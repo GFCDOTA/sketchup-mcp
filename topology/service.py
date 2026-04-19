@@ -11,6 +11,8 @@ from model.types import ConnectivityReport, Junction, Room, SplitWall, Wall
 
 
 _ORPHAN_COMPONENT_MAX_NODES = 3
+_SMART_SPLIT_EPSILON_RATIO = 0.75
+_SPUR_MIN_THICKNESS_RATIO = 1.0
 
 
 def build_topology(
@@ -19,9 +21,15 @@ def build_topology(
     if snap_tolerance is None:
         snap_tolerance = _infer_snap_tolerance(walls)
 
-    split_walls = _split_walls_at_intersections(walls)
+    epsilon = _SMART_SPLIT_EPSILON_RATIO * snap_tolerance / 1.5  # = 0.75 * median
+    split_walls = _split_walls_at_intersections(walls, epsilon=epsilon)
     split_walls = _snap_endpoints(split_walls, snap_tolerance)
     split_walls = _drop_degenerate(split_walls)
+    # Junctions, polygonize and connectivity are computed from the
+    # SPLIT graph (each intersection is a node), so cross/tee
+    # information stays intact even after we merge colinear segments
+    # for the wall-output list.
+    output_walls = _merge_colinear_segments(split_walls)
 
     by_page: dict[int, list[SplitWall]] = {}
     for wall in split_walls:
@@ -75,7 +83,7 @@ def build_topology(
         orphan_component_count=orphan_component_count,
         orphan_node_count=orphan_node_count,
     )
-    return split_walls, junctions, rooms, report
+    return output_walls, junctions, rooms, report
 
 
 def _infer_snap_tolerance(walls: list[Wall]) -> float:
@@ -150,7 +158,106 @@ def _drop_degenerate(walls: list[SplitWall]) -> list[SplitWall]:
     return [wall for wall in walls if wall.start != wall.end]
 
 
-def _split_walls_at_intersections(walls: list[Wall]) -> list[SplitWall]:
+def _is_near_existing(
+    point: tuple[float, float],
+    existing: set[tuple[float, float]],
+    epsilon: float,
+) -> bool:
+    if epsilon <= 0:
+        return False
+    px, py = point
+    for ex, ey in existing:
+        if abs(px - ex) <= epsilon and abs(py - ey) <= epsilon:
+            return True
+    return False
+
+
+def _merge_colinear_segments(walls: list[SplitWall]) -> list[SplitWall]:
+    """Recombine SplitWalls that share an endpoint where they are the only
+    two walls of their orientation.
+
+    Cross junction (degree 4: 2 H + 2 V): the H pair merges through the V
+    cross (V is unrelated, just intersects there) and vice versa.
+    Tee (degree 3: 2 H + 1 V or 2 V + 1 H): the colinear pair merges
+    through the stem.
+    Pure pass-through (degree 2 same orientation): merges trivially.
+    A degree-2 corner (H + V) cannot merge: different orientations.
+
+    Page isolation: each page is processed independently.
+    """
+    if not walls:
+        return walls
+
+    by_page: dict[int, list[SplitWall]] = defaultdict(list)
+    for wall in walls:
+        by_page[wall.page_index].append(wall)
+
+    merged: list[SplitWall] = []
+    for page_walls in by_page.values():
+        merged.extend(_merge_colinear_within_page(page_walls))
+    return merged
+
+
+def _merge_colinear_within_page(page_walls: list[SplitWall]) -> list[SplitWall]:
+    walls = list(page_walls)
+    while True:
+        node_orient: dict[tuple[float, float], dict[str, list[int]]] = {}
+        for i, w in enumerate(walls):
+            for endpoint in (w.start, w.end):
+                bucket = node_orient.setdefault(
+                    endpoint, {"horizontal": [], "vertical": []}
+                )
+                bucket[w.orientation].append(i)
+
+        merge_pair = None
+        for node, by_orient in node_orient.items():
+            for orient in ("horizontal", "vertical"):
+                indices = by_orient[orient]
+                if len(indices) == 2 and indices[0] != indices[1]:
+                    merge_pair = (node, orient, indices[0], indices[1])
+                    break
+            if merge_pair:
+                break
+
+        if merge_pair is None:
+            break
+
+        node, orient, a_idx, b_idx = merge_pair
+        a = walls[a_idx]
+        b = walls[b_idx]
+        other_a = a.start if a.end == node else a.end
+        other_b = b.start if b.end == node else b.end
+        if other_a == other_b:
+            high, low = max(a_idx, b_idx), min(a_idx, b_idx)
+            walls.pop(high)
+            walls.pop(low)
+            continue
+
+        new_wall = SplitWall(
+            wall_id=a.wall_id,
+            parent_wall_id=a.parent_wall_id,
+            page_index=a.page_index,
+            start=other_a,
+            end=other_b,
+            thickness=max(a.thickness, b.thickness),
+            orientation=orient,
+            source=a.source,
+            confidence=min(a.confidence, b.confidence),
+        )
+        high, low = max(a_idx, b_idx), min(a_idx, b_idx)
+        walls.pop(high)
+        walls[low] = new_wall
+
+    return walls
+
+
+def _split_walls_at_intersections(walls: list[Wall], epsilon: float = 0.0) -> list[SplitWall]:
+    """Split each wall at every perpendicular intersection. When `epsilon`
+    > 0, an intersection point that lies within `epsilon` of an existing
+    endpoint of the wall being split is silently skipped (the existing
+    endpoint absorbs it). This prevents micro-segments at locations where
+    discretization noise creates a near-corner intersection.
+    """
     split_points: dict[str, set[tuple[float, float]]] = defaultdict(set)
 
     for wall in walls:
@@ -161,8 +268,10 @@ def _split_walls_at_intersections(walls: list[Wall]) -> list[SplitWall]:
         intersection = _intersection_point(wall_a, wall_b)
         if intersection is None:
             continue
-        split_points[wall_a.wall_id].add(intersection)
-        split_points[wall_b.wall_id].add(intersection)
+        if not _is_near_existing(intersection, split_points[wall_a.wall_id], epsilon):
+            split_points[wall_a.wall_id].add(intersection)
+        if not _is_near_existing(intersection, split_points[wall_b.wall_id], epsilon):
+            split_points[wall_b.wall_id].add(intersection)
 
     result: list[SplitWall] = []
     counter = 1
