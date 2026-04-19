@@ -84,7 +84,10 @@ def _infer_snap_tolerance(walls: list[Wall]) -> float:
         return 2.0
     thicknesses.sort()
     median = thicknesses[len(thicknesses) // 2]
-    return max(2.0, median)
+    # 1.5 x median keeps legitimate wall endpoints distinct while collapsing
+    # sub-thickness stubs created when two intersections fall very close
+    # along the same parent wall.
+    return max(2.0, 1.5 * median)
 
 
 def _snap_endpoints(walls: list[SplitWall], tolerance: float) -> list[SplitWall]:
