@@ -21,7 +21,7 @@ TOP_LEVEL_FIELDS = {
 
 SOURCE_FIELDS = {"filename", "source_type", "page_count", "sha256"}
 SCORE_FIELDS = {"geometry", "topology", "rooms"}
-METADATA_FIELDS = {"rooms_detected", "topology_quality", "connectivity"}
+METADATA_FIELDS = {"rooms_detected", "topology_quality", "connectivity", "warnings"}
 
 
 def _observed_model(tmp_path: Path, fixture):
@@ -102,6 +102,13 @@ def test_warnings_is_top_level_list_of_strings(tmp_path: Path) -> None:
     assert all(isinstance(w, str) for w in warnings), warnings
 
 
+def test_metadata_warnings_mirrors_top_level(tmp_path: Path) -> None:
+    # AGENTS.md still lists metadata.warnings as a mandatory field. Keep both
+    # locations in lock-step until a major schema bump removes the legacy one.
+    model = _observed_model(tmp_path, blank_canvas())
+    assert model["metadata"]["warnings"] == model["warnings"]
+
+
 def test_walls_and_junctions_have_page_index(tmp_path: Path) -> None:
     model = _observed_model(tmp_path, simple_square())
     for wall in model["walls"]:
@@ -115,3 +122,40 @@ def test_empty_fixture_still_emits_valid_contract(tmp_path: Path) -> None:
     assert TOP_LEVEL_FIELDS <= set(model)
     assert model["walls"] == []
     assert model["rooms"] == []
+
+
+def _synthetic_pdf_bytes(pages: int = 1) -> bytes:
+    import io
+
+    import pypdfium2 as pdfium
+
+    doc = pdfium.PdfDocument.new()
+    for _ in range(pages):
+        doc.new_page(200, 200)
+    buf = io.BytesIO()
+    doc.save(buf)
+    return buf.getvalue()
+
+
+def test_pdf_pipeline_populates_pdf_source_fields(tmp_path: Path) -> None:
+    from model.pipeline import run_pdf_pipeline
+
+    pdf_bytes = _synthetic_pdf_bytes(pages=2)
+    result = run_pdf_pipeline(
+        pdf_bytes=pdf_bytes,
+        filename="synthetic.pdf",
+        output_dir=tmp_path / "pdf_run",
+    )
+    source = result.observed_model["source"]
+    assert source["source_type"] == "pdf"
+    assert source["filename"] == "synthetic.pdf"
+    assert source["page_count"] == 2
+    assert isinstance(source["sha256"], str) and len(source["sha256"]) == 64
+    # sha256 must be deterministic for identical bytes.
+    again = run_pdf_pipeline(
+        pdf_bytes=pdf_bytes,
+        filename="synthetic.pdf",
+        output_dir=tmp_path / "pdf_run_again",
+    )
+    assert again.observed_model["source"]["sha256"] == source["sha256"]
+    assert again.observed_model["run_id"] != result.observed_model["run_id"]

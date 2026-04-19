@@ -50,6 +50,7 @@ def build_observed_model(
             "rooms_detected": len(rooms),
             "topology_quality": topology_quality,
             "connectivity": connectivity_report.to_dict(),
+            "warnings": warnings,
         },
         "warnings": warnings,
     }
