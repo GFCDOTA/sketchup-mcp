@@ -110,6 +110,25 @@ def test_chain_of_three_colinear_segments_merges_to_one() -> None:
     assert len(ends) == 2
 
 
+def test_merge_output_is_input_order_invariant() -> None:
+    # Codex review noted that the surviving merged wall picks attributes
+    # from whichever segment lands first in iteration. Pin the geometric
+    # invariance: regardless of input wall ORDER, the merged output set
+    # describes the same lines (start/end points). wall_id may differ.
+    base = [
+        _wall("a", (0.0, 100.0), (100.0, 100.0), "horizontal"),
+        _wall("b", (100.0, 100.0), (200.0, 100.0), "horizontal"),
+        _wall("c", (200.0, 100.0), (300.0, 100.0), "horizontal"),
+    ]
+    geom = lambda walls: sorted(
+        tuple(sorted([w.start, w.end])) for w in walls
+    )
+    out_default, _, _, _ = build_topology(list(base))
+    out_reversed, _, _, _ = build_topology(list(reversed(base)))
+    out_shuffled, _, _, _ = build_topology([base[1], base[2], base[0]])
+    assert geom(out_default) == geom(out_reversed) == geom(out_shuffled)
+
+
 def test_existing_t_junction_preserved_after_merge() -> None:
     # A T: long H crossed by a V whose endpoint sits ON the H. The T has
     # degree-3 at the intersection. Merge across the H pair must still

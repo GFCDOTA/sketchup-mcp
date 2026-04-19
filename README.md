@@ -65,9 +65,12 @@ Antes do extract, a pagina passa por `roi.detect_architectural_roi`:
 
 ### Pipeline topology
 
-- `_split_walls_at_intersections` + snap (radius = 1.5 x median thickness).
-- Per-page graph: junctions, connectivity, polygonize.
-- `min_area = (2 x median_thickness)^2` para rejeitar slivers degenerados.
+- `_split_walls_at_intersections` com smart-split: intersection a < 0.75 x median thickness de um endpoint existente da parede e absorvida pelo endpoint (sem micro-segmento).
+- `_snap_endpoints` com radius = 1.5 x median thickness.
+- `_drop_degenerate` remove segments com start == end.
+- `_merge_colinear_segments` recombina dois SplitWalls que compartilham endpoint onde sao os unicos dois da sua orientacao. Cross (degree 4) e Tee (degree 3) deixam o pair colinear atravessar; L corner (orientacoes diferentes) preserva o canto.
+- **Decoupling deliberado**: `observed_model.walls` recebe a saida APOS merge (geometria limpa). `junctions`, `rooms` e `metadata.connectivity` sao computados do SPLIT graph ANTES do merge para preservar cross/tee. Logo `len(walls)` (output) pode ser menor que `metadata.connectivity.node_count` (split graph) — sao coisas diferentes, ambas honestas.
+- `min_area = (2 x median_thickness)^2` rejeita slivers degenerados em polygonize.
 - `orphan_component_count` e `orphan_node_count` reportados sem dropar evidencia.
 - Warning `many_orphan_components` dispara com >= 5 componentes com <=3 nos.
 
@@ -82,11 +85,12 @@ Antes do extract, a pagina passa por `roi.detect_architectural_roi`:
 
 ### Numeros no PDF de referencia `planta_74m2.pdf` (74 m^2, uma pagina)
 
-Estado pos-ROI + recalibracao:
-- walls: 227 (meta ideal 40-150 — ainda acima)
+Estado pos-merge colinear (output walls sao centerlines limpas):
+- walls: **94** (output limpo, dentro da meta <=150)
 - rooms: 14 (dentro do ideal 6-15)
-- junctions: 161 (end=85, pass_through=14, tee=29, cross=33)
-- H/V ratio: 0.99 (balanceado, sinal de planta arquitetonica real)
+- junctions: 161 (do split graph: end=85, pass_through=14, tee=29, cross=33; preserva intersection topology completa)
+- metadata.connectivity.node_count: ~227 (split graph; nao confundir com walls)
+- H/V ratio (output): balanceado
 - scores: geometry=0.156, topology=0.275, rooms=0.581
 - topology_quality: `poor` (snap ainda nao fecha 100% da estrutura)
 - orphan_component_count: 7

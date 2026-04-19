@@ -41,8 +41,8 @@ Top-level obrigatórios:
 - `source` (filename, source_type in {pdf, raster}, page_count, sha256; sha256/filename podem ser null no path raster)
 - `bounds` (pages[] com per-page AABB; pages=[] quando nenhuma wall foi detectada)
 - `roi` (per-page; cada item: applied bool, bbox or null, fallback_reason, component_pixel_count, component_bbox_area, component_count). Imagens < 500 px do menor lado retornam applied=true com bbox = página inteira (skip semântico, não fallback).
-- `walls`
-- `junctions`
+- `walls` (saída pós-merge: segmentos colineares recombinados — geometria limpa para consumo)
+- `junctions` (extraídos do SPLIT graph antes do merge — preservam cross/tee em pontos onde o output `walls` agora passa por dentro sem quebrar)
 - `rooms`
 - `scores`
 - `metadata`
@@ -53,6 +53,7 @@ Campos mínimos esperados:
 - `scores.geometry`, `scores.topology`, `scores.rooms` (todos em [0, 1])
 - `metadata.rooms_detected`, `metadata.topology_quality` (good/fair/poor), `metadata.connectivity`
 - `metadata.warnings` (mirror do top-level `warnings` durante 2.x; remoção prevista num major bump)
+- `metadata.connectivity.*` (computado do SPLIT graph: node_count e component_sizes podem ser maiores que `len(walls)` porque cada intersection topológica é nó. Honest reporting: se você divide o número de junctions pelo número de walls, NÃO é uma métrica direta — junctions descrevem topologia, walls descrevem geometria observada)
 
 Regras do contrato:
 
