@@ -78,7 +78,15 @@ Regras do contrato:
 
 O `README.md` é a fonte canônica dos comandos de execução e teste.
 
-## 8. Histórico de decisões arquiteturais
+## 8. Conflict resolution
+
+- Codex is final reviewer for code correctness, tests, and local implementation quality.
+- Claude is final coordinator for task order, execution flow, and delivery strategy.
+- Objective evidence overrides both: failing/passing tests, reproducible bug, minimal diff, debug artifacts.
+- If disagreement remains on a reversible change, choose the safer reversible option and continue.
+- Escalate to user only for irreversible, destructive, or high-cost decisions (push, destructive FS ops, global config, credentials).
+
+## 9. Histórico de decisões arquiteturais
 
 ### Decisões
 
