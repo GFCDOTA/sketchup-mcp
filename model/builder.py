@@ -26,6 +26,7 @@ def build_observed_model(
     run_id: str,
     source: dict,
     bounds: dict,
+    roi: list[dict] | None = None,
 ) -> dict:
     topology_quality = "poor"
     if topology_score >= 0.8:
@@ -38,6 +39,7 @@ def build_observed_model(
         "run_id": run_id,
         "source": source,
         "bounds": bounds,
+        "roi": roi if roi is not None else [],
         "walls": [wall_to_dict(wall) for wall in walls],
         "junctions": [junction_to_dict(junction) for junction in junctions],
         "rooms": [room_to_dict(room) for room in rooms],

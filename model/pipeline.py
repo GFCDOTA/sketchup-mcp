@@ -10,10 +10,11 @@ import numpy as np
 
 from classify.service import classify_walls
 from debug.service import write_debug_artifacts
-from extract.service import extract_from_document, extract_from_raster
+from extract.service import extract_from_raster
 from ingest.service import IngestError, IngestedDocument, ingest_pdf
 from model.builder import build_observed_model, compute_bounds
 from model.types import ConnectivityReport, Junction, Room, SplitWall, WallCandidate
+from roi.service import RoiResult, crop_image_to_bbox, detect_architectural_roi
 from topology.service import build_topology
 
 
@@ -37,28 +38,80 @@ def run_pdf_pipeline(pdf_bytes: bytes, filename: str, output_dir: Path) -> Pipel
         document = ingest_pdf(pdf_bytes=pdf_bytes, filename=filename)
     except IngestError as exc:
         raise PipelineError(str(exc)) from exc
-    candidates = extract_from_document(document)
+    candidates, roi_results = _extract_with_roi_from_document(document)
     source = _build_pdf_source(pdf_bytes=pdf_bytes, filename=filename, document=document)
-    return _run_pipeline(candidates=candidates, output_dir=output_dir, source=source)
+    return _run_pipeline(
+        candidates=candidates,
+        output_dir=output_dir,
+        source=source,
+        roi_results=roi_results,
+    )
 
 
 def run_raster_pipeline(image: np.ndarray, output_dir: Path) -> PipelineResult:
-    candidates = extract_from_raster(image=image)
+    candidates, roi_result = _extract_with_roi_from_raster(image, page_index=0)
     source = {
         "filename": None,
         "source_type": "raster",
         "page_count": 1,
         "sha256": None,
     }
-    return _run_pipeline(candidates=candidates, output_dir=output_dir, source=source)
+    return _run_pipeline(
+        candidates=candidates,
+        output_dir=output_dir,
+        source=source,
+        roi_results=[roi_result],
+    )
+
+
+def _extract_with_roi_from_document(document: IngestedDocument):
+    all_candidates: list[WallCandidate] = []
+    roi_results: list[RoiResult] = []
+    for page in document.pages:
+        candidates, roi = _extract_with_roi_from_raster(page.image, page_index=page.index)
+        all_candidates.extend(candidates)
+        roi_results.append(roi)
+    return all_candidates, roi_results
+
+
+def _extract_with_roi_from_raster(image: np.ndarray, page_index: int):
+    roi = detect_architectural_roi(image)
+    if not roi.applied or roi.bbox is None:
+        candidates = extract_from_raster(image=image, page_index=page_index)
+        return candidates, roi
+    cropped = crop_image_to_bbox(image, roi.bbox)
+    raw = extract_from_raster(image=cropped, page_index=page_index)
+    dx, dy = roi.bbox[0], roi.bbox[1]
+    translated = [
+        WallCandidate(
+            page_index=c.page_index,
+            start=(c.start[0] + dx, c.start[1] + dy),
+            end=(c.end[0] + dx, c.end[1] + dy),
+            thickness=c.thickness,
+            source=c.source,
+            confidence=c.confidence,
+        )
+        for c in raw
+    ]
+    return translated, roi
 
 
 def _run_pipeline(
-    candidates: list[WallCandidate], output_dir: Path, source: dict
+    candidates: list[WallCandidate],
+    output_dir: Path,
+    source: dict,
+    roi_results: list[RoiResult],
 ) -> PipelineResult:
     walls = classify_walls(candidates)
     split_walls, junctions, rooms, connectivity_report = build_topology(walls)
-    warnings = _build_warnings(candidates, walls, split_walls, rooms, connectivity_report)
+    warnings = _build_warnings(
+        candidates=candidates,
+        walls=walls,
+        split_walls=split_walls,
+        rooms=rooms,
+        connectivity_report=connectivity_report,
+        roi_results=roi_results,
+    )
     run_id = uuid4().hex
     bounds = compute_bounds(split_walls)
     observed_model = build_observed_model(
@@ -73,6 +126,7 @@ def _run_pipeline(
         run_id=run_id,
         source=source,
         bounds=bounds,
+        roi=[r.to_dict() for r in roi_results],
     )
 
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -113,8 +167,11 @@ def _build_warnings(
     split_walls: list[SplitWall],
     rooms: list[Room],
     connectivity_report: ConnectivityReport,
+    roi_results: list[RoiResult],
 ) -> list[str]:
     warnings: list[str] = []
+    if any(not r.applied for r in roi_results):
+        warnings.append("roi_fallback_used")
     if not candidates:
         warnings.append("no_wall_candidates")
     if candidates and not walls:

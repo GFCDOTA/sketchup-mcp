@@ -77,6 +77,7 @@ def test_multipage_connected_pages_do_not_warn_disconnected() -> None:
         split_walls=split_walls,
         rooms=rooms,
         connectivity_report=report,
+        roi_results=[],
     )
     assert "walls_disconnected" not in warnings, warnings
 
@@ -134,6 +135,7 @@ def test_many_orphan_components_warning_fires() -> None:
         split_walls=split_walls,
         rooms=rooms,
         connectivity_report=report,
+        roi_results=[],
     )
     assert "many_orphan_components" in warnings, warnings
 
