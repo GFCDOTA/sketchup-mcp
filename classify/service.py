@@ -35,6 +35,12 @@ _IMBALANCE_MIN_TOTAL = 4
 _IMBALANCE_RATIO = 4.0
 _IMBALANCE_MAX_STROKE_LENGTH = 100.0
 
+# Aspect-ratio filter: a real architectural wall is much longer than it is
+# thick. A stroke whose length / thickness ratio is below this threshold is
+# a glyph fragment, a tick mark, or other residual noise with the shape of
+# a blob, not a wall.
+_MIN_ASPECT_RATIO = 1.5
+
 
 def classify_walls(
     candidates: list[WallCandidate], coordinate_tolerance: float | None = None
@@ -59,11 +65,20 @@ def classify_walls(
     # and label text that survived the chain-based filter.
     strokes = _drop_orientation_imbalanced(strokes)
 
-    # Stage 4: pair parallel strokes that represent the two faces of the
+    # Stage 4: drop strokes whose length / thickness ratio is too low to be
+    # a wall (blob-shaped glyph fragments and tick marks).
+    strokes = _drop_low_aspect_strokes(strokes)
+
+    # Stage 5: pair parallel strokes that represent the two faces of the
     # same wall into a single centerline candidate.
     wall_candidates = _pair_merge_strokes(strokes)
 
-    # Stage 5: assign stable wall ids and turn the candidates into Walls.
+    # Stage 6: aspect check again, because pair-merge can synthesise a
+    # centerline whose thickness (= the pair gap) is close to its length.
+    # Real walls are long compared to their thickness even after pairing.
+    wall_candidates = _drop_low_aspect_strokes(wall_candidates)
+
+    # Stage 7: assign stable wall ids and turn the candidates into Walls.
     return _candidates_to_walls(wall_candidates)
 
 
@@ -281,6 +296,27 @@ def _drop_orientation_imbalanced(strokes: list[WallCandidate]) -> list[WallCandi
                     continue
             kept.append(stroke)
 
+    return kept
+
+
+def _drop_low_aspect_strokes(strokes: list[WallCandidate]) -> list[WallCandidate]:
+    """Remove strokes whose length / thickness ratio is below
+    _MIN_ASPECT_RATIO.
+
+    A legitimate wall stroke is elongated: its length is many times its
+    thickness. Residual glyph fragments, tick marks, and noise clusters
+    that survived earlier filters tend to have near-square bounding
+    boxes (aspect around 1). Strokes with thickness == 0 are left in
+    place because the ratio is undefined; downstream stages can decide.
+    """
+    kept: list[WallCandidate] = []
+    for stroke in strokes:
+        if stroke.thickness <= 0:
+            kept.append(stroke)
+            continue
+        length = abs(stroke.end[0] - stroke.start[0]) + abs(stroke.end[1] - stroke.start[1])
+        if length >= _MIN_ASPECT_RATIO * stroke.thickness:
+            kept.append(stroke)
     return kept
 
 
