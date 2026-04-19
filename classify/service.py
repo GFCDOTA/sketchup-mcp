@@ -45,7 +45,7 @@ _IMBALANCE_EXTREME_RATIO = 10.0
 # thick. A stroke whose length / thickness ratio is below this threshold is
 # a glyph fragment, a tick mark, or other residual noise with the shape of
 # a blob, not a wall.
-_MIN_ASPECT_RATIO = 1.5
+_MIN_ASPECT_RATIO = 2.0
 
 
 def classify_walls(

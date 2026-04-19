@@ -28,9 +28,9 @@ def test_square_stroke_is_dropped() -> None:
 
 
 def test_aspect_at_threshold_survives() -> None:
-    # length / thickness == 1.5 exactly. Comparison is `>=`, so the stroke
-    # just barely passes.
-    walls = classify_walls([_h(y=10, x0=10, x1=25, thickness=10.0)])
+    # length / thickness == 2.0 exactly (_MIN_ASPECT_RATIO). Comparison is
+    # `>=`, so the stroke just barely passes.
+    walls = classify_walls([_h(y=10, x0=10, x1=30, thickness=10.0)])
     assert len(walls) == 1
 
 
