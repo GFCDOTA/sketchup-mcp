@@ -10,7 +10,7 @@ from shapely.ops import polygonize, unary_union
 from model.types import ConnectivityReport, Junction, Room, SplitWall, Wall
 
 
-_MIN_COMPONENT_SIZE = 4
+_ORPHAN_COMPONENT_MAX_NODES = 3
 
 
 def build_topology(
@@ -22,7 +22,6 @@ def build_topology(
     split_walls = _split_walls_at_intersections(walls)
     split_walls = _snap_endpoints(split_walls, snap_tolerance)
     split_walls = _drop_degenerate(split_walls)
-    split_walls = _drop_small_components(split_walls)
 
     by_page: dict[int, list[SplitWall]] = {}
     for wall in split_walls:
@@ -34,6 +33,8 @@ def build_topology(
     total_edges = 0
     max_components_within_page = 0
     per_page_ratios: list[float] = []
+    orphan_component_count = 0
+    orphan_node_count = 0
     junction_counter = 1
 
     for page_index in sorted(by_page):
@@ -54,6 +55,9 @@ def build_topology(
         total_edges += page_edges
         for component in page_components:
             component_sizes.append(len(component))
+            if len(component) <= _ORPHAN_COMPONENT_MAX_NODES:
+                orphan_component_count += 1
+                orphan_node_count += len(component)
 
         if page_edges > 0 and page_nodes > 0:
             largest = max((len(c) for c in page_components), default=0)
@@ -68,6 +72,8 @@ def build_topology(
         page_count=len(by_page),
         max_components_within_page=max_components_within_page,
         min_intra_page_connectivity_ratio=min(per_page_ratios) if per_page_ratios else 0.0,
+        orphan_component_count=orphan_component_count,
+        orphan_node_count=orphan_node_count,
     )
     return split_walls, junctions, rooms, report
 
@@ -139,37 +145,6 @@ def _cluster_points(
 
 def _drop_degenerate(walls: list[SplitWall]) -> list[SplitWall]:
     return [wall for wall in walls if wall.start != wall.end]
-
-
-def _drop_small_components(walls: list[SplitWall]) -> list[SplitWall]:
-    """Remove walls that belong to a connected component smaller than
-    _MIN_COMPONENT_SIZE. Per-page graph construction keeps pages
-    isolated. A very small component is an orphan cluster of detections
-    that cannot close a room anyway; dropping them reduces dangling
-    `end` junctions and keeps the connectivity report honest.
-    """
-    if not walls:
-        return walls
-
-    by_page: dict[int, list[SplitWall]] = {}
-    for wall in walls:
-        by_page.setdefault(wall.page_index, []).append(wall)
-
-    kept: list[SplitWall] = []
-    for page_walls in by_page.values():
-        graph = nx.Graph()
-        for wall in page_walls:
-            graph.add_edge(wall.start, wall.end)
-        retained_nodes: set[tuple[float, float]] = set()
-        for component in nx.connected_components(graph):
-            if len(component) >= _MIN_COMPONENT_SIZE:
-                retained_nodes.update(component)
-        kept.extend(
-            wall
-            for wall in page_walls
-            if wall.start in retained_nodes and wall.end in retained_nodes
-        )
-    return kept
 
 
 def _split_walls_at_intersections(walls: list[Wall]) -> list[SplitWall]:
@@ -320,6 +295,8 @@ def _build_connectivity_report_aggregate(
     page_count: int,
     max_components_within_page: int,
     min_intra_page_connectivity_ratio: float,
+    orphan_component_count: int,
+    orphan_node_count: int,
 ) -> ConnectivityReport:
     largest_component = max(component_sizes, default=0)
     connected_ratio = (
@@ -335,4 +312,6 @@ def _build_connectivity_report_aggregate(
         page_count=page_count,
         max_components_within_page=max_components_within_page,
         min_intra_page_connectivity_ratio=round(min_intra_page_connectivity_ratio, 4),
+        orphan_component_count=orphan_component_count,
+        orphan_node_count=orphan_node_count,
     )

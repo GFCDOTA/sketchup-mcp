@@ -121,6 +121,8 @@ def _build_warnings(
         warnings.append("all_candidates_filtered")
     if split_walls and connectivity_report.max_components_within_page > 1:
         warnings.append("walls_disconnected")
+    if split_walls and connectivity_report.orphan_component_count >= 5:
+        warnings.append("many_orphan_components")
     if not rooms:
         warnings.append("rooms_not_detected")
     return warnings

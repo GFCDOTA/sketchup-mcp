@@ -95,6 +95,18 @@ def test_metadata_has_required_fields(tmp_path: Path) -> None:
     assert metadata["rooms_detected"] == len(model["rooms"])
 
 
+def test_connectivity_has_orphan_component_counts(tmp_path: Path) -> None:
+    model = _observed_model(tmp_path, simple_square())
+    connectivity = model["metadata"]["connectivity"]
+    assert "orphan_component_count" in connectivity
+    assert "orphan_node_count" in connectivity
+    assert isinstance(connectivity["orphan_component_count"], int)
+    assert isinstance(connectivity["orphan_node_count"], int)
+    # simple_square forms one large component, not an orphan
+    assert connectivity["orphan_component_count"] == 0
+    assert connectivity["orphan_node_count"] == 0
+
+
 def test_warnings_is_top_level_list_of_strings(tmp_path: Path) -> None:
     model = _observed_model(tmp_path, blank_canvas())
     warnings = model["warnings"]

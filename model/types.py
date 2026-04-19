@@ -72,6 +72,8 @@ class ConnectivityReport:
     page_count: int = 1
     max_components_within_page: int = 0
     min_intra_page_connectivity_ratio: float = 0.0
+    orphan_component_count: int = 0
+    orphan_node_count: int = 0
 
     def to_dict(self) -> dict:
         return asdict(self)
