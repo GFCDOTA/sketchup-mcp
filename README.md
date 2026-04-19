@@ -43,11 +43,22 @@ Premissas mantidas no codigo:
 
 O servico esta preparado para ser honesto e depuravel, mas ainda nao resolve todos os casos do mundo real.
 
+### ROI crop (pre-extract)
+
+Antes do extract, a pagina passa por `roi.detect_architectural_roi`:
+
+- threshold + connectedComponentsWithStats (8-connected)
+- escolhe componente com maior bounding-box area (planta = frame de paredes linkado)
+- expande com margem 5 % e cropa o raster
+- pipeline roda no crop e traduz coords absolutas
+- imagem < 500 px do menor lado: skip (bbox = pagina inteira)
+- fallback explicito (no_components, no_dominant_component, empty_image) se nao houver cluster claro -> warning `roi_fallback_used`
+
 ### Pipeline classify (seis estagios)
 
 1. Consolidate Hough duplicates (cluster por coord perpendicular com tolerance = max(4.0, median thickness)).
-2. Text-baseline filter (chains de 3+ strokes paralelos com gap uniforme e overlap >= 20 px).
-3. Orientation dominance filter multi-scale (120 e 240 px cells; drop curtos em ratio >=4:1; drop todos em ratio >=10:1).
+2. Text-baseline filter (chains de 3+ strokes paralelos com gap uniforme em [4, 60] e overlap >= 20 px).
+3. Orientation dominance filter multi-scale (120 e 240 px cells; drop curtos em ratio >=3:1; drop todos em ratio >=5:1).
 4. Aspect ratio filter (drop strokes com length < 2 x thickness).
 5. Pair-merge (combina duas faces paralelas de uma parede em uma centerline).
 6. Aspect ratio filter novamente (aplica a centerlines sintetizadas pelo pair-merge).
@@ -71,15 +82,24 @@ O servico esta preparado para ser honesto e depuravel, mas ainda nao resolve tod
 
 ### Numeros no PDF de referencia `planta_74m2.pdf` (74 m^2, uma pagina)
 
-Estado atual (post-filtros acumulados nesta sessao):
-- walls: 328 (meta em apto similar: ~40-100 — ainda 3-8x acima do esperado)
-- junctions: 221 (end=110, tee=43, cross=37, pass_through=31)
-- rooms: 32 (dos quais ~8 com area plausivel, ~24 residuos)
-- scores: geometry=0.097, topology=0.129, rooms=0.637
-- topology_quality: `poor`
-- orphan_component_count: ~26 (componentes com <=3 nos)
-- orphan_node_count: ~60
-- warnings: `walls_disconnected`, `many_orphan_components`
+Estado pos-ROI + recalibracao:
+- walls: 227 (meta ideal 40-150 — ainda acima)
+- rooms: 14 (dentro do ideal 6-15)
+- junctions: 161 (end=85, pass_through=14, tee=29, cross=33)
+- H/V ratio: 0.99 (balanceado, sinal de planta arquitetonica real)
+- scores: geometry=0.156, topology=0.275, rooms=0.581
+- topology_quality: `poor` (snap ainda nao fecha 100% da estrutura)
+- orphan_component_count: 7
+- orphan_node_count: 16
+- warnings: `walls_disconnected`, `many_orphan_components` (preservados, nao mascarados)
+
+Trajetoria desta sessao:
+- v1 scaffold: 133 walls fake (cruz por thickness bug), score 0.04
+- v8 thickness fix: 1272 walls (explosao temporaria), score 0.40
+- v14 orientation: 411 walls
+- v17 honest revert: 411 walls + orphans reportados
+- v23 snap+aspect: 328 walls, 32 rooms, geometry 0.097
+- ROI + recalibracao: **227 walls, 14 rooms, geometry 0.156, topology 0.275, H/V 0.99**
 
 Melhorias aprovadas pelo Codex nesta sessao (round-review iterativo):
 - `f434438` CLI com extract e serve subcommands.

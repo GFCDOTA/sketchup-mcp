@@ -83,29 +83,29 @@ def detect_architectural_roi(
     if nlabels <= 1:
         return RoiResult(False, None, "no_components", 0, 0, 0)
 
-    # Skip background (label 0). Pick the component with the largest bbox
-    # area; that is the one that physically sprawls across the page, which
-    # for architectural drawings is the linked wall frame, not a label
-    # block whose bbox is small even when the pixel count is high.
+    # Skip background (label 0). Pick the component with the largest
+    # PIXEL count: real wall frames carry many ink pixels, while a thin
+    # page border or page outline has a huge bbox but very few pixels.
+    # Selecting by pixel count avoids collapsing onto borders/frames.
     best_label = -1
-    best_area = -1
-    best_pixels = 0
+    best_pixels = -1
+    best_bbox_area = 0
     for label in range(1, nlabels):
         x, y, w, h, area = stats[label]
-        bbox_area = int(w) * int(h)
-        if bbox_area > best_area:
-            best_area = bbox_area
+        pixels = int(area)
+        if pixels > best_pixels:
+            best_pixels = pixels
             best_label = label
-            best_pixels = int(area)
+            best_bbox_area = int(w) * int(h)
 
     page_area = width * height
-    if best_area < min_component_bbox_area_ratio * page_area:
+    if best_bbox_area < min_component_bbox_area_ratio * page_area:
         return RoiResult(
             False,
             None,
             "no_dominant_component",
-            best_pixels,
-            int(best_area),
+            max(0, best_pixels),
+            int(best_bbox_area),
             int(nlabels - 1),
         )
 
@@ -118,7 +118,7 @@ def detect_architectural_roi(
         min(width, int(x + w) + margin_x),
         min(height, int(y + h) + margin_y),
     )
-    return RoiResult(True, bbox, None, best_pixels, int(best_area), int(nlabels - 1))
+    return RoiResult(True, bbox, None, best_pixels, int(best_bbox_area), int(nlabels - 1))
 
 
 def crop_image_to_bbox(image: np.ndarray, bbox: tuple[int, int, int, int]) -> np.ndarray:

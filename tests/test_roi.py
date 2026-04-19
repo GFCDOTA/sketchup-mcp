@@ -115,6 +115,26 @@ def test_roi_falls_back_when_no_clear_region() -> None:
     assert result.fallback_reason is not None
 
 
+def test_roi_skips_thin_page_border() -> None:
+    # A 1-pixel border around the entire page is a connected component
+    # whose bbox area is the whole page but whose pixel count is small.
+    # The plan inside has many more pixels and a slightly smaller bbox.
+    # ROI must pick the plan, not the page border.
+    canvas = _blank()
+    H, W = canvas.shape[:2]
+    cv2.rectangle(canvas, (0, 0), (W - 1, H - 1), (0, 0, 0), thickness=1)
+    _draw_plan(canvas, 100, 100, 500, 500)
+    result = detect_architectural_roi(canvas)
+    assert result.applied is True, result
+    assert result.bbox is not None
+    min_x, min_y, max_x, max_y = result.bbox
+    bbox_area = (max_x - min_x) * (max_y - min_y)
+    page_area = W * H
+    # Plan bbox is meaningfully smaller than the page; fail loud if ROI
+    # collapsed onto the border component.
+    assert bbox_area < 0.85 * page_area, (bbox_area, page_area, result.bbox)
+
+
 def test_roi_falls_back_on_blank_image() -> None:
     canvas = _blank()
     result = detect_architectural_roi(canvas)

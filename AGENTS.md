@@ -40,12 +40,13 @@ Top-level obrigatórios:
 - `run_id` (uuid4 hex por run)
 - `source` (filename, source_type in {pdf, raster}, page_count, sha256; sha256/filename podem ser null no path raster)
 - `bounds` (pages[] com per-page AABB; pages=[] quando nenhuma wall foi detectada)
+- `roi` (per-page; cada item: applied bool, bbox or null, fallback_reason, component_pixel_count, component_bbox_area, component_count). Imagens < 500 px do menor lado retornam applied=true com bbox = página inteira (skip semântico, não fallback).
 - `walls`
 - `junctions`
 - `rooms`
 - `scores`
 - `metadata`
-- `warnings` (lista de strings)
+- `warnings` (lista de strings; `roi_fallback_used` aparece quando qualquer página do PDF caiu em fallback)
 
 Campos mínimos esperados:
 
