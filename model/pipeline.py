@@ -111,7 +111,8 @@ def _topology_score(split_walls: list[SplitWall], connectivity_report: Connectiv
     if not split_walls:
         return 0.0
     component_penalty = 1.0 / max(1, connectivity_report.max_components_within_page or 1)
-    return min(1.0, round((connectivity_report.largest_component_ratio + component_penalty) / 2.0, 4))
+    intra_page_ratio = connectivity_report.min_intra_page_connectivity_ratio
+    return min(1.0, round((intra_page_ratio + component_penalty) / 2.0, 4))
 
 
 def _room_score(rooms: list[Room], connectivity_report: ConnectivityReport) -> float:

@@ -71,6 +71,7 @@ class ConnectivityReport:
     rooms_detected: int
     page_count: int = 1
     max_components_within_page: int = 0
+    min_intra_page_connectivity_ratio: float = 0.0
 
     def to_dict(self) -> dict:
         return asdict(self)
