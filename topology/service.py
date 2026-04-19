@@ -20,13 +20,37 @@ def build_topology(
     split_walls = _snap_endpoints(split_walls, snap_tolerance)
     split_walls = _drop_degenerate(split_walls)
 
-    graph = nx.Graph()
+    by_page: dict[int, list[SplitWall]] = {}
     for wall in split_walls:
-        graph.add_edge(wall.start, wall.end, wall_id=wall.wall_id, length=wall.length)
+        by_page.setdefault(wall.page_index, []).append(wall)
 
-    junctions = _build_junctions(graph)
+    junctions: list[Junction] = []
+    component_sizes: list[int] = []
+    total_nodes = 0
+    total_edges = 0
+    junction_counter = 1
+
+    for page_index in sorted(by_page):
+        page_walls = by_page[page_index]
+        graph = nx.Graph()
+        for wall in page_walls:
+            graph.add_edge(wall.start, wall.end, wall_id=wall.wall_id, length=wall.length)
+
+        junctions.extend(_build_page_junctions(graph, start_id=junction_counter))
+        junction_counter += len([node for node in graph.nodes if graph.degree(node) > 0])
+
+        total_nodes += graph.number_of_nodes()
+        total_edges += graph.number_of_edges()
+        for component in nx.connected_components(graph):
+            component_sizes.append(len(component))
+
     rooms = _polygonize_rooms(split_walls)
-    report = _build_connectivity_report(graph, rooms)
+    report = _build_connectivity_report_aggregate(
+        total_nodes=total_nodes,
+        total_edges=total_edges,
+        component_sizes=component_sizes,
+        rooms=rooms,
+    )
     return split_walls, junctions, rooms, report
 
 
@@ -42,22 +66,30 @@ def _infer_snap_tolerance(walls: list[Wall]) -> float:
 def _snap_endpoints(walls: list[SplitWall], tolerance: float) -> list[SplitWall]:
     if not walls:
         return walls
-    points = {wall.start for wall in walls} | {wall.end for wall in walls}
-    mapping = _cluster_points(list(points), tolerance)
-    return [
-        SplitWall(
-            wall_id=wall.wall_id,
-            parent_wall_id=wall.parent_wall_id,
-            page_index=wall.page_index,
-            start=mapping[wall.start],
-            end=mapping[wall.end],
-            thickness=wall.thickness,
-            orientation=wall.orientation,
-            source=wall.source,
-            confidence=wall.confidence,
+
+    by_page: dict[int, list[SplitWall]] = {}
+    for wall in walls:
+        by_page.setdefault(wall.page_index, []).append(wall)
+
+    snapped: list[SplitWall] = []
+    for page_walls in by_page.values():
+        points = {wall.start for wall in page_walls} | {wall.end for wall in page_walls}
+        mapping = _cluster_points(list(points), tolerance)
+        snapped.extend(
+            SplitWall(
+                wall_id=wall.wall_id,
+                parent_wall_id=wall.parent_wall_id,
+                page_index=wall.page_index,
+                start=mapping[wall.start],
+                end=mapping[wall.end],
+                thickness=wall.thickness,
+                orientation=wall.orientation,
+                source=wall.source,
+                confidence=wall.confidence,
+            )
+            for wall in page_walls
         )
-        for wall in walls
-    ]
+    return snapped
 
 
 def _cluster_points(
@@ -158,9 +190,10 @@ def _segment_length(start: tuple[float, float], end: tuple[float, float]) -> flo
     return abs(end[0] - start[0]) + abs(end[1] - start[1])
 
 
-def _build_junctions(graph: nx.Graph) -> list[Junction]:
+def _build_page_junctions(graph: nx.Graph, start_id: int) -> list[Junction]:
     junctions: list[Junction] = []
-    for index, node in enumerate(sorted(graph.nodes), start=1):
+    counter = start_id
+    for node in sorted(graph.nodes):
         degree = graph.degree(node)
         if degree == 0:
             continue
@@ -173,12 +206,13 @@ def _build_junctions(graph: nx.Graph) -> list[Junction]:
             kind = "cross"
         junctions.append(
             Junction(
-                junction_id=f"junction-{index}",
+                junction_id=f"junction-{counter}",
                 point=node,
                 degree=degree,
                 kind=kind,
             )
         )
+        counter += 1
     return junctions
 
 
@@ -186,43 +220,53 @@ def _polygonize_rooms(walls: list[SplitWall]) -> list[Room]:
     if not walls:
         return []
 
-    lines = [LineString([wall.start, wall.end]) for wall in walls]
-    merged = unary_union(lines)
-    polygons = list(polygonize(merged))
-    if not polygons:
-        return []
-
-    thickness_reference = max(1.0, min((wall.thickness for wall in walls), default=1.0))
-    min_area = thickness_reference * thickness_reference
+    by_page: dict[int, list[SplitWall]] = {}
+    for wall in walls:
+        by_page.setdefault(wall.page_index, []).append(wall)
 
     rooms: list[Room] = []
-    for index, polygon in enumerate(polygons, start=1):
-        if polygon.area < min_area:
+    counter = 1
+    for page_index in sorted(by_page):
+        page_walls = by_page[page_index]
+        lines = [LineString([wall.start, wall.end]) for wall in page_walls]
+        merged = unary_union(lines)
+        polygons = list(polygonize(merged))
+        if not polygons:
             continue
-        centroid = polygon.centroid
-        rooms.append(
-            Room(
-                room_id=f"room-{index}",
-                polygon=[(float(x), float(y)) for x, y in polygon.exterior.coords[:-1]],
-                area=float(polygon.area),
-                centroid=(float(centroid.x), float(centroid.y)),
+
+        thickness_reference = max(1.0, min((w.thickness for w in page_walls), default=1.0))
+        min_area = thickness_reference * thickness_reference
+
+        for polygon in polygons:
+            if polygon.area < min_area:
+                continue
+            centroid = polygon.centroid
+            rooms.append(
+                Room(
+                    room_id=f"room-{counter}",
+                    polygon=[(float(x), float(y)) for x, y in polygon.exterior.coords[:-1]],
+                    area=float(polygon.area),
+                    centroid=(float(centroid.x), float(centroid.y)),
+                )
             )
-        )
+            counter += 1
     return rooms
 
 
-def _build_connectivity_report(
-    graph: nx.Graph, rooms: list[Room]
+def _build_connectivity_report_aggregate(
+    total_nodes: int,
+    total_edges: int,
+    component_sizes: list[int],
+    rooms: list[Room],
 ) -> ConnectivityReport:
-    components = [sorted(component) for component in nx.connected_components(graph)] if graph.number_of_nodes() else []
-    component_sizes = [len(component) for component in components]
-    edge_count = graph.number_of_edges()
     largest_component = max(component_sizes, default=0)
-    connected_ratio = 0.0 if edge_count == 0 else largest_component / max(1, graph.number_of_nodes())
+    connected_ratio = (
+        0.0 if total_edges == 0 or total_nodes == 0 else largest_component / total_nodes
+    )
     return ConnectivityReport(
-        node_count=graph.number_of_nodes(),
-        edge_count=edge_count,
-        component_count=len(components),
+        node_count=total_nodes,
+        edge_count=total_edges,
+        component_count=len(component_sizes),
         component_sizes=component_sizes,
         largest_component_ratio=round(connected_ratio, 4),
         rooms_detected=len(rooms),
