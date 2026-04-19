@@ -71,11 +71,14 @@ O servico esta preparado para ser honesto e depuravel, mas ainda nao resolve tod
 
 ### Numeros no PDF de referencia `planta_74m2.pdf` (74 m^2, uma pagina)
 
-Estado v19 (post-filtros acumulados):
-- walls: 328 (meta em apto similar: ~40-100)
-- junctions: 221, end=110, tee=43, cross=37, pass_through=31
+Estado atual (post-filtros acumulados nesta sessao):
+- walls: 328 (meta em apto similar: ~40-100 — ainda 3-8x acima do esperado)
+- junctions: 221 (end=110, tee=43, cross=37, pass_through=31)
 - rooms: 32 (dos quais ~8 com area plausivel, ~24 residuos)
-- scores: geometry=0.38, topology baixo, rooms=?
+- scores: geometry=0.097, topology=0.129, rooms=0.637
+- topology_quality: `poor`
+- orphan_component_count: ~26 (componentes com <=3 nos)
+- orphan_node_count: ~60
 - warnings: `walls_disconnected`, `many_orphan_components`
 
 Melhorias aprovadas pelo Codex nesta sessao (round-review iterativo):
