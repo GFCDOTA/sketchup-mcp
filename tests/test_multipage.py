@@ -81,6 +81,27 @@ def test_multipage_connected_pages_do_not_warn_disconnected() -> None:
     assert "walls_disconnected" not in warnings, warnings
 
 
+def test_multipage_connected_pages_keep_full_topology_score() -> None:
+    # Two pages, each self-contained square. topology_score must not be
+    # penalised for structural page partitioning: each page is internally
+    # fully connected, so score should be 1.0.
+    from model.pipeline import _topology_score
+
+    walls = classify_walls(
+        [
+            _h(0, 40, 40, 200), _h(0, 200, 40, 200),
+            _v(0, 40, 40, 200), _v(0, 200, 40, 200),
+            _h(1, 40, 40, 200), _h(1, 200, 40, 200),
+            _v(1, 40, 40, 200), _v(1, 200, 40, 200),
+        ]
+    )
+    split_walls, _, _, report = build_topology(walls)
+
+    assert report.min_intra_page_connectivity_ratio == 1.0, report
+    assert report.max_components_within_page == 1, report
+    assert _topology_score(split_walls, report) == 1.0
+
+
 def test_topology_does_not_connect_across_pages() -> None:
     # Same square on page 0 and page 1; topology must not create cross-page edges.
     walls_page_0 = classify_walls(
