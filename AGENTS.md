@@ -32,29 +32,34 @@ Não é responsabilidade deste serviço lidar com Ruby/SketchUp, mobiliário, cl
 
 ## 4. Contrato de saída (observed_model.json)
 
-Schema mínimo obrigatório:
+Schema atual: `2.1.0`.
+
+Top-level obrigatórios:
 
 - `schema_version`
+- `run_id` (uuid4 hex por run)
+- `source` (filename, source_type in {pdf, raster}, page_count, sha256; sha256/filename podem ser null no path raster)
+- `bounds` (pages[] com per-page AABB; pages=[] quando nenhuma wall foi detectada)
 - `walls`
 - `junctions`
 - `rooms`
 - `scores`
 - `metadata`
+- `warnings` (lista de strings)
 
 Campos mínimos esperados:
 
-- `scores.geometry`
-- `scores.topology`
-- `scores.rooms`
-- `metadata.rooms_detected`
-- `metadata.topology_quality`
-- `metadata.warnings`
+- `scores.geometry`, `scores.topology`, `scores.rooms` (todos em [0, 1])
+- `metadata.rooms_detected`, `metadata.topology_quality` (good/fair/poor), `metadata.connectivity`
+- `metadata.warnings` (mirror do top-level `warnings` durante 2.x; remoção prevista num major bump)
 
 Regras do contrato:
 
 - `rooms` pode ser `[]` — isso é observação válida
+- `bounds.pages` pode ser `[]` — quando não há walls, mantenha a lista vazia em vez de `null`
 - O arquivo representa observação do pipeline, não preenchimento especulativo
 - Scores são indicadores observacionais e não licença para mascarar ausência de estrutura
+- Mudança de contrato backward-incompatível exige major bump (3.x) e atualização desta seção + README
 
 ## 5. Regras de trabalho para agentes
 
