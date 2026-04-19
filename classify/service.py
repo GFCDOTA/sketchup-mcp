@@ -13,6 +13,16 @@ _PAIR_MIN_OVERLAP_RATIO = 0.7
 _HACHURA_CHAIN_LENGTH = 3
 _HACHURA_GAP_VARIANCE = 0.35
 
+# Text-baseline filter: paragraph text (NOTAS, LEGENDA, footers) registers
+# as 3+ parallel strokes with near-uniform perpendicular spacing that share
+# a common parallel extent. Architectural walls never form such chains:
+# even a double-line pair is only 2 strokes, not 3+.
+_TEXT_CHAIN_MIN_GAP = 4.0
+_TEXT_CHAIN_MAX_GAP = 30.0
+_TEXT_CHAIN_MIN_LENGTH = 3
+_TEXT_GAP_VARIANCE = 0.35
+_TEXT_MIN_OVERLAP = 20.0
+
 
 def classify_walls(
     candidates: list[WallCandidate], coordinate_tolerance: float | None = None
@@ -26,11 +36,17 @@ def classify_walls(
     # Stage 1: collapse redundant Hough detections of the same stroke.
     strokes = _consolidate_hough_duplicates(candidates, coordinate_tolerance)
 
-    # Stage 2: pair parallel strokes that represent the two faces of the
+    # Stage 2: drop text baselines / repeating decorative patterns. Chains of
+    # 3+ parallel strokes at near-uniform perpendicular spacing that share a
+    # significant parallel extent are the signature of paragraph text or
+    # hachura, not architectural walls.
+    strokes = _remove_text_baselines(strokes)
+
+    # Stage 3: pair parallel strokes that represent the two faces of the
     # same wall into a single centerline candidate.
     wall_candidates = _pair_merge_strokes(strokes)
 
-    # Stage 3: assign stable wall ids and turn the candidates into Walls.
+    # Stage 4: assign stable wall ids and turn the candidates into Walls.
     return _candidates_to_walls(wall_candidates)
 
 
@@ -94,10 +110,13 @@ def _orientation(candidate: WallCandidate) -> str:
 def _infer_tolerance(candidates: list[WallCandidate]) -> float:
     thicknesses = [c.thickness for c in candidates if c.thickness > 0]
     if not thicknesses:
-        return 2.0
+        return 4.0
     thicknesses.sort()
     median = thicknesses[len(thicknesses) // 2]
-    return max(2.0, median)
+    # Floor at 4 px so Hough's twin detections of the top and bottom of a
+    # single thick stroke (common on text baselines rendered at 2x scale)
+    # always collapse into one candidate at consolidation time.
+    return max(4.0, median)
 
 
 def _perp_coord(candidate: WallCandidate, orientation: str) -> float:
@@ -108,6 +127,80 @@ def _para_range(candidate: WallCandidate, orientation: str) -> tuple[float, floa
     if orientation == "horizontal":
         return (min(candidate.start[0], candidate.end[0]), max(candidate.start[0], candidate.end[0]))
     return (min(candidate.start[1], candidate.end[1]), max(candidate.start[1], candidate.end[1]))
+
+
+def _remove_text_baselines(strokes: list[WallCandidate]) -> list[WallCandidate]:
+    """Drop chains of 3+ parallel strokes with near-uniform perpendicular
+    spacing and at least _TEXT_MIN_OVERLAP px of pairwise parallel overlap
+    between consecutive members.
+
+    Paragraph text (NOTAS, LEGENDA, footers) renders as baseline strokes
+    stacked at the line height, with consecutive lines overlapping in
+    column even when widths differ due to wrapping. Decorative hachura
+    shares the same signature. Real walls never form chains this long.
+    """
+    if not strokes:
+        return list(strokes)
+
+    by_group: dict[tuple[int, str], list[WallCandidate]] = {}
+    for stroke in strokes:
+        orientation = _orientation(stroke)
+        by_group.setdefault((stroke.page_index, orientation), []).append(stroke)
+
+    kept: list[WallCandidate] = []
+    for (_, orientation), items in by_group.items():
+        ordered = sorted(items, key=lambda c: _perp_coord(c, orientation))
+        n = len(ordered)
+        drop: set[int] = set()
+
+        start = 0
+        while start < n - (_TEXT_CHAIN_MIN_LENGTH - 1):
+            chain_end = start + 1
+            while chain_end < n:
+                gap = _perp_coord(ordered[chain_end], orientation) - _perp_coord(
+                    ordered[chain_end - 1], orientation
+                )
+                if gap < _TEXT_CHAIN_MIN_GAP or gap > _TEXT_CHAIN_MAX_GAP:
+                    break
+                if chain_end - start >= 2:
+                    gaps = [
+                        _perp_coord(ordered[k + 1], orientation)
+                        - _perp_coord(ordered[k], orientation)
+                        for k in range(start, chain_end)
+                    ]
+                    mean_gap = sum(gaps) / len(gaps)
+                    if mean_gap <= 0:
+                        break
+                    if any(
+                        abs(g - mean_gap) / mean_gap > _TEXT_GAP_VARIANCE for g in gaps
+                    ):
+                        break
+                chain_end += 1
+
+            chain_len = chain_end - start
+            if chain_len >= _TEXT_CHAIN_MIN_LENGTH:
+                pairwise_ok = True
+                for k in range(start, chain_end - 1):
+                    a_range = _para_range(ordered[k], orientation)
+                    b_range = _para_range(ordered[k + 1], orientation)
+                    pair_overlap = max(
+                        0.0, min(a_range[1], b_range[1]) - max(a_range[0], b_range[0])
+                    )
+                    if pair_overlap < _TEXT_MIN_OVERLAP:
+                        pairwise_ok = False
+                        break
+                if pairwise_ok:
+                    for k in range(start, chain_end):
+                        drop.add(k)
+                    start = chain_end
+                    continue
+            start += 1
+
+        for idx, stroke in enumerate(ordered):
+            if idx not in drop:
+                kept.append(stroke)
+
+    return kept
 
 
 def _pair_merge_strokes(candidates: list[WallCandidate]) -> list[WallCandidate]:

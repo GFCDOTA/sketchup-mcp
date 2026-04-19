@@ -60,10 +60,13 @@ def test_low_overlap_parallel_strokes_do_not_pair() -> None:
     assert len(walls) == 2, [(w.start, w.end) for w in walls]
 
 
-def test_hachura_chain_does_not_pair() -> None:
-    # Three parallel horizontal strokes 15 px apart (uniform spacing). This is
-    # the signature of hachura / repeating pattern, not a wall pair; none of
-    # them may be merged.
+def test_hachura_chain_is_removed_before_pair_merge() -> None:
+    # Three parallel horizontal strokes at uniform 15 px spacing with a
+    # shared parallel extent: signature of text / decorative hachura. The
+    # text-baseline filter removes them before pair-merge runs, so the
+    # pipeline produces no walls from this input. That is stronger than the
+    # previous "not paired" guarantee: hachura should not become walls at
+    # all.
     candidates = [
         _h(page=0, y=40, x0=10, x1=110),
         _h(page=0, y=55, x0=10, x1=110),
@@ -71,13 +74,7 @@ def test_hachura_chain_does_not_pair() -> None:
     ]
     walls = classify_walls(candidates)
 
-    # After classify's own per-page perpendicular clustering, the three
-    # strokes remain distinguishable as long as none got pair-merged. The
-    # thickness inferred from the candidates is 3.0, so the classify
-    # clustering tolerance is small and the three perpendicular coords stay
-    # in separate clusters -> 3 walls come out.
-    assert len(walls) == 3, [(w.start, w.end, w.thickness) for w in walls]
-    assert all(w.thickness == 3.0 for w in walls), [w.thickness for w in walls]
+    assert walls == [], [(w.start, w.end, w.thickness) for w in walls]
 
 
 def test_strokes_too_close_are_left_to_classify_clustering() -> None:
