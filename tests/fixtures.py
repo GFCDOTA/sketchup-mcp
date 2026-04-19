@@ -39,7 +39,14 @@ def t_junction() -> np.ndarray:
 
 
 def disconnected_walls() -> np.ndarray:
+    # Two disconnected T-shaped fragments on the same page. Each T has
+    # one intersection and five nodes after topology split, so the
+    # component-size filter keeps both (>= 4 nodes). Neither T closes
+    # into a polygon, so `rooms == 0`, and the two components on one
+    # page still trigger `walls_disconnected`.
     canvas = blank_canvas()
-    cv2.line(canvas, (40, 40), (100, 40), color=(0, 0, 0), thickness=8)
-    cv2.line(canvas, (160, 160), (220, 160), color=(0, 0, 0), thickness=8)
+    cv2.line(canvas, (30, 60), (110, 60), color=(0, 0, 0), thickness=8)
+    cv2.line(canvas, (70, 30), (70, 100), color=(0, 0, 0), thickness=8)
+    cv2.line(canvas, (130, 170), (210, 170), color=(0, 0, 0), thickness=8)
+    cv2.line(canvas, (170, 140), (170, 210), color=(0, 0, 0), thickness=8)
     return canvas

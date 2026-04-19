@@ -15,8 +15,9 @@ _HACHURA_GAP_VARIANCE = 0.35
 
 # Text-baseline filter: paragraph text (NOTAS, LEGENDA, footers) registers
 # as 3+ parallel strokes with near-uniform perpendicular spacing that share
-# a common parallel extent. Architectural walls never form such chains:
-# even a double-line pair is only 2 strokes, not 3+.
+# a common parallel extent. Same signature for hachura / floor pattern
+# inside rooms. Architectural walls never form such chains: even a
+# double-line pair is only 2 strokes, not 3+.
 _TEXT_CHAIN_MIN_GAP = 4.0
 _TEXT_CHAIN_MAX_GAP = 30.0
 _TEXT_CHAIN_MIN_LENGTH = 3

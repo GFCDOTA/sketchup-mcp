@@ -10,6 +10,9 @@ from shapely.ops import polygonize, unary_union
 from model.types import ConnectivityReport, Junction, Room, SplitWall, Wall
 
 
+_MIN_COMPONENT_SIZE = 4
+
+
 def build_topology(
     walls: list[Wall], snap_tolerance: float | None = None
 ) -> tuple[list[SplitWall], list[Junction], list[Room], ConnectivityReport]:
@@ -19,6 +22,7 @@ def build_topology(
     split_walls = _split_walls_at_intersections(walls)
     split_walls = _snap_endpoints(split_walls, snap_tolerance)
     split_walls = _drop_degenerate(split_walls)
+    split_walls = _drop_small_components(split_walls)
 
     by_page: dict[int, list[SplitWall]] = {}
     for wall in split_walls:
@@ -135,6 +139,37 @@ def _cluster_points(
 
 def _drop_degenerate(walls: list[SplitWall]) -> list[SplitWall]:
     return [wall for wall in walls if wall.start != wall.end]
+
+
+def _drop_small_components(walls: list[SplitWall]) -> list[SplitWall]:
+    """Remove walls that belong to a connected component smaller than
+    _MIN_COMPONENT_SIZE. Per-page graph construction keeps pages
+    isolated. A very small component is an orphan cluster of detections
+    that cannot close a room anyway; dropping them reduces dangling
+    `end` junctions and keeps the connectivity report honest.
+    """
+    if not walls:
+        return walls
+
+    by_page: dict[int, list[SplitWall]] = {}
+    for wall in walls:
+        by_page.setdefault(wall.page_index, []).append(wall)
+
+    kept: list[SplitWall] = []
+    for page_walls in by_page.values():
+        graph = nx.Graph()
+        for wall in page_walls:
+            graph.add_edge(wall.start, wall.end)
+        retained_nodes: set[tuple[float, float]] = set()
+        for component in nx.connected_components(graph):
+            if len(component) >= _MIN_COMPONENT_SIZE:
+                retained_nodes.update(component)
+        kept.extend(
+            wall
+            for wall in page_walls
+            if wall.start in retained_nodes and wall.end in retained_nodes
+        )
+    return kept
 
 
 def _split_walls_at_intersections(walls: list[Wall]) -> list[SplitWall]:
