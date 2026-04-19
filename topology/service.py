@@ -28,6 +28,7 @@ def build_topology(
     component_sizes: list[int] = []
     total_nodes = 0
     total_edges = 0
+    max_components_within_page = 0
     junction_counter = 1
 
     for page_index in sorted(by_page):
@@ -39,9 +40,12 @@ def build_topology(
         junctions.extend(_build_page_junctions(graph, start_id=junction_counter))
         junction_counter += len([node for node in graph.nodes if graph.degree(node) > 0])
 
+        page_components = list(nx.connected_components(graph))
+        max_components_within_page = max(max_components_within_page, len(page_components))
+
         total_nodes += graph.number_of_nodes()
         total_edges += graph.number_of_edges()
-        for component in nx.connected_components(graph):
+        for component in page_components:
             component_sizes.append(len(component))
 
     rooms = _polygonize_rooms(split_walls)
@@ -50,6 +54,8 @@ def build_topology(
         total_edges=total_edges,
         component_sizes=component_sizes,
         rooms=rooms,
+        page_count=len(by_page),
+        max_components_within_page=max_components_within_page,
     )
     return split_walls, junctions, rooms, report
 
@@ -258,6 +264,8 @@ def _build_connectivity_report_aggregate(
     total_edges: int,
     component_sizes: list[int],
     rooms: list[Room],
+    page_count: int,
+    max_components_within_page: int,
 ) -> ConnectivityReport:
     largest_component = max(component_sizes, default=0)
     connected_ratio = (
@@ -270,4 +278,6 @@ def _build_connectivity_report_aggregate(
         component_sizes=component_sizes,
         largest_component_ratio=round(connected_ratio, 4),
         rooms_detected=len(rooms),
+        page_count=page_count,
+        max_components_within_page=max_components_within_page,
     )

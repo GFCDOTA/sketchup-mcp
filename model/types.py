@@ -69,6 +69,8 @@ class ConnectivityReport:
     component_sizes: list[int]
     largest_component_ratio: float
     rooms_detected: int
+    page_count: int = 1
+    max_components_within_page: int = 0
 
     def to_dict(self) -> dict:
         return asdict(self)
