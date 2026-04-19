@@ -12,31 +12,37 @@ def classify_walls(
     if coordinate_tolerance is None:
         coordinate_tolerance = _infer_tolerance(candidates)
 
-    by_orientation: dict[str, list[WallCandidate]] = {"horizontal": [], "vertical": []}
+    by_page: dict[int, list[WallCandidate]] = {}
     for candidate in candidates:
-        by_orientation[_orientation(candidate)].append(candidate)
+        by_page.setdefault(candidate.page_index, []).append(candidate)
 
     walls: list[Wall] = []
     counter = 1
-    for orientation, items in by_orientation.items():
-        if not items:
-            continue
-        clusters = _cluster_by_perpendicular(items, orientation, coordinate_tolerance)
-        for cluster in clusters:
-            for merged in _merge_collinear_segments(cluster, orientation, coordinate_tolerance):
-                walls.append(
-                    Wall(
-                        wall_id=f"wall-{counter}",
-                        page_index=merged.page_index,
-                        start=merged.start,
-                        end=merged.end,
-                        thickness=merged.thickness,
-                        orientation=orientation,
-                        source=merged.source,
-                        confidence=merged.confidence,
+    for page_index in sorted(by_page):
+        page_items = by_page[page_index]
+        by_orientation: dict[str, list[WallCandidate]] = {"horizontal": [], "vertical": []}
+        for candidate in page_items:
+            by_orientation[_orientation(candidate)].append(candidate)
+
+        for orientation, items in by_orientation.items():
+            if not items:
+                continue
+            clusters = _cluster_by_perpendicular(items, orientation, coordinate_tolerance)
+            for cluster in clusters:
+                for merged in _merge_collinear_segments(cluster, orientation, coordinate_tolerance):
+                    walls.append(
+                        Wall(
+                            wall_id=f"wall-{counter}",
+                            page_index=page_index,
+                            start=merged.start,
+                            end=merged.end,
+                            thickness=merged.thickness,
+                            orientation=orientation,
+                            source=merged.source,
+                            confidence=merged.confidence,
+                        )
                     )
-                )
-                counter += 1
+                    counter += 1
     return walls
 
 
