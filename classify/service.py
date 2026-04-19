@@ -19,7 +19,11 @@ _HACHURA_GAP_VARIANCE = 0.35
 # inside rooms. Architectural walls never form such chains: even a
 # double-line pair is only 2 strokes, not 3+.
 _TEXT_CHAIN_MIN_GAP = 4.0
-_TEXT_CHAIN_MAX_GAP = 30.0
+# Bumped after ROI crop landed: inside the planta crop, the residual
+# noise is mostly floor hachura with 30-60 px spacing that escaped the
+# previous 30 px ceiling. ROI itself protects walls outside the planta
+# region, so a wider chain window is safe to use here.
+_TEXT_CHAIN_MAX_GAP = 60.0
 _TEXT_CHAIN_MIN_LENGTH = 3
 _TEXT_GAP_VARIANCE = 0.35
 _TEXT_MIN_OVERLAP = 20.0
@@ -33,13 +37,13 @@ _TEXT_MIN_OVERLAP = 20.0
 # requiring a perpendicular partner inside that cell.
 _IMBALANCE_CELL_SIZES = (120.0, 240.0)
 _IMBALANCE_MIN_TOTAL = 4
-_IMBALANCE_RATIO = 4.0
+_IMBALANCE_RATIO = 3.0
 _IMBALANCE_MAX_STROKE_LENGTH = 100.0
 # When one orientation dominates the cell by _IMBALANCE_EXTREME_RATIO or
 # more, the region is treated as non-architectural (paragraph text block,
 # legend hatching, footer). Even long strokes there are noise: a real
 # floor plan would mix orientations that densely.
-_IMBALANCE_EXTREME_RATIO = 10.0
+_IMBALANCE_EXTREME_RATIO = 5.0
 
 # Aspect-ratio filter: a real architectural wall is much longer than it is
 # thick. A stroke whose length / thickness ratio is below this threshold is

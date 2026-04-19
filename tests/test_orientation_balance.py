@@ -32,13 +32,13 @@ def test_balanced_region_keeps_all_short_strokes() -> None:
     # filter does not fire.
     candidates = [
         _h(page=0, y=10, x0=10, x1=50),
-        _h(page=0, y=70, x0=10, x1=50),
-        _h(page=0, y=130, x0=10, x1=50),
-        _h(page=0, y=190, x0=10, x1=50),
+        _h(page=0, y=80, x0=10, x1=50),
+        _h(page=0, y=150, x0=10, x1=50),
+        _h(page=0, y=220, x0=10, x1=50),
         _v(page=0, x=10, y0=10, y1=50),
-        _v(page=0, x=70, y0=10, y1=50),
-        _v(page=0, x=130, y0=10, y1=50),
-        _v(page=0, x=190, y0=10, y1=50),
+        _v(page=0, x=80, y0=10, y1=50),
+        _v(page=0, x=150, y0=10, y1=50),
+        _v(page=0, x=220, y0=10, y1=50),
     ]
     walls = classify_walls(candidates)
     assert len(walls) == 8
