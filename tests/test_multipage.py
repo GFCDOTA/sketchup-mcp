@@ -51,6 +51,36 @@ def test_classify_keeps_pages_separate_when_coords_collide() -> None:
     assert per_page_count == {0: 4, 1: 4}, per_page_count
 
 
+def test_multipage_connected_pages_do_not_warn_disconnected() -> None:
+    # Two pages, each a self-contained square. Each page's graph is a single
+    # component; only the aggregate sees 2 components. walls_disconnected
+    # warns on intra-page disconnection, so it must NOT fire here.
+    from model.pipeline import _build_warnings
+
+    walls = classify_walls(
+        [
+            _h(0, 40, 40, 200), _h(0, 200, 40, 200),
+            _v(0, 40, 40, 200), _v(0, 200, 40, 200),
+            _h(1, 40, 40, 200), _h(1, 200, 40, 200),
+            _v(1, 40, 40, 200), _v(1, 200, 40, 200),
+        ]
+    )
+    split_walls, _, rooms, report = build_topology(walls)
+
+    assert report.page_count == 2
+    assert report.component_count == 2  # aggregate
+    assert report.max_components_within_page == 1  # per-page
+
+    warnings = _build_warnings(
+        candidates=[object()],  # non-empty stand-in
+        walls=walls,
+        split_walls=split_walls,
+        rooms=rooms,
+        connectivity_report=report,
+    )
+    assert "walls_disconnected" not in warnings, warnings
+
+
 def test_topology_does_not_connect_across_pages() -> None:
     # Same square on page 0 and page 1; topology must not create cross-page edges.
     walls_page_0 = classify_walls(
