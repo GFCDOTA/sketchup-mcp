@@ -248,8 +248,18 @@ def _polygonize_rooms(walls: list[SplitWall]) -> list[Room]:
         if not polygons:
             continue
 
-        thickness_reference = max(1.0, min((w.thickness for w in page_walls), default=1.0))
-        min_area = thickness_reference * thickness_reference
+        # Use the median thickness as the spatial floor rather than the
+        # minimum: a single thin fragment left over from extract would
+        # otherwise push min_area to ~1 px^2 and admit any closed sliver.
+        # A room must cover at least a square of side ~ median thickness
+        # (in practice, 2x that square).
+        thicknesses = sorted(w.thickness for w in page_walls if w.thickness > 0)
+        if thicknesses:
+            median_thickness = thicknesses[len(thicknesses) // 2]
+        else:
+            median_thickness = 1.0
+        thickness_reference = max(1.0, median_thickness)
+        min_area = (2.0 * thickness_reference) ** 2
 
         for polygon in polygons:
             if polygon.area < min_area:
