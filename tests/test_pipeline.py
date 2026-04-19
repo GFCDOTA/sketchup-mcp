@@ -31,13 +31,13 @@ def test_t_junction_is_detected(tmp_path: Path) -> None:
 def test_disconnected_walls_keep_rooms_zero(tmp_path: Path) -> None:
     result = run_raster_pipeline(disconnected_walls(), output_dir=tmp_path / "disconnected")
     assert len(result.rooms) == 0
-    assert result.observed_model["metadata"]["warnings"] == ["walls_disconnected", "rooms_not_detected"]
+    assert result.observed_model["warnings"] == ["walls_disconnected", "rooms_not_detected"]
 
 
 def test_debug_artifacts_exist_even_when_no_geometry_is_found(tmp_path: Path) -> None:
     output_dir = tmp_path / "empty"
     result = run_raster_pipeline(blank_canvas(), output_dir=output_dir)
-    assert result.observed_model["metadata"]["warnings"] == ["no_wall_candidates", "rooms_not_detected"]
+    assert result.observed_model["warnings"] == ["no_wall_candidates", "rooms_not_detected"]
     assert (output_dir / "observed_model.json").exists()
     assert (output_dir / "debug_walls.svg").exists()
     assert (output_dir / "debug_junctions.svg").exists()

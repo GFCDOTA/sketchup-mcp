@@ -1,16 +1,18 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from dataclasses import dataclass
 from pathlib import Path
+from uuid import uuid4
 
 import numpy as np
 
 from classify.service import classify_walls
 from debug.service import write_debug_artifacts
 from extract.service import extract_from_document, extract_from_raster
-from ingest.service import IngestError, ingest_pdf
-from model.builder import build_observed_model
+from ingest.service import IngestError, IngestedDocument, ingest_pdf
+from model.builder import build_observed_model, compute_bounds
 from model.types import ConnectivityReport, Junction, Room, SplitWall, WallCandidate
 from topology.service import build_topology
 
@@ -36,18 +38,29 @@ def run_pdf_pipeline(pdf_bytes: bytes, filename: str, output_dir: Path) -> Pipel
     except IngestError as exc:
         raise PipelineError(str(exc)) from exc
     candidates = extract_from_document(document)
-    return _run_pipeline(candidates=candidates, output_dir=output_dir)
+    source = _build_pdf_source(pdf_bytes=pdf_bytes, filename=filename, document=document)
+    return _run_pipeline(candidates=candidates, output_dir=output_dir, source=source)
 
 
 def run_raster_pipeline(image: np.ndarray, output_dir: Path) -> PipelineResult:
     candidates = extract_from_raster(image=image)
-    return _run_pipeline(candidates=candidates, output_dir=output_dir)
+    source = {
+        "filename": None,
+        "source_type": "raster",
+        "page_count": 1,
+        "sha256": None,
+    }
+    return _run_pipeline(candidates=candidates, output_dir=output_dir, source=source)
 
 
-def _run_pipeline(candidates: list[WallCandidate], output_dir: Path) -> PipelineResult:
+def _run_pipeline(
+    candidates: list[WallCandidate], output_dir: Path, source: dict
+) -> PipelineResult:
     walls = classify_walls(candidates)
     split_walls, junctions, rooms, connectivity_report = build_topology(walls)
     warnings = _build_warnings(candidates, walls, split_walls, rooms, connectivity_report)
+    run_id = uuid4().hex
+    bounds = compute_bounds(split_walls)
     observed_model = build_observed_model(
         walls=split_walls,
         junctions=junctions,
@@ -57,6 +70,9 @@ def _run_pipeline(candidates: list[WallCandidate], output_dir: Path) -> Pipeline
         topology_score=_topology_score(split_walls, connectivity_report),
         room_score=_room_score(rooms, connectivity_report),
         warnings=warnings,
+        run_id=run_id,
+        source=source,
+        bounds=bounds,
     )
 
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -80,6 +96,15 @@ def _run_pipeline(candidates: list[WallCandidate], output_dir: Path) -> Pipeline
         rooms=rooms,
         connectivity_report=connectivity_report,
     )
+
+
+def _build_pdf_source(pdf_bytes: bytes, filename: str, document: IngestedDocument) -> dict:
+    return {
+        "filename": filename,
+        "source_type": "pdf",
+        "page_count": len(document.pages),
+        "sha256": hashlib.sha256(pdf_bytes).hexdigest(),
+    }
 
 
 def _build_warnings(
