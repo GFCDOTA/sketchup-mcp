@@ -1,94 +1,126 @@
 from __future__ import annotations
 
-from collections import defaultdict
-
 from model.types import Wall, WallCandidate
 
 
-def classify_walls(candidates: list[WallCandidate], coordinate_tolerance: float = 2.0) -> list[Wall]:
-    grouped: dict[tuple[int, str, int], list[WallCandidate]] = defaultdict(list)
+def classify_walls(
+    candidates: list[WallCandidate], coordinate_tolerance: float | None = None
+) -> list[Wall]:
+    if not candidates:
+        return []
+
+    if coordinate_tolerance is None:
+        coordinate_tolerance = _infer_tolerance(candidates)
+
+    by_orientation: dict[str, list[WallCandidate]] = {"horizontal": [], "vertical": []}
     for candidate in candidates:
-        orientation = _orientation(candidate)
-        fixed_coord = (
-            candidate.start[1] if orientation == "horizontal" else candidate.start[0]
-        )
-        grouped[(candidate.page_index, orientation, int(round(fixed_coord / coordinate_tolerance)))].append(candidate)
+        by_orientation[_orientation(candidate)].append(candidate)
 
     walls: list[Wall] = []
     counter = 1
-    for (_, orientation, _), batch in grouped.items():
-        merged = _merge_candidates(batch, orientation=orientation, tolerance=coordinate_tolerance)
-        for candidate in merged:
-            walls.append(
-                Wall(
-                    wall_id=f"wall-{counter}",
-                    page_index=candidate.page_index,
-                    start=candidate.start,
-                    end=candidate.end,
-                    thickness=candidate.thickness,
-                    orientation=orientation,
-                    source=candidate.source,
-                    confidence=candidate.confidence,
+    for orientation, items in by_orientation.items():
+        if not items:
+            continue
+        clusters = _cluster_by_perpendicular(items, orientation, coordinate_tolerance)
+        for cluster in clusters:
+            for merged in _merge_collinear_segments(cluster, orientation, coordinate_tolerance):
+                walls.append(
+                    Wall(
+                        wall_id=f"wall-{counter}",
+                        page_index=merged.page_index,
+                        start=merged.start,
+                        end=merged.end,
+                        thickness=merged.thickness,
+                        orientation=orientation,
+                        source=merged.source,
+                        confidence=merged.confidence,
+                    )
                 )
-            )
-            counter += 1
+                counter += 1
     return walls
 
 
 def _orientation(candidate: WallCandidate) -> str:
-    if abs(candidate.start[1] - candidate.end[1]) <= abs(candidate.start[0] - candidate.end[0]):
-        return "horizontal"
-    return "vertical"
+    horizontal_span = abs(candidate.end[0] - candidate.start[0])
+    vertical_span = abs(candidate.end[1] - candidate.start[1])
+    return "horizontal" if horizontal_span >= vertical_span else "vertical"
 
 
-def _merge_candidates(
-    candidates: list[WallCandidate], orientation: str, tolerance: float
-) -> list[WallCandidate]:
-    if not candidates:
-        return []
+def _infer_tolerance(candidates: list[WallCandidate]) -> float:
+    thicknesses = [c.thickness for c in candidates if c.thickness > 0]
+    if not thicknesses:
+        return 2.0
+    thicknesses.sort()
+    median = thicknesses[len(thicknesses) // 2]
+    return max(2.0, median)
 
+
+def _perp_coord(candidate: WallCandidate, orientation: str) -> float:
+    return candidate.start[1] if orientation == "horizontal" else candidate.start[0]
+
+
+def _para_range(candidate: WallCandidate, orientation: str) -> tuple[float, float]:
     if orientation == "horizontal":
-        ordered = sorted(candidates, key=lambda item: (item.start[0], item.end[0]))
-    else:
-        ordered = sorted(candidates, key=lambda item: (item.start[1], item.end[1]))
+        return (min(candidate.start[0], candidate.end[0]), max(candidate.start[0], candidate.end[0]))
+    return (min(candidate.start[1], candidate.end[1]), max(candidate.start[1], candidate.end[1]))
+
+
+def _cluster_by_perpendicular(
+    items: list[WallCandidate], orientation: str, tolerance: float
+) -> list[list[WallCandidate]]:
+    ordered = sorted(items, key=lambda c: _perp_coord(c, orientation))
+    clusters: list[list[WallCandidate]] = []
+    current: list[WallCandidate] = [ordered[0]]
+    current_mean = _perp_coord(ordered[0], orientation)
+    for candidate in ordered[1:]:
+        coord = _perp_coord(candidate, orientation)
+        if abs(coord - current_mean) <= tolerance:
+            current.append(candidate)
+            current_mean = sum(_perp_coord(c, orientation) for c in current) / len(current)
+        else:
+            clusters.append(current)
+            current = [candidate]
+            current_mean = coord
+    clusters.append(current)
+    return clusters
+
+
+def _merge_collinear_segments(
+    cluster: list[WallCandidate], orientation: str, tolerance: float
+) -> list[WallCandidate]:
+    mean_perp = sum(_perp_coord(c, orientation) for c in cluster) / len(cluster)
+    max_thickness = max(c.thickness for c in cluster)
+    confidence = min(c.confidence for c in cluster)
+    source = cluster[0].source
+    page_index = cluster[0].page_index
+
+    ranges = sorted((_para_range(c, orientation) for c in cluster), key=lambda r: r[0])
+    merged_ranges: list[tuple[float, float]] = []
+    cur_start, cur_end = ranges[0]
+    for start, end in ranges[1:]:
+        if start <= cur_end + tolerance:
+            cur_end = max(cur_end, end)
+        else:
+            merged_ranges.append((cur_start, cur_end))
+            cur_start, cur_end = start, end
+    merged_ranges.append((cur_start, cur_end))
 
     merged: list[WallCandidate] = []
-    current = ordered[0]
-
-    for candidate in ordered[1:]:
-        if _can_merge(current, candidate, orientation=orientation, tolerance=tolerance):
-            current = _merge_pair(current, candidate, orientation=orientation)
+    for start, end in merged_ranges:
+        if orientation == "horizontal":
+            p1 = (round(start, 3), round(mean_perp, 3))
+            p2 = (round(end, 3), round(mean_perp, 3))
         else:
-            merged.append(current)
-            current = candidate
-
-    merged.append(current)
+            p1 = (round(mean_perp, 3), round(start, 3))
+            p2 = (round(mean_perp, 3), round(end, 3))
+        merged.append(
+            WallCandidate(
+                page_index=page_index,
+                start=p1,
+                end=p2,
+                thickness=max_thickness,
+                source=source,
+                confidence=confidence,
+            )
+        )
     return merged
-
-
-def _can_merge(a: WallCandidate, b: WallCandidate, orientation: str, tolerance: float) -> bool:
-    if orientation == "horizontal":
-        same_axis = abs(a.start[1] - b.start[1]) <= tolerance
-        gap = b.start[0] - a.end[0]
-    else:
-        same_axis = abs(a.start[0] - b.start[0]) <= tolerance
-        gap = b.start[1] - a.end[1]
-    thickness_gap = abs(a.thickness - b.thickness) <= max(a.thickness, b.thickness, tolerance)
-    return same_axis and thickness_gap and gap <= max(a.thickness, b.thickness, tolerance)
-
-
-def _merge_pair(a: WallCandidate, b: WallCandidate, orientation: str) -> WallCandidate:
-    if orientation == "horizontal":
-        start = (min(a.start[0], b.start[0]), (a.start[1] + b.start[1]) / 2.0)
-        end = (max(a.end[0], b.end[0]), (a.end[1] + b.end[1]) / 2.0)
-    else:
-        start = ((a.start[0] + b.start[0]) / 2.0, min(a.start[1], b.start[1]))
-        end = ((a.end[0] + b.end[0]) / 2.0, max(a.end[1], b.end[1]))
-    return WallCandidate(
-        page_index=a.page_index,
-        start=start,
-        end=end,
-        thickness=max(a.thickness, b.thickness),
-        source=a.source,
-        confidence=min(a.confidence, b.confidence),
-    )
