@@ -3,6 +3,17 @@ from __future__ import annotations
 from model.types import Wall, WallCandidate
 
 
+# Pair-merge heuristics. A wall drawn in a plan is typically two parallel
+# strokes with the wall's true thickness as the gap between them. These
+# parameters filter out stroke duplicates (gap too small) and pairings
+# across unrelated walls (gap too large) before clustering.
+_PAIR_MIN_GAP = 4.0
+_PAIR_MAX_GAP = 100.0
+_PAIR_MIN_OVERLAP_RATIO = 0.7
+_HACHURA_CHAIN_LENGTH = 3
+_HACHURA_GAP_VARIANCE = 0.35
+
+
 def classify_walls(
     candidates: list[WallCandidate], coordinate_tolerance: float | None = None
 ) -> list[Wall]:
@@ -12,12 +23,25 @@ def classify_walls(
     if coordinate_tolerance is None:
         coordinate_tolerance = _infer_tolerance(candidates)
 
+    # Stage 1: collapse redundant Hough detections of the same stroke.
+    strokes = _consolidate_hough_duplicates(candidates, coordinate_tolerance)
+
+    # Stage 2: pair parallel strokes that represent the two faces of the
+    # same wall into a single centerline candidate.
+    wall_candidates = _pair_merge_strokes(strokes)
+
+    # Stage 3: assign stable wall ids and turn the candidates into Walls.
+    return _candidates_to_walls(wall_candidates)
+
+
+def _consolidate_hough_duplicates(
+    candidates: list[WallCandidate], tolerance: float
+) -> list[WallCandidate]:
     by_page: dict[int, list[WallCandidate]] = {}
     for candidate in candidates:
         by_page.setdefault(candidate.page_index, []).append(candidate)
 
-    walls: list[Wall] = []
-    counter = 1
+    strokes: list[WallCandidate] = []
     for page_index in sorted(by_page):
         page_items = by_page[page_index]
         by_orientation: dict[str, list[WallCandidate]] = {"horizontal": [], "vertical": []}
@@ -27,22 +51,37 @@ def classify_walls(
         for orientation, items in by_orientation.items():
             if not items:
                 continue
-            clusters = _cluster_by_perpendicular(items, orientation, coordinate_tolerance)
+            clusters = _cluster_by_perpendicular(items, orientation, tolerance)
             for cluster in clusters:
-                for merged in _merge_collinear_segments(cluster, orientation, coordinate_tolerance):
-                    walls.append(
-                        Wall(
-                            wall_id=f"wall-{counter}",
+                for merged in _merge_collinear_segments(cluster, orientation, tolerance):
+                    strokes.append(
+                        WallCandidate(
                             page_index=page_index,
                             start=merged.start,
                             end=merged.end,
                             thickness=merged.thickness,
-                            orientation=orientation,
                             source=merged.source,
                             confidence=merged.confidence,
                         )
                     )
-                    counter += 1
+    return strokes
+
+
+def _candidates_to_walls(candidates: list[WallCandidate]) -> list[Wall]:
+    walls: list[Wall] = []
+    for counter, candidate in enumerate(candidates, start=1):
+        walls.append(
+            Wall(
+                wall_id=f"wall-{counter}",
+                page_index=candidate.page_index,
+                start=candidate.start,
+                end=candidate.end,
+                thickness=candidate.thickness,
+                orientation=_orientation(candidate),
+                source=candidate.source,
+                confidence=candidate.confidence,
+            )
+        )
     return walls
 
 
@@ -69,6 +108,118 @@ def _para_range(candidate: WallCandidate, orientation: str) -> tuple[float, floa
     if orientation == "horizontal":
         return (min(candidate.start[0], candidate.end[0]), max(candidate.start[0], candidate.end[0]))
     return (min(candidate.start[1], candidate.end[1]), max(candidate.start[1], candidate.end[1]))
+
+
+def _pair_merge_strokes(candidates: list[WallCandidate]) -> list[WallCandidate]:
+    """Combine pairs of parallel strokes that represent the two faces of a
+    single wall into one centerline candidate whose thickness equals the
+    gap between the strokes.
+
+    A candidate is considered the pair of its immediate perpendicular
+    neighbour when the gap falls in [_PAIR_MIN_GAP, _PAIR_MAX_GAP] and at
+    least _PAIR_MIN_OVERLAP_RATIO of the shorter segment overlaps the
+    longer one in the parallel direction.
+
+    Hachura / repeating parallel patterns (3+ collinear strokes with
+    near-uniform spacing) are never paired: every candidate in such a
+    chain passes through unchanged so the caller can still observe the
+    raw linework.
+    """
+    if not candidates:
+        return list(candidates)
+
+    by_group: dict[tuple[int, str], list[WallCandidate]] = {}
+    for candidate in candidates:
+        orientation = _orientation(candidate)
+        by_group.setdefault((candidate.page_index, orientation), []).append(candidate)
+
+    merged: list[WallCandidate] = []
+    for (page_index, orientation), items in by_group.items():
+        ordered = sorted(items, key=lambda c: _perp_coord(c, orientation))
+        hachura = _detect_hachura_indices(ordered, orientation)
+
+        used: set[int] = set()
+        for i in range(len(ordered) - 1):
+            if i in used or i in hachura or (i + 1) in used or (i + 1) in hachura:
+                continue
+            a = ordered[i]
+            b = ordered[i + 1]
+            gap = _perp_coord(b, orientation) - _perp_coord(a, orientation)
+            if gap < _PAIR_MIN_GAP or gap > _PAIR_MAX_GAP:
+                continue
+            a_range = _para_range(a, orientation)
+            b_range = _para_range(b, orientation)
+            overlap_start = max(a_range[0], b_range[0])
+            overlap_end = min(a_range[1], b_range[1])
+            overlap = max(0.0, overlap_end - overlap_start)
+            max_len = max(a_range[1] - a_range[0], b_range[1] - b_range[0])
+            # overlap must be large relative to the LONGER stroke. Using max
+            # prevents pairing a short stroke with a much longer one that
+            # merely happens to be parallel (e.g., the two opposite edges of
+            # an L-shape fixture would otherwise look like a wall pair).
+            if max_len <= 0 or overlap / max_len < _PAIR_MIN_OVERLAP_RATIO:
+                continue
+
+            used.add(i)
+            used.add(i + 1)
+            merged.append(
+                _build_centerline(a, b, page_index, orientation, gap, overlap_start, overlap_end)
+            )
+
+        for index, candidate in enumerate(ordered):
+            if index not in used:
+                merged.append(candidate)
+    return merged
+
+
+def _detect_hachura_indices(
+    ordered: list[WallCandidate], orientation: str
+) -> set[int]:
+    n = len(ordered)
+    if n < _HACHURA_CHAIN_LENGTH:
+        return set()
+    hachura: set[int] = set()
+    for start in range(n - _HACHURA_CHAIN_LENGTH + 1):
+        window = ordered[start : start + _HACHURA_CHAIN_LENGTH]
+        gaps = [
+            _perp_coord(window[k + 1], orientation) - _perp_coord(window[k], orientation)
+            for k in range(_HACHURA_CHAIN_LENGTH - 1)
+        ]
+        if any(g < _PAIR_MIN_GAP or g > _PAIR_MAX_GAP for g in gaps):
+            continue
+        mean_gap = sum(gaps) / len(gaps)
+        if mean_gap <= 0:
+            continue
+        if all(abs(g - mean_gap) / mean_gap <= _HACHURA_GAP_VARIANCE for g in gaps):
+            for offset in range(_HACHURA_CHAIN_LENGTH):
+                hachura.add(start + offset)
+    return hachura
+
+
+def _build_centerline(
+    a: WallCandidate,
+    b: WallCandidate,
+    page_index: int,
+    orientation: str,
+    gap: float,
+    overlap_start: float,
+    overlap_end: float,
+) -> WallCandidate:
+    mean_perp = (_perp_coord(a, orientation) + _perp_coord(b, orientation)) / 2.0
+    if orientation == "horizontal":
+        start = (round(overlap_start, 3), round(mean_perp, 3))
+        end = (round(overlap_end, 3), round(mean_perp, 3))
+    else:
+        start = (round(mean_perp, 3), round(overlap_start, 3))
+        end = (round(mean_perp, 3), round(overlap_end, 3))
+    return WallCandidate(
+        page_index=page_index,
+        start=start,
+        end=end,
+        thickness=round(gap, 3),
+        source=f"paired_{orientation}",
+        confidence=min(a.confidence, b.confidence),
+    )
 
 
 def _cluster_by_perpendicular(
