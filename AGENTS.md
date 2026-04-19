@@ -78,13 +78,20 @@ Regras do contrato:
 
 O `README.md` é a fonte canônica dos comandos de execução e teste.
 
-## 8. Conflict resolution
+## 8. Decision hierarchy and conflict resolution
 
-- Codex is final reviewer for code correctness, tests, and local implementation quality.
-- Claude is final coordinator for task order, execution flow, and delivery strategy.
-- Objective evidence overrides both: failing/passing tests, reproducible bug, minimal diff, debug artifacts.
-- If disagreement remains on a reversible change, choose the safer reversible option and continue.
-- Escalate to user only for irreversible, destructive, or high-cost decisions (push, destructive FS ops, global config, credentials).
+Decision hierarchy:
+
+1. Automated tests are the source of truth.
+2. Codex is authoritative for code correctness and test validity.
+3. Claude is authoritative for architecture, planning, and execution flow.
+4. The user is only consulted for irreversible or high-cost decisions (push, destructive FS ops, global config, credentials).
+
+Conflict rule:
+
+- If tests fail -> Codex is correct.
+- If tests pass but the design is questionable -> Claude decides.
+- If both are uncertain -> create a minimal reproducible test; the test outcome decides.
 
 ## 9. Histórico de decisões arquiteturais
 
