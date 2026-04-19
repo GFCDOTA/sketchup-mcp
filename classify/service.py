@@ -30,10 +30,15 @@ _TEXT_MIN_OVERLAP = 20.0
 # dominant-orientation short strokes in any such cell. Long strokes are
 # preserved because a single structural wall can span a cell without
 # requiring a perpendicular partner inside that cell.
-_IMBALANCE_CELL_SIZE = 120.0
+_IMBALANCE_CELL_SIZES = (120.0, 240.0)
 _IMBALANCE_MIN_TOTAL = 4
 _IMBALANCE_RATIO = 4.0
 _IMBALANCE_MAX_STROKE_LENGTH = 100.0
+# When one orientation dominates the cell by _IMBALANCE_EXTREME_RATIO or
+# more, the region is treated as non-architectural (paragraph text block,
+# legend hatching, footer). Even long strokes there are noise: a real
+# floor plan would mix orientations that densely.
+_IMBALANCE_EXTREME_RATIO = 10.0
 
 # Aspect-ratio filter: a real architectural wall is much longer than it is
 # thick. A stroke whose length / thickness ratio is below this threshold is
@@ -236,16 +241,19 @@ def _remove_text_baselines(strokes: list[WallCandidate]) -> list[WallCandidate]:
 
 
 def _drop_orientation_imbalanced(strokes: list[WallCandidate]) -> list[WallCandidate]:
-    """Drop short strokes whose orientation dominates their local cell.
+    """Drop strokes whose orientation dominates their local cell.
 
-    The page is tiled with _IMBALANCE_CELL_SIZE x _IMBALANCE_CELL_SIZE cells.
-    A cell counts strokes by orientation via their midpoint. When the cell
-    holds at least _IMBALANCE_MIN_TOTAL strokes and one orientation is more
-    than _IMBALANCE_RATIO x the other, any dominant-orientation stroke
-    shorter than _IMBALANCE_MAX_STROKE_LENGTH whose midpoint falls in the
-    cell is treated as noise (residual text, label rows, hachura runs) and
-    dropped. Long strokes survive because a single structural wall may
-    cross the cell without a perpendicular partner inside it.
+    The page is tiled at every scale in _IMBALANCE_CELL_SIZES. A stroke is
+    dropped if, at ANY scale, the cell containing its midpoint holds at
+    least _IMBALANCE_MIN_TOTAL strokes and the stroke's orientation
+    exceeds _IMBALANCE_RATIO x the other. Short strokes (len <
+    _IMBALANCE_MAX_STROKE_LENGTH) fall under a moderate rule; all strokes,
+    including long ones, are dropped when the cell shows extreme
+    dominance (>= _IMBALANCE_EXTREME_RATIO).
+
+    Multi-scale catches both small label clusters (120 px) and paragraph
+    blocks that span several cells (240 px). Architectural walls mix
+    orientations at these scales, so real walls are preserved.
     """
     if not strokes:
         return list(strokes)
@@ -256,45 +264,64 @@ def _drop_orientation_imbalanced(strokes: list[WallCandidate]) -> list[WallCandi
 
     kept: list[WallCandidate] = []
     for items in by_page.values():
-        cells_h: dict[tuple[int, int], int] = {}
-        cells_v: dict[tuple[int, int], int] = {}
+        orientations = [_orientation(s) for s in items]
+        lengths = [
+            abs(s.end[0] - s.start[0]) + abs(s.end[1] - s.start[1]) for s in items
+        ]
+        midpoints_xy = [
+            ((s.start[0] + s.end[0]) / 2.0, (s.start[1] + s.end[1]) / 2.0)
+            for s in items
+        ]
 
-        midpoints = []
-        orientations = []
-        lengths = []
-        for stroke in items:
-            mx = (stroke.start[0] + stroke.end[0]) / 2.0
-            my = (stroke.start[1] + stroke.end[1]) / 2.0
-            key = (int(mx // _IMBALANCE_CELL_SIZE), int(my // _IMBALANCE_CELL_SIZE))
-            orientation = _orientation(stroke)
-            length = abs(stroke.end[0] - stroke.start[0]) + abs(stroke.end[1] - stroke.start[1])
-            midpoints.append(key)
-            orientations.append(orientation)
-            lengths.append(length)
-            if orientation == "horizontal":
-                cells_h[key] = cells_h.get(key, 0) + 1
-            else:
-                cells_v[key] = cells_v.get(key, 0) + 1
+        drop: set[int] = set()
+        for cell_size in _IMBALANCE_CELL_SIZES:
+            keys = [(int(mx // cell_size), int(my // cell_size)) for mx, my in midpoints_xy]
+            cells_h: dict[tuple[int, int], int] = {}
+            cells_v: dict[tuple[int, int], int] = {}
+            for orientation, key in zip(orientations, keys):
+                if orientation == "horizontal":
+                    cells_h[key] = cells_h.get(key, 0) + 1
+                else:
+                    cells_v[key] = cells_v.get(key, 0) + 1
 
-        imbalanced_h: set[tuple[int, int]] = set()
-        imbalanced_v: set[tuple[int, int]] = set()
-        for key in set(cells_h) | set(cells_v):
-            h = cells_h.get(key, 0)
-            v = cells_v.get(key, 0)
-            if h + v < _IMBALANCE_MIN_TOTAL:
-                continue
-            if h >= _IMBALANCE_RATIO * max(1, v):
-                imbalanced_h.add(key)
-            elif v >= _IMBALANCE_RATIO * max(1, h):
-                imbalanced_v.add(key)
-
-        for stroke, key, orientation, length in zip(items, midpoints, orientations, lengths):
-            if length < _IMBALANCE_MAX_STROKE_LENGTH:
-                if orientation == "horizontal" and key in imbalanced_h:
+            imbalanced_h: set[tuple[int, int]] = set()
+            imbalanced_v: set[tuple[int, int]] = set()
+            extreme_h: set[tuple[int, int]] = set()
+            extreme_v: set[tuple[int, int]] = set()
+            for key in set(cells_h) | set(cells_v):
+                h = cells_h.get(key, 0)
+                v = cells_v.get(key, 0)
+                if h + v < _IMBALANCE_MIN_TOTAL:
                     continue
-                if orientation == "vertical" and key in imbalanced_v:
+                if h >= _IMBALANCE_EXTREME_RATIO * max(1, v):
+                    extreme_h.add(key)
+                    imbalanced_h.add(key)
+                elif h >= _IMBALANCE_RATIO * max(1, v):
+                    imbalanced_h.add(key)
+                elif v >= _IMBALANCE_EXTREME_RATIO * max(1, h):
+                    extreme_v.add(key)
+                    imbalanced_v.add(key)
+                elif v >= _IMBALANCE_RATIO * max(1, h):
+                    imbalanced_v.add(key)
+
+            for idx, (orientation, key, length) in enumerate(zip(orientations, keys, lengths)):
+                if idx in drop:
                     continue
-            kept.append(stroke)
+                if orientation == "horizontal" and key in extreme_h:
+                    drop.add(idx)
+                    continue
+                if orientation == "vertical" and key in extreme_v:
+                    drop.add(idx)
+                    continue
+                if length < _IMBALANCE_MAX_STROKE_LENGTH:
+                    if orientation == "horizontal" and key in imbalanced_h:
+                        drop.add(idx)
+                    elif orientation == "vertical" and key in imbalanced_v:
+                        drop.add(idx)
+
+        for idx, stroke in enumerate(items):
+            if idx not in drop:
+                kept.append(stroke)
 
     return kept
 
