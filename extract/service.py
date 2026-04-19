@@ -12,8 +12,10 @@ from model.types import WallCandidate
 @dataclass(frozen=True)
 class ExtractConfig:
     threshold: int = 200
-    min_wall_length: int = 24
-    line_kernel_ratio: float = 0.04
+    min_wall_length: int = 20
+    hough_threshold: int = 30
+    hough_max_line_gap: int = 10
+    orthogonal_tolerance_ratio: float = 3.0
 
 
 def extract_from_document(
@@ -35,24 +37,54 @@ def extract_from_raster(
     gray = _to_grayscale(image)
     _, binary = cv2.threshold(gray, active_config.threshold, 255, cv2.THRESH_BINARY_INV)
 
-    height, width = binary.shape
-    horizontal_kernel = cv2.getStructuringElement(
-        cv2.MORPH_RECT, (max(3, int(width * active_config.line_kernel_ratio)), 1)
-    )
-    vertical_kernel = cv2.getStructuringElement(
-        cv2.MORPH_RECT, (1, max(3, int(height * active_config.line_kernel_ratio)))
-    )
+    if int(binary.sum()) == 0:
+        return []
 
-    horizontal = cv2.morphologyEx(binary, cv2.MORPH_OPEN, horizontal_kernel)
-    vertical = cv2.morphologyEx(binary, cv2.MORPH_OPEN, vertical_kernel)
+    lines = cv2.HoughLinesP(
+        binary,
+        rho=1,
+        theta=np.pi / 180,
+        threshold=active_config.hough_threshold,
+        minLineLength=active_config.min_wall_length,
+        maxLineGap=active_config.hough_max_line_gap,
+    )
+    if lines is None:
+        return []
 
-    candidates = []
-    candidates.extend(
-        _contours_to_candidates(horizontal, page_index=page_index, orientation="horizontal", config=active_config)
-    )
-    candidates.extend(
-        _contours_to_candidates(vertical, page_index=page_index, orientation="vertical", config=active_config)
-    )
+    thickness_estimate = _estimate_stroke_thickness(binary)
+    ratio = active_config.orthogonal_tolerance_ratio
+
+    candidates: list[WallCandidate] = []
+    for line in lines:
+        x1, y1, x2, y2 = (int(v) for v in line[0])
+        dx = abs(x2 - x1)
+        dy = abs(y2 - y1)
+        if dx >= dy * ratio:
+            xs = sorted((x1, x2))
+            center_y = (y1 + y2) / 2.0
+            candidates.append(
+                WallCandidate(
+                    page_index=page_index,
+                    start=(float(xs[0]), center_y),
+                    end=(float(xs[1]), center_y),
+                    thickness=thickness_estimate,
+                    source="hough_horizontal",
+                    confidence=1.0,
+                )
+            )
+        elif dy >= dx * ratio:
+            ys = sorted((y1, y2))
+            center_x = (x1 + x2) / 2.0
+            candidates.append(
+                WallCandidate(
+                    page_index=page_index,
+                    start=(center_x, float(ys[0])),
+                    end=(center_x, float(ys[1])),
+                    thickness=thickness_estimate,
+                    source="hough_vertical",
+                    confidence=1.0,
+                )
+            )
     return candidates
 
 
@@ -62,44 +94,8 @@ def _to_grayscale(image: np.ndarray) -> np.ndarray:
     return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
 
-def _contours_to_candidates(
-    mask: np.ndarray,
-    page_index: int,
-    orientation: str,
-    config: ExtractConfig,
-) -> list[WallCandidate]:
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    results: list[WallCandidate] = []
-
-    for contour in contours:
-        x, y, w, h = cv2.boundingRect(contour)
-        if orientation == "horizontal":
-            if w < config.min_wall_length:
-                continue
-            center_y = y + (h / 2.0)
-            results.append(
-                WallCandidate(
-                    page_index=page_index,
-                    start=(float(x), float(center_y)),
-                    end=(float(x + w), float(center_y)),
-                    thickness=float(max(1, h)),
-                    source="raster_horizontal",
-                    confidence=1.0,
-                )
-            )
-        else:
-            if h < config.min_wall_length:
-                continue
-            center_x = x + (w / 2.0)
-            results.append(
-                WallCandidate(
-                    page_index=page_index,
-                    start=(float(center_x), float(y)),
-                    end=(float(center_x), float(y + h)),
-                    thickness=float(max(1, w)),
-                    source="raster_vertical",
-                    confidence=1.0,
-                )
-            )
-
-    return results
+def _estimate_stroke_thickness(binary: np.ndarray) -> float:
+    # distance transform peak is half the stroke width; double it to get thickness estimate
+    dist = cv2.distanceTransform(binary, cv2.DIST_L2, 3)
+    peak = float(dist.max()) if dist.size else 0.0
+    return max(1.0, 2.0 * peak)
