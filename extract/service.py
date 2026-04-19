@@ -51,7 +51,7 @@ def extract_from_raster(
     if lines is None:
         return []
 
-    thickness_estimate = _estimate_stroke_thickness(binary)
+    dist = cv2.distanceTransform(binary, cv2.DIST_L2, 3)
     ratio = active_config.orthogonal_tolerance_ratio
 
     candidates: list[WallCandidate] = []
@@ -59,6 +59,7 @@ def extract_from_raster(
         x1, y1, x2, y2 = (int(v) for v in line[0])
         dx = abs(x2 - x1)
         dy = abs(y2 - y1)
+        thickness = _sample_local_thickness(dist, x1, y1, x2, y2)
         if dx >= dy * ratio:
             xs = sorted((x1, x2))
             center_y = (y1 + y2) / 2.0
@@ -67,7 +68,7 @@ def extract_from_raster(
                     page_index=page_index,
                     start=(float(xs[0]), center_y),
                     end=(float(xs[1]), center_y),
-                    thickness=thickness_estimate,
+                    thickness=thickness,
                     source="hough_horizontal",
                     confidence=1.0,
                 )
@@ -80,7 +81,7 @@ def extract_from_raster(
                     page_index=page_index,
                     start=(center_x, float(ys[0])),
                     end=(center_x, float(ys[1])),
-                    thickness=thickness_estimate,
+                    thickness=thickness,
                     source="hough_vertical",
                     confidence=1.0,
                 )
@@ -94,8 +95,25 @@ def _to_grayscale(image: np.ndarray) -> np.ndarray:
     return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
 
-def _estimate_stroke_thickness(binary: np.ndarray) -> float:
-    # distance transform peak is half the stroke width; double it to get thickness estimate
-    dist = cv2.distanceTransform(binary, cv2.DIST_L2, 3)
-    peak = float(dist.max()) if dist.size else 0.0
-    return max(1.0, 2.0 * peak)
+def _sample_local_thickness(
+    dist: np.ndarray, x1: int, y1: int, x2: int, y2: int
+) -> float:
+    # Sample the distance transform at 25%, 50%, 75% along the line. Each
+    # value is the distance from a foreground pixel to the nearest background,
+    # so twice the median approximates the local stroke thickness. Samples
+    # that fall on background (dist==0) are ignored so a slightly mis-aligned
+    # Hough endpoint does not poison the estimate.
+    height, width = dist.shape
+    samples: list[float] = []
+    for t in (0.25, 0.5, 0.75):
+        x = int(round(x1 + t * (x2 - x1)))
+        y = int(round(y1 + t * (y2 - y1)))
+        if 0 <= x < width and 0 <= y < height:
+            value = float(dist[y, x])
+            if value > 0:
+                samples.append(value)
+    if not samples:
+        return 1.0
+    samples.sort()
+    median = samples[len(samples) // 2]
+    return max(1.0, 2.0 * median)
