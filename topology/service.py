@@ -10,8 +10,16 @@ from shapely.ops import polygonize, unary_union
 from model.types import ConnectivityReport, Junction, Room, SplitWall, Wall
 
 
-def build_topology(walls: list[Wall]) -> tuple[list[SplitWall], list[Junction], list[Room], ConnectivityReport]:
+def build_topology(
+    walls: list[Wall], snap_tolerance: float | None = None
+) -> tuple[list[SplitWall], list[Junction], list[Room], ConnectivityReport]:
+    if snap_tolerance is None:
+        snap_tolerance = _infer_snap_tolerance(walls)
+
     split_walls = _split_walls_at_intersections(walls)
+    split_walls = _snap_endpoints(split_walls, snap_tolerance)
+    split_walls = _drop_degenerate(split_walls)
+
     graph = nx.Graph()
     for wall in split_walls:
         graph.add_edge(wall.start, wall.end, wall_id=wall.wall_id, length=wall.length)
@@ -20,6 +28,67 @@ def build_topology(walls: list[Wall]) -> tuple[list[SplitWall], list[Junction], 
     rooms = _polygonize_rooms(split_walls)
     report = _build_connectivity_report(graph, rooms)
     return split_walls, junctions, rooms, report
+
+
+def _infer_snap_tolerance(walls: list[Wall]) -> float:
+    thicknesses = [w.thickness for w in walls if w.thickness > 0]
+    if not thicknesses:
+        return 2.0
+    thicknesses.sort()
+    median = thicknesses[len(thicknesses) // 2]
+    return max(2.0, median)
+
+
+def _snap_endpoints(walls: list[SplitWall], tolerance: float) -> list[SplitWall]:
+    if not walls:
+        return walls
+    points = {wall.start for wall in walls} | {wall.end for wall in walls}
+    mapping = _cluster_points(list(points), tolerance)
+    return [
+        SplitWall(
+            wall_id=wall.wall_id,
+            parent_wall_id=wall.parent_wall_id,
+            page_index=wall.page_index,
+            start=mapping[wall.start],
+            end=mapping[wall.end],
+            thickness=wall.thickness,
+            orientation=wall.orientation,
+            source=wall.source,
+            confidence=wall.confidence,
+        )
+        for wall in walls
+    ]
+
+
+def _cluster_points(
+    points: list[tuple[float, float]], tolerance: float
+) -> dict[tuple[float, float], tuple[float, float]]:
+    ordered = sorted(points)
+    clusters: list[list[tuple[float, float]]] = []
+    for point in ordered:
+        assigned = False
+        for cluster in clusters:
+            cx = sum(p[0] for p in cluster) / len(cluster)
+            cy = sum(p[1] for p in cluster) / len(cluster)
+            if abs(point[0] - cx) <= tolerance and abs(point[1] - cy) <= tolerance:
+                cluster.append(point)
+                assigned = True
+                break
+        if not assigned:
+            clusters.append([point])
+
+    mapping: dict[tuple[float, float], tuple[float, float]] = {}
+    for cluster in clusters:
+        cx = round(sum(p[0] for p in cluster) / len(cluster), 3)
+        cy = round(sum(p[1] for p in cluster) / len(cluster), 3)
+        representative = (cx, cy)
+        for point in cluster:
+            mapping[point] = representative
+    return mapping
+
+
+def _drop_degenerate(walls: list[SplitWall]) -> list[SplitWall]:
+    return [wall for wall in walls if wall.start != wall.end]
 
 
 def _split_walls_at_intersections(walls: list[Wall]) -> list[SplitWall]:
