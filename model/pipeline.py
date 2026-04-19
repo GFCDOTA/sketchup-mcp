@@ -94,7 +94,7 @@ def _build_warnings(
         warnings.append("no_wall_candidates")
     if candidates and not walls:
         warnings.append("all_candidates_filtered")
-    if split_walls and connectivity_report.component_count > 1:
+    if split_walls and connectivity_report.max_components_within_page > 1:
         warnings.append("walls_disconnected")
     if not rooms:
         warnings.append("rooms_not_detected")
@@ -110,7 +110,7 @@ def _geometry_score(candidates: list[WallCandidate], walls: list) -> float:
 def _topology_score(split_walls: list[SplitWall], connectivity_report: ConnectivityReport) -> float:
     if not split_walls:
         return 0.0
-    component_penalty = 1.0 / max(1, connectivity_report.component_count)
+    component_penalty = 1.0 / max(1, connectivity_report.max_components_within_page or 1)
     return min(1.0, round((connectivity_report.largest_component_ratio + component_penalty) / 2.0, 4))
 
 
