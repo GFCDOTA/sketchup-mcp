@@ -64,24 +64,24 @@ def classify_walls(
     # Stage 1: collapse redundant Hough detections of the same stroke.
     strokes = _consolidate_hough_duplicates(candidates, coordinate_tolerance)
 
-    # Stage 2: drop text baselines / repeating decorative patterns. Chains of
-    # 3+ parallel strokes at near-uniform perpendicular spacing that share a
-    # significant parallel extent are the signature of paragraph text or
-    # hachura, not architectural walls.
-    strokes = _remove_text_baselines(strokes)
-
-    # Stage 3: drop orientation-dominated short strokes in regions where one
-    # orientation overwhelms the other. Catches residual hachura patterns
-    # and label text that survived the chain-based filter.
-    strokes = _drop_orientation_imbalanced(strokes)
+    # Filtros de ruido (text baselines + orientation imbalance) so fazem
+    # sentido em planta real bagunsada. Quando o input ja vem limpo
+    # (poucas centenas de candidatos), eles matam paredes legitimas.
+    if len(strokes) > 200:
+        strokes = _remove_text_baselines(strokes)
+        strokes = _drop_orientation_imbalanced(strokes)
 
     # Stage 4: drop strokes whose length / thickness ratio is too low to be
     # a wall (blob-shaped glyph fragments and tick marks).
     strokes = _drop_low_aspect_strokes(strokes)
 
-    # Stage 5: pair parallel strokes that represent the two faces of the
-    # same wall into a single centerline candidate.
-    wall_candidates = _pair_merge_strokes(strokes)
+    # Stage 5: pair parallel strokes que representam as 2 faces de uma
+    # wall double-line. Quando input ja vem limpo (single-stroke walls),
+    # esse merge causa falsos positivos e mata walls de banheiros pequenos.
+    if len(strokes) > 200:
+        wall_candidates = _pair_merge_strokes(strokes)
+    else:
+        wall_candidates = list(strokes)
 
     # Stage 6: aspect check again, because pair-merge can synthesise a
     # centerline whose thickness (= the pair gap) is close to its length.

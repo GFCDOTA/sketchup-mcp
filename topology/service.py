@@ -92,10 +92,13 @@ def _infer_snap_tolerance(walls: list[Wall]) -> float:
         return 2.0
     thicknesses.sort()
     median = thicknesses[len(thicknesses) // 2]
-    # 1.5 x median keeps legitimate wall endpoints distinct while collapsing
-    # sub-thickness stubs created when two intersections fall very close
-    # along the same parent wall.
-    return max(2.0, 1.5 * median)
+    # Quando o input ja vem limpo (poucas walls), os endpoints ficam mais
+    # esparsos por causa dos gaps de porta — precisa de tolerancia maior
+    # pra fechar polygons. Heuristica: floor adaptativo baseado em densidade.
+    base = max(2.0, 3.0 * median)
+    if len(walls) < 30:
+        return max(base, 25.0)  # input limpo -> snap mais agressivo
+    return base
 
 
 def _snap_endpoints(walls: list[SplitWall], tolerance: float) -> list[SplitWall]:

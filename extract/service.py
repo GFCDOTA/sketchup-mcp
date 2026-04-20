@@ -12,9 +12,9 @@ from model.types import WallCandidate
 @dataclass(frozen=True)
 class ExtractConfig:
     threshold: int = 200
-    min_wall_length: int = 20
-    hough_threshold: int = 30
-    hough_max_line_gap: int = 10
+    min_wall_length: int = 15
+    hough_threshold: int = 12
+    hough_max_line_gap: int = 40
     orthogonal_tolerance_ratio: float = 3.0
 
 

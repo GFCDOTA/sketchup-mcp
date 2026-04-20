@@ -14,6 +14,7 @@ from extract.service import extract_from_raster
 from ingest.service import IngestError, IngestedDocument, ingest_pdf
 from model.builder import build_observed_model, compute_bounds
 from model.types import ConnectivityReport, Junction, Room, SplitWall, WallCandidate
+from openings.service import detect_openings
 from roi.service import RoiResult, crop_image_to_bbox, detect_architectural_roi
 from topology.service import build_topology
 
@@ -33,7 +34,12 @@ class PipelineResult:
     connectivity_report: ConnectivityReport
 
 
-def run_pdf_pipeline(pdf_bytes: bytes, filename: str, output_dir: Path) -> PipelineResult:
+def run_pdf_pipeline(
+    pdf_bytes: bytes,
+    filename: str,
+    output_dir: Path,
+    peitoris: list[dict] | None = None,
+) -> PipelineResult:
     try:
         document = ingest_pdf(pdf_bytes=pdf_bytes, filename=filename)
     except IngestError as exc:
@@ -45,6 +51,7 @@ def run_pdf_pipeline(pdf_bytes: bytes, filename: str, output_dir: Path) -> Pipel
         output_dir=output_dir,
         source=source,
         roi_results=roi_results,
+        peitoris=peitoris,
     )
 
 
@@ -75,6 +82,15 @@ def _extract_with_roi_from_document(document: IngestedDocument):
 
 
 def _extract_with_roi_from_raster(image: np.ndarray, page_index: int):
+    # Heuristica: se o input ja vem limpo (poucos pixels escuros = planta
+    # pre-processada/anotada), pula ROI pra nao perder paredes que ele
+    # trataria como "fora da regiao principal".
+    import cv2 as _cv2
+    _gray = image if image.ndim == 2 else _cv2.cvtColor(image, _cv2.COLOR_BGR2GRAY)
+    dark_pct = (_gray < 200).sum() / _gray.size
+    if dark_pct < 0.03:
+        candidates = extract_from_raster(image=image, page_index=page_index)
+        return candidates, RoiResult(applied=False, bbox=None, fallback_reason="clean_input_skip_roi")
     roi = detect_architectural_roi(image)
     if not roi.applied or roi.bbox is None:
         candidates = extract_from_raster(image=image, page_index=page_index)
@@ -101,8 +117,10 @@ def _run_pipeline(
     output_dir: Path,
     source: dict,
     roi_results: list[RoiResult],
+    peitoris: list[dict] | None = None,
 ) -> PipelineResult:
     walls = classify_walls(candidates)
+    walls, openings = detect_openings(walls, peitoris=peitoris)
     split_walls, junctions, rooms, connectivity_report = build_topology(walls)
     warnings = _build_warnings(
         candidates=candidates,
@@ -128,6 +146,8 @@ def _run_pipeline(
         bounds=bounds,
         roi=[r.to_dict() for r in roi_results],
     )
+    observed_model["openings"] = [o.to_dict() for o in openings]
+    observed_model["peitoris"] = peitoris or []
 
     output_dir.mkdir(parents=True, exist_ok=True)
     (output_dir / "observed_model.json").write_text(
