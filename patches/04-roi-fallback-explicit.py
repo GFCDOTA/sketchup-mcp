@@ -14,21 +14,33 @@ PROBLEMA ATUAL (roi/service.py:70-74):
 Comentário admite: "Signal applied=True so callers do not emit a fallback warning"
 = MASCARAMENTO INTENCIONAL da falha.
 
-SOLUÇÃO: separar conceitos.
-- `applied`: ROI foi semanticamente detectada (componente real, não fallback)
-- `fallback_used`: bbox = página inteira porque não foi possível detectar
-- `reason`: sempre preenchido com razão explícita
+SOLUÇÃO ADITIVA (mantém schema estável 2.1.0 §4):
+
+- `applied` — mantém semântica: True se ROI semanticamente detectada.
+- `fallback_reason` — PERMANECE o campo canônico (schema 2.1.0 §4). Nunca
+  renomear, consumers dependem desse nome.
+- `fallback_used` — NOVO campo aditivo booleano. True quando o bbox é a
+  página inteira por impossibilidade de detectar. Permite que callers
+  distingam "ROI detectada" de "fallback explícito" sem olhar a string
+  de `fallback_reason`.
+
+REVIEW PENDENTE (Felipe, PR #1 comment):
+Versão anterior deste patch renomeou `fallback_reason` para `reason` e
+adicionou uma property de compat. O briefing do Felipe § "Invariantes a
+respeitar" explicita: não renomear campos estáveis do schema 2.1.0;
+apenas aditivos. Este patch agora mantém `fallback_reason` canônico e
+acrescenta `fallback_used` ao lado.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 import cv2
 import numpy as np
 
 
 # ==============================================================================
-# PATCH: atualizar RoiResult dataclass
+# PATCH: atualizar RoiResult dataclass (ADITIVO — não renomear nada)
 # ==============================================================================
 
 @dataclass(frozen=True)
@@ -36,28 +48,26 @@ class RoiResult:
     """Resultado da detecção de ROI arquitetônico.
 
     Invariantes:
-    - `applied=True` SEMPRE implica detecção real (não fallback)
-    - `fallback_used=True` sinaliza bbox = página inteira por não poder detectar
-    - `reason` é sempre preenchido com descrição da decisão
+    - `applied=True` SEMPRE implica detecção real (não fallback).
+    - `fallback_used=True` sinaliza bbox = página inteira por não poder
+      detectar. Coexiste com `applied=False` nesse caso.
+    - `fallback_reason` é campo ESTÁVEL (schema 2.1.0 §4) — não renomear.
+      Sempre preenchido com descrição da decisão quando `applied=False`
+      ou `fallback_used=True`.
     """
     applied: bool
     bbox: tuple[int, int, int, int] | None  # (min_x, min_y, max_x, max_y)
-    fallback_used: bool = False  # NOVO — distinto de `applied`
-    reason: str | None = None  # NOVO — substitui `fallback_reason`
+    fallback_reason: str | None = None  # CANÔNICO — schema 2.1.0 §4
+    fallback_used: bool = False  # NOVO aditivo — distinto de `applied`
     component_pixel_count: int = 0
     component_bbox_area: int = 0
     component_count: int = 0
-
-    # Backward compat: `fallback_reason` ainda disponível via property
-    @property
-    def fallback_reason(self) -> str | None:
-        return self.reason
 
     def to_dict(self) -> dict:
         return {
             "applied": self.applied,
             "fallback_used": self.fallback_used,
-            "reason": self.reason,
+            "fallback_reason": self.fallback_reason,
             "bbox": (
                 {
                     "min_x": int(self.bbox[0]),
@@ -84,14 +94,15 @@ def detect_architectural_roi(
     """Find the bounding box of the architectural region on the page.
 
     ATUALIZADO: nunca mais mascara falha via `applied=True`.
-    Se fallback é usado (página inteira), fallback_used=True e reason explícita.
+    Se fallback é usado (página inteira), `fallback_used=True`,
+    `applied=False` e `fallback_reason` explícita.
     """
     if image.size == 0:
         return RoiResult(
             applied=False,
             bbox=None,
+            fallback_reason="empty_image",
             fallback_used=False,
-            reason="empty_image",
         )
 
     height, width = image.shape[:2]
@@ -103,12 +114,12 @@ def detect_architectural_roi(
 
     # NOVO (explícito):
     if min(height, width) < min_image_side:
-        # Pequeno demais para partition significativa; fallback honesto
+        # Pequeno demais para partition significativa; fallback honesto.
         return RoiResult(
             applied=False,
             bbox=(0, 0, width, height),
+            fallback_reason="small_input_fallback_whole_page",
             fallback_used=True,
-            reason="small_input_fallback_whole_page",
         )
 
     if image.ndim == 3:
@@ -124,8 +135,8 @@ def detect_architectural_roi(
         return RoiResult(
             applied=False,
             bbox=None,
+            fallback_reason="no_components",
             fallback_used=False,
-            reason="no_components",
             component_count=0,
         )
 
@@ -142,8 +153,8 @@ def detect_architectural_roi(
         return RoiResult(
             applied=False,
             bbox=None,
+            fallback_reason="no_dominant_component",
             fallback_used=False,
-            reason="no_dominant_component",
             component_count=int(nlabels - 1),
         )
 
@@ -159,8 +170,8 @@ def detect_architectural_roi(
         return RoiResult(
             applied=False,
             bbox=None,
+            fallback_reason="dominant_component_too_small",
             fallback_used=False,
-            reason="dominant_component_too_small",
             component_pixel_count=best_pixel_count,
             component_bbox_area=bbox_area,
             component_count=int(nlabels - 1),
@@ -178,8 +189,8 @@ def detect_architectural_roi(
     return RoiResult(
         applied=True,
         bbox=(min_x, min_y, max_x, max_y),
+        fallback_reason=None,  # sucesso, sem fallback
         fallback_used=False,
-        reason="component_detected",
         component_pixel_count=best_pixel_count,
         component_bbox_area=bbox_area,
         component_count=int(nlabels - 1),
@@ -198,13 +209,13 @@ def detect_architectural_roi(
 # DEPOIS:
 #   roi = detect_architectural_roi(page.image)
 #   if roi.fallback_used:
-#       # Warning explícito: bbox é página inteira, não detecção real
-#       warnings.append(f"roi_fallback_used: {roi.reason}")
+#       # Warning explícito: bbox é página inteira, não detecção real.
+#       warnings.append(f"roi_fallback_used: {roi.fallback_reason}")
 #   elif not roi.applied:
-#       # Sem fallback usado: ROI falhou completamente (bbox=None)
-#       warnings.append(f"roi_failed: {roi.reason}")
+#       # Sem fallback usado: ROI falhou completamente (bbox=None).
+#       warnings.append(f"roi_failed: {roi.fallback_reason}")
 #   else:
-#       # ROI detectada com sucesso
+#       # ROI detectada com sucesso, bbox real.
 #       pass
 #
 # IMPORTANTE: warnings devem ser emitidos mesmo quando `fallback_used=True`.
@@ -216,28 +227,37 @@ def detect_architectural_roi(
 # ==============================================================================
 
 def test_roi_small_input_flags_fallback_used():
-    """Imagem < min_image_side deve retornar fallback_used=True, não applied=True."""
+    """Imagem < min_image_side deve retornar fallback_used=True, applied=False.
+
+    O bbox ainda é a página inteira (consumer consegue rodar o pipeline),
+    mas o caller sabe que foi fallback e pode emitir warning.
+    """
     import numpy as np
     small_image = np.zeros((400, 400), dtype=np.uint8)
 
     # result = detect_architectural_roi(small_image, min_image_side=500)
-    # assert result.applied is False  # ANTES era True, agora False
+    # assert result.applied is False  # ANTES era True (mascarava falha), agora False
     # assert result.fallback_used is True  # NOVO
-    # assert result.reason == "small_input_fallback_whole_page"
+    # assert result.fallback_reason == "small_input_fallback_whole_page"
     # assert result.bbox == (0, 0, 400, 400)
     pass
 
 
 def test_roi_detected_is_applied_and_no_fallback():
-    """ROI detectada corretamente deve ter applied=True, fallback_used=False."""
+    """ROI detectada corretamente: applied=True, fallback_used=False, fallback_reason=None."""
     pass
 
 
 def test_roi_empty_image_neither_applied_nor_fallback():
-    """Imagem vazia: nem applied nem fallback — falha explícita."""
+    """Imagem vazia: nem applied nem fallback — falha explícita sem bbox."""
     pass
 
 
 def test_roi_no_components_sets_bbox_none():
     """Sem componentes detectados: bbox None, applied False, fallback_used False."""
+    pass
+
+
+def test_roi_fallback_reason_schema_name_is_preserved():
+    """Consumer schema 2.1.0 §4 depende do nome `fallback_reason` — nunca renomear."""
     pass
