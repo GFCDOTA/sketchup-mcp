@@ -1,13 +1,23 @@
 from __future__ import annotations
 
+import hashlib
+import json
 from collections import defaultdict
 from itertools import combinations
 
 import networkx as nx
-from shapely.geometry import LineString
+from shapely.geometry import LineString, Polygon
 from shapely.ops import polygonize, unary_union
 
-from model.types import ConnectivityReport, Junction, Room, SplitWall, Wall
+from model.types import (
+    ConnectivityReport,
+    Junction,
+    Room,
+    RoomCheck,
+    RoomTopologyReport,
+    SplitWall,
+    Wall,
+)
 
 
 _ORPHAN_COMPONENT_MAX_NODES = 3
@@ -16,8 +26,27 @@ _SPUR_MIN_THICKNESS_RATIO = 1.0
 
 
 def build_topology(
-    walls: list[Wall], snap_tolerance: float | None = None
+    walls: list[Wall],
+    snap_tolerance: float | None = None,
+    *,
+    room_topology_report_sink: list | None = None,
+    snapshot_hash_sink: list | None = None,
 ) -> tuple[list[SplitWall], list[Junction], list[Room], ConnectivityReport]:
+    """Build topology from classified walls.
+
+    Optional keyword-only sinks receive audit artifacts without changing
+    the return tuple (preserves backward compatibility with existing
+    call sites and tests):
+
+    - ``room_topology_report_sink``: if an empty list is passed, a
+      ``RoomTopologyReport`` describing polygon validity, area filter
+      hits, and nested-containment warnings is appended.
+    - ``snapshot_hash_sink``: if passed, a SHA256 hex string derived
+      from the canonical (walls, junctions) serialization is appended.
+      Clean baselines (p10/p11/p12) should produce identical hashes
+      across semantically equivalent algorithm refactors — the hash
+      is the regression gate for F1.
+    """
     if snap_tolerance is None:
         snap_tolerance = _infer_snap_tolerance(walls)
 
@@ -71,7 +100,7 @@ def build_topology(
             largest = max((len(c) for c in page_components), default=0)
             per_page_ratios.append(largest / page_nodes)
 
-    rooms = _polygonize_rooms(split_walls)
+    rooms, min_area_threshold = _polygonize_rooms_with_threshold(split_walls)
     report = _build_connectivity_report_aggregate(
         total_nodes=total_nodes,
         total_edges=total_edges,
@@ -83,6 +112,16 @@ def build_topology(
         orphan_component_count=orphan_component_count,
         orphan_node_count=orphan_node_count,
     )
+
+    if room_topology_report_sink is not None:
+        room_topology_report_sink.append(
+            _validate_room_polygons(rooms, min_area_threshold)
+        )
+    if snapshot_hash_sink is not None:
+        snapshot_hash_sink.append(
+            _topology_snapshot_hash(output_walls, junctions)
+        )
+
     return output_walls, junctions, rooms, report
 
 
@@ -356,8 +395,25 @@ def _build_page_junctions(graph: nx.Graph, start_id: int) -> list[Junction]:
 
 
 def _polygonize_rooms(walls: list[SplitWall]) -> list[Room]:
+    rooms, _threshold = _polygonize_rooms_with_threshold(walls)
+    return rooms
+
+
+def _polygonize_rooms_with_threshold(
+    walls: list[SplitWall],
+) -> tuple[list[Room], float]:
+    """Same as ``_polygonize_rooms`` but also returns the area floor
+    used for the last page processed. Callers that only need rooms
+    (the old signature) can call ``_polygonize_rooms`` unchanged;
+    the audit path uses the threshold to report why a room passed
+    or would have been dropped.
+
+    When walls span multiple pages with different median thicknesses
+    the threshold reported is the maximum across pages — the
+    conservative floor that any kept room has cleared.
+    """
     if not walls:
-        return []
+        return [], 0.0
 
     by_page: dict[int, list[SplitWall]] = {}
     for wall in walls:
@@ -365,6 +421,7 @@ def _polygonize_rooms(walls: list[SplitWall]) -> list[Room]:
 
     rooms: list[Room] = []
     counter = 1
+    max_threshold = 0.0
     for page_index in sorted(by_page):
         page_walls = by_page[page_index]
         lines = [LineString([wall.start, wall.end]) for wall in page_walls]
@@ -385,6 +442,7 @@ def _polygonize_rooms(walls: list[SplitWall]) -> list[Room]:
             median_thickness = 1.0
         thickness_reference = max(1.0, median_thickness)
         min_area = (2.0 * thickness_reference) ** 2
+        max_threshold = max(max_threshold, min_area)
 
         for polygon in polygons:
             if polygon.area < min_area:
@@ -399,7 +457,135 @@ def _polygonize_rooms(walls: list[SplitWall]) -> list[Room]:
                 )
             )
             counter += 1
-    return rooms
+    return rooms, max_threshold
+
+
+def _validate_room_polygons(
+    rooms: list[Room], min_area_threshold: float
+) -> RoomTopologyReport:
+    """Audit the post-polygonize room set.
+
+    Checks per room: Shapely ``is_valid`` on the reconstructed polygon,
+    and whether the reported area clears the threshold used during
+    polygonize. Nested pairs (outer room strictly containing another
+    room) are flagged but do not fail the outer — nesting happens in
+    legitimate floor plans when an inner enclosure exists, so it's a
+    warning, not an error.
+    """
+    checks: list[RoomCheck] = []
+    nested_pairs: list[tuple[str, str]] = []
+
+    reconstructed: list[tuple[Room, Polygon]] = []
+    for room in rooms:
+        poly = Polygon(room.polygon) if len(room.polygon) >= 3 else None
+        reconstructed.append((room, poly))
+
+    inner_ids: set[str] = set()
+    for outer_room, outer_poly in reconstructed:
+        if outer_poly is None or not outer_poly.is_valid:
+            continue
+        for inner_room, inner_poly in reconstructed:
+            if outer_room is inner_room or inner_poly is None:
+                continue
+            try:
+                # ``contains`` is a strict containment with shared
+                # boundary tolerated as non-contained — that's what
+                # we want for nested enclosures.
+                if outer_poly.contains(inner_poly):
+                    nested_pairs.append((outer_room.room_id, inner_room.room_id))
+                    inner_ids.add(inner_room.room_id)
+            except Exception:
+                continue
+
+    passed = 0
+    failed = 0
+    for room, poly in reconstructed:
+        if poly is None or not poly.is_valid:
+            checks.append(
+                RoomCheck(
+                    room_id=room.room_id,
+                    status="invalid_polygon",
+                    area=room.area,
+                    notes="Shapely is_valid=False",
+                )
+            )
+            failed += 1
+            continue
+        if room.area < min_area_threshold:
+            checks.append(
+                RoomCheck(
+                    room_id=room.room_id,
+                    status="below_min_area",
+                    area=room.area,
+                    notes=f"area < threshold {min_area_threshold:.1f}",
+                )
+            )
+            failed += 1
+            continue
+        if room.room_id in inner_ids:
+            checks.append(
+                RoomCheck(
+                    room_id=room.room_id,
+                    status="nested",
+                    area=room.area,
+                    notes="contained by another room (warning, not failure)",
+                )
+            )
+            passed += 1
+            continue
+        checks.append(
+            RoomCheck(room_id=room.room_id, status="pass", area=room.area)
+        )
+        passed += 1
+
+    return RoomTopologyReport(
+        total_rooms=len(rooms),
+        passed=passed,
+        failed=failed,
+        min_area_threshold=round(min_area_threshold, 3),
+        checks=checks,
+        nested_pairs=nested_pairs,
+    )
+
+
+def _topology_snapshot_hash(
+    walls: list[SplitWall], junctions: list[Junction]
+) -> str:
+    """Canonical SHA256 of (walls, junctions).
+
+    Coordinates are rounded to 3 decimals before serialization to
+    absorb float noise. Walls are sorted by
+    ``(page_index, start, end, orientation)`` and junctions by
+    ``(point, degree, kind)`` so the hash depends only on topology,
+    not on processing order.
+    """
+
+    def _round_point(point: tuple[float, float]) -> list[float]:
+        return [round(point[0], 3), round(point[1], 3)]
+
+    wall_rows = sorted(
+        [
+            (
+                w.page_index,
+                tuple(_round_point(w.start)),
+                tuple(_round_point(w.end)),
+                w.orientation,
+            )
+            for w in walls
+        ]
+    )
+    junction_rows = sorted(
+        [
+            (tuple(_round_point(j.point)), j.degree, j.kind)
+            for j in junctions
+        ]
+    )
+    payload = json.dumps(
+        {"walls": wall_rows, "junctions": junction_rows},
+        sort_keys=True,
+        default=list,
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
 def _build_connectivity_report_aggregate(

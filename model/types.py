@@ -103,6 +103,29 @@ class DedupReport:
         return payload
 
 
+@dataclass(frozen=True)
+class RoomCheck:
+    room_id: str
+    status: str  # "pass", "invalid_polygon", "below_min_area", "nested"
+    area: float
+    notes: str = ""
+
+
+@dataclass(frozen=True)
+class RoomTopologyReport:
+    total_rooms: int
+    passed: int
+    failed: int
+    min_area_threshold: float
+    checks: list[RoomCheck]
+    nested_pairs: list[tuple[str, str]]  # (outer_room_id, inner_room_id)
+
+    def to_dict(self) -> dict:
+        payload = asdict(self)
+        payload["nested_pairs"] = [list(pair) for pair in self.nested_pairs]
+        return payload
+
+
 def wall_to_dict(wall: Wall | SplitWall) -> dict:
     payload = asdict(wall)
     payload["start"] = list(wall.start)
