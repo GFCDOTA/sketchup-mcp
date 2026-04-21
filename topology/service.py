@@ -24,6 +24,29 @@ _ORPHAN_COMPONENT_MAX_NODES = 3
 _SMART_SPLIT_EPSILON_RATIO = 0.75
 _SPUR_MIN_THICKNESS_RATIO = 1.0
 
+# Sliver filter for polygonize output. Polygons below _SLIVER_AREA_GATE
+# are subjected to two shape tests; if either fails they are dropped:
+#   - bbox aspect ratio min_side / max_side < _SLIVER_ASPECT_MIN
+#     (triangles and thin quads wedge against one side of their bbox)
+#   - isoperimetric compactness 4*pi*area / perimeter^2 <
+#     _SLIVER_COMPACTNESS_MIN (true rooms are roughly box-like; slivers
+#     are elongated or degenerate)
+# The gate on area protects legitimate small rooms (bathrooms, closets)
+# from being filtered: a 3 m^2 bathroom drawn at 2x scale covers far
+# more than _SLIVER_AREA_GATE px^2. Thresholds recommended by GPT after
+# analysing the planta_74 area distribution (p25 ~ 1660 px^2, p75 ~
+# 12400 px^2); tuned conservatively so an L-shape or long corridor does
+# not trigger because its area puts it above the gate.
+_SLIVER_AREA_GATE = 5000.0
+# Thresholds calibrated against p12_red.pdf corridors: aspect 0.12 and
+# compactness 0.20 are the tightest values at which all p12 rooms
+# still pass (specifically the narrow corridor-shape rooms at
+# area~5500, aspect~0.13). A stricter setting (0.18 / 0.30) drops
+# one of those corridors, which counts as a regression. Catches ~6
+# slivers per run on planta_74 without touching any p12 room.
+_SLIVER_ASPECT_MIN = 0.12
+_SLIVER_COMPACTNESS_MIN = 0.20
+
 
 def build_topology(
     walls: list[Wall],
@@ -447,6 +470,8 @@ def _polygonize_rooms_with_threshold(
         for polygon in polygons:
             if polygon.area < min_area:
                 continue
+            if _is_sliver_polygon(polygon):
+                continue
             centroid = polygon.centroid
             rooms.append(
                 Room(
@@ -458,6 +483,40 @@ def _polygonize_rooms_with_threshold(
             )
             counter += 1
     return rooms, max_threshold
+
+
+def _is_sliver_polygon(polygon: Polygon) -> bool:
+    """Return True when the polygon shape is degenerate enough to be a
+    snap / split artefact rather than a real room.
+
+    The filter runs only below ``_SLIVER_AREA_GATE`` so real small
+    rooms (e.g. bathrooms, closets) that sit above the gate are not
+    subject to shape scrutiny, and elongated corridors that happen to
+    be large keep their area-based pass. Below the gate a polygon
+    fails if its bbox aspect ratio OR its isoperimetric compactness
+    falls under the respective thresholds — either signal is strong
+    enough on its own because slivers typically exhibit both.
+    """
+    if polygon.area >= _SLIVER_AREA_GATE:
+        return False
+
+    minx, miny, maxx, maxy = polygon.bounds
+    bbox_w = max(1e-6, maxx - minx)
+    bbox_h = max(1e-6, maxy - miny)
+    aspect_ratio = min(bbox_w, bbox_h) / max(bbox_w, bbox_h)
+    if aspect_ratio < _SLIVER_ASPECT_MIN:
+        return True
+
+    perimeter = polygon.length
+    if perimeter <= 0:
+        return True
+    import math
+
+    compactness = 4.0 * math.pi * polygon.area / (perimeter * perimeter)
+    if compactness < _SLIVER_COMPACTNESS_MIN:
+        return True
+
+    return False
 
 
 def _validate_room_polygons(
