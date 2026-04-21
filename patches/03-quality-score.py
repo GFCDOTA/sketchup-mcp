@@ -16,12 +16,25 @@ PROBLEMA ATUAL (pipeline.py:208-211):
 
 SOLUÇÃO:
 - Renomear _geometry_score → _retention_score (honesto, não esconde semântica)
-- Adicionar _quality_score() real usando F1 + perimeter + connectivity + orthogonality
-- Componente opcional F1 quando ground truth disponível
+- Adicionar _quality_score() real usando perimeter + connectivity + rooms + orthogonality
+
+REVIEW PENDENTE (Felipe, PR #1 comment):
+- `wall.p0/p1` foi renomeado para `wall.start/end` — usar nomes reais do
+  `model.types.Wall` dataclass.
+- `connectivity_report.max_component_size_within_page` NÃO existe; o campo
+  real `max_components_within_page` é um COUNT (número de componentes),
+  não um size. A ratio que queremos (maior componente / total de nodes)
+  já vive em `connectivity_report.largest_component_ratio`, então
+  usamos direto.
+- F1-against-GT foi removido: ground truth é contrato do consumer, não
+  do pipeline (invariante §6 do CLAUDE.md). O score do extrator tem que
+  ser auto-contido em artefatos observados.
 """
 from __future__ import annotations
 
+import math
 from typing import Optional
+
 
 # ==============================================================================
 # PARTE 1 — renomear _geometry_score → _retention_score (15 min)
@@ -49,10 +62,13 @@ def _retention_score(candidates: list, walls: list) -> float:
 #   model.scores.geometry = _geometry_score(candidates, walls)
 #
 # DEPOIS:
+#   orthogonality = _compute_orthogonality(walls)
+#   quality = _quality_score(walls, rooms, connectivity_report, orthogonality)
 #   model.scores.retention = _retention_score(candidates, walls)
-#   model.scores.quality = _quality_score(walls, rooms, connectivity_report, orthogonality)
+#   model.scores.quality = quality
+#   model.scores.orthogonality = round(orthogonality, 4)
 #   # manter geometry_score como alias deprecated por 1 release:
-#   model.scores.geometry = model.scores.quality  # NÃO retention — evita quebrar consumers
+#   model.scores.geometry = quality  # NÃO retention — evita quebrar consumers
 
 
 # ==============================================================================
@@ -66,31 +82,30 @@ def _quality_score(
     rooms: list,
     connectivity_report,
     orthogonality: Optional[float] = None,
-    ground_truth: Optional[dict] = None,
 ) -> float:
     """Score composto de QUALIDADE (não retenção).
 
     Componentes (todos 0.0-1.0):
-    - perimeter_closure: largest_component / total_nodes do grafo de walls
-    - room_density: rooms detectados / edges esperados (normalized)
-    - orthogonality: 1 - (non_ortho_edges / total_edges)
+    - perimeter_closure: largest component ratio of the wall graph
+    - room_density: rooms detectados / edges (normalized, min floor)
+    - orthogonality: fração de walls axis-aligned (Manhattan-world)
     - orphan_penalty: 1 - (orphan_components / 5.0) clamped
-    - f1 (opcional): F1 contra ground truth se disponível
-
-    Se ground_truth disponível: F1 peso 0.4, resto completa 0.6
-    Sem ground_truth (default): média ponderada dos componentes estruturais
 
     Retorna 0.0 se walls vazios; 1.0 se planta é perfeita.
+
+    Todos os componentes usam apenas artefatos OBSERVADOS pelo pipeline:
+    nenhum depende de ground truth externo. GT é contrato do consumer
+    (invariante §6 do CLAUDE.md).
     """
     if not walls:
         return 0.0
 
-    components = {}
+    components: dict[str, float] = {}
 
-    # 1. Perimeter closure
-    max_component_size = connectivity_report.max_component_size_within_page
-    total_nodes = max(1, connectivity_report.node_count)
-    components["perimeter_closure"] = min(1.0, max_component_size / total_nodes)
+    # 1. Perimeter closure: fração dos nodes que caem no maior componente
+    # do grafo de walls. `connectivity_report.largest_component_ratio` já
+    # expõe exatamente isso (== max(component_sizes) / node_count).
+    components["perimeter_closure"] = float(connectivity_report.largest_component_ratio)
 
     # 2. Room density (rooms / edge_count, com min floor 0.5 pra não zerar)
     if rooms:
@@ -106,45 +121,29 @@ def _quality_score(
     orphan_count = connectivity_report.orphan_component_count
     components["orphan_penalty"] = max(0.0, 1.0 - (orphan_count / 5.0))
 
-    # 5. F1 opcional
-    f1 = None
-    if ground_truth is not None:
-        f1 = _compute_f1_against_gt(walls, ground_truth)
-
-    # Pesos diferem se GT disponível
-    if f1 is not None:
-        components["f1"] = f1
-        weights = {
-            "f1": 0.4,
-            "perimeter_closure": 0.25,
-            "room_density": 0.15,
-            "orthogonality": 0.10,
-            "orphan_penalty": 0.10,
-        }
-    else:
-        weights = {
-            "perimeter_closure": 0.40,
-            "room_density": 0.20,
-            "orthogonality": 0.20,
-            "orphan_penalty": 0.20,
-        }
+    weights = {
+        "perimeter_closure": 0.40,
+        "room_density": 0.20,
+        "orthogonality": 0.20,
+        "orphan_penalty": 0.20,
+    }
 
     score = sum(components[k] * weights[k] for k in weights)
     return round(min(1.0, max(0.0, score)), 4)
 
 
 def _compute_orthogonality(walls: list) -> float:
-    """Mede fração de edges ortogonais (Manhattan-world)."""
+    """Mede fração de walls axis-aligned (Manhattan-world).
+
+    Usa `wall.start` / `wall.end` — nomes canônicos do `model.types.Wall`.
+    """
     if not walls:
         return 0.0
 
-    import math
-
     n_ortho = 0
     for wall in walls:
-        # wall tem p0, p1 (coord normalizadas ou em pixels)
-        dx = wall.p1[0] - wall.p0[0]
-        dy = wall.p1[1] - wall.p0[1]
+        dx = wall.end[0] - wall.start[0]
+        dy = wall.end[1] - wall.start[1]
         if dx == 0 and dy == 0:
             continue
 
@@ -154,72 +153,6 @@ def _compute_orthogonality(walls: list) -> float:
             n_ortho += 1
 
     return n_ortho / max(1, len(walls))
-
-
-def _compute_f1_against_gt(walls: list, ground_truth: dict) -> Optional[float]:
-    """F1 entre walls detectados e ground truth (se disponível).
-
-    ground_truth dict format:
-    {
-        "walls": [(p0, p1, thickness), ...]  # lista de walls verdadeiros
-    }
-
-    Usa matching Hungarian ou greedy baseado em distância Hausdorff.
-    """
-    if not walls or "walls" not in ground_truth:
-        return None
-
-    gt_walls = ground_truth["walls"]
-    if not gt_walls:
-        return None
-
-    # Simplificação: matching greedy por proximidade
-    # Implementação production deveria usar scipy.optimize.linear_sum_assignment
-    matched_walls = set()
-    matched_gt = set()
-
-    for i, wall in enumerate(walls):
-        best_match = None
-        best_dist = float('inf')
-        for j, gt_wall in enumerate(gt_walls):
-            if j in matched_gt:
-                continue
-            dist = _hausdorff_wall(wall, gt_wall)
-            if dist < best_dist and dist < 20.0:  # threshold em pixels
-                best_dist = dist
-                best_match = j
-
-        if best_match is not None:
-            matched_walls.add(i)
-            matched_gt.add(best_match)
-
-    tp = len(matched_walls)
-    fp = len(walls) - tp
-    fn = len(gt_walls) - len(matched_gt)
-
-    if tp == 0:
-        return 0.0
-
-    precision = tp / (tp + fp)
-    recall = tp / (tp + fn)
-    f1 = 2 * (precision * recall) / (precision + recall + 1e-9)
-    return f1
-
-
-def _hausdorff_wall(wall, gt_wall) -> float:
-    """Distância Hausdorff simplificada entre dois segmentos de parede."""
-    import math
-    # Distância entre endpoints
-    p0_a, p1_a = wall.p0, wall.p1
-    p0_b, p1_b = gt_wall[0], gt_wall[1]
-
-    def d(p, q):
-        return math.hypot(p[0] - q[0], p[1] - q[1])
-
-    # Melhor match de endpoints
-    h_ab = max(min(d(p0_a, p0_b), d(p0_a, p1_b)), min(d(p1_a, p0_b), d(p1_a, p1_b)))
-    h_ba = max(min(d(p0_b, p0_a), d(p0_b, p1_a)), min(d(p1_b, p0_a), d(p1_b, p1_a)))
-    return max(h_ab, h_ba)
 
 
 # ==============================================================================
@@ -237,17 +170,33 @@ def _hausdorff_wall(wall, gt_wall) -> float:
 #
 # DEPOIS:
 #   orthogonality = _compute_orthogonality(walls)
+#   quality = _quality_score(walls, rooms, connectivity_report, orthogonality)
 #   scores = {
 #       "retention": _retention_score(candidates, walls),
 #       "topology": _topology_score(split_walls, connectivity_report),
 #       "room": _room_score(rooms, connectivity_report),
-#       "quality": _quality_score(walls, rooms, connectivity_report, orthogonality),
+#       "quality": quality,
 #       "orthogonality": round(orthogonality, 4),
 #       # Alias deprecated (remover em 1 release):
-#       "geometry": round(_quality_score(walls, rooms, connectivity_report, orthogonality), 4),
+#       "geometry": quality,
 #   }
 #
 # E documentar no README + schema output.
+
+
+# ==============================================================================
+# GROUND-TRUTH / F1: FORA DO ESCOPO DESTE PATCH
+# ==============================================================================
+#
+# Versões anteriores deste patch incluíam `_compute_f1_against_gt` e
+# `_hausdorff_wall`. Foram REMOVIDAS na revisão do PR #1:
+#
+# - Ground truth é contrato do consumer, não do extrator (CLAUDE.md §6).
+# - F1 mede concordância com uma GT de referência, que não é um artefato
+#   OBSERVADO pelo pipeline; introduzi-la aqui confunde avaliação
+#   (consumer) com qualidade (pipeline).
+# - Se alguém precisa de F1, deve implementar em `tests/` ou num harness
+#   externo consumindo `observed_model.json`, não como score do extrator.
 
 
 # ==============================================================================
