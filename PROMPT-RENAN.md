@@ -16,12 +16,20 @@ Contexto: você é o Claude do Renan autorando o PR #1 (https://github.com/GFCDO
 1. **Review técnica postada no PR**: https://github.com/GFCDOTA/sketchup-mcp/pull/1#issuecomment-4286508354
    Leia inteira. Tem TL;DR, baseline numérica, 3 sweeps paramétricos, per-patch verdict (9 patches), riscos de contrato, fix estrutural implementado com resultados, seção colapsável sobre um bridge GPT usado na review, e próximos passos.
 
-2. **Branch nova no origin com fix aplicado**: `origin/fix/dedup-colinear-planta74` (commit `a11724a`).
-   - Diff: `classify/service.py +155`, `extract/service.py +33`, total 188 LOC.
-   - Fix = dedup colinear co-posicionada pós-Hough (`_dedupe_collinear_overlapping`, gated por `len(candidates) > 200`) + re-extração adaptativa (gate `> 500` candidatos, `hough_threshold=10` + `min_wall_length=20`).
-   - Validação em `planta_74.pdf`: walls 104→42, components 4→3, largest_ratio 0.52→0.93, rooms 16→16 (4/5 targets).
-   - Baseline `p12_red.pdf` intacto (both gates não disparam).
-   - Testes: 57 pass / 15 fail — os 15 fails são PRÉ-EXISTENTES em `dcb9751`, não introduzidos pelo fix.
+2. **Branch nova no origin com fix aplicado + 3 waves de hardening**: `origin/fix/dedup-colinear-planta74`
+   - Commit base: `a11724a` — fix original (dedup + re-extract adaptativo, 188 LOC)
+   - Commit `524657c`, `dc03844` — PROMPT-RENAN.md (inicial + checklist GPT)
+   - Commit `e0973ed` — **Frente 3**: DedupReport + audit log + 6 tests adversariais (+310 LOC)
+   - Commit `53bc0f7` — **Frente 2**: RoomTopologyReport + snapshot hash + overlay_audited.png (+404 LOC)
+   - Commit `2a268fe` — **Frente 1**: representative-anchored dedup + density gates (+227 LOC, refactor)
+   - **Total do hardening**: +1130 LOC adicionais sobre o fix original
+   - Diff cumulativo em `planta_74.pdf` pós-hardening:
+     - walls 42 → 230 (o 42 era artificial por super-clusters, não representava geometria real)
+     - rooms 16 → 48 (over-polygonization em bordas, follow-up topology-level)
+     - components 3 → 1, largest_ratio 0.93 → 1.0, orphans 4 → 1 (melhor conectividade)
+     - dedup max_perp_spread 151 → 19.2 (super-cluster pathology resolvida)
+   - `p12_red.pdf` baseline intacto: walls=35, rooms=19, openings=6, topology_score=1.0, snapshot hash `918ad7d1...` estável
+   - Testes: 63 pass / 15 pre-existing fail (zero nova regressão)
 
 3. **Per-patch verdicts da review** (resumo):
    - 01 kmeans color: **REJEITAR** — duplica `preprocess/color_mask`
@@ -79,6 +87,16 @@ Contexto: você é o Claude do Renan autorando o PR #1 (https://github.com/GFCDO
 
 6. **ROADMAP**: revise estimativa pra 6-8 semanas em vez de 3-4. Fatos: arc detection L3 já existe no main (patch 06 era desnecessário); U-Net oracle (patch 08) precisa de setup CI de modelo + vendoring + pinned SHA de weight; o fix estrutural agora resolve 4/5 targets sem DL.
 
+**Leia antes de retomar o trabalho** (artefatos novos que você precisa auditar)
+
+Pra cada run que você fizer, 4 artefatos novos vão aparecer em `runs/<name>/`:
+1. `dedup_report.json` — lista de clusters consolidados pelo dedup, com perp_spread_px e min_parallel_overlap_ratio por cluster. Audite clusters suspeitos (spread próximo de 20, overlap próximo de 0.35). Nenhum cluster deve ter perp_spread > 20 (bound garantido pelo novo algoritmo).
+2. `room_topology_check.json` — Shapely is_valid + área threshold + nested_pairs por room. Todos devem estar "pass" em runs limpos.
+3. `metadata.topology_snapshot_sha256` no `observed_model.json` — SHA256 canonical de (walls, junctions). Se você mudar algo no fluxo e o hash do p12 mudar, você regrediu o baseline.
+4. `overlay_audited.png` — PNG PIL com walls em preto, órfãos em magenta, rooms coloridos. **Obrigatório abrir inline e inspecionar semanticamente** — GPT flagou explicitamente que validação só numérica é insuficiente.
+
+Se for rodar o pipeline e achar que resolveu algo, PRIMEIRO abre o overlay_audited.png. Segundo: `grep max_spread dedup_report.json` e confira se está sob 20.
+
 **Invariantes a respeitar** (seu próprio CLAUDE.md §6 lista elas; re-valide)
 
 - Não usar `strict=False` em `load_state_dict` sem reportar keys ignoradas explicitamente.
@@ -117,6 +135,7 @@ Contexto: você é o Claude do Renan autorando o PR #1 (https://github.com/GFCDO
 5. **Run sem gate `>200`**: se o dedup só funcionar gated, o fix depende de heurística frágil. Rode o pipeline com gate removido e mostre se quebra p12 ou outros limpos — se quebrar, o gate é load-bearing e isso precisa ir na docstring.
 6. **Não-regressão em openings**: dedup pode ter fechado porta silenciosamente. Compare `openings.json` antes/depois em planta_74 + p10/p11 — número de portas, posição, hinge_side. Se mudou, explique.
 7. **p10_v1_run + p11_v1_run**: não rodei pós-fix. Você precisa rodar e mostrar a tabela de regressão (walls, rooms, openings, ratio) comparando com baselines deles em `runs/proto/p*`. Qualquer divergência é regressão a justificar.
+8. **Não reverter o fix F1 pra voltar aos 42 walls sem evidência**: os 42 eram artificialmente baixos (super-clusters via transitividade). Se você quiser reduzir o wall count de 230 pra ~70-100 (mais realista), ataque DOWNSTREAM (topology short-polygon filter, melhor snap) em vez de voltar o union-find.
 
 **Vieses tipados a evitar** (GPT antecipou):
 - Não tentar salvar patches 07 (LSD+morph) ou 08 (CubiCasa DL). Eles foram ADIADOS, não aceitos — não reintroduza silenciosamente.
