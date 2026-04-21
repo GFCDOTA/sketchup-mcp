@@ -47,6 +47,52 @@ _SLIVER_AREA_GATE = 5000.0
 _SLIVER_ASPECT_MIN = 0.12
 _SLIVER_COMPACTNESS_MIN = 0.20
 
+# Strip-room merge (F5): collapses thin long polygons produced between
+# pairs of nearly-parallel walls that dedup (perp_tolerance=20) could
+# not absorb because they are genuinely distinct walls, not twin
+# detections. The merge is applied on the room adjacency graph after
+# polygonize.
+#
+# Triggers merge iff ALL three signals agree:
+#   - width_estimate = area / length_major_axis <= _STRIP_WIDTH_FACTOR *
+#     median_wall_thickness   (decisive: strip thickness matches
+#     wall thickness; a real room is ~5x wider functionally)
+#   - bbox aspect_ratio <= _STRIP_ASPECT_MAX
+#   - shared boundary length with at least one neighbour >=
+#     _STRIP_SHARED_RATIO_MIN of the strip's own perimeter
+# Multi-neighbour tie break: score = shared_length + 0.001 * area;
+# highest score wins.
+#
+# No area gate: width_estimate already separates strips (width ~ wall
+# thickness) from legitimate small rooms (bathrooms/closets have
+# functional width >> 2.5 * wall_thickness). A 2 m^2 bathroom drawn
+# at 2x raster scale has width_estimate around 100-150 px while the
+# ceiling lands on 25-30 px.
+_STRIP_WIDTH_FACTOR = 2.5
+# General aspect bound for strip detection. A real room in a floor
+# plan rarely has bbox aspect below ~0.15 (even a corridor has some
+# width). A strip between two parallel walls, by contrast, has aspect
+# close to 0 because its width is dominated by wall thickness.
+_STRIP_ASPECT_MAX = 0.20
+_STRIP_SHARED_RATIO_MIN = 0.60
+# After a strip grows (absorbing neighbours on subsequent passes), its
+# width_estimate can exceed the wall-thickness multiple; fall back to
+# "almost fully enclosed by other rooms" (high total shared ratio) as
+# the secondary signal. Tighter aspect gate in this path avoids
+# catching legitimate corridors (p12_red has corridor-shape rooms at
+# aspect 0.18 that are NOT strips — they have real architectural
+# width, just happen to be long).
+_STRIP_HIGH_RATIO = 0.80
+_STRIP_HIGH_RATIO_ASPECT_MAX = 0.14
+# Even in the elastic path (strip that has grown by absorbing
+# neighbours), the effective width must stay within a few multiples
+# of the median wall thickness. Real enclosed corridors have
+# functional width >5x wall thickness (p12_red room-19 has a corridor
+# with width_estimate ~7x wall_thickness that is NOT a strip), so this
+# cap stops the merge from engulfing them.
+_STRIP_HIGH_RATIO_WIDTH_FACTOR = 5.0
+_STRIP_MAX_ITER = 5
+
 
 def build_topology(
     walls: list[Wall],
@@ -124,6 +170,7 @@ def build_topology(
             per_page_ratios.append(largest / page_nodes)
 
     rooms, min_area_threshold = _polygonize_rooms_with_threshold(split_walls)
+    rooms = _merge_strip_rooms(rooms, split_walls)
     report = _build_connectivity_report_aggregate(
         total_nodes=total_nodes,
         total_edges=total_edges,
@@ -483,6 +530,197 @@ def _polygonize_rooms_with_threshold(
             )
             counter += 1
     return rooms, max_threshold
+
+
+def _merge_strip_rooms(rooms: list[Room], walls: list[SplitWall]) -> list[Room]:
+    """Iteratively merge "strip" rooms into their largest neighbour.
+
+    A strip is a polygon whose width (minor axis length) matches the
+    wall thickness — the signature of a polygon formed between two
+    nearly-parallel walls that survived dedup. Because the criterion
+    is an AND of four signals gated by area, legitimate small rooms
+    (bathrooms, closets) cannot be misclassified: their width is
+    several times the wall thickness even when their area is modest.
+
+    Runs up to ``_STRIP_MAX_ITER`` iterations, rebuilding the adjacency
+    graph after each batch; stops as soon as a pass produces no merge.
+    Multi-neighbour ties are broken by shared-boundary length, with
+    area as the secondary key (prefer merging into the larger neighbour
+    when boundary lengths tie).
+    """
+    if len(rooms) < 2:
+        return rooms
+
+    wall_thicknesses = [w.thickness for w in walls if w.thickness > 0]
+    if not wall_thicknesses:
+        return rooms
+    wall_thicknesses.sort()
+    median_wall_thickness = wall_thicknesses[len(wall_thicknesses) // 2]
+    width_ceiling = _STRIP_WIDTH_FACTOR * max(1.0, median_wall_thickness)
+
+    current = list(rooms)
+    for _ in range(_STRIP_MAX_ITER):
+        if len(current) < 2:
+            break
+
+        polygons: dict[str, Polygon] = {}
+        for r in current:
+            if len(r.polygon) < 3:
+                continue
+            try:
+                poly = Polygon(r.polygon)
+                if poly.is_valid:
+                    polygons[r.room_id] = poly
+            except Exception:
+                continue
+        if len(polygons) < 2:
+            break
+
+        # Score each candidate strip against its best neighbour.
+        merges: list[tuple[str, str]] = []  # (strip_id, target_id)
+        claimed_targets: set[str] = set()
+        claimed_strips: set[str] = set()
+
+        for strip in current:
+            if strip.room_id in claimed_strips or strip.room_id in claimed_targets:
+                continue
+            strip_poly = polygons.get(strip.room_id)
+            if strip_poly is None:
+                continue
+            try:
+                obb = strip_poly.minimum_rotated_rectangle
+            except Exception:
+                continue
+            obb_coords = list(obb.exterior.coords)[:-1]
+            if len(obb_coords) < 4:
+                continue
+            edges = [
+                (
+                    (obb_coords[i][0] - obb_coords[(i + 1) % 4][0]) ** 2
+                    + (obb_coords[i][1] - obb_coords[(i + 1) % 4][1]) ** 2
+                )
+                ** 0.5
+                for i in range(4)
+            ]
+            length_major = max(edges)
+            if length_major <= 0:
+                continue
+            width_estimate = strip.area / length_major
+
+            minx, miny, maxx, maxy = strip_poly.bounds
+            bbox_w = max(1e-6, maxx - minx)
+            bbox_h = max(1e-6, maxy - miny)
+            bbox_aspect = min(bbox_w, bbox_h) / max(bbox_w, bbox_h)
+            if bbox_aspect > _STRIP_ASPECT_MAX:
+                continue
+
+            strip_perim = max(1e-6, strip_poly.length)
+            neighbour_shared: list[tuple[Room, float]] = []
+            for other in current:
+                if (
+                    other.room_id == strip.room_id
+                    or other.room_id in claimed_strips
+                ):
+                    continue
+                other_poly = polygons.get(other.room_id)
+                if other_poly is None:
+                    continue
+                if not strip_poly.touches(other_poly):
+                    continue
+                try:
+                    boundary_inter = strip_poly.boundary.intersection(other_poly.boundary)
+                except Exception:
+                    continue
+                shared_length = getattr(boundary_inter, "length", 0.0) or 0.0
+                if shared_length <= 0:
+                    continue
+                neighbour_shared.append((other, shared_length))
+
+            if not neighbour_shared:
+                continue
+            total_shared = sum(sl for _, sl in neighbour_shared)
+            total_ratio = total_shared / strip_perim
+
+            # Strip decision: width_estimate alone catches Hough-level
+            # thin strips (width close to wall thickness). After a
+            # merge in an earlier pass, the absorbed strip can grow
+            # wider than the ceiling while keeping its strip aspect
+            # and near-total enclosure — so we also accept polygons
+            # that are visibly elongated (tighter aspect) AND mostly
+            # bounded by other rooms.
+            width_ok = width_estimate <= width_ceiling
+            high_ratio_width_ceiling = (
+                _STRIP_HIGH_RATIO_WIDTH_FACTOR * max(1.0, median_wall_thickness)
+            )
+            enclosed_ok = (
+                total_ratio >= _STRIP_HIGH_RATIO
+                and bbox_aspect <= _STRIP_HIGH_RATIO_ASPECT_MAX
+                and width_estimate <= high_ratio_width_ceiling
+            )
+            if not (width_ok or enclosed_ok):
+                continue
+            if total_ratio < _STRIP_SHARED_RATIO_MIN:
+                # Not sandwiched by neighbours enough — this is a real
+                # room with exterior walls, not a strip between two
+                # parallel walls.
+                continue
+
+            best_target = max(
+                neighbour_shared,
+                key=lambda pair: (pair[1], pair[0].area),
+            )[0]
+            merges.append((strip.room_id, best_target.room_id))
+            claimed_strips.add(strip.room_id)
+            claimed_targets.add(best_target.room_id)
+
+        if not merges:
+            break
+
+        # Apply unions. Cannot chain merges into the same target in one
+        # pass (would require re-scoring), hence the claimed_targets
+        # guard above.
+        target_updates: dict[str, Polygon] = {}
+        for strip_id, target_id in merges:
+            strip_poly = polygons[strip_id]
+            target_poly = target_updates.get(target_id, polygons[target_id])
+            try:
+                union_poly = target_poly.union(strip_poly)
+            except Exception:
+                continue
+            if union_poly.geom_type != "Polygon" or not union_poly.is_valid:
+                # Merge would produce a disjoint multi-part — skip,
+                # leave both rooms untouched.
+                continue
+            target_updates[target_id] = union_poly
+
+        if not target_updates:
+            break
+
+        next_rooms: list[Room] = []
+        for r in current:
+            if r.room_id in claimed_strips:
+                continue
+            if r.room_id in target_updates:
+                new_poly = target_updates[r.room_id]
+                next_rooms.append(
+                    Room(
+                        room_id=r.room_id,
+                        polygon=[
+                            (float(x), float(y))
+                            for x, y in new_poly.exterior.coords[:-1]
+                        ],
+                        area=float(new_poly.area),
+                        centroid=(
+                            float(new_poly.centroid.x),
+                            float(new_poly.centroid.y),
+                        ),
+                    )
+                )
+            else:
+                next_rooms.append(r)
+        current = next_rooms
+
+    return current
 
 
 def _is_sliver_polygon(polygon: Polygon) -> bool:
