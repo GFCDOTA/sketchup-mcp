@@ -60,7 +60,23 @@ _MIN_ASPECT_RATIO = 2.0
 # that explicitly checks 1D overlap collapses them without needing to
 # relax the earlier perpendicular tolerance (which would risk fusing
 # unrelated walls).
-_DEDUP_PERP_TOLERANCE = 10.0
+# Perp tolerance and overlap ratio calibrated empirically after F1.
+#
+# History:
+# - Original union-find approach (F2): tolerance 10, overlap 0.35, but
+#   union-find allowed transitive chains → super-clusters with
+#   perp_spread up to 151 px (completely fusing unrelated walls).
+# - F1 switched to representative-anchored clustering with
+#   perp_spread <= tolerance enforced as a hard bound. At tolerance=10
+#   the new algorithm was too conservative (dedup merged only 22 of
+#   220 candidates on planta_74 vs 169 before), inflating rooms from
+#   16 to 54.
+# - Bumping tolerance to 20 lets the algorithm absorb twin chains on
+#   thick-line raster (2x scale doubles perp jitter) while keeping
+#   dupla alvenaria (perpendicular separation >= 25 px, well above
+#   tolerance) unharmed. Overlap stayed at 0.35 to avoid admitting
+#   collinear segments that barely touch.
+_DEDUP_PERP_TOLERANCE = 20.0
 _DEDUP_OVERLAP_RATIO = 0.35
 # perp_spread at or below this value is treated as Hough twin detection
 # (sub-pixel jitter on the same physical stroke); above it, the cluster
@@ -69,6 +85,14 @@ _DEDUP_OVERLAP_RATIO = 0.35
 # a reviewer can audit whether each merge has the expected geometric
 # signature.
 _TWIN_DETECTION_PERP_PX = 5.0
+# Fraction of candidates that must have at least one collinear-overlap
+# partner within perp_tolerance to trigger the dedup pass. This
+# replaces the old raw-count gate (len(candidates) > 200) because the
+# raw count couples behaviour to canvas size, not geometry. Clean
+# inputs like p12_red.pdf observe ~0 pair ratio; noisy inputs like
+# planta_74.pdf observe >> 0.05. Calibrated empirically against the
+# four baseline runs; see F1 commit message for the measured values.
+_DEDUP_ACTIVATION_RATIO = 0.05
 
 
 def classify_walls(
@@ -107,18 +131,16 @@ def classify_walls(
     # Stage 1b: second dedup pass that clusters collinear strokes whose
     # perpendicular separation is small (<= _DEDUP_PERP_TOLERANCE) AND
     # whose parallel ranges overlap by >= _DEDUP_OVERLAP_RATIO of the
-    # shorter segment. This catches Hough twin detections that escaped
-    # the tolerance-based consolidation above because the bucketing
-    # happened to split them across neighbouring clusters.
+    # shorter segment. Catches Hough twin detections that escaped the
+    # earlier tolerance-based consolidation.
     #
-    # Gated by raw candidate count for the same reason as the text /
-    # imbalance filters below: on already-clean inputs (for example
-    # the p12_red.pdf proto with ~35 walls, where the Hough extractor
-    # emits only ~160 candidates), the near-parallel survivors are
-    # almost always genuine neighbouring walls rather than Hough
-    # twins, and collapsing them kills legitimate openings and rooms.
-    gate_active = len(candidates) > 200
+    # Gate now derives from geometry (what fraction of the candidates
+    # has a collinear-overlap partner) rather than raw count, so
+    # behaviour is scale-invariant: a large clean plan with 400
+    # candidates but no overlap will skip, and a small noisy plan with
+    # 120 candidates where half have partners will activate.
     strokes_before_dedup = len(strokes)
+    gate_active = _dedup_activation_ratio(strokes) >= _DEDUP_ACTIVATION_RATIO
     if gate_active:
         strokes, dedup_report = _dedupe_collinear_overlapping(strokes)
     else:
@@ -193,32 +215,95 @@ def _consolidate_hough_duplicates(
     return strokes
 
 
+def _dedup_activation_ratio(
+    candidates: list[WallCandidate],
+    perp_tolerance: float = _DEDUP_PERP_TOLERANCE,
+    overlap_ratio: float = _DEDUP_OVERLAP_RATIO,
+) -> float:
+    """Cheap sweep that returns the fraction of candidates that have
+    at least one collinear-overlap partner within ``perp_tolerance``
+    and parallel overlap >= ``overlap_ratio`` of the shorter segment.
+
+    Used as the dedup activation gate: geometry-anchored, scale-
+    invariant, replaces the old raw-count threshold.
+    """
+    if len(candidates) < 2:
+        return 0.0
+
+    by_group: dict[tuple[int, str], list[WallCandidate]] = {}
+    for candidate in candidates:
+        orientation = _orientation(candidate)
+        by_group.setdefault((candidate.page_index, orientation), []).append(
+            candidate
+        )
+
+    paired = 0
+    for (_, orientation), items in by_group.items():
+        if len(items) < 2:
+            continue
+        ordered = sorted(items, key=lambda c: _perp_coord(c, orientation))
+        # Precompute ranges to avoid redundant work.
+        ranges = [_para_range(c, orientation) for c in ordered]
+        perps = [_perp_coord(c, orientation) for c in ordered]
+        has_partner = [False] * len(ordered)
+        for i in range(len(ordered)):
+            if has_partner[i]:
+                continue
+            ri = ranges[i]
+            li = ri[1] - ri[0]
+            for j in range(i + 1, len(ordered)):
+                if perps[j] - perps[i] > perp_tolerance:
+                    break
+                rj = ranges[j]
+                lj = rj[1] - rj[0]
+                shorter = min(li, lj)
+                if shorter <= 0:
+                    continue
+                overlap = max(0.0, min(ri[1], rj[1]) - max(ri[0], rj[0]))
+                if overlap / shorter >= overlap_ratio:
+                    has_partner[i] = True
+                    has_partner[j] = True
+                    break
+        paired += sum(1 for flag in has_partner if flag)
+    return paired / len(candidates)
+
+
 def _dedupe_collinear_overlapping(
     candidates: list[WallCandidate],
     perp_tolerance: float = _DEDUP_PERP_TOLERANCE,
     overlap_ratio: float = _DEDUP_OVERLAP_RATIO,
 ) -> tuple[list[WallCandidate], DedupReport]:
-    """Cluster collinear candidates that share most of their parallel
-    extent and collapse each cluster to a single representative.
+    """Representative-anchored clustering of collinear candidates.
 
-    Two candidates join the same cluster when they share orientation
-    and page, their perpendicular coordinates differ by at most
-    ``perp_tolerance`` pixels, and the 1D overlap in the parallel
-    direction is at least ``overlap_ratio`` of the SHORTER segment's
-    length. Clustering uses transitive closure via union-find so that
-    three+ near-parallel twins collapse together.
+    Replaces the previous union-find approach, which allowed transitive
+    chains to produce clusters whose total perpendicular spread far
+    exceeded ``perp_tolerance``: the F3 audit observed clusters on
+    planta_74.pdf with 56 members and ``perp_spread_px`` of 151 — the
+    old algorithm was fusing walls three orders of magnitude apart
+    perpendicularly just because each consecutive pair fell inside the
+    tolerance.
 
-    The representative keeps the longest segment's endpoints (extended
-    to the full span if a shorter neighbour sticks out on either end),
-    the mean perpendicular coordinate across the cluster, and the max
-    thickness. Source / confidence are inherited from the longest
-    member.
+    The new algorithm enforces a bounded spread per cluster:
 
-    Returns a tuple ``(kept_candidates, report)`` where ``report`` is a
-    ``DedupReport`` describing every multi-member cluster this pass
-    collapsed. The report is structured so a human reviewer can spot
-    suspicious merges (e.g. ``perp_spread_px`` close to the tolerance or
-    ``min_parallel_overlap_ratio`` close to the overlap threshold).
+    - Within each ``(page, orientation)`` group, sort by perpendicular
+      coordinate.
+    - Sweep with an open cluster: the first unprocessed candidate seeds
+      the cluster and supplies the initial parallel range.
+    - Each subsequent candidate joins the cluster iff
+      ``cluster_max_perp - cluster_min_perp <= perp_tolerance`` after
+      inclusion AND its overlap with the running seed (the longest
+      segment seen so far) is >= ``overlap_ratio`` of the shorter
+      segment.
+    - Otherwise the cluster closes and the candidate seeds a new one.
+
+    The representative is the bbox union of cluster members at the mean
+    perpendicular coordinate, as before. The dedup report now carries
+    clusters whose ``perp_spread_px`` is guaranteed <= perp_tolerance.
+
+    Two candidates may still be merged even when they don't overlap
+    each other directly, provided both overlap the seed; this preserves
+    the transitivity needed for Hough sub-pixel jitter while refusing
+    the pathological chain case.
     """
     if not candidates:
         return list(candidates), DedupReport(
@@ -246,85 +331,29 @@ def _dedupe_collinear_overlapping(
             continue
         ordered = sorted(items, key=lambda pair: _perp_coord(pair[1], orientation))
 
-        # Union-find over the ordered indices. We only try to merge a
-        # candidate with its window of following neighbours whose
-        # perpendicular offset is still within the tolerance, so the
-        # pass stays near-linear for typical inputs.
-        n = len(ordered)
-        parent = list(range(n))
-        # Track the minimum overlap ratio observed on any merge edge
-        # within each future cluster. This is a conservative "weakest
-        # link" metric: if the report shows a cluster with overlap 0.36,
-        # the reviewer knows at least one merge decision was close to
-        # the threshold.
-        min_overlap_by_root: dict[int, float] = {}
+        # Sweep with an "open cluster" whose spread is bounded by
+        # perp_tolerance. When a candidate would violate the bound or
+        # fails overlap with the cluster seed, the current cluster is
+        # closed (emitted if it has >=2 members) and the candidate
+        # starts a new one.
+        open_cluster: list[tuple[int, WallCandidate]] = []
+        open_min_perp = 0.0
+        open_max_perp = 0.0
+        open_min_overlap = 1.0
+        seed_range: tuple[float, float] = (0.0, 0.0)
+        seed_length = 0.0
 
-        def find(x: int) -> int:
-            while parent[x] != x:
-                parent[x] = parent[parent[x]]
-                x = parent[x]
-            return x
-
-        def union(a: int, b: int, edge_overlap: float) -> None:
-            ra, rb = find(a), find(b)
-            if ra != rb:
-                parent[rb] = ra
-                existing = min(
-                    min_overlap_by_root.pop(ra, float("inf")),
-                    min_overlap_by_root.pop(rb, float("inf")),
-                    edge_overlap,
-                )
-                min_overlap_by_root[ra] = existing
-            else:
-                existing = min_overlap_by_root.get(ra, float("inf"))
-                min_overlap_by_root[ra] = min(existing, edge_overlap)
-
-        for i in range(n):
-            pi = _perp_coord(ordered[i][1], orientation)
-            ri = _para_range(ordered[i][1], orientation)
-            li = ri[1] - ri[0]
-            j = i + 1
-            while j < n:
-                pj = _perp_coord(ordered[j][1], orientation)
-                if pj - pi > perp_tolerance:
-                    break
-                rj = _para_range(ordered[j][1], orientation)
-                lj = rj[1] - rj[0]
-                overlap = max(0.0, min(ri[1], rj[1]) - max(ri[0], rj[0]))
-                shorter = min(li, lj)
-                if shorter > 0 and overlap / shorter >= overlap_ratio:
-                    union(i, j, overlap / shorter)
-                j += 1
-
-        groups: dict[int, list[int]] = {}
-        for local_idx in range(n):
-            root = find(local_idx)
-            groups.setdefault(root, []).append(local_idx)
-
-        for root, members in groups.items():
-            if len(members) <= 1:
-                continue
-            cluster = [ordered[m] for m in members]
-            # Pick the longest segment as the representative basis.
-            representative = max(
-                cluster,
-                key=lambda pair: _para_range(pair[1], orientation)[1]
-                - _para_range(pair[1], orientation)[0],
-            )
-            rep_original_idx, rep_candidate = representative
-
+        def _emit_cluster(cluster: list[tuple[int, WallCandidate]], min_overlap: float) -> None:
+            nonlocal cluster_id_counter
+            if len(cluster) < 2:
+                return
             spans = [_para_range(pair[1], orientation) for pair in cluster]
+            perps = [_perp_coord(pair[1], orientation) for pair in cluster]
             span_start = min(s[0] for s in spans)
             span_end = max(s[1] for s in spans)
-            perps = [_perp_coord(pair[1], orientation) for pair in cluster]
             mean_perp = sum(perps) / len(cluster)
             max_thickness = max(pair[1].thickness for pair in cluster)
             perp_spread = max(perps) - min(perps)
-            min_overlap = min_overlap_by_root.get(root, 1.0)
-            # Below _TWIN_DETECTION_PERP_PX the spread is within Hough
-            # sub-pixel jitter (twin detections of the same stroke);
-            # above it the survivors are more likely collinear splits
-            # that were bucketed apart by the earlier consolidation.
             merge_reason = (
                 "twin_detection" if perp_spread <= _TWIN_DETECTION_PERP_PX
                 else "collinear_split"
@@ -341,6 +370,16 @@ def _dedupe_collinear_overlapping(
                 )
             )
             cluster_id_counter += 1
+
+            # Representative = longest member by parallel extent; we
+            # preserve its original index to write the merged
+            # WallCandidate back into its slot.
+            representative = max(
+                cluster,
+                key=lambda pair: _para_range(pair[1], orientation)[1]
+                - _para_range(pair[1], orientation)[0],
+            )
+            rep_original_idx, rep_candidate = representative
 
             if orientation == "horizontal":
                 new_start = (round(span_start, 3), round(mean_perp, 3))
@@ -361,6 +400,51 @@ def _dedupe_collinear_overlapping(
             for pair in cluster:
                 if pair[0] != rep_original_idx:
                     keep_mask[pair[0]] = False
+
+        for pair in ordered:
+            _idx, candidate = pair
+            p = _perp_coord(candidate, orientation)
+            r = _para_range(candidate, orientation)
+            length = r[1] - r[0]
+
+            if not open_cluster:
+                open_cluster = [pair]
+                open_min_perp = p
+                open_max_perp = p
+                open_min_overlap = 1.0
+                seed_range = r
+                seed_length = length
+                continue
+
+            new_min = min(open_min_perp, p)
+            new_max = max(open_max_perp, p)
+            spread_ok = (new_max - new_min) <= perp_tolerance
+
+            shorter = min(seed_length, length)
+            overlap_abs = max(0.0, min(seed_range[1], r[1]) - max(seed_range[0], r[0]))
+            overlap_ok = shorter > 0 and (overlap_abs / shorter) >= overlap_ratio
+
+            if spread_ok and overlap_ok:
+                open_cluster.append(pair)
+                open_min_perp = new_min
+                open_max_perp = new_max
+                open_min_overlap = min(open_min_overlap, overlap_abs / shorter)
+                # Let a longer segment become the new seed; this keeps
+                # the overlap gate anchored on the most informative
+                # member of the cluster as it grows.
+                if length > seed_length:
+                    seed_range = r
+                    seed_length = length
+            else:
+                _emit_cluster(open_cluster, open_min_overlap)
+                open_cluster = [pair]
+                open_min_perp = p
+                open_max_perp = p
+                open_min_overlap = 1.0
+                seed_range = r
+                seed_length = length
+
+        _emit_cluster(open_cluster, open_min_overlap)
 
     out: list[WallCandidate] = []
     for idx, candidate in enumerate(candidates):
