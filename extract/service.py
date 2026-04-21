@@ -18,6 +18,20 @@ class ExtractConfig:
     orthogonal_tolerance_ratio: float = 3.0
 
 
+# "Noisy-regime" override: when the clean-baseline Hough settings produce
+# a flood of candidates (> _NOISE_CANDIDATE_THRESHOLD), the input is a
+# detailed architectural plan with legend/hachura/text. Re-running with
+# a lower Hough vote threshold and a stricter minimum segment length
+# recovers thin walls without re-admitting the short hachura ticks.
+# Values tuned on the planta_74 (apto 74 m2) experiment. Clean inputs
+# like p12_red.pdf stay under the threshold and never see this override.
+_NOISE_CANDIDATE_THRESHOLD = 500
+_NOISE_CONFIG = {
+    "min_wall_length": 20,
+    "hough_threshold": 10,
+}
+
+
 def extract_from_document(
     document: IngestedDocument, config: ExtractConfig | None = None
 ) -> list[WallCandidate]:
@@ -27,6 +41,25 @@ def extract_from_document(
         candidates.extend(
             extract_from_raster(page.image, page_index=page.index, config=active_config)
         )
+
+    # Adaptive re-extraction for noise-heavy plans. The baseline config
+    # still wins on clean inputs (p12_red.pdf etc.) because it avoids
+    # the dedup complexity below; only when the raw candidate count
+    # explodes do we switch to the aggressive recall settings.
+    if config is None and len(candidates) > _NOISE_CANDIDATE_THRESHOLD:
+        noisy_config = ExtractConfig(
+            threshold=active_config.threshold,
+            min_wall_length=_NOISE_CONFIG["min_wall_length"],
+            hough_threshold=_NOISE_CONFIG["hough_threshold"],
+            hough_max_line_gap=active_config.hough_max_line_gap,
+            orthogonal_tolerance_ratio=active_config.orthogonal_tolerance_ratio,
+        )
+        noisy_candidates: list[WallCandidate] = []
+        for page in document.pages:
+            noisy_candidates.extend(
+                extract_from_raster(page.image, page_index=page.index, config=noisy_config)
+            )
+        return noisy_candidates
     return candidates
 
 

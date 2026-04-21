@@ -51,6 +51,18 @@ _IMBALANCE_EXTREME_RATIO = 5.0
 # a blob, not a wall.
 _MIN_ASPECT_RATIO = 2.0
 
+# Collinear-overlap dedup: after the per-orientation cluster consolidation,
+# HoughLinesP can still emit twin detections of the SAME physical stroke
+# whose perpendicular coordinates differ by more than the consolidation
+# tolerance (typically thick-lined walls drawn at scale 2x, where the
+# interior sampling step misses a single tolerance bucket). Those survivors
+# still overlap heavily in the parallel direction, so a second dedup pass
+# that explicitly checks 1D overlap collapses them without needing to
+# relax the earlier perpendicular tolerance (which would risk fusing
+# unrelated walls).
+_DEDUP_PERP_TOLERANCE = 10.0
+_DEDUP_OVERLAP_RATIO = 0.35
+
 
 def classify_walls(
     candidates: list[WallCandidate], coordinate_tolerance: float | None = None
@@ -63,6 +75,22 @@ def classify_walls(
 
     # Stage 1: collapse redundant Hough detections of the same stroke.
     strokes = _consolidate_hough_duplicates(candidates, coordinate_tolerance)
+
+    # Stage 1b: second dedup pass that clusters collinear strokes whose
+    # perpendicular separation is small (<= _DEDUP_PERP_TOLERANCE) AND
+    # whose parallel ranges overlap by >= _DEDUP_OVERLAP_RATIO of the
+    # shorter segment. This catches Hough twin detections that escaped
+    # the tolerance-based consolidation above because the bucketing
+    # happened to split them across neighbouring clusters.
+    #
+    # Gated by raw candidate count for the same reason as the text /
+    # imbalance filters below: on already-clean inputs (for example
+    # the p12_red.pdf proto with ~35 walls, where the Hough extractor
+    # emits only ~160 candidates), the near-parallel survivors are
+    # almost always genuine neighbouring walls rather than Hough
+    # twins, and collapsing them kills legitimate openings and rooms.
+    if len(candidates) > 200:
+        strokes = _dedupe_collinear_overlapping(strokes)
 
     # Filtros de ruido (text baselines + orientation imbalance) so fazem
     # sentido em planta real bagunsada. Quando o input ja vem limpo
@@ -123,6 +151,133 @@ def _consolidate_hough_duplicates(
                         )
                     )
     return strokes
+
+
+def _dedupe_collinear_overlapping(
+    candidates: list[WallCandidate],
+    perp_tolerance: float = _DEDUP_PERP_TOLERANCE,
+    overlap_ratio: float = _DEDUP_OVERLAP_RATIO,
+) -> list[WallCandidate]:
+    """Cluster collinear candidates that share most of their parallel
+    extent and collapse each cluster to a single representative.
+
+    Two candidates join the same cluster when they share orientation
+    and page, their perpendicular coordinates differ by at most
+    ``perp_tolerance`` pixels, and the 1D overlap in the parallel
+    direction is at least ``overlap_ratio`` of the SHORTER segment's
+    length. Clustering uses transitive closure via union-find so that
+    three+ near-parallel twins collapse together.
+
+    The representative keeps the longest segment's endpoints (extended
+    to the full span if a shorter neighbour sticks out on either end),
+    the mean perpendicular coordinate across the cluster, and the max
+    thickness. Source / confidence are inherited from the longest
+    member.
+    """
+    if not candidates:
+        return list(candidates)
+
+    by_group: dict[tuple[int, str], list[tuple[int, WallCandidate]]] = {}
+    for idx, candidate in enumerate(candidates):
+        orientation = _orientation(candidate)
+        by_group.setdefault((candidate.page_index, orientation), []).append(
+            (idx, candidate)
+        )
+
+    keep_mask = [True] * len(candidates)
+    replacements: dict[int, WallCandidate] = {}
+
+    for (page_index, orientation), items in by_group.items():
+        if len(items) < 2:
+            continue
+        ordered = sorted(items, key=lambda pair: _perp_coord(pair[1], orientation))
+
+        # Union-find over the ordered indices. We only try to merge a
+        # candidate with its window of following neighbours whose
+        # perpendicular offset is still within the tolerance, so the
+        # pass stays near-linear for typical inputs.
+        n = len(ordered)
+        parent = list(range(n))
+
+        def find(x: int) -> int:
+            while parent[x] != x:
+                parent[x] = parent[parent[x]]
+                x = parent[x]
+            return x
+
+        def union(a: int, b: int) -> None:
+            ra, rb = find(a), find(b)
+            if ra != rb:
+                parent[rb] = ra
+
+        for i in range(n):
+            pi = _perp_coord(ordered[i][1], orientation)
+            ri = _para_range(ordered[i][1], orientation)
+            li = ri[1] - ri[0]
+            j = i + 1
+            while j < n:
+                pj = _perp_coord(ordered[j][1], orientation)
+                if pj - pi > perp_tolerance:
+                    break
+                rj = _para_range(ordered[j][1], orientation)
+                lj = rj[1] - rj[0]
+                overlap = max(0.0, min(ri[1], rj[1]) - max(ri[0], rj[0]))
+                shorter = min(li, lj)
+                if shorter > 0 and overlap / shorter >= overlap_ratio:
+                    union(i, j)
+                j += 1
+
+        groups: dict[int, list[int]] = {}
+        for local_idx in range(n):
+            root = find(local_idx)
+            groups.setdefault(root, []).append(local_idx)
+
+        for members in groups.values():
+            if len(members) <= 1:
+                continue
+            cluster = [ordered[m] for m in members]
+            # Pick the longest segment as the representative basis.
+            representative = max(
+                cluster,
+                key=lambda pair: _para_range(pair[1], orientation)[1]
+                - _para_range(pair[1], orientation)[0],
+            )
+            rep_original_idx, rep_candidate = representative
+
+            spans = [_para_range(pair[1], orientation) for pair in cluster]
+            span_start = min(s[0] for s in spans)
+            span_end = max(s[1] for s in spans)
+            mean_perp = sum(
+                _perp_coord(pair[1], orientation) for pair in cluster
+            ) / len(cluster)
+            max_thickness = max(pair[1].thickness for pair in cluster)
+
+            if orientation == "horizontal":
+                new_start = (round(span_start, 3), round(mean_perp, 3))
+                new_end = (round(span_end, 3), round(mean_perp, 3))
+            else:
+                new_start = (round(mean_perp, 3), round(span_start, 3))
+                new_end = (round(mean_perp, 3), round(span_end, 3))
+
+            merged = WallCandidate(
+                page_index=page_index,
+                start=new_start,
+                end=new_end,
+                thickness=round(max_thickness, 3),
+                source=rep_candidate.source,
+                confidence=min(pair[1].confidence for pair in cluster),
+            )
+            replacements[rep_original_idx] = merged
+            for pair in cluster:
+                if pair[0] != rep_original_idx:
+                    keep_mask[pair[0]] = False
+
+    out: list[WallCandidate] = []
+    for idx, candidate in enumerate(candidates):
+        if not keep_mask[idx]:
+            continue
+        out.append(replacements.get(idx, candidate))
+    return out
 
 
 def _candidates_to_walls(candidates: list[WallCandidate]) -> list[Wall]:
