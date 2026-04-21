@@ -9,11 +9,12 @@ from uuid import uuid4
 import numpy as np
 
 from classify.service import classify_walls
+from debug.overlay import write_audited_overlay
 from debug.service import write_debug_artifacts
 from extract.service import extract_from_raster
 from ingest.service import IngestError, IngestedDocument, ingest_pdf
 from model.builder import build_observed_model, compute_bounds
-from model.types import ConnectivityReport, Junction, Room, SplitWall, WallCandidate
+from model.types import ConnectivityReport, DedupReport, Junction, Room, SplitWall, WallCandidate
 from openings.service import detect_openings
 from roi.service import RoiResult, crop_image_to_bbox, detect_architectural_roi
 from topology.service import build_topology
@@ -119,9 +120,19 @@ def _run_pipeline(
     roi_results: list[RoiResult],
     peitoris: list[dict] | None = None,
 ) -> PipelineResult:
-    walls = classify_walls(candidates)
+    dedup_report_sink: list[DedupReport] = []
+    walls = classify_walls(candidates, dedup_report_sink=dedup_report_sink)
+    dedup_report = dedup_report_sink[0] if dedup_report_sink else None
     walls, openings = detect_openings(walls, peitoris=peitoris)
-    split_walls, junctions, rooms, connectivity_report = build_topology(walls)
+    room_topology_sink: list = []
+    snapshot_hash_sink: list[str] = []
+    split_walls, junctions, rooms, connectivity_report = build_topology(
+        walls,
+        room_topology_report_sink=room_topology_sink,
+        snapshot_hash_sink=snapshot_hash_sink,
+    )
+    room_topology_report = room_topology_sink[0] if room_topology_sink else None
+    topology_snapshot_sha256 = snapshot_hash_sink[0] if snapshot_hash_sink else None
     warnings = _build_warnings(
         candidates=candidates,
         walls=walls,
@@ -148,18 +159,36 @@ def _run_pipeline(
     )
     observed_model["openings"] = [o.to_dict() for o in openings]
     observed_model["peitoris"] = peitoris or []
+    if topology_snapshot_sha256 is not None:
+        observed_model.setdefault("metadata", {})["topology_snapshot_sha256"] = topology_snapshot_sha256
 
     output_dir.mkdir(parents=True, exist_ok=True)
     (output_dir / "observed_model.json").write_text(
         json.dumps(observed_model, indent=2),
         encoding="utf-8",
     )
+    if dedup_report is not None:
+        (output_dir / "dedup_report.json").write_text(
+            json.dumps(dedup_report.to_dict(), indent=2),
+            encoding="utf-8",
+        )
+    if room_topology_report is not None:
+        (output_dir / "room_topology_check.json").write_text(
+            json.dumps(room_topology_report.to_dict(), indent=2),
+            encoding="utf-8",
+        )
     write_debug_artifacts(
         output_dir=output_dir,
         walls=split_walls,
         junctions=junctions,
         connectivity_report=connectivity_report,
     )
+    try:
+        write_audited_overlay(observed_model, output_dir / "overlay_audited.png")
+    except Exception as exc:  # render issues must not fail the pipeline
+        (output_dir / "overlay_audited.error.txt").write_text(
+            f"{type(exc).__name__}: {exc}\n", encoding="utf-8"
+        )
 
     return PipelineResult(
         observed_model=observed_model,

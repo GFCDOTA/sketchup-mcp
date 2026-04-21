@@ -18,6 +18,25 @@ class ExtractConfig:
     orthogonal_tolerance_ratio: float = 3.0
 
 
+# "Noisy-regime" override: when the clean-baseline Hough settings
+# produce a high density of candidates per raster megapixel, the input
+# is a detailed architectural plan with legend / hachura / text. We
+# re-run with a lower Hough vote threshold and a stricter minimum
+# segment length to recover thin walls without re-admitting the short
+# hachura ticks.
+#
+# The gate was previously raw count (> 500). Density per megapixel
+# replaces it so the decision is scale-invariant: two plans drawn at
+# different raster scales but the same semantic complexity now trigger
+# the same branch. Values calibrated against the four baseline runs;
+# see the F1 commit for observed density numbers.
+_NOISE_DENSITY_PER_MPX = 300.0
+_NOISE_CONFIG = {
+    "min_wall_length": 20,
+    "hough_threshold": 10,
+}
+
+
 def extract_from_document(
     document: IngestedDocument, config: ExtractConfig | None = None
 ) -> list[WallCandidate]:
@@ -27,7 +46,48 @@ def extract_from_document(
         candidates.extend(
             extract_from_raster(page.image, page_index=page.index, config=active_config)
         )
+
+    # Adaptive re-extraction for noise-heavy plans. The baseline config
+    # still wins on clean inputs (p12_red.pdf etc.) because it avoids
+    # the dedup complexity below; only when the candidate density per
+    # megapixel of raster exceeds the noise threshold do we switch to
+    # the aggressive recall settings.
+    if config is None and _noise_regime_triggered(candidates, document):
+        noisy_config = ExtractConfig(
+            threshold=active_config.threshold,
+            min_wall_length=_NOISE_CONFIG["min_wall_length"],
+            hough_threshold=_NOISE_CONFIG["hough_threshold"],
+            hough_max_line_gap=active_config.hough_max_line_gap,
+            orthogonal_tolerance_ratio=active_config.orthogonal_tolerance_ratio,
+        )
+        noisy_candidates: list[WallCandidate] = []
+        for page in document.pages:
+            noisy_candidates.extend(
+                extract_from_raster(page.image, page_index=page.index, config=noisy_config)
+            )
+        return noisy_candidates
     return candidates
+
+
+def _noise_regime_triggered(
+    candidates: list[WallCandidate], document: IngestedDocument
+) -> bool:
+    """Decide whether the noise-regime re-extraction path should run.
+
+    Returns True when the candidate density across all pages exceeds
+    ``_NOISE_DENSITY_PER_MPX`` candidates per megapixel of raster.
+    """
+    total_mpx = 0.0
+    for page in document.pages:
+        if page.image is None:
+            continue
+        h = page.image.shape[0]
+        w = page.image.shape[1] if page.image.ndim >= 2 else 0
+        total_mpx += (h * w) / 1_000_000.0
+    if total_mpx <= 0:
+        return False
+    density = len(candidates) / total_mpx
+    return density >= _NOISE_DENSITY_PER_MPX
 
 
 def extract_from_raster(
