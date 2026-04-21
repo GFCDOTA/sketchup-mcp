@@ -1,0 +1,818 @@
+[
+  {
+    "room_id": "room-1",
+    "area": 12384.3,
+    "vertices": 5,
+    "perimeter": 452.84,
+    "bbox_w": 138.19,
+    "bbox_h": 106.14,
+    "aspect_ratio": 1.302,
+    "compactness": 0.7589,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      193.90844902082492,
+      339.644937429713
+    ],
+    "category": "legitimate"
+  },
+  {
+    "room_id": "room-2",
+    "area": 24857.63,
+    "vertices": 4,
+    "perimeter": 1740.53,
+    "bbox_w": 837.9,
+    "bbox_h": 64.93,
+    "aspect_ratio": 12.904,
+    "compactness": 0.1031,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      529.1848698832346,
+      351.8179728394116
+    ],
+    "category": "thin_strip"
+  },
+  {
+    "room_id": "room-3",
+    "area": 16057.54,
+    "vertices": 3,
+    "perimeter": 1243.39,
+    "bbox_w": 596.63,
+    "bbox_h": 54.0,
+    "aspect_ratio": 11.049,
+    "compactness": 0.1305,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      899.5193333333333,
+      365.8330000000001
+    ],
+    "category": "sliver_triangle"
+  },
+  {
+    "room_id": "room-4",
+    "area": 11904.17,
+    "vertices": 3,
+    "perimeter": 1203.79,
+    "bbox_w": 596.63,
+    "bbox_h": 42.66,
+    "aspect_ratio": 13.986,
+    "compactness": 0.1032,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      732.255345546473,
+      391.9204821699838
+    ],
+    "category": "sliver_triangle"
+  },
+  {
+    "room_id": "room-5",
+    "area": 7967.56,
+    "vertices": 4,
+    "perimeter": 679.52,
+    "bbox_w": 333.71,
+    "bbox_h": 47.3,
+    "aspect_ratio": 7.056,
+    "compactness": 0.2168,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      451.36338724116723,
+      396.7842612992948
+    ],
+    "category": "thin_strip"
+  },
+  {
+    "room_id": "room-6",
+    "area": 23382.76,
+    "vertices": 5,
+    "perimeter": 1068.01,
+    "bbox_w": 507.3,
+    "bbox_h": 64.78,
+    "aspect_ratio": 7.831,
+    "compactness": 0.2576,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      879.5423711491669,
+      425.9283916926511
+    ],
+    "category": "legitimate"
+  },
+  {
+    "room_id": "room-7",
+    "area": 1877.42,
+    "vertices": 3,
+    "perimeter": 352.14,
+    "bbox_w": 170.67,
+    "bbox_h": 35.21,
+    "aspect_ratio": 4.847,
+    "compactness": 0.1903,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      585.2000122131395,
+      427.5104821699838
+    ],
+    "category": "sliver_triangle"
+  },
+  {
+    "room_id": "room-8",
+    "area": 18097.27,
+    "vertices": 5,
+    "perimeter": 552.87,
+    "bbox_w": 134.56,
+    "bbox_h": 171.08,
+    "aspect_ratio": 1.271,
+    "compactness": 0.744,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      188.05653255709623,
+      459.2494059757134
+    ],
+    "category": "legitimate"
+  },
+  {
+    "room_id": "room-9",
+    "area": 40375.71,
+    "vertices": 7,
+    "perimeter": 1028.74,
+    "bbox_w": 417.96,
+    "bbox_h": 129.82,
+    "aspect_ratio": 3.22,
+    "compactness": 0.4794,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      439.3419607189166,
+      465.8219167658499
+    ],
+    "category": "legitimate"
+  },
+  {
+    "room_id": "room-10",
+    "area": 21166.92,
+    "vertices": 5,
+    "perimeter": 782.08,
+    "bbox_w": 318.68,
+    "bbox_h": 74.58,
+    "aspect_ratio": 4.273,
+    "compactness": 0.4349,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      822.8085845327713,
+      485.35954840911376
+    ],
+    "category": "legitimate"
+  },
+  {
+    "room_id": "room-11",
+    "area": 739.32,
+    "vertices": 3,
+    "perimeter": 193.8,
+    "bbox_w": 90.46,
+    "bbox_h": 16.34,
+    "aspect_ratio": 5.535,
+    "compactness": 0.2474,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      1043.6057193172762,
+      460.1923333333333
+    ],
+    "category": "sliver_triangle"
+  },
+  {
+    "room_id": "room-12",
+    "area": 958.85,
+    "vertices": 3,
+    "perimeter": 163.82,
+    "bbox_w": 29.6,
+    "bbox_h": 64.78,
+    "aspect_ratio": 2.188,
+    "compactness": 0.449,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      1093.8213859839427,
+      433.1503333333333
+    ],
+    "category": "sliver_triangle"
+  },
+  {
+    "room_id": "room-13",
+    "area": 2920.17,
+    "vertices": 3,
+    "perimeter": 254.69,
+    "bbox_w": 84.3,
+    "bbox_h": 69.28,
+    "aspect_ratio": 1.217,
+    "compactness": 0.5657,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      1013.451,
+      483.28499999999997
+    ],
+    "category": "small_triangle"
+  },
+  {
+    "room_id": "room-14",
+    "area": 1285.43,
+    "vertices": 3,
+    "perimeter": 177.26,
+    "bbox_w": 35.76,
+    "bbox_h": 71.88,
+    "aspect_ratio": 2.01,
+    "compactness": 0.5141,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      1093.4956666666667,
+      484.1536666666667
+    ],
+    "category": "sliver_triangle"
+  },
+  {
+    "room_id": "room-15",
+    "area": 1756.26,
+    "vertices": 3,
+    "perimeter": 638.18,
+    "bbox_w": 318.68,
+    "bbox_h": 11.02,
+    "aspect_ratio": 28.913,
+    "compactness": 0.0542,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      839.0056666666666,
+      520.3480000000001
+    ],
+    "category": "sliver_triangle"
+  },
+  {
+    "room_id": "room-16",
+    "area": 1157.62,
+    "vertices": 3,
+    "perimeter": 637.71,
+    "bbox_w": 318.68,
+    "bbox_h": 7.26,
+    "aspect_ratio": 43.866,
+    "compactness": 0.0358,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      815.3389999999999,
+      526.4436666666667
+    ],
+    "category": "sliver_triangle"
+  },
+  {
+    "room_id": "room-17",
+    "area": 2354.78,
+    "vertices": 3,
+    "perimeter": 237.96,
+    "bbox_w": 84.3,
+    "bbox_h": 59.96,
+    "aspect_ratio": 1.406,
+    "compactness": 0.5226,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      1039.38,
+      508.71866666666665
+    ],
+    "category": "small_triangle"
+  },
+  {
+    "room_id": "room-18",
+    "area": 1253.08,
+    "vertices": 3,
+    "perimeter": 168.88,
+    "bbox_w": 42.28,
+    "bbox_h": 59.96,
+    "aspect_ratio": 1.418,
+    "compactness": 0.5521,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      1079.4023333333332,
+      509.58733333333333
+    ],
+    "category": "sliver_triangle"
+  },
+  {
+    "room_id": "room-19",
+    "area": 1661.46,
+    "vertices": 3,
+    "perimeter": 399.58,
+    "bbox_w": 198.2,
+    "bbox_h": 18.24,
+    "aspect_ratio": 10.864,
+    "compactness": 0.1308,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      577.712,
+      516.5183333333333
+    ],
+    "category": "sliver_triangle"
+  },
+  {
+    "room_id": "room-20",
+    "area": 12829.95,
+    "vertices": 4,
+    "perimeter": 525.95,
+    "bbox_w": 198.2,
+    "bbox_h": 68.79,
+    "aspect_ratio": 2.881,
+    "compactness": 0.5828,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      567.4608378106993,
+      554.2528064511146
+    ],
+    "category": "legitimate"
+  },
+  {
+    "room_id": "room-21",
+    "area": 2656.73,
+    "vertices": 4,
+    "perimeter": 210.47,
+    "bbox_w": 42.28,
+    "bbox_h": 65.37,
+    "aspect_ratio": 1.546,
+    "compactness": 0.7537,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      1084.5607775815013,
+      560.242088069832
+    ],
+    "category": "legitimate"
+  },
+  {
+    "room_id": "room-22",
+    "area": 3771.61,
+    "vertices": 3,
+    "perimeter": 315.67,
+    "bbox_w": 124.04,
+    "bbox_h": 61.15,
+    "aspect_ratio": 2.029,
+    "compactness": 0.4756,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      206.96633333333335,
+      547.4449999999999
+    ],
+    "category": "small_triangle"
+  },
+  {
+    "room_id": "room-23",
+    "area": 19719.01,
+    "vertices": 7,
+    "perimeter": 771.13,
+    "bbox_w": 318.68,
+    "bbox_h": 67.83,
+    "aspect_ratio": 4.698,
+    "compactness": 0.4167,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      826.8854146023788,
+      558.5671399595266
+    ],
+    "category": "legitimate"
+  },
+  {
+    "room_id": "room-24",
+    "area": 4983.77,
+    "vertices": 4,
+    "perimeter": 284.03,
+    "bbox_w": 77.79,
+    "bbox_h": 67.83,
+    "aspect_ratio": 1.147,
+    "compactness": 0.7763,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      1023.4819536206775,
+      559.5363390068597
+    ],
+    "category": "legitimate"
+  },
+  {
+    "room_id": "room-25",
+    "area": 10711.8,
+    "vertices": 6,
+    "perimeter": 573.55,
+    "bbox_w": 220.94,
+    "bbox_h": 69.38,
+    "aspect_ratio": 3.184,
+    "compactness": 0.4092,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      358.7596724545292,
+      542.5210513740194
+    ],
+    "category": "legitimate"
+  },
+  {
+    "room_id": "room-26",
+    "area": 3183.87,
+    "vertices": 4,
+    "perimeter": 448.73,
+    "bbox_w": 220.94,
+    "bbox_h": 28.37,
+    "aspect_ratio": 7.788,
+    "compactness": 0.1987,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      361.5054135445834,
+      571.3151932815986
+    ],
+    "category": "thin_strip"
+  },
+  {
+    "room_id": "room-27",
+    "area": 2984.71,
+    "vertices": 3,
+    "perimeter": 297.31,
+    "bbox_w": 122.87,
+    "bbox_h": 49.12,
+    "aspect_ratio": 2.502,
+    "compactness": 0.4243,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      166.46166666666664,
+      575.5633333333334
+    ],
+    "category": "small_triangle"
+  },
+  {
+    "room_id": "room-28",
+    "area": 1291.25,
+    "vertices": 4,
+    "perimeter": 398.41,
+    "bbox_w": 198.2,
+    "bbox_h": 14.41,
+    "aspect_ratio": 13.754,
+    "compactness": 0.1022,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      556.1776119487711,
+      590.7577980588394
+    ],
+    "category": "thin_strip"
+  },
+  {
+    "room_id": "room-29",
+    "area": 1147.99,
+    "vertices": 4,
+    "perimeter": 470.71,
+    "bbox_w": 234.7,
+    "bbox_h": 10.46,
+    "aspect_ratio": 22.434,
+    "compactness": 0.0651,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      808.3243161676792,
+      593.1337060240006
+    ],
+    "category": "thin_strip"
+  },
+  {
+    "room_id": "room-30",
+    "area": 3618.79,
+    "vertices": 4,
+    "perimeter": 249.08,
+    "bbox_w": 78.89,
+    "bbox_h": 46.44,
+    "aspect_ratio": 1.699,
+    "compactness": 0.733,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      1024.5928832960242,
+      614.7524112394456
+    ],
+    "category": "legitimate"
+  },
+  {
+    "room_id": "room-31",
+    "area": 1924.27,
+    "vertices": 4,
+    "perimeter": 175.71,
+    "bbox_w": 42.28,
+    "bbox_h": 46.44,
+    "aspect_ratio": 1.098,
+    "compactness": 0.7832,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      1084.504870105306,
+      614.6317745971475
+    ],
+    "category": "legitimate"
+  },
+  {
+    "room_id": "room-32",
+    "area": 7504.85,
+    "vertices": 4,
+    "perimeter": 408.68,
+    "bbox_w": 157.33,
+    "bbox_h": 66.22,
+    "aspect_ratio": 2.376,
+    "compactness": 0.5647,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      734.5728814404922,
+      618.9649918286193
+    ],
+    "category": "legitimate"
+  },
+  {
+    "room_id": "room-33",
+    "area": 11099.8,
+    "vertices": 8,
+    "perimeter": 543.25,
+    "bbox_w": 198.2,
+    "bbox_h": 70.06,
+    "aspect_ratio": 2.829,
+    "compactness": 0.4726,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      563.7510279911503,
+      621.4405854793935
+    ],
+    "category": "legitimate"
+  },
+  {
+    "room_id": "room-34",
+    "area": 3617.83,
+    "vertices": 5,
+    "perimeter": 365.93,
+    "bbox_w": 167.06,
+    "bbox_h": 38.07,
+    "aspect_ratio": 4.388,
+    "compactness": 0.3395,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      883.5632534923996,
+      619.8303113250739
+    ],
+    "category": "legitimate"
+  },
+  {
+    "room_id": "room-35",
+    "area": 939.8,
+    "vertices": 4,
+    "perimeter": 233.72,
+    "bbox_w": 114.75,
+    "bbox_h": 18.56,
+    "aspect_ratio": 6.183,
+    "compactness": 0.2162,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      921.6171994946444,
+      600.1958621608729
+    ],
+    "category": "thin_strip"
+  },
+  {
+    "room_id": "room-36",
+    "area": 1600.58,
+    "vertices": 3,
+    "perimeter": 192.92,
+    "bbox_w": 69.68,
+    "bbox_h": 45.94,
+    "aspect_ratio": 1.517,
+    "compactness": 0.5404,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      962.1223333333335,
+      613.3546666666666
+    ],
+    "category": "sliver_triangle"
+  },
+  {
+    "room_id": "room-37",
+    "area": 1113.86,
+    "vertices": 3,
+    "perimeter": 222.25,
+    "bbox_w": 106.82,
+    "bbox_h": 20.85,
+    "aspect_ratio": 5.123,
+    "compactness": 0.2834,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      607.5030731108221,
+      647.8086666666667
+    ],
+    "category": "sliver_triangle"
+  },
+  {
+    "room_id": "room-38",
+    "area": 2542.44,
+    "vertices": 3,
+    "perimeter": 639.86,
+    "bbox_w": 318.68,
+    "bbox_h": 24.33,
+    "aspect_ratio": 13.097,
+    "compactness": 0.078,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      825.339,
+      640.994
+    ],
+    "category": "sliver_triangle"
+  },
+  {
+    "room_id": "room-39",
+    "area": 4036.34,
+    "vertices": 3,
+    "perimeter": 643.6,
+    "bbox_w": 318.68,
+    "bbox_h": 38.09,
+    "aspect_ratio": 8.367,
+    "compactness": 0.1225,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      799.2581524108305,
+      656.1449224278492
+    ],
+    "category": "sliver_triangle"
+  },
+  {
+    "room_id": "room-40",
+    "area": 16054.6,
+    "vertices": 4,
+    "perimeter": 585.89,
+    "bbox_w": 220.94,
+    "bbox_h": 78.3,
+    "aspect_ratio": 2.822,
+    "compactness": 0.5877,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      357.08580390692407,
+      617.0232762879199
+    ],
+    "category": "legitimate"
+  },
+  {
+    "room_id": "room-41",
+    "area": 40590.96,
+    "vertices": 9,
+    "perimeter": 992.84,
+    "bbox_w": 341.28,
+    "bbox_h": 184.12,
+    "aspect_ratio": 1.854,
+    "compactness": 0.5175,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      285.0996995348308,
+      686.6304717316187
+    ],
+    "category": "legitimate"
+  },
+  {
+    "room_id": "room-42",
+    "area": 10831.92,
+    "vertices": 5,
+    "perimeter": 507.98,
+    "bbox_w": 198.2,
+    "bbox_h": 56.96,
+    "aspect_ratio": 3.479,
+    "compactness": 0.5275,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      568.3739024372393,
+      683.1946768645247
+    ],
+    "category": "legitimate"
+  },
+  {
+    "room_id": "room-43",
+    "area": 945.78,
+    "vertices": 3,
+    "perimeter": 234.61,
+    "bbox_w": 111.33,
+    "bbox_h": 34.93,
+    "aspect_ratio": 3.187,
+    "compactness": 0.2159,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      728.2223333333334,
+      691.0036666666667
+    ],
+    "category": "sliver_triangle"
+  },
+  {
+    "room_id": "room-44",
+    "area": 10498.85,
+    "vertices": 4,
+    "perimeter": 502.44,
+    "bbox_w": 198.2,
+    "bbox_h": 57.09,
+    "aspect_ratio": 3.472,
+    "compactness": 0.5226,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      568.6321725172969,
+      737.0278417356503
+    ],
+    "category": "legitimate"
+  },
+  {
+    "room_id": "room-45",
+    "area": 35967.07,
+    "vertices": 11,
+    "perimeter": 888.43,
+    "bbox_w": 332.85,
+    "bbox_h": 134.01,
+    "aspect_ratio": 2.484,
+    "compactness": 0.5726,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      297.31251238425034,
+      805.8880046108683
+    ],
+    "category": "legitimate"
+  },
+  {
+    "room_id": "room-46",
+    "area": 808.27,
+    "vertices": 3,
+    "perimeter": 134.13,
+    "bbox_w": 34.83,
+    "bbox_h": 47.07,
+    "aspect_ratio": 1.352,
+    "compactness": 0.5645,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      139.79633333333334,
+      854.7173333333333
+    ],
+    "category": "sliver_triangle"
+  },
+  {
+    "room_id": "room-47",
+    "area": 1696.6,
+    "vertices": 4,
+    "perimeter": 619.1,
+    "bbox_w": 309.17,
+    "bbox_h": 12.14,
+    "aspect_ratio": 25.461,
+    "compactness": 0.0556,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      321.5909579189671,
+      863.0604715875577
+    ],
+    "category": "thin_strip"
+  },
+  {
+    "room_id": "room-48",
+    "area": 2088.67,
+    "vertices": 3,
+    "perimeter": 214.76,
+    "bbox_w": 73.33,
+    "bbox_h": 56.96,
+    "aspect_ratio": 1.287,
+    "compactness": 0.5691,
+    "nested": false,
+    "topo_status": "pass",
+    "centroid": [
+      691.1113333333333,
+      681.0933333333332
+    ],
+    "category": "small_triangle"
+  }
+]
