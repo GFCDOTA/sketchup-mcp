@@ -148,6 +148,59 @@ Boa sessão.
 
 ---
 
+## Aprendizados transferíveis (pós-F4)
+
+Estado do projeto ao entregar o handoff: **~45% utilizável pro use-case real** (PDF → SKP de apto 74m²), **~75% pra baseline limpo / prova-de-conceito**. Pipeline roda sem crash em todos os runs (100%), baseline p12_red perfeito (100%), mas planta real ainda produz 230 walls / 38 rooms vs ~50-80 walls / ~10-12 rooms esperados.
+
+### 12 aprendizados da minha sessão
+
+1. **Audit log revela o que métricas escondem.** F3 expôs clusters com `perp_spread=151px` que pareciam bons pelo count de componentes. Antes do audit, teríamos mergeado o bug.
+2. **Validação só numérica mente.** 42 walls olhou bem mas era compressão artificial. F2 visual + semantic expôs. "Plausível ≠ correto".
+3. **Representative-anchored > union-find livre** pra dedup geométrico. Transitividade sem bound é bug escalonável.
+4. **Density gates > count gates.** `len > 200` acopla ao canvas; `cand/mpx` é scale-invariant.
+5. **Side-by-side é validação barata e crítica.** PDF + model no mesmo PNG transforma "parece ok" em "ta errado ali".
+6. **LLM sem clock alucina timestamp.** Injete `datetime.now()` em toda prompt enviada ao GPT.
+7. **Threshold calibration precisa múltiplos baselines.** 0.12 vs 0.18 decide entre zero regressão e 1 room perdido. Sempre teste em p12 antes de commit.
+8. **Nunca confie memória de hash.** Meu commit F1 citou `918ad7d1...` errado pra p12 — real é `39b4138f...`. Re-derive sempre.
+9. **Sessão GPT acumula contaminação.** Resetar antes de consultoria nova (`POST /new_chat` no bridge agora).
+10. **Worktree isolado é obrigatório pra experiments.** 4 worktrees paralelas salvaram bagunça no main do usuário.
+11. **Dedup "que funciona demais" é bug disfarçado.** Compressão visual (rooms 48→16) pode esconder walls reais.
+12. **Bridge GPT é leverage arquitetural.** Cada decisão consultada saiu melhor. 5 rodadas no total. Sem histórico, teria perdido tempo.
+
+### Próximo gap conhecido: strip rooms em planta real
+
+`planta_74` tem 38 rooms vs ~10-12 reais. Inflamento residual é **"strip rooms"** — polígonos estreitos/longos criados entre pares de walls paralelas próximas (7-15px) que o dedup em `perp_tolerance=20` não absorve (walls não são twins, são walls adjacentes distintas).
+
+**Ordem de ataque sugerida (consultei GPT na minha sessão):**
+
+1. **Preferencial (pré-polygonize):** line clustering mais agressivo — funde walls paralelas próximas por orientação + distância em linha média. Ataca a causa raiz. Requer refinar o dedup atual ou adicionar estágio novo em classify.
+2. **Alternativa (pós-polygonize):** topology-level room merge. Grafo de adjacência de rooms; merge de "strip candidate" no vizinho maior.
+
+Critério do merge pós-polygonize (AND triplo, não OR):
+- `width_estimate = area / length_major_axis <= 2.5 * median_wall_thickness`
+- `bbox_aspect <= 0.15`
+- `shared_length / strip_perimeter >= 0.6`
+- Gated: `area <= 0.3 * median_room_area`
+
+Multi-vizinho: scoring `α*shared_length + β*neighbor_area`, prioridade shared_length, tie-break area. Iterativo até convergir (≤5 passes).
+
+**Teste adversarial obrigatório:** banheiro legítimo de 2m² (~30000px²) NÃO pode virar strip porque `width_estimate > 50px >> 2.5*wall_thickness (~25px)`. Corridor de p12 NÃO pode ser matado.
+
+### Filtro semântico de mobiliário (ortogonal, escopo separado)
+
+Walls isoladas (componente ≤2 nós) com bbox diagonal pequena = mobiliário/legenda. Drop safely. Diferencia mesa/balcão de wall real desconectada. NÃO misture com strip merge — fonte do bug é outra (mobiliário vira candidato errôneo no Hough; strip é polygonize de walls reais).
+
+### Checklist obrigatório antes de mergear qualquer coisa
+
+- [ ] `dedup_report.json` sem cluster com `perp_spread_px > 20` OU `min_parallel_overlap_ratio < 0.35`
+- [ ] `overlay_audited.png` inspecionado inline — rooms no modelo batem com rooms do PDF (side-by-side ativo)
+- [ ] p12 `topology_snapshot_sha256` == `39b4138f4fd5613ed897824657b0329445d2eb332a6a1d810da75933ba4b5ce3`
+- [ ] pytest: 63+ passed, 15 failed (os 15 pré-existentes inalterados)
+- [ ] `room_topology_check.json` com 100% status="pass" nos baselines limpos (p12/p10/p11)
+- [ ] Não introduzir nova dependência sem spike isolado em requirements opcional
+
+---
+
 ## Metadata
 
 - **Autor da sessão revisora:** Claude Opus 4.7 (1M ctx), autônomo, operado por Felipe (fmodesto30)
