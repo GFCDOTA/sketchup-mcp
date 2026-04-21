@@ -9,6 +9,12 @@ Por que: o `polygonize` do shapely so fecha um poligono se as walls de
 fato se tocam. Gaps de porta deixam o poligono aberto e nenhuma sala e
 detectada. Esse modulo "fecha" os gaps semanticamente sem perder a
 informacao de onde estava o vao.
+
+`detect_openings` aceita `wall_thickness` opcional: quando fornecido
+(tipicamente em entrada SVG cujo thickness em user-units difere dos ~6 px
+do raster @ 150 DPI), as thresholds sao derivadas por multiplicadores
+escalados pelo thickness. Quando None (default), usa as constantes
+originais preservando comportamento raster exato.
 """
 from __future__ import annotations
 
@@ -41,6 +47,50 @@ _PEITORIL_PROXIMITY_PX = 30.0
 _CORNER_SNAP_PX = 60.0
 
 
+# Multiplicadores usados quando `wall_thickness` e passado explicitamente
+# (caso SVG). Validados em planta_74m2 no fork openings_svg.py.
+_MIN_OPENING_MUL = 3.0
+_MAX_OPENING_MUL = 12.0
+_PERP_TOL_MUL = 0.4
+_DOOR_MAX_MUL = 9.0
+_PEITORIL_MUL = 5.0
+_CORNER_SNAP_MUL = 5.0
+
+
+@dataclass(frozen=True)
+class _Thresholds:
+    min_opening: float
+    max_opening: float
+    perp_tolerance: float
+    door_max: float
+    peitoril_proximity: float
+    corner_snap: float
+
+    @classmethod
+    def raster_default(cls) -> "_Thresholds":
+        """Usa as constantes originais do modulo (raster @ 150 DPI)."""
+        return cls(
+            min_opening=_MIN_OPENING_PX,
+            max_opening=_MAX_OPENING_PX,
+            perp_tolerance=_PERP_TOLERANCE,
+            door_max=_DOOR_MAX_PX,
+            peitoril_proximity=_PEITORIL_PROXIMITY_PX,
+            corner_snap=_CORNER_SNAP_PX,
+        )
+
+    @classmethod
+    def from_thickness(cls, thickness: float) -> "_Thresholds":
+        """Deriva thresholds proporcionais ao thickness (SVG)."""
+        return cls(
+            min_opening=thickness * _MIN_OPENING_MUL,
+            max_opening=thickness * _MAX_OPENING_MUL,
+            perp_tolerance=thickness * _PERP_TOL_MUL,
+            door_max=thickness * _DOOR_MAX_MUL,
+            peitoril_proximity=thickness * _PEITORIL_MUL,
+            corner_snap=thickness * _CORNER_SNAP_MUL,
+        )
+
+
 @dataclass(frozen=True)
 class Opening:
     opening_id: str
@@ -68,6 +118,7 @@ class Opening:
 def detect_openings(
     walls: list[Wall],
     peitoris: list[dict] | None = None,
+    wall_thickness: float | None = None,
 ) -> tuple[list[Wall], list[Opening]]:
     """Retorna (walls_estendidas, openings_detectados).
 
@@ -76,16 +127,25 @@ def detect_openings(
 
     `peitoris`: lista opcional de dicts com `bbox=[x1,y1,x2,y2]`. Openings
     proximos a um peitoril (centro do opening dentro do bbox expandido
-    em _PEITORIL_PROXIMITY_PX) sao classificados como "window" em vez de
+    em peitoril_proximity) sao classificados como "window" em vez de
     "door"/"passage".
+
+    `wall_thickness`: se None (default), usa thresholds raster calibrados
+    @ 150 DPI. Se passado, thresholds sao escaladas proporcionalmente
+    (entrada SVG em user-units).
     """
     peitoris = peitoris or []
     if not walls:
         return list(walls), []
 
+    if wall_thickness is None:
+        th = _Thresholds.raster_default()
+    else:
+        th = _Thresholds.from_thickness(wall_thickness)
+
     # antes de detectar gaps colineares, fecha cantos abertos (extensao
     # perpendicular). Isso aumenta a chance de polygonize fechar rooms.
-    walls = _extend_to_perpendicular(walls)
+    walls = _extend_to_perpendicular(walls, th)
 
     by_group: dict[tuple[int, str], list[Wall]] = {}
     for w in walls:
@@ -99,7 +159,7 @@ def detect_openings(
 
     for (page_index, orientation), group in by_group.items():
         # cluster por coord perpendicular
-        clusters = _cluster_by_perp(group, orientation, _PERP_TOLERANCE)
+        clusters = _cluster_by_perp(group, orientation, th.perp_tolerance)
         for cluster in clusters:
             if len(cluster) < 2:
                 continue
@@ -111,7 +171,7 @@ def detect_openings(
                 a_range = _para_range(a, orientation)
                 b_range = _para_range(b, orientation)
                 gap = b_range[0] - a_range[1]
-                if gap < _MIN_OPENING_PX or gap > _MAX_OPENING_PX:
+                if gap < th.min_opening or gap > th.max_opening:
                     continue
                 # cria wall fantasma preenchendo o gap
                 bridge_wall = _make_bridge(
@@ -133,7 +193,7 @@ def detect_openings(
                     center = (round(center_para, 3), round(center_perp, 3))
                 else:
                     center = (round(center_perp, 3), round(center_para, 3))
-                kind = _classify_opening(center, gap, peitoris)
+                kind = _classify_opening(center, gap, peitoris, th)
                 openings.append(
                     Opening(
                         opening_id=f"opening-{opening_counter}",
@@ -154,8 +214,8 @@ def detect_openings(
 
 # ---------- helpers ----------
 
-def _extend_to_perpendicular(walls: list[Wall]) -> list[Wall]:
-    """Estende endpoints de walls que estao a < _CORNER_SNAP_PX de uma
+def _extend_to_perpendicular(walls: list[Wall], th: _Thresholds) -> list[Wall]:
+    """Estende endpoints de walls que estao a < th.corner_snap de uma
     wall perpendicular. Resolve L-corners abertos onde uma horizontal
     quase encontra uma vertical mas nao chega.
 
@@ -176,8 +236,8 @@ def _extend_to_perpendicular(walls: list[Wall]) -> list[Wall]:
             new_start = w.start
             new_end = w.end
             others = v_walls if w.orientation == "horizontal" else h_walls
-            new_start = _snap_endpoint(new_start, w.orientation, others)
-            new_end = _snap_endpoint(new_end, w.orientation, others)
+            new_start = _snap_endpoint(new_start, w.orientation, others, th.corner_snap)
+            new_end = _snap_endpoint(new_end, w.orientation, others, th.corner_snap)
             if new_start == w.start and new_end == w.end:
                 out.append(w)
             else:
@@ -197,12 +257,15 @@ def _extend_to_perpendicular(walls: list[Wall]) -> list[Wall]:
 
 
 def _snap_endpoint(
-    point: tuple[float, float], orientation: str, perpendiculars: list[Wall]
+    point: tuple[float, float],
+    orientation: str,
+    perpendiculars: list[Wall],
+    corner_snap: float,
 ) -> tuple[float, float]:
     """Move point pra interseccao com a wall perpendicular mais proxima
-    se a distancia for <= _CORNER_SNAP_PX."""
+    se a distancia for <= corner_snap."""
     px, py = point
-    best_dist = _CORNER_SNAP_PX
+    best_dist = corner_snap
     best_target: tuple[float, float] | None = None
     for w in perpendiculars:
         if w.orientation == "horizontal":
@@ -211,7 +274,7 @@ def _snap_endpoint(
             wx_min = min(w.start[0], w.end[0])
             wx_max = max(w.start[0], w.end[0])
             # ponto.x precisa estar dentro (ou quase) do range x da wall H
-            if px < wx_min - _CORNER_SNAP_PX or px > wx_max + _CORNER_SNAP_PX:
+            if px < wx_min - corner_snap or px > wx_max + corner_snap:
                 continue
             # clampa x ao range da wall H (caso esteja so um pouco fora)
             tx = max(wx_min, min(wx_max, px))
@@ -223,7 +286,7 @@ def _snap_endpoint(
             wx = w.start[0]
             wy_min = min(w.start[1], w.end[1])
             wy_max = max(w.start[1], w.end[1])
-            if py < wy_min - _CORNER_SNAP_PX or py > wy_max + _CORNER_SNAP_PX:
+            if py < wy_min - corner_snap or py > wy_max + corner_snap:
                 continue
             ty = max(wy_min, min(wy_max, py))
             d = abs(px - wx) + abs(py - ty) * 0.3
@@ -236,7 +299,10 @@ def _snap_endpoint(
 
 
 def _classify_opening(
-    center: tuple[float, float], width: float, peitoris: list[dict]
+    center: tuple[float, float],
+    width: float,
+    peitoris: list[dict],
+    th: _Thresholds,
 ) -> str:
     cx, cy = center
     on_peitoril = False
@@ -245,14 +311,14 @@ def _classify_opening(
         if len(bb) != 4:
             continue
         x1, y1, x2, y2 = bb
-        x1 -= _PEITORIL_PROXIMITY_PX; x2 += _PEITORIL_PROXIMITY_PX
-        y1 -= _PEITORIL_PROXIMITY_PX; y2 += _PEITORIL_PROXIMITY_PX
+        x1 -= th.peitoril_proximity; x2 += th.peitoril_proximity
+        y1 -= th.peitoril_proximity; y2 += th.peitoril_proximity
         if x1 <= cx <= x2 and y1 <= cy <= y2:
             on_peitoril = True
             break
     if on_peitoril:
         return "window"
-    if width > _DOOR_MAX_PX:
+    if width > th.door_max:
         return "passage"
     return "door"
 

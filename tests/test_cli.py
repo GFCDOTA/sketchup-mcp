@@ -46,7 +46,7 @@ def test_extract_missing_pdf_returns_two(tmp_path: Path, capsys: pytest.CaptureF
     rc = main(["extract", str(tmp_path / "does_not_exist.pdf"), "--out", str(tmp_path / "out")])
     assert rc == 2
     err = capsys.readouterr().err
-    assert "PDF not found" in err
+    assert "input not found" in err
 
 
 def test_extract_uses_default_output_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

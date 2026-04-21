@@ -18,6 +18,7 @@ from model.types import (
     SplitWall,
     Wall,
 )
+from topology.wall_interior_filter import is_wall_interior
 
 
 _ORPHAN_COMPONENT_MAX_NODES = 3
@@ -31,6 +32,8 @@ def build_topology(
     *,
     room_topology_report_sink: list | None = None,
     snapshot_hash_sink: list | None = None,
+    filter_wall_interior: bool = False,
+    wall_thickness: float | None = None,
 ) -> tuple[list[SplitWall], list[Junction], list[Room], ConnectivityReport]:
     """Build topology from classified walls.
 
@@ -47,6 +50,13 @@ def build_topology(
       across semantically equivalent algorithm refactors — the hash
       is the regression gate for F1.
     """
+    if filter_wall_interior and wall_thickness is None:
+        raise ValueError(
+            "filter_wall_interior=True requires wall_thickness to be provided "
+            "(got None); pass the median wall thickness in the same units as "
+            "the wall coordinates."
+        )
+
     if snap_tolerance is None:
         snap_tolerance = _infer_snap_tolerance(walls)
 
@@ -100,7 +110,11 @@ def build_topology(
             largest = max((len(c) for c in page_components), default=0)
             per_page_ratios.append(largest / page_nodes)
 
-    rooms, min_area_threshold = _polygonize_rooms_with_threshold(split_walls)
+    rooms, min_area_threshold = _polygonize_rooms_with_threshold(
+        split_walls,
+        filter_wall_interior=filter_wall_interior,
+        wall_thickness_override=wall_thickness,
+    )
     report = _build_connectivity_report_aggregate(
         total_nodes=total_nodes,
         total_edges=total_edges,
@@ -401,6 +415,9 @@ def _polygonize_rooms(walls: list[SplitWall]) -> list[Room]:
 
 def _polygonize_rooms_with_threshold(
     walls: list[SplitWall],
+    *,
+    filter_wall_interior: bool = False,
+    wall_thickness_override: float | None = None,
 ) -> tuple[list[Room], float]:
     """Same as ``_polygonize_rooms`` but also returns the area floor
     used for the last page processed. Callers that only need rooms
@@ -429,6 +446,20 @@ def _polygonize_rooms_with_threshold(
         polygons = list(polygonize(merged))
         if not polygons:
             continue
+
+        # Double-wall sliver filter: polygons whose minimum rotated
+        # rectangle has a short side <= wall_thickness * margin are the
+        # gap between the two faces of a double-drawn wall, not rooms.
+        # Opt-in (build_topology(filter_wall_interior=True, ...)). Runs
+        # BEFORE min_area so audit reports reflect the true drop cause.
+        if filter_wall_interior and wall_thickness_override is not None:
+            polygons = [
+                poly
+                for poly in polygons
+                if not is_wall_interior(poly, wall_thickness_override)
+            ]
+            if not polygons:
+                continue
 
         # Use the median thickness as the spatial floor rather than the
         # minimum: a single thin fragment left over from extract would

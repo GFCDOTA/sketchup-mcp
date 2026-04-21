@@ -13,8 +13,9 @@ from debug.overlay import write_audited_overlay
 from debug.service import write_debug_artifacts
 from extract.service import extract_from_raster
 from ingest.service import IngestError, IngestedDocument, ingest_pdf
+from ingest.svg_service import IngestSvgError, IngestedSvgDocument, ingest_svg
 from model.builder import build_observed_model, compute_bounds
-from model.types import ConnectivityReport, DedupReport, Junction, Room, SplitWall, WallCandidate
+from model.types import ConnectivityReport, DedupReport, Junction, Room, SplitWall, Wall, WallCandidate
 from openings.service import detect_openings
 from roi.service import RoiResult, crop_image_to_bbox, detect_architectural_roi
 from topology.service import build_topology
@@ -52,6 +53,26 @@ def run_pdf_pipeline(
         output_dir=output_dir,
         source=source,
         roi_results=roi_results,
+        peitoris=peitoris,
+    )
+
+
+def run_svg_pipeline(
+    svg_bytes: bytes,
+    filename: str,
+    output_dir: Path,
+    peitoris: list[dict] | None = None,
+) -> PipelineResult:
+    try:
+        document = ingest_svg(svg_bytes=svg_bytes, filename=filename)
+    except IngestSvgError as exc:
+        raise PipelineError(str(exc)) from exc
+    source = _build_svg_source(svg_bytes=svg_bytes, filename=filename, document=document)
+    return _run_pipeline_from_walls(
+        walls=document.walls,
+        wall_thickness=document.stroke_width_median,
+        output_dir=output_dir,
+        source=source,
         peitoris=peitoris,
     )
 
@@ -208,6 +229,103 @@ def _build_pdf_source(pdf_bytes: bytes, filename: str, document: IngestedDocumen
         "page_count": len(document.pages),
         "sha256": hashlib.sha256(pdf_bytes).hexdigest(),
     }
+
+
+def _build_svg_source(svg_bytes: bytes, filename: str, document: IngestedSvgDocument) -> dict:
+    return {
+        "filename": filename,
+        "source_type": "svg",
+        "page_count": 1,
+        "sha256": hashlib.sha256(svg_bytes).hexdigest(),
+        "viewbox_width": document.viewbox_width,
+        "viewbox_height": document.viewbox_height,
+        "stroke_width_median": document.stroke_width_median,
+        "stroke_width_samples": document.stroke_width_samples,
+    }
+
+
+def _run_pipeline_from_walls(
+    walls: list[Wall],
+    wall_thickness: float,
+    output_dir: Path,
+    source: dict,
+    peitoris: list[dict] | None = None,
+) -> PipelineResult:
+    walls, openings = detect_openings(walls, peitoris=peitoris, wall_thickness=wall_thickness)
+    room_topology_sink: list = []
+    snapshot_hash_sink: list[str] = []
+    split_walls, junctions, rooms, connectivity_report = build_topology(
+        walls,
+        room_topology_report_sink=room_topology_sink,
+        snapshot_hash_sink=snapshot_hash_sink,
+        filter_wall_interior=True,
+        wall_thickness=wall_thickness,
+    )
+    room_topology_report = room_topology_sink[0] if room_topology_sink else None
+    topology_snapshot_sha256 = snapshot_hash_sink[0] if snapshot_hash_sink else None
+    warnings: list[str] = []
+    if not walls:
+        warnings.append("no_walls")
+    if split_walls and connectivity_report.max_components_within_page > 1:
+        warnings.append("walls_disconnected")
+    if split_walls and connectivity_report.orphan_component_count >= 5:
+        warnings.append("many_orphan_components")
+    if not rooms:
+        warnings.append("rooms_not_detected")
+
+    run_id = uuid4().hex
+    bounds = compute_bounds(split_walls)
+    observed_model = build_observed_model(
+        walls=split_walls,
+        junctions=junctions,
+        rooms=rooms,
+        connectivity_report=connectivity_report,
+        geometry_score=1.0 if walls else 0.0,
+        topology_score=_topology_score(split_walls, connectivity_report),
+        room_score=_room_score(rooms, connectivity_report),
+        warnings=warnings,
+        run_id=run_id,
+        source=source,
+        bounds=bounds,
+        roi=[],
+    )
+    observed_model["openings"] = [o.to_dict() for o in openings]
+    observed_model["peitoris"] = peitoris or []
+    if topology_snapshot_sha256 is not None:
+        observed_model.setdefault("metadata", {})["topology_snapshot_sha256"] = topology_snapshot_sha256
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    (output_dir / "observed_model.json").write_text(
+        json.dumps(observed_model, indent=2),
+        encoding="utf-8",
+    )
+    if room_topology_report is not None:
+        (output_dir / "room_topology_check.json").write_text(
+            json.dumps(room_topology_report.to_dict(), indent=2),
+            encoding="utf-8",
+        )
+    write_debug_artifacts(
+        output_dir=output_dir,
+        walls=split_walls,
+        junctions=junctions,
+        connectivity_report=connectivity_report,
+    )
+    try:
+        write_audited_overlay(observed_model, output_dir / "overlay_audited.png")
+    except Exception as exc:
+        (output_dir / "overlay_audited.error.txt").write_text(
+            f"{type(exc).__name__}: {exc}\n", encoding="utf-8"
+        )
+
+    return PipelineResult(
+        observed_model=observed_model,
+        output_dir=output_dir,
+        candidates=[],
+        split_walls=split_walls,
+        junctions=junctions,
+        rooms=rooms,
+        connectivity_report=connectivity_report,
+    )
 
 
 def _build_warnings(

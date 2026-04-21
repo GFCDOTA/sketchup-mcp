@@ -6,7 +6,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Sequence
 
-from model.pipeline import PipelineError, run_pdf_pipeline
+from model.pipeline import PipelineError, run_pdf_pipeline, run_svg_pipeline
 
 
 def _print_summary(observed_model: dict, output_dir: Path) -> None:
@@ -28,6 +28,13 @@ def _print_summary(observed_model: dict, output_dir: Path) -> None:
         f"pages={source['page_count']} "
         f"sha256={sha_display}"
     )
+    if source.get("source_type") == "svg":
+        samples = source.get("stroke_width_samples", [])
+        print(
+            f"svg:       viewbox={source.get('viewbox_width')}x{source.get('viewbox_height')} "
+            f"stroke_width_median={source.get('stroke_width_median')} "
+            f"stroke_width_samples={samples[:5]}"
+        )
     print(f"walls:     {len(walls)}")
     per_page_walls = Counter(w["page_index"] for w in walls)
     for page_index in sorted(per_page_walls):
@@ -63,18 +70,31 @@ def _print_summary(observed_model: dict, output_dir: Path) -> None:
 
 
 def cmd_extract(args: argparse.Namespace) -> int:
-    pdf_path = Path(args.pdf)
-    if not pdf_path.is_file():
-        print(f"error: PDF not found: {pdf_path}", file=sys.stderr)
+    source_path = Path(args.pdf)
+    if not source_path.is_file():
+        print(f"error: input not found: {source_path}", file=sys.stderr)
         return 2
 
-    output_dir = Path(args.out) if args.out else Path("runs") / pdf_path.stem
+    suffix = source_path.suffix.lower()
+    if suffix not in (".pdf", ".svg"):
+        print(f"error: unsupported input extension: {suffix}", file=sys.stderr)
+        return 2
+
+    output_dir = Path(args.out) if args.out else Path("runs") / source_path.stem
+    payload = source_path.read_bytes()
     try:
-        result = run_pdf_pipeline(
-            pdf_bytes=pdf_path.read_bytes(),
-            filename=pdf_path.name,
-            output_dir=output_dir,
-        )
+        if suffix == ".svg":
+            result = run_svg_pipeline(
+                svg_bytes=payload,
+                filename=source_path.name,
+                output_dir=output_dir,
+            )
+        else:
+            result = run_pdf_pipeline(
+                pdf_bytes=payload,
+                filename=source_path.name,
+                output_dir=output_dir,
+            )
     except PipelineError as exc:
         print(f"error: pipeline failed: {exc}", file=sys.stderr)
         return 3
@@ -101,10 +121,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_extract = subs.add_parser(
         "extract",
-        help="Run the pipeline on a PDF and write artifacts.",
-        description="Run the pipeline on a PDF and write observed_model.json plus debug artifacts.",
+        help="Run the pipeline on a PDF or SVG and write artifacts.",
+        description="Run the pipeline on a PDF or SVG and write observed_model.json plus debug artifacts.",
     )
-    p_extract.add_argument("pdf", help="Path to the input PDF.")
+    p_extract.add_argument("pdf", help="Path to the input PDF or SVG.")
     p_extract.add_argument(
         "--out",
         default=None,

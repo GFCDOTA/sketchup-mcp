@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 
-from model.pipeline import PipelineError, run_pdf_pipeline
+from model.pipeline import PipelineError, run_pdf_pipeline, run_svg_pipeline
 
 
 app = FastAPI(title="plan-extract-v2", version="2.0.0")
@@ -16,18 +16,28 @@ def health() -> dict:
 
 @app.post("/extract")
 async def extract(pdf: UploadFile = File(...)) -> dict:
-    if not pdf.filename or not pdf.filename.lower().endswith(".pdf"):
-        raise HTTPException(status_code=400, detail="Input must be a PDF file.")
+    if not pdf.filename:
+        raise HTTPException(status_code=400, detail="Uploaded file must have a filename.")
+    lower = pdf.filename.lower()
+    if not (lower.endswith(".pdf") or lower.endswith(".svg")):
+        raise HTTPException(status_code=400, detail="Input must be a PDF or SVG file.")
 
     payload = await pdf.read()
     output_dir = Path("artifacts") / uuid4().hex
 
     try:
-        result = run_pdf_pipeline(
-            pdf_bytes=payload,
-            filename=pdf.filename,
-            output_dir=output_dir,
-        )
+        if lower.endswith(".svg"):
+            result = run_svg_pipeline(
+                svg_bytes=payload,
+                filename=pdf.filename,
+                output_dir=output_dir,
+            )
+        else:
+            result = run_pdf_pipeline(
+                pdf_bytes=payload,
+                filename=pdf.filename,
+                output_dir=output_dir,
+            )
     except PipelineError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
