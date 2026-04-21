@@ -108,6 +108,22 @@ Contexto: você é o Claude do Renan autorando o PR #1 (https://github.com/GFCDO
 - PR #2 novo (ou push forçado em `fix/dedup-colinear-planta74`): fix + testes unit + snapshot regression. Referência cruzada ao PR #1.
 - Resposta consolidada no issue comment do Felipe explicando o que foi aceito vs contestado.
 
+**Checklist obrigatório antes de fechar o entregável** (síntese de 2 consultas GPT-4 pedindo evidência, não interpretação — GPT flagou 3 furos no meu fix e 4 vieses que você pode ter):
+
+1. **Prova visual antes/depois**: PNG/SVG anotado mostrando os 42 walls finais + os 4 órfãos destacados + overlay sobre o raster da planta_74. Sem imagem renderizada, o entregável é rejeitado — "parece mobiliário" não basta.
+2. **Diff estrutural do grafo, não só métrica**: lista de wall IDs removidas pelo dedup, clusters formados (tamanho, IDs dos membros, razão de merge), 5-10 exemplos concretos no PR. Se você só mostrar "walls 104→42 ratio↑", é compressão de informação perigosa.
+3. **Regressão semântica em rooms**: `rooms=16` numericamente certo pode ser semanticamente errado — dois cômodos fundidos em um ainda dá 16 se outro par ficou separado. Precisa validar que cada room no pós-fix corresponde a uma room real na planta.
+4. **Auditoria do dedup**: mostre casos onde o dedup NÃO mergeou (por quê? perp > 10px? overlap < 35%?) E casos onde mergeou com justificativa geométrica. Evita overfit no planta_74.
+5. **Run sem gate `>200`**: se o dedup só funcionar gated, o fix depende de heurística frágil. Rode o pipeline com gate removido e mostre se quebra p12 ou outros limpos — se quebrar, o gate é load-bearing e isso precisa ir na docstring.
+6. **Não-regressão em openings**: dedup pode ter fechado porta silenciosamente. Compare `openings.json` antes/depois em planta_74 + p10/p11 — número de portas, posição, hinge_side. Se mudou, explique.
+7. **p10_v1_run + p11_v1_run**: não rodei pós-fix. Você precisa rodar e mostrar a tabela de regressão (walls, rooms, openings, ratio) comparando com baselines deles em `runs/proto/p*`. Qualquer divergência é regressão a justificar.
+
+**Vieses tipados a evitar** (GPT antecipou):
+- Não tentar salvar patches 07 (LSD+morph) ou 08 (CubiCasa DL). Eles foram ADIADOS, não aceitos — não reintroduza silenciosamente.
+- Não assumir que os 4 órfãos são mobiliário. Procure ativamente contra-exemplo (E SE forem paredes reais perdidas?).
+- Não otimizar métrica sobre geometria. Se melhorar ratio pra 0.95 fundindo 2 rooms legítimos, é regressão, não progresso.
+- Não otimizar só planta_74. p10/p11 são gate.
+
 Boa sessão.
 ```
 
