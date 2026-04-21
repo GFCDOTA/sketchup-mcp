@@ -79,6 +79,30 @@ class ConnectivityReport:
         return asdict(self)
 
 
+@dataclass(frozen=True)
+class DedupCluster:
+    cluster_id: int
+    page_index: int
+    orientation: str
+    member_count: int
+    perp_spread_px: float
+    min_parallel_overlap_ratio: float
+    merge_reason: str
+
+
+@dataclass(frozen=True)
+class DedupReport:
+    triggered: bool
+    candidate_count_before: int
+    kept_count: int
+    merged_count: int
+    clusters: list[DedupCluster]
+
+    def to_dict(self) -> dict:
+        payload = asdict(self)
+        return payload
+
+
 def wall_to_dict(wall: Wall | SplitWall) -> dict:
     payload = asdict(wall)
     payload["start"] = list(wall.start)

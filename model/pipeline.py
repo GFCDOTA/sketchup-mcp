@@ -13,7 +13,7 @@ from debug.service import write_debug_artifacts
 from extract.service import extract_from_raster
 from ingest.service import IngestError, IngestedDocument, ingest_pdf
 from model.builder import build_observed_model, compute_bounds
-from model.types import ConnectivityReport, Junction, Room, SplitWall, WallCandidate
+from model.types import ConnectivityReport, DedupReport, Junction, Room, SplitWall, WallCandidate
 from openings.service import detect_openings
 from roi.service import RoiResult, crop_image_to_bbox, detect_architectural_roi
 from topology.service import build_topology
@@ -119,7 +119,9 @@ def _run_pipeline(
     roi_results: list[RoiResult],
     peitoris: list[dict] | None = None,
 ) -> PipelineResult:
-    walls = classify_walls(candidates)
+    dedup_report_sink: list[DedupReport] = []
+    walls = classify_walls(candidates, dedup_report_sink=dedup_report_sink)
+    dedup_report = dedup_report_sink[0] if dedup_report_sink else None
     walls, openings = detect_openings(walls, peitoris=peitoris)
     split_walls, junctions, rooms, connectivity_report = build_topology(walls)
     warnings = _build_warnings(
@@ -154,6 +156,11 @@ def _run_pipeline(
         json.dumps(observed_model, indent=2),
         encoding="utf-8",
     )
+    if dedup_report is not None:
+        (output_dir / "dedup_report.json").write_text(
+            json.dumps(dedup_report.to_dict(), indent=2),
+            encoding="utf-8",
+        )
     write_debug_artifacts(
         output_dir=output_dir,
         walls=split_walls,

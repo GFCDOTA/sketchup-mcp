@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from model.types import Wall, WallCandidate
+from model.types import DedupCluster, DedupReport, Wall, WallCandidate
 
 
 # Pair-merge heuristics. A wall drawn in a plan is typically two parallel
@@ -62,12 +62,40 @@ _MIN_ASPECT_RATIO = 2.0
 # unrelated walls).
 _DEDUP_PERP_TOLERANCE = 10.0
 _DEDUP_OVERLAP_RATIO = 0.35
+# perp_spread at or below this value is treated as Hough twin detection
+# (sub-pixel jitter on the same physical stroke); above it, the cluster
+# is more plausibly a collinear split that slipped through the earlier
+# consolidation. The report uses this boundary to annotate clusters so
+# a reviewer can audit whether each merge has the expected geometric
+# signature.
+_TWIN_DETECTION_PERP_PX = 5.0
 
 
 def classify_walls(
-    candidates: list[WallCandidate], coordinate_tolerance: float | None = None
+    candidates: list[WallCandidate],
+    coordinate_tolerance: float | None = None,
+    *,
+    dedup_report_sink: list | None = None,
 ) -> list[Wall]:
+    """Classify wall candidates into Wall objects.
+
+    ``dedup_report_sink`` is an optional out-parameter. When provided
+    (empty list), exactly one ``DedupReport`` is appended — useful for
+    callers that want to audit what the collinear dedup stage did
+    without changing the return type. Tests that don't pass it keep
+    working unchanged.
+    """
     if not candidates:
+        if dedup_report_sink is not None:
+            dedup_report_sink.append(
+                DedupReport(
+                    triggered=False,
+                    candidate_count_before=0,
+                    kept_count=0,
+                    merged_count=0,
+                    clusters=[],
+                )
+            )
         return []
 
     if coordinate_tolerance is None:
@@ -89,8 +117,20 @@ def classify_walls(
     # emits only ~160 candidates), the near-parallel survivors are
     # almost always genuine neighbouring walls rather than Hough
     # twins, and collapsing them kills legitimate openings and rooms.
-    if len(candidates) > 200:
-        strokes = _dedupe_collinear_overlapping(strokes)
+    gate_active = len(candidates) > 200
+    strokes_before_dedup = len(strokes)
+    if gate_active:
+        strokes, dedup_report = _dedupe_collinear_overlapping(strokes)
+    else:
+        dedup_report = DedupReport(
+            triggered=False,
+            candidate_count_before=strokes_before_dedup,
+            kept_count=strokes_before_dedup,
+            merged_count=0,
+            clusters=[],
+        )
+    if dedup_report_sink is not None:
+        dedup_report_sink.append(dedup_report)
 
     # Filtros de ruido (text baselines + orientation imbalance) so fazem
     # sentido em planta real bagunsada. Quando o input ja vem limpo
@@ -157,7 +197,7 @@ def _dedupe_collinear_overlapping(
     candidates: list[WallCandidate],
     perp_tolerance: float = _DEDUP_PERP_TOLERANCE,
     overlap_ratio: float = _DEDUP_OVERLAP_RATIO,
-) -> list[WallCandidate]:
+) -> tuple[list[WallCandidate], DedupReport]:
     """Cluster collinear candidates that share most of their parallel
     extent and collapse each cluster to a single representative.
 
@@ -173,9 +213,21 @@ def _dedupe_collinear_overlapping(
     the mean perpendicular coordinate across the cluster, and the max
     thickness. Source / confidence are inherited from the longest
     member.
+
+    Returns a tuple ``(kept_candidates, report)`` where ``report`` is a
+    ``DedupReport`` describing every multi-member cluster this pass
+    collapsed. The report is structured so a human reviewer can spot
+    suspicious merges (e.g. ``perp_spread_px`` close to the tolerance or
+    ``min_parallel_overlap_ratio`` close to the overlap threshold).
     """
     if not candidates:
-        return list(candidates)
+        return list(candidates), DedupReport(
+            triggered=True,
+            candidate_count_before=0,
+            kept_count=0,
+            merged_count=0,
+            clusters=[],
+        )
 
     by_group: dict[tuple[int, str], list[tuple[int, WallCandidate]]] = {}
     for idx, candidate in enumerate(candidates):
@@ -186,6 +238,8 @@ def _dedupe_collinear_overlapping(
 
     keep_mask = [True] * len(candidates)
     replacements: dict[int, WallCandidate] = {}
+    clusters_report: list[DedupCluster] = []
+    cluster_id_counter = 0
 
     for (page_index, orientation), items in by_group.items():
         if len(items) < 2:
@@ -198,6 +252,12 @@ def _dedupe_collinear_overlapping(
         # pass stays near-linear for typical inputs.
         n = len(ordered)
         parent = list(range(n))
+        # Track the minimum overlap ratio observed on any merge edge
+        # within each future cluster. This is a conservative "weakest
+        # link" metric: if the report shows a cluster with overlap 0.36,
+        # the reviewer knows at least one merge decision was close to
+        # the threshold.
+        min_overlap_by_root: dict[int, float] = {}
 
         def find(x: int) -> int:
             while parent[x] != x:
@@ -205,10 +265,19 @@ def _dedupe_collinear_overlapping(
                 x = parent[x]
             return x
 
-        def union(a: int, b: int) -> None:
+        def union(a: int, b: int, edge_overlap: float) -> None:
             ra, rb = find(a), find(b)
             if ra != rb:
                 parent[rb] = ra
+                existing = min(
+                    min_overlap_by_root.pop(ra, float("inf")),
+                    min_overlap_by_root.pop(rb, float("inf")),
+                    edge_overlap,
+                )
+                min_overlap_by_root[ra] = existing
+            else:
+                existing = min_overlap_by_root.get(ra, float("inf"))
+                min_overlap_by_root[ra] = min(existing, edge_overlap)
 
         for i in range(n):
             pi = _perp_coord(ordered[i][1], orientation)
@@ -224,7 +293,7 @@ def _dedupe_collinear_overlapping(
                 overlap = max(0.0, min(ri[1], rj[1]) - max(ri[0], rj[0]))
                 shorter = min(li, lj)
                 if shorter > 0 and overlap / shorter >= overlap_ratio:
-                    union(i, j)
+                    union(i, j, overlap / shorter)
                 j += 1
 
         groups: dict[int, list[int]] = {}
@@ -232,7 +301,7 @@ def _dedupe_collinear_overlapping(
             root = find(local_idx)
             groups.setdefault(root, []).append(local_idx)
 
-        for members in groups.values():
+        for root, members in groups.items():
             if len(members) <= 1:
                 continue
             cluster = [ordered[m] for m in members]
@@ -247,10 +316,31 @@ def _dedupe_collinear_overlapping(
             spans = [_para_range(pair[1], orientation) for pair in cluster]
             span_start = min(s[0] for s in spans)
             span_end = max(s[1] for s in spans)
-            mean_perp = sum(
-                _perp_coord(pair[1], orientation) for pair in cluster
-            ) / len(cluster)
+            perps = [_perp_coord(pair[1], orientation) for pair in cluster]
+            mean_perp = sum(perps) / len(cluster)
             max_thickness = max(pair[1].thickness for pair in cluster)
+            perp_spread = max(perps) - min(perps)
+            min_overlap = min_overlap_by_root.get(root, 1.0)
+            # Below _TWIN_DETECTION_PERP_PX the spread is within Hough
+            # sub-pixel jitter (twin detections of the same stroke);
+            # above it the survivors are more likely collinear splits
+            # that were bucketed apart by the earlier consolidation.
+            merge_reason = (
+                "twin_detection" if perp_spread <= _TWIN_DETECTION_PERP_PX
+                else "collinear_split"
+            )
+            clusters_report.append(
+                DedupCluster(
+                    cluster_id=cluster_id_counter,
+                    page_index=page_index,
+                    orientation=orientation,
+                    member_count=len(cluster),
+                    perp_spread_px=round(perp_spread, 3),
+                    min_parallel_overlap_ratio=round(min_overlap, 3),
+                    merge_reason=merge_reason,
+                )
+            )
+            cluster_id_counter += 1
 
             if orientation == "horizontal":
                 new_start = (round(span_start, 3), round(mean_perp, 3))
@@ -277,7 +367,14 @@ def _dedupe_collinear_overlapping(
         if not keep_mask[idx]:
             continue
         out.append(replacements.get(idx, candidate))
-    return out
+    report = DedupReport(
+        triggered=True,
+        candidate_count_before=len(candidates),
+        kept_count=len(out),
+        merged_count=len(candidates) - len(out),
+        clusters=clusters_report,
+    )
+    return out, report
 
 
 def _candidates_to_walls(candidates: list[WallCandidate]) -> list[Wall]:
