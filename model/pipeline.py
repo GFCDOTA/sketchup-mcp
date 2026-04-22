@@ -18,6 +18,7 @@ from model.builder import build_observed_model, compute_bounds
 from model.types import ConnectivityReport, DedupReport, Junction, Room, SplitWall, Wall, WallCandidate
 from openings.service import detect_openings
 from roi.service import RoiResult, crop_image_to_bbox, detect_architectural_roi
+from topology.main_component_filter import select_main_component
 from topology.service import build_topology
 
 
@@ -252,6 +253,9 @@ def _run_pipeline_from_walls(
     peitoris: list[dict] | None = None,
 ) -> PipelineResult:
     walls, openings = detect_openings(walls, peitoris=peitoris, wall_thickness=wall_thickness)
+    walls, main_component_report = select_main_component(
+        walls, snap_tolerance=wall_thickness / 2
+    )
     room_topology_sink: list = []
     snapshot_hash_sink: list[str] = []
     split_walls, junctions, rooms, connectivity_report = build_topology(
@@ -291,8 +295,9 @@ def _run_pipeline_from_walls(
     )
     observed_model["openings"] = [o.to_dict() for o in openings]
     observed_model["peitoris"] = peitoris or []
+    observed_model.setdefault("metadata", {})["main_component"] = dict(main_component_report)
     if topology_snapshot_sha256 is not None:
-        observed_model.setdefault("metadata", {})["topology_snapshot_sha256"] = topology_snapshot_sha256
+        observed_model["metadata"]["topology_snapshot_sha256"] = topology_snapshot_sha256
 
     output_dir.mkdir(parents=True, exist_ok=True)
     (output_dir / "observed_model.json").write_text(
