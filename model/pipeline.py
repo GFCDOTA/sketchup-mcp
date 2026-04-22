@@ -47,12 +47,14 @@ def run_pdf_pipeline(
         raise PipelineError(str(exc)) from exc
     candidates, roi_results = _extract_with_roi_from_document(document)
     source = _build_pdf_source(pdf_bytes=pdf_bytes, filename=filename, document=document)
+    first_page_raster = document.pages[0].image if document.pages else None
     return _run_pipeline(
         candidates=candidates,
         output_dir=output_dir,
         source=source,
         roi_results=roi_results,
         peitoris=peitoris,
+        first_page_raster=first_page_raster,
     )
 
 
@@ -119,6 +121,7 @@ def _run_pipeline(
     source: dict,
     roi_results: list[RoiResult],
     peitoris: list[dict] | None = None,
+    first_page_raster: np.ndarray | None = None,
 ) -> PipelineResult:
     dedup_report_sink: list[DedupReport] = []
     walls = classify_walls(candidates, dedup_report_sink=dedup_report_sink)
@@ -184,7 +187,11 @@ def _run_pipeline(
         connectivity_report=connectivity_report,
     )
     try:
-        write_audited_overlay(observed_model, output_dir / "overlay_audited.png")
+        write_audited_overlay(
+            observed_model,
+            output_dir / "overlay_audited.png",
+            raster_image=first_page_raster,
+        )
     except Exception as exc:  # render issues must not fail the pipeline
         (output_dir / "overlay_audited.error.txt").write_text(
             f"{type(exc).__name__}: {exc}\n", encoding="utf-8"

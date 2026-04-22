@@ -12,6 +12,12 @@ Renders the post-pipeline model as a single PNG with:
 - a header line with counts so anyone reviewing the PNG can see whether
   a single number (rooms, orphans) moved between runs
 
+When a ``raster_image`` is provided (the PDF first page rendered by
+ingest), the output is a side-by-side composition: PDF raster on the
+left, model overlay on the right, both scaled to the same height. This
+follows the project convention of auditing every planta change with
+the real PDF alongside the extracted model.
+
 PIL-only (already a transitive dependency through the existing render_*
 scripts). Output path is chosen by the caller so the pipeline places it
 inside ``runs/<name>/`` alongside the JSON artifacts.
@@ -21,6 +27,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import networkx as nx
+import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 
@@ -36,7 +43,11 @@ _MAIN_WALL_COLOR = (15, 23, 42)
 _ORPHAN_WALL_COLOR = (217, 70, 239)  # magenta
 
 
-def write_audited_overlay(observed_model: dict, output_path: Path) -> None:
+def write_audited_overlay(
+    observed_model: dict,
+    output_path: Path,
+    raster_image: np.ndarray | None = None,
+) -> None:
     walls = observed_model.get("walls", [])
     juncs = observed_model.get("junctions", [])
     rooms = observed_model.get("rooms", [])
@@ -118,7 +129,64 @@ def write_audited_overlay(observed_model: dict, output_path: Path) -> None:
     draw.text((6, 6), header, fill="black", font=font)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    img.save(output_path)
+    if raster_image is not None:
+        composed = _compose_side_by_side(raster_image, img)
+        composed.save(output_path)
+    else:
+        img.save(output_path)
+
+
+def _compose_side_by_side(raster: np.ndarray, model: Image.Image) -> Image.Image:
+    """Place PDF raster on the left, model overlay on the right.
+
+    Both panels are scaled to the same height so a reviewer can scan
+    horizontally and check room-for-room correspondence. A thin
+    separator and small labels make the split obvious at a glance.
+    """
+    if raster.ndim == 2:
+        pdf_img = Image.fromarray(raster).convert("RGB")
+    elif raster.shape[2] == 4:
+        pdf_img = Image.fromarray(raster[:, :, :3]).convert("RGB")
+    else:
+        pdf_img = Image.fromarray(raster).convert("RGB")
+
+    target_h = max(pdf_img.height, model.height)
+    pdf_scaled = _scale_to_height(pdf_img, target_h)
+    model_scaled = _scale_to_height(model, target_h)
+
+    separator_w = 6
+    total_w = pdf_scaled.width + separator_w + model_scaled.width
+    canvas = Image.new("RGB", (total_w, target_h + 32), "white")
+    canvas.paste(pdf_scaled, (0, 32))
+    canvas.paste(model_scaled, (pdf_scaled.width + separator_w, 32))
+
+    draw = ImageDraw.Draw(canvas)
+    try:
+        label_font = ImageFont.truetype("arial.ttf", 16)
+    except Exception:
+        label_font = ImageFont.load_default()
+    draw.rectangle([0, 0, total_w, 32], fill=(240, 240, 240))
+    draw.text((6, 6), "PDF (ground truth)", fill="black", font=label_font)
+    draw.text(
+        (pdf_scaled.width + separator_w + 6, 6),
+        "Extracted model",
+        fill="black",
+        font=label_font,
+    )
+    # separator column
+    draw.rectangle(
+        [pdf_scaled.width, 32, pdf_scaled.width + separator_w, 32 + target_h],
+        fill=(180, 180, 180),
+    )
+    return canvas
+
+
+def _scale_to_height(img: Image.Image, target_h: int) -> Image.Image:
+    if img.height == target_h:
+        return img
+    ratio = target_h / img.height
+    new_w = max(1, int(round(img.width * ratio)))
+    return img.resize((new_w, target_h), Image.LANCZOS)
 
 
 def _draw_wall(
