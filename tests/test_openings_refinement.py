@@ -2,13 +2,30 @@ from __future__ import annotations
 
 import pytest
 
-from model.types import Wall
+from model.types import Room, Wall
 from openings.pruning import (
     dedup_collinear_openings,
     filter_min_width_openings,
+    postfilter_roomless_openings,
     prune_orphan_openings,
 )
 from openings.service import Opening
+
+
+def _room(room_id: str, polygon: list[tuple[float, float]], area: float | None = None) -> Room:
+    if area is None:
+        # Simple shoelace
+        n = len(polygon)
+        area = 0.5 * abs(
+            sum(
+                polygon[i][0] * polygon[(i + 1) % n][1]
+                - polygon[(i + 1) % n][0] * polygon[i][1]
+                for i in range(n)
+            )
+        )
+    cx = sum(p[0] for p in polygon) / len(polygon)
+    cy = sum(p[1] for p in polygon) / len(polygon)
+    return Room(room_id=room_id, polygon=polygon, area=area, centroid=(cx, cy))
 
 
 def _wall(wall_id: str, start: tuple[float, float], end: tuple[float, float]) -> Wall:
@@ -245,3 +262,107 @@ def test_dedup_single_input() -> None:
     result, report = dedup_collinear_openings(openings, wall_thickness=6.25)
     assert len(result) == 1
     assert report.merged == 0
+
+
+def test_dedup_relaxed_perp_merges_parede_dupla_7px_offset() -> None:
+    """Parede dupla real: dois openings horizontais com perp offset 7px
+    (> 1xt=6.25 mas < 1.5xt=9.4). Default perp_mul=1.5 deve fundir."""
+    openings = [
+        _opening("opening-1", "wall-1", "wall-2", width=45.0, center=(200.0, 212.0), orientation="horizontal"),
+        _opening("opening-2", "wall-3", "wall-4", width=46.0, center=(199.0, 219.0), orientation="horizontal"),
+    ]
+
+    result, report = dedup_collinear_openings(openings, wall_thickness=6.25)
+
+    assert len(result) == 1
+    assert result[0].opening_id == "opening-2"  # wider width (46 > 45)
+    assert report.merged == 1
+
+
+def test_dedup_explicit_tight_perp_preserves_separate_walls() -> None:
+    """Perp_mul=1.0 (antigo default): dois openings com 7px offset NAO devem
+    fundir, pois a 7 > 6.25 eles poderiam ser paredes distintas."""
+    openings = [
+        _opening("opening-1", "wall-1", "wall-2", width=45.0, center=(200.0, 212.0), orientation="horizontal"),
+        _opening("opening-2", "wall-3", "wall-4", width=46.0, center=(199.0, 219.0), orientation="horizontal"),
+    ]
+
+    result, report = dedup_collinear_openings(openings, wall_thickness=6.25, perp_mul=1.0)
+
+    assert len(result) == 2
+    assert report.merged == 0
+
+
+def test_postfilter_roomless_drops_opening_between_slivers() -> None:
+    """Opening cujos dois lados caem fora de qualquer room legitimo."""
+    # Room grande bem longe do opening
+    big_room = _room("room-1", [(500.0, 500.0), (600.0, 500.0), (600.0, 600.0), (500.0, 600.0)])
+    openings = [
+        _opening("opening-1", "wall-1", "wall-2", width=30.0, center=(100.0, 100.0), orientation="horizontal"),
+    ]
+
+    result, report = postfilter_roomless_openings(openings, [big_room], wall_thickness=6.25)
+
+    assert result == []
+    assert report.dropped_roomless == 1
+    assert report.kept == 0
+
+
+def test_postfilter_roomless_keeps_opening_between_rooms() -> None:
+    """Opening entre dois rooms grandes: um lado em room_a, outro em room_b."""
+    room_a = _room("room-a", [(0.0, 0.0), (100.0, 0.0), (100.0, 80.0), (0.0, 80.0)])
+    room_b = _room("room-b", [(0.0, 100.0), (100.0, 100.0), (100.0, 200.0), (0.0, 200.0)])
+    openings = [
+        _opening("opening-1", "wall-1", "wall-2", width=30.0, center=(50.0, 90.0), orientation="horizontal"),
+    ]
+
+    # thickness=6.25, perp_offset_mul=3 -> 18.75 -> side_a=(50,71.25) in room_a, side_b=(50,108.75) in room_b
+    result, report = postfilter_roomless_openings(openings, [room_a, room_b], wall_thickness=6.25)
+
+    assert len(result) == 1
+    assert report.dropped_roomless == 0
+
+
+def test_postfilter_roomless_keeps_external_door_one_side() -> None:
+    """Porta externa: um lado toca room interno, outro e fachada (sem room)."""
+    room = _room("room-1", [(0.0, 0.0), (100.0, 0.0), (100.0, 80.0), (0.0, 80.0)])
+    openings = [
+        # Near north wall (y=80), bisected by the wall -> side_a inside, side_b outside
+        _opening("opening-1", "wall-1", "wall-2", width=30.0, center=(50.0, 80.0), orientation="horizontal"),
+    ]
+
+    result, report = postfilter_roomless_openings(openings, [room], wall_thickness=6.25)
+
+    # side_a at (50, 80-18.75=61.25) is inside; side_b outside -> kept (conservative)
+    assert len(result) == 1
+    assert report.dropped_roomless == 0
+
+
+def test_postfilter_roomless_ignores_rooms_below_min_area() -> None:
+    """Rooms sliver (area < thickness^2 * 25) nao contam como legitimos."""
+    # thickness=6.25, min_area = 39.0625 * 25 = 976.56
+    # 20x20 room has area=400 (below threshold)
+    sliver = _room("sliver", [(0.0, 0.0), (20.0, 0.0), (20.0, 20.0), (0.0, 20.0)])
+    openings = [
+        _opening("opening-1", "wall-1", "wall-2", width=10.0, center=(10.0, 10.0), orientation="horizontal"),
+    ]
+
+    result, report = postfilter_roomless_openings(openings, [sliver], wall_thickness=6.25)
+
+    assert result == []  # sliver doesn't count, so opening has no legit side
+    assert report.dropped_roomless == 1
+
+
+def test_postfilter_roomless_empty_rooms() -> None:
+    openings = [_opening("opening-1", "wall-1", "wall-2", width=30.0)]
+    result, report = postfilter_roomless_openings(openings, [], wall_thickness=6.25)
+    assert result == []
+    assert report.dropped_roomless == 1
+
+
+def test_postfilter_roomless_empty_openings() -> None:
+    room = _room("room-1", [(0.0, 0.0), (100.0, 0.0), (100.0, 100.0), (0.0, 100.0)])
+    result, report = postfilter_roomless_openings([], [room], wall_thickness=6.25)
+    assert result == []
+    assert report.input_count == 0
+    assert report.dropped_roomless == 0

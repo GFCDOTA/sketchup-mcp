@@ -17,7 +17,7 @@ import os
 from dataclasses import dataclass
 from typing import Iterable
 
-from model.types import Wall
+from model.types import Room, Wall
 from openings.service import Opening
 
 
@@ -73,6 +73,22 @@ class DedupReport:
             "merged": self.merged,
             "kept": self.kept,
             "gap_threshold_px": round(self.gap_threshold_px, 3),
+        }
+
+
+@dataclass(frozen=True)
+class RoomlessReport:
+    input_count: int
+    dropped_roomless: int
+    kept: int
+    min_area: float
+
+    def to_dict(self) -> dict:
+        return {
+            "input_count": self.input_count,
+            "dropped_roomless": self.dropped_roomless,
+            "kept": self.kept,
+            "min_area": round(self.min_area, 3),
         }
 
 
@@ -198,14 +214,17 @@ def dedup_collinear_openings(
     wall_thickness: float,
     gap_mul: float = 4.0,
     overlap_min: float = 0.30,
+    perp_mul: float = 1.5,
 ) -> tuple[list[Opening], DedupReport]:
     """Funde openings duplicadas da mesma parede dupla.
 
     Quatro gates combinados (todos precisam passar para fundir):
 
     1. Mesma orientacao (horizontal ou vertical).
-    2. Eixo perpendicular proximo: delta <= wall_thickness (tolerancia
-       curta porque parede dupla tem exatamente 1 thickness de offset).
+    2. Eixo perpendicular proximo: delta <= wall_thickness * perp_mul
+       (default 1.5; parede dupla varia entre 1-1.5 x thickness na
+       pratica porque walls individuais tem pequenas variacoes na
+       posicao do trace).
     3. Distancia entre centros no eixo principal < wall_thickness *
        gap_mul (default 4.0; consultado contra ChatGPT 2026-04-21:
        4x e conservador, 6x precisaria evidencia adicional).
@@ -232,7 +251,7 @@ def dedup_collinear_openings(
         )
 
     gap_threshold = wall_thickness * gap_mul
-    perp_tol = wall_thickness
+    perp_tol = wall_thickness * perp_mul
 
     # Union-find simples para agrupar duplicatas transitivamente.
     parent = list(range(n))
@@ -288,4 +307,77 @@ def dedup_collinear_openings(
         merged=merged,
         kept=len(kept),
         gap_threshold_px=gap_threshold,
+    )
+
+
+def _point_in_polygon(px: float, py: float, polygon: list[tuple[float, float]]) -> bool:
+    """Ray casting tipico. Polygon e uma lista de (x,y); assume fechamento
+    automatico (ultimo vertice nao precisa repetir o primeiro)."""
+    n = len(polygon)
+    if n < 3:
+        return False
+    inside = False
+    j = n - 1
+    for i in range(n):
+        xi, yi = polygon[i]
+        xj, yj = polygon[j]
+        if ((yi > py) != (yj > py)) and (
+            px < (xj - xi) * (py - yi) / ((yj - yi) or 1e-12) + xi
+        ):
+            inside = not inside
+        j = i
+    return inside
+
+
+def postfilter_roomless_openings(
+    openings: Iterable[Opening],
+    rooms: Iterable[Room],
+    wall_thickness: float,
+    min_area_mul: float = 25.0,
+    perp_offset_mul: float = 3.0,
+) -> tuple[list[Opening], RoomlessReport]:
+    """Remove openings cujos DOIS lados nao tocam nenhum room legitimo.
+
+    Um room e considerado legitimo se `area >= thickness**2 * min_area_mul`
+    (default 25x thickness^2 ≈ 977 px^2 com thickness=6.25). Para cada
+    opening, projeta dois pontos de teste a distancia
+    `thickness * perp_offset_mul` do centro, perpendicular a orientacao
+    do opening. Opening sobrevive se pelo menos UM dos dois lados cai
+    dentro de um room legitimo (politica conservadora: porta externa
+    onde um lado e fachada sem room interno e preservada).
+
+    Opening com ambos os lados em espaco vazio (nenhum room legitimo
+    em volta) e fantasma semantico — um gap colinear que nao conecta
+    rooms reais.
+    """
+    openings_list = list(openings)
+    rooms_list = list(rooms)
+    min_area = wall_thickness ** 2 * min_area_mul
+    legit_polys = [r.polygon for r in rooms_list if r.area >= min_area]
+
+    dropped = 0
+    kept: list[Opening] = []
+    for o in openings_list:
+        cx, cy = o.center
+        off = wall_thickness * perp_offset_mul
+        if o.orientation == "horizontal":
+            side_a = (cx, cy - off)
+            side_b = (cx, cy + off)
+        else:
+            side_a = (cx - off, cy)
+            side_b = (cx + off, cy)
+        in_legit = any(
+            _point_in_polygon(*side_a, polygon=p) or _point_in_polygon(*side_b, polygon=p)
+            for p in legit_polys
+        )
+        if in_legit:
+            kept.append(o)
+        else:
+            dropped += 1
+
+    return kept, RoomlessReport(
+        input_count=len(openings_list),
+        dropped_roomless=dropped,
+        kept=len(kept),
+        min_area=min_area,
     )
