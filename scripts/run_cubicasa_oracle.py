@@ -154,17 +154,127 @@ def _prepare_import_path() -> None:
 # ---------- SVG -> raster ----------
 
 
-def svg_to_raster(svg_path: Path, size: int) -> "numpy.ndarray":  # type: ignore[name-defined]
-    """Render SVG to a `size x size` RGB raster (numpy uint8, HxWx3).
+@dataclass(frozen=True)
+class RasterTransform:
+    """Describes the pixel-space -> SVG viewBox-space affine used when we
+    rasterised the input. Applied to oracle centers/widths to emit openings
+    in the SVG coordinate system (so GT and pipeline JSON compare directly).
 
-    Tries cairosvg first (best quality), falls back to Pillow if SVG is
-    already a Pillow-openable embedded raster. Neither dependency is
-    mandatory for the rest of the project, so we import lazily with a
-    clear error if both fail.
+    Invariants:
+        vb_x = (px_x - offset_x) / scale
+        vb_y = (px_y - offset_y) / scale
+    """
+
+    scale: float           # pixels per SVG user-unit (uniform)
+    offset_x: float        # letterbox offset in pixels, x
+    offset_y: float        # letterbox offset in pixels, y
+    vb_min_x: float
+    vb_min_y: float
+    vb_width: float
+    vb_height: float
+
+
+def _read_svg_viewbox(svg_path: Path) -> tuple[float, float, float, float]:
+    """Return (min_x, min_y, width, height) for the SVG viewBox.
+
+    Falls back to (0,0,width,height) if only width/height are given, and
+    to (0,0,size,size) as a last resort.
+    """
+    import xml.etree.ElementTree as ET
+
+    try:
+        root = ET.parse(str(svg_path)).getroot()
+    except Exception:
+        return (0.0, 0.0, 0.0, 0.0)
+
+    vb = root.attrib.get("viewBox")
+    if vb:
+        parts = [float(x) for x in vb.replace(",", " ").split()]
+        if len(parts) == 4:
+            return tuple(parts)  # type: ignore[return-value]
+
+    def _as_num(val: str | None) -> float:
+        if not val:
+            return 0.0
+        return float("".join(c for c in val if c.isdigit() or c in ".-"))
+
+    w = _as_num(root.attrib.get("width"))
+    h = _as_num(root.attrib.get("height"))
+    return (0.0, 0.0, w, h)
+
+
+def svg_to_raster(
+    svg_path: Path, size: int
+) -> tuple["numpy.ndarray", RasterTransform]:  # type: ignore[name-defined]
+    """Render SVG to a `size x size` RGB raster (numpy uint8, HxWx3) and
+    return both the raster and the pixel->viewBox transform.
+
+    Tries resvg-py first (pure Rust, no native DLL deps on Windows),
+    then cairosvg (needs Cairo DLLs), finally Pillow (only works if
+    the file is actually a raster with an SVG extension). None of these
+    are mandatory for the rest of the project, so we import lazily and
+    raise a clear error if every path fails.
     """
     import numpy as np
 
-    # Path 1: cairosvg (preferred)
+    vb_min_x, vb_min_y, vb_w, vb_h = _read_svg_viewbox(svg_path)
+
+    # Path 1: resvg-py (preferred on Windows — ships self-contained)
+    try:
+        import resvg_py
+        from PIL import Image
+        import io
+
+        # background='white' is essential: without it, resvg emits a
+        # fully opaque canvas with RGB=(0,0,0) and alpha=255 everywhere,
+        # because our synthetic plans are unfilled strokes on a
+        # transparent canvas. A transparent->RGB convert via PIL collapses
+        # to pure black and wipes out the wall strokes.
+        png_bytes = bytes(
+            resvg_py.svg_to_bytes(
+                svg_path=str(svg_path),
+                width=size,
+                height=size,
+                background="white",
+            )
+        )
+        img = Image.open(io.BytesIO(png_bytes)).convert("RGB")
+        rendered_w, rendered_h = img.size
+        # resvg preserves aspect ratio when both width+height are passed,
+        # so the resulting canvas may be letterbox-shaped. Pad to square on a
+        # white background so the model sees the full plan at the requested
+        # raster_size on both axes.
+        if img.size != (size, size):
+            bg = Image.new("RGB", (size, size), (255, 255, 255))
+            off_x = (size - rendered_w) // 2
+            off_y = (size - rendered_h) // 2
+            bg.paste(img, (off_x, off_y))
+            img = bg
+        else:
+            off_x = 0
+            off_y = 0
+        # scale: pixels per SVG user-unit. Uniform (aspect preserved).
+        if vb_w > 0 and vb_h > 0:
+            scale = min(rendered_w / vb_w, rendered_h / vb_h)
+        else:
+            scale = 1.0
+        transform = RasterTransform(
+            scale=scale,
+            offset_x=float(off_x),
+            offset_y=float(off_y),
+            vb_min_x=vb_min_x,
+            vb_min_y=vb_min_y,
+            vb_width=vb_w,
+            vb_height=vb_h,
+        )
+        return np.array(img), transform
+    except ImportError:
+        pass
+    except Exception:
+        # resvg may choke on exotic features — fall through
+        pass
+
+    # Path 2: cairosvg (needs native Cairo; usually unavailable on vanilla Windows)
     try:
         import cairosvg
         from PIL import Image
@@ -174,24 +284,41 @@ def svg_to_raster(svg_path: Path, size: int) -> "numpy.ndarray":  # type: ignore
             url=str(svg_path), output_width=size, output_height=size
         )
         img = Image.open(io.BytesIO(png_bytes)).convert("RGB")
-        return np.array(img)
+        # cairosvg forces exactly size x size; if the user gave a non-square
+        # viewBox this stretches — document by recording the x/y scales
+        # separately isn't supported by our uniform-scale RasterTransform,
+        # so we record the geometric-mean scale and accept some mapping
+        # error on the minor axis.
+        if vb_w > 0 and vb_h > 0:
+            scale = (size / vb_w + size / vb_h) / 2.0
+        else:
+            scale = 1.0
+        return np.array(img), RasterTransform(
+            scale=scale, offset_x=0.0, offset_y=0.0,
+            vb_min_x=vb_min_x, vb_min_y=vb_min_y,
+            vb_width=vb_w, vb_height=vb_h,
+        )
     except ImportError:
         pass
     except Exception:
-        # cairosvg may fail on exotic SVG features — fall through
         pass
 
-    # Path 2: Pillow-only path (works only if file is actually raster)
+    # Path 3: Pillow-only path (works only if file is actually raster)
     try:
         from PIL import Image
 
         img = Image.open(svg_path).convert("RGB").resize((size, size))
-        return np.array(img)
+        return np.array(img), RasterTransform(
+            scale=1.0, offset_x=0.0, offset_y=0.0,
+            vb_min_x=0.0, vb_min_y=0.0,
+            vb_width=float(size), vb_height=float(size),
+        )
     except Exception as exc:
         _fail_setup(
             f"Could not rasterise {svg_path}: {exc}. "
-            f"Install cairosvg ('pip install cairosvg') or convert the SVG "
-            f"to PNG first and pass it as --svg."
+            f"Install resvg-py ('pip install resvg-py') or cairosvg "
+            f"('pip install cairosvg' — needs Cairo DLLs on Windows), "
+            f"or convert the SVG to PNG first and pass it as --svg."
         )
         raise  # unreachable, _fail_setup raises
 
@@ -229,7 +356,19 @@ def load_cubicasa_model(weights_path: Path, device: str):
     # Match the upstream samples.ipynb recipe: instantiate with 51 heads,
     # then override the final conv + upsample to the 44-head config used
     # by the published checkpoint.
-    model = get_model("hg_furukawa_original", 51)
+    #
+    # `hg_furukawa_original.init_weights()` hardcodes a relative path to
+    # 'floortrans/models/model_1427.pth', which exists at the root of the
+    # cloned repo. We chdir into the vendor repo for the duration of
+    # `get_model` so that relative lookup resolves against the repo root.
+    import os
+    prev_cwd = os.getcwd()
+    try:
+        if VENDOR_REPO.exists():
+            os.chdir(str(VENDOR_REPO))
+        model = get_model("hg_furukawa_original", 51)
+    finally:
+        os.chdir(prev_cwd)
     model.conv4_ = torch.nn.Conv2d(256, n_classes, bias=True, kernel_size=1)
     model.upsample = torch.nn.ConvTranspose2d(
         n_classes, n_classes, kernel_size=4, stride=4
@@ -294,9 +433,28 @@ def run_inference(model, torch_device, rgb: "numpy.ndarray"):  # type: ignore[na
     return out[0, :, :h, :w].detach().cpu().numpy()
 
 
+def _px_to_vb(
+    px_x: float, px_y: float, transform: RasterTransform | None
+) -> tuple[float, float]:
+    """Map pixel-space point back to SVG viewBox-space."""
+    if transform is None or transform.scale <= 0:
+        return (px_x, px_y)
+    vb_x = (px_x - transform.offset_x) / transform.scale + transform.vb_min_x
+    vb_y = (px_y - transform.offset_y) / transform.scale + transform.vb_min_y
+    return (vb_x, vb_y)
+
+
+def _px_to_vb_length(px_len: float, transform: RasterTransform | None) -> float:
+    """Map pixel length back to SVG viewBox user units."""
+    if transform is None or transform.scale <= 0:
+        return px_len
+    return px_len / transform.scale
+
+
 def extract_openings_from_output(
     output: "numpy.ndarray",  # type: ignore[name-defined]
     page_index: int = 0,
+    transform: RasterTransform | None = None,
 ) -> list[OracleOpening]:
     """Convert the 44-channel output into pipeline-compatible openings.
 
@@ -304,6 +462,10 @@ def extract_openings_from_output(
     icon classes, and read the Door (local=2) and Window (local=1) channels.
     Each channel is thresholded into a binary mask, blobbed with
     cv2.findContours, and each blob becomes one opening record.
+
+    If `transform` is provided, centers and widths are mapped back from
+    pixel space to the SVG viewBox coordinate space so oracle output
+    shares units with `observed_model.json` and GT YAML.
     """
     import numpy as np
     import cv2
@@ -335,24 +497,27 @@ def extract_openings_from_output(
                 continue
 
             x, y, bw, bh = cv2.boundingRect(contour)
-            cx = x + bw / 2.0
-            cy = y + bh / 2.0
+            cx_px = x + bw / 2.0
+            cy_px = y + bh / 2.0
 
             # Longer axis determines orientation; width = longer axis length.
             if bw >= bh:
                 orientation = "horizontal"
-                width = float(bw)
+                width_px = float(bw)
             else:
                 orientation = "vertical"
-                width = float(bh)
+                width_px = float(bh)
+
+            cx_vb, cy_vb = _px_to_vb(cx_px, cy_px, transform)
+            width_vb = _px_to_vb_length(width_px, transform)
 
             openings.append(
                 OracleOpening(
                     opening_id=f"oracle-{counter}",
                     page_index=page_index,
                     orientation=orientation,
-                    center=(float(cx), float(cy)),
-                    width=width,
+                    center=(cx_vb, cy_vb),
+                    width=width_vb,
                     kind=kind,
                 )
             )
@@ -376,10 +541,12 @@ def run(
     _require_weights(weights_path)
     sha256 = _compute_sha256(weights_path)
 
-    rgb = svg_to_raster(svg_path, raster_size)
+    rgb, transform = svg_to_raster(svg_path, raster_size)
     model, torch_device = load_cubicasa_model(weights_path, device)
     output = run_inference(model, torch_device, rgb)
-    openings = extract_openings_from_output(output, page_index=page_index)
+    openings = extract_openings_from_output(
+        output, page_index=page_index, transform=transform,
+    )
 
     payload: dict[str, Any] = {
         "source": "CubiCasa5K oracle",
@@ -389,6 +556,14 @@ def run(
             "svg": str(svg_path),
             "raster_size": [raster_size, raster_size],
             "device": device,
+            "viewbox": [
+                transform.vb_min_x,
+                transform.vb_min_y,
+                transform.vb_width,
+                transform.vb_height,
+            ],
+            "px_per_unit": transform.scale,
+            "letterbox_offset_px": [transform.offset_x, transform.offset_y],
         },
         "openings": [o.to_dict() for o in openings],
     }
