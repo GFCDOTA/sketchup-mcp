@@ -3,7 +3,11 @@ from __future__ import annotations
 import pytest
 
 from model.types import Wall
-from openings.pruning import filter_min_width_openings, prune_orphan_openings
+from openings.pruning import (
+    dedup_collinear_openings,
+    filter_min_width_openings,
+    prune_orphan_openings,
+)
 from openings.service import Opening
 
 
@@ -20,12 +24,19 @@ def _wall(wall_id: str, start: tuple[float, float], end: tuple[float, float]) ->
     )
 
 
-def _opening(opening_id: str, wall_a: str, wall_b: str, width: float = 50.0) -> Opening:
+def _opening(
+    opening_id: str,
+    wall_a: str,
+    wall_b: str,
+    width: float = 50.0,
+    center: tuple[float, float] = (100.0, 100.0),
+    orientation: str = "horizontal",
+) -> Opening:
     return Opening(
         opening_id=opening_id,
         page_index=0,
-        orientation="horizontal",
-        center=(100.0, 100.0),
+        orientation=orientation,
+        center=center,
         width=width,
         wall_a=wall_a,
         wall_b=wall_b,
@@ -144,3 +155,93 @@ def test_filter_min_width_empty() -> None:
     assert result == []
     assert report.input_count == 0
     assert report.threshold_px == pytest.approx(21.875)
+
+
+def test_dedup_merges_very_close_colinear_pair() -> None:
+    """Parede dupla em vertical: dois openings em ~mesmo x, centros
+    separados por 5px (< 4xt=25), overlap completo. Deve fundir."""
+    openings = [
+        _opening("opening-1", "wall-1", "wall-2", width=54.0, center=(437.0, 309.0), orientation="vertical"),
+        _opening("opening-2", "wall-3", "wall-4", width=40.0, center=(441.0, 313.0), orientation="vertical"),
+    ]
+
+    result, report = dedup_collinear_openings(openings, wall_thickness=6.25)
+
+    assert len(result) == 1
+    # Keeps the wider opening
+    assert result[0].opening_id == "opening-1"
+    assert result[0].width == pytest.approx(54.0)
+    assert report.merged == 1
+    assert report.kept == 1
+
+
+def test_dedup_keeps_distant_colinear_pair() -> None:
+    """Mesma parede, centros separados por 150px (muito > 4xt=25).
+    Duas portas reais distintas — nao devem fundir."""
+    openings = [
+        _opening("opening-1", "wall-1", "wall-2", width=60.0, center=(100.0, 100.0), orientation="horizontal"),
+        _opening("opening-2", "wall-1", "wall-2", width=60.0, center=(250.0, 100.0), orientation="horizontal"),
+    ]
+
+    result, report = dedup_collinear_openings(openings, wall_thickness=6.25)
+
+    assert len(result) == 2
+    assert report.merged == 0
+
+
+def test_dedup_skips_different_orientation() -> None:
+    openings = [
+        _opening("opening-1", "wall-1", "wall-2", width=50.0, center=(100.0, 100.0), orientation="horizontal"),
+        _opening("opening-2", "wall-3", "wall-4", width=50.0, center=(100.0, 100.0), orientation="vertical"),
+    ]
+
+    result, report = dedup_collinear_openings(openings, wall_thickness=6.25)
+
+    assert len(result) == 2
+    assert report.merged == 0
+
+
+def test_dedup_skips_pair_without_overlap() -> None:
+    """Dois openings colineares com overlap insuficiente: nao sao duplicatas.
+
+    centros a 20px, ambos com width=10 (ranges nao se tocam): overlap=0,
+    gate de 0.30 falha, mantidos os 2.
+    """
+    openings = [
+        _opening("opening-1", "wall-1", "wall-2", width=10.0, center=(100.0, 100.0), orientation="horizontal"),
+        _opening("opening-2", "wall-3", "wall-4", width=10.0, center=(120.0, 100.0), orientation="horizontal"),
+    ]
+
+    result, report = dedup_collinear_openings(openings, wall_thickness=6.25)
+
+    assert len(result) == 2
+    assert report.merged == 0
+
+
+def test_dedup_skips_different_perpendicular_axis() -> None:
+    """Mesma orientacao mas eixos perp diferentes (> 1xt): paredes paralelas,
+    nao mesma parede dupla. Mantidos os 2."""
+    openings = [
+        _opening("opening-1", "wall-1", "wall-2", width=50.0, center=(100.0, 100.0), orientation="horizontal"),
+        _opening("opening-2", "wall-3", "wall-4", width=50.0, center=(100.0, 120.0), orientation="horizontal"),
+    ]
+
+    # delta perp = 20 > thickness (6.25)
+    result, report = dedup_collinear_openings(openings, wall_thickness=6.25)
+
+    assert len(result) == 2
+    assert report.merged == 0
+
+
+def test_dedup_empty_input() -> None:
+    result, report = dedup_collinear_openings([], wall_thickness=6.25)
+    assert result == []
+    assert report.input_count == 0
+    assert report.merged == 0
+
+
+def test_dedup_single_input() -> None:
+    openings = [_opening("opening-1", "wall-1", "wall-2")]
+    result, report = dedup_collinear_openings(openings, wall_thickness=6.25)
+    assert len(result) == 1
+    assert report.merged == 0

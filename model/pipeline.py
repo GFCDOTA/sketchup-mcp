@@ -16,7 +16,7 @@ from ingest.service import IngestError, IngestedDocument, ingest_pdf
 from ingest.svg_service import IngestSvgError, IngestedSvgDocument, ingest_svg
 from model.builder import build_observed_model, compute_bounds
 from model.types import ConnectivityReport, DedupReport, Junction, Room, SplitWall, Wall, WallCandidate
-from openings.pruning import filter_min_width_openings, prune_orphan_openings
+from openings.pruning import dedup_collinear_openings, filter_min_width_openings, prune_orphan_openings
 from openings.service import detect_openings
 from roi.service import RoiResult, crop_image_to_bbox, detect_architectural_roi
 from topology.main_component_filter import select_main_component
@@ -259,6 +259,7 @@ def _run_pipeline_from_walls(
     )
     openings, prune_report = prune_orphan_openings(openings, walls)
     openings, min_width_report = filter_min_width_openings(openings, wall_thickness)
+    openings, dedup_report = dedup_collinear_openings(openings, wall_thickness)
     room_topology_sink: list = []
     snapshot_hash_sink: list[str] = []
     split_walls, junctions, rooms, connectivity_report = build_topology(
@@ -302,6 +303,7 @@ def _run_pipeline_from_walls(
     observed_model["metadata"]["openings_refinement"] = {
         "prune_orphan": prune_report.to_dict(),
         "min_width": min_width_report.to_dict(),
+        "dedup_collinear": dedup_report.to_dict(),
     }
     if topology_snapshot_sha256 is not None:
         observed_model["metadata"]["topology_snapshot_sha256"] = topology_snapshot_sha256

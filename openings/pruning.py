@@ -60,6 +60,22 @@ class MinWidthReport:
         }
 
 
+@dataclass(frozen=True)
+class DedupReport:
+    input_count: int
+    merged: int
+    kept: int
+    gap_threshold_px: float
+
+    def to_dict(self) -> dict:
+        return {
+            "input_count": self.input_count,
+            "merged": self.merged,
+            "kept": self.kept,
+            "gap_threshold_px": round(self.gap_threshold_px, 3),
+        }
+
+
 def prune_orphan_openings(
     openings: Iterable[Opening],
     kept_walls: Iterable[Wall],
@@ -137,4 +153,139 @@ def filter_min_width_openings(
         dropped_below_min=dropped,
         kept=len(kept),
         threshold_px=threshold,
+    )
+
+
+def _parallel_range(o: Opening) -> tuple[float, float]:
+    """Intervalo no eixo principal ocupado pelo opening (centro - width/2,
+    centro + width/2).
+    """
+    cx, cy = o.center
+    half = o.width / 2.0
+    if o.orientation == "horizontal":
+        return (cx - half, cx + half)
+    return (cy - half, cy + half)
+
+
+def _perp_coord(o: Opening) -> float:
+    cx, cy = o.center
+    return cy if o.orientation == "horizontal" else cx
+
+
+def _parallel_coord(o: Opening) -> float:
+    cx, cy = o.center
+    return cx if o.orientation == "horizontal" else cy
+
+
+def _overlap_fraction(a: Opening, b: Opening) -> float:
+    """Fracao de overlap no eixo principal relativo ao menor dos dois.
+
+    Retorna valor em [0, 1]. Zero = sem sobreposicao. 1 = um esta contido
+    no outro. Usado como gate secundario: sem overlap minimo, nao sao
+    duplicatas mesmo se os centros estao proximos.
+    """
+    a_lo, a_hi = _parallel_range(a)
+    b_lo, b_hi = _parallel_range(b)
+    overlap = max(0.0, min(a_hi, b_hi) - max(a_lo, b_lo))
+    smaller = min(a_hi - a_lo, b_hi - b_lo)
+    if smaller <= 0:
+        return 0.0
+    return overlap / smaller
+
+
+def dedup_collinear_openings(
+    openings: Iterable[Opening],
+    wall_thickness: float,
+    gap_mul: float = 4.0,
+    overlap_min: float = 0.30,
+) -> tuple[list[Opening], DedupReport]:
+    """Funde openings duplicadas da mesma parede dupla.
+
+    Quatro gates combinados (todos precisam passar para fundir):
+
+    1. Mesma orientacao (horizontal ou vertical).
+    2. Eixo perpendicular proximo: delta <= wall_thickness (tolerancia
+       curta porque parede dupla tem exatamente 1 thickness de offset).
+    3. Distancia entre centros no eixo principal < wall_thickness *
+       gap_mul (default 4.0; consultado contra ChatGPT 2026-04-21:
+       4x e conservador, 6x precisaria evidencia adicional).
+    4. Overlap do intervalo paralelo >= overlap_min do menor (default
+       0.30): sem overlap minimo sao portas distintas mesmo se os
+       centros estao proximos, nao duplicatas.
+
+    Quando funde, mantem a de maior width (opening_id preservado). O
+    criterio de "maior width" e apropriado para parede dupla porque o
+    gap real da porta e a envelope da duplicata.
+
+    Corredor com duas portas lado-a-lado: thickness * 4 ≈ 25 px (≈ 40 cm
+    em escala tipica). Portas vizinhas tem centros > 1.5 m apart (>=
+    240 units, > 38 * thickness), bem acima do gate 3.
+    """
+    openings_list = list(openings)
+    n = len(openings_list)
+    if n < 2:
+        return openings_list, DedupReport(
+            input_count=n,
+            merged=0,
+            kept=n,
+            gap_threshold_px=wall_thickness * gap_mul,
+        )
+
+    gap_threshold = wall_thickness * gap_mul
+    perp_tol = wall_thickness
+
+    # Union-find simples para agrupar duplicatas transitivamente.
+    parent = list(range(n))
+
+    def find(i: int) -> int:
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        return i
+
+    def union(i: int, j: int) -> None:
+        ri, rj = find(i), find(j)
+        if ri != rj:
+            parent[ri] = rj
+
+    for i in range(n):
+        oi = openings_list[i]
+        for j in range(i + 1, n):
+            oj = openings_list[j]
+            # Gate 1: orientacao
+            if oi.orientation != oj.orientation:
+                continue
+            # Gate 2: mesmo eixo perpendicular
+            if abs(_perp_coord(oi) - _perp_coord(oj)) > perp_tol:
+                continue
+            # Gate 3: centros proximos no eixo principal
+            if abs(_parallel_coord(oi) - _parallel_coord(oj)) >= gap_threshold:
+                continue
+            # Gate 4: overlap minimo
+            if _overlap_fraction(oi, oj) < overlap_min:
+                continue
+            union(i, j)
+
+    # Agrupar por cluster e escolher representante (maior width).
+    clusters: dict[int, list[int]] = {}
+    for i in range(n):
+        clusters.setdefault(find(i), []).append(i)
+
+    kept: list[Opening] = []
+    merged = 0
+    for idxs in clusters.values():
+        if len(idxs) == 1:
+            kept.append(openings_list[idxs[0]])
+        else:
+            best = max(idxs, key=lambda i: openings_list[i].width)
+            kept.append(openings_list[best])
+            merged += len(idxs) - 1
+
+    # Preserva a ordem original dos representantes.
+    kept.sort(key=lambda o: openings_list.index(o))
+    return kept, DedupReport(
+        input_count=n,
+        merged=merged,
+        kept=len(kept),
+        gap_threshold_px=gap_threshold,
     )
