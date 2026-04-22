@@ -93,6 +93,25 @@ _STRIP_HIGH_RATIO_ASPECT_MAX = 0.14
 _STRIP_HIGH_RATIO_WIDTH_FACTOR = 5.0
 _STRIP_MAX_ITER = 5
 
+# Triangle-sliver filter (F6): after F5 (sliver + strip merge) planta_74
+# still yields ~34 rooms where ~9 of them are small triangular
+# partitions (vertices == 3, area 800-3000) created by wall endpoints
+# that pair-snapped into 3-vertex cycles. ``_is_sliver_polygon`` lets
+# them through because their aspect and compactness are decent
+# (polygon is roughly equilateral, just small). The activation gate
+# here is on room COUNT, not area: fixtures with <=25 rooms (synthetic
+# test_plan, p12_red clean baseline, pytest fixtures) are untouched.
+#
+# Area threshold (2000 px^2) is below the minimum real bathroom area
+# at typical scan resolutions — a 1.5 m^2 bathroom at 1.5x raster
+# scale covers >= 3500 px^2 in every baseline we have. Raising this
+# risks eating legitimate rooms on dense floor plans; lowering it
+# eats fewer triangle slivers. Calibrated against planta_74 where
+# the smallest legitimate room (a hall corner) is 2656 px^2, and the
+# nine triangular slivers are all below 2100 px^2.
+_TRIANGLE_SLIVER_ACTIVATION_COUNT = 25
+_TRIANGLE_SLIVER_AREA_MAX = 2000.0
+
 
 def build_topology(
     walls: list[Wall],
@@ -171,6 +190,12 @@ def build_topology(
 
     rooms, min_area_threshold = _polygonize_rooms_with_threshold(split_walls)
     rooms = _merge_strip_rooms(rooms, split_walls)
+    # F6: drop triangle slivers that escape _is_sliver_polygon (area
+    # above gate OR aspect/compactness decent enough to pass, but the
+    # polygon is still a 3-vertex partition artefact). Gated on room
+    # count so synthetic fixtures and clean baselines are untouched.
+    if len(rooms) >= _TRIANGLE_SLIVER_ACTIVATION_COUNT:
+        rooms = [room for room in rooms if not _is_triangle_sliver(room)]
     report = _build_connectivity_report_aggregate(
         total_nodes=total_nodes,
         total_edges=total_edges,
@@ -721,6 +746,36 @@ def _merge_strip_rooms(rooms: list[Room], walls: list[SplitWall]) -> list[Room]:
         current = next_rooms
 
     return current
+
+
+def _is_triangle_sliver(room: Room) -> bool:
+    """Return True when the room polygon is a tiny triangle artefact
+    left behind by snap / split on dense plans.
+
+    A 3-vertex polygon below ``_TRIANGLE_SLIVER_AREA_MAX`` is almost
+    always produced when three wall endpoints pair-snapped into a
+    3-cycle without bounding a real room. Larger triangles (chanfros,
+    diagonal walls) stay untouched because architectural triangles
+    cover many square metres at scan resolution.
+
+    This filter is the F6 counterpart to ``_is_sliver_polygon`` (F5):
+    that one keyed off shape (aspect, compactness) below an area gate;
+    this one keys off vertex count AND area. Any single polygon can
+    only match one of the two checks because ``_is_sliver_polygon``
+    runs earlier via ``_polygonize_rooms_with_threshold``.
+    """
+    if room.area >= _TRIANGLE_SLIVER_AREA_MAX:
+        return False
+    # Room.polygon is a closed ring — the last vertex repeats the
+    # first, so unique vertex count is len - 1 when the last equals
+    # the first and len otherwise.
+    polygon_points = room.polygon
+    if not polygon_points:
+        return False
+    vertex_count = len(polygon_points)
+    if vertex_count > 1 and polygon_points[0] == polygon_points[-1]:
+        vertex_count -= 1
+    return vertex_count <= 3
 
 
 def _is_sliver_polygon(polygon: Polygon) -> bool:
