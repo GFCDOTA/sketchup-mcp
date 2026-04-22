@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import pytest
+
 from model.types import Wall
-from openings.pruning import prune_orphan_openings
+from openings.pruning import filter_min_width_openings, prune_orphan_openings
 from openings.service import Opening
 
 
@@ -94,3 +96,51 @@ def test_prune_does_not_mutate_kept_walls_list() -> None:
     prune_orphan_openings(openings, kept)
 
     assert kept == before
+
+
+def test_filter_min_width_drops_below_threshold() -> None:
+    """Default 3.5 x thickness threshold: 6.25 x 3.5 = 21.875 px."""
+    openings = [
+        _opening("opening-1", "wall-1", "wall-2", width=15.0),  # below -> drop
+        _opening("opening-2", "wall-3", "wall-4", width=21.0),  # below -> drop
+        _opening("opening-3", "wall-5", "wall-6", width=22.0),  # above -> keep
+        _opening("opening-4", "wall-7", "wall-8", width=60.0),  # above -> keep
+    ]
+
+    result, report = filter_min_width_openings(openings, wall_thickness=6.25)
+
+    assert [o.opening_id for o in result] == ["opening-3", "opening-4"]
+    assert report.input_count == 4
+    assert report.dropped_below_min == 2
+    assert report.kept == 2
+    assert report.threshold_px == pytest.approx(21.875)
+
+
+def test_filter_min_width_respects_explicit_mul() -> None:
+    openings = [
+        _opening("opening-1", "wall-1", "wall-2", width=40.0),
+        _opening("opening-2", "wall-3", "wall-4", width=60.0),
+    ]
+
+    # mul=8 -> threshold = 50 px; drops the 40 px opening
+    result, report = filter_min_width_openings(openings, wall_thickness=6.25, min_width_mul=8.0)
+
+    assert [o.opening_id for o in result] == ["opening-2"]
+    assert report.threshold_px == pytest.approx(50.0)
+
+
+def test_filter_min_width_env_var_override(monkeypatch) -> None:
+    openings = [_opening("opening-1", "wall-1", "wall-2", width=40.0)]
+    monkeypatch.setenv("OPENINGS_MIN_WIDTH_MUL", "10.0")
+
+    # threshold = 62.5, opening 40 dropped
+    _, report = filter_min_width_openings(openings, wall_thickness=6.25)
+    assert report.dropped_below_min == 1
+    assert report.threshold_px == pytest.approx(62.5)
+
+
+def test_filter_min_width_empty() -> None:
+    result, report = filter_min_width_openings([], wall_thickness=6.25)
+    assert result == []
+    assert report.input_count == 0
+    assert report.threshold_px == pytest.approx(21.875)
