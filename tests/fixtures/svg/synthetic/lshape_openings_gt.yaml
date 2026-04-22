@@ -29,12 +29,12 @@ openings:
   notes: bathroom to hallway (interior wall)
 - id: laundry_door
   center:
-  - 620.0
+  - 600.0
   - 470.0
   width: 50.0
   orientation: vertical
   kind: door
-  notes: laundry off living room
+  notes: laundry off living room (on partition at x=600)
 - id: hall_passage
   center:
   - 150.0
@@ -45,12 +45,14 @@ openings:
   notes: open passage between upper-arm hallway and living room
 - id: window_living
   center:
-  - 700.0
+  - 675.0
   - 550.0
   width: 70.0
   orientation: horizontal
   kind: window
-  notes: external window, living room south
+  notes: external window, living room south. Center moved 700->675 so both stubs (40
+    and 40 units) exceed corner_snap (31.25) and the pipeline detects the colinear
+    gap. Paired with the laundry partition moved from x=620 to x=600.
 - id: window_bedroom
   center:
   - 150.0

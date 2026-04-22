@@ -17,8 +17,12 @@
     <path d="M 460.0,330.0 L 460.0,445.0" style="fill:none;stroke:#000000;stroke-width:6.25" />
     <path d="M 460.0,495.0 L 460.0,550" style="fill:none;stroke:#000000;stroke-width:6.25" />
     <path d="M 50,220.0 L 340.0,220.0" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 340.0,220.0 L 375.0,220.0" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 425.0,220.0 L 460.0,220.0" style="fill:none;stroke:#000000;stroke-width:6.25" />
     <path d="M 460.0,220.0 L 750,220.0" style="fill:none;stroke:#000000;stroke-width:6.25" />
     <path d="M 50,390.0 L 340.0,390.0" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 340.0,390.0 L 375.0,390.0" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 425.0,390.0 L 460.0,390.0" style="fill:none;stroke:#000000;stroke-width:6.25" />
     <path d="M 460.0,390.0 L 750,390.0" style="fill:none;stroke:#000000;stroke-width:6.25" />
   </g>
 </svg>

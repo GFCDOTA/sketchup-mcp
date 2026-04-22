@@ -6,4 +6,5 @@ pypdfium2>=4.30,<5.0
 shapely>=2.0,<3.0
 networkx>=3.3,<4.0
 pydantic>=2.8,<3.0
+jsonschema>=4.0
 pytest>=8.3,<9.0

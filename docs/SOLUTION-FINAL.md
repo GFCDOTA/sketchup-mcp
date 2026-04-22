@@ -1,5 +1,10 @@
 # SOLUTION-FINAL.md — Pacote consolidado após revisão empírica
 
+> **Note (2026-04-21):** This file documents the raster-era diagnosis and
+> per-patch verdicts. Current ingest path is SVG-first (see
+> `docs/SVG-INGEST-INTEGRATION.md`). For the current state of openings
+> refinement, see `docs/OPENINGS-REFINEMENT.md` + `docs/VALIDATION-F1-REPORT.md`.
+
 **Data:** 2026-04-21 (atualizado depois do fix estrutural em `a11724a`)
 **Status:** Fix real aplicado no branch `fix/dedup-colinear-planta74`,
 validado em ambiente Python 3.12.10 fresh. Patches 01/06 rejeitados,

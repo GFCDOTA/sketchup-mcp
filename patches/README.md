@@ -1,32 +1,60 @@
 # Patches — guia de aplicação
 
-**ATUALIZADO após empirical review + fix estrutural em `fix/dedup-colinear-planta74` (commit `a11724a`).**
+**ATUALIZADO em 2026-04-21 após housekeeping na `feat/svg-ingest-openings-refine`.**
 
 > **TL;DR**: o fix real que resolveu a planta despedaçada foi **dedup
 > colinear co-posicionada pós-Hough + re-extração adaptativa**. Está
 > em `classify/service.py` + `extract/service.py` desde `a11724a`,
 > gated por `len(candidates) > 200` (dedup) e `> 500` (re-extract).
-> Os patches 01/06 foram rejeitados, 07/08/09 adiados. Use os patches
-> 02/03/04 como "higiene" opcional e ignore o resto até revisão própria.
+> Os patches 01/06 foram rejeitados e removidos deste diretório.
+> Os patches 07/08/09 foram arquivados em `archive/`. Os patches
+> 02/03/04 continuam aqui como "higiene opcional" — ainda **não
+> integrados** e sujeitos às correções abaixo antes de qualquer PR.
 
 ---
 
-## Per-patch verdict (pós-review PR #1)
+## Patches aprovados (ainda não integrados)
 
-| Patch | Verdict | Motivo |
+Manter no topo do diretório — `patches/02-*.py`, `patches/03-*.py`,
+`patches/04-*.py`.
+
+| Patch | Verdict | Status | Motivo / correções |
+|---|---|---|---|
+| `02-density-trigger.py` | **APROVAR c/ mudanças** | não integrado | Threshold não calibrado; rerodar sweep antes de merge. |
+| `03-quality-score.py` | **APROVAR c/ correções** *(já corrigidas no arquivo)* | não integrado | `wall.p0/p1` inexistentes → `wall.start/end`; `max_component_size_within_page` → usar `largest_component_ratio` direto; F1-against-GT removido (GT é contrato do consumer, não do extrator). |
+| `04-roi-fallback-explicit.py` | **APROVAR c/ mudanças** *(já corrigidas no arquivo)* | não integrado | Manter `fallback_reason` canônico (schema 2.1.0 §4) e adicionar `fallback_used` ao lado — aditivo, não renomear. |
+
+---
+
+## Patches arquivados
+
+Movidos para `patches/archive/` com seu próprio README. Não aplicar sem
+spike isolado e revisão completa. Resumo:
+
+| Patch | Status | Por quê |
 |---|---|---|
-| 01 K-means color | **REJEITAR** | Duplica `preprocess/color_mask` que já existe no main. |
-| 02 Density trigger | **APROVAR c/ mudanças** | Threshold não calibrado; rerodar sweep antes. |
-| 03 Quality score | **APROVAR c/ correções** *(corrigidas nesta revisão)* | `wall.p0/p1` inexistentes → `wall.start/end`; `max_component_size_within_page` inexistente → usar `largest_component_ratio` direto; F1-against-GT removido (GT é contrato do consumer). |
-| 04 ROI fallback | **APROVAR c/ mudanças** *(corrigidas nesta revisão)* | Manter `fallback_reason` canônico (schema 2.1.0 §4) e adicionar `fallback_used` como aditivo — não renomear. |
-| 05 U-Net stub | **DEPRECATED** | Substituído por 08-FIXED (que por sua vez foi adiado). |
-| 06 Arc detection | **REJEITAR** | `openings/service.py` no main já implementa `_detect_arc_and_hinge` / `_arc_coverage` / `_assign_rooms` com 259 linhas de teste. Patch escrito contra HEAD stale. |
-| 07 LSD+morph FIXED | **ADIAR** | `scipy` ausente em `requirements.txt`; morph close funde gaps de porta (confirmado empírico). |
-| 08 CubiCasa DL FIXED | **ADIAR** | Sem offline fallback para weights; `strict=False` silencioso viola CLAUDE.md §6. |
-| 09 AFPlan | **APROVAR c/ gate** | Melhor dos 3 extractors alternativos, mas só atrás de `SKM_EXTRACTOR=afplan`. GPT-4 consultado considerou inferior por introduzir blobs sem trocar classe de bug. |
+| `archive/07-reconnect-fragments-FIXED.py` | **ADIADO** | `scipy` ausente em `requirements.txt`; morph close funde gaps de porta reais. |
+| `archive/08-unet-oracle-FIXED.py` | **ADIADO** | Sem offline fallback para weights; `strict=False` silencioso viola CLAUDE.md §6. |
+| `archive/09-afplan-convex-hull.py` | **APROVAR atrás de env flag** | GPT-4 consultado considerou inferior — só atrás de `SKM_EXTRACTOR=afplan` via env. |
 
-Referência: comentário de review em
-`https://github.com/GFCDOTA/sketchup-mcp/pull/1#issuecomment-4286508354`.
+Detalhes em `archive/README.md`.
+
+---
+
+## Patches removidos deste diretório (rejeitados)
+
+Deletados no housekeeping de 2026-04-21 depois de verificação contra
+`SOLUTION-FINAL.md`:
+
+- `01-kmeans-color-aware.py` — **REJEITADO**: duplica
+  `preprocess/color_mask` que já existe no main.
+- `06-arc-detection-openings.py` — **REJEITADO**: `openings/service.py`
+  já implementa `_detect_arc_and_hinge` / `_arc_coverage` /
+  `_assign_rooms` com 259 linhas de teste; patch foi escrito contra
+  HEAD stale.
+
+Se precisar olhar o conteúdo original, usar `git log -- patches/` para
+recuperar os blobs dos commits anteriores.
 
 ---
 
@@ -82,7 +110,8 @@ Baseline `p12_red.pdf` intacto (ambos os gates não disparam).
 3. **Patch 04 (ROI fallback aditivo)** — aplicar mantendo
    `fallback_reason` canônico e adicionando `fallback_used` ao lado.
 4. **Patch 09 (AFPlan) atrás de feature-flag** — só se o usuário
-   explicitar `SKM_EXTRACTOR=afplan` via env.
+   explicitar `SKM_EXTRACTOR=afplan` via env. Patch mora em
+   `archive/09-afplan-convex-hull.py`.
 5. **Semantic filter dos 4 órfãos residuais** em PR separado. PDF
    `planta_74.pdf` ainda tem 2 componentes órfãos de 2 nós cada
    (~[282,754]→[334,754] e ~[357,420]→[401,420]) que inferimos como
@@ -91,17 +120,10 @@ Baseline `p12_red.pdf` intacto (ambos os gates não disparam).
 
 ### Não aplicar sem spike isolado
 
-- Patch 07 (LSD + morph) — adiar até ter `scipy` na stack e teste
-  contra gaps de porta reais.
-- Patch 08 (CubiCasa DL) — adiar até ter pipeline offline de weights
-  + CI vendoring + SHA pinning.
-
----
-
-## Arquivos DEPRECATED — não usar
-
-- ❌ `05-unet-oracle-stub.py` — substituído por `08-unet-oracle-FIXED.py` (também adiado).
-- Versões sem `-FIXED` (`07-reconnect-fragments.py`, `08-unet-oracle-real.py`) NÃO existem neste repo; só as `-FIXED` foram commitadas.
+- Patch `archive/07` (LSD + morph) — adiar até ter `scipy` na stack e
+  teste contra gaps de porta reais.
+- Patch `archive/08` (CubiCasa DL) — adiar até ter pipeline offline de
+  weights + CI vendoring + SHA pinning.
 
 ---
 
@@ -152,16 +174,16 @@ ls runs/fase_N/
 ## Setup dependências
 
 Atual `requirements.txt` é suficiente para o fix estrutural e para os
-patches 02/03/04 corrigidos. Só os patches adiados exigem extras:
+patches 02/03/04 corrigidos. Só os patches arquivados exigem extras:
 
-### Para patch 07 (LSD + morph) — adiado
+### Para patch `archive/07` (LSD + morph) — adiado
 
 ```bash
 pip install "opencv-python-headless>=4.5.4"  # LSD no core
 pip install scipy  # KDTree, ainda não em requirements.txt
 ```
 
-### Para patch 08 (CubiCasa5K DL) — adiado
+### Para patch `archive/08` (CubiCasa5K DL) — adiado
 
 ```bash
 # Clonar repo oficial (vendor no monorepo; não usar install -e remoto)
@@ -181,7 +203,7 @@ pip install torch torchvision gdown scikit-image
 - LSD foi removido em 4.1 por patent, restaurado em 4.5.4 após expirar.
 
 ### "No module named 'floortrans'"
-- CubiCasa5K não está no PYTHONPATH (patch 08 adiado — não espere que esteja).
+- CubiCasa5K não está no PYTHONPATH (patch `archive/08` adiado — não espere que esteja).
 - Para spike isolado: `cd vendor/CubiCasa5k && pip install -e .`.
 
 ### "torch.load fails with UnpicklingError"

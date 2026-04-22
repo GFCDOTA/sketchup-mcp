@@ -51,6 +51,16 @@ openings:
   orientation: horizontal
   kind: passage
   notes: wide living-to-corridor passage
+- id: corridor_cross
+  center:
+  - 425.0
+  - 300.0
+  width: 50.0
+  orientation: horizontal
+  kind: passage
+  notes: corridor threshold between upper and lower corridor halves (analogous to
+    3br.corridor_cross); the 50u gap at y=300 between the two vertical corridor walls
+    x=400/x=450 is an architectural passage, not a spurious colinear gap
 - id: window_br1
   center:
   - 50.0

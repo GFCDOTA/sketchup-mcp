@@ -1,0 +1,29 @@
+meta:
+  source: tiny.svg
+  thickness: 6.25
+  annotator: programmatic (generate_synthetic_plans.py)
+openings:
+- id: main_entrance
+  center:
+  - 130.0
+  - 30.0
+  width: 50.0
+  orientation: horizontal
+  kind: door
+  notes: front door on top outer wall, main room
+- id: bathroom_door
+  center:
+  - 240.0
+  - 150.0
+  width: 50.0
+  orientation: vertical
+  kind: door
+  notes: door between main room and bathroom
+- id: window_main
+  center:
+  - 130.0
+  - 270.0
+  width: 70.0
+  orientation: horizontal
+  kind: window
+  notes: window on bottom wall, main room

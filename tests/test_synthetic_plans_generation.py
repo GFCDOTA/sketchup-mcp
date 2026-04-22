@@ -1,9 +1,10 @@
 """Tests for scripts/generate_synthetic_plans.py.
 
-The generator is the source of truth for four synthetic fixtures:
-``studio.svg``, ``2br.svg``, ``3br.svg``, ``lshape.svg``. These tests
-verify the generator itself (parse-ability, viewBox, GT schema) and
-the end-to-end SVG pipeline's ability to ingest each fixture.
+The generator is the source of truth for the synthetic fixtures (
+``studio.svg``, ``2br.svg``, ``3br.svg``, ``lshape.svg``, ``tiny.svg``,
+``large.svg``, ``multistory.svg``). These tests verify the generator
+itself (parse-ability, viewBox, GT schema) and the end-to-end SVG
+pipeline's ability to ingest each fixture.
 
 They intentionally do *not* assert on the exact number of detected
 rooms/openings. That is the job of downstream scoring (see
@@ -32,7 +33,9 @@ from scripts.generate_synthetic_plans import (
 )
 
 
-LAYOUT_NAMES = [name for name, _ in LAYOUTS]
+# Each LAYOUTS entry is (name, layout_fn, view_w, view_h).
+LAYOUT_NAMES = [entry[0] for entry in LAYOUTS]
+LAYOUT_VIEWBOX = {entry[0]: f"0 0 {entry[2]} {entry[3]}" for entry in LAYOUTS}
 
 
 @pytest.fixture(scope="module")
@@ -79,8 +82,9 @@ def test_studio_gt_openings_count(synthetic_dir: Path) -> None:
 def test_all_layouts_have_viewbox(synthetic_dir: Path, name: str) -> None:
     svg_path = synthetic_dir / f"{name}.svg"
     root = ET.fromstring(svg_path.read_bytes())
-    assert root.get("viewBox") == "0 0 800 600", (
-        f"{name}.svg has wrong viewBox: {root.get('viewBox')!r}"
+    expected = LAYOUT_VIEWBOX[name]
+    assert root.get("viewBox") == expected, (
+        f"{name}.svg has wrong viewBox: {root.get('viewBox')!r} (expected {expected!r})"
     )
 
 
@@ -109,9 +113,12 @@ def test_generate_all_layouts_returns_expected_counts(tmp_path: Path) -> None:
     # Opening counts are locked to the spec.
     # studio dropped to 3 after removing kitchen_opening (virtual passage).
     assert by_name["studio"][1] == 3
-    assert by_name["2br"][1] == 8
+    assert by_name["2br"][1] == 9
     assert by_name["3br"][1] == 12
     assert by_name["lshape"][1] == 8
+    assert by_name["tiny"][1] == 3
+    assert by_name["large"][1] == 17
+    assert by_name["multistory"][1] == 13
     # Wall counts after cutting are bounded below by the base geometry.
     for name, (n_walls, _) in by_name.items():
         assert n_walls > 4, f"{name} has too few walls ({n_walls}) after cuts"

@@ -1,0 +1,481 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://plan-extract-v2/observed_model.schema.json",
+  "title": "observed_model",
+  "description": "Output contract of the plan-extract-v2 pipeline. Consumed by the Ruby/SketchUp bridge (ROADMAP Fase 6) and by downstream QA tooling. Shape is append-only; old fields are kept until a major bump.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "run_id",
+    "source",
+    "bounds",
+    "roi",
+    "walls",
+    "junctions",
+    "rooms",
+    "scores",
+    "metadata",
+    "warnings",
+    "openings",
+    "peitoris"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "description": "Semantic version of this schema. Consumers SHOULD pin to a major.",
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "run_id": {
+      "description": "Hex UUID (uuid4.hex) identifying this pipeline run.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{32}$"
+    },
+    "source": {
+      "$ref": "#/$defs/Source"
+    },
+    "bounds": {
+      "$ref": "#/$defs/Bounds"
+    },
+    "roi": {
+      "description": "Per-page ROI detection result. Empty list on SVG / synthetic raster inputs (no ROI step was run).",
+      "type": "array",
+      "items": {"$ref": "#/$defs/RoiEntry"}
+    },
+    "walls": {
+      "description": "Classified, dedup'ed and topology-split walls. Coordinates are in source units (PDF page pixels @ 150 DPI; SVG user-units).",
+      "type": "array",
+      "items": {"$ref": "#/$defs/Wall"}
+    },
+    "junctions": {
+      "description": "Graph nodes produced by build_topology where two or more walls meet (or a dangling endpoint).",
+      "type": "array",
+      "items": {"$ref": "#/$defs/Junction"}
+    },
+    "rooms": {
+      "description": "Polygons found by shapely.polygonize over the wall graph. Empty is a VALID observation (CLAUDE.md invariant #1) — downstream MUST handle rooms=[].",
+      "type": "array",
+      "items": {"$ref": "#/$defs/Room"}
+    },
+    "scores": {
+      "$ref": "#/$defs/Scores"
+    },
+    "metadata": {
+      "$ref": "#/$defs/Metadata"
+    },
+    "warnings": {
+      "description": "Structured warning codes emitted by the pipeline. Duplicated inside metadata.warnings for backward compat.",
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "openings": {
+      "description": "Doors / passages / windows detected as colinear gaps between two walls.",
+      "type": "array",
+      "items": {"$ref": "#/$defs/Opening"}
+    },
+    "peitoris": {
+      "description": "Window-sill hints passed into the pipeline (used to reclassify openings as 'window'). Pass-through field: the pipeline does NOT detect peitoris itself — it consumes them.",
+      "type": "array",
+      "items": {"$ref": "#/$defs/Peitoril"}
+    }
+  },
+  "$defs": {
+    "Point2D": {
+      "description": "[x, y] in source units (origin top-left, y-axis increases downward).",
+      "type": "array",
+      "prefixItems": [{"type": "number"}, {"type": "number"}],
+      "items": false,
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "Source": {
+      "description": "Provenance for this run. Extra fields appear depending on source_type.",
+      "type": "object",
+      "required": ["filename", "source_type", "page_count", "sha256"],
+      "additionalProperties": true,
+      "properties": {
+        "filename": {
+          "type": ["string", "null"],
+          "description": "Original filename as submitted. null when the pipeline was invoked with in-memory raster (debug/tests)."
+        },
+        "source_type": {
+          "type": "string",
+          "enum": ["pdf", "svg", "raster"],
+          "description": "Ingest path taken. 'pdf' runs the raster pipeline (HoughLinesP + classify). 'svg' runs the vector pipeline (ingest_svg + main_component + openings refinement). 'raster' is a debug-only entry point."
+        },
+        "page_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sha256": {
+          "type": ["string", "null"],
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "SHA-256 hex of the raw input bytes. null for the 'raster' source_type."
+        },
+        "viewbox_width": {
+          "type": "number",
+          "description": "SVG only. Width of the root <svg> viewBox in user-units."
+        },
+        "viewbox_height": {
+          "type": "number",
+          "description": "SVG only. Height of the root <svg> viewBox in user-units."
+        },
+        "stroke_width_median": {
+          "type": "number",
+          "description": "SVG only. Median stroke-width over accepted paths. Seeds opening thresholds in detect_openings."
+        },
+        "stroke_width_samples": {
+          "type": "array",
+          "description": "SVG only. Distinct stroke-width values observed in accepted paths.",
+          "items": {"type": "number"}
+        }
+      }
+    },
+    "Bounds": {
+      "description": "Axis-aligned bounding box per page, computed from final split walls.",
+      "type": "object",
+      "required": ["pages"],
+      "additionalProperties": false,
+      "properties": {
+        "pages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["page_index", "min_x", "min_y", "max_x", "max_y"],
+            "additionalProperties": false,
+            "properties": {
+              "page_index": {"type": "integer", "minimum": 0},
+              "min_x": {"type": "number"},
+              "min_y": {"type": "number"},
+              "max_x": {"type": "number"},
+              "max_y": {"type": "number"}
+            }
+          }
+        }
+      }
+    },
+    "RoiEntry": {
+      "description": "Result of detect_architectural_roi for one page. Raster path only.",
+      "type": "object",
+      "required": ["applied", "bbox", "fallback_reason"],
+      "additionalProperties": true,
+      "properties": {
+        "applied": {"type": "boolean"},
+        "bbox": {
+          "oneOf": [
+            {"type": "null"},
+            {
+              "type": "object",
+              "required": ["min_x", "min_y", "max_x", "max_y"],
+              "additionalProperties": false,
+              "properties": {
+                "min_x": {"type": "integer"},
+                "min_y": {"type": "integer"},
+                "max_x": {"type": "integer"},
+                "max_y": {"type": "integer"}
+              }
+            }
+          ]
+        },
+        "fallback_reason": {
+          "type": ["string", "null"],
+          "description": "When applied=false, one of: 'empty_image', 'no_components', 'no_dominant_component', 'clean_input_skip_roi'."
+        },
+        "component_pixel_count": {"type": "integer", "minimum": 0},
+        "component_bbox_area": {"type": "integer", "minimum": 0},
+        "component_count": {"type": "integer", "minimum": 0}
+      }
+    },
+    "Wall": {
+      "description": "A wall segment after topology split. parent_wall_id points to the classified pre-split wall; when no split happened, the segment's wall_id itself equals its parent's id. source is the detector that produced it.",
+      "type": "object",
+      "required": [
+        "wall_id",
+        "parent_wall_id",
+        "page_index",
+        "start",
+        "end",
+        "thickness",
+        "orientation",
+        "source",
+        "confidence"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "wall_id": {"type": "string"},
+        "parent_wall_id": {"type": "string"},
+        "page_index": {"type": "integer", "minimum": 0},
+        "start": {"$ref": "#/$defs/Point2D"},
+        "end": {"$ref": "#/$defs/Point2D"},
+        "thickness": {"type": "number", "exclusiveMinimum": 0},
+        "orientation": {
+          "type": "string",
+          "enum": ["horizontal", "vertical"]
+        },
+        "source": {
+          "type": "string",
+          "description": "Known producers: 'hough_horizontal', 'hough_vertical' (raster), 'svg' (vector ingest), 'opening_bridge' (ghost wall inserted by detect_openings to close a door gap). New detectors (LSD, CubiCasa5K) append their own strings — consumers MUST treat this as open-ended."
+        },
+        "confidence": {"type": "number", "minimum": 0.0, "maximum": 1.0}
+      }
+    },
+    "Junction": {
+      "description": "Graph node at a wall endpoint or intersection. 'kind' is derived from degree.",
+      "type": "object",
+      "required": ["junction_id", "point", "degree", "kind"],
+      "additionalProperties": false,
+      "properties": {
+        "junction_id": {"type": "string"},
+        "point": {"$ref": "#/$defs/Point2D"},
+        "degree": {"type": "integer", "minimum": 1},
+        "kind": {
+          "type": "string",
+          "enum": ["end", "pass_through", "tee", "cross"],
+          "description": "degree=1 -> end; degree=2 -> pass_through; degree=3 -> tee; degree>=4 -> cross."
+        }
+      }
+    },
+    "Room": {
+      "description": "Polygon detected by shapely.polygonize over the wall graph. polygon is a CLOSED ring (last vertex MAY or MAY NOT equal the first — consumers SHOULD re-close defensively).",
+      "type": "object",
+      "required": ["room_id", "polygon", "area", "centroid"],
+      "additionalProperties": false,
+      "properties": {
+        "room_id": {"type": "string"},
+        "polygon": {
+          "type": "array",
+          "minItems": 3,
+          "items": {"$ref": "#/$defs/Point2D"}
+        },
+        "area": {"type": "number", "minimum": 0},
+        "centroid": {"$ref": "#/$defs/Point2D"}
+      }
+    },
+    "Opening": {
+      "description": "A door/window/passage detected as a colinear gap between two walls. wall_a and wall_b reference wall_ids before topology split (i.e. parent-level ids from the detect_openings stage) — they MAY NOT resolve against observed_model.walls[].wall_id directly if walls were later split.",
+      "type": "object",
+      "required": [
+        "opening_id",
+        "page_index",
+        "orientation",
+        "center",
+        "width",
+        "wall_a",
+        "wall_b",
+        "kind"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "opening_id": {"type": "string"},
+        "page_index": {"type": "integer", "minimum": 0},
+        "orientation": {
+          "type": "string",
+          "enum": ["horizontal", "vertical"]
+        },
+        "center": {"$ref": "#/$defs/Point2D"},
+        "width": {"type": "number", "minimum": 0},
+        "wall_a": {"type": "string"},
+        "wall_b": {"type": "string"},
+        "kind": {
+          "type": "string",
+          "enum": ["door", "window", "passage"],
+          "description": "window only when a peitoril hint overlaps the opening center; passage when width > door_max; door otherwise."
+        }
+      }
+    },
+    "Peitoril": {
+      "description": "Window-sill hint. Only 'bbox' is read by the pipeline; extra keys are passed through untouched.",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "bbox": {
+          "type": "array",
+          "description": "[x1, y1, x2, y2] in source units.",
+          "prefixItems": [
+            {"type": "number"},
+            {"type": "number"},
+            {"type": "number"},
+            {"type": "number"}
+          ],
+          "items": false,
+          "minItems": 4,
+          "maxItems": 4
+        }
+      }
+    },
+    "Scores": {
+      "description": "Observational scores. NOT quality gates — they reflect what the extractor observed, never ground truth (CLAUDE.md invariant #6).",
+      "type": "object",
+      "required": ["geometry", "topology", "rooms"],
+      "additionalProperties": false,
+      "properties": {
+        "geometry": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Retention: walls_kept / candidates_in. SVG path always reports 1.0 (no candidates to filter). Do not interpret as 'quality'."
+        },
+        "topology": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "(intra_page_connectivity_ratio + 1 / max_components_within_page) / 2. 1.0 means single connected component per page."
+        },
+        "rooms": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "0.5 + rooms_count / edges_count, clamped to 1.0. 0 when no rooms. A room density proxy, not a correctness score."
+        }
+      }
+    },
+    "Metadata": {
+      "description": "Non-geometric annotations about the run. Required: rooms_detected, topology_quality, connectivity, warnings. Optional keys appear only on specific pipeline paths — see per-field descriptions.",
+      "type": "object",
+      "required": ["rooms_detected", "topology_quality", "connectivity", "warnings"],
+      "additionalProperties": true,
+      "properties": {
+        "rooms_detected": {"type": "integer", "minimum": 0},
+        "topology_quality": {
+          "type": "string",
+          "enum": ["good", "fair", "poor"],
+          "description": "good if topology score >= 0.8, fair if >= 0.5, else poor."
+        },
+        "connectivity": {"$ref": "#/$defs/ConnectivityReport"},
+        "warnings": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "main_component": {
+          "description": "SVG path only. Report from topology.main_component_filter.select_main_component.",
+          "$ref": "#/$defs/MainComponentReport"
+        },
+        "openings_refinement": {
+          "description": "SVG path only. Audit trail of the four post-detection filters from openings/pruning.py. Present since schema 2.2.0.",
+          "$ref": "#/$defs/OpeningsRefinement"
+        },
+        "topology_snapshot_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "Hash of the canonicalized (walls, junctions) tuple. Stable across cosmetic run_id changes; used by regression tests to detect topology drift."
+        }
+      }
+    },
+    "ConnectivityReport": {
+      "description": "Graph connectivity metrics computed by topology.service.",
+      "type": "object",
+      "required": [
+        "node_count",
+        "edge_count",
+        "component_count",
+        "component_sizes",
+        "largest_component_ratio",
+        "rooms_detected",
+        "page_count",
+        "max_components_within_page",
+        "min_intra_page_connectivity_ratio",
+        "orphan_component_count",
+        "orphan_node_count"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "node_count": {"type": "integer", "minimum": 0},
+        "edge_count": {"type": "integer", "minimum": 0},
+        "component_count": {"type": "integer", "minimum": 0},
+        "component_sizes": {
+          "type": "array",
+          "items": {"type": "integer", "minimum": 0}
+        },
+        "largest_component_ratio": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "rooms_detected": {"type": "integer", "minimum": 0},
+        "page_count": {"type": "integer", "minimum": 0},
+        "max_components_within_page": {"type": "integer", "minimum": 0},
+        "min_intra_page_connectivity_ratio": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "orphan_component_count": {"type": "integer", "minimum": 0},
+        "orphan_node_count": {"type": "integer", "minimum": 0}
+      }
+    },
+    "MainComponentReport": {
+      "description": "Result of topology.main_component_filter.select_main_component.",
+      "type": "object",
+      "required": [
+        "component_count",
+        "selected_wall_count",
+        "second_wall_count",
+        "selected_bbox_area",
+        "second_bbox_area",
+        "dominance_applied",
+        "walls_dropped"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "component_count": {"type": "integer", "minimum": 0},
+        "selected_wall_count": {"type": "integer", "minimum": 0},
+        "second_wall_count": {"type": "integer", "minimum": 0},
+        "selected_bbox_area": {"type": "number", "minimum": 0},
+        "second_bbox_area": {"type": "number", "minimum": 0},
+        "dominance_applied": {"type": "boolean"},
+        "walls_dropped": {"type": "integer", "minimum": 0}
+      }
+    },
+    "OpeningsRefinement": {
+      "description": "Audit trail of the four SVG-only opening filters. Each sub-report records input_count (count going in), kept (count going out), and filter-specific drop bookkeeping.",
+      "type": "object",
+      "required": ["prune_orphan", "min_width", "dedup_collinear", "postfilter_roomless"],
+      "additionalProperties": false,
+      "properties": {
+        "prune_orphan": {
+          "type": "object",
+          "required": ["input_count", "dropped_orphan", "kept"],
+          "additionalProperties": false,
+          "properties": {
+            "input_count": {"type": "integer", "minimum": 0},
+            "dropped_orphan": {"type": "integer", "minimum": 0},
+            "kept": {"type": "integer", "minimum": 0}
+          }
+        },
+        "min_width": {
+          "type": "object",
+          "required": ["input_count", "dropped_below_min", "kept", "threshold_px"],
+          "additionalProperties": false,
+          "properties": {
+            "input_count": {"type": "integer", "minimum": 0},
+            "dropped_below_min": {"type": "integer", "minimum": 0},
+            "kept": {"type": "integer", "minimum": 0},
+            "threshold_px": {"type": "number", "minimum": 0}
+          }
+        },
+        "dedup_collinear": {
+          "type": "object",
+          "required": ["input_count", "merged", "kept", "gap_threshold_px"],
+          "additionalProperties": false,
+          "properties": {
+            "input_count": {"type": "integer", "minimum": 0},
+            "merged": {"type": "integer", "minimum": 0},
+            "kept": {"type": "integer", "minimum": 0},
+            "gap_threshold_px": {"type": "number", "minimum": 0}
+          }
+        },
+        "postfilter_roomless": {
+          "type": "object",
+          "required": ["input_count", "dropped_roomless", "kept", "min_area"],
+          "additionalProperties": false,
+          "properties": {
+            "input_count": {"type": "integer", "minimum": 0},
+            "dropped_roomless": {"type": "integer", "minimum": 0},
+            "kept": {"type": "integer", "minimum": 0},
+            "min_area": {"type": "number", "minimum": 0}
+          }
+        }
+      }
+    }
+  }
+}

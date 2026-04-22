@@ -63,18 +63,20 @@ openings:
   center:
   - 400.0
   - 390.0
-  width: 70.0
+  width: 50.0
   orientation: horizontal
   kind: passage
-  notes: passage from corridor to bottom-middle space
+  notes: passage from corridor to bottom-middle space (50-wide gap between y=390 row-divider
+    stubs)
 - id: corridor_cross
   center:
   - 400.0
   - 220.0
-  width: 70.0
+  width: 50.0
   orientation: horizontal
   kind: passage
-  notes: opening across corridor at row boundary
+  notes: opening across corridor at row boundary (50-wide gap between y=220 row-divider
+    stubs)
 - id: window_br1
   center:
   - 50.0

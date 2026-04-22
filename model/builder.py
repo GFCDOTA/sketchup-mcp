@@ -11,7 +11,7 @@ from model.types import (
 )
 
 
-SCHEMA_VERSION = "2.1.0"
+SCHEMA_VERSION = "2.2.0"
 
 
 def build_observed_model(

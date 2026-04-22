@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 800">
+  <g>
+    <path d="M 50,50 L 950,50" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 950,50 L 950,120.0" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 950,190.0 L 950,575.0" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 950,645.0 L 950,750" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 50,750 L 165.0,750" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 235.0,750 L 275.0,750" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 325.0,750 L 765.0,750" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 835.0,750 L 950,750" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 50,50 L 50,120.0" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 50,190.0 L 50,750" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 280,50 L 280,260" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 510,50 L 510,260" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 740,50 L 740,260" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 50,260 L 140.0,260" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 190.0,260 L 370.0,260" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 420.0,260 L 600.0,260" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 650.0,260 L 820.0,260" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 870.0,260 L 950,260" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 50,310 L 100.0,310" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 150.0,310 L 500.0,310" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 550.0,310 L 710.0,310" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 760.0,310 L 860.0,310" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 910.0,310 L 950,310" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 200,310 L 200,470" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 420,310 L 420,470" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 640,310 L 640,470" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 820,310 L 820,470" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 50,470 L 265.0,470" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 335.0,470 L 765.0,470" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 835.0,470 L 950,470" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 620,470 L 620,585.0" style="fill:none;stroke:#000000;stroke-width:6.25" />
+    <path d="M 620,635.0 L 620,750" style="fill:none;stroke:#000000;stroke-width:6.25" />
+  </g>
+</svg>

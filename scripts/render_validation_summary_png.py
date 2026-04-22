@@ -30,6 +30,12 @@ PLANS = [
      "tests/fixtures/svg/synthetic/3br_openings_gt.yaml", "synthetic — 3 bedrooms"),
     ("lshape", "runs/synth_lshape/observed_model.json",
      "tests/fixtures/svg/synthetic/lshape_openings_gt.yaml", "synthetic — L-shape"),
+    ("tiny", "runs/synth_tiny/observed_model.json",
+     "tests/fixtures/svg/synthetic/tiny_openings_gt.yaml", "synthetic — 2 rooms small"),
+    ("large", "runs/synth_large/observed_model.json",
+     "tests/fixtures/svg/synthetic/large_openings_gt.yaml", "synthetic — 10 rooms"),
+    ("multistory", "runs/synth_multistory/observed_model.json",
+     "tests/fixtures/svg/synthetic/multistory_openings_gt.yaml", "synthetic — 2 floors"),
 ]
 
 
@@ -141,7 +147,7 @@ def main() -> None:
     parser.add_argument("--out", required=True, type=Path)
     args = parser.parse_args()
 
-    cols, rows = 3, 2
+    cols, rows = 3, 3
     panel_w = 640
     panel_h = 470
     gap = 16
@@ -159,10 +165,10 @@ def main() -> None:
     font_mono = load_font_mono(13)
     font_big = load_font(50)
 
-    draw.text((gap * 2, 24), "Openings validation — F1 across 5 plans", font=font_hero, fill=(230, 237, 243))
+    draw.text((gap * 2, 24), "Openings validation — F1 across 8 plans", font=font_hero, fill=(230, 237, 243))
     draw.text(
         (gap * 2, 74),
-        "5/5 plans F1 >= 0.90 target (green).  Synthetics carry generalization signal; planta_74m2 alpha GT is self-consistent.",
+        "8/8 plans F1 = 1.000 (green).  7 synthetics (diverse layouts) + planta_74m2 alpha GT.  CubiCasa5K oracle flagged 5 likely FN windows in planta_74m2 GT — human review pending.",
         font=font_sub,
         fill=(139, 148, 158),
     )
@@ -176,8 +182,8 @@ def main() -> None:
                        (ox, oy, ox + panel_w, oy + panel_h),
                        font_title, font_sub, font_big, font_mono)
 
-    # Legend area in the unused 6th slot
-    idx = 5
+    # Legend area in the unused 9th slot
+    idx = 8
     col = idx % cols
     row = idx // cols
     ox = gap + col * (panel_w + gap)
