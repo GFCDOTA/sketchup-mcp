@@ -22,3 +22,11 @@ runs/
 .vscode/
 .DS_Store
 Thumbs.db
+# vendored CubiCasa5K (dev-time oracle, manual setup — see vendor/CubiCasa5k/README.md)
+vendor/CubiCasa5k/weights/*.pkl
+vendor/CubiCasa5k/weights/*.pth
+vendor/CubiCasa5k/repo/
+# keep the placeholders so the folder structure is versioned
+!vendor/CubiCasa5k/.gitkeep
+!vendor/CubiCasa5k/weights/.gitkeep
+!vendor/CubiCasa5k/README.md

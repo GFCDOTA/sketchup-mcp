@@ -1,0 +1,202 @@
+meta:
+  source: planta_74m2.svg (Anexo-1 planta padrao 74-93m2 T1-Final-4A-3B)
+  thickness: 6.25
+  annotator: auto-derived from pipeline v1 (2026-04-21); ALPHA GT — requires human
+    review
+  policy: each detection assumed TP until human audit; F1 against this GT is self-consistency,
+    NOT correctness
+  notes: Synthetics carry the real generalization signal (F1 0.91-1.0 on 4/4 distinct
+    layouts).
+openings:
+- id: opening-2
+  center:
+  - 199.351
+  - 219.286
+  width: 46.075
+  orientation: horizontal
+  kind: door
+  notes: auto-derived
+- id: opening-3
+  center:
+  - 371.416
+  - 233.524
+  width: 35.036
+  orientation: horizontal
+  kind: door
+  notes: auto-derived
+- id: opening-5
+  center:
+  - 367.656
+  - 289.198
+  width: 35.836
+  orientation: horizontal
+  kind: door
+  notes: auto-derived
+- id: opening-6
+  center:
+  - 680.827
+  - 292.078
+  width: 35.675
+  orientation: horizontal
+  kind: door
+  notes: auto-derived
+- id: opening-8
+  center:
+  - 416.772
+  - 336.075
+  width: 40.957
+  orientation: horizontal
+  kind: door
+  notes: auto-derived
+- id: opening-10
+  center:
+  - 137.758
+  - 346.313
+  width: 49.277
+  orientation: horizontal
+  kind: door
+  notes: auto-derived
+- id: opening-12
+  center:
+  - 98.722
+  - 471.9
+  width: 22.718
+  orientation: horizontal
+  kind: door
+  notes: auto-derived
+- id: opening-35
+  center:
+  - 73.204
+  - 328.236
+  width: 36.475
+  orientation: vertical
+  kind: door
+  notes: auto-derived
+- id: opening-37
+  center:
+  - 72.804
+  - 489.98
+  width: 27.839
+  orientation: vertical
+  kind: door
+  notes: auto-derived
+- id: opening-40
+  center:
+  - 88.083
+  - 435.105
+  width: 73.59
+  orientation: vertical
+  kind: passage
+  notes: auto-derived
+- id: opening-43
+  center:
+  - 105.521
+  - 337.995
+  width: 55.994
+  orientation: vertical
+  kind: door
+  notes: auto-derived
+- id: opening-44
+  center:
+  - 106.401
+  - 377.111
+  width: 22.238
+  orientation: vertical
+  kind: door
+  notes: auto-derived
+- id: opening-45
+  center:
+  - 105.281
+  - 525.256
+  width: 22.879
+  orientation: vertical
+  kind: door
+  notes: auto-derived
+- id: opening-46
+  center:
+  - 110.081
+  - 489.98
+  width: 36.159
+  orientation: vertical
+  kind: door
+  notes: auto-derived
+- id: opening-49
+  center:
+  - 175.754
+  - 283.36
+  width: 43.037
+  orientation: vertical
+  kind: door
+  notes: auto-derived
+- id: opening-54
+  center:
+  - 316.461
+  - 472.781
+  width: 56.795
+  orientation: vertical
+  kind: passage
+  notes: auto-derived
+- id: opening-56
+  center:
+  - 319.981
+  - 544.615
+  width: 50.075
+  orientation: vertical
+  kind: door
+  notes: auto-derived
+- id: opening-57
+  center:
+  - 331.661
+  - 447.826
+  width: 41.437
+  orientation: vertical
+  kind: door
+  notes: auto-derived
+- id: opening-61
+  center:
+  - 431.73
+  - 254.683
+  width: 54.314
+  orientation: vertical
+  kind: door
+  notes: auto-derived
+- id: opening-62
+  center:
+  - 437.37
+  - 308.877
+  width: 54.075
+  orientation: vertical
+  kind: door
+  notes: auto-derived
+- id: opening-65
+  center:
+  - 448.688
+  - 364.471
+  width: 34.717
+  orientation: vertical
+  kind: door
+  notes: auto-derived
+- id: opening-66
+  center:
+  - 499.323
+  - 454.222
+  width: 38.235
+  orientation: vertical
+  kind: door
+  notes: auto-derived
+- id: opening-67
+  center:
+  - 518.202
+  - 401.828
+  width: 33.277
+  orientation: vertical
+  kind: door
+  notes: auto-derived
+- id: opening-68
+  center:
+  - 533.56
+  - 390.15
+  width: 41.595
+  orientation: vertical
+  kind: door
+  notes: auto-derived
