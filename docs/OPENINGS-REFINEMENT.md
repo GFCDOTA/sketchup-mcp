@@ -82,42 +82,62 @@ Raster: sha256 identico em todos os 4 runs (baseline / A / A+B / A+B+C).
 
 ---
 
-## Estado atual (pos A+B+C)
+## 2026-04-21 — PR `feat(openings): close 33->24 gap` (commit `b1827a2`)
+
+Duas mudancas fecharam o gap para o target arquitetonico:
+
+1. **Filtro C relax**: `perp_mul` 1.0 -> 1.5. Analise empirica dos 33
+   restantes identificou 4 pares de duplicatas horizontais em offset
+   perp 7-8 px (> 1 x thickness mas < 1.5 x thickness). Com o gate
+   relaxado, mais o efeito transitivo via union-find, o filtro C
+   captura 11 merges (vs 4 antes).
+2. **Filtro D implementado** (`postfilter_roomless_openings`): roda
+   apos `build_topology`, drop openings cujos 2 side-points
+   perpendiculares caem fora de qualquer room legitimo
+   (area >= thickness^2 x 25). Conservador: mantem porta externa
+   onde um lado tem room interior. Em planta_74m2 remove os 3 "no_legit"
+   (opening-36, -38, -39 no canto inferior esquerdo entre walls sem room).
+
+```
+openings: 33 -> 26 -> 24  (filter C relaxed: -7 extra; filter D: -2)
+```
+
+---
+
+## Estado atual (pos A+B+C+D)
 
 ```
 walls:       261
 rooms:       23
 junctions:   75
-openings:    33      <-- ainda acima do target 15-25
+openings:    24      <-- DENTRO DO TARGET (15-25)
 warnings:    []
 ```
 
-Reducao total: **68 -> 33 (-51%)**.
+Reducao total: **68 -> 24 (-65%)**.
 
-### Gap para target
+### Breakdown final das 24
 
-33 openings restantes, meta arquitetonica 15-25. Delta 8-18.
-
-Proximos candidatos (fora deste ciclo):
-- **Filtro D** (`postfilter_roomless_openings`): opt-in, remove openings
-  cujos 2 lados nao tocam room legitimo (area > `thickness^2 * 25`).
-  Risco: pode remover porta externa onde um lado e fachada sem room
-  interno. Default OFF.
-- **Arc coverage detection** (raster-first): patch 06 rejeitado no ciclo
-  raster anterior; reconsiderar para SVG se aparecer real falso positivo.
-- **Validacao em outros SVGs**: planta_74m2 e sintetico; SVGs de outras
-  origens podem revelar se 33 sao legit ou se ha mais filtros aplicaveis.
+- **18** com ambos os lados em room legitimo (portas internas)
+- **6** com um lado em room legitimo (portas externas / perimetro)
+- **0** sem nenhum lado legitimo (filtro D removeu)
 
 ### Auditoria visual
 
-Artefato visual gerado com:
+Geracao:
 ```
-python scripts/plot_openings_comparison.py \
-  --before runs/openings_refine_baseline/observed_model.json \
-  --after  runs/openings_refine_v1_c/observed_model.json \
-  --out    runs/openings_refine_v1_c/openings_final_diff.svg
+python scripts/render_openings_conclusion_png.py --out runs/openings_conclusion.png
 ```
 
-`openings_final_diff.svg`: openings kept em verde (33), dropped em
-vermelho (35). Todos os reds estao fora do bbox da planta principal
-ou sao tiny gaps (<22px). Nenhum tocou porta visualmente legit.
+`openings_conclusion.png` (2x2 grid): baseline / +A / +A+B / +A+B+C+D.
+Cada painel mostra walls em cinza claro e openings como circulos
+coloridos por etapa, com contador e delta chip no topo.
+
+### Proximos candidatos (fora deste ciclo)
+
+- **Validacao em outros SVGs**: planta_74m2 foi o unico input; SVGs de
+  outras origens podem expor novos edge cases.
+- **Openings schema richer**: adicionar `bridge_wall_id` como campo do
+  `Opening` permitiria auditoria mais direta do vinculo opening <-> bridge.
+- **Proximo passo arquitetural** (por memoria): schema freeze +
+  Ruby/SketchUp bridge (Fase 6 do ROADMAP).

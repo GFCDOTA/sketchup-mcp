@@ -14,7 +14,7 @@ STAGES = [
     ("runs/openings_refine_baseline/observed_model.json", "baseline", "#d6604d"),
     ("runs/openings_refine_v1_a/observed_model.json", "+ prune orphan (A)", "#e08214"),
     ("runs/openings_refine_v1_b/observed_model.json", "+ size floor (B)", "#fdb863"),
-    ("runs/openings_refine_v1_c/observed_model.json", "+ dedup colinear (C)", "#1b7837"),
+    ("runs/openings_refine_final/observed_model.json", "+ dedup + roomless (C+D)", "#1b7837"),
 ]
 
 
