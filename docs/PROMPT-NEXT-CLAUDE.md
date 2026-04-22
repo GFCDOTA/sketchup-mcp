@@ -1,5 +1,21 @@
 # PROMPT-NEXT-CLAUDE.md — handoff para o próximo Claude
 
+**NOTE 2026-04-21 (sessao de refinamento):** o texto abaixo descreve a
+sessao do `feat/svg-ingest` original (main-plan isolation); ja foi
+implementado em `f80ab33`. Depois veio um ciclo de openings refinement
+em `feat/svg-ingest-openings-refine` que reduziu 68 -> 33 openings em
+tres commits:
+
+- `55e6cb1` feat(openings): prune orphan openings after main-component filter
+- `8425c7f` feat(openings): filter tiny gaps below 3.5x wall thickness
+- `06f934f` feat(openings): dedup colinear duplicates from double-wall detection
+
+Estado pos-refinamento: ver `docs/OPENINGS-REFINEMENT.md`. Proximos
+candidatos: filtro D (postfilter_roomless opt-in) e validacao em SVGs
+reais alem de planta_74m2.
+
+---
+
 **Última sessão:** 2026-04-21 (Felipe + Claude Opus 4.7 via Claude Code)
 **Branch:** `feat/svg-ingest` (a partir de `origin/main`)
 **Estado:** integração SVG fim-a-fim **funcionando**, próximo passo **planejado mas não executado**.
