@@ -3,7 +3,7 @@
   "pdf_sha256_optional": null,
   "expected_walls": 33,
   "expected_walls_tolerance": 2,
-  "expected_rooms": 19,
+  "expected_rooms": 18,
   "expected_rooms_tolerance": 0,
   "expected_openings": 6,
   "expected_openings_tolerance": 1,

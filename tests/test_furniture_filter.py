@@ -123,7 +123,10 @@ def test_p12_no_false_positive_furniture() -> None:
     )
     assert obs["metadata"]["topology_snapshot_sha256"] == expected_hash
     assert len(obs["walls"]) == 33
-    assert len(obs["rooms"]) == 19
+    # F6 dedup absorbs room-17 (3-vertex sliver) into its largest
+    # neighbour, taking p12 from 19 to 18 legitimate rooms. The
+    # topology hash stays frozen because walls/junctions are unchanged.
+    assert len(obs["rooms"]) == 18
 
 
 def test_planta_74_orphan_count_drops() -> None:

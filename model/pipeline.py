@@ -238,6 +238,13 @@ def _build_warnings(
         warnings.append("many_orphan_components")
     if not rooms:
         warnings.append("rooms_not_detected")
+    # F6: warn when the final room count falls outside the expected
+    # range for a typical residential floor plan. Does not block
+    # anything — the user still sees all rooms — but surfaces a signal
+    # that dedup may have been too aggressive (<9) or not aggressive
+    # enough (>18), useful when tuning thresholds across new plantas.
+    if rooms and (len(rooms) < 9 or len(rooms) > 18):
+        warnings.append("room_count_deviation")
     return warnings
 
 

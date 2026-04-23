@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from collections import defaultdict
 from itertools import combinations
 
 import networkx as nx
-from shapely.geometry import LineString, Polygon
+from shapely.geometry import LineString, Polygon, box
 from shapely.ops import polygonize, unary_union
 
 from model.types import (
@@ -93,6 +94,42 @@ _STRIP_HIGH_RATIO_ASPECT_MAX = 0.14
 _STRIP_HIGH_RATIO_WIDTH_FACTOR = 5.0
 _STRIP_MAX_ITER = 5
 
+# F6 room dedup thresholds — a final pass after F5 strip-merge to tame
+# residual sliver artefacts that polygonize produced at wall junctions
+# and small gaps. F6 only operates on the room set (walls/junctions are
+# already frozen by this point so the topology snapshot hash is not
+# affected). The three passes are composed in order:
+#
+#   F6.1 _drop_micro_slivers — reject polygons below a thickness-scaled
+#     floor EXCEPT when the polygon looks architecturally plausible (a
+#     compact quad with near-unit aspect, like a small closet). The
+#     ``(4 * t) ** 2`` floor corresponds to "smaller than a 4-thickness
+#     square" — at p12 raster scale that is ~233 px², at planta_74
+#     scale ~2100 px². The ``max(1000.0, ...)`` guard exists so a very
+#     thin-line plan does not lose the floor entirely.
+#   F6.2 _merge_3vertex_slivers — triangular polygons are almost always
+#     polygonize artefacts (real rooms are rectilinear). Absorb them
+#     into their largest shared-boundary neighbour. Iterative: one
+#     triangle can absorb into a growing neighbour over multiple
+#     passes.
+#   F6.3 _merge_adjacency_pairs — catches tight quad-pair splits where
+#     dedup left two adjacent rectangles that are really one room.
+#     Conservative: requires (a) boundary sharing > 55% of the smaller
+#     room's perimeter, (b) bbox overlap > 30% of the smaller bbox,
+#     and (c) the smaller room is below 5000 px² (legit big rooms do
+#     not need to be merged).
+_F6_MICRO_FLOOR_ABS = 1000.0
+_F6_MICRO_FLOOR_FACTOR = 4.0
+_F6_PROTECTED_ASPECT_MIN = 0.7
+_F6_PROTECTED_COMPACTNESS_MIN = 0.5
+_F6_PROTECTED_MIN_VERTICES = 4
+_F6_3VERT_MAX_ITER = 3
+_F6_ADJ_SHARED_RATIO_MIN = 0.55
+_F6_ADJ_BBOX_OVERLAP_MIN = 0.30
+_F6_ADJ_SMALL_AREA_MAX = 5000.0
+_F6_ROOM_COUNT_DEVIATION_MIN = 9
+_F6_ROOM_COUNT_DEVIATION_MAX = 18
+
 
 def build_topology(
     walls: list[Wall],
@@ -171,6 +208,12 @@ def build_topology(
 
     rooms, min_area_threshold = _polygonize_rooms_with_threshold(split_walls)
     rooms = _merge_strip_rooms(rooms, split_walls)
+    # F6: dedup pass — drop micro slivers, absorb triangles, merge
+    # obvious split pairs. Operates on rooms only, so topology snapshot
+    # hash (derived from walls + junctions above) is unaffected.
+    rooms = _drop_micro_slivers(rooms, split_walls)
+    rooms = _merge_3vertex_slivers(rooms)
+    rooms = _merge_adjacency_pairs(rooms)
     report = _build_connectivity_report_aggregate(
         total_nodes=total_nodes,
         total_edges=total_edges,
@@ -721,6 +764,305 @@ def _merge_strip_rooms(rooms: list[Room], walls: list[SplitWall]) -> list[Room]:
         current = next_rooms
 
     return current
+
+
+def _drop_micro_slivers(rooms: list[Room], walls: list[SplitWall]) -> list[Room]:
+    """Drop rooms whose area falls below a thickness-scaled floor.
+
+    The floor is ``max(_F6_MICRO_FLOOR_ABS, (factor * median_thickness) ** 2)``
+    where ``factor = _F6_MICRO_FLOOR_FACTOR``. Intuition: a legitimate
+    room must cover at least a square of side ``factor * wall thickness``.
+    At p12 raster scale (median ~3.8 px) that produces a 1000 px² floor
+    (absolute guard dominates); at planta_74 scale (median ~11.5 px) it
+    grows to ~2100 px² which matches the raster's "visibly reasonable"
+    size.
+
+    The filter protects "small but architecturally plausible" rooms via
+    a shape escape hatch: a polygon with >=4 vertices, aspect > 0.7, and
+    compactness > 0.5 is kept even when below the floor. This saves
+    small closets and utility rooms that read as rectangular (high
+    aspect) and compact, while still catching thin splinters produced
+    by polygonize at the end of wall splits.
+    """
+    if not rooms:
+        return rooms
+    thicknesses = [w.thickness for w in walls if w.thickness > 0]
+    if not thicknesses:
+        return rooms
+    thicknesses.sort()
+    median_thickness = thicknesses[len(thicknesses) // 2]
+    floor = max(
+        _F6_MICRO_FLOOR_ABS,
+        (_F6_MICRO_FLOOR_FACTOR * max(1.0, median_thickness)) ** 2,
+    )
+
+    kept: list[Room] = []
+    for room in rooms:
+        if room.area >= floor:
+            kept.append(room)
+            continue
+        if len(room.polygon) < 3:
+            continue  # degenerate, drop regardless
+        try:
+            poly = Polygon(room.polygon)
+        except Exception:
+            continue
+        if not poly.is_valid or poly.is_empty:
+            continue
+        minx, miny, maxx, maxy = poly.bounds
+        bbox_w = max(1e-6, maxx - minx)
+        bbox_h = max(1e-6, maxy - miny)
+        aspect = min(bbox_w, bbox_h) / max(bbox_w, bbox_h)
+        perim = poly.length
+        compactness = 4.0 * math.pi * poly.area / (perim * perim) if perim > 0 else 0.0
+        if (
+            len(room.polygon) >= _F6_PROTECTED_MIN_VERTICES
+            and aspect >= _F6_PROTECTED_ASPECT_MIN
+            and compactness >= _F6_PROTECTED_COMPACTNESS_MIN
+        ):
+            kept.append(room)  # architecturally plausible small room
+    return kept
+
+
+def _merge_3vertex_slivers(rooms: list[Room]) -> list[Room]:
+    """Absorb triangular polygons into their largest shared-boundary neighbour.
+
+    Polygonize occasionally produces 3-vertex polygons where two walls
+    converge at a gap or where a split intersects at an angle. These
+    are always artefacts — a real room in a floor plan has >=4 sides.
+    The merger picks the neighbour with the highest shared boundary
+    length as the absorption target and performs a Shapely union. If
+    the union would turn into a MultiPolygon or become invalid the
+    merge is skipped (the triangle is left in place rather than
+    corrupting the geometry).
+
+    Iterative: a triangle that merges first may become a quad; a
+    neighbouring triangle will then share a longer boundary with the
+    grown room and merge in the next pass. Converges within a handful
+    of passes in practice (``_F6_3VERT_MAX_ITER`` caps the cost in
+    pathological inputs).
+    """
+    if len(rooms) < 2:
+        return rooms
+
+    current = list(rooms)
+    for _ in range(_F6_3VERT_MAX_ITER):
+        polygons: dict[str, Polygon] = {}
+        for r in current:
+            if len(r.polygon) < 3:
+                continue
+            try:
+                poly = Polygon(r.polygon)
+                if poly.is_valid:
+                    polygons[r.room_id] = poly
+            except Exception:
+                continue
+
+        merges: dict[str, str] = {}  # triangle_id -> target_id
+        claimed_strips: set[str] = set()
+        claimed_targets: set[str] = set()
+        for triangle in current:
+            if len(triangle.polygon) != 3:
+                continue
+            if triangle.room_id in claimed_strips or triangle.room_id in claimed_targets:
+                continue
+            tp = polygons.get(triangle.room_id)
+            if tp is None:
+                continue
+            best_target: str | None = None
+            best_shared = 0.0
+            for other in current:
+                if other.room_id == triangle.room_id:
+                    continue
+                if other.room_id in claimed_strips:
+                    continue
+                op = polygons.get(other.room_id)
+                if op is None:
+                    continue
+                if not tp.touches(op):
+                    continue
+                try:
+                    shared = tp.boundary.intersection(op.boundary).length
+                except Exception:
+                    shared = 0.0
+                if shared > best_shared:
+                    best_shared = shared
+                    best_target = other.room_id
+            if best_target is None or best_shared <= 0:
+                continue
+            merges[triangle.room_id] = best_target
+            claimed_strips.add(triangle.room_id)
+            claimed_targets.add(best_target)
+
+        if not merges:
+            break
+
+        target_updates: dict[str, Polygon] = {}
+        for strip_id, target_id in merges.items():
+            target_poly = target_updates.get(target_id, polygons[target_id])
+            strip_poly = polygons[strip_id]
+            try:
+                union_poly = target_poly.union(strip_poly)
+            except Exception:
+                continue
+            if union_poly.geom_type != "Polygon" or not union_poly.is_valid:
+                continue
+            target_updates[target_id] = union_poly
+
+        if not target_updates:
+            break
+
+        next_rooms: list[Room] = []
+        for r in current:
+            if r.room_id in merges and merges[r.room_id] in target_updates:
+                # Triangle absorbed — drop.
+                continue
+            if r.room_id in target_updates:
+                new_poly = target_updates[r.room_id]
+                next_rooms.append(
+                    Room(
+                        room_id=r.room_id,
+                        polygon=[
+                            (float(x), float(y))
+                            for x, y in new_poly.exterior.coords[:-1]
+                        ],
+                        area=float(new_poly.area),
+                        centroid=(
+                            float(new_poly.centroid.x),
+                            float(new_poly.centroid.y),
+                        ),
+                    )
+                )
+            else:
+                next_rooms.append(r)
+        current = next_rooms
+
+    return current
+
+
+def _merge_adjacency_pairs(rooms: list[Room]) -> list[Room]:
+    """Final relaxed pass: merge room pairs that are visibly one room.
+
+    Two rooms are considered a split pair when:
+      - their shared boundary exceeds ``_F6_ADJ_SHARED_RATIO_MIN`` of
+        the smaller room's perimeter (the smaller one is "mostly inside"
+        the larger);
+      - their bounding boxes overlap by more than
+        ``_F6_ADJ_BBOX_OVERLAP_MIN`` of the smaller bbox (they occupy
+        the same region spatially, not just touch along an edge);
+      - the smaller one is below ``_F6_ADJ_SMALL_AREA_MAX`` (a sanity
+        gate; we do not merge two genuinely large rooms even if they
+        happen to share a long wall).
+
+    When the criteria hold, the smaller room is merged into the larger.
+    Each room participates in at most one merge per pass (greedy; a
+    chain like A-B-C only consumes one link, but any residual pair
+    would be caught by a subsequent run).
+    """
+    if len(rooms) < 2:
+        return rooms
+
+    polygons: dict[str, Polygon] = {}
+    area_map: dict[str, float] = {}
+    for r in rooms:
+        if len(r.polygon) < 3:
+            continue
+        try:
+            poly = Polygon(r.polygon)
+            if poly.is_valid:
+                polygons[r.room_id] = poly
+                area_map[r.room_id] = poly.area
+        except Exception:
+            continue
+    if len(polygons) < 2:
+        return rooms
+
+    ids = [r.room_id for r in rooms if r.room_id in polygons]
+    merges: dict[str, str] = {}  # smaller_id -> larger_id
+    claimed: set[str] = set()
+    for i, a_id in enumerate(ids):
+        if a_id in claimed:
+            continue
+        ap = polygons[a_id]
+        a_area = area_map[a_id]
+        a_perim = max(1e-6, ap.length)
+        for b_id in ids[i + 1 :]:
+            if b_id in claimed:
+                continue
+            bp = polygons[b_id]
+            if not ap.touches(bp):
+                continue
+            try:
+                shared = ap.boundary.intersection(bp.boundary).length
+            except Exception:
+                shared = 0.0
+            if shared <= 0:
+                continue
+            b_area = area_map[b_id]
+            b_perim = max(1e-6, bp.length)
+            shared_ratio = shared / min(a_perim, b_perim)
+            if shared_ratio <= _F6_ADJ_SHARED_RATIO_MIN:
+                continue
+            ab = box(*ap.bounds)
+            bb = box(*bp.bounds)
+            min_bbox_area = max(1e-6, min(ab.area, bb.area))
+            bbox_overlap = ab.intersection(bb).area / min_bbox_area
+            if bbox_overlap <= _F6_ADJ_BBOX_OVERLAP_MIN:
+                continue
+            min_area = min(a_area, b_area)
+            if min_area >= _F6_ADJ_SMALL_AREA_MAX:
+                continue
+            # Merge smaller into larger.
+            if a_area <= b_area:
+                smaller, larger = a_id, b_id
+            else:
+                smaller, larger = b_id, a_id
+            merges[smaller] = larger
+            claimed.add(smaller)
+            claimed.add(larger)
+            break  # a is consumed, move on
+
+    if not merges:
+        return rooms
+
+    target_updates: dict[str, Polygon] = {}
+    for smaller, larger in merges.items():
+        larger_poly = target_updates.get(larger, polygons[larger])
+        smaller_poly = polygons[smaller]
+        try:
+            union_poly = larger_poly.union(smaller_poly)
+        except Exception:
+            continue
+        if union_poly.geom_type != "Polygon" or not union_poly.is_valid:
+            continue
+        target_updates[larger] = union_poly
+
+    if not target_updates:
+        return rooms
+
+    next_rooms: list[Room] = []
+    for r in rooms:
+        if r.room_id in merges and merges[r.room_id] in target_updates:
+            continue
+        if r.room_id in target_updates:
+            new_poly = target_updates[r.room_id]
+            next_rooms.append(
+                Room(
+                    room_id=r.room_id,
+                    polygon=[
+                        (float(x), float(y))
+                        for x, y in new_poly.exterior.coords[:-1]
+                    ],
+                    area=float(new_poly.area),
+                    centroid=(
+                        float(new_poly.centroid.x),
+                        float(new_poly.centroid.y),
+                    ),
+                )
+            )
+        else:
+            next_rooms.append(r)
+    return next_rooms
 
 
 def _is_sliver_polygon(polygon: Polygon) -> bool:

@@ -27,12 +27,17 @@ P12_PEITORIS = REPO_ROOT / "runs" / "proto" / "p12_peitoris.json"
 EXPECTED_SHA = "39b4138f4fd5613ed897824657b0329445d2eb332a6a1d810da75933ba4b5ce3"
 EXPECTED_WALLS = 33
 EXPECTED_JUNCS = 65
-EXPECTED_ROOMS = 19
+# F6 dedup absorbs room-17 (a 3-vertex sliver between room-16 and
+# room-18) into room-16. Walls/junctions are unchanged — the topology
+# snapshot hash remains byte-identical to the Wave 1 baseline.
+EXPECTED_ROOMS = 18
 EXPECTED_OPENINGS = 6
 EXPECTED_PEITORIS = 2
 EXPECTED_TOPOLOGY_SCORE = 1.0
 EXPECTED_GEOMETRY_SCORE = 0.3226
-EXPECTED_ROOMS_SCORE = 0.7346
+# Rooms score depends on room count (density over edge count); drops
+# from 0.7346 to 0.7222 when a single room is absorbed.
+EXPECTED_ROOMS_SCORE = 0.7222
 
 
 def _require_inputs():
