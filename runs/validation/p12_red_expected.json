@@ -1,0 +1,14 @@
+{
+  "pdf_filename": "p12_red.pdf",
+  "pdf_sha256_optional": null,
+  "expected_walls": 33,
+  "expected_walls_tolerance": 2,
+  "expected_rooms": 19,
+  "expected_rooms_tolerance": 0,
+  "expected_openings": 6,
+  "expected_openings_tolerance": 1,
+  "expected_largest_ratio_min": 1.0,
+  "expected_orphan_node_max": 0,
+  "expected_topology_snapshot_sha256": "39b4138f4fd5613ed897824657b0329445d2eb332a6a1d810da75933ba4b5ce3",
+  "notes": "baseline limpo (pré-vermelhado), gate GOLDEN"
+}

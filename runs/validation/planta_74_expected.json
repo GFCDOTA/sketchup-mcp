@@ -1,0 +1,9 @@
+{
+  "pdf_filename": "planta_74.pdf",
+  "expected_walls_range": [120, 240],
+  "expected_rooms_range": [11, 35],
+  "expected_openings_range": [8, 30],
+  "expected_largest_ratio_min": 0.90,
+  "expected_orphan_node_max": 5,
+  "notes": "planta real noisy, faixas amplas até F6 calibrar"
+}
