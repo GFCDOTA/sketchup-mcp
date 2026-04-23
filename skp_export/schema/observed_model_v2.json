@@ -1,0 +1,215 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://sketchup-mcp/schemas/observed_model_v2.json",
+  "title": "ObservedModel v2",
+  "description": "JSONSchema for observed_model.json emitted by the Python pipeline (schema 2.x).",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "run_id",
+    "source",
+    "bounds",
+    "roi",
+    "walls",
+    "junctions",
+    "rooms",
+    "scores",
+    "metadata",
+    "warnings",
+    "openings",
+    "peitoris"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^2\\."
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "object",
+      "required": ["filename", "source_type"],
+      "properties": {
+        "filename": {"type": "string"},
+        "source_type": {"type": "string"},
+        "page_count": {"type": "integer", "minimum": 0},
+        "sha256": {"type": "string"}
+      }
+    },
+    "bounds": {
+      "type": "object",
+      "required": ["pages"],
+      "properties": {
+        "pages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["page_index", "min_x", "min_y", "max_x", "max_y"],
+            "properties": {
+              "page_index": {"type": "integer"},
+              "min_x": {"type": "number"},
+              "min_y": {"type": "number"},
+              "max_x": {"type": "number"},
+              "max_y": {"type": "number"}
+            }
+          }
+        }
+      }
+    },
+    "roi": {
+      "type": "array"
+    },
+    "walls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "wall_id",
+          "page_index",
+          "start",
+          "end",
+          "thickness",
+          "orientation",
+          "source",
+          "confidence"
+        ],
+        "properties": {
+          "wall_id": {"type": "string"},
+          "parent_wall_id": {"type": ["string", "null"]},
+          "page_index": {"type": "integer"},
+          "start": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {"type": "number"}
+          },
+          "end": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {"type": "number"}
+          },
+          "thickness": {"type": "number", "minimum": 0},
+          "orientation": {"type": "string"},
+          "source": {"type": "string"},
+          "confidence": {"type": "number"}
+        }
+      }
+    },
+    "junctions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["junction_id", "point", "degree"],
+        "properties": {
+          "junction_id": {"type": "string"},
+          "point": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {"type": "number"}
+          },
+          "degree": {"type": "integer", "minimum": 0},
+          "kind": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "rooms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["room_id", "polygon", "area", "centroid"],
+        "properties": {
+          "room_id": {"type": "string"},
+          "polygon": {
+            "type": "array",
+            "minItems": 3,
+            "items": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {"type": "number"}
+            }
+          },
+          "area": {"type": "number"},
+          "centroid": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {"type": "number"}
+          }
+        }
+      }
+    },
+    "scores": {
+      "type": "object",
+      "required": ["geometry", "topology"],
+      "properties": {
+        "geometry": {"type": "number"},
+        "topology": {"type": "number"},
+        "rooms": {"type": ["number", "string"]}
+      }
+    },
+    "metadata": {
+      "type": "object"
+    },
+    "warnings": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "openings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "opening_id",
+          "orientation",
+          "center",
+          "width",
+          "wall_a",
+          "wall_b",
+          "kind"
+        ],
+        "properties": {
+          "opening_id": {"type": "string"},
+          "page_index": {"type": "integer"},
+          "orientation": {"type": "string"},
+          "center": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {"type": "number"}
+          },
+          "width": {"type": "number", "minimum": 0},
+          "wall_a": {"type": ["string", "null"]},
+          "wall_b": {"type": ["string", "null"]},
+          "kind": {"type": "string"},
+          "room_a": {"type": ["string", "null"]},
+          "room_b": {"type": ["string", "null"]},
+          "confidence": {"type": "number"},
+          "hinge_side": {"type": ["string", "null"]},
+          "swing_deg": {"type": ["number", "null"]}
+        }
+      }
+    },
+    "peitoris": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["peitoril_id"],
+        "properties": {
+          "peitoril_id": {"type": "string"},
+          "bbox": {
+            "type": ["array", "null"],
+            "items": {"type": "number"}
+          },
+          "area_px": {"type": "number"},
+          "kind": {"type": "string"},
+          "height_m": {"type": "number"}
+        }
+      }
+    }
+  }
+}
