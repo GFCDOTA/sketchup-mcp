@@ -1,0 +1,7 @@
+# Development / test dependencies.
+# Installed separately from requirements.txt so the production pipeline
+# stays lean.
+-r requirements.txt
+
+jsonschema>=4
+pyyaml>=6.0,<7.0

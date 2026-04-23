@@ -107,3 +107,43 @@ Conflict rule:
 - 2026-04-19: Scaffold inicial via Codex, pipeline em estágios isolados, sem reaproveitar código legado.
 - 2026-04-19: Ingest raster-first usando `pypdfium2`.
 - 2026-04-19: Topology via grafo + polygonize — sem fallback de bounding box para rooms.
+
+## 10. Hardening 2026-04
+
+Ciclo de 13 fases (F1–F13) sobre a branch `fix/dedup-colinear-planta74`
+para levar a app de "fix colinear isolado" (`a11724a`) ao estado
+estável publicável. F1–F5 já eram fundamentação pré-existente; F6–F13
+são a onda de hardening.
+
+| Fase | Entrega | Nota |
+| --- | --- | --- |
+| F1–F5 | fix colinear + audit log + room check + sliver + strip merge | pré-existente |
+| F6 | room dedup final — planta_74 31 -> 18 rooms + 8 testes | `03581fb` |
+| F7 | openings adaptive gate + locus dedup + room-membership filter | `dcc5b07` |
+| F8 | Python CLI para o bridge Ruby (`skp_export.__main__`) + schema v2 | paralelo |
+| F9 | Ruby robustness — coords unify, thickness, hinge, floors | paralelo |
+| F10 | +33 testes (transport openings_arc + snapshot p12/planta_74) | `4814e81` |
+| F11 | multiplant validation via `scripts/validate_multiplant.py` | `3663cce` |
+| F12 | semantic furniture filter — walls 230 -> 149 | `a9367b2` |
+| F13 | CI gating — GitHub Actions + Makefile + AGENTS sync | este commit |
+
+Gate estável p12 `snapshot_sha256 = 39b4138f4fd5613e...` (preservado
+através de toda a onda). pytest suite: **149 pass / 15 pre-existing
+fail / 7 skip** — os 15 fails listados são anteriores à branch e estão
+rastreados, não regressão desta onda.
+
+Contribuição: Claude Opus 4.7 (1M ctx) como agent principal, consultas
+pontuais ao GPT-4 via bridge local (UIAutomation + sessão Plus) em
+bifurcações de design.
+
+### Como rodar a regressão completa
+
+```bash
+make all       # lint + pytest + validate + skp-dryrun + smoke
+make validate  # só a suite multiplant F11 contra os JSON fixtures
+make test      # só pytest (gate primário de regressão)
+```
+
+CI replicado em `.github/workflows/ci.yml` (jobs: pytest, lint,
+schema-validate, skp-dryrun). PR de referência:
+<https://github.com/GFCDOTA/sketchup-mcp/pull/1>.
