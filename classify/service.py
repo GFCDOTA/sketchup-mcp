@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import math
+
+import networkx as nx
+
 from model.types import DedupCluster, DedupReport, Wall, WallCandidate
 
 
@@ -94,12 +98,45 @@ _TWIN_DETECTION_PERP_PX = 5.0
 # four baseline runs; see F1 commit message for the measured values.
 _DEDUP_ACTIVATION_RATIO = 0.05
 
+# F12 semantic furniture/legend filter.
+#
+# After the previous noise filters, residual non-architectural components
+# remain on noisy plans: legend pictograms, mobiliary (chairs, sinks,
+# small balcony outlines), decorative hatching inside rooms. Two
+# signatures distinguish them from real walls:
+#
+# 1) Small orphan connected components: a component of 2-3 walls whose
+#    bounding-box diagonal is under _FURNITURE_ORPHAN_DIAG_PX AND that
+#    does not share an endpoint with any larger graph component. Typical
+#    furniture (chair silhouettes, appliance outlines) fits this profile;
+#    a real architectural wall never does — even the shortest bathroom
+#    wall belongs to a larger connected component via its junctions.
+#
+# 2) Dense short parallel strokes: a _FURNITURE_DENSITY_WINDOW_PX window
+#    that contains > _FURNITURE_DENSITY_MIN_STROKES parallel strokes,
+#    each shorter than _FURNITURE_DENSITY_MAX_STROKE_PX. That is the
+#    signature of decorative hatching (floor texture, legend cross-
+#    hatching). Real walls in a floor plan do not cluster this densely.
+#
+# Only activated when the candidate count entering this stage exceeds
+# _FURNITURE_ACTIVATION_MIN_COUNT — clean inputs (single-page p12_red
+# style, ~40 strokes) never reach this count and so never trigger the
+# filter, which would otherwise risk false positives.
+_FURNITURE_ACTIVATION_MIN_COUNT = 150
+_FURNITURE_ORPHAN_DIAG_PX = 80.0
+_FURNITURE_ORPHAN_MAX_MEMBERS = 3
+_FURNITURE_ENDPOINT_TOLERANCE_PX = 6.0
+_FURNITURE_DENSITY_WINDOW_PX = 50.0
+_FURNITURE_DENSITY_MIN_STROKES = 5
+_FURNITURE_DENSITY_MAX_STROKE_PX = 30.0
+
 
 def classify_walls(
     candidates: list[WallCandidate],
     coordinate_tolerance: float | None = None,
     *,
     dedup_report_sink: list | None = None,
+    filter_furniture: bool = True,
 ) -> list[Wall]:
     """Classify wall candidates into Wall objects.
 
@@ -108,6 +145,13 @@ def classify_walls(
     callers that want to audit what the collinear dedup stage did
     without changing the return type. Tests that don't pass it keep
     working unchanged.
+
+    ``filter_furniture`` (default True) enables the F12 semantic filter
+    that removes small orphan components (mobiliary, legend pictograms)
+    and dense parallel stroke clusters (decorative hatching). The filter
+    itself is self-gated on candidate count (>
+    _FURNITURE_ACTIVATION_MIN_COUNT), so clean inputs are untouched even
+    with the flag on.
     """
     if not candidates:
         if dedup_report_sink is not None:
@@ -177,6 +221,11 @@ def classify_walls(
     # centerline whose thickness (= the pair gap) is close to its length.
     # Real walls are long compared to their thickness even after pairing.
     wall_candidates = _drop_low_aspect_strokes(wall_candidates)
+
+    # Stage 6b (F12): semantic furniture / legend / hachura filter. Self-
+    # gated on candidate count so clean inputs skip this stage entirely.
+    if filter_furniture and len(wall_candidates) > _FURNITURE_ACTIVATION_MIN_COUNT:
+        wall_candidates = _filter_furniture_components(wall_candidates)
 
     # Stage 7: assign stable wall ids and turn the candidates into Walls.
     return _candidates_to_walls(wall_candidates)
@@ -859,3 +908,130 @@ def _merge_collinear_segments(
             )
         )
     return merged
+
+
+def _filter_furniture_components(
+    candidates: list[WallCandidate],
+) -> list[WallCandidate]:
+    """Drop non-architectural residue: legend/furniture components and
+    dense decorative hatching.
+
+    Two independent passes, both operating per page:
+
+    Pass 1 (orphan compact component): build a graph where nodes are
+    candidates and edges connect candidates whose endpoints coincide
+    within _FURNITURE_ENDPOINT_TOLERANCE_PX. A connected component with
+    <= _FURNITURE_ORPHAN_MAX_MEMBERS members whose bbox diagonal is
+    below _FURNITURE_ORPHAN_DIAG_PX is treated as furniture / pictogram
+    and dropped entirely. Real architectural walls always belong to
+    larger components via their junctions, so this is safe.
+
+    Pass 2 (density of short parallels): for each orientation, scan
+    candidates whose length < _FURNITURE_DENSITY_MAX_STROKE_PX. Sort by
+    perpendicular coordinate and count the number that fall within any
+    _FURNITURE_DENSITY_WINDOW_PX window. When > _FURNITURE_DENSITY_MIN_-
+    STROKES are packed into the same window, they form a decorative
+    hachura cluster; drop every short stroke inside that window.
+    """
+    if not candidates:
+        return list(candidates)
+
+    by_page: dict[int, list[tuple[int, WallCandidate]]] = {}
+    for idx, cand in enumerate(candidates):
+        by_page.setdefault(cand.page_index, []).append((idx, cand))
+
+    drop_indices: set[int] = set()
+
+    for items in by_page.values():
+        # Pass 1: graph of endpoint adjacency. Nodes = candidate indices
+        # (into `items`), edges = endpoint coincidence.
+        graph = nx.Graph()
+        for local_idx in range(len(items)):
+            graph.add_node(local_idx)
+
+        # Endpoint bucket for O(n) adjacency lookup: a wall with 2 pts
+        # registered at rounded keys lets us find coincident endpoints
+        # without a full O(n^2) scan.
+        bucket_size = max(1.0, _FURNITURE_ENDPOINT_TOLERANCE_PX)
+        endpoint_bucket: dict[tuple[int, int], list[int]] = {}
+        for local_idx, (_, cand) in enumerate(items):
+            for pt in (cand.start, cand.end):
+                key = (int(pt[0] // bucket_size), int(pt[1] // bucket_size))
+                # Check every neighbor bucket for a tolerance match.
+                for dx in (-1, 0, 1):
+                    for dy in (-1, 0, 1):
+                        nkey = (key[0] + dx, key[1] + dy)
+                        for other in endpoint_bucket.get(nkey, ()):  # noqa: E501
+                            if other == local_idx:
+                                continue
+                            _, other_cand = items[other]
+                            if _endpoints_close(cand, other_cand):
+                                graph.add_edge(local_idx, other)
+                endpoint_bucket.setdefault(key, []).append(local_idx)
+
+        for component in nx.connected_components(graph):
+            if len(component) > _FURNITURE_ORPHAN_MAX_MEMBERS:
+                continue
+            # Compute bbox diagonal across all member endpoints.
+            xs: list[float] = []
+            ys: list[float] = []
+            for local_idx in component:
+                _, cand = items[local_idx]
+                xs.extend((cand.start[0], cand.end[0]))
+                ys.extend((cand.start[1], cand.end[1]))
+            diag = math.hypot(max(xs) - min(xs), max(ys) - min(ys))
+            if diag < _FURNITURE_ORPHAN_DIAG_PX:
+                for local_idx in component:
+                    original_idx, _ = items[local_idx]
+                    drop_indices.add(original_idx)
+
+        # Pass 2: density of short parallels. Short strokes are the ones
+        # most likely to be decorative hachura; a real short wall
+        # segment is rarely packed alongside 5+ other short parallels
+        # within a 50px window.
+        by_orientation: dict[str, list[tuple[int, WallCandidate]]] = {
+            "horizontal": [],
+            "vertical": [],
+        }
+        for local_idx, (original_idx, cand) in enumerate(items):
+            if original_idx in drop_indices:
+                continue
+            length = math.hypot(
+                cand.end[0] - cand.start[0], cand.end[1] - cand.start[1]
+            )
+            if length >= _FURNITURE_DENSITY_MAX_STROKE_PX:
+                continue
+            by_orientation[_orientation(cand)].append((original_idx, cand))
+
+        for orientation, shorts in by_orientation.items():
+            if len(shorts) <= _FURNITURE_DENSITY_MIN_STROKES:
+                continue
+            ordered = sorted(
+                shorts, key=lambda pair: _perp_coord(pair[1], orientation)
+            )
+            perps = [_perp_coord(pair[1], orientation) for pair in ordered]
+            # Sliding window over perpendicular coordinate.
+            left = 0
+            flagged: set[int] = set()
+            for right in range(len(ordered)):
+                while perps[right] - perps[left] > _FURNITURE_DENSITY_WINDOW_PX:
+                    left += 1
+                window_size = right - left + 1
+                if window_size > _FURNITURE_DENSITY_MIN_STROKES:
+                    for k in range(left, right + 1):
+                        flagged.add(ordered[k][0])
+            drop_indices.update(flagged)
+
+    return [c for idx, c in enumerate(candidates) if idx not in drop_indices]
+
+
+def _endpoints_close(a: WallCandidate, b: WallCandidate) -> bool:
+    """True iff any endpoint of ``a`` is within
+    _FURNITURE_ENDPOINT_TOLERANCE_PX of any endpoint of ``b``.
+    """
+    tol = _FURNITURE_ENDPOINT_TOLERANCE_PX
+    for pa in (a.start, a.end):
+        for pb in (b.start, b.end):
+            if math.hypot(pa[0] - pb[0], pa[1] - pb[1]) <= tol:
+                return True
+    return False
