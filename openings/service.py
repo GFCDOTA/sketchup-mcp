@@ -9,10 +9,26 @@ Por que: o `polygonize` do shapely so fecha um poligono se as walls de
 fato se tocam. Gaps de porta deixam o poligono aberto e nenhuma sala e
 detectada. Esse modulo "fecha" os gaps semanticamente sem perder a
 informacao de onde estava o vao.
+
+F7 adiciona 4 estagios de filtro pos-deteccao bruta:
+  1. Gate adaptativo `_compute_max_opening_px` substitui o limite fixo
+     _MAX_OPENING_PX. Plantas com paredes pequenas (planta_74, median
+     ~140 px) recebem um teto mais baixo que plantas uniformes (p12,
+     median ~170 px). Evita que "paredes nao detectadas" virem portas
+     espurias.
+  2. Dedup por locus — openings co-localizados (mesma orientacao,
+     perpendicular similar, centros a <=30 px) sao fundidos. Em planta
+     real portas raramente estao tao proximas.
+  3. Filtro por room membership — opening sem nenhuma room associada
+     (room_a=None E room_b=None) e flutuante/espuria e removido.
+  4. Modo strict opt-in — quando nenhum arco eh visivel e strict=True,
+     opening eh demoted de "door" pra "passage" em vez de sair como door
+     sem confirmacao. Nao muda contagem, so semantica.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Any
 
 from model.types import Wall
 
@@ -24,8 +40,21 @@ from model.types import Wall
 # devem virar opening (provavelmente sao paredes nao detectadas, nao
 # portas reais).
 _MIN_OPENING_PX = 8.0
-_MAX_OPENING_PX = 280.0
+_MAX_OPENING_PX = 280.0  # fallback se _compute_max_opening_px nao resolve
 _PERP_TOLERANCE = 6.0
+
+# F7: piso e teto do gate adaptativo. O piso (180 px) garante que mesmo
+# plantas com paredes curtas em massa (planta_74) ainda conseguem
+# reconhecer vaos de acesso largos. O teto (320 px) protege contra
+# medianas infladas.
+_ADAPTIVE_GATE_MIN_PX = 180.0
+_ADAPTIVE_GATE_MAX_PX = 320.0
+_ADAPTIVE_GATE_FACTOR = 1.8 / 3.0  # ~0.6 * median_length
+
+# F7: dedup por locus — openings com centro a distancia <= _LOCUS_EPS_PX
+# E mesma orientacao E mesma faixa perpendicular (tolerancia _PERP_TOLERANCE)
+# sao considerados o mesmo vao fisico duplicado.
+_LOCUS_EPS_PX = 30.0
 
 # Classificacao por largura (px @ 150 DPI):
 #   < 110 px (~73 cm)        -> door (porta padrao)
@@ -51,9 +80,15 @@ class Opening:
     wall_a: str
     wall_b: str
     kind: str = "door"  # "door" | "window" | "passage"
+    # F7 enriched fields (level 4 — room membership). `room_a`/`room_b`
+    # ficam None quando a opening esta entre interior e exterior, ou
+    # quando a rooms list nao foi passada (compat com chamadas antigas).
+    room_a: str | None = None
+    room_b: str | None = None
+    confidence: float = 1.0
 
     def to_dict(self) -> dict:
-        return {
+        d = {
             "opening_id": self.opening_id,
             "page_index": self.page_index,
             "orientation": self.orientation,
@@ -62,12 +97,18 @@ class Opening:
             "wall_a": self.wall_a,
             "wall_b": self.wall_b,
             "kind": self.kind,
+            "room_a": self.room_a,
+            "room_b": self.room_b,
+            "confidence": round(self.confidence, 3),
         }
+        return d
 
 
 def detect_openings(
     walls: list[Wall],
     peitoris: list[dict] | None = None,
+    rooms: list[Any] | None = None,
+    strict_openings: bool = False,
 ) -> tuple[list[Wall], list[Opening]]:
     """Retorna (walls_estendidas, openings_detectados).
 
@@ -78,6 +119,15 @@ def detect_openings(
     proximos a um peitoril (centro do opening dentro do bbox expandido
     em _PEITORIL_PROXIMITY_PX) sao classificados como "window" em vez de
     "door"/"passage".
+
+    `rooms`: opcional. Quando passado, F7-level-4 atribui `room_a`/`room_b`
+    a cada opening via point-in-polygon do centroid offsetado no eixo
+    perpendicular; openings com ambos os lados sem room sao dropados
+    (flutuantes). Quando None, nenhum filtro por room eh aplicado.
+
+    `strict_openings`: F7-strict mode. Quando True e o opening nao tem
+    arco confirmado (hinge_side ausente — o que hoje e sempre, ja que
+    level 3 nao existe nesta branch), demota "door" pra "passage".
     """
     peitoris = peitoris or []
     if not walls:
@@ -86,6 +136,9 @@ def detect_openings(
     # antes de detectar gaps colineares, fecha cantos abertos (extensao
     # perpendicular). Isso aumenta a chance de polygonize fechar rooms.
     walls = _extend_to_perpendicular(walls)
+
+    # F7: gate adaptativo por comprimento mediano de parede.
+    max_opening_px = _compute_max_opening_px(walls)
 
     by_group: dict[tuple[int, str], list[Wall]] = {}
     for w in walls:
@@ -111,7 +164,7 @@ def detect_openings(
                 a_range = _para_range(a, orientation)
                 b_range = _para_range(b, orientation)
                 gap = b_range[0] - a_range[1]
-                if gap < _MIN_OPENING_PX or gap > _MAX_OPENING_PX:
+                if gap < _MIN_OPENING_PX or gap > max_opening_px:
                     continue
                 # cria wall fantasma preenchendo o gap
                 bridge_wall = _make_bridge(
@@ -149,10 +202,276 @@ def detect_openings(
                 opening_counter += 1
                 bridge_counter += 1
 
-    return extended, openings
+    # F7 estagio 2: dedup por locus.
+    openings = _dedupe_openings_by_locus(openings)
+
+    # F7 estagio 3: filtro por room membership (quando rooms disponivel).
+    if rooms is not None:
+        openings = _assign_and_filter_rooms(openings, rooms)
+
+    # F7 estagio 4: strict mode demote.
+    if strict_openings:
+        openings = [_maybe_demote_strict(op) for op in openings]
+
+    # Re-numera ids pra manter sequencia estavel pos-filtros (dedup +
+    # room filter podem ter removido buracos). Isso mantem determinismo
+    # do hash snapshot a jusante.
+    renumbered: list[Opening] = []
+    for i, op in enumerate(openings, start=1):
+        renumbered.append(
+            Opening(
+                opening_id=f"opening-{i}",
+                page_index=op.page_index,
+                orientation=op.orientation,
+                center=op.center,
+                width=op.width,
+                wall_a=op.wall_a,
+                wall_b=op.wall_b,
+                kind=op.kind,
+                room_a=op.room_a,
+                room_b=op.room_b,
+                confidence=op.confidence,
+            )
+        )
+
+    return extended, renumbered
 
 
-# ---------- helpers ----------
+# ---------- F7 estagio 1: gate adaptativo --------------------------------
+
+
+def _compute_max_opening_px(walls: list[Wall]) -> float:
+    """Computa o teto de largura de gap admissivel como opening.
+
+    Rationale:
+        - Plantas com paredes longas uniformes (p12) tendem a ter
+          median alto (~170 px) -> teto ~ 180-210 (compativel com o
+          comportamento atual de 280).
+        - Plantas com paredes pequenas e muito fragmentadas (planta_74,
+          median ~140) -> teto ~180 (piso minimo); paredes nao
+          detectadas entre dois segmentos curtos NAO viram porta.
+
+    Usa soma |dx|+|dy| que pra walls horizontais/verticais e exatamente
+    o comprimento L1 (idem L2 nesse eixo unico).
+    """
+    if not walls:
+        return _MAX_OPENING_PX
+    lengths = sorted(
+        abs(w.end[0] - w.start[0]) + abs(w.end[1] - w.start[1]) for w in walls
+    )
+    median_length = lengths[len(lengths) // 2]
+    # Gaps maiores que ~0.6x o comprimento de uma parede mediana sao mais
+    # provavelmente paredes nao-detectadas que portas reais.
+    candidate = _ADAPTIVE_GATE_FACTOR * median_length
+    return max(_ADAPTIVE_GATE_MIN_PX, min(_ADAPTIVE_GATE_MAX_PX, candidate))
+
+
+# ---------- F7 estagio 2: dedup por locus --------------------------------
+
+
+def _dedupe_openings_by_locus(openings: list[Opening]) -> list[Opening]:
+    """Funde openings co-localizados.
+
+    Regra: dois openings sao o mesmo vao fisico quando
+        (1) mesma orientation
+        (2) perp_coord proximo (dentro de _PERP_TOLERANCE)
+        (3) center a distancia <= _LOCUS_EPS_PX
+
+    Quando funde, mantem o de maior confidence (com desempate por
+    width maior — portas detectadas mais completas vencem slivers).
+
+    NAO funde openings perpendiculares mesmo se proximos — so mesmo
+    eixo conta como "mesmo vao".
+    """
+    if len(openings) <= 1:
+        return list(openings)
+
+    kept: list[Opening] = []
+    absorbed = [False] * len(openings)
+
+    for i, op in enumerate(openings):
+        if absorbed[i]:
+            continue
+        group = [op]
+        i_perp = op.center[1] if op.orientation == "horizontal" else op.center[0]
+        for j in range(i + 1, len(openings)):
+            if absorbed[j]:
+                continue
+            other = openings[j]
+            if other.orientation != op.orientation:
+                continue
+            j_perp = other.center[1] if other.orientation == "horizontal" else other.center[0]
+            if abs(j_perp - i_perp) > _PERP_TOLERANCE:
+                continue
+            # distancia euclidiana entre centros (2D) — simples o bastante
+            dx = op.center[0] - other.center[0]
+            dy = op.center[1] - other.center[1]
+            if (dx * dx + dy * dy) ** 0.5 <= _LOCUS_EPS_PX:
+                group.append(other)
+                absorbed[j] = True
+
+        if len(group) == 1:
+            kept.append(op)
+        else:
+            # Escolhe o "melhor": maior confidence, desempate por width
+            # maior (porta mais completa vence sliver colado).
+            best = max(group, key=lambda o: (o.confidence, o.width))
+            kept.append(best)
+
+    return kept
+
+
+# ---------- F7 estagio 3: room membership filter -------------------------
+
+
+def _assign_rooms(
+    center: tuple[float, float],
+    orientation: str,
+    width: float,
+    rooms: list[Any],
+) -> tuple[str | None, str | None]:
+    """Dada uma opening (centro + orientacao), retorna (room_a, room_b).
+
+    Estrategia: offseta o centro um pouco pra cada lado no eixo
+    perpendicular e aplica point-in-polygon. O offset eh pequeno
+    (max(8 px, width * 0.15)) pra ficar dentro da room mais proxima
+    sem pular pra sala vizinha.
+
+    `rooms` e uma lista de objetos com atributo `polygon` (list[Point])
+    e `room_id`. Se o objeto nao tiver esses atributos (dict bruto),
+    tenta chaves equivalentes.
+    """
+    if not rooms:
+        return (None, None)
+
+    # offset perpendicular a orientacao da opening
+    offset = max(8.0, width * 0.15)
+    cx, cy = center
+    if orientation == "horizontal":
+        # parede horizontal -> salas ficam acima/abaixo (eixo Y)
+        p_left = (cx, cy - offset)
+        p_right = (cx, cy + offset)
+    else:
+        # parede vertical -> salas ficam esquerda/direita (eixo X)
+        p_left = (cx - offset, cy)
+        p_right = (cx + offset, cy)
+
+    def _resolve(point: tuple[float, float]) -> str | None:
+        for r in rooms:
+            polygon = getattr(r, "polygon", None)
+            if polygon is None and isinstance(r, dict):
+                polygon = r.get("polygon")
+            room_id = getattr(r, "room_id", None)
+            if room_id is None and isinstance(r, dict):
+                room_id = r.get("room_id")
+            if polygon is None or room_id is None:
+                continue
+            poly_pts = [tuple(p) for p in polygon]
+            if _point_in_polygon(point, poly_pts):
+                return str(room_id)
+        return None
+
+    room_a = _resolve(p_left)
+    room_b = _resolve(p_right)
+    return (room_a, room_b)
+
+
+def _point_in_polygon(
+    point: tuple[float, float], polygon: list[tuple[float, float]]
+) -> bool:
+    """Ray-casting classico. Retorna True se ponto estritamente dentro
+    do poligono."""
+    if len(polygon) < 3:
+        return False
+    x, y = point
+    inside = False
+    n = len(polygon)
+    j = n - 1
+    for i in range(n):
+        xi, yi = polygon[i]
+        xj, yj = polygon[j]
+        intersects = ((yi > y) != (yj > y)) and (
+            x < (xj - xi) * (y - yi) / (yj - yi + 1e-12) + xi
+        )
+        if intersects:
+            inside = not inside
+        j = i
+    return inside
+
+
+def _assign_and_filter_rooms(
+    openings: list[Opening], rooms: list[Any]
+) -> list[Opening]:
+    """Atribui room_a/room_b a cada opening e dropa os flutuantes
+    (ambos None). Mantem os que sao "exterior-interior" (um lado None
+    e o outro room valido)."""
+    if not rooms:
+        return list(openings)
+
+    kept: list[Opening] = []
+    for op in openings:
+        room_a, room_b = _assign_rooms(
+            center=op.center,
+            orientation=op.orientation,
+            width=op.width,
+            rooms=rooms,
+        )
+        if room_a is None and room_b is None:
+            # opening flutuante sem room de nenhum lado -> drop
+            continue
+        kept.append(
+            Opening(
+                opening_id=op.opening_id,
+                page_index=op.page_index,
+                orientation=op.orientation,
+                center=op.center,
+                width=op.width,
+                wall_a=op.wall_a,
+                wall_b=op.wall_b,
+                kind=op.kind,
+                room_a=room_a,
+                room_b=room_b,
+                confidence=op.confidence,
+            )
+        )
+    return kept
+
+
+# ---------- F7 estagio 4: strict mode ------------------------------------
+
+
+def _maybe_demote_strict(op: Opening) -> Opening:
+    """Strict mode: opening sem arco confirmado vira passage (nao door).
+
+    Nesta branch `hinge_side` nao existe no Opening — TODO arc-confirm
+    (level 3) fica pra V6.2+. Enquanto isso, strict eh equivalente a
+    "toda porta que nao passou por arc-confirm vira passage", que
+    atualmente significa "toda porta". Por isso strict_openings default
+    continua False.
+
+    A semantica e: quando uma futura evolucao adicionar hinge_side,
+    este helper ja vai funcionar corretamente — so demota quando
+    hinge_side is None.
+    """
+    hinge_side = getattr(op, "hinge_side", None)
+    if op.kind == "door" and hinge_side is None:
+        return Opening(
+            opening_id=op.opening_id,
+            page_index=op.page_index,
+            orientation=op.orientation,
+            center=op.center,
+            width=op.width,
+            wall_a=op.wall_a,
+            wall_b=op.wall_b,
+            kind="passage",
+            room_a=op.room_a,
+            room_b=op.room_b,
+            confidence=op.confidence,
+        )
+    return op
+
+
+# ---------- helpers originais --------------------------------------------
 
 def _extend_to_perpendicular(walls: list[Wall]) -> list[Wall]:
     """Estende endpoints de walls que estao a < _CORNER_SNAP_PX de uma
