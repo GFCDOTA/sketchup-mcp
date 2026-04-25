@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}{{ a.name }} vs {{ b.name }} · compare{% endblock %}
+{% block content %}
+<div style="margin-bottom:16px"><a href="/" style="color:#7ab7ff;font-size:13px">← runs</a></div>
+<h1 style="margin:0 0 24px;font-size:20px">
+  <span style="color:#7ab7ff;font-size:11px">[{{ a.repo }}]</span> {{ a.name }}
+  <span style="color:#4a5662">vs</span>
+  <span style="color:#7ab7ff;font-size:11px">[{{ b.repo }}]</span> {{ b.name }}
+</h1>
+
+<div class="compare-grid">
+  <div class="compare-side">
+    <h3><a href="/run/{{ a.repo }}/{{ a.name }}" style="color:#7ab7ff">[{{ a.repo }}] {{ a.name }}</a></h3>
+    <div style="font-size:11px;color:#8a9ba8;margin-bottom:8px">{{ a.phase }} · openings: {{ a.openings }}</div>
+    {% if a.overlay %}<img src="/img/{{ a.repo }}/{{ a.name }}/{{ a.overlay }}">{% endif %}
+    {% if a.has_openings %}<object data="/svg/{{ a.repo }}/{{ a.name }}" type="image/svg+xml" style="width:100%;margin-top:8px"></object>{% endif %}
+    {% if not a.overlay and not a.has_openings %}<em>sem overlay</em>{% endif %}
+  </div>
+  <div class="compare-side">
+    <h3><a href="/run/{{ b.repo }}/{{ b.name }}" style="color:#7ab7ff">[{{ b.repo }}] {{ b.name }}</a></h3>
+    <div style="font-size:11px;color:#8a9ba8;margin-bottom:8px">{{ b.phase }} · openings: {{ b.openings }}</div>
+    {% if b.overlay %}<img src="/img/{{ b.repo }}/{{ b.name }}/{{ b.overlay }}">{% endif %}
+    {% if b.has_openings %}<object data="/svg/{{ b.repo }}/{{ b.name }}" type="image/svg+xml" style="width:100%;margin-top:8px"></object>{% endif %}
+    {% if not b.overlay and not b.has_openings %}<em>sem overlay</em>{% endif %}
+  </div>
+</div>
+
+<table class="metrics-table">
+  <tr><th>métrica</th><th>{{ a.name }}</th><th>{{ b.name }}</th><th>Δ</th></tr>
+  {% for r in rows %}
+  <tr>
+    <td>{{ r.key }}</td>
+    <td>{{ r.a if r.a is not none else '—' }}</td>
+    <td>{{ r.b if r.b is not none else '—' }}</td>
+    <td class="{% if r.delta is none %}diff-zero{% elif r.delta > 0 %}diff-up{% elif r.delta < 0 %}diff-down{% else %}diff-zero{% endif %}">
+      {% if r.delta is none %}—
+      {% elif r.delta > 0 %}+{{ '%.3f' % r.delta if r.delta is float else r.delta }}
+      {% else %}{{ '%.3f' % r.delta if r.delta is float else r.delta }}
+      {% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

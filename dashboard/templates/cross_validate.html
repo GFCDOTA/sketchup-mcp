@@ -1,0 +1,547 @@
+{% extends "base.html" %}
+{% block title %}cross-validate · {{ m.name }} · {{ m.repo }}{% endblock %}
+
+{# ============================================================
+   MACROS reusáveis
+   ============================================================ #}
+{% macro path_line(abs_path, label="caminho") -%}
+<div class="path-line">
+  <span class="path-label">{{ label }}</span>
+  <code class="path-value" title="clique para selecionar">{{ abs_path }}</code>
+  <button type="button" class="copy-btn" data-copy="{{ abs_path }}" title="copiar caminho">⧉</button>
+</div>
+{%- endmacro %}
+
+{% macro four_buttons(view_url, download_url, abs_path, name, size_human=None) -%}
+<div class="actions">
+  <a class="btn btn-open" href="{{ view_url }}" target="_blank" rel="noopener" title="visualizar inline">👁 visualizar</a>
+  <a class="btn btn-open" href="{{ view_url }}" target="_blank" rel="noopener" title="abrir em nova aba">↗ nova aba</a>
+  <a class="btn btn-download" href="{{ download_url }}" download="{{ name }}" title="baixar">⬇ baixar</a>
+  <button type="button" class="btn copy-btn" data-copy="{{ abs_path }}" title="copiar caminho absoluto">⧉ copiar path</button>
+  {% if size_human %}<span class="size-badge">{{ size_human }}</span>{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro action_buttons(view_url, download_url, name, size_kb=None, extra=None) -%}
+<div class="actions">
+  <a class="btn btn-download" href="{{ download_url }}" download="{{ name }}">⬇ baixar</a>
+  <a class="btn btn-open" href="{{ view_url }}" target="_blank" rel="noopener">↗ abrir</a>
+  {% if extra %}{{ extra|safe }}{% endif %}
+  {% if size_kb is not none %}<span class="size-badge">{{ "%.1f"|format(size_kb) }} KB</span>{% endif %}
+</div>
+{%- endmacro %}
+
+{% block content %}
+<div class="bc">
+  <a href="/">← runs</a>
+  <span class="sep">·</span>
+  <a href="/run/{{ m.repo }}/{{ m.name }}">📋 RUN detail</a>
+  <span class="sep">·</span>
+  <a href="/cv/{{ m.repo }}/{{ m.name }}">🎯 CV</a>
+  <span class="sep">·</span>
+  <a href="/fusion/{{ m.repo }}/{{ m.name }}">🔀 FUSION</a>
+  <span class="sep">·</span>
+  <a href="/3d/{{ m.repo }}/{{ m.name }}">🧱 3D</a>
+  <span class="sep">·</span>
+  <a href="/api/metrics">⚙ JSON</a>
+  <span class="sep">·</span>
+  <a href="#artifacts">⤓ artefatos</a>
+</div>
+
+{# ============================================================
+   HEADER do RUN — nome, repo, path absoluto, mtime, status
+   ============================================================ #}
+<header class="run-header">
+  <div class="run-title">
+    <span class="badge badge-cv">CROSS-VALIDATE</span>
+    <span class="badge badge-repo">{{ m.repo }}</span>
+    <h1>{{ m.name }}</h1>
+  </div>
+  <div class="run-summary">
+    <span class="summary-item"><span class="summary-label">phase</span> {{ m.phase or "—" }}</span>
+    <span class="summary-item"><span class="summary-label">data/hora (run dir mtime)</span> <strong>{{ run_dir_mtime }}</strong></span>
+    <span class="summary-item"><span class="summary-label">arquivos</span> <strong>{{ artifacts.all|length }}</strong></span>
+    <span class="summary-item"><span class="summary-label">pdf</span> {{ m.pdf or '—' }}</span>
+    <span class="summary-item"><span class="summary-label">doors</span> <strong>{{ pipeline.doors }}</strong></span>
+    <span class="summary-item"><span class="summary-label">windows</span> <strong>{{ pipeline.windows }}</strong></span>
+    <span class="summary-item"><span class="summary-label">walls</span> <strong>{{ pipeline.walls }}</strong></span>
+    <span class="summary-item"><span class="summary-label">detectors</span> <strong>{{ detectors|length }}</strong></span>
+  </div>
+</header>
+
+<div class="dirs-row">
+  <div class="path-block">
+    {{ path_line(run_dir, "run dir absoluto") }}
+  </div>
+  <div class="path-block">
+    {{ path_line(detections_dir, "detections dir") }}
+  </div>
+</div>
+
+{# ============================================================
+   STATUS dos ARTEFATOS ESPERADOS (pendente / ok)
+   ============================================================ #}
+<h2 class="section-title">✅ Status dos artefatos esperados</h2>
+<table class="metrics-table data-table">
+  <thead>
+    <tr><th>arquivo esperado</th><th>status</th><th>path</th><th>tamanho</th><th>ações</th></tr>
+  </thead>
+  <tbody>
+    {% for e in expected %}
+    <tr>
+      <td>
+        <span class="kind-badge kind-{{ e.ext }}">{{ e.ext|upper }}</span>
+        <strong>{{ e.name }}</strong>
+      </td>
+      <td>
+        {% if e.status == "ok" %}
+          <span class="badge" style="background:#6ec07a;color:#0f1419">OK</span>
+        {% else %}
+          <span class="badge" style="background:#e85b5b;color:#fff">PENDENTE</span>
+        {% endif %}
+      </td>
+      <td><code class="path-value">{{ e.abs_path }}</code></td>
+      <td>{{ e.size_human if e.status == "ok" else "—" }}</td>
+      <td>
+        {% if e.status == "ok" %}
+          <a class="btn btn-open" href="{{ e.view_url }}" target="_blank" rel="noopener">↗ abrir</a>
+          <a class="btn btn-download" href="{{ e.download_url }}" download="{{ e.name }}">⬇ baixar</a>
+          <button type="button" class="btn copy-btn" data-copy="{{ e.abs_path }}">⧉ path</button>
+        {% else %}
+          <button type="button" class="btn copy-btn" data-copy="{{ e.abs_path }}" title="copiar path esperado">⧉ esperado</button>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{# ============================================================
+   SIDE-BY-SIDE: PDF original ↔ melhor overlay
+   ============================================================ #}
+<h2 class="section-title">📐 PDF original ↔ melhor overlay (side-by-side)</h2>
+<div class="dual-grid">
+  {# PDF #}
+  <div class="artifact-card">
+    <div class="card-head">
+      <span class="kind-badge kind-pdf">PDF</span>
+      <span class="card-title">{{ pdf_info.name if pdf_info else (m.pdf or "—") }}</span>
+    </div>
+    <div class="card-thumb thumb-pdf">
+      {% if pdf_info %}
+      <a href="{{ pdf_info.url }}" target="_blank" rel="noopener" title="abrir PDF em nova aba">
+        <img src="{{ pdf_info.thumb_url }}" loading="lazy" alt="{{ pdf_info.name }}">
+      </a>
+      {% else %}
+      <div class="thumb-empty">PDF não encontrado em <code>{{ m.repo }}</code></div>
+      {% endif %}
+    </div>
+    {% if pdf_info %}
+    <div class="card-foot">
+      {{ path_line(pdf_info.abs_path) }}
+      {{ four_buttons(pdf_info.url, pdf_info.download_url, pdf_info.abs_path, pdf_info.name, pdf_info.size_human) }}
+    </div>
+    {% endif %}
+  </div>
+
+  {# MELHOR OVERLAY — fallback chain ja resolvido no controller #}
+  <div class="artifact-card">
+    <div class="card-head">
+      {% if best_overlay %}
+        <span class="kind-badge kind-{{ best_overlay.ext }}">OVERLAY</span>
+        <span class="card-title">{{ best_overlay.name }}</span>
+      {% else %}
+        <span class="kind-badge kind-other">OVERLAY</span>
+        <span class="card-title">— pendente —</span>
+      {% endif %}
+    </div>
+    <div class="card-thumb">
+      {% if best_overlay %}
+      <a href="{{ best_overlay.view_url }}" target="_blank" rel="noopener" title="abrir em tamanho real">
+        <img src="{{ best_overlay.view_url }}" loading="lazy" alt="{{ best_overlay.name }}">
+      </a>
+      {% else %}
+      <div class="thumb-empty">
+        <div>Nenhum overlay encontrado.<br>Esperados (em ordem):
+        <code>pdf_vs_consensus.png</code>,
+        <code>pdf_vs_skp_topview.png</code>,
+        <code>consensus_overlay.png</code>,
+        <code>logical_walls_overlay.png</code>.</div>
+      </div>
+      {% endif %}
+    </div>
+    {% if best_overlay %}
+    <div class="card-foot">
+      {{ path_line(best_overlay.abs_path) }}
+      {{ four_buttons(best_overlay.view_url, best_overlay.download_url, best_overlay.abs_path, best_overlay.name, best_overlay.size_human) }}
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{# ============================================================
+   PIPELINE SVG (mantido)
+   ============================================================ #}
+<h2 class="section-title">📐 Pipeline · SVG nativo (walls + junctions + openings)</h2>
+<div class="artifact-card">
+  <div class="card-head">
+    <span class="kind-badge kind-pipeline">PIPELINE SVG</span>
+    <span class="card-title">openings · walls · junctions</span>
+  </div>
+  <div class="card-thumb thumb-svg">
+    <a href="{{ svg_url }}" target="_blank" rel="noopener">
+      <img src="{{ svg_url }}" alt="pipeline SVG">
+    </a>
+  </div>
+  <div class="card-foot">
+    <div class="legend">
+      <span><span class="dot" style="background:#dc3c3c"></span> walls</span>
+      <span><span class="dot" style="background:#3c78dc"></span> junctions</span>
+      <span><span class="diamond" style="background:#f09632"></span> openings (portas)</span>
+    </div>
+    {{ path_line(svg_abs_path, "fonte") }}
+    {{ action_buttons(svg_url, svg_url, "pipeline.svg") }}
+  </div>
+</div>
+
+{# ============================================================
+   ARTEFATOS DO RUN — TABELA COMPLETA (TODO arquivo)
+   ============================================================ #}
+<h2 class="section-title" id="artifacts">📦 Artefatos do Run · TODOS os arquivos em runs/{{ m.repo }}/{{ m.name }}/</h2>
+<table class="metrics-table data-table">
+  <thead>
+    <tr>
+      <th>nome</th>
+      <th>tipo</th>
+      <th>tamanho</th>
+      <th>data/hora</th>
+      <th>path absoluto</th>
+      <th>path relativo</th>
+      <th>ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for a in artifacts.all %}
+    <tr>
+      <td><strong>{{ a.name }}</strong></td>
+      <td><span class="kind-badge kind-{{ a.ext }}">{{ a.ext|upper }}</span></td>
+      <td>{{ a.size_human }}</td>
+      <td><code class="dump-file">{{ a.mtime_iso }}</code></td>
+      <td><code class="path-value">{{ a.abs_path }}</code></td>
+      <td><code class="path-value">{{ a.rel_path }}</code></td>
+      <td>
+        <a class="btn btn-open" href="{{ a.view_url }}" target="_blank" rel="noopener" title="visualizar inline">👁</a>
+        <a class="btn btn-open" href="{{ a.view_url }}" target="_blank" rel="noopener" title="abrir nova aba">↗</a>
+        <a class="btn btn-download" href="{{ a.download_url }}" download="{{ a.name }}" title="baixar (force download)">⬇</a>
+        <button type="button" class="btn copy-btn" data-copy="{{ a.abs_path }}" title="copiar path">⧉</button>
+      </td>
+    </tr>
+    {% endfor %}
+    {% if not artifacts.all %}
+    <tr><td colspan="7"><em style="color:#8a9ba8">Nenhum arquivo encontrado em <code>{{ run_dir }}</code></em></td></tr>
+    {% endif %}
+  </tbody>
+</table>
+
+{# ============================================================
+   GALERIA DE IMAGENS — preview, sem labels gigantes, abrir full-size
+   ============================================================ #}
+{% if artifacts.visuals %}
+<h2 class="section-title">🖼️ Galeria de imagens</h2>
+<div class="artifact-grid">
+  {% for a in artifacts.visuals %}
+  <div class="artifact-card">
+    <div class="card-head">
+      <span class="kind-badge kind-{{ a.ext }}">{{ a.ext|upper }}</span>
+      <span class="card-title">{{ a.name }}</span>
+    </div>
+    <div class="card-thumb">
+      <a href="{{ a.view_url }}" target="_blank" rel="noopener" title="abrir tamanho real">
+        <img src="{{ a.view_url }}" loading="lazy" alt="{{ a.name }}">
+      </a>
+    </div>
+    <div class="card-foot">
+      {{ path_line(a.abs_path) }}
+      {{ four_buttons(a.view_url, a.download_url, a.abs_path, a.name, a.size_human) }}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{# ============================================================
+   PDFs do run (separado da galeria de imagens)
+   ============================================================ #}
+{% if artifacts.pdfs %}
+<h2 class="section-title">📄 PDFs no run dir</h2>
+<div class="artifact-grid">
+  {% for a in artifacts.pdfs %}
+  <div class="artifact-card">
+    <div class="card-head">
+      <span class="kind-badge kind-pdf">PDF</span>
+      <span class="card-title">{{ a.name }}</span>
+    </div>
+    <div class="card-thumb thumb-pdf">
+      <a href="{{ a.view_url }}" target="_blank" rel="noopener">
+        <iframe src="{{ a.view_url }}" loading="lazy"></iframe>
+      </a>
+    </div>
+    <div class="card-foot">
+      {{ path_line(a.abs_path) }}
+      {{ four_buttons(a.view_url, a.download_url, a.abs_path, a.name, a.size_human) }}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{# ============================================================
+   Modelos 3D / SKP
+   ============================================================ #}
+{% if artifacts.models %}
+<h2 class="section-title">🧱 Modelos 3D / SKP</h2>
+<div class="artifact-grid">
+  {% for a in artifacts.models %}
+  <div class="artifact-card">
+    <div class="card-head">
+      <span class="kind-badge kind-other">{{ a.ext|upper }}</span>
+      <span class="card-title">{{ a.name }}</span>
+    </div>
+    <div class="card-thumb thumb-empty">
+      <div>{{ a.ext|upper }} · não embeda no browser<br>
+      use <a href="{{ a.download_url }}" download="{{ a.name }}" style="color:#7ab7ff">baixar</a>
+      ou <a href="/3d/{{ m.repo }}/{{ m.name }}" style="color:#7ab7ff">viewer 3D</a></div>
+    </div>
+    <div class="card-foot">
+      {{ path_line(a.abs_path) }}
+      {{ four_buttons(a.view_url, a.download_url, a.abs_path, a.name, a.size_human) }}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{# ============================================================
+   ARQUIVOS JSON — tabela com download/copy
+   ============================================================ #}
+{% if artifacts.data %}
+<h2 class="section-title">📁 Arquivos JSON</h2>
+<table class="metrics-table data-table">
+  <thead>
+    <tr><th>arquivo</th><th>caminho</th><th>tamanho</th><th>data/hora</th><th>ações</th></tr>
+  </thead>
+  <tbody>
+    {% for a in artifacts.data %}
+    <tr>
+      <td><strong>{{ a.name }}</strong></td>
+      <td><code class="path-value">{{ a.abs_path }}</code></td>
+      <td>{{ a.size_human }}</td>
+      <td><code class="dump-file">{{ a.mtime_iso }}</code></td>
+      <td>
+        <a class="btn btn-open" href="{{ a.view_url }}" target="_blank" rel="noopener">↗ abrir</a>
+        <a class="btn btn-download" href="{{ a.download_url }}" download="{{ a.name }}">⬇ baixar</a>
+        <button type="button" class="btn copy-btn" data-copy="{{ a.abs_path }}">⧉ path</button>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+{# ============================================================
+   TABELA COMPARATIVA pipeline ↔ detectores (mantida)
+   ============================================================ #}
+{% if detectors %}
+<h2 class="section-title">📊 Pipeline vs detectores · contagens</h2>
+<table class="metrics-table compare-table">
+  <thead>
+    <tr>
+      <th>detector</th><th>doors</th><th>windows</th><th>walls</th>
+      <th>latência (s)</th><th>status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="row-pipeline">
+      <td><strong style="color:#7ab7ff">PIPELINE (baseline)</strong></td>
+      <td><strong>{{ pipeline.doors }}</strong></td>
+      <td><strong>{{ pipeline.windows }}</strong></td>
+      <td><strong>{{ pipeline.walls }}</strong></td>
+      <td>—</td>
+      <td class="good">baseline</td>
+    </tr>
+    {% for d in detectors %}
+    {% set dd = d.counts.doors %}
+    {% set ww = d.counts.windows %}
+    {% set wl = d.counts.walls %}
+    <tr>
+      <td>
+        <span class="kind-badge kind-{{ d.kind }}">{{ d.kind }}</span>
+        <strong style="margin-left:6px">{{ d.model }}</strong>
+      </td>
+      <td class="{% if dd is not none and pipeline.doors is not none and dd != pipeline.doors %}warn{% endif %}">
+        {{ dd if dd is not none else '—' }}
+        {% if dd is not none and pipeline.doors is not none %}
+          <span class="delta">(Δ {{ dd - pipeline.doors }})</span>
+        {% endif %}
+      </td>
+      <td class="{% if ww is not none and pipeline.windows is not none and ww != pipeline.windows %}warn{% endif %}">
+        {{ ww if ww is not none else '—' }}
+        {% if ww is not none and pipeline.windows is not none %}
+          <span class="delta">(Δ {{ ww - pipeline.windows }})</span>
+        {% endif %}
+      </td>
+      <td>{{ wl if wl is not none else '—' }}</td>
+      <td>{{ '%.2f' % d.latency if d.latency is not none else '—' }}</td>
+      <td class="{% if d.error %}bad{% else %}good{% endif %}">
+        {% if d.error %}error{% else %}ok{% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+{# ============================================================
+   DETECTORES (cards)
+   ============================================================ #}
+{% if detectors %}
+<h2 class="section-title">🤖 Detectores · imagens anotadas</h2>
+<div class="artifact-grid">
+  {% for d in detectors %}
+  <div class="artifact-card">
+    <div class="card-head">
+      <span class="kind-badge kind-{{ d.kind }}">{{ d.kind }}</span>
+      <span class="card-title">{{ d.model }}</span>
+      {% if d.error %}<span class="status-badge bad">error</span>{% endif %}
+    </div>
+    {% if d.png_url %}
+    <div class="card-thumb">
+      <a href="{{ d.png_url }}" target="_blank" rel="noopener" title="abrir em tamanho real">
+        <img src="{{ d.png_url }}" loading="lazy" alt="{{ d.model }} annotated">
+      </a>
+    </div>
+    {% else %}
+    <div class="card-thumb thumb-empty">— sem PNG anotado —</div>
+    {% endif %}
+    <div class="card-foot">
+      <div class="counts-row">
+        <span><span class="summary-label">doors</span> <strong>{{ d.counts.doors if d.counts.doors is not none else '—' }}</strong></span>
+        <span><span class="summary-label">windows</span> <strong>{{ d.counts.windows if d.counts.windows is not none else '—' }}</strong></span>
+        {% if d.latency is not none %}<span><span class="summary-label">latência</span> <strong>{{ '%.2f' % d.latency }}s</strong></span>{% endif %}
+      </div>
+      {% if d.png_url %}
+      <div class="path-block">
+        {{ path_line(d.abs_png, "PNG") }}
+        {{ action_buttons(d.png_url, d.png_download_url, d.annotated_png, d.png_size_kb) }}
+      </div>
+      {% endif %}
+      <div class="path-block">
+        {{ path_line(d.abs_json, "JSON") }}
+        {{ action_buttons(d.json_url, d.json_download_url, d.file, d.json_size_kb) }}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{# ============================================================
+   DETECÇÕES alternativas
+   ============================================================ #}
+{% if alternates %}
+<h2 class="section-title">🔄 Detectores · variantes alternativas (clean / outras fontes)</h2>
+<div class="artifact-grid">
+  {% for d in alternates %}
+  <div class="artifact-card alt">
+    <div class="card-head">
+      <span class="kind-badge kind-{{ d.kind }}">{{ d.kind }}</span>
+      <span class="card-title">{{ d.label }}</span>
+    </div>
+    {% if d.png_url %}
+    <div class="card-thumb">
+      <a href="{{ d.png_url }}" target="_blank" rel="noopener">
+        <img src="{{ d.png_url }}" loading="lazy" alt="{{ d.label }}">
+      </a>
+    </div>
+    {% else %}
+    <div class="card-thumb thumb-empty">— sem PNG —</div>
+    {% endif %}
+    <div class="card-foot">
+      <div class="counts-row">
+        <span><span class="summary-label">doors</span> <strong>{{ d.counts.doors if d.counts.doors is not none else '—' }}</strong></span>
+        <span><span class="summary-label">windows</span> <strong>{{ d.counts.windows if d.counts.windows is not none else '—' }}</strong></span>
+      </div>
+      {% if d.png_url %}
+      <div class="path-block">
+        {{ path_line(d.abs_png, "PNG") }}
+        {{ action_buttons(d.png_url, d.png_download_url, d.annotated_png, d.png_size_kb) }}
+      </div>
+      {% endif %}
+      <div class="path-block">
+        {{ path_line(d.abs_json, "JSON") }}
+        {{ action_buttons(d.json_url, d.json_download_url, d.file, d.json_size_kb) }}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{# ============================================================
+   JSON dumps detectores (collapsible)
+   ============================================================ #}
+{% if detectors %}
+<h2 class="section-title">🔍 JSON dumps dos detectores</h2>
+{% for d in detectors %}
+<details class="artifact">
+  <summary>
+    <span class="kind-badge kind-{{ d.kind }}">{{ d.kind }}</span>
+    <strong style="margin-left:6px">{{ d.model }}</strong>
+    <span class="dump-file">{{ d.file }}</span>
+    {% if d.error %}<span class="bad" style="margin-left:8px">error: {{ d.error }}</span>{% endif %}
+  </summary>
+  <pre>{{ d.json_dump }}</pre>
+</details>
+{% endfor %}
+{% endif %}
+
+{# ============================================================
+   EMPTY STATE
+   ============================================================ #}
+{% if not detectors %}
+<div class="empty-state">
+  <p>Sem detectores para este run ainda.</p>
+  <p>Coloque arquivos JSON em <code>{{ detections_dir }}</code> com nome
+  <code>{model}_{{ m.name.split('/')[-1] }}.json</code>
+  (ex: <code>yolo_{{ m.name.split('/')[-1] }}.json</code>,
+  <code>cubicasa_{{ m.name.split('/')[-1] }}.json</code>,
+  <code>qwen_vl_{{ m.name.split('/')[-1] }}.json</code>).</p>
+</div>
+{% endif %}
+
+<script>
+// Copy-to-clipboard handler — vanilla JS, compativel com todos browsers modernos
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-copy]");
+  if (!btn) return;
+  e.preventDefault();
+  const txt = btn.dataset.copy;
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(txt).then(() => flash(btn));
+  } else {
+    // Fallback para http://localhost (no isSecureContext em alguns setups)
+    const ta = document.createElement("textarea");
+    ta.value = txt; ta.style.position = "fixed"; ta.style.left = "-9999px";
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); flash(btn); } catch (err) {}
+    document.body.removeChild(ta);
+  }
+});
+function flash(btn) {
+  const orig = btn.textContent;
+  btn.textContent = "✓";
+  btn.classList.add("copied");
+  setTimeout(() => { btn.textContent = orig; btn.classList.remove("copied"); }, 1200);
+}
+</script>
+{% endblock %}

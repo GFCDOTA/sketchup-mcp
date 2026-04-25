@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+{% if final and baseline %}
+<div style="background:#1a1f29;padding:16px;border-radius:6px;margin-bottom:24px;border:1px solid #2a3340">
+  <strong>Progresso F1→F13 (planta_74.pdf · expdedup)</strong>
+  <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-top:12px;font-size:13px">
+    <div><span style="color:#8a9ba8">walls</span><br><strong class="bad">{{ baseline.walls }}</strong> → <strong class="good">{{ final.walls }}</strong></div>
+    <div><span style="color:#8a9ba8">rooms</span><br><strong class="bad">{{ baseline.rooms }}</strong> → <strong class="good">{{ final.rooms }}</strong></div>
+    <div><span style="color:#8a9ba8">openings</span><br><strong class="bad">{{ baseline.openings }}</strong> → <strong class="good">{{ final.openings }}</strong></div>
+    <div><span style="color:#8a9ba8">orphans</span><br><strong class="bad">{{ baseline.orphan_count if baseline.orphan_count is not none else '?' }}</strong> → <strong class="good">{{ final.orphan_count if final.orphan_count is not none else '?' }}</strong></div>
+    <div><span style="color:#8a9ba8">largest_ratio</span><br><strong class="bad">{{ '%.2f' % baseline.largest_ratio if baseline.largest_ratio else '?' }}</strong> → <strong class="good">{{ '%.2f' % final.largest_ratio if final.largest_ratio else '?' }}</strong></div>
+    <div><span style="color:#8a9ba8">warnings</span><br><strong class="bad">{{ baseline.warnings }}</strong> → <strong class="good">{{ final.warnings }}</strong></div>
+  </div>
+</div>
+{% endif %}
+
+<div style="color:#8a9ba8;font-size:13px;margin-bottom:8px">{{ total }} runs · 2 repos · cards mostram <span style="color:#f0b95d">overlay_openings</span> (losangos = portas) quando disponível</div>
+
+{% for section_name, runs in sections %}
+<h2>{{ section_name }} <span style="color:#4a5662;font-weight:normal">({{ runs|length }})</span></h2>
+<div class="grid">
+  {% for r in runs %}
+  <div class="card" style="position:relative">
+    {% if r.has_cv %}
+    <a href="/cv/{{ r.repo }}/{{ r.name }}"
+       title="cross-validate disponível"
+       style="position:absolute;top:6px;right:6px;z-index:2;background:#f0b95d;color:#0f1419;font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;text-decoration:none;letter-spacing:0.5px">
+      ✓ CV
+    </a>
+    {% endif %}
+    <a href="/run/{{ r.repo }}/{{ r.name }}">
+      <div class="thumb {% if not r.overlay and not r.has_openings %}empty{% endif %}">
+        {% if r.overlay %}
+          <img src="/img/{{ r.repo }}/{{ r.name }}/{{ r.overlay }}" loading="lazy" alt="overlay">
+        {% elif r.has_openings %}
+          <img src="/svg/{{ r.repo }}/{{ r.name }}" loading="lazy" alt="openings svg">
+        {% else %}
+          (sem overlay nem openings)
+        {% endif %}
+      </div>
+      <div class="meta">
+        <div class="name">
+          <span style="color:#7ab7ff;font-size:10px;text-transform:uppercase">{{ r.repo }}</span>
+          {{ r.name }}
+        </div>
+        <div class="phase">{{ r.phase or r.pdf }}</div>
+        <div class="stats">
+          <div class="stat"><div class="label">walls</div><div class="value">{{ r.walls }}</div></div>
+          <div class="stat"><div class="label">rooms</div><div class="value">{{ r.rooms }}</div></div>
+          <div class="stat"><div class="label">port</div><div class="value">{{ r.openings }}</div></div>
+          <div class="stat"><div class="label">warn</div><div class="value {% if r.warnings %}warn{% endif %}">{{ r.warnings }}</div></div>
+        </div>
+      </div>
+    </a>
+  </div>
+  {% endfor %}
+</div>
+{% endfor %}
+{% endblock %}

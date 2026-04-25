@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <title>3D viewer · {{ repo }}/{{ name }}</title>
+  <style>
+    html, body {
+      margin: 0; padding: 0; height: 100%; width: 100%;
+      background: #0f1419; color: #d8dee9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", monospace;
+      overflow: hidden;
+    }
+    #header {
+      position: absolute; top: 0; left: 0; right: 0; z-index: 10;
+      background: rgba(15, 20, 25, 0.85);
+      padding: 10px 16px;
+      border-bottom: 1px solid #2a3340;
+      font-size: 13px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    #header a { color: #7ab7ff; text-decoration: none; }
+    #header a:hover { text-decoration: underline; }
+    #header .title { color: #f0b95d; font-weight: 600; }
+    #info {
+      position: absolute; top: 60px; left: 16px; z-index: 10;
+      background: rgba(15, 20, 25, 0.85);
+      padding: 10px 14px; border-radius: 6px;
+      border: 1px solid #2a3340; font-size: 12px;
+      color: #8a9ba8; max-width: 280px;
+    }
+    #info .key { color: #d8dee9; }
+    #legend {
+      position: absolute; bottom: 16px; left: 16px; z-index: 10;
+      background: rgba(15, 20, 25, 0.85);
+      padding: 10px 14px; border-radius: 6px;
+      border: 1px solid #2a3340; font-size: 12px;
+    }
+    #legend .swatch {
+      display: inline-block; width: 14px; height: 10px;
+      vertical-align: middle; margin-right: 6px;
+      border: 1px solid #2a3340;
+    }
+    #status {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      color: #8a9ba8; font-size: 14px;
+    }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+  <div id="header">
+    <a href="/fusion/{{ repo }}/{{ name }}">&larr; fusion</a>
+    <a href="/run/{{ repo }}/{{ name }}">run</a>
+    <a href="/cv/{{ repo }}/{{ name }}">cross-validate</a>
+    <span style="color:#3a4350">|</span>
+    <span class="title">3D viewer</span>
+    <span style="color:#7ab7ff">{{ repo }}</span>
+    <span>{{ name }}</span>
+  </div>
+
+  <div id="info">
+    <div><span class="key">arquivo:</span> consensus_3d.glb</div>
+    <div><span class="key">controles:</span> arrastar = orbit, scroll = zoom, shift+arrastar = pan</div>
+    <div style="margin-top:6px;color:#5a6470">altura paredes 2.7 m, escala derivada de rooms = 74 m&sup2;</div>
+  </div>
+
+  <div id="legend">
+    <div><span class="swatch" style="background:#dcdcd7"></span> wall (V13 + SVG)</div>
+    <div><span class="swatch" style="background:#c8afa0"></span> wall SVG-only</div>
+    <div><span class="swatch" style="background:#ff8c00"></span> opening (porta arc)</div>
+    <div><span class="swatch" style="background:#ffc864"></span> opening gap</div>
+    <div><span class="swatch" style="background:#ffe0b2"></span> piso (room polygon)</div>
+    <div><span class="swatch" style="background:#7890a0"></span> furniture</div>
+  </div>
+
+  <div id="status">carregando consensus_3d.glb...</div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+    const GLB_URL = "/img/{{ repo }}/{{ name }}/consensus_3d.glb";
+    const status = document.getElementById('status');
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0f1419);
+
+    const camera = new THREE.PerspectiveCamera(
+      50, window.innerWidth / window.innerHeight, 0.1, 500
+    );
+    camera.position.set(8, -8, 10);
+    camera.up.set(0, 0, 1);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    document.body.appendChild(renderer.domElement);
+
+    // lights
+    const hemi = new THREE.HemisphereLight(0xffffff, 0x222233, 0.5);
+    scene.add(hemi);
+    const dir = new THREE.DirectionalLight(0xffffff, 0.9);
+    dir.position.set(8, 10, 18);
+    dir.castShadow = true;
+    dir.shadow.mapSize.width = 1024;
+    dir.shadow.mapSize.height = 1024;
+    dir.shadow.camera.near = 1;
+    dir.shadow.camera.far = 80;
+    dir.shadow.camera.left = -25;
+    dir.shadow.camera.right = 25;
+    dir.shadow.camera.top = 25;
+    dir.shadow.camera.bottom = -25;
+    scene.add(dir);
+    const ambient = new THREE.AmbientLight(0xffffff, 0.25);
+    scene.add(ambient);
+
+    // ground plane (subtle grid below the model)
+    const grid = new THREE.GridHelper(40, 40, 0x2a3340, 0x1a1f29);
+    grid.rotation.x = Math.PI / 2;
+    grid.position.z = -0.05;
+    scene.add(grid);
+
+    // controls
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.target.set(0, 0, 1);
+
+    // load model
+    const loader = new GLTFLoader();
+    loader.load(
+      GLB_URL,
+      (gltf) => {
+        const root = gltf.scene;
+        root.traverse((obj) => {
+          if (obj.isMesh) {
+            obj.castShadow = true;
+            obj.receiveShadow = true;
+          }
+        });
+        scene.add(root);
+
+        // re-centre camera around model bounding box
+        const bbox = new THREE.Box3().setFromObject(root);
+        const size = new THREE.Vector3();
+        const centre = new THREE.Vector3();
+        bbox.getSize(size);
+        bbox.getCenter(centre);
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const dist = maxDim * 1.6;
+        camera.position.set(
+          centre.x + dist * 0.6,
+          centre.y - dist * 0.9,
+          centre.z + dist * 0.7,
+        );
+        controls.target.copy(centre);
+        controls.update();
+
+        status.style.display = 'none';
+      },
+      (xhr) => {
+        if (xhr.total) {
+          status.textContent = `carregando ${(xhr.loaded / 1024).toFixed(0)} / ${(xhr.total / 1024).toFixed(0)} KB`;
+        }
+      },
+      (err) => {
+        status.textContent = 'erro carregando GLB: ' + (err.message || err);
+        status.style.color = '#ff8080';
+      }
+    );
+
+    function onResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+    window.addEventListener('resize', onResize);
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
+</body>
+</html>

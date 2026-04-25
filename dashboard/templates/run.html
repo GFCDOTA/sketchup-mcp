@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}{{ m.name }} · {{ m.repo }} · sketchup-mcp dashboard{% endblock %}
+{% block content %}
+<div style="margin-bottom:16px"><a href="/" style="color:#7ab7ff;font-size:13px">← runs</a></div>
+<h1 style="margin:0 0 4px;font-size:22px">
+  <span style="color:#7ab7ff;font-size:11px;text-transform:uppercase;letter-spacing:1px">{{ m.repo }}</span>
+  {{ m.name }}
+</h1>
+<div style="color:#8a9ba8;font-size:13px;margin-bottom:24px">{{ m.phase or "—" }} · pdf: {{ m.pdf }} · openings: {{ m.openings }} · topology_hash: <code>{{ m.topology_hash }}</code></div>
+
+<div class="detail">
+  <div>
+    <div class="image-stack">
+      {% if m.overlay and m.has_openings %}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="image-wrap">
+          <div style="font-size:11px;color:#7ab7ff;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;text-align:left">{{ m.overlay }} · pipeline</div>
+          <img src="/img/{{ m.repo }}/{{ m.name }}/{{ m.overlay }}" alt="{{ m.overlay }}">
+        </div>
+        <div class="image-wrap">
+          <div style="font-size:11px;color:#f0b95d;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;text-align:left;display:flex;justify-content:space-between">
+            <span>SVG · portas (losangos)</span>
+            <a href="/svg/{{ m.repo }}/{{ m.name }}" target="_blank" style="color:#7ab7ff">abrir</a>
+          </div>
+          <object data="/svg/{{ m.repo }}/{{ m.name }}" type="image/svg+xml" style="width:100%;height:auto;background:#fff;border-radius:4px"></object>
+        </div>
+      </div>
+      {% elif m.overlay %}
+      <div class="image-wrap">
+        <div style="font-size:11px;color:#7ab7ff;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;text-align:left">{{ m.overlay }}</div>
+        <img src="/img/{{ m.repo }}/{{ m.name }}/{{ m.overlay }}" alt="{{ m.overlay }}">
+      </div>
+      {% elif m.has_openings %}
+      <div class="image-wrap">
+        <div style="font-size:11px;color:#f0b95d;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;text-align:left">SVG · portas (losangos)</div>
+        <object data="/svg/{{ m.repo }}/{{ m.name }}" type="image/svg+xml" style="width:100%;height:auto;background:#fff;border-radius:4px"></object>
+      </div>
+      {% else %}
+      <div class="image-wrap"><div style="padding:60px;color:#4a5662">sem overlay disponível</div></div>
+      {% endif %}
+    </div>
+    {% for art in artifacts %}
+      <details class="artifact">
+        <summary>{{ art.name }} · {{ art.size }} bytes</summary>
+        <pre>{{ art.preview }}</pre>
+      </details>
+    {% endfor %}
+  </div>
+
+  <aside>
+    <div class="compare-form">
+      <form action="/compare" method="get" style="display:flex;flex-direction:column;gap:8px">
+        <input type="hidden" name="a_repo" value="{{ m.repo }}">
+        <input type="hidden" name="a" value="{{ m.name }}">
+        <label style="font-size:11px;color:#8a9ba8;text-transform:uppercase;letter-spacing:1px">comparar com</label>
+        <select name="b" onchange="document.querySelector('[name=b_repo]').value = this.options[this.selectedIndex].dataset.repo">
+          {% for repo, name in other_runs %}<option value="{{ name }}" data-repo="{{ repo }}">[{{ repo }}] {{ name }}</option>{% endfor %}
+        </select>
+        <input type="hidden" name="b_repo" value="{{ other_runs[0][0] if other_runs else 'expdedup' }}">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button type="submit" style="flex:1;min-width:90px">comparar</button>
+          <a href="/cv/{{ m.repo }}/{{ m.name }}"
+             style="flex:1;min-width:90px;background:#f0b95d;color:#0f1419;border:0;padding:6px 12px;border-radius:3px;cursor:pointer;text-align:center;text-decoration:none;font-weight:600;font-size:13px">
+            CV{% if m.has_cv %} ✓{% endif %}
+          </a>
+          <a href="/fusion/{{ m.repo }}/{{ m.name }}"
+             style="flex:1;min-width:90px;background:#6ec07a;color:#0f1419;border:0;padding:6px 12px;border-radius:3px;cursor:pointer;text-align:center;text-decoration:none;font-weight:600;font-size:13px">
+            FUSION
+          </a>
+        </div>
+      </form>
+    </div>
+    <table class="metrics-table">
+      <tr><th>métrica</th><th>valor</th></tr>
+      <tr><td>walls</td><td>{{ m.walls }}</td></tr>
+      <tr><td>rooms</td><td>{{ m.rooms }}</td></tr>
+      <tr><td>junctions</td><td>{{ m.juncs }}</td></tr>
+      <tr><td>openings (portas)</td><td class="warn">{{ m.openings }}</td></tr>
+      <tr><td>peitoris</td><td>{{ m.peitoris }}</td></tr>
+      <tr><td>edges</td><td>{{ m.edges if m.edges is not none else '—' }}</td></tr>
+      <tr><td>components</td><td>{{ m.components if m.components is not none else '—' }}</td></tr>
+      <tr><td>orphan_count</td><td class="{% if m.orphan_count %}warn{% else %}good{% endif %}">{{ m.orphan_count if m.orphan_count is not none else '—' }}</td></tr>
+      <tr><td>largest_ratio</td><td>{{ '%.3f' % m.largest_ratio if m.largest_ratio is not none else '—' }}</td></tr>
+      <tr><td>topology_score</td><td>{{ '%.3f' % m.topology_score if m.topology_score is not none else '—' }}</td></tr>
+      <tr><td>rooms_score</td><td>{{ '%.3f' % m.rooms_score if m.rooms_score is not none else '—' }}</td></tr>
+      <tr><td>geometry_score</td><td>{{ '%.3f' % m.geometry_score if m.geometry_score is not none else '—' }}</td></tr>
+      <tr><td>warnings</td><td class="{% if m.warnings %}warn{% else %}good{% endif %}">{{ m.warnings }}</td></tr>
+    </table>
+  </aside>
+</div>
+{% endblock %}

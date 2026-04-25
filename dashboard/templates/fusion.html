@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}fusion · {{ m.name }}{% endblock %}
+{% block content %}
+<div style="margin-bottom:16px">
+  <a href="/" style="color:#7ab7ff;font-size:13px">← runs</a> ·
+  <a href="/run/{{ m.repo }}/{{ m.name }}" style="color:#7ab7ff;font-size:13px">run detail</a> ·
+  <a href="/cv/{{ m.repo }}/{{ m.name }}" style="color:#7ab7ff;font-size:13px">cross-validate</a>
+</div>
+<div style="margin-bottom:20px">
+  <a href="/3d/{{ m.repo }}/{{ m.name }}" target="_blank" rel="noopener"
+     style="display:inline-block;background:#1f6feb;color:#fff;padding:9px 18px;
+            border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;
+            border:1px solid #2a7ff5;box-shadow:0 1px 0 rgba(255,255,255,.1) inset">
+    abrir viewer 3D &rarr;
+  </a>
+  <span style="color:#5a6470;font-size:11px;margin-left:10px">
+    three.js · OrbitControls · GLB derivado de consensus_model.json
+  </span>
+</div>
+<h1 style="margin:0 0 4px;font-size:22px">
+  <span style="color:#f0b95d;font-size:11px;text-transform:uppercase;letter-spacing:1px">FUSION</span>
+  <span style="color:#7ab7ff;font-size:11px;text-transform:uppercase;letter-spacing:1px">{{ m.repo }}</span>
+  {{ m.name }}
+</h1>
+
+{% if not consensus %}
+<div style="background:#1a1f29;padding:24px;border-radius:6px;text-align:center;color:#8a9ba8">
+  <p>Sem <code>consensus_model.json</code> ainda.</p>
+  <p>Rode: <code>E:/Python312/python.exe E:/Claude/sketchup-mcp-exp-dedup/dashboard/fuse_detections.py {{ m.name }}</code></p>
+</div>
+{% else %}
+
+<div style="background:#1a1f29;padding:16px;border-radius:6px;margin-bottom:24px;border:1px solid #2a3340">
+  <strong style="color:#f0b95d">Contrato</strong>
+  <div style="font-size:12px;color:#8a9ba8;margin-top:6px">
+    coordinate_space: <code>{{ consensus.metadata.coordinate_space }}</code> ·
+    sources: {{ consensus.metadata.sources | join(', ') }} ·
+    schema: {{ consensus.metadata.schema_version }} ·
+    fusion_latency: {{ consensus.metadata.fusion_latency_seconds }}s
+  </div>
+  <div style="font-size:11px;color:#8a9ba8;margin-top:6px">
+    pesos:
+    {% for k, v in consensus.metadata.weights.items() %}
+      <span style="background:#0f1419;padding:2px 6px;border-radius:3px;margin-right:4px">{{ k }}={{ v }}</span>
+    {% endfor %}
+  </div>
+</div>
+
+<h2 style="margin:24px 0 12px;font-size:14px;color:#8a9ba8;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #2a3340;padding-bottom:6px">Diagnostics</h2>
+<table class="metrics-table" style="margin-bottom:24px">
+  <tr><th>métrica</th><th>valor</th><th>nota</th></tr>
+  <tr><td>walls_total</td><td>{{ consensus.diagnostics.walls_total }}</td><td>SVG-native (geometria primária)</td></tr>
+  <tr><td>walls_with_v13_agreement</td><td class="good">{{ consensus.diagnostics.walls_with_v13_agreement }}</td><td>+{{ consensus.metadata.weights.pipeline_v13 }} cada</td></tr>
+  <tr><td>walls_svg_only</td><td>{{ consensus.diagnostics.walls_svg_only }}</td><td>sem confirmação V13 (V13 segmenta em junctions)</td></tr>
+  <tr><td>openings_total</td><td>{{ consensus.diagnostics.openings_total }}</td><td>arcs + gap-only</td></tr>
+  <tr><td>openings_arc_seed</td><td class="good">{{ consensus.diagnostics.openings_arc_seed }}</td><td>SVG arc primário (porta com swing)</td></tr>
+  <tr><td>openings_gap_only</td><td class="warn">{{ consensus.diagnostics.openings_gap_only }}</td><td>passagem ou porta sem arco</td></tr>
+  <tr><td>openings_yolo_confirmed</td><td>{{ consensus.diagnostics.openings_yolo_confirmed }}</td><td>+{{ consensus.metadata.weights.yolo }} cada</td></tr>
+  <tr><td>rooms_total</td><td>{{ consensus.diagnostics.rooms_total }}</td><td>polígonos V13 (normalizados pra SVG space)</td></tr>
+  <tr><td>rooms_with_qwen_label</td><td class="good">{{ consensus.diagnostics.rooms_with_qwen_label }}</td><td>nomes PT-BR</td></tr>
+  <tr><td>furniture_total</td><td>{{ consensus.diagnostics.furniture_total }}</td><td>{{ consensus.diagnostics.furniture_cubicasa }} CubiCasa + {{ consensus.diagnostics.furniture_qwen }} Qwen</td></tr>
+</table>
+
+<h2 style="margin:24px 0 12px;font-size:14px;color:#8a9ba8;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #2a3340;padding-bottom:6px">PDF original ↔ Consensus</h2>
+{% if has_sbs %}
+  <img src="/img/{{ m.repo }}/{{ m.name }}/pdf_vs_consensus.png" style="width:100%;border-radius:6px;background:#fff;margin-bottom:24px">
+{% endif %}
+
+<h2 style="margin:24px 0 12px;font-size:14px;color:#8a9ba8;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #2a3340;padding-bottom:6px">Consensus overlay (cores=fonte)</h2>
+{% if has_overlay %}
+  <div style="display:grid;grid-template-columns:1fr 360px;gap:16px">
+    <img src="/img/{{ m.repo }}/{{ m.name }}/consensus_overlay.png" style="width:100%;border-radius:6px;background:#fff">
+    <div style="font-size:12px;color:#8a9ba8;background:#1a1f29;padding:12px;border-radius:6px">
+      <div style="margin-bottom:6px"><span style="display:inline-block;width:14px;height:3px;background:#b41e1e;vertical-align:middle"></span> wall + V13 agreement (mais grosso)</div>
+      <div style="margin-bottom:6px"><span style="display:inline-block;width:14px;height:2px;background:#dc6464;vertical-align:middle"></span> wall só SVG-native</div>
+      <div style="margin-bottom:6px"><span style="display:inline-block;width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:10px solid #ff8c00;vertical-align:middle"></span> opening arc seed (porta confirmada por arco)</div>
+      <div style="margin-bottom:6px"><span style="display:inline-block;width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:10px solid #ffc864;vertical-align:middle"></span> opening gap-only (sem arco SVG)</div>
+      <div style="margin-bottom:6px"><span style="display:inline-block;width:14px;height:14px;background:#fff0c8;border:1px solid #dcb450;vertical-align:middle"></span> room polygon (V13)</div>
+      <div style="color:#8a9ba8;margin-top:10px">número ao lado do losango = quantas fontes votaram naquele opening</div>
+    </div>
+  </div>
+{% endif %}
+
+<h2 style="margin:24px 0 12px;font-size:14px;color:#8a9ba8;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #2a3340;padding-bottom:6px">Rooms nomeados (Qwen PT-BR)</h2>
+<table class="metrics-table" style="margin-bottom:24px">
+  <tr><th>room_id</th><th>area</th><th>label PT-BR</th><th>sources</th></tr>
+  {% for r in consensus.rooms %}
+  <tr>
+    <td>{{ r.room_id }}</td>
+    <td>{{ "%.0f" % r.area if r.area else "—" }}</td>
+    <td class="{% if r.label_qwen %}good{% endif %}">{{ r.label_qwen or "—" }}</td>
+    <td style="font-size:11px;color:#8a9ba8">{{ r.sources | join(', ') }}</td>
+  </tr>
+  {% endfor %}
+</table>
+
+<h2 style="margin:24px 0 12px;font-size:14px;color:#8a9ba8;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #2a3340;padding-bottom:6px">Furniture</h2>
+<table class="metrics-table" style="margin-bottom:24px">
+  <tr><th>type</th><th>room</th><th>sources</th><th>conf</th></tr>
+  {% for f in consensus.furniture %}
+  <tr>
+    <td>{{ f.type }}</td>
+    <td>{{ f.room_label or "—" }}</td>
+    <td style="font-size:11px;color:#8a9ba8">{{ f.sources | join(', ') }}</td>
+    <td>{{ f.confidence }}</td>
+  </tr>
+  {% endfor %}
+</table>
+
+<details class="artifact" style="margin-top:24px">
+  <summary>consensus_model.json (primeiros 5 walls + 5 openings)</summary>
+  <pre>{{ {
+    "metadata": consensus.metadata,
+    "diagnostics": consensus.diagnostics,
+    "walls_first_5": consensus.walls[:5],
+    "openings_first_5": consensus.openings[:5],
+    "rooms_first_3": consensus.rooms[:3],
+  } | tojson(indent=2) }}</pre>
+</details>
+
+{% endif %}
+{% endblock %}

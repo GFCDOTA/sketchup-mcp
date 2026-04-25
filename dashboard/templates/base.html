@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}sketchup-mcp dashboard{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header>
+    <h1>sketchup-mcp · dashboard de progresso</h1>
+    <nav>
+      <a href="/">runs</a>
+      <a href="/api/metrics">metrics.json</a>
+      <a href="/health">health</a>
+    </nav>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

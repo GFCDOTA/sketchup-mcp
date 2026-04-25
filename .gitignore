@@ -27,3 +27,13 @@ runs/validation/*
 .vscode/
 .DS_Store
 Thumbs.db
+# dashboard generated artifacts (excluded from git — regeneratable or too large)
+dashboard/_metrics.json
+dashboard/__pycache__/
+dashboard/models/
+dashboard/detections/**/*.png
+dashboard/detections/**/*.jpg
+dashboard/detections/**/*.jpeg
+dashboard/detections/*.json
+# keep parsed SVG fixture
+!dashboard/detections/planta_74_native.svg
