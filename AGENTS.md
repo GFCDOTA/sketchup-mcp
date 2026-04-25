@@ -65,6 +65,7 @@ Regras do contrato:
 
 ## 5. Regras de trabalho para agentes
 
+- **Session start protocol** — toda nova sessão começa com `git fetch --all` + `git pull --ff-only` em cada repo ativo (`sketchup-mcp` e `sketchup-mcp-exp-dedup`). Working tree dirty da sessão anterior é committado em commits temáticos antes de mexer em código novo. No final da sessão: commits do trabalho desta sessão + `git push` na branch corrente. Sem `--force`, sem `--no-verify` sem autorização explícita.
 - Toda mudança começa com um git checkpoint (ou branch) antes de alterar código
 - Commits pequenos, semânticos, com prefixo convencional (`feat:`, `fix:`, `chore:`, `test:`, `docs:`, `refactor:`)
 - Um commit = uma ideia
@@ -107,3 +108,39 @@ Conflict rule:
 - 2026-04-19: Scaffold inicial via Codex, pipeline em estágios isolados, sem reaproveitar código legado.
 - 2026-04-19: Ingest raster-first usando `pypdfium2`.
 - 2026-04-19: Topology via grafo + polygonize — sem fallback de bounding box para rooms.
+- 2026-04-21: Promovidos protos `proto_red.py` / `proto_colored*.py` / `proto_skel.py` / `preprocess_walls.py` para o pacote `preprocess/`. Os scripts originais foram movidos para `preprocess/legacy/` (preservados, não removidos).
+
+## 10. Apêndice — Preprocess opcional (`preprocess/`)
+
+O pacote `preprocess/` adiciona uma etapa **opcional** entre `ingest` e `extract`. Ele transforma o raster da página antes da extração — tipicamente isolando paredes desenhadas em uma cor específica (vermelho, preto, grey31, ...) — quando o PDF cru não rende geometria limpa o suficiente para o pipeline.
+
+### Regras
+
+- **Off por default.** Sem `preprocess=`, o pipeline opera exatamente como antes.
+- **Genérico.** Os presets descrevem famílias de paleta (`red`, `black`, `grey31`, ...), nunca um PDF específico. Não acoplar heurística a `planta_74.pdf` ou similar — isso violaria a invariante §2.
+- **Nunca silencioso.** Toda aplicação de preprocess injeta um warning explícito no `observed_model.warnings` (ex: `preprocess_color_mask_applied`). Se o pipeline rodar com input alterado, o consumidor downstream tem como saber. Sem warning = bug.
+- **Sem fallback automático.** O pipeline NÃO escolhe sozinho ativar preprocess "se o PDF parecer ruim". A decisão é do caller (CLI/API/teste). Fallback silencioso mascararia falha de extração.
+- **Não substitui o extrator.** Preprocess é uma muleta para paletas onde a alvenaria é desenhada em cor sólida. Casos onde extract precisa melhorar (Hough, ROI, classify) continuam sendo problema do extractor.
+
+### API
+
+```python
+from model.pipeline import run_pdf_pipeline
+
+result = run_pdf_pipeline(
+    pdf_bytes,
+    filename="planta.pdf",
+    output_dir=Path("artifacts/run-001"),
+    preprocess={"mode": "color_mask", "color": "auto"},
+)
+assert "preprocess_color_mask_applied" in result.observed_model["warnings"]
+```
+
+### Modos suportados
+
+- `{"mode": "color_mask", "color": "auto"|"red"|"black"|"grey31"|...}` — extrai canal cromático dominante.
+- `{"mode": "color_mask", ..., "skeleton": true}` — adicionalmente esqueletoniza para 1px e re-dilata.
+
+### Legado
+
+Scripts originais `proto_red.py`, `proto_colored*.py`, `proto_skel.py`, `proto_v2.py`, `proto_runner.py`, `preprocess_walls.py` foram movidos para `preprocess/legacy/` (não deletados). Ver `preprocess/legacy/README.md` para mapeamento proto -> produção.

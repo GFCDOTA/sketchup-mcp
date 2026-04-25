@@ -6,8 +6,10 @@ from PIL import Image
 from pathlib import Path
 from skimage.morphology import skeletonize
 import json
+import sys
 
-SRC = r"C:/Users/felip_local/Documents/paredes.png"
+SRC = sys.argv[1] if len(sys.argv) > 1 else r"C:/Users/felip_local/Documents/paredes.png"
+PREFIX = sys.argv[2] if len(sys.argv) > 2 else f"{PREFIX}"
 OUT = Path("runs/proto"); OUT.mkdir(parents=True, exist_ok=True)
 
 img = cv2.imread(SRC)
@@ -29,11 +31,11 @@ brown = cv2.morphologyEx(brown, cv2.MORPH_CLOSE, np.ones((3,3), np.uint8), itera
 print(f"brown px: {(brown>0).sum():,}")
 
 # salva masks pra debug
-cv2.imwrite(str(OUT / "p9_red_mask.png"), red)
-cv2.imwrite(str(OUT / "p9_brown_mask.png"), brown)
+cv2.imwrite(str(OUT / f"{PREFIX}_red_mask.png"), red)
+cv2.imwrite(str(OUT / f"{PREFIX}_brown_mask.png"), brown)
 
 # walls em pdf (so vermelho)
-Image.fromarray(255 - red).convert("RGB").save(OUT / "p9_red.pdf", "PDF", resolution=150.0)
+Image.fromarray(255 - red).convert("RGB").save(OUT / f"{PREFIX}_red.pdf", "PDF", resolution=150.0)
 
 # peitoris: salva como JSON com bounding boxes pra adicionar no observed_model
 n, lbl, st, _ = cv2.connectedComponentsWithStats(brown, 8)
@@ -49,6 +51,6 @@ for i in range(1, n):
         "kind": "peitoril",
         "height_m": 1.10,  # padrao da legenda do PDF
     })
-(OUT / "p9_peitoris.json").write_text(json.dumps(peitoris, indent=2))
+(OUT / f"{PREFIX}_peitoris.json").write_text(json.dumps(peitoris, indent=2))
 print(f"peitoris: {len(peitoris)}")
 print("done")
