@@ -65,6 +65,7 @@ Regras do contrato:
 
 ## 5. Regras de trabalho para agentes
 
+- **Session start protocol** — toda nova sessão começa com `git fetch --all` + `git pull --ff-only` em cada repo ativo (`sketchup-mcp` e `sketchup-mcp-exp-dedup`). Working tree dirty da sessão anterior é committado em commits temáticos antes de mexer em código novo. No final da sessão: commits do trabalho desta sessão + `git push` na branch corrente. Sem `--force`, sem `--no-verify` sem autorização explícita.
 - Toda mudança começa com um git checkpoint (ou branch) antes de alterar código
 - Commits pequenos, semânticos, com prefixo convencional (`feat:`, `fix:`, `chore:`, `test:`, `docs:`, `refactor:`)
 - Um commit = uma ideia
