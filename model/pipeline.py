@@ -11,10 +11,12 @@ import numpy as np
 from classify.service import classify_walls
 from debug.service import write_debug_artifacts
 from extract.service import extract_from_raster
-from ingest.service import IngestError, IngestedDocument, ingest_pdf
+from ingest.service import IngestError, IngestedDocument, RasterPage, ingest_pdf
 from model.builder import build_observed_model, compute_bounds
 from model.types import ConnectivityReport, Junction, Room, SplitWall, WallCandidate
 from openings.service import detect_openings
+from peitoris.service import detect_peitoris
+from preprocess import apply_preprocessing, preprocess_warning_for
 from roi.service import RoiResult, crop_image_to_bbox, detect_architectural_roi
 from topology.service import build_topology
 
@@ -39,23 +41,57 @@ def run_pdf_pipeline(
     filename: str,
     output_dir: Path,
     peitoris: list[dict] | None = None,
+    source_image: np.ndarray | None = None,
+    preprocess: dict | None = None,
 ) -> PipelineResult:
+    """Roda o pipeline completo a partir de um PDF.
+
+    `peitoris`: override manual (legado pNN_peitoris.json). Se None E
+    `source_image` for fornecida (PNG colorido original), detecta
+    peitoris automaticamente via `peitoris.service.detect_peitoris`.
+    Se ambos forem None, observed_model.peitoris fica `[]`.
+
+    `preprocess`: configuracao opcional de pre-processamento por pagina,
+    aplicada APOS rasterizacao e ANTES da extracao. Ex:
+    ``{"mode": "color_mask", "color": "auto"}`` extrai canal cromatico
+    dominante (vermelho/preto/...) e injeta um warning explicito
+    `preprocess_color_mask_applied` no observed_model. ``None`` mantem o
+    comportamento default (sem alteracao do raster). Ver `preprocess/`.
+    """
     try:
         document = ingest_pdf(pdf_bytes=pdf_bytes, filename=filename)
     except IngestError as exc:
         raise PipelineError(str(exc)) from exc
+    document = _apply_preprocess_to_document(document, preprocess)
     candidates, roi_results = _extract_with_roi_from_document(document)
     source = _build_pdf_source(pdf_bytes=pdf_bytes, filename=filename, document=document)
+    if peitoris is None and source_image is not None:
+        peitoris = detect_peitoris(source_image, page_index=0)
     return _run_pipeline(
         candidates=candidates,
         output_dir=output_dir,
         source=source,
         roi_results=roi_results,
         peitoris=peitoris,
+        preprocess=preprocess,
     )
 
 
-def run_raster_pipeline(image: np.ndarray, output_dir: Path) -> PipelineResult:
+def run_raster_pipeline(
+    image: np.ndarray,
+    output_dir: Path,
+    peitoris: list[dict] | None = None,
+    auto_detect_peitoris: bool = False,
+    preprocess: dict | None = None,
+) -> PipelineResult:
+    """Roda o pipeline a partir de um raster ja em memoria.
+
+    `auto_detect_peitoris`: se True E `peitoris` for None, roda o
+    detector automatico em cima da imagem (deve ser colorida).
+    `preprocess`: ver docstring de :func:`run_pdf_pipeline`.
+    """
+    if preprocess is not None:
+        image = apply_preprocessing(image, preprocess)
     candidates, roi_result = _extract_with_roi_from_raster(image, page_index=0)
     source = {
         "filename": None,
@@ -63,12 +99,41 @@ def run_raster_pipeline(image: np.ndarray, output_dir: Path) -> PipelineResult:
         "page_count": 1,
         "sha256": None,
     }
+    if peitoris is None and auto_detect_peitoris:
+        peitoris = detect_peitoris(image, page_index=0)
     return _run_pipeline(
         candidates=candidates,
         output_dir=output_dir,
         source=source,
         roi_results=[roi_result],
+        peitoris=peitoris,
+        preprocess=preprocess,
     )
+
+
+def _apply_preprocess_to_document(
+    document: IngestedDocument,
+    preprocess: dict | None,
+) -> IngestedDocument:
+    """Return a new IngestedDocument with each page image preprocessed.
+
+    No-op (returns ``document`` as-is) when ``preprocess`` is None.
+    """
+    if preprocess is None:
+        return document
+    new_pages: list[RasterPage] = []
+    for page in document.pages:
+        new_image = apply_preprocessing(page.image, preprocess)
+        new_image = np.ascontiguousarray(new_image)
+        new_pages.append(
+            RasterPage(
+                index=page.index,
+                image=new_image,
+                width=int(new_image.shape[1]),
+                height=int(new_image.shape[0]),
+            )
+        )
+    return IngestedDocument(source_name=document.source_name, pages=new_pages)
 
 
 def _extract_with_roi_from_document(document: IngestedDocument):
@@ -118,6 +183,7 @@ def _run_pipeline(
     source: dict,
     roi_results: list[RoiResult],
     peitoris: list[dict] | None = None,
+    preprocess: dict | None = None,
 ) -> PipelineResult:
     walls = classify_walls(candidates)
     walls, openings = detect_openings(walls, peitoris=peitoris)
@@ -129,6 +195,7 @@ def _run_pipeline(
         rooms=rooms,
         connectivity_report=connectivity_report,
         roi_results=roi_results,
+        preprocess=preprocess,
     )
     run_id = uuid4().hex
     bounds = compute_bounds(split_walls)
@@ -188,8 +255,13 @@ def _build_warnings(
     rooms: list[Room],
     connectivity_report: ConnectivityReport,
     roi_results: list[RoiResult],
+    preprocess: dict | None = None,
 ) -> list[str]:
     warnings: list[str] = []
+    # INVARIANT: preprocessing is never silent. If applied, the warning is
+    # the FIRST entry so downstream consumers cannot miss it.
+    if preprocess is not None and preprocess.get("mode"):
+        warnings.append(preprocess_warning_for(preprocess["mode"]))
     if any(not r.applied for r in roi_results):
         warnings.append("roi_fallback_used")
     if not candidates:

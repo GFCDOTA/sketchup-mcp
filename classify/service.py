@@ -64,24 +64,38 @@ def classify_walls(
     # Stage 1: collapse redundant Hough detections of the same stroke.
     strokes = _consolidate_hough_duplicates(candidates, coordinate_tolerance)
 
-    # Filtros de ruido (text baselines + orientation imbalance) so fazem
-    # sentido em planta real bagunsada. Quando o input ja vem limpo
-    # (poucas centenas de candidatos), eles matam paredes legitimas.
+    # Filtros 1+2 (text baselines + orientation imbalance) so fazem sentido
+    # em planta real bagunsada. Mantem gate >200 mas instrumenta drop.
     if len(strokes) > 200:
+        before = len(strokes)
         strokes = _remove_text_baselines(strokes)
         strokes = _drop_orientation_imbalanced(strokes)
+        if before and (before - len(strokes)) / before > 0.6:
+            import warnings as _w
+            _w.warn(
+                f"classify: noise filters dropped "
+                f"{before - len(strokes)}/{before} strokes (>60%)",
+                RuntimeWarning,
+            )
 
     # Stage 4: drop strokes whose length / thickness ratio is too low to be
     # a wall (blob-shaped glyph fragments and tick marks).
     strokes = _drop_low_aspect_strokes(strokes)
 
-    # Stage 5: pair parallel strokes que representam as 2 faces de uma
-    # wall double-line. Quando input ja vem limpo (single-stroke walls),
-    # esse merge causa falsos positivos e mata walls de banheiros pequenos.
-    if len(strokes) > 200:
-        wall_candidates = _pair_merge_strokes(strokes)
-    else:
-        wall_candidates = list(strokes)
+    # Stage 5: pair-merge SEMPRE roda. Plantas reais sao desenhadas em
+    # double-line independente de quanto ruido a pagina tem. Strokes sem
+    # par compativel (gap fora de [_PAIR_MIN_GAP, _PAIR_MAX_GAP] ou overlap
+    # < _PAIR_MIN_OVERLAP_RATIO) passam unchanged, entao single-stroke
+    # input (banheiros pequenos / planta pre-skeletonizada) e seguro.
+    before_pm = len(strokes)
+    wall_candidates = _pair_merge_strokes(strokes)
+    if before_pm and (before_pm - len(wall_candidates)) / before_pm > 0.8:
+        import warnings as _w
+        _w.warn(
+            f"classify: pair_merge consumed "
+            f"{before_pm - len(wall_candidates)}/{before_pm} strokes (>80%)",
+            RuntimeWarning,
+        )
 
     # Stage 6: aspect check again, because pair-merge can synthesise a
     # centerline whose thickness (= the pair gap) is close to its length.
