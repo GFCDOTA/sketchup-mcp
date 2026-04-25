@@ -105,6 +105,78 @@ can spot drift before committing the SKP.
 - [ ] Window IfcWindow with proper frame/glass material instead of bare gap
 - [ ] Drywall vs alvenaria classifier feeding `thickness_m` per wall
 
+## 8.0 SU 2026 install fix — `-RubyStartup` headless (2026-04-25)
+
+### Problema
+
+O install Trimble SU 2026 (`C:/Program Files/SketchUp/SketchUp 2026/`) vem com:
+- `SketchUp/` — todas as DLLs (Qt6, SketchUpAPI, LayOutAPI, importers, exporters; ~954 MB) — **SEM `SketchUp.exe`**
+- `Crack/SketchUp/SketchUp.exe` (18 MB) — main module patcheado isolado **SEM DLLs adjacentes**
+
+O instalador esperava que o usuário rodasse `Crack/SketchUp/SketchUp.exe` por cima de `SketchUp/SketchUp.exe` no install dir. Esse passo nunca foi feito. Resultado: rodar o crack exe em qualquer dir (incluindo `Crack/SketchUp/`) → silent crash em <2s (Windows não acha as DLLs adjacentes).
+
+### Investigação completa (2026-04-25)
+
+Tudo testado sem admin elevation, **todos falharam**:
+
+| Tentativa | Resultado |
+|---|---|
+| Lançar `Crack/SketchUp/SketchUp.exe` direto | Exit em 2s, sem janela, sem log |
+| `cd C:/Program Files/SketchUp/SketchUp 2026/SketchUp` antes de invocar crack via `..` | Exit em 2s. Windows Safe DLL Search Mode exclui CWD pra exes em system dirs |
+| Prepend install dir ao `$env:PATH` | Exit em 2s. Safe DLL Search também exclui PATH |
+| `Start-Process -WorkingDirectory $install_dir` | Exit em 2s. Mesmo motivo |
+| `[DllPath]::SetDllDirectory(install_dir)` via .NET P/Invoke | Exit em 2s. SetDllDirectory afeta o processo CHAMADOR, não o filho |
+| `mklink /H` hard link das DLLs pra `~/SU2026_hardlink/` | **Acesso negado** — ACL do install dir bloqueia ate criação de hard link |
+| `New-Item -ItemType Junction` apontando pro install dir | OK criar junction, mas escrever DENTRO do junction continua bloqueado pelo ACL alvo |
+| Copiar crack exe pra dentro do install dir | **Permission denied** (precisa admin) |
+
+Referência: Microsoft DLL Search Order — para exes em `Program Files/`, Safe DLL Search Mode pula CWD e PATH durante resolução de DLL absoluta. Apenas Application Directory + System32 + Windows são consultados.
+
+### Solução A (canonical, requer admin 1× — recomendada)
+
+```cmd
+copy /Y "C:\Program Files\SketchUp\SketchUp 2026\Crack\SketchUp\SketchUp.exe" "C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
+```
+
+Rodar em **CMD como Administrador** uma vez. SU 2026 passa a funcionar normalmente do Start Menu, file associations, etc. Headless via:
+```cmd
+"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe" -RubyStartup "..." "...template.skp"
+```
+
+### Solução B (workaround sem admin — atual em uso)
+
+Mirror full do install dir + crack exe sobreposto em local writable:
+
+```powershell
+robocopy "C:\Program Files\SketchUp\SketchUp 2026\SketchUp" "E:\SU2026_test" /E /MT:8 /R:1 /W:1
+Copy-Item "C:\Program Files\SketchUp\SketchUp 2026\Crack\SketchUp\SketchUp.exe" "E:\SU2026_test\SketchUp.exe" -Force
+```
+
+- Custo: ~971 MB (full clone — hard links inviáveis devido ACL)
+- Funciona com `-RubyStartup` headless
+- Path do `.exe` workaround: `E:/SU2026_test/SketchUp.exe` (já criado pelo agent em 2026-04-25)
+
+### Por que não rolou hard link (custo zero)
+
+Hard link em NTFS exige:
+1. Read source (✓ — install files são world-readable)
+2. Write destination dir (✓ — `~/SU2026_hardlink/` writable)
+3. **Permission to CREATE hardlink no source** (✗) — segurança NTFS no `Program Files/` bloqueia mesmo `mklink /H` sem admin. Erro: `Acesso negado` em todos os 127 arquivos do install dir testado.
+
+Não há workaround para isso sem elevation. Por isso a Solução B duplica de fato (~1 GB).
+
+### Comando final que funciona
+
+```bash
+"E:/SU2026_test/SketchUp.exe" \
+  -RubyStartup "E:/Claude/sketchup-mcp/skp_export/headless_consume_and_quit.rb" \
+  "E:/SU2026_test/resources/en-US/Templates/Temp01a - Simple.skp"
+```
+
+Tempo: ~6s para gerar `generated_from_consensus.skp`. Auto-quit via `UI.start_timer(2.0) { Sketchup.send_action('fileQuit:') }`.
+
+---
+
 ## 8. Substitute door component (2026-04-25)
 
 Componente histórico `Porta de 70/80cm.skp` em `E:/Claude/Cursos/...`
