@@ -9,19 +9,40 @@ CONSENSUS_JSON = "E:/Claude/sketchup-mcp-exp-dedup/runs/final_planta_74/consensu
 OUTPUT_SKP     = "E:/Claude/sketchup-mcp-exp-dedup/runs/final_planta_74/generated_from_consensus.skp"
 CONSUMER_RB    = "E:/Claude/sketchup-mcp/skp_export/consume_consensus.rb"
 DOOR_LIB       = "E:/Claude/sketchup-mcp/skp_export/components/Door Interior.skp"
+LOG_FILE       = "E:/Claude/sketchup-mcp-exp-dedup/runs/final_planta_74/headless_run.log"
+
+def hlog(msg)
+  File.open(LOG_FILE, "a") { |f| f.puts "[#{Time.now}] #{msg}" }
+  warn(msg) rescue nil
+end
+
+File.write(LOG_FILE, "")  # truncate at start
+hlog("START headless_consume_and_quit")
+hlog("RUBY_VERSION=#{RUBY_VERSION}  Sketchup.version=#{Sketchup.version rescue 'N/A'}")
 
 begin
+  hlog("loading #{CONSUMER_RB}")
   load CONSUMER_RB
+  hlog("CONSUMER_RB loaded")
   model = Sketchup.active_model
-  # door_lib explicitly passed; consume_consensus also has a DEFAULT_DOOR_LIB
-  # fallback to the same path if File.exist? checks pass.
-  Consume.from_consensus(CONSENSUS_JSON, model, door_lib: DOOR_LIB)
-  model.save(OUTPUT_SKP)
-  warn("[headless] saved #{OUTPUT_SKP}")
+  hlog("active_model: #{model.inspect}")
+  hlog("calling Consume.from_consensus")
+  result = Consume.from_consensus(CONSENSUS_JSON, model, door_lib: DOOR_LIB)
+  hlog("from_consensus returned: #{result.inspect}")
+  hlog("saving to #{OUTPUT_SKP}")
+  ok = model.save(OUTPUT_SKP)
+  hlog("save returned: #{ok.inspect}")
 rescue => e
-  warn("[headless] ERROR: #{e.class}: #{e.message}")
-  warn(e.backtrace.first(8).join("\n"))
+  hlog("ERROR: #{e.class}: #{e.message}")
+  hlog(e.backtrace.first(15).join("\n"))
 ensure
-  # Defer quit so SU can flush the save buffer.
-  UI.start_timer(2.0, false) { Sketchup.send_action("fileQuit:") }
+  hlog("scheduling fileQuit in 2s")
+  UI.start_timer(2.0, false) do
+    begin
+      hlog("invoking fileQuit:")
+      Sketchup.send_action("fileQuit:")
+    rescue => qe
+      hlog("fileQuit error: #{qe.message}")
+    end
+  end
 end

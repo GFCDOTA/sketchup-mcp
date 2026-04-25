@@ -327,7 +327,11 @@ module Consume
       [ex - nx * half_thick_pt, ey - ny * half_thick_pt],
       [sx - nx * half_thick_pt, sy - ny * half_thick_pt],
     ]
-    face = g_ents.add_face(pts.map { |x, y| Geom::Point3d.new(x.pt, y.pt, 0) })
+    # Numeric#pt nao existe em SU 2026 API. Convertemos pt -> m -> inches
+    # via (val_pt * PT_TO_M).m (Numeric#m sim e SU built-in).
+    face = g_ents.add_face(pts.map { |x, y|
+      Geom::Point3d.new((x * PT_TO_M).m, (y * PT_TO_M).m, 0)
+    })
     face.reverse! if face.normal.z < 0
     face.pushpull(WALL_HEIGHT_M.m)
     group.name = "Wall_#{w[:wall_id]}"
