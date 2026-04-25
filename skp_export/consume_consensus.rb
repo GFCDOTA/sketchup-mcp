@@ -46,6 +46,14 @@ module Consume
   ARC_ORIGIN                = "svg_arc"
   GAP_ORIGIN                = "pipeline_gap"
 
+  # Default door component path (Trimble SketchUp 2026 sampler component
+  # copiado para skp_export/components/ em 2026-04-25 como substituto
+  # do "Porta de 70/80cm.skp" historico — folder E:/Claude/Cursos/ foi
+  # removido). Resolvido relative a este arquivo.
+  DEFAULT_DOOR_LIB = File.expand_path(
+    "components/Door Interior.skp", __dir__
+  )
+
   module_function
 
   # ---------------------------------------------------------------
@@ -58,6 +66,13 @@ module Consume
     raise "consensus_model.json not found: #{json_path}" unless File.exist?(json_path)
 
     require_relative "place_door_component" # SketchUp-only deps
+
+    # Resolve door_lib: explicit param > DEFAULT_DOOR_LIB if exists > nil.
+    # Quando nil, place_door_component cai em fallback procedural.
+    if door_lib.nil? && File.exist?(DEFAULT_DOOR_LIB)
+      door_lib = DEFAULT_DOOR_LIB
+      warn("[consume_consensus] using default door component: #{door_lib}")
+    end
 
     data  = JSON.parse(File.read(json_path, mode: "r:UTF-8"))
     plan  = build_plan(data)
@@ -72,7 +87,11 @@ module Consume
         placement_record(door, host)
       end
       placements.each do |p|
-        SkpExport::PlaceDoorComponent.place_door(su_model, p, doors_lib_path: door_lib)
+        SkpExport::PlaceDoorComponent.place_door(
+          su_model, p,
+          doors_lib_path: door_lib,
+          assume_upright: true,  # Default: SU sampler Door Interior.skp e modelado em pe
+        )
       end
 
       plan[:gaps].each do |g|

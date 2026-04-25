@@ -104,3 +104,40 @@ can spot drift before committing the SKP.
 - [ ] Replace cube placeholders with real 3D Warehouse furniture components
 - [ ] Window IfcWindow with proper frame/glass material instead of bare gap
 - [ ] Drywall vs alvenaria classifier feeding `thickness_m` per wall
+
+## 8. Substitute door component (2026-04-25)
+
+Componente histórico `Porta de 70/80cm.skp` em `E:/Claude/Cursos/...`
+foi removido junto com o folder. Substituto: **`Door Interior.skp`**
+do install Trimble SketchUp 2026, copiado para
+`skp_export/components/Door Interior.skp` (19.5 KB, source:
+`C:/ProgramData/SketchUp/SketchUp 2026/SketchUp/Components/Components Sampler/`).
+
+**Uso:**
+- `consume_consensus.rb` define `DEFAULT_DOOR_LIB` apontando pro
+  novo componente. Quando `from_consensus` é chamado sem `door_lib:`,
+  o default é resolvido automaticamente.
+- `headless_consume_and_quit.rb` passa `door_lib: DOOR_LIB` explicito.
+
+**Convenção de eixos:**
+- Default `assume_upright: true` em `place_door_component.rb` —
+  componentes modelados em pé (X=width, Y=thickness, Z=height) usam
+  scale_y, sem rotação -90 X. Caso do SU sampler.
+- `assume_upright: false` retoma convenção V6.1 (X=thickness, lying flat,
+  -90 X rotação). Útil pra componentes legados/customizados.
+
+**Calibração TBD:**
+- Não foi possível medir bbox real do `Door Interior.skp` sem abrir
+  SU desktop. O código lê `definition.bounds` dinamicamente em runtime,
+  então scale_y deve sair correto. **Validação visual pendente** após
+  primeiro run em SU 2026 — comparar com PDF real (memory pdf_skp_sidebyside).
+- Se a porta sair errada (proporção, orientação, posição), candidatos:
+  - Trocar `assume_upright` para false
+  - Verificar qual axis do bbox é realmente thickness (pode não ser Y)
+  - Substituir por outro componente: 3D Warehouse busca "porta arquitetônica brasileira" tem candidatos.
+
+**Bibliotecas alternativas (não baixadas):**
+- [3D Warehouse SketchUp](https://3dwarehouse.sketchup.com/) — busca "porta interior" ou "porta arquitetônica"
+- [Built Archi single shutter door](https://builtarchi.com/sketchup-door-model/) — Door_3D_model_1.skp via MediaFire
+- [Allan Brito](https://www.allanbrito.com/2016/11/29/portas-e-janelas-para-sketchup-download-gratuito/) — pacote pt-BR
+- [BIMobject doors](https://www.bimobject.com/en-us/categories/doors?software=sketchup) — BIM grátis com cadastro

@@ -8,11 +8,14 @@
 CONSENSUS_JSON = "E:/Claude/sketchup-mcp-exp-dedup/runs/final_planta_74/consensus_model.json"
 OUTPUT_SKP     = "E:/Claude/sketchup-mcp-exp-dedup/runs/final_planta_74/generated_from_consensus.skp"
 CONSUMER_RB    = "E:/Claude/sketchup-mcp/skp_export/consume_consensus.rb"
+DOOR_LIB       = "E:/Claude/sketchup-mcp/skp_export/components/Door Interior.skp"
 
 begin
   load CONSUMER_RB
   model = Sketchup.active_model
-  Consume.from_consensus(CONSENSUS_JSON, model)
+  # door_lib explicitly passed; consume_consensus also has a DEFAULT_DOOR_LIB
+  # fallback to the same path if File.exist? checks pass.
+  Consume.from_consensus(CONSENSUS_JSON, model, door_lib: DOOR_LIB)
   model.save(OUTPUT_SKP)
   warn("[headless] saved #{OUTPUT_SKP}")
 rescue => e

@@ -22,3 +22,6 @@ runs/
 .vscode/
 .DS_Store
 Thumbs.db
+# door component substitutes (Trimble SU sampler licensed, NOT redistributable)
+skp_export/components/*.skp
+!skp_export/components/.gitkeep

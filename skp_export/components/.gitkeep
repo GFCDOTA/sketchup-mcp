@@ -1,0 +1,16 @@
+# Door component substitutes
+#
+# Place a SketchUp door .skp here. consume_consensus.rb defaults to
+# `Door Interior.skp` (Trimble SU sampler) but any single-leaf door
+# component works as long as `assume_upright` is set correctly in
+# place_door_component.rb.
+#
+# Sources for substitute components (2026-04-25):
+# - C:/ProgramData/SketchUp/SketchUp 2026/SketchUp/Components/Components Sampler/Door Interior.skp
+#   (local install, recommended; copied here on 2026-04-25)
+# - https://3dwarehouse.sketchup.com (search "porta interior")
+# - https://builtarchi.com/sketchup-door-model/ (free Door_3D_model_1.skp)
+# - https://www.allanbrito.com/2016/11/29/portas-e-janelas-para-sketchup-download-gratuito/
+#
+# *.skp files in this folder are gitignored to avoid redistributing
+# Trimble sampler components without explicit license clearance.

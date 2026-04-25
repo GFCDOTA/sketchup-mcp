@@ -27,10 +27,16 @@ module SkpExport
     # Place one door at the given placement record.
     # Returns the created Sketchup::ComponentInstance (or Group for
     # the procedural fallback), or nil on hard failure.
-    def self.place_door(model, placement, doors_lib_path: nil)
+    #
+    # `assume_upright: true` (default agora) significa que o componente
+    # ja foi modelado em pe (X=width, Y=thickness, Z=height) — caso do
+    # SU sampler "Door Interior.skp". Skip da rotacao -90 X.
+    # `assume_upright: false` corresponde ao convencao historica V6.1
+    # ("Porta de 70/80cm.skp" lying flat com X=thickness).
+    def self.place_door(model, placement, doors_lib_path: nil, assume_upright: true)
       definition = load_component_definition(model, doors_lib_path)
       if definition
-        place_real_component(model, placement, definition)
+        place_real_component(model, placement, definition, assume_upright: assume_upright)
       else
         place_procedural_fallback(model, placement)
       end
@@ -51,26 +57,43 @@ module SkpExport
       nil
     end
 
-    def self.place_real_component(model, placement, definition)
+    def self.place_real_component(model, placement, definition, assume_upright: true)
       cx_m, cy_m = placement[:center_m]
       thickness_m = placement[:wall_thickness_m]
       axis = placement[:axis] # "horizontal" / "vertical"
 
-      scale_x = thickness_m / NATIVE_COMPONENT_BBOX_X_M
-      scale_trn = Geom::Transformation.scaling(
-        Geom::Point3d.new(0, 0, 0),
-        scale_x,
-        1.0,
-        1.0,
-      )
+      bounds = definition.bounds
+      dim_x_m = bounds.width.to_f * 0.0254  # SU internal inches -> m
+      dim_y_m = bounds.depth.to_f * 0.0254
+      dim_z_m = bounds.height.to_f * 0.0254
 
-      # Stand door upright: native component lies flat, rotate -90 deg
-      # around the X axis.
-      rot = Geom::Transformation.rotation(
-        Geom::Point3d.new(0, 0, 0),
-        Geom::Vector3d.new(1, 0, 0),
-        -Math::PI / 2.0,
-      )
+      if assume_upright
+        # Native upright (X=width, Y=thickness, Z=height) — caso do SU
+        # sampler. Scale on Y para match wall thickness. Sem rotacao.
+        native_thickness_m = dim_y_m > 0.001 ? dim_y_m : 0.05
+        scale_trn = Geom::Transformation.scaling(
+          Geom::Point3d.new(0, 0, 0),
+          1.0,
+          thickness_m / native_thickness_m,
+          1.0,
+        )
+        rot = Geom::Transformation.new # identity
+      else
+        # Native lying flat (V6.1 convention: X=thickness, Y=height,
+        # Z=width). Stand up via -90 X rotation, scale X.
+        native_thickness_m = dim_x_m > 0.001 ? dim_x_m : NATIVE_COMPONENT_BBOX_X_M
+        scale_trn = Geom::Transformation.scaling(
+          Geom::Point3d.new(0, 0, 0),
+          thickness_m / native_thickness_m,
+          1.0,
+          1.0,
+        )
+        rot = Geom::Transformation.rotation(
+          Geom::Point3d.new(0, 0, 0),
+          Geom::Vector3d.new(1, 0, 0),
+          -Math::PI / 2.0,
+        )
+      end
 
       # If wall is "vertical" (runs north-south in the source PDF) we
       # also rotate the door 90 deg around Z so its width aligns with
