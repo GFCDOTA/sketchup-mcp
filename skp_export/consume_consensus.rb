@@ -46,6 +46,13 @@ module Consume
   ARC_ORIGIN                = "svg_arc"
   GAP_ORIGIN                = "pipeline_gap"
 
+  # Override empirico de escala (debug knob). Quando setado, substitui
+  # PT_TO_M na conversao pt -> world. Padrao nil = usa PT_TO_M.
+  # Setar via env var CONSUME_SCALE_OVERRIDE quando precisar iterar
+  # visualmente (ex: 0.01, 0.005). Memoria do user 2026-04-25:
+  # planta sai "em pe / colapsada" sugere preciso testar valores.
+  SCALE_OVERRIDE = (ENV["CONSUME_SCALE_OVERRIDE"] || "").strip.empty? ? nil : ENV["CONSUME_SCALE_OVERRIDE"].to_f
+
   # Default door component path (Trimble SketchUp 2026 sampler component
   # copiado para skp_export/components/ em 2026-04-25 como substituto
   # do "Porta de 70/80cm.skp" historico — folder E:/Claude/Cursos/ foi
@@ -53,6 +60,11 @@ module Consume
   DEFAULT_DOOR_LIB = File.expand_path(
     "components/Door Interior.skp", __dir__
   )
+
+  # Origem em pt-space, populada por compute_origin antes de criar
+  # geometria. Permite normalizar todos os pts pra (0,0)+ no SU world
+  # e inverter Y (PDF raster y-down -> SU y-up).
+  @origin_pt = { min_x: 0.0, max_y: 0.0 }
 
   module_function
 
@@ -76,6 +88,13 @@ module Consume
 
     data  = JSON.parse(File.read(json_path, mode: "r:UTF-8"))
     plan  = build_plan(data)
+
+    # Calcula origin (min_x, max_y) das walls em pt-space. Todas as
+    # conversoes pt -> SU world em build_wall_su, build_room_su e
+    # placement_record usam @origin_pt + Y invert + scale via
+    # pt_to_world_m. Sem isso, planta fica off-origin no SU e Y
+    # invertido (PDF raster y-down vs SU y-up).
+    compute_origin(plan[:walls])
 
     su_model.start_operation("consume_consensus build", true)
     begin
@@ -119,12 +138,14 @@ module Consume
 
     data = JSON.parse(File.read(json_path, mode: "r:UTF-8"))
     plan = build_plan(data)
+    compute_origin(plan[:walls])
 
     puts "=== consume_consensus DRY-RUN ==="
     puts "input: #{json_path}"
     puts "schema_version: #{data.dig('metadata', 'schema_version')}"
     puts "coordinate_space: #{data.dig('metadata', 'coordinate_space')}"
     puts "page_bounds: #{data.dig('metadata', 'page_bounds').inspect}"
+    puts "origin_pt: #{@origin_pt.inspect}  scale: #{effective_scale} (#{SCALE_OVERRIDE ? 'override' : 'PT_TO_M default'})"
     puts ""
 
     puts "WALLS — would create #{plan[:walls].size} wall groups (height #{WALL_HEIGHT_M} m)"
@@ -139,9 +160,10 @@ module Consume
     plan[:doors].each do |d|
       host = nearest_wall_for(d[:center_pt], plan[:walls])
       host_id = host ? host[:wall_id] : "<none>"
+      cx_m, cy_m = world_xy_m(*d[:center_pt])
       puts "  #{d[:opening_id]} chord=#{d[:chord_m].round(3)}m " \
-           "center_m=(#{d[:center_m].map { |c| c.round(3) }.join(', ')}) " \
-           "host=#{host_id} thick=#{d[:wall_thickness_m]}m axis=#{d[:axis]}"
+           "center_m=(#{cx_m.round(3)}, #{cy_m.round(3)}) " \
+           "host=#{host_id} thick=#{d[:wall_thickness_m]}m"
     end
     puts ""
 
@@ -213,7 +235,7 @@ module Consume
       start_pt:     [sx, sy],
       end_pt:       [ex, ey],
       length_pt:    length_pt,
-      length_m:     length_pt * PT_TO_M,
+      length_m:     length_pt * effective_scale,  # consistente com pt->world transform
       angle_deg:    angle_deg,
       orientation:  orientation,
       thickness_m:  ALVENARIA_THICKNESS_M, # default; refinement TBD
@@ -228,9 +250,10 @@ module Consume
     {
       opening_id:       o["opening_id"],
       center_pt:        [cx_pt, cy_pt],
-      center_m:         [cx_pt * PT_TO_M, cy_pt * PT_TO_M],
+      # center_m calculado em placement_record via pt_to_world_m
+      # (precisa @origin_pt setado por compute_origin).
       chord_pt:         chord_pt,
-      chord_m:          chord_pt * PT_TO_M,
+      chord_m:          chord_pt * effective_scale,  # chord eh delta, sem origin shift / Y invert; mesmo scale que walls
       kind:             o["kind"] || "door",
       hinge_side:       o["hinge_side"],
       swing_deg:        o["swing_deg"],
@@ -244,15 +267,15 @@ module Consume
   end
 
   def normalise_room(r)
-    poly_pt = r["polygon"] || []
-    poly_m  = poly_pt.map { |xy| xy.map { |c| c.to_f * PT_TO_M } }
+    poly_pt_raw = r["polygon"] || []
     area_pt2 = (r["area"] || 0.0).to_f
+    s = effective_scale
     {
-      room_id:  r["room_id"],
-      label:    r["label_qwen"] || r["room_id"],
-      polygon:  poly_m,
-      area_m2:  area_pt2 * PT_TO_M * PT_TO_M,
-      sources:  r["sources"] || [],
+      room_id:    r["room_id"],
+      label:      r["label_qwen"] || r["room_id"],
+      polygon_pt: poly_pt_raw.map { |xy| xy.map(&:to_f) },  # RAW pt — convertido em build_room_su via su_point
+      area_m2:    area_pt2 * s * s,  # consistente com walls/openings; pt^2 -> m^2
+      sources:    r["sources"] || [],
     }
   end
 
@@ -291,9 +314,11 @@ module Consume
 
   def placement_record(door, host)
     axis = host ? host[:orientation] : "horizontal"
+    cx_pt, cy_pt = door[:center_pt]
+    cx_m, cy_m   = world_xy_m(cx_pt, cy_pt)  # normalized + Y-inverted + scaled (meters)
     {
       opening_id:       door[:opening_id],
-      center_m:         door[:center_m],
+      center_m:         [cx_m, cy_m],
       width_m:          door[:chord_m],
       wall_thickness_m: host ? host[:thickness_m] : ALVENARIA_THICKNESS_M,
       axis:             axis,
@@ -301,6 +326,70 @@ module Consume
       hinge_side:       door[:hinge_side],
       swing_deg:        door[:swing_deg],
     }
+  end
+
+  # ---------------------------------------------------------------
+  # COORD TRANSFORM (pt PDF-space -> SU world meters)
+  # ---------------------------------------------------------------
+
+  # Calcula origem (min_x, max_y) em pt-space a partir das walls.
+  # Setado uma vez por run, antes de criar qualquer geometria.
+  # Loga ranges pt + world (pre-validacao) pra debug determinacao.
+  def compute_origin(walls)
+    if walls.empty?
+      @origin_pt = { min_x: 0.0, max_y: 0.0 }
+      warn("[consume_consensus] empty walls — origin_pt zeroed")
+      return @origin_pt
+    end
+    xs = walls.flat_map { |w| [w[:start_pt][0], w[:end_pt][0]] }
+    ys = walls.flat_map { |w| [w[:start_pt][1], w[:end_pt][1]] }
+    @origin_pt = { min_x: xs.min, max_y: ys.max }
+
+    s = effective_scale
+    # Preview do range em SU world (metros) ANTES de criar geometria
+    # — sanity check do scale aplicado.
+    world_x_max = (xs.max - xs.min) * s
+    world_y_max = (ys.max - ys.min) * s
+    warn("[consume_consensus] walls_pt_range:    x[#{xs.min.round(1)}..#{xs.max.round(1)}] y[#{ys.min.round(1)}..#{ys.max.round(1)}]")
+    warn("[consume_consensus] origin_pt:         #{@origin_pt}")
+    warn("[consume_consensus] effective_scale:   #{s}  (#{SCALE_OVERRIDE ? 'CONSUME_SCALE_OVERRIDE active' : 'PT_TO_M default'})")
+    warn("[consume_consensus] walls_world_range: x[0..#{world_x_max.round(3)}m] y[0..#{world_y_max.round(3)}m] (pos Y-invert)")
+    @origin_pt
+  end
+
+  def effective_scale
+    SCALE_OVERRIDE || PT_TO_M
+  end
+
+  # ---------------------------------------------------------------
+  # PRIMARY COORD TRANSFORM — single source of truth
+  # ---------------------------------------------------------------
+
+  # Converte (x_pt, y_pt) PDF coord-space pra (x_m, y_m) SU world meters:
+  # 1) normaliza origem ao (min_x, max_y) das walls (compute_origin)
+  # 2) inverte Y (PDF raster y-down -> SU world y-up)
+  # 3) aplica effective_scale
+  # Retorna pair de floats em metros — sem .m aplicado. Useful pra
+  # dry-run mode (Ruby plain) onde Geom::Point3d nao existe.
+  def world_xy_m(x_pt, y_pt)
+    s = effective_scale
+    nx_m = (x_pt - @origin_pt[:min_x]) * s
+    ny_m = (@origin_pt[:max_y] - y_pt) * s   # INVERT Y
+    [nx_m, ny_m]
+  end
+
+  # Live-mode wrapper: world_xy_m + Numeric#m + Point3d.
+  # Use this pra QUALQUER conversao pt -> SU geometry. Single source
+  # of truth pra walls, rooms, openings, doors. Z opcional em metros.
+  def su_point(x_pt, y_pt, z_m = 0.0)
+    nx_m, ny_m = world_xy_m(x_pt, y_pt)
+    Geom::Point3d.new(nx_m.m, ny_m.m, z_m.m)
+  end
+
+  # DEPRECATED alias — mantido temporariamente pra compat externa.
+  # Novos calls devem usar su_point (live) ou world_xy_m (pure).
+  def pt_to_world_m(x_pt, y_pt)
+    world_xy_m(x_pt, y_pt)
   end
 
   # ---------------------------------------------------------------
@@ -317,21 +406,22 @@ module Consume
     length_pt = Math.hypot(dx, dy)
     return group if length_pt < 1e-6
 
+    # half_thick em pt-space pra perp displacement no PDF coord-space.
+    # Conversao pra SU world acontece DEPOIS via su_point. Usa
+    # effective_scale (nao PT_TO_M) pra manter aspect ratio correto
+    # quando SCALE_OVERRIDE estiver ativo.
     nx = -dy / length_pt
     ny =  dx / length_pt
-    half_thick_pt = (w[:thickness_m] / PT_TO_M) / 2.0
+    half_thick_pt = (w[:thickness_m] / effective_scale) / 2.0
 
-    pts = [
+    pts_pt = [
       [sx + nx * half_thick_pt, sy + ny * half_thick_pt],
       [ex + nx * half_thick_pt, ey + ny * half_thick_pt],
       [ex - nx * half_thick_pt, ey - ny * half_thick_pt],
       [sx - nx * half_thick_pt, sy - ny * half_thick_pt],
     ]
-    # Numeric#pt nao existe em SU 2026 API. Convertemos pt -> m -> inches
-    # via (val_pt * PT_TO_M).m (Numeric#m sim e SU built-in).
-    face = g_ents.add_face(pts.map { |x, y|
-      Geom::Point3d.new((x * PT_TO_M).m, (y * PT_TO_M).m, 0)
-    })
+    # su_point: normaliza origem + inverte Y + aplica scale + retorna Point3d.
+    face = g_ents.add_face(pts_pt.map { |x, y| su_point(x, y) })
     face.reverse! if face.normal.z < 0
     face.pushpull(WALL_HEIGHT_M.m)
     group.name = "Wall_#{w[:wall_id]}"
@@ -339,11 +429,11 @@ module Consume
   end
 
   def build_room_su(model, r)
-    return nil if r[:polygon].size < 3
+    return nil if r[:polygon_pt].size < 3
     ents = model.active_entities
     group = ents.add_group
     g_ents = group.entities
-    pts = r[:polygon].map { |x, y| Geom::Point3d.new(x.m, y.m, 0) }
+    pts = r[:polygon_pt].map { |x, y| su_point(x, y) }
     face = g_ents.add_face(pts) rescue nil
     group.name = "Room_#{r[:label].to_s.gsub(/\s+/, '_')}"
     group

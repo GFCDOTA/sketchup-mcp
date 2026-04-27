@@ -29,6 +29,12 @@ begin
   hlog("calling Consume.from_consensus")
   result = Consume.from_consensus(CONSENSUS_JSON, model, door_lib: DOOR_LIB)
   hlog("from_consensus returned: #{result.inspect}")
+  # Sanity check: model.bounds em metros — deve casar com walls_world_range
+  # logado por compute_origin (caso contrario, transform inconsistente).
+  bb = model.bounds
+  hlog("model.bounds (m): min=(#{bb.min.x.to_m.round(3)}, #{bb.min.y.to_m.round(3)}, #{bb.min.z.to_m.round(3)}) " \
+       "max=(#{bb.max.x.to_m.round(3)}, #{bb.max.y.to_m.round(3)}, #{bb.max.z.to_m.round(3)})")
+  hlog("model.bounds diag (m): #{bb.diagonal.to_m.round(3)}")
   hlog("saving to #{OUTPUT_SKP}")
   ok = model.save(OUTPUT_SKP)
   hlog("save returned: #{ok.inspect}")
