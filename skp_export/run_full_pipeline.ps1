@@ -5,7 +5,7 @@
 
 $ErrorActionPreference = "Continue"
 $SU = "C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
-$TEMPLATE = "C:\Program Files\SketchUp\SketchUp 2026\SketchUp\resources\en-US\Templates\Temp01a - Simple.skp"
+$TEMPLATE = "E:\Claude\sketchup-mcp\skp_export\template_work.skp"  # writable copy (Program Files era read-only)
 $HEADLESS = "E:\Claude\sketchup-mcp\skp_export\headless_consume_and_quit.rb"
 $SCREENSHOT = "E:\Claude\sketchup-mcp\skp_export\screenshot_consensus.rb"
 $RUN_DIR = "E:\Claude\sketchup-mcp-exp-dedup\runs\final_planta_74"

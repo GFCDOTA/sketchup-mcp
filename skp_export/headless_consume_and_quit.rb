@@ -27,7 +27,18 @@ begin
   model = Sketchup.active_model
   hlog("active_model: #{model.inspect}")
   hlog("calling Consume.from_consensus")
-  result = Consume.from_consensus(CONSENSUS_JSON, model, door_lib: DOOR_LIB)
+  # door_lib forcado pra "" pra usar fallback procedural (rectangle simples)
+  # — Door Interior.skp do SU sampler tem axis convention X=width Y=HEIGHT
+  # Z=thickness (nao Y=thickness como assume_upright esperava). Resultado:
+  # doors saiam com y span 7.46m (height multiplicado por scale_y errado).
+  # TBD V6.3: detectar smallest axis = thickness automatically em
+  # place_real_component, OU re-modelar Door Interior com eixos certos.
+  effective_door_lib = ENV["CONSUME_DOOR_LIB"]
+  if effective_door_lib.nil?
+    effective_door_lib = ""  # default: forca fallback procedural
+    hlog("door_lib defaulted to '' (procedural fallback) — set CONSUME_DOOR_LIB env to override")
+  end
+  result = Consume.from_consensus(CONSENSUS_JSON, model, door_lib: effective_door_lib)
   hlog("from_consensus returned: #{result.inspect}")
   # Sanity check: model.bounds em metros — deve casar com walls_world_range
   # logado por compute_origin (caso contrario, transform inconsistente).
