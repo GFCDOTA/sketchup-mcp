@@ -52,18 +52,40 @@ Walls have **no thickness/parent_wall_id** — each entry is already a split
 segment. Openings have **no host wall_a/wall_b** — host inferred via
 nearest-segment lookup.
 
-## 3. Coordinate conversion
+## 3. Coordinate conversion (V6.2 final, 2026-04-27)
 
-PDF points -> metres -> SketchUp internal inches:
-
-- `PT_TO_M = 0.000352778` (1pt = 1/72in)
-- `1m = 39.37in`
-- Ruby shorthand: `Numeric#pt` and `Numeric#m` go straight to internal inches.
+**Use SEMPRE `su_point(x_pt, y_pt)`** — single source of truth para conversão pt PDF-space → SU world. Internamente:
+1. Normaliza origem: `(x - min_x_pt)`, `(max_y_pt - y)` (inverte Y porque PDF raster é y-down e SU é y-up)
+2. Aplica `effective_scale` (default `PT_TO_M = 0.000352778` OR override via env var)
+3. Multiplica por `Numeric#m` (built-in SU; converte metros → SU internal inches)
 
 ```ruby
-Geom::Point3d.new(x_pt.pt, y_pt.pt, 0)   # from pdf points
-Geom::Point3d.new(x_m.m,   y_m.m,   0)   # from metres
+def su_point(x_pt, y_pt, z_m = 0.0)
+  nx_m, ny_m = world_xy_m(x_pt, y_pt)
+  Geom::Point3d.new(nx_m.m, ny_m.m, z_m.m)
+end
 ```
+
+`compute_origin(walls)` deve ser chamado **uma vez** antes de qualquer `su_point`, populando `@origin_pt = {min_x, max_y}` em pt-space.
+
+**⚠️ Importante:** `Numeric#pt` **NÃO existe** em SU 2026 Ruby API (apenas `.cm/.feet/.inch/.m/.mm/.yard`). Tentar `x_pt.pt` causa `NoMethodError: undefined method 'pt' for Float`. Bug histórico corrigido em commit `4b03515` (2026-04-25).
+
+### Scale override (`CONSUME_SCALE_OVERRIDE` env var)
+
+`PT_TO_M = 0.000352778` assume PDF a **1:1 publication scale** (1pt papel = 1pt real). Plantas arquitetônicas reais são desenhadas em **1:50 a 1:100** — nesse caso o default deixa o modelo 50–100× menor que real. Pra `planta_74` (74,93m²) o scale correto é `0.0135` (modelo sai 6.96m × 10.63m = 74.0m² ✓).
+
+```bash
+CONSUME_SCALE_OVERRIDE=0.0135 \
+  "C:/Program Files/SketchUp/SketchUp 2026/SketchUp/SketchUp.exe" \
+  -RubyStartup ".../headless_consume_and_quit.rb" "...Templates/Temp01a - Simple.skp"
+```
+
+Cálculo do scale por planta (mais detalhes em [GEOMETRY_FIX_REPORT.md](GEOMETRY_FIX_REPORT.md)):
+```python
+scale = math.sqrt(area_real_m2 / (walls_x_span_pt * walls_y_span_pt))
+```
+
+V6.3 TODO: substituir override manual por OCR de cota dimensional (ler "3.40m" do PDF → calcular scale auto).
 
 ## 4. Category mapping
 
@@ -80,14 +102,12 @@ Low-confidence `svg_arc` openings (<0.5) are skipped with a `warn`.
 
 ## 5. Known limitations
 
-- **PT_TO_M scale** assumes PDF is at 1:1 publication scale. Real planta
-  needs calibration via dimension OCR (cota "3.40") — slated for V6.3.
-- **`hinge_side` flip** is procedural and sometimes mirrors. The arc geometry
-  is not rebuilt in Ruby yet (V6.2 final).
-- **Furniture without `center_pdf_pt`** (Qwen-only labels) falls back to the
-  centroide of its parent room.
-- **Wall thickness** hardcoded to 0.14m alvenaria; drywall (0.075m) detection
-  not wired.
+- **Scale calibration manual via `CONSUME_SCALE_OVERRIDE`** — V6.2 entrega knob; V6.3 TODO substitui por OCR de cota.
+- **Welcome dialog SU 2026** bloqueia `-RubyStartup` na primeira run após install. Workaround: usuário dismissa welcome 1× manualmente, depois automation funciona indefinidamente (state persiste em `login_session.dat` + `WebCache/`). Tentativas de dismiss programático (WM_CLOSE/SC_CLOSE/SendKeys/UIAutomation) falham porque welcome é DOM CEF, não nativo.
+- **`hinge_side` flip** é procedural e às vezes espelha. Arc geometry não rebuild em Ruby ainda (V6.3).
+- **Furniture sem `center_pdf_pt`** (Qwen-only labels) cai no centroide da room pai.
+- **Wall thickness** hardcoded 0.14m alvenaria; drywall (0.075m) classifier TBD.
+- **Pipeline NÃO generaliza** pra plantas externas brasileiras (5/5 FAIL — ver [EXTERNAL_VALIDATION_REPORT.md](../../sketchup-mcp-exp-dedup/EXTERNAL_VALIDATION_REPORT.md)). V6.3 wave deve atacar isso.
 
 ## 6. Visual debug
 
@@ -99,81 +119,64 @@ can spot drift before committing the SKP.
 
 ## 7. TODO — V6.3
 
-- [ ] Scale calibration via dimension OCR (read cota `3.40m`, solve PT_TO_M)
-- [ ] Swing-arc geometry in Ruby (`add_arc` + sweep) instead of static folha
-- [ ] Replace cube placeholders with real 3D Warehouse furniture components
-- [ ] Window IfcWindow with proper frame/glass material instead of bare gap
-- [ ] Drywall vs alvenaria classifier feeding `thickness_m` per wall
+### Generalization wave (high priority — 5/5 externas FAIL hoje)
+- [ ] **Auto-detect color preset** via K-means em fingerprint cromático (`color: auto` flag não está disparando em plantas pretas)
+- [ ] **Single-page selector** heurístico (página com mais structure geometry, não primeira) — multi-page A0 PDFs (codhab, natal) explodem
+- [ ] **Cap + retry**: rejeitar runs com walls>500 OR rooms>50, re-tentar com preset diferente automaticamente
+- [ ] **Regression gates negativas**: 5 plantas externas como `expected_quality: poor` em fixtures multiplant
 
-## 8.0 SU 2026 install fix — `-RubyStartup` headless (2026-04-25)
+### Geometry refinements
+- [ ] **Scale calibration via dimension OCR** (ler cota "3.40m" do PDF → calcular scale automático, substituir `CONSUME_SCALE_OVERRIDE` manual)
+- [ ] **Swing-arc geometry** em Ruby (`add_arc` + sweep) em vez de folha estática
+- [ ] **Drywall vs alvenaria classifier** feeding `thickness_m` per wall
 
-### Problema
+### Components / scene
+- [ ] **3D Warehouse furniture real** (substituir cube placeholders) — auth-walled, scrap via Selenium ou usar Built Archi/CGTips mirrors
+- [ ] **IfcWindow proper** com frame/glass material em vez de bare gap
+- [ ] Wire 11 furniture items do `furniture_room_mapping.json` aos componentes reais (Wardrobe.skp, Janela_Correr_2F.skp, etc., já em `components/`)
 
-O install Trimble SU 2026 (`C:/Program Files/SketchUp/SketchUp 2026/`) vem com:
-- `SketchUp/` — todas as DLLs (Qt6, SketchUpAPI, LayOutAPI, importers, exporters; ~954 MB) — **SEM `SketchUp.exe`**
-- `Crack/SketchUp/SketchUp.exe` (18 MB) — main module patcheado isolado **SEM DLLs adjacentes**
+## 8.0 SU 2026 install state (2026-04-27 — RESOLVIDO)
 
-O instalador esperava que o usuário rodasse `Crack/SketchUp/SketchUp.exe` por cima de `SketchUp/SketchUp.exe` no install dir. Esse passo nunca foi feito. Resultado: rodar o crack exe em qualquer dir (incluindo `Crack/SketchUp/`) → silent crash em <2s (Windows não acha as DLLs adjacentes).
+### Estado atual: canonical install funcionando
 
-### Investigação completa (2026-04-25)
+`SketchUp.exe` agora está em `C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe` (canonical install path) — Solução A (admin 1×) foi aplicada pelo user entre sessões. Crack folder removida. Comando de execução headless:
 
-Tudo testado sem admin elevation, **todos falharam**:
+```powershell
+$env:CONSUME_SCALE_OVERRIDE = "0.0135"   # planta_74 specific
+& "C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe" `
+  -RubyStartup "E:\Claude\sketchup-mcp\skp_export\headless_consume_and_quit.rb" `
+  "C:\Program Files\SketchUp\SketchUp 2026\SketchUp\resources\en-US\Templates\Temp01a - Simple.skp"
+```
 
-| Tentativa | Resultado |
-|---|---|
-| Lançar `Crack/SketchUp/SketchUp.exe` direto | Exit em 2s, sem janela, sem log |
-| `cd C:/Program Files/SketchUp/SketchUp 2026/SketchUp` antes de invocar crack via `..` | Exit em 2s. Windows Safe DLL Search Mode exclui CWD pra exes em system dirs |
-| Prepend install dir ao `$env:PATH` | Exit em 2s. Safe DLL Search também exclui PATH |
-| `Start-Process -WorkingDirectory $install_dir` | Exit em 2s. Mesmo motivo |
-| `[DllPath]::SetDllDirectory(install_dir)` via .NET P/Invoke | Exit em 2s. SetDllDirectory afeta o processo CHAMADOR, não o filho |
-| `mklink /H` hard link das DLLs pra `~/SU2026_hardlink/` | **Acesso negado** — ACL do install dir bloqueia ate criação de hard link |
-| `New-Item -ItemType Junction` apontando pro install dir | OK criar junction, mas escrever DENTRO do junction continua bloqueado pelo ACL alvo |
-| Copiar crack exe pra dentro do install dir | **Permission denied** (precisa admin) |
+Ou via wrapper completo:
+```powershell
+powershell -File "E:\Claude\sketchup-mcp\skp_export\run_full_pipeline.ps1"
+```
 
-Referência: Microsoft DLL Search Order — para exes em `Program Files/`, Safe DLL Search Mode pula CWD e PATH durante resolução de DLL absoluta. Apenas Application Directory + System32 + Windows são consultados.
+### Histórico do fix (2026-04-25)
 
-### Solução A (canonical, requer admin 1× — recomendada)
+Install Trimble SU 2026 vinha quebrado: `Crack/SketchUp/SketchUp.exe` (18MB main module patcheado) isolado **sem DLLs adjacentes** + install dir `SketchUp/` com 954MB de DLLs **sem `SketchUp.exe`**. Crack folder veio sem README explicando o passo de overlay.
 
+**Soluções avaliadas (todas SEM admin falharam — 7 tentativas):**
+- Lançar exe direto, `cd` no install dir, prepend PATH, `Start-Process -WorkingDirectory`, `[DllPath]::SetDllDirectory()`, `mklink /H` hard links, `New-Item -ItemType Junction` — todas blocked por Windows Safe DLL Search Mode + NTFS ACL no `Program Files/`. Detalhes em [reference_su2026_crack_install_fix.md](~/.claude/projects/E--Claude/memory/reference_su2026_crack_install_fix.md).
+
+**Solução A aplicada (admin 1×):**
 ```cmd
 copy /Y "C:\Program Files\SketchUp\SketchUp 2026\Crack\SketchUp\SketchUp.exe" "C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
 ```
 
-Rodar em **CMD como Administrador** uma vez. SU 2026 passa a funcionar normalmente do Start Menu, file associations, etc. Headless via:
-```cmd
-"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe" -RubyStartup "..." "...template.skp"
-```
+### Welcome dialog (limitação remanescente)
 
-### Solução B (workaround sem admin — atual em uso)
+SU 2026 abre dialog "Bem-vindo(a)" (CommonWebDialog CEF) que bloqueia `-RubyStartup` na **primeira run após reinstall**. Tentativas programáticas falham:
+- WM_CLOSE/SC_CLOSE → mata SU inteiro
+- SendKeys Esc/Tab/Enter → CEF não reage
+- UIAutomation tree → vê só "Chrome Legacy Window" panel (DOM oculto)
 
-Mirror full do install dir + crack exe sobreposto em local writable:
+**Workaround de 30 segundos:** abrir SU manualmente uma vez, dismissar welcome (qualquer template), fechar SU. Estado persiste em `%APPDATA%/SketchUp/SketchUp 2026/login_session.dat` + `WebCache/`. Subsequent `-RubyStartup` funcionam.
 
-```powershell
-robocopy "C:\Program Files\SketchUp\SketchUp 2026\SketchUp" "E:\SU2026_test" /E /MT:8 /R:1 /W:1
-Copy-Item "C:\Program Files\SketchUp\SketchUp 2026\Crack\SketchUp\SketchUp.exe" "E:\SU2026_test\SketchUp.exe" -Force
-```
+### Solução B (workaround antigo — DEPRECATED)
 
-- Custo: ~971 MB (full clone — hard links inviáveis devido ACL)
-- Funciona com `-RubyStartup` headless
-- Path do `.exe` workaround: `E:/SU2026_test/SketchUp.exe` (já criado pelo agent em 2026-04-25)
-
-### Por que não rolou hard link (custo zero)
-
-Hard link em NTFS exige:
-1. Read source (✓ — install files são world-readable)
-2. Write destination dir (✓ — `~/SU2026_hardlink/` writable)
-3. **Permission to CREATE hardlink no source** (✗) — segurança NTFS no `Program Files/` bloqueia mesmo `mklink /H` sem admin. Erro: `Acesso negado` em todos os 127 arquivos do install dir testado.
-
-Não há workaround para isso sem elevation. Por isso a Solução B duplica de fato (~1 GB).
-
-### Comando final que funciona
-
-```bash
-"E:/SU2026_test/SketchUp.exe" \
-  -RubyStartup "E:/Claude/sketchup-mcp/skp_export/headless_consume_and_quit.rb" \
-  "E:/SU2026_test/resources/en-US/Templates/Temp01a - Simple.skp"
-```
-
-Tempo: ~6s para gerar `generated_from_consensus.skp`. Auto-quit via `UI.start_timer(2.0) { Sketchup.send_action('fileQuit:') }`.
+`E:/SU2026_test/` (971MB clone com crack exe overlaid) foi parcialmente removido após Solução A aplicada. Não é mais usado.
 
 ---
 
