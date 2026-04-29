@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from dataclasses import dataclass
 from pathlib import Path
 from uuid import uuid4
@@ -171,12 +172,15 @@ def _run_pipeline(
     )
     run_id = uuid4().hex
     bounds = compute_bounds(split_walls)
+    orthogonality = _compute_orthogonality(walls)
     observed_model = build_observed_model(
         walls=split_walls,
         junctions=junctions,
         rooms=rooms,
         connectivity_report=connectivity_report,
-        geometry_score=_geometry_score(candidates, walls),
+        quality_score=_quality_score(walls, rooms, connectivity_report, orthogonality),
+        retention_score=_retention_score(candidates, walls),
+        orthogonality_score=orthogonality,
         topology_score=_topology_score(split_walls, connectivity_report),
         room_score=_room_score(rooms, connectivity_report),
         warnings=warnings,
@@ -291,12 +295,15 @@ def _run_pipeline_from_walls(
 
     run_id = uuid4().hex
     bounds = compute_bounds(split_walls)
+    orthogonality = _compute_orthogonality(walls)
     observed_model = build_observed_model(
         walls=split_walls,
         junctions=junctions,
         rooms=rooms,
         connectivity_report=connectivity_report,
-        geometry_score=1.0 if walls else 0.0,
+        quality_score=_quality_score(walls, rooms, connectivity_report, orthogonality),
+        retention_score=1.0 if walls else 0.0,
+        orthogonality_score=orthogonality,
         topology_score=_topology_score(split_walls, connectivity_report),
         room_score=_room_score(rooms, connectivity_report),
         warnings=warnings,
@@ -375,10 +382,62 @@ def _build_warnings(
     return warnings
 
 
-def _geometry_score(candidates: list[WallCandidate], walls: list) -> float:
+def _retention_score(candidates: list[WallCandidate], walls: list) -> float:
+    """Taxa de retenção pós filtros de classify.
+
+    ATENÇÃO: métrica é RETENÇÃO, não qualidade. Alta = poucos candidatos
+    filtrados (pipeline permissivo); baixa = muitos filtrados (conservador).
+    Nenhum dos dois é necessariamente melhor. Para QUALIDADE, ver `_quality_score`.
+    """
     if not candidates:
         return 0.0
     return min(1.0, len(walls) / len(candidates))
+
+
+def _compute_orthogonality(walls: list) -> float:
+    """Fração de walls axis-aligned (Manhattan-world)."""
+    if not walls:
+        return 0.0
+    n_ortho = 0
+    for wall in walls:
+        dx = wall.end[0] - wall.start[0]
+        dy = wall.end[1] - wall.start[1]
+        if dx == 0 and dy == 0:
+            continue
+        angle_deg = abs(math.degrees(math.atan2(dy, dx))) % 180
+        if angle_deg < 5 or abs(angle_deg - 90) < 5 or abs(angle_deg - 180) < 5:
+            n_ortho += 1
+    return n_ortho / max(1, len(walls))
+
+
+def _quality_score(
+    walls: list,
+    rooms: list,
+    connectivity_report: ConnectivityReport,
+    orthogonality: float | None = None,
+) -> float:
+    """Score composto de QUALIDADE (não retenção). Componentes 0-1, todos
+    derivados de artefatos OBSERVADOS (sem ground truth — CLAUDE.md §6)."""
+    if not walls:
+        return 0.0
+    components: dict[str, float] = {}
+    components["perimeter_closure"] = float(connectivity_report.largest_component_ratio)
+    if rooms:
+        density_raw = len(rooms) / max(1, connectivity_report.edge_count)
+        components["room_density"] = min(1.0, 0.5 + density_raw)
+    else:
+        components["room_density"] = 0.0
+    components["orthogonality"] = orthogonality if orthogonality is not None else 0.7
+    orphan_count = connectivity_report.orphan_component_count
+    components["orphan_penalty"] = max(0.0, 1.0 - (orphan_count / 5.0))
+    weights = {
+        "perimeter_closure": 0.40,
+        "room_density": 0.20,
+        "orthogonality": 0.20,
+        "orphan_penalty": 0.20,
+    }
+    score = sum(components[k] * weights[k] for k in weights)
+    return round(min(1.0, max(0.0, score)), 4)
 
 
 def _topology_score(split_walls: list[SplitWall], connectivity_report: ConnectivityReport) -> float:

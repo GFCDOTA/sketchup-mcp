@@ -20,7 +20,7 @@ TOP_LEVEL_FIELDS = {
 }
 
 SOURCE_FIELDS = {"filename", "source_type", "page_count", "sha256"}
-SCORE_FIELDS = {"geometry", "topology", "rooms"}
+SCORE_FIELDS = {"geometry", "topology", "rooms", "quality", "retention", "orthogonality"}
 METADATA_FIELDS = {"rooms_detected", "topology_quality", "connectivity", "warnings"}
 
 

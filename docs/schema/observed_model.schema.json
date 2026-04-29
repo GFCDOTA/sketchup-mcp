@@ -313,7 +313,7 @@
           "type": "number",
           "minimum": 0.0,
           "maximum": 1.0,
-          "description": "Retention: walls_kept / candidates_in. SVG path always reports 1.0 (no candidates to filter). Do not interpret as 'quality'."
+          "description": "Alias for `quality` (kept for backward compat). Composite score 0-1 derived from observed artefacts only."
         },
         "topology": {
           "type": "number",
@@ -326,6 +326,24 @@
           "minimum": 0.0,
           "maximum": 1.0,
           "description": "0.5 + rooms_count / edges_count, clamped to 1.0. 0 when no rooms. A room density proxy, not a correctness score."
+        },
+        "quality": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Composite quality score: 0.4*perimeter_closure + 0.2*room_density + 0.2*orthogonality + 0.2*orphan_penalty. Replaces the misleading retention=quality conflation in the legacy `geometry` field. Optional in older schema versions; required from 2.2.0+."
+        },
+        "retention": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Pure retention rate: walls_kept / candidates_in. Permissive vs conservative pipeline indicator only — NOT a quality measure (use `quality` for that)."
+        },
+        "orthogonality": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Fraction of walls that are axis-aligned within 5 degrees (Manhattan-world)."
         }
       }
     },
