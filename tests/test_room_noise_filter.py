@@ -1,13 +1,14 @@
-"""Unit tests for ``topology.wall_interior_filter.is_room_noise``.
+"""Unit tests for ``topology.wall_interior_filter.is_room_noise`` and
+``is_triangle_artifact``.
 
-Guarantees the noise filter preserves corridors and legitimate small
-rooms while dropping slivers / narrow artefacts.
+Guarantees the noise filters preserve corridors / legitimate rooms while
+dropping slivers, narrow artefacts and small triangular wedges.
 """
 from __future__ import annotations
 
 from shapely.geometry import Polygon
 
-from topology.wall_interior_filter import is_room_noise
+from topology.wall_interior_filter import is_room_noise, is_triangle_artifact
 
 
 THICKNESS = 6.0
@@ -15,6 +16,10 @@ THICKNESS = 6.0
 
 def _rect(w: float, h: float) -> Polygon:
     return Polygon([(0, 0), (w, 0), (w, h), (0, h)])
+
+
+def _triangle(p0: tuple, p1: tuple, p2: tuple) -> Polygon:
+    return Polygon([p0, p1, p2])
 
 
 def test_tiny_room_is_noise() -> None:
@@ -61,3 +66,40 @@ def test_corridor_too_narrow_is_still_noise() -> None:
 def test_degenerate_polygon_is_not_flagged() -> None:
     degenerate = Polygon()
     assert is_room_noise(degenerate, THICKNESS) is False
+
+
+# ---------------------------------------------------------------------------
+# is_triangle_artifact
+# ---------------------------------------------------------------------------
+
+def test_small_triangle_is_artifact() -> None:
+    # 50x40x30 small wedge — area ~600, well below 30 * 6^2 = 1080 floor
+    poly = _triangle((0, 0), (50, 0), (25, 24))
+    assert poly.area < 30 * THICKNESS ** 2
+    assert is_triangle_artifact(poly, THICKNESS) is True
+
+
+def test_large_triangle_is_preserved() -> None:
+    # 200x150 corner-cut room — area 15000, way above floor — real room
+    poly = _triangle((0, 0), (200, 0), (100, 150))
+    assert poly.area > 30 * THICKNESS ** 2
+    assert is_triangle_artifact(poly, THICKNESS) is False
+
+
+def test_rectangle_is_never_triangle_artifact() -> None:
+    # Even a tiny rectangle isn't a triangle — let is_room_noise handle it
+    assert is_triangle_artifact(_rect(10, 10), THICKNESS) is False
+
+
+def test_5_vertex_polygon_is_never_triangle_artifact() -> None:
+    # Pentagon — 5 unique vertices, not a triangle
+    pentagon = Polygon([(0, 0), (10, 0), (12, 5), (5, 10), (0, 5)])
+    assert is_triangle_artifact(pentagon, THICKNESS) is False
+
+
+def test_triangle_filter_uses_thickness_squared_floor() -> None:
+    # With thickness 10, floor = 30 * 100 = 3000. A 2000-area triangle fails.
+    poly = _triangle((0, 0), (100, 0), (50, 40))  # area = 2000
+    assert is_triangle_artifact(poly, wall_thickness=10.0) is True
+    # Same triangle with thickness 5 has floor 30 * 25 = 750 — passes.
+    assert is_triangle_artifact(poly, wall_thickness=5.0) is False

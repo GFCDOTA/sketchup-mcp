@@ -18,7 +18,7 @@ from model.types import (
     SplitWall,
     Wall,
 )
-from topology.wall_interior_filter import is_room_noise, is_wall_interior
+from topology.wall_interior_filter import is_room_noise, is_triangle_artifact, is_wall_interior
 
 
 _ORPHAN_COMPONENT_MAX_NODES = 3
@@ -462,6 +462,11 @@ def _polygonize_rooms_with_threshold(
                 poly
                 for poly in polygons
                 if not is_room_noise(poly, wall_thickness_override)
+            ]
+            polygons = [
+                poly
+                for poly in polygons
+                if not is_triangle_artifact(poly, wall_thickness_override)
             ]
             if not polygons:
                 continue
