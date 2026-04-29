@@ -1,0 +1,109 @@
+meta:
+  source: multistory.svg
+  thickness: 6.25
+  annotator: programmatic (generate_synthetic_plans.py)
+openings:
+- id: f1_entrance
+  center:
+  - 200.0
+  - 560.0
+  width: 50.0
+  orientation: horizontal
+  kind: door
+  notes: floor 1 front door, living room south wall
+- id: f1_br1_door
+  center:
+  - 200.0
+  - 305.0
+  width: 50.0
+  orientation: horizontal
+  kind: door
+  notes: floor 1 bedroom 1 door onto central hallway
+- id: f1_br2_door
+  center:
+  - 600.0
+  - 305.0
+  width: 50.0
+  orientation: horizontal
+  kind: door
+  notes: ''
+- id: f1_kitchen_door
+  center:
+  - 400.0
+  - 435.0
+  width: 50.0
+  orientation: vertical
+  kind: door
+  notes: ''
+- id: f1_window_br1
+  center:
+  - 200.0
+  - 50.0
+  width: 70.0
+  orientation: horizontal
+  kind: window
+  notes: floor 1 br1 window on north wall
+- id: f1_window_br2
+  center:
+  - 600.0
+  - 50.0
+  width: 70.0
+  orientation: horizontal
+  kind: window
+  notes: floor 1 br2 window on north wall
+- id: f1_window_kitchen
+  center:
+  - 750.0
+  - 435.0
+  width: 70.0
+  orientation: vertical
+  kind: window
+  notes: floor 1 kitchen east window
+- id: f2_entrance
+  center:
+  - 200.0
+  - 1170.0
+  width: 50.0
+  orientation: horizontal
+  kind: door
+  notes: floor 2 front door, office south wall
+- id: f2_br3_door
+  center:
+  - 200.0
+  - 895.0
+  width: 50.0
+  orientation: horizontal
+  kind: door
+  notes: ''
+- id: f2_br4_door
+  center:
+  - 600.0
+  - 895.0
+  width: 50.0
+  orientation: horizontal
+  kind: door
+  notes: ''
+- id: f2_dining_door
+  center:
+  - 400.0
+  - 1025.0
+  width: 50.0
+  orientation: vertical
+  kind: door
+  notes: ''
+- id: f2_window_br3
+  center:
+  - 200.0
+  - 640.0
+  width: 70.0
+  orientation: horizontal
+  kind: window
+  notes: floor 2 br3 window on north wall
+- id: f2_window_dining
+  center:
+  - 750.0
+  - 1025.0
+  width: 70.0
+  orientation: vertical
+  kind: window
+  notes: floor 2 dining east window

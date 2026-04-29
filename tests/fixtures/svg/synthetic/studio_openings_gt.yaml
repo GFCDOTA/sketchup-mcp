@@ -1,0 +1,30 @@
+meta:
+  source: studio.svg
+  thickness: 6.25
+  annotator: programmatic (generate_synthetic_plans.py)
+openings:
+- id: main_entrance
+  center:
+  - 150.0
+  - 50.0
+  width: 50.0
+  orientation: horizontal
+  kind: door
+  notes: front door on top outer wall
+- id: bathroom_door
+  center:
+  - 450.0
+  - 420.0
+  width: 50.0
+  orientation: vertical
+  kind: door
+  notes: door between living and bathroom
+- id: window_bedroom
+  center:
+  - 640.0
+  - 50.0
+  width: 70.0
+  orientation: horizontal
+  kind: window
+  notes: window on top outer wall, bedroom side (moved from 700 to avoid corner-snap
+    collapse)

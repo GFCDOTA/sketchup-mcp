@@ -1,0 +1,79 @@
+meta:
+  source: 2br.svg
+  thickness: 6.25
+  annotator: programmatic (generate_synthetic_plans.py)
+openings:
+- id: entrance
+  center:
+  - 150.0
+  - 50.0
+  width: 70.0
+  orientation: horizontal
+  kind: door
+  notes: front door to corridor
+- id: bedroom1_door
+  center:
+  - 400.0
+  - 100.0
+  width: 50.0
+  orientation: vertical
+  kind: door
+  notes: ''
+- id: bedroom2_door
+  center:
+  - 400.0
+  - 230.0
+  width: 50.0
+  orientation: vertical
+  kind: door
+  notes: ''
+- id: bathroom_door
+  center:
+  - 400.0
+  - 420.0
+  width: 50.0
+  orientation: vertical
+  kind: door
+  notes: ''
+- id: kitchen_door
+  center:
+  - 450.0
+  - 420.0
+  width: 50.0
+  orientation: vertical
+  kind: door
+  notes: ''
+- id: living_passage
+  center:
+  - 225.0
+  - 300.0
+  width: 70.0
+  orientation: horizontal
+  kind: passage
+  notes: wide living-to-corridor passage
+- id: corridor_cross
+  center:
+  - 425.0
+  - 300.0
+  width: 50.0
+  orientation: horizontal
+  kind: passage
+  notes: corridor threshold between upper and lower corridor halves (analogous to
+    3br.corridor_cross); the 50u gap at y=300 between the two vertical corridor walls
+    x=400/x=450 is an architectural passage, not a spurious colinear gap
+- id: window_br1
+  center:
+  - 50.0
+  - 140.0
+  width: 70.0
+  orientation: vertical
+  kind: window
+  notes: external window, bedroom 1
+- id: window_br2
+  center:
+  - 50.0
+  - 260.0
+  width: 70.0
+  orientation: vertical
+  kind: window
+  notes: external window, bedroom 2

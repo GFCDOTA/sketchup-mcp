@@ -1,0 +1,103 @@
+meta:
+  source: 3br.svg
+  thickness: 6.25
+  annotator: programmatic (generate_synthetic_plans.py)
+openings:
+- id: entrance
+  center:
+  - 400.0
+  - 550.0
+  width: 50.0
+  orientation: horizontal
+  kind: door
+  notes: front door opens onto corridor from bottom wall
+- id: br1_door
+  center:
+  - 340.0
+  - 135.0
+  width: 50.0
+  orientation: vertical
+  kind: door
+  notes: ''
+- id: br2_door
+  center:
+  - 460.0
+  - 135.0
+  width: 50.0
+  orientation: vertical
+  kind: door
+  notes: ''
+- id: bath1_door
+  center:
+  - 340.0
+  - 305.0
+  width: 50.0
+  orientation: vertical
+  kind: door
+  notes: ''
+- id: bath2_door
+  center:
+  - 460.0
+  - 305.0
+  width: 50.0
+  orientation: vertical
+  kind: door
+  notes: ''
+- id: living_door
+  center:
+  - 340.0
+  - 470.0
+  width: 50.0
+  orientation: vertical
+  kind: door
+  notes: ''
+- id: kitchen_door
+  center:
+  - 460.0
+  - 470.0
+  width: 50.0
+  orientation: vertical
+  kind: door
+  notes: ''
+- id: br3_passage
+  center:
+  - 400.0
+  - 390.0
+  width: 50.0
+  orientation: horizontal
+  kind: passage
+  notes: passage from corridor to bottom-middle space (50-wide gap between y=390 row-divider
+    stubs)
+- id: corridor_cross
+  center:
+  - 400.0
+  - 220.0
+  width: 50.0
+  orientation: horizontal
+  kind: passage
+  notes: opening across corridor at row boundary (50-wide gap between y=220 row-divider
+    stubs)
+- id: window_br1
+  center:
+  - 50.0
+  - 135.0
+  width: 70.0
+  orientation: vertical
+  kind: window
+  notes: external window, bedroom 1
+- id: window_br2
+  center:
+  - 750.0
+  - 135.0
+  width: 70.0
+  orientation: vertical
+  kind: window
+  notes: external window, bedroom 2
+- id: window_living
+  center:
+  - 150.0
+  - 550.0
+  width: 70.0
+  orientation: horizontal
+  kind: window
+  notes: external window, living room

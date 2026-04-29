@@ -1,0 +1,141 @@
+meta:
+  source: large.svg
+  thickness: 6.25
+  annotator: programmatic (generate_synthetic_plans.py)
+openings:
+- id: entrance
+  center:
+  - 300.0
+  - 750.0
+  width: 50.0
+  orientation: horizontal
+  kind: door
+  notes: front door on south outer wall, living room
+- id: br1_door
+  center:
+  - 165.0
+  - 260.0
+  width: 50.0
+  orientation: horizontal
+  kind: door
+  notes: ''
+- id: br2_door
+  center:
+  - 395.0
+  - 260.0
+  width: 50.0
+  orientation: horizontal
+  kind: door
+  notes: ''
+- id: br3_door
+  center:
+  - 625.0
+  - 260.0
+  width: 50.0
+  orientation: horizontal
+  kind: door
+  notes: ''
+- id: br4_door
+  center:
+  - 845.0
+  - 260.0
+  width: 50.0
+  orientation: horizontal
+  kind: door
+  notes: ''
+- id: bath1_door
+  center:
+  - 125.0
+  - 310.0
+  width: 50.0
+  orientation: horizontal
+  kind: door
+  notes: ''
+- id: office_door
+  center:
+  - 525.0
+  - 310.0
+  width: 50.0
+  orientation: horizontal
+  kind: door
+  notes: ''
+- id: bath2_door
+  center:
+  - 735.0
+  - 310.0
+  width: 50.0
+  orientation: horizontal
+  kind: door
+  notes: ''
+- id: storage_door
+  center:
+  - 885.0
+  - 310.0
+  width: 50.0
+  orientation: horizontal
+  kind: door
+  notes: ''
+- id: living_passage
+  center:
+  - 300.0
+  - 470.0
+  width: 70.0
+  orientation: horizontal
+  kind: passage
+  notes: open passage from utility band to living room
+- id: kitchen_passage
+  center:
+  - 800.0
+  - 470.0
+  width: 70.0
+  orientation: horizontal
+  kind: passage
+  notes: open passage from utility band to kitchen
+- id: kitchen_door
+  center:
+  - 620.0
+  - 610.0
+  width: 50.0
+  orientation: vertical
+  kind: door
+  notes: door between living and kitchen
+- id: window_br1
+  center:
+  - 50.0
+  - 155.0
+  width: 70.0
+  orientation: vertical
+  kind: window
+  notes: external window, bedroom 1 west wall
+- id: window_br4
+  center:
+  - 950.0
+  - 155.0
+  width: 70.0
+  orientation: vertical
+  kind: window
+  notes: external window, bedroom 4 east wall
+- id: window_living
+  center:
+  - 200.0
+  - 750.0
+  width: 70.0
+  orientation: horizontal
+  kind: window
+  notes: external window, living room south wall
+- id: window_kitchen
+  center:
+  - 800.0
+  - 750.0
+  width: 70.0
+  orientation: horizontal
+  kind: window
+  notes: external window, kitchen south wall
+- id: window_kitchen_east
+  center:
+  - 950.0
+  - 610.0
+  width: 70.0
+  orientation: vertical
+  kind: window
+  notes: external window, kitchen east wall
