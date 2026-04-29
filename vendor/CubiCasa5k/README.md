@@ -41,47 +41,54 @@ When in doubt, read the official license:
 
 ## 3. Setup (Linux / macOS / WSL)
 
+The clone + weights download is automated by a single script. Run it from the
+project root (`microservices/plan-extract-v2/`):
+
 ```bash
-cd vendor/CubiCasa5k/
+# From microservices/plan-extract-v2 root
+python scripts/oracle/cubicasa_download.py
+# Optional: --force re-runs even if already done
+```
 
-# 1. Clone the official repo (source code for the model architecture)
-git clone https://github.com/CubiCasa/CubiCasa5k repo
+The script is idempotent: it will skip steps that are already complete unless
+`--force` is passed. It requires `git` and `gdown` on `PATH`; install them
+beforehand:
 
-# 2. Download pretrained weights (~96 MB, from Google Drive)
+```bash
 pip install --user gdown
-gdown --id 1gRB7ez1e4H7a9Y09lLqRuna0luZO5VRK -O weights/model_best_val_loss_var.pkl
+# (git is assumed to be available on most dev machines)
+```
 
-# 3. Install PyTorch (CPU is fine for oracle use; GPU makes inference ~10x faster)
+You will also need PyTorch + a few small image libs for the inference script
+(`scripts/oracle/cubicasa.py`):
+
+```bash
+# CPU is fine for oracle use; GPU makes inference ~10x faster
 pip install torch torchvision
-
-# 4. Install remaining deps used by our script
-pip install scikit-image scipy opencv-python-headless cairosvg Pillow
+pip install jsonschema opencv-python-headless Pillow
 ```
 
 ## 4. Setup (Windows PowerShell)
 
 ```powershell
-cd vendor/CubiCasa5k/
+# From microservices/plan-extract-v2 root
+python scripts/oracle/cubicasa_download.py
+# Optional: --force re-runs even if already done
+```
 
-# 1. Clone the official repo
-git clone https://github.com/CubiCasa/CubiCasa5k repo
+Prerequisites:
 
-# 2. Download pretrained weights
+```powershell
 pip install --user gdown
-gdown --id 1gRB7ez1e4H7a9Y09lLqRuna0luZO5VRK -O weights/model_best_val_loss_var.pkl
+# git is assumed to be on PATH; install from https://git-scm.com/downloads if not.
 
-# 3. PyTorch. CPU-only:
+# PyTorch. CPU-only:
 pip install torch torchvision
 # Or with CUDA 12.1:
 #   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
 
-# 4. Script deps
-pip install scikit-image scipy opencv-python-headless cairosvg Pillow
+pip install jsonschema opencv-python-headless Pillow
 ```
-
-> `cairosvg` requires Cairo native libs on Windows. If install/runtime fails,
-> the oracle script falls back to rasterising SVGs via the pipeline's own
-> `ingest/render` path or via Pillow. See the script's help text.
 
 ---
 
@@ -150,43 +157,84 @@ pipeline's schema.
 
 ## 7. Run the oracle
 
-Once weights are in place:
+Once `cubicasa_download.py` has completed:
 
 ```bash
-# From project root
-python scripts/run_cubicasa_oracle.py \
-    --svg tests/fixtures/svg/minimal_room.svg \
-    --out runs/oracle_minimal/oracle_openings.json
+# From microservices/plan-extract-v2 root
+python scripts/oracle/cubicasa.py --pdf planta_74.pdf --out runs/cubicasa_p74
+# Optional: --raster-size 512 (default), 1024
+# Optional: --device cpu (default) or cuda
 ```
 
-Output JSON (pipeline-compatible opening schema):
+The output is `runs/cubicasa_p74/cubicasa_observed.json`, which is
+**schema-compliant against `docs/schema/observed_model.schema.json`**
+(the script validates the payload before writing; on failure it writes
+`cubicasa_observed.invalid.json` instead — see section 10).
+
+Unlike the previous oracle (which only emitted a partial `oracle_openings.json`
+opening list), the new payload is a full `observed_model` with walls,
+junctions, rooms, and openings — the same shape the pipeline produces. Walls
+carry `source: "cubicasa"` so they're distinguishable from pipeline walls if
+you merge runs. Openings have `wall_a` and `wall_b` set to empty strings
+(`""`) because CubiCasa outputs segmentation masks, not wall topology — there
+is no wall ID to link to.
+
+Example payload (truncated):
 
 ```json
 {
-  "source": "CubiCasa5K oracle",
-  "weights_path": "vendor/CubiCasa5k/weights/model_best_val_loss_var.pkl",
-  "weights_sha256": "<first-run-computed>",
-  "input": {"svg": "tests/fixtures/svg/minimal_room.svg", "raster_size": [512, 512]},
+  "schema_version": "2.2.0",
+  "run_id": "<hex>",
+  "source": {
+    "filename": "planta_74.pdf",
+    "source_type": "raster",
+    "page_count": 1,
+    "sha256": "<pdf-sha256>"
+  },
+  "walls": [
+    {
+      "wall_id": "cubicasa-wall-1",
+      "parent_wall_id": "cubicasa-wall-1",
+      "page_index": 0,
+      "start": [120.0, 80.0],
+      "end": [320.0, 80.0],
+      "thickness": 4.0,
+      "orientation": "horizontal",
+      "source": "cubicasa",
+      "confidence": 0.95
+    }
+  ],
+  "junctions": [
+    {"junction_id": "cubicasa-j-1", "point": [120.0, 80.0], "degree": 2, "kind": "pass_through"}
+  ],
+  "rooms": [
+    {
+      "room_id": "cubicasa-room-1",
+      "polygon": [[120.0, 80.0], [320.0, 80.0], [320.0, 215.0], [120.0, 215.0]],
+      "area": 27000.0,
+      "centroid": [220.0, 147.5]
+    }
+  ],
   "openings": [
     {
-      "opening_id": "oracle-1",
+      "opening_id": "cubicasa-opening-1",
       "page_index": 0,
       "orientation": "horizontal",
       "center": [200.0, 215.0],
       "width": 46.0,
-      "wall_a": null,
-      "wall_b": null,
+      "wall_a": "",
+      "wall_b": "",
       "kind": "door"
     }
-  ]
+  ],
+  "peitoris": []
 }
 ```
 
-Note `wall_a` / `wall_b` are `null` for oracle records. CubiCasa doesn't
-output wall IDs — it outputs segmentation masks — so we can't link each
-opening to two specific walls. `scripts/compare_oracle.py` ignores those
-fields when comparing against pipeline output; matching is purely by
-center + orientation + width.
+`wall_a` / `wall_b` are empty strings rather than null because the schema
+requires string types on opening endpoints. A future `compare_oracles.py`
+should ignore those fields when matching pipeline vs. oracle openings; match
+by center + orientation + width.
 
 ---
 
@@ -197,9 +245,10 @@ center + orientation + width.
 | CPU (i5 / Ryzen 5) | 5-15 s |
 | GPU (any modern CUDA) | 0.2-2 s |
 
-First run takes a few extra seconds for torch to import + model to load.
-Subsequent runs with the `WallMaskOracle` singleton cached in a script
-hitting multiple plans will be faster.
+`scripts/oracle/cubicasa.py` defaults to `--device cpu`. Pass `--device cuda`
+to run on GPU when a CUDA-enabled torch build is available; expect a ~10x
+speedup on inference. First run takes a few extra seconds for torch to import
+plus the model to load.
 
 ---
 
@@ -223,14 +272,28 @@ hitting multiple plans will be faster.
 ## 10. Troubleshooting
 
 ### `ImportError: cannot import floortrans.models`
-You skipped step 1 (cloning the repo). Either clone `repo/` here or add the
-CubiCasa5K folder to `PYTHONPATH` before running the script.
+You skipped or interrupted `cubicasa_download.py`. Run it again — it will
+clone the upstream repo into `vendor/CubiCasa5k/repo/`. If you cloned
+manually somewhere else, either move the clone to that path or set
+`PYTHONPATH` to include your clone before running `cubicasa.py`.
 
-### Weights download fails with "Cannot retrieve the public link"
-Google Drive sometimes rate-limits anonymous downloads of large files. Use
-a browser with a Google account to open
-<https://drive.google.com/uc?id=1gRB7ez1e4H7a9Y09lLqRuna0luZO5VRK> and
-place the downloaded `.pkl` in `weights/` manually.
+### After running `cubicasa_download.py`, weights download fails with "Cannot retrieve the public link"
+Google Drive sometimes rate-limits anonymous downloads of large files. The
+download script will report a non-zero exit from `gdown` in this case. Open
+<https://drive.google.com/uc?id=1gRB7ez1e4H7a9Y09lLqRuna0luZO5VRK> in a
+browser logged into a Google account, download the `.pkl` manually, and
+place it at:
+
+```
+vendor/CubiCasa5k/weights/model_best_val_loss_var.pkl
+```
+
+Then re-run `cubicasa_download.py` — it will detect the existing weights file
+and skip the download step (or pass `--force` to redo it).
+
+If the file gets saved with HTML quota-exceeded content (the size will be
+well under 50 MB), the script's size sanity-check rejects it; delete and
+retry.
 
 ### `torch.load` fails with pickle unpickling error
 Newer torch versions default to `weights_only=True`. Our script passes
@@ -238,9 +301,44 @@ Newer torch versions default to `weights_only=True`. Our script passes
 dict, not just a state_dict. If you are calling `torch.load` yourself,
 use the same flag.
 
+### Output JSON validation fails
+`cubicasa.py` validates its payload against
+`docs/schema/observed_model.schema.json` before writing. If validation
+fails, the script writes `cubicasa_observed.invalid.json` instead of the
+canonical filename and exits with code 3. The validation error (with the
+JSON path of the offending field) is printed to stderr — read it to see
+which field is non-conforming.
+
 ### Oracle output has **zero** openings on a plan you know has doors
-- Check the rendered raster first (`runs/<name>/oracle_raster.png`).
-  If the walls aren't visible, the SVG-to-raster step lost contrast.
 - Try raising `--raster-size` from 512 to 1024 to recover small doors.
-- Confidence thresholds live in `scripts/run_cubicasa_oracle.py`
-  (`DOOR_PROB_THRESHOLD`, `WINDOW_PROB_THRESHOLD`). Lower to 0.3 if needed.
+- Confidence thresholds live as module-level constants in
+  `scripts/oracle/cubicasa.py` (`DOOR_PROB_THRESHOLD`,
+  `WINDOW_PROB_THRESHOLD`). Lower to 0.3 if needed.
+- Re-run with `--device cuda` if available — CPU + small raster is the
+  slowest combination and tends to make iteration painful.
+
+---
+
+## 11. Compare with the pipeline (3-way diff)
+
+Once you have both `runs/<run>/observed_model.json` (pipeline output) and
+`runs/cubicasa_<run>/cubicasa_observed.json` (this oracle's output), run
+the comparison tool to get counts deltas, cross-signal flags and an
+automatic narrative interpretation:
+
+```bash
+python scripts/oracle/compare_oracles.py \
+    --pipeline runs/openings_refine_final \
+    --cubicasa runs/cubicasa_p74 \
+    --out runs/openings_refine_final/oracle_comparison.json
+# Optional: --png to also render an oracle_comparison.png side-by-side
+```
+
+The JSON includes `counts`, `deltas`, `cross_signal.rooms_only_in_pipeline`,
+`cross_signal.openings_only_in_pipeline` (anything in pipeline whose
+centroid doesn't match a CubiCasa centroid within `--min-match-distance-px`,
+default 30 px) and a one-paragraph `interpretation`.
+
+If `oracle_diagnosis_llm.json` exists in the pipeline run dir (output of
+`scripts/oracle/llm_architect.py`), it is auto-discovered and folded into
+the same comparison.

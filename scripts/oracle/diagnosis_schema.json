@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://plan-extract-v2.local/schemas/oracle_diagnosis.json",
+  "title": "OracleDiagnosis",
+  "description": "Structured diagnosis returned by the Claude Vision architect oracle for a single plan-extract-v2 run. Captures observable defects in the rendered overlay (slivers, fragments, mis-hosted openings, etc.) so a downstream filter pass can address them.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["run_id", "summary", "defects"],
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "description": "The run_id copied verbatim from observed_model.json. Lets diagnoses be cross-referenced with their source run.",
+      "minLength": 1
+    },
+    "summary": {
+      "type": "string",
+      "description": "One-paragraph overall assessment of the run's geometric/topological health. Plain prose, no markdown.",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "defects": {
+      "type": "array",
+      "description": "List of the most actionable defects observed in the overlay image. Aim for 5-15 items, ordered roughly by severity.",
+      "minItems": 1,
+      "maxItems": 50,
+      "items": {
+        "$ref": "#/$defs/Defect"
+      }
+    }
+  },
+  "$defs": {
+    "Defect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "element_id",
+        "element_type",
+        "defect_kind",
+        "severity",
+        "hypothesis",
+        "suggested_fix"
+      ],
+      "properties": {
+        "element_id": {
+          "type": "string",
+          "description": "Identifier of the offending element. Should match an id present in observed_model.json (e.g. 'room-12', 'wall-83', 'opening-5'). Use 'global' for run-wide issues.",
+          "minLength": 1
+        },
+        "element_type": {
+          "type": "string",
+          "enum": ["room", "wall", "opening", "junction", "global"],
+          "description": "Which collection in observed_model.json the element_id refers to."
+        },
+        "defect_kind": {
+          "type": "string",
+          "enum": [
+            "sliver_room",
+            "thin_strip_room",
+            "triangle_room",
+            "wedge_room",
+            "fragmented_wall",
+            "duplicate_wall",
+            "stub_wall",
+            "opening_no_host",
+            "opening_in_corner",
+            "opening_on_sliver",
+            "global_topology",
+            "global_inflation",
+            "other"
+          ],
+          "description": "Coarse taxonomy of the observed defect."
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["high", "medium", "low"],
+          "description": "How much this defect inflates the model or distorts downstream stages."
+        },
+        "hypothesis": {
+          "type": "string",
+          "description": "Geometric/topological reasoning for what likely caused the defect (e.g. 'snap_tolerance too small leaves a gap that polygonize closes as a triangle').",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "suggested_fix": {
+          "type": "string",
+          "description": "Concrete code change or filter the pipeline could apply to address the defect (e.g. 'drop rooms with area < 0.4 m^2 or aspect_ratio > 8').",
+          "minLength": 1,
+          "maxLength": 1000
+        }
+      }
+    }
+  }
+}

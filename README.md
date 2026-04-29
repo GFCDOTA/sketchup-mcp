@@ -177,6 +177,32 @@ Exemplos pre-gerados em `docs/preview/example_*.png` (run `openings_refine_final
 
 Os render scripts existentes em `scripts/` (`render_f1_diff_png.py`, `plot_openings_*.py`) continuam servindo auditoria/debug do pipeline. O `render_preview.py` e voltado para apresentacao do output final, nao para inspecao de pipeline.
 
+## Oracle / Architect
+
+`scripts/oracle/` contem dois oraculos dev-time que ajudam a diagnosticar e auditar o output do pipeline. **Nunca** sao importados pelo `main.py` ou pela API — sao ferramentas de inspecao.
+
+- **`llm_architect.py`** — manda a overlay PNG + observed_model.json pra Claude Vision API e recebe lista estruturada de defeitos (slivers, walls fragmentadas, openings duvidosos) com hipotese de causa e fix sugerido. Custo ~$0.10/run, requer `ANTHROPIC_API_KEY`.
+- **`cubicasa.py`** — roda CubiCasa5K (modelo DL vendored em `vendor/CubiCasa5k/`) sobre o PDF e devolve walls/rooms/openings em schema canonico, pra comparacao independente. Setup via `cubicasa_download.py` (~600 MB de torch + weights, CC BY-NC 4.0).
+- **`compare_oracles.py`** — diff 3-way (pipeline x CubiCasa x LLM) com counts, deltas, cross-signal e narrativa automatica. Output JSON + PNG comparativo opcional.
+
+```bash
+# Fase 1: LLM como arquiteto (rapido, paid)
+export ANTHROPIC_API_KEY=sk-...
+python scripts/oracle/llm_architect.py --run runs/openings_refine_final
+
+# Fase 2: CubiCasa5K como oraculo DL (offline depois do setup)
+python scripts/oracle/cubicasa_download.py
+python scripts/oracle/cubicasa.py --pdf planta_74.pdf --out runs/cubicasa_p74
+
+# Comparativo 3-way
+python scripts/oracle/compare_oracles.py \
+    --pipeline runs/openings_refine_final \
+    --cubicasa runs/cubicasa_p74 \
+    --out runs/openings_refine_final/oracle_comparison.json
+```
+
+Documentacao detalhada em `scripts/oracle/README.md`. Limitacoes, troubleshooting e exemplos de output JSON estao la.
+
 ## Proximos Passos
 
 1. **ROI crop** pre-Hough: detectar a regiao arquitetonica principal (maior densidade de cross/tee junctions) e processar apenas essa area. Elimina de uma vez blocos de texto/mini-plantas fora do escopo.

@@ -8,3 +8,12 @@ networkx>=3.3,<4.0
 pydantic>=2.8,<3.0
 jsonschema>=4.0
 pytest>=8.3,<9.0
+
+# Oracle / architect (scripts/oracle/) — optional
+# Phase 1: LLM-as-architect
+anthropic>=0.39
+# Phase 2: CubiCasa5K DL oracle
+torch>=2.1
+torchvision>=0.16
+gdown>=5.1
+scikit-image>=0.22
