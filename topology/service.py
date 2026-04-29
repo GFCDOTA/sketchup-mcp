@@ -34,6 +34,7 @@ def build_topology(
     snapshot_hash_sink: list | None = None,
     filter_wall_interior: bool = False,
     wall_thickness: float | None = None,
+    filter_triangle_artifacts: bool = False,
 ) -> tuple[list[SplitWall], list[Junction], list[Room], ConnectivityReport]:
     """Build topology from classified walls.
 
@@ -54,6 +55,12 @@ def build_topology(
         raise ValueError(
             "filter_wall_interior=True requires wall_thickness to be provided "
             "(got None); pass the median wall thickness in the same units as "
+            "the wall coordinates."
+        )
+    if filter_triangle_artifacts and wall_thickness is None:
+        raise ValueError(
+            "filter_triangle_artifacts=True requires wall_thickness to be "
+            "provided; pass the median wall thickness in the same units as "
             "the wall coordinates."
         )
 
@@ -114,6 +121,7 @@ def build_topology(
         split_walls,
         filter_wall_interior=filter_wall_interior,
         wall_thickness_override=wall_thickness,
+        filter_triangle_artifacts=filter_triangle_artifacts,
     )
     report = _build_connectivity_report_aggregate(
         total_nodes=total_nodes,
@@ -418,6 +426,7 @@ def _polygonize_rooms_with_threshold(
     *,
     filter_wall_interior: bool = False,
     wall_thickness_override: float | None = None,
+    filter_triangle_artifacts: bool = False,
 ) -> tuple[list[Room], float]:
     """Same as ``_polygonize_rooms`` but also returns the area floor
     used for the last page processed. Callers that only need rooms
@@ -463,6 +472,16 @@ def _polygonize_rooms_with_threshold(
                 for poly in polygons
                 if not is_room_noise(poly, wall_thickness_override)
             ]
+            polygons = [
+                poly
+                for poly in polygons
+                if not is_triangle_artifact(poly, wall_thickness_override)
+            ]
+            if not polygons:
+                continue
+        elif filter_triangle_artifacts and wall_thickness_override is not None:
+            # Triangle filter alone (universal — depends only on wall_thickness,
+            # not on SVG-specific calibration). Safe to enable on raster too.
             polygons = [
                 poly
                 for poly in polygons

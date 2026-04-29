@@ -155,10 +155,19 @@ def _run_pipeline(
     walls, openings = detect_openings(walls, peitoris=peitoris)
     room_topology_sink: list = []
     snapshot_hash_sink: list[str] = []
+    # Compute median wall thickness for the universal triangle-artifact
+    # filter (the SVG-tuned wall_interior + room_noise filters stay opt-in
+    # via filter_wall_interior; triangle filter is scale-only, safe on raster).
+    raster_wall_thickness = (
+        sorted(w.thickness for w in walls if w.thickness > 0)[len(walls) // 2]
+        if walls else None
+    )
     split_walls, junctions, rooms, connectivity_report = build_topology(
         walls,
         room_topology_report_sink=room_topology_sink,
         snapshot_hash_sink=snapshot_hash_sink,
+        filter_triangle_artifacts=raster_wall_thickness is not None,
+        wall_thickness=raster_wall_thickness,
     )
     room_topology_report = room_topology_sink[0] if room_topology_sink else None
     topology_snapshot_sha256 = snapshot_hash_sink[0] if snapshot_hash_sink else None
