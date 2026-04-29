@@ -17,12 +17,23 @@ import numpy as np
 
 @dataclass(frozen=True)
 class RoiResult:
+    """Result of architectural ROI detection.
+
+    Invariants:
+    - `applied=True` SEMPRE implies a real component-based detection.
+    - `fallback_used=True` signals that bbox was set to the whole page
+      because real detection was impossible (e.g. small input). It coexists
+      with `applied=False` and a populated `fallback_reason`.
+    - `fallback_reason` is the canonical schema field (2.1.0 §4) — never
+      rename. Always set when applied=False or fallback_used=True.
+    """
     applied: bool
     bbox: tuple[int, int, int, int] | None  # (min_x, min_y, max_x, max_y) in input pixel coords
     fallback_reason: str | None
     component_pixel_count: int = 0
     component_bbox_area: int = 0
     component_count: int = 0
+    fallback_used: bool = False  # additive: distinct from `applied`
 
     def to_dict(self) -> dict:
         return {
@@ -38,6 +49,7 @@ class RoiResult:
                 else None
             ),
             "fallback_reason": self.fallback_reason,
+            "fallback_used": self.fallback_used,
             "component_pixel_count": self.component_pixel_count,
             "component_bbox_area": self.component_bbox_area,
             "component_count": self.component_count,
@@ -68,10 +80,16 @@ def detect_architectural_roi(
 
     height, width = image.shape[:2]
     if min(height, width) < min_image_side:
-        # Too small to meaningfully partition -- behave as if ROI were the
-        # whole image. Signal `applied=True` so callers do not emit a
-        # fallback warning for legitimate small inputs (synthetic tests).
-        return RoiResult(True, (0, 0, width, height), None)
+        # Too small to meaningfully partition. Honest fallback: bbox is the
+        # whole image so the pipeline can still run, but applied=False and
+        # fallback_used=True so callers can emit a warning instead of
+        # silently masking the failure (CLAUDE.md invariants #2 and #3).
+        return RoiResult(
+            applied=False,
+            bbox=(0, 0, width, height),
+            fallback_reason="small_input_fallback_whole_page",
+            fallback_used=True,
+        )
 
     if image.ndim == 3:
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
