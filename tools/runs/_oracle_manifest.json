@@ -1,0 +1,5 @@
+{
+  "schema_version": "1.0.0",
+  "description": "Consumed by dashboard/index.html (tab Plantas > Oraculo / Diagnostico). List runs that have oracle output. The dashboard then fetches each run's oracle JSONs.",
+  "runs": []
+}

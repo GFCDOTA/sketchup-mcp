@@ -1,0 +1,2548 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Observabilidade — Geral & Analítico</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg:#0f1115; --panel:#171a21; --panel-2:#1e222b; --border:#262b35;
+      --fg:#e6e8ee; --muted:#8b93a7;
+      --accent:#4f8cff; --ok:#3ccf7a; --warn:#f5a524; --err:#ef4444;
+      --claude:#d97757; --codex:#10b981; --system:#8b93a7;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin:0; background:var(--bg); color:var(--fg); font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+
+    header { padding:18px 24px; border-bottom:1px solid var(--border); display:flex; align-items:baseline; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+    header h1 { margin:0; font-size:18px; font-weight:600; }
+    header .meta { color:var(--muted); font-size:12px; font-variant-numeric:tabular-nums; }
+
+    /* progress bar */
+    #progress { padding: 10px 24px; border-bottom:1px solid var(--border); background:var(--panel); transition: opacity .2s ease; }
+    #progress.hidden { display:none; }
+    #progress .label { color:var(--muted); font-size:12px; margin-bottom:6px; }
+    #progress .bar { height:6px; background:var(--panel-2); border-radius:999px; overflow:hidden; }
+    #progress .fill { height:100%; width:0%; background:linear-gradient(90deg, var(--accent), #22d3ee); transition: width .15s ease; }
+
+    /* tab nav */
+    nav.tabs {
+      position: sticky; top: 0; z-index: 20;
+      background: rgba(15,17,21,0.92); backdrop-filter: blur(8px);
+      border-bottom:1px solid var(--border);
+      padding: 14px 24px;
+      display:grid; grid-template-columns: repeat(5, 1fr); gap:12px;
+    }
+    @media (max-width: 1100px) { nav.tabs { grid-template-columns: repeat(3, 1fr); } }
+
+    /* gallery */
+    .gallery-section { margin-bottom: 28px; }
+    .gallery-grid {
+      display:grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap:14px;
+    }
+    .gallery-card {
+      background:var(--panel); border:1px solid var(--border); border-radius:12px;
+      overflow:hidden; display:flex; flex-direction:column;
+      transition: border-color .15s ease, transform .15s ease;
+    }
+    .gallery-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .gallery-card .img-wrap {
+      background: #0a0c10; aspect-ratio: 16/10; overflow:hidden;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .gallery-card img {
+      width:100%; height:100%; object-fit:contain; display:block;
+    }
+    .gallery-card .body { padding: 12px 14px 14px; }
+    .gallery-card .title { font-size:14px; font-weight:600; color:var(--fg); margin:0 0 4px; }
+    .gallery-card .desc { font-size:12px; color:var(--muted); margin:0; line-height:1.5; }
+    .gallery-card .meta { font-size:11px; color:var(--muted); margin-top:6px; font-family: ui-monospace, monospace; }
+    .gallery-card.featured { border-left: 3px solid var(--ok); }
+    .gallery-card.warn-card { border-left: 3px solid var(--warn); }
+    nav.tabs button {
+      text-align:left; cursor:pointer;
+      background:var(--panel); border:1px solid var(--border); border-radius:12px;
+      padding: 12px 18px; color:var(--fg); font: inherit;
+      transition: all .15s ease;
+      display:flex; flex-direction:column; gap:4px;
+    }
+    nav.tabs button:hover { border-color:#3a4152; }
+    nav.tabs button .t { font-size:16px; font-weight:700; display:flex; align-items:center; gap:10px; }
+    nav.tabs button .t .kbd { font-size:10px; font-weight:600; color:var(--muted); background:var(--panel-2); padding: 2px 6px; border-radius:4px; border:1px solid var(--border); }
+    nav.tabs button .s { font-size:12px; color:var(--muted); }
+    nav.tabs button.active {
+      background: linear-gradient(180deg, rgba(79,140,255,0.12), rgba(79,140,255,0.05));
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(79,140,255,0.3), 0 4px 16px rgba(79,140,255,0.08);
+    }
+    nav.tabs button.active .t { color: var(--accent); }
+
+    main { padding:20px 24px; display:flex; flex-direction:column; gap:22px; max-width:1400px; margin:0 auto; }
+
+    .section-title { font-size:11px; font-weight:700; letter-spacing:1.2px; color:var(--muted); text-transform:uppercase; margin:0 0 10px; }
+
+    /* filter bar */
+    .filter-bar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    .filter-bar label { color:var(--muted); font-size:12px; }
+    .filter-bar select, .filter-bar input {
+      background:var(--panel); color:var(--fg); border:1px solid var(--border); border-radius:8px; padding:6px 10px; font:inherit;
+    }
+
+    /* resumo cards */
+    .cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:12px; }
+    .card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:14px 16px; }
+    .card .label { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.6px; font-weight:600; }
+    .card .value { font-size:24px; font-weight:700; margin-top:4px; font-variant-numeric:tabular-nums; }
+    .card .sub { color:var(--muted); font-size:12px; margin-top:2px; }
+
+    /* agent hero cards */
+    .agents-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:14px; }
+    .agent-card { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:16px 18px; border-top:3px solid var(--border); }
+    .agent-card.claude { border-top-color: var(--claude); }
+    .agent-card.codex  { border-top-color: var(--codex); }
+    .agent-card.system { border-top-color: var(--system); }
+    .agent-card .name { font-size:16px; font-weight:700; text-transform:capitalize; }
+    .agent-card .stats { display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin:12px 0 14px; }
+    .agent-card .stat .k { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.6px; }
+    .agent-card .stat .v { font-size:16px; font-weight:600; margin-top:2px; font-variant-numeric:tabular-nums; }
+    .agent-card .outcomes { display:flex; flex-wrap:wrap; gap:6px; }
+
+    .outcome { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:600; background:var(--panel-2); border:1px solid var(--border); }
+    .outcome b { font-variant-numeric:tabular-nums; }
+    .outcome .dot { width:6px; height:6px; border-radius:50%; }
+    .t-helped    .dot { background:var(--ok); }
+    .t-agreed    .dot { background:var(--accent); }
+    .t-improved  .dot { background:#22d3ee; }
+    .t-disagreed .dot { background:var(--warn); }
+    .t-erred     .dot { background:var(--err); }
+    .t-no_change .dot { background:var(--muted); }
+
+    /* sessions */
+    .sessions { display:flex; flex-direction:column; gap:10px; }
+    details.session { background:var(--panel); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+    details.session summary { list-style:none; cursor:pointer; padding:14px 16px; display:grid; grid-template-columns: 1.2fr 2fr auto; gap:16px; align-items:center; }
+    details.session summary::-webkit-details-marker { display:none; }
+    details.session[open] summary { border-bottom:1px solid var(--border); }
+    .sess-head .id { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; color:var(--muted); }
+    .sess-head .when { font-size:13px; color:var(--fg); margin-top:2px; }
+    .sess-totals { text-align:right; font-variant-numeric:tabular-nums; }
+    .sess-totals .big { font-weight:700; font-size:14px; }
+    .sess-totals .sml { color:var(--muted); font-size:12px; }
+    .sess-body { padding:8px 12px 14px; }
+    .sess-runs { width:100%; border-collapse:collapse; font-size:13px; }
+    .sess-runs th { text-align:left; color:var(--muted); font-weight:500; padding:6px 8px; font-size:11px; text-transform:uppercase; letter-spacing:.6px; border-bottom:1px solid var(--border); }
+    .sess-runs td { padding:6px 8px; border-bottom:1px solid var(--border); }
+    .sess-runs tr:last-child td { border-bottom:none; }
+    .sess-runs tr.err { background:rgba(239,68,68,0.08); }
+    .sess-runs tr.rej { background:rgba(245,165,36,0.06); }
+    .badge { display:inline-block; padding:1px 8px; border-radius:999px; font-size:11px; font-weight:600; }
+    .badge.approved { background:rgba(60,207,122,0.15); color:var(--ok); }
+    .badge.rejected { background:rgba(245,165,36,0.18); color:var(--warn); }
+    .badge.retry    { background:rgba(79,140,255,0.18); color:var(--accent); }
+    .badge.error    { background:rgba(239,68,68,0.18); color:var(--err); }
+    .chip { display:inline-flex; align-items:center; gap:6px; padding:3px 9px; border-radius:999px; font-size:12px; background:var(--panel-2); border:1px solid var(--border); }
+    .chip .dot { width:6px; height:6px; border-radius:50%; }
+    .chip.claude .dot { background:var(--claude); }
+    .chip.codex  .dot { background:var(--codex); }
+    .chip.system .dot { background:var(--system); }
+
+    /* panels / charts */
+    .panel { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:14px 16px; }
+    .panel h2 { font-size:11px; font-weight:700; margin:0 0 10px; color:var(--muted); text-transform:uppercase; letter-spacing:1.2px; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .panel .hint { color:var(--muted); font-size:11px; font-weight:500; text-transform:none; letter-spacing:0; }
+    .charts-row { display:grid; grid-template-columns:1.2fr 1fr; gap:16px; }
+    .charts-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .panel canvas { width:100% !important; height:240px !important; }
+    .panel canvas.tall { height:300px !important; }
+
+    .empty-state { padding:28px 12px; color:var(--muted); text-align:center; border:1px dashed var(--border); border-radius:8px; font-size:13px; }
+
+    /* heatmap */
+    .heatmap { display:grid; gap:2px; font-size:11px; }
+    .heatmap .row, .heatmap .header { display:grid; gap:2px; align-items:center; }
+    .heatmap .cell { height:26px; border-radius:4px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; cursor:default; }
+    .heatmap .cell[data-val="0"] { color:var(--muted); background:var(--panel-2); font-weight:400; }
+    .heatmap .rowlabel, .heatmap .colheader { color:var(--muted); font-size:11px; padding:4px 6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .heatmap .colheader { text-align:center; transform-origin: left bottom; }
+
+    /* top tasks table */
+    .top-tasks-table { width:100%; border-collapse:collapse; font-size:13px; }
+    .top-tasks-table th { text-align:left; color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.6px; padding:8px 10px; border-bottom:1px solid var(--border); cursor:pointer; user-select:none; }
+    .top-tasks-table th:hover { color:var(--fg); }
+    .top-tasks-table th .arrow { opacity:.5; margin-left:4px; }
+    .top-tasks-table td { padding:8px 10px; border-bottom:1px solid var(--border); font-variant-numeric:tabular-nums; }
+    .top-tasks-table td.err-rate.high { color:var(--err); font-weight:600; }
+
+    /* oracle / diagnóstico (Plantas tab) */
+    .oracle-counts { width:100%; border-collapse:collapse; font-size:12px; margin:8px 0 12px; font-variant-numeric:tabular-nums; }
+    .oracle-counts th, .oracle-counts td { padding:6px 10px; border-bottom:1px solid var(--border); text-align:left; }
+    .oracle-counts th { color:var(--muted); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.6px; background:var(--panel-2); }
+    .oracle-counts tr:last-child td { border-bottom:none; }
+    .oracle-counts td.miss { color:var(--muted); font-style:italic; }
+    .oracle-counts td.delta-up { color:var(--ok); }
+    .oracle-counts td.delta-down { color:var(--warn); }
+    .gallery-card .body h4 { font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; margin:10px 0 6px; }
+    .defect-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:6px; }
+    .defect-list li { background:var(--panel-2); border:1px solid var(--border); border-left:3px solid var(--err); border-radius:6px; padding:8px 10px; font-size:12px; line-height:1.5; }
+    .defect-list li b { font-family:ui-monospace,Menlo,Consolas,monospace; color:var(--accent); font-size:11px; }
+    .defect-list li .kind { color:var(--muted); font-size:11px; margin-left:6px; }
+    .defect-list li .arrow { color:var(--muted); margin:0 4px; }
+
+    /* tree */
+    .run-tree { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; line-height:1.7; max-height:400px; overflow:auto; padding:4px 8px; }
+    .run-tree .node { white-space:nowrap; }
+    .run-tree .depth-1 { padding-left:16px; }
+    .run-tree .depth-2 { padding-left:32px; }
+    .run-tree .depth-3 { padding-left:48px; }
+    .run-tree .depth-4 { padding-left:64px; }
+    .run-tree .connector { color:var(--muted); }
+
+    /* efficiency cards */
+    .eff-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px; }
+    .eff-card { background:var(--panel-2); border:1px solid var(--border); border-radius:8px; padding:10px 12px; }
+    .eff-card .who { font-weight:700; text-transform:capitalize; margin-bottom:4px; font-size:13px; }
+    .eff-card .bars { display:flex; flex-direction:column; gap:4px; margin-top:6px; }
+    .eff-card .row { display:flex; align-items:center; gap:8px; font-size:12px; }
+    .eff-card .row .lbl { width:70px; color:var(--muted); }
+    .eff-card .row .track { flex:1; height:6px; background:var(--panel); border-radius:999px; overflow:hidden; }
+    .eff-card .row .fill { height:100%; border-radius:999px; }
+    .eff-card .row .val { width:48px; text-align:right; font-variant-numeric:tabular-nums; }
+
+    @media (max-width:900px) {
+      nav.tabs { grid-template-columns:1fr; }
+      .charts-row, .charts-row-2 { grid-template-columns:1fr; }
+      details.session summary { grid-template-columns:1fr; }
+      .sess-totals { text-align:left; }
+    }
+
+    /* ---------- decisões ---------- */
+    /* Alert banners — severity colored, compact. */
+    .alerts { display:flex; flex-direction:column; gap:8px; }
+    .alert { display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border-radius:8px; border:1px solid var(--border); background:var(--panel); }
+    .alert.sev-info  { border-left:3px solid var(--accent); }
+    .alert.sev-warn  { border-left:3px solid var(--warn); }
+    .alert.sev-crit  { border-left:3px solid var(--err); }
+    .alert .ico { width:18px; text-align:center; flex:0 0 auto; font-weight:700; }
+    .alert.sev-info .ico { color:var(--accent); }
+    .alert.sev-warn .ico { color:var(--warn); }
+    .alert.sev-crit .ico { color:var(--err); }
+    .alert .title { font-weight:600; font-size:13px; }
+    .alert .detail { color:var(--muted); font-size:12px; margin-top:2px; }
+
+    /* Policy bullets — each rule reads like a playbook line. */
+    .policy-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px; }
+    .policy-list li { display:flex; gap:10px; padding:8px 10px; border-radius:8px; background:var(--panel-2); border:1px solid var(--border); }
+    .policy-list li .bullet { font-weight:700; flex:0 0 auto; }
+    .policy-list li .text { font-size:13px; line-height:1.45; }
+    .policy-list li.neutral .bullet { color: var(--muted); }
+    .policy-list li.good    .bullet { color: var(--ok); }
+    .policy-list li.warn    .bullet { color: var(--warn); }
+    .policy-list li.bad     .bullet { color: var(--err); }
+
+    /* Best agent hero */
+    .best-agent { display:flex; gap:16px; align-items:center; }
+    .best-agent .ring { width:74px; height:74px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:22px; text-transform:capitalize; color:#fff; border:3px solid; }
+    .best-agent .meta .score { font-size:20px; font-weight:700; font-variant-numeric:tabular-nums; }
+    .best-agent .meta .why { color:var(--muted); font-size:12px; margin-top:2px; line-height:1.5; }
+
+    /* Routing table */
+    .routing-table { width:100%; border-collapse:collapse; font-size:13px; }
+    .routing-table th { text-align:left; color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.6px; padding:8px 10px; border-bottom:1px solid var(--border); }
+    .routing-table td { padding:8px 10px; border-bottom:1px solid var(--border); vertical-align:middle; }
+    .routing-table td.agents { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+    .routing-table .rank { font-variant-numeric:tabular-nums; font-weight:600; color:var(--muted); margin-right:4px; }
+    .routing-table .winner { background:rgba(60,207,122,0.08); }
+    .routing-table .insufficient td { color:var(--muted); font-style:italic; }
+
+    /* Next-agent per session */
+    .next-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:10px; }
+    .next-card { background:var(--panel-2); border:1px solid var(--border); border-radius:8px; padding:10px 12px; border-left:3px solid var(--border); }
+    .next-card.rec-codex  { border-left-color: var(--codex); }
+    .next-card.rec-claude { border-left-color: var(--claude); }
+    .next-card.rec-human  { border-left-color: var(--err); }
+    .next-card.rec-stop   { border-left-color: var(--muted); }
+    .next-card .sid { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:11px; color:var(--muted); }
+    .next-card .rec { font-weight:700; font-size:14px; margin-top:4px; }
+    .next-card .why { font-size:12px; color:var(--muted); margin-top:4px; line-height:1.45; }
+
+    /* No-codex counterfactual */
+    .nocodex { display:grid; grid-template-columns: 1fr 1fr; gap:14px; align-items:start; }
+    .nocodex .num { font-size:22px; font-weight:700; font-variant-numeric:tabular-nums; }
+    .nocodex .sub { color:var(--muted); font-size:12px; margin-top:2px; }
+    .nocodex .pos { color: var(--ok); }
+    .nocodex .neg { color: var(--err); }
+    .nocodex .verdict { grid-column:1 / -1; padding:12px; border-radius:8px; background:var(--panel-2); border:1px solid var(--border); font-size:13px; line-height:1.5; }
+
+    /* Generic "dados insuficientes" inline state */
+    .insuff { padding:14px 12px; color:var(--muted); font-size:13px; font-style:italic; border:1px dashed var(--border); border-radius:8px; text-align:center; }
+
+    /* Verdict chips (human feedback) — same chip base but with dedicated colours. */
+    .verdict { display:inline-flex; align-items:center; gap:6px; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:600; border:1px solid var(--border); background:var(--panel-2); }
+    .verdict .dot { width:6px; height:6px; border-radius:50%; }
+    .verdict.util    { color: var(--ok);   border-color: rgba(60,207,122,0.35); }
+    .verdict.util    .dot { background: var(--ok); }
+    .verdict.parcial { color: var(--warn); border-color: rgba(245,165,36,0.35); }
+    .verdict.parcial .dot { background: var(--warn); }
+    .verdict.nao_util { color: var(--err); border-color: rgba(239,68,68,0.35); }
+    .verdict.nao_util .dot { background: var(--err); }
+
+    /* Quality bar used in per-agent hero cards + Geral summary. */
+    .qbar { height:6px; background:var(--panel-2); border-radius:999px; overflow:hidden; margin-top:6px; }
+    .qbar .fill { height:100%; background:linear-gradient(90deg, var(--err), var(--warn), var(--ok)); border-radius:999px; }
+    .qlabel { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-top:4px; }
+    .qlabel b { color: var(--fg); font-variant-numeric:tabular-nums; }
+
+    /* Regressions table in Analítico */
+    .regressions-table { width:100%; border-collapse:collapse; font-size:12px; }
+    .regressions-table th { text-align:left; color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.6px; padding:6px 8px; border-bottom:1px solid var(--border); }
+    .regressions-table td { padding:6px 8px; border-bottom:1px solid var(--border); font-variant-numeric:tabular-nums; }
+    .regressions-table td.delta-down { color: var(--err); font-weight:600; }
+    .regressions-table td.delta-up   { color: var(--ok);  font-weight:600; }
+    .regressions-table td.fp { font-family: ui-monospace, Menlo, Consolas, monospace; font-size:11px; color:var(--muted); }
+
+    /* Coverage note (human_verdict coverage) */
+    .coverage-note { font-size:12px; color:var(--muted); padding:6px 10px; border:1px solid var(--border); border-radius:6px; display:inline-block; }
+
+    /* Aprendizados (learnings) tab */
+    .learn-filters { display:flex; gap:8px; align-items:center; margin-bottom:10px; flex-wrap:wrap; }
+    .learn-pill { background:var(--panel); border:1px solid var(--border); color:var(--muted); border-radius:999px; padding:4px 12px; font-size:12px; font-weight:600; cursor:pointer; }
+    .learn-pill.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+    .learn-list { display:flex; flex-direction:column; gap:10px; }
+    .learn-card { background:var(--panel); border:1px solid var(--border); border-radius:10px; overflow:hidden; border-left:4px solid var(--border); }
+    .learn-card.aprovado  { border-left-color: var(--ok); }
+    .learn-card.rejeitado { border-left-color: var(--err); }
+    .learn-card.outro     { border-left-color: var(--warn); }
+    .learn-card summary   { list-style:none; cursor:pointer; padding:12px 16px; display:grid; grid-template-columns:auto 1fr auto; gap:14px; align-items:center; }
+    .learn-card summary::-webkit-details-marker { display:none; }
+    .learn-card[open] summary { border-bottom:1px solid var(--border); }
+    .learn-card .status-chip { font-size:11px; font-weight:700; padding:3px 10px; border-radius:999px; text-transform:uppercase; letter-spacing:.6px; }
+    .learn-card.aprovado  .status-chip { background:rgba(60,207,122,0.15); color:var(--ok); }
+    .learn-card.rejeitado .status-chip { background:rgba(239,68,68,0.18);  color:var(--err); }
+    .learn-card.outro     .status-chip { background:rgba(245,165,36,0.18); color:var(--warn); }
+    .learn-card .title { font-size:14px; font-weight:600; }
+    .learn-card .meta  { font-size:12px; color:var(--muted); margin-top:3px; }
+    .learn-card .date  { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; color:var(--muted); }
+    .learn-card .body {
+      padding:12px 16px 16px; font-size:13px; line-height:1.55;
+      max-height:320px; overflow:auto;
+      white-space:pre-wrap; font-family: ui-monospace, Menlo, Consolas, monospace;
+    }
+
+    @media (max-width: 900px) {
+      .nocodex { grid-template-columns:1fr; }
+    }
+
+    [hidden] { display:none !important; }
+
+    /* PDF button */
+    #btn-pdf {
+      display:inline-flex; align-items:center;
+      background: var(--panel); border:1px solid var(--border); color: var(--fg);
+      padding: 7px 12px; border-radius:8px; font: inherit; font-size: 12px; font-weight:600;
+      cursor:pointer; transition: all .15s ease;
+    }
+    #btn-pdf:hover { border-color: var(--accent); color: var(--accent); }
+    #btn-pdf:active { transform: translateY(1px); }
+    #btn-pdf:disabled { opacity:.5; cursor:wait; }
+
+    /* ------------------------- print (Salvar como PDF) ------------------------- */
+    @media print {
+      /* Force backgrounds & chart colors to render on paper / PDF. */
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      html, body { background: #fff !important; color: #111 !important; }
+      header { border-color: #ccc !important; }
+      header h1 { color: #111 !important; }
+      header .meta { color: #555 !important; }
+      nav.tabs, #progress, .filter-bar, #btn-pdf { display: none !important; }
+      /* When printing, show BOTH tabs stacked so the PDF contains the full report. */
+      .tab-panel { display: block !important; }
+      .tab-panel[hidden] { display: block !important; }
+      main { max-width: none !important; padding: 12px 16px !important; }
+      /* Break sections into pages cleanly. */
+      section { break-inside: avoid; page-break-inside: avoid; }
+      .panel, .card, .agent-card, details.session { break-inside: avoid; page-break-inside: avoid; }
+      /* Auto-expand all sessions so every run shows in the PDF. */
+      details.session[open] summary { border-bottom: 1px solid #ccc !important; }
+      details.session summary { cursor: default; }
+      /* Lighter borders and panels for paper. */
+      .panel, .card, .agent-card, details.session, .eff-card, .outcome, .chip, .badge {
+        background: #fff !important; border-color: #ddd !important; color: #111 !important;
+      }
+      .section-title, .panel h2, .agent-card .stat .k, .card .label, .card .sub, .eff-card .who, .eff-card .row .lbl {
+        color: #444 !important;
+      }
+      .outcome, .chip, .badge { background: #f3f4f6 !important; border-color: #ddd !important; color:#111 !important; }
+      .sess-runs th, .top-tasks-table th { color:#555 !important; border-bottom-color:#ddd !important; }
+      .sess-runs td, .top-tasks-table td { color:#111 !important; border-bottom-color:#eee !important; }
+      .sess-runs tr.err { background: #fef2f2 !important; }
+      .sess-runs tr.rej { background: #fffbeb !important; }
+      /* Canvas elements print as their current pixels; guarantee they don't clip. */
+      .panel canvas { max-height: 260px !important; height: 260px !important; }
+      a { color: #111 !important; text-decoration: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Observabilidade — Geral &amp; Analítico</h1>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <div class="meta" id="meta">inicializando&hellip;</div>
+      <button id="btn-pdf" title="Abre o diálogo de impressão — escolha 'Salvar como PDF' no destino.">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Baixar PDF
+      </button>
+    </div>
+  </header>
+
+  <!-- Loading progress -->
+  <div id="progress">
+    <div class="label" id="progress-label">Carregando runs 0/0…</div>
+    <div class="bar"><div class="fill" id="progress-fill"></div></div>
+  </div>
+
+  <!-- Tabs -->
+  <nav class="tabs" role="tablist" aria-label="Views">
+    <button id="tabbtn-geral" data-tab="geral" role="tab" aria-selected="true">
+      <div class="t">Geral <span class="kbd">1</span></div>
+      <div class="s">visão executiva · decisões rápidas · status de saúde</div>
+    </button>
+    <button id="tabbtn-decisoes" data-tab="decisoes" role="tab" aria-selected="false">
+      <div class="t">Decisões <span class="kbd">2</span></div>
+      <div class="s">quem chamar · quem evitar · quando escalar</div>
+    </button>
+    <button id="tabbtn-aprendizados" data-tab="aprendizados" role="tab" aria-selected="false">
+      <div class="t">Aprendizados <span class="kbd">3</span></div>
+      <div class="s">patches aprovados e rejeitados · o que ficou</div>
+    </button>
+    <button id="tabbtn-analitico" data-tab="analitico" role="tab" aria-selected="false">
+      <div class="t">Analítico <span class="kbd">4</span></div>
+      <div class="s">deep dive · investigar anomalias · otimizar custo</div>
+    </button>
+    <button id="tabbtn-plantas" data-tab="plantas" role="tab" aria-selected="false">
+      <div class="t">Plantas <span class="kbd">5</span></div>
+      <div class="s">galeria de renders · pipeline atual · evolução</div>
+    </button>
+  </nav>
+
+  <main>
+    <!-- Global filters (persist across tabs) -->
+    <section>
+      <div class="filter-bar">
+        <label for="filter-agent">modelo</label>
+        <select id="filter-agent">
+          <option value="">todos</option>
+          <option value="claude">claude</option>
+          <option value="codex">codex</option>
+          <option value="system">system</option>
+        </select>
+        <label for="filter-sort">ordenar sessões</label>
+        <select id="filter-sort">
+          <option value="recent">mais recentes</option>
+          <option value="cost">maior custo</option>
+          <option value="runs">mais runs</option>
+        </select>
+        <span style="color:var(--muted); font-size:12px; margin-left:auto;" id="filter-info"></span>
+      </div>
+    </section>
+
+    <!-- ========== TAB: GERAL ========== -->
+    <section id="tab-geral" class="tab-panel" role="tabpanel" aria-labelledby="tabbtn-geral">
+      <section>
+        <h3 class="section-title">Resumo</h3>
+        <div class="cards" id="g-cards"></div>
+      </section>
+
+      <section style="margin-top:22px;">
+        <h3 class="section-title">Por modelo</h3>
+        <div class="agents-grid" id="g-agents"></div>
+      </section>
+
+      <section style="margin-top:22px;">
+        <h3 class="section-title">Tendências</h3>
+        <div class="charts-row-2">
+          <div class="panel"><h2>Status <span class="hint">(distribuição)</span></h2><canvas id="g-chart-status"></canvas><div class="empty-state" id="g-empty-status" hidden>Sem dados suficientes</div></div>
+          <div class="panel"><h2>Custo acumulado por modelo</h2><canvas id="g-chart-cumcost"></canvas><div class="empty-state" id="g-empty-cumcost" hidden>Sem dados suficientes</div></div>
+        </div>
+        <div class="charts-row-2" style="margin-top:12px;">
+          <div class="panel"><h2>Tokens por run <span class="hint">(no tempo)</span></h2><canvas id="g-chart-tokens"></canvas><div class="empty-state" id="g-empty-tokens" hidden>Sem dados suficientes</div></div>
+          <div class="panel"><h2>Duração por run <span class="hint">(ms, no tempo)</span></h2><canvas id="g-chart-duration"></canvas><div class="empty-state" id="g-empty-duration" hidden>Sem dados suficientes</div></div>
+        </div>
+      </section>
+
+      <section style="margin-top:22px;">
+        <h3 class="section-title">Sessões</h3>
+        <div class="sessions" id="g-sessions"></div>
+      </section>
+    </section>
+
+    <!-- ========== TAB: DECISÕES ========== -->
+    <section id="tab-decisoes" class="tab-panel" role="tabpanel" aria-labelledby="tabbtn-decisoes" hidden>
+      <section>
+        <h3 class="section-title">Alertas acionáveis</h3>
+        <div id="d-alerts" class="alerts"></div>
+      </section>
+
+      <section style="margin-top:22px;">
+        <div class="charts-row">
+          <div class="panel">
+            <h2>Política atual <span class="hint">(derivada dos dados)</span></h2>
+            <ul id="d-policy" class="policy-list"></ul>
+          </div>
+          <div class="panel">
+            <h2>Melhor agente agora <span class="hint">(score global)</span></h2>
+            <div id="d-best"></div>
+          </div>
+        </div>
+      </section>
+
+      <section style="margin-top:22px;">
+        <h3 class="section-title">Roteamento por tarefa</h3>
+        <div class="panel">
+          <h2>Ranking por tarefa <span class="hint">score = produtividade − erro − custo relativo</span></h2>
+          <div id="d-routing"></div>
+        </div>
+      </section>
+
+      <section style="margin-top:22px;">
+        <h3 class="section-title">Próximo passo por sessão</h3>
+        <div class="panel">
+          <h2>Recomendação de próximo agente <span class="hint">(últimas sessões ativas)</span></h2>
+          <div id="d-next"></div>
+        </div>
+      </section>
+
+      <section style="margin-top:22px;">
+        <h3 class="section-title">Contrafactual</h3>
+        <div class="panel">
+          <h2>Simulação sem Codex</h2>
+          <div id="d-nocodex"></div>
+        </div>
+      </section>
+    </section>
+
+    <!-- ========== TAB: APRENDIZADOS ========== -->
+    <section id="tab-aprendizados" class="tab-panel" role="tabpanel" aria-labelledby="tabbtn-aprendizados" hidden>
+      <section>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
+          <h3 class="section-title" style="margin:0;">Aprendizados extraídos do PROJECT_STATE.md</h3>
+          <div class="learn-filters" id="l-filters">
+            <button class="learn-pill active" data-filter="all">todos</button>
+            <button class="learn-pill" data-filter="aprovado">aprovados</button>
+            <button class="learn-pill" data-filter="rejeitado">rejeitados</button>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>Contagem <span class="hint" id="l-counts"></span></h2>
+          <div id="l-summary"></div>
+        </div>
+      </section>
+      <section style="margin-top:16px;">
+        <div class="learn-list" id="l-list"></div>
+      </section>
+    </section>
+
+    <!-- ========== TAB: ANALÍTICO ========== -->
+    <section id="tab-analitico" class="tab-panel" role="tabpanel" aria-labelledby="tabbtn-analitico" hidden>
+      <section>
+        <h3 class="section-title">Eficiência por agente</h3>
+        <div class="eff-grid" id="a-eff"></div>
+      </section>
+
+      <section style="margin-top:22px;">
+        <h3 class="section-title">Custo & outcomes</h3>
+        <div class="charts-row-2">
+          <div class="panel"><h2>Custo por outcome, por agente</h2><canvas id="a-chart-cost-outcome"></canvas><div class="empty-state" id="a-empty-cost-outcome" hidden>Sem dados suficientes</div></div>
+          <div class="panel"><h2>Valor × custo <span class="hint">(scatter, color = agente)</span></h2><canvas id="a-chart-scatter"></canvas><div class="empty-state" id="a-empty-scatter" hidden>Sem value_score informado</div></div>
+        </div>
+      </section>
+
+      <section style="margin-top:22px;">
+        <h3 class="section-title">Distribuições</h3>
+        <div class="charts-row-2">
+          <div class="panel"><h2>Duração <span class="hint" id="a-dur-quantiles"></span></h2><canvas id="a-chart-hist-duration"></canvas><div class="empty-state" id="a-empty-hist-duration" hidden>Sem dados suficientes</div></div>
+          <div class="panel"><h2>Custo <span class="hint" id="a-cost-quantiles"></span></h2><canvas id="a-chart-hist-cost"></canvas><div class="empty-state" id="a-empty-hist-cost" hidden>Sem dados suficientes</div></div>
+        </div>
+      </section>
+
+      <section style="margin-top:22px;">
+        <h3 class="section-title">Volume &amp; saúde por agente</h3>
+        <div class="charts-row-2">
+          <div class="panel"><h2>Runs por dia <span class="hint">(empilhado + MA 3d)</span></h2><canvas id="a-chart-runs-ma" class="tall"></canvas><div class="empty-state" id="a-empty-runs-ma" hidden>Sem dados suficientes</div></div>
+          <div class="panel"><h2>Erros por tipo</h2><canvas id="a-chart-errors"></canvas><div class="empty-state" id="a-empty-errors" hidden>Sem erros registrados</div></div>
+        </div>
+      </section>
+
+      <section style="margin-top:22px;">
+        <h3 class="section-title">Saúde dos modelos</h3>
+        <div class="charts-row-2">
+          <div class="panel">
+            <h2>Codex <span class="hint">(concordância vs discordância)</span></h2>
+            <div style="display:grid; grid-template-columns:1fr 1.4fr; gap:12px; align-items:center;">
+              <canvas id="a-chart-codex-donut"></canvas>
+              <canvas id="a-chart-codex-agree"></canvas>
+            </div>
+            <div class="empty-state" id="a-empty-codex" hidden>Sem runs do Codex</div>
+          </div>
+          <div class="panel">
+            <h2>Claude <span class="hint">(outcomes por dia + retry rate)</span></h2>
+            <canvas id="a-chart-claude" class="tall"></canvas>
+            <div class="empty-state" id="a-empty-claude" hidden>Sem runs do Claude</div>
+          </div>
+        </div>
+      </section>
+
+      <section style="margin-top:22px;">
+        <h3 class="section-title">Tarefas & mapa agente × tarefa</h3>
+        <div class="charts-row">
+          <div class="panel">
+            <h2>Top tarefas</h2>
+            <div style="overflow:auto;">
+              <table class="top-tasks-table" id="a-top-tasks">
+                <thead><tr>
+                  <th data-sort="task">Tarefa<span class="arrow"></span></th>
+                  <th data-sort="runs">Runs<span class="arrow"></span></th>
+                  <th data-sort="cost">Custo<span class="arrow"></span></th>
+                  <th data-sort="errRate">Erro %<span class="arrow"></span></th>
+                  <th data-sort="agent">Agente dominante<span class="arrow"></span></th>
+                </tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div class="empty-state" id="a-empty-top-tasks" hidden>Sem tarefas</div>
+          </div>
+          <div class="panel">
+            <h2>Heatmap <span class="hint">(runs: agente × tarefa)</span></h2>
+            <div id="a-heatmap"></div>
+            <div class="empty-state" id="a-empty-heatmap" hidden>Sem dados suficientes</div>
+          </div>
+        </div>
+      </section>
+
+      <section style="margin-top:22px;">
+        <h3 class="section-title">Regressões por input</h3>
+        <div class="panel">
+          <h2>Δ qualidade por fingerprint <span class="hint">(precisa 2+ runs avaliadas pro mesmo input)</span></h2>
+          <div id="a-regressions"></div>
+        </div>
+      </section>
+
+      <section style="margin-top:22px;">
+        <h3 class="section-title">Cadeia de runs</h3>
+        <div class="panel">
+          <h2>Hand-offs entre agentes <span class="hint">(parent_run_id)</span></h2>
+          <div class="run-tree" id="a-tree"></div>
+          <div class="empty-state" id="a-empty-tree" hidden>Nenhum hand-off registrado</div>
+        </div>
+      </section>
+    </section>
+
+    <!-- ========== TAB: PLANTAS ========== -->
+    <section id="tab-plantas" class="tab-panel" role="tabpanel" aria-labelledby="tabbtn-plantas" hidden>
+      <section class="gallery-section">
+        <h3 class="section-title">Render limpo (output esperado, pós Fase 6)</h3>
+        <p style="color:var(--muted); font-size:13px; margin:0 0 12px;">
+          Como o <code>.skp</code> ficaria a partir do <code>observed_model.json</code>. Render simulado em matplotlib via <code>scripts/preview/render_preview.py</code> — o bridge Ruby/SketchUp ainda não foi construído.
+          Run de referência: <code>openings_refine_final</code> (261 walls · 23 rooms · 24 openings · 0 órfãos).
+        </p>
+        <div class="gallery-grid">
+          <div class="gallery-card featured">
+            <a href="assets/plantas/02_render_top.png" target="_blank"><div class="img-wrap"><img src="assets/plantas/02_render_top.png" alt="Top view" loading="lazy"></div></a>
+            <div class="body">
+              <p class="title">Vista de topo (planta 2D)</p>
+              <p class="desc">Cômodos coloridos com <code>room_id</code> + área. Walls como footprint. Openings marcados (laranja=portas, azul=passagens). Junctions categorizadas.</p>
+              <p class="meta">render_preview.py --mode top</p>
+            </div>
+          </div>
+          <div class="gallery-card featured">
+            <a href="assets/plantas/03_render_frontal.png" target="_blank"><div class="img-wrap"><img src="assets/plantas/03_render_frontal.png" alt="Frontal" loading="lazy"></div></a>
+            <div class="body">
+              <p class="title">Vista frontal (elevation)</p>
+              <p class="desc">Projeção 2D no plano X-Z com sombreamento por profundidade Y. Tom escuro = parede ao sul (frente); claro = ao norte (fundo).</p>
+              <p class="meta">render_preview.py --mode frontal</p>
+            </div>
+          </div>
+          <div class="gallery-card featured">
+            <a href="assets/plantas/04_render_axon.png" target="_blank"><div class="img-wrap"><img src="assets/plantas/04_render_axon.png" alt="Axonometric" loading="lazy"></div></a>
+            <div class="body">
+              <p class="title">Axonometria 3D</p>
+              <p class="desc">Walls extrudadas + pisos coloridos + openings 3D em vista isométrica estilo SketchUp.</p>
+              <p class="meta">render_preview.py --mode axon</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="gallery-section">
+        <h3 class="section-title">Pipeline atual (output bruto)</h3>
+        <p style="color:var(--muted); font-size:13px; margin:0 0 12px;">
+          O que o pipeline gera hoje. Útil pra debug e auditoria, mas com problemas conhecidos (paredes fragmentadas, componentes órfãos).
+        </p>
+        <div class="gallery-grid">
+          <div class="gallery-card">
+            <a href="assets/plantas/05_pdf_original.png" target="_blank"><div class="img-wrap"><img src="assets/plantas/05_pdf_original.png" alt="PDF original" loading="lazy"></div></a>
+            <div class="body">
+              <p class="title">PDF original renderizado</p>
+              <p class="desc">"PLANTA DE VENDAS" — Living Grand Wish Jardim, 74,63 m². Input do pipeline.</p>
+              <p class="meta">runs/planta_final2/page_0.png</p>
+            </div>
+          </div>
+          <div class="gallery-card warn-card">
+            <a href="assets/plantas/06_pipeline_overlay.png" target="_blank"><div class="img-wrap"><img src="assets/plantas/06_pipeline_overlay.png" alt="Pipeline overlay" loading="lazy"></div></a>
+            <div class="body">
+              <p class="title">Overlay do pipeline</p>
+              <p class="desc">PDF + walls extraídas (vermelho). 108 walls · 13 rooms · 0 openings · 12 componentes desconexos · topology=poor.</p>
+              <p class="meta">runs/planta_final2/overlay_0.png</p>
+            </div>
+          </div>
+          <div class="gallery-card">
+            <a href="assets/plantas/07_overlay_audited.png" target="_blank"><div class="img-wrap"><img src="assets/plantas/07_overlay_audited.png" alt="Overlay audited" loading="lazy"></div></a>
+            <div class="body">
+              <p class="title">Overlay auditado (rooms coloridos)</p>
+              <p class="desc">Run agressivo do <code>planta_74</code>: 230 walls · 48 rooms · 71 openings · 1 órfão · topo=1.0. Mais cômodos detectados, possível over-polygonization.</p>
+              <p class="meta">runs/planta_74/overlay_audited.png</p>
+            </div>
+          </div>
+          <div class="gallery-card featured">
+            <a href="assets/plantas/08_validation_f1.png" target="_blank"><div class="img-wrap"><img src="assets/plantas/08_validation_f1.png" alt="F1 validation" loading="lazy"></div></a>
+            <div class="body">
+              <p class="title">Validação F1 (openings)</p>
+              <p class="desc">Ground Truth × Pipeline × Diff. F1=1.000, precision=1.000, recall=1.000 — 24/24 openings detectados corretamente no PDF de referência.</p>
+              <p class="meta">runs/validation_p74/f1_diff_3panel.png</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="gallery-section">
+        <h3 class="section-title">Evolução & comparações</h3>
+        <p style="color:var(--muted); font-size:13px; margin:0 0 12px;">
+          Histórico de iterações da branch SVG e comparativos raster vs SVG. Mostra o progresso ao longo dos commits.
+        </p>
+        <div class="gallery-grid">
+          <div class="gallery-card">
+            <a href="assets/plantas/09_compare_raster_svg.png" target="_blank"><div class="img-wrap"><img src="assets/plantas/09_compare_raster_svg.png" alt="Raster vs SVG" loading="lazy"></div></a>
+            <div class="body">
+              <p class="title">Raster vs SVG (Renan PR #7 vs PoC)</p>
+              <p class="desc">Esquerda: pipeline raster atual com 48 polys, slivers. Direita: SVG PoC com parser de 280 LOC, 9 rooms limpos.</p>
+              <p class="meta">svg_poc/comparison_raster_vs_svg.png</p>
+            </div>
+          </div>
+          <div class="gallery-card">
+            <a href="assets/plantas/10_compare_v1v2v3.png" target="_blank"><div class="img-wrap"><img src="assets/plantas/10_compare_v1v2v3.png" alt="v1 v2 v3" loading="lazy"></div></a>
+            <div class="body">
+              <p class="title">Progressão v1 → v2 → v3</p>
+              <p class="desc">Ingest básico → +<code>main_component_filter</code> (393 walls cortadas) → +<code>lo_room_noise</code> (32→23 rooms).</p>
+              <p class="meta">svg_poc/feat-svg-ingest/runs/compare_v1_v2_v3.png</p>
+            </div>
+          </div>
+          <div class="gallery-card">
+            <a href="assets/plantas/11_compare_v3v5.png" target="_blank"><div class="img-wrap"><img src="assets/plantas/11_compare_v3v5.png" alt="v3 v5" loading="lazy"></div></a>
+            <div class="body">
+              <p class="title">v3 (baseline) → v5 (filtro)</p>
+              <p class="desc">v3 mantinha 22 ruídos colineares; v5 com <code>+filtro is_wall_interior</code> reduz para 15 legítimos + 0 ruído.</p>
+              <p class="meta">svg_poc/compare_v3_v5.png</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="gallery-section">
+        <h3 class="section-title">Workspace overview</h3>
+        <div class="gallery-grid">
+          <div class="gallery-card">
+            <a href="assets/plantas/01_overview.png" target="_blank"><div class="img-wrap"><img src="assets/plantas/01_overview.png" alt="Workspace overview" loading="lazy"></div></a>
+            <div class="body">
+              <p class="title">Infográfico do workspace</p>
+              <p class="desc">Estrutura D:\Claude · pipeline · baseline · roadmap · causa raiz da planta despedaçada.</p>
+              <p class="meta">D:\Claude\overview.png</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="gallery-section">
+        <h3 class="section-title">Oráculo / Diagnóstico</h3>
+        <p style="color:var(--muted); font-size:13px; margin:0 0 12px;">
+          Comparativo entre pipeline atual, oráculo CubiCasa5K e diagnóstico do LLM-architect.
+          Aparece aqui quando os arquivos <code>oracle_diagnosis_llm.json</code> ou
+          <code>cubicasa_observed.json</code> existirem no diretório do run.
+          Gerar com <code>scripts/oracle/llm_architect.py</code> e <code>scripts/oracle/cubicasa.py</code>.
+        </p>
+        <div id="oracle-runs"></div>
+      </section>
+    </section>
+
+    <section id="warn" style="display:none" class="empty-state"></section>
+  </main>
+
+  <script>
+  // ============================================================
+  // Observability dashboard — vanilla JS + Chart.js, single file
+  // ============================================================
+
+  // ------------------------- constants -------------------------
+  const OUTCOME_LABELS = {
+    helped:    "ajudou",
+    agreed:    "concordou",
+    improved:  "melhorou",
+    disagreed: "discordou",
+    erred:     "errou",
+    no_change: "sem efeito",
+  };
+  const OUTCOME_ORDER = ["helped","agreed","improved","disagreed","erred","no_change"];
+  const OUTCOME_COLOR = {
+    helped:"#3ccf7a", agreed:"#4f8cff", improved:"#22d3ee",
+    disagreed:"#f5a524", erred:"#ef4444", no_change:"#8b93a7",
+  };
+  const AGENT_COLOR = { claude:"#d97757", codex:"#10b981", system:"#8b93a7" };
+  const AGENTS = ["claude","codex","system"];
+
+  // ------------------------- state -------------------------
+  // ALL_RUNS holds the loaded runs (immutable after load). The filter cache
+  // short-circuits rebuilding filteredRuns + aggregations when filters haven't
+  // changed. Charts are kept in `charts` so we can destroy on tab switch.
+  const state = {
+    allRuns: [],
+    filteredRuns: null,
+    aggs: null,
+    filterKey: "",
+    activeTab: "geral",
+    filterAgent: "",
+    filterSort: "recent",
+    charts: {},
+  };
+
+  // ------------------------- helpers -------------------------
+
+  // Defensive normalization: any missing/null field gets a safe default so the
+  // dashboard never crashes on partial legacy records.
+  function normalizeRun(r) {
+    r = r || {};
+    return {
+      run_id: r.run_id || "",
+      timestamp: r.timestamp || "",
+      session_id: r.session_id || "(sem sessão)",
+      parent_run_id: r.parent_run_id || null,
+      agent: r.agent || "system",
+      task: r.task || "(sem tarefa)",
+      duration_ms: Number(r.duration_ms) || 0,
+      tokens_used: Number(r.tokens_used) || 0,
+      cost_estimate: Number(r.cost_estimate) || 0,
+      status: r.status || "approved",
+      retries: Number(r.retries) || 0,
+      codex_calls: Number(r.codex_calls) || 0,
+      tests_passed: Number(r.tests_passed) || 0,
+      tests_failed: Number(r.tests_failed) || 0,
+      tags: Array.isArray(r.tags) ? r.tags : (r.tags ? [r.tags] : []),
+      value_score: (r.value_score == null ? null : Number(r.value_score)),
+      error_type: r.error_type || null,
+      notes: r.notes || "",
+      // Phase 2 — quality & provenance
+      final_quality_score: (r.final_quality_score == null ? null : Number(r.final_quality_score)),
+      quality_components: (r.quality_components && typeof r.quality_components === "object") ? r.quality_components : {},
+      input_fingerprint: r.input_fingerprint || "",
+      human_verdict: r.human_verdict || null,
+    };
+  }
+
+  // UTC day bucket — consistent across user timezones.
+  function utcDay(iso) {
+    if (!iso) return "";
+    const d = new Date(iso);
+    if (isNaN(d)) return "";
+    return d.toISOString().slice(0, 10);
+  }
+
+  function fmtMs(n) {
+    if (n == null) return "—";
+    if (n < 1000) return n + " ms";
+    if (n < 60_000) return (n/1000).toFixed(1) + " s";
+    return (n/60_000).toFixed(1) + " min";
+  }
+  function fmtNum(n) { return n == null ? "—" : Number(n).toLocaleString("pt-BR"); }
+  // Adaptive cost precision: 2 decimals once we cross the dollar, 3 for cents,
+  // 4 only for sub-cent values where the tail still carries signal.
+  function fmtCost(n) {
+    if (n == null) return "—";
+    const abs = Math.abs(Number(n));
+    if (abs >= 1) return "$" + Number(n).toFixed(2);
+    if (abs >= 0.01) return "$" + Number(n).toFixed(3);
+    return "$" + Number(n).toFixed(4);
+  }
+
+  // HTML-escape any run-supplied text before injecting via innerHTML.
+  // task / notes / error_type / session_id / run_id are treated as untrusted.
+  const ESC_MAP = { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" };
+  function esc(s) { return s == null ? "" : String(s).replace(/[&<>"']/g, c => ESC_MAP[c]); }
+
+  // Stable sort key: valid ISO → its own string; invalid/missing → "~" (sorts
+  // after all valid ISO chars, pushing broken rows to the end).
+  function tsKey(r) {
+    const t = r && r.timestamp;
+    if (!t) return "~";
+    const d = new Date(t);
+    return isNaN(d) ? "~" : String(t);
+  }
+  function compareByTs(a, b) {
+    const ka = tsKey(a), kb = tsKey(b);
+    if (ka === kb) return 0;
+    return ka < kb ? -1 : 1;
+  }
+
+  function groupBy(arr, keyFn) {
+    const m = new Map();
+    for (const x of arr) {
+      const k = keyFn(x);
+      if (!m.has(k)) m.set(k, []);
+      m.get(k).push(x);
+    }
+    return m;
+  }
+
+  // Count runs by tag — tags are NOT mutually exclusive, a run with two tags
+  // is counted in both buckets.
+  function countTags(runs) {
+    const c = {};
+    for (const t of OUTCOME_ORDER) c[t] = 0;
+    for (const r of runs) for (const t of (r.tags || [])) if (t in c) c[t]++;
+    return c;
+  }
+
+  function quantile(arr, q) {
+    if (!arr.length) return null;
+    const s = [...arr].sort((a,b) => a - b);
+    const idx = (s.length - 1) * q;
+    const lo = Math.floor(idx), hi = Math.ceil(idx);
+    return s[lo] + (s[hi] - s[lo]) * (idx - lo);
+  }
+
+  // ------------------------- loader -------------------------
+  async function loadRuns(onProgress) {
+    let index;
+    try {
+      const r = await fetch("../runs/_index.json", { cache:"no-store" });
+      if (!r.ok) throw new Error("index " + r.status);
+      index = await r.json();
+    } catch (e) {
+      return { runs: [], error: "Não foi possível ler ../runs/_index.json. Rode generate_fake_runs.py primeiro." };
+    }
+    const files = index.runs || [];
+    const total = files.length;
+    onProgress && onProgress(0, total, 0);
+    const out = [];
+    let done = 0, failed = 0;
+    // Parallelise in small batches to avoid flooding the connection.
+    const batch = 8;
+    for (let i = 0; i < files.length; i += batch) {
+      const slice = files.slice(i, i + batch);
+      const results = await Promise.all(slice.map(async (name) => {
+        try {
+          const r = await fetch("../runs/" + name, { cache:"no-store" });
+          if (!r.ok) return null;
+          return await r.json();
+        } catch (_) { return null; }
+      }));
+      for (const r of results) {
+        if (r) out.push(normalizeRun(r)); else failed++;
+        done++;
+      }
+      onProgress && onProgress(done, total, failed);
+    }
+    out.sort(compareByTs);
+    // Merge sidecar verdicts. Verdict file wins over inline run field — this
+    // is intentional: verdicts are appended after the run was written, so the
+    // sidecar is authoritative when present.
+    try {
+      const vr = await fetch("../runs/_verdicts.json", { cache: "no-store" });
+      if (vr.ok) {
+        const verdicts = await vr.json();
+        for (const run of out) {
+          if (verdicts && Object.prototype.hasOwnProperty.call(verdicts, run.run_id)) {
+            run.human_verdict = verdicts[run.run_id];
+          }
+        }
+      }
+    } catch (_) { /* sidecar is optional */ }
+    return { runs: out, failed };
+  }
+
+  // ------------------------- filter/aggs cache -------------------------
+  function applyFilters(runs) {
+    return state.filterAgent ? runs.filter(r => r.agent === state.filterAgent) : runs;
+  }
+
+  // Recompute filtered+aggs only when the filter key changes.
+  function ensureCache() {
+    const key = JSON.stringify({ a: state.filterAgent });
+    if (state.filterKey === key && state.filteredRuns) return;
+    state.filteredRuns = applyFilters(state.allRuns);
+    state.aggs = computeAggs(state.filteredRuns);
+    state.filterKey = key;
+  }
+
+  // One-shot aggregation bundle. Compute once per filter change, reuse across
+  // tabs and re-renders.
+  function computeAggs(runs) {
+    const byAgent = groupBy(runs, r => r.agent);
+    const byDay = groupBy(runs, r => utcDay(r.timestamp));
+    const bySession = groupBy(runs, r => r.session_id);
+    const byTask = groupBy(runs, r => r.task);
+
+    const allDays = [...byDay.keys()].filter(Boolean).sort();
+    const tagsAll = countTags(runs);
+    const tagsByAgent = {};
+    for (const a of AGENTS) tagsByAgent[a] = countTags(byAgent.get(a) || []);
+
+    const statusCounts = runs.reduce((m, r) => { m[r.status] = (m[r.status] || 0) + 1; return m; }, {});
+
+    const totalCost = runs.reduce((s, r) => s + r.cost_estimate, 0);
+    const totalTokens = runs.reduce((s, r) => s + r.tokens_used, 0);
+    const codexCalls = runs.reduce((s, r) => s + r.codex_calls, 0);
+    const approved = runs.filter(r => r.status === "approved").length;
+
+    const sessions = [...bySession.keys()];
+
+    return {
+      runs, byAgent, byDay, bySession, byTask, allDays,
+      tagsAll, tagsByAgent, statusCounts,
+      totalCost, totalTokens, codexCalls, approved,
+      sessions,
+    };
+  }
+
+  // ------------------------- chart lifecycle -------------------------
+  // Per-tab registry. When switching tabs, destroy the previous tab's charts so
+  // Chart.js doesn't hold onto hidden canvases.
+  function registerChart(tab, id, chart) {
+    state.charts[tab] = state.charts[tab] || {};
+    const prev = state.charts[tab][id];
+    if (prev) prev.destroy();
+    state.charts[tab][id] = chart;
+  }
+  function destroyTabCharts(tab) {
+    const group = state.charts[tab];
+    if (!group) return;
+    for (const k of Object.keys(group)) { try { group[k].destroy(); } catch(_){} }
+    state.charts[tab] = {};
+  }
+
+  function showEmpty(emptyId, canvasId, isEmpty) {
+    const emptyEl = document.getElementById(emptyId);
+    const canvasEl = canvasId && document.getElementById(canvasId);
+    if (emptyEl) emptyEl.hidden = !isEmpty;
+    if (canvasEl) canvasEl.hidden = isEmpty;
+  }
+
+  const tickOpts = () => ({ ticks:{ color:"#8b93a7", maxTicksLimit:8 }, grid:{ color:"rgba(255,255,255,.05)" } });
+  function baseOpts(extra = {}) {
+    return Object.assign({
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{ legend:{ labels:{ color:"#e6e8ee", boxWidth:12 } } },
+      scales:{ x: tickOpts(), y: tickOpts() },
+    }, extra);
+  }
+
+  // ============================================================
+  // TAB: GERAL
+  // ============================================================
+  function renderGeral() {
+    destroyTabCharts("geral");
+    const { runs, byAgent, statusCounts, totalCost, totalTokens, codexCalls, approved, sessions } = state.aggs;
+
+    // Resumo cards
+    const pct = runs.length ? ((approved / runs.length) * 100).toFixed(0) + "%" : "—";
+    // Quality is averaged only over runs that actually have a score — avoids
+    // dragging the mean down with nulls.
+    const qualityRuns = runs.filter(r => r.final_quality_score != null);
+    const qAvg = qualityRuns.length ? (qualityRuns.reduce((s,r)=>s+r.final_quality_score,0) / qualityRuns.length) : null;
+    const qStr = qAvg == null ? "—" : qAvg.toFixed(1) + "/10";
+    const qSub = qualityRuns.length ? `${qualityRuns.length}/${runs.length} runs avaliadas` : "sem quality_score";
+    const gc = [
+      ["Sessões", fmtNum(sessions.length), `${runs.length} runs no total`],
+      ["Taxa de aprovação", pct, `${approved}/${runs.length} aprovados`],
+      ["Qualidade média", qStr, qSub],
+      ["Chamadas do Codex", fmtNum(codexCalls), ""],
+      ["Custo total", fmtCost(totalCost), ""],
+      ["Tokens totais", fmtNum(totalTokens), ""],
+    ];
+    document.getElementById("g-cards").innerHTML = gc
+      .map(([l,v,s]) => `<div class="card"><div class="label">${l}</div><div class="value">${v}</div><div class="sub">${s}</div></div>`)
+      .join("");
+
+    // Agent hero cards
+    const hasAnyAgent = runs.length > 0;
+    if (!hasAnyAgent) {
+      document.getElementById("g-agents").innerHTML = `<div class="empty-state">Sem runs para exibir.</div>`;
+    } else {
+      const present = AGENTS.filter(a => byAgent.has(a));
+      // `a` comes from the AGENTS whitelist so it's safe to interpolate.
+      document.getElementById("g-agents").innerHTML = present.map(a => {
+        const ar = byAgent.get(a) || [];
+        const cost = ar.reduce((s,r)=>s+r.cost_estimate,0);
+        const avgDur = ar.length ? Math.round(ar.reduce((s,r)=>s+r.duration_ms,0)/ar.length) : 0;
+        const tags = countTags(ar);
+        const chips = OUTCOME_ORDER.filter(t => tags[t] > 0)
+          .map(t => `<span class="outcome t-${t}"><span class="dot"></span>${OUTCOME_LABELS[t]} <b>${tags[t]}</b></span>`)
+          .join("");
+        // Agent-level quality average (null-safe).
+        const aq = ar.filter(r => r.final_quality_score != null);
+        const qAvg = aq.length ? (aq.reduce((s,r)=>s+r.final_quality_score,0) / aq.length) : null;
+        const qBlock = qAvg == null
+          ? `<div class="qlabel"><span>Qualidade</span><span>sem dados</span></div>`
+          : `<div class="qlabel"><span>Qualidade</span><span><b>${qAvg.toFixed(1)}</b>/10 · ${aq.length} avaliadas</span></div>
+             <div class="qbar"><div class="fill" style="width:${Math.max(2, qAvg*10).toFixed(1)}%"></div></div>`;
+        return `<div class="agent-card ${a}">
+          <div class="name">${a}</div>
+          <div class="stats">
+            <div class="stat"><div class="k">Runs</div><div class="v">${fmtNum(ar.length)}</div></div>
+            <div class="stat"><div class="k">Custo</div><div class="v">${fmtCost(cost)}</div></div>
+            <div class="stat"><div class="k">Dur. méd.</div><div class="v">${fmtMs(avgDur)}</div></div>
+          </div>
+          <div class="outcomes">${chips || '<span class="outcome t-no_change"><span class="dot"></span>sem outcomes</span>'}</div>
+          ${qBlock}
+        </div>`;
+      }).join("");
+    }
+
+    // Chart: status donut
+    const statusKeys = Object.keys(statusCounts);
+    const statusPalette = { approved: "#3ccf7a", rejected: "#f5a524", retry: "#4f8cff", error: "#ef4444" };
+    if (statusKeys.length) {
+      showEmpty("g-empty-status", "g-chart-status", false);
+      registerChart("geral", "status", new Chart(document.getElementById("g-chart-status"), {
+        type: "doughnut",
+        data: { labels: statusKeys, datasets:[{ data: statusKeys.map(k => statusCounts[k]), backgroundColor: statusKeys.map(k => statusPalette[k] || "#8b93a7") }] },
+        options: baseOpts({ scales: {} }),
+      }));
+    } else showEmpty("g-empty-status", "g-chart-status", true);
+
+    // Chart: cumulative cost per agent (line)
+    const ordered = [...runs].sort(compareByTs);
+    if (ordered.length) {
+      showEmpty("g-empty-cumcost", "g-chart-cumcost", false);
+      const datasets = AGENTS.map(a => {
+        let acc = 0;
+        return {
+          label: a,
+          data: ordered.map(r => ({ x: r.timestamp, y: (r.agent === a ? (acc += r.cost_estimate) : acc) })),
+          borderColor: AGENT_COLOR[a], backgroundColor: AGENT_COLOR[a] + "33",
+          pointRadius: 0, tension: .2,
+        };
+      });
+      registerChart("geral", "cumcost", new Chart(document.getElementById("g-chart-cumcost"), {
+        type: "line",
+        data: { datasets },
+        options: baseOpts({ scales: { x: { type: "category", labels: ordered.map(r => r.timestamp), ...tickOpts() }, y: tickOpts() } }),
+      }));
+    } else showEmpty("g-empty-cumcost", "g-chart-cumcost", true);
+
+    // Chart: tokens per run
+    if (ordered.length) {
+      showEmpty("g-empty-tokens", "g-chart-tokens", false);
+      registerChart("geral", "tokens", new Chart(document.getElementById("g-chart-tokens"), {
+        type: "line",
+        data: {
+          labels: ordered.map(r => r.timestamp),
+          datasets: [{ label:"tokens", data: ordered.map(r => r.tokens_used), borderColor:"#4f8cff", backgroundColor:"rgba(79,140,255,.2)", pointRadius:2, tension:0.2 }],
+        },
+        options: baseOpts(),
+      }));
+    } else showEmpty("g-empty-tokens", "g-chart-tokens", true);
+
+    // Chart: duration per run
+    if (ordered.length) {
+      showEmpty("g-empty-duration", "g-chart-duration", false);
+      registerChart("geral", "duration", new Chart(document.getElementById("g-chart-duration"), {
+        type: "line",
+        data: {
+          labels: ordered.map(r => r.timestamp),
+          datasets: [{ label:"duration_ms", data: ordered.map(r => r.duration_ms), borderColor:"#3ccf7a", backgroundColor:"rgba(60,207,122,.2)", pointRadius:2, tension:0.2 }],
+        },
+        options: baseOpts(),
+      }));
+    } else showEmpty("g-empty-duration", "g-chart-duration", true);
+
+    // Sessions list (uses filtered runs; filter-sort controls order here)
+    renderSessions(runs);
+  }
+
+  function renderSessions(runs) {
+    const bySession = groupBy(runs, r => r.session_id);
+    let sessions = [...bySession.entries()].map(([sid, sr]) => {
+      const sorted = [...sr].sort(compareByTs);
+      const firstTs = sorted[0]?.timestamp || "";
+      const agents = [...new Set(sorted.map(r => r.agent))];
+      const cost = sorted.reduce((s,r)=>s+r.cost_estimate,0);
+      const tokens = sorted.reduce((s,r)=>s+r.tokens_used,0);
+      return { sid, sr: sorted, firstTs, agents, cost, tokens };
+    });
+    const sort = state.filterSort;
+    if (sort === "cost") sessions.sort((a,b) => b.cost - a.cost);
+    else if (sort === "runs") sessions.sort((a,b) => b.sr.length - a.sr.length);
+    else sessions.sort((a,b) => b.firstTs.localeCompare(a.firstTs));
+
+    const host = document.getElementById("g-sessions");
+    if (!sessions.length) {
+      host.innerHTML = `<div class="empty-state">Nenhuma sessão no filtro atual.</div>`;
+      return;
+    }
+    // `ag`/`a`/`r.agent` are whitelisted to the AGENTS enum via normalizeRun
+    // fallback; still, anything that could echo user-supplied text
+    // (session_id, task) is routed through esc().
+    host.innerHTML = sessions.map(s => {
+      const byAg = groupBy(s.sr, r => r.agent);
+      const perAgent = [...byAg.entries()].map(([ag, rs]) => {
+        const tags = countTags(rs);
+        const chips = OUTCOME_ORDER.filter(t => tags[t] > 0)
+          .map(t => `<span class="outcome t-${t}"><span class="dot"></span>${OUTCOME_LABELS[t]} <b>${tags[t]}</b></span>`).join(" ");
+        return `<div style="margin-bottom:6px;">
+          <span class="chip ${esc(ag)}"><span class="dot"></span>${esc(ag)} · ${rs.length} run${rs.length>1?'s':''}</span>
+          <span style="margin-left:8px;">${chips}</span>
+        </div>`;
+      }).join("");
+      const agentChips = s.agents.map(a => `<span class="chip ${esc(a)}"><span class="dot"></span>${esc(a)}</span>`).join("");
+      const dateStr = s.firstTs ? (() => {
+        const d = new Date(s.firstTs);
+        return isNaN(d) ? "—" : d.toLocaleString("pt-BR", { timeZone: "UTC" }) + " UTC";
+      })() : "—";
+      const rows = s.sr.map(r => {
+        const cls = r.status==="error" ? "err" : r.status==="rejected" ? "rej" : "";
+        const tags = (r.tags||[]).map(t => `<span class="outcome t-${esc(t)}"><span class="dot"></span>${esc(OUTCOME_LABELS[t] || t)}</span>`).join(" ");
+        const verdict = r.human_verdict
+          ? `<span class="verdict ${esc(r.human_verdict)}"><span class="dot"></span>${esc(r.human_verdict === "nao_util" ? "não útil" : r.human_verdict)}</span>`
+          : "";
+        const qCell = r.final_quality_score == null ? "—" : `<b>${r.final_quality_score.toFixed(1)}</b>`;
+        return `<tr class="${cls}">
+          <td>${esc((r.timestamp||"").slice(11,19))}</td>
+          <td><span class="chip ${esc(r.agent)}"><span class="dot"></span>${esc(r.agent)}</span></td>
+          <td>${esc(r.task)}</td>
+          <td><span class="badge ${esc(r.status)}">${esc(r.status)}</span></td>
+          <td>${qCell}</td>
+          <td>${fmtMs(r.duration_ms)}</td>
+          <td>${fmtCost(r.cost_estimate)}</td>
+          <td>${tags} ${verdict}</td>
+        </tr>`;
+      }).join("");
+      return `<details class="session">
+        <summary>
+          <div class="sess-head">
+            <div class="id">${esc(s.sid)}</div>
+            <div class="when">${esc(dateStr)} · ${s.sr.length} runs · ${s.agents.length} agente${s.agents.length>1?'s':''}</div>
+          </div>
+          <div>
+            <div>${agentChips}</div>
+            <div style="margin-top:6px;">${perAgent}</div>
+          </div>
+          <div class="sess-totals">
+            <div class="big">${fmtCost(s.cost)}</div>
+            <div class="sml">${fmtNum(s.tokens)} tokens</div>
+          </div>
+        </summary>
+        <div class="sess-body">
+          <table class="sess-runs">
+            <thead><tr><th>Hora</th><th>Modelo</th><th>Tarefa</th><th>Status</th><th>Qualidade</th><th>Duração</th><th>Custo</th><th>Outcomes</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </details>`;
+    }).join("");
+  }
+
+  // ============================================================
+  // TAB: ANALÍTICO
+  // ============================================================
+  function renderAnalitico() {
+    destroyTabCharts("analitico");
+    const { runs, byAgent, byDay, allDays, tagsByAgent, byTask } = state.aggs;
+
+    // ---- Eficiência por agente ----
+    renderEfficiency(byAgent);
+
+    // ---- Custo por outcome, por agente (stacked bar) ----
+    renderCostByOutcome(runs);
+
+    // ---- Valor × custo (scatter) ----
+    renderValueScatter(runs);
+
+    // ---- Histogramas com p50/p95/p99 ----
+    renderHistogram("duration", "a-chart-hist-duration", "a-empty-hist-duration", "a-dur-quantiles",
+      runs.map(r => r.duration_ms), v => fmtMs(Math.round(v)));
+    renderHistogram("cost", "a-chart-hist-cost", "a-empty-hist-cost", "a-cost-quantiles",
+      runs.map(r => r.cost_estimate), v => fmtCost(v));
+
+    // ---- Runs por dia empilhado + MA 3d ----
+    renderRunsWithMA(byAgent, allDays, runs);
+
+    // ---- Erros por tipo ----
+    renderErrors(runs);
+
+    // ---- Codex saúde ----
+    renderCodexHealth(byAgent.get("codex") || []);
+
+    // ---- Claude saúde ----
+    renderClaudeHealth(byAgent.get("claude") || []);
+
+    // ---- Top tasks ----
+    renderTopTasks(byTask);
+
+    // ---- Heatmap agente × task ----
+    renderHeatmap(byAgent, byTask);
+
+    // ---- Regressões por input ----
+    renderRegressions(runs);
+
+    // ---- Cadeia de runs ----
+    renderRunTree(runs);
+  }
+
+  function renderEfficiency(byAgent) {
+    const host = document.getElementById("a-eff");
+    const agents = AGENTS.filter(a => byAgent.has(a));
+    if (!agents.length) { host.innerHTML = `<div class="empty-state">Sem agentes com runs.</div>`; return; }
+    host.innerHTML = agents.map(a => {
+      const rs = byAgent.get(a) || [];
+      const tags = countTags(rs);
+      const total = rs.length;
+      const good = tags.helped + tags.improved;
+      const bad = tags.erred;
+      const goodPct = total ? (good / total * 100) : 0;
+      const badPct = total ? (bad / total * 100) : 0;
+      return `<div class="eff-card">
+        <div class="who" style="color:${AGENT_COLOR[a]}">${a}</div>
+        <div style="color:var(--muted); font-size:11px;">${total} runs</div>
+        <div class="bars">
+          <div class="row"><div class="lbl">Produtivo</div><div class="track"><div class="fill" style="width:${goodPct.toFixed(1)}%; background:var(--ok)"></div></div><div class="val">${goodPct.toFixed(0)}%</div></div>
+          <div class="row"><div class="lbl">Erro</div><div class="track"><div class="fill" style="width:${badPct.toFixed(1)}%; background:var(--err)"></div></div><div class="val">${badPct.toFixed(0)}%</div></div>
+        </div>
+      </div>`;
+    }).join("");
+  }
+
+  function renderCostByOutcome(runs) {
+    const data = {};
+    for (const a of AGENTS) {
+      data[a] = {}; for (const t of OUTCOME_ORDER) data[a][t] = 0;
+    }
+    for (const r of runs) {
+      for (const t of r.tags) {
+        if (AGENTS.includes(r.agent) && data[r.agent] && t in data[r.agent]) {
+          data[r.agent][t] += r.cost_estimate;
+        }
+      }
+    }
+    const anyData = runs.some(r => r.cost_estimate > 0 && r.tags.length > 0);
+    if (!anyData) { showEmpty("a-empty-cost-outcome", "a-chart-cost-outcome", true); return; }
+    showEmpty("a-empty-cost-outcome", "a-chart-cost-outcome", false);
+    const labels = OUTCOME_ORDER.map(t => OUTCOME_LABELS[t]);
+    const datasets = AGENTS.map(a => ({
+      label: a,
+      data: OUTCOME_ORDER.map(t => Number(data[a][t].toFixed(4))),
+      backgroundColor: AGENT_COLOR[a],
+    }));
+    registerChart("analitico", "cost-outcome", new Chart(document.getElementById("a-chart-cost-outcome"), {
+      type: "bar",
+      data: { labels, datasets },
+      options: baseOpts({
+        scales: { x: { stacked: true, ...tickOpts() }, y: { stacked: true, ...tickOpts() } },
+      }),
+    }));
+  }
+
+  function renderValueScatter(runs) {
+    // Prefer final_quality_score (Phase 2). Fall back to legacy value_score so
+    // very old records still render.
+    const pts = runs
+      .map(r => ({ ...r, _q: r.final_quality_score != null ? r.final_quality_score : r.value_score }))
+      .filter(r => r._q != null && r.cost_estimate > 0);
+    if (!pts.length) { showEmpty("a-empty-scatter", "a-chart-scatter", true); return; }
+    showEmpty("a-empty-scatter", "a-chart-scatter", false);
+    const datasets = AGENTS.map(a => ({
+      label: a,
+      data: pts.filter(r => r.agent === a).map(r => ({ x: r.cost_estimate, y: r._q, r: 4 })),
+      backgroundColor: AGENT_COLOR[a] + "cc",
+      borderColor: AGENT_COLOR[a],
+    }));
+    registerChart("analitico", "scatter", new Chart(document.getElementById("a-chart-scatter"), {
+      type: "scatter",
+      data: { datasets },
+      options: baseOpts({
+        scales: {
+          x: { title: { display:true, text:"custo ($)", color:"#8b93a7" }, ...tickOpts() },
+          y: { title: { display:true, text:"final_quality_score (0..10)", color:"#8b93a7" }, ...tickOpts(), min: 0, max: 10 },
+        },
+      }),
+    }));
+  }
+
+  // Regressions-per-input table: groups runs by input_fingerprint, compares
+  // first vs last final_quality_score for that fingerprint. Surfaces real
+  // regressions or genuine improvements against the same input.
+  function renderRegressions(runs) {
+    const host = document.getElementById("a-regressions");
+    const byFp = groupBy(runs.filter(r => r.input_fingerprint), r => r.input_fingerprint);
+    const rows = [];
+    for (const [fp, rs] of byFp) {
+      const scored = rs.filter(r => r.final_quality_score != null)
+        .sort(compareByTs);
+      if (scored.length < 2) continue;  // need at least 2 scored runs to compare
+      const first = scored[0], last = scored[scored.length - 1];
+      const delta = last.final_quality_score - first.final_quality_score;
+      const sessions = new Set(rs.map(r => r.session_id)).size;
+      rows.push({ fp, n: rs.length, sessions, first: first.final_quality_score, last: last.final_quality_score, delta, avg: scored.reduce((s,r)=>s+r.final_quality_score,0)/scored.length });
+    }
+    if (!rows.length) {
+      host.innerHTML = `<div class="empty-state">Nenhum fingerprint com 2+ runs avaliadas — precisa rodar o mesmo input mais de uma vez pra detectar regressão.</div>`;
+      return;
+    }
+    rows.sort((a,b) => a.delta - b.delta); // biggest drops on top
+    const body = rows.map(r => {
+      const cls = r.delta <= -1 ? "delta-down" : r.delta >= 1 ? "delta-up" : "";
+      const sign = r.delta >= 0 ? "+" : "";
+      return `<tr>
+        <td class="fp" title="${esc(r.fp)}">${esc(r.fp.slice(0,10))}…</td>
+        <td>${r.n}</td>
+        <td>${r.sessions}</td>
+        <td>${r.first.toFixed(1)}</td>
+        <td>${r.last.toFixed(1)}</td>
+        <td>${r.avg.toFixed(1)}</td>
+        <td class="${cls}">${sign}${r.delta.toFixed(1)}</td>
+      </tr>`;
+    }).join("");
+    host.innerHTML = `<table class="regressions-table">
+      <thead><tr>
+        <th>Input fingerprint</th>
+        <th>Runs</th>
+        <th>Sessões</th>
+        <th>Primeiro</th>
+        <th>Último</th>
+        <th>Média</th>
+        <th>Δ último−primeiro</th>
+      </tr></thead>
+      <tbody>${body}</tbody>
+    </table>`;
+  }
+
+  function renderHistogram(key, canvasId, emptyId, quantileLabelId, values, fmt) {
+    const nums = values.filter(v => Number.isFinite(v) && v > 0);
+    const qEl = document.getElementById(quantileLabelId);
+    if (nums.length < 3) { showEmpty(emptyId, canvasId, true); if (qEl) qEl.textContent = ""; return; }
+    showEmpty(emptyId, canvasId, false);
+    const p50 = quantile(nums, .5), p95 = quantile(nums, .95), p99 = quantile(nums, .99);
+    if (qEl) qEl.textContent = `p50 ${fmt(p50)} · p95 ${fmt(p95)} · p99 ${fmt(p99)}`;
+
+    const min = Math.min(...nums), max = Math.max(...nums);
+    const bins = 16;
+    const step = (max - min) / bins || 1;
+    const counts = new Array(bins).fill(0);
+    for (const v of nums) {
+      const i = Math.min(bins - 1, Math.floor((v - min) / step));
+      counts[i]++;
+    }
+    const labels = counts.map((_, i) => fmt(min + i * step));
+
+    // Simple plugin to draw p50/p95/p99 vertical lines onto the chart.
+    const quantilesPlugin = {
+      id: "quantilesLines-" + key,
+      afterDatasetsDraw(chart) {
+        const { ctx, chartArea, scales: { x } } = chart;
+        if (!x) return;
+        const draw = (value, label, color) => {
+          const xi = Math.min(bins - 1, Math.floor((value - min) / step));
+          const px = x.getPixelForValue(xi);
+          ctx.save();
+          ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.setLineDash([4,3]);
+          ctx.beginPath(); ctx.moveTo(px, chartArea.top); ctx.lineTo(px, chartArea.bottom); ctx.stroke();
+          ctx.fillStyle = color; ctx.setLineDash([]); ctx.font = "10px -apple-system,sans-serif";
+          ctx.fillText(label, px + 3, chartArea.top + 10);
+          ctx.restore();
+        };
+        draw(p50, "p50", "#3ccf7a");
+        draw(p95, "p95", "#f5a524");
+        draw(p99, "p99", "#ef4444");
+      },
+    };
+
+    registerChart("analitico", "hist-" + key, new Chart(document.getElementById(canvasId), {
+      type: "bar",
+      data: { labels, datasets:[{ label:"runs", data: counts, backgroundColor:"#4f8cff" }] },
+      options: baseOpts(),
+      plugins: [quantilesPlugin],
+    }));
+  }
+
+  function renderRunsWithMA(byAgent, allDays, runs) {
+    if (!allDays.length) { showEmpty("a-empty-runs-ma", "a-chart-runs-ma", true); return; }
+    showEmpty("a-empty-runs-ma", "a-chart-runs-ma", false);
+    const datasets = AGENTS.map(a => ({
+      label: a,
+      type: "bar",
+      data: allDays.map(d => (byAgent.get(a) || []).filter(r => utcDay(r.timestamp) === d).length),
+      backgroundColor: AGENT_COLOR[a],
+      stack: "s1",
+    }));
+    // 3-day moving average of total runs
+    const daily = allDays.map(d => runs.filter(r => utcDay(r.timestamp) === d).length);
+    const ma = daily.map((_, i) => {
+      const start = Math.max(0, i - 2);
+      const slice = daily.slice(start, i + 1);
+      return slice.reduce((a,b) => a + b, 0) / slice.length;
+    });
+    datasets.push({
+      label: "média móvel 3d",
+      type: "line",
+      data: ma,
+      borderColor: "#e6e8ee", backgroundColor: "rgba(230,232,238,.1)",
+      borderWidth: 2, pointRadius: 2, tension: 0.25, yAxisID: "y",
+    });
+    registerChart("analitico", "runs-ma", new Chart(document.getElementById("a-chart-runs-ma"), {
+      data: { labels: allDays, datasets },
+      options: baseOpts({
+        scales: { x: { stacked:true, ...tickOpts() }, y: { stacked:true, beginAtZero:true, ...tickOpts() } },
+      }),
+    }));
+  }
+
+  function renderErrors(runs) {
+    const counts = {};
+    for (const r of runs) if (r.error_type) counts[r.error_type] = (counts[r.error_type] || 0) + 1;
+    const keys = Object.keys(counts).sort((a,b) => counts[b] - counts[a]);
+    if (!keys.length) { showEmpty("a-empty-errors", "a-chart-errors", true); return; }
+    showEmpty("a-empty-errors", "a-chart-errors", false);
+    registerChart("analitico", "errors", new Chart(document.getElementById("a-chart-errors"), {
+      type: "bar",
+      data: { labels: keys, datasets:[{ label:"erros", data: keys.map(k => counts[k]), backgroundColor:"#ef4444" }] },
+      options: baseOpts({ indexAxis: "y" }),
+    }));
+  }
+
+  function renderCodexHealth(codexRuns) {
+    const donutEl = document.getElementById("a-chart-codex-donut");
+    const agreeEl = document.getElementById("a-chart-codex-agree");
+    if (!codexRuns.length) { showEmpty("a-empty-codex", null, true); donutEl.hidden = true; agreeEl.hidden = true; return; }
+    showEmpty("a-empty-codex", null, false); donutEl.hidden = false; agreeEl.hidden = false;
+    const c = countTags(codexRuns);
+    const keys = ["agreed","disagreed","improved"];
+    registerChart("analitico", "codex-donut", new Chart(donutEl, {
+      type: "doughnut",
+      data: { labels: keys.map(k => OUTCOME_LABELS[k]), datasets:[{ data: keys.map(k => c[k]), backgroundColor: keys.map(k => OUTCOME_COLOR[k]) }] },
+      options: baseOpts({ scales: {} }),
+    }));
+    // agreement rate per day: agreed / (agreed + disagreed)
+    const days = [...new Set(codexRuns.map(r => utcDay(r.timestamp)))].sort();
+    const rate = days.map(d => {
+      const dayRuns = codexRuns.filter(r => utcDay(r.timestamp) === d);
+      const tc = countTags(dayRuns);
+      const tot = tc.agreed + tc.disagreed;
+      return tot ? tc.agreed / tot * 100 : null;
+    });
+    registerChart("analitico", "codex-agree", new Chart(agreeEl, {
+      type: "line",
+      data: { labels: days, datasets:[{ label:"taxa de concordância (%)", data: rate, borderColor: AGENT_COLOR.codex, backgroundColor: AGENT_COLOR.codex + "33", tension:.25, pointRadius:2, spanGaps: true }] },
+      options: baseOpts({ scales:{ x: tickOpts(), y: { ...tickOpts(), min:0, max:100 } } }),
+    }));
+  }
+
+  function renderClaudeHealth(claudeRuns) {
+    const canvas = document.getElementById("a-chart-claude");
+    if (!claudeRuns.length) { showEmpty("a-empty-claude", "a-chart-claude", true); return; }
+    showEmpty("a-empty-claude", "a-chart-claude", false);
+    const days = [...new Set(claudeRuns.map(r => utcDay(r.timestamp)))].sort();
+    const mk = (tag) => days.map(d => {
+      const rs = claudeRuns.filter(r => utcDay(r.timestamp) === d);
+      return rs.reduce((n, r) => n + (r.tags.includes(tag) ? 1 : 0), 0);
+    });
+    const retries = days.map(d => {
+      const rs = claudeRuns.filter(r => utcDay(r.timestamp) === d);
+      return rs.length ? (rs.reduce((s,r) => s + (r.retries > 0 ? 1 : 0), 0) / rs.length * 100) : 0;
+    });
+    registerChart("analitico", "claude", new Chart(canvas, {
+      data: {
+        labels: days,
+        datasets: [
+          { type:"bar", label:"ajudou", data: mk("helped"),   backgroundColor: OUTCOME_COLOR.helped,   stack:"c" },
+          { type:"bar", label:"melhorou", data: mk("improved"), backgroundColor: OUTCOME_COLOR.improved, stack:"c" },
+          { type:"bar", label:"errou", data: mk("erred"),       backgroundColor: OUTCOME_COLOR.erred,    stack:"c" },
+          { type:"line", label:"retry rate (%)", data: retries, borderColor:"#e6e8ee", backgroundColor:"rgba(230,232,238,.1)", yAxisID:"y1", tension:.25, pointRadius:2 },
+        ],
+      },
+      options: baseOpts({
+        scales: {
+          x: { stacked:true, ...tickOpts() },
+          y: { stacked:true, ...tickOpts(), title: { display:true, text:"runs/dia", color:"#8b93a7" } },
+          y1: { position:"right", grid: { drawOnChartArea:false }, ...tickOpts(), min:0, max:100, title:{ display:true, text:"%", color:"#8b93a7" } },
+        },
+      }),
+    }));
+  }
+
+  function renderTopTasks(byTask) {
+    const tbody = document.querySelector("#a-top-tasks tbody");
+    if (!byTask.size) { showEmpty("a-empty-top-tasks", null, true); tbody.innerHTML = ""; return; }
+    showEmpty("a-empty-top-tasks", null, false);
+    const rows = [...byTask.entries()].map(([task, rs]) => {
+      const cost = rs.reduce((s,r) => s + r.cost_estimate, 0);
+      const errs = rs.filter(r => r.status === "error" || r.status === "rejected").length;
+      const errRate = rs.length ? (errs / rs.length * 100) : 0;
+      const agentCounts = rs.reduce((m, r) => { m[r.agent] = (m[r.agent] || 0) + 1; return m; }, {});
+      const dominant = Object.entries(agentCounts).sort((a,b) => b[1] - a[1])[0]?.[0] || "—";
+      return { task, runs: rs.length, cost, errRate, agent: dominant };
+    });
+    // default sort: runs desc
+    if (!tbody.dataset.sortKey) { tbody.dataset.sortKey = "runs"; tbody.dataset.sortDir = "desc"; }
+    const { sortKey, sortDir } = tbody.dataset;
+    rows.sort((a,b) => {
+      const dir = sortDir === "asc" ? 1 : -1;
+      const va = a[sortKey], vb = b[sortKey];
+      if (typeof va === "number") return (va - vb) * dir;
+      return String(va).localeCompare(String(vb)) * dir;
+    });
+    tbody.innerHTML = rows.map(r => `<tr>
+      <td>${esc(r.task)}</td>
+      <td>${fmtNum(r.runs)}</td>
+      <td>${fmtCost(r.cost)}</td>
+      <td class="err-rate ${r.errRate > 30 ? 'high' : ''}">${r.errRate.toFixed(1)}%</td>
+      <td><span class="chip ${esc(r.agent)}"><span class="dot"></span>${esc(r.agent)}</span></td>
+    </tr>`).join("");
+  }
+
+  function renderHeatmap(byAgent, byTask) {
+    const host = document.getElementById("a-heatmap");
+    const agents = AGENTS.filter(a => byAgent.has(a));
+    const tasks = [...byTask.keys()].sort();
+    if (!agents.length || !tasks.length) { host.innerHTML = ""; showEmpty("a-empty-heatmap", null, true); return; }
+    showEmpty("a-empty-heatmap", null, false);
+
+    // Count runs by (task, agent)
+    const grid = {};
+    let max = 0;
+    for (const t of tasks) { grid[t] = {}; for (const a of agents) grid[t][a] = 0; }
+    for (const [a, rs] of byAgent) for (const r of rs) if (grid[r.task] && grid[r.task][a] != null) { grid[r.task][a]++; if (grid[r.task][a] > max) max = grid[r.task][a]; }
+
+    const cellColor = (v) => {
+      if (v === 0) return "";
+      const t = v / max;
+      // Blue intensity
+      const r = Math.round(79 + (34 - 79) * t);
+      const g = Math.round(140 + (211 - 140) * t);
+      const b = Math.round(255);
+      return `rgb(${r},${g},${b})`;
+    };
+
+    const cols = agents.length;
+    const gridStyle = `grid-template-columns: 180px repeat(${cols}, 1fr);`;
+    let html = `<div class="heatmap">`;
+    html += `<div class="header" style="${gridStyle}"><div></div>${agents.map(a => `<div class="colheader" style="color:${AGENT_COLOR[a]}">${esc(a)}</div>`).join("")}</div>`;
+    for (const t of tasks) {
+      html += `<div class="row" style="${gridStyle}"><div class="rowlabel" title="${esc(t)}">${esc(t)}</div>`;
+      for (const a of agents) {
+        const v = grid[t][a];
+        const bg = cellColor(v);
+        html += `<div class="cell" data-val="${v}" style="${bg ? `background:${bg};` : ''}" title="${esc(t)} × ${esc(a)}: ${v} run${v===1?'':'s'}">${v || ''}</div>`;
+      }
+      html += `</div>`;
+    }
+    html += `</div>`;
+    host.innerHTML = html;
+  }
+
+  function renderRunTree(runs) {
+    const host = document.getElementById("a-tree");
+    // Only render sessions that have at least one parent_run_id chain.
+    const bySession = groupBy(runs, r => r.session_id);
+    const interesting = [];
+    for (const [sid, rs] of bySession) {
+      if (rs.some(r => r.parent_run_id)) interesting.push([sid, rs]);
+    }
+    if (!interesting.length) { host.innerHTML = ""; showEmpty("a-empty-tree", null, true); return; }
+    showEmpty("a-empty-tree", null, false);
+
+    // Render each session as a simple indented tree.
+    const parts = interesting.slice(0, 8).map(([sid, rs]) => {
+      const byParent = groupBy(rs, r => r.parent_run_id || "__root__");
+      const roots = byParent.get("__root__") || [];
+      const lines = [`<div class="node" style="color:var(--muted)">■ ${esc(sid)}</div>`];
+      const recurse = (parentId, depth) => {
+        const kids = byParent.get(parentId) || [];
+        for (const k of kids) {
+          const tag0 = k.tags[0];
+          const outcome = (tag0 ? `<span class="outcome t-${esc(tag0)}"><span class="dot"></span>${esc(OUTCOME_LABELS[tag0] || tag0)}</span>` : "");
+          lines.push(`<div class="node depth-${Math.min(depth, 4)}">
+            <span class="connector">└─</span>
+            <span class="chip ${esc(k.agent)}"><span class="dot"></span>${esc(k.agent)}</span>
+            ${esc(k.task)} · ${fmtMs(k.duration_ms)} ${outcome}
+          </div>`);
+          recurse(k.run_id, depth + 1);
+        }
+      };
+      for (const r of roots) {
+        const tag0 = r.tags[0];
+        const outcome = (tag0 ? `<span class="outcome t-${esc(tag0)}"><span class="dot"></span>${esc(OUTCOME_LABELS[tag0] || tag0)}</span>` : "");
+        lines.push(`<div class="node depth-1">
+          <span class="chip ${esc(r.agent)}"><span class="dot"></span>${esc(r.agent)}</span>
+          ${esc(r.task)} · ${fmtMs(r.duration_ms)} ${outcome}
+        </div>`);
+        recurse(r.run_id, 2);
+      }
+      return lines.join("");
+    });
+    host.innerHTML = parts.join(`<div style="height:10px;"></div>`);
+  }
+
+  // ============================================================
+  // TAB: DECISÕES
+  // ============================================================
+  // Calculators (pure) ------------------------------------------
+  //
+  // Each takes the pre-computed `aggs` and returns a plain-data result the
+  // renderers just layout. When there is not enough signal to be honest, the
+  // calculator sets `insufficient:true` plus a short reason. Renderers never
+  // try to "fill in" that case.
+
+  // Thresholds centralised so we can tune one place.
+  const DECISION_MIN = {
+    runsPerAgent: 5,            // global best-agent needs this per agent to compare
+    runsPerAgentTask: 2,        // per-task per-agent floor
+    alertWindowDays: 7,         // alert rolling window
+    alertMinRunsInWindow: 3,    // noise guard for per-agent alerts
+    noCodexMinDisagreed: 3,     // below this, no-codex counterfactual is hand-wavy
+  };
+
+  // Per-agent productive-tag set. Codex's role is to REVIEW — agreeing,
+  // disagreeing or improving are all useful outputs. Claude's role is to
+  // PRODUCE — only improved/helped count. System just runs things.
+  const AGENT_PRODUCTIVE_TAGS = {
+    claude: ["helped", "improved"],
+    codex:  ["agreed", "disagreed", "improved", "helped"],
+    system: ["helped", "improved"],
+  };
+
+  function _agentRates(runs, agent) {
+    const t = countTags(runs);
+    const n = runs.length;
+    if (!n) return null;
+    const productiveTags = AGENT_PRODUCTIVE_TAGS[agent] || ["helped", "improved"];
+    // Count RUNS that have at least one productive tag (not total tag count),
+    // so a run tagged helped+improved still contributes 1, not 2. Keeps
+    // productivity a proper 0..1 fraction even with multi-tag runs.
+    const productiveRuns = runs.filter(r => (r.tags || []).some(tag => productiveTags.includes(tag))).length;
+    const erredRuns = runs.filter(r => (r.tags || []).includes("erred")).length;
+    return {
+      n,
+      productivity: productiveRuns / n,              // fraction, 0..1, role-aware
+      errorRate: erredRuns / n,
+      avgCost: runs.reduce((s,r)=>s+r.cost_estimate,0) / n,
+      totalCost: runs.reduce((s,r)=>s+r.cost_estimate,0),
+      tags: t,
+    };
+  }
+
+  // Score used by best-agent + task routing. Same shape so results are
+  // comparable across views.
+  function _score(rates, maxAvgCost) {
+    if (!rates) return -Infinity;
+    const costPenalty = maxAvgCost > 0 ? (rates.avgCost / maxAvgCost) : 0;
+    // productivity weight 2, error weight 3, cost weight 1.
+    return rates.productivity * 2 - rates.errorRate * 3 - costPenalty * 1;
+  }
+
+  // --- best agent globally ----------------------------------------------
+  function computeBestAgent(aggs) {
+    const { byAgent } = aggs;
+    const rows = AGENTS
+      .filter(a => byAgent.has(a))
+      .map(a => ({ agent: a, rates: _agentRates(byAgent.get(a) || [], a) }))
+      .filter(x => x.rates);
+    if (!rows.length) return { insufficient: true, reason: "Sem runs para comparar agentes." };
+    const insufficient = rows.filter(r => r.rates.n < DECISION_MIN.runsPerAgent);
+    if (insufficient.length === rows.length) {
+      return { insufficient: true, reason: `Cada agente precisa de ao menos ${DECISION_MIN.runsPerAgent} runs para comparar (máximo atual: ${Math.max(...rows.map(r=>r.rates.n))}).` };
+    }
+    const maxAvgCost = Math.max(...rows.map(r => r.rates.avgCost));
+    const scored = rows.map(r => ({ ...r, score: _score(r.rates, maxAvgCost) }));
+    scored.sort((a,b) => b.score - a.score);
+    const top = scored[0];
+    const runner = scored[1];
+    const close = runner && Math.abs(top.score - runner.score) < 0.1;
+    return {
+      insufficient: false,
+      top: top.agent,
+      score: top.score,
+      productivity: top.rates.productivity,
+      errorRate: top.rates.errorRate,
+      avgCost: top.rates.avgCost,
+      sampleSize: top.rates.n,
+      close, runnerUp: runner ? runner.agent : null,
+    };
+  }
+
+  // --- quality helpers (used by policy + alerts + regressions) ---------
+  function _qualityStats(runs) {
+    const scored = runs.filter(r => r.final_quality_score != null);
+    if (!scored.length) return null;
+    const avg = scored.reduce((s,r)=>s+r.final_quality_score,0) / scored.length;
+    return { n: scored.length, total: runs.length, avg };
+  }
+
+  // --- policy (human-readable rules) ------------------------------------
+  function computePolicy(aggs) {
+    const rules = [];
+    const { byAgent, byTask } = aggs;
+
+    // Per-task best-agent rules.
+    for (const [task, runs] of byTask) {
+      const perAgent = AGENTS
+        .map(a => ({ a, rates: _agentRates(runs.filter(r => r.agent === a), a) }))
+        .filter(x => x.rates && x.rates.n >= DECISION_MIN.runsPerAgentTask);
+      if (perAgent.length < 2) continue;
+      const maxCost = Math.max(...perAgent.map(x => x.rates.avgCost));
+      const scored = perAgent.map(x => ({ ...x, s: _score(x.rates, maxCost) }));
+      scored.sort((x,y) => y.s - x.s);
+      const [best, second] = scored;
+      const margin = best.s - second.s;
+      if (margin < 0.15) continue; // too close to pick
+      rules.push({
+        cls: "good",
+        text: `Para <b>${esc(task)}</b>, preferir <b>${esc(best.a)}</b> (produtividade ${(best.rates.productivity*100).toFixed(0)}% · erro ${(best.rates.errorRate*100).toFixed(0)}%) — evita <b>${esc(second.a)}</b> até nova amostra.`,
+      });
+    }
+
+    // High-error agent overall.
+    for (const a of AGENTS) {
+      const rates = _agentRates(byAgent.get(a) || [], a);
+      if (rates && rates.n >= DECISION_MIN.runsPerAgent && rates.errorRate >= 0.4) {
+        rules.push({ cls: "bad", text: `<b>${esc(a)}</b> está com taxa de erro alta (${(rates.errorRate*100).toFixed(0)}% em ${rates.n} runs) — exigir revisão antes de aceitar.` });
+      }
+    }
+
+    // Task-level cost × quality rule — flags tasks burning money without
+    // producing good artifacts. Only fires when quality has been measured.
+    for (const [task, runs] of byTask) {
+      const q = _qualityStats(runs);
+      if (!q || q.n < 3) continue;
+      const cost = runs.reduce((s,r)=>s+r.cost_estimate, 0);
+      if (q.avg <= 5.5 && cost >= 0.1) {
+        rules.push({
+          cls: "bad",
+          text: `<b>${esc(task)}</b> está cara e com qualidade fraca (média ${q.avg.toFixed(1)}/10 em ${q.n} runs, custo ${fmtCost(cost)}) — revisar prompt/fluxo antes de continuar investindo.`,
+        });
+      }
+    }
+
+    // Codex pushback signal: if codex disagrees a lot, the upstream prompt or
+    // pipeline may be producing bad drafts.
+    const codexRates = _agentRates(byAgent.get("codex") || [], "codex");
+    if (codexRates && codexRates.n >= DECISION_MIN.runsPerAgent) {
+      const dis = codexRates.tags.disagreed / codexRates.n;
+      if (dis >= 0.35) {
+        rules.push({ cls: "warn", text: `<b>Codex</b> discorda em ${(dis*100).toFixed(0)}% das runs — revisar o upstream (prompts/pipeline) que está gerando drafts fracos.` });
+      }
+    }
+
+    if (!rules.length) {
+      rules.push({ cls: "neutral", text: "Sem regras derivadas no momento (amostras pequenas ou desempenho muito próximo entre agentes)." });
+    }
+    return rules;
+  }
+
+  // --- per-task routing ranking -----------------------------------------
+  function computeTaskRouting(aggs) {
+    const { byTask } = aggs;
+    const rows = [];
+    for (const [task, runs] of byTask) {
+      const perAgent = AGENTS
+        .map(a => ({ agent: a, rates: _agentRates(runs.filter(r => r.agent === a), a) }))
+        .filter(x => x.rates && x.rates.n >= DECISION_MIN.runsPerAgentTask);
+      if (perAgent.length === 0) {
+        rows.push({ task, insufficient: true, reason: "sem amostra mínima por agente", total: runs.length });
+        continue;
+      }
+      const maxCost = Math.max(...perAgent.map(x => x.rates.avgCost));
+      const scored = perAgent.map(x => ({ ...x, score: _score(x.rates, maxCost) }));
+      scored.sort((x,y) => y.score - x.score);
+      rows.push({ task, insufficient: false, ranking: scored, total: runs.length });
+    }
+    rows.sort((a,b) => b.total - a.total);
+    return rows;
+  }
+
+  // --- next-agent recommendation per recent session ---------------------
+  function computeNextAgent(aggs) {
+    const { bySession } = aggs;
+    // Take the 5 most recently touched sessions.
+    const sessions = [...bySession.entries()].map(([sid, rs]) => {
+      const sorted = [...rs].sort(compareByTs);
+      return { sid, runs: sorted, last: sorted[sorted.length - 1], agents: new Set(sorted.map(r => r.agent)) };
+    });
+    sessions.sort((a,b) => String(b.last.timestamp).localeCompare(String(a.last.timestamp)));
+    return sessions.slice(0, 5).map(s => {
+      const last = s.last;
+      const tags = last.tags || [];
+      // Rule cascade — first match wins. Each rule cites the signal.
+      if (last.status === "error" || tags.includes("erred")) {
+        return { sid: s.sid, rec: "Escalar para humano", cls: "rec-human",
+          why: `Última run de <b>${esc(last.agent)}</b> terminou com erro (${esc(last.error_type || last.status)}).` };
+      }
+      if (last.agent === "codex" && tags.includes("disagreed")) {
+        return { sid: s.sid, rec: "Escalar para humano", cls: "rec-human",
+          why: "Codex discordou — mérito ambíguo, humano decide." };
+      }
+      if (last.agent === "claude" && last.status === "approved" && !s.agents.has("codex")) {
+        return { sid: s.sid, rec: "Pedir review do Codex", cls: "rec-codex",
+          why: "Claude aprovou e não houve review do Codex nesta sessão." };
+      }
+      if (last.agent === "codex" && (tags.includes("agreed") || tags.includes("helped") || tags.includes("improved"))) {
+        return { sid: s.sid, rec: "Encerrar sessão", cls: "rec-stop",
+          why: "Codex concordou / ajudou — seguir como aprovado." };
+      }
+      if (last.status === "retry") {
+        return { sid: s.sid, rec: "Reexecutar com outro agente", cls: "rec-claude",
+          why: "Última run marcou retry — trocar de agente antes de tentar de novo." };
+      }
+      return { sid: s.sid, rec: "Sem ação recomendada", cls: "rec-stop",
+        why: "Nenhuma regra se aplica — sinal atual não justifica próxima chamada." };
+    });
+  }
+
+  // --- rolling alerts ---------------------------------------------------
+  function computeAlerts(aggs) {
+    const { runs } = aggs;
+    const nowMs = Date.now();
+    const windowMs = DECISION_MIN.alertWindowDays * 86400_000;
+    const recent = runs.filter(r => {
+      const t = new Date(r.timestamp).getTime();
+      return Number.isFinite(t) && (nowMs - t) <= windowMs;
+    });
+    const alerts = [];
+
+    // Per-agent error rate alerts.
+    for (const a of AGENTS) {
+      const ra = recent.filter(r => r.agent === a);
+      if (ra.length < DECISION_MIN.alertMinRunsInWindow) continue;
+      const errR = ra.filter(r => (r.tags || []).includes("erred") || r.status === "error").length / ra.length;
+      if (errR >= 0.5) {
+        alerts.push({ sev: "crit", title: `${a} com taxa de erro alta`, detail: `${(errR*100).toFixed(0)}% em ${ra.length} runs dos últimos ${DECISION_MIN.alertWindowDays}d.` });
+      } else if (errR >= 0.3) {
+        alerts.push({ sev: "warn", title: `${a} errando mais que o usual`, detail: `${(errR*100).toFixed(0)}% em ${ra.length} runs dos últimos ${DECISION_MIN.alertWindowDays}d.` });
+      }
+    }
+
+    // Cost concentration in a single task.
+    const totalCost = recent.reduce((s,r)=>s+r.cost_estimate, 0);
+    if (totalCost > 0) {
+      const byTask = groupBy(recent, r => r.task);
+      for (const [task, rs] of byTask) {
+        const cost = rs.reduce((s,r)=>s+r.cost_estimate, 0);
+        const share = cost / totalCost;
+        const errors = rs.filter(r => r.status === "error" || r.status === "rejected").length / rs.length;
+        if (share >= 0.4 && errors >= 0.3) {
+          alerts.push({ sev: "warn", title: `${task} consome ${(share*100).toFixed(0)}% do custo`, detail: `E tem ${(errors*100).toFixed(0)}% de falha nos últimos ${DECISION_MIN.alertWindowDays}d — reavaliar prompt/fluxo.` });
+        }
+      }
+    }
+
+    // Quality-drop alert per task: compare avg quality in the window vs the
+    // same task's avg in the preceding window of the same length.
+    const windowStart = nowMs - windowMs;
+    const priorStart = nowMs - 2 * windowMs;
+    const prior = runs.filter(r => {
+      const t = new Date(r.timestamp).getTime();
+      return Number.isFinite(t) && t >= priorStart && t < windowStart;
+    });
+    const byTaskRecent = groupBy(recent, r => r.task);
+    const byTaskPrior = groupBy(prior, r => r.task);
+    for (const [task, rs] of byTaskRecent) {
+      const qNow = _qualityStats(rs);
+      const qPrior = _qualityStats(byTaskPrior.get(task) || []);
+      if (!qNow || qNow.n < 3 || !qPrior || qPrior.n < 3) continue;
+      const delta = qNow.avg - qPrior.avg;
+      if (delta <= -1.0) {
+        alerts.push({
+          sev: delta <= -2.0 ? "crit" : "warn",
+          title: `Qualidade caindo em ${task}`,
+          detail: `${qPrior.avg.toFixed(1)} → ${qNow.avg.toFixed(1)} (Δ ${delta.toFixed(1)}) entre a janela anterior e a atual (${DECISION_MIN.alertWindowDays}d).`,
+        });
+      }
+    }
+
+    // Feedback coverage — not an alert per se, just a visibility signal so
+    // you know how much ground truth exists behind the numbers.
+    const verdicted = runs.filter(r => r.human_verdict).length;
+    const coverage = runs.length ? verdicted / runs.length : 0;
+    if (runs.length >= 10 && coverage < 0.2) {
+      alerts.push({
+        sev: "info",
+        title: `Feedback humano baixo: ${verdicted}/${runs.length} runs com verdict`,
+        detail: `Rodar ${'`'}log_verdict.py${'`'} nas runs recentes aumenta a confiabilidade das métricas de qualidade.`,
+      });
+    }
+
+    // Codex disagreement spike.
+    const codexRecent = recent.filter(r => r.agent === "codex");
+    if (codexRecent.length >= DECISION_MIN.alertMinRunsInWindow) {
+      const dis = codexRecent.filter(r => (r.tags || []).includes("disagreed")).length / codexRecent.length;
+      if (dis >= 0.5) {
+        alerts.push({ sev: "warn", title: `Codex discordando em ${(dis*100).toFixed(0)}%`, detail: `Em ${codexRecent.length} runs dos últimos ${DECISION_MIN.alertWindowDays}d — revisar o que está sendo submetido para review.` });
+      }
+    }
+
+    if (!alerts.length) {
+      alerts.push({ sev: "info", title: "Nada fora do padrão", detail: `Sem alertas nos últimos ${DECISION_MIN.alertWindowDays}d — dentro das faixas normais.` });
+    }
+    return alerts;
+  }
+
+  // --- no-codex counterfactual ------------------------------------------
+  function computeNoCodex(aggs) {
+    const { byAgent, runs } = aggs;
+    const codex = byAgent.get("codex") || [];
+    if (!codex.length) return { insufficient: true, reason: "Nenhum run do Codex na amostra." };
+    const disagreedCount = codex.filter(r => (r.tags || []).includes("disagreed")).length;
+    if (disagreedCount < DECISION_MIN.noCodexMinDisagreed) {
+      return { insufficient: true, reason: `Codex tem ${disagreedCount} discordâncias — precisa de ao menos ${DECISION_MIN.noCodexMinDisagreed} pra estimar impacto com honestidade.` };
+    }
+    const codexCost = codex.reduce((s,r) => s + r.cost_estimate, 0);
+    const approvedNow = runs.filter(r => r.status === "approved").length;
+    const rejectedByCodex = codex.filter(r => r.status === "rejected" || (r.tags || []).includes("disagreed")).length;
+    // Apparent approval without Codex gate: Codex rejections would have shown as approved upstream.
+    const apparentApprovedWithoutCodex = approvedNow + rejectedByCodex;
+    const deltaApproval = (apparentApprovedWithoutCodex / runs.length) - (approvedNow / runs.length);
+
+    // "Bad that would have passed" = disagreed items that led to improved
+    // in the chain (rough proxy for prevented bad output).
+    const improvedAfterDisagree = codex.filter(r => (r.tags || []).includes("improved") && (r.tags || []).includes("disagreed")).length
+      + codex.filter(r => (r.tags || []).includes("improved")).length;
+
+    return {
+      insufficient: false,
+      codexCost,
+      disagreedCount,
+      deltaApparentApproval: deltaApproval,
+      preventedBadOutputs: improvedAfterDisagree,
+    };
+  }
+
+  // Single entry point the renderer uses.
+  function computeDecisions(aggs) {
+    return {
+      alerts: computeAlerts(aggs),
+      policy: computePolicy(aggs),
+      bestAgent: computeBestAgent(aggs),
+      routing: computeTaskRouting(aggs),
+      nextAgent: computeNextAgent(aggs),
+      noCodex: computeNoCodex(aggs),
+    };
+  }
+
+  // Renderers ---------------------------------------------------
+  function renderDecisoes() {
+    destroyTabCharts("decisoes");
+    const d = computeDecisions(state.aggs);
+    renderAlerts(d.alerts);
+    renderPolicy(d.policy);
+    renderBestAgent(d.bestAgent);
+    renderRouting(d.routing);
+    renderNextAgent(d.nextAgent);
+    renderNoCodex(d.noCodex);
+  }
+
+  function renderAlerts(alerts) {
+    const host = document.getElementById("d-alerts");
+    const icon = (sev) => sev === "crit" ? "!" : sev === "warn" ? "⚠" : "i";
+    host.innerHTML = alerts.map(a =>
+      `<div class="alert sev-${esc(a.sev)}">
+        <div class="ico">${icon(a.sev)}</div>
+        <div>
+          <div class="title">${esc(a.title)}</div>
+          <div class="detail">${esc(a.detail)}</div>
+        </div>
+      </div>`
+    ).join("");
+  }
+
+  function renderPolicy(rules) {
+    const host = document.getElementById("d-policy");
+    // The rule text is constructed in the calculator and already passes
+    // user-supplied fields through esc(); bullets and classes come from a
+    // fixed whitelist, so innerHTML is safe here.
+    host.innerHTML = rules.map(r =>
+      `<li class="${esc(r.cls)}"><span class="bullet">●</span><span class="text">${r.text}</span></li>`
+    ).join("");
+  }
+
+  function renderBestAgent(b) {
+    const host = document.getElementById("d-best");
+    if (b.insufficient) { host.innerHTML = `<div class="insuff">${esc(b.reason)}</div>`; return; }
+    const color = AGENT_COLOR[b.top] || "#8b93a7";
+    const closeNote = b.close ? `<div class="why" style="color:var(--warn); margin-top:6px;">Empate técnico com ${esc(b.runnerUp)} — decisão pouco estável.</div>` : "";
+    host.innerHTML = `<div class="best-agent">
+      <div class="ring" style="background:${color}; border-color:${color}">${esc(b.top)}</div>
+      <div class="meta">
+        <div class="score">score ${b.score.toFixed(2)}</div>
+        <div class="why">
+          produtividade <b>${(b.productivity*100).toFixed(0)}%</b> ·
+          erro <b>${(b.errorRate*100).toFixed(0)}%</b> ·
+          custo médio <b>${fmtCost(b.avgCost)}</b>
+          <br>base: ${b.sampleSize} runs
+        </div>
+        ${closeNote}
+      </div>
+    </div>`;
+  }
+
+  function renderRouting(rows) {
+    const host = document.getElementById("d-routing");
+    if (!rows.length) { host.innerHTML = `<div class="insuff">Sem tarefas registradas.</div>`; return; }
+    const head = `<thead><tr>
+      <th>Tarefa</th><th>Runs</th><th>Melhor agente</th><th>Ranking</th>
+    </tr></thead>`;
+    const body = rows.map(r => {
+      if (r.insufficient) {
+        return `<tr class="insufficient"><td>${esc(r.task)}</td><td>${r.total}</td><td>dados insuficientes</td><td>${esc(r.reason)}</td></tr>`;
+      }
+      const top = r.ranking[0];
+      const rankChips = r.ranking.map((x, i) =>
+        `<span class="chip ${esc(x.agent)}"><span class="rank">${i+1}.</span><span class="dot"></span>${esc(x.agent)} · ${x.score.toFixed(2)}</span>`
+      ).join(" ");
+      return `<tr class="winner">
+        <td>${esc(r.task)}</td>
+        <td>${r.total}</td>
+        <td><span class="chip ${esc(top.agent)}"><span class="dot"></span>${esc(top.agent)}</span></td>
+        <td class="agents">${rankChips}</td>
+      </tr>`;
+    }).join("");
+    host.innerHTML = `<table class="routing-table">${head}<tbody>${body}</tbody></table>`;
+  }
+
+  function renderNextAgent(recs) {
+    const host = document.getElementById("d-next");
+    if (!recs.length) { host.innerHTML = `<div class="insuff">Sem sessões recentes.</div>`; return; }
+    // All dynamic strings are user-controlled (sid) or pre-escaped (why).
+    host.innerHTML = `<div class="next-grid">` + recs.map(r =>
+      `<div class="next-card ${esc(r.cls)}">
+        <div class="sid">${esc(r.sid)}</div>
+        <div class="rec">${esc(r.rec)}</div>
+        <div class="why">${r.why}</div>
+      </div>`
+    ).join("") + `</div>`;
+  }
+
+  function renderNoCodex(nc) {
+    const host = document.getElementById("d-nocodex");
+    if (nc.insufficient) { host.innerHTML = `<div class="insuff">${esc(nc.reason)}</div>`; return; }
+    const apparentDir = nc.deltaApparentApproval >= 0 ? "pos" : "neg";
+    const sign = nc.deltaApparentApproval >= 0 ? "+" : "";
+    const plural = nc.preventedBadOutputs > 1;
+    const outputsStr = plural ? "outputs ruins" : "output ruim";
+    const verb = plural ? "teriam" : "teria";
+    const verdict = nc.preventedBadOutputs > 0
+      ? `Sem o Codex, a taxa de aprovação <b>aparentaria</b> subir ${sign}${(nc.deltaApparentApproval*100).toFixed(1)}pp, mas pelo menos <b>${nc.preventedBadOutputs} ${outputsStr}</b> ${verb} passado sem revisão. O custo economizado (${fmtCost(nc.codexCost)}) não compensa o retrabalho evitado.`
+      : `Sem o Codex, custo cairia ${fmtCost(nc.codexCost)} e aprovação aparente subiria ${sign}${(nc.deltaApparentApproval*100).toFixed(1)}pp — mas não há sinal de que ele tenha prevenido erros concretos na janela atual.`;
+    host.innerHTML = `<div class="nocodex">
+      <div>
+        <div class="num">${fmtCost(nc.codexCost)}</div>
+        <div class="sub">custo total atribuído ao Codex</div>
+      </div>
+      <div>
+        <div class="num ${apparentDir}">${sign}${(nc.deltaApparentApproval*100).toFixed(1)}pp</div>
+        <div class="sub">mudança aparente na taxa de aprovação sem o gate do Codex</div>
+      </div>
+      <div>
+        <div class="num">${nc.disagreedCount}</div>
+        <div class="sub">discordâncias do Codex na amostra</div>
+      </div>
+      <div>
+        <div class="num pos">${nc.preventedBadOutputs}</div>
+        <div class="sub">outputs "melhorados" após passar pelo Codex</div>
+      </div>
+      <div class="verdict">${verdict}</div>
+    </div>`;
+  }
+
+  // ============================================================
+  // Tab switching + re-render
+  // ============================================================
+  const TABS = ["geral", "decisoes", "aprendizados", "analitico", "plantas"];
+  function setTab(tab, pushHash = true) {
+    if (!TABS.includes(tab)) tab = "geral";
+    if (state.activeTab === tab) return;
+    // Destroy the OLD tab's charts before hiding it so we don't leak.
+    destroyTabCharts(state.activeTab);
+
+    state.activeTab = tab;
+    for (const t of TABS) {
+      document.getElementById("tab-" + t).hidden = t !== tab;
+      const btn = document.getElementById("tabbtn-" + t);
+      const active = t === tab;
+      btn.classList.toggle("active", active);
+      btn.setAttribute("aria-selected", active ? "true" : "false");
+    }
+    if (pushHash) try { history.replaceState(null, "", "#" + tab); } catch (_) {}
+    renderActiveTab();
+  }
+
+  function renderActiveTab() {
+    ensureCache();
+    if (state.activeTab === "geral") renderGeral();
+    else if (state.activeTab === "decisoes") renderDecisoes();
+    else if (state.activeTab === "aprendizados") renderAprendizados();
+    else if (state.activeTab === "analitico") renderAnalitico();
+    else if (state.activeTab === "plantas") renderPlantas();
+    document.getElementById("filter-info").textContent =
+      `${state.filteredRuns.length} runs · ${state.aggs.sessions.length} sessões após filtros`;
+  }
+
+  // ============================================================
+  // TAB: APRENDIZADOS
+  // ============================================================
+  // `_learnings.json` is emitted by build_learnings.py. Loaded lazily on
+  // first render so we don't block the boot path.
+  state.learnings = null;
+  state.learningFilter = "all";
+
+  async function loadLearnings() {
+    try {
+      const r = await fetch("../runs/_learnings.json", { cache: "no-store" });
+      if (!r.ok) return [];
+      return await r.json();
+    } catch (_) { return []; }
+  }
+
+  async function renderAprendizados() {
+    destroyTabCharts("aprendizados");
+    if (state.learnings === null) {
+      state.learnings = await loadLearnings();
+    }
+    const data = state.learnings || [];
+    const counts = data.reduce((m, d) => { m[d.status] = (m[d.status] || 0) + 1; return m; }, {});
+    const total = data.length;
+    document.getElementById("l-counts").textContent =
+      `${total} decisões · ${counts.aprovado || 0} aprovadas · ${counts.rejeitado || 0} rejeitadas · ${counts.outro || 0} outras`;
+
+    // Summary panel (status distribution as simple bars)
+    const summary = document.getElementById("l-summary");
+    if (!total) {
+      summary.innerHTML = `<div class="insuff">Sem aprendizados extraídos. Rode <code>python observability/build_learnings.py</code> pra popular <code>runs/_learnings.json</code>.</div>`;
+      document.getElementById("l-list").innerHTML = "";
+      return;
+    }
+    const pct = (n) => ((n / total) * 100).toFixed(0) + "%";
+    const bar = (status, color) => {
+      const v = counts[status] || 0;
+      const p = total ? (v / total) * 100 : 0;
+      return `<div class="row" style="display:flex; align-items:center; gap:8px; margin:6px 0;">
+        <div style="width:90px; color:var(--muted); font-size:12px; text-transform:capitalize;">${esc(status)}</div>
+        <div style="flex:1; height:8px; background:var(--panel-2); border-radius:999px; overflow:hidden;">
+          <div style="width:${p.toFixed(1)}%; height:100%; background:${color}; border-radius:999px;"></div>
+        </div>
+        <div style="width:64px; text-align:right; font-size:12px; font-variant-numeric:tabular-nums;"><b>${v}</b> <span style="color:var(--muted)">· ${pct(v)}</span></div>
+      </div>`;
+    };
+    summary.innerHTML = bar("aprovado", "var(--ok)") + bar("rejeitado", "var(--err)") + bar("outro", "var(--warn)");
+
+    // List
+    const filtered = state.learningFilter === "all" ? data : data.filter(d => d.status === state.learningFilter);
+    const host = document.getElementById("l-list");
+    if (!filtered.length) {
+      host.innerHTML = `<div class="insuff">Nenhuma decisão no filtro atual.</div>`;
+      return;
+    }
+    host.innerHTML = filtered.map(d => `
+      <details class="learn-card ${esc(d.status)}">
+        <summary>
+          <span class="status-chip">${esc(d.verdict)}</span>
+          <div>
+            <div class="title">${esc(d.title || "(sem título)")}</div>
+            <div class="meta">${esc(d.summary || "—")}</div>
+          </div>
+          <span class="date">${esc(d.date)}</span>
+        </summary>
+        <div class="body">${esc(d.body)}</div>
+      </details>
+    `).join("");
+  }
+
+  // ============================================================
+  // TAB: PLANTAS — Oráculo / Diagnóstico
+  // ============================================================
+  // Lazy-load the oracle manifest + per-run JSONs once on first activation.
+  // `state.oracleData` caches the rendered model so re-renders are cheap.
+  // Network failures are silent: when the manifest 404s we just show the
+  // placeholder message and never retry.
+  state.oracleData = null;
+
+  async function _fetchJsonOrNull(url) {
+    try {
+      const r = await fetch(url, { cache: "no-store" });
+      if (!r.ok) return null;
+      return await r.json();
+    } catch (_) { return null; }
+  }
+
+  async function loadOracleData() {
+    const manifest = await _fetchJsonOrNull("../runs/_oracle_manifest.json");
+    if (!manifest || !Array.isArray(manifest.runs)) {
+      return { runs: [], missing: true };
+    }
+    // Fetch each run's payloads in parallel. We tolerate any single fetch
+    // failing — it just becomes a missing column in the comparison.
+    const runs = await Promise.all(manifest.runs.map(async (entry) => {
+      const name = entry && entry.name;
+      if (!name) return null;
+      const wantLlm = !!entry.has_llm;
+      const wantCub = !!entry.has_cubicasa;
+      const [llm, cub, pipe] = await Promise.all([
+        wantLlm ? _fetchJsonOrNull(`../runs/${encodeURIComponent(name)}/oracle_diagnosis_llm.json`) : null,
+        wantCub ? _fetchJsonOrNull(`../runs/cubicasa_${encodeURIComponent(name)}/cubicasa_observed.json`) : null,
+        // Pipeline counts come from observed_model.json in the same run dir.
+        // Optional — if missing we just leave the row blank.
+        _fetchJsonOrNull(`../runs/${encodeURIComponent(name)}/observed_model.json`),
+      ]);
+      return { name, llm, cub, pipe };
+    }));
+    return { runs: runs.filter(Boolean), missing: false };
+  }
+
+  function _countLen(obj, key) {
+    if (!obj) return null;
+    const v = obj[key];
+    return Array.isArray(v) ? v.length : null;
+  }
+
+  function _renderOracleCard(entry) {
+    const pipeWalls    = _countLen(entry.pipe, "walls");
+    const pipeRooms    = _countLen(entry.pipe, "rooms");
+    const pipeOpenings = _countLen(entry.pipe, "openings");
+    const cubWalls     = _countLen(entry.cub, "walls");
+    const cubRooms     = _countLen(entry.cub, "rooms");
+    const cubOpenings  = _countLen(entry.cub, "openings");
+
+    const fmtCell = (v) => v == null
+      ? `<td class="miss">—</td>`
+      : `<td>${fmtNum(v)}</td>`;
+
+    // LLM defects: tally by severity, then surface up to 3 high-severity ones.
+    const defects = (entry.llm && Array.isArray(entry.llm.defects)) ? entry.llm.defects : [];
+    const sevCounts = defects.reduce((m, d) => {
+      const k = (d && d.severity) || "low";
+      m[k] = (m[k] || 0) + 1; return m;
+    }, {});
+    const high = sevCounts.high || 0;
+    const med = sevCounts.medium || 0;
+    const low = sevCounts.low || 0;
+    const llmRow = entry.llm
+      ? `${defects.length} total · ${high} high · ${med} medium · ${low} low`
+      : `<span style="color:var(--muted); font-style:italic;">sem diagnóstico LLM</span>`;
+
+    const topHigh = defects.filter(d => d && d.severity === "high").slice(0, 3);
+    const defectItems = topHigh.length
+      ? topHigh.map(d => `
+          <li>
+            <b>${esc(d.element_id || "—")}</b><span class="kind">(${esc(d.defect_kind || "other")})</span>:
+            ${esc(d.hypothesis || "")}<span class="arrow">→</span>${esc(d.suggested_fix || "")}
+          </li>`).join("")
+      : `<li style="border-left-color:var(--muted); color:var(--muted); font-style:italic;">Nenhum defeito high-severity${entry.llm ? "" : " (LLM ausente)"}.</li>`;
+
+    return `
+      <div class="gallery-card" style="grid-column: 1 / -1;">
+        <div class="body">
+          <p class="title">${esc(entry.name)}</p>
+          <table class="oracle-counts">
+            <tr><th>Source</th><th>Walls</th><th>Rooms</th><th>Openings</th></tr>
+            <tr><td>Pipeline</td>${fmtCell(pipeWalls)}${fmtCell(pipeRooms)}${fmtCell(pipeOpenings)}</tr>
+            <tr><td>CubiCasa</td>${fmtCell(cubWalls)}${fmtCell(cubRooms)}${fmtCell(cubOpenings)}</tr>
+            <tr><td>LLM (defects)</td><td colspan="3">${llmRow}</td></tr>
+          </table>
+          <h4>Top defeitos (high severity)</h4>
+          <ul class="defect-list">${defectItems}</ul>
+        </div>
+      </div>`;
+  }
+
+  async function renderPlantas() {
+    const host = document.getElementById("oracle-runs");
+    if (!host) return;
+    if (state.oracleData === null) {
+      host.innerHTML = `<div class="empty-state">Carregando oracle…</div>`;
+      state.oracleData = await loadOracleData();
+    }
+    const data = state.oracleData;
+    if (!data || data.missing || !data.runs.length) {
+      host.innerHTML = `<div class="empty-state">Nenhum run com oracle output ainda. Rode <code>scripts/oracle/llm_architect.py --run &lt;run&gt;</code> para popular.</div>`;
+      return;
+    }
+    host.innerHTML = `<div class="gallery-grid">${data.runs.map(_renderOracleCard).join("")}</div>`;
+  }
+
+  // ============================================================
+  // Boot
+  // ============================================================
+  (async () => {
+    const meta = document.getElementById("meta");
+    const progress = document.getElementById("progress");
+    const fill = document.getElementById("progress-fill");
+    const label = document.getElementById("progress-label");
+
+    // Initial tab from hash
+    const initial = (location.hash || "#geral").replace("#", "");
+    state.activeTab = TABS.includes(initial) ? initial : "geral";
+    for (const t of TABS) {
+      document.getElementById("tab-" + t).hidden = t !== state.activeTab;
+      const btn = document.getElementById("tabbtn-" + t);
+      const active = t === state.activeTab;
+      btn.classList.toggle("active", active);
+      btn.setAttribute("aria-selected", active ? "true" : "false");
+    }
+
+    meta.textContent = "carregando…";
+    const { runs, error, failed } = await loadRuns((done, total, failedCount) => {
+      const pct = total ? (done / total * 100) : 0;
+      fill.style.width = pct + "%";
+      label.textContent = `Carregando runs ${done}/${total}…` + (failedCount ? ` (${failedCount} com falha)` : "");
+    });
+
+    if (error) {
+      progress.classList.add("hidden");
+      document.getElementById("warn").style.display = "block";
+      document.getElementById("warn").textContent = error;
+      meta.textContent = "0 runs · erro ao carregar";
+      return;
+    }
+
+    if (failed) { label.textContent = `${runs.length} runs carregados · ${failed} falharam`; }
+    else { progress.classList.add("hidden"); }
+
+    state.allRuns = runs;
+    ensureCache();
+    const sessions = state.aggs.sessions.length;
+    meta.textContent = `${sessions} sessões · ${runs.length} runs · ${new Date().toLocaleString("pt-BR")}`;
+
+    if (!runs.length) {
+      document.getElementById("warn").style.display = "block";
+      document.getElementById("warn").textContent = "Nenhum run encontrado.";
+      return;
+    }
+
+    renderActiveTab();
+
+    // ---- Event wiring ----
+    for (const t of TABS) {
+      document.getElementById("tabbtn-" + t).addEventListener("click", () => setTab(t));
+    }
+    window.addEventListener("hashchange", () => {
+      const h = (location.hash || "#geral").replace("#", "");
+      setTab(h, false);
+    });
+    window.addEventListener("keydown", (e) => {
+      if (e.target && /input|select|textarea/i.test(e.target.tagName)) return;
+      if (e.key === "1") setTab("geral");
+      if (e.key === "2") setTab("decisoes");
+      if (e.key === "3") setTab("aprendizados");
+      if (e.key === "4") setTab("analitico");
+    });
+
+    // Aprendizados filter pills (delegated listener)
+    document.getElementById("l-filters").addEventListener("click", (e) => {
+      const btn = e.target.closest(".learn-pill");
+      if (!btn) return;
+      state.learningFilter = btn.dataset.filter;
+      for (const p of document.querySelectorAll("#l-filters .learn-pill")) {
+        p.classList.toggle("active", p === btn);
+      }
+      renderAprendizados();
+    });
+
+    document.getElementById("filter-agent").addEventListener("change", (e) => {
+      state.filterAgent = e.target.value;
+      state.filterKey = ""; // invalidate cache
+      renderActiveTab();
+    });
+    document.getElementById("filter-sort").addEventListener("change", (e) => {
+      state.filterSort = e.target.value;
+      // Sort only affects sessions list in Geral — no need to invalidate agg cache.
+      if (state.activeTab === "geral") renderSessions(state.filteredRuns);
+    });
+
+    // Top-tasks sort interactions
+    document.querySelectorAll("#a-top-tasks th[data-sort]").forEach(th => {
+      th.addEventListener("click", () => {
+        const tbody = document.querySelector("#a-top-tasks tbody");
+        const k = th.dataset.sort;
+        if (tbody.dataset.sortKey === k) tbody.dataset.sortDir = tbody.dataset.sortDir === "asc" ? "desc" : "asc";
+        else { tbody.dataset.sortKey = k; tbody.dataset.sortDir = "desc"; }
+        renderTopTasks(state.aggs.byTask);
+      });
+    });
+  })();
+
+  // Self-validation: log duplicate-id and unreferenced-canvas issues once.
+  (function validate(){
+    const ids = [...document.querySelectorAll("[id]")].map(e => e.id);
+    const dup = ids.filter((id, i) => ids.indexOf(id) !== i);
+    if (dup.length) console.warn("[dashboard] IDs duplicados:", [...new Set(dup)]);
+  })();
+
+  // ------------------------- PDF (print dialog) -------------------------
+  // The dashboard is a single SPA, so the cleanest "export as PDF" is to use
+  // the browser's own print pipeline. We:
+  //   1. render BOTH tabs so the PDF covers the whole report
+  //   2. open every <details> so all runs are visible
+  //   3. trigger print (user picks "Salvar como PDF")
+  //   4. restore the prior state in the afterprint event
+  async function handleDownloadPdf() {
+    const btn = document.getElementById("btn-pdf");
+    if (!btn || btn.disabled) return;
+    btn.disabled = true; btn.textContent = "Preparando…";
+    const prevTab = state.activeTab;
+    const tabEls = Object.fromEntries(TABS.map(t => [t, document.getElementById("tab-" + t)]));
+    const prevHidden = Object.fromEntries(TABS.map(t => [t, tabEls[t].hidden]));
+
+    // Force-render each tab so Chart.js lays out once for every canvas.
+    try {
+      for (const t of TABS) {
+        if (state.activeTab !== t) { setTab(t, false); await new Promise(r => setTimeout(r, 250)); }
+      }
+      // Expand every session for the printed view.
+      const allDetails = document.querySelectorAll("details.session");
+      const previouslyOpen = new Set();
+      allDetails.forEach(d => { if (d.open) previouslyOpen.add(d); else d.open = true; });
+
+      // Reveal all tab panels for the print pass. @media print rules already
+      // force .tab-panel to display, but we also clear the `hidden` attribute
+      // so Chart.js finalises layout for any hidden canvas.
+      for (const t of TABS) tabEls[t].hidden = false;
+
+      // Force charts to relayout to the now-visible width.
+      try {
+        for (const group of Object.values(state.charts)) {
+          for (const c of Object.values(group)) c.resize && c.resize();
+        }
+      } catch (_) {}
+
+      await new Promise(r => setTimeout(r, 200));
+
+      const restore = () => {
+        for (const t of TABS) tabEls[t].hidden = prevHidden[t];
+        allDetails.forEach(d => { if (!previouslyOpen.has(d)) d.open = false; });
+        // Return to the tab the user was on.
+        if (state.activeTab !== prevTab) setTab(prevTab, false);
+        btn.disabled = false; btn.innerHTML = pdfBtnInnerHtml;
+        window.removeEventListener("afterprint", restore);
+      };
+      window.addEventListener("afterprint", restore);
+      window.print();
+      // Safari/Firefox: afterprint may fire synchronously on close. Restore
+      // anyway after a grace period if it didn't.
+      setTimeout(() => { if (btn.disabled) restore(); }, 1500);
+    } catch (e) {
+      console.error("pdf export failed", e);
+      btn.disabled = false; btn.innerHTML = pdfBtnInnerHtml;
+    }
+  }
+  // Capture the original button markup so we can restore it after printing.
+  const pdfBtnInnerHtml = document.getElementById("btn-pdf")?.innerHTML || "Baixar PDF";
+  document.getElementById("btn-pdf")?.addEventListener("click", handleDownloadPdf);
+  </script>
+</body>
+</html>
