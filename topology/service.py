@@ -35,6 +35,7 @@ def build_topology(
     filter_wall_interior: bool = False,
     wall_thickness: float | None = None,
     filter_triangle_artifacts: bool = False,
+    filter_room_noise: bool = False,
 ) -> tuple[list[SplitWall], list[Junction], list[Room], ConnectivityReport]:
     """Build topology from classified walls.
 
@@ -50,12 +51,27 @@ def build_topology(
       Clean baselines (p10/p11/p12) should produce identical hashes
       across semantically equivalent algorithm refactors — the hash
       is the regression gate for F1.
+
+    Filter flags layer additively (each implies all weaker filters):
+      - ``filter_wall_interior=True`` -> wall_interior + room_noise + triangle
+        (SVG path: aggressive, requires double-drawn wall geometry)
+      - ``filter_room_noise=True`` -> room_noise + triangle
+        (raster path: drops slivers, narrow medium polygons; preserves
+        corridors via aspect>3 + short>=1.5*thickness exception)
+      - ``filter_triangle_artifacts=True`` -> triangle only
+        (legacy raster: only 3-vertex artefacts dropped)
     """
     if filter_wall_interior and wall_thickness is None:
         raise ValueError(
             "filter_wall_interior=True requires wall_thickness to be provided "
             "(got None); pass the median wall thickness in the same units as "
             "the wall coordinates."
+        )
+    if filter_room_noise and wall_thickness is None:
+        raise ValueError(
+            "filter_room_noise=True requires wall_thickness to be provided; "
+            "pass the median wall thickness in the same units as the wall "
+            "coordinates."
         )
     if filter_triangle_artifacts and wall_thickness is None:
         raise ValueError(
@@ -122,6 +138,7 @@ def build_topology(
         filter_wall_interior=filter_wall_interior,
         wall_thickness_override=wall_thickness,
         filter_triangle_artifacts=filter_triangle_artifacts,
+        filter_room_noise=filter_room_noise,
     )
     report = _build_connectivity_report_aggregate(
         total_nodes=total_nodes,
@@ -427,6 +444,7 @@ def _polygonize_rooms_with_threshold(
     filter_wall_interior: bool = False,
     wall_thickness_override: float | None = None,
     filter_triangle_artifacts: bool = False,
+    filter_room_noise: bool = False,
 ) -> tuple[list[Room], float]:
     """Same as ``_polygonize_rooms`` but also returns the area floor
     used for the last page processed. Callers that only need rooms
@@ -456,32 +474,28 @@ def _polygonize_rooms_with_threshold(
         if not polygons:
             continue
 
-        # Double-wall sliver filter: polygons whose minimum rotated
-        # rectangle has a short side <= wall_thickness * margin are the
-        # gap between the two faces of a double-drawn wall, not rooms.
-        # Opt-in (build_topology(filter_wall_interior=True, ...)). Runs
-        # BEFORE min_area so audit reports reflect the true drop cause.
-        if filter_wall_interior and wall_thickness_override is not None:
-            polygons = [
-                poly
-                for poly in polygons
-                if not is_wall_interior(poly, wall_thickness_override)
-            ]
-            polygons = [
-                poly
-                for poly in polygons
-                if not is_room_noise(poly, wall_thickness_override)
-            ]
-            polygons = [
-                poly
-                for poly in polygons
-                if not is_triangle_artifact(poly, wall_thickness_override)
-            ]
-            if not polygons:
-                continue
-        elif filter_triangle_artifacts and wall_thickness_override is not None:
-            # Triangle filter alone (universal — depends only on wall_thickness,
-            # not on SVG-specific calibration). Safe to enable on raster too.
+        # Post-polygonize filters layer additively, each implying the
+        # weaker ones. Run BEFORE min_area so audit reports reflect the
+        # true drop cause.
+        #   wall_interior  : SVG path only — assumes double-drawn walls.
+        #   room_noise     : drops slivers + narrow medium polygons,
+        #                    preserves corridors via aspect/short rule.
+        #   triangle       : drops 3-vertex wedges below thickness^2*30.
+        if wall_thickness_override is not None and (
+            filter_wall_interior or filter_room_noise or filter_triangle_artifacts
+        ):
+            if filter_wall_interior:
+                polygons = [
+                    poly
+                    for poly in polygons
+                    if not is_wall_interior(poly, wall_thickness_override)
+                ]
+            if filter_wall_interior or filter_room_noise:
+                polygons = [
+                    poly
+                    for poly in polygons
+                    if not is_room_noise(poly, wall_thickness_override)
+                ]
             polygons = [
                 poly
                 for poly in polygons
