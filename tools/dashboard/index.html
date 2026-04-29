@@ -704,6 +704,14 @@
             </div>
           </div>
           <div class="gallery-card featured">
+            <a href="assets/plantas/12_postfix_room_noise_overlay.png" target="_blank"><div class="img-wrap"><img src="assets/plantas/12_postfix_room_noise_overlay.png" alt="Pos-fix room_noise overlay" loading="lazy"></div></a>
+            <div class="body">
+              <p class="title">Pós <code>filter_room_noise</code> (24 rooms)</p>
+              <p class="desc">Branch <code>feat/raster-room-noise-filter</code> commit <code>ceec361</code>. 230 walls · <strong>24 rooms</strong> · 1 componente · 0 warnings · geom=0.919, topo=1.0. Slivers/narrow polygons (R23, R30, R16, R17, R18, R19) eliminados pelo filtro <code>is_room_noise</code> habilitado no path raster.</p>
+              <p class="meta">runs/postfix_2026-04-29/overlay_audited.png</p>
+            </div>
+          </div>
+          <div class="gallery-card featured">
             <a href="assets/plantas/08_validation_f1.png" target="_blank"><div class="img-wrap"><img src="assets/plantas/08_validation_f1.png" alt="F1 validation" loading="lazy"></div></a>
             <div class="body">
               <p class="title">Validação F1 (openings)</p>
@@ -742,6 +750,14 @@
               <p class="title">v3 (baseline) → v5 (filtro)</p>
               <p class="desc">v3 mantinha 22 ruídos colineares; v5 com <code>+filtro is_wall_interior</code> reduz para 15 legítimos + 0 ruído.</p>
               <p class="meta">svg_poc/compare_v3_v5.png</p>
+            </div>
+          </div>
+          <div class="gallery-card featured">
+            <a href="assets/plantas/13_compare_pre_pos_room_noise.png" target="_blank"><div class="img-wrap"><img src="assets/plantas/13_compare_pre_pos_room_noise.png" alt="Pre vs pos room_noise" loading="lazy"></div></a>
+            <div class="body">
+              <p class="title">PDF / pré-fix (30 rooms) / pós <code>filter_room_noise</code> (24 rooms)</p>
+              <p class="desc">Side-by-side 3-way: PDF original · raster pre-fix com sliver wedges · raster pos-fix com filtro room_noise habilitado. 6 polygons sliver/narrow eliminados (R23 940u² · R30 1696u² · R16 1291u² · R17 1148u² · R18 3618u² · R19 1924u²) que o filtro 3-vertex apenas não capturava.</p>
+              <p class="meta">runs/postfix_2026-04-29/comparison_pdf_pre_pos.png · 2026-04-29</p>
             </div>
           </div>
         </div>
