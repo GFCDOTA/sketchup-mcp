@@ -32,12 +32,39 @@ def _mrr_edges(polygon: Polygon) -> tuple[float, float] | None:
     return edges[0], edges[-1]
 
 
-def is_wall_interior(polygon: Polygon, wall_thickness: float, margin: float = 1.5) -> bool:
+def is_wall_interior(
+    polygon: Polygon,
+    wall_thickness: float,
+    margin: float = 1.5,
+    sliver_aspect: float = 5.0,
+    sliver_margin: float = 6.0,
+) -> bool:
+    """Drop polygons that are wall-band slivers.
+
+    Two cases trigger the drop, both thickness-scaled so the rule is
+    PDF-agnostic:
+
+      1. ``short <= wall_thickness * margin`` (default 1.5): the polygon
+         is squeezed between two near-identical walls, the classic
+         double-drawn wall artefact.
+      2. ``short <= wall_thickness * sliver_margin`` (default 6.0) AND
+         ``aspect >= sliver_aspect`` (default 5.0): an elongated sliver
+         that survives parallel_dedup because the two source walls are
+         just outside the dedup tolerance. Aspect>=5 separates these
+         from genuine narrow rooms (lavabo ~ 1:2, hallway ~ 1:4).
+    """
     edges = _mrr_edges(polygon)
     if edges is None:
         return False
-    short, _long = edges
-    return short <= wall_thickness * margin
+    short, long = edges
+    if short <= wall_thickness * margin:
+        return True
+    if short <= 0:
+        return True
+    aspect = long / short
+    if short <= wall_thickness * sliver_margin and aspect >= sliver_aspect:
+        return True
+    return False
 
 
 def is_triangle_artifact(

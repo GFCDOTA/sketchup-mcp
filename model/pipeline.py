@@ -153,8 +153,6 @@ def _run_pipeline(
     walls = classify_walls(candidates, dedup_report_sink=dedup_report_sink)
     dedup_report = dedup_report_sink[0] if dedup_report_sink else None
     walls, openings = detect_openings(walls, peitoris=peitoris)
-    room_topology_sink: list = []
-    snapshot_hash_sink: list[str] = []
     # Median wall thickness drives the post-polygonize noise filters.
     # Raster path enables filter_room_noise (room_noise + triangle):
     # drops both slivers and 3-vertex wedges from polygonize artefacts.
@@ -164,6 +162,20 @@ def _run_pipeline(
         sorted(w.thickness for w in walls if w.thickness > 0)[len(walls) // 2]
         if walls else None
     )
+    # Drop walls belonging to disconnected annotations: legenda, mapa-da-
+    # torre, carimbo, rodape — every PDF de planta de venda has them and
+    # they were producing 6-15 phantom rooms on top of the real floor
+    # plan. Run BEFORE build_topology so polygonize only sees apartment
+    # walls. Buffer-based connectivity at thickness/2 matches the snap
+    # tolerance the topology layer would otherwise have applied.
+    main_component_report = None
+    if raster_wall_thickness is not None and walls:
+        from topology.main_component_filter import select_main_component
+        walls, main_component_report = select_main_component(
+            walls, snap_tolerance=raster_wall_thickness / 2
+        )
+    room_topology_sink: list = []
+    snapshot_hash_sink: list[str] = []
     # Raster path enables both pre-split passes:
     #   - rectify_to_orientation: collapse the H/V jitter that
     #     classify._orientation labels but the Hough endpoints retain.
@@ -171,11 +183,17 @@ def _run_pipeline(
     #   - parallel_dedup_factor=0.5: fuse the inner+outer line of
     #     double-drawn walls. 0.5 of median_thickness keeps genuinely
     #     parallel walls (separated by >= 1 thickness) intact.
+    # filter_wall_interior catches the sliver polygons that survive when
+    # parallel_dedup leaves two walls just outside its tolerance:
+    # polygonize then closes a thin "wall-thickness" band between them
+    # which the visual debug had been showing as a phantom "room".
+    # Enabled together with rectify_to_orientation so the assumption of
+    # near-axis-aligned walls in is_wall_interior holds.
     split_walls, junctions, rooms, connectivity_report = build_topology(
         walls,
         room_topology_report_sink=room_topology_sink,
         snapshot_hash_sink=snapshot_hash_sink,
-        filter_room_noise=raster_wall_thickness is not None,
+        filter_wall_interior=raster_wall_thickness is not None,
         wall_thickness=raster_wall_thickness,
         rectify_to_orientation=True,
         parallel_dedup_factor=0.5,
