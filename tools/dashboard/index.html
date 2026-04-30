@@ -720,6 +720,22 @@
             </div>
           </div>
           <div class="gallery-card featured">
+            <a href="assets/plantas/17_post_rectify_render_top.png" target="_blank"><div class="img-wrap"><img src="assets/plantas/17_post_rectify_render_top.png" alt="Top pós-rectify+dedup" loading="lazy"></div></a>
+            <div class="body">
+              <p class="title">Vista de topo pós <code>rectify + parallel_dedup</code></p>
+              <p class="desc">Branch <code>feat/raster-room-noise-filter</code>. <strong>201 walls · 28 rooms · 71 openings</strong>. Pipeline raster ganhou dois passes pré-split em <code>topology.service</code>: <code>rectify_to_orientation</code> (collapse das walls H/V ao midpoint do label, eliminando 5-15° de jitter Hough) + <code>parallel_dedup_factor=0.5</code> (funde as duplas inner/outer da mesma parede). Resultado: <strong>100% das walls agora estritamente H ou V</strong> (vs 41% antes) e 29 walls duplicadas eliminadas. Os rooms-trapézio sumiram porque <code>polygonize</code> agora opera sobre wall lines coerentes.</p>
+              <p class="meta">runs/post_rectify_v2/preview_top.png · 2026-04-30</p>
+            </div>
+          </div>
+          <div class="gallery-card featured">
+            <a href="assets/plantas/17_post_rectify_render_axon.png" target="_blank"><div class="img-wrap"><img src="assets/plantas/17_post_rectify_render_axon.png" alt="Axon Blender pós-rectify" loading="lazy"></div></a>
+            <div class="body">
+              <p class="title">Axonometria 3D (Blender headless) pós-rectify</p>
+              <p class="desc">Render via <code>scripts/preview/render_blender.py</code> em Blender 5.1 <code>--background</code>. Walls extrudadas em mesh real, sem triângulos no topo (que antes denunciavam o jitter). Esse pipeline 3D já está disponível e independe da bridge Ruby/SketchUp da Fase 6.</p>
+              <p class="meta">runs/post_rectify_v2 · blender --background --python render_blender.py -- --mode axon</p>
+            </div>
+          </div>
+          <div class="gallery-card featured">
             <a href="assets/plantas/08_validation_f1.png" target="_blank"><div class="img-wrap"><img src="assets/plantas/08_validation_f1.png" alt="F1 validation" loading="lazy"></div></a>
             <div class="body">
               <p class="title">Validação F1 (openings)</p>
