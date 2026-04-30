@@ -81,10 +81,11 @@ def test_raster_byte_identical_on_planta_74(tmp_path):
     # Known-good sha. Updated on schema bumps that legitimately rewrite the
     # output (e.g. 2.1.0 -> 2.2.0 added metadata.openings_refinement docs
     # and the schema_version string itself changed).
-    # Last regenerated: 2026-04-29, after enabling filter_room_noise on raster
-    # path (planta_74.pdf rooms 30 -> 24 with 6 narrow/tiny slivers dropped on
-    # top of the previous triangle-only filter).
-    EXPECTED_SHA = "3151da689d573d02b590885eb4f4d679acab6813516a24ed09564b6a1303b237"
+    # Last regenerated: 2026-04-30, after enabling rectify_to_orientation +
+    # parallel_dedup_factor=0.5 on raster path (planta_74.pdf walls 230 -> 201
+    # with parallel-collapse, rooms 24 -> 28, and angular jitter eliminated:
+    # 100% of output walls are now strictly H or V, vs 41% before).
+    EXPECTED_SHA = "5480ee65ba315c0b5e2788e463f0ead6d2d32d85e56bb719fb967e80f52aee66"
     assert sha == EXPECTED_SHA, (
         f"planta_74.pdf model sha changed: {sha[:16]}... (expected {EXPECTED_SHA[:16]}...). "
         "Raster path regressed - investigate model/pipeline.py:_run_pipeline changes."

@@ -164,12 +164,21 @@ def _run_pipeline(
         sorted(w.thickness for w in walls if w.thickness > 0)[len(walls) // 2]
         if walls else None
     )
+    # Raster path enables both pre-split passes:
+    #   - rectify_to_orientation: collapse the H/V jitter that
+    #     classify._orientation labels but the Hough endpoints retain.
+    #     Without this the trapezoidal-room artefact is unavoidable.
+    #   - parallel_dedup_factor=0.5: fuse the inner+outer line of
+    #     double-drawn walls. 0.5 of median_thickness keeps genuinely
+    #     parallel walls (separated by >= 1 thickness) intact.
     split_walls, junctions, rooms, connectivity_report = build_topology(
         walls,
         room_topology_report_sink=room_topology_sink,
         snapshot_hash_sink=snapshot_hash_sink,
         filter_room_noise=raster_wall_thickness is not None,
         wall_thickness=raster_wall_thickness,
+        rectify_to_orientation=True,
+        parallel_dedup_factor=0.5,
     )
     room_topology_report = room_topology_sink[0] if room_topology_sink else None
     topology_snapshot_sha256 = snapshot_hash_sink[0] if snapshot_hash_sink else None

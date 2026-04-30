@@ -36,6 +36,8 @@ def build_topology(
     wall_thickness: float | None = None,
     filter_triangle_artifacts: bool = False,
     filter_room_noise: bool = False,
+    rectify_to_orientation: bool = False,
+    parallel_dedup_factor: float | None = None,
 ) -> tuple[list[SplitWall], list[Junction], list[Room], ConnectivityReport]:
     """Build topology from classified walls.
 
@@ -60,6 +62,24 @@ def build_topology(
         corridors via aspect>3 + short>=1.5*thickness exception)
       - ``filter_triangle_artifacts=True`` -> triangle only
         (legacy raster: only 3-vertex artefacts dropped)
+
+    Pre-split passes (raster path on by default once enabled by caller):
+      - ``rectify_to_orientation=True``: each input ``Wall`` whose
+        declared ``orientation`` is horizontal/vertical has its endpoints
+        collapsed to the perpendicular midpoint, removing 5-15 degree
+        jitter that otherwise propagates through ``_split_walls`` (which
+        assumes pure H/V) and produces trapezoidal rooms after polygonize.
+        Diagonal walls (orientation neither H nor V, or large declared
+        deviation) pass through unchanged.
+      - ``parallel_dedup_factor`` (``None`` to disable, otherwise a float
+        in (0, 1.5] interpreted as a multiple of the median ``Wall``
+        thickness): adjacent parallel walls within
+        ``factor * median_thickness`` perpendicular and overlapping in
+        the parallel direction are merged into a single wall whose
+        perpendicular coordinate is the cluster centroid and whose
+        parallel range is the union of input ranges. Use 0.5 to merge
+        the inner+outer line of a double-drawn wall while preserving
+        genuinely parallel walls separated by at least one thickness.
     """
     if filter_wall_interior and wall_thickness is None:
         raise ValueError(
@@ -83,6 +103,13 @@ def build_topology(
     if snap_tolerance is None:
         snap_tolerance = _infer_snap_tolerance(walls)
 
+    # Pre-split rectify + parallel dedup (raster path). Each is
+    # opt-in so SVG path and existing tests stay byte-identical.
+    if rectify_to_orientation:
+        walls = _rectify_walls_to_orientation(walls)
+    if parallel_dedup_factor is not None and walls:
+        walls = _collapse_parallel_walls(walls, factor=parallel_dedup_factor)
+
     epsilon = _SMART_SPLIT_EPSILON_RATIO * snap_tolerance / 1.5  # = 0.75 * median
     split_walls = _split_walls_at_intersections(walls, epsilon=epsilon)
     split_walls = _snap_endpoints(split_walls, snap_tolerance)
@@ -92,6 +119,18 @@ def build_topology(
     # information stays intact even after we merge colinear segments
     # for the wall-output list.
     output_walls = _merge_colinear_segments(split_walls)
+
+    # _snap_endpoints clusters endpoints by axis-aligned proximity and
+    # MIXES H/V endpoints, so a horizontal wall whose endpoint sat near
+    # a vertical wall's endpoint can come out of merge with start.y !=
+    # end.y — re-introducing the jitter that ``rectify_to_orientation``
+    # tried to remove. A final pass on the output list, scoped to the
+    # already-decided orientation tag, restores strict H/V geometry.
+    # Junctions/rooms keep using split_walls (pre-merge), so this only
+    # affects what callers see as ``walls`` in observed_model.
+    if rectify_to_orientation:
+        output_walls = _rectify_split_walls_to_orientation(output_walls)
+        output_walls = [w for w in output_walls if w.start != w.end]
 
     by_page: dict[int, list[SplitWall]] = {}
     for wall in split_walls:
@@ -162,6 +201,251 @@ def build_topology(
         )
 
     return output_walls, junctions, rooms, report
+
+
+def _rectify_walls_to_orientation(walls: list[Wall]) -> list[Wall]:
+    """Collapse each H/V-labeled wall to strict horizontal or vertical.
+
+    Walls produced by the raster path carry an ``orientation`` label
+    derived in ``classify._orientation`` from whichever span dominates,
+    but their endpoints frequently retain 5-15 degree jitter from the
+    underlying Hough fit. ``_split_walls_at_intersections`` and
+    ``_intersection_point`` downstream assume *pure* horizontal/vertical
+    geometry — they read ``horizontal.start[1]`` as the wall's y-line
+    even when ``end[1]`` differs by 8 pixels. The mismatch is what
+    produces the trapezoidal rooms after ``polygonize``: each room
+    polygon traces wall lines with inconsistent perpendicular offsets.
+
+    The fix is to make the geometry agree with the label *before* the
+    pipeline relies on it. For each wall:
+
+      - ``horizontal`` -> y = (start.y + end.y) / 2 for both endpoints
+      - ``vertical``   -> x = (start.x + end.x) / 2 for both endpoints
+      - other          -> kept as-is (genuine diagonals: corner cuts,
+        staircases, scenic walls — must not be silently flattened).
+
+    Why midpoint and not min/max: midpoint is unbiased w.r.t. which
+    Hough sample produced which endpoint. Using min/max would
+    systematically shift the wall toward one neighbor and break tee
+    junctions.
+
+    Returns a NEW list of ``Wall`` instances; inputs are unchanged.
+    """
+    rectified: list[Wall] = []
+    for wall in walls:
+        orientation = (wall.orientation or "").lower()
+        if orientation == "horizontal":
+            ymid = (wall.start[1] + wall.end[1]) / 2.0
+            new_start = (round(wall.start[0], 3), round(ymid, 3))
+            new_end = (round(wall.end[0], 3), round(ymid, 3))
+        elif orientation == "vertical":
+            xmid = (wall.start[0] + wall.end[0]) / 2.0
+            new_start = (round(xmid, 3), round(wall.start[1], 3))
+            new_end = (round(xmid, 3), round(wall.end[1], 3))
+        else:
+            rectified.append(wall)
+            continue
+        if new_start == new_end:
+            # Wall collapsed to a point under rectification (very short
+            # wall whose perpendicular jitter exceeded its parallel
+            # length). Drop — it was noise, not a real wall.
+            continue
+        rectified.append(
+            Wall(
+                wall_id=wall.wall_id,
+                page_index=wall.page_index,
+                start=new_start,
+                end=new_end,
+                thickness=wall.thickness,
+                orientation=wall.orientation,
+                source=wall.source,
+                confidence=wall.confidence,
+            )
+        )
+    return rectified
+
+
+def _rectify_split_walls_to_orientation(walls: list[SplitWall]) -> list[SplitWall]:
+    """SplitWall variant of :func:`_rectify_walls_to_orientation`.
+
+    Applied AFTER ``_merge_colinear_segments`` to undo the jitter that
+    ``_snap_endpoints`` re-introduces when it clusters H and V endpoints
+    in the same axis-aligned tolerance band. This pass is purely
+    cosmetic for the output list — junctions/rooms reference the
+    pre-merge ``split_walls`` and are not affected.
+    """
+    out: list[SplitWall] = []
+    for wall in walls:
+        orientation = (wall.orientation or "").lower()
+        if orientation == "horizontal":
+            ymid = (wall.start[1] + wall.end[1]) / 2.0
+            new_start = (round(wall.start[0], 3), round(ymid, 3))
+            new_end = (round(wall.end[0], 3), round(ymid, 3))
+        elif orientation == "vertical":
+            xmid = (wall.start[0] + wall.end[0]) / 2.0
+            new_start = (round(xmid, 3), round(wall.start[1], 3))
+            new_end = (round(xmid, 3), round(wall.end[1], 3))
+        else:
+            out.append(wall)
+            continue
+        out.append(
+            SplitWall(
+                wall_id=wall.wall_id,
+                parent_wall_id=wall.parent_wall_id,
+                page_index=wall.page_index,
+                start=new_start,
+                end=new_end,
+                thickness=wall.thickness,
+                orientation=wall.orientation,
+                source=wall.source,
+                confidence=wall.confidence,
+            )
+        )
+    return out
+
+
+def _collapse_parallel_walls(
+    walls: list[Wall], *, factor: float
+) -> list[Wall]:
+    """Merge adjacent parallel walls inside a thickness-derived band.
+
+    The raster path emits both the inner and outer line of every
+    double-drawn wall as separate ``Wall`` entries. They share the
+    same ``orientation`` and lie within ~ 1 thickness of each other
+    perpendicular-wise, with parallel ranges that often overlap by
+    >50 percent. The ``_merge_colinear_segments`` pass downstream
+    cannot fuse them (it requires shared endpoints, not just
+    parallelism), so polygonize sees twice as many lines as needed and
+    every room's edge is bracketed by two near-identical walls.
+
+    Algorithm (per page, per orientation):
+      1. Compute a per-page median thickness, ``T``. Skip the page if
+         the candidate set is empty or all thicknesses are zero.
+      2. Sort walls by perpendicular coordinate.
+      3. Scan; group walls whose perpendicular distance to the running
+         cluster centroid stays within ``factor * T`` AND whose
+         parallel range overlaps any wall in the cluster.
+      4. Emit one ``Wall`` per cluster: perpendicular coord =
+         cluster centroid (length-weighted), parallel range =
+         union of cluster ranges, thickness = max in cluster,
+         orientation = group orientation.
+    """
+    if not walls:
+        return walls
+    by_page: dict[int, list[Wall]] = defaultdict(list)
+    for w in walls:
+        by_page[w.page_index].append(w)
+    out: list[Wall] = []
+    for page_walls in by_page.values():
+        thicknesses = sorted(w.thickness for w in page_walls if w.thickness > 0)
+        if not thicknesses:
+            out.extend(page_walls)
+            continue
+        median_t = thicknesses[len(thicknesses) // 2]
+        tol = max(1.0, median_t) * factor
+
+        by_orient: dict[str, list[Wall]] = defaultdict(list)
+        for w in page_walls:
+            by_orient[(w.orientation or "").lower()].append(w)
+
+        for orient, group in by_orient.items():
+            if orient not in ("horizontal", "vertical"):
+                # Diagonals are not deduped (no single perpendicular axis).
+                out.extend(group)
+                continue
+            out.extend(_collapse_parallel_group(group, orient, tol))
+    return out
+
+
+def _collapse_parallel_group(
+    group: list[Wall], orientation: str, tol: float
+) -> list[Wall]:
+    if not group:
+        return []
+
+    def perp(w: Wall) -> float:
+        # After rectify both endpoints share the perpendicular coord;
+        # without rectify we use the midpoint to absorb jitter.
+        return (
+            (w.start[1] + w.end[1]) / 2.0
+            if orientation == "horizontal"
+            else (w.start[0] + w.end[0]) / 2.0
+        )
+
+    def para_range(w: Wall) -> tuple[float, float]:
+        if orientation == "horizontal":
+            lo = min(w.start[0], w.end[0])
+            hi = max(w.start[0], w.end[0])
+        else:
+            lo = min(w.start[1], w.end[1])
+            hi = max(w.start[1], w.end[1])
+        return lo, hi
+
+    ordered = sorted(group, key=perp)
+    clusters: list[list[Wall]] = []
+    centroids: list[float] = []
+    for w in ordered:
+        wp = perp(w)
+        wlo, whi = para_range(w)
+        attached = False
+        for idx, cluster in enumerate(clusters):
+            if abs(wp - centroids[idx]) > tol:
+                continue
+            # Require parallel-range overlap with at least one cluster member.
+            if any(_ranges_overlap(para_range(c), (wlo, whi)) for c in cluster):
+                cluster.append(w)
+                # Update centroid as length-weighted mean (longer walls
+                # carry more signal about the true line).
+                total_w = sum((para_range(c)[1] - para_range(c)[0]) for c in cluster) or 1.0
+                centroids[idx] = sum(
+                    perp(c) * (para_range(c)[1] - para_range(c)[0]) for c in cluster
+                ) / total_w
+                attached = True
+                break
+        if not attached:
+            clusters.append([w])
+            centroids.append(wp)
+
+    merged: list[Wall] = []
+    for cluster, centroid in zip(clusters, centroids):
+        if len(cluster) == 1:
+            merged.append(cluster[0])
+            continue
+        ranges = [para_range(c) for c in cluster]
+        lo = min(r[0] for r in ranges)
+        hi = max(r[1] for r in ranges)
+        thickness = max(c.thickness for c in cluster)
+        # Pick a representative (highest confidence, longest range).
+        rep = max(
+            cluster,
+            key=lambda c: (
+                c.confidence or 0.0,
+                para_range(c)[1] - para_range(c)[0],
+            ),
+        )
+        if orientation == "horizontal":
+            new_start = (round(lo, 3), round(centroid, 3))
+            new_end = (round(hi, 3), round(centroid, 3))
+        else:
+            new_start = (round(centroid, 3), round(lo, 3))
+            new_end = (round(centroid, 3), round(hi, 3))
+        merged.append(
+            Wall(
+                wall_id=rep.wall_id,
+                page_index=rep.page_index,
+                start=new_start,
+                end=new_end,
+                thickness=thickness,
+                orientation=orientation,
+                source=rep.source,
+                confidence=min(c.confidence for c in cluster),
+            )
+        )
+    return merged
+
+
+def _ranges_overlap(a: tuple[float, float], b: tuple[float, float]) -> bool:
+    return not (a[1] < b[0] or b[1] < a[0])
 
 
 def _infer_snap_tolerance(walls: list[Wall]) -> float:
