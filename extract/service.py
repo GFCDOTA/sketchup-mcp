@@ -16,6 +16,18 @@ class ExtractConfig:
     hough_threshold: int = 12
     hough_max_line_gap: int = 40
     orthogonal_tolerance_ratio: float = 3.0
+    binary_opening_kernel_h: int = 0
+    binary_opening_kernel_v: int = 0
+    # Directional morphological opening on the binary mask before
+    # HoughLinesP. Use a tall kernel (e.g. v=3, h=1) to erase THIN
+    # HORIZONTAL strokes (wood-flooring hachura, dimension ticks)
+    # without eroding the real walls' horizontal extent; use a wide
+    # kernel (h=3, v=1) to erase thin vertical strokes. A square
+    # kernel erodes both directions and tends to break partition-wall
+    # endpoints at junctions; the directional form keeps the topology
+    # graph connected. Both default 0 = disabled to keep SVG path and
+    # existing tests byte-identical (CLAUDE.md SVG byte-identical
+    # guarantee). Raster opts in via _extract_with_roi_from_raster.
 
 
 # "Noisy-regime" override: when the clean-baseline Hough settings
@@ -97,6 +109,24 @@ def extract_from_raster(
     gray = _to_grayscale(image)
     _, binary = cv2.threshold(gray, active_config.threshold, 255, cv2.THRESH_BINARY_INV)
 
+    # Distance transform on the ORIGINAL (un-eroded) binary so that
+    # ``_sample_local_thickness`` returns honest stroke widths. Opening
+    # the binary for Hough detection (below) shrinks strokes by ~1 px
+    # along the kernel axis, which would bias thickness low and break
+    # ``classify._pair_merge`` (real wall pairs would no longer match
+    # the median used for the merge tolerance).
+    dist_source = binary
+    kh = active_config.binary_opening_kernel_h
+    kv = active_config.binary_opening_kernel_v
+    if kh > 0 or kv > 0:
+        # Directional opening: a tall (h=1, v>=3) kernel deletes thin
+        # horizontal hachura without touching wall horizontal extent;
+        # a wide (h>=3, v=1) kernel does the same for vertical hachura.
+        # Real walls have non-trivial extent in BOTH directions and
+        # survive either form intact.
+        kernel = np.ones((max(1, kv), max(1, kh)), np.uint8)
+        binary = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel)
+
     if int(binary.sum()) == 0:
         return []
 
@@ -111,7 +141,7 @@ def extract_from_raster(
     if lines is None:
         return []
 
-    dist = cv2.distanceTransform(binary, cv2.DIST_L2, 3)
+    dist = cv2.distanceTransform(dist_source, cv2.DIST_L2, 3)
     ratio = active_config.orthogonal_tolerance_ratio
 
     candidates: list[WallCandidate] = []

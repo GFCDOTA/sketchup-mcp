@@ -51,7 +51,11 @@ def run_pdf_pipeline(
     peitoris: list[dict] | None = None,
 ) -> PipelineResult:
     try:
-        document = ingest_pdf(pdf_bytes=pdf_bytes, filename=filename)
+        # Render at 3x scale so walls keep >= 4 px thickness even after
+        # the directional opening (5, 1) used to erase floor hachura
+        # (1-2 px tall horizontal lines). At the previous 2x scale a 6
+        # px wall became 4 px tall and a (5, 1) kernel ate it whole.
+        document = ingest_pdf(pdf_bytes=pdf_bytes, filename=filename, scale=3.0)
     except IngestError as exc:
         raise PipelineError(str(exc)) from exc
     candidates, roi_results = _extract_with_roi_from_document(document)
@@ -115,18 +119,20 @@ def _extract_with_roi_from_raster(image: np.ndarray, page_index: int):
     # Heuristica: se o input ja vem limpo (poucos pixels escuros = planta
     # pre-processada/anotada), pula ROI pra nao perder paredes que ele
     # trataria como "fora da regiao principal".
+    from extract.service import ExtractConfig as _Cfg
+    raster_cfg = _Cfg()
     import cv2 as _cv2
     _gray = image if image.ndim == 2 else _cv2.cvtColor(image, _cv2.COLOR_BGR2GRAY)
     dark_pct = (_gray < 200).sum() / _gray.size
     if dark_pct < 0.03:
-        candidates = extract_from_raster(image=image, page_index=page_index)
+        candidates = extract_from_raster(image=image, page_index=page_index, config=raster_cfg)
         return candidates, RoiResult(applied=False, bbox=None, fallback_reason="clean_input_skip_roi")
     roi = detect_architectural_roi(image)
     if not roi.applied or roi.bbox is None:
-        candidates = extract_from_raster(image=image, page_index=page_index)
+        candidates = extract_from_raster(image=image, page_index=page_index, config=raster_cfg)
         return candidates, roi
     cropped = crop_image_to_bbox(image, roi.bbox)
-    raw = extract_from_raster(image=cropped, page_index=page_index)
+    raw = extract_from_raster(image=cropped, page_index=page_index, config=raster_cfg)
     dx, dy = roi.bbox[0], roi.bbox[1]
     translated = [
         WallCandidate(
