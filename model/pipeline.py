@@ -197,6 +197,7 @@ def _run_pipeline(
         wall_thickness=raster_wall_thickness,
         rectify_to_orientation=True,
         parallel_dedup_factor=0.5,
+        floor_hachura=True,
     )
     room_topology_report = room_topology_sink[0] if room_topology_sink else None
     topology_snapshot_sha256 = snapshot_hash_sink[0] if snapshot_hash_sink else None

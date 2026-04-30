@@ -38,6 +38,7 @@ def build_topology(
     filter_room_noise: bool = False,
     rectify_to_orientation: bool = False,
     parallel_dedup_factor: float | None = None,
+    floor_hachura: bool = False,
 ) -> tuple[list[SplitWall], list[Junction], list[Room], ConnectivityReport]:
     """Build topology from classified walls.
 
@@ -178,6 +179,7 @@ def build_topology(
         wall_thickness_override=wall_thickness,
         filter_triangle_artifacts=filter_triangle_artifacts,
         filter_room_noise=filter_room_noise,
+        floor_hachura=floor_hachura,
     )
     report = _build_connectivity_report_aggregate(
         total_nodes=total_nodes,
@@ -729,6 +731,7 @@ def _polygonize_rooms_with_threshold(
     wall_thickness_override: float | None = None,
     filter_triangle_artifacts: bool = False,
     filter_room_noise: bool = False,
+    floor_hachura: bool = False,
 ) -> tuple[list[Room], float]:
     """Same as ``_polygonize_rooms`` but also returns the area floor
     used for the last page processed. Callers that only need rooms
@@ -772,7 +775,11 @@ def _polygonize_rooms_with_threshold(
                 polygons = [
                     poly
                     for poly in polygons
-                    if not is_wall_interior(poly, wall_thickness_override)
+                    if not is_wall_interior(
+                        poly,
+                        wall_thickness_override,
+                        floor_hachura=floor_hachura,
+                    )
                 ]
             if filter_wall_interior or filter_room_noise:
                 polygons = [

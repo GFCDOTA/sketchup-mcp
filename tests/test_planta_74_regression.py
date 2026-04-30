@@ -65,13 +65,18 @@ def test_planta_74_connectivity_is_single_component(planta_74_run: dict) -> None
 
 
 def test_planta_74_room_count_within_post_hardening_range(planta_74_run: dict) -> None:
-    # Pre-hardening: 16 rooms, many semantically fragmented. Post-
-    # hardening: 48, with visible over-polygonization in borders
-    # (thin triangular slivers around R2/R7/R12/R14). A later topology
-    # filter will bring this back toward ~16. Range captures both
-    # states so regressions in either direction flag.
+    # Pre-hardening: 16 rooms, many semantically fragmented.
+    # Mid-hardening (sliver only): 23, with horizontal floor-hachura
+    # strips in SUITE 01 / SUITE 02 / TERRAÇO surviving as "rooms".
+    # Post-floor-hachura filter (is_wall_interior with floor_hachura=True):
+    # 11, matching the 11 named spaces of the 74 m² apartment
+    # (COZINHA, AS, SALA JANTAR/ESTAR, LAVABO, BANHO 02, SUITE 01,
+    # BANHO 01, SUITE 02, TERRAÇO TÉCNICO, TERRAÇO SOCIAL, plus the
+    # connecting hallway). Lower bound 8 catches regressions that
+    # over-merge rooms; upper bound 16 catches regressions that re-
+    # admit hachura strips.
     rooms = planta_74_run["rooms"]
-    assert 16 <= len(rooms) <= 60, f"rooms={len(rooms)}"
+    assert 8 <= len(rooms) <= 16, f"rooms={len(rooms)}"
 
 
 def test_planta_74_no_disconnected_warning(planta_74_run: dict) -> None:
