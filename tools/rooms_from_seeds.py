@@ -106,23 +106,19 @@ def detect_rooms(consensus: dict, labels: list[dict],
     cv2.rectangle(mask, (0, 0), (W - 1, H - 1), 255, 1)
 
     if use_voronoi:
-        # Plant a Voronoi tessellation between label seeds: each white
-        # pixel is assigned to its nearest seed. This separates rooms
-        # that flood-fill would merge because of missing partition
-        # walls (e.g. an open kitchen + dining room split into two
-        # rooms based on which label is closer). The wall mask still
-        # acts as a hard barrier — we tessellate only the white space.
-        # We also clip to the planta interior (the convex hull of the
-        # wall network) so that rooms don't extend off the building
+        # Watershed segmentation: each label seed expands outward
+        # through white space until it meets another room's expansion.
+        # Walls act as hard barriers (markers ignore them). This
+        # tracks actual wall geometry instead of Voronoi straight
+        # bisectors — rooms hug the walls. Clipped to the convex hull
+        # of the wall network so rooms don't bleed off the building
         # footprint where exterior peitoril is unwalled.
         seed_pts = [to_px(l["seed_pt"][0], l["seed_pt"][1]) for l in labels]
 
         # Build interior mask: convex hull of wall pixels
         wall_pts = np.column_stack(np.where(mask > 0))
         if len(wall_pts) > 0:
-            # cv2 convex hull expects (x, y); wall_pts is (row=y, col=x)
-            yx = wall_pts
-            xy = yx[:, ::-1].astype(np.int32)
+            xy = wall_pts[:, ::-1].astype(np.int32)
             hull = cv2.convexHull(xy)
             interior = np.zeros_like(mask)
             cv2.fillPoly(interior, [hull], 255)
@@ -130,26 +126,28 @@ def detect_rooms(consensus: dict, labels: list[dict],
             interior = np.full_like(mask, 255)
         # Build a label image: -1 where wall, 0..N-1 where assigned.
         white = (mask == 0).astype(np.uint8)
-        # cv2 distanceTransformWithLabels assigns each white pixel to
-        # the nearest "zero" pixel — but seeds need to be the only
-        # zeros. Make a seed-only image.
-        seed_img = np.full_like(white, 255)
+        # cv2.watershed: 3-channel image input, markers as int32 with
+        # one positive ID per seed and 0 elsewhere; walls are -1
+        # afterwards. Seeds expand outward through low-gradient regions
+        # — using the wall mask itself as the gradient image makes
+        # watershed treat walls as ridges and rooms as basins.
+        markers = np.zeros(mask.shape, np.int32)
         for i, (sx, sy) in enumerate(seed_pts):
-            if 0 <= sx < W and 0 <= sy < H and white[sy, sx]:
-                seed_img[sy, sx] = 0
-        _, label_img = cv2.distanceTransformWithLabels(
-            seed_img, cv2.DIST_L2, 3, cv2.DIST_LABEL_PIXEL,
-        )
-        # Apply the wall mask: walls become label 0 (sentinel).
-        label_img = label_img.astype(np.int32)
-        label_img[mask > 0] = 0
-        # Map cv2's label IDs back to our seed indices via probing.
-        cv_label_to_seed = {}
-        for i, (sx, sy) in enumerate(seed_pts):
-            if 0 <= sx < W and 0 <= sy < H:
-                lbl = int(label_img[sy, sx])
-                if lbl > 0:
-                    cv_label_to_seed[lbl] = i
+            if 0 <= sx < W and 0 <= sy < H and mask[sy, sx] == 0:
+                cv2.circle(markers, (sx, sy), 2, i + 1, -1)
+        # Mark walls with a sentinel positive id outside seed range so
+        # watershed treats them as their own region (we filter later).
+        WALL_MARKER = len(seed_pts) + 100
+        markers[mask > 0] = WALL_MARKER
+        gradient = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
+        cv2.watershed(gradient, markers)
+        # cv2.watershed marks watershed boundaries with -1; rooms are
+        # 1..N, walls are WALL_MARKER. Build label_img.
+        label_img = markers.copy()
+        # Watershed boundaries (-1) belong to walls visually
+        label_img[label_img == -1] = 0
+        label_img[label_img == WALL_MARKER] = 0
+        cv_label_to_seed = {i + 1: i for i in range(len(seed_pts))}
 
         rooms: list[dict] = []
         for cv_lbl, seed_i in cv_label_to_seed.items():
