@@ -63,6 +63,28 @@ def rasterize_walls(walls: list[dict], bridges: list[dict], t: float,
     return mask, to_px, from_px
 
 
+def add_soft_barriers(mask: np.ndarray, to_px,
+                      barriers: list[dict], thickness_px: int = 2) -> np.ndarray:
+    """Rasterise polylines from soft_barriers onto the mask.
+
+    These are non-structural elements (peitoril, grade, building
+    outline traces) that bound rooms but are NOT load-bearing walls.
+    They seal terraço regions for watershed without polluting the
+    structural wall list. Drawn at a thin pixel width since they
+    represent thin lines in the source, not solid bands.
+    """
+    out = mask.copy()
+    for b in barriers:
+        pts = b.get("polyline_pts", [])
+        if len(pts) < 2:
+            continue
+        for i in range(len(pts) - 1):
+            p1 = to_px(pts[i][0], pts[i][1])
+            p2 = to_px(pts[i + 1][0], pts[i + 1][1])
+            cv2.line(out, p1, p2, 255, thickness_px)
+    return out
+
+
 def flood_room(mask: np.ndarray, seed_px: tuple[int, int]) -> np.ndarray | None:
     """Returns a binary mask of the connected white region containing
     ``seed_px``, or None if seed sits on a wall pixel.
@@ -81,14 +103,30 @@ def flood_room(mask: np.ndarray, seed_px: tuple[int, int]) -> np.ndarray | None:
     return (flooded == 128).astype(np.uint8) * 255
 
 
-def mask_to_polygon(mask: np.ndarray, from_px) -> list[list[float]] | None:
+def mask_to_polygon(mask: np.ndarray, from_px,
+                    simplify_tolerance: float = 0.5) -> list[list[float]] | None:
+    """Extract the room contour as a polygon and Douglas-Peucker
+    simplify to drop sub-pixel jagged vertices. ``simplify_tolerance``
+    is in PDF points; 0.5 ≈ wall-thickness/10 keeps rectangles axis-
+    aligned and shaves the staircase artefacts contour-following
+    introduces around 1-2px walls."""
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL,
                                    cv2.CHAIN_APPROX_TC89_L1)
     if not contours:
         return None
     cnt = max(contours, key=cv2.contourArea)
-    poly = [list(from_px(int(p[0][0]), int(p[0][1]))) for p in cnt]
-    return poly
+    poly_pts = [from_px(int(p[0][0]), int(p[0][1])) for p in cnt]
+    if simplify_tolerance > 0 and len(poly_pts) >= 4:
+        try:
+            from shapely.geometry import Polygon as _Poly
+            poly = _Poly(poly_pts)
+            if poly.is_valid:
+                simp = poly.simplify(simplify_tolerance, preserve_topology=True)
+                if simp.is_valid and not simp.is_empty:
+                    poly_pts = list(simp.exterior.coords)
+        except Exception:
+            pass
+    return [list(p) for p in poly_pts]
 
 
 def detect_rooms(consensus: dict, labels: list[dict],
@@ -100,6 +138,12 @@ def detect_rooms(consensus: dict, labels: list[dict],
 
     bridges = _detect_door_bridges(walls, t, door_min, door_max)
     mask, to_px, from_px = rasterize_walls(walls, bridges, t, region, scale)
+
+    # Apply soft barriers AFTER filtering: peitoril/grade traces with
+    # bbox not overlapping any wall (filter done in build step).
+    soft_barriers = consensus.get("soft_barriers", [])
+    if soft_barriers:
+        mask = add_soft_barriers(mask, to_px, soft_barriers, thickness_px=2)
 
     # Border seal so a leaked flood is contained at envelope edges.
     H, W = mask.shape

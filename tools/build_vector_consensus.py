@@ -171,6 +171,90 @@ def _planta_bbox(walls: list[WallSeg], margin: float = 10.0) -> tuple[float, flo
 
 # ----- main ---------------------------------------------------------------
 
+def _bbox_overlaps_any_wall(bbox: tuple[float, float, float, float],
+                             walls: list["WallSeg"], t: float) -> bool:
+    """Returns True if the path bbox overlaps any wall rectangle by
+    more than 50% of its area. Walls are wider than they are tall (or
+    vice versa) — a stroked outline of a wall has the same bbox as the
+    wall itself, so we use overlap-fraction not bbox-equality."""
+    bl, bb, br, bt = bbox
+    barea = max(0.0, (br - bl) * (bt - bb))
+    if barea <= 0:
+        return False
+    for w in walls:
+        s, e = w.start, w.end
+        if w.orientation == "h":
+            x0, x1 = sorted([s[0], e[0]])
+            cy = s[1]
+            wl, wb, wr, wt = x0, cy - t / 2, x1, cy + t / 2
+        else:
+            cx = s[0]
+            y0, y1 = sorted([s[1], e[1]])
+            wl, wb, wr, wt = cx - t / 2, y0, cx + t / 2, y1
+        ix0 = max(bl, wl); iy0 = max(bb, wb)
+        ix1 = min(br, wr); iy1 = min(bt, wt)
+        if ix1 > ix0 and iy1 > iy0:
+            inter = (ix1 - ix0) * (iy1 - iy0)
+            if inter / barea > 0.50:
+                return True
+    return False
+
+
+def _extract_building_outline(page, region: tuple[float, float, float, float],
+                               walls: list["WallSeg"], thickness: float,
+                               top_n: int = 8) -> list[list[tuple[float, float]]]:
+    """Pull peitoril/parapet outline polylines (NON-STRUCTURAL).
+
+    The architect renders the building's exterior boundary as
+    STROKED-only paths. We collect top-N stroked paths by bbox area
+    and KEEP only those that don't overlap the structural walls — a
+    wall-edge stroked path traces the wall and would pollute room
+    detection, while the peitoril/grade outline runs along the
+    exterior where there are no walls.
+    """
+    cands = []
+    for obj in page.get_objects():
+        if obj.type != 2:
+            continue
+        l, b, r, t = obj.get_pos()
+        cx, cy = (l + r) / 2.0, (b + t) / 2.0
+        if not (region[0] <= cx <= region[2] and region[1] <= cy <= region[3]):
+            continue
+        raw = obj.raw
+        fm = ctypes.c_int(0)
+        st = ctypes.c_int(0)
+        pdfium_c.FPDFPath_GetDrawMode(raw, ctypes.byref(fm), ctypes.byref(st))
+        if fm.value != 0 or not st.value:
+            continue
+        nseg = pdfium_c.FPDFPath_CountSegments(raw)
+        bbox = (l, b, r, t)
+        bbox_area = (r - l) * (t - b)
+        if bbox_area < 1500:  # skip small fixtures, dimension lines
+            continue
+        if _bbox_overlaps_any_wall(bbox, walls, thickness):
+            continue
+        cands.append({
+            "obj": obj, "raw": raw, "bbox": bbox, "bbox_area": bbox_area, "nseg": nseg,
+        })
+    cands.sort(key=lambda c: -c["bbox_area"])
+
+    polylines: list[list[tuple[float, float]]] = []
+    for cand in cands[:top_n]:
+        m = cand["obj"].get_matrix()
+        ma, mb, mc, md, me, mf = m.get()
+        pts: list[tuple[float, float]] = []
+        for i in range(cand["nseg"]):
+            seg = pdfium_c.FPDFPath_GetPathSegment(cand["raw"], i)
+            x = ctypes.c_float(0)
+            y = ctypes.c_float(0)
+            pdfium_c.FPDFPathSegment_GetPoint(seg, ctypes.byref(x), ctypes.byref(y))
+            px = ma * x.value + mc * y.value + me
+            py = mb * x.value + md * y.value + mf
+            pts.append((px, py))
+        polylines.append(pts)
+    return polylines
+
+
 def build(pdf_path: Path, out_path: Path) -> dict:
     pdf = pdfium.PdfDocument(str(pdf_path))
     page = pdf[0]
@@ -191,6 +275,9 @@ def build(pdf_path: Path, out_path: Path) -> dict:
         return {}
 
     region = _planta_bbox(walls)
+    wall_thickness = statistics.median([w.thickness for w in walls])
+    soft_barriers = _extract_building_outline(page, region, walls,
+                                              wall_thickness, top_n=8)
 
     consensus = {
         "schema_version": "1.0.0",
@@ -211,9 +298,14 @@ def build(pdf_path: Path, out_path: Path) -> dict:
         ],
         "openings": [],   # filled in by a downstream gap-detection pass
         "rooms": [],      # filled in by polygonize pass
+        "soft_barriers": [
+            {"id": f"sb{i:03d}", "polyline_pts": [list(p) for p in pts]}
+            for i, pts in enumerate(soft_barriers)
+        ],
         "metadata": {
             "extractor": "vector",
             "wall_count": len(walls),
+            "soft_barrier_count": len(soft_barriers),
         },
     }
     out_path.parent.mkdir(parents=True, exist_ok=True)
