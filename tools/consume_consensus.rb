@@ -12,8 +12,7 @@
 
 require 'json'
 
-PT_TO_M = 0.0254 / 8.0      # 1 PDF pt at this drawing scale ≈ 3.5 cm
-                             # (calibrated: wall thickness 5.4 pt = 19 cm)
+PT_TO_M = 0.19 / 5.4        # calibrated: wall thickness 5.4 pt -> 19 cm
 M_TO_IN = 39.3700787402
 PT_TO_IN = PT_TO_M * M_TO_IN
 
@@ -35,7 +34,7 @@ def pdf_pt_to_su_pt(x, y)
   Geom::Point3d.new(x * PT_TO_IN, y * PT_TO_IN, 0.0)
 end
 
-def add_wall_volume(entities, wall, thickness_pt)
+def add_wall_volume(parent_entities, wall, thickness_pt, material)
   start_pt = wall['start']
   end_pt   = wall['end']
   ori = wall['orientation']
@@ -61,11 +60,19 @@ def add_wall_volume(entities, wall, thickness_pt)
     ]
   end
   pts = corners_pdf.map { |p| pdf_pt_to_su_pt(*p) }
-  face = entities.add_face(pts)
+  # Wrap each wall in its own Group so pushpull merging on adjacent
+  # walls cannot delete refs we still hold.
+  group = parent_entities.add_group
+  group.name = wall['id'] if wall['id']
+  face = group.entities.add_face(pts)
+  return nil if face.nil?
   face.reverse! if face.normal.z < 0
   face.pushpull(WALL_HEIGHT_IN)
-  group = nil
-  face
+  group.entities.grep(Sketchup::Face).each do |fc|
+    fc.material = material
+    fc.back_material = material
+  end
+  group
 end
 
 def add_floor_face(entities, room, color)
@@ -134,11 +141,7 @@ def main
   wall_mat.color = Sketchup::Color.new(*WALL_FILL_RGB)
 
   walls.each do |w|
-    f = add_wall_volume(ents, w, thickness_pt)
-    next if f.nil?
-    f.parent.entities.grep(Sketchup::Face).each do |fc|
-      fc.material = wall_mat unless fc.material
-    end
+    add_wall_volume(ents, w, thickness_pt, wall_mat)
   end
 
   rooms = data['rooms'] || []
@@ -156,9 +159,12 @@ def main
   model.commit_operation
   status = model.save(out)
   puts "[consume] saved -> #{out} (status=#{status})"
-  Sketchup.exit_code = 0
-  Sketchup.send_action('cmd_quit:')  rescue nil
-  Sketchup.quit                      rescue nil
+  # Frame the build: zoom extents + iso view
+  begin
+    Sketchup.send_action('viewIso:')
+    Sketchup.active_model.active_view.zoom_extents
+  rescue
+  end
 end
 
 begin
@@ -166,6 +172,4 @@ begin
 rescue => e
   puts "[ERR] #{e.class}: #{e.message}"
   e.backtrace.each { |l| puts "  #{l}" }
-  Sketchup.exit_code = 1
-  Sketchup.quit rescue nil
 end
