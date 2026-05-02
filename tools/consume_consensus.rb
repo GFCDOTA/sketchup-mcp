@@ -94,7 +94,37 @@ def add_floor_face(entities, room, color)
   end
 end
 
-def add_parapet(entities, polyline_pts, parapet_material, layer, thickness_in: 1.5)
+def _wall_footprints_in(walls, thickness_pt)
+  # Pre-compute every wall's [xmin, ymin, xmax, ymax] footprint in SU
+  # inches, so add_parapet can reject segments whose midpoint sits
+  # inside a wall (= peitoril coincident with the building perimeter,
+  # which renders as a "papel-de-parede" band on the wall).
+  half = thickness_pt / 2.0
+  walls.map do |w|
+    sx, sy = w['start']
+    ex, ey = w['end']
+    if w['orientation'] == 'h'
+      x0, x1 = [sx, ex].minmax
+      y0, y1 = sy - half, sy + half
+    else
+      x0, x1 = sx - half, sx + half
+      y0, y1 = [sy, ey].minmax
+    end
+    [x0 * PT_TO_IN, y0 * PT_TO_IN, x1 * PT_TO_IN, y1 * PT_TO_IN]
+  end
+end
+
+def _midpoint_inside_any?(p1, p2, footprints, tol_in: 0.5)
+  mx = (p1.x + p2.x) / 2.0
+  my = (p1.y + p2.y) / 2.0
+  footprints.any? do |x0, y0, x1, y1|
+    mx >= x0 - tol_in && mx <= x1 + tol_in &&
+      my >= y0 - tol_in && my <= y1 + tol_in
+  end
+end
+
+def add_parapet(entities, polyline_pts, parapet_material, layer,
+                thickness_in: 1.5, wall_footprints: nil)
   return if polyline_pts.length < 2
   polyline_pts.each_cons(2).with_index do |(a, b), idx|
     next if a == b
@@ -104,6 +134,13 @@ def add_parapet(entities, polyline_pts, parapet_material, layer, thickness_in: 1
     dy = p2.y - p1.y
     len = Math.sqrt(dx * dx + dy * dy)
     next if len < 0.01
+    # Drop parapet segments whose midpoint sits inside a wall footprint
+    # — those are the perimeter of the building outline that the
+    # vector extractor catches as soft_barrier, not real peitoris. They
+    # were rendering as a 1.10m-tall "wallpaper" band on the wall.
+    if wall_footprints && _midpoint_inside_any?(p1, p2, wall_footprints)
+      next
+    end
     nx = -dy / len * (thickness_in / 2.0)
     ny =  dx / len * (thickness_in / 2.0)
     quad = [
@@ -194,8 +231,10 @@ def main
   parapet_mat.color = Sketchup::Color.new(*PARAPET_RGB)
   barriers = data['soft_barriers'] || []
   puts "[consume] soft_barriers: #{barriers.length}"
+  wall_footprints = _wall_footprints_in(walls, thickness_pt)
   barriers.each do |b|
-    add_parapet(ents, b['polyline_pts'], parapet_mat, parapets_layer)
+    add_parapet(ents, b['polyline_pts'], parapet_mat, parapets_layer,
+                wall_footprints: wall_footprints)
   end
 
   model.commit_operation
