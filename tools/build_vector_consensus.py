@@ -255,7 +255,7 @@ def _extract_building_outline(page, region: tuple[float, float, float, float],
     return polylines
 
 
-def build(pdf_path: Path, out_path: Path) -> dict:
+def build(pdf_path: Path, out_path: Path, *, detect_openings: bool = False) -> dict:
     pdf = pdfium.PdfDocument(str(pdf_path))
     page = pdf[0]
     page_w, page_h = page.get_size()
@@ -296,7 +296,7 @@ def build(pdf_path: Path, out_path: Path) -> dict:
             }
             for w in walls
         ],
-        "openings": [],   # filled in by a downstream gap-detection pass
+        "openings": [],   # populated below from arc paths if detect_openings=True
         "rooms": [],      # filled in by polygonize pass
         "soft_barriers": [
             {"id": f"sb{i:03d}", "polyline_pts": [list(p) for p in pts]}
@@ -308,9 +308,21 @@ def build(pdf_path: Path, out_path: Path) -> dict:
             "soft_barrier_count": len(soft_barriers),
         },
     }
+    if detect_openings:
+        try:
+            from tools.extract_openings_vector import enrich_consensus
+        except ImportError:
+            from extract_openings_vector import enrich_consensus  # type: ignore
+        try:
+            enrich_consensus(consensus, pdf_path)
+            consensus["metadata"]["opening_count"] = len(consensus["openings"])
+        except Exception as exc:
+            print(f"[warn] opening detection failed: {exc}", file=sys.stderr)
+
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(consensus, indent=2))
-    print(f"[ok] {len(walls)} walls -> {out_path}")
+    op_msg = f", {len(consensus['openings'])} openings" if detect_openings else ""
+    print(f"[ok] {len(walls)} walls{op_msg} -> {out_path}")
     return consensus
 
 
@@ -318,5 +330,9 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("pdf", type=Path)
     ap.add_argument("--out", type=Path, default=Path("runs/vector/consensus_model.json"))
+    ap.add_argument("--detect-openings", action="store_true",
+                    help="run arc-based opening detection inline (default off; "
+                         "prefer running tools.extract_openings_vector after "
+                         "tools.polygonize_rooms so openings + rooms coexist)")
     args = ap.parse_args()
-    build(args.pdf, args.out)
+    build(args.pdf, args.out, detect_openings=args.detect_openings)
