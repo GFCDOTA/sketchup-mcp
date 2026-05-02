@@ -1,0 +1,82 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sketchup-mcp"
+version = "0.1.0"
+description = "Floor-plan PDF -> observed_model.json pipeline, with optional MCP server."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Proprietary" }
+authors = [{ name = "Felipe (GFCDOTA)" }]
+keywords = ["sketchup", "floor-plan", "pdf", "extraction", "mcp"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: POSIX :: Linux",
+  "Topic :: Scientific/Engineering :: Image Recognition",
+]
+
+dependencies = [
+  "fastapi>=0.115,<1.0",
+  "uvicorn[standard]>=0.30,<1.0",
+  "numpy>=1.26,<3.0",
+  "opencv-python-headless>=4.10,<5.0",
+  "pypdfium2>=4.30,<5.0",
+  "shapely>=2.0,<3.0",
+  "networkx>=3.3,<4.0",
+  "pydantic>=2.8,<3.0",
+  "jsonschema>=4.0",
+  "mcp>=1.27,<2.0",
+]
+
+[project.optional-dependencies]
+dl = [
+  "anthropic>=0.39",
+  "torch>=2.1",
+  "torchvision>=0.16",
+  "gdown>=5.1",
+  "scikit-image>=0.22",
+]
+dev = [
+  "pytest>=8.3,<9.0",
+  "ruff",
+]
+
+[project.scripts]
+sketchup-mcp-server = "sketchup_mcp_server.server:main"
+
+[project.urls]
+Repository = "https://github.com/GFCDOTA/sketchup-mcp"
+
+[tool.setuptools.packages.find]
+include = [
+  "model*",
+  "extract*",
+  "classify*",
+  "openings*",
+  "topology*",
+  "ingest*",
+  "debug*",
+  "roi*",
+  "api*",
+  "sketchup_mcp_server*",
+]
+exclude = [
+  "tests*",
+  "tools*",
+  "scripts*",
+  "runs*",
+  "vendor*",
+  "docs*",
+  "patches*",
+  "validator*",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-ra"
