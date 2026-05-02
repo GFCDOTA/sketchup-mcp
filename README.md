@@ -2,6 +2,10 @@
 
 Microservico novo, desacoplado de legado, para extrair geometria observada de plantas em PDF e produzir um modelo canônico auditável.
 
+> **Setup em outra máquina + visão de arquitetura completa:** [`OVERVIEW.md`](OVERVIEW.md).
+> Documento canônico de onboarding/handoff. Lê primeiro se você está chegando
+> agora ou levando o repo pra outra máquina.
+
 ## Objetivo
 
 O pipeline foi separado em estagios independentes e testaveis:
