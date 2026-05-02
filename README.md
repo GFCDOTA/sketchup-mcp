@@ -151,6 +151,57 @@ Para executar os testes sinteticos:
 pytest
 ```
 
+## Install como package
+
+A partir do `pyproject.toml` da raiz, em ambiente Python >= 3.11:
+
+```bash
+pip install -e .            # core: pipeline + FastAPI + MCP server
+pip install -e ".[dl]"      # extras: torch + CubiCasa5K oracle
+pip install -e ".[dev]"     # extras: pytest + ruff
+```
+
+Console scripts instalados:
+
+- `sketchup-mcp-server` — MCP stdio server (ver secao MCP abaixo)
+
+CLI legado (`python main.py extract <pdf>`) continua funcionando inalterado.
+
+## MCP server
+
+O repo expoe um [Model Context Protocol](https://modelcontextprotocol.io) server stdio que disponibiliza o pipeline como tool nativa para Claude Code, Codex, Cursor e outros clientes MCP.
+
+### Setup no Claude Code
+
+Adicione em `~/.claude/settings.json` (ou `.claude/mcp.json` no repo):
+
+```json
+{
+  "mcpServers": {
+    "sketchup-mcp": {
+      "command": "sketchup-mcp-server",
+      "cwd": "E:/Claude/sketchup-mcp"
+    }
+  }
+}
+```
+
+`cwd` garante que paths relativos (`runs/<stem>/`) caiam dentro do repo. Reinicie o Claude Code e rode `/mcp` para confirmar que `sketchup-mcp` aparece como `connected`.
+
+### Tools disponiveis (v1)
+
+| Tool | Descricao |
+|---|---|
+| `extract_plan(pdf_path, out_dir?)` | Roda o pipeline completo em um `.pdf` ou `.svg` e retorna `observed_model` + paths dos artefatos (`debug_walls.svg`, `debug_junctions.svg`, `connectivity_report.json`, `observed_model.json`, `overlay_audited.png`). |
+
+Exemplo:
+
+> usa a tool `sketchup-mcp.extract_plan` no arquivo `planta_74.pdf`
+
+### Tools planejadas (fora da v1)
+
+`build_vector_consensus`, `score_png`, `render_axon`, `list_runs`, `get_run_artifact`, `send_to_sketchup`. Ver `~/.claude/plans/ola-tenho-esse-projeto-breezy-finch.md` para o roadmap.
+
 ## Testes Cobertos
 
 - quadrado simples -> 1 room
