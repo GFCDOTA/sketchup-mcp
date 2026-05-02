@@ -22,7 +22,7 @@ WALL_HEIGHT_IN    = WALL_HEIGHT_M * M_TO_IN
 PARAPET_HEIGHT_IN = PARAPET_HEIGHT_M * M_TO_IN
 
 WALL_FILL_RGB    = [78, 78, 78]
-PARAPET_RGB      = [200, 220, 230]
+PARAPET_RGB      = [130, 135, 140]   # médio cinza-concreto; antes era [200,220,230] (papel-de-parede)
 ROOM_PALETTE = [
   [253, 226, 192], [200, 230, 201], [187, 222, 251], [248, 187, 208],
   [220, 237, 200], [255, 224, 178], [209, 196, 233], [179, 229, 252],
