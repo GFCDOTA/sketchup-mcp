@@ -42,7 +42,8 @@ def write_control(plugins_dir: Path, consensus: Path, out_skp: Path) -> None:
 
 def run(consensus: Path, out_skp: Path, sketchup_exe: Path,
         plugins_dir: Path = PLUGINS_DIR_DEFAULT,
-        timeout_s: int = 90) -> bool:
+        timeout_s: int = 90,
+        bootstrap_skp: Path | None = None) -> bool:
     out_skp.parent.mkdir(parents=True, exist_ok=True)
     if out_skp.exists():
         out_skp.unlink()
@@ -51,7 +52,19 @@ def run(consensus: Path, out_skp: Path, sketchup_exe: Path,
     if err_file.exists():
         err_file.unlink()
 
+    # SU2026 trial shows a Welcome dialog when launched without a
+    # positional .skp, blocking the autorun plugin from ever firing.
+    # Per memory reference_su2026_headless_invoke: pass any existing
+    # .skp positional to skip it. Default to a sibling backup if one
+    # exists, else pick the most recent .skp on disk.
+    if bootstrap_skp is None:
+        candidates = sorted(out_skp.parent.glob("*.skp"),
+                            key=lambda p: -p.stat().st_mtime)
+        bootstrap_skp = candidates[0] if candidates else None
+
     cmd = [str(sketchup_exe)]
+    if bootstrap_skp and bootstrap_skp.exists():
+        cmd.append(str(bootstrap_skp))
     print(f"[run] launching SU: {' '.join(cmd)}")
     proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL,
                             stderr=subprocess.DEVNULL,
