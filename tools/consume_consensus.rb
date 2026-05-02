@@ -94,9 +94,9 @@ def add_floor_face(entities, room, color)
   end
 end
 
-def add_parapet(entities, polyline_pts, thickness_in: 1.5)
+def add_parapet(entities, polyline_pts, parapet_material, layer, thickness_in: 1.5)
   return if polyline_pts.length < 2
-  polyline_pts.each_cons(2) do |a, b|
+  polyline_pts.each_cons(2).with_index do |(a, b), idx|
     next if a == b
     p1 = pdf_pt_to_su_pt(*a)
     p2 = pdf_pt_to_su_pt(*b)
@@ -112,11 +112,44 @@ def add_parapet(entities, polyline_pts, thickness_in: 1.5)
       Geom::Point3d.new(p2.x - nx, p2.y - ny, 0),
       Geom::Point3d.new(p1.x - nx, p1.y - ny, 0),
     ]
-    face = entities.add_face(quad) rescue nil
+    group = entities.add_group
+    group.name = "parapet_#{idx}"
+    group.layer = layer if layer
+    face = group.entities.add_face(quad) rescue nil
     next if face.nil?
     face.reverse! if face.normal.z < 0
     face.pushpull(PARAPET_HEIGHT_IN)
+    group.entities.grep(Sketchup::Face).each do |fc|
+      fc.material = parapet_material
+      fc.back_material = parapet_material
+    end
   end
+end
+
+def reset_model(model)
+  # Wipe everything that came from the template (default Sree figure,
+  # template-bundled materials/components/layers) AND from any previous
+  # consume run. Without this the same file builds 2x or 3x in place,
+  # producing wall_dark1/wall_dark2 + room_r1..r11/r12..r22 duplicates
+  # and z-fighting white seams along every wall.
+  model.entities.clear!
+  model.definitions.purge_unused
+  begin
+    model.materials.purge_unused
+  rescue
+  end
+  begin
+    # Layers API renamed to layers/tags in newer SU; either works.
+    layers = model.layers
+    layers.purge_unused if layers.respond_to?(:purge_unused)
+  rescue
+  end
+end
+
+def ensure_layer(model, name)
+  existing = model.layers[name]
+  return existing if existing
+  model.layers.add(name)
 end
 
 def main
@@ -130,8 +163,13 @@ def main
   data = JSON.parse(File.read(cjson))
 
   model = Sketchup.active_model
+  reset_model(model)
   model.start_operation('build_from_consensus', true)
   ents = model.active_entities
+
+  walls_layer    = ensure_layer(model, 'walls')
+  parapets_layer = ensure_layer(model, 'parapets')
+  rooms_layer    = ensure_layer(model, 'rooms')
 
   thickness_pt = data['wall_thickness_pts']
   walls = data['walls'] || []
@@ -141,19 +179,23 @@ def main
   wall_mat.color = Sketchup::Color.new(*WALL_FILL_RGB)
 
   walls.each do |w|
-    add_wall_volume(ents, w, thickness_pt, wall_mat)
+    grp = add_wall_volume(ents, w, thickness_pt, wall_mat)
+    grp.layer = walls_layer if grp
   end
 
   rooms = data['rooms'] || []
   puts "[consume] rooms: #{rooms.length}"
   rooms.each_with_index do |r, i|
-    add_floor_face(ents, r, ROOM_PALETTE[i % ROOM_PALETTE.length])
+    f = add_floor_face(ents, r, ROOM_PALETTE[i % ROOM_PALETTE.length])
+    f.layer = rooms_layer if f
   end
 
+  parapet_mat = model.materials.add('parapet')
+  parapet_mat.color = Sketchup::Color.new(*PARAPET_RGB)
   barriers = data['soft_barriers'] || []
   puts "[consume] soft_barriers: #{barriers.length}"
   barriers.each do |b|
-    add_parapet(ents, b['polyline_pts'])
+    add_parapet(ents, b['polyline_pts'], parapet_mat, parapets_layer)
   end
 
   model.commit_operation

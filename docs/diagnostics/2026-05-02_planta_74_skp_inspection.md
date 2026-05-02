@@ -137,3 +137,33 @@ E:/Claude/sketchup-mcp/tools/inspect_walls_report.rb" > ~/AppData/Roaming/Sketch
 "C:/Program Files/SketchUp/SketchUp 2026/SketchUp/SketchUp.exe" PATH/to/other.skp
 # JSON aparece em ~6s
 ```
+
+---
+
+## POST-FIX (2026-05-02 02:29) — fix aplicado e medido
+
+Aplicada correção em [tools/consume_consensus.rb](../../tools/consume_consensus.rb):
+1. `reset_model()` chama `entities.clear!` + `definitions.purge_unused` + `materials.purge_unused`
+2. `add_parapet()` envolve cada segmento em group nomeado e pinta com material `parapet` (PARAPET_RGB [200,220,230])
+3. Layers `walls` / `parapets` / `rooms` criadas e atribuídas a cada categoria
+
+Re-rodado `consume_consensus.rb` no `consensus_model.json` (mesmo input), inspector pós-build:
+
+| Métrica | Pre-fix | Post-fix | Resultado |
+|---|---|---|---|
+| `.skp` size | 443 KB | **248 KB** | -44% |
+| `active_entities` | 4075 | **309** | -92% |
+| `faces` | 1855 | **1085** | -41% |
+| `materials` | 57 | **13** | -77% (sem `wall_dark1/2`, sem `Sree_*`) |
+| `layers` | 1 (`Layer0`) | **4** (`walls/parapets/rooms/Layer0`) | tagged |
+| `wall_overlaps` | 20 (auto-overlap por triplicação) | **0** | ✅ |
+| `default_faces_count` | 1140 (61% das faces) | **0** | ✅ |
+| ComponentInstance `Sree` | 1 | **0** | ✅ |
+| triplicação walls | 99 wall groups (33×3) | **33** | ✅ |
+| `parapet_*_default` | 994 faces brancas | 0 (876 faces com material `parapet`) | ✅ |
+
+Render pós-fix em `runs/png_history/2026-05-02T05-30-04_5286411_axon_3d_post_fix_88ef2ba6.png` —
+sem z-fighting/seams, parapets pintados, footprint limpo.
+
+Backup do .skp pré-fix: `runs/vector/planta_74_pre_fix.skp` (443 KB) — preservado pra
+comparação visual e regression test futuro.

@@ -209,5 +209,25 @@ if __name__ == "__main__":
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--mode", choices=["axon", "top"], default="axon")
     ap.add_argument("--dpi", type=int, default=200)
+    ap.add_argument("--no-history", action="store_true",
+                    help="Skip png_history manifest registration")
+    ap.add_argument("--skp", type=Path, default=None,
+                    help="Source .skp path to record in manifest source.skp")
+    ap.add_argument("--pdf", type=Path, default=None,
+                    help="Source PDF path to record in manifest source.pdf")
     args = ap.parse_args()
     render(args.consensus, args.out, args.mode, args.dpi)
+    if not args.no_history:
+        try:
+            from png_history import register
+        except ImportError:
+            import sys
+            sys.path.insert(0, str(Path(__file__).resolve().parent))
+            from png_history import register
+        register(
+            args.out,
+            kind=f"axon_{args.mode}",
+            source={"consensus": args.consensus, "skp": args.skp, "pdf": args.pdf},
+            generator="tools/render_axon.py",
+            params={"mode": args.mode, "dpi": args.dpi},
+        )
