@@ -61,13 +61,34 @@ def extrude_polygon(xs: np.ndarray, ys: np.ndarray, z0: float, z1: float
     return faces
 
 
+DOOR_HEIGHT_M = 2.10        # standard door clearance
+DOOR_COLOR = "#f97316"      # orange — same as PDF overlay
+DOOR_FRAME_COLOR = "#c2410c"
+
+
+def _opening_chord(opening: dict, wall: dict, t_pt: float
+                   ) -> tuple[tuple[float, float], tuple[float, float]] | None:
+    """Return (start_xy_pt, end_xy_pt) of the opening's chord on its
+    host wall, in PDF point coords. Used to mark the door footprint."""
+    if not opening.get("center"):
+        return None
+    cx, cy = opening["center"]
+    width_pt = float(opening.get("opening_width_pts") or 30.0)
+    s, e = wall["start"], wall["end"]
+    if wall["orientation"] == "h":
+        return (cx - width_pt / 2, s[1]), (cx + width_pt / 2, s[1])
+    return (s[0], cy - width_pt / 2), (s[0], cy + width_pt / 2)
+
+
 def render(consensus_path: Path, out: Path, mode: str = "axon",
            dpi: int = 200) -> None:
     d = json.loads(consensus_path.read_text())
     walls = d["walls"]
     rooms = d.get("rooms", [])
     barriers = d.get("soft_barriers", [])
+    openings = d.get("openings", [])
     t_pt = d["wall_thickness_pts"]
+    walls_by_id = {w["id"]: w for w in walls}
 
     # Convert PDF pt -> meters for sensible aspect
     def conv_xy(x: float, y: float) -> tuple[float, float]:
@@ -136,6 +157,36 @@ def render(consensus_path: Path, out: Path, mode: str = "axon",
                                                       edgecolors="#5a7a8a", linewidths=0.3,
                                                       alpha=0.85))
 
+        # Openings — draw a flat orange rectangle at floor level on the
+        # wall surface, marking where consume_consensus.rb will carve a
+        # doorway. This keeps the wall extrusion visually intact (the
+        # .skp on disk still has full-height walls until rebuilt) while
+        # making the detected door positions immediately legible.
+        for op in openings:
+            wall = walls_by_id.get(op.get("wall_id"))
+            if not wall:
+                continue
+            chord = _opening_chord(op, wall, t_pt)
+            if not chord:
+                continue
+            (sx_pt, sy_pt), (ex_pt, ey_pt) = chord
+            sx, sy = sx_pt * PT_TO_M, sy_pt * PT_TO_M
+            ex, ey = ex_pt * PT_TO_M, ey_pt * PT_TO_M
+            # door footprint as a thin floor rectangle
+            tk = t_pt * PT_TO_M
+            if wall["orientation"] == "h":
+                quad = np.array([[sx, sy - tk / 2], [ex, sy - tk / 2],
+                                 [ex, sy + tk / 2], [sx, sy + tk / 2]])
+            else:
+                quad = np.array([[sx - tk / 2, sy], [sx + tk / 2, sy],
+                                 [sx + tk / 2, ey], [sx - tk / 2, ey]])
+            xs, ys = quad[:, 0], quad[:, 1]
+            # tiny lift off floor (z=0.005) to avoid z-fighting with rooms
+            faces = extrude_polygon(xs, ys, 0.005, DOOR_HEIGHT_M)
+            ax.add_collection3d(Poly3DCollection(
+                faces, facecolors=DOOR_COLOR,
+                edgecolors=DOOR_FRAME_COLOR, linewidths=0.6, alpha=0.55))
+
         # View setup: tight footprint, isometric-ish camera
         all_xy = []
         for w in walls:
@@ -185,6 +236,27 @@ def render(consensus_path: Path, out: Path, mode: str = "axon",
                               closed=True, facecolor=WALL_TOP,
                               edgecolor="#3d3325", linewidth=0.5)
             ax.add_patch(poly)
+        # openings: orange swatches over the wall they sit on
+        for op in openings:
+            wall = walls_by_id.get(op.get("wall_id"))
+            if not wall:
+                continue
+            chord = _opening_chord(op, wall, t_pt)
+            if not chord:
+                continue
+            (sx_pt, sy_pt), (ex_pt, ey_pt) = chord
+            sx, sy = sx_pt * PT_TO_M, sy_pt * PT_TO_M
+            ex, ey = ex_pt * PT_TO_M, ey_pt * PT_TO_M
+            tk = t_pt * PT_TO_M
+            if wall["orientation"] == "h":
+                quad = [(sx, sy - tk / 2), (ex, sy - tk / 2),
+                        (ex, sy + tk / 2), (sx, sy + tk / 2)]
+            else:
+                quad = [(sx - tk / 2, sy), (sx + tk / 2, sy),
+                        (sx + tk / 2, ey), (sx - tk / 2, ey)]
+            ax.add_patch(MplPolygon(quad, closed=True, facecolor=DOOR_COLOR,
+                                    edgecolor=DOOR_FRAME_COLOR, linewidth=0.7,
+                                    alpha=0.85))
         for b in barriers:
             pts = b.get("polyline_pts", [])
             if len(pts) < 2:
