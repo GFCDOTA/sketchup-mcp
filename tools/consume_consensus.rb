@@ -114,12 +114,25 @@ def _wall_footprints_in(walls, thickness_pt)
   end
 end
 
-def _midpoint_inside_any?(p1, p2, footprints, tol_in: 0.5)
-  mx = (p1.x + p2.x) / 2.0
-  my = (p1.y + p2.y) / 2.0
+def _segment_overlaps_wall?(p1, p2, footprints, tol_in: 1.0)
+  # Sample 3 points (p1, midpoint, p2) and reject the segment if ANY of
+  # them sits inside a wall footprint (within tol_in inches). Earlier
+  # version sampled only the midpoint with tol_in=0.5, which let two
+  # families through:
+  #   1. long segments crossing a wall whose midpoint landed outside
+  #   2. peitoris running parallel to the exterior wall face, offset
+  #      ~1-3 cm by extractor jitter — these rendered as a 1.10m
+  #      "rodapé" band on the wall.
+  pts = [
+    [p1.x, p1.y],
+    [(p1.x + p2.x) / 2.0, (p1.y + p2.y) / 2.0],
+    [p2.x, p2.y],
+  ]
   footprints.any? do |x0, y0, x1, y1|
-    mx >= x0 - tol_in && mx <= x1 + tol_in &&
-      my >= y0 - tol_in && my <= y1 + tol_in
+    pts.any? do |px, py|
+      px >= x0 - tol_in && px <= x1 + tol_in &&
+        py >= y0 - tol_in && py <= y1 + tol_in
+    end
   end
 end
 
@@ -138,7 +151,7 @@ def add_parapet(entities, polyline_pts, parapet_material, layer,
     # — those are the perimeter of the building outline that the
     # vector extractor catches as soft_barrier, not real peitoris. They
     # were rendering as a 1.10m-tall "wallpaper" band on the wall.
-    if wall_footprints && _midpoint_inside_any?(p1, p2, wall_footprints)
+    if wall_footprints && _segment_overlaps_wall?(p1, p2, wall_footprints)
       next
     end
     nx = -dy / len * (thickness_in / 2.0)
