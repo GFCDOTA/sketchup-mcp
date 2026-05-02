@@ -1,5 +1,6 @@
 """Renderiza overlay incluindo bridges em verde + openings em laranja."""
 import json
+import os
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
@@ -7,7 +8,8 @@ import sys
 RUN = Path(sys.argv[1] if len(sys.argv) > 1 else "runs/proto/p8_red_v5_run")
 MASK = Path(sys.argv[2]) if len(sys.argv) > 2 else None
 
-obs = json.loads((RUN / "observed_model.json").read_text())
+OBS_PATH = RUN / "observed_model.json"
+obs = json.loads(OBS_PATH.read_text())
 walls = obs["walls"]
 juncs = obs["junctions"]
 openings = obs.get("openings", [])
@@ -58,3 +60,15 @@ d.text((6,4),
 out = RUN / "overlay_with_openings.png"
 base.save(out)
 print(f"wrote {out}")
+
+if not os.environ.get("PNG_HISTORY_DISABLE"):
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent / "tools"))
+        from png_history import register
+        register(out, kind="overlay_with_openings",
+                 source={"consensus": OBS_PATH},
+                 generator="render_with_openings.py",
+                 params={"run": str(RUN), "mask": str(MASK) if MASK else None,
+                         "openings": len(openings)})
+    except Exception as e:
+        print(f"[png_history skipped] {e}")
