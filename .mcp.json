@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "sketchup-mcp": {
+      "type": "stdio",
+      "command": "E:\\Claude\\sketchup-mcp\\.venv\\Scripts\\sketchup-mcp-server.exe",
+      "args": [],
+      "env": {}
+    }
+  }
+}
