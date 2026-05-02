@@ -81,9 +81,16 @@ def test_raster_byte_identical_on_planta_74(tmp_path):
     # Known-good sha. Updated on schema bumps that legitimately rewrite the
     # output (e.g. 2.1.0 -> 2.2.0 added metadata.openings_refinement docs
     # and the schema_version string itself changed).
-    # Last regenerated: 2026-04-29, after enabling is_triangle_artifact on raster
-    # path (planta_74.pdf rooms 48 -> 30 with 18 sliver wedges dropped).
-    EXPECTED_SHA = "bb5d7b94606e267d38a3ea659c4ccafff9d08f162f727e624da8e3660a98006c"
+    # Last regenerated: 2026-04-30, after a follow-up that
+    #  (1) enabled main_component_filter on the raster path,
+    #  (2) extended is_wall_interior with a sliver-aspect rule (short<=6*t
+    #      AND aspect>=5 also drops), and
+    #  (3) switched the raster polygonize filter from filter_room_noise to
+    #      filter_wall_interior so the new sliver rule actually runs.
+    # Net effect on planta_74.pdf: 28 -> 23 rooms (5 wall-band slivers
+    # eliminated). Visually the planta now reads as a real apartment
+    # layout instead of trapezoids over a banded background.
+    EXPECTED_SHA = "f5a1b76b2c8eaf02f38ff4e01bd58333ef618ce169d4d16e9e77071cc1ebdf82"
     assert sha == EXPECTED_SHA, (
         f"planta_74.pdf model sha changed: {sha[:16]}... (expected {EXPECTED_SHA[:16]}...). "
         "Raster path regressed - investigate model/pipeline.py:_run_pipeline changes."

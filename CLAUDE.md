@@ -4,6 +4,32 @@
 
 ---
 
+## 0. Git Protocol (REGRA INVIOLÁVEL — antes de tudo)
+
+**Toda sessão neste repo:**
+
+1. **Início — antes de qualquer Read/Glob/Grep do código:**
+   ```bash
+   cd E:/Claude/sketchup-mcp
+   git status -s
+   git fetch --all
+   git pull --ff-only
+   ```
+   Se working tree dirty: committar trabalho não-versionado em commits temáticos (`feat:`/`fix:`/`refactor:`/`docs:`/`chore:`/`test:`) ANTES de seguir.
+
+2. **Fim — antes de fechar a resposta final:**
+   - Commits do trabalho da sessão (um commit = uma ideia)
+   - `git push` na branch corrente
+
+**Não esquecer.** Pull desatualizado = merge conflicts ou trabalho duplicado. Push esquecido = trabalho perdido entre sessões. Reforçado pelo user em 2026-05-02.
+
+Regras anti-acidente:
+- NUNCA `git push --force` em main/master sem autorização explícita
+- NUNCA `--no-verify`/`--no-gpg-sign` sem autorização — se hook falhar, fix root cause
+- Branch + PR pra main; commits diretos só em feature branches
+
+---
+
 ## 1. Missão do projeto (resumo)
 
 PDF de planta arquitetônica → `observed_model.json` (Python) → `.skp` SketchUp (Ruby).

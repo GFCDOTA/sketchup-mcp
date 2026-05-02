@@ -1,11 +1,13 @@
 """Renderiza observed_model.json em PNG. Uso: python render_debug.py <run_dir>"""
 import json
+import os
 import sys
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 RUN_DIR = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("runs/test_plan")
-model = json.loads((RUN_DIR / "observed_model.json").read_text(encoding="utf-8"))
+OBS_PATH = RUN_DIR / "observed_model.json"
+model = json.loads(OBS_PATH.read_text(encoding="utf-8"))
 
 walls = model["walls"]
 juncs = model["junctions"]
@@ -89,3 +91,13 @@ d.text((6, 4),
 out = RUN_DIR / "debug_combined.png"
 img.save(out)
 print(f"wrote {out.resolve()}  ({w_px}x{h_px})")
+
+if not os.environ.get("PNG_HISTORY_DISABLE"):
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent / "tools"))
+        from png_history import register
+        register(out, kind="debug_combined", source={"consensus": OBS_PATH},
+                 generator="render_debug.py",
+                 params={"run_dir": str(RUN_DIR), "size": [w_px, h_px]})
+    except Exception as e:
+        print(f"[png_history skipped] {e}")

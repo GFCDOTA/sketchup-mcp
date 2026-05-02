@@ -32,12 +32,60 @@ def _mrr_edges(polygon: Polygon) -> tuple[float, float] | None:
     return edges[0], edges[-1]
 
 
-def is_wall_interior(polygon: Polygon, wall_thickness: float, margin: float = 1.5) -> bool:
+def is_wall_interior(
+    polygon: Polygon,
+    wall_thickness: float,
+    margin: float = 1.5,
+    sliver_aspect: float = 5.0,
+    sliver_margin: float = 6.0,
+    *,
+    floor_hachura: bool = False,
+    hatch_aspect: float = 2.5,
+    hatch_short_mul: float = 6.0,
+    hatch_area_mul: float = 100.0,
+) -> bool:
+    """Drop polygons that are wall-band slivers (and optionally floor-hachura).
+
+    Cases (all thickness-scaled so the rule is PDF-agnostic, CLAUDE.md
+    invariant #4):
+
+      1. ``short <= wall_thickness * margin`` (default 1.5): squeezed
+         between two near-identical walls — classic double-drawn-wall
+         artefact.
+      2. ``short <= wall_thickness * sliver_margin`` (default 6.0) AND
+         ``aspect >= sliver_aspect`` (default 5.0): elongated sliver that
+         survived parallel_dedup. Aspect>=5 separates it from genuine
+         narrow rooms (lavabo ~ 1:2, hallway ~ 1:4).
+      3. opt-in via ``floor_hachura=True``:
+         ``short <= wall_thickness * hatch_short_mul`` (6.0) AND
+         ``aspect >= hatch_aspect`` (2.5) AND
+         ``area <= wall_thickness^2 * hatch_area_mul`` (100): floor-
+         pattern strips. Wood/tile hachura inside a real room produces
+         parallel near-walls; polygonize closes narrow strips between
+         them. Real corridors clear the area cap (e.g. 1.2 m × 4 m
+         corridor ~ 8000 px² < 13²·100 = 16900). The opt-in keeps the
+         SVG path byte-identical (per CLAUDE.md SVG-pipeline notes).
+    """
     edges = _mrr_edges(polygon)
     if edges is None:
         return False
-    short, _long = edges
-    return short <= wall_thickness * margin
+    short, long = edges
+    if short <= wall_thickness * margin:
+        return True
+    if short <= 0:
+        return True
+    aspect = long / short
+    if short <= wall_thickness * sliver_margin and aspect >= sliver_aspect:
+        return True
+    if floor_hachura:
+        hatch_floor = (wall_thickness ** 2) * hatch_area_mul
+        if (
+            short <= wall_thickness * hatch_short_mul
+            and aspect >= hatch_aspect
+            and polygon.area <= hatch_floor
+        ):
+            return True
+    return False
 
 
 def is_triangle_artifact(

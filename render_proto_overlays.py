@@ -1,10 +1,20 @@
 """Renderiza overlay (mask em preto + walls extraidas em vermelho + junctions em azul) pra cada prototipo."""
 import json
+import os
+import sys
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 PROTOS = ["p1_components", "p2_thickness", "p3_kmeans", "p4_roi"]
 RUN_DIR = Path("runs/proto")
+
+_history_register = None
+if not os.environ.get("PNG_HISTORY_DISABLE"):
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent / "tools"))
+        from png_history import register as _history_register
+    except Exception as e:
+        print(f"[png_history skipped] {e}")
 
 try:
     font = ImageFont.truetype("arial.ttf", 28)
@@ -48,3 +58,12 @@ for name in PROTOS:
     out = RUN_DIR / f"{name}_overlay.png"
     base.save(out)
     print(f"wrote {out}")
+
+    if _history_register:
+        try:
+            _history_register(out, kind="proto_overlay",
+                              source={"consensus": run_dir / "observed_model.json"},
+                              generator="render_proto_overlays.py",
+                              params={"proto": name})
+        except Exception as e:
+            print(f"[png_history skipped {name}] {e}")

@@ -1,10 +1,11 @@
 """Renderiza debug_walls.png e debug_junctions.png nativos (replicando o SVG do repo)."""
-import json, sys
+import json, os, sys
 from pathlib import Path
 from PIL import Image, ImageDraw
 
 RUN_DIR = Path(sys.argv[1])
-model = json.loads((RUN_DIR / "observed_model.json").read_text(encoding="utf-8"))
+OBS_PATH = RUN_DIR / "observed_model.json"
+model = json.loads(OBS_PATH.read_text(encoding="utf-8"))
 walls, juncs = model["walls"], model["junctions"]
 
 xs, ys = [], []
@@ -39,3 +40,15 @@ for j in juncs:
     db.ellipse([cx-r, cy-r, cx+r, cy+r], fill=col)
 b.save(RUN_DIR / "debug_junctions.png")
 print(f"{W}x{H} -> debug_walls.png + debug_junctions.png")
+
+if not os.environ.get("PNG_HISTORY_DISABLE"):
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent / "tools"))
+        from png_history import register
+        for kind, png in (("debug_walls", RUN_DIR / "debug_walls.png"),
+                          ("debug_junctions", RUN_DIR / "debug_junctions.png")):
+            register(png, kind=kind, source={"consensus": OBS_PATH},
+                     generator="render_native.py",
+                     params={"run_dir": str(RUN_DIR)})
+    except Exception as e:
+        print(f"[png_history skipped] {e}")

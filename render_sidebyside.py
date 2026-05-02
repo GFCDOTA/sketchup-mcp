@@ -1,4 +1,6 @@
 """Side-by-side da regiao do apto (cropado)."""
+import os
+import sys
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
@@ -28,3 +30,14 @@ d.text((A2.width + gap + 10, 12), "PIPELINE EXTRAIU (rosa/azul=rooms detectados)
 out = Path("runs/proto/p9_v3_run/sidebyside.png")
 canvas.save(out)
 print(f"wrote {out}  {canvas.size}")
+
+if not os.environ.get("PNG_HISTORY_DISABLE"):
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent / "tools"))
+        from png_history import register
+        register(out, kind="sidebyside",
+                 source={"consensus": Path("runs/proto/p9_v3_run/observed_model.json")},
+                 generator="render_sidebyside.py",
+                 params={"size": list(canvas.size)})
+    except Exception as e:
+        print(f"[png_history skipped] {e}")

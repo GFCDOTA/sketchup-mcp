@@ -51,7 +51,11 @@ def run_pdf_pipeline(
     peitoris: list[dict] | None = None,
 ) -> PipelineResult:
     try:
-        document = ingest_pdf(pdf_bytes=pdf_bytes, filename=filename)
+        # Render at 3x scale so walls keep >= 4 px thickness even after
+        # the directional opening (5, 1) used to erase floor hachura
+        # (1-2 px tall horizontal lines). At the previous 2x scale a 6
+        # px wall became 4 px tall and a (5, 1) kernel ate it whole.
+        document = ingest_pdf(pdf_bytes=pdf_bytes, filename=filename, scale=3.0)
     except IngestError as exc:
         raise PipelineError(str(exc)) from exc
     candidates, roi_results = _extract_with_roi_from_document(document)
@@ -115,18 +119,20 @@ def _extract_with_roi_from_raster(image: np.ndarray, page_index: int):
     # Heuristica: se o input ja vem limpo (poucos pixels escuros = planta
     # pre-processada/anotada), pula ROI pra nao perder paredes que ele
     # trataria como "fora da regiao principal".
+    from extract.service import ExtractConfig as _Cfg
+    raster_cfg = _Cfg()
     import cv2 as _cv2
     _gray = image if image.ndim == 2 else _cv2.cvtColor(image, _cv2.COLOR_BGR2GRAY)
     dark_pct = (_gray < 200).sum() / _gray.size
     if dark_pct < 0.03:
-        candidates = extract_from_raster(image=image, page_index=page_index)
+        candidates = extract_from_raster(image=image, page_index=page_index, config=raster_cfg)
         return candidates, RoiResult(applied=False, bbox=None, fallback_reason="clean_input_skip_roi")
     roi = detect_architectural_roi(image)
     if not roi.applied or roi.bbox is None:
-        candidates = extract_from_raster(image=image, page_index=page_index)
+        candidates = extract_from_raster(image=image, page_index=page_index, config=raster_cfg)
         return candidates, roi
     cropped = crop_image_to_bbox(image, roi.bbox)
-    raw = extract_from_raster(image=cropped, page_index=page_index)
+    raw = extract_from_raster(image=cropped, page_index=page_index, config=raster_cfg)
     dx, dy = roi.bbox[0], roi.bbox[1]
     translated = [
         WallCandidate(
@@ -153,21 +159,51 @@ def _run_pipeline(
     walls = classify_walls(candidates, dedup_report_sink=dedup_report_sink)
     dedup_report = dedup_report_sink[0] if dedup_report_sink else None
     walls, openings = detect_openings(walls, peitoris=peitoris)
-    room_topology_sink: list = []
-    snapshot_hash_sink: list[str] = []
-    # Compute median wall thickness for the universal triangle-artifact
-    # filter (the SVG-tuned wall_interior + room_noise filters stay opt-in
-    # via filter_wall_interior; triangle filter is scale-only, safe on raster).
+    # Median wall thickness drives the post-polygonize noise filters.
+    # Raster path enables filter_room_noise (room_noise + triangle):
+    # drops both slivers and 3-vertex wedges from polygonize artefacts.
+    # The SVG-only wall_interior filter (assumes double-drawn walls)
+    # remains opt-in.
     raster_wall_thickness = (
         sorted(w.thickness for w in walls if w.thickness > 0)[len(walls) // 2]
         if walls else None
     )
+    # Drop walls belonging to disconnected annotations: legenda, mapa-da-
+    # torre, carimbo, rodape — every PDF de planta de venda has them and
+    # they were producing 6-15 phantom rooms on top of the real floor
+    # plan. Run BEFORE build_topology so polygonize only sees apartment
+    # walls. Buffer-based connectivity at thickness/2 matches the snap
+    # tolerance the topology layer would otherwise have applied.
+    main_component_report = None
+    if raster_wall_thickness is not None and walls:
+        from topology.main_component_filter import select_main_component
+        walls, main_component_report = select_main_component(
+            walls, snap_tolerance=raster_wall_thickness / 2
+        )
+    room_topology_sink: list = []
+    snapshot_hash_sink: list[str] = []
+    # Raster path enables both pre-split passes:
+    #   - rectify_to_orientation: collapse the H/V jitter that
+    #     classify._orientation labels but the Hough endpoints retain.
+    #     Without this the trapezoidal-room artefact is unavoidable.
+    #   - parallel_dedup_factor=0.5: fuse the inner+outer line of
+    #     double-drawn walls. 0.5 of median_thickness keeps genuinely
+    #     parallel walls (separated by >= 1 thickness) intact.
+    # filter_wall_interior catches the sliver polygons that survive when
+    # parallel_dedup leaves two walls just outside its tolerance:
+    # polygonize then closes a thin "wall-thickness" band between them
+    # which the visual debug had been showing as a phantom "room".
+    # Enabled together with rectify_to_orientation so the assumption of
+    # near-axis-aligned walls in is_wall_interior holds.
     split_walls, junctions, rooms, connectivity_report = build_topology(
         walls,
         room_topology_report_sink=room_topology_sink,
         snapshot_hash_sink=snapshot_hash_sink,
-        filter_triangle_artifacts=raster_wall_thickness is not None,
+        filter_wall_interior=raster_wall_thickness is not None,
         wall_thickness=raster_wall_thickness,
+        rectify_to_orientation=True,
+        parallel_dedup_factor=0.5,
+        floor_hachura=True,
     )
     room_topology_report = room_topology_sink[0] if room_topology_sink else None
     topology_snapshot_sha256 = snapshot_hash_sink[0] if snapshot_hash_sink else None
