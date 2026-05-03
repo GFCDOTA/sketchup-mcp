@@ -1,0 +1,82 @@
+{
+  "_comment": "Example output of scripts/benchmark/bench_pipeline.py. Real reports overwrite reports/perf_baseline.json.",
+  "schema_version": "1.0.0",
+  "timestamp": "2026-05-02T18:30:00+00:00",
+  "label": "example-baseline",
+  "git_commit": "0000000000000000000000000000000000000000",
+  "git_branch": "main",
+  "python_version": "3.12.10",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "input": {
+    "pdf_path": "D:/Claude/microservices/plan-extract-v2/planta_74.pdf",
+    "pdf_sha256": "81722670c0281ee4caff473b2037d42ac3b41ef248abc57b49eeecebd795067a",
+    "pdf_size_bytes": 524288
+  },
+  "command": "python scripts/benchmark/bench_pipeline.py --pdf planta_74.pdf --runs 3 --warmup 1",
+  "config": {
+    "runs": 3,
+    "warmup": 1,
+    "scratch": "reports/_bench_scratch"
+  },
+  "summary": {
+    "vector_consensus": {
+      "status_counts": {"ok": 3},
+      "elapsed_s_median": 0.612,
+      "elapsed_s_min": 0.589,
+      "elapsed_s_max": 0.641,
+      "elapsed_s_cv": 0.043,
+      "rss_after_mb_max": 142.7
+    },
+    "extract_room_labels": {
+      "status_counts": {"ok": 3},
+      "elapsed_s_median": 0.218,
+      "elapsed_s_min": 0.204,
+      "elapsed_s_max": 0.234,
+      "elapsed_s_cv": 0.069,
+      "rss_after_mb_max": 145.3
+    },
+    "rooms_from_seeds": {
+      "status_counts": {"ok": 3},
+      "elapsed_s_median": 1.847,
+      "elapsed_s_min": 1.792,
+      "elapsed_s_max": 1.901,
+      "elapsed_s_cv": 0.030,
+      "rss_after_mb_max": 178.4
+    },
+    "extract_openings_vector": {
+      "status_counts": {"ok": 3},
+      "elapsed_s_median": 0.493,
+      "elapsed_s_min": 0.471,
+      "elapsed_s_max": 0.518,
+      "elapsed_s_cv": 0.048,
+      "rss_after_mb_max": 181.2
+    },
+    "render_axon_top": {
+      "status_counts": {"ok": 3},
+      "elapsed_s_median": 1.234,
+      "elapsed_s_min": 1.198,
+      "elapsed_s_max": 1.276,
+      "elapsed_s_cv": 0.032,
+      "rss_after_mb_max": 215.6
+    },
+    "sketchup_export": {
+      "status_counts": {"skipped": 3},
+      "elapsed_s_median": null,
+      "elapsed_s_min": null,
+      "elapsed_s_max": null,
+      "elapsed_s_cv": null,
+      "rss_after_mb_max": null
+    },
+    "validation": {
+      "status_counts": {"ok": 3},
+      "elapsed_s_median": 2.341,
+      "elapsed_s_min": 2.287,
+      "elapsed_s_max": 2.402,
+      "elapsed_s_cv": 0.025,
+      "rss_after_mb_max": 224.1
+    }
+  },
+  "runs_raw": [
+    "..."
+  ]
+}
