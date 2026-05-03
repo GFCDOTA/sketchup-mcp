@@ -13,10 +13,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v3
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      # NOTE: astral-sh/setup-uv@v3 does NOT accept `python-version` as
+      # input (that input is only available on v5+). Keeping uv at v3
+      # and using actions/setup-python@v5 above for the interpreter.
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
 
       - name: Install project (dev extras)
         run: uv pip install --system -e ".[dev]"
