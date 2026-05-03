@@ -13,10 +13,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v3
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      # NOTE: astral-sh/setup-uv@v3 does NOT accept `python-version` as
+      # input (that input is only available on v5+). Keeping uv at v3
+      # and using actions/setup-python@v5 above for the interpreter.
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
 
       - name: Install project (dev extras)
         run: uv pip install --system -e ".[dev]"
@@ -32,15 +38,21 @@ jobs:
         run: ruff check . --output-format=concise
 
       # NOTA: este é um CI de "subset verde inicial".
-      # Os deselects abaixo são divididos em 2 grupos:
+      # Os deselects abaixo são divididos em 3 grupos:
       #
-      # HARD_EXTERNAL_DEPS — tests que precisam de planta_74.pdf,
-      # CubiCasa weights, ANTHROPIC_API_KEY ou Ollama. Não dá pra rodar
-      # em CI ubuntu padrão.
+      # HARD_EXTERNAL_DEPS — tests que precisam de assets não disponíveis
+      # em ubuntu CI puro (planta_74.pdf, CubiCasa weights,
+      # ANTHROPIC_API_KEY, Ollama, ou runs/<plan>/observed_model.json
+      # populados por execução prévia do pipeline).
       #   - tests/test_planta_74_regression.py
       #   - tests/test_cubicasa_oracle.py
       #   - tests/test_oracle.py
       #   - tests/test_f1_regression.py::test_raster_byte_identical_on_planta_74
+      #   - tests/test_f1_dashboard.py::test_dashboard_runs (depende de
+      #       runs/<plan>/observed_model.json estarem populados — runs/
+      #       é gitignored e fica vazio em fresh checkout. O outro teste
+      #       do mesmo arquivo, test_dashboard_handles_missing_runs,
+      #       passa sem deselect.)
       #
       # BASELINE_KNOWN_FAILURES — tests atualmente quebrados em main
       # (gate `len(strokes) > 200` em classify/service.py). Documentados
@@ -57,6 +69,7 @@ jobs:
             --deselect tests/test_cubicasa_oracle.py \
             --deselect tests/test_oracle.py \
             --deselect tests/test_f1_regression.py::test_raster_byte_identical_on_planta_74 \
+            --deselect tests/test_f1_dashboard.py::test_dashboard_runs \
             --deselect tests/test_text_filter.py \
             --deselect tests/test_orientation_balance.py \
             --deselect tests/test_pair_merge.py
