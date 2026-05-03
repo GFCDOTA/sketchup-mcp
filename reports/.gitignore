@@ -1,0 +1,18 @@
+# Ignore ephemeral audit/benchmark/validator outputs.
+# Keep only example files (*.example.*) and READMEs in version control.
+repo_audit.md
+repo_audit.json
+repo_audit_*.md
+repo_audit_*.json
+perf_baseline.json
+perf_history.jsonl
+perf_diff_*.md
+geometry_review_*.md
+openings_review_*.md
+sketchup_review_*.md
+validator_diff_*.md
+validator_history.jsonl
+docs_maintenance_*.md
+ci_health_*.md
+ci_history.jsonl
+_bench_scratch/
