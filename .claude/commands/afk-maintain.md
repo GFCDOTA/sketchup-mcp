@@ -52,7 +52,7 @@ asked. Conservative defaults always win.
      | python -c "import json,sys;[print(r['conclusion'],r['head_sha'][:7],r['display_title'][:60]) for r in json.load(sys.stdin)['workflow_runs'][:5]]"
    ```
 
-4. **Pick the safest next task** from `docs/roadmap.md` (Now > Next).
+4. **Pick the safest next task** from `docs/operational_roadmap.md` (Now > Next).
    Match against rules above. Skip anything in "Human decision required".
 
 5. **Create branch** from develop with appropriate prefix:
@@ -115,7 +115,7 @@ asked. Conservative defaults always win.
 - Critical: <list>
 
 ## Task picked
-<from docs/roadmap.md>
+<from docs/operational_roadmap.md>
 
 ## Branch / PR
 - branch: <name>
@@ -131,5 +131,5 @@ asked. Conservative defaults always win.
 🔴 Failed — see reports/...
 
 ## Next recommended task
-<from docs/roadmap.md>
+<from docs/operational_roadmap.md>
 ```

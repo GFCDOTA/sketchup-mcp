@@ -1,7 +1,7 @@
 # Operational Roadmap
 
 > Where the project is going operationally (CI, agents, perf, cache,
-> tooling). Complements `docs/roadmap.md` (the algorithmic roadmap
+> tooling). Complements `docs/ROADMAP.md` (the algorithmic roadmap
 > from 2026-04-21).
 >
 > The `/afk-maintain` slash command picks the safest task from "Now"

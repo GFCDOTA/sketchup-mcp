@@ -11,9 +11,13 @@ Cache misses every time because each minor edit changes the consensus.
 
 **Root cause:** No cheap gate before SU. No content-based cache.
 
-**Rule:** Never invoke `tools.skp_from_consensus` in a loop. Use
-`scripts/smoke/smoke_skp_export.py` which runs cheap gates first
-and skips SU when consensus hash hasn't changed.
+**Rule:** Never invoke `tools.skp_from_consensus` in a loop. Run
+cheap gates first (JSON structural validation, preview PNG,
+consensus SHA256) and skip SU when the hash hasn't changed. The
+`scripts/smoke/smoke_skp_export.py` harness will automate this — it
+is planned, tracked as `tooling/sketchup-smoke-gates` in
+`docs/operational_roadmap.md`. Until it lands, follow the cheap-gate
+sequence manually.
 
 **See also:** `LL-001`, `LL-008`.
 

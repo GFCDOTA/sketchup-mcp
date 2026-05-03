@@ -114,8 +114,12 @@ SU 2026 (~5-90s, GUI process). Do not run it in tight loops.
    (`tools/inspect_walls_report.rb` via the autorun plugin).
 8. Open the `.skp` visually only when needed (final QA step).
 
-The smoke harness (`scripts/smoke/smoke_skp_export.py` — see
-`docs/validation/sketchup_smoke_workflow.md`) enforces this order.
+**Planned tool:** `scripts/smoke/smoke_skp_export.py` (with companion
+doc `docs/validation/sketchup_smoke_workflow.md`) will enforce this
+order automatically. Tracked as `tooling/sketchup-smoke-gates` in
+[`docs/operational_roadmap.md`](docs/operational_roadmap.md). Until
+it lands, follow the cheap-gate sequence above manually before
+invoking `tools.skp_from_consensus`.
 
 ---
 
@@ -182,7 +186,7 @@ When something is learned, it goes to `docs/learning/`:
 - `prompt_improvements.md` — prompts that worked / didn't
 - `agent_improvements.md` — adjustments to specialist agents
 
-Roadmap of pending work: [`docs/roadmap.md`](docs/roadmap.md).
+Roadmap of pending work: [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ---
 
