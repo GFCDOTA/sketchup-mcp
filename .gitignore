@@ -22,7 +22,13 @@ build/
 # editor / os
 .idea/
 .vscode/
-.claude/
+# .claude/ — ignore by default (local settings, projects state) but
+# version the team-shared subdirs (constitution, agents, commands, hooks)
+.claude/*
+!.claude/agents/
+!.claude/commands/
+!.claude/hooks/
+!.claude/settings.json
 .DS_Store
 Thumbs.db
 # vendored CubiCasa5K (dev-time oracle, manual setup — see vendor/CubiCasa5k/README.md)

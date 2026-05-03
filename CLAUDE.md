@@ -1,266 +1,303 @@
-# CLAUDE.md — instruções pra agentes Claude no sketchup-mcp
+# CLAUDE.md — Constitution for sketchup-mcp
 
-**Propósito:** pacote de contexto pra Claude Code/API ao continuar trabalho neste projeto. Lido automaticamente em toda sessão.
-
----
-
-## 0. Git Protocol (REGRA INVIOLÁVEL — antes de tudo)
-
-**Toda sessão neste repo:**
-
-1. **Início — antes de qualquer Read/Glob/Grep do código:**
-   ```bash
-   cd E:/Claude/sketchup-mcp
-   git status -s
-   git fetch --all
-   git pull --ff-only
-   ```
-   Se working tree dirty: committar trabalho não-versionado em commits temáticos (`feat:`/`fix:`/`refactor:`/`docs:`/`chore:`/`test:`) ANTES de seguir.
-
-2. **Fim — antes de fechar a resposta final:**
-   - Commits do trabalho da sessão (um commit = uma ideia)
-   - `git push` na branch corrente
-
-**Não esquecer.** Pull desatualizado = merge conflicts ou trabalho duplicado. Push esquecido = trabalho perdido entre sessões. Reforçado pelo user em 2026-05-02.
-
-Regras anti-acidente:
-- NUNCA `git push --force` em main/master sem autorização explícita
-- NUNCA `--no-verify`/`--no-gpg-sign` sem autorização — se hook falhar, fix root cause
-- Branch + PR pra main; commits diretos só em feature branches
+> Loaded automatically every Claude Code session. Operational memory.
+> Treat as constitution, not as inspiration. If a request conflicts
+> with this file, this file wins.
 
 ---
 
-## 1. Missão do projeto (resumo)
+## Mission
 
-PDF de planta arquitetônica → `observed_model.json` (Python) → `.skp` SketchUp (Ruby).
-
-Etapa Python: `PDF → ingest → extract → classify → openings → topology → model → debug`.
-
-**Este CLAUDE.md foca apenas na etapa Python.** Ruby/SketchUp tem outro escopo.
-
----
-
-## 2. Invariantes INVIOLÁVEIS (AGENTS.md §2)
-
-Claude NUNCA pode violar:
-
-1. **Não inventar rooms / walls.** Se `polygonize` retorna `[]`, output é `rooms=[]`. Isso é observação válida.
-2. **Não mascarar falhas.** `rooms=0` é informação. Não substituir por bbox.
-3. **Não usar bounding box como substituto de room.**
-4. **Não acoplar pipeline a PDF específico.** Nada hardcoded para `planta_74.pdf`, `proto_p10.pdf`, etc.
-5. **Debug artifacts obrigatórios:** `debug_walls.svg`, `debug_junctions.svg`, `connectivity_report.json`. Sem eles o run é inválido.
-6. **Ground truth NUNCA entra no output do extrator.** Scores são observacionais.
-
-Se uma mudança "resolveria o caso" violando invariante, **PARE** e reporte o tradeoff.
-
----
-
-## 3. Contexto do trabalho feito por Claude (sessão 2026-04-21)
-
-### Auditoria completa em docs/
-- `docs/ANALYSIS.md` — análise crítica do código (4 violações de invariantes)
-- `docs/SOLUTION.md` — arquitetura Hybrid CV+DL em 10 stages
-- `docs/SOLUTION-FINAL.md` — status real após code review com 3 agents
-- `docs/CAUSA-RAIZ.md` — por que a planta despedaça
-- `docs/ROADMAP.md` — 6 fases de execução, 3-4 semanas
-
-### Patches propostos em patches/ (NÃO APLICADOS)
-- 01-04: higiene (corrigem violações de invariantes sem mudar extração)
-- 06: openings L3 (arc + hinge_side + swing_deg)
-- 07 FIXED: LSD real + KDTree (OpenCV puro)
-- 08 FIXED: CubiCasa5K DL (arch `hg_furukawa_original`)
-- 09: AFPlan multi-scale + CCA (topologia força reconnect)
-
-Patches foram revisados mas **não executados** (ambiente Python 3.12 não disponível). Valide antes de merge.
-
----
-
-## 4. Causa raiz da planta despedaçada
-
-Conhecida após leitura completa do código:
+Build a reliable pipeline:
 
 ```
-extract/service.py:43-50
-  HoughLinesP(maxLineGap=40)  # fragmenta walls em 2-5 pedaços
-
-topology/service.py:98
-  snap_tolerance = 3 × thickness ≈ 24px  # não reconecta gaps 24-80px
-
-Resultado: walls a 24-80px de distância = ilhas flutuantes permanentes
+PDF/floorplan -> extraction -> consensus_model.json -> validation -> renders -> SketchUp .skp
 ```
 
-Ver `docs/CAUSA-RAIZ.md` para análise completa.
+The priority is **structural fidelity for furniture/layout planning**,
+not perfect CAD precision.
+
+Two extraction tracks coexist:
+- **Raster** (`ingest/`, `roi/`, `extract/`, `classify/`, `topology/`,
+  `openings/`, `model/`) — legacy, fragments complex plans
+- **Vector** (`tools/build_vector_consensus.py`,
+  `tools/extract_room_labels.py`, `tools/rooms_from_seeds.py`,
+  `tools/extract_openings_vector.py`) — newer, clean for vectorial PDFs
+
+The Ruby/SketchUp side (`tools/consume_consensus.rb`,
+`tools/inspect_walls_report.rb`, autorun plugins,
+`tools/skp_from_consensus.py`) is the final step. **It is the most
+expensive gate** and must run last, only when cheap gates pass.
 
 ---
 
-## 5. Ordem recomendada de ataque
+## 0. Git Flow (INVIOLABLE)
 
-Se vai aplicar patches, siga esta ordem (baixo → alto risco):
+- **Always** branch from `develop`. Never directly from `main`.
+- **Always** open PRs against `develop`. Never directly to `main`.
+- `main` only receives PRs that come from `develop`.
+- Hotfix exception: a PR `hotfix/<slug> -> main` is allowed only when
+  production is broken AND human approval is on record. After merge,
+  immediately open `main -> develop` to sync.
+- **Never** `git push --force` `main` or `develop`.
+- **Never** `git commit` directly on `main` or `develop`.
+- **Never** `git push --no-verify` or `--no-gpg-sign` without explicit
+  human authorization.
+- Branch naming: `feature/`, `fix/`, `chore/`, `docs/`, `perf/`,
+  `refactor/`, `test/`, `agents/`, `tooling/`, `validate/`, `hotfix/`.
+- Delete a feature branch (local + remote) after its PR is merged.
+  `develop` and `main` are never deleted.
 
-### Fase 1 — Higiene (1 dia, baixo risco)
-- Aplicar 01-04 (corrige invariantes, não muda extração)
-- Rodar `pytest`, confirmar baseline
-- Commit por patch
-
-### Fase 2 — Topologia (1 dia)
-- Aplicar 09 (AFPlan multi-scale + CCA)
-- Testar em `planta_74.pdf`
-- Métricas: `orphan_components` deve cair, `perimeter_closure` deve subir
-
-### Fase 3 — LSD (1 dia, se Fase 2 insuficiente)
-- Aplicar 07 FIXED ensemble com 09
-- Instalar `opencv-python>=4.5.4` + `scipy`
-
-### Fase 4 — DL oracle (2-3 dias, solução definitiva)
-- Setup CubiCasa5K (clone + weights Google Drive)
-- Aplicar 08 FIXED
-- DL primário, Hough fallback
-
-### Fase 5 — Features
-- Aplicar 06 (openings L3)
-
-### Fase 6 — Ruby bridge
-- TCP socket pattern (mhyrr/sketchup-mcp)
-- NÃO reescrever em Python — manter contrato `observed_model.json` estável
+Detailed flow: [`docs/git_workflow.md`](docs/git_workflow.md).
 
 ---
 
-## 6. Regras pra Claude ao trabalhar aqui
+## 1. Hard Safety Rules — never do these without explicit human approval
 
-### Sempre
-- **Antes de mudar código:** ler o arquivo inteiro, não apenas o trecho a editar
-- **Antes de declarar "resolvido":** medir baseline antes/depois empiricamente (rodar em planta_74 + p12)
-- **Ao adicionar filtro:** documentar reasoning no código (ver `classify/service.py` como exemplo)
-- **Ao adicionar parâmetro:** default que preserva comportamento atual (backward compat)
-- **Commits pequenos e semânticos** com prefixo (`feat:`, `fix:`, `chore:`, `docs:`, `test:`, `refactor:`)
-- **Um commit = uma ideia**
-
-### Nunca
-- **Hardcoded paths** (ex: `C:/Users/felip_local/Documents/paredes.png`)
-- **Thresholds específicos por PDF** (viola invariante #4)
-- **`strict=False` em load_state_dict** sem reportar explicitamente keys ignoradas
-- **Scores que não refletem qualidade** (ver `_geometry_score` antigo como anti-exemplo)
-- **Push direto em main** (sempre branch + PR)
-- **`--no-verify`** em commits (hooks existem por motivo)
-
-### Quando em dúvida
-- Ler `AGENTS.md` §2 (invariantes) e §6 (proibido)
-- Consultar 2ª LLM ou rodar teste mínimo
-- Perguntar ao usuário se a decisão é irreversível (destrutiva)
+1. Delete or rewrite history under `runs/`, `patches/`, `docs/`,
+   `vendor/`, or any baseline/diagnostic artifact.
+2. Change the `consensus_model.json` schema (see `docs/SCHEMA-V2.md`).
+3. Change geometry thresholds (e.g. `len(strokes) > 200` in
+   `classify/service.py:160`, `snap_tolerance` in `topology/service.py`,
+   `WALL_HEIGHT_M` / `PARAPET_HEIGHT_M` / `PARAPET_RGB` in
+   `tools/consume_consensus.rb`).
+4. Modify Ruby/SketchUp exporter logic
+   (`tools/consume_consensus.rb`, `tools/inspect_walls_report.rb`,
+   `tools/autorun_*.rb`, `tools/su_boot.rb`).
+5. Apply patches under `patches/archive/` (07-09 are HIGH risk).
+6. Move `tools/` wholesale or any high-risk entrypoint
+   (`main.py`, `api/app.py`, `sketchup_mcp_server/server.py`).
+7. Run `ruff --fix` over the entire repo.
+8. Run any autoformatter over the entire repo.
+9. Mix refactor + functional fix + performance optimization in one PR.
+10. Skip the validation step (`pytest`, `ruff check`, smoke gates) on
+    a PR that touches Python.
 
 ---
 
-## 7. Debug eficiente
+## 2. Pipeline Invariants (from `AGENTS.md` §2 — also inviolable)
 
-### Comparar runs
-```bash
-python main.py extract planta_74.pdf --out runs/before
-# aplicar patch
-python main.py extract planta_74.pdf --out runs/after
-diff <(jq '.scores, .metadata.connectivity' runs/before/observed_model.json) \
-     <(jq '.scores, .metadata.connectivity' runs/after/observed_model.json)
-```
+The pipeline must NEVER:
 
-### Visualização obrigatória
-```bash
-# Ver debug_walls.svg ANTES de confiar em métricas
-# Métricas podem mentir (ex: retention score invertido) — imagens não
-open runs/<name>/debug_walls.svg
-open runs/<name>/debug_junctions.svg
-```
+1. **Invent rooms or walls.** If `polygonize` returns `[]`, output is
+   `rooms=[]`. That is valid observation.
+2. **Mask failures.** `rooms=0` is information; do not substitute by
+   bbox or any synthetic fallback.
+3. **Use bounding box as a substitute for a room.**
+4. **Couple to a specific PDF.** Nothing hardcoded for `planta_74.pdf`,
+   `proto_p10.pdf`, etc.
+5. **Skip required debug artifacts.** `debug_walls.svg`,
+   `debug_junctions.svg`, `connectivity_report.json` are mandatory.
+6. **Leak ground-truth into the extractor output.** Scores are
+   observational only.
 
-### Quando patches de reconnect falharem
-Comum em plantas com:
-- Walls diagonais (LSD falha, AFPlan aceita)
-- Hachura densa (text-baseline filter mata walls reais)
-- Plantas pequenas <20 walls (snap over-aggressive sem floor)
-
-Nesses casos, consultar `docs/SOLUTION-FINAL.md` seção "O que PODE precisar ajuste".
+If a change "would resolve the case" by violating an invariant,
+**STOP** and report the trade-off.
 
 ---
 
-## 8. Estado das coisas (2026-04-21)
+## 3. The SketchUp Rule
 
-### Baseline conhecido em planta_74
-```
-walls: 94 (meta ≤ 150)
-rooms: 14 (ideal 6-15)
-junctions: 161 (split graph)
-orphan_component_count: 7  ← alto, problema
-orphan_node_count: 16
-geometry_score: 0.156  ← É RETENÇÃO, não qualidade
-topology_score: 0.275
-room_score: 0.581
-topology_quality: poor
-warnings: [walls_disconnected, many_orphan_components]
-```
+SketchUp is the final gate, not the first. The export step spawns
+SU 2026 (~5-90s, GUI process). Do not run it in tight loops.
 
-### Meta pós-fixes
-```
-orphan_components: ≤ 2
-perimeter_closure: ≥ 0.90  (novo score, ver patch 03)
-quality_score: ≥ 0.75
-warnings: [] (ou só notes, não blockers)
-```
+**Before opening SketchUp:**
 
-### Runs base conhecidos
-- `runs/planta_74/` — PDF principal, 74m²
-- `runs/proto/p10..p12_v1_run/` — **VIOLA INV #4** (usa PDFs pré-processados red-mask)
+1. Validate the JSON structurally (walls/rooms/openings shape).
+2. Generate cheap previews (top + axon PNG via `tools/render_axon.py`).
+3. Run cheap validators (pytest subset, ruff).
+4. Compute SHA256 of `consensus_model.json`.
+5. Skip SketchUp if the hash matches the previous successful export
+   (cache-by-content). Honor `--force-skp` to bypass.
+6. Only then run `python -m tools.skp_from_consensus`.
+7. Inspect the `.skp` automatically when possible
+   (`tools/inspect_walls_report.rb` via the autorun plugin).
+8. Open the `.skp` visually only when needed (final QA step).
+
+The smoke harness (`scripts/smoke/smoke_skp_export.py` — see
+`docs/validation/sketchup_smoke_workflow.md`) enforces this order.
 
 ---
 
-## 9. Ferramentas externas úteis
+## 4. PR Standard
 
-- `cv2.createLineSegmentDetector` — LSD real, OpenCV core 4.5.4+ (patent expirou)
-- `cv2.ximgproc.createFastLineDetector` — alternativa em contrib
-- `scipy.spatial.cKDTree` — nearest-neighbor queries O(n log n)
-- `skimage.morphology.skeletonize(method='lee')` — robusto em walls espessas
+Every PR body must include:
+
+```markdown
+## Summary
+1-3 bullets, what this PR is.
+
+## What changed
+List of files + brief reason.
+
+## What did NOT change
+Confirm scope: no algorithm, no schema, no thresholds, no Ruby/SU,
+or whatever applies.
+
+## Validation
+Commands run + expected output (pytest, ruff, smoke, bench).
+
+## Risks
+What could go wrong.
+
+## Rollback
+Exact git revert / git push --delete commands.
+
+## Next steps
+Optional: what should follow this PR.
+```
+
+Keep PRs small. One PR = one idea. If a PR diff is > 500 lines and
+not pure docs, split it.
+
+---
+
+## 5. Default Decision Rule
+
+When in doubt, choose the conservative path:
+
+- Document instead of changing code.
+- Benchmark instead of optimizing blindly.
+- Add a guardrail instead of trusting future authors.
+- Add a deselect instead of muting an assertion.
+- Open a draft PR instead of merging silently.
+- Ask the user (via `AskUserQuestion`) instead of guessing.
+
+---
+
+## 6. Operational memory
+
+Versioned learning loop:
+
+```
+EXECUTE -> MEASURE -> COMPARE -> RECORD -> UPDATE RULE -> OPEN PR
+```
+
+When something is learned, it goes to `docs/learning/`:
+
+- `lessons_learned.md` — positive lessons
+- `failure_patterns.md` — anti-patterns to never repeat
+- `decision_log.md` — architectural decisions with date + author
+- `validation_matrix.md` — what is validated by what
+- `prompt_improvements.md` — prompts that worked / didn't
+- `agent_improvements.md` — adjustments to specialist agents
+
+Roadmap of pending work: [`docs/roadmap.md`](docs/roadmap.md).
+
+---
+
+## 7. Specialist agents
+
+Defined in `.claude/agents/*.md`. Each agent has:
+- a narrow mission,
+- explicit allow/deny lists for files,
+- mandatory checks,
+- output format,
+- examples of safe and forbidden tasks.
+
+Available agents:
+- `repo-auditor` — read-only repo health audit
+- `geometry-specialist` — review extraction/topology/model changes
+- `openings-specialist` — review door/window detection
+- `sketchup-specialist` — review Ruby/SU exporter changes
+- `performance-specialist` — benchmark + perf regression
+- `validator-specialist` — validator/scoring changes
+- `ci-guardian` — CI workflow health
+- `docs-maintainer` — keeps docs in sync
+- `agent-coordinator` — chooses which specialists to invoke
+
+A subagent reads its own file plus this CLAUDE.md. Critical rules
+are duplicated inside each agent file so they survive context
+compaction.
+
+---
+
+## 8. Slash commands (playbooks)
+
+Defined in `.claude/commands/*.md`:
+
+- `/afk-maintain` — autonomous maintenance loop
+- `/validate-skp` — JSON -> SKP via smoke gates
+- `/perf-baseline` — capture timing baseline
+- `/repo-audit` — run the auditor
+- `/prepare-pr` — write a compliant PR body
+- `/improve-agents` — propose changes to agent docs
+
+---
+
+## 9. Hooks (the electric fence)
+
+Defined in `.claude/settings.json` + `.claude/hooks/`:
+
+- `pre_bash_guard.py` runs before every Bash tool call. It rejects:
+  - `git push origin main` (any path)
+  - `git push --force` against `main` or `develop`
+  - `git commit` while currently on `main` or `develop`
+  - `rm -rf` against `runs/`, `patches/`, `docs/`
+  - `ruff --fix .` or `ruff format .` over the whole repo
+  - `Remove-Item -Recurse` against the same protected paths
+  - destructive edits to `patches/archive/`
+
+Hooks fail closed: when in doubt, block. Override is via the user
+explicitly running the command outside Claude.
+
+---
+
+## 10. Pipeline state (for context)
+
+### Known baseline on `planta_74` (vector pipeline)
+- 33 walls, 11 rooms, 12 openings, 8 soft_barriers
+- Generated via the documented 4-step flow (see `OVERVIEW.md` §4.4)
+
+### Known baseline on `planta_74` (raster pipeline, OUTDATED)
+- 94 walls, 14 rooms, 7 orphan_components, geometry_score 0.156
+- 16 tests fail in main due to gate `len(strokes) > 200` in
+  `classify/service.py:160`. Documented in
+  `docs/repo_hardening_plan.md`. Address only with empirical
+  threshold sweep on planta_74 + p10 + p12.
+
+### Known SketchUp issues
+- `consume_consensus.rb` does not carve openings yet (doors stay as
+  full-height walls). Tracked in `OVERVIEW.md` §7.
+- Window detection is missing (only door arcs).
+- `inspect_walls_report.rb` doesn't embed SHA256 of inspected `.skp`.
+
+### Recently fixed
+- 3-pt parapet/wall coincidence filter
+  (`commit 7fbd531`) — eliminates the "rodapé branco" band.
+
+---
+
+## 11. Patches inventory
+
+| Patch | Status | Notes |
+|---|---|---|
+| `patches/02-density-trigger.py` | NOT applied | Medium risk; first attempt failed |
+| `patches/03-quality-score.py` | APPLIED (`b798881`) | Honest scoring |
+| `patches/04-roi-fallback-explicit.py` | APPLIED (`7fb1d80`) | Schema-additive |
+| `patches/archive/07-reconnect-fragments-FIXED.py` | NOT applied | HIGH risk: new dep, core algorithm change |
+| `patches/archive/08-unet-oracle-FIXED.py` | NOT applied | HIGH risk: torch + offline weights |
+| `patches/archive/09-afplan-convex-hull.py` | NOT applied | HIGH risk: alternative extractor |
+
+Never apply archive patches without an explicit, signed-off PR plan.
+
+---
+
+## 12. Ferramentas externas úteis (kept for searchability)
+
+- `cv2.createLineSegmentDetector` — LSD real, OpenCV 4.5.4+
+- `scipy.spatial.cKDTree` — nearest-neighbor O(n log n)
+- `skimage.morphology.skeletonize(method='lee')` — robust on thick walls
 - `networkx` — cycle detection, connectivity
-- `shapely.polygonize` — detectar rooms fechados
-
-### Para DL (se Fase 4 aplicada)
-- `torch` + `torchvision`
-- `segmentation-models-pytorch` — NÃO serve para CubiCasa5K (arch incompatível)
-- `gdown` — download de Google Drive (weights CubiCasa5K)
-- Clone `github.com/CubiCasa/CubiCasa5k` + `pip install -e .`
+- `shapely.polygonize` — closed-room detection
+- DL extras (`[dl]`): `torch`, `torchvision`, `gdown`,
+  `scikit-image`, `anthropic`. Only the `dl` extra is allowed to
+  pull these in.
 
 ---
 
-## 10. Como validar que "resolveu" a planta despedaçada
+## 13. Last-updated marker
 
-### Critérios (todos devem ser verdade)
-```python
-def plan_is_resolved(observed_model) -> bool:
-    return all([
-        observed_model['metadata']['connectivity']['largest_component_ratio'] >= 0.90,
-        observed_model['metadata']['connectivity']['orphan_component_count'] <= 2,
-        len(observed_model['rooms']) >= 1,  # pelo menos 1 room
-        # visual inspection de debug_walls.svg
-    ])
-```
-
-### Visual inspection manual (obrigatória)
-Abrir `debug_walls.svg` e verificar:
-- Perímetro da planta visivelmente **fechado**
-- Nenhuma "ilha" solta longe do resto
-- Walls alinhadas com o PDF original (não deslocadas)
-
-### Regression tests
-- Planta_74 deve continuar funcionando APÓS mudanças
-- P12 deve funcionar SEM red-mask manual (invariante #4)
-- Tests sintéticos (`tests/fixtures.py`) devem passar
-
----
-
-## 11. Contatos relevantes
-
-Se precisar escalar:
-- Felipe (GFCDOTA, dono do repo): decisões arquiteturais
-- Documentação: este CLAUDE.md + `docs/*.md` + `AGENTS.md`
-- Testes: `pytest -v` + comparação empirica de runs
-
----
-
-**Última atualização:** 2026-04-21
-**Contexto anterior:** sessão Claude autônoma (worktree sleepy-tu-9247d5)
-**Estado:** docs + patches propostos, não aplicados. Aguardando validação empírica e decisão de integração.
+- **2026-05-03** — converted to constitution form, added agents/hooks
+  references, develop-first git flow, SketchUp-as-last-gate rule.
+- Previous version: 2026-04-21 (preserved in git history).
