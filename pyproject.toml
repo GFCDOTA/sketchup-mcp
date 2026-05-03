@@ -43,7 +43,8 @@ dl = [
 ]
 dev = [
   "pytest>=8.3,<9.0",
-  "ruff",
+  "pytest-xdist>=3.6,<4.0",
+  "ruff>=0.6,<1.0",
 ]
 
 [project.scripts]
@@ -80,3 +81,30 @@ exclude = [
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 addopts = "-ra"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = [
+  ".venv",
+  "venv",
+  "vendor",
+  "runs",
+  "patches/archive",
+  "__pycache__",
+  "build",
+  "dist",
+  "*.egg-info",
+  # tech debt — hardcoded local paths (C:/Users/felip_local/...);
+  # documented in docs/repo_hardening_plan.md, will be turned into CLI args:
+  "proto_colored.py",
+  "proto_red.py",
+  "render_sidebyside.py",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = ["E501"]  # line-too-long: deferred; many existing long lines
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["F401", "F811"]
