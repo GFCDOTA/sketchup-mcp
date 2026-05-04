@@ -40,9 +40,14 @@ def _build_prompt(entry: dict, ctx: ScorerContext) -> str:
             f"(comparar com a render se possivel)."
         )
 
+    area_hint = (
+        f"com area esperada informada de {ctx.expected_area_m2:g} m2"
+        if ctx.expected_area_m2 is not None
+        else "arquitetonica"
+    )
     return (
         f"Voce e revisor critico de plantas baixas extraidas. "
-        f"Esta imagem e do tipo '{kind}', extraida de uma planta de 74 m2. "
+        f"Esta imagem e do tipo '{kind}', extraida de uma planta {area_hint}. "
         f"O modelo de consenso tem walls={walls}, rooms={rooms}, openings={openings}. "
         f"{pdf_hint}\n\n"
         "Aponte EXPLICITAMENTE:\n"

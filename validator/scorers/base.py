@@ -44,6 +44,8 @@ class ScorerContext:
     entry: dict[str, Any]
     consensus: dict[str, Any] | None = None    # parsed consensus_model.json
     inspect_report: dict[str, Any] | None = None  # tools/inspect_walls_report output
+    expected_area_m2: float | None = None
+    expected_area_source: str | None = None  # e.g. "user_config", for traceability
 
     @classmethod
     def build(cls, repo_root: Path, entry: dict[str, Any]) -> "ScorerContext":
