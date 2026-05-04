@@ -73,3 +73,26 @@ jobs:
             --deselect tests/test_text_filter.py \
             --deselect tests/test_orientation_balance.py \
             --deselect tests/test_pair_merge.py
+
+      # Smoke harness gates A-E only (no SketchUp). Constitutional rule
+      # CLAUDE.md §3: SU is the LAST gate. Cheap gates run on every PR
+      # against a versioned synthetic consensus (tests/fixtures/smoke_consensus.json)
+      # so the harness's contract is exercised on Linux without needing
+      # the gitignored runs/vector/consensus_model.json or SketchUp 2026.
+      # Failure here means the harness or one of the cheap stages
+      # (render_axon, JSON validator, hashing) regressed.
+      - name: Smoke harness — cheap gates only (--skip-skp)
+        run: |
+          python scripts/smoke/smoke_skp_export.py \
+            --consensus tests/fixtures/smoke_consensus.json \
+            --out-dir runs/smoke/_ci \
+            --skip-skp
+
+      - name: Upload smoke report (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-cheap-gates-report
+          path: runs/smoke/_ci/
+          if-no-files-found: ignore
+          retention-days: 7

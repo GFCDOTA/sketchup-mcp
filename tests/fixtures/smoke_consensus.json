@@ -1,0 +1,15 @@
+{
+  "_comment": "Minimal versioned consensus for the cheap-gates CI smoke (--skip-skp). Single-room rectangle, four walls. Sized to satisfy tools/render_axon.py and the smoke harness's structural validator without depending on planta_74.pdf, which is gitignored. Bench/skip tests use runs/vector/consensus_model.json (real data, gitignored).",
+  "schema_version": "1.0.0",
+  "wall_thickness_pts": 5.4,
+  "planta_region": [0, 0, 200, 150],
+  "walls": [
+    {"id": "w1", "start": [0.0, 0.0], "end": [200.0, 0.0], "orientation": "h"},
+    {"id": "w2", "start": [200.0, 0.0], "end": [200.0, 150.0], "orientation": "v"},
+    {"id": "w3", "start": [0.0, 150.0], "end": [200.0, 150.0], "orientation": "h"},
+    {"id": "w4", "start": [0.0, 0.0], "end": [0.0, 150.0], "orientation": "v"}
+  ],
+  "rooms": [],
+  "openings": [],
+  "soft_barriers": []
+}
