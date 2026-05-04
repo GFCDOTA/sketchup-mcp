@@ -28,6 +28,7 @@ import argparse
 import hashlib
 import json
 import os
+import shutil
 import subprocess
 import sys
 from dataclasses import asdict, dataclass, field
@@ -43,6 +44,16 @@ DEFAULT_SKETCHUP = Path(
 CACHE_KEY_INPUTS = (
     Path("tools/skp_from_consensus.py"),
     Path("tools/consume_consensus.rb"),
+)
+# SU 2026 trial blocks the autorun plugin behind a Welcome dialog
+# unless a positional .skp is on the command line (FP-007 / LL-009).
+# tools.skp_from_consensus auto-picks any .skp in the output dir, so
+# we drop a template there before invoking it.
+SU_TEMPLATE_CANDIDATES = (
+    Path(r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp"
+         r"\resources\en-US\Templates\Temp01a - Simple.skp"),
+    Path(r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp"
+         r"\resources\en-US\Templates\Temp01b - Simple.skp"),
 )
 
 
@@ -288,43 +299,75 @@ def gate_f(args: argparse.Namespace, report: SmokeReport) -> GateResult:
         return g
     out_dir = Path(report.out_dir)
     consensus = Path(report.consensus_path)
+    # tools.skp_from_consensus's --out is a FILE path, not a directory.
+    # Use a deterministic name inside out_dir; gate_g and gate_h
+    # reference it back via args._skp_path.
+    skp_target = out_dir / "model.skp"
+    # Bootstrap template so SU 2026 trial doesn't show its Welcome
+    # dialog (FP-007). Best-effort: if no template is reachable we
+    # still try, and the existing premature-exit error explains why.
+    bootstrap_target = out_dir / "_bootstrap.skp"
+    if not bootstrap_target.exists():
+        template = next(
+            (t for t in SU_TEMPLATE_CANDIDATES if t.exists()), None
+        )
+        if template is not None:
+            shutil.copy2(template, bootstrap_target)
     cmd = [
         sys.executable, "-m", "tools.skp_from_consensus",
         str(consensus),
-        "--out", str(out_dir),
+        "--out", str(skp_target),
         "--sketchup", str(args.sketchup),
         "--timeout", str(args.timeout),
     ]
     if args.plugins:
         cmd += ["--plugins", str(args.plugins)]
+    # Capture stderr+stdout to a sidecar log so debugging doesn't
+    # depend on the truncated message field.
+    log_path = out_dir / "skp_from_consensus.log"
     try:
         proc = subprocess.run(
             cmd, capture_output=True, text=True,
             cwd=str(REPO_ROOT), check=False,
             timeout=max(args.timeout + 30, 60),
         )
-    except subprocess.TimeoutExpired:
+    except subprocess.TimeoutExpired as e:
+        log_path.write_text(
+            f"TIMEOUT after {args.timeout + 30}s\nstdout:\n{e.stdout or ''}"
+            f"\nstderr:\n{e.stderr or ''}",
+            encoding="utf-8",
+        )
         g.status = "fail"
         g.message = f"skp_from_consensus timed out after {args.timeout + 30}s"
+        g.artifacts = [_relpath(log_path)]
         g.finished_at = _utc_now()
         return g
+    log_path.write_text(
+        f"rc={proc.returncode}\nstdout:\n{proc.stdout}\nstderr:\n{proc.stderr}",
+        encoding="utf-8",
+    )
+    g.artifacts = [_relpath(log_path)]
     if proc.returncode != 0:
+        # Combine stdout + stderr because skp_from_consensus uses
+        # plain print() for both info and error messages.
+        tail = (proc.stdout + proc.stderr).strip().splitlines()[-3:]
         g.status = "fail"
         g.message = (
-            f"skp_from_consensus failed (rc={proc.returncode}): "
-            f"{proc.stderr.strip()[:300]}"
+            f"skp_from_consensus failed (rc={proc.returncode}); "
+            f"see {log_path.name}: {' | '.join(tail)[:300]}"
         )
         g.finished_at = _utc_now()
         return g
-    skp = next((p for p in out_dir.glob("*.skp")
-                if not p.name.startswith("_bootstrap")), None)
-    if skp is None:
+    if not skp_target.exists():
         g.status = "fail"
-        g.message = "skp_from_consensus succeeded but no .skp produced"
+        g.message = (
+            f"skp_from_consensus succeeded (rc=0) but {skp_target.name} "
+            f"not found; see {log_path.name}"
+        )
     else:
-        g.artifacts = [_relpath(skp)]
-        g.message = f"exported {skp.name}"
-        args._skp_path = skp
+        g.artifacts.insert(0, _relpath(skp_target))
+        g.message = f"exported {skp_target.name}"
+        args._skp_path = skp_target
     g.finished_at = _utc_now()
     return g
 
