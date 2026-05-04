@@ -96,3 +96,31 @@ jobs:
           path: runs/smoke/_ci/
           if-no-files-found: ignore
           retention-days: 7
+
+  # CLAUDE.md §3: SketchUp is the LAST gate (~5-90s GUI launch). A Ruby
+  # syntax error in tools/*.rb (consume_consensus.rb, autorun plugins,
+  # inspect_walls_report.rb, su_boot.rb) is currently only caught when
+  # SU loads the file at runtime. `ruby -c` catches the typo in <1s
+  # without launching SU. Runs in parallel to `test` (sibling job).
+  ruby-syntax:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: false
+
+      - name: Ruby syntax check (tools/*.rb)
+        run: |
+          set -e
+          fail=0
+          for f in tools/*.rb; do
+            if [ -f "$f" ]; then
+              ruby -c "$f" || fail=1
+            fi
+          done
+          exit $fail
