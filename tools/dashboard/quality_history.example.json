@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0.0",
+  "description": "Snapshot of walls/rooms/openings counts from runs/*/observed_model.json. Hand-collected example reflecting state at generated_at; replace with quality_history.json (same shape) once a generator is wired up.",
+  "generated_at": "2026-05-04T16:53:43+00:00",
+  "points": [
+    {
+      "run": "baseline_2026-04-29",
+      "mtime": "2026-04-29T13:33:25.260074+00:00",
+      "walls": 230,
+      "rooms": 30,
+      "openings": 71
+    },
+    {
+      "run": "postfix_2026-04-29",
+      "mtime": "2026-04-29T13:40:21.679324+00:00",
+      "walls": 230,
+      "rooms": 24,
+      "openings": 71
+    },
+    {
+      "run": "baseline_pre_fix",
+      "mtime": "2026-04-30T03:55:38.054696+00:00",
+      "walls": 230,
+      "rooms": 24,
+      "openings": 71
+    },
+    {
+      "run": "post_rectify_dedup",
+      "mtime": "2026-04-30T03:57:38.987462+00:00",
+      "walls": 201,
+      "rooms": 28,
+      "openings": 71
+    },
+    {
+      "run": "post_rectify_v2",
+      "mtime": "2026-04-30T03:59:34.603202+00:00",
+      "walls": 201,
+      "rooms": 28,
+      "openings": 71
+    },
+    {
+      "run": "post_main_component",
+      "mtime": "2026-04-30T17:03:00.267242+00:00",
+      "walls": 201,
+      "rooms": 28,
+      "openings": 71
+    },
+    {
+      "run": "post_aggressive_filter",
+      "mtime": "2026-04-30T17:07:00.464916+00:00",
+      "walls": 201,
+      "rooms": 28,
+      "openings": 71
+    },
+    {
+      "run": "post_wall_interior",
+      "mtime": "2026-04-30T17:08:10.138870+00:00",
+      "walls": 201,
+      "rooms": 28,
+      "openings": 71
+    },
+    {
+      "run": "post_sliver",
+      "mtime": "2026-04-30T17:08:49.444776+00:00",
+      "walls": 201,
+      "rooms": 23,
+      "openings": 71
+    },
+    {
+      "run": "post_thin_wall_filter",
+      "mtime": "2026-04-30T19:22:00.496883+00:00",
+      "walls": 149,
+      "rooms": 16,
+      "openings": 66
+    },
+    {
+      "run": "post_thin_v2",
+      "mtime": "2026-04-30T19:26:08.085570+00:00",
+      "walls": 149,
+      "rooms": 16,
+      "openings": 66
+    },
+    {
+      "run": "post_hatch_filter",
+      "mtime": "2026-04-30T19:29:38.374585+00:00",
+      "walls": 201,
+      "rooms": 11,
+      "openings": 71
+    },
+    {
+      "run": "post_combined",
+      "mtime": "2026-04-30T19:30:55.525649+00:00",
+      "walls": 165,
+      "rooms": 11,
+      "openings": 66
+    },
+    {
+      "run": "final",
+      "mtime": "2026-04-30T19:37:28.699090+00:00",
+      "walls": 201,
+      "rooms": 11,
+      "openings": 71
+    },
+    {
+      "run": "clean",
+      "mtime": "2026-04-30T21:41:27.495354+00:00",
+      "walls": 53,
+      "rooms": 7,
+      "openings": 30
+    }
+  ]
+}
