@@ -6,15 +6,21 @@
 
 ## AI-001 — `repo-auditor` should compare against previous report
 
-**Date:** 2026-05-03 (proposed)
+**Date:** 2026-05-03 (proposed) → 2026-05-04 (applied)
 **Agent:** `.claude/agents/repo-auditor.md`
 **Incident:** First version produced a report but didn't track
 NEW vs RESOLVED vs PERSISTING findings. Without a delta, every run
 looks the same to a reviewer.
 **Improvement:** Add a "Diff vs previous run" section to the report
-output. Implementation lives in `agents/auditor/run_audit.py` v2
-(see roadmap FASE 7 in `docs/repo_hardening_plan.md`).
-**Status:** Documented in agent file; implementation pending.
+output. Findings are derived from the per-section report into a
+flat list with stable `(kind, key)` identity, then compared via set
+arithmetic against the most recent prior `repo_audit_<ts>.json`
+snapshot. The auditor now writes both the canonical
+`repo_audit.{md,json}` and a timestamped snapshot per run.
+**Status:** Applied in v2 (PR `agents/repo-auditor-v2`).
+`load_findings_from_snapshot` includes a v1 fallback that
+re-derives findings from old reports without a `findings` array,
+so the diff works across the v1→v2 boundary.
 
 ## AI-002 — `sketchup-specialist` needs reproduce hint when no inspect_report
 
