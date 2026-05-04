@@ -32,9 +32,10 @@
       background: rgba(15,17,21,0.92); backdrop-filter: blur(8px);
       border-bottom:1px solid var(--border);
       padding: 14px 24px;
-      display:grid; grid-template-columns: repeat(5, 1fr); gap:12px;
+      display:grid; grid-template-columns: repeat(6, 1fr); gap:12px;
     }
-    @media (max-width: 1100px) { nav.tabs { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 1400px) { nav.tabs { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 1100px) { nav.tabs { grid-template-columns: repeat(2, 1fr); } }
 
     /* gallery */
     .gallery-section { margin-bottom: 28px; }
@@ -381,6 +382,66 @@
       .panel canvas { max-height: 260px !important; height: 260px !important; }
       a { color: #111 !important; text-decoration: none !important; }
     }
+
+    /* ========== Roadmap tab ========== */
+    .roadmap-header { display:grid; grid-template-columns: 2fr 1fr; gap:14px; margin-bottom:18px; }
+    @media (max-width: 900px) { .roadmap-header { grid-template-columns: 1fr; } }
+    .roadmap-mission { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:14px 16px; }
+    .roadmap-mission h2 { margin:0 0 6px; font-size:15px; font-weight:600; }
+    .roadmap-mission .mission { color:var(--muted); font-size:13px; margin:0 0 8px; }
+    .roadmap-mission .focus { font-size:13px; }
+    .next-action-card { background:linear-gradient(180deg, rgba(79,140,255,0.12), rgba(79,140,255,0.04)); border:1px solid var(--accent); border-radius:12px; padding:14px 16px; }
+    .next-action-card .label { font-size:11px; color:var(--accent); font-weight:700; letter-spacing:.6px; text-transform:uppercase; }
+    .next-action-card .value { font-size:15px; font-weight:600; margin-top:6px; }
+    .next-action-card .risk { color:var(--muted); font-size:12px; margin-top:8px; }
+    .status-badge { display:inline-block; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
+    .status-badge.done, .status-badge.healthy { background:rgba(60,207,122,.15); color:var(--ok); }
+    .status-badge.in_progress, .status-badge.mostly_done, .status-badge.warning { background:rgba(79,140,255,.15); color:var(--accent); }
+    .status-badge.next, .status-badge.planned { background:var(--panel-2); color:var(--muted); }
+    .status-badge.blocked, .status-badge.critical { background:rgba(239,68,68,.15); color:var(--err); }
+    .lane-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:14px; }
+    .lane-card { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:14px 16px; }
+    .lane-card h3 { margin:0 0 4px; font-size:14px; font-weight:600; display:flex; align-items:center; gap:8px; }
+    .lane-card .lane-counts { color:var(--muted); font-size:11px; margin-bottom:10px; }
+    .lane-card .lane-items { list-style:none; margin:0; padding:0; }
+    .lane-card .lane-items li { display:flex; align-items:flex-start; gap:8px; padding:6px 0; border-bottom:1px dashed var(--border); font-size:13px; }
+    .lane-card .lane-items li:last-child { border-bottom:none; }
+    .lane-card .lane-items .item-status { flex:0 0 8px; width:8px; height:8px; border-radius:50%; margin-top:6px; }
+    .lane-card .lane-items .item-status.done { background:var(--ok); }
+    .lane-card .lane-items .item-status.in_progress { background:var(--accent); }
+    .lane-card .lane-items .item-status.next { background:var(--muted); }
+    .lane-card .lane-items .item-status.blocked { background:var(--err); }
+    .lane-card .lane-items .item-title { flex:1; }
+    .lane-card .lane-items .blocked-by { display:block; color:var(--warn); font-size:11px; margin-top:2px; font-style:italic; }
+    .blocked-section { background:var(--panel); border:1px solid var(--border); border-left:3px solid var(--err); border-radius:12px; padding:14px 16px; margin-top:18px; }
+    .blocked-section h3 { margin:0 0 8px; font-size:14px; font-weight:600; }
+    .blocked-row { padding:10px 0; border-bottom:1px dashed var(--border); }
+    .blocked-row:last-child { border-bottom:none; }
+    .blocked-row .blocked-title { font-weight:600; }
+    .blocked-row .blocked-reason { color:var(--muted); font-size:12px; margin-top:2px; }
+    .blocked-row .blocked-decision { color:var(--warn); font-size:12px; margin-top:4px; }
+    .next-steps-list { counter-reset: ns; list-style:none; padding:0; margin:0; }
+    .next-steps-list li { counter-increment: ns; padding:8px 12px 8px 38px; background:var(--panel); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; position:relative; font-size:13px; }
+    .next-steps-list li::before { content: counter(ns); position:absolute; left:12px; top:8px; width:20px; height:20px; background:var(--panel-2); border:1px solid var(--border); border-radius:50%; text-align:center; font-size:11px; font-weight:700; color:var(--muted); line-height:18px; }
+    .roadmap-empty { background:var(--panel); border:1px dashed var(--border); border-radius:12px; padding:24px; text-align:center; color:var(--muted); }
+    /* hero metrics row */
+    .hero-row { display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap:12px; margin:18px 0; }
+    .hero { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:14px 16px; }
+    .hero .label { font-size:10px; font-weight:700; letter-spacing:.8px; color:var(--muted); text-transform:uppercase; }
+    .hero .value { font-size:26px; font-weight:700; margin-top:6px; font-variant-numeric:tabular-nums; }
+    .hero .sub { color:var(--muted); font-size:11px; margin-top:4px; }
+    .hero.warn .value { color:var(--warn); }
+    .hero.err .value { color:var(--err); }
+    .hero.ok .value { color:var(--ok); }
+    .hero.accent .value { color:var(--accent); }
+    /* roadmap chart grid */
+    .roadmap-charts { display:grid; grid-template-columns: repeat(2, 1fr); gap:14px; margin-top:18px; }
+    @media (max-width: 1100px) { .roadmap-charts { grid-template-columns: 1fr; } }
+    .chart-card { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:14px 16px; }
+    .chart-card h2 { margin:0 0 4px; font-size:14px; font-weight:600; }
+    .chart-card .hint { color:var(--muted); font-size:11px; font-weight:400; margin-left:6px; }
+    .chart-card .chart-host { position:relative; height:240px; }
+    .chart-card .chart-empty { color:var(--muted); font-size:12px; padding:24px 8px; text-align:center; }
   </style>
 </head>
 <body>
@@ -423,11 +484,15 @@
       <div class="t">Plantas <span class="kbd">5</span></div>
       <div class="s">galeria de renders · pipeline atual · evolução</div>
     </button>
+    <button id="tabbtn-roadmap" data-tab="roadmap" role="tab" aria-selected="false">
+      <div class="t">Roadmap <span class="kbd">6</span></div>
+      <div class="s">status do projeto · entregas · próxima ação</div>
+    </button>
   </nav>
 
   <main>
     <!-- Global filters (persist across tabs) -->
-    <section>
+    <section id="filter-bar-section">
       <div class="filter-bar">
         <label for="filter-agent">modelo</label>
         <select id="filter-agent">
@@ -810,6 +875,35 @@
           Gerar com <code>scripts/oracle/llm_architect.py</code> e <code>scripts/oracle/cubicasa.py</code>.
         </p>
         <div id="oracle-runs"></div>
+      </section>
+    </section>
+
+    <!-- ========== TAB: ROADMAP ========== -->
+    <section id="tab-roadmap" class="tab-panel" role="tabpanel" aria-labelledby="tabbtn-roadmap" hidden>
+      <div id="roadmap-root">
+        <div class="roadmap-empty">Carregando status do projeto&hellip;</div>
+      </div>
+      <section class="roadmap-charts" id="roadmap-charts" hidden>
+        <div class="chart-card">
+          <h2>Qualidade da extração ao longo dos runs <span class="hint">walls · rooms · openings</span></h2>
+          <div class="chart-host"><canvas id="r-chart-quality"></canvas></div>
+          <div class="chart-empty" id="r-empty-quality" hidden>Sem <code>quality_history.json</code> nem example.</div>
+        </div>
+        <div class="chart-card">
+          <h2>Tempo por estágio do pipeline <span class="hint">mediana, segundos</span></h2>
+          <div class="chart-host"><canvas id="r-chart-timing"></canvas></div>
+          <div class="chart-empty" id="r-empty-timing" hidden>Sem <code>pipeline_timing.json</code> nem example.</div>
+        </div>
+        <div class="chart-card">
+          <h2>Distribuição do roadmap <span class="hint">% por status</span></h2>
+          <div class="chart-host"><canvas id="r-chart-status"></canvas></div>
+          <div class="chart-empty" id="r-empty-status" hidden>Sem lanes no <code>project_status.json</code>.</div>
+        </div>
+        <div class="chart-card">
+          <h2>Saúde do repo no tempo <span class="hint">ruff · pytest · runs</span></h2>
+          <div class="chart-host"><canvas id="r-chart-repo-health"></canvas></div>
+          <div class="chart-empty" id="r-empty-repo-health" hidden>Sem <code>repo_health_history.json</code> nem example.</div>
+        </div>
       </section>
     </section>
 
@@ -2203,7 +2297,10 @@
   // ============================================================
   // Tab switching + re-render
   // ============================================================
-  const TABS = ["geral", "decisoes", "aprendizados", "analitico", "plantas"];
+  const TABS = ["geral", "decisoes", "aprendizados", "analitico", "plantas", "roadmap"];
+  // Tabs whose content has nothing to do with the runs filter (modelo / ordenar
+  // sessões). On those, the global filter-bar would just confuse the reader.
+  const TABS_WITHOUT_RUNS_FILTER = new Set(["roadmap"]);
   function setTab(tab, pushHash = true) {
     if (!TABS.includes(tab)) tab = "geral";
     if (state.activeTab === tab) return;
@@ -2218,19 +2315,30 @@
       btn.classList.toggle("active", active);
       btn.setAttribute("aria-selected", active ? "true" : "false");
     }
+    const filterSection = document.getElementById("filter-bar-section");
+    if (filterSection) filterSection.hidden = TABS_WITHOUT_RUNS_FILTER.has(tab);
     if (pushHash) try { history.replaceState(null, "", "#" + tab); } catch (_) {}
     renderActiveTab();
   }
 
   function renderActiveTab() {
-    ensureCache();
+    // Skip the runs-aggregate cache (and the filter-info update) on tabs that
+    // don't depend on runs data — they must keep working on fresh checkouts
+    // where `_index.json` 404s and `state.allRuns` is never populated.
+    const usesRuns = !TABS_WITHOUT_RUNS_FILTER.has(state.activeTab);
+    if (usesRuns) ensureCache();
     if (state.activeTab === "geral") renderGeral();
     else if (state.activeTab === "decisoes") renderDecisoes();
     else if (state.activeTab === "aprendizados") renderAprendizados();
     else if (state.activeTab === "analitico") renderAnalitico();
     else if (state.activeTab === "plantas") renderPlantas();
-    document.getElementById("filter-info").textContent =
-      `${state.filteredRuns.length} runs · ${state.aggs.sessions.length} sessões após filtros`;
+    else if (state.activeTab === "roadmap") renderRoadmap();
+    if (usesRuns) {
+      try {
+        document.getElementById("filter-info").textContent =
+          `${state.filteredRuns.length} runs · ${state.aggs.sessions.length} sessões após filtros`;
+      } catch (_) { /* state may not be ready yet */ }
+    }
   }
 
   // ============================================================
@@ -2416,6 +2524,377 @@
   }
 
   // ============================================================
+  // TAB: ROADMAP — project status cockpit
+  // ============================================================
+  // Loads four JSON manifests from tools/dashboard/ in parallel:
+  //   - project_status.json      (lanes / blocked / next_steps / metrics)
+  //   - quality_history.json     (walls/rooms/openings per run, line chart)
+  //   - pipeline_timing.json     (per-stage pipeline time, horizontal bar)
+  //   - repo_health_history.json (ruff/pytest/runs over audits, line chart)
+  // Each falls back to its `.example.json` counterpart and gracefully degrades
+  // to an empty state if both 404. Charts use the page's already-loaded
+  // Chart.js (no new dependency). Schema docs:
+  //   docs/dashboard/project_status_dashboard.md
+  state.roadmap = null;          // project_status payload
+  state.roadmapQuality = null;
+  state.roadmapTiming = null;
+  state.roadmapRepoHealth = null;
+  state.roadmapLoaded = false;
+
+  async function _loadJsonWithFallback(name) {
+    return (await _fetchJsonOrNull(`./${name}.json`))
+        ?? (await _fetchJsonOrNull(`./${name}.example.json`));
+  }
+
+  async function loadRoadmap() {
+    const [project, quality, timing, repoHealth] = await Promise.all([
+      _loadJsonWithFallback("project_status"),
+      _loadJsonWithFallback("quality_history"),
+      _loadJsonWithFallback("pipeline_timing"),
+      _loadJsonWithFallback("repo_health_history"),
+    ]);
+    return { project, quality, timing, repoHealth };
+  }
+
+  function _statusBadge(status) {
+    const s = String(status || "unknown").toLowerCase();
+    return `<span class="status-badge ${esc(s)}">${esc(s.replace("_", " "))}</span>`;
+  }
+
+  function _renderLane(lane) {
+    const items = Array.isArray(lane.items) ? lane.items : [];
+    const counts = items.reduce((m, it) => {
+      const k = (it && it.status) || "unknown"; m[k] = (m[k] || 0) + 1; return m;
+    }, {});
+    const order = ["done", "in_progress", "next", "blocked"];
+    const countLine = order
+      .filter(k => counts[k])
+      .map(k => `${counts[k]} ${k.replace("_", " ")}`)
+      .join(" · ");
+    const itemsHtml = items.map(it => {
+      const st = String((it && it.status) || "unknown").toLowerCase();
+      const blockedBy = it && it.blocked_by
+        ? `<span class="blocked-by">${esc(it.blocked_by)}</span>` : "";
+      return `<li>
+        <span class="item-status ${esc(st)}" title="${esc(st)}"></span>
+        <span class="item-title">${esc(it.title || "(sem título)")}${blockedBy}</span>
+      </li>`;
+    }).join("");
+    return `<div class="lane-card">
+      <h3>${esc(lane.title || lane.id || "(lane)")} ${_statusBadge(lane.status)}</h3>
+      <div class="lane-counts">${esc(countLine || "(sem itens)")}</div>
+      <ul class="lane-items">${itemsHtml || '<li><span class="item-title" style="color:var(--muted)">(vazio)</span></li>'}</ul>
+    </div>`;
+  }
+
+  // Hand-picked hero metrics — the ten raw cards from before were unreadable,
+  // so we now surface the five most decision-shaping numbers and tuck the rest
+  // into a small footer line.
+  function _renderRoadmapHero(payload) {
+    const m = (payload && payload.metrics) || {};
+    const timing = state.roadmapTiming;
+    const heroes = [];
+    // Total wall-clock — pull from timing manifest when available, else metric.
+    const totalS = (timing && typeof timing.total_median_s === "number")
+      ? timing.total_median_s
+      : (typeof m.last_measured_total_s === "number" ? m.last_measured_total_s : null);
+    if (totalS != null) {
+      heroes.push({
+        label: "pipeline wall-clock",
+        value: totalS.toFixed(2) + "s",
+        sub: m.last_baseline_date ? "baseline " + m.last_baseline_date : "median per run",
+        cls: "accent",
+      });
+    }
+    // SU bottleneck — derive from timing if present, else metric.
+    let bottleneck = null;
+    if (timing && Array.isArray(timing.stages) && timing.stages.length) {
+      const top = [...timing.stages].sort((a, b) => (b.elapsed_s_median || 0) - (a.elapsed_s_median || 0))[0];
+      if (top && typeof top.pct_of_total === "number") {
+        bottleneck = { stage: top.stage, pct: top.pct_of_total };
+      }
+    } else if (typeof m.sketchup_export_bottleneck_percent === "number") {
+      bottleneck = { stage: "sketchup_export", pct: m.sketchup_export_bottleneck_percent };
+    }
+    if (bottleneck) {
+      heroes.push({
+        label: "top stage",
+        value: Math.round(bottleneck.pct) + "%",
+        sub: bottleneck.stage.replace(/_/g, " "),
+        cls: bottleneck.pct >= 80 ? "warn" : "accent",
+      });
+    }
+    if (m.ci_status) heroes.push({
+      label: "CI", value: m.ci_status, sub: m.smoke_gate ? "smoke " + m.smoke_gate : "",
+      cls: m.ci_status === "green" ? "ok" : (m.ci_status === "red" ? "err" : ""),
+    });
+    if (typeof m.pytest_collected === "number") heroes.push({
+      label: "pytest", value: m.pytest_collected, sub: "tests collected", cls: "ok",
+    });
+    if (typeof m.ruff_violations === "number") heroes.push({
+      label: "ruff", value: m.ruff_violations, sub: "violations to fix",
+      cls: m.ruff_violations > 100 ? "warn" : (m.ruff_violations > 0 ? "" : "ok"),
+    });
+    const cardsHtml = heroes.map(h => `<div class="hero ${h.cls || ''}">
+      <div class="label">${esc(h.label)}</div>
+      <div class="value">${esc(String(h.value))}</div>
+      ${h.sub ? `<div class="sub">${esc(h.sub)}</div>` : ""}
+    </div>`).join("");
+    // Tuck remaining metrics into a small footer line so we don't lose them.
+    const heroLabels = new Set(["last_measured_total_s", "last_baseline_date",
+      "sketchup_export_bottleneck_percent", "ci_status", "smoke_gate",
+      "pytest_collected", "ruff_violations"]);
+    const rest = Object.entries(m)
+      .filter(([k, v]) => !heroLabels.has(k) && v !== null && v !== undefined && v !== "")
+      .map(([k, v]) => `${esc(k.replace(/_/g, " "))}: <b>${esc(String(v))}</b>`)
+      .join(" · ");
+    const restHtml = rest
+      ? `<p class="metrics-footer" style="color:var(--muted); font-size:11px; margin:0 0 4px;">${rest}</p>`
+      : "";
+    return cardsHtml
+      ? `<section style="margin-top:6px;">${restHtml}<div class="hero-row">${cardsHtml}</div></section>`
+      : "";
+  }
+
+  function _emptyStateRoadmap() {
+    return `<div class="roadmap-empty">
+      Sem <code>project_status.json</code> nem <code>project_status.example.json</code> em
+      <code>tools/dashboard/</code>. Edite o example committado ou crie o arquivo real.
+      Schema em <code>docs/dashboard/project_status_dashboard.md</code>.
+    </div>`;
+  }
+
+  // === Charts (Chart.js — already loaded for other tabs) =================
+  // Each helper destroys any previous instance under the same id so re-render
+  // (e.g. tab toggling) doesn't leak canvases. The state.charts.roadmap group
+  // is the same one destroyTabCharts("roadmap") wipes.
+  function _showChartEmpty(emptyId, canvasId, isEmpty) {
+    const ce = document.getElementById(emptyId);
+    const cv = document.getElementById(canvasId);
+    if (ce) ce.hidden = !isEmpty;
+    if (cv) cv.hidden = isEmpty;
+  }
+
+  // Build a Chart and register it under state.charts.roadmap[key]. Returns
+  // null if the canvas is missing (e.g. tab DOM not yet present).
+  function _buildRoadmapChart(key, canvasId, type, data, options) {
+    const cv = document.getElementById(canvasId);
+    if (!cv) return null;
+    const chart = new Chart(cv.getContext("2d"), { type, data, options });
+    registerChart("roadmap", key, chart);
+    return chart;
+  }
+
+  function _renderQualityChart(payload) {
+    const pts = (payload && Array.isArray(payload.points)) ? payload.points : [];
+    _showChartEmpty("r-empty-quality", "r-chart-quality", pts.length === 0);
+    if (!pts.length) return;
+    const labels = pts.map(p => p.run || "(unnamed)");
+    const ds = (label, key, color) => ({
+      label, data: pts.map(p => p[key] ?? null),
+      borderColor: color, backgroundColor: color + "33", tension: 0.25,
+      pointRadius: 3, borderWidth: 2, spanGaps: true,
+    });
+    _buildRoadmapChart("quality", "r-chart-quality", "line", {
+      labels,
+      datasets: [
+        ds("walls", "walls", "#4f8cff"),
+        ds("rooms", "rooms", "#3ccf7a"),
+        ds("openings", "openings", "#f5a524"),
+      ],
+    }, baseOpts({
+      plugins: { legend: { labels: { color: "#e6e8ee", boxWidth: 12 } } },
+      scales: {
+        x: Object.assign(tickOpts(), { ticks: { color: "#8b93a7", maxRotation: 45, minRotation: 30, autoSkip: true, maxTicksLimit: 12 } }),
+        y: tickOpts(),
+      },
+    }));
+  }
+
+  function _renderTimingChart(payload) {
+    const stages = (payload && Array.isArray(payload.stages)) ? [...payload.stages] : [];
+    _showChartEmpty("r-empty-timing", "r-chart-timing", stages.length === 0);
+    if (!stages.length) return;
+    stages.sort((a, b) => (b.elapsed_s_median || 0) - (a.elapsed_s_median || 0));
+    const labels = stages.map(s => s.stage);
+    const data = stages.map(s => +(s.elapsed_s_median || 0).toFixed(4));
+    // Highlight the top bar in red when it dominates (≥ 80% of total).
+    const total = stages.reduce((sum, s) => sum + (s.elapsed_s_median || 0), 0);
+    const colors = stages.map(s => {
+      const pct = total ? (s.elapsed_s_median || 0) / total : 0;
+      if (pct >= 0.8) return "#ef4444";
+      if (pct >= 0.4) return "#f5a524";
+      return "#4f8cff";
+    });
+    _buildRoadmapChart("timing", "r-chart-timing", "bar", {
+      labels,
+      datasets: [{ label: "median seconds", data, backgroundColor: colors, borderWidth: 0 }],
+    }, baseOpts({
+      indexAxis: "y",
+      plugins: { legend: { display: false } },
+      scales: {
+        x: Object.assign(tickOpts(), { title: { display: true, text: "seconds (median)", color: "#8b93a7" } }),
+        y: tickOpts(),
+      },
+    }));
+  }
+
+  function _renderStatusDonut(payload) {
+    const lanes = (payload && Array.isArray(payload.lanes)) ? payload.lanes : [];
+    const counts = { done: 0, in_progress: 0, next: 0, blocked: 0 };
+    for (const lane of lanes) {
+      for (const it of (lane.items || [])) {
+        const k = String((it && it.status) || "").toLowerCase().replace(/-/g, "_");
+        if (k in counts) counts[k]++;
+      }
+    }
+    const total = Object.values(counts).reduce((s, v) => s + v, 0);
+    _showChartEmpty("r-empty-status", "r-chart-status", total === 0);
+    if (!total) return;
+    _buildRoadmapChart("status", "r-chart-status", "doughnut", {
+      labels: ["done", "in progress", "next", "blocked"],
+      datasets: [{
+        data: [counts.done, counts.in_progress, counts.next, counts.blocked],
+        backgroundColor: ["#3ccf7a", "#4f8cff", "#8b93a7", "#ef4444"],
+        borderColor: "#171a21", borderWidth: 2,
+      }],
+    }, {
+      responsive: true, maintainAspectRatio: false, cutout: "62%",
+      plugins: {
+        legend: { position: "right", labels: { color: "#e6e8ee", boxWidth: 12 } },
+        tooltip: { callbacks: { label: (ctx) => {
+          const v = ctx.parsed; const pct = ((v / total) * 100).toFixed(0);
+          return `${ctx.label}: ${v} (${pct}%)`;
+        } } },
+      },
+    });
+  }
+
+  function _renderRepoHealthChart(payload) {
+    const pts = (payload && Array.isArray(payload.points)) ? payload.points : [];
+    _showChartEmpty("r-empty-repo-health", "r-chart-repo-health", pts.length === 0);
+    if (!pts.length) return;
+    const labels = pts.map(p => (p.timestamp || "").slice(0, 16).replace("T", " "));
+    _buildRoadmapChart("repoHealth", "r-chart-repo-health", "line", {
+      labels,
+      datasets: [
+        { label: "ruff violations", data: pts.map(p => p.ruff_violations ?? null), yAxisID: "y", borderColor: "#f5a524", backgroundColor: "#f5a52433", tension: 0.2, pointRadius: 3, borderWidth: 2 },
+        { label: "pytest collected", data: pts.map(p => p.pytest_collected ?? null), yAxisID: "y2", borderColor: "#4f8cff", backgroundColor: "#4f8cff33", tension: 0.2, pointRadius: 3, borderWidth: 2 },
+        { label: "runs/", data: pts.map(p => p.runs_subdir_count ?? null), yAxisID: "y2", borderColor: "#3ccf7a", backgroundColor: "#3ccf7a33", tension: 0.2, pointRadius: 3, borderWidth: 2, borderDash: [4, 3] },
+      ],
+    }, baseOpts({
+      scales: {
+        x: tickOpts(),
+        y: Object.assign(tickOpts(), { position: "left", title: { display: true, text: "ruff", color: "#f5a524" } }),
+        y2: { position: "right", grid: { drawOnChartArea: false }, ticks: { color: "#8b93a7" }, title: { display: true, text: "pytest / runs", color: "#8b93a7" } },
+      },
+    }));
+  }
+
+  function renderRoadmap() {
+    const root = document.getElementById("roadmap-root");
+    const charts = document.getElementById("roadmap-charts");
+    if (!root) return;
+    if (!state.roadmapLoaded) {
+      root.innerHTML = `<div class="roadmap-empty">Carregando status do projeto&hellip;</div>`;
+      if (charts) charts.hidden = true;
+      loadRoadmap().then(payload => {
+        state.roadmap = payload.project;
+        state.roadmapQuality = payload.quality;
+        state.roadmapTiming = payload.timing;
+        state.roadmapRepoHealth = payload.repoHealth;
+        state.roadmapLoaded = true;
+        renderRoadmap();
+      });
+      return;
+    }
+    const data = state.roadmap;
+    if (!data) { root.innerHTML = _emptyStateRoadmap(); if (charts) charts.hidden = true; return; }
+
+    const project = data.project || {};
+    const summary = data.summary || {};
+    const lanes = Array.isArray(data.lanes) ? data.lanes : [];
+    const blocked = Array.isArray(data.blocked) ? data.blocked : [];
+    const nextSteps = Array.isArray(data.next_steps) ? data.next_steps : [];
+
+    const headerHtml = `<div class="roadmap-header">
+      <div class="roadmap-mission">
+        <h2>${esc(project.name || "(projeto)")} ${_statusBadge(summary.overall_status)}</h2>
+        <p class="mission">${esc(project.mission || "")}</p>
+        <p class="focus"><b>Foco atual:</b> ${esc(project.current_focus || summary.current_phase || "—")}</p>
+      </div>
+      <div class="next-action-card">
+        <div class="label">Próxima ação recomendada</div>
+        <div class="value">${esc(summary.next_recommended_action || "(definir)")}</div>
+        ${summary.main_risk ? `<div class="risk"><b>Risco principal:</b> ${esc(summary.main_risk)}</div>` : ""}
+      </div>
+    </div>`;
+
+    const heroHtml = _renderRoadmapHero(data);
+
+    const lanesHtml = lanes.length
+      ? `<section><h3 class="section-title">Lanes</h3>
+           <div class="lane-grid">${lanes.map(_renderLane).join("")}</div>
+         </section>`
+      : "";
+
+    const blockedHtml = blocked.length
+      ? `<div class="blocked-section">
+           <h3>Bloqueios &amp; decisões pendentes</h3>
+           ${blocked.map(b => `<div class="blocked-row">
+             <div class="blocked-title">${esc(b.title || "(item)")}</div>
+             ${b.reason ? `<div class="blocked-reason">${esc(b.reason)}</div>` : ""}
+             ${b.needed_decision ? `<div class="blocked-decision"><b>Decisão necessária:</b> ${esc(b.needed_decision)}</div>` : ""}
+           </div>`).join("")}
+         </div>`
+      : "";
+
+    const nextStepsHtml = nextSteps.length
+      ? `<section style="margin-top:18px;">
+           <h3 class="section-title">Próximos passos</h3>
+           <ol class="next-steps-list">${nextSteps.map(s => `<li>${esc(s)}</li>`).join("")}</ol>
+         </section>`
+      : "";
+
+    const footerHtml = data.generated_at
+      ? `<p style="color:var(--muted); font-size:11px; margin-top:18px; text-align:right;">
+           gerado em <code>${esc(data.generated_at)}</code> · schema <code>${esc(data.schema_version || "?")}</code>
+         </p>`
+      : "";
+
+    root.innerHTML = headerHtml + heroHtml + lanesHtml + blockedHtml + nextStepsHtml + footerHtml;
+
+    // Charts go in a separate sibling section so the layout stays predictable
+    // even when project_status is empty but quality/timing data exists.
+    if (charts) charts.hidden = false;
+    destroyTabCharts("roadmap");
+    _renderQualityChart(state.roadmapQuality);
+    _renderTimingChart(state.roadmapTiming);
+    _renderStatusDonut(data);
+    _renderRepoHealthChart(state.roadmapRepoHealth);
+  }
+
+  // Roadmap tab is independent of `/runs/` data — wire its click + hashchange
+  // here so it stays functional on fresh checkouts where `_index.json` 404s
+  // (the main boot below would otherwise return early before binding tabs).
+  (function bootstrapRoadmap() {
+    const btn = document.getElementById("tabbtn-roadmap");
+    if (btn) btn.addEventListener("click", () => setTab("roadmap"));
+    window.addEventListener("hashchange", () => {
+      if ((location.hash || "") === "#roadmap") setTab("roadmap", false);
+    });
+    // Defer past the main boot's synchronous setup so `state.activeTab` is set
+    // from the hash before we render. The microtask runs before the boot's
+    // first await, but after its sync prelude.
+    queueMicrotask(() => {
+      if ((location.hash || "") === "#roadmap") {
+        if (state.activeTab !== "roadmap") state.activeTab = "roadmap";
+        renderRoadmap();
+      }
+    });
+  })();
+
+  // ============================================================
   // Boot
   // ============================================================
   (async () => {
@@ -2433,6 +2912,10 @@
       const active = t === state.activeTab;
       btn.classList.toggle("active", active);
       btn.setAttribute("aria-selected", active ? "true" : "false");
+    }
+    {
+      const filterSection = document.getElementById("filter-bar-section");
+      if (filterSection) filterSection.hidden = TABS_WITHOUT_RUNS_FILTER.has(state.activeTab);
     }
 
     meta.textContent = "carregando…";
@@ -2480,6 +2963,8 @@
       if (e.key === "2") setTab("decisoes");
       if (e.key === "3") setTab("aprendizados");
       if (e.key === "4") setTab("analitico");
+      if (e.key === "5") setTab("plantas");
+      if (e.key === "6") setTab("roadmap");
     });
 
     // Aprendizados filter pills (delegated listener)

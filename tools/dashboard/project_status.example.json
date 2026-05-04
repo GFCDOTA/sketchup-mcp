@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0.0",
+  "description": "Example fallback for the Roadmap tab in tools/dashboard/index.html. Replace with project_status.json (same shape) when a generator is wired up. Keep in sync with docs/operational_roadmap.md and docs/ROADMAP.md.",
+  "generated_at": "2026-05-04T00:00:00Z",
+  "project": {
+    "name": "sketchup-mcp / plan-extract",
+    "mission": "PDF/floorplan -> consensus_model.json -> validation -> renders -> SketchUp .skp",
+    "current_focus": "Opening-aware topology + window detector before touching the SketchUp exporter"
+  },
+  "summary": {
+    "overall_status": "in_progress",
+    "current_phase": "Product quality after platform hardening",
+    "next_recommended_action": "Land feature/window-detector then decide on skp-carve-openings",
+    "main_risk": "consume_consensus.rb still draws doors over walls without carving an actual opening"
+  },
+  "metrics": {
+    "ci_status": "green",
+    "smoke_gate": "available",
+    "sketchup_export_bottleneck_percent": 91,
+    "cached_rerun_time": "<1s",
+    "last_measured_total_s": 8.76,
+    "last_baseline_date": "2026-05-04",
+    "ruff_violations": 146,
+    "pytest_collected": 317,
+    "agents_count": 9,
+    "slash_commands_count": 6
+  },
+  "lanes": [
+    {
+      "id": "platform",
+      "title": "Plataforma",
+      "status": "mostly_done",
+      "items": [
+        {"title": "CI workflow (.github/workflows/ci.yml)", "status": "done"},
+        {"title": "Smoke harness (scripts/smoke/smoke_skp_export.py)", "status": "done"},
+        {"title": "Cheap SketchUp gates without launching SU (PR #18)", "status": "done"},
+        {"title": "Real benchmark (scripts/benchmark/bench_pipeline.py, ~9s baseline)", "status": "done"},
+        {"title": "repo-auditor v2 with NEW/RESOLVED/PERSISTING delta (PR #16)", "status": "done"},
+        {"title": "Skip-on-unchanged-consensus (tools/skp_from_consensus.py)", "status": "done"},
+        {"title": "Cache infra (packages/cache/) — no callers in pipeline yet", "status": "in_progress"},
+        {"title": "perf/cache-raster-stage", "status": "next"},
+        {"title": "chore/ruff-f821-cleanup", "status": "next"}
+      ]
+    },
+    {
+      "id": "product",
+      "title": "Produto / qualidade da planta + SKP",
+      "status": "in_progress",
+      "items": [
+        {"title": "Fase 0 — dedup colinear no planta_74 (commit a11724a)", "status": "done"},
+        {"title": "rectify + parallel_dedup pre-split em topology.service", "status": "done"},
+        {"title": "Vector-first consensus (tools/build_vector_consensus.py)", "status": "done"},
+        {"title": "Fase 1 — opening-aware topology (ligar portas detectadas ao grafo)", "status": "in_progress"},
+        {"title": "Window detector (branch feature/window-detector)", "status": "in_progress"},
+        {"title": "Fase 2 — semantic filter dos órfãos residuais", "status": "next"},
+        {"title": "skp-carve-openings (consume_consensus.rb abre vão real)", "status": "blocked", "blocked_by": "Mexe em tools/consume_consensus.rb (Hard Safety Rule §1.4) — precisa autorização humana explícita"},
+        {"title": "Fase 6 — Ruby/SketchUp bridge rebuild", "status": "blocked", "blocked_by": "Aguarda produto melhorar antes de tocar Ruby"}
+      ]
+    },
+    {
+      "id": "governance",
+      "title": "Autonomia / governança",
+      "status": "in_progress",
+      "items": [
+        {"title": "CLAUDE.md constitution (309 linhas)", "status": "done"},
+        {"title": "9 specialist agents em .claude/agents/", "status": "done"},
+        {"title": "6 slash commands em .claude/commands/", "status": "done"},
+        {"title": "Pre-bash guard (.claude/hooks/pre_bash_guard.py)", "status": "done"},
+        {"title": "docs/learning/ (lessons / failure_patterns / decision_log)", "status": "done"},
+        {"title": "Agent improvement loop (auto-feedback nos agentes)", "status": "next"}
+      ]
+    }
+  ],
+  "blocked": [
+    {
+      "title": "skp-carve-openings",
+      "reason": "Toca tools/consume_consensus.rb e thresholds (Hard Safety Rule §1.3 e §1.4)",
+      "needed_decision": "SIM explícito para autorizar PR Ruby/SketchUp"
+    },
+    {
+      "title": "Threshold sweep no raster (len(strokes) > 200)",
+      "reason": "Exige sweep empírico sobre planta_74 + p10 + p12 + visual diff antes de qualquer mudança",
+      "needed_decision": "Aprovação humana antes de rodar sweep e comitar resultado"
+    },
+    {
+      "title": "patches/archive/07-09",
+      "reason": "HIGH risk — novas dependências (torch, gdown), troca de extractor",
+      "needed_decision": "PR plan assinado antes de aplicar"
+    }
+  ],
+  "next_steps": [
+    "Mergear PR operacional do dashboard (este PR)",
+    "Mergear feature/window-detector quando tests passarem",
+    "Decidir skp-carve-openings (autorização humana)",
+    "Rodar auditor v2 e atualizar reports/repo_audit.json",
+    "Adicionar SRE Radar no dashboard (PR sequencial)"
+  ]
+}
