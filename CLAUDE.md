@@ -108,7 +108,10 @@ SU 2026 (~5-90s, GUI process). Do not run it in tight loops.
 3. Run cheap validators (pytest subset, ruff).
 4. Compute SHA256 of `consensus_model.json`.
 5. Skip SketchUp if the hash matches the previous successful export
-   (cache-by-content). Honor `--force-skp` to bypass.
+   (cache-by-content). `tools/skp_from_consensus.py` writes a
+   sidecar `<out_skp>.metadata.json` with the consensus sha256;
+   reruns short-circuit when the sha matches. Honor `--force-skp`
+   to bypass. See `docs/performance/skip_unchanged_skp.md`.
 6. Only then run `python -m tools.skp_from_consensus`.
 7. Inspect the `.skp` automatically when possible
    (`tools/inspect_walls_report.rb` via the autorun plugin).

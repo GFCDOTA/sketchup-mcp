@@ -210,20 +210,31 @@ def _run_one_pass(pdf_path: Path, out_dir: Path) -> dict[str, Any]:
             )
             if template is not None:
                 shutil.copy2(template, bootstrap_target)
+        sfc_result: dict[str, Any] | None = None
         with _stage_timer("sketchup_export", results):
             from tools.skp_from_consensus import run as sfc_run
-            ok = sfc_run(
+            sfc_result = sfc_run(
                 consensus_path, skp_path, su_exe,
                 timeout_s=180,
                 bootstrap_skp=bootstrap_target if bootstrap_target.exists() else None,
             )
-            if not ok:
-                # `run` returns False on timeout/early-exit. Re-raise
-                # so the timer marks the stage failed.
+            if not sfc_result.get("ok"):
                 raise RuntimeError(
-                    "skp_from_consensus.run returned False "
+                    "skp_from_consensus.run failed "
                     "(SU spawn or autorun plugin failure)"
                 )
+        # The stage_timer overwrites results[name] in its finally,
+        # so the skip-aware status has to be applied AFTER the with
+        # block exits. A skipped run still counts as `ok` for the
+        # bench, but the status field "skipped" lets the summary
+        # quantify how much time the cache saved.
+        if (
+            sfc_result is not None
+            and sfc_result.get("skipped")
+            and results["sketchup_export"]["status"] == "ok"
+        ):
+            results["sketchup_export"]["status"] = "skipped"
+            results["sketchup_export"]["error"] = "SKIPPED_UNCHANGED_CONSENSUS"
     else:
         results["sketchup_export"] = {
             "status": "skipped",
@@ -250,7 +261,14 @@ def _run_one_pass(pdf_path: Path, out_dir: Path) -> dict[str, Any]:
 
 
 def _summarize_runs(runs: list[dict[str, dict[str, Any]]]) -> dict[str, Any]:
-    """Aggregate N runs into median/min/max per stage."""
+    """Aggregate N runs into median/min/max per stage.
+
+    "skipped" runs (e.g. sketchup_export reusing an unchanged .skp)
+    are recorded in `status_counts` but excluded from timing
+    aggregates — their elapsed_s is the hash-check cost, not the
+    real export cost. `skip_savings_s` estimates the wall-clock
+    saved across the run set.
+    """
     if not runs:
         return {}
     stage_names = list(runs[0].keys())
@@ -258,10 +276,12 @@ def _summarize_runs(runs: list[dict[str, dict[str, Any]]]) -> dict[str, Any]:
     for stage in stage_names:
         timings = [r[stage]["elapsed_s"] for r in runs if r[stage]["status"] == "ok"]
         statuses = [r[stage]["status"] for r in runs]
+        skipped_count = statuses.count("skipped")
         if timings:
+            median_ok = statistics.median(timings)
             summary[stage] = {
                 "status_counts": {s: statuses.count(s) for s in set(statuses)},
-                "elapsed_s_median": round(statistics.median(timings), 4),
+                "elapsed_s_median": round(median_ok, 4),
                 "elapsed_s_min": round(min(timings), 4),
                 "elapsed_s_max": round(max(timings), 4),
                 "elapsed_s_cv": round(
@@ -271,6 +291,7 @@ def _summarize_runs(runs: list[dict[str, dict[str, Any]]]) -> dict[str, Any]:
                     4,
                 ),
                 "rss_after_mb_max": max(r[stage]["rss_after_mb"] for r in runs),
+                "skip_savings_s": round(skipped_count * median_ok, 4),
             }
         else:
             summary[stage] = {
@@ -280,6 +301,7 @@ def _summarize_runs(runs: list[dict[str, dict[str, Any]]]) -> dict[str, Any]:
                 "elapsed_s_max": None,
                 "elapsed_s_cv": None,
                 "rss_after_mb_max": None,
+                "skip_savings_s": 0.0,
             }
     return summary
 

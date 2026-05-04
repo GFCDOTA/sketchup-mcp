@@ -322,6 +322,14 @@ def gate_f(args: argparse.Namespace, report: SmokeReport) -> GateResult:
     ]
     if args.plugins:
         cmd += ["--plugins", str(args.plugins)]
+    # Propagate --force-skp so the inner sidecar-based skip in
+    # tools.skp_from_consensus stays consistent with the outer
+    # smoke cache layer. (When the smoke cache hits we never even
+    # get to F; this matters only when the smoke cache missed but
+    # the sidecar might still match — we want the explicit force
+    # to override both layers.)
+    if args.force_skp:
+        cmd.append("--force-skp")
     # Capture stderr+stdout to a sidecar log so debugging doesn't
     # depend on the truncated message field.
     log_path = out_dir / "skp_from_consensus.log"
