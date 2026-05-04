@@ -168,6 +168,9 @@ When in doubt, choose the conservative path:
 - Add a deselect instead of muting an assertion.
 - Open a draft PR instead of merging silently.
 - Ask the user (via `AskUserQuestion`) instead of guessing.
+- Before any autonomous task, fill the Prompt Contract from
+  `docs/learning/prompt_quality_rubric.md`. The `agent-coordinator`
+  enforces it.
 
 ---
 
@@ -186,6 +189,7 @@ When something is learned, it goes to `docs/learning/`:
 - `decision_log.md` — architectural decisions with date + author
 - `validation_matrix.md` — what is validated by what
 - `prompt_improvements.md` — prompts that worked / didn't
+- `prompt_quality_rubric.md` — rubric + Prompt Contract template for autonomous tasks
 - `agent_improvements.md` — adjustments to specialist agents
 
 Roadmap of pending work: [`docs/ROADMAP.md`](docs/ROADMAP.md).

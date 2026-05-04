@@ -146,3 +146,11 @@ without documenting WHY each one is deselected.
 YAML comment in `.github/workflows/ci.yml` AND in
 `docs/repo_hardening_plan.md`. Never deselect to mask a regression
 introduced by the current PR.
+
+## FP-011 — Ground-truth leaked into validator LLM prompt (2026-05-XX)
+
+**Date:** 2026-05-04
+**Discovered in:** `validator/vision.py:46` (commit history: pre-2026-05-04).
+**Pattern:** The `_build_prompt` function hardcoded the string `"extraida de uma planta de 74 m2"`, leaking the ground-truth area of the canonical fixture into the LLM critic's prompt. This violates CLAUDE.md §2.6 ("Leak ground-truth into the extractor output. Scores are observational only.") and risked making the validator silently PDF-coupled (CLAUDE.md §2.4).
+**Anti-pattern signal:** Any literal numeric value or filename in a prompt template that originates from a known fixture is a candidate leak. Watch for `74`, `planta_74`, `proto_p10`, `p12`.
+**Resolution:** Tracked in branch `validate/no-gt-leak` (Stream B of the 2026-05-04 wave). Replaces hardcoded value with optional `expected_area_m2` from external config.

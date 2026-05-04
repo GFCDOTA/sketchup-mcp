@@ -89,6 +89,8 @@ Antes do extract, a pagina passa por `roi.detect_architectural_roi`:
 
 ### Numeros no PDF de referencia `planta_74m2.pdf` (74 m^2, uma pagina)
 
+> **OUTDATED (raster pipeline).** Vector pipeline baseline on `planta_74` is **33 walls / 11 rooms / 12 openings / 8 soft_barriers** (CLAUDE.md §10).
+
 Estado pos-merge colinear (output walls sao centerlines limpas):
 - walls: **94** (output limpo, dentro da meta <=150)
 - rooms: 14 (dentro do ideal 6-15)

@@ -32,10 +32,9 @@
   category. See `docs/architecture/target_repo_architecture.md`.
 - [ ] **`refactor/extract-apps`** — Extract apps to `apps/`.
 - [ ] **`refactor/extract-packages`** — Move libs to `packages/`.
-- [ ] **`feature/window-detector`** — Detect windows in
-  `tools/extract_openings_vector.py`.
 - [ ] **`feature/skp-carve-openings`** — Modify `consume_consensus.rb`
-  to actually carve openings. Touches Ruby.
+  to actually carve openings. Touches Ruby; **gated on explicit user
+  authorization** per CLAUDE.md §1 hard rule #4.
 - [ ] **`chore/runs-archive`** — Move old runs to `runs/_archive/`.
 - [ ] **`chore/patches-applied-archive`** — Move applied patches.
 - [ ] **`agents/repo-auditor-workflow`** — Cron weekly audit upload.
@@ -79,4 +78,6 @@
 15. PR #15 `Promote develop to main` (drains PR #14)
 16. PR #16 `agents: repo-auditor v2 with NEW/RESOLVED/PERSISTING delta`
 17. PR #17 `Promote develop to main` (drains PR #16)
-18. PR (this) `ci: run cheap SketchUp smoke gates without launching SketchUp`
+18. PR #18 `ci: run cheap SketchUp smoke gates without launching SketchUp`
+19. PR #19 `Promote develop to main` (drains PR #18)
+20. PR (this) `feature: detect vector windows separately from doors`

@@ -1,39 +1,44 @@
-"""Vector-first opening detector.
+"""Vector-first opening detector — doors AND windows.
 
 The vector consensus builder (``build_vector_consensus.py``) extracts
 walls from filled paths but emits ``openings: []`` because it
-deliberately filters out stroked-only fixtures. Door arcs in Brazilian
-sales-brochure PDFs are stroked-only paths with cubic Bezier segments
-— the same bucket the wall extractor ignores. This module re-scans
-that bucket for door-arc shapes and emits openings.
+deliberately filters out stroked-only fixtures. Brazilian
+sales-brochure PDFs draw openings with two distinct vector idioms:
 
-Algorithm (v0)
---------------
-1. Iterate every page object; keep stroked-only paths inside the planta
-   region whose bbox is roughly square (15-100 PDF pts on each side,
-   aspect 0.4..2.5) and which contain at least one cubic Bezier segment.
-   Door arcs in Brazilian residential plantas (~70-90 cm doors) project
-   to ~30-60 PDF pts at typical 1:50/1:100 scales.
-2. For each arc candidate, find the nearest wall whose perpendicular
-   distance from the arc's bbox center is within ``wall_thickness * 1.5``.
-3. Project the arc center onto that wall and emit an opening:
-       center      = projection on the wall's centerline
-       chord_pt    = arc's bbox-side touching the wall (door's hinge edge)
-       kind        = "door" if cubic_count >= 1 else "passage"
-       geometry_origin = "svg_arc"
-       confidence  = derived from bbox aspect, segment count, wall match
-       hinge_side  = "near" if arc is on the host wall side closest to
-                     the room interior, else "far" (best-effort)
-       swing_deg   = 90 (default; arc geometry could be analyzed later)
+- **Door arc** — stroked path with at least one cubic Bezier segment,
+  bbox roughly square (15-100 PDF pts each side, aspect 0.4..2.5),
+  drawn perpendicular to the host wall.
+- **Window** — stroked path with zero cubic segments, very elongated
+  bbox (one dim ~ wall thickness, the other 25-250 PDF pts), centered
+  along a wall.
 
-This v0 does NOT carve walls or determine room_a/room_b. Those are
-downstream concerns for ``consume_consensus.rb``. We only fill the
-``openings`` array honestly per memory ``feedback_nao_fabricar_sem_medidas``:
-emit ONLY where the PDF actually drew an arc.
+Both are stroked-only paths in the same pdfium bucket the wall
+extractor ignores. This module re-scans that bucket and emits
+``openings`` of kind ``"door"`` or ``"window"`` accordingly.
 
-Invariant: if ``--no-arc-fallback`` is passed and zero arcs are found,
-the openings list stays empty. We never invent doors from gap heuristics
-in this module.
+Algorithm
+---------
+1. Door arcs (``_arc_candidates`` → ``_dedupe_arcs``): aspect-
+   constrained stroked paths with cubic Bezier segments. Match each
+   to the nearest wall whose perpendicular distance from any arc-
+   bbox CORNER is within ``thickness * 1.5``. Hinge corner = the
+   bbox vertex sitting on the wall.
+
+2. Windows (``_window_candidates``): stroked paths with **zero**
+   cubic segments, bbox elongated (aspect ≥ 3, short side ≤
+   thickness*1.5), inside the planta region. Each window must lie
+   within ``thickness * 0.6`` of a wall centerline; if so the
+   window is projected onto that wall and emitted. Windows are
+   deduped against the door arcs already detected (≥ 50 % bbox
+   overlap with an arc → drop the window — the arc wins because
+   its detection is stricter).
+
+Both stages emit honest data per memory
+``feedback_nao_fabricar_sem_medidas``: only paths that the PDF
+actually drew become openings.
+
+This module does NOT carve walls or determine room_a/room_b — that
+remains a downstream concern for ``tools/consume_consensus.rb``.
 """
 from __future__ import annotations
 
@@ -58,6 +63,16 @@ ARC_ASPECT_MIN = 0.4
 ARC_ASPECT_MAX = 2.5
 
 WALL_MATCH_FACTOR = 1.5  # arc center must be within thickness * this
+
+# Window detector: stroked paths drawn AS the glazing line in the
+# wall band, oriented along the wall, no curves.
+WINDOW_LONG_MIN = 25.0          # ~30 cm at 1:50 (smallest sensible window width)
+WINDOW_LONG_MAX = 250.0         # ~3 m (e.g. a sliding glass door front)
+WINDOW_DEPTH_FACTOR = 1.5       # short side <= thickness * this
+WINDOW_ASPECT_MIN = 3.0         # must be much more elongated than door arcs
+WINDOW_WALL_DIST_FACTOR = 0.6   # bbox center within thickness * this of a wall centerline
+WINDOW_DEDUPE_OVERLAP = 0.5     # drop window if it shares >= this fraction of bbox with an arc
+WINDOW_WALL_LEN_RATIO_MAX = 0.7 # drop window if its long side >= this fraction of the wall — likely a wall outline stroke
 
 
 @dataclass
@@ -203,6 +218,191 @@ def _bbox_overlap_area(a, b) -> float:
     return iw * ih
 
 
+@dataclass
+class WindowCandidate:
+    """Stroked, no-curve, very elongated path that sits along a wall.
+
+    The bbox short side is roughly the wall thickness; the long side
+    spans the window opening (typical 30-200 cm).
+    """
+    bbox: tuple[float, float, float, float]
+    n_seg: int
+
+    @property
+    def w(self) -> float:
+        return self.bbox[2] - self.bbox[0]
+
+    @property
+    def h(self) -> float:
+        return self.bbox[3] - self.bbox[1]
+
+    @property
+    def cx(self) -> float:
+        return (self.bbox[0] + self.bbox[2]) / 2
+
+    @property
+    def cy(self) -> float:
+        return (self.bbox[1] + self.bbox[3]) / 2
+
+    @property
+    def long_side(self) -> float:
+        return max(self.w, self.h)
+
+    @property
+    def short_side(self) -> float:
+        return min(self.w, self.h)
+
+
+def _is_window_shape(bbox: tuple[float, float, float, float],
+                     n_cubic: int, thickness: float) -> bool:
+    """Pure geometry classifier — stroke type + region filters are
+    the caller's job.
+
+    True iff the bbox shape matches the window heuristic: elongated
+    (aspect >= WINDOW_ASPECT_MIN), short side close to wall thickness,
+    long side in the 25-250 pt range. The aspect filter alone
+    excludes door arcs (which are square-ish, aspect 0.4..2.5) so
+    presence of cubic Bezier segments is NOT a disqualifier — many
+    PDF generators emit cubic primitives even for straight lines.
+    The `n_cubic` parameter is accepted for forward compatibility
+    with extractors that want to report it; this function ignores it.
+    """
+    del n_cubic  # accepted for symmetry with the door classifier; unused
+    l, b, r, t = bbox
+    w, h = r - l, t - b
+    long_side = max(w, h)
+    short_side = min(w, h)
+    if long_side < WINDOW_LONG_MIN or long_side > WINDOW_LONG_MAX:
+        return False
+    if short_side <= 0 or short_side > thickness * WINDOW_DEPTH_FACTOR:
+        return False
+    if long_side / short_side < WINDOW_ASPECT_MIN:
+        return False
+    return True
+
+
+def _window_candidates(page,
+                       region: tuple[float, float, float, float],
+                       thickness: float) -> list[WindowCandidate]:
+    """Scan stroked paths inside the region; keep ones whose bbox
+    matches the window-shape heuristic."""
+    rx0, ry0, rx1, ry1 = region
+    out: list[WindowCandidate] = []
+    for obj in page.get_objects():
+        if obj.type != 2:
+            continue
+        l, b, r, t = obj.get_pos()
+        cx, cy = (l + r) / 2, (b + t) / 2
+        if not (rx0 <= cx <= rx1 and ry0 <= cy <= ry1):
+            continue
+
+        raw = obj.raw
+        fm = ctypes.c_int(0)
+        st = ctypes.c_int(0)
+        pdfium_c.FPDFPath_GetDrawMode(raw, ctypes.byref(fm), ctypes.byref(st))
+        if not st.value:
+            continue   # require stroked
+
+        nseg = pdfium_c.FPDFPath_CountSegments(raw)
+        n_cubic = 0
+        for i in range(nseg):
+            seg = pdfium_c.FPDFPath_GetPathSegment(raw, i)
+            if pdfium_c.FPDFPathSegment_GetType(seg) == 2:  # FPDF_SEGMENT_BEZIERTO
+                n_cubic += 1
+
+        if not _is_window_shape((l, b, r, t), n_cubic, thickness):
+            continue
+        out.append(WindowCandidate(bbox=(l, b, r, t), n_seg=nseg))
+    return out
+
+
+def _wall_length(wall: dict) -> float:
+    sx, sy = wall["start"]
+    ex, ey = wall["end"]
+    return math.hypot(ex - sx, ey - sy)
+
+
+def _window_to_wall(window: WindowCandidate, walls: list[dict],
+                    thickness: float) -> tuple[dict | None, tuple[float, float], float]:
+    """Find the wall whose centerline runs closest to the window's
+    bbox center. Returns ``(wall, projection, distance)`` or
+    ``(None, ...)`` if:
+      - no wall is within ``thickness * WINDOW_WALL_DIST_FACTOR``, OR
+      - the window long side is at least ``WINDOW_WALL_LEN_RATIO_MAX``
+        of the matched wall length (suggests it's the wall's stroked
+        outline, not a window opening drawn inside the wall band).
+    """
+    best: tuple[dict | None, tuple[float, float], float] = (None, (0, 0), float("inf"))
+    for w in walls:
+        ax, ay = w["start"]
+        bx, by = w["end"]
+        proj, dist = _project_on_segment(window.cx, window.cy, ax, ay, bx, by)
+        if dist < best[2]:
+            best = (w, proj, dist)
+    wall, proj, dist = best
+    if wall is None or dist > thickness * WINDOW_WALL_DIST_FACTOR:
+        return None, (0, 0), dist
+    wall_len = _wall_length(wall)
+    if wall_len > 0 and window.long_side / wall_len >= WINDOW_WALL_LEN_RATIO_MAX:
+        # Probably the wall's own stroked outline, not a window.
+        return None, (0, 0), dist
+    return wall, proj, dist
+
+
+def _window_overlaps_arc(window: WindowCandidate,
+                         arc_bboxes: list[tuple[float, float, float, float]],
+                         threshold: float = WINDOW_DEDUPE_OVERLAP) -> bool:
+    """True iff `window.bbox` shares ≥ `threshold` of the smaller
+    bbox area with any arc bbox. Used to drop windows already
+    covered by a door arc detection."""
+    cand_area = window.w * window.h
+    if cand_area <= 0:
+        return False
+    for ab in arc_bboxes:
+        ab_area = (ab[2] - ab[0]) * (ab[3] - ab[1])
+        if ab_area <= 0:
+            continue
+        inter = _bbox_overlap_area(window.bbox, ab)
+        small = min(cand_area, ab_area)
+        if small > 0 and inter / small >= threshold:
+            return True
+    return False
+
+
+def _window_confidence(window: WindowCandidate, dist_to_wall: float,
+                       thickness: float) -> float:
+    """Confidence for a window detection. Highest when the bbox is
+    very elongated, perfectly aligned with the wall centerline, and
+    short-side close to (but not exceeding) the wall thickness."""
+    aspect = window.long_side / max(window.short_side, 0.001)
+    elongation = min(1.0, (aspect - WINDOW_ASPECT_MIN) /
+                     max(WINDOW_ASPECT_MIN, 1.0) + 0.5)
+    wall_ok = max(0.0, 1.0 - (dist_to_wall /
+                              max(thickness * WINDOW_WALL_DIST_FACTOR, 1e-3)))
+    depth_ratio = window.short_side / max(thickness, 0.001)
+    depth_ok = 1.0 - min(1.0, abs(1.0 - depth_ratio))
+    return round(0.4 * elongation + 0.4 * wall_ok + 0.2 * depth_ok, 3)
+
+
+def _emit_window_opening(window: WindowCandidate, wall: dict,
+                         proj: tuple[float, float], dist: float,
+                         thickness: float, idx: int) -> dict[str, Any]:
+    """Build a single window opening dict. No hinge/swing — windows
+    don't have those."""
+    return {
+        "id":               f"o{idx:03d}",
+        "center":           [round(proj[0], 3), round(proj[1], 3)],
+        "kind":             "window",
+        "geometry_origin":  "svg_segments",
+        "confidence":       _window_confidence(window, dist, thickness),
+        "wall_id":          wall.get("id"),
+        "opening_width_pts": round(window.long_side, 3),
+        "window_bbox_pts":  [round(c, 3) for c in window.bbox],
+        "window_n_seg":     window.n_seg,
+        "wall_dist_pts":    round(dist, 3),
+    }
+
+
 def _dedupe_arcs(arcs: list[ArcCandidate]) -> list[ArcCandidate]:
     """A real door is often drawn as TWO paths: the leaf rectangle and
     the swing arc. They occupy nearly the same bbox. Cluster candidates
@@ -233,7 +433,8 @@ def detect_openings(pdf_path: Path,
                     region: tuple[float, float, float, float],
                     thickness: float) -> list[dict[str, Any]]:
     """Return a list of openings (dicts ready to be JSON-serialized
-    into the consensus.openings array)."""
+    into the consensus.openings array). Doors come first (by
+    historical convention), then windows."""
     pdf = pdfium.PdfDocument(str(pdf_path))
     page = pdf[0]
     arcs = _dedupe_arcs(_arc_candidates(page, region))
@@ -265,6 +466,29 @@ def detect_openings(pdf_path: Path,
             "arc_n_cubic":      arc.n_cubic,
             "wall_dist_pts":    round(dist, 3),
         })
+
+    # Windows: very elongated stroked paths along walls. Doors are
+    # detected first; windows that overlap an existing arc bbox are
+    # dropped to avoid double-counting (the arc detection is stricter
+    # and wins by construction).
+    #
+    # The door loop above uses the ARC INDEX as the id ("o<i>"), which
+    # leaves gaps when an arc fails wall-matching. Window ids must
+    # start strictly after `len(arcs)` so they never collide with a
+    # gap-filling arc id.
+    arc_bboxes = [a.bbox for a in arcs]
+    windows = _window_candidates(page, region, thickness)
+    next_id = len(arcs)
+    for cand in windows:
+        if _window_overlaps_arc(cand, arc_bboxes):
+            continue
+        wall, proj, dist = _window_to_wall(cand, walls, thickness)
+        if wall is None:
+            continue
+        openings.append(_emit_window_opening(
+            cand, wall, proj, dist, thickness, idx=next_id,
+        ))
+        next_id += 1
 
     return openings
 
@@ -299,8 +523,13 @@ def enrich_consensus(consensus: dict, pdf_path: Path,
             existing.append(op)
         consensus["openings"] = existing
 
-    consensus.setdefault("metadata", {})["openings_extractor"] = "vector_arc_v0"
-    consensus["metadata"]["svg_arc_opening_count"] = len(new_openings)
+    consensus.setdefault("metadata", {})["openings_extractor"] = "vector_arc_window_v1"
+    consensus["metadata"]["svg_arc_opening_count"] = sum(
+        1 for o in new_openings if o.get("geometry_origin") == "svg_arc"
+    )
+    consensus["metadata"]["svg_window_opening_count"] = sum(
+        1 for o in new_openings if o.get("geometry_origin") == "svg_segments"
+    )
     return consensus
 
 
@@ -324,16 +553,27 @@ def _cli() -> int:
     enrich_consensus(consensus, args.pdf, mode=args.mode)
     arc_openings = [o for o in consensus["openings"]
                     if o.get("geometry_origin") == "svg_arc"]
-    print(f"[ok] {len(arc_openings)} openings detected from {args.pdf.name}")
+    window_openings = [o for o in consensus["openings"]
+                       if o.get("geometry_origin") == "svg_segments"]
+    print(f"[ok] {len(arc_openings)} doors + {len(window_openings)} "
+          f"windows detected from {args.pdf.name}")
     for o in arc_openings:
         wall_id = o.get("wall_id") or "?"
         center = o.get("center") or [0, 0]
         width = o.get("opening_width_pts") or 0
         conf = o.get("confidence") or 0
         hinge = o.get("hinge_side") or "?"
-        print(f"  {o['id']}  wall={wall_id:<4} "
+        print(f"  {o['id']} door   wall={wall_id:<4} "
               f"center=({center[0]:.1f},{center[1]:.1f}) "
               f"width={width:.1f}pt conf={conf:.2f}  hinge={hinge}")
+    for o in window_openings:
+        wall_id = o.get("wall_id") or "?"
+        center = o.get("center") or [0, 0]
+        width = o.get("opening_width_pts") or 0
+        conf = o.get("confidence") or 0
+        print(f"  {o['id']} window wall={wall_id:<4} "
+              f"center=({center[0]:.1f},{center[1]:.1f}) "
+              f"width={width:.1f}pt conf={conf:.2f}")
 
     if not args.dry_run:
         out = args.out or args.consensus

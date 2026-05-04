@@ -124,3 +124,19 @@ and rollback strategy. Mixing them makes diff impossible to
 properly review.
 **Implementation:** Codified in `CLAUDE.md` §1 rule #9 and in
 `/prepare-pr` slash command.
+
+## DL-011 — Cache content-addressed for SketchUp export shipped (2026-05-XX)
+
+**Date:** 2026-05-04
+**Author:** docs-maintainer
+**Decision:** PR #14 (`5fdbbdd`) shipped real content-addressed cache for the `.skp` export step (`tools/skp_from_consensus.py`). Sidecar `<out_skp>.metadata.json` stores the consensus sha256; reruns short-circuit when the sha matches. Bypass via `--force-skp`.
+**Rationale:** SU is the most expensive gate (~91% of wall-clock per PR #12 baseline). Content-addressed cache removes redundant SU launches when consensus is byte-identical.
+**Status:** SHIPPED (replaces DL-006 "designed; not implemented" status). Documented in `docs/performance/skip_unchanged_skp.md`.
+
+## DL-012 — Cheap CI smoke gates without launching SketchUp (2026-05-XX)
+
+**Date:** 2026-05-04
+**Author:** docs-maintainer
+**Decision:** PR #18 (`d77b61a`) runs the smoke harness gates A-E with `--skip-skp` against a versioned synthetic consensus (`tests/fixtures/smoke_consensus.json`) on every PR. SketchUp itself is never launched in CI.
+**Rationale:** SU is GUI/Windows-only and slow (~5-90s). The harness still exercises the JSON validator, render_axon, hashing, and report shapes — the contract — without paying the SU cost. Honors CLAUDE.md §3 (SU is the LAST gate).
+**Status:** SHIPPED. CI green on ubuntu-latest in <15min total.

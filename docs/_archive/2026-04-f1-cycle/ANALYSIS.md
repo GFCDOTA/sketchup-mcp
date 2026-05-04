@@ -68,7 +68,7 @@ def _geometry_score(candidates: list[WallCandidate], walls: list) -> float:
 
 **Severidade:** CRÍTICA.
 
-**Fix proposto:** substituir por F1-score + perimeter closure + connectivity. Ver [patches/03-quality-score.py](patches/03-quality-score.py).
+**Fix proposto:** substituir por F1-score + perimeter closure + connectivity. Ver [patches/03-quality-score.py](../patches/03-quality-score.py).
 
 ---
 
@@ -94,7 +94,7 @@ if len(strokes) > 200:
 
 **Severidade:** ALTA.
 
-**Fix proposto:** substituir por densidade por área (`candidates_per_cm²`). Ver [patches/02-density-trigger.py](patches/02-density-trigger.py).
+**Fix proposto:** substituir por densidade por área (`candidates_per_cm²`). Ver [patches/02-density-trigger.py](../patches/02-density-trigger.py).
 
 ---
 
@@ -119,7 +119,7 @@ if min(height, width) < min_image_side:
 
 **Severidade:** MÉDIA-ALTA.
 
-**Fix proposto:** adicionar `reason="small_input"` separado de `applied`. Ver [patches/04-roi-fallback-explicit.py](patches/04-roi-fallback-explicit.py).
+**Fix proposto:** adicionar `reason="small_input"` separado de `applied`. Ver [patches/04-roi-fallback-explicit.py](../patches/04-roi-fallback-explicit.py).
 
 ---
 
