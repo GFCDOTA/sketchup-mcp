@@ -1,3 +1,9 @@
+> **Historical / algorithmic roadmap. Status may be stale.**
+> Operational source of truth: [`docs/operational_roadmap.md`](operational_roadmap.md).
+> Kept for algorithmic context (Fases 0-6 framing). Individual line items
+> may not match current state — cross-reference with CLAUDE.md §11
+> (patches inventory) and the operational roadmap before acting.
+
 # ROADMAP.md — Execução revisada pós fix estrutural
 
 **Atualizado:** 2026-04-21, após `fix/dedup-colinear-planta74` (`a11724a`)
@@ -40,13 +46,13 @@ via winget user-scope). Venv isolada, sem torch/scipy em
 **Objetivo:** aplicar patches 02/03/04 corrigidos, fechar dívidas de
 invariante sem regredir o fix estrutural.
 
-| # | Tarefa | Patch | Tempo |
-|---|---|---|---|
-| 0.1 | Integrar `_retention_score` + `_quality_score` em `model/pipeline.py` | [03](patches/03-quality-score.py) | 2h |
-| 0.2 | Adicionar `fallback_used` aditivo em `RoiResult`; manter `fallback_reason` canônico | [04](patches/04-roi-fallback-explicit.py) | 1h |
-| 0.3 | Calibrar threshold de density-trigger (sweep) antes de mergear patch 02 | [02](patches/02-density-trigger.py) | 4h |
-| 0.4 | Atualizar `README.md` + schema docs pros 2 campos novos | inline | 1h |
-| 0.5 | Rodar suite, confirmar 77 pass / 15 pre-existing fails | `pytest` | 30min |
+| # | Tarefa | Patch | Tempo | Status |
+|---|---|---|---|---|
+| 0.1 | Integrar `_retention_score` + `_quality_score` em `model/pipeline.py` | [03](patches/03-quality-score.py) | 2h | APPLIED (`b798881`) |
+| 0.2 | Adicionar `fallback_used` aditivo em `RoiResult`; manter `fallback_reason` canônico | [04](patches/04-roi-fallback-explicit.py) | 1h | APPLIED (`7fb1d80`) |
+| 0.3 | Calibrar threshold de density-trigger (sweep) antes de mergear patch 02 | [02](patches/02-density-trigger.py) | 4h | PENDING (sweep not done) |
+| 0.4 | Atualizar `README.md` + schema docs pros 2 campos novos | inline | 1h | APPLIED |
+| 0.5 | Rodar suite, confirmar 77 pass / 15 pre-existing fails | `pytest` | 30min | N/A (one-shot) |
 
 **Baseline esperado** em `planta_74` (metrics NUMÉRICAS não mudam,
 só semântica dos scores):

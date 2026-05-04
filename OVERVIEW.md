@@ -363,7 +363,8 @@ A divisão natural é **por camada do pipeline**. Cada camada conversa pelo sche
 - ❌ **SU2026 trial dialog** — sem admin no `C:\Program Files\…`, o launcher precisa do bootstrap fix (passar .skp positional) — já implementado em `skp_from_consensus.py`.
 - ❌ **Sem regression alerting** — validator scoreia mas não diffa contra histórico.
 - ❌ **Janelas não detectadas** — `extract_openings_vector.py` só pega arcos de porta, não pares de linhas paralelas de janela.
-- ❌ **Pipeline raster despedaça plantas complexas** — ver [`docs/CAUSA-RAIZ.md`](docs/CAUSA-RAIZ.md). Patches existem em `patches/` mas não foram aplicados.
+- ❌ **Pipeline raster despedaça plantas complexas** — ver [`docs/CAUSA-RAIZ.md`](docs/CAUSA-RAIZ.md).
+- Patches 03 (`b798881`) and 04 (`7fb1d80`) APPLIED. Patch 02 (density-trigger) PENDING empirical sweep. Patches 07-09 in `patches/archive/` are HIGH risk and require explicit human approval per CLAUDE.md §1 hard rule #5.
 
 ### Limitações
 

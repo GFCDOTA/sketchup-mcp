@@ -104,6 +104,13 @@ state).
 way, even a context-stripped agent retains the safety guarantees.
 **Status:** Applied in v1.
 
+## AI-009 — repo-auditor must use ls-remote for remote claims (2026-05-XX)
+
+**Date:** 2026-05-04
+**Trigger:** During the 2026-05-04 multi-specialist audit, the auditor concluded that `develop` did not exist remote-side based only on `git branch -a` output, when in fact the local clone hadn't fetched.
+**Pattern:** Any agent claim about the existence/state of a remote ref MUST be backed by `git ls-remote --heads origin <name>` (or equivalent), not by inspecting local refs only.
+**Action:** Update `.claude/agents/repo-auditor.md` to add this rule under "Mandatory checks". (NOT done in this PR — Stream A is docs-only. Tracked as a follow-up: `agents/repo-auditor-remote-check`.)
+
 ## Template for new entry
 
 ```markdown
