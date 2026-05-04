@@ -10,11 +10,11 @@
 ## Now (in flight or next up)
 
 ### Tooling / SketchUp gates
-- [ ] **`tooling/sketchup-smoke-gates`** — `scripts/smoke/smoke_skp_export.py`
-  with gates A→H. Drafted in stash; needs PR to develop.
-- [ ] **`validate/sketchup-2026-export`** — Run smoke harness end-to-end
-  against `runs/vector/consensus_model.json`, document result in
-  `docs/validation/sketchup_2026_validation.md`.
+- [ ] **`validate/sketchup-2026-export`** — Run the smoke harness
+  end-to-end against `runs/vector/consensus_model.json`, document the
+  result in `docs/validation/sketchup_2026_validation.md`. Now
+  unblocked: `scripts/smoke/smoke_skp_export.py` shipped via PR
+  `tooling/sketchup-smoke-gates`.
 
 ### Performance
 - [ ] **`perf/capture-real-baseline`** — Run `bench_pipeline.py`
@@ -84,4 +84,6 @@
 4. PR #4 `perf: add pipeline benchmark baseline script`
 5. PR #5 `agents: add read-only repo auditor`
 6. PR #6 `docs: define content-addressed cache rollout plan`
-7. PR (this) `agents: add operational memory and guardrails`
+7. PR #7 `agents: add operational memory and guardrails`
+8. PR #8 `Promote develop to main` (initial promotion under develop-first)
+9. PR (this) `tooling: add SketchUp smoke gates harness`

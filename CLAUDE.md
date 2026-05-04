@@ -114,12 +114,11 @@ SU 2026 (~5-90s, GUI process). Do not run it in tight loops.
    (`tools/inspect_walls_report.rb` via the autorun plugin).
 8. Open the `.skp` visually only when needed (final QA step).
 
-**Planned tool:** `scripts/smoke/smoke_skp_export.py` (with companion
-doc `docs/validation/sketchup_smoke_workflow.md`) will enforce this
-order automatically. Tracked as `tooling/sketchup-smoke-gates` in
-[`docs/operational_roadmap.md`](docs/operational_roadmap.md). Until
-it lands, follow the cheap-gate sequence above manually before
-invoking `tools.skp_from_consensus`.
+The smoke harness `scripts/smoke/smoke_skp_export.py` enforces this
+order automatically. Companion doc:
+[`docs/validation/sketchup_smoke_workflow.md`](docs/validation/sketchup_smoke_workflow.md).
+Honors `--skip-skp` (cheap gates only) and `--force-skp` (bypass
+content-hash cache).
 
 ---
 

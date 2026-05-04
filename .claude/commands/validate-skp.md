@@ -5,21 +5,9 @@ description: Run JSON->SKP via cheap smoke gates. Only opens SketchUp if the che
 # /validate-skp
 
 End-to-end SketchUp validation through the smoke gates. SketchUp is
-the LAST gate, never the first.
-
-> ⚠️ **Pre-requisite (planned):** `scripts/smoke/smoke_skp_export.py`
-> does not exist yet. It is tracked as `tooling/sketchup-smoke-gates`
-> in [`docs/operational_roadmap.md`](../../docs/operational_roadmap.md).
-> Until it lands, run the cheap gates manually:
->
-> 1. JSON structural validation of `consensus_model.json`.
-> 2. `python tools/render_axon.py` (top + axon previews).
-> 3. SHA256 of `consensus_model.json`; skip SU if it matches the
->    previous export.
-> 4. Then invoke `python -m tools.skp_from_consensus` directly.
->
-> The Sequence below describes the harness once it lands; treat it
-> as the contract for the upcoming PR, not as runnable today.
+the LAST gate, never the first. Implementation:
+[`scripts/smoke/smoke_skp_export.py`](../../scripts/smoke/smoke_skp_export.py)
++ [`docs/validation/sketchup_smoke_workflow.md`](../../docs/validation/sketchup_smoke_workflow.md).
 
 ## Sequence
 
