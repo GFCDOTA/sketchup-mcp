@@ -77,4 +77,6 @@
 13. PR #13 `Promote develop to main` (drains PR #12)
 14. PR #14 `perf: skip SketchUp export when consensus is unchanged`
 15. PR #15 `Promote develop to main` (drains PR #14)
-16. PR (this) `agents: repo-auditor v2 with NEW/RESOLVED/PERSISTING delta`
+16. PR #16 `agents: repo-auditor v2 with NEW/RESOLVED/PERSISTING delta`
+17. PR #17 `Promote develop to main` (drains PR #16)
+18. PR (this) `ci: run cheap SketchUp smoke gates without launching SketchUp`
