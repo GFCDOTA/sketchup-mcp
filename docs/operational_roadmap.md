@@ -21,10 +21,11 @@
 
 ## Next (after Now)
 
-- [ ] **`perf/skip-unchanged-skp`** — Promote the cache marker from
-  `smoke_skp_export.py` to a reusable helper in `packages/cache/`.
 - [ ] **`perf/cache-raster-stage`** — First real cache callsite.
-  Implement only after baseline confirms raster is the bottleneck.
+  Now LOWER priority: the baseline confirmed SketchUp is the
+  bottleneck (91 % of wall-clock), not raster. Reconsider after
+  smoke harness usage shows whether `rooms_from_seeds` (495 ms)
+  becomes a bottleneck during dev iteration.
 - [ ] **`chore/ruff-f821-cleanup`** — Add
   `from __future__ import annotations` to 3 oracle scripts. Zeroes 5 F821s.
 - [ ] **`refactor/render-scripts-compat`** — Move `render_*.py` from
@@ -77,4 +78,6 @@
 9. PR #9 `tooling: add SketchUp smoke gates harness`
 10. PR #10 `validate: SketchUp 2026 end-to-end smoke run`
 11. PR #11 `Promote develop to main` (drains PRs #9 + #10)
-12. PR (this) `perf: capture real pipeline baseline`
+12. PR #12 `perf: capture real pipeline baseline (+ bench fixes)`
+13. PR #13 `Promote develop to main` (drains PR #12)
+14. PR (this) `perf: skip SketchUp export when consensus is unchanged`
