@@ -81,6 +81,17 @@ def _sha256_path(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _relpath(path: Path) -> str:
+    """Path relative to REPO_ROOT if possible, absolute string otherwise.
+
+    Robust to out-dirs outside the repo (e.g. pytest tmp_path).
+    """
+    try:
+        return str(path.relative_to(REPO_ROOT))
+    except ValueError:
+        return str(path)
+
+
 def _validate_consensus_shape(data: Any) -> None:
     """Cheap structural check. Raises ValueError on any violation."""
     if not isinstance(data, dict):
@@ -227,7 +238,7 @@ def gate_d(args: argparse.Namespace, report: SmokeReport) -> GateResult:
             )
             g.finished_at = _utc_now()
             return g
-        artifacts.append(str(target.relative_to(REPO_ROOT)))
+        artifacts.append(_relpath(target))
     g.artifacts = artifacts
     g.message = "rendered top + axon previews"
     g.finished_at = _utc_now()
@@ -311,7 +322,7 @@ def gate_f(args: argparse.Namespace, report: SmokeReport) -> GateResult:
         g.status = "fail"
         g.message = "skp_from_consensus succeeded but no .skp produced"
     else:
-        g.artifacts = [str(skp.relative_to(REPO_ROOT))]
+        g.artifacts = [_relpath(skp)]
         g.message = f"exported {skp.name}"
         args._skp_path = skp
     g.finished_at = _utc_now()
@@ -359,10 +370,7 @@ def gate_h(args: argparse.Namespace, report: SmokeReport) -> GateResult:
         json.dumps(asdict(report), indent=2), encoding="utf-8"
     )
     md_path.write_text(_render_markdown(report), encoding="utf-8")
-    g.artifacts = [
-        str(json_path.relative_to(REPO_ROOT)),
-        str(md_path.relative_to(REPO_ROOT)),
-    ]
+    g.artifacts = [_relpath(json_path), _relpath(md_path)]
 
     if report.verdict == "pass" and not args.skip_skp:
         skp: Path | None = getattr(args, "_skp_path", None)
@@ -371,7 +379,7 @@ def gate_h(args: argparse.Namespace, report: SmokeReport) -> GateResult:
             cache_data = {
                 "cache_key": report.cache_key,
                 "consensus_sha256": report.consensus_sha256,
-                "skp_path": str(skp.relative_to(REPO_ROOT)) if skp else None,
+                "skp_path": _relpath(skp) if skp else None,
                 "run_id": out_dir.name,
                 "verdict": report.verdict,
                 "finished_at": report.finished_at,
@@ -379,7 +387,7 @@ def gate_h(args: argparse.Namespace, report: SmokeReport) -> GateResult:
             cache_marker.write_text(
                 json.dumps(cache_data, indent=2), encoding="utf-8"
             )
-            g.artifacts.append(str(cache_marker.relative_to(REPO_ROOT)))
+            g.artifacts.append(_relpath(cache_marker))
     g.finished_at = _utc_now()
     return g
 
