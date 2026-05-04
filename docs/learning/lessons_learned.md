@@ -13,11 +13,9 @@ when the consensus was identical to a previous run.
 **Rule:** Validate JSON + render PNG previews + compute consensus
 hash BEFORE launching SU. Cache by hash. Honor `--force-skp` to
 bypass.
-**Automation (planned):** `scripts/smoke/smoke_skp_export.py` will
-enforce gate order A→H. Tracked as `tooling/sketchup-smoke-gates`
-in `docs/operational_roadmap.md`. Until it lands, run cheap gates
-(JSON structural validation, preview PNG, consensus SHA256) manually
-before invoking `tools.skp_from_consensus`.
+**Automation:** `scripts/smoke/smoke_skp_export.py` enforces gate
+order A→H. See `docs/validation/sketchup_smoke_workflow.md` for the
+gate contract, CLI options, and typical invocations.
 
 ## LL-002 — Always reproduce CI failure locally in a fresh venv
 

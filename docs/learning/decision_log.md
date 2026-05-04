@@ -58,10 +58,11 @@ has explicit allow/deny lists.
 (JSON validation, preview PNG, hash compare) come first.
 **Rationale:** SU spawn costs 5-90s. Iterating on a fix shouldn't
 require a coffee break.
-**Implementation (planned):** `scripts/smoke/smoke_skp_export.py`
-will enforce gates A→H. Tracked as `tooling/sketchup-smoke-gates`
-in `docs/operational_roadmap.md`. The hash-based skip cache will
-live in `runs/smoke/<run>/_skp_cache.json` once the script lands.
+**Implementation:** `scripts/smoke/smoke_skp_export.py` enforces
+gates A→H. The cache marker lives at `runs/smoke/_skp_cache.json`
+(one level above each run dir) and the cache key is
+`SHA256(consensus_sha || sha(skp_from_consensus.py) || sha(consume_consensus.rb))`.
+Documented in `docs/validation/sketchup_smoke_workflow.md`.
 
 ## DL-006 — Content-addressed cache for the pipeline
 
