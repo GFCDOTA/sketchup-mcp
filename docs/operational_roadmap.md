@@ -9,13 +9,6 @@
 
 ## Now (in flight or next up)
 
-### Tooling / SketchUp gates
-- [ ] **`validate/sketchup-2026-export`** — Run the smoke harness
-  end-to-end against `runs/vector/consensus_model.json`, document the
-  result in `docs/validation/sketchup_2026_validation.md`. Now
-  unblocked: `scripts/smoke/smoke_skp_export.py` shipped via PR
-  `tooling/sketchup-smoke-gates`.
-
 ### Performance
 - [ ] **`perf/capture-real-baseline`** — Run `bench_pipeline.py`
   against planta_74 with `--runs 3 --warmup 1`. Write
@@ -86,4 +79,5 @@
 6. PR #6 `docs: define content-addressed cache rollout plan`
 7. PR #7 `agents: add operational memory and guardrails`
 8. PR #8 `Promote develop to main` (initial promotion under develop-first)
-9. PR (this) `tooling: add SketchUp smoke gates harness`
+9. PR #9 `tooling: add SketchUp smoke gates harness`
+10. PR (this) `validate: SketchUp 2026 end-to-end smoke run`
