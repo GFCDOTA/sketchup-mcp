@@ -41,7 +41,21 @@ Generate the standard PR body for the current branch.
      `roi/`, `ingest/` → route to geometry-specialist
    - Etc.
 
-5. **Compose the PR body** following the standard template:
+5. **Prompt/Task Quality Gate** — before drafting the PR body, self-check
+   the work against `docs/learning/prompt_quality_rubric.md`:
+
+   - Goal stated and singular?
+   - Scope (allowed / forbidden) documented and respected by the diff?
+   - Validation commands present, reproducible, and run with passing output?
+   - Risks called out (what could break, what didn't change)?
+   - Rollback command exact (`git revert <sha>` or
+     `git push origin --delete <branch>`)?
+   - Output format specified (CLAUDE.md §4 PR Standard sections all filled)?
+
+   If any gate fails, refuse to draft the PR body; surface the missing
+   item to the user.
+
+6. **Compose the PR body** following the standard template:
 
    ```markdown
    ## Summary
@@ -82,7 +96,7 @@ Generate the standard PR body for the current branch.
    🤖 Generated with [Claude Code](https://claude.com/claude-code)
    ```
 
-6. **Open the PR** (if `gh` is authenticated):
+7. **Open the PR** (if `gh` is authenticated):
 
    ```bash
    gh pr create --base develop --head <branch> \

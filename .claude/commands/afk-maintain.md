@@ -55,6 +55,26 @@ asked. Conservative defaults always win.
 4. **Pick the safest next task** from `docs/operational_roadmap.md` (Now > Next).
    Match against rules above. Skip anything in "Human decision required".
 
+4a. **Instantiate the Prompt Contract** before creating the branch.
+    Fill every field below from
+    `docs/learning/prompt_quality_rubric.md`. If any required field is
+    blank or fuzzy, halt and report instead of dispatching.
+
+    ```
+    Context:           <branch base, CLAUDE.md sections, anchor>
+    Goal:              <one sentence, singular outcome>
+    Allowed files:     <closed list of paths>
+    Forbidden files:   <closed list with §reason>
+    Steps:             <numbered, deterministic>
+    Validation:        <exact commands + pass criteria + baseline>
+    Stop conditions:   <halt triggers>
+    PR body:           <CLAUDE.md §4 PR Standard>
+    Final output:      <files written, PR URL, report path>
+    ```
+
+    See the worked example in `docs/learning/prompt_quality_rubric.md`
+    "Worked example — this rubric PR" for a real instance.
+
 5. **Create branch** from develop with appropriate prefix:
 
    ```bash
@@ -99,6 +119,7 @@ asked. Conservative defaults always win.
 - If CI is red on develop (don't add more PRs to a broken main).
 - If the task you picked turns out to need decisions you can't make
   conservatively.
+- If the Prompt Contract (step 4a) has any blank required field.
 
 ## Output format
 
