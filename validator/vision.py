@@ -11,7 +11,10 @@ import base64
 from pathlib import Path
 from typing import Any
 
-import requests
+try:
+    import requests
+except ModuleNotFoundError:  # optional: only needed for live Ollama call
+    requests = None  # type: ignore[assignment]
 
 from .scorers.base import ScorerContext
 
@@ -61,6 +64,8 @@ def _build_prompt(entry: dict, ctx: ScorerContext) -> str:
 
 
 def _ollama_available() -> bool:
+    if requests is None:
+        return False
     try:
         r = requests.get("http://localhost:11434/api/tags", timeout=2)
         return r.ok
