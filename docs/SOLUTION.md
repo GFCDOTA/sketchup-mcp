@@ -106,6 +106,7 @@
 ┌──────────────────────▼───────────────────────────────────────────────────┐
 │ STAGE 8 — TOPOLOGY (mantém, ajuste em snap)                               │
 │   topology/service.py + fix #1 (patches/01b)                              │
+> NOTE: patches 01/01b/05/06 were REJECTED in review (duplicated existing code). See CLAUDE.md §11 for current patch inventory.
 │   • Remove `return max(base, 25.0)` — substituir por base puro            │
 │   • Ou tornar floor configurável via param                                │
 │   • Split + snap + merge colinear + polygonize → rooms                    │

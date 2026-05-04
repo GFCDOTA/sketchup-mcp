@@ -108,3 +108,10 @@ it picks the most recent `.skp` in the output dir; if none, copy a
 template like
 `C:\Program Files\SketchUp\SketchUp 2026\SketchUp\resources\en-US\Templates\Temp01a - Simple.skp`
 to the output dir as `_bootstrap.skp`.
+
+## LL-010 — Multi-specialist parallel audit produces higher-quality synthesis (2026-05-XX)
+
+**Date:** 2026-05-04
+**Context:** During the 2026-05-04 panorama generation, eight specialist analyses ran in parallel (instead of one single-pass review). Each surfaced different gaps: the validator GT leak (validator-specialist), CI Ruby syntax blindness (ci-guardian), 17 root-of-repo orphan scripts (repo-auditor), schema drift between raster and vector openings (geometry-specialist), DL-006 status drift (docs-maintainer).
+**Lesson:** For non-trivial repo audits, prefer N parallel specialist passes over a single sequential review. The synthesis surfaces issues no single pass would have caught.
+**Caveat:** Only applies to AUDIT/REVIEW work where each specialist has a distinct lens. For execution/coding tasks, parallel agents on overlapping code paths cause merge conflicts — keep them disjoint.
