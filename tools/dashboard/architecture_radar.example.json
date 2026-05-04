@@ -1,0 +1,304 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-05-04T20:09:54+00:00",
+  "git": {
+    "branch": "dashboard/architecture-sre-radar",
+    "commit": "992bb79"
+  },
+  "overall": {
+    "health_score": 62,
+    "status": "warning",
+    "summary": "repo hygiene"
+  },
+  "scores": {
+    "overall": 62,
+    "docs_health": 88,
+    "service_health": 70,
+    "automation_health": 70,
+    "repo_hygiene": 0,
+    "product_quality": 82
+  },
+  "markdown": {
+    "total_files": 62,
+    "healthy_count": 62,
+    "warning_count": 0,
+    "saturated_count": 0,
+    "top_saturated": [
+      {
+        "path": "docs/agents/repo_auditor.md",
+        "lines": 210,
+        "size_kb": 6.2,
+        "headings": 29,
+        "todo_count": 6,
+        "score": 10,
+        "reasons": [
+          ">5 TODO/FIXME"
+        ]
+      },
+      {
+        "path": "AGENTS.md",
+        "lines": 109,
+        "size_kb": 5.5,
+        "headings": 11,
+        "todo_count": 0,
+        "score": 0,
+        "reasons": []
+      },
+      {
+        "path": "CLAUDE.md",
+        "lines": 309,
+        "size_kb": 10.6,
+        "headings": 27,
+        "todo_count": 1,
+        "score": 0,
+        "reasons": []
+      },
+      {
+        "path": "OVERVIEW.md",
+        "lines": 442,
+        "size_kb": 20.4,
+        "headings": 59,
+        "todo_count": 0,
+        "score": 0,
+        "reasons": []
+      },
+      {
+        "path": "PROMPT-FELIPE.md",
+        "lines": 142,
+        "size_kb": 6.4,
+        "headings": 3,
+        "todo_count": 0,
+        "score": 0,
+        "reasons": []
+      },
+      {
+        "path": "PROMPT-RENAN.md",
+        "lines": 157,
+        "size_kb": 12.7,
+        "headings": 3,
+        "todo_count": 0,
+        "score": 0,
+        "reasons": []
+      },
+      {
+        "path": "README.md",
+        "lines": 269,
+        "size_kb": 12.4,
+        "headings": 25,
+        "todo_count": 1,
+        "score": 0,
+        "reasons": []
+      },
+      {
+        "path": "agents/auditor/PROMPT.md",
+        "lines": 89,
+        "size_kb": 2.8,
+        "headings": 8,
+        "todo_count": 1,
+        "score": 0,
+        "reasons": []
+      },
+      {
+        "path": "agents/auditor/README.md",
+        "lines": 85,
+        "size_kb": 3.1,
+        "headings": 12,
+        "todo_count": 2,
+        "score": 0,
+        "reasons": []
+      },
+      {
+        "path": "docs/git_workflow.md",
+        "lines": 128,
+        "size_kb": 4.1,
+        "headings": 15,
+        "todo_count": 0,
+        "score": 0,
+        "reasons": []
+      }
+    ]
+  },
+  "drift_findings": [
+    {
+      "doc": "OVERVIEW.md",
+      "ref": "tools/autorun_consume.rb",
+      "severity": "medium",
+      "message": "OVERVIEW.md references tools/autorun_consume.rb, which does not exist"
+    },
+    {
+      "doc": "OVERVIEW.md",
+      "ref": "docs/CAUSA-RAIZ.md",
+      "severity": "medium",
+      "message": "OVERVIEW.md references docs/CAUSA-RAIZ.md, which does not exist"
+    },
+    {
+      "doc": "OVERVIEW.md",
+      "ref": "docs/SOLUTION-FINAL.md",
+      "severity": "medium",
+      "message": "OVERVIEW.md references docs/SOLUTION-FINAL.md, which does not exist"
+    }
+  ],
+  "services": [
+    {
+      "name": "smoke_skp_export",
+      "path": "scripts/smoke/smoke_skp_export.py",
+      "category": "smoke",
+      "exists": true,
+      "help_passed": null,
+      "elapsed_ms": null,
+      "risk": "unknown"
+    },
+    {
+      "name": "bench_pipeline",
+      "path": "scripts/benchmark/bench_pipeline.py",
+      "category": "benchmark",
+      "exists": true,
+      "help_passed": null,
+      "elapsed_ms": null,
+      "risk": "unknown"
+    },
+    {
+      "name": "repo_auditor",
+      "path": "agents/auditor/run_audit.py",
+      "category": "agent",
+      "exists": true,
+      "help_passed": null,
+      "elapsed_ms": null,
+      "risk": "unknown"
+    },
+    {
+      "name": "skp_from_consensus",
+      "path": "tools/skp_from_consensus.py",
+      "category": "sketchup",
+      "exists": true,
+      "help_passed": null,
+      "elapsed_ms": null,
+      "risk": "unknown"
+    },
+    {
+      "name": "build_vector_consensus",
+      "path": "tools/build_vector_consensus.py",
+      "category": "pipeline",
+      "exists": true,
+      "help_passed": null,
+      "elapsed_ms": null,
+      "risk": "unknown"
+    },
+    {
+      "name": "validator",
+      "path": "validator/run.py",
+      "category": "validator",
+      "exists": true,
+      "help_passed": null,
+      "elapsed_ms": null,
+      "risk": "unknown"
+    },
+    {
+      "name": "main",
+      "path": "main.py",
+      "category": "pipeline",
+      "exists": true,
+      "help_passed": null,
+      "elapsed_ms": null,
+      "risk": "unknown"
+    },
+    {
+      "name": "dashboard_index",
+      "path": "tools/dashboard/index.html",
+      "category": "dashboard",
+      "exists": true,
+      "help_passed": null,
+      "elapsed_ms": null,
+      "risk": "low"
+    }
+  ],
+  "hygiene": {
+    "root_python_files": [
+      "analyze_overpoly.py",
+      "crop_legend.py",
+      "main.py",
+      "make_test_pdf.py",
+      "peek_pdf.py",
+      "preprocess_walls.py",
+      "proto_colored.py",
+      "proto_red.py",
+      "proto_runner.py",
+      "proto_skel.py",
+      "proto_v2.py",
+      "render_debug.py",
+      "render_native.py",
+      "render_proto_overlays.py",
+      "render_semantic.py",
+      "render_sidebyside.py",
+      "render_with_openings.py"
+    ],
+    "root_python_count": 17,
+    "sys_path_hacks": [
+      "render_debug.py",
+      "render_native.py",
+      "render_proto_overlays.py",
+      "render_semantic.py",
+      "render_sidebyside.py",
+      "render_with_openings.py",
+      "scripts/annotate_openings_helper.py",
+      "scripts/compare_oracle.py",
+      "scripts/generate_f1_dashboard.py",
+      "scripts/render_f1_diff_png.py",
+      "scripts/render_validation_summary_png.py",
+      "scripts/run_cubicasa_oracle.py",
+      "scripts/benchmark/bench_pipeline.py",
+      "scripts/oracle/cubicasa.py",
+      "tests/test_cubicasa_oracle.py",
+      "tests/test_f1_dashboard.py",
+      "tests/test_f1_regression.py",
+      "tests/test_oracle.py",
+      "tests/test_score_openings.py",
+      "tests/dashboard/test_generate_architecture_radar.py",
+      "tools/render_axon.py",
+      "tools/render_openings_overlay.py",
+      "tools/rooms_from_seeds.py",
+      "validator/run.py"
+    ],
+    "hardcoded_paths": [
+      "proto_colored.py",
+      "proto_red.py",
+      "render_sidebyside.py",
+      "agents/auditor/run_audit.py",
+      "tests/test_run_audit_v2.py"
+    ]
+  },
+  "recommendations": [
+    {
+      "title": "Fix 3 broken doc reference(s)",
+      "category": "documentation",
+      "impact": "low",
+      "effort": "low",
+      "risk": "low",
+      "suggested_branch": "docs/fix-broken-refs",
+      "why": "Docs cite paths that no longer exist; readers hit dead ends.",
+      "validation": "Re-run this generator and confirm drift_findings is empty."
+    },
+    {
+      "title": "Move stray Python from repo root into a package",
+      "category": "hygiene",
+      "impact": "low",
+      "effort": "medium",
+      "risk": "low",
+      "suggested_branch": "refactor/root-py-cleanup",
+      "why": "17 loose .py files at the root.",
+      "validation": "Imports continue to resolve; root has only entrypoints."
+    },
+    {
+      "title": "Drop sys.path.insert/append hacks",
+      "category": "hygiene",
+      "impact": "low",
+      "effort": "medium",
+      "risk": "medium",
+      "suggested_branch": "refactor/no-sys-path-hacks",
+      "why": "24 files mutate sys.path.",
+      "validation": "Tests pass without the hacks (proper packaging)."
+    }
+  ],
+  "errors": [],
+  "command_checks": false
+}

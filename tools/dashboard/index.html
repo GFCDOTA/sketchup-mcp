@@ -32,9 +32,9 @@
       background: rgba(15,17,21,0.92); backdrop-filter: blur(8px);
       border-bottom:1px solid var(--border);
       padding: 14px 24px;
-      display:grid; grid-template-columns: repeat(6, 1fr); gap:12px;
+      display:grid; grid-template-columns: repeat(7, 1fr); gap:12px;
     }
-    @media (max-width: 1400px) { nav.tabs { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 1500px) { nav.tabs { grid-template-columns: repeat(4, 1fr); } }
     @media (max-width: 1100px) { nav.tabs { grid-template-columns: repeat(2, 1fr); } }
 
     /* gallery */
@@ -442,6 +442,52 @@
     .chart-card .hint { color:var(--muted); font-size:11px; font-weight:400; margin-left:6px; }
     .chart-card .chart-host { position:relative; height:240px; }
     .chart-card .chart-empty { color:var(--muted); font-size:12px; padding:24px 8px; text-align:center; }
+    /* ========== SRE Radar tab ========== */
+    .radar-hero { display:grid; grid-template-columns: minmax(260px, 1fr) 2fr; gap:14px; margin:18px 0; }
+    @media (max-width: 900px) { .radar-hero { grid-template-columns: 1fr; } }
+    .radar-overall { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:18px 18px 16px; text-align:center; }
+    .radar-overall .label { font-size:11px; font-weight:700; letter-spacing:.8px; color:var(--muted); text-transform:uppercase; }
+    .radar-overall .score { font-size:64px; font-weight:800; margin:6px 0; font-variant-numeric:tabular-nums; line-height:1; }
+    .radar-overall.healthy .score { color:var(--ok); }
+    .radar-overall.warning .score { color:var(--warn); }
+    .radar-overall.critical .score { color:var(--err); }
+    .radar-overall .summary { color:var(--muted); font-size:12px; margin-top:6px; }
+    .radar-scoreboard { display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:10px; }
+    .score-pill { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:12px 14px; }
+    .score-pill .name { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; }
+    .score-pill .row { display:flex; align-items:baseline; gap:8px; margin-top:4px; }
+    .score-pill .num { font-size:22px; font-weight:700; font-variant-numeric:tabular-nums; }
+    .score-pill .bar { flex:1; height:6px; background:var(--panel-2); border-radius:999px; overflow:hidden; }
+    .score-pill .fill { height:100%; border-radius:999px; }
+    .score-pill .fill.healthy { background:var(--ok); }
+    .score-pill .fill.warning { background:var(--warn); }
+    .score-pill .fill.critical { background:var(--err); }
+    .radar-grid { display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-top:18px; }
+    @media (max-width: 1100px) { .radar-grid { grid-template-columns: 1fr; } }
+    .radar-card { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:14px 16px; }
+    .radar-card h3 { margin:0 0 10px; font-size:14px; font-weight:600; display:flex; align-items:baseline; gap:8px; }
+    .radar-card h3 .count { color:var(--muted); font-size:11px; font-weight:500; }
+    .radar-card .empty { color:var(--muted); font-size:12px; padding:8px 0; }
+    .radar-list { list-style:none; margin:0; padding:0; }
+    .radar-list li { display:flex; align-items:flex-start; gap:8px; padding:8px 0; border-bottom:1px dashed var(--border); font-size:12px; }
+    .radar-list li:last-child { border-bottom:none; }
+    .radar-list .path { font-family: ui-monospace, monospace; word-break:break-all; }
+    .severity { display:inline-block; padding:1px 6px; border-radius:4px; font-size:10px; font-weight:700; text-transform:uppercase; }
+    .severity.low { background:rgba(60,207,122,.15); color:var(--ok); }
+    .severity.medium { background:rgba(245,165,36,.15); color:var(--warn); }
+    .severity.high { background:rgba(239,68,68,.15); color:var(--err); }
+    .severity.unknown { background:var(--panel-2); color:var(--muted); }
+    .radar-services { display:grid; grid-template-columns: 1.2fr 2fr 0.7fr 0.7fr 0.6fr; gap:6px 12px; font-size:12px; align-items:baseline; }
+    .radar-services .header { color:var(--muted); font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; padding-bottom:4px; border-bottom:1px solid var(--border); }
+    .radar-services .row { display:contents; }
+    .radar-services .row > div { padding:4px 0; border-bottom:1px dashed var(--border); }
+    .radar-rec { background:var(--panel-2); border:1px solid var(--border); border-left:3px solid var(--accent); border-radius:8px; padding:10px 12px; margin-bottom:8px; }
+    .radar-rec.impact-high { border-left-color: var(--err); }
+    .radar-rec.impact-medium { border-left-color: var(--warn); }
+    .radar-rec .rec-title { font-weight:600; font-size:13px; }
+    .radar-rec .rec-meta { color:var(--muted); font-size:11px; margin-top:2px; }
+    .radar-rec .rec-why { font-size:12px; margin-top:6px; }
+    .radar-rec .rec-branch { font-family: ui-monospace, monospace; font-size:11px; color:var(--accent); }
   </style>
 </head>
 <body>
@@ -487,6 +533,10 @@
     <button id="tabbtn-roadmap" data-tab="roadmap" role="tab" aria-selected="false">
       <div class="t">Roadmap <span class="kbd">6</span></div>
       <div class="s">status do projeto · entregas · próxima ação</div>
+    </button>
+    <button id="tabbtn-radar" data-tab="radar" role="tab" aria-selected="false">
+      <div class="t">SRE Radar <span class="kbd">7</span></div>
+      <div class="s">saúde do repo · drift · serviços · débito</div>
     </button>
   </nav>
 
@@ -905,6 +955,13 @@
           <div class="chart-empty" id="r-empty-repo-health" hidden>Sem <code>repo_health_history.json</code> nem example.</div>
         </div>
       </section>
+    </section>
+
+    <!-- ========== TAB: SRE RADAR ========== -->
+    <section id="tab-radar" class="tab-panel" role="tabpanel" aria-labelledby="tabbtn-radar" hidden>
+      <div id="radar-root">
+        <div class="roadmap-empty">Carregando radar&hellip;</div>
+      </div>
     </section>
 
     <section id="warn" style="display:none" class="empty-state"></section>
@@ -2297,10 +2354,10 @@
   // ============================================================
   // Tab switching + re-render
   // ============================================================
-  const TABS = ["geral", "decisoes", "aprendizados", "analitico", "plantas", "roadmap"];
+  const TABS = ["geral", "decisoes", "aprendizados", "analitico", "plantas", "roadmap", "radar"];
   // Tabs whose content has nothing to do with the runs filter (modelo / ordenar
   // sessões). On those, the global filter-bar would just confuse the reader.
-  const TABS_WITHOUT_RUNS_FILTER = new Set(["roadmap"]);
+  const TABS_WITHOUT_RUNS_FILTER = new Set(["roadmap", "radar"]);
   function setTab(tab, pushHash = true) {
     if (!TABS.includes(tab)) tab = "geral";
     if (state.activeTab === tab) return;
@@ -2333,6 +2390,7 @@
     else if (state.activeTab === "analitico") renderAnalitico();
     else if (state.activeTab === "plantas") renderPlantas();
     else if (state.activeTab === "roadmap") renderRoadmap();
+    else if (state.activeTab === "radar") renderRadar();
     if (usesRuns) {
       try {
         document.getElementById("filter-info").textContent =
@@ -2895,6 +2953,246 @@
   })();
 
   // ============================================================
+  // TAB: SRE RADAR — repo health view
+  // ============================================================
+  // Loads `tools/dashboard/architecture_radar.json` (real, generator output)
+  // → fallback `architecture_radar.example.json` (committed) → empty state.
+  // Schema docs: docs/dashboard/architecture_sre_radar.md.
+  state.radar = null;
+  state.radarLoaded = false;
+
+  async function loadRadar() {
+    return await _loadJsonWithFallback("architecture_radar");
+  }
+
+  function _radarStatusFor(score) {
+    if (score >= 80) return "healthy";
+    if (score >= 60) return "warning";
+    return "critical";
+  }
+
+  function _renderScorePill(name, score) {
+    const status = _radarStatusFor(score);
+    return `<div class="score-pill">
+      <div class="name">${esc(name.replace(/_/g, " "))}</div>
+      <div class="row">
+        <div class="num">${esc(String(score))}</div>
+        <div class="bar"><div class="fill ${status}" style="width:${Math.max(0, Math.min(100, score))}%"></div></div>
+      </div>
+    </div>`;
+  }
+
+  function _renderRadarMarkdown(md) {
+    const top = (md && Array.isArray(md.top_saturated)) ? md.top_saturated.slice(0, 8) : [];
+    const counts = md
+      ? `${md.total_files || 0} files · ${md.healthy_count || 0} healthy · ${md.warning_count || 0} warning · ${md.saturated_count || 0} saturated`
+      : "no data";
+    if (!top.length) {
+      return `<div class="radar-card">
+        <h3>Markdown saturation <span class="count">${esc(counts)}</span></h3>
+        <p class="empty">Nenhum doc saturado no momento.</p>
+      </div>`;
+    }
+    const items = top.map(d => {
+      const sev = d.score >= 55 ? "high" : d.score >= 25 ? "medium" : "low";
+      const reasons = (d.reasons || []).join(" · ") || "—";
+      return `<li>
+        <span class="severity ${esc(sev)}">${esc(String(d.score))}</span>
+        <span class="path"><b>${esc(d.path)}</b><br>
+          <span style="color:var(--muted)">${esc(d.lines)}L · ${esc(String(d.size_kb))}KB · ${esc(reasons)}</span>
+        </span>
+      </li>`;
+    }).join("");
+    return `<div class="radar-card">
+      <h3>Markdown saturation <span class="count">${esc(counts)}</span></h3>
+      <ul class="radar-list">${items}</ul>
+    </div>`;
+  }
+
+  function _renderRadarDrift(findings) {
+    findings = Array.isArray(findings) ? findings : [];
+    if (!findings.length) {
+      return `<div class="radar-card">
+        <h3>Drift findings <span class="count">0 broken refs</span></h3>
+        <p class="empty">Sem referências quebradas nos docs auditados.</p>
+      </div>`;
+    }
+    const items = findings.map(f => `<li>
+      <span class="severity ${esc(f.severity || "medium")}">${esc((f.severity || "med").slice(0,3))}</span>
+      <span class="path">
+        <b>${esc(f.doc || "?")}</b> → <code>${esc(f.ref || "?")}</code><br>
+        <span style="color:var(--muted)">${esc(f.message || "")}</span>
+      </span>
+    </li>`).join("");
+    return `<div class="radar-card">
+      <h3>Drift findings <span class="count">${esc(String(findings.length))} broken refs</span></h3>
+      <ul class="radar-list">${items}</ul>
+    </div>`;
+  }
+
+  function _renderRadarServices(services) {
+    services = Array.isArray(services) ? services : [];
+    if (!services.length) {
+      return `<div class="radar-card">
+        <h3>Services <span class="count">0</span></h3>
+        <p class="empty">Sem registros de serviço.</p>
+      </div>`;
+    }
+    const rows = services.map(s => {
+      const exists = s.exists ? `<span class="severity low">yes</span>` : `<span class="severity high">missing</span>`;
+      let helpHtml;
+      if (s.help_passed === true) helpHtml = `<span class="severity low">pass</span>`;
+      else if (s.help_passed === false) helpHtml = `<span class="severity high">fail</span>`;
+      else helpHtml = `<span class="severity unknown">—</span>`;
+      const risk = `<span class="severity ${esc(s.risk || "unknown")}">${esc(s.risk || "?")}</span>`;
+      return `<div class="row">
+        <div><b>${esc(s.name)}</b></div>
+        <div><code>${esc(s.path)}</code></div>
+        <div>${exists}</div>
+        <div>${helpHtml}</div>
+        <div>${risk}</div>
+      </div>`;
+    }).join("");
+    return `<div class="radar-card">
+      <h3>Services <span class="count">${esc(String(services.length))}</span></h3>
+      <div class="radar-services">
+        <div class="header">name</div>
+        <div class="header">path</div>
+        <div class="header">exists</div>
+        <div class="header">help</div>
+        <div class="header">risk</div>
+        ${rows}
+      </div>
+    </div>`;
+  }
+
+  function _renderRadarHygiene(hygiene) {
+    hygiene = hygiene || {};
+    const sections = [
+      { title: "root .py files", items: hygiene.root_python_files || [] },
+      { title: "sys.path hacks", items: hygiene.sys_path_hacks || [] },
+      { title: "hardcoded paths", items: hygiene.hardcoded_paths || [] },
+    ];
+    const blocks = sections.map(sec => {
+      if (!sec.items.length) {
+        return `<div><div class="name" style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-top:8px;">${esc(sec.title)}</div>
+          <p class="empty">none</p></div>`;
+      }
+      const list = sec.items.slice(0, 12).map(p => `<li><span class="path"><code>${esc(p)}</code></span></li>`).join("");
+      const more = sec.items.length > 12 ? `<li style="color:var(--muted); border-bottom:none;">+${sec.items.length - 12} more…</li>` : "";
+      return `<div><div class="name" style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-top:8px;">${esc(sec.title)} <span class="count" style="color:var(--muted); font-weight:500;">(${sec.items.length})</span></div>
+        <ul class="radar-list">${list}${more}</ul></div>`;
+    }).join("");
+    return `<div class="radar-card">
+      <h3>Repo hygiene</h3>
+      ${blocks}
+    </div>`;
+  }
+
+  function _renderRadarRecommendations(recs) {
+    recs = Array.isArray(recs) ? recs : [];
+    if (!recs.length) {
+      return `<div class="radar-card">
+        <h3>Recommendations <span class="count">0</span></h3>
+        <p class="empty">Sem recomendações ativas.</p>
+      </div>`;
+    }
+    const items = recs.map(r => `<div class="radar-rec impact-${esc(r.impact || "low")}">
+      <div class="rec-title">${esc(r.title || "(item)")}</div>
+      <div class="rec-meta">
+        impact <b>${esc(r.impact || "?")}</b> · effort <b>${esc(r.effort || "?")}</b> · risk <b>${esc(r.risk || "?")}</b> · category ${esc(r.category || "?")}
+        ${r.suggested_branch ? ` · branch <span class="rec-branch">${esc(r.suggested_branch)}</span>` : ""}
+      </div>
+      ${r.why ? `<div class="rec-why">${esc(r.why)}</div>` : ""}
+      ${r.validation ? `<div class="rec-meta">Validation: ${esc(r.validation)}</div>` : ""}
+    </div>`).join("");
+    return `<div class="radar-card" style="grid-column: 1 / -1;">
+      <h3>Recommendations <span class="count">${esc(String(recs.length))}</span></h3>
+      ${items}
+    </div>`;
+  }
+
+  function _emptyStateRadar() {
+    return `<div class="roadmap-empty">
+      Sem <code>architecture_radar.json</code> nem <code>architecture_radar.example.json</code> em
+      <code>tools/dashboard/</code>. Rode
+      <code>python scripts/dashboard/generate_architecture_radar.py --no-command-checks</code>
+      para popular. Schema em <code>docs/dashboard/architecture_sre_radar.md</code>.
+    </div>`;
+  }
+
+  function renderRadar() {
+    const root = document.getElementById("radar-root");
+    if (!root) return;
+    if (!state.radarLoaded) {
+      root.innerHTML = `<div class="roadmap-empty">Carregando radar&hellip;</div>`;
+      loadRadar().then(d => {
+        state.radar = d;
+        state.radarLoaded = true;
+        renderRadar();
+      });
+      return;
+    }
+    const data = state.radar;
+    if (!data) { root.innerHTML = _emptyStateRadar(); return; }
+
+    const overall = data.overall || {};
+    const scores = data.scores || {};
+    const status = overall.status || _radarStatusFor(overall.health_score || 0);
+
+    const heroHtml = `<div class="radar-hero">
+      <div class="radar-overall ${esc(status)}">
+        <div class="label">Overall health</div>
+        <div class="score">${esc(String(overall.health_score ?? "—"))}</div>
+        <div class="status-badge ${esc(status)}">${esc(status)}</div>
+        <div class="summary">${esc(overall.summary || "")}</div>
+      </div>
+      <div>
+        <div class="section-title" style="margin-bottom:8px;">Scores por categoria</div>
+        <div class="radar-scoreboard">
+          ${["docs_health","service_health","automation_health","repo_hygiene","product_quality"]
+            .filter(k => k in scores).map(k => _renderScorePill(k, scores[k])).join("")}
+        </div>
+      </div>
+    </div>`;
+
+    const gridHtml = `<div class="radar-grid">
+      ${_renderRadarMarkdown(data.markdown)}
+      ${_renderRadarDrift(data.drift_findings)}
+      ${_renderRadarServices(data.services)}
+      ${_renderRadarHygiene(data.hygiene)}
+      ${_renderRadarRecommendations(data.recommendations)}
+    </div>`;
+
+    const footer = data.generated_at
+      ? `<p style="color:var(--muted); font-size:11px; margin-top:16px; text-align:right;">
+          gerado em <code>${esc(data.generated_at)}</code>
+          ${data.git && data.git.commit ? ` · commit <code>${esc(data.git.commit)}</code>` : ""}
+          · schema <code>${esc(data.schema_version || "?")}</code>
+        </p>`
+      : "";
+
+    root.innerHTML = heroHtml + gridHtml + footer;
+  }
+
+  // SRE Radar tab is also independent of `/runs/` data. Same bootstrap as the
+  // Roadmap tab — keeps the click + hashchange wiring alive when the main
+  // boot bails on `_index.json`.
+  (function bootstrapRadar() {
+    const btn = document.getElementById("tabbtn-radar");
+    if (btn) btn.addEventListener("click", () => setTab("radar"));
+    window.addEventListener("hashchange", () => {
+      if ((location.hash || "") === "#radar") setTab("radar", false);
+    });
+    queueMicrotask(() => {
+      if ((location.hash || "") === "#radar") {
+        if (state.activeTab !== "radar") state.activeTab = "radar";
+        renderRadar();
+      }
+    });
+  })();
+
+  // ============================================================
   // Boot
   // ============================================================
   (async () => {
@@ -2965,6 +3263,7 @@
       if (e.key === "4") setTab("analitico");
       if (e.key === "5") setTab("plantas");
       if (e.key === "6") setTab("roadmap");
+      if (e.key === "7") setTab("radar");
     });
 
     // Aprendizados filter pills (delegated listener)

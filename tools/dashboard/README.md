@@ -37,6 +37,19 @@ The `tools/runs/` folder is the place where `_oracle_manifest.json` lives. The d
   | Repo-health chart | `repo_health_history.json` | `repo_health_history.example.json` |
 
   Each chart loads its data with a graceful fallback (real → example → empty state). No backend, no generator yet. Schema + edit guide: [`docs/dashboard/project_status_dashboard.md`](../../docs/dashboard/project_status_dashboard.md).
+- **SRE Radar** — repo health view: overall score (0–100) plus five subscores (`docs_health`, `service_health`, `automation_health`, `repo_hygiene`, `product_quality`). Surfaces:
+  - top markdown saturation candidates (line count, KB, TODO/FIXME counts)
+  - drift findings (docs referencing paths that no longer exist)
+  - registered services with `exists` / `--help` probe results
+  - repo hygiene flags (root .py, sys.path hacks, hardcoded paths)
+  - ranked recommendations with suggested branch names
+
+  Source: `tools/dashboard/architecture_radar.json` (real, generator output) → fallback `tools/dashboard/architecture_radar.example.json` (committed snapshot). Generator + schema docs: [`docs/dashboard/architecture_sre_radar.md`](../../docs/dashboard/architecture_sre_radar.md).
+
+  ```bash
+  # Refresh the radar JSON locally (stdlib only, ≈0.1s with --no-command-checks)
+  python scripts/dashboard/generate_architecture_radar.py --no-command-checks
+  ```
 
 ## Empty state
 
