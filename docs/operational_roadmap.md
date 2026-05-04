@@ -9,11 +9,6 @@
 
 ## Now (in flight or next up)
 
-### Performance
-- [ ] **`perf/capture-real-baseline`** — Run `bench_pipeline.py`
-  against planta_74 with `--runs 3 --warmup 1`. Write
-  `docs/performance/current_perf_baseline.md`.
-
 ### Cache (infra only)
 - [ ] **`perf/cache-infrastructure`** — `packages/cache/` with
   `cache_key()`, `cache_get()`, `cache_set()`, `cache_path()`. Tests
@@ -80,4 +75,6 @@
 7. PR #7 `agents: add operational memory and guardrails`
 8. PR #8 `Promote develop to main` (initial promotion under develop-first)
 9. PR #9 `tooling: add SketchUp smoke gates harness`
-10. PR (this) `validate: SketchUp 2026 end-to-end smoke run`
+10. PR #10 `validate: SketchUp 2026 end-to-end smoke run`
+11. PR #11 `Promote develop to main` (drains PRs #9 + #10)
+12. PR (this) `perf: capture real pipeline baseline`

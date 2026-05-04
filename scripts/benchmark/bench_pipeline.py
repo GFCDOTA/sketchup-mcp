@@ -23,6 +23,7 @@ import hashlib
 import json
 import os
 import platform
+import shutil
 import statistics
 import subprocess
 import sys
@@ -112,7 +113,13 @@ def _stage_timer(name: str, results: dict[str, dict[str, Any]]):
 
 def _run_one_pass(pdf_path: Path, out_dir: Path) -> dict[str, Any]:
     """Single benchmark pass — runs each stage in order, captures
-    timing per stage. Returns dict of stage_name -> stage_metrics."""
+    timing per stage. Returns dict of stage_name -> stage_metrics.
+
+    The vector tools (`tools.build_vector_consensus` etc.) expose
+    library functions, not `main(argv)` callables — we call those
+    directly. This avoids subprocess overhead and gives clean RSS
+    deltas per stage.
+    """
     results: dict[str, dict[str, Any]] = {}
 
     # ---- Vector pipeline (the recommended path for vectorial PDFs) ----
@@ -121,35 +128,54 @@ def _run_one_pass(pdf_path: Path, out_dir: Path) -> dict[str, Any]:
     labels_path = out_dir / "labels.json"
 
     with _stage_timer("vector_consensus", results):
-        # build_vector_consensus: PDF -> walls + soft_barriers
-        from tools.build_vector_consensus import main as bvc_main
-        bvc_main([str(pdf_path), "--out", str(consensus_path)])
+        from tools.build_vector_consensus import build as bvc_build
+        bvc_build(pdf_path, consensus_path, detect_openings=False)
 
     with _stage_timer("extract_room_labels", results):
-        from tools.extract_room_labels import main as erl_main
-        erl_main([str(pdf_path), "--out", str(labels_path)])
+        from tools.extract_room_labels import extract_labels
+        # Constrain to planta_region if the consensus produced one;
+        # extract_labels accepts None to mean "whole page".
+        consensus_loaded = json.loads(consensus_path.read_text(encoding="utf-8"))
+        region = consensus_loaded.get("planta_region")
+        region_tuple = tuple(region) if region and len(region) == 4 else None
+        labels = extract_labels(pdf_path, region_tuple)
+        labels_path.write_text(
+            json.dumps({"labels": labels}, indent=2), encoding="utf-8"
+        )
 
     with _stage_timer("rooms_from_seeds", results):
-        from tools.rooms_from_seeds import main as rfs_main
-        rfs_main([str(consensus_path), str(labels_path)])
+        from tools.rooms_from_seeds import detect_rooms
+        consensus_loaded = json.loads(consensus_path.read_text(encoding="utf-8"))
+        labels_data = json.loads(labels_path.read_text(encoding="utf-8"))
+        labels_list = (
+            labels_data.get("labels", [])
+            if isinstance(labels_data, dict)
+            else labels_data
+        )
+        # Defaults match tools/rooms_from_seeds.py CLI: door_min=15.0,
+        # door_max=50.0 (PDF points; ~5-18 cm at PT_TO_M).
+        rooms = detect_rooms(consensus_loaded, labels_list,
+                             door_min=15.0, door_max=50.0)
+        consensus_loaded["rooms"] = rooms
+        consensus_path.write_text(
+            json.dumps(consensus_loaded, indent=2), encoding="utf-8"
+        )
 
     with _stage_timer("extract_openings_vector", results):
-        from tools.extract_openings_vector import main as eov_main
-        eov_main([
-            str(pdf_path),
-            "--consensus", str(consensus_path),
-            "--mode", "replace",
-        ])
+        from tools.extract_openings_vector import enrich_consensus
+        consensus_loaded = json.loads(consensus_path.read_text(encoding="utf-8"))
+        consensus_loaded = enrich_consensus(
+            consensus_loaded, pdf_path, mode="replace"
+        )
+        consensus_path.write_text(
+            json.dumps(consensus_loaded, indent=2), encoding="utf-8"
+        )
 
     # ---- Render (matplotlib, no SketchUp dependency) ----
     with _stage_timer("render_axon_top", results):
         try:
-            from tools.render_axon import main as ra_main
-            ra_main([
-                str(consensus_path),
-                "--out", str(out_dir / "axon_top.png"),
-                "--mode", "top",
-            ])
+            from tools.render_axon import render as ra_render
+            ra_render(consensus_path, out_dir / "axon_top.png", mode="top")
         except (ImportError, ModuleNotFoundError) as e:
             results["render_axon_top"] = {
                 "status": "skipped",
@@ -162,15 +188,42 @@ def _run_one_pass(pdf_path: Path, out_dir: Path) -> dict[str, Any]:
 
     # ---- SketchUp export (optional — requires SU2026 installed) ----
     skp_path = out_dir / "out.skp"
-    su_exe = Path("C:/Program Files/SketchUp/SketchUp 2026/SketchUp/SketchUp.exe")
+    su_exe = Path(
+        r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
+    )
     if su_exe.exists():
+        # SU 2026 trial Welcome dialog blocks the autorun plugin
+        # unless a positional .skp is on the command line (FP-007).
+        # `run` auto-picks any .skp in `out_skp.parent`, so drop a
+        # template there before invoking. Same workaround used by
+        # scripts/smoke/smoke_skp_export.py gate F.
+        bootstrap_target = skp_path.parent / "_bootstrap.skp"
+        template_candidates = (
+            Path(r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp"
+                 r"\resources\en-US\Templates\Temp01a - Simple.skp"),
+            Path(r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp"
+                 r"\resources\en-US\Templates\Temp01b - Simple.skp"),
+        )
+        if not bootstrap_target.exists():
+            template = next(
+                (t for t in template_candidates if t.exists()), None
+            )
+            if template is not None:
+                shutil.copy2(template, bootstrap_target)
         with _stage_timer("sketchup_export", results):
-            from tools.skp_from_consensus import main as sfc_main
-            sfc_main([
-                str(consensus_path),
-                "--out", str(skp_path),
-                "--timeout", "180",
-            ])
+            from tools.skp_from_consensus import run as sfc_run
+            ok = sfc_run(
+                consensus_path, skp_path, su_exe,
+                timeout_s=180,
+                bootstrap_skp=bootstrap_target if bootstrap_target.exists() else None,
+            )
+            if not ok:
+                # `run` returns False on timeout/early-exit. Re-raise
+                # so the timer marks the stage failed.
+                raise RuntimeError(
+                    "skp_from_consensus.run returned False "
+                    "(SU spawn or autorun plugin failure)"
+                )
     else:
         results["sketchup_export"] = {
             "status": "skipped",
@@ -213,7 +266,8 @@ def _summarize_runs(runs: list[dict[str, dict[str, Any]]]) -> dict[str, Any]:
                 "elapsed_s_max": round(max(timings), 4),
                 "elapsed_s_cv": round(
                     statistics.stdev(timings) / statistics.mean(timings)
-                    if len(timings) >= 2 else 0.0,
+                    if len(timings) >= 2 and statistics.mean(timings) > 0
+                    else 0.0,
                     4,
                 ),
                 "rss_after_mb_max": max(r[stage]["rss_after_mb"] for r in runs),
@@ -287,7 +341,8 @@ def main(argv: list[str] | None = None) -> int:
         runs.append(run_results)
         # Print quick summary for this run
         for stage, m in run_results.items():
-            status_marker = {"ok": "✓", "failed": "✗", "skipped": "—"}.get(m["status"], "?")
+            status_marker = {"ok": "[OK]  ", "failed": "[FAIL]",
+                             "skipped": "[SKIP]"}.get(m["status"], "[?]   ")
             print(f"  {status_marker} {stage:30s} {m['elapsed_s']:>8.3f}s  ({m['status']})")
 
     summary = _summarize_runs(runs)
