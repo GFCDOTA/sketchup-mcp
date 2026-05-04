@@ -14,11 +14,6 @@
   `cache_key()`, `cache_get()`, `cache_set()`, `cache_path()`. Tests
   for determinism + atomic write. **No callers in pipeline yet.**
 
-### Auditor v2
-- [ ] **`agents/repo-auditor-v2`** — Add NEW/RESOLVED/PERSISTING
-  delta tracking to `agents/auditor/run_audit.py`. Read previous
-  report from `reports/repo_audit_<timestamp>.md` if any exists.
-
 ## Next (after Now)
 
 - [ ] **`perf/cache-raster-stage`** — First real cache callsite.
@@ -80,4 +75,6 @@
 11. PR #11 `Promote develop to main` (drains PRs #9 + #10)
 12. PR #12 `perf: capture real pipeline baseline (+ bench fixes)`
 13. PR #13 `Promote develop to main` (drains PR #12)
-14. PR (this) `perf: skip SketchUp export when consensus is unchanged`
+14. PR #14 `perf: skip SketchUp export when consensus is unchanged`
+15. PR #15 `Promote develop to main` (drains PR #14)
+16. PR (this) `agents: repo-auditor v2 with NEW/RESOLVED/PERSISTING delta`

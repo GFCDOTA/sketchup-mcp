@@ -19,11 +19,36 @@ import json
 import re
 import subprocess
 import sys
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
+@dataclass(frozen=True)
+class Finding:
+    """A single audit finding. Identity is `(kind, key)`; that pair
+    is what the diff uses to match findings across runs.
+    """
+    kind: str       # e.g. "ruff_code", "suspicious_root_py"
+    key: str        # the specific instance, e.g. "F401" or "stale.py"
+    severity: str   # "critical" | "attention" | "ok"
+    message: str    # human-readable summary
+
+    def to_dict(self) -> dict[str, str]:
+        return {"kind": self.kind, "key": self.key,
+                "severity": self.severity, "message": self.message}
+
+    @classmethod
+    def from_dict(cls, d: dict[str, Any]) -> "Finding":
+        return cls(
+            kind=str(d.get("kind", "")),
+            key=str(d.get("key", "")),
+            severity=str(d.get("severity", "attention")),
+            message=str(d.get("message", "")),
+        )
 
 
 def _run(cmd: list[str], cwd: Path = REPO_ROOT, timeout: int = 30) -> tuple[int, str, str]:
@@ -269,8 +294,8 @@ def check_entrypoints() -> dict[str, Any]:
 
 
 def build_report() -> dict[str, Any]:
-    return {
-        "schema_version": "1.0.0",
+    report: dict[str, Any] = {
+        "schema_version": "2.0.0",
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "repo_root": str(REPO_ROOT),
         "git": check_git_status(),
@@ -287,6 +312,167 @@ def build_report() -> dict[str, Any]:
         "todo_fixme": check_todo_fixme(),
         "entrypoints": check_entrypoints(),
     }
+    # findings is the canonical, diff-friendly view of the report.
+    # Each Finding is keyed by (kind, key), so any two reports can
+    # be compared via set arithmetic to get NEW / RESOLVED / PERSISTING.
+    report["findings"] = [f.to_dict() for f in derive_findings(report)]
+    return report
+
+
+# ---------------------------------------------------------------------------
+# Findings & delta tracking (v2)
+# ---------------------------------------------------------------------------
+
+
+def derive_findings(report: dict[str, Any]) -> list[Finding]:
+    """Synthesize a flat findings list from the per-section report.
+
+    Each finding has stable identity `(kind, key)` so two runs can
+    be compared even if the human-readable message changes.
+    """
+    findings: list[Finding] = []
+
+    # Ruff: one finding per code, severity "attention" (lint debt).
+    for code, n in (report.get("ruff", {}).get("by_code") or {}).items():
+        findings.append(Finding(
+            kind="ruff_code", key=str(code), severity="attention",
+            message=f"{n} {code} violation{'s' if int(n) != 1 else ''}",
+        ))
+
+    # Suspicious root-level .py files.
+    for f in report.get("root_python_files", {}).get("suspicious", []) or []:
+        findings.append(Finding(
+            kind="suspicious_root_py", key=str(f), severity="attention",
+            message=f"unexpected .py at repo root: {f}",
+        ))
+
+    # Hardcoded paths (CI risk).
+    for f in report.get("hardcoded_paths", {}).get("findings", []) or []:
+        match = str(f.get("match", ""))
+        findings.append(Finding(
+            kind="hardcoded_path", key=match[:120], severity="attention",
+            message=f"hardcoded path ({f.get('desc', '?')}): {match}",
+        ))
+
+    # Active patches (informational; presence/absence is the signal).
+    for p in report.get("patches", {}).get("active", []) or []:
+        findings.append(Finding(
+            kind="active_patch", key=str(p), severity="ok",
+            message=f"patch active: {p}",
+        ))
+
+    # Archived (high-risk) patches.
+    for p in report.get("patches", {}).get("archived", []) or []:
+        findings.append(Finding(
+            kind="archived_patch", key=str(p), severity="ok",
+            message=f"patch archived: {p}",
+        ))
+
+    # Large tracked files.
+    for entry in report.get("large_files", {}).get("top10", []) or []:
+        findings.append(Finding(
+            kind="large_file", key=str(entry.get("path", "")),
+            severity="attention",
+            message=f"{int(entry.get('size_bytes', 0)):,} bytes",
+        ))
+
+    # Broken entrypoints.
+    for name, info in (report.get("entrypoints") or {}).items():
+        if not info.get("ok"):
+            findings.append(Finding(
+                kind="broken_entrypoint", key=str(name), severity="critical",
+                message=f"entrypoint {name} exits {info.get('exit_code')}",
+            ))
+
+    # Pytest collection errors (critical: tests can't even collect).
+    pytest = report.get("pytest", {})
+    if int(pytest.get("collection_errors") or 0) > 0:
+        findings.append(Finding(
+            kind="pytest_collection_errors",
+            key=str(pytest.get("collection_errors")),
+            severity="critical",
+            message=f"pytest reports {pytest.get('collection_errors')} "
+                    f"collection error(s)",
+        ))
+
+    # Render scripts spread across multiple locations (debt signal).
+    rs = report.get("render_scripts", {}) or {}
+    populated = sorted(loc for loc, files in rs.items() if files)
+    if len(populated) >= 2:
+        findings.append(Finding(
+            kind="render_scripts_duplicated",
+            key=",".join(populated),
+            severity="attention",
+            message=f"render_*.py spread across {len(populated)} "
+                    f"locations: {', '.join(populated)}",
+        ))
+
+    # Working-tree dirty at audit time (transient but useful).
+    git_info = report.get("git", {}) or {}
+    if not git_info.get("working_tree_clean", True):
+        findings.append(Finding(
+            kind="working_tree_dirty",
+            key=str(git_info.get("uncommitted_files_count", 0)),
+            severity="attention",
+            message=f"{git_info.get('uncommitted_files_count')} "
+                    f"uncommitted file(s) at audit time",
+        ))
+
+    return sorted(findings, key=lambda f: (f.kind, f.key))
+
+
+def diff_findings(curr: list[Finding],
+                  prev: list[Finding]) -> dict[str, list[dict[str, str]]]:
+    """Set difference on `(kind, key)` identity.
+
+    NEW       — present in curr, absent in prev.
+    RESOLVED  — present in prev, absent in curr.
+    PERSISTING— present in both. (Message is taken from `curr` so
+                                  the latest text wins.)
+    """
+    curr_map = {(f.kind, f.key): f for f in curr}
+    prev_map = {(f.kind, f.key): f for f in prev}
+
+    new_keys = sorted(set(curr_map) - set(prev_map))
+    resolved_keys = sorted(set(prev_map) - set(curr_map))
+    persisting_keys = sorted(set(curr_map) & set(prev_map))
+
+    return {
+        "new": [curr_map[k].to_dict() for k in new_keys],
+        "resolved": [prev_map[k].to_dict() for k in resolved_keys],
+        "persisting": [curr_map[k].to_dict() for k in persisting_keys],
+    }
+
+
+def latest_prior_snapshot(
+    out_dir: Path, exclude: Path | None = None
+) -> Path | None:
+    """Most recent `repo_audit_<timestamp>.json` snapshot in `out_dir`.
+
+    `exclude` lets the caller skip a snapshot they just wrote (so a
+    rerun in the same second doesn't read its own output).
+    """
+    if not out_dir.exists():
+        return None
+    snapshots = sorted(out_dir.glob("repo_audit_*.json"))
+    if exclude:
+        snapshots = [s for s in snapshots if s.resolve() != exclude.resolve()]
+    return snapshots[-1] if snapshots else None
+
+
+def load_findings_from_snapshot(snapshot: Path) -> list[Finding]:
+    """Read findings out of a snapshot file. Tolerates both v2
+    (explicit `findings` array) and v1 (derive from raw report).
+    """
+    try:
+        data = json.loads(snapshot.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return []
+    raw = data.get("findings")
+    if isinstance(raw, list) and raw:
+        return [Finding.from_dict(d) for d in raw if isinstance(d, dict)]
+    # v1 fallback: synthesize from the raw report shape.
+    return derive_findings(data)
 
 
 def render_markdown(report: dict[str, Any]) -> str:
@@ -398,6 +584,48 @@ def render_markdown(report: dict[str, Any]) -> str:
         marker = "✅" if info["ok"] else "🟡"
         lines.append(f"- {marker} `{name}` (exit {info['exit_code']})")
 
+    diff = report.get("diff_vs_prior") or {}
+    if diff:
+        lines.extend(["", "## Diff vs previous run", ""])
+        prior = diff.get("prior_snapshot")
+        if prior:
+            lines.append(f"- Previous snapshot: `{prior}`")
+        else:
+            lines.append("- No previous snapshot — first run.")
+        new_list = diff.get("new", []) or []
+        resolved = diff.get("resolved", []) or []
+        persisting = diff.get("persisting", []) or []
+        lines.append(
+            f"- **{len(new_list)} new** · "
+            f"**{len(resolved)} resolved** · "
+            f"**{len(persisting)} persisting**"
+        )
+        if new_list:
+            lines.extend(["", "### NEW", ""])
+            for f in new_list[:30]:
+                lines.append(
+                    f"- 🆕 `{f['kind']}/{f['key']}` "
+                    f"({f['severity']}): {f['message']}"
+                )
+            if len(new_list) > 30:
+                lines.append(f"- … and {len(new_list) - 30} more")
+        if resolved:
+            lines.extend(["", "### RESOLVED", ""])
+            for f in resolved[:30]:
+                lines.append(
+                    f"- ✅ `{f['kind']}/{f['key']}` "
+                    f"({f['severity']}): {f['message']}"
+                )
+            if len(resolved) > 30:
+                lines.append(f"- … and {len(resolved) - 30} more")
+        if persisting:
+            lines.extend(["", "### PERSISTING", ""])
+            counts: dict[str, int] = {}
+            for f in persisting:
+                counts[f["kind"]] = counts.get(f["kind"], 0) + 1
+            for kind, n in sorted(counts.items(), key=lambda x: -x[1]):
+                lines.append(f"- `{kind}`: {n}")
+
     lines.extend([
         "",
         "---",
@@ -415,9 +643,16 @@ def main(argv: list[str] | None = None) -> int:
                    help="Output directory (default: reports/)")
     p.add_argument("--json-only", action="store_true",
                    help="Skip rendering markdown report")
+    p.add_argument("--no-snapshot", action="store_true",
+                   help="Do not write the timestamped history snapshot "
+                        "(repo_audit_<ts>.{json,md}). Diff vs prior is "
+                        "still computed from existing snapshots.")
     args = p.parse_args(argv)
 
-    out_dir = (REPO_ROOT / args.out).resolve() if not args.out.is_absolute() else args.out
+    out_dir = (
+        (REPO_ROOT / args.out).resolve()
+        if not args.out.is_absolute() else args.out
+    )
     out_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"[auditor] Scanning repo at {REPO_ROOT}")
@@ -426,14 +661,47 @@ def main(argv: list[str] | None = None) -> int:
 
     report = build_report()
 
+    # ---- Diff vs the most recent prior snapshot, if any ----
+    findings_now = [Finding.from_dict(d) for d in report.get("findings", [])]
+    prior = latest_prior_snapshot(out_dir)
+    if prior is not None:
+        prev = load_findings_from_snapshot(prior)
+        diff = diff_findings(findings_now, prev)
+        report["diff_vs_prior"] = {"prior_snapshot": prior.name, **diff}
+    else:
+        # First run: every finding is NEW by definition.
+        report["diff_vs_prior"] = {
+            "prior_snapshot": None,
+            "new": [f.to_dict() for f in findings_now],
+            "resolved": [],
+            "persisting": [],
+        }
+    d = report["diff_vs_prior"]
+    print(
+        f"[auditor] Findings: {len(findings_now)} "
+        f"(new={len(d['new'])}, resolved={len(d['resolved'])}, "
+        f"persisting={len(d['persisting'])})"
+    )
+
+    # ---- Canonical (overwrite) outputs ----
     json_path = out_dir / "repo_audit.json"
     json_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
     print(f"[auditor] JSON: {json_path}")
 
-    if not args.json_only:
+    md_text = render_markdown(report) if not args.json_only else None
+    if md_text is not None:
         md_path = out_dir / "repo_audit.md"
-        md_path.write_text(render_markdown(report), encoding="utf-8")
+        md_path.write_text(md_text, encoding="utf-8")
         print(f"[auditor] Markdown: {md_path}")
+
+    # ---- History snapshot (per .claude/agents/repo-auditor.md) ----
+    if not args.no_snapshot:
+        ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        snap_json = out_dir / f"repo_audit_{ts}.json"
+        snap_json.write_text(json.dumps(report, indent=2), encoding="utf-8")
+        print(f"[auditor] Snapshot: {snap_json.name}")
+        if md_text is not None:
+            (out_dir / f"repo_audit_{ts}.md").write_text(md_text, encoding="utf-8")
 
     print("[auditor] Done.")
     return 0
