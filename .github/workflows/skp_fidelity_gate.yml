@@ -1,0 +1,159 @@
+name: SKP Fidelity Gate
+
+# Paths-filtered gate that surfaces the SKP fidelity contract on PRs
+# that touch the SKP exporter, the inspector, the metric extractor, or
+# the geometry pipeline (walls / openings / rooms). Pins the
+# source-level invariants documented in
+# `docs/validation/skp_fidelity_2026-05-04.md` so a PR cannot silently
+# revert the reset_model / parapet-paint fixes or drop the metric tool.
+#
+# CI cannot launch SketchUp 2026 (CLAUDE.md §3 — SU is the last gate),
+# so this gate is structural: source-grep regressions + metric extractor
+# unit tests + cheap-gate smoke harness on the versioned synthetic
+# consensus fixture. Empirical inspect_report.json validation lives in
+# `tests/test_inspect_metrics.py::test_real_inspect_report_if_available`,
+# which skips on CI when no live inspect output is on disk.
+
+on:
+  pull_request:
+    paths:
+      # SU exporter side
+      - "tools/consume_consensus.rb"
+      - "tools/skp_from_consensus.py"
+      - "tools/inspect_walls_report.rb"
+      - "tools/autorun_*.rb"
+      - "tools/su_boot.rb"
+      # Metric extractor + protections
+      - "tools/inspect_metrics.py"
+      - "tests/test_consume_consensus_regression.py"
+      - "tests/test_inspect_metrics.py"
+      # Vector pipeline (walls / openings / rooms)
+      - "tools/build_vector_consensus.py"
+      - "tools/extract_openings_vector.py"
+      - "tools/rooms_from_seeds.py"
+      - "tools/extract_room_labels.py"
+      - "openings/**"
+      - "extract/**"
+      - "topology/**"
+      - "model/**"
+      - "roi/**"
+      - "ingest/**"
+      # Smoke contract (rare but explicit)
+      - "scripts/smoke/smoke_skp_export.py"
+      - "tests/fixtures/smoke_consensus.json"
+      # The gate itself
+      - ".github/workflows/skp_fidelity_gate.yml"
+  workflow_dispatch:
+
+jobs:
+  source-invariants:
+    name: Source-level fidelity invariants
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install project (dev extras)
+        run: uv pip install --system -e ".[dev]"
+
+      # Pins reset_model + parapet painting in tools/consume_consensus.rb.
+      # Source-grep style; no SU launch. See
+      # docs/validation/skp_fidelity_2026-05-04.md for empirical proof
+      # that these invariants kill default_faces=1140 -> 0,
+      # materials=57 -> 13, wall_overlaps=3 -> 0.
+      - name: Pin consume_consensus.rb source invariants
+        run: |
+          pytest -v --tb=short tests/test_consume_consensus_regression.py
+
+      # Pins the FidelityMetrics extractor contract: shape parsing,
+      # is_clean() boolean, compare() delta semantics. Synthetic
+      # fixtures only — no SU.
+      - name: Pin inspect_metrics extractor contract
+        run: |
+          pytest -v --tb=short tests/test_inspect_metrics.py
+
+      # Lint the protected files explicitly so style drift on the gated
+      # files is reported alongside the gate, not buried in the main CI.
+      - name: Ruff — protected files
+        run: |
+          ruff check --output-format=concise \
+            tools/inspect_metrics.py \
+            tests/test_consume_consensus_regression.py \
+            tests/test_inspect_metrics.py \
+            scripts/smoke/smoke_skp_export.py
+
+  smoke-cheap-gates:
+    name: Smoke harness — cheap gates only
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install project (dev extras)
+        run: uv pip install --system -e ".[dev]"
+
+      # Exercises the smoke harness contract gates A-E (Preparation,
+      # Acquire consensus, JSON structural, Preview PNG, Hash+cache)
+      # against the versioned synthetic consensus fixture. F (export)
+      # and G (validate .skp) skip via --skip-skp because SU 2026 isn't
+      # on Linux. Companion doc: docs/validation/sketchup_smoke_workflow.md.
+      - name: Smoke harness — gates A-E on smoke_consensus.json
+        run: |
+          python scripts/smoke/smoke_skp_export.py \
+            --consensus tests/fixtures/smoke_consensus.json \
+            --out-dir runs/smoke/_skp_fidelity_gate \
+            --skip-skp
+
+      - name: Upload smoke report (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: skp-fidelity-gate-smoke-report
+          path: runs/smoke/_skp_fidelity_gate/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  ruby-syntax:
+    name: Ruby syntax (tools/*.rb)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: false
+
+      # Catches a typo in consume_consensus.rb / inspect_walls_report.rb
+      # without spawning SU. Duplicates the global ruby-syntax job from
+      # ci.yml on purpose — keeps the SKP fidelity gate self-contained
+      # so branch protection can require this single workflow name and
+      # cover the full SKP contract.
+      - name: ruby -c on tools/*.rb
+        run: |
+          set -e
+          fail=0
+          for f in tools/*.rb; do
+            if [ -f "$f" ]; then
+              ruby -c "$f" || fail=1
+            fi
+          done
+          exit $fail
