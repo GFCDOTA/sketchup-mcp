@@ -547,10 +547,28 @@ def _cli() -> int:
                     help="print openings to stdout, don't write")
     ap.add_argument("--mode", choices=["merge", "replace"], default="merge",
                     help="merge with existing consensus.openings (default) or replace")
+    # V5 enrichment: tag each opening with a semantic kind_v5 +
+    # kind_v5_reason. Schema-additive, opt-in. Does NOT change SKP
+    # render. See tools/classify_opening_kind.py +
+    # docs/learning/v5_opening_kind_enrichment.md.
+    ap.add_argument("--classify-kind", action="store_true",
+                    help="run V5 opening kind classifier post-process; "
+                         "adds kind_v5 + kind_v5_reason fields. Off by default.")
     args = ap.parse_args()
 
     consensus = json.loads(args.consensus.read_text(encoding="utf-8"))
     enrich_consensus(consensus, args.pdf, mode=args.mode)
+
+    if args.classify_kind:
+        try:
+            from tools.classify_opening_kind import classify_openings
+        except ModuleNotFoundError:
+            from classify_opening_kind import classify_openings  # type: ignore
+        classify_openings(consensus)
+        v5_counts = consensus.get("metadata", {}).get(
+            "opening_kind_v5_classifier", {}
+        ).get("counts", {})
+        print(f"[classify-kind] kind_v5 counts: {v5_counts}")
     arc_openings = [o for o in consensus["openings"]
                     if o.get("geometry_origin") == "svg_arc"]
     window_openings = [o for o in consensus["openings"]
