@@ -285,13 +285,57 @@ if __name__ == "__main__":
     ap.add_argument("--door-min", type=float, default=15.0)
     ap.add_argument("--door-max", type=float, default=50.0)
     ap.add_argument("--scale", type=int, default=8)
+    # V1 fix wiring (CLAUDE.md §3 paradigm: opt-in only).
+    # See docs/tour/matterport_visual_findings_74m2.md V1 verdict and
+    # tests/test_living_terraco_shape_canonicity.py for the empirical
+    # tolerance choice. Default OFF — flipping to ON is a deliberate
+    # operational decision; the flag keeps the change reversible.
+    ap.add_argument("--canonicalize-rooms", action="store_true",
+                    help="Snap room polygon vertices to wall-induced axis "
+                         "grid after watershed (V1 fix: SALA DE ESTAR "
+                         "diagonal mordida). Off by default.")
+    ap.add_argument("--room-canonicalization-tol", type=float, default=8.0,
+                    help="Snap tolerance in PDF points (default 8.0 = "
+                         "1.5x wall_thickness on planta_74). Only effective "
+                         "when --canonicalize-rooms is set.")
     args = ap.parse_args()
 
     consensus = json.loads(args.consensus.read_text())
     labels = json.loads(args.labels.read_text())
     rooms = detect_rooms(consensus, labels, args.door_min, args.door_max, args.scale)
 
+    if args.canonicalize_rooms:
+        # Local import to keep cv2 import cheap when feature unused. The
+        # parent dir is on sys.path so canonicalize_room_polygons resolves
+        # whether this script runs as `python tools/rooms_from_seeds.py`
+        # or `python -m tools.rooms_from_seeds` (the documented form in
+        # OVERVIEW.md §4.4).
+        try:
+            from tools.canonicalize_room_polygons import canonicalize_rooms
+        except ModuleNotFoundError:
+            from canonicalize_room_polygons import canonicalize_rooms
+        n_before_pts = sum(len(r.get("polygon_pts", [])) for r in rooms)
+        rooms = canonicalize_rooms(
+            rooms,
+            consensus["walls"],
+            consensus["wall_thickness_pts"],
+            tol_pts=args.room_canonicalization_tol,
+        )
+        n_after_pts = sum(len(r.get("polygon_pts", [])) for r in rooms)
+        print(f"[canonicalize] tol={args.room_canonicalization_tol}pt: "
+              f"polygon vertex count {n_before_pts} -> {n_after_pts}")
+
     consensus["rooms"] = rooms
+    # Stamp how the consensus was produced so downstream / debug can tell
+    # whether canonicalization ran. Stays inside the existing schema-
+    # additive metadata field per docs/SCHEMA-V2.md.
+    md = consensus.setdefault("metadata", {})
+    md["rooms_from_seeds"] = {
+        "canonicalize_rooms": bool(args.canonicalize_rooms),
+        "room_canonicalization_tol": (
+            args.room_canonicalization_tol if args.canonicalize_rooms else None
+        ),
+    }
     out = args.out or args.consensus
     out.write_text(json.dumps(consensus, indent=2))
     print(f"[ok] {len(rooms)} rooms detected from labels -> {out}")
