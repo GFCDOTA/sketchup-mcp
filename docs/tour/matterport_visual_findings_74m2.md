@@ -12,6 +12,19 @@
 > dimensions extracted, no mesh/texture/asset download, no proprietary
 > data accessed. Public viewer screenshots and structural observation only.
 
+## TL;DR verdicts (one-line per defect)
+
+```
+V1: strong evidence — sala retangular no Matterport, mordida no SKP é provável artefato.
+V2: needs final screenshot — terraço parece retangular, mas falta crop dedicado.
+V4: confirmed correct — não corrigir geometria (A.S. é faixa estreita mesmo).
+V5: explained — abrir futura frente de semantic opening classification.
+```
+
+V1 has enough evidence to start a technical attack (separate
+branch, `tools/rooms_from_seeds.py`). V2 needs one more manual
+screenshot before patching the same code path.
+
 ## Method
 
 Browser-driven inspection via Claude_in_Chrome MCP:
@@ -142,19 +155,44 @@ Track A PR after V1/V2 root cause is fixed.
 
 ## Manual screenshots needed (for stronger confirmation)
 
-To turn V2 from "likely contradicted" into "definitively contradicted" I
-would want — if you can capture them manually from the Matterport tour:
+The Chrome MCP `screenshot` action returns image data inline (visible in
+the conversation transcript) but does not produce a stable file path I
+can persist into the repo. The two captures listed below would persist
+the V2 evidence as committed artifacts so a future PR doesn't have to
+re-walk the tour.
+
+To turn V2 from "likely contradicted" into "definitively contradicted",
+**please capture manually from https://discover.matterport.com/space/rLoqyVDHfzC**:
 
 1. **Top-down floorplan zoomed only on the TERRACO** (left wood-floor
-   area). The Matterport top-down view is the fastest comparable to the
-   SKP consensus top render. Open the tour, switch to dollhouse, tilt
-   to top, zoom into the wood-floor area.
-2. **FPV from inside the TERRACO looking back at the building** — shows
-   any structural column or angular wall that might justify a real
-   pentagonal cut.
+   area). Steps:
+   - Open the tour.
+   - Click the dollhouse icon in the bottom toolbar (third icon from
+     the left, between the play button and the walking-person icon).
+   - Hold **Ctrl** and drag the model upward until you are looking
+     straight down (true top-down).
+   - Scroll/zoom into the wood-floor area on the left side.
+   - Save the screenshot as
+     `docs/tour/matterport_terraco_topdown.png`.
+   This is the direct comparable to the SKP consensus top render's
+   bottom-left "TERRACO SOCIAL" pentagon.
 
-These two would let `tools/rooms_from_seeds.py` be patched (or not)
-with confidence.
+2. **FPV from inside the TERRACO looking back at the building**.
+   Steps:
+   - From dollhouse view, double-click on a scan circle that sits
+     **on the wood-floor area** (any of the ones inside the dining
+     table region works).
+   - Once in walking mode, drag-rotate to face away from the
+     exterior glass and toward the apartment's interior wall.
+   - Save the screenshot as
+     `docs/tour/matterport_terraco_fpv_inward.png`.
+   This shows whether there is a structural column or angular wall
+   that would justify a real pentagonal cut (vs. a polygonize
+   artifact).
+
+These two PNGs alongside this doc convert V2 into definitive evidence
+and let `tools/rooms_from_seeds.py` be patched (or not) for V2 with the
+same confidence we now have for V1.
 
 ## Decision: no source code change in this PR
 
