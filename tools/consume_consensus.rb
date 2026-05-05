@@ -25,6 +25,12 @@ WALL_FILL_RGB    = [78, 78, 78]
 PARAPET_RGB      = [130, 135, 140]   # médio cinza-concreto; antes era [200,220,230] (papel-de-parede)
 PASSAGE_RGB      = [102, 187, 230]   # azul claro destacado pra ler em axon
 PASSAGE_MARKER_HEIGHT_IN = 1.0       # 1 in (~2.5 cm) acima do chão pra ficar visível
+
+# Openings whose host wall must be split around them (true carving).
+# wall_gap origin is intentionally absent: the gap is already in the wall
+# data (the source PDF drew the flanking walls as separate filled
+# rectangles), so carving would double-shrink the geometry.
+CARVING_OPENING_ORIGINS = ['svg_arc', 'svg_segments'].freeze
 ROOM_PALETTE = [
   [253, 226, 192], [200, 230, 201], [187, 222, 251], [248, 187, 208],
   [220, 237, 200], [255, 224, 178], [209, 196, 233], [179, 229, 252],
@@ -136,6 +142,93 @@ def _segment_overlaps_wall?(p1, p2, footprints, tol_in: 1.0)
         py >= y0 - tol_in && py <= y1 + tol_in
     end
   end
+end
+
+def _kept_segments(axis_start, axis_end, carve_ranges)
+  # Subtract the union of carve_ranges from [axis_start, axis_end].
+  # Returns a list of [start, end] kept segments. Carve ranges may
+  # extend past the wall axis on either side (clamped) or overlap each
+  # other (merged via the cursor). Empty input or fully-carved input
+  # both yield an empty list, in which case the wall is omitted entirely
+  # — matching the pipeline invariant "do not invent geometry".
+  return [] if axis_end <= axis_start
+  sorted = carve_ranges.map { |s, e| [[s, e].min, [s, e].max] }
+                       .sort_by { |s, _| s }
+  kept = []
+  cursor = axis_start.to_f
+  sorted.each do |c_start, c_end|
+    c_start = [c_start, axis_start].max
+    c_end   = [c_end,   axis_end].min
+    next if c_end <= cursor
+    if c_start > cursor
+      kept << [cursor, c_start]
+    end
+    cursor = [cursor, c_end].max
+  end
+  kept << [cursor, axis_end] if cursor < axis_end
+  kept
+end
+
+def _carve_ranges_for(wall, openings_on_wall)
+  # Each carving opening contributes [center_axis - width/2, center_axis + width/2]
+  # along the wall's variable axis. The host wall's orientation decides
+  # which coordinate component is the axis.
+  axis_idx = wall['orientation'] == 'h' ? 0 : 1
+  openings_on_wall.map do |op|
+    half = op['opening_width_pts'].to_f / 2.0
+    cx = op['center'][axis_idx]
+    [cx - half, cx + half]
+  end
+end
+
+def _wall_axis_range(wall)
+  # Returns [axis_start, axis_end] along the wall's variable axis, sorted
+  # ascending. start/end in the consensus may be in either direction.
+  axis_idx = wall['orientation'] == 'h' ? 0 : 1
+  s = wall['start'][axis_idx].to_f
+  e = wall['end'][axis_idx].to_f
+  [[s, e].min, [s, e].max]
+end
+
+def _emit_carved_wall(parent_entities, wall, segment, seg_idx, thickness_pt, material)
+  # Build a sub-wall whose extent along the axis is [segment[0], segment[1]],
+  # otherwise identical to the parent wall (same cross-axis centerline,
+  # same orientation, same thickness). Group is named '<wall_id>_seg_<n>'
+  # so the inspector can reconstruct the parent->sub mapping.
+  s_start, s_end = segment
+  return nil if s_end - s_start < 0.5  # smaller than 0.5 PDF pt -> drop
+  if wall['orientation'] == 'h'
+    cy = wall['start'][1]
+    sub_wall = {
+      'id'          => "#{wall['id']}_seg_#{seg_idx}",
+      'start'       => [s_start, cy],
+      'end'         => [s_end,   cy],
+      'orientation' => 'h',
+    }
+  else
+    cx = wall['start'][0]
+    sub_wall = {
+      'id'          => "#{wall['id']}_seg_#{seg_idx}",
+      'start'       => [cx, s_start],
+      'end'         => [cx, s_end],
+      'orientation' => 'v',
+    }
+  end
+  add_wall_volume(parent_entities, sub_wall, thickness_pt, material)
+end
+
+def add_carved_wall(parent_entities, wall, openings_on_wall, thickness_pt, material)
+  # Splits the wall into sub-segments around each carving opening and
+  # emits one SU group per kept segment. Returns the list of emitted
+  # groups (may be empty if the wall is fully consumed by openings —
+  # which would be a detector pathology, but we don't fabricate
+  # geometry to compensate).
+  axis_start, axis_end = _wall_axis_range(wall)
+  carve = _carve_ranges_for(wall, openings_on_wall)
+  segments = _kept_segments(axis_start, axis_end, carve)
+  segments.each_with_index.map do |seg, idx|
+    _emit_carved_wall(parent_entities, wall, seg, idx, thickness_pt, material)
+  end.compact
 end
 
 def add_passage_marker(parent_entities, opening, walls_by_id, thickness_pt,
@@ -280,14 +373,37 @@ def main
 
   thickness_pt = data['wall_thickness_pts']
   walls = data['walls'] || []
+  openings_all = data['openings'] || []
+  # Index carving openings by host wall_id. Skip wall_gap origin: the gap
+  # is already in the wall data and re-carving would shrink the flanking
+  # walls a second time. See CARVING_OPENING_ORIGINS above.
+  carving_openings_by_wall = Hash.new { |h, k| h[k] = [] }
+  openings_all.each do |op|
+    next unless CARVING_OPENING_ORIGINS.include?(op['geometry_origin'])
+    next unless op['wall_id']
+    carving_openings_by_wall[op['wall_id']] << op
+  end
   puts "[consume] walls: #{walls.length}"
+  carving_count = carving_openings_by_wall.values.map(&:length).sum
+  puts "[consume] carving_openings: #{carving_count}"
 
   wall_mat = model.materials.add('wall_dark')
   wall_mat.color = Sketchup::Color.new(*WALL_FILL_RGB)
 
+  carved_subwall_count = 0
   walls.each do |w|
-    grp = add_wall_volume(ents, w, thickness_pt, wall_mat)
-    grp.layer = walls_layer if grp
+    openings_on_w = carving_openings_by_wall[w['id']]
+    if openings_on_w.empty?
+      grp = add_wall_volume(ents, w, thickness_pt, wall_mat)
+      grp.layer = walls_layer if grp
+    else
+      grps = add_carved_wall(ents, w, openings_on_w, thickness_pt, wall_mat)
+      grps.each { |g| g.layer = walls_layer if g }
+      carved_subwall_count += grps.length
+    end
+  end
+  if carving_count > 0
+    puts "[consume] carved subwalls emitted: #{carved_subwall_count}"
   end
 
   rooms = data['rooms'] || []
@@ -309,10 +425,11 @@ def main
 
   # Wall-gap passage markers — visible sentinels for openings whose
   # gap is already in the wall geometry (geometry_origin == 'wall_gap').
-  # See tools/detect_wall_gaps.py for the producer side. door_arc /
-  # svg_segments openings sit on continuous walls and need true carving;
-  # they are intentionally NOT handled here (separate PR).
-  openings = data['openings'] || []
+  # See tools/detect_wall_gaps.py for the producer side.
+  # door_arc / svg_segments openings are carved into walls in the loop
+  # above (search add_carved_wall); they don't get markers because the
+  # carved gap is the marker.
+  openings = openings_all
   walls_by_id = walls.each_with_object({}) { |w, h| h[w['id']] = w if w['id'] }
   passage_mat = model.materials.add('passage_marker')
   passage_mat.color = Sketchup::Color.new(*PASSAGE_RGB)
