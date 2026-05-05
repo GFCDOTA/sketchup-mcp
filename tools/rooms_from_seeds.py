@@ -27,7 +27,7 @@ import numpy as np
 THIS = Path(__file__).resolve().parent
 sys.path.insert(0, str(THIS))
 
-from polygonize_rooms import _wall_to_box, _detect_door_bridges  # noqa: E402
+from polygonize_rooms import _detect_door_bridges  # noqa: E402, I001
 
 
 def rasterize_walls(walls: list[dict], bridges: list[dict], t: float,
@@ -157,7 +157,8 @@ def detect_rooms(consensus: dict, labels: list[dict],
         # bisectors — rooms hug the walls. Clipped to the convex hull
         # of the wall network so rooms don't bleed off the building
         # footprint where exterior peitoril is unwalled.
-        seed_pts = [to_px(l["seed_pt"][0], l["seed_pt"][1]) for l in labels]
+        seed_pts = [to_px(label["seed_pt"][0], label["seed_pt"][1])
+                    for label in labels]
 
         # Build interior mask: convex hull of wall pixels
         wall_pts = np.column_stack(np.where(mask > 0))
@@ -169,7 +170,6 @@ def detect_rooms(consensus: dict, labels: list[dict],
         else:
             interior = np.full_like(mask, 255)
         # Build a label image: -1 where wall, 0..N-1 where assigned.
-        white = (mask == 0).astype(np.uint8)
         # cv2.watershed: 3-channel image input, markers as int32 with
         # one positive ID per seed and 0 elsewhere; walls are -1
         # afterwards. Seeds expand outward through low-gradient regions
