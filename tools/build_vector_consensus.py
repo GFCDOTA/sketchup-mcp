@@ -260,6 +260,23 @@ def build(pdf_path: Path, out_path: Path, *, detect_openings: bool = False) -> d
     page = pdf[0]
     page_w, page_h = page.get_size()
     paths = _read_paths(page)
+
+    # Early-detection of rasterized PDFs. The vector pipeline is built
+    # for filled-path source data. A PDF that wraps a single bitmap
+    # (typical "print to PDF" or scan workflow) reports zero path
+    # objects, and the wall extractor will silently produce no walls.
+    # See docs/learning/planta_74_clean_compatibility.md for the
+    # planta_74_clean.pdf precedent.
+    if not paths:
+        msg = (
+            f"[err] PDF appears rasterized; vector pipeline incompatible. "
+            f"drawings=0 page_size={int(page_w)}x{int(page_h)} mode=raster-like. "
+            f"Use the raster pipeline (`python main.py extract {pdf_path}`) "
+            f"or supply a vector PDF whose walls are filled paths."
+        )
+        print(msg, file=sys.stderr)
+        return {}
+
     wall_paths = _identify_wall_paths(paths)
 
     walls: list[WallSeg] = []
@@ -271,7 +288,22 @@ def build(pdf_path: Path, out_path: Path, *, detect_openings: bool = False) -> d
         walls.append(seg)
 
     if not walls:
-        print("[err] no wall paths detected", file=sys.stderr)
+        # PDF has paths but no filled-only cluster looks like walls. Could
+        # be a vector PDF with stroke-based walls or unusual color/fill
+        # rule. Surface diagnostic counters so the operator can decide.
+        n_filled = sum(1 for pi, _ in paths
+                       if pi.fillmode != 0 and pi.stroke_on == 0)
+        n_stroked = sum(1 for pi, _ in paths
+                        if pi.fillmode == 0 and pi.stroke_on)
+        msg = (
+            f"[err] no wall paths detected. "
+            f"drawings={len(paths)} filled_only={n_filled} stroked_only={n_stroked} "
+            f"page_size={int(page_w)}x{int(page_h)}. "
+            f"Vector source has paths but the wall extractor's filled+thickness "
+            f"cluster filter rejected them — possibly stroke-based walls or a "
+            f"different fill color. See docs/learning/planta_74_clean_compatibility.md."
+        )
+        print(msg, file=sys.stderr)
         return {}
 
     region = _planta_bbox(walls)
