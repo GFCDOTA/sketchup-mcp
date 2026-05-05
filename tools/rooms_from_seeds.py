@@ -27,7 +27,7 @@ import numpy as np
 THIS = Path(__file__).resolve().parent
 sys.path.insert(0, str(THIS))
 
-from polygonize_rooms import _wall_to_box, _detect_door_bridges  # noqa: E402
+from polygonize_rooms import _detect_door_bridges  # noqa: E402, I001
 
 
 def rasterize_walls(walls: list[dict], bridges: list[dict], t: float,
@@ -157,7 +157,8 @@ def detect_rooms(consensus: dict, labels: list[dict],
         # bisectors — rooms hug the walls. Clipped to the convex hull
         # of the wall network so rooms don't bleed off the building
         # footprint where exterior peitoril is unwalled.
-        seed_pts = [to_px(l["seed_pt"][0], l["seed_pt"][1]) for l in labels]
+        seed_pts = [to_px(label["seed_pt"][0], label["seed_pt"][1])
+                    for label in labels]
 
         # Build interior mask: convex hull of wall pixels
         wall_pts = np.column_stack(np.where(mask > 0))
@@ -169,7 +170,6 @@ def detect_rooms(consensus: dict, labels: list[dict],
         else:
             interior = np.full_like(mask, 255)
         # Build a label image: -1 where wall, 0..N-1 where assigned.
-        white = (mask == 0).astype(np.uint8)
         # cv2.watershed: 3-channel image input, markers as int32 with
         # one positive ID per seed and 0 elsewhere; walls are -1
         # afterwards. Seeds expand outward through low-gradient regions
@@ -285,13 +285,57 @@ if __name__ == "__main__":
     ap.add_argument("--door-min", type=float, default=15.0)
     ap.add_argument("--door-max", type=float, default=50.0)
     ap.add_argument("--scale", type=int, default=8)
+    # V1 fix wiring (CLAUDE.md §3 paradigm: opt-in only).
+    # See docs/tour/matterport_visual_findings_74m2.md V1 verdict and
+    # tests/test_living_terraco_shape_canonicity.py for the empirical
+    # tolerance choice. Default OFF — flipping to ON is a deliberate
+    # operational decision; the flag keeps the change reversible.
+    ap.add_argument("--canonicalize-rooms", action="store_true",
+                    help="Snap room polygon vertices to wall-induced axis "
+                         "grid after watershed (V1 fix: SALA DE ESTAR "
+                         "diagonal mordida). Off by default.")
+    ap.add_argument("--room-canonicalization-tol", type=float, default=8.0,
+                    help="Snap tolerance in PDF points (default 8.0 = "
+                         "1.5x wall_thickness on planta_74). Only effective "
+                         "when --canonicalize-rooms is set.")
     args = ap.parse_args()
 
     consensus = json.loads(args.consensus.read_text())
     labels = json.loads(args.labels.read_text())
     rooms = detect_rooms(consensus, labels, args.door_min, args.door_max, args.scale)
 
+    if args.canonicalize_rooms:
+        # Local import to keep cv2 import cheap when feature unused. The
+        # parent dir is on sys.path so canonicalize_room_polygons resolves
+        # whether this script runs as `python tools/rooms_from_seeds.py`
+        # or `python -m tools.rooms_from_seeds` (the documented form in
+        # OVERVIEW.md §4.4).
+        try:
+            from tools.canonicalize_room_polygons import canonicalize_rooms
+        except ModuleNotFoundError:
+            from canonicalize_room_polygons import canonicalize_rooms
+        n_before_pts = sum(len(r.get("polygon_pts", [])) for r in rooms)
+        rooms = canonicalize_rooms(
+            rooms,
+            consensus["walls"],
+            consensus["wall_thickness_pts"],
+            tol_pts=args.room_canonicalization_tol,
+        )
+        n_after_pts = sum(len(r.get("polygon_pts", [])) for r in rooms)
+        print(f"[canonicalize] tol={args.room_canonicalization_tol}pt: "
+              f"polygon vertex count {n_before_pts} -> {n_after_pts}")
+
     consensus["rooms"] = rooms
+    # Stamp how the consensus was produced so downstream / debug can tell
+    # whether canonicalization ran. Stays inside the existing schema-
+    # additive metadata field per docs/SCHEMA-V2.md.
+    md = consensus.setdefault("metadata", {})
+    md["rooms_from_seeds"] = {
+        "canonicalize_rooms": bool(args.canonicalize_rooms),
+        "room_canonicalization_tol": (
+            args.room_canonicalization_tol if args.canonicalize_rooms else None
+        ),
+    }
     out = args.out or args.consensus
     out.write_text(json.dumps(consensus, indent=2))
     print(f"[ok] {len(rooms)} rooms detected from labels -> {out}")
