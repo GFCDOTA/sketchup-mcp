@@ -25,6 +25,21 @@ V1 has enough evidence to start a technical attack (separate
 branch, `tools/rooms_from_seeds.py`). V2 needs one more manual
 screenshot before patching the same code path.
 
+## Evidence
+
+| Defect | Evidence | Where |
+|---|---|---|
+| V1 | Persisted Matterport official Living Room photo (640×360 JPEG) — sala retangular, no diagonal cut visible | `references/matterport_74m2/01_living_room_official.jpg` |
+| V1 | Visual observation only of the dollhouse + top-down floorplan in this conversation transcript; not persisted because of the Chrome multi-download block | `docs/tour/matterport_photo_inventory_74m2.md` § "Dollhouse / top-down captures observed" |
+| V2 | Visual observation only; wood-deck top-down crop and terraço-interior FPV not persisted | `docs/tour/matterport_capture_failure_74m2.md` (technical details) |
+| V4 | Visual observation only; FPV from A.S. corridor confirmed A.S. is a thin vertical strip between exterior wall and kitchen | `docs/tour/matterport_photo_inventory_74m2.md` § "Dollhouse / top-down captures observed" |
+| V5 | Persisted Living Room photo (porta-balcão visible right edge) + observation of foto 9 / foto 4 in the gallery | `references/matterport_74m2/01_living_room_official.jpg` + photo inventory rows 4 and 9 |
+
+If a verdict is "visual observation only", the corresponding step in
+`docs/tour/matterport_capture_failure_74m2.md` lists the exact method
+that failed and the recommended next-session method to convert the
+observation into a persisted artifact.
+
 ## Method
 
 Browser-driven inspection via Claude_in_Chrome MCP:
