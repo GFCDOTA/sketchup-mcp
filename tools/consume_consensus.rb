@@ -23,6 +23,8 @@ PARAPET_HEIGHT_IN = PARAPET_HEIGHT_M * M_TO_IN
 
 WALL_FILL_RGB    = [78, 78, 78]
 PARAPET_RGB      = [130, 135, 140]   # médio cinza-concreto; antes era [200,220,230] (papel-de-parede)
+PASSAGE_RGB      = [102, 187, 230]   # azul claro destacado pra ler em axon
+PASSAGE_MARKER_HEIGHT_IN = 1.0       # 1 in (~2.5 cm) acima do chão pra ficar visível
 ROOM_PALETTE = [
   [253, 226, 192], [200, 230, 201], [187, 222, 251], [248, 187, 208],
   [220, 237, 200], [255, 224, 178], [209, 196, 233], [179, 229, 252],
@@ -136,6 +138,60 @@ def _segment_overlaps_wall?(p1, p2, footprints, tol_in: 1.0)
   end
 end
 
+def add_passage_marker(parent_entities, opening, walls_by_id, thickness_pt,
+                        marker_material, layer)
+  # Visual sentinel for an "open_passage" opening. The wall geometry already
+  # has the gap (the source PDF drew the two flanking wall rectangles
+  # separately), so there is nothing to CARVE — but a human reviewing the
+  # SKP cannot tell whether a wall-line break is "passage detected" or
+  # "wall ended here". This marker resolves that ambiguity by drawing a
+  # thin floor-level rectangle inside the gap, oriented along the host
+  # wall axis, sized to the detector's reported opening_width_pts.
+  #
+  # Schema: this function fires only for openings with
+  # ``geometry_origin == "wall_gap"`` (see tools/detect_wall_gaps.py).
+  # Other geometry_origins (svg_arc, svg_segments) sit on continuous
+  # walls and require true carving — out of scope here.
+  wall_id = opening['wall_id']
+  wall = walls_by_id[wall_id]
+  return nil unless wall
+  center = opening['center']
+  return nil unless center.is_a?(Array) && center.length >= 2
+  width_pt = opening['opening_width_pts']
+  return nil if width_pt.nil? || width_pt <= 0
+
+  cx, cy = center
+  ori = wall['orientation']
+  if ori == 'h'
+    corners_pdf = [
+      [cx - width_pt / 2.0, cy - thickness_pt / 2.0],
+      [cx + width_pt / 2.0, cy - thickness_pt / 2.0],
+      [cx + width_pt / 2.0, cy + thickness_pt / 2.0],
+      [cx - width_pt / 2.0, cy + thickness_pt / 2.0],
+    ]
+  else
+    corners_pdf = [
+      [cx - thickness_pt / 2.0, cy - width_pt / 2.0],
+      [cx + thickness_pt / 2.0, cy - width_pt / 2.0],
+      [cx + thickness_pt / 2.0, cy + width_pt / 2.0],
+      [cx - thickness_pt / 2.0, cy + width_pt / 2.0],
+    ]
+  end
+  pts = corners_pdf.map { |p| pdf_pt_to_su_pt(*p) }
+  group = parent_entities.add_group
+  group.name = "passage_#{opening['id']}" if opening['id']
+  group.layer = layer if layer
+  face = group.entities.add_face(pts)
+  return nil if face.nil?
+  face.reverse! if face.normal.z < 0
+  face.pushpull(PASSAGE_MARKER_HEIGHT_IN)
+  group.entities.grep(Sketchup::Face).each do |fc|
+    fc.material = marker_material
+    fc.back_material = marker_material
+  end
+  group
+end
+
 def add_parapet(entities, polyline_pts, parapet_material, layer,
                 thickness_in: 1.5, wall_footprints: nil)
   return if polyline_pts.length < 2
@@ -220,6 +276,7 @@ def main
   walls_layer    = ensure_layer(model, 'walls')
   parapets_layer = ensure_layer(model, 'parapets')
   rooms_layer    = ensure_layer(model, 'rooms')
+  passages_layer = ensure_layer(model, 'passages')
 
   thickness_pt = data['wall_thickness_pts']
   walls = data['walls'] || []
@@ -249,6 +306,24 @@ def main
     add_parapet(ents, b['polyline_pts'], parapet_mat, parapets_layer,
                 wall_footprints: wall_footprints)
   end
+
+  # Wall-gap passage markers — visible sentinels for openings whose
+  # gap is already in the wall geometry (geometry_origin == 'wall_gap').
+  # See tools/detect_wall_gaps.py for the producer side. door_arc /
+  # svg_segments openings sit on continuous walls and need true carving;
+  # they are intentionally NOT handled here (separate PR).
+  openings = data['openings'] || []
+  walls_by_id = walls.each_with_object({}) { |w, h| h[w['id']] = w if w['id'] }
+  passage_mat = model.materials.add('passage_marker')
+  passage_mat.color = Sketchup::Color.new(*PASSAGE_RGB)
+  passage_count = 0
+  openings.each do |op|
+    next unless op['geometry_origin'] == 'wall_gap'
+    grp = add_passage_marker(ents, op, walls_by_id, thickness_pt,
+                              passage_mat, passages_layer)
+    passage_count += 1 if grp
+  end
+  puts "[consume] passages: #{passage_count}"
 
   model.commit_operation
   status = model.save(out)
