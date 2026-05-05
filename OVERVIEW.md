@@ -220,6 +220,14 @@ python -m tools.extract_room_labels planta_74.pdf \
 python -m tools.rooms_from_seeds runs/vector/consensus_model.json \
        runs/vector/labels.json
 
+# 3-opt-in. Mesmo step com canonicalização de polígonos (V1 fix —
+# elimina a "mordida diagonal" da SALA DE ESTAR documentada em
+# docs/tour/matterport_visual_findings_74m2.md). Default OFF; ative
+# explicitamente quando quiser o fix V1 no consensus_model.json:
+python -m tools.rooms_from_seeds runs/vector/consensus_model.json \
+       runs/vector/labels.json \
+       --canonicalize-rooms --room-canonicalization-tol 8
+
 # 4. openings (door arcs)
 python -m tools.extract_openings_vector planta_74.pdf \
        --consensus runs/vector/consensus_model.json --mode replace

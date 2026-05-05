@@ -237,3 +237,134 @@ def test_v2_terracos_dont_regress(live_consensus: dict) -> None:
         assert sig_a["diag"] <= sig_b["diag"], (
             f"{name} diagonal count regressed: {sig_b['diag']} -> {sig_a['diag']}"
         )
+
+
+# ---------------------------------------------------------------------------
+# Pipeline CLI integration tests — exercise tools.rooms_from_seeds CLI
+# ---------------------------------------------------------------------------
+
+
+def _run_rooms_from_seeds_cli(
+    consensus_in: Path, labels_in: Path, out: Path,
+    canonicalize: bool = False, tol: float = 8.0,
+) -> None:
+    """Invoke `python -m tools.rooms_from_seeds` as a subprocess. Mirrors
+    OVERVIEW.md §4.4 step 3 invocation."""
+    import subprocess
+    import sys
+
+    cmd = [
+        sys.executable, "-m", "tools.rooms_from_seeds",
+        str(consensus_in), str(labels_in),
+        "--out", str(out),
+    ]
+    if canonicalize:
+        cmd += ["--canonicalize-rooms", "--room-canonicalization-tol", str(tol)]
+    proc = subprocess.run(cmd, cwd=REPO_ROOT, capture_output=True, text=True, timeout=60)
+    assert proc.returncode == 0, (
+        f"rooms_from_seeds CLI failed (rc={proc.returncode}):\n"
+        f"STDOUT:\n{proc.stdout}\nSTDERR:\n{proc.stderr}"
+    )
+
+
+def _live_pipeline_inputs() -> tuple[Path, Path] | None:
+    """Locate the most recent pre-rooms consensus.json + labels.json pair
+    under runs/v1_pipeline_*/ or runs/skp_p74_*/.
+
+    Returns (consensus_path, labels_path) or None if neither exists.
+    """
+    for pattern in ("runs/v1_pipeline_*", "runs/skp_p74_*"):
+        candidates = sorted(REPO_ROOT.glob(pattern))
+        for c in reversed(candidates):
+            cons = c / "consensus.json"
+            lbl = c / "labels.json"
+            if cons.exists() and lbl.exists():
+                return cons, lbl
+    return None
+
+
+@pytest.fixture(scope="module")
+def live_inputs(tmp_path_factory: pytest.TempPathFactory) -> tuple[Path, Path, Path]:
+    """Copy pipeline inputs to a tmp dir and return (consensus, labels, tmp).
+
+    Skipped on a fresh checkout where no pipeline has run yet.
+    """
+    inputs = _live_pipeline_inputs()
+    if inputs is None:
+        pytest.skip("no pre-rooms consensus.json + labels.json under runs/v1_pipeline_*")
+    cons_src, lbl_src = inputs
+    tmp = tmp_path_factory.mktemp("v1_cli")
+    cons = tmp / "consensus.json"
+    lbl = tmp / "labels.json"
+    cons.write_bytes(cons_src.read_bytes())
+    lbl.write_bytes(lbl_src.read_bytes())
+    return cons, lbl, tmp
+
+
+def test_pipeline_cli_default_off_preserves_baseline(
+    live_inputs: tuple[Path, Path, Path],
+) -> None:
+    """Pipeline without --canonicalize-rooms must produce baseline rooms
+    AND must stamp metadata.rooms_from_seeds.canonicalize_rooms = False.
+    """
+    cons, lbl, tmp = live_inputs
+    out = tmp / "default_off.json"
+    _run_rooms_from_seeds_cli(cons, lbl, out, canonicalize=False)
+    d = json.loads(out.read_text(encoding="utf-8"))
+    assert len(d["rooms"]) == 11
+    assert len(d["walls"]) == 33
+    assert len(d["openings"]) == 12
+    assert len(d["soft_barriers"]) == 8
+    md = d.get("metadata", {}).get("rooms_from_seeds", {})
+    assert md.get("canonicalize_rooms") is False
+    assert md.get("room_canonicalization_tol") is None
+
+
+def test_pipeline_cli_with_flag_reduces_v1(
+    live_inputs: tuple[Path, Path, Path],
+) -> None:
+    """Pipeline with --canonicalize-rooms must (a) reduce SALA DE ESTAR
+    diagonals, (b) preserve global counts, (c) keep A.S. narrow.
+    Stamps metadata.rooms_from_seeds.canonicalize_rooms = True.
+    """
+    cons, lbl, tmp = live_inputs
+
+    out_off = tmp / "v1_cli_off.json"
+    _run_rooms_from_seeds_cli(cons, lbl, out_off, canonicalize=False)
+    d_off = json.loads(out_off.read_text(encoding="utf-8"))
+
+    out_on = tmp / "v1_cli_on.json"
+    _run_rooms_from_seeds_cli(cons, lbl, out_on, canonicalize=True, tol=8.0)
+    d_on = json.loads(out_on.read_text(encoding="utf-8"))
+
+    # Global counts identical (33/11/12/8)
+    for k in ("walls", "rooms", "openings", "soft_barriers"):
+        assert len(d_off[k]) == len(d_on[k]), f"{k} count diverged off vs on"
+    assert len(d_on["rooms"]) == 11
+    assert len(d_on["openings"]) == 12
+
+    # Metadata stamp
+    md = d_on.get("metadata", {}).get("rooms_from_seeds", {})
+    assert md.get("canonicalize_rooms") is True
+    assert md.get("room_canonicalization_tol") == 8.0
+
+    # V1 invariant: SALA DE ESTAR diagonals strictly reduced
+    sala_off = next(r for r in d_off["rooms"] if r["name"] == "SALA DE ESTAR")
+    sala_on = next(r for r in d_on["rooms"] if r["name"] == "SALA DE ESTAR")
+    sig_off = diagonal_signature(sala_off["polygon_pts"])
+    sig_on = diagonal_signature(sala_on["polygon_pts"])
+    assert sig_on["diag"] < sig_off["diag"], (
+        f"V1 CLI regression: SALA DE ESTAR diag {sig_off['diag']} -> {sig_on['diag']}"
+    )
+    assert sig_on["diag_total_len"] <= sig_off["diag_total_len"] - 10.0, (
+        f"V1 CLI regression: diag total len {sig_off['diag_total_len']:.1f} -> "
+        f"{sig_on['diag_total_len']:.1f}, expected drop >= 10pt"
+    )
+
+    # V4 invariant: A.S. stays narrow vertical strip
+    asv_on = next(r for r in d_on["rooms"] if r["name"] == "A.S.")
+    x0, y0, x1, y1 = _bbox(asv_on["polygon_pts"])
+    width = x1 - x0
+    height = y1 - y0
+    assert width < 100.0, f"V4 CLI regression: A.S. width {width:.1f}pt"
+    assert height / width >= 2.0, f"V4 CLI regression: A.S. ratio {height/width:.2f}"
