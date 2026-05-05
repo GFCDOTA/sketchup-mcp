@@ -554,10 +554,28 @@ def _cli() -> int:
     ap.add_argument("--classify-kind", action="store_true",
                     help="run V5 opening kind classifier post-process; "
                          "adds kind_v5 + kind_v5_reason fields. Off by default.")
+    # Wall-gap detection: emit openings with geometry_origin "wall_gap"
+    # for collinear wall pairs separated by a door/passage-sized gap.
+    # Schema-additive, opt-in, runs AFTER arc/window detection so
+    # existing openings dedupe wall-gap candidates.
+    ap.add_argument("--detect-wall-gaps", action="store_true",
+                    help="emit open_passage candidates from collinear "
+                         "wall pairs separated by a door/passage-sized "
+                         "gap. Off by default.")
     args = ap.parse_args()
 
     consensus = json.loads(args.consensus.read_text(encoding="utf-8"))
     enrich_consensus(consensus, args.pdf, mode=args.mode)
+
+    if args.detect_wall_gaps:
+        try:
+            from tools.detect_wall_gaps import detect_wall_gaps
+        except ModuleNotFoundError:
+            from detect_wall_gaps import detect_wall_gaps  # type: ignore
+        detect_wall_gaps(consensus)
+        wg = consensus.get("metadata", {}).get("wall_gap_detector", {})
+        print(f"[detect-wall-gaps] {wg.get('n_gaps_detected', 0)} "
+              f"open_passage candidates emitted")
 
     if args.classify_kind:
         try:
