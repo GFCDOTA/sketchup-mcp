@@ -302,6 +302,162 @@ def _width_fit_score(kind: str, width_m: float) -> float:
     return abs(width_m - target)
 
 
+# ---- Confidence + hypotheses + evidence ----
+
+KIND_TARGETS_M = {
+    "interior_door":     (0.90, 0.50),  # (target_m, half-window for full credit)
+    "interior_passage":  (1.80, 0.70),
+    "window":            (1.10, 0.50),
+    "glazed_balcony":    (2.20, 1.00),
+}
+
+
+def _width_fit_credit(kind: str, width_m: float) -> float:
+    """0.0 .. 1.0 — how snugly width matches the canonical target for
+    this kind. 1.0 at target, decays linearly to 0.0 at +/- half-window."""
+    target, half = KIND_TARGETS_M.get(kind, (width_m, 0.5))
+    delta = abs(width_m - target)
+    if delta <= 0:
+        return 1.0
+    if delta >= half:
+        return 0.0
+    return 1.0 - (delta / half)
+
+
+def _adjacency_plausibility(room_a_name: str | None,
+                              room_b_name: str | None,
+                              kind: str) -> float:
+    """0.0 .. 1.0 — how architecturally plausible is this kind given
+    the two adjacent rooms. Heuristic and conservative; meant to
+    penalise weird pairings (e.g., COZINHA <-> SUITE 02 wide passage).
+
+    No hard rules here — just bumps a confidence floor up when the
+    pairing is canonical (private<->private = door; sala<->jantar =
+    passage; sala<->terraco = glazed_balcony).
+    """
+    if not room_a_name or not room_b_name:
+        # Indoor-to-exterior is fine for window / glazed_balcony
+        if kind in ("window", "glazed_balcony"):
+            return 1.0
+        return 0.4
+    a = room_a_name.upper()
+    b = room_b_name.upper()
+    a_priv = is_private_room(a)
+    b_priv = is_private_room(b)
+    a_open = is_open_air_room(a)
+    b_open = is_open_air_room(b)
+
+    if kind == "interior_door":
+        if a_priv and b_priv:
+            return 1.0  # canonical
+        if a_priv != b_priv:
+            return 0.85  # private<->public, plausible
+        return 0.7
+
+    if kind == "interior_passage":
+        if a_priv and b_priv:
+            return 0.0   # NEVER — private rooms only get doors
+        if not a_priv and not b_priv and not a_open and not b_open:
+            return 1.0   # sala<->jantar canonical
+        return 0.6
+
+    if kind == "window":
+        if a_open or b_open:
+            return 1.0
+        return 0.5
+
+    if kind == "glazed_balcony":
+        if a_open or b_open:
+            return 1.0
+        return 0.4
+
+    return 0.5
+
+
+def _compute_confidence_and_hypotheses(opening: dict,
+                                          room_a: dict | None,
+                                          room_b: dict | None,
+                                          width_m: float,
+                                          selected_kind: str | None,
+                                          ) -> tuple[float, list[dict]]:
+    """Return (confidence, hypotheses).
+
+    confidence in [0.0, 1.0] is a weighted sum of:
+      - rooms_evidence  (0.30 weight) — both rooms identified > one > none
+      - width_fit       (0.40 weight) — how snugly the width matches kind
+      - adjacency_plaus (0.30 weight) — pairing makes architectural sense
+    """
+    rooms_populated = (
+        (1 if room_a is not None else 0)
+        + (1 if room_b is not None else 0)
+    )
+    rooms_evidence = {0: 0.0, 1: 0.5, 2: 1.0}[rooms_populated]
+
+    if selected_kind is None:
+        # No kind picked at all — confidence is 0; alternates list
+        # exhaustively from the 4 known kinds with low prob each.
+        return 0.0, [
+            {"kind": k, "prob": 0.0, "reason": "rule rejected"}
+            for k in KIND_TARGETS_M
+        ]
+
+    width_fit = _width_fit_credit(selected_kind, width_m)
+    a_name = room_a["name"] if room_a else None
+    b_name = room_b["name"] if room_b else None
+    adj_plaus = _adjacency_plausibility(a_name, b_name, selected_kind)
+
+    confidence = (
+        0.30 * rooms_evidence
+        + 0.40 * width_fit
+        + 0.30 * adj_plaus
+    )
+    confidence = max(0.0, min(1.0, confidence))
+
+    # Build hypotheses: selected kind first (with computed conf),
+    # then alternates with the same confidence formula but the OTHER
+    # kinds. This lets an auditor or downstream tool see which other
+    # interpretations are nearly as plausible.
+    candidates = []
+    for k in KIND_TARGETS_M:
+        if k == selected_kind:
+            prob = confidence
+            reason = (
+                f"width {width_m:.2f}m fits target "
+                f"{KIND_TARGETS_M[k][0]:.2f}m; rooms "
+                f"{a_name or '-'} <-> {b_name or '-'}"
+            )
+        else:
+            wf = _width_fit_credit(k, width_m)
+            ap = _adjacency_plausibility(a_name, b_name, k)
+            prob = max(0.0, min(1.0,
+                0.30 * rooms_evidence + 0.40 * wf + 0.30 * ap,
+            ))
+            reason = f"width fit={wf:.2f}, adjacency plausibility={ap:.2f}"
+        candidates.append({"kind": k, "prob": round(prob, 3),
+                            "reason": reason})
+    candidates.sort(key=lambda c: c["prob"], reverse=True)
+    return round(confidence, 3), candidates
+
+
+def _build_evidence(opening: dict, wall: dict | None,
+                     room_a: dict | None, room_b: dict | None,
+                     pt_to_m: float) -> dict:
+    return {
+        "wall_id": opening.get("wall_id"),
+        "wall_orientation": (wall.get("orientation") if wall else None),
+        "room_left": room_a["name"] if room_a else None,
+        "room_right": room_b["name"] if room_b else None,
+        "room_left_id": room_a["id"] if room_a else None,
+        "room_right_id": room_b["id"] if room_b else None,
+        "width_m": round(
+            float(opening.get("opening_width_pts", 0.0)) * pt_to_m, 3,
+        ),
+        "width_pts": float(opening.get("opening_width_pts", 0.0)),
+        "geometry_origin": opening.get("geometry_origin"),
+        "chord_recovered": "opening_width_pts_legacy" in opening,
+    }
+
+
 # ---- Dedup ----
 
 def _cluster_openings_by_proximity(openings: list[dict],
@@ -402,10 +558,25 @@ def _recover_chord_width_pt(opening: dict,
 def classify_openings_by_room_context(consensus: dict,
                                        pt_to_m: float = PT_TO_M_DEFAULT,
                                        dedup_distance_pt: float = DEDUP_DISTANCE_PT,
+                                       ambiguity_policy: object = None,
                                        ) -> dict:
     """Read-modify-write classification. Returns the same dict, with
     ``consensus['openings']`` filtered + each remaining opening's
-    ``kind_v5`` rewritten to the context-derived value."""
+    ``kind_v5`` rewritten to the context-derived value.
+
+    Stage 1 (PR feature/coherence-audit): every kept opening also gets
+    a Stage-1 contract of uncertainty:
+
+        opening['confidence']  : float in [0.0, 1.0]
+        opening['decision']    : 'clean' | 'debug' | 'ask' | 'drop'
+        opening['hypotheses']  : list of {kind, prob, reason}
+        opening['evidence']    : structured features used for the call
+
+    Pass ``ambiguity_policy`` (an AmbiguityPolicy from
+    assumptions_loader) to apply a custom decision routing; otherwise
+    a conservative default (drop<0.20, ask<0.50, debug<0.75, clean>=0.75)
+    is used. Geometry/SKP are NOT touched.
+    """
     rooms = consensus.get("rooms") or []
     walls = consensus.get("walls") or []
     walls_by_id = {w["id"]: w for w in walls if w.get("id")}
@@ -467,7 +638,17 @@ def classify_openings_by_room_context(consensus: dict,
                         f"{best.get('id','?')} on wall {wid})"
                     )
 
-    # Apply: rewrite kind_v5 + reason for kept openings
+    # Resolve ambiguity policy (Stage 1: routing, no geometry change)
+    if ambiguity_policy is None:
+        try:
+            # Lazy import to keep this module standalone
+            from tools.assumptions_loader import AmbiguityPolicy
+            ambiguity_policy = AmbiguityPolicy()
+        except Exception:
+            ambiguity_policy = None
+
+    # Apply: rewrite kind_v5 + reason + Stage-1 uncertainty contract
+    decision_counts: dict = defaultdict(int)
     for op in keep:
         ctx = op.pop("context_kind", None)
         op["kind_v5"] = ctx
@@ -475,6 +656,33 @@ def classify_openings_by_room_context(consensus: dict,
             f"room_context: {op.get('room_left_name','-')} "
             f"<-> {op.get('room_right_name','-')}"
         )
+        # --- Stage-1 contract ---
+        wall = walls_by_id.get(op.get("wall_id"))
+        room_a = next(
+            (r for r in rooms if r["id"] == op.get("room_left_id")),
+            None,
+        )
+        room_b = next(
+            (r for r in rooms if r["id"] == op.get("room_right_id")),
+            None,
+        )
+        width_m = float(op.get("opening_width_pts", 0.0)) * pt_to_m
+        confidence, hypotheses = _compute_confidence_and_hypotheses(
+            op, room_a, room_b, width_m, ctx,
+        )
+        op["confidence"] = confidence
+        op["hypotheses"] = hypotheses
+        op["evidence"] = _build_evidence(op, wall, room_a, room_b, pt_to_m)
+        if ambiguity_policy is not None:
+            op["decision"] = ambiguity_policy.decide(confidence)
+        else:
+            op["decision"] = (
+                "clean" if confidence >= 0.75
+                else "debug" if confidence >= 0.50
+                else "ask" if confidence >= 0.20
+                else "drop"
+            )
+        decision_counts[op["decision"]] += 1
 
     # Update consensus
     consensus["openings"] = keep
@@ -484,6 +692,7 @@ def classify_openings_by_room_context(consensus: dict,
         "dropped": drop_count,
         "dedup_distance_pt": dedup_distance_pt,
         "pt_to_m": pt_to_m,
+        "decisions": dict(decision_counts),
     }
     return consensus
 
