@@ -125,6 +125,89 @@ def test_classify_both_none_dropped():
     assert _classify_pair(None, None, 1.0) is None
 
 
+# ---- private-room rule ----
+
+def test_classify_private_pair_force_door():
+    """Two private rooms (suite/banho) ALWAYS render as door even
+    when width is up to PRIVATE_PAIR_DOOR_MAX_M (1.50m)."""
+    assert _classify_pair(_r("SUITE 01"), _r("BANHO 01"), 1.36) == \
+        "interior_door"
+    assert _classify_pair(_r("LAVABO"), _r("BANHO 02"), 1.40) == \
+        "interior_door"
+
+
+def test_classify_private_pair_too_wide_dropped():
+    """Private pair with width > 1.50m is detector noise, not a real
+    passage between bedroom and bathroom."""
+    assert _classify_pair(_r("BANHO 01"), _r("SUITE 01"), 1.88) is None
+    assert _classify_pair(_r("BANHO 02"), _r("SUITE 01"), 2.20) is None
+
+
+def test_classify_private_plus_public_uses_default_rules():
+    """SUITE -> SALA DE ESTAR is a corridor connection. Default
+    interior_door / interior_passage rules apply (not the strict
+    private-pair rule)."""
+    assert _classify_pair(_r("SUITE 02"), _r("SALA DE ESTAR"), 0.95) == \
+        "interior_door"
+    assert _classify_pair(_r("SUITE 02"), _r("SALA DE ESTAR"), 1.80) == \
+        "interior_passage"
+
+
+# ---- chord recovery from arc bbox ----
+
+def test_chord_recovery_horizontal_wall_uses_x_span():
+    """Horizontal wall: chord is bbox X-span. Earlier bug used
+    max(W,H) which equals the swing depth."""
+    cons = _two_room_consensus(width_pt=55.0)  # legacy wide width
+    op = cons["openings"][0]
+    op["arc_bbox_pts"] = [50.0, 100.0, 80.0, 155.0]  # 30 x 55
+    classify_openings_by_room_context(cons)
+    op = cons["openings"][0]
+    # chord recovered = 30pt = 1.06m, room pair is SUITE 01 / BANHO 01
+    # (private pair) -> door
+    assert op["kind_v5"] == "interior_door"
+    assert op["opening_width_pts_legacy"] == 55.0
+    assert abs(op["opening_width_pts"] - 30.0) < 0.5
+
+
+def test_chord_recovery_vertical_wall_uses_y_span():
+    cons = _two_room_consensus()
+    cons["walls"][0]["start"] = [100.0, 0.0]
+    cons["walls"][0]["end"] = [100.0, 200.0]
+    cons["walls"][0]["orientation"] = "v"
+    op = cons["openings"][0]
+    op["center"] = [100.0, 100.0]
+    op["opening_width_pts"] = 55.0
+    op["arc_bbox_pts"] = [85.0, 90.0, 140.0, 120.0]  # 55 x 30
+    # Need to set up rooms on either side of vertical wall
+    cons["rooms"] = [
+        {"id": "rA", "name": "SUITE 01", "seed_pt": [50.0, 100.0],
+         "polygon_pts": _square_polygon(0, 0, 95, 200)},
+        {"id": "rB", "name": "BANHO 01", "seed_pt": [150.0, 100.0],
+         "polygon_pts": _square_polygon(105, 0, 200, 200)},
+    ]
+    classify_openings_by_room_context(cons)
+    op = cons["openings"][0]
+    assert op["kind_v5"] == "interior_door"
+    # y-span = 30pt = 1.06m
+    assert abs(op["opening_width_pts"] - 30.0) < 0.5
+
+
+def test_chord_recovery_skipped_for_wall_gap():
+    """wall_gap openings have no arc_bbox; recovery is a no-op and the
+    existing opening_width_pts (real gap width) is used as-is."""
+    cons = _two_room_consensus(width_pt=82.0,
+                                geometry_origin="wall_gap",
+                                kind_v5="open_passage",
+                                room_a="SALA DE ESTAR",
+                                room_b="TERRACO SOCIAL")
+    classify_openings_by_room_context(cons)
+    op = cons["openings"][0]
+    assert "opening_width_pts_legacy" not in op
+    assert op["opening_width_pts"] == 82.0
+    assert op["kind_v5"] == "glazed_balcony"
+
+
 # ---- find_rooms_flanking_wall ----
 
 def test_flanking_wall_two_rooms_polygon_hit():

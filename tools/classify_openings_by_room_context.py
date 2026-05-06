@@ -73,12 +73,31 @@ OPEN_AIR_LABEL_SUBSTRINGS = (
     "TERRACO", "TERRAÇO", "SACADA", "VARANDA",
 )
 
+# Substrings that mark a room as private (bedrooms, bathrooms). Walls
+# between two private rooms are ALWAYS partitioned by a door —
+# real apartments do not have open passages between SUITE/BANHO/
+# LAVABO/QUARTO. So if the classifier sees two private rooms the
+# door range is widened (up to PRIVATE_PAIR_DOOR_MAX_M) and any
+# wider opening is dropped (= detector noise).
+PRIVATE_ROOM_LABEL_SUBSTRINGS = (
+    "SUITE", "SUÍTE", "QUARTO", "DORMITORIO", "DORMITÓRIO",
+    "BANHO", "BANHEIRO", "LAVABO", "WC",
+)
+PRIVATE_PAIR_DOOR_MAX_M = 1.50  # widened range for private<->private
+
 
 def is_open_air_room(name: Optional[str]) -> bool:
     if not name:
         return False
     upper = name.upper()
     return any(s in upper for s in OPEN_AIR_LABEL_SUBSTRINGS)
+
+
+def is_private_room(name: Optional[str]) -> bool:
+    if not name:
+        return False
+    upper = name.upper()
+    return any(s in upper for s in PRIVATE_ROOM_LABEL_SUBSTRINGS)
 
 
 # ---- Geometry helpers ----
@@ -235,9 +254,19 @@ def _classify_pair(room_a: Optional[dict], room_b: Optional[dict],
     b_open = is_open_air_room(room_b["name"]) if room_b else False
     a_indoor = room_a is not None and not a_open
     b_indoor = room_b is not None and not b_open
+    a_private = is_private_room(room_a["name"]) if room_a else False
+    b_private = is_private_room(room_b["name"]) if room_b else False
 
     # Both indoor closed rooms
     if a_indoor and b_indoor:
+        # Two private rooms (suite/banho/quarto/lavabo): force door
+        # classification with widened range. Real apartments never
+        # have open passages here. Anything > PRIVATE_PAIR_DOOR_MAX_M
+        # is detector noise.
+        if a_private and b_private:
+            if width_m <= PRIVATE_PAIR_DOOR_MAX_M:
+                return "interior_door"
+            return None
         if width_m < INTERIOR_DOOR_MAX_M:
             return "interior_door"
         if INTERIOR_PASSAGE_MIN_M <= width_m <= INTERIOR_PASSAGE_MAX_M:
@@ -342,6 +371,32 @@ def _pick_best_in_cluster(cluster: list[dict],
     return min(valid, key=_key)
 
 
+# ---- Width recovery from arc bbox ----
+
+def _recover_chord_width_pt(opening: dict,
+                              wall: Optional[dict]) -> Optional[float]:
+    """For svg_arc openings, the legacy ``opening_width_pts`` uses
+    ``max(bbox_w, bbox_h)`` which equals the SWING DEPTH (radius)
+    when the door is wider on one bbox axis than the other. The real
+    chord (= the door panel width) is the bbox dimension ALIGNED with
+    the wall axis: for a horizontal wall use bbox_w (x-span), for a
+    vertical wall use bbox_h (y-span).
+
+    Returns the recovered width in PDF points, or None if data
+    insufficient (in which case caller falls back to opening_width_pts).
+    """
+    if opening.get("geometry_origin") != "svg_arc":
+        return None
+    bbox = opening.get("arc_bbox_pts")
+    if not bbox or len(bbox) < 4 or wall is None:
+        return None
+    bbox_w = float(bbox[2]) - float(bbox[0])  # x-span
+    bbox_h = float(bbox[3]) - float(bbox[1])  # y-span
+    if wall.get("orientation") == "h":
+        return bbox_w
+    return bbox_h
+
+
 # ---- Public API ----
 
 def classify_openings_by_room_context(consensus: dict,
@@ -372,6 +427,15 @@ def classify_openings_by_room_context(consensus: dict,
         op["room_right_id"] = rr["id"] if rr else None
         op["room_left_name"] = rl["name"] if rl else None
         op["room_right_name"] = rr["name"] if rr else None
+        # Recover the wall-aligned chord width for svg_arc openings.
+        # The legacy field uses max(bbox_w, bbox_h) which is the swing
+        # depth, not the chord. Stash both: corrected width drives
+        # classification + Ruby rendering, original is preserved for
+        # backward compat / debugging.
+        chord_pt = _recover_chord_width_pt(op, wall)
+        if chord_pt is not None and chord_pt > 0:
+            op["opening_width_pts_legacy"] = op.get("opening_width_pts")
+            op["opening_width_pts"] = chord_pt
         width_m = float(op.get("opening_width_pts", 0.0)) * pt_to_m
         op["context_kind"] = _classify_pair(rl, rr, width_m)
 
