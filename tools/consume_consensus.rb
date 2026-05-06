@@ -26,6 +26,23 @@ PARAPET_RGB      = [130, 135, 140]   # médio cinza-concreto; antes era [200,220
 PASSAGE_RGB      = [102, 187, 230]   # azul claro destacado pra ler em axon
 PASSAGE_MARKER_HEIGHT_IN = 1.0       # 1 in (~2.5 cm) acima do chão pra ficar visível
 
+# Door leaf (rendered for door_arc openings, post-carve)
+DOOR_HEIGHT_M    = 2.10
+DOOR_THICK_M     = 0.04
+DOOR_HEIGHT_IN   = DOOR_HEIGHT_M * M_TO_IN
+DOOR_THICK_IN    = DOOR_THICK_M  * M_TO_IN
+DOOR_RGB         = [140, 95, 55]     # madeira escura
+DOOR_SWING_DEG   = 30.0              # visual swing angle (deg open)
+
+# Window panel (rendered for wall_gap openings, additive to passage marker)
+WINDOW_SILL_M    = 0.90              # peitoril height (concrete to glass bottom)
+WINDOW_HEAD_M    = 2.10              # verga / lintel bottom (glass top)
+WINDOW_SILL_IN   = WINDOW_SILL_M  * M_TO_IN
+WINDOW_HEAD_IN   = WINDOW_HEAD_M  * M_TO_IN
+GLASS_RGB        = [180, 220, 240]   # azul-glass
+GLASS_ALPHA      = 0.45
+LINTEL_RGB       = [110, 115, 120]   # mesmo família do PARAPET_RGB
+
 # Openings whose host wall must be split around them (true carving).
 # wall_gap origin is intentionally absent: the gap is already in the wall
 # data (the source PDF drew the flanking walls as separate filled
@@ -325,6 +342,175 @@ def add_parapet(entities, polyline_pts, parapet_material, layer,
   end
 end
 
+def _opening_axis_basis(wall)
+  # Returns [axis_idx, cross_idx, cross_value] for the wall.
+  # axis_idx is the index (0=x, 1=y) of the wall's variable axis;
+  # cross_idx is the perpendicular index; cross_value is the wall
+  # centerline coordinate on the cross axis (in PDF pts).
+  if wall['orientation'] == 'h'
+    [0, 1, wall['start'][1].to_f]
+  else
+    [1, 0, wall['start'][0].to_f]
+  end
+end
+
+def add_door_leaf(parent_entities, opening, walls_by_id, thickness_pt,
+                   door_material, layer)
+  # Render a door leaf (single panel, swung open by DOOR_SWING_DEG)
+  # at the hinge side of the opening. The host wall is already CARVED
+  # by add_carved_wall (see CARVING_OPENING_ORIGINS); this function
+  # just inserts the visible swing geometry inside the carved gap.
+  #
+  # Schema: fires only for openings with kind_v5 == 'door_arc' AND
+  # geometry_origin == 'svg_arc' (= already carved).
+  # Reads: wall_id, center, opening_width_pts, hinge ('left'|'right').
+  wall_id = opening['wall_id']
+  wall = walls_by_id[wall_id]
+  return nil unless wall
+  center = opening['center']
+  return nil unless center.is_a?(Array) && center.length >= 2
+  width_pt = opening['opening_width_pts']
+  return nil if width_pt.nil? || width_pt <= 0
+  hinge_side = opening['hinge'] || 'left'
+
+  axis_idx, cross_idx, cross_value = _opening_axis_basis(wall)
+  axis_center = center[axis_idx].to_f
+  half = width_pt / 2.0
+
+  # Hinge axis location along the wall: 'left' = lower axis coord,
+  # 'right' = higher. Door leaf base sits at the hinge edge of the
+  # opening, panel extends along the wall axis CLOSED, then we rotate
+  # DOOR_SWING_DEG around the hinge (vertical Z axis at hinge point).
+  hinge_axis = hinge_side == 'right' ? axis_center + half : axis_center - half
+  panel_far_axis  = hinge_side == 'right' ? axis_center - half : axis_center + half
+  cross_inner = cross_value - thickness_pt / 2.0  # arbitrary face of wall
+  cross_outer = cross_value + thickness_pt / 2.0
+
+  # Build closed panel as 4 PDF-pt corners. Panel sits at the
+  # cross-centerline (centro da espessura da parede), so swung edges
+  # don't overlap the wall.
+  panel_cross = cross_value
+  if axis_idx == 0
+    # horizontal wall: axis is X, cross is Y
+    p_hinge_inner = [hinge_axis,    panel_cross]
+    p_hinge_outer = [hinge_axis,    panel_cross]  # degenerate; panel has no thickness in PDF coords
+    p_far_inner   = [panel_far_axis, panel_cross]
+    p_far_outer   = [panel_far_axis, panel_cross]
+  else
+    p_hinge_inner = [panel_cross, hinge_axis]
+    p_far_inner   = [panel_cross, panel_far_axis]
+  end
+  # We render the leaf as a vertical face in SU 3D (pushpull thickness
+  # afterwards). Build the 2 floor-level base points first.
+  hinge_pt = pdf_pt_to_su_pt(*p_hinge_inner)
+  far_pt   = pdf_pt_to_su_pt(*p_far_inner)
+  hinge_pt_top = Geom::Point3d.new(hinge_pt.x, hinge_pt.y, DOOR_HEIGHT_IN)
+  far_pt_top   = Geom::Point3d.new(far_pt.x,   far_pt.y,   DOOR_HEIGHT_IN)
+
+  group = parent_entities.add_group
+  group.name = "door_leaf_#{opening['id']}" if opening['id']
+  group.layer = layer if layer
+  face = group.entities.add_face([hinge_pt, far_pt, far_pt_top, hinge_pt_top])
+  return nil if face.nil?
+  face.reverse! if face.normal.z < 0
+  # Give it physical thickness (pushpull along face normal)
+  face.pushpull(DOOR_THICK_IN)
+  group.entities.grep(Sketchup::Face).each do |fc|
+    fc.material = door_material
+    fc.back_material = door_material
+  end
+
+  # Rotate the panel DOOR_SWING_DEG around the hinge vertical axis so
+  # the swing is visible. Rotation point = hinge floor-level; axis = Z.
+  swing_dir = hinge_side == 'right' ? -1.0 : 1.0
+  rotation = Geom::Transformation.rotation(
+    hinge_pt,
+    Geom::Vector3d.new(0, 0, 1),
+    swing_dir * DOOR_SWING_DEG.degrees,
+  )
+  group.transform!(rotation)
+  group
+rescue => e
+  puts "[warn] door_leaf opening=#{opening['id']} failed: #{e.message}"
+  nil
+end
+
+def _wall_gap_corners_pdf(wall, center, width_pt, thickness_pt)
+  cx, cy = center
+  if wall['orientation'] == 'h'
+    [
+      [cx - width_pt / 2.0, cy - thickness_pt / 2.0],
+      [cx + width_pt / 2.0, cy - thickness_pt / 2.0],
+      [cx + width_pt / 2.0, cy + thickness_pt / 2.0],
+      [cx - width_pt / 2.0, cy + thickness_pt / 2.0],
+    ]
+  else
+    [
+      [cx - thickness_pt / 2.0, cy - width_pt / 2.0],
+      [cx + thickness_pt / 2.0, cy - width_pt / 2.0],
+      [cx + thickness_pt / 2.0, cy + width_pt / 2.0],
+      [cx - thickness_pt / 2.0, cy + width_pt / 2.0],
+    ]
+  end
+end
+
+def _emit_box_at(parent_entities, corners_pdf, z_bottom_in, z_top_in,
+                  material, name, layer)
+  return nil if z_top_in - z_bottom_in <= 0.001
+  pts_floor = corners_pdf.map { |p| pdf_pt_to_su_pt(*p) }
+  pts_floor.each { |p| p.z = z_bottom_in }
+  group = parent_entities.add_group
+  group.name = name if name
+  group.layer = layer if layer
+  face = group.entities.add_face(pts_floor)
+  return nil if face.nil?
+  face.reverse! if face.normal.z < 0
+  face.pushpull(z_top_in - z_bottom_in)
+  group.entities.grep(Sketchup::Face).each do |fc|
+    fc.material = material
+    fc.back_material = material
+  end
+  group
+end
+
+def add_window_panel(parent_entities, opening, walls_by_id, thickness_pt,
+                      sill_material, glass_material, lintel_material, layer)
+  # Render a 3-band window assembly inside a wall_gap: peitoril
+  # (concrete 0 -> WINDOW_SILL_IN) + vidro (glass WINDOW_SILL_IN ->
+  # WINDOW_HEAD_IN) + verga (concrete WINDOW_HEAD_IN -> WALL_HEIGHT_IN).
+  # Width = opening_width_pts; depth = wall thickness.
+  #
+  # CAVEAT (caminho A): we render every wall_gap as a window. Some
+  # wall_gaps in real plants are interior passages (e.g. sala -> jantar
+  # without a door). Caminho B will classify wall_gap into
+  # window | passage based on adjacent room context. For now the
+  # passage_marker rectangle still emits to the 'passages' layer so a
+  # human can isolate / delete window groups that should be passages.
+  wall_id = opening['wall_id']
+  wall = walls_by_id[wall_id]
+  return nil unless wall
+  center = opening['center']
+  return nil unless center.is_a?(Array) && center.length >= 2
+  width_pt = opening['opening_width_pts']
+  return nil if width_pt.nil? || width_pt <= 0
+
+  corners = _wall_gap_corners_pdf(wall, center, width_pt, thickness_pt)
+  oid = opening['id']
+  groups = []
+  groups << _emit_box_at(parent_entities, corners, 0.0, WINDOW_SILL_IN,
+                         sill_material, "window_sill_#{oid}", layer)
+  groups << _emit_box_at(parent_entities, corners, WINDOW_SILL_IN,
+                         WINDOW_HEAD_IN, glass_material,
+                         "window_glass_#{oid}", layer)
+  groups << _emit_box_at(parent_entities, corners, WINDOW_HEAD_IN,
+                         WALL_HEIGHT_IN, lintel_material,
+                         "window_lintel_#{oid}", layer)
+  groups.compact
+rescue => e
+  puts "[warn] window_panel opening=#{opening['id']} failed: #{e.message}"
+  []
+end
+
 def reset_model(model)
   # Wipe everything that came from the template (default Sree figure,
   # template-bundled materials/components/layers) AND from any previous
@@ -370,6 +556,8 @@ def main
   parapets_layer = ensure_layer(model, 'parapets')
   rooms_layer    = ensure_layer(model, 'rooms')
   passages_layer = ensure_layer(model, 'passages')
+  doors_layer    = ensure_layer(model, 'doors')
+  windows_layer  = ensure_layer(model, 'windows')
 
   thickness_pt = data['wall_thickness_pts']
   walls = data['walls'] || []
@@ -441,6 +629,40 @@ def main
     passage_count += 1 if grp
   end
   puts "[consume] passages: #{passage_count}"
+
+  # Door leaves — visible swing panel inside each carved door_arc gap.
+  # Reads opening['hinge'] to decide swing direction. door_arc openings
+  # are already CARVED above; this adds the panel.
+  door_mat = model.materials.add('door_leaf')
+  door_mat.color = Sketchup::Color.new(*DOOR_RGB)
+  door_count = 0
+  openings.each do |op|
+    next unless op['kind_v5'] == 'door_arc' || op['geometry_origin'] == 'svg_arc'
+    grp = add_door_leaf(ents, op, walls_by_id, thickness_pt, door_mat,
+                         doors_layer)
+    door_count += 1 if grp
+  end
+  puts "[consume] door_leaves: #{door_count}"
+
+  # Window panels — peitoril + glass + verga inside each wall_gap.
+  # Caminho A: every wall_gap rendered as window. Passage marker still
+  # emitted (above) so designer can isolate misclassified wall_gaps.
+  sill_mat = model.materials.add('window_sill')
+  sill_mat.color = Sketchup::Color.new(*PARAPET_RGB)
+  glass_mat = model.materials.add('window_glass')
+  glass_mat.color = Sketchup::Color.new(*GLASS_RGB)
+  glass_mat.alpha = GLASS_ALPHA
+  lintel_mat = model.materials.add('window_lintel')
+  lintel_mat.color = Sketchup::Color.new(*LINTEL_RGB)
+  window_count = 0
+  openings.each do |op|
+    next unless op['geometry_origin'] == 'wall_gap'
+    grps = add_window_panel(ents, op, walls_by_id, thickness_pt,
+                             sill_mat, glass_mat, lintel_mat,
+                             windows_layer)
+    window_count += 1 unless grps.empty?
+  end
+  puts "[consume] windows: #{window_count}"
 
   model.commit_operation
   status = model.save(out)

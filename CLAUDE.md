@@ -263,12 +263,21 @@ explicitly running the command outside Claude.
   threshold sweep on planta_74 + p10 + p12.
 
 ### Known SketchUp issues
-- `consume_consensus.rb` does not carve openings yet (doors stay as
-  full-height walls). Tracked in `OVERVIEW.md` §7.
-- Window detection is missing (only door arcs).
 - `inspect_walls_report.rb` doesn't embed SHA256 of inspected `.skp`.
+- wall_gap openings are rendered as windows by default (caminho A);
+  classifier window-vs-passage based on adjacent room context is the
+  next step (caminho B). Designer must isolate/delete window groups
+  on `windows` layer that should be passages — passage_marker still
+  emits to `passages` layer for visibility.
 
 ### Recently fixed
+- door_arc openings are now CARVED into walls (PR #42, `consume_consensus.rb`)
+  and rendered with a visible swing leaf + 30° open
+  (`feature/openings-as-components`).
+- Window detection runs end-to-end (vector detector + 3-band
+  rendering: peitoril 0–0.9 m, glass 0.9–2.1 m, verga 2.1–2.7 m).
+  planta_74 specifically yields 0 vector windows (drawn inside wall
+  hatch); the 3 wall_gaps detected render as windows.
 - 3-pt parapet/wall coincidence filter
   (`commit 7fbd531`) — eliminates the "rodapé branco" band.
 
