@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0",
+  "source_pdf": "planta_74.pdf",
+  "pipeline": {
+    "stages": [
+      {
+        "module": "tools.build_vector_consensus",
+        "flags": ["--detect-openings"]
+      },
+      {
+        "module": "tools.extract_room_labels",
+        "flags": []
+      },
+      {
+        "module": "tools.rooms_from_seeds",
+        "flags": ["--canonicalize-rooms",
+                   "--room-canonicalization-tol", "8"]
+      },
+      {
+        "module": "tools.extract_openings_vector",
+        "flags": ["--mode", "replace",
+                   "--classify-kind",
+                   "--detect-wall-gaps"]
+      },
+      {
+        "module": "tools.classify_openings_by_room_context",
+        "flags": []
+      }
+    ]
+  },
+  "expected_counts": {
+    "walls": 33,
+    "rooms": 11,
+    "openings": 11,
+    "soft_barriers": 8
+  },
+  "expected_by_kind": {
+    "interior_door": 6,
+    "interior_passage": 2,
+    "window": 1,
+    "glazed_balcony": 2
+  },
+  "expected_by_decision": {
+    "clean": 7,
+    "debug": 4
+  },
+  "expected_room_names": [
+    "SUITE 02", "BANHO 02", "A.S.", "TERRACO SOCIAL",
+    "SUITE 01", "BANHO 01", "COZINHA", "LAVABO",
+    "SALA DE JANTAR", "SALA DE ESTAR", "TERRACO TECNICO"
+  ],
+  "invariants": {
+    "invalid_rooms": 0,
+    "floating_openings": 0,
+    "duplicate_walls": 0,
+    "openings_without_kind_v5": 0,
+    "openings_without_wall_id": 0,
+    "rooms_without_seed_pt": 0
+  },
+  "tolerances": {
+    "wall_count_delta": 0,
+    "room_count_delta": 0,
+    "opening_count_delta": 0,
+    "soft_barrier_count_delta": 0,
+    "by_kind_count_delta": 0,
+    "by_decision_count_delta": 0
+  },
+  "notes": [
+    "Locked 2026-05-06 after Stage 1 (PR feature/coherence-audit).",
+    "12 openings was the May-5 baseline (no --detect-wall-gaps).",
+    "15 openings is the post-detector pre-classifier count.",
+    "11 openings is the post-classifier count (4 dropped by",
+    "  caminho B: 2 phantoms-de-arc-radius via dedup + 2",
+    "  widths outside private<->private door range).",
+    "Update this baseline ONLY via an explicit PR that explains",
+    "  the count delta + bumps schema_version if tolerances widen."
+  ]
+}
