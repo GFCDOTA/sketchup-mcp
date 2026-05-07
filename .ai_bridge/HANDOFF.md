@@ -1,12 +1,50 @@
-# Handoff — 2026-05-07 03:30 UTC
+# Handoff — 2026-05-07 04:00 UTC
 
 > Most recent session's exit state. Next session reads this FIRST
 > after `CLAUDE.md`. Append-only is fine but the top entry must
 > always be the latest.
 
-## Status
+## Status — Validation Cycle (this session)
 
-Stage 1.6 substantially landed:
+Validated on `develop` (sha `fad28d9`) that the 5-PR queue from
+2026-05-06 (PRs #44–#48) is integrated and healthy. No code change in
+this cycle — pure validation + memory/docs updates.
+
+Critério final (all green):
+
+- `pytest tests/test_planta_74_truth_gate.py` → **15/15 PASS** in 2.03s
+- `tools.coherence_audit` → emitted `coherence_report.json` schema 1.0
+  (openings=11, by_decision={clean:7, debug:4})
+- `tools.micro_truth_gate` → emitted `micro_truth_report.json` schema 1.0;
+  SALA DE ESTAR matched `r009`, all 5 checks PASS, **score=1.0**
+- `scripts/smoke/smoke_skp_export.py` → verdict **PASS**, gates A–G PASS,
+  `model.skp` = 70,762 bytes (in 68–74 KB band), walls=33/rooms=11/openings=11
+- Test suite: 520 passed / 8 skipped / 17 failed; the 17 fails are all
+  pre-existing (16 raster, gate `len(strokes) > 200` doc CLAUDE.md §10;
+  + 1 `test_f1_dashboard`). 138 tests of the 5-PR-touched files all pass.
+
+Artifacts under `runs/validation_2026-05-07/` (gitignored, local only).
+
+### New behavioral rule added (cross-project memory)
+
+User saved permanent rule **"DONE IS NOT STOP"**:
+escopo concluído ≠ encerrar a sessão. Ao terminar uma task, registrar
+em `.ai_bridge/`, atualizar `TODO_NEXT.md`, escolher próximo ROI e
+continuar — só parar por bloqueio real. Saved as
+`feedback_done_is_not_stop.md` in user MEMORY.md.
+This handoff itself is the first application of the rule.
+
+## Status — Previous handoff (Stage 1.6 substantially landed)
+
+- PR #49 inspector v2 schema 1.0 → MERGED (`4cb968f`)
+- PR #50 CLAUDE.md autonomy rules (§14/§15/§16) → MERGED (`de8507d`)
+- PR #51 hygiene cycle 1 → MERGED (`fad28d9`)
+- PR #52 smoke gate G2 (`--inspect-strict`) → OPEN, awaiting merge
+
+Plus session N-1: created `.ai_bridge/` scaffolding on a separate
+branch (`feature/ai-bridge-scaffolding`) — still NOT merged as PR.
+
+## Status — Older entries
 
 - PR #49 inspector v2 schema 1.0 → MERGED (`4cb968f`)
 - PR #50 CLAUDE.md autonomy rules (§14/§15/§16) → MERGED (`de8507d`)
@@ -59,15 +97,19 @@ to `.ai_bridge/PROJECT_CONTEXT.md` for full context.
    to add BANHO 02 / COZINHA / SUITE 02.
 3. PR #52 still open — needs merge before Cycle 6 can build on it.
 
-## Next Best Actions (ROI order)
+## Next Best Actions (ROI order, after this validation cycle)
 
-See `TODO_NEXT.md` for full queue. Top of stack:
+See `TODO_NEXT.md` for full queue. Updated top of stack:
 
-1. Merge PR #52 (gate G2)
-2. Cycle 6: wire `autorun_inspector_plugin.rb` into gate F so
-   `inspect_report.json` becomes default smoke output
-3. Cycle 7: expand `planta_74_micro.json` ground truth
-4. Cycle 8: RuboCop SketchUp lint CI
+1. **Open PR for `feature/ai-bridge-scaffolding`** (this branch) —
+   per "Nunca deixar PR aberto" rule, branches with commits must land
+   or be discarded. Branch ready, validated, no source changes.
+2. **Open PR for `docs/non-stop-autonomy-rule`** (new branch this
+   session) — adds the DONE IS NOT STOP rule as CLAUDE.md §18.
+3. Merge PR #52 (gate G2) — Stage 1.6 already in CLAUDE.md §10
+4. Cycle 6: wire `autorun_inspector_plugin.rb` into gate F
+5. Cycle 7: expand `planta_74_micro.json` ground truth
+6. Cycle 8: RuboCop SketchUp lint CI
 
 ## Risks
 

@@ -15,7 +15,21 @@ Each entry:
 
 ---
 
-## P0 — Merge in-flight
+## P0 — Open PRs for in-flight branches (rule: never leave PR-less branches dangling)
+
+**Open PR for `feature/ai-bridge-scaffolding`** — branch ready, no source change
+- Evidence: branch carries .ai_bridge/ scaffolding + CLAUDE.md §17 reference
+- Touchpoints: branch already pushed to origin
+- Validation: PR opens cleanly against develop; no conflicts
+- Risk: none (docs/scaffolding only)
+
+**Open PR for `docs/non-stop-autonomy-rule`** — CLAUDE.md §18
+- Evidence: user requested rule in 2026-05-07 prompt; saved as memory + this PR
+- Touchpoints: CLAUDE.md
+- Validation: PR opens cleanly; ruff/pytest N/A (markdown only)
+- Risk: none
+
+## P0 — Merge in-flight (Stage 1.6)
 
 **Merge PR #52 (smoke gate G2)** — `feature/smoke-promotes-inspector-v2-gate`
 - Evidence: PR open, all checks green, no conflicts
