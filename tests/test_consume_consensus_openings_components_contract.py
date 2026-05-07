@@ -49,14 +49,36 @@ def test_consumer_reads_hinge_field():
     )
 
 
-def test_consumer_branches_on_door_arc_kind():
+def test_consumer_branches_on_room_context_kinds():
+    """Caminho B: Ruby reads kind_v5 set by
+    classify_openings_by_room_context and routes to the corresponding
+    renderer. Each kind below MUST appear as a branch target so a
+    typo / missing branch in the case-when fails the contract."""
     src = _consumer_source()
-    pattern = (r"kind_v5'?\s*\]\s*==\s*'door_arc'"
-               r"|geometry_origin'?\s*\]\s*==\s*'svg_arc'")
-    assert re.search(pattern, src), (
-        "consume_consensus.rb does not branch on the door_arc "
-        "discriminator; door leaves would be skipped."
-    )
+    for kind in ("interior_door", "interior_passage",
+                  "window", "glazed_balcony"):
+        # The kind appears either as a string literal in a `when`
+        # branch, a comparison, or as the body of the legacy mapping.
+        pattern = rf"['\"]({kind})['\"]"
+        assert re.search(pattern, src), (
+            f"consume_consensus.rb does not reference kind_v5='{kind}'; "
+            f"openings with this kind will not render."
+        )
+
+
+def test_consumer_back_compat_legacy_v5_kinds():
+    """Older consensus files (pre-room-context) emit door_arc /
+    open_passage. The Ruby exporter must map these to the new kinds
+    or render nothing. Either way, the legacy strings must still
+    appear in the source as case-arm targets."""
+    src = _consumer_source()
+    for legacy in ("door_arc", "open_passage"):
+        pattern = rf"['\"]({legacy})['\"]"
+        assert re.search(pattern, src), (
+            f"consume_consensus.rb dropped legacy V5 kind '{legacy}' "
+            f"compatibility; older consensus files would silently "
+            f"render nothing."
+        )
 
 
 def test_consumer_uses_doors_layer():

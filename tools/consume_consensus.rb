@@ -621,32 +621,21 @@ def main
   walls_by_id = walls.each_with_object({}) { |w, h| h[w['id']] = w if w['id'] }
   passage_mat = model.materials.add('passage_marker')
   passage_mat.color = Sketchup::Color.new(*PASSAGE_RGB)
-  passage_count = 0
-  openings.each do |op|
-    next unless op['geometry_origin'] == 'wall_gap'
-    grp = add_passage_marker(ents, op, walls_by_id, thickness_pt,
-                              passage_mat, passages_layer)
-    passage_count += 1 if grp
-  end
-  puts "[consume] passages: #{passage_count}"
-
-  # Door leaves — visible swing panel inside each carved door_arc gap.
-  # Reads opening['hinge'] to decide swing direction. door_arc openings
-  # are already CARVED above; this adds the panel.
+  # Caminho B: opening rendering is keyed off room-context kind_v5.
+  # Recognized values:
+  #   interior_door     -> carved gap + visible door leaf (swing 30°)
+  #   interior_passage  -> carved gap, no panel (vão livre between rooms)
+  #   window            -> peitoril (0-0.9m) + glass (0.9-2.1m) + verga (2.1-2.7m)
+  #   glazed_balcony    -> full-height glass panel (porta-vidro)
+  # Carving (when wall is continuous, geometry_origin in svg_arc /
+  # svg_segments) already happened above. wall_gap openings have the
+  # gap built-in to the wall data.
+  #
+  # Backward compat: if kind_v5 is one of the legacy V5 values
+  # (door_arc, open_passage), we map to interior_door / interior_passage
+  # so older consensus files still render reasonably.
   door_mat = model.materials.add('door_leaf')
   door_mat.color = Sketchup::Color.new(*DOOR_RGB)
-  door_count = 0
-  openings.each do |op|
-    next unless op['kind_v5'] == 'door_arc' || op['geometry_origin'] == 'svg_arc'
-    grp = add_door_leaf(ents, op, walls_by_id, thickness_pt, door_mat,
-                         doors_layer)
-    door_count += 1 if grp
-  end
-  puts "[consume] door_leaves: #{door_count}"
-
-  # Window panels — peitoril + glass + verga inside each wall_gap.
-  # Caminho A: every wall_gap rendered as window. Passage marker still
-  # emitted (above) so designer can isolate misclassified wall_gaps.
   sill_mat = model.materials.add('window_sill')
   sill_mat.color = Sketchup::Color.new(*PARAPET_RGB)
   glass_mat = model.materials.add('window_glass')
@@ -654,15 +643,42 @@ def main
   glass_mat.alpha = GLASS_ALPHA
   lintel_mat = model.materials.add('window_lintel')
   lintel_mat.color = Sketchup::Color.new(*LINTEL_RGB)
-  window_count = 0
+
+  door_count, window_count, balcony_count, passage_count = 0, 0, 0, 0
   openings.each do |op|
-    next unless op['geometry_origin'] == 'wall_gap'
-    grps = add_window_panel(ents, op, walls_by_id, thickness_pt,
-                             sill_mat, glass_mat, lintel_mat,
-                             windows_layer)
-    window_count += 1 unless grps.empty?
+    raw_kind = op['kind_v5']
+    # Legacy fallbacks for older consensus pipelines
+    kind = case raw_kind
+           when 'door_arc'      then 'interior_door'
+           when 'open_passage'  then 'interior_passage'
+           else raw_kind
+           end
+    case kind
+    when 'interior_door'
+      grp = add_door_leaf(ents, op, walls_by_id, thickness_pt, door_mat,
+                           doors_layer)
+      door_count += 1 if grp
+    when 'window'
+      grps = add_window_panel(ents, op, walls_by_id, thickness_pt,
+                               sill_mat, glass_mat, lintel_mat,
+                               windows_layer)
+      window_count += 1 unless grps.empty?
+    when 'glazed_balcony'
+      # Full-height glass: reuse window helper but pass glass_mat for
+      # all 3 bands so the result is a single solid glass panel.
+      grps = add_window_panel(ents, op, walls_by_id, thickness_pt,
+                               glass_mat, glass_mat, glass_mat,
+                               windows_layer)
+      balcony_count += 1 unless grps.empty?
+    when 'interior_passage'
+      # Carved gap is the marker. No extra geometry.
+      passage_count += 1
+    end
   end
-  puts "[consume] windows: #{window_count}"
+  puts "[consume] interior_doors:  #{door_count}"
+  puts "[consume] windows:         #{window_count}"
+  puts "[consume] glazed_balcony:  #{balcony_count}"
+  puts "[consume] interior_passages: #{passage_count}"
 
   model.commit_operation
   status = model.save(out)
