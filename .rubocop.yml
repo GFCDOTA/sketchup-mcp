@@ -1,0 +1,63 @@
+# .rubocop.yml — Ruby lint config for tools/*.rb
+#
+# Scope: this repo is primarily Python; Ruby lives only in
+# tools/*.rb (consume_consensus, inspect_walls_report, autorun
+# plugins, su_boot). RuboCop is wired exclusively for that
+# directory at this stage.
+#
+# Cycle 9 spike (2026-05-07): conservative bootstrap. Only the
+# default Lint cops are enabled. Layout / Style / Naming are
+# disabled because:
+#   * The Ruby files run inside SketchUp's Ruby (currently 3.2)
+#     where some idioms are forced by SketchUp's API surface
+#     (e.g. Geom::Point3d.new with positional args).
+#   * Many existing files use a mixed style; bulk auto-correct
+#     would be a separate PR per CLAUDE.md §4 ("one PR = one idea").
+#   * rubocop-sketchup gem (sketchup-deprecations / requirements
+#     / performance / suggestions cops) is deferred to a follow-up
+#     PR; it requires per-file annotations for the autorun-plugin
+#     pattern and benefits from a dedicated review pass.
+
+AllCops:
+  TargetRubyVersion: 3.2
+  NewCops: disable
+  SuggestExtensions: false
+  Include:
+    - 'tools/**/*.rb'
+  Exclude:
+    - '.venv/**/*'
+    - 'venv/**/*'
+    - 'vendor/**/*'
+    - 'runs/**/*'
+    - 'patches/archive/**/*'
+    - '.git/**/*'
+
+# Disable cosmetic categories wholesale at this stage. They will
+# be enabled selectively in follow-up PRs after the rubocop
+# baseline run reveals the actual diff size.
+Layout:
+  Enabled: false
+
+Style:
+  Enabled: false
+
+Naming:
+  Enabled: false
+
+Metrics:
+  Enabled: false
+
+Bundler:
+  Enabled: false
+
+Gemspec:
+  Enabled: false
+
+Security:
+  Enabled: true
+
+# Lint cops are the entire value of this spike: catch parse
+# errors, unreachable code, useless assignments, ambiguous
+# operators, etc. before SketchUp tries to load the file.
+Lint:
+  Enabled: true
