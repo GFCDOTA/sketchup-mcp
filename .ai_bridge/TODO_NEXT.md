@@ -17,16 +17,28 @@ Each entry:
 
 ## P0 — Open PRs for in-flight branches (rule: never leave PR-less branches dangling)
 
-**Open PR for `feature/ai-bridge-scaffolding`** — branch ready, no source change
-- Evidence: branch carries .ai_bridge/ scaffolding + CLAUDE.md §17 reference
-- Touchpoints: branch already pushed to origin
-- Validation: PR opens cleanly against develop; no conflicts
-- Risk: none (docs/scaffolding only)
+**Open PR for `feature/ai-bridge-scaffolding`** — BLOCKED by stacking
+- Status: branch is stacked on PR #52's gate G2 commit (`2417a20`), so a
+  PR against `develop` would include gate G2 changes too — violates
+  "one PR = one idea" (§4). Resolution options:
+  1. Wait for PR #52 to merge into `develop`, then ai-bridge naturally
+     becomes clean (preferred — minimal risk).
+  2. Rebase ai-bridge onto `develop` and force-push, dropping the G2
+     commit (allowed for feature branches; requires care).
+  3. Cherry-pick the two .ai_bridge commits (`8b467ed` + `f26984e`)
+     onto a new fresh branch off `develop` and open PR from there.
+- Evidence: `git log develop..feature/ai-bridge-scaffolding` shows 3
+  commits including `2417a20` (gate G2).
+- Validation: chosen path produces a PR with only .ai_bridge/ files in diff.
+- Risk: low (rebase / cherry-pick on a feature branch).
 
-**Open PR for `docs/non-stop-autonomy-rule`** — CLAUDE.md §18
-- Evidence: user requested rule in 2026-05-07 prompt; saved as memory + this PR
-- Touchpoints: CLAUDE.md
-- Validation: PR opens cleanly; ruff/pytest N/A (markdown only)
+**Open PR for `docs/non-stop-autonomy-rule`** — CLAUDE.md §17
+- Status: branch pushed 2026-05-07 04:00 UTC. Single commit `f60d99e`.
+- Compare URL:
+  https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/non-stop-autonomy-rule
+- Touchpoints: CLAUDE.md only (+83 lines, no source change)
+- Validation: ruff/pytest N/A (markdown only); no schema, threshold,
+  Ruby/SU change → §1/§2/§3 not invoked.
 - Risk: none
 
 ## P0 — Merge in-flight (Stage 1.6)
