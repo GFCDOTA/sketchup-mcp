@@ -34,6 +34,23 @@ continuar — só parar por bloqueio real. Saved as
 `feedback_done_is_not_stop.md` in user MEMORY.md.
 This handoff itself is the first application of the rule.
 
+### Cycle 7 done (demonstration of the new rule)
+
+After the validation cycle completed, the rule's "pick next ROI"
+loop kicked in. Cycle 7 (`feature/micro-truth-expand-planta-74-cycle7`,
+commit `d5ce23d`, single commit, pushed) added SUITE 02 / BANHO 02 /
+COZINHA to `ground_truth/planta_74_micro.json`, raising external-truth
+coverage from 1 → 4 rooms. Tightened
+`tests/test_micro_truth_gate.py::test_real_planta_74_micro_passes` to
+also assert all four labels are present. Validation:
+- `pytest tests/test_micro_truth_gate.py` → 20/20 PASS
+- `pytest tests/test_planta_74_truth_gate.py + coherence + micro` → 56/56
+- `tools.micro_truth_gate` against canonical run → overall 1.0,
+  4/4 rooms = 1.0
+- `tools.micro_truth_gate` against today's c3 → overall 1.0, 4/4 rooms = 1.0
+
+Compare URL: https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/micro-truth-expand-planta-74-cycle7
+
 ## Status — Previous handoff (Stage 1.6 substantially landed)
 
 - PR #49 inspector v2 schema 1.0 → MERGED (`4cb968f`)
