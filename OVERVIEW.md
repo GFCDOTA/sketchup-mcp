@@ -123,6 +123,10 @@ A galeria de Plantas mostra renders + comparações. Oráculo lista runs com dia
 | `png_history.py` | Manifest append-only de todos os PNGs com hashes de origem |
 | `extract_room_labels.py` | Extrai texto + coord do PDF |
 | `polygonize_rooms.py` | Subtração de área via shapely |
+| `classify_openings_by_room_context.py` | Stage 5 do pipeline vetorial (caminho B): classifica openings em `interior_door / interior_passage / window / glazed_balcony` usando o contexto dos rooms adjacentes. Emite o contrato Stage 1 (`confidence/decision/hypotheses/evidence`). |
+| `coherence_audit.py` | Audit Stage 1 sobre um consensus já classificado. Emite `coherence_report.json` (schema 1.0) com facts/hypotheses/ambiguities/drops/policy/summary + `questions.json` (Rodada-2). Não-bloqueante por default; `--strict` opta em block-on-issue. |
+| `micro_truth_gate.py` | Stage 1.5: valida 1+ rooms contra `ground_truth/<plant>_micro.json` curado à mão. Emite `micro_truth_report.json` schema 1.0. Default exit 0; `--strict` blocks on failure. |
+| `skp_inspection_report.py` | Stage 1.6: relatório schema 1.0 sobre o `.skp` exportado (sha256/size + bounds_check vs consensus). Pareado com o autorun plugin Ruby. |
 
 ### 2.9 Testes + Docs
 
@@ -228,12 +232,39 @@ python -m tools.rooms_from_seeds runs/vector/consensus_model.json \
        runs/vector/labels.json \
        --canonicalize-rooms --room-canonicalization-tol 8
 
-# 4. openings (door arcs)
+# 4. openings (door arcs + window panes + wall_gaps)
 python -m tools.extract_openings_vector planta_74.pdf \
-       --consensus runs/vector/consensus_model.json --mode replace
+       --consensus runs/vector/consensus_model.json \
+       --mode replace --classify-kind --detect-wall-gaps
+
+# 5. classify openings by room context (caminho B)
+python -m tools.classify_openings_by_room_context \
+       runs/vector/consensus_model.json \
+       --out runs/vector/consensus_classified.json
 ```
 
-Output esperado: `runs/vector/consensus_model.json` com **33 walls + 11 rooms + 12 openings** para `planta_74.pdf`.
+Output esperado: `runs/vector/consensus_classified.json` com **33 walls
++ 11 rooms + 11 openings + 8 soft_barriers** para `planta_74.pdf`.
+
+### 4.4.1 Validation gates (cheap, run on every change)
+
+```bash
+# Plan Truth Gate — versioned baseline regression test
+pytest tests/test_planta_74_truth_gate.py -v
+
+# Coherence audit — Stage 1 uncertainty report
+python -m tools.coherence_audit runs/vector/consensus_classified.json \
+       --out-dir runs/vector
+
+# Micro Truth Gate — versioned manual ground truth on labelled rooms
+python -m tools.micro_truth_gate runs/vector/consensus_classified.json \
+       --ground-truth ground_truth/planta_74_micro.json \
+       --out runs/vector/micro_truth_report.json
+```
+
+Each gate emits a `*.json` (schema 1.0); `--strict` opt-in flips them
+to hard exit-non-zero. CI runs all three on every PR via
+`.github/workflows/quality_gates.yml`.
 
 ### 4.5 Gerar o .skp 3D (precisa SU2026)
 
