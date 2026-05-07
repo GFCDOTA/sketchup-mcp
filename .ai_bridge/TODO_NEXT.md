@@ -15,31 +15,20 @@ Each entry:
 
 ---
 
-## P0 — Open PRs for in-flight branches (rule: never leave PR-less branches dangling)
+## P0 — Four PR-less branches ready (PR bodies under .ai_bridge/pr_bodies/)
 
-**Open PR for `feature/ai-bridge-scaffolding`** — BLOCKED by stacking
-- Status: branch is stacked on PR #52's gate G2 commit (`2417a20`), so a
-  PR against `develop` would include gate G2 changes too — violates
-  "one PR = one idea" (§4). Resolution options:
-  1. Wait for PR #52 to merge into `develop`, then ai-bridge naturally
-     becomes clean (preferred — minimal risk).
-  2. Rebase ai-bridge onto `develop` and force-push, dropping the G2
-     commit (allowed for feature branches; requires care).
-  3. Cherry-pick the two .ai_bridge commits (`8b467ed` + `f26984e`)
-     onto a new fresh branch off `develop` and open PR from there.
-- Evidence: `git log develop..feature/ai-bridge-scaffolding` shows 3
-  commits including `2417a20` (gate G2).
-- Validation: chosen path produces a PR with only .ai_bridge/ files in diff.
-- Risk: low (rebase / cherry-pick on a feature branch).
+User opens PRs manually (memory rule `feedback_pr_manual_preferido.md`).
 
-**Open PR for `docs/non-stop-autonomy-rule`** — CLAUDE.md §17
-- Status: branch pushed 2026-05-07 04:00 UTC. Single commit `f60d99e`.
-- Compare URL:
-  https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/non-stop-autonomy-rule
-- Touchpoints: CLAUDE.md only (+83 lines, no source change)
-- Validation: ruff/pytest N/A (markdown only); no schema, threshold,
-  Ruby/SU change → §1/§2/§3 not invoked.
-- Risk: none
+| Branch | Body file | Compare URL |
+|---|---|---|
+| `docs/non-stop-autonomy-rule` | `PR_BODY_non_stop_autonomy_rule.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/non-stop-autonomy-rule |
+| `feature/micro-truth-expand-planta-74-cycle7` | `PR_BODY_cycle7_micro_truth_expand.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/micro-truth-expand-planta-74-cycle7 |
+| `docs/ai-bridge-scaffolding-clean` | `PR_BODY_ai_bridge_scaffolding_clean.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/ai-bridge-scaffolding-clean |
+| `docs/suite01-polygon-leakage-investigation` | `PR_BODY_suite01_polygon_diagnostic.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/suite01-polygon-leakage-investigation |
+
+**Branch to delete after `docs/ai-bridge-scaffolding-clean` merges**:
+`feature/ai-bridge-scaffolding` (contaminated with PR #52 commit
+`2417a20`). Local + remote.
 
 ## P0 — Merge in-flight (Stage 1.6)
 
@@ -81,9 +70,47 @@ Open issue surfaced (deferred):
 - COZINHA's only detected adjacency is SUITE 02 (architecturally
   implausible). Restore `expected_adjacent_labels=["A.S."]` once
   the room-context classifier reaches cozinha — likely via Cycle 6.
-- SUITE 01 polygon is 69.91 m² (oversized; absorbs neighbouring
-  rooms). Likely contributing to BANHO 02's spurious adjacencies.
-  File a separate bug to investigate `rooms_from_seeds` for SUITE 01.
+- SUITE 01 polygon is 69.91 m² (oversized) — diagnostic landed in
+  `docs/suite01-polygon-leakage-investigation` branch with FP-012
+  + 3 fix paths.
+
+## ✅ SUITE 01 diagnostic done (2026-05-07) — fix is the next ROI
+
+`docs/suite01-polygon-leakage-investigation` (commit `1863abd`).
+- Documents FP-012 (convex-hull room clip leaks watershed into
+  exterior). Pure documentation per CLAUDE.md §1.
+- See `docs/diagnostics/2026-05-07_planta_74_suite01_polygon_leakage.md`
+  for symptom + root cause + 3 candidate fix paths.
+- Recommended next: spike Option A (alpha-shape via
+  `shapely.concave_hull`) behind `--use-concave-hull` flag,
+  default off → `feature/concave-hull-room-clip-spike`.
+
+## P1 — Cycle 8: SUITE 01 fix spike (Option A from FP-012)
+
+**Goal**: prove Option A reduces SUITE 01 from ~70 m² toward
+~25-30 m² without touching the default code path. User stated
+preference (2026-05-07): geometric quality > infrastructure (RuboCop).
+- Touchpoints:
+  - `tools/rooms_from_seeds.py:152-219` — add `use_concave_hull`
+    parameter; new branch uses `shapely.concave_hull(MultiPoint, ratio)`
+    with a tunable `ratio` (default 0.3) instead of `cv2.convexHull`
+  - `tools/rooms_from_seeds.py:259+` (CLI) — add `--use-concave-hull`
+    flag default off
+  - new test `tests/test_rooms_from_seeds_concave_hull.py` — exercise
+    the new branch on a synthetic L-shaped envelope
+  - DO NOT update `tests/baselines/planta_74.json` in this PR
+- Validation:
+  - default-off path → existing 56/56 gate tests still pass
+  - flag-on rebuild on planta_74 → SUITE 01 < 50 m² (target ~30)
+  - render top preview with flag-on, save in
+    `docs/diagnostics/<date>_planta_74_concave_hull_spike.png`
+  - micro_truth_gate (with the new c3) → score still 1.0 across 4 rooms
+- Risk: medium. shapely 2.0 `concave_hull` accepts a `ratio` between
+  0 (most concave) and 1 (convex hull). Wrong ratio could shrink
+  the hull *inside* the building. Mitigation: ratio sweep on
+  planta_74 logged in PR description; only one chosen value lands.
+
+## Cycle 8 (renamed → Cycle 9): RuboCop SketchUp lint CI
 
 ## P2 — Cycle 8: RuboCop SketchUp lint CI
 

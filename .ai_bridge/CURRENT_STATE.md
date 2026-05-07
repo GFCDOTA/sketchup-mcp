@@ -1,4 +1,4 @@
-# Current State — 2026-05-07 04:00 UTC
+# Current State — 2026-05-07 04:30 UTC
 
 > Per-session snapshot. Update at start of each long session and
 > overwrite (not append). For history → `HANDOFF.md` (per-session
@@ -6,24 +6,35 @@
 
 ## Branch
 
-- Working: `feature/ai-bridge-scaffolding` (this session updated
-  HANDOFF + CURRENT_STATE + TODO_NEXT with validation cycle + Cycle 7)
+- Working: `docs/ai-bridge-scaffolding-clean` (this update)
 - Sync target: `develop` (sha `fad28d9`)
 - Pending PR (waiting for merge): `feature/smoke-promotes-inspector-v2-gate` (gate G2, commit `2417a20`) → PR #52
-- **New branches this session** (both pushed, PR-able via compare URL):
+- **Four pushed branches with PR bodies ready** (under `.ai_bridge/pr_bodies/`):
   - `docs/non-stop-autonomy-rule` — CLAUDE.md §17 DONE IS NOT STOP rule.
     Compare: https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/non-stop-autonomy-rule
   - `feature/micro-truth-expand-planta-74-cycle7` — Cycle 7 ground
     truth expansion (4 rooms now scored 1.0).
     Compare: https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/micro-truth-expand-planta-74-cycle7
+  - `docs/ai-bridge-scaffolding-clean` — clean replacement of
+    `feature/ai-bridge-scaffolding` (cherry-picked off develop).
+    Compare: https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/ai-bridge-scaffolding-clean
+  - `docs/suite01-polygon-leakage-investigation` — diagnostic for
+    SUITE 01 oversized polygon (FP-012). Pure docs.
+    Compare: https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/suite01-polygon-leakage-investigation
+
+- **Branch to delete** post-merge of `docs/ai-bridge-scaffolding-clean`:
+  `feature/ai-bridge-scaffolding` (contaminated with PR #52 commit).
 
 ## Last objective
 
-Validation cycle confirming the 5-PR queue (PRs #44–#48) on `develop` is
-healthy + saving the new "DONE IS NOT STOP" behavioral rule into
-cross-project memory and CLAUDE.md, then immediately exercising the
-rule by running Cycle 7 (planta_74_micro 1 → 4 rooms). Critério
-final all green (see `HANDOFF.md` top entry).
+PR organization wave (4 branches with bodies prepared) + SUITE 01
+polygon leakage diagnostic (root cause located in
+`tools/rooms_from_seeds.py:163-169`, FP-012 documented, fix paths
+proposed but NOT implemented per CLAUDE.md §1).
+
+Earlier in this session: validation of the 5-PR queue (PRs #44–#48)
+on `develop` + saving the "DONE IS NOT STOP" rule + Cycle 7
+(planta_74_micro 1 → 4 rooms).
 
 Previous session was Stage 1.6: inspector v2 schema 1.0 (PR #49)
 → autonomous-rules in CLAUDE.md (PR #50) → hygiene cycle (PR #51) →

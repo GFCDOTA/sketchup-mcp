@@ -1,10 +1,37 @@
-# Handoff — 2026-05-07 04:00 UTC
+# Handoff — 2026-05-07 04:30 UTC
 
 > Most recent session's exit state. Next session reads this FIRST
 > after `CLAUDE.md`. Append-only is fine but the top entry must
 > always be the latest.
 
-## Status — Validation Cycle (this session)
+## Status — Cycle 4 (PR organization + SUITE 01 diagnostic)
+
+After Cycle 7 (ground-truth expansion) landed, the loop selected the
+next two highest-ROI items per the user's prompt: (a) prepare clean
+PRs for all in-flight branches and (b) investigate the SUITE 01
+oversized polygon surfaced during Cycle 7.
+
+**(a) Three clean PRs ready** (compare URLs + bodies under
+`.ai_bridge/pr_bodies/`):
+- `docs/non-stop-autonomy-rule` — CLAUDE.md §17 (commit `f60d99e`)
+- `feature/micro-truth-expand-planta-74-cycle7` — Cycle 7 GT (commit `d5ce23d`)
+- `docs/ai-bridge-scaffolding-clean` — replaces stacked branch
+  (cherry-picked off develop, commits `2250cdf` `1d57647` `146cab5`
+  `a95176e` `13cdeb9` `d6ebdc7`). Original
+  `feature/ai-bridge-scaffolding` should be deleted post-merge.
+
+**(b) SUITE 01 diagnostic done** — branch
+`docs/suite01-polygon-leakage-investigation`, commit `1863abd`,
+documents the bug (sum of all rooms ≈ 182 m² in a 74 m² apartment)
++ root cause (`cv2.convexHull` over-encloses non-convex envelopes
+in `tools/rooms_from_seeds.py:163-169`) + 3 candidate fix paths
+(alpha-shape / soft-barrier outline / per-room area cap) +
+visual artifact + FP-012 entry in `docs/learning/failure_patterns.md`.
+Pure documentation — no algorithm change (CLAUDE.md §1 guards the
+geometry surface, requires explicit human approval). Compare URL:
+https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/suite01-polygon-leakage-investigation
+
+## Status — Validation Cycle (earlier in this session)
 
 Validated on `develop` (sha `fad28d9`) that the 5-PR queue from
 2026-05-06 (PRs #44–#48) is integrated and healthy. No code change in
