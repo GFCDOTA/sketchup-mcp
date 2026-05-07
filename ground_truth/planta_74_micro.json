@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "source_pdf": "planta_74.pdf",
+  "scope": "micro",
+  "description": "Minimal manual ground truth for planta_74 — Stage 1.5 Micro Truth Gate. Asserts ONE room is detected with sane geometry + adjacencies. Polygon-perfect IoU and full-plant coverage are explicitly out of scope here; that's a future Stage.",
+  "rooms": [
+    {
+      "label": "SALA DE ESTAR",
+      "must_be_closed": true,
+      "expected_area_m2_range": [8.0, 25.0],
+      "expected_openings_count_range": [2, 5],
+      "expected_adjacent_labels": ["TERRACO SOCIAL"],
+      "allow_debug_openings": true,
+      "notes": [
+        "SALA DE ESTAR is the most stable room in planta_74:",
+        "  - Always carries the porta-vidro to TERRACO SOCIAL.",
+        "  - Integrated layout, no door arcs internally to confuse the",
+        "    detector with phantom-de-arc-radius dupes.",
+        "  - Polygon area calibrated 2026-05-06 at 10.75 m² (pre-PR",
+        "    feature/micro-truth-gate). Range 8-25 absorbs detector",
+        "    noise + future canonicalization tweaks.",
+        "Update procedure: bump schema_version on breaking changes;",
+        "expand range only with a PR that explains the cause."
+      ]
+    }
+  ],
+  "invariants": {
+    "invalid_rooms": 0,
+    "floating_openings": 0,
+    "duplicate_walls": 0
+  }
+}
