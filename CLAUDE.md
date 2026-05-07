@@ -263,21 +263,26 @@ explicitly running the command outside Claude.
   threshold sweep on planta_74 + p10 + p12.
 
 ### Known SketchUp issues
-- `inspect_walls_report.rb` doesn't embed SHA256 of inspected `.skp`.
-- wall_gap openings are rendered as windows by default (caminho A);
-  classifier window-vs-passage based on adjacent room context is the
-  next step (caminho B). Designer must isolate/delete window groups
-  on `windows` layer that should be passages — passage_marker still
-  emits to `passages` layer for visibility.
+- (none open as of 2026-05-06; previous SHA256 + caminho-A items shipped)
 
 ### Recently fixed
-- door_arc openings are now CARVED into walls (PR #42, `consume_consensus.rb`)
-  and rendered with a visible swing leaf + 30° open
-  (`feature/openings-as-components`).
-- Window detection runs end-to-end (vector detector + 3-band
-  rendering: peitoril 0–0.9 m, glass 0.9–2.1 m, verga 2.1–2.7 m).
-  planta_74 specifically yields 0 vector windows (drawn inside wall
-  hatch); the 3 wall_gaps detected render as windows.
+- `inspect_walls_report.rb` now embeds SHA256 + size of the inspected
+  `.skp`, plus optional `bounds_check` against a consensus JSON
+  (`feature/skp-structural-gate-inspector-v2`, schema_version 1.0).
+- door_arc openings are now CARVED into walls (PR #42) and rendered
+  with a visible swing leaf + 30° open (PR #44).
+- Window detection runs end-to-end. planta_74 yields 0 vector
+  windows (drawn inside wall hatch); the 3 wall_gaps detected on it
+  are classified by adjacent room context (PR #45 caminho B):
+  `interior_door | interior_passage | window | glazed_balcony`.
+  See `tools/classify_openings_by_room_context.py`.
+- Stage 1 uncertainty contract on each opening:
+  `confidence` / `decision` / `hypotheses` / `evidence` (PR #46).
+- Versioned baseline regression gate
+  `tests/baselines/planta_74.json` + `tests/test_planta_74_truth_gate.py`
+  (PR #47, 33/11/11/8 locked).
+- First external truth: `ground_truth/planta_74_micro.json` +
+  `tools/micro_truth_gate.py` (PR #48, SALA DE ESTAR score 1.0).
 - 3-pt parapet/wall coincidence filter
   (`commit 7fbd531`) — eliminates the "rodapé branco" band.
 

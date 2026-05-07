@@ -3,11 +3,29 @@
 # white / default-material surfaces in the apartment model.
 #
 # Inputs (env, set by autorun_inspector.rb):
-#   ENV['INSPECT_REPORT'] -> path to write JSON report
+#   ENV['INSPECT_REPORT']                 -> path to write JSON report
 # Optional:
-#   ENV['INSPECT_QUIT']='1' -> call Sketchup.quit after writing
+#   ENV['INSPECT_QUIT']='1'               -> call Sketchup.quit after writing
+#   ENV['CONSENSUS_JSON_FOR_INSPECTION']  -> path to consensus JSON; when
+#                                            set, the report includes a
+#                                            ``bounds_check`` section
+#                                            comparing the SKP bbox against
+#                                            the consensus walls bbox.
+#
+# Schema version for the emitted JSON: ``1.0`` (Stage 1.6 inspector v2).
+# Backward compatible with v0: every legacy top-level key (totals,
+# materials, layers, wall_overlaps_top20, default_faces_count, groups)
+# is preserved. New fields:
+#   - ``schema_version``
+#   - ``meta.skp_sha256`` + ``meta.skp_size_bytes``
+#   - ``meta.consensus_path`` + ``meta.consensus_sha256`` (when env set)
+#   - ``structural`` aggregated counts (incl. ``groups_by_layer``)
+#   - ``bounds_check`` (when consensus available)
 
 require 'json'
+require 'digest'
+
+INSPECTOR_REPORT_SCHEMA_VERSION = '1.0'.freeze
 
 PROGRESS_LOG = 'C:/Users/felip_local/AppData/Roaming/SketchUp/SketchUp 2026/SketchUp/Plugins/inspect_progress.txt'
 File.delete(PROGRESS_LOG) rescue nil
@@ -150,6 +168,92 @@ def classify_face(f)
   end
 end
 
+def sha256_of(path)
+  return nil if path.nil? || path.empty?
+  return nil unless File.exist?(path)
+  Digest::SHA256.hexdigest(File.binread(path))
+rescue
+  nil
+end
+
+def file_size(path)
+  return nil if path.nil? || path.empty?
+  return nil unless File.exist?(path)
+  File.size(path)
+rescue
+  nil
+end
+
+def groups_by_layer(groups)
+  by_layer = Hash.new(0)
+  groups.each do |g|
+    layer = (g['layer'] || 'untagged').to_s
+    by_layer[layer] += 1
+  end
+  by_layer
+end
+
+def model_bbox_in(model)
+  bb = model.bounds
+  [bb.min.x.to_f.round(3), bb.min.y.to_f.round(3), bb.min.z.to_f.round(3),
+   bb.max.x.to_f.round(3), bb.max.y.to_f.round(3), bb.max.z.to_f.round(3)]
+rescue
+  nil
+end
+
+def consensus_walls_bbox_pt(consensus)
+  walls = consensus['walls'] || []
+  return nil if walls.empty?
+  xs, ys = [], []
+  walls.each do |w|
+    s = w['start']; e = w['end']
+    next unless s && e
+    xs << s[0].to_f; xs << e[0].to_f
+    ys << s[1].to_f; ys << e[1].to_f
+  end
+  return nil if xs.empty?
+  [xs.min.round(3), ys.min.round(3), 0.0,
+   xs.max.round(3), ys.max.round(3), 0.0]
+end
+
+def build_bounds_check(model, consensus_path)
+  return nil if consensus_path.nil? || consensus_path.empty?
+  return nil unless File.exist?(consensus_path)
+  consensus = JSON.parse(File.read(consensus_path)) rescue nil
+  return nil if consensus.nil?
+  skp_bb = model_bbox_in(model)
+  cons_bb_pt = consensus_walls_bbox_pt(consensus)
+  return nil if skp_bb.nil? || cons_bb_pt.nil?
+  # Same PT_TO_M used by consume_consensus.rb (calibrated for planta_74).
+  pt_to_m = 0.19 / 5.4
+  m_to_in = 39.3700787402
+  pt_to_in = pt_to_m * m_to_in
+  scaled_bb_in = [
+    (cons_bb_pt[0] * pt_to_in).round(3),
+    (cons_bb_pt[1] * pt_to_in).round(3),
+    0.0,
+    (cons_bb_pt[3] * pt_to_in).round(3),
+    (cons_bb_pt[4] * pt_to_in).round(3),
+    0.0,
+  ]
+  delta_in = [
+    (skp_bb[0] - scaled_bb_in[0]).round(3),
+    (skp_bb[1] - scaled_bb_in[1]).round(3),
+    (skp_bb[3] - scaled_bb_in[3]).round(3),
+    (skp_bb[4] - scaled_bb_in[4]).round(3),
+  ]
+  tol_in = 5.0  # 5 in tolerance — generous; planta walls are 19cm thick
+  within = delta_in.all? { |d| d.abs <= tol_in }
+  {
+    'skp_bbox_in'             => skp_bb,
+    'consensus_bbox_pt'       => cons_bb_pt,
+    'scaled_consensus_bbox_in' => scaled_bb_in,
+    'delta_in'                => delta_in,
+    'within_tol_in'           => tol_in,
+    'delta_within_tol'        => within,
+  }
+end
+
 def detect_overlaps(groups)
   walls = groups.select { |g| g['name'].to_s =~ /\Aw\d+\z/ }
   pairs = []
@@ -215,11 +319,22 @@ def main
   ]
   default_faces = faces.select { |f| default_class_keys.include?(f['classification']) }
 
+  skp_path = (model.path rescue nil)
+  consensus_path_for_inspection = ENV['CONSENSUS_JSON_FOR_INSPECTION']
+  bounds_check = build_bounds_check(model, consensus_path_for_inspection)
+  components_count = groups.count { |g| g['kind'] == 'ComponentInstance' }
+  by_layer = groups_by_layer(groups)
+
   report = {
+    'schema_version' => INSPECTOR_REPORT_SCHEMA_VERSION,
     'meta' => {
-      'inspected_at' => Time.now.iso8601,
-      'skp_path'     => (model.path rescue nil),
+      'inspected_at'    => Time.now.iso8601,
+      'skp_path'        => skp_path,
+      'skp_sha256'      => sha256_of(skp_path),
+      'skp_size_bytes'  => file_size(skp_path),
       'sketchup_version' => Sketchup.version,
+      'consensus_path'  => consensus_path_for_inspection,
+      'consensus_sha256' => sha256_of(consensus_path_for_inspection),
     },
     'totals' => {
       'groups'    => groups.length,
@@ -227,6 +342,14 @@ def main
       'materials' => materials_summary.length,
       'layers'    => layers_summary.length,
     },
+    'structural' => {
+      'default_faces_count'   => default_faces.length,
+      'materials_count'       => materials_summary.length,
+      'wall_overlaps_count'   => overlaps.length,
+      'components_count'      => components_count,
+      'groups_by_layer'       => by_layer,
+    },
+    'bounds_check' => bounds_check,
     'face_classification_counts' => face_class_counts,
     'materials' => materials_summary,
     'layers' => layers_summary,
