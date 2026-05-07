@@ -15,7 +15,7 @@ Each entry:
 
 ---
 
-## P0 — Six PR-less branches ready (PR bodies under .ai_bridge/pr_bodies/)
+## P0 — Seven PR-less branches ready (PR bodies under .ai_bridge/pr_bodies/)
 
 User opens PRs manually (memory rule `feedback_pr_manual_preferido.md`).
 Recommended merge order to minimize rebase pain:
@@ -23,15 +23,17 @@ Recommended merge order to minimize rebase pain:
 1. `docs/non-stop-autonomy-rule` (CLAUDE.md only, no conflicts)
 2. `docs/suite01-polygon-leakage-investigation` (docs/ only)
 3. `feature/rubocop-sketchup-ci` (Gemfile/.rubocop/workflow only)
-4. `feature/concave-hull-room-clip-spike` (default-off code change)
-5. `docs/ai-bridge-scaffolding-clean` (.ai_bridge/ only)
-6. `feature/micro-truth-expand-planta-74-cycle7` (ground_truth + tests)
+4. `feature/quality-gates-ci-workflow` (.github/workflows only)
+5. `feature/concave-hull-room-clip-spike` (default-off code change)
+6. `docs/ai-bridge-scaffolding-clean` (.ai_bridge/ only)
+7. `feature/micro-truth-expand-planta-74-cycle7` (ground_truth + tests)
 
 | Branch | Body file | Compare URL |
 |---|---|---|
 | `docs/non-stop-autonomy-rule` | `PR_BODY_non_stop_autonomy_rule.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/non-stop-autonomy-rule |
 | `docs/suite01-polygon-leakage-investigation` | `PR_BODY_suite01_polygon_diagnostic.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/suite01-polygon-leakage-investigation |
 | `feature/rubocop-sketchup-ci` | `PR_BODY_rubocop_ci.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/rubocop-sketchup-ci |
+| `feature/quality-gates-ci-workflow` | `PR_BODY_quality_gates_ci.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/quality-gates-ci-workflow |
 | `feature/concave-hull-room-clip-spike` | `PR_BODY_concave_hull_spike.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/concave-hull-room-clip-spike |
 | `docs/ai-bridge-scaffolding-clean` | `PR_BODY_ai_bridge_scaffolding_clean.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/ai-bridge-scaffolding-clean |
 | `feature/micro-truth-expand-planta-74-cycle7` | `PR_BODY_cycle7_micro_truth_expand.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/micro-truth-expand-planta-74-cycle7 |
@@ -158,17 +160,20 @@ Expected first-CI behaviour: may surface real Lint violations on
 open `feature/rubocop-cleanup-tools` to address them in a
 review-friendly diff.
 
-## P2 — Cycle 9: GitHub Action wiring all 4 gates per PR
+## ✅ Cycle 10 done (2026-05-07) — branch ready, PR pending
 
-**Goal**: every PR runs Plan Truth + Micro Truth + Coherence Audit
-strict + Smoke `--inspect-strict`. Block on failure.
-- Evidence: each gate works in isolation; not yet tied together in CI
-- Touchpoints:
-  - `.github/workflows/quality_gates.yml` (new)
-  - Reuse existing fixture data from `runs/post_merge_*`
-- Validation: PR with intentional regression fails CI before merge
-- Risk: SU dependency in CI is heavy; may need to skip the SU step
-  in the CI run and only validate the JSON consumers
+`feature/quality-gates-ci-workflow` (commit `c5b5342`, pushed).
+- `.github/workflows/quality_gates.yml` (new) — builds the 5-stage
+  vector pipeline + runs Plan Truth Gate (pytest), `coherence_audit
+  --strict`, `micro_truth_gate --strict`. Hard merge blocker.
+- Uploads `runs/_ci_quality_gates/` artifact 14 days, on success
+  AND failure, for diffability across PRs.
+- Smoke `--inspect-strict` (G2) intentionally OUT (Stage 1.6
+  excluded from this session chain).
+- Both --strict commands re-verified locally on today's c3:
+  exit 0, score 1.0.
+- Compare URL:
+  https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/quality-gates-ci-workflow
 
 ## P3 — Cycle 10+ (future, not soon)
 
