@@ -78,6 +78,7 @@ class FidelityMetrics:
             or []
         )
         totals = data.get("totals") or {}
+        structural = data.get("structural") or {}
 
         wall_dark_variants = sum(
             1 for m in materials
@@ -90,11 +91,22 @@ class FidelityMetrics:
             and SREE_RE.match(str(m.get("name", "")))
         )
 
+        # v2 schema (Stage 1.6): prefer structural.* counters when present;
+        # fall back to legacy top-level fields for v0 reports.
         return cls(
-            default_faces_count=int(data.get("default_faces_count", 0)),
-            materials_count=len(materials),
-            wall_overlaps_count=len(overlaps),
-            components_count=len(components),
+            default_faces_count=int(
+                structural.get("default_faces_count",
+                                data.get("default_faces_count", 0))
+            ),
+            materials_count=int(
+                structural.get("materials_count", len(materials))
+            ),
+            wall_overlaps_count=int(
+                structural.get("wall_overlaps_count", len(overlaps))
+            ),
+            components_count=int(
+                structural.get("components_count", len(components))
+            ),
             groups_count=len(groups),
             faces_count=int(totals.get("faces", data.get("faces_count", 0))),
             wall_dark_variant_count=wall_dark_variants,
