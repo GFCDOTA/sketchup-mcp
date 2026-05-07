@@ -1,8 +1,29 @@
-# Handoff — 2026-05-07 06:00 UTC
+# Handoff — 2026-05-07 06:30 UTC
 
 > Most recent session's exit state. Next session reads this FIRST
 > after `CLAUDE.md`. Append-only is fine but the top entry must
 > always be the latest.
+
+## Status — Cycle 11 done (README/OVERVIEW catch-up)
+
+After Cycles 9 + 10 (RuboCop + Quality Gates CI), the loop noticed
+that README and OVERVIEW were still stuck at 2026-04-XX (zero
+references to coherence_audit / micro_truth_gate / Plan Truth Gate).
+Pure additive markdown.
+
+- Branch: `docs/readme-overview-stage15-tools`
+- Commit: `d62954c`
+- Compare URL:
+  https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/readme-overview-stage15-tools
+- PR body: `.ai_bridge/pr_bodies/PR_BODY_readme_overview_stage15.md`
+
+What changed (markdown only, +56 lines):
+- OVERVIEW.md §2.8 — adds 4 entries to "Tools auxiliares"
+- OVERVIEW.md §4.4 — extends pipeline recipe with Stage 5
+- OVERVIEW.md §4.4.1 (new) — three-line Validation Gates recipe
+- README.md — new "Validation Gates (Stage 1 / 1.5 / 1.6)" section
+
+Risk: none. Pure docs. References `quality_gates.yml` from Cycle 10 PR.
 
 ## Status — Cycle 10 done (Quality Gates CI)
 

@@ -15,23 +15,25 @@ Each entry:
 
 ---
 
-## P0 — Seven PR-less branches ready (PR bodies under .ai_bridge/pr_bodies/)
+## P0 — Eight PR-less branches ready (PR bodies under .ai_bridge/pr_bodies/)
 
 User opens PRs manually (memory rule `feedback_pr_manual_preferido.md`).
 Recommended merge order to minimize rebase pain:
 
 1. `docs/non-stop-autonomy-rule` (CLAUDE.md only, no conflicts)
 2. `docs/suite01-polygon-leakage-investigation` (docs/ only)
-3. `feature/rubocop-sketchup-ci` (Gemfile/.rubocop/workflow only)
-4. `feature/quality-gates-ci-workflow` (.github/workflows only)
-5. `feature/concave-hull-room-clip-spike` (default-off code change)
-6. `docs/ai-bridge-scaffolding-clean` (.ai_bridge/ only)
-7. `feature/micro-truth-expand-planta-74-cycle7` (ground_truth + tests)
+3. `docs/readme-overview-stage15-tools` (README + OVERVIEW only)
+4. `feature/rubocop-sketchup-ci` (Gemfile/.rubocop/workflow only)
+5. `feature/quality-gates-ci-workflow` (.github/workflows only)
+6. `feature/concave-hull-room-clip-spike` (default-off code change)
+7. `docs/ai-bridge-scaffolding-clean` (.ai_bridge/ only)
+8. `feature/micro-truth-expand-planta-74-cycle7` (ground_truth + tests)
 
 | Branch | Body file | Compare URL |
 |---|---|---|
 | `docs/non-stop-autonomy-rule` | `PR_BODY_non_stop_autonomy_rule.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/non-stop-autonomy-rule |
 | `docs/suite01-polygon-leakage-investigation` | `PR_BODY_suite01_polygon_diagnostic.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/suite01-polygon-leakage-investigation |
+| `docs/readme-overview-stage15-tools` | `PR_BODY_readme_overview_stage15.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/readme-overview-stage15-tools |
 | `feature/rubocop-sketchup-ci` | `PR_BODY_rubocop_ci.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/rubocop-sketchup-ci |
 | `feature/quality-gates-ci-workflow` | `PR_BODY_quality_gates_ci.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/quality-gates-ci-workflow |
 | `feature/concave-hull-room-clip-spike` | `PR_BODY_concave_hull_spike.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/concave-hull-room-clip-spike |

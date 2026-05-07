@@ -30,6 +30,12 @@
   - `feature/quality-gates-ci-workflow` — Cycle 10 (Plan/Coherence/
     Micro strict CI workflow, infra-only).
     Compare: https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/quality-gates-ci-workflow
+  - `docs/readme-overview-stage15-tools` — Cycle 11 (README + OVERVIEW
+    catch-up to Stage 1.5 tools, pure docs).
+    Compare: https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/readme-overview-stage15-tools
+
+Total: **8 PR-able branches** ready (PR bodies all under
+`.ai_bridge/pr_bodies/`).
 
 - **Branch to delete** post-merge of `docs/ai-bridge-scaffolding-clean`:
   `feature/ai-bridge-scaffolding` (contaminated with PR #52 commit).
