@@ -15,21 +15,23 @@ Each entry:
 
 ---
 
-## P0 — Five PR-less branches ready (PR bodies under .ai_bridge/pr_bodies/)
+## P0 — Six PR-less branches ready (PR bodies under .ai_bridge/pr_bodies/)
 
 User opens PRs manually (memory rule `feedback_pr_manual_preferido.md`).
 Recommended merge order to minimize rebase pain:
 
 1. `docs/non-stop-autonomy-rule` (CLAUDE.md only, no conflicts)
 2. `docs/suite01-polygon-leakage-investigation` (docs/ only)
-3. `feature/concave-hull-room-clip-spike` (default-off code change)
-4. `docs/ai-bridge-scaffolding-clean` (.ai_bridge/ only)
-5. `feature/micro-truth-expand-planta-74-cycle7` (ground_truth + tests)
+3. `feature/rubocop-sketchup-ci` (Gemfile/.rubocop/workflow only)
+4. `feature/concave-hull-room-clip-spike` (default-off code change)
+5. `docs/ai-bridge-scaffolding-clean` (.ai_bridge/ only)
+6. `feature/micro-truth-expand-planta-74-cycle7` (ground_truth + tests)
 
 | Branch | Body file | Compare URL |
 |---|---|---|
 | `docs/non-stop-autonomy-rule` | `PR_BODY_non_stop_autonomy_rule.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/non-stop-autonomy-rule |
 | `docs/suite01-polygon-leakage-investigation` | `PR_BODY_suite01_polygon_diagnostic.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/suite01-polygon-leakage-investigation |
+| `feature/rubocop-sketchup-ci` | `PR_BODY_rubocop_ci.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/rubocop-sketchup-ci |
 | `feature/concave-hull-room-clip-spike` | `PR_BODY_concave_hull_spike.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/concave-hull-room-clip-spike |
 | `docs/ai-bridge-scaffolding-clean` | `PR_BODY_ai_bridge_scaffolding_clean.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/ai-bridge-scaffolding-clean |
 | `feature/micro-truth-expand-planta-74-cycle7` | `PR_BODY_cycle7_micro_truth_expand.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/micro-truth-expand-planta-74-cycle7 |
@@ -135,21 +137,26 @@ After Cycle 8 lands, open `feature/concave-hull-promote-default`:
   the hull *inside* the building. Mitigation: ratio sweep on
   planta_74 logged in PR description; only one chosen value lands.
 
-## Cycle 8 (renamed → Cycle 9): RuboCop SketchUp lint CI
+## ✅ Cycle 9 done (2026-05-07) — branch ready, PR pending
 
-## P2 — Cycle 8: RuboCop SketchUp lint CI
+`feature/rubocop-sketchup-ci` (commit `83e175d`, pushed). Pure
+infrastructure bootstrap of Ruby lint for `tools/*.rb`:
+- `Gemfile.lint` (new, name avoids implying full Ruby application)
+- `.rubocop.yml` (new) — TargetRubyVersion 3.2, only Lint +
+  Security cops on, all cosmetic categories disabled
+- `.github/workflows/rubocop.yml` (new) — paths-filtered to fire
+  only when a Ruby file or the lint config itself changes; PR +
+  push to main/develop, 5-min timeout, `--format github`
+- ZERO Ruby code touched. ZERO Python touched. ZERO test touched.
+- rubocop-sketchup gem deferred to a follow-up (needs per-file
+  annotations for our autorun-plugin pattern).
+- Compare URL:
+  https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/rubocop-sketchup-ci
 
-**Goal**: enforce Extension Warehouse compliance + catch dumb Ruby
-errors at PR time.
-- Evidence: Stage 1.6 plan in PR #49 stack note lists this
-- Touchpoints:
-  - `Gemfile.dev` (new) — add `rubocop-sketchup`
-  - `.rubocop.yml` (new) — `inherit_from: rubocop-sketchup`
-  - `.github/workflows/rubocop.yml` (new) — runs on PR
-- Validation: PR #N triggers RuboCop check; shows green or specific
-  violation
-- Risk: initial run may surface dozens of violations; ship with
-  `--auto-correct-safe` first commit + manual fixes second
+Expected first-CI behaviour: may surface real Lint violations on
+`tools/*.rb`. Per FP-010, do NOT auto-correct in the same PR;
+open `feature/rubocop-cleanup-tools` to address them in a
+review-friendly diff.
 
 ## P2 — Cycle 9: GitHub Action wiring all 4 gates per PR
 

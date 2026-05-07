@@ -9,7 +9,7 @@
 - Working: `docs/ai-bridge-scaffolding-clean` (this update)
 - Sync target: `develop` (sha `fad28d9`)
 - Pending PR (waiting for merge): `feature/smoke-promotes-inspector-v2-gate` (gate G2, commit `2417a20`) → PR #52
-- **Five pushed branches with PR bodies ready** (under `.ai_bridge/pr_bodies/`):
+- **Six pushed branches with PR bodies ready** (under `.ai_bridge/pr_bodies/`):
   - `docs/non-stop-autonomy-rule` — CLAUDE.md §17 DONE IS NOT STOP rule.
     Compare: https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/non-stop-autonomy-rule
   - `feature/micro-truth-expand-planta-74-cycle7` — Cycle 7 ground
@@ -24,20 +24,21 @@
   - `feature/concave-hull-room-clip-spike` — Cycle 8 spike
     (FP-012 Option A behind default-off flag).
     Compare: https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/concave-hull-room-clip-spike
+  - `feature/rubocop-sketchup-ci` — Cycle 9 (RuboCop lint workflow
+    bootstrap, infra-only).
+    Compare: https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/rubocop-sketchup-ci
 
 - **Branch to delete** post-merge of `docs/ai-bridge-scaffolding-clean`:
   `feature/ai-bridge-scaffolding` (contaminated with PR #52 commit).
 
 ## Last objective
 
-Cycle 8 — FP-012 spike (`--use-concave-hull` flag) landed on
-`feature/concave-hull-room-clip-spike`. Default OFF, ZERO
-regression on existing tests. Empirical: SUITE 01 = 69.91 → 18.61 m²
-at default ratio 0.30; total room area 182 → 83 m². Followed by
-PR organization wave + SUITE 01
-polygon leakage diagnostic (root cause located in
-`tools/rooms_from_seeds.py:163-169`, FP-012 documented, fix paths
-proposed but NOT implemented per CLAUDE.md §1).
+Cycle 9 — RuboCop CI bootstrap on `feature/rubocop-sketchup-ci`.
+Pure infrastructure, ZERO Ruby code touched, paths-filtered so the
+workflow only fires when a Ruby file or the lint config itself
+changes. Earlier in this session: Cycle 8 (FP-012 spike) +
+PR organization wave (4 branches) + SUITE 01 polygon leakage
+diagnostic (FP-012 documented).
 
 Earlier in this session: validation of the 5-PR queue (PRs #44–#48)
 on `develop` + saving the "DONE IS NOT STOP" rule + Cycle 7

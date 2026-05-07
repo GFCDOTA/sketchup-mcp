@@ -1,8 +1,34 @@
-# Handoff — 2026-05-07 05:00 UTC
+# Handoff — 2026-05-07 05:30 UTC
 
 > Most recent session's exit state. Next session reads this FIRST
 > after `CLAUDE.md`. Append-only is fine but the top entry must
 > always be the latest.
+
+## Status — Cycle 9 done (RuboCop CI bootstrap)
+
+After Cycle 8 (FP-012 spike) landed, the loop selected Cycle 9
+(RuboCop CI) — independent infrastructure, well-bounded, P2
+deferred from before. Cycle 6 (autorun inspector wiring) skipped
+because user excluded Stage 1.6 at the start of this session
+chain.
+
+- Branch: `feature/rubocop-sketchup-ci`
+- Commit: `83e175d`
+- Compare URL:
+  https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/rubocop-sketchup-ci
+- PR body: `.ai_bridge/pr_bodies/PR_BODY_rubocop_ci.md`
+
+What changed:
+- `Gemfile.lint` (new) — rubocop ~> 1.65 in :lint group
+- `.rubocop.yml` (new) — TargetRubyVersion 3.2, Include
+  `tools/**/*.rb`, only Lint + Security cops on
+- `.github/workflows/rubocop.yml` (new) — paths-filtered
+  (Ruby files + lint config only); PR + push to main/develop
+- ZERO Ruby code touched. ZERO Python touched. ZERO test touched.
+
+Risk: first CI run may surface Lint violations on existing
+`tools/*.rb` — by design. Per FP-010, do NOT auto-correct
+in the same PR; open a dedicated cleanup PR.
 
 ## Status — Cycle 8 done (FP-012 spike landed behind flag)
 
