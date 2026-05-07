@@ -167,7 +167,13 @@ When in doubt, choose the conservative path:
 - Add a guardrail instead of trusting future authors.
 - Add a deselect instead of muting an assertion.
 - Open a draft PR instead of merging silently.
-- Ask the user (via `AskUserQuestion`) instead of guessing.
+- **Ask the user only for real blockers. Prefer autonomous
+  investigation over questions.** A "real blocker" is one of:
+  missing credential, missing required file, destructive risk,
+  product decision the agent genuinely cannot infer, security-rule
+  conflict, change forbidden by this CLAUDE.md, or operational /
+  context-window limit. Anything else — read the code, run the
+  tool, write the test, ship the PR.
 
 ---
 
@@ -318,6 +324,149 @@ Never apply archive patches without an explicit, signed-off PR plan.
 
 ## 13. Last-updated marker
 
+- **2026-05-06** — strengthened §5 wording (autonomous-first); added
+  §14 Autonomous Continuation Protocol, §15 Repository Hygiene
+  Protocol, §16 Review Frequency.
 - **2026-05-03** — converted to constitution form, added agents/hooks
   references, develop-first git flow, SketchUp-as-last-gate rule.
 - Previous version: 2026-04-21 (preserved in git history).
+
+---
+
+## 14. Autonomous Continuation Protocol
+
+Claude does NOT stop after completing a single task when there is a
+safe, valuable next technical step. The default loop is:
+
+```
+READ -> DIAGNOSE -> PLAN -> EXECUTE -> VALIDATE -> RECORD -> COMMIT -> CONTINUE
+```
+
+Per cycle, do all of the following:
+
+1. **READ** — at session start, read `CLAUDE.md`, run `git status`,
+   identify current branch + recent commits + last reports.
+2. **DIAGNOSE** — pick the highest-ROI bottleneck with concrete
+   evidence (file path, log line, test output, metric delta).
+3. **PLAN** — answer internally before editing:
+   - What is the most likely bottleneck?
+   - What evidence proves it?
+   - What cheap validation can confirm it?
+   - What is the smallest safe change?
+   - What test prevents regression?
+   - What can break?
+   - What should be documented?
+4. **EXECUTE** — small, verifiable changes on a properly-named
+   branch (`feature/`, `fix/`, `chore/`, `docs/`, `refactor/`, etc.).
+5. **VALIDATE** — pytest, ruff, smoke, gate run; capture output.
+6. **RECORD** — register learning in `docs/learning/` when relevant;
+   update `docs/ops/` for long-session snapshots.
+7. **COMMIT** — small commit with the standard message format; or
+   give an explicit reason for not committing.
+8. **CONTINUE** — pick the next ROI item. Do NOT ask the human
+   what to do next when there is a safe technical step.
+
+**Specialist agents in parallel** — when work decomposes cleanly
+(e.g., one agent audits the consensus while another drafts the test),
+launch them in a single multi-tool message.
+
+**Consult GPT (or local LLM) via bridge** when there is an ambiguous
+bug, an architectural decision, a hard regression, an uncertain
+validation, or a relevant trade-off. Do not consult for trivial calls.
+
+**Stop only on real blockers.** When blocked, the report must list:
+current state, evidence, attempts, exact blocker, and the next
+commands needed to resume.
+
+**A cycle is complete only when all of the following are true:**
+- validation evidence exists (test result / metric / artifact);
+- learning recorded if the cycle produced one;
+- `git diff` reviewed before commit;
+- commit shipped OR explicit reason logged for not committing;
+- next-step ROI candidate identified.
+
+---
+
+## 15. Repository Hygiene Protocol
+
+Every autonomous cycle includes a lightweight repo-hygiene pass.
+The agent looks for:
+
+- obsolete `.md` files
+- duplicate reports
+- stale JSONs
+- generated PNG/SVG no longer referenced
+- old smoke outputs
+- temporary scripts
+- abandoned dashboard artifacts
+- docs that contradict current behavior
+- loose files in the repo root
+
+**Never delete blindly.** Before removing or moving any file:
+
+1. Search for references in: `README.md`, `CLAUDE.md`, `docs/`,
+   `tests/`, `scripts/`, `tools/`, CI workflows, dashboard, Python
+   imports, Ruby scripts, smoke commands.
+2. Classify each suspect as one of:
+   - `active`
+   - `historical baseline`
+   - `diagnostic artifact`
+   - `generated output`
+   - `duplicate`
+   - `obsolete`
+   - `unknown / preserve`
+3. **Preserve by default**: ground truth, baselines, regression
+   snapshots, reports used by tests, files referenced by docs,
+   artifacts needed to reproduce bugs, anything inside protected
+   paths (`runs/`, `patches/`, `docs/`, `vendor/` per §1).
+4. When in doubt → archive / quarantine instead of delete.
+5. Cleanup ships in its **own commit**, separate from any
+   algorithmic change.
+6. Never mix repo cleanup with risky algorithmic changes in the
+   same PR.
+
+**Suggested commit messages:**
+- `chore: clean obsolete generated artifacts`
+- `docs: archive stale operational notes`
+- `chore: remove unreferenced markdown files`
+
+**Every cleanup must report:**
+- files removed
+- files archived
+- files preserved + why
+- reference searches performed
+- validations executed (pytest / smoke / dashboard build)
+
+---
+
+## 16. Review Frequency
+
+CLAUDE.md is the operational source of truth and is read **every
+session**. Update cadence:
+
+- **Read** at the start of every session.
+- **Verify** before any risky edit (Ruby/SU/schema/threshold).
+- **Verify conformance** before every commit.
+- **Update `docs/ops/`** at the end of long sessions.
+- **Update `docs/learning/`** when there is a new bug, failure
+  pattern, validation rule, or agent improvement.
+- **Promote repeated failures to CLAUDE.md** immediately.
+- **Compact CLAUDE.md** every 3-5 PRs OR once per week, whichever
+  comes first. Strip duplication; refresh §10 known-issue list.
+
+**Add to CLAUDE.md only when the information will change future
+agent behavior.** Do not add:
+
+- execution logs
+- one-off command outputs
+- temporary metrics
+- single-execution observations
+- PR summaries
+
+These belong in:
+
+- `docs/ops/`
+- `docs/learning/`
+- `docs/adr/`
+- `runs/`
+- `artifacts/`
