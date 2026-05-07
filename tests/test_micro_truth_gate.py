@@ -348,8 +348,9 @@ def test_audit_does_not_invoke_subprocess_or_network(monkeypatch,
 
 def test_real_planta_74_micro_passes(tmp_path):
     """Read the canonical ground_truth/planta_74_micro.json and the
-    last classifier output. If the pipeline is healthy, score >= 0.8.
-    Skipped when artifacts are missing (CI on a stripped branch)."""
+    last classifier output. If the pipeline is healthy, score >= 0.8
+    across the four asserted rooms. Skipped when artifacts are
+    missing (CI on a stripped branch)."""
     canonical_run = (REPO_ROOT
                      / "runs/feature_room_context_2026_05_06"
                      / "consensus_with_room_context.json")
@@ -359,4 +360,7 @@ def test_real_planta_74_micro_passes(tmp_path):
     consensus = json.loads(canonical_run.read_text(encoding="utf-8"))
     gt = json.loads(canonical_gt.read_text(encoding="utf-8"))
     r = build_micro_truth_report(consensus, canonical_run, gt, canonical_gt)
+    audited_labels = {room["label"] for room in r["rooms_audited"]}
+    assert audited_labels == {"SALA DE ESTAR", "SUITE 02",
+                              "BANHO 02", "COZINHA"}, audited_labels
     assert r["score"] >= 0.8, r
