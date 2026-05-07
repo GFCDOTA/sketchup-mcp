@@ -1,8 +1,42 @@
-# Handoff — 2026-05-07 04:30 UTC
+# Handoff — 2026-05-07 05:00 UTC
 
 > Most recent session's exit state. Next session reads this FIRST
 > after `CLAUDE.md`. Append-only is fine but the top entry must
 > always be the latest.
+
+## Status — Cycle 8 done (FP-012 spike landed behind flag)
+
+Per the user's stated ROI preference (geometry > infra), the next
+cycle attacked SUITE 01. Implemented Option A from FP-012 behind
+a default-OFF flag (`--use-concave-hull` + `--concave-hull-ratio`).
+
+- Branch: `feature/concave-hull-room-clip-spike`
+- Commit: `39bfb99`
+- Compare URL:
+  https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/concave-hull-room-clip-spike
+- PR body: `.ai_bridge/pr_bodies/PR_BODY_concave_hull_spike.md`
+
+Empirical proof on planta_74:
+- SUITE 01 drops from **69.91 m² → 18.61 m²** at default ratio 0.30
+- Sum 11 rooms drops from **182 m² → 83.3 m²** (closer to nominal 74 m²)
+- ratio=1.0 reproduces convex baseline exactly (sanity)
+
+Validation:
+- `pytest test_planta_74_truth_gate + coherence + micro + new
+  rooms_from_seeds_concave_hull` → **60/60 PASS** in 2.27s
+- Full in-scope suite (excluding pre-existing raster + dashboard
+  fails) → **519 passed, 8 skipped, 0 failed** — ZERO regression
+- 4 new unit tests on synthetic L-shape envelope harden the
+  default-off / concave-on / ratio=1.0 / empty-walls paths
+
+Per CLAUDE.md §1 the flag stays default OFF. A future PR
+(`feature/concave-hull-promote-default`) is needed to:
+- pick the production ratio (recommend 0.55 for minimum disruption,
+  0.30 for closest-to-truth result)
+- regenerate `tests/baselines/planta_74.json`
+- recalibrate `ground_truth/planta_74_micro.json` ranges
+- regenerate `docs/preview/example_top.png`
+- update CLAUDE.md §10
 
 ## Status — Cycle 4 (PR organization + SUITE 01 diagnostic)
 

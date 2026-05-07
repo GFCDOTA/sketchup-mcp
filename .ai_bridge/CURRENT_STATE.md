@@ -1,4 +1,4 @@
-# Current State — 2026-05-07 04:30 UTC
+# Current State — 2026-05-07 05:00 UTC
 
 > Per-session snapshot. Update at start of each long session and
 > overwrite (not append). For history → `HANDOFF.md` (per-session
@@ -9,7 +9,7 @@
 - Working: `docs/ai-bridge-scaffolding-clean` (this update)
 - Sync target: `develop` (sha `fad28d9`)
 - Pending PR (waiting for merge): `feature/smoke-promotes-inspector-v2-gate` (gate G2, commit `2417a20`) → PR #52
-- **Four pushed branches with PR bodies ready** (under `.ai_bridge/pr_bodies/`):
+- **Five pushed branches with PR bodies ready** (under `.ai_bridge/pr_bodies/`):
   - `docs/non-stop-autonomy-rule` — CLAUDE.md §17 DONE IS NOT STOP rule.
     Compare: https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/non-stop-autonomy-rule
   - `feature/micro-truth-expand-planta-74-cycle7` — Cycle 7 ground
@@ -21,13 +21,20 @@
   - `docs/suite01-polygon-leakage-investigation` — diagnostic for
     SUITE 01 oversized polygon (FP-012). Pure docs.
     Compare: https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/suite01-polygon-leakage-investigation
+  - `feature/concave-hull-room-clip-spike` — Cycle 8 spike
+    (FP-012 Option A behind default-off flag).
+    Compare: https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/concave-hull-room-clip-spike
 
 - **Branch to delete** post-merge of `docs/ai-bridge-scaffolding-clean`:
   `feature/ai-bridge-scaffolding` (contaminated with PR #52 commit).
 
 ## Last objective
 
-PR organization wave (4 branches with bodies prepared) + SUITE 01
+Cycle 8 — FP-012 spike (`--use-concave-hull` flag) landed on
+`feature/concave-hull-room-clip-spike`. Default OFF, ZERO
+regression on existing tests. Empirical: SUITE 01 = 69.91 → 18.61 m²
+at default ratio 0.30; total room area 182 → 83 m². Followed by
+PR organization wave + SUITE 01
 polygon leakage diagnostic (root cause located in
 `tools/rooms_from_seeds.py:163-169`, FP-012 documented, fix paths
 proposed but NOT implemented per CLAUDE.md §1).

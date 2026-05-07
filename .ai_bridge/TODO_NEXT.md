@@ -15,16 +15,24 @@ Each entry:
 
 ---
 
-## P0 — Four PR-less branches ready (PR bodies under .ai_bridge/pr_bodies/)
+## P0 — Five PR-less branches ready (PR bodies under .ai_bridge/pr_bodies/)
 
 User opens PRs manually (memory rule `feedback_pr_manual_preferido.md`).
+Recommended merge order to minimize rebase pain:
+
+1. `docs/non-stop-autonomy-rule` (CLAUDE.md only, no conflicts)
+2. `docs/suite01-polygon-leakage-investigation` (docs/ only)
+3. `feature/concave-hull-room-clip-spike` (default-off code change)
+4. `docs/ai-bridge-scaffolding-clean` (.ai_bridge/ only)
+5. `feature/micro-truth-expand-planta-74-cycle7` (ground_truth + tests)
 
 | Branch | Body file | Compare URL |
 |---|---|---|
 | `docs/non-stop-autonomy-rule` | `PR_BODY_non_stop_autonomy_rule.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/non-stop-autonomy-rule |
-| `feature/micro-truth-expand-planta-74-cycle7` | `PR_BODY_cycle7_micro_truth_expand.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/micro-truth-expand-planta-74-cycle7 |
-| `docs/ai-bridge-scaffolding-clean` | `PR_BODY_ai_bridge_scaffolding_clean.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/ai-bridge-scaffolding-clean |
 | `docs/suite01-polygon-leakage-investigation` | `PR_BODY_suite01_polygon_diagnostic.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/suite01-polygon-leakage-investigation |
+| `feature/concave-hull-room-clip-spike` | `PR_BODY_concave_hull_spike.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/concave-hull-room-clip-spike |
+| `docs/ai-bridge-scaffolding-clean` | `PR_BODY_ai_bridge_scaffolding_clean.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/ai-bridge-scaffolding-clean |
+| `feature/micro-truth-expand-planta-74-cycle7` | `PR_BODY_cycle7_micro_truth_expand.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/micro-truth-expand-planta-74-cycle7 |
 
 **Branch to delete after `docs/ai-bridge-scaffolding-clean` merges**:
 `feature/ai-bridge-scaffolding` (contaminated with PR #52 commit
@@ -85,20 +93,37 @@ Open issue surfaced (deferred):
   `shapely.concave_hull`) behind `--use-concave-hull` flag,
   default off → `feature/concave-hull-room-clip-spike`.
 
-## P1 — Cycle 8: SUITE 01 fix spike (Option A from FP-012)
+## ✅ Cycle 8 done (2026-05-07) — branch ready, PR pending
 
-**Goal**: prove Option A reduces SUITE 01 from ~70 m² toward
-~25-30 m² without touching the default code path. User stated
-preference (2026-05-07): geometric quality > infrastructure (RuboCop).
-- Touchpoints:
-  - `tools/rooms_from_seeds.py:152-219` — add `use_concave_hull`
-    parameter; new branch uses `shapely.concave_hull(MultiPoint, ratio)`
-    with a tunable `ratio` (default 0.3) instead of `cv2.convexHull`
-  - `tools/rooms_from_seeds.py:259+` (CLI) — add `--use-concave-hull`
-    flag default off
-  - new test `tests/test_rooms_from_seeds_concave_hull.py` — exercise
-    the new branch on a synthetic L-shaped envelope
-  - DO NOT update `tests/baselines/planta_74.json` in this PR
+`feature/concave-hull-room-clip-spike` (commit `39bfb99`, pushed).
+- `_build_interior_mask()` extracted; `--use-concave-hull` flag
+  + `--concave-hull-ratio` (default 0.3) added.
+- Default OFF → byte-identical behavior on existing baseline.
+- Empirical: SUITE 01 = 69.91 → 18.61 m² at ratio 0.30; sum 11
+  rooms = 182 → 83 m². ratio=1.0 reproduces convex baseline.
+- 4 new unit tests on synthetic L-shape; 519/519 in-scope tests
+  still pass (zero regression).
+- Diagnostic artifacts: `docs/diagnostics/2026-05-07_planta_74_fp012_spike_results.md`
+  + 2 PNG previews (ratio 0.30 + 0.55).
+- Compare URL:
+  https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/concave-hull-room-clip-spike
+
+## P1 — Cycle 8b: promote concave-hull to default
+
+After Cycle 8 lands, open `feature/concave-hull-promote-default`:
+- Pick the production ratio (recommend 0.55 for minimum disruption,
+  0.30 for closest-to-truth result; sweep table in
+  `docs/diagnostics/2026-05-07_planta_74_fp012_spike_results.md`)
+- Flip flag default to True (or remove flag entirely)
+- Regenerate `tests/baselines/planta_74.json` with new room counts
+  / area distributions
+- Recalibrate `ground_truth/planta_74_micro.json` ranges (or
+  remove specific assertions that no longer hold)
+- Regenerate `docs/preview/example_top.png`
+- Update CLAUDE.md §10 known-baseline note
+- File LL-XXX in `docs/learning/lessons_learned.md`
+- Risk: medium. This PR INTENTIONALLY changes baseline numbers,
+  needs careful diff review.
 - Validation:
   - default-off path → existing 56/56 gate tests still pass
   - flag-on rebuild on planta_74 → SUITE 01 < 50 m² (target ~30)
