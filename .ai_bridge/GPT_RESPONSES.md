@@ -40,6 +40,59 @@ Operate per CLAUDE.md §14. Consult GPT only when:
 
 <!-- New responses below this line, newest at top -->
 
+## Response 2026-05-08 16:30 — Cycle 6 alt: adjacency_f1 plateau
+
+### Source
+
+`planta-assistant:latest` via Ollama localhost:11434
+(ChatGPT desktop bridge offline; same fallback chain as the
+Cycle 8b consult).
+
+### Verbatim recommendation
+
+> **Resposta:**
+> A opção **B (documentar limitação)** é a mais adequada. Ajustes
+> no classificador não resolverão os problemas de FP e FN, que são
+> causados por falhas nos polígonos das salas, não na classificação.
+> Documentar explicitamente o teto de performance e adicionar
+> padrões de fracasso clarifica as limitações do sistema sem
+> comprometer a integridade do projeto.
+>
+> **Próximo passo:** Atualizar a documentação para estabelecer um
+> piso explícito de 0,60 para a métrica F1 e detalhar os padrões
+> de falha identificados.
+
+### Decision and execution
+
+**Executing option B**, autonomously per the operational autonomy
+protocol (`feedback_autonomia_operacional_protocolo.md` updated
+2026-05-08 to clarify YELLOW = "execute with caution + evidence",
+NOT "ask Felipe").
+
+This PR:
+1. `docs/diagnostics/2026-05-08_cycle6alt_adjacency_f1_analysis.md`
+   — full per-edge breakdown + reproducible probe-by-probe
+   investigation + LLM trace + Cycle 8c fix path.
+2. `docs/learning/failure_patterns.md` `FP-013` — anti-pattern
+   "don't chase adjacency_f1 in classify_openings without first
+   fixing room polygons; never lower the threshold to mask".
+3. `docs/ground_truth_v1.md` "Limitations" — references the
+   `adjacency_f1 ∈ [0.60, 0.80]` plateau as expected, points to
+   the new diagnostic + FP-013.
+
+What is NOT in this PR:
+- `tools/classify_openings_by_room_context.py` — untouched.
+- `tools/fidelity/compare_generated_to_expected.py` — untouched
+  (thresholds preserved).
+- No threshold adjustment to "make it pass".
+- No code change at all. Pure docs.
+
+Expected outcome: `develop` continues to surface the warning;
+the next agent who reads HANDOFF + this diagnostic doesn't
+re-investigate; Cycle 8c is queued with concrete fix
+candidates.
+
+
 ## Response 2026-05-08 14:30 — Cycle 8b ratio + PR strategy
 
 ### Source
