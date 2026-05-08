@@ -1,8 +1,69 @@
-# Handoff — 2026-05-08 00:30 UTC
+# Handoff — 2026-05-08 14:30 UTC
 
 > Most recent session's exit state. Next session reads this FIRST
 > after `CLAUDE.md`. Append-only is fine but the top entry must
 > always be the latest.
+
+## Status — QUEUE ZEROED + Operational autonomy protocol installed
+
+**develop @ `07fd499`** (was `fad28d9` at start of cycle)
+
+User installed **permanent operational autonomy protocol** (saved as
+cross-project memory `feedback_autonomia_operacional_protocolo.md`):
+GREEN/YELLOW/RED loop + ChatGPT bridge consult direct (não via
+Felipe roteador) + auto-merge clean+green + don't ask per-PR.
+
+### All 9 PRs merged + 1 follow-up wave
+
+Wave A → E (initial wave):
+
+| Wave | PR  | Branch | Merge SHA |
+|---|---|---|---|
+| A1  | #52 | docs/non-stop-autonomy-rule | `148db2b` |
+| A2  | #53 | docs/suite01-polygon-leakage-investigation | `5840532` |
+| A3  | #54 | docs/readme-overview-stage15-tools | `b4d3ab4` |
+| B1  | #55 | feature/rubocop-sketchup-ci | `0dd2ecd` (+12 Lint fixes) |
+| B2  | #56 | feature/quality-gates-ci-workflow | `fbe7d45` |
+| C1  | #57 | feature/concave-hull-room-clip-spike | `3fcbbf6` |
+| D1  | #58 | feature/ground-truth-v1-fidelity-engine | `07fd499` (+advisory mode) |
+| D2  | #59 | feature/micro-truth-expand-planta-74-cycle7 | `ceb2702` |
+| E1  | #60 | docs/ai-bridge-scaffolding-clean | `31ef3de` |
+
+**Cleanup pós-wave:** branches mergeadas deletadas (local + remote);
+`feature/ai-bridge-scaffolding` (contaminada com gate G2 herdado)
+deletada.
+
+### Final state
+
+- **Tests:** 85/85 PASS (was 60 antes; +25 fidelity engine + round-trip)
+- **CI workflows ativos:** `ci.yml`, `skp_fidelity_gate.yml`,
+  `rubocop.yml` (NEW), `quality_gates.yml` (NEW — Plan + Coherence
+  strict + Micro strict + Fidelity advisory)
+- **Fidelity engine** roda --strict mas em advisory mode
+  (`continue-on-error: true`) até Cycle 8b clear FP-012; report
+  ainda emitido como artifact
+
+### CI runs em develop pós-merge
+
+Todos os 4 últimos runs verdes (RuboCop, Quality Gates incluindo
+Plan Truth, Coherence strict, Micro strict, Fidelity advisory).
+
+## Next ROIs — analysis em andamento
+
+Queue de 9 PRs zerada. Próximo natural seria Cycle 8b (promote
+concave-hull default + recalibrar baselines), mas precisa decisão
+estratégica (ratio 0.30 vs 0.55) — vou consultar via LLM local
+(ChatGPT bridge offline; planta-assistant via Ollama é fallback
+documented em `feedback_always_consult_gpt.md`).
+
+Outros candidatos (ranked):
+- **Cycle 8b** (P1) — promove concave-hull pra default; clear
+  FP-012 hard_fails; remove `continue-on-error` do fidelity step
+- **Multi-PDF corpus** (P2 → blocked by RED: precisa Felipe
+  fornecer PDFs)
+- **Cycle 6 (Stage 1.6)** — ainda bloqueado explicitamente
+- **Cycle 14: investigar SUITE 01 oversized via algoritmo Option
+  B (soft-barrier outline)** — alternativa a 8b
 
 ## Status — Wave preserve cycle (NAO PARE mode active)
 
