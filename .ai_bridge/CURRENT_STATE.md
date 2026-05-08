@@ -1,27 +1,42 @@
-# Current State — 2026-05-08 (Cycle 12 cockpit MVP)
+# Current State — 2026-05-08 (post Cycle 12 merge)
 
 > Per-session snapshot. Overwrite (not append). For history →
 > `HANDOFF.md` or `docs/ops/`.
 
 ## Branch
 
-- **Working:** `feature/validation-cockpit-mvp-cycle12` (pushed, 2 commits ahead of `develop`)
-- **develop @** `07fd499` (last known clean point)
-- **Active CI:** `ci.yml`, `skp_fidelity_gate.yml`, `rubocop.yml`, `quality_gates.yml`. Last 4 develop runs all green pre-PR.
-- **Open PRs:** Cycle 12 cockpit (compare URL ready in `HANDOFF.md`; PR body in `.ai_bridge/pr_bodies/PR_BODY_cockpit_cycle12.md`)
-- **Local branches alive:** `dashboard/architecture-sre-radar`, `dashboard/project-roadmap`, `feature/smoke-promotes-inspector-v2-gate` (all RED-blocked Stage 1.6 / out-of-scope)
+- **Working:** `chore/post-cycle12-handoff-refresh` (this commit)
+- **develop @** `84eae72` (merge commit of PR #68 — Cycle 12 cockpit MVP)
+- **Active CI:** `ci.yml`, `skp_fidelity_gate.yml`, `rubocop.yml`,
+  `quality_gates.yml`. PR #68 went green CLEAN on all 3 (test 27s,
+  quality-gates 15s, ruby-syntax 5s).
+- **Open PRs:** none (post-merge cleanup PR is being prepared on
+  this branch).
+- **Local branches alive:** `dashboard/architecture-sre-radar`,
+  `dashboard/project-roadmap`, `feature/smoke-promotes-inspector-v2-gate`
+  (all RED-blocked Stage 1.6 / out-of-scope).
 
 ## Last objective (just completed)
 
-**Cycle 12 — Validation Cockpit MVP** shipped. Streamlit-based local UI for visualizing what the planta extraction pipeline understood from a PDF, before paying the SKP cost. Read-only by design; gated behind `[cockpit]` extra so core pipeline + CI stay lean.
+**Cycle 12 — Validation Cockpit MVP** MERGED via PR #68
+(`84eae72`). 13 files, 1223 insertions, 41 deletions. 10 new cockpit
+unit tests added, all green. 0 new failures vs. develop baseline.
+Streamlit pinned as optional `[cockpit]` extra; core pipeline
+contract intact.
 
-This PR replaces the original (untracked, only sketched) plan to build the cockpit as `tools/dashboard/cockpit/` vanilla JS + FastAPI. Decision recorded in `DECISIONS.md` under 2026-05-08 — Hybrid path: Slice 1 stays Streamlit; Slice 2/3 will introduce FastAPI when persistence becomes necessary.
+The cockpit is the human-in-the-loop checkpoint between the
+extraction pipeline and the SKP gate. Read-only — never writes back
+to consensus / GT files. See `docs/validation_cockpit.md`.
 
 ## Three trincos status
 
-- ✅ **PDF → SKP determinístico** — pipeline 5-stage stable, smoke green, CI green
-- ✅ **Incerteza auditável** — coherence_audit + plan truth gate + micro truth gate (4 rooms via Cycle 7) + Fidelity Engine v1 advisory (#58)
-- ✅ **Verdade externa mínima** — Ground Truth v1 + Fidelity Engine v1 (whole-plant) shipped (#58); cockpit now lets a human review *before* SKP, closing the visual loop between consensus and the SU export step.
+- ✅ **PDF → SKP determinístico** — pipeline 5-stage stable, smoke
+  green, CI green
+- ✅ **Incerteza auditável** — coherence_audit + plan truth gate +
+  micro truth gate (4 rooms via Cycle 7) + Fidelity Engine v1
+  (HARD blocker post-Cycle-8b)
+- ✅ **Verdade externa mínima** — Ground Truth v1 + Fidelity Engine
+  v1 (whole-plant) + cockpit visual review BEFORE SKP
 
 ## Active tools
 
@@ -34,46 +49,39 @@ This PR replaces the original (untracked, only sketched) plan to build the cockp
 | `tools/inspect_walls_report.rb` | ✓ v2 schema (PR #49) + Lint clean (PR #55) |
 | `tools/fidelity/compare_generated_to_expected.py` | ✓ schema 1.0, 21 unit tests; called LIVE by cockpit |
 | `tools/fidelity/synth_from_expected.py` | ✓ round-trip helper, 4 guard tests |
-| `tools/rooms_from_seeds.py` | ✓ stable + opt-in `--use-concave-hull` (FP-012 spike, default OFF) |
+| `tools/rooms_from_seeds.py` | ✓ DEFAULT `--use-concave-hull=True` (Cycle 8b promoted; ratio 0.5 cleared FP-012) |
+| `tools/synth/make_synthetic_vector_pdf.py` | ✓ Cycle 11c/11d round-trip closed |
 | `tests/test_planta_74_truth_gate.py` | ✓ 15 assertions locked |
 | `scripts/smoke/smoke_skp_export.py` | ✓ A-G + H |
-| **`cockpit/render_overlay.py`** | **✓ NEW — pure SVG renderer + summary helpers** |
-| **`cockpit/app.py`** | **✓ NEW — Streamlit MVP, read-only viewer** |
-| **`tests/test_cockpit_render_overlay.py`** | **✓ NEW — 10 unit tests** |
+| `cockpit/render_overlay.py` | ✓ pure SVG renderer + summary helpers (Cycle 12) |
+| `cockpit/app.py` | ✓ Streamlit shell w/ sidebar pickers + 4 tabs (Cycle 12) |
 
-## Tests
+## Known baselines
 
-Re-validated 2026-05-08 on `feature/validation-cockpit-mvp-cycle12`:
+- `planta_74` vector pipeline: 33 walls, 11 rooms, 11 openings,
+  8 soft_barriers
+- Total room polygon area: 104.78 m² (post-Cycle-8b concave-hull,
+  ratio 0.5)
+- Fidelity Engine v1: global=0.917, 0 hard_fails, 2 advisory
+  warnings (TERRACO TECNICO area marginal, adjacency_f1=0.67 →
+  documented as FP-013)
 
-- Plan Truth Gate: **15/15 PASS**
-- Micro Truth Gate: **20/20 PASS** (4 rooms scoring 1.0)
-- Coherence Audit: **21/21 PASS**
-- Concave-hull spike unit tests: **4/4 PASS**
-- Fidelity Engine: **21/21 PASS**
-- Fidelity round-trip: **4/4 PASS**
-- **Cockpit renderer: 10/10 PASS** (NEW)
-- **Total: 95/95 PASS** in ~3 s
-- Live smoke: `streamlit run cockpit/app.py` boots, renders SVG overlay, no errors
+## Test counts
 
-## Next ROIs
+- Pre-Cycle-12 develop: 568 PASS, 17 FAIL (raster legacy, CLAUDE.md
+  §10), 8 SKIP
+- Post-Cycle-12 develop: **578 PASS** (+10 cockpit tests), 17 FAIL
+  (same raster set), 8 SKIP
 
-| Item | Color | Notes |
-|---|---|---|
-| Open + merge Cycle 12 PR | 🟢 GREEN | manual via compare URL; merge once CI green |
-| **Cycle 8b — promote concave-hull default + recalibrar baselines** | 🟡 YELLOW | needs ratio decision (0.30 / 0.55); will consult LLM local; clears the 3 advisory-mode FP-012 hard_fails |
-| Cockpit Slice 2 — approve/reject + `review_overrides.json` (FastAPI) | 🟢 GREEN | additive, needs Slice 1 merged first |
-| Cockpit Slice 3 — `proposed_actions.json` + pre-SKP gate F0 | 🟢 GREEN | builds on Slice 2 |
-| Cockpit Slice 1.5 — PDF underlay (Cycle 12b) | 🟢 GREEN | smaller, big visual win |
-| Multi-PDF corpus | 🔴 RED | needs Felipe to provide additional PDFs |
-| Cycle 6 (Stage 1.6) — autorun inspector wiring | 🔴 RED | Stage 1.6 explicitly held |
+## Tooling notes
 
-## Operational protocol
-
-`feedback_autonomia_operacional_protocolo.md` is the active rule:
-- GREEN: execute without asking
-- YELLOW: execute with reinforced validation
-- RED: stop and report
-- ChatGPT bridge / Ollama local: consult directly, no Felipe-as-router
-- PR CLEAN + verde + escopo esperado → merge without asking
-
-`feedback_pre_existing_work_pivot.md` (NEW cross-project rule, 2026-05-08): on conflict between fresh plan and pre-existing committed work, preserve and pivot if objective stays the same; only ask when discarding > preserving, objective changes, or destructive risk.
+- **gh CLI** lives at `C:\Program Files\GitHub CLI\gh.exe` and is
+  NOT on the Git Bash PATH that Claude Code runs in. Always invoke
+  via absolute path: `"/c/Program Files/GitHub CLI/gh.exe"` and
+  always use `--repo GFCDOTA/sketchup-mcp` for cwd-independent
+  commands. Auth is keyring-backed (account `fmodesto30`, scope
+  `repo`). See `~/.claude/projects/E--Claude/memory/reference_gh_cli_absolute_path.md`.
+- Cockpit launch: `pip install -e ".[cockpit]"` then `streamlit run
+  cockpit/app.py`. The `cockpit` package was added to
+  `setuptools.packages.find` so `pip install -e` registers it
+  properly (was bug fixed in commit `f11e13c`).

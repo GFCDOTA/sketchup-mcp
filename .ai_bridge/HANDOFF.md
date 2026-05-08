@@ -1,10 +1,65 @@
-# Handoff — 2026-05-08 (Cycle 12 cockpit MVP)
+# Handoff — 2026-05-08 (Cycle 12 cockpit MVP MERGED)
 
 > Most recent session's exit state. Next session reads this FIRST
 > after `CLAUDE.md`. Append-only is fine but the top entry must
 > always be the latest.
 
-## Status — Cycle 12 MVP shipped, PR ready (open + merge manually)
+## Status — Cycle 12 MERGED + gh-CLI tooling unblocked
+
+**develop @ `84eae72`** — PR #68 merged 2026-05-08T19:03:44Z, branch
+deleted local + remote, smoke 10/10 still PASS.
+
+### Merge results
+
+| Field | Value |
+|---|---|
+| PR | [#68](https://github.com/GFCDOTA/sketchup-mcp/pull/68) |
+| Title | feat(cockpit): Cycle 12 — Validation Cockpit MVP (read-only Streamlit UI) |
+| Merge SHA | `84eae72` |
+| Diff | 13 files, +1223 / −41 |
+| Checks | test (27s), quality-gates (15s), ruby-syntax (5s) — all pass |
+| Test delta vs develop baseline | +10 passing (cockpit), 0 new failures |
+
+### Tooling unblocked this session
+
+`gh` CLI was missing from Bash PATH on this machine — diagnosed,
+located at `/c/Program Files/GitHub CLI/gh.exe` (v2.92.0), auth via
+keyring already configured (account `fmodesto30`, scope `repo`).
+**Workaround documented as cross-project memory:**
+`~/.claude/projects/E--Claude/memory/reference_gh_cli_absolute_path.md`.
+Future sessions: invoke via absolute path + always pass
+`--repo GFCDOTA/sketchup-mcp`. No more "PR via URL manual" requests
+to Felipe.
+
+### Boundary check (CLAUDE.md)
+
+- §1.2 schema unchanged ✓
+- §1.3 thresholds unchanged ✓
+- §1.4 Ruby/SU exporter untouched ✓
+- §1.6 high-risk entrypoints (`api/app.py`, `main.py`) untouched ✓
+- §2 invariants intact (read-only) ✓
+- §3 cockpit IS the cheap gate, runs without SU ✓
+
+### Next moves (post-merge)
+
+1. **This branch:** `chore/post-cycle12-handoff-refresh` ships the
+   `.ai_bridge/` refresh + LL-012 (gh CLI lesson) — PR + merge.
+2. **After:** pick next ROI from `TODO_NEXT.md`. Per Felipe's
+   ordering, the next item is **NOT** Cycle 8c, **NOT** polygon
+   refinement, **NOT** Stage 1.6. Top GREEN candidates are the
+   Cockpit Slice 1.5 / 2 / 3 follow-ups (12b PDF underlay, 12c
+   interactive selection, 12d expected_model overlay).
+
+### Slice 2/3 deferred (not in PR #68)
+
+- Approve / reject per element + `review_overrides.json` persistence
+  (needs FastAPI for POST)
+- `proposed_actions.json` schema + pre-SKP gate F0 in
+  `scripts/smoke/smoke_skp_export.py`
+
+---
+
+## Previous entry — Cycle 12 cockpit MVP (PR ready, pre-merge)
 
 **Branch:** `feature/validation-cockpit-mvp-cycle12` (pushed)
 **Compare:**

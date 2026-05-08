@@ -4,6 +4,40 @@
 > rule. Add a new entry every time we discover "this should always
 > happen this way." Anti-patterns go to `failure_patterns.md`.
 
+## LL-012 — Fix tooling access before falling back to manual
+
+**Date:** 2026-05-08
+**Context:** Mid-session, opened the Cycle 12 cockpit PR via the
+"compare URL → user pastes manually in browser" workflow because
+`gh: command not found` in the Bash that Claude Code runs in. Felipe
+correctly pushed back: doing it manually means the next PR hits the
+same wall. The fix is to find the tool, not work around it.
+
+**Diagnosis:** `gh.exe` was installed at `C:\Program Files\GitHub CLI\`
+and authenticated via keyring (account `fmodesto30`, scope `repo`),
+but Git Bash didn't have that directory on its PATH.
+
+**Rule:** When a CLI is "missing" from the environment, the first
+move is `where`/`Get-ChildItem` to the standard install paths
+(`C:\Program Files\<Tool>\`, `%LOCALAPPDATA%\Programs\<tool>\`,
+`scoop\shims\`). If the binary exists, invoke via absolute path
+(`"/c/Program Files/GitHub CLI/gh.exe"`) and pass cwd-independent
+flags (`--repo <owner>/<name>`). Document the path so the next
+session doesn't repeat the diagnostic. **Don't fall back to manual
+workflow because the binary lookup failed.**
+
+**Automation:** cross-project memory file
+`~/.claude/projects/E--Claude/memory/reference_gh_cli_absolute_path.md`;
+referenced from `MEMORY.md` so every Claude session sees it before
+attempting a PR action.
+
+**Generalization:** the pattern applies to any external CLI on
+Windows + Git Bash where PATH inheritance into the harness shell is
+unreliable — `python.exe`, `node.exe`, `docker.exe`, etc. Probe
+before assuming.
+
+
+
 ## LL-001 — SketchUp is the last gate, never the first
 
 **Date:** 2026-05-03
