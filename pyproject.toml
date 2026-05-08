@@ -76,6 +76,7 @@ include = [
   "api*",
   "sketchup_mcp_server*",
   "cockpit*",
+  "renderers*",
 ]
 exclude = [
   "tests*",

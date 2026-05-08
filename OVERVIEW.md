@@ -82,7 +82,7 @@ Quando o PDF tem geometria vetorial limpa (caso comum de plantas comerciais bras
 |---|---|
 | `tools/render_axon.py` | Vista isométrica + topo a partir do consensus (matplotlib 3D) — desenha openings como swatches laranja nas paredes |
 | `tools/render_openings_overlay.py` | PDF cropado com markers das openings detectadas |
-| `render_debug.py`, `render_native.py`, `render_semantic.py`, `render_proto_overlays.py`, `render_with_openings.py`, `render_sidebyside.py` | Overlays variados para conferência visual |
+| `renderers/{debug,native,semantic,proto_overlays,with_openings}.py`, `render_sidebyside.py` | Overlays variados para conferência visual. Os 5 antigos `render_*.py` no root viraram thin wrappers de deprecação que delegam pro pacote `renderers/` (migração 2026-05-08, step 5 do `docs/architecture/target_repo_architecture.md`). |
 
 Todos auto-registram seu PNG em `runs/png_history/manifest.jsonl` via `tools/png_history.py` — append-only com SHA256 de origem (.skp + consensus + PDF).
 
