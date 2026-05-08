@@ -258,8 +258,22 @@ explicitly running the command outside Claude.
 ## 10. Pipeline state (for context)
 
 ### Known baseline on `planta_74` (vector pipeline)
-- 33 walls, 11 rooms, 12 openings, 8 soft_barriers
-- Generated via the documented 4-step flow (see `OVERVIEW.md` §4.4)
+- 33 walls, 11 rooms, 11 openings, 8 soft_barriers
+- by_kind: 5 interior_door / 2 interior_passage / 2 window / 2 glazed_balcony
+- by_decision: 6 clean / 5 debug
+- room areas (post-Cycle-8b concave-hull default):
+  SALA DE ESTAR 10.82, SALA DE JANTAR 13.07, COZINHA 8.80,
+  LAVABO 3.40, A.S. 2.52, SUITE 01 26.75, SUITE 02 14.38,
+  BANHO 01 5.48, BANHO 02 6.24, TERRACO SOCIAL 11.70,
+  TERRACO TECNICO 1.61
+- Total room polygon area: 104.78 m² (apartment nominal 74 m²;
+  delta accounts for internal walls + 2 terraços)
+- Fidelity Engine v1 baseline: global=0.917, 0 hard_fails,
+  2 warnings (TERRACO TECNICO area marginal, adjacency_f1=0.67
+  below 0.80 advisory threshold)
+- Generated via the 5-step flow (see `OVERVIEW.md` §4.4) with
+  the default `--use-concave-hull` flag (Cycle 8b 2026-05-08;
+  pass `--no-concave-hull` to recover legacy convex behaviour)
 
 ### Known baseline on `planta_74` (raster pipeline, OUTDATED)
 - 94 walls, 14 rooms, 7 orphan_components, geometry_score 0.156
@@ -272,6 +286,14 @@ explicitly running the command outside Claude.
 - (none open as of 2026-05-06; previous SHA256 + caminho-A items shipped)
 
 ### Recently fixed
+- **FP-012 — Convex-hull room clip leaks watershed into exterior**
+  (Cycle 8b, 2026-05-08, PR #N): `tools/rooms_from_seeds.py` now
+  defaults to `shapely.concave_hull` over wall endpoints (ratio 0.5)
+  instead of `cv2.convexHull`. SUITE 01 polygon dropped from
+  69.91 m² → 26.75 m². Fidelity Engine v1 step in
+  `quality_gates.yml` promoted from advisory (continue-on-error)
+  to hard merge blocker. Pass `--no-concave-hull` to recover legacy
+  behaviour for plants whose envelope is genuinely convex.
 - `inspect_walls_report.rb` now embeds SHA256 + size of the inspected
   `.skp`, plus optional `bounds_check` against a consensus JSON
   (`feature/skp-structural-gate-inspector-v2`, schema_version 1.0).

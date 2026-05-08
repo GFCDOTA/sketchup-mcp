@@ -192,23 +192,29 @@ def _build_interior_mask(mask: np.ndarray, walls: list[dict],
 def detect_rooms(consensus: dict, labels: list[dict],
                  door_min: float, door_max: float, scale: int = 8,
                  use_voronoi: bool = True,
-                 use_concave_hull: bool = False,
-                 concave_hull_ratio: float = 0.3) -> list[dict]:
+                 use_concave_hull: bool = True,
+                 concave_hull_ratio: float = 0.5) -> list[dict]:
     """Detect room polygons via watershed seeded from PDF text labels.
 
-    ``use_concave_hull`` (default False): replaces the default
-    ``cv2.convexHull`` envelope clip with a ``shapely.concave_hull``
-    over the wall endpoints. Tighter envelope on non-convex
-    footprints — addresses FP-012 (SUITE 01 leakage on planta_74).
-    Default OFF to keep the existing baseline JSON stable; flip to
-    True via the ``--use-concave-hull`` CLI flag during the spike.
-    See ``docs/diagnostics/2026-05-07_planta_74_suite01_polygon_leakage.md``.
+    ``use_concave_hull`` (default **True** since Cycle 8b, 2026-05-08):
+    uses a ``shapely.concave_hull`` over wall endpoints instead of
+    ``cv2.convexHull``. Fixes FP-012 (SUITE 01 leakage on planta_74)
+    where the convex envelope over-encloses non-convex footprints
+    and the watershed assigns unwalled exterior to the nearest seed.
 
-    ``concave_hull_ratio`` (default 0.3): only effective when
+    Pass ``use_concave_hull=False`` (or CLI ``--no-concave-hull``)
+    to recover the legacy convex behaviour for debugging or for
+    plants whose envelope is genuinely convex.
+
+    ``concave_hull_ratio`` (default 0.5): only effective when
     ``use_concave_hull`` is True. Range 0.0 (tightest, may shrink
-    inside) to 1.0 (= convex hull). 0.3 chosen empirically on
-    planta_74 (~97 m² envelope vs 148 m² convex; reproduces the
-    L-shaped footprint without cutting interior rooms).
+    inside) to 1.0 (= convex hull). 0.5 chosen empirically on
+    planta_74 (Cycle 8b empirical decision: SUITE 01 = 26.75 m²
+    in [10, 28]; 10/11 rooms in GT range; only TERRACO TECNICO
+    marginally below floor; ratio=0.30 was rejected because it
+    cut into A.S./COZINHA/TERRACO TECNICO). See
+    ``docs/diagnostics/2026-05-07_planta_74_fp012_spike_results.md``
+    for the full sweep + Cycle 8b decision rationale.
     """
     walls = consensus["walls"]
     t = consensus["wall_thickness_pts"]
@@ -372,26 +378,31 @@ if __name__ == "__main__":
                     help="Snap tolerance in PDF points (default 8.0 = "
                          "1.5x wall_thickness on planta_74). Only effective "
                          "when --canonicalize-rooms is set.")
-    # FP-012 spike (CLAUDE.md §3 paradigm: opt-in only). See
+    # FP-012 fix (Cycle 8b, 2026-05-08): concave-hull envelope clip
+    # is now the DEFAULT. Pass --no-concave-hull to recover the
+    # legacy convex behaviour. See
     # docs/diagnostics/2026-05-07_planta_74_suite01_polygon_leakage.md
-    # for the bug + 3 candidate fix paths. Option A landed here behind
-    # this flag; default OFF so existing baseline JSON stays stable.
-    ap.add_argument("--use-concave-hull", action="store_true",
-                    help="Replace cv2.convexHull envelope clip with "
-                         "shapely.concave_hull over wall endpoints "
-                         "(FP-012 Option A). Off by default.")
-    ap.add_argument("--concave-hull-ratio", type=float, default=0.3,
-                    help="shapely concave_hull ratio when "
-                         "--use-concave-hull is set. 0.0 = tightest "
-                         "(may shrink inside), 1.0 = convex hull. "
-                         "Default 0.3 (calibrated on planta_74).")
+    # for the bug history and
+    # docs/diagnostics/2026-05-07_planta_74_fp012_spike_results.md
+    # for the empirical sweep that picked ratio 0.3.
+    ap.add_argument("--no-concave-hull", action="store_true",
+                    help="Disable the default shapely.concave_hull "
+                         "envelope clip; use legacy cv2.convexHull "
+                         "instead. Provided as an escape hatch for "
+                         "plants whose envelope is genuinely convex.")
+    ap.add_argument("--concave-hull-ratio", type=float, default=0.5,
+                    help="shapely concave_hull ratio. 0.0 = tightest "
+                         "(may shrink inside rooms), 1.0 = convex "
+                         "hull. Default 0.5 (Cycle 8b empirical: "
+                         "lower ratios cut A.S./COZINHA/TERRACO; "
+                         "0.5 keeps SUITE 01 in [10, 28] m²).")
     args = ap.parse_args()
 
     consensus = json.loads(args.consensus.read_text())
     labels = json.loads(args.labels.read_text())
     rooms = detect_rooms(consensus, labels, args.door_min, args.door_max,
                          args.scale,
-                         use_concave_hull=args.use_concave_hull,
+                         use_concave_hull=not args.no_concave_hull,
                          concave_hull_ratio=args.concave_hull_ratio)
 
     if args.canonicalize_rooms:
@@ -425,9 +436,9 @@ if __name__ == "__main__":
         "room_canonicalization_tol": (
             args.room_canonicalization_tol if args.canonicalize_rooms else None
         ),
-        "use_concave_hull": bool(args.use_concave_hull),
+        "use_concave_hull": not bool(args.no_concave_hull),
         "concave_hull_ratio": (
-            args.concave_hull_ratio if args.use_concave_hull else None
+            args.concave_hull_ratio if not args.no_concave_hull else None
         ),
     }
     out = args.out or args.consensus

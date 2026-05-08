@@ -35,14 +35,14 @@
     "soft_barriers": 8
   },
   "expected_by_kind": {
-    "interior_door": 6,
+    "interior_door": 5,
     "interior_passage": 2,
-    "window": 1,
+    "window": 2,
     "glazed_balcony": 2
   },
   "expected_by_decision": {
-    "clean": 7,
-    "debug": 4
+    "clean": 6,
+    "debug": 5
   },
   "expected_room_names": [
     "SUITE 02", "BANHO 02", "A.S.", "TERRACO SOCIAL",
@@ -67,6 +67,13 @@
   },
   "notes": [
     "Locked 2026-05-06 after Stage 1 (PR feature/coherence-audit).",
+    "Updated 2026-05-08 (Cycle 8b): concave-hull room clip became",
+    "  default (replaces convex hull, fixes FP-012 SUITE 01 leakage).",
+    "  by_kind shifted: interior_door 6->5, window 1->2 because one",
+    "  opening's room-context classification changed when the rooms'",
+    "  polygons tightened. by_decision shifted: clean 7->6, debug",
+    "  4->5 for the same reason. Counts (rooms, walls, openings,",
+    "  soft_barriers) are stable across the algorithm change.",
     "12 openings was the May-5 baseline (no --detect-wall-gaps).",
     "15 openings is the post-detector pre-classifier count.",
     "11 openings is the post-classifier count (4 dropped by",
