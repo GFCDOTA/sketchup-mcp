@@ -864,3 +864,22 @@ defaults).
   no-op (the F0 gate added in Slice 3 is the consumer) ✓
 - ADR-001 §2.7 / §2.10.3 — audit_trail append-only invariant is
   preserved by `remove_override` AND covered by an explicit test.
+
+## Appendix — multi-PDF synth corpus (Cycle 11e, 2026-05-08)
+
+The cockpit gates fidelity-engine output. Outside the cockpit, the
+extraction pipeline itself is round-tripped against a synthetic-PDF
+corpus that exercises the same `compare_generated_to_expected.py` path.
+
+Current synth corpus:
+- `synth_l2` — 2-room L (Cycle 11c/11d)
+- `synth_t3` — 3-room T (Cycle 11e)
+- `synth_plus4` — 4-room cross with 1 central + 3 wings (Cycle 11e)
+- `synth_hall5` — 5-room corridor with mixed public/private (Cycle 11e)
+
+Each spec lives in `tools/synth/make_synthetic_vector_pdf.py:SPECS`
+with a paired `ground_truth/synth_<id>/expected_model.json`. The
+round-trip test is `tests/test_synth_multi_pdf_corpus.py`. See
+`docs/diagnostics/2026-05-08_multi_pdf_synth_corpus.md` for the
+honest scope note: synth coverage is algorithmic round-trip only,
+not real-PDF detector generalisation (which remains Felipe-blocked).
