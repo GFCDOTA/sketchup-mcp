@@ -459,22 +459,72 @@ def _sha256(p: Path) -> str | None:
 
 def compare(observed: dict, expected: dict, pt_to_m: float = PT_TO_M_DEFAULT,
              observed_path: Path | str = "<dict>",
-             expected_path: Path | str = "<dict>") -> dict:
+             expected_path: Path | str = "<dict>",
+             *,
+             apply_overrides: bool = False,
+             overrides_doc: dict | None = None) -> dict:
+    """Compare an observed consensus against an expected ground-truth.
+
+    Slice 3 (ADR-001 §2.10.5): when ``apply_overrides=True`` AND
+    ``overrides_doc`` is supplied, the comparison is run TWICE: once
+    on the raw observed (for ``global_fidelity_pre_override``) and
+    once on the amended observed (for ``global_fidelity``). Both
+    scores are emitted in the report so a review can never make the
+    score look better without leaving evidence.
+
+    When ``apply_overrides=False`` (default), behaviour is byte-
+    equivalent to v1: only ``global_fidelity`` is computed, and
+    ``global_fidelity_pre_override`` / ``overrides_applied_count``
+    are NOT present in the report.
+    """
     if expected.get("schema_version") != EXPECTED_SCHEMA_VERSION:
         raise ValueError(
             f"expected_model schema_version "
             f"{expected.get('schema_version')!r} != "
             f"{EXPECTED_SCHEMA_VERSION!r}"
         )
-    counts = _metric_count_deltas(observed, expected)
-    bbox = _metric_global_bbox_drift(observed, expected, pt_to_m)
-    rooms = _metric_rooms(observed, expected, pt_to_m)
-    adjacency = _metric_adjacency(observed, expected)
-    kinds = _metric_opening_kinds(observed, expected)
-    return _aggregate(
-        Path(str(observed_path)), Path(str(expected_path)),
-        counts, bbox, rooms, adjacency, kinds, expected,
+
+    def _run_metrics(obs: dict) -> dict:
+        counts = _metric_count_deltas(obs, expected)
+        bbox = _metric_global_bbox_drift(obs, expected, pt_to_m)
+        rooms = _metric_rooms(obs, expected, pt_to_m)
+        adjacency = _metric_adjacency(obs, expected)
+        kinds = _metric_opening_kinds(obs, expected)
+        return _aggregate(
+            Path(str(observed_path)), Path(str(expected_path)),
+            counts, bbox, rooms, adjacency, kinds, expected,
+        )
+
+    if not apply_overrides:
+        return _run_metrics(observed)
+
+    # Slice 3 mode: produce both pre and post scores.
+    pre_report = _run_metrics(observed)
+    # Local import keeps fidelity engine import-clean for callers
+    # that don't enable overrides.
+    from tools.apply_overrides import apply_overrides as _apply
+    amended = _apply(observed, overrides_doc)
+    post_report = _run_metrics(amended)
+
+    # Merge: post_report becomes the canonical report; pre values
+    # are surfaced as additional fields per ADR-001 §2.10.5.
+    post_report["global_fidelity_pre_override"] = pre_report[
+        "global_fidelity"
+    ]
+    post_report["sub_scores_pre_override"] = pre_report["sub_scores"]
+    post_report["hard_fails_pre_override"] = pre_report["hard_fails"]
+    post_report["warnings_pre_override"] = pre_report["warnings"]
+    md = amended.get("_overrides_metadata") or {}
+    post_report["overrides_applied_count"] = md.get(
+        "overrides_applied_count", 0,
     )
+    post_report["overrides_dropped_count"] = md.get(
+        "overrides_dropped_count", 0,
+    )
+    post_report["override_warnings"] = md.get("warnings") or []
+    post_report["block_skp_export"] = md.get("block_skp_export", False)
+    post_report["block_reason"] = md.get("block_reason")
+    return post_report
 
 
 def render_scorecard(report: dict) -> str:

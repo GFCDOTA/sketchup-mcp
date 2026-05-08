@@ -462,11 +462,39 @@ def compare_runs(a: RunSummary,
 # Pre-SKP review
 # ---------------------------------------------------------------------------
 
+def _load_pre_skp_review_report(run_dir: Path) -> dict | None:
+    """Read ``pre_skp_review_report.json`` (Slice 3 / ADR-001 §2.8) if
+    present. Returns None when the file is absent or unreadable.
+
+    The F0 gate of the smoke harness writes this file. When present,
+    the cockpit treats it as authoritative and skips the in-memory
+    Cycle 12f computation."""
+    path = run_dir / "pre_skp_review_report.json"
+    if not path.exists():
+        return None
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    if not isinstance(data, dict):
+        return None
+    return data
+
+
 def pre_skp_review(run: RunSummary,
                    pass_fidelity: float = PRE_SKP_PASS_FIDELITY,
                    warn_fidelity: float = PRE_SKP_WARN_FIDELITY,
                    pass_warnings: int = PRE_SKP_PASS_WARNINGS) -> dict:
     """Compute a Pre-SKP Review verdict for one run.
+
+    Slice 3 (ADR-001 §4): when a ``pre_skp_review_report.json`` file
+    is present in the run dir, this function reads it directly and
+    maps it to the existing return shape. The F0 gate of the smoke
+    harness becomes the single source of truth.
+
+    Otherwise (Cycle 12f fallback): the original in-memory computation
+    runs against the ``RunSummary``. Behaviour for runs without F0
+    reports is byte-equivalent to the Cycle 12f shipping version.
 
     Status tiers (advisory only — does NOT block SKP export):
 
@@ -486,8 +514,35 @@ def pre_skp_review(run: RunSummary,
         ``{"status": "PASS"|"WARN"|"FAIL", "reasons": [...],
         "recommendation": "safe"|"review", "fidelity_score": float|None,
         "hard_fails_count": int, "warnings_count": int,
-        "thresholds": {...}}``
+        "thresholds": {...}, "source": "f0_report"|"in_memory"}``
     """
+    f0 = _load_pre_skp_review_report(run.run_dir)
+    if f0 is not None and f0.get("verdict") in {"PASS", "WARN", "FAIL"}:
+        verdict = f0["verdict"]
+        # F0's recommendation strings are different from the cockpit's
+        # ("safe to export SKP" vs "safe"). Map to the cockpit shape.
+        recommendation = "safe" if verdict == "PASS" else "review"
+        return {
+            "status": verdict,
+            "reasons": list(f0.get("reasons") or []),
+            "recommendation": recommendation,
+            "fidelity_score": f0.get("fidelity_score"),
+            "hard_fails_count": int(f0.get("hard_fails_count") or 0),
+            "warnings_count": int(f0.get("warnings_count") or 0),
+            "thresholds": {
+                "pass_fidelity": pass_fidelity,
+                "warn_fidelity": warn_fidelity,
+                "pass_warnings": pass_warnings,
+            },
+            "source": "f0_report",
+            "f0_block_skp_export": bool(f0.get("block_skp_export")),
+            "f0_active_overrides_count": int(
+                f0.get("active_overrides_count") or 0,
+            ),
+            "f0_recommendation": f0.get("recommendation"),
+        }
+
+    # ----- Cycle 12f fallback (unchanged behaviour) -----
     reasons: list[str] = []
     score = run.fidelity_score
     n_hard = len(run.hard_fails)
@@ -537,6 +592,7 @@ def pre_skp_review(run: RunSummary,
             "warn_fidelity": warn_fidelity,
             "pass_warnings": pass_warnings,
         },
+        "source": "in_memory",
     }
 
 
