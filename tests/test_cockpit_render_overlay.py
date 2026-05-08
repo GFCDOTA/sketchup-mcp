@@ -1,0 +1,177 @@
+"""Unit tests for the Validation Cockpit's SVG overlay renderer.
+
+Cycle 12 (2026-05-08). The renderer is pure Python (no streamlit
+import), so it can run in the standard test suite. The Streamlit
+app itself (`cockpit/app.py`) is not unit-tested here — its
+behaviour is exercised by manual `streamlit run cockpit/app.py`
+session.
+"""
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import pytest
+
+from cockpit.render_overlay import (
+    PT_TO_M_DEFAULT,
+    OverlayToggles,
+    opening_summary_rows,
+    render_overlay_svg,
+    room_summary_rows,
+)
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+
+
+# ---- Fixtures ----------------------------------------------------------
+
+def _toy_consensus() -> dict:
+    return {
+        "schema_version": "1.0.0",
+        "wall_thickness_pts": 5.4,
+        "walls": [
+            {"id": "w0", "start": [0, 0], "end": [100, 0],
+             "thickness": 5.4, "orientation": "h"},
+            {"id": "w1", "start": [0, 100], "end": [100, 100],
+             "thickness": 5.4, "orientation": "h"},
+            {"id": "w2", "start": [0, 0], "end": [0, 100],
+             "thickness": 5.4, "orientation": "v"},
+            {"id": "w3", "start": [100, 0], "end": [100, 100],
+             "thickness": 5.4, "orientation": "v"},
+            {"id": "w4", "start": [50, 0], "end": [50, 100],
+             "thickness": 5.4, "orientation": "v"},
+        ],
+        "rooms": [
+            {"id": "r0", "name": "SALA", "seed_pt": [25, 50],
+             "polygon_pts": [[0, 0], [50, 0], [50, 100], [0, 100]],
+             "area_pts2": 5000},
+            {"id": "r1", "name": "COZINHA", "seed_pt": [75, 50],
+             "polygon_pts": [[50, 0], [100, 0], [100, 100], [50, 100]],
+             "area_pts2": 5000},
+        ],
+        "openings": [
+            {"id": "o0", "wall_id": "w4",
+             "kind_v5": "interior_door", "decision": "clean",
+             "center": [50.0, 50.0],
+             "evidence": {"room_left": "SALA",
+                          "room_right": "COZINHA",
+                          "room_left_id": "r0",
+                          "room_right_id": "r1"}},
+        ],
+        "soft_barriers": [],
+    }
+
+
+# ---- render_overlay_svg ------------------------------------------------
+
+def test_render_overlay_returns_self_contained_svg():
+    svg = render_overlay_svg(_toy_consensus())
+    assert svg.startswith("<svg "), svg[:60]
+    assert svg.endswith("</svg>"), svg[-60:]
+    assert "viewBox=" in svg
+    assert "preserveAspectRatio" in svg
+
+
+def test_render_overlay_includes_walls_when_toggled_on():
+    svg = render_overlay_svg(
+        _toy_consensus(),
+        toggles=OverlayToggles(walls=True, rooms=False, labels=False,
+                                 openings=False),
+    )
+    # Wall fill color (#3b3326) appears in wall polygons
+    assert "#3b3326" in svg
+
+
+def test_render_overlay_omits_walls_when_toggled_off():
+    svg = render_overlay_svg(
+        _toy_consensus(),
+        toggles=OverlayToggles(walls=False, rooms=True, labels=False,
+                                 openings=False),
+    )
+    assert "#3b3326" not in svg
+
+
+def test_render_overlay_includes_room_labels_when_toggled():
+    svg = render_overlay_svg(
+        _toy_consensus(),
+        toggles=OverlayToggles(walls=True, rooms=True, labels=True,
+                                 openings=False),
+    )
+    assert "SALA" in svg
+    assert "COZINHA" in svg
+    assert "m²" in svg  # area annotation
+
+
+def test_render_overlay_includes_openings_when_toggled():
+    svg = render_overlay_svg(
+        _toy_consensus(),
+        toggles=OverlayToggles(walls=False, rooms=False, labels=False,
+                                 openings=True),
+    )
+    # Orange interior_door fill present
+    assert "#f59e0b" in svg
+
+
+def test_render_overlay_handles_empty_consensus():
+    """Renderer must not crash on a consensus with empty walls + rooms."""
+    svg = render_overlay_svg(
+        {"walls": [], "rooms": [], "openings": []})
+    assert svg.startswith("<svg ")
+    assert svg.endswith("</svg>")
+
+
+def test_render_overlay_special_chars_in_label_are_escaped():
+    """Label rendering uppercases the name AND escapes XML chars."""
+    c = _toy_consensus()
+    c["rooms"][0]["name"] = "<sala> & cia"
+    svg = render_overlay_svg(c)
+    # The renderer uppercases the room name in the label.
+    assert "&lt;SALA&gt;" in svg
+    assert "&amp;" in svg
+    # Raw `<sala>` (or any unescaped `<` followed by alpha) must
+    # not slip through. Check for the lowercase variant since the
+    # uppercased one is escaped.
+    assert "<sala>" not in svg
+    assert "<SALA>" not in svg
+
+
+# ---- room_summary_rows / opening_summary_rows -------------------------
+
+def test_room_summary_rows_returns_one_row_per_room():
+    rows = room_summary_rows(_toy_consensus(), pt_to_m=PT_TO_M_DEFAULT)
+    assert len(rows) == 2
+    names = {r["name"] for r in rows}
+    assert names == {"SALA", "COZINHA"}
+    sala = next(r for r in rows if r["name"] == "SALA")
+    assert sala["polygon_verts"] == 4
+    assert sala["openings_touching"] == 1
+    assert sala["area_m2"] > 0
+
+
+def test_opening_summary_rows_returns_one_row_per_opening():
+    rows = opening_summary_rows(_toy_consensus())
+    assert len(rows) == 1
+    op = rows[0]
+    assert op["kind"] == "interior_door"
+    assert op["decision"] == "clean"
+    assert op["room_left"] == "SALA"
+    assert op["room_right"] == "COZINHA"
+    assert op["host_wall"] == "w4"
+
+
+# ---- Real consensus smoke test (skip if missing) ----------------------
+
+def test_render_overlay_on_planta_74_baseline_smoke():
+    """Smoke: renderer produces a non-empty SVG on the canonical
+    `planta_74` run dir if it exists. Skipped on stripped CI checkout."""
+    canonical = (REPO_ROOT / "runs" / "feature_room_context_2026_05_06"
+                 / "consensus_with_room_context.json")
+    if not canonical.exists():
+        pytest.skip("canonical planta_74 c3 missing")
+    consensus = json.loads(canonical.read_text(encoding="utf-8"))
+    svg = render_overlay_svg(consensus)
+    assert svg.startswith("<svg ")
+    assert svg.endswith("</svg>")
+    # Must contain at least one of the planta_74 room names
+    assert "SUITE" in svg or "SALA" in svg
