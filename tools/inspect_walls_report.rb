@@ -375,6 +375,8 @@ rescue => e
     File.write(ENV['INSPECT_REPORT'] || 'E:/Claude/sketchup-mcp/runs/vector/inspect_report.json',
                JSON.pretty_generate({ 'error' => "#{e.class}: #{e.message}",
                                       'backtrace' => e.backtrace.first(20) }))
-  rescue
+  rescue StandardError
+    nil # if writing the error report itself fails (disk full / perm),
+        # we already logged via plg() above; nothing more to do.
   end
 end

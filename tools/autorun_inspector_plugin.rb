@@ -25,7 +25,7 @@ if File.exist?(ctrl)
         begin
           load script
           lg(logp, "load returned ok")
-        rescue Exception => e
+        rescue StandardError => e
           msg = "load #{script} failed: #{e.class}: #{e.message}\n#{e.backtrace.first(30).join("\n")}"
           File.write(errp, msg)
           lg(logp, "load raised: #{e.class}: #{e.message}")

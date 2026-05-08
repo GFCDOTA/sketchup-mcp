@@ -354,8 +354,12 @@ def _opening_axis_basis(wall)
   end
 end
 
-def add_door_leaf(parent_entities, opening, walls_by_id, thickness_pt,
+def add_door_leaf(parent_entities, opening, walls_by_id, _thickness_pt,
                    door_material, layer)
+  # `_thickness_pt` retained in signature for caller-symmetry with
+  # add_carved_wall; the door leaf itself is degenerate in the cross
+  # axis (SU pushpull adds volume later), so the value is unused
+  # here. Underscore prefix per Ruby/RuboCop convention.
   # Render a door leaf (single panel, swung open by DOOR_SWING_DEG)
   # at the hinge side of the opening. The host wall is already CARVED
   # by add_carved_wall (see CARVING_OPENING_ORIGINS); this function
@@ -373,7 +377,7 @@ def add_door_leaf(parent_entities, opening, walls_by_id, thickness_pt,
   return nil if width_pt.nil? || width_pt <= 0
   hinge_side = opening['hinge'] || 'left'
 
-  axis_idx, cross_idx, cross_value = _opening_axis_basis(wall)
+  axis_idx, _cross_idx, cross_value = _opening_axis_basis(wall)
   axis_center = center[axis_idx].to_f
   half = width_pt / 2.0
 
@@ -383,19 +387,18 @@ def add_door_leaf(parent_entities, opening, walls_by_id, thickness_pt,
   # DOOR_SWING_DEG around the hinge (vertical Z axis at hinge point).
   hinge_axis = hinge_side == 'right' ? axis_center + half : axis_center - half
   panel_far_axis  = hinge_side == 'right' ? axis_center - half : axis_center + half
-  cross_inner = cross_value - thickness_pt / 2.0  # arbitrary face of wall
-  cross_outer = cross_value + thickness_pt / 2.0
 
   # Build closed panel as 4 PDF-pt corners. Panel sits at the
   # cross-centerline (centro da espessura da parede), so swung edges
-  # don't overlap the wall.
+  # don't overlap the wall. (`cross_inner`/`cross_outer` were
+  # historically ±thickness/2 markers; the panel is degenerate in
+  # the PDF cross axis — the SU `pushpull` later gives it volume.
+  # Removed the unused inner/outer pair to keep linter clean.)
   panel_cross = cross_value
   if axis_idx == 0
     # horizontal wall: axis is X, cross is Y
     p_hinge_inner = [hinge_axis,    panel_cross]
-    p_hinge_outer = [hinge_axis,    panel_cross]  # degenerate; panel has no thickness in PDF coords
     p_far_inner   = [panel_far_axis, panel_cross]
-    p_far_outer   = [panel_far_axis, panel_cross]
   else
     p_hinge_inner = [panel_cross, hinge_axis]
     p_far_inner   = [panel_cross, panel_far_axis]
@@ -521,13 +524,15 @@ def reset_model(model)
   model.definitions.purge_unused
   begin
     model.materials.purge_unused
-  rescue
+  rescue StandardError
+    nil # best-effort cleanup; some SU versions raise on empty material set
   end
   begin
     # Layers API renamed to layers/tags in newer SU; either works.
     layers = model.layers
     layers.purge_unused if layers.respond_to?(:purge_unused)
-  rescue
+  rescue StandardError
+    nil # best-effort cleanup; older SU may not implement purge_unused
   end
 end
 
@@ -555,7 +560,7 @@ def main
   walls_layer    = ensure_layer(model, 'walls')
   parapets_layer = ensure_layer(model, 'parapets')
   rooms_layer    = ensure_layer(model, 'rooms')
-  passages_layer = ensure_layer(model, 'passages')
+  ensure_layer(model, 'passages') # creates layer for future use; no consumer today
   doors_layer    = ensure_layer(model, 'doors')
   windows_layer  = ensure_layer(model, 'windows')
 
@@ -687,7 +692,8 @@ def main
   begin
     Sketchup.send_action('viewIso:')
     Sketchup.active_model.active_view.zoom_extents
-  rescue
+  rescue StandardError
+    nil # best-effort: zoom/iso are cosmetic; failure must not abort save
   end
 end
 
