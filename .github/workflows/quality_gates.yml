@@ -87,35 +87,22 @@ jobs:
             --out runs/_ci_quality_gates/micro_truth_report.json \
             --strict
 
-      # Fidelity Engine v1 (Ground Truth v1) — ADVISORY / report-only.
+      # Fidelity Engine v1 (Ground Truth v1) — HARD merge blocker.
       #
       # The hashFiles() guard SKIPS this step entirely when
       # tools/fidelity or the expected_model.json is missing
-      # (early-merge ordering protection).
+      # (early-merge ordering protection from when this step was
+      # first introduced; safe to keep).
       #
-      # When the files exist, the step runs in --strict mode AND
-      # is marked continue-on-error so the workflow stays GREEN on
-      # develop. Rationale:
-      # - Fidelity v1 INTENTIONALLY hard-fails today on FP-012
-      #   (SUITE 01 / SUITE 02 areas) + the adjacency_f1 gap.
-      #   Those failures are the expected design output — the gate
-      #   measures architectural truth; the pipeline doesn't yet
-      #   match it.
-      # - Hard-blocking merges on this would turn develop red on
-      #   every push until Cycle 8b (concave-hull promote) lands.
-      # - Solution: --strict still computes the exact would-block
-      #   list and writes it into fidelity_report.json; the
-      #   continue-on-error mask only affects the step's exit code,
-      #   not the report content.
-      # - fidelity_report.json + fidelity_scorecard.md are uploaded
-      #   as artifacts (next step) for human inspection.
-      #
-      # PROMOTE TO HARD BLOCKER (drop continue-on-error) AFTER
-      # Cycle 8b lands and the 3 known hard_fails clear. Tracked in
-      # docs/ground_truth_v1.md "Next steps" + .ai_bridge/TODO_NEXT.
-      - name: Fidelity Engine v1 (advisory until Cycle 8b clears FP-012)
+      # Promoted from advisory (continue-on-error: true) to hard
+      # blocker on 2026-05-08 by Cycle 8b: concave-hull room clip
+      # became the rooms_from_seeds default, SUITE 01 dropped from
+      # 69.91 to 26.75 m² (in [10, 28]), all hard_fails cleared.
+      # global_fidelity baseline = 0.917 with 0 hard_fails (only
+      # warnings: TERRACO TECNICO marginal area, adjacency_f1 = 0.67
+      # below 0.80 advisory threshold).
+      - name: Fidelity Engine v1 (strict, hard blocker on regression)
         if: hashFiles('tools/fidelity/__init__.py', 'ground_truth/planta_74/expected_model.json') != ''
-        continue-on-error: true
         run: |
           python -m tools.fidelity.compare_generated_to_expected \
             runs/_ci_quality_gates/c3_classified.json \

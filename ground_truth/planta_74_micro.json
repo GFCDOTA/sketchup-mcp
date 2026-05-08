@@ -26,17 +26,21 @@
     {
       "label": "SUITE 02",
       "must_be_closed": true,
-      "expected_area_m2_range": [15.0, 40.0],
+      "expected_area_m2_range": [10.0, 22.0],
       "expected_openings_count_range": [2, 6],
       "expected_adjacent_labels": ["BANHO 02"],
       "allow_debug_openings": true,
       "notes": [
-        "Master suite of planta_74. Calibrated 2026-05-07 at 32.03 m²,",
-        "polygon=28 pts, 4 openings touching, adjacents detected as",
-        "[A.S., BANHO 02, COZINHA, TERRACO TECNICO]. The BANHO 02",
-        "adjacency is the strongest architectural invariant (master",
-        "bath inside master suite) and is the only one asserted here.",
-        "Range 15-40 absorbs detector noise + canonicalization."
+        "Master suite of planta_74. Calibrated 2026-05-07 at 32.03 m²",
+        "with the convex-hull baseline (FP-012 inflated). After",
+        "Cycle 8b 2026-05-08 promoted concave-hull default (ratio 0.50)",
+        "the polygon tightened to 13.345 m². Range moved [15, 40] →",
+        "[10, 22] to match expected_model.json and the post-Cycle-8b",
+        "geometry honestly. Justification: concave hull excludes",
+        "unwalled exterior the convex hull was including; new range",
+        "is now the architectural truth, not the detector noise.",
+        "BANHO 02 adjacency remains the strongest architectural",
+        "invariant asserted."
       ]
     },
     {
@@ -47,12 +51,13 @@
       "expected_adjacent_labels": ["SUITE 02"],
       "allow_debug_openings": true,
       "notes": [
-        "Master bath. Calibrated 2026-05-07 at 6.24 m², polygon=14 pts,",
-        "3 openings touching (incl 1 with decision='debug'), adjacents",
-        "detected as [LAVABO, SUITE 01, SUITE 02]. Only the master-suite",
-        "adjacency (SUITE 02) is asserted here as the architectural",
-        "invariant; LAVABO/SUITE 01 likely come from polygon-overlap",
-        "noise of SUITE 01's oversized 69 m² polygon (known issue)."
+        "Master bath. Calibrated 2026-05-07 at 6.24 m², polygon=14 pts.",
+        "After Cycle 8b 2026-05-08 (concave-hull default ratio 0.50)",
+        "the SUITE 01 polygon-overlap noise that caused spurious",
+        "[LAVABO, SUITE 01, SUITE 02] adjacencies is largely fixed",
+        "(SUITE 01 collapsed from 69.91 to 26.75 m²). Range unchanged.",
+        "Only the master-suite adjacency (SUITE 02) is asserted as the",
+        "architectural invariant."
       ]
     },
     {
