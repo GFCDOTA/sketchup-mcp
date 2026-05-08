@@ -324,6 +324,9 @@ Never apply archive patches without an explicit, signed-off PR plan.
 
 ## 13. Last-updated marker
 
+- **2026-05-07** — added §17 Non-Stop Autonomy Rule
+  ("DONE IS NOT STOP"); reinforces §14 with explicit twelve-question
+  gate before any stop and an end-of-cycle reporting format.
 - **2026-05-06** — strengthened §5 wording (autonomous-first); added
   §14 Autonomous Continuation Protocol, §15 Repository Hygiene
   Protocol, §16 Review Frequency.
@@ -470,3 +473,83 @@ These belong in:
 - `docs/adr/`
 - `runs/`
 - `artifacts/`
+
+---
+
+## 17. Non-Stop Autonomy Rule
+
+Completing the requested scope is **not** a stopping condition.
+
+When a task, queue, validation, PR review, bugfix, or stage finishes,
+Claude must:
+
+1. Record the result in `.ai_bridge/HANDOFF.md` and `CURRENT_STATE.md`.
+2. Update `.ai_bridge/TODO_NEXT.md` with real pendencies.
+3. Pick the next highest-ROI safe item.
+4. Start the next cycle without asking the human.
+5. Continue while there is a safe technical step to take.
+
+> **DONE IS NOT STOP. DONE MEANS PICK NEXT HIGHEST-ROI TASK.**
+
+The mandatory loop is `READ → DIAGNOSE → PLAN → EXECUTE → VALIDATE →
+RECORD → COMMIT → CONTINUE` (see §14 for the cycle's per-step gates).
+
+Before stopping, Claude internally checks all twelve:
+
+1. Open PR?
+2. Local branch without PR?
+3. Failing test?
+4. `TODO_NEXT.md` item?
+5. `HANDOFF.md` pending?
+6. Documented known failure?
+7. Safe cleanup pending?
+8. Stale doc?
+9. Broken dashboard/report?
+10. Validation improvement available?
+11. Next-highest-ROI gate?
+12. Anything safe to measure / validate / clean / document / prep?
+
+**Any** answer of "yes" → keep going.
+
+Stop only on a real blocker:
+
+- missing credential
+- missing required file/artifact
+- nonexistent branch with no safe alternative
+- destructive conflict
+- data-loss risk
+- §1 / §2 / §3 hard rule blocks the action
+- human approval required and not on record
+- forbidden operation on `main` / `develop`
+- tool / context / environment limit
+- operational failure with no workaround
+- environment unavailable
+
+When stopped by a real blocker, leave: current state, evidence, what
+was attempted, why blocked, exact next commands, and the next-best
+item if the blocker is resolved.
+
+### End-of-cycle reporting format
+
+Each cycle ends with:
+
+```
+## Cycle Completed
+What finished.
+
+## Evidence
+Tests, reports, PRs, files, metrics.
+
+## Recorded State
+Files in .ai_bridge / docs that were updated.
+
+## Next Highest-ROI Task
+Which next item was picked and why.
+
+## Continuing
+First action of the next cycle.
+```
+
+**Important:** "do not stop" never authorizes risky actions. This rule
+operates *inside* the safety boundary set by §1, §2, §3, §9, the git
+flow rules, and the validation gates.
