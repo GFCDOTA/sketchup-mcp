@@ -1,8 +1,15 @@
 # docs(readme,overview): document Stage 1 / 1.5 / 1.6 tools + gates
 
 **Branch**: `docs/readme-overview-stage15-tools` → `develop`
-**Commit**: `d62954c`
+**Commits**: `d62954c` (initial Stage 1.5 catch-up) + `d0734a7`
+(adendo: Fidelity Engine v1 + Ground Truth v1 mentions)
 **Compare URL**: https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/readme-overview-stage15-tools
+
+> **Adendo (NAO PARE mode)**: when this branch was authored,
+> Fidelity Engine v1 (Ground Truth v1) didn't exist yet — it
+> landed in `feature/ground-truth-v1-fidelity-engine` afterwards.
+> Adendo closes the gap so once both PRs merge, README/OVERVIEW
+> already mention all four gates including the fidelity engine.
 
 ## Summary
 

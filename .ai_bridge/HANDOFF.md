@@ -1,8 +1,43 @@
-# Handoff — 2026-05-07 07:00 UTC
+# Handoff — 2026-05-08 00:30 UTC
 
 > Most recent session's exit state. Next session reads this FIRST
 > after `CLAUDE.md`. Append-only is fine but the top entry must
 > always be the latest.
+
+## Status — Wave preserve cycle (NAO PARE mode active)
+
+User invoked **NAO PARE mode** (saved as cross-project memory
+`feedback_nao_pare_mode.md`). Heuristic: prefer commits to PUSHED
+branches over creating new ones, to avoid growing the queue.
+Two adendos landed in this rotation:
+
+### Adendo A — `feature/ground-truth-v1-fidelity-engine` `+1`
+
+- Commit `dac81ed`: `test(fidelity): add synth_from_expected + round-trip guard tests`
+- New: `tools/fidelity/synth_from_expected.py` (~150 LOC) +
+  `tests/test_fidelity_engine_round_trip.py` (4 tests)
+- Pattern: expected → synth → compare must return 1.0 exactly.
+  Catches engine bugs (not pipeline bugs). Surfaced and fixed
+  TWO bugs in MY initial synthesizer during authoring (wall
+  count mismatch + bbox overshoot). That's the round-trip
+  doing its job.
+- Validation: 25/25 tests PASS (4 round-trip + 21 existing
+  fidelity) in 0.32s
+
+### Adendo B — `docs/readme-overview-stage15-tools` `+1`
+
+- Commit `d0734a7`: `docs(readme,overview): add Fidelity Engine v1 (Ground Truth v1) entries`
+- Closes the doc gap created when GT v1 landed AFTER the
+  README/OVERVIEW catch-up branch was authored.
+- OVERVIEW.md §2.8 +2 rows; §4.4.1 extended with fidelity
+  command. README.md "Validation Gates" bumped 3 → 4 gates.
+- Validation: pure markdown, no test surface.
+
+### Memory rule added
+
+`feedback_nao_pare_mode.md` indexed in `MEMORY.md`. Captures the
+verbal trigger ("NAO PARE / continue / autonomo") and the
+heuristic for picking next ROI without growing the PR queue.
 
 ## Status — Cycle 12 done (Ground Truth v1 + Fidelity Engine)
 

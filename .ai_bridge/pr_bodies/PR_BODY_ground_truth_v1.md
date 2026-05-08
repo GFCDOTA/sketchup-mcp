@@ -1,8 +1,16 @@
 # feat(ground-truth): v1 schema + planta_74 expected_model + fidelity engine
 
 **Branch**: `feature/ground-truth-v1-fidelity-engine` → `develop`
-**Commit**: `c5aa0f6`
+**Commits**: `c5aa0f6` (initial v1, 7 files +1734) + `dac81ed`
+(adendo: `tools/fidelity/synth_from_expected.py` +
+`tests/test_fidelity_engine_round_trip.py`, +323 lines, 4 new tests)
 **Compare URL**: https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/ground-truth-v1-fidelity-engine
+
+> **Adendo (NAO PARE mode)**: round-trip guard tests added. Pattern:
+> `expected → synthesize_observed(expected) → compare(...)` MUST
+> return `global_fidelity == 1.0`. Catches engine bugs (not pipeline
+> bugs). Surfaced + fixed two bugs in the synthesizer during
+> authoring. 25/25 tests PASS now (4 round-trip + 21 existing).
 
 ## Summary
 
