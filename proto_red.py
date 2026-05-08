@@ -25,10 +25,15 @@ from pathlib import Path
 import cv2
 import numpy as np
 from PIL import Image
-from skimage.morphology import skeletonize
 
 
 def main(args: argparse.Namespace) -> int:
+    # ``skimage`` is in the optional ``[dl]`` extra (it's only used for
+    # the skeletonisation pass below), so import it lazily — this keeps
+    # ``proto_red.py --help`` working in environments that only install
+    # the core deps (e.g. CI's "subset verde" job).
+    from skimage.morphology import skeletonize
+
     src = Path(args.input)
     if not src.exists():
         print(f"ERROR: input not found: {src}", file=sys.stderr)
