@@ -30,47 +30,32 @@ Each entry:
 - Cycle 11b/11c/11d: vector-PDF inventory + synthetic vector PDF
   generator + wall-gap widened so opening + adjacency round-trip
   closes (fidelity = 1.0 on `synth_l2`).
-- **Cycle 12 cockpit MVP** (PR #68, merged 19:03Z): Streamlit
-  read-only validator + pure-Python SVG renderer + 10 new tests +
-  `[cockpit]` extra. develop @ `84eae72`. 578/595 passing.
+- **Cycle 12 cockpit MVP** (PR #68, merged 19:03Z, `84eae72`):
+  Streamlit read-only validator + pure-Python SVG renderer + 10
+  new tests + `[cockpit]` extra.
+- **Cycle 12b PDF underlay** (PR #70, merged 19:25Z, `8e1e225`):
+  pypdfium2 → base64 PNG `<image>` behind the SVG; sidebar picker
+  + DPI/opacity sliders; +4 tests (14/14 cockpit total); demo SVG
+  with planta_74 baked in. Default opt-in `(none)`. develop @
+  `8e1e225`. 99/99 in-scope passing.
 
-## 🟢 P0 — Cockpit Slice 1.5 (Cycle 12b): PDF underlay
-
-- **Color:** GREEN — additive, opt-in, no schema change
-- **Felipe ordering:** explicitly first in queue post-Cycle-12.
-  "Não mexer em Cycle 8c / polygon refinement / Stage 1.6 antes
-  desse cockpit" + cockpit doc lists it as biggest visual win.
-- **Goal:** render the source PDF (`pypdfium2`) as an `<image>`
-  behind the SVG overlay so the user sees consensus *on top of*
-  the original drawing. Still read-only.
-- **Touchpoints:**
-  - `cockpit/render_overlay.py` — accept optional PDF base bytes,
-    emit `<image href="data:application/pdf...">` (or pre-render
-    to PNG via pypdfium2 + base64).
-  - `cockpit/app.py` — sidebar PDF picker (auto-discover
-    `runs/<dir>/*.pdf` and `proto_*.pdf` siblings of consensus).
-  - `pyproject.toml` — `pypdfium2` joins `[cockpit]` extra (or
-    `[dl]`-style extra, decision pending).
-- **Validation:** visual smoke on planta_74 (PDF + cockpit SVG
-  align within ±2pt); existing 10 cockpit tests still green;
-  no streamlit-import on core path.
-- **Risk:** LOW. Pure additive. Coord alignment is the one
-  watch-out — PDF user-space already matches consensus PT coords,
-  so should be 1:1 with a y-flip we already do.
-
-## 🟢 P1 — Cockpit Slice 1.5b (Cycle 12d): expected_model overlay
+## 🟢 P0 — Cycle 12d: render `expected_model` overlay layer
 
 - **Color:** GREEN — toggle already exists in `OverlayToggles`,
-  data is in `expected_model.json`, renderer just needs to draw.
+  signature param `expected_model=None` already in
+  `render_overlay_svg`, data is in `ground_truth/<plant>/expected_model.json`,
+  renderer just needs to draw.
 - **Goal:** when GT picker is selected and `ground_truth_overlay`
   toggle is ON, draw expected room polygons as dashed outlines
-  over the observed.
-- **Touchpoints:** `cockpit/render_overlay.py` (extend
-  `render_overlay_svg` to consume `expected_model` arg, already
-  in signature).
-- **Validation:** unit test against `ground_truth/planta_74_micro.json`;
-  pixel-diff against current overlay limited to dashed outlines.
-- **Risk:** LOW. Pure additive.
+  in a contrasting color (per-room match status: green=found,
+  orange=mismatched-area, red=missing, grey=extra-observed).
+- **Touchpoints:** `cockpit/render_overlay.py` (extend renderer +
+  add `_build_room_status_map(consensus, expected_model)`),
+  optionally `cockpit/app.py` for a "GT match summary" panel.
+- **Validation:** unit test asserting `<polygon stroke-dasharray=...>`
+  present when `expected_model` provided + visual smoke on
+  `runs/vector` vs `ground_truth/planta_74/expected_model.json`.
+- **Risk:** LOW. Pure additive. Renderer-only change.
 
 ## 🟢 P1 — Cleanup hygiene scan (CLAUDE.md §15)
 
