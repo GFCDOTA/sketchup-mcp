@@ -216,6 +216,33 @@ Exemplo:
 - T-junction -> detectado corretamente
 - walls desconectadas -> `rooms=0`
 
+## Validation Gates (Stage 1 / 1.5 / 1.6 + Ground Truth v1)
+
+Beyond unit tests, the pipeline ships four layered gates that run on
+every PR via `.github/workflows/quality_gates.yml`:
+
+- **Plan Truth Gate** — `tests/test_planta_74_truth_gate.py` pins
+  the deterministic output of the `planta_74` vector pipeline against
+  a versioned baseline (`tests/baselines/planta_74.json`).
+- **Coherence Audit** — `python -m tools.coherence_audit` reads a
+  classified consensus + `config/assumptions.yaml` and emits
+  `coherence_report.json` (facts / hypotheses / drops / asks).
+- **Micro Truth Gate** — `python -m tools.micro_truth_gate` checks
+  labelled rooms against `ground_truth/<plant>_micro.json` (manual
+  curated truth: label / area range / openings count / adjacencies).
+- **Fidelity Engine v1** —
+  `python -m tools.fidelity.compare_generated_to_expected` compares
+  the whole-plant consensus against
+  `ground_truth/<plant>/expected_model.json` (golden truth: rooms,
+  openings, adjacency, global bbox + per-row `manual_confidence`).
+  Emits `fidelity_report.json` with `global_fidelity` (0..1, capped
+  at 0.69 on hard_fail) + per-metric sub-scores. See
+  [`docs/ground_truth_v1.md`](docs/ground_truth_v1.md).
+
+All four are non-blocking by default; pass `--strict` to opt into
+hard exit-non-zero on issues. The CI workflow uses `--strict` so a
+regression blocks merge.
+
 ## Preview / Visualizacao
 
 Para visualizar um run sem precisar do bridge Ruby/SketchUp (Fase 6 do roadmap, ainda nao construido), o script `scripts/preview/render_preview.py` consome o `observed_model.json` e gera PNGs em tres modos:
