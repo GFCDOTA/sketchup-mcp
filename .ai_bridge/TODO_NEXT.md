@@ -19,106 +19,104 @@ Each entry:
 
 ---
 
-## 🟢 P0 — Open + merge Cycle 12 PR (Validation Cockpit MVP)
+## ✅ DONE (2026-05-08 — full day wave)
 
-- **Color:** GREEN — clean, additive, optional `[cockpit]` extra,
-  read-only by design, zero touches to schema / thresholds /
-  Ruby / smoke / fidelity engine
-- **Branch:** `feature/validation-cockpit-mvp-cycle12` (pushed)
-- **Compare:**
-  https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/validation-cockpit-mvp-cycle12
-- **PR body:** `.ai_bridge/pr_bodies/PR_BODY_cockpit_cycle12.md`
-- **Commits:** `30246d6` (feat) + `f11e13c` (fix: launch fixes)
-- **Validation:** 10/10 cockpit unit tests + live Streamlit smoke
-- **Action:** Felipe opens PR via compare URL; CI runs; merge if
-  green per operational autonomy protocol.
+- 9-PR queue zerada (Wave A → E).
+- Cycle 8b: concave-hull promoted to default at ratio 0.5; FP-012
+  cleared; fidelity engine flipped from advisory → HARD merge
+  blocker in `quality_gates.yml`.
+- Cycle 6 alt: adjacency_f1=0.67 plateau diagnosed and documented
+  as FP-013 (root cause: room polygon defects upstream).
+- Cycle 11b/11c/11d: vector-PDF inventory + synthetic vector PDF
+  generator + wall-gap widened so opening + adjacency round-trip
+  closes (fidelity = 1.0 on `synth_l2`).
+- **Cycle 12 cockpit MVP** (PR #68, merged 19:03Z): Streamlit
+  read-only validator + pure-Python SVG renderer + 10 new tests +
+  `[cockpit]` extra. develop @ `84eae72`. 578/595 passing.
 
-## ✅ DONE (2026-05-08 wave) — queue zerada
+## 🟢 P0 — Cockpit Slice 1.5 (Cycle 12b): PDF underlay
 
-All 9 PRs from the previous queue merged. See `HANDOFF.md` for
-per-PR table + merge SHAs. CI all green on develop. 85/85 tests.
+- **Color:** GREEN — additive, opt-in, no schema change
+- **Felipe ordering:** explicitly first in queue post-Cycle-12.
+  "Não mexer em Cycle 8c / polygon refinement / Stage 1.6 antes
+  desse cockpit" + cockpit doc lists it as biggest visual win.
+- **Goal:** render the source PDF (`pypdfium2`) as an `<image>`
+  behind the SVG overlay so the user sees consensus *on top of*
+  the original drawing. Still read-only.
+- **Touchpoints:**
+  - `cockpit/render_overlay.py` — accept optional PDF base bytes,
+    emit `<image href="data:application/pdf...">` (or pre-render
+    to PNG via pypdfium2 + base64).
+  - `cockpit/app.py` — sidebar PDF picker (auto-discover
+    `runs/<dir>/*.pdf` and `proto_*.pdf` siblings of consensus).
+  - `pyproject.toml` — `pypdfium2` joins `[cockpit]` extra (or
+    `[dl]`-style extra, decision pending).
+- **Validation:** visual smoke on planta_74 (PDF + cockpit SVG
+  align within ±2pt); existing 10 cockpit tests still green;
+  no streamlit-import on core path.
+- **Risk:** LOW. Pure additive. Coord alignment is the one
+  watch-out — PDF user-space already matches consensus PT coords,
+  so should be 1:1 with a y-flip we already do.
 
-Cycle 12 GT-v1 (Ground Truth v1 + Fidelity Engine) shipped with
-advisory mode (`continue-on-error: true`) on the fidelity step
-until Cycle 8b clears the 3 known FP-012 hard_fails.
+## 🟢 P1 — Cockpit Slice 1.5b (Cycle 12d): expected_model overlay
 
-Cycle 12 Cockpit MVP (this branch) shipped — see P0 above.
+- **Color:** GREEN — toggle already exists in `OverlayToggles`,
+  data is in `expected_model.json`, renderer just needs to draw.
+- **Goal:** when GT picker is selected and `ground_truth_overlay`
+  toggle is ON, draw expected room polygons as dashed outlines
+  over the observed.
+- **Touchpoints:** `cockpit/render_overlay.py` (extend
+  `render_overlay_svg` to consume `expected_model` arg, already
+  in signature).
+- **Validation:** unit test against `ground_truth/planta_74_micro.json`;
+  pixel-diff against current overlay limited to dashed outlines.
+- **Risk:** LOW. Pure additive.
 
-## 🟢 P1 — Cockpit Slice 1.5 / 2 / 3 candidates
+## 🟢 P1 — Cleanup hygiene scan (CLAUDE.md §15)
 
-- **1.5 — PDF underlay (Cycle 12b):** render the source PDF
-  (`pypdfium2`) as an `<image>` behind the SVG overlay so the user
-  sees consensus *on top of* the original drawing. Biggest visual
-  win, smallest scope. Touchpoints: `cockpit/render_overlay.py`
-  (accept optional PDF base bytes), `cockpit/app.py` (sidebar PDF
-  picker). Validation: visual smoke on planta_74.
-- **2 — Approve / reject per element + `review_overrides.json`:**
-  needs FastAPI for POST. Touchpoints: new `api/cockpit_routes.py`,
-  new `api/review_store.py`, `cockpit/app.py` button wiring.
-  Validation: round-trip override file + sha256 invalidation test.
-- **3 — `proposed_actions.json` + pre-SKP gate F0:** new
-  `tools/propose_skp_actions.py` derives action plan from c3 +
-  fidelity; `scripts/smoke/smoke_skp_export.py` adds Gate F0 with
-  `--review-mode={off,warn,block}`. Default `off` so existing
-  smokes keep passing.
+- **Color:** GREEN — additive, archive-not-delete
+- **Goal:** post-12-PR-wave scan of stale .md / generated PNG /
+  abandoned scripts.
+- **Touchpoints:** root-level `.md`, `runs/_archive/`, top-level
+  `proto_*.py` candidates, `docs/diagnostics/2026-05-0[1-7]_*`.
+- **Validation:** nothing live broken; archive doc updated.
+- **Risk:** LOW. Per §15: archive instead of delete; preserve
+  baselines / ground_truth / regression artifacts.
 
-All three are GREEN (additive, opt-in, no schema change).
-Sequenced post-merge.
+## 🟡 P2 — Cockpit Slice 2: approve / reject + review_overrides.json
 
-## 🟡 P1 — Cycle 8b: promote concave-hull default
+- **Color:** YELLOW — introduces FastAPI + persistence
+- **Goal:** per-element approve/reject buttons; persisted to
+  `runs/<dir>/review_overrides.json`; sha256 invalidation if
+  consensus changes underneath.
+- **Touchpoints:** new `api/cockpit_routes.py`, new
+  `api/review_store.py`, `cockpit/app.py` button wiring.
+- **Validation:** round-trip override file + sha256 invalidation
+  test; doesn't break read-only contract on consensus itself.
+- **Risk:** MEDIUM. First mutation surface in cockpit boundary —
+  ADR update in `.ai_bridge/DECISIONS.md` required.
 
-Highest-ROI remaining technical item.
+## 🟡 P2 — Cockpit Slice 3: proposed_actions.json + pre-SKP gate F0
 
-- **Color:** YELLOW (alters baseline numbers — needs validation)
-- **Goal:** flip `--use-concave-hull` default to True (or remove
-  flag), recalibrate `tests/baselines/planta_74.json` and
-  `ground_truth/planta_74_micro.json` ranges, regenerate
-  `docs/preview/example_top.png`. Then remove
-  `continue-on-error: true` from the fidelity step in
-  `quality_gates.yml` (single-line change documented in
-  `docs/ground_truth_v1.md`).
-- **Decision required:** ratio choice. From the spike sweep
-  (`docs/diagnostics/2026-05-07_planta_74_fp012_spike_results.md`):
-  - ratio=0.30 → SUITE 01 = 18.61 m² (most architecturally correct,
-    biggest baseline shift)
-  - ratio=0.55 → SUITE 01 = 35.64 m² (less disruption, biggest fix
-    that still preserves room shapes near-baseline)
-- **Recommendation:** to be decided after consulting `planta-assistant`
-  via Ollama (protocol-compliant — Felipe não é roteador humano).
-- **Validation:** all 85 tests pass post-recalibration; quality_gates
-  workflow turns from advisory → hard blocker; develop stays green;
-  fidelity_report shows global=1.0.
-- **Risk:** medium. PR INTENTIONALLY changes baseline numbers.
-  Can split into two PRs (flag promote first, GT recalibration
-  second) if review surface gets too big.
-
-## 🔴 P1 — Cycle 6: wire autorun inspector into smoke gate F (Stage 1.6)
-
-- **Color:** RED — Stage 1.6 was explicitly held in earlier session
-- **To unblock:** Felipe needs to lift Stage 1.6 hold
+- **Color:** YELLOW — new schema + smoke gate
+- **Goal:** new `tools/propose_skp_actions.py` derives action plan
+  from c3 + fidelity; `scripts/smoke/smoke_skp_export.py` adds
+  Gate F0 with `--review-mode={off,warn,block}`. Default `off` so
+  existing smokes keep passing.
+- **Risk:** MEDIUM. Smoke gate is core CI surface; default-off
+  protects baseline.
 
 ## 🔴 P2 — Multi-PDF corpus
 
-- **Color:** RED — needs Felipe to provide 3+ different real planta
-  PDFs
-- **Goal:** widen the test surface beyond `planta_74` so detector
-  retunes don't accidentally specialize
+- **Color:** RED — needs Felipe to provide 3+ different real
+  planta PDFs. Synthetic round-trip (Cycle 11) covers algo
+  validation; this would cover detector generalization.
+- **Goal:** widen test surface beyond `planta_74` so detector
+  retunes don't accidentally specialize.
 
-## 🔴 P3 — `feature/smoke-promotes-inspector-v2-gate` orphan branch
+## 🔴 P3 — Stage 1.6 / orphan inspector branch
 
-- **Color:** RED — coupled to Stage 1.6
-- **Status:** branch on origin + local, never had PR opened.
-  Contains gate G2 + inspector v2 schema.
-- **Decision required:** open PR + merge (after Stage 1.6 unblock)
-  OR delete branch (if Cycle 6 supersedes it)
-
-## 🟢 P3 — Cleanup hygiene scan (CLAUDE.md §15)
-
-- **Color:** GREEN — additive, no risk
-- **Goal:** scan repo for stale .md / generated PNG / abandoned
-  scripts after the 9-PR wave
-- **Touchpoints:** root-level `.md`, `runs/_archive/`, top-level
-  `proto_*.py` candidates
-- **Validation:** nothing live broken; archive doc updated
-- **Risk:** low. Per CLAUDE.md §15: archive instead of delete;
-  preserve baselines / ground_truth / regression artifacts.
+- **Color:** RED — explicitly on hold per earlier session
+- **Branches affected:** `feature/smoke-promotes-inspector-v2-gate`
+  (orphan, never PR'd).
+- **To unblock:** Felipe needs to lift Stage 1.6 hold.
