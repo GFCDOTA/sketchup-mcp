@@ -1,0 +1,49 @@
+{
+  "_comment": "Minimal hand-crafted consensus for cross-PR Slice2->Slice3 integration tests. Two rectangular rooms (SALA + COZINHA) sharing a vertical interior wall, joined by one interior_door opening. Five walls total (outer perimeter + 1 interior divider). Sized so areas in meters fall in a reasonable range with PT_TO_M_DEFAULT (0.0352): each room ~10.0 m^2. Not derived from any real PDF — purely a self-contained fixture.",
+  "schema_version": "1.0.0",
+  "wall_thickness_pts": 5.4,
+  "plan_id": "cockpit_mutation_integration_minimal",
+  "planta_region": [0, 0, 180, 90],
+  "walls": [
+    {"id": "w0", "start": [0.0, 0.0], "end": [180.0, 0.0], "thickness": 5.4, "orientation": "h"},
+    {"id": "w1", "start": [180.0, 0.0], "end": [180.0, 90.0], "thickness": 5.4, "orientation": "v"},
+    {"id": "w2", "start": [0.0, 90.0], "end": [180.0, 90.0], "thickness": 5.4, "orientation": "h"},
+    {"id": "w3", "start": [0.0, 0.0], "end": [0.0, 90.0], "thickness": 5.4, "orientation": "v"},
+    {"id": "w4", "start": [90.0, 0.0], "end": [90.0, 90.0], "thickness": 5.4, "orientation": "v"}
+  ],
+  "rooms": [
+    {
+      "id": "r0",
+      "name": "SALA",
+      "polygon_pts": [[0.0, 0.0], [90.0, 0.0], [90.0, 90.0], [0.0, 90.0]],
+      "area_pts2": 8100.0,
+      "seed_pt": [45.0, 45.0]
+    },
+    {
+      "id": "r1",
+      "name": "COZINHA",
+      "polygon_pts": [[90.0, 0.0], [180.0, 0.0], [180.0, 90.0], [90.0, 90.0]],
+      "area_pts2": 8100.0,
+      "seed_pt": [135.0, 45.0]
+    }
+  ],
+  "openings": [
+    {
+      "id": "o0",
+      "wall_id": "w4",
+      "kind_v5": "interior_door",
+      "decision": "clean",
+      "confidence": 0.85,
+      "center": [90.0, 45.0],
+      "room_left_id": "r0",
+      "room_right_id": "r1",
+      "evidence": {
+        "room_left": "SALA",
+        "room_right": "COZINHA",
+        "room_left_id": "r0",
+        "room_right_id": "r1"
+      }
+    }
+  ],
+  "soft_barriers": []
+}
