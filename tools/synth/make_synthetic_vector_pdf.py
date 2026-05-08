@@ -110,12 +110,14 @@ EXAMPLE_SPEC_2_ROOM_L = {
         # (the L shoulder; goes from 220 to 220+? actually closes the
         # L's notch: from (220, 100) to (220, 200))
         WallRect(220 - T / 2, 100 - T, T, 100 + T), # vertical between rooms
-        # divider with door gap (horizontal between rooms at x=120 to 220)
-        # Two stubs flanking a 40-pt gap centred at x=170, y=100.
-        WallRect(20, 100 - T, 130, T),               # left stub of divider
-        WallRect(170, 100 - T, 50, T),               # right stub
-        # NOTE: divider is at y=100, from x=20 to x=220. With door gap
-        # 130..170 (40 pt wide), a person walks between rooms there.
+        # divider with door gap (horizontal between rooms at x=20 to 220).
+        # Cycle 11d: gap widened to 50 pt (was 20 pt, below
+        # DEFAULT_GAP_MIN_PTS=30 in tools/detect_wall_gaps.py so the
+        # detector silently dropped it). Now 130..180 = 50 pt — well
+        # within the [30, 250] band that the wall-gap detector
+        # accepts as a door-shaped opening.
+        WallRect(20, 100 - T, 110, T),               # left stub  (x: 20..130)
+        WallRect(180, 100 - T, 40, T),               # right stub (x: 180..220)
     ],
     "labels": [
         TextLabel("SALA SYNTH", x=80, y=60),         # in left/lower room (room_b)
