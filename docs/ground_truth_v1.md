@@ -206,6 +206,29 @@ fidelity report is RED. Once they land, all three should clear and
 
 ---
 
+## Promote to hard CI blocker (post-Cycle 8b TODO)
+
+The Fidelity Engine v1 step in `.github/workflows/quality_gates.yml`
+ships in **advisory mode** (`continue-on-error: true`) on the first
+release. Reason: today's run produces 3 hard_fails (FP-012 SUITE 01 /
+SUITE 02 areas + adjacency_f1) — those are real bugs the engine
+correctly surfaces, but they would turn `develop` red on every push
+until the underlying fix lands.
+
+**When Cycle 8b promotes the concave-hull-room-clip flag to default
+and the 3 hard_fails clear** (verified via a green run of
+`tools.fidelity.compare_generated_to_expected --strict` on develop),
+remove `continue-on-error: true` from the
+`Fidelity Engine v1 (advisory until Cycle 8b clears FP-012)` step in
+`.github/workflows/quality_gates.yml`. That single-line removal
+flips the gate to a hard merge blocker, completing the design intent.
+
+Until that happens, the report is still emitted on every CI run and
+uploaded as `fidelity_report.json` / `fidelity_scorecard.md` under
+the `quality-gate-reports` artifact for human inspection.
+
+---
+
 ## Next steps (v2 candidates, not part of this PR)
 
 Listed in priority order. None of these is in scope for v1.
