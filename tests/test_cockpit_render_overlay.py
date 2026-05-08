@@ -16,7 +16,9 @@ import pytest
 from cockpit.render_overlay import (
     PT_TO_M_DEFAULT,
     OverlayToggles,
+    PdfUnderlay,
     opening_summary_rows,
+    pdf_page_to_data_url,
     render_overlay_svg,
     room_summary_rows,
 )
@@ -158,6 +160,79 @@ def test_opening_summary_rows_returns_one_row_per_opening():
     assert op["room_left"] == "SALA"
     assert op["room_right"] == "COZINHA"
     assert op["host_wall"] == "w4"
+
+
+# ---- PDF underlay (Cycle 12b) ----------------------------------------
+
+def _toy_underlay() -> PdfUnderlay:
+    """Hand-crafted PdfUnderlay so the renderer tests stay free of
+    pypdfium2 + filesystem (the helper itself is exercised by the
+    real-PDF smoke test below)."""
+    # 1x1 transparent PNG, base64-encoded
+    transparent_png = (
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lE"
+        "QVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
+    )
+    return PdfUnderlay(
+        data_url=f"data:image/png;base64,{transparent_png}",
+        page_w_pt=595.0,
+        page_h_pt=842.0,
+        opacity=0.55,
+    )
+
+
+def test_render_overlay_with_pdf_underlay_emits_image():
+    """When a PdfUnderlay is supplied, the SVG must include the
+    raster <image> element with the page bounds and the data URL."""
+    svg = render_overlay_svg(_toy_consensus(), pdf_underlay=_toy_underlay())
+    assert "<image " in svg
+    assert "data:image/png;base64," in svg
+    # Page bounds applied as image dimensions
+    assert 'width="595.00"' in svg
+    assert 'height="842.00"' in svg
+    # opacity passed through
+    assert 'opacity="0.55"' in svg
+
+
+def test_render_overlay_without_pdf_underlay_omits_image():
+    """Default path is unchanged — no `<image>` when no underlay."""
+    svg = render_overlay_svg(_toy_consensus())
+    assert "<image " not in svg
+    assert "data:image/png;base64," not in svg
+
+
+def test_render_overlay_pdf_underlay_overrides_viewbox():
+    """When the underlay is on, the viewBox must be the PDF page
+    bounds (0 0 page_w page_h), NOT the auto-fit bounds of the
+    consensus polygons. This guarantees the bitmap and the vector
+    overlay share the same coord system."""
+    svg = render_overlay_svg(_toy_consensus(), pdf_underlay=_toy_underlay())
+    assert 'viewBox="0.00 0.00 595.00 842.00"' in svg
+    # And the y-flip group reflects the page-height anchor:
+    # translate(0 {y0+y1}) scale(1 -1) where y0=0, y1=842
+    assert 'transform="translate(0 842.0) scale(1 -1)"' in svg
+
+
+def test_pdf_page_to_data_url_returns_png_data_uri(tmp_path):
+    """Round-trip the helper against a real PDF candidate. Skip on
+    stripped checkout. Asserts the data URL is well-formed and the
+    page dims are positive."""
+    candidates = [
+        REPO_ROOT / "planta_74.pdf",
+        REPO_ROOT / "runs" / "cycle11c" / "synth_l2.pdf",
+    ]
+    pdf_path = next((p for p in candidates if p.exists()), None)
+    if pdf_path is None:
+        pytest.skip("no PDF available to round-trip")
+    underlay = pdf_page_to_data_url(pdf_path)
+    assert underlay.data_url.startswith("data:image/png;base64,")
+    assert underlay.page_w_pt > 0
+    assert underlay.page_h_pt > 0
+    # PNG decode sanity: base64 payload must decode without error
+    import base64
+    payload = underlay.data_url.split(",", 1)[1]
+    raw = base64.b64decode(payload)
+    assert raw[:8] == b"\x89PNG\r\n\x1a\n", "data URL is not a PNG"
 
 
 # ---- Real consensus smoke test (skip if missing) ----------------------

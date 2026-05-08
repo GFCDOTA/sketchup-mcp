@@ -38,6 +38,7 @@ from cockpit.render_overlay import (
     PT_TO_M_DEFAULT,
     OverlayToggles,
     opening_summary_rows,
+    pdf_page_to_data_url,
     render_overlay_svg,
     room_summary_rows,
 )
@@ -76,6 +77,37 @@ def _find_expected_models(repo: Path) -> list[Path]:
             if cand.exists():
                 out.append(cand)
     return sorted(out)
+
+
+def _find_pdf_candidates(repo: Path,
+                          consensus_path: Path | None = None) -> list[Path]:
+    """Find candidate source PDFs that the user might want to use as
+    the cockpit underlay.
+
+    Search order (deduplicated):
+    1. PDFs sitting next to the active consensus (`<run>/*.pdf`).
+    2. PDFs in the repo root (`planta_*.pdf`, `proto_*.pdf`).
+    3. Any PDF found anywhere under `runs/`.
+    """
+    seen: set[Path] = set()
+    out: list[Path] = []
+
+    def _add(p: Path) -> None:
+        rp = p.resolve()
+        if rp not in seen and rp.exists():
+            seen.add(rp)
+            out.append(rp)
+
+    if consensus_path is not None:
+        for p in sorted(consensus_path.parent.glob("*.pdf")):
+            _add(p)
+    for p in sorted(repo.glob("*.pdf")):
+        _add(p)
+    runs_dir = repo / "runs"
+    if runs_dir.exists():
+        for p in sorted(runs_dir.rglob("*.pdf")):
+            _add(p)
+    return out
 
 
 def _load_json(path: Path) -> dict[str, Any] | None:
@@ -137,6 +169,33 @@ def main() -> None:
         expected = _load_json(gt_choice) if gt_choice else None
 
         st.divider()
+        st.header("PDF underlay")
+        pdf_paths = _find_pdf_candidates(REPO_ROOT, cons_path)
+        pdf_options = [None, *pdf_paths]
+        pdf_choice = st.selectbox(
+            "Source PDF (optional)",
+            pdf_options,
+            index=0,
+            format_func=lambda p: ("(none)" if p is None
+                                    else str(p.relative_to(REPO_ROOT))),
+            help=("When set, the cockpit rasterises the page via "
+                  "pypdfium2 and renders it BEHIND the consensus "
+                  "overlay so you can verify alignment with the "
+                  "original drawing."),
+        )
+        pdf_underlay_opacity = st.slider(
+            "Underlay opacity", min_value=0.0, max_value=1.0,
+            value=0.55, step=0.05,
+            help="0 = invisible (overlay only); 1 = fully opaque PDF.",
+        )
+        pdf_underlay_dpi = st.select_slider(
+            "Underlay DPI", options=[72, 96, 144, 200, 300],
+            value=144,
+            help=("Higher = sharper text but bigger payload sent to "
+                  "the browser."),
+        )
+
+        st.divider()
         st.header("Layers")
         toggles = OverlayToggles(
             walls=st.checkbox("Walls", value=True),
@@ -157,16 +216,38 @@ def main() -> None:
     # --- Main: SVG overlay + inspectors -----------------------------
     col_overlay, col_inspect = st.columns([3, 2], gap="medium")
 
+    # Build the PDF underlay once (if requested) so we don't pay the
+    # rasterisation cost twice.
+    underlay = None
+    underlay_error: str | None = None
+    if pdf_choice is not None:
+        try:
+            underlay = pdf_page_to_data_url(
+                pdf_choice, dpi=pdf_underlay_dpi,
+                opacity=pdf_underlay_opacity,
+            )
+        except Exception as e:  # noqa: BLE001
+            underlay_error = f"PDF underlay failed: {e}"
+
     with col_overlay:
         st.subheader("Top-down overlay")
-        st.caption(
-            f"Source: `{cons_path.relative_to(REPO_ROOT)}` · "
-            f"PT_TO_M = {pt_to_m:.5f}"
-        )
+        caption_bits = [
+            f"Source: `{cons_path.relative_to(REPO_ROOT)}`",
+            f"PT_TO_M = {pt_to_m:.5f}",
+        ]
+        if pdf_choice is not None:
+            caption_bits.append(
+                f"Underlay: `{pdf_choice.relative_to(REPO_ROOT)}` "
+                f"@ {pdf_underlay_dpi}dpi · α={pdf_underlay_opacity}"
+            )
+        st.caption(" · ".join(caption_bits))
+        if underlay_error:
+            st.warning(underlay_error)
         try:
             svg = render_overlay_svg(
                 consensus=consensus,
                 toggles=toggles,
+                pdf_underlay=underlay,
                 pt_to_m=pt_to_m,
                 expected_model=expected,
             )

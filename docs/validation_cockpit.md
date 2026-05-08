@@ -125,33 +125,70 @@ same consensus rendered via the existing `tools/render_axon.py`
 (matplotlib top mode), included as a familiar reference point
 to compare against the new SVG output.
 
-## Limitations (v0)
+## PDF underlay (Cycle 12b — landed 2026-05-08)
 
-- No **PDF base layer**. The cockpit only shows the extracted
-  consensus, not the source PDF behind it. Adding a
-  `pypdfium2`-rendered PDF page underneath the SVG is a
-  Cycle 12b candidate — needs careful coord alignment.
+The cockpit now renders the source PDF page rasterised behind the
+SVG overlay so you can visually confirm "is the consensus on top of
+the right walls?" instead of staring at an empty canvas with vector
+shapes.
+
+### How it works
+
+1. Sidebar **PDF underlay** picker auto-discovers candidates: PDFs
+   sibling to the active consensus, then repo-root PDFs
+   (`planta_74.pdf`, `synth_*.pdf`, etc.), then anything under
+   `runs/`. Default is `(none)` — no rasterisation cost paid until
+   the user opts in.
+2. When a PDF is picked, `cockpit.render_overlay.pdf_page_to_data_url`
+   uses `pypdfium2` to rasterise the chosen page at the picked DPI
+   (72/96/144/200/300; default 144). The result is a base64-encoded
+   PNG embedded as an `<image>` element inside the SVG.
+3. The renderer anchors the SVG `viewBox` to the PDF page bounds
+   (`0 0 page_w_pt page_h_pt`) so the bitmap and the consensus
+   polygons share the same coordinate system. The bitmap goes
+   OUTSIDE the y-flip group (its native orientation is top-down);
+   the vector overlay group keeps its `scale(1, -1)` so PDF-up
+   stays visual-up.
+4. The opacity slider (default 0.55) blends the bitmap with the
+   beige cockpit background so the consensus stays legible.
+
+### Demo
+
+`docs/diagnostics/2026-05-08_cockpit_demo_overlay_with_pdf.svg` —
+self-contained SVG with the rasterised `planta_74.pdf` baked in as a
+base64 data URL. Open in a browser to compare against
+`docs/diagnostics/2026-05-08_cockpit_demo_overlay.svg` (the
+no-underlay version from Cycle 12). Generator script:
+`scripts/cockpit_make_demo_pdf_underlay.py`.
+
+### What this unlocks
+
+- **Wall offset eyeball check** — see if a wall in the consensus
+  drifted off the original drawing's wall stroke.
+- **Phantom opening detection** — see if a door arc in the consensus
+  is actually drawn on the PDF.
+- **Missing terraço detection** — see if the consensus failed to
+  pick up a balcony shape that the PDF clearly draws.
+
+## Remaining limitations (post-12b)
+
 - No **ground-truth overlay** rendering. The toggle exists in
   the UI but the renderer doesn't yet draw expected polygons.
 - No **interactive room/opening selection**. Clicking a room
   doesn't highlight it. Static SVG only. Cycle 12c.
 - No **side-by-side runs**. Pick one consensus at a time.
-- No **PT_TO_M auto-detect** from `consensus.metadata`. Manual.
+- No **PT_TO_M auto-detect** from `consensus.metadata`. Manual
+  number_input.
 
-These are deliberate v0 cuts to ship the MVP fast. The renderer
-+ inspector cover the "did the pipeline get the right rooms" use
-case today.
-
-## Next steps (post-MVP candidates)
+## Next steps (remaining post-MVP candidates)
 
 | Candidate | Why |
 |---|---|
-| Cycle 12b — PDF underlay | The biggest visual win after MVP. |
 | Cycle 12c — opening / room highlight on hover | Better triage UX. |
 | Cycle 12d — render expected_model overlay | Real visual fidelity check. |
 | Cycle 12e — diff view | run A vs run B, useful for baseline-shift PRs. |
-
-None of these are in the v0 PR.
+| Slice 2 — approve/reject + `review_overrides.json` | Needs FastAPI for POST. |
+| Slice 3 — `proposed_actions.json` + pre-SKP gate F0 | Closes the validation-before-SKP loop. |
 
 ## Non-goals (explicitly)
 
