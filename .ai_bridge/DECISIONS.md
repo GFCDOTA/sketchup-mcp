@@ -32,6 +32,63 @@
 
 ---
 
+## 2026-05-08 — Mutation Surface contract → promoted to ADR-001
+
+### Context
+
+The cockpit's read-only slice is feature-complete (Cycles 12 / 12b /
+12c / 12d / 12e / 12f). The next phase has a different nature: it
+must accept human decisions (approve / reject / re-classify / block
+SKP). That contract touches ground truth, fidelity scoring, SKP
+export, and audit trail simultaneously — too cross-cutting for an
+ADR-lite entry.
+
+### Options considered
+
+1. **Inline ADR-lite here** — fast, but the contract is too detailed
+   (7 override types, 6 proposed-action types, 8 safety rules,
+   F0 gate semantics) to fit the lightweight format.
+2. **Promote to a full ADR under `docs/adr/`** — heavier process but
+   the right home for a multi-PR contract that future readers will
+   reference.
+
+### Decision
+
+**Promote.** Created `docs/adr/` (first ADR in the repo) and shipped
+**ADR-001 — Validation Cockpit Mutation Surface** as the canonical
+contract for review_overrides_v1 + proposed_actions_v1 + the F0
+pre-SKP gate.
+
+### Reason
+
+The contract spans:
+- 4 new schemas (review_overrides_v1, proposed_actions_v1,
+  pre_skp_review_v1, amended_observed_v1)
+- ≥3 new files / modules across Slices 2 and 3
+  (`cockpit/overrides.py`, `tools/apply_overrides.py`,
+  smoke `gate_f0`)
+- 8 invariants ("override never deletes original",
+  "audit trail is append-only", etc.) that must survive future PRs
+
+A future agent reading just `.ai_bridge/DECISIONS.md` couldn't
+derive that. ADR-001 gives them a single document to land on.
+
+### Consequences
+
+- Future cockpit-mutation work derives from ADR-001 without
+  re-litigating the contract.
+- `.ai_bridge/DECISIONS.md` keeps its tactical role; `docs/adr/`
+  takes the architectural one.
+- ADRs are append-only and numbered; supersession is explicit.
+
+### Rollback
+
+`git revert <merge-sha>` removes the ADR + this entry. Since no code
+references the ADR yet (Slices 2/3 are unbuilt), rollback is purely
+docs-level.
+
+---
+
 ## 2026-05-08 — Validation Cockpit MVP: Streamlit, not vanilla JS+FastAPI
 
 ### Context
