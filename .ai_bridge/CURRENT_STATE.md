@@ -28,24 +28,39 @@
     bootstrap, infra-only).
     Compare: https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/rubocop-sketchup-ci
   - `feature/quality-gates-ci-workflow` — Cycle 10 (Plan/Coherence/
-    Micro strict CI workflow, infra-only).
+    Micro strict CI workflow, infra-only) **+ Adendo C** (commit
+    `a73be99`: hashFiles-guarded Fidelity Engine v1 step → Cycle 13
+    delivered inside the existing PR).
     Compare: https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/quality-gates-ci-workflow
   - `docs/readme-overview-stage15-tools` — Cycle 11 (README + OVERVIEW
-    catch-up to Stage 1.5 tools, pure docs).
+    catch-up to Stage 1.5 tools, pure docs) **+ Adendo B** (commit
+    `d0734a7`: Fidelity Engine v1 mentions added).
     Compare: https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/readme-overview-stage15-tools
   - `feature/ground-truth-v1-fidelity-engine` — Cycle 12 (whole-plant
-    golden truth + fidelity engine + 21 unit tests + 2 docs).
+    golden truth + fidelity engine + 21 unit tests + 2 docs) **+
+    Adendo A** (commit `dac81ed`: synth_from_expected + 4 round-trip
+    guard tests; engine self-check now covered).
     Compare: https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/ground-truth-v1-fidelity-engine
 
 Total: **9 PR-able branches** ready (PR bodies all under
-`.ai_bridge/pr_bodies/`).
+`.ai_bridge/pr_bodies/`). NAO PARE wave 2026-05-08 added 3 adendos
+to existing branches (queue stayed at 9, value increased).
 
 - **Branch to delete** post-merge of `docs/ai-bridge-scaffolding-clean`:
   `feature/ai-bridge-scaffolding` (contaminated with PR #52 commit).
 
 ## Last objective
 
-Cycle 10 — Quality Gates CI workflow on
+NAO PARE wave (2026-05-08) — 3 adendos to existing pushed branches:
+- GT branch: synth + round-trip tests (catches engine bugs)
+- README/OVERVIEW: Fidelity Engine v1 mentions
+- Quality-gates: hashFiles-guarded fidelity step (Cycle 13 delivered)
+
+Effective Cycle 13 done WITHOUT opening a 10th branch. Queue
+preserved at 9.
+
+Earlier this session chain: Cycle 12 = Ground Truth v1 + Fidelity
+Engine; Cycle 10 = Quality Gates CI workflow on
 `feature/quality-gates-ci-workflow`. Builds the planta_74 5-stage
 pipeline + runs `coherence_audit --strict` and `micro_truth_gate
 --strict`. Hard merge blocker on regression. Earlier in this
