@@ -1,8 +1,48 @@
-# Handoff — 2026-05-07 06:30 UTC
+# Handoff — 2026-05-07 07:00 UTC
 
 > Most recent session's exit state. Next session reads this FIRST
 > after `CLAUDE.md`. Append-only is fine but the top entry must
 > always be the latest.
+
+## Status — Cycle 12 done (Ground Truth v1 + Fidelity Engine)
+
+User issued the GT design prompt asking for the "minimum ground
+truth that already blocks real regression". Cycle 12 delivered it:
+
+- Branch: `feature/ground-truth-v1-fidelity-engine`
+- Commit: `c5aa0f6` (7 new files, +1734 lines, 0 deletions)
+- Compare URL:
+  https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/ground-truth-v1-fidelity-engine
+- PR body: `.ai_bridge/pr_bodies/PR_BODY_ground_truth_v1.md`
+
+**Architecture:** distinct from the three pre-existing layers
+(`tests/test_planta_74_truth_gate.py` self-pin,
+`tools/coherence_audit.py` uncertainty,
+`tools/micro_truth_gate.py` per-room subset). GT v1 fills the
+**whole-plant golden-truth** gap — 11 rooms, 8 openings, 8
+adjacency edges in `ground_truth/planta_74/expected_model.json`,
+backed by JSON Schema 1.0 in `ground_truth/schema/`, scored by
+`tools/fidelity/compare_generated_to_expected.py`.
+
+**Today's snapshot** on `develop` (sha `fad28d9`):
+- `global_fidelity = 0.69` (capped — 3 hard_fails)
+- sub_scores: `room=0.75, count=1.0, adjacency=0.421, bbox=1.0`
+- hard_fails: SUITE 01 area (FP-012), SUITE 02 area (FP-012 mild),
+  adjacency_f1=0.42<0.60 (classifier gaps)
+- These three fail by **design** — the in-flight branches
+  `feature/concave-hull-room-clip-spike` + Cycle 6 fix them.
+  When they land, global_fidelity should jump to ~0.95.
+
+**Validation:**
+- 21 new unit tests, all PASS
+- 77/77 across the four gate test files
+- jsonschema validates expected_model.json
+- Engine runs default-non-blocking; `--strict` blocks on hard_fail
+
+**Docs:** `docs/ground_truth_v1.md` (protocol + how-to) and
+`docs/ground_truth_references.md` (public datasets survey —
+CubiCasa5K/FloorPlanCAD/Structured3D as benchmark-only;
+Google Images/3DW explicitly REJECTED as ground truth).
 
 ## Status — Cycle 11 done (README/OVERVIEW catch-up)
 

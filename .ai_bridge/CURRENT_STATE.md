@@ -9,7 +9,7 @@
 - Working: `docs/ai-bridge-scaffolding-clean` (this update)
 - Sync target: `develop` (sha `fad28d9`)
 - Pending PR (waiting for merge): `feature/smoke-promotes-inspector-v2-gate` (gate G2, commit `2417a20`) → PR #52
-- **Seven pushed branches with PR bodies ready** (under `.ai_bridge/pr_bodies/`):
+- **Nine pushed branches with PR bodies ready** (under `.ai_bridge/pr_bodies/`):
   - `docs/non-stop-autonomy-rule` — CLAUDE.md §17 DONE IS NOT STOP rule.
     Compare: https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/non-stop-autonomy-rule
   - `feature/micro-truth-expand-planta-74-cycle7` — Cycle 7 ground
@@ -33,8 +33,11 @@
   - `docs/readme-overview-stage15-tools` — Cycle 11 (README + OVERVIEW
     catch-up to Stage 1.5 tools, pure docs).
     Compare: https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/readme-overview-stage15-tools
+  - `feature/ground-truth-v1-fidelity-engine` — Cycle 12 (whole-plant
+    golden truth + fidelity engine + 21 unit tests + 2 docs).
+    Compare: https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/ground-truth-v1-fidelity-engine
 
-Total: **8 PR-able branches** ready (PR bodies all under
+Total: **9 PR-able branches** ready (PR bodies all under
 `.ai_bridge/pr_bodies/`).
 
 - **Branch to delete** post-merge of `docs/ai-bridge-scaffolding-clean`:

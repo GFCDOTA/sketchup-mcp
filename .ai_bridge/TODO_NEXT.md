@@ -15,7 +15,7 @@ Each entry:
 
 ---
 
-## P0 — Eight PR-less branches ready (PR bodies under .ai_bridge/pr_bodies/)
+## P0 — Nine PR-less branches ready (PR bodies under .ai_bridge/pr_bodies/)
 
 User opens PRs manually (memory rule `feedback_pr_manual_preferido.md`).
 Recommended merge order to minimize rebase pain:
@@ -26,8 +26,9 @@ Recommended merge order to minimize rebase pain:
 4. `feature/rubocop-sketchup-ci` (Gemfile/.rubocop/workflow only)
 5. `feature/quality-gates-ci-workflow` (.github/workflows only)
 6. `feature/concave-hull-room-clip-spike` (default-off code change)
-7. `docs/ai-bridge-scaffolding-clean` (.ai_bridge/ only)
-8. `feature/micro-truth-expand-planta-74-cycle7` (ground_truth + tests)
+7. `feature/ground-truth-v1-fidelity-engine` (additive: ground_truth/, tools/fidelity/, tests/, docs/)
+8. `docs/ai-bridge-scaffolding-clean` (.ai_bridge/ only)
+9. `feature/micro-truth-expand-planta-74-cycle7` (ground_truth + tests)
 
 | Branch | Body file | Compare URL |
 |---|---|---|
@@ -37,6 +38,7 @@ Recommended merge order to minimize rebase pain:
 | `feature/rubocop-sketchup-ci` | `PR_BODY_rubocop_ci.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/rubocop-sketchup-ci |
 | `feature/quality-gates-ci-workflow` | `PR_BODY_quality_gates_ci.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/quality-gates-ci-workflow |
 | `feature/concave-hull-room-clip-spike` | `PR_BODY_concave_hull_spike.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/concave-hull-room-clip-spike |
+| `feature/ground-truth-v1-fidelity-engine` | `PR_BODY_ground_truth_v1.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/ground-truth-v1-fidelity-engine |
 | `docs/ai-bridge-scaffolding-clean` | `PR_BODY_ai_bridge_scaffolding_clean.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/ai-bridge-scaffolding-clean |
 | `feature/micro-truth-expand-planta-74-cycle7` | `PR_BODY_cycle7_micro_truth_expand.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/micro-truth-expand-planta-74-cycle7 |
 
