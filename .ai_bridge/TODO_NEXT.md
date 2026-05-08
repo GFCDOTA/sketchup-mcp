@@ -34,46 +34,21 @@ Each entry:
 - **Cycle 12b PDF underlay** (PR #70, `8e1e225`).
 - **Cycle 12d expected_model overlay** (PR #71, `d1a8acc`):
   match-status renderer (5-state palette) + Expected inspector
-  tab. **Catches FP-012 leakage on planta_74 visually.** +4 tests
-  (18/18 cockpit total).
-- **Hygiene audit ledger** (PR #73, `c788df9`): root-level files
-  cross-referenced; no archives this cycle (every candidate has a
-  live reference path); ledger at
+  tab. **Catches FP-012 leakage on planta_74 visually.**
+- **Hygiene audit ledger** (PR #73, `c788df9`): no archives this
+  cycle (every candidate has a live reference path); ledger at
   `docs/diagnostics/2026-05-08_post_cycle12d_hygiene_audit.md`.
-- 6 PRs total this session. develop @ `c788df9`.
+- **Cycle 12c hover highlight** (PR #75, `38c3c54`): `<title>`
+  tooltips + CSS `:hover` on rooms/openings. Pure CSS, no JS.
+- **Cycle 12e diff view** (PR #76, `e090272`): second consensus
+  picker + dashed-magenta overlay + Diff inspector tab + per-room
+  delta. **Cockpit read-only slice now feature-complete.**
+- **9 PRs total this session.** develop @ `e090272`.
+  26/26 cockpit unit tests pass.
 - **gh CLI tooling unblocked** — see LL-012 +
   `~/.claude/projects/E--Claude/memory/reference_gh_cli_absolute_path.md`.
 
-## 🟢 P0 — Cycle 12c: hover highlight on rooms / openings
-
-- **Color:** GREEN — additive, opt-in (no breaking change)
-- **Goal:** add `<title>` tooltips + a small CSS rule that
-  highlights the polygon under the cursor (`fill-opacity` jump,
-  outline thicken). Optionally add JS-driven cross-highlighting
-  between SVG and the inspector table.
-- **Touchpoints:** `cockpit/render_overlay.py` (emit `<title>`
-  child elements + maybe `<style>` block); optional
-  `cockpit/app.py` event wiring via `streamlit-extras` if available.
-- **Validation:** unit test asserting `<title>` present per room +
-  per opening with the expected name; visual smoke.
-- **Risk:** LOW. Pure additive — no new render path triggered
-  unless the cursor moves over an element.
-
-## 🟢 P1 — Cycle 12e: diff view (run A vs run B)
-
-- **Color:** GREEN — additive, dual-consensus rendering
-- **Goal:** sidebar second consensus picker; when both are picked,
-  render side-by-side OR overlay-with-diff. Per-room area delta
-  in inspector. Useful for baseline-shift PRs (e.g. visualise the
-  pre/post Cycle-8b concave-hull change).
-- **Touchpoints:** `cockpit/render_overlay.py` (add a
-  `render_diff_svg(consensus_a, consensus_b)` helper or extend the
-  existing renderer with a `consensus_b` param), `cockpit/app.py`
-  sidebar second-picker.
-- **Validation:** unit tests on the diff helper + visual smoke.
-- **Risk:** LOW. Pure additive.
-
-## 🟢 P1 — `renderers/` migration (architecture plan step 5)
+## 🟢 P0 — `renderers/` migration (architecture plan step 5)
 
 - **Color:** GREEN — clears the 4 transitional `render_*.py`
   orphans flagged in PR #73's hygiene audit.

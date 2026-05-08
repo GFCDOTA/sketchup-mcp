@@ -1,4 +1,86 @@
-# Handoff — 2026-05-08 (post-Cycle-12d wave: 6 PRs merged, hygiene audit + cockpit feature-complete)
+# Handoff — 2026-05-08 (Cockpit READ-ONLY SLICE feature-complete: 9 PRs merged this session)
+
+> Most recent session's exit state. Next session reads this FIRST
+> after `CLAUDE.md`. Append-only is fine but the top entry must
+> always be the latest.
+
+## Status — Cockpit feature-complete, develop @ `e090272`, queue clean
+
+This session shipped **nine PRs** end-to-end via the gh CLI
+(unblocked early via LL-012). The Validation Cockpit went from
+"0 LOC" to "feature-complete read-only slice with 5 progressive
+visual layers" in one continuous loop.
+
+### Merge wall (this session, in order)
+
+| PR | Title | Merge SHA |
+|---|---|---|
+| #68 | feat(cockpit): Cycle 12 — Validation Cockpit MVP | `84eae72` |
+| #69 | chore(ai_bridge): post-Cycle-12 handoff refresh + LL-012 | `6b8e8c6` |
+| #70 | feat(cockpit): Cycle 12b — PDF underlay | `8e1e225` |
+| #72 | chore(ai_bridge): post-Cycle-12b refresh (parallel session) | `fe48f73` |
+| #71 | feat(cockpit): Cycle 12d — expected_model overlay | `d1a8acc` |
+| #73 | chore(hygiene): post-Cycle-12d audit ledger | `c788df9` |
+| #74 | chore(ai_bridge): post-Cycle-12d session wrap | `40c3c3b` |
+| #75 | feat(cockpit): Cycle 12c — hover highlight | `38c3c54` |
+| #76 | feat(cockpit): Cycle 12e — diff view | `e090272` |
+
+### Cockpit feature matrix — all read-only slices ✅
+
+| Slice | Status | What it does |
+|---|---|---|
+| 12 — MVP | ✅ | SVG overlay (walls / rooms / labels / openings); 4 layer toggles; 4 inspector tabs |
+| 12b — PDF underlay | ✅ | pypdfium2 rasterised page behind the SVG; opacity + DPI sliders |
+| 12d — expected_model overlay | ✅ | 5-state status palette on observed room outlines + Expected inspector tab. Catches FP-012 leakage on `planta_74` visually. |
+| 12c — hover highlight | ✅ | `<title>` tooltips + CSS `:hover` on rooms/openings; pure CSS, no JS |
+| 12e — diff view | ✅ | Second consensus picker + dashed-magenta B-rooms over A + Diff inspector tab with per-room delta |
+
+### Validation snapshot
+
+- **26/26 cockpit unit tests** PASS in 0.25s
+- Full `pytest -q`: 17 pre-existing raster failures (CLAUDE.md §10,
+  unchanged), 0 new failures from the cockpit work
+- `ruff check cockpit/ tests/test_cockpit_render_overlay.py` clean
+  on the new code; pre-existing E402 in `cockpit/app.py` from
+  PR #68's sys.path bootstrap is informative-only
+- All demos regenerated; all toggles default OFF; existing renders
+  byte-equivalent to the no-overlay path
+
+### Tooling unblocked (LL-012)
+
+`gh` CLI located at `C:\Program Files\GitHub CLI\gh.exe` (v2.92.0).
+Auth via keyring (account `fmodesto30`, scope `repo`). Documented
+in `~/.claude/projects/E--Claude/memory/reference_gh_cli_absolute_path.md`
++ LL-012 in `docs/learning/lessons_learned.md`. Future sessions
+invoke via absolute path + always pass `--repo GFCDOTA/sketchup-mcp`.
+
+### Boundary check (CLAUDE.md)
+
+- §1.2 schema unchanged ✓
+- §1.3 thresholds unchanged ✓
+- §1.4 Ruby/SU exporter untouched ✓
+- §1.6 high-risk entrypoints untouched ✓
+- §2 invariants intact (cockpit is read-only) ✓
+- §3 cockpit IS the cheap gate ✓
+- §15 hygiene scan ran (PR #73); ledger preserved
+
+### Next moves (per `TODO_NEXT.md` post-refresh)
+
+The cockpit's read-only slice is closed. Next ROIs:
+
+1. 🟢 P0 — `renderers/` migration per architecture plan step 5
+   (clears the 5 transitional `render_*.py` orphans flagged in
+   PR #73's audit).
+2. 🟡 P1 — `proto_*.py` + `render_sidebyside.py` CLI-arg refactor
+   (un-blocks the 3 ruff-excluded scripts).
+3. 🟡 P2 — Cockpit Slice 2 (FastAPI POST overrides) — first
+   mutation surface; needs ADR.
+4. 🟡 P2 — Cockpit Slice 3 (proposed_actions + pre-SKP gate F0).
+5. 🔴 — Stage 1.6 (held), Multi-PDF corpus (Felipe must provide).
+
+---
+
+## Previous entry — Handoff — 2026-05-08 (post-Cycle-12d wave: 6 PRs merged)
 
 > Most recent session's exit state. Next session reads this FIRST
 > after `CLAUDE.md`. Append-only is fine but the top entry must
