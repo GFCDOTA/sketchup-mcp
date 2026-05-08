@@ -1,10 +1,68 @@
-# Handoff — 2026-05-08 (Cycle 12 cockpit MVP MERGED)
+# Handoff — 2026-05-08 (Cycle 12b PDF underlay MERGED)
 
 > Most recent session's exit state. Next session reads this FIRST
 > after `CLAUDE.md`. Append-only is fine but the top entry must
 > always be the latest.
 
-## Status — Cycle 12 MERGED + gh-CLI tooling unblocked
+## Status — Cycle 12b MERGED + gh-first protocol applied
+
+**develop @ `8e1e225`** — PR #70 merged 2026-05-08T19:25Z via
+`gh pr merge --squash --delete-branch`. CI all green pre-merge:
+test 25 s, quality-gates 15 s, ruby-syntax 4 s.
+
+### Merge results
+
+| Field | Value |
+|---|---|
+| PR | [#70](https://github.com/GFCDOTA/sketchup-mcp/pull/70) |
+| Title | feat(cockpit): Cycle 12b — PDF underlay (rasterised page behind the SVG overlay) |
+| Merge SHA | `8e1e225` |
+| Diff | 7 files, +462 / −42 |
+| Checks | test (25s), quality-gates (15s), ruby-syntax (4s) — all pass |
+| Test delta vs Cycle 12 baseline | +4 passing (PdfUnderlay tests), 0 new failures |
+
+### What shipped in Cycle 12b
+
+- `cockpit/render_overlay.py`: `PdfUnderlay` dataclass + `pdf_page_to_data_url(pdf, dpi, opacity)` rasterizer (pypdfium2 → base64 PNG data URL) + `render_overlay_svg(..., pdf_underlay=None)` viewBox-anchor branch with `<image>` outside the y-flip group.
+- `cockpit/app.py`: sidebar PDF picker (auto-discovers run-sibling PDFs > repo root > `runs/**`), opacity slider (default 0.55), DPI select_slider (72/96/144/200/300; default 144). Default `(none)` so rasterisation is opt-in.
+- `tests/test_cockpit_render_overlay.py`: 4 new tests (image emit, no-underlay path unchanged, viewBox switch, real-PDF round-trip).
+- `docs/validation_cockpit.md`: replaces "No PDF base layer" v0 limitation with a Cycle 12b section (how it works + what it unlocks: wall-offset / phantom-opening / missing-terraço eyeball checks).
+- `docs/diagnostics/2026-05-08_cockpit_demo_overlay_with_pdf.svg`: 487 KB demo SVG with `planta_74.pdf` baked in.
+- `scripts/cockpit_make_demo_pdf_underlay.py`: deterministic generator for the demo SVG.
+- `.ai_bridge/pr_bodies/PR_BODY_cockpit_cycle12b.md`: PR body following CLAUDE.md §4 template.
+
+### Protocol learning applied this session
+
+- `feedback_pr_manual_preferido.md` (2026-05-04) was **superseded** by `feedback_gh_first_then_manual.md` after Felipe's correction: gh CLI + auto-merge is the new default, manual URL is fallback only. Memory entry refreshed cross-project.
+- This session detected the `feature/cockpit-pdf-underlay-cycle12b` branch + WIP files via `git status` BEFORE editing — confirms `feedback_pre_existing_work_pivot.md` rule (preserve existing work, pivot if objective matches).
+
+### Boundary check (CLAUDE.md)
+
+- §1.2 schema unchanged ✓
+- §1.3 thresholds unchanged ✓
+- §1.4 Ruby/SU exporter untouched ✓
+- §1.6 high-risk entrypoints (`api/app.py`, `main.py`) untouched ✓
+- §2 invariants intact (read-only) ✓
+- §3 cockpit IS the cheap gate, runs without SU ✓
+
+### Next moves (this branch + after)
+
+1. **This branch:** `chore/post-cycle12b-handoff-refresh` — ships this `.ai_bridge/` refresh. PR + merge via gh.
+2. **After:** Cycle 12d — render `expected_model` overlay layer. The toggle (`OverlayToggles.ground_truth_overlay`) and signature param (`render_overlay_svg(..., expected_model=None)`) already exist; the renderer just doesn't use them yet. Smallest GREEN cockpit follow-up. See `TODO_NEXT.md` P0.
+
+### Slice 2/3 still deferred (not in PR #70)
+
+- Approve / reject per element + `review_overrides.json` persistence (needs FastAPI for POST)
+- `proposed_actions.json` schema + pre-SKP gate F0 in `scripts/smoke/smoke_skp_export.py`
+
+---
+
+## Previous entry — Cycle 12 cockpit MVP MERGED
+
+**develop @ `84eae72`** — PR #68 merged 2026-05-08T19:03:44Z, branch
+deleted local + remote, smoke 10/10 still PASS.
+
+### Cycle 12 merge results
 
 **develop @ `84eae72`** — PR #68 merged 2026-05-08T19:03:44Z, branch
 deleted local + remote, smoke 10/10 still PASS.

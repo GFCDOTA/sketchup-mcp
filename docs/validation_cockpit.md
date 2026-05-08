@@ -170,10 +170,48 @@ no-underlay version from Cycle 12). Generator script:
 - **Missing terraço detection** — see if the consensus failed to
   pick up a balcony shape that the PDF clearly draws.
 
-## Remaining limitations (post-12b)
+## Ground-truth overlay (Cycle 12d — landed 2026-05-08)
 
-- No **ground-truth overlay** rendering. The toggle exists in
-  the UI but the renderer doesn't yet draw expected polygons.
+When the **Ground truth overlay** sidebar toggle is ON AND a
+`ground_truth/<plant>/expected_model.json` is selected, every
+observed room outline is recoloured to its match status against the
+expected `expected_area_m2_range`:
+
+| Status | Color | Meaning |
+|---|---|---|
+| `in_range` | green `#16a34a` | observed area inside the expected range |
+| `out_of_range_low` | orange `#f59e0b` | observed area below `expected_min` |
+| `out_of_range_high` | deeper orange `#ea580c` | observed area above `expected_max` |
+| `missing_polygon` | red `#dc2626` | expected room with NO observed match |
+| `unmatched_observed` | grey `#9ca3af` | observed room with no expected entry |
+
+Outline width is bumped from `0.4` to `2.0` so the colour reads even
+at zoomed-out fit-to-screen.
+
+Match key is a case-insensitive comparison between observed `name`
+and expected `label`. Phantom expected rooms (no observed match)
+appear in the inspector's **Expected** tab as `missing_polygon` rows
+but cannot be drawn on the SVG — the GT schema carries
+`expected_area_m2_range` and `expected_bbox_m`, not polygon
+coordinates.
+
+The new **Expected** inspector tab pairs with the SVG re-coloring
+and shows the full match table textually, with status badges and
+per-room `observed_m2` vs `expected_min`/`expected_max`. Useful for
+screenshotting into a PR review when the SVG is too dense to read
+at a glance.
+
+### Smoke on planta_74
+
+Running the cockpit on the canonical `planta_74` consensus +
+`ground_truth/planta_74/expected_model.json` immediately surfaces
+the FP-012 (convex-hull) leakage as **two** `out_of_range_high`
+rows (SUITE 01 at 69.91 m² vs expected `[10, 28]`; SUITE 02 at
+32.03 m² vs `[10, 22]`) — the same suites that motivated the
+Cycle 8b concave-hull promote.
+
+## Remaining limitations (post-12d)
+
 - No **interactive room/opening selection**. Clicking a room
   doesn't highlight it. Static SVG only. Cycle 12c.
 - No **side-by-side runs**. Pick one consensus at a time.
@@ -185,7 +223,6 @@ no-underlay version from Cycle 12). Generator script:
 | Candidate | Why |
 |---|---|
 | Cycle 12c — opening / room highlight on hover | Better triage UX. |
-| Cycle 12d — render expected_model overlay | Real visual fidelity check. |
 | Cycle 12e — diff view | run A vs run B, useful for baseline-shift PRs. |
 | Slice 2 — approve/reject + `review_overrides.json` | Needs FastAPI for POST. |
 | Slice 3 — `proposed_actions.json` + pre-SKP gate F0 | Closes the validation-before-SKP loop. |

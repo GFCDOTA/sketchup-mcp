@@ -278,6 +278,14 @@ def render_overlay_svg(consensus: dict,
         f'<g transform="translate(0 {y0 + y1}) scale(1 -1)">'
     )
 
+    # Build the GT match → outline color map ONCE per render. Empty
+    # when GT toggle off or no expected_model supplied (Cycle 12d).
+    status_color_map: dict[str, str] = {}
+    if toggles.ground_truth_overlay and expected_model is not None:
+        status_color_map = _build_room_status_map(
+            consensus, expected_model, pt_to_m,
+        )
+
     # Rooms first (so walls render on top).
     if toggles.rooms:
         for r in rooms:
@@ -285,9 +293,17 @@ def render_overlay_svg(consensus: dict,
             if len(poly) < 3:
                 continue
             color = _color_for(r.get("name") or "")
+            stroke_color = "#7a7a7a"
+            stroke_width = 0.4
+            rid = r.get("id") or ""
+            if rid in status_color_map:
+                # GT-overlay-on: thicken the outline and recolor it
+                # to the match status (green/orange/red/grey).
+                stroke_color = status_color_map[rid]
+                stroke_width = 2.0
             parts.append(_polygon_svg(
-                poly, fill=color, stroke="#7a7a7a",
-                stroke_width=0.4, fill_opacity=0.55,
+                poly, fill=color, stroke=stroke_color,
+                stroke_width=stroke_width, fill_opacity=0.55,
             ))
 
     # Walls.
@@ -345,6 +361,129 @@ _OPENING_KIND_COLORS = {
     "exterior_door": "#dc2626",       # red — entry
     "unknown": "#9ca3af",             # grey
 }
+
+
+# ---------- Expected-model match (Cycle 12d) ---------------------------
+
+# Status palette for the expected_model overlay. Tuned to read on the
+# beige cockpit background AND alongside the kind-coded opening
+# circles without colliding visually.
+_EXPECTED_MATCH_COLORS = {
+    "in_range": "#16a34a",         # green — observed within expected range
+    "out_of_range_low": "#f59e0b",  # orange — observed below expected_min
+    "out_of_range_high": "#ea580c", # deeper orange — observed above expected_max
+    "missing_polygon": "#dc2626",   # red — expected room but no observed match
+    "unmatched_observed": "#9ca3af",# grey — observed room with no expected entry
+}
+
+
+def expected_match_summary(consensus: dict,
+                            expected_model: dict | None,
+                            pt_to_m: float = PT_TO_M_DEFAULT) -> list[dict]:
+    """Build a per-room match table between observed (consensus) and
+    expected (ground-truth) rooms.
+
+    Match key is a case-insensitive comparison between observed
+    `name` and expected `label`. Schema of each row:
+
+        {
+          "expected_id": str | None,
+          "expected_label": str | None,
+          "observed_id": str | None,
+          "observed_name": str | None,
+          "observed_area_m2": float | None,
+          "expected_area_m2_range": [float, float] | None,
+          "status": "in_range" | "out_of_range_low" |
+                    "out_of_range_high" | "missing_polygon" |
+                    "unmatched_observed",
+        }
+
+    Returns one row per expected room, plus extra rows for observed
+    rooms with no expected counterpart (status `unmatched_observed`).
+    Empty list when `expected_model` is `None` or has no `rooms`.
+    """
+    if not expected_model:
+        return []
+    expected_rooms = expected_model.get("rooms") or []
+    observed_rooms = consensus.get("rooms") or []
+
+    obs_by_label: dict[str, dict] = {
+        (r.get("name") or "").strip().upper(): r for r in observed_rooms
+    }
+    out: list[dict] = []
+    matched_obs_ids: set[str] = set()
+
+    for er in expected_rooms:
+        label = (er.get("label") or "").strip()
+        rng = er.get("expected_area_m2_range")
+        obs = obs_by_label.get(label.upper())
+        if obs is None:
+            out.append({
+                "expected_id": er.get("id"),
+                "expected_label": label,
+                "observed_id": None,
+                "observed_name": None,
+                "observed_area_m2": None,
+                "expected_area_m2_range": rng,
+                "status": "missing_polygon",
+            })
+            continue
+        matched_obs_ids.add(obs.get("id") or "")
+        area_pt = float(obs.get("area_pts2") or 0.0)
+        area_m2 = area_pt * pt_to_m * pt_to_m
+        status = "in_range"
+        if rng and len(rng) == 2:
+            lo, hi = float(rng[0]), float(rng[1])
+            if area_m2 < lo:
+                status = "out_of_range_low"
+            elif area_m2 > hi:
+                status = "out_of_range_high"
+        out.append({
+            "expected_id": er.get("id"),
+            "expected_label": label,
+            "observed_id": obs.get("id"),
+            "observed_name": obs.get("name"),
+            "observed_area_m2": round(area_m2, 2),
+            "expected_area_m2_range": rng,
+            "status": status,
+        })
+
+    # Catch observed rooms with no expected counterpart
+    for obs in observed_rooms:
+        oid = obs.get("id") or ""
+        if oid in matched_obs_ids:
+            continue
+        area_pt = float(obs.get("area_pts2") or 0.0)
+        area_m2 = area_pt * pt_to_m * pt_to_m
+        out.append({
+            "expected_id": None,
+            "expected_label": None,
+            "observed_id": oid,
+            "observed_name": obs.get("name"),
+            "observed_area_m2": round(area_m2, 2),
+            "expected_area_m2_range": None,
+            "status": "unmatched_observed",
+        })
+
+    return out
+
+
+def _build_room_status_map(consensus: dict,
+                            expected_model: dict | None,
+                            pt_to_m: float) -> dict[str, str]:
+    """Map observed room id → status color (only for observed rows
+    in the match summary). Used by the renderer to recolor outlines.
+    """
+    summary = expected_match_summary(consensus, expected_model, pt_to_m)
+    out: dict[str, str] = {}
+    for row in summary:
+        oid = row.get("observed_id")
+        if not oid:
+            continue
+        out[oid] = _EXPECTED_MATCH_COLORS.get(
+            row.get("status") or "", "#9ca3af",
+        )
+    return out
 
 
 # ---------- Inspector helpers (text summaries) -------------------------
