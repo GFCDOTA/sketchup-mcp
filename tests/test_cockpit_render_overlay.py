@@ -312,6 +312,62 @@ def test_render_overlay_with_gt_toggle_off_keeps_default_outlines():
     assert 'stroke="#7a7a7a"' in svg
 
 
+# ---- Hover highlight (Cycle 12c) -------------------------------------
+
+def test_render_overlay_emits_hover_style_block():
+    """The SVG must include the inline `<style>` block that defines
+    `.hover-room:hover` and `.hover-opening:hover` so browsers (and
+    GitHub's inline SVG renderer) get hover feedback for free."""
+    svg = render_overlay_svg(_toy_consensus())
+    assert "<style>" in svg
+    assert ".hover-room:hover" in svg
+    assert ".hover-opening:hover" in svg
+
+
+def test_render_overlay_emits_title_per_room():
+    """Each rendered room polygon carries a `<title>` child with the
+    room name, area, and id — browsers show this as a native
+    tooltip on hover, no JS needed."""
+    svg = render_overlay_svg(
+        _toy_consensus(),
+        toggles=OverlayToggles(walls=False, rooms=True, labels=False,
+                                 openings=False),
+    )
+    assert "<title>SALA · " in svg
+    assert "<title>COZINHA · " in svg
+    # Tooltip carries the m² annotation + id
+    assert "m² · id=" in svg
+    # And the polygon class is applied so CSS hover fires
+    assert 'class="hover-room"' in svg
+
+
+def test_render_overlay_emits_title_per_opening():
+    """Each opening circle carries a `<title>` with kind + decision
+    + room context (room_left ↔ room_right) + id."""
+    svg = render_overlay_svg(
+        _toy_consensus(),
+        toggles=OverlayToggles(walls=False, rooms=False, labels=False,
+                                 openings=True),
+    )
+    # Toy fixture has one interior_door between SALA and COZINHA
+    assert "<title>interior_door · decision=clean · SALA ↔ COZINHA" in svg
+    assert 'class="hover-opening"' in svg
+
+
+def test_render_overlay_title_text_xml_escaped():
+    """Tooltip text MUST be XML-escaped so a room name containing
+    `<`, `>`, or `&` doesn't break the SVG. Mirrors the existing
+    label-escape contract."""
+    c = _toy_consensus()
+    c["rooms"][0]["name"] = "<bad> & evil"
+    svg = render_overlay_svg(c)
+    # Raw `<bad>` must NOT slip through (it would terminate the title
+    # element and inject markup). Note: the renderer does NOT
+    # uppercase the tooltip text — names pass through as-is.
+    assert "<title><bad>" not in svg
+    assert "<title>&lt;bad&gt; &amp; evil ·" in svg
+
+
 # ---- Real consensus smoke test (skip if missing) ----------------------
 
 def test_render_overlay_on_planta_74_baseline_smoke():
