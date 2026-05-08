@@ -210,10 +210,30 @@ rows (SUITE 01 at 69.91 m² vs expected `[10, 28]`; SUITE 02 at
 32.03 m² vs `[10, 22]`) — the same suites that motivated the
 Cycle 8b concave-hull promote.
 
-## Remaining limitations (post-12d)
+## Hover highlight (Cycle 12c — landed 2026-05-08)
 
-- No **interactive room/opening selection**. Clicking a room
-  doesn't highlight it. Static SVG only. Cycle 12c.
+Every rendered room polygon and opening circle now carries:
+
+1. A `<title>` child element — browsers show this as a **native
+   tooltip** on hover, no JS required. Tooltip content:
+   - Rooms: `<NAME> · <area> m² · id=<id>`
+   - Openings: `<kind> · decision=<decision> · <room_left> ↔ <room_right> · id=<id>`
+2. A `class="hover-room"` / `class="hover-opening"` attribute paired
+   with a CSS rule in the SVG's inline `<style>` block: hovering
+   bumps the polygon's `fill-opacity` to 0.85 and thickens the
+   stroke; hovering an opening thickens its outline. Cursor turns
+   into a pointer to signal the element is informative.
+
+The whole interaction is **CSS + native SVG `<title>`** — no
+JavaScript, no Streamlit event wiring. Works in every browser AND
+in GitHub's inline SVG renderer (try hovering a room in
+`docs/diagnostics/2026-05-08_cockpit_demo_overlay.svg`).
+
+XML escaping mirrors the existing label-escape contract: room names
+containing `<`, `>`, or `&` are safely encoded inside the tooltip.
+
+## Remaining limitations (post-12c)
+
 - No **side-by-side runs**. Pick one consensus at a time.
 - No **PT_TO_M auto-detect** from `consensus.metadata`. Manual
   number_input.
@@ -222,8 +242,8 @@ Cycle 8b concave-hull promote.
 
 | Candidate | Why |
 |---|---|
-| Cycle 12c — opening / room highlight on hover | Better triage UX. |
 | Cycle 12e — diff view | run A vs run B, useful for baseline-shift PRs. |
+| `renderers/` migration | Architecture plan step 5; clears the 5 transitional `render_*.py` orphans. |
 | Slice 2 — approve/reject + `review_overrides.json` | Needs FastAPI for POST. |
 | Slice 3 — `proposed_actions.json` + pre-SKP gate F0 | Closes the validation-before-SKP loop. |
 

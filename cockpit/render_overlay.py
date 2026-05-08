@@ -105,27 +105,73 @@ def _walls_to_polys(walls: list[dict]) -> list[list[list[float]]]:
 
 # ---------- SVG primitives ---------------------------------------------
 
+def _xml_escape(s: str) -> str:
+    return (s.replace("&", "&amp;")
+             .replace("<", "&lt;")
+             .replace(">", "&gt;"))
+
+
 def _polygon_svg(pts: Sequence[Sequence[float]],
                   fill: str = "none",
                   stroke: str = "#222",
                   stroke_width: float = 0.5,
-                  fill_opacity: float = 1.0) -> str:
+                  fill_opacity: float = 1.0,
+                  class_name: str | None = None,
+                  title_text: str | None = None) -> str:
+    """Emit a `<polygon>`. When `title_text` is provided, the polygon
+    becomes a parent element with a `<title>` child — browsers render
+    this as a native tooltip on hover (Cycle 12c). When `class_name`
+    is provided the CSS rule in the SVG `<style>` block applies."""
     pts_str = " ".join(f"{p[0]:.2f},{p[1]:.2f}" for p in pts)
+    cls = f' class="{class_name}"' if class_name else ""
+    if title_text is None:
+        return (
+            f'<polygon{cls} points="{pts_str}" '
+            f'fill="{fill}" fill-opacity="{fill_opacity}" '
+            f'stroke="{stroke}" stroke-width="{stroke_width}" />'
+        )
     return (
-        f'<polygon points="{pts_str}" '
+        f'<polygon{cls} points="{pts_str}" '
         f'fill="{fill}" fill-opacity="{fill_opacity}" '
-        f'stroke="{stroke}" stroke-width="{stroke_width}" />'
+        f'stroke="{stroke}" stroke-width="{stroke_width}">'
+        f'<title>{_xml_escape(title_text)}</title>'
+        f'</polygon>'
     )
 
 
 def _circle_svg(cx: float, cy: float, r: float,
                   fill: str = "#f59e0b",
                   stroke: str = "#000",
-                  stroke_width: float = 0.4) -> str:
+                  stroke_width: float = 0.4,
+                  class_name: str | None = None,
+                  title_text: str | None = None) -> str:
+    """Emit a `<circle>`. Same `<title>` + `class` extension as
+    `_polygon_svg` for hover tooltips (Cycle 12c)."""
+    cls = f' class="{class_name}"' if class_name else ""
+    if title_text is None:
+        return (
+            f'<circle{cls} cx="{cx:.2f}" cy="{cy:.2f}" r="{r:.2f}" '
+            f'fill="{fill}" stroke="{stroke}" stroke-width="{stroke_width}" />'
+        )
     return (
-        f'<circle cx="{cx:.2f}" cy="{cy:.2f}" r="{r:.2f}" '
-        f'fill="{fill}" stroke="{stroke}" stroke-width="{stroke_width}" />'
+        f'<circle{cls} cx="{cx:.2f}" cy="{cy:.2f}" r="{r:.2f}" '
+        f'fill="{fill}" stroke="{stroke}" stroke-width="{stroke_width}">'
+        f'<title>{_xml_escape(title_text)}</title>'
+        f'</circle>'
     )
+
+
+# ---------- Hover-highlight CSS (Cycle 12c) ----------------------------
+# Emitted inside the SVG so the file remains self-contained. Pure CSS
+# (no JS), works in every browser AND in GitHub's inline SVG renderer.
+_HOVER_STYLE_BLOCK = (
+    '<style>'
+    '.hover-room{transition:fill-opacity 0.15s,stroke-width 0.15s;}'
+    '.hover-room:hover{fill-opacity:0.85;stroke-width:2.5;cursor:pointer;}'
+    '.hover-opening{transition:stroke-width 0.15s;}'
+    '.hover-opening:hover{stroke-width:1.5;cursor:pointer;}'
+    '</style>'
+)
 
 
 def _text_svg(x: float, y: float, text: str,
@@ -257,6 +303,9 @@ def render_overlay_svg(consensus: dict,
         f'style="width:100%;height:auto;background:#f8f6ec;'
         f'border:1px solid #ccc;">'
     )
+    # Hover-highlight CSS (Cycle 12c). Self-contained inside the SVG
+    # so the file stays portable.
+    parts.append(_HOVER_STYLE_BLOCK)
 
     # PDF underlay (raster). Outside the flip group — the bitmap is
     # already top-down (pypdfium2 native), so we place it directly
@@ -301,9 +350,15 @@ def render_overlay_svg(consensus: dict,
                 # to the match status (green/orange/red/grey).
                 stroke_color = status_color_map[rid]
                 stroke_width = 2.0
+            # Cycle 12c hover tooltip: room name + computed area
+            name = r.get("name") or "?"
+            area_pt = float(r.get("area_pts2") or _polygon_area_pt2(poly))
+            area_m2 = area_pt * pt_to_m * pt_to_m
+            tooltip = f"{name} · {area_m2:.1f} m² · id={rid or '?'}"
             parts.append(_polygon_svg(
                 poly, fill=color, stroke=stroke_color,
                 stroke_width=stroke_width, fill_opacity=0.55,
+                class_name="hover-room", title_text=tooltip,
             ))
 
     # Walls.
@@ -344,9 +399,22 @@ def render_overlay_svg(consensus: dict,
             color = _OPENING_KIND_COLORS.get(kind, "#888")
             decision = op.get("decision", "?")
             stroke = "#000" if decision == "clean" else "#888"
-            parts.append(_circle_svg(float(c[0]), float(c[1]),
-                                       r=4.0, fill=color, stroke=stroke,
-                                       stroke_width=0.5))
+            # Cycle 12c hover tooltip: kind + decision + room context
+            ev = op.get("evidence") or {}
+            room_left = (op.get("room_left_name")
+                          or ev.get("room_left") or "?")
+            room_right = (op.get("room_right_name")
+                           or ev.get("room_right") or "?")
+            tooltip = (
+                f"{kind} · decision={decision} · "
+                f"{room_left} ↔ {room_right} · "
+                f"id={op.get('id') or '?'}"
+            )
+            parts.append(_circle_svg(
+                float(c[0]), float(c[1]), r=4.0, fill=color,
+                stroke=stroke, stroke_width=0.5,
+                class_name="hover-opening", title_text=tooltip,
+            ))
 
     parts.append("</g>")
     parts.append("</svg>")
