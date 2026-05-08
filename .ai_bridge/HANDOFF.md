@@ -1,4 +1,106 @@
-# Handoff — 2026-05-08 (Cycle 12b PDF underlay MERGED)
+# Handoff — 2026-05-08 (post-Cycle-12d wave: 6 PRs merged, hygiene audit + cockpit feature-complete)
+
+> Most recent session's exit state. Next session reads this FIRST
+> after `CLAUDE.md`. Append-only is fine but the top entry must
+> always be the latest.
+
+## Status — 6-PR session shipped, develop @ `c788df9`, queue clean
+
+This session shipped six PRs end-to-end via `gh` CLI (newly
+unblocked — see LL-012). Cockpit progressed from "0 LOC" to
+"feature-complete read-only slice" in one continuous loop.
+
+### Merge wall
+
+| PR | Title | Merge SHA |
+|---|---|---|
+| #68 | feat(cockpit): Cycle 12 — Validation Cockpit MVP (read-only Streamlit UI) | `84eae72` |
+| #69 | chore(ai_bridge): post-Cycle-12-merge handoff refresh + LL-012 (gh CLI tooling) | `6b8e8c6` |
+| #70 | feat(cockpit): Cycle 12b — PDF underlay (rasterised page behind the SVG overlay) | `8e1e225` |
+| #72 | chore(ai_bridge): post-Cycle-12b refresh + Cycle 12d promoted to P0 (parallel session) | `fe48f73` |
+| #71 | feat(cockpit): Cycle 12d — expected_model overlay (room outline status + Expected tab) | `d1a8acc` |
+| #73 | chore(hygiene): post-Cycle-12d audit ledger — no archives this cycle | `c788df9` |
+
+### Cockpit feature-complete (read-only slice)
+
+- **Cycle 12 (MVP)**: SVG overlay (walls / rooms / labels / openings),
+  4 layer toggles, 4 inspector tabs (Rooms / Openings / Fidelity /
+  Meta), Streamlit pinned as optional `[cockpit]` extra.
+- **Cycle 12b (PDF underlay)**: pypdfium2 rasterised page behind
+  the SVG overlay; sidebar picker auto-discovers PDFs near the
+  consensus + repo root + `runs/**`; opacity slider (0..1) +
+  DPI slider (72/96/144/200/300). viewBox snaps to PDF page
+  bounds when underlay is on.
+- **Cycle 12d (expected_model overlay)**: 5-state status palette
+  (`in_range`, `out_of_range_low/high`, `missing_polygon`,
+  `unmatched_observed`) recolours observed room outlines when the
+  GT overlay toggle is on. Fifth "Expected" inspector tab shows
+  the textual match table with status badges. **Real value
+  proven**: catches FP-012 leakage on canonical `planta_74` as 2
+  `out_of_range_high` rooms (SUITE 01 at 69.91 m² > 28 max;
+  SUITE 02 at 32.03 m² > 22 max).
+
+### Tooling unblocked (LL-012)
+
+`gh` CLI was missing from Bash PATH. Located at
+`C:\Program Files\GitHub CLI\gh.exe` (v2.92.0). Auth via keyring
+already configured (account `fmodesto30`, scope `repo`). Workflow
+documented in cross-project memory
+`~/.claude/projects/E--Claude/memory/reference_gh_cli_absolute_path.md`
++ linked from `MEMORY.md` + LL-012 in
+`docs/learning/lessons_learned.md`. Future sessions: invoke via
+absolute path + always pass `--repo GFCDOTA/sketchup-mcp` for
+cwd-independent commands. **No more "PR via URL manual" requests.**
+
+### Hygiene audit (PR #73)
+
+Audited every root-level `.py` and `.md` candidate for archival.
+No files moved this cycle — every candidate has at least one
+reference path that keeps it actionable. Ledger at
+`docs/diagnostics/2026-05-08_post_cycle12d_hygiene_audit.md` so the
+next pass starts from the same baseline.
+
+### Validation snapshot
+
+- **18/18 cockpit unit tests** PASS in 0.27s
+- Full `pytest -q`: 17 pre-existing raster failures (CLAUDE.md §10,
+  unchanged), 0 new failures from the cockpit work
+- `ruff check cockpit/ tests/test_cockpit_render_overlay.py` clean
+  on the new code; pre-existing E402 in `cockpit/app.py` from
+  PR #68's sys.path bootstrap is informative-only
+- `streamlit run cockpit/app.py` boots and renders with PDF
+  underlay + expected_model overlay both active
+
+### Boundary check (CLAUDE.md)
+
+- §1.2 schema unchanged ✓
+- §1.3 thresholds unchanged ✓
+- §1.4 Ruby/SU exporter untouched ✓
+- §1.6 high-risk entrypoints untouched ✓
+- §2 invariants intact (cockpit is read-only) ✓
+- §3 cockpit IS the cheap gate ✓
+
+### Next moves (per `TODO_NEXT.md` post-refresh)
+
+Top of queue (all GREEN P1):
+1. **Cycle 12c — interactive room/opening highlight on hover** —
+   adds `<title>` tooltip + JS-driven highlight on the SVG.
+2. **Cycle 12e — diff view (run A vs run B)** — side-by-side
+   renderer + per-room area delta. Useful for baseline-shift PRs.
+3. **`renderers/` migration** per architecture plan step 5
+   (kills the 4 transitional `render_*.py` orphans).
+
+YELLOW P2:
+- Slice 2 — approve/reject + `review_overrides.json` (FastAPI POST)
+- Slice 3 — `proposed_actions.json` + pre-SKP gate F0
+
+RED:
+- Stage 1.6 (held)
+- Multi-PDF corpus (Felipe must provide)
+
+---
+
+## Previous entry — Handoff — 2026-05-08 (Cycle 12b PDF underlay MERGED)
 
 > Most recent session's exit state. Next session reads this FIRST
 > after `CLAUDE.md`. Append-only is fine but the top entry must
