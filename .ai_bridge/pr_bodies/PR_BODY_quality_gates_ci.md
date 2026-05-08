@@ -1,8 +1,18 @@
 # ci(quality-gates): add strict-mode workflow for Plan/Coherence/Micro
 
 **Branch**: `feature/quality-gates-ci-workflow` → `develop`
-**Commit**: `c5b5342`
+**Commits**: `c5b5342` (initial workflow with 3 strict gates) +
+`a73be99` (adendo: hashFiles-guarded Fidelity Engine v1 step,
+auto-skip until GT branch lands)
 **Compare URL**: https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/quality-gates-ci-workflow
+
+> **Adendo (NAO PARE mode)**: adds the Fidelity Engine v1 step
+> guarded by `hashFiles('tools/fidelity/__init__.py',
+> 'ground_truth/planta_74/expected_model.json') != ''`. Step is
+> SKIPPED gracefully until `feature/ground-truth-v1-fidelity-engine`
+> lands on develop, then runs automatically with `--strict`. Removes
+> the cross-branch sequencing dependency between this PR and the
+> GT v1 PR — they can land in either order.
 
 ## Summary
 

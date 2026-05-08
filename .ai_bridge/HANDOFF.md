@@ -9,7 +9,7 @@
 User invoked **NAO PARE mode** (saved as cross-project memory
 `feedback_nao_pare_mode.md`). Heuristic: prefer commits to PUSHED
 branches over creating new ones, to avoid growing the queue.
-Two adendos landed in this rotation:
+**Three adendos** landed in this rotation:
 
 ### Adendo A — `feature/ground-truth-v1-fidelity-engine` `+1`
 
@@ -32,6 +32,19 @@ Two adendos landed in this rotation:
 - OVERVIEW.md §2.8 +2 rows; §4.4.1 extended with fidelity
   command. README.md "Validation Gates" bumped 3 → 4 gates.
 - Validation: pure markdown, no test surface.
+
+### Adendo C — `feature/quality-gates-ci-workflow` `+1`
+
+- Commit `a73be99`: `ci(quality-gates): add hashFiles-guarded Fidelity Engine v1 step`
+- Adds the Fidelity Engine v1 step inside the existing strict
+  workflow, with `hashFiles('tools/fidelity/__init__.py',
+  'ground_truth/planta_74/expected_model.json') != ''` guard.
+- Behaviour: SKIP gracefully until GT branch lands on develop;
+  RUN with `--strict` once both files exist.
+- Removes cross-branch ordering dependency between this PR and
+  the GT v1 PR — they can land in either order.
+- Effectively delivers Cycle 13 inside the existing PR instead
+  of opening a 10th branch.
 
 ### Memory rule added
 
