@@ -106,11 +106,6 @@ extend-exclude = [
   "build",
   "dist",
   "*.egg-info",
-  # tech debt — hardcoded local paths (C:/Users/felip_local/...);
-  # documented in docs/repo_hardening_plan.md, will be turned into CLI args:
-  "proto_colored.py",
-  "proto_red.py",
-  "render_sidebyside.py",
 ]
 
 [tool.ruff.lint]
