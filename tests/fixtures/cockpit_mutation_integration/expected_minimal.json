@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0",
+  "plan_id": "cockpit_mutation_integration_minimal",
+  "source_pdf": "(synthetic — fixture for cockpit Slice2->Slice3 round-trip integration tests)",
+  "unit": "m",
+  "scale_source": "synthetic — pt-to-m anchored on PT_TO_M_DEFAULT (0.19/5.4 ~ 0.0352)",
+  "global_bbox": {
+    "width": 6.333,
+    "height": 3.167,
+    "tolerance_pct": 10
+  },
+  "expected_counts": {
+    "rooms": 2,
+    "openings": 1,
+    "walls": 5,
+    "tolerance": {
+      "rooms_delta": 0,
+      "openings_delta": 1,
+      "walls_delta": 1
+    }
+  },
+  "rooms": [
+    {
+      "id": "gt_r0",
+      "label": "SALA",
+      "expected_area_m2_range": [9.0, 11.0],
+      "must_be_closed": true,
+      "manual_confidence": "high"
+    },
+    {
+      "id": "gt_r1",
+      "label": "COZINHA",
+      "expected_area_m2_range": [9.0, 11.0],
+      "must_be_closed": true,
+      "manual_confidence": "high"
+    }
+  ],
+  "openings": [
+    {
+      "id": "gt_o0",
+      "kind": "interior_door",
+      "connects": ["gt_r0", "gt_r1"],
+      "manual_confidence": "high"
+    }
+  ],
+  "adjacency": [
+    {
+      "a": "gt_r0",
+      "b": "gt_r1",
+      "via": "gt_o0",
+      "kind": "interior_door",
+      "manual_confidence": "high"
+    }
+  ],
+  "notes": [
+    "Paired with consensus_minimal.json. Used by",
+    "tests/test_cockpit_mutation_integration.py to drive the full",
+    "Slice 2 (cockpit/overrides.save_override) -> Slice 3",
+    "(tools.apply_overrides + fidelity.compare apply mode) round-trip",
+    "without depending on planta_74 baseline files. Both rooms square,",
+    "10.03 m^2 each, joined by 1 interior_door."
+  ]
+}
