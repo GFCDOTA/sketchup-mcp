@@ -133,6 +133,223 @@ EXAMPLE_SPEC_2_ROOM_L = {
 }
 
 
+# A 3-room T topology — added Cycle 11e (2026-05-08) to broaden the
+# round-trip surface beyond the 2-room L.  One horizontal HALL at the
+# bottom + 2 rooms (TOP_LEFT, TOP_RIGHT) above, separated by a full-
+# height vertical divider. ONE 50-pt gap on the horizontal divider
+# (the SUITE-side door) and a vertical divider between TL and TR.
+#
+# Why only one interior gap?  Watershed-based room polygonization
+# (`tools/rooms_from_seeds.py`) flows seeds through every wall_gap.
+# When two seeds compete for the same gap, the closer one claims most
+# of the cross-sectional area, leaving the further seed with a sliver
+# polygon.  In the T topology, seating an opening between HALL and a
+# top room and ALSO between HALL and another top room overconstrains
+# watershed — the HALL seed loses its polygon to the closer top-room
+# seeds.  We keep ONE clear interior_passage and one clean closed
+# divider so each room watershed is well-defined.
+#
+# Layout (PDF y-up):
+#
+#   +-----------------------+-----------------------+    y=240
+#   |                       |                       |
+#   |   TOP_LEFT            |   TOP_RIGHT           |
+#   |     [SALA T]          |     [SUITE T]         |
+#   |                       |                       |
+#   +-----------------------+-----+--gap1-----+-----+    y=140 (H div)
+#   |                                               |
+#   |                  HALL                         |
+#   |              [COZINHA T]                      |
+#   +-----------------------------------------------+    y=20
+#   x=20                                          x=620
+#
+# Three rooms; one wall_gap opening (gap1 between HALL & TOP_RIGHT).
+# Gap is 50 pt — well within DEFAULT_GAP_MIN_PTS=30.
+EXAMPLE_SPEC_3_ROOM_T = {
+    "page_w": 700.0,
+    "page_h": 280.0,
+    "walls": [
+        # outer rectangle
+        WallRect(20, 20, 600, T),                      # bottom (hall floor)
+        WallRect(20, 240 - T, 600, T),                 # top
+        WallRect(20, 20, T, 220),                      # left side
+        WallRect(620 - T, 20, T, 220),                 # right side
+        # horizontal divider y=140 between hall and top rooms,
+        # with ONE 50-pt gap on the SUITE-T side (gap1 at x=460..510).
+        # Divider goes x=20..620 with two stubs around the gap.
+        WallRect(20, 140 - T, 440, T),                 # left full segment x:20..460
+        WallRect(510, 140 - T, 110, T),                # right stub x:510..620
+        # vertical divider x=320 between TOP_LEFT and TOP_RIGHT,
+        # from y=140 (top edge of H divider) to y=240 (top wall).
+        WallRect(320 - T / 2, 140 - T, T, 100 + T),    # full height
+    ],
+    "labels": [
+        # Note: extract_room_labels.py only emits text matching
+        # ROOM_KEYWORDS (SALA, SUITE, COZINHA, QUARTO, BANHO, etc.).
+        # We use canonical keywords + a single suffix letter so the
+        # rooms map 1:1 to the spec without colliding with l2.
+        # The text-center for "COZINHA T" at Helvetica 10pt is ~25pt
+        # right of x. Place HALL seed left of the vertical divider.
+        TextLabel("COZINHA T", x=120, y=70),           # in HALL room
+        TextLabel("SALA T", x=140, y=190),             # in TOP_LEFT (closed)
+        TextLabel("SUITE T", x=440, y=190),            # in TOP_RIGHT (gap1)
+    ],
+    "expected_counts": {
+        "walls_min": 7,
+        "rooms": 3,
+        "openings_min": 0,
+        "openings_max": 1,
+    },
+}
+
+
+# A 4-room PLUS (cross) topology — added Cycle 11e (2026-05-08).
+# One central HALL room + 4 wing rooms (NORTH, SOUTH, EAST, WEST)
+# branching off, each connected by a 50-pt wall_gap. Wait — task says
+# "1 central + 3 wings". So 4 rooms total: CENTER + 3 wings (NORTH,
+# EAST, WEST). South is closed by an exterior wall. 3 openings between
+# CENTER and each wing.
+#
+# Layout (PDF y-up). Center sits at the middle; arms extend out:
+#
+#                  +-----------+               y=320
+#                  |  NORTH    |
+#                  |  [N WING] |
+#                  +--gap_n----+               y=240 (top divider)
+#                  |           |
+#   +-----------+--+           +--+-----------+ y=200
+#   |  WEST     |   CENTER     |   EAST       |
+#   | [W WING]  | gap_w   gap_e |  [E WING]   |
+#   +-----------+--+           +--+-----------+ y=120
+#                  |           |
+#                  |  HALL P   |
+#                  +-----------+               y=80 (south = closed)
+#                 x=180     x=320
+EXAMPLE_SPEC_4_ROOM_PLUS = {
+    "page_w": 500.0,
+    "page_h": 360.0,
+    "walls": [
+        # ---- CENTER box (vertical strip x=180..320, y=80..320) ----
+        # bottom of CENTER (closed — south is exterior here)
+        WallRect(180, 80, 140, T),
+        # top of CENTER (closed — N wing connects via gap above)
+        # The H divider between CENTER and NORTH at y=240, with gap_n.
+        WallRect(180, 240 - T, 60, T),                 # left stub x:180..240
+        WallRect(290, 240 - T, 30, T),                 # right stub x:290..320
+        # CENTER left wall (x=180), full height. Has gap_w at the
+        # WEST connection (y=140..190 = 50pt).
+        WallRect(180, 80, T, 60),                      # bottom stub y:80..140
+        WallRect(180, 190, T, 50),                     # top stub y:190..240
+        # CENTER right wall (x=320 - T = 314), full height. Has gap_e
+        # at the EAST connection (y=140..190).
+        WallRect(320 - T, 80, T, 60),                  # bottom stub
+        WallRect(320 - T, 190, T, 50),                 # top stub
+        # ---- NORTH wing (x=180..320, y=240..320) ----
+        # north wing's top + sides
+        WallRect(180, 320 - T, 140, T),                # top
+        WallRect(180, 240, T, 80),                     # left side
+        WallRect(320 - T, 240, T, 80),                 # right side
+        # ---- WEST wing (x=20..180, y=120..200) ----
+        WallRect(20, 120, T, 80),                      # left side
+        WallRect(20, 120, 160, T),                     # bottom
+        WallRect(20, 200 - T, 160, T),                 # top
+        # west's right wall is the CENTER's left, already drawn
+        # ---- EAST wing (x=320..480, y=120..200) ----
+        WallRect(480 - T, 120, T, 80),                 # right side
+        WallRect(320, 120, 160, T),                    # bottom
+        WallRect(320, 200 - T, 160, T),                # top
+    ],
+    "labels": [
+        # Same ROOM_KEYWORDS rule as SPEC_3 — pick canonical room
+        # words. The suffix letter (P/N/W/E) keeps each name unique.
+        TextLabel("SALA P", x=220, y=130),             # in CENTER
+        TextLabel("QUARTO N", x=215, y=270),           # in NORTH
+        TextLabel("QUARTO W", x=60, y=155),            # in WEST
+        TextLabel("QUARTO E", x=355, y=155),           # in EAST
+    ],
+    "expected_counts": {
+        "walls_min": 12,
+        "rooms": 4,
+        "openings_min": 0,
+        "openings_max": 3,
+    },
+}
+
+
+# A 5-room LONG HALL topology — added Cycle 11e (2026-05-08).
+# Five rooms in a row, separated by 4 vertical dividers each with a
+# 35-pt wall_gap door. Mixed public/private room mix so the V5
+# room-context classifier doesn't reject every gap as "private<->private
+# too wide" (PRIVATE_PAIR_DOOR_MAX_M = 1.50 m caps QUARTO<->QUARTO).
+# 35 pt × PT_TO_M=0.0352 ≈ 1.23 m — passes interior_passage.
+#
+# Layout (PDF y-up):
+#
+#   +------+-+----+-+----+-+----+-+----+-+------+    y=180
+#   |      |g|    |g|    |g|    |g|         |
+#   | R1   |1| R2 |2| R3 |3| R4 |4| R5      |
+#   |      | |    | |    | |    | |    | |     |
+#   +------+-+----+-+----+-+----+-+----+-+------+   y=20
+#   x=20                                         x=820
+#
+# Each room is ~157 pt wide (inside). Each divider has a 6-pt wall +
+# 35-pt gap + 6-pt wall, centered vertically on the divider.
+EXAMPLE_SPEC_5_LONG_HALL = {
+    "page_w": 840.0,
+    "page_h": 200.0,
+    "walls": [
+        # outer rectangle
+        WallRect(20, 20, 800, T),                      # bottom
+        WallRect(20, 180 - T, 800, T),                 # top
+        WallRect(20, 20, T, 160),                      # left side
+        WallRect(820 - T, 20, T, 160),                 # right side
+        # 4 vertical dividers at x = 180, 340, 500, 660.
+        # Each divider has a 35-pt vertical gap centered at y=100
+        # (so y=82.5..117.5 = 35pt gap).
+        # bottom stub: y=20..82.5 (h=62.5), top stub: y=117.5..180 (h=62.5).
+        # Divider 1 at x=180:
+        WallRect(180 - T / 2, 20, T, 62.5),
+        WallRect(180 - T / 2, 117.5, T, 62.5),
+        # Divider 2 at x=340:
+        WallRect(340 - T / 2, 20, T, 62.5),
+        WallRect(340 - T / 2, 117.5, T, 62.5),
+        # Divider 3 at x=500:
+        WallRect(500 - T / 2, 20, T, 62.5),
+        WallRect(500 - T / 2, 117.5, T, 62.5),
+        # Divider 4 at x=660:
+        WallRect(660 - T / 2, 20, T, 62.5),
+        WallRect(660 - T / 2, 117.5, T, 62.5),
+    ],
+    "labels": [
+        # Mixed public/private to avoid the
+        # PRIVATE_PAIR_DOOR_MAX_M=1.50m wall in
+        # tools/classify_openings_by_room_context.py:_classify_pair.
+        # Pattern: alternate private (QUARTO/SUITE) with public
+        # (SALA/COZINHA) so each adjacent pair has at least one public.
+        TextLabel("SALA H", x=65, y=95),               # in R1 (public)
+        TextLabel("QUARTO H", x=215, y=95),            # in R2 (private)
+        TextLabel("COZINHA H", x=375, y=95),           # in R3 (public)
+        TextLabel("SUITE H", x=545, y=95),             # in R4 (private)
+        TextLabel("LAVABO H", x=705, y=95),            # in R5 (private-ish)
+    ],
+    "expected_counts": {
+        "walls_min": 12,
+        "rooms": 5,
+        "openings_min": 0,
+        "openings_max": 4,
+    },
+}
+
+
+# Mapping for CLI/test access. Add new specs here.
+SPECS: dict[str, dict] = {
+    "l2": EXAMPLE_SPEC_2_ROOM_L,
+    "t3": EXAMPLE_SPEC_3_ROOM_T,
+    "plus4": EXAMPLE_SPEC_4_ROOM_PLUS,
+    "hall5": EXAMPLE_SPEC_5_LONG_HALL,
+}
+
+
 # ---------- PDF writer (hand-rolled PDF 1.4) -------------------------
 
 def _content_stream(walls: Sequence[WallRect],
@@ -243,11 +460,12 @@ def main(argv: list[str] | None = None) -> int:
     )
     ap.add_argument("--out", type=Path, required=True,
                      help="output PDF path")
-    ap.add_argument("--spec", choices=["l2"], default="l2",
+    ap.add_argument("--spec", choices=sorted(SPECS.keys()), default="l2",
                      help="which built-in spec to render (default: l2 "
-                          "= 2-room L-shape)")
+                          "= 2-room L-shape; t3 = 3-room T; plus4 = "
+                          "4-room cross; hall5 = 5-room corridor)")
     args = ap.parse_args(argv)
-    spec = EXAMPLE_SPEC_2_ROOM_L if args.spec == "l2" else None
+    spec = SPECS.get(args.spec)
     if spec is None:
         raise SystemExit(f"unknown spec: {args.spec}")
     write_pdf(spec, args.out)
