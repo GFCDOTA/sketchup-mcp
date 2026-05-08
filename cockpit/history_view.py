@@ -362,6 +362,20 @@ def summarise_run(run_dir: Path,
     fidelity = _parse_fidelity_report(fidelity_path)
     meta = _extract_meta_from_consensus(consensus)
     images = _collect_images(run_dir)
+    # Cycle 12g — when no PNG/SVG previews exist, render an
+    # on-demand thumbnail from the consensus JSON so the History
+    # view always has something to show. Local import to keep the
+    # graceful-degradation guarantee: if the thumbnail module
+    # itself fails to import (PIL missing on a stripped checkout),
+    # we keep the empty image_paths list.
+    if not images and cons_path is not None:
+        try:
+            from cockpit.thumbnails import ensure_thumbnail  # noqa: WPS433
+            thumb = ensure_thumbnail(run_dir, cons_path)
+            if thumb is not None:
+                images = [thumb]
+        except Exception:  # noqa: BLE001 — never break summarise_run
+            pass
     pdf_path = _pick_pdf(run_dir, repo)
     expected_path = _pick_expected_model(consensus, run_dir, repo)
 
