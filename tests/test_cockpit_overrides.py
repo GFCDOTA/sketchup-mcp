@@ -34,6 +34,7 @@ from cockpit.overrides import (
     overrides_for_element,
     overrides_path,
     precedence_resolve,
+    remove_override,
     save_override,
     set_block_skp_export,
     validate_override_payload,
@@ -710,3 +711,173 @@ def test_override_constants_exposed():
     assert len(OPENING_KIND_VALUES) == 6
     assert "interior_door" in OPENING_KIND_VALUES
     assert SUSPECT_SEVERITIES == ("low", "medium", "high")
+
+
+# ---------------------------------------------------------------------------
+# Cycle 12h — remove_override (Slice 2 deferral closure)
+# ---------------------------------------------------------------------------
+
+def test_remove_override_round_trip(tmp_path: Path):
+    """Save an override → remove it by id → re-load and confirm
+    `overrides[]` is empty + the file is still valid v1 on disk."""
+    run_dir, consensus_path = _materialise_run(tmp_path)
+    payload = {
+        "type": "opening_kind_override",
+        "target": {"kind": "opening", "id": "o0"},
+        "payload": {"new_kind_v5": "interior_passage"},
+        "reason": "to be removed",
+    }
+    saved = save_override(
+        run_dir, payload, audit_actor="human:tester",
+        consensus_path=consensus_path, consensus=_toy_consensus(),
+    )
+    assert len(saved["overrides"]) == 1
+    ov_id = saved["overrides"][0]["id"]
+
+    after = remove_override(
+        run_dir, override_id=ov_id, audit_actor="human:tester",
+        consensus_path=consensus_path,
+    )
+    assert after["overrides"] == [], (
+        "remove_override must drop the matching record from overrides[]"
+    )
+    # File still parseable v1 on disk
+    assert overrides_path(run_dir).exists()
+    re = load_overrides(run_dir, consensus_path=consensus_path)
+    assert re["schema_version"] == SCHEMA_VERSION
+    assert re["overrides"] == []
+
+
+def test_remove_override_appends_delete_to_audit_trail(tmp_path: Path):
+    """The delete event lands as a NEW audit entry with
+    `event: delete`, the captured `before` snapshot, and
+    `after: null` (per ADR-001 §2.7)."""
+    run_dir, consensus_path = _materialise_run(tmp_path)
+    payload = {
+        "type": "approve_element",
+        "target": {"kind": "room", "id": "r0"},
+        "payload": {},
+        "reason": "approved by mistake",
+    }
+    saved = save_override(
+        run_dir, payload, audit_actor="human",
+        consensus_path=consensus_path, consensus=_toy_consensus(),
+    )
+    ov_id = saved["overrides"][0]["id"]
+    saved_record = dict(saved["overrides"][0])
+
+    after = remove_override(
+        run_dir, override_id=ov_id, audit_actor="human:cleanup",
+        consensus_path=consensus_path,
+    )
+    # Two audit entries total: original `create` + new `delete`
+    assert len(after["audit_trail"]) == 2
+    delete_entry = after["audit_trail"][-1]
+    assert delete_entry["event"] == "delete"
+    assert delete_entry["override_id"] == ov_id
+    assert delete_entry["actor"] == "human:cleanup"
+    assert delete_entry["after"] is None, (
+        "ADR-001 §2.7: delete events carry after: null"
+    )
+    # The full `before` snapshot of the removed override is captured
+    # so a future viewer can replay the create→delete history.
+    assert delete_entry["before"] == saved_record
+    # diff_signature is present and 64-hex (sha256) like other entries
+    assert "diff_signature" in delete_entry
+    assert len(delete_entry["diff_signature"]) == 64
+    # Each entry has a unique id
+    ids = [a["id"] for a in after["audit_trail"]]
+    assert len(set(ids)) == len(ids)
+
+
+def test_remove_unknown_override_id_raises(tmp_path: Path):
+    """Removing an id that does not exist raises ValueError. The
+    file is NOT mutated (no spurious audit entries land)."""
+    run_dir, consensus_path = _materialise_run(tmp_path)
+    # Seed one real override so the file exists
+    save_override(
+        run_dir,
+        {"type": "approve_element",
+         "target": {"kind": "opening", "id": "o0"}, "payload": {}},
+        audit_actor="human",
+        consensus_path=consensus_path, consensus=_toy_consensus(),
+    )
+    before = load_overrides(run_dir, consensus_path=consensus_path)
+    audit_len_before = len(before["audit_trail"])
+    overrides_len_before = len(before["overrides"])
+
+    with pytest.raises(ValueError, match="not found"):
+        remove_override(
+            run_dir, override_id="bogus-uuid-does-not-exist",
+            audit_actor="human", consensus_path=consensus_path,
+        )
+
+    # File state unchanged: no entries were appended on the failed
+    # call (failure must not pollute the audit trail).
+    after = load_overrides(run_dir, consensus_path=consensus_path)
+    assert len(after["audit_trail"]) == audit_len_before
+    assert len(after["overrides"]) == overrides_len_before
+
+
+def test_audit_trail_remains_append_only_after_remove(tmp_path: Path):
+    """ADR-001 §2.10.3 invariant: removing an override does NOT
+    erase its prior `create` audit entry. The trail strictly grows
+    (append-only). A replay of the audit_trail can reconstruct the
+    full history (create → delete)."""
+    run_dir, consensus_path = _materialise_run(tmp_path)
+    payload_a = {
+        "type": "opening_kind_override",
+        "target": {"kind": "opening", "id": "o0"},
+        "payload": {"new_kind_v5": "window"},
+        "reason": "first",
+    }
+    payload_b = {
+        "type": "room_label_override",
+        "target": {"kind": "room", "id": "r1"},
+        "payload": {"new_name": "KITCHEN"},
+        "reason": "second",
+    }
+    state_a = save_override(
+        run_dir, payload_a, audit_actor="h1",
+        consensus_path=consensus_path, consensus=_toy_consensus(),
+    )
+    save_override(
+        run_dir, payload_b, audit_actor="h1",
+        consensus_path=consensus_path, consensus=_toy_consensus(),
+    )
+    ov_a_id = state_a["overrides"][0]["id"]
+    create_a_event = next(
+        a for a in state_a["audit_trail"]
+        if a.get("override_id") == ov_a_id
+        and a.get("event") == "create"
+    )
+
+    # Remove override A
+    after = remove_override(
+        run_dir, override_id=ov_a_id, audit_actor="h1",
+        consensus_path=consensus_path,
+    )
+
+    # 3 audit events total (create A, create B, delete A);
+    # ZERO entries were removed.
+    assert len(after["audit_trail"]) == 3
+    events = [a.get("event") for a in after["audit_trail"]]
+    assert events == ["create", "create", "delete"], (
+        "Audit trail must preserve original create entries and "
+        "append the delete event at the end (append-only)."
+    )
+
+    # The original `create` event for override A is STILL in the
+    # audit trail with byte-equivalent content (same id, same payload,
+    # same timestamp) — the remove call does not rewrite history.
+    create_a_after = next(
+        a for a in after["audit_trail"]
+        if a.get("override_id") == ov_a_id
+        and a.get("event") == "create"
+    )
+    assert create_a_after == create_a_event
+
+    # Override A is gone from overrides[]; B remains.
+    remaining_ids = [o.get("id") for o in after["overrides"]]
+    assert ov_a_id not in remaining_ids
+    assert len(after["overrides"]) == 1

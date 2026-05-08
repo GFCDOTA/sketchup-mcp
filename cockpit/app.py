@@ -46,7 +46,9 @@ from cockpit.overrides import (
     OPENING_KIND_VALUES,
     SUSPECT_SEVERITIES,
     load_overrides,
+    overrides_apply_view,
     overrides_for_element,
+    remove_override,
     save_override,
     set_block_skp_export,
 )
@@ -294,6 +296,22 @@ def _render_single_run_page() -> None:
         except Exception as e:  # noqa: BLE001
             underlay_error = f"PDF underlay failed: {e}"
 
+    # Cycle 12h — build the overrides apply view ONCE so both the
+    # SVG annotation and the Review tab share the same snapshot.
+    # Graceful degradation: any failure leaves overrides_view=None
+    # and the renderer reverts to byte-equivalent v1.x behaviour.
+    overrides_view: dict | None = None
+    try:
+        overrides_doc = load_overrides(
+            cons_path.parent, consensus_path=cons_path,
+        )
+        overrides_view = overrides_apply_view(
+            consensus, overrides_doc.get("overrides") or [],
+            pt_to_m=pt_to_m,
+        )
+    except Exception:  # noqa: BLE001
+        overrides_view = None
+
     with col_overlay:
         st.subheader("Top-down overlay")
         caption_bits = [
@@ -316,6 +334,7 @@ def _render_single_run_page() -> None:
                 pt_to_m=pt_to_m,
                 expected_model=expected,
                 consensus_b=consensus_b,
+                overrides_view=overrides_view,
             )
         except Exception as e:  # noqa: BLE001
             st.error(f"Renderer error: {e}")
@@ -954,6 +973,52 @@ def _render_review_panel(consensus: dict,
                 })
             st.dataframe(view_rows, use_container_width=True,
                           hide_index=True)
+
+            # Cycle 12h — inline override removal. Per ADR-001 §2.7
+            # the audit_trail is append-only: clicking "× remove"
+            # pops the override from `overrides[]` and appends a
+            # NEW `event: delete` audit entry; the original `create`
+            # entry stays untouched.
+            st.caption(
+                "Click `× remove` to delete an override. The "
+                "audit trail keeps the original `create` entry "
+                "and gains a new `delete` entry — full history "
+                "is preserved (ADR-001 §2.7)."
+            )
+            for ov in overrides:
+                ov_id = ov.get("id") or ""
+                tgt = ov.get("target") or {}
+                tgt_str = f"{tgt.get('kind')}:{tgt.get('id')}"
+                cols = st.columns([5, 1])
+                with cols[0]:
+                    st.markdown(
+                        f"`{ov_id[:8]}` · **{ov.get('type')}** · "
+                        f"target=`{tgt_str}` · "
+                        f"author=`{ov.get('author')}`"
+                    )
+                with cols[1]:
+                    if st.button(
+                            "× remove",
+                            key=f"rm_ov_{ov_id}",
+                            help=("Delete this override. The "
+                                  "original `create` audit entry "
+                                  "stays; a new `delete` entry is "
+                                  "appended."),
+                    ):
+                        try:
+                            remove_override(
+                                run_dir,
+                                override_id=ov_id,
+                                audit_actor="human",
+                                consensus_path=consensus_path,
+                            )
+                            st.success(
+                                f"Removed override `{ov_id[:8]}`. "
+                                "Reload the tab to see the updated "
+                                "audit trail."
+                            )
+                        except Exception as e:  # noqa: BLE001
+                            st.error(f"remove_override failed: {e}")
 
 
 def _render_opening_review_row(*,
