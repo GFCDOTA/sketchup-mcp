@@ -32,6 +32,71 @@
 
 ---
 
+## 2026-05-08 — Validation Cockpit MVP: Streamlit, not vanilla JS+FastAPI
+
+### Context
+
+Two parallel design paths surfaced for the pre-SKP visual-validation UI:
+
+- A previous session had already begun and committed (`30246d6`) a
+  Streamlit MVP — `cockpit/app.py` + `cockpit/render_overlay.py`
+  (308 LOC pure Python SVG renderer) + 10 unit tests + docs +
+  `[cockpit]` extra in `pyproject.toml`.
+- A fresh planning session (in plan mode, before discovering the
+  pushed work) recommended vanilla JS + FastAPI router under
+  `tools/dashboard/cockpit/` to avoid forking the dashboard stack.
+
+### Options considered
+
+1. **Honor fresh plan, discard Streamlit work** — clean stack
+   alignment with the existing FastAPI dashboard, but discards
+   ~600 LOC of working, tested, reasonable code.
+2. **Honor pushed work, abandon fresh plan** — preserves invested
+   effort; Streamlit is what GPT recommended in the original
+   exploration; ships Slice 1 fastest.
+3. **Hybrid** — Slice 1 stays Streamlit (this PR); Slice 2/3 add
+   FastAPI when state mutation (review_overrides / proposed_actions
+   / pre-SKP gate) makes a Python-only UI insufficient.
+
+### Decision
+
+Option 3 (Hybrid). This PR is the Slice 1 Streamlit MVP. FastAPI
+remains reserved for Slice 2/3 when POST endpoints are needed.
+
+### Reason
+
+Streamlit gets us a working visual gate fastest, reuses 100% of
+the already-pushed renderer, and respects the rule "preserve
+existing work of good quality, prefer the least destructive
+path." The renderer itself is dependency-free, so Slice 2/3 can
+keep importing it from a future FastAPI surface unchanged.
+
+### Consequences
+
+- Forward: Slice 2 will introduce FastAPI alongside (not replacing)
+  the Streamlit shell, since approve/reject persistence + diff +
+  pre-SKP gate are inherently mutation-flavoured.
+- Forward: `[cockpit]` extra is a permanent install path — must
+  stay opt-in so core pipeline + CI never pull in Streamlit.
+- Backward: the `tools/dashboard/cockpit/` subdirectory the fresh
+  plan assumed is NOT created in Slice 1; it stays as a Slice 2/3
+  candidate.
+
+### Rollback
+
+If Streamlit becomes unviable, revert commits `30246d6` + `f11e13c`
+on this branch (or after merge, on develop). Renderer code is
+self-contained and could be re-mounted under a different UI shell
+(plain HTML, FastAPI/Jinja, etc.) without rewriting.
+
+### See also
+
+- `docs/validation_cockpit.md` — UI map + boundary
+- `feedback_pre_existing_work_pivot.md` (cross-project memory) —
+  the rule that guided this decision
+
+---
+
 ## 2026-05-07 — Plan Truth Gate stays pytest-only (no JSON report)
 
 ### Context

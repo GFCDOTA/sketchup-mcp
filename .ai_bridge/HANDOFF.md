@@ -1,8 +1,54 @@
-# Handoff — 2026-05-08 14:30 UTC
+# Handoff — 2026-05-08 (Cycle 12 cockpit MVP)
 
 > Most recent session's exit state. Next session reads this FIRST
 > after `CLAUDE.md`. Append-only is fine but the top entry must
 > always be the latest.
+
+## Status — Cycle 12 MVP shipped, PR ready (open + merge manually)
+
+**Branch:** `feature/validation-cockpit-mvp-cycle12` (pushed)
+**Compare:**
+https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/validation-cockpit-mvp-cycle12
+**PR body:** `.ai_bridge/pr_bodies/PR_BODY_cockpit_cycle12.md`
+**Commits ahead of `develop`:**
+- `30246d6` feat(cockpit): Cycle 12 — Validation Cockpit MVP (read-only Streamlit UI)
+- `f11e13c` fix(cockpit): make app launchable from any cwd + install cockpit package
+
+### What shipped
+
+- `cockpit/render_overlay.py` (308 LOC pure-Python SVG renderer, zero deps)
+- `cockpit/app.py` (281 LOC Streamlit shell: consensus + GT picker, 4 layer toggles, 3:2 split overlay+inspector, live fidelity engine call when GT selected)
+- `tests/test_cockpit_render_overlay.py` (10 unit tests, 0.02s)
+- `pyproject.toml` `[cockpit]` extra (`streamlit>=1.57,<2.0`) + `cockpit*` in `packages.find`
+- `docs/validation_cockpit.md` (UI map + boundary + post-MVP candidate list)
+- `docs/diagnostics/2026-05-08_cockpit_demo_overlay.svg` + `*_axon_top.png`
+
+### Validation evidence
+
+- `pytest tests/test_cockpit_render_overlay.py -q` → **10/10 PASS** in 0.02s
+- `streamlit run cockpit/app.py` boots; `runs/cycle11c/c0.json` overlay renders without errors. Initial `ModuleNotFoundError: No module named 'cockpit'` was caught + fixed in `f11e13c` (sys.path bootstrap + `cockpit*` added to packages.find).
+- `python -c "import cockpit.app as a; print(callable(a.main))"` → `True`
+
+### Boundary check (CLAUDE.md)
+
+- §1.2 schema unchanged ✓
+- §1.3 thresholds unchanged ✓
+- §1.4 Ruby/SU exporter untouched ✓
+- §1.6 high-risk entrypoints (`api/app.py`, `main.py`) untouched ✓
+- §2 invariants intact (read-only) ✓
+- §3 cockpit IS the cheap gate, runs without SU ✓
+
+### Next moves
+
+1. **User:** open PR manually via compare URL, paste body from `PR_BODY_cockpit_cycle12.md`, watch CI.
+2. **If CI green + clean:** merge per operational autonomy protocol (PR clean + verde + escopo esperado → mergear sem pedir).
+3. **Post-merge:** delete the feature branch (local + remote), refresh `CURRENT_STATE.md`, pick next ROI from `TODO_NEXT.md` (Cycle 8b — promote concave-hull default — remains the highest-ROI YELLOW item).
+
+### Slice 2/3 deferred (not in this PR)
+
+- Approve / reject per element + `review_overrides.json` persistence (needs FastAPI for POST)
+- `proposed_actions.json` schema + pre-SKP gate F0 in `scripts/smoke/smoke_skp_export.py`
+- Run-vs-run diff (e.g. cycle11b vs cycle11c, or planta_74 pre/post-Cycle 8b)
 
 ## Status — QUEUE ZEROED + Operational autonomy protocol installed
 
