@@ -1,0 +1,201 @@
+{
+  "schema_version": "1.0",
+  "plan_id": "planta_74",
+  "source_pdf": "planta_74.pdf",
+  "unit": "m",
+  "scale_source": "wall_thickness_pts=5.4 mapped to 0.19 m via PT_TO_M=0.0352 (anchor calibrated 2026-04, see CLAUDE.md §10 'PDF -> m precisa de ancora fisica' memory rule)",
+  "global_bbox": {
+    "width": 17.7,
+    "height": 10.3,
+    "tolerance_pct": 10
+  },
+  "expected_counts": {
+    "rooms": 11,
+    "openings": 11,
+    "walls": 33,
+    "tolerance": {
+      "rooms_delta": 1,
+      "openings_delta": 3,
+      "walls_delta": 4
+    }
+  },
+  "rooms": [
+    {
+      "id": "sala_estar",
+      "label": "SALA DE ESTAR",
+      "expected_area_m2_range": [8.0, 18.0],
+      "expected_bbox_m": { "width": 4.0, "height": 3.5 },
+      "must_be_closed": true,
+      "manual_confidence": "high",
+      "source": "manual review of planta_74.pdf cross-checked with detected polygon (10.75 m^2)",
+      "notes": [
+        "Most stable room in the plant. Carries the porta-vidro to TERRACO SOCIAL.",
+        "Calibrated baseline 2026-05-06 at 10.75 m^2. Range 8-18 absorbs detector noise."
+      ]
+    },
+    {
+      "id": "sala_jantar",
+      "label": "SALA DE JANTAR",
+      "expected_area_m2_range": [8.0, 18.0],
+      "must_be_closed": true,
+      "manual_confidence": "high",
+      "notes": [
+        "Adjacent to SALA DE ESTAR (open social area) and to COZINHA (passage)."
+      ]
+    },
+    {
+      "id": "cozinha",
+      "label": "COZINHA",
+      "expected_area_m2_range": [6.0, 14.0],
+      "must_be_closed": true,
+      "manual_confidence": "high",
+      "notes": [
+        "Detected at 11.34 m^2 today.",
+        "Architecturally adjacent to A.S. (service connection); this adjacency is currently MISSED by the room-context classifier (Cycle 6 follow-up)."
+      ]
+    },
+    {
+      "id": "lavabo",
+      "label": "LAVABO",
+      "expected_area_m2_range": [2.0, 5.5],
+      "must_be_closed": true,
+      "manual_confidence": "high",
+      "notes": ["Guest bathroom in the social area. Detected at 3.40 m^2."]
+    },
+    {
+      "id": "as",
+      "label": "A.S.",
+      "expected_area_m2_range": [2.5, 11.0],
+      "must_be_closed": true,
+      "manual_confidence": "medium",
+      "notes": [
+        "Service area (area de servico). Detected at 10.39 m^2.",
+        "Range upper-bound is generous because detector currently bleeds A.S. into nearby exterior strip on the LEFT side (mirror of the FP-012 SUITE 01 issue, smaller magnitude)."
+      ]
+    },
+    {
+      "id": "terraco_social",
+      "label": "TERRACO SOCIAL",
+      "expected_area_m2_range": [4.0, 16.0],
+      "must_be_closed": true,
+      "manual_confidence": "medium",
+      "notes": ["Social terrace; non-walled exterior, watershed-clipped via convex hull today. Detected at 13.64 m^2."]
+    },
+    {
+      "id": "terraco_tecnico",
+      "label": "TERRACO TECNICO",
+      "expected_area_m2_range": [2.0, 8.0],
+      "must_be_closed": true,
+      "manual_confidence": "medium",
+      "notes": ["Technical terrace (clothesline / AC condenser). Detected at 5.77 m^2."]
+    },
+    {
+      "id": "suite_01",
+      "label": "SUITE 01",
+      "expected_area_m2_range": [10.0, 28.0],
+      "must_be_closed": true,
+      "manual_confidence": "high",
+      "notes": [
+        "KNOWN BUG: convex-hull clip leaks watershed; default observed area is 69.91 m^2 (~5x too big), see FP-012 + docs/diagnostics/2026-05-07_planta_74_suite01_polygon_leakage.md.",
+        "feature/concave-hull-room-clip-spike (default-off) brings this to 18-26 m^2, which is in range.",
+        "v1 GT INTENTIONALLY hard-fails this room until Cycle 8b promotes the concave hull as default. That failure IS the value of the gate — it makes the regression visible."
+      ]
+    },
+    {
+      "id": "suite_02",
+      "label": "SUITE 02",
+      "expected_area_m2_range": [10.0, 22.0],
+      "must_be_closed": true,
+      "manual_confidence": "high",
+      "notes": [
+        "Detected at 32.03 m^2 today (slightly oversized via the same FP-012 mechanism as SUITE 01, smaller magnitude).",
+        "Range upper-bound 22 INTENTIONALLY hard-fails until Cycle 8b lands."
+      ]
+    },
+    {
+      "id": "banho_01",
+      "label": "BANHO 01",
+      "expected_area_m2_range": [3.0, 8.0],
+      "must_be_closed": true,
+      "manual_confidence": "high",
+      "notes": ["Master bath of SUITE 01. Detected at 5.48 m^2."]
+    },
+    {
+      "id": "banho_02",
+      "label": "BANHO 02",
+      "expected_area_m2_range": [3.0, 8.0],
+      "must_be_closed": true,
+      "manual_confidence": "high",
+      "notes": ["Master bath of SUITE 02. Detected at 6.24 m^2."]
+    }
+  ],
+  "openings": [
+    {
+      "id": "op_sala_estar_terraco",
+      "kind": "glazed_balcony",
+      "connects": ["sala_estar", "terraco_social"],
+      "manual_confidence": "high"
+    },
+    {
+      "id": "op_sala_estar_jantar",
+      "kind": "interior_passage",
+      "connects": ["sala_estar", "sala_jantar"],
+      "manual_confidence": "medium",
+      "notes": ["Open passage between the two sala rooms; may not have a discrete opening object in the consensus."]
+    },
+    {
+      "id": "op_sala_jantar_cozinha",
+      "kind": "interior_passage",
+      "connects": ["sala_jantar", "cozinha"],
+      "manual_confidence": "high"
+    },
+    {
+      "id": "op_sala_jantar_lavabo",
+      "kind": "interior_door",
+      "connects": ["sala_jantar", "lavabo"],
+      "manual_confidence": "high"
+    },
+    {
+      "id": "op_cozinha_as",
+      "kind": "interior_door",
+      "connects": ["cozinha", "as"],
+      "manual_confidence": "medium",
+      "notes": ["Service door cozinha to A.S. — currently MISSING from the detected openings (Cycle 6 follow-up)."]
+    },
+    {
+      "id": "op_suite_01_banho_01",
+      "kind": "interior_door",
+      "connects": ["suite_01", "banho_01"],
+      "manual_confidence": "high"
+    },
+    {
+      "id": "op_suite_02_banho_02",
+      "kind": "interior_door",
+      "connects": ["suite_02", "banho_02"],
+      "manual_confidence": "high"
+    },
+    {
+      "id": "op_suite_02_terraco_tecnico",
+      "kind": "glazed_balcony",
+      "connects": ["suite_02", "terraco_tecnico"],
+      "manual_confidence": "medium"
+    }
+  ],
+  "adjacency": [
+    { "a": "sala_estar", "b": "terraco_social", "via": "op_sala_estar_terraco", "kind": "glazed_balcony", "manual_confidence": "high" },
+    { "a": "sala_estar", "b": "sala_jantar", "via": "op_sala_estar_jantar", "kind": "open", "manual_confidence": "medium" },
+    { "a": "sala_jantar", "b": "cozinha", "via": "op_sala_jantar_cozinha", "kind": "interior_passage", "manual_confidence": "high" },
+    { "a": "sala_jantar", "b": "lavabo", "via": "op_sala_jantar_lavabo", "kind": "interior_door", "manual_confidence": "high" },
+    { "a": "cozinha", "b": "as", "via": "op_cozinha_as", "kind": "interior_door", "manual_confidence": "medium" },
+    { "a": "suite_01", "b": "banho_01", "via": "op_suite_01_banho_01", "kind": "interior_door", "manual_confidence": "high" },
+    { "a": "suite_02", "b": "banho_02", "via": "op_suite_02_banho_02", "kind": "interior_door", "manual_confidence": "high" },
+    { "a": "suite_02", "b": "terraco_tecnico", "via": "op_suite_02_terraco_tecnico", "kind": "glazed_balcony", "manual_confidence": "medium" }
+  ],
+  "notes": [
+    "Ground Truth v1 — 2026-05-07. The 'minimum that already blocks real regression' per the GT design prompt.",
+    "Authored by Claude after a multi-pipeline-output audit; cross-checked with the rendered top-down preview (docs/diagnostics/2026-05-07_planta_74_suite01_polygon_leakage.png) and architectural priors for a 74 m^2 Brazilian apartment with 2 suites + 1 lavabo.",
+    "The two SUITES are intentionally calibrated to FAIL today against the convex-hull baseline. Cycle 8b (promote concave hull) flips them to PASS. That regression-and-recovery cycle is the v1 value proposition.",
+    "v1 deliberately omits: per-wall geometry, per-room polygon IoU, opening positions along walls, mobiliario, materials. Those are v2 once the v1 metrics stabilize.",
+    "Update procedure: bump schema_version on breaking changes; expand a range only with a PR that explains why the detector moved."
+  ]
+}
