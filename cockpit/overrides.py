@@ -429,6 +429,72 @@ def save_override(run_dir: Path,
     return data
 
 
+def remove_override(run_dir: Path,
+                     override_id: str,
+                     audit_actor: str,
+                     consensus_path: Path | None = None) -> dict:
+    """Remove an override from `overrides[]` and append a `delete`
+    audit entry.
+
+    The audit trail is **append-only** (ADR §2.10.3 / §2.7): the
+    deleted override's prior `create` entry STAYS in `audit_trail[]`
+    untouched; this function appends a NEW entry with
+    ``event: "delete"``, the captured ``before`` state of the removed
+    override, and ``after: null``. A future viewer can replay the
+    full history (create → delete) without losing fidelity.
+
+    Args:
+        run_dir: directory containing the `review_overrides.json`.
+        override_id: the `id` of the override to remove (the uuid
+            assigned by ``save_override``). Lookup is exact match.
+        audit_actor: free-form actor string (e.g. ``"human"`` or
+            ``"agent:cleanup"``).
+        consensus_path: optional, only used to refresh the
+            `_consensus_sha256_match` flag on the loaded doc.
+
+    Returns:
+        The full file dict after the atomic write.
+
+    Raises:
+        ValueError: if no override with the supplied ``override_id``
+            is found in ``overrides[]``.
+    """
+    data = load_overrides(run_dir, consensus_path=consensus_path)
+    data.pop("_consensus_sha256_match", None)
+
+    overrides = data.get("overrides") or []
+    idx = next(
+        (i for i, ov in enumerate(overrides)
+         if ov.get("id") == override_id),
+        None,
+    )
+    if idx is None:
+        raise ValueError(
+            f"override_id {override_id!r} not found in overrides[]"
+        )
+
+    before = dict(overrides[idx])  # snapshot for audit
+    # Remove the override from the live list
+    del overrides[idx]
+    data["overrides"] = overrides
+    data["last_updated_at"] = _now_iso()
+
+    audit = {
+        "id": _new_id(),
+        "event": "delete",
+        "override_id": override_id,
+        "actor": audit_actor or "human",
+        "timestamp": data["last_updated_at"],
+        "before": before,
+        "after": None,
+        "diff_signature": _audit_diff_signature(before, None),
+    }
+    data["audit_trail"].append(audit)
+
+    _atomic_write_json(overrides_path(run_dir), data)
+    return data
+
+
 def set_block_skp_export(run_dir: Path,
                           blocked: bool,
                           reason: str | None,
@@ -651,6 +717,7 @@ __all__ = [
     "load_overrides",
     "validate_override_payload",
     "save_override",
+    "remove_override",
     "set_block_skp_export",
     "precedence_resolve",
     "overrides_apply_view",
