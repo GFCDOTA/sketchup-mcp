@@ -20,8 +20,17 @@ Cycle 12 MVP boundary:
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 from typing import Any
+
+# Make ``cockpit`` package importable when launched via
+# ``streamlit run cockpit/app.py`` regardless of cwd. Streamlit only
+# adds the script's directory (cockpit/) to sys.path; we also need the
+# repo root so the absolute ``cockpit.*`` imports below resolve.
+_REPO_ROOT_BOOT = Path(__file__).resolve().parent.parent
+if str(_REPO_ROOT_BOOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT_BOOT))
 
 import streamlit as st
 
