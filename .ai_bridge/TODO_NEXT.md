@@ -18,17 +18,24 @@ Each entry:
 ## P0 — Nine PR-less branches ready (PR bodies under .ai_bridge/pr_bodies/)
 
 User opens PRs manually (memory rule `feedback_pr_manual_preferido.md`).
-Recommended merge order to minimize rebase pain:
+Recommended merge order to minimize rebase pain (still zero
+file-level conflicts after the 2026-05-08 NAO PARE adendos):
 
 1. `docs/non-stop-autonomy-rule` (CLAUDE.md only, no conflicts)
 2. `docs/suite01-polygon-leakage-investigation` (docs/ only)
-3. `docs/readme-overview-stage15-tools` (README + OVERVIEW only)
+3. `docs/readme-overview-stage15-tools` (README + OVERVIEW + Adendo B Fidelity mentions)
 4. `feature/rubocop-sketchup-ci` (Gemfile/.rubocop/workflow only)
-5. `feature/quality-gates-ci-workflow` (.github/workflows only)
+5. `feature/quality-gates-ci-workflow` (.github/workflows + Adendo C hashFiles-guarded fidelity step)
 6. `feature/concave-hull-room-clip-spike` (default-off code change)
-7. `feature/ground-truth-v1-fidelity-engine` (additive: ground_truth/, tools/fidelity/, tests/, docs/)
+7. `feature/ground-truth-v1-fidelity-engine` (additive: ground_truth/, tools/fidelity/, tests/, docs/ + Adendo A round-trip tests)
 8. `docs/ai-bridge-scaffolding-clean` (.ai_bridge/ only)
 9. `feature/micro-truth-expand-planta-74-cycle7` (ground_truth + tests)
+
+**NAO PARE wave 2026-05-08 adendos:**
+- A: `dac81ed` on GT branch (synth + 4 round-trip tests)
+- B: `d0734a7` on README/OVERVIEW (Fidelity mentions)
+- C: `a73be99` on quality-gates (hashFiles-guarded fidelity step =
+  effectively delivers Cycle 13 inside the existing PR)
 
 | Branch | Body file | Compare URL |
 |---|---|---|
