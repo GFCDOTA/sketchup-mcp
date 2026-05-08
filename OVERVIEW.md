@@ -127,6 +127,8 @@ A galeria de Plantas mostra renders + comparações. Oráculo lista runs com dia
 | `coherence_audit.py` | Audit Stage 1 sobre um consensus já classificado. Emite `coherence_report.json` (schema 1.0) com facts/hypotheses/ambiguities/drops/policy/summary + `questions.json` (Rodada-2). Não-bloqueante por default; `--strict` opta em block-on-issue. |
 | `micro_truth_gate.py` | Stage 1.5: valida 1+ rooms contra `ground_truth/<plant>_micro.json` curado à mão. Emite `micro_truth_report.json` schema 1.0. Default exit 0; `--strict` blocks on failure. |
 | `skp_inspection_report.py` | Stage 1.6: relatório schema 1.0 sobre o `.skp` exportado (sha256/size + bounds_check vs consensus). Pareado com o autorun plugin Ruby. |
+| `fidelity/compare_generated_to_expected.py` | Ground Truth v1: compara um consensus observado contra `ground_truth/<plant>/expected_model.json` (golden truth manual). Emite `fidelity_report.json` (schema 1.0) com counts/bbox/rooms/adjacency/opening_kind metrics + `global_fidelity` score (0..1, capped at 0.69 quando há hard_fail) + `hard_fails[]`/`warnings[]`/`suggested_fixes[]`. Default exit 0; `--strict` blocks. Distinto do `micro_truth_gate` (per-room subset) e do Plan Truth Gate (self-pin baseline). |
+| `fidelity/synth_from_expected.py` | Round-trip helper: gera um consensus sintético a partir de qualquer `expected_model.json` cuja fidelity contra o próprio expected é exatamente 1.0. Usado por `tests/test_fidelity_engine_round_trip.py` pra catchar bugs na engine (não no pipeline). |
 
 ### 2.9 Testes + Docs
 
@@ -260,11 +262,21 @@ python -m tools.coherence_audit runs/vector/consensus_classified.json \
 python -m tools.micro_truth_gate runs/vector/consensus_classified.json \
        --ground-truth ground_truth/planta_74_micro.json \
        --out runs/vector/micro_truth_report.json
+
+# Fidelity Engine v1 — whole-plant golden truth (Ground Truth v1)
+python -m tools.fidelity.compare_generated_to_expected \
+       runs/vector/consensus_classified.json \
+       --expected ground_truth/planta_74/expected_model.json \
+       --out runs/vector/fidelity_report.json \
+       --scorecard runs/vector/fidelity_scorecard.md
 ```
 
 Each gate emits a `*.json` (schema 1.0); `--strict` opt-in flips them
-to hard exit-non-zero. CI runs all three on every PR via
-`.github/workflows/quality_gates.yml`.
+to hard exit-non-zero. CI runs all four on every PR via
+`.github/workflows/quality_gates.yml`. See
+[`docs/ground_truth_v1.md`](docs/ground_truth_v1.md) for the
+fidelity engine's hard-fail vs warning policy + how to author
+new `expected_model.json` files.
 
 ### 4.5 Gerar o .skp 3D (precisa SU2026)
 
