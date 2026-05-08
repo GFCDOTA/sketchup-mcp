@@ -354,8 +354,12 @@ def _opening_axis_basis(wall)
   end
 end
 
-def add_door_leaf(parent_entities, opening, walls_by_id, thickness_pt,
+def add_door_leaf(parent_entities, opening, walls_by_id, _thickness_pt,
                    door_material, layer)
+  # `_thickness_pt` retained in signature for caller-symmetry with
+  # add_carved_wall; the door leaf itself is degenerate in the cross
+  # axis (SU pushpull adds volume later), so the value is unused
+  # here. Underscore prefix per Ruby/RuboCop convention.
   # Render a door leaf (single panel, swung open by DOOR_SWING_DEG)
   # at the hinge side of the opening. The host wall is already CARVED
   # by add_carved_wall (see CARVING_OPENING_ORIGINS); this function
