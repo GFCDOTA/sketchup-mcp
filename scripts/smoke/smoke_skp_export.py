@@ -1,4 +1,4 @@
-"""SketchUp smoke harness — gates A through H.
+"""SketchUp smoke harness — gates A through H + F0 (Slice 3).
 
 Enforces the rule from CLAUDE.md §3: SketchUp is the LAST gate.
 Cheap gates run first; SU spawns only after JSON, previews, and the
@@ -6,18 +6,23 @@ content-hash cache all agree the work is needed.
 
 Gate sequence
 -------------
-A. Preparation       — verify env, ensure out-dir, locate sketchup.exe.
-B. Acquire consensus — load JSON, defaults to runs/vector/consensus_model.json.
-C. JSON structural   — walls/rooms/openings shape sanity-checks.
-D. Preview PNG       — call tools.render_axon for top + axon (no SU).
-E. Hash + cache      — SHA256 of (consensus + skp_from_consensus.py +
-                       consume_consensus.rb) compared to a per-run cache marker.
-F. Export .skp       — invoke tools.skp_from_consensus (skipped on
-                       --skip-skp or cache hit unless --force-skp).
-G. Validate .skp     — file exists, size > 1 KiB.
-H. Reports           — write sketchup_smoke_report.{json,md}; refresh cache.
+A.  Preparation       — verify env, ensure out-dir, locate sketchup.exe.
+B.  Acquire consensus — load JSON, defaults to runs/vector/consensus_model.json.
+C.  JSON structural   — walls/rooms/openings shape sanity-checks.
+D.  Preview PNG       — call tools.render_axon for top + axon (no SU).
+E.  Hash + cache      — SHA256 of (consensus + skp_from_consensus.py +
+                        consume_consensus.rb) compared to a per-run cache marker.
+F0. Pre-SKP review    — read fidelity_report + (optional) review_overrides;
+                        emit pre_skp_review_report.json (ADR-001 §2.8).
+                        Verdict semantics gated by --review-mode={off,warn,block}.
+F.  Export .skp       — invoke tools.skp_from_consensus (skipped on
+                        --skip-skp or cache hit unless --force-skp).
+G.  Validate .skp     — file exists, size > 1 KiB.
+H.  Reports           — write sketchup_smoke_report.{json,md}; refresh cache.
 
 Any FAIL gate short-circuits to H (so reports are always written).
+F0 with --review-mode=off is a NO-OP from CI's perspective — it
+writes the verdict to disk but never aborts the smoke run.
 
 Companion doc: docs/validation/sketchup_smoke_workflow.md.
 """
@@ -285,6 +290,251 @@ def gate_e(args: argparse.Namespace, report: SmokeReport) -> GateResult:
     return g
 
 
+PRE_SKP_REVIEW_SCHEMA_VERSION = "pre_skp_review_v1"
+PRE_SKP_PASS_FIDELITY = 0.85
+PRE_SKP_WARN_FIDELITY = 0.69
+PRE_SKP_PASS_WARNINGS = 3
+
+
+def _compute_pre_skp_review(
+    fidelity_report: dict | None,
+    overrides_doc: dict | None,
+    consensus_sha: str,
+) -> dict:
+    """Pure verdict logic per ADR-001 §2.8.
+
+    Inputs are the *already-loaded* fidelity report and optional
+    overrides document. Returns the dict written to
+    ``pre_skp_review_report.json``.
+    """
+    reasons: list[str] = []
+    fidelity_score: float | None = None
+    hard_fails_count = 0
+    warnings_count = 0
+    active_overrides_count = 0
+    block_skp_export = False
+
+    if fidelity_report is None:
+        reasons.append("no_fidelity_report")
+        verdict = "FAIL"
+    else:
+        score_v = fidelity_report.get("global_fidelity")
+        if isinstance(score_v, (int, float)):
+            fidelity_score = float(score_v)
+        hard_fails = fidelity_report.get("hard_fails") or []
+        warnings = fidelity_report.get("warnings") or []
+        hard_fails_count = len(hard_fails)
+        warnings_count = len(warnings)
+
+    sha_mismatch = False
+    has_high_suspect = False
+    has_human_review_request = False
+    if overrides_doc is not None:
+        overrides = overrides_doc.get("overrides") or []
+        active_overrides_count = len(overrides)
+        bound_sha = overrides_doc.get("consensus_sha256") or ""
+        if bound_sha and consensus_sha and bound_sha != consensus_sha:
+            sha_mismatch = True
+            reasons.append(
+                f"consensus_sha256_mismatch: bound to {bound_sha[:12]}..., "
+                f"live consensus is {consensus_sha[:12]}..."
+            )
+        if (overrides_doc.get("global") or {}).get("block_skp_export"):
+            block_skp_export = True
+            br = (overrides_doc.get("global") or {}).get("block_reason")
+            reasons.append(
+                f"block_skp_export=true ({br or 'no reason given'})"
+            )
+        for ov in overrides:
+            if ov.get("type") == "block_skp_export":
+                block_skp_export = True
+                br = (ov.get("payload") or {}).get("reason")
+                reasons.append(
+                    f"override block_skp_export ({br or 'no reason given'})"
+                )
+            if ov.get("type") == "mark_suspect":
+                if (ov.get("payload") or {}).get("severity") == "high":
+                    has_high_suspect = True
+            if ov.get("type") == "request_human_review":
+                # Not a v1 override type (lives in proposed_actions),
+                # but defensive support if it sneaks in.
+                has_human_review_request = True
+
+    # ADR-001 §2.8 verdict logic
+    if fidelity_report is None:
+        verdict = "FAIL"
+    elif (
+        block_skp_export
+        or sha_mismatch
+        or (fidelity_score is not None and fidelity_score < PRE_SKP_WARN_FIDELITY)
+        or hard_fails_count > 0
+    ):
+        if fidelity_score is not None and fidelity_score < PRE_SKP_WARN_FIDELITY:
+            reasons.append(
+                f"fidelity={fidelity_score:.3f} < {PRE_SKP_WARN_FIDELITY:.2f}"
+            )
+        if hard_fails_count > 0:
+            reasons.append(f"{hard_fails_count} hard_fail(s)")
+        verdict = "FAIL"
+    elif (
+        (fidelity_score is not None and fidelity_score < PRE_SKP_PASS_FIDELITY)
+        or warnings_count > PRE_SKP_PASS_WARNINGS
+        or has_high_suspect
+        or has_human_review_request
+    ):
+        if fidelity_score is not None and fidelity_score < PRE_SKP_PASS_FIDELITY:
+            reasons.append(
+                f"fidelity={fidelity_score:.3f} < {PRE_SKP_PASS_FIDELITY:.2f}"
+            )
+        if warnings_count > PRE_SKP_PASS_WARNINGS:
+            reasons.append(
+                f"{warnings_count} warning(s) > {PRE_SKP_PASS_WARNINGS} budget"
+            )
+        if has_high_suspect:
+            reasons.append("mark_suspect.severity=high present")
+        if has_human_review_request:
+            reasons.append("request_human_review present")
+        verdict = "WARN"
+    else:
+        verdict = "PASS"
+        if fidelity_score is not None:
+            reasons.append(
+                f"fidelity={fidelity_score:.3f} ≥ {PRE_SKP_PASS_FIDELITY:.2f}, "
+                f"0 hard_fails, {warnings_count} warnings"
+            )
+
+    if verdict == "PASS":
+        recommendation = "safe to export SKP"
+    elif verdict == "WARN":
+        recommendation = "review before SKP"
+    else:
+        recommendation = "do not export SKP"
+
+    return {
+        "schema_version": PRE_SKP_REVIEW_SCHEMA_VERSION,
+        "verdict": verdict,
+        "reasons": reasons,
+        "fidelity_score": fidelity_score,
+        "hard_fails_count": hard_fails_count,
+        "warnings_count": warnings_count,
+        "active_overrides_count": active_overrides_count,
+        "block_skp_export": block_skp_export,
+        "recommendation": recommendation,
+    }
+
+
+def gate_f0(args: argparse.Namespace, report: SmokeReport) -> GateResult:
+    """Pre-SKP review gate (Slice 3 / ADR-001 §2.8).
+
+    Reads the fidelity report + optional review_overrides, emits a
+    pre_skp_review_report.json verdict file, and respects
+    ``--review-mode``:
+      - off (default): always pass; verdict written to disk
+      - warn         : pass + stderr warning when verdict != PASS
+      - block        : fail when verdict == FAIL
+    """
+    g = GateResult(name="F0. Pre-SKP review", status="pass",
+                    started_at=_utc_now())
+    out_dir = Path(report.out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    fidelity_path = out_dir / "fidelity_report.json"
+    if not fidelity_path.exists():
+        # Fall back to per-consensus-dir report (some pipelines write
+        # the fidelity report next to the consensus, not into the
+        # smoke out_dir).
+        sibling = Path(report.consensus_path).parent / "fidelity_report.json"
+        if sibling.exists():
+            fidelity_path = sibling
+
+    fidelity_report: dict | None = None
+    if fidelity_path.exists():
+        try:
+            fidelity_report = json.loads(
+                fidelity_path.read_text(encoding="utf-8"),
+            )
+        except json.JSONDecodeError:
+            fidelity_report = None
+
+    overrides_doc: dict | None = None
+    overrides_path = out_dir / "review_overrides.json"
+    if not overrides_path.exists():
+        sibling_ovs = (
+            Path(report.consensus_path).parent / "review_overrides.json"
+        )
+        if sibling_ovs.exists():
+            overrides_path = sibling_ovs
+    if overrides_path.exists():
+        try:
+            overrides_doc = json.loads(
+                overrides_path.read_text(encoding="utf-8"),
+            )
+        except json.JSONDecodeError:
+            overrides_doc = None
+
+    review = _compute_pre_skp_review(
+        fidelity_report, overrides_doc, report.consensus_sha256,
+    )
+    review_path = out_dir / "pre_skp_review_report.json"
+    review_path.write_text(
+        json.dumps(review, indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    g.artifacts = [_relpath(review_path)]
+    args._pre_skp_verdict = review["verdict"]
+    args._pre_skp_review = review
+
+    mode = getattr(args, "review_mode", "off")
+    verdict = review["verdict"]
+
+    if mode == "off":
+        g.status = "pass"
+        g.message = (
+            f"verdict={verdict} (review-mode=off; advisory only, "
+            f"smoke continues)"
+        )
+        if verdict != "PASS":
+            print(
+                f"[smoke][F0] verdict={verdict} reasons="
+                f"{review['reasons']}",
+                file=sys.stderr,
+            )
+    elif mode == "warn":
+        g.status = "pass"
+        g.message = f"verdict={verdict} (review-mode=warn)"
+        if verdict != "PASS":
+            print(
+                f"[smoke][F0][WARN] verdict={verdict} reasons="
+                f"{review['reasons']}",
+                file=sys.stderr,
+            )
+    elif mode == "block":
+        if verdict == "FAIL":
+            g.status = "fail"
+            g.message = (
+                f"verdict=FAIL (review-mode=block); reasons="
+                f"{review['reasons']}"
+            )
+        else:
+            g.status = "pass"
+            g.message = (
+                f"verdict={verdict} (review-mode=block; only FAIL aborts)"
+            )
+            if verdict == "WARN":
+                print(
+                    f"[smoke][F0][WARN] verdict=WARN reasons="
+                    f"{review['reasons']}",
+                    file=sys.stderr,
+                )
+    else:
+        # Defensive — argparse choices should prevent this.
+        g.status = "fail"
+        g.message = f"unknown review-mode {mode!r}"
+
+    g.finished_at = _utc_now()
+    return g
+
+
 def gate_f(args: argparse.Namespace, report: SmokeReport) -> GateResult:
     g = GateResult(name="F. Export .skp", status="pass", started_at=_utc_now())
     if args.skip_skp:
@@ -494,6 +744,17 @@ def _build_parser() -> argparse.ArgumentParser:
                     help="bypass cache hit, always run F")
     ap.add_argument("--open", dest="open_after", action="store_true",
                     help="reserved; current implementation always quits SU")
+    ap.add_argument(
+        "--review-mode", dest="review_mode",
+        choices=("off", "warn", "block"), default="off",
+        help=(
+            "Pre-SKP review (gate F0) verdict mode (ADR-001 §2.8). "
+            "'off' (default): F0 writes the verdict file but NEVER "
+            "aborts the smoke. 'warn': verdict != PASS warns to "
+            "stderr. 'block': verdict == FAIL aborts the smoke run. "
+            "Default 'off' preserves byte-equivalent CI behaviour."
+        ),
+    )
     return ap
 
 
@@ -510,7 +771,8 @@ def main(argv: list[str] | None = None) -> int:
         started_at=_utc_now(),
     )
 
-    pipeline = (gate_a, gate_b, gate_c, gate_d, gate_e, gate_f, gate_g)
+    pipeline = (gate_a, gate_b, gate_c, gate_d, gate_e,
+                gate_f0, gate_f, gate_g)
     for gate in pipeline:
         result = report.add(gate(args, report))
         if result.status == "fail":

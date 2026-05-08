@@ -522,6 +522,74 @@ Verified by `test_save_opening_kind_override_round_trip` +
 | Slice 3 — `tools/apply_overrides.py` + smoke gate F0 | Closes the validation-before-SKP loop. Consumes the `review_overrides.json` written by Slice 2. |
 | Cycle 12h — SVG `source: manual` annotation deferred from Slice 2 | Thread `overrides_view` into `render_overlay_svg` for tooltip + outline coloring. |
 
+## Slice 3 — pipeline consumption (ADR-001 §4)
+
+Slice 3 introduces the pipeline-side consumers of
+`review_overrides.json` per ADR-001 §4. The cockpit becomes a
+control surface: humans wrote overrides in Slice 2, and now the
+pipeline starts honouring them.
+
+### What landed
+
+| Touchpoint | What |
+|---|---|
+| `tools/apply_overrides.py` (NEW) | Pure function + CLI: reads consensus + overrides, writes `amended_observed.json`. Honours ADR-001 §2.5 precedence and §2.10 safety rules. |
+| `tools/fidelity/compare_generated_to_expected.py` | New optional `apply_overrides: bool = False` (+ `overrides_doc`) param. When True, the report carries BOTH `global_fidelity` (post-override) and `global_fidelity_pre_override` per ADR-001 §2.10.5. Default `False` preserves byte-equivalent v1 behaviour. |
+| `scripts/smoke/smoke_skp_export.py` | New gate F0 (Pre-SKP review) inserted before gate F. Reads fidelity report + (optional) review_overrides, emits `pre_skp_review_report.json` per ADR-001 §2.8. New flag `--review-mode={off,warn,block}` (default `off`). |
+| `cockpit/history_view.py` | `pre_skp_review()` now reads `pre_skp_review_report.json` when present (returns `source: f0_report`). Falls back to the Cycle 12f in-memory computation otherwise (`source: in_memory`) so legacy runs without F0 reports keep their Cycle 12f behaviour byte-equivalently. |
+
+### Module: `tools.apply_overrides`
+
+Pure function:
+
+```python
+from tools.apply_overrides import apply_overrides
+amended = apply_overrides(consensus, overrides_doc, expected_sha=...)
+```
+
+CLI:
+
+```bash
+python -m tools.apply_overrides \
+    --consensus runs/<run_id>/consensus_with_room_context.json \
+    --overrides runs/<run_id>/review_overrides.json \
+    --output    runs/<run_id>/amended_observed.json
+```
+
+Output schema is `amended_observed_v1`: the consensus shape plus
+per-element `source` ∈ `{detected, manual, override_rejected}` and
+`_<field>_original` preservation for any field changed by an
+override. A top-level `_overrides_metadata` block carries
+`overrides_applied_count`, `overrides_dropped_count`, `block_skp_export`,
+`block_reason`, and any per-application warnings (e.g. SHA-256
+binding mismatch per ADR-001 §2.10.6).
+
+### Gate F0 in the smoke harness
+
+Inserted between gate E and gate F. Default `--review-mode=off`
+means CI behaviour is byte-equivalent: the verdict file is always
+written, but the smoke never fails on it. See
+[`docs/validation/sketchup_smoke_workflow.md`](validation/sketchup_smoke_workflow.md)
+for the full verdict matrix.
+
+### Cockpit `pre_skp_review()` change
+
+Single-function change inside `cockpit/history_view.py`. Signature
+preserved; return shape gains `"source": "f0_report"|"in_memory"`
+and (when F0 is the source) `f0_block_skp_export`,
+`f0_active_overrides_count`, `f0_recommendation`. Existing UI
+callers depending only on the legacy keys keep working unchanged.
+
+### What Slice 3 did NOT do
+
+- Did NOT change `--review-mode` default from `off`.
+- Did NOT modify the cockpit Streamlit UI (Slice 2's territory).
+- Did NOT change any existing fidelity threshold (`0.69` /
+  `0.85` / `3` warnings). The thresholds were already documented
+  in Cycle 12f.
+- Did NOT modify `cockpit/app.py` or `cockpit/overrides.py`
+  (Slice 2's territory).
+
 ## Non-goals (explicitly)
 
 - **NOT** a SketchUp viewer. The cockpit operates BEFORE the

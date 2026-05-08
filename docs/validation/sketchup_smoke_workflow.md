@@ -193,9 +193,71 @@ the produced `.skp` for gate G.
 - Cache key change: extend `CACHE_KEY_INPUTS`; bump nothing else,
   the next run misses by definition.
 
+## Gate F0 — Pre-SKP review (Slice 3, 2026-05-08)
+
+`gate_f0` runs between `gate_e` and `gate_f`. It reads the live
+`fidelity_report.json` plus an optional `review_overrides.json`
+(ADR-001 §2.3) and writes a verdict to
+`pre_skp_review_report.json` (schema `pre_skp_review_v1`,
+ADR-001 §2.8).
+
+### Inputs
+
+| File | Required | Source |
+|---|---|---|
+| `<out_dir>/fidelity_report.json` (with sibling fallback to consensus dir) | yes | written by `tools.fidelity.compare_generated_to_expected` upstream |
+| `<out_dir>/review_overrides.json` (with sibling fallback) | no | written by Slice 2 cockpit when a human reviewed the run |
+
+### Verdict logic (ADR-001 §2.8)
+
+- `FAIL`: `block_skp_export=true` OR fidelity < 0.69 OR
+  `hard_fails_count > 0` OR consensus SHA-256 mismatch on overrides
+- `WARN`: fidelity ∈ [0.69, 0.85) OR `warnings_count > 3` OR any
+  `mark_suspect` severity=high OR any `request_human_review`
+- `PASS`: otherwise
+
+### `--review-mode` flag
+
+| Mode | Verdict PASS | Verdict WARN | Verdict FAIL |
+|---|---|---|---|
+| `off` (default) | continue | continue (stderr note) | continue (stderr note) |
+| `warn` | continue | continue (stderr [WARN]) | continue (stderr [WARN]) |
+| `block` | continue | continue (stderr [WARN]) | **abort smoke (exit 1)** |
+
+The default `off` keeps shipping CI byte-equivalent: the verdict
+file is always written, but the smoke run never fails on it.
+Adoption of `block` is a deliberate later flip after Slice 3 lands
+and is exercised on a real review case.
+
+### Output schema (`pre_skp_review_v1`)
+
+```json
+{
+  "schema_version": "pre_skp_review_v1",
+  "verdict": "PASS" | "WARN" | "FAIL",
+  "reasons": ["..."],
+  "fidelity_score": 0.917,
+  "hard_fails_count": 0,
+  "warnings_count": 2,
+  "active_overrides_count": 0,
+  "block_skp_export": false,
+  "recommendation": "safe to export SKP"
+                  | "review before SKP"
+                  | "do not export SKP"
+}
+```
+
+The cockpit's History view (`cockpit/history_view.py`) reads this
+file when present and skips its own in-memory computation
+(`source: f0_report` vs `source: in_memory` in the returned dict).
+
 ## Related
 
 - `CLAUDE.md` §3 — the rule.
+- `docs/adr/ADR-001-validation-cockpit-mutation-surface.md` — the
+  full mutation-surface contract that defines gate F0.
+- `tools/apply_overrides.py` — the apply layer that consumes
+  `review_overrides.json` per ADR-001 §2.10.
 - `LL-001`, `LL-008`, `LL-009` — lessons.
 - `FP-001`, `FP-007` — failure patterns.
 - `DL-005` — decision log.
