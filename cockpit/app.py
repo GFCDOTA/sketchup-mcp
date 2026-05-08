@@ -37,6 +37,7 @@ import streamlit as st
 from cockpit.render_overlay import (
     PT_TO_M_DEFAULT,
     OverlayToggles,
+    expected_match_summary,
     opening_summary_rows,
     pdf_page_to_data_url,
     render_overlay_svg,
@@ -262,8 +263,9 @@ def main() -> None:
 
     with col_inspect:
         st.subheader("Inspector")
-        tab_rooms, tab_openings, tab_fidelity, tab_meta = st.tabs(
-            ["Rooms", "Openings", "Fidelity", "Meta"]
+        (tab_rooms, tab_openings, tab_fidelity, tab_expected,
+         tab_meta) = st.tabs(
+            ["Rooms", "Openings", "Fidelity", "Expected", "Meta"]
         )
         with tab_rooms:
             rows = room_summary_rows(consensus, pt_to_m=pt_to_m)
@@ -295,6 +297,9 @@ def main() -> None:
         with tab_fidelity:
             _render_fidelity_panel(consensus, expected, pt_to_m)
 
+        with tab_expected:
+            _render_expected_panel(consensus, expected, pt_to_m)
+
         with tab_meta:
             md = consensus.get("metadata") or {}
             if md:
@@ -320,6 +325,54 @@ def _render_warnings_panel(consensus: dict) -> None:
         st.warning("Detected issues in metadata:")
         for w in warns:
             st.code(w, language="text")
+
+
+def _render_expected_panel(consensus: dict,
+                            expected: dict | None,
+                            pt_to_m: float) -> None:
+    """Cycle 12d — show the per-room match table between observed
+    consensus and expected_model. Pairs with the SVG outline
+    re-coloring driven by the `Ground truth overlay` toggle."""
+    if expected is None:
+        st.info(
+            "No ground truth selected — pick a "
+            "`ground_truth/<plant>/expected_model.json` in the sidebar "
+            "to see the per-room match table."
+        )
+        return
+    rows = expected_match_summary(consensus, expected, pt_to_m)
+    if not rows:
+        st.info("Expected model has no `rooms` entries to match.")
+        return
+    # Pretty-print the status with an emoji + color hint so the
+    # table reads at a glance even without GT-toggle on the SVG
+    status_label = {
+        "in_range": "✅ in range",
+        "out_of_range_low": "🟧 below min",
+        "out_of_range_high": "🟧 above max",
+        "missing_polygon": "❌ missing",
+        "unmatched_observed": "⬜ unmatched",
+    }
+    pretty = []
+    for r in rows:
+        rng = r.get("expected_area_m2_range") or [None, None]
+        pretty.append({
+            "label": (r.get("expected_label")
+                      or r.get("observed_name") or "?"),
+            "status": status_label.get(
+                r.get("status") or "", r.get("status") or "?"),
+            "observed_m2": r.get("observed_area_m2"),
+            "expected_min": rng[0] if rng else None,
+            "expected_max": rng[1] if rng else None,
+        })
+    st.dataframe(pretty, use_container_width=True, hide_index=True)
+    from collections import Counter
+    by_status = Counter(r.get("status") for r in rows)
+    st.caption(f"by_status: {dict(by_status)}")
+    st.caption(
+        "Toggle `Ground truth overlay` in the sidebar to color the "
+        "observed room outlines on the SVG by these statuses."
+    )
 
 
 def _render_fidelity_panel(consensus: dict,

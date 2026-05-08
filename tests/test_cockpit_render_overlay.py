@@ -17,6 +17,7 @@ from cockpit.render_overlay import (
     PT_TO_M_DEFAULT,
     OverlayToggles,
     PdfUnderlay,
+    expected_match_summary,
     opening_summary_rows,
     pdf_page_to_data_url,
     render_overlay_svg,
@@ -233,6 +234,82 @@ def test_pdf_page_to_data_url_returns_png_data_uri(tmp_path):
     payload = underlay.data_url.split(",", 1)[1]
     raw = base64.b64decode(payload)
     assert raw[:8] == b"\x89PNG\r\n\x1a\n", "data URL is not a PNG"
+
+
+# ---- Expected-model overlay (Cycle 12d) ------------------------------
+
+def _toy_expected_model() -> dict:
+    """Two expected rooms: SALA (matches observed area), COZINHA
+    (observed area is below expected_min so should be flagged
+    out_of_range_low). One PHANTOM expected room with no observed
+    counterpart (should appear as missing_polygon)."""
+    return {
+        "schema_version": "1.0",
+        "rooms": [
+            # _toy_consensus has SALA at 5000 pts^2.
+            # 5000 * (0.19/5.4)^2 = 5000 * 0.001238 = 6.19 m^2.
+            # Pick a range that contains 6.19 → in_range.
+            {"id": "sala", "label": "SALA",
+             "expected_area_m2_range": [3.0, 12.0]},
+            # COZINHA also at 5000 pts^2 = 6.19 m^2. Range starts at
+            # 8 → out_of_range_low.
+            {"id": "cozinha", "label": "COZINHA",
+             "expected_area_m2_range": [8.0, 14.0]},
+            # Phantom — no observed match.
+            {"id": "lavabo_phantom", "label": "LAVABO",
+             "expected_area_m2_range": [2.0, 5.0]},
+        ],
+    }
+
+
+def test_expected_match_summary_categorizes_rooms():
+    rows = expected_match_summary(_toy_consensus(), _toy_expected_model())
+    by_label = {r["expected_label"] or r["observed_name"]: r for r in rows}
+    assert by_label["SALA"]["status"] == "in_range"
+    assert by_label["SALA"]["observed_id"] == "r0"
+    assert by_label["COZINHA"]["status"] == "out_of_range_low"
+    assert by_label["COZINHA"]["observed_id"] == "r1"
+    assert by_label["LAVABO"]["status"] == "missing_polygon"
+    assert by_label["LAVABO"]["observed_id"] is None
+    # 3 expected rooms; 0 unmatched_observed (both observed rooms
+    # are in the expected list)
+    assert len(rows) == 3
+
+
+def test_expected_match_summary_returns_empty_without_expected_model():
+    assert expected_match_summary(_toy_consensus(), None) == []
+    assert expected_match_summary(_toy_consensus(), {}) == []
+
+
+def test_render_overlay_with_gt_toggle_recolors_room_outlines():
+    """When ground_truth_overlay is ON and expected_model has data,
+    each observed room gets a thicker outline in the status color
+    instead of the default '#7a7a7a' grey."""
+    svg = render_overlay_svg(
+        _toy_consensus(),
+        toggles=OverlayToggles(ground_truth_overlay=True),
+        expected_model=_toy_expected_model(),
+    )
+    # Status colors must appear as outline strokes
+    assert 'stroke="#16a34a"' in svg, "in_range green not present"
+    assert 'stroke="#f59e0b"' in svg, "out_of_range_low orange not present"
+    # Outline thickened to 2.0
+    assert 'stroke-width="2.0"' in svg
+
+
+def test_render_overlay_with_gt_toggle_off_keeps_default_outlines():
+    """Default toggle is off — the SVG must stay byte-equivalent to
+    the baseline path even if `expected_model` is supplied."""
+    svg = render_overlay_svg(
+        _toy_consensus(),
+        toggles=OverlayToggles(ground_truth_overlay=False),
+        expected_model=_toy_expected_model(),
+    )
+    # Status palette colors must NOT appear
+    assert 'stroke="#16a34a"' not in svg
+    assert 'stroke="#f59e0b"' not in svg
+    # Default room stroke present
+    assert 'stroke="#7a7a7a"' in svg
 
 
 # ---- Real consensus smoke test (skip if missing) ----------------------
