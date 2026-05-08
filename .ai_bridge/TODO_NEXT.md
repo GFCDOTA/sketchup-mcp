@@ -48,20 +48,25 @@ Each entry:
 - **gh CLI tooling unblocked** — see LL-012 +
   `~/.claude/projects/E--Claude/memory/reference_gh_cli_absolute_path.md`.
 
-## 🟢 P0 — `renderers/` migration (architecture plan step 5)
+## ✅ DONE (this PR — 2026-05-08 step 5 of architecture migration)
 
-- **Color:** GREEN — clears the 4 transitional `render_*.py`
-  orphans flagged in PR #73's hygiene audit.
-- **Goal:** move `render_debug.py`, `render_native.py`,
-  `render_semantic.py`, `render_proto_overlays.py`,
-  `render_with_openings.py` into `packages/renderers/` per
-  `docs/architecture/target_repo_architecture.md` step 5.
-- **Touchpoints:** new `packages/renderers/` tree; deprecation
-  wrappers at the original root paths; `OVERVIEW.md` +
-  `docs/png_history_protocol.md` reference updates.
-- **Validation:** root scripts still importable (deprecation
-  wrapper) + `python -m packages.renderers.<name>` works.
-- **Risk:** MEDIUM. Repo-shape change. Should be its own PR.
+- **`renderers/` migration (architecture plan step 5)**: 5 root
+  `render_*.py` scripts moved into the new top-level `renderers/`
+  package via `git mv` (history preserved with `--follow`); each
+  refactored from a top-level script into a `render(...)` library
+  function plus a `main()` CLI entry; root paths kept as thin
+  deprecation wrappers that emit `DeprecationWarning` and re-export
+  via `from renderers.<name> import *`. New tests at
+  `tests/test_renderers_migration.py` lock back-compat,
+  `pyproject.toml [tool.setuptools.packages.find].include` now
+  ships `renderers*`, and `OVERVIEW.md` + `docs/png_history_protocol.md`
+  point to the new module paths.
+- **Note on classification:** the parent session originally tagged
+  this work GREEN/P0, but moving repo top-level files is YELLOW per
+  the standard ROI matrix (touches packaging + ruff scope).
+  Executed under YELLOW autonomy (caution + evidence + tests +
+  rollback path) rather than GREEN. Future sessions should use
+  YELLOW for similar repo-shape changes.
 
 ## 🟡 P2 — Refactor `proto_*.py` + `render_sidebyside.py` to CLI args
 

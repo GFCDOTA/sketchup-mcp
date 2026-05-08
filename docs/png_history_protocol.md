@@ -124,7 +124,7 @@ for e in pending_validation():
 | `axon_top`  | `tools/render_axon.py --mode top`  | matplotlib top-down |
 | `skp_view`  | PowerShell screenshot of SU2026   | full-desktop capture, params.view |
 | `sidebyside` | `render_sidebyside.py` | PDF + render diptych |
-| `overlay`   | `render_proto_overlays.py`, `render_with_openings.py` | wall/opening overlays on PDF |
+| `overlay`   | `renderers.proto_overlays`, `renderers.with_openings` (`python -m`) | wall/opening overlays on PDF (root `render_*.py` are thin deprecation wrappers since 2026-05-08) |
 | `legacy`    | backfill of pre-history PNGs       | params.state=pre_fix to flag stale renders |
 
 Add new kinds freely; the validator uses `kind` to dispatch which
