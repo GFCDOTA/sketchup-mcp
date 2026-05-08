@@ -11,7 +11,7 @@
   },
   "expected_counts": {
     "rooms": 2,
-    "openings": 0,
+    "openings": 1,
     "walls": 9,
     "tolerance": {
       "rooms_delta": 0,
@@ -46,8 +46,27 @@
       ]
     }
   ],
-  "openings": [],
-  "adjacency": [],
+  "openings": [
+    {
+      "id": "op_sala_suite_passage",
+      "kind": "interior_passage",
+      "connects": ["sala_synth", "suite_synth"],
+      "manual_confidence": "high",
+      "notes": [
+        "Wall-gap on the divider between the two rooms; widened to",
+        "50 pt in Cycle 11d so DEFAULT_GAP_MIN_PTS=30 picks it up."
+      ]
+    }
+  ],
+  "adjacency": [
+    {
+      "a": "sala_synth",
+      "b": "suite_synth",
+      "via": "op_sala_suite_passage",
+      "kind": "interior_passage",
+      "manual_confidence": "high"
+    }
+  ],
   "notes": [
     "Cycle 11c (2026-05-08) — synthetic ground truth paired with",
     "tools.synth.make_synthetic_vector_pdf. The PDF is a 2-room",
@@ -55,11 +74,9 @@
     "Goal: round-trip the REAL extraction pipeline against a known-",
     "intent input, complementing tools.fidelity.synth_from_expected",
     "(which round-trips the engine internally only).",
-    "v0 spec deliberately has 0 openings — wall-gap on the divider",
-    "is too small for the current --detect-wall-gaps threshold to",
-    "carve. Future synth specs (l3+) will include door arcs.",
-    "Adjacency edges intentionally empty: no opening objects -> no",
-    "edges via openings.evidence; the fidelity engine skips the",
-    "adjacency metric for this plan."
+    "Cycle 11d (2026-05-08): wall-gap widened to 50 pt so the",
+    "wall-gap detector emits 1 interior_passage opening. The full",
+    "round-trip now exercises wall + room + opening + classifier",
+    "+ fidelity stages — not just walls + rooms."
   ]
 }
