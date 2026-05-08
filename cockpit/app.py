@@ -42,6 +42,14 @@ from cockpit.history_view import (
     history_summary,
     pre_skp_review,
 )
+from cockpit.overrides import (
+    OPENING_KIND_VALUES,
+    SUSPECT_SEVERITIES,
+    load_overrides,
+    overrides_for_element,
+    save_override,
+    set_block_skp_export,
+)
 from cockpit.render_overlay import (
     PT_TO_M_DEFAULT,
     OverlayToggles,
@@ -321,9 +329,9 @@ def _render_single_run_page() -> None:
     with col_inspect:
         st.subheader("Inspector")
         (tab_rooms, tab_openings, tab_fidelity, tab_expected,
-         tab_diff, tab_meta) = st.tabs(
+         tab_diff, tab_review, tab_meta) = st.tabs(
             ["Rooms", "Openings", "Fidelity", "Expected",
-             "Diff", "Meta"]
+             "Diff", "Review", "Meta"]
         )
         with tab_rooms:
             rows = room_summary_rows(consensus, pt_to_m=pt_to_m)
@@ -360,6 +368,9 @@ def _render_single_run_page() -> None:
 
         with tab_diff:
             _render_diff_panel(consensus, consensus_b, pt_to_m)
+
+        with tab_review:
+            _render_review_panel(consensus, cons_path, pt_to_m)
 
         with tab_meta:
             md = consensus.get("metadata") or {}
@@ -788,6 +799,374 @@ def _render_diff_panel(consensus_a: dict,
         "Toggle `Diff overlay` in the sidebar to render B's rooms "
         "as dashed magenta outlines over A on the SVG."
     )
+
+
+def _render_review_panel(consensus: dict,
+                          consensus_path: Path,
+                          pt_to_m: float) -> None:
+    """Slice 2 — Review tab.
+
+    The cockpit's first mutation surface. Reads / writes
+    `runs/<run_id>/review_overrides.json` for the active run
+    (per ADR-001 §3 / §2.3). The pipeline still IGNORES the file
+    at this Phase (per ADR-001 §2.9 Phase 1) — Slice 3 introduces
+    `tools/apply_overrides.py`.
+    """
+    run_dir = consensus_path.parent
+    try:
+        data = load_overrides(run_dir, consensus_path=consensus_path)
+    except Exception as e:  # noqa: BLE001
+        st.error(f"load_overrides failed: {e}")
+        return
+
+    overrides = data.get("overrides") or []
+    global_block = data.get("global") or {}
+    sha_match = data.get("_consensus_sha256_match")
+
+    # ---- Stale-binding warning (ADR §2.10.6) ------------------------
+    if sha_match is False:
+        st.error(
+            "**Stale binding** — `consensus_sha256` does NOT match the "
+            "live consensus. Existing overrides are kept on disk but "
+            "are NOT applied until you re-confirm them. Save any new "
+            "override below to refresh the binding."
+        )
+
+    # ---- Global block toggle (top of tab) ---------------------------
+    block_now = bool(global_block.get("block_skp_export") or False)
+    if block_now:
+        reason_text = global_block.get("block_reason") or "(no reason given)"
+        st.error(f"⛔ **SKP export blocked**: {reason_text}")
+
+    with st.expander("⛔ Block SKP export (master toggle)",
+                       expanded=block_now):
+        new_blocked = st.checkbox(
+            "Block SKP export for this run",
+            value=block_now,
+            help=("When ON, the cockpit refuses to greenlight the "
+                  "SKP export step. This sets `global.block_skp_export "
+                  "= true` in `review_overrides.json`. The pipeline "
+                  "still ignores this file at Slice 2 — Slice 3 wires "
+                  "it into the smoke harness via the F0 gate."),
+        )
+        new_reason = st.text_input(
+            "Block reason",
+            value=global_block.get("block_reason") or "",
+            help="Free-text. Recorded in the audit trail.",
+        )
+        if st.button("Apply block toggle", key="apply_block_skp"):
+            try:
+                set_block_skp_export(
+                    run_dir,
+                    blocked=bool(new_blocked),
+                    reason=(new_reason or None),
+                    audit_actor="human",
+                    consensus_path=consensus_path,
+                )
+                st.success(
+                    "Block toggle saved → "
+                    "`review_overrides.json`. Reload the tab to "
+                    "see the updated audit trail."
+                )
+            except Exception as e:  # noqa: BLE001
+                st.error(f"set_block_skp_export failed: {e}")
+
+    # ---- Per-opening rows -------------------------------------------
+    st.divider()
+    st.markdown("### Per-opening review")
+    openings = list(consensus.get("openings") or [])
+    if not openings:
+        st.info("No openings in this consensus.")
+    else:
+        st.caption(
+            f"{len(openings)} opening(s). For each row: pick a "
+            "kind override, mark suspect, or reject/approve. "
+            "Each click writes to `review_overrides.json`."
+        )
+        for op in openings:
+            _render_opening_review_row(
+                op=op, run_dir=run_dir, consensus_path=consensus_path,
+                consensus=consensus, overrides=overrides,
+            )
+
+    # ---- Per-room rows ----------------------------------------------
+    st.divider()
+    st.markdown("### Per-room review")
+    rooms = list(consensus.get("rooms") or [])
+    if not rooms:
+        st.info("No rooms in this consensus.")
+    else:
+        st.caption(
+            f"{len(rooms)} room(s). Override label, mark suspect, "
+            "or reject/approve."
+        )
+        for r in rooms:
+            _render_room_review_row(
+                room=r, run_dir=run_dir, consensus_path=consensus_path,
+                consensus=consensus, overrides=overrides,
+                pt_to_m=pt_to_m,
+            )
+
+    # ---- Audit trail (bottom) ----------------------------------------
+    st.divider()
+    audit = list(data.get("audit_trail") or [])
+    if not audit:
+        st.caption("Audit trail is empty — no overrides recorded yet.")
+    else:
+        with st.expander(
+                f"Audit trail ({len(audit)} event(s))",
+                expanded=False):
+            # Reverse chronological — newest first
+            for entry in reversed(audit):
+                ts = entry.get("timestamp") or "?"
+                actor = entry.get("actor") or "?"
+                event = entry.get("event") or "?"
+                tag = entry.get("tag") or ""
+                ovid = entry.get("override_id") or "(global)"
+                head = (f"`{ts}` · **{event}** · actor=`{actor}` · "
+                        f"override_id=`{ovid}`"
+                        + (f" · tag=`{tag}`" if tag else ""))
+                st.markdown(head)
+                cols = st.columns(2)
+                with cols[0]:
+                    st.caption("before")
+                    st.json(entry.get("before") or {})
+                with cols[1]:
+                    st.caption("after")
+                    st.json(entry.get("after") or {})
+
+    # ---- Active overrides summary ------------------------------------
+    if overrides:
+        with st.expander(
+                f"Active overrides ({len(overrides)})", expanded=False):
+            view_rows: list[dict] = []
+            for ov in overrides:
+                tgt = ov.get("target") or {}
+                pl = ov.get("payload") or {}
+                view_rows.append({
+                    "id": (ov.get("id") or "?")[:8],
+                    "type": ov.get("type"),
+                    "target": f"{tgt.get('kind')}:{tgt.get('id')}",
+                    "payload": json.dumps(pl, ensure_ascii=False),
+                    "author": ov.get("author"),
+                    "created_at": ov.get("created_at"),
+                    "reason": ov.get("reason"),
+                })
+            st.dataframe(view_rows, use_container_width=True,
+                          hide_index=True)
+
+
+def _render_opening_review_row(*,
+                                op: dict,
+                                run_dir: Path,
+                                consensus_path: Path,
+                                consensus: dict,
+                                overrides: list[dict]) -> None:
+    """One opening row in the Review tab.
+
+    Layout: id+kind on the left; kind dropdown + suspect radio +
+    reject/approve toggles on the right.
+    """
+    eid = op.get("id") or "?"
+    kind = op.get("kind_v5") or op.get("kind") or "?"
+    decision = op.get("decision") or "?"
+    active = overrides_for_element(overrides, "opening", eid)
+    active_summary = ", ".join(o.get("type") or "?" for o in active) \
+        if active else "(none)"
+
+    with st.container(border=True):
+        cols = st.columns([2, 3])
+        with cols[0]:
+            st.markdown(f"**id=`{eid}`** · kind=`{kind}` · "
+                        f"decision=`{decision}`")
+            st.caption(f"active overrides: {active_summary}")
+
+        with cols[1]:
+            kind_options = ["(none)", *OPENING_KIND_VALUES]
+            new_kind = st.selectbox(
+                f"kind override · `{eid}`",
+                kind_options,
+                index=0,
+                key=f"opn_kind_{eid}",
+                label_visibility="collapsed",
+            )
+            sev = st.radio(
+                f"mark suspect · `{eid}`",
+                options=["(off)", *SUSPECT_SEVERITIES],
+                index=0,
+                horizontal=True,
+                key=f"opn_susp_{eid}",
+                label_visibility="collapsed",
+            )
+            r_cols = st.columns(3)
+            with r_cols[0]:
+                do_reject = st.checkbox(
+                    "reject", key=f"opn_rej_{eid}", value=False)
+            with r_cols[1]:
+                do_approve = st.checkbox(
+                    "approve", key=f"opn_app_{eid}", value=False)
+            with r_cols[2]:
+                if st.button("Apply", key=f"opn_apply_{eid}"):
+                    _apply_element_overrides(
+                        run_dir=run_dir,
+                        consensus_path=consensus_path,
+                        consensus=consensus,
+                        kind="opening", eid=eid,
+                        new_kind=(None if new_kind == "(none)" else new_kind),
+                        new_label=None,
+                        severity=(None if sev == "(off)" else sev),
+                        do_reject=bool(do_reject),
+                        do_approve=bool(do_approve),
+                    )
+
+
+def _render_room_review_row(*,
+                             room: dict,
+                             run_dir: Path,
+                             consensus_path: Path,
+                             consensus: dict,
+                             overrides: list[dict],
+                             pt_to_m: float) -> None:
+    """One room row in the Review tab."""
+    eid = room.get("id") or "?"
+    name = room.get("name") or "?"
+    poly = room.get("polygon_pts") or []
+    area_pts2 = float(room.get("area_pts2") or 0.0)
+    area_m2 = area_pts2 * pt_to_m * pt_to_m
+    active = overrides_for_element(overrides, "room", eid)
+    active_summary = ", ".join(o.get("type") or "?" for o in active) \
+        if active else "(none)"
+
+    with st.container(border=True):
+        cols = st.columns([2, 3])
+        with cols[0]:
+            st.markdown(
+                f"**id=`{eid}`** · name=`{name}` · "
+                f"area={area_m2:.2f} m² · verts={len(poly)}"
+            )
+            st.caption(f"active overrides: {active_summary}")
+
+        with cols[1]:
+            new_label = st.text_input(
+                f"label override · `{eid}`",
+                value="",
+                placeholder=f"new name (current: {name})",
+                key=f"room_lbl_{eid}",
+                label_visibility="collapsed",
+            )
+            sev = st.radio(
+                f"mark suspect · `{eid}`",
+                options=["(off)", *SUSPECT_SEVERITIES],
+                index=0,
+                horizontal=True,
+                key=f"room_susp_{eid}",
+                label_visibility="collapsed",
+            )
+            r_cols = st.columns(3)
+            with r_cols[0]:
+                do_reject = st.checkbox(
+                    "reject", key=f"room_rej_{eid}", value=False)
+            with r_cols[1]:
+                do_approve = st.checkbox(
+                    "approve", key=f"room_app_{eid}", value=False)
+            with r_cols[2]:
+                if st.button("Apply", key=f"room_apply_{eid}"):
+                    _apply_element_overrides(
+                        run_dir=run_dir,
+                        consensus_path=consensus_path,
+                        consensus=consensus,
+                        kind="room", eid=eid,
+                        new_kind=None,
+                        new_label=(new_label.strip() or None),
+                        severity=(None if sev == "(off)" else sev),
+                        do_reject=bool(do_reject),
+                        do_approve=bool(do_approve),
+                    )
+
+
+def _apply_element_overrides(*,
+                              run_dir: Path,
+                              consensus_path: Path,
+                              consensus: dict,
+                              kind: str,
+                              eid: str,
+                              new_kind: str | None,
+                              new_label: str | None,
+                              severity: str | None,
+                              do_reject: bool,
+                              do_approve: bool) -> None:
+    """Helper that fans the `Apply` click out into one or more
+    `save_override` calls — one per non-default UI control.
+
+    Each call is its own audit-trailed override (per ADR §2.10.3).
+    """
+    saved_count = 0
+    errors: list[str] = []
+
+    if do_reject and do_approve:
+        st.error("`reject` and `approve` are mutually exclusive — "
+                  "uncheck one and try again.")
+        return
+
+    pending: list[dict] = []
+    if new_kind and kind == "opening":
+        pending.append({
+            "type": "opening_kind_override",
+            "target": {"kind": "opening", "id": eid},
+            "payload": {"new_kind_v5": new_kind},
+            "reason": "set via cockpit Review tab",
+        })
+    if new_label and kind == "room":
+        pending.append({
+            "type": "room_label_override",
+            "target": {"kind": "room", "id": eid},
+            "payload": {"new_name": new_label},
+            "reason": "set via cockpit Review tab",
+        })
+    if severity:
+        pending.append({
+            "type": "mark_suspect",
+            "target": {"kind": kind, "id": eid},
+            "payload": {"severity": severity, "tag": "review"},
+            "reason": "set via cockpit Review tab",
+        })
+    if do_reject:
+        pending.append({
+            "type": "reject_element",
+            "target": {"kind": kind, "id": eid},
+            "payload": {},
+            "reason": "set via cockpit Review tab",
+        })
+    if do_approve:
+        pending.append({
+            "type": "approve_element",
+            "target": {"kind": kind, "id": eid},
+            "payload": {},
+            "reason": "set via cockpit Review tab",
+        })
+
+    if not pending:
+        st.info("Nothing to save — pick at least one override.")
+        return
+
+    for p in pending:
+        try:
+            save_override(
+                run_dir, p, audit_actor="human",
+                consensus_path=consensus_path, consensus=consensus,
+            )
+            saved_count += 1
+        except Exception as e:  # noqa: BLE001
+            errors.append(f"{p['type']}: {e}")
+
+    if saved_count:
+        st.success(
+            f"Saved {saved_count} override(s) for `{kind}:{eid}`. "
+            "Reload the page to see the updated audit trail."
+        )
+    if errors:
+        for er in errors:
+            st.error(er)
 
 
 def _render_expected_panel(consensus: dict,

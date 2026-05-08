@@ -402,6 +402,111 @@ run (`runs/overpoly_audit/` — see test
 populated checkout (`runs/feature_room_context_2026_05_06/` etc),
 the page would list every cycle's run with its fidelity verdict.
 
+## Slice 2 — Review tab + `review_overrides.json` (2026-05-08)
+
+The cockpit now has a first **mutation surface**, implemented per
+`docs/adr/ADR-001-validation-cockpit-mutation-surface.md` Phase 1.
+A new `Review` tab in the inspector (between `Diff` and `Meta`)
+lets the human approve / reject / re-classify openings + rooms,
+and toggle a global "block SKP export" master flag. Every change
+writes to `runs/<run_id>/review_overrides.json` via
+`cockpit/overrides.py` (pure-Python, no streamlit imports — see
+`tests/test_cockpit_overrides.py` for 30 unit tests round-tripping
+each override type).
+
+### What lands in `review_overrides.json`
+
+Schema `review_overrides_v1` (full spec in ADR-001 §2.3 + §2.5).
+The 6 v1 per-element override types + 1 global toggle:
+
+| Type | Effect (cockpit-side) | Pipeline (Slice 3+) |
+|---|---|---|
+| `opening_kind_override` | Replaces `kind_v5` for the opening; original kept under `_kind_v5_original` in the apply view. | Slice 3 will respect via `tools/apply_overrides.py`. |
+| `opening_connects_override` | Replaces `room_left_id` / `room_right_id`. | Same. |
+| `room_label_override` | Replaces room `name`. | Same. |
+| `mark_suspect` | Annotates the element with `_suspect = {severity, tag}`. Element keeps its values. | Pre-SKP gate FAILs on severity=high (ADR §2.8). |
+| `reject_element` | Marks the element to be DROPPED at apply time. | Slice 3 drop. |
+| `approve_element` | Whitelists the element; pipeline cannot drop or amend. | Slice 3 honor. |
+| `block_skp_export` (global) | Sets `global.block_skp_export=true` + `global.block_reason`. | F0 gate FAILs in `--review-mode=block`. |
+
+**Phase 1 boundary (this slice):** the pipeline IGNORES the file.
+Only the cockpit reads + writes it. Slice 3 introduces
+`tools/apply_overrides.py` and the F0 gate (`scripts/smoke/smoke_skp_export.py`).
+
+### Persistence model
+
+`cockpit.overrides.save_override()` writes atomically (sibling
+tempfile + `os.replace`) and appends an audit-trail event per
+mutation. The audit trail is **append-only** (ADR §2.10.3) — a
+"remove an override" action is recorded as `event: delete` with
+`after: null`, never erased.
+
+`cockpit.overrides.load_overrides()` returns a derived
+`_consensus_sha256_match` flag (True / False / None) so the cockpit
+can warn the user when the live consensus has drifted from the
+snapshot the overrides were authored against (ADR §2.10.6).
+
+### Streamlit UX
+
+The Review tab shows:
+
+1. **Block SKP export** master expander at top: checkbox + reason
+   text input + Apply button. When set, an `error` banner appears
+   above ("⛔ SKP export blocked: <reason>").
+2. **Per-opening review** — one bordered row per opening with id +
+   current `kind_v5` + `decision` on the left, and on the right:
+   - kind override dropdown: `(none) | interior_door | interior_passage | window | glazed_balcony | exterior_door | unknown`
+   - mark suspect radio: `(off) | low | medium | high`
+   - reject + approve checkboxes (mutually exclusive — UI rejects)
+   - **Apply** button — fans the row's controls into one or more
+     `save_override` calls (one per non-default control).
+3. **Per-room review** — same row shape for rooms; the kind
+   dropdown becomes a **label override** text input.
+4. **Audit trail** expander at the bottom — full
+   `audit_trail[]` newest-first, each entry shows the
+   `before` / `after` JSON side-by-side.
+5. **Active overrides** expander — table of all current overrides
+   with id (8-char prefix), type, target, payload, author,
+   timestamp, reason.
+
+### Acceptance check (ADR §3 / Felipe's words)
+
+> "I can open the cockpit, override an opening's kind, close the
+> cockpit, re-open it, see the override persisted, see the audit
+> trail."
+
+Verified by `test_save_opening_kind_override_round_trip` +
+`test_audit_trail_is_append_only` (closed-loop write → read).
+
+### Deferred to Cycle 12h
+
+- **SVG `source: manual` annotation.** The full visual annotation
+  on the SVG (tooltip suffix `· override` + outline color tweak
+  for overridden elements) is deferred to a follow-up. The Review
+  tab itself surfaces the override status textually per row, and
+  the `overrides_apply_view()` helper already builds the data
+  needed by a future renderer pass. Threading the override view
+  through `render_overlay_svg(consensus, ..., overrides_view=...)`
+  cleanly is the kind of multi-file change that bloats this PR
+  beyond the Slice 2 scope.
+- **Filtering / search inside the Review tab.** With ≥30 openings
+  on a complex plant the per-row UI gets long; a search box +
+  "show only with active overrides" filter is a UX improvement
+  for the next pass.
+- **Inline removal of an override.** Slice 2 ships create-only.
+  The audit-trail-as-source-of-truth model already supports a
+  `delete` event (per ADR §2.7), but the UI button that emits
+  `event: delete` with `after: null` is deferred.
+
+### Boundary check (CLAUDE.md)
+
+- §1.2 schema unchanged — `consensus.json` never written ✓
+- §1.3 thresholds unchanged ✓
+- §1.4 Ruby/SU exporter untouched ✓
+- §2 invariants intact: cockpit's mutation surface is a LAYER
+  ABOVE the consensus, never edits it (ADR §2.10.1) ✓
+- §3 SketchUp gate unaffected — Slice 2's pipeline-side is a no-op ✓
+
 ## Remaining limitations (post-12f)
 
 - No **PT_TO_M auto-detect** from `consensus.metadata`. Manual
@@ -413,8 +518,9 @@ the page would list every cycle's run with its fidelity verdict.
 |---|---|
 | Cycle 12g — thumbnail rendering for runs without PNG/SVG | Re-render the SVG overlay on demand so every History row has a preview. |
 | `renderers/` migration | Architecture plan step 5; clears the 5 transitional `render_*.py` orphans. |
-| Slice 2 — approve/reject + `review_overrides.json` | Needs FastAPI for POST. |
-| Slice 3 — `proposed_actions.json` + pre-SKP gate F0 | Closes the validation-before-SKP loop. The Pre-SKP Review verdict added in Cycle 12f is the logical input to that gate. |
+| ~~Slice 2 — approve/reject + `review_overrides.json`~~ | Landed 2026-05-08 (Streamlit + filesystem, no FastAPI). See "Slice 2" section above. |
+| Slice 3 — `tools/apply_overrides.py` + smoke gate F0 | Closes the validation-before-SKP loop. Consumes the `review_overrides.json` written by Slice 2. |
+| Cycle 12h — SVG `source: manual` annotation deferred from Slice 2 | Thread `overrides_view` into `render_overlay_svg` for tooltip + outline coloring. |
 
 ## Non-goals (explicitly)
 
@@ -433,9 +539,14 @@ the page would list every cycle's run with its fidelity verdict.
 - `cockpit/history_view.py` — pure-Python multi-run discovery /
   summary / compare / Pre-SKP Review (Cycle 12f), unit-tested in
   `tests/test_cockpit_history_view.py`
+- `cockpit/overrides.py` — pure-Python `review_overrides.json`
+  read/write helper (Slice 2), unit-tested in
+  `tests/test_cockpit_overrides.py`
 - `cockpit/app.py` — Streamlit entry point
 - `tools/fidelity/compare_generated_to_expected.py` — the
   fidelity engine the cockpit calls live
+- `docs/adr/ADR-001-validation-cockpit-mutation-surface.md` — the
+  authoritative spec for `review_overrides.json` + the F0 gate
 - CLAUDE.md §3 "The SketchUp Rule" — why the cockpit exists
   upstream of the SKP gate
 - `feedback_autonomia_operacional_protocolo.md` — the YELLOW
