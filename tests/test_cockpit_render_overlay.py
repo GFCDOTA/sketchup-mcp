@@ -17,6 +17,7 @@ from cockpit.render_overlay import (
     PT_TO_M_DEFAULT,
     OverlayToggles,
     PdfUnderlay,
+    diff_summary,
     expected_match_summary,
     opening_summary_rows,
     pdf_page_to_data_url,
@@ -366,6 +367,86 @@ def test_render_overlay_title_text_xml_escaped():
     # uppercase the tooltip text — names pass through as-is.
     assert "<title><bad>" not in svg
     assert "<title>&lt;bad&gt; &amp; evil ·" in svg
+
+
+# ---- Diff view (Cycle 12e) -------------------------------------------
+
+def _toy_consensus_b() -> dict:
+    """Variant of `_toy_consensus`: SALA shifted slightly + COZINHA
+    enlarged + a brand-new BANHO room. Used to exercise the diff
+    overlay (matched / only_in_a / only_in_b paths)."""
+    base = _toy_consensus()
+    base["rooms"] = [
+        # SALA shifted x+10
+        {"id": "rb0", "name": "SALA",
+         "polygon_pts": [[10, 0], [60, 0], [60, 100], [10, 100]],
+         "area_pts2": 5000},
+        # COZINHA wider — area_pts2 is bigger
+        {"id": "rb1", "name": "COZINHA",
+         "polygon_pts": [[50, 0], [120, 0], [120, 100], [50, 100]],
+         "area_pts2": 7000},
+        # New room only in B
+        {"id": "rb2", "name": "BANHO",
+         "polygon_pts": [[0, 100], [50, 100], [50, 150], [0, 150]],
+         "area_pts2": 2500},
+    ]
+    return base
+
+
+def test_render_overlay_with_diff_overlay_emits_dashed_polygons():
+    """When `consensus_b` is provided AND `diff_overlay=True`, the
+    SVG must include `<polygon ... stroke-dasharray="3,2" ...>` for
+    each B room — drawn over the A render."""
+    svg = render_overlay_svg(
+        _toy_consensus(),
+        toggles=OverlayToggles(diff_overlay=True),
+        consensus_b=_toy_consensus_b(),
+    )
+    assert 'stroke-dasharray="3,2"' in svg
+    # Magenta is the diff stroke color
+    assert 'stroke="#c026d3"' in svg
+    # B has 3 rooms → 3 dashed polygons (one per room)
+    assert svg.count('stroke-dasharray="3,2"') == 3
+
+
+def test_render_overlay_diff_overlay_off_omits_dashed():
+    """Default toggle is off; even if `consensus_b` is supplied the
+    SVG must stay byte-equivalent to the no-diff path."""
+    svg = render_overlay_svg(
+        _toy_consensus(),
+        toggles=OverlayToggles(diff_overlay=False),
+        consensus_b=_toy_consensus_b(),
+    )
+    assert 'stroke-dasharray="3,2"' not in svg
+    assert 'stroke="#c026d3"' not in svg
+
+
+def test_diff_summary_categorises_matched_and_unique_rooms():
+    rows = diff_summary(_toy_consensus(), _toy_consensus_b())
+    by_name = {r["name"]: r for r in rows}
+    # 3 rooms total: SALA, COZINHA (matched) + BANHO (only_in_b)
+    assert set(by_name.keys()) == {"SALA", "COZINHA", "BANHO"}
+    assert by_name["SALA"]["status"] == "matched"
+    assert by_name["SALA"]["in_a"] and by_name["SALA"]["in_b"]
+    # Both have area_pts2 = 5000, same PT_TO_M → delta = 0
+    assert by_name["SALA"]["delta_m2"] == 0.0
+    assert by_name["COZINHA"]["status"] == "matched"
+    # B's COZINHA is bigger (7000 vs 5000 pts^2) → positive delta
+    assert by_name["COZINHA"]["delta_m2"] > 0
+    assert by_name["BANHO"]["status"] == "only_in_b"
+    assert by_name["BANHO"]["in_b"] and not by_name["BANHO"]["in_a"]
+    assert by_name["BANHO"]["delta_m2"] is None
+
+
+def test_diff_summary_handles_only_in_a_rooms():
+    """When B is missing a room that A has, status is `only_in_a`."""
+    a = _toy_consensus()
+    b = {"rooms": [a["rooms"][0]]}  # only SALA
+    rows = diff_summary(a, b)
+    by_name = {r["name"]: r for r in rows}
+    assert by_name["COZINHA"]["status"] == "only_in_a"
+    assert by_name["COZINHA"]["in_a"] and not by_name["COZINHA"]["in_b"]
+    assert by_name["COZINHA"]["delta_m2"] is None
 
 
 # ---- Real consensus smoke test (skip if missing) ----------------------

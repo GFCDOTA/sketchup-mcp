@@ -232,9 +232,42 @@ in GitHub's inline SVG renderer (try hovering a room in
 XML escaping mirrors the existing label-escape contract: room names
 containing `<`, `>`, or `&` are safely encoded inside the tooltip.
 
-## Remaining limitations (post-12c)
+## Diff view (Cycle 12e — landed 2026-05-08)
 
-- No **side-by-side runs**. Pick one consensus at a time.
+The cockpit now compares **two consensus runs** side-by-side. Use
+case: visually verify a baseline-shift PR (pre vs post Cycle 8b
+concave-hull, or two synth iterations).
+
+### How it works
+
+1. Sidebar **Second consensus (run B, optional)** picker reuses the
+   same auto-discovery as the primary picker. Default is `(none)`.
+2. Toggle **Diff overlay (run B as dashed magenta)** in the Layers
+   section. When ON + B is selected, every B room is drawn as a
+   dashed magenta (`#c026d3`) outline OVER A's render. Walls /
+   labels / openings come from A only.
+3. New **Diff** inspector tab shows a per-room match table:
+   `name`, `status` (matched / only_in_a / only_in_b), `area_a_m2`,
+   `area_b_m2`, `delta_m2 (B−A)`, plus polygon vertex counts. Caption
+   includes `by_status` histogram + `sum(matched Δ)`.
+
+Match key is case-insensitive room name (same as the
+expected-model overlay).
+
+### What this unlocks
+
+- **Baseline shift verification** — pull up the same plant before
+  and after a fix; see at a glance which rooms moved, grew, or
+  shrank.
+- **Synth round-trip** — pre-roundtrip vs post-roundtrip consensus
+  in one view; matched rooms with `Δ ≈ 0` confirm the round-trip
+  preserved geometry.
+- **Pipeline regression triage** — older "good" run vs current
+  candidate; spot a phantom new room (`only_in_b`) or a vanished
+  one (`only_in_a`) without grepping JSON.
+
+## Remaining limitations (post-12e)
+
 - No **PT_TO_M auto-detect** from `consensus.metadata`. Manual
   number_input.
 
@@ -242,7 +275,6 @@ containing `<`, `>`, or `&` are safely encoded inside the tooltip.
 
 | Candidate | Why |
 |---|---|
-| Cycle 12e — diff view | run A vs run B, useful for baseline-shift PRs. |
 | `renderers/` migration | Architecture plan step 5; clears the 5 transitional `render_*.py` orphans. |
 | Slice 2 — approve/reject + `review_overrides.json` | Needs FastAPI for POST. |
 | Slice 3 — `proposed_actions.json` + pre-SKP gate F0 | Closes the validation-before-SKP loop. |

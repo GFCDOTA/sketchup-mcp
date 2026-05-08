@@ -39,6 +39,7 @@ class OverlayToggles:
     labels: bool = True
     openings: bool = True
     ground_truth_overlay: bool = False
+    diff_overlay: bool = False
     warnings: bool = True
 
 
@@ -117,23 +118,28 @@ def _polygon_svg(pts: Sequence[Sequence[float]],
                   stroke_width: float = 0.5,
                   fill_opacity: float = 1.0,
                   class_name: str | None = None,
-                  title_text: str | None = None) -> str:
+                  title_text: str | None = None,
+                  stroke_dasharray: str | None = None) -> str:
     """Emit a `<polygon>`. When `title_text` is provided, the polygon
     becomes a parent element with a `<title>` child — browsers render
     this as a native tooltip on hover (Cycle 12c). When `class_name`
-    is provided the CSS rule in the SVG `<style>` block applies."""
+    is provided the CSS rule in the SVG `<style>` block applies.
+    When `stroke_dasharray` is provided the outline is dashed
+    (Cycle 12e diff overlay uses `"3,2"`)."""
     pts_str = " ".join(f"{p[0]:.2f},{p[1]:.2f}" for p in pts)
     cls = f' class="{class_name}"' if class_name else ""
+    dash = (f' stroke-dasharray="{stroke_dasharray}"'
+            if stroke_dasharray else "")
     if title_text is None:
         return (
             f'<polygon{cls} points="{pts_str}" '
             f'fill="{fill}" fill-opacity="{fill_opacity}" '
-            f'stroke="{stroke}" stroke-width="{stroke_width}" />'
+            f'stroke="{stroke}" stroke-width="{stroke_width}"{dash} />'
         )
     return (
         f'<polygon{cls} points="{pts_str}" '
         f'fill="{fill}" fill-opacity="{fill_opacity}" '
-        f'stroke="{stroke}" stroke-width="{stroke_width}">'
+        f'stroke="{stroke}" stroke-width="{stroke_width}"{dash}>'
         f'<title>{_xml_escape(title_text)}</title>'
         f'</polygon>'
     )
@@ -248,7 +254,8 @@ def render_overlay_svg(consensus: dict,
                          toggles: OverlayToggles | None = None,
                          pt_to_m: float = PT_TO_M_DEFAULT,
                          expected_model: dict | None = None,
-                         pdf_underlay: PdfUnderlay | None = None) -> str:
+                         pdf_underlay: PdfUnderlay | None = None,
+                         consensus_b: dict | None = None) -> str:
     """Build a self-contained SVG string visualizing the consensus.
 
     Coordinates are in PDF user space; the SVG flips y so PDF-up
@@ -416,6 +423,25 @@ def render_overlay_svg(consensus: dict,
                 class_name="hover-opening", title_text=tooltip,
             ))
 
+    # Diff overlay (Cycle 12e): consensus_b's rooms drawn as dashed
+    # magenta outlines OVER consensus A. Useful for spotting where
+    # rooms shifted between two runs of the same plant (e.g. pre vs
+    # post Cycle 8b concave-hull). Pure additive — no fill, no
+    # tooltip, just a dashed outline.
+    if (toggles.diff_overlay and consensus_b is not None
+            and (consensus_b.get("rooms") or [])):
+        for rb in consensus_b["rooms"]:
+            poly = rb.get("polygon_pts") or []
+            if len(poly) < 3:
+                continue
+            parts.append(_polygon_svg(
+                poly, fill="none",
+                stroke="#c026d3",  # magenta — high contrast
+                stroke_width=1.5,
+                fill_opacity=0.0,
+                stroke_dasharray="3,2",
+            ))
+
     parts.append("</g>")
     parts.append("</svg>")
     return "".join(parts)
@@ -551,6 +577,85 @@ def _build_room_status_map(consensus: dict,
         out[oid] = _EXPECTED_MATCH_COLORS.get(
             row.get("status") or "", "#9ca3af",
         )
+    return out
+
+
+# ---------- Diff between two consensuses (Cycle 12e) -------------------
+
+def diff_summary(consensus_a: dict,
+                 consensus_b: dict,
+                 pt_to_m: float = PT_TO_M_DEFAULT) -> list[dict]:
+    """Compare two consensuses (typically two runs of the same plant)
+    and produce a per-room delta table.
+
+    Match key is the case-insensitive room name. Each row:
+
+        {
+          "name": str,
+          "in_a": bool,
+          "in_b": bool,
+          "area_a_m2": float | None,
+          "area_b_m2": float | None,
+          "delta_m2": float | None,   # b - a; None when a side is missing
+          "verts_a": int,
+          "verts_b": int,
+          "status": "matched" | "only_in_a" | "only_in_b",
+        }
+
+    Top-level summary delta (counts) can be derived by the caller.
+    """
+    rooms_a = consensus_a.get("rooms") or []
+    rooms_b = consensus_b.get("rooms") or []
+    by_name_a: dict[str, dict] = {
+        (r.get("name") or "").strip().upper(): r for r in rooms_a
+    }
+    by_name_b: dict[str, dict] = {
+        (r.get("name") or "").strip().upper(): r for r in rooms_b
+    }
+    all_keys = sorted(set(by_name_a) | set(by_name_b))
+
+    def _area_m2(r: dict | None) -> float | None:
+        if r is None:
+            return None
+        poly = r.get("polygon_pts") or []
+        area_pt = float(r.get("area_pts2") or _polygon_area_pt2(poly))
+        return round(area_pt * pt_to_m * pt_to_m, 2)
+
+    def _verts(r: dict | None) -> int:
+        if r is None:
+            return 0
+        return len(r.get("polygon_pts") or [])
+
+    out: list[dict] = []
+    for k in all_keys:
+        ra = by_name_a.get(k)
+        rb = by_name_b.get(k)
+        area_a = _area_m2(ra)
+        area_b = _area_m2(rb)
+        if ra is not None and rb is not None:
+            status = "matched"
+            delta = (None if (area_a is None or area_b is None)
+                     else round(area_b - area_a, 2))
+        elif ra is not None:
+            status = "only_in_a"
+            delta = None
+        else:
+            status = "only_in_b"
+            delta = None
+        # Display name preserves the source casing — prefer A's casing
+        # when matched, fall back to B's.
+        display_name = ((ra or rb or {}).get("name") or k)
+        out.append({
+            "name": display_name,
+            "in_a": ra is not None,
+            "in_b": rb is not None,
+            "area_a_m2": area_a,
+            "area_b_m2": area_b,
+            "delta_m2": delta,
+            "verts_a": _verts(ra),
+            "verts_b": _verts(rb),
+            "status": status,
+        })
     return out
 
 

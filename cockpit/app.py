@@ -37,6 +37,7 @@ import streamlit as st
 from cockpit.render_overlay import (
     PT_TO_M_DEFAULT,
     OverlayToggles,
+    diff_summary,
     expected_match_summary,
     opening_summary_rows,
     pdf_page_to_data_url,
@@ -170,6 +171,25 @@ def main() -> None:
         expected = _load_json(gt_choice) if gt_choice else None
 
         st.divider()
+        st.header("Diff (run B)")
+        # Reuse the same consensus discovery used for the primary
+        # picker — Cycle 12e uses two consensuses.
+        cons_b_options = [None, *cons_paths]
+        cons_b_choice = st.selectbox(
+            "Second consensus (run B, optional)",
+            cons_b_options,
+            index=0,
+            format_func=lambda p: ("(none)" if p is None
+                                    else str(p.relative_to(REPO_ROOT))),
+            help=("When set + the `Diff overlay` toggle is on, B's "
+                  "rooms render as dashed magenta outlines over A's "
+                  "render. The Diff inspector tab shows per-room "
+                  "area deltas (B − A)."),
+        )
+        consensus_b = (_load_json(cons_b_choice)
+                       if cons_b_choice is not None else None)
+
+        st.divider()
         st.header("PDF underlay")
         pdf_paths = _find_pdf_candidates(REPO_ROOT, cons_path)
         pdf_options = [None, *pdf_paths]
@@ -205,6 +225,9 @@ def main() -> None:
             openings=st.checkbox("Openings", value=True),
             ground_truth_overlay=st.checkbox(
                 "Ground truth overlay", value=False),
+            diff_overlay=st.checkbox(
+                "Diff overlay (run B as dashed magenta)",
+                value=False),
             warnings=st.checkbox("Warnings", value=True),
         )
         st.divider()
@@ -251,6 +274,7 @@ def main() -> None:
                 pdf_underlay=underlay,
                 pt_to_m=pt_to_m,
                 expected_model=expected,
+                consensus_b=consensus_b,
             )
         except Exception as e:  # noqa: BLE001
             st.error(f"Renderer error: {e}")
@@ -264,8 +288,9 @@ def main() -> None:
     with col_inspect:
         st.subheader("Inspector")
         (tab_rooms, tab_openings, tab_fidelity, tab_expected,
-         tab_meta) = st.tabs(
-            ["Rooms", "Openings", "Fidelity", "Expected", "Meta"]
+         tab_diff, tab_meta) = st.tabs(
+            ["Rooms", "Openings", "Fidelity", "Expected",
+             "Diff", "Meta"]
         )
         with tab_rooms:
             rows = room_summary_rows(consensus, pt_to_m=pt_to_m)
@@ -300,6 +325,9 @@ def main() -> None:
         with tab_expected:
             _render_expected_panel(consensus, expected, pt_to_m)
 
+        with tab_diff:
+            _render_diff_panel(consensus, consensus_b, pt_to_m)
+
         with tab_meta:
             md = consensus.get("metadata") or {}
             if md:
@@ -325,6 +353,59 @@ def _render_warnings_panel(consensus: dict) -> None:
         st.warning("Detected issues in metadata:")
         for w in warns:
             st.code(w, language="text")
+
+
+def _render_diff_panel(consensus_a: dict,
+                        consensus_b: dict | None,
+                        pt_to_m: float) -> None:
+    """Cycle 12e — show the per-room diff table between two
+    consensuses. Pairs with the dashed-magenta `Diff overlay` toggle
+    on the SVG side."""
+    if consensus_b is None:
+        st.info(
+            "No second consensus selected — pick `Second consensus "
+            "(run B, optional)` in the sidebar to see the diff "
+            "table + the dashed-magenta overlay on the SVG."
+        )
+        return
+    rows = diff_summary(consensus_a, consensus_b, pt_to_m)
+    if not rows:
+        st.info("No rooms in either consensus to compare.")
+        return
+    status_label = {
+        "matched": "✅ matched",
+        "only_in_a": "⬅ only in A",
+        "only_in_b": "➡ only in B",
+    }
+    pretty = []
+    for r in rows:
+        pretty.append({
+            "name": r.get("name"),
+            "status": status_label.get(
+                r.get("status") or "", r.get("status") or "?"),
+            "area_a_m2": r.get("area_a_m2"),
+            "area_b_m2": r.get("area_b_m2"),
+            "delta_m2 (B−A)": r.get("delta_m2"),
+            "verts_a": r.get("verts_a"),
+            "verts_b": r.get("verts_b"),
+        })
+    st.dataframe(pretty, use_container_width=True, hide_index=True)
+    from collections import Counter
+    by_status = Counter(r.get("status") for r in rows)
+    matched = [r for r in rows if r.get("status") == "matched"
+               and r.get("delta_m2") is not None]
+    if matched:
+        total_delta = sum(r["delta_m2"] for r in matched)
+        st.caption(
+            f"by_status: {dict(by_status)} · "
+            f"sum(matched Δ): {total_delta:+.2f} m²"
+        )
+    else:
+        st.caption(f"by_status: {dict(by_status)}")
+    st.caption(
+        "Toggle `Diff overlay` in the sidebar to render B's rooms "
+        "as dashed magenta outlines over A on the SVG."
+    )
 
 
 def _render_expected_panel(consensus: dict,
