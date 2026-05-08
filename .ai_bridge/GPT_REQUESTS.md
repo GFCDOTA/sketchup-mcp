@@ -41,7 +41,55 @@ the autonomous loop is sufficient.
 
 <!-- New requests below this line, newest at top -->
 
-## Request 2026-05-08 14:30 — Cycle 8b promote: ratio choice + PR strategy
+## Request 2026-05-08 16:30 — Cycle 6 alt: adjacency_f1=0.67 plateau
+
+### Context
+
+Post-Cycle-8b (concave-hull default ratio 0.50), Fidelity Engine
+v1 surfaces `adjacency_f1=0.67<0.80` as a WARNING. Hard-fail
+floor (0.60) is cleared. Empirical breakdown: 6 TP / 4 FP / 2 FN
+across `planta_74`'s 8 expected adjacency edges.
+
+Investigated each FP and FN by inspecting wall+probe+polygon.
+Each remaining mismatch traces to either:
+- room polygon LEAKING beyond actual boundary (SUITE 01 still
+  spans), causing FPs;
+- room polygon SHRINKING short of the host wall (LAVABO bbox
+  x_max=320 but opening at x=336), causing FNs via fallback to
+  nearest-seed which picks wrong neighbour;
+- room pair connected by OPEN PASSAGE with no door object
+  (SALA DE ESTAR <-> SALA DE JANTAR), unfixable in
+  `classify_openings_by_room_context` by design.
+
+Tested two alternative classifier heuristics locally
+(nearest-vertex; side-filtered nearest-seed): both fail because
+the root cause is upstream polygon defects.
+
+### Files / Evidence
+
+- `tools/classify_openings_by_room_context.py:172`
+  (`find_rooms_flanking_wall`)
+- `runs/cycle6alt/c3.json` — current default-on output
+- `ground_truth/planta_74/expected_model.json` — adjacency[]
+- Investigation script output (probes + nearest seeds + polygon
+  containments per FN/FP)
+
+### Question
+
+Three options:
+- (A) Fix mínimo no classifier (side-filtered nearest-seed)
+- (B) Document plateau, mark adjacency_f1 ∈ [0.60, 0.80] as
+  expected post-Cycle-8b, queue Cycle 8c (room polygon refinement)
+  as the proper fix
+- (C) Fix upstream `rooms_from_seeds.py` polygon grow-by-thickness
+  in the same PR (bigger scope)
+
+Preliminary recommendation: B.
+
+### Expected Output
+
+A/B/C decision + 1-paragraph justification. Concise (~200 words).
+
 
 ### Context
 

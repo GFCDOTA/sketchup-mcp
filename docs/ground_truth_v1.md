@@ -203,6 +203,14 @@ fidelity report is RED. Once they land, all three should clear and
   as an opening of `kind: interior_passage` in the GT, but the
   observed pipeline may or may not emit one — that's why the
   expected_model includes it as a `medium` confidence entry.
+- **`adjacency_f1` plateau ∈ [0.60, 0.80].** Post-Cycle-8b the
+  metric settles around 0.67 on `planta_74`. The remaining FN/FP
+  are root-caused upstream in `rooms_from_seeds.py` polygon
+  shape, NOT in `classify_openings_by_room_context.py`. The
+  fidelity engine surfaces this band as a **warning** (hard-fail
+  threshold is 0.60). See `FP-013` and
+  `docs/diagnostics/2026-05-08_cycle6alt_adjacency_f1_analysis.md`
+  for the breakdown + Cycle 8c fix candidates.
 
 ---
 

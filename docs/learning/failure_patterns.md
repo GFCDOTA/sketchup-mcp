@@ -200,3 +200,27 @@ flag default-off. Promote default only after `tests/baselines/
 planta_74.json` is updated in a single dedicated PR.
 
 **See also:** `LL-XXX` lesson to be filed once a fix lands.
+
+## FP-013 — adjacency_f1 plateau lives upstream in room polygon quality
+
+**Date:** 2026-05-08
+**Discovered in:** `tools/classify_openings_by_room_context.py` post-Cycle-8b empirical analysis. Full diagnostic in `docs/diagnostics/2026-05-08_cycle6alt_adjacency_f1_analysis.md`.
+
+**Symptom:** Fidelity Engine v1 reports `adjacency_f1 ∈ [0.65, 0.70]` on `planta_74` even after FP-012 was fixed. The metric stops improving regardless of changes to the classifier. Specific failures (FN: LAVABO↔SALA DE JANTAR, SALA DE ESTAR↔SALA DE JANTAR; FP: A.S.↔SALA DE ESTAR, A.S.↔TERRACO SOCIAL, BANHO 02↔LAVABO, BANHO 02↔SUITE 01).
+
+**Pattern:** When the adjacency metric is below 0.80 but above the hard-fail floor of 0.60, the natural next step is to "tighten the classifier". **Don't.** Each remaining mismatch traces to one of:
+- Room polygon LEAKING beyond actual room boundaries (e.g., SUITE 01 still spans into LAVABO area even at concave-hull r=0.50). Causes FPs.
+- Room polygon SHRINKING short of host wall (canonicalization or tight concave hull). Causes the polygon-containment lookup to fail, fallback nearest-seed picks the wrong neighbour. Causes FNs.
+- Two rooms architecturally adjacent via an OPEN PASSAGE (no door object). The classifier has nothing to attribute the adjacency to. Causes FNs that are unfixable in `classify_*` by design.
+
+All three are upstream defects in `rooms_from_seeds.py` polygon shape OR in the lack of a "synthetic open_passage" opening.
+
+**Anti-pattern signal:** changing `eps`, swapping nearest-seed for nearest-vertex, or special-casing self-adjacent disambiguation in `classify_openings_by_room_context.py` to chase adjacency_f1 above 0.70 without touching `rooms_from_seeds.py`. None of those work.
+
+**Rule (until fix lands):** treat `adjacency_f1 ∈ [0.60, 0.80]` as the expected plateau on `planta_74`. The fidelity engine surfaces it as a warning by design. Investigate root cause in room polygon shape, NOT in the classifier. Cycle 8c candidates: polygon grow-by-thickness; alpha-shape per room; synthetic open_passage opening for shared polygon edges.
+
+**Anti-pattern signal:** lowering the hard-fail threshold from 0.60 to "make it pass" — that violates CLAUDE.md §1 and the operational protocol's "alterar threshold para fazer passar" RED rule.
+
+**Resolution:** Open. Documented in this entry and in `docs/diagnostics/2026-05-08_cycle6alt_adjacency_f1_analysis.md`. Cycle 8c will fix the underlying polygon quality issues; this is the unblocking work, not a classifier change.
+
+**See also:** `FP-012` (convex-hull room clip — fixed in Cycle 8b but exposed this layer of plateau); LL-011 (empirical evidence overrides parametric guesses).
