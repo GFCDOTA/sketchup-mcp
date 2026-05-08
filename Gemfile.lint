@@ -1,0 +1,22 @@
+# Gemfile.lint — Ruby tooling for CI lint only
+#
+# Scope: this file is NOT loaded in production. It exists so the
+# rubocop GitHub Action can `bundle install --gemfile=Gemfile.lint`
+# without polluting the repo root with a Gemfile that implies this
+# is a Ruby project (it is primarily Python; Ruby is only used in
+# tools/*.rb for the SketchUp consumer side).
+#
+# To run locally:
+#   bundle install --gemfile=Gemfile.lint
+#   BUNDLE_GEMFILE=Gemfile.lint bundle exec rubocop tools/
+#
+# Adding rubocop-sketchup is intentionally deferred to a follow-up
+# PR. Current setup runs the conservative built-in Lint cops only;
+# rubocop-sketchup adds SketchUp-specific suggestions / requirements
+# / deprecations / performance cops that may need per-file tuning
+# given the autorun-plugin pattern we use (tools/autorun_*.rb).
+source "https://rubygems.org"
+
+group :lint do
+  gem "rubocop", "~> 1.65", require: false
+end

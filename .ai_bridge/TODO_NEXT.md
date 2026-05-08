@@ -1,0 +1,195 @@
+# TODO Next — ROI-ordered
+
+> Continuous queue. Top items execute first. Update as items land
+> or new ones surface. Stale entries → either compact or move to
+> `LESSONS.md`.
+
+## Format
+
+Each entry:
+- **Priority** — P0 (blocker) / P1 (high ROI) / P2 (nice) / P3 (deferred)
+- **Evidence** — why this matters (file path, log, test, metric)
+- **Touchpoints** — files / commands likely involved
+- **Validation** — how to know it worked
+- **Risk** — what can break
+
+---
+
+## P0 — Nine PR-less branches ready (PR bodies under .ai_bridge/pr_bodies/)
+
+User opens PRs manually (memory rule `feedback_pr_manual_preferido.md`).
+Recommended merge order to minimize rebase pain (still zero
+file-level conflicts after the 2026-05-08 NAO PARE adendos):
+
+1. `docs/non-stop-autonomy-rule` (CLAUDE.md only, no conflicts)
+2. `docs/suite01-polygon-leakage-investigation` (docs/ only)
+3. `docs/readme-overview-stage15-tools` (README + OVERVIEW + Adendo B Fidelity mentions)
+4. `feature/rubocop-sketchup-ci` (Gemfile/.rubocop/workflow only)
+5. `feature/quality-gates-ci-workflow` (.github/workflows + Adendo C hashFiles-guarded fidelity step)
+6. `feature/concave-hull-room-clip-spike` (default-off code change)
+7. `feature/ground-truth-v1-fidelity-engine` (additive: ground_truth/, tools/fidelity/, tests/, docs/ + Adendo A round-trip tests)
+8. `docs/ai-bridge-scaffolding-clean` (.ai_bridge/ only)
+9. `feature/micro-truth-expand-planta-74-cycle7` (ground_truth + tests)
+
+**NAO PARE wave 2026-05-08 adendos:**
+- A: `dac81ed` on GT branch (synth + 4 round-trip tests)
+- B: `d0734a7` on README/OVERVIEW (Fidelity mentions)
+- C: `a73be99` on quality-gates (hashFiles-guarded fidelity step =
+  effectively delivers Cycle 13 inside the existing PR)
+
+| Branch | Body file | Compare URL |
+|---|---|---|
+| `docs/non-stop-autonomy-rule` | `PR_BODY_non_stop_autonomy_rule.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/non-stop-autonomy-rule |
+| `docs/suite01-polygon-leakage-investigation` | `PR_BODY_suite01_polygon_diagnostic.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/suite01-polygon-leakage-investigation |
+| `docs/readme-overview-stage15-tools` | `PR_BODY_readme_overview_stage15.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/readme-overview-stage15-tools |
+| `feature/rubocop-sketchup-ci` | `PR_BODY_rubocop_ci.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/rubocop-sketchup-ci |
+| `feature/quality-gates-ci-workflow` | `PR_BODY_quality_gates_ci.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/quality-gates-ci-workflow |
+| `feature/concave-hull-room-clip-spike` | `PR_BODY_concave_hull_spike.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/concave-hull-room-clip-spike |
+| `feature/ground-truth-v1-fidelity-engine` | `PR_BODY_ground_truth_v1.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/ground-truth-v1-fidelity-engine |
+| `docs/ai-bridge-scaffolding-clean` | `PR_BODY_ai_bridge_scaffolding_clean.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...docs/ai-bridge-scaffolding-clean |
+| `feature/micro-truth-expand-planta-74-cycle7` | `PR_BODY_cycle7_micro_truth_expand.md` | https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/micro-truth-expand-planta-74-cycle7 |
+
+**Branch to delete after `docs/ai-bridge-scaffolding-clean` merges**:
+`feature/ai-bridge-scaffolding` (contaminated with PR #52 commit
+`2417a20`). Local + remote.
+
+## P0 — Merge in-flight (Stage 1.6)
+
+**Merge PR #52 (smoke gate G2)** — `feature/smoke-promotes-inspector-v2-gate`
+- Evidence: PR open, all checks green, no conflicts
+- Touchpoints: GitHub PR #52
+- Validation: `git pull origin develop && grep "gate_g2" scripts/smoke/smoke_skp_export.py`
+- Risk: none (additive, opt-in flag)
+
+## P1 — Cycle 6: wire autorun inspector into gate F
+
+**Goal**: `inspect_report.json` becomes default output of every smoke
+run; gate G2 stops SKIPping.
+- Evidence: smoke_g2_2026_05_07 run shows G2 SKIP "no inspect_report.json"
+- Touchpoints:
+  - `tools/skp_from_consensus.py` (launcher) — pass `INSPECT_REPORT` env
+    + `CONSENSUS_JSON_FOR_INSPECTION` env to SU launch
+  - `tools/autorun_inspector_plugin.rb` — already exists, needs trigger
+    wiring
+  - `scripts/smoke/smoke_skp_export.py` gate F — write the inspector
+    control file before SU launch
+- Validation: smoke run produces `inspect_report.json` in out_dir;
+  G2 transitions from SKIP → PASS with structural counts
+- Risk: SU session adds inspector cost (~1-2 s); negligible
+
+## ✅ Cycle 7 done (2026-05-07) — branch ready, PR pending
+
+`feature/micro-truth-expand-planta-74-cycle7` (commit `d5ce23d`,
+pushed). 4 rooms now scored, all 1.0:
+
+- SALA DE ESTAR (unchanged), SUITE 02, BANHO 02, COZINHA
+- `tests/test_micro_truth_gate.py::test_real_planta_74_micro_passes`
+  now also asserts the four labels are present
+- 20/20 micro_truth tests pass; 56/56 across 3 gate test files
+- Compare URL:
+  https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/micro-truth-expand-planta-74-cycle7
+
+Open issue surfaced (deferred):
+- COZINHA's only detected adjacency is SUITE 02 (architecturally
+  implausible). Restore `expected_adjacent_labels=["A.S."]` once
+  the room-context classifier reaches cozinha — likely via Cycle 6.
+- SUITE 01 polygon is 69.91 m² (oversized) — diagnostic landed in
+  `docs/suite01-polygon-leakage-investigation` branch with FP-012
+  + 3 fix paths.
+
+## ✅ SUITE 01 diagnostic done (2026-05-07) — fix is the next ROI
+
+`docs/suite01-polygon-leakage-investigation` (commit `1863abd`).
+- Documents FP-012 (convex-hull room clip leaks watershed into
+  exterior). Pure documentation per CLAUDE.md §1.
+- See `docs/diagnostics/2026-05-07_planta_74_suite01_polygon_leakage.md`
+  for symptom + root cause + 3 candidate fix paths.
+- Recommended next: spike Option A (alpha-shape via
+  `shapely.concave_hull`) behind `--use-concave-hull` flag,
+  default off → `feature/concave-hull-room-clip-spike`.
+
+## ✅ Cycle 8 done (2026-05-07) — branch ready, PR pending
+
+`feature/concave-hull-room-clip-spike` (commit `39bfb99`, pushed).
+- `_build_interior_mask()` extracted; `--use-concave-hull` flag
+  + `--concave-hull-ratio` (default 0.3) added.
+- Default OFF → byte-identical behavior on existing baseline.
+- Empirical: SUITE 01 = 69.91 → 18.61 m² at ratio 0.30; sum 11
+  rooms = 182 → 83 m². ratio=1.0 reproduces convex baseline.
+- 4 new unit tests on synthetic L-shape; 519/519 in-scope tests
+  still pass (zero regression).
+- Diagnostic artifacts: `docs/diagnostics/2026-05-07_planta_74_fp012_spike_results.md`
+  + 2 PNG previews (ratio 0.30 + 0.55).
+- Compare URL:
+  https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/concave-hull-room-clip-spike
+
+## P1 — Cycle 8b: promote concave-hull to default
+
+After Cycle 8 lands, open `feature/concave-hull-promote-default`:
+- Pick the production ratio (recommend 0.55 for minimum disruption,
+  0.30 for closest-to-truth result; sweep table in
+  `docs/diagnostics/2026-05-07_planta_74_fp012_spike_results.md`)
+- Flip flag default to True (or remove flag entirely)
+- Regenerate `tests/baselines/planta_74.json` with new room counts
+  / area distributions
+- Recalibrate `ground_truth/planta_74_micro.json` ranges (or
+  remove specific assertions that no longer hold)
+- Regenerate `docs/preview/example_top.png`
+- Update CLAUDE.md §10 known-baseline note
+- File LL-XXX in `docs/learning/lessons_learned.md`
+- Risk: medium. This PR INTENTIONALLY changes baseline numbers,
+  needs careful diff review.
+- Validation:
+  - default-off path → existing 56/56 gate tests still pass
+  - flag-on rebuild on planta_74 → SUITE 01 < 50 m² (target ~30)
+  - render top preview with flag-on, save in
+    `docs/diagnostics/<date>_planta_74_concave_hull_spike.png`
+  - micro_truth_gate (with the new c3) → score still 1.0 across 4 rooms
+- Risk: medium. shapely 2.0 `concave_hull` accepts a `ratio` between
+  0 (most concave) and 1 (convex hull). Wrong ratio could shrink
+  the hull *inside* the building. Mitigation: ratio sweep on
+  planta_74 logged in PR description; only one chosen value lands.
+
+## ✅ Cycle 9 done (2026-05-07) — branch ready, PR pending
+
+`feature/rubocop-sketchup-ci` (commit `83e175d`, pushed). Pure
+infrastructure bootstrap of Ruby lint for `tools/*.rb`:
+- `Gemfile.lint` (new, name avoids implying full Ruby application)
+- `.rubocop.yml` (new) — TargetRubyVersion 3.2, only Lint +
+  Security cops on, all cosmetic categories disabled
+- `.github/workflows/rubocop.yml` (new) — paths-filtered to fire
+  only when a Ruby file or the lint config itself changes; PR +
+  push to main/develop, 5-min timeout, `--format github`
+- ZERO Ruby code touched. ZERO Python touched. ZERO test touched.
+- rubocop-sketchup gem deferred to a follow-up (needs per-file
+  annotations for our autorun-plugin pattern).
+- Compare URL:
+  https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/rubocop-sketchup-ci
+
+Expected first-CI behaviour: may surface real Lint violations on
+`tools/*.rb`. Per FP-010, do NOT auto-correct in the same PR;
+open `feature/rubocop-cleanup-tools` to address them in a
+review-friendly diff.
+
+## ✅ Cycle 10 done (2026-05-07) — branch ready, PR pending
+
+`feature/quality-gates-ci-workflow` (commit `c5b5342`, pushed).
+- `.github/workflows/quality_gates.yml` (new) — builds the 5-stage
+  vector pipeline + runs Plan Truth Gate (pytest), `coherence_audit
+  --strict`, `micro_truth_gate --strict`. Hard merge blocker.
+- Uploads `runs/_ci_quality_gates/` artifact 14 days, on success
+  AND failure, for diffability across PRs.
+- Smoke `--inspect-strict` (G2) intentionally OUT (Stage 1.6
+  excluded from this session chain).
+- Both --strict commands re-verified locally on today's c3:
+  exit 0, score 1.0.
+- Compare URL:
+  https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/quality-gates-ci-workflow
+
+## P3 — Cycle 10+ (future, not soon)
+
+- Multi-PDF corpus (need 5+ different floor plans to break the
+  planta_74-specific tunings)
+- DL wall oracle (CubiCasa5K) only after multi-PDF corpus exists
+- Web upload UI (PDF in → SKP out) — needs product decision
+- C API SKP I/O (defer indefinitely; current Ruby flow works)

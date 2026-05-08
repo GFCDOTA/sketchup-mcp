@@ -129,9 +129,87 @@ def mask_to_polygon(mask: np.ndarray, from_px,
     return [list(p) for p in poly_pts]
 
 
+def _build_interior_mask(mask: np.ndarray, walls: list[dict],
+                         to_px,
+                         *, use_concave_hull: bool,
+                         concave_hull_ratio: float) -> np.ndarray:
+    """Build the interior-mask used to clip watershed output.
+
+    Default path (``use_concave_hull=False``): convex hull of every
+    wall pixel. Cheap, robust, but over-encloses non-convex
+    footprints (FP-012).
+
+    Concave path (``use_concave_hull=True``): ``shapely.concave_hull``
+    over wall ENDPOINTS (~60–70 points typical, ms-scale even on
+    planta_74 which has ~750k wall pixels). Empirical default
+    ratio 0.3 keeps the building outline without slicing into
+    interior rooms. Falls back to convex hull if concave_hull
+    returns a non-Polygon (degenerate input).
+    """
+    H, W = mask.shape
+
+    if use_concave_hull and walls:
+        try:
+            from shapely import concave_hull as _shapely_concave_hull
+            from shapely.geometry import MultiPoint
+        except ImportError:
+            use_concave_hull = False  # graceful fall-through
+
+    if use_concave_hull and walls:
+        endpts_px: list[tuple[int, int]] = []
+        seen: set[tuple[int, int]] = set()
+        for w in walls:
+            for pt in (w.get("start"), w.get("end")):
+                if pt is None:
+                    continue
+                px = to_px(float(pt[0]), float(pt[1]))
+                if px not in seen:
+                    seen.add(px)
+                    endpts_px.append(px)
+        if len(endpts_px) >= 3:
+            try:
+                ch = _shapely_concave_hull(MultiPoint(endpts_px),
+                                            ratio=concave_hull_ratio)
+            except Exception:
+                ch = None
+            if ch is not None and ch.geom_type == "Polygon" and not ch.is_empty:
+                hull_pts = np.array(list(ch.exterior.coords),
+                                     dtype=np.int32)
+                interior = np.zeros_like(mask)
+                cv2.fillPoly(interior, [hull_pts], 255)
+                return interior
+
+    wall_pts = np.column_stack(np.where(mask > 0))
+    if len(wall_pts) > 0:
+        xy = wall_pts[:, ::-1].astype(np.int32)
+        hull = cv2.convexHull(xy)
+        interior = np.zeros_like(mask)
+        cv2.fillPoly(interior, [hull], 255)
+        return interior
+    return np.full_like(mask, 255)
+
+
 def detect_rooms(consensus: dict, labels: list[dict],
                  door_min: float, door_max: float, scale: int = 8,
-                 use_voronoi: bool = True) -> list[dict]:
+                 use_voronoi: bool = True,
+                 use_concave_hull: bool = False,
+                 concave_hull_ratio: float = 0.3) -> list[dict]:
+    """Detect room polygons via watershed seeded from PDF text labels.
+
+    ``use_concave_hull`` (default False): replaces the default
+    ``cv2.convexHull`` envelope clip with a ``shapely.concave_hull``
+    over the wall endpoints. Tighter envelope on non-convex
+    footprints — addresses FP-012 (SUITE 01 leakage on planta_74).
+    Default OFF to keep the existing baseline JSON stable; flip to
+    True via the ``--use-concave-hull`` CLI flag during the spike.
+    See ``docs/diagnostics/2026-05-07_planta_74_suite01_polygon_leakage.md``.
+
+    ``concave_hull_ratio`` (default 0.3): only effective when
+    ``use_concave_hull`` is True. Range 0.0 (tightest, may shrink
+    inside) to 1.0 (= convex hull). 0.3 chosen empirically on
+    planta_74 (~97 m² envelope vs 148 m² convex; reproduces the
+    L-shaped footprint without cutting interior rooms).
+    """
     walls = consensus["walls"]
     t = consensus["wall_thickness_pts"]
     region = tuple(consensus["planta_region"])
@@ -154,21 +232,17 @@ def detect_rooms(consensus: dict, labels: list[dict],
         # through white space until it meets another room's expansion.
         # Walls act as hard barriers (markers ignore them). This
         # tracks actual wall geometry instead of Voronoi straight
-        # bisectors — rooms hug the walls. Clipped to the convex hull
-        # of the wall network so rooms don't bleed off the building
-        # footprint where exterior peitoril is unwalled.
+        # bisectors — rooms hug the walls. The interior mask clips
+        # the result so rooms don't bleed off the building footprint
+        # where exterior peitoril is unwalled.
         seed_pts = [to_px(label["seed_pt"][0], label["seed_pt"][1])
                     for label in labels]
 
-        # Build interior mask: convex hull of wall pixels
-        wall_pts = np.column_stack(np.where(mask > 0))
-        if len(wall_pts) > 0:
-            xy = wall_pts[:, ::-1].astype(np.int32)
-            hull = cv2.convexHull(xy)
-            interior = np.zeros_like(mask)
-            cv2.fillPoly(interior, [hull], 255)
-        else:
-            interior = np.full_like(mask, 255)
+        interior = _build_interior_mask(
+            mask, walls, to_px,
+            use_concave_hull=use_concave_hull,
+            concave_hull_ratio=concave_hull_ratio,
+        )
         # Build a label image: -1 where wall, 0..N-1 where assigned.
         # cv2.watershed: 3-channel image input, markers as int32 with
         # one positive ID per seed and 0 elsewhere; walls are -1
@@ -298,11 +372,27 @@ if __name__ == "__main__":
                     help="Snap tolerance in PDF points (default 8.0 = "
                          "1.5x wall_thickness on planta_74). Only effective "
                          "when --canonicalize-rooms is set.")
+    # FP-012 spike (CLAUDE.md §3 paradigm: opt-in only). See
+    # docs/diagnostics/2026-05-07_planta_74_suite01_polygon_leakage.md
+    # for the bug + 3 candidate fix paths. Option A landed here behind
+    # this flag; default OFF so existing baseline JSON stays stable.
+    ap.add_argument("--use-concave-hull", action="store_true",
+                    help="Replace cv2.convexHull envelope clip with "
+                         "shapely.concave_hull over wall endpoints "
+                         "(FP-012 Option A). Off by default.")
+    ap.add_argument("--concave-hull-ratio", type=float, default=0.3,
+                    help="shapely concave_hull ratio when "
+                         "--use-concave-hull is set. 0.0 = tightest "
+                         "(may shrink inside), 1.0 = convex hull. "
+                         "Default 0.3 (calibrated on planta_74).")
     args = ap.parse_args()
 
     consensus = json.loads(args.consensus.read_text())
     labels = json.loads(args.labels.read_text())
-    rooms = detect_rooms(consensus, labels, args.door_min, args.door_max, args.scale)
+    rooms = detect_rooms(consensus, labels, args.door_min, args.door_max,
+                         args.scale,
+                         use_concave_hull=args.use_concave_hull,
+                         concave_hull_ratio=args.concave_hull_ratio)
 
     if args.canonicalize_rooms:
         # Local import to keep cv2 import cheap when feature unused. The
@@ -334,6 +424,10 @@ if __name__ == "__main__":
         "canonicalize_rooms": bool(args.canonicalize_rooms),
         "room_canonicalization_tol": (
             args.room_canonicalization_tol if args.canonicalize_rooms else None
+        ),
+        "use_concave_hull": bool(args.use_concave_hull),
+        "concave_hull_ratio": (
+            args.concave_hull_ratio if args.use_concave_hull else None
         ),
     }
     out = args.out or args.consensus
