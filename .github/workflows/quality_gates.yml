@@ -87,6 +87,21 @@ jobs:
             --out runs/_ci_quality_gates/micro_truth_report.json \
             --strict
 
+      # Fidelity Engine v1 (Ground Truth v1) — guarded so this
+      # workflow does NOT break on develop until
+      # feature/ground-truth-v1-fidelity-engine merges. Once both
+      # are on develop the step runs; before that it is SKIPPED with
+      # a one-line note. Prevents cross-branch ordering deadlock.
+      - name: Fidelity Engine v1 (strict, against expected_model.json)
+        if: hashFiles('tools/fidelity/__init__.py', 'ground_truth/planta_74/expected_model.json') != ''
+        run: |
+          python -m tools.fidelity.compare_generated_to_expected \
+            runs/_ci_quality_gates/c3_classified.json \
+            --expected ground_truth/planta_74/expected_model.json \
+            --out runs/_ci_quality_gates/fidelity_report.json \
+            --scorecard runs/_ci_quality_gates/fidelity_scorecard.md \
+            --strict
+
       - name: Upload quality-gate artifacts (always)
         if: always()
         uses: actions/upload-artifact@v4
