@@ -440,3 +440,115 @@ the page would list every cycle's run with its fidelity verdict.
   upstream of the SKP gate
 - `feedback_autonomia_operacional_protocolo.md` — the YELLOW
   rules under which Cycle 12 was authorized
+
+
+## Cycle 12g — on-demand thumbnails for runs without preview files
+
+The History view introduced in Cycle 12f shows "no previews
+discovered" for any run that does not carry a pre-rendered PNG/SVG
+on disk. Cycle 12g closes that gap by rendering a small (320 px
+wide, aspect-preserved) thumbnail directly from
+`consensus_*.json` whenever no preview file is present, and caches
+the result under `runs/<run_id>/_cockpit_cache/cockpit_thumbnail.png`.
+
+### Module — `cockpit/thumbnails.py`
+
+| Symbol | Purpose |
+|---|---|
+| `CACHE_DIRNAME` (`_cockpit_cache`) | Subdir of every run dir reserved for cockpit-only generated artefacts. |
+| `THUMBNAIL_FILENAME` (`cockpit_thumbnail.png`) | Filename used inside the cache. |
+| `DEFAULT_WIDTH_PX` (320) | Default raster width; height is derived from the consensus aspect ratio (clamped 80..240 px). |
+| `thumbnail_path(run_dir)` | Pure helper — does not touch disk. |
+| `ensure_thumbnail(run_dir, consensus_path, *, force=False)` | Returns the cached path; renders if missing or stale. Returns `None` on any failure (graceful degradation). |
+| `render_consensus_thumbnail(consensus, width_px=320)` | Pure consensus to PNG bytes; raises only on programmer error (e.g. `width_px <= 0`). |
+
+### Rendering approach — Pillow (option 2)
+
+The renderer draws walls + rooms + openings directly via
+`PIL.ImageDraw.Draw.polygon` and `.ellipse`. Color choices mirror
+`cockpit/render_overlay.py`: walls in `#3b3326`, rooms in the same
+hash-stable palette, openings in the same kind-coded RGB map.
+Y-axis is flipped at draw time so PDF-up renders as visual-up,
+matching the SVG view.
+
+This avoids adding `cairosvg` (system-libcairo dependency, awkward
+on Windows). The downside is mild duplication of the geometry
+helpers; the upside is no new optional extra and a fully
+self-contained pure-Python module that only imports Pillow at
+render time.
+
+### Cache strategy
+
+- **Path**: `runs/<run_id>/_cockpit_cache/cockpit_thumbnail.png`.
+  The whole `runs/` tree is gitignored (root `.gitignore`,
+  `/runs/`), so generated thumbnails never enter the repo.
+- **Invalidation**: stale when `consensus_path.stat().st_mtime`
+  is greater than `thumbnail_path.stat().st_mtime`. Any stat
+  failure also counts as stale (re-render rather than serve
+  potentially wrong bytes).
+- **`force=True`** bypasses the freshness check (debug aid).
+- **Atomic writes**: render to `cockpit_thumbnail.png.tmp` then
+  `Path.replace`, so a SIGKILL mid-write never leaves a corrupt
+  half-PNG behind.
+
+### History-view wiring
+
+`cockpit.history_view.summarise_run` now invokes
+`ensure_thumbnail` only when `image_paths` is empty AND a
+consensus path was discovered. If the call returns a path, that
+path is appended to `image_paths` so the History row renders the
+thumbnail like any other preview. If it returns `None`, the row
+keeps its "no previews" message — the cockpit never crashes
+because of a missing thumbnail.
+
+### Graceful degradation contract
+
+Every failure mode returns `None` from `ensure_thumbnail` and logs
+a warning:
+
+| Failure | Behaviour |
+|---|---|
+| Pillow not installed (`ImportError`) | `None`, warning. |
+| Consensus file missing | `None`, warning. |
+| Consensus JSON malformed | `None`, warning. |
+| Render exception (e.g. degenerate geometry) | `None`, warning, no partial cache. |
+| Cache write blocked (read-only filesystem) | `None`, warning. |
+
+This matches the Cycle 12f boundary: the cockpit must NEVER take
+itself down because a thumbnail couldn't be rendered.
+
+### Tests — `tests/test_cockpit_thumbnails.py`
+
+19 unit tests cover:
+
+- path shape (`thumbnail_path` always under `_cockpit_cache/`)
+- cache creation (`ensure_thumbnail` warms the cache dir on first call)
+- cache freshness (no re-render when consensus mtime <= thumb mtime)
+- cache invalidation (re-render when consensus is newer)
+- `force=True` re-renders unconditionally
+- pure renderer returns valid PNG bytes (`\x89PNG\r\n\x1a\n` signature)
+- empty consensus produces a beige rectangle without crashing
+- custom `width_px` honoured
+- `width_px <= 0` raises `ValueError`
+- render failure (mocked exception) returns `None`, no partial file
+- import failure (mocked `ImportError`) returns `None`
+- corrupt JSON consensus returns `None`
+- missing consensus file returns `None`
+- `summarise_run` populates `image_paths` with the thumbnail when no other previews exist
+- `summarise_run` does NOT trigger the thumbnail path when a real preview already exists
+- `summarise_run` does NOT trigger when both consensus and previews are absent
+- repeated calls with a fresh cache return the same path without rewriting
+- default rendered width = `DEFAULT_WIDTH_PX` (320)
+
+### Boundaries respected
+
+- No streamlit import in either `thumbnails.py` or the
+  `summarise_run` wiring — both stay pure-Python.
+- No SketchUp dependency.
+- No mutation of any pipeline artefact: writes go strictly to
+  `runs/<run_id>/_cockpit_cache/`, a subdir reserved for the
+  cockpit and ignored by git via the existing `/runs/` rule.
+- No threshold or schema change.
+- Existing `cockpit/render_overlay.py` is untouched: the SVG
+  inspector remains the high-fidelity view; the PIL thumbnail is
+  the History-row preview.
