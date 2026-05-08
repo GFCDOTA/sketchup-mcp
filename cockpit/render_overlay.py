@@ -5,18 +5,27 @@ SVG string that visualizes:
 - walls (filled rectangles in PDF coords)
 - rooms (translucent polygons + label + area)
 - openings (door arcs / wall-gaps as colored markers on host walls)
+- (optional, Cycle 12b) the source PDF page rasterised behind it
+  via `pypdfium2`, so the consensus is overlaid on the original
+  drawing instead of an empty canvas.
 
-Zero hard dependencies (pure Python + stdlib). Streamlit consumes
-the returned SVG via `st.markdown(svg, unsafe_allow_html=True)`.
+Zero hard dependencies for the consensus-only path (pure Python +
+stdlib). The PDF underlay path uses `pypdfium2` (already a core dep
+since the vector pipeline imports it).
 
 Coord system note: PDF user space has origin at bottom-left and
 y axis pointing UP. SVG has origin at top-left and y pointing
 DOWN. This module flips y inside the SVG transform so the rendered
-view matches what you'd see in a PDF reader.
+view matches what you'd see in a PDF reader. The optional PDF
+underlay is rasterised top-down (its native orientation) and placed
+OUTSIDE the y-flip group so it renders right-side-up.
 """
 from __future__ import annotations
 
+import base64
+import io
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Sequence
 
 # ---------- Toggle bag --------------------------------------------------
@@ -138,15 +147,72 @@ def _text_svg(x: float, y: float, text: str,
 PT_TO_M_DEFAULT = 0.19 / 5.4
 
 
+@dataclass
+class PdfUnderlay:
+    """Rasterised PDF page used as a visual base layer.
+
+    Built by `pdf_page_to_data_url`. Carries the page bounds in PT
+    so the renderer can align the bitmap to the consensus coord
+    space.
+    """
+    data_url: str
+    page_w_pt: float
+    page_h_pt: float
+    opacity: float = 0.55
+
+
+def pdf_page_to_data_url(pdf_path: str | Path,
+                         page_index: int = 0,
+                         dpi: int = 144,
+                         opacity: float = 0.55) -> PdfUnderlay:
+    """Render a PDF page to a PNG data URL via `pypdfium2`.
+
+    Returns a `PdfUnderlay` carrying the data URL + the page bounds
+    in PDF user-space PT. Resolution is `dpi`; default 144 = 2× the
+    PDF DPI (72), good enough to read text without exploding the
+    embedded base64. Raises `FileNotFoundError` if the path is
+    missing.
+    """
+    import pypdfium2 as pdfium  # local import — not on the SVG-only path
+
+    p = Path(pdf_path)
+    if not p.exists():
+        raise FileNotFoundError(p)
+    doc = pdfium.PdfDocument(str(p))
+    try:
+        page = doc[page_index]
+        page_w_pt = float(page.get_width())
+        page_h_pt = float(page.get_height())
+        scale = dpi / 72.0
+        pil_image = page.render(scale=scale).to_pil()
+        buf = io.BytesIO()
+        pil_image.save(buf, format="PNG", optimize=True)
+        png_b64 = base64.b64encode(buf.getvalue()).decode("ascii")
+    finally:
+        doc.close()
+    return PdfUnderlay(
+        data_url=f"data:image/png;base64,{png_b64}",
+        page_w_pt=page_w_pt,
+        page_h_pt=page_h_pt,
+        opacity=opacity,
+    )
+
+
 def render_overlay_svg(consensus: dict,
                          toggles: OverlayToggles | None = None,
                          pt_to_m: float = PT_TO_M_DEFAULT,
-                         expected_model: dict | None = None) -> str:
+                         expected_model: dict | None = None,
+                         pdf_underlay: PdfUnderlay | None = None) -> str:
     """Build a self-contained SVG string visualizing the consensus.
 
     Coordinates are in PDF user space; the SVG flips y so PDF-up
     renders as visual-up (matches what you'd see in a PDF reader).
-    The viewBox is auto-fit to the union of walls + rooms.
+
+    The viewBox is auto-fit to the union of walls + rooms by
+    default. When `pdf_underlay` is provided (Cycle 12b), the
+    viewBox is overridden to the PDF page bounds so the rasterised
+    page fills the canvas, and the bitmap is placed OUTSIDE the
+    y-flip group so it renders in its native top-down orientation.
     """
     toggles = toggles or OverlayToggles()
     walls = consensus.get("walls") or []
@@ -154,25 +220,34 @@ def render_overlay_svg(consensus: dict,
     openings = consensus.get("openings") or []
     wall_polys = _walls_to_polys(walls)
 
-    all_polys: list[list[list[float]]] = []
-    if toggles.walls:
-        all_polys.extend(wall_polys)
-    if toggles.rooms:
-        for r in rooms:
-            poly = r.get("polygon_pts") or []
-            if poly:
-                all_polys.append(poly)
-    if not all_polys:
-        all_polys = wall_polys or [[[0, 0], [100, 0], [100, 100], [0, 100]]]
+    if pdf_underlay is not None:
+        # When the PDF page is present, anchor the viewBox to its
+        # native bounds: that way the consensus polygons (already in
+        # PDF coords) sit perfectly on top of the rasterised page.
+        x0, y0 = 0.0, 0.0
+        x1, y1 = pdf_underlay.page_w_pt, pdf_underlay.page_h_pt
+        w = x1 - x0
+        h = y1 - y0
+    else:
+        all_polys: list[list[list[float]]] = []
+        if toggles.walls:
+            all_polys.extend(wall_polys)
+        if toggles.rooms:
+            for r in rooms:
+                poly = r.get("polygon_pts") or []
+                if poly:
+                    all_polys.append(poly)
+        if not all_polys:
+            all_polys = wall_polys or [[[0, 0], [100, 0], [100, 100], [0, 100]]]
 
-    x0, y0, x1, y1 = _bbox_pt(*all_polys)
-    pad = max(10.0, (x1 - x0) * 0.04)
-    x0 -= pad
-    y0 -= pad
-    x1 += pad
-    y1 += pad
-    w = x1 - x0
-    h = y1 - y0
+        x0, y0, x1, y1 = _bbox_pt(*all_polys)
+        pad = max(10.0, (x1 - x0) * 0.04)
+        x0 -= pad
+        y0 -= pad
+        x1 += pad
+        y1 += pad
+        w = x1 - x0
+        h = y1 - y0
 
     parts: list[str] = []
     parts.append(
@@ -182,6 +257,22 @@ def render_overlay_svg(consensus: dict,
         f'style="width:100%;height:auto;background:#f8f6ec;'
         f'border:1px solid #ccc;">'
     )
+
+    # PDF underlay (raster). Outside the flip group — the bitmap is
+    # already top-down (pypdfium2 native), so we place it directly
+    # in svg-coords with y running 0..h_pt down. The vector group
+    # below applies its own y-flip so PDF-coord polygons land on the
+    # correct page region.
+    if pdf_underlay is not None:
+        parts.append(
+            f'<image x="0" y="0" '
+            f'width="{pdf_underlay.page_w_pt:.2f}" '
+            f'height="{pdf_underlay.page_h_pt:.2f}" '
+            f'opacity="{pdf_underlay.opacity:.2f}" '
+            f'preserveAspectRatio="none" '
+            f'href="{pdf_underlay.data_url}" />'
+        )
+
     # Flip Y so PDF up = visual up.
     parts.append(
         f'<g transform="translate(0 {y0 + y1}) scale(1 -1)">'
