@@ -30,43 +30,75 @@ Each entry:
 - Cycle 11b/11c/11d: vector-PDF inventory + synthetic vector PDF
   generator + wall-gap widened so opening + adjacency round-trip
   closes (fidelity = 1.0 on `synth_l2`).
-- **Cycle 12 cockpit MVP** (PR #68, merged 19:03Z, `84eae72`):
-  Streamlit read-only validator + pure-Python SVG renderer + 10
-  new tests + `[cockpit]` extra.
-- **Cycle 12b PDF underlay** (PR #70, merged 19:25Z, `8e1e225`):
-  pypdfium2 → base64 PNG `<image>` behind the SVG; sidebar picker
-  + DPI/opacity sliders; +4 tests (14/14 cockpit total); demo SVG
-  with planta_74 baked in. Default opt-in `(none)`. develop @
-  `8e1e225`. 99/99 in-scope passing.
+- **Cycle 12 cockpit MVP** (PR #68, `84eae72`).
+- **Cycle 12b PDF underlay** (PR #70, `8e1e225`).
+- **Cycle 12d expected_model overlay** (PR #71, `d1a8acc`):
+  match-status renderer (5-state palette) + Expected inspector
+  tab. **Catches FP-012 leakage on planta_74 visually.** +4 tests
+  (18/18 cockpit total).
+- **Hygiene audit ledger** (PR #73, `c788df9`): root-level files
+  cross-referenced; no archives this cycle (every candidate has a
+  live reference path); ledger at
+  `docs/diagnostics/2026-05-08_post_cycle12d_hygiene_audit.md`.
+- 6 PRs total this session. develop @ `c788df9`.
+- **gh CLI tooling unblocked** — see LL-012 +
+  `~/.claude/projects/E--Claude/memory/reference_gh_cli_absolute_path.md`.
 
-## 🟢 P0 — Cycle 12d: render `expected_model` overlay layer
+## 🟢 P0 — Cycle 12c: hover highlight on rooms / openings
 
-- **Color:** GREEN — toggle already exists in `OverlayToggles`,
-  signature param `expected_model=None` already in
-  `render_overlay_svg`, data is in `ground_truth/<plant>/expected_model.json`,
-  renderer just needs to draw.
-- **Goal:** when GT picker is selected and `ground_truth_overlay`
-  toggle is ON, draw expected room polygons as dashed outlines
-  in a contrasting color (per-room match status: green=found,
-  orange=mismatched-area, red=missing, grey=extra-observed).
-- **Touchpoints:** `cockpit/render_overlay.py` (extend renderer +
-  add `_build_room_status_map(consensus, expected_model)`),
-  optionally `cockpit/app.py` for a "GT match summary" panel.
-- **Validation:** unit test asserting `<polygon stroke-dasharray=...>`
-  present when `expected_model` provided + visual smoke on
-  `runs/vector` vs `ground_truth/planta_74/expected_model.json`.
-- **Risk:** LOW. Pure additive. Renderer-only change.
+- **Color:** GREEN — additive, opt-in (no breaking change)
+- **Goal:** add `<title>` tooltips + a small CSS rule that
+  highlights the polygon under the cursor (`fill-opacity` jump,
+  outline thicken). Optionally add JS-driven cross-highlighting
+  between SVG and the inspector table.
+- **Touchpoints:** `cockpit/render_overlay.py` (emit `<title>`
+  child elements + maybe `<style>` block); optional
+  `cockpit/app.py` event wiring via `streamlit-extras` if available.
+- **Validation:** unit test asserting `<title>` present per room +
+  per opening with the expected name; visual smoke.
+- **Risk:** LOW. Pure additive — no new render path triggered
+  unless the cursor moves over an element.
 
-## 🟢 P1 — Cleanup hygiene scan (CLAUDE.md §15)
+## 🟢 P1 — Cycle 12e: diff view (run A vs run B)
 
-- **Color:** GREEN — additive, archive-not-delete
-- **Goal:** post-12-PR-wave scan of stale .md / generated PNG /
-  abandoned scripts.
-- **Touchpoints:** root-level `.md`, `runs/_archive/`, top-level
-  `proto_*.py` candidates, `docs/diagnostics/2026-05-0[1-7]_*`.
-- **Validation:** nothing live broken; archive doc updated.
-- **Risk:** LOW. Per §15: archive instead of delete; preserve
-  baselines / ground_truth / regression artifacts.
+- **Color:** GREEN — additive, dual-consensus rendering
+- **Goal:** sidebar second consensus picker; when both are picked,
+  render side-by-side OR overlay-with-diff. Per-room area delta
+  in inspector. Useful for baseline-shift PRs (e.g. visualise the
+  pre/post Cycle-8b concave-hull change).
+- **Touchpoints:** `cockpit/render_overlay.py` (add a
+  `render_diff_svg(consensus_a, consensus_b)` helper or extend the
+  existing renderer with a `consensus_b` param), `cockpit/app.py`
+  sidebar second-picker.
+- **Validation:** unit tests on the diff helper + visual smoke.
+- **Risk:** LOW. Pure additive.
+
+## 🟢 P1 — `renderers/` migration (architecture plan step 5)
+
+- **Color:** GREEN — clears the 4 transitional `render_*.py`
+  orphans flagged in PR #73's hygiene audit.
+- **Goal:** move `render_debug.py`, `render_native.py`,
+  `render_semantic.py`, `render_proto_overlays.py`,
+  `render_with_openings.py` into `packages/renderers/` per
+  `docs/architecture/target_repo_architecture.md` step 5.
+- **Touchpoints:** new `packages/renderers/` tree; deprecation
+  wrappers at the original root paths; `OVERVIEW.md` +
+  `docs/png_history_protocol.md` reference updates.
+- **Validation:** root scripts still importable (deprecation
+  wrapper) + `python -m packages.renderers.<name>` works.
+- **Risk:** MEDIUM. Repo-shape change. Should be its own PR.
+
+## 🟡 P2 — Refactor `proto_*.py` + `render_sidebyside.py` to CLI args
+
+- **Color:** YELLOW — kills the hardcoded `C:/Users/felip_local/`
+  paths flagged in `pyproject.toml [tool.ruff].extend-exclude`.
+  Once done, un-exclude them from ruff.
+- **Goal:** convert hardcoded paths to `argparse` CLI args.
+- **Touchpoints:** `proto_colored.py`, `proto_red.py`,
+  `render_sidebyside.py`, `pyproject.toml [tool.ruff]` cleanup.
+- **Validation:** `python proto_colored.py --plant planta_74` (or
+  similar) reproduces previous output; ruff turns from
+  excluded → checked.
 
 ## 🟡 P2 — Cockpit Slice 2: approve / reject + review_overrides.json
 
