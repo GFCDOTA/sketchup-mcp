@@ -19,14 +19,51 @@ Each entry:
 
 ---
 
+## 🟢 P0 — Open + merge Cycle 12 PR (Validation Cockpit MVP)
+
+- **Color:** GREEN — clean, additive, optional `[cockpit]` extra,
+  read-only by design, zero touches to schema / thresholds /
+  Ruby / smoke / fidelity engine
+- **Branch:** `feature/validation-cockpit-mvp-cycle12` (pushed)
+- **Compare:**
+  https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feature/validation-cockpit-mvp-cycle12
+- **PR body:** `.ai_bridge/pr_bodies/PR_BODY_cockpit_cycle12.md`
+- **Commits:** `30246d6` (feat) + `f11e13c` (fix: launch fixes)
+- **Validation:** 10/10 cockpit unit tests + live Streamlit smoke
+- **Action:** Felipe opens PR via compare URL; CI runs; merge if
+  green per operational autonomy protocol.
+
 ## ✅ DONE (2026-05-08 wave) — queue zerada
 
 All 9 PRs from the previous queue merged. See `HANDOFF.md` for
 per-PR table + merge SHAs. CI all green on develop. 85/85 tests.
 
-Cycle 12 (Ground Truth v1 + Fidelity Engine) shipped with advisory
-mode (`continue-on-error: true`) on the fidelity step until Cycle 8b
-clears the 3 known FP-012 hard_fails.
+Cycle 12 GT-v1 (Ground Truth v1 + Fidelity Engine) shipped with
+advisory mode (`continue-on-error: true`) on the fidelity step
+until Cycle 8b clears the 3 known FP-012 hard_fails.
+
+Cycle 12 Cockpit MVP (this branch) shipped — see P0 above.
+
+## 🟢 P1 — Cockpit Slice 1.5 / 2 / 3 candidates
+
+- **1.5 — PDF underlay (Cycle 12b):** render the source PDF
+  (`pypdfium2`) as an `<image>` behind the SVG overlay so the user
+  sees consensus *on top of* the original drawing. Biggest visual
+  win, smallest scope. Touchpoints: `cockpit/render_overlay.py`
+  (accept optional PDF base bytes), `cockpit/app.py` (sidebar PDF
+  picker). Validation: visual smoke on planta_74.
+- **2 — Approve / reject per element + `review_overrides.json`:**
+  needs FastAPI for POST. Touchpoints: new `api/cockpit_routes.py`,
+  new `api/review_store.py`, `cockpit/app.py` button wiring.
+  Validation: round-trip override file + sha256 invalidation test.
+- **3 — `proposed_actions.json` + pre-SKP gate F0:** new
+  `tools/propose_skp_actions.py` derives action plan from c3 +
+  fidelity; `scripts/smoke/smoke_skp_export.py` adds Gate F0 with
+  `--review-mode={off,warn,block}`. Default `off` so existing
+  smokes keep passing.
+
+All three are GREEN (additive, opt-in, no schema change).
+Sequenced post-merge.
 
 ## 🟡 P1 — Cycle 8b: promote concave-hull default
 
