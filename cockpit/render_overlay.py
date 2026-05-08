@@ -199,6 +199,102 @@ def _text_svg(x: float, y: float, text: str,
 PT_TO_M_DEFAULT = 0.19 / 5.4
 
 
+# Cycle 12h — short-name mapping used when annotating SVG <title>
+# tooltips with the override type that is currently active for an
+# element. Drawn from `cockpit.overrides.OVERRIDE_TYPES` (kept inline
+# rather than imported to keep this module dependency-free of the
+# overrides helper — `overrides_view` is consumed as a plain dict).
+_OVERRIDE_TYPE_SHORTNAME = {
+    "opening_kind_override": "kind",
+    "opening_connects_override": "connects",
+    "room_label_override": "label",
+    "mark_suspect": "suspect",
+    "reject_element": "rejected",
+    "approve_element": "approved",
+}
+
+
+def _overrides_view_index(overrides_view: dict | None
+                           ) -> tuple[dict[str, dict], dict[str, dict]]:
+    """Index `overrides_view['rooms']` and `['openings']` by id.
+
+    Returns ``(rooms_by_id, openings_by_id)``. Both empty when
+    ``overrides_view`` is None / empty / malformed (graceful
+    degradation — never raises).
+    """
+    if not overrides_view or not isinstance(overrides_view, dict):
+        return {}, {}
+    rooms_by_id: dict[str, dict] = {
+        r.get("id"): r for r in (overrides_view.get("rooms") or [])
+        if isinstance(r, dict) and r.get("id")
+    }
+    openings_by_id: dict[str, dict] = {
+        o.get("id"): o for o in (overrides_view.get("openings") or [])
+        if isinstance(o, dict) and o.get("id")
+    }
+    return rooms_by_id, openings_by_id
+
+
+def _override_tooltip_suffix(view_record: dict | None) -> str:
+    """Build the tooltip suffix for an element annotated by
+    `overrides_apply_view`.
+
+    Returns "" when the element is `source: detected` AND has no
+    suspect / approved annotations. Otherwise returns one of:
+
+        " · override"
+        " · override (kind)"
+        " · override (label, rejected)"
+        " · suspect:high"
+        " · approved"
+        ...
+
+    Multiple modifiers concatenate with ", " inside the parentheses.
+    Annotations that don't flip `source` to manual (mark_suspect,
+    approve_element) still surface as their own discriminator.
+    """
+    if not view_record or not isinstance(view_record, dict):
+        return ""
+    source = view_record.get("source")
+    suspect = view_record.get("_suspect")
+    approved = view_record.get("_approved")
+    rejected = view_record.get("_rejected")
+
+    parts: list[str] = []
+
+    if source == "manual" or source == "override_rejected" or rejected:
+        # Determine the short-name(s) by inspecting which fields the
+        # apply-view set. The view stamps `_<field>_original` for
+        # every field it rewrites, so we infer the override type
+        # from the presence of those fields.
+        type_tags: list[str] = []
+        if "_kind_v5_original" in view_record:
+            type_tags.append(_OVERRIDE_TYPE_SHORTNAME["opening_kind_override"])
+        if ("_room_left_id_original" in view_record
+                or "_room_right_id_original" in view_record):
+            type_tags.append(
+                _OVERRIDE_TYPE_SHORTNAME["opening_connects_override"]
+            )
+        if "_name_original" in view_record:
+            type_tags.append(_OVERRIDE_TYPE_SHORTNAME["room_label_override"])
+        if rejected or source == "override_rejected":
+            type_tags.append(_OVERRIDE_TYPE_SHORTNAME["reject_element"])
+        if type_tags:
+            parts.append(f"override ({', '.join(type_tags)})")
+        else:
+            parts.append("override")
+
+    if suspect and isinstance(suspect, dict):
+        sev = suspect.get("severity") or "?"
+        parts.append(f"suspect:{sev}")
+    if approved:
+        parts.append(_OVERRIDE_TYPE_SHORTNAME["approve_element"])
+
+    if not parts:
+        return ""
+    return " · " + " · ".join(parts)
+
+
 @dataclass
 class PdfUnderlay:
     """Rasterised PDF page used as a visual base layer.
@@ -255,7 +351,8 @@ def render_overlay_svg(consensus: dict,
                          pt_to_m: float = PT_TO_M_DEFAULT,
                          expected_model: dict | None = None,
                          pdf_underlay: PdfUnderlay | None = None,
-                         consensus_b: dict | None = None) -> str:
+                         consensus_b: dict | None = None,
+                         overrides_view: dict | None = None) -> str:
     """Build a self-contained SVG string visualizing the consensus.
 
     Coordinates are in PDF user space; the SVG flips y so PDF-up
@@ -266,6 +363,21 @@ def render_overlay_svg(consensus: dict,
     viewBox is overridden to the PDF page bounds so the rasterised
     page fills the canvas, and the bitmap is placed OUTSIDE the
     y-flip group so it renders in its native top-down orientation.
+
+    When `overrides_view` is provided (Cycle 12h — the dict returned
+    by ``cockpit.overrides.overrides_apply_view``), every room /
+    opening tooltip is annotated with the active override(s):
+
+        - ``" · override (kind)"`` for an opening whose kind was
+          rewritten via ``opening_kind_override``
+        - ``" · override (label)"`` for a room renamed via
+          ``room_label_override``
+        - ``" · override (rejected)"`` for a ``reject_element``
+        - ``" · suspect:high"`` / ``" · approved"`` for the
+          annotation-only override types
+
+    Default ``overrides_view=None`` is byte-equivalent to the v1.x
+    renderer; the param is purely additive.
     """
     toggles = toggles or OverlayToggles()
     walls = consensus.get("walls") or []
@@ -342,6 +454,13 @@ def render_overlay_svg(consensus: dict,
             consensus, expected_model, pt_to_m,
         )
 
+    # Cycle 12h — index the overrides apply view by element id so we
+    # can append the override-source annotation to each tooltip in
+    # O(1). Empty dicts when no overrides_view supplied.
+    rooms_view_by_id, openings_view_by_id = _overrides_view_index(
+        overrides_view
+    )
+
     # Rooms first (so walls render on top).
     if toggles.rooms:
         for r in rooms:
@@ -362,6 +481,11 @@ def render_overlay_svg(consensus: dict,
             area_pt = float(r.get("area_pts2") or _polygon_area_pt2(poly))
             area_m2 = area_pt * pt_to_m * pt_to_m
             tooltip = f"{name} · {area_m2:.1f} m² · id={rid or '?'}"
+            # Cycle 12h — append override annotation when an active
+            # override targets this room (graceful no-op otherwise).
+            tooltip += _override_tooltip_suffix(
+                rooms_view_by_id.get(rid)
+            )
             parts.append(_polygon_svg(
                 poly, fill=color, stroke=stroke_color,
                 stroke_width=stroke_width, fill_opacity=0.55,
@@ -416,6 +540,11 @@ def render_overlay_svg(consensus: dict,
                 f"{kind} · decision={decision} · "
                 f"{room_left} ↔ {room_right} · "
                 f"id={op.get('id') or '?'}"
+            )
+            # Cycle 12h — append override annotation when an active
+            # override targets this opening.
+            tooltip += _override_tooltip_suffix(
+                openings_view_by_id.get(op.get("id"))
             )
             parts.append(_circle_svg(
                 float(c[0]), float(c[1]), r=4.0, fill=color,

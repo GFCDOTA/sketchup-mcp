@@ -732,6 +732,139 @@ itself down because a thumbnail couldn't be rendered.
   inspector remains the high-fidelity view; the PIL thumbnail is
   the History-row preview.
 
+## Cycle 12h — SVG `source: manual` annotation + inline override removal (2026-05-08)
+
+Closes the two items deferred at the bottom of the Slice 2 section
+above ("Deferred to Cycle 12h"):
+
+1. **SVG `source: manual` tooltip annotation.** When an override
+   targets a room or opening, the existing `<title>` hover tooltip
+   gains a ` · override (...)` suffix listing the active override
+   short-name (`kind`, `connects`, `label`, `rejected`,
+   `suspect:<sev>`, `approved`).
+2. **Inline override removal in the Review tab.** Each row of the
+   `Active overrides` expander now carries a `× remove` button.
+   Clicking it pops the override from `overrides[]` and appends a
+   NEW `event: delete` audit entry — the original `create` entry
+   stays untouched (ADR-001 §2.7 append-only contract).
+
+### Renderer change — `cockpit/render_overlay.py`
+
+`render_overlay_svg(...)` gains one optional keyword argument added
+at the END of the signature (back-compat strict):
+
+```python
+def render_overlay_svg(consensus, toggles=None, pt_to_m=...,
+                       expected_model=None, pdf_underlay=None,
+                       consensus_b=None,
+                       overrides_view: dict | None = None) -> str:
+```
+
+When `overrides_view` is `None` (the default), the SVG output is
+**byte-equivalent** to the v1.x renderer — verified by
+`test_render_overlay_without_overrides_view_unchanged`.
+
+When `overrides_view` is supplied (the dict produced by
+`cockpit.overrides.overrides_apply_view`), each room/opening tooltip
+is annotated by appending the suffix produced by
+`_override_tooltip_suffix(view_record)`. The renderer indexes the
+view by element id once at the top of the render and looks up the
+annotation in O(1) per element. Element field values (`name`,
+`kind_v5`) still come from the source `consensus` — the renderer is
+not the apply-time rewriter (Slice 3 / `tools/apply_overrides.py`
+owns that).
+
+Short-name table:
+
+| Override type | Annotation tag |
+|---|---|
+| `opening_kind_override` | `kind` |
+| `opening_connects_override` | `connects` |
+| `room_label_override` | `label` |
+| `reject_element` | `rejected` |
+| `mark_suspect` | `suspect:<severity>` |
+| `approve_element` | `approved` |
+
+Multiple modifiers concatenate inside the `override (...)` parens
+(e.g. `override (kind, rejected)`).
+
+### Removal helper — `cockpit/overrides.remove_override`
+
+NEW pure-Python function (`save_override` signature is unchanged):
+
+```python
+def remove_override(run_dir: Path, override_id: str,
+                    audit_actor: str,
+                    consensus_path: Path | None = None) -> dict:
+```
+
+Behaviour:
+
+1. Loads the file via `load_overrides`.
+2. Finds the override by exact id match in `overrides[]`.
+3. Captures the full `before` snapshot of the override.
+4. Removes the override from `overrides[]`.
+5. Appends a new `audit_trail` entry with `event: "delete"`,
+   `before: <captured>`, `after: null`, `diff_signature: sha256`.
+6. Writes atomically via tempfile + `os.replace` (same crash-safe
+   path as `save_override`).
+7. Returns the updated doc.
+
+Raises `ValueError` when `override_id` is not present in
+`overrides[]`. The file is not mutated on the failure path (no
+spurious audit entries land — verified by
+`test_remove_unknown_override_id_raises`).
+
+### Append-only invariant (ADR-001 §2.10.3 / §2.7)
+
+The audit_trail is **strictly append-only**. Removing override A
+appends ONE new `delete` event; the original `create` event for
+A remains in `audit_trail[]` byte-equivalent (same id, same payload,
+same timestamp). A future viewer can replay the create-then-delete
+history for full provenance — verified by
+`test_audit_trail_remains_append_only_after_remove`.
+
+### Streamlit wiring — `cockpit/app.py`
+
+- Single-run page builds `overrides_view` once near the top of
+  `_render_single_run_page` (graceful: any failure leaves it
+  `None` and the renderer reverts to byte-equivalent v1.x output).
+- The same `overrides_view` is threaded into the
+  `render_overlay_svg(..., overrides_view=overrides_view)` call so
+  the SVG annotations match what the Review tab displays.
+- Inside the Review tab, the existing `Active overrides`
+  expander now lists each override on its own row with a
+  `× remove` button and a `help=` tooltip explaining the
+  audit-trail-append-only behaviour.
+
+### Tests
+
+- `tests/test_cockpit_overrides.py` (was 30, now 34 — +4):
+  - `test_remove_override_round_trip`
+  - `test_remove_override_appends_delete_to_audit_trail`
+  - `test_remove_unknown_override_id_raises`
+  - `test_audit_trail_remains_append_only_after_remove`
+- `tests/test_cockpit_render_overlay.py` (was 25, now 27 — +2):
+  - `test_render_overlay_with_overrides_view_annotates_title`
+  - `test_render_overlay_without_overrides_view_unchanged`
+
+All 30 existing override tests + all 25 existing renderer tests
+remain green (back-compat verified by the second renderer test
+asserting byte-equivalence between `overrides_view=None` and
+defaults).
+
+### Boundary check (CLAUDE.md)
+
+- §1.2 schema unchanged — `consensus.json` never written ✓
+- §1.3 thresholds unchanged ✓
+- §1.4 Ruby/SU exporter untouched ✓
+- §2 invariants intact: removal is a layer ABOVE the consensus,
+  acts only on `review_overrides.json` (ADR-001 §2.10.1) ✓
+- §3 SketchUp gate unaffected — Slice 2's pipeline-side stays a
+  no-op (the F0 gate added in Slice 3 is the consumer) ✓
+- ADR-001 §2.7 / §2.10.3 — audit_trail append-only invariant is
+  preserved by `remove_override` AND covered by an explicit test.
+
 ## Appendix — multi-PDF synth corpus (Cycle 11e, 2026-05-08)
 
 The cockpit gates fidelity-engine output. Outside the cockpit, the

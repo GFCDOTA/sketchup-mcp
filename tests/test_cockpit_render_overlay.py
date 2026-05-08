@@ -451,6 +451,114 @@ def test_diff_summary_handles_only_in_a_rooms():
 
 # ---- Real consensus smoke test (skip if missing) ----------------------
 
+# ---- overrides_view annotation (Cycle 12h) ---------------------------
+
+def _toy_overrides_view_room_label() -> dict:
+    """Apply-view shape that flips room `r1` (COZINHA → KITCHEN) via
+    a `room_label_override`. Mirrors what
+    `cockpit.overrides.overrides_apply_view` produces."""
+    return {
+        "schema_version": "review_overrides_view_v1",
+        "rooms": [
+            {"id": "r0", "name": "SALA", "source": "detected"},
+            {
+                "id": "r1",
+                "name": "KITCHEN",
+                "_name_original": "COZINHA",
+                "source": "manual",
+            },
+        ],
+        "openings": [
+            {"id": "o0", "source": "detected"},
+        ],
+    }
+
+
+def _toy_overrides_view_opening_kind() -> dict:
+    """Apply-view shape that flips opening `o0`'s kind_v5 via an
+    `opening_kind_override` and rejects opening `o0` (use only one
+    of these in the same test, but the helper covers both)."""
+    return {
+        "schema_version": "review_overrides_view_v1",
+        "rooms": [
+            {"id": "r0", "name": "SALA", "source": "detected"},
+            {"id": "r1", "name": "COZINHA", "source": "detected"},
+        ],
+        "openings": [
+            {
+                "id": "o0",
+                "kind_v5": "window",
+                "_kind_v5_original": "interior_door",
+                "source": "manual",
+            },
+        ],
+    }
+
+
+def test_render_overlay_with_overrides_view_annotates_title():
+    """When `overrides_view` is supplied, room/opening tooltips gain
+    a ` · override (...)` suffix listing the active override
+    short-name. Default v1.x tooltip text remains intact.
+
+    Note: the renderer reads room/opening field values (name, kind)
+    from the source `consensus`, not from `overrides_view`. The view
+    is consulted purely to look up the override status by id and
+    append the annotation suffix. Apply-time rewriting of values
+    is the job of `tools/apply_overrides.py` (Slice 3).
+    """
+    svg = render_overlay_svg(
+        _toy_consensus(),
+        overrides_view=_toy_overrides_view_room_label(),
+    )
+    # COZINHA's tooltip carries the original (consensus-side) name
+    # AND picks up the `override (label)` annotation suffix.
+    cozinha_chunk = (
+        svg.split("<title>COZINHA · ", 1)[1].split("</title>", 1)[0]
+    )
+    assert "override (label)" in cozinha_chunk
+    # SALA was not overridden → no annotation, baseline tooltip only.
+    assert "<title>SALA · " in svg
+    sala_chunk = svg.split("<title>SALA · ", 1)[1].split("</title>", 1)[0]
+    assert "override" not in sala_chunk, (
+        "Room without an active override must not gain the suffix"
+    )
+
+    # Now an opening_kind_override on o0 → tooltip gains
+    # `override (kind)` for the opening
+    svg2 = render_overlay_svg(
+        _toy_consensus(),
+        overrides_view=_toy_overrides_view_opening_kind(),
+    )
+    # Opening tooltip carries the override annotation
+    o0_chunk = (
+        svg2.split("<title>interior_door · decision=clean · "
+                   "SALA ↔ COZINHA · ", 1)[1]
+            .split("</title>", 1)[0]
+    )
+    assert "override (kind)" in o0_chunk
+
+
+def test_render_overlay_without_overrides_view_unchanged():
+    """Default `overrides_view=None` is byte-equivalent to the v1.x
+    renderer — no annotations leak into the SVG even when override
+    short-names appear elsewhere in the toy fixture."""
+    svg_default = render_overlay_svg(_toy_consensus())
+    svg_explicit_none = render_overlay_svg(
+        _toy_consensus(), overrides_view=None,
+    )
+    # Default-vs-explicit-None: identical bytes
+    assert svg_default == svg_explicit_none
+
+    # No ` · override` suffix anywhere
+    assert " · override" not in svg_default
+    # Existing v1.x tooltips still present (regression check on
+    # Cycle 12c contract)
+    assert "<title>SALA · " in svg_default
+    assert "<title>COZINHA · " in svg_default
+    assert ("<title>interior_door · decision=clean · "
+            "SALA ↔ COZINHA · ") in svg_default
+
+
 def test_render_overlay_on_planta_74_baseline_smoke():
     """Smoke: renderer produces a non-empty SVG on the canonical
     `planta_74` run dir if it exists. Skipped on stripped CI checkout."""
