@@ -48,68 +48,121 @@ Each entry:
 - **gh CLI tooling unblocked** — see LL-012 +
   `~/.claude/projects/E--Claude/memory/reference_gh_cli_absolute_path.md`.
 
-## ✅ DONE (this PR — 2026-05-08 step 5 of architecture migration)
+## ✅ DONE — 2026-05-08 parallel wave (PRs #78, #79, #80)
 
-- **`renderers/` migration (architecture plan step 5)**: 5 root
-  `render_*.py` scripts moved into the new top-level `renderers/`
-  package via `git mv` (history preserved with `--follow`); each
-  refactored from a top-level script into a `render(...)` library
-  function plus a `main()` CLI entry; root paths kept as thin
-  deprecation wrappers that emit `DeprecationWarning` and re-export
-  via `from renderers.<name> import *`. New tests at
-  `tests/test_renderers_migration.py` lock back-compat,
-  `pyproject.toml [tool.setuptools.packages.find].include` now
-  ships `renderers*`, and `OVERVIEW.md` + `docs/png_history_protocol.md`
-  point to the new module paths.
-- **Note on classification:** the parent session originally tagged
-  this work GREEN/P0, but moving repo top-level files is YELLOW per
-  the standard ROI matrix (touches packaging + ruff scope).
-  Executed under YELLOW autonomy (caution + evidence + tests +
-  rollback path) rather than GREEN. Future sessions should use
-  YELLOW for similar repo-shape changes.
+- **PR #80 — `renderers/` migration step 5** (`a87185c`): 5 root
+  `render_*.py` → `renderers/` package via `git mv`; deprecation
+  wrappers + DeprecationWarning + 8 new tests. Function-ised each
+  module so `renderers.<name>.render(...)` works programmatically.
+- **PR #79 — Cycle 12f cockpit History/Fidelity view** (`a1d04ff`):
+  new `cockpit/history_view.py` (350 LOC pure-Python) + History /
+  Compare / Detail views + Pre-SKP Review status (PASS/WARN/FAIL,
+  advisory). 19 new tests. All 10 FRs implemented in v0; thumbnails
+  for runs without preview files deferred to Cycle 12g.
+- **PR #78 — proto/render_sidebyside CLI refactor** (`0655f0a`):
+  3 scripts → argparse; 3 entries cleared from
+  `[tool.ruff].extend-exclude`; 5 new smoke tests. CI hiccup
+  (skimage missing in `[dev]`) handled mid-flight via lazy import.
+- 3 PRs landed in parallel via 3 worktrees. develop @ `a87185c`.
+  Net session delta: 626 PASS / 17 FAIL (raster legacy) / 8 SKIP —
+  +58 tests vs pre-session baseline.
 
-## 🟡 P2 — Refactor `proto_*.py` + `render_sidebyside.py` to CLI args
+## ✅ DONE — this PR (ADR-001)
 
-- **Color:** YELLOW — kills the hardcoded `C:/Users/felip_local/`
-  paths flagged in `pyproject.toml [tool.ruff].extend-exclude`.
-  Once done, un-exclude them from ruff.
-- **Goal:** convert hardcoded paths to `argparse` CLI args.
-- **Touchpoints:** `proto_colored.py`, `proto_red.py`,
-  `render_sidebyside.py`, `pyproject.toml [tool.ruff]` cleanup.
-- **Validation:** `python proto_colored.py --plant planta_74` (or
-  similar) reproduces previous output; ruff turns from
-  excluded → checked.
+- **`docs/adr/` directory created** (first ADR in the repo).
+- **ADR-001 — Validation Cockpit Mutation Surface** shipped at
+  `docs/adr/ADR-001-validation-cockpit-mutation-surface.md`.
+  Defines the contract for `review_overrides_v1`,
+  `proposed_actions_v1`, `pre_skp_review_v1`,
+  `amended_observed_v1` schemas; 7 override types; 6 proposed-
+  action types; F0 gate PASS/WARN/FAIL semantics + `--review-mode`
+  CLI; 8 safety invariants; phased pipeline-consumption rollout
+  (Slice 2 → Slice 3 → future FastAPI Phase 3).
+- `docs/adr/README.md` — index + ADR template + promotion rules
+  (when an ADR-lite graduates to a full ADR).
+- `.ai_bridge/DECISIONS.md` — entry pointing at ADR-001.
+- This file refreshed: Slice 2 + Slice 3 entries below are now
+  derived directly from ADR-001 § 3 + § 4.
 
-## 🟡 P2 — Cockpit Slice 2: approve / reject + review_overrides.json
+## 🟡 P0 — Cockpit Slice 2: review_overrides.json read/write
 
-- **Color:** YELLOW — introduces FastAPI + persistence
-- **Goal:** per-element approve/reject buttons; persisted to
-  `runs/<dir>/review_overrides.json`; sha256 invalidation if
-  consensus changes underneath.
-- **Touchpoints:** new `api/cockpit_routes.py`, new
-  `api/review_store.py`, `cockpit/app.py` button wiring.
-- **Validation:** round-trip override file + sha256 invalidation
-  test; doesn't break read-only contract on consensus itself.
-- **Risk:** MEDIUM. First mutation surface in cockpit boundary —
-  ADR update in `.ai_bridge/DECISIONS.md` required.
+- **Color:** YELLOW — first mutation surface for the cockpit
+- **Authoritative spec:** `docs/adr/ADR-001-validation-cockpit-mutation-surface.md` § 3
+- **Goal:** the cockpit reads + writes `runs/<run_id>/review_overrides.json`
+  for the active run via Streamlit + filesystem (NO FastAPI yet —
+  see ADR § 5 alternative C).
+- **Touchpoints:**
+  - `cockpit/overrides.py` (NEW) — pure helper:
+    `load_overrides(run_dir, expected_consensus_sha) -> dict`,
+    `save_override(run_dir, override_payload, audit_actor) -> dict`.
+    Hash-validates; appends to audit_trail. No streamlit imports.
+  - `cockpit/app.py` — new "Review" tab: dropdown per opening for
+    re-classify, dropdown per room for re-label, "mark suspect"
+    toggle, "reject" button, master "block SKP export" toggle.
+  - `tests/test_cockpit_overrides.py` — round-trip, audit-trail
+    append-only, sha256-invalidation, schema validation. ≥10 tests.
+  - `docs/validation_cockpit.md` — Slice 2 section.
+- **What Slice 2 does NOT do:** modify consensus, compute amended
+  fidelity, run smoke, block anything. Pipeline still ignores the
+  file.
+- **Acceptance (from ADR § 3 acceptance):** I can open the cockpit,
+  override an opening's kind, close, re-open, see the override
+  persisted, see the audit trail, see `source: manual` annotation
+  on the SVG.
 
-## 🟡 P2 — Cockpit Slice 3: proposed_actions.json + pre-SKP gate F0
+## 🟡 P1 — Cockpit Slice 3: apply_overrides.py + gate_f0
 
-- **Color:** YELLOW — new schema + smoke gate
-- **Goal:** new `tools/propose_skp_actions.py` derives action plan
-  from c3 + fidelity; `scripts/smoke/smoke_skp_export.py` adds
-  Gate F0 with `--review-mode={off,warn,block}`. Default `off` so
-  existing smokes keep passing.
-- **Risk:** MEDIUM. Smoke gate is core CI surface; default-off
-  protects baseline.
+- **Color:** YELLOW — pipeline starts honouring overrides
+- **Authoritative spec:** ADR-001 § 4
+- **Goal:** pipeline reads overrides via thin layer; smoke harness
+  gains gate_f0; cockpit's Pre-SKP Review reads the F0 verdict
+  instead of computing locally.
+- **Touchpoints:**
+  - `tools/apply_overrides.py` (NEW) — CLI: reads consensus +
+    overrides → writes `amended_observed.json`. Pure function plus
+    a thin CLI shell.
+  - `tools/fidelity/compare_generated_to_expected.py` — new optional
+    `apply_overrides: bool = False` param. Default off preserves
+    existing baseline.
+  - `scripts/smoke/smoke_skp_export.py` — new `gate_f0` BEFORE
+    `gate_f`; emits `pre_skp_review_report.json`; honours
+    `--review-mode={off,warn,block}` (default `off` keeps CI green).
+  - `cockpit/history_view.py` — `pre_skp_review()` reads
+    `pre_skp_review_report.json` if present, falls back to in-memory
+    computation otherwise.
+  - Tests: amended-observed schema, fidelity in apply-overrides
+    mode, gate_f0 verdict matrix, --review-mode CLI matrix.
+  - `docs/validation/sketchup_smoke_workflow.md` — gate_f0 added.
+- **What Slice 3 does NOT do:** flip `--review-mode` default to
+  `block` (separate follow-up after one real review case); change
+  any existing fidelity threshold; add UI.
+
+## 🟢 P2 — Cycle 12g: on-demand thumbnail rendering
+
+- **Color:** GREEN — additive, opt-in, pure renderer extension
+- **Goal:** Cycle 12f's History view shows "no previews discovered"
+  for runs that lack PNG/SVG preview files. Add an on-demand
+  rasterisation that generates a small thumbnail from
+  `consensus_*.json` if no preview exists.
+- **Touchpoints:** `cockpit/history_view.py` (thumbnail-on-demand
+  helper), maybe a small cache under `runs/<run_id>/_cockpit_cache/`.
+- **Risk:** LOW. Cache means it costs nothing on subsequent loads.
+
+## 🟡 P3 — Cockpit Phase 3: FastAPI POST + multi-user
+
+- **Color:** YELLOW — DEFERRED until Slice 2 + 3 prove the contract
+- **Authoritative spec:** ADR-001 § 2.9 Phase 3 (no detail yet —
+  ADR-002 will land when this becomes real)
+- **Why deferred:** ADR § 5 alternative C — premature complexity for
+  a single-user local tool. Streamlit + filesystem JSON is enough
+  through Slice 2. Re-evaluate after the first real review case
+  pushes the limits of the local-only contract.
 
 ## 🔴 P2 — Multi-PDF corpus
 
 - **Color:** RED — needs Felipe to provide 3+ different real
   planta PDFs. Synthetic round-trip (Cycle 11) covers algo
-  validation; this would cover detector generalization.
-- **Goal:** widen test surface beyond `planta_74` so detector
-  retunes don't accidentally specialize.
+  validation; this would cover detector generalisation.
 
 ## 🔴 P3 — Stage 1.6 / orphan inspector branch
 
