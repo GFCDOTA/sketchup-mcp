@@ -266,7 +266,143 @@ expected-model overlay).
   candidate; spot a phantom new room (`only_in_b`) or a vanished
   one (`only_in_a`) without grepping JSON.
 
-## Remaining limitations (post-12e)
+## History / Fidelity view (Cycle 12f — landed 2026-05-08)
+
+The cockpit now has a second top-level page — **History** — that
+lists every consensus-bearing dir under `runs/`, surfaces fidelity
++ counts + image previews per run, and grades each one with a
+**Pre-SKP Review** status before the SketchUp gate runs.
+
+### Why this exists
+
+CLAUDE.md §3 ("The SketchUp Rule") says SU is the LAST gate, not
+the first. SKP cannot be the first time we "see" the planta. The
+cockpit's job is to maximise what the human knows BEFORE paying the
+60–90 s SU spawn cost.
+
+The Single-run page (Cycles 12 → 12e) shows ONE consensus at a
+time. The History page shows ALL of them, ranks them by fidelity,
+and tells you which ones are safe to export.
+
+### How it works
+
+1. The new `cockpit/history_view.py` module is **pure Python** (no
+   streamlit imports, no SketchUp dependency, no pipeline
+   invocation). It walks `<repo>/runs/` for any directory that
+   contains a consensus-shaped JSON (top-level `walls` + `rooms`),
+   parses each artifact best-effort, and produces a `RunSummary`.
+2. The cockpit shell adds a sidebar `View` selector (`Single run`
+   | `History`). The History page consumes `RunSummary` objects and
+   renders three sections.
+
+### Page layout
+
+#### 1. Master table
+
+One row per run, sorted newest-first using
+`consensus.metadata.generated_at` (falls back to a `YYYY-MM-DD`
+substring in the run_id, then mtime). Columns: `run_id`, `branch`,
+`commit` (8-char prefix), `stage`, `fidelity_score`, `hard_fails`
+count, `warnings` count, `rooms` / `walls` / `openings` count,
+`image_count`, `pre_skp` status badge, `recommendation`. A
+status histogram below the table summarises how many runs are
+PASS / WARN / FAIL.
+
+#### 2. Run detail
+
+A drilldown panel for any run picked from the dropdown. Three
+columns:
+
+- **Identifiers** — run_id, branch, commit, stage, generated_at
+- **Counts** — rooms / walls / openings / soft_barriers
+- **Pre-SKP Review** — status badge + recommendation + reasoning
+  text + fidelity / hard_fails / warnings totals
+
+Plus an **Artifacts** block listing every resolved file path
+(consensus, fidelity_report, scorecard, expected_model, source_pdf)
+and image previews (PNG/JPG render via `st.image`; SVG surfaces as
+a relative-path link with file size).
+
+#### 3. Compare two runs (before / after)
+
+Two run selectors → a `RunDiff` panel: fidelity Δ, rooms Δ, walls
+Δ, openings Δ; warnings new / resolved; hard_fails new / resolved;
+per-room delta table (delegates to
+`cockpit.render_overlay.diff_summary` so the geometry logic stays
+shared with the Single-run Diff tab); side-by-side image rows.
+
+### Pre-SKP Review status logic
+
+Three tiers, advisory only — the cockpit does NOT block SKP export
+in v0:
+
+| Status | Condition | Recommendation |
+|---|---|---|
+| `PASS` | fidelity ≥ `pass_fidelity` AND zero hard_fails AND warnings ≤ `pass_warnings` | "safe to export SKP" |
+| `WARN` | fidelity in `[warn_fidelity, pass_fidelity)` OR warnings exceed budget AND zero hard_fails | "review before SKP" |
+| `FAIL` | fidelity < `warn_fidelity` OR ANY hard_fail OR no fidelity_report.json | "review before SKP" |
+
+Defaults (v0; tunable via the History sidebar sliders so the user
+can experiment without code change):
+
+```
+pass_fidelity   = 0.85   (mirrors the fidelity engine's healthy band)
+warn_fidelity   = 0.69   (mirrors the fidelity engine's hard-fail cap)
+pass_warnings   = 3      (CLAUDE.md §10 baseline = 2 warnings on planta_74)
+```
+
+These thresholds are **advisory** — they do NOT lower or raise the
+fidelity engine's own `--strict` cutoffs. If the engine would block
+strict (any hard_fail), the cockpit FAILs the run regardless of
+fidelity.
+
+### Acceptance criteria mapped to features (Felipe's words)
+
+| Felipe's ask | Implemented in v0 |
+|---|---|
+| "I can open the cockpit and see a historical list of runs" | Master table |
+| "I can see images/overlays generated in each run" | Run detail → image previews; Compare → side-by-side rows |
+| "I can compare two runs" | Compare two runs section |
+| "I can see fidelity before SKP" | `fidelity_score` column in master + Run detail panel |
+| "I can know whether the pipeline is safe to export SKP or needs review" | Pre-SKP Review badge per run + recommendation |
+
+### Boundary check (CLAUDE.md)
+
+- §1.2 schema unchanged ✓
+- §1.3 thresholds unchanged ✓ (pre-SKP review thresholds are NEW
+  advisory ones, not engine thresholds)
+- §1.4 Ruby/SU exporter untouched ✓
+- §1.6 high-risk entrypoints untouched ✓
+- §2 invariants intact (read-only) ✓
+- §3 cockpit IS the cheap gate, runs without SU ✓ — and now
+  surfaces the verdict BEFORE the gate
+
+### Deferred to future cycles
+
+- **Thumbnail rendering of complex artifacts** — when a run dir
+  has neither PNG nor SVG previews, the History view shows a
+  "no previews discovered" caption. Re-rendering an overlay from
+  the consensus on demand (so EVERY run has a thumbnail) is
+  deferred to Cycle 12g; the SVG renderer already exists in
+  `cockpit/render_overlay.py` so this is a pure wiring task.
+- **Filtering / sorting controls in the master table** — v0 ships
+  one fixed sort (newest-first). Streamlit's native dataframe
+  supports column-click sort already; bespoke filters
+  (status=PASS, branch=feature/foo) are deferred.
+- **Artifact drilldown from the table** — clicking a row to jump
+  back to the Single-run page (with the consensus pre-selected) is
+  a UX improvement deferred for now; the Single-run page already
+  auto-discovers every consensus, so users can switch manually.
+
+### Sample real-data smoke
+
+`history_summary(REPO_ROOT)` against the live checkout returns 1
+run (`runs/overpoly_audit/` — see test
+`test_history_summary_on_real_repo_does_not_raise`). On a fully
+populated checkout (`runs/feature_room_context_2026_05_06/` etc),
+the page would list every cycle's run with its fidelity verdict.
+
+## Remaining limitations (post-12f)
 
 - No **PT_TO_M auto-detect** from `consensus.metadata`. Manual
   number_input.
@@ -275,9 +411,10 @@ expected-model overlay).
 
 | Candidate | Why |
 |---|---|
+| Cycle 12g — thumbnail rendering for runs without PNG/SVG | Re-render the SVG overlay on demand so every History row has a preview. |
 | `renderers/` migration | Architecture plan step 5; clears the 5 transitional `render_*.py` orphans. |
 | Slice 2 — approve/reject + `review_overrides.json` | Needs FastAPI for POST. |
-| Slice 3 — `proposed_actions.json` + pre-SKP gate F0 | Closes the validation-before-SKP loop. |
+| Slice 3 — `proposed_actions.json` + pre-SKP gate F0 | Closes the validation-before-SKP loop. The Pre-SKP Review verdict added in Cycle 12f is the logical input to that gate. |
 
 ## Non-goals (explicitly)
 
@@ -293,6 +430,9 @@ expected-model overlay).
 
 - `cockpit/render_overlay.py` — pure renderer, unit-tested in
   `tests/test_cockpit_render_overlay.py`
+- `cockpit/history_view.py` — pure-Python multi-run discovery /
+  summary / compare / Pre-SKP Review (Cycle 12f), unit-tested in
+  `tests/test_cockpit_history_view.py`
 - `cockpit/app.py` — Streamlit entry point
 - `tools/fidelity/compare_generated_to_expected.py` — the
   fidelity engine the cockpit calls live

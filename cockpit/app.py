@@ -34,6 +34,14 @@ if str(_REPO_ROOT_BOOT) not in sys.path:
 
 import streamlit as st
 
+from cockpit.history_view import (
+    PRE_SKP_PASS_FIDELITY,
+    PRE_SKP_WARN_FIDELITY,
+    RunSummary,
+    compare_runs,
+    history_summary,
+    pre_skp_review,
+)
 from cockpit.render_overlay import (
     PT_TO_M_DEFAULT,
     OverlayToggles,
@@ -128,7 +136,32 @@ def main() -> None:
         page_title="sketchup-mcp · Validation Cockpit",
         layout="wide",
     )
-    st.title("Validation Cockpit — Cycle 12 MVP")
+
+    # Top-level page selector — Cycle 12f added the History view
+    # alongside the existing Single Run view. Each page has its own
+    # sidebar layout below; the selector itself lives at the top of
+    # the sidebar so it's the first thing the user sees.
+    with st.sidebar:
+        st.header("View")
+        page = st.radio(
+            "Page",
+            options=["Single run", "History"],
+            index=0,
+            help=("`Single run` is the original cockpit (overlay + "
+                  "inspector tabs). `History` lists every run under "
+                  "`runs/` with fidelity + Pre-SKP Review status."),
+            label_visibility="collapsed",
+        )
+
+    if page == "History":
+        _render_history_page()
+        return
+    _render_single_run_page()
+
+
+def _render_single_run_page() -> None:
+    """Cycle 12 MVP — single-consensus visualisation."""
+    st.title("Validation Cockpit — Single run")
     st.caption(
         "Read-only viewer. Pick a consensus + (optional) expected_model "
         "in the sidebar; toggle layers; inspect rooms / openings / "
@@ -338,6 +371,355 @@ def main() -> None:
                 f"schema_version = "
                 f"{consensus.get('schema_version', '(unset)')}"
             )
+
+
+def _render_history_page() -> None:
+    """Cycle 12f — multi-run history view with Pre-SKP Review.
+
+    Lists every run under `runs/`, surfaces fidelity + counts +
+    image previews per run, lets the user pick two runs to compare
+    side-by-side, and grades each with the Pre-SKP Review status
+    (PASS / WARN / FAIL — advisory only, never blocks SKP export).
+    """
+    st.title("Validation Cockpit — History")
+    st.caption(
+        "Read-only browser of every consensus-bearing dir under "
+        "`runs/`. Surfaces fidelity + Pre-SKP Review BEFORE the SKP "
+        "spawn cost. Cycle 12f."
+    )
+
+    runs = history_summary(REPO_ROOT)
+    if not runs:
+        st.info(
+            "No consensus-bearing dirs under `runs/`. Run the "
+            "pipeline first (e.g. `python -m tools.build_vector_consensus "
+            "...`) to populate `runs/<dir>/consensus_*.json`."
+        )
+        return
+
+    with st.sidebar:
+        st.header("History view")
+        st.caption(
+            f"Discovered **{len(runs)}** run(s) under `runs/`."
+        )
+        st.divider()
+        st.subheader("Pre-SKP thresholds")
+        pass_fidelity = st.slider(
+            "PASS fidelity ≥",
+            min_value=0.50, max_value=1.00, step=0.01,
+            value=PRE_SKP_PASS_FIDELITY,
+            help=("Runs at or above this score with zero hard_fails "
+                  "and few warnings are flagged 'safe to export SKP'."),
+        )
+        warn_fidelity = st.slider(
+            "WARN fidelity ≥",
+            min_value=0.50, max_value=1.00, step=0.01,
+            value=PRE_SKP_WARN_FIDELITY,
+            help=("Runs below this score are flagged FAIL — they "
+                  "need review before exporting SKP."),
+        )
+        pass_warnings = st.number_input(
+            "PASS warnings budget ≤",
+            min_value=0, max_value=99, value=3, step=1,
+            help=("Maximum number of fidelity warnings tolerated for "
+                  "PASS status. Anything above demotes to WARN."),
+        )
+
+    # --- 1) Master table ---------------------------------------------
+    st.subheader(f"Runs discovered ({len(runs)})")
+    rows: list[dict] = []
+    for rs in runs:
+        review = pre_skp_review(
+            rs,
+            pass_fidelity=pass_fidelity,
+            warn_fidelity=warn_fidelity,
+            pass_warnings=int(pass_warnings),
+        )
+        snap = rs.as_dict()
+        snap["pre_skp"] = (
+            f"{_status_emoji(review['status'])} {review['status']}"
+        )
+        snap["recommendation"] = review["recommendation"]
+        rows.append(snap)
+    st.dataframe(rows, use_container_width=True, hide_index=True)
+
+    # Histogram of statuses for quick eyeballing
+    from collections import Counter
+    status_counts = Counter(
+        pre_skp_review(
+            r,
+            pass_fidelity=pass_fidelity,
+            warn_fidelity=warn_fidelity,
+            pass_warnings=int(pass_warnings),
+        )["status"] for r in runs
+    )
+    st.caption(
+        "Pre-SKP histogram: "
+        + " · ".join(
+            f"{_status_emoji(k)} {k}: {v}"
+            for k, v in sorted(status_counts.items())
+        )
+    )
+
+    # --- 2) Single-run detail panel ----------------------------------
+    st.divider()
+    st.subheader("Run detail")
+    by_id = {rs.run_id: rs for rs in runs}
+    detail_id = st.selectbox(
+        "Run", options=list(by_id.keys()), index=0,
+        format_func=lambda rid: rid,
+    )
+    detail = by_id[detail_id]
+    _render_run_detail(detail, pass_fidelity, warn_fidelity,
+                       int(pass_warnings))
+
+    # --- 3) Compare two runs -----------------------------------------
+    st.divider()
+    st.subheader("Compare two runs (before / after)")
+    if len(runs) < 2:
+        st.info(
+            "Need at least 2 runs to compare. Run the pipeline a "
+            "second time on the same plant to populate the diff."
+        )
+        return
+    c1, c2 = st.columns(2)
+    with c1:
+        a_id = st.selectbox(
+            "Run A (baseline)", options=list(by_id.keys()),
+            index=min(1, len(runs) - 1),
+        )
+    with c2:
+        b_id = st.selectbox(
+            "Run B (candidate)", options=list(by_id.keys()),
+            index=0,
+        )
+    if a_id == b_id:
+        st.info("Pick two different runs to see the diff.")
+        return
+    diff = compare_runs(by_id[a_id], by_id[b_id])
+    _render_run_compare(diff, by_id[a_id], by_id[b_id])
+
+
+def _render_run_detail(rs: RunSummary,
+                        pass_fidelity: float,
+                        warn_fidelity: float,
+                        pass_warnings: int) -> None:
+    """One-run drilldown: identifiers + counts + Pre-SKP verdict +
+    image previews. Pure read-only; mirrors the master-table row but
+    with text-friendly layout for screenshotting into PR reviews."""
+    review = pre_skp_review(
+        rs,
+        pass_fidelity=pass_fidelity,
+        warn_fidelity=warn_fidelity,
+        pass_warnings=pass_warnings,
+    )
+    cols = st.columns(3)
+    with cols[0]:
+        st.markdown("**Identifiers**")
+        st.write({
+            "run_id": rs.run_id,
+            "branch": rs.branch or "—",
+            "commit": rs.commit or "—",
+            "stage": rs.stage or "—",
+            "generated_at": rs.generated_at or "—",
+        })
+    with cols[1]:
+        st.markdown("**Counts**")
+        st.write({
+            "rooms": rs.rooms_count,
+            "walls": rs.walls_count,
+            "openings": rs.openings_count,
+            "soft_barriers": rs.soft_barriers_count,
+        })
+    with cols[2]:
+        emoji = _status_emoji(review["status"])
+        st.markdown(
+            f"**Pre-SKP Review:** {emoji} `{review['status']}` · "
+            f"recommendation = `{review['recommendation']}`"
+        )
+        if rs.fidelity_score is None:
+            st.caption("fidelity_report.json missing — cannot grade.")
+        else:
+            st.caption(
+                f"fidelity = {rs.fidelity_score:.3f} · "
+                f"hard_fails = {len(rs.hard_fails)} · "
+                f"warnings = {len(rs.warnings)}"
+            )
+        if review["reasons"]:
+            st.write("Reasons:")
+            for r in review["reasons"]:
+                st.code(r, language="text")
+
+    # Files surfaced
+    st.markdown("**Artifacts**")
+    facts: list[str] = []
+    if rs.consensus_path is not None:
+        facts.append(f"consensus → `{rs.consensus_path.relative_to(REPO_ROOT)}`")
+    if rs.fidelity_report_path is not None:
+        facts.append(
+            f"fidelity_report → `{rs.fidelity_report_path.relative_to(REPO_ROOT)}`"
+        )
+    if rs.scorecard_path is not None:
+        facts.append(
+            f"scorecard → `{rs.scorecard_path.relative_to(REPO_ROOT)}`"
+        )
+    if rs.expected_model_path is not None:
+        facts.append(
+            f"expected_model → `{rs.expected_model_path.relative_to(REPO_ROOT)}`"
+        )
+    if rs.source_pdf_path is not None:
+        facts.append(
+            f"source_pdf → `{rs.source_pdf_path.relative_to(REPO_ROOT)}`"
+        )
+    for line in facts:
+        st.markdown(f"- {line}")
+    if not facts:
+        st.caption("No identifying artifacts found in this run dir.")
+
+    # Hard fails + warnings (if any)
+    if rs.hard_fails:
+        st.error(f"{len(rs.hard_fails)} hard_fail(s):")
+        for hf in rs.hard_fails:
+            st.code(hf, language="text")
+    if rs.warnings:
+        with st.expander(f"{len(rs.warnings)} warning(s)", expanded=False):
+            for w in rs.warnings:
+                st.code(w, language="text")
+
+    # Sub-scores (if present)
+    if rs.sub_scores:
+        with st.expander("sub_scores", expanded=False):
+            st.json(rs.sub_scores)
+
+    # Image previews — best-effort. PNG/JPG render directly; SVG is
+    # surfaced as a relative link (Streamlit's `st.image` doesn't load
+    # SVG natively; markdown links are the friendlier path).
+    if rs.image_paths:
+        st.markdown("**Image previews**")
+        png_jpg = [p for p in rs.image_paths
+                   if p.suffix.lower() in (".png", ".jpg", ".jpeg")]
+        svgs = [p for p in rs.image_paths if p.suffix.lower() == ".svg"]
+        if png_jpg:
+            st.image(
+                [str(p) for p in png_jpg],
+                caption=[p.name for p in png_jpg],
+                use_container_width=True,
+            )
+        for svg in svgs:
+            try:
+                st.markdown(
+                    f"- `{svg.relative_to(REPO_ROOT)}` "
+                    f"({svg.stat().st_size} bytes)"
+                )
+            except OSError:
+                pass
+    else:
+        st.caption(
+            "No image previews discovered in this run dir "
+            "(searched for *.png / *.svg / *.jpg)."
+        )
+
+
+def _render_run_compare(diff, a: RunSummary, b: RunSummary) -> None:
+    """Render the before/after comparison panel for two runs."""
+    cols = st.columns(2)
+    with cols[0]:
+        st.markdown(f"**Run A** = `{a.run_id}`")
+        st.write({
+            "fidelity": a.fidelity_score,
+            "hard_fails": len(a.hard_fails),
+            "warnings": len(a.warnings),
+            "rooms": a.rooms_count,
+            "walls": a.walls_count,
+            "openings": a.openings_count,
+        })
+    with cols[1]:
+        st.markdown(f"**Run B** = `{b.run_id}`")
+        st.write({
+            "fidelity": b.fidelity_score,
+            "hard_fails": len(b.hard_fails),
+            "warnings": len(b.warnings),
+            "rooms": b.rooms_count,
+            "walls": b.walls_count,
+            "openings": b.openings_count,
+        })
+
+    delta_lines: list[str] = []
+    if diff.fidelity_delta is not None:
+        delta_lines.append(
+            f"fidelity Δ = `{diff.fidelity_delta:+.3f}` (B − A)"
+        )
+    delta_lines.append(f"rooms Δ = `{diff.rooms_delta:+d}`")
+    delta_lines.append(f"walls Δ = `{diff.walls_delta:+d}`")
+    delta_lines.append(f"openings Δ = `{diff.openings_delta:+d}`")
+    st.markdown(" · ".join(delta_lines))
+
+    if diff.warnings_resolved:
+        st.success(f"Resolved {len(diff.warnings_resolved)} warning(s)")
+        with st.expander("warnings resolved", expanded=False):
+            for w in diff.warnings_resolved:
+                st.code(w, language="text")
+    if diff.warnings_new:
+        st.warning(f"{len(diff.warnings_new)} new warning(s)")
+        with st.expander("warnings new", expanded=False):
+            for w in diff.warnings_new:
+                st.code(w, language="text")
+    if diff.hard_fails_resolved:
+        st.success(
+            f"Resolved {len(diff.hard_fails_resolved)} hard_fail(s)"
+        )
+    if diff.hard_fails_new:
+        st.error(f"{len(diff.hard_fails_new)} new hard_fail(s)")
+        for hf in diff.hard_fails_new:
+            st.code(hf, language="text")
+
+    # Per-room delta table (delegates to render_overlay.diff_summary)
+    if diff.rooms:
+        st.markdown("**Per-room delta**")
+        pretty = []
+        for r in diff.rooms:
+            pretty.append({
+                "name": r.get("name"),
+                "status": r.get("status"),
+                "area_a_m2": r.get("area_a_m2"),
+                "area_b_m2": r.get("area_b_m2"),
+                "delta_m2 (B−A)": r.get("delta_m2"),
+            })
+        st.dataframe(pretty, use_container_width=True, hide_index=True)
+    else:
+        st.caption(
+            "No per-room rows produced — at least one consensus is "
+            "missing or unparseable."
+        )
+
+    # Side-by-side image rows
+    if a.image_paths or b.image_paths:
+        st.markdown("**Image previews — side-by-side**")
+        cols2 = st.columns(2)
+        with cols2[0]:
+            st.caption(f"A: `{a.run_id}`")
+            png_a = [p for p in a.image_paths
+                     if p.suffix.lower() in (".png", ".jpg", ".jpeg")]
+            if png_a:
+                st.image([str(p) for p in png_a],
+                          caption=[p.name for p in png_a],
+                          use_container_width=True)
+            else:
+                st.caption("(no PNG/JPG previews in A)")
+        with cols2[1]:
+            st.caption(f"B: `{b.run_id}`")
+            png_b = [p for p in b.image_paths
+                     if p.suffix.lower() in (".png", ".jpg", ".jpeg")]
+            if png_b:
+                st.image([str(p) for p in png_b],
+                          caption=[p.name for p in png_b],
+                          use_container_width=True)
+            else:
+                st.caption("(no PNG/JPG previews in B)")
+
+
+def _status_emoji(status: str) -> str:
+    return {"PASS": "✅", "WARN": "🟧", "FAIL": "❌"}.get(status, "?")
 
 
 def _render_warnings_panel(consensus: dict) -> None:
