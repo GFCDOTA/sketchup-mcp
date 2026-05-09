@@ -590,6 +590,75 @@ callers depending only on the legacy keys keep working unchanged.
 - Did NOT modify `cockpit/app.py` or `cockpit/overrides.py`
   (Slice 2's territory).
 
+## Cycle 13 — `proposed_actions.json` producer (2026-05-09)
+
+ADR-001 §2.6 locked the `proposed_actions_v1` schema. Slice 3's
+apply layer honoured human-authored `review_overrides.json`. Cycle
+13 fills the third corner: a producer that emits **advisory**
+suggestions a human can review (and optionally promote into an
+override).
+
+### What it does
+
+`tools/propose_skp_actions.py` reads a consensus + (optional)
+fidelity report and emits `runs/<run_id>/proposed_actions.json`
+following ADR-001 §2.4 + §2.6.
+
+Detection rules in v1 are deliberately conservative — only fire
+when there's strong evidence the pipeline is uncertain:
+
+| Rule | Type | Fires when |
+|---|---|---|
+| 1 | `mark_low_confidence` | `opening.confidence < 0.7` |
+| 2 | `request_human_review` (opening) | `opening.decision != "clean"` |
+| 3 | `classify_opening` | `opening.kind_v5 == "unknown"` (suggests `interior_passage` heuristically) |
+| 4 | `request_human_review` (room) | room name appears in any fidelity warning string |
+
+### Idempotence
+
+Each action's `id` is a UUIDv5 over
+`(generator, type, target.kind, target.id, payload)`. Re-running
+on byte-identical input produces byte-identical action ids — no
+proliferation. The doc's `generated_at` always reflects the latest
+run, but the action ids are stable. The output `actions[]` is
+sorted by `(type, target.kind, target.id)` for deterministic file
+diffs.
+
+### CLI
+
+```bash
+# Auto-discover consensus + fidelity_report from a run dir
+python -m tools.propose_skp_actions --run-dir runs/<run_id>
+
+# Or pass explicit paths
+python -m tools.propose_skp_actions \
+    --consensus runs/<run_id>/consensus_with_room_context.json \
+    --fidelity runs/<run_id>/fidelity_report.json \
+    --output   runs/<run_id>/proposed_actions.json
+```
+
+### Boundary
+
+- **Read-only** with respect to consensus + fidelity. Only writes
+  `proposed_actions.json`.
+- Never touches `review_overrides.json` (that's the human's
+  authoritative voice per ADR-001 §2.1).
+- Pipeline doesn't apply proposed_actions automatically — they're
+  advisory hints. The cockpit Review tab will surface them as
+  suggestion chips in a future Slice 4 (deferred; this PR ships
+  the producer only).
+
+### What this PR did NOT change
+
+- Did NOT touch `cockpit/` (Slice 4 territory will wire suggestion
+  chips into the Review tab).
+- Did NOT modify `tools/apply_overrides.py` — the apply layer
+  remains overrides-only.
+- Did NOT change schema, thresholds, baselines, fidelity engine,
+  smoke harness, Ruby/SU exporter.
+- Did NOT alter detector reproducibility from PDF — proposed_actions
+  are downstream of the consensus, not feedback into it.
+
 ## Non-goals (explicitly)
 
 - **NOT** a SketchUp viewer. The cockpit operates BEFORE the
