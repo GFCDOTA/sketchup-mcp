@@ -570,6 +570,23 @@ def pre_skp_review(run: RunSummary,
         delta = f0.get("fidelity_delta")
         if isinstance(delta, (int, float)):
             out["fidelity_delta"] = float(delta)
+        # Slice 5d (Cycle 14): per-sub-score delta surfacing.
+        # Discovered as dogfood UX gap #3 — global_fidelity rounded
+        # to 2 decimals can hide a real -0.088 movement on
+        # adjacency_score (planta_74 dogfood). Surface BOTH the
+        # pre/post sub-score blocks AND a per-key delta dict so the
+        # cockpit Pre-SKP pane can show WHERE the override moved
+        # the score, not just THAT it moved. All 3 fields are
+        # additive / optional — readers ignoring them stay back-compat.
+        post_subs = f0.get("sub_scores")
+        if isinstance(post_subs, dict):
+            out["sub_scores"] = dict(post_subs)
+        pre_subs = f0.get("sub_scores_pre_override")
+        if isinstance(pre_subs, dict):
+            out["sub_scores_pre_override"] = dict(pre_subs)
+        delta_subs = f0.get("sub_scores_delta")
+        if isinstance(delta_subs, dict):
+            out["sub_scores_delta"] = dict(delta_subs)
         return out
 
     # ----- Cycle 12f fallback (unchanged behaviour) -----

@@ -452,8 +452,15 @@ def _f0_report(*, verdict: str, fidelity_score: float | None,
                 hard_fails: int = 0, warnings: int = 0,
                 using_amended_fidelity: bool = False,
                 fidelity_score_pre_override: float | None = None,
-                fidelity_delta: float | None = None) -> dict:
-    """Build a pre_skp_review_v1-shaped F0 report fixture."""
+                fidelity_delta: float | None = None,
+                sub_scores: dict | None = None,
+                sub_scores_pre_override: dict | None = None,
+                sub_scores_delta: dict | None = None) -> dict:
+    """Build a pre_skp_review_v1-shaped F0 report fixture.
+
+    Slice 5d additions: optional sub_scores / sub_scores_pre_override /
+    sub_scores_delta for testing the per-sub-score delta surfacing.
+    """
     out: dict = {
         "schema_version": "pre_skp_review_v1",
         "verdict": verdict,
@@ -471,6 +478,12 @@ def _f0_report(*, verdict: str, fidelity_score: float | None,
         out["fidelity_score_pre_override"] = fidelity_score_pre_override
     if fidelity_delta is not None:
         out["fidelity_delta"] = fidelity_delta
+    if sub_scores is not None:
+        out["sub_scores"] = sub_scores
+    if sub_scores_pre_override is not None:
+        out["sub_scores_pre_override"] = sub_scores_pre_override
+    if sub_scores_delta is not None:
+        out["sub_scores_delta"] = sub_scores_delta
     return out
 
 
@@ -622,3 +635,86 @@ def test_pre_skp_review_real_planta_74_baseline_smoke():
     review = pre_skp_review(rs)
     assert review["status"] in {"PASS", "WARN", "FAIL"}
     assert review["recommendation"] in {"safe", "review"}
+
+
+# ---------------------------------------------------------------------------
+# Slice 5d (Cycle 14): sub_scores_delta propagation
+# ---------------------------------------------------------------------------
+
+def test_pre_skp_review_propagates_sub_scores_delta_when_f0_carries_them(tmp_path: Path):
+    """Dogfood UX gap #3 fix — when F0 wrote a report with
+    sub_scores + sub_scores_pre_override + sub_scores_delta (Slice
+    5d additions), the cockpit's pre_skp_review() should expose all
+    three on the returned dict so the UI can render the per-sub-score
+    delta table."""
+    run_dir = _materialise_run(
+        tmp_path, "amended_with_subscores_run", _consensus_payload(),
+        _fidelity_report_payload(score=0.69, hard_fails=[], warnings=[]),
+        extra_files={
+            "pre_skp_review_report.json": json.dumps(_f0_report(
+                verdict="WARN",
+                fidelity_score=0.69,
+                using_amended_fidelity=True,
+                fidelity_score_pre_override=0.69,
+                fidelity_delta=0.0,
+                sub_scores={"adjacency_score": 0.333,
+                              "room_score": 0.75},
+                sub_scores_pre_override={"adjacency_score": 0.421,
+                                            "room_score": 0.75},
+                sub_scores_delta={"adjacency_score": -0.088,
+                                    "room_score": 0.0},
+            )),
+        },
+    )
+    rs = summarise_run(run_dir, repo=tmp_path)
+    review = pre_skp_review(rs)
+    assert review["source"] == "f0_report"
+    assert "sub_scores" in review
+    assert "sub_scores_pre_override" in review
+    assert "sub_scores_delta" in review
+    assert review["sub_scores_delta"]["adjacency_score"] == -0.088
+    assert review["sub_scores"]["adjacency_score"] == 0.333
+    assert review["sub_scores_pre_override"]["adjacency_score"] == 0.421
+
+
+def test_pre_skp_review_omits_sub_scores_blocks_when_f0_lacks_them(tmp_path: Path):
+    """When F0 reported amended fidelity but didn't include the
+    Slice-5d sub_scores blocks (older F0 reports), the cockpit
+    should NOT introduce them — back-compat preserved."""
+    run_dir = _materialise_run(
+        tmp_path, "amended_no_subs_run", _consensus_payload(),
+        _fidelity_report_payload(score=0.92, hard_fails=[], warnings=[]),
+        extra_files={
+            "pre_skp_review_report.json": json.dumps(_f0_report(
+                verdict="PASS",
+                fidelity_score=0.92,
+                using_amended_fidelity=True,
+                fidelity_score_pre_override=0.50,
+                fidelity_delta=0.42,
+                # No sub_scores* fields
+            )),
+        },
+    )
+    rs = summarise_run(run_dir, repo=tmp_path)
+    review = pre_skp_review(rs)
+    assert review["using_amended_fidelity"] is True
+    assert review["fidelity_score_pre_override"] == 0.50
+    # Sub-score blocks NOT present
+    assert "sub_scores" not in review
+    assert "sub_scores_pre_override" not in review
+    assert "sub_scores_delta" not in review
+
+
+def test_pre_skp_review_sub_scores_blocks_absent_from_inmemory_path(tmp_path: Path):
+    """Cycle-12f in-memory fallback never introduces the Slice-5d
+    sub_scores fields — those are an F0-only concept."""
+    run_dir = _materialise_run(
+        tmp_path, "no_f0_sub_scores_run", _consensus_payload(),
+        _fidelity_report_payload(score=0.92, hard_fails=[], warnings=[]),
+    )
+    rs = summarise_run(run_dir, repo=tmp_path)
+    review = pre_skp_review(rs)
+    assert review["source"] == "in_memory"
+    assert "sub_scores" not in review
+    assert "sub_scores_pre_override" not in review
+    assert "sub_scores_delta" not in review

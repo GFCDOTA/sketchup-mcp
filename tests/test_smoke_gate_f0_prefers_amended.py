@@ -36,19 +36,28 @@ def _raw_fidelity_report(score: float = 0.50,
 
 def _amended_fidelity_report(post: float = 0.92,
                               pre: float = 0.50,
-                              hard_fails: list[str] | None = None) -> dict:
+                              hard_fails: list[str] | None = None,
+                              sub_scores: dict | None = None,
+                              sub_scores_pre: dict | None = None) -> dict:
     """An 'amended' fidelity report with both pre/post scores per
     ADR-001 §2.10.5. Default values exercise the case where a
-    human's overrides lifted the score from FAIL → PASS."""
-    return {
+    human's overrides lifted the score from FAIL → PASS.
+
+    Slice 5d: when ``sub_scores`` and ``sub_scores_pre`` are provided,
+    they're emitted in the report shape that gate E3 actually
+    produces (used to exercise the per-sub-score delta surfacing)."""
+    rpt = {
         "schema_version": "fidelity_v1",
         "global_fidelity": post,
         "global_fidelity_pre_override": pre,
-        "sub_scores": {},
+        "sub_scores": sub_scores or {},
         "hard_fails": hard_fails or [],
         "warnings": [],
         "overrides_applied_count": 1,
     }
+    if sub_scores_pre is not None:
+        rpt["sub_scores_pre_override"] = sub_scores_pre
+    return rpt
 
 
 def _make_report(tmp_path: Path,
@@ -271,3 +280,128 @@ def test_review_dict_carries_using_amended_field_in_default_path(tmp_path):
     )
     assert "using_amended_fidelity" in review
     assert review["using_amended_fidelity"] is False
+
+
+# ---- Slice 5d: sub_scores_delta surfacing -----------------------------
+
+def test_compute_pre_skp_surfaces_sub_scores_delta_when_amended_has_subs():
+    """Dogfood gap #3: when amended report carries both sub_scores
+    and sub_scores_pre_override, the verdict dict should include
+    sub_scores, sub_scores_pre_override, AND sub_scores_delta (per-key
+    post-pre) so the cockpit can show WHERE the override moved the
+    score, not just THAT it moved."""
+    rpt = _compute_pre_skp_review(
+        _amended_fidelity_report(
+            post=0.69, pre=0.69,
+            sub_scores={"adjacency_score": 0.333,
+                         "room_score": 0.75,
+                         "count_score": 1.0,
+                         "bbox_score": 1.0},
+            sub_scores_pre={"adjacency_score": 0.421,
+                              "room_score": 0.75,
+                              "count_score": 1.0,
+                              "bbox_score": 1.0},
+        ),
+        overrides_doc=None,
+        consensus_sha="x",
+        using_amended_fidelity=True,
+    )
+    assert rpt["using_amended_fidelity"] is True
+    assert "sub_scores" in rpt
+    assert "sub_scores_pre_override" in rpt
+    assert "sub_scores_delta" in rpt
+    delta = rpt["sub_scores_delta"]
+    # Real values from the dogfood — surface MUST capture the -0.088
+    # adjacency movement that global_fidelity rounding hid as Δ=0.0
+    assert delta["adjacency_score"] == round(0.333 - 0.421, 4)
+    assert delta["room_score"] == 0.0
+    assert delta["count_score"] == 0.0
+    assert delta["bbox_score"] == 0.0
+
+
+def test_compute_pre_skp_omits_sub_scores_blocks_when_using_raw():
+    """Default behaviour (using_amended_fidelity=False): even if the
+    raw report carries sub_scores, they're NOT surfaced in the pre-SKP
+    review dict — sub_scores blocks are an amended-only concept."""
+    rpt = _compute_pre_skp_review(
+        {"schema_version": "fidelity_v1", "global_fidelity": 0.92,
+         "sub_scores": {"adjacency_score": 0.95},
+         "hard_fails": [], "warnings": []},
+        overrides_doc=None,
+        consensus_sha="x",
+    )
+    assert rpt["using_amended_fidelity"] is False
+    assert "sub_scores" not in rpt
+    assert "sub_scores_pre_override" not in rpt
+    assert "sub_scores_delta" not in rpt
+
+
+def test_compute_pre_skp_omits_sub_scores_when_amended_lacks_pre_block():
+    """Defensive: amended report carries only post sub_scores (no pre).
+    Don't emit a partial sub_scores_delta — drop both."""
+    rpt = _compute_pre_skp_review(
+        _amended_fidelity_report(
+            post=0.92, pre=0.50,
+            sub_scores={"adjacency_score": 0.95},
+            sub_scores_pre=None,  # missing the pre block
+        ),
+        overrides_doc=None,
+        consensus_sha="x",
+        using_amended_fidelity=True,
+    )
+    assert rpt["using_amended_fidelity"] is True
+    assert "sub_scores" not in rpt
+    assert "sub_scores_pre_override" not in rpt
+    assert "sub_scores_delta" not in rpt
+
+
+def test_compute_pre_skp_sub_scores_delta_only_keys_in_both():
+    """Defensive: if the post and pre sub_scores have different keys,
+    sub_scores_delta only contains keys present in BOTH (and numeric
+    in both). Mismatched-shape sub_scores shouldn't crash."""
+    rpt = _compute_pre_skp_review(
+        _amended_fidelity_report(
+            post=0.92, pre=0.50,
+            sub_scores={"adjacency_score": 0.95, "new_metric": 0.5},
+            sub_scores_pre={"adjacency_score": 0.42,
+                              "old_metric": 0.7},
+        ),
+        overrides_doc=None,
+        consensus_sha="x",
+        using_amended_fidelity=True,
+    )
+    assert "sub_scores_delta" in rpt
+    delta = rpt["sub_scores_delta"]
+    assert "adjacency_score" in delta
+    # Keys present in only one side are dropped from the delta
+    assert "new_metric" not in delta
+    assert "old_metric" not in delta
+
+
+def test_gate_f0_writes_sub_scores_delta_into_pre_skp_review_report(tmp_path):
+    """End-to-end: gate F0 reads amended report with sub_scores +
+    sub_scores_pre_override and writes sub_scores_delta into
+    pre_skp_review_report.json."""
+    report = _make_report(tmp_path)
+    out_dir = Path(report.out_dir)
+    (out_dir / "fidelity_report_amended.json").write_text(
+        json.dumps(_amended_fidelity_report(
+            post=0.92, pre=0.50,
+            sub_scores={"adjacency_score": 0.95, "room_score": 0.90},
+            sub_scores_pre={"adjacency_score": 0.42, "room_score": 0.75},
+        )),
+        encoding="utf-8",
+    )
+    gate_f0(_args(), report)
+    review = json.loads(
+        (out_dir / "pre_skp_review_report.json").read_text(
+            encoding="utf-8",
+        )
+    )
+    assert review["using_amended_fidelity"] is True
+    assert "sub_scores" in review
+    assert "sub_scores_pre_override" in review
+    assert "sub_scores_delta" in review
+    delta = review["sub_scores_delta"]
+    assert delta["adjacency_score"] == round(0.95 - 0.42, 4)
+    assert delta["room_score"] == round(0.90 - 0.75, 4)
