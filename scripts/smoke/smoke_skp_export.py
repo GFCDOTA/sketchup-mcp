@@ -330,15 +330,26 @@ def _compute_pre_skp_review(
     fidelity_report: dict | None,
     overrides_doc: dict | None,
     consensus_sha: str,
+    using_amended_fidelity: bool = False,
 ) -> dict:
     """Pure verdict logic per ADR-001 §2.8.
 
     Inputs are the *already-loaded* fidelity report and optional
     overrides document. Returns the dict written to
     ``pre_skp_review_report.json``.
+
+    Slice 5c: when ``using_amended_fidelity`` is True (caller selected
+    the amended report from gate E3), the output dict carries an
+    extra ``fidelity_score_pre_override`` field surfaced from the
+    amended report's ``global_fidelity_pre_override``. The verdict
+    itself uses the post-override ``global_fidelity`` — the human's
+    intent IS the loop. The pre-override score is recorded so a
+    review can never make the score look better without leaving
+    evidence (ADR-001 §2.10.5).
     """
     reasons: list[str] = []
     fidelity_score: float | None = None
+    fidelity_score_pre_override: float | None = None
     hard_fails_count = 0
     warnings_count = 0
     active_overrides_count = 0
@@ -351,6 +362,10 @@ def _compute_pre_skp_review(
         score_v = fidelity_report.get("global_fidelity")
         if isinstance(score_v, (int, float)):
             fidelity_score = float(score_v)
+        if using_amended_fidelity:
+            pre = fidelity_report.get("global_fidelity_pre_override")
+            if isinstance(pre, (int, float)):
+                fidelity_score_pre_override = float(pre)
         hard_fails = fidelity_report.get("hard_fails") or []
         warnings = fidelity_report.get("warnings") or []
         hard_fails_count = len(hard_fails)
@@ -440,7 +455,7 @@ def _compute_pre_skp_review(
     else:
         recommendation = "do not export SKP"
 
-    return {
+    out = {
         "schema_version": PRE_SKP_REVIEW_SCHEMA_VERSION,
         "verdict": verdict,
         "reasons": reasons,
@@ -450,7 +465,20 @@ def _compute_pre_skp_review(
         "active_overrides_count": active_overrides_count,
         "block_skp_export": block_skp_export,
         "recommendation": recommendation,
+        "using_amended_fidelity": bool(using_amended_fidelity),
     }
+    # Slice 5c — surface the pre-override fidelity score when the
+    # caller used the amended report. Mirrors ADR-001 §2.10.5: a
+    # review can never make the score look better without leaving
+    # evidence.
+    if using_amended_fidelity and fidelity_score_pre_override is not None:
+        out["fidelity_score_pre_override"] = fidelity_score_pre_override
+        if (fidelity_score is not None
+                and fidelity_score_pre_override is not None):
+            out["fidelity_delta"] = round(
+                fidelity_score - fidelity_score_pre_override, 4,
+            )
+    return out
 
 
 def gate_e_amend(args: argparse.Namespace,
@@ -779,29 +807,59 @@ def gate_f0(args: argparse.Namespace, report: SmokeReport) -> GateResult:
       - off (default): always pass; verdict written to disk
       - warn         : pass + stderr warning when verdict != PASS
       - block        : fail when verdict == FAIL
+
+    Slice 5c: when ``fidelity_report_amended.json`` is present in
+    ``out_dir`` (written by gate E3), F0 PREFERS it over the raw
+    ``fidelity_report.json``. The verdict is then computed against
+    the post-override score, and the pre-override score is surfaced
+    in ``pre_skp_review_report.json`` so the human's impact on the
+    fidelity number is auditable. When parsing the amended report
+    fails, F0 falls back cleanly to the raw report.
     """
     g = GateResult(name="F0. Pre-SKP review", status="pass",
                     started_at=_utc_now())
     out_dir = Path(report.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    fidelity_path = out_dir / "fidelity_report.json"
-    if not fidelity_path.exists():
-        # Fall back to per-consensus-dir report (some pipelines write
-        # the fidelity report next to the consensus, not into the
-        # smoke out_dir).
-        sibling = Path(report.consensus_path).parent / "fidelity_report.json"
-        if sibling.exists():
-            fidelity_path = sibling
-
     fidelity_report: dict | None = None
-    if fidelity_path.exists():
+    fidelity_path: Path | None = None
+    using_amended = False
+
+    # Slice 5c — prefer the amended report if gate E3 wrote one.
+    amended_path = out_dir / "fidelity_report_amended.json"
+    if amended_path.exists():
         try:
             fidelity_report = json.loads(
-                fidelity_path.read_text(encoding="utf-8"),
+                amended_path.read_text(encoding="utf-8"),
             )
+            fidelity_path = amended_path
+            using_amended = True
         except json.JSONDecodeError:
+            # Fall back to raw report; the amended file is corrupt.
+            print(
+                "[smoke][F0] fidelity_report_amended.json failed to "
+                "parse; falling back to raw fidelity_report.json",
+                file=sys.stderr,
+            )
             fidelity_report = None
+            fidelity_path = None
+
+    if fidelity_report is None:
+        fidelity_path = out_dir / "fidelity_report.json"
+        if not fidelity_path.exists():
+            # Fall back to per-consensus-dir report (some pipelines
+            # write the fidelity report next to the consensus, not
+            # into the smoke out_dir).
+            sibling = Path(report.consensus_path).parent / "fidelity_report.json"
+            if sibling.exists():
+                fidelity_path = sibling
+        if fidelity_path.exists():
+            try:
+                fidelity_report = json.loads(
+                    fidelity_path.read_text(encoding="utf-8"),
+                )
+            except json.JSONDecodeError:
+                fidelity_report = None
 
     overrides_doc: dict | None = None
     overrides_path = out_dir / "review_overrides.json"
@@ -821,6 +879,7 @@ def gate_f0(args: argparse.Namespace, report: SmokeReport) -> GateResult:
 
     review = _compute_pre_skp_review(
         fidelity_report, overrides_doc, report.consensus_sha256,
+        using_amended_fidelity=using_amended,
     )
     review_path = out_dir / "pre_skp_review_report.json"
     review_path.write_text(
