@@ -32,6 +32,81 @@
 
 ---
 
+## 2026-05-09 — Geometric room overrides → promoted to ADR-002
+
+### Context
+
+The override-aware end-to-end dogfood (PR #98) on `planta_74`
+surfaced **UX gap #2**: the most common real failure mode is
+"room polygon area out of expected range" (FP-012 SUITE 01 =
+69.91 m² vs expected `[10, 28]`), and the 7 v1 override types
+have no way to adjust a room polygon. The reviewer's only option
+is `reject_element` on the entire room — which usually hurts
+fidelity more than it helps (count_score then drops).
+
+ADR-001 §2.6 specified two producer-side advisory action types
+(`expand_room_polygon`, `shrink_room_polygon` with `delta_pts`)
+but explicitly deferred the consumer-side override.
+
+### Options considered
+
+1. **Three separate override types** (`expand_room_polygon_override`,
+   `shrink_room_polygon_override`, `redraw_room_polygon_override`) —
+   triples enum + apply-layer surface; apply semantics are
+   identical so no behavioural payoff.
+2. **One `room_polygon_override` with `edit_method` discriminator**
+   — single apply branch; producer's expand/shrink chips become
+   the ergonomic UX entry point that promotes into the override
+   via `from_proposed_action_id`.
+3. **`delta_pts` in the override (relative)** instead of absolute
+   `new_polygon_pts` — fragile across detector revisions
+   (override invalidates if detector changes how it draws the
+   room); rejected.
+4. **Quick patch to `cockpit/overrides.py`** without an ADR —
+   fails the promotion rule (touches ≥4 files: schema, apply
+   layer, fidelity report, F0 verdict, cockpit UI) and 4 distinct
+   risk vectors that need explicit mitigation.
+
+### Decision
+
+Option 2 (one override type + edit_method discriminator),
+promoted to **ADR-002 — `room_polygon_override`**. Additive to
+ADR-001; no schema-version bump.
+
+### Reason
+
+The dogfood gap is real and Felipe explicitly named ADR-002 as
+the next ROI. The contract spans schema (new override type +
+new amended_observed fields), apply layer (new branch in
+`tools/apply_overrides.py`), fidelity engine metadata
+(`polygon_overrides_applied_count`), F0 verdict (new
+`manual_polygon_room_count` field + new WARN trigger), cockpit
+UI (chip handler + text-area edit), AND has 4 distinct risk
+vectors (detector-bug-hidden, score-inflation, invalid-SKP-geo,
+expected_model-conflict) — each grounded in §2 invariants.
+
+A future agent reading just `.ai_bridge/DECISIONS.md` couldn't
+derive the apply semantics without re-litigating. ADR-002 gives
+them a single document.
+
+### Consequences
+
+- Slice 6 (a/b/c shippable, d/e deferred) is the implementation
+  arc derived from §4 of the ADR.
+- SKP exporter stays overrides-blind in v1 (§2.8) — fixing the
+  fidelity score is independent of fixing what SU draws.
+- `expected_model.json` is **never** auto-derived from overrides
+  (§2.9) — graduation remains a deliberate human action.
+
+### Rollback
+
+- Per ADR-002 §7 (per-slice revert); also `git revert <merge-sha>`
+  removes the ADR + this entry. Schema is additive, so existing
+  override files remain readable; new entries become inert at
+  apply time.
+
+---
+
 ## 2026-05-08 — Mutation Surface contract → promoted to ADR-001
 
 ### Context
