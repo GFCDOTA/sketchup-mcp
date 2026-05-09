@@ -167,11 +167,15 @@ When in doubt, choose the conservative path:
 - Add a guardrail instead of trusting future authors.
 - Add a deselect instead of muting an assertion.
 - Open a draft PR instead of merging silently.
-- Ask the user (via `AskUserQuestion`) instead of guessing.
-- Before any autonomous task, fill the Prompt Contract from
-  `docs/learning/prompt_quality_rubric.md`. The `agent-coordinator`
-  enforces it.
 
+=======
+- **Ask the user only for real blockers. Prefer autonomous
+  investigation over questions.** A "real blocker" is one of:
+  missing credential, missing required file, destructive risk,
+  product decision the agent genuinely cannot infer, security-rule
+  conflict, change forbidden by this CLAUDE.md, or operational /
+  context-window limit. Anything else — read the code, run the
+  tool, write the test, ship the PR.
 ---
 
 ## 6. Operational memory
@@ -256,8 +260,22 @@ explicitly running the command outside Claude.
 ## 10. Pipeline state (for context)
 
 ### Known baseline on `planta_74` (vector pipeline)
-- 33 walls, 11 rooms, 12 openings, 8 soft_barriers
-- Generated via the documented 4-step flow (see `OVERVIEW.md` §4.4)
+- 33 walls, 11 rooms, 11 openings, 8 soft_barriers
+- by_kind: 5 interior_door / 2 interior_passage / 2 window / 2 glazed_balcony
+- by_decision: 6 clean / 5 debug
+- room areas (post-Cycle-8b concave-hull default):
+  SALA DE ESTAR 10.82, SALA DE JANTAR 13.07, COZINHA 8.80,
+  LAVABO 3.40, A.S. 2.52, SUITE 01 26.75, SUITE 02 14.38,
+  BANHO 01 5.48, BANHO 02 6.24, TERRACO SOCIAL 11.70,
+  TERRACO TECNICO 1.61
+- Total room polygon area: 104.78 m² (apartment nominal 74 m²;
+  delta accounts for internal walls + 2 terraços)
+- Fidelity Engine v1 baseline: global=0.917, 0 hard_fails,
+  2 warnings (TERRACO TECNICO area marginal, adjacency_f1=0.67
+  below 0.80 advisory threshold)
+- Generated via the 5-step flow (see `OVERVIEW.md` §4.4) with
+  the default `--use-concave-hull` flag (Cycle 8b 2026-05-08;
+  pass `--no-concave-hull` to recover legacy convex behaviour)
 
 ### Known baseline on `planta_74` (raster pipeline, OUTDATED)
 - 94 walls, 14 rooms, 7 orphan_components, geometry_score 0.156
@@ -267,12 +285,34 @@ explicitly running the command outside Claude.
   threshold sweep on planta_74 + p10 + p12.
 
 ### Known SketchUp issues
-- `consume_consensus.rb` does not carve openings yet (doors stay as
-  full-height walls). Tracked in `OVERVIEW.md` §7.
-- Window detection is missing (only door arcs).
-- `inspect_walls_report.rb` doesn't embed SHA256 of inspected `.skp`.
+- (none open as of 2026-05-06; previous SHA256 + caminho-A items shipped)
 
 ### Recently fixed
+- **FP-012 — Convex-hull room clip leaks watershed into exterior**
+  (Cycle 8b, 2026-05-08, PR #N): `tools/rooms_from_seeds.py` now
+  defaults to `shapely.concave_hull` over wall endpoints (ratio 0.5)
+  instead of `cv2.convexHull`. SUITE 01 polygon dropped from
+  69.91 m² → 26.75 m². Fidelity Engine v1 step in
+  `quality_gates.yml` promoted from advisory (continue-on-error)
+  to hard merge blocker. Pass `--no-concave-hull` to recover legacy
+  behaviour for plants whose envelope is genuinely convex.
+- `inspect_walls_report.rb` now embeds SHA256 + size of the inspected
+  `.skp`, plus optional `bounds_check` against a consensus JSON
+  (`feature/skp-structural-gate-inspector-v2`, schema_version 1.0).
+- door_arc openings are now CARVED into walls (PR #42) and rendered
+  with a visible swing leaf + 30° open (PR #44).
+- Window detection runs end-to-end. planta_74 yields 0 vector
+  windows (drawn inside wall hatch); the 3 wall_gaps detected on it
+  are classified by adjacent room context (PR #45 caminho B):
+  `interior_door | interior_passage | window | glazed_balcony`.
+  See `tools/classify_openings_by_room_context.py`.
+- Stage 1 uncertainty contract on each opening:
+  `confidence` / `decision` / `hypotheses` / `evidence` (PR #46).
+- Versioned baseline regression gate
+  `tests/baselines/planta_74.json` + `tests/test_planta_74_truth_gate.py`
+  (PR #47, 33/11/11/8 locked).
+- First external truth: `ground_truth/planta_74_micro.json` +
+  `tools/micro_truth_gate.py` (PR #48, SALA DE ESTAR score 1.0).
 - 3-pt parapet/wall coincidence filter
   (`commit 7fbd531`) — eliminates the "rodapé branco" band.
 
@@ -308,6 +348,232 @@ Never apply archive patches without an explicit, signed-off PR plan.
 
 ## 13. Last-updated marker
 
+- **2026-05-07** — added §17 Non-Stop Autonomy Rule
+  ("DONE IS NOT STOP"); reinforces §14 with explicit twelve-question
+  gate before any stop and an end-of-cycle reporting format.
+- **2026-05-06** — strengthened §5 wording (autonomous-first); added
+  §14 Autonomous Continuation Protocol, §15 Repository Hygiene
+  Protocol, §16 Review Frequency.
 - **2026-05-03** — converted to constitution form, added agents/hooks
   references, develop-first git flow, SketchUp-as-last-gate rule.
 - Previous version: 2026-04-21 (preserved in git history).
+
+---
+
+## 14. Autonomous Continuation Protocol
+
+Claude does NOT stop after completing a single task when there is a
+safe, valuable next technical step. The default loop is:
+
+```
+READ -> DIAGNOSE -> PLAN -> EXECUTE -> VALIDATE -> RECORD -> COMMIT -> CONTINUE
+```
+
+Per cycle, do all of the following:
+
+1. **READ** — at session start, read `CLAUDE.md`, run `git status`,
+   identify current branch + recent commits + last reports.
+2. **DIAGNOSE** — pick the highest-ROI bottleneck with concrete
+   evidence (file path, log line, test output, metric delta).
+3. **PLAN** — answer internally before editing:
+   - What is the most likely bottleneck?
+   - What evidence proves it?
+   - What cheap validation can confirm it?
+   - What is the smallest safe change?
+   - What test prevents regression?
+   - What can break?
+   - What should be documented?
+4. **EXECUTE** — small, verifiable changes on a properly-named
+   branch (`feature/`, `fix/`, `chore/`, `docs/`, `refactor/`, etc.).
+5. **VALIDATE** — pytest, ruff, smoke, gate run; capture output.
+6. **RECORD** — register learning in `docs/learning/` when relevant;
+   update `docs/ops/` for long-session snapshots.
+7. **COMMIT** — small commit with the standard message format; or
+   give an explicit reason for not committing.
+8. **CONTINUE** — pick the next ROI item. Do NOT ask the human
+   what to do next when there is a safe technical step.
+
+**Specialist agents in parallel** — when work decomposes cleanly
+(e.g., one agent audits the consensus while another drafts the test),
+launch them in a single multi-tool message.
+
+**Consult GPT (or local LLM) via bridge** when there is an ambiguous
+bug, an architectural decision, a hard regression, an uncertain
+validation, or a relevant trade-off. Do not consult for trivial calls.
+
+**Stop only on real blockers.** When blocked, the report must list:
+current state, evidence, attempts, exact blocker, and the next
+commands needed to resume.
+
+**A cycle is complete only when all of the following are true:**
+- validation evidence exists (test result / metric / artifact);
+- learning recorded if the cycle produced one;
+- `git diff` reviewed before commit;
+- commit shipped OR explicit reason logged for not committing;
+- next-step ROI candidate identified.
+
+---
+
+## 15. Repository Hygiene Protocol
+
+Every autonomous cycle includes a lightweight repo-hygiene pass.
+The agent looks for:
+
+- obsolete `.md` files
+- duplicate reports
+- stale JSONs
+- generated PNG/SVG no longer referenced
+- old smoke outputs
+- temporary scripts
+- abandoned dashboard artifacts
+- docs that contradict current behavior
+- loose files in the repo root
+
+**Never delete blindly.** Before removing or moving any file:
+
+1. Search for references in: `README.md`, `CLAUDE.md`, `docs/`,
+   `tests/`, `scripts/`, `tools/`, CI workflows, dashboard, Python
+   imports, Ruby scripts, smoke commands.
+2. Classify each suspect as one of:
+   - `active`
+   - `historical baseline`
+   - `diagnostic artifact`
+   - `generated output`
+   - `duplicate`
+   - `obsolete`
+   - `unknown / preserve`
+3. **Preserve by default**: ground truth, baselines, regression
+   snapshots, reports used by tests, files referenced by docs,
+   artifacts needed to reproduce bugs, anything inside protected
+   paths (`runs/`, `patches/`, `docs/`, `vendor/` per §1).
+4. When in doubt → archive / quarantine instead of delete.
+5. Cleanup ships in its **own commit**, separate from any
+   algorithmic change.
+6. Never mix repo cleanup with risky algorithmic changes in the
+   same PR.
+
+**Suggested commit messages:**
+- `chore: clean obsolete generated artifacts`
+- `docs: archive stale operational notes`
+- `chore: remove unreferenced markdown files`
+
+**Every cleanup must report:**
+- files removed
+- files archived
+- files preserved + why
+- reference searches performed
+- validations executed (pytest / smoke / dashboard build)
+
+---
+
+## 16. Review Frequency
+
+CLAUDE.md is the operational source of truth and is read **every
+session**. Update cadence:
+
+- **Read** at the start of every session.
+- **Verify** before any risky edit (Ruby/SU/schema/threshold).
+- **Verify conformance** before every commit.
+- **Update `docs/ops/`** at the end of long sessions.
+- **Update `docs/learning/`** when there is a new bug, failure
+  pattern, validation rule, or agent improvement.
+- **Promote repeated failures to CLAUDE.md** immediately.
+- **Compact CLAUDE.md** every 3-5 PRs OR once per week, whichever
+  comes first. Strip duplication; refresh §10 known-issue list.
+
+**Add to CLAUDE.md only when the information will change future
+agent behavior.** Do not add:
+
+- execution logs
+- one-off command outputs
+- temporary metrics
+- single-execution observations
+- PR summaries
+
+These belong in:
+
+- `docs/ops/`
+- `docs/learning/`
+- `docs/adr/`
+- `runs/`
+- `artifacts/`
+
+---
+
+## 17. Non-Stop Autonomy Rule
+
+Completing the requested scope is **not** a stopping condition.
+
+When a task, queue, validation, PR review, bugfix, or stage finishes,
+Claude must:
+
+1. Record the result in `.ai_bridge/HANDOFF.md` and `CURRENT_STATE.md`.
+2. Update `.ai_bridge/TODO_NEXT.md` with real pendencies.
+3. Pick the next highest-ROI safe item.
+4. Start the next cycle without asking the human.
+5. Continue while there is a safe technical step to take.
+
+> **DONE IS NOT STOP. DONE MEANS PICK NEXT HIGHEST-ROI TASK.**
+
+The mandatory loop is `READ → DIAGNOSE → PLAN → EXECUTE → VALIDATE →
+RECORD → COMMIT → CONTINUE` (see §14 for the cycle's per-step gates).
+
+Before stopping, Claude internally checks all twelve:
+
+1. Open PR?
+2. Local branch without PR?
+3. Failing test?
+4. `TODO_NEXT.md` item?
+5. `HANDOFF.md` pending?
+6. Documented known failure?
+7. Safe cleanup pending?
+8. Stale doc?
+9. Broken dashboard/report?
+10. Validation improvement available?
+11. Next-highest-ROI gate?
+12. Anything safe to measure / validate / clean / document / prep?
+
+**Any** answer of "yes" → keep going.
+
+Stop only on a real blocker:
+
+- missing credential
+- missing required file/artifact
+- nonexistent branch with no safe alternative
+- destructive conflict
+- data-loss risk
+- §1 / §2 / §3 hard rule blocks the action
+- human approval required and not on record
+- forbidden operation on `main` / `develop`
+- tool / context / environment limit
+- operational failure with no workaround
+- environment unavailable
+
+When stopped by a real blocker, leave: current state, evidence, what
+was attempted, why blocked, exact next commands, and the next-best
+item if the blocker is resolved.
+
+### End-of-cycle reporting format
+
+Each cycle ends with:
+
+```
+## Cycle Completed
+What finished.
+
+## Evidence
+Tests, reports, PRs, files, metrics.
+
+## Recorded State
+Files in .ai_bridge / docs that were updated.
+
+## Next Highest-ROI Task
+Which next item was picked and why.
+
+## Continuing
+First action of the next cycle.
+```
+
+**Important:** "do not stop" never authorizes risky actions. This rule
+operates *inside* the safety boundary set by §1, §2, §3, §9, the git
+flow rules, and the validation gates.

@@ -154,3 +154,73 @@ introduced by the current PR.
 **Pattern:** The `_build_prompt` function hardcoded the string `"extraida de uma planta de 74 m2"`, leaking the ground-truth area of the canonical fixture into the LLM critic's prompt. This violates CLAUDE.md §2.6 ("Leak ground-truth into the extractor output. Scores are observational only.") and risked making the validator silently PDF-coupled (CLAUDE.md §2.4).
 **Anti-pattern signal:** Any literal numeric value or filename in a prompt template that originates from a known fixture is a candidate leak. Watch for `74`, `planta_74`, `proto_p10`, `p12`.
 **Resolution:** Tracked in branch `validate/no-gt-leak` (Stream B of the 2026-05-04 wave). Replaces hardcoded value with optional `expected_area_m2` from external config.
+
+## FP-012 — Convex-hull room clip leaks watershed into exterior
+
+**Date:** 2026-05-07
+**Discovered in:** `tools/rooms_from_seeds.py:163-169`, surfaced
+during Cycle 7 ground-truth expansion of `planta_74_micro.json`.
+
+**Symptom:** SUITE 01 polygon on `planta_74` is **69.91 m²** in a
+nominally 74 m² apartment. Sum of all 11 rooms ≈ 182 m² (~2.5×
+nominal). BANHO 02's audited adjacencies include `SUITE 01` and
+`LAVABO`, neither of which are architecturally true.
+
+**Pattern:** When the building footprint is non-convex (L/C-shaped
+or has a far-flung wing — `planta_74` has BANHO 01 sitting at the
+far right with a wide unwalled exterior strip between it and the
+rest of the apartment), `cv2.convexHull(wall_pts)` overshoots and
+the watershed assigns the exterior to whichever seed is nearest.
+The room nearest that strip becomes the "vacuum cleaner" for all
+unclaimed exterior area.
+
+**Anti-pattern signal:** Per-room polygon area > ~40 m² in a
+< 100 m² floor; total room area > 1.3× nominal floor area;
+`expected_adjacent_labels` for one or more rooms keeps surfacing
+implausible neighbours.
+
+**Rule (until fix lands):**
+1. Do NOT silently shrink an inflated room polygon to "make a
+   gate pass" — that hides the bug. Document instead.
+2. When authoring `ground_truth/<plant>_micro.json` for a planta
+   exhibiting this pattern, omit `expected_adjacent_labels` for
+   any room whose only detected adjacency is implausible (Cycle 7
+   COZINHA entry is the exemplar).
+3. The Plan Truth Gate (`tests/test_planta_74_truth_gate.py`)
+   does not yet assert per-room area caps. Until FP-012 is fixed,
+   either land Option C from the diagnostic doc (regression
+   `assert max(rooms_areas_m2) < 50`), or accept that the gate
+   will not catch a recurrence in another corpus PDF.
+
+**Resolution:** **Open.** Diagnostic + three fix paths (alpha-shape
+hull, soft-barrier outer outline, per-room area cap) documented in
+`docs/diagnostics/2026-05-07_planta_74_suite01_polygon_leakage.md`.
+Recommended next step: spike Option A behind `--use-concave-hull`
+flag default-off. Promote default only after `tests/baselines/
+planta_74.json` is updated in a single dedicated PR.
+
+**See also:** `LL-XXX` lesson to be filed once a fix lands.
+
+## FP-013 — adjacency_f1 plateau lives upstream in room polygon quality
+
+**Date:** 2026-05-08
+**Discovered in:** `tools/classify_openings_by_room_context.py` post-Cycle-8b empirical analysis. Full diagnostic in `docs/diagnostics/2026-05-08_cycle6alt_adjacency_f1_analysis.md`.
+
+**Symptom:** Fidelity Engine v1 reports `adjacency_f1 ∈ [0.65, 0.70]` on `planta_74` even after FP-012 was fixed. The metric stops improving regardless of changes to the classifier. Specific failures (FN: LAVABO↔SALA DE JANTAR, SALA DE ESTAR↔SALA DE JANTAR; FP: A.S.↔SALA DE ESTAR, A.S.↔TERRACO SOCIAL, BANHO 02↔LAVABO, BANHO 02↔SUITE 01).
+
+**Pattern:** When the adjacency metric is below 0.80 but above the hard-fail floor of 0.60, the natural next step is to "tighten the classifier". **Don't.** Each remaining mismatch traces to one of:
+- Room polygon LEAKING beyond actual room boundaries (e.g., SUITE 01 still spans into LAVABO area even at concave-hull r=0.50). Causes FPs.
+- Room polygon SHRINKING short of host wall (canonicalization or tight concave hull). Causes the polygon-containment lookup to fail, fallback nearest-seed picks the wrong neighbour. Causes FNs.
+- Two rooms architecturally adjacent via an OPEN PASSAGE (no door object). The classifier has nothing to attribute the adjacency to. Causes FNs that are unfixable in `classify_*` by design.
+
+All three are upstream defects in `rooms_from_seeds.py` polygon shape OR in the lack of a "synthetic open_passage" opening.
+
+**Anti-pattern signal:** changing `eps`, swapping nearest-seed for nearest-vertex, or special-casing self-adjacent disambiguation in `classify_openings_by_room_context.py` to chase adjacency_f1 above 0.70 without touching `rooms_from_seeds.py`. None of those work.
+
+**Rule (until fix lands):** treat `adjacency_f1 ∈ [0.60, 0.80]` as the expected plateau on `planta_74`. The fidelity engine surfaces it as a warning by design. Investigate root cause in room polygon shape, NOT in the classifier. Cycle 8c candidates: polygon grow-by-thickness; alpha-shape per room; synthetic open_passage opening for shared polygon edges.
+
+**Anti-pattern signal:** lowering the hard-fail threshold from 0.60 to "make it pass" — that violates CLAUDE.md §1 and the operational protocol's "alterar threshold para fazer passar" RED rule.
+
+**Resolution:** Open. Documented in this entry and in `docs/diagnostics/2026-05-08_cycle6alt_adjacency_f1_analysis.md`. Cycle 8c will fix the underlying polygon quality issues; this is the unblocking work, not a classifier change.
+
+**See also:** `FP-012` (convex-hull room clip — fixed in Cycle 8b but exposed this layer of plateau); LL-011 (empirical evidence overrides parametric guesses).

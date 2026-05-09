@@ -4,6 +4,40 @@
 > rule. Add a new entry every time we discover "this should always
 > happen this way." Anti-patterns go to `failure_patterns.md`.
 
+## LL-012 — Fix tooling access before falling back to manual
+
+**Date:** 2026-05-08
+**Context:** Mid-session, opened the Cycle 12 cockpit PR via the
+"compare URL → user pastes manually in browser" workflow because
+`gh: command not found` in the Bash that Claude Code runs in. Felipe
+correctly pushed back: doing it manually means the next PR hits the
+same wall. The fix is to find the tool, not work around it.
+
+**Diagnosis:** `gh.exe` was installed at `C:\Program Files\GitHub CLI\`
+and authenticated via keyring (account `fmodesto30`, scope `repo`),
+but Git Bash didn't have that directory on its PATH.
+
+**Rule:** When a CLI is "missing" from the environment, the first
+move is `where`/`Get-ChildItem` to the standard install paths
+(`C:\Program Files\<Tool>\`, `%LOCALAPPDATA%\Programs\<tool>\`,
+`scoop\shims\`). If the binary exists, invoke via absolute path
+(`"/c/Program Files/GitHub CLI/gh.exe"`) and pass cwd-independent
+flags (`--repo <owner>/<name>`). Document the path so the next
+session doesn't repeat the diagnostic. **Don't fall back to manual
+workflow because the binary lookup failed.**
+
+**Automation:** cross-project memory file
+`~/.claude/projects/E--Claude/memory/reference_gh_cli_absolute_path.md`;
+referenced from `MEMORY.md` so every Claude session sees it before
+attempting a PR action.
+
+**Generalization:** the pattern applies to any external CLI on
+Windows + Git Bash where PATH inheritance into the harness shell is
+unreliable — `python.exe`, `node.exe`, `docker.exe`, etc. Probe
+before assuming.
+
+
+
 ## LL-001 — SketchUp is the last gate, never the first
 
 **Date:** 2026-05-03
@@ -115,3 +149,11 @@ to the output dir as `_bootstrap.skp`.
 **Context:** During the 2026-05-04 panorama generation, eight specialist analyses ran in parallel (instead of one single-pass review). Each surfaced different gaps: the validator GT leak (validator-specialist), CI Ruby syntax blindness (ci-guardian), 17 root-of-repo orphan scripts (repo-auditor), schema drift between raster and vector openings (geometry-specialist), DL-006 status drift (docs-maintainer).
 **Lesson:** For non-trivial repo audits, prefer N parallel specialist passes over a single sequential review. The synthesis surfaces issues no single pass would have caught.
 **Caveat:** Only applies to AUDIT/REVIEW work where each specialist has a distinct lens. For execution/coding tasks, parallel agents on overlapping code paths cause merge conflicts — keep them disjoint.
+
+## LL-011 — Empirical evidence overrides initial parametric choice (Cycle 8b, 2026-05-08)
+
+**Date:** 2026-05-08
+**Context:** Cycle 8b promote-concave-hull-default decision. User authorized `ratio = 0.30` based on architectural intuition + LLM (`planta-assistant`) recommendation. First implementation run revealed `ratio=0.30` cuts INTO valid rooms (A.S. 10.39 → 1.35 m², COZINHA 11.34 → 5.23 m², TERRACO TECNICO 5.77 → 0.69 m²). Three rooms failed GT ranges. Re-ran with `ratio=0.50`: 10/11 rooms in range, only TERRACO TECNICO marginally below floor (1.61 vs 2.0).
+**Lesson:** When a parametric decision is initially made on theoretical reasoning (LLM "more correct" + user "biggest fix"), **execute the smallest reproducible run and let empirical numbers override**. The protocol path was honored: I asked the LLM, applied the answer, INVESTIGATED the resulting failures (not "maquiar"), found the root cause (algorithm aggression), tested the alternative (`ratio=0.50`), and chose the option with better empirical evidence. Recorded the override in `.ai_bridge/GPT_RESPONSES.md` so the audit trail is intact.
+**Caveat:** This loop only works if the gate (in this case, fidelity engine + GT ranges) is honest. Had I been allowed to "maquiar" the GT ranges to match `ratio=0.30`'s output, the empirical signal would have been silenced. CLAUDE.md §1 + the operational protocol's RED rule against "alterar baseline para fazer passar" are what made the override visible.
+**See also:** `FP-012` (the bug being fixed); `feedback_autonomia_operacional_protocolo.md` (the GREEN/YELLOW/RED loop that authorized the override).

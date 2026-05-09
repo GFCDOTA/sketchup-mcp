@@ -48,6 +48,14 @@ dev = [
   "pytest-xdist>=3.6,<4.0",
   "ruff>=0.6,<1.0",
 ]
+cockpit = [
+  # Validation Cockpit MVP (Cycle 12, 2026-05-08).
+  # Streamlit-based local UI to visualize what the pipeline
+  # understood from a PDF before SKP generation. Optional extra
+  # so the core pipeline stays lean. Install via:
+  #   pip install -e ".[cockpit]"
+  "streamlit>=1.57,<2.0",
+]
 
 [project.scripts]
 sketchup-mcp-server = "sketchup_mcp_server.server:main"
@@ -67,6 +75,8 @@ include = [
   "roi*",
   "api*",
   "sketchup_mcp_server*",
+  "cockpit*",
+  "renderers*",
 ]
 exclude = [
   "tests*",
@@ -97,11 +107,6 @@ extend-exclude = [
   "build",
   "dist",
   "*.egg-info",
-  # tech debt — hardcoded local paths (C:/Users/felip_local/...);
-  # documented in docs/repo_hardening_plan.md, will be turned into CLI args:
-  "proto_colored.py",
-  "proto_red.py",
-  "render_sidebyside.py",
 ]
 
 [tool.ruff.lint]

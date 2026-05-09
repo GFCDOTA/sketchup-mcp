@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "source_pdf": "planta_74.pdf",
+  "scope": "micro",
+  "description": "Manual ground truth for planta_74 — Stage 1.5 Micro Truth Gate. Asserts FOUR rooms (SALA DE ESTAR, SUITE 02, BANHO 02, COZINHA) exist with sane geometry, opening counts, and architectural adjacencies. Polygon-perfect IoU and full-plant coverage are still out of scope here; that's a future Stage. Cycle 7 expansion (2026-05-07) added the three new rooms.",
+  "rooms": [
+    {
+      "label": "SALA DE ESTAR",
+      "must_be_closed": true,
+      "expected_area_m2_range": [8.0, 25.0],
+      "expected_openings_count_range": [2, 5],
+      "expected_adjacent_labels": ["TERRACO SOCIAL"],
+      "allow_debug_openings": true,
+      "notes": [
+        "SALA DE ESTAR is the most stable room in planta_74:",
+        "  - Always carries the porta-vidro to TERRACO SOCIAL.",
+        "  - Integrated layout, no door arcs internally to confuse the",
+        "    detector with phantom-de-arc-radius dupes.",
+        "  - Polygon area calibrated 2026-05-06 at 10.75 m² (pre-PR",
+        "    feature/micro-truth-gate). Range 8-25 absorbs detector",
+        "    noise + future canonicalization tweaks.",
+        "Update procedure: bump schema_version on breaking changes;",
+        "expand range only with a PR that explains the cause."
+      ]
+    },
+    {
+      "label": "SUITE 02",
+      "must_be_closed": true,
+      "expected_area_m2_range": [10.0, 22.0],
+      "expected_openings_count_range": [2, 6],
+      "expected_adjacent_labels": ["BANHO 02"],
+      "allow_debug_openings": true,
+      "notes": [
+        "Master suite of planta_74. Calibrated 2026-05-07 at 32.03 m²",
+        "with the convex-hull baseline (FP-012 inflated). After",
+        "Cycle 8b 2026-05-08 promoted concave-hull default (ratio 0.50)",
+        "the polygon tightened to 13.345 m². Range moved [15, 40] →",
+        "[10, 22] to match expected_model.json and the post-Cycle-8b",
+        "geometry honestly. Justification: concave hull excludes",
+        "unwalled exterior the convex hull was including; new range",
+        "is now the architectural truth, not the detector noise.",
+        "BANHO 02 adjacency remains the strongest architectural",
+        "invariant asserted."
+      ]
+    },
+    {
+      "label": "BANHO 02",
+      "must_be_closed": true,
+      "expected_area_m2_range": [3.0, 12.0],
+      "expected_openings_count_range": [1, 4],
+      "expected_adjacent_labels": ["SUITE 02"],
+      "allow_debug_openings": true,
+      "notes": [
+        "Master bath. Calibrated 2026-05-07 at 6.24 m², polygon=14 pts.",
+        "After Cycle 8b 2026-05-08 (concave-hull default ratio 0.50)",
+        "the SUITE 01 polygon-overlap noise that caused spurious",
+        "[LAVABO, SUITE 01, SUITE 02] adjacencies is largely fixed",
+        "(SUITE 01 collapsed from 69.91 to 26.75 m²). Range unchanged.",
+        "Only the master-suite adjacency (SUITE 02) is asserted as the",
+        "architectural invariant."
+      ]
+    },
+    {
+      "label": "COZINHA",
+      "must_be_closed": true,
+      "expected_area_m2_range": [7.0, 18.0],
+      "expected_openings_count_range": [1, 4],
+      "allow_debug_openings": true,
+      "notes": [
+        "Kitchen. Calibrated 2026-05-07 at 11.34 m², polygon=14 pts,",
+        "1 opening touching (interior_passage to SUITE 02 — detector",
+        "currently mislabels the cozinha↔A.S. door's room context).",
+        "expected_adjacent_labels intentionally omitted: the only",
+        "detected adjacency (SUITE 02) is architecturally implausible,",
+        "and the architecturally correct A.S./SALA DE JANTAR adjacency",
+        "is missing from the detector. Restore once the room-context",
+        "classifier reaches cozinha (likely Cycle 6 or downstream)."
+      ]
+    }
+  ],
+  "invariants": {
+    "invalid_rooms": 0,
+    "floating_openings": 0,
+    "duplicate_walls": 0
+  }
+}

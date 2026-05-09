@@ -1,74 +1,26 @@
-"""Renderiza overlay incluindo bridges em verde + openings em laranja."""
-import json
-import os
-from pathlib import Path
-from PIL import Image, ImageDraw, ImageFont
+"""DEPRECATED — moved to ``renderers.with_openings``.
 
-import sys
-RUN = Path(sys.argv[1] if len(sys.argv) > 1 else "runs/proto/p8_red_v5_run")
-MASK = Path(sys.argv[2]) if len(sys.argv) > 2 else None
+This thin wrapper preserves backward compatibility for callers still
+running ``python render_with_openings.py <run_dir>``. It will be
+removed in a future release. Migrate to
+``python -m renderers.with_openings <run_dir>`` or
+``import renderers.with_openings``.
 
-OBS_PATH = RUN / "observed_model.json"
-obs = json.loads(OBS_PATH.read_text())
-walls = obs["walls"]
-juncs = obs["junctions"]
-openings = obs.get("openings", [])
-sc = obs["scores"]
+Migrated 2026-05-08 per ``docs/architecture/target_repo_architecture.md``
+step 5.
+"""
+import runpy
+import warnings
 
-xs = [c for w in walls for c in (w["start"][0], w["end"][0])]
-ys = [c for w in walls for c in (w["start"][1], w["end"][1])]
-margin = 40
-min_x, min_y = min(xs)-margin, min(ys)-margin
-max_x, max_y = max(xs)+margin, max(ys)+margin
-W, H = int(max_x-min_x), int(max_y-min_y)
+warnings.warn(
+    "render_with_openings.py at repo root is deprecated; "
+    "use 'python -m renderers.with_openings' or "
+    "'import renderers.with_openings' instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
-base = Image.new("RGB", (W, H), "white")
-d = ImageDraw.Draw(base, "RGBA")
-try:
-    font = ImageFont.truetype("arial.ttf", 18)
-except Exception:
-    font = ImageFont.load_default()
+from renderers.with_openings import *  # noqa: E402, F401, F403
 
-# walls — vermelho normais, verde bridges
-for w in walls:
-    x1,y1 = w["start"][0]-min_x, w["start"][1]-min_y
-    x2,y2 = w["end"][0]-min_x, w["end"][1]-min_y
-    if w.get("source") == "opening_bridge":
-        d.line([(x1,y1),(x2,y2)], fill=(34,197,94), width=4)  # verde
-    else:
-        d.line([(x1,y1),(x2,y2)], fill=(220,38,38), width=4)
-
-# junctions
-for j in juncs:
-    cx,cy = j["point"][0]-min_x, j["point"][1]-min_y
-    col = (220,38,38) if j.get("degree",0)>=3 else (37,99,235)
-    r = 5
-    d.ellipse([cx-r,cy-r,cx+r,cy+r], fill=col)
-
-# openings: laranja diamond no centro
-for o in openings:
-    cx,cy = o["center"][0]-min_x, o["center"][1]-min_y
-    r = 9
-    d.polygon([(cx,cy-r),(cx+r,cy),(cx,cy+r),(cx-r,cy)], fill=(249,115,22), outline="black")
-
-d.rectangle([0,0,W,32], fill=(255,255,255,230))
-d.text((6,4),
-       f"walls={len(walls)} juncs={len(juncs)} rooms={len(obs['rooms'])} "
-       f"openings={len(openings)} geom={sc['geometry']} topo={sc['topology']}",
-       fill="black", font=font)
-
-out = RUN / "overlay_with_openings.png"
-base.save(out)
-print(f"wrote {out}")
-
-if not os.environ.get("PNG_HISTORY_DISABLE"):
-    try:
-        sys.path.insert(0, str(Path(__file__).resolve().parent / "tools"))
-        from png_history import register
-        register(out, kind="overlay_with_openings",
-                 source={"consensus": OBS_PATH},
-                 generator="render_with_openings.py",
-                 params={"run": str(RUN), "mask": str(MASK) if MASK else None,
-                         "openings": len(openings)})
-    except Exception as e:
-        print(f"[png_history skipped] {e}")
+if __name__ == "__main__":
+    runpy.run_module("renderers.with_openings", run_name="__main__", alter_sys=True)

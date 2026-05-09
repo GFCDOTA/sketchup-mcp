@@ -12,9 +12,10 @@ shouldn't require a coffee break. The smoke harness gates the
 expensive step behind cheap ones:
 
 ```
-A → B → C → D → E → F → G → H
-prep   read  shape preview cache SU   .skp   reports
-                                      check valid
+A → B → C → D → E → E2 → E3 → F0 → F0pa → F → G → G2 → H
+prep   read  shape preview cache amend amended pre-SKP proposed SU .skp inspect reports
+                                obs.  fidelity review  actions       check  v2
+                              (auto) (auto)            (opt-in)
 ```
 
 Any FAIL short-circuits to H so a report is always written.
@@ -28,8 +29,13 @@ Any FAIL short-circuits to H so a report is always written.
 | C | JSON structural | <1 s | Walls/rooms/openings shape sanity. |
 | D | Preview PNG | 2–4 s | `tools.render_axon` for top + axon (no SU). |
 | E | Hash + cache | <1 s | Build cache key from consensus + skp source. Compare to last marker. |
+| E2 | Amend observed | <1 s | When `review_overrides.json` is present (in out_dir or next to the consensus), runs `tools.apply_overrides` and writes `amended_observed.json` into out_dir (Slice 5a / ADR-001 §2.10.4). SKIPs cleanly when no overrides file is found, so CI runs are byte-equivalent. Opt-out via `--no-apply-overrides`. |
+| E3 | Amended fidelity | <1 s | When BOTH `expected_model.json` AND `review_overrides.json` are available, runs the fidelity engine in `apply_overrides=True` mode and writes `fidelity_report_amended.json` into out_dir (Slice 5b / ADR-001 §2.10.5). Emits both `global_fidelity` (post-override) and `global_fidelity_pre_override` so a review cannot make the score look better without leaving evidence. SKIPs cleanly when either precondition is missing. Opt-out via `--no-amended-fidelity`. |
+| F0 | Pre-SKP review | <1 s | **Slice 5c**: PREFERS `fidelity_report_amended.json` (gate E3 output) over `fidelity_report.json` when both exist in out_dir. The verdict uses the post-override score; `pre_skp_review_report.json` surfaces both `fidelity_score` (post) and `fidelity_score_pre_override` + `fidelity_delta` so a review cannot make the score look better without leaving evidence (ADR-001 §2.10.5). Falls back cleanly to the raw report when amended is missing or malformed. Verdict semantics gated by `--review-mode={off,warn,block}` (ADR-001 §2.8). |
+| F0pa | Proposed actions (opt-in) | <1 s | Opt-in via `--emit-proposed-actions`. When on, runs `tools.propose_skp_actions` against consensus + (optional) fidelity_report and writes `proposed_actions.json` into out_dir for the cockpit Slice 4 Review tab to consume (ADR-001 §2.6). Default off keeps CI byte-equivalent. |
 | F | Export .skp | 5–90 s | `tools.skp_from_consensus` (skipped on `--skip-skp` or cache hit). |
 | G | Validate .skp | <1 s | File exists; size > 1 KiB. |
+| G2 | Inspector v2 (opt-in strict) | <1 s | Reads `inspect_report.json` from out_dir, parses via `tools.skp_inspection_report`. SKIP if report missing (until Cycle 6 wires the autorun plugin into gate F). PASS with `would-block` warning when blockers present in default mode. FAIL on blockers when `--inspect-strict` is passed. |
 | H | Reports | <1 s | Write `sketchup_smoke_report.{json,md}`; refresh cache marker. |
 
 The harness exits 0 if every non-skipped gate passes, 1 otherwise.
@@ -58,6 +64,12 @@ python scripts/smoke/smoke_skp_export.py \
 | `--skip-skp` | off | Run A–E + H only. No SU spawn. |
 | `--force-skp` | off | Bypass cache hit. Always run F. |
 | `--open` | reserved | Hook for future "leave SU open after save"; currently no-op. |
+| `--review-mode` | off | Pre-SKP review (gate F0) verdict mode. `off`: F0 writes verdict file but never aborts smoke. `warn`: verdict != PASS warns to stderr. `block`: verdict == FAIL aborts the smoke run. (ADR-001 §2.8.) |
+| `--emit-proposed-actions` | off | Opt-in for gate F0pa. When on, runs `tools.propose_skp_actions` and writes `proposed_actions.json` into out_dir for the cockpit Review tab. Default off keeps CI byte-equivalent. (ADR-001 §2.6 / Slice 4.) |
+| `--no-apply-overrides` | off | Opt-out for gate E2. Skip `apply_overrides` even when `review_overrides.json` exists. Useful for diagnostic runs that want to see the raw detector output (Slice 5a). |
+| `--expected-model` | (auto) | Optional explicit path to `ground_truth/<plant>/expected_model.json`. When omitted, gate E3 auto-discovers at `ground_truth/<consensus_parent_dir>/expected_model.json`. (Slice 5b.) |
+| `--no-amended-fidelity` | off | Opt-out for gate E3. Skip amended-fidelity computation even when expected_model + review_overrides are both available. (Slice 5b.) |
+| `--inspect-strict` | off | Promote gate G2 from report-only to fail-on-blocker. Until Cycle 6 wires the autorun inspector into gate F, G2 SKIPs anyway, so this flag is forward-looking. |
 
 `--skip-skp` and `--force-skp` come from `LL-008` (always offer both).
 
@@ -193,9 +205,71 @@ the produced `.skp` for gate G.
 - Cache key change: extend `CACHE_KEY_INPUTS`; bump nothing else,
   the next run misses by definition.
 
+## Gate F0 — Pre-SKP review (Slice 3, 2026-05-08)
+
+`gate_f0` runs between `gate_e` and `gate_f`. It reads the live
+`fidelity_report.json` plus an optional `review_overrides.json`
+(ADR-001 §2.3) and writes a verdict to
+`pre_skp_review_report.json` (schema `pre_skp_review_v1`,
+ADR-001 §2.8).
+
+### Inputs
+
+| File | Required | Source |
+|---|---|---|
+| `<out_dir>/fidelity_report.json` (with sibling fallback to consensus dir) | yes | written by `tools.fidelity.compare_generated_to_expected` upstream |
+| `<out_dir>/review_overrides.json` (with sibling fallback) | no | written by Slice 2 cockpit when a human reviewed the run |
+
+### Verdict logic (ADR-001 §2.8)
+
+- `FAIL`: `block_skp_export=true` OR fidelity < 0.69 OR
+  `hard_fails_count > 0` OR consensus SHA-256 mismatch on overrides
+- `WARN`: fidelity ∈ [0.69, 0.85) OR `warnings_count > 3` OR any
+  `mark_suspect` severity=high OR any `request_human_review`
+- `PASS`: otherwise
+
+### `--review-mode` flag
+
+| Mode | Verdict PASS | Verdict WARN | Verdict FAIL |
+|---|---|---|---|
+| `off` (default) | continue | continue (stderr note) | continue (stderr note) |
+| `warn` | continue | continue (stderr [WARN]) | continue (stderr [WARN]) |
+| `block` | continue | continue (stderr [WARN]) | **abort smoke (exit 1)** |
+
+The default `off` keeps shipping CI byte-equivalent: the verdict
+file is always written, but the smoke run never fails on it.
+Adoption of `block` is a deliberate later flip after Slice 3 lands
+and is exercised on a real review case.
+
+### Output schema (`pre_skp_review_v1`)
+
+```json
+{
+  "schema_version": "pre_skp_review_v1",
+  "verdict": "PASS" | "WARN" | "FAIL",
+  "reasons": ["..."],
+  "fidelity_score": 0.917,
+  "hard_fails_count": 0,
+  "warnings_count": 2,
+  "active_overrides_count": 0,
+  "block_skp_export": false,
+  "recommendation": "safe to export SKP"
+                  | "review before SKP"
+                  | "do not export SKP"
+}
+```
+
+The cockpit's History view (`cockpit/history_view.py`) reads this
+file when present and skips its own in-memory computation
+(`source: f0_report` vs `source: in_memory` in the returned dict).
+
 ## Related
 
 - `CLAUDE.md` §3 — the rule.
+- `docs/adr/ADR-001-validation-cockpit-mutation-surface.md` — the
+  full mutation-surface contract that defines gate F0.
+- `tools/apply_overrides.py` — the apply layer that consumes
+  `review_overrides.json` per ADR-001 §2.10.
 - `LL-001`, `LL-008`, `LL-009` — lessons.
 - `FP-001`, `FP-007` — failure patterns.
 - `DL-005` — decision log.
