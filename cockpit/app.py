@@ -569,18 +569,60 @@ def _render_run_detail(rs: RunSummary,
         })
     with cols[2]:
         emoji = _status_emoji(review["status"])
+        # Slice 4-extra: when the F0 report came from gate E3
+        # (apply_overrides=True), badge the verdict so a reviewer
+        # knows the score reflects their overrides.
+        amended_badge = (
+            " · 🧑 amended"
+            if review.get("using_amended_fidelity") else ""
+        )
         st.markdown(
             f"**Pre-SKP Review:** {emoji} `{review['status']}` · "
             f"recommendation = `{review['recommendation']}`"
+            f"{amended_badge}"
         )
         if rs.fidelity_score is None:
             st.caption("fidelity_report.json missing — cannot grade.")
         else:
-            st.caption(
+            base_caption = (
                 f"fidelity = {rs.fidelity_score:.3f} · "
                 f"hard_fails = {len(rs.hard_fails)} · "
                 f"warnings = {len(rs.warnings)}"
             )
+            st.caption(base_caption)
+
+        # Slice 4-extra (Cycle 14): when the verdict was computed
+        # against the amended fidelity report (Slice 5b/5c output),
+        # surface both pre/post scores + the delta. The human sees
+        # exactly how much their overrides moved the score — and
+        # the file proves it cannot be silently masked
+        # (ADR-001 §2.10.5).
+        if (review.get("using_amended_fidelity")
+                and review.get("fidelity_score_pre_override") is not None):
+            pre = float(review["fidelity_score_pre_override"])
+            post = (
+                float(review["fidelity_score"])
+                if review.get("fidelity_score") is not None
+                else None
+            )
+            delta = review.get("fidelity_delta")
+            delta_str = (
+                f" · Δ = {float(delta):+.3f}"
+                if isinstance(delta, (int, float))
+                else ""
+            )
+            post_str = (
+                f"post-override = {post:.3f}"
+                if post is not None
+                else "post-override = (missing)"
+            )
+            st.caption(
+                f"🧑 amended fidelity in use · "
+                f"{post_str} · "
+                f"pre-override = {pre:.3f}"
+                f"{delta_str}"
+            )
+
         if review["reasons"]:
             st.write("Reasons:")
             for r in review["reasons"]:

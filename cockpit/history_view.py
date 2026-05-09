@@ -536,7 +536,7 @@ def pre_skp_review(run: RunSummary,
         # F0's recommendation strings are different from the cockpit's
         # ("safe to export SKP" vs "safe"). Map to the cockpit shape.
         recommendation = "safe" if verdict == "PASS" else "review"
-        return {
+        out = {
             "status": verdict,
             "reasons": list(f0.get("reasons") or []),
             "recommendation": recommendation,
@@ -555,6 +555,22 @@ def pre_skp_review(run: RunSummary,
             ),
             "f0_recommendation": f0.get("recommendation"),
         }
+        # Slice 4-extra (Cycle 14): when the F0 report came from an
+        # AMENDED fidelity run (Slice 5b/5c), surface both pre/post
+        # scores + the delta. Lets the cockpit show the human's
+        # impact on the verdict directly. Fields are additive on top
+        # of the Slice 3 contract — readers ignoring them stay
+        # back-compat.
+        out["using_amended_fidelity"] = bool(
+            f0.get("using_amended_fidelity"),
+        )
+        pre = f0.get("fidelity_score_pre_override")
+        if isinstance(pre, (int, float)):
+            out["fidelity_score_pre_override"] = float(pre)
+        delta = f0.get("fidelity_delta")
+        if isinstance(delta, (int, float)):
+            out["fidelity_delta"] = float(delta)
+        return out
 
     # ----- Cycle 12f fallback (unchanged behaviour) -----
     reasons: list[str] = []
