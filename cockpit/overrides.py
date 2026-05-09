@@ -364,13 +364,22 @@ def save_override(run_dir: Path,
                    override_payload: dict,
                    audit_actor: str,
                    consensus_path: Path | None = None,
-                   consensus: dict | None = None) -> dict:
+                   consensus: dict | None = None,
+                   source_proposed_action_id: str | None = None) -> dict:
     """Append a new override to `review_overrides.json`.
 
     `override_payload` is a partial override-record shaped like
     {type, target, payload, reason?}. The function fills in `id`,
     `created_at`, `author`, `signature`. The corresponding
     audit_trail entry is appended atomically.
+
+    When `source_proposed_action_id` is provided (Slice 4 — the
+    cockpit "Apply suggestion" path), the value is stamped on the
+    audit-trail `create` entry as `source_proposed_action_id`. This
+    lets a future cockpit pane trace back from an applied override
+    to the proposed_actions.json entry that triggered it. The
+    override record itself is unchanged — the link lives in the
+    history layer where it belongs (per ADR-001 §2.7).
 
     Returns the full file dict after write. Raises ValueError on
     schema validation failure (with all errors concatenated).
@@ -423,6 +432,8 @@ def save_override(run_dir: Path,
         "after": dict(record),
         "diff_signature": _audit_diff_signature(None, record),
     }
+    if source_proposed_action_id:
+        audit["source_proposed_action_id"] = str(source_proposed_action_id)
     data["audit_trail"].append(audit)
 
     _atomic_write_json(overrides_path(run_dir), data)
