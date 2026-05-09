@@ -119,27 +119,79 @@ Each entry:
 - 7 PRs since ADR-001. develop @ `dc0aa14`. **776 PASS** (+150
   vs session start).
 
-## 🟡 P0 — Cycle 5 (Stage 1.6 follow-up): port `gate_g2` consumer
+## ✅ DONE — 2026-05-09 autonomous-loop wave (PRs #90–#99)
 
-- **Color:** YELLOW — pure-Python smoke harness extension; no SU
-  spawn (gate is `"deferred"` SKIP until Cycle 6 lands)
-- **Authoritative spec:**
-  `.ai_bridge/pr_bodies/PR_BODY_stage_1_6_followup.md` (ready-to-paste
-  brief) + `docs/diagnostics/2026-05-08_stage_1_6_investigation.md`
-  (full audit)
-- **Goal:** add the 88-LOC harness change + 11 fixture tests from
-  the orphan branch `feature/smoke-promotes-inspector-v2-gate`,
-  with one trivial test relaxation (substring assertion in
-  `test_pipeline_includes_gate_g2` to handle the multi-line tuple
-  now that `gate_f0` lives in the pipeline).
-- **Touchpoints:** `scripts/smoke/smoke_skp_export.py` (gate_g2
-  consumer); `tests/test_smoke_gate_g2.py` (NEW); cherry-pick or
-  fresh-author from the orphan tip `2417a20`.
-- **Validation:** new gate SKIPs cleanly; smoke harness behaviour
-  unchanged in default invocation; `pytest -q` no NEW failures.
-- **What Cycle 5 does NOT do:** spawn SU; integrate
-  `tools/autorun_inspector_plugin.rb`; modify `gate_f`. That's
-  Cycle 6.
+10 PRs end-to-end through the autonomous `<<autonomous-loop-dynamic>>`
+runtime, closing the override-aware F0 verdict loop completely + a
+real-data dogfood that proved the contract holds:
+
+- **PR #90 — Cycle 5** (`cfd7f8a`): gate_g2 inspector v2 consumer
+  ported from the orphan branch (Stage 1.6 follow-up half 1; SKIPs
+  cleanly until Cycle 6 wires the producer)
+- **PR #91 — Cycle 13** (`86cb1f3`): `tools/propose_skp_actions.py`
+  producer for `proposed_actions_v1` (4 detection rules, 23 tests,
+  uuid5 idempotence)
+- **PR #92 — Slice 4** (`dc8048d`): cockpit Review tab consumes
+  proposed_actions.json + chips with one-click apply +
+  `source_proposed_action_id` audit-link
+- **PR #93 — Cycle 13b** (`1789227`): smoke harness gate_f0_pa
+  emits proposed_actions.json into out_dir (opt-in via
+  `--emit-proposed-actions`)
+- **PR #94 — Slice 5a** (`c469d00`): gate_e_amend writes
+  `amended_observed.json` when `review_overrides.json` exists
+  (auto-default)
+- **PR #95 — Slice 5b** (`341e2c8`): gate_e_fidelity_amended runs
+  fidelity engine in `apply_overrides=True` mode, emits both pre/post
+  scores per ADR §2.10.5
+- **PR #96 — Slice 5c** (`08bb8e7`): gate F0 PREFERS
+  `fidelity_report_amended.json` over the raw report; surfaces
+  pre/post/Δ in `pre_skp_review_v1`
+- **PR #97 — Slice 4-extra** (`bc5281c`): cockpit Pre-SKP pane
+  shows `🧑 amended` badge + post/pre/Δ caption
+- **PR #98 — sys.path fix + dogfood report** (`d01bc76`): real
+  end-to-end exercise on planta_74 + UX gap #1 fixed in-flight
+  (smoke harness sys.path bootstrap)
+- **PR #99 — Slice 5d** (`f7ee221`): per-sub-score Δ surfaced in
+  `pre_skp_review_v1` + cockpit collapsible "🔍 sub-score Δ"
+  expander (closes UX gap #3 from dogfood)
+
+**Validation:** 568 PASS baseline → **889 PASS** (+321), 17 raster
+legacy failures (CLAUDE.md §10) unchanged, 8 SKIP. Zero new failures
+across the wave. develop @ `f7ee221`.
+
+**Dogfood evidence (PR #98):** 3 overrides created via cockpit API
+on the canonical planta_74 baseline; consensus sha256 byte-identical
+before/after (ADR §2.10.1 invariant proved). adjacency_score moved
+-0.088 (caught + reported honestly per §2.10.5; Slice 5d ships the
+visibility fix).
+
+## 🟡 P1 — ADR-002: room_polygon_override (dogfood UX gap #2)
+
+- **Color:** YELLOW — schema-extending architectural decision,
+  NOT autonomous-loop-friendly
+- **Why this matters:** the dogfood (PR #98) found the most common
+  real failure mode — room polygon area out of expected range
+  (FP-012-style leakage on SUITE 01 = 69.91 m² vs expected
+  `[10, 28]`) — has NO direct override type in v1. Reviewer's
+  only option is `reject_element` on the entire room, which usually
+  hurts fidelity more than it helps (count_score then drops).
+- **Goal:** ADR-002 defining `room_polygon_override` schema, apply
+  semantics, and how it interacts with `apply_overrides.py`.
+  Consider symmetric option: producer-side
+  `expand/shrink_room_polygon` proposed_actions (already in ADR-001
+  §2.6 spec, just no producer yet).
+- **Why deferred from autonomous loop:** schema extension touches
+  multiple files (override schema, apply_overrides, fidelity engine
+  apply mode, cockpit overrides.py + Review tab + chip promotion
+  mapping). Deserves Felipe's input on direction before committing.
+- **Recommended sequencing:**
+  1. Draft ADR-002 (decision: new override type vs proposed_action
+     surface + UI hints)
+  2. If new override type: extend `cockpit/overrides.py` schema +
+     `tools/apply_overrides.py` apply logic + cockpit Review tab
+     UX (polygon edit picker is the hard part)
+  3. Tests for round-trip + apply + fidelity recompute
+  4. Dogfood the new path on the same SUITE 01 case from PR #98
 
 ## 🟡 P1 — Cycle 6 (Stage 1.6 implementation): wire autorun inspector into `gate_f`
 

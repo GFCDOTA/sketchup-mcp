@@ -1,4 +1,116 @@
-# Handoff — 2026-05-08 (Cockpit MUTATION SURFACE live + Stage 1.6 audit + multi-PDF synth: 8 PRs since ADR-001)
+# Handoff — 2026-05-09 (autonomous-loop wave: 10 PRs end-to-end + dogfood proof)
+
+> Most recent session's exit state. Next session reads this FIRST
+> after `CLAUDE.md`. Append-only is fine but the top entry must
+> always be the latest.
+
+## Status — Override-aware F0 verdict END-TO-END proven on real data; develop @ `f7ee221`
+
+The autonomous-loop wave shipped 10 PRs (#90–#99) closing the
+remaining gaps in the cockpit + smoke override-aware stack, then
+**dogfooded the full path on the real planta_74 baseline**. The
+contract works end-to-end on real data; the dogfood surfaced 3 UX
+gaps; one was fixed in-flight (sys.path bootstrap), one closed a PR
+later (sub_scores_delta surfacing), one is queued (room polygon
+overrides — needs ADR-002).
+
+### Merge wall — autonomous loop iterations
+
+| Iter | PR | Title | SHA |
+|---|---|---|---|
+| 1 | #90 | Cycle 5 — gate_g2 inspector v2 consumer (Stage 1.6 follow-up) | `cfd7f8a` |
+| 2 | #91 | Cycle 13 — proposed_actions producer (`tools/propose_skp_actions.py`) | `86cb1f3` |
+| 3 | #92 | Slice 4 — cockpit Review tab consumes proposed_actions.json | `dc8048d` |
+| 4 | #93 | Cycle 13b — gate_f0_pa smoke integration (opt-in) | `1789227` |
+| 5 | #94 | Slice 5a — gate_e_amend writes amended_observed.json | `c469d00` |
+| 6 | #95 | Slice 5b — gate_e_fidelity_amended (apply_overrides=True) | `341e2c8` |
+| 7 | #96 | Slice 5c — gate F0 prefers fidelity_report_amended.json | `08bb8e7` |
+| 8 | #97 | Slice 4-extra — cockpit shows pre/post/Δ in Pre-SKP pane | `bc5281c` |
+| dog | #98 | sys.path bootstrap fix + dogfood report (UX gap #1 fix) | `d01bc76` |
+| 10 | #99 | Slice 5d — sub_scores_delta surfaced (UX gap #3 fix) | `f7ee221` |
+
+### Override-aware F0 verdict — NOW LIVE END-TO-END (proven on real data)
+
+```
+Cockpit Review tab writes review_overrides.json    (Slice 2 / earlier)
+  ↓
+Smoke gate E2 writes amended_observed.json         (Slice 5a / PR #94)
+  ↓
+Smoke gate E3 writes fidelity_report_amended.json  (Slice 5b / PR #95)
+  ↓
+Smoke gate F0 prefers amended → pre/post/Δ + sub_scores_Δ  (5c / 5d / PRs #96, #99)
+  ↓
+Cockpit pre_skp_review() propagates all amended fields  (4-extra / PR #97)
+  ↓
+Cockpit Pre-SKP pane SHOWS pre/post/Δ + collapsible sub-score Δ table
+```
+
+### Dogfood evidence (PR #98)
+
+Real planta_74 baseline (`runs/feature_room_context_2026_05_06`),
+3 overrides created via `cockpit.overrides` API, full smoke
+end-to-end. **Felipe's 10-step checklist all green.** The detector
+path stays overrides-blind throughout — consensus sha256 byte-
+identical before AND after the entire dogfood
+(`64b57dc34bb9c01d...`). ADR-001 §2.10.1 invariant proved on real
+data. Honest delta reporting (§2.10.5) caught a real -0.088 movement
+on `adjacency_score` that the rounded `global_fidelity` display
+hid — Slice 5d (PR #99) ships the fix for that visibility gap.
+
+### Validation snapshot
+
+- **889 PASS** / 17 FAIL (CLAUDE.md §10 raster baseline,
+  unchanged) / 8 SKIP
+- 10 PRs in the loop wave; **+321 tests** vs. pre-Cycle-12
+  baseline (568 PASS)
+- All 10 PRs merged CLEAN; zero new failures across the wave
+- ruff clean on all new code; pre-existing E402 in `cockpit/app.py`
+  (PR #68's sys.path bootstrap) untouched
+
+### Tooling state
+
+- gh CLI absolute path used throughout (cross-project memory:
+  `~/.claude/projects/E--Claude/memory/reference_gh_cli_absolute_path.md`,
+  LL-012)
+- Smoke harness sys.path bootstrap (PR #98) — script-style
+  invocation now works as designed; matches cockpit/app.py pattern
+- Multi-agent worktree pattern previously proven (3-agent + 4-agent
+  waves earlier); the autonomous loop ran sequential single-PR
+  iterations because each new gate / cockpit change had natural
+  dependencies on the previous one
+
+### Boundary check (CLAUDE.md)
+
+- §1 schema/threshold/SU/exporter untouched ✓
+- §2 invariants intact (cockpit reads-and-writes overrides;
+  detector pipeline is provably overrides-blind per ADR §2.10.8 —
+  proven on real data in PR #98 dogfood) ✓
+- §3 SketchUp not spawned this session ✓
+- §17 every PR closed cleanly with merge SHA documented ✓
+- §15 No archive cleanup this wave (the autonomous loop focused on
+  feature surface; hygiene scan can be next-session if needed)
+
+### Next moves (per refreshed `TODO_NEXT.md`)
+
+The queue is now genuinely thin. Remaining items are either RED-
+blocked or deserve focused fresh sessions:
+
+1. 🟡 **P1 — ADR-002**: room_polygon_override (dogfood UX gap #2).
+   Schema-extending architectural decision; deserves dedicated
+   focus rather than autonomous-loop chaining.
+2. 🟡 **P1 — Cycle 6** (Stage 1.6 SU integration): wire
+   autorun_inspector_plugin into gate_f. SU runtime — needs
+   focused fresh session.
+3. 🟢 P2 — Cycle 7: promote `--inspect-strict` to default (after
+   Cycle 6 stabilises).
+4. 🟡 P3 — Cockpit Phase 3: FastAPI POST + multi-user (still
+   deferred per ADR-001 §5C until first real review case).
+5. 🔴 — REAL multi-PDF corpus (Felipe must provide PDFs; synth
+   corpus is the algorithmic-coverage substitute already live).
+
+---
+
+## Previous entry — Handoff — 2026-05-08 (Cockpit MUTATION SURFACE live + Stage 1.6 audit + multi-PDF synth: 8 PRs since ADR-001)
 
 > Most recent session's exit state. Next session reads this FIRST
 > after `CLAUDE.md`. Append-only is fine but the top entry must
