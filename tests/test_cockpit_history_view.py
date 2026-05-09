@@ -445,6 +445,128 @@ def test_pre_skp_review_threshold_kwargs_override_defaults(tmp_path: Path):
 
 
 # ---------------------------------------------------------------------------
+# Slice 4-extra (Cycle 14): amended fidelity surfaced from F0 report
+# ---------------------------------------------------------------------------
+
+def _f0_report(*, verdict: str, fidelity_score: float | None,
+                hard_fails: int = 0, warnings: int = 0,
+                using_amended_fidelity: bool = False,
+                fidelity_score_pre_override: float | None = None,
+                fidelity_delta: float | None = None) -> dict:
+    """Build a pre_skp_review_v1-shaped F0 report fixture."""
+    out: dict = {
+        "schema_version": "pre_skp_review_v1",
+        "verdict": verdict,
+        "reasons": [],
+        "fidelity_score": fidelity_score,
+        "hard_fails_count": hard_fails,
+        "warnings_count": warnings,
+        "active_overrides_count": 0,
+        "block_skp_export": False,
+        "recommendation": "safe to export SKP" if verdict == "PASS"
+        else "review before SKP",
+        "using_amended_fidelity": using_amended_fidelity,
+    }
+    if fidelity_score_pre_override is not None:
+        out["fidelity_score_pre_override"] = fidelity_score_pre_override
+    if fidelity_delta is not None:
+        out["fidelity_delta"] = fidelity_delta
+    return out
+
+
+def test_pre_skp_review_propagates_amended_fields_when_f0_carries_them(tmp_path: Path):
+    """When F0 wrote an amended-aware report (gate F0 Slice 5c), the
+    cockpit's pre_skp_review() should expose using_amended_fidelity,
+    fidelity_score_pre_override, and fidelity_delta on the returned
+    dict so the UI can render the human's impact on the score."""
+    run_dir = _materialise_run(
+        tmp_path, "amended_run", _consensus_payload(),
+        _fidelity_report_payload(score=0.92, hard_fails=[], warnings=[]),
+        extra_files={
+            "pre_skp_review_report.json": json.dumps(_f0_report(
+                verdict="PASS",
+                fidelity_score=0.92,
+                using_amended_fidelity=True,
+                fidelity_score_pre_override=0.50,
+                fidelity_delta=0.42,
+            )),
+        },
+    )
+    rs = summarise_run(run_dir, repo=tmp_path)
+    review = pre_skp_review(rs)
+    assert review["source"] == "f0_report"
+    assert review["using_amended_fidelity"] is True
+    assert review["fidelity_score_pre_override"] == 0.50
+    assert review["fidelity_delta"] == 0.42
+    assert review["fidelity_score"] == 0.92
+    assert review["status"] == "PASS"
+
+
+def test_pre_skp_review_omits_pre_when_not_using_amended(tmp_path: Path):
+    """When F0 wrote a raw-only report (no amended), the cockpit
+    surfaces using_amended_fidelity=False and does NOT include
+    pre/delta fields. Schema-additive: existing readers stay
+    back-compat."""
+    run_dir = _materialise_run(
+        tmp_path, "raw_only_run", _consensus_payload(),
+        _fidelity_report_payload(score=0.92, hard_fails=[], warnings=[]),
+        extra_files={
+            "pre_skp_review_report.json": json.dumps(_f0_report(
+                verdict="PASS",
+                fidelity_score=0.92,
+                using_amended_fidelity=False,
+            )),
+        },
+    )
+    rs = summarise_run(run_dir, repo=tmp_path)
+    review = pre_skp_review(rs)
+    assert review["source"] == "f0_report"
+    assert review["using_amended_fidelity"] is False
+    assert "fidelity_score_pre_override" not in review
+    assert "fidelity_delta" not in review
+
+
+def test_pre_skp_review_handles_amended_flag_with_no_pre_field(tmp_path: Path):
+    """Defensive: F0 set using_amended_fidelity=True but the
+    pre_override field is missing for some reason — cockpit
+    should surface the flag but not crash + omit the missing fields."""
+    run_dir = _materialise_run(
+        tmp_path, "amended_no_pre_run", _consensus_payload(),
+        _fidelity_report_payload(score=0.92, hard_fails=[], warnings=[]),
+        extra_files={
+            "pre_skp_review_report.json": json.dumps(_f0_report(
+                verdict="PASS",
+                fidelity_score=0.92,
+                using_amended_fidelity=True,
+                # No pre_override / delta supplied
+            )),
+        },
+    )
+    rs = summarise_run(run_dir, repo=tmp_path)
+    review = pre_skp_review(rs)
+    assert review["using_amended_fidelity"] is True
+    assert "fidelity_score_pre_override" not in review
+    assert "fidelity_delta" not in review
+
+
+def test_pre_skp_review_amended_fields_absent_from_inmemory_path(tmp_path: Path):
+    """The Cycle-12f in-memory fallback (no F0 report on disk) should
+    NOT introduce amended fields — they're an F0-only concept."""
+    run_dir = _materialise_run(
+        tmp_path, "no_f0_run", _consensus_payload(),
+        _fidelity_report_payload(score=0.92, hard_fails=[], warnings=[]),
+    )
+    rs = summarise_run(run_dir, repo=tmp_path)
+    review = pre_skp_review(rs)
+    assert review["source"] == "in_memory"
+    # The in-memory path keeps its original v1 shape — amended fields
+    # only surface from the F0 report path.
+    assert "using_amended_fidelity" not in review
+    assert "fidelity_score_pre_override" not in review
+    assert "fidelity_delta" not in review
+
+
+# ---------------------------------------------------------------------------
 # Smoke: real planta_74 expected_model resolution path
 # ---------------------------------------------------------------------------
 
