@@ -491,6 +491,29 @@ def _compute_pre_skp_review(
             out["fidelity_delta"] = round(
                 fidelity_score - fidelity_score_pre_override, 4,
             )
+    # Slice 5d — surface per-sub-score deltas when amended.
+    # Discovered as dogfood UX gap #3: global_fidelity rounds to 2
+    # decimals and can show Δ=0.00 even when individual sub-scores
+    # moved (e.g. adjacency_score went 0.421 → 0.333 = Δ -0.088 on
+    # the planta_74 dogfood, but global_fidelity stayed 0.69).
+    # Surface BOTH the pre/post sub-score blocks AND a per-key delta
+    # dict so a reviewer (and the cockpit Pre-SKP pane) can see WHERE
+    # the override moved the score, not just THAT it moved.
+    if using_amended_fidelity and fidelity_report is not None:
+        post_subs = fidelity_report.get("sub_scores")
+        pre_subs = fidelity_report.get("sub_scores_pre_override")
+        if isinstance(post_subs, dict) and isinstance(pre_subs, dict):
+            out["sub_scores"] = dict(post_subs)
+            out["sub_scores_pre_override"] = dict(pre_subs)
+            delta_subs: dict[str, float] = {}
+            for k in sorted(set(post_subs) | set(pre_subs)):
+                p = pre_subs.get(k)
+                q = post_subs.get(k)
+                if (isinstance(p, (int, float))
+                        and isinstance(q, (int, float))):
+                    delta_subs[k] = round(float(q) - float(p), 4)
+            if delta_subs:
+                out["sub_scores_delta"] = delta_subs
     return out
 
 

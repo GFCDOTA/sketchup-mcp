@@ -622,6 +622,46 @@ def _render_run_detail(rs: RunSummary,
                 f"pre-override = {pre:.3f}"
                 f"{delta_str}"
             )
+            # Slice 5d: when the global Δ is rounded to ~zero but
+            # individual sub-scores moved (the dogfood case), surface
+            # the per-sub-score delta table so the human sees WHERE
+            # their overrides actually shifted the score.
+            sub_delta = review.get("sub_scores_delta")
+            sub_post = review.get("sub_scores")
+            sub_pre = review.get("sub_scores_pre_override")
+            if (isinstance(sub_delta, dict)
+                    and isinstance(sub_post, dict)
+                    and isinstance(sub_pre, dict)
+                    and any(abs(v) > 1e-6 for v in sub_delta.values()
+                            if isinstance(v, (int, float)))):
+                rows = []
+                for k in sorted(sub_delta):
+                    p = sub_pre.get(k)
+                    q = sub_post.get(k)
+                    d = sub_delta.get(k)
+                    if not (isinstance(p, (int, float))
+                            and isinstance(q, (int, float))
+                            and isinstance(d, (int, float))):
+                        continue
+                    rows.append({
+                        "sub_score": k,
+                        "pre": round(float(p), 4),
+                        "post": round(float(q), 4),
+                        "Δ": f"{float(d):+.4f}",
+                    })
+                if rows:
+                    with st.expander(
+                        "🔍 sub-score Δ (where the overrides moved the score)",
+                        expanded=False,
+                    ):
+                        st.dataframe(rows, use_container_width=True,
+                                      hide_index=True)
+                        st.caption(
+                            "Surfaced to address dogfood UX gap #3 — "
+                            "global_fidelity rounded to 2 decimals "
+                            "can hide real movement on individual "
+                            "sub-scores."
+                        )
 
         if review["reasons"]:
             st.write("Reasons:")
