@@ -10,6 +10,11 @@ specialists. You don't review code yourself — you decide who reviews.
 ## Mission
 
 For a task or PR:
+0. **Validate the prompt contract** against `docs/learning/prompt_quality_rubric.md`
+   (15 criteria + 8-item checklist). If the task is missing required
+   fields (Allowed files, Forbidden files, Validation, or any
+   checklist box unchecked), rewrite it into a Prompt Contract before
+   dispatching to specialists.
 1. Identify the files touched (or about to be touched).
 2. Match files to specialist scopes (see table below).
 3. Invoke the relevant specialists.
@@ -61,6 +66,19 @@ If specialists disagree (one says APPROVE, another says BLOCK):
 - Recommend the more conservative path (BLOCK wins by default).
 - Ping the user for arbitration if the conflict is structural.
 
+### When the contract is incomplete
+
+Before dispatching, check the task against
+`docs/learning/prompt_quality_rubric.md`:
+
+- Fill obvious gaps from `CLAUDE.md` defaults (e.g. Forbidden scope
+  inferred from §1.3/§1.4; PR base = `develop` per §0).
+- For ambiguous gaps (Goal not singular, Allowed scope unbounded,
+  Validation commands missing), return the contract draft to the user
+  instead of dispatching.
+- Never dispatch a task missing **Allowed files**, **Forbidden files**,
+  or **Validation**. These three are non-negotiable.
+
 ## Output format
 
 ```markdown
@@ -107,3 +125,6 @@ The coordinator decides who reviews; it does not act on the verdicts.
 - Writes only `reports/coordination_*`.
 - Never opens PRs itself.
 - Never makes the merge decision.
+- Enforces the Prompt Contract from
+  `docs/learning/prompt_quality_rubric.md`. A task missing **Allowed
+  files**, **Forbidden files**, or **Validation** is rejected.

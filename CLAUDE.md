@@ -167,6 +167,8 @@ When in doubt, choose the conservative path:
 - Add a guardrail instead of trusting future authors.
 - Add a deselect instead of muting an assertion.
 - Open a draft PR instead of merging silently.
+
+=======
 - **Ask the user only for real blockers. Prefer autonomous
   investigation over questions.** A "real blocker" is one of:
   missing credential, missing required file, destructive risk,
@@ -174,7 +176,6 @@ When in doubt, choose the conservative path:
   conflict, change forbidden by this CLAUDE.md, or operational /
   context-window limit. Anything else — read the code, run the
   tool, write the test, ship the PR.
-
 ---
 
 ## 6. Operational memory
@@ -192,6 +193,7 @@ When something is learned, it goes to `docs/learning/`:
 - `decision_log.md` — architectural decisions with date + author
 - `validation_matrix.md` — what is validated by what
 - `prompt_improvements.md` — prompts that worked / didn't
+- `prompt_quality_rubric.md` — rubric + Prompt Contract template for autonomous tasks
 - `agent_improvements.md` — adjustments to specialist agents
 
 Roadmap of pending work: [`docs/ROADMAP.md`](docs/ROADMAP.md).
