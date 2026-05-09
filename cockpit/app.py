@@ -52,6 +52,19 @@ from cockpit.overrides import (
     save_override,
     set_block_skp_export,
 )
+from cockpit.project_status import (
+    blockers_from_todo,
+    current_project_state,
+    current_state_excerpt,
+    gates_summary,
+    handoff_excerpt,
+    merged_pull_requests_today,
+    open_pull_requests,
+    read_events,
+    recent_artifacts,
+    recent_commits,
+    recent_runs,
+)
 from cockpit.proposed_actions import (
     action_already_applied,
     actions_for_target,
@@ -161,16 +174,20 @@ def main() -> None:
         st.header("View")
         page = st.radio(
             "Page",
-            options=["Single run", "History"],
+            options=["Single run", "History", "Mission Control"],
             index=0,
             help=("`Single run` is the original cockpit (overlay + "
                   "inspector tabs). `History` lists every run under "
-                  "`runs/` with fidelity + Pre-SKP Review status."),
+                  "`runs/`. `Mission Control` is the project-level "
+                  "live view (events, PRs, gates, artifacts, blockers)."),
             label_visibility="collapsed",
         )
 
     if page == "History":
         _render_history_page()
+        return
+    if page == "Mission Control":
+        _render_mission_control_page()
         return
     _render_single_run_page()
 
@@ -1569,6 +1586,334 @@ def _render_fidelity_panel(consensus: dict,
         st.info("Suggested fixes:")
         for s in report["suggested_fixes"]:
             st.write(f"- {s}")
+
+
+# ---------------------------------------------------------------------------
+# Mission Control page (Slice 1)
+# ---------------------------------------------------------------------------
+
+_VERDICT_BADGE = {
+    "PASS": "🟢", "WARN": "🟡", "FAIL": "🔴",
+    "pass": "🟢", "warn": "🟡", "fail": "🔴", "skip": "⚪",
+}
+_MERGE_STATE_BADGE = {
+    "CLEAN": "🟢", "BLOCKED": "🔴", "DIRTY": "🔴", "UNSTABLE": "🟡",
+    "BEHIND": "🟡", "UNKNOWN": "⚪",
+}
+
+
+def _render_mission_control_page() -> None:
+    """Project-level live view (Slice 1).
+
+    7 sub-tabs: Overview / Live Timeline / PRs / Runs / Gates /
+    Artifacts / Blockers. Pure read; no commands sent. Auto-refresh
+    cadence configurable in the sidebar.
+    """
+    st.title("Mission Control")
+    st.caption(
+        "Project-level live view. What is Claude doing right now? "
+        "Which branch / PR / gate / artifact? Read-only — no commands."
+    )
+
+    with st.sidebar:
+        st.header("Mission Control")
+        refresh_s = st.slider(
+            "Auto-refresh (seconds)", min_value=0, max_value=60,
+            value=10, step=5,
+            help="0 disables. Above 5s recommended to avoid hammering "
+                 "git + gh CLI.",
+        )
+        events_limit = st.slider(
+            "Timeline events to show", min_value=10, max_value=200,
+            value=50, step=10,
+        )
+        artifacts_limit = st.slider(
+            "Artifacts to show", min_value=4, max_value=24,
+            value=12, step=2,
+        )
+
+    # Pull state once per render
+    state = current_project_state(REPO_ROOT)
+
+    (tab_overview, tab_timeline, tab_prs, tab_runs,
+     tab_gates, tab_artifacts, tab_blockers) = st.tabs([
+        "Overview", "Live Timeline", "PRs", "Runs",
+        "Gates", "Artifacts", "Blockers",
+    ])
+
+    with tab_overview:
+        _render_mc_overview(state)
+    with tab_timeline:
+        _render_mc_timeline(events_limit)
+    with tab_prs:
+        _render_mc_prs(state)
+    with tab_runs:
+        _render_mc_runs(state)
+    with tab_gates:
+        _render_mc_gates(state)
+    with tab_artifacts:
+        _render_mc_artifacts(artifacts_limit)
+    with tab_blockers:
+        _render_mc_blockers(state)
+
+    # Auto-refresh — uses st.experimental_fragment when available, falls
+    # back to st_autorefresh-style hack. Streamlit ≥1.32 has
+    # st.fragment for partial re-runs but here we want full refresh.
+    if refresh_s > 0:
+        # Using st.empty + sleep would block; we rely on the meta-refresh
+        # tag injected via st.markdown(unsafe_allow_html=True) — works
+        # in any Streamlit version without needing extras.
+        st.markdown(
+            f'<meta http-equiv="refresh" content="{refresh_s}">',
+            unsafe_allow_html=True,
+        )
+
+
+def _render_mc_overview(state: dict) -> None:
+    captured = state.get("captured_at", "?")
+    st.caption(f"Snapshot: {captured}")
+
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("Branch", state.get("branch", "?"))
+        clean = state.get("clean")
+        emoji = "🟢" if clean else "🟡"
+        st.write(f"{emoji} working tree: {'clean' if clean else 'dirty'}")
+    with col2:
+        st.metric("HEAD commit", state.get("commit", "?"))
+        ahead = state.get("ahead_of_develop", 0)
+        st.write(f"🔀 {ahead} ahead of develop ({state.get('develop','?')})")
+    with col3:
+        prs = state.get("open_prs") or []
+        st.metric("Open PRs", len(prs))
+        if prs:
+            top = prs[0]
+            mb = _MERGE_STATE_BADGE.get(top["merge_state"], "⚪")
+            st.write(f"{mb} #{top['number']} · {top['merge_state']}")
+    with col4:
+        runs = state.get("recent_runs") or []
+        if runs:
+            r = runs[0]
+            f0 = r.get("f0_verdict") or "—"
+            sb = r.get("structural_blockers_count", 0)
+            st.metric("Latest run F0", f0,
+                      delta=f"{sb} blockers" if sb else None)
+            st.write(f"📁 {r['run_id']}")
+        else:
+            st.metric("Latest run F0", "—")
+
+    st.divider()
+    col_left, col_right = st.columns(2)
+    with col_left:
+        st.subheader("Recent commits")
+        commits = recent_commits(REPO_ROOT, limit=6)
+        if commits:
+            for c in commits:
+                st.text(f"{c['sha_short']} · {c['subject'][:70]}")
+        else:
+            st.caption("(git log unavailable)")
+    with col_right:
+        st.subheader("Recent events")
+        events = state.get("recent_events") or []
+        if events:
+            for ev in reversed(events[-8:]):
+                ts = (ev.get("ts") or "")[-9:-1]
+                t = ev.get("type") or "?"
+                title = ev.get("title") or ev.get("message") or ""
+                st.text(f"{ts} · {t} · {title[:55]}")
+        else:
+            st.caption("(no events yet — log via tools/log_event.py)")
+
+
+def _render_mc_timeline(limit: int) -> None:
+    st.subheader(f"Live event timeline (last {limit})")
+    events = read_events(limit=limit, repo=REPO_ROOT)
+    if not events:
+        st.info(
+            "No events yet. Producers should call "
+            "`python -m tools.log_event <type> [k=v ...]` "
+            "or `from tools.log_event import log_event`."
+        )
+        return
+    # Newest first
+    for ev in reversed(events):
+        ts = ev.get("ts", "")
+        t = ev.get("type", "?")
+        actor = ev.get("actor", "?")
+        title = ev.get("title") or ev.get("message") or ""
+        with st.container(border=True):
+            cols = st.columns([1, 1, 4])
+            with cols[0]:
+                st.code(ts, language="text")
+            with cols[1]:
+                st.write(f"**{t}**")
+                st.caption(actor)
+            with cols[2]:
+                if title:
+                    st.write(title)
+                # Render any extra fields as small dict
+                extras = {
+                    k: v for k, v in ev.items()
+                    if k not in ("ts", "type", "actor", "title",
+                                 "message", "schema_version")
+                }
+                if extras:
+                    st.json(extras, expanded=False)
+
+
+def _render_mc_prs(state: dict) -> None:
+    st.subheader("Open pull requests")
+    prs = state.get("open_prs") or []
+    if not prs:
+        st.success("Zero open PRs.")
+    for pr in prs:
+        mb = _MERGE_STATE_BADGE.get(pr["merge_state"], "⚪")
+        with st.container(border=True):
+            top = st.columns([1, 4, 2])
+            with top[0]:
+                st.markdown(f"### #{pr['number']}")
+            with top[1]:
+                st.write(pr["title"])
+                st.caption(f"branch: `{pr['branch']}`")
+            with top[2]:
+                st.write(f"{mb} {pr['merge_state']}")
+                st.caption(
+                    f"checks: {pr['checks_success']}/"
+                    f"{pr['checks_total']} ✓"
+                    + (f" · {pr['checks_failure']} ✗"
+                       if pr['checks_failure'] else "")
+                    + (f" · {pr['checks_running']} ⟳"
+                       if pr['checks_running'] else "")
+                )
+    st.divider()
+    st.subheader("Recently merged (last 5)")
+    merged = state.get("merged_recent") or []
+    for m in merged:
+        st.text(
+            f"#{m['number']} · {m['title'][:80]}  "
+            f"({(m.get('merged_at') or '')[:10]})"
+        )
+
+
+def _render_mc_runs(state: dict) -> None:
+    st.subheader("Recent runs")
+    runs = state.get("recent_runs") or []
+    if not runs:
+        st.caption("(no run dirs found under runs/)")
+        return
+    for r in runs:
+        f0 = r.get("f0_verdict") or "—"
+        f0e = _VERDICT_BADGE.get(f0, "⚪")
+        sb = r.get("structural_blockers_count", 0)
+        sw = r.get("structural_warnings_count", 0)
+        fid = r.get("fidelity_score")
+        skp = "📦" if r.get("has_skp") else "—"
+        with st.container(border=True):
+            cols = st.columns([4, 1, 1, 1, 1])
+            with cols[0]:
+                st.write(f"**{r['run_id']}**")
+                st.caption(r['run_dir'])
+            with cols[1]:
+                st.metric("F0", f"{f0e} {f0}")
+            with cols[2]:
+                st.metric(
+                    "fidelity",
+                    f"{fid:.3f}" if fid is not None else "—",
+                )
+            with cols[3]:
+                st.metric("struct.", f"{sb}/{sw}",
+                          help="blockers / warnings")
+            with cols[4]:
+                st.metric("SKP", skp)
+
+
+def _render_mc_gates(state: dict) -> None:
+    st.subheader("Smoke gates per recent run")
+    runs = state.get("recent_runs") or []
+    if not runs:
+        st.caption("(no run dirs found)")
+        return
+    for r in runs[:5]:
+        gates = gates_summary(Path(r['run_dir']))
+        if not gates["found"]:
+            st.text(f"{r['run_id']}: (no smoke report)")
+            continue
+        verdict = gates["verdict"] or "?"
+        ve = _VERDICT_BADGE.get(verdict, "⚪")
+        with st.expander(
+            f"{ve} {r['run_id']} — overall verdict {verdict}",
+            expanded=False,
+        ):
+            for g in gates["gates"]:
+                gs = (g.get("status") or "").lower()
+                ge = _VERDICT_BADGE.get(gs, "⚪")
+                msg = (g.get("message") or "")[:160]
+                st.text(f"{ge}  {g['name']:<40}  {msg}")
+
+
+def _render_mc_artifacts(limit: int) -> None:
+    st.subheader(f"Recent artifacts (last {limit})")
+    arts = recent_artifacts(REPO_ROOT, limit=limit)
+    if not arts:
+        st.caption("(no artifacts found under runs/ or docs/diagnostics/)")
+        return
+    cols = st.columns(3)
+    for idx, p in enumerate(arts):
+        col = cols[idx % 3]
+        with col:
+            with st.container(border=True):
+                rel = (
+                    str(p.relative_to(REPO_ROOT))
+                    if p.is_relative_to(REPO_ROOT) else str(p)
+                )
+                st.caption(rel)
+                if p.suffix.lower() in (".png", ".svg"):
+                    try:
+                        st.image(str(p), use_container_width=True)
+                    except Exception as e:  # noqa: BLE001
+                        st.code(f"failed to render: {e}")
+                elif p.suffix.lower() == ".skp":
+                    sz = p.stat().st_size
+                    st.write(f"📦 SKP · {sz:,} bytes")
+                try:
+                    mt = p.stat().st_mtime
+                    from datetime import datetime as _dt
+                    st.caption(
+                        _dt.fromtimestamp(mt).strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        )
+                    )
+                except OSError:
+                    pass
+
+
+def _render_mc_blockers(state: dict) -> None:
+    st.subheader("Blockers (parsed from .ai_bridge/TODO_NEXT.md)")
+    rows = state.get("blockers") or []
+    if not rows:
+        st.success("No headings of form `## 🔴/🟡/🟢 Pn — Title` parsed.")
+    red = [r for r in rows if r["color"] == "RED"]
+    yellow = [r for r in rows if r["color"] == "YELLOW"]
+    green = [r for r in rows if r["color"] == "GREEN"]
+    if red:
+        st.markdown("### 🔴 RED")
+        for r in red:
+            st.write(f"**{r['priority']}** — {r['title']}")
+    if yellow:
+        st.markdown("### 🟡 YELLOW")
+        for r in yellow:
+            st.write(f"{r['priority']} — {r['title']}")
+    if green:
+        st.markdown("### 🟢 GREEN")
+        for r in green:
+            st.write(f"{r['priority']} — {r['title']}")
+    st.divider()
+    st.subheader("HANDOFF.md excerpt")
+    excerpt = handoff_excerpt(REPO_ROOT, max_lines=30)
+    if excerpt:
+        st.code(excerpt, language="markdown")
+    else:
+        st.caption("(.ai_bridge/HANDOFF.md not found)")
 
 
 if __name__ == "__main__":

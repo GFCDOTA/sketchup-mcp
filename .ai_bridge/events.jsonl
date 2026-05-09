@@ -1,0 +1,3 @@
+{"schema_version":"events_v1","ts":"2026-05-09T14:28:07Z","type":"mission_control_bootstrapped","actor":"claude","title":"cockpit/project_status.py + tools/log_event.py shipped","branch":"feature/mission-control-cockpit-slice1"}
+{"schema_version":"events_v1","ts":"2026-05-09T14:28:28Z","type":"task_started","actor":"claude","title":"Slice 1 — adicionar aba Mission Control em cockpit/app.py"}
+{"schema_version":"events_v1","ts":"2026-05-09T14:28:28Z","type":"branch_switched","actor":"claude","branch":"feature/mission-control-cockpit-slice1","commit":"20f980e4"}
