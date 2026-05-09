@@ -84,89 +84,104 @@ Each entry:
 - This file refreshed: Slice 2 + Slice 3 entries below are now
   derived directly from ADR-001 § 3 + § 4.
 
-## 🟡 P0 — Cockpit Slice 2: review_overrides.json read/write
+## ✅ DONE — 2026-05-08 mutation-wave (PRs #82–#88)
 
-- **Color:** YELLOW — first mutation surface for the cockpit
-- **Authoritative spec:** `docs/adr/ADR-001-validation-cockpit-mutation-surface.md` § 3
-- **Goal:** the cockpit reads + writes `runs/<run_id>/review_overrides.json`
-  for the active run via Streamlit + filesystem (NO FastAPI yet —
-  see ADR § 5 alternative C).
-- **Touchpoints:**
-  - `cockpit/overrides.py` (NEW) — pure helper:
-    `load_overrides(run_dir, expected_consensus_sha) -> dict`,
-    `save_override(run_dir, override_payload, audit_actor) -> dict`.
-    Hash-validates; appends to audit_trail. No streamlit imports.
-  - `cockpit/app.py` — new "Review" tab: dropdown per opening for
-    re-classify, dropdown per room for re-label, "mark suspect"
-    toggle, "reject" button, master "block SKP export" toggle.
-  - `tests/test_cockpit_overrides.py` — round-trip, audit-trail
-    append-only, sha256-invalidation, schema validation. ≥10 tests.
-  - `docs/validation_cockpit.md` — Slice 2 section.
-- **What Slice 2 does NOT do:** modify consensus, compute amended
-  fidelity, run smoke, block anything. Pipeline still ignores the
-  file.
-- **Acceptance (from ADR § 3 acceptance):** I can open the cockpit,
-  override an opening's kind, close, re-open, see the override
-  persisted, see the audit trail, see `source: manual` annotation
-  on the SVG.
+- **PR #82 — Cycle 12g thumbnail on-demand** (`1f200c5`):
+  `cockpit/thumbnails.py` (282 LOC PIL-direct rasteriser); cache
+  under `runs/<run_id>/_cockpit_cache/`; 19 tests.
+- **PR #83 — Slice 2 cockpit/overrides.py + Review tab**
+  (`dd2a199`): all 7 v1 override types live; 30 tests; Streamlit
+  Review tab persists to `runs/<run_id>/review_overrides.json`.
+- **PR #84 — Slice 3 apply_overrides + gate_f0 + history_view F0
+  read** (`76739b3`): pipeline-side consumer + new `gate_f0` in
+  smoke harness with `--review-mode={off,warn,block}` (default
+  `off` keeps CI byte-equivalent); fidelity engine
+  `apply_overrides=True` mode emits both `global_fidelity` and
+  `global_fidelity_pre_override`; 69 tests.
+- **PR #85 — Cycle 12h SVG `source: manual` annotation + inline
+  override removal** (`d454842`): closes Slice 2's two deferred
+  items; `× remove` button writes append-only `event: delete`
+  audit entries; 6 new tests.
+- **PR #86 — Stage 1.6 investigation + follow-up brief**
+  (`c452bc5`): docs-only audit of orphan branch
+  `feature/smoke-promotes-inspector-v2-gate`; concludes `gate_f0`
+  + proposed `gate_g2` are complementary; brief at
+  `.ai_bridge/pr_bodies/PR_BODY_stage_1_6_followup.md`.
+- **PR #87 — cross-PR mutation integration tests** (`ef977a4`):
+  16 tests exercising Slice 2 → Slice 3 round-trip end-to-end on
+  hand-crafted minimal fixtures; **zero API gaps** between the
+  two slices.
+- **PR #88 — multi-PDF synth corpus** (`dc0aa14`): 3 new
+  topologies (T, +, long-hall) round-tripped at fidelity = 1.0;
+  `ground_truth/synth_{t3,plus4,hall5}/`; 10 new tests. RED →
+  partial-YELLOW substitution: synth coverage broadens, real-PDF
+  coverage stays Felipe-blocked.
+- 7 PRs since ADR-001. develop @ `dc0aa14`. **776 PASS** (+150
+  vs session start).
 
-## 🟡 P1 — Cockpit Slice 3: apply_overrides.py + gate_f0
+## 🟡 P0 — Cycle 5 (Stage 1.6 follow-up): port `gate_g2` consumer
 
-- **Color:** YELLOW — pipeline starts honouring overrides
-- **Authoritative spec:** ADR-001 § 4
-- **Goal:** pipeline reads overrides via thin layer; smoke harness
-  gains gate_f0; cockpit's Pre-SKP Review reads the F0 verdict
-  instead of computing locally.
-- **Touchpoints:**
-  - `tools/apply_overrides.py` (NEW) — CLI: reads consensus +
-    overrides → writes `amended_observed.json`. Pure function plus
-    a thin CLI shell.
-  - `tools/fidelity/compare_generated_to_expected.py` — new optional
-    `apply_overrides: bool = False` param. Default off preserves
-    existing baseline.
-  - `scripts/smoke/smoke_skp_export.py` — new `gate_f0` BEFORE
-    `gate_f`; emits `pre_skp_review_report.json`; honours
-    `--review-mode={off,warn,block}` (default `off` keeps CI green).
-  - `cockpit/history_view.py` — `pre_skp_review()` reads
-    `pre_skp_review_report.json` if present, falls back to in-memory
-    computation otherwise.
-  - Tests: amended-observed schema, fidelity in apply-overrides
-    mode, gate_f0 verdict matrix, --review-mode CLI matrix.
-  - `docs/validation/sketchup_smoke_workflow.md` — gate_f0 added.
-- **What Slice 3 does NOT do:** flip `--review-mode` default to
-  `block` (separate follow-up after one real review case); change
-  any existing fidelity threshold; add UI.
+- **Color:** YELLOW — pure-Python smoke harness extension; no SU
+  spawn (gate is `"deferred"` SKIP until Cycle 6 lands)
+- **Authoritative spec:**
+  `.ai_bridge/pr_bodies/PR_BODY_stage_1_6_followup.md` (ready-to-paste
+  brief) + `docs/diagnostics/2026-05-08_stage_1_6_investigation.md`
+  (full audit)
+- **Goal:** add the 88-LOC harness change + 11 fixture tests from
+  the orphan branch `feature/smoke-promotes-inspector-v2-gate`,
+  with one trivial test relaxation (substring assertion in
+  `test_pipeline_includes_gate_g2` to handle the multi-line tuple
+  now that `gate_f0` lives in the pipeline).
+- **Touchpoints:** `scripts/smoke/smoke_skp_export.py` (gate_g2
+  consumer); `tests/test_smoke_gate_g2.py` (NEW); cherry-pick or
+  fresh-author from the orphan tip `2417a20`.
+- **Validation:** new gate SKIPs cleanly; smoke harness behaviour
+  unchanged in default invocation; `pytest -q` no NEW failures.
+- **What Cycle 5 does NOT do:** spawn SU; integrate
+  `tools/autorun_inspector_plugin.rb`; modify `gate_f`. That's
+  Cycle 6.
 
-## 🟢 P2 — Cycle 12g: on-demand thumbnail rendering
+## 🟡 P1 — Cycle 6 (Stage 1.6 implementation): wire autorun inspector into `gate_f`
 
-- **Color:** GREEN — additive, opt-in, pure renderer extension
-- **Goal:** Cycle 12f's History view shows "no previews discovered"
-  for runs that lack PNG/SVG preview files. Add an on-demand
-  rasterisation that generates a small thumbnail from
-  `consensus_*.json` if no preview exists.
-- **Touchpoints:** `cockpit/history_view.py` (thumbnail-on-demand
-  helper), maybe a small cache under `runs/<run_id>/_cockpit_cache/`.
-- **Risk:** LOW. Cache means it costs nothing on subsequent loads.
+- **Color:** YELLOW — touches SU runtime; deserves its own
+  focused session
+- **Goal:** every successful `gate_f` leaves `inspect_report.json`
+  via `tools/autorun_inspector_plugin.rb`; `gate_g2` stops
+  SKIPping and starts validating it.
+- **Touchpoints:** `scripts/smoke/smoke_skp_export.py` (gate_f
+  extension); `tools/autorun_inspector_plugin.rb` (existing,
+  untouched logic — just hooked in); CI workflow may need a
+  Windows-runner with SU 2026 (TBD).
+- **Risk:** MEDIUM — first SU spawn wired into the smoke harness
+  beyond gate_f's existing SU usage.
+
+## 🟢 P2 — Cycle 7: promote `--inspect-strict` to default in CI
+
+- **Color:** GREEN — additive flag flip after Cycle 6 stabilises
+- **When:** after Cycle 6 runs green for several days on develop.
+- **Risk:** LOW — feature-flag flip; rollback is one revert.
 
 ## 🟡 P3 — Cockpit Phase 3: FastAPI POST + multi-user
 
-- **Color:** YELLOW — DEFERRED until Slice 2 + 3 prove the contract
+- **Color:** YELLOW — DEFERRED until first real review case shows
+  the local-only contract is insufficient
 - **Authoritative spec:** ADR-001 § 2.9 Phase 3 (no detail yet —
   ADR-002 will land when this becomes real)
-- **Why deferred:** ADR § 5 alternative C — premature complexity for
-  a single-user local tool. Streamlit + filesystem JSON is enough
-  through Slice 2. Re-evaluate after the first real review case
-  pushes the limits of the local-only contract.
+- **Why deferred:** ADR § 5 alternative C — premature complexity
+  for a single-user local tool. The Slice 2 + 3 + 12h surface is
+  a complete local-only review loop. Re-evaluate after the first
+  real review case pushes the limits.
 
-## 🔴 P2 — Multi-PDF corpus
+## 🔴 P2 — REAL multi-PDF corpus
 
 - **Color:** RED — needs Felipe to provide 3+ different real
-  planta PDFs. Synthetic round-trip (Cycle 11) covers algo
-  validation; this would cover detector generalisation.
-
-## 🔴 P3 — Stage 1.6 / orphan inspector branch
-
-- **Color:** RED — explicitly on hold per earlier session
-- **Branches affected:** `feature/smoke-promotes-inspector-v2-gate`
-  (orphan, never PR'd).
-- **To unblock:** Felipe needs to lift Stage 1.6 hold.
+  planta PDFs. PR #88 (synth corpus) covers 4 topologies in synth
+  but does NOT cover detector generalisation on real-world PDFs
+  (arc walls, peitoris, soft barriers, scale anchoring,
+  project-specific labels).
+- **What's already covered (synth):** L, T, +, long-hall — 4
+  topologies, all round-tripping at fidelity = 1.0. Algorithmic
+  generalisation surface is now broad enough that algo
+  regressions surface fast.
+- **What's missing:** detector behaviour on real-world drawing
+  conventions. No substitute exists for actual PDFs.

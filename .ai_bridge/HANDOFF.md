@@ -1,4 +1,115 @@
-# Handoff — 2026-05-08 (Cockpit READ-ONLY SLICE feature-complete: 9 PRs merged this session)
+# Handoff — 2026-05-08 (Cockpit MUTATION SURFACE live + Stage 1.6 audit + multi-PDF synth: 8 PRs since ADR-001)
+
+> Most recent session's exit state. Next session reads this FIRST
+> after `CLAUDE.md`. Append-only is fine but the top entry must
+> always be the latest.
+
+## Status — Mutation surface end-to-end live, develop @ `dc0aa14`, queue clean
+
+ADR-001 → Slice 2 → Slice 3 → Cycle 12h closed-out the cockpit's
+**mutation surface**. The cockpit is now a working pre-SKP control
+panel: human can override openings/rooms, block SKP export, and the
+smoke harness's new gate_f0 honours the verdict (default mode `off`
+keeps CI green). Cycle 12g shipped on-demand thumbnails so every
+run in the History view has a visual preview. Multi-PDF synth
+corpus expanded the round-trip surface to 4 topologies (L, T, +,
+long-hall) with fidelity 1.0 each. Stage 1.6 RED was authorized
+and audited — produced a follow-up brief instead of an
+implementation (the SU-runtime work belongs in a fresh focused
+session).
+
+### Merge wall (this session, in order)
+
+| PR | Title | SHA |
+|---|---|---|
+| #81 | docs(adr): ADR-001 — Validation Cockpit Mutation Surface | `4a8eb42` |
+| #82 | feat(cockpit): Cycle 12g — on-demand thumbnail rendering | `1f200c5` |
+| #83 | feat(cockpit): Slice 2 — overrides.py + Review tab | `dd2a199` |
+| #84 | feat(cockpit): Slice 3 — apply_overrides + gate_f0 + history_view F0 read | `76739b3` |
+| #85 | feat(cockpit): Cycle 12h — SVG source: manual annotation + inline override removal | `d454842` |
+| #86 | docs(diagnostic): Stage 1.6 / orphan inspector branch investigation + follow-up brief | `c452bc5` |
+| #87 | test(cockpit): cross-PR Slice 2 → Slice 3 mutation round-trip integration tests | `ef977a4` |
+| #88 | feat(synth): multi-PDF synth corpus — 3 new topologies (T, +, long-hall) | `dc0aa14` |
+
+### Mutation surface — what's live
+
+| Layer | Where | Notes |
+|---|---|---|
+| Schemas | ADR-001 §2.3, §2.4, §2.8 (`review_overrides_v1`, `proposed_actions_v1`, `pre_skp_review_v1`, `amended_observed_v1`) | Locked-in contract |
+| Writer | `cockpit/overrides.py` (526 LOC, 30 tests) + Review tab in `cockpit/app.py` | All 7 v1 override types |
+| SVG annotation | `cockpit/render_overlay.py:render_overlay_svg(..., overrides_view=...)` | Optional kwarg; default byte-equivalent. ` · override` appended to `<title>` tooltips |
+| Inline removal | `cockpit/overrides.py:remove_override()` + `× remove` button in Review tab | `event: delete` audit entry; original `create` entry preserved (append-only invariant) |
+| Reader / apply | `tools/apply_overrides.py` CLI + pure function | `amended_observed_v1` output; preserves `_<field>_original` |
+| Apply-aware fidelity | `tools/fidelity/compare_generated_to_expected.py` `apply_overrides=True` mode | Emits both `global_fidelity` and `global_fidelity_pre_override` per ADR §2.10.5 |
+| Pre-SKP gate | `scripts/smoke/smoke_skp_export.py:gate_f0` + `--review-mode={off,warn,block}` | Default `off` — CI byte-equivalent |
+| Pre-SKP UI | `cockpit/history_view.py:pre_skp_review()` reads `pre_skp_review_report.json` if present, falls back to in-memory 12f computation | Backwards-compatible |
+| Round-trip integration | `tests/test_cockpit_mutation_integration.py` (16 tests) | Slice 2 → Slice 3 composes cleanly; zero API gaps found |
+| Thumbnails on-demand | `cockpit/thumbnails.py` (282 LOC, PIL direct, 19 tests) | Cache under `runs/<run_id>/_cockpit_cache/` (gitignored via root `runs/` rule) |
+
+### Stage 1.6 — investigation outcome (PR #86)
+
+`gate_f0` (extraction-side) and the orphan branch's proposed
+`gate_g2` (post-SKP structural check) are **complementary, not
+redundant** — disjoint failure surfaces. Recommended sequenced
+re-launch:
+1. **Cycle 5** (next): port the `gate_g2` consumer + 11 fixture
+   tests. Pure-Python, no SU spawn. Always SKIPs `"deferred"`
+   until Cycle 6 lands. Brief is ready: `.ai_bridge/pr_bodies/PR_BODY_stage_1_6_followup.md`.
+2. **Cycle 6**: wire `tools/autorun_inspector_plugin.rb` into
+   `gate_f` (the SU-runtime work).
+3. **Cycle 7**: promote `--inspect-strict` to default in CI.
+
+Orphan branch `feature/smoke-promotes-inspector-v2-gate`
+recommendation: KEEP until Cycle 5 merges, then DELETE.
+
+### Multi-PDF synth corpus (PR #88)
+
+3 new topologies all round-tripped at fidelity = 1.0:
+- `synth_t3` — 3-room T (1 wall_gap)
+- `synth_plus4` — 1 central + 3 wings (3 wall_gaps)
+- `synth_hall5` — 5 mixed-type rooms in a row (4 wall_gaps)
+
+Honest scope: **synth coverage**, NOT real-PDF detector
+generalisation. Real-PDF corpus remains 🔴 Felipe-blocked (needs
+real planta PDFs, not synth).
+
+### Validation snapshot
+
+- `pytest -q`: **776 PASS** / 17 FAIL (CLAUDE.md §10 raster
+  baseline, unchanged) / 8 SKIP.
+- Net delta from session start (626 PASS): **+150 tests** across
+  the 8 PRs.
+- ruff: clean on all new code; pre-existing E402 in `cockpit/app.py`
+  (sys.path bootstrap from PR #68) untouched.
+- Smoke harness `--review-mode=off` (default) is byte-equivalent
+  to pre-Slice-3 behaviour.
+
+### Boundary check (CLAUDE.md)
+
+- §1 schema/threshold/SU/exporter untouched ✓
+- §2 invariants intact (cockpit reads-and-writes overrides; detector
+  pipeline still reproducibility-from-PDF blind to overrides per
+  ADR-001 §2.10.8) ✓
+- §3 SketchUp not spawned this session ✓
+- §17 every PR closed cleanly with merge SHA documented ✓
+
+### Next moves (per `TODO_NEXT.md` post-refresh)
+
+1. 🟡 **P0 — Cycle 5 (Stage 1.6 follow-up)**: implement `gate_g2`
+   consumer per the brief at `.ai_bridge/pr_bodies/PR_BODY_stage_1_6_followup.md`.
+2. 🟡 P1 — Cycle 6: wire autorun inspector into `gate_f` (SU
+   runtime; deserves its own session).
+3. 🟢 P2 — Cycle 7: `--inspect-strict` default after Cycle 6
+   stabilises.
+4. 🟡 P3 — Cockpit Phase 3: FastAPI POST + multi-user (still
+   deferred per ADR-001 §2.9 / §5C).
+5. 🔴 — REAL multi-PDF corpus (Felipe must provide actual planta
+   PDFs; synth corpus is now broad enough that algorithmic
+   regressions surface fast).
+
+---
+
+## Previous entry — Handoff — 2026-05-08 (Cockpit READ-ONLY SLICE feature-complete: 9 PRs merged this session)
 
 > Most recent session's exit state. Next session reads this FIRST
 > after `CLAUDE.md`. Append-only is fine but the top entry must
