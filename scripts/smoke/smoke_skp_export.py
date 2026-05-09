@@ -18,6 +18,16 @@ E2. Amend observed    — when review_overrides.json exists, runs
                         cleanly when no overrides file is found, so CI
                         runs are byte-equivalent. Opt-out via
                         --no-apply-overrides.
+E3. Amended fidelity  — when BOTH expected_model AND review_overrides.json
+                        exist, runs the fidelity engine in
+                        apply_overrides=True mode and writes
+                        fidelity_report_amended.json (Slice 5b /
+                        ADR-001 §2.10.5). Emits both global_fidelity
+                        and global_fidelity_pre_override so a review
+                        cannot make the score look better without
+                        leaving evidence. SKIPs cleanly when either
+                        precondition is missing. Opt-out via
+                        --no-amended-fidelity.
 F0. Pre-SKP review    — read fidelity_report + (optional) review_overrides;
                         emit pre_skp_review_report.json (ADR-001 §2.8).
                         Verdict semantics gated by --review-mode={off,warn,block}.
@@ -575,6 +585,191 @@ def gate_e_amend(args: argparse.Namespace,
     return g
 
 
+def gate_e_fidelity_amended(args: argparse.Namespace,
+                              report: SmokeReport) -> GateResult:
+    """Slice 5b — re-compute fidelity on the amended observation.
+
+    Companion to gate_e_amend (Slice 5a). When BOTH an expected
+    model AND review_overrides.json are available for the run,
+    invokes ``tools.fidelity.compare_generated_to_expected.compare``
+    in ``apply_overrides=True`` mode and writes
+    ``fidelity_report_amended.json`` into ``out_dir``. The engine
+    emits BOTH ``global_fidelity`` (post-override) and
+    ``global_fidelity_pre_override`` per ADR-001 §2.10.5 — a
+    review can never make the score look better without leaving
+    evidence.
+
+    Default semantics:
+      - SKIP when no expected_model is found (no ``--expected-model``
+        flag AND auto-discover under ``ground_truth/<plant>/``
+        fails). The common case in CI; preserves byte-equivalent
+        behaviour.
+      - SKIP when no review_overrides.json is found (nothing to
+        amend with — the raw fidelity report from a separate
+        invocation is already the authoritative score).
+      - SKIP on ``--no-amended-fidelity`` flag (opt-out
+        escape hatch for diagnostic runs).
+      - PASS on success; message reports both pre and post fidelity
+        scores so a smoke log shows the human's impact at a glance.
+      - FAIL on fidelity engine exception.
+
+    Slice 5c will then have gate_f0 prefer the amended report over
+    the raw one when both are present.
+    """
+    g = GateResult(
+        name="E3. Amended fidelity (apply_overrides=True)",
+        status="pass", started_at=_utc_now(),
+    )
+    if getattr(args, "no_amended_fidelity", False):
+        g.status = "skip"
+        g.message = "--no-amended-fidelity set"
+        g.finished_at = _utc_now()
+        return g
+
+    consensus_path = Path(report.consensus_path)
+    if not consensus_path.exists():
+        g.status = "skip"
+        g.message = (
+            f"consensus path missing: {_relpath(consensus_path)} "
+            "(gate_b should have failed already)"
+        )
+        g.finished_at = _utc_now()
+        return g
+
+    out_dir = Path(report.out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    # ---- Discover expected_model -----------------------------------
+    expected_path: Path | None = None
+    explicit = getattr(args, "expected_model", None)
+    if explicit is not None:
+        explicit_path = Path(explicit)
+        if explicit_path.exists():
+            expected_path = explicit_path
+    if expected_path is None:
+        # Auto-discover: ground_truth/<consensus_parent_name>/expected_model.json
+        plant_name = consensus_path.parent.name
+        candidate = REPO_ROOT / "ground_truth" / plant_name / "expected_model.json"
+        if candidate.exists():
+            expected_path = candidate
+    if expected_path is None:
+        g.status = "skip"
+        g.message = (
+            "no expected_model found "
+            "(--expected-model not set AND auto-discover at "
+            f"ground_truth/{consensus_path.parent.name}/expected_model.json failed)"
+        )
+        g.finished_at = _utc_now()
+        return g
+
+    # ---- Discover review_overrides.json -----------------------------
+    overrides_path = out_dir / "review_overrides.json"
+    if not overrides_path.exists():
+        sibling = consensus_path.parent / "review_overrides.json"
+        if sibling.exists():
+            overrides_path = sibling
+    if not overrides_path.exists():
+        g.status = "skip"
+        g.message = (
+            "no review_overrides.json found in out_dir or "
+            f"{_relpath(consensus_path.parent)}; nothing to amend "
+            "(raw fidelity report from a separate invocation is "
+            "already authoritative)"
+        )
+        g.finished_at = _utc_now()
+        return g
+
+    try:
+        overrides_doc = json.loads(
+            overrides_path.read_text(encoding="utf-8"),
+        )
+    except (OSError, json.JSONDecodeError) as e:
+        g.status = "fail"
+        g.message = f"failed to load review_overrides.json: {e}"
+        g.finished_at = _utc_now()
+        return g
+
+    try:
+        consensus_doc = json.loads(
+            consensus_path.read_text(encoding="utf-8"),
+        )
+    except (OSError, json.JSONDecodeError) as e:
+        g.status = "fail"
+        g.message = f"failed to load consensus: {e}"
+        g.finished_at = _utc_now()
+        return g
+
+    try:
+        expected_doc = json.loads(
+            expected_path.read_text(encoding="utf-8"),
+        )
+    except (OSError, json.JSONDecodeError) as e:
+        g.status = "fail"
+        g.message = f"failed to load expected_model: {e}"
+        g.finished_at = _utc_now()
+        return g
+
+    # Lazy import — keeps cheap-gate path import-light.
+    try:
+        from tools.fidelity.compare_generated_to_expected import compare
+    except Exception as e:  # noqa: BLE001
+        g.status = "fail"
+        g.message = (
+            f"failed to import fidelity engine: {e}"
+        )
+        g.finished_at = _utc_now()
+        return g
+
+    try:
+        amended_report = compare(
+            observed=consensus_doc,
+            expected=expected_doc,
+            observed_path=consensus_path,
+            expected_path=expected_path,
+            apply_overrides=True,
+            overrides_doc=overrides_doc,
+        )
+    except Exception as e:  # noqa: BLE001
+        g.status = "fail"
+        g.message = (
+            f"compare(apply_overrides=True) raised: "
+            f"{type(e).__name__}: {e}"
+        )
+        g.finished_at = _utc_now()
+        return g
+
+    out_path = out_dir / "fidelity_report_amended.json"
+    try:
+        out_path.write_text(
+            json.dumps(amended_report, indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+    except OSError as e:
+        g.status = "fail"
+        g.message = f"failed to write fidelity_report_amended.json: {e}"
+        g.finished_at = _utc_now()
+        return g
+
+    g.artifacts = [_relpath(out_path)]
+    pre = amended_report.get("global_fidelity_pre_override")
+    post = amended_report.get("global_fidelity")
+    delta = (
+        round(float(post) - float(pre), 4)
+        if isinstance(pre, (int, float)) and isinstance(post, (int, float))
+        else None
+    )
+    n_applied = amended_report.get("overrides_applied_count")
+    delta_str = (
+        f" (Δ={delta:+.4f})" if delta is not None else ""
+    )
+    g.message = (
+        f"global_fidelity={post} pre_override={pre}{delta_str} "
+        f"overrides_applied={n_applied}"
+    )
+    g.finished_at = _utc_now()
+    return g
+
+
 def gate_f0(args: argparse.Namespace, report: SmokeReport) -> GateResult:
     """Pre-SKP review gate (Slice 3 / ADR-001 §2.8).
 
@@ -1121,6 +1316,27 @@ def _build_parser() -> argparse.ArgumentParser:
             "fidelity against the raw detector output."
         ),
     )
+    ap.add_argument(
+        "--expected-model", dest="expected_model", type=Path,
+        default=None,
+        help=(
+            "Optional explicit path to ground_truth/<plant>/expected_model.json. "
+            "When omitted, gate E3 (Slice 5b) auto-discovers at "
+            "ground_truth/<consensus_parent_dir>/expected_model.json. "
+            "Required for amended-fidelity computation; gate E3 SKIPs "
+            "cleanly when no expected model is found."
+        ),
+    )
+    ap.add_argument(
+        "--no-amended-fidelity", dest="no_amended_fidelity",
+        action="store_true",
+        help=(
+            "Opt-out escape hatch: skip gate E3 (Slice 5b) even when "
+            "expected_model + review_overrides are both available. "
+            "Default behaviour is to compute amended fidelity when "
+            "all preconditions are met."
+        ),
+    )
     return ap
 
 
@@ -1138,7 +1354,7 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     pipeline = (gate_a, gate_b, gate_c, gate_d, gate_e,
-                gate_e_amend,
+                gate_e_amend, gate_e_fidelity_amended,
                 gate_f0, gate_f0_pa, gate_f, gate_g, gate_g2)
     for gate in pipeline:
         result = report.add(gate(args, report))
