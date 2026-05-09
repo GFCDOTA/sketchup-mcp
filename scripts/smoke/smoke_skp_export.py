@@ -72,6 +72,19 @@ from pathlib import Path
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+
+# Make ``tools.*`` and ``cockpit.*`` importable when this file is invoked
+# as a script (``python scripts/smoke/smoke_skp_export.py``). Without
+# this, Python only adds the script's directory (``scripts/smoke/``)
+# to sys.path, which breaks the lazy ``from tools.X import Y`` calls
+# inside gate_e_amend / gate_e_fidelity_amended / gate_f0_pa.
+# Mirrors the cockpit/app.py bootstrap pattern (PR #68 / f11e13c).
+# Discovered as a UX gap during the override-aware-flow dogfood
+# session (2026-05-09): the gate would FAIL with
+# ``failed to import tools.apply_overrides: No module named 'tools'``.
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 DEFAULT_CONSENSUS = REPO_ROOT / "runs" / "vector" / "consensus_model.json"
 DEFAULT_SKETCHUP = Path(
     r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
