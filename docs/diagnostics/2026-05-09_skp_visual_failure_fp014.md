@@ -7,6 +7,9 @@
 > **Reportado por:** Felipe ao revisar `model.skp` em SU 2026.
 > **Run que evidencia:** `runs/_milestone_skp_planta74_2026_05_09/`
 > **commit:** `9df2fee` (develop tip post-PR #101)
+> **Validação externa:** GPT-4o (2026-05-09) — confirma diagnóstico,
+> rank de prioridade ajustado para A→C→B. Ver
+> [`_gpt_validation.md`](2026-05-09_skp_visual_failure_fp014_gpt_validation.md).
 
 ## Sintoma
 
@@ -372,33 +375,70 @@ nenhum ADR novo, nenhum schema bump. Pure validation surface.
 SUITE 01=738 e TERRACO TECNICO=189 ambos disparam) — o SKP NÃO
 seria exportado. Que é exatamente o comportamento desejado.
 
-## Menor fix real (proposta classificada A / B / C)
+## Menor fix real — proposta atualizada após validação GPT-4o
 
-### Opção C — gate visual/geométrico antes do SKP (RECOMENDADA)
-**Por quê:** o pedido explícito de Felipe ("não alterar detector").
-Adiciona surface de validação que pega o defeito sem mexer no
-extrator. Implementação ~150 LOC + ~15 testes; reversível trivialmente.
+> **Validação externa GPT-4o (2026-05-09):** ver
+> [`2026-05-09_skp_visual_failure_fp014_gpt_validation.md`](2026-05-09_skp_visual_failure_fp014_gpt_validation.md)
+> para a resposta integral. GPT classifica `rooms_from_seeds` como
+> **root cause primário** e Opção C como **gate de proteção
+> necessário, mas não substituto**.
 
-**Limitação:** não conserta o SKP existente; só impede exports
-defeituosos no futuro. O fix do polygon ainda fica pendente.
+### Sequência recomendada (atualizada)
 
-### Opção A — corrigir `rooms_from_seeds` algorítmico
-**Por quê não:** Felipe disse "não alterar detector". E o fix
-correto (`shapely.polygonize(walls)` para cells fechadas, depois
-matchar seed→cell) é uma re-arquitetura do módulo, não um patch.
+```
+1º — (A)  rooms_from_seeds refactor   ← fix que destrava o SKP
+2º — (C)  gates F0 estruturais         ← proteção em paralelo
+3º — (B)  extract_openings_vector      ← dívida secundária
+```
 
-Mas é o **fix definitivo** quando vier — o método raster trace é
-inadequado por design para gerar polygons consumíveis por SU.
+### Opção A — refatorar `rooms_from_seeds` (ROOT CAUSE)
+**Por quê:** GPT confirma — "o SKP ruim não está falhando primeiro
+por porta/janela. Ele está falhando porque os polígonos dos
+cômodos/pisos estão errados". Mesmo com openings perfeitas, o SKP
+sai errado se polygon vaza.
 
-### Opção B — `room_polygon_override` (ADR-002 + Slice 6a)
-**Por quê não agora:** ADR-002 §2.8 deixa explícito que SKP exporter
-é overrides-blind em v1. Override só fixa fidelity report, não o SKP.
-Pra o override fluir pro SKP, precisa Slice 6e (`amended_consensus.json`),
-deferida no próprio ADR. Sem Slice 6e, o `room_polygon_override`
-não ajuda este caso de uso.
+**Fix correto:** trocar método raster trace + concave-hull por
+`shapely.polygonize(walls)` para obter cells fechadas a partir de
+wall segments. Cada room recebe a cell que contém seu seed_pt.
+Polygon resultante tem 4–20 vértices, perfeitamente colado aos walls.
 
-**Quando é a opção certa:** quando Slice 6e existir + reviewer humano
-quer corrigir caso a caso. Não substitui Opção C — eles coexistem.
+**Impacto:** elimina SUITE 01 com 738 vts; elimina TERRACO TECNICO
+sliver; elimina diagonais "vazando" entre walls não-adjacentes.
+
+**Reversível:** sim — `--use-polygonize` flag mantém legacy raster
+trace como fallback.
+
+### Opção C — gates F0 estruturais (PROTEÇÃO PARALELA)
+**Por quê:** GPT — "mesmo que o algoritmo ainda não esteja perfeito,
+o sistema NÃO PODE deixar sair SKP visivelmente defeituoso". Gate
+deve bloquear: room polygon atravessando parede; floor fora do
+envelope; área absurda; triângulo gigante; room com vértices demais.
+
+**NÃO substitui Opção A** — é gate, não fix. Mas previne regressão
+mesmo após Opção A landar.
+
+**Implementação:** módulo novo `tools/structural_checks.py` (~150 LOC)
+chamado por `gate_f0`. 7 checks definidos na seção
+"Checks mínimos para BLOQUEAR antes do SKP" deste documento.
+
+### Opção B — corrigir `extract_openings_vector` (DÍVIDA SECUNDÁRIA)
+**Por quê é terceiro:** GPT — "o erro que mata o SKP hoje não é
+'janela 20 cm fora' ou 'peitoril perdido' — é 'o cômodo virou um
+polígono errado e o piso vazou'". Openings entram depois que room
+polygons estiverem estáveis e F0 bloquear export ruim.
+
+**Quando atacar:** após Opção A + C landrarem e estabilizarem.
+Foco: detectar peitoris (PEITORIL H=1,10M de 3.82m totalmente
+ausente) + medir vão completo (não fragmento entre wall stubs).
+
+### Por que NÃO `room_polygon_override` (ADR-002) agora
+
+ADR-002 §2.8 deixa explícito que SKP exporter é overrides-blind em
+v1. Override só fixa fidelity report, não o SKP. Para o override
+fluir pro SKP, precisa Slice 6e (`amended_consensus.json`), deferida
+no próprio ADR. Sem Slice 6e, `room_polygon_override` não ajuda
+este caso de uso. Continua queued para quando reviewer humano quiser
+corrigir caso a caso, mas não está no critical path.
 
 ## Critério de aceite (próximo SKP)
 
