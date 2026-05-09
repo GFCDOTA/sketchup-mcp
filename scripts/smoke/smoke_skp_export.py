@@ -15,6 +15,12 @@ E.  Hash + cache      — SHA256 of (consensus + skp_from_consensus.py +
 F0. Pre-SKP review    — read fidelity_report + (optional) review_overrides;
                         emit pre_skp_review_report.json (ADR-001 §2.8).
                         Verdict semantics gated by --review-mode={off,warn,block}.
+F0pa. Proposed actions — opt-in (--emit-proposed-actions). When on,
+                        runs tools.propose_skp_actions against consensus +
+                        (optional) fidelity_report and writes
+                        proposed_actions.json into out_dir for the cockpit
+                        Review tab (ADR-001 §2.6). Default off keeps CI
+                        byte-equivalent.
 F.  Export .skp       — invoke tools.skp_from_consensus (skipped on
                         --skip-skp or cache hit unless --force-skp).
 G.  Validate .skp     — file exists, size > 1 KiB.
@@ -543,6 +549,112 @@ def gate_f0(args: argparse.Namespace, report: SmokeReport) -> GateResult:
     return g
 
 
+def gate_f0_pa(args: argparse.Namespace,
+                report: SmokeReport) -> GateResult:
+    """Cycle 13b — emit ``proposed_actions.json`` for cockpit Slice 4.
+
+    Runs ``tools.propose_skp_actions.propose_actions`` against the
+    smoke harness's consensus + (optional) fidelity_report and
+    writes ``proposed_actions.json`` into ``out_dir`` so the cockpit
+    Review tab can render suggestion chips next to each
+    affected element (per ADR-001 §2.6).
+
+    Skipped by default — opt-in via ``--emit-proposed-actions`` so
+    CI behaviour stays byte-equivalent (mirrors the
+    ``--review-mode=off`` safety pattern from gate_f0).
+
+    PASS on success with a per-action-count message. SKIP on
+    consensus missing (defensive). FAIL on producer exception (so
+    the human notices a regression in the producer).
+    """
+    g = GateResult(
+        name="F0pa. Proposed actions (opt-in)",
+        status="pass", started_at=_utc_now(),
+    )
+    if not getattr(args, "emit_proposed_actions", False):
+        g.status = "skip"
+        g.message = "--emit-proposed-actions not set (default off)"
+        g.finished_at = _utc_now()
+        return g
+
+    consensus_path = Path(report.consensus_path)
+    if not consensus_path.exists():
+        g.status = "skip"
+        g.message = (
+            f"consensus path missing: {_relpath(consensus_path)} "
+            "(gate_b should have failed already)"
+        )
+        g.finished_at = _utc_now()
+        return g
+
+    out_dir = Path(report.out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    # Pick fidelity_report.json the same way gate_f0 does — out_dir
+    # first, then sibling-of-consensus.
+    fidelity_path = out_dir / "fidelity_report.json"
+    if not fidelity_path.exists():
+        sibling = consensus_path.parent / "fidelity_report.json"
+        if sibling.exists():
+            fidelity_path = sibling
+    fidelity_doc: dict | None = None
+    if fidelity_path.exists():
+        try:
+            fidelity_doc = json.loads(
+                fidelity_path.read_text(encoding="utf-8"),
+            )
+        except json.JSONDecodeError:
+            fidelity_doc = None
+
+    try:
+        consensus_doc = json.loads(
+            consensus_path.read_text(encoding="utf-8"),
+        )
+    except (OSError, json.JSONDecodeError) as e:
+        g.status = "fail"
+        g.message = f"failed to load consensus: {e}"
+        g.finished_at = _utc_now()
+        return g
+
+    # Lazy import: keep the smoke harness usable when only the
+    # cheap gates A-E are exercised.
+    try:
+        from tools.propose_skp_actions import (
+            propose_actions,
+            write_proposed_actions,
+        )
+    except Exception as e:  # noqa: BLE001
+        g.status = "fail"
+        g.message = f"failed to import tools.propose_skp_actions: {e}"
+        g.finished_at = _utc_now()
+        return g
+
+    try:
+        doc = propose_actions(
+            consensus=consensus_doc,
+            fidelity_report=fidelity_doc,
+            consensus_sha256=report.consensus_sha256 or None,
+            run_id=consensus_path.parent.name,
+        )
+        out_path = out_dir / "proposed_actions.json"
+        write_proposed_actions(doc, out_path)
+    except Exception as e:  # noqa: BLE001
+        g.status = "fail"
+        g.message = f"propose_actions raised: {type(e).__name__}: {e}"
+        g.finished_at = _utc_now()
+        return g
+
+    g.artifacts = [_relpath(out_path)]
+    n = len(doc.get("actions") or [])
+    g.message = (
+        f"emitted {n} proposed action{'s' if n != 1 else ''} "
+        f"({_relpath(out_path)})"
+        + (" — fidelity_report consumed" if fidelity_doc else "")
+    )
+    g.finished_at = _utc_now()
+    return g
+
+
 def gate_f(args: argparse.Namespace, report: SmokeReport) -> GateResult:
     g = GateResult(name="F. Export .skp", status="pass", started_at=_utc_now())
     if args.skip_skp:
@@ -848,6 +960,17 @@ def _build_parser() -> argparse.ArgumentParser:
                     help="Gate G2 fails the smoke run when "
                          "inspect_report.json has structural blockers "
                          "(default: non-blocking; report-only)")
+    ap.add_argument(
+        "--emit-proposed-actions", dest="emit_proposed_actions",
+        action="store_true",
+        help=(
+            "Opt-in: gate F0pa runs tools.propose_skp_actions and "
+            "writes proposed_actions.json into out_dir for the "
+            "cockpit Review tab to consume (ADR-001 §2.6). "
+            "Default off keeps CI byte-equivalent — mirrors the "
+            "--review-mode=off safety pattern."
+        ),
+    )
     return ap
 
 
@@ -865,7 +988,7 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     pipeline = (gate_a, gate_b, gate_c, gate_d, gate_e,
-                gate_f0, gate_f, gate_g, gate_g2)
+                gate_f0, gate_f0_pa, gate_f, gate_g, gate_g2)
     for gate in pipeline:
         result = report.add(gate(args, report))
         if result.status == "fail":
