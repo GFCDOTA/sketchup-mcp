@@ -12,9 +12,10 @@ shouldn't require a coffee break. The smoke harness gates the
 expensive step behind cheap ones:
 
 ```
-A → B → C → D → E → F0 → F → G → G2 → H
-prep   read  shape preview cache pre-SKP  SU   .skp   inspect reports
-                                  review        check  v2
+A → B → C → D → E → F0 → F0pa → F → G → G2 → H
+prep   read  shape preview cache pre-SKP  proposed   SU   .skp   inspect reports
+                                  review   actions          check  v2
+                                          (opt-in)
 ```
 
 Any FAIL short-circuits to H so a report is always written.
@@ -29,6 +30,7 @@ Any FAIL short-circuits to H so a report is always written.
 | D | Preview PNG | 2–4 s | `tools.render_axon` for top + axon (no SU). |
 | E | Hash + cache | <1 s | Build cache key from consensus + skp source. Compare to last marker. |
 | F0 | Pre-SKP review | <1 s | Reads `fidelity_report.json` + (optional) `review_overrides.json`; emits `pre_skp_review_report.json` (ADR-001 §2.8). Verdict semantics gated by `--review-mode={off,warn,block}`. |
+| F0pa | Proposed actions (opt-in) | <1 s | Opt-in via `--emit-proposed-actions`. When on, runs `tools.propose_skp_actions` against consensus + (optional) fidelity_report and writes `proposed_actions.json` into out_dir for the cockpit Slice 4 Review tab to consume (ADR-001 §2.6). Default off keeps CI byte-equivalent. |
 | F | Export .skp | 5–90 s | `tools.skp_from_consensus` (skipped on `--skip-skp` or cache hit). |
 | G | Validate .skp | <1 s | File exists; size > 1 KiB. |
 | G2 | Inspector v2 (opt-in strict) | <1 s | Reads `inspect_report.json` from out_dir, parses via `tools.skp_inspection_report`. SKIP if report missing (until Cycle 6 wires the autorun plugin into gate F). PASS with `would-block` warning when blockers present in default mode. FAIL on blockers when `--inspect-strict` is passed. |
@@ -61,6 +63,7 @@ python scripts/smoke/smoke_skp_export.py \
 | `--force-skp` | off | Bypass cache hit. Always run F. |
 | `--open` | reserved | Hook for future "leave SU open after save"; currently no-op. |
 | `--review-mode` | off | Pre-SKP review (gate F0) verdict mode. `off`: F0 writes verdict file but never aborts smoke. `warn`: verdict != PASS warns to stderr. `block`: verdict == FAIL aborts the smoke run. (ADR-001 §2.8.) |
+| `--emit-proposed-actions` | off | Opt-in for gate F0pa. When on, runs `tools.propose_skp_actions` and writes `proposed_actions.json` into out_dir for the cockpit Review tab. Default off keeps CI byte-equivalent. (ADR-001 §2.6 / Slice 4.) |
 | `--inspect-strict` | off | Promote gate G2 from report-only to fail-on-blocker. Until Cycle 6 wires the autorun inspector into gate F, G2 SKIPs anyway, so this flag is forward-looking. |
 
 `--skip-skp` and `--force-skp` come from `LL-008` (always offer both).
