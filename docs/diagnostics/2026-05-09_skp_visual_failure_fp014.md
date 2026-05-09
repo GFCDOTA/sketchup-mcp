@@ -11,6 +11,80 @@
 > rank de prioridade ajustado para A→C→B. Ver
 > [`_gpt_validation.md`](2026-05-09_skp_visual_failure_fp014_gpt_validation.md).
 
+---
+
+## TL;DR — conclusão canônica (2026-05-09 pós-validação GPT-4o)
+
+### Stack do diagnóstico
+
+```
+FP-014 repro = Python
+stack        = pypdfium2 + Pillow/PIL + shapely
+Ruby         = só exporter SketchUp (tools/consume_consensus.rb), passthrough
+```
+
+**Implicação importante:** o bug principal **NÃO está no Ruby
+exporter**. O exporter só materializa o que o pipeline Python já
+entregou errado: room polygons / floor shapes vazando. Não mexer
+em Ruby primeiro.
+
+### Conclusão GPT-4o sobre as imagens
+
+1. A interpretação manual (Claude) está mais próxima do PDF que
+   o detector atual.
+2. O detector mede alguns vãos melhor (PV-SALA-TERR 2.88m,
+   PV-SU02-TERR 1.93m), mas perde semântica: peitoris, balcões,
+   janelas e tipos de abertura.
+3. O bloqueio principal para SKP utilizável **NÃO é openings
+   primeiro**.
+4. O bloqueio principal é **`rooms_from_seeds`**: room/floor
+   polygons vazando, atravessando paredes, virando shapes
+   diagonais / triângulos.
+5. F0 também precisa **bloquear SKP visualmente defeituoso** antes
+   do export.
+6. `extract_openings_vector` fica em **terceiro**: importante, mas
+   secundário enquanto os floors/rooms estiverem errados.
+
+### Prioridade FP-014
+
+```
+P0  rooms_from_seeds       — room polygon leakage (root cause)
+P1  F0 visual/geometry gate — bloquear export visualmente defeituoso
+P2  extract_openings_vector — peitoris / balcões / janelas
+```
+
+### Conclusão de engenharia
+
+```
+Não mexer em Ruby primeiro.
+Não mexer em porta/janela primeiro.
+Corrigir/validar room polygons primeiro.
+Adicionar gate F0 para impedir SKP com floors vazando.
+Depois refinar openings.
+```
+
+### Artefato canônico (script reproduzível)
+
+```
+docs/diagnostics/2026-05-09_skp_visual_failure_fp014_repro.py
+```
+
+Em vez de discutir por screenshot solta:
+
+```bash
+.venv/Scripts/python.exe docs/diagnostics/2026-05-09_skp_visual_failure_fp014_repro.py all
+```
+
+Regenera **tudo** (PDF limpo, interpretação manual, overlay do
+detector, zooms, side-by-side, métricas quantitativas).
+
+**Para corrigir a interpretação manual:** editar a constante
+`MY_OPENINGS` no topo do script (linhas ~95–115) e rodar
+`my-interpretation` de novo. Cada entry é
+`(kind, label, cx_pt, cy_pt, width_m, orient)` em coordenadas PDF.
+
+---
+
 ## Sintoma
 
 Ao abrir `model.skp` em SU 2026 ou inspecionar a render top
