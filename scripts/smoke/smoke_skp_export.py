@@ -344,8 +344,9 @@ def _compute_pre_skp_review(
     overrides_doc: dict | None,
     consensus_sha: str,
     using_amended_fidelity: bool = False,
+    structural_report: dict | None = None,
 ) -> dict:
-    """Pure verdict logic per ADR-001 §2.8.
+    """Pure verdict logic per ADR-001 §2.8 + FP-014 gamma gate.
 
     Inputs are the *already-loaded* fidelity report and optional
     overrides document. Returns the dict written to
@@ -359,6 +360,14 @@ def _compute_pre_skp_review(
     intent IS the loop. The pre-override score is recorded so a
     review can never make the score look better without leaving
     evidence (ADR-001 §2.10.5).
+
+    FP-014 gamma gate (2026-05-09): when ``structural_report`` is
+    provided (output of ``tools.structural_checks.evaluate_structural_health``),
+    structural_blockers_count > 0 forces verdict=FAIL regardless of
+    fidelity score. structural_warnings_count > 0 demotes PASS to WARN.
+    Top 10 blockers + top 10 warnings are surfaced into the output
+    dict for cockpit display + audit. This is the FP-014 "gate that
+    impede SKP export ruim" — additive to ADR-001 §2.8 logic.
     """
     reasons: list[str] = []
     fidelity_score: float | None = None
@@ -367,6 +376,17 @@ def _compute_pre_skp_review(
     warnings_count = 0
     active_overrides_count = 0
     block_skp_export = False
+    structural_blockers_count = 0
+    structural_warnings_count = 0
+    has_structural_blocker = False
+    has_structural_warning = False
+    if structural_report is not None:
+        sb = structural_report.get("structural_blockers") or []
+        sw = structural_report.get("structural_warnings") or []
+        structural_blockers_count = len(sb)
+        structural_warnings_count = len(sw)
+        has_structural_blocker = structural_blockers_count > 0
+        has_structural_warning = structural_warnings_count > 0
 
     if fidelity_report is None:
         reasons.append("no_fidelity_report")
@@ -418,7 +438,7 @@ def _compute_pre_skp_review(
                 # but defensive support if it sneaks in.
                 has_human_review_request = True
 
-    # ADR-001 §2.8 verdict logic
+    # ADR-001 §2.8 verdict logic + FP-014 gamma gate
     if fidelity_report is None:
         verdict = "FAIL"
     elif (
@@ -426,6 +446,7 @@ def _compute_pre_skp_review(
         or sha_mismatch
         or (fidelity_score is not None and fidelity_score < PRE_SKP_WARN_FIDELITY)
         or hard_fails_count > 0
+        or has_structural_blocker
     ):
         if fidelity_score is not None and fidelity_score < PRE_SKP_WARN_FIDELITY:
             reasons.append(
@@ -433,12 +454,18 @@ def _compute_pre_skp_review(
             )
         if hard_fails_count > 0:
             reasons.append(f"{hard_fails_count} hard_fail(s)")
+        if has_structural_blocker:
+            reasons.append(
+                f"{structural_blockers_count} structural_blocker(s) "
+                f"(FP-014 gamma gate)"
+            )
         verdict = "FAIL"
     elif (
         (fidelity_score is not None and fidelity_score < PRE_SKP_PASS_FIDELITY)
         or warnings_count > PRE_SKP_PASS_WARNINGS
         or has_high_suspect
         or has_human_review_request
+        or has_structural_warning
     ):
         if fidelity_score is not None and fidelity_score < PRE_SKP_PASS_FIDELITY:
             reasons.append(
@@ -452,6 +479,11 @@ def _compute_pre_skp_review(
             reasons.append("mark_suspect.severity=high present")
         if has_human_review_request:
             reasons.append("request_human_review present")
+        if has_structural_warning:
+            reasons.append(
+                f"{structural_warnings_count} structural_warning(s) "
+                f"(FP-014 gamma gate)"
+            )
         verdict = "WARN"
     else:
         verdict = "PASS"
@@ -479,7 +511,22 @@ def _compute_pre_skp_review(
         "block_skp_export": block_skp_export,
         "recommendation": recommendation,
         "using_amended_fidelity": bool(using_amended_fidelity),
+        # FP-014 gamma gate fields (additive). Always present so a
+        # downstream consumer never hits KeyError; zero/empty when
+        # structural_report wasn't supplied.
+        "structural_blockers_count": structural_blockers_count,
+        "structural_warnings_count": structural_warnings_count,
     }
+    # Surface top 10 of each for quick triage in the cockpit / CI logs.
+    # Full evidence lives in `structural_report.json` written separately
+    # by gate F0.
+    if structural_report is not None:
+        sb_full = structural_report.get("structural_blockers") or []
+        sw_full = structural_report.get("structural_warnings") or []
+        if sb_full:
+            out["structural_blockers"] = sb_full[:10]
+        if sw_full:
+            out["structural_warnings"] = sw_full[:10]
     # Slice 5c — surface the pre-override fidelity score when the
     # caller used the amended report. Mirrors ADR-001 §2.10.5: a
     # review can never make the score look better without leaving
@@ -913,16 +960,80 @@ def gate_f0(args: argparse.Namespace, report: SmokeReport) -> GateResult:
         except json.JSONDecodeError:
             overrides_doc = None
 
+    # FP-014 gamma gate: load consensus + (optional) expected_model and
+    # run structural health checks. Output is additive — pre_skp_review
+    # gets structural_*_count fields + top-10 lists; full evidence to
+    # structural_report.json sibling. On any error, we WARN to stderr
+    # and continue without structural fields (defensive — gamma gate
+    # never crashes the pipeline).
+    structural_report: dict | None = None
+    consensus_doc: dict | None = None
+    consensus_path = Path(report.consensus_path)
+    if consensus_path.exists():
+        try:
+            consensus_doc = json.loads(
+                consensus_path.read_text(encoding="utf-8"),
+            )
+        except (OSError, json.JSONDecodeError) as e:
+            print(
+                f"[smoke][F0] failed to load consensus for structural "
+                f"checks: {e}",
+                file=sys.stderr,
+            )
+    expected_model: dict | None = None
+    expected_path_arg = getattr(args, "expected_model", None)
+    if expected_path_arg:
+        try:
+            expected_model = json.loads(
+                Path(expected_path_arg).read_text(encoding="utf-8"),
+            )
+        except (OSError, json.JSONDecodeError) as e:
+            print(
+                f"[smoke][F0] failed to load expected_model: {e}",
+                file=sys.stderr,
+            )
+    if (
+        consensus_doc is not None
+        and not getattr(args, "no_structural_checks", False)
+    ):
+        try:
+            from tools.structural_checks import (
+                evaluate_structural_health,
+            )
+            structural_report = evaluate_structural_health(
+                consensus_doc,
+                fidelity_report=fidelity_report,
+                expected_model=expected_model,
+            )
+            structural_path = out_dir / "structural_report.json"
+            structural_path.write_text(
+                json.dumps(
+                    structural_report, indent=2, ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+        except Exception as e:  # noqa: BLE001
+            print(
+                f"[smoke][F0] structural_checks failed (continuing "
+                f"without gamma gate): {type(e).__name__}: {e}",
+                file=sys.stderr,
+            )
+            structural_report = None
+
     review = _compute_pre_skp_review(
         fidelity_report, overrides_doc, report.consensus_sha256,
         using_amended_fidelity=using_amended,
+        structural_report=structural_report,
     )
     review_path = out_dir / "pre_skp_review_report.json"
     review_path.write_text(
         json.dumps(review, indent=2, ensure_ascii=False),
         encoding="utf-8",
     )
-    g.artifacts = [_relpath(review_path)]
+    artifacts = [_relpath(review_path)]
+    if structural_report is not None:
+        artifacts.append(_relpath(out_dir / "structural_report.json"))
+    g.artifacts = artifacts
     args._pre_skp_verdict = review["verdict"]
     args._pre_skp_review = review
 
@@ -1409,6 +1520,21 @@ def _build_parser() -> argparse.ArgumentParser:
             "the file is present, and to SKIP cleanly when it isn't. "
             "Use this flag for diagnostic runs that want to see "
             "fidelity against the raw detector output."
+        ),
+    )
+    ap.add_argument(
+        "--no-structural-checks", dest="no_structural_checks",
+        action="store_true",
+        help=(
+            "Opt-out escape hatch: skip the FP-014 gamma gate "
+            "structural checks (tools.structural_checks) inside "
+            "gate F0. Default behaviour is to ALWAYS run structural "
+            "checks; their findings flow into pre_skp_review_v1 as "
+            "structural_blockers/structural_warnings. Use this flag "
+            "ONLY for legacy/synthetic fixtures whose minimal "
+            "wall topology trips C9 envelope_decomposition or C7 "
+            "short_wall_fragments cosmetic warnings unrelated to "
+            "FP-014. Production runs should NOT pass this flag."
         ),
     )
     ap.add_argument(

@@ -1,6 +1,12 @@
 # FP-014 — SKP room polygon leakage / invalid floor surfaces
 
-> **Status:** OPEN — bloqueia entrega de SKP utilizável.
+> **Status:** **GAMMA GATE LIVE** — `tools/structural_checks.py` +
+> `gate_f0` integration shipped. F0 agora reporta `verdict=FAIL`
+> com `12 structural_blocker(s)` em planta_74 + `recommendation:
+> "do not export SKP"`. A geometria ainda está errada (P0 Opção α
+> = `build_vector_consensus` refactor pendente) mas o sistema **não
+> diz mais "safe to export"** para SKPs estruturalmente defeituosos.
+> **OPEN** — bloqueia entrega de SKP utilizável (geometricamente).
 > **Severidade:** Alta — F0 reportou PASS mas o SKP é visualmente
 > inutilizável.
 > **Aberto em:** 2026-05-09
@@ -59,8 +65,24 @@ P2  extract_openings_vector — peitoris / balcões / janelas
 Não mexer em Ruby primeiro.
 Não mexer em porta/janela primeiro.
 Corrigir/validar room polygons primeiro.
-Adicionar gate F0 para impedir SKP com floors vazando.
+Adicionar gate F0 para impedir SKP com floors vazando.   ← γ DONE
 Depois refinar openings.
+```
+
+### Status implementação γ (2026-05-09)
+
+```
+✅ tools/structural_checks.py        — 11 checks (C1–C11)
+✅ gate_f0 integration                — additive em pre_skp_review_v1
+✅ structural_report.json sibling     — full evidence
+✅ --no-structural-checks opt-out     — preserva legacy fixtures
+✅ tests/test_structural_checks.py    — 20 PASS
+✅ planta_74 F0 verdict = FAIL        — 12 blockers, "do not export"
+✅ --review-mode=block aborta smoke   — quando structural_blockers > 0
+
+Próximo (não nessa PR):
+🟡 P0 Opção α — refactor build_vector_consensus (root cause)
+🟡 Slice 6 — room_polygon_override (ADR-002, depois Opção α)
 ```
 
 ### Artefato canônico (script reproduzível)
