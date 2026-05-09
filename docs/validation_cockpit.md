@@ -590,6 +590,67 @@ callers depending only on the legacy keys keep working unchanged.
 - Did NOT modify `cockpit/app.py` or `cockpit/overrides.py`
   (Slice 2's territory).
 
+## Slice 4 — proposed_actions chips on the Review tab (2026-05-09)
+
+Cycle 13 shipped the producer (`tools/propose_skp_actions.py`).
+Slice 4 ships the consumer: the cockpit Review tab now **reads**
+`runs/<run_id>/proposed_actions.json` and renders each entry as a
+chip next to the affected opening or room. One click promotes a
+chip into a real `review_overrides.json` entry, with the audit
+trail recording the source link.
+
+### Promotion mapping
+
+| Proposed action type | → Override type | Notes |
+|---|---|---|
+| `classify_opening` | `opening_kind_override` | `payload.suggested_kind` → `new_kind_v5` |
+| `mark_low_confidence` | `mark_suspect` | severity = `"low"`, tag = `"low_confidence"` |
+| `request_human_review` (opening) | `mark_suspect` | severity = `"medium"`, tag = first reason_code |
+| `request_human_review` (room) | `mark_suspect` | severity = `"medium"`, tag = first reason_code |
+| (others — `expand_room_polygon`, `shrink_room_polygon`, `relink_opening_rooms`) | (skipped) | The producer's v1 doesn't emit these; Slice 4 returns `None` from the promoter so future producer versions can ship without breaking the cockpit |
+
+### Audit trail link
+
+Each chip-promoted override gets a
+`source_proposed_action_id: "<the action's id>"` field stamped on
+its `audit_trail` `create` entry (per ADR-001 §2.7). The override
+record itself is unchanged — the link lives in the history layer
+where it belongs.
+
+This means a chip can detect "I've already been applied" and grey
+itself out. The cockpit calls
+`cockpit.proposed_actions.action_already_applied(action,
+audit_trail)` which checks for the source-link presence.
+
+### Stale-binding handling
+
+`proposed_actions.json` carries the `consensus_sha256` it was
+generated against. When that doesn't match the live consensus, the
+chips render with a STALE banner instead of being silently hidden
+or invalidated — the human can still apply them, but knows the
+suggestions are out of date.
+
+### What this PR did NOT change
+
+- No schema change to `proposed_actions.json` or
+  `review_overrides.json`. The new
+  `audit_trail.create.source_proposed_action_id` field is additive
+  (omitted when the override wasn't promoted from a chip).
+- No change to the producer (`tools/propose_skp_actions.py`).
+- No change to `tools/apply_overrides.py` — apply layer still
+  consumes only `review_overrides.json`.
+- No change to detector / fidelity engine / smoke harness / Ruby
+  exporter / SU spawn path.
+
+### Boundary
+
+- `cockpit/proposed_actions.py` (NEW) — pure-Python loader +
+  promotion mapping + apply-convenience wrapper. No streamlit
+  imports.
+- Promotion is **explicit** — the cockpit never auto-applies
+  proposed_actions. Each chip click is a one-button human gesture
+  that lands as an audit-tracked override.
+
 ## Cycle 13 — `proposed_actions.json` producer (2026-05-09)
 
 ADR-001 §2.6 locked the `proposed_actions_v1` schema. Slice 3's

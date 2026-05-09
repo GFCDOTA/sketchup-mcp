@@ -52,6 +52,12 @@ from cockpit.overrides import (
     save_override,
     set_block_skp_export,
 )
+from cockpit.proposed_actions import (
+    action_already_applied,
+    actions_for_target,
+    apply_proposed_action,
+    load_proposed_actions,
+)
 from cockpit.render_overlay import (
     PT_TO_M_DEFAULT,
     OverlayToggles,
@@ -890,6 +896,38 @@ def _render_review_panel(consensus: dict,
             except Exception as e:  # noqa: BLE001
                 st.error(f"set_block_skp_export failed: {e}")
 
+    # ---- Slice 4 — proposed_actions chips ---------------------------
+    # Loaded once per render so each row helper reads from the same
+    # snapshot. Audit trail is the existing on-disk one (post any
+    # writes from this render's earlier interactions).
+    proposed_doc = load_proposed_actions(
+        run_dir,
+        expected_consensus_sha=data.get("consensus_sha256"),
+    )
+    proposed_actions_list = proposed_doc.get("actions") or []
+    audit_trail = data.get("audit_trail") or []
+    pa_load_error = proposed_doc.get("_load_error")
+    pa_sha_match = proposed_doc.get("_consensus_sha256_match", True)
+    if pa_load_error:
+        st.warning(
+            f"`proposed_actions.json` failed to parse: {pa_load_error}. "
+            "Suggestion chips disabled."
+        )
+    elif proposed_actions_list and pa_sha_match is False:
+        st.warning(
+            "`proposed_actions.json` was generated against a different "
+            "consensus_sha256. Chips are still rendered but flagged as "
+            "STALE — re-run `python -m tools.propose_skp_actions "
+            f"--run-dir {run_dir.name}` to refresh."
+        )
+    elif proposed_actions_list:
+        st.caption(
+            f"📎 {len(proposed_actions_list)} agent suggestion(s) loaded "
+            "from `proposed_actions.json`. Chips appear inline next to "
+            "each affected opening / room. Click `Apply suggestion` to "
+            "promote a chip into a real override (audit-tracked)."
+        )
+
     # ---- Per-opening rows -------------------------------------------
     st.divider()
     st.markdown("### Per-opening review")
@@ -906,6 +944,8 @@ def _render_review_panel(consensus: dict,
             _render_opening_review_row(
                 op=op, run_dir=run_dir, consensus_path=consensus_path,
                 consensus=consensus, overrides=overrides,
+                proposed_actions=proposed_actions_list,
+                audit_trail=audit_trail,
             )
 
     # ---- Per-room rows ----------------------------------------------
@@ -924,6 +964,8 @@ def _render_review_panel(consensus: dict,
                 room=r, run_dir=run_dir, consensus_path=consensus_path,
                 consensus=consensus, overrides=overrides,
                 pt_to_m=pt_to_m,
+                proposed_actions=proposed_actions_list,
+                audit_trail=audit_trail,
             )
 
     # ---- Audit trail (bottom) ----------------------------------------
@@ -1026,11 +1068,16 @@ def _render_opening_review_row(*,
                                 run_dir: Path,
                                 consensus_path: Path,
                                 consensus: dict,
-                                overrides: list[dict]) -> None:
+                                overrides: list[dict],
+                                proposed_actions: list[dict] | None = None,
+                                audit_trail: list[dict] | None = None) -> None:
     """One opening row in the Review tab.
 
     Layout: id+kind on the left; kind dropdown + suspect radio +
-    reject/approve toggles on the right.
+    reject/approve toggles on the right. Slice 4 (Cycle 14): when
+    ``proposed_actions`` is non-empty and contains entries targeting
+    this opening, suggestion chips render below the controls with a
+    one-click `Apply suggestion` button.
     """
     eid = op.get("id") or "?"
     kind = op.get("kind_v5") or op.get("kind") or "?"
@@ -1084,6 +1131,15 @@ def _render_opening_review_row(*,
                         do_approve=bool(do_approve),
                     )
 
+        _render_proposed_action_chips(
+            target_kind="opening", target_id=eid,
+            proposed_actions=proposed_actions,
+            audit_trail=audit_trail,
+            run_dir=run_dir,
+            consensus_path=consensus_path,
+            consensus=consensus,
+        )
+
 
 def _render_room_review_row(*,
                              room: dict,
@@ -1091,8 +1147,14 @@ def _render_room_review_row(*,
                              consensus_path: Path,
                              consensus: dict,
                              overrides: list[dict],
-                             pt_to_m: float) -> None:
-    """One room row in the Review tab."""
+                             pt_to_m: float,
+                             proposed_actions: list[dict] | None = None,
+                             audit_trail: list[dict] | None = None) -> None:
+    """One room row in the Review tab.
+
+    Slice 4 (Cycle 14): proposed_actions chips render below the
+    controls, same shape as the opening helper.
+    """
     eid = room.get("id") or "?"
     name = room.get("name") or "?"
     poly = room.get("polygon_pts") or []
@@ -1147,6 +1209,107 @@ def _render_room_review_row(*,
                         do_reject=bool(do_reject),
                         do_approve=bool(do_approve),
                     )
+
+        _render_proposed_action_chips(
+            target_kind="room", target_id=eid,
+            proposed_actions=proposed_actions,
+            audit_trail=audit_trail,
+            run_dir=run_dir,
+            consensus_path=consensus_path,
+            consensus=consensus,
+        )
+
+
+def _render_proposed_action_chips(*,
+                                    target_kind: str,
+                                    target_id: str,
+                                    proposed_actions: list[dict] | None,
+                                    audit_trail: list[dict] | None,
+                                    run_dir: Path,
+                                    consensus_path: Path,
+                                    consensus: dict) -> None:
+    """Slice 4 — render proposed_actions as `Apply suggestion` chips.
+
+    No-op when no proposals target this element. Already-applied
+    proposals (audit_trail has a `source_proposed_action_id` link)
+    render greyed out as "✓ applied".
+    """
+    if not proposed_actions:
+        return
+    matches = actions_for_target(
+        proposed_actions, target_kind, str(target_id),
+    )
+    if not matches:
+        return
+    audit = audit_trail or []
+    st.caption("📎 agent suggestions")
+    for action in matches:
+        applied = action_already_applied(action, audit)
+        a_type = action.get("type") or "?"
+        a_id = action.get("id") or "?"
+        payload = action.get("payload") or {}
+        rationale = (action.get("rationale") or "")[:160]
+        # Build a one-line chip summary
+        if a_type == "classify_opening":
+            chip_summary = (
+                f"`classify_opening` → {payload.get('suggested_kind', '?')}"
+            )
+        elif a_type == "mark_low_confidence":
+            chip_summary = (
+                f"`mark_low_confidence` "
+                f"(conf={payload.get('current_confidence', '?')})"
+            )
+        elif a_type == "request_human_review":
+            codes = payload.get("reason_codes") or []
+            chip_summary = (
+                "`request_human_review` "
+                f"({', '.join(str(c) for c in codes) or 'no codes'})"
+            )
+        else:
+            chip_summary = f"`{a_type}` (no Slice 4 mapping)"
+        c1, c2 = st.columns([5, 2])
+        with c1:
+            if applied:
+                st.markdown(
+                    f"~~{chip_summary}~~ ✓ applied · "
+                    f"<span style='opacity:0.6'>{rationale}</span>",
+                    unsafe_allow_html=True,
+                )
+            else:
+                st.markdown(
+                    f"{chip_summary} · "
+                    f"<span style='opacity:0.7'>{rationale}</span>",
+                    unsafe_allow_html=True,
+                )
+        with c2:
+            if applied:
+                st.button(
+                    "applied",
+                    key=f"chip_apply_{target_kind}_{target_id}_{a_id}",
+                    disabled=True,
+                )
+            else:
+                if st.button(
+                    "Apply suggestion",
+                    key=f"chip_apply_{target_kind}_{target_id}_{a_id}",
+                ):
+                    try:
+                        apply_proposed_action(
+                            run_dir=run_dir,
+                            action=action,
+                            audit_actor="human",
+                            consensus_path=consensus_path,
+                            consensus=consensus,
+                        )
+                        st.success(
+                            f"Promoted suggestion `{a_id}` → override. "
+                            "Reload the tab to see the updated audit "
+                            "trail."
+                        )
+                    except ValueError as e:
+                        st.error(f"apply_proposed_action failed: {e}")
+                    except Exception as e:  # noqa: BLE001
+                        st.error(f"unexpected error: {e}")
 
 
 def _apply_element_overrides(*,
