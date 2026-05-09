@@ -101,24 +101,37 @@ def render_pdf_clean(out: Path | None = None) -> Path:
     return out
 
 
-# Claude visual interpretation of openings — coords approximated by visual
-# inspection of the PDF. Format: (kind, label, cx_pt, cy_pt, width_m, orient)
+# Claude visual interpretation of openings — refined v2 (2026-05-09)
+# after GPT-4o validation correction. See _gpt_validation.md.
+# Format: (kind, label, cx_pt, cy_pt, width_m, orient)
+#
+# Changes from v1:
+# - REMOVED J-LAVABO 0.60m (GPT: "shaft/elemento técnico, não janela")
+# - REMOVED J-SU01-TOP 1.40m (GPT: "medida pertence ao banho 01 lateral")
+# - PV-SALA-TERR width 4.20m -> 2.88m (GPT: 4.20 era cota do ambiente,
+#   não do vão; detector 2.88m mais correto)
+# - PV-SU02-TERR width 3.20m -> 1.93m (GPT: idem, detector 1.93m correto)
+# - J-BAN01 0.40m -> 0.85m (GPT: subestimada, era abertura lateral
+#   mais perceptível)
+# - ADDED J-SU01-BOT (abertura horizontal SUITE 01 inferior, GPT F1)
+# - RENAMED P-BAN02-SU01 -> P-CIRC-SU01 (GPT: confusão de pareamento;
+#   é porta da circulação para SUITE 01, não direto banho02-suite01)
+# - RENAMED P-BAN02-SU02 -> P-BAN02-ENT (GPT idem)
 MY_OPENINGS: list[tuple[str, str, float, float, float, str]] = [
     # ---- TOP REGION (y > 540) ----
     ("door",     "P-COZ-SALA",    155, 685, 0.85, "h"),
     ("door",     "P-LAVABO",      260, 660, 0.85, "v"),
     ("door",     "P-SUITE01",     335, 627, 0.90, "v"),
-    ("door",     "P-BAN02-SU01",  413, 587, 1.20, "v"),
+    ("door",     "P-CIRC-SU01",   413, 587, 1.20, "v"),
     ("door",     "P-SU01-BAN01",  525, 525, 0.85, "v"),
-    ("window",   "J-LAVABO",      290, 706, 0.60, "h"),
-    ("window",   "J-SU01-TOP",    400, 706, 1.40, "h"),
-    ("window",   "J-BAN01",       560, 530, 0.40, "v"),
+    ("window",   "J-BAN01",       560, 540, 0.85, "v"),
     # ---- BOT REGION (y < 540) ----
     ("door",     "P-AS",          110, 535, 0.85, "v"),
     ("door",     "P-SUITE02",     370, 484, 1.20, "h"),
-    ("door",     "P-BAN02-SU02",  430, 520, 0.85, "h"),
-    ("balcony",  "PV-SALA-TERR",  175, 511, 4.20, "h"),
-    ("balcony",  "PV-SU02-TERR",  295, 457, 3.20, "h"),
+    ("door",     "P-BAN02-ENT",   430, 520, 0.85, "h"),
+    ("balcony",  "PV-SALA-TERR",  175, 511, 2.88, "h"),
+    ("balcony",  "PV-SU02-TERR",  295, 457, 1.93, "h"),
+    ("window",   "J-SU01-BOT",    470, 555, 1.40, "h"),
     ("peitoril", "PEIT-TERRSOC",  140, 396, 3.82, "h"),
     ("peitoril", "PEIT-TERRTEC",  273, 405, 1.20, "h"),
     ("window",   "J-AS-EXT",       51, 480, 1.77, "v"),
