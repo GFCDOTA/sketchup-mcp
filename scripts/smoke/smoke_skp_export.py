@@ -18,6 +18,14 @@ F0. Pre-SKP review    — read fidelity_report + (optional) review_overrides;
 F.  Export .skp       — invoke tools.skp_from_consensus (skipped on
                         --skip-skp or cache hit unless --force-skp).
 G.  Validate .skp     — file exists, size > 1 KiB.
+G2. Inspector v2      — read inspect_report.json from out_dir, parse via
+                        tools.skp_inspection_report, report InspectionReport
+                        verdict (Stage 1.6 Cycle 5). SKIP on --skip-skp /
+                        cache hit / no inspect_report.json. PASS in default
+                        with would-block warning; FAIL on blockers when
+                        --inspect-strict is passed. Cycle 6 will wire the
+                        autorun plugin into gate F so the SKIP path becomes
+                        the exception rather than the rule.
 H.  Reports           — write sketchup_smoke_report.{json,md}; refresh cache.
 
 Any FAIL gate short-circuits to H (so reports are always written).
@@ -656,6 +664,87 @@ def gate_g(args: argparse.Namespace, report: SmokeReport) -> GateResult:
     return g
 
 
+def gate_g2(args: argparse.Namespace, report: SmokeReport) -> GateResult:
+    """Gate G2 — Inspector v2 structural check (Stage 1.6 Cycle 5).
+
+    Reads an existing ``inspect_report.json`` from the out_dir, parses it
+    with :mod:`tools.skp_inspection_report`, and reports the
+    ``InspectionReport.is_clean`` verdict. Optionally **fails** the
+    smoke run when ``--inspect-strict`` is passed and any structural
+    blocker is present (default_faces > 0 / overlaps > 0 / components
+    > 0 / bounds out of tol / null sha / non-1.0 schema).
+
+    Skipped when:
+      - ``--skip-skp`` (no SKP, no inspector)
+      - cache hit and not ``--force-skp`` (last inspector run still valid)
+      - no ``inspect_report.json`` next to the SKP (the autorun
+        inspector plugin has not yet fired for this run; smoke does
+        not launch SU twice — Cycle 6 wires the producer)
+
+    This gate NEVER launches SketchUp itself; it only consumes a
+    report produced upstream.
+    """
+    g = GateResult(name="G2. Inspector v2 (strict={})".format(
+        bool(getattr(args, "inspect_strict", False))),
+        status="pass", started_at=_utc_now())
+    if args.skip_skp:
+        g.status = "skip"
+        g.message = "--skip-skp"
+        g.finished_at = _utc_now()
+        return g
+    if report.cache_hit and not args.force_skp:
+        g.status = "skip"
+        g.message = "cache hit; previous inspect_report.json not re-validated"
+        g.finished_at = _utc_now()
+        return g
+    out_dir = Path(report.out_dir)
+    inspect_path = out_dir / "inspect_report.json"
+    if not inspect_path.exists():
+        g.status = "skip"
+        g.message = (
+            "no inspect_report.json in out_dir — autorun inspector "
+            "plugin did not fire for this smoke run (deferred)"
+        )
+        g.finished_at = _utc_now()
+        return g
+    # Lazy import: keep smoke harness usable even when only the
+    # cheap gates A-E are exercised.
+    try:
+        from tools.skp_inspection_report import InspectionReport
+    except Exception as e:
+        g.status = "fail"
+        g.message = f"failed to import skp_inspection_report: {e}"
+        g.finished_at = _utc_now()
+        return g
+    try:
+        ir = InspectionReport.from_path(inspect_path)
+    except Exception as e:
+        g.status = "fail"
+        g.message = f"failed to parse inspect_report.json: {e}"
+        g.finished_at = _utc_now()
+        return g
+    blockers = ir.strict_blockers()
+    g.artifacts = [_relpath(inspect_path)]
+    if not blockers:
+        g.message = (
+            f"clean (schema={ir.schema_version}, "
+            f"materials={ir.materials_count}, "
+            f"overlaps={ir.wall_overlaps_count}, "
+            f"defaults={ir.default_faces_count})"
+        )
+    elif getattr(args, "inspect_strict", False):
+        g.status = "fail"
+        g.message = "strict blockers fired: " + "; ".join(blockers[:5])
+    else:
+        g.status = "pass"
+        g.message = (
+            "non-strict; would-block: "
+            + "; ".join(blockers[:3])
+        )
+    g.finished_at = _utc_now()
+    return g
+
+
 def gate_h(args: argparse.Namespace, report: SmokeReport) -> GateResult:
     g = GateResult(name="H. Reports", status="pass", started_at=_utc_now())
     out_dir = Path(report.out_dir)
@@ -755,6 +844,10 @@ def _build_parser() -> argparse.ArgumentParser:
             "Default 'off' preserves byte-equivalent CI behaviour."
         ),
     )
+    ap.add_argument("--inspect-strict", action="store_true",
+                    help="Gate G2 fails the smoke run when "
+                         "inspect_report.json has structural blockers "
+                         "(default: non-blocking; report-only)")
     return ap
 
 
@@ -772,7 +865,7 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     pipeline = (gate_a, gate_b, gate_c, gate_d, gate_e,
-                gate_f0, gate_f, gate_g)
+                gate_f0, gate_f, gate_g, gate_g2)
     for gate in pipeline:
         result = report.add(gate(args, report))
         if result.status == "fail":
