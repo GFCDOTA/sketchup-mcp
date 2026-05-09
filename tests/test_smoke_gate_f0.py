@@ -91,6 +91,13 @@ def _override(otype: str, target_kind: str, target_id: str,
 def _make_args(smoke, **overrides):
     parser = smoke._build_parser()
     args = parser.parse_args([])
+    # Tests in this file pre-date the FP-014 gamma gate; their fixtures
+    # do not write a consensus.json so structural_checks would no-op
+    # anyway, but defaulting the flag ON keeps the verdict logic
+    # identical to pre-gamma behaviour for any test that does pass a
+    # fixture with a real consensus.
+    if "no_structural_checks" not in overrides:
+        overrides["no_structural_checks"] = True
     for k, v in overrides.items():
         setattr(args, k, v)
     return args
