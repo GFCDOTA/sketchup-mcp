@@ -12,6 +12,12 @@ C.  JSON structural   — walls/rooms/openings shape sanity-checks.
 D.  Preview PNG       — call tools.render_axon for top + axon (no SU).
 E.  Hash + cache      — SHA256 of (consensus + skp_from_consensus.py +
                         consume_consensus.rb) compared to a per-run cache marker.
+E2. Amend observed    — when review_overrides.json exists, runs
+                        tools.apply_overrides → writes amended_observed.json
+                        into out_dir (Slice 5a / ADR-001 §2.10.4). SKIPs
+                        cleanly when no overrides file is found, so CI
+                        runs are byte-equivalent. Opt-out via
+                        --no-apply-overrides.
 F0. Pre-SKP review    — read fidelity_report + (optional) review_overrides;
                         emit pre_skp_review_report.json (ADR-001 §2.8).
                         Verdict semantics gated by --review-mode={off,warn,block}.
@@ -435,6 +441,138 @@ def _compute_pre_skp_review(
         "block_skp_export": block_skp_export,
         "recommendation": recommendation,
     }
+
+
+def gate_e_amend(args: argparse.Namespace,
+                  report: SmokeReport) -> GateResult:
+    """Slice 5a — apply review_overrides → write amended_observed.json.
+
+    When ``runs/<consensus_dir>/review_overrides.json`` (or the
+    out_dir copy) exists, runs ``tools.apply_overrides.apply_overrides``
+    against the source consensus and writes ``amended_observed.json``
+    into ``out_dir``. Slice 5b/5c will then re-compute fidelity on
+    the amended observation and let gate F0 prefer the amended report.
+
+    Default semantics:
+      - SKIP when no ``review_overrides.json`` is found (the common
+        case in CI; preserves byte-equivalent behaviour)
+      - SKIP when ``--no-apply-overrides`` is passed (opt-out
+        escape hatch)
+      - PASS when overrides exist + amended_observed.json was
+        written; message reports the apply-count + dropped-count
+      - FAIL on apply layer exception
+
+    The gate is intentionally idempotent: writing
+    ``amended_observed.json`` for the same inputs produces a
+    byte-identical file (apply_overrides is a pure function).
+    """
+    g = GateResult(
+        name="E2. Amend observed (apply overrides)",
+        status="pass", started_at=_utc_now(),
+    )
+    if getattr(args, "no_apply_overrides", False):
+        g.status = "skip"
+        g.message = "--no-apply-overrides set"
+        g.finished_at = _utc_now()
+        return g
+
+    consensus_path = Path(report.consensus_path)
+    if not consensus_path.exists():
+        g.status = "skip"
+        g.message = (
+            f"consensus path missing: {_relpath(consensus_path)} "
+            "(gate_b should have failed already)"
+        )
+        g.finished_at = _utc_now()
+        return g
+
+    out_dir = Path(report.out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    # Pick review_overrides.json the same way gate_f0 does — out_dir
+    # first, then sibling-of-consensus.
+    overrides_path = out_dir / "review_overrides.json"
+    if not overrides_path.exists():
+        sibling = consensus_path.parent / "review_overrides.json"
+        if sibling.exists():
+            overrides_path = sibling
+    if not overrides_path.exists():
+        g.status = "skip"
+        g.message = (
+            "no review_overrides.json found in out_dir or "
+            f"{_relpath(consensus_path.parent)}; nothing to amend"
+        )
+        g.finished_at = _utc_now()
+        return g
+
+    try:
+        overrides_doc = json.loads(
+            overrides_path.read_text(encoding="utf-8"),
+        )
+    except (OSError, json.JSONDecodeError) as e:
+        g.status = "fail"
+        g.message = f"failed to load review_overrides.json: {e}"
+        g.finished_at = _utc_now()
+        return g
+
+    try:
+        consensus_doc = json.loads(
+            consensus_path.read_text(encoding="utf-8"),
+        )
+    except (OSError, json.JSONDecodeError) as e:
+        g.status = "fail"
+        g.message = f"failed to load consensus: {e}"
+        g.finished_at = _utc_now()
+        return g
+
+    # Lazy import — keeps the cheap-gate path import-light.
+    try:
+        from tools.apply_overrides import apply_overrides
+    except Exception as e:  # noqa: BLE001
+        g.status = "fail"
+        g.message = f"failed to import tools.apply_overrides: {e}"
+        g.finished_at = _utc_now()
+        return g
+
+    try:
+        amended = apply_overrides(
+            consensus=consensus_doc,
+            overrides_doc=overrides_doc,
+            expected_sha=report.consensus_sha256 or None,
+        )
+    except Exception as e:  # noqa: BLE001
+        g.status = "fail"
+        g.message = (
+            f"apply_overrides raised: {type(e).__name__}: {e}"
+        )
+        g.finished_at = _utc_now()
+        return g
+
+    out_path = out_dir / "amended_observed.json"
+    try:
+        out_path.write_text(
+            json.dumps(amended, indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+    except OSError as e:
+        g.status = "fail"
+        g.message = f"failed to write amended_observed.json: {e}"
+        g.finished_at = _utc_now()
+        return g
+
+    meta = amended.get("_overrides_metadata") or {}
+    applied = meta.get("overrides_applied_count", 0)
+    dropped = meta.get("overrides_dropped_count", 0)
+    block = bool(meta.get("block_skp_export", False))
+    warnings = meta.get("warnings") or []
+    g.artifacts = [_relpath(out_path)]
+    g.message = (
+        f"applied={applied} dropped={dropped} "
+        f"block_skp_export={'yes' if block else 'no'}"
+        + (f" warnings={len(warnings)}" if warnings else "")
+    )
+    g.finished_at = _utc_now()
+    return g
 
 
 def gate_f0(args: argparse.Namespace, report: SmokeReport) -> GateResult:
@@ -971,6 +1109,18 @@ def _build_parser() -> argparse.ArgumentParser:
             "--review-mode=off safety pattern."
         ),
     )
+    ap.add_argument(
+        "--no-apply-overrides", dest="no_apply_overrides",
+        action="store_true",
+        help=(
+            "Opt-out escape hatch: skip gate E2 (Slice 5a) even when "
+            "review_overrides.json exists. Default behaviour is to "
+            "auto-apply overrides → write amended_observed.json when "
+            "the file is present, and to SKIP cleanly when it isn't. "
+            "Use this flag for diagnostic runs that want to see "
+            "fidelity against the raw detector output."
+        ),
+    )
     return ap
 
 
@@ -988,6 +1138,7 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     pipeline = (gate_a, gate_b, gate_c, gate_d, gate_e,
+                gate_e_amend,
                 gate_f0, gate_f0_pa, gate_f, gate_g, gate_g2)
     for gate in pipeline:
         result = report.add(gate(args, report))
