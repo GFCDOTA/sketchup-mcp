@@ -165,33 +165,131 @@ before/after (ADR §2.10.1 invariant proved). adjacency_score moved
 -0.088 (caught + reported honestly per §2.10.5; Slice 5d ships the
 visibility fix).
 
-## 🟡 P1 — ADR-002: room_polygon_override (dogfood UX gap #2)
+## ✅ DONE — this PR (ADR-002)
 
-- **Color:** YELLOW — schema-extending architectural decision,
-  NOT autonomous-loop-friendly
-- **Why this matters:** the dogfood (PR #98) found the most common
-  real failure mode — room polygon area out of expected range
-  (FP-012-style leakage on SUITE 01 = 69.91 m² vs expected
-  `[10, 28]`) — has NO direct override type in v1. Reviewer's
-  only option is `reject_element` on the entire room, which usually
-  hurts fidelity more than it helps (count_score then drops).
-- **Goal:** ADR-002 defining `room_polygon_override` schema, apply
-  semantics, and how it interacts with `apply_overrides.py`.
-  Consider symmetric option: producer-side
-  `expand/shrink_room_polygon` proposed_actions (already in ADR-001
-  §2.6 spec, just no producer yet).
-- **Why deferred from autonomous loop:** schema extension touches
-  multiple files (override schema, apply_overrides, fidelity engine
-  apply mode, cockpit overrides.py + Review tab + chip promotion
-  mapping). Deserves Felipe's input on direction before committing.
-- **Recommended sequencing:**
-  1. Draft ADR-002 (decision: new override type vs proposed_action
-     surface + UI hints)
-  2. If new override type: extend `cockpit/overrides.py` schema +
-     `tools/apply_overrides.py` apply logic + cockpit Review tab
-     UX (polygon edit picker is the hard part)
-  3. Tests for round-trip + apply + fidelity recompute
-  4. Dogfood the new path on the same SUITE 01 case from PR #98
+- **ADR-002 — `room_polygon_override`** shipped at
+  `docs/adr/ADR-002-room-polygon-overrides.md`. Defines:
+  - ONE override type with `edit_method` discriminator
+    (`manual_draw` | `snap_to_walls` | `trace_pdf` |
+    `from_proposed_action`)
+  - Additive to `review_overrides_v1` (no schema-version bump);
+    `OVERRIDE_TYPES` grows from 7 → 8
+  - Payload shape: `new_polygon_pts` (absolute, PDF points, CCW),
+    `estimated_area_pts2`, `estimated_area_m2`, optional
+    `from_proposed_action_id` linking back to producer chip
+  - Validation rules: ≥3 finite pts, simple polygon, area > 0,
+    area-consistency soft check, wall-crossing soft warning,
+    bounding-box plausibility soft warning
+  - Apply semantics: preserve `_polygon_pts_original`,
+    `_area_pts2_original`, `_area_m2_original`; set
+    `source: manual`, `_edit_method`, optional
+    `_source_proposed_action_id`
+  - Fidelity interaction: free via existing `apply_overrides=True`
+    mode; new `polygon_overrides_applied_count` metadata
+  - F0 surface: new `manual_polygon_room_count` field + new WARN
+    trigger when polygon overrides moved score by ≥0.05 upward
+  - **SKP exporter stays overrides-blind in v1** (§2.8) — biggest
+    safety call; deliberate deferral to Slice 6e
+  - **expected_model never auto-derived from overrides** (§2.9) —
+    graduation remains a deliberate human action
+- 4 risks documented + mitigated (detector-bug-hidden,
+  score-inflation, invalid-SKP-geo, expected_model-conflict),
+  each tied to existing ADR-001 invariants
+- Slice 6 plan derived: 6a (schema + apply), 6b (chip promotion +
+  text polygon entry), 6c (F0 surface + cockpit pane), 6d
+  (graphical edit, deferred), 6e (amended_consensus.json for SKP,
+  deferred)
+- `docs/adr/README.md` index updated
+- `.ai_bridge/DECISIONS.md` entry pointing to ADR-002
+
+## 🟡 P1 — Slice 6a: room_polygon_override schema + apply layer
+
+- **Color:** YELLOW — schema-extending change touching apply
+  layer + fidelity engine metadata. Tests carry the proof.
+- **Goal:** the data plane works end-to-end. No UI surface yet.
+  See ADR-002 §4 Slice 6a for full touchpoint list.
+- **Touchpoints:**
+  - `cockpit/overrides.py` — extend `OVERRIDE_TYPES` (8th entry)
+    + new validation branch + `_PRECEDENCE_ORDER` slot
+  - `tools/apply_overrides.py` — new branch mirrors
+    `opening_kind_override` pattern; new `_overrides_metadata`
+    field `polygon_overrides_applied_count`
+  - `tools/fidelity/compare_generated_to_expected.py` — pass
+    new field through to fidelity report metadata (one-liner)
+  - `tests/test_cockpit_overrides_polygon.py` (NEW),
+    `tests/test_apply_overrides_polygon.py` (NEW),
+    `tests/test_fidelity_engine_polygon_override.py` (NEW)
+- **Validation:** ~25 new tests + hand-written round-trip on
+  `runs/_dogfood_e2e_2026_05_09/` SUITE 01 (replaces the
+  `mark_suspect` from PR #98 with a real polygon edit and
+  expects `room_score` to climb).
+- **Risk:** MEDIUM. Apply layer is well-tested but the new
+  branch is the first to mutate room geometry post-detector.
+
+## 🟡 P1 — Slice 6b: chip promotion + text-area polygon entry UX
+
+- **Color:** YELLOW — cockpit UX surface change.
+- **Goal:** Cockpit Review tab can produce a
+  `room_polygon_override` from a producer chip
+  (`expand_room_polygon` / `shrink_room_polygon`) or from
+  manual text-area paste. Producer also gains the detection
+  rules (currently spec-only).
+- **Touchpoints:**
+  - `cockpit/proposed_actions.py` — chip handler composes
+    `original_polygon + delta_pts` → absolute polygon,
+    computes areas, calls `save_override` with
+    `edit_method="from_proposed_action"`
+  - `cockpit/app.py` Review tab — per-room "✏️ Edit polygon"
+    button + Streamlit text-area + soft-warnings UI
+  - `tools/propose_skp_actions.py` — implement
+    `expand_room_polygon` / `shrink_room_polygon` detection
+    rules (was zero before; ADR-001 §2.6 enum was satisfied
+    by the type list alone)
+  - `tests/test_cockpit_proposed_actions_polygon.py` (NEW),
+    `tests/test_propose_skp_actions_polygon.py` (NEW)
+- **Validation:** ~30 new tests; manual dogfood on the
+  `runs/_dogfood_e2e_2026_05_09/` SUITE 01 case to confirm the
+  producer emits an `expand_room_polygon` chip and clicking
+  "Apply" produces a valid `room_polygon_override`.
+- **Risk:** MEDIUM. Streamlit text-area UX is new surface;
+  validation soft-warnings need clear UI.
+
+## 🟡 P1 — Slice 6c: F0 surface + cockpit Pre-SKP pane
+
+- **Color:** YELLOW — surfaces the new F0 field +
+  WARN trigger on the cockpit.
+- **Goal:** F0 emits `manual_polygon_room_count` per ADR-002
+  §2.7; cockpit Pre-SKP pane renders the new line + jumps to
+  Review tab on click.
+- **Touchpoints:**
+  - `scripts/smoke/smoke_skp_export.py` gate F0 — count rooms
+    with `_edit_method` set; emit field + WARN trigger when
+    `fidelity_score >= fidelity_score_pre_override + 0.05`
+  - `cockpit/history_view.py` Pre-SKP pane — read field, render
+    "✏️ N room(s) with manual polygon edit" line
+  - `tests/test_smoke_gate_f0_polygon_count.py` (NEW),
+    `tests/test_history_view_polygon_count.py` (NEW)
+- **Validation:** ~15 new tests; dogfood on Slice 6a/6b
+  artifacts.
+- **Risk:** LOW — additive field + UI line; logic is
+  straightforward.
+
+## 🟡 P3 — Slice 6d: graphical polygon edit UX (DEFERRED)
+
+- **Color:** YELLOW deferred — Streamlit interactive SVG limited.
+- **When:** after Slice 6a/6b/6c land + dogfooded. Decision
+  point: add `streamlit-drawable-canvas` (new dep) vs wait for
+  Phase 3 (FastAPI + browser SPA per ADR-001 §2.9).
+
+## 🟡 P3 — Slice 6e: amended_consensus.json for SKP (DEFERRED)
+
+- **Color:** YELLOW deferred — explicit safety risk per
+  ADR-002 §2.8.
+- **When:** after at least one real review case has produced a
+  `room_polygon_override` AND the human asked for it to flow
+  through to SU. Acceptance: every overridden polygon
+  round-trips through `tools/skp_from_consensus.py` without
+  degenerate geometry, validated by smoke harness.
 
 ## 🟡 P1 — Cycle 6 (Stage 1.6 implementation): wire autorun inspector into `gate_f`
 

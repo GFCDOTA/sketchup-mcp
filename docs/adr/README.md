@@ -32,6 +32,7 @@ predecessor and the predecessor's `Status:` becomes
 | ID | Title | Status | Date |
 |---|---|---|---|
 | [ADR-001](ADR-001-validation-cockpit-mutation-surface.md) | Validation Cockpit Mutation Surface | Proposed | 2026-05-08 |
+| [ADR-002](ADR-002-room-polygon-overrides.md) | `room_polygon_override` (geometric room overrides) | Proposed | 2026-05-09 |
 
 ## ADR template
 
