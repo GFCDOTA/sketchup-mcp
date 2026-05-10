@@ -1,3 +1,35 @@
+# Handoff — 2026-05-10 (Cycle 3 hygiene audit shipped — audit-only, hygiene loop paused)
+
+> Most recent session's exit state. Next session reads this FIRST
+> after `CLAUDE.md`. Append-only is fine but the top entry must
+> always be the latest.
+
+## Status — Cycle 3 hygiene audit landed (PR #108, merge `530310a`); develop @ `530310a`
+
+3 audits consecutivos (PR #73 / 2026-05-06, diagnostic 2026-05-08, **PR #108 / 2026-05-10**) convergem em "preserve-only". Cleanup do cluster legacy (`proto_*`, `peek_pdf`, `crop_legend`, `analyze_overpoly`, `render_*` wrappers, `PROMPT-*.md`) **não progride** sem trigger humano explícito. Por decisão do maintainer, **hygiene loop pausa aqui** — não rodar novo ciclo de hygiene até trigger real disparar (lista abaixo).
+
+### Achados de Cycle 3
+
+- 28 candidatos da raiz inventariados em [`docs/ops/repo_hygiene_audit_2026-05-10.md`](../docs/ops/repo_hygiene_audit_2026-05-10.md).
+- Mudança de evidência vs Cycle 1 (PR #73): refs em `docs/ROADMAP.md` / `docs/repo_hardening_plan.md` / `pyproject.toml` que justificavam preservação **sumiram**.
+- Refs ainda preservadas em `docs/_archive/2026-04-f1-cycle/*` (frozen by §1) + `patches/README.md:194` (PROMPT-RENAN como autoridade de invariantes — load-bearing).
+- 0 deletions, 0 archives, 0 source touched. PR doc-only mergeada após CI 3/3 verde.
+- Suite estável: 301 passed, 4 skipped, 0 failed (renderers_migration + proto_cli + cli + smoke_gate_* + cockpit_* + truth_gate + fidelity_*).
+
+### Regra nova (vigente a partir de 2026-05-10)
+
+**Não iniciar novo ciclo de repo hygiene até existir trigger real:**
+
+- Raster pipeline oficialmente aposentado (CLAUDE.md §10 deixar de marcar raster como OUTDATED-but-kept).
+- `patches/README.md:194` deixar de citar `PROMPT-RENAN.md` como autoridade de invariantes.
+- `tests/test_renderers_migration.py` "future release" gate explicitamente declarado fechado (próximo refactor major do `renderers/` package).
+- Decisão humana explícita pra arquivar `runs/` (amendment a §1 hard-rule).
+- Aparecer arquivo claramente temporário/orphan que NÃO esteja no inventário do audit 2026-05-10.
+
+Sem trigger, hygiene não vira loop recorrente.
+
+---
+
 # Handoff — 2026-05-09 (autonomous-loop wave: 10 PRs end-to-end + dogfood proof)
 
 > Most recent session's exit state. Next session reads this FIRST
