@@ -22,15 +22,83 @@ import json
 from pathlib import Path
 
 
+def _snap_center_to_wall(center: list[float],
+                          width_pts: float,
+                          wall: dict) -> tuple[list[float], dict]:
+    """Snap an opening center onto its host wall's centerline so that
+    consume_consensus.rb's carve step (which requires center to lie
+    within the wall's axis range minus half-width) actually fires.
+
+    Returns (snapped_center, snap_info_dict) — the dict carries
+    diagnostic fields so the apply step can report how far the center
+    was moved.
+    """
+    if not wall or not wall.get("start") or not wall.get("end"):
+        return list(center), {"snapped": False, "reason": "no_wall"}
+    sx, sy = float(wall["start"][0]), float(wall["start"][1])
+    ex, ey = float(wall["end"][0]), float(wall["end"][1])
+    orient = wall.get("orientation")
+    half = max(width_pts / 2.0, 1.0)
+    cx, cy = float(center[0]), float(center[1])
+    if orient == "h":
+        axis_min = min(sx, ex)
+        axis_max = max(sx, ex)
+        # Clamp X to wall axis range minus half-width on each end so
+        # the opening fits inside the wall.
+        clamp_lo = axis_min + half
+        clamp_hi = axis_max - half
+        if clamp_hi < clamp_lo:
+            # Wall too short to host the opening at full width;
+            # land at the midpoint and let consume_consensus shrink.
+            snapped_x = (axis_min + axis_max) / 2.0
+        else:
+            snapped_x = max(clamp_lo, min(cx, clamp_hi))
+        snapped_y = sy  # wall centerline y
+        snapped = [snapped_x, snapped_y]
+    elif orient == "v":
+        axis_min = min(sy, ey)
+        axis_max = max(sy, ey)
+        clamp_lo = axis_min + half
+        clamp_hi = axis_max - half
+        if clamp_hi < clamp_lo:
+            snapped_y = (axis_min + axis_max) / 2.0
+        else:
+            snapped_y = max(clamp_lo, min(cy, clamp_hi))
+        snapped_x = sx  # wall centerline x
+        snapped = [snapped_x, snapped_y]
+    else:
+        return list(center), {"snapped": False, "reason": "unknown_orientation"}
+    dx = snapped[0] - cx
+    dy = snapped[1] - cy
+    shift = (dx * dx + dy * dy) ** 0.5
+    return snapped, {
+        "snapped": True,
+        "original_center": [cx, cy],
+        "snapped_center": snapped,
+        "shift_pts": round(shift, 3),
+        "wall_orientation": orient,
+    }
+
+
 def apply_truth_to_consensus(consensus: dict,
                               truth: dict,
-                              mode: str = "replace") -> dict:
+                              mode: str = "replace",
+                              snap_to_wall: bool = True) -> dict:
     """Return a new consensus dict with human openings applied.
     Does NOT mutate the input dicts.
+
+    When ``snap_to_wall`` (default True), each opening's center is
+    snapped onto the host wall's centerline and clamped to the wall's
+    axis range (minus half-width). Without this, openings whose
+    image-derived center lies slightly outside the wall axis (a
+    typical 10-15 pt drift from auto-calibrate) silently float —
+    consume_consensus.rb's carve step requires center to fall inside
+    the wall.
     """
     out = dict(consensus)
     walls_by_id = {w["id"]: w for w in out.get("walls", [])}
     human_openings: list[dict] = []
+    snap_log: list[dict] = []
     for i, src in enumerate(truth.get("openings", [])):
         wall_id = src.get("wall_id")
         wall = walls_by_id.get(wall_id) if wall_id else None
@@ -42,6 +110,15 @@ def apply_truth_to_consensus(consensus: dict,
              if wall and wall.get("orientation")
              else src.get("orientation"))
         center = src.get("center_pts", [0.0, 0.0])
+        width = float(src.get("opening_width_pts", 0))
+        if snap_to_wall and wall:
+            snapped_center, snap_info = _snap_center_to_wall(
+                center, width, wall
+            )
+            snap_info["opening_id"] = f"h_o{i:03d}"
+            snap_info["wall_id"] = wall_id
+            snap_log.append(snap_info)
+            center = snapped_center
         # Default hinge_side = "left" (the Ruby exporter falls back to
         # "left" when missing; reviewer can edit truth JSON to flip).
         hinge_side = src.get("hinge_side", "left")
@@ -105,6 +182,8 @@ def apply_truth_to_consensus(consensus: dict,
         "source_truth": truth.get("source_image"),
         "required_counts": truth.get("required_counts"),
         "explicit_constraints_count": len(truth.get("explicit_constraints", [])),
+        "snap_to_wall": snap_to_wall,
+        "snap_log": snap_log,
     }
     out["metadata"] = md
     return out
@@ -119,11 +198,18 @@ def main() -> None:
                     help="'replace' (default): wipe consensus.openings and "
                          "write only human openings. 'merge': keep "
                          "existing non-colliding openings plus human ones.")
+    ap.add_argument("--no-snap-to-wall", action="store_true",
+                    help="Disable snap-to-wall projection. Without this "
+                         "flag, opening centers are snapped onto the host "
+                         "wall's centerline and clamped to its axis range "
+                         "so consume_consensus.rb's carve step fires "
+                         "(it requires center inside the wall).")
     args = ap.parse_args()
 
     consensus = json.loads(args.consensus.read_text())
     truth = json.loads(args.truth.read_text())
-    out = apply_truth_to_consensus(consensus, truth, mode=args.mode)
+    out = apply_truth_to_consensus(consensus, truth, mode=args.mode,
+                                     snap_to_wall=not args.no_snap_to_wall)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(out, indent=2))
 

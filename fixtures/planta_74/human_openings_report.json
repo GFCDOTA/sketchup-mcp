@@ -50,7 +50,7 @@
     {
       "check_id": "C-H5",
       "severity": "PASS",
-      "message": "BANHO_02_west_door: 1 interior_door in region",
+      "message": "BANHO_02_west_door: 2 interior_door in region",
       "evidence": {
         "constraint": {
           "name": "BANHO_02_west_door",
@@ -65,6 +65,7 @@
           ]
         },
         "matches": [
+          "h_o004",
           "h_o006"
         ]
       }
