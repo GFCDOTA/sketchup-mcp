@@ -22,7 +22,7 @@ import json
 from collections import defaultdict
 from pathlib import Path
 
-from shapely.geometry import Polygon, box, Point
+from shapely.geometry import LineString, Polygon, box
 from shapely.ops import unary_union
 
 
@@ -108,11 +108,41 @@ def _detect_door_bridges(walls: list[dict], t: float,
     return bridges
 
 
+def _soft_barriers_to_polys(barriers: list[dict], width_pts: float) -> list[Polygon]:
+    """Buffer each soft_barrier polyline into a thin closed strip.
+
+    Soft_barriers carry non-structural separators (peitoril, grade,
+    terraço outlines) that bound rooms but are NOT load-bearing walls.
+    Polygonize needs them in the wall_union to close interior cells —
+    without them a vector PDF planta with peitoris keeps 60–80 % of
+    its rooms open (env.difference returns one giant merged "outside"
+    region and only a couple of small enclosed cells, FP-014 §"Opção A"
+    failure mode observed on planta_74). Buffered as thin (``width_pts``)
+    strips so the envelope cap doesn't shrink room interiors.
+    """
+    polys: list[Polygon] = []
+    if width_pts <= 0:
+        return polys
+    half = width_pts / 2.0
+    for b in barriers:
+        pts = b.get("polyline_pts", [])
+        if not pts or len(pts) < 2:
+            continue
+        try:
+            ls = LineString([(float(p[0]), float(p[1])) for p in pts])
+            polys.append(ls.buffer(half, cap_style="flat"))
+        except Exception:
+            continue
+    return polys
+
+
 def polygonize_rooms(consensus: dict,
                      door_min_pts: float = 15.0,
                      door_max_pts: float = 50.0,
                      envelope_margin_pts: float = 2.0,
-                     min_room_area_factor: float = 12.0) -> tuple[list[dict], list[dict]]:
+                     min_room_area_factor: float = 12.0,
+                     use_soft_barriers: bool = True,
+                     soft_barrier_width_pts: float | None = None) -> tuple[list[dict], list[dict]]:
     walls = consensus["walls"]
     t = consensus["wall_thickness_pts"]
 
@@ -122,6 +152,19 @@ def polygonize_rooms(consensus: dict,
     # End-extend by t so partition walls reach into the backbone wall
     # at T-junctions; the perpendicular wall absorbs the overshoot.
     wall_polys = [_wall_to_box(w, t, end_extend=t) for w in all_walls]
+
+    # Soft barriers (peitoris, grades, terraço outlines) close interior
+    # cells that walls alone leave open — without them, polygonize on
+    # vector-PDF plantas with peitoris collapses most rooms into the
+    # outside cell. Buffer width defaults to a thin strip (~0.4 × wall
+    # thickness) so the envelope cap doesn't eat room interiors.
+    sb_width = (soft_barrier_width_pts
+                if soft_barrier_width_pts is not None else 0.4 * t)
+    if use_soft_barriers:
+        wall_polys.extend(
+            _soft_barriers_to_polys(consensus.get("soft_barriers", []), sb_width)
+        )
+
     wall_union = unary_union(wall_polys)
 
     # If the wall network still has multiple disconnected components,

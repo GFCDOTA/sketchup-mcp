@@ -159,6 +159,45 @@ def test_two_seeds_same_cell():
     assert len(r["merged_seeds"]) == 2
 
 
+def test_soft_barrier_closes_open_cell():
+    """3 walls (U-shape) + soft_barrier sealing the open side → 1 closed room.
+
+    Without the soft_barrier the cell only closes via the envelope bottom
+    (see ``test_envelope_terraco``). With a soft_barrier well inside the
+    envelope, the room's polygon should be bounded by the barrier line —
+    materially smaller area than the envelope-bounded variant. This proves
+    polygonize_rooms picks up ``consensus.soft_barriers`` as part of the
+    wall_union (FP-014 §"Opção A" — peitoris/grades are the bridge between
+    wall fragments that vector PDF plantas leave open).
+    """
+    walls = [
+        {"id": "w000", "start": [0, 100], "end": [100, 100],
+         "orientation": "h", "thickness": 5.0},
+        {"id": "w002", "start": [0, 50], "end": [0, 100],
+         "orientation": "v", "thickness": 5.0},
+        {"id": "w003", "start": [100, 50], "end": [100, 100],
+         "orientation": "v", "thickness": 5.0},
+    ]
+    consensus = _consensus(walls, region=[0, 0, 100, 100])
+    consensus["soft_barriers"] = [{
+        "id": "sb000",
+        "polyline_pts": [[0, 50], [100, 50]],
+    }]
+    labels = [_label("ROOM_WITH_PEITORIL", 50, 75)]
+    rooms = detect_rooms_polygonize(consensus, labels)
+    assert len(rooms) == 1
+    r = rooms[0]
+    assert r["name"] == "ROOM_WITH_PEITORIL"
+    # The soft_barrier at y=50 caps the cell from below — area should be
+    # roughly 100 (x) * 50 (y) = 5000 minus the wall+barrier buffer strip
+    # contribution. Significantly less than the envelope-only terraço
+    # (~9500 in test_envelope_terraco), so a tight upper bound catches a
+    # regression where the barrier is silently ignored.
+    assert 3000 < r["area_pts2"] < 6000, (
+        f"expected ~5000 pts² bounded by soft_barrier, got {r['area_pts2']}"
+    )
+
+
 def test_seed_outside_all_cells():
     """Seed far outside any cell is dropped + recorded in metadata."""
     walls = _rect_walls()
