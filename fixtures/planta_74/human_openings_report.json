@@ -1,11 +1,11 @@
 {
-  "verdict": "PASS",
-  "recommendation": "safe to export SKP \u2014 human openings contract OK",
+  "verdict": "FAIL",
+  "recommendation": "do not export SKP \u2014 human openings contract violated",
   "summary": {
-    "pass": 6,
+    "pass": 17,
     "warn": 0,
-    "fail": 0,
-    "total": 6
+    "fail": 2,
+    "total": 19
   },
   "findings": [
     {
@@ -50,6 +50,294 @@
     {
       "check_id": "C-H5",
       "severity": "PASS",
+      "message": "h_o000 (interior_door): mode=existing_gap host=gap_w003_w002 shift=4.97pt drawn=True carved=False",
+      "evidence": {
+        "opening_id": "h_o000",
+        "kind": "interior_door",
+        "mode": "existing_gap",
+        "shift_pt": 4.972,
+        "drawn": true,
+        "carved": false,
+        "host_wall_id": "w003",
+        "gap_id": "gap_w003_w002",
+        "original_center_pdf": [
+          152.308,
+          675.384
+        ],
+        "adjusted_center_pdf": [
+          152.308,
+          680.3556213378906
+        ]
+      }
+    },
+    {
+      "check_id": "C-H6",
+      "severity": "PASS",
+      "message": "h_o001 (interior_door): mode=existing_gap host=gap_w007_w006 shift=2.34pt drawn=True carved=False",
+      "evidence": {
+        "opening_id": "h_o001",
+        "kind": "interior_door",
+        "mode": "existing_gap",
+        "shift_pt": 2.337,
+        "drawn": true,
+        "carved": false,
+        "host_wall_id": "w007",
+        "gap_id": "gap_w007_w006",
+        "original_center_pdf": [
+          276.7255,
+          625.5840000000001
+        ],
+        "adjusted_center_pdf": [
+          276.7255,
+          627.9210205078125
+        ]
+      }
+    },
+    {
+      "check_id": "C-H7",
+      "severity": "PASS",
+      "message": "h_o002 (interior_door): mode=existing_gap host=gap_w010_w009 shift=1.88pt drawn=True carved=False",
+      "evidence": {
+        "opening_id": "h_o002",
+        "kind": "interior_door",
+        "mode": "existing_gap",
+        "shift_pt": 1.881,
+        "drawn": true,
+        "carved": false,
+        "host_wall_id": "w010",
+        "gap_id": "gap_w010_w009",
+        "original_center_pdf": [
+          508.399,
+          618.2405
+        ],
+        "adjusted_center_pdf": [
+          508.399,
+          620.1216430664062
+        ]
+      }
+    },
+    {
+      "check_id": "C-H8",
+      "severity": "PASS",
+      "message": "h_o003 (interior_door): mode=existing_gap host=gap_w024_w004 shift=0.62pt drawn=True carved=False",
+      "evidence": {
+        "opening_id": "h_o003",
+        "kind": "interior_door",
+        "mode": "existing_gap",
+        "shift_pt": 0.621,
+        "drawn": true,
+        "carved": false,
+        "host_wall_id": "w024",
+        "gap_id": "gap_w024_w004",
+        "original_center_pdf": [
+          332.77549999999997,
+          606.892
+        ],
+        "adjusted_center_pdf": [
+          333.39662170410156,
+          606.892
+        ]
+      }
+    },
+    {
+      "check_id": "C-H9",
+      "severity": "PASS",
+      "message": "h_o004 (interior_door): mode=existing_gap host=gap_w012_w011 shift=0.01pt drawn=True carved=False",
+      "evidence": {
+        "opening_id": "h_o004",
+        "kind": "interior_door",
+        "mode": "existing_gap",
+        "shift_pt": 0.008,
+        "drawn": true,
+        "carved": false,
+        "host_wall_id": "w012",
+        "gap_id": "gap_w012_w011",
+        "original_center_pdf": [
+          313.12300000000005,
+          587.1324999999999
+        ],
+        "adjusted_center_pdf": [
+          313.12300000000005,
+          587.1240539550781
+        ]
+      }
+    },
+    {
+      "check_id": "C-H10",
+      "severity": "FAIL",
+      "message": "h_o005 (interior_door): UNHOSTED \u2014 no wall or colinear gap matches the user-paint position. Door/window will NOT render. Painter must adjust blob OR add a human-annotated wall.",
+      "evidence": {
+        "opening_id": "h_o005",
+        "kind": "interior_door",
+        "mode": "unhosted",
+        "shift_pt": 0.0,
+        "drawn": false,
+        "carved": false,
+        "host_wall_id": "w022",
+        "gap_id": null,
+        "original_center_pdf": [
+          105.9455,
+          580.1895
+        ],
+        "adjusted_center_pdf": [
+          105.9455,
+          580.1895
+        ]
+      }
+    },
+    {
+      "check_id": "C-H11",
+      "severity": "PASS",
+      "message": "h_o006 (interior_door): mode=existing_gap host=gap_w024_w004 shift=0.48pt drawn=True carved=False",
+      "evidence": {
+        "opening_id": "h_o006",
+        "kind": "interior_door",
+        "mode": "existing_gap",
+        "shift_pt": 0.483,
+        "drawn": true,
+        "carved": false,
+        "host_wall_id": "w024",
+        "gap_id": "gap_w024_w004",
+        "original_center_pdf": [
+          332.914,
+          569.909
+        ],
+        "adjusted_center_pdf": [
+          333.39662170410156,
+          569.909
+        ]
+      }
+    },
+    {
+      "check_id": "C-H12",
+      "severity": "PASS",
+      "message": "h_o007 (window): mode=existing_gap host=gap_w018_w016 shift=3.04pt drawn=True carved=False",
+      "evidence": {
+        "opening_id": "h_o007",
+        "kind": "window",
+        "mode": "existing_gap",
+        "shift_pt": 3.035,
+        "drawn": true,
+        "carved": false,
+        "host_wall_id": "w018",
+        "gap_id": "gap_w018_w016",
+        "original_center_pdf": [
+          511.582,
+          522.2455
+        ],
+        "adjusted_center_pdf": [
+          511.582,
+          519.2106323242188
+        ]
+      }
+    },
+    {
+      "check_id": "C-H13",
+      "severity": "PASS",
+      "message": "h_o008 (window): mode=existing_gap host=gap_w018_w016 shift=2.77pt drawn=True carved=False",
+      "evidence": {
+        "opening_id": "h_o008",
+        "kind": "window",
+        "mode": "existing_gap",
+        "shift_pt": 2.768,
+        "drawn": true,
+        "carved": false,
+        "host_wall_id": "w018",
+        "gap_id": "gap_w018_w016",
+        "original_center_pdf": [
+          433.3885,
+          521.9784999999999
+        ],
+        "adjusted_center_pdf": [
+          433.3885,
+          519.2106323242188
+        ]
+      }
+    },
+    {
+      "check_id": "C-H14",
+      "severity": "PASS",
+      "message": "h_o009 (window): mode=existing_gap host=gap_w026_w025 shift=4.77pt drawn=True carved=False",
+      "evidence": {
+        "opening_id": "h_o009",
+        "kind": "window",
+        "mode": "existing_gap",
+        "shift_pt": 4.766,
+        "drawn": true,
+        "carved": false,
+        "host_wall_id": "w026",
+        "gap_id": "gap_w026_w025",
+        "original_center_pdf": [
+          354.9185,
+          489.001
+        ],
+        "adjusted_center_pdf": [
+          354.9185,
+          484.2348175048828
+        ]
+      }
+    },
+    {
+      "check_id": "C-H15",
+      "severity": "PASS",
+      "message": "h_o010 (window): mode=existing_gap host=gap_w030_w029 shift=6.18pt drawn=True carved=False",
+      "evidence": {
+        "opening_id": "h_o010",
+        "kind": "window",
+        "mode": "existing_gap",
+        "shift_pt": 6.176,
+        "drawn": true,
+        "carved": false,
+        "host_wall_id": "w030",
+        "gap_id": "gap_w030_w029",
+        "original_center_pdf": [
+          295.6855,
+          463.233
+        ],
+        "adjusted_center_pdf": [
+          295.6855,
+          457.05662536621094
+        ]
+      }
+    },
+    {
+      "check_id": "C-H16",
+      "severity": "PASS",
+      "message": "h_o011 (glazed_balcony): mode=existing_gap host=gap_w022_w021 shift=3.62pt drawn=True carved=False",
+      "evidence": {
+        "opening_id": "h_o011",
+        "kind": "glazed_balcony",
+        "mode": "existing_gap",
+        "shift_pt": 3.624,
+        "drawn": true,
+        "carved": false,
+        "host_wall_id": "w022",
+        "gap_id": "gap_w022_w021",
+        "original_center_pdf": [
+          175.005,
+          515.036
+        ],
+        "adjusted_center_pdf": [
+          175.005,
+          511.41184997558594
+        ]
+      }
+    },
+    {
+      "check_id": "C-H17",
+      "severity": "FAIL",
+      "message": "Hosting summary: drawn=11/12, carved=0/12, unhosted=1/12",
+      "evidence": {
+        "drawn": 11,
+        "carved": 0,
+        "unhosted": 1,
+        "shift_warn": 0,
+        "shift_fail": 0
+      }
+    },
+    {
+      "check_id": "C-H18",
+      "severity": "PASS",
       "message": "BANHO_02_west_door: 1 interior_door in region",
       "evidence": {
         "constraint": {
@@ -70,7 +358,7 @@
       }
     },
     {
-      "check_id": "C-H6",
+      "check_id": "C-H19",
       "severity": "PASS",
       "message": "NO_SUITE_01_BANHO_01_internal_window: 0 window in region (correct)",
       "evidence": {
