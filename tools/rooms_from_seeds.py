@@ -359,7 +359,7 @@ def detect_rooms(consensus: dict, labels: list[dict],
 
 def detect_rooms_polygonize(consensus: dict, labels: list[dict],
                             door_min: float = 15.0,
-                            door_max: float = 50.0,
+                            door_max: float = 150.0,
                             envelope_margin_pts: float = 2.0,
                             min_room_area_factor: float = 12.0) -> list[dict]:
     """Detect rooms via wall-rectangle subtraction (FP-014 P0 fix).
@@ -369,6 +369,17 @@ def detect_rooms_polygonize(consensus: dict, labels: list[dict],
     each label's ``seed_pt`` to the cell that contains it. Produces polygons
     with 4–20 vertices, perfectly wall-aligned — the FP-014 fix for the
     legacy raster-watershed method that emitted SUITE 01 with 738 vts.
+
+    ``door_max`` defaults to 150 pt (~5.7 m) instead of the 50 pt door-only
+    range used by the underlying ``polygonize_rooms``: empirically on
+    planta_74 the narrower default bridges only 6 / 11 expected openings
+    and leaves 9 of 11 rooms collapsed into a single envelope-spanning
+    cell that ``touches_all_edges`` then drops. 150 pt covers typical
+    apartment openings (port a-vidro, glazed balcony, peitoril gap),
+    growing planta_74 from 2 mapped rooms to 7 (the remaining 4 share
+    cells because the structural walls between them are missing from the
+    stage-1 consensus — a build_vector_consensus issue, not a polygonize
+    issue).
 
     Two labels resolving to the same cell are kept as a single room with
     ``name = "X | Y"`` plus ``metadata.warnings = ["seeds_share_cell"]``
@@ -534,6 +545,17 @@ if __name__ == "__main__":
     ap.add_argument("--min-room-area-factor", type=float, default=12.0,
                     help="Min room area = factor * thickness² to drop "
                          "slivers (--method polygonize only).")
+    # Polygonize bridges any colinear gap in [door_min, polygonize_door_max]
+    # range. Defaults to 150 pt (~5.7 m) so port a-vidro / glazed balcony /
+    # peitoril-sized gaps still close cells. Separate from --door-max
+    # (which the voronoi raster path uses for its bridge mask, tuned to
+    # the door-arc-only range) so the two methods stay independent.
+    ap.add_argument("--polygonize-door-max", type=float, default=150.0,
+                    help="Max colinear gap (pt) bridged by polygonize. "
+                         "150 default covers door + port a-vidro + balcony "
+                         "openings on typical apartment plantas. Set lower "
+                         "to leave wider gaps open (forces those rooms to "
+                         "merge into the outside cell).")
     args = ap.parse_args()
 
     consensus = json.loads(args.consensus.read_text())
@@ -542,7 +564,7 @@ if __name__ == "__main__":
         rooms = detect_rooms_polygonize(
             consensus, labels,
             door_min=args.door_min,
-            door_max=args.door_max,
+            door_max=args.polygonize_door_max,
             envelope_margin_pts=args.envelope_margin_pts,
             min_room_area_factor=args.min_room_area_factor,
         )
