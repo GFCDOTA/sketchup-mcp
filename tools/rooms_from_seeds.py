@@ -27,7 +27,7 @@ import numpy as np
 THIS = Path(__file__).resolve().parent
 sys.path.insert(0, str(THIS))
 
-from polygonize_rooms import _detect_door_bridges  # noqa: E402, I001
+from polygonize_rooms import _detect_door_bridges, polygonize_rooms  # noqa: E402, I001
 
 
 def rasterize_walls(walls: list[dict], bridges: list[dict], t: float,
@@ -357,6 +357,123 @@ def detect_rooms(consensus: dict, labels: list[dict],
     return rooms
 
 
+def detect_rooms_polygonize(consensus: dict, labels: list[dict],
+                            door_min: float = 15.0,
+                            door_max: float = 50.0,
+                            envelope_margin_pts: float = 2.0,
+                            min_room_area_factor: float = 12.0) -> list[dict]:
+    """Detect rooms via wall-rectangle subtraction (FP-014 P0 fix).
+
+    Delegates the closed-cell extraction to ``polygonize_rooms.polygonize_rooms``
+    (which builds ``unary_union(wall_boxes) → env.difference()``), then maps
+    each label's ``seed_pt`` to the cell that contains it. Produces polygons
+    with 4–20 vertices, perfectly wall-aligned — the FP-014 fix for the
+    legacy raster-watershed method that emitted SUITE 01 with 738 vts.
+
+    Two labels resolving to the same cell are kept as a single room with
+    ``name = "X | Y"`` plus ``metadata.warnings = ["seeds_share_cell"]``
+    (honest signal that a structural wall is missing — the cell-merged
+    polygon is the correct observation given the wall data). Seeds outside
+    every cell are dropped and recorded under
+    ``consensus.metadata.rooms_from_seeds.dropped_seeds``.
+
+    See ``docs/diagnostics/2026-05-09_skp_visual_failure_fp014.md`` §"Opção A"
+    for the design rationale and the empirical evidence behind picking
+    polygonize over raster-watershed.
+    """
+    from shapely.geometry import Point, Polygon
+
+    cells_raw, _bridges = polygonize_rooms(
+        consensus,
+        door_min_pts=door_min,
+        door_max_pts=door_max,
+        envelope_margin_pts=envelope_margin_pts,
+        min_room_area_factor=min_room_area_factor,
+    )
+
+    cell_polys: list[tuple[dict, Polygon]] = []
+    for c in cells_raw:
+        try:
+            poly = Polygon(c["polygon_pts"])
+        except Exception:
+            continue
+        if poly.is_valid and not poly.is_empty:
+            cell_polys.append((c, poly))
+
+    t = float(consensus["wall_thickness_pts"])
+    dropped: list[dict] = []
+    seed_to_cell: dict[int, int] = {}
+
+    for li, label in enumerate(labels):
+        sp = label.get("seed_pt")
+        if not sp:
+            dropped.append({"label_id": label.get("id"),
+                            "label_name": label.get("name"),
+                            "reason": "no_seed_pt"})
+            continue
+        point = Point(float(sp[0]), float(sp[1]))
+
+        assigned: int | None = None
+        for ci, (_c, poly) in enumerate(cell_polys):
+            if poly.contains(point):
+                assigned = ci
+                break
+        if assigned is None:
+            best_ci = None
+            best_d = float("inf")
+            for ci, (_c, poly) in enumerate(cell_polys):
+                d = poly.centroid.distance(point)
+                if d < best_d:
+                    best_d = d
+                    best_ci = ci
+            if best_ci is not None and best_d <= 3.0 * t:
+                assigned = best_ci
+
+        if assigned is None:
+            dropped.append({
+                "label_id": label.get("id"),
+                "label_name": label.get("name"),
+                "seed_pt": list(sp),
+                "reason": "no_containing_cell",
+            })
+            continue
+        seed_to_cell[li] = assigned
+
+    cell_to_labels: dict[int, list[dict]] = {}
+    for li, ci in seed_to_cell.items():
+        cell_to_labels.setdefault(ci, []).append(labels[li])
+
+    rooms: list[dict] = []
+    for ci in sorted(cell_to_labels.keys()):
+        cell, _poly = cell_polys[ci]
+        lbls = cell_to_labels[ci]
+        merged = len(lbls) > 1
+        names = [lb["name"] for lb in lbls]
+        label_ids = [lb.get("id") for lb in lbls if lb.get("id") is not None]
+        room: dict = {
+            "id": f"r{len(rooms):03d}",
+            "name": " | ".join(names) if merged else names[0],
+            "label_id": label_ids[0] if not merged and label_ids else None,
+            "seed_pt": list(lbls[0]["seed_pt"]),
+            "polygon_pts": cell["polygon_pts"],
+            "area_pts2": cell["area_pts2"],
+            "centroid": cell["centroid"],
+            "method": "polygonize",
+        }
+        if merged:
+            room["label_ids"] = label_ids
+            room["merged_seeds"] = [list(lb["seed_pt"]) for lb in lbls]
+            room["metadata"] = {"warnings": ["seeds_share_cell"]}
+        rooms.append(room)
+
+    if dropped:
+        md = consensus.setdefault("metadata", {})
+        rfs = md.setdefault("rooms_from_seeds", {})
+        rfs.setdefault("dropped_seeds", []).extend(dropped)
+
+    return rooms
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("consensus", type=Path)
@@ -396,16 +513,61 @@ if __name__ == "__main__":
                          "hull. Default 0.5 (Cycle 8b empirical: "
                          "lower ratios cut A.S./COZINHA/TERRACO; "
                          "0.5 keeps SUITE 01 in [10, 28] m²).")
+    # FP-014 P0 (2026-05-11): opt-in polygonize method that swaps the
+    # legacy raster-watershed for shapely.unary_union(wall_boxes) +
+    # env.difference(). Polygons emerge wall-aligned with 4–20 vts
+    # instead of the 738-vts raster-contour traces that caused SUITE 01
+    # to leak across BANHO 02. Default stays 'voronoi' in PR-A1; the
+    # default flips to 'polygonize' in PR-A2 (refactor/rooms-polygonize-
+    # default) once the baseline JSON is updated to match the new vts /
+    # area expectations.
+    ap.add_argument("--method",
+                    choices=["voronoi", "flood", "polygonize"],
+                    default="voronoi",
+                    help="Room detection method. 'voronoi' (default) is the "
+                         "legacy raster watershed; 'flood' is the raster "
+                         "flood-fill fallback; 'polygonize' uses shapely "
+                         "wall-rectangle subtraction (FP-014 P0 fix).")
+    ap.add_argument("--envelope-margin-pts", type=float, default=2.0,
+                    help="Envelope padding around planta_region "
+                         "(--method polygonize only).")
+    ap.add_argument("--min-room-area-factor", type=float, default=12.0,
+                    help="Min room area = factor * thickness² to drop "
+                         "slivers (--method polygonize only).")
     args = ap.parse_args()
 
     consensus = json.loads(args.consensus.read_text())
     labels = json.loads(args.labels.read_text())
-    rooms = detect_rooms(consensus, labels, args.door_min, args.door_max,
-                         args.scale,
-                         use_concave_hull=not args.no_concave_hull,
-                         concave_hull_ratio=args.concave_hull_ratio)
+    if args.method == "polygonize":
+        rooms = detect_rooms_polygonize(
+            consensus, labels,
+            door_min=args.door_min,
+            door_max=args.door_max,
+            envelope_margin_pts=args.envelope_margin_pts,
+            min_room_area_factor=args.min_room_area_factor,
+        )
+    elif args.method == "flood":
+        rooms = detect_rooms(
+            consensus, labels, args.door_min, args.door_max, args.scale,
+            use_voronoi=False,
+            use_concave_hull=not args.no_concave_hull,
+            concave_hull_ratio=args.concave_hull_ratio,
+        )
+    else:  # voronoi
+        rooms = detect_rooms(consensus, labels, args.door_min, args.door_max,
+                             args.scale,
+                             use_concave_hull=not args.no_concave_hull,
+                             concave_hull_ratio=args.concave_hull_ratio)
 
-    if args.canonicalize_rooms:
+    if args.canonicalize_rooms and args.method == "polygonize":
+        # Polygonize emits wall-aligned cells (4–20 vts); the canonicalize
+        # pass is designed to repair raster-watershed staircase artefacts,
+        # not these clean polygons. Running it would either be a no-op or
+        # snap legitimate vertices to nearby wall axes that don't belong
+        # to the cell — silently skip with a notice.
+        print("[warn] --canonicalize-rooms ignored with --method=polygonize "
+              "(cells already wall-aligned)")
+    elif args.canonicalize_rooms:
         # Local import to keep cv2 import cheap when feature unused. The
         # parent dir is on sys.path so canonicalize_room_polygons resolves
         # whether this script runs as `python tools/rooms_from_seeds.py`
@@ -428,19 +590,31 @@ if __name__ == "__main__":
 
     consensus["rooms"] = rooms
     # Stamp how the consensus was produced so downstream / debug can tell
-    # whether canonicalization ran. Stays inside the existing schema-
-    # additive metadata field per docs/SCHEMA-V2.md.
+    # which method ran and whether canonicalization applied. Stays inside
+    # the existing schema-additive metadata field per docs/SCHEMA-V2.md.
     md = consensus.setdefault("metadata", {})
+    existing_rfs = md.get("rooms_from_seeds", {}) or {}
+    dropped_seeds = existing_rfs.get("dropped_seeds", [])
     md["rooms_from_seeds"] = {
-        "canonicalize_rooms": bool(args.canonicalize_rooms),
+        "method": args.method,
+        "canonicalize_rooms": bool(args.canonicalize_rooms) and args.method != "polygonize",
         "room_canonicalization_tol": (
-            args.room_canonicalization_tol if args.canonicalize_rooms else None
+            args.room_canonicalization_tol
+            if (args.canonicalize_rooms and args.method != "polygonize") else None
         ),
         "use_concave_hull": not bool(args.no_concave_hull),
         "concave_hull_ratio": (
             args.concave_hull_ratio if not args.no_concave_hull else None
         ),
+        "envelope_margin_pts": (
+            args.envelope_margin_pts if args.method == "polygonize" else None
+        ),
+        "min_room_area_factor": (
+            args.min_room_area_factor if args.method == "polygonize" else None
+        ),
     }
+    if dropped_seeds:
+        md["rooms_from_seeds"]["dropped_seeds"] = dropped_seeds
     out = args.out or args.consensus
     out.write_text(json.dumps(consensus, indent=2))
     print(f"[ok] {len(rooms)} rooms detected from labels -> {out}")
