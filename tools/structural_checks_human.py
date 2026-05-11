@@ -46,6 +46,10 @@ def _bbox_contains(bbox: list[float], point: list[float]) -> bool:
     return x0 <= px <= x1 and y0 <= py <= y1
 
 
+SHIFT_WARN_PT = 8.0
+SHIFT_FAIL_PT = 15.0
+
+
 def check(consensus: dict, truth: dict) -> dict:
     """Run all human-openings gates. Returns the report dict."""
     findings: list[Finding] = []
@@ -84,10 +88,90 @@ def check(consensus: dict, truth: dict) -> dict:
                       "required": req_count},
         ))
 
-    # C-H5+: explicit constraints
+    # C-H5..C-H?: per-opening hosting / shift / drawn-or-not (new in
+    # 2026-05-11 per "Não usar snap grande como correção silenciosa").
+    next_id = 5
+    n_unhosted = 0
+    n_shift_warn = 0
+    n_shift_fail = 0
+    n_drawn = 0
+    n_carved = 0
+    for op in human_openings:
+        ha = op.get("human_annotation", {}) or {}
+        mode = op.get("host_mode", "unknown")
+        shift = float(ha.get("shift_pt", 0))
+        drawn = bool(ha.get("drawn_predicted", False))
+        carved = bool(ha.get("carved_predicted", False))
+        if drawn:
+            n_drawn += 1
+        if carved:
+            n_carved += 1
+        # Per-opening verdict
+        if mode == "unhosted":
+            sev = "FAIL"
+            n_unhosted += 1
+            msg = (f"{op['id']} ({op.get('kind_v5', '?')}): UNHOSTED — "
+                   f"no wall or colinear gap matches the user-paint "
+                   f"position. Door/window will NOT render. Painter "
+                   f"must adjust blob OR add a human-annotated wall.")
+        elif shift > SHIFT_FAIL_PT:
+            sev = "FAIL"
+            n_shift_fail += 1
+            msg = (f"{op['id']} ({op.get('kind_v5', '?')}): "
+                   f"shift={shift:.2f}pt > {SHIFT_FAIL_PT}pt FAIL "
+                   f"threshold (mode={mode}, host={ha.get('gap_id') or op.get('wall_id')}). "
+                   f"User-paint position drifted too far from any wall/gap; review required.")
+        elif shift > SHIFT_WARN_PT:
+            sev = "WARN"
+            n_shift_warn += 1
+            msg = (f"{op['id']} ({op.get('kind_v5', '?')}): "
+                   f"shift={shift:.2f}pt > {SHIFT_WARN_PT}pt advisory "
+                   f"(mode={mode}, host={ha.get('gap_id') or op.get('wall_id')}).")
+        else:
+            sev = "PASS"
+            msg = (f"{op['id']} ({op.get('kind_v5', '?')}): "
+                   f"mode={mode} host={ha.get('gap_id') or op.get('wall_id')} "
+                   f"shift={shift:.2f}pt drawn={drawn} carved={carved}")
+        findings.append(Finding(
+            check_id=f"C-H{next_id}",
+            severity=sev,
+            message=msg,
+            evidence={
+                "opening_id": op["id"],
+                "kind": op.get("kind_v5"),
+                "mode": mode,
+                "shift_pt": shift,
+                "drawn": drawn,
+                "carved": carved,
+                "host_wall_id": op.get("wall_id"),
+                "gap_id": ha.get("gap_id"),
+                "original_center_pdf": ha.get("original_center_pdf"),
+                "adjusted_center_pdf": ha.get("adjusted_center_pdf"),
+            },
+        ))
+        next_id += 1
+
+    # Aggregate hosting metrics
+    findings.append(Finding(
+        check_id=f"C-H{next_id}",
+        severity="PASS" if (n_drawn == total_actual and n_unhosted == 0) else "FAIL",
+        message=(f"Hosting summary: drawn={n_drawn}/{total_actual}, "
+                  f"carved={n_carved}/{total_actual}, "
+                  f"unhosted={n_unhosted}/{total_actual}"),
+        evidence={
+            "drawn": n_drawn,
+            "carved": n_carved,
+            "unhosted": n_unhosted,
+            "shift_warn": n_shift_warn,
+            "shift_fail": n_shift_fail,
+        },
+    ))
+    next_id += 1
+
+    # Explicit constraints
     constraints = truth.get("explicit_constraints", [])
     for i, c in enumerate(constraints):
-        cid = f"C-H{5 + i}"
+        cid = f"C-H{next_id + i}"
         kind = c.get("kind")
         region = c.get("search_region_pts")
         policy = c.get("policy", "require_present")
