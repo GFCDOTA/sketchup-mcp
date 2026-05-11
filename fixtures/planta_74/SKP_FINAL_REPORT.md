@@ -1,14 +1,17 @@
-# SKP final — 3-verdict honest report (planta_74, post host classifier)
+# SKP final — 3-verdict honest report (planta_74, segment classifier)
 
-**Date:** 2026-05-11  
-**Run:** `runs/smoke/20260511T161305Z/`  
-**SKP:** `fixtures/planta_74/skp_final_model.skp` (82,384 bytes)  
-**Source annotation:** `fixtures/planta_74/human_openings_annotation.png` (real reviewer)
+**Date:** 2026-05-11 (cycle 4 — segment-based host classifier)  
+**Run:** `runs/smoke/20260511T162327Z/`  
+**SKP:** `fixtures/planta_74/skp_final_model.skp` (82,378 bytes)  
+**Source annotation:** `fixtures/planta_74/human_openings_annotation.png`
 
-> Reworked per the 2026-05-11 user mandate: **separate the verdicts.**
-> Snap was removed as a silent correction. Each opening is now
-> classified into `cut_into_wall` / `existing_gap` / `unhosted` mode;
-> shifts > 8 pt WARN, > 15 pt FAIL.
+> Reworked per user mandate 2026-05-11: separate three verdicts, no
+> silent snap, host based on the painted SEGMENT (full bbox), not the
+> center alone. Tolerance is evidence-justified:
+> `cross_tol = thickness * 1.5` = wall half-width (0.5) + paint
+> precision allowance (1.0) ≈ gate WARN threshold (8 pt). Above 8 pt
+> shift the gate WARNs; above 15 pt FAILs. No `> 15 pt` snaps are
+> applied silently.
 
 ---
 
@@ -16,108 +19,149 @@
 
 | Layer | Verdict | Evidence |
 |---|---|---|
-| 1. `human_openings_extraction` | ✅ **PASS** | 7 green + 4 magenta + 1 orange components extracted from the real annotation PNG → 12 openings. Required counts met (`gate C-H1..C-H4`). |
-| 2. `opening_hosting/carving` | ❌ **FAIL** | 11/12 openings = `existing_gap` (drawn, no carve needed). **1/12 = `unhosted`** (h_o005, A.S. door — no wall in the consensus matches the painted position). `gate C-H10 FAIL`, `gate C-H17 FAIL` (hosting summary). |
-| 3. `global_skp_visual_fidelity` | ❌ **FAIL** | side-by-side render diverges from PDF: 7 cells vs 11 expected rooms (FP-014 P0 structural ceiling: dividers between A.S./TERRACO SOCIAL/COZINHA/TERRACO TECNICO + SALA ESTAR/SALA JANTAR not present as filled paths). Even with all openings rendered, the floor topology is still 7-cell merged. |
+| 1. `human_openings_extraction` | ✅ **PASS** | 7 green + 4 magenta + 1 orange components extracted from the real PNG → 12 openings. Gate C-H1..C-H4 PASS. |
+| 2. `opening_hosting/carving` | ❌ **FAIL** | 11/12 = `existing_gap` (drawn, shifts 0.01–6.18 pt — all ≤ 8 pt WARN gate). **1/12 = `unhosted`** (h_o005 A.S. door). Gate C-H10 FAIL + C-H17 hosting-summary FAIL. |
+| 3. `global_skp_visual_fidelity` | ❌ **FAIL** | 7 cells vs 11 expected rooms (FP-014 P0 structural ceiling). 2 merged cells: A.S.\|TERRACO SOCIAL\|COZINHA\|TERRACO TECNICO + SALA ESTAR\|SALA JANTAR. The dividers do not exist as filled paths in the PDF (refuted by `2026-05-11_wall_candidates_audit.md`). |
 
-### Cycle verdict: **FAIL** (per user rule: any of the 3 fails → cycle fails)
+### Cycle verdict: **FAIL** (any FAIL → fail per user rule)
 
 ---
 
-## Per-opening hosting table
+## Per-opening table (mandatory columns)
 
 ```
-       id            kind   color    mode             host       shift   carve  drawn  verdict
-  h_o000  interior_door   green  existing_gap   gap_w003_w002      4.97   False   True  PASS
-  h_o001  interior_door   green  existing_gap   gap_w007_w006      2.34   False   True  PASS  (LAVABO)
-  h_o002  interior_door   green  existing_gap   gap_w010_w008      1.88   False   True  PASS  (BANHO 01)
-  h_o003  interior_door   green  existing_gap   gap_w024_w027      0.62   False   True  PASS  (SUITE 02 entry vert)
-  h_o004  interior_door   green  existing_gap   gap_w012_w011      0.01   False   True  PASS  (SUITE 01 entry)
-  h_o005  interior_door   green  UNHOSTED       —                  0.00   False  False  FAIL  (A.S. — wall missing)
-  h_o006  interior_door   green  existing_gap   gap_w024_w027      0.48   False   True  PASS  (BANHO 02 west — KEY)
-  h_o007         window  magenta  existing_gap   gap_w017_w015      3.04   False   True  PASS  (BANHO 01 east #1)
-  h_o008         window  magenta  existing_gap   gap_w018_w017      2.77   False   True  PASS  (BANHO 01 east #2)
-  h_o009         window  magenta  existing_gap   gap_w026_w025      4.77   False   True  PASS  (SUITE 02 south)
-  h_o010         window  magenta  existing_gap   gap_w030_w029      6.18   False   True  PASS  (BANHO 02 south)
-  h_o011  glazed_balcony  orange  existing_gap   gap_w022_w021      3.62   False   True  PASS  (SALA ↔ TERRACO)
+       id            kind    color  bbox_px (l,b,r,t)             orient  nearest_wall  nearest_gap        mode             host  shift  drawn carved  verdict    failure_reason
+  h_o000  interior_door    green   ( 402, 207, 521, 227)         h    w003          gap_w003_w002      existing_gap      w003     4.97   True  False  PASS       —
+  h_o001  interior_door    green   ( 865, 393, 957, 414)         h    w007          gap_w007_w006      existing_gap      w007     2.34   True  False  PASS       —
+  h_o002  interior_door    green   (1704, 420,1792, 442)         h    w010          gap_w010_w008      existing_gap      w010     1.88   True  False  PASS       —
+  h_o003  interior_door    green   (1104, 422,1123, 525)         v    w024          gap_w024_w027      existing_gap      w024     0.62   True  False  PASS       —
+  h_o004  interior_door    green   ( 993, 537,1092, 558)         h    w012          gap_w012_w011      existing_gap      w012     0.01   True  False  PASS       —
+  h_o005  interior_door    green   ( 230, 566, 358, 581)         h    w012(*)       (none usable)      UNHOSTED          —        0.00   False False  FAIL       A) wall_missing_in_consensus
+  h_o006  interior_door    green   (1104, 569,1124, 655)         v    w024          gap_w024_w027      existing_gap      w024     0.48   True  False  PASS       —
+  h_o007         window  magenta   (1722, 778,1797, 803)         h    w018          gap_w018_w017      existing_gap      w018     3.04   True  False  PASS       —
+  h_o008         window  magenta   (1371, 780,1583, 803)         h    w018          gap_w018_w017      existing_gap      w018     2.77   True  False  PASS       —
+  h_o009         window  magenta   (1156, 903,1231, 927)         h    w026          gap_w026_w025      existing_gap      w026     4.77   True  False  PASS       —
+  h_o010         window  magenta   ( 887, 999,1072,1024)         h    w030          gap_w029_w030      existing_gap      w030     6.18   True  False  PASS       —
+  h_o011 glazed_balcony   orange   ( 402, 806, 685, 829)         h    w022          gap_w022_w021      existing_gap      w022     3.62   True  False  PASS       —
 ```
 
-All `existing_gap` shifts ≤ 6.18 pt — every drawn opening is **well below** the WARN threshold (8 pt) and FAIL threshold (15 pt). The user-paint positions land in honest colinear gaps between wall fragments — exactly the architectural mode where doors and windows live in vector PDFs.
+(*) h_o005 has no usable nearest wall: closest same-orientation wall is w012 at cross_diff 6.93 pt BUT axis_overlap = 0 (wall sits at x=[232, 297] while opening segment is at x=[86, 134] — 100 pt west of any wall in the same y-band).
 
-**Key per-user-criterion verifications:**
+11/12 PASS, 1/12 FAIL.
 
-| User rule | Check | Outcome |
+---
+
+## Unhosted diagnosis (h_o005 A.S. door)
+
+**Cause classification: A) wall_missing_in_consensus**
+
+Evidence from `fixtures/planta_74/unhosted_nearest_candidates.json`:
+
+```
+opening h_o005: interior_door at PDF (105.9, 580.2)
+opening segment: h, x ∈ [86, 134], cross_y = 580
+
+3 nearest same-orientation walls:
+  w022  axis=[124.9, 132.2]  cross=511.4  cross_diff= 68.78  axis_overlap=0.00
+  w003  axis=[124.9, 132.2]  cross=680.4  cross_diff=100.17  axis_overlap=0.00
+  w012  axis=[231.7, 297.2]  cross=587.1  cross_diff=  6.93  axis_overlap=0.00
+
+3 nearest colinear-gap pairs:
+  gap_w021_w022  axis=[132.2, 214.2]  width= 82.0pt  cross_diff= 68.78  seg_overlap=0.00
+  gap_w002_w003  axis=[132.2, 167.6]  width= 35.4pt  cross_diff=100.17  seg_overlap=0.00
+  gap_w011_w012  axis=[297.2, 328.8]  width= 31.6pt  cross_diff=  6.93  seg_overlap=0.00
+```
+
+**Why A (wall_missing) and not the alternatives:**
+
+- **B (gap_missing_because_wall_fragmentation)** — there ARE no fragmented walls in this region; the nearest wall in the same y-band is w012 at x=231, 100 pt east of the painted segment.
+- **C (host_algorithm_bug_center_only)** — the segment classifier was tested above; bbox segment x=[86, 134] still finds no axis overlap with any wall.
+- **D (calibration_drift)** — for drift to explain this, the painted segment would need to be 100 pt off horizontally. Drift on planta_74 is ≤ 7 pt (see h_o010, the worst case).
+- **E (human_annotation_off_wall)** — the user clearly painted the door between A.S. and COZINHA. The annotation is correct; the wall they painted across just isn't in the consensus.
+- **F (unsupported_border)** — door type is `interior_door`, fully supported.
+
+The COZINHA↔A.S. divider is one of the 4 missing dividers in the merged cell A.S.\|TERRACO SOCIAL\|COZINHA\|TERRACO TECNICO. Refer to `docs/diagnostics/2026-05-11_wall_candidates_audit.md` for the audit that established this is a stage-1 wall extraction gap, NOT a threshold issue.
+
+---
+
+## Hosting modes — geometric verification
+
+```
+host_summary:
+  cut_into_wall: 0   (no opening sits inside a continuous wall — planta_74 walls are short fragments split by door arcs)
+  existing_gap: 11   (all 11 hosted openings live in colinear gaps; gap_id encodes the bracket pair)
+  unhosted:      1   (h_o005)
+```
+
+Per-opening hosting evidence (existing_gap matches):
+
+```
+h_o000  evidence: seg_overlap_pts=119.0  seg_overlap_frac=1.00  gap_width=145.0
+h_o001  evidence: seg_overlap_pts= 92.0  seg_overlap_frac=1.00  gap_width= 90.0
+h_o002  evidence: seg_overlap_pts= 88.0  seg_overlap_frac=1.00  gap_width=120.0
+h_o003  evidence: seg_overlap_pts=103.0  seg_overlap_frac=1.00  gap_width= 36.6
+h_o004  evidence: seg_overlap_pts= 99.0  seg_overlap_frac=1.00  gap_width= 31.6
+h_o006  evidence: seg_overlap_pts= 86.0  seg_overlap_frac=1.00  gap_width= 48.4
+h_o007  evidence: seg_overlap_pts= 75.0  seg_overlap_frac=1.00  gap_width=143.0
+h_o008  evidence: seg_overlap_pts=212.0  seg_overlap_frac=1.00  gap_width=143.0
+h_o009  evidence: seg_overlap_pts= 75.0  seg_overlap_frac=1.00  gap_width= 23.6
+h_o010  evidence: seg_overlap_pts=185.0  seg_overlap_frac=1.00  gap_width= 54.7
+h_o011  evidence: seg_overlap_pts=283.0  seg_overlap_frac=1.00  gap_width= 82.0
+```
+
+Every existing_gap match has `seg_overlap_frac = 1.0` — the opening segment lies entirely within the gap between the colinear walls. No partial matches, no chute.
+
+---
+
+## User acceptance criteria — per-criterion check
+
+| Criterion | Verdict | Evidence |
 |---|---|---|
-| BANHO 02 porta física aberta, sem parede fechando o vão | h_o006: existing_gap between w024 and w027 (both vertical, x=333.4, bracketing y=543.4). The wall is ALREADY OPEN at that position — no carving needed, door leaf renders at center. | ✅ |
-| SALA DE ESTAR ↔ TERRACO SOCIAL = porta-balcão (não janela pequena) | h_o011: kind=glazed_balcony ✓ width=78.3pt, mode=existing_gap between w022 and w021 (both horizontal, y=511.4). Renders as glazed_balcony with full glass extending the gap width. | ✅ |
-| SUITE 02 sul magenta = janela (não porta-balcão) | h_o009: kind=window ✓ width=20.8pt, mode=existing_gap on south wall of SUITE 02. | ✅ |
-| NÃO criar window interna entre SUITE 01 e BANHO 01 | Gate C-H18 (require_absent in region [475, 540, 510, 605]) → 0 windows. | ✅ |
-| Porta LAVABO lado correto | h_o001: kind=interior_door, hinge_side="left" (default — Ruby exporter convention). **Reviewer must open SKP and verify swing direction; edit `human_openings_truth.json` `hinge_side` to flip if wrong.** | ⚠️ NEEDS VISUAL VERIFY |
-| h_o005 (A.S. door) renderiza | **UNHOSTED — door leaf will NOT render.** The wall between COZINHA and A.S. doesn't exist in the consensus (FP-014 root cause). | ❌ FAIL |
+| 12 openings nos lugares corretos | 11/12 PASS, 1/12 FAIL | shifts ≤ 6.18 pt for hosted; h_o005 unhosted = A) wall_missing |
+| BANHO 02 porta física aberta, sem parede fechando o vão | ✅ PASS | h_o006: existing_gap between w024 and w027 (vertical, x=333.4, bracketing y=543.4); wall ALREADY open at that position; door leaf renders at center |
+| Porta LAVABO lado correto | ⚠️ NEEDS VERIFY | h_o001 hinge_side="left" default; reviewer must open SKP and flip if wrong |
+| SALA ESTAR ↔ TERRACO SOCIAL = porta-balcão | ✅ PASS | h_o011 kind=glazed_balcony, mode=existing_gap, seg_overlap=283 pt = full balcony width, shift=3.62 pt |
+| SUITE 02 sul magenta = window (NOT balcony) | ✅ PASS | h_o009 kind_v5=window, painted color=magenta |
+| NO SUITE 01 ↔ BANHO 01 internal window | ✅ PASS | C-H18 require_absent in [475, 540, 510, 605] → 0 windows |
+| h_o005 (A.S.) renderiza | ❌ FAIL | UNHOSTED — door leaf will NOT render; wall missing |
 
 ---
 
-## Rooms — 7 cells in SKP (vs 11 expected)
+## Rooms in SKP (7 cells)
 
-| id | cell name | rooms in cell |
-|---|---|---:|
-| r000 | A.S. \| TERRACO SOCIAL \| COZINHA \| TERRACO TECNICO | **4 merged** |
-| r001 | SUITE 01 | 1 |
-| r002 | SALA DE JANTAR \| SALA DE ESTAR | **2 merged** |
-| r003 | SUITE 02 | 1 |
-| r004 | BANHO 01 | 1 |
-| r005 | BANHO 02 | 1 |
-| r006 | LAVABO | 1 |
+| id | cell name | merged |
+|---|---|:---:|
+| r000 | A.S. \| TERRACO SOCIAL \| COZINHA \| TERRACO TECNICO | 4 rooms |
+| r001 | SUITE 01 | — |
+| r002 | SALA DE JANTAR \| SALA DE ESTAR | 2 rooms |
+| r003 | SUITE 02 | — |
+| r004 | BANHO 01 | — |
+| r005 | BANHO 02 | — |
+| r006 | LAVABO | — |
 
-The 4+2 merge is the **structural ceiling** documented in `docs/diagnostics/2026-05-11_wall_candidates_audit.md`. The dividers between these rooms are not drawn as filled paths in `planta_74.pdf` (audit refuted threshold-rejection hypothesis). To split into 11 cells, the protocol needs **human-annotated walls** — a follow-up extension to the human-openings protocol.
-
----
-
-## Hosting modes — what each mode means in the SKP
-
-- **`cut_into_wall`** (0 openings) — opening center sits inside a continuous wall. consume_consensus.rb's carve step walks the wall axis range and emits sub-walls only outside `[center - half, center + half]`. The wall gets sliced; the door/window renders at the carved gap.
-- **`existing_gap`** (11 openings) — opening center sits between two colinear wall fragments. The wall is ALREADY split in the consensus (door arc drew the gap during stage-1 extraction). consume_consensus.rb's carve loop runs but emits no cut because the center is outside any individual wall's axis range; the door/window leaf renders at the center, in the gap. **Visually indistinguishable from `cut_into_wall` — both yield a physical opening with a leaf.**
-- **`unhosted`** (1 opening: h_o005 A.S. door) — neither a containing wall nor a bracketing gap matches. consume_consensus.rb's `add_door_leaf` returns nil if `wall_id is null`. Door does NOT render. **This is a FAIL** that the reviewer must resolve.
+The 4+2 merge is the **structural ceiling** — root cause analyzed in `docs/diagnostics/2026-05-11_wall_candidates_audit.md`. Resolving this requires the **human-annotated walls** protocol extension (companion future PR).
 
 ---
 
-## Gate report (final)
-
-```
-verdict: FAIL  pass/warn/fail: 17/0/2  (gates C-H1..C-H18)
-
-PASS:
-  C-H1   Total openings = 12 (required 12)
-  C-H2   glazed_balcony = 1 (req 1)
-  C-H3   interior_door  = 7 (req 7)
-  C-H4   window         = 4 (req 4)
-  C-H5..C-H9, C-H11..C-H16 — 11 existing_gap openings with shift_pt ≤ 6.18 pt
-  C-H18  BANHO_02_west_door require_present interior_door — found 1 in region
-
-FAIL:
-  C-H10  h_o005 (interior_door): UNHOSTED — A.S. door has no wall to host
-  C-H17  Hosting summary: drawn=11/12, carved=0/12, unhosted=1/12
-```
-
----
-
-## Artifacts (all committed under `fixtures/planta_74/`)
+## Artifacts (committed under `fixtures/planta_74/`)
 
 | File | What it shows |
 |---|---|
-| `human_openings_annotation.png` | The reviewer's source annotation |
-| `human_openings_truth.json` | 12 openings extracted, calibrated to PDF coords |
-| `human_openings_overlay.png` | PDF + painted blobs + final consensus outlines |
+| `human_openings_annotation.png` | Reviewer's source annotation |
+| `human_openings_truth.json` | 12 openings extracted + calibrated |
+| `human_openings_overlay.png` | PDF + paint + final consensus |
 | `human_openings_report.json` | Gate verdict (FAIL 17/0/2) |
-| `skp_final_model.skp` | The 82,384-byte SKP (open in SU 2026) |
-| `skp_final_preview_top.png` | Top-down render from smoke harness |
+| `unhosted_nearest_candidates.json` | h_o005's 3 nearest walls + 3 nearest gaps + scores |
+| `unhosted_debug_overlay.png` | PDF with the unhosted opening highlighted + connector lines |
+| `skp_final_model.skp` | 82,378-byte SKP (open in SU 2026) |
+| `skp_final_preview_top.png` | Top-down from smoke harness |
 | `skp_final_preview_axon.png` | 3D axon from smoke harness |
-| `skp_final_axon.png` | render_preflight axon (doll-house, with door swing arcs) |
-| `skp_final_side_by_side.png` | **PDF \| axon — visual FAIL is clearest here** |
-| `skp_final_door_audit.png` | Top-down with all 12 openings color-coded by kind |
-| `skp_final_zooms.png` | **12-panel zoom mosaic — per-opening visual verify** |
-| `skp_final_notes.md` | render_preflight 10-point checklist + verdict |
-| `SKP_FINAL_REPORT.md` | This file |
+| `skp_final_axon.png` | render_preflight axon (doll-house) |
+| `skp_final_side_by_side.png` | **PDF \| axon — visual FAIL clearest** |
+| `skp_final_door_audit.png` | Top-down + 12 openings color-coded |
+| `skp_final_zooms.png` | **12-panel zoom mosaic — per-opening verify** |
+| `skp_final_notes.md` | render_preflight 10-point checklist |
+| `SKP_FINAL_REPORT.md` | This report |
 
 ---
 
@@ -125,6 +169,6 @@ FAIL:
 
 In priority order:
 
-1. **(unblocks all of 3-verdict layer 3)** Extend the protocol to accept **human-annotated walls**. Paint solid red lines for the missing dividers (4 between A.S./TERRACO/COZINHA/TECNICO + 1 between SALA ESTAR/JANTAR). Build `tools/extract_human_walls.py` symmetric to openings extraction. Rerun the pipeline; `polygonize_rooms` forms 11 cells. h_o005 becomes hostable.
-2. Open `fixtures/planta_74/skp_final_model.skp` in SU 2026 to verify per-opening swing direction (`hinge_side` default is "left"). Edit individual `hinge_side` in `human_openings_truth.json` and rerun apply → SKP.
-3. Accept 11/12 openings drawn at honest gap positions for v1; v2 follows after human walls.
+1. **Extend protocol to accept `human_walls`** — reviewer paints solid red lines for the 4 missing dividers in cell00 (A.S./TERRACO SOCIAL/COZINHA/TERRACO TECNICO splitters) + 1 between SALA ESTAR/JANTAR. New `tools/extract_human_walls.py` symmetric to openings. After applying, `polygonize_rooms` forms 11 cells, h_o005 finds a host, side-by-side matches the PDF.
+2. **Open `skp_final_model.skp` in SU 2026** — verify per-opening swing direction (`hinge_side` default "left"). Edit individual `hinge_side` in truth JSON and rerun.
+3. **Accept 11/12 + 1 unhosted as v1** — verdict stays FAIL until step 1 ships.

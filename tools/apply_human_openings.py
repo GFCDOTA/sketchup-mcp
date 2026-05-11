@@ -103,15 +103,19 @@ def _find_existing_gap(center: list[float],
     if the user painted on the colinear axis).
 
     Returns (None, inf, "") if no plausible gap matches.
+
+    Note: this is the LEGACY center-based path. The segment-based
+    classifier in ``classify_opening_host_segment`` is preferred for
+    real human annotations because the user paints a BBOX not a point;
+    using the full segment catches matches the center alone misses.
+    Kept here for synthetic-test backward compatibility.
     """
     cx, cy = float(center[0]), float(center[1])
-    # Colinearity tolerance: how far the user-paint cross-axis can be
-    # from a candidate wall row. thickness*1.5 = the brush-paint width
-    # plus auto-calibrate drift typical of a 1999x1307 -> 595x842 map
-    # (empirical: cross-axis diffs of 4-7 pt observed on planta_74).
-    # Tighter values miss legitimate gap matches; looser values over-
-    # match neighbouring wall rows.
-    coll_tol = thickness * 1.5
+    # Colinearity tolerance: the wall has thickness/2 on each side of
+    # its centerline; allow paint anywhere within the wall's filled
+    # rectangle as "on the colinear band". No global multiplier — the
+    # evidence is the wall thickness itself.
+    coll_tol = thickness * 0.6
     # Filter walls by orientation matching the opening
     same_ori = [w for w in walls
                  if w.get("orientation") == opening_orientation]
@@ -186,6 +190,292 @@ def _find_existing_gap(center: list[float],
             if axis_max <= cy <= axis_max + thickness:
                 return w, abs(cross - cx), f"gap_after_{w['id']}"
     return None, float("inf"), ""
+
+
+def _opening_segment(opening: dict) -> tuple[str, float, float, float]:
+    """Derive the architectural SEGMENT covered by the painted blob.
+
+    For an h opening with bbox [x0, y0, x1, y1]:
+        returns ("h", x0, x1, (y0+y1)/2)   # axis [x0..x1] at cross_y
+    For a v opening:
+        returns ("v", y0, y1, (x0+x1)/2)   # axis [y0..y1] at cross_x
+
+    Falls back to a degenerate segment of width = opening_width_pts
+    centered on center_pts when bbox is absent.
+    """
+    orient = opening.get("orientation", "h")
+    bbox = opening.get("bbox_pts")
+    if bbox and len(bbox) == 4:
+        x0, y0, x1, y1 = [float(v) for v in bbox]
+        if orient == "h":
+            return ("h", min(x0, x1), max(x0, x1), (y0 + y1) / 2.0)
+        return ("v", min(y0, y1), max(y0, y1), (x0 + x1) / 2.0)
+    # Fallback from center + width
+    c = opening.get("center_pts") or opening.get("center") or [0.0, 0.0]
+    w = float(opening.get("opening_width_pts", 0))
+    if orient == "h":
+        return ("h", float(c[0]) - w / 2, float(c[0]) + w / 2, float(c[1]))
+    return ("v", float(c[1]) - w / 2, float(c[1]) + w / 2, float(c[0]))
+
+
+def _wall_axis_range(w: dict) -> tuple[float, float, float, str]:
+    """Return (axis_min, axis_max, cross, orientation) for a wall."""
+    sx, sy = float(w["start"][0]), float(w["start"][1])
+    ex, ey = float(w["end"][0]), float(w["end"][1])
+    if w.get("orientation") == "h":
+        return (min(sx, ex), max(sx, ex), sy, "h")
+    return (min(sy, ey), max(sy, ey), sx, "v")
+
+
+def _nearest_candidates(opening: dict,
+                         walls: list[dict],
+                         thickness: float,
+                         top_n: int = 3) -> list[dict]:
+    """Diagnose: list the N nearest walls + colinear-gap candidates
+    that COULD host this opening, sorted by a composite distance.
+    Used in unhosted reports.
+    """
+    orient, axis_lo, axis_hi, cross = _opening_segment(opening)
+    cands: list[dict] = []
+    # Same-orientation walls
+    for w in walls:
+        if w.get("orientation") != orient:
+            continue
+        a0, a1, wcross, _ = _wall_axis_range(w)
+        cross_diff = abs(wcross - cross)
+        # Axis overlap of opening segment vs wall axis range
+        overlap = max(0.0, min(a1, axis_hi) - max(a0, axis_lo))
+        cands.append({
+            "kind": "wall",
+            "wall_id": w["id"],
+            "wall_axis_range": [round(a0, 3), round(a1, 3)],
+            "wall_cross": round(wcross, 3),
+            "cross_diff": round(cross_diff, 3),
+            "axis_overlap_pts": round(overlap, 3),
+            "score": round(cross_diff + max(0, axis_lo - a1) + max(0, a0 - axis_hi), 3),
+        })
+    # Sort walls by score (lower = closer)
+    cands.sort(key=lambda c: c["score"])
+    nearest_walls = cands[:top_n]
+
+    # Same-orientation wall pairs (gaps)
+    gap_cands: list[dict] = []
+    same_ori = [w for w in walls if w.get("orientation") == orient]
+    for i, wa in enumerate(same_ori):
+        for wb in same_ori[i + 1:]:
+            a0, a1, ca, _ = _wall_axis_range(wa)
+            b0, b1, cb, _ = _wall_axis_range(wb)
+            # Same cross-axis within thickness
+            cross_diff_a = abs(ca - cross)
+            cross_diff_b = abs(cb - cross)
+            cross_diff = (cross_diff_a + cross_diff_b) / 2
+            if abs(ca - cb) > thickness * 0.6:
+                continue  # not colinear
+            # Gap range
+            if a1 <= b0:
+                gap_lo, gap_hi = a1, b0
+            elif b1 <= a0:
+                gap_lo, gap_hi = b1, a0
+            else:
+                continue  # walls overlap, no gap
+            gap = gap_hi - gap_lo
+            if gap <= 0:
+                continue
+            # Opening segment overlap with gap
+            seg_overlap = max(0.0, min(gap_hi, axis_hi) - max(gap_lo, axis_lo))
+            gap_cands.append({
+                "kind": "gap",
+                "gap_id": f"gap_{wa['id']}_{wb['id']}",
+                "walls": [wa["id"], wb["id"]],
+                "gap_axis_range": [round(gap_lo, 3), round(gap_hi, 3)],
+                "gap_width_pts": round(gap, 3),
+                "cross_diff": round(cross_diff, 3),
+                "seg_overlap_pts": round(seg_overlap, 3),
+                "score": round(cross_diff
+                                + max(0, axis_lo - gap_hi)
+                                + max(0, gap_lo - axis_hi), 3),
+            })
+    gap_cands.sort(key=lambda c: c["score"])
+    nearest_gaps = gap_cands[:top_n]
+    return nearest_walls + nearest_gaps
+
+
+def classify_opening_host_segment(opening: dict,
+                                    walls: list[dict],
+                                    thickness: float,
+                                    *,
+                                    cross_tol_factor: float = 1.5,
+                                    min_axis_overlap_frac: float = 0.5
+                                    ) -> dict:
+    """Segment-based host classifier (preferred over center-only).
+
+    Derives the opening's architectural segment from its bbox and
+    compares it to wall geometry:
+
+    1. cut_into_wall — a SINGLE same-orientation wall whose filled
+       rectangle COVERS the opening's segment. Requires:
+       a. cross-axis distance ≤ thickness * cross_tol_factor.
+          cross_tol_factor = 1.5 by design — wall half-width (0.5)
+          + paint-precision allowance (1.0) = the maximum
+          perpendicular distance an honest user-paint can land from
+          the wall centerline. This EQUALS the gate's WARN threshold
+          (shift_pt > 8 ≈ thickness * 1.5 on planta_74), so anything
+          the classifier accepts is still inspected by the gate.
+       b. axis overlap of opening segment vs wall axis range ≥
+          min_axis_overlap_frac (default 0.5) of opening length.
+
+    2. existing_gap — a PAIR of colinear same-orientation walls
+       whose CROSS axes are within thickness * cross_tol_factor AND
+       whose axis gap contains the opening segment with overlap ≥
+       min_axis_overlap_frac.
+
+    3. unhosted — neither matches. Returns nearest candidates for
+       diagnostic (cause classification A-F per the audit protocol).
+
+    Returns a dict with the same shape as classify_opening_host plus:
+        "nearest_candidates": [...]  (for unhosted, 3 walls + 3 gaps)
+        "evidence": {...}            (for matched, what passed)
+    """
+    orient, axis_lo, axis_hi, cross = _opening_segment(opening)
+    seg_len = max(axis_hi - axis_lo, 0.001)
+    center_axis = (axis_lo + axis_hi) / 2.0
+    if orient == "h":
+        center = [center_axis, cross]
+    else:
+        center = [cross, center_axis]
+
+    cross_tol = thickness * cross_tol_factor
+    # 1) cut_into_wall — single wall covering segment
+    same_ori = [w for w in walls if w.get("orientation") == orient]
+    best_wall: dict | None = None
+    best_axis_overlap = 0.0
+    best_cross_diff = float("inf")
+    for w in same_ori:
+        a0, a1, wcross, _ = _wall_axis_range(w)
+        cd = abs(wcross - cross)
+        if cd > cross_tol:
+            continue
+        overlap = max(0.0, min(a1, axis_hi) - max(a0, axis_lo))
+        if overlap / seg_len < min_axis_overlap_frac:
+            continue
+        # Prefer wall with most overlap; tie-break by cross_diff
+        if overlap > best_axis_overlap or (
+            overlap == best_axis_overlap and cd < best_cross_diff
+        ):
+            best_wall = w
+            best_axis_overlap = overlap
+            best_cross_diff = cd
+    if best_wall:
+        # Adjust opening center to lie on the wall's centerline
+        a0, a1, wcross, _ = _wall_axis_range(best_wall)
+        if orient == "h":
+            adjusted = [center_axis, wcross]
+        else:
+            adjusted = [wcross, center_axis]
+        shift = ((adjusted[0] - center[0]) ** 2
+                 + (adjusted[1] - center[1]) ** 2) ** 0.5
+        return {
+            "mode": "cut_into_wall",
+            "host_wall_id": best_wall["id"],
+            "gap_id": None,
+            "original_center_pdf": list(center),
+            "adjusted_center_pdf": adjusted,
+            "shift_pt": round(shift, 3),
+            "carved": True,
+            "drawn": True,
+            "evidence": {
+                "axis_overlap_pts": round(best_axis_overlap, 3),
+                "axis_overlap_frac": round(best_axis_overlap / seg_len, 3),
+                "cross_diff_pts": round(best_cross_diff, 3),
+                "cross_tol_pts": round(cross_tol, 3),
+            },
+        }
+
+    # 2) existing_gap — colinear pair bracketing segment.
+    # gap_tol = distance between the 2 bracket walls' own cross axes
+    # (NOT distance from opening). Two walls are colinear if their own
+    # cross coords match within thickness*0.6 (less than a full wall
+    # thickness — they're truly on the same row).
+    gap_tol = thickness * 0.6
+    best_pair = None
+    best_seg_overlap = 0.0
+    best_cross_pair = float("inf")
+    for i, wa in enumerate(same_ori):
+        a0, a1, ca, _ = _wall_axis_range(wa)
+        if abs(ca - cross) > cross_tol:
+            continue
+        for wb in same_ori[i + 1:]:
+            b0, b1, cb, _ = _wall_axis_range(wb)
+            if abs(cb - cross) > cross_tol:
+                continue
+            if abs(ca - cb) > gap_tol:
+                continue
+            # Determine gap
+            if a1 <= b0:
+                gap_lo, gap_hi = a1, b0
+                left, right = wa, wb
+            elif b1 <= a0:
+                gap_lo, gap_hi = b1, a0
+                left, right = wb, wa
+            else:
+                continue
+            gap = gap_hi - gap_lo
+            if gap <= 0:
+                continue
+            seg_overlap = max(0.0, min(gap_hi, axis_hi) - max(gap_lo, axis_lo))
+            if seg_overlap / seg_len < min_axis_overlap_frac:
+                continue
+            cross_pair = (abs(ca - cross) + abs(cb - cross)) / 2
+            if seg_overlap > best_seg_overlap or (
+                seg_overlap == best_seg_overlap and cross_pair < best_cross_pair
+            ):
+                best_pair = (left, right, gap_lo, gap_hi)
+                best_seg_overlap = seg_overlap
+                best_cross_pair = cross_pair
+    if best_pair:
+        left, right, gap_lo, gap_hi = best_pair
+        a0, a1, wcross, _ = _wall_axis_range(left)
+        if orient == "h":
+            adjusted = [center_axis, wcross]
+        else:
+            adjusted = [wcross, center_axis]
+        shift = ((adjusted[0] - center[0]) ** 2
+                 + (adjusted[1] - center[1]) ** 2) ** 0.5
+        return {
+            "mode": "existing_gap",
+            "host_wall_id": left["id"],
+            "gap_id": f"gap_{left['id']}_{right['id']}",
+            "original_center_pdf": list(center),
+            "adjusted_center_pdf": adjusted,
+            "shift_pt": round(shift, 3),
+            "carved": False,
+            "drawn": True,
+            "evidence": {
+                "seg_overlap_pts": round(best_seg_overlap, 3),
+                "seg_overlap_frac": round(best_seg_overlap / seg_len, 3),
+                "gap_width_pts": round(gap_hi - gap_lo, 3),
+                "cross_pair_avg_pts": round(best_cross_pair, 3),
+                "cross_tol_pts": round(cross_tol, 3),
+            },
+        }
+
+    # 3) unhosted — emit diagnostic
+    nearest = _nearest_candidates(opening, walls, thickness, top_n=3)
+    return {
+        "mode": "unhosted",
+        "host_wall_id": None,
+        "gap_id": None,
+        "original_center_pdf": list(center),
+        "adjusted_center_pdf": list(center),
+        "shift_pt": 0.0,
+        "carved": False,
+        "drawn": False,
+        "evidence": {
+            "cross_tol_pts": round(cross_tol, 3),
+            "min_axis_overlap_frac": min_axis_overlap_frac,
+        },
+        "nearest_candidates": nearest,
+    }
 
 
 def classify_opening_host(opening: dict,
@@ -271,9 +561,15 @@ def classify_opening_host(opening: dict,
 
 def apply_truth_to_consensus(consensus: dict,
                               truth: dict,
-                              mode: str = "replace") -> dict:
+                              mode: str = "replace",
+                              classifier: str = "segment") -> dict:
     """Return a new consensus dict with human openings applied + host
     classification stamped. Does NOT mutate the input dicts.
+
+    ``classifier`` selects ``"segment"`` (default; uses the painted
+    bbox as a full axis segment) or ``"center"`` (legacy; uses only
+    the bbox center, prone to missing matches when paint is slightly
+    off the wall row).
     """
     out = dict(consensus)
     walls = out.get("walls", [])
@@ -283,7 +579,10 @@ def apply_truth_to_consensus(consensus: dict,
     host_log: list[dict] = []
     for i, src in enumerate(truth.get("openings", [])):
         oid = f"h_o{i:03d}"
-        hosting = classify_opening_host(src, walls, thickness)
+        if classifier == "segment":
+            hosting = classify_opening_host_segment(src, walls, thickness)
+        else:
+            hosting = classify_opening_host(src, walls, thickness)
         adjusted = hosting["adjusted_center_pdf"]
         wall_id = hosting["host_wall_id"]
         hinge_side = src.get("hinge_side", "left")
@@ -323,7 +622,7 @@ def apply_truth_to_consensus(consensus: dict,
             op["wall_id"] = src["wall_id"]
             op["human_annotation"]["extractor_wall_id"] = src["wall_id"]
         human_openings.append(op)
-        host_log.append({
+        host_entry = {
             "opening_id": oid,
             "kind": kind,
             "mode": hosting["mode"],
@@ -334,7 +633,12 @@ def apply_truth_to_consensus(consensus: dict,
             "drawn_predicted": hosting["drawn"],
             "original_center_pdf": hosting["original_center_pdf"],
             "adjusted_center_pdf": hosting["adjusted_center_pdf"],
-        })
+        }
+        if "evidence" in hosting:
+            host_entry["evidence"] = hosting["evidence"]
+        if "nearest_candidates" in hosting:
+            host_entry["nearest_candidates"] = hosting["nearest_candidates"]
+        host_log.append(host_entry)
 
     if mode == "replace":
         out["openings"] = human_openings

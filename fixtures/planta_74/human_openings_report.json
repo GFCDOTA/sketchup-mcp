@@ -84,11 +84,11 @@
         "host_wall_id": "w007",
         "gap_id": "gap_w007_w006",
         "original_center_pdf": [
-          276.725,
-          625.584
+          276.7255,
+          625.5840000000001
         ],
         "adjusted_center_pdf": [
-          276.725,
+          276.7255,
           627.9210205078125
         ]
       }
@@ -108,7 +108,7 @@
         "gap_id": "gap_w010_w009",
         "original_center_pdf": [
           508.399,
-          618.241
+          618.2405
         ],
         "adjusted_center_pdf": [
           508.399,
@@ -124,13 +124,13 @@
         "opening_id": "h_o003",
         "kind": "interior_door",
         "mode": "existing_gap",
-        "shift_pt": 0.622,
+        "shift_pt": 0.621,
         "drawn": true,
         "carved": false,
         "host_wall_id": "w024",
         "gap_id": "gap_w024_w004",
         "original_center_pdf": [
-          332.775,
+          332.77549999999997,
           606.892
         ],
         "adjusted_center_pdf": [
@@ -153,11 +153,11 @@
         "host_wall_id": "w012",
         "gap_id": "gap_w012_w011",
         "original_center_pdf": [
-          313.123,
-          587.132
+          313.12300000000005,
+          587.1324999999999
         ],
         "adjusted_center_pdf": [
-          313.123,
+          313.12300000000005,
           587.1240539550781
         ]
       }
@@ -176,12 +176,12 @@
         "host_wall_id": "w022",
         "gap_id": null,
         "original_center_pdf": [
-          105.946,
-          580.19
+          105.9455,
+          580.1895
         ],
         "adjusted_center_pdf": [
-          105.946,
-          580.19
+          105.9455,
+          580.1895
         ]
       }
     },
@@ -211,7 +211,7 @@
     {
       "check_id": "C-H12",
       "severity": "PASS",
-      "message": "h_o007 (window): mode=existing_gap host=gap_w017_w016 shift=3.04pt drawn=True carved=False",
+      "message": "h_o007 (window): mode=existing_gap host=gap_w018_w016 shift=3.04pt drawn=True carved=False",
       "evidence": {
         "opening_id": "h_o007",
         "kind": "window",
@@ -219,11 +219,11 @@
         "shift_pt": 3.035,
         "drawn": true,
         "carved": false,
-        "host_wall_id": "w017",
-        "gap_id": "gap_w017_w016",
+        "host_wall_id": "w018",
+        "gap_id": "gap_w018_w016",
         "original_center_pdf": [
           511.582,
-          522.246
+          522.2455
         ],
         "adjusted_center_pdf": [
           511.582,
@@ -239,17 +239,17 @@
         "opening_id": "h_o008",
         "kind": "window",
         "mode": "existing_gap",
-        "shift_pt": 2.767,
+        "shift_pt": 2.768,
         "drawn": true,
         "carved": false,
         "host_wall_id": "w018",
         "gap_id": "gap_w018_w016",
         "original_center_pdf": [
-          433.389,
-          521.978
+          433.3885,
+          521.9784999999999
         ],
         "adjusted_center_pdf": [
-          433.389,
+          433.3885,
           519.2106323242188
         ]
       }
@@ -268,11 +268,11 @@
         "host_wall_id": "w026",
         "gap_id": "gap_w026_w025",
         "original_center_pdf": [
-          354.919,
+          354.9185,
           489.001
         ],
         "adjusted_center_pdf": [
-          354.919,
+          354.9185,
           484.2348175048828
         ]
       }
@@ -291,11 +291,11 @@
         "host_wall_id": "w030",
         "gap_id": "gap_w030_w029",
         "original_center_pdf": [
-          295.685,
+          295.6855,
           463.233
         ],
         "adjusted_center_pdf": [
-          295.685,
+          295.6855,
           457.05662536621094
         ]
       }
@@ -303,7 +303,7 @@
     {
       "check_id": "C-H16",
       "severity": "PASS",
-      "message": "h_o011 (glazed_balcony): mode=existing_gap host=gap_w022_w016 shift=3.62pt drawn=True carved=False",
+      "message": "h_o011 (glazed_balcony): mode=existing_gap host=gap_w022_w021 shift=3.62pt drawn=True carved=False",
       "evidence": {
         "opening_id": "h_o011",
         "kind": "glazed_balcony",
@@ -312,7 +312,7 @@
         "drawn": true,
         "carved": false,
         "host_wall_id": "w022",
-        "gap_id": "gap_w022_w016",
+        "gap_id": "gap_w022_w021",
         "original_center_pdf": [
           175.005,
           515.036
