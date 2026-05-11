@@ -288,6 +288,45 @@ explicitly running the command outside Claude.
 - (none open as of 2026-05-06; previous SHA256 + caminho-A items shipped)
 
 ### Recently fixed
+- **Human-openings ground-truth pipeline shipped** (2026-05-11, PRs #112+#113+#115+#116):
+  When a reviewer paints color blobs (#00ff00 green = interior_door,
+  #ff00ff magenta = window, #ffa500 orange = glazed_balcony) on a planta
+  render, the painted blobs are **mandatory ground truth** for openings —
+  the detector loses every conflict. 5-tool pipeline:
+  `tools/extract_human_openings.py` (image -> JSON via cv2 connected
+  components + nearest-wall projection),
+  `tools/apply_human_openings.py` (truth JSON -> consensus.openings with
+  `geometry_origin="human_annotation"`),
+  `tools/structural_checks_human.py` (C-H1..C-Hn gates: total + per-kind
+  counts + explicit positional constraints),
+  `tools/render_human_openings_overlay.py` (visual verification PNG),
+  `tools/run_human_openings_pipeline.py` (one-shot runner).
+  Schema: `fixtures/planta_74/human_openings_truth.schema.json`.
+  Protocol: `docs/learning/human_openings_truth_protocol.md`.
+  When `fixtures/planta_74/human_openings_annotation.png` exists, the
+  pipeline runs in one command:
+  `python -m tools.run_human_openings_pipeline`. **Never infer opening
+  positions from the image visually and write them as synthetic — that
+  recreates the fidelity-circular hallucination the protocol exists to
+  prevent.** The PNG IS the truth.
+
+  Related diagnostics this cycle:
+  - `docs/diagnostics/2026-05-11_wall_candidates_audit.md` — refutes
+    the wall-threshold-rejection hypothesis (planta_74 cluster 1
+    captures 33/37 candidates at 89% tight; rejected filled paths are
+    fixtures + legend, not dividers; stroked wall-like paths are
+    >70% hatches; centerline polygonize is strictly worse than
+    box-difference). The 7-room polygonize ceiling is HONEST given
+    the PDF; the missing dividers between A.S./TERRACO SOCIAL/COZINHA/
+    TERRACO TECNICO + SALA ESTAR/JANTAR genuinely don't exist as
+    geometry, only as semantics. Hence the human-openings protocol.
+  - `tools/polygonize_rooms.py` now consumes `consensus.soft_barriers`
+    in its `unary_union` (PR #112). `--polygonize-door-max` default
+    150pt (PR #113) bridges porta-vidro / glazed-balcony / peitoril
+    gaps; planta_74 lifted 2 -> 7 rooms.
+  - `tools/render_preflight.py` (PR #114) — visual preflight gate
+    (axon + door audit D1..D7 + side-by-side + checklist).
+
 - **Ruby exporter — human_annotation openings ignored by carve + hinge_side field mismatch**
   (2026-05-10, PR fix/consume-consensus-human-annotation-carving):
   Two cirurgical fixes in `tools/consume_consensus.rb`:
@@ -361,6 +400,11 @@ Never apply archive patches without an explicit, signed-off PR plan.
 
 ## 13. Last-updated marker
 
+- **2026-05-11** — added human-openings ground-truth protocol entry to
+  §10. The PNG annotation at
+  `fixtures/planta_74/human_openings_annotation.png` is the source of
+  truth for openings on planta_74; the detector is subordinate.
+  Cross-references the 4-PR FP-014 cycle (#112/#113/#114/#115/#116).
 - **2026-05-07** — added §17 Non-Stop Autonomy Rule
   ("DONE IS NOT STOP"); reinforces §14 with explicit twelve-question
   gate before any stop and an end-of-cycle reporting format.
