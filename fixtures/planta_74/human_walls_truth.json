@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0",
+  "source_image": "fixtures/planta_74/human_walls_annotation.png",
+  "image_size_px": [
+    2541,
+    3580
+  ],
+  "color_mapping": {
+    "blue": {
+      "rgb": [
+        0,
+        0,
+        255
+      ],
+      "kind": "structural_wall"
+    },
+    "purple": {
+      "rgb": [
+        128,
+        0,
+        255
+      ],
+      "kind": "structural_wall"
+    }
+  },
+  "calibration": {
+    "img_x0": 217,
+    "img_y0": 605,
+    "img_x1": 2357,
+    "img_y1": 1891,
+    "pdf_x0": 49.2037239074707,
+    "pdf_y0": 404.6214294433594,
+    "pdf_x1": 553.515625,
+    "pdf_y1": 697.8138122558594,
+    "scale_x_pt_per_px": 0.2356597668656679,
+    "scale_y_pt_per_px": 0.2279878559972784
+  },
+  "consensus_wall_thickness_pts": 5.399517059326172,
+  "walls": [
+    {
+      "id": "h_w000",
+      "color": "blue",
+      "bbox_px": [
+        251.0,
+        1113.0,
+        371.0,
+        1127.0
+      ],
+      "bbox_pts": [
+        57.216,
+        578.804,
+        85.495,
+        581.996
+      ],
+      "orientation": "h",
+      "start": [
+        57.216,
+        580.4
+      ],
+      "end": [
+        85.495,
+        580.4
+      ],
+      "thickness": 5.4,
+      "geometry_origin": "human_annotation"
+    },
+    {
+      "id": "h_w001",
+      "color": "blue",
+      "bbox_px": [
+        251.0,
+        1734.0,
+        363.0,
+        1846.0
+      ],
+      "bbox_pts": [
+        57.216,
+        414.881,
+        83.61,
+        440.416
+      ],
+      "orientation": "h",
+      "start": [
+        57.216,
+        427.648
+      ],
+      "end": [
+        83.61,
+        427.648
+      ],
+      "thickness": 5.4,
+      "geometry_origin": "human_annotation"
+    }
+  ]
+}

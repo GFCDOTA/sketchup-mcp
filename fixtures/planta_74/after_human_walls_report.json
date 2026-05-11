@@ -1,0 +1,61 @@
+{
+  "verdict": "FAIL",
+  "recommendation": "do not export final SKP \u2014 wall augmentation insufficient",
+  "summary": {
+    "pass": 1,
+    "warn": 1,
+    "fail": 3,
+    "total": 5
+  },
+  "findings": [
+    {
+      "check_id": "G-W1",
+      "severity": "FAIL",
+      "message": "room count: before=7, after=7, expected\u226510",
+      "evidence": {
+        "before": 7,
+        "after": 7,
+        "expected_min": 10
+      }
+    },
+    {
+      "check_id": "G-W2",
+      "severity": "FAIL",
+      "message": "merged cells: before=2, after=2",
+      "evidence": {
+        "before": [
+          "A.S. | TERRACO SOCIAL | COZINHA | TERRACO TECNICO",
+          "SALA DE JANTAR | SALA DE ESTAR"
+        ],
+        "after": [
+          "A.S. | TERRACO SOCIAL | COZINHA | TERRACO TECNICO",
+          "SALA DE JANTAR | SALA DE ESTAR"
+        ]
+      }
+    },
+    {
+      "check_id": "G-W3",
+      "severity": "FAIL",
+      "message": "unhosted human openings after walls: 1",
+      "evidence": {
+        "unhosted_ids": [
+          "h_o005"
+        ]
+      }
+    },
+    {
+      "check_id": "G-W4",
+      "severity": "PASS",
+      "message": "human openings re-validated on augmented walls: 12 total",
+      "evidence": {
+        "n_human_openings": 12
+      }
+    },
+    {
+      "check_id": "G-W5",
+      "severity": "WARN",
+      "message": "global_skp_visual_fidelity requires operator confirmation against the PDF side-by-side. This gate is advisory; the operator must review side_by_side_pdf_vs_skp_after_human_walls.png.",
+      "evidence": {}
+    }
+  ]
+}
