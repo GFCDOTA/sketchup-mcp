@@ -1,0 +1,407 @@
+{
+  "schema_version": "1.0",
+  "source_image": "C:/Users/FELIP_~1/AppData/Local/Temp/he_test/synthetic_annotation.png",
+  "image_size_px": [
+    1190,
+    1684
+  ],
+  "pdf_page_size_pts": [
+    595.0,
+    842.0
+  ],
+  "color_mapping": {
+    "green": {
+      "rgb": [
+        0,
+        255,
+        0
+      ],
+      "kind": "interior_door"
+    },
+    "magenta": {
+      "rgb": [
+        255,
+        0,
+        255
+      ],
+      "kind": "window"
+    },
+    "orange": {
+      "rgb": [
+        255,
+        165,
+        0
+      ],
+      "kind": "glazed_balcony"
+    }
+  },
+  "required_counts": {
+    "interior_door": 7,
+    "window": 4,
+    "glazed_balcony": 1
+  },
+  "openings": [
+    {
+      "id": "h_o000",
+      "kind": "interior_door",
+      "color": "green",
+      "bbox_px": [
+        582.0,
+        412.0,
+        599.0,
+        457.0
+      ],
+      "bbox_pts": [
+        291.0,
+        613.5,
+        299.5,
+        636.0
+      ],
+      "center_pts": [
+        295.25,
+        624.75
+      ],
+      "orientation": "v",
+      "wall_id": "w005",
+      "wall_dist_pts": 38.022,
+      "opening_width_pts": 22.5,
+      "required": true
+    },
+    {
+      "id": "h_o001",
+      "kind": "interior_door",
+      "color": "green",
+      "bbox_px": [
+        328.0,
+        436.0,
+        373.0,
+        453.0
+      ],
+      "bbox_pts": [
+        164.0,
+        615.5,
+        186.5,
+        624.0
+      ],
+      "center_pts": [
+        175.25,
+        619.75
+      ],
+      "orientation": "h",
+      "wall_id": "w002",
+      "wall_dist_pts": 60.606,
+      "opening_width_pts": 22.5,
+      "required": true
+    },
+    {
+      "id": "h_o002",
+      "kind": "interior_door",
+      "color": "green",
+      "bbox_px": [
+        932.0,
+        452.0,
+        949.0,
+        497.0
+      ],
+      "bbox_pts": [
+        466.0,
+        593.5,
+        474.5,
+        616.0
+      ],
+      "center_pts": [
+        470.25,
+        604.75
+      ],
+      "orientation": "v",
+      "wall_id": "w014",
+      "wall_dist_pts": 22.372,
+      "opening_width_pts": 22.5,
+      "required": true
+    },
+    {
+      "id": "h_o003",
+      "kind": "interior_door",
+      "color": "green",
+      "bbox_px": [
+        512.0,
+        472.0,
+        529.0,
+        517.0
+      ],
+      "bbox_pts": [
+        256.0,
+        583.5,
+        264.5,
+        606.0
+      ],
+      "center_pts": [
+        260.25,
+        594.75
+      ],
+      "orientation": "v",
+      "wall_id": "w019",
+      "wall_dist_pts": 27.831,
+      "opening_width_pts": 22.5,
+      "required": true
+    },
+    {
+      "id": "h_o004",
+      "kind": "interior_door",
+      "color": "green",
+      "bbox_px": [
+        618.0,
+        486.0,
+        663.0,
+        503.0
+      ],
+      "bbox_pts": [
+        309.0,
+        590.5,
+        331.5,
+        599.0
+      ],
+      "center_pts": [
+        320.25,
+        594.75
+      ],
+      "orientation": "h",
+      "wall_id": "w011",
+      "wall_dist_pts": 11.44,
+      "opening_width_pts": 22.5,
+      "required": true
+    },
+    {
+      "id": "h_o005",
+      "kind": "interior_door",
+      "color": "green",
+      "bbox_px": [
+        662.0,
+        562.0,
+        679.0,
+        607.0
+      ],
+      "bbox_pts": [
+        331.0,
+        538.5,
+        339.5,
+        561.0
+      ],
+      "center_pts": [
+        335.25,
+        549.75
+      ],
+      "orientation": "v",
+      "wall_id": "w024",
+      "wall_dist_pts": 1.853,
+      "opening_width_pts": 22.5,
+      "required": true
+    },
+    {
+      "id": "h_o006",
+      "kind": "interior_door",
+      "color": "green",
+      "bbox_px": [
+        158.0,
+        566.0,
+        203.0,
+        583.0
+      ],
+      "bbox_pts": [
+        79.0,
+        550.5,
+        101.5,
+        559.0
+      ],
+      "center_pts": [
+        90.25,
+        554.75
+      ],
+      "orientation": "h",
+      "wall_id": "w022",
+      "wall_dist_pts": 55.497,
+      "opening_width_pts": 22.5,
+      "required": true
+    },
+    {
+      "id": "h_o007",
+      "kind": "window",
+      "color": "magenta",
+      "bbox_px": [
+        755.0,
+        306.0,
+        826.0,
+        323.0
+      ],
+      "bbox_pts": [
+        377.5,
+        680.5,
+        413.0,
+        689.0
+      ],
+      "center_pts": [
+        395.25,
+        684.75
+      ],
+      "orientation": "h",
+      "wall_id": "w002",
+      "wall_dist_pts": 4.394,
+      "opening_width_pts": 35.5,
+      "required": true
+    },
+    {
+      "id": "h_o008",
+      "kind": "window",
+      "color": "magenta",
+      "bbox_px": [
+        92.0,
+        489.0,
+        109.0,
+        560.0
+      ],
+      "bbox_pts": [
+        46.0,
+        562.0,
+        54.5,
+        597.5
+      ],
+      "center_pts": [
+        50.25,
+        579.75
+      ],
+      "orientation": "v",
+      "wall_id": "w031",
+      "wall_dist_pts": 1.653,
+      "opening_width_pts": 35.5,
+      "required": true
+    },
+    {
+      "id": "h_o009",
+      "kind": "window",
+      "color": "magenta",
+      "bbox_px": [
+        1088.0,
+        489.0,
+        1105.0,
+        560.0
+      ],
+      "bbox_pts": [
+        544.0,
+        562.0,
+        552.5,
+        597.5
+      ],
+      "center_pts": [
+        548.25,
+        579.75
+      ],
+      "orientation": "v",
+      "wall_id": "w013",
+      "wall_dist_pts": 2.566,
+      "opening_width_pts": 35.5,
+      "required": true
+    },
+    {
+      "id": "h_o010",
+      "kind": "window",
+      "color": "magenta",
+      "bbox_px": [
+        605.0,
+        856.0,
+        676.0,
+        873.0
+      ],
+      "bbox_pts": [
+        302.5,
+        405.5,
+        338.0,
+        414.0
+      ],
+      "center_pts": [
+        320.25,
+        409.75
+      ],
+      "orientation": "h",
+      "wall_id": "w029",
+      "wall_dist_pts": 47.381,
+      "opening_width_pts": 35.5,
+      "required": true
+    },
+    {
+      "id": "h_o011",
+      "kind": "glazed_balcony",
+      "color": "orange",
+      "bbox_px": [
+        230.0,
+        756.0,
+        391.0,
+        773.0
+      ],
+      "bbox_pts": [
+        115.0,
+        455.5,
+        195.5,
+        464.0
+      ],
+      "center_pts": [
+        155.25,
+        459.75
+      ],
+      "orientation": "h",
+      "wall_id": "w022",
+      "wall_dist_pts": 56.556,
+      "opening_width_pts": 80.5,
+      "required": true
+    }
+  ],
+  "explicit_constraints": [
+    {
+      "name": "BANHO_02_west_door",
+      "description": "BANHO 02 must have an interior_door on its WEST (left) vertical wall, opening inward.",
+      "kind": "interior_door",
+      "policy": "require_present",
+      "search_region_pts": [
+        325,
+        510,
+        345,
+        590
+      ]
+    },
+    {
+      "name": "SALA_ESTAR_TERRACO_SOCIAL_balcony",
+      "description": "There must be a glazed_balcony between SALA DE ESTAR and TERRA\u00c7O SOCIAL.",
+      "kind": "glazed_balcony",
+      "policy": "require_present",
+      "search_region_pts": [
+        100,
+        440,
+        280,
+        470
+      ]
+    },
+    {
+      "name": "SUITE_02_south_window",
+      "description": "SUITE 02 south opening is MAGENTA (window), NOT orange.",
+      "kind": "window",
+      "policy": "require_present",
+      "search_region_pts": [
+        255,
+        395,
+        380,
+        415
+      ]
+    },
+    {
+      "name": "NO_SUITE_01_BANHO_01_internal_window",
+      "description": "There must NOT be any window between SUITE 01 and BANHO 01.",
+      "kind": "window",
+      "policy": "require_absent",
+      "search_region_pts": [
+        475,
+        540,
+        510,
+        605
+      ]
+    }
+  ]
+}
