@@ -288,6 +288,19 @@ explicitly running the command outside Claude.
 - (none open as of 2026-05-06; previous SHA256 + caminho-A items shipped)
 
 ### Recently fixed
+- **Ruby exporter — human_annotation openings ignored by carve + hinge_side field mismatch**
+  (2026-05-10, PR fix/consume-consensus-human-annotation-carving):
+  Two cirurgical fixes in `tools/consume_consensus.rb`:
+  (1) `CARVING_OPENING_ORIGINS` was `['svg_arc', 'svg_segments']` only; added
+  `'human_annotation'` so openings injected by a human reviewer (via
+  consensus patching) actually CARVE the host wall instead of rendering a
+  door leaf stuck on top of solid masonry. (2) `add_door_leaf` was reading
+  `opening['hinge']`, but schema 1.0.0 writes `opening['hinge_side']`, so
+  every door rendered with the default `'left'` regardless of detector or
+  human input. Now reads both with `hinge_side` preferred. Surfaced when
+  reviewer-annotated 12-openings consensus produced a structurally broken
+  SKP (paredes fragmentadas + portas coladas em paredes maciças). Smoke
+  passes (`runs/smoke/20260511T015600Z/`).
 - **FP-012 — Convex-hull room clip leaks watershed into exterior**
   (Cycle 8b, 2026-05-08, PR #N): `tools/rooms_from_seeds.py` now
   defaults to `shapely.concave_hull` over wall endpoints (ratio 0.5)

@@ -47,7 +47,10 @@ LINTEL_RGB       = [110, 115, 120]   # mesmo família do PARAPET_RGB
 # wall_gap origin is intentionally absent: the gap is already in the wall
 # data (the source PDF drew the flanking walls as separate filled
 # rectangles), so carving would double-shrink the geometry.
-CARVING_OPENING_ORIGINS = ['svg_arc', 'svg_segments'].freeze
+# human_annotation added 2026-05-10: openings injected by user review
+# need real wall carving same as svg_arc, otherwise door leaves render
+# stuck on top of a solid wall (no opening through which to walk).
+CARVING_OPENING_ORIGINS = ['svg_arc', 'svg_segments', 'human_annotation'].freeze
 ROOM_PALETTE = [
   [253, 226, 192], [200, 230, 201], [187, 222, 251], [248, 187, 208],
   [220, 237, 200], [255, 224, 178], [209, 196, 233], [179, 229, 252],
@@ -375,7 +378,11 @@ def add_door_leaf(parent_entities, opening, walls_by_id, _thickness_pt,
   return nil unless center.is_a?(Array) && center.length >= 2
   width_pt = opening['opening_width_pts']
   return nil if width_pt.nil? || width_pt <= 0
-  hinge_side = opening['hinge'] || 'left'
+  # Field naming: pipeline writes 'hinge_side' (consensus schema 1.0.0);
+  # legacy producers wrote 'hinge'. Read both. Fix 2026-05-10: previously
+  # only checked 'hinge' so every door rendered with the default 'left'
+  # regardless of what the extractor / human reviewer recorded.
+  hinge_side = opening['hinge_side'] || opening['hinge'] || 'left'
 
   axis_idx, _cross_idx, cross_value = _opening_axis_basis(wall)
   axis_center = center[axis_idx].to_f
