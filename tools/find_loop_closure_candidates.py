@@ -202,10 +202,72 @@ def _suggested_segment(a: dict, b: dict,
     return seg, orientation, round(2 * half, 3)
 
 
+def _wall_separates_seeds(seed_a: list[float],
+                            seed_b: list[float],
+                            human_walls: list[dict]) -> dict | None:
+    """Return the first human_annotation wall that LIES BETWEEN the
+    two seeds along its perpendicular axis. This is the honest test
+    of "the operator already painted the divider for this pair",
+    regardless of whether the painted wall spans the full seed-pair
+    distance along its parallel axis — a wall doesn't need to be as
+    long as the seeds are apart to be the architectural separator
+    (peitoril / esquadria covers the rest, which is exactly the soft-
+    barrier protocol's job).
+
+    Geometry contract:
+      - For an axis-aligned wall, the perpendicular axis is the
+        wall's "thin" dimension. A vertical wall at x=X separates
+        seeds whose x-coords lie on opposite sides of X.
+      - The wall must also have SOME overlap with the seed-pair on
+        its parallel axis (otherwise it's a wall in a completely
+        different area).
+    """
+    if not human_walls:
+        return None
+    sax, say = seed_a
+    sbx, sby = seed_b
+    for w in human_walls:
+        s, e = w["start"], w["end"]
+        if w["orientation"] == "v":
+            wx = s[0]
+            wy_lo, wy_hi = sorted([s[1], e[1]])
+            # Wall lies between seeds in x?
+            if (sax - wx) * (sbx - wx) >= 0:
+                continue
+            # Wall's y range overlaps seeds' y range (any overlap)?
+            seed_y_lo, seed_y_hi = sorted([say, sby])
+            # Expand seed y-range by a generous margin so a wall
+            # that ends 50pt before the lower seed still counts —
+            # the remaining gap is exactly what the soft-barrier
+            # protocol picks up.
+            margin = 80.0
+            if wy_hi + margin < seed_y_lo or wy_lo - margin > seed_y_hi:
+                continue
+        else:
+            wy = s[1]
+            wx_lo, wx_hi = sorted([s[0], e[0]])
+            if (say - wy) * (sby - wy) >= 0:
+                continue
+            seed_x_lo, seed_x_hi = sorted([sax, sbx])
+            margin = 80.0
+            if wx_hi + margin < seed_x_lo or wx_lo - margin > seed_x_hi:
+                continue
+        return {
+            "wall_id": w["id"],
+            "wall_orientation": w["orientation"],
+            "wall_start": w["start"],
+            "wall_end": w["end"],
+        }
+    return None
+
+
 def find_candidates(consensus: dict, labels: list[dict]) -> dict:
     rooms = consensus.get("rooms", [])
     merged = [r for r in rooms if "|" in r.get("name", "")]
+    human_walls = [w for w in consensus.get("walls", [])
+                    if w.get("geometry_origin") == "human_annotation"]
     candidates: list[ClosureCandidate] = []
+    n_downgraded_by_existing_human_wall = 0
     for cell in merged:
         name = cell["name"]
         cell_poly = cell.get("polygon_pts", [])
@@ -218,6 +280,38 @@ def find_candidates(consensus: dict, labels: list[dict]) -> dict:
             my = (say + sby) / 2.0
             dist = ((sax - sbx) ** 2 + (say - sby) ** 2) ** 0.5
             seg, orient, length = _suggested_segment(a, b, cls["candidate_type"])
+            # POST-PROCESS: if the suggested wall is already painted by
+            # the operator (human_annotation wall covering >=50% of the
+            # segment), downgrade the classification. The cell still
+            # doesn't close, but the gap is on a PERPENDICULAR axis
+            # the operator chose not to paint — meaning it's
+            # honest-soft-barrier (peitoril / esquadria) or semantic_split,
+            # not "more masonry needed".
+            painted = (_wall_separates_seeds(a["seed_pt"], b["seed_pt"],
+                                                  human_walls)
+                        if cls["candidate_type"] == "human_wall" else None)
+            if painted:
+                n_downgraded_by_existing_human_wall += 1
+                cls = {
+                    "candidate_type": "already_explained",
+                    "evidence_source": "existing_human_wall",
+                    "confidence": 0.85,
+                    "should_user_paint": False,
+                    "reason": (
+                        f"Operator already painted {painted['wall_id']} "
+                        f"({painted['wall_orientation']}, "
+                        f"{painted['wall_start']} -> {painted['wall_end']}) "
+                        f"as the divider for this pair. The wall lies "
+                        f"between the seeds on its perpendicular axis. "
+                        f"If the cell still doesn't fully close, the "
+                        f"remaining gap is NOT another wall (per user "
+                        f"mandate 2026-05-12: don't fabricate walls to "
+                        f"close cells) — it is human_soft_barrier "
+                        f"(peitoril / grade) or semantic_room_split "
+                        f"(open plan)."
+                    ),
+                }
+                seg, orient, length = None, None, None
             candidates.append(ClosureCandidate(
                 from_room=a["name"],
                 to_room=b["name"],
@@ -247,6 +341,8 @@ def find_candidates(consensus: dict, labels: list[dict]) -> dict:
         "by_candidate_type": by_type,
         "n_should_user_paint": by_paint[True],
         "n_should_not_paint": by_paint[False],
+        "n_downgraded_by_existing_human_wall":
+            n_downgraded_by_existing_human_wall,
         "candidates": [asdict(c) for c in candidates],
     }
 

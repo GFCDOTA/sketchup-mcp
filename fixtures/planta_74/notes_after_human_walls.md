@@ -1,7 +1,7 @@
 # Preflight notes — apto 74,93 m²
 
 - **PDF**: `planta_74.pdf`
-- **Consensus**: `runs\vector\consensus_final.json`
+- **Consensus**: `runs\vector\consensus_with_human_walls.json`
 - **Walls**: 35
 - **Rooms**: 8
 - **Openings**: 12
