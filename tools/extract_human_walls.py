@@ -216,6 +216,7 @@ def extract(image_path: Path,
     planta_y1 = calibration["img_y1"]
     extracted: list[ExtractedWall] = []
     n_rejected_outside_planta = 0
+    n_rejected_square = 0
     idx = 0
     for color_name, info in cmap.items():
         target = tuple(info["rgb"])
@@ -235,6 +236,15 @@ def extract(image_path: Path,
             if not (planta_x0 <= cx_px <= planta_x1
                     and planta_y0 <= cy_px <= planta_y1):
                 n_rejected_outside_planta += 1
+                continue
+            # Reject square-ish blobs — real walls are elongated (long/
+            # short ≥ 2). Square blobs are typically legend swatches or
+            # plumbing-fixture markers; they're real BLUE pixels but
+            # don't represent wall geometry.
+            long_side = max(w_blob, h_blob)
+            short_side = max(min(w_blob, h_blob), 1)
+            if long_side / short_side < 2.0:
+                n_rejected_square += 1
                 continue
             bbox_px = (float(x_px), float(y_px),
                         float(x_px + w_blob), float(y_px + h_blob))
@@ -284,6 +294,8 @@ def extract(image_path: Path,
     print(f"  walls extracted: {len(extracted)}")
     if n_rejected_outside_planta:
         print(f"  rejected (outside planta region): {n_rejected_outside_planta}")
+    if n_rejected_square:
+        print(f"  rejected (square aspect, not elongated): {n_rejected_square}")
     by_color: dict[str, int] = {}
     for w in extracted:
         by_color[w.color] = by_color.get(w.color, 0) + 1

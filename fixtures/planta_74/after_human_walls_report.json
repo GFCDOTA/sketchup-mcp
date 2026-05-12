@@ -2,9 +2,9 @@
   "verdict": "FAIL",
   "recommendation": "do not export final SKP \u2014 wall augmentation insufficient",
   "summary": {
-    "pass": 1,
+    "pass": 2,
     "warn": 1,
-    "fail": 3,
+    "fail": 2,
     "total": 5
   },
   "findings": [
@@ -35,12 +35,10 @@
     },
     {
       "check_id": "G-W3",
-      "severity": "FAIL",
-      "message": "unhosted human openings after walls: 1",
+      "severity": "PASS",
+      "message": "unhosted human openings after walls: 0",
       "evidence": {
-        "unhosted_ids": [
-          "h_o005"
-        ]
+        "unhosted_ids": []
       }
     },
     {
