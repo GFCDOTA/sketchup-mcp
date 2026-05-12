@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "verdict_top_level": "FAIL",
+  "verdict_top_level": "WARN",
   "fidelities": {
     "wall_fidelity": {
       "verdict": "PASS",
@@ -12,12 +12,12 @@
       "h_o005_host_wall_id": "h_w000"
     },
     "soft_barrier_fidelity": {
-      "verdict": "FAIL",
-      "reason": "2 pair(s) across 1 merged cell(s) need a soft_barrier (peitoril/grade/esquadria) but 0 human soft_barriers have been applied. Run the human_soft_barriers protocol.",
+      "verdict": "WARN",
+      "reason": "1 human soft_barriers applied but 1 target cell(s) still merged \u2014 the painted barriers do not fully close the loops.",
       "n_target_pairs": 2,
       "n_target_cells": 1,
-      "n_human_soft_barriers_applied": 0,
-      "target_cells": [
+      "n_human_soft_barriers_applied": 1,
+      "target_cells_still_merged": [
         "A.S. | TERRACO SOCIAL | TERRACO TECNICO"
       ]
     },
