@@ -38,7 +38,12 @@ DEFAULT_WALL_COLORS: dict[str, dict[str, Any]] = {
     "purple": {"rgb": [128, 0, 255]},
 }
 DEFAULT_COLOR_TOLERANCE = 35
-MIN_BLOB_AREA_PX = 60
+# Min blob area in pixels. Real painted walls span at least a couple
+# of cm in PDF coords → > 1500 px² in the planta render. Below this
+# is matplotlib legend swatches (~1450 px²) bleeding into the planta
+# region's image-y range. Painters can override via CLI for very
+# small walls on a different planta.
+MIN_BLOB_AREA_PX = 1500
 
 
 @dataclass
@@ -217,64 +222,107 @@ def extract(image_path: Path,
     extracted: list[ExtractedWall] = []
     n_rejected_outside_planta = 0
     n_rejected_square = 0
+    n_split_l_shapes = 0
     idx = 0
     for color_name, info in cmap.items():
         target = tuple(info["rgb"])
         mask = _build_color_mask(img_rgb, target, tol)
         if not mask.any():
             continue
-        n_labels, _label_img, stats, _centroids = (
+        # L-shape / T-shape decomposition: when the reviewer paints
+        # two walls joined at a corner, cv2 sees one big connected
+        # component with aspect ~1. To detect this, run morphological
+        # opening with directional kernels — each isolates straight-
+        # line strokes of one orientation; the resulting components
+        # are the constituent walls.
+        kernel_h = cv2.getStructuringElement(cv2.MORPH_RECT, (40, 5))
+        kernel_v = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 40))
+        mask_h = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel_h)
+        mask_v = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel_v)
+        # Each oriented mask gives axis-aligned components
+        component_masks = [(mask_h, "h_open"), (mask_v, "v_open")]
+        decomposed = False
+        n_labels_main, _label_img_main, stats_main, _ = (
             cv2.connectedComponentsWithStats(mask, connectivity=8)
         )
-        for lbl in range(1, n_labels):
-            x_px, y_px, w_blob, h_blob, area = stats[lbl]
-            if area < min_blob_area:
-                continue
-            # Reject blobs whose CENTER is outside the planta region
+        # Decide between MAIN mask or decomposed masks: if any main
+        # component has aspect < 2 but area > 2000, it's likely an
+        # L-shape — use the decomposed masks instead.
+        for lbl in range(1, n_labels_main):
+            x_px, y_px, w_blob, h_blob, area = stats_main[lbl]
             cx_px = x_px + w_blob / 2
             cy_px = y_px + h_blob / 2
             if not (planta_x0 <= cx_px <= planta_x1
                     and planta_y0 <= cy_px <= planta_y1):
-                n_rejected_outside_planta += 1
                 continue
-            # Reject square-ish blobs — real walls are elongated (long/
-            # short ≥ 2). Square blobs are typically legend swatches or
-            # plumbing-fixture markers; they're real BLUE pixels but
-            # don't represent wall geometry.
+            if area < 2000:
+                continue
             long_side = max(w_blob, h_blob)
             short_side = max(min(w_blob, h_blob), 1)
-            if long_side / short_side < 2.0:
-                n_rejected_square += 1
-                continue
-            bbox_px = (float(x_px), float(y_px),
-                        float(x_px + w_blob), float(y_px + h_blob))
-            x0_pt, y0_pt, x1_pt, y1_pt = _px_bbox_to_pts(
-                bbox_px, (w_px, h_px), calibration
+            if long_side / short_side < 2.5:
+                decomposed = True
+                break
+        if decomposed:
+            print(f"  [decompose] {color_name} blob has L/T shape; "
+                  "splitting via directional morphological opening")
+            scan_masks = component_masks
+        else:
+            scan_masks = [(mask, "raw")]
+
+        for cur_mask, src_tag in scan_masks:
+            n_labels, _label_img, stats, _centroids = (
+                cv2.connectedComponentsWithStats(cur_mask, connectivity=8)
             )
-            # Orientation: longer axis of bbox in PDF coords
-            w_pt = x1_pt - x0_pt
-            h_pt = y1_pt - y0_pt
-            if w_pt >= h_pt:
-                orient = "h"
-                cy = (y0_pt + y1_pt) / 2.0
-                start = [x0_pt, cy]
-                end = [x1_pt, cy]
-            else:
-                orient = "v"
-                cx = (x0_pt + x1_pt) / 2.0
-                start = [cx, y0_pt]
-                end = [cx, y1_pt]
-            extracted.append(ExtractedWall(
-                id=f"h_w{idx:03d}",
-                color=color_name,
-                bbox_px=[round(v, 2) for v in bbox_px],
-                bbox_pts=[round(v, 3) for v in (x0_pt, y0_pt, x1_pt, y1_pt)],
-                orientation=orient,
-                start=[round(start[0], 3), round(start[1], 3)],
-                end=[round(end[0], 3), round(end[1], 3)],
-                thickness=round(thickness, 3),
-            ))
-            idx += 1
+            for lbl in range(1, n_labels):
+                x_px, y_px, w_blob, h_blob, area = stats[lbl]
+                if area < min_blob_area:
+                    continue
+                # Reject blobs whose CENTER is outside the planta region
+                cx_px = x_px + w_blob / 2
+                cy_px = y_px + h_blob / 2
+                if not (planta_x0 <= cx_px <= planta_x1
+                        and planta_y0 <= cy_px <= planta_y1):
+                    n_rejected_outside_planta += 1
+                    continue
+                # Reject square-ish blobs — real walls are elongated.
+                # Threshold relaxed slightly because directional opening
+                # already filtered orientation.
+                long_side = max(w_blob, h_blob)
+                short_side = max(min(w_blob, h_blob), 1)
+                if long_side / short_side < 2.0:
+                    n_rejected_square += 1
+                    continue
+                if decomposed:
+                    n_split_l_shapes += 1
+                bbox_px = (float(x_px), float(y_px),
+                            float(x_px + w_blob), float(y_px + h_blob))
+                x0_pt, y0_pt, x1_pt, y1_pt = _px_bbox_to_pts(
+                    bbox_px, (w_px, h_px), calibration
+                )
+                # Orientation: longer axis of bbox in PDF coords
+                w_pt = x1_pt - x0_pt
+                h_pt = y1_pt - y0_pt
+                if w_pt >= h_pt:
+                    orient = "h"
+                    cy = (y0_pt + y1_pt) / 2.0
+                    start = [x0_pt, cy]
+                    end = [x1_pt, cy]
+                else:
+                    orient = "v"
+                    cx = (x0_pt + x1_pt) / 2.0
+                    start = [cx, y0_pt]
+                    end = [cx, y1_pt]
+                extracted.append(ExtractedWall(
+                    id=f"h_w{idx:03d}",
+                    color=color_name,
+                    bbox_px=[round(v, 2) for v in bbox_px],
+                    bbox_pts=[round(v, 3) for v in (x0_pt, y0_pt, x1_pt, y1_pt)],
+                    orientation=orient,
+                    start=[round(start[0], 3), round(start[1], 3)],
+                    end=[round(end[0], 3), round(end[1], 3)],
+                    thickness=round(thickness, 3),
+                ))
+                idx += 1
 
     truth = {
         "schema_version": "1.0",
@@ -296,6 +344,8 @@ def extract(image_path: Path,
         print(f"  rejected (outside planta region): {n_rejected_outside_planta}")
     if n_rejected_square:
         print(f"  rejected (square aspect, not elongated): {n_rejected_square}")
+    if n_split_l_shapes:
+        print(f"  split from L/T-shape via directional opening: {n_split_l_shapes}")
     by_color: dict[str, int] = {}
     for w in extracted:
         by_color[w.color] = by_color.get(w.color, 0) + 1

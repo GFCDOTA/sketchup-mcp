@@ -11,10 +11,10 @@
     {
       "check_id": "G-W1",
       "severity": "FAIL",
-      "message": "room count: before=7, after=7, expected\u226510",
+      "message": "room count: before=7, after=8, expected\u226510",
       "evidence": {
         "before": 7,
-        "after": 7,
+        "after": 8,
         "expected_min": 10
       }
     },
@@ -28,7 +28,7 @@
           "SALA DE JANTAR | SALA DE ESTAR"
         ],
         "after": [
-          "A.S. | TERRACO SOCIAL | COZINHA | TERRACO TECNICO",
+          "A.S. | TERRACO SOCIAL | TERRACO TECNICO",
           "SALA DE JANTAR | SALA DE ESTAR"
         ]
       }

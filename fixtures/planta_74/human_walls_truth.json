@@ -41,25 +41,52 @@
       "id": "h_w000",
       "color": "blue",
       "bbox_px": [
-        249.0,
+        250.0,
         1111.0,
-        545.0,
+        570.0,
         1130.0
       ],
       "bbox_pts": [
-        56.745,
+        56.98,
         578.12,
-        126.5,
+        132.392,
         582.452
       ],
       "orientation": "h",
       "start": [
-        56.745,
+        56.98,
         580.286
       ],
       "end": [
-        126.5,
+        132.392,
         580.286
+      ],
+      "thickness": 5.4,
+      "geometry_origin": "human_annotation"
+    },
+    {
+      "id": "h_w001",
+      "color": "blue",
+      "bbox_px": [
+        544.0,
+        982.0,
+        569.0,
+        1407.0
+      ],
+      "bbox_pts": [
+        126.264,
+        514.968,
+        132.156,
+        611.862
+      ],
+      "orientation": "v",
+      "start": [
+        129.21,
+        514.968
+      ],
+      "end": [
+        129.21,
+        611.862
       ],
       "thickness": 5.4,
       "geometry_origin": "human_annotation"

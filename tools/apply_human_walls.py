@@ -27,9 +27,18 @@ sys.path.insert(0, str(THIS))
 
 def apply_walls_to_consensus(consensus: dict,
                                walls_truth: dict,
-                               rebuild_rooms: bool = True) -> dict:
+                               rebuild_rooms: bool = True,
+                               labels: list[dict] | None = None) -> dict:
     """Return a new consensus dict with human walls applied + (optional)
     rooms rebuilt via polygonize. Does NOT mutate inputs.
+
+    ``labels`` are the ORIGINAL per-room seeds (from extract_room_labels).
+    When provided AND ``rebuild_rooms`` is True, polygonize re-runs with
+    one seed per room name — this is what lets a previously-merged cell
+    split into its constituent rooms once augmented walls form closed
+    loops. Without labels, the rebuild collapses all original labels to
+    the merged cell's single seed and polygonize can't tell the rooms
+    apart.
     """
     out = dict(consensus)
     existing_walls = list(out.get("walls", []))
@@ -57,26 +66,26 @@ def apply_walls_to_consensus(consensus: dict,
     # Rebuild rooms via polygonize (the whole point of adding walls)
     if rebuild_rooms and new_walls:
         from rooms_from_seeds import detect_rooms_polygonize
-        # Need labels — pull from existing rooms' seed_pts when available
-        labels = []
-        for r in out.get("rooms", []):
-            sp = r.get("seed_pt")
-            if not sp:
-                continue
-            # Split merged names back into individual labels
-            name = r.get("name", "")
-            for n in name.split("|"):
-                labels.append({
-                    "id": f"l_{n.strip().lower().replace(' ', '_')}",
-                    "name": n.strip(),
-                    "seed_pt": sp,
-                })
-        # If consensus has no rooms (yet), fall back to label seeds
-        # carried directly in metadata
-        if not labels and "metadata" in out:
-            md_labels = out["metadata"].get("labels_seed", [])
-            labels = md_labels
-        rooms = detect_rooms_polygonize(out, labels)
+        rebuild_labels: list[dict] = []
+        if labels:
+            # Use the original per-room labels (preferred path).
+            rebuild_labels = list(labels)
+        else:
+            # Fallback: synthesise from existing rooms by collapsing
+            # merged names to a SHARED seed. This will NOT split merged
+            # cells (all child labels resolve to the same polygon).
+            for r in out.get("rooms", []):
+                sp = r.get("seed_pt")
+                if not sp:
+                    continue
+                name = r.get("name", "")
+                for n in name.split("|"):
+                    rebuild_labels.append({
+                        "id": f"l_{n.strip().lower().replace(' ', '_')}",
+                        "name": n.strip(),
+                        "seed_pt": sp,
+                    })
+        rooms = detect_rooms_polygonize(out, rebuild_labels)
         out["rooms"] = rooms
 
     md = dict(out.get("metadata", {}))
@@ -102,12 +111,20 @@ def main() -> None:
     ap.add_argument("--no-rebuild-rooms", action="store_true",
                     help="Skip the room rebuild step (useful for inspecting "
                          "the wall diff before recomputing cells).")
+    ap.add_argument("--labels", type=Path, default=None,
+                    help="Original labels.json from extract_room_labels. "
+                         "Required to actually split merged cells (without "
+                         "this the rebuild gives all merged labels the same "
+                         "seed and the cells stay merged).")
     args = ap.parse_args()
 
     consensus = json.loads(args.consensus.read_text())
     truth = json.loads(args.truth.read_text())
+    labels = (json.loads(args.labels.read_text())
+              if args.labels and args.labels.exists() else None)
     out = apply_walls_to_consensus(consensus, truth,
-                                     rebuild_rooms=not args.no_rebuild_rooms)
+                                     rebuild_rooms=not args.no_rebuild_rooms,
+                                     labels=labels)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(out, indent=2))
 

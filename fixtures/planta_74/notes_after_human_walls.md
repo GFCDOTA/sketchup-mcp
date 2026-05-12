@@ -2,8 +2,8 @@
 
 - **PDF**: `planta_74.pdf`
 - **Consensus**: `runs\vector\consensus_final.json`
-- **Walls**: 34
-- **Rooms**: 7
+- **Walls**: 35
+- **Rooms**: 8
 - **Openings**: 12
 
 ## D1..D7 mapping
