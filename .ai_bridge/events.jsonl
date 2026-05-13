@@ -3,3 +3,5 @@
 {"schema_version":"events_v1","ts":"2026-05-09T14:28:28Z","type":"branch_switched","actor":"claude","branch":"feature/mission-control-cockpit-slice1","commit":"20f980e4"}
 {"schema_version":"events_v1","ts":"2026-05-09T14:34:13Z","type":"pr_merged","actor":"claude","number":107,"title":"Mission Control Slice 1","sha":"954db134a4e83ceabf933b0bea6627022e196f89"}
 {"schema_version":"events_v1","ts":"2026-05-09T14:34:13Z","type":"task_finished","actor":"claude","title":"Mission Control Slice 1 (events log + project_status + cockpit aba + 24 tests)","status":"ok"}
+{"schema_version":"events_v1","ts":"2026-05-13T23:48:58Z","type":"pr_merged","actor":"claude","number":121,"title":"feat(human-walls): protocol + tools to fix global SKP visual fidelity","sha":"39a8f3a1509339a1a2f9cf40b535fad83b019923"}
+{"schema_version":"events_v1","ts":"2026-05-13T23:49:30Z","type":"issue_opened","actor":"claude","number":122,"title":"planta_74: close global_visual_fidelity WARN advisory (post-PR #121)","ref":"PR #121 follow-up — operator-verbal-waived visual review"}

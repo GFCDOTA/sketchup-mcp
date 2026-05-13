@@ -1,3 +1,84 @@
+# Handoff — 2026-05-13 (PR #121 merged — human-walls protocol shipped end-to-end)
+
+> Most recent session's exit state. Next session reads this FIRST
+> after `CLAUDE.md`.
+
+## Status — PR #121 merged at `39a8f3a`; develop fast-forwarded; one advisory issue filed
+
+The 8-commit `feat/human-walls-protocol` branch landed as a single
+squash commit on develop. The branch shipped the whole `human-walls`
++ `human-soft-barriers` protocol end-to-end against `planta_74`,
+including the human-painted soft-barrier `h_sb000` (outer parapet),
+the 35-wall augmented consensus, the 4-axis fidelity verdict
+(`tools/verify_fidelities.py`), and 2 prior corrections in
+`tools/find_loop_closure_candidates.py`.
+
+### What landed (+11 423 LOC)
+
+- **`tools/verify_fidelities.py`** — 4-axis verdict
+  (`wall_fidelity`, `soft_barrier_fidelity`, `semantic_room_fidelity`,
+  `global_visual_fidelity`) with `--operator-confirmed-visual`
+  override for the advisory axis.
+- **`tools/find_loop_closure_candidates.py`** — `PLANTA_74_PAIR_PRIORS`
+  dictionary; final 2 priors corrected 2026-05-13 (A.S./TERRACO
+  TECNICO + TERRACO SOCIAL/TERRACO TECNICO from
+  `human_soft_barrier(peitoril)` → `semantic_room_split(open_plan)`).
+- **`tools/extract_human_soft_barriers.py` +
+  `tools/apply_human_soft_barriers.py`** — soft-barriers half of the
+  protocol (cyan paint → `consensus.soft_barriers`).
+- **`tools/extract_human_walls.py` + `tools/apply_human_walls.py` +
+  `tools/render_human_walls_annotation_base.py` +
+  `tools/render_human_soft_barriers_annotation_base.py`** — walls +
+  soft-barriers full reviewer-paint workflow.
+- **`tools/detect_door_glyphs.py` +
+  `tools/render_door_glyph_overlay.py`** — additional door-detector
+  artefact (out-of-scope but tagged along with the protocol).
+- **`tools/render_cell_leak_debug.py` +
+  `tools/render_diagnostic_for_user.py`** — diagnostic dumps used to
+  obtain operator verbal confirmation of the 2026-05-13 prior flip.
+- **`docs/protocols/human_soft_barriers_protocol.md`** — companion
+  protocol doc.
+- **35-wall augmented consensus at
+  `fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json`**
+  with all 12 human openings hosted and 1 soft barrier applied.
+
+### 4-axis verdict — final state at merge
+
+| Axis                     | Verdict | Notes                                                  |
+|--------------------------|---------|--------------------------------------------------------|
+| `wall_fidelity`          | PASS    | `h_o005` cut_into_wall via host `h_w000`               |
+| `soft_barrier_fidelity`  | PASS    | 0 cells need a soft_barrier post 2026-05-13 prior flip |
+| `semantic_room_fidelity` | PASS    | SALA DE JANTAR \| SALA DE ESTAR labels preserved       |
+| `global_visual_fidelity` | **WARN**| Operator verbally waived visual review (advisory only) |
+
+Top-level verdict: WARN (advisory; merge unblocked by hard axes).
+
+### Visual-confirm advisory parked
+
+The operator declined to compare `side_by_side_pdf_vs_skp_FINAL.png`
+against the PDF in this cycle. Decision documented at
+[`fixtures/planta_74/operator_acknowledgment_2026-05-13.md`](../fixtures/planta_74/operator_acknowledgment_2026-05-13.md).
+Follow-up filed as **issue #122**
+(`planta_74: close global_visual_fidelity WARN advisory`); body in
+[`.ai_bridge/pr_bodies/ISSUE_BODY_visual_confirm_pendente.md`](pr_bodies/ISSUE_BODY_visual_confirm_pendente.md).
+Close conditions in the issue body. Re-run with
+`--operator-confirmed-visual` once a reviewer (operator OR LLM via
+GPT-bridge / local Ollama) confirms.
+
+### Next-session top ROI
+
+Per `.ai_bridge/TODO_NEXT.md`:
+
+1. 🟡 **P1 — Slice 6a** — `room_polygon_override` schema + apply
+   layer (ADR-002 §4). ~25 new tests. Touches `cockpit/overrides.py`,
+   `tools/apply_overrides.py`, `tools/fidelity/compare_generated_to_expected.py`.
+2. 🟡 P1 — Slice 6b — chip promotion + text-area polygon entry UX
+   (depends on 6a landing).
+3. 🟡 P1 — Cycle 6 (Stage 1.6 SU integration) — wire autorun
+   inspector into `gate_f`. SU runtime, needs focused session.
+
+---
+
 # Handoff — 2026-05-10 (Cycle 3 hygiene audit shipped — audit-only, hygiene loop paused)
 
 > Most recent session's exit state. Next session reads this FIRST
