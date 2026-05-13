@@ -1,0 +1,522 @@
+{
+  "schema_version": "1.0",
+  "pdf_path": "planta_74.pdf",
+  "consensus_path": "runs\\vector\\consensus_with_human_walls.json",
+  "match_tol_pts": 30.0,
+  "wall_match_tol_pts": 12.0,
+  "summary": {
+    "n_glyphs": 18,
+    "n_walls_in_consensus": 35,
+    "n_human_openings": 12,
+    "by_cross_ref": {
+      "matched_human": 10,
+      "unmatched_glyph": 8,
+      "glyph_without_host_wall": 0
+    },
+    "glyphs_per_human_opening": {
+      "h_o007": [
+        "dg_001"
+      ],
+      "h_o009": [
+        "dg_003"
+      ],
+      "h_o001": [
+        "dg_004",
+        "dg_011"
+      ],
+      "h_o000": [
+        "dg_009"
+      ],
+      "h_o004": [
+        "dg_010"
+      ],
+      "h_o002": [
+        "dg_012"
+      ],
+      "h_o003": [
+        "dg_013"
+      ],
+      "h_o006": [
+        "dg_014"
+      ],
+      "h_o005": [
+        "dg_015"
+      ]
+    },
+    "human_openings_without_glyph": [
+      "h_o008",
+      "h_o010",
+      "h_o011"
+    ]
+  },
+  "glyphs": [
+    {
+      "id": "dg_000",
+      "bbox_pts": [
+        495.0616455078125,
+        556.567626953125,
+        548.3756103515625,
+        617.681640625
+      ],
+      "n_seg": 8,
+      "n_cubic": 2,
+      "hinge_corner_pt": [
+        495.0616455078125,
+        556.567626953125
+      ],
+      "chord_corner_pt": [
+        548.3756103515625,
+        617.681640625
+      ],
+      "door_width_pts": 61.114,
+      "nearest_wall_id": "w014",
+      "nearest_wall_dist_pts": 2.44,
+      "cross_ref": "unmatched_glyph",
+      "matched_human_opening_id": null,
+      "matched_human_kind": null,
+      "match_distance_pts": null
+    },
+    {
+      "id": "dg_001",
+      "bbox_pts": [
+        495.421630859375,
+        522.010009765625,
+        534.0980224609375,
+        557.567626953125
+      ],
+      "n_seg": 8,
+      "n_cubic": 2,
+      "hinge_corner_pt": [
+        495.421630859375,
+        522.010009765625
+      ],
+      "chord_corner_pt": [
+        534.0980224609375,
+        557.567626953125
+      ],
+      "door_width_pts": 38.676,
+      "nearest_wall_id": "w017",
+      "nearest_wall_dist_pts": 2.799,
+      "cross_ref": "matched_human",
+      "matched_human_opening_id": "h_o007",
+      "matched_human_kind": "window",
+      "match_distance_pts": 20.822
+    },
+    {
+      "id": "dg_002",
+      "bbox_pts": [
+        335.8360290527344,
+        523.0900268554688,
+        383.3924255371094,
+        584.6852416992188
+      ],
+      "n_seg": 8,
+      "n_cubic": 2,
+      "hinge_corner_pt": [
+        335.8360290527344,
+        584.6852416992188
+      ],
+      "chord_corner_pt": [
+        383.3924255371094,
+        523.0900268554688
+      ],
+      "door_width_pts": 61.595,
+      "nearest_wall_id": "w011",
+      "nearest_wall_dist_pts": 2.439,
+      "cross_ref": "unmatched_glyph",
+      "matched_human_opening_id": null,
+      "matched_human_kind": null,
+      "match_distance_pts": null
+    },
+    {
+      "id": "dg_003",
+      "bbox_pts": [
+        336.1960144042969,
+        486.9748229980469,
+        370.91241455078125,
+        524.0900268554688
+      ],
+      "n_seg": 8,
+      "n_cubic": 2,
+      "hinge_corner_pt": [
+        336.1960144042969,
+        486.9748229980469
+      ],
+      "chord_corner_pt": [
+        370.91241455078125,
+        524.0900268554688
+      ],
+      "door_width_pts": 37.115,
+      "nearest_wall_id": "w026",
+      "nearest_wall_dist_pts": 2.74,
+      "cross_ref": "matched_human",
+      "matched_human_opening_id": "h_o009",
+      "matched_human_kind": "window",
+      "match_distance_pts": 21.341
+    },
+    {
+      "id": "dg_004",
+      "bbox_pts": [
+        260.12322998046875,
+        630.3604125976562,
+        321.2384338378906,
+        677.9155883789062
+      ],
+      "n_seg": 8,
+      "n_cubic": 2,
+      "hinge_corner_pt": [
+        260.12322998046875,
+        630.3604125976562
+      ],
+      "chord_corner_pt": [
+        321.2384338378906,
+        677.9155883789062
+      ],
+      "door_width_pts": 61.115,
+      "nearest_wall_id": "w007",
+      "nearest_wall_dist_pts": 2.439,
+      "cross_ref": "matched_human",
+      "matched_human_opening_id": "h_o001",
+      "matched_human_kind": "interior_door",
+      "match_distance_pts": 29.7
+    },
+    {
+      "id": "dg_005",
+      "bbox_pts": [
+        65.02191925048828,
+        460.4560241699219,
+        94.69952392578125,
+        488.5748291015625
+      ],
+      "n_seg": 8,
+      "n_cubic": 2,
+      "hinge_corner_pt": [
+        65.02191925048828,
+        460.4560241699219
+      ],
+      "chord_corner_pt": [
+        94.69952392578125,
+        488.5748291015625
+      ],
+      "door_width_pts": 29.678,
+      "nearest_wall_id": "w031",
+      "nearest_wall_dist_pts": 13.118,
+      "cross_ref": "unmatched_glyph",
+      "matched_human_opening_id": null,
+      "matched_human_kind": null,
+      "match_distance_pts": null
+    },
+    {
+      "id": "dg_006",
+      "bbox_pts": [
+        54.82276153564453,
+        434.7784118652344,
+        94.69952392578125,
+        461.4560241699219
+      ],
+      "n_seg": 8,
+      "n_cubic": 2,
+      "hinge_corner_pt": [
+        54.82276153564453,
+        434.7784118652344
+      ],
+      "chord_corner_pt": [
+        94.69952392578125,
+        461.4560241699219
+      ],
+      "door_width_pts": 39.877,
+      "nearest_wall_id": "w031",
+      "nearest_wall_dist_pts": 2.919,
+      "cross_ref": "unmatched_glyph",
+      "matched_human_opening_id": null,
+      "matched_human_kind": null,
+      "match_distance_pts": null
+    },
+    {
+      "id": "dg_007",
+      "bbox_pts": [
+        54.103240966796875,
+        406.8208312988281,
+        82.22048950195312,
+        435.05841064453125
+      ],
+      "n_seg": 7,
+      "n_cubic": 1,
+      "hinge_corner_pt": [
+        54.103240966796875,
+        406.8208312988281
+      ],
+      "chord_corner_pt": [
+        82.22048950195312,
+        435.05841064453125
+      ],
+      "door_width_pts": 28.238,
+      "nearest_wall_id": "w032",
+      "nearest_wall_dist_pts": 2.199,
+      "cross_ref": "unmatched_glyph",
+      "matched_human_opening_id": null,
+      "matched_human_kind": null,
+      "match_distance_pts": null
+    },
+    {
+      "id": "dg_008",
+      "bbox_pts": [
+        54.7027587890625,
+        609.0016479492188,
+        78.98096466064453,
+        664.3568725585938
+      ],
+      "n_seg": 5,
+      "n_cubic": 1,
+      "hinge_corner_pt": [
+        54.7027587890625,
+        609.0016479492188
+      ],
+      "chord_corner_pt": [
+        78.98096466064453,
+        664.3568725585938
+      ],
+      "door_width_pts": 55.355,
+      "nearest_wall_id": "w031",
+      "nearest_wall_dist_pts": 2.799,
+      "cross_ref": "unmatched_glyph",
+      "matched_human_opening_id": null,
+      "matched_human_kind": null,
+      "match_distance_pts": null
+    },
+    {
+      "id": "dg_009",
+      "bbox_pts": [
+        133.59521484375,
+        645.1192626953125,
+        166.4516143798828,
+        677.9755859375
+      ],
+      "n_seg": 4,
+      "n_cubic": 1,
+      "hinge_corner_pt": [
+        166.4516143798828,
+        677.9755859375
+      ],
+      "chord_corner_pt": [
+        133.59521484375,
+        645.1192626953125
+      ],
+      "door_width_pts": 32.856,
+      "nearest_wall_id": "w002",
+      "nearest_wall_dist_pts": 2.656,
+      "cross_ref": "matched_human",
+      "matched_human_opening_id": "h_o000",
+      "matched_human_kind": "interior_door",
+      "match_distance_pts": 18.946
+    },
+    {
+      "id": "dg_010",
+      "bbox_pts": [
+        298.6396179199219,
+        555.7276000976562,
+        327.5372314453125,
+        584.7452392578125
+      ],
+      "n_seg": 4,
+      "n_cubic": 1,
+      "hinge_corner_pt": [
+        327.5372314453125,
+        584.7452392578125
+      ],
+      "chord_corner_pt": [
+        298.6396179199219,
+        555.7276000976562
+      ],
+      "door_width_pts": 29.018,
+      "nearest_wall_id": "w011",
+      "nearest_wall_dist_pts": 2.683,
+      "cross_ref": "matched_human",
+      "matched_human_opening_id": "h_o004",
+      "matched_human_kind": "interior_door",
+      "match_distance_pts": 16.888
+    },
+    {
+      "id": "dg_011",
+      "bbox_pts": [
+        263.6632385253906,
+        630.42041015625,
+        288.7208251953125,
+        655.47802734375
+      ],
+      "n_seg": 4,
+      "n_cubic": 1,
+      "hinge_corner_pt": [
+        288.7208251953125,
+        630.42041015625
+      ],
+      "chord_corner_pt": [
+        263.6632385253906,
+        655.47802734375
+      ],
+      "door_width_pts": 25.058,
+      "nearest_wall_id": "w006",
+      "nearest_wall_dist_pts": 2.764,
+      "cross_ref": "matched_human",
+      "matched_human_opening_id": "h_o001",
+      "matched_human_kind": "interior_door",
+      "match_distance_pts": 15.038
+    },
+    {
+      "id": "dg_012",
+      "bbox_pts": [
+        498.6016540527344,
+        592.6840209960938,
+        523.6592407226562,
+        617.7416381835938
+      ],
+      "n_seg": 4,
+      "n_cubic": 1,
+      "hinge_corner_pt": [
+        523.6592407226562,
+        617.7416381835938
+      ],
+      "chord_corner_pt": [
+        498.6016540527344,
+        592.6840209960938
+      ],
+      "door_width_pts": 25.058,
+      "nearest_wall_id": "w009",
+      "nearest_wall_dist_pts": 2.656,
+      "cross_ref": "matched_human",
+      "matched_human_opening_id": "h_o002",
+      "matched_human_kind": "interior_door",
+      "match_distance_pts": 15.157
+    },
+    {
+      "id": "dg_013",
+      "bbox_pts": [
+        335.8960266113281,
+        593.1040649414062,
+        364.9148254394531,
+        622.0016479492188
+      ],
+      "n_seg": 4,
+      "n_cubic": 1,
+      "hinge_corner_pt": [
+        335.8960266113281,
+        622.0016479492188
+      ],
+      "chord_corner_pt": [
+        364.9148254394531,
+        593.1040649414062
+      ],
+      "door_width_pts": 29.019,
+      "nearest_wall_id": "w006",
+      "nearest_wall_dist_pts": 5.919,
+      "cross_ref": "matched_human",
+      "matched_human_opening_id": "h_o003",
+      "matched_human_kind": "interior_door",
+      "match_distance_pts": 17.022
+    },
+    {
+      "id": "dg_014",
+      "bbox_pts": [
+        335.8960266113281,
+        556.2076416015625,
+        360.954833984375,
+        581.2651977539062
+      ],
+      "n_seg": 4,
+      "n_cubic": 1,
+      "hinge_corner_pt": [
+        335.8960266113281,
+        556.2076416015625
+      ],
+      "chord_corner_pt": [
+        360.954833984375,
+        581.2651977539062
+      ],
+      "door_width_pts": 25.059,
+      "nearest_wall_id": "w024",
+      "nearest_wall_dist_pts": 2.817,
+      "cross_ref": "matched_human",
+      "matched_human_opening_id": "h_o006",
+      "matched_human_kind": "interior_door",
+      "match_distance_pts": 15.074
+    },
+    {
+      "id": "dg_015",
+      "bbox_pts": [
+        85.48660278320312,
+        545.5480346679688,
+        119.97920227050781,
+        581.2448120117188
+      ],
+      "n_seg": 4,
+      "n_cubic": 1,
+      "hinge_corner_pt": [
+        85.48660278320312,
+        581.2448120117188
+      ],
+      "chord_corner_pt": [
+        119.97920227050781,
+        545.5480346679688
+      ],
+      "door_width_pts": 35.697,
+      "nearest_wall_id": "h_w000",
+      "nearest_wall_dist_pts": 0.845,
+      "cross_ref": "matched_human",
+      "matched_human_opening_id": "h_o005",
+      "matched_human_kind": "interior_door",
+      "match_distance_pts": 17.098
+    },
+    {
+      "id": "dg_016",
+      "bbox_pts": [
+        526.0180053710938,
+        585.7240600585938,
+        548.3756103515625,
+        617.681640625
+      ],
+      "n_seg": 5,
+      "n_cubic": 1,
+      "hinge_corner_pt": [
+        548.3756103515625,
+        585.7240600585938
+      ],
+      "chord_corner_pt": [
+        526.0180053710938,
+        617.681640625
+      ],
+      "door_width_pts": 31.958,
+      "nearest_wall_id": "w013",
+      "nearest_wall_dist_pts": 2.44,
+      "cross_ref": "unmatched_glyph",
+      "matched_human_opening_id": null,
+      "matched_human_kind": null,
+      "match_distance_pts": null
+    },
+    {
+      "id": "dg_017",
+      "bbox_pts": [
+        361.0348205566406,
+        552.6076049804688,
+        383.3924255371094,
+        584.6852416992188
+      ],
+      "n_seg": 5,
+      "n_cubic": 1,
+      "hinge_corner_pt": [
+        361.0348205566406,
+        584.6852416992188
+      ],
+      "chord_corner_pt": [
+        383.3924255371094,
+        552.6076049804688
+      ],
+      "door_width_pts": 32.078,
+      "nearest_wall_id": "w011",
+      "nearest_wall_dist_pts": 2.439,
+      "cross_ref": "unmatched_glyph",
+      "matched_human_opening_id": null,
+      "matched_human_kind": null,
+      "match_distance_pts": null
+    }
+  ]
+}

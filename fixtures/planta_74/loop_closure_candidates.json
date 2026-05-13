@@ -1,0 +1,200 @@
+{
+  "schema_version": "1.0",
+  "n_merged_cells": 2,
+  "n_pairs": 7,
+  "by_candidate_type": {
+    "human_wall": 2,
+    "human_soft_barrier": 3,
+    "already_explained": 1,
+    "semantic_room_split": 1
+  },
+  "n_should_user_paint": 2,
+  "n_should_not_paint": 5,
+  "candidates": [
+    {
+      "from_room": "A.S.",
+      "to_room": "TERRACO SOCIAL",
+      "seed_from": [
+        91.1695556640625,
+        523.3749389648438
+      ],
+      "seed_to": [
+        154.44516372680664,
+        462.88114166259766
+      ],
+      "midpoint_pdf": [
+        122.807,
+        493.128
+      ],
+      "distance_pts": 87.54,
+      "candidate_type": "human_wall",
+      "evidence_source": "drywall",
+      "confidence": 0.8,
+      "should_user_paint": true,
+      "reason": "Drywall separando A.S. (\u00e1rea servi\u00e7o) do TERRACO SOCIAL (varanda). Wall vertical at x\u2248130, cobrindo y range da A.S./TERRACO transition.",
+      "suggested_segment_pdf": [
+        122.807,
+        437.881,
+        122.807,
+        548.375
+      ],
+      "suggested_orientation": "v",
+      "suggested_length_pts": 110.494
+    },
+    {
+      "from_room": "A.S.",
+      "to_room": "COZINHA",
+      "seed_from": [
+        91.1695556640625,
+        523.3749389648438
+      ],
+      "seed_to": [
+        96.46437072753906,
+        640.9668884277344
+      ],
+      "midpoint_pdf": [
+        93.817,
+        582.171
+      ],
+      "distance_pts": 117.711,
+      "candidate_type": "human_wall",
+      "evidence_source": "drywall",
+      "confidence": 0.95,
+      "should_user_paint": true,
+      "reason": "Drywall com v\u00e3o de porta (h_o005) entre COZINHA e A.S. \u2014 h_w000 j\u00e1 cobre 40pt mas precisa estender pra fechar loop. Wall horizontal at y\u2248580, x range full A.S./COZINHA column.",
+      "suggested_segment_pdf": [
+        43.817,
+        582.171,
+        143.817,
+        582.171
+      ],
+      "suggested_orientation": "h",
+      "suggested_length_pts": 100.0
+    },
+    {
+      "from_room": "A.S.",
+      "to_room": "TERRACO TECNICO",
+      "seed_from": [
+        91.1695556640625,
+        523.3749389648438
+      ],
+      "seed_to": [
+        247.55320358276367,
+        432.83577728271484
+      ],
+      "midpoint_pdf": [
+        169.361,
+        478.105
+      ],
+      "distance_pts": 180.702,
+      "candidate_type": "human_soft_barrier",
+      "evidence_source": "peitoril",
+      "confidence": 0.65,
+      "should_user_paint": false,
+      "reason": "Lim\u00edtrofe entre A.S. interna e TERRACO TECNICO externo via peitoril/grade; soft_barrier, n\u00e3o wall.",
+      "suggested_segment_pdf": null,
+      "suggested_orientation": null,
+      "suggested_length_pts": null
+    },
+    {
+      "from_room": "TERRACO SOCIAL",
+      "to_room": "COZINHA",
+      "seed_from": [
+        154.44516372680664,
+        462.88114166259766
+      ],
+      "seed_to": [
+        96.46437072753906,
+        640.9668884277344
+      ],
+      "midpoint_pdf": [
+        125.455,
+        551.924
+      ],
+      "distance_pts": 187.287,
+      "candidate_type": "already_explained",
+      "evidence_source": "existing_human_opening",
+      "confidence": 0.8,
+      "should_user_paint": false,
+      "reason": "Boundary explicada por porta-balc\u00e3o (h_o011 glazed_balcony) ou peitoril intermedi\u00e1rio; cell-merge resolve quando o loop fecha via SALA DE ESTAR.",
+      "suggested_segment_pdf": null,
+      "suggested_orientation": null,
+      "suggested_length_pts": null
+    },
+    {
+      "from_room": "TERRACO SOCIAL",
+      "to_room": "TERRACO TECNICO",
+      "seed_from": [
+        154.44516372680664,
+        462.88114166259766
+      ],
+      "seed_to": [
+        247.55320358276367,
+        432.83577728271484
+      ],
+      "midpoint_pdf": [
+        200.999,
+        447.858
+      ],
+      "distance_pts": 97.836,
+      "candidate_type": "human_soft_barrier",
+      "evidence_source": "peitoril",
+      "confidence": 0.8,
+      "should_user_paint": false,
+      "reason": "Dois terra\u00e7os separados por peitoril/muretas (H=0.70M no PDF). soft_barrier, n\u00e3o wall.",
+      "suggested_segment_pdf": null,
+      "suggested_orientation": null,
+      "suggested_length_pts": null
+    },
+    {
+      "from_room": "COZINHA",
+      "to_room": "TERRACO TECNICO",
+      "seed_from": [
+        96.46437072753906,
+        640.9668884277344
+      ],
+      "seed_to": [
+        247.55320358276367,
+        432.83577728271484
+      ],
+      "midpoint_pdf": [
+        172.009,
+        536.901
+      ],
+      "distance_pts": 257.189,
+      "candidate_type": "human_soft_barrier",
+      "evidence_source": "peitoril",
+      "confidence": 0.75,
+      "should_user_paint": false,
+      "reason": "TERRACO TECNICO \u00e9 varanda externa separada por peitoril H=1,10M (j\u00e1 em consensus.soft_barriers). N\u00c3O pintar como wall.",
+      "suggested_segment_pdf": null,
+      "suggested_orientation": null,
+      "suggested_length_pts": null
+    },
+    {
+      "from_room": "SALA DE JANTAR",
+      "to_room": "SALA DE ESTAR",
+      "seed_from": [
+        189.7418098449707,
+        630.5092620849609
+      ],
+      "seed_to": [
+        182.5546417236328,
+        563.4514465332031
+      ],
+      "midpoint_pdf": [
+        186.148,
+        596.98
+      ],
+      "distance_pts": 67.442,
+      "candidate_type": "semantic_room_split",
+      "evidence_source": "open_plan",
+      "confidence": 0.95,
+      "should_user_paint": false,
+      "reason": "Sala integrada: SALA DE JANTAR e SALA DE ESTAR s\u00e3o um \u00fanico ambiente em planta aberta. N\u00c3O existe parede f\u00edsica. Aceitar fus\u00e3o como semanticamente correta.",
+      "suggested_segment_pdf": null,
+      "suggested_orientation": null,
+      "suggested_length_pts": null
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "schema_version": "1.0",
+  "verdict_top_level": "WARN",
+  "fidelities": {
+    "wall_fidelity": {
+      "verdict": "PASS",
+      "reason": "all physical walls present; h_o005 cut_into_wall (carved + door leaf drawn).",
+      "n_walls_missing": 0,
+      "missing_wall_pairs": [],
+      "h_o005_host_mode": "cut_into_wall",
+      "h_o005_carved": true,
+      "h_o005_host_wall_id": "h_w000"
+    },
+    "soft_barrier_fidelity": {
+      "verdict": "PASS",
+      "reason": "no cell requires a soft_barrier (leak map lists 0 candidate_type=human_soft_barrier).",
+      "n_target_pairs": 0,
+      "n_target_cells": 0,
+      "n_human_soft_barriers_applied": 1,
+      "target_cells": []
+    },
+    "semantic_room_fidelity": {
+      "verdict": "PASS",
+      "reason": "1 open-plan merge(s); all constituent labels preserved in cell names.",
+      "n_semantic_cells": 1,
+      "semantic_cells": [
+        {
+          "cell_name": "SALA DE JANTAR | SALA DE ESTAR",
+          "constituent_labels": [
+            "SALA DE JANTAR",
+            "SALA DE ESTAR"
+          ],
+          "labels_present": [
+            "SALA DE JANTAR",
+            "SALA DE ESTAR"
+          ],
+          "labels_missing": []
+        }
+      ]
+    },
+    "global_visual_fidelity": {
+      "verdict": "WARN",
+      "reason": "operator review pending. Open the side-by-side render and pass --operator-confirmed-visual if it looks faithful to the PDF.",
+      "side_by_side_artifact": "fixtures\\planta_74\\side_by_side_pdf_vs_skp_after_soft_barriers.png"
+    }
+  }
+}

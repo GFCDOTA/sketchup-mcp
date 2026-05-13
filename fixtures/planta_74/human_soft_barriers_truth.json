@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0",
+  "source_image": "fixtures/planta_74/human_soft_barriers_annotation.png",
+  "image_size_px": [
+    2541,
+    3580
+  ],
+  "color_mapping": {
+    "cyan": {
+      "rgb": [
+        0,
+        255,
+        255
+      ],
+      "barrier_type": "peitoril"
+    }
+  },
+  "calibration": {
+    "img_x0": 221,
+    "img_y0": 609,
+    "img_x1": 2353,
+    "img_y1": 1876,
+    "pdf_x0": 49.2037239074707,
+    "pdf_y0": 404.6214294433594,
+    "pdf_x1": 553.515625,
+    "pdf_y1": 697.8138122558594,
+    "scale_x_pt_per_px": 0.23654404366441337,
+    "scale_y_pt_per_px": 0.2314067741219416
+  },
+  "consensus_wall_thickness_pts": 5.399517059326172,
+  "soft_barriers": [
+    {
+      "id": "h_sb000",
+      "color": "cyan",
+      "barrier_type": "peitoril",
+      "bbox_px": [
+        457.0,
+        1652.0,
+        1129.0,
+        1883.0
+      ],
+      "bbox_pts": [
+        105.028,
+        403.002,
+        263.986,
+        456.457
+      ],
+      "orientation": "h",
+      "polyline_pts": [
+        [
+          105.028,
+          429.729
+        ],
+        [
+          263.986,
+          429.729
+        ]
+      ],
+      "height_m": 1.1,
+      "geometry_origin": "human_annotation"
+    }
+  ]
+}
