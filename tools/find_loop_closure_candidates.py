@@ -95,20 +95,30 @@ PLANTA_74_PAIR_PRIORS: dict[frozenset[str], dict] = {
                    "da A.S./TERRACO transition.",
     },
     frozenset({"A.S.", "TERRACO TECNICO"}): {
-        "candidate_type": "human_soft_barrier",
-        "evidence_source": "peitoril",
-        "confidence": 0.65,
+        "candidate_type": "semantic_room_split",
+        "evidence_source": "open_plan",
+        "confidence": 0.85,
         "should_user_paint": False,
-        "reason": "Limítrofe entre A.S. interna e TERRACO TECNICO externo via "
-                   "peitoril/grade; soft_barrier, não wall.",
+        "reason": "Operator confirmed 2026-05-13 (visual diagnostic): the trio "
+                   "A.S. / TERRACO SOCIAL / TERRACO TECNICO is one continuous "
+                   "physical space bounded ONLY by the outer parapet h_sb000 "
+                   "(south facade). No physical divider exists between A.S. "
+                   "and TERRACO TECNICO — earlier 'human_soft_barrier' prior "
+                   "was fabricated by assumption, not observation. The trio "
+                   "merge is honest open_plan; labels remain preserved.",
     },
     frozenset({"TERRACO SOCIAL", "TERRACO TECNICO"}): {
-        "candidate_type": "human_soft_barrier",
-        "evidence_source": "peitoril",
-        "confidence": 0.80,
+        "candidate_type": "semantic_room_split",
+        "evidence_source": "open_plan",
+        "confidence": 0.90,
         "should_user_paint": False,
-        "reason": "Dois terraços separados por peitoril/muretas (H=0.70M no "
-                   "PDF). soft_barrier, não wall.",
+        "reason": "Operator confirmed 2026-05-13 (visual diagnostic): no "
+                   "mureta or peitoril exists between the two terraços in the "
+                   "PDF. The distinction is semantic (label-only) — earlier "
+                   "'H=0.70M mureta' prior was inferred from generic "
+                   "architectural assumption, not from observed PDF "
+                   "geometry. The only physical peitoril is h_sb000 "
+                   "(outer parapet H=1.10M on the south facade).",
     },
     frozenset({"SALA DE JANTAR", "SALA DE ESTAR"}): {
         "candidate_type": "semantic_room_split",

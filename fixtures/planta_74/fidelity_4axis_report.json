@@ -12,14 +12,12 @@
       "h_o005_host_wall_id": "h_w000"
     },
     "soft_barrier_fidelity": {
-      "verdict": "WARN",
-      "reason": "1 human soft_barriers applied but 1 target cell(s) still merged \u2014 the painted barriers do not fully close the loops.",
-      "n_target_pairs": 2,
-      "n_target_cells": 1,
+      "verdict": "PASS",
+      "reason": "no cell requires a soft_barrier (leak map lists 0 candidate_type=human_soft_barrier).",
+      "n_target_pairs": 0,
+      "n_target_cells": 0,
       "n_human_soft_barriers_applied": 1,
-      "target_cells_still_merged": [
-        "A.S. | TERRACO SOCIAL | TERRACO TECNICO"
-      ]
+      "target_cells": []
     },
     "semantic_room_fidelity": {
       "verdict": "PASS",
