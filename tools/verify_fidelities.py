@@ -307,13 +307,119 @@ def _global_visual_fidelity(operator_confirmed: bool,
     }
 
 
+# Visual Fidelity Gate Protocol (2026-05-14). See
+# docs/protocols/visual_fidelity_gate_protocol.md.
+#
+# Keep the list ordered so the report's `missing_visual_artifacts`
+# field is deterministic.
+REQUIRED_VISUAL_ARTIFACTS: tuple[tuple[str, str], ...] = (
+    ("original_floorplan", "original_floorplan.png"),
+    ("skp_render", "skp_render.png"),
+    ("overlay_pdf_skp", "overlay_pdf_skp.png"),
+    ("diff_walls", "diff_walls.png"),
+    ("diff_doors", "diff_doors.png"),
+    ("diff_rooms", "diff_rooms.png"),
+    ("mismatches_list", "mismatches_list.md"),
+)
+
+VISUAL_FIDELITY_POLICY_VIOLATION_TAG = (
+    "2026-05-14_visual_fidelity_gate_required"
+)
+
+
+def _check_visual_evidence(visual_evidence_dir: Path | None
+                              ) -> dict[str, Any]:
+    """Inspect the visual-evidence directory for the seven required
+    artifacts. PR-A artifact-presence mode: a >0-byte file at the
+    expected path counts as `present`; everything else is `missing`.
+    PR B will refine this with per-artifact checks that set
+    `incomplete` when an artifact exists but fails its content gate.
+
+    Returns a dict with:
+      * `required`: ordered list of artifact keys (canonical).
+      * `present`: list of keys for artifacts whose file exists.
+      * `missing`: list of keys for artifacts whose file is absent
+        or empty.
+      * `status`: one of `present` (all 7), `incomplete` (some, but
+        not all 7), `missing` (none).
+      * `directory`: stringified `visual_evidence_dir` (or null
+        when no dir was supplied).
+      * `per_artifact`: list of dicts with `{key, expected_path,
+        status}`.
+    """
+    required_keys = [k for k, _ in REQUIRED_VISUAL_ARTIFACTS]
+    if visual_evidence_dir is None:
+        return {
+            "required": required_keys,
+            "present": [],
+            "missing": list(required_keys),
+            "status": "missing",
+            "directory": None,
+            "per_artifact": [
+                {"key": k, "expected_path": fname, "status": "missing"}
+                for k, fname in REQUIRED_VISUAL_ARTIFACTS
+            ],
+        }
+    base = Path(visual_evidence_dir)
+    present: list[str] = []
+    missing: list[str] = []
+    per_artifact: list[dict] = []
+    for key, fname in REQUIRED_VISUAL_ARTIFACTS:
+        path = base / fname
+        try:
+            exists_nonempty = path.exists() and path.stat().st_size > 0
+        except OSError:
+            exists_nonempty = False
+        if exists_nonempty:
+            present.append(key)
+            status = "present"
+        else:
+            missing.append(key)
+            status = "missing"
+        per_artifact.append({
+            "key": key,
+            "expected_path": str(path),
+            "status": status,
+        })
+    if len(missing) == 0:
+        overall = "present"
+    elif len(present) == 0:
+        overall = "missing"
+    else:
+        overall = "incomplete"
+    return {
+        "required": required_keys,
+        "present": present,
+        "missing": missing,
+        "status": overall,
+        "directory": str(base),
+        "per_artifact": per_artifact,
+    }
+
+
 def verify_fidelities(consensus_after: dict,
                         candidates_report: dict,
                         labels: list[dict] | None = None,
                         operator_confirmed_visual: bool = False,
-                        side_by_side_path: Path | None = None
+                        side_by_side_path: Path | None = None,
+                        require_visual_evidence: bool = False,
+                        visual_evidence_dir: Path | None = None,
                         ) -> dict[str, Any]:
-    """Produce the 4 separated verdicts."""
+    """Produce the 4 separated verdicts.
+
+    When ``require_visual_evidence=True``, the Visual Fidelity Gate
+    Protocol (2026-05-14) applies: the per-axis verdicts are computed
+    as before, but the top-level verdict is **forced to FAIL** unless
+    all seven artifacts described in
+    ``REQUIRED_VISUAL_ARTIFACTS`` exist in
+    ``visual_evidence_dir`` and are non-empty. The per-axis verdicts
+    are preserved (the operator can still see which axes
+    algorithmically pass); only the top-level reflects the gate.
+
+    When ``require_visual_evidence=False`` (default), behaviour is
+    byte-equivalent to the prior contract — existing callers and CI
+    workflows are unaffected.
+    """
     wf = _wall_fidelity(consensus_after, candidates_report)
     sbf = _soft_barrier_fidelity(consensus_after, candidates_report)
     srf = _semantic_room_fidelity(consensus_after, candidates_report, labels)
@@ -331,11 +437,34 @@ def verify_fidelities(consensus_after: dict,
     top = next(k for k, v in severity_rank.items() if v == worst)
     # top-level uses the FAIL/WARN/PASS string, not "wall_fidelity"
 
-    return {
+    report: dict[str, Any] = {
         "schema_version": "1.0",
         "verdict_top_level": top,
         "fidelities": by_axis,
     }
+
+    if require_visual_evidence:
+        evidence = _check_visual_evidence(visual_evidence_dir)
+        report["visual_evidence_required"] = True
+        report["visual_evidence_status"] = evidence["status"]
+        report["missing_visual_artifacts"] = evidence["missing"]
+        report["visual_evidence"] = evidence
+        if evidence["status"] != "present":
+            report["verdict_top_level_pre_visual_gate"] = top
+            report["verdict_top_level"] = "FAIL"
+            report["policy_violation"] = VISUAL_FIDELITY_POLICY_VIOLATION_TAG
+            report["policy_reason"] = (
+                "Visual Fidelity Gate Protocol (2026-05-14): "
+                f"visual_evidence_status={evidence['status']!r}; "
+                f"missing {len(evidence['missing'])} of "
+                f"{len(REQUIRED_VISUAL_ARTIFACTS)} required "
+                "artifacts. Per-axis verdicts are preserved above; "
+                "top-level is forced to FAIL until the seven "
+                "artifacts are produced. See "
+                "docs/protocols/visual_fidelity_gate_protocol.md."
+            )
+
+    return report
 
 
 def main() -> None:
@@ -352,6 +481,29 @@ def main() -> None:
                     help="Set when operator has reviewed the side-by-side "
                          "and accepts the global_visual_fidelity. Without "
                          "this flag global_visual_fidelity is WARN.")
+    ap.add_argument(
+        "--require-visual-evidence", action="store_true",
+        help=(
+            "Apply the Visual Fidelity Gate Protocol (2026-05-14, "
+            "docs/protocols/visual_fidelity_gate_protocol.md). When set, "
+            "the top-level verdict is FORCED to FAIL unless the seven "
+            "required visual evidence artifacts exist under "
+            "--visual-evidence-dir. Per-axis verdicts are preserved. "
+            "Without this flag the script is byte-equivalent to the "
+            "prior contract."
+        ),
+    )
+    ap.add_argument(
+        "--visual-evidence-dir", type=Path, default=None,
+        help=(
+            "Directory inspected for the seven required visual evidence "
+            "artifacts (original_floorplan.png, skp_render.png, "
+            "overlay_pdf_skp.png, diff_walls.png, diff_doors.png, "
+            "diff_rooms.png, mismatches_list.md). Defaults to the parent "
+            "directory of --consensus-after when --require-visual-evidence "
+            "is set."
+        ),
+    )
     ap.add_argument("--out", type=Path, default=None)
     ap.add_argument("--strict", action="store_true")
     args = ap.parse_args()
@@ -361,11 +513,17 @@ def main() -> None:
     labels = (json.loads(args.labels.read_text())
               if args.labels and args.labels.exists() else None)
 
+    visual_evidence_dir = args.visual_evidence_dir
+    if args.require_visual_evidence and visual_evidence_dir is None:
+        visual_evidence_dir = args.consensus_after.parent
+
     report = verify_fidelities(
         consensus_after, candidates_report,
         labels=labels,
         operator_confirmed_visual=args.operator_confirmed_visual,
         side_by_side_path=args.side_by_side,
+        require_visual_evidence=args.require_visual_evidence,
+        visual_evidence_dir=visual_evidence_dir,
     )
     if args.out:
         args.out.parent.mkdir(parents=True, exist_ok=True)
@@ -375,6 +533,15 @@ def main() -> None:
     # Pretty console summary
     print()
     print(f"=== Top-level verdict: {report['verdict_top_level']} ===")
+    if report.get("policy_violation"):
+        pre_gate = report.get("verdict_top_level_pre_visual_gate")
+        print(f"  policy_violation: {report['policy_violation']}")
+        print(f"  pre-gate top-level (per-axis worst): {pre_gate}")
+        print(f"  visual_evidence_status: "
+              f"{report.get('visual_evidence_status')}")
+        if report.get("missing_visual_artifacts"):
+            missing = ", ".join(report["missing_visual_artifacts"])
+            print(f"  missing artifacts: {missing}")
     print()
     print(f"{'axis':>26}  {'verdict':>5}  reason")
     print(f"{'-'*26:>26}  {'-'*5:>5}  {'-'*60}")

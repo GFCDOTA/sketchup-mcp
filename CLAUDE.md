@@ -259,6 +259,49 @@ explicitly running the command outside Claude.
 
 ## 10. Pipeline state (for context)
 
+### Visual Fidelity Gate (active policy, 2026-05-14)
+
+> **Aggregate score is not visual fidelity.** A `verdict_top_level:
+> PASS` from `tools/verify_fidelities.py` is meaningless unless the
+> consensus has been compared to the source PDF and the seven
+> visual evidence artifacts exist on disk.
+
+Operational rules:
+
+1. **No aggregate-score promotion to PASS without visual evidence.**
+   `tools/verify_fidelities.py --require-visual-evidence` is the
+   canonical entrypoint when the report's `verdict_top_level` will
+   be acted on (PR gates, releases, end-of-cycle ship checks).
+2. **Top-level PASS requires all seven artifacts** under the
+   `--visual-evidence-dir`:
+   `original_floorplan.png`, `skp_render.png`,
+   `overlay_pdf_skp.png`, `diff_walls.png`, `diff_doors.png`,
+   `diff_rooms.png`, `mismatches_list.md`. Missing any one
+   downgrades the top-level to FAIL with
+   `policy_violation: 2026-05-14_visual_fidelity_gate_required`.
+3. **Per-axis verdicts are preserved** so the report still says
+   which axis was algorithmically PASS/WARN/FAIL. Only the top
+   level is downgraded; the operator sees both the raw axes and
+   the gate's override reason.
+4. **Eight failure conditions** are documented in
+   `docs/protocols/visual_fidelity_gate_protocol.md`. Their
+   algorithmic checks land in PR B
+   (`tools/visual_fidelity_gate.py`). Until PR B ships, the gate
+   runs in **artifact-presence mode**: a >0-byte file at the
+   expected path counts as `present`.
+5. **Backward compatibility** — the flag is opt-in. Calls without
+   `--require-visual-evidence` are byte-equivalent to the prior
+   contract; existing CI workflows are unaffected.
+6. **Aggregate scores still useful** for incremental improvement
+   tracking, regression detection, and per-axis triage. They are
+   simply not authorized to gate a "ship this consensus" decision
+   on their own.
+
+This policy supersedes the 2026-05-13 operator-verbal-waiver
+pattern (`fixtures/planta_74/operator_acknowledgment_2026-05-13.md`).
+A verbal "trust me, looks fine" does not satisfy the seven-artifact
+requirement.
+
 ### Known baseline on `planta_74` (vector pipeline)
 - 33 walls, 11 rooms, 11 openings, 8 soft_barriers
 - by_kind: 5 interior_door / 2 interior_passage / 2 window / 2 glazed_balcony
@@ -400,6 +443,17 @@ Never apply archive patches without an explicit, signed-off PR plan.
 
 ## 13. Last-updated marker
 
+- **2026-05-14** — Visual Fidelity Gate policy added to §10. Aggregate
+  score cannot promote `verdict_top_level: PASS` without the seven
+  visual evidence artifacts on disk. `tools/verify_fidelities.py`
+  gains `--require-visual-evidence` (opt-in flag, default off →
+  backward compatible) that FAILs the top-level when artifacts are
+  missing/incomplete and stamps the report with
+  `policy_violation: 2026-05-14_visual_fidelity_gate_required`.
+  Full protocol: `docs/protocols/visual_fidelity_gate_protocol.md`.
+  Algorithmic checks land in PR B
+  (`tools/visual_fidelity_gate.py`); PR A is artifact-presence only.
+  Supersedes the 2026-05-13 operator-verbal-waiver pattern.
 - **2026-05-11** — added human-openings ground-truth protocol entry to
   §10. The PNG annotation at
   `fixtures/planta_74/human_openings_annotation.png` is the source of
