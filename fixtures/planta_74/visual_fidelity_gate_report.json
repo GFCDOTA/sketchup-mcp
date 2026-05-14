@@ -1,0 +1,165 @@
+{
+  "schema_version": "visual_fidelity_gate_v1",
+  "generated_at": "2026-05-14T03:06:08Z",
+  "evidence_dir": "fixtures\\planta_74\\visual_evidence",
+  "consensus_path": "fixtures\\planta_74\\consensus_with_human_walls_and_soft_barriers.json",
+  "pdf_path": "planta_74.pdf",
+  "verdict_top_level": "WARN",
+  "artifacts": {
+    "directory": "fixtures\\planta_74\\visual_evidence",
+    "per_artifact": [
+      {
+        "key": "original_floorplan",
+        "filename": "original_floorplan.png",
+        "expected_path": "fixtures\\planta_74\\visual_evidence\\original_floorplan.png",
+        "exists": true,
+        "size_bytes": 364136,
+        "status": "present"
+      },
+      {
+        "key": "skp_render",
+        "filename": "skp_render.png",
+        "expected_path": "fixtures\\planta_74\\visual_evidence\\skp_render.png",
+        "exists": true,
+        "size_bytes": 468360,
+        "status": "present"
+      },
+      {
+        "key": "overlay_pdf_skp",
+        "filename": "overlay_pdf_skp.png",
+        "expected_path": "fixtures\\planta_74\\visual_evidence\\overlay_pdf_skp.png",
+        "exists": true,
+        "size_bytes": 708168,
+        "status": "present"
+      },
+      {
+        "key": "diff_walls",
+        "filename": "diff_walls.png",
+        "expected_path": "fixtures\\planta_74\\visual_evidence\\diff_walls.png",
+        "exists": true,
+        "size_bytes": 384142,
+        "status": "present"
+      },
+      {
+        "key": "diff_doors",
+        "filename": "diff_doors.png",
+        "expected_path": "fixtures\\planta_74\\visual_evidence\\diff_doors.png",
+        "exists": true,
+        "size_bytes": 99622,
+        "status": "present"
+      },
+      {
+        "key": "diff_rooms",
+        "filename": "diff_rooms.png",
+        "expected_path": "fixtures\\planta_74\\visual_evidence\\diff_rooms.png",
+        "exists": true,
+        "size_bytes": 425726,
+        "status": "present"
+      },
+      {
+        "key": "mismatches_list",
+        "filename": "mismatches_list.md",
+        "expected_path": "fixtures\\planta_74\\visual_evidence\\mismatches_list.md",
+        "exists": true,
+        "size_bytes": 2190,
+        "status": "present"
+      }
+    ],
+    "present_keys": [
+      "original_floorplan",
+      "skp_render",
+      "overlay_pdf_skp",
+      "diff_walls",
+      "diff_doors",
+      "diff_rooms",
+      "mismatches_list"
+    ],
+    "missing_keys": [],
+    "empty_keys": [],
+    "overall_status": "present"
+  },
+  "checks": [
+    {
+      "key": "door_without_opening",
+      "description": "Door drawn without a real opening in its host wall.",
+      "severity_on_fail": "FAIL",
+      "status": "not_yet_checked",
+      "verdict": "WARN",
+      "failing_elements": [],
+      "notes": "Algorithm not yet implemented (lands in PR B3). The scaffold record keeps the gate report shape stable so downstream consumers (verify_fidelities, cockpit) can rely on it before B3 ships."
+    },
+    {
+      "key": "door_crossing_or_displaced",
+      "description": "Door crossing the wall (no carve) or displaced from the gap.",
+      "severity_on_fail": "FAIL",
+      "status": "not_yet_checked",
+      "verdict": "WARN",
+      "failing_elements": [],
+      "notes": "Algorithm not yet implemented (lands in PR B3). The scaffold record keeps the gate report shape stable so downstream consumers (verify_fidelities, cockpit) can rely on it before B3 ships."
+    },
+    {
+      "key": "door_swing_diverges",
+      "description": "Door swing / orientation diverges from the PDF arc.",
+      "severity_on_fail": "FAIL",
+      "status": "not_yet_checked",
+      "verdict": "WARN",
+      "failing_elements": [],
+      "notes": "Algorithm not yet implemented (lands in PR B3). The scaffold record keeps the gate report shape stable so downstream consumers (verify_fidelities, cockpit) can rely on it before B3 ships."
+    },
+    {
+      "key": "room_polygon_not_closed",
+      "description": "Room with a non-closed polygon.",
+      "severity_on_fail": "FAIL",
+      "status": "not_yet_checked",
+      "verdict": "WARN",
+      "failing_elements": [],
+      "notes": "Algorithm not yet implemented (lands in PR B3). The scaffold record keeps the gate report shape stable so downstream consumers (verify_fidelities, cockpit) can rely on it before B3 ships."
+    },
+    {
+      "key": "room_polygon_bleeds_outside",
+      "description": "Room polygon bleeding outside the building outline.",
+      "severity_on_fail": "FAIL",
+      "status": "not_yet_checked",
+      "verdict": "WARN",
+      "failing_elements": [],
+      "notes": "Algorithm not yet implemented (lands in PR B3). The scaffold record keeps the gate report shape stable so downstream consumers (verify_fidelities, cockpit) can rely on it before B3 ships."
+    },
+    {
+      "key": "invented_or_wrong_height_exterior",
+      "description": "Exterior wall / esquadria / peitoril invented or with the wrong height.",
+      "severity_on_fail": "FAIL",
+      "status": "not_yet_checked",
+      "verdict": "WARN",
+      "failing_elements": [],
+      "notes": "Algorithm not yet implemented (lands in PR B3). The scaffold record keeps the gate report shape stable so downstream consumers (verify_fidelities, cockpit) can rely on it before B3 ships."
+    },
+    {
+      "key": "wet_or_terrace_adjacency_wrong",
+      "description": "Bathroom / lavabo / A.S. / terra\u00e7o with wrong adjacency.",
+      "severity_on_fail": "FAIL",
+      "status": "not_yet_checked",
+      "verdict": "WARN",
+      "failing_elements": [],
+      "notes": "Algorithm not yet implemented (lands in PR B3). The scaffold record keeps the gate report shape stable so downstream consumers (verify_fidelities, cockpit) can rely on it before B3 ships."
+    },
+    {
+      "key": "room_rendered_as_bbox",
+      "description": "Room rendered as a bounding box / block instead of real geometry.",
+      "severity_on_fail": "FAIL",
+      "status": "not_yet_checked",
+      "verdict": "WARN",
+      "failing_elements": [],
+      "notes": "Algorithm not yet implemented (lands in PR B3). The scaffold record keeps the gate report shape stable so downstream consumers (verify_fidelities, cockpit) can rely on it before B3 ships."
+    }
+  ],
+  "summary": {
+    "artifacts_present": 7,
+    "artifacts_empty": 0,
+    "artifacts_missing": 0,
+    "checks_pass": 0,
+    "checks_warn": 0,
+    "checks_fail": 0,
+    "checks_not_yet_checked": 8
+  },
+  "pending_algorithmic_checks_pr": "B3"
+}
