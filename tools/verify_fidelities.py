@@ -404,17 +404,34 @@ def verify_fidelities(consensus_after: dict,
                         side_by_side_path: Path | None = None,
                         require_visual_evidence: bool = False,
                         visual_evidence_dir: Path | None = None,
+                        consensus_after_path: Path | None = None,
+                        pdf_path: Path | None = None,
                         ) -> dict[str, Any]:
     """Produce the 4 separated verdicts.
 
     When ``require_visual_evidence=True``, the Visual Fidelity Gate
-    Protocol (2026-05-14) applies: the per-axis verdicts are computed
-    as before, but the top-level verdict is **forced to FAIL** unless
-    all seven artifacts described in
-    ``REQUIRED_VISUAL_ARTIFACTS`` exist in
-    ``visual_evidence_dir`` and are non-empty. The per-axis verdicts
-    are preserved (the operator can still see which axes
-    algorithmically pass); only the top-level reflects the gate.
+    Protocol (2026-05-14) applies:
+
+      1. Per-axis verdicts are computed as before (preserved
+         throughout).
+      2. ``_check_visual_evidence`` inspects the seven required
+         artifacts under ``visual_evidence_dir``. If any are
+         missing / empty, the top-level verdict is forced to FAIL
+         with ``policy_violation`` — the gate hasn't been given
+         enough data to run.
+      3. **PR B4 wires the algorithmic gate**: when the artifacts
+         ARE present, ``tools.visual_fidelity_gate.run_gate`` runs
+         the eight per-check algorithms against the consensus.
+         The gate's verdict propagates into the top-level:
+           * gate FAIL  → top-level FAIL  (with policy_violation
+             tagged)
+           * gate WARN  → top-level WARN  (when per-axis worst was
+             PASS; preserves higher severities)
+           * gate PASS  → top-level keeps the per-axis worst
+
+    The full gate report is embedded under
+    ``report["visual_fidelity_gate"]`` so downstream consumers can
+    inspect per-check results without re-running the gate.
 
     When ``require_visual_evidence=False`` (default), behaviour is
     byte-equivalent to the prior contract — existing callers and CI
@@ -463,6 +480,56 @@ def verify_fidelities(consensus_after: dict,
                 "artifacts are produced. See "
                 "docs/protocols/visual_fidelity_gate_protocol.md."
             )
+        else:
+            # PR B4 — artifacts present → run the algorithmic gate.
+            # Local import keeps verify_fidelities import-clean for
+            # callers that don't enable the gate.
+            from visual_fidelity_gate import run_gate as _run_gate
+            gate_report = _run_gate(
+                evidence_dir=Path(visual_evidence_dir),
+                consensus_path=(
+                    Path(consensus_after_path)
+                    if consensus_after_path is not None else None
+                ),
+                pdf_path=(
+                    Path(pdf_path) if pdf_path is not None else None
+                ),
+            )
+            report["visual_fidelity_gate"] = gate_report
+            gate_verdict = gate_report["verdict_top_level"]
+            n_total = len(gate_report["checks"])
+            n_not_yet = gate_report["summary"].get(
+                "checks_not_yet_checked", n_total,
+            )
+            # Severity propagation rules (PR B4):
+            #   gate scaffolded (no consensus_path supplied)  → no propagation
+            #   gate FAIL                                      → top FAIL
+            #   gate WARN + per-axis worst was PASS            → top WARN
+            #   gate PASS                                      → top keeps per-axis worst
+            if n_not_yet >= n_total:
+                # No algorithmic input — gate didn't actually evaluate.
+                # Surface the gate report for inspection but do NOT
+                # propagate its verdict.
+                pass
+            elif gate_verdict == "FAIL":
+                report["verdict_top_level_pre_visual_gate"] = top
+                report["verdict_top_level"] = "FAIL"
+                fail_count = gate_report["summary"].get("checks_fail", 0)
+                report["policy_violation"] = (
+                    VISUAL_FIDELITY_POLICY_VIOLATION_TAG
+                )
+                report["policy_reason"] = (
+                    "Visual Fidelity Gate Protocol (2026-05-14): "
+                    f"{fail_count} of {n_total} algorithmic check(s) "
+                    "FAILED. See report['visual_fidelity_gate']"
+                    "['checks'] for per-check details + "
+                    "failing_elements. Per-axis verdicts above are "
+                    "preserved."
+                )
+            elif (gate_verdict == "WARN"
+                    and severity_rank.get(top, 1) < severity_rank["WARN"]):
+                report["verdict_top_level_pre_visual_gate"] = top
+                report["verdict_top_level"] = "WARN"
 
     return report
 
@@ -504,6 +571,14 @@ def main() -> None:
             "is set."
         ),
     )
+    ap.add_argument(
+        "--pdf", type=Path, default=None,
+        help=(
+            "Source PDF — forwarded to the visual fidelity gate "
+            "when --require-visual-evidence is set. Not consumed "
+            "directly by the per-axis checks."
+        ),
+    )
     ap.add_argument("--out", type=Path, default=None)
     ap.add_argument("--strict", action="store_true")
     args = ap.parse_args()
@@ -524,6 +599,8 @@ def main() -> None:
         side_by_side_path=args.side_by_side,
         require_visual_evidence=args.require_visual_evidence,
         visual_evidence_dir=visual_evidence_dir,
+        consensus_after_path=args.consensus_after,
+        pdf_path=args.pdf,
     )
     if args.out:
         args.out.parent.mkdir(parents=True, exist_ok=True)

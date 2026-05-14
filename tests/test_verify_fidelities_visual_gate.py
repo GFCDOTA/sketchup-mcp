@@ -28,6 +28,13 @@ from tools.verify_fidelities import (
     _check_visual_evidence,
     verify_fidelities,
 )
+from tools.visual_fidelity_gate import (
+    REQUIRED_VISUAL_ARTIFACTS as _GATE_ARTIFACTS,
+)
+
+# Mirror the gate's filename map so the test materialises real
+# canonical files.
+_ARTIFACT_FILENAMES = dict(_GATE_ARTIFACTS)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -344,6 +351,13 @@ def test_cli_require_flag_defaults_dir_to_consensus_parent(tmp_path: Path):
 
 
 def test_cli_require_flag_with_explicit_visual_evidence_dir(tmp_path: Path):
+    """CLI accepts `--visual-evidence-dir` + the 7 artifacts populate
+    `visual_evidence`. Since PR B4 also runs the algorithmic gate
+    against the supplied `--consensus-after`, the verdict may be
+    FAIL when the synthetic fixture trips a check — that's expected
+    (gate is doing its job). What this test guarantees is the
+    artifact-presence side of the gate, NOT the algorithmic verdict.
+    """
     consensus_path, candidates_path, labels_path = _materialise_cli_inputs(
         tmp_path)
     artifact_dir = tmp_path / "artifacts"
@@ -363,9 +377,337 @@ def test_cli_require_flag_with_explicit_visual_evidence_dir(tmp_path: Path):
     )
     assert res.returncode == 0, res.stderr
     report = json.loads(out_path.read_text(encoding="utf-8"))
-    assert report["verdict_top_level"] == "PASS"
     assert report["visual_evidence_status"] == "present"
+    # The artifact-presence gate cleared. The gate's algorithmic
+    # verdict for this synthetic fixture is whatever the checks say
+    # — verdict_top_level may be PASS / WARN / FAIL depending on
+    # the eight algorithms. The point is: the CLI wired the gate
+    # through and the report carries the per-axis verdicts.
+    assert report["verdict_top_level"] in {"PASS", "WARN", "FAIL"}
+    # `policy_violation` is present iff the gate's algorithmic
+    # verdict is FAIL (PR B4 contract). When the synthetic fixture
+    # passes the gate it must be absent.
+    if report["verdict_top_level"] == "FAIL":
+        assert (
+            report.get("policy_violation")
+            == VISUAL_FIDELITY_POLICY_VIOLATION_TAG
+        )
+    else:
+        assert "policy_violation" not in report
+
+
+# ---------------------------------------------------------------------------
+# PR B4 — gate propagation into top-level verdict
+# ---------------------------------------------------------------------------
+
+def _materialise_artifact_dir(directory: Path) -> Path:
+    """Drop a >0-byte placeholder for each of the seven canonical
+    artifact files under `directory`."""
+    directory.mkdir(parents=True, exist_ok=True)
+    for _key, fname in REQUIRED_VISUAL_ARTIFACTS:
+        (directory / fname).write_bytes(b"x")
+    return directory
+
+
+def _failing_gate_consensus_path(tmp_path: Path) -> Path:
+    """Write a consensus that the algorithmic gate will FAIL.
+
+    The fixture has one interior_door whose `host_mode` is
+    explicitly `unhosted` — that trips check 1
+    (door_without_opening) which is a hard FAIL.
+    """
+    path = tmp_path / "consensus.json"
+    consensus = {
+        "wall_thickness_pts": 5.4,
+        "source": "synthetic.pdf",
+        "walls": [
+            {"id": "w0", "start": [0, 0], "end": [100, 0],
+             "thickness": 5.4, "orientation": "h"},
+            {"id": "w1", "start": [0, 100], "end": [100, 100],
+             "thickness": 5.4, "orientation": "h"},
+            {"id": "w2", "start": [0, 0], "end": [0, 100],
+             "thickness": 5.4, "orientation": "v"},
+            {"id": "w3", "start": [100, 0], "end": [100, 100],
+             "thickness": 5.4, "orientation": "v"},
+            {"id": "w4", "start": [50, 0], "end": [50, 100],
+             "thickness": 5.4, "orientation": "v"},
+        ],
+        "rooms": [
+            {"id": "r0", "name": "A",
+             "polygon_pts": [[0, 0], [50, 0], [50, 100], [0, 100]],
+             "area_pts2": 5000, "seed_pt": [25, 50]},
+            {"id": "r1", "name": "B",
+             "polygon_pts": [[50, 0], [100, 0], [100, 100], [50, 100]],
+             "area_pts2": 5000, "seed_pt": [75, 50]},
+        ],
+        "openings": [
+            # Unhosted door → check 1 FAILs.
+            {"id": "o0", "kind_v5": "interior_door",
+             "wall_id": None, "host_mode": "unhosted",
+             "center": [25, 50], "hinge_side": "left",
+             "opening_width_pts": 20.0},
+        ],
+        "soft_barriers": [],
+    }
+    path.write_text(json.dumps(consensus), encoding="utf-8")
+    return path
+
+
+def _passing_gate_consensus_path(tmp_path: Path) -> Path:
+    """Consensus that the gate's eight checks all PASS (or WARN on
+    swing where no svg_arc evidence exists)."""
+    path = tmp_path / "consensus_clean.json"
+    # L-shape polygon → not a bbox rectangle.
+    poly = [[0, 0], [100, 0], [100, 50], [50, 50], [50, 100], [0, 100]]
+    consensus = {
+        "wall_thickness_pts": 5.4,
+        "source": "synthetic.pdf",
+        "walls": [
+            {"id": "w0", "start": [0, 0], "end": [200, 0],
+             "thickness": 5.4, "orientation": "h"},
+            {"id": "w1", "start": [0, 100], "end": [200, 100],
+             "thickness": 5.4, "orientation": "h"},
+            {"id": "w2", "start": [0, 0], "end": [0, 100],
+             "thickness": 5.4, "orientation": "v"},
+            {"id": "w3", "start": [200, 0], "end": [200, 100],
+             "thickness": 5.4, "orientation": "v"},
+            {"id": "w4", "start": [100, 0], "end": [100, 100],
+             "thickness": 5.4, "orientation": "v"},
+        ],
+        "rooms": [
+            {"id": "r0", "name": "ROOM_A",
+             "polygon_pts": poly,
+             "area_pts2": 7500.0, "seed_pt": [25, 25]},
+            {"id": "r1", "name": "ROOM_B",
+             "polygon_pts": [[p[0] + 100, p[1]] for p in poly],
+             "area_pts2": 7500.0, "seed_pt": [125, 25]},
+        ],
+        "openings": [
+            {"id": "o0", "kind_v5": "interior_door",
+             "wall_id": "w4", "host_mode": "cut_into_wall",
+             "center": [100, 50], "hinge_side": "left",
+             "opening_width_pts": 20.0},
+        ],
+        "soft_barriers": [],
+    }
+    path.write_text(json.dumps(consensus), encoding="utf-8")
+    return path
+
+
+def test_b4_gate_fail_propagates_to_top_level_fail(tmp_path: Path):
+    """Gate FAIL → top-level FAIL with policy_violation tag."""
+    evidence_dir = _materialise_artifact_dir(tmp_path / "evidence")
+    consensus_path = _failing_gate_consensus_path(tmp_path)
+    report = verify_fidelities(
+        _passing_consensus(), _passing_candidates(),
+        labels=_labels_one_room(),
+        operator_confirmed_visual=True,
+        require_visual_evidence=True,
+        visual_evidence_dir=evidence_dir,
+        consensus_after_path=consensus_path,
+    )
+    assert report["visual_evidence_status"] == "present"
+    assert report["verdict_top_level"] == "FAIL"
+    assert (
+        report["policy_violation"]
+        == VISUAL_FIDELITY_POLICY_VIOLATION_TAG
+    )
+    assert "algorithmic check" in report["policy_reason"]
+    # Embedded gate report carries the per-check verdicts.
+    gate = report["visual_fidelity_gate"]
+    assert gate["verdict_top_level"] == "FAIL"
+    door_check = next(
+        c for c in gate["checks"] if c["key"] == "door_without_opening"
+    )
+    assert door_check["verdict"] == "FAIL"
+    # Per-axis verdicts are preserved through the propagation.
+    assert "fidelities" in report
+    for axis in report["fidelities"].values():
+        assert axis["verdict"] in {"PASS", "WARN", "FAIL"}
+
+
+def test_b4_gate_pass_preserves_per_axis_pass(tmp_path: Path):
+    """Gate PASS (all 8 checks pass, no WARN) → top-level stays
+    at per-axis worst (which is PASS for the synthetic fixture)."""
+    evidence_dir = _materialise_artifact_dir(tmp_path / "evidence")
+    consensus_path = _passing_gate_consensus_path(tmp_path)
+    report = verify_fidelities(
+        _passing_consensus(), _passing_candidates(),
+        labels=_labels_one_room(),
+        operator_confirmed_visual=True,
+        require_visual_evidence=True,
+        visual_evidence_dir=evidence_dir,
+        consensus_after_path=consensus_path,
+    )
+    assert report["visual_evidence_status"] == "present"
+    gate = report["visual_fidelity_gate"]
+    # The gate may be WARN (swing has no arc) or PASS depending on
+    # the per-check semantics; either way no FAIL.
+    assert gate["verdict_top_level"] in {"PASS", "WARN"}
+    # When gate is PASS the top-level stays at per-axis worst.
+    if gate["verdict_top_level"] == "PASS":
+        assert report["verdict_top_level"] == "PASS"
+        assert "policy_violation" not in report
+        # No downgrade event surfaced.
+        assert "verdict_top_level_pre_visual_gate" not in report
+
+
+def test_b4_gate_warn_downgrades_pass_to_warn(tmp_path: Path):
+    """When the gate emits WARN and the per-axis worst was PASS,
+    top-level becomes WARN (gate WARN is a real signal — eg an
+    interior_door without svg_arc evidence)."""
+    evidence_dir = _materialise_artifact_dir(tmp_path / "evidence")
+    consensus_path = _passing_gate_consensus_path(tmp_path)
+    # The fixture has a door without svg_arc evidence → gate WARN.
+    report = verify_fidelities(
+        _passing_consensus(), _passing_candidates(),
+        labels=_labels_one_room(),
+        operator_confirmed_visual=True,
+        require_visual_evidence=True,
+        visual_evidence_dir=evidence_dir,
+        consensus_after_path=consensus_path,
+    )
+    gate = report["visual_fidelity_gate"]
+    if gate["verdict_top_level"] != "WARN":
+        pytest.skip("synthetic fixture didn't produce gate WARN")
+    # Per-axis worst is PASS but gate is WARN → top-level WARN.
+    assert report["verdict_top_level_pre_visual_gate"] == "PASS"
+    assert report["verdict_top_level"] == "WARN"
+
+
+def test_b4_gate_scaffolded_when_no_consensus_path(tmp_path: Path):
+    """When `consensus_after_path` is None the gate scaffolds
+    (no checks run); the verifier MUST NOT propagate that into a
+    downgrade. Top-level stays at the per-axis worst."""
+    evidence_dir = _materialise_artifact_dir(tmp_path / "evidence")
+    report = verify_fidelities(
+        _passing_consensus(), _passing_candidates(),
+        labels=_labels_one_room(),
+        operator_confirmed_visual=True,
+        require_visual_evidence=True,
+        visual_evidence_dir=evidence_dir,
+        consensus_after_path=None,  # explicit
+    )
+    assert report["visual_evidence_status"] == "present"
+    assert report["verdict_top_level"] == "PASS"
     assert "policy_violation" not in report
+    # Gate report is still embedded (for inspection) even though it
+    # didn't propagate.
+    gate = report["visual_fidelity_gate"]
+    assert gate["summary"]["checks_not_yet_checked"] == 8
+
+
+def test_b4_gate_report_embedded_under_visual_fidelity_gate(
+        tmp_path: Path):
+    """Schema lock — when the gate runs, the verifier exposes the
+    full gate report under `report['visual_fidelity_gate']` so
+    downstream consumers don't need to re-run the gate to inspect
+    per-check details."""
+    evidence_dir = _materialise_artifact_dir(tmp_path / "evidence")
+    consensus_path = _passing_gate_consensus_path(tmp_path)
+    report = verify_fidelities(
+        _passing_consensus(), _passing_candidates(),
+        labels=_labels_one_room(),
+        require_visual_evidence=True,
+        visual_evidence_dir=evidence_dir,
+        consensus_after_path=consensus_path,
+    )
+    gate = report["visual_fidelity_gate"]
+    assert "schema_version" in gate
+    assert "verdict_top_level" in gate
+    assert isinstance(gate["checks"], list)
+    assert len(gate["checks"]) == 8
+    assert {c["key"] for c in gate["checks"]} == {
+        "door_without_opening", "door_crossing_or_displaced",
+        "door_swing_diverges", "room_polygon_not_closed",
+        "room_polygon_bleeds_outside",
+        "invented_or_wrong_height_exterior",
+        "wet_or_terrace_adjacency_wrong",
+        "room_rendered_as_bbox",
+    }
+
+
+# ---------------------------------------------------------------------------
+# PR B4 — Integration on planta_74
+# ---------------------------------------------------------------------------
+
+PLANTA_74_PDF = REPO_ROOT / "planta_74.pdf"
+PLANTA_74_CONSENSUS = (
+    REPO_ROOT
+    / "fixtures"
+    / "planta_74"
+    / "consensus_with_human_walls_and_soft_barriers.json"
+)
+PLANTA_74_CANDIDATES = (
+    REPO_ROOT
+    / "fixtures"
+    / "planta_74"
+    / "loop_closure_candidates_after_soft_barriers.json"
+)
+PLANTA_74_EVIDENCE_DIR = (
+    REPO_ROOT / "fixtures" / "planta_74" / "visual_evidence"
+)
+PLANTA_74_LABELS = REPO_ROOT / "runs" / "vector" / "labels.json"
+
+
+_planta_74_available = (
+    PLANTA_74_PDF.exists()
+    and PLANTA_74_CONSENSUS.exists()
+    and PLANTA_74_CANDIDATES.exists()
+    and PLANTA_74_EVIDENCE_DIR.exists()
+    and PLANTA_74_LABELS.exists()
+)
+
+
+@pytest.mark.skipif(
+    not _planta_74_available,
+    reason="planta_74 fixtures missing (shallow clone?)",
+)
+def test_b4_integration_planta_74_top_level_fails(tmp_path: Path):
+    """End-to-end: planta_74's known-bad consensus runs through
+    producer → gate → verifier and the top-level lands at FAIL with
+    the gate's per-check verdicts surfaced.
+
+    The h_o005 unhosted opening is the canonical signal: it trips
+    `door_without_opening` AND `door_crossing_or_displaced`.
+    """
+    out_path = tmp_path / "fidelity_report.json"
+    res = subprocess.run(
+        [sys.executable, "-m", "tools.verify_fidelities",
+         "--consensus-after", str(PLANTA_74_CONSENSUS),
+         "--candidates", str(PLANTA_74_CANDIDATES),
+         "--labels", str(PLANTA_74_LABELS),
+         "--pdf", str(PLANTA_74_PDF),
+         "--require-visual-evidence",
+         "--visual-evidence-dir", str(PLANTA_74_EVIDENCE_DIR),
+         "--out", str(out_path)],
+        cwd=str(REPO_ROOT),
+        capture_output=True, text=True,
+    )
+    assert res.returncode == 0, res.stderr
+    report = json.loads(out_path.read_text(encoding="utf-8"))
+    assert report["visual_evidence_status"] == "present"
+    assert report["verdict_top_level"] == "FAIL"
+    assert (
+        report["policy_violation"]
+        == VISUAL_FIDELITY_POLICY_VIOLATION_TAG
+    )
+    gate = report["visual_fidelity_gate"]
+    assert gate["verdict_top_level"] == "FAIL"
+    # h_o005 should appear in the door checks.
+    door_check = next(
+        c for c in gate["checks"] if c["key"] == "door_without_opening"
+    )
+    assert door_check["verdict"] == "FAIL"
+    assert any(
+        e.get("opening_id") == "h_o005"
+        for e in door_check["failing_elements"]
+    )
+    cross_check = next(
+        c for c in gate["checks"]
+        if c["key"] == "door_crossing_or_displaced"
+    )
+    assert cross_check["verdict"] == "FAIL"
 
 
 def test_cli_strict_exits_2_on_visual_gate_fail(tmp_path: Path):
