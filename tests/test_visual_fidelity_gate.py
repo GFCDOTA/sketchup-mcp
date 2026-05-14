@@ -151,7 +151,7 @@ def test_scaffold_all_checks_returns_eight_records():
         assert entry["status"] == "not_yet_checked"
         assert entry["verdict"] == "WARN"
         assert entry["failing_elements"] == []
-        assert "Algorithm not yet implemented" in entry["notes"]
+        assert "Consensus not supplied" in entry["notes"]
         assert entry["severity_on_fail"] in {"FAIL", "WARN"}
 
 
@@ -349,16 +349,34 @@ PLANTA_74_CONSENSUS = (
     reason="planta_74 fixtures missing",
 )
 def test_planta_74_end_to_end_smoke(tmp_path: Path):
-    """Real planta_74 evidence dir + consensus → WARN, all checks
-    not_yet_checked, PR B3 hint surfaces."""
+    """Real planta_74 evidence dir + consensus → top-level FAIL.
+
+    After PR B3 the gate runs the 8 algorithmic checks. The known
+    planta_74 baseline trips two FAIL checks (the unhosted
+    ``h_o005`` interior_door fails both ``door_without_opening`` and
+    ``door_crossing_or_displaced``) and one WARN
+    (``door_swing_diverges`` lacks svg_arc evidence in consensus).
+    """
     out = tmp_path / "gate_report.json"
     report = run_gate(
         evidence_dir=PLANTA_74_EVIDENCE_DIR,
         consensus_path=PLANTA_74_CONSENSUS,
     )
     out.write_text(json.dumps(report, indent=2), encoding="utf-8")
-    assert report["verdict_top_level"] == "WARN"
     assert report["artifacts"]["overall_status"] == "present"
     assert report["summary"]["artifacts_present"] == 7
-    assert report["summary"]["checks_not_yet_checked"] == 8
+    # B3 ran the checks → 0 scaffolded.
+    assert report["summary"]["checks_not_yet_checked"] == 0
+    assert report["verdict_top_level"] == "FAIL"
+    assert report["summary"]["checks_fail"] >= 1
     assert "policy_violation" not in report
+    # Spot-check: door_without_opening FAILed on h_o005.
+    door_check = next(
+        c for c in report["checks"]
+        if c["key"] == "door_without_opening"
+    )
+    assert door_check["verdict"] == "FAIL"
+    assert any(
+        e.get("opening_id") == "h_o005"
+        for e in door_check["failing_elements"]
+    )
