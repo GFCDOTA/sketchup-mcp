@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "verdict_top_level": "WARN",
+  "verdict_top_level": "FAIL",
   "fidelities": {
     "wall_fidelity": {
       "verdict": "PASS",
@@ -12,12 +12,14 @@
       "h_o005_host_wall_id": "h_w000"
     },
     "soft_barrier_fidelity": {
-      "verdict": "PASS",
-      "reason": "no cell requires a soft_barrier (leak map lists 0 candidate_type=human_soft_barrier).",
-      "n_target_pairs": 0,
-      "n_target_cells": 0,
+      "verdict": "WARN",
+      "reason": "1 human soft_barriers applied but 1 target cell(s) still merged \u2014 the painted barriers do not fully close the loops.",
+      "n_target_pairs": 2,
+      "n_target_cells": 1,
       "n_human_soft_barriers_applied": 1,
-      "target_cells": []
+      "target_cells_still_merged": [
+        "A.S. | TERRACO SOCIAL | TERRACO TECNICO"
+      ]
     },
     "semantic_room_fidelity": {
       "verdict": "PASS",
@@ -41,7 +43,81 @@
     "global_visual_fidelity": {
       "verdict": "WARN",
       "reason": "operator review pending. Open the side-by-side render and pass --operator-confirmed-visual if it looks faithful to the PDF.",
-      "side_by_side_artifact": "fixtures\\planta_74\\side_by_side_pdf_vs_skp_after_soft_barriers.png"
+      "side_by_side_artifact": "fixtures\\planta_74\\side_by_side_pdf_vs_skp_FINAL.png"
     }
-  }
+  },
+  "visual_evidence_required": true,
+  "visual_evidence_status": "missing",
+  "missing_visual_artifacts": [
+    "original_floorplan",
+    "skp_render",
+    "overlay_pdf_skp",
+    "diff_walls",
+    "diff_doors",
+    "diff_rooms",
+    "mismatches_list"
+  ],
+  "visual_evidence": {
+    "required": [
+      "original_floorplan",
+      "skp_render",
+      "overlay_pdf_skp",
+      "diff_walls",
+      "diff_doors",
+      "diff_rooms",
+      "mismatches_list"
+    ],
+    "present": [],
+    "missing": [
+      "original_floorplan",
+      "skp_render",
+      "overlay_pdf_skp",
+      "diff_walls",
+      "diff_doors",
+      "diff_rooms",
+      "mismatches_list"
+    ],
+    "status": "missing",
+    "directory": "fixtures\\planta_74",
+    "per_artifact": [
+      {
+        "key": "original_floorplan",
+        "expected_path": "fixtures\\planta_74\\original_floorplan.png",
+        "status": "missing"
+      },
+      {
+        "key": "skp_render",
+        "expected_path": "fixtures\\planta_74\\skp_render.png",
+        "status": "missing"
+      },
+      {
+        "key": "overlay_pdf_skp",
+        "expected_path": "fixtures\\planta_74\\overlay_pdf_skp.png",
+        "status": "missing"
+      },
+      {
+        "key": "diff_walls",
+        "expected_path": "fixtures\\planta_74\\diff_walls.png",
+        "status": "missing"
+      },
+      {
+        "key": "diff_doors",
+        "expected_path": "fixtures\\planta_74\\diff_doors.png",
+        "status": "missing"
+      },
+      {
+        "key": "diff_rooms",
+        "expected_path": "fixtures\\planta_74\\diff_rooms.png",
+        "status": "missing"
+      },
+      {
+        "key": "mismatches_list",
+        "expected_path": "fixtures\\planta_74\\mismatches_list.md",
+        "status": "missing"
+      }
+    ]
+  },
+  "verdict_top_level_pre_visual_gate": "WARN",
+  "policy_violation": "2026-05-14_visual_fidelity_gate_required",
+  "policy_reason": "Visual Fidelity Gate Protocol (2026-05-14): visual_evidence_status='missing'; missing 7 of 7 required artifacts. Per-axis verdicts are preserved above; top-level is forced to FAIL until the seven artifacts are produced. See docs/protocols/visual_fidelity_gate_protocol.md."
 }
