@@ -521,6 +521,12 @@ def compare(observed: dict, expected: dict, pt_to_m: float = PT_TO_M_DEFAULT,
     post_report["overrides_dropped_count"] = md.get(
         "overrides_dropped_count", 0,
     )
+    # ADR-002 §2.6 — finer-grained breakdown of geometry-mutating
+    # overrides. Always present in amended reports; readers older than
+    # ADR-002 can ignore.
+    post_report["polygon_overrides_applied_count"] = md.get(
+        "polygon_overrides_applied_count", 0,
+    )
     post_report["override_warnings"] = md.get("warnings") or []
     post_report["block_skp_export"] = md.get("block_skp_export", False)
     post_report["block_reason"] = md.get("block_reason")
