@@ -47,16 +47,8 @@
     }
   },
   "visual_evidence_required": true,
-  "visual_evidence_status": "missing",
-  "missing_visual_artifacts": [
-    "original_floorplan",
-    "skp_render",
-    "overlay_pdf_skp",
-    "diff_walls",
-    "diff_doors",
-    "diff_rooms",
-    "mismatches_list"
-  ],
+  "visual_evidence_status": "present",
+  "missing_visual_artifacts": [],
   "visual_evidence": {
     "required": [
       "original_floorplan",
@@ -67,8 +59,7 @@
       "diff_rooms",
       "mismatches_list"
     ],
-    "present": [],
-    "missing": [
+    "present": [
       "original_floorplan",
       "skp_render",
       "overlay_pdf_skp",
@@ -77,47 +68,263 @@
       "diff_rooms",
       "mismatches_list"
     ],
-    "status": "missing",
-    "directory": "fixtures\\planta_74",
+    "missing": [],
+    "status": "present",
+    "directory": "fixtures\\planta_74\\visual_evidence",
     "per_artifact": [
       {
         "key": "original_floorplan",
-        "expected_path": "fixtures\\planta_74\\original_floorplan.png",
-        "status": "missing"
+        "expected_path": "fixtures\\planta_74\\visual_evidence\\original_floorplan.png",
+        "status": "present"
       },
       {
         "key": "skp_render",
-        "expected_path": "fixtures\\planta_74\\skp_render.png",
-        "status": "missing"
+        "expected_path": "fixtures\\planta_74\\visual_evidence\\skp_render.png",
+        "status": "present"
       },
       {
         "key": "overlay_pdf_skp",
-        "expected_path": "fixtures\\planta_74\\overlay_pdf_skp.png",
-        "status": "missing"
+        "expected_path": "fixtures\\planta_74\\visual_evidence\\overlay_pdf_skp.png",
+        "status": "present"
       },
       {
         "key": "diff_walls",
-        "expected_path": "fixtures\\planta_74\\diff_walls.png",
-        "status": "missing"
+        "expected_path": "fixtures\\planta_74\\visual_evidence\\diff_walls.png",
+        "status": "present"
       },
       {
         "key": "diff_doors",
-        "expected_path": "fixtures\\planta_74\\diff_doors.png",
-        "status": "missing"
+        "expected_path": "fixtures\\planta_74\\visual_evidence\\diff_doors.png",
+        "status": "present"
       },
       {
         "key": "diff_rooms",
-        "expected_path": "fixtures\\planta_74\\diff_rooms.png",
-        "status": "missing"
+        "expected_path": "fixtures\\planta_74\\visual_evidence\\diff_rooms.png",
+        "status": "present"
       },
       {
         "key": "mismatches_list",
-        "expected_path": "fixtures\\planta_74\\mismatches_list.md",
-        "status": "missing"
+        "expected_path": "fixtures\\planta_74\\visual_evidence\\mismatches_list.md",
+        "status": "present"
       }
     ]
   },
+  "visual_fidelity_gate": {
+    "schema_version": "visual_fidelity_gate_v1",
+    "generated_at": "2026-05-14T03:26:43Z",
+    "evidence_dir": "fixtures\\planta_74\\visual_evidence",
+    "consensus_path": "fixtures\\planta_74\\consensus_with_human_walls_and_soft_barriers.json",
+    "pdf_path": "planta_74.pdf",
+    "verdict_top_level": "FAIL",
+    "artifacts": {
+      "directory": "fixtures\\planta_74\\visual_evidence",
+      "per_artifact": [
+        {
+          "key": "original_floorplan",
+          "filename": "original_floorplan.png",
+          "expected_path": "fixtures\\planta_74\\visual_evidence\\original_floorplan.png",
+          "exists": true,
+          "size_bytes": 364136,
+          "status": "present"
+        },
+        {
+          "key": "skp_render",
+          "filename": "skp_render.png",
+          "expected_path": "fixtures\\planta_74\\visual_evidence\\skp_render.png",
+          "exists": true,
+          "size_bytes": 468360,
+          "status": "present"
+        },
+        {
+          "key": "overlay_pdf_skp",
+          "filename": "overlay_pdf_skp.png",
+          "expected_path": "fixtures\\planta_74\\visual_evidence\\overlay_pdf_skp.png",
+          "exists": true,
+          "size_bytes": 708168,
+          "status": "present"
+        },
+        {
+          "key": "diff_walls",
+          "filename": "diff_walls.png",
+          "expected_path": "fixtures\\planta_74\\visual_evidence\\diff_walls.png",
+          "exists": true,
+          "size_bytes": 384142,
+          "status": "present"
+        },
+        {
+          "key": "diff_doors",
+          "filename": "diff_doors.png",
+          "expected_path": "fixtures\\planta_74\\visual_evidence\\diff_doors.png",
+          "exists": true,
+          "size_bytes": 99622,
+          "status": "present"
+        },
+        {
+          "key": "diff_rooms",
+          "filename": "diff_rooms.png",
+          "expected_path": "fixtures\\planta_74\\visual_evidence\\diff_rooms.png",
+          "exists": true,
+          "size_bytes": 425726,
+          "status": "present"
+        },
+        {
+          "key": "mismatches_list",
+          "filename": "mismatches_list.md",
+          "expected_path": "fixtures\\planta_74\\visual_evidence\\mismatches_list.md",
+          "exists": true,
+          "size_bytes": 2190,
+          "status": "present"
+        }
+      ],
+      "present_keys": [
+        "original_floorplan",
+        "skp_render",
+        "overlay_pdf_skp",
+        "diff_walls",
+        "diff_doors",
+        "diff_rooms",
+        "mismatches_list"
+      ],
+      "missing_keys": [],
+      "empty_keys": [],
+      "overall_status": "present"
+    },
+    "checks": [
+      {
+        "key": "door_without_opening",
+        "description": "Door drawn without a real opening in its host wall.",
+        "severity_on_fail": "FAIL",
+        "status": "checked",
+        "verdict": "FAIL",
+        "failing_elements": [
+          {
+            "opening_id": "h_o005",
+            "kind_v5": "interior_door",
+            "wall_id": "w022",
+            "host_mode": "unhosted"
+          }
+        ],
+        "notes": "1 door-type opening(s) lack a valid host wall + host_mode in ['cut_into_wall', 'existing_gap']."
+      },
+      {
+        "key": "door_crossing_or_displaced",
+        "description": "Door crossing the wall (no carve) or displaced from the gap.",
+        "severity_on_fail": "FAIL",
+        "status": "checked",
+        "verdict": "FAIL",
+        "failing_elements": [
+          {
+            "opening_id": "h_o005",
+            "kind_v5": "interior_door",
+            "wall_id": "w022",
+            "shift_pts": 68.778,
+            "max_tolerated_pts": 3.699
+          }
+        ],
+        "notes": "1 door-type opening(s) displaced >wall_thickness/2 from the wall centerline."
+      },
+      {
+        "key": "door_swing_diverges",
+        "description": "Door swing / orientation diverges from the PDF arc.",
+        "severity_on_fail": "FAIL",
+        "status": "checked",
+        "verdict": "WARN",
+        "failing_elements": [
+          {
+            "opening_id": "h_o000",
+            "reason": "no_arc_evidence_in_consensus",
+            "detected_hinge_side": "left"
+          },
+          {
+            "opening_id": "h_o001",
+            "reason": "no_arc_evidence_in_consensus",
+            "detected_hinge_side": "left"
+          },
+          {
+            "opening_id": "h_o002",
+            "reason": "no_arc_evidence_in_consensus",
+            "detected_hinge_side": "left"
+          },
+          {
+            "opening_id": "h_o003",
+            "reason": "no_arc_evidence_in_consensus",
+            "detected_hinge_side": "left"
+          },
+          {
+            "opening_id": "h_o004",
+            "reason": "no_arc_evidence_in_consensus",
+            "detected_hinge_side": "left"
+          },
+          {
+            "opening_id": "h_o005",
+            "reason": "no_arc_evidence_in_consensus",
+            "detected_hinge_side": "left"
+          },
+          {
+            "opening_id": "h_o006",
+            "reason": "no_arc_evidence_in_consensus",
+            "detected_hinge_side": "left"
+          }
+        ],
+        "notes": "7 interior_door(s) carry no svg_arc evidence in consensus; swing direction unverified. PR B4 may consult the PDF directly to upgrade this WARN."
+      },
+      {
+        "key": "room_polygon_not_closed",
+        "description": "Room with a non-closed polygon.",
+        "severity_on_fail": "FAIL",
+        "status": "checked",
+        "verdict": "PASS",
+        "failing_elements": [],
+        "notes": "All room polygons are valid (closed, simple, >0 area)."
+      },
+      {
+        "key": "room_polygon_bleeds_outside",
+        "description": "Room polygon bleeding outside the building outline.",
+        "severity_on_fail": "FAIL",
+        "status": "checked",
+        "verdict": "PASS",
+        "failing_elements": [],
+        "notes": "All room polygons lie inside the building envelope."
+      },
+      {
+        "key": "invented_or_wrong_height_exterior",
+        "description": "Exterior wall / esquadria / peitoril invented or with the wrong height.",
+        "severity_on_fail": "FAIL",
+        "status": "checked",
+        "verdict": "PASS",
+        "failing_elements": [],
+        "notes": "All walls have plausible 2D geometry; height verification deferred to PR B4."
+      },
+      {
+        "key": "wet_or_terrace_adjacency_wrong",
+        "description": "Bathroom / lavabo / A.S. / terra\u00e7o with wrong adjacency.",
+        "severity_on_fail": "FAIL",
+        "status": "checked",
+        "verdict": "PASS",
+        "failing_elements": [],
+        "notes": "All expected adjacencies for plan_id='planta_74' are present."
+      },
+      {
+        "key": "room_rendered_as_bbox",
+        "description": "Room rendered as a bounding box / block instead of real geometry.",
+        "severity_on_fail": "FAIL",
+        "status": "checked",
+        "verdict": "PASS",
+        "failing_elements": [],
+        "notes": "No rooms collapsed to a bbox rectangle."
+      }
+    ],
+    "summary": {
+      "artifacts_present": 7,
+      "artifacts_empty": 0,
+      "artifacts_missing": 0,
+      "checks_pass": 5,
+      "checks_warn": 1,
+      "checks_fail": 2,
+      "checks_not_yet_checked": 0
+    }
+  },
   "verdict_top_level_pre_visual_gate": "WARN",
   "policy_violation": "2026-05-14_visual_fidelity_gate_required",
-  "policy_reason": "Visual Fidelity Gate Protocol (2026-05-14): visual_evidence_status='missing'; missing 7 of 7 required artifacts. Per-axis verdicts are preserved above; top-level is forced to FAIL until the seven artifacts are produced. See docs/protocols/visual_fidelity_gate_protocol.md."
+  "policy_reason": "Visual Fidelity Gate Protocol (2026-05-14): 2 of 8 algorithmic check(s) FAILED. See report['visual_fidelity_gate']['checks'] for per-check details + failing_elements. Per-axis verdicts above are preserved."
 }
