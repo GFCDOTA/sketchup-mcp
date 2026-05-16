@@ -349,13 +349,21 @@ PLANTA_74_CONSENSUS = (
     reason="planta_74 fixtures missing",
 )
 def test_planta_74_end_to_end_smoke(tmp_path: Path):
-    """Real planta_74 evidence dir + consensus → top-level FAIL.
+    """Real planta_74 evidence dir + consensus → top-level WARN.
 
-    After PR B3 the gate runs the 8 algorithmic checks. The known
-    planta_74 baseline trips two FAIL checks (the unhosted
-    ``h_o005`` interior_door fails both ``door_without_opening`` and
-    ``door_crossing_or_displaced``) and one WARN
-    (``door_swing_diverges`` lacks svg_arc evidence in consensus).
+    Baseline after the ``reclassify_human_openings`` fix (#130):
+    the previously-stale ``h_o005.wall_id`` flipped to ``h_w000``
+    (its actual host), so the door-related checks now PASS. What
+    survives:
+
+      * ``door_swing_diverges``      WARN  (no svg_arc evidence in
+        consensus — PDF-aware check is future work)
+      * everything else              PASS
+
+    The smoke test pins this baseline so a regression that re-breaks
+    ``h_o005`` (or any other door-host re-association) trips CI loud.
+    If the planta_74 geometry ever drifts back into a FAIL on any
+    hard-check, this test will surface it.
     """
     out = tmp_path / "gate_report.json"
     report = run_gate(
@@ -367,16 +375,20 @@ def test_planta_74_end_to_end_smoke(tmp_path: Path):
     assert report["summary"]["artifacts_present"] == 7
     # B3 ran the checks → 0 scaffolded.
     assert report["summary"]["checks_not_yet_checked"] == 0
-    assert report["verdict_top_level"] == "FAIL"
-    assert report["summary"]["checks_fail"] >= 1
+    # Baseline post-host-fix: 0 FAIL, 1 WARN (door_swing_diverges).
+    assert report["summary"]["checks_fail"] == 0
+    assert report["verdict_top_level"] in {"PASS", "WARN"}
     assert "policy_violation" not in report
-    # Spot-check: door_without_opening FAILed on h_o005.
+    # Spot-check: door_without_opening PASS (h_o005 has a real host).
     door_check = next(
         c for c in report["checks"]
         if c["key"] == "door_without_opening"
     )
-    assert door_check["verdict"] == "FAIL"
-    assert any(
-        e.get("opening_id") == "h_o005"
-        for e in door_check["failing_elements"]
+    assert door_check["verdict"] == "PASS"
+    assert door_check["failing_elements"] == []
+    # door_swing_diverges remains WARN until PDF-aware checks ship.
+    swing_check = next(
+        c for c in report["checks"]
+        if c["key"] == "door_swing_diverges"
     )
+    assert swing_check["verdict"] == "WARN"

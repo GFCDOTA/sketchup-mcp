@@ -663,13 +663,19 @@ _planta_74_available = (
     not _planta_74_available,
     reason="planta_74 fixtures missing (shallow clone?)",
 )
-def test_b4_integration_planta_74_top_level_fails(tmp_path: Path):
-    """End-to-end: planta_74's known-bad consensus runs through
-    producer → gate → verifier and the top-level lands at FAIL with
-    the gate's per-check verdicts surfaced.
+def test_b4_integration_planta_74_top_level_warn(tmp_path: Path):
+    """End-to-end: planta_74 runs through producer → gate → verifier
+    and the top-level lands at WARN.
 
-    The h_o005 unhosted opening is the canonical signal: it trips
-    `door_without_opening` AND `door_crossing_or_displaced`.
+    Baseline after the ``reclassify_human_openings`` fix (#130):
+    h_o005 hosted correctly on h_w000, so the two door checks PASS.
+    What survives:
+      * gate `door_swing_diverges` WARN  (no svg_arc evidence)
+      * per-axis `soft_barrier_fidelity` WARN  (mureta still missing)
+      * per-axis `global_visual_fidelity` WARN  (operator review pending)
+
+    No policy_violation; gate has zero FAILs. If planta_74 ever
+    regresses on a hard check, this assertion will trip CI loudly.
     """
     out_path = tmp_path / "fidelity_report.json"
     res = subprocess.run(
@@ -687,27 +693,28 @@ def test_b4_integration_planta_74_top_level_fails(tmp_path: Path):
     assert res.returncode == 0, res.stderr
     report = json.loads(out_path.read_text(encoding="utf-8"))
     assert report["visual_evidence_status"] == "present"
-    assert report["verdict_top_level"] == "FAIL"
-    assert (
-        report["policy_violation"]
-        == VISUAL_FIDELITY_POLICY_VIOLATION_TAG
-    )
+    assert report["verdict_top_level"] == "WARN"
+    assert "policy_violation" not in report
     gate = report["visual_fidelity_gate"]
-    assert gate["verdict_top_level"] == "FAIL"
-    # h_o005 should appear in the door checks.
+    assert gate["verdict_top_level"] == "WARN"
+    assert gate["summary"]["checks_fail"] == 0
+    # h_o005 hosted → door_without_opening PASS, no failing element.
     door_check = next(
         c for c in gate["checks"] if c["key"] == "door_without_opening"
     )
-    assert door_check["verdict"] == "FAIL"
-    assert any(
-        e.get("opening_id") == "h_o005"
-        for e in door_check["failing_elements"]
-    )
+    assert door_check["verdict"] == "PASS"
+    assert door_check["failing_elements"] == []
     cross_check = next(
         c for c in gate["checks"]
         if c["key"] == "door_crossing_or_displaced"
     )
-    assert cross_check["verdict"] == "FAIL"
+    assert cross_check["verdict"] == "PASS"
+    # door_swing_diverges remains WARN — PDF-aware check is future work.
+    swing_check = next(
+        c for c in gate["checks"]
+        if c["key"] == "door_swing_diverges"
+    )
+    assert swing_check["verdict"] == "WARN"
 
 
 def test_cli_strict_exits_2_on_visual_gate_fail(tmp_path: Path):
