@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "verdict_top_level": "FAIL",
+  "verdict_top_level": "WARN",
   "fidelities": {
     "wall_fidelity": {
       "verdict": "PASS",
@@ -111,11 +111,11 @@
   },
   "visual_fidelity_gate": {
     "schema_version": "visual_fidelity_gate_v1",
-    "generated_at": "2026-05-14T03:26:43Z",
+    "generated_at": "2026-05-16T03:27:02Z",
     "evidence_dir": "fixtures\\planta_74\\visual_evidence",
     "consensus_path": "fixtures\\planta_74\\consensus_with_human_walls_and_soft_barriers.json",
     "pdf_path": "planta_74.pdf",
-    "verdict_top_level": "FAIL",
+    "verdict_top_level": "WARN",
     "artifacts": {
       "directory": "fixtures\\planta_74\\visual_evidence",
       "per_artifact": [
@@ -195,33 +195,18 @@
         "description": "Door drawn without a real opening in its host wall.",
         "severity_on_fail": "FAIL",
         "status": "checked",
-        "verdict": "FAIL",
-        "failing_elements": [
-          {
-            "opening_id": "h_o005",
-            "kind_v5": "interior_door",
-            "wall_id": "w022",
-            "host_mode": "unhosted"
-          }
-        ],
-        "notes": "1 door-type opening(s) lack a valid host wall + host_mode in ['cut_into_wall', 'existing_gap']."
+        "verdict": "PASS",
+        "failing_elements": [],
+        "notes": "All door-type openings host on a real wall."
       },
       {
         "key": "door_crossing_or_displaced",
         "description": "Door crossing the wall (no carve) or displaced from the gap.",
         "severity_on_fail": "FAIL",
         "status": "checked",
-        "verdict": "FAIL",
-        "failing_elements": [
-          {
-            "opening_id": "h_o005",
-            "kind_v5": "interior_door",
-            "wall_id": "w022",
-            "shift_pts": 68.778,
-            "max_tolerated_pts": 3.699
-          }
-        ],
-        "notes": "1 door-type opening(s) displaced >wall_thickness/2 from the wall centerline."
+        "verdict": "PASS",
+        "failing_elements": [],
+        "notes": "All door-type openings sit on their wall centerline."
       },
       {
         "key": "door_swing_diverges",
@@ -318,13 +303,10 @@
       "artifacts_present": 7,
       "artifacts_empty": 0,
       "artifacts_missing": 0,
-      "checks_pass": 5,
+      "checks_pass": 7,
       "checks_warn": 1,
-      "checks_fail": 2,
+      "checks_fail": 0,
       "checks_not_yet_checked": 0
     }
-  },
-  "verdict_top_level_pre_visual_gate": "WARN",
-  "policy_violation": "2026-05-14_visual_fidelity_gate_required",
-  "policy_reason": "Visual Fidelity Gate Protocol (2026-05-14): 2 of 8 algorithmic check(s) FAILED. See report['visual_fidelity_gate']['checks'] for per-check details + failing_elements. Per-axis verdicts above are preserved."
+  }
 }

@@ -744,14 +744,14 @@
       "confidence": 1.0,
       "decision": "clean",
       "required": true,
-      "wall_id": "w022",
+      "wall_id": "h_w000",
       "center": [
         105.9455,
         580.1895
       ],
       "opening_width_pts": 35.429,
       "hinge_side": "left",
-      "host_mode": "unhosted",
+      "host_mode": "cut_into_wall",
       "human_annotation": {
         "source_image": "fixtures/planta_74/human_openings_annotation.png",
         "bbox_px": [
@@ -780,7 +780,12 @@
         "carved_predicted": false,
         "drawn_predicted": false,
         "extractor_wall_id": "w022"
-      }
+      },
+      "_host_was": {
+        "wall_id": "w022",
+        "host_mode": "unhosted"
+      },
+      "_host_reclassified_at": "2026-05-16T03:26:36Z"
     },
     {
       "id": "h_o006",
@@ -5990,6 +5995,26 @@
       "n_barriers_total_after": 9,
       "rebuilt_rooms": true,
       "source_truth": "fixtures/planta_74/human_soft_barriers_annotation.png"
+    },
+    "host_reclassification": {
+      "run_at": "2026-05-16T03:26:36Z",
+      "n_openings_inspected": 12,
+      "n_changed": 1,
+      "changes": [
+        {
+          "opening_id": "h_o005",
+          "kind_v5": "interior_door",
+          "old": {
+            "wall_id": "w022",
+            "host_mode": "unhosted"
+          },
+          "new": {
+            "wall_id": "h_w000",
+            "host_mode": "cut_into_wall"
+          },
+          "shift_pt": 0.096
+        }
+      ]
     }
   }
 }
