@@ -1,6 +1,6 @@
 # Visual Fidelity Mismatches — PR B1 template
 
-- generated_at: `2026-05-14T02:57:22Z`
+- generated_at: `2026-05-16T03:26:52Z`
 - consensus_path: `fixtures\planta_74\consensus_with_human_walls_and_soft_barriers.json`
 - walls: 35
 - rooms: 8
