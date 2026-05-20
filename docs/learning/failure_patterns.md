@@ -224,3 +224,62 @@ All three are upstream defects in `rooms_from_seeds.py` polygon shape OR in the 
 **Resolution:** Open. Documented in this entry and in `docs/diagnostics/2026-05-08_cycle6alt_adjacency_f1_analysis.md`. Cycle 8c will fix the underlying polygon quality issues; this is the unblocking work, not a classifier change.
 
 **See also:** `FP-012` (convex-hull room clip — fixed in Cycle 8b but exposed this layer of plateau); LL-011 (empirical evidence overrides parametric guesses).
+
+## FP-014 — Orphan autorun_control.txt clobbering opened .skp (autorun_control_files) (2026-05-20)
+
+**Symptom (user-visible):** opening a `.skp` produced by our pipeline
+"corrupts" or "closes" SketchUp. Reports range over: SU window
+disappears 5–10 s after opening; the model becomes empty; the file
+is silently overwritten with content from a different consensus.
+
+**Root cause:** every autorun plugin in
+`%APPDATA%\SketchUp\SketchUp 2026\SketchUp\Plugins\` reads its
+companion `*_control.txt` on every SU launch and, if the file is
+present, fires its script. The launchers
+(`tools/skp_from_consensus.py`, `tools/build_room_ring_skp.py`)
+write `autorun_control.txt` to arm the autorun, but historically
+**did not remove it on the way out**. Any subsequent SU launch —
+including the user double-clicking the `.skp` to inspect it — fires
+the same autorun against stale paths. The autorun's script calls
+`model.entities.clear!`, `model.save(out_skp)` and (in the case of
+`render_skp_axon_and_inspect.rb` used by the inspector autorun)
+`Sketchup.quit`. The opened file is gone before the user can see it.
+
+A second instance of the same class: `autorun_inspector_control.txt`
+left behind by `tools/render_skp_axon_and_inspect.rb` from an old
+session. Removing only one launcher's control file isn't enough —
+any orphan from any sibling launcher reproduces the bug.
+
+**Rule:**
+
+1. **Disarm before every SU launch.** Launchers must call
+   `disarm_sketchup_autoruns.disarm(plugins_dir)` BEFORE arming
+   their own control file. This catches orphans from sibling
+   launchers or crashed sessions.
+2. **Disarm in a `try / finally`.** Every code path out of `run()`
+   — success, premature SU exit, timeout, exception — must remove
+   the control file the launcher wrote. Cleanup-on-success-only is
+   the trap: a SU crash, Ctrl-C, or `out_skp` already-exists race
+   leaves the trap armed.
+3. **Remove every `*control.txt`, not just yours.** Use the shared
+   `disarm` helper so future launchers inherit the same hygiene
+   without forking the logic. Forgotten cleanup in a single launcher
+   contaminates every other launcher's SU launches.
+4. **Treat "SU is doing something to my file" as an autorun bug
+   until proven otherwise.** First diagnostic step is `ls`
+   `%APPDATA%\SketchUp\SketchUp 2026\SketchUp\Plugins\*control.txt`.
+   If anything matches, that's the prime suspect.
+
+**Anti-pattern signal:** writing `autorun_control.txt` (or any
+sibling `*_control.txt`) without a matching cleanup in the same
+function, in a `finally` block, with a wider glob than just the
+file you wrote.
+
+**Repair landed:** `fix/disarm-sketchup-autoruns` —
+adds `tools/disarm_sketchup_autoruns.py` (library + CLI),
+wires it into `tools/skp_from_consensus.py` (pre-launch +
+post-run cleanup in `try / finally`), and migrates
+`tools/build_room_ring_skp.py` to the same helper.
+
+**See also:** `FP-007` (welcome dialog) — same surface area
+(SU2026 launch ergonomics) but unrelated cause.
