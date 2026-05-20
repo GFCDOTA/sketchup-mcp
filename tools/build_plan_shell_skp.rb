@@ -1,0 +1,510 @@
+# Build a single-shell .skp for an entire floor plan.
+#
+# Loaded via the existing autorun_consume.rb plugin (line 3 of
+# autorun_control.txt points here). Reads:
+#   ENV['CONSENSUS_JSON']  -> consensus path (set by autorun)
+#   ENV['SKP_OUT']         -> output .skp path (set by autorun)
+#   ENV['SHELL_JSON_IN']   -> _shell_polygon.json produced by the Python
+#                             phase of build_plan_shell_skp.py
+#   ENV['PNG_ISO_OUT']     -> isometric PNG screenshot path (optional)
+#   ENV['PNG_TOP_OUT']     -> top-down PNG screenshot path (optional)
+#   ENV['REPORT_OUT']      -> geometry_report.json path (optional)
+#   ENV['SOFT_BARRIERS_MODE'] -> "groups" or "skip" (default "groups")
+#
+# Geometry strategy (see docs/adr/ADR-003-plan-shell-exporter.md):
+#   1. PlanShell_Group: one Group containing the union'd wall polygon
+#      extruded ONCE. No per-wall groups, no corner overlap, gaps for
+#      openings already carved in 2D by the Python phase.
+#   2. Floor_Group_<room_id>: one Group per room, flat face at z=0
+#      from consensus.rooms[i].polygon_pts. No pushpull. Light room
+#      palette colour.
+#   3. SoftBarrier_Group_<i>: optional, one Group per soft_barrier at
+#      1.10 m height. Skipped if SOFT_BARRIERS_MODE='skip', or if the
+#      polyline overlaps a wall (FP-006 filter) — overlap policy here
+#      is intentionally conservative for the first cut.
+
+require 'json'
+
+PT_TO_M  = 0.19 / 5.4         # matches consume_consensus.rb calibration
+M_TO_IN  = 39.3700787402
+PT_TO_IN = PT_TO_M * M_TO_IN
+
+WALL_HEIGHT_M    = 2.70
+WALL_HEIGHT_IN   = WALL_HEIGHT_M * M_TO_IN
+PARAPET_HEIGHT_M = 1.10
+PARAPET_HEIGHT_IN = PARAPET_HEIGHT_M * M_TO_IN
+
+WALL_RGB    = [78, 78, 78]     # same as consume_consensus.rb wall_dark
+PARAPET_RGB = [130, 135, 140]  # same as consume_consensus.rb parapet
+ROOM_PALETTE = [               # same as consume_consensus.rb ROOM_PALETTE
+  [253, 226, 192], [200, 230, 201], [187, 222, 251], [248, 187, 208],
+  [220, 237, 200], [255, 224, 178], [209, 196, 233], [179, 229, 252],
+  [255, 249, 196], [245, 224, 208], [207, 216, 220],
+]
+
+def pdf_pt_to_su(pt)
+  Geom::Point3d.new(pt[0] * PT_TO_IN, pt[1] * PT_TO_IN, 0.0)
+end
+
+# ---- shell extrusion ------------------------------------------------
+
+def build_plan_shell(parent_ents, polygon_pieces, material)
+  # Top-level wrapper Group. Each piece lives in its OWN sub-group so
+  # pushpull operations are contextually isolated — previously they
+  # were re-finding faces from earlier pieces, leading to extrusions
+  # of the wrong face.
+  group = parent_ents.add_group
+  group.name = 'PlanShell_Group'
+
+  pieces_solid = 0
+  pieces_failed = 0
+  pieces_holes_emitted = 0
+
+  polygon_pieces.each_with_index do |piece, idx|
+    outer = piece['outer']
+    holes = piece['holes'] || []
+    outer_pts = outer.map { |p| pdf_pt_to_su(p) }
+
+    sub_group = group.entities.add_group
+    sub_group.name = "PlanShell_piece_#{idx}"
+    sub_ents = sub_group.entities
+
+    outer_face = sub_ents.add_face(outer_pts)
+    if outer_face.nil?
+      puts "[shell] piece[#{idx}] outer face creation failed (#{outer.length} verts)"
+      sub_group.erase!
+      pieces_failed += 1
+      next
+    end
+
+    # Add hole faces; SU recognises each as inside outer and creates
+    # the hole topology. erase! the inner face — its edges remain and
+    # bound the donut.
+    holes.each do |hole|
+      hole_pts = hole.map { |p| pdf_pt_to_su(p) }
+      inner_face = sub_ents.add_face(hole_pts)
+      if inner_face && inner_face.valid?
+        inner_face.erase!
+        pieces_holes_emitted += 1
+      end
+    end
+
+    # In the sub-group, the only face(s) here are the ones we just
+    # added — no risk of grabbing an old face. Prefer the multi-loop
+    # face (when holes exist); else the only face.
+    ring_face = sub_ents.grep(Sketchup::Face).find { |f| f.loops.length > 1 }
+    ring_face ||= sub_ents.grep(Sketchup::Face).first
+    if ring_face.nil?
+      puts "[shell] piece[#{idx}] no ring face found after hole carve"
+      sub_group.erase!
+      pieces_failed += 1
+      next
+    end
+    ring_face.reverse! if ring_face.normal.z < 0
+
+    ring_face.pushpull(WALL_HEIGHT_IN)
+
+    # Paint each face of the sub-group.
+    sub_ents.grep(Sketchup::Face).each do |f|
+      f.material      = material
+      f.back_material = material
+    end
+
+    pieces_solid += 1
+  end
+
+  {
+    'pieces_solid'         => pieces_solid,
+    'pieces_failed'        => pieces_failed,
+    'pieces_holes_emitted' => pieces_holes_emitted,
+    'group'                => group,
+  }
+end
+
+# ---- floors --------------------------------------------------------
+
+def dedupe_consecutive_pts(pts, eps = 0.001)
+  # Strip consecutive duplicates in a polygon's vertex list. Real
+  # consensus data (planta_74) has rooms whose polygon_pts include
+  # repeats (e.g., A.S. | TERRACO SOCIAL | TERRACO TECNICO has 196
+  # entries with duplicates); SU's add_face refuses those with
+  # ArgumentError: "Duplicate points in array". Also strip a closing
+  # duplicate (last == first) since add_face wants distinct vertices.
+  return pts if pts.length < 2
+  result = [pts[0]]
+  pts[1..].each do |pt|
+    prev = result.last
+    next if (pt[0] - prev[0]).abs < eps && (pt[1] - prev[1]).abs < eps
+    result << pt
+  end
+  # Drop closing duplicate if present.
+  if result.length >= 2
+    first = result.first
+    last  = result.last
+    if (first[0] - last[0]).abs < eps && (first[1] - last[1]).abs < eps
+      result.pop
+    end
+  end
+  result
+end
+
+def build_floor(parent_ents, room, material, room_index)
+  raw_pts = room['polygon_pts'] || []
+  poly_pts = dedupe_consecutive_pts(raw_pts)
+  if poly_pts.length < 3
+    return {
+      'ok' => false,
+      'reason' => "polygon has #{poly_pts.length} unique vertices " \
+                  "after dedupe (raw=#{raw_pts.length}); need >= 3",
+    }
+  end
+  group = parent_ents.add_group
+  rid = (room['id'] || "r#{room_index}").to_s
+  group.name = "Floor_Group_#{rid}"
+  ents = group.entities
+
+  begin
+    pts = poly_pts.map { |p| pdf_pt_to_su(p) }
+    face = ents.add_face(pts)
+    if face.nil?
+      group.erase!
+      return {
+        'ok' => false,
+        'reason' => "add_face returned nil (raw=#{raw_pts.length} " \
+                    "deduped=#{poly_pts.length}; polygon may be " \
+                    "self-intersecting or non-planar)",
+      }
+    end
+    face.reverse! if face.normal.z < 0
+    face.material      = material
+    face.back_material = material
+    {
+      'ok'       => true,
+      'group'    => group,
+      'area_in2' => face.area.round(2),
+      'raw_pts'  => raw_pts.length,
+      'deduped_pts' => poly_pts.length,
+    }
+  rescue StandardError => e
+    group.erase! if group && group.valid?
+    {
+      'ok'     => false,
+      'reason' => "exception: #{e.class}: #{e.message} " \
+                  "(raw=#{raw_pts.length} deduped=#{poly_pts.length})",
+    }
+  end
+end
+
+# ---- soft barriers (peitorils) -------------------------------------
+
+def soft_barrier_polyline_pts(barrier)
+  # Soft barriers come as polyline arrays (consume_consensus.rb consumes
+  # them the same way). Each is a list of [x, y] PDF points.
+  barrier['polyline_pts'] || barrier['polyline'] || []
+end
+
+def build_soft_barrier(parent_ents, barrier, material, index)
+  pts_pdf = soft_barrier_polyline_pts(barrier)
+  return {'ok' => false, 'reason' => 'no polyline_pts'} if pts_pdf.length < 2
+
+  # Build a thin slab along the polyline path. Use a fixed half-width
+  # of 0.5 * wall_thickness so the slab reads as "shorter than wall but
+  # same footprint". Phase-1 simple approach: build a rectangle for the
+  # bounding box of the polyline and extrude to PARAPET_HEIGHT.
+  xs = pts_pdf.map { |p| p[0] }
+  ys = pts_pdf.map { |p| p[1] }
+  x0, x1 = xs.minmax
+  y0, y1 = ys.minmax
+  # Skip degenerate polylines (all one point, or zero width)
+  return {'ok' => false, 'reason' => 'degenerate bbox'} \
+    if (x1 - x0) < 0.1 && (y1 - y0) < 0.1
+  # Heuristic: if the polyline is fully on a single axis line (vertical
+  # or horizontal), give it a token thickness equal to wall thickness;
+  # otherwise use the actual bbox.
+  thickness_min = 0.5  # pdf points
+  if (x1 - x0) < thickness_min
+    x0 -= thickness_min / 2.0
+    x1 += thickness_min / 2.0
+  end
+  if (y1 - y0) < thickness_min
+    y0 -= thickness_min / 2.0
+    y1 += thickness_min / 2.0
+  end
+
+  group = parent_ents.add_group
+  group.name = "SoftBarrier_Group_#{index}"
+  ents = group.entities
+  corners = [[x0, y0], [x1, y0], [x1, y1], [x0, y1]]
+  pts = corners.map { |p| pdf_pt_to_su(p) }
+  face = ents.add_face(pts)
+  if face.nil?
+    group.erase!
+    return {'ok' => false, 'reason' => 'add_face nil'}
+  end
+  face.reverse! if face.normal.z < 0
+  face.pushpull(PARAPET_HEIGHT_IN)
+  ents.grep(Sketchup::Face).each do |f|
+    f.material      = material
+    f.back_material = material
+  end
+  {'ok' => true, 'group' => group}
+end
+
+# ---- camera + screenshots -----------------------------------------
+
+def setup_iso_camera(model)
+  view = model.active_view
+  bbox = model.bounds
+  center = bbox.center
+  diag = bbox.diagonal
+  # Cabinet-iso direction with healthy margin
+  d = diag * 5.0
+  eye = Geom::Point3d.new(
+    center.x + d * 0.5,
+    center.y - d * 0.6,
+    center.z + d * 0.7,
+  )
+  cam = Sketchup::Camera.new(eye, center, Geom::Vector3d.new(0, 0, 1))
+  cam.perspective = false
+  cam.height = diag * 1.2
+  view.camera = cam
+  view.zoom_extents
+end
+
+def setup_top_camera(model)
+  view = model.active_view
+  bbox = model.bounds
+  center = bbox.center
+  diag = bbox.diagonal
+  eye = Geom::Point3d.new(center.x, center.y, center.z + diag * 5.0)
+  cam = Sketchup::Camera.new(
+    eye, center, Geom::Vector3d.new(0, 1, 0),
+  )
+  cam.perspective = false
+  cam.height = diag * 1.05
+  view.camera = cam
+  view.zoom_extents
+end
+
+def write_png(model, path, width = 1600, height = 1200)
+  options = {
+    :filename    => path,
+    :width       => width,
+    :height      => height,
+    :antialias   => true,
+    :compression => 0.95,
+    :transparent => false,
+  }
+  model.active_view.write_image(options)
+end
+
+# ---- geometry report ----------------------------------------------
+
+def walk_entities(ents, faces_out, edges_out, sub_groups_out)
+  ents.each do |e|
+    case e
+    when Sketchup::Face then faces_out << e
+    when Sketchup::Edge then edges_out << e
+    when Sketchup::Group
+      sub_groups_out << e
+      walk_entities(e.entities, faces_out, edges_out, sub_groups_out)
+    end
+  end
+end
+
+def collect_face_records(group)
+  faces = []
+  edges = []
+  sub_groups = []
+  walk_entities(group.entities, faces, edges, sub_groups)
+  default_faces = faces.count do |f|
+    (f.material.nil? || f.back_material.nil?)
+  end
+  {
+    'faces'                 => faces.length,
+    'edges'                 => edges.length,
+    'sub_groups'            => sub_groups.length,
+    'faces_with_holes'      => faces.count { |f| f.loops.length > 1 },
+    'top_or_bottom_faces'   => faces.count { |f| f.normal.z.abs > 0.99 },
+    'default_material_faces' => default_faces,
+  }
+end
+
+def deep_face_check_all_painted?(group)
+  faces = []
+  edges = []
+  subs = []
+  walk_entities(group.entities, faces, edges, subs)
+  faces.all? { |f| !f.material.nil? }
+end
+
+def write_geometry_report(model, report_path, ctx)
+  ents = model.active_entities
+  groups = ents.grep(Sketchup::Group)
+  plan_shell  = groups.find { |g| g.name == 'PlanShell_Group' }
+  floor_grps  = groups.select { |g| g.name.start_with?('Floor_Group_') }
+  sb_grps     = groups.select { |g| g.name.start_with?('SoftBarrier_Group_') }
+
+  report = {
+    'schema_version'   => '1.0.0',
+    'tool'             => 'build_plan_shell_skp',
+    'consensus_path'   => ctx[:consensus_path],
+    'skp_path'         => ctx[:skp_path],
+    'shell_json_path'  => ctx[:shell_json_path],
+    'soft_barriers_mode' => ctx[:soft_barriers_mode],
+    'plan_shell' => plan_shell ?
+      collect_face_records(plan_shell).merge({'present' => true}) :
+      {'present' => false},
+    'floor_groups' => {
+      'present'  => !floor_grps.empty?,
+      'count'    => floor_grps.length,
+      'failed_count'   => (ctx[:floors_failed] || []).length,
+      'failed_records' => ctx[:floors_failed] || [],
+      'records'  => floor_grps.map do |g|
+        face = g.entities.grep(Sketchup::Face).first
+        {
+          'name'      => g.name,
+          'faces'     => g.entities.grep(Sketchup::Face).length,
+          'edges'     => g.entities.grep(Sketchup::Edge).length,
+          'area_in2'  => face ? face.area.round(2) : nil,
+          'area_m2'   => face ? (face.area / (M_TO_IN * M_TO_IN)).round(4) : nil,
+        }
+      end,
+    },
+    'soft_barrier_groups' => {
+      'present' => !sb_grps.empty?,
+      'count'   => sb_grps.length,
+      'skipped_count' => ctx[:soft_barriers_skipped] || 0,
+      'skip_reasons'  => ctx[:soft_barriers_skip_reasons] || [],
+    },
+    'totals' => {
+      'top_level_groups' => groups.length,
+      'faces' => groups.sum { |g| g.entities.grep(Sketchup::Face).length },
+      'edges' => groups.sum { |g| g.entities.grep(Sketchup::Edge).length },
+    },
+    'shell_stats_from_python' => ctx[:py_stats],
+    'gates_self_check' => {
+      'plan_shell_group_exists'    => !plan_shell.nil?,
+      'wall_shell_is_single_group' => !plan_shell.nil?,
+      'floors_separated_from_walls' => floor_grps.length > 0,
+      'default_material_faces_zero' =>
+        groups.all? { |g| deep_face_check_all_painted?(g) },
+    },
+  }
+  File.write(report_path, JSON.pretty_generate(report))
+end
+
+# ===== Main =========================================================
+
+cjson      = ENV['CONSENSUS_JSON'] or raise 'CONSENSUS_JSON env not set'
+outskp     = ENV['SKP_OUT']        or raise 'SKP_OUT env not set'
+shell_json = ENV['SHELL_JSON_IN']  or raise 'SHELL_JSON_IN env not set'
+outpng_iso = ENV['PNG_ISO_OUT']
+outpng_top = ENV['PNG_TOP_OUT']
+outreport  = ENV['REPORT_OUT']
+sb_mode    = ENV['SOFT_BARRIERS_MODE'] || 'groups'
+
+puts "[rb] consensus=#{cjson}"
+puts "[rb] out_skp=#{outskp}"
+puts "[rb] shell_json=#{shell_json}"
+puts "[rb] soft_barriers_mode=#{sb_mode}"
+
+shell_data = JSON.parse(File.read(shell_json))
+consensus  = JSON.parse(File.read(cjson))
+
+model = Sketchup.active_model
+model.entities.clear!
+model.definitions.purge_unused
+model.start_operation('build_plan_shell', true)
+
+wall_mat = model.materials.add('plan_wall')
+wall_mat.color = Sketchup::Color.new(*WALL_RGB)
+
+# 1. Plan shell (the unified wall)
+shell_result = build_plan_shell(
+  model.active_entities, shell_data['polygons'], wall_mat,
+)
+puts "[rb] shell: solid=#{shell_result['pieces_solid']} " \
+     "failed=#{shell_result['pieces_failed']} " \
+     "holes=#{shell_result['pieces_holes_emitted']}"
+
+# 2. Floors (one per room)
+rooms = consensus['rooms'] || []
+floors_built  = 0
+floors_failed = []
+rooms.each_with_index do |room, i|
+  palette_rgb = ROOM_PALETTE[i % ROOM_PALETTE.length]
+  mat_name = "floor_#{room['id'] || i}"
+  mat = model.materials.add(mat_name)
+  mat.color = Sketchup::Color.new(*palette_rgb)
+  res = build_floor(model.active_entities, room, mat, i)
+  if res['ok']
+    floors_built += 1
+  else
+    floors_failed << {
+      'room_id'  => room['id'] || "r#{i}",
+      'room_name' => room['name'] || "(unnamed)",
+      'polygon_vertex_count' => (room['polygon_pts'] || []).length,
+      'reason'   => res['reason'],
+    }
+    puts "[rb] floor FAILED for #{room['name'] || room['id']}: #{res['reason']}"
+  end
+end
+puts "[rb] floors: built=#{floors_built} failed=#{floors_failed.length}"
+
+# 3. Soft barriers (optional)
+sb_built = 0
+sb_skipped = 0
+sb_skip_reasons = []
+if sb_mode == 'groups'
+  parapet_mat = model.materials.add('plan_parapet')
+  parapet_mat.color = Sketchup::Color.new(*PARAPET_RGB)
+  (consensus['soft_barriers'] || []).each_with_index do |sb, i|
+    res = build_soft_barrier(model.active_entities, sb, parapet_mat, i)
+    if res['ok']
+      sb_built += 1
+    else
+      sb_skipped += 1
+      sb_skip_reasons << "sb[#{i}]: #{res['reason']}"
+    end
+  end
+elsif sb_mode == 'skip'
+  sb_skipped = (consensus['soft_barriers'] || []).length
+  sb_skip_reasons << "SOFT_BARRIERS_MODE=skip; #{sb_skipped} soft_barriers " \
+                     "intentionally not emitted; expect fidelity impact."
+end
+puts "[rb] soft_barriers: built=#{sb_built} skipped=#{sb_skipped}"
+
+model.commit_operation
+
+# 4. Geometry report
+if outreport
+  ctx = {
+    consensus_path:           cjson,
+    skp_path:                 outskp,
+    shell_json_path:          shell_json,
+    soft_barriers_mode:       sb_mode,
+    soft_barriers_skipped:    sb_skipped,
+    soft_barriers_skip_reasons: sb_skip_reasons,
+    floors_failed:            floors_failed,
+    py_stats:                 shell_data['stats'],
+  }
+  write_geometry_report(model, outreport, ctx)
+  puts "[rb] wrote #{outreport}"
+end
+
+# 5. Screenshots — iso then top, write image after each
+if outpng_iso
+  setup_iso_camera(model)
+  write_png(model, outpng_iso)
+  puts "[rb] wrote #{outpng_iso}"
+end
+if outpng_top
+  setup_top_camera(model)
+  write_png(model, outpng_top)
+  puts "[rb] wrote #{outpng_top}"
+end
+
+# 6. Save .skp last (this is the launcher's exit signal)
+status = model.save(outskp)
+puts "[rb] saved #{outskp} (status=#{status})"
