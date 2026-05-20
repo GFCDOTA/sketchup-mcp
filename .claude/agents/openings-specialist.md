@@ -67,7 +67,7 @@ openings section:
 
 ### Cross-check with PDF
 
-- planta_74: 12 doors expected (per `docs/openings_vector_v0.md`)
+- planta_74: 12 doors expected (per the active human-openings ground-truth protocol — `docs/learning/human_openings_truth_protocol.md`)
 - p10/p11/p12: counts known from `runs/proto/`
 
 ## When to edit

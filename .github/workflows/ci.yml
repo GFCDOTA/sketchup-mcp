@@ -30,9 +30,8 @@ jobs:
       # Ruff em modo INFORMATIVO por enquanto (continue-on-error).
       # Baseline em main = 144 violations (64 I001, 34 F401, 13 E702, 9 E741,
       # 8 F841, 5 E401, 5 F821, 3 E701, 1 E402, 1 E731, 1 F541).
-      # Documentado em docs/repo_hardening_plan.md como dívida técnica.
-      # Vai virar bloqueante (continue-on-error: false) em commit dedicado
-      # de cleanup, em ondas (não autoformat em massa).
+      # Tech debt: virar bloqueante (continue-on-error: false) em commit
+      # dedicado de cleanup, em ondas (não autoformat em massa).
       - name: Lint (ruff check, informativo)
         continue-on-error: true
         run: ruff check . --output-format=concise
@@ -55,10 +54,9 @@ jobs:
       #       passa sem deselect.)
       #
       # BASELINE_KNOWN_FAILURES — tests atualmente quebrados em main
-      # (gate `len(strokes) > 200` em classify/service.py). Documentados
-      # em docs/repo_hardening_plan.md como dívida técnica. Devem ser
-      # destravados (sem deselect) em commit futuro quando a causa raiz
-      # for endereçada — não nesta etapa.
+      # (gate `len(strokes) > 200` em classify/service.py). Tech debt:
+      # devem ser destravados (sem deselect) em commit futuro quando a
+      # causa raiz for endereçada — não nesta etapa.
       #   - tests/test_text_filter.py
       #   - tests/test_orientation_balance.py
       #   - tests/test_pair_merge.py
