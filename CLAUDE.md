@@ -196,7 +196,8 @@ When something is learned, it goes to `docs/learning/`:
 - `prompt_quality_rubric.md` — rubric + Prompt Contract template for autonomous tasks
 - `agent_improvements.md` — adjustments to specialist agents
 
-Roadmap of pending work: [`docs/ROADMAP.md`](docs/ROADMAP.md).
+Roadmap of pending work: [`.ai_bridge/TODO_NEXT.md`](.ai_bridge/TODO_NEXT.md).
+Historical roadmap archived at `docs/_archive/2026-05-cleanup/ROADMAP.md`.
 
 ---
 
@@ -298,7 +299,7 @@ Operational rules:
    on their own.
 
 This policy supersedes the 2026-05-13 operator-verbal-waiver
-pattern (`fixtures/planta_74/operator_acknowledgment_2026-05-13.md`).
+pattern (archived at `docs/_archive/2026-05-cleanup/operator_acknowledgment_2026-05-13.md`).
 A verbal "trust me, looks fine" does not satisfy the seven-artifact
 requirement.
 
@@ -323,9 +324,9 @@ requirement.
 ### Known baseline on `planta_74` (raster pipeline, OUTDATED)
 - 94 walls, 14 rooms, 7 orphan_components, geometry_score 0.156
 - 16 tests fail in main due to gate `len(strokes) > 200` in
-  `classify/service.py:160`. Documented in
-  `docs/repo_hardening_plan.md`. Address only with empirical
-  threshold sweep on planta_74 + p10 + p12.
+  `classify/service.py:160`. Tech debt documented in
+  `.github/workflows/ci.yml` deselect list (BASELINE_KNOWN_FAILURES).
+  Address only with empirical threshold sweep on planta_74 + p10 + p12.
 
 ### Known SketchUp issues
 - (none open as of 2026-05-06; previous SHA256 + caminho-A items shipped)

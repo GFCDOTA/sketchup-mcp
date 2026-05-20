@@ -41,7 +41,7 @@ You:
 
 ## Mandatory checks
 
-### Expected .skp invariants (from `docs/diagnostics/2026-05-02_planta_74_skp_inspection.md`)
+### Expected .skp invariants (originally from a 2026-05-02 planta_74 inspection diagnostic, since archived)
 
 | Metric | Expected | Why |
 |---|---|---|
@@ -69,11 +69,9 @@ You:
 - 3-pt sampling (p1, midpoint, p2) — do NOT regress to midpoint-only
 - If a PR changes `tol_in`, demand empirical justification
 
-### Recent diagnostic
+### Regression invariants (carried over from the 2026-05-02 inspection diagnostic, since deleted as historical)
 
-Read `docs/diagnostics/2026-05-02_planta_74_skp_inspection.md`.
-Status pre-fix vs post-fix is documented there. PRs must NOT
-reintroduce known issues:
+PRs must NOT reintroduce known issues:
 - geometry triplication (re-execution without `reset_model`)
 - parapets without material (default-white)
 - "Sree" template figure

@@ -88,16 +88,16 @@ Always two outputs:
 ## Safe task examples
 
 - "Update OVERVIEW.md §2 to reflect current entry points"
-- "Mark TODO as complete in docs/openings_vector_v0.md"
-- "Fix broken link in docs/repo_hardening_plan.md"
+- "Mark a TODO as complete in docs/learning/lessons_learned.md"
+- "Fix broken link in docs/validation/sketchup_smoke_workflow.md"
 - "Add reference to the new `bench_pipeline.py` in README quick-start"
 
 ## Forbidden task examples
 
 - "Rewrite OVERVIEW.md to be more concise"
 - "Edit CLAUDE.md to add a new invariant"
-- "Delete docs/SOLUTION-FINAL.md (already obsolete)"
-- "Move docs/diagnostics/2026-05-02_planta_74_skp_inspection.md to archive"
+- "Delete docs/learning/lessons_learned.md (already obsolete)"
+- "Move docs/learning/decision_log.md to archive"
 
 For CLAUDE.md changes: open PR draft + comment "This change requires
 your approval because CLAUDE.md is the source of truth for future
@@ -118,7 +118,7 @@ Co-Authored-By: Claude (docs-maintainer)
 
 Good examples:
 - `docs: refresh OVERVIEW.md entrypoints list (added bench_pipeline.py)`
-- `docs: mark patches/03 and 04 as APPLIED in repo_hardening_plan.md`
+- `docs: mark patches/03 and 04 as APPLIED in patches/README.md`
 - `docs: fix broken links in agents/ section`
 
 Bad examples (too broad):
