@@ -89,10 +89,19 @@ DEFAULT_CONSENSUS = REPO_ROOT / "runs" / "vector" / "consensus_model.json"
 DEFAULT_SKETCHUP = Path(
     r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
 )
-CACHE_KEY_INPUTS = (
-    Path("tools/skp_from_consensus.py"),
-    Path("tools/consume_consensus.rb"),
-)
+CACHE_KEY_INPUTS_BY_EXPORTER = {
+    "consume": (
+        Path("tools/skp_from_consensus.py"),
+        Path("tools/consume_consensus.rb"),
+    ),
+    "plan-shell": (
+        Path("tools/build_plan_shell_skp.py"),
+        Path("tools/build_plan_shell_skp.rb"),
+        Path("tools/disarm_sketchup_autoruns.py"),
+    ),
+}
+# Back-compat alias — direct external readers used the old name.
+CACHE_KEY_INPUTS = CACHE_KEY_INPUTS_BY_EXPORTER["consume"]
 # SU 2026 trial blocks the autorun plugin behind a Welcome dialog
 # unless a positional .skp is on the command line (FP-007 / LL-009).
 # tools.skp_from_consensus auto-picks any .skp in the output dir, so
@@ -126,6 +135,7 @@ class SmokeReport:
     cache_hit: bool = False
     consensus_sha256: str = ""
     cache_key: str = ""
+    exporter: str = "consume"  # ADR-003: "consume" | "plan-shell"
 
     def add(self, gate: GateResult) -> GateResult:
         self.gates.append(gate)
@@ -177,13 +187,20 @@ def _validate_consensus_shape(data: Any) -> None:
                 )
 
 
-def _compute_cache_key(consensus_sha: str, repo_root: Path) -> str:
-    """Cache key combines consensus hash with the source files that
-    produce the .skp. If any of those changes, the cache is invalid.
+def _compute_cache_key(consensus_sha: str, repo_root: Path,
+                       exporter: str = "consume") -> str:
+    """Cache key combines consensus hash + exporter choice + the source
+    files that produce the .skp for that exporter. If any of those
+    changes, the cache is invalid. Two different exporters never share
+    a cache slot (the exporter name is fed into the hash too).
     """
     h = hashlib.sha256()
     h.update(consensus_sha.encode("utf-8"))
-    for rel in CACHE_KEY_INPUTS:
+    h.update(f"|exporter={exporter}|".encode("utf-8"))
+    inputs = CACHE_KEY_INPUTS_BY_EXPORTER.get(
+        exporter, CACHE_KEY_INPUTS_BY_EXPORTER["consume"]
+    )
+    for rel in inputs:
         p = repo_root / rel
         if p.exists():
             h.update(_sha256_path(p).encode("utf-8"))
@@ -306,7 +323,14 @@ def gate_d(args: argparse.Namespace, report: SmokeReport) -> GateResult:
 
 def gate_e(args: argparse.Namespace, report: SmokeReport) -> GateResult:
     g = GateResult(name="E. Hash + cache", status="pass", started_at=_utc_now())
-    cache_key = _compute_cache_key(report.consensus_sha256, REPO_ROOT)
+    # Make sure the report knows which exporter was requested BEFORE
+    # gate_e so the cache key is bound to it (otherwise two different
+    # exporters could share / clobber a cache slot).
+    if not report.exporter or report.exporter == "consume":
+        report.exporter = getattr(args, "exporter", "consume")
+    cache_key = _compute_cache_key(
+        report.consensus_sha256, REPO_ROOT, exporter=report.exporter,
+    )
     report.cache_key = cache_key
     cache_marker = Path(report.out_dir).parent / "_skp_cache.json"
     prev: dict[str, Any] | None = None
@@ -1208,7 +1232,7 @@ def gate_f(args: argparse.Namespace, report: SmokeReport) -> GateResult:
         return g
     out_dir = Path(report.out_dir)
     consensus = Path(report.consensus_path)
-    # tools.skp_from_consensus's --out is a FILE path, not a directory.
+    # Both exporters' --out is a FILE path, not a directory.
     # Use a deterministic name inside out_dir; gate_g and gate_h
     # reference it back via args._skp_path.
     skp_target = out_dir / "model.skp"
@@ -1222,8 +1246,23 @@ def gate_f(args: argparse.Namespace, report: SmokeReport) -> GateResult:
         )
         if template is not None:
             shutil.copy2(template, bootstrap_target)
+
+    # ADR-003: dispatch to the chosen exporter. Both share the same
+    # CLI surface (positional consensus path, --out, --sketchup,
+    # --timeout, --plugins, --force-skp) so the command shape is
+    # symmetric — only the entry-point module name differs.
+    exporter_choice = getattr(args, "exporter", "consume")
+    if exporter_choice == "plan-shell":
+        exporter_module = "tools.build_plan_shell_skp"
+        log_path = out_dir / "build_plan_shell_skp.log"
+        report.exporter = "plan-shell"
+    else:
+        exporter_module = "tools.skp_from_consensus"
+        log_path = out_dir / "skp_from_consensus.log"
+        report.exporter = "consume"
+
     cmd = [
-        sys.executable, "-m", "tools.skp_from_consensus",
+        sys.executable, "-m", exporter_module,
         str(consensus),
         "--out", str(skp_target),
         "--sketchup", str(args.sketchup),
@@ -1231,17 +1270,13 @@ def gate_f(args: argparse.Namespace, report: SmokeReport) -> GateResult:
     ]
     if args.plugins:
         cmd += ["--plugins", str(args.plugins)]
-    # Propagate --force-skp so the inner sidecar-based skip in
-    # tools.skp_from_consensus stays consistent with the outer
-    # smoke cache layer. (When the smoke cache hits we never even
-    # get to F; this matters only when the smoke cache missed but
-    # the sidecar might still match — we want the explicit force
-    # to override both layers.)
+    # Propagate --force-skp so the inner sidecar-based skip in both
+    # exporters stays consistent with the outer smoke cache layer.
+    # When the smoke cache hits we never reach F; this matters only
+    # when the smoke cache missed but the inner sidecar might still
+    # match — explicit force overrides both layers.
     if args.force_skp:
         cmd.append("--force-skp")
-    # Capture stderr+stdout to a sidecar log so debugging doesn't
-    # depend on the truncated message field.
-    log_path = out_dir / "skp_from_consensus.log"
     try:
         proc = subprocess.run(
             cmd, capture_output=True, text=True,
@@ -1265,12 +1300,12 @@ def gate_f(args: argparse.Namespace, report: SmokeReport) -> GateResult:
     )
     g.artifacts = [_relpath(log_path)]
     if proc.returncode != 0:
-        # Combine stdout + stderr because skp_from_consensus uses
-        # plain print() for both info and error messages.
+        # Combine stdout + stderr because both exporters use plain
+        # print() for both info and error messages.
         tail = (proc.stdout + proc.stderr).strip().splitlines()[-3:]
         g.status = "fail"
         g.message = (
-            f"skp_from_consensus failed (rc={proc.returncode}); "
+            f"{exporter_module} failed (rc={proc.returncode}); "
             f"see {log_path.name}: {' | '.join(tail)[:300]}"
         )
         g.finished_at = _utc_now()
@@ -1278,12 +1313,12 @@ def gate_f(args: argparse.Namespace, report: SmokeReport) -> GateResult:
     if not skp_target.exists():
         g.status = "fail"
         g.message = (
-            f"skp_from_consensus succeeded (rc=0) but {skp_target.name} "
+            f"{exporter_module} succeeded (rc=0) but {skp_target.name} "
             f"not found; see {log_path.name}"
         )
     else:
         g.artifacts.insert(0, _relpath(skp_target))
-        g.message = f"exported {skp_target.name}"
+        g.message = f"exported {skp_target.name} via {exporter_choice}"
         args._skp_path = skp_target
     g.finished_at = _utc_now()
     return g
@@ -1482,6 +1517,20 @@ def _build_parser() -> argparse.ArgumentParser:
                     help="run gates A-E + H only, no SU spawn")
     ap.add_argument("--force-skp", action="store_true",
                     help="bypass cache hit, always run F")
+    ap.add_argument(
+        "--exporter", choices=("consume", "plan-shell"), default="consume",
+        help=(
+            "Gate F exporter (ADR-003). 'consume' (default): the "
+            "production per-wall paradigm via tools.skp_from_consensus + "
+            "tools/consume_consensus.rb (35 wall groups for planta_74). "
+            "'plan-shell': experimental parallel exporter via "
+            "tools.build_plan_shell_skp (1 PlanShell_Group with "
+            "footprint union; no door leaves / windows in this phase, "
+            "openings render as gaps in the shell). Both exporters "
+            "consume the same consensus and write `model.skp` into "
+            "out_dir; --skip-skp and --force-skp behave identically."
+        ),
+    )
     ap.add_argument("--open", dest="open_after", action="store_true",
                     help="reserved; current implementation always quits SU")
     ap.add_argument(
