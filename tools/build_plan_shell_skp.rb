@@ -197,57 +197,143 @@ end
 
 # ---- soft barriers (peitorils) -------------------------------------
 
+# Half-thickness (in SU inches) of the thin slab swept along a soft
+# barrier polyline segment. 1.5 in / 2 = 0.75 in ≈ 1.9 cm half-width
+# → 3.8 cm full thickness. Matches consume_consensus.rb's add_parapet
+# default. The point of using a thin sweep instead of the polyline's
+# bounding box is so a peitoril running ~3 m along one edge of a
+# room renders as a 3 m × 3.8 cm strip (~0.12 m²), not as a 3 m × Y
+# rectangle covering the entire room interior (the 2026-05-20 bug).
+SOFT_BARRIER_THICKNESS_IN = 1.5
+
 def soft_barrier_polyline_pts(barrier)
   # Soft barriers come as polyline arrays (consume_consensus.rb consumes
   # them the same way). Each is a list of [x, y] PDF points.
   barrier['polyline_pts'] || barrier['polyline'] || []
 end
 
-def build_soft_barrier(parent_ents, barrier, material, index)
+# Wall footprints + FP-006 overlap filter, ported from
+# consume_consensus.rb lines 125-165 to keep the plan_shell exporter
+# robust against the same "peitoril coincident with wall" failure
+# (renders as 1.10 m wallpaper band on the wall face).
+def wall_footprints_in_su(walls, thickness_pt)
+  half = thickness_pt / 2.0
+  walls.map do |w|
+    sx, sy = w['start']
+    ex, ey = w['end']
+    if w['orientation'] == 'h'
+      x0, x1 = [sx, ex].minmax
+      y0, y1 = sy - half, sy + half
+    else
+      x0, x1 = sx - half, sx + half
+      y0, y1 = [sy, ey].minmax
+    end
+    [x0 * PT_TO_IN, y0 * PT_TO_IN, x1 * PT_TO_IN, y1 * PT_TO_IN]
+  end
+end
+
+def segment_overlaps_wall?(p1, p2, footprints, tol_in = 1.0)
+  # 3-point sample (p1, midpoint, p2) inside any wall footprint
+  # (within tol_in inches) ⇒ reject. Mirror of FP-006 in
+  # consume_consensus.rb.
+  pts = [
+    [p1.x, p1.y],
+    [(p1.x + p2.x) / 2.0, (p1.y + p2.y) / 2.0],
+    [p2.x, p2.y],
+  ]
+  footprints.any? do |x0, y0, x1, y1|
+    pts.any? do |px, py|
+      px >= x0 - tol_in && px <= x1 + tol_in &&
+        py >= y0 - tol_in && py <= y1 + tol_in
+    end
+  end
+end
+
+def build_soft_barrier(parent_ents, barrier, material, index,
+                       wall_footprints: nil)
+  # Per-segment swept slab. For each consecutive pair (a, b) on the
+  # polyline, build a thin rectangle perpendicular to the segment
+  # direction with half-width SOFT_BARRIER_THICKNESS_IN/2. The slab is
+  # then extruded to PARAPET_HEIGHT_IN. This mirrors the production
+  # add_parapet behaviour (consume_consensus.rb:308-345) and replaces
+  # the earlier polyline-bbox approach that produced enormous slabs
+  # covering room interiors (2026-05-20 bug captured by
+  # tests/test_plan_shell_invariants.py).
   pts_pdf = soft_barrier_polyline_pts(barrier)
   return {'ok' => false, 'reason' => 'no polyline_pts'} if pts_pdf.length < 2
 
-  # Build a thin slab along the polyline path. Use a fixed half-width
-  # of 0.5 * wall_thickness so the slab reads as "shorter than wall but
-  # same footprint". Phase-1 simple approach: build a rectangle for the
-  # bounding box of the polyline and extrude to PARAPET_HEIGHT.
-  xs = pts_pdf.map { |p| p[0] }
-  ys = pts_pdf.map { |p| p[1] }
-  x0, x1 = xs.minmax
-  y0, y1 = ys.minmax
-  # Skip degenerate polylines (all one point, or zero width)
-  return {'ok' => false, 'reason' => 'degenerate bbox'} \
-    if (x1 - x0) < 0.1 && (y1 - y0) < 0.1
-  # Heuristic: if the polyline is fully on a single axis line (vertical
-  # or horizontal), give it a token thickness equal to wall thickness;
-  # otherwise use the actual bbox.
-  thickness_min = 0.5  # pdf points
-  if (x1 - x0) < thickness_min
-    x0 -= thickness_min / 2.0
-    x1 += thickness_min / 2.0
-  end
-  if (y1 - y0) < thickness_min
-    y0 -= thickness_min / 2.0
-    y1 += thickness_min / 2.0
-  end
-
   group = parent_ents.add_group
   group.name = "SoftBarrier_Group_#{index}"
-  ents = group.entities
-  corners = [[x0, y0], [x1, y0], [x1, y1], [x0, y1]]
-  pts = corners.map { |p| pdf_pt_to_su(p) }
-  face = ents.add_face(pts)
-  if face.nil?
+
+  segments_built  = 0
+  segments_skipped_short    = 0
+  segments_skipped_overlap  = 0
+  segments_skipped_facefail = 0
+
+  pts_pdf.each_cons(2).with_index do |(a, b), seg_idx|
+    next if a == b
+    p1 = pdf_pt_to_su(a)
+    p2 = pdf_pt_to_su(b)
+    dx = p2.x - p1.x
+    dy = p2.y - p1.y
+    len = Math.sqrt(dx * dx + dy * dy)
+    if len < 0.01
+      segments_skipped_short += 1
+      next
+    end
+    # FP-006: drop segments whose midpoint sits inside a wall footprint
+    # — those are the building outline that the vector extractor
+    # catches as soft_barrier, not real peitoris.
+    if wall_footprints && segment_overlaps_wall?(p1, p2, wall_footprints)
+      segments_skipped_overlap += 1
+      next
+    end
+
+    nx = -dy / len * (SOFT_BARRIER_THICKNESS_IN / 2.0)
+    ny =  dx / len * (SOFT_BARRIER_THICKNESS_IN / 2.0)
+    quad = [
+      Geom::Point3d.new(p1.x + nx, p1.y + ny, 0),
+      Geom::Point3d.new(p2.x + nx, p2.y + ny, 0),
+      Geom::Point3d.new(p2.x - nx, p2.y - ny, 0),
+      Geom::Point3d.new(p1.x - nx, p1.y - ny, 0),
+    ]
+
+    sub_group = group.entities.add_group
+    sub_group.name = "SoftBarrier_#{index}_seg_#{seg_idx}"
+    face = sub_group.entities.add_face(quad) rescue nil
+    if face.nil?
+      sub_group.erase!
+      segments_skipped_facefail += 1
+      next
+    end
+    face.reverse! if face.normal.z < 0
+    face.pushpull(PARAPET_HEIGHT_IN)
+    sub_group.entities.grep(Sketchup::Face).each do |f|
+      f.material      = material
+      f.back_material = material
+    end
+    segments_built += 1
+  end
+
+  if segments_built == 0
     group.erase!
-    return {'ok' => false, 'reason' => 'add_face nil'}
+    return {
+      'ok' => false,
+      'reason' => "all segments skipped " \
+                  "(short=#{segments_skipped_short}, " \
+                  "wall_overlap=#{segments_skipped_overlap}, " \
+                  "facefail=#{segments_skipped_facefail})",
+    }
   end
-  face.reverse! if face.normal.z < 0
-  face.pushpull(PARAPET_HEIGHT_IN)
-  ents.grep(Sketchup::Face).each do |f|
-    f.material      = material
-    f.back_material = material
-  end
-  {'ok' => true, 'group' => group}
+
+  {
+    'ok' => true,
+    'group' => group,
+    'segments_built'           => segments_built,
+    'segments_skipped_short'   => segments_skipped_short,
+    'segments_skipped_overlap' => segments_skipped_overlap,
+    'segments_skipped_facefail' => segments_skipped_facefail,
+  }
 end
 
 # ---- camera + screenshots -----------------------------------------
@@ -330,6 +416,92 @@ def collect_face_records(group)
   }
 end
 
+def primary_material_name(faces)
+  # The "primary" material is the one most faces are painted with.
+  # Returns nil if no face has a material.
+  counts = Hash.new(0)
+  faces.each do |f|
+    m = f.material
+    counts[m.name] += 1 if m
+  end
+  return nil if counts.empty?
+  counts.max_by { |_, n| n }.first
+end
+
+def lateral_face_count(faces, eps = 0.01)
+  # A "lateral" face has a normal lying roughly in the XY plane, i.e.
+  # |normal.z| << 1. A pure floor has ZERO lateral faces. Wall-shell
+  # and soft-barrier groups have many.
+  faces.count { |f| f.normal.z.abs < eps }
+end
+
+def group_bbox_record(group)
+  # Walk the group's entities (recursing into sub-groups) and capture
+  # the axis-aligned bbox in SU's internal units (inches). Also returns
+  # height_m for direct invariant checks.
+  faces = []
+  edges = []
+  subs = []
+  walk_entities(group.entities, faces, edges, subs)
+
+  # SU's Group#bounds returns the local bbox in inches.
+  bbox = group.bounds
+  z_min_in = bbox.min.z
+  z_max_in = bbox.max.z
+  x_min_in = bbox.min.x
+  x_max_in = bbox.max.x
+  y_min_in = bbox.min.y
+  y_max_in = bbox.max.y
+  height_in = z_max_in - z_min_in
+
+  # Real material footprint: sum of areas of all faces with a roughly
+  # +Z normal (the "tops" of the swept slabs / the floor tile / the
+  # top of the wall shell). Distinct from `footprint_bbox_m2`, which
+  # is the bounding box of the whole group and over-estimates badly
+  # when sub-groups are sparsely placed along a polyline.
+  m_per_in = 1.0 / M_TO_IN
+  top_faces = faces.select { |f| f.normal.z > 0.99 }
+  top_area_in2 = top_faces.sum(0.0) { |f| f.area }
+  top_area_m2 = (top_area_in2 * m_per_in * m_per_in).round(4)
+
+  {
+    'name'              => group.name,
+    'entity_count'      => group.entities.length,
+    'face_count'        => faces.length,
+    'edge_count'        => edges.length,
+    'sub_group_count'   => subs.length,
+    'lateral_face_count' => lateral_face_count(faces),
+    'top_or_bottom_face_count' => faces.count { |f| f.normal.z.abs > 0.99 },
+    'top_face_count' => top_faces.length,
+    'default_material_face_count' => faces.count do |f|
+      f.material.nil? || f.back_material.nil?
+    end,
+    'primary_material'  => primary_material_name(faces),
+    'bbox_in' => {
+      'min' => [x_min_in.round(4), y_min_in.round(4), z_min_in.round(4)],
+      'max' => [x_max_in.round(4), y_max_in.round(4), z_max_in.round(4)],
+    },
+    'bbox_m' => {
+      'min' => [
+        (x_min_in * m_per_in).round(4),
+        (y_min_in * m_per_in).round(4),
+        (z_min_in * m_per_in).round(4),
+      ],
+      'max' => [
+        (x_max_in * m_per_in).round(4),
+        (y_max_in * m_per_in).round(4),
+        (z_max_in * m_per_in).round(4),
+      ],
+    },
+    'height_m'  => (height_in * m_per_in).round(4),
+    'footprint_bbox_m2' => (
+      ((x_max_in - x_min_in) * (y_max_in - y_min_in)) *
+      m_per_in * m_per_in
+    ).round(4),
+    'footprint_top_face_m2' => top_area_m2,
+  }
+end
+
 def deep_face_check_all_painted?(group)
   faces = []
   edges = []
@@ -382,6 +554,7 @@ def write_geometry_report(model, report_path, ctx)
       'faces' => groups.sum { |g| g.entities.grep(Sketchup::Face).length },
       'edges' => groups.sum { |g| g.entities.grep(Sketchup::Edge).length },
     },
+    'groups_diagnostic' => groups.map { |g| group_bbox_record(g) },
     'shell_stats_from_python' => ctx[:py_stats],
     'gates_self_check' => {
       'plan_shell_group_exists'    => !plan_shell.nil?,
@@ -459,8 +632,18 @@ sb_skip_reasons = []
 if sb_mode == 'groups'
   parapet_mat = model.materials.add('plan_parapet')
   parapet_mat.color = Sketchup::Color.new(*PARAPET_RGB)
+  # Precompute wall footprints once so FP-006 can reject perimeter
+  # segments without re-deriving the footprint per call.
+  walls_for_overlap = consensus['walls'] || []
+  thickness_for_overlap = consensus['wall_thickness_pts'] || 5.4
+  wall_footprints = wall_footprints_in_su(
+    walls_for_overlap, thickness_for_overlap,
+  )
   (consensus['soft_barriers'] || []).each_with_index do |sb, i|
-    res = build_soft_barrier(model.active_entities, sb, parapet_mat, i)
+    res = build_soft_barrier(
+      model.active_entities, sb, parapet_mat, i,
+      wall_footprints: wall_footprints,
+    )
     if res['ok']
       sb_built += 1
     else
