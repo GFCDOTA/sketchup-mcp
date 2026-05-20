@@ -46,6 +46,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from tools.disarm_sketchup_autoruns import disarm as disarm_autoruns
 
 SKETCHUP_EXE_DEFAULT = (
     r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
@@ -178,6 +179,16 @@ def run(consensus: Path, out_skp: Path, sketchup_exe: Path,
     if meta_p.exists():
         meta_p.unlink()
 
+    # Defence-in-depth: clear ANY orphan autorun control file from a
+    # previous (possibly crashed) run before we arm our own. Without
+    # this, a stale autorun_inspector_control.txt or similar from an
+    # earlier session can fire on the SU we are about to launch and
+    # call Sketchup.quit on us. See docs/learning/failure_patterns.md
+    # § "autorun_control_files".
+    pre_disarmed = disarm_autoruns(plugins_dir)
+    for p in pre_disarmed:
+        print(f"[pre-launch disarm] removed orphan {p.name}")
+
     write_control(plugins_dir, consensus, out_skp)
     err_file = plugins_dir / "autorun_error.txt"
     if err_file.exists():
@@ -216,55 +227,68 @@ def run(consensus: Path, out_skp: Path, sketchup_exe: Path,
     proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL,
                             stderr=subprocess.DEVNULL,
                             creationflags=getattr(subprocess, "DETACHED_PROCESS", 0))
-    deadline = time.time() + timeout_s
-    while time.time() < deadline:
-        if out_skp.exists():
-            # Wait a couple more seconds for the file write to flush
-            time.sleep(2)
-            print(f"[ok] {out_skp} ({out_skp.stat().st_size} bytes)")
-            try:
-                proc.terminate()
-            except Exception:
-                pass
-            elapsed = time.time() - started
-            if consensus_sha is not None:
-                write_metadata(
-                    out_skp,
-                    consensus_sha256=consensus_sha,
-                    sketchup_exe=sketchup_exe,
-                    command=cmd,
-                )
-            return {
-                "ok": True,
-                "skipped": False,
-                "skp_path": str(out_skp),
-                "consensus_sha256": consensus_sha,
-                "elapsed_s": round(elapsed, 4),
-            }
-        if proc.poll() is not None:
-            print(f"[err] SketchUp exited prematurely (code={proc.returncode})")
-            return {
-                "ok": False,
-                "skipped": False,
-                "skp_path": str(out_skp),
-                "consensus_sha256": consensus_sha,
-                "elapsed_s": round(time.time() - started, 4),
-            }
-        time.sleep(1)
-    print(f"[err] timeout after {timeout_s}s waiting for {out_skp}")
     try:
-        proc.terminate()
-        time.sleep(2)
-        proc.kill()
-    except Exception:
-        pass
-    return {
-        "ok": False,
-        "skipped": False,
-        "skp_path": str(out_skp),
-        "consensus_sha256": consensus_sha,
-        "elapsed_s": round(time.time() - started, 4),
-    }
+        deadline = time.time() + timeout_s
+        while time.time() < deadline:
+            if out_skp.exists():
+                # Wait a couple more seconds for the file write to flush
+                time.sleep(2)
+                print(f"[ok] {out_skp} ({out_skp.stat().st_size} bytes)")
+                try:
+                    proc.terminate()
+                except Exception:
+                    pass
+                elapsed = time.time() - started
+                if consensus_sha is not None:
+                    write_metadata(
+                        out_skp,
+                        consensus_sha256=consensus_sha,
+                        sketchup_exe=sketchup_exe,
+                        command=cmd,
+                    )
+                return {
+                    "ok": True,
+                    "skipped": False,
+                    "skp_path": str(out_skp),
+                    "consensus_sha256": consensus_sha,
+                    "elapsed_s": round(elapsed, 4),
+                }
+            if proc.poll() is not None:
+                print(f"[err] SketchUp exited prematurely (code={proc.returncode})")
+                return {
+                    "ok": False,
+                    "skipped": False,
+                    "skp_path": str(out_skp),
+                    "consensus_sha256": consensus_sha,
+                    "elapsed_s": round(time.time() - started, 4),
+                }
+            time.sleep(1)
+        print(f"[err] timeout after {timeout_s}s waiting for {out_skp}")
+        try:
+            proc.terminate()
+            time.sleep(2)
+            proc.kill()
+        except Exception:
+            pass
+        return {
+            "ok": False,
+            "skipped": False,
+            "skp_path": str(out_skp),
+            "consensus_sha256": consensus_sha,
+            "elapsed_s": round(time.time() - started, 4),
+        }
+    finally:
+        # ALWAYS disarm autoruns on the way out, regardless of success,
+        # premature exit, or timeout. If we leave autorun_control.txt
+        # behind, the next SU launch — including the user double-clicking
+        # the .skp we just produced — will fire consume_consensus.rb,
+        # call model.entities.clear! and save() over the file. Removing
+        # every *control.txt is defence-in-depth: we also catch orphans
+        # left by sibling launchers (e.g. autorun_inspector_control.txt).
+        # See docs/learning/failure_patterns.md § "autorun_control_files".
+        post_disarmed = disarm_autoruns(plugins_dir)
+        for p in post_disarmed:
+            print(f"[post-run disarm] removed {p.name}")
 
 
 if __name__ == "__main__":
