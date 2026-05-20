@@ -140,11 +140,16 @@ Out of scope for this first cut, on purpose:
   ADR-001 §3). It consumes whichever JSON the user points at —
   `consensus_model.json` or `amended_observed.json`. The launcher
   does not invoke `apply_overrides`; the caller is responsible.
-- **Smoke harness integration.** Not wired into
-  `scripts/smoke/smoke_skp_export.py` gate F yet. This first cut is
-  invoked directly: `python -m tools.build_plan_shell_skp ...`.
-  Once metrics prove an improvement, a follow-up PR adds it as an
-  alternative `--exporter plan-shell` flag on the smoke harness.
+- **Smoke harness integration — DONE (Phase 3, follow-up PR).**
+  `scripts/smoke/smoke_skp_export.py` now accepts
+  `--exporter {consume,plan-shell}` (default `consume` keeps
+  byte-equivalent CI behaviour). Gate F dispatches to
+  `tools.build_plan_shell_skp` when `plan-shell` is chosen; gate E's
+  cache key includes the exporter choice + the exporter's source
+  file SHAs, so the two exporters never share a cache slot. The
+  Python launcher now also honours `--force-skp` and writes a
+  sidecar `<out_skp>.metadata.json` (consensus SHA + exporter name)
+  so subsequent runs short-circuit when input is unchanged.
 
 ## 4. Deviation from `sketchup-specialist.md` invariants
 

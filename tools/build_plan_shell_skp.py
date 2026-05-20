@@ -51,11 +51,13 @@ we only swap line 3 of autorun_control.txt to point at our .rb.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import shutil
 import subprocess
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -72,6 +74,7 @@ PLUGINS_DIR_DEFAULT = Path(os.path.expandvars(
 ))
 RUBY_TEMPLATE = Path(__file__).resolve().parent / "build_plan_shell_skp.rb"
 CONTROL_FILE = "autorun_control.txt"
+METADATA_SUFFIX = ".metadata.json"
 
 # ---- algorithmic tuning constants ------------------------------------
 
@@ -279,6 +282,70 @@ def serialize_polygons(polygons: list[Polygon],
     }
 
 
+# ---- cache (mirror skp_from_consensus.py sidecar pattern) ----------
+
+def _file_sha256(path: Path) -> str:
+    """Stream the file and return its SHA256 hex digest."""
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(65536), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def metadata_path(out_skp: Path) -> Path:
+    """Path of the sidecar metadata file for a given .skp."""
+    return out_skp.with_name(out_skp.name + METADATA_SUFFIX)
+
+
+def read_metadata(out_skp: Path) -> dict[str, Any] | None:
+    """Read the sidecar metadata. Returns None if missing or unparseable."""
+    p = metadata_path(out_skp)
+    if not p.exists():
+        return None
+    try:
+        return json.loads(p.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
+def write_metadata(out_skp: Path, *, consensus_sha256: str,
+                   sketchup_exe: Path, command: list[str]) -> Path:
+    """Write the sidecar metadata next to the .skp. Returns the path written."""
+    p = metadata_path(out_skp)
+    data = {
+        "schema_version": "1.0.0",
+        "exporter": "build_plan_shell_skp",
+        "consensus_sha256": consensus_sha256,
+        "skp_path": str(out_skp),
+        "created_at": datetime.now(timezone.utc).strftime(
+            "%Y-%m-%dT%H:%M:%SZ"),
+        "sketchup_path": str(sketchup_exe),
+        "command": " ".join(command),
+    }
+    p.write_text(json.dumps(data, indent=2), encoding="utf-8")
+    return p
+
+
+def should_skip(out_skp: Path, consensus_sha256: str) -> bool:
+    """True iff the .skp exists and its sidecar's consensus_sha256 matches.
+
+    Caller is responsible for honouring `force_skp` BEFORE calling this —
+    we don't take that flag here so the helper stays trivially testable.
+    """
+    if not out_skp.exists():
+        return False
+    meta = read_metadata(out_skp)
+    if not meta:
+        return False
+    # Only skip when the SAME exporter produced the cached .skp.
+    # Otherwise consume-produced .skp would be reused for a plan-shell
+    # request (and vice-versa), corrupting the user's intent.
+    if meta.get("exporter") != "build_plan_shell_skp":
+        return False
+    return meta.get("consensus_sha256") == consensus_sha256
+
+
 # ---- launcher --------------------------------------------------------
 
 def write_control(plugins_dir: Path, consensus: Path, out_skp: Path) -> None:
@@ -319,7 +386,8 @@ def run(consensus_path: Path, out_skp: Path, *, sketchup_exe: Path,
         out_png_top: Path | None = None,
         out_report: Path | None = None,
         out_shell_json: Path | None = None,
-        soft_barriers_mode: str = "groups") -> dict[str, Any]:
+        soft_barriers_mode: str = "groups",
+        force_skp: bool = False) -> dict[str, Any]:
     """Build the plan shell .skp end-to-end.
 
     Args:
@@ -328,11 +396,14 @@ def run(consensus_path: Path, out_skp: Path, *, sketchup_exe: Path,
       out_skp: output .skp path.
       soft_barriers_mode: "groups" (emit at 1.10m as SoftBarrier_Group_N)
         or "skip" (record in report, do not emit).
+      force_skp: bypass the content-hash cache. Default False.
 
-    Returns a dict with paths and stats. Idempotent w.r.t. the SU launch:
-    each call regenerates the .skp (no content-hash cache yet — that's
-    a future PR).
+    Returns a dict with paths and stats. Honours the content-hash
+    cache via a sidecar `<out_skp>.metadata.json` (matches the
+    skp_from_consensus.py pattern); reruns short-circuit when the
+    consensus SHA256 matches and force_skp is False.
     """
+    started = time.time()
     out_skp.parent.mkdir(parents=True, exist_ok=True)
     if out_png_iso is None:
         out_png_iso = out_skp.with_name("model_iso.png")
@@ -343,8 +414,32 @@ def run(consensus_path: Path, out_skp: Path, *, sketchup_exe: Path,
     if out_shell_json is None:
         out_shell_json = out_skp.with_name("_shell_polygon.json")
 
-    # Clean stale outputs.
-    for p in (out_skp, out_png_iso, out_png_top, out_report, out_shell_json):
+    # ---- skip path: re-use unchanged .skp ----
+    consensus_sha = (
+        _file_sha256(consensus_path) if consensus_path.exists() else None
+    )
+    if (
+        not force_skp
+        and consensus_sha is not None
+        and should_skip(out_skp, consensus_sha)
+    ):
+        elapsed = time.time() - started
+        print(
+            f"[skip] {out_skp} unchanged consensus "
+            f"(sha {consensus_sha[:12]}); skipped SU launch"
+        )
+        return {
+            "ok": True,
+            "skipped": True,
+            "skp_path": str(out_skp),
+            "consensus_sha256": consensus_sha,
+            "elapsed_s": round(elapsed, 4),
+        }
+
+    # Clean stale outputs (incl. stale sidecar metadata).
+    meta_p = metadata_path(out_skp)
+    for p in (out_skp, out_png_iso, out_png_top, out_report,
+              out_shell_json, meta_p):
         if p.exists():
             p.unlink()
 
@@ -396,13 +491,25 @@ def run(consensus_path: Path, out_skp: Path, *, sketchup_exe: Path,
                     proc.terminate()
                 except Exception:  # noqa: BLE001
                     pass
+                # Persist sidecar metadata so a future run with the
+                # same consensus short-circuits the cache check.
+                if consensus_sha is not None:
+                    write_metadata(
+                        out_skp,
+                        consensus_sha256=consensus_sha,
+                        sketchup_exe=sketchup_exe,
+                        command=cmd,
+                    )
                 return {
                     "ok": True,
+                    "skipped": False,
                     "skp_path": str(out_skp),
                     "png_iso": str(out_png_iso),
                     "png_top": str(out_png_top),
                     "report": str(out_report),
                     "shell_json": str(out_shell_json),
+                    "consensus_sha256": consensus_sha,
+                    "elapsed_s": round(time.time() - started, 4),
                     "stats": stats,
                 }
             if proc.poll() is not None:
@@ -444,6 +551,8 @@ if __name__ == "__main__":
                     default="groups",
                     help='"groups": emit each as SoftBarrier_Group_N at '
                          '1.10 m; "skip": skip and record in report')
+    ap.add_argument("--force-skp", action="store_true",
+                    help="bypass the consensus-hash cache, always launch SU")
     args = ap.parse_args()
     result = run(
         args.consensus.resolve(), args.out.resolve(),
@@ -451,5 +560,9 @@ if __name__ == "__main__":
         plugins_dir=args.plugins,
         timeout_s=args.timeout,
         soft_barriers_mode=args.soft_barriers,
+        force_skp=args.force_skp,
     )
+    if result.get("skipped"):
+        sha = result.get("consensus_sha256") or ""
+        print(f"SKIPPED_UNCHANGED_CONSENSUS sha={sha[:12]}")
     raise SystemExit(0 if result.get("ok") else 1)

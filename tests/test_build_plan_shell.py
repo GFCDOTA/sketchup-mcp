@@ -1,9 +1,13 @@
 """Unit tests for tools.build_plan_shell_skp pure-Python phase.
 
 Tests the geometric primitives that produce the 2D shell polygon
-before SketchUp gets involved. SU is not exercised here.
+before SketchUp gets involved, plus the sidecar-metadata cache layer
+added in phase 3 (ADR-003). SU is not exercised here.
 """
 from __future__ import annotations
+
+import json
+from pathlib import Path
 
 import pytest
 from shapely.geometry import MultiPolygon, Polygon
@@ -11,10 +15,15 @@ from shapely.geometry import MultiPolygon, Polygon
 from tools.build_plan_shell_skp import (
     MIN_SLIVER_AREA_PTS2,
     SNAP_EPS_PTS,
+    _file_sha256,
     build_shell_polygon,
+    metadata_path,
     opening_carve_rect,
+    read_metadata,
     serialize_polygons,
+    should_skip,
     wall_footprint,
+    write_metadata,
 )
 
 # ---- wall_footprint --------------------------------------------------
@@ -258,3 +267,90 @@ def test_min_sliver_area_below_typical_wall_unit() -> None:
     # A 1×1 pt² sliver is real noise; the threshold must be lower
     # than meaningful geometry.
     assert 0 < MIN_SLIVER_AREA_PTS2 < 1.0
+
+
+# ---- sidecar metadata cache (phase 3) -------------------------------
+
+
+def test_should_skip_returns_false_when_no_metadata(tmp_path: Path) -> None:
+    skp = tmp_path / "m.skp"
+    skp.write_bytes(b"fake")
+    assert should_skip(skp, consensus_sha256="abc" * 8) is False
+
+
+def test_should_skip_true_when_sha_and_exporter_match(tmp_path: Path) -> None:
+    consensus = tmp_path / "c.json"
+    consensus.write_text('{"foo": "bar"}', encoding="utf-8")
+    sha = _file_sha256(consensus)
+    skp = tmp_path / "m.skp"
+    skp.write_bytes(b"fake-skp")
+    write_metadata(
+        skp, consensus_sha256=sha,
+        sketchup_exe=Path("su.exe"), command=["python", "-m", "x"],
+    )
+    assert should_skip(skp, sha) is True
+
+
+def test_should_skip_false_when_sha_mismatches(tmp_path: Path) -> None:
+    skp = tmp_path / "m.skp"
+    skp.write_bytes(b"fake-skp")
+    write_metadata(
+        skp, consensus_sha256="aaa" * 8,
+        sketchup_exe=Path("su.exe"), command=[],
+    )
+    assert should_skip(skp, consensus_sha256="bbb" * 8) is False
+
+
+def test_should_skip_false_when_exporter_differs(tmp_path: Path) -> None:
+    """A .skp produced by consume_consensus.rb must NOT be reused by
+    a plan_shell request (and vice-versa). The exporter tag in
+    metadata distinguishes them."""
+    skp = tmp_path / "m.skp"
+    skp.write_bytes(b"fake-skp")
+    sha = "abc" * 8
+    write_metadata(
+        skp, consensus_sha256=sha,
+        sketchup_exe=Path("su.exe"), command=[],
+    )
+    # Now overwrite the exporter tag to something else.
+    meta = read_metadata(skp)
+    assert meta is not None
+    meta["exporter"] = "consume_consensus"  # not us
+    metadata_path(skp).write_text(json.dumps(meta), encoding="utf-8")
+    assert should_skip(skp, sha) is False
+
+
+def test_metadata_path_is_sidecar(tmp_path: Path) -> None:
+    skp = tmp_path / "model.skp"
+    p = metadata_path(skp)
+    assert p.parent == skp.parent
+    assert p.name == "model.skp.metadata.json"
+
+
+def test_read_metadata_returns_none_on_missing_or_corrupt(
+    tmp_path: Path,
+) -> None:
+    skp = tmp_path / "m.skp"
+    skp.write_bytes(b"x")
+    # missing
+    assert read_metadata(skp) is None
+    # corrupt
+    metadata_path(skp).write_text("{not json", encoding="utf-8")
+    assert read_metadata(skp) is None
+
+
+def test_write_metadata_includes_exporter_tag(tmp_path: Path) -> None:
+    skp = tmp_path / "m.skp"
+    skp.write_bytes(b"x")
+    write_metadata(
+        skp, consensus_sha256="abc" * 8,
+        sketchup_exe=Path("su.exe"),
+        command=["python", "-m", "tools.build_plan_shell_skp"],
+    )
+    meta = read_metadata(skp)
+    assert meta is not None
+    # The exporter name is the cache namespace — must be present so a
+    # consume-produced sidecar doesn't satisfy a plan-shell skip query.
+    assert meta["exporter"] == "build_plan_shell_skp"
+    assert meta["consensus_sha256"] == "abc" * 8
+    assert meta["schema_version"] == "1.0.0"

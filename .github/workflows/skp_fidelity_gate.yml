@@ -23,6 +23,12 @@ on:
       - "tools/inspect_walls_report.rb"
       - "tools/autorun_*.rb"
       - "tools/su_boot.rb"
+      # Experimental parallel exporter (ADR-003)
+      - "tools/build_plan_shell_skp.py"
+      - "tools/build_plan_shell_skp.rb"
+      - "tools/render_plan_shell_comparison.py"
+      - "tools/disarm_sketchup_autoruns.py"
+      - "tests/test_build_plan_shell.py"
       # Metric extractor + protections
       - "tools/inspect_metrics.py"
       - "tests/test_consume_consensus_regression.py"
