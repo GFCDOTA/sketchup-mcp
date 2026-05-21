@@ -233,3 +233,78 @@ The change is purely additive — three new files, one new directory
 under `runs/` (gitignored), one new ADR. No production code is
 modified. Reverting only removes the experimental exporter; the
 production pipeline is unaffected because it never used it.
+
+---
+
+## 11. 2026-05-21 — `--layer-mode` diagnostic harness
+
+After PRs #141 / #142 landed Phase 2 visual parity (door leaves /
+windows / glazed_balcony / passage markers), the user flagged that a
+manually-cleaned `.skb` had 5 of 7 soft_barriers and 2 of 7 doors
+removed, plus Floor_r001 visibly merging 3 separate rooms
+(A.S. | TERRACO SOCIAL | TERRACO TECNICO). The user mandated:
+
+> Diagnóstico antes de fix. FP-006 classifica, NÃO apaga. Rodar em
+> camadas: wall_shell_only -> +floors -> +soft_barriers -> +doors
+> -> full. Cada camada precisa de PNG e report.
+
+This ADR is amended (additive) with a **progressive layered build
+mode** controlled by the new flag `--layer-mode`:
+
+| Mode | Step | Groups emitted |
+|---|---|---|
+| `wall_shell_only` | 0 | `PlanShell_Group` |
+| `with_floors` | +1 | + `Floor_Group_<room_id>` (per room) |
+| `with_soft_barriers` | +2 | + `SoftBarrier_Group_<i>` (FP-006 filtered) |
+| `with_doors` | +3 | + `DoorLeaf_Group_<opening_id>` (interior_door + carved only) |
+| `full` (default) | +4 | + windows / glazed_balcony / passage markers |
+
+Rationale:
+
+1. **Bisection**. Bug introduced by which category? Build 5 PNGs and
+   visually diff. No more "this PR changed everything" forensics.
+2. **Cache namespace**. The sidecar metadata records `layer_mode`;
+   a `wall_shell_only` cached `.skp` does NOT short-circuit a `full`
+   request. `should_skip` key is `(consensus_sha256, layer_mode)`.
+3. **Backwards-compatible**. Default is `full`. Existing smoke gates,
+   tests, and CI workflows are unaffected.
+4. **Mirror in Ruby**. `LAYER_MODE_INDEX` in
+   `build_plan_shell_skp.rb` mirrors the Python order; the helper
+   `layer_includes?(mode, step)` gates each `build_*` block.
+5. **Geometry invariants report**. `layer_mode` is recorded in
+   `geometry_report.json` so a report can be traced back to its
+   exact build configuration.
+
+This is a *diagnostic* feature, not a runtime feature: production
+callers continue to invoke `full` and see no behaviour change.
+Layered builds are the operator's tool when triaging a visual
+regression — they produce a stratigraphy of artefacts. The same
+mode flag is honoured by the smoke harness if `--exporter plan-shell
+--layer-mode <mode>` is plumbed through (left as a follow-up PR; this
+ADR documents only the exporter-level flag).
+
+Companion diagnostic tools introduced in the same PR:
+
+- `tools/diagnose_room_polygons.py` — read-only audit of every
+  room polygon in a consensus. Flags `suspicious_merge` when the
+  label contains ` | `, the vertex_count exceeds 4× median, the
+  area exceeds 2× median, or `concavity_ratio > 0.30`. Emits a
+  per-room JSON + an overlay PNG against the source PDF showing
+  which `soft_barriers` candidate as interior splitters. Does
+  NOT modify consensus.
+- `tools/audit_soft_barriers.py` — read-only audit of every
+  soft_barrier with 11-field classification: `keep` | `warn` |
+  `reject`. **Critical constraint:** `reject` only fires when
+  `overlap_fraction_with_walls > 0.50` (the FP-006 hard case);
+  long polylines, far-from-wall barriers, and high vertex-count
+  noise are all `warn`, never auto-rejected. Three PDF overlays
+  (`all`, `keep`, `reject_warn`) let the human reviewer adjudicate
+  borderline cases. The audit is purely classificatory — the
+  production exporter `consume_consensus.rb` is untouched.
+
+These three additions (the flag + two diagnostic tools) cover the
+"diagnose first, fix later" protocol the user enforced after the
+Phase 2 surface bug review. The fixes themselves (Floor_r001 split
+strategy + soft_barrier extension recommendations) are deferred to
+a follow-up cycle so the evidence is reviewed independently of any
+patch.

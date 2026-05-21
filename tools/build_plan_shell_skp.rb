@@ -68,6 +68,32 @@ PASSAGE_RGB              = [102, 187, 230]  # azul claro destacado
 # rendered (carved) vs which only get a passage marker (already in
 # wall data).
 CARVING_ORIGINS = ['svg_arc', 'svg_segments', 'human_annotation'].freeze
+
+# Progressive layer ordering (mirror of LAYER_MODES in
+# build_plan_shell_skp.py). Each index is the highest step a given
+# mode covers. The 2026-05-20 diagnostic harness uses these to bisect
+# which category of geometry introduces a visual artefact.
+#
+#   wall_shell_only    -> step 0: PlanShell_Group only
+#   with_floors        -> step 1: + Floor_Group_*
+#   with_soft_barriers -> step 2: + SoftBarrier_Group_*
+#   with_doors         -> step 3: + DoorLeaf_Group_* (interior_door, carved)
+#   full               -> step 4: + windows / glazed_balcony / passage markers
+#
+# `step` is the minimum mode index needed for that step to run.
+LAYER_MODE_INDEX = {
+  'wall_shell_only'    => 0,
+  'with_floors'        => 1,
+  'with_soft_barriers' => 2,
+  'with_doors'         => 3,
+  'full'               => 4,
+}.freeze
+
+def layer_includes?(mode, step)
+  idx = LAYER_MODE_INDEX[mode]
+  raise ArgumentError, "unknown LAYER_MODE=#{mode.inspect}" if idx.nil?
+  idx >= step
+end
 ROOM_PALETTE = [               # same as consume_consensus.rb ROOM_PALETTE
   [253, 226, 192], [200, 230, 201], [187, 222, 251], [248, 187, 208],
   [220, 237, 200], [255, 224, 178], [209, 196, 233], [179, 229, 252],
@@ -776,6 +802,7 @@ def write_geometry_report(model, report_path, ctx)
     'skp_path'         => ctx[:skp_path],
     'shell_json_path'  => ctx[:shell_json_path],
     'soft_barriers_mode' => ctx[:soft_barriers_mode],
+    'layer_mode'         => ctx[:layer_mode],
     'plan_shell' => plan_shell ?
       collect_face_records(plan_shell).merge({'present' => true}) :
       {'present' => false},
@@ -828,11 +855,17 @@ outpng_iso = ENV['PNG_ISO_OUT']
 outpng_top = ENV['PNG_TOP_OUT']
 outreport  = ENV['REPORT_OUT']
 sb_mode    = ENV['SOFT_BARRIERS_MODE'] || 'groups'
+layer_mode = ENV['LAYER_MODE'] || 'full'
+unless LAYER_MODE_INDEX.key?(layer_mode)
+  raise "LAYER_MODE=#{layer_mode.inspect} not in " \
+        "#{LAYER_MODE_INDEX.keys.inspect}"
+end
 
 puts "[rb] consensus=#{cjson}"
 puts "[rb] out_skp=#{outskp}"
 puts "[rb] shell_json=#{shell_json}"
 puts "[rb] soft_barriers_mode=#{sb_mode}"
+puts "[rb] layer_mode=#{layer_mode} (step <= #{LAYER_MODE_INDEX[layer_mode]})"
 
 shell_data = JSON.parse(File.read(shell_json))
 consensus  = JSON.parse(File.read(cjson))
@@ -853,35 +886,41 @@ puts "[rb] shell: solid=#{shell_result['pieces_solid']} " \
      "failed=#{shell_result['pieces_failed']} " \
      "holes=#{shell_result['pieces_holes_emitted']}"
 
-# 2. Floors (one per room)
+# 2. Floors (one per room) — step 1
 rooms = consensus['rooms'] || []
 floors_built  = 0
 floors_failed = []
-rooms.each_with_index do |room, i|
-  palette_rgb = ROOM_PALETTE[i % ROOM_PALETTE.length]
-  mat_name = "floor_#{room['id'] || i}"
-  mat = model.materials.add(mat_name)
-  mat.color = Sketchup::Color.new(*palette_rgb)
-  res = build_floor(model.active_entities, room, mat, i)
-  if res['ok']
-    floors_built += 1
-  else
-    floors_failed << {
-      'room_id'  => room['id'] || "r#{i}",
-      'room_name' => room['name'] || "(unnamed)",
-      'polygon_vertex_count' => (room['polygon_pts'] || []).length,
-      'reason'   => res['reason'],
-    }
-    puts "[rb] floor FAILED for #{room['name'] || room['id']}: #{res['reason']}"
+if layer_includes?(layer_mode, 1)
+  rooms.each_with_index do |room, i|
+    palette_rgb = ROOM_PALETTE[i % ROOM_PALETTE.length]
+    mat_name = "floor_#{room['id'] || i}"
+    mat = model.materials.add(mat_name)
+    mat.color = Sketchup::Color.new(*palette_rgb)
+    res = build_floor(model.active_entities, room, mat, i)
+    if res['ok']
+      floors_built += 1
+    else
+      floors_failed << {
+        'room_id'  => room['id'] || "r#{i}",
+        'room_name' => room['name'] || "(unnamed)",
+        'polygon_vertex_count' => (room['polygon_pts'] || []).length,
+        'reason'   => res['reason'],
+      }
+      puts "[rb] floor FAILED for #{room['name'] || room['id']}: #{res['reason']}"
+    end
   end
+  puts "[rb] floors: built=#{floors_built} failed=#{floors_failed.length}"
+else
+  puts "[rb] floors: SKIPPED (layer_mode=#{layer_mode})"
 end
-puts "[rb] floors: built=#{floors_built} failed=#{floors_failed.length}"
 
-# 3. Soft barriers (optional)
+# 3. Soft barriers — step 2
 sb_built = 0
 sb_skipped = 0
 sb_skip_reasons = []
-if sb_mode == 'groups'
+if !layer_includes?(layer_mode, 2)
+  puts "[rb] soft_barriers: SKIPPED (layer_mode=#{layer_mode})"
+elsif sb_mode == 'groups'
   parapet_mat = model.materials.add('plan_parapet')
   parapet_mat.color = Sketchup::Color.new(*PARAPET_RGB)
   # Precompute wall footprints once so FP-006 can reject perimeter
@@ -911,27 +950,17 @@ end
 puts "[rb] soft_barriers: built=#{sb_built} skipped=#{sb_skipped}"
 
 # 4. Opening renderers (Phase 2 visual parity).
-# Dispatch each consensus.openings entry to the appropriate renderer
-# based on kind_v5 + geometry_origin. Door leaves, window panels,
-# glazed balconies, and passage markers are each emitted as top-level
-# Groups separate from PlanShell_Group — never inside the wall shell.
+# Layered (2026-05-20 diagnostic harness):
+#   with_doors  -> only DoorLeaf_Group_* for interior_door + carved
+#   full        -> + windows / glazed_balcony / passage markers
+# Lower modes skip this whole block. Step indices used below:
+#   step 3 = doors only (DoorLeaf)
+#   step 4 = full visual parity
 openings = consensus['openings'] || []
 walls_by_id = consensus['walls'].each_with_object({}) do |w, h|
   h[w['id']] = w if w['id']
 end
 thickness_pt = consensus['wall_thickness_pts'] || 5.4
-
-door_mat = model.materials.add('plan_door')
-door_mat.color = Sketchup::Color.new(*DOOR_RGB)
-sill_mat = model.materials.add('plan_window_sill')
-sill_mat.color = Sketchup::Color.new(*PARAPET_RGB)
-glass_mat = model.materials.add('plan_window_glass')
-glass_mat.color = Sketchup::Color.new(*GLASS_RGB)
-glass_mat.alpha = GLASS_ALPHA
-lintel_mat = model.materials.add('plan_window_lintel')
-lintel_mat.color = Sketchup::Color.new(*LINTEL_RGB)
-passage_mat = model.materials.add('plan_passage_marker')
-passage_mat.color = Sketchup::Color.new(*PASSAGE_RGB)
 
 door_built = 0
 window_built = 0
@@ -939,55 +968,81 @@ glazed_built = 0
 passage_built = 0
 opening_skips = []
 
-openings.each_with_index do |op, i|
-  host = walls_by_id[op['wall_id']]
-  if host.nil?
-    opening_skips << "op[#{i}] #{op['id']}: no host wall #{op['wall_id'].inspect}"
-    next
+if !layer_includes?(layer_mode, 3)
+  puts "[rb] openings (doors/windows/glazed/passage): SKIPPED " \
+       "(layer_mode=#{layer_mode})"
+else
+  door_mat = model.materials.add('plan_door')
+  door_mat.color = Sketchup::Color.new(*DOOR_RGB)
+  # Window / glazed / passage materials only allocated when needed —
+  # `with_doors` mode wouldn't render them and adding unused materials
+  # to the model wastes invariant scan time.
+  full_visual = layer_includes?(layer_mode, 4)
+  sill_mat = glass_mat = lintel_mat = passage_mat = nil
+  if full_visual
+    sill_mat = model.materials.add('plan_window_sill')
+    sill_mat.color = Sketchup::Color.new(*PARAPET_RGB)
+    glass_mat = model.materials.add('plan_window_glass')
+    glass_mat.color = Sketchup::Color.new(*GLASS_RGB)
+    glass_mat.alpha = GLASS_ALPHA
+    lintel_mat = model.materials.add('plan_window_lintel')
+    lintel_mat.color = Sketchup::Color.new(*LINTEL_RGB)
+    passage_mat = model.materials.add('plan_passage_marker')
+    passage_mat.color = Sketchup::Color.new(*PASSAGE_RGB)
   end
-  kind = opening_kind_v5(op)
-  origin = op['geometry_origin'] || ''
-  carved = CARVING_ORIGINS.include?(origin)
 
-  case kind
-  when 'interior_door'
-    if carved
-      res = build_door_leaf(model.active_entities, op, host,
-                           thickness_pt, door_mat, i)
-      door_built += 1 if res['ok']
-      opening_skips << "op[#{i}] door: #{res['reason']}" unless res['ok']
+  openings.each_with_index do |op, i|
+    host = walls_by_id[op['wall_id']]
+    if host.nil?
+      opening_skips << "op[#{i}] #{op['id']}: no host wall #{op['wall_id'].inspect}"
+      next
+    end
+    kind = opening_kind_v5(op)
+    origin = op['geometry_origin'] || ''
+    carved = CARVING_ORIGINS.include?(origin)
+
+    case kind
+    when 'interior_door'
+      if carved
+        res = build_door_leaf(model.active_entities, op, host,
+                             thickness_pt, door_mat, i)
+        door_built += 1 if res['ok']
+        opening_skips << "op[#{i}] door: #{res['reason']}" unless res['ok']
+      elsif full_visual
+        # geometry already in wall data; emit a passage marker so the
+        # opening is visible to the reviewer (full mode only).
+        res = build_passage_marker(model.active_entities, op, host,
+                                  thickness_pt, passage_mat, i)
+        passage_built += 1 if res['ok']
+      end
+    when 'interior_passage'
+      # No leaf rendered (vão livre). Marker only if not carved AND full.
+      if !carved && full_visual
+        res = build_passage_marker(model.active_entities, op, host,
+                                  thickness_pt, passage_mat, i)
+        passage_built += 1 if res['ok']
+      end
+    when 'window'
+      next unless full_visual
+      res = build_window_panel(model.active_entities, op, host,
+                              thickness_pt,
+                              sill_mat, glass_mat, lintel_mat, i)
+      window_built += 1 if res['ok']
+      opening_skips << "op[#{i}] window: #{res['reason']}" unless res['ok']
+    when 'glazed_balcony'
+      next unless full_visual
+      res = build_glazed_balcony(model.active_entities, op, host,
+                                thickness_pt, glass_mat, i)
+      glazed_built += 1 if res['ok']
+      opening_skips << "op[#{i}] glazed: #{res['reason']}" unless res['ok']
     else
-      # geometry already in wall data; emit a passage marker so the
-      # opening is visible to the reviewer.
-      res = build_passage_marker(model.active_entities, op, host,
-                                thickness_pt, passage_mat, i)
-      passage_built += 1 if res['ok']
+      opening_skips << "op[#{i}] unknown kind #{kind.inspect}"
     end
-  when 'interior_passage'
-    # No leaf rendered (vão livre). Marker only if not carved.
-    unless carved
-      res = build_passage_marker(model.active_entities, op, host,
-                                thickness_pt, passage_mat, i)
-      passage_built += 1 if res['ok']
-    end
-  when 'window'
-    res = build_window_panel(model.active_entities, op, host,
-                            thickness_pt,
-                            sill_mat, glass_mat, lintel_mat, i)
-    window_built += 1 if res['ok']
-    opening_skips << "op[#{i}] window: #{res['reason']}" unless res['ok']
-  when 'glazed_balcony'
-    res = build_glazed_balcony(model.active_entities, op, host,
-                              thickness_pt, glass_mat, i)
-    glazed_built += 1 if res['ok']
-    opening_skips << "op[#{i}] glazed: #{res['reason']}" unless res['ok']
-  else
-    opening_skips << "op[#{i}] unknown kind #{kind.inspect}"
   end
 end
 puts "[rb] openings: doors=#{door_built} windows=#{window_built} " \
      "glazed=#{glazed_built} passage=#{passage_built} " \
-     "skipped=#{opening_skips.length}"
+     "skipped=#{opening_skips.length} (layer_mode=#{layer_mode})"
 
 model.commit_operation
 
@@ -998,6 +1053,7 @@ if outreport
     skp_path:                 outskp,
     shell_json_path:          shell_json,
     soft_barriers_mode:       sb_mode,
+    layer_mode:               layer_mode,
     soft_barriers_skipped:    sb_skipped,
     soft_barriers_skip_reasons: sb_skip_reasons,
     floors_failed:            floors_failed,

@@ -13,6 +13,8 @@ import pytest
 from shapely.geometry import MultiPolygon, Polygon
 
 from tools.build_plan_shell_skp import (
+    DEFAULT_LAYER_MODE,
+    LAYER_MODES,
     MIN_SLIVER_AREA_PTS2,
     SNAP_EPS_PTS,
     _file_sha256,
@@ -354,3 +356,85 @@ def test_write_metadata_includes_exporter_tag(tmp_path: Path) -> None:
     assert meta["exporter"] == "build_plan_shell_skp"
     assert meta["consensus_sha256"] == "abc" * 8
     assert meta["schema_version"] == "1.0.0"
+
+
+# ---- layer_mode (2026-05-21 diagnostic harness) ---------------------
+
+
+def test_layer_modes_lists_the_five_documented_levels() -> None:
+    """User-mandated layer ordering: wall_shell_only < with_floors
+    < with_soft_barriers < with_doors < full. Adding/removing entries
+    here must be a deliberate change to the diagnostic contract."""
+    assert LAYER_MODES == (
+        "wall_shell_only", "with_floors",
+        "with_soft_barriers", "with_doors", "full",
+    )
+    assert DEFAULT_LAYER_MODE == "full"
+    assert DEFAULT_LAYER_MODE in LAYER_MODES
+
+
+def test_metadata_records_layer_mode(tmp_path: Path) -> None:
+    """A partial-layer build must not be reused as if it were a full
+    build, and vice-versa. The sidecar records which layer_mode
+    produced the .skp."""
+    skp = tmp_path / "m.skp"
+    skp.write_bytes(b"x")
+    write_metadata(
+        skp, consensus_sha256="abc" * 8,
+        sketchup_exe=Path("su.exe"), command=[],
+        layer_mode="wall_shell_only",
+    )
+    meta = read_metadata(skp)
+    assert meta is not None
+    assert meta["layer_mode"] == "wall_shell_only"
+
+
+def test_should_skip_false_when_layer_mode_differs(tmp_path: Path) -> None:
+    """Cache key is the pair (consensus_sha256, layer_mode). A
+    wall_shell_only build CANNOT short-circuit a 'full' request — the
+    cached .skp is missing floors/SBs/openings."""
+    skp = tmp_path / "m.skp"
+    skp.write_bytes(b"x")
+    sha = "abc" * 8
+    write_metadata(
+        skp, consensus_sha256=sha,
+        sketchup_exe=Path("su.exe"), command=[],
+        layer_mode="wall_shell_only",
+    )
+    # Same SHA, but different mode requested.
+    assert should_skip(skp, sha, layer_mode="full") is False
+    # Same SHA + same mode — match.
+    assert should_skip(skp, sha, layer_mode="wall_shell_only") is True
+
+
+def test_should_skip_treats_missing_layer_mode_as_full(tmp_path: Path) -> None:
+    """Sidecars written before --layer-mode existed (pre-2026-05-21)
+    didn't record the field. For backward compatibility, treat
+    'missing layer_mode' as 'full', the prior default. So a legacy
+    sidecar must still satisfy a 'full' skip query."""
+    skp = tmp_path / "m.skp"
+    skp.write_bytes(b"x")
+    sha = "abc" * 8
+    # Hand-write metadata without the layer_mode field.
+    metadata_path(skp).write_text(json.dumps({
+        "schema_version": "1.0.0",
+        "exporter": "build_plan_shell_skp",
+        "consensus_sha256": sha,
+        # no layer_mode here
+    }), encoding="utf-8")
+    assert should_skip(skp, sha, layer_mode="full") is True
+    assert should_skip(skp, sha, layer_mode="wall_shell_only") is False
+
+
+def test_run_rejects_unknown_layer_mode() -> None:
+    """run() validates layer_mode before launching SU — a typo
+    must fail fast, not silently fall back to 'full'."""
+    from tools.build_plan_shell_skp import run
+
+    with pytest.raises(ValueError, match="layer_mode"):
+        run(
+            Path("nonexistent.json"),
+            Path("nonexistent.skp"),
+            sketchup_exe=Path("su.exe"),
+            layer_mode="not_a_real_mode",
+        )

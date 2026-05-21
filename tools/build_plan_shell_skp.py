@@ -103,6 +103,19 @@ MIN_SLIVER_AREA_PTS2 = 0.5
 #   render a passage marker / window panel on top.
 CARVING_ORIGINS = frozenset({"svg_arc", "svg_segments", "human_annotation"})
 
+# Layer modes for diagnostic rebuilds. Each value progressively adds
+# one category of geometry; user contract (2026-05-20 review):
+#   wall_shell_only       -> PlanShell_Group only (walls + carved gaps)
+#   with_floors           -> + Floor_Group_<rid> per room
+#   with_soft_barriers    -> + SoftBarrier_Group_<i> (FP-006 filtered)
+#   with_doors            -> + DoorLeaf_Group_<id> (interior_door only)
+#   full                  -> + windows / glazed_balcony / passage markers
+# Default is 'full' for backward compatibility with smoke gates and
+# the cache layer. Diagnostic harnesses pass an explicit mode.
+LAYER_MODES = ("wall_shell_only", "with_floors",
+               "with_soft_barriers", "with_doors", "full")
+DEFAULT_LAYER_MODE = "full"
+
 
 # ---- core geometry ---------------------------------------------------
 
@@ -347,13 +360,20 @@ def read_metadata(out_skp: Path) -> dict[str, Any] | None:
 
 
 def write_metadata(out_skp: Path, *, consensus_sha256: str,
-                   sketchup_exe: Path, command: list[str]) -> Path:
-    """Write the sidecar metadata next to the .skp. Returns the path written."""
+                   sketchup_exe: Path, command: list[str],
+                   layer_mode: str = DEFAULT_LAYER_MODE) -> Path:
+    """Write the sidecar metadata next to the .skp. Returns the path written.
+
+    `layer_mode` is recorded so partial-layer builds don't get reused as
+    if they were full builds (the cache key is the pair
+    `(consensus_sha256, layer_mode)`).
+    """
     p = metadata_path(out_skp)
     data = {
         "schema_version": "1.0.0",
         "exporter": "build_plan_shell_skp",
         "consensus_sha256": consensus_sha256,
+        "layer_mode": layer_mode,
         "skp_path": str(out_skp),
         "created_at": datetime.now(timezone.utc).strftime(
             "%Y-%m-%dT%H:%M:%SZ"),
@@ -364,11 +384,15 @@ def write_metadata(out_skp: Path, *, consensus_sha256: str,
     return p
 
 
-def should_skip(out_skp: Path, consensus_sha256: str) -> bool:
-    """True iff the .skp exists and its sidecar's consensus_sha256 matches.
+def should_skip(out_skp: Path, consensus_sha256: str,
+                layer_mode: str = DEFAULT_LAYER_MODE) -> bool:
+    """True iff the .skp exists and its sidecar's consensus_sha256
+    AND layer_mode both match.
 
     Caller is responsible for honouring `force_skp` BEFORE calling this —
     we don't take that flag here so the helper stays trivially testable.
+    Older metadata files without `layer_mode` are assumed to be 'full'
+    builds (backward compatible).
     """
     if not out_skp.exists():
         return False
@@ -380,7 +404,10 @@ def should_skip(out_skp: Path, consensus_sha256: str) -> bool:
     # request (and vice-versa), corrupting the user's intent.
     if meta.get("exporter") != "build_plan_shell_skp":
         return False
-    return meta.get("consensus_sha256") == consensus_sha256
+    if meta.get("consensus_sha256") != consensus_sha256:
+        return False
+    cached_mode = meta.get("layer_mode", DEFAULT_LAYER_MODE)
+    return cached_mode == layer_mode
 
 
 # ---- launcher --------------------------------------------------------
@@ -424,6 +451,7 @@ def run(consensus_path: Path, out_skp: Path, *, sketchup_exe: Path,
         out_report: Path | None = None,
         out_shell_json: Path | None = None,
         soft_barriers_mode: str = "groups",
+        layer_mode: str = DEFAULT_LAYER_MODE,
         force_skp: bool = False) -> dict[str, Any]:
     """Build the plan shell .skp end-to-end.
 
@@ -433,13 +461,26 @@ def run(consensus_path: Path, out_skp: Path, *, sketchup_exe: Path,
       out_skp: output .skp path.
       soft_barriers_mode: "groups" (emit at 1.10m as SoftBarrier_Group_N)
         or "skip" (record in report, do not emit).
+      layer_mode: one of LAYER_MODES. Progressive layered build used by
+        the 2026-05-20 diagnostic harness:
+          wall_shell_only    -> PlanShell_Group only
+          with_floors        -> + Floor_Group_*
+          with_soft_barriers -> + SoftBarrier_Group_*
+          with_doors         -> + DoorLeaf_Group_* (no windows/glazed/passage)
+          full               -> + windows / glazed_balcony / passage markers
+        Default 'full' preserves all callers' behaviour.
       force_skp: bypass the content-hash cache. Default False.
 
     Returns a dict with paths and stats. Honours the content-hash
     cache via a sidecar `<out_skp>.metadata.json` (matches the
     skp_from_consensus.py pattern); reruns short-circuit when the
-    consensus SHA256 matches and force_skp is False.
+    consensus SHA256 matches, layer_mode matches, and force_skp is False.
     """
+    if layer_mode not in LAYER_MODES:
+        raise ValueError(
+            f"layer_mode={layer_mode!r} not in {LAYER_MODES}; "
+            f"see DEFAULT_LAYER_MODE={DEFAULT_LAYER_MODE!r}"
+        )
     started = time.time()
     out_skp.parent.mkdir(parents=True, exist_ok=True)
     if out_png_iso is None:
@@ -458,18 +499,20 @@ def run(consensus_path: Path, out_skp: Path, *, sketchup_exe: Path,
     if (
         not force_skp
         and consensus_sha is not None
-        and should_skip(out_skp, consensus_sha)
+        and should_skip(out_skp, consensus_sha, layer_mode)
     ):
         elapsed = time.time() - started
         print(
             f"[skip] {out_skp} unchanged consensus "
-            f"(sha {consensus_sha[:12]}); skipped SU launch"
+            f"(sha {consensus_sha[:12]}, layer_mode={layer_mode}); "
+            "skipped SU launch"
         )
         return {
             "ok": True,
             "skipped": True,
             "skp_path": str(out_skp),
             "consensus_sha256": consensus_sha,
+            "layer_mode": layer_mode,
             "elapsed_s": round(elapsed, 4),
         }
 
@@ -511,7 +554,8 @@ def run(consensus_path: Path, out_skp: Path, *, sketchup_exe: Path,
     env["REPORT_OUT"] = str(out_report.resolve()).replace("\\", "/")
     env["SHELL_JSON_IN"] = str(out_shell_json.resolve()).replace("\\", "/")
     env["SOFT_BARRIERS_MODE"] = soft_barriers_mode
-    print(f"[run] launching SU: {' '.join(cmd)}")
+    env["LAYER_MODE"] = layer_mode
+    print(f"[run] launching SU: {' '.join(cmd)} (layer_mode={layer_mode})")
     proc = subprocess.Popen(
         cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
         creationflags=getattr(subprocess, "DETACHED_PROCESS", 0),
@@ -529,13 +573,14 @@ def run(consensus_path: Path, out_skp: Path, *, sketchup_exe: Path,
                 except Exception:  # noqa: BLE001
                     pass
                 # Persist sidecar metadata so a future run with the
-                # same consensus short-circuits the cache check.
+                # same consensus + layer_mode short-circuits the cache.
                 if consensus_sha is not None:
                     write_metadata(
                         out_skp,
                         consensus_sha256=consensus_sha,
                         sketchup_exe=sketchup_exe,
                         command=cmd,
+                        layer_mode=layer_mode,
                     )
                 return {
                     "ok": True,
@@ -546,6 +591,7 @@ def run(consensus_path: Path, out_skp: Path, *, sketchup_exe: Path,
                     "report": str(out_report),
                     "shell_json": str(out_shell_json),
                     "consensus_sha256": consensus_sha,
+                    "layer_mode": layer_mode,
                     "elapsed_s": round(time.time() - started, 4),
                     "stats": stats,
                 }
@@ -588,6 +634,15 @@ if __name__ == "__main__":
                     default="groups",
                     help='"groups": emit each as SoftBarrier_Group_N at '
                          '1.10 m; "skip": skip and record in report')
+    ap.add_argument("--layer-mode", choices=LAYER_MODES,
+                    default=DEFAULT_LAYER_MODE,
+                    help="Progressive layered build for diagnostics. "
+                         "'wall_shell_only' -> walls only; 'with_floors' "
+                         "-> +floors; 'with_soft_barriers' -> +SBs; "
+                         "'with_doors' -> +door leaves; 'full' (default) "
+                         "-> +windows/glazed/passage markers. Each mode "
+                         "writes a distinct metadata cache so partial "
+                         "builds aren't mistaken for full builds.")
     ap.add_argument("--force-skp", action="store_true",
                     help="bypass the consensus-hash cache, always launch SU")
     args = ap.parse_args()
@@ -597,6 +652,7 @@ if __name__ == "__main__":
         plugins_dir=args.plugins,
         timeout_s=args.timeout,
         soft_barriers_mode=args.soft_barriers,
+        layer_mode=args.layer_mode,
         force_skp=args.force_skp,
     )
     if result.get("skipped"):
