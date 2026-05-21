@@ -340,3 +340,82 @@ as the regression gate (max 1 m distance from opening center).
 **See also:** ADR-003 §3 (Phase 2 visual parity, where the bug
 shipped); FP-014 (autorun cleanup — same author's pattern of bugs
 that "look fine in tests but fail visually in SU").
+
+## FP-016 — Soft barrier near-miss does not cross polygon interior, causing merged floor cell (2026-05-21)
+
+**Mode:** room-detection / polygonize. The Cycle 8b vector
+pipeline runs `polygonize_rooms` (wall-rectangle union ∪
+soft-barrier-buffered strips) → `env.difference()` → `rooms_from_seeds.
+detect_rooms_polygonize` for label assignment. For planta_74 this
+yields **8 cells** when the architectural truth is **11 rooms**:
+`r001` carries the merged name `"A.S. | TERRACO SOCIAL | TERRACO
+TECNICO"` (3 seeds in one cell) and `r002` carries
+`"SALA DE JANTAR | SALA DE ESTAR"` (2 seeds in one cell). Two
+separate failure modes feed this:
+
+1. **Boundary-coincident soft_barriers.** The peitoris/muretas
+   that should separate the rooms (`sb005`, `sb006`, `h_sb000`)
+   ARE drawn in the source PDF but their polylines stop 1.1–6 pt
+   OUTSIDE the polygonize cell boundary, OR sit ON the boundary
+   instead of crossing the interior. `unary_union(walls ∪ SBs)`
+   needs interior-crossing geometry to bisect a cell, so the
+   boundary-coincident SBs add zero discrimination power.
+2. **Single-endpoint near-miss isn't enough.** For a cell with
+   three seeds you'd need TWO independent splitters; even when
+   one SB's endpoint can be extended into the cell, no single
+   endpoint adjustment forms a boundary-to-boundary divisor on
+   the merged cell. Falsification recorded in
+   `tests/test_room_polygon_fixes.py::test_planta_74_sb_extension_alone_does_not_split_r001`.
+
+**Repair landed:** `fix/floor-r001-soft-barrier-buffered-split`.
+TWO layered, opt-in fixes:
+
+  a. **Near-miss soft_barrier extension** (`extend_near_miss_sbs=True`
+     in `polygonize_rooms`). For each SB that survives the FP-006
+     wall-coincidence gate (`overlap_fraction_with_walls ≤ 0.50`)
+     AND has a semantic origin (`geometry_origin=human_annotation`
+     OR `barrier_type ∈ {peitoril, mureta, guarda_corpo, esquadria,
+     parapet}`), probe each polyline endpoint outward by ≤ 8 pt.
+     A candidate extension is APPLIED only when a post-extension
+     re-polygonize confirms one of: cell count increased by ≥ 1,
+     OR a baseline suspicious cell shrank by ≥ 20 %. Provenance
+     records every candidate (applied and rejected).
+  b. **Voronoi sub-division of merged-seed cells**
+     (`voronoi_subdivide_merged_cells=True` in
+     `rooms_from_seeds.detect_rooms_polygonize`). When a single
+     cell contains > 1 seed label, split it by
+     `shapely.ops.voronoi_diagram(seeds, envelope=cell)` and
+     clip each region against the cell polygon. Each Voronoi
+     sub-polygon is strictly contained in the original cell, so
+     this is a topology-preserving refinement. Boundaries are
+     equidistant bisectors (NOT real architectural divisors), so
+     they're an APPROXIMATION — but the alternative is to keep
+     the merged room, which is wrong by construction.
+
+Both layers default OFF (production pipeline behaviour unchanged
+until a caller opts in). The standalone runner
+`tools/apply_room_polygon_fixes.py` chains both layers with
+provenance writing.
+
+**Outcome on planta_74:** 8 → 11 rooms; r001 splits into A.S.
+(9.06 m²) + TERRACO SOCIAL (13.78 m²) + TERRACO TECNICO
+(2.83 m²); r002 splits into SALA DE JANTAR (15.34 m²) + SALA DE
+ESTAR (10.08 m²). `room_polygon_diagnostic_report` flags drop
+from 3 suspicious_merge entries to 1 (the remaining flag is SUITE
+01's area outlier — legitimate, not a merge). `geometry_invariants_
+report` on the plan-shell `with_floors` rebuild: 12/12 PASS, 0
+WARN, 0 FAIL.
+
+**Anti-pattern signal:** when a polygonize-based room detector
+returns fewer rooms than there are seed labels AND a
+`seeds_share_cell` warning is emitted, the WRONG fix is to relax
+the polygonize tolerance globally (which may collapse correct
+walls). The RIGHT fix is targeted near-miss SB extension first
+(small, geometrically sound), then Voronoi sub-division as
+fallback when the SB geometry doesn't permit a real split.
+
+**See also:** ADR-003 §12 (Frente 3 — SB extension + Voronoi
+fallback). FP-006 (wall-coincident soft_barriers — the FP-006
+filter is the guard that prevents extending noise SBs). FP-014
+(autorun cleanup — same lineage of "fix small things, surface
+real architectural decisions, don't add hidden globals").
