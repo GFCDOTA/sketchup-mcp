@@ -6,6 +6,13 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Cancel in-flight CI when a newer commit lands on the same PR /
+# branch. Rapid-fire pushes during local debugging stop wasting CI
+# minutes; the latest commit always wins (2026-05-21).
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
