@@ -459,3 +459,81 @@ def test_no_soft_barrier_uses_wall_or_floor_material() -> None:
         f"SoftBarrier groups painted with wall or floor material: "
         f"{offenders}"
     )
+
+
+# ---- FP-015: door leaf hinge_world for vertical walls -------------
+
+
+# Maximum distance allowed between a DoorLeaf bbox center and its
+# host opening's declared center in the consensus, in metres.
+# 1 m is generous — a healthy leaf sits less than the opening width
+# (~0.8 m) plus the rotation displacement (~0.4 m at 30 deg) away.
+# The 2026-05-20 hinge_world bug pushed leaves on vertical walls
+# *metres* from their openings (≈ |hinge_along - cross_base| in
+# coordinates, often > 5 m), so 1 m is a comfortable headroom.
+DOOR_LEAF_MAX_DISTANCE_FROM_OPENING_M = 1.0
+
+
+def _load_consensus() -> dict:
+    """Load the consensus that produced the current report. We pin
+    on planta_74 because that is the .skp the report describes."""
+    import json
+    p = (
+        REPO_ROOT / "fixtures" / "planta_74"
+        / "consensus_with_human_walls_and_soft_barriers.json"
+    )
+    if not p.exists():
+        pytest.skip(f"consensus not found at {p}")
+    return json.loads(p.read_text(encoding="utf-8"))
+
+
+def test_door_leaf_stays_near_its_opening_center() -> None:
+    """REGRESSION (FP-015): in 2026-05-20 build_plan_shell_skp.rb
+    computed `hinge_world` as `(hinge_along, axis_idx==0 ? cross_base : hinge_along, 0)`.
+    For vertical walls the Y component became `hinge_along` instead
+    of `cross_base`, sending the rotation pivot onto a diagonal
+    miles from the door. The leaf then rotated 30 deg around that
+    pivot and ended up "floating" several metres from the actual
+    wall — visible as orphan brown rectangles in the .skp middle of
+    open space.
+
+    This test asserts every DoorLeaf_Group's bbox center sits within
+    1 m of the corresponding opening's declared center (PDF coords
+    → metres via PT_TO_M). On the buggy build, vertical-wall doors
+    were 5-20 m away; on the fix, they sit ≤ 0.5 m away.
+    """
+    r = _load_report()
+    consensus = _load_consensus()
+    pt_to_m = 0.19 / 5.4
+    openings_by_id = {
+        o["id"]: o for o in consensus.get("openings", []) if "id" in o
+    }
+
+    offenders = []
+    for g in r["groups_diagnostic"]:
+        if not g["name"].startswith("DoorLeaf_Group_"):
+            continue
+        oid = g["name"][len("DoorLeaf_Group_"):]
+        op = openings_by_id.get(oid)
+        if op is None or "center" not in op:
+            continue  # cannot validate without consensus center
+        op_cx_m = op["center"][0] * pt_to_m
+        op_cy_m = op["center"][1] * pt_to_m
+        bb = g["bbox_m"]
+        leaf_cx = (bb["min"][0] + bb["max"][0]) / 2.0
+        leaf_cy = (bb["min"][1] + bb["max"][1]) / 2.0
+        dist = ((leaf_cx - op_cx_m) ** 2 + (leaf_cy - op_cy_m) ** 2) ** 0.5
+        if dist > DOOR_LEAF_MAX_DISTANCE_FROM_OPENING_M:
+            offenders.append({
+                "door_group": g["name"],
+                "opening_id": oid,
+                "host_wall_id": op.get("wall_id"),
+                "opening_center_m": [op_cx_m, op_cy_m],
+                "leaf_bbox_center_m": [leaf_cx, leaf_cy],
+                "distance_m": round(dist, 3),
+            })
+    assert not offenders, (
+        "DoorLeaf groups bbox centers > "
+        f"{DOOR_LEAF_MAX_DISTANCE_FROM_OPENING_M} m from their opening's "
+        f"declared center (FP-015 hinge_world regression): {offenders}"
+    )
