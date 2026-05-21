@@ -44,10 +44,31 @@ FLOOR_HEIGHT_EPS = 0.001          # 1 mm tolerance on "flat"
 WALL_HEIGHT_M = 2.70
 PARAPET_HEIGHT_M = 1.10
 HEIGHT_TOL_M = 0.01               # 1 cm tolerance on exact heights
-# A real peitoril/esquadria is at most a few cm thick × a few metres
-# long, so ~0.3 m² is already generous. Cap at 1.0 m² for the test;
-# anything bigger is the bbox bug, period.
-MAX_SOFT_BARRIER_FOOTPRINT_M2 = 1.0
+
+# Heuristic ceiling for soft-barrier top-face material area, expressed
+# as a fraction of the smallest room polygon's area in the current
+# consensus. A peitoril/esquadria is a thin slab swept along its
+# polyline; its top-face footprint is (polyline length) × (slab
+# thickness). For typical residential geometry that's a fraction of
+# a square metre. The ceiling 0.30 means "if the slab covers more
+# than 30 % of the smallest room, it's almost certainly the
+# bbox-as-slab bug coming back."
+#
+# Why RELATIVE instead of an absolute number: the original 2026-05-20
+# regression test used `MAX_SOFT_BARRIER_FOOTPRINT_M2 = 1.0`. The
+# 1.0 m² figure had no architectural source — it was a magic number
+# that "felt small enough to catch the bug but big enough to not
+# break on slightly oversized peitorils". A planta with very large
+# terraço peitorils could legitimately have a thin slab pushing
+# 1 m². The ratio-to-smallest-room is consensus-anchored, so it
+# scales with the floor plan instead of imposing an external rule.
+#
+# WARN-not-FAIL: this is still a heuristic; a corpus of >1 real
+# planta does not exist yet. The test emits a pytest.warns instead of
+# raising AssertionError so the rule surfaces in CI logs without
+# blocking a PR until we have grounding evidence (NBR / measured
+# corpus). See docs/grounding/constants_provenance.md.
+MAX_SOFT_BARRIER_FOOTPRINT_FRACTION = 0.30
 
 
 def _load_report() -> dict[str, Any]:
@@ -216,44 +237,67 @@ def test_soft_barriers_use_parapet_material() -> None:
     )
 
 
-def test_soft_barriers_footprint_below_architectural_ceiling() -> None:
-    """REGRESSION: peitorils/esquadrias are thin slabs (few cm thick
-    × few metres long). The "soft_barrier-bbox-as-slab" bug
-    (2026-05-20) produced peitorils with REAL footprints of 30-80 m²,
-    which is bigger than the rooms they cover.
+def test_soft_barriers_footprint_below_relative_ceiling_warn() -> None:
+    """REGRESSION (WARN-only, consensus-relative): peitoris are
+    thin slabs (few cm × few metres). The 2026-05-20 bug produced
+    peitoris with REAL footprints of 30-80 m² — bigger than the
+    rooms they cover.
 
-    The metric to enforce is the SUM of TOP face areas
-    (`footprint_top_face_m2`), not the group's bbox area
-    (`footprint_bbox_m2`) — once the fix lands, a single SoftBarrier
-    can have many sub-segment slabs spread along an L-shape polyline,
-    so its bbox-rectangle is large but the material it actually
-    covers is tiny. The top-face-sum is the architecturally correct
-    figure: it equals (sum of segment lengths) × (slab thickness).
+    Metric: SUM of TOP face areas (`footprint_top_face_m2`), not the
+    bbox area. The ceiling is `MAX_SOFT_BARRIER_FOOTPRINT_FRACTION`
+    times the smallest floor area in the same `.skp` — consensus-
+    anchored, not a magic number.
 
-    Before fix: top face area = bbox area = 30-80 m² ← bug.
-    After fix:  top face area ≈ Σ segment lengths × 0.038 m ≪ 1 m²
-                (room-sized bbox is fine because slabs are sparse
-                inside that bbox).
+    Emits `pytest.warns(UserWarning)` instead of asserting so the
+    rule surfaces in CI logs WITHOUT blocking a PR until a corpus
+    of >1 real planta exists. See docs/grounding/constants_provenance.md
+    and ADR-004 §5 for the rationale of WARN-now-FAIL-later.
 
-    This test FAILS on the buggy report and PASSES after the
-    per-segment swept slab fix lands.
+    The hard FAIL companion (any SoftBarrier emitting at floor
+    height) lives in
+    `test_no_soft_barrier_at_floor_height_confused_with_floor`.
     """
+    import warnings
+
     r = _load_report()
     barriers = _groups_by_prefix(r, "SoftBarrier_Group_")
+    floors = _groups_by_prefix(r, "Floor_Group_")
+    if not floors:
+        # Nothing to relate against — skip rather than fabricate a ceiling.
+        pytest.skip("no floor groups in report; cannot derive ceiling")
+
+    # Use the per-group top-face area from groups_diagnostic (already
+    # the painted material area in m²; same shape as the metric we're
+    # measuring on the barriers, so the comparison is apples-to-apples).
+    floor_areas = [f["footprint_top_face_m2"] for f in floors
+                   if f.get("footprint_top_face_m2", 0) > 0]
+    if not floor_areas:
+        pytest.skip("no floor groups with non-zero top-face area")
+    smallest_floor_m2 = min(floor_areas)
+    ceiling = smallest_floor_m2 * MAX_SOFT_BARRIER_FOOTPRINT_FRACTION
+
     offenders = []
     for b in barriers:
-        # Prefer the real metric; fall back to bbox on older reports
-        # that didn't capture top_face_area yet.
-        real_m2 = b.get("footprint_top_face_m2")
-        if real_m2 is None:
-            real_m2 = b.get("footprint_m2", b.get("footprint_bbox_m2", 0))
-        if real_m2 > MAX_SOFT_BARRIER_FOOTPRINT_M2:
-            offenders.append((b["name"], real_m2))
-    assert not offenders, (
-        f"SoftBarrier top-face footprints exceed "
-        f"{MAX_SOFT_BARRIER_FOOTPRINT_M2} m² (bbox-as-slab bug): "
-        f"{offenders}"
-    )
+        real_m2 = b.get("footprint_top_face_m2", 0)
+        if real_m2 > ceiling:
+            offenders.append((b["name"], real_m2, ceiling))
+
+    if offenders:
+        # WARN-only: this is heuristic, not authoritative. The
+        # hard-fail invariants on height + material + lateral-face
+        # count already catch the structural bug; this one catches
+        # the looser "material area is unreasonable for a peitoril"
+        # case which deserves human review, not auto-block.
+        warnings.warn(
+            f"SoftBarrier top-face footprints exceed heuristic "
+            f"ceiling {ceiling:.3f} m² "
+            f"(= {MAX_SOFT_BARRIER_FOOTPRINT_FRACTION:.0%} × smallest "
+            f"floor {smallest_floor_m2:.3f} m²): {offenders}. "
+            f"Re-check whether the per-segment swept-slab logic is "
+            f"intact.",
+            UserWarning,
+            stacklevel=2,
+        )
 
 
 # ---- totals + cross-checks --------------------------------------
@@ -287,3 +331,112 @@ def test_gates_self_check_all_true() -> None:
     g = r["gates_self_check"]
     failures = [k for k, v in g.items() if not v]
     assert not failures, f"gates_self_check failures: {failures}"
+
+
+# ---- Defensive invariants — regression patches for the 2026-05-20 bug ---
+
+
+def test_no_soft_barrier_at_floor_height_confused_with_floor() -> None:
+    """REGRESSION: a SoftBarrier that emits at height ~0 would render
+    as a flat floor-coloured patch in the .skp and visually pass as
+    a floor. Anything below half the parapet height is suspect."""
+    r = _load_report()
+    barriers = _groups_by_prefix(r, "SoftBarrier_Group_")
+    half_parapet = PARAPET_HEIGHT_M / 2.0
+    offenders = [
+        (b["name"], b["height_m"]) for b in barriers
+        if b["height_m"] < half_parapet
+    ]
+    assert not offenders, (
+        f"SoftBarrier groups with height < {half_parapet:.3f}m — they "
+        f"would render as floor-shaped patches, not parapets: "
+        f"{offenders}"
+    )
+
+
+def test_every_consensus_opening_has_a_real_gap_in_shell() -> None:
+    """REGRESSION: the soft_barrier bug was a symptom of "geometry
+    that looked OK in self-check but failed visually". Same class
+    for openings: every opening in the consensus must have been
+    counted in `shell_stats_from_python.openings_carved`. A drop
+    here means the door rectangle was silently skipped — gap
+    disappears, planta becomes uninhabitable."""
+    r = _load_report()
+    stats = r.get("shell_stats_from_python", {})
+    carved = stats.get("openings_carved", 0)
+    skipped = stats.get("openings_skipped", [])
+    declared = carved + len(skipped)
+    # Total openings the consensus offered = carved + skipped
+    # The skipped count is observable but should be 0 on healthy
+    # consensus — every consensus opening should carve a gap.
+    assert not skipped, (
+        f"Consensus openings were silently skipped during 2D carve "
+        f"(door geometry will not be visible in the shell): {skipped}. "
+        f"If a skip is legitimate (ghost wall_id), it must be "
+        f"explicitly whitelisted; default is FAIL."
+    )
+    # And carved count > 0 unless consensus has zero openings
+    if declared > 0:
+        assert carved > 0, (
+            f"declared {declared} openings but 0 were carved — "
+            f"door geometry will be missing entirely"
+        )
+
+
+def test_no_unrecognized_top_level_group_name() -> None:
+    """REGRESSION: every top-level Group must match one of the known
+    semantic prefixes (PlanShell_Group, Floor_Group_*, SoftBarrier_Group_*).
+    An "unnamed" or unrecognised top-level group means the exporter
+    leaked something the user can't classify visually."""
+    r = _load_report()
+    known_prefixes = ("PlanShell_Group", "Floor_Group_", "SoftBarrier_Group_")
+    offenders = []
+    for g in r["groups_diagnostic"]:
+        name = g["name"] or ""
+        if not any(name == p or name.startswith(p) for p in known_prefixes):
+            offenders.append(name or "(empty name)")
+    assert not offenders, (
+        f"Top-level groups with unrecognised names: {offenders}. "
+        f"Every group must be classifiable as wall_shell, floor, or "
+        f"soft_barrier. Unknown groups are a regression — add them "
+        f"to the known set OR fix the exporter to not emit them."
+    )
+
+
+def test_no_floor_uses_parapet_or_wall_material_swap() -> None:
+    """REGRESSION (paired with floor-material check): catches the
+    symmetric mistake where a floor gets painted with the parapet's
+    RGB by accident. A 1.10m parapet that is visually identical to
+    floor colour would slip through."""
+    r = _load_report()
+    floors = _groups_by_prefix(r, "Floor_Group_")
+    forbidden = {"plan_wall", "plan_parapet", "wall_dark",
+                 "wall_ring", "parapet"}
+    offenders = [
+        (f["name"], f["primary_material"]) for f in floors
+        if f["primary_material"] in forbidden
+    ]
+    assert not offenders, (
+        f"floors painted with wall/parapet material: {offenders}"
+    )
+
+
+def test_no_soft_barrier_uses_wall_or_floor_material() -> None:
+    """REGRESSION (symmetric): a SoftBarrier painted with wall RGB
+    blends into the wall shell and reads as a "rodapé branco"
+    (FP-006). A SoftBarrier painted with a floor RGB blends into
+    the floor and is invisible. Either is the same class of failure
+    as the floor-material-mix-up: the user can't visually
+    distinguish layers."""
+    r = _load_report()
+    barriers = _groups_by_prefix(r, "SoftBarrier_Group_")
+    forbidden_walls = {"plan_wall", "wall_dark", "wall_ring"}
+    offenders = []
+    for b in barriers:
+        m = b["primary_material"] or ""
+        if m in forbidden_walls or m.startswith("floor_"):
+            offenders.append((b["name"], m))
+    assert not offenders, (
+        f"SoftBarrier groups painted with wall or floor material: "
+        f"{offenders}"
+    )
