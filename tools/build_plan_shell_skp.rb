@@ -496,12 +496,30 @@ def build_door_leaf(parent_ents, opening, host_wall, _thickness_pt, material, in
     f.back_material = material
   end
 
-  # Rotate around hinge axis by DOOR_SWING_DEG.
-  hinge_world = Geom::Point3d.new(
-    hinge_along * PT_TO_IN,
-    (axis_idx == 0 ? cross_base : hinge_along) * PT_TO_IN,
-    0,
-  )
+  # Rotate around the vertical hinge axis by DOOR_SWING_DEG.
+  # Bug fix (2026-05-20): the previous version computed
+  #   hinge_world = (hinge_along, axis_idx == 0 ? cross_base : hinge_along, 0)
+  # which for vertical walls (axis_idx == 1) put BOTH x and y to
+  # `hinge_along`, sending the pivot onto an arbitrary diagonal in
+  # world space. The leaf then rotated around that off-axis pivot
+  # and was visibly translated metres away from the host wall —
+  # "floating doors" in the .skp.
+  # The correct mapping:
+  #   horizontal wall (axis_idx == 0): hinge_world = (hinge_along, cross_base, 0)
+  #   vertical wall  (axis_idx == 1): hinge_world = (cross_base, hinge_along, 0)
+  hinge_world = if axis_idx == 0
+    Geom::Point3d.new(
+      hinge_along * PT_TO_IN,
+      cross_base * PT_TO_IN,
+      0,
+    )
+  else
+    Geom::Point3d.new(
+      cross_base * PT_TO_IN,
+      hinge_along * PT_TO_IN,
+      0,
+    )
+  end
   hinge_axis = Geom::Vector3d.new(0, 0, 1)
   hinge_xform = Geom::Transformation.rotation(
     hinge_world, hinge_axis,

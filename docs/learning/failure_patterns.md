@@ -283,3 +283,60 @@ post-run cleanup in `try / finally`), and migrates
 
 **See also:** `FP-007` (welcome dialog) — same surface area
 (SU2026 launch ergonomics) but unrelated cause.
+
+## FP-015 — Door leaf hinge_world wrong for vertical walls in plan_shell (2026-05-20)
+
+**Symptom:** opening the `runs/planta_74_plan_shell/model.skp`
+produced after PR #141 (Phase 2 visual parity) showed two brown
+door leaves "floating" in mid-air below the wall shell. The doors
+on horizontal walls rendered correctly; the doors on vertical walls
+ended up several metres from their host openings, parked over open
+space or other rooms.
+
+**Root cause:** in `tools/build_plan_shell_skp.rb` `build_door_leaf`,
+the rotation pivot was computed as
+
+```ruby
+hinge_world = Geom::Point3d.new(
+  hinge_along * PT_TO_IN,
+  (axis_idx == 0 ? cross_base : hinge_along) * PT_TO_IN,
+  0,
+)
+```
+
+For horizontal walls (`axis_idx == 0`) the Y component is
+`cross_base` (correct — perpendicular to the wall axis). For
+vertical walls (`axis_idx == 1`) the Y component falls back to
+`hinge_along` — duplicating the X value. The pivot ended up on a
+diagonal in world space, often metres from the door's actual
+hinge edge. The leaf's footprint was built correctly; it was the
+30° rotation around that off-axis pivot that translated the leaf
+into open space.
+
+**Rule:** for any rotation around a wall-perpendicular hinge in a
+generic axis-aligned exporter, the pivot must dispatch on
+`axis_idx` BOTH for X and Y:
+
+  - `axis_idx == 0` (horizontal wall): pivot at `(hinge_along, cross_base, 0)`
+  - `axis_idx == 1` (vertical wall):  pivot at `(cross_base, hinge_along, 0)`
+
+Sanity check: every door leaf bbox center must sit within
+≈ opening width + rotation displacement of its host opening
+center. We pin 1 m as the ceiling (real value is ≤ 0.5 m for
+healthy leaves).
+
+**Anti-pattern signal:** ternaries that pick ONE coordinate
+component based on `axis_idx` without picking the symmetric pair
+on the other component. The Y-only conditional in the buggy line
+was the smell — both X and Y need the dispatch.
+
+**Repair landed:** `fix/door-leaf-hinge-world-vertical-walls` —
+splits the `hinge_world` computation into explicit
+`axis_idx == 0` and `axis_idx == 1` branches, both setting BOTH
+coordinates correctly. Adds
+`tests/test_plan_shell_invariants.py::test_door_leaf_stays_near_its_opening_center`
+as the regression gate (max 1 m distance from opening center).
+
+**See also:** ADR-003 §3 (Phase 2 visual parity, where the bug
+shipped); FP-014 (autorun cleanup — same author's pattern of bugs
+that "look fine in tests but fail visually in SU").

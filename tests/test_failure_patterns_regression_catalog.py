@@ -167,6 +167,17 @@ KNOWN_FP_REGRESSIONS: list[tuple[str, list[str], str]] = [
         "disarm helper plus try/finally cleanup in both launchers. "
         "6 unit tests on the disarm helper.",
     ),
+    (
+        "FP-015",
+        ["tests/test_plan_shell_invariants.py::"
+         "test_door_leaf_stays_near_its_opening_center",
+         "tools/build_plan_shell_skp.rb"],
+        "Door leaf hinge_world wrong for vertical walls: pivot Y "
+        "dispatched on axis_idx but X was hardcoded, sending the "
+        "rotation pivot onto an arbitrary diagonal. Regression "
+        "test asserts every DoorLeaf bbox center sits within 1 m of "
+        "its opening's declared center.",
+    ),
 ]
 
 
