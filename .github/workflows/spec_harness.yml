@@ -60,6 +60,15 @@ jobs:
       - name: Install project (dev extras)
         run: uv pip install --system -e ".[dev]"
 
+      # Lint specs BEFORE running the harness. A malformed YAML or an
+      # unknown rule type would make the harness report misleading
+      # (the rule would error out per-contract but the spec author
+      # might not notice in the comment summary). Linter is fast
+      # (~50ms) so always run it; failure here IS a hard block on
+      # this workflow (continue-on-error stays default = false).
+      - name: Lint specs (YAML + rule-type validity)
+        run: python -m tools.lint_specs
+
       - name: Run spec harness on planta_74 (non-blocking)
         id: harness
         continue-on-error: true
