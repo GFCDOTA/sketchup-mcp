@@ -438,12 +438,14 @@ def emit_band_at(parent_ents, corners_pdf, z_bottom_in, z_top_in, material, name
   group
 end
 
-def build_door_leaf(parent_ents, opening, host_wall, thickness_pt, material, index)
+def build_door_leaf(parent_ents, opening, host_wall, _thickness_pt, material, index)
   # Renders a thin rotating leaf (DOOR_THICK_M × opening_width)
   # hinged at one end of the opening, rotated DOOR_SWING_DEG open.
   # The leaf lives in its own top-level Group (DoorLeaf_Group_<id>),
   # NOT inside PlanShell_Group — leaves are a separate visual layer.
-  axis_idx, cross_idx, cross_value = opening_axis_basis(host_wall)
+  # _thickness_pt retained for caller symmetry with the other
+  # opening renderers (each receives the same signature).
+  axis_idx, _cross_idx, cross_value = opening_axis_basis(host_wall)
   cx, cy = opening['center']
   along = axis_idx == 0 ? cx.to_f : cy.to_f
   width_pt = opening['opening_width_pts'].to_f
