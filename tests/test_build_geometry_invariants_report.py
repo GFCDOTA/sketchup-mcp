@@ -36,6 +36,24 @@ def test_classify_unknown_falls_through() -> None:
     assert classify_semantic_type({}) == "unknown"
 
 
+def test_classify_phase2_groups() -> None:
+    """Phase 2 added 4 new semantic types — door_leaf, window,
+    glazed_balcony, passage_marker. Each is its own top-level Group."""
+    assert (
+        classify_semantic_type({"name": "DoorLeaf_Group_h_o000"})
+        == "door_leaf"
+    )
+    assert classify_semantic_type({"name": "Window_Group_5"}) == "window"
+    assert (
+        classify_semantic_type({"name": "GlazedBalcony_Group_g001"})
+        == "glazed_balcony"
+    )
+    assert (
+        classify_semantic_type({"name": "PassageMarker_Group_3"})
+        == "passage_marker"
+    )
+
+
 # ---- synthetic group records helpers -----------------------------
 
 
@@ -307,3 +325,190 @@ def test_report_has_rules_applied_block() -> None:
 def test_report_schema_version_is_pinned() -> None:
     rep = build_invariants_report(_wrap(_good_plan_shell()))
     assert rep["schema_version"] == "1.0.0"
+
+
+# ---- Phase 2 graders (door_leaf, window, glazed_balcony, passage) ---
+
+
+def _good_door_leaf(oid: str = "o000") -> dict:
+    return {
+        "name": f"DoorLeaf_Group_{oid}",
+        "primary_material": "plan_door",
+        # Door leaf rotated ~30° → bbox height ≈ DOOR_HEIGHT_M
+        # (the rotation is around the vertical hinge axis, so z extent
+        # stays ≈ DOOR_HEIGHT_M).
+        "height_m": 2.10,
+        "face_count": 6,
+        "edge_count": 12,
+        "lateral_face_count": 4,
+        "default_material_face_count": 0,
+        "footprint_top_face_m2": 0.04,
+        "footprint_bbox_m2": 0.10,
+        "bbox_m": {"min": [0, 0, 0], "max": [0.9, 0.04, 2.1]},
+    }
+
+
+def _good_window(oid: str = "w0") -> dict:
+    return {
+        "name": f"Window_Group_{oid}",
+        "primary_material": "plan_window_glass",
+        # Wrapper spans the full 2.70 m (sill + glass + lintel).
+        "height_m": 2.70,
+        "face_count": 18,
+        "edge_count": 36,
+        "lateral_face_count": 12,
+        "default_material_face_count": 0,
+        "footprint_top_face_m2": 0.3,
+        "footprint_bbox_m2": 0.6,
+        "bbox_m": {"min": [0, 0, 0], "max": [1.5, 0.2, 2.7]},
+    }
+
+
+def _good_glazed_balcony(oid: str = "g0") -> dict:
+    return {
+        "name": f"GlazedBalcony_Group_{oid}",
+        "primary_material": "plan_window_glass",
+        "height_m": 2.70,
+        "face_count": 6,
+        "edge_count": 12,
+        "lateral_face_count": 4,
+        "default_material_face_count": 0,
+        "footprint_top_face_m2": 1.5,
+        "footprint_bbox_m2": 3.0,
+        "bbox_m": {"min": [0, 0, 0], "max": [3.0, 0.2, 2.7]},
+    }
+
+
+def _good_passage_marker(oid: str = "p0") -> dict:
+    return {
+        "name": f"PassageMarker_Group_{oid}",
+        "primary_material": "plan_passage_marker",
+        "height_m": 0.025,  # ~1 inch
+        "face_count": 6,
+        "edge_count": 12,
+        "lateral_face_count": 4,
+        "default_material_face_count": 0,
+        "footprint_top_face_m2": 0.5,
+        "footprint_bbox_m2": 0.5,
+        "bbox_m": {"min": [0, 0, 0], "max": [1.0, 0.2, 0.025]},
+    }
+
+
+def test_door_leaf_at_wall_height_fails() -> None:
+    """REGRESSION: a door leaf accidentally pushpulled to WALL_HEIGHT_M
+    would render as a full coloured wall slab — visually confusing
+    and structurally wrong."""
+    bad = _good_door_leaf()
+    bad["height_m"] = 2.70  # full wall height
+    rep = build_invariants_report(_wrap(_good_plan_shell(), bad))
+    rec = next(g for g in rep["groups"] if g["name"] == bad["name"])
+    assert rec["status"] == "FAIL"
+    assert any("WALL_HEIGHT_M" in r for r in rec["reasons"])
+
+
+def test_door_leaf_flat_at_floor_fails() -> None:
+    """REGRESSION: a door leaf with z extent ~0 would render as a
+    floor-coloured patch (the 2026-05-20 bug class extended to
+    doors)."""
+    bad = _good_door_leaf()
+    bad["height_m"] = 0.0
+    rep = build_invariants_report(_wrap(_good_plan_shell(), bad))
+    rec = next(g for g in rep["groups"] if g["name"] == bad["name"])
+    assert rec["status"] == "FAIL"
+    assert any("floor" in r.lower() for r in rec["reasons"])
+
+
+def test_door_leaf_wrong_material_fails() -> None:
+    bad = _good_door_leaf()
+    bad["primary_material"] = "plan_wall"
+    rep = build_invariants_report(_wrap(_good_plan_shell(), bad))
+    rec = next(g for g in rep["groups"] if g["name"] == bad["name"])
+    assert rec["status"] == "FAIL"
+    assert any("door set" in r for r in rec["reasons"])
+
+
+def test_door_leaf_within_band_passes() -> None:
+    rep = build_invariants_report(_wrap(
+        _good_plan_shell(), _good_door_leaf()
+    ))
+    rec = next(g for g in rep["groups"] if g["name"].startswith("DoorLeaf"))
+    assert rec["status"] == "PASS"
+
+
+def test_window_wrong_wrapper_height_fails() -> None:
+    """REGRESSION: window wrapper bbox MUST span the full wall height
+    (0 to WALL_HEIGHT_M). A wrapper that ends at WINDOW_HEAD_M means
+    the lintel band wasn't built."""
+    bad = _good_window()
+    bad["height_m"] = 2.10  # missing lintel
+    rep = build_invariants_report(_wrap(_good_plan_shell(), bad))
+    rec = next(g for g in rep["groups"] if g["name"] == bad["name"])
+    assert rec["status"] == "FAIL"
+
+
+def test_window_default_material_face_fails() -> None:
+    bad = _good_window()
+    bad["default_material_face_count"] = 1
+    rep = build_invariants_report(_wrap(_good_plan_shell(), bad))
+    rec = next(g for g in rep["groups"] if g["name"] == bad["name"])
+    assert rec["status"] == "FAIL"
+
+
+def test_glazed_balcony_not_glass_fails() -> None:
+    """REGRESSION: porta-vidro rendered with opaque material would
+    look like a wall, not a glass panel."""
+    bad = _good_glazed_balcony()
+    bad["primary_material"] = "plan_wall"
+    rep = build_invariants_report(_wrap(_good_plan_shell(), bad))
+    rec = next(g for g in rep["groups"] if g["name"] == bad["name"])
+    assert rec["status"] == "FAIL"
+    assert any("glass" in r for r in rec["reasons"])
+
+
+def test_glazed_balcony_wrong_height_fails() -> None:
+    bad = _good_glazed_balcony()
+    bad["height_m"] = 1.10  # parapet height — would look like a soft barrier
+    rep = build_invariants_report(_wrap(_good_plan_shell(), bad))
+    rec = next(g for g in rep["groups"] if g["name"] == bad["name"])
+    assert rec["status"] == "FAIL"
+
+
+def test_passage_marker_too_tall_fails() -> None:
+    """REGRESSION: a passage marker rendered at wall height would be
+    a solid block in the middle of a doorway — same class as the
+    soft-barrier bbox bug."""
+    bad = _good_passage_marker()
+    bad["height_m"] = 1.0  # 1 m is way over the 0.10 m ceiling
+    rep = build_invariants_report(_wrap(_good_plan_shell(), bad))
+    rec = next(g for g in rep["groups"] if g["name"] == bad["name"])
+    assert rec["status"] == "FAIL"
+    assert any("0.10" in r for r in rec["reasons"])
+
+
+def test_passage_marker_at_zero_height_fails() -> None:
+    bad = _good_passage_marker()
+    bad["height_m"] = 0
+    rep = build_invariants_report(_wrap(_good_plan_shell(), bad))
+    rec = next(g for g in rep["groups"] if g["name"] == bad["name"])
+    assert rec["status"] == "FAIL"
+    assert any("would not render" in r for r in rec["reasons"])
+
+
+def test_full_phase2_model_is_pass() -> None:
+    """All 7 semantic types together — should PASS."""
+    rep = build_invariants_report(_wrap(
+        _good_plan_shell(),
+        _good_floor(0, 10.0),
+        _good_floor(1, 5.0),
+        _good_soft_barrier(0),
+        _good_door_leaf("d0"),
+        _good_window("w0"),
+        _good_glazed_balcony("g0"),
+        _good_passage_marker("p0"),
+    ))
+    assert rep["summary"]["verdict"] == "PASS"
+    types = {g["semantic_type"] for g in rep["groups"]}
+    assert types == {
+        "wall_shell", "floor", "soft_barrier",
+        "door_leaf", "window", "glazed_balcony", "passage_marker",
+    }

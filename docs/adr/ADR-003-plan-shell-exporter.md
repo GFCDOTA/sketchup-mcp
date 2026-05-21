@@ -119,23 +119,24 @@ consensus is consumed unchanged.
 
 Out of scope for this first cut, on purpose:
 
-- **Door leaves.** Openings show as gaps in the shell (no panel, no
-  hinge, no swing arc). Deferred to a phase-2 PR; this matches the
-  user's explicit instruction "door leaves ficam para fase 2, mas os
-  vãos das portas NÃO podem ficar para fase 2".
-- **Windows.** No three-band (sill / glass / lintel) assembly. The
-  opening rectangle subtracts the full wall height. A future phase
-  will add the per-`kind_v5` rendering (`interior_door` /
-  `interior_passage` / `window` / `glazed_balcony`).
-- **Carving by `geometry_origin`.** `consume_consensus.rb` restricts
-  carving to `svg_arc | svg_segments | human_annotation` and skips
-  `wall_gap` (the source PDF already drew the gap into the wall
-  geometry). This exporter carves **every** opening with a valid
-  `wall_id`, on the assumption that consensus walls are stored as
-  full-length centerlines. For planta_74 (`geometry_origin =
-  human_annotation` on all 12 openings) the assumption holds; for
-  consensuses with mixed origins it must be revisited before phase
-  2 ships.
+- **Door leaves.** ✅ **DONE in Phase 2** (2026-05-20). Each carved
+  interior_door now emits a `DoorLeaf_Group_<id>` with a 30°-swung
+  leaf (DOOR_HEIGHT_M = 2.10 m, DOOR_THICK_M = 4 cm, DOOR_RGB
+  madeira). Lives as a separate top-level group; never inside
+  `PlanShell_Group`.
+- **Windows.** ✅ **DONE in Phase 2** (2026-05-20). Each window
+  emits a `Window_Group_<id>` containing three sub-groups (sill
+  0–0.9 m, glass 0.9–2.1 m with alpha=0.45, lintel 2.1–2.7 m).
+- **Glazed balcony (porta-vidro).** ✅ **DONE in Phase 2**
+  (2026-05-20). Single full-height glass pane (GlazedBalcony_Group).
+- **Passage markers (`wall_gap` origin).** ✅ **DONE in Phase 2**
+  (2026-05-20). Thin floor-level rectangle for visibility.
+- **Carving by `geometry_origin`.** ✅ **DONE in Phase 2**
+  (2026-05-20). `tools/build_plan_shell_skp.py` now respects
+  `CARVING_ORIGINS = {svg_arc, svg_segments, human_annotation}` and
+  records skipped-by-origin openings separately from
+  skipped-by-error openings. `wall_gap` origin → not carved (gap
+  already in wall data) + passage marker emitted.
 - **Overrides.** This exporter is overrides-blind by design (per
   ADR-001 §3). It consumes whichever JSON the user points at —
   `consensus_model.json` or `amended_observed.json`. The launcher

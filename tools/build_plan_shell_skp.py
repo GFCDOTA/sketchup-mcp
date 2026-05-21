@@ -91,6 +91,18 @@ SNAP_EPS_PTS = 0.1
 # preserved.
 MIN_SLIVER_AREA_PTS2 = 0.5
 
+# Opening geometry_origin values whose 2D carve we apply. Mirrors
+# CARVING_OPENING_ORIGINS in consume_consensus.rb. The rationale:
+# - `svg_arc`, `svg_segments`: arc/segment-shaped openings the SVG
+#   extractor found inside continuous walls — gap must be carved.
+# - `human_annotation`: openings injected by a reviewer painting on
+#   a render; same — gap must be carved.
+# - `wall_gap`: the source PDF already drew the flanking walls as
+#   separate filled rectangles, so the gap is *already* in the wall
+#   data. Carving here would double-shrink the geometry. We instead
+#   render a passage marker / window panel on top.
+CARVING_ORIGINS = frozenset({"svg_arc", "svg_segments", "human_annotation"})
+
 
 # ---- core geometry ---------------------------------------------------
 
@@ -188,19 +200,33 @@ def build_shell_polygon(consensus: dict) -> tuple[list[Polygon], dict]:
     # [4] subtract opening rectangles
     walls_by_id = {w["id"]: w for w in walls if "id" in w}
     carve_rects: list[Polygon] = []
-    openings_skipped: list[str] = []
+    openings_skipped_by_origin: list[dict] = []
+    openings_skipped_by_error: list[str] = []
     for op in openings:
         wid = op.get("wall_id")
         host = walls_by_id.get(wid)
         if host is None:
-            openings_skipped.append(
+            openings_skipped_by_error.append(
                 f"{op.get('id')}: host wall_id={wid!r} not in walls[]"
             )
+            continue
+        # geometry_origin gates whether we carve OR leave the wall
+        # data alone (because the source PDF already encoded the gap).
+        origin = op.get("geometry_origin", "")
+        if origin and origin not in CARVING_ORIGINS:
+            openings_skipped_by_origin.append({
+                "id": op.get("id"),
+                "geometry_origin": origin,
+                "reason": (
+                    f"origin {origin!r} not in CARVING_ORIGINS "
+                    f"({sorted(CARVING_ORIGINS)}); gap already in wall data"
+                ),
+            })
             continue
         try:
             carve_rects.append(opening_carve_rect(op, host, default_thickness))
         except ValueError as e:
-            openings_skipped.append(f"{op.get('id')}: {e}")
+            openings_skipped_by_error.append(f"{op.get('id')}: {e}")
 
     if carve_rects:
         carve_union = unary_union(carve_rects)
@@ -237,12 +263,23 @@ def build_shell_polygon(consensus: dict) -> tuple[list[Polygon], dict]:
         "input_walls": len(walls),
         "input_openings": len(openings),
         "openings_carved": len(carve_rects),
-        "openings_skipped": openings_skipped,
+        # Split into two buckets: by_origin is legitimate (wall_gap
+        # origin; gap is already in the wall data, no carve needed).
+        # by_error is a real failure (missing wall_id, zero width,
+        # etc) and must be 0 on a healthy consensus.
+        "openings_skipped_by_origin": openings_skipped_by_origin,
+        "openings_skipped_by_error": openings_skipped_by_error,
+        # Back-compat: keep the flat field for old test readers, but
+        # only populate with the error bucket — origin-based skips
+        # are by design and shouldn't trip "skipped is not empty"
+        # checks. Removed entirely once test suite migrates.
+        "openings_skipped": list(openings_skipped_by_error),
         "shell_pieces_after_union": len(polygons),
         "shell_pieces_after_sliver_filter": len(kept),
         "slivers_removed": slivers_removed,
         "snap_eps_pts": SNAP_EPS_PTS,
         "min_sliver_area_pts2": MIN_SLIVER_AREA_PTS2,
+        "carving_origins": sorted(CARVING_ORIGINS),
         "total_shell_area_pts2": round(sum(p.area for p in kept), 4),
     }
     return kept, stats

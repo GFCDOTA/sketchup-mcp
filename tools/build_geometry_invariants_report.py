@@ -47,7 +47,9 @@ from pathlib import Path
 from typing import Any, Literal
 
 SemanticType = Literal[
-    "wall_shell", "floor", "soft_barrier", "opening_marker", "unknown"
+    "wall_shell", "floor", "soft_barrier",
+    "door_leaf", "window", "glazed_balcony", "passage_marker",
+    "unknown"
 ]
 Status = Literal["PASS", "WARN", "FAIL"]
 
@@ -56,11 +58,18 @@ Status = Literal["PASS", "WARN", "FAIL"]
 # AND the comment in build_plan_shell_skp.rb must move together.
 WALL_HEIGHT_M = 2.70
 PARAPET_HEIGHT_M = 1.10
+DOOR_HEIGHT_M = 2.10
+PASSAGE_MARKER_HEIGHT_M = 1.0 / 39.3700787402  # 1 in → m
 HEIGHT_TOL_M = 0.01
 FLOOR_HEIGHT_EPS_M = 0.001
 
 WALL_MATERIALS = {"plan_wall", "wall_dark", "wall_ring"}
 PARAPET_MATERIALS = {"plan_parapet", "parapet"}
+DOOR_MATERIALS = {"plan_door", "door_leaf"}
+GLASS_MATERIALS = {"plan_window_glass", "window_glass"}
+WINDOW_SILL_MATERIALS = {"plan_window_sill", "window_sill"}
+WINDOW_LINTEL_MATERIALS = {"plan_window_lintel", "window_lintel"}
+PASSAGE_MATERIALS = {"plan_passage_marker", "passage_marker"}
 
 # Heuristic relative ceiling for soft-barrier top-face footprint:
 # WARN if a SoftBarrier's painted top area exceeds this fraction of
@@ -78,8 +87,14 @@ def classify_semantic_type(group_record: dict) -> SemanticType:
         return "floor"
     if name.startswith("SoftBarrier_Group_"):
         return "soft_barrier"
-    if name.startswith("OpeningMarker_"):
-        return "opening_marker"
+    if name.startswith("DoorLeaf_Group_"):
+        return "door_leaf"
+    if name.startswith("Window_Group_"):
+        return "window"
+    if name.startswith("GlazedBalcony_Group_"):
+        return "glazed_balcony"
+    if name.startswith("PassageMarker_Group_"):
+        return "passage_marker"
     return "unknown"
 
 
@@ -203,14 +218,122 @@ def grade_soft_barrier(g: dict, ctx: dict) -> tuple[Status, list[str]]:
     return status, reasons
 
 
-def grade_opening_marker(g: dict, _ctx: dict) -> tuple[Status, list[str]]:
-    # Reserved for future use (when door leaves / window panels land).
-    # For now any opening-marker group is unexpected — exporter does
-    # not emit them.
-    return "WARN", [
-        "opening_marker semantics not yet implemented in this exporter; "
-        "group appearing as opening_marker is unexpected"
-    ]
+def grade_door_leaf(g: dict, _ctx: dict) -> tuple[Status, list[str]]:
+    reasons: list[str] = []
+    status: Status = "PASS"
+    h = g.get("height_m", 0)
+    # The leaf is rotated 30° on its hinge, so the rendered bbox
+    # height is slightly less than DOOR_HEIGHT_M (cos(30°) ≈ 0.87).
+    # Accept the rotated height: [DOOR_HEIGHT_M * 0.85, DOOR_HEIGHT_M + tol].
+    min_h = DOOR_HEIGHT_M * 0.85
+    max_h = DOOR_HEIGHT_M + HEIGHT_TOL_M
+    if h < min_h or h > max_h:
+        # FAIL hard if at wall height — a door leaf rendered as a
+        # full wall is the visually-confusing failure.
+        if abs(h - WALL_HEIGHT_M) <= HEIGHT_TOL_M:
+            status = "FAIL"
+            reasons.append(
+                f"door leaf height {h:.3f} m matches WALL_HEIGHT_M — "
+                f"rendered as full wall instead of leaf"
+            )
+        elif h < FLOOR_HEIGHT_EPS_M:
+            status = "FAIL"
+            reasons.append(
+                "door leaf flat at z=0; would look like a floor patch"
+            )
+        else:
+            status = "FAIL"
+            reasons.append(
+                f"door leaf height {h:.3f} m outside expected band "
+                f"[{min_h:.3f}, {max_h:.3f}]"
+            )
+    mat = g.get("primary_material") or ""
+    if mat not in DOOR_MATERIALS:
+        status = "FAIL"
+        reasons.append(
+            f"primary_material {mat!r} not in door set {sorted(DOOR_MATERIALS)}"
+        )
+    if g.get("default_material_face_count", 0) > 0:
+        status = "FAIL"
+        reasons.append(
+            f"{g['default_material_face_count']} faces missing material"
+        )
+    return status, reasons
+
+
+def grade_window(g: dict, _ctx: dict) -> tuple[Status, list[str]]:
+    reasons: list[str] = []
+    status: Status = "PASS"
+    h = g.get("height_m", 0)
+    # The wrapper Window_Group bbox spans from 0 to WALL_HEIGHT_M
+    # because it contains all 3 bands (sill + glass + lintel).
+    if abs(h - WALL_HEIGHT_M) > HEIGHT_TOL_M:
+        status = "FAIL"
+        reasons.append(
+            f"window 3-band wrapper height {h:.3f} m != WALL_HEIGHT_M "
+            f"{WALL_HEIGHT_M} ± {HEIGHT_TOL_M}; expect bbox 0 → WALL_HEIGHT_M"
+        )
+    # We don't enforce primary_material at the wrapper level — the
+    # 3 bands inside have different materials. The wrapper records
+    # the modal material, which depends on which band has more faces.
+    if g.get("default_material_face_count", 0) > 0:
+        status = "FAIL"
+        reasons.append(
+            f"{g['default_material_face_count']} faces missing material"
+        )
+    return status, reasons
+
+
+def grade_glazed_balcony(g: dict, _ctx: dict) -> tuple[Status, list[str]]:
+    reasons: list[str] = []
+    status: Status = "PASS"
+    h = g.get("height_m", 0)
+    if abs(h - WALL_HEIGHT_M) > HEIGHT_TOL_M:
+        status = "FAIL"
+        reasons.append(
+            f"glazed balcony height {h:.3f} m != WALL_HEIGHT_M "
+            f"{WALL_HEIGHT_M} ± {HEIGHT_TOL_M}; porta-vidro should "
+            f"sweep full height"
+        )
+    mat = g.get("primary_material") or ""
+    if mat not in GLASS_MATERIALS:
+        status = "FAIL"
+        reasons.append(
+            f"primary_material {mat!r} not in glass set {sorted(GLASS_MATERIALS)}"
+        )
+    if g.get("default_material_face_count", 0) > 0:
+        status = "FAIL"
+        reasons.append(
+            f"{g['default_material_face_count']} faces missing material"
+        )
+    return status, reasons
+
+
+def grade_passage_marker(g: dict, _ctx: dict) -> tuple[Status, list[str]]:
+    reasons: list[str] = []
+    status: Status = "PASS"
+    h = g.get("height_m", 0)
+    # Marker is intentionally tiny (~2.5 cm). FAIL if at wall or
+    # door height — those would be confused with structural elements.
+    if h > 0.10:  # 10 cm is the upper bound for a "marker"
+        status = "FAIL"
+        reasons.append(
+            f"passage marker height {h:.3f} m > 0.10 m; markers must "
+            f"be floor-level (~{PASSAGE_MARKER_HEIGHT_M:.3f} m)"
+        )
+    if h <= 0:
+        status = "FAIL"
+        reasons.append(
+            f"passage marker height {h:.3f} m <= 0; would not render"
+        )
+    mat = g.get("primary_material") or ""
+    if mat not in PASSAGE_MATERIALS:
+        status = "FAIL"
+        reasons.append(
+            f"primary_material {mat!r} not in passage set "
+            f"{sorted(PASSAGE_MATERIALS)}"
+        )
+    return status, reasons
 
 
 def grade_unknown(g: dict, _ctx: dict) -> tuple[Status, list[str]]:
@@ -225,7 +348,10 @@ GRADERS: dict[SemanticType, Any] = {
     "wall_shell": grade_wall_shell,
     "floor": grade_floor,
     "soft_barrier": grade_soft_barrier,
-    "opening_marker": grade_opening_marker,
+    "door_leaf": grade_door_leaf,
+    "window": grade_window,
+    "glazed_balcony": grade_glazed_balcony,
+    "passage_marker": grade_passage_marker,
     "unknown": grade_unknown,
 }
 
@@ -311,7 +437,28 @@ def build_invariants_report(report: dict) -> dict:
                 "WARN: footprint_top_face_m2 ≤ "
                 f"{SOFT_BARRIER_FOOTPRINT_FRACTION_WARN:.0%} × smallest_floor",
             ],
-            "opening_marker": ["(WARN, not implemented yet)"],
+            "door_leaf": [
+                f"rotated bbox height in [DOOR_HEIGHT_M×0.85, DOOR_HEIGHT_M+tol] "
+                f"= [{DOOR_HEIGHT_M * 0.85:.3f}, {DOOR_HEIGHT_M + HEIGHT_TOL_M:.3f}] m",
+                "height NOT equal to WALL_HEIGHT_M (no full-wall door)",
+                "height NOT at floor level (no flat door patch)",
+                f"primary_material in {sorted(DOOR_MATERIALS)}",
+            ],
+            "window": [
+                f"wrapper height ≈ WALL_HEIGHT_M ({WALL_HEIGHT_M} ± {HEIGHT_TOL_M}) "
+                "— bbox spans sill+glass+lintel = 0 → 2.70 m",
+                "no default-material faces",
+            ],
+            "glazed_balcony": [
+                f"height ≈ WALL_HEIGHT_M ({WALL_HEIGHT_M} ± {HEIGHT_TOL_M}) "
+                "— porta-vidro full height",
+                f"primary_material in {sorted(GLASS_MATERIALS)}",
+            ],
+            "passage_marker": [
+                "height ≤ 0.10 m (floor-level marker, not structural)",
+                "height > 0 (must render)",
+                f"primary_material in {sorted(PASSAGE_MATERIALS)}",
+            ],
             "unknown": ["FAIL — every group must classify into a known type"],
         },
         "groups": out_groups,
