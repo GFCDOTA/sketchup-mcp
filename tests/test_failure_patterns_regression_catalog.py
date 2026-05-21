@@ -179,6 +179,24 @@ KNOWN_FP_REGRESSIONS: list[tuple[str, list[str], str]] = [
         "its opening's declared center.",
     ),
     (
+        "FP-016",
+        ["tests/test_room_polygon_fixes.py::"
+         "test_planta_74_voronoi_splits_r001_into_three",
+         "tests/test_room_polygon_fixes.py::"
+         "test_planta_74_sb_extension_alone_does_not_split_r001",
+         "tools/polygonize_rooms.py",
+         "tools/rooms_from_seeds.py",
+         "tools/apply_room_polygon_fixes.py"],
+        "Soft barrier near-miss does not cross polygon interior, "
+        "causing merged floor cell: the planta_74 r001 (A.S.|TERRACO "
+        "SOCIAL|TERRACO TECNICO) case. Fix: (a) near-miss SB endpoint "
+        "extension with FP-006 + semantic guards + post-extension "
+        "effectiveness validation; (b) Voronoi sub-division of "
+        "merged-seed cells when SB extension is insufficient. "
+        "Regression test pins the 11-room outcome AND the falsification "
+        "that SB extension alone can't resolve r001 on planta_74.",
+    ),
+    (
         "FP-023",
         ["tools/su_runner_safety.py",
          "tests/test_su_runner_safety.py",

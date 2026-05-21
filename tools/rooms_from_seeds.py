@@ -357,11 +357,90 @@ def detect_rooms(consensus: dict, labels: list[dict],
     return rooms
 
 
+def _voronoi_subdivide_merged_cell(
+    cell_poly,
+    seed_labels: list[dict],
+) -> list[tuple[dict, list[list[float]], float]]:
+    """When a single polygonize cell contains multiple seed labels (the
+    A.S./TER SOC/TER TEC merge on planta_74), split the cell by a
+    bounded Voronoi tessellation of the seed points and clip each
+    Voronoi region against the cell polygon. Returns one
+    (label, polygon_pts, area_pts2) tuple per seed, in label order.
+
+    The Voronoi split is an APPROXIMATION (bisectors are equidistant
+    lines between seeds, not the real architectural divisors), but
+    it's strictly conservative w.r.t. cell extent: every returned
+    sub-polygon is contained in the original cell. Use only when the
+    underlying polygonize step couldn't distinguish the rooms because
+    the dividing soft_barriers/walls don't span the boundary — i.e.
+    the `seeds_share_cell` case. Returns an empty list if the Voronoi
+    computation fails (e.g., collinear or duplicate seeds), so callers
+    must always handle the empty case as "no split possible".
+
+    Shapely's ``voronoi_diagram`` accepts an envelope; passing the
+    cell polygon ensures each Voronoi region is pre-clipped to the
+    cell footprint. The post-intersection clip is a belt-and-braces
+    safety check.
+    """
+    if len(seed_labels) < 2:
+        return []
+    from shapely.geometry import MultiPoint
+    from shapely.ops import voronoi_diagram
+
+    seeds_xy = [(float(lb["seed_pt"][0]), float(lb["seed_pt"][1]))
+                for lb in seed_labels]
+    try:
+        mp = MultiPoint(seeds_xy)
+        vor = voronoi_diagram(mp, envelope=cell_poly)
+    except Exception:
+        return []
+    if vor.is_empty:
+        return []
+
+    from shapely.geometry import Point as _Point
+    regions = list(vor.geoms) if hasattr(vor, "geoms") else [vor]
+    out: list[tuple[dict, list[list[float]], float]] = []
+    for lb, (sx, sy) in zip(seed_labels, seeds_xy):
+        seed_pt = _Point(sx, sy)
+        # Find the Voronoi region containing this seed
+        chosen = None
+        for region in regions:
+            if region.covers(seed_pt):
+                chosen = region
+                break
+        if chosen is None:
+            return []
+        clipped = chosen.intersection(cell_poly)
+        if clipped.is_empty:
+            return []
+        # Voronoi region clipped against cell may be a MultiPolygon if
+        # the cell is non-convex; keep the largest piece.
+        if hasattr(clipped, "geoms"):
+            parts = sorted(list(clipped.geoms), key=lambda p: -p.area)
+            clipped = parts[0] if parts else None
+            if clipped is None or clipped.is_empty:
+                return []
+        try:
+            poly_pts = [[round(x, 3), round(y, 3)]
+                        for x, y in clipped.exterior.coords]
+        except Exception:
+            return []
+        out.append((lb, poly_pts, round(clipped.area, 2)))
+    return out
+
+
 def detect_rooms_polygonize(consensus: dict, labels: list[dict],
                             door_min: float = 15.0,
                             door_max: float = 150.0,
                             envelope_margin_pts: float = 2.0,
-                            min_room_area_factor: float = 12.0) -> list[dict]:
+                            min_room_area_factor: float = 12.0,
+                            extend_near_miss_sbs: bool = False,
+                            near_miss_gap_tol_pt: float = 8.0,
+                            near_miss_require_semantic: bool = True,
+                            voronoi_subdivide_merged_cells: bool = False,
+                            extension_provenance_out: list[dict] | None = None,
+                            voronoi_provenance_out: list[dict] | None = None,
+                            ) -> list[dict]:
     """Detect rooms via wall-rectangle subtraction (FP-014 P0 fix).
 
     Delegates the closed-cell extraction to ``polygonize_rooms.polygonize_rooms``
@@ -400,6 +479,10 @@ def detect_rooms_polygonize(consensus: dict, labels: list[dict],
         door_max_pts=door_max,
         envelope_margin_pts=envelope_margin_pts,
         min_room_area_factor=min_room_area_factor,
+        extend_near_miss_sbs=extend_near_miss_sbs,
+        near_miss_gap_tol_pt=near_miss_gap_tol_pt,
+        near_miss_require_semantic=near_miss_require_semantic,
+        extension_provenance_out=extension_provenance_out,
     )
 
     cell_polys: list[tuple[dict, Polygon]] = []
@@ -456,26 +539,76 @@ def detect_rooms_polygonize(consensus: dict, labels: list[dict],
 
     rooms: list[dict] = []
     for ci in sorted(cell_to_labels.keys()):
-        cell, _poly = cell_polys[ci]
+        cell, cell_poly = cell_polys[ci]
         lbls = cell_to_labels[ci]
         merged = len(lbls) > 1
         names = [lb["name"] for lb in lbls]
         label_ids = [lb.get("id") for lb in lbls if lb.get("id") is not None]
-        room: dict = {
-            "id": f"r{len(rooms):03d}",
-            "name": " | ".join(names) if merged else names[0],
-            "label_id": label_ids[0] if not merged and label_ids else None,
-            "seed_pt": list(lbls[0]["seed_pt"]),
-            "polygon_pts": cell["polygon_pts"],
-            "area_pts2": cell["area_pts2"],
-            "centroid": cell["centroid"],
-            "method": "polygonize",
-        }
-        if merged:
-            room["label_ids"] = label_ids
-            room["merged_seeds"] = [list(lb["seed_pt"]) for lb in lbls]
-            room["metadata"] = {"warnings": ["seeds_share_cell"]}
-        rooms.append(room)
+
+        # When the cell carries multiple seeds AND the Voronoi fallback
+        # is enabled, split the cell into one sub-polygon per seed.
+        # Polygonize's "seeds_share_cell" warning is the primary trigger
+        # — it signals that the wall/SB network couldn't separate the
+        # rooms, so we use seed positions as a backstop divisor. The
+        # resulting boundaries are equidistant bisectors, NOT real
+        # architectural divisions; the provenance log records the
+        # approximation so downstream code can flag the room as
+        # voronoi-derived.
+        did_voronoi = False
+        if merged and voronoi_subdivide_merged_cells:
+            sub_polys = _voronoi_subdivide_merged_cell(cell_poly, lbls)
+            if sub_polys:
+                did_voronoi = True
+                source_cell_id = f"polygonize_cell_{ci}"
+                for lb, poly_pts, area in sub_polys:
+                    sub_lid = lb.get("id")
+                    seed_pt = list(lb["seed_pt"])
+                    sub_room = {
+                        "id": f"r{len(rooms):03d}",
+                        "name": lb["name"],
+                        "label_id": sub_lid,
+                        "seed_pt": seed_pt,
+                        "polygon_pts": poly_pts,
+                        "area_pts2": area,
+                        "centroid": [round(sum(p[0] for p in poly_pts) /
+                                           len(poly_pts), 3),
+                                     round(sum(p[1] for p in poly_pts) /
+                                           len(poly_pts), 3)],
+                        "method": "polygonize+voronoi",
+                        "metadata": {
+                            "warnings": ["voronoi_sub_split_from_shared_cell"],
+                            "voronoi_source_cell_id": source_cell_id,
+                        },
+                    }
+                    rooms.append(sub_room)
+                    if voronoi_provenance_out is not None:
+                        voronoi_provenance_out.append({
+                            "source_cell_id": source_cell_id,
+                            "source_cell_polygon_pts": cell["polygon_pts"],
+                            "source_cell_area_pts2": cell["area_pts2"],
+                            "assigned_label_id": sub_lid,
+                            "assigned_label_name": lb["name"],
+                            "assigned_seed_pt": seed_pt,
+                            "sub_polygon_area_pts2": area,
+                            "reason_code": "voronoi_subdivide_merged_cell",
+                        })
+
+        if not did_voronoi:
+            room: dict = {
+                "id": f"r{len(rooms):03d}",
+                "name": " | ".join(names) if merged else names[0],
+                "label_id": label_ids[0] if not merged and label_ids else None,
+                "seed_pt": list(lbls[0]["seed_pt"]),
+                "polygon_pts": cell["polygon_pts"],
+                "area_pts2": cell["area_pts2"],
+                "centroid": cell["centroid"],
+                "method": "polygonize",
+            }
+            if merged:
+                room["label_ids"] = label_ids
+                room["merged_seeds"] = [list(lb["seed_pt"]) for lb in lbls]
+                room["metadata"] = {"warnings": ["seeds_share_cell"]}
+            rooms.append(room)
 
     if dropped:
         md = consensus.setdefault("metadata", {})

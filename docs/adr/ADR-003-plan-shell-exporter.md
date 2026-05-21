@@ -233,3 +233,138 @@ The change is purely additive — three new files, one new directory
 under `runs/` (gitignored), one new ADR. No production code is
 modified. Reverting only removes the experimental exporter; the
 production pipeline is unaffected because it never used it.
+---
+
+## 8. 2026-05-21 — Floor_r001 split (SB extension + Voronoi)
+
+The Floor_r001 merge identified by manual review of planta_74
+(`A.S. | TERRACO SOCIAL | TERRACO TECNICO` collapsed into a single
+196-vertex cell; analogous `SALA DE JANTAR | SALA DE ESTAR` case)
+is addressed here by two opt-in, layered fixes applied in order.
+Both layers default OFF — production callers see byte-equivalent
+behaviour. Note: the diagnostic harness referenced inside this
+section (`tools/diagnose_room_polygons.py`, `tools/audit_soft_barriers.py`)
+is NOT on develop as of this PR; it is tracked in a separate
+follow-up. References to those tools below describe the eventual
+end-state, not the current repo:
+
+### Layer 1 — Near-miss soft_barrier extension
+
+Implementation in `tools/polygonize_rooms.py`:
+
+  - `extend_near_miss_soft_barriers(walls, soft_barriers, base_cells, t, ...)`
+    — public helper that probes each polyline endpoint for a near-miss
+    extension up to `gap_tol_pt` (default 8 pt).
+  - Safety guards:
+      * FP-006 wall-coincidence: SBs whose polyline overlaps a wall
+        axis by > 50 % are NEVER extended (they're the noise the
+        FP-006 filter exists to reject).
+      * Semantic origin: by default only SBs with
+        `geometry_origin = "human_annotation"` OR
+        `barrier_type ∈ {peitoril, mureta, guarda_corpo, esquadria,
+        parapet}` are eligible. Operator can opt out via
+        `near_miss_require_semantic=False` (CLI: `--no-semantic-guard`).
+      * Deep-interior endpoints (a polyline endpoint sitting inside
+        any suspicious cell) are skipped — there's no near-miss to
+        recover.
+  - Post-extension validation: `_validate_extension_effectiveness`
+    re-runs `_polygonize_cells_only` with the candidate-extended SBs
+    and accepts the extension only when one of:
+      * `cell_count_after > cell_count_before` (a split occurred), OR
+      * any baseline suspicious cell's area shrank by ≥ 20 %.
+    Rejected candidates are still recorded in the provenance log
+    with `applied=False` so the audit trail shows what was tried.
+
+The flag in `polygonize_rooms()` is `extend_near_miss_sbs=False` by
+default; downstream callers see byte-equivalent behaviour.
+
+### Layer 2 — Voronoi sub-division of merged-seed cells
+
+Implementation in `tools/rooms_from_seeds.py`:
+
+  - `_voronoi_subdivide_merged_cell(cell_poly, seed_labels)` —
+    private helper. Given a cell containing ≥ 2 seed labels,
+    computes `shapely.ops.voronoi_diagram` over the seed points
+    bounded by the cell polygon, clips each Voronoi region against
+    the cell, and returns one sub-polygon per seed.
+  - Triggered by `voronoi_subdivide_merged_cells=True` in
+    `detect_rooms_polygonize`. Each sub-room carries
+    `method="polygonize+voronoi"` and a metadata warning
+    `voronoi_sub_split_from_shared_cell` so downstream code can
+    distinguish architecturally-derived rooms from Voronoi
+    approximations.
+
+### Standalone runner
+
+`tools/apply_room_polygon_fixes.py` chains both layers:
+
+```
+python -m tools.apply_room_polygon_fixes \
+  fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json \
+  --out runs/planta_74_after.json \
+  --extend-near-miss-sbs \
+  --voronoi-subdivide
+```
+
+Writes both the new consensus and a `<out>.fix_provenance.json`
+sidecar with `applied_extensions`, `rejected_extensions`,
+`voronoi_subdivisions`, and before/after room counts.
+
+### Outcome on planta_74
+
+| Metric | Before | After (voronoi + ext) |
+|---|---|---|
+| Room count | 8 | **11** |
+| Suspicious merges | 3 | 1 (SUITE 01 area outlier — legitimate) |
+| r001 name | `A.S. \| TERRACO SOCIAL \| TERRACO TECNICO` | A.S. + TERRACO SOCIAL + TERRACO TECNICO (3 rooms) |
+| r002 name | `SALA DE JANTAR \| SALA DE ESTAR` | SALA DE JANTAR + SALA DE ESTAR (2 rooms) |
+| Plan-shell `with_floors` invariants | 9 PASS / 0 WARN / 0 FAIL | 12 PASS / 0 WARN / 0 FAIL |
+| SB extension applied on planta_74 | n/a | 0 applied / 1 rejected (validator vetoed sb004) |
+
+The SB-extension layer's REJECTED candidate is the honest answer:
+on planta_74 the available SB geometry is insufficient for
+single-endpoint extension to bisect the 3-way merged cell, even with
+gap_tol=8 pt. Voronoi resolves the merge correctly. This falsifies
+the hypothesis "SB extension alone fixes Floor_r001" — recorded in
+`tests/test_room_polygon_fixes.py::
+test_planta_74_sb_extension_alone_does_not_split_r001`.
+
+### What this does NOT do
+
+- Does NOT touch `tools/consume_consensus.rb`.
+- Does NOT modify the consensus schema.
+- Does NOT promote any soft_barrier `warn` from the audit to `keep`
+  (the audit decision lives in `audit_soft_barriers.py` reports and
+  remains independent of the SB extension feature).
+- Does NOT delete any soft_barrier.
+- Does NOT change the smoke harness default.
+- Does NOT alter the default plan-shell exporter behaviour — all
+  flags are opt-in.
+
+### Limitations
+
+- Voronoi sub-division produces equidistant bisectors, NOT real
+  architectural divisors. Areas / bbox of sub-rooms are approximate
+  (e.g., the A.S. true area is ≈ 2.5 m² per CLAUDE.md baseline, but
+  the Voronoi split gives ≈ 9 m² because A.S. occupies less than
+  one-third of the merged cell by physical division — the bisector
+  cuts it equally). For accurate areas the operator should paint
+  additional CYAN human soft_barriers on the divisors.
+- Layer 1 (near-miss extension) is best suited to small adjustments
+  (≤ 8 pt ≈ 28 cm at planta_74 scale). Larger gaps need new SBs in
+  the source, not extension.
+- The semantic-origin guard depends on `geometry_origin` /
+  `barrier_type` being populated correctly. V7 extractor SBs without
+  these fields are skipped by default — that's intentional but means
+  on some PDFs the operator must add the metadata or pass
+  `--no-semantic-guard`.
+
+### Reversal
+
+```
+git revert <fix commit hash>
+```
+
+Or per-call: pass `extend_near_miss_sbs=False` and
+`voronoi_subdivide_merged_cells=False` (the defaults). All
+production callers without flag changes are unaffected.
