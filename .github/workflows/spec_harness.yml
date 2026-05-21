@@ -23,6 +23,7 @@ on:
       - "specs/**"
       - "fixtures/planta_74/**"
       - "tools/spec_harness.py"
+      - "tools/lint_specs.py"
       - "tools/polygonize_rooms.py"
       - "tools/rooms_from_seeds.py"
       - "tools/build_plan_shell_skp.{py,rb}"
@@ -36,6 +37,13 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+
+# Cancel an in-flight harness run when a newer commit lands on the
+# same PR / branch. Saves CI minutes and ensures the comment on the
+# PR always reflects the latest commit (not a stale one).
+concurrency:
+  group: spec-harness-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   spec-harness:

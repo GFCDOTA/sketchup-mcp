@@ -33,6 +33,12 @@ dependencies = [
   "mcp>=1.27,<2.0",
   "Pillow>=10.0,<12.0",
   "matplotlib>=3.7,<4.0",
+  # Used by tools/spec_harness.py + tools/lint_specs.py +
+  # tools/new_spec_contract.py + tools/spec_coverage_report.py.
+  # Previously pulled in transitively by `mcp` / `anthropic`;
+  # promoted to explicit dep so SDD framework keeps working if a
+  # transitive provider ever drops it (2026-05-21).
+  "PyYAML>=6.0,<7.0",
 ]
 
 [project.optional-dependencies]
