@@ -304,17 +304,24 @@ def test_soft_barriers_footprint_below_relative_ceiling_warn() -> None:
 
 
 def test_total_top_level_groups_matches_components() -> None:
-    """Plan shell + floors + soft barriers — no orphan groups."""
+    """Plan shell + floors + soft barriers + door leaves + windows +
+    glazed balconies + passage markers — no orphan groups."""
     r = _load_report()
     total = r["totals"]["top_level_groups"]
     shell = 1 if _plan_shell(r) else 0
     floors = len(_groups_by_prefix(r, "Floor_Group_"))
     barriers = len(_groups_by_prefix(r, "SoftBarrier_Group_"))
-    accounted = shell + floors + barriers
+    doors = len(_groups_by_prefix(r, "DoorLeaf_Group_"))
+    windows = len(_groups_by_prefix(r, "Window_Group_"))
+    glazed = len(_groups_by_prefix(r, "GlazedBalcony_Group_"))
+    passages = len(_groups_by_prefix(r, "PassageMarker_Group_"))
+    accounted = shell + floors + barriers + doors + windows + glazed + passages
     assert total == accounted, (
         f"total_top_level_groups={total} but accounted for "
         f"{accounted} (shell={shell}, floors={floors}, "
-        f"barriers={barriers}) — investigate orphan groups"
+        f"barriers={barriers}, doors={doors}, windows={windows}, "
+        f"glazed={glazed}, passages={passages}) — investigate orphan "
+        f"groups"
     )
 
 
@@ -385,11 +392,23 @@ def test_every_consensus_opening_has_a_real_gap_in_shell() -> None:
 
 def test_no_unrecognized_top_level_group_name() -> None:
     """REGRESSION: every top-level Group must match one of the known
-    semantic prefixes (PlanShell_Group, Floor_Group_*, SoftBarrier_Group_*).
-    An "unnamed" or unrecognised top-level group means the exporter
-    leaked something the user can't classify visually."""
+    semantic prefixes. An unnamed or unrecognised top-level group
+    means the exporter leaked something the user can't classify
+    visually.
+
+    Phase 2 added door leaves, window panels, glazed balconies, and
+    passage markers — each as its own top-level group separate from
+    PlanShell_Group."""
     r = _load_report()
-    known_prefixes = ("PlanShell_Group", "Floor_Group_", "SoftBarrier_Group_")
+    known_prefixes = (
+        "PlanShell_Group",
+        "Floor_Group_",
+        "SoftBarrier_Group_",
+        "DoorLeaf_Group_",
+        "Window_Group_",
+        "GlazedBalcony_Group_",
+        "PassageMarker_Group_",
+    )
     offenders = []
     for g in r["groups_diagnostic"]:
         name = g["name"] or ""
@@ -397,9 +416,9 @@ def test_no_unrecognized_top_level_group_name() -> None:
             offenders.append(name or "(empty name)")
     assert not offenders, (
         f"Top-level groups with unrecognised names: {offenders}. "
-        f"Every group must be classifiable as wall_shell, floor, or "
-        f"soft_barrier. Unknown groups are a regression — add them "
-        f"to the known set OR fix the exporter to not emit them."
+        f"Every group must be classifiable. Unknown groups are a "
+        f"regression — add them to the known set OR fix the exporter "
+        f"to not emit them."
     )
 
 

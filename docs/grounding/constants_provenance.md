@@ -38,6 +38,23 @@ audits how badly we cannot answer it today.
 | `ROOM_PALETTE` | 11 RGB triples | `aesthetic` | Pastéis aleatórios escolhidos pra distinguir 11 cômodos. Sem fonte | nenhuma (é estético) |
 | `SOFT_BARRIER_THICKNESS_IN` | `1.5` | `inherited_from_consume_consensus` | consume_consensus.rb usa 1.5 in (≈ 3.8 cm) como espessura de slab pra peitoril/esquadria. **Sem fonte arquitetônica conhecida.** Real espessura de peitoril em construção: 2-15 cm dependendo material (alvenaria 9-15 cm, vidro com perfil 2-5 cm). 3.8 cm é razoável pra perfil de esquadria de alumínio, irreal pra peitoril de alvenaria | medir peitorils reais OU citar referência de construção residencial |
 
+### Phase 2 visual parity constants (added 2026-05-20)
+
+| Constante | Valor | Classificação | Fonte real | Ação pendente |
+|---|---|---|---|---|
+| `DOOR_HEIGHT_M` | `2.10` | `inherited_from_consume_consensus` | Convenção pé-direito de porta residencial. NBR 15575-1 não especifica; senso comum / catálogo de marcenaria padrão 2.10 m | citar referência (catálogo Pormade / Lafer / qualquer fabricante residencial) |
+| `DOOR_THICK_M` | `0.04` | `inherited_from_consume_consensus` | 4 cm é folha de porta MDF interna típica (3.5-4.5 cm). Sem citação | citar catálogo |
+| `DOOR_RGB` | `[140, 95, 55]` | `aesthetic` + `inherited_from_consume_consensus` | Madeira escura, escolha visual | nenhuma |
+| `DOOR_SWING_DEG` | `30.0` | `inherited_from_consume_consensus` | "Visual swing angle pra renderização" — não tem base arquitetônica, é só pra reviewer ver que a porta abre. Convenção em planta baixa BR é 90° aberta (símbolo arco completo); 30° foi escolha de quem desenhou o exporter | poderia ser parametrizado por opening (ABNT NBR 6492 §6.1 desenho arquitetônico). Mas pra Phase 1, 30° é OK |
+| `WINDOW_SILL_M` | `0.90` | `inherited_from_consume_consensus` (suspeita NBR 14718) | NBR 14718:2014 (vidros pra esquadrias) usa 0.90 m como peitoril padrão pra janela residencial. NBR 9050 também | citar NBR 14718 §X |
+| `WINDOW_HEAD_M` | `2.10` | `inherited_from_consume_consensus` | Convenção: verga de janela alinhada com porta. NBR 15575 não impõe valor | mesma fonte que DOOR_HEIGHT_M |
+| `GLASS_RGB` | `[180, 220, 240]` | `aesthetic` | Azul-vidro com tinta clara | nenhuma |
+| `GLASS_ALPHA` | `0.45` | `aesthetic` | Opacidade 45% pra ler como vidro | nenhuma |
+| `LINTEL_RGB` | `[110, 115, 120]` | `aesthetic` | Cinza-concreto pra verga | nenhuma |
+| `PASSAGE_RGB` | `[102, 187, 230]` | `aesthetic` | Azul claro pra destacar marker em axon | nenhuma |
+| `PASSAGE_MARKER_HEIGHT_IN` | `1.0` | `inherited_from_consume_consensus` | 1 in ≈ 2.5 cm. Marker visual, não estrutural. Sem fonte arquitetônica | nenhuma (é marcador, não geometria real) |
+| `CARVING_ORIGINS` | `{svg_arc, svg_segments, human_annotation}` | `inherited_from_consume_consensus` | Set de geometry_origin values que disparam carving 2D. wall_gap é excluído porque a geometria já está nas walls do consensus. Conhecido no docstring do consume_consensus.rb | nenhuma — é convenção interna do pipeline |
+
 ## Audit — `tools/build_plan_shell_skp.py`
 
 | Constante | Valor | Classificação | Fonte real | Ação pendente |

@@ -36,6 +36,38 @@ PARAPET_HEIGHT_IN = PARAPET_HEIGHT_M * M_TO_IN
 
 WALL_RGB    = [78, 78, 78]     # same as consume_consensus.rb wall_dark
 PARAPET_RGB = [130, 135, 140]  # same as consume_consensus.rb parapet
+
+# ---- Phase 2 visual-parity constants (ports from consume_consensus.rb)
+# All inherit consume_consensus.rb's values; provenance recorded in
+# docs/grounding/constants_provenance.md as inherited_from_consume_consensus.
+
+# Door leaf (for kind=interior_door / door_arc)
+DOOR_HEIGHT_M    = 2.10
+DOOR_THICK_M     = 0.04
+DOOR_HEIGHT_IN   = DOOR_HEIGHT_M * M_TO_IN
+DOOR_THICK_IN    = DOOR_THICK_M  * M_TO_IN
+DOOR_RGB         = [140, 95, 55]   # madeira escura
+DOOR_SWING_DEG   = 30.0            # visual swing angle
+
+# Window panel (for kind=window). 3 bands: sill / glass / lintel.
+WINDOW_SILL_M    = 0.90            # peitoril height
+WINDOW_HEAD_M    = 2.10            # verga bottom
+WINDOW_SILL_IN   = WINDOW_SILL_M * M_TO_IN
+WINDOW_HEAD_IN   = WINDOW_HEAD_M * M_TO_IN
+GLASS_RGB        = [180, 220, 240] # azul-glass
+GLASS_ALPHA      = 0.45
+LINTEL_RGB       = [110, 115, 120]
+
+# Passage marker (for openings with geometry_origin=wall_gap that
+# weren't carved). Thin floor-level rect for visibility.
+PASSAGE_MARKER_HEIGHT_IN = 1.0     # ~2.5 cm above floor
+PASSAGE_RGB              = [102, 187, 230]  # azul claro destacado
+
+# Mirror of CARVING_ORIGINS in tools/build_plan_shell_skp.py — kept
+# in sync manually. Used to decide which openings get a leaf/panel
+# rendered (carved) vs which only get a passage marker (already in
+# wall data).
+CARVING_ORIGINS = ['svg_arc', 'svg_segments', 'human_annotation'].freeze
 ROOM_PALETTE = [               # same as consume_consensus.rb ROOM_PALETTE
   [253, 226, 192], [200, 230, 201], [187, 222, 251], [248, 187, 208],
   [220, 237, 200], [255, 224, 178], [209, 196, 233], [179, 229, 252],
@@ -334,6 +366,208 @@ def build_soft_barrier(parent_ents, barrier, material, index,
     'segments_skipped_overlap' => segments_skipped_overlap,
     'segments_skipped_facefail' => segments_skipped_facefail,
   }
+end
+
+# ---- opening renderers (Phase 2 visual parity) --------------------
+
+def opening_kind_v5(op)
+  # Normalise the opening's semantic kind. consume_consensus.rb keys
+  # off `kind_v5` with fallback to legacy `kind`. The strings we care
+  # about: interior_door | interior_passage | window | glazed_balcony.
+  k = op['kind_v5'] || op['kind'] || 'interior_door'
+  return 'interior_door'   if k == 'door_arc' || k == 'door'
+  return 'interior_passage' if k == 'open_passage' || k == 'passage'
+  k
+end
+
+def opening_axis_basis(host_wall)
+  # Returns the axis the wall runs along (0=x, 1=y), the cross axis,
+  # and the centerline coordinate on the cross axis.
+  if host_wall['orientation'] == 'h'
+    [0, 1, host_wall['start'][1].to_f]
+  else
+    [1, 0, host_wall['start'][0].to_f]
+  end
+end
+
+def opening_carve_corners_pdf(opening, host_wall, thickness_pt)
+  # Mirror of opening_carve_rect in build_plan_shell_skp.py.
+  # Returns the 4 PDF-point corners of the opening rectangle aligned
+  # with the host wall.
+  half = thickness_pt / 2.0
+  cx, cy = opening['center']
+  w = opening['opening_width_pts'].to_f
+  half_w = w / 2.0
+  if host_wall['orientation'] == 'h'
+    wall_cy = host_wall['start'][1].to_f
+    [
+      [cx - half_w, wall_cy - half],
+      [cx + half_w, wall_cy - half],
+      [cx + half_w, wall_cy + half],
+      [cx - half_w, wall_cy + half],
+    ]
+  else
+    wall_cx = host_wall['start'][0].to_f
+    [
+      [wall_cx - half, cy - half_w],
+      [wall_cx + half, cy - half_w],
+      [wall_cx + half, cy + half_w],
+      [wall_cx - half, cy + half_w],
+    ]
+  end
+end
+
+def emit_band_at(parent_ents, corners_pdf, z_bottom_in, z_top_in, material, name)
+  # Build a 3D box from a 2D footprint between two z heights. Used by
+  # window panels (sill / glass / lintel). Returns the sub-group.
+  pts_pdf = corners_pdf
+  # Move to z_bottom, then pushpull to z_top.
+  base_pts = pts_pdf.map { |p|
+    Geom::Point3d.new(p[0] * PT_TO_IN, p[1] * PT_TO_IN, z_bottom_in)
+  }
+  group = parent_ents.add_group
+  group.name = name
+  face = group.entities.add_face(base_pts)
+  return nil if face.nil?
+  face.reverse! if face.normal.z < 0
+  face.pushpull(z_top_in - z_bottom_in)
+  group.entities.grep(Sketchup::Face).each do |f|
+    f.material      = material
+    f.back_material = material
+  end
+  group
+end
+
+def build_door_leaf(parent_ents, opening, host_wall, _thickness_pt, material, index)
+  # Renders a thin rotating leaf (DOOR_THICK_M × opening_width)
+  # hinged at one end of the opening, rotated DOOR_SWING_DEG open.
+  # The leaf lives in its own top-level Group (DoorLeaf_Group_<id>),
+  # NOT inside PlanShell_Group — leaves are a separate visual layer.
+  # _thickness_pt retained for caller symmetry with the other
+  # opening renderers (each receives the same signature).
+  axis_idx, _cross_idx, cross_value = opening_axis_basis(host_wall)
+  cx, cy = opening['center']
+  along = axis_idx == 0 ? cx.to_f : cy.to_f
+  width_pt = opening['opening_width_pts'].to_f
+  hinge_side = opening['hinge_side'] || opening['hinge'] || 'left'
+
+  # Hinge end along the wall axis.
+  hinge_along = (hinge_side == 'right') ? along + width_pt / 2.0 : along - width_pt / 2.0
+  far_along   = (hinge_side == 'right') ? along - width_pt / 2.0 : along + width_pt / 2.0
+
+  # Place leaf on one face of the wall (offset by half thickness on the
+  # cross axis). Closed leaf base: a rectangle hinge_along..far_along
+  # along the wall axis × DOOR_THICK_IN across.
+  cross_offset_pt = host_wall['thickness'].to_f / 2.0
+  # Leaf sits aligned with one wall face — pick the side based on
+  # opening direction. We don't have side info; use cross+offset.
+  cross_base = cross_value + cross_offset_pt
+
+  # Build the leaf's flat footprint at z=0, then pushpull to DOOR_HEIGHT.
+  if axis_idx == 0
+    # Horizontal wall — leaf footprint along x, thickness along y
+    base_corners = [
+      [hinge_along, cross_base],
+      [far_along,   cross_base],
+      [far_along,   cross_base + DOOR_THICK_M / PT_TO_M],
+      [hinge_along, cross_base + DOOR_THICK_M / PT_TO_M],
+    ]
+  else
+    base_corners = [
+      [cross_base,                         hinge_along],
+      [cross_base + DOOR_THICK_M / PT_TO_M, hinge_along],
+      [cross_base + DOOR_THICK_M / PT_TO_M, far_along],
+      [cross_base,                         far_along],
+    ]
+  end
+  pts = base_corners.map { |p| Geom::Point3d.new(p[0] * PT_TO_IN, p[1] * PT_TO_IN, 0) }
+
+  group = parent_ents.add_group
+  group.name = "DoorLeaf_Group_#{opening['id'] || index}"
+  face = group.entities.add_face(pts)
+  if face.nil?
+    group.erase!
+    return {'ok' => false, 'reason' => 'door leaf add_face nil'}
+  end
+  face.reverse! if face.normal.z < 0
+  face.pushpull(DOOR_HEIGHT_IN)
+  group.entities.grep(Sketchup::Face).each do |f|
+    f.material      = material
+    f.back_material = material
+  end
+
+  # Rotate around hinge axis by DOOR_SWING_DEG.
+  hinge_world = Geom::Point3d.new(
+    hinge_along * PT_TO_IN,
+    (axis_idx == 0 ? cross_base : hinge_along) * PT_TO_IN,
+    0,
+  )
+  hinge_axis = Geom::Vector3d.new(0, 0, 1)
+  hinge_xform = Geom::Transformation.rotation(
+    hinge_world, hinge_axis,
+    DOOR_SWING_DEG * Math::PI / 180.0,
+  )
+  group.transform!(hinge_xform)
+
+  {'ok' => true, 'group' => group}
+end
+
+def build_window_panel(parent_ents, opening, host_wall, thickness_pt,
+                        sill_mat, glass_mat, lintel_mat, index)
+  # 3-band window: sill (0 → 0.9 m) + glass (0.9 → 2.1 m) + lintel (2.1 → 2.7 m).
+  # Each band is a sub-group inside Window_Group_<id> wrapper.
+  corners = opening_carve_corners_pdf(opening, host_wall, thickness_pt)
+  group = parent_ents.add_group
+  group.name = "Window_Group_#{opening['id'] || index}"
+
+  oid = opening['id'] || index.to_s
+  sill = emit_band_at(group.entities, corners, 0.0, WINDOW_SILL_IN,
+                     sill_mat, "Window_#{oid}_sill")
+  glass = emit_band_at(group.entities, corners, WINDOW_SILL_IN, WINDOW_HEAD_IN,
+                      glass_mat, "Window_#{oid}_glass")
+  lintel = emit_band_at(group.entities, corners, WINDOW_HEAD_IN, WALL_HEIGHT_IN,
+                       lintel_mat, "Window_#{oid}_lintel")
+  built = [sill, glass, lintel].compact.length
+  if built == 0
+    group.erase!
+    return {'ok' => false, 'reason' => 'window panel: all 3 bands failed'}
+  end
+  {'ok' => true, 'group' => group, 'bands_built' => built}
+end
+
+def build_glazed_balcony(parent_ents, opening, host_wall, thickness_pt,
+                         glass_mat, index)
+  # Full-height glass (porta-vidro). Single sub-group sweeping 0 → WALL_HEIGHT_IN.
+  corners = opening_carve_corners_pdf(opening, host_wall, thickness_pt)
+  group = parent_ents.add_group
+  group.name = "GlazedBalcony_Group_#{opening['id'] || index}"
+  oid = opening['id'] || index.to_s
+  pane = emit_band_at(group.entities, corners, 0.0, WALL_HEIGHT_IN,
+                     glass_mat, "GlazedBalcony_#{oid}_pane")
+  if pane.nil?
+    group.erase!
+    return {'ok' => false, 'reason' => 'glazed_balcony pane add_face nil'}
+  end
+  {'ok' => true, 'group' => group}
+end
+
+def build_passage_marker(parent_ents, opening, host_wall, thickness_pt,
+                          material, index)
+  # Thin floor-level rect (PASSAGE_MARKER_HEIGHT_IN ≈ 2.5 cm) to make
+  # the opening visible in the model. Used for wall_gap-origin
+  # openings whose gap is already in the wall data (not carved by us).
+  corners = opening_carve_corners_pdf(opening, host_wall, thickness_pt)
+  group = parent_ents.add_group
+  group.name = "PassageMarker_Group_#{opening['id'] || index}"
+  oid = opening['id'] || index.to_s
+  marker = emit_band_at(group.entities, corners, 0.0,
+                       PASSAGE_MARKER_HEIGHT_IN,
+                       material, "PassageMarker_#{oid}_band")
+  if marker.nil?
+    group.erase!
+    return {'ok' => false, 'reason' => 'passage marker add_face nil'}
+  end
+  {'ok' => true, 'group' => group}
 end
 
 # ---- camera + screenshots -----------------------------------------
@@ -657,6 +891,85 @@ elsif sb_mode == 'skip'
                      "intentionally not emitted; expect fidelity impact."
 end
 puts "[rb] soft_barriers: built=#{sb_built} skipped=#{sb_skipped}"
+
+# 4. Opening renderers (Phase 2 visual parity).
+# Dispatch each consensus.openings entry to the appropriate renderer
+# based on kind_v5 + geometry_origin. Door leaves, window panels,
+# glazed balconies, and passage markers are each emitted as top-level
+# Groups separate from PlanShell_Group — never inside the wall shell.
+openings = consensus['openings'] || []
+walls_by_id = consensus['walls'].each_with_object({}) do |w, h|
+  h[w['id']] = w if w['id']
+end
+thickness_pt = consensus['wall_thickness_pts'] || 5.4
+
+door_mat = model.materials.add('plan_door')
+door_mat.color = Sketchup::Color.new(*DOOR_RGB)
+sill_mat = model.materials.add('plan_window_sill')
+sill_mat.color = Sketchup::Color.new(*PARAPET_RGB)
+glass_mat = model.materials.add('plan_window_glass')
+glass_mat.color = Sketchup::Color.new(*GLASS_RGB)
+glass_mat.alpha = GLASS_ALPHA
+lintel_mat = model.materials.add('plan_window_lintel')
+lintel_mat.color = Sketchup::Color.new(*LINTEL_RGB)
+passage_mat = model.materials.add('plan_passage_marker')
+passage_mat.color = Sketchup::Color.new(*PASSAGE_RGB)
+
+door_built = 0
+window_built = 0
+glazed_built = 0
+passage_built = 0
+opening_skips = []
+
+openings.each_with_index do |op, i|
+  host = walls_by_id[op['wall_id']]
+  if host.nil?
+    opening_skips << "op[#{i}] #{op['id']}: no host wall #{op['wall_id'].inspect}"
+    next
+  end
+  kind = opening_kind_v5(op)
+  origin = op['geometry_origin'] || ''
+  carved = CARVING_ORIGINS.include?(origin)
+
+  case kind
+  when 'interior_door'
+    if carved
+      res = build_door_leaf(model.active_entities, op, host,
+                           thickness_pt, door_mat, i)
+      door_built += 1 if res['ok']
+      opening_skips << "op[#{i}] door: #{res['reason']}" unless res['ok']
+    else
+      # geometry already in wall data; emit a passage marker so the
+      # opening is visible to the reviewer.
+      res = build_passage_marker(model.active_entities, op, host,
+                                thickness_pt, passage_mat, i)
+      passage_built += 1 if res['ok']
+    end
+  when 'interior_passage'
+    # No leaf rendered (vão livre). Marker only if not carved.
+    unless carved
+      res = build_passage_marker(model.active_entities, op, host,
+                                thickness_pt, passage_mat, i)
+      passage_built += 1 if res['ok']
+    end
+  when 'window'
+    res = build_window_panel(model.active_entities, op, host,
+                            thickness_pt,
+                            sill_mat, glass_mat, lintel_mat, i)
+    window_built += 1 if res['ok']
+    opening_skips << "op[#{i}] window: #{res['reason']}" unless res['ok']
+  when 'glazed_balcony'
+    res = build_glazed_balcony(model.active_entities, op, host,
+                              thickness_pt, glass_mat, i)
+    glazed_built += 1 if res['ok']
+    opening_skips << "op[#{i}] glazed: #{res['reason']}" unless res['ok']
+  else
+    opening_skips << "op[#{i}] unknown kind #{kind.inspect}"
+  end
+end
+puts "[rb] openings: doors=#{door_built} windows=#{window_built} " \
+     "glazed=#{glazed_built} passage=#{passage_built} " \
+     "skipped=#{opening_skips.length}"
 
 model.commit_operation
 
