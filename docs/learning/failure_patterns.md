@@ -340,3 +340,94 @@ as the regression gate (max 1 m distance from opening center).
 **See also:** ADR-003 §3 (Phase 2 visual parity, where the bug
 shipped); FP-014 (autorun cleanup — same author's pattern of bugs
 that "look fine in tests but fail visually in SU").
+
+## FP-023 — Python subprocess.terminate of SU confuses user about SKP stability (2026-05-23)
+
+**Symptom:** User reports "abriu o SketchUp e fechou rápido" when
+opening an SKP that the agent had just generated. Agent verifies
+SU launches and stays alive 27+ seconds via `cmd /c start`; SKP is
+structurally valid; inspector reports correct topology. Disconnect.
+
+**Root cause:** Agent's helper Python launchers
+(`_run_add_window.py`, `_render_view.py`, `_inspect_skp.py`,
+`_reframe.py`) all follow the same pattern:
+```python
+proc = subprocess.Popen([SU, target_skp])
+... poll for done marker ...
+proc.terminate()    # ← kills SU
+```
+The user opening the SKP manually in parallel saw an SU instance
+appear (could be theirs OR the agent's), then disappear when one
+of the agent's helpers fired its `proc.terminate()`. The agent
+attributed the close to a bug in the SKP; the user attributed it
+to the agent's previous "broken" output.
+
+**Rule:** When the agent's workflow uses SU as a headless renderer
+(launch → run plugin → terminate), declare it loudly in the
+session log. The user must know:
+
+- "I'm about to launch SU on `target.skp` and terminate it after
+  the plugin writes the done marker (~5–15s)."
+- "If you have SU open right now or open it during this command,
+  my terminate may catch your instance too."
+
+For long-form interactive work (user opens SKP to inspect), the
+agent must NOT have a pending `proc.terminate()`. Kill any
+agent-launched SU explicitly with `taskkill /IM SketchUp.exe /F`
+BEFORE telling the user "now open the file".
+
+**Anti-pattern signal:** generating a sequence of agent SU runs in
+the same session where the user might be trying to open the output
+SKP in parallel; reporting "SU opens fine in my tests" without
+mentioning that the agent's tests TERMINATE SU as part of the run.
+
+**Repair pattern:**
+```python
+# Always log the lifecycle
+print(f"[agent] launching SU on {target}")
+proc = subprocess.Popen([SU, target])
+...
+proc.terminate()
+print(f"[agent] terminated SU PID {proc.pid}")
+# Before handing off to user:
+subprocess.run(["taskkill", "/IM", "SketchUp.exe", "/F"])
+print("[agent] all SU instances killed; safe to open manually")
+```
+
+### Formal runner-mode protocol (2026-05-23, user-mandated)
+
+Every SU runner (Python launcher, helper, harness) MUST declare its
+runtime mode and behave accordingly. **Safe default is `interactive`
+— do NOT terminate SU automatically.**
+
+| Mode | When to use | Termination behaviour |
+|---|---|---|
+| `headless` / `ci` | Automated CI; agent self-tests; smoke gates | MAY terminate the child process the runner itself launched. NEVER `taskkill /IM` other SU instances. |
+| `interactive` / `debug` | Local development; agent in a user session | MUST NOT terminate. Print done marker, wait for user to close SU. |
+| `attach` / `manual` | User opened SU; runner just consumes events | NEVER touch any SU process. No `Popen`, no `terminate`, no `taskkill`. |
+
+The marker file (`_*_done.txt`) means **"artifact ready"**, NOT
+"kill SU". Termination is a separate decision driven by mode.
+
+### Implementation requirements
+
+Every `_run_*.py`, `*launcher*.py`, or tool that calls `Popen` on
+`SketchUp.exe` must:
+
+1. Read mode from `RUN_MODE` env var OR `--mode {headless,interactive,attach}` CLI flag OR `--no-terminate` shorthand.
+2. Default to `interactive` when neither is set.
+3. Print the chosen mode at launch: `[su-runner] mode=interactive; will NOT terminate SU on done`.
+4. In docstring/help: declare whether the runner is destructive to external SU processes.
+5. In `headless` mode, only terminate `proc.pid` (own child); never `taskkill /IM`.
+
+### Reference helper
+
+`tools/su_runner_safety.py` provides `parse_mode`,
+`should_terminate(mode) -> bool`, `is_attach(mode) -> bool`, and
+`log_mode(mode)`. Every SU launcher imports it and respects the
+chosen mode. Covered by 35 unit tests in
+`tests/test_su_runner_safety.py`.
+
+**See also:** FP-007 (welcome dialog — also a SU2026 launch
+ergonomics issue); LL-009 (bootstrap .skp pattern); LL-015 (runner
+mode protocol, the positive rule complementing this FP).
