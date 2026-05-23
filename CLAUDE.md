@@ -444,6 +444,13 @@ Never apply archive patches without an explicit, signed-off PR plan.
 
 ## 13. Last-updated marker
 
+- **2026-05-23** — §18 Canonical Artifact Rule added (micro-fixture
+  → planta 5-etapa flow + 4-declaration template + forbidden
+  actions). Surfaced from user MEMORY priority ROOT_RULE
+  (`feedback_canonical_artifact_rule.md`). Validated by quadrado
+  window POC (`runs/quadrado_demo/quadrado_with_window.skp`,
+  8/8 invariants PASS). Cross-refs LL-013, LL-014, FP-016–019.
+  Etapas 4–5 (regression test + apply to planta_74) pending.
 - **2026-05-14** — Visual Fidelity Gate policy added to §10. Aggregate
   score cannot promote `verdict_top_level: PASS` without the seven
   visual evidence artifacts on disk. `tools/verify_fidelities.py`
@@ -689,3 +696,139 @@ First action of the next cycle.
 **Important:** "do not stop" never authorizes risky actions. This rule
 operates *inside* the safety boundary set by §1, §2, §3, §9, the git
 flow rules, and the validation gates.
+
+---
+
+## 18. Canonical Artifact Rule — micro-fixture → planta (2026-05-23)
+
+> Every task touching geometry/SKP/planta must respect the existing
+> canonical artifacts. No parallel demos, no fabricated geometry, no
+> "como ficaria" shortcuts. The micro-fixture is a laboratory; the
+> planta_74 SKP is the product.
+
+**Mental filter before any task:** *"Does this bring the real
+pipeline closer to generating a correct planta SKP, or is it just a
+pretty demo?"* If pretty demo without a clear path back to the
+planta, do not do it.
+
+### 18.1 The 5-etapa flow
+
+Every micro-test follows this order:
+
+1. **Micro-fixture canônico** — use the validated baseline that
+   already exists (e.g. `runs/quadrado_demo/quadrado.skp`,
+   `runs/planta_74_plan_shell/model.skp`). If nothing exists,
+   create the smallest possible one with path + purpose documented.
+2. **Prova isolada** — geometry report + render + invariants PASS
+   on the micro-fixture, in its own directory.
+3. **Teste/regressão/harness** — versioned baseline +
+   assertions saved (`tests/baselines/<name>.json` + pytest gate).
+4. **Aplicação na planta real** — same logic against the real
+   target (`runs/planta_74_plan_shell/model.skp` or whichever
+   canonical SKP).
+5. **Comparação com baseline da planta** — antes/depois SKP+PNG
+   + geometry diff + PDF as ground truth.
+
+Skipping etapas 4–5 demotes the micro-test to a "demo paralela" and
+violates this rule. Every micro-test must end with explicit
+decision: **APPLIED on the planta** / **REJECTED with reason** /
+**BLOCKED with evidence**.
+
+### 18.2 The 4-declaration template (before any edit)
+
+Before touching any file, declare:
+
+1. **Canonical input artifact** — exact path + hash/metadata if it
+   exists + why it is the correct baseline.
+2. **Minimal diff** — the smallest atomic change (e.g. "add 1
+   window opening to w_bottom"). No origin shift, no coordinate
+   reinterpretation, no `dimension_mode` reset, no unit change.
+3. **Pipeline** — which existing pipeline carries the diff
+   (in-place Ruby edit, plan_shell exporter, smoke gate, etc.) and
+   why it fits.
+4. **Comparison to deliver** — SKP + render PNG + geometry diff
+   + invariants preserved (model bounds, wall thickness, room
+   polygons, dimension_mode).
+
+### 18.3 Always-forbidden actions
+
+- Creating a "similar" consensus when the canonical one exists
+- Shifting origin or coordinates without a documented technical
+  reason
+- Resetting `dimension_mode` (inner_clear / centerline / outer)
+  without justification
+- Isolated demos with no declared path back to the planta
+- Generating SKPs that aren't comparable to the baseline
+- Solving visually only in matplotlib when the target is an SKP
+- "Como ficaria" PNGs that escape the real pipeline
+- Adding elements (window/door/wall) to a parallel model that
+  doesn't inherit the correct artifact
+- Stopping at the micro-test without applying on the planta
+  (etapas 4–5 skipped)
+- Using `consume_consensus.rb` to ADD features to an existing SKP
+  (it does `entities.clear!` and rebuilds; see FP-017)
+
+### 18.4 Validated patterns (2026-05-23, quadrado window POC)
+
+- **Wall correct topology** = continuous shell/ring/footprint (not
+  4 blocks touching).
+- **Floor** = separate layer.
+- **Openings** = carved on the existing shell via push/pull +
+  `intersect_with`, NOT via rebuild.
+- **Each edit preserves the base geometry** (bounds, walls not
+  touched, room polygons intact).
+- **SKP that opens cleanly in SU** = raw entities in Layer0
+  (edges + faces), NOT grouped walls + boolean carving.
+- **Hardcoded coordinates are forbidden**: every edit reads its
+  geometry from the model (see LL-014, FP-018).
+- **Python subprocess.terminate of SU** is forbidden by default;
+  see §18.6 below for the runner-mode protocol.
+
+### 18.5 The 5-question contract for every mini-task
+
+Before starting any micro-experiment, the runner/agent answers:
+
+1. **Which canonical fixture** did you use?
+2. **Which hypothesis** did you test?
+3. **Which minimal diff** did you apply?
+4. **Which metric/evidence** proved the result?
+5. **How does this replicate on the planta real?**
+
+If question 5 has no answer, the experiment is "demo solta" and
+violates §18.3.
+
+### 18.6 SU runner mode protocol (LL-015, FP-019)
+
+Every Python/Ruby tool that calls `Popen` on `SketchUp.exe` MUST
+declare a runtime mode and behave accordingly:
+
+| Mode | Termination |
+|---|---|
+| `headless` / `ci` | MAY terminate ONLY `proc.pid` (own child). NEVER `taskkill /IM SketchUp.exe`. |
+| `interactive` / `debug` | MUST NOT terminate. Done marker = artifact ready, not "kill SU". |
+| `attach` / `manual` | NEVER touch any SU process. Read files only. |
+
+**Safe default is `interactive`** — a runner without a declared
+mode behaves as if `interactive` (no termination). This protects
+any concurrent human SU session.
+
+Implementation contract:
+- Accept mode via `RUN_MODE` env, `--mode {headless,interactive,attach}` CLI, or `--no-terminate` shorthand.
+- Print at launch: `[su-runner] mode=<X>; terminate_on_done=<bool>`.
+- Document destructiveness in docstring + `--help`.
+- In `headless` mode, terminate only own `proc.pid` (never broader kill).
+
+Reference helper: `tools/su_runner_safety.py` (planned). Until it
+ships, runners inline the mode check (see LL-015 for code pattern).
+
+### 18.7 Cross-references
+
+- User MEMORY `feedback_canonical_artifact_rule.md` (priority
+  ROOT_RULE) — full rationale + examples.
+- LL-013 (5-etapa flow), LL-014 (read coords from model),
+  LL-015 (SU runner mode protocol).
+- FP-016 (path proliferation), FP-017 (rebuild vs in-place),
+  FP-018 (hardcoded coords drift), FP-019 (subprocess.terminate
+  confusion — anti-pattern that §18.6 prevents).
+- ADR-005 (Spec-Driven Development) — complementary framework
+  for spec → test → implementation.

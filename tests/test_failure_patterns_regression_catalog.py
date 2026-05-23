@@ -178,6 +178,63 @@ KNOWN_FP_REGRESSIONS: list[tuple[str, list[str], str]] = [
         "test asserts every DoorLeaf bbox center sits within 1 m of "
         "its opening's declared center.",
     ),
+    (
+        "FP-016",
+        ["CLAUDE.md",
+         "docs/learning/lessons_learned.md"],
+        "Path proliferation (parallel artifacts outside canonical "
+        "run dir): policy enforced by CLAUDE.md §18 Canonical "
+        "Artifact Rule (4-declaration template requires canonical "
+        "input path) + LL-013. No runtime test possible — the "
+        "anti-pattern is structural (creating a new dir for outputs "
+        "of a task against an existing canonical artifact); caught "
+        "at code review.",
+    ),
+    (
+        "FP-017",
+        ["CLAUDE.md",
+         "docs/learning/lessons_learned.md",
+         "tools/consume_consensus.rb"],
+        "Rebuild via consume_consensus.rb when in-place edit was "
+        "correct: policy enforced by CLAUDE.md §18.3 forbidden "
+        "actions list ('using consume_consensus.rb to ADD features "
+        "to existing SKP'). The `entities.clear!` at the top of "
+        "consume_consensus.rb is by-design for the BUILD pipeline; "
+        "the rule is choosing the right tool, not modifying the "
+        "builder. Caught at PR review via the 4-declaration "
+        "template (pipeline choice must be justified).",
+    ),
+    (
+        "FP-018",
+        ["CLAUDE.md",
+         "docs/learning/lessons_learned.md"],
+        "Hardcoded coords cause intersect_with float drift: "
+        "policy enforced by CLAUDE.md §18.4 ('Hardcoded "
+        "coordinates are forbidden; every edit reads its geometry "
+        "from the model') + LL-014. Recommended pattern is "
+        "documented inline in LL-014 and FP-018. A runtime test "
+        "would require running an SU in-place edit pipeline in CI; "
+        "deferred until etapa 5 ships an in-place edit tool that "
+        "can be unit-tested.",
+    ),
+    (
+        "FP-019",
+        ["tools/su_runner_safety.py",
+         "tests/test_su_runner_safety.py",
+         "CLAUDE.md",
+         "docs/learning/lessons_learned.md"],
+        "Python subprocess.terminate of SU confuses user about SKP "
+        "stability: enforced by the runner-mode protocol in "
+        "tools/su_runner_safety.py (parse_mode + should_terminate "
+        "+ is_attach + log_mode helpers) covered by 35 unit tests "
+        "in test_su_runner_safety.py. Safe default is `interactive` "
+        "(no termination); `headless`/`ci` is opt-in via "
+        "`RUN_MODE` env, `--mode` CLI, or absence of `--no-terminate`. "
+        "Even in headless mode, runners terminate ONLY their own "
+        "`proc.pid` — never `taskkill /IM SketchUp.exe`. "
+        "CLAUDE.md §18.6 codifies the protocol; LL-015 documents "
+        "the positive rule.",
+    ),
 ]
 
 
