@@ -1125,6 +1125,34 @@ was a quadrado-window POC, but the bigger output is the
 **Canonical Artifact Rule** that now governs how every micro-test
 relates to the planta_74 target.
 
+### Update (later in session) — runner-safety operational rule
+
+Following Felipe's directive (post-FP-019 surfacing), the runner
+mode protocol is now CODE-BACKED:
+
+- **`tools/su_runner_safety.py`** (NEW, tracked) — canonical
+  helper. Exports `parse_mode`, `should_terminate`, `is_attach`,
+  `log_mode`. Safe default is `interactive` (no termination).
+  Mode source order: `--no-terminate` flag → `--mode` CLI →
+  `RUN_MODE` env → default. Unknown values fall back with stderr
+  warning.
+- **`tests/test_su_runner_safety.py`** (NEW, tracked) — 35 unit
+  tests covering parse precedence, mode dispatch, defensive
+  fallback, protocol invariants (disjoint mode sets, safe default
+  is non-destructive).
+- **LL-015** (NEW) — positive rule for the protocol.
+- **CLAUDE.md §18.6** — the protocol as constitution.
+- **FP-019 catalog entry** updated to reference the helper +
+  test file (no longer "deferred").
+
+**Pending migration** (next session): tracked launchers
+`tools/skp_from_consensus.py` and `tools/build_plan_shell_skp.py`
+must import `su_runner_safety` and respect mode. Currently they
+default to terminate-after-marker, which violates §18.6 when a
+human session is running in parallel. Migration plan: small PR
+that wraps each `proc.terminate()` call with
+`if should_terminate(mode):` + adds `--mode/--no-terminate` CLI.
+
 ### What landed (rules / docs — TRACKED)
 
 - **`~/.claude/projects/E--Claude/memory/feedback_canonical_artifact_rule.md`**

@@ -110,13 +110,40 @@ Cycle 6 (autorun inspector wired into gate F) is still pending.
 
 - **LL-013** — Canonical Artifact Rule: 5-step micro→planta flow.
 - **LL-014** — Read coordinates from the model, never hardcode.
+- **LL-015** — SU runner mode protocol (interactive default, opt-in
+  headless). Reference helper:
+  `tools/su_runner_safety.py` (parse_mode / should_terminate /
+  is_attach / log_mode), 35 unit tests in
+  `tests/test_su_runner_safety.py`.
 - **FP-016** — Path proliferation (parallel artifacts outside
   canonical run dir).
 - **FP-017** — Rebuild via `consume_consensus.rb` when in-place
   edit was correct.
 - **FP-018** — Hardcoded coords cause `intersect_with` float drift.
 - **FP-019** — Python `subprocess.terminate` of SU confuses user
-  about SKP stability.
+  about SKP stability. Now backed by runtime gate
+  (`tools/su_runner_safety.py` + 35 tests).
+
+## Pipeline-core focus (priority for next ROI cycles)
+
+The real product is `plan_shell` exporter producing planta_74 SKP.
+Everything else is laboratory or scaffolding. Next ROI cycles
+should ALL pass the "pipeline real or pretty demo?" filter:
+
+- ✅ Pipeline-core: anything that improves wall_shell / plan_shell /
+  openings carving / room polygons / fidelity gate / smoke harness
+  / overlay reports / comparison against PDF / regression gates.
+- ⚠️ Laboratory: micro-fixture (quadrado_demo) experiments — OK if
+  the path to planta is declared (etapas 4–5 of LL-013).
+- ❌ Embelezamento: dashboard polish, render aesthetics, demo
+  artifacts without canonical path back to planta.
+
+The current branch (`docs/adr-005-spec-driven-development`) ships
+docs + protocol + safety helper — all pipeline-adjacent (specs,
+rules, runner safety). After PR #150 merges, the next high-ROI
+cycle is **etapa 5 of the quadrado POC**: apply the in-place edit
+method to `runs/planta_74_plan_shell/model.skp` and produce a
+comparison report against the plan_shell exporter baseline.
 
 ## Tooling notes
 

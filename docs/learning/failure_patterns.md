@@ -525,5 +525,41 @@ subprocess.run(["taskkill", "/IM", "SketchUp.exe", "/F"])
 print("[agent] all SU instances killed; safe to open manually")
 ```
 
+### Formal runner-mode protocol (2026-05-23, user-mandated)
+
+Every SU runner (Python launcher, helper, harness) MUST declare its
+runtime mode and behave accordingly. **Safe default is `interactive`
+— do NOT terminate SU automatically.**
+
+| Mode | When to use | Termination behaviour |
+|---|---|---|
+| `headless` / `ci` | Automated CI; agent self-tests; smoke gates | MAY terminate the child process the runner itself launched. NEVER `taskkill /IM` other SU instances. |
+| `interactive` / `debug` | Local development; agent in a user session | MUST NOT terminate. Print done marker, wait for user to close SU. |
+| `attach` / `manual` | User opened SU; runner just consumes events | NEVER touch any SU process. No `Popen`, no `terminate`, no `taskkill`. |
+
+The marker file (`_*_done.txt`) means **"artifact ready"**, NOT
+"kill SU". Termination is a separate decision driven by mode.
+
+### Implementation requirements
+
+Every `_run_*.py`, `*launcher*.py`, or tool that calls `Popen` on
+`SketchUp.exe` must:
+
+1. Read mode from `RUN_MODE` env var OR `--mode {headless,interactive,attach}` CLI flag OR `--no-terminate` shorthand.
+2. Default to `interactive` when neither is set.
+3. Print the chosen mode at launch: `[su-runner] mode=interactive; will NOT terminate SU on done`.
+4. In docstring/help: declare whether the runner is destructive to external SU processes.
+5. In `headless` mode, only terminate `proc.pid` (own child); never `taskkill /IM`.
+
+### Reference helper
+
+`tools/su_runner_safety.py` (TODO) provides
+`should_terminate(mode) -> bool` and a context-manager wrapper that
+each runner imports. Until that ships, every runner inlines the
+mode check explicitly. See LL-015.
+
 **See also:** FP-007 (welcome dialog — also a SU2026 launch
-ergonomics issue); LL-009 (bootstrap .skp pattern).
+ergonomics issue); LL-009 (bootstrap .skp pattern); LL-015 (runner
+mode protocol, the positive rule complementing this FP);
+CLAUDE.md §18 (canonical artifact rule §"forbidden actions" lists
+silent `subprocess.terminate`).

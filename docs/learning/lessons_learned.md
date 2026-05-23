@@ -257,3 +257,81 @@ naive area assertions.
 **See also:** FP-018 (hardcoded coords cause intersect_with float
 drift); LL-013 (canonical artifact rule §"sem reinterpretar
 dimensão/unidade").
+
+## LL-015 — SU runner mode protocol (interactive default; opt-in headless)
+
+**Date:** 2026-05-23
+**Context:** During the quadrado window POC, helper Python
+launchers (`_run_add_window.py`, `_render_view.py`,
+`_inspect_skp.py`, `_reframe.py`) all called `proc.terminate()`
+after a done marker appeared. This silently killed any SU instance
+the user had open in parallel for manual inspection, causing the
+"abre o SU e fecha rápido" complaint that I initially mis-diagnosed
+as a SKP bug. FP-019 documents the anti-pattern; this LL codifies
+the positive rule.
+
+**Rule:** every SU runner (Python launcher, harness, helper) MUST
+declare a runtime mode and behave accordingly:
+
+| Mode | Termination behaviour |
+|---|---|
+| `headless` / `ci` | MAY terminate only `proc.pid` (the child the runner itself spawned). NEVER `taskkill /IM SketchUp.exe`. |
+| `interactive` / `debug` | MUST NOT terminate. Print done marker + lifecycle log + leave SU running. |
+| `attach` / `manual` | NEVER touch any SU process — runner only reads files/markers. |
+
+**Safe default is `interactive`.** A runner that does not declare
+its mode and finds none in `RUN_MODE` env or `--mode` CLI must
+behave as `interactive` (NO termination). This protects the human
+session by default.
+
+**Marker semantics:** `_<name>_done.txt` means "artifact ready, my
+script finished". It is NOT a signal to kill SU. Termination is a
+separate decision driven by mode.
+
+**Implementation contract** for every `_run_*.py`,
+`*launcher*.py`, or tool that calls `Popen` on `SketchUp.exe`:
+
+1. Accept mode via `RUN_MODE` env var OR `--mode {headless,interactive,attach}` CLI OR `--no-terminate` shorthand.
+2. Default to `interactive` when nothing is declared.
+3. Print at launch: `[su-runner] mode=<X>; terminate_on_done=<bool>`.
+4. Document destructiveness in docstring + `--help`.
+5. In `headless`: terminate only `proc.pid`, never `taskkill /IM`.
+6. In `attach`: don't call `Popen` at all — just read markers.
+
+**Pattern:**
+```python
+import os, argparse, subprocess
+
+def parse_mode():
+    p = argparse.ArgumentParser()
+    p.add_argument("--mode", choices=["headless", "interactive", "attach"], default=None)
+    p.add_argument("--no-terminate", action="store_true")
+    args, _ = p.parse_known_args()
+    if args.no_terminate or args.mode == "interactive":
+        return "interactive"
+    if args.mode:
+        return args.mode
+    return os.environ.get("RUN_MODE", "interactive")
+
+mode = parse_mode()
+terminate_on_done = (mode == "headless")
+print(f"[su-runner] mode={mode}; terminate_on_done={terminate_on_done}")
+
+if mode != "attach":
+    proc = subprocess.Popen([SU, target_skp])
+    # ... poll done marker ...
+    if terminate_on_done:
+        proc.terminate()
+        print(f"[su-runner] terminated own child PID {proc.pid}")
+    else:
+        print(f"[su-runner] artifact ready; SU left running ({proc.pid})")
+```
+
+**Future reference helper**: `tools/su_runner_safety.py` (planned)
+will export `parse_mode()`, `should_terminate(mode) -> bool`, and a
+context manager. Until it ships, runners inline the check.
+
+**See also:** FP-019 (the anti-pattern this rule prevents); LL-013
+(canonical artifact rule, applies the same "disclosed lifecycle"
+principle to multi-step tasks); CLAUDE.md §18.3 (forbidden actions
+list cross-references this).

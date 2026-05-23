@@ -219,17 +219,21 @@ KNOWN_FP_REGRESSIONS: list[tuple[str, list[str], str]] = [
     ),
     (
         "FP-019",
-        ["CLAUDE.md",
+        ["tools/su_runner_safety.py",
+         "tests/test_su_runner_safety.py",
+         "CLAUDE.md",
          "docs/learning/lessons_learned.md"],
-        "Python subprocess.terminate of SU confuses user: policy "
-        "enforced by CLAUDE.md §18.4 ('Python subprocess.terminate "
-        "of SU must be disclosed loudly to the user') + LL-013 "
-        "(applied/rejected/blocked decision required). Future SU "
-        "launchers must print explicit lifecycle logs AND call "
-        "`taskkill /IM SketchUp.exe /F` before any user-facing "
-        "handoff. Linter-style check could grep for `proc.terminate` "
-        "calls on SU subprocess without a matching log+taskkill — "
-        "deferred to etapa 4 follow-up.",
+        "Python subprocess.terminate of SU confuses user about SKP "
+        "stability: enforced by the runner-mode protocol in "
+        "tools/su_runner_safety.py (parse_mode + should_terminate "
+        "+ is_attach + log_mode helpers) covered by 35 unit tests "
+        "in test_su_runner_safety.py. Safe default is `interactive` "
+        "(no termination); `headless`/`ci` is opt-in via "
+        "`RUN_MODE` env, `--mode` CLI, or absence of `--no-terminate`. "
+        "Even in headless mode, runners terminate ONLY their own "
+        "`proc.pid` — never `taskkill /IM SketchUp.exe`. "
+        "CLAUDE.md §18.6 codifies the protocol; LL-015 documents "
+        "the positive rule.",
     ),
 ]
 

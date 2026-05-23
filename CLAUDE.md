@@ -781,16 +781,54 @@ Before touching any file, declare:
   (edges + faces), NOT grouped walls + boolean carving.
 - **Hardcoded coordinates are forbidden**: every edit reads its
   geometry from the model (see LL-014, FP-018).
-- **Python subprocess.terminate of SU** must be disclosed loudly
-  to the user (see FP-019).
+- **Python subprocess.terminate of SU** is forbidden by default;
+  see §18.6 below for the runner-mode protocol.
 
-### 18.5 Cross-references
+### 18.5 The 5-question contract for every mini-task
+
+Before starting any micro-experiment, the runner/agent answers:
+
+1. **Which canonical fixture** did you use?
+2. **Which hypothesis** did you test?
+3. **Which minimal diff** did you apply?
+4. **Which metric/evidence** proved the result?
+5. **How does this replicate on the planta real?**
+
+If question 5 has no answer, the experiment is "demo solta" and
+violates §18.3.
+
+### 18.6 SU runner mode protocol (LL-015, FP-019)
+
+Every Python/Ruby tool that calls `Popen` on `SketchUp.exe` MUST
+declare a runtime mode and behave accordingly:
+
+| Mode | Termination |
+|---|---|
+| `headless` / `ci` | MAY terminate ONLY `proc.pid` (own child). NEVER `taskkill /IM SketchUp.exe`. |
+| `interactive` / `debug` | MUST NOT terminate. Done marker = artifact ready, not "kill SU". |
+| `attach` / `manual` | NEVER touch any SU process. Read files only. |
+
+**Safe default is `interactive`** — a runner without a declared
+mode behaves as if `interactive` (no termination). This protects
+any concurrent human SU session.
+
+Implementation contract:
+- Accept mode via `RUN_MODE` env, `--mode {headless,interactive,attach}` CLI, or `--no-terminate` shorthand.
+- Print at launch: `[su-runner] mode=<X>; terminate_on_done=<bool>`.
+- Document destructiveness in docstring + `--help`.
+- In `headless` mode, terminate only own `proc.pid` (never broader kill).
+
+Reference helper: `tools/su_runner_safety.py` (planned). Until it
+ships, runners inline the mode check (see LL-015 for code pattern).
+
+### 18.7 Cross-references
 
 - User MEMORY `feedback_canonical_artifact_rule.md` (priority
   ROOT_RULE) — full rationale + examples.
-- LL-013 (5-etapa flow), LL-014 (read coords from model).
+- LL-013 (5-etapa flow), LL-014 (read coords from model),
+  LL-015 (SU runner mode protocol).
 - FP-016 (path proliferation), FP-017 (rebuild vs in-place),
   FP-018 (hardcoded coords drift), FP-019 (subprocess.terminate
-  confusion).
+  confusion — anti-pattern that §18.6 prevents).
 - ADR-005 (Spec-Driven Development) — complementary framework
   for spec → test → implementation.
