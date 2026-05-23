@@ -444,6 +444,13 @@ Never apply archive patches without an explicit, signed-off PR plan.
 
 ## 13. Last-updated marker
 
+- **2026-05-23** — §18 SU runner mode protocol added. Three modes
+  (`headless`/`interactive`/`attach`) with `interactive` as safe
+  default. Reference helper `tools/su_runner_safety.py` exports
+  `parse_mode` + `should_terminate` + `is_attach` + `log_mode`; 35
+  unit tests in `tests/test_su_runner_safety.py`. Closes the
+  anti-pattern documented in FP-023 (subprocess.terminate of SU
+  confuses user about SKP stability). Cross-ref: LL-015.
 - **2026-05-14** — Visual Fidelity Gate policy added to §10. Aggregate
   score cannot promote `verdict_top_level: PASS` without the seven
   visual evidence artifacts on disk. `tools/verify_fidelities.py`
@@ -689,3 +696,32 @@ First action of the next cycle.
 **Important:** "do not stop" never authorizes risky actions. This rule
 operates *inside* the safety boundary set by §1, §2, §3, §9, the git
 flow rules, and the validation gates.
+
+---
+
+## 18. SU runner mode protocol (LL-015, FP-023)
+
+Every Python/Ruby tool that calls `Popen` on `SketchUp.exe` MUST
+declare a runtime mode and behave accordingly:
+
+| Mode | Termination |
+|---|---|
+| `headless` / `ci` | MAY terminate ONLY `proc.pid` (own child). NEVER `taskkill /IM SketchUp.exe`. |
+| `interactive` / `debug` | MUST NOT terminate. Done marker = artifact ready, not "kill SU". |
+| `attach` / `manual` | NEVER touch any SU process. Read files only. |
+
+**Safe default is `interactive`** — a runner without a declared
+mode behaves as if `interactive` (no termination). This protects
+any concurrent human SU session.
+
+Implementation contract:
+- Accept mode via `RUN_MODE` env, `--mode {headless,interactive,attach}` CLI, or `--no-terminate` shorthand.
+- Print at launch: `[su-runner] mode=<X>; terminate_on_done=<bool>`.
+- Document destructiveness in docstring + `--help`.
+- In `headless` mode, terminate only own `proc.pid` (never broader kill).
+
+Reference helper: `tools/su_runner_safety.py` exports `parse_mode`,
+`should_terminate`, `is_attach`, `log_mode`. Covered by 35 unit
+tests in `tests/test_su_runner_safety.py`.
+
+See LL-015 (positive rule) and FP-023 (anti-pattern).

@@ -157,3 +157,80 @@ to the output dir as `_bootstrap.skp`.
 **Lesson:** When a parametric decision is initially made on theoretical reasoning (LLM "more correct" + user "biggest fix"), **execute the smallest reproducible run and let empirical numbers override**. The protocol path was honored: I asked the LLM, applied the answer, INVESTIGATED the resulting failures (not "maquiar"), found the root cause (algorithm aggression), tested the alternative (`ratio=0.50`), and chose the option with better empirical evidence. Recorded the override in `.ai_bridge/GPT_RESPONSES.md` so the audit trail is intact.
 **Caveat:** This loop only works if the gate (in this case, fidelity engine + GT ranges) is honest. Had I been allowed to "maquiar" the GT ranges to match `ratio=0.30`'s output, the empirical signal would have been silenced. CLAUDE.md §1 + the operational protocol's RED rule against "alterar baseline para fazer passar" are what made the override visible.
 **See also:** `FP-012` (the bug being fixed); `feedback_autonomia_operacional_protocolo.md` (the GREEN/YELLOW/RED loop that authorized the override).
+
+## LL-015 — SU runner mode protocol (interactive default; opt-in headless)
+
+**Date:** 2026-05-23
+**Context:** During the quadrado window POC, helper Python
+launchers (`_run_add_window.py`, `_render_view.py`,
+`_inspect_skp.py`, `_reframe.py`) all called `proc.terminate()`
+after a done marker appeared. This silently killed any SU instance
+the user had open in parallel for manual inspection, causing the
+"abre o SU e fecha rápido" complaint that I initially mis-diagnosed
+as a SKP bug. FP-023 documents the anti-pattern; this LL codifies
+the positive rule.
+
+**Rule:** every SU runner (Python launcher, harness, helper) MUST
+declare a runtime mode and behave accordingly:
+
+| Mode | Termination behaviour |
+|---|---|
+| `headless` / `ci` | MAY terminate only `proc.pid` (the child the runner itself spawned). NEVER `taskkill /IM SketchUp.exe`. |
+| `interactive` / `debug` | MUST NOT terminate. Print done marker + lifecycle log + leave SU running. |
+| `attach` / `manual` | NEVER touch any SU process — runner only reads files/markers. |
+
+**Safe default is `interactive`.** A runner that does not declare
+its mode and finds none in `RUN_MODE` env or `--mode` CLI must
+behave as `interactive` (NO termination). This protects the human
+session by default.
+
+**Marker semantics:** `_<name>_done.txt` means "artifact ready, my
+script finished". It is NOT a signal to kill SU. Termination is a
+separate decision driven by mode.
+
+**Implementation contract** for every `_run_*.py`,
+`*launcher*.py`, or tool that calls `Popen` on `SketchUp.exe`:
+
+1. Accept mode via `RUN_MODE` env var OR `--mode {headless,interactive,attach}` CLI OR `--no-terminate` shorthand.
+2. Default to `interactive` when nothing is declared.
+3. Print at launch: `[su-runner] mode=<X>; terminate_on_done=<bool>`.
+4. Document destructiveness in docstring + `--help`.
+5. In `headless`: terminate only `proc.pid`, never `taskkill /IM`.
+6. In `attach`: don't call `Popen` at all — just read markers.
+
+**Pattern:**
+```python
+import os, argparse, subprocess
+
+def parse_mode():
+    p = argparse.ArgumentParser()
+    p.add_argument("--mode", choices=["headless", "interactive", "attach"], default=None)
+    p.add_argument("--no-terminate", action="store_true")
+    args, _ = p.parse_known_args()
+    if args.no_terminate or args.mode == "interactive":
+        return "interactive"
+    if args.mode:
+        return args.mode
+    return os.environ.get("RUN_MODE", "interactive")
+
+mode = parse_mode()
+terminate_on_done = (mode == "headless")
+print(f"[su-runner] mode={mode}; terminate_on_done={terminate_on_done}")
+
+if mode != "attach":
+    proc = subprocess.Popen([SU, target_skp])
+    # ... poll done marker ...
+    if terminate_on_done:
+        proc.terminate()
+        print(f"[su-runner] terminated own child PID {proc.pid}")
+    else:
+        print(f"[su-runner] artifact ready; SU left running ({proc.pid})")
+```
+
+**Reference helper**: `tools/su_runner_safety.py` exports
+`parse_mode()`, `should_terminate(mode) -> bool`,
+`is_attach(mode) -> bool`, and `log_mode(mode)`. Covered by 35
+unit tests in `tests/test_su_runner_safety.py`.
+
+**See also:** FP-023 (the anti-pattern this rule prevents);
+LL-009 (bootstrap .skp pattern — same launcher ergonomics).

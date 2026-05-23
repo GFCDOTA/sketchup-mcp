@@ -178,6 +178,22 @@ KNOWN_FP_REGRESSIONS: list[tuple[str, list[str], str]] = [
         "test asserts every DoorLeaf bbox center sits within 1 m of "
         "its opening's declared center.",
     ),
+    (
+        "FP-023",
+        ["tools/su_runner_safety.py",
+         "tests/test_su_runner_safety.py",
+         "docs/learning/lessons_learned.md"],
+        "Python subprocess.terminate of SU confuses user about SKP "
+        "stability: enforced by the runner-mode protocol in "
+        "tools/su_runner_safety.py (parse_mode + should_terminate "
+        "+ is_attach + log_mode helpers) covered by 35 unit tests "
+        "in test_su_runner_safety.py. Safe default is `interactive` "
+        "(no termination); `headless`/`ci` is opt-in via "
+        "`RUN_MODE` env, `--mode` CLI, or absence of `--no-terminate`. "
+        "Even in headless mode, runners terminate ONLY their own "
+        "`proc.pid` — never `taskkill /IM SketchUp.exe`. "
+        "LL-015 documents the positive rule.",
+    ),
 ]
 
 
