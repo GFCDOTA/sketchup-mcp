@@ -1109,3 +1109,169 @@ See `TODO_NEXT.md` for full queue. Updated top of stack:
 - `feedback_ai_bridge_protocol.md` added to user MEMORY.md so
   this protocol is loaded into future Claude sessions
   automatically (cross-project memory).
+
+---
+
+# Session 2026-05-23 — Canonical Artifact Rule + quadrado window POC + consolidation
+
+> Working branch: `docs/adr-005-spec-driven-development` (not pushed).
+> develop @ `8724ca2` (PR #142). 21 PRs landed since the prior
+> HANDOFF section's freeze at #121. CURRENT_STATE.md refreshed.
+
+## Status
+
+Rule-discovery + consolidation session. Concrete pipeline work
+was a quadrado-window POC, but the bigger output is the
+**Canonical Artifact Rule** that now governs how every micro-test
+relates to the planta_74 target.
+
+### What landed (rules / docs — TRACKED)
+
+- **`~/.claude/projects/E--Claude/memory/feedback_canonical_artifact_rule.md`**
+  — user MEMORY at priority `ROOT_RULE`. Defines the 5-etapa flow
+  (micro-fixture → prova → regressão → planta → comparação) +
+  the 4-declaration template (canonical input / minimal diff /
+  pipeline / comparison) + the mental filter ("pipeline real or
+  pretty demo?").
+- **`docs/learning/lessons_learned.md`** — LL-013 (Canonical
+  Artifact Rule), LL-014 (read coordinates from model).
+- **`docs/learning/failure_patterns.md`** — FP-016 (path
+  proliferation), FP-017 (rebuild via consume_consensus when
+  in-place was right), FP-018 (hardcoded coords cause
+  intersect_with float drift), FP-019 (subprocess.terminate of SU
+  confuses user about SKP stability).
+- **`.ai_bridge/CURRENT_STATE.md`** — refreshed from frozen
+  #121 → real #142; documents canonical artifacts + active rules.
+
+### What landed (POC artifacts in `runs/quadrado_demo/` — gitignored)
+
+Preserved as local canonical micro-fixture:
+
+- `quadrado_with_window.skp` (38.8 KB) — final POC, in-place edit
+  derivative of `quadrado.skp` (32 KB). 19 faces (vs 10 in base).
+  Real through-hole on south wall (outer area 15303 = 17535−2232,
+  inner area 13712 = 15944−2232) + glass pane at mid-thickness.
+- `quadrado_with_window_render.png` — SU `write_image` 1600×1200,
+  showing carved window with reveal/jamb visible.
+- `invariants_report.md` — 8/8 PASS invariants (face count,
+  floor preserved, walls preserved, south wall carved on both
+  faces, glass present, bounds unchanged, through-hole verified).
+- `_add_window.rb` — Ruby implementation: push/pull +
+  intersect_with on both outer and inner faces; reads y coords
+  from the model (LL-014).
+- `_inspect_skp.rb` + `_invariants.py` — harness for etapa 3.
+- `_render_view.{py,rb}` — SU screenshot harness.
+- `consensus_with_window.json` — derivative consensus (NOT used
+  by final flow — kept as evidence of the wrong path taken).
+
+### The mistake taxonomy (this session)
+
+1. **Path proliferation**: created `E:/Claude/quadrado_delivery/`
+   outside canonical structure → FP-016.
+2. **Rebuild via `consume_consensus.rb`**: discarded the working
+   `quadrado.skp` to rebuild from a synthetic consensus → FP-017.
+3. **Hardcoded coordinates**: hardcoded `y_in = 142.284` when
+   actual was 142.26, causing `intersect_with` drift → FP-018.
+4. **`subprocess.terminate` without disclosure**: every
+   `_run_*.py` helper terminates SU after marker, confusing the
+   user about whether the SKP itself was causing the close →
+   FP-019.
+
+All four documented with anti-pattern signals + repair patterns.
+
+### Method validated (replicable on planta_74)
+
+In-place window edit via SU Ruby API (see `_add_window.rb` for
+the full implementation). Key steps:
+
+1. Find canonical SKP and launch SU with it positional.
+2. Discover real coords from the model (not theoretical).
+3. `add_face` of the rect on the outer plane (coplanar with
+   target wall face).
+4. `intersect_with` to force-split the wall face into outer
+   surrounding + window sub-face.
+5. `pushpull` the sub-face by the REAL wall thickness (read
+   from the model) → SU auto-merges with the inner face if
+   float-exact.
+6. If a back-face remained, manually `add_face` + `intersect_with`
+   on the inner plane + `erase_entities` of the resulting sub-face.
+7. `add_face` for the glass pane at mid-thickness; assign glass
+   material (alpha 0.45).
+8. `commit_operation` + `save(out_path)`.
+
+## Open Problems
+
+1. **Etapa 4 not closed** for the quadrado POC: regression test
+   not yet promoted to `tests/test_quadrado_window_invariants.py`.
+2. **Etapa 5 not closed** for the quadrado POC: the in-place edit
+   method has NOT been applied to
+   `runs/planta_74_plan_shell/model.skp`. Until that happens, the
+   POC is in the "demo paralela" zone per the canonical artifact
+   rule.
+3. **4 untracked files in `tools/`**:
+   `build_room_ring_skp.{py,rb}`, `dump_skp_groups.{py,rb}` —
+   origin unclear; need to either promote (tests + commit) or
+   archive.
+4. **Canonical Artifact Rule lives in user MEMORY only** —
+   should be promoted to `CLAUDE.md §18` so it's loaded
+   automatically as project constitution, not user-specific
+   preference.
+
+## Next Best Actions (ROI order, after this consolidation)
+
+1. **Etapa 4 + 5 of quadrado window POC**: promote
+   `_invariants.py` → `tests/test_quadrado_window_invariants.py`
+   (regression gate) + apply the in-place method to planta_74's
+   south wall (pick an existing window opening for comparison
+   against the plan_shell exporter output).
+2. **Promote canonical-artifact rule to CLAUDE.md §18** — make
+   it project constitution, not just user MEMORY.
+3. **Investigate the 4 untracked `tools/`** files — likely from a
+   prior POC ring builder; if redundant with `plan_shell`,
+   archive; if useful, add tests + commit.
+4. **Slice 6a** (`room_polygon_override` schema + apply) —
+   unchanged from prior cycle.
+5. **Cycle 6** — wire autorun inspector into gate F.
+
+## Risks
+
+- The in-place edit method works on the quadrado's simple
+  topology (raw Layer0 faces, no groups). The `plan_shell`
+  exporter for planta_74 uses **groups** with carved openings.
+  Applying the same method requires entering each wall group
+  (`group.entities.add_face` instead of `model.active_entities`).
+  Etapa 5 must verify this transition.
+- The `intersect_with` API is sensitive to float-exact coplanarity
+  (LL-014). On the planta, walls may have slightly different
+  thicknesses (drift from PT_TO_M conversion). Each edit must
+  re-discover the real wall thickness from the target wall group.
+- Subprocess SU lifecycle (FP-019): future tooling should print
+  explicit "launching SU on X" / "terminating SU PID Y" log lines
+  AND call `taskkill /IM SketchUp.exe /F` before any user-facing
+  handoff.
+
+## GPT/Agent Notes
+
+- No GPT consult this session — every fork was within the agent's
+  competence given the user's verbal corrections.
+- User's escalating frustration with path proliferation +
+  rebuild-from-consensus was the trigger for crystallising the
+  Canonical Artifact Rule.
+- The rule should propagate to specialist agents
+  (`.claude/agents/*.md`) so they ALSO check the 4-declaration
+  template before editing.
+
+## Session metrics
+
+- Files modified (tracked):
+  - `docs/learning/lessons_learned.md` (+LL-013, LL-014)
+  - `docs/learning/failure_patterns.md` (+FP-016/17/18/19)
+  - `.ai_bridge/CURRENT_STATE.md` (full rewrite)
+  - `.ai_bridge/HANDOFF.md` (this section)
+- Files created (gitignored, local POC):
+  - `runs/quadrado_demo/quadrado_with_window.skp` + render + report
+  - `runs/quadrado_demo/_*.{rb,py,txt,md,json}` (helpers + outputs)
+- User MEMORY:
+  - `feedback_canonical_artifact_rule.md` (ROOT_RULE)
+  - `feedback_nao_rebuild_edite_correto.md` (un-archived; refined)
+  - Index `MEMORY.md` reordered to put rule at top

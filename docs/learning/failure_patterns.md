@@ -340,3 +340,190 @@ as the regression gate (max 1 m distance from opening center).
 **See also:** ADR-003 §3 (Phase 2 visual parity, where the bug
 shipped); FP-014 (autorun cleanup — same author's pattern of bugs
 that "look fine in tests but fail visually in SU").
+
+## FP-016 — Path proliferation: creating parallel artifacts outside canonical run dir (2026-05-23)
+
+**Symptom:** Agent asked to "add a window to the quadrado" creates
+`E:/Claude/quadrado_delivery/` outside the project tree, copies the
+SKP there, generates a new consensus there with shifted origin
+(2.7,2.7 instead of 100,100), produces matplotlib-only renders
+called `quadrado_4x4_with_window_iso.png`. User confused because
+the "real" canonical quadrado lives at
+`runs/quadrado_demo/quadrado.skp` and its consensus uses
+`dimension_mode: inner_clear` with walls at 100–213 pt.
+
+**Root cause:** Agent treated each task as a fresh workspace
+instead of operating on the existing canonical artifact. Three
+specific drift triggers:
+
+1. "I'll put outputs in `quadrado_delivery/`" — invents a delivery
+   folder that doesn't exist in the project structure.
+2. "I'll write a new consensus with cleaner coords" — shifts origin
+   from (100,100) to (2.7,2.7) "for simplicity"; this changes the
+   model fundamentally.
+3. "Let me render via matplotlib for a quick visual" — produces a
+   PNG that has nothing to do with the actual SKP geometry.
+
+**Rule:** Outputs of any task against an existing artifact live in
+the **same directory as the canonical artifact**. For
+`runs/quadrado_demo/quadrado.skp`, all derivatives go to
+`runs/quadrado_demo/quadrado_with_window.skp`,
+`runs/quadrado_demo/quadrado_with_window_render.png`, etc. No
+parallel "delivery" folders, no synthetic consensus with shifted
+origin, no matplotlib-only "como ficaria" when the target is an
+SKP that must open in SU.
+
+**Anti-pattern signal:** creating a new directory outside
+`runs/<existing_run>/` for outputs of a task against an existing
+canonical artifact; mentioning "delivery" / "demo" / "visualization"
+folders that aren't already in the tree.
+
+**Repair landed:** LL-013 (canonical artifact rule); user MEMORY
+`feedback_canonical_artifact_rule.md` (priority ROOT_RULE).
+
+**See also:** FP-017 (rebuilding instead of in-place edit — the
+sibling failure pattern that often triggers together with this one).
+
+## FP-017 — Rebuild via consume_consensus.rb when in-place edit was correct (2026-05-23)
+
+**Symptom:** Asked to add a window to an existing working SKP,
+agent reaches for `tools.skp_from_consensus` which runs
+`consume_consensus.rb` which calls `model.entities.clear!` and
+rebuilds the entire model from the consensus JSON. The existing
+working baseline (`quadrado.skp` with 34 raw entities in Layer0,
+opens clean) is discarded; the rebuilt SKP uses a fundamentally
+different topology (grouped walls + boolean carving) that exhibits
+"abre o SU e fecha rápido" symptoms for the user.
+
+**Root cause:** `consume_consensus.rb` is the **builder** pipeline,
+not an editor. Its contract is: consensus.json → SKP from scratch.
+When the goal is "add ONE element to an existing SKP", calling
+`consume_consensus.rb` discards the validated topology in favour of
+the consensus → SKP grammar, which produces a different
+(legitimately different, but for THIS purpose wrong) SKP.
+
+**Rule:** To **add** features (window, door, furniture) to an
+existing SKP, **open the SKP and edit in-place** via SU Ruby API
+(push/pull, add_face, add_line, intersect_with, erase_entities).
+Never use `consume_consensus.rb`, which is `entities.clear!`-based
+and only correct when the consensus IS the source of truth and you
+want to rebuild from it.
+
+**Repair pattern** (validated in quadrado window POC,
+`runs/quadrado_demo/_add_window.rb`):
+```ruby
+m = Sketchup.active_model   # SU launched with target .skp as positional
+ents = m.active_entities
+# Find existing face by bbox criteria
+target_face = ents.grep(Sketchup::Face).find { |f| ... }
+m.start_operation('edit', true)
+# Modify in-place: add_face for coplanar rect, intersect_with to
+# force split, pushpull to carve, erase_entities for cleanup
+m.commit_operation
+m.save(out_path)
+```
+
+**Anti-pattern signal:** reaching for `tools.skp_from_consensus` or
+`consume_consensus.rb` when the task description is "add X to
+existing Y.skp"; any flow where the input SKP is touched only as
+the launcher's positional argument (bootstrap) while the actual
+geometry comes from a consensus rebuild.
+
+**See also:** LL-013 (canonical artifact rule §5-step flow);
+FP-016 (path proliferation, sibling).
+
+## FP-018 — Hardcoded coordinates cause intersect_with float drift (2026-05-23)
+
+**Symptom:** In-place window cut via `entities.intersect_with`
+appeared to succeed (invariants_report passed 7/8) but left
+vestigial slabs of 0.92 in² and a redundant coplanar 2232 in² face,
+plus the inner wall area didn't change as expected.
+
+**Root cause:** Wall coordinates hardcoded in the Ruby (`y_in =
+142.284` from `134.784 + 7.5"` theoretical thickness) didn't match
+what SU actually stored (`y_in = 142.26`, a 0.02" / 0.5 mm drift).
+`intersect_with` requires float-exact coplanarity to merge faces;
+the drift caused SU to create a thin extra slab between the two
+"near-coplanar" planes instead of merging them.
+
+**Rule:** Any geometry edit on an existing SKP must **read
+coordinates from the model**, never hardcode them from theoretical
+conversion constants. For wall thickness:
+```ruby
+south_faces = ents.grep(Sketchup::Face).select { |f|
+  bb = f.bounds
+  bb.min.y < 145 && (bb.max.y - bb.min.y).abs < 0.1 && bb.max.z > 100
+}
+outer = south_faces.min_by { |f| f.bounds.min.y }
+inner = south_faces.max_by { |f| f.bounds.min.y }
+wall_thick = inner.bounds.min.y - outer.bounds.min.y   # real value
+```
+
+Same principle applies to floor z=0, ceiling z=height, room
+polygon vertices, etc. The model is the source of truth, not the
+conversion math.
+
+**Anti-pattern signal:** wall thickness, room dimensions, or any
+edit coordinate computed via `0.19 * 39.3701` or `PT_TO_M * something`
+without a `face.bounds.min.x` cross-check. Especially dangerous
+combined with `intersect_with`, `Face#pushpull`, or any operation
+that depends on float-exact alignment.
+
+**See also:** LL-014 (read coordinates from model); LL-013
+(canonical artifact rule §"sem reinterpretar dimensão/unidade").
+
+## FP-019 — Python subprocess.terminate of SU confuses user about SKP stability (2026-05-23)
+
+**Symptom:** User reports "abriu o SketchUp e fechou rápido" when
+opening an SKP that the agent had just generated. Agent verifies
+SU launches and stays alive 27+ seconds via `cmd /c start`; SKP is
+structurally valid; inspector reports correct topology. Disconnect.
+
+**Root cause:** Agent's helper Python launchers
+(`_run_add_window.py`, `_render_view.py`, `_inspect_skp.py`,
+`_reframe.py`) all follow the same pattern:
+```python
+proc = subprocess.Popen([SU, target_skp])
+... poll for done marker ...
+proc.terminate()    # ← kills SU
+```
+The user opening the SKP manually in parallel saw an SU instance
+appear (could be theirs OR the agent's), then disappear when one
+of the agent's helpers fired its `proc.terminate()`. The agent
+attributed the close to a bug in the SKP; the user attributed it
+to the agent's previous "broken" output.
+
+**Rule:** When the agent's workflow uses SU as a headless renderer
+(launch → run plugin → terminate), declare it loudly in the
+session log. The user must know:
+
+- "I'm about to launch SU on `target.skp` and terminate it after
+  the plugin writes the done marker (~5–15s)."
+- "If you have SU open right now or open it during this command,
+  my terminate may catch your instance too."
+
+For long-form interactive work (user opens SKP to inspect), the
+agent must NOT have a pending `proc.terminate()`. Kill any
+agent-launched SU explicitly with `taskkill /IM SketchUp.exe /F`
+BEFORE telling the user "now open the file".
+
+**Anti-pattern signal:** generating a sequence of agent SU runs in
+the same session where the user might be trying to open the output
+SKP in parallel; reporting "SU opens fine in my tests" without
+mentioning that the agent's tests TERMINATE SU as part of the run.
+
+**Repair pattern:**
+```python
+# Always log the lifecycle
+print(f"[agent] launching SU on {target}")
+proc = subprocess.Popen([SU, target])
+...
+proc.terminate()
+print(f"[agent] terminated SU PID {proc.pid}")
+# Before handing off to user:
+subprocess.run(["taskkill", "/IM", "SketchUp.exe", "/F"])
+print("[agent] all SU instances killed; safe to open manually")
+```
+
+**See also:** FP-007 (welcome dialog — also a SU2026 launch
+ergonomics issue); LL-009 (bootstrap .skp pattern).

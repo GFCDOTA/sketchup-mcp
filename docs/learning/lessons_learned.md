@@ -157,3 +157,103 @@ to the output dir as `_bootstrap.skp`.
 **Lesson:** When a parametric decision is initially made on theoretical reasoning (LLM "more correct" + user "biggest fix"), **execute the smallest reproducible run and let empirical numbers override**. The protocol path was honored: I asked the LLM, applied the answer, INVESTIGATED the resulting failures (not "maquiar"), found the root cause (algorithm aggression), tested the alternative (`ratio=0.50`), and chose the option with better empirical evidence. Recorded the override in `.ai_bridge/GPT_RESPONSES.md` so the audit trail is intact.
 **Caveat:** This loop only works if the gate (in this case, fidelity engine + GT ranges) is honest. Had I been allowed to "maquiar" the GT ranges to match `ratio=0.30`'s output, the empirical signal would have been silenced. CLAUDE.md §1 + the operational protocol's RED rule against "alterar baseline para fazer passar" are what made the override visible.
 **See also:** `FP-012` (the bug being fixed); `feedback_autonomia_operacional_protocolo.md` (the GREEN/YELLOW/RED loop that authorized the override).
+
+## LL-013 — Canonical Artifact Rule: micro-test → planta (5-step disciplined flow)
+
+**Date:** 2026-05-23
+**Context:** During quadrado_demo POC of adding a window, agent
+created parallel artifacts (new `quadrado_delivery/` dir, separate
+consensus with different origin, rebuilt SKP via
+`consume_consensus.rb` which calls `entities.clear!`). Each step
+discarded the validated baseline (`runs/quadrado_demo/quadrado.skp`,
+34 raw entities, opens clean) and rebuilt from scratch with a
+different topology (grouped walls + boolean carving). Resulting SKPs
+exhibited "abre o SU e fecha rápido" behaviour for the user — a
+combination of (a) broken rebuilt topology and (b) Python
+subprocess.terminate killing the SU instance the user could see.
+
+**Rule:** Every task involving an existing artifact follows
+**5 etapas**, in order:
+
+1. **Micro-fixture canônico** — use the validated baseline that
+   already exists (e.g. `runs/quadrado_demo/quadrado.skp`). If
+   nothing exists, create the smallest possible one with path +
+   purpose documented.
+2. **Prova isolada** — geometry report + render + invariants
+   PASS on the micro-fixture.
+3. **Teste/regressão/harness** — versioned baseline + assertions
+   gravadas (`tests/baselines/<name>.json` + pytest gate).
+4. **Aplicação na planta real** — same logic against the real
+   target (e.g. `runs/planta_74_plan_shell/model.skp`).
+5. **Comparação com baseline da planta** — antes/depois SKP+PNG
+   + geometry diff + PDF as ground truth.
+
+Skipping etapas 4–5 makes the micro-test a "demo paralela" that
+violates the rule. Every micro-test must end with explicit decision:
+**applied / rejected with reason / blocked with evidence**.
+
+Before any edit, declare 4 things:
+1. **Canonical input artifact** (exact path + why it's the baseline)
+2. **Minimal diff** (without changing coords/origin/unit)
+3. **Pipeline** (which existing one + why it fits)
+4. **Comparison** (SKP+PNG before/after + invariants preserved)
+
+Mental filter for every task: *"does this bring the real pipeline
+closer to generating a correct planta SKP, or is it just a pretty
+demo?"* If the latter, don't do it.
+
+**Anti-pattern signal:** creating a new directory parallel to an
+existing canonical run dir; modifying origin/scale/dimension_mode
+"to make things cleaner"; using a different consensus when the
+canonical one was already validated; matplotlib-only "como ficaria"
+renders when the real target is a SKP that must open in SU.
+
+**Repair landed:** `feedback_canonical_artifact_rule.md` (user
+MEMORY.md, priority ROOT_RULE) + this LL.
+
+**See also:** FP-016 (path proliferation), FP-017 (rebuild via
+consume_consensus when in-place edit was correct).
+
+## LL-014 — Read coordinates from the model, never hardcode
+
+**Date:** 2026-05-23
+**Context:** Quadrado window POC used hardcoded wall coordinates
+(`y_in = 142.284` based on theoretical `134.784 + 7.5` from
+`PT_TO_M = 0.19 / 5.4 * 39.3701`). The SKP actually stored
+`y_in = 142.26` (a 0.02" / 0.5 mm float drift). When the in-place
+edit ran `intersect_with` between a face at y=142.284 (added by the
+Ruby) and the existing face at y=142.26, SU did not auto-merge them
+(they're not coplanar in float-exact terms). Result: vestigial
+slabs of 0.92 in² (= 47" × 0.02") left in the model + a redundant
+coplanar face of 2232 in² that made the invariants report claim
+"no change" when the inner wall HAD been carved.
+
+**Rule:** any Ruby/Python that edits an existing SKP must
+**discover dimensions from the model**, not from theoretical
+conversion constants. For wall thickness, find both inner and outer
+face bbox.min.y and compute `thick = y_in - y_out`. Same for all
+other dimensions that depend on what's actually stored.
+
+The fix in `_add_window.rb` (POC artifact):
+```ruby
+south_faces = ents.grep(Sketchup::Face).select do |f|
+  bb = f.bounds
+  bb.min.y < 145 && bb.max.y < 145 && (bb.max.y - bb.min.y).abs < 0.1 && bb.max.z > 100
+end
+outer = south_faces.min_by { |f| f.bounds.min.y }
+inner = south_faces.max_by { |f| f.bounds.min.y }
+y_out = outer.bounds.min.y
+y_in  = inner.bounds.min.y
+wall_thick = y_in - y_out   # real value, not 7.5"
+```
+
+**Anti-pattern signal:** any geometry edit script that defines
+coordinate constants from `m_to_in` conversion or PT_TO_M without
+cross-checking against the actual face bbox. Especially dangerous
+with `intersect_with`, which requires float-exact coplanarity to
+merge faces — small drift creates vestigial sub-faces that pass
+naive area assertions.
+
+**See also:** FP-018 (hardcoded coords cause intersect_with float
+drift); LL-013 (canonical artifact rule §"sem reinterpretar
+dimensão/unidade").
