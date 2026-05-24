@@ -163,7 +163,7 @@ jobs:
               lines.push(`</details>`);
             }
             lines.push(`_Phase 2 is observational — this comment never blocks merge. `
-              + `Phase 3 will flip `continue-on-error` to `false` once the gate is trusted. `
+              + `Phase 3 will flip \`continue-on-error\` to \`false\` once the gate is trusted. `
               + `See \`docs/engineering/spec_driven_development.md\` §Workflow._`);
             const body = lines.join('\n');
             // De-duplicate: if a previous run already left a comment with the
