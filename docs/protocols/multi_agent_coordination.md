@@ -1,10 +1,10 @@
 # Multi-Agent Coordination Protocol
 
+> **Status:** Canonical (2026-05-24).
 > **Permanent operational protocol** for sessions where multiple
 > Claude (or human) agents may be acting on the same repo and the
 > same local working tree concurrently.
 > Canonical reference; do not duplicate this content elsewhere — link here.
-> Last updated: 2026-05-24.
 
 ---
 
