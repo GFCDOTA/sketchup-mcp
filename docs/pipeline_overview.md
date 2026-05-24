@@ -1,5 +1,7 @@
 # Pipeline overview — PDF → SKP
 
+> **Status:** Canonical (2026-05-24).
+>
 > Read this before reading specific stage docs. It's the map; the
 > stage docs are the territory. Companion: [`CLAUDE.md`](../CLAUDE.md)
 > §10 for the canonical baselines, [`OVERVIEW.md`](../OVERVIEW.md) for

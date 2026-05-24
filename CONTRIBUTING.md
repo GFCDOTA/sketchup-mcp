@@ -1,5 +1,7 @@
 # Contributing to sketchup-mcp
 
+> **Status:** Canonical (2026-05-24).
+
 This file is the short version for humans + agents who want to ship a
 change without re-reading the entire `CLAUDE.md` constitution every
 time. **`CLAUDE.md` is the authoritative source for the rules.** When
