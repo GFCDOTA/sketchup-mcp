@@ -65,6 +65,7 @@ from shapely.geometry import MultiPolygon, Polygon, box
 from shapely.ops import unary_union
 
 from tools.disarm_sketchup_autoruns import disarm as disarm_autoruns
+from tools.su_runner_safety import log_mode, parse_mode, should_terminate
 
 SKETCHUP_EXE_DEFAULT = (
     r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
@@ -416,6 +417,23 @@ def find_bootstrap(out_skp: Path) -> Path | None:
     return None
 
 
+def _default_runner_mode() -> str:
+    """Pick a safe default runner mode based on environment.
+
+    - If `CI=true` or `GITHUB_ACTIONS=true`: assume `headless`
+      (preserves the historical terminate-after-SKP behaviour on CI).
+    - Otherwise: `interactive` (the safe default — do NOT terminate
+      SU automatically, protecting any concurrent human session).
+
+    Callers can override via the `mode` argument, `--mode` CLI flag,
+    `--no-terminate` shorthand, or `RUN_MODE` env var (resolved
+    by `tools.su_runner_safety.parse_mode`).
+    """
+    ci_env = os.environ.get("CI", "").lower() == "true"
+    gh_actions = os.environ.get("GITHUB_ACTIONS", "").lower() == "true"
+    return "headless" if (ci_env or gh_actions) else "interactive"
+
+
 def run(consensus_path: Path, out_skp: Path, *, sketchup_exe: Path,
         plugins_dir: Path = PLUGINS_DIR_DEFAULT,
         timeout_s: int = 180,
@@ -424,7 +442,8 @@ def run(consensus_path: Path, out_skp: Path, *, sketchup_exe: Path,
         out_report: Path | None = None,
         out_shell_json: Path | None = None,
         soft_barriers_mode: str = "groups",
-        force_skp: bool = False) -> dict[str, Any]:
+        force_skp: bool = False,
+        mode: str | None = None) -> dict[str, Any]:
     """Build the plan shell .skp end-to-end.
 
     Args:
@@ -434,6 +453,10 @@ def run(consensus_path: Path, out_skp: Path, *, sketchup_exe: Path,
       soft_barriers_mode: "groups" (emit at 1.10m as SoftBarrier_Group_N)
         or "skip" (record in report, do not emit).
       force_skp: bypass the content-hash cache. Default False.
+      mode: SU runner mode per CLAUDE.md §18 (LL-015, FP-023). When
+        None (default), resolves via parse_mode with a CI-aware safe
+        default. Pass an explicit string (``"headless"`` /
+        ``"interactive"`` / ``"attach"``) to override.
 
     Returns a dict with paths and stats. Honours the content-hash
     cache via a sidecar `<out_skp>.metadata.json` (matches the
@@ -511,6 +534,16 @@ def run(consensus_path: Path, out_skp: Path, *, sketchup_exe: Path,
     env["REPORT_OUT"] = str(out_report.resolve()).replace("\\", "/")
     env["SHELL_JSON_IN"] = str(out_shell_json.resolve()).replace("\\", "/")
     env["SOFT_BARRIERS_MODE"] = soft_barriers_mode
+    # Resolve runner mode (CLAUDE.md §18, LL-015, FP-023).
+    # Safe default = `interactive` for local dev; `headless` on CI so
+    # we preserve historical terminate-after-SKP behaviour. CLI flags
+    # (`--mode`, `--no-terminate`) and `RUN_MODE` env var override.
+    resolved_mode = mode if mode is not None else parse_mode(
+        default=_default_runner_mode()
+    )
+    log_mode(resolved_mode)
+    terminate_allowed = should_terminate(resolved_mode)
+
     print(f"[run] launching SU: {' '.join(cmd)}")
     proc = subprocess.Popen(
         cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
@@ -524,10 +557,18 @@ def run(consensus_path: Path, out_skp: Path, *, sketchup_exe: Path,
             if out_skp.exists():
                 time.sleep(2)  # flush
                 print(f"[ok] {out_skp} ({out_skp.stat().st_size} bytes)")
-                try:
-                    proc.terminate()
-                except Exception:  # noqa: BLE001
-                    pass
+                _pid = getattr(proc, "pid", "?")
+                if terminate_allowed:
+                    try:
+                        proc.terminate()
+                        print(f"[su-runner] terminated own child PID {_pid}")
+                    except Exception:  # noqa: BLE001
+                        pass
+                else:
+                    print(
+                        f"[su-runner] artifact ready; SU left running "
+                        f"(PID {_pid}) per mode={resolved_mode}"
+                    )
                 # Persist sidecar metadata so a future run with the
                 # same consensus short-circuits the cache check.
                 if consensus_sha is not None:
@@ -562,12 +603,23 @@ def run(consensus_path: Path, out_skp: Path, *, sketchup_exe: Path,
                 return {"ok": False, "stats": stats}
             time.sleep(1)
         print(f"[err] timeout {timeout_s}s waiting for {out_skp}")
-        try:
-            proc.terminate()
-            time.sleep(2)
-            proc.kill()
-        except Exception:  # noqa: BLE001
-            pass
+        # Timeout cleanup respects mode: in `interactive`/`attach` we
+        # leave SU running so the user can inspect what went wrong;
+        # in `headless` we terminate our own child cleanly.
+        _pid = getattr(proc, "pid", "?")
+        if terminate_allowed:
+            try:
+                proc.terminate()
+                time.sleep(2)
+                proc.kill()
+                print(f"[su-runner] timeout terminated own child PID {_pid}")
+            except Exception:  # noqa: BLE001
+                pass
+        else:
+            print(
+                f"[su-runner] timeout — SU left running (PID {_pid}) "
+                f"per mode={resolved_mode}; investigate manually"
+            )
         return {"ok": False, "stats": stats, "timeout": True}
     finally:
         for p in disarm_autoruns(plugins_dir):
@@ -590,7 +642,25 @@ if __name__ == "__main__":
                          '1.10 m; "skip": skip and record in report')
     ap.add_argument("--force-skp", action="store_true",
                     help="bypass the consensus-hash cache, always launch SU")
+    ap.add_argument(
+        "--mode",
+        choices=["headless", "ci", "interactive", "debug", "attach", "manual"],
+        default=None,
+        help=(
+            "SU runner mode (CLAUDE.md §18). `headless`/`ci`: terminate "
+            "own SU child after the marker. `interactive`/`debug`: leave "
+            "SU running. `attach`/`manual`: don't launch SU. Default: "
+            "CI-aware (`headless` on CI env, `interactive` elsewhere). "
+            "Can also be set via RUN_MODE env."
+        ),
+    )
+    ap.add_argument(
+        "--no-terminate",
+        action="store_true",
+        help="Shorthand for --mode interactive (do not terminate SU).",
+    )
     args = ap.parse_args()
+    resolved_mode = parse_mode(default=_default_runner_mode())
     result = run(
         args.consensus.resolve(), args.out.resolve(),
         sketchup_exe=args.sketchup,
@@ -598,6 +668,7 @@ if __name__ == "__main__":
         timeout_s=args.timeout,
         soft_barriers_mode=args.soft_barriers,
         force_skp=args.force_skp,
+        mode=resolved_mode,
     )
     if result.get("skipped"):
         sha = result.get("consensus_sha256") or ""
