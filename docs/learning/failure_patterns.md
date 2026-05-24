@@ -431,3 +431,88 @@ chosen mode. Covered by 35 unit tests in
 **See also:** FP-007 (welcome dialog — also a SU2026 launch
 ergonomics issue); LL-009 (bootstrap .skp pattern); LL-015 (runner
 mode protocol, the positive rule complementing this FP).
+
+## FP-024 — Window modelled as full-height void + 3-band infill (door-like shaft) (2026-05-24)
+
+**Symptom:** Looking at a rendered .skp (quadrado canonical fixture
+and planta_74), windows appear as **vertical shafts** with three
+stacked sub-volumes: a gray block at the bottom, a translucent blue
+panel in the middle, a gray block at the top. The wall structurally
+"breaks" at the window position — there's no continuous wall mass
+between sill and floor or between head and ceiling. Visually reads
+as "door with infill" or "elevator shaft," not as "wall with
+aperture."
+
+**Root cause:** `tools/build_plan_shell_skp.{py,rb}` (and the
+legacy `tools/consume_consensus.rb add_window_panel`) treated every
+opening uniformly:
+
+1. Python: subtracts a `width × wall_thickness` rectangle from the
+   2D wall shell polygon BEFORE extrusion (function
+   `opening_carve_rect`).
+2. Ruby: extrudes the carved shell to `WALL_HEIGHT_IN` — the 2D-
+   carved region becomes a full-height floor-to-ceiling void.
+3. Ruby `build_window_panel` then emits THREE sub-groups inside
+   that void: `Window_Group_<id>_sill` (z ∈ [0, 0.9 m], material
+   PARAPET_RGB), `Window_Group_<id>_glass` (z ∈ [0.9, 2.1 m],
+   material GLASS_RGB), `Window_Group_<id>_lintel` (z ∈ [2.1, 2.7 m],
+   material LINTEL_RGB).
+
+The semantic contract of a window — **wall-hosted partial-height
+aperture; wall mass continuous below the sill (peitoril) and above
+the head (verga)** — is violated. The "sill" and "lintel" boxes
+exist but they are independent volumes with their own materials,
+NOT the wall continuing past the aperture.
+
+**Why it survived for a while:** Aggregate fidelity scores looked
+fine — wall area, opening count, classification accuracy were all
+correct. The bug was purely **structural / visual** and required
+explicit human review of the rendered SKP to surface.
+
+**Repair pattern (ADR-007):**
+
+1. Distinguish `WINDOW_APERTURE_KINDS = {"window"}` from
+   `FULL_HEIGHT_CARVE_KINDS = {interior_door, door_arc, door,
+   interior_passage, open_passage, passage, glazed_balcony}`.
+2. In Python, skip windows from `carve_rects`; route them to a
+   separate `window_apertures` list (top-level field in the
+   serialized `_shell_polygon.json`).
+3. In Ruby, after extruding the solid wall shell, call
+   `build_window_aperture_3d` per aperture:
+   - Find the host wall lateral face (full wall-height span).
+   - Read its fixed coord from the model (LL-014 — never hardcode).
+   - Add a coplanar rectangle at z ∈ [WINDOW_SILL_IN, WINDOW_HEAD_IN].
+     SU auto-splits the host face — the wall material above head
+     and below sill REMAINS as the perimeter remainder.
+   - `pushpull(-real_thickness_in)` through the wall; SU merges
+     with the opposite face on exact match, creating a real
+     through-hole.
+   - Emit `WindowGlass_Group_<id>` at mid-thickness — the ONLY
+     window-specific element. Wall material is wall material.
+
+**Detection signature (anti-regression):**
+
+The geometry report from a healthy build will have:
+- `groups_diagnostic[*]` containing `PlanShell_Group` with
+  `bbox_m.max.z == WALL_HEIGHT_M` (~2.70 m).
+- `WindowGlass_Group_<id>` per window, bbox_m.z = [0.9, 2.1].
+- **No** `Window_Group_*_sill` or `Window_Group_*_lintel` entries.
+
+The bug signature is the opposite: legacy sill/lintel groups
+present, often with `bbox_m.z = [0, 0.9]` (sill on the floor)
+which is the architectural "shaft" appearance.
+
+**Validation gates** (test files):
+- `tests/test_window_aperture_contract.py` — Python contract.
+  Windows must NOT appear in `openings_carved`; the kind sets are
+  disjoint; planta_74's 4 windows must all route to the 3D path.
+- `tests/test_window_aperture_geometry.py` — SKP geometry. Wall
+  height preserved; glass at sill-to-head only; legacy `_sill` /
+  `_lintel` groups absent.
+
+**See also:** ADR-007 (the decision document); LL-016 (the
+positive rule); ADR-003 (`build_plan_shell_skp` overall design —
+this fix is a Phase 2.5 refinement); LL-014 (read coords from
+the actual model, never hardcode — applied in the 3D carve);
+`docs/specs/quadrado_demo_spec.md` §6.4 (the in-place edit pattern
+that `build_window_aperture_3d` adopts).

@@ -588,6 +588,169 @@ def build_passage_marker(parent_ents, opening, host_wall, thickness_pt,
   {'ok' => true, 'group' => group}
 end
 
+# ---- WINDOW APERTURE 3D CARVE (ADR-007 / FP-024) -------------------
+#
+# A WINDOW is a wall-hosted partial-height aperture: WINDOW_SILL_IN to
+# WINDOW_HEAD_IN. The wall MUST retain mass below the sill (peitoril /
+# parapet) AND above the head (verga / lintel). Carving the wall full-
+# height in 2D (the prior bug) then refilling with sill+glass+lintel
+# bands produces three structurally-separate volumes that read as
+# "shaft with infill," not as "wall with window aperture."
+#
+# This function carves the aperture AFTER the wall is extruded as a
+# solid. Steps mirror the in-place edit pattern documented in
+# docs/specs/quadrado_demo_spec.md §6.4:
+#   1. Locate the PlanShell sub-group containing the host wall.
+#   2. Find a vertical (lateral) face perpendicular to the wall axis
+#      that contains the window aperture position. (Either the outer
+#      or inner face — pushpull goes through anyway.)
+#   3. READ wall face coords FROM THE MODEL (LL-014; never hardcode).
+#   4. Add a coplanar rectangle face on that face at
+#      [sill_in..head_in] × [cx-w/2 .. cx+w/2]. SU auto-splits the
+#      host face into [aperture] + [perimeter remainder].
+#   5. pushpull(-real_thickness_in) — pushes aperture face through the
+#      wall; SU merges with the opposite face on exact match,
+#      creating a real through-hole. Wall mass above head and below
+#      sill is preserved as part of the perimeter remainder.
+#   6. Add a glass face at mid-thickness inside the aperture (separate
+#      top-level group so it can be inspected/replaced without
+#      touching the wall shell).
+
+def find_wall_face_for_aperture(piece_ents, host_wall, cx_in, cy_in,
+                                  half_w_in, slab_floor_in, slab_ceiling_in)
+  ori = host_wall['orientation']
+  piece_ents.grep(Sketchup::Face).find do |f|
+    next false if f.normal.z.abs > 0.01  # skip top/bottom (annular floor/ceiling)
+    if ori == 'h'
+      next false unless f.normal.y.abs > 0.99
+      bb = f.bounds
+      bb.min.x <= cx_in - half_w_in + 0.5 &&
+        bb.max.x >= cx_in + half_w_in - 0.5 &&
+        bb.min.z < slab_floor_in + 0.5 &&
+        bb.max.z > slab_ceiling_in - 0.5
+    else
+      next false unless f.normal.x.abs > 0.99
+      bb = f.bounds
+      bb.min.y <= cy_in - half_w_in + 0.5 &&
+        bb.max.y >= cy_in + half_w_in - 0.5 &&
+        bb.min.z < slab_floor_in + 0.5 &&
+        bb.max.z > slab_ceiling_in - 0.5
+    end
+  end
+end
+
+def build_window_aperture_3d(parent_ents, opening, host_wall, thickness_pt,
+                              glass_mat, index)
+  oid = opening['id'] || index.to_s
+  cx_pt, cy_pt = opening['center']
+  w_pt = opening['opening_width_pts'].to_f
+  ori = host_wall['orientation']
+
+  cx_in = cx_pt * PT_TO_IN
+  cy_in = cy_pt * PT_TO_IN
+  half_w_in = (w_pt * PT_TO_IN) / 2.0
+  sill_in = WINDOW_SILL_IN
+  head_in = WINDOW_HEAD_IN
+  thickness_in = thickness_pt.to_f * PT_TO_IN
+
+  plan_shell = parent_ents.grep(Sketchup::Group)
+                          .find { |g| g.name == 'PlanShell_Group' }
+  return {'ok' => false, 'reason' => 'PlanShell_Group not found'} if plan_shell.nil?
+
+  carve_succeeded = false
+  glass_group = nil
+  carve_diag = []
+
+  plan_shell.entities.grep(Sketchup::Group).each do |piece|
+    ents = piece.entities
+    target = find_wall_face_for_aperture(
+      ents, host_wall, cx_in, cy_in, half_w_in, 0.0, WALL_HEIGHT_IN,
+    )
+    if target.nil?
+      carve_diag << "#{piece.name}: no candidate face"
+      next
+    end
+
+    # Read face's fixed coord from the actual model (LL-014).
+    if ori == 'h'
+      y_at = target.bounds.min.y  # face is at constant y
+      pts = [
+        Geom::Point3d.new(cx_in - half_w_in, y_at, sill_in),
+        Geom::Point3d.new(cx_in + half_w_in, y_at, sill_in),
+        Geom::Point3d.new(cx_in + half_w_in, y_at, head_in),
+        Geom::Point3d.new(cx_in - half_w_in, y_at, head_in),
+      ]
+    else
+      x_at = target.bounds.min.x
+      pts = [
+        Geom::Point3d.new(x_at, cy_in - half_w_in, sill_in),
+        Geom::Point3d.new(x_at, cy_in + half_w_in, sill_in),
+        Geom::Point3d.new(x_at, cy_in + half_w_in, head_in),
+        Geom::Point3d.new(x_at, cy_in - half_w_in, head_in),
+      ]
+    end
+
+    aperture_face = ents.add_face(pts)
+    if aperture_face.nil?
+      carve_diag << "#{piece.name}: add_face returned nil"
+      next
+    end
+
+    # Push aperture face INTO the wall. Outer face normal points
+    # outward; pushpull(-thickness) drives the face inward through
+    # the wall, where it merges with the opposite face on exact match,
+    # creating a real through-hole. Wall mass above/below stays put.
+    begin
+      aperture_face.pushpull(-thickness_in)
+    rescue StandardError => e
+      carve_diag << "#{piece.name}: pushpull raised #{e.class}: #{e.message}"
+      next
+    end
+    carve_succeeded = true
+
+    # Glass pane at mid-thickness — separate top-level group.
+    if ori == 'h'
+      mid_y_in = host_wall['start'][1].to_f * PT_TO_IN
+      glass_pts = [
+        Geom::Point3d.new(cx_in - half_w_in, mid_y_in, sill_in),
+        Geom::Point3d.new(cx_in + half_w_in, mid_y_in, sill_in),
+        Geom::Point3d.new(cx_in + half_w_in, mid_y_in, head_in),
+        Geom::Point3d.new(cx_in - half_w_in, mid_y_in, head_in),
+      ]
+    else
+      mid_x_in = host_wall['start'][0].to_f * PT_TO_IN
+      glass_pts = [
+        Geom::Point3d.new(mid_x_in, cy_in - half_w_in, sill_in),
+        Geom::Point3d.new(mid_x_in, cy_in + half_w_in, sill_in),
+        Geom::Point3d.new(mid_x_in, cy_in + half_w_in, head_in),
+        Geom::Point3d.new(mid_x_in, cy_in - half_w_in, head_in),
+      ]
+    end
+
+    glass_group = parent_ents.add_group
+    glass_group.name = "WindowGlass_Group_#{oid}"
+    glass_face = glass_group.entities.add_face(glass_pts)
+    if glass_face
+      glass_face.material = glass_mat
+      glass_face.back_material = glass_mat
+    end
+
+    break
+  end
+
+  if carve_succeeded
+    {
+      'ok' => true,
+      'group' => glass_group,
+      'aperture_carved' => true,
+      'sill_in' => sill_in,
+      'head_in' => head_in,
+    }
+  else
+    {'ok' => false, 'reason' => "no piece matched: #{carve_diag.join('; ')}"}
+  end
+end
+
 # ---- camera + screenshots -----------------------------------------
 
 def setup_iso_camera(model)
@@ -971,9 +1134,16 @@ openings.each_with_index do |op, i|
       passage_built += 1 if res['ok']
     end
   when 'window'
-    res = build_window_panel(model.active_entities, op, host,
-                            thickness_pt,
-                            sill_mat, glass_mat, lintel_mat, i)
+    # ADR-007 / FP-024: windows are wall-hosted partial-height
+    # apertures. Carve in 3D (post-extrude) so wall mass remains
+    # below sill and above head. The legacy build_window_panel
+    # (3-band sill/glass/lintel infill of a full-height carve)
+    # produced door-like / shaft-like voids and is no longer
+    # called for window kinds. Glazed_balcony (porta-vidro) is
+    # genuinely full-height and continues to use the 2D carve +
+    # build_glazed_balcony path below.
+    res = build_window_aperture_3d(model.active_entities, op, host,
+                                   thickness_pt, glass_mat, i)
     window_built += 1 if res['ok']
     opening_skips << "op[#{i}] window: #{res['reason']}" unless res['ok']
   when 'glazed_balcony'
