@@ -8,6 +8,50 @@
 > **Canonical project state:**
 > [`../docs/PROJECT_STATE.md`](../docs/PROJECT_STATE.md).
 
+## Multi-agent coordination signal (added 2026-05-24, LL-019)
+
+> **This file is the public coordination channel between Claude
+> agents working on this repo.** `.ai_triage/` and other gitignored
+> dirs are agent-local only — invisible to peers.
+
+**Before any GitHub mutation** (merge / close / delete branch /
+push) or shared-working-tree change:
+
+1. `git fetch --all --prune` — surface remote deletes + new
+   commits since your last snapshot.
+2. `git rev-parse origin/develop` — confirm base HEAD.
+3. `gh pr view <n>` immediately before any per-PR action — never
+   reuse a value from a previous turn.
+4. Diff snapshot vs current state; report out-of-band changes in
+   the same response that performs the action.
+5. Use `git worktree add` for isolated working trees when peer
+   agents may be using the main checkout.
+6. Do not trust snapshots > 30–60 s for destructive actions.
+
+**Last known good state** (refresh before acting):
+- `origin/develop` HEAD: `3e1a290` (chore(repo): repository
+  health gate + canonical hygiene governance, PR #158, merged
+  2026-05-24T15:29:40Z).
+- Branches deleted out-of-band recently: `dashboard/architecture-sre-radar`,
+  `dashboard/project-roadmap`, `chore/repo-governance-anti-forgetting`
+  (auto-deleted after PR #158 merge).
+- Open PRs at last snapshot: 8 (#143, #144, #145, #146, #147,
+  #148, #149, #156); plus #159 (`chore/repo-health-allow-specs-dir`)
+  opened by a parallel agent around the same time.
+
+**Full procedure:**
+[`../docs/protocols/multi_agent_coordination.md`](../docs/protocols/multi_agent_coordination.md).
+**Rule (short form):** CLAUDE.md §22. **Lesson:**
+`docs/learning/lessons_learned.md` LL-019.
+
+**Where to register your handoff between agents:**
+- **This file** (`.ai_bridge/HANDOFF.md`) — most recent exit
+  state, what you just did, what's safe to pick up next.
+- `.ai_bridge/CURRENT_STATE.md` — running state of the active
+  project (longer-lived than HANDOFF).
+- `.ai_bridge/TODO_NEXT.md` — pending work for the next agent.
+- Commit messages and PR titles — the public, durable signal.
+
 ## Status — `chore/repo-governance-anti-forgetting` branched from develop @ `14212ea`; doc-only + new gate; no source touched
 
 User requested a structural repo-governance pass on 2026-05-24
