@@ -1,6 +1,6 @@
 # Quadrado Demo — Canonical Micro-Fixture Spec
 
-> **Status:** Active reference (2026-05-23).
+> **Status:** Active reference (2026-05-24).
 > **Purpose:** Smallest reproducible SU pipeline fixture, used as
 > proof-of-concept laboratory for any operation that will later be
 > applied to `planta_74_plan_shell`.
@@ -8,6 +8,45 @@
 > `feedback_canonical_artifact_rule.md`, ROOT_RULE 2026-05-23). The
 > quadrado is the **micro-fixture** of the 5-etapa flow:
 > `micro-fixture → prova → regressão → planta → comparação`.
+
+> **🟢 Canonical success reference (2026-05-24).** The quadrado +
+> window canonical build is **the** reference of a correct
+> wall-shell + window-aperture pipeline output. The input, expected
+> outputs, render, and helpers are all **versioned** (under git):
+>
+> | Role | Path |
+> |---|---|
+> | Input consensus (with window) | `fixtures/quadrado/consensus_with_window.json` |
+> | Input consensus (empty room) | `fixtures/quadrado/consensus_empty.json` |
+> | Expected `_shell_polygon.json` | `docs/specs/_assets/quadrado_canonical_shell_polygon.json` |
+> | Expected geometry report | `docs/specs/_assets/quadrado_canonical_geometry_report.json` |
+> | Reference 3D render | `docs/specs/_assets/quadrado_canonical_success_render.png` |
+> | Render helpers (Python + Ruby) | `tools/quadrado/render_view.{py,rb}` |
+> | Smoke gate (ready to promote to CI) | `tests/test_quadrado_canonical_smoke.py` |
+>
+> **If any of these claims regress, the gate fails.** The whole
+> point is that no future agent should ever have to re-derive
+> "what does a correct window-on-clean-shell look like" — this
+> spec + the versioned artifacts answer that question.
+>
+> Cross-refs: ADR-007 (window aperture 3D carve), LL-016 + FP-024
+> (window semantics), LL-017 + FP-025 (wall shell canonicalisation),
+> CLAUDE.md §§19–20.
+>
+> **Reproduction** (from a fresh clone, after `pip install -e .[dev]`):
+>
+> ```bash
+> python -m tools.build_plan_shell_skp \
+>   fixtures/quadrado/consensus_with_window.json \
+>   --out runs/quadrado_canonical/quadrado.skp
+>
+> python tools/quadrado/render_view.py \
+>   runs/quadrado_canonical/quadrado.skp \
+>   --out runs/quadrado_canonical/render.png
+>
+> # Validate against the versioned reference:
+> pytest tests/test_quadrado_canonical_smoke.py -v
+> ```
 
 ---
 
