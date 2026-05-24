@@ -383,7 +383,7 @@ branch / push / API write):
   prefixes (`feature/`, `fix/`, `chore/`, `docs/`) so other agents
   can predict scope from name alone.
 
-**See also:** `docs/protocols/multi_agent_coordination.md` (the
+**See also:** `docs/AGENT_COORDINATION.md` (the
 canonical procedure with copy-paste snippets); CLAUDE.md §22 (the
 rule, condensed); LL-018 (terminal-first GitHub auth — same
 operational philosophy applied to credentials, not state);

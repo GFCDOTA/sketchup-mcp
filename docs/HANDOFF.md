@@ -32,16 +32,20 @@ in this exact order:
    the reasoning behind them.
 4. [`PR_HYGIENE.md`](PR_HYGIENE.md) — startup / exit checklists +
    terminal-first GitHub workflow.
-5. [`GATES.md`](GATES.md) — validation gates and commands.
-6. [`../OVERVIEW.md`](../OVERVIEW.md) — full architectural map (only
+5. [`AGENT_COORDINATION.md`](AGENT_COORDINATION.md) — **MANDATORY if any
+   peer agent (Claude or human) may be active on this repo.** Worktree-
+   per-agent is the default; lock files are advisory only. Skipping
+   this doc is how race conditions and lost commits happen.
+6. [`GATES.md`](GATES.md) — validation gates and commands.
+7. [`../OVERVIEW.md`](../OVERVIEW.md) — full architectural map (only
    if `PROJECT_STATE.md` left you wanting more context).
-7. [`../.ai_bridge/HANDOFF.md`](../.ai_bridge/HANDOFF.md) — most recent
+8. [`../.ai_bridge/HANDOFF.md`](../.ai_bridge/HANDOFF.md) — most recent
    session's exit state (top entry).
-8. [`../.ai_bridge/TODO_NEXT.md`](../.ai_bridge/TODO_NEXT.md) —
+9. [`../.ai_bridge/TODO_NEXT.md`](../.ai_bridge/TODO_NEXT.md) —
    ROI-ordered queue of next moves.
 
-Total reading time: about 20 minutes. Skipping #1 or #3 will cause you
-to repeat mistakes that are already documented.
+Total reading time: about 20 minutes. Skipping #1 or #3 or #5 will
+cause you to repeat mistakes that are already documented.
 
 ---
 

@@ -782,13 +782,22 @@ philosophy applied to PATH lookups).
 
 ## 22. Multi-agent coordination (LL-019)
 
+> **Root rule:** multiple autonomous agents MUST NEVER share the
+> same physical working directory. `git worktree add` per
+> agent / per session is the default isolation mechanism. Lock files
+> are advisory only — the worktree is the architectural safety, not
+> a courtesy marker.
+>
+> Canonical protocol: [`docs/AGENT_COORDINATION.md`](docs/AGENT_COORDINATION.md)
+> (the long form with copy-paste snippets).
+>
 > **In multi-agent mode, never assume sole authorship of remote
 > state.** Other agents (Claude or human) may push commits, merge
 > PRs, delete branches, or even check out a different branch in
-> the shared local working tree between any two of your commands.
+> any working tree between any two of your commands.
 
 **Mandatory checklist before any GitHub mutation** (merge, close,
-delete branch, push, REST write) or shared-working-tree change:
+delete branch, push, REST write):
 
 1. `git fetch --all --prune` — surface remote deletes + new commits.
 2. `git rev-parse origin/develop` — confirm base HEAD before basing /
@@ -797,12 +806,29 @@ delete branch, push, REST write) or shared-working-tree change:
    reuse a value from an earlier turn.
 4. **Diff snapshot vs current state** and report out-of-band changes
    in the same response that performs the mutation.
-5. **Use `git worktree add`** when working in a directory another
-   agent may be using; cleanup with `git worktree remove`.
+5. **Operate from your own `git worktree`** — never from the
+   canonical clone that peer agents may also be using.
 6. **Do not trust snapshots older than 30–60 s** for destructive
    actions.
 7. **If state changed mid-operation**, stop, document, re-classify
    before continuing.
+
+**Mandatory checklist before every commit:** confirm current branch,
+HEAD SHA, and `git diff --stat HEAD`. No unexpected files. See
+[`docs/AGENT_COORDINATION.md`](docs/AGENT_COORDINATION.md)
+"before every commit".
+
+**Mandatory checklist after every commit:** verify `git log
+--oneline -1`, push ASAP, record SHA in `.ai_bridge/HANDOFF.md`.
+See [`docs/AGENT_COORDINATION.md`](docs/AGENT_COORDINATION.md)
+"after every commit".
+
+**Concurrency incident** — if branch / HEAD / working tree changes
+unexpectedly between tool calls: STOP, capture state, report to
+user in the same response, wait for instruction before any new
+mutation. Full recovery in
+[`docs/AGENT_COORDINATION.md`](docs/AGENT_COORDINATION.md)
+"Concurrency incident".
 
 **Coordination surface:**
 - `.ai_bridge/HANDOFF.md` is the **tracked, public** coordination
@@ -821,7 +847,7 @@ delete branch, push, REST write) or shared-working-tree change:
   tree (use your own worktree).
 
 Full procedure with copy-paste snippets:
-[`docs/protocols/multi_agent_coordination.md`](docs/protocols/multi_agent_coordination.md).
+[`docs/AGENT_COORDINATION.md`](docs/AGENT_COORDINATION.md).
 
 See LL-019 (the lesson + incident timeline),
 LL-018 (same operational philosophy applied to credentials),

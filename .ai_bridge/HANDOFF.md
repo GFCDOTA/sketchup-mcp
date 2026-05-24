@@ -40,7 +40,7 @@ push) or shared-working-tree change:
   opened by a parallel agent around the same time.
 
 **Full procedure:**
-[`../docs/protocols/multi_agent_coordination.md`](../docs/protocols/multi_agent_coordination.md).
+[`../docs/AGENT_COORDINATION.md`](../docs/AGENT_COORDINATION.md).
 **Rule (short form):** CLAUDE.md §22. **Lesson:**
 `docs/learning/lessons_learned.md` LL-019.
 
