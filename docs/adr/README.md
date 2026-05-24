@@ -33,6 +33,10 @@ predecessor and the predecessor's `Status:` becomes
 |---|---|---|---|
 | [ADR-001](ADR-001-validation-cockpit-mutation-surface.md) | Validation Cockpit Mutation Surface | Proposed | 2026-05-08 |
 | [ADR-002](ADR-002-room-polygon-overrides.md) | `room_polygon_override` (geometric room overrides) | Proposed | 2026-05-09 |
+| [ADR-003](ADR-003-plan-shell-exporter.md) | `build_plan_shell_skp` (experimental parallel exporter) | Accepted (experimental) | 2026-05-20 |
+| [ADR-004](ADR-004-mutation-and-regression-testing-policy.md) | Mutation testing policy + failure-pattern regression catalog | Accepted | 2026-05-20 |
+| [ADR-005](ADR-005-spec-driven-development.md) | Spec-Driven Development framework | Accepted (Phase 2, observational) | 2026-05-21 |
+| [ADR-007](ADR-007-window-aperture-3d-carve.md) | Window apertures: 3D post-extrude carve | Accepted | 2026-05-24 |
 
 ## ADR template
 
