@@ -55,7 +55,35 @@ ones** ([`../CLAUDE.md`](../CLAUDE.md) §3).
   fixtures are gone.
 - **Failure signature:** exit 1 + list of missing items.
 - **When to run:** at the start and end of every cycle. CI runs it
-  on every PR.
+  on every PR via [`.github/workflows/repo_health.yml`](../.github/workflows/repo_health.yml).
+- **Strict mode:** `--strict` promotes soft warnings to hard fails.
+- **JSON output:** `--json` for machine consumption.
+
+### G-REPO-HEALTH — repository hygiene gate
+- **Role:** enforce [`REPO_HYGIENE.md`](REPO_HYGIENE.md) +
+  [`../CLAUDE.md`](../CLAUDE.md) §15 mechanically. Three modes:
+  - `audit` — read-only, always exits 0, writes
+    `reports/current/repo_health_report.md`.
+  - `check` — exits non-zero on ERROR-class findings (or any warning
+    under `--strict`). With `--base REF`, only NEW violations vs
+    the base count; pre-existing warnings are grandfathered.
+  - `fix` — applies the conservative safe-fix list ONLY (move >30d
+    reports to archive, append obvious patterns to `.gitignore`,
+    delete untracked tmp files in the working tree). Never deletes
+    tracked files, never rewrites .md content, never touches `.py` /
+    `.rb`.
+- **Cost:** < 3 s on the full repo.
+- **Command (local audit):** `python tools/repo_health_gate.py --mode audit`
+- **Command (PR gate):**
+  `python tools/repo_health_gate.py --mode check --base origin/develop`
+- **Detector catalogue:** see the script docstring. ERROR codes
+  (`E001`–`E006`) gate CI; WARNING codes (`W001`–`W005`) surface as
+  technical debt without gating; INFO codes (`I001`–`I002`) are
+  observations.
+- **Failure signature:** non-zero exit + `reports/current/repo_health_report.md`
+  lists the offending paths + the suggested action per finding.
+- **JSON output:** `--json` emits the full finding list for
+  machine consumption.
 
 ### G-QUADRADO — quadrado canonical smoke gate
 - **Role:** lock the wall-shell + window aperture canonical contract
@@ -192,6 +220,7 @@ ones** ([`../CLAUDE.md`](../CLAUDE.md) §3).
 |---|---|---|
 | `.github/workflows/ci.yml` | G-LINT + G-UNIT | every PR + push |
 | `.github/workflows/quality_gates.yml` | G-PLAN-TRUTH + G-COHERENCE --strict + G-MICRO --strict + G-FIDELITY | every PR + push |
+| `.github/workflows/repo_health.yml` | G-PROJECT-STATE + G-REPO-HEALTH (PR-diff aware) | every PR + push to develop/main |
 | `.github/workflows/rubocop.yml` | Ruby lint | PR + push touching Ruby |
 | `.github/workflows/skp_fidelity_gate.yml` | G-FIDELITY --strict only | every PR + push |
 

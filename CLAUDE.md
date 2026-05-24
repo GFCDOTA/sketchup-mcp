@@ -535,6 +535,17 @@ commands needed to resume.
 
 ## 15. Repository Hygiene Protocol
 
+> **Canonical policy:** [`docs/REPO_HYGIENE.md`](docs/REPO_HYGIENE.md).
+> **Canonical gate list:** [`docs/GATES.md`](docs/GATES.md) §G-REPO-HEALTH
+> + §G-PROJECT-STATE.
+> **Automated enforcement:** `tools/repo_health_gate.py` (audit /
+> check / fix) + `scripts/project_state_check.py` (canonical-paths
+> check). CI: `.github/workflows/repo_health.yml`.
+>
+> **Frase-regra permanente:** No new artifact without a home, no new
+> document without status, no generated output as source of truth,
+> and no PR merged without repo health passing.
+
 Every autonomous cycle includes a lightweight repo-hygiene pass.
 The agent looks for:
 
@@ -582,6 +593,16 @@ The agent looks for:
 - files preserved + why
 - reference searches performed
 - validations executed (pytest / smoke / dashboard build)
+
+**Cheap automated checks before every commit:**
+```bash
+python scripts/project_state_check.py       # G-PROJECT-STATE
+python tools/repo_health_gate.py --mode audit  # G-REPO-HEALTH (read-only)
+```
+
+CI runs the strict equivalents on every PR
+(`.github/workflows/repo_health.yml`); the local commands above are
+the same gates in audit form, so any local clean run reproduces CI.
 
 ---
 
