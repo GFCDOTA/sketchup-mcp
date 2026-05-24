@@ -210,3 +210,4 @@ must follow + the §15 mandatory report fields:
 | Date | Commit | What changed |
 |---|---|---|
 | 2026-05-24 | (this commit) | Initial policy doc. Consolidates the five-category scheme + status header policy + don't-delete-blindly protocol + tracked-vs-ignored rules. Supersedes the implicit policy that lived only inside `docs/ops/repo_hygiene_audit_2026-05-10.md`. |
+| 2026-05-24 | (this commit) | Canonical top-level dir set in `tools/repo_health_gate.py` gains `specs/` so the spec-driven development PR chain (#145 onward) does not trigger E003. `specs/` joins `tools/`, `scripts/`, `docs/`, etc., as a canonical home for hand-curated content (spec YAML contracts). |
