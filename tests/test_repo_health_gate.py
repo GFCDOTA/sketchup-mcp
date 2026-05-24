@@ -307,6 +307,33 @@ def test_new_dir_not_canonical_fires(tmp_path: Path):
     assert e003 and any(f["path"] == "stuff/" for f in e003), payload["findings"]
 
 
+def test_canonical_top_level_dirs_accept_specs(tmp_path: Path):
+    """E003 must NOT fire on `specs/` — it is part of the canonical set.
+
+    Regression test for the PR that added spec-driven development files
+    under specs/. Without specs/ in CANONICAL_TOP_LEVEL_DIRS the SDD PR
+    chain (#145-#149) fails this gate.
+    """
+    repo = _init_mini_repo(tmp_path)
+    _commit_all(repo, "base")
+    base_sha = subprocess.run(["git", "rev-parse", "HEAD"], cwd=repo,
+                                capture_output=True, text=True,
+                                check=True).stdout.strip()
+    (repo / "specs").mkdir()
+    (repo / "specs" / "example.spec.yaml").write_text(
+        "name: example\nrules: []\n", encoding="utf-8")
+    _commit_all(repo, "add specs/")
+    proc = _run_in_repo(repo, ["--mode", "check", "--base", base_sha,
+                                  "--json", "--no-report"])
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    payload = json.loads(proc.stdout)
+    e003_for_specs = [f for f in payload["findings"]
+                      if f["code"] == "E003" and f["path"] == "specs/"]
+    assert not e003_for_specs, (
+        f"E003 unexpectedly fired on specs/: {e003_for_specs}"
+    )
+
+
 def test_fix_mode_never_deletes_tracked_files(tmp_path: Path):
     """fix mode must NOT remove or modify tracked files in the repo."""
     repo = _init_mini_repo(tmp_path)

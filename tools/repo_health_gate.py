@@ -76,8 +76,9 @@ CANONICAL_TOP_LEVEL_DIRS = frozenset({
     "extract", "ingest", "model", "openings", "patches", "renderers",
     "roi", "sketchup_mcp_server", "topology", "validator",
     # Docs & governance
-    "docs", "scripts", "tools", "tests", "fixtures", "ground_truth",
-    "references", "reports", "runs", "vendor", "out", "review",
+    "docs", "scripts", "specs", "tools", "tests", "fixtures",
+    "ground_truth", "references", "reports", "runs", "vendor",
+    "out", "review",
     # Hidden / tooling
     ".github", ".claude", ".ai_bridge", ".venv", ".git", ".pytest_cache",
     ".ruff_cache", ".mypy_cache",
