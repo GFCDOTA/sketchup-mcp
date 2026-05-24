@@ -1,0 +1,187 @@
+name: spec-harness
+
+# SDD Phase 2 — non-blocking spec harness over the planta_74 fixture.
+# Runs on every PR + every push to main; uploads the harness report
+# as an artifact and (when there's a failing critical) appends a
+# concise PR comment so reviewers see the contract status without
+# clicking through to the artifact.
+#
+# Phase 2 = OBSERVATIONAL. The job uses `continue-on-error: true` on
+# the harness step so a failing critical does NOT block PR merge.
+# Phase 3 (per docs/engineering/spec_driven_development.md) flips
+# that flag to false after a cooldown period proves the gate is
+# trustworthy.
+#
+# Trigger filter: only PRs touching files that could plausibly
+# affect the harness verdict (specs, consensus fixture, exporter,
+# pipeline tools) actually run. PRs that only touch docs or unrelated
+# tests skip the workflow.
+
+on:
+  pull_request:
+    paths:
+      - "specs/**"
+      - "fixtures/planta_74/**"
+      - "tools/spec_harness.py"
+      - "tools/polygonize_rooms.py"
+      - "tools/rooms_from_seeds.py"
+      - "tools/build_plan_shell_skp.{py,rb}"
+      - "tools/consume_consensus.rb"
+      - "tools/skp_from_consensus.py"
+      - "tools/diagnose_room_polygons.py"
+      - "tools/audit_soft_barriers.py"
+      - "tools/apply_room_polygon_fixes.py"
+      - "tools/build_geometry_invariants_report.py"
+      - ".github/workflows/spec_harness.yml"
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  spec-harness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      # comment-on-pr needs write to the PR; the rest of the workflow
+      # is read-only. Both pinned so a fork PR can't escalate.
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install project (dev extras)
+        run: uv pip install --system -e ".[dev]"
+
+      # Lint specs BEFORE running the harness. A malformed YAML or an
+      # unknown rule type would make the harness report misleading
+      # (the rule would error out per-contract but the spec author
+      # might not notice in the comment summary). Linter is fast
+      # (~50ms) so always run it; failure here IS a hard block on
+      # this workflow (continue-on-error stays default = false).
+      - name: Lint specs (YAML + rule-type validity)
+        run: python -m tools.lint_specs
+
+      - name: Run spec harness on planta_74 (non-blocking)
+        id: harness
+        continue-on-error: true
+        run: |
+          mkdir -p runs/spec_harness_ci
+          python -m tools.spec_harness \
+            --spec specs/planta_74/rooms.spec.yaml \
+            --spec specs/planta_74/openings.spec.yaml \
+            --spec specs/planta_74/soft_barriers.spec.yaml \
+            --spec specs/planta_74/fidelity.spec.yaml \
+            --consensus fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json \
+            --out runs/spec_harness_ci/spec_harness_report.json
+          # Capture the exit code into a step output so the comment
+          # step below can branch on it without re-running the harness.
+          echo "harness_exit=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Render a one-line summary for the log
+        if: always()
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          p = Path("runs/spec_harness_ci/spec_harness_report.json")
+          if not p.exists():
+              print("[harness] report missing — earlier step likely failed before write")
+              raise SystemExit(0)
+          r = json.loads(p.read_text(encoding="utf-8"))
+          s = r["summary"]
+          print(f"[harness] verdict={s['verdict']} "
+                f"pass={s['pass']} warn={s['warn']} fail={s['fail']} "
+                f"skip={s['skip']} error={s['error']} "
+                f"critical_fail={s['critical_fail']}")
+          PY
+
+      - name: Upload harness report as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spec-harness-report
+          path: runs/spec_harness_ci/spec_harness_report.json
+          if-no-files-found: warn
+          retention-days: 14
+
+      # On a PR, append a concise comment so reviewers see the
+      # harness status inline. Uses the GitHub Actions script context;
+      # falls through quietly if the harness produced no report
+      # (e.g., the install step errored — that case is already
+      # surfaced by the GitHub-side red X on the job).
+      - name: Comment harness summary on PR
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = 'runs/spec_harness_ci/spec_harness_report.json';
+            if (!fs.existsSync(path)) {
+              core.warning("spec_harness_report.json missing; skipping comment");
+              return;
+            }
+            const r = JSON.parse(fs.readFileSync(path, 'utf-8'));
+            const s = r.summary;
+            const verdictEmoji = s.verdict === 'pass' ? '✅' : '❌';
+            const lines = [
+              `### Spec harness — Phase 2 (non-blocking)`,
+              ``,
+              `${verdictEmoji} **verdict: ${s.verdict}** &nbsp;·&nbsp; `
+                + `pass: ${s.pass} &nbsp;·&nbsp; warn: ${s.warn} &nbsp;·&nbsp; `
+                + `fail: ${s.fail} &nbsp;·&nbsp; skip: ${s.skip} &nbsp;·&nbsp; `
+                + `critical_fail: ${s.critical_fail}`,
+              ``,
+            ];
+            if (s.critical_fail > 0) {
+              lines.push(`<details><summary>Failing critical contracts (${s.critical_fail})</summary>`);
+              lines.push(``);
+              for (const c of r.contracts) {
+                if (c.severity === 'critical' && (c.verdict === 'fail' || c.verdict === 'error')) {
+                  lines.push(`- \`${c.id}\` (${c.rule_type}) — ${c.message}`);
+                }
+              }
+              lines.push(``);
+              lines.push(`</details>`);
+            }
+            if (s.warn > 0) {
+              lines.push(`<details><summary>Warn contracts (${s.warn})</summary>`);
+              lines.push(``);
+              for (const c of r.contracts) {
+                if (c.severity === 'warn' && c.verdict === 'fail') {
+                  lines.push(`- \`${c.id}\` (${c.rule_type}) — ${c.message}`);
+                }
+              }
+              lines.push(``);
+              lines.push(`</details>`);
+            }
+            lines.push(`_Phase 2 is observational — this comment never blocks merge. `
+              + `Phase 3 will flip \`continue-on-error\` to \`false\` once the gate is trusted. `
+              + `See \`docs/engineering/spec_driven_development.md\` §Workflow._`);
+            const body = lines.join('\n');
+            // De-duplicate: if a previous run already left a comment with the
+            // marker, update it in place instead of stacking new ones.
+            const marker = '<!-- spec-harness-bot -->';
+            const fullBody = marker + '\n' + body;
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+            const existing = await github.rest.issues.listComments({
+              owner, repo, issue_number, per_page: 100,
+            });
+            const prior = existing.data.find(c => c.body && c.body.includes(marker));
+            if (prior) {
+              await github.rest.issues.updateComment({
+                owner, repo, comment_id: prior.id, body: fullBody,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner, repo, issue_number, body: fullBody,
+              });
+            }
