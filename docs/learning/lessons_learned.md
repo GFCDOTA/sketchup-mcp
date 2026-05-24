@@ -235,6 +235,98 @@ unit tests in `tests/test_su_runner_safety.py`.
 **See also:** FP-023 (the anti-pattern this rule prevents);
 LL-009 (bootstrap .skp pattern — same launcher ergonomics).
 
+## LL-016 — Window openings are wall-hosted partial-height apertures (3D post-extrude carve, never 2D full-height)
+
+**Date:** 2026-05-24.
+**Context:** Reviewing the quadrado canonical fixture render after
+the wall-shell continuity fix landed, the user pointed out that the
+window still rendered as a vertical shaft with sill/glass/lintel
+infill — semantically a door-like void, not a window. Same bug
+present in planta_74 (4 windows). FP-024 documents the anti-pattern;
+this LL codifies the positive rule.
+
+**Rule:**
+
+> **Window openings must be wall-hosted partial-height apertures.
+> They must preserve wall mass below the sill (peitoril / parapet)
+> AND above the head (verga / lintel). They must NEVER be modelled
+> as door-like full-height voids unless explicitly classified as
+> a door kind.**
+
+This is the architectural contract of a window. The exporter must
+encode it structurally — in the topology of the produced SKP — not
+cosmetically (via material colours or render tricks).
+
+**Distinguishing kinds:**
+
+| `kind_v5` (normalised) | Full-height void? | Wall mass below sill? | Wall mass above head? |
+|---|---|---|---|
+| `interior_door` | yes | no (door reaches floor) | no (lintel is part of door frame) |
+| `interior_passage` | yes | no | no |
+| `glazed_balcony` (porta-vidro) | yes (intentional) | no | no |
+| `window` | **NO** | **YES** (peitoril) | **YES** (verga) |
+
+`{interior_door, interior_passage, glazed_balcony}` are routed
+through the 2D pre-extrude carve path in
+`tools/build_plan_shell_skp.py` and rendered with leaf / marker /
+glass-pane fills inside the full-height void.
+
+`{window}` is routed through the 3D post-extrude carve path in
+`tools/build_plan_shell_skp.rb build_window_aperture_3d`. The wall
+is extruded as a solid; the aperture is cut **only** at
+z ∈ [`WINDOW_SILL_IN`, `WINDOW_HEAD_IN`]; the glass face sits at
+mid-thickness inside that aperture. Wall mass elsewhere on that
+wall stays as wall.
+
+**Implementation contract:**
+
+1. **Python phase** must populate
+   `_shell_polygon.json`'s top-level `window_apertures` list with
+   `{id, wall_id, kind_v5, center, opening_width_pts,
+   host_wall_orientation, host_wall_thickness_pts}` per window.
+   Windows must **never** be added to the 2D `carve_rects` union.
+
+2. **Ruby phase** must, for each `window_apertures` entry:
+   - Find the host wall lateral face (vertical, perpendicular to
+     wall axis, spanning [0, WALL_HEIGHT_IN]).
+   - Read its fixed coord from `face.bounds` — never hardcode
+     (LL-014).
+   - Add a coplanar rectangle at `[cx ± w/2, fixed_coord,
+     [WINDOW_SILL_IN, WINDOW_HEAD_IN]]`. SU auto-splits the host
+     face.
+   - `pushpull(-real_thickness_in)` to drive the aperture face
+     through the wall.
+   - Emit `WindowGlass_Group_<id>` as a separate top-level group
+     at mid-thickness.
+   - **MUST NOT emit** `Window_Group_<id>_sill` or
+     `Window_Group_<id>_lintel` — those are FP-024 signatures.
+
+3. **Geometry report** must show:
+   - `PlanShell_Group.bbox_m.z = [0, WALL_HEIGHT_M]` (~2.70 m).
+   - `WindowGlass_Group_<id>.bbox_m.z = [WINDOW_SILL_M, WINDOW_HEAD_M]`
+     (~[0.9, 2.1]).
+
+**Validation gates** (locking the rule against regression):
+
+- `tests/test_window_aperture_contract.py` (15 tests) — Python
+  contract. Asserts `is_window_aperture()` classification,
+  `FULL_HEIGHT_CARVE_KINDS ∩ WINDOW_APERTURE_KINDS = ∅`, windows
+  produce `openings_carved = 0` + `window_apertures_3d ≥ 1`, doors
+  the inverse. Includes a planta_74 fixture regression test
+  (4 windows, all must route to 3D path).
+
+- `tests/test_window_aperture_geometry.py` (9 tests) — SKP /
+  geometry-report invariants. Skips cleanly when no SKP artifact
+  is present (CI-portable); fails loudly when present and
+  miscarved. Asserts wall height preserved, glass at sill-to-head
+  only, no legacy `_sill` / `_lintel` group names.
+
+**Cross-references:** ADR-007 (the architectural decision);
+FP-024 (the anti-pattern this LL prevents); ADR-003 (the broader
+plan-shell exporter); LL-014 (read coords from the actual model);
+`docs/specs/quadrado_demo_spec.md` §6.4 (the in-place edit pattern
+adopted by `build_window_aperture_3d`).
+
 ## LL-018 — Terminal-first GitHub auth: if `git push` works, the cached token can create PRs
 
 **Date:** 2026-05-24.

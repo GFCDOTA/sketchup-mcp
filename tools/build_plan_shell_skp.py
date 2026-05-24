@@ -104,6 +104,38 @@ MIN_SLIVER_AREA_PTS2 = 0.5
 #   render a passage marker / window panel on top.
 CARVING_ORIGINS = frozenset({"svg_arc", "svg_segments", "human_annotation"})
 
+# Opening kinds whose 2D pre-extrude carve goes FULL-HEIGHT (floor to
+# ceiling). Doors, passages, and porta-vidro (glazed_balcony) genuinely
+# remove wall mass from floor to wall_height. Windows DO NOT — they must
+# preserve a peitoril (parapet) below the sill AND a verga (lintel)
+# above the head. Window apertures are emitted in a separate
+# `window_apertures` field so the Ruby exporter can cut them in 3D at
+# WINDOW_SILL_IN..WINDOW_HEAD_IN after extruding the solid wall.
+# See ADR-007 and FP-024 for the rationale.
+FULL_HEIGHT_CARVE_KINDS = frozenset({
+    "interior_door", "door_arc", "door",
+    "interior_passage", "open_passage", "passage",
+    "glazed_balcony",
+})
+WINDOW_APERTURE_KINDS = frozenset({"window"})
+
+
+def opening_kind_v5_normalised(op: dict) -> str:
+    """Normalise opening kind. Matches `opening_kind_v5` in the Ruby
+    exporter (build_plan_shell_skp.rb:373)."""
+    k = op.get("kind_v5") or op.get("kind") or "interior_door"
+    if k in ("door_arc", "door"):
+        return "interior_door"
+    if k in ("open_passage", "passage"):
+        return "interior_passage"
+    return k
+
+
+def is_window_aperture(op: dict) -> bool:
+    """Window apertures must preserve wall mass above + below.
+    Carved in 3D after wall extrusion (NOT in 2D pre-extrude)."""
+    return opening_kind_v5_normalised(op) in WINDOW_APERTURE_KINDS
+
 
 # ---- core geometry ---------------------------------------------------
 
@@ -201,6 +233,7 @@ def build_shell_polygon(consensus: dict) -> tuple[list[Polygon], dict]:
     # [4] subtract opening rectangles
     walls_by_id = {w["id"]: w for w in walls if "id" in w}
     carve_rects: list[Polygon] = []
+    window_apertures: list[dict] = []
     openings_skipped_by_origin: list[dict] = []
     openings_skipped_by_error: list[str] = []
     for op in openings:
@@ -221,6 +254,29 @@ def build_shell_polygon(consensus: dict) -> tuple[list[Polygon], dict]:
                 "reason": (
                     f"origin {origin!r} not in CARVING_ORIGINS "
                     f"({sorted(CARVING_ORIGINS)}); gap already in wall data"
+                ),
+            })
+            continue
+        # Window vs door-like semantics (ADR-007 / FP-024).
+        # Windows preserve wall mass below sill + above head — they
+        # must NOT be carved full-height in 2D. Hand them to the Ruby
+        # exporter as a window_aperture for post-extrude 3D carve.
+        if is_window_aperture(op):
+            w_pts = op.get("opening_width_pts")
+            if w_pts is None or w_pts <= 0:
+                openings_skipped_by_error.append(
+                    f"{op.get('id')}: window missing/invalid opening_width_pts"
+                )
+                continue
+            window_apertures.append({
+                "id": op.get("id"),
+                "wall_id": wid,
+                "kind_v5": opening_kind_v5_normalised(op),
+                "center": list(op["center"]),
+                "opening_width_pts": float(w_pts),
+                "host_wall_orientation": host.get("orientation"),
+                "host_wall_thickness_pts": float(
+                    host.get("thickness", default_thickness)
                 ),
             })
             continue
@@ -264,6 +320,7 @@ def build_shell_polygon(consensus: dict) -> tuple[list[Polygon], dict]:
         "input_walls": len(walls),
         "input_openings": len(openings),
         "openings_carved": len(carve_rects),
+        "window_apertures_3d": len(window_apertures),
         # Split into two buckets: by_origin is legitimate (wall_gap
         # origin; gap is already in the wall data, no carve needed).
         # by_error is a real failure (missing wall_id, zero width,
@@ -282,6 +339,11 @@ def build_shell_polygon(consensus: dict) -> tuple[list[Polygon], dict]:
         "min_sliver_area_pts2": MIN_SLIVER_AREA_PTS2,
         "carving_origins": sorted(CARVING_ORIGINS),
         "total_shell_area_pts2": round(sum(p.area for p in kept), 4),
+        # ADR-007 / FP-024: windows are NOT 2D-carved. The Ruby exporter
+        # reads this list from the serialized _shell_polygon.json
+        # (top-level `window_apertures`) and post-extrudes a 3D aperture
+        # per entry.
+        "window_apertures": window_apertures,
     }
     return kept, stats
 
@@ -316,6 +378,9 @@ def serialize_polygons(polygons: list[Polygon],
         "polygons": pieces,
         "rooms": consensus.get("rooms", []),
         "soft_barriers": consensus.get("soft_barriers", []),
+        # ADR-007 / FP-024: surface window_apertures at top level so
+        # the Ruby exporter can iterate without unpacking stats.
+        "window_apertures": stats.get("window_apertures", []),
         "stats": stats,
     }
 

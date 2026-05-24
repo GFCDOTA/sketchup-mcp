@@ -332,6 +332,28 @@ requirement.
 - (none open as of 2026-05-06; previous SHA256 + caminho-A items shipped)
 
 ### Recently fixed
+- **Window apertures: 3D post-extrude carve (no more door-like voids)**
+  (2026-05-24, branch `feature/window-aperture-semantics`):
+  `tools/build_plan_shell_skp.{py,rb}` historically carved every
+  opening as a 2D full-height rectangle pre-extrude, then refilled
+  windows with three stacked sub-volumes (sill / glass / lintel).
+  Structurally that's three separate boxes inside a floor-to-ceiling
+  void — semantically a door with infill, not a window. Affected
+  the quadrado canonical fixture AND all 4 windows on planta_74.
+  Fix: Python now routes `kind_v5 == 'window'` to a separate
+  `window_apertures` list (NOT the 2D carve). Ruby
+  `build_window_aperture_3d` reads that list, finds the host wall
+  face after extrusion, adds a coplanar rect at sill-to-head only
+  (SU auto-splits — perimeter remainder preserves wall mass), and
+  pushpulls through to create a real through-hole. Glass sits at
+  mid-thickness as `WindowGlass_Group_<id>` (separate top-level
+  group). Door/passage/glazed_balcony stay on the 2D full-height
+  path (correct for them).
+  Validation: 15 contract tests + 9 geometry tests; planta_74's
+  4 windows all route to the 3D path; PlanShell_Group preserves
+  full [0, 2.70 m] height; WindowGlass_Group bbox is exactly
+  [0.9, 2.1 m]. ADR-007 + LL-016 + FP-024 codify the rule.
+  See CLAUDE.md §19 for the permanent guardrail.
 - **Human-openings ground-truth pipeline shipped** (2026-05-11, PRs #112+#113+#115+#116):
   When a reviewer paints color blobs (#00ff00 green = interior_door,
   #ff00ff magenta = window, #ffa500 orange = glazed_balcony) on a planta
@@ -444,6 +466,14 @@ Never apply archive patches without an explicit, signed-off PR plan.
 
 ## 13. Last-updated marker
 
+- **2026-05-24** — §19 window vs door opening semantics added.
+  Window apertures are now 3D post-extrude carves; doors and
+  passages stay on the 2D full-height path. Reference:
+  `tools/build_plan_shell_skp.{py,rb}` (`build_window_aperture_3d`
+  + `WINDOW_APERTURE_KINDS`), `tests/test_window_aperture_contract.py`
+  (15 tests), `tests/test_window_aperture_geometry.py` (9 tests),
+  ADR-007, LL-016, FP-024. Locks the no-door-like-void rule for
+  windows on both the quadrado canonical fixture and planta_74.
 - **2026-05-23** — §18 SU runner mode protocol added. Three modes
   (`headless`/`interactive`/`attach`) with `interactive` as safe
   default. Reference helper `tools/su_runner_safety.py` exports
@@ -746,6 +776,56 @@ Reference helper: `tools/su_runner_safety.py` exports `parse_mode`,
 tests in `tests/test_su_runner_safety.py`.
 
 See LL-015 (positive rule) and FP-023 (anti-pattern).
+
+---
+
+## 19. Window vs door opening semantics (LL-016, FP-024, ADR-007)
+
+> **Window openings must be wall-hosted partial-height openings.
+> They must preserve wall mass below and above the opening and must
+> never be represented as door-like full-height voids unless
+> explicitly classified as doors.**
+
+This is the architectural contract of a window. The exporter encodes
+it structurally — in the topology of the produced SKP — not
+cosmetically (via material colours).
+
+**Routing table** (`tools/build_plan_shell_skp.py` + `.rb`):
+
+| Normalised `kind_v5` | 2D pre-extrude carve | 3D post-extrude aperture | Wall mass below sill | Wall mass above head |
+|---|---|---|---|---|
+| `interior_door` | full-height | — | no | no |
+| `interior_passage` | full-height | — | no | no |
+| `glazed_balcony` (porta-vidro) | full-height | — | no | no |
+| `window` | **NEVER** | **`build_window_aperture_3d`** | **yes (peitoril)** | **yes (verga)** |
+
+Window apertures are carved by `build_window_aperture_3d` in
+`tools/build_plan_shell_skp.rb`:
+1. Find host wall lateral face spanning [0, WALL_HEIGHT_IN].
+2. Read its fixed coord from `face.bounds` (LL-014).
+3. Add coplanar rect at z ∈ [WINDOW_SILL_IN, WINDOW_HEAD_IN] — SU
+   splits the host face; perimeter remainder preserves wall mass.
+4. `pushpull(-real_thickness_in)` → real through-hole.
+5. Emit `WindowGlass_Group_<id>` at mid-thickness (separate
+   top-level group). NO sill/lintel sub-groups.
+
+**Detection signature of the bug (FP-024) — must NEVER appear in
+a healthy build:**
+- `Window_Group_<id>_sill` group at `bbox_m.z = [0, 0.9]` (sill on
+  the floor — door-like void with infill).
+- `Window_Group_<id>_lintel` group.
+- `PlanShell_Group.bbox_m.max.z` < WALL_HEIGHT_M (wall carved short).
+
+**Validation gates:**
+- `tests/test_window_aperture_contract.py` (15 tests) — Python
+  contract; includes a planta_74 regression that locks 4-window
+  routing.
+- `tests/test_window_aperture_geometry.py` (9 tests) — SKP /
+  geometry-report invariants; skips cleanly when no SKP present.
+
+See ADR-007 (the decision document), LL-016 (positive rule),
+FP-024 (anti-pattern), `docs/specs/quadrado_demo_spec.md` §6.4
+(in-place edit pattern adopted by the 3D carve).
 
 ---
 
