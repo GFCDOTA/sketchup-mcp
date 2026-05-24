@@ -777,3 +777,52 @@ See LL-018 (the lesson + context),
 `docs/protocols/terminal_first_github_auth.md` (the full procedure
 with bash + PowerShell snippets), LL-012 (same operational
 philosophy applied to PATH lookups).
+
+---
+
+## 22. Multi-agent coordination (LL-019)
+
+> **In multi-agent mode, never assume sole authorship of remote
+> state.** Other agents (Claude or human) may push commits, merge
+> PRs, delete branches, or even check out a different branch in
+> the shared local working tree between any two of your commands.
+
+**Mandatory checklist before any GitHub mutation** (merge, close,
+delete branch, push, REST write) or shared-working-tree change:
+
+1. `git fetch --all --prune` — surface remote deletes + new commits.
+2. `git rev-parse origin/develop` — confirm base HEAD before basing /
+   rebasing / merging.
+3. `gh pr view <n>` immediately before any per-PR action — never
+   reuse a value from an earlier turn.
+4. **Diff snapshot vs current state** and report out-of-band changes
+   in the same response that performs the mutation.
+5. **Use `git worktree add`** when working in a directory another
+   agent may be using; cleanup with `git worktree remove`.
+6. **Do not trust snapshots older than 30–60 s** for destructive
+   actions.
+7. **If state changed mid-operation**, stop, document, re-classify
+   before continuing.
+
+**Coordination surface:**
+- `.ai_bridge/HANDOFF.md` is the **tracked, public** coordination
+  file — use it for "last known good state" + "what I just did".
+- `.ai_triage/` and gitignored scratch dirs are **agent-local
+  only** — invisible to peers; do NOT use for coordination.
+- Commit messages, PR titles, branch names are **public signals**
+  — write them so peer agents can route around your work.
+
+**Forbidden even under multi-agent pressure:**
+- `git push --force` to any shared branch.
+- Deleting a branch with an open PR.
+- Closing a PR without a comment.
+- Touching `main` directly.
+- Editing files in a peer agent's branch from a shared working
+  tree (use your own worktree).
+
+Full procedure with copy-paste snippets:
+[`docs/protocols/multi_agent_coordination.md`](docs/protocols/multi_agent_coordination.md).
+
+See LL-019 (the lesson + incident timeline),
+LL-018 (same operational philosophy applied to credentials),
+LL-012 (fix tooling access before falling back to manual).

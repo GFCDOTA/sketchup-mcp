@@ -293,3 +293,98 @@ becomes the dominant friction. The terminal-first ladder eliminates
 tooling access before falling back to manual — same operational
 philosophy, applied to PATH-lookup); CLAUDE.md §0 (git flow:
 PRs against `develop`).
+
+## LL-019 — Multi-agent coordination: never assume sole authorship of the remote
+
+**Date:** 2026-05-24.
+**Context:** During a multi-phase triage session, the operating
+agent observed multiple out-of-band mutations to the same repo:
+
+- **PR #158** (`chore(repo): repository health gate + canonical
+  hygiene governance`) was opened by a parallel agent between
+  Phase A and Phase B, and **merged out-of-band** (squash
+  `3e1a290`) at 15:29:40Z while the operating agent was mid-way
+  through its Phase D inspection of the same PR.
+- **`origin/dashboard/architecture-sre-radar`** and
+  **`origin/dashboard/project-roadmap`** were deleted on the remote
+  between Phase B and Phase C, surfaced as `[deleted] (none) -> …`
+  in the operating agent's next `git fetch --prune`. The operating
+  agent did not issue any branch-delete in that window.
+- **`origin/develop` HEAD advanced** under the operating agent as
+  other agents merged PRs; the agent's prior `gh pr view` cache
+  was stale within seconds.
+- The shared working tree was **switched between branches** by
+  parallel agents (`chore/repo-health-allow-specs-dir` opened
+  PR #159, and `chore/repo-cleanup-w1-fresh` appeared with 2
+  commits ahead of develop) — the agent's
+  `git branch --show-current` and `git status -sb` returned
+  inconsistent values within the same turn because another agent
+  was actively performing checkouts in the shared working tree.
+
+The operating agent had no bug — it was assuming that the state
+captured by its last `gh` or `git` call was still true at the
+moment it wanted to act. In a multi-agent environment, **that
+assumption is false on a sub-second timescale**.
+
+**Rule:** in multi-agent mode, **never assume sole authorship of
+remote state**. Before any GitHub mutation (merge / close / delete
+branch / push / API write):
+
+1. **`git fetch --all --prune`** immediately, to surface remote
+   deletes (`[deleted] (none) -> origin/<name>`) and new commits
+   on the refs you care about.
+2. **`gh pr view <n>` immediately** before any per-PR action —
+   never reuse the value from a previous turn or even an earlier
+   shell command in the same turn.
+3. **`git rev-parse origin/develop`** immediately before basing,
+   rebasing, or merging.
+4. **Diff your snapshot** (the JSON / branch list captured at the
+   start of the phase) against current state, and **report any
+   out-of-band change in the same response** that performs the
+   mutation. Audit trail beats apparent cleanliness.
+5. **Use an isolated `git worktree`** when working in a directory
+   another agent may also be using. The cost is a few seconds
+   (`git worktree add -b <new-branch> <path> origin/develop`);
+   the benefit is that branch switches and stash operations don't
+   collide with the other agent's working state. Cleanup via
+   `git worktree remove <path>` when done.
+6. **Don't trust reports older than 30–60 seconds** for destructive
+   actions. Re-query.
+7. **If state changed mid-operation**, stop and re-classify before
+   continuing — the assumption that motivated the action may no
+   longer hold.
+
+**Concrete failures this rule prevents:**
+
+- Merging a PR that was already merged by another agent (idempotent
+  but wastes a turn and pollutes the audit trail).
+- Re-deleting a branch that another agent already deleted (harmless
+  but confusing).
+- Rebasing onto an `origin/develop` that has already advanced past
+  the agent's last fetch (results in unnecessary conflicts or
+  attempts to re-do work).
+- Committing into a working tree that another agent just switched
+  to a different branch — your changes land on the wrong branch
+  or get stashed inconsistently.
+
+**Coordination surface — public vs private:**
+
+- **`.ai_bridge/HANDOFF.md`** is the **visible (tracked) coordination
+  file** between agents. Use it to record "last known good state"
+  and "what I just did" entries so other agents can read them.
+- **`.ai_triage/`**, **scratch dirs**, and other gitignored
+  locations are **agent-local only** — invisible to peers. Useful
+  for working notes; do NOT rely on them for coordination.
+- **Commit messages and PR titles** are **public coordination
+  signals** — write them so a peer agent can route around your
+  work (avoid ambiguous titles like `fix bug`; prefer
+  `fix(openings): X` so another agent's grep can match).
+- **Branch names** signal intent and ownership — use the canonical
+  prefixes (`feature/`, `fix/`, `chore/`, `docs/`) so other agents
+  can predict scope from name alone.
+
+**See also:** `docs/protocols/multi_agent_coordination.md` (the
+canonical procedure with copy-paste snippets); CLAUDE.md §22 (the
+rule, condensed); LL-018 (terminal-first GitHub auth — same
+operational philosophy applied to credentials, not state);
+LL-012 (fix tooling access before falling back to manual).
