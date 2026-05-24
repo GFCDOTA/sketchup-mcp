@@ -20,9 +20,19 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
+def _script_path(name: str) -> str:
+    """Return the canonical path of a legacy CLI script.
+
+    Scripts moved from root to `tools/legacy/` on 2026-05-24 (Repo
+    Health Gate Wave 1 — W001). See `tools/legacy/README.md` for the
+    migration log.
+    """
+    return str(REPO_ROOT / "tools" / "legacy" / name)
+
+
 def _run_help(script: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        [sys.executable, script, "--help"],
+        [sys.executable, _script_path(script), "--help"],
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
@@ -61,7 +71,7 @@ def test_render_sidebyside_help_runs():
 def test_proto_red_missing_input_exits_nonzero():
     """Required --input must surface a usage error (exit 2) when omitted."""
     cp = subprocess.run(
-        [sys.executable, "proto_red.py"],
+        [sys.executable, _script_path("proto_red.py")],
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
@@ -76,7 +86,7 @@ def test_render_sidebyside_crop_validator_rejects_bad_spec():
     cp = subprocess.run(
         [
             sys.executable,
-            "render_sidebyside.py",
+            _script_path("render_sidebyside.py"),
             "--painted",
             "x.png",
             "--overlay",
