@@ -331,6 +331,33 @@ requirement.
 ### Known SketchUp issues
 - (none open as of 2026-05-06; previous SHA256 + caminho-A items shipped)
 
+### Canonical success reference — quadrado + window (2026-05-24)
+
+The quadrado canonical fixture is the **reference of a correct
+wall-shell + window-aperture pipeline output**. All inputs, expected
+outputs, render, and helpers are versioned (do NOT re-derive from
+scratch — read these paths first):
+
+| Role | Path |
+|---|---|
+| Input consensus (with window) | `fixtures/quadrado/consensus_with_window.json` |
+| Input consensus (empty room) | `fixtures/quadrado/consensus_empty.json` |
+| Expected `_shell_polygon.json` | `docs/specs/_assets/quadrado_canonical_shell_polygon.json` |
+| Expected geometry report | `docs/specs/_assets/quadrado_canonical_geometry_report.json` |
+| Reference 3D render | `docs/specs/_assets/quadrado_canonical_success_render.png` |
+| Render helpers | `tools/quadrado/render_view.{py,rb}` |
+| Smoke gate (CI-ready) | `tests/test_quadrado_canonical_smoke.py` (14 tests) |
+| Spec | `docs/specs/quadrado_demo_spec.md` |
+
+**Reproduce from a fresh clone:** `python -m tools.build_plan_shell_skp fixtures/quadrado/consensus_with_window.json --out runs/<dir>/quadrado.skp`
+
+**Rule for future agents:** when validating a pipeline change against
+the quadrado, ALWAYS use these versioned inputs and compare against the
+versioned reference outputs. Never invent a parallel fixture under
+`runs/` (gitignored) and call it canonical. If the reference outputs
+need to change, justify in the PR body — the spec calls this out
+explicitly.
+
 ### Recently fixed
 - **Wall shell canonicalisation: no more L-shape notches at outer corners**
   (2026-05-24, branch `feature/window-aperture-semantics`):
