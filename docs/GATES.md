@@ -4,8 +4,9 @@
 > **Type:** Catalogue of validation gates with commands and SLAs
 > **Updated:** 2026-05-24
 > **Companion docs:** [`PROJECT_STATE.md`](PROJECT_STATE.md) §6,
-> [`HANDOFF.md`](HANDOFF.md) §2.3, [`../CLAUDE.md`](../CLAUDE.md) §3
-> (SketchUp rule).
+> [`HANDOFF.md`](HANDOFF.md) §2.3,
+> [`PR_HYGIENE.md`](PR_HYGIENE.md) §1 + §3 (gate usage in startup/exit
+> checklists), [`../CLAUDE.md`](../CLAUDE.md) §3 (SketchUp rule).
 
 This file lists every validation gate that matters. Each gate has:
 
@@ -226,6 +227,27 @@ ones** ([`../CLAUDE.md`](../CLAUDE.md) §3).
 
 If a new gate is added, decide which workflow it belongs in (or create
 a new one) — and update this file's tier table in the same PR.
+
+---
+
+## Make targets (Unix / WSL / CI)
+
+A canonical [`../Makefile`](../Makefile) wraps the cheap gates:
+
+| Target | Equivalent command |
+|---|---|
+| `make project-state` | `python scripts/project_state_check.py` |
+| `make project-state-json` | `python scripts/project_state_check.py --json` |
+| `make repo-health` | `python tools/repo_health_gate.py --mode audit` |
+| `make repo-health-check` | `python tools/repo_health_gate.py --mode check --base origin/develop` |
+| `make repo-health-fix-dry` | `python tools/repo_health_gate.py --mode fix --dry-run` |
+| `make gates` | `make project-state` + `make repo-health-check` |
+| `make pytest-gates` | `pytest tests/test_project_state_check.py tests/test_repo_health_gate.py -v` |
+| `make ci-local` | mirror of `.github/workflows/repo_health.yml` |
+
+Windows users without `make` should run the right-hand commands
+directly — they are the canonical form documented in `PR_HYGIENE.md`
+§7 quick-reference card.
 
 ---
 

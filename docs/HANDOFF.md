@@ -30,12 +30,14 @@ in this exact order:
    it is now, what works, what's canonical.
 3. [`ANTI_FORGETTING.md`](ANTI_FORGETTING.md) — permanent rules and
    the reasoning behind them.
-4. [`GATES.md`](GATES.md) — validation gates and commands.
-5. [`../OVERVIEW.md`](../OVERVIEW.md) — full architectural map (only
+4. [`PR_HYGIENE.md`](PR_HYGIENE.md) — startup / exit checklists +
+   terminal-first GitHub workflow.
+5. [`GATES.md`](GATES.md) — validation gates and commands.
+6. [`../OVERVIEW.md`](../OVERVIEW.md) — full architectural map (only
    if `PROJECT_STATE.md` left you wanting more context).
-6. [`../.ai_bridge/HANDOFF.md`](../.ai_bridge/HANDOFF.md) — most recent
+7. [`../.ai_bridge/HANDOFF.md`](../.ai_bridge/HANDOFF.md) — most recent
    session's exit state (top entry).
-7. [`../.ai_bridge/TODO_NEXT.md`](../.ai_bridge/TODO_NEXT.md) —
+8. [`../.ai_bridge/TODO_NEXT.md`](../.ai_bridge/TODO_NEXT.md) —
    ROI-ordered queue of next moves.
 
 Total reading time: about 20 minutes. Skipping #1 or #3 will cause you
@@ -76,6 +78,9 @@ pip install -e ".[dl]"        # torch + CubiCasa5K oracle (heavy, optional)
 # Validate the project state on this machine
 python scripts/project_state_check.py
 
+# Validate the repo hygiene baseline locally
+python tools/repo_health_gate.py --mode audit
+
 # Run the cheap unit suite
 pytest -q
 
@@ -86,6 +91,9 @@ pytest tests/test_quadrado_canonical_smoke.py -v
 If `project_state_check.py` fails, **STOP** and read its output —
 it tells you exactly which canonical doc / fixture / gate is missing
 or inconsistent. Do not proceed until it returns exit 0.
+
+For the full startup / exit checklists + the terminal-first GitHub
+workflow rules, see [`PR_HYGIENE.md`](PR_HYGIENE.md).
 
 ### 2.4 Build the planta_74 baseline locally
 
@@ -205,7 +213,8 @@ These have actually happened on this repo. Do not repeat:
 
 ## 6. When you finish a cycle
 
-Per [`../CLAUDE.md`](../CLAUDE.md) §14 / §17, every cycle ends by:
+Per [`../CLAUDE.md`](../CLAUDE.md) §14 / §17 +
+[`PR_HYGIENE.md`](PR_HYGIENE.md) §3, every cycle ends by:
 
 1. Updating [`../.ai_bridge/CURRENT_STATE.md`](../.ai_bridge/CURRENT_STATE.md)
    (overwrite the snapshot — current branch, open PRs, top of queue).
@@ -220,10 +229,16 @@ Per [`../CLAUDE.md`](../CLAUDE.md) §14 / §17, every cycle ends by:
    [`learning/lessons_learned.md`](learning/lessons_learned.md) (LL-xxx)
    or [`learning/failure_patterns.md`](learning/failure_patterns.md)
    (FP-xxx).
-6. Running the state-check gate before committing:
-   `python scripts/project_state_check.py`.
+6. Running both gates before committing:
+   ```bash
+   python scripts/project_state_check.py
+   python tools/repo_health_gate.py --mode check --base origin/develop
+   ```
+   Both MUST exit 0.
+7. Snapshot of open PRs before and after the cycle (counts +
+   reasons), per [`PR_HYGIENE.md`](PR_HYGIENE.md) §3.
 
-A cycle is NOT complete until all six are done. See
+A cycle is NOT complete until all seven are done. See
 [`../CLAUDE.md`](../CLAUDE.md) §17 for the twelve-question stop gate.
 
 ---
