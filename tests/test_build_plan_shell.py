@@ -30,27 +30,39 @@ from tools.build_plan_shell_skp import (
 
 
 def test_wall_footprint_horizontal() -> None:
+    # LL-017/FP-025: wall_footprint now extends by half-thickness at
+    # both endpoints along the wall axis (default). Pass
+    # extend_endpoints=False to inspect the un-extended box.
     w = {"id": "w0", "start": [10.0, 20.0], "end": [30.0, 20.0],
          "thickness": 4.0, "orientation": "h"}
-    box = wall_footprint(w)
+    box = wall_footprint(w, extend_endpoints=False)
     assert box.bounds == (10.0, 18.0, 30.0, 22.0)
     assert pytest.approx(box.area) == 20.0 * 4.0
+    # With extension (production default): x extends by half=2 on each side.
+    box_ext = wall_footprint(w)
+    assert box_ext.bounds == (8.0, 18.0, 32.0, 22.0)
+    assert pytest.approx(box_ext.area) == 24.0 * 4.0
 
 
 def test_wall_footprint_vertical() -> None:
     w = {"id": "w1", "start": [50.0, 10.0], "end": [50.0, 60.0],
          "thickness": 6.0, "orientation": "v"}
-    box = wall_footprint(w)
+    box = wall_footprint(w, extend_endpoints=False)
     assert box.bounds == (47.0, 10.0, 53.0, 60.0)
     assert pytest.approx(box.area) == 50.0 * 6.0
+    box_ext = wall_footprint(w)
+    assert box_ext.bounds == (47.0, 7.0, 53.0, 63.0)
+    assert pytest.approx(box_ext.area) == 56.0 * 6.0
 
 
 def test_wall_footprint_handles_reversed_endpoints() -> None:
     # start > end on the principal axis still produces correct bounds.
     w = {"id": "w2", "start": [100.0, 50.0], "end": [20.0, 50.0],
          "thickness": 5.0, "orientation": "h"}
-    box = wall_footprint(w)
+    box = wall_footprint(w, extend_endpoints=False)
     assert box.bounds == (20.0, 47.5, 100.0, 52.5)
+    box_ext = wall_footprint(w)
+    assert box_ext.bounds == (17.5, 47.5, 102.5, 52.5)
 
 
 def test_wall_footprint_rejects_unknown_orientation() -> None:

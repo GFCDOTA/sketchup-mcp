@@ -104,15 +104,60 @@ MIN_SLIVER_AREA_PTS2 = 0.5
 #   render a passage marker / window panel on top.
 CARVING_ORIGINS = frozenset({"svg_arc", "svg_segments", "human_annotation"})
 
+# Opening kinds whose 2D pre-extrude carve goes FULL-HEIGHT (floor to
+# ceiling). Doors, passages, and porta-vidro (glazed_balcony) genuinely
+# remove wall mass from floor to wall_height. Windows DO NOT — they must
+# preserve a peitoril (parapet) below the sill AND a verga (lintel)
+# above the head. Window apertures are emitted in a separate
+# `window_apertures` field so the Ruby exporter can cut them in 3D at
+# WINDOW_SILL_IN..WINDOW_HEAD_IN after extruding the solid wall.
+# See ADR-007 and FP-024 for the rationale.
+FULL_HEIGHT_CARVE_KINDS = frozenset({
+    "interior_door", "door_arc", "door",
+    "interior_passage", "open_passage", "passage",
+    "glazed_balcony",
+})
+WINDOW_APERTURE_KINDS = frozenset({"window"})
+
+
+def opening_kind_v5_normalised(op: dict) -> str:
+    """Normalise opening kind. Matches `opening_kind_v5` in the Ruby
+    exporter (build_plan_shell_skp.rb:373)."""
+    k = op.get("kind_v5") or op.get("kind") or "interior_door"
+    if k in ("door_arc", "door"):
+        return "interior_door"
+    if k in ("open_passage", "passage"):
+        return "interior_passage"
+    return k
+
+
+def is_window_aperture(op: dict) -> bool:
+    """Window apertures must preserve wall mass above + below.
+    Carved in 3D after wall extrusion (NOT in 2D pre-extrude)."""
+    return opening_kind_v5_normalised(op) in WINDOW_APERTURE_KINDS
+
 
 # ---- core geometry ---------------------------------------------------
 
-def wall_footprint(wall: dict) -> Polygon:
+def wall_footprint(wall: dict, extend_endpoints: bool = True) -> Polygon:
     """Return the 2D rectangle this wall occupies, in PDF points.
 
     Mirrors the corner computation in consume_consensus.rb's
     ``add_wall_volume`` (lines 67-90): horizontal walls hug the y-axis
     (thickness in y), vertical walls hug the x-axis (thickness in x).
+
+    When ``extend_endpoints`` is True (default), each wall extends by
+    half-thickness along its own axis at BOTH endpoints. This is the
+    canonical corner-completion rule (LL-017 / FP-025): at a junction
+    where two perpendicular walls meet, BOTH must extend halfway into
+    each other so the outer corner is a clean L-shape (not a stepped
+    notch). Without this, `unary_union` leaves a `2*half × 2*half`
+    L-shaped notch at every junction outer corner — the FP-025
+    "tecos" signature.
+
+    The extension is harmless at non-junction endpoints (free wall
+    ends): the resulting stub is a tiny `half × half` square at the
+    wall's terminus, identical to the existing wall thickness.
     """
     s = wall["start"]
     e = wall["end"]
@@ -120,19 +165,86 @@ def wall_footprint(wall: dict) -> Polygon:
     if t is None:
         raise ValueError(f"wall {wall.get('id')} missing thickness")
     half = t / 2.0
+    ext = half if extend_endpoints else 0.0
     ori = wall.get("orientation")
     if ori == "h":
-        x0, x1 = min(s[0], e[0]), max(s[0], e[0])
+        x0 = min(s[0], e[0]) - ext
+        x1 = max(s[0], e[0]) + ext
         cy = s[1]
         return box(x0, cy - half, x1, cy + half)
     if ori == "v":
         cx = s[0]
-        y0, y1 = min(s[1], e[1]), max(s[1], e[1])
+        y0 = min(s[1], e[1]) - ext
+        y1 = max(s[1], e[1]) + ext
         return box(cx - half, y0, cx + half, y1)
     raise ValueError(
         f"wall {wall.get('id')} has unsupported orientation={ori!r}; "
         "this exporter only handles axis-aligned walls"
     )
+
+
+# ---- canonicalisation (LL-017 / FP-025) ----------------------------
+
+def _canonicalise_axis_aligned_ring(coords: list[tuple[float, float]],
+                                    tol: float = 1e-6
+                                    ) -> list[tuple[float, float]]:
+    """Drop collinear redundant vertices from an axis-aligned ring.
+
+    For axis-aligned polygons every edge is either horizontal or
+    vertical. A vertex sandwiched between two edges in the SAME
+    cardinal direction (both horizontal or both vertical) is
+    redundant and must be dropped — otherwise the union of two
+    same-axis wall rectangles can leave "internal" vertices on the
+    outer boundary, producing the FP-025 stepped-notch signature
+    that survives `shapely.simplify` for orthogonal geometry.
+    """
+    if len(coords) < 4:
+        return coords
+    # Drop closing duplicate if present.
+    if abs(coords[0][0] - coords[-1][0]) < tol \
+            and abs(coords[0][1] - coords[-1][1]) < tol:
+        coords = coords[:-1]
+    n = len(coords)
+    keep = []
+    for i in range(n):
+        prev = coords[(i - 1) % n]
+        cur = coords[i]
+        nxt = coords[(i + 1) % n]
+        # Vertex is redundant iff prev->cur and cur->nxt share
+        # direction (both horizontal or both vertical AND same sign).
+        d1x = cur[0] - prev[0]
+        d1y = cur[1] - prev[1]
+        d2x = nxt[0] - cur[0]
+        d2y = nxt[1] - cur[1]
+        same_h = abs(d1y) < tol and abs(d2y) < tol
+        same_v = abs(d1x) < tol and abs(d2x) < tol
+        if same_h or same_v:
+            continue
+        keep.append(cur)
+    return keep
+
+
+def canonicalise_axis_aligned_polygon(poly: Polygon,
+                                       tol: float = 1e-6) -> Polygon:
+    """Strip redundant collinear vertices from an axis-aligned polygon.
+
+    A clean rectangular wall shell with a single interior room has
+    EXACTLY 4 outer + 4 inner vertices after canonicalisation. Any
+    excess is the FP-025 corner-notch signature.
+    """
+    outer = _canonicalise_axis_aligned_ring(
+        list(poly.exterior.coords), tol=tol,
+    )
+    interiors = []
+    for ring in poly.interiors:
+        cleaned = _canonicalise_axis_aligned_ring(
+            list(ring.coords), tol=tol,
+        )
+        if len(cleaned) >= 3:
+            interiors.append(cleaned)
+    if len(outer) < 3:
+        return poly
+    return Polygon(outer, holes=interiors)
 
 
 def opening_carve_rect(opening: dict, host_wall: dict,
@@ -201,6 +313,7 @@ def build_shell_polygon(consensus: dict) -> tuple[list[Polygon], dict]:
     # [4] subtract opening rectangles
     walls_by_id = {w["id"]: w for w in walls if "id" in w}
     carve_rects: list[Polygon] = []
+    window_apertures: list[dict] = []
     openings_skipped_by_origin: list[dict] = []
     openings_skipped_by_error: list[str] = []
     for op in openings:
@@ -221,6 +334,29 @@ def build_shell_polygon(consensus: dict) -> tuple[list[Polygon], dict]:
                 "reason": (
                     f"origin {origin!r} not in CARVING_ORIGINS "
                     f"({sorted(CARVING_ORIGINS)}); gap already in wall data"
+                ),
+            })
+            continue
+        # Window vs door-like semantics (ADR-007 / FP-024).
+        # Windows preserve wall mass below sill + above head — they
+        # must NOT be carved full-height in 2D. Hand them to the Ruby
+        # exporter as a window_aperture for post-extrude 3D carve.
+        if is_window_aperture(op):
+            w_pts = op.get("opening_width_pts")
+            if w_pts is None or w_pts <= 0:
+                openings_skipped_by_error.append(
+                    f"{op.get('id')}: window missing/invalid opening_width_pts"
+                )
+                continue
+            window_apertures.append({
+                "id": op.get("id"),
+                "wall_id": wid,
+                "kind_v5": opening_kind_v5_normalised(op),
+                "center": list(op["center"]),
+                "opening_width_pts": float(w_pts),
+                "host_wall_orientation": host.get("orientation"),
+                "host_wall_thickness_pts": float(
+                    host.get("thickness", default_thickness)
                 ),
             })
             continue
@@ -246,6 +382,7 @@ def build_shell_polygon(consensus: dict) -> tuple[list[Polygon], dict]:
         )
     slivers_removed = 0
     kept: list[Polygon] = []
+    redundant_vertices_dropped = 0
     for p in polygons:
         if not p.is_valid:
             slivers_removed += 1
@@ -253,7 +390,20 @@ def build_shell_polygon(consensus: dict) -> tuple[list[Polygon], dict]:
         if p.area < MIN_SLIVER_AREA_PTS2:
             slivers_removed += 1
             continue
-        kept.append(p)
+        # [5b] Canonicalise: strip collinear redundant vertices left by
+        # unary_union on adjacent axis-aligned rectangles. This is the
+        # FP-025 cleanup step — without it, the outer ring of even a
+        # clean 4-wall shell carries 12 vertices (4 corners × 3 each)
+        # instead of the canonical 4.
+        before_outer = len(p.exterior.coords)
+        before_holes = sum(len(r.coords) for r in p.interiors)
+        clean = canonicalise_axis_aligned_polygon(p)
+        after_outer = len(clean.exterior.coords)
+        after_holes = sum(len(r.coords) for r in clean.interiors)
+        redundant_vertices_dropped += (
+            (before_outer - after_outer) + (before_holes - after_holes)
+        )
+        kept.append(clean)
     if not kept:
         raise RuntimeError(
             "all shell polygons were filtered as slivers — input or "
@@ -264,6 +414,7 @@ def build_shell_polygon(consensus: dict) -> tuple[list[Polygon], dict]:
         "input_walls": len(walls),
         "input_openings": len(openings),
         "openings_carved": len(carve_rects),
+        "window_apertures_3d": len(window_apertures),
         # Split into two buckets: by_origin is legitimate (wall_gap
         # origin; gap is already in the wall data, no carve needed).
         # by_error is a real failure (missing wall_id, zero width,
@@ -278,10 +429,21 @@ def build_shell_polygon(consensus: dict) -> tuple[list[Polygon], dict]:
         "shell_pieces_after_union": len(polygons),
         "shell_pieces_after_sliver_filter": len(kept),
         "slivers_removed": slivers_removed,
+        # FP-025 cleanup counters: total redundant collinear vertices
+        # dropped by canonicalise_axis_aligned_polygon after union+carve.
+        # On a healthy build, a clean rectangle has exactly 4 outer +
+        # 4 inner vertices, so an N-wall quadrado-style fixture drops
+        # 8 redundant vertices (the corner notches).
+        "redundant_vertices_dropped": redundant_vertices_dropped,
         "snap_eps_pts": SNAP_EPS_PTS,
         "min_sliver_area_pts2": MIN_SLIVER_AREA_PTS2,
         "carving_origins": sorted(CARVING_ORIGINS),
         "total_shell_area_pts2": round(sum(p.area for p in kept), 4),
+        # ADR-007 / FP-024: windows are NOT 2D-carved. The Ruby exporter
+        # reads this list from the serialized _shell_polygon.json
+        # (top-level `window_apertures`) and post-extrudes a 3D aperture
+        # per entry.
+        "window_apertures": window_apertures,
     }
     return kept, stats
 
@@ -316,6 +478,9 @@ def serialize_polygons(polygons: list[Polygon],
         "polygons": pieces,
         "rooms": consensus.get("rooms", []),
         "soft_barriers": consensus.get("soft_barriers", []),
+        # ADR-007 / FP-024: surface window_apertures at top level so
+        # the Ruby exporter can iterate without unpacking stats.
+        "window_apertures": stats.get("window_apertures", []),
         "stats": stats,
     }
 

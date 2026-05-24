@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0.0",
+  "tool": "build_plan_shell_skp",
+  "consensus_source": null,
+  "wall_thickness_pts": 5.4,
+  "page_size_pts": null,
+  "polygons": [
+    {
+      "outer": [
+        [
+          216.384,
+          97.3
+        ],
+        [
+          97.3,
+          97.3
+        ],
+        [
+          97.3,
+          216.384
+        ],
+        [
+          216.384,
+          216.384
+        ]
+      ],
+      "holes": [
+        [
+          [
+            102.7,
+            102.7
+          ],
+          [
+            210.984,
+            102.7
+          ],
+          [
+            210.984,
+            210.984
+          ],
+          [
+            102.7,
+            210.984
+          ]
+        ]
+      ],
+      "area_pts2": 2455.5744
+    }
+  ],
+  "rooms": [
+    {
+      "id": "r_main",
+      "name": "QUADRADO",
+      "polygon_pts": [
+        [
+          102.7,
+          102.7
+        ],
+        [
+          210.984,
+          102.7
+        ],
+        [
+          210.984,
+          210.984
+        ],
+        [
+          102.7,
+          210.984
+        ]
+      ],
+      "area_pts2": 11725.4,
+      "seed_pt": [
+        156.842,
+        156.842
+      ]
+    }
+  ],
+  "soft_barriers": [],
+  "window_apertures": [
+    {
+      "id": "win_south",
+      "wall_id": "w_bottom",
+      "kind_v5": "window",
+      "center": [
+        156.842,
+        100.0
+      ],
+      "opening_width_pts": 30.0,
+      "host_wall_orientation": "h",
+      "host_wall_thickness_pts": 5.4
+    }
+  ],
+  "stats": {
+    "input_walls": 4,
+    "input_openings": 1,
+    "openings_carved": 0,
+    "window_apertures_3d": 1,
+    "openings_skipped_by_origin": [],
+    "openings_skipped_by_error": [],
+    "openings_skipped": [],
+    "shell_pieces_after_union": 1,
+    "shell_pieces_after_sliver_filter": 1,
+    "slivers_removed": 0,
+    "redundant_vertices_dropped": 0,
+    "snap_eps_pts": 0.1,
+    "min_sliver_area_pts2": 0.5,
+    "carving_origins": [
+      "human_annotation",
+      "svg_arc",
+      "svg_segments"
+    ],
+    "total_shell_area_pts2": 2455.5744,
+    "window_apertures": [
+      {
+        "id": "win_south",
+        "wall_id": "w_bottom",
+        "kind_v5": "window",
+        "center": [
+          156.842,
+          100.0
+        ],
+        "opening_width_pts": 30.0,
+        "host_wall_orientation": "h",
+        "host_wall_thickness_pts": 5.4
+      }
+    ]
+  }
+}
