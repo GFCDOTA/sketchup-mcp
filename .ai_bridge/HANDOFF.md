@@ -1,3 +1,88 @@
+# Handoff — 2026-05-24 (post #165 merge; Wave 2 closed, repo hygiene returns to product focus)
+
+> Most recent session's exit state. Next session reads this FIRST
+> after `CLAUDE.md`.
+>
+> **Canonical onboarding (stable, NOT session log):**
+> [`../docs/HANDOFF.md`](../docs/HANDOFF.md).
+> **Canonical project state:**
+> [`../docs/PROJECT_STATE.md`](../docs/PROJECT_STATE.md) §9 (update log).
+> **Multi-agent coordination rule:**
+> [`../docs/AGENT_COORDINATION.md`](../docs/AGENT_COORDINATION.md).
+
+## This turn — worktree + branch
+
+| Field | Value |
+|---|---|
+| Agent ID | `claude-main` |
+| Worktree | `D:\Claude\worktrees\sketchup-claude-handoff` |
+| Branch | `chore/handoff-post-w2-merge` (fresh from `origin/develop`) |
+| Canonical clone | `D:\Claude\microservices\plan-extract-v2` — read-only this session |
+
+## Recently merged on `origin/develop`
+
+| PR | Merged at (UTC) | Merge commit | Title |
+|---|---|---|---|
+| #158 | 2026-05-24T15:29:40Z | `3e1a290` | chore(repo): repository health gate + canonical hygiene governance |
+| #161 | 2026-05-24 (earlier) | `f77e1eb` | docs(protocol): LL-019 multi-agent coordination protocol |
+| #160 | 2026-05-24T16:31:12Z | `cf25f28` | chore(repo): W001 Wave 1 — root prototype cleanup (16 → 10) |
+| #162 | 2026-05-24T16:47:27Z | `7ff2182` | docs(repo): codify multi-agent worktree-isolation policy |
+| #163 | 2026-05-24 | `ffa5a4d` | docs: clean docs foundations without stale SDD stack commits |
+| #164 | 2026-05-24 | `b01b194` | fix(openings+walls): wall-hosted window semantics + canonical shell + quadrado (supersedes #156) |
+| #165 | 2026-05-24T20:01:38Z | `ef85206` | chore(repo): W001 Wave 2 — root-script allowlist (10 → 0; zero file moves) |
+
+**Current `origin/develop` HEAD:** `ef85206` (= PR #165 squash merge).
+
+Worktrees cleaned up after merge:
+`D:/Claude/worktrees/sketchup-claude-main` (post #162),
+`D:/Claude/worktrees/sketchup-claude-main-wave2` (post #165).
+
+## Repo Health Gate baselines (locked here)
+
+| Metric | Value | Notes |
+|---|---|---|
+| **W001 (loose-script-root)** | **0** | Zero loose root Python files unexpected at this point. |
+| **I003 (intentional-root-script)** | **10** | 5 deprecation wrappers + 5 standalone scripts, each with cited rationale in `ROOT_PY_KEEP_AT_ROOT` (`tools/repo_health_gate.py`). Informational only — does NOT gate CI. |
+| W002 (md-no-status) | 48 | Pre-policy deferral per `REPO_HYGIENE.md` §2 ("Do not run a bulk rewrite"). Status: headers ship when each doc is next touched. |
+| ERROR (any code) | 0 | CI green on `develop`. |
+
+## Operational rules to remember (do NOT relax)
+
+1. **`ROOT_PY_KEEP_AT_ROOT` is not permission to add more root scripts.**
+   It is a *closed allowlist* of files that already exist at root with
+   a documented trigger condition. Adding a NEW root Python file
+   means it should land under `tools/` or `scripts/`, not the
+   allowlist. New W001 firings on a PR are the gate doing its job.
+
+2. **The 10 I003 entries each cite their move-trigger.**
+   When a trigger fires (e.g., maintainer confirms "I do not use
+   `crop_legend.py` manually"; raster pipeline officially retired;
+   all wrapper clients migrate to `renderers.*`), the workflow is
+   strictly: remove the allowlist entry → run the gate → the file
+   re-fires W001 → `git mv` to `tools/legacy/` (or `git rm` if
+   truly orphan) in a focused PR. NOT bulk edits.
+
+3. **Repo hygiene is now policy-stable; product/fidelity/SKP work
+   is the focus.** Per user's directive, the next cleanup wave only
+   happens with a concrete trigger:
+     (a) a preserved root script is proven unused by `rg` AND no
+         human/manual workflow depends on it, OR
+     (b) a wrapper is no longer needed because all clients migrated
+         to `renderers.*`, OR
+     (c) the raster legacy path is officially retired, OR
+     (d) a new root Python file appears and is not allowlisted with
+         rationale, OR
+     (e) a gate starts failing.
+   Otherwise: stop the hygiene loop and ship product work.
+
+4. **Multi-agent worktree rule is in force** (`docs/AGENT_COORDINATION.md`
+   §0). Never share the canonical clone with peer agents. Always
+   `git worktree add` fresh from updated `origin/develop`.
+
+## Where to register your handoff between agents:
+
+---
+
 # Handoff — 2026-05-24 (post #158/#160/#161/#162 merge; Wave 2 cleanup starting)
 
 > Most recent session's exit state. Next session reads this FIRST
