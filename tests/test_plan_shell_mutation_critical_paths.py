@@ -80,9 +80,17 @@ def _v_wall(length: float = 100.0, thickness: float = 4.0) -> dict:
 def test_wall_footprint_thickness_doubles_area_doubles() -> None:
     """MUT-03: if `half = t / 2.0` became `half = t / 1.0`, the
     rectangle perpendicular to the wall axis would double in width.
-    A direct area assertion catches the off-by-half-factor."""
-    base_area = wall_footprint(_h_wall(length=100, thickness=4)).area
-    double_area = wall_footprint(_h_wall(length=100, thickness=8)).area
+    A direct area assertion catches the off-by-half-factor.
+
+    Use extend_endpoints=False so the test isolates the thickness-area
+    relationship from the LL-017 corner extension (which also depends
+    on thickness, breaking strict 2× linearity)."""
+    base_area = wall_footprint(
+        _h_wall(length=100, thickness=4), extend_endpoints=False,
+    ).area
+    double_area = wall_footprint(
+        _h_wall(length=100, thickness=8), extend_endpoints=False,
+    ).area
     # Linear in thickness — exactly 2× when thickness doubles.
     assert double_area == pytest.approx(base_area * 2.0, rel=1e-9)
 

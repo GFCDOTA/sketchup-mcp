@@ -332,6 +332,24 @@ requirement.
 - (none open as of 2026-05-06; previous SHA256 + caminho-A items shipped)
 
 ### Recently fixed
+- **Wall shell canonicalisation: no more L-shape notches at outer corners**
+  (2026-05-24, branch `feature/window-aperture-semantics`):
+  `tools/build_plan_shell_skp.py wall_footprint()` was cutting each
+  wall's 2D rectangle exactly at its centerline endpoints, leaving
+  a `2*half × 2*half` L-shape notch at every outer corner where
+  two perpendicular walls met. On the quadrado canonical fixture,
+  the outer ring carried 12 vertices instead of the canonical 4.
+  Fix: `wall_footprint` now extends by half-thickness at both
+  endpoints (default), so adjacent perpendicular walls fully
+  overlap in the corner cell. A `canonicalise_axis_aligned_polygon`
+  pass after union+carve drops any leftover collinear redundant
+  vertices. Stats carry `redundant_vertices_dropped` for visibility.
+  Validation: 15 new canonical-shell tests + planta_74 idempotency
+  + 92 plan-shell suite tests pass; quadrado now has outer ring
+  = 4 canonical-corner vertices; planta_74 dropped from 8 to 7
+  shell pieces (corner notches were causing extra fragmentation).
+  ADR + LL-017 + FP-025 codify the rule. See §20 for permanent
+  guardrail.
 - **Window apertures: 3D post-extrude carve (no more door-like voids)**
   (2026-05-24, branch `feature/window-aperture-semantics`):
   `tools/build_plan_shell_skp.{py,rb}` historically carved every
@@ -466,6 +484,14 @@ Never apply archive patches without an explicit, signed-off PR plan.
 
 ## 13. Last-updated marker
 
+- **2026-05-24** — §20 wall shell canonicalisation added.
+  Wall footprints extend by half-thickness at endpoints by default;
+  `canonicalise_axis_aligned_polygon` drops collinear redundant
+  vertices after union+carve. Quadrado outer ring drops from 12 to
+  canonical 4 vertices. Reference: `tools/build_plan_shell_skp.py`
+  (`wall_footprint`, `canonicalise_axis_aligned_polygon`),
+  `tests/test_wall_shell_canonical.py` (15 tests + planta_74 regression),
+  LL-017, FP-025. Locks the no-notches/no-slivers rule.
 - **2026-05-24** — §19 window vs door opening semantics added.
   Window apertures are now 3D post-extrude carves; doors and
   passages stay on the 2D full-height path. Reference:
@@ -805,3 +831,51 @@ a healthy build:**
 See ADR-007 (the decision document), LL-016 (positive rule),
 FP-024 (anti-pattern), `docs/specs/quadrado_demo_spec.md` §6.4
 (in-place edit pattern adopted by the 3D carve).
+
+---
+
+## 20. Wall shell canonicalisation (LL-017, FP-025)
+
+> **Wall footprints must extend by half-thickness at BOTH endpoints
+> along the wall's own axis. After `unary_union` and carve, the
+> resulting polygon must be canonicalised: drop any vertex
+> sandwiched between two same-cardinal-direction edges. Axis-aligned
+> wall input must produce axis-aligned output with no stepped
+> notches, no slivers, no overhanging segments.**
+
+This is the canonical corner-completion rule. Without it, the union
+of two perpendicular wall rectangles (each cut exactly at its
+centerline endpoints) leaves a `2*half × 2*half` L-shape notch at
+each outer corner — the FP-025 "tecos" signature.
+
+**Implementation contract** (`tools/build_plan_shell_skp.py`):
+
+1. `wall_footprint(wall, extend_endpoints=True)` defaults to
+   extension. Opt-out (`extend_endpoints=False`) only for unit
+   tests that need the raw box.
+2. After `unary_union(wall_footprints)` and `shell.difference(carve_union)`,
+   each retained polygon passes through
+   `canonicalise_axis_aligned_polygon(poly)` which drops collinear
+   redundant vertices on every ring (outer + interiors).
+3. Stats carry `redundant_vertices_dropped` so regressions are
+   visible in the artifact. Quadrado-healthy = 0 (extension alone
+   produces canonical union); non-zero indicates the canonicaliser
+   earned its keep on mid-wall carves.
+
+**Detection signature of the bug — must NEVER appear in a healthy
+build:**
+- Quadrado outer ring with > 4 vertices (notches at corners).
+- Outer vertices off `{(97.3, 97.3), (216.384, 97.3),
+  (216.384, 216.384), (97.3, 216.384)}` for the canonical fixture.
+- Non-axis-aligned edges from axis-aligned input.
+- `slivers_removed > 0` on planta_74.
+
+**Validation gates:**
+- `tests/test_wall_shell_canonical.py` (15 tests) — wall_footprint
+  extension, quadrado canonical 4-vertex outer + inner, edge
+  axis-alignment, canonicaliser unit tests, planta_74 regression
+  (canonicaliser idempotent + no slivers + all edges axis-aligned).
+
+See ADR-007 (window aperture fix landed first; this corner fix
+complements it on the wall side), LL-017 (the positive rule),
+FP-025 (anti-pattern), ADR-003 (the broader plan-shell exporter).

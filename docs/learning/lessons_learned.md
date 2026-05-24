@@ -326,3 +326,101 @@ FP-024 (the anti-pattern this LL prevents); ADR-003 (the broader
 plan-shell exporter); LL-014 (read coords from the actual model);
 `docs/specs/quadrado_demo_spec.md` §6.4 (the in-place edit pattern
 adopted by `build_window_aperture_3d`).
+
+## LL-017 — Wall footprints must extend by half-thickness at both endpoints; shell rings must be canonicalised after union
+
+**Date:** 2026-05-24.
+**Context:** After the window aperture fix shipped (LL-016), the
+user reported visible "tecos / sobras" at the wall outer corners of
+the quadrado canonical fixture. Inspection of the serialised
+`_shell_polygon.json` confirmed: the outer ring of the 4-wall
+quadrado had 12 vertices (three per corner, forming L-shape notches)
+instead of the canonical 4. FP-025 documents the anti-pattern; this
+LL codifies the positive rule.
+
+**Rule:**
+
+> **Wall footprints must extend by half-thickness at BOTH endpoints
+> along the wall's own axis. After `unary_union` and any carve
+> operations, the resulting polygon must be canonicalised: drop any
+> vertex sandwiched between two same-cardinal-direction edges.
+> Axis-aligned wall input must produce axis-aligned output with no
+> stepped notches, no slivers, no overhanging segments.**
+
+This is the canonical corner-completion rule. Without it, the
+union of two perpendicular wall rectangles (each cut exactly at
+its centerline endpoints) leaves a `2*half × 2*half` L-shape
+notch at each outer corner — the FP-025 "tecos" signature.
+
+**Implementation contract** (`tools/build_plan_shell_skp.py`):
+
+1. `wall_footprint(wall, extend_endpoints=True)` defaults to
+   extension. The opt-out flag (`extend_endpoints=False`) is for
+   unit tests that need the un-extended box; production code
+   uses the default.
+
+2. The extension is `half = thickness / 2.0` applied on the
+   `min` and `max` endpoint along the wall's principal axis.
+   For a horizontal wall: `x0 -= half`, `x1 += half`. The
+   perpendicular extent stays at `cy ± half` (unchanged).
+
+3. After `unary_union(wall_footprints)` and any
+   `shell.difference(carve_union)` operation, each retained
+   polygon piece is passed through
+   `canonicalise_axis_aligned_polygon(poly)`. The canonicaliser:
+   - Walks the outer ring + every interior ring.
+   - Drops any vertex `cur` where `prev->cur` and `cur->nxt` are
+     both horizontal (same `y`) or both vertical (same `x`).
+   - Returns a `Polygon` with the cleaned rings.
+
+4. The stats dict carries
+   `"redundant_vertices_dropped": <int>` so regressions are
+   visible in the artifact. On a healthy quadrado build, this
+   equals 0 (the wall-extension fix alone produces a canonical
+   union). Non-zero values indicate the canonicaliser earned
+   its keep on edge cases.
+
+**Why the safety net exists alongside the extension:** the
+wall-extension fix produces a canonical union for simple cases
+(quadrado, planta_74 wall rings). For arbitrary plans with
+mid-wall carves (doors / passages) that touch the outer ring,
+`shell.difference` can introduce collinear redundant vertices
+on the carve boundary. The canonicaliser drops them in a single
+pass. Both layers are cheap; both are needed.
+
+**Detection signature** (in `_shell_polygon.json`):
+
+For the quadrado canonical fixture, a healthy build has:
+- `stats.shell_pieces_after_sliver_filter == 1`
+- `polygons[0]` outer ring length == 4 (excluding closing dup)
+- `polygons[0]` interiors length == 1 with inner ring length == 4
+- All outer vertices at the canonical corners
+  `{(97.3, 97.3), (216.384, 97.3), (216.384, 216.384), (97.3, 216.384)}`
+- `stats.slivers_removed == 0`
+- `stats.redundant_vertices_dropped == 0`
+
+For planta_74:
+- `stats.slivers_removed == 0`
+- `stats.shell_pieces_after_sliver_filter` == 7 (post-fix; was 8
+  pre-fix because corner notches caused an extra piece to be
+  classified separately).
+- All edges of every piece are axis-aligned.
+
+**Validation gates** (`tests/test_wall_shell_canonical.py`, 15
+tests + planta_74 regression):
+- `wall_footprint` extension is correct on h and v walls.
+- Quadrado outer ring == canonical 4 vertices.
+- Quadrado inner hole == canonical 4 vertices.
+- All edges axis-aligned.
+- Canonicaliser drops sandwiched verts; preserves L-shape real
+  corners; handles polygon with hole.
+- Quadrado WITH window keeps the canonical outer ring (the 3D
+  aperture path of ADR-007 does not pollute the 2D ring).
+- Planta_74 canonicaliser is idempotent (re-running drops 0).
+- Planta_74 all edges axis-aligned + 0 slivers.
+
+**Cross-references:** FP-025 (the anti-pattern this LL prevents);
+LL-016 / ADR-007 (window aperture fix landed first; this rule
+complements it on the wall side); ADR-003 (the broader
+`build_plan_shell_skp` exporter design); FP-006 (wall/peitoril
+overlap filter that depends on clean wall footprints).
