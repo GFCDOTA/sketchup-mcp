@@ -79,9 +79,11 @@ def test_M02_negative_thickness_produces_inverted_box() -> None:
     negative thickness doesn't go unnoticed."""
     w = {"id": "neg", "start": [0, 50], "end": [100, 50],
          "thickness": -4.0, "orientation": "h"}
-    box = wall_footprint(w)
+    box = wall_footprint(w, extend_endpoints=False)
     # Shapely's box() handles min/max flips internally; the bounds
     # still come back as a valid rectangle with positive area.
+    # Use extend_endpoints=False to test the raw thickness behaviour
+    # without LL-017 corner extension entering the assertion.
     assert box.area == pytest.approx(400.0)
 
 
@@ -95,7 +97,11 @@ def test_M03_zero_length_wall_produces_degenerate_polygon() -> None:
     surprising (a None, a crash) is the regression."""
     w = {"id": "zero", "start": [50, 50], "end": [50, 50],
          "thickness": 4.0, "orientation": "h"}
-    box = wall_footprint(w)
+    box = wall_footprint(w, extend_endpoints=False)
+    # Same as M02: pin the raw zero-length behaviour. With LL-017
+    # extension the zero-length wall becomes a thickness×thickness
+    # square, which is the intended "stub at junction" behaviour and
+    # is exercised by test_wall_footprint_extends_*.
     assert box.area == pytest.approx(0.0)
 
 

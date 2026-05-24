@@ -331,7 +331,74 @@ requirement.
 ### Known SketchUp issues
 - (none open as of 2026-05-06; previous SHA256 + caminho-A items shipped)
 
+### Canonical success reference — quadrado + window (2026-05-24)
+
+The quadrado canonical fixture is the **reference of a correct
+wall-shell + window-aperture pipeline output**. All inputs, expected
+outputs, render, and helpers are versioned (do NOT re-derive from
+scratch — read these paths first):
+
+| Role | Path |
+|---|---|
+| Input consensus (with window) | `fixtures/quadrado/consensus_with_window.json` |
+| Input consensus (empty room) | `fixtures/quadrado/consensus_empty.json` |
+| Expected `_shell_polygon.json` | `docs/specs/_assets/quadrado_canonical_shell_polygon.json` |
+| Expected geometry report | `docs/specs/_assets/quadrado_canonical_geometry_report.json` |
+| Reference 3D render | `docs/specs/_assets/quadrado_canonical_success_render.png` |
+| Render helpers | `tools/quadrado/render_view.{py,rb}` |
+| Smoke gate (CI-ready) | `tests/test_quadrado_canonical_smoke.py` (14 tests) |
+| Spec | `docs/specs/quadrado_demo_spec.md` |
+
+**Reproduce from a fresh clone:** `python -m tools.build_plan_shell_skp fixtures/quadrado/consensus_with_window.json --out runs/<dir>/quadrado.skp`
+
+**Rule for future agents:** when validating a pipeline change against
+the quadrado, ALWAYS use these versioned inputs and compare against the
+versioned reference outputs. Never invent a parallel fixture under
+`runs/` (gitignored) and call it canonical. If the reference outputs
+need to change, justify in the PR body — the spec calls this out
+explicitly.
+
 ### Recently fixed
+- **Wall shell canonicalisation: no more L-shape notches at outer corners**
+  (2026-05-24, branch `feature/window-aperture-semantics`):
+  `tools/build_plan_shell_skp.py wall_footprint()` was cutting each
+  wall's 2D rectangle exactly at its centerline endpoints, leaving
+  a `2*half × 2*half` L-shape notch at every outer corner where
+  two perpendicular walls met. On the quadrado canonical fixture,
+  the outer ring carried 12 vertices instead of the canonical 4.
+  Fix: `wall_footprint` now extends by half-thickness at both
+  endpoints (default), so adjacent perpendicular walls fully
+  overlap in the corner cell. A `canonicalise_axis_aligned_polygon`
+  pass after union+carve drops any leftover collinear redundant
+  vertices. Stats carry `redundant_vertices_dropped` for visibility.
+  Validation: 15 new canonical-shell tests + planta_74 idempotency
+  + 92 plan-shell suite tests pass; quadrado now has outer ring
+  = 4 canonical-corner vertices; planta_74 dropped from 8 to 7
+  shell pieces (corner notches were causing extra fragmentation).
+  ADR + LL-017 + FP-025 codify the rule. See §20 for permanent
+  guardrail.
+- **Window apertures: 3D post-extrude carve (no more door-like voids)**
+  (2026-05-24, branch `feature/window-aperture-semantics`):
+  `tools/build_plan_shell_skp.{py,rb}` historically carved every
+  opening as a 2D full-height rectangle pre-extrude, then refilled
+  windows with three stacked sub-volumes (sill / glass / lintel).
+  Structurally that's three separate boxes inside a floor-to-ceiling
+  void — semantically a door with infill, not a window. Affected
+  the quadrado canonical fixture AND all 4 windows on planta_74.
+  Fix: Python now routes `kind_v5 == 'window'` to a separate
+  `window_apertures` list (NOT the 2D carve). Ruby
+  `build_window_aperture_3d` reads that list, finds the host wall
+  face after extrusion, adds a coplanar rect at sill-to-head only
+  (SU auto-splits — perimeter remainder preserves wall mass), and
+  pushpulls through to create a real through-hole. Glass sits at
+  mid-thickness as `WindowGlass_Group_<id>` (separate top-level
+  group). Door/passage/glazed_balcony stay on the 2D full-height
+  path (correct for them).
+  Validation: 15 contract tests + 9 geometry tests; planta_74's
+  4 windows all route to the 3D path; PlanShell_Group preserves
+  full [0, 2.70 m] height; WindowGlass_Group bbox is exactly
+  [0.9, 2.1 m]. ADR-007 + LL-016 + FP-024 codify the rule.
+  See CLAUDE.md §19 for the permanent guardrail.
 - **Human-openings ground-truth pipeline shipped** (2026-05-11, PRs #112+#113+#115+#116):
   When a reviewer paints color blobs (#00ff00 green = interior_door,
   #ff00ff magenta = window, #ffa500 orange = glazed_balcony) on a planta
@@ -444,6 +511,22 @@ Never apply archive patches without an explicit, signed-off PR plan.
 
 ## 13. Last-updated marker
 
+- **2026-05-24** — §20 wall shell canonicalisation added.
+  Wall footprints extend by half-thickness at endpoints by default;
+  `canonicalise_axis_aligned_polygon` drops collinear redundant
+  vertices after union+carve. Quadrado outer ring drops from 12 to
+  canonical 4 vertices. Reference: `tools/build_plan_shell_skp.py`
+  (`wall_footprint`, `canonicalise_axis_aligned_polygon`),
+  `tests/test_wall_shell_canonical.py` (15 tests + planta_74 regression),
+  LL-017, FP-025. Locks the no-notches/no-slivers rule.
+- **2026-05-24** — §19 window vs door opening semantics added.
+  Window apertures are now 3D post-extrude carves; doors and
+  passages stay on the 2D full-height path. Reference:
+  `tools/build_plan_shell_skp.{py,rb}` (`build_window_aperture_3d`
+  + `WINDOW_APERTURE_KINDS`), `tests/test_window_aperture_contract.py`
+  (15 tests), `tests/test_window_aperture_geometry.py` (9 tests),
+  ADR-007, LL-016, FP-024. Locks the no-door-like-void rule for
+  windows on both the quadrado canonical fixture and planta_74.
 - **2026-05-23** — §18 SU runner mode protocol added. Three modes
   (`headless`/`interactive`/`attach`) with `interactive` as safe
   default. Reference helper `tools/su_runner_safety.py` exports
@@ -746,6 +829,104 @@ Reference helper: `tools/su_runner_safety.py` exports `parse_mode`,
 tests in `tests/test_su_runner_safety.py`.
 
 See LL-015 (positive rule) and FP-023 (anti-pattern).
+
+---
+
+## 19. Window vs door opening semantics (LL-016, FP-024, ADR-007)
+
+> **Window openings must be wall-hosted partial-height openings.
+> They must preserve wall mass below and above the opening and must
+> never be represented as door-like full-height voids unless
+> explicitly classified as doors.**
+
+This is the architectural contract of a window. The exporter encodes
+it structurally — in the topology of the produced SKP — not
+cosmetically (via material colours).
+
+**Routing table** (`tools/build_plan_shell_skp.py` + `.rb`):
+
+| Normalised `kind_v5` | 2D pre-extrude carve | 3D post-extrude aperture | Wall mass below sill | Wall mass above head |
+|---|---|---|---|---|
+| `interior_door` | full-height | — | no | no |
+| `interior_passage` | full-height | — | no | no |
+| `glazed_balcony` (porta-vidro) | full-height | — | no | no |
+| `window` | **NEVER** | **`build_window_aperture_3d`** | **yes (peitoril)** | **yes (verga)** |
+
+Window apertures are carved by `build_window_aperture_3d` in
+`tools/build_plan_shell_skp.rb`:
+1. Find host wall lateral face spanning [0, WALL_HEIGHT_IN].
+2. Read its fixed coord from `face.bounds` (LL-014).
+3. Add coplanar rect at z ∈ [WINDOW_SILL_IN, WINDOW_HEAD_IN] — SU
+   splits the host face; perimeter remainder preserves wall mass.
+4. `pushpull(-real_thickness_in)` → real through-hole.
+5. Emit `WindowGlass_Group_<id>` at mid-thickness (separate
+   top-level group). NO sill/lintel sub-groups.
+
+**Detection signature of the bug (FP-024) — must NEVER appear in
+a healthy build:**
+- `Window_Group_<id>_sill` group at `bbox_m.z = [0, 0.9]` (sill on
+  the floor — door-like void with infill).
+- `Window_Group_<id>_lintel` group.
+- `PlanShell_Group.bbox_m.max.z` < WALL_HEIGHT_M (wall carved short).
+
+**Validation gates:**
+- `tests/test_window_aperture_contract.py` (15 tests) — Python
+  contract; includes a planta_74 regression that locks 4-window
+  routing.
+- `tests/test_window_aperture_geometry.py` (9 tests) — SKP /
+  geometry-report invariants; skips cleanly when no SKP present.
+
+See ADR-007 (the decision document), LL-016 (positive rule),
+FP-024 (anti-pattern), `docs/specs/quadrado_demo_spec.md` §6.4
+(in-place edit pattern adopted by the 3D carve).
+
+---
+
+## 20. Wall shell canonicalisation (LL-017, FP-025)
+
+> **Wall footprints must extend by half-thickness at BOTH endpoints
+> along the wall's own axis. After `unary_union` and carve, the
+> resulting polygon must be canonicalised: drop any vertex
+> sandwiched between two same-cardinal-direction edges. Axis-aligned
+> wall input must produce axis-aligned output with no stepped
+> notches, no slivers, no overhanging segments.**
+
+This is the canonical corner-completion rule. Without it, the union
+of two perpendicular wall rectangles (each cut exactly at its
+centerline endpoints) leaves a `2*half × 2*half` L-shape notch at
+each outer corner — the FP-025 "tecos" signature.
+
+**Implementation contract** (`tools/build_plan_shell_skp.py`):
+
+1. `wall_footprint(wall, extend_endpoints=True)` defaults to
+   extension. Opt-out (`extend_endpoints=False`) only for unit
+   tests that need the raw box.
+2. After `unary_union(wall_footprints)` and `shell.difference(carve_union)`,
+   each retained polygon passes through
+   `canonicalise_axis_aligned_polygon(poly)` which drops collinear
+   redundant vertices on every ring (outer + interiors).
+3. Stats carry `redundant_vertices_dropped` so regressions are
+   visible in the artifact. Quadrado-healthy = 0 (extension alone
+   produces canonical union); non-zero indicates the canonicaliser
+   earned its keep on mid-wall carves.
+
+**Detection signature of the bug — must NEVER appear in a healthy
+build:**
+- Quadrado outer ring with > 4 vertices (notches at corners).
+- Outer vertices off `{(97.3, 97.3), (216.384, 97.3),
+  (216.384, 216.384), (97.3, 216.384)}` for the canonical fixture.
+- Non-axis-aligned edges from axis-aligned input.
+- `slivers_removed > 0` on planta_74.
+
+**Validation gates:**
+- `tests/test_wall_shell_canonical.py` (15 tests) — wall_footprint
+  extension, quadrado canonical 4-vertex outer + inner, edge
+  axis-alignment, canonicaliser unit tests, planta_74 regression
+  (canonicaliser idempotent + no slivers + all edges axis-aligned).
+
+See ADR-007 (window aperture fix landed first; this corner fix
+complements it on the wall side), LL-017 (the positive rule),
+FP-025 (anti-pattern), ADR-003 (the broader plan-shell exporter).
 
 ---
 

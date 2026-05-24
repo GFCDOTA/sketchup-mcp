@@ -1,0 +1,213 @@
+{
+  "schema_version": "1.0.0",
+  "tool": "build_plan_shell_skp",
+  "consensus_path": "D:/Claude/microservices/plan-extract-v2/runs/quadrado_v4_canonical/consensus.json",
+  "skp_path": "D:/Claude/microservices/plan-extract-v2/runs/quadrado_v4_canonical/quadrado.skp",
+  "shell_json_path": "D:/Claude/microservices/plan-extract-v2/runs/quadrado_v4_canonical/_shell_polygon.json",
+  "soft_barriers_mode": "groups",
+  "plan_shell": {
+    "faces": 14,
+    "edges": 36,
+    "sub_groups": 1,
+    "faces_with_holes": 4,
+    "top_or_bottom_faces": 4,
+    "default_material_faces": 0,
+    "present": true
+  },
+  "floor_groups": {
+    "present": true,
+    "count": 1,
+    "failed_count": 0,
+    "failed_records": [
+
+    ],
+    "records": [
+      {
+        "name": "Floor_Group_r_main",
+        "faces": 1,
+        "edges": 4,
+        "area_in2": 22499.91,
+        "area_m2": 14.516
+      }
+    ]
+  },
+  "soft_barrier_groups": {
+    "present": false,
+    "count": 0,
+    "skipped_count": 0,
+    "skip_reasons": [
+
+    ]
+  },
+  "totals": {
+    "top_level_groups": 3,
+    "faces": 2,
+    "edges": 8
+  },
+  "groups_diagnostic": [
+    {
+      "name": "PlanShell_Group",
+      "entity_count": 1,
+      "face_count": 14,
+      "edge_count": 36,
+      "sub_group_count": 1,
+      "lateral_face_count": 10,
+      "top_or_bottom_face_count": 4,
+      "top_face_count": 2,
+      "default_material_face_count": 0,
+      "primary_material": "plan_wall",
+      "bbox_in": {
+        "min": [
+          134.7842,
+          134.7842,
+          0.0
+        ],
+        "max": [
+          299.7445,
+          299.7445,
+          106.2992
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          3.4235,
+          3.4235,
+          0.0
+        ],
+        "max": [
+          7.6135,
+          7.6135,
+          2.7
+        ]
+      },
+      "height_m": 2.7,
+      "footprint_bbox_m2": 17.556,
+      "footprint_top_face_m2": 3.2405
+    },
+    {
+      "name": "Floor_Group_r_main",
+      "entity_count": 5,
+      "face_count": 1,
+      "edge_count": 4,
+      "sub_group_count": 0,
+      "lateral_face_count": 0,
+      "top_or_bottom_face_count": 1,
+      "top_face_count": 1,
+      "default_material_face_count": 0,
+      "primary_material": "floor_r_main",
+      "bbox_in": {
+        "min": [
+          142.2645,
+          142.2645,
+          0.0
+        ],
+        "max": [
+          292.2642,
+          292.2642,
+          0.0
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          3.6135,
+          3.6135,
+          0.0
+        ],
+        "max": [
+          7.4235,
+          7.4235,
+          0.0
+        ]
+      },
+      "height_m": 0.0,
+      "footprint_bbox_m2": 14.516,
+      "footprint_top_face_m2": 14.516
+    },
+    {
+      "name": "WindowGlass_Group_win_south",
+      "entity_count": 5,
+      "face_count": 1,
+      "edge_count": 4,
+      "sub_group_count": 0,
+      "lateral_face_count": 1,
+      "top_or_bottom_face_count": 0,
+      "top_face_count": 0,
+      "default_material_face_count": 0,
+      "primary_material": "plan_window_glass",
+      "bbox_in": {
+        "min": [
+          196.4857,
+          138.5244,
+          35.4331
+        ],
+        "max": [
+          238.043,
+          138.5244,
+          82.6772
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          4.9907,
+          3.5185,
+          0.9
+        ],
+        "max": [
+          6.0463,
+          3.5185,
+          2.1
+        ]
+      },
+      "height_m": 1.2,
+      "footprint_bbox_m2": 0.0,
+      "footprint_top_face_m2": 0.0
+    }
+  ],
+  "shell_stats_from_python": {
+    "input_walls": 4,
+    "input_openings": 1,
+    "openings_carved": 0,
+    "window_apertures_3d": 1,
+    "openings_skipped_by_origin": [
+
+    ],
+    "openings_skipped_by_error": [
+
+    ],
+    "openings_skipped": [
+
+    ],
+    "shell_pieces_after_union": 1,
+    "shell_pieces_after_sliver_filter": 1,
+    "slivers_removed": 0,
+    "redundant_vertices_dropped": 0,
+    "snap_eps_pts": 0.1,
+    "min_sliver_area_pts2": 0.5,
+    "carving_origins": [
+      "human_annotation",
+      "svg_arc",
+      "svg_segments"
+    ],
+    "total_shell_area_pts2": 2455.5744,
+    "window_apertures": [
+      {
+        "id": "win_south",
+        "wall_id": "w_bottom",
+        "kind_v5": "window",
+        "center": [
+          156.842,
+          100.0
+        ],
+        "opening_width_pts": 30.0,
+        "host_wall_orientation": "h",
+        "host_wall_thickness_pts": 5.4
+      }
+    ]
+  },
+  "gates_self_check": {
+    "plan_shell_group_exists": true,
+    "wall_shell_is_single_group": true,
+    "floors_separated_from_walls": true,
+    "default_material_faces_zero": true
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "_comment": "Canonical quadrado micro-fixture. Recreated from docs/specs/quadrado_demo_spec.md §4.1. Single 4m x 4m room, inner_clear mode. Builder treats walls.start/end as centerlines (see spec §7.1).",
+  "schema_version": "1.0.0",
+  "wall_thickness_pts": 5.4,
+  "dimension_mode": "inner_clear",
+  "plan_id": "quadrado_demo",
+  "planta_region": [90, 90, 224, 224],
+  "walls": [
+    {"id": "w_bottom", "start": [100.0, 100.0],   "end": [213.684, 100.0],   "thickness": 5.4, "orientation": "h"},
+    {"id": "w_top",    "start": [100.0, 213.684], "end": [213.684, 213.684], "thickness": 5.4, "orientation": "h"},
+    {"id": "w_left",   "start": [100.0, 100.0],   "end": [100.0, 213.684],   "thickness": 5.4, "orientation": "v"},
+    {"id": "w_right",  "start": [213.684, 100.0], "end": [213.684, 213.684], "thickness": 5.4, "orientation": "v"}
+  ],
+  "rooms": [
+    {
+      "id": "r_main",
+      "name": "QUADRADO",
+      "polygon_pts": [[102.7, 102.7], [210.984, 102.7], [210.984, 210.984], [102.7, 210.984]],
+      "area_pts2": 11725.4,
+      "seed_pt": [156.842, 156.842]
+    }
+  ],
+  "openings": [],
+  "soft_barriers": []
+}
