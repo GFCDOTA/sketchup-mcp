@@ -194,6 +194,47 @@ KNOWN_FP_REGRESSIONS: list[tuple[str, list[str], str]] = [
         "`proc.pid` — never `taskkill /IM SketchUp.exe`. "
         "LL-015 documents the positive rule.",
     ),
+    (
+        "FP-024",
+        ["tests/test_window_aperture_contract.py",
+         "tests/test_window_aperture_geometry.py",
+         "tools/build_plan_shell_skp.py",
+         "tools/build_plan_shell_skp.rb"],
+        "Window openings rendered as door-like full-height voids with "
+        "sill/glass/lintel infill: enforced by the kind_v5 routing "
+        "table in tools/build_plan_shell_skp.{py,rb}. Windows go "
+        "through `build_window_aperture_3d` (3D post-extrude carve "
+        "at z in [WINDOW_SILL_IN, WINDOW_HEAD_IN]) — NEVER the 2D "
+        "full-height carve path used by interior_door / "
+        "interior_passage / glazed_balcony. Glass sits at "
+        "mid-thickness as `WindowGlass_Group_<id>` (separate "
+        "top-level group). The 15 contract tests assert "
+        "`is_window_aperture()` classification, "
+        "FULL_HEIGHT_CARVE_KINDS ∩ WINDOW_APERTURE_KINDS == ∅, and "
+        "the planta_74 4-window routing. The 9 geometry tests "
+        "assert wall height preserved, glass at sill-to-head only, "
+        "and no legacy `_sill`/`_lintel` group names. LL-016 and "
+        "ADR-007 document the positive rule.",
+    ),
+    (
+        "FP-025",
+        ["tests/test_wall_shell_canonical.py",
+         "tools/build_plan_shell_skp.py"],
+        "Wall shell built from independent bars (each cut exactly at "
+        "centerline endpoints) leaves a 2*half × 2*half L-shape "
+        "notch at every outer corner where two perpendicular walls "
+        "meet (the 'tecos' signature): enforced by "
+        "`wall_footprint(extend_endpoints=True)` (default) + "
+        "`canonicalise_axis_aligned_polygon` post-pass in "
+        "tools/build_plan_shell_skp.py. The 15 tests + planta_74 "
+        "regression assert wall_footprint extension on h+v walls, "
+        "quadrado canonical 4-vertex outer ring (was 12 pre-fix), "
+        "canonicaliser idempotence, all edges axis-aligned, and "
+        "slivers_removed == 0 on planta_74. "
+        "`redundant_vertices_dropped` stat is published in the build "
+        "artifact so any regression surfaces visibly. LL-017 "
+        "documents the positive rule.",
+    ),
 ]
 
 
