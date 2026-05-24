@@ -1,10 +1,10 @@
 # ADR-007 — Window apertures are 3D post-extrude carves, not 2D full-height carves + 3-band infill
 
-- **Status:** Accepted (2026-05-24).
-- **Decider:** Felipe (GFCDOTA) / Claude.
-- **Cross-refs:** FP-024 (the bug), LL-016 (the positive rule),
-  `docs/specs/quadrado_demo_spec.md` §6.4 (the in-place edit pattern
-  this carve adopts), ADR-003 (`build_plan_shell_skp` overall design).
+> **Status:** Accepted (2026-05-24).
+> **Decider:** Felipe (GFCDOTA) / Claude.
+> **Cross-refs:** FP-024 (the bug), LL-016 (the positive rule),
+> `docs/specs/quadrado_demo_spec.md` §6.4 (the in-place edit pattern
+> this carve adopts), ADR-003 (`build_plan_shell_skp` overall design).
 
 ---
 
