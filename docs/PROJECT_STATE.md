@@ -292,3 +292,4 @@ Every update of this file MUST come with:
 | Date | Commit | What changed |
 |---|---|---|
 | 2026-05-24 | (this commit) | Initial canonical state doc. §1–§7 derived from CLAUDE.md, OVERVIEW.md, AGENTS.md, and the 2026-05-24 quadrado + wall-shell + window aperture cycle. |
+| 2026-05-24 | (Wave 1 cleanup) | Repo Health Gate Wave 1 — root-prototype cleanup. Deleted 3 unreferenced root scripts (`proto_runner.py`, `proto_skel.py`, `proto_v2.py`); moved 3 test-referenced scripts to `tools/legacy/` (`proto_colored.py`, `proto_red.py`, `render_sidebyside.py`). New scaffolding: `tools/legacy/README.md`. Test reference update in `tests/test_proto_cli.py`. W001 count: 16 → 10. No fixture, baseline, gate, or canonical artifact changed; 5 deprecation-wrapper `render_*.py` and 5 other root scripts (`analyze_overpoly` etc.) remain at root, listed under "intentionally deferred" in [`../reports/current/repo_health_report.md`](../reports/current/repo_health_report.md). |
