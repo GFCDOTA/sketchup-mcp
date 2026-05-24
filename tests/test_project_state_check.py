@@ -106,6 +106,7 @@ def test_canonical_docs_carry_status_header():
         "docs/PROJECT_STATE.md",
         "docs/HANDOFF.md",
         "docs/REPO_HYGIENE.md",
+        "docs/PR_HYGIENE.md",
         "docs/GATES.md",
         "docs/ANTI_FORGETTING.md",
     ]

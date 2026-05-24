@@ -62,6 +62,7 @@ CANONICAL_DOCS = [
     "docs/PROJECT_STATE.md",
     "docs/HANDOFF.md",
     "docs/REPO_HYGIENE.md",
+    "docs/PR_HYGIENE.md",
     "docs/GATES.md",
     "docs/ANTI_FORGETTING.md",
     "docs/git_workflow.md",
@@ -122,6 +123,7 @@ STATUS_REQUIRED_DOCS = [
     "docs/PROJECT_STATE.md",
     "docs/HANDOFF.md",
     "docs/REPO_HYGIENE.md",
+    "docs/PR_HYGIENE.md",
     "docs/GATES.md",
     "docs/ANTI_FORGETTING.md",
 ]
