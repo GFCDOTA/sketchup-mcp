@@ -1,3 +1,75 @@
+# Handoff — 2026-05-24 (post #158/#160/#161/#162 merge; Wave 2 cleanup starting)
+
+> Most recent session's exit state. Next session reads this FIRST
+> after `CLAUDE.md`.
+>
+> **Canonical onboarding (stable, NOT session log):**
+> [`../docs/HANDOFF.md`](../docs/HANDOFF.md).
+> **Canonical project state:**
+> [`../docs/PROJECT_STATE.md`](../docs/PROJECT_STATE.md).
+> **Multi-agent coordination rule:**
+> [`../docs/AGENT_COORDINATION.md`](../docs/AGENT_COORDINATION.md) — §0
+> root rule (worktree per agent, lock files advisory only).
+
+## This turn — worktree + branch
+
+| Field | Value |
+|---|---|
+| Agent ID | `claude-main` |
+| Worktree | `D:\Claude\worktrees\sketchup-claude-main-wave2` |
+| Branch | `chore/repo-cleanup-wave-2-root-scripts` (fresh from `origin/develop`) |
+| Canonical clone | `D:\Claude\microservices\plan-extract-v2` — **read-only this session** |
+
+## Last known good state — `origin/develop` HEAD = `7ff2182`
+
+Recently merged on `develop`:
+
+| PR | Merged at (UTC) | Merge commit | Title |
+|---|---|---|---|
+| #158 | 2026-05-24T15:29:40Z | `3e1a290` | chore(repo): repository health gate + canonical hygiene governance |
+| #160 | 2026-05-24T16:31:12Z | `cf25f28` | chore(repo): W001 Wave 1 — root prototype cleanup (16 → 10) |
+| #161 | 2026-05-24 (earlier) | `f77e1eb` | docs(protocol): LL-019 multi-agent coordination protocol |
+| #162 | 2026-05-24T16:47:27Z | `7ff2182` | docs(repo): codify multi-agent worktree-isolation policy |
+
+Branches deleted out-of-band this cycle (auto-deleted via PR
+`--delete-branch`):
+`chore/repo-governance-anti-forgetting`,
+`chore/repo-cleanup-w1-fresh`,
+`chore/agent-coordination-worktree-policy`.
+
+Other live worktrees observed at this snapshot:
+`D:/Claude/microservices/sketchup-mcp-pr156-repair`
+(branch `fix/pr156-window-semantics-repair`).
+
+## Wave 2 plan (starts this turn)
+
+- **Scope:** the 10 remaining W001 warnings on `develop` (5 standalone
+  scripts at root: `analyze_overpoly.py`, `crop_legend.py`,
+  `make_test_pdf.py`, `peek_pdf.py`, `preprocess_walls.py`; plus 5
+  deprecation-wrapper `render_*.py` files at root).
+- **Branch:** `chore/repo-cleanup-wave-2-root-scripts` (this worktree
+  only — must not reuse the #162 branch / worktree, both already
+  deleted).
+- **No docs / policy work in this PR.** Cleanup-only.
+- **`rg` proof required** before any delete; per
+  `docs/REPO_HYGIENE.md` §3 don't-delete-blindly protocol.
+- **Before / after warning count** must appear in the PR body
+  (target: 10 → ≤5 W001).
+
+## Coordination rule (active, do not forget)
+
+Per `docs/AGENT_COORDINATION.md` §0: multiple autonomous agents MUST
+NEVER share the same physical working directory. `git worktree add`
+per agent / per session is the default. Lock files are advisory.
+
+Wave 2 starts only in a fresh worktree from updated `origin/develop`
+(this entry is the proof: the cleanup branch was branched from
+`7ff2182` after fetch/prune, in the worktree path above).
+
+---
+
+(historical entry below — kept for chronological audit trail)
+
 # Handoff — 2026-05-24 (repo governance + anti-forgetting protocol branch open)
 
 > Most recent session's exit state. Next session reads this FIRST
