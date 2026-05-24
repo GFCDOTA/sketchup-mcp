@@ -191,6 +191,53 @@ def test_loose_script_in_root_fires(tmp_path: Path):
     assert "main.py" not in paths
 
 
+def test_allowlisted_root_script_emits_i003_not_w001():
+    """A file in ROOT_PY_KEEP_AT_ROOT must NOT emit W001 and MUST emit I003.
+
+    Runs against the real repo where the allowlist is populated (the 10
+    intentional-root-script keepers from
+    docs/ops/repo_hygiene_audit_2026-05-10.md §211).
+    """
+    proc = _run(["--mode", "audit", "--no-report", "--json"])
+    assert proc.returncode == 0, proc.stderr
+    payload = json.loads(proc.stdout)
+    w001_paths = {f["path"] for f in payload["findings"] if f["code"] == "W001"}
+    i003_paths = {f["path"] for f in payload["findings"] if f["code"] == "I003"}
+
+    # Sample of allowlisted keepers — all must be in I003, none in W001.
+    must_be_i003 = {"analyze_overpoly.py", "make_test_pdf.py",
+                     "render_debug.py", "render_native.py",
+                     "preprocess_walls.py"}
+    assert must_be_i003 <= i003_paths, (
+        f"missing I003 entries: {must_be_i003 - i003_paths}"
+    )
+    assert not (must_be_i003 & w001_paths), (
+        f"allowlisted files leaked into W001: {must_be_i003 & w001_paths}"
+    )
+
+
+def test_stale_keep_at_root_entry_emits_i003(tmp_path: Path):
+    """If an allowlisted filename is no longer tracked, I003 fires
+    with category 'stale-keep-at-root-entry' so the operator prunes
+    the entry."""
+    # Build a mini repo WITHOUT any of the allowlisted files. The real
+    # gate's allowlist still mentions them, so every entry should
+    # surface as a stale-entry I003.
+    repo = _init_mini_repo(tmp_path)
+    _commit_all(repo, "init")
+    proc = _run_in_repo(repo, ["--mode", "audit", "--json", "--no-report"])
+    payload = json.loads(proc.stdout)
+    stale = [f for f in payload["findings"]
+              if f["code"] == "I003"
+              and f["category"] == "stale-keep-at-root-entry"]
+    stale_paths = {f["path"] for f in stale}
+    # Every allowlist entry should be flagged as stale in this
+    # synthetic repo that has none of them.
+    assert "analyze_overpoly.py" in stale_paths
+    assert "render_debug.py" in stale_paths
+    assert "make_test_pdf.py" in stale_paths
+
+
 def test_md_missing_status_fires(tmp_path: Path):
     """W002 fires for docs/*.md without Status: header."""
     repo = _init_mini_repo(tmp_path)

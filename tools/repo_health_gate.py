@@ -38,6 +38,11 @@ Detectors:
                                   pattern that is not in .gitignore
   I002  archived-wrong-location   Status: Archived doc not under
                                   docs/_archive/
+  I003  intentional-root-script   *.py at root that is in
+                                  ROOT_PY_KEEP_AT_ROOT allowlist (with
+                                  cited reason — never fires W001).
+                                  Stale entries (allowlisted file no
+                                  longer tracked) also surface as I003.
 
 Safe fixes (mode=fix only):
 
@@ -138,6 +143,72 @@ OLD_REPORT_DAYS = 30
 
 # Root .py files that are legitimately at the repo root.
 ROOT_PY_ALLOWED = frozenset({"main.py", "setup.py"})
+
+# Root .py files INTENTIONALLY kept at the repo root with a documented
+# reason. These never fire W001; they fire I003 (informational) so the
+# decision stays visible in every audit report.
+#
+# Each entry MUST cite an authoritative source (audit ledger / archive
+# doc / deprecation-wrapper spec). Promote out (move/delete) only when
+# the cited trigger fires.
+#
+# Source of these decisions: docs/ops/repo_hygiene_audit_2026-05-10.md
+# §211 (per-file move-trigger matrix) + docs/architecture/
+# target_repo_architecture.md step 5 (renderers/ migration wrapper
+# policy) + .ai_bridge/HANDOFF.md:301 (3-audit "preserve-only"
+# convergence under maintainer review).
+ROOT_PY_KEEP_AT_ROOT: dict[str, str] = {
+    # --- deprecation wrappers for renderers/ migration (step 5) ---
+    "render_debug.py": (
+        "deprecation wrapper for `renderers.debug` (2026-05-08 "
+        "migration step 5); keeps `python render_debug.py` CLI alive "
+        "for legacy callers until full client migration"
+    ),
+    "render_native.py": (
+        "deprecation wrapper for `renderers.native` (2026-05-08 "
+        "migration step 5); keeps `python render_native.py` CLI alive"
+    ),
+    "render_proto_overlays.py": (
+        "deprecation wrapper for `renderers.proto_overlays` "
+        "(2026-05-08 migration step 5)"
+    ),
+    "render_semantic.py": (
+        "deprecation wrapper for `renderers.semantic` "
+        "(2026-05-08 migration step 5)"
+    ),
+    "render_with_openings.py": (
+        "deprecation wrapper for `renderers.with_openings` "
+        "(2026-05-08 migration step 5)"
+    ),
+    # --- standalone diagnostic / fixture-builder scripts ---
+    "analyze_overpoly.py": (
+        "reproducible-script CLI cited at "
+        "docs/_archive/2026-04-f1-cycle/OVER-POLYGONIZATION-ANALYSIS.md:220 "
+        "(`python analyze_overpoly.py`); moving would break the "
+        "archive's reproducibility instruction — archive is frozen "
+        "per CLAUDE.md §1 hard rule"
+    ),
+    "crop_legend.py": (
+        "historical baseline per docs/ops/repo_hygiene_audit_2026-05-10.md §60; "
+        "deferred until raster-pipeline-retirement OR maintainer "
+        "confirms 'not used manually'"
+    ),
+    "peek_pdf.py": (
+        "debug aid per docs/ops/repo_hygiene_audit_2026-05-10.md §61; "
+        "same trigger as crop_legend.py"
+    ),
+    "make_test_pdf.py": (
+        "active fixture builder per "
+        "docs/ops/repo_hygiene_audit_2026-05-10.md §211 ('mantém'); "
+        "generates inviolable canonical test_plan.pdf — no removal "
+        "trigger exists"
+    ),
+    "preprocess_walls.py": (
+        "generates inviolable planta_74_mask.png per "
+        "docs/ops/repo_hygiene_audit_2026-05-10.md §92; deferred until "
+        "raster-pipeline-officially-retired trigger fires"
+    ),
+}
 
 # Loose data extensions banned from repo root (W005).
 LOOSE_DATA_AT_ROOT_SUFFIXES = (".pdf", ".png", ".jpg", ".jpeg", ".svg",
@@ -410,7 +481,11 @@ def detect_md_missing_status(tracked: list[str], *, only_paths: set[str] | None 
 
 
 def detect_loose_script_root(tracked: list[str]) -> list[Finding]:
-    """W001 — *.py files at repo root other than main.py."""
+    """W001 — *.py files at repo root other than main.py.
+
+    Skips files in ROOT_PY_KEEP_AT_ROOT (those get I003 via
+    `detect_intentional_root_script` instead).
+    """
     out: list[Finding] = []
     for rel in tracked:
         if "/" in rel or "\\" in rel:
@@ -418,6 +493,9 @@ def detect_loose_script_root(tracked: list[str]) -> list[Finding]:
         if not rel.endswith(".py"):
             continue
         if rel in ROOT_PY_ALLOWED:
+            continue
+        if rel in ROOT_PY_KEEP_AT_ROOT:
+            # Intentional — covered by I003 below.
             continue
         out.append(Finding(
             code="W001",
@@ -429,6 +507,48 @@ def detect_loose_script_root(tracked: list[str]) -> list[Finding]:
                 f"(active) or tools/legacy/ (historical) when next "
                 "touched. Don't auto-move — verify references first."
             ),
+            fix_action=None,
+        ))
+    return out
+
+
+def detect_intentional_root_script(tracked: list[str]) -> list[Finding]:
+    """I003 — root-level *.py files explicitly kept at root with a
+    documented reason (ROOT_PY_KEEP_AT_ROOT).
+
+    Surfaces each keeper as an INFO finding so the decision stays
+    visible in every audit report. Promote out only when the cited
+    trigger fires.
+    """
+    out: list[Finding] = []
+    tracked_set = set(tracked)
+    for name, reason in sorted(ROOT_PY_KEEP_AT_ROOT.items()):
+        if name not in tracked_set:
+            # File is no longer in the index (already moved/deleted);
+            # the allowlist entry is stale. Surface as INFO so we
+            # remember to prune the entry.
+            out.append(Finding(
+                code="I003",
+                severity="info",
+                category="stale-keep-at-root-entry",
+                path=name,
+                message=(
+                    f"`{name}` is in ROOT_PY_KEEP_AT_ROOT allowlist but "
+                    "no longer tracked — remove the entry from "
+                    "tools/repo_health_gate.py."
+                ),
+                fix_action=(
+                    "remove the corresponding key from "
+                    "ROOT_PY_KEEP_AT_ROOT in tools/repo_health_gate.py"
+                ),
+            ))
+            continue
+        out.append(Finding(
+            code="I003",
+            severity="info",
+            category="intentional-root-script",
+            path=name,
+            message=f"kept at root: {reason}",
             fix_action=None,
         ))
     return out
@@ -808,6 +928,7 @@ def collect_findings(*, base: str | None) -> list[Finding]:
     findings.extend(detect_generated_outside_allowed(tracked))
     findings.extend(detect_heavy_file(tracked))
     findings.extend(detect_loose_script_root(tracked))
+    findings.extend(detect_intentional_root_script(tracked))
     findings.extend(detect_loose_data_root(tracked))
     findings.extend(detect_md_missing_status(tracked))
     findings.extend(detect_duplicate_fixture(tracked))
