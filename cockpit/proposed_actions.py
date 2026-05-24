@@ -1,4 +1,4 @@
-"""Cockpit-side consumer for ``proposed_actions.json`` (Slice 4).
+"""Cockpit-side consumer for ``proposed_actions.json`` (Slice 4 + 6b).
 
 ADR-001 §2.6 says proposed_actions are **advisory** — the pipeline
 never auto-applies them. The cockpit Review tab surfaces each
@@ -7,7 +7,7 @@ clicks "Apply" to promote a chip into a real ``review_overrides.json``
 entry. This module provides the loader + the promotion mapping +
 a thin convenience wrapper around :func:`cockpit.overrides.save_override`.
 
-# Promotion mapping (Slice 4)
+# Promotion mapping
 
 | Proposed action type | Override type | Notes |
 |---|---|---|
@@ -15,11 +15,20 @@ a thin convenience wrapper around :func:`cockpit.overrides.save_override`.
 | ``mark_low_confidence`` | ``mark_suspect`` | severity = ``"low"`` |
 | ``request_human_review`` (opening) | ``mark_suspect`` | severity = ``"medium"`` |
 | ``request_human_review`` (room) | ``mark_suspect`` | severity = ``"medium"`` |
+| ``expand_room_polygon`` (Slice 6b) | ``room_polygon_override`` | ``edit_method = "from_proposed_action"``; ``new_polygon_pts`` ← ``payload.suggested_polygon_pts`` |
+| ``shrink_room_polygon`` (Slice 6b) | ``room_polygon_override`` | same as expand |
 
-The producer's v1 only emits the four types above; the renderer
-returns ``None`` for any unknown action type so future producer
-versions can ship more types before the cockpit knows how to
-promote them.
+The producer emits ``suggested_polygon_pts`` pre-computed (uniform
+centroid scale by ``payload.scale_factor``). The cockpit UI is
+expected to seed the polygon text-area from that field so the human
+can review and edit BEFORE the override is written; calling
+:func:`apply_proposed_action` directly on a polygon chip writes the
+suggested polygon AS-IS (no review step) and is intended for headless
+tests, not the UI path. See ADR-002 §4 Slice 6b.
+
+The renderer returns ``None`` for any unknown action type so future
+producer versions can ship more types before the cockpit knows how
+to promote them.
 
 # Boundary
 
@@ -40,8 +49,17 @@ import json
 from pathlib import Path
 
 from cockpit import overrides as overrides_mod
+from cockpit.overrides import PT_TO_M
 
 PROPOSED_ACTIONS_FILENAME = "proposed_actions.json"
+
+# Slice 6b — proposed_action types that the cockpit promotes into a
+# ``room_polygon_override``. Kept as a frozenset so callers (including
+# the cockpit Review tab) can do membership tests cheaply.
+POLYGON_PROPOSED_ACTION_TYPES: frozenset[str] = frozenset({
+    "expand_room_polygon",
+    "shrink_room_polygon",
+})
 
 # Mirror the producer's enums so a stale install of one side doesn't
 # silently drift from the other. If these diverge from
@@ -60,6 +78,22 @@ PROPOSED_ACTION_TYPES: tuple[str, ...] = (
 def proposed_actions_path(run_dir: Path | str) -> Path:
     """Conventional path: ``<run_dir>/proposed_actions.json``."""
     return Path(run_dir) / PROPOSED_ACTIONS_FILENAME
+
+
+def _polygon_area_pts2(pts: list[list[float]]) -> float:
+    """Signed shoelace area, absolute value. Mirrors the same helper
+    in ``tools.propose_skp_actions`` so this module stays import-light
+    (no shapely dep). Used as a fallback when the producer chip omits
+    ``estimated_area_pts2``."""
+    n = len(pts) if pts else 0
+    if n < 3:
+        return 0.0
+    total = 0.0
+    for i in range(n):
+        x0, y0 = float(pts[i][0]), float(pts[i][1])
+        x1, y1 = float(pts[(i + 1) % n][0]), float(pts[(i + 1) % n][1])
+        total += x0 * y1 - x1 * y0
+    return abs(total) / 2.0
 
 
 # ---------- Loader ----------------------------------------------------
@@ -171,6 +205,48 @@ def proposed_action_to_override_payload(action: dict) -> dict | None:
             "payload": {"severity": "medium", "tag": str(tag)},
             "reason": base_reason,
         }
+    if a_type in POLYGON_PROPOSED_ACTION_TYPES:
+        # Slice 6b: polygon-correction chip → room_polygon_override.
+        # Reads suggested_polygon_pts from the producer payload (the
+        # producer ran a uniform-centroid scale; the cockpit text-area
+        # surfaces this as a DRAFT for human review before save).
+        if target_kind != "room":
+            return None
+        suggested = payload.get("suggested_polygon_pts")
+        if (not isinstance(suggested, list)
+                or len(suggested) < 3):
+            return None
+        # Defensive: every point must be a [x, y] number pair.
+        normalised: list[list[float]] = []
+        for pt in suggested:
+            if (not isinstance(pt, (list, tuple))
+                    or len(pt) != 2
+                    or not isinstance(pt[0], (int, float))
+                    or not isinstance(pt[1], (int, float))):
+                return None
+            normalised.append([float(pt[0]), float(pt[1])])
+        # Prefer producer-supplied areas; otherwise recompute so the
+        # override always carries consistent estimated_area_*.
+        area_pts2 = payload.get("estimated_area_pts2")
+        if not isinstance(area_pts2, (int, float)) or area_pts2 <= 0:
+            area_pts2 = _polygon_area_pts2(normalised)
+        if area_pts2 <= 0:
+            return None
+        area_m2 = payload.get("estimated_area_m2")
+        if not isinstance(area_m2, (int, float)) or area_m2 <= 0:
+            area_m2 = float(area_pts2) * (PT_TO_M ** 2)
+        return {
+            "type": "room_polygon_override",
+            "target": {"kind": "room", "id": str(target_id)},
+            "payload": {
+                "new_polygon_pts": normalised,
+                "edit_method": "from_proposed_action",
+                "estimated_area_pts2": float(area_pts2),
+                "estimated_area_m2": float(area_m2),
+                "from_proposed_action_id": str(pa_id),
+            },
+            "reason": base_reason,
+        }
     # Unknown / not-yet-supported types
     return None
 
@@ -241,6 +317,7 @@ def action_already_applied(action: dict, audit_trail: list[dict]) -> bool:
 
 
 __all__ = [
+    "POLYGON_PROPOSED_ACTION_TYPES",
     "PROPOSED_ACTIONS_FILENAME",
     "PROPOSED_ACTION_TYPES",
     "action_already_applied",
