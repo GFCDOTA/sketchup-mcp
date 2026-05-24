@@ -39,3 +39,19 @@ vendor/CubiCasa5k/repo/
 !vendor/CubiCasa5k/.gitkeep
 !vendor/CubiCasa5k/weights/.gitkeep
 !vendor/CubiCasa5k/README.md
+
+# Local triage artifacts (not tracked)
+.ai_triage/
+
+# temp / backup files — never commit
+# Enforced by tools/repo_health_gate.py E001 (see docs/REPO_HYGIENE.md §5)
+.tmp_*
+*.tmp
+*.bak
+*~
+*.swp
+*.orig
+*.rej
+
+# per-cycle repo-health JSON dumps (markdown stays tracked)
+reports/current/*.json
