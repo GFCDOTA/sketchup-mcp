@@ -234,3 +234,62 @@ unit tests in `tests/test_su_runner_safety.py`.
 
 **See also:** FP-023 (the anti-pattern this rule prevents);
 LL-009 (bootstrap .skp pattern — same launcher ergonomics).
+
+## LL-018 — Terminal-first GitHub auth: if `git push` works, the cached token can create PRs
+
+**Date:** 2026-05-24.
+
+**Context:** A Claude session pushed a feature branch successfully
+(via Git Credential Manager on Windows), then called `gh pr create`,
+got "not authenticated," and **escalated immediately to "use the
+browser or give me a PAT"** instead of trying to reuse the credential
+the `git push` had just used. The PR was opened via the browser
+automation tool — a heavy, manual-feeling path that the user
+correctly flagged as unnecessary.
+
+**Diagnosis:** `gh` was not authenticated, BUT the Git Credential
+Manager on Windows had a valid GitHub OAuth token cached from prior
+HTTPS pushes. That same token can:
+
+- Be extracted via `git credential fill`.
+- Be exported as `GH_TOKEN` to make `gh` work non-interactively.
+- Or be used directly with the GitHub REST API via `curl`.
+
+None of these require user input. None require a PAT. None require
+the browser.
+
+**Rule:** Before requesting any manual action for GitHub
+(opening / merging / commenting on PRs, listing checks, calling
+the API), walk the recovery ladder in
+[`docs/protocols/terminal_first_github_auth.md`](../protocols/terminal_first_github_auth.md):
+
+1. `gh auth status` — try `gh` first.
+2. `git ls-remote origin` — confirm Git can reach GitHub.
+3. `git credential fill` — pull the cached token (NEVER log it).
+4. `GH_TOKEN=… gh pr create …` — temporary env var, unset after.
+5. `curl https://api.github.com/…` — REST API fallback.
+6. Only NOW request manual action, with the diagnostic trail.
+
+The full procedure (including token-hygiene safety rules) lives in
+the protocol document above. CLAUDE.md §21 is the short pointer.
+
+**Why this matters operationally:** every "use the browser" / "give
+me a PAT" request is a 30-60 second context switch for the user.
+Multiply by every PR / merge / status check in a session and it
+becomes the dominant friction. The terminal-first ladder eliminates
+~95% of those interruptions.
+
+**Token-hygiene non-negotiables** (extracted from the protocol):
+
+- Token never appears in stdout / stderr / logs.
+- Token never appears in PR body / commit message / committed file.
+- Token only lives in a local shell var or `GH_TOKEN` env.
+- Token is unset / cleared at end of cycle.
+- Evidence about token use is masked as `ghs_***`, never the real
+  value.
+
+**Cross-references:** `docs/protocols/terminal_first_github_auth.md`
+(canonical procedure); CLAUDE.md §21 (the rule); LL-012 (fix
+tooling access before falling back to manual — same operational
+philosophy, applied to PATH-lookup); CLAUDE.md §0 (git flow:
+PRs against `develop`).
