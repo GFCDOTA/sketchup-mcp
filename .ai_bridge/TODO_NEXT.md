@@ -232,7 +232,12 @@ visibility fix).
 - `docs/adr/README.md` index updated
 - `.ai_bridge/DECISIONS.md` entry pointing to ADR-002
 
-## 🟡 P1 — Slice 6a: room_polygon_override schema + apply layer
+## ✅ DONE — Slice 6a: room_polygon_override schema + apply layer
+
+**MERGED via PR #124 (`f01a9ae`).** Data plane (schema + validation +
+apply branch + fidelity metadata threading + 3 test files) is on
+develop. Slice 6b is the current active next slice. Below entry
+preserved as historical specification reference.
 
 - **Color:** YELLOW — schema-extending change touching apply
   layer + fidelity engine metadata. Tests carry the proof.
@@ -256,9 +261,12 @@ visibility fix).
 - **Risk:** MEDIUM. Apply layer is well-tested but the new
   branch is the first to mutate room geometry post-detector.
 
-## 🟡 P1 — Slice 6b: chip promotion + text-area polygon entry UX
+## 🟡 P1 — **CURRENT** Slice 6b: chip promotion + text-area polygon entry UX
 
 - **Color:** YELLOW — cockpit UX surface change.
+- **Status:** ACTIVE (Slice 6a landed via PR #124 / `f01a9ae`;
+  6b is the immediate next slice. Branch:
+  `feature/slice-6b-room-polygon-cockpit-actions`).
 - **Goal:** Cockpit Review tab can produce a
   `room_polygon_override` from a producer chip
   (`expand_room_polygon` / `shrink_room_polygon`) or from
