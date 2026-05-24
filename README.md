@@ -2,9 +2,13 @@
 
 Microservico novo, desacoplado de legado, para extrair geometria observada de plantas em PDF e produzir um modelo canônico auditável.
 
-> **Setup em outra máquina + visão de arquitetura completa:** [`OVERVIEW.md`](OVERVIEW.md).
-> Documento canônico de onboarding/handoff. Lê primeiro se você está chegando
-> agora ou levando o repo pra outra máquina.
+> **Doc map (start here if you're new):**
+> - [`CLAUDE.md`](CLAUDE.md) — operational constitution (must read)
+> - [`CONTRIBUTING.md`](CONTRIBUTING.md) — TL;DR for shipping a change
+> - [`OVERVIEW.md`](OVERVIEW.md) — full architecture + cross-machine setup
+> - [`docs/pipeline_overview.md`](docs/pipeline_overview.md) — visual map of PDF→SKP (mermaid)
+> - [`docs/engineering/spec_driven_development.md`](docs/engineering/spec_driven_development.md) — Spec-Driven Development framework
+> - [`AGENTS.md`](AGENTS.md) — specialist agent contracts
 
 ## Objetivo
 
