@@ -1,3 +1,98 @@
+# Handoff — 2026-05-24 (repo governance + anti-forgetting protocol branch open)
+
+> Most recent session's exit state. Next session reads this FIRST
+> after `CLAUDE.md`.
+>
+> **Canonical onboarding (stable, NOT session log):**
+> [`../docs/HANDOFF.md`](../docs/HANDOFF.md).
+> **Canonical project state:**
+> [`../docs/PROJECT_STATE.md`](../docs/PROJECT_STATE.md).
+
+## Status — `chore/repo-governance-anti-forgetting` branched from develop @ `14212ea`; doc-only + new gate; no source touched
+
+User requested a structural repo-governance pass on 2026-05-24
+(verbatim: "repo hygiene + project state durability +
+anti-forgetting protocol"). Branch carries doc additions + a new
+state-check script + a hygiene report. No source code changed, no
+files deleted, no files archived (per the 3 prior audits' converging
+"preserve unless trigger" conclusion + the user's explicit scope
+choice on this run: governance-only, not archival).
+
+### What landed (this branch)
+
+- **Canonical state docs (`docs/`):**
+  - [`docs/PROJECT_STATE.md`](../docs/PROJECT_STATE.md) — single source
+    of truth for current state, canonical fixtures, gates, permanent
+    rules; explicit pointer to the 3-commit in-flight feature branch.
+  - [`docs/HANDOFF.md`](../docs/HANDOFF.md) — stable canonical
+    onboarding (read order, setup steps, where-to-find-what, common
+    pitfalls). Distinct from this file (session log).
+  - [`docs/REPO_HYGIENE.md`](../docs/REPO_HYGIENE.md) — five-category
+    file scheme + status-header policy + don't-delete-blindly
+    protocol.
+  - [`docs/GATES.md`](../docs/GATES.md) — canonical catalogue of all
+    validation gates with command + cost + failure signature.
+  - [`docs/ANTI_FORGETTING.md`](../docs/ANTI_FORGETTING.md) — 10
+    permanent rules with reasoning, how-to-apply, and gates that
+    enforce each.
+- **New validation gate:**
+  - `scripts/project_state_check.py` — asserts canonical docs +
+    fixtures + gate test files all exist.
+  - `tests/test_project_state_check.py` — pytest wrapper for CI.
+- **Hygiene report:**
+  - `reports/repo_hygiene_report.md` — full inventory of all 121
+    `.md` files + 17 root `.py` files classified into the 5
+    categories.
+
+### What did NOT change
+
+- Zero source code touched.
+- Zero files deleted.
+- Zero files archived.
+- `CLAUDE.md` unchanged on this branch (the new docs are pointers
+  into it; not replacements).
+- `runs/`, `patches/`, `vendor/` untouched per §1 hard rule.
+- `feature/window-aperture-semantics` left alone (still 3 commits
+  ahead of develop; needs its own PR).
+
+### Trigger context
+
+User's prompt cited symptoms that motivated this branch:
+- difficulty resuming on another computer / with another person;
+- unclear which `.md` are current vs obsolete;
+- decisions that "worked" getting lost between machines;
+- progress depending on local context / prints / outputs / memory;
+- Claude occasionally repeating already-fixed mistakes;
+- no single source of truth on project state.
+
+This branch addresses all six by establishing canonical docs +
+explicit permanent rules + a validation gate.
+
+### Next-session top ROI
+
+1. 🟢 Open PR `chore/repo-governance-anti-forgetting → develop`.
+   Doc-only + new gate + 1 new test. Squash merge.
+2. 🟡 **P1 — Merge `feature/window-aperture-semantics`.** 3 commits
+   with quadrado canonical work, wall-shell canonicalisation, window
+   aperture 3D carve. Reference: see `docs/PROJECT_STATE.md` §2.
+3. 🟡 P1 — Slice 6a — `room_polygon_override` schema + apply layer.
+
+### Trigger watch (when to re-run hygiene cycle 4)
+
+Per `docs/ops/repo_hygiene_audit_2026-05-10.md` §"Triggers de retirada"
+— monitor for any of:
+- Raster pipeline officially retired (CLAUDE.md §10 stops marking
+  raster as OUTDATED-but-kept).
+- `patches/README.md:194` stops citing `PROMPT-RENAN.md`.
+- `tests/test_renderers_migration.py` future-release gate declared
+  closed.
+- Explicit human decision to archive `runs/` (amends §1 hard rule).
+
+None of these have fired yet. Next hygiene cycle is **on hold** until
+one does.
+
+---
+
 # Handoff — 2026-05-13 (PR #121 merged — human-walls protocol shipped end-to-end)
 
 > Most recent session's exit state. Next session reads this FIRST

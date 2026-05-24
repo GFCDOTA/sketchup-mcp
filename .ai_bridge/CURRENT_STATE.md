@@ -1,98 +1,74 @@
-# Current State — 2026-05-13 (post PR #121 merge)
+# Current State — 2026-05-24 (repo governance + anti-forgetting branch)
 
 > Per-session snapshot. Overwrite (not append). For history →
 > `HANDOFF.md` or `docs/ops/`.
 
 ## Branch
 
-- **Working:** `develop` (clean, fast-forwarded)
-- **develop @** `39a8f3a` — PR #121 (`feat(human-walls): protocol
-  + tools to fix global SKP visual fidelity`) merged 2026-05-13
-- **Open PRs:** none
-- **Open issues:** **#122** — `planta_74: close
-  global_visual_fidelity WARN advisory (post-PR #121)`, advisory
-  only, body at
-  `.ai_bridge/pr_bodies/ISSUE_BODY_visual_confirm_pendente.md`
+- **Working:** `chore/repo-governance-anti-forgetting` (from
+  `origin/develop @ 14212ea`)
+- **`develop` HEAD:** `14212ea` — PR #153
+  (`feat(safety): SU runner mode protocol — clean cherry-pick from
+  #150`)
+- **In-flight feature branch:** `feature/window-aperture-semantics`
+  (3 commits ahead of develop; not yet PR'd)
+  - `7e56dc7` `fix(openings): enforce wall-hosted window semantics`
+  - `ebdac1a` `fix(walls): canonicalize wall shell and remove residual sliver geometry`
+  - `8799466` `chore(quadrado): promote canonical success reference + smoke gate`
 
-## Most recent PR
+## What this branch does
 
-| PR | Title | SHA | When |
-|---|---|---|---|
-| #121 | feat(human-walls): protocol + tools to fix global SKP visual fidelity | `39a8f3a` | 2026-05-13 23:48 UTC |
+Repo governance pass per user request (2026-05-24):
+"diagnostique, classifique, limpe com segurança, documente, crie gate,
+valide e commite."
 
-8-commit feature branch squashed to develop. +11 423 LOC. Three
-hard fidelity axes PASS; advisory axis (global_visual_fidelity)
-WARN with operator-verbal-waived rationale documented in
-`fixtures/planta_74/operator_acknowledgment_2026-05-13.md`.
+Scope agreed with user (autonomous within these limits):
+- **DO** create canonical state docs + ADRs + gate script + hygiene
+  report.
+- **DO** refresh `.ai_bridge/` with fresh entries.
+- **DON'T** delete or archive files (per 3 prior audits' converging
+  recommendation; require explicit trigger).
 
 ## Pipeline state for planta_74
 
-The 4-axis verdict on
-`fixtures/planta_74/fidelity_4axis_report.json`:
+Unchanged from 2026-05-13 baseline (33 walls / 11 rooms / 12 openings
+including human-annotated soft barrier / 8 soft_barriers). The new
+wall-shell + window aperture work lives on
+`feature/window-aperture-semantics` and improves the quadrado
+canonical render but does not alter planta_74 counts.
 
-```
-wall_fidelity            PASS  h_o005 cut_into_wall via h_w000
-soft_barrier_fidelity    PASS  0 cells need a soft_barrier
-semantic_room_fidelity   PASS  SALA labels preserved
-global_visual_fidelity   WARN  operator waived; issue #122 tracks
-verdict_top_level        WARN  (advisory only)
-```
+## Docs added this branch
 
-Consensus: `fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json`
-(35 walls, 11 rooms, 12 openings, 1 soft_barrier).
-
-Final priors in `tools/find_loop_closure_candidates.py`
-`PLANTA_74_PAIR_PRIORS`:
-
-| Pair                                  | candidate_type        | evidence  | conf |
-|---------------------------------------|-----------------------|-----------|------|
-| A.S. ↔ TERRACO SOCIAL                 | `already_explained`   | `h_w001`  | n/a  |
-| **A.S. ↔ TERRACO TECNICO**            | `semantic_room_split` | `open_plan` | 0.85 |
-| **TERRACO SOCIAL ↔ TERRACO TECNICO**  | `semantic_room_split` | `open_plan` | 0.90 |
-| SALA DE JANTAR ↔ SALA DE ESTAR        | `semantic_room_split` | `open_plan` | n/a  |
-
-The two **bold** rows changed in PR #121's final commit
-(2026-05-13). Earlier values were `human_soft_barrier(peitoril)`;
-the change is honesty about the absence of any physical divider
-in the PDF.
-
-## Last 5 develop merges
-
-| SHA | PR | Title |
-|---|---|---|
-| `39a8f3a` | #121 | feat(human-walls): protocol + tools to fix global SKP visual fidelity |
-| `9ae9203` | #120 | fix(human-openings): host classifier + shift gate |
-| `0f4465b` | #118 | feat(human-openings): real planta_74 annotation run + auto-calibrate |
-| `3c9761c` | #117 | docs(claude-md): record human-openings ground-truth protocol in §10 |
-| `f18da68` | #116 | feat(human-openings): mandatory ground-truth pipeline (FP-014 P0 ship) |
+- `docs/PROJECT_STATE.md` (canonical state snapshot)
+- `docs/HANDOFF.md` (canonical onboarding)
+- `docs/REPO_HYGIENE.md` (canonical policy)
+- `docs/GATES.md` (canonical gate catalogue)
+- `docs/ANTI_FORGETTING.md` (10 permanent rules)
+- `scripts/project_state_check.py` + `tests/test_project_state_check.py`
+- `reports/repo_hygiene_report.md`
 
 ## Top of next-session queue
 
-1. 🟡 **P1 — Slice 6a** — `room_polygon_override` schema + apply
-   layer per ADR-002 §4. Touches `cockpit/overrides.py`,
-   `tools/apply_overrides.py`,
-   `tools/fidelity/compare_generated_to_expected.py`. ~25 new tests.
-   MEDIUM risk (first override branch to mutate room geometry).
-2. 🟡 P1 — Slice 6b — chip promotion + text-area polygon entry UX.
-   Depends on 6a.
-3. 🟡 P1 — Cycle 6 (Stage 1.6 SU integration) — wire autorun
-   inspector into `gate_f`. SU runtime; focused session.
-4. 🟢 P2 — Cycle 7: promote `--inspect-strict` default in CI
-   (after Cycle 6).
-5. ↘ Issue #122 — visual-confirm advisory for planta_74; bundle
-   into next planta_74 cycle, don't make it standalone.
-6. 🔴 P2 — REAL multi-PDF corpus (RED — needs Felipe to provide
-   3+ real planta PDFs).
+Same as before this branch, plus one new item:
+
+1. 🟢 **THIS BRANCH** — open PR `chore/repo-governance-anti-forgetting
+   → develop`. Doc-only + new gate script + 1 new test. Low risk.
+2. 🟡 **P1 — Merge `feature/window-aperture-semantics` into `develop`.**
+   3 commits with quadrado canonical work, wall-shell canonicalisation,
+   window aperture 3D carve. Needs PR.
+3. 🟡 P1 — Slice 6a — `room_polygon_override` schema + apply layer
+   (ADR-002 §4).
+4. 🟡 P1 — Cycle 6 (Stage 1.6 SU integration) — wire autorun inspector
+   into `gate_f`.
+5. 🟢 P2 — Cycle 7: promote `--inspect-strict` default in CI.
+6. 🔴 P2 — REAL multi-PDF corpus (needs Felipe to provide PDFs).
 
 ## Tooling notes
 
-- **gh CLI** at `C:\Program Files\GitHub CLI\gh.exe`; not on Bash
-  PATH. Always invoke via absolute path +
-  `--repo GFCDOTA/sketchup-mcp`. Auth keyring
-  (account `fmodesto30`, scope `repo`). See
-  `~/.claude/projects/E--Claude/memory/reference_gh_cli_absolute_path.md`.
-- Squash-merge is the established pattern on this repo (see commit
-  history: #114/#116/#118/#120/#121 all squashed).
-- `--delete-branch` deletes the remote branch on merge; the local
-  feature branch must be deleted manually
-  (`git branch -D feat/<name>` after `git pull --ff-only`).
+- gh CLI at `C:\Program Files\GitHub CLI\gh.exe`; always pass
+  `--repo GFCDOTA/sketchup-mcp`.
+- Squash-merge is established pattern (PRs #114/#116/#118/#120/#121
+  /#134/#135/#153 all squashed).
+- New gate: `python scripts/project_state_check.py` validates the
+  presence of canonical docs / fixtures / gates listed in
+  `PROJECT_STATE.md` and `GATES.md`.
