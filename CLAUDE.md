@@ -725,3 +725,34 @@ Reference helper: `tools/su_runner_safety.py` exports `parse_mode`,
 tests in `tests/test_su_runner_safety.py`.
 
 See LL-015 (positive rule) and FP-023 (anti-pattern).
+
+---
+
+## 21. Terminal-first GitHub auth & PR workflow (LL-018)
+
+> **Before requesting any manual action for GitHub** (opening /
+> merging / commenting on PRs, listing checks, calling the API),
+> walk this recovery ladder. If `git push` works on this machine,
+> the cached token can create PRs.
+
+**Ladder** (canonical procedure in
+[`docs/protocols/terminal_first_github_auth.md`](docs/protocols/terminal_first_github_auth.md)):
+
+1. `gh auth status` — try `gh` directly first.
+2. `git ls-remote origin` — confirm Git can reach GitHub.
+3. `git credential fill` — pull the cached token (NEVER echo).
+4. `GH_TOKEN=… gh pr create …` — temporary env var, unset after.
+5. `curl https://api.github.com/…` — REST API fallback.
+6. **Only NOW** request manual action, with the diagnostic trail.
+
+**Token-hygiene non-negotiables:**
+- NEVER print the token to stdout / stderr / logs.
+- NEVER paste it into a PR body, commit, or any tracked file.
+- Token only lives in a local shell var or `GH_TOKEN` env.
+- Unset/clear the variable at end of cycle.
+- Evidence about token use is masked as `ghs_***`, not the value.
+
+See LL-018 (the lesson + context),
+`docs/protocols/terminal_first_github_auth.md` (the full procedure
+with bash + PowerShell snippets), LL-012 (same operational
+philosophy applied to PATH lookups).
