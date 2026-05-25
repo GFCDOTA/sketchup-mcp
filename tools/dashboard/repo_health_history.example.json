@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0.0",
+  "description": "Snapshot of reports/repo_audit_*.json over time. Each point summarises a repo-auditor run.",
+  "generated_at": "2026-05-04T16:53:43+00:00",
+  "points": [
+    {
+      "timestamp": "2026-05-04T02:54:37.975632+00:00",
+      "commit": "",
+      "ruff_violations": 146,
+      "pytest_collected": 317,
+      "pytest_errors": 0,
+      "runs_subdir_count": 19
+    },
+    {
+      "timestamp": "2026-05-04T02:55:06.588839+00:00",
+      "commit": "",
+      "ruff_violations": 146,
+      "pytest_collected": 317,
+      "pytest_errors": 0,
+      "runs_subdir_count": 19
+    }
+  ]
+}

@@ -1,6 +1,6 @@
-# Dashboard — Plantas tab
+# Dashboard
 
-HTML/CSS/JS dashboard for browsing pipeline runs and oracle output. Standalone, served via Python's built-in HTTP server.
+HTML/CSS/JS dashboard for browsing pipeline runs, oracle output, and project status. Standalone, served via Python's built-in HTTP server.
 
 ## Run
 
@@ -22,6 +22,34 @@ The `tools/runs/` folder is the place where `_oracle_manifest.json` lives. The d
   - Evolução & comparações — raster vs SVG, v1→v2→v3, v3→v5
   - Workspace overview infographic
   - **Oráculo / Diagnóstico** — populated from `_oracle_manifest.json` when oracle scripts (`scripts/oracle/llm_architect.py`, `scripts/oracle/cubicasa.py`) have written diagnosis files for any run.
+- **Roadmap** — project status cockpit + four Chart.js views:
+  1. **Quality progression** (line) — walls/rooms/openings per run from `runs/*/observed_model.json`
+  2. **Pipeline timing** (horizontal bar) — per-stage median seconds from `reports/perf_baseline.json`
+  3. **Status donut** — share of items by `done`/`in_progress`/`next`/`blocked`
+  4. **Repo health** (line) — ruff violations + pytest collected + runs count over `reports/repo_audit_*.json` snapshots
+
+  Manifests live in `tools/dashboard/`:
+  | Tab uses | real (optional) | fallback (committed) |
+  |---|---|---|
+  | Lanes / metrics / next steps | `project_status.json` | `project_status.example.json` |
+  | Quality chart | `quality_history.json` | `quality_history.example.json` |
+  | Timing chart | `pipeline_timing.json` | `pipeline_timing.example.json` |
+  | Repo-health chart | `repo_health_history.json` | `repo_health_history.example.json` |
+
+  Each chart loads its data with a graceful fallback (real → example → empty state). No backend, no generator yet. Schema + edit guide: [`docs/dashboard/project_status_dashboard.md`](../../docs/dashboard/project_status_dashboard.md).
+- **SRE Radar** — repo health view: overall score (0–100) plus five subscores (`docs_health`, `service_health`, `automation_health`, `repo_hygiene`, `product_quality`). Surfaces:
+  - top markdown saturation candidates (line count, KB, TODO/FIXME counts)
+  - drift findings (docs referencing paths that no longer exist)
+  - registered services with `exists` / `--help` probe results
+  - repo hygiene flags (root .py, sys.path hacks, hardcoded paths)
+  - ranked recommendations with suggested branch names
+
+  Source: `tools/dashboard/architecture_radar.json` (real, generator output) → fallback `tools/dashboard/architecture_radar.example.json` (committed snapshot). Generator + schema docs: [`docs/dashboard/architecture_sre_radar.md`](../../docs/dashboard/architecture_sre_radar.md).
+
+  ```bash
+  # Refresh the radar JSON locally (stdlib only, ≈0.1s with --no-command-checks)
+  python scripts/dashboard/generate_architecture_radar.py --no-command-checks
+  ```
 
 ## Empty state
 
