@@ -1,5 +1,7 @@
 # Roadmap tab — `project_status.json`
 
+**Status:** Active (2026-05-04). Companion doc to the dashboard's Roadmap tab; load-bearing for the schema of `project_status.json` + sibling manifests consumed by `tools/dashboard/index.html`.
+
 The dashboard's **Roadmap** tab (`tools/dashboard/index.html`, accessible at `http://localhost:8765/dashboard/#roadmap`) renders a project cockpit answering "where are we, what's done, what's blocked, what's next" without forcing the reader to open `docs/operational_roadmap.md`, `docs/ROADMAP.md`, `CLAUDE.md`, and `docs/performance/current_perf_baseline.md` separately.
 
 ## Source of truth

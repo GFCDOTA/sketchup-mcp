@@ -1,5 +1,7 @@
 # SRE Radar tab — `architecture_radar.json`
 
+**Status:** Active (2026-05-04). Companion doc to the dashboard's SRE Radar tab; load-bearing for the schema of `architecture_radar.json` consumed by `tools/dashboard/index.html`.
+
 The dashboard's **SRE Radar** tab (`tools/dashboard/index.html`, `http://localhost:8765/dashboard/#radar`) answers a different question than the Roadmap tab: not "what are we shipping?" but "is the repo healthy?".
 
 It surfaces five categories of signal, each scored 0–100, plus an aggregate `overall.health_score`:
