@@ -1,3 +1,78 @@
+# Handoff — 2026-05-25 (post #172 merge; Slice 6b shipped, polygon-override loop closed)
+
+> Most recent session's exit state. Next session reads this FIRST
+> after `CLAUDE.md`.
+>
+> **Canonical onboarding (stable, NOT session log):**
+> [`../docs/HANDOFF.md`](../docs/HANDOFF.md).
+> **Canonical project state:**
+> [`../docs/PROJECT_STATE.md`](../docs/PROJECT_STATE.md) §9 (update log).
+> **Multi-agent coordination rule:**
+> [`../docs/AGENT_COORDINATION.md`](../docs/AGENT_COORDINATION.md).
+
+## This turn — worktree + branch
+
+| Field | Value |
+|---|---|
+| Agent ID | `claude-main` |
+| Worktree | `D:\Claude\worktrees\sketchup-claude-handoff-172` |
+| Branch | `chore/handoff-post-172-merge` (fresh from `origin/develop`) |
+| Canonical clone | `D:\Claude\microservices\plan-extract-v2` — read-only this session |
+
+## Recently merged on `origin/develop`
+
+| PR | Merged at (UTC) | Merge commit | Title |
+|---|---|---|---|
+| #170 | 2026-05-24 | `912fc42` | fix(rooms): repair Floor_r001 soft-barrier split (supersedes #144) |
+| #171 | 2026-05-24 | `63f8df3` | feat(tools): restore soft-barrier and room polygon diagnostics |
+| **#172** | **2026-05-25T01:28:55Z** | **`2c61387`** | **feat(cockpit): Slice 6b — room_polygon_override producer rule + chip handler + text-area UX** |
+
+**Current `origin/develop` HEAD:** `2c61387` (= PR #172 squash merge).
+
+Worktree `sketchup-claude-slice-6b` removed from git registry
+post-merge (filesystem residue at
+`D:/Claude/worktrees/sketchup-claude-slice-6b` retained due to
+Windows file lock — git no longer tracks it; safe to delete
+manually when convenient).
+
+## Slice 6 status (ADR-002)
+
+| Slice | Status | PR | Notes |
+|---|---|---|---|
+| 6a — data plane (`room_polygon_override` schema + apply + fidelity metadata) | **MERGED** | #124 `f01a9ae` | Pre-this-session |
+| 6b — producer rule + cockpit chip handler + text-area UX | **MERGED** | #172 `2c61387` | This session |
+| 6c — F0 emit `manual_polygon_room_count` + Pre-SKP pane | **NOT STARTED** | — | Deferred; do not start without explicit trigger |
+| 6d — graphical polygon edit UX | DEFERRED | — | Per ADR-002 §4, waits for Phase 3 (FastAPI + SPA) |
+| 6e — `amended_consensus.json` for SKP exporter | DEFERRED | — | Per ADR-002 §4 + §2.8, waits for review case + SU geometry validation |
+
+## Operational notes for next session
+
+1. **Slice 6c is the next natural step in the polygon-override chain.** Touchpoints documented in ADR-002 §4: `scripts/smoke/smoke_skp_export.py` gate F0 (emit `manual_polygon_room_count`, WARN trigger on 5pt-jump), `cockpit/history_view.py` Pre-SKP pane line, 2 new test files. ~15 tests · ~80 LOC. LOW risk.
+2. **Do not start 6c without explicit trigger.** Per user policy: stop after #172 unless asked to continue.
+3. **Polygon chips on the Review tab** now seed the editor (do not auto-save). When testing manually: open cockpit on a `runs/<id>/` directory with a `proposed_actions.json` containing `expand_room_polygon` / `shrink_room_polygon` chips → "Open in editor" button → text-area pre-fills with `suggested_polygon_pts` → Save button writes the override.
+4. **Producer rule activation:** the new `_rule_polygon_correction` fires when `fidelity_report.warnings[]` contains strings matching `"ROOM area X: observed Y m^2 vs expected [LO, HI]"`. Smoke this by running the fidelity engine on planta_74 in `apply_overrides=False` mode and inspecting the resulting `proposed_actions.json`.
+
+## Worktrees alive at this snapshot
+
+```
+D:/Claude/microservices/plan-extract-v2     (canonical clone — develop)
+D:/Claude/worktrees/_wt_148_clean           (peer agent — feat/spec-yaml-linter-clean)
+D:/Claude/worktrees/sketchup-claude-handoff-172   (this session — removed after #172.handoff PR merges)
+```
+
+## Coordination rule (active, do not forget)
+
+Per `docs/AGENT_COORDINATION.md` §0: multiple autonomous agents MUST
+NEVER share the same physical working directory. `git worktree add`
+per agent / per session is the default. Lock files are advisory.
+
+This handoff PR was branched from `origin/develop @ 2c61387` in a
+fresh worktree per the rule.
+
+---
+
+(historical entry below — kept for chronological audit trail)
+
 # Handoff — 2026-05-24 (post #165 merge; Wave 2 closed, repo hygiene returns to product focus)
 
 > Most recent session's exit state. Next session reads this FIRST
