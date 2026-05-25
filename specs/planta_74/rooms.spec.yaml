@@ -1,0 +1,130 @@
+# SDD spec — rooms aspect on planta_74.
+#
+# Source of truth: CLAUDE.md §10 baseline (33 walls, 11 rooms, 11
+# openings, 8 soft_barriers). Architectural reading of planta_74.pdf
+# corroborates: A.S., TERRACO SOCIAL, TERRACO TECNICO are visually
+# distinct ambients separated by peitoris/muretas; SALA DE JANTAR and
+# SALA DE ESTAR are open-plan but labelled separately and treated as
+# distinct rooms in the floorplan delivery.
+#
+# Companion: docs/engineering/spec_driven_development.md
+schema_version: "1.0.0"
+target: planta_74
+
+contracts:
+
+  # ---- critical: architectural integrity --------------------------
+
+  - id: rooms-no-merged-as-tt-cell
+    severity: critical
+    description: >
+      A.S., TERRACO SOCIAL and TERRACO TECNICO must NOT be co-located
+      in a single room polygon. The source PDF separates them with
+      peitoris (sb005 + h_sb000 area) and a mureta; a merged
+      "A.S. | TERRACO SOCIAL | TERRACO TECNICO" room is the FP-016
+      failure mode — polygonize couldn't bisect because the SBs are
+      boundary-coincident, not interior-crossing.
+    evidence_pointers:
+      - docs/learning/failure_patterns.md#FP-016
+      - runs/floor_r001_split_before_after/r001_overlay_before.png
+    rule:
+      type: no_merged_room_names
+      forbidden_substrings:
+        - "A.S. | TERRACO"
+        - "TERRACO SOCIAL | TERRACO TECNICO"
+        - "A.S. | TERRACO SOCIAL | TERRACO TECNICO"
+
+  - id: rooms-no-merged-salas-cell
+    severity: critical
+    description: >
+      SALA DE JANTAR and SALA DE ESTAR are open-plan but the PDF
+      labels them as separate ambients. A merged "SALA DE JANTAR |
+      SALA DE ESTAR" room means polygonize lost the semantic
+      distinction the PDF preserves. Voronoi sub-division is an
+      acceptable resolution; what's NOT acceptable is shipping the
+      merged name to downstream consumers.
+    rule:
+      type: no_merged_room_names
+      forbidden_substrings:
+        - "SALA DE JANTAR | SALA DE ESTAR"
+
+  - id: rooms-required-architectural-list
+    severity: critical
+    description: >
+      planta_74 has 11 architecturally-named rooms per the canonical
+      delivery (CLAUDE.md §10). The consensus MUST contain at least
+      these names. Missing any one is a regression — typically the
+      pipeline merged or dropped the room.
+    rule:
+      type: expected_room_names
+      required:
+        - A.S.
+        - TERRACO SOCIAL
+        - TERRACO TECNICO
+        - SUITE 01
+        - SUITE 02
+        - BANHO 01
+        - BANHO 02
+        - SALA DE JANTAR
+        - SALA DE ESTAR
+        - COZINHA
+        - LAVABO
+
+  # ---- warn: area plausibility ------------------------------------
+  #
+  # Ranges are wide on purpose — Voronoi sub-division produces
+  # approximate areas that can deviate ±50% from the architectural
+  # truth without invalidating the room split. The warn band catches
+  # gross errors (a room reporting 0.1 m² or 50 m²) without fighting
+  # the operator over Voronoi approximations. Tighten only when the
+  # operator paints additional CYAN human soft_barriers and the
+  # geometry converges to the PDF dimensions.
+
+  - id: rooms-area-suite-01
+    severity: warn
+    description: >
+      SUITE 01 architectural area on planta_74 is ~13–14 m² per the
+      truth_gate baseline. Wide band to absorb Voronoi noise.
+    rule:
+      type: room_area_range
+      ranges:
+        - { name: "SUITE 01", min_m2: 5.0, max_m2: 32.0 }
+
+  - id: rooms-area-banhos-lavabo
+    severity: warn
+    description: >
+      Small rooms (BANHO 01/02, LAVABO) area sanity check. These
+      should never balloon (something merged) nor collapse to a
+      sliver (Voronoi degenerate case).
+    rule:
+      type: room_area_range
+      ranges:
+        - { name: "BANHO 01", min_m2: 2.0, max_m2: 10.0 }
+        - { name: "BANHO 02", min_m2: 2.0, max_m2: 10.0 }
+        - { name: "LAVABO",   min_m2: 1.5, max_m2: 6.0 }
+
+  - id: rooms-area-as-terracos
+    severity: warn
+    description: >
+      A.S., TERRACO SOCIAL, TERRACO TECNICO areas — wide band because
+      Voronoi sub-division currently approximates these (A.S. true
+      ~2.5 m² but Voronoi ~9 m²; documented limitation in ADR-003
+      §12). Tightens when operator paints additional CYAN SBs.
+    rule:
+      type: room_area_range
+      ranges:
+        - { name: "A.S.",            min_m2: 1.5, max_m2: 15.0 }
+        - { name: "TERRACO SOCIAL",  min_m2: 5.0, max_m2: 25.0 }
+        - { name: "TERRACO TECNICO", min_m2: 1.0, max_m2: 10.0 }
+
+  # ---- info: observational counts ---------------------------------
+
+  - id: rooms-total-count-baseline
+    severity: info
+    description: >
+      Counts surfaced for the report — not enforced. The canonical
+      baseline is 11 rooms, but a 12-room delivery (e.g., HALL or
+      VARANDA added) is acceptable; a sub-8 count is the bad signal.
+    rule:
+      type: expected_room_names
+      required: []

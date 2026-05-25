@@ -224,3 +224,464 @@ All three are upstream defects in `rooms_from_seeds.py` polygon shape OR in the 
 **Resolution:** Open. Documented in this entry and in `docs/diagnostics/2026-05-08_cycle6alt_adjacency_f1_analysis.md`. Cycle 8c will fix the underlying polygon quality issues; this is the unblocking work, not a classifier change.
 
 **See also:** `FP-012` (convex-hull room clip — fixed in Cycle 8b but exposed this layer of plateau); LL-011 (empirical evidence overrides parametric guesses).
+
+## FP-014 — Orphan autorun_control.txt clobbering opened .skp (autorun_control_files) (2026-05-20)
+
+**Symptom (user-visible):** opening a `.skp` produced by our pipeline
+"corrupts" or "closes" SketchUp. Reports range over: SU window
+disappears 5–10 s after opening; the model becomes empty; the file
+is silently overwritten with content from a different consensus.
+
+**Root cause:** every autorun plugin in
+`%APPDATA%\SketchUp\SketchUp 2026\SketchUp\Plugins\` reads its
+companion `*_control.txt` on every SU launch and, if the file is
+present, fires its script. The launchers
+(`tools/skp_from_consensus.py`, `tools/build_room_ring_skp.py`)
+write `autorun_control.txt` to arm the autorun, but historically
+**did not remove it on the way out**. Any subsequent SU launch —
+including the user double-clicking the `.skp` to inspect it — fires
+the same autorun against stale paths. The autorun's script calls
+`model.entities.clear!`, `model.save(out_skp)` and (in the case of
+`render_skp_axon_and_inspect.rb` used by the inspector autorun)
+`Sketchup.quit`. The opened file is gone before the user can see it.
+
+A second instance of the same class: `autorun_inspector_control.txt`
+left behind by `tools/render_skp_axon_and_inspect.rb` from an old
+session. Removing only one launcher's control file isn't enough —
+any orphan from any sibling launcher reproduces the bug.
+
+**Rule:**
+
+1. **Disarm before every SU launch.** Launchers must call
+   `disarm_sketchup_autoruns.disarm(plugins_dir)` BEFORE arming
+   their own control file. This catches orphans from sibling
+   launchers or crashed sessions.
+2. **Disarm in a `try / finally`.** Every code path out of `run()`
+   — success, premature SU exit, timeout, exception — must remove
+   the control file the launcher wrote. Cleanup-on-success-only is
+   the trap: a SU crash, Ctrl-C, or `out_skp` already-exists race
+   leaves the trap armed.
+3. **Remove every `*control.txt`, not just yours.** Use the shared
+   `disarm` helper so future launchers inherit the same hygiene
+   without forking the logic. Forgotten cleanup in a single launcher
+   contaminates every other launcher's SU launches.
+4. **Treat "SU is doing something to my file" as an autorun bug
+   until proven otherwise.** First diagnostic step is `ls`
+   `%APPDATA%\SketchUp\SketchUp 2026\SketchUp\Plugins\*control.txt`.
+   If anything matches, that's the prime suspect.
+
+**Anti-pattern signal:** writing `autorun_control.txt` (or any
+sibling `*_control.txt`) without a matching cleanup in the same
+function, in a `finally` block, with a wider glob than just the
+file you wrote.
+
+**Repair landed:** `fix/disarm-sketchup-autoruns` —
+adds `tools/disarm_sketchup_autoruns.py` (library + CLI),
+wires it into `tools/skp_from_consensus.py` (pre-launch +
+post-run cleanup in `try / finally`), and migrates
+`tools/build_room_ring_skp.py` to the same helper.
+
+**See also:** `FP-007` (welcome dialog) — same surface area
+(SU2026 launch ergonomics) but unrelated cause.
+
+## FP-015 — Door leaf hinge_world wrong for vertical walls in plan_shell (2026-05-20)
+
+**Symptom:** opening the `runs/planta_74_plan_shell/model.skp`
+produced after PR #141 (Phase 2 visual parity) showed two brown
+door leaves "floating" in mid-air below the wall shell. The doors
+on horizontal walls rendered correctly; the doors on vertical walls
+ended up several metres from their host openings, parked over open
+space or other rooms.
+
+**Root cause:** in `tools/build_plan_shell_skp.rb` `build_door_leaf`,
+the rotation pivot was computed as
+
+```ruby
+hinge_world = Geom::Point3d.new(
+  hinge_along * PT_TO_IN,
+  (axis_idx == 0 ? cross_base : hinge_along) * PT_TO_IN,
+  0,
+)
+```
+
+For horizontal walls (`axis_idx == 0`) the Y component is
+`cross_base` (correct — perpendicular to the wall axis). For
+vertical walls (`axis_idx == 1`) the Y component falls back to
+`hinge_along` — duplicating the X value. The pivot ended up on a
+diagonal in world space, often metres from the door's actual
+hinge edge. The leaf's footprint was built correctly; it was the
+30° rotation around that off-axis pivot that translated the leaf
+into open space.
+
+**Rule:** for any rotation around a wall-perpendicular hinge in a
+generic axis-aligned exporter, the pivot must dispatch on
+`axis_idx` BOTH for X and Y:
+
+  - `axis_idx == 0` (horizontal wall): pivot at `(hinge_along, cross_base, 0)`
+  - `axis_idx == 1` (vertical wall):  pivot at `(cross_base, hinge_along, 0)`
+
+Sanity check: every door leaf bbox center must sit within
+≈ opening width + rotation displacement of its host opening
+center. We pin 1 m as the ceiling (real value is ≤ 0.5 m for
+healthy leaves).
+
+**Anti-pattern signal:** ternaries that pick ONE coordinate
+component based on `axis_idx` without picking the symmetric pair
+on the other component. The Y-only conditional in the buggy line
+was the smell — both X and Y need the dispatch.
+
+**Repair landed:** `fix/door-leaf-hinge-world-vertical-walls` —
+splits the `hinge_world` computation into explicit
+`axis_idx == 0` and `axis_idx == 1` branches, both setting BOTH
+coordinates correctly. Adds
+`tests/test_plan_shell_invariants.py::test_door_leaf_stays_near_its_opening_center`
+as the regression gate (max 1 m distance from opening center).
+
+**See also:** ADR-003 §3 (Phase 2 visual parity, where the bug
+shipped); FP-014 (autorun cleanup — same author's pattern of bugs
+that "look fine in tests but fail visually in SU").
+
+## FP-016 — Soft barrier near-miss does not cross polygon interior, causing merged floor cell (2026-05-21)
+
+**Mode:** room-detection / polygonize. The Cycle 8b vector
+pipeline runs `polygonize_rooms` (wall-rectangle union ∪
+soft-barrier-buffered strips) → `env.difference()` → `rooms_from_seeds.
+detect_rooms_polygonize` for label assignment. For planta_74 this
+yields **8 cells** when the architectural truth is **11 rooms**:
+`r001` carries the merged name `"A.S. | TERRACO SOCIAL | TERRACO
+TECNICO"` (3 seeds in one cell) and `r002` carries
+`"SALA DE JANTAR | SALA DE ESTAR"` (2 seeds in one cell). Two
+separate failure modes feed this:
+
+1. **Boundary-coincident soft_barriers.** The peitoris/muretas
+   that should separate the rooms (`sb005`, `sb006`, `h_sb000`)
+   ARE drawn in the source PDF but their polylines stop 1.1–6 pt
+   OUTSIDE the polygonize cell boundary, OR sit ON the boundary
+   instead of crossing the interior. `unary_union(walls ∪ SBs)`
+   needs interior-crossing geometry to bisect a cell, so the
+   boundary-coincident SBs add zero discrimination power.
+2. **Single-endpoint near-miss isn't enough.** For a cell with
+   three seeds you'd need TWO independent splitters; even when
+   one SB's endpoint can be extended into the cell, no single
+   endpoint adjustment forms a boundary-to-boundary divisor on
+   the merged cell. Falsification recorded in
+   `tests/test_room_polygon_fixes.py::test_planta_74_sb_extension_alone_does_not_split_r001`.
+
+**Repair landed:** `fix/floor-r001-soft-barrier-buffered-split`.
+TWO layered, opt-in fixes:
+
+  a. **Near-miss soft_barrier extension** (`extend_near_miss_sbs=True`
+     in `polygonize_rooms`). For each SB that survives the FP-006
+     wall-coincidence gate (`overlap_fraction_with_walls ≤ 0.50`)
+     AND has a semantic origin (`geometry_origin=human_annotation`
+     OR `barrier_type ∈ {peitoril, mureta, guarda_corpo, esquadria,
+     parapet}`), probe each polyline endpoint outward by ≤ 8 pt.
+     A candidate extension is APPLIED only when a post-extension
+     re-polygonize confirms one of: cell count increased by ≥ 1,
+     OR a baseline suspicious cell shrank by ≥ 20 %. Provenance
+     records every candidate (applied and rejected).
+  b. **Voronoi sub-division of merged-seed cells**
+     (`voronoi_subdivide_merged_cells=True` in
+     `rooms_from_seeds.detect_rooms_polygonize`). When a single
+     cell contains > 1 seed label, split it by
+     `shapely.ops.voronoi_diagram(seeds, envelope=cell)` and
+     clip each region against the cell polygon. Each Voronoi
+     sub-polygon is strictly contained in the original cell, so
+     this is a topology-preserving refinement. Boundaries are
+     equidistant bisectors (NOT real architectural divisors), so
+     they're an APPROXIMATION — but the alternative is to keep
+     the merged room, which is wrong by construction.
+
+Both layers default OFF (production pipeline behaviour unchanged
+until a caller opts in). The standalone runner
+`tools/apply_room_polygon_fixes.py` chains both layers with
+provenance writing.
+
+**Outcome on planta_74:** 8 → 11 rooms; r001 splits into A.S.
+(9.06 m²) + TERRACO SOCIAL (13.78 m²) + TERRACO TECNICO
+(2.83 m²); r002 splits into SALA DE JANTAR (15.34 m²) + SALA DE
+ESTAR (10.08 m²). `room_polygon_diagnostic_report` flags drop
+from 3 suspicious_merge entries to 1 (the remaining flag is SUITE
+01's area outlier — legitimate, not a merge). `geometry_invariants_
+report` on the plan-shell `with_floors` rebuild: 12/12 PASS, 0
+WARN, 0 FAIL.
+
+**Anti-pattern signal:** when a polygonize-based room detector
+returns fewer rooms than there are seed labels AND a
+`seeds_share_cell` warning is emitted, the WRONG fix is to relax
+the polygonize tolerance globally (which may collapse correct
+walls). The RIGHT fix is targeted near-miss SB extension first
+(small, geometrically sound), then Voronoi sub-division as
+fallback when the SB geometry doesn't permit a real split.
+
+**See also:** ADR-003 §8 (Frente 3 — SB extension + Voronoi
+fallback). FP-006 (wall-coincident soft_barriers — the FP-006
+filter is the guard that prevents extending noise SBs). FP-014
+(autorun cleanup — same lineage of "fix small things, surface
+real architectural decisions, don't add hidden globals").
+## FP-023 — Python subprocess.terminate of SU confuses user about SKP stability (2026-05-23)
+
+**Symptom:** User reports "abriu o SketchUp e fechou rápido" when
+opening an SKP that the agent had just generated. Agent verifies
+SU launches and stays alive 27+ seconds via `cmd /c start`; SKP is
+structurally valid; inspector reports correct topology. Disconnect.
+
+**Root cause:** Agent's helper Python launchers
+(`_run_add_window.py`, `_render_view.py`, `_inspect_skp.py`,
+`_reframe.py`) all follow the same pattern:
+```python
+proc = subprocess.Popen([SU, target_skp])
+... poll for done marker ...
+proc.terminate()    # ← kills SU
+```
+The user opening the SKP manually in parallel saw an SU instance
+appear (could be theirs OR the agent's), then disappear when one
+of the agent's helpers fired its `proc.terminate()`. The agent
+attributed the close to a bug in the SKP; the user attributed it
+to the agent's previous "broken" output.
+
+**Rule:** When the agent's workflow uses SU as a headless renderer
+(launch → run plugin → terminate), declare it loudly in the
+session log. The user must know:
+
+- "I'm about to launch SU on `target.skp` and terminate it after
+  the plugin writes the done marker (~5–15s)."
+- "If you have SU open right now or open it during this command,
+  my terminate may catch your instance too."
+
+For long-form interactive work (user opens SKP to inspect), the
+agent must NOT have a pending `proc.terminate()`. Kill any
+agent-launched SU explicitly with `taskkill /IM SketchUp.exe /F`
+BEFORE telling the user "now open the file".
+
+**Anti-pattern signal:** generating a sequence of agent SU runs in
+the same session where the user might be trying to open the output
+SKP in parallel; reporting "SU opens fine in my tests" without
+mentioning that the agent's tests TERMINATE SU as part of the run.
+
+**Repair pattern:**
+```python
+# Always log the lifecycle
+print(f"[agent] launching SU on {target}")
+proc = subprocess.Popen([SU, target])
+...
+proc.terminate()
+print(f"[agent] terminated SU PID {proc.pid}")
+# Before handing off to user:
+subprocess.run(["taskkill", "/IM", "SketchUp.exe", "/F"])
+print("[agent] all SU instances killed; safe to open manually")
+```
+
+### Formal runner-mode protocol (2026-05-23, user-mandated)
+
+Every SU runner (Python launcher, helper, harness) MUST declare its
+runtime mode and behave accordingly. **Safe default is `interactive`
+— do NOT terminate SU automatically.**
+
+| Mode | When to use | Termination behaviour |
+|---|---|---|
+| `headless` / `ci` | Automated CI; agent self-tests; smoke gates | MAY terminate the child process the runner itself launched. NEVER `taskkill /IM` other SU instances. |
+| `interactive` / `debug` | Local development; agent in a user session | MUST NOT terminate. Print done marker, wait for user to close SU. |
+| `attach` / `manual` | User opened SU; runner just consumes events | NEVER touch any SU process. No `Popen`, no `terminate`, no `taskkill`. |
+
+The marker file (`_*_done.txt`) means **"artifact ready"**, NOT
+"kill SU". Termination is a separate decision driven by mode.
+
+### Implementation requirements
+
+Every `_run_*.py`, `*launcher*.py`, or tool that calls `Popen` on
+`SketchUp.exe` must:
+
+1. Read mode from `RUN_MODE` env var OR `--mode {headless,interactive,attach}` CLI flag OR `--no-terminate` shorthand.
+2. Default to `interactive` when neither is set.
+3. Print the chosen mode at launch: `[su-runner] mode=interactive; will NOT terminate SU on done`.
+4. In docstring/help: declare whether the runner is destructive to external SU processes.
+5. In `headless` mode, only terminate `proc.pid` (own child); never `taskkill /IM`.
+
+### Reference helper
+
+`tools/su_runner_safety.py` provides `parse_mode`,
+`should_terminate(mode) -> bool`, `is_attach(mode) -> bool`, and
+`log_mode(mode)`. Every SU launcher imports it and respects the
+chosen mode. Covered by 35 unit tests in
+`tests/test_su_runner_safety.py`.
+
+**See also:** FP-007 (welcome dialog — also a SU2026 launch
+ergonomics issue); LL-009 (bootstrap .skp pattern); LL-015 (runner
+mode protocol, the positive rule complementing this FP).
+
+## FP-024 — Window modelled as full-height void + 3-band infill (door-like shaft) (2026-05-24)
+
+**Symptom:** Looking at a rendered .skp (quadrado canonical fixture
+and planta_74), windows appear as **vertical shafts** with three
+stacked sub-volumes: a gray block at the bottom, a translucent blue
+panel in the middle, a gray block at the top. The wall structurally
+"breaks" at the window position — there's no continuous wall mass
+between sill and floor or between head and ceiling. Visually reads
+as "door with infill" or "elevator shaft," not as "wall with
+aperture."
+
+**Root cause:** `tools/build_plan_shell_skp.{py,rb}` (and the
+legacy `tools/consume_consensus.rb add_window_panel`) treated every
+opening uniformly:
+
+1. Python: subtracts a `width × wall_thickness` rectangle from the
+   2D wall shell polygon BEFORE extrusion (function
+   `opening_carve_rect`).
+2. Ruby: extrudes the carved shell to `WALL_HEIGHT_IN` — the 2D-
+   carved region becomes a full-height floor-to-ceiling void.
+3. Ruby `build_window_panel` then emits THREE sub-groups inside
+   that void: `Window_Group_<id>_sill` (z ∈ [0, 0.9 m], material
+   PARAPET_RGB), `Window_Group_<id>_glass` (z ∈ [0.9, 2.1 m],
+   material GLASS_RGB), `Window_Group_<id>_lintel` (z ∈ [2.1, 2.7 m],
+   material LINTEL_RGB).
+
+The semantic contract of a window — **wall-hosted partial-height
+aperture; wall mass continuous below the sill (peitoril) and above
+the head (verga)** — is violated. The "sill" and "lintel" boxes
+exist but they are independent volumes with their own materials,
+NOT the wall continuing past the aperture.
+
+**Why it survived for a while:** Aggregate fidelity scores looked
+fine — wall area, opening count, classification accuracy were all
+correct. The bug was purely **structural / visual** and required
+explicit human review of the rendered SKP to surface.
+
+**Repair pattern (ADR-007):**
+
+1. Distinguish `WINDOW_APERTURE_KINDS = {"window"}` from
+   `FULL_HEIGHT_CARVE_KINDS = {interior_door, door_arc, door,
+   interior_passage, open_passage, passage, glazed_balcony}`.
+2. In Python, skip windows from `carve_rects`; route them to a
+   separate `window_apertures` list (top-level field in the
+   serialized `_shell_polygon.json`).
+3. In Ruby, after extruding the solid wall shell, call
+   `build_window_aperture_3d` per aperture:
+   - Find the host wall lateral face (full wall-height span).
+   - Read its fixed coord from the model (LL-014 — never hardcode).
+   - Add a coplanar rectangle at z ∈ [WINDOW_SILL_IN, WINDOW_HEAD_IN].
+     SU auto-splits the host face — the wall material above head
+     and below sill REMAINS as the perimeter remainder.
+   - `pushpull(-real_thickness_in)` through the wall; SU merges
+     with the opposite face on exact match, creating a real
+     through-hole.
+   - Emit `WindowGlass_Group_<id>` at mid-thickness — the ONLY
+     window-specific element. Wall material is wall material.
+
+**Detection signature (anti-regression):**
+
+The geometry report from a healthy build will have:
+- `groups_diagnostic[*]` containing `PlanShell_Group` with
+  `bbox_m.max.z == WALL_HEIGHT_M` (~2.70 m).
+- `WindowGlass_Group_<id>` per window, bbox_m.z = [0.9, 2.1].
+- **No** `Window_Group_*_sill` or `Window_Group_*_lintel` entries.
+
+The bug signature is the opposite: legacy sill/lintel groups
+present, often with `bbox_m.z = [0, 0.9]` (sill on the floor)
+which is the architectural "shaft" appearance.
+
+**Validation gates** (test files):
+- `tests/test_window_aperture_contract.py` — Python contract.
+  Windows must NOT appear in `openings_carved`; the kind sets are
+  disjoint; planta_74's 4 windows must all route to the 3D path.
+- `tests/test_window_aperture_geometry.py` — SKP geometry. Wall
+  height preserved; glass at sill-to-head only; legacy `_sill` /
+  `_lintel` groups absent.
+
+**See also:** ADR-007 (the decision document); LL-016 (the
+positive rule); ADR-003 (`build_plan_shell_skp` overall design —
+this fix is a Phase 2.5 refinement); LL-014 (read coords from
+the actual model, never hardcode — applied in the 3D carve);
+`docs/specs/quadrado_demo_spec.md` §6.4 (the in-place edit pattern
+that `build_window_aperture_3d` adopts).
+
+## FP-025 — Wall shell outer corners have L-shape notches ("tecos") after `unary_union` of perpendicular wall boxes (2026-05-24)
+
+**Symptom:** Rendered SKP from `build_plan_shell_skp` shows the
+quadrado canonical fixture (and any other axis-aligned rectangular
+room) with **stepped outer corners** instead of clean L-shapes.
+Each corner has a small 2.7 × 2.7 pt notch (wall thickness 5.4 pt,
+half = 2.7) cut OUT of the outer wall material. The wall reads as
+"4 bars assembled" rather than "1 continuous frame."
+
+In the serialised `_shell_polygon.json`, the canonical 4-wall
+quadrado outer ring carried **12 vertices instead of 4** — three
+vertices per corner forming the L-shape notch:
+- (100, 97.3) — south wall outer at x = wall start
+- (100, 100)  — corner step
+- (97.3, 100) — left wall outer at y = wall start
+
+**Root cause:** `wall_footprint(wall)` in `tools/build_plan_shell_skp.py`
+built each wall's 2D rectangle exactly between the wall's start
+and end points along the wall axis:
+
+```python
+# horizontal wall
+x0, x1 = min(s[0], e[0]), max(s[0], e[0])  # NO extension
+return box(x0, cy - half, x1, cy + half)
+```
+
+At every junction where two perpendicular walls met, each wall
+extended `half = thickness/2` past the OTHER wall's centerline
+(via its own perpendicular thickness), but neither extended past
+its own centerline endpoint along its own axis. The result: the
+union covered everything EXCEPT the small `2*half × 2*half`
+square at each outer corner — exactly the L-shape notch.
+
+**Why earlier visual checks missed it:** the notches are
+**2*half × 2*half ≈ 0.19 m × 0.19 m** — visible on the quadrado
+(where the wall is small relative to the room), much less obvious
+on planta_74 (where wall thickness is small relative to the
+30+ wall complex geometry). The bug was always there.
+
+**Why `shapely.simplify` didn't fix it:** the L-shape notch
+produces real, non-collinear vertices (the corner step goes
++x then -y). `simplify` only collapses collinear sequences;
+it cannot remove a real notch.
+
+**Repair pattern (LL-017):**
+
+1. **Extend each wall by half-thickness at BOTH endpoints along
+   its own axis.** For a horizontal wall: `x0 = min(s.x, e.x) - half`,
+   `x1 = max(s.x, e.x) + half`. The two perpendicular walls now
+   fully overlap in the `2*half × 2*half` corner cell — `unary_union`
+   produces a clean outer corner.
+
+2. **Add an axis-aligned canonicalisation pass** after union and
+   carve. `_canonicalise_axis_aligned_ring` drops any vertex
+   sandwiched between two edges with the same cardinal direction
+   (both horizontal or both vertical). Safety net for edge cases
+   where extension alone leaves a redundant vertex (mid-wall door
+   carves that intersect the outer ring, etc.).
+
+3. **Stats counter `redundant_vertices_dropped`** is surfaced in
+   `_shell_polygon.json`. On a healthy build it equals zero after
+   the wall-extension fix (the union is already canonical). Non-zero
+   indicates the canonicaliser earned its keep.
+
+**Detection signature (anti-regression):**
+
+For the quadrado canonical fixture:
+- `polygons[0].exterior` has **4 vertices** (not 12).
+- All 4 at corners `(97.3, 97.3)`, `(216.384, 97.3)`,
+  `(216.384, 216.384)`, `(97.3, 216.384)`.
+- `polygons[0].interiors[0]` has **4 vertices**.
+- All edges axis-aligned (dx=0 OR dy=0).
+
+For planta_74:
+- `slivers_removed == 0`.
+- Each piece passes `is_valid` and `area > MIN_SLIVER_AREA_PTS2`.
+- All edges axis-aligned.
+
+**Validation gates** (`tests/test_wall_shell_canonical.py`, 15 tests):
+- `wall_footprint` extends by half at both endpoints (h and v).
+- Quadrado outer ring = 4 vertices at canonical positions.
+- All edges axis-aligned.
+- Canonicaliser idempotent (drops 0 on a second pass).
+- Planta_74 has 0 slivers and 0 leftover redundant vertices.
+- Window aperture (ADR-007) does not pollute the outer ring.
+
+**See also:** LL-017 (the positive rule); ADR-007 (window aperture
+fix landed first; this corner fix complements it); ADR-003
+(`build_plan_shell_skp` overall design); FP-006 (wall/peitoril
+overlap filter — also depends on clean wall footprints).

@@ -704,9 +704,11 @@ def test_overrides_file_is_valid_json_on_disk(tmp_path: Path):
 
 
 def test_override_constants_exposed():
-    """Public surface mentioned in ADR is exported."""
-    assert len(OVERRIDE_TYPES) == 6
+    """Public surface mentioned in ADR-001 / ADR-002 is exported."""
+    # ADR-001 baseline = 6 types; ADR-002 adds room_polygon_override.
+    assert len(OVERRIDE_TYPES) == 7
     assert "opening_kind_override" in OVERRIDE_TYPES
+    assert "room_polygon_override" in OVERRIDE_TYPES
     assert "block_skp_export" not in OVERRIDE_TYPES  # global, not per-element
     assert len(OPENING_KIND_VALUES) == 6
     assert "interior_door" in OPENING_KIND_VALUES

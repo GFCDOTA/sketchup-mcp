@@ -1,0 +1,99 @@
+{
+  "h_o005": {
+    "kind": "interior_door",
+    "original_center_pdf": [
+      105.9455,
+      580.1895
+    ],
+    "nearest_candidates": [
+      {
+        "kind": "wall",
+        "wall_id": "w022",
+        "wall_axis_range": [
+          124.915,
+          132.235
+        ],
+        "wall_cross": 511.412,
+        "cross_diff": 68.778,
+        "axis_overlap_pts": 0.0,
+        "score": 70.033
+      },
+      {
+        "kind": "wall",
+        "wall_id": "w003",
+        "wall_axis_range": [
+          124.915,
+          132.235
+        ],
+        "wall_cross": 680.356,
+        "cross_diff": 100.166,
+        "axis_overlap_pts": 0.0,
+        "score": 101.421
+      },
+      {
+        "kind": "wall",
+        "wall_id": "w012",
+        "wall_axis_range": [
+          231.706,
+          297.22
+        ],
+        "wall_cross": 587.124,
+        "cross_diff": 6.935,
+        "axis_overlap_pts": 0.0,
+        "score": 114.98
+      },
+      {
+        "kind": "gap",
+        "gap_id": "gap_w021_w022",
+        "walls": [
+          "w021",
+          "w022"
+        ],
+        "gap_axis_range": [
+          132.235,
+          214.188
+        ],
+        "gap_width_pts": 81.953,
+        "cross_diff": 68.778,
+        "seg_overlap_pts": 0.0,
+        "score": 77.353
+      },
+      {
+        "kind": "gap",
+        "gap_id": "gap_w002_w003",
+        "walls": [
+          "w002",
+          "w003"
+        ],
+        "gap_axis_range": [
+          132.235,
+          167.632
+        ],
+        "gap_width_pts": 35.396,
+        "cross_diff": 100.166,
+        "seg_overlap_pts": 0.0,
+        "score": 108.741
+      },
+      {
+        "kind": "gap",
+        "gap_id": "gap_w011_w012",
+        "walls": [
+          "w011",
+          "w012"
+        ],
+        "gap_axis_range": [
+          297.22,
+          328.777
+        ],
+        "gap_width_pts": 31.558,
+        "cross_diff": 6.935,
+        "seg_overlap_pts": 0.0,
+        "score": 180.494
+      }
+    ],
+    "evidence": {
+      "cross_tol_pts": 8.099,
+      "min_axis_overlap_frac": 0.5
+    }
+  }
+}

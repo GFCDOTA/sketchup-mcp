@@ -19,6 +19,36 @@ Each entry:
 
 ---
 
+## ✅ DONE — 2026-05-13 (PR #121 — human-walls protocol shipped end-to-end)
+
+- **PR #121 — `feat(human-walls): protocol + tools to fix global
+  SKP visual fidelity`** (`39a8f3a`, squashed, 8 commits, +11 423
+  LOC). Ships the human-walls + human-soft-barriers full protocol
+  end-to-end on `planta_74` plus the 4-axis fidelity verdict in
+  `tools/verify_fidelities.py`.
+- **Final-commit prior correction (2026-05-13):**
+  `PLANTA_74_PAIR_PRIORS` flipped two pairs (A.S. ↔ TERRACO TECNICO
+  and TERRACO SOCIAL ↔ TERRACO TECNICO) from
+  `human_soft_barrier(peitoril, 0.65/0.80)` to
+  `semantic_room_split(open_plan, 0.85/0.90)`. Operator verbally
+  confirmed 2026-05-13 that no internal divider exists in the PDF;
+  only `h_sb000` (outer parapet) bounds the trio. The decision is
+  preserved at
+  `fixtures/planta_74/operator_acknowledgment_2026-05-13.md`.
+- **4-axis verdict on merge:** 3 hard axes PASS, 1 advisory axis
+  WARN (operator-waived visual review). Top-level WARN by design;
+  merge unblocked because the advisory axis is documented in the
+  contract (`tools/verify_fidelities.py:51–55`) as non-gating.
+- **Follow-up issue #122** — `planta_74: close
+  global_visual_fidelity WARN advisory (post-PR #121)`.
+  Body at `.ai_bridge/pr_bodies/ISSUE_BODY_visual_confirm_pendente.md`.
+  Bundle into the next planta_74 cycle; not a standalone session.
+- 12 files staged + committed in the final cycle commit (`6252e8d`,
+  squashed into `39a8f3a`). `planta_74.rar` (18 MB binary source)
+  intentionally left out of git.
+
+---
+
 ## ✅ DONE (2026-05-08 — full day wave)
 
 - 9-PR queue zerada (Wave A → E).
@@ -202,7 +232,12 @@ visibility fix).
 - `docs/adr/README.md` index updated
 - `.ai_bridge/DECISIONS.md` entry pointing to ADR-002
 
-## 🟡 P1 — Slice 6a: room_polygon_override schema + apply layer
+## ✅ DONE — Slice 6a: room_polygon_override schema + apply layer
+
+**MERGED via PR #124 (`f01a9ae`).** Data plane (schema + validation +
+apply branch + fidelity metadata threading + 3 test files) is on
+develop. Slice 6b is the current active next slice. Below entry
+preserved as historical specification reference.
 
 - **Color:** YELLOW — schema-extending change touching apply
   layer + fidelity engine metadata. Tests carry the proof.
@@ -226,9 +261,12 @@ visibility fix).
 - **Risk:** MEDIUM. Apply layer is well-tested but the new
   branch is the first to mutate room geometry post-detector.
 
-## 🟡 P1 — Slice 6b: chip promotion + text-area polygon entry UX
+## 🟡 P1 — **CURRENT** Slice 6b: chip promotion + text-area polygon entry UX
 
 - **Color:** YELLOW — cockpit UX surface change.
+- **Status:** ACTIVE (Slice 6a landed via PR #124 / `f01a9ae`;
+  6b is the immediate next slice. Branch:
+  `feature/slice-6b-room-polygon-cockpit-actions`).
 - **Goal:** Cockpit Review tab can produce a
   `room_polygon_override` from a producer chip
   (`expand_room_polygon` / `shrink_room_polygon`) or from

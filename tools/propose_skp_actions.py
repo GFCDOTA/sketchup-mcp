@@ -66,6 +66,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import sys
 import uuid
 from dataclasses import dataclass
@@ -78,6 +79,28 @@ PROPOSED_ACTIONS_SCHEMA_VERSION: str = "proposed_actions_v1"
 GENERATOR_NAME: str = "tools/propose_skp_actions.py@v0.1"
 
 LOW_CONFIDENCE_THRESHOLD: float = 0.7
+
+# PDF-points to metres conversion. Mirrors the canonical anchor in
+# `cockpit/overrides.py:PT_TO_M` (kept local here so this tool has no
+# cockpit import dependency — UI boundary, per ADR-001 §2.9).
+PT_TO_M: float = 0.19 / 5.4
+
+# Slice 6b — confidence of the polygon-correction chip. Always
+# <LOW_CONFIDENCE_THRESHOLD so the cockpit treats it as a draft
+# suggestion (human must review/edit in the polygon text-area before
+# the override is actually written).
+POLYGON_CORRECTION_CONFIDENCE: float = 0.55
+
+# Regex for the "ROOM NAME area <qualifier>: observed X.XX m^2 vs
+# expected [LO, HI]" warning emitted by
+# `tools/fidelity/compare_generated_to_expected.py` when a room's
+# area falls outside the expected range. The Slice 6b producer rule
+# parses these warnings to derive expand/shrink chip suggestions.
+_AREA_WARNING_RE: re.Pattern[str] = re.compile(
+    r"^(?P<name>.+?)\s+area\s+\S+:\s+observed\s+(?P<obs>[\d.]+)\s+m\^?2"
+    r"\s+vs\s+expected\s+\[(?P<lo>[\d.]+)\s*,\s*(?P<hi>[\d.]+)\]",
+    re.IGNORECASE,
+)
 
 # Mirror cockpit.overrides.OPENING_KIND_VALUES so we don't drift.
 OPENING_KIND_VALUES: tuple[str, ...] = (
@@ -254,6 +277,196 @@ def _rule_classify_unknown_openings(openings: list[dict],
     return out
 
 
+# ---------- Polygon math helpers (Slice 6b) ---------------------------
+
+def _polygon_area_pts2(pts: list[list[float]]) -> float:
+    """Signed shoelace area, returned as absolute value (PDF-points²).
+
+    Pure stdlib; works without shapely so this tool stays import-light.
+    """
+    n = len(pts)
+    if n < 3:
+        return 0.0
+    total = 0.0
+    for i in range(n):
+        x0, y0 = float(pts[i][0]), float(pts[i][1])
+        x1, y1 = float(pts[(i + 1) % n][0]), float(pts[(i + 1) % n][1])
+        total += x0 * y1 - x1 * y0
+    return abs(total) / 2.0
+
+
+def _polygon_bbox(pts: list[list[float]]) -> tuple[float, float, float, float]:
+    """Return (xmin, ymin, xmax, ymax). pts is assumed non-empty."""
+    xs = [float(p[0]) for p in pts]
+    ys = [float(p[1]) for p in pts]
+    return (min(xs), min(ys), max(xs), max(ys))
+
+
+def _polygon_centroid(pts: list[list[float]]) -> tuple[float, float]:
+    """Geometric centroid (mean of vertices, ignores self-intersection).
+
+    Good enough for the chip suggestion — the human reviews/edits the
+    result in the cockpit text-area before save.
+    """
+    if not pts:
+        return (0.0, 0.0)
+    sx = sum(float(p[0]) for p in pts)
+    sy = sum(float(p[1]) for p in pts)
+    n = len(pts)
+    return (sx / n, sy / n)
+
+
+def _scale_polygon_around_centroid(
+    pts: list[list[float]], scale: float,
+) -> list[list[float]]:
+    """Uniform scale about the polygon's centroid.
+
+    scale > 1 expands, scale < 1 shrinks. Result is a new list (does
+    not mutate input).
+    """
+    cx, cy = _polygon_centroid(pts)
+    return [
+        [cx + (float(p[0]) - cx) * scale, cy + (float(p[1]) - cy) * scale]
+        for p in pts
+    ]
+
+
+def _bbox_delta_pts(orig: list[list[float]],
+                     scaled: list[list[float]]) -> list[float]:
+    """Return [left_dx, bottom_dy, right_dx, top_dy] — how each bbox
+    corner moves from `orig` to `scaled`. Positive on the right/top
+    means the corner shifted outward.
+
+    Provided alongside `suggested_polygon_pts` in the chip payload so
+    the cockpit can render a one-line summary ("expand by ~Xpts on
+    each side") without re-computing the math.
+    """
+    if not orig or not scaled:
+        return [0.0, 0.0, 0.0, 0.0]
+    ox0, oy0, ox1, oy1 = _polygon_bbox(orig)
+    sx0, sy0, sx1, sy1 = _polygon_bbox(scaled)
+    return [
+        round(sx0 - ox0, 3),  # left edge delta (negative = expanded)
+        round(sy0 - oy0, 3),  # bottom edge delta
+        round(sx1 - ox1, 3),  # right edge delta (positive = expanded)
+        round(sy1 - oy1, 3),  # top edge delta
+    ]
+
+
+def _rule_polygon_correction(
+    rooms: list[dict],
+    fidelity_report: dict | None,
+    created_at: str,
+) -> list[dict]:
+    """Rule 5 (Slice 6b / ADR-002 §4) — when fidelity_report warns
+    that a room's area is outside its expected range, emit a draft
+    chip suggesting an expand/shrink polygon override.
+
+    Reads the warning text directly (e.g. ``"TERRACO TECNICO area
+    marginal: observed 1.61 m^2 vs expected [2.0, 8.0]"``) — does not
+    require an `expected_model` companion file. The cockpit MUST treat
+    this as a draft suggestion: the human reviews and edits the
+    suggested polygon in the polygon text-area before
+    :func:`cockpit.overrides.save_override` is invoked.
+
+    Idempotence: action id derives from (type, target, payload) per
+    :func:`_stable_action_id`. Repeated runs on byte-identical warning
+    text produce byte-identical chip ids.
+    """
+    if not fidelity_report:
+        return []
+    warnings = fidelity_report.get("warnings") or []
+    if not warnings:
+        return []
+    out: list[dict] = []
+    seen_room_ids: set[str] = set()
+    rooms_by_upper_name: dict[str, dict] = {}
+    for room in rooms:
+        nm = (room.get("name") or "").strip().upper()
+        rid = room.get("id")
+        if not nm or not rid:
+            continue
+        rooms_by_upper_name.setdefault(nm, room)
+    for w in warnings:
+        if not isinstance(w, str):
+            continue
+        m = _AREA_WARNING_RE.search(w)
+        if not m:
+            continue
+        warning_name = m.group("name").strip().upper()
+        try:
+            observed_m2 = float(m.group("obs"))
+            expected_lo = float(m.group("lo"))
+            expected_hi = float(m.group("hi"))
+        except (TypeError, ValueError):
+            continue
+        if observed_m2 <= 0 or expected_lo <= 0 or expected_hi <= expected_lo:
+            # Malformed warning — skip rather than emit a degenerate chip.
+            continue
+        # Strict name match. Substring match would over-fire on e.g.
+        # "SUITE 01" matching a warning about "SUITE 02".
+        room = rooms_by_upper_name.get(warning_name)
+        if room is None:
+            continue
+        rid = str(room.get("id"))
+        if rid in seen_room_ids:
+            continue
+        polygon_pts = room.get("polygon_pts") or []
+        if len(polygon_pts) < 3:
+            continue
+        # Decide direction + target area
+        if observed_m2 < expected_lo:
+            action_type = "expand_room_polygon"
+            target_m2 = expected_lo  # conservative — just touch the low edge
+        elif observed_m2 > expected_hi:
+            action_type = "shrink_room_polygon"
+            target_m2 = expected_hi  # conservative — just touch the high edge
+        else:
+            # In range — nothing to suggest.
+            continue
+        # Uniform scale around centroid. Linear factor = sqrt(area_ratio).
+        scale_factor = (target_m2 / observed_m2) ** 0.5
+        suggested = _scale_polygon_around_centroid(polygon_pts, scale_factor)
+        suggested_rounded = [
+            [round(x, 3), round(y, 3)] for x, y in suggested
+        ]
+        bbox_delta = _bbox_delta_pts(polygon_pts, suggested_rounded)
+        # Recompute area on the rounded polygon so the chip's
+        # estimated_area_* fields match what the cockpit will see.
+        est_area_pts2 = _polygon_area_pts2(suggested_rounded)
+        est_area_m2 = est_area_pts2 * (PT_TO_M ** 2)
+        seen_room_ids.add(rid)
+        out.append(_build_action(
+            action_type=action_type,
+            target_kind="room",
+            target_id=rid,
+            payload={
+                "current_area_m2": round(observed_m2, 3),
+                "target_area_m2": round(target_m2, 3),
+                "expected_range_m2": [
+                    round(expected_lo, 3), round(expected_hi, 3),
+                ],
+                "scale_factor": round(scale_factor, 4),
+                "delta_pts": bbox_delta,
+                "suggested_polygon_pts": suggested_rounded,
+                "estimated_area_pts2": round(est_area_pts2, 3),
+                "estimated_area_m2": round(est_area_m2, 4),
+                "warning_text": w[:200],
+            },
+            confidence=POLYGON_CORRECTION_CONFIDENCE,
+            rationale=(
+                f"room {warning_name!r} observed area {observed_m2:.2f} m² is "
+                f"outside expected [{expected_lo:.2f}, {expected_hi:.2f}] m²; "
+                f"chip suggests uniform-centroid scale by {scale_factor:.3f} "
+                f"toward {target_m2:.2f} m². Human must review/edit the "
+                "polygon in the cockpit text-area before save (ADR-002 §2.4 "
+                "soft warnings apply)."
+            ),
+            created_at=created_at,
+        ))
+    return out
+
+
 def _rule_review_rooms_in_fidelity_warnings(rooms: list[dict],
                                               fidelity_report: dict | None,
                                               created_at: str) -> list[dict]:
@@ -339,6 +552,13 @@ def propose_actions(*, consensus: dict,
     ))
     actions.extend(_rule_classify_unknown_openings(openings, created_at))
     actions.extend(_rule_review_rooms_in_fidelity_warnings(
+        rooms, fidelity_report, created_at,
+    ))
+    # Rule 5 (Slice 6b) — polygon-correction draft chips from
+    # area-out-of-range fidelity warnings. Always advisory; chips are
+    # not promoted into overrides until the human edits + saves in the
+    # cockpit polygon text-area.
+    actions.extend(_rule_polygon_correction(
         rooms, fidelity_report, created_at,
     ))
 
@@ -500,7 +720,9 @@ __all__ = [
     "GENERATOR_NAME",
     "LOW_CONFIDENCE_THRESHOLD",
     "OPENING_KIND_VALUES",
+    "POLYGON_CORRECTION_CONFIDENCE",
     "PROPOSED_ACTIONS_SCHEMA_VERSION",
+    "PT_TO_M",
     "main",
     "propose_actions",
     "write_proposed_actions",

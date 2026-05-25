@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import os
 import tempfile
 import uuid
@@ -42,8 +43,32 @@ OVERRIDE_TYPES: tuple[str, ...] = (
     "mark_suspect",
     "reject_element",
     "approve_element",
+    "room_polygon_override",  # ADR-002 — additive, schema_version unchanged
     # block_skp_export is global, not per-element — see set_block_skp_export()
 )
+
+POLYGON_EDIT_METHODS: tuple[str, ...] = (
+    "manual_draw",
+    "snap_to_walls",
+    "trace_pdf",
+    "from_proposed_action",
+)
+
+# PDF-points to metres anchor. Mirrors
+# `tools/fidelity/compare_generated_to_expected.py:PT_TO_M_DEFAULT` and
+# `feedback_pdf_scale_anchor.md`. Used by polygon validation to cross-check
+# `estimated_area_m2` against the recomputed polygon area.
+PT_TO_M = 0.19 / 5.4
+
+# Plausible m² range for a single architectural room (smallest plausible
+# bath ≈ 1 m², up to a 200 m² loft). Outside this band, polygon-override
+# validation warns (soft check, not an error — see ADR-002 §2.4).
+POLYGON_AREA_M2_SOFT_RANGE: tuple[float, float] = (1.0, 200.0)
+
+# Hard rejection guard: when the polygon exterior crosses more than this
+# many walls, surface a warning. Defends against accidentally tracing a
+# polygon through unrelated rooms. Soft only — does not fail validation.
+POLYGON_WALL_CROSSING_SOFT_LIMIT = 2
 
 OPENING_KIND_VALUES: tuple[str, ...] = (
     "interior_door",
@@ -66,6 +91,7 @@ _PRECEDENCE_ORDER: tuple[str, ...] = (
     "opening_kind_override",
     "opening_connects_override",
     "room_label_override",
+    "room_polygon_override",  # ADR-002: polygon > label, < mark_suspect
     "mark_suspect",
     "reject_element",
 )
@@ -246,6 +272,121 @@ def load_overrides(run_dir: Path,
 
 
 # ---------------------------------------------------------------------------
+# Polygon helpers (ADR-002 §2.4)
+# ---------------------------------------------------------------------------
+
+def _polygon_pts_are_well_formed(pts: object) -> bool:
+    """`pts` must be a list of >=3 [x, y] pairs of finite floats."""
+    if not isinstance(pts, list) or len(pts) < 3:
+        return False
+    for pt in pts:
+        if not isinstance(pt, (list, tuple)) or len(pt) != 2:
+            return False
+        x, y = pt
+        if not isinstance(x, (int, float)) or not isinstance(y, (int, float)):
+            return False
+        if not (math.isfinite(x) and math.isfinite(y)):
+            return False
+    return True
+
+
+def _polygon_area_pts2(pts: list) -> float:
+    """Unsigned shoelace area in pts^2. Returns 0.0 for degenerate input."""
+    n = len(pts)
+    if n < 3:
+        return 0.0
+    acc = 0.0
+    for i in range(n):
+        x0, y0 = pts[i]
+        x1, y1 = pts[(i + 1) % n]
+        acc += x0 * y1 - x1 * y0
+    return abs(acc) * 0.5
+
+
+def _segments_intersect(a: tuple, b: tuple,
+                          c: tuple, d: tuple) -> bool:
+    """Return True iff open segment ab properly crosses open segment cd.
+
+    Endpoint-sharing (consecutive polygon edges meeting at a vertex)
+    is excluded. Collinear overlap is treated as no intersection: a
+    self-overlap on a single edge is degenerate but not a hard
+    self-cross; soft-area check catches it.
+    """
+    def _orient(p: tuple, q: tuple, r: tuple) -> float:
+        return ((q[0] - p[0]) * (r[1] - p[1])
+                - (q[1] - p[1]) * (r[0] - p[0]))
+
+    o1 = _orient(a, b, c)
+    o2 = _orient(a, b, d)
+    o3 = _orient(c, d, a)
+    o4 = _orient(c, d, b)
+    # Strict proper crossing: signs differ on both segments.
+    return (o1 * o2 < 0) and (o3 * o4 < 0)
+
+
+def _polygon_is_self_intersecting(pts: list) -> bool:
+    """True iff any pair of non-adjacent edges of the closed polygon
+    cross. O(n^2); polygons in this codebase are <50 vertices so the
+    naive check is fine."""
+    n = len(pts)
+    if n < 4:
+        return False
+    edges = [(tuple(pts[i]), tuple(pts[(i + 1) % n])) for i in range(n)]
+    for i in range(n):
+        a, b = edges[i]
+        # Skip adjacent edges (share a vertex by construction).
+        for j in range(i + 2, n):
+            if i == 0 and j == n - 1:
+                # Wrap-around adjacency: edge0 and edge_{n-1} share pts[0].
+                continue
+            c, d = edges[j]
+            if _segments_intersect(a, b, c, d):
+                return True
+    return False
+
+
+def _segments_cross_count(poly_edges: list,
+                          walls: list[dict]) -> int:
+    """Count walls whose [start,end] segment properly crosses any of
+    the polygon's exterior edges. Used by the soft wall-crossing check
+    (ADR-002 §2.4)."""
+    crossings = 0
+    for w in walls or []:
+        start = w.get("start")
+        end = w.get("end")
+        if (not isinstance(start, (list, tuple))
+                or not isinstance(end, (list, tuple))
+                or len(start) != 2 or len(end) != 2):
+            continue
+        wa = (float(start[0]), float(start[1]))
+        wb = (float(end[0]), float(end[1]))
+        for pa, pb in poly_edges:
+            if _segments_intersect(wa, wb, pa, pb):
+                crossings += 1
+                break
+    return crossings
+
+
+def _within_relative_tolerance(actual: float,
+                                expected: float,
+                                tol: float) -> bool:
+    """|actual - expected| <= tol * max(|expected|, eps)."""
+    if expected == 0:
+        return actual == 0
+    return abs(actual - expected) <= tol * abs(expected)
+
+
+def _is_uuid4_string(value: object) -> bool:
+    if not isinstance(value, str):
+        return False
+    try:
+        u = uuid.UUID(value)
+    except (ValueError, AttributeError, TypeError):
+        return False
+    return u.version == 4
+
+
+# ---------------------------------------------------------------------------
 # Validation
 # ---------------------------------------------------------------------------
 
@@ -335,6 +476,78 @@ def validate_override_payload(payload: dict,
                 f"mark_suspect.severity {sev!r} not in {SUSPECT_SEVERITIES}"
             )
         # tag is free-text and optional in v1; accept missing
+    elif typ == "room_polygon_override":
+        # ADR-002 §2.4 hard rules. Soft checks live in
+        # validate_override_warnings(); see ADR-002 §2.4 last
+        # paragraph + this module's `validate_override_warnings`.
+        if target_kind != "room":
+            errors.append(
+                "room_polygon_override target.kind must be 'room'"
+            )
+        edit_method = body.get("edit_method")
+        if edit_method not in POLYGON_EDIT_METHODS:
+            errors.append(
+                f"room_polygon_override.edit_method {edit_method!r} "
+                f"not in {POLYGON_EDIT_METHODS}"
+            )
+        pts = body.get("new_polygon_pts")
+        valid_pts = _polygon_pts_are_well_formed(pts)
+        if not valid_pts:
+            errors.append(
+                "room_polygon_override.new_polygon_pts must be a list "
+                "of >=3 [x,y] pairs of finite floats"
+            )
+        area_pts2 = body.get("estimated_area_pts2")
+        area_m2 = body.get("estimated_area_m2")
+        if not isinstance(area_pts2, (int, float)) or area_pts2 <= 0:
+            errors.append(
+                "room_polygon_override.estimated_area_pts2 must be a "
+                "positive number"
+            )
+        if not isinstance(area_m2, (int, float)) or area_m2 <= 0:
+            errors.append(
+                "room_polygon_override.estimated_area_m2 must be a "
+                "positive number"
+            )
+        # When the polygon is well-formed and the areas are present,
+        # also assert basic consistency (1 % tolerance per ADR-002).
+        if (valid_pts
+                and isinstance(area_pts2, (int, float)) and area_pts2 > 0
+                and isinstance(area_m2, (int, float)) and area_m2 > 0):
+            computed_pts2 = _polygon_area_pts2(pts)
+            if computed_pts2 <= 0:
+                errors.append(
+                    "room_polygon_override.new_polygon_pts has zero "
+                    "or degenerate area"
+                )
+            else:
+                if not _within_relative_tolerance(
+                        area_pts2, computed_pts2, 0.01):
+                    errors.append(
+                        f"room_polygon_override.estimated_area_pts2 "
+                        f"{area_pts2:.2f} disagrees with computed "
+                        f"polygon area {computed_pts2:.2f} (>1% off)"
+                    )
+                expected_m2 = area_pts2 * (PT_TO_M ** 2)
+                if not _within_relative_tolerance(
+                        area_m2, expected_m2, 0.01):
+                    errors.append(
+                        f"room_polygon_override.estimated_area_m2 "
+                        f"{area_m2:.4f} not consistent with "
+                        f"estimated_area_pts2 * PT_TO_M^2 "
+                        f"({expected_m2:.4f}); >1% off"
+                    )
+            if _polygon_is_self_intersecting(pts):
+                errors.append(
+                    "room_polygon_override.new_polygon_pts is not a "
+                    "simple polygon (self-intersecting)"
+                )
+        fpa_id = body.get("from_proposed_action_id")
+        if fpa_id is not None and not _is_uuid4_string(fpa_id):
+            errors.append(
+                "room_polygon_override.from_proposed_action_id must be "
+                "null or a valid uuid4 string"
+            )
     elif typ in ("reject_element", "approve_element"):
         # Empty body permitted
         pass
@@ -354,6 +567,54 @@ def validate_override_payload(payload: dict,
             )
 
     return errors
+
+
+def validate_override_warnings(payload: dict,
+                                consensus: dict | None = None) -> list[str]:
+    """Return soft-check warnings for an override payload.
+
+    Warnings DO NOT block save. The cockpit surfaces them as a yellow
+    callout next to the "Save" button (ADR-002 §2.4). Errors (from
+    ``validate_override_payload``) still block save.
+
+    Currently emits warnings only for ``room_polygon_override``:
+      - polygon exterior crosses more than ``POLYGON_WALL_CROSSING_SOFT_LIMIT``
+        walls (only when ``consensus`` is provided)
+      - estimated area in m² is outside ``POLYGON_AREA_M2_SOFT_RANGE``
+    """
+    warnings: list[str] = []
+    if not isinstance(payload, dict):
+        return warnings
+    if payload.get("type") != "room_polygon_override":
+        return warnings
+    body = payload.get("payload") or {}
+    pts = body.get("new_polygon_pts")
+    area_m2 = body.get("estimated_area_m2")
+
+    if isinstance(area_m2, (int, float)) and area_m2 > 0:
+        lo, hi = POLYGON_AREA_M2_SOFT_RANGE
+        if area_m2 < lo or area_m2 > hi:
+            warnings.append(
+                f"estimated area {area_m2:.2f} m² is outside "
+                f"sanity range [{lo}, {hi}] m²"
+            )
+
+    if (consensus is not None
+            and _polygon_pts_are_well_formed(pts)):
+        walls = consensus.get("walls") or []
+        n = len(pts)
+        poly_edges = [
+            (tuple(pts[i]), tuple(pts[(i + 1) % n]))
+            for i in range(n)
+        ]
+        crossings = _segments_cross_count(poly_edges, walls)
+        if crossings > POLYGON_WALL_CROSSING_SOFT_LIMIT:
+            warnings.append(
+                f"polygon exterior crosses {crossings} walls "
+                f"(>{POLYGON_WALL_CROSSING_SOFT_LIMIT} is unusual)"
+            )
+
+    return warnings
 
 
 # ---------------------------------------------------------------------------
@@ -689,6 +950,49 @@ def overrides_apply_view(consensus: dict,
                 record["_name_original"] = record.get("name")
                 record["name"] = body.get("new_name")
                 record["source"] = "manual"
+            elif typ == "room_polygon_override":
+                body = ov.get("payload") or {}
+                record["_polygon_pts_original"] = record.get("polygon_pts")
+                record["_area_pts2_original"] = record.get("area_pts2")
+                record["_area_m2_original"] = record.get("area_m2")
+                record["polygon_pts"] = list(body.get("new_polygon_pts") or [])
+                record["area_pts2"] = float(body.get("estimated_area_pts2") or 0)
+                record["area_m2"] = float(body.get("estimated_area_m2") or 0)
+                record["_edit_method"] = body.get("edit_method")
+                if body.get("from_proposed_action_id"):
+                    record["_source_proposed_action_id"] = body.get(
+                        "from_proposed_action_id"
+                    )
+                record["source"] = "manual"
+        # If precedence picked a non-polygon override but a polygon
+        # override ALSO exists for the same room, apply the polygon
+        # before precedence's chosen override so geometry survives
+        # under e.g. an active room_label_override. (ADR-002 §2.5:
+        # both apply.)
+        for sec in (overrides or []):
+            if _element_key(sec.get("target")) != key:
+                continue
+            if sec.get("type") != "room_polygon_override":
+                continue
+            if ov is sec:
+                continue  # already applied above
+            body = sec.get("payload") or {}
+            record.setdefault("_polygon_pts_original",
+                               record.get("polygon_pts"))
+            record.setdefault("_area_pts2_original",
+                               record.get("area_pts2"))
+            record.setdefault("_area_m2_original",
+                               record.get("area_m2"))
+            record["polygon_pts"] = list(body.get("new_polygon_pts") or [])
+            record["area_pts2"] = float(body.get("estimated_area_pts2") or 0)
+            record["area_m2"] = float(body.get("estimated_area_m2") or 0)
+            record["_edit_method"] = body.get("edit_method")
+            if body.get("from_proposed_action_id"):
+                record["_source_proposed_action_id"] = body.get(
+                    "from_proposed_action_id"
+                )
+            if record.get("source") != "override_rejected":
+                record["source"] = "manual"
         out_rooms.append(record)
 
     return {
@@ -721,12 +1025,17 @@ __all__ = [
     "OPENING_KIND_VALUES",
     "SUSPECT_SEVERITIES",
     "TARGET_KINDS",
+    "POLYGON_EDIT_METHODS",
+    "POLYGON_AREA_M2_SOFT_RANGE",
+    "POLYGON_WALL_CROSSING_SOFT_LIMIT",
+    "PT_TO_M",
     "OVERRIDES_FILENAME",
     "overrides_path",
     "compute_consensus_sha256",
     "empty_overrides_file",
     "load_overrides",
     "validate_override_payload",
+    "validate_override_warnings",
     "save_override",
     "remove_override",
     "set_block_skp_export",

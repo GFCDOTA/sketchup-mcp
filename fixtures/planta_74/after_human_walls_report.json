@@ -1,0 +1,229 @@
+{
+  "verdict": "WARN",
+  "recommendation": "walls OK; remaining merges need human_soft_barriers protocol (peitoril / grade), not more walls. Acceptable to ship if peitoril fidelity is not required.",
+  "summary": {
+    "pass": 6,
+    "warn": 2,
+    "fail": 0,
+    "info": 2,
+    "total": 10
+  },
+  "merge_classification": {
+    "A.S. | TERRACO SOCIAL | TERRACO TECNICO": {
+      "pairs": [
+        {
+          "from_room": "A.S.",
+          "to_room": "TERRACO SOCIAL",
+          "seed_from": [
+            91.1695556640625,
+            523.3749389648438
+          ],
+          "seed_to": [
+            154.44516372680664,
+            462.88114166259766
+          ],
+          "midpoint_pdf": [
+            122.807,
+            493.128
+          ],
+          "distance_pts": 87.54,
+          "candidate_type": "already_explained",
+          "evidence_source": "existing_human_wall",
+          "confidence": 0.85,
+          "should_user_paint": false,
+          "reason": "Operator already painted h_w001 (v, [129.21, 514.968] -> [129.21, 611.862]) as the divider for this pair. The wall lies between the seeds on its perpendicular axis. If the cell still doesn't fully close, the remaining gap is NOT another wall (per user mandate 2026-05-12: don't fabricate walls to close cells) \u2014 it is human_soft_barrier (peitoril / grade) or semantic_room_split (open plan).",
+          "suggested_segment_pdf": null,
+          "suggested_orientation": null,
+          "suggested_length_pts": null
+        },
+        {
+          "from_room": "A.S.",
+          "to_room": "TERRACO TECNICO",
+          "seed_from": [
+            91.1695556640625,
+            523.3749389648438
+          ],
+          "seed_to": [
+            247.55320358276367,
+            432.83577728271484
+          ],
+          "midpoint_pdf": [
+            169.361,
+            478.105
+          ],
+          "distance_pts": 180.702,
+          "candidate_type": "human_soft_barrier",
+          "evidence_source": "peitoril",
+          "confidence": 0.65,
+          "should_user_paint": false,
+          "reason": "Lim\u00edtrofe entre A.S. interna e TERRACO TECNICO externo via peitoril/grade; soft_barrier, n\u00e3o wall.",
+          "suggested_segment_pdf": null,
+          "suggested_orientation": null,
+          "suggested_length_pts": null
+        },
+        {
+          "from_room": "TERRACO SOCIAL",
+          "to_room": "TERRACO TECNICO",
+          "seed_from": [
+            154.44516372680664,
+            462.88114166259766
+          ],
+          "seed_to": [
+            247.55320358276367,
+            432.83577728271484
+          ],
+          "midpoint_pdf": [
+            200.999,
+            447.858
+          ],
+          "distance_pts": 97.836,
+          "candidate_type": "human_soft_barrier",
+          "evidence_source": "peitoril",
+          "confidence": 0.8,
+          "should_user_paint": false,
+          "reason": "Dois terra\u00e7os separados por peitoril/muretas (H=0.70M no PDF). soft_barrier, n\u00e3o wall.",
+          "suggested_segment_pdf": null,
+          "suggested_orientation": null,
+          "suggested_length_pts": null
+        }
+      ],
+      "needs_wall": false,
+      "needs_sbarrier": true,
+      "semantic_only": false,
+      "wall_failures": [],
+      "n_pairs": 3
+    },
+    "SALA DE JANTAR | SALA DE ESTAR": {
+      "pairs": [
+        {
+          "from_room": "SALA DE JANTAR",
+          "to_room": "SALA DE ESTAR",
+          "seed_from": [
+            189.7418098449707,
+            630.5092620849609
+          ],
+          "seed_to": [
+            182.5546417236328,
+            563.4514465332031
+          ],
+          "midpoint_pdf": [
+            186.148,
+            596.98
+          ],
+          "distance_pts": 67.442,
+          "candidate_type": "semantic_room_split",
+          "evidence_source": "open_plan",
+          "confidence": 0.95,
+          "should_user_paint": false,
+          "reason": "Sala integrada: SALA DE JANTAR e SALA DE ESTAR s\u00e3o um \u00fanico ambiente em planta aberta. N\u00c3O existe parede f\u00edsica. Aceitar fus\u00e3o como semanticamente correta.",
+          "suggested_segment_pdf": null,
+          "suggested_orientation": null,
+          "suggested_length_pts": null
+        }
+      ],
+      "needs_wall": false,
+      "needs_sbarrier": false,
+      "semantic_only": true,
+      "wall_failures": [],
+      "n_pairs": 1
+    }
+  },
+  "findings": [
+    {
+      "check_id": "G-WW1",
+      "severity": "PASS",
+      "message": "human walls applied: 2",
+      "evidence": {
+        "n_human_walls": 2,
+        "ids": [
+          "h_w000",
+          "h_w001"
+        ]
+      }
+    },
+    {
+      "check_id": "G-WH1",
+      "severity": "PASS",
+      "message": "unhosted human openings after walls: 0",
+      "evidence": {
+        "unhosted_ids": []
+      }
+    },
+    {
+      "check_id": "G-WH2",
+      "severity": "PASS",
+      "message": "human openings re-validated on augmented walls: 12 total",
+      "evidence": {
+        "n_human_openings": 12
+      }
+    },
+    {
+      "check_id": "G-WC1",
+      "severity": "PASS",
+      "message": "no merged cell needs a real wall painted (all merges explained by soft_barrier or semantic_split).",
+      "evidence": {
+        "wall_failure_cells": [],
+        "details": {}
+      }
+    },
+    {
+      "check_id": "G-WC2",
+      "severity": "WARN",
+      "message": "cells that would close with soft_barrier (peitoril/grade): 1. These require the human_soft_barriers protocol \u2014 NOT more blue walls.",
+      "evidence": {
+        "softbarrier_cells": [
+          "A.S. | TERRACO SOCIAL | TERRACO TECNICO"
+        ]
+      }
+    },
+    {
+      "check_id": "G-WC3",
+      "severity": "PASS",
+      "message": "cells merged honestly as semantic_room_split / open plan: 1",
+      "evidence": {
+        "semantic_cells": [
+          "SALA DE JANTAR | SALA DE ESTAR"
+        ]
+      }
+    },
+    {
+      "check_id": "G-WC4",
+      "severity": "PASS",
+      "message": "all remaining merges documented in loop_closure_candidates.",
+      "evidence": {
+        "undocumented_cells": []
+      }
+    },
+    {
+      "check_id": "G-W1-info",
+      "severity": "INFO",
+      "message": "room count: before=7, after=8, target\u226510",
+      "evidence": {
+        "before": 7,
+        "after": 8,
+        "expected_min": 10
+      }
+    },
+    {
+      "check_id": "G-W2-info",
+      "severity": "INFO",
+      "message": "merged cells: before=2, after=2",
+      "evidence": {
+        "before": [
+          "A.S. | TERRACO SOCIAL | COZINHA | TERRACO TECNICO",
+          "SALA DE JANTAR | SALA DE ESTAR"
+        ],
+        "after": [
+          "A.S. | TERRACO SOCIAL | TERRACO TECNICO",
+          "SALA DE JANTAR | SALA DE ESTAR"
+        ]
+      }
+    },
+    {
+      "check_id": "G-W5",
+      "severity": "WARN",
+      "message": "global_skp_visual_fidelity requires operator confirmation against the PDF side-by-side. Advisory.",
+      "evidence": {}
+    }
+  ]
+}

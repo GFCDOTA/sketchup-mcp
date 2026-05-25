@@ -4,18 +4,19 @@
 > **Supersedes:** none. **Extends:** ADR-001 (additive — no schema-version bump).
 > **Author:** Claude session, authorized by Felipe (YELLOW autonomous)
 > **Related:** `docs/adr/ADR-001-validation-cockpit-mutation-surface.md`,
-> `docs/diagnostics/2026-05-09_dogfood_override_aware_flow.md`,
 > `cockpit/overrides.py`, `tools/apply_overrides.py`,
 > `tools/propose_skp_actions.py`,
 > `tools/fidelity/compare_generated_to_expected.py`,
 > `scripts/smoke/smoke_skp_export.py`
+> *(2026-05-09 dogfood flow diagnostic — origin of this ADR — has been
+> deleted as historical noise; PR #98 history on GitHub preserves the
+> dogfood context.)*
 
 ---
 
 ## 1. Context
 
-The first end-to-end dogfood of the override-aware flow (PR #98,
-`docs/diagnostics/2026-05-09_dogfood_override_aware_flow.md`)
+The first end-to-end dogfood of the override-aware flow (PR #98)
 exercised the contract on the canonical `planta_74` baseline with
 3 real overrides. The contract held: consensus sha256 byte-identical
 before/after, detector path provably overrides-blind, fidelity

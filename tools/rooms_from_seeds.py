@@ -27,7 +27,7 @@ import numpy as np
 THIS = Path(__file__).resolve().parent
 sys.path.insert(0, str(THIS))
 
-from polygonize_rooms import _detect_door_bridges  # noqa: E402, I001
+from polygonize_rooms import _detect_door_bridges, polygonize_rooms  # noqa: E402, I001
 
 
 def rasterize_walls(walls: list[dict], bridges: list[dict], t: float,
@@ -357,6 +357,267 @@ def detect_rooms(consensus: dict, labels: list[dict],
     return rooms
 
 
+def _voronoi_subdivide_merged_cell(
+    cell_poly,
+    seed_labels: list[dict],
+) -> list[tuple[dict, list[list[float]], float]]:
+    """When a single polygonize cell contains multiple seed labels (the
+    A.S./TER SOC/TER TEC merge on planta_74), split the cell by a
+    bounded Voronoi tessellation of the seed points and clip each
+    Voronoi region against the cell polygon. Returns one
+    (label, polygon_pts, area_pts2) tuple per seed, in label order.
+
+    The Voronoi split is an APPROXIMATION (bisectors are equidistant
+    lines between seeds, not the real architectural divisors), but
+    it's strictly conservative w.r.t. cell extent: every returned
+    sub-polygon is contained in the original cell. Use only when the
+    underlying polygonize step couldn't distinguish the rooms because
+    the dividing soft_barriers/walls don't span the boundary — i.e.
+    the `seeds_share_cell` case. Returns an empty list if the Voronoi
+    computation fails (e.g., collinear or duplicate seeds), so callers
+    must always handle the empty case as "no split possible".
+
+    Shapely's ``voronoi_diagram`` accepts an envelope; passing the
+    cell polygon ensures each Voronoi region is pre-clipped to the
+    cell footprint. The post-intersection clip is a belt-and-braces
+    safety check.
+    """
+    if len(seed_labels) < 2:
+        return []
+    from shapely.geometry import MultiPoint
+    from shapely.ops import voronoi_diagram
+
+    seeds_xy = [(float(lb["seed_pt"][0]), float(lb["seed_pt"][1]))
+                for lb in seed_labels]
+    try:
+        mp = MultiPoint(seeds_xy)
+        vor = voronoi_diagram(mp, envelope=cell_poly)
+    except Exception:
+        return []
+    if vor.is_empty:
+        return []
+
+    from shapely.geometry import Point as _Point
+    regions = list(vor.geoms) if hasattr(vor, "geoms") else [vor]
+    out: list[tuple[dict, list[list[float]], float]] = []
+    for lb, (sx, sy) in zip(seed_labels, seeds_xy):
+        seed_pt = _Point(sx, sy)
+        # Find the Voronoi region containing this seed
+        chosen = None
+        for region in regions:
+            if region.covers(seed_pt):
+                chosen = region
+                break
+        if chosen is None:
+            return []
+        clipped = chosen.intersection(cell_poly)
+        if clipped.is_empty:
+            return []
+        # Voronoi region clipped against cell may be a MultiPolygon if
+        # the cell is non-convex; keep the largest piece.
+        if hasattr(clipped, "geoms"):
+            parts = sorted(list(clipped.geoms), key=lambda p: -p.area)
+            clipped = parts[0] if parts else None
+            if clipped is None or clipped.is_empty:
+                return []
+        try:
+            poly_pts = [[round(x, 3), round(y, 3)]
+                        for x, y in clipped.exterior.coords]
+        except Exception:
+            return []
+        out.append((lb, poly_pts, round(clipped.area, 2)))
+    return out
+
+
+def detect_rooms_polygonize(consensus: dict, labels: list[dict],
+                            door_min: float = 15.0,
+                            door_max: float = 150.0,
+                            envelope_margin_pts: float = 2.0,
+                            min_room_area_factor: float = 12.0,
+                            extend_near_miss_sbs: bool = False,
+                            near_miss_gap_tol_pt: float = 8.0,
+                            near_miss_require_semantic: bool = True,
+                            voronoi_subdivide_merged_cells: bool = False,
+                            extension_provenance_out: list[dict] | None = None,
+                            voronoi_provenance_out: list[dict] | None = None,
+                            ) -> list[dict]:
+    """Detect rooms via wall-rectangle subtraction (FP-014 P0 fix).
+
+    Delegates the closed-cell extraction to ``polygonize_rooms.polygonize_rooms``
+    (which builds ``unary_union(wall_boxes) → env.difference()``), then maps
+    each label's ``seed_pt`` to the cell that contains it. Produces polygons
+    with 4–20 vertices, perfectly wall-aligned — the FP-014 fix for the
+    legacy raster-watershed method that emitted SUITE 01 with 738 vts.
+
+    ``door_max`` defaults to 150 pt (~5.7 m) instead of the 50 pt door-only
+    range used by the underlying ``polygonize_rooms``: empirically on
+    planta_74 the narrower default bridges only 6 / 11 expected openings
+    and leaves 9 of 11 rooms collapsed into a single envelope-spanning
+    cell that ``touches_all_edges`` then drops. 150 pt covers typical
+    apartment openings (port a-vidro, glazed balcony, peitoril gap),
+    growing planta_74 from 2 mapped rooms to 7 (the remaining 4 share
+    cells because the structural walls between them are missing from the
+    stage-1 consensus — a build_vector_consensus issue, not a polygonize
+    issue).
+
+    Two labels resolving to the same cell are kept as a single room with
+    ``name = "X | Y"`` plus ``metadata.warnings = ["seeds_share_cell"]``
+    (honest signal that a structural wall is missing — the cell-merged
+    polygon is the correct observation given the wall data). Seeds outside
+    every cell are dropped and recorded under
+    ``consensus.metadata.rooms_from_seeds.dropped_seeds``.
+
+    See ``docs/diagnostics/2026-05-09_skp_visual_failure_fp014.md`` §"Opção A"
+    for the design rationale and the empirical evidence behind picking
+    polygonize over raster-watershed.
+    """
+    from shapely.geometry import Point, Polygon
+
+    cells_raw, _bridges = polygonize_rooms(
+        consensus,
+        door_min_pts=door_min,
+        door_max_pts=door_max,
+        envelope_margin_pts=envelope_margin_pts,
+        min_room_area_factor=min_room_area_factor,
+        extend_near_miss_sbs=extend_near_miss_sbs,
+        near_miss_gap_tol_pt=near_miss_gap_tol_pt,
+        near_miss_require_semantic=near_miss_require_semantic,
+        extension_provenance_out=extension_provenance_out,
+    )
+
+    cell_polys: list[tuple[dict, Polygon]] = []
+    for c in cells_raw:
+        try:
+            poly = Polygon(c["polygon_pts"])
+        except Exception:
+            continue
+        if poly.is_valid and not poly.is_empty:
+            cell_polys.append((c, poly))
+
+    t = float(consensus["wall_thickness_pts"])
+    dropped: list[dict] = []
+    seed_to_cell: dict[int, int] = {}
+
+    for li, label in enumerate(labels):
+        sp = label.get("seed_pt")
+        if not sp:
+            dropped.append({"label_id": label.get("id"),
+                            "label_name": label.get("name"),
+                            "reason": "no_seed_pt"})
+            continue
+        point = Point(float(sp[0]), float(sp[1]))
+
+        assigned: int | None = None
+        for ci, (_c, poly) in enumerate(cell_polys):
+            if poly.contains(point):
+                assigned = ci
+                break
+        if assigned is None:
+            best_ci = None
+            best_d = float("inf")
+            for ci, (_c, poly) in enumerate(cell_polys):
+                d = poly.centroid.distance(point)
+                if d < best_d:
+                    best_d = d
+                    best_ci = ci
+            if best_ci is not None and best_d <= 3.0 * t:
+                assigned = best_ci
+
+        if assigned is None:
+            dropped.append({
+                "label_id": label.get("id"),
+                "label_name": label.get("name"),
+                "seed_pt": list(sp),
+                "reason": "no_containing_cell",
+            })
+            continue
+        seed_to_cell[li] = assigned
+
+    cell_to_labels: dict[int, list[dict]] = {}
+    for li, ci in seed_to_cell.items():
+        cell_to_labels.setdefault(ci, []).append(labels[li])
+
+    rooms: list[dict] = []
+    for ci in sorted(cell_to_labels.keys()):
+        cell, cell_poly = cell_polys[ci]
+        lbls = cell_to_labels[ci]
+        merged = len(lbls) > 1
+        names = [lb["name"] for lb in lbls]
+        label_ids = [lb.get("id") for lb in lbls if lb.get("id") is not None]
+
+        # When the cell carries multiple seeds AND the Voronoi fallback
+        # is enabled, split the cell into one sub-polygon per seed.
+        # Polygonize's "seeds_share_cell" warning is the primary trigger
+        # — it signals that the wall/SB network couldn't separate the
+        # rooms, so we use seed positions as a backstop divisor. The
+        # resulting boundaries are equidistant bisectors, NOT real
+        # architectural divisions; the provenance log records the
+        # approximation so downstream code can flag the room as
+        # voronoi-derived.
+        did_voronoi = False
+        if merged and voronoi_subdivide_merged_cells:
+            sub_polys = _voronoi_subdivide_merged_cell(cell_poly, lbls)
+            if sub_polys:
+                did_voronoi = True
+                source_cell_id = f"polygonize_cell_{ci}"
+                for lb, poly_pts, area in sub_polys:
+                    sub_lid = lb.get("id")
+                    seed_pt = list(lb["seed_pt"])
+                    sub_room = {
+                        "id": f"r{len(rooms):03d}",
+                        "name": lb["name"],
+                        "label_id": sub_lid,
+                        "seed_pt": seed_pt,
+                        "polygon_pts": poly_pts,
+                        "area_pts2": area,
+                        "centroid": [round(sum(p[0] for p in poly_pts) /
+                                           len(poly_pts), 3),
+                                     round(sum(p[1] for p in poly_pts) /
+                                           len(poly_pts), 3)],
+                        "method": "polygonize+voronoi",
+                        "metadata": {
+                            "warnings": ["voronoi_sub_split_from_shared_cell"],
+                            "voronoi_source_cell_id": source_cell_id,
+                        },
+                    }
+                    rooms.append(sub_room)
+                    if voronoi_provenance_out is not None:
+                        voronoi_provenance_out.append({
+                            "source_cell_id": source_cell_id,
+                            "source_cell_polygon_pts": cell["polygon_pts"],
+                            "source_cell_area_pts2": cell["area_pts2"],
+                            "assigned_label_id": sub_lid,
+                            "assigned_label_name": lb["name"],
+                            "assigned_seed_pt": seed_pt,
+                            "sub_polygon_area_pts2": area,
+                            "reason_code": "voronoi_subdivide_merged_cell",
+                        })
+
+        if not did_voronoi:
+            room: dict = {
+                "id": f"r{len(rooms):03d}",
+                "name": " | ".join(names) if merged else names[0],
+                "label_id": label_ids[0] if not merged and label_ids else None,
+                "seed_pt": list(lbls[0]["seed_pt"]),
+                "polygon_pts": cell["polygon_pts"],
+                "area_pts2": cell["area_pts2"],
+                "centroid": cell["centroid"],
+                "method": "polygonize",
+            }
+            if merged:
+                room["label_ids"] = label_ids
+                room["merged_seeds"] = [list(lb["seed_pt"]) for lb in lbls]
+                room["metadata"] = {"warnings": ["seeds_share_cell"]}
+            rooms.append(room)
+
+    if dropped:
+        md = consensus.setdefault("metadata", {})
+        rfs = md.setdefault("rooms_from_seeds", {})
+        rfs.setdefault("dropped_seeds", []).extend(dropped)
+
+    return rooms
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("consensus", type=Path)
@@ -396,16 +657,72 @@ if __name__ == "__main__":
                          "hull. Default 0.5 (Cycle 8b empirical: "
                          "lower ratios cut A.S./COZINHA/TERRACO; "
                          "0.5 keeps SUITE 01 in [10, 28] m²).")
+    # FP-014 P0 (2026-05-11): opt-in polygonize method that swaps the
+    # legacy raster-watershed for shapely.unary_union(wall_boxes) +
+    # env.difference(). Polygons emerge wall-aligned with 4–20 vts
+    # instead of the 738-vts raster-contour traces that caused SUITE 01
+    # to leak across BANHO 02. Default stays 'voronoi' in PR-A1; the
+    # default flips to 'polygonize' in PR-A2 (refactor/rooms-polygonize-
+    # default) once the baseline JSON is updated to match the new vts /
+    # area expectations.
+    ap.add_argument("--method",
+                    choices=["voronoi", "flood", "polygonize"],
+                    default="voronoi",
+                    help="Room detection method. 'voronoi' (default) is the "
+                         "legacy raster watershed; 'flood' is the raster "
+                         "flood-fill fallback; 'polygonize' uses shapely "
+                         "wall-rectangle subtraction (FP-014 P0 fix).")
+    ap.add_argument("--envelope-margin-pts", type=float, default=2.0,
+                    help="Envelope padding around planta_region "
+                         "(--method polygonize only).")
+    ap.add_argument("--min-room-area-factor", type=float, default=12.0,
+                    help="Min room area = factor * thickness² to drop "
+                         "slivers (--method polygonize only).")
+    # Polygonize bridges any colinear gap in [door_min, polygonize_door_max]
+    # range. Defaults to 150 pt (~5.7 m) so port a-vidro / glazed balcony /
+    # peitoril-sized gaps still close cells. Separate from --door-max
+    # (which the voronoi raster path uses for its bridge mask, tuned to
+    # the door-arc-only range) so the two methods stay independent.
+    ap.add_argument("--polygonize-door-max", type=float, default=150.0,
+                    help="Max colinear gap (pt) bridged by polygonize. "
+                         "150 default covers door + port a-vidro + balcony "
+                         "openings on typical apartment plantas. Set lower "
+                         "to leave wider gaps open (forces those rooms to "
+                         "merge into the outside cell).")
     args = ap.parse_args()
 
     consensus = json.loads(args.consensus.read_text())
     labels = json.loads(args.labels.read_text())
-    rooms = detect_rooms(consensus, labels, args.door_min, args.door_max,
-                         args.scale,
-                         use_concave_hull=not args.no_concave_hull,
-                         concave_hull_ratio=args.concave_hull_ratio)
+    if args.method == "polygonize":
+        rooms = detect_rooms_polygonize(
+            consensus, labels,
+            door_min=args.door_min,
+            door_max=args.polygonize_door_max,
+            envelope_margin_pts=args.envelope_margin_pts,
+            min_room_area_factor=args.min_room_area_factor,
+        )
+    elif args.method == "flood":
+        rooms = detect_rooms(
+            consensus, labels, args.door_min, args.door_max, args.scale,
+            use_voronoi=False,
+            use_concave_hull=not args.no_concave_hull,
+            concave_hull_ratio=args.concave_hull_ratio,
+        )
+    else:  # voronoi
+        rooms = detect_rooms(consensus, labels, args.door_min, args.door_max,
+                             args.scale,
+                             use_concave_hull=not args.no_concave_hull,
+                             concave_hull_ratio=args.concave_hull_ratio)
 
-    if args.canonicalize_rooms:
+    if args.canonicalize_rooms and args.method == "polygonize":
+        # Polygonize emits wall-aligned cells (4–20 vts); the canonicalize
+        # pass is designed to repair raster-watershed staircase artefacts,
+        # not these clean polygons. Running it would either be a no-op or
+        # snap legitimate vertices to nearby wall axes that don't belong
+        # to the cell — silently skip with a notice.
+        print("[warn] --canonicalize-rooms ignored with --method=polygonize "
+              "(cells already wall-aligned)")
+    elif args.canonicalize_rooms:
         # Local import to keep cv2 import cheap when feature unused. The
         # parent dir is on sys.path so canonicalize_room_polygons resolves
         # whether this script runs as `python tools/rooms_from_seeds.py`
@@ -428,19 +745,31 @@ if __name__ == "__main__":
 
     consensus["rooms"] = rooms
     # Stamp how the consensus was produced so downstream / debug can tell
-    # whether canonicalization ran. Stays inside the existing schema-
-    # additive metadata field per docs/SCHEMA-V2.md.
+    # which method ran and whether canonicalization applied. Stays inside
+    # the existing schema-additive metadata field per docs/SCHEMA-V2.md.
     md = consensus.setdefault("metadata", {})
+    existing_rfs = md.get("rooms_from_seeds", {}) or {}
+    dropped_seeds = existing_rfs.get("dropped_seeds", [])
     md["rooms_from_seeds"] = {
-        "canonicalize_rooms": bool(args.canonicalize_rooms),
+        "method": args.method,
+        "canonicalize_rooms": bool(args.canonicalize_rooms) and args.method != "polygonize",
         "room_canonicalization_tol": (
-            args.room_canonicalization_tol if args.canonicalize_rooms else None
+            args.room_canonicalization_tol
+            if (args.canonicalize_rooms and args.method != "polygonize") else None
         ),
         "use_concave_hull": not bool(args.no_concave_hull),
         "concave_hull_ratio": (
             args.concave_hull_ratio if not args.no_concave_hull else None
         ),
+        "envelope_margin_pts": (
+            args.envelope_margin_pts if args.method == "polygonize" else None
+        ),
+        "min_room_area_factor": (
+            args.min_room_area_factor if args.method == "polygonize" else None
+        ),
     }
+    if dropped_seeds:
+        md["rooms_from_seeds"]["dropped_seeds"] = dropped_seeds
     out = args.out or args.consensus
     out.write_text(json.dumps(consensus, indent=2))
     print(f"[ok] {len(rooms)} rooms detected from labels -> {out}")

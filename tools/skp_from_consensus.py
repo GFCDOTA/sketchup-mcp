@@ -46,6 +46,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from tools.disarm_sketchup_autoruns import disarm as disarm_autoruns
+from tools.su_runner_safety import log_mode, parse_mode, should_terminate
 
 SKETCHUP_EXE_DEFAULT = (
     r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
@@ -137,16 +139,40 @@ def should_skip(out_skp: Path, consensus_sha256: str) -> bool:
     return meta.get("consensus_sha256") == consensus_sha256
 
 
+def _default_runner_mode() -> str:
+    """Pick a safe default runner mode based on environment.
+
+    - If `CI=true` or `GITHUB_ACTIONS=true`: assume `headless`
+      (preserves the historical terminate-after-SKP behaviour on CI).
+    - Otherwise: `interactive` (the safe default — do NOT terminate
+      SU automatically, protecting any concurrent human session).
+
+    Callers can override via the `mode` argument, `--mode` CLI flag,
+    `--no-terminate` shorthand, or `RUN_MODE` env var (resolved
+    by `tools.su_runner_safety.parse_mode`).
+    """
+    ci_env = os.environ.get("CI", "").lower() == "true"
+    gh_actions = os.environ.get("GITHUB_ACTIONS", "").lower() == "true"
+    return "headless" if (ci_env or gh_actions) else "interactive"
+
+
 def run(consensus: Path, out_skp: Path, sketchup_exe: Path,
         plugins_dir: Path = PLUGINS_DIR_DEFAULT,
         timeout_s: int = 90,
         bootstrap_skp: Path | None = None,
-        force_skp: bool = False) -> dict[str, Any]:
+        force_skp: bool = False,
+        mode: str | None = None) -> dict[str, Any]:
     """Build a .skp from a consensus JSON. Returns a result dict.
 
     If a sidecar metadata file at ``<out_skp>.metadata.json`` exists
     and its ``consensus_sha256`` matches the current consensus,
     skip the SU launch and return immediately (unless `force_skp`).
+
+    ``mode`` controls the SU subprocess lifecycle per CLAUDE.md §18
+    (LL-015, FP-023). When None (default), resolves via
+    ``parse_mode`` with a CI-aware safe default
+    (`_default_runner_mode`). Pass an explicit string
+    (``"headless"`` / ``"interactive"`` / ``"attach"``) to override.
     """
     started = time.time()
     consensus_sha = _file_sha256(consensus) if consensus.exists() else None
@@ -177,6 +203,16 @@ def run(consensus: Path, out_skp: Path, sketchup_exe: Path,
     meta_p = metadata_path(out_skp)
     if meta_p.exists():
         meta_p.unlink()
+
+    # Defence-in-depth: clear ANY orphan autorun control file from a
+    # previous (possibly crashed) run before we arm our own. Without
+    # this, a stale autorun_inspector_control.txt or similar from an
+    # earlier session can fire on the SU we are about to launch and
+    # call Sketchup.quit on us. See docs/learning/failure_patterns.md
+    # § "autorun_control_files".
+    pre_disarmed = disarm_autoruns(plugins_dir)
+    for p in pre_disarmed:
+        print(f"[pre-launch disarm] removed orphan {p.name}")
 
     write_control(plugins_dir, consensus, out_skp)
     err_file = plugins_dir / "autorun_error.txt"
@@ -209,6 +245,16 @@ def run(consensus: Path, out_skp: Path, sketchup_exe: Path,
                     bootstrap_skp = bootstrap_target
                     break
 
+    # Resolve runner mode (CLAUDE.md §18, LL-015, FP-023).
+    # Safe default = `interactive` for local dev; `headless` on CI so
+    # we preserve historical terminate-after-SKP behaviour. CLI flags
+    # (`--mode`, `--no-terminate`) and `RUN_MODE` env var override.
+    resolved_mode = mode if mode is not None else parse_mode(
+        default=_default_runner_mode()
+    )
+    log_mode(resolved_mode)
+    terminate_allowed = should_terminate(resolved_mode)
+
     cmd = [str(sketchup_exe)]
     if bootstrap_skp and bootstrap_skp.exists():
         cmd.append(str(bootstrap_skp))
@@ -216,55 +262,87 @@ def run(consensus: Path, out_skp: Path, sketchup_exe: Path,
     proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL,
                             stderr=subprocess.DEVNULL,
                             creationflags=getattr(subprocess, "DETACHED_PROCESS", 0))
-    deadline = time.time() + timeout_s
-    while time.time() < deadline:
-        if out_skp.exists():
-            # Wait a couple more seconds for the file write to flush
-            time.sleep(2)
-            print(f"[ok] {out_skp} ({out_skp.stat().st_size} bytes)")
+    try:
+        deadline = time.time() + timeout_s
+        while time.time() < deadline:
+            if out_skp.exists():
+                # Wait a couple more seconds for the file write to flush
+                time.sleep(2)
+                print(f"[ok] {out_skp} ({out_skp.stat().st_size} bytes)")
+                _pid = getattr(proc, "pid", "?")
+                if terminate_allowed:
+                    try:
+                        proc.terminate()
+                        print(f"[su-runner] terminated own child PID {_pid}")
+                    except Exception:
+                        pass
+                else:
+                    print(
+                        f"[su-runner] artifact ready; SU left running "
+                        f"(PID {_pid}) per mode={resolved_mode}"
+                    )
+                elapsed = time.time() - started
+                if consensus_sha is not None:
+                    write_metadata(
+                        out_skp,
+                        consensus_sha256=consensus_sha,
+                        sketchup_exe=sketchup_exe,
+                        command=cmd,
+                    )
+                return {
+                    "ok": True,
+                    "skipped": False,
+                    "skp_path": str(out_skp),
+                    "consensus_sha256": consensus_sha,
+                    "elapsed_s": round(elapsed, 4),
+                }
+            if proc.poll() is not None:
+                print(f"[err] SketchUp exited prematurely (code={proc.returncode})")
+                return {
+                    "ok": False,
+                    "skipped": False,
+                    "skp_path": str(out_skp),
+                    "consensus_sha256": consensus_sha,
+                    "elapsed_s": round(time.time() - started, 4),
+                }
+            time.sleep(1)
+        print(f"[err] timeout after {timeout_s}s waiting for {out_skp}")
+        # Timeout cleanup respects mode: in `interactive`/`attach` we
+        # leave SU running so the user can inspect what went wrong;
+        # in `headless` we terminate our own child cleanly.
+        _pid = getattr(proc, "pid", "?")
+        if terminate_allowed:
             try:
                 proc.terminate()
+                time.sleep(2)
+                proc.kill()
+                print(f"[su-runner] timeout terminated own child PID {_pid}")
             except Exception:
                 pass
-            elapsed = time.time() - started
-            if consensus_sha is not None:
-                write_metadata(
-                    out_skp,
-                    consensus_sha256=consensus_sha,
-                    sketchup_exe=sketchup_exe,
-                    command=cmd,
-                )
-            return {
-                "ok": True,
-                "skipped": False,
-                "skp_path": str(out_skp),
-                "consensus_sha256": consensus_sha,
-                "elapsed_s": round(elapsed, 4),
-            }
-        if proc.poll() is not None:
-            print(f"[err] SketchUp exited prematurely (code={proc.returncode})")
-            return {
-                "ok": False,
-                "skipped": False,
-                "skp_path": str(out_skp),
-                "consensus_sha256": consensus_sha,
-                "elapsed_s": round(time.time() - started, 4),
-            }
-        time.sleep(1)
-    print(f"[err] timeout after {timeout_s}s waiting for {out_skp}")
-    try:
-        proc.terminate()
-        time.sleep(2)
-        proc.kill()
-    except Exception:
-        pass
-    return {
-        "ok": False,
-        "skipped": False,
-        "skp_path": str(out_skp),
-        "consensus_sha256": consensus_sha,
-        "elapsed_s": round(time.time() - started, 4),
-    }
+        else:
+            print(
+                f"[su-runner] timeout — SU left running (PID {_pid}) "
+                f"per mode={resolved_mode}; investigate manually"
+            )
+        return {
+            "ok": False,
+            "skipped": False,
+            "skp_path": str(out_skp),
+            "consensus_sha256": consensus_sha,
+            "elapsed_s": round(time.time() - started, 4),
+        }
+    finally:
+        # ALWAYS disarm autoruns on the way out, regardless of success,
+        # premature exit, or timeout. If we leave autorun_control.txt
+        # behind, the next SU launch — including the user double-clicking
+        # the .skp we just produced — will fire consume_consensus.rb,
+        # call model.entities.clear! and save() over the file. Removing
+        # every *control.txt is defence-in-depth: we also catch orphans
+        # left by sibling launchers (e.g. autorun_inspector_control.txt).
+        # See docs/learning/failure_patterns.md § "autorun_control_files".
+        post_disarmed = disarm_autoruns(plugins_dir)
+        for p in post_disarmed:
+            print(f"[post-run disarm] removed {p.name}")
 
 
 if __name__ == "__main__":
@@ -277,11 +355,31 @@ if __name__ == "__main__":
     ap.add_argument("--timeout", type=int, default=120)
     ap.add_argument("--force-skp", action="store_true",
                     help="bypass the consensus-hash skip, always launch SU")
+    ap.add_argument(
+        "--mode",
+        choices=["headless", "ci", "interactive", "debug", "attach", "manual"],
+        default=None,
+        help=(
+            "SU runner mode (CLAUDE.md §18). `headless`/`ci`: terminate "
+            "own SU child after the marker. `interactive`/`debug`: leave "
+            "SU running. `attach`/`manual`: don't launch SU (read files "
+            "only). Default: CI-aware (`headless` on CI env, "
+            "`interactive` elsewhere). Can also be set via RUN_MODE env."
+        ),
+    )
+    ap.add_argument(
+        "--no-terminate",
+        action="store_true",
+        help="Shorthand for --mode interactive (do not terminate SU).",
+    )
     args = ap.parse_args()
+    # Resolve mode via the safety helper so CLI/env/default agree.
+    resolved_mode = parse_mode(default=_default_runner_mode())
     result = run(
         args.consensus.resolve(), args.out.resolve(),
         args.sketchup, args.plugins, args.timeout,
         force_skp=args.force_skp,
+        mode=resolved_mode,
     )
     if result["skipped"]:
         sys.stdout.write(

@@ -65,8 +65,7 @@ adjustments via PR drafts; never commits directly to main.
 ### Ruff (currently `continue-on-error: true`)
 
 - If baseline drops below 50 violations: propose removing
-  `continue-on-error` via PR
-- Cross-ref with cleanup documented in `docs/repo_hardening_plan.md`
+  `continue-on-error` via PR (`.github/workflows/ci.yml`)
 
 ## When to edit
 

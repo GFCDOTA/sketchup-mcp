@@ -44,6 +44,7 @@ from cockpit.history_view import (
 )
 from cockpit.overrides import (
     OPENING_KIND_VALUES,
+    PT_TO_M,
     SUSPECT_SEVERITIES,
     load_overrides,
     overrides_apply_view,
@@ -51,12 +52,29 @@ from cockpit.overrides import (
     remove_override,
     save_override,
     set_block_skp_export,
+    validate_override_payload,
+    validate_override_warnings,
+)
+from cockpit.project_status import (
+    blockers_from_todo,
+    current_project_state,
+    current_state_excerpt,
+    gates_summary,
+    handoff_excerpt,
+    merged_pull_requests_today,
+    open_pull_requests,
+    read_events,
+    recent_artifacts,
+    recent_commits,
+    recent_runs,
 )
 from cockpit.proposed_actions import (
+    POLYGON_PROPOSED_ACTION_TYPES,
     action_already_applied,
     actions_for_target,
     apply_proposed_action,
     load_proposed_actions,
+    proposed_action_to_override_payload,
 )
 from cockpit.render_overlay import (
     PT_TO_M_DEFAULT,
@@ -161,16 +179,20 @@ def main() -> None:
         st.header("View")
         page = st.radio(
             "Page",
-            options=["Single run", "History"],
+            options=["Single run", "History", "Mission Control"],
             index=0,
             help=("`Single run` is the original cockpit (overlay + "
                   "inspector tabs). `History` lists every run under "
-                  "`runs/` with fidelity + Pre-SKP Review status."),
+                  "`runs/`. `Mission Control` is the project-level "
+                  "live view (events, PRs, gates, artifacts, blockers)."),
             label_visibility="collapsed",
         )
 
     if page == "History":
         _render_history_page()
+        return
+    if page == "Mission Control":
+        _render_mission_control_page()
         return
     _render_single_run_page()
 
@@ -1292,6 +1314,85 @@ def _render_room_review_row(*,
                         do_approve=bool(do_approve),
                     )
 
+        # ---- Slice 6b — polygon edit text-area (room_polygon_override)
+        # The expander defaults closed so it never adds noise for rooms
+        # the reviewer isn't editing. Producer chips
+        # (expand_room_polygon / shrink_room_polygon) auto-open it +
+        # pre-fill via session_state (see _render_proposed_action_chips).
+        _polygon_textarea_key = f"room_poly_text_{eid}"
+        _polygon_open_key = f"room_poly_open_{eid}"
+        _polygon_chip_id_key = f"room_poly_chip_id_{eid}"
+        _polygon_method_key = f"room_poly_method_{eid}"
+        # Default text = current polygon JSON. Override with the chip's
+        # suggested polygon if a chip just pre-filled this key.
+        if _polygon_textarea_key in st.session_state:
+            initial_text = st.session_state[_polygon_textarea_key]
+        else:
+            initial_text = json.dumps(poly, indent=2)
+        chip_seeded = st.session_state.pop(_polygon_open_key, False)
+        with st.expander(
+            f"✏️ Edit polygon · `{eid}`",
+            expanded=bool(chip_seeded),
+        ):
+            method_default = st.session_state.pop(
+                _polygon_method_key, "manual_draw",
+            )
+            method = st.radio(
+                f"polygon edit method · `{eid}`",
+                options=[
+                    "manual_draw", "snap_to_walls",
+                    "from_proposed_action",
+                ],
+                index=(
+                    ["manual_draw", "snap_to_walls", "from_proposed_action"]
+                    .index(method_default)
+                    if method_default in (
+                        "manual_draw", "snap_to_walls", "from_proposed_action",
+                    )
+                    else 0
+                ),
+                horizontal=True,
+                key=f"room_poly_method_radio_{eid}",
+                help=(
+                    "Audit-trail tag — records HOW you arrived at this "
+                    "polygon. `from_proposed_action` is auto-selected "
+                    "when you click an expand/shrink chip."
+                ),
+            )
+            new_pts_text = st.text_area(
+                f"polygon JSON · `{eid}` (≥3 [x, y] PDF-point pairs)",
+                value=initial_text,
+                height=180,
+                key=_polygon_textarea_key,
+                help=(
+                    "Override the detector's polygon for this room. "
+                    "Validated as a simple polygon with area > 0; soft "
+                    "warnings surfaced before save (ADR-002 §2.4)."
+                ),
+            )
+            pcols = st.columns([5, 2])
+            with pcols[1]:
+                if st.button(
+                    "Save polygon override", key=f"room_poly_save_{eid}",
+                ):
+                    try:
+                        parsed = json.loads(new_pts_text)
+                    except json.JSONDecodeError as e:
+                        st.error(f"invalid JSON: {e}")
+                    else:
+                        chip_id = st.session_state.pop(
+                            _polygon_chip_id_key, None,
+                        )
+                        _save_room_polygon_override(
+                            run_dir=run_dir,
+                            consensus_path=consensus_path,
+                            consensus=consensus,
+                            room_id=eid,
+                            new_polygon_pts=parsed,
+                            edit_method=method,
+                            from_proposed_action_id=chip_id,
+                        )
+
         _render_proposed_action_chips(
             target_kind="room", target_id=eid,
             proposed_actions=proposed_actions,
@@ -1347,6 +1448,14 @@ def _render_proposed_action_chips(*,
                 "`request_human_review` "
                 f"({', '.join(str(c) for c in codes) or 'no codes'})"
             )
+        elif a_type in POLYGON_PROPOSED_ACTION_TYPES:
+            cur = payload.get("current_area_m2", "?")
+            tgt = payload.get("target_area_m2", "?")
+            sf = payload.get("scale_factor", "?")
+            chip_summary = (
+                f"`{a_type}` (area {cur} → {tgt} m²; scale {sf}). "
+                "Click ‘Open in editor’ to review/edit before save."
+            )
         else:
             chip_summary = f"`{a_type}` (no Slice 4 mapping)"
         c1, c2 = st.columns([5, 2])
@@ -1370,6 +1479,47 @@ def _render_proposed_action_chips(*,
                     key=f"chip_apply_{target_kind}_{target_id}_{a_id}",
                     disabled=True,
                 )
+            elif a_type in POLYGON_PROPOSED_ACTION_TYPES:
+                # Slice 6b — polygon chips DO NOT auto-save. They
+                # pre-fill the room polygon text-area; human reviews,
+                # edits, and clicks Save in the expander.
+                if st.button(
+                    "Open in editor",
+                    key=f"chip_open_{target_kind}_{target_id}_{a_id}",
+                ):
+                    promoted = proposed_action_to_override_payload(action)
+                    if promoted is None:
+                        st.error(
+                            "chip payload is malformed (missing "
+                            "suggested_polygon_pts); refusing to seed editor."
+                        )
+                    else:
+                        suggested_pts = (
+                            promoted.get("payload", {})
+                            .get("new_polygon_pts") or []
+                        )
+                        # Seed the polygon text-area via session_state
+                        # then trigger a rerun so the expander opens
+                        # with the new prefill.
+                        st.session_state[
+                            f"room_poly_text_{target_id}"
+                        ] = json.dumps(suggested_pts, indent=2)
+                        st.session_state[
+                            f"room_poly_open_{target_id}"
+                        ] = True
+                        st.session_state[
+                            f"room_poly_chip_id_{target_id}"
+                        ] = a_id
+                        st.session_state[
+                            f"room_poly_method_{target_id}"
+                        ] = "from_proposed_action"
+                        st.info(
+                            f"Seeded polygon editor for `room:{target_id}` "
+                            f"from chip `{a_id}`. Scroll to the "
+                            "‘✏️ Edit polygon’ expander above, review/edit, "
+                            "then click ‘Save polygon override’."
+                        )
+                        st.rerun()
             else:
                 if st.button(
                     "Apply suggestion",
@@ -1479,6 +1629,99 @@ def _apply_element_overrides(*,
             st.error(er)
 
 
+def _save_room_polygon_override(*,
+                                  run_dir: Path,
+                                  consensus_path: Path,
+                                  consensus: dict,
+                                  room_id: str,
+                                  new_polygon_pts: list,
+                                  edit_method: str,
+                                  from_proposed_action_id: str | None) -> None:
+    """Slice 6b — save a ``room_polygon_override`` from the polygon
+    text-area in the Review tab.
+
+    Computes ``estimated_area_pts2`` + ``estimated_area_m2`` from the
+    new vertex list (shoelace), runs the existing hard + soft validators
+    (``validate_override_payload`` + ``validate_override_warnings``)
+    BEFORE calling ``save_override``, and surfaces soft warnings as a
+    yellow callout per ADR-002 §2.4.
+
+    Honors the Slice 6b constraint "no automatic destructive polygon
+    edits": this helper is only ever invoked from the explicit
+    "Save polygon override" button (never from a chip click).
+    """
+    # Shape guard before computing area (avoid silent garbage).
+    if not isinstance(new_polygon_pts, list) or len(new_polygon_pts) < 3:
+        st.error(
+            "Polygon must be a JSON list of ≥3 [x, y] PDF-point pairs."
+        )
+        return
+    pts_normalised: list[list[float]] = []
+    for pt in new_polygon_pts:
+        if (not isinstance(pt, (list, tuple))
+                or len(pt) != 2
+                or not isinstance(pt[0], (int, float))
+                or not isinstance(pt[1], (int, float))):
+            st.error(
+                "Each polygon vertex must be a [x, y] pair of numbers."
+            )
+            return
+        pts_normalised.append([float(pt[0]), float(pt[1])])
+    # Shoelace area, absolute.
+    n = len(pts_normalised)
+    total = 0.0
+    for i in range(n):
+        x0, y0 = pts_normalised[i]
+        x1, y1 = pts_normalised[(i + 1) % n]
+        total += x0 * y1 - x1 * y0
+    area_pts2 = abs(total) / 2.0
+    if area_pts2 <= 0:
+        st.error("Polygon has zero area — refusing to save.")
+        return
+    area_m2 = area_pts2 * (PT_TO_M ** 2)
+    payload: dict = {
+        "new_polygon_pts": pts_normalised,
+        "edit_method": edit_method,
+        "estimated_area_pts2": float(area_pts2),
+        "estimated_area_m2": float(area_m2),
+    }
+    if from_proposed_action_id:
+        payload["from_proposed_action_id"] = str(from_proposed_action_id)
+    override = {
+        "type": "room_polygon_override",
+        "target": {"kind": "room", "id": str(room_id)},
+        "payload": payload,
+        "reason": (
+            f"set via cockpit Review tab polygon text-area "
+            f"(edit_method={edit_method})"
+        ),
+    }
+    # Hard validation first — surface errors and abort.
+    errors = validate_override_payload(override, consensus=consensus)
+    if errors:
+        for er in errors:
+            st.error(f"polygon override validation failed: {er}")
+        return
+    # Soft warnings — non-blocking; surface as yellow callouts.
+    warnings = validate_override_warnings(override, consensus=consensus)
+    for w in warnings:
+        st.warning(f"polygon soft check: {w}")
+    try:
+        save_override(
+            run_dir, override, audit_actor="human",
+            consensus_path=consensus_path, consensus=consensus,
+            source_proposed_action_id=from_proposed_action_id,
+        )
+    except Exception as e:  # noqa: BLE001
+        st.error(f"save_override failed: {e}")
+        return
+    st.success(
+        f"Saved room_polygon_override on `room:{room_id}` "
+        f"(area={area_m2:.2f} m²; edit_method={edit_method}). "
+        "Reload the page to see the updated audit trail."
+    )
+
+
 def _render_expected_panel(consensus: dict,
                             expected: dict | None,
                             pt_to_m: float) -> None:
@@ -1569,6 +1812,334 @@ def _render_fidelity_panel(consensus: dict,
         st.info("Suggested fixes:")
         for s in report["suggested_fixes"]:
             st.write(f"- {s}")
+
+
+# ---------------------------------------------------------------------------
+# Mission Control page (Slice 1)
+# ---------------------------------------------------------------------------
+
+_VERDICT_BADGE = {
+    "PASS": "🟢", "WARN": "🟡", "FAIL": "🔴",
+    "pass": "🟢", "warn": "🟡", "fail": "🔴", "skip": "⚪",
+}
+_MERGE_STATE_BADGE = {
+    "CLEAN": "🟢", "BLOCKED": "🔴", "DIRTY": "🔴", "UNSTABLE": "🟡",
+    "BEHIND": "🟡", "UNKNOWN": "⚪",
+}
+
+
+def _render_mission_control_page() -> None:
+    """Project-level live view (Slice 1).
+
+    7 sub-tabs: Overview / Live Timeline / PRs / Runs / Gates /
+    Artifacts / Blockers. Pure read; no commands sent. Auto-refresh
+    cadence configurable in the sidebar.
+    """
+    st.title("Mission Control")
+    st.caption(
+        "Project-level live view. What is Claude doing right now? "
+        "Which branch / PR / gate / artifact? Read-only — no commands."
+    )
+
+    with st.sidebar:
+        st.header("Mission Control")
+        refresh_s = st.slider(
+            "Auto-refresh (seconds)", min_value=0, max_value=60,
+            value=10, step=5,
+            help="0 disables. Above 5s recommended to avoid hammering "
+                 "git + gh CLI.",
+        )
+        events_limit = st.slider(
+            "Timeline events to show", min_value=10, max_value=200,
+            value=50, step=10,
+        )
+        artifacts_limit = st.slider(
+            "Artifacts to show", min_value=4, max_value=24,
+            value=12, step=2,
+        )
+
+    # Pull state once per render
+    state = current_project_state(REPO_ROOT)
+
+    (tab_overview, tab_timeline, tab_prs, tab_runs,
+     tab_gates, tab_artifacts, tab_blockers) = st.tabs([
+        "Overview", "Live Timeline", "PRs", "Runs",
+        "Gates", "Artifacts", "Blockers",
+    ])
+
+    with tab_overview:
+        _render_mc_overview(state)
+    with tab_timeline:
+        _render_mc_timeline(events_limit)
+    with tab_prs:
+        _render_mc_prs(state)
+    with tab_runs:
+        _render_mc_runs(state)
+    with tab_gates:
+        _render_mc_gates(state)
+    with tab_artifacts:
+        _render_mc_artifacts(artifacts_limit)
+    with tab_blockers:
+        _render_mc_blockers(state)
+
+    # Auto-refresh — uses st.experimental_fragment when available, falls
+    # back to st_autorefresh-style hack. Streamlit ≥1.32 has
+    # st.fragment for partial re-runs but here we want full refresh.
+    if refresh_s > 0:
+        # Using st.empty + sleep would block; we rely on the meta-refresh
+        # tag injected via st.markdown(unsafe_allow_html=True) — works
+        # in any Streamlit version without needing extras.
+        st.markdown(
+            f'<meta http-equiv="refresh" content="{refresh_s}">',
+            unsafe_allow_html=True,
+        )
+
+
+def _render_mc_overview(state: dict) -> None:
+    captured = state.get("captured_at", "?")
+    st.caption(f"Snapshot: {captured}")
+
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("Branch", state.get("branch", "?"))
+        clean = state.get("clean")
+        emoji = "🟢" if clean else "🟡"
+        st.write(f"{emoji} working tree: {'clean' if clean else 'dirty'}")
+    with col2:
+        st.metric("HEAD commit", state.get("commit", "?"))
+        ahead = state.get("ahead_of_develop", 0)
+        st.write(f"🔀 {ahead} ahead of develop ({state.get('develop','?')})")
+    with col3:
+        prs = state.get("open_prs") or []
+        st.metric("Open PRs", len(prs))
+        if prs:
+            top = prs[0]
+            mb = _MERGE_STATE_BADGE.get(top["merge_state"], "⚪")
+            st.write(f"{mb} #{top['number']} · {top['merge_state']}")
+    with col4:
+        runs = state.get("recent_runs") or []
+        if runs:
+            r = runs[0]
+            f0 = r.get("f0_verdict") or "—"
+            sb = r.get("structural_blockers_count", 0)
+            st.metric("Latest run F0", f0,
+                      delta=f"{sb} blockers" if sb else None)
+            st.write(f"📁 {r['run_id']}")
+        else:
+            st.metric("Latest run F0", "—")
+
+    st.divider()
+    col_left, col_right = st.columns(2)
+    with col_left:
+        st.subheader("Recent commits")
+        commits = recent_commits(REPO_ROOT, limit=6)
+        if commits:
+            for c in commits:
+                st.text(f"{c['sha_short']} · {c['subject'][:70]}")
+        else:
+            st.caption("(git log unavailable)")
+    with col_right:
+        st.subheader("Recent events")
+        events = state.get("recent_events") or []
+        if events:
+            for ev in reversed(events[-8:]):
+                ts = (ev.get("ts") or "")[-9:-1]
+                t = ev.get("type") or "?"
+                title = ev.get("title") or ev.get("message") or ""
+                st.text(f"{ts} · {t} · {title[:55]}")
+        else:
+            st.caption("(no events yet — log via tools/log_event.py)")
+
+
+def _render_mc_timeline(limit: int) -> None:
+    st.subheader(f"Live event timeline (last {limit})")
+    events = read_events(limit=limit, repo=REPO_ROOT)
+    if not events:
+        st.info(
+            "No events yet. Producers should call "
+            "`python -m tools.log_event <type> [k=v ...]` "
+            "or `from tools.log_event import log_event`."
+        )
+        return
+    # Newest first
+    for ev in reversed(events):
+        ts = ev.get("ts", "")
+        t = ev.get("type", "?")
+        actor = ev.get("actor", "?")
+        title = ev.get("title") or ev.get("message") or ""
+        with st.container(border=True):
+            cols = st.columns([1, 1, 4])
+            with cols[0]:
+                st.code(ts, language="text")
+            with cols[1]:
+                st.write(f"**{t}**")
+                st.caption(actor)
+            with cols[2]:
+                if title:
+                    st.write(title)
+                # Render any extra fields as small dict
+                extras = {
+                    k: v for k, v in ev.items()
+                    if k not in ("ts", "type", "actor", "title",
+                                 "message", "schema_version")
+                }
+                if extras:
+                    st.json(extras, expanded=False)
+
+
+def _render_mc_prs(state: dict) -> None:
+    st.subheader("Open pull requests")
+    prs = state.get("open_prs") or []
+    if not prs:
+        st.success("Zero open PRs.")
+    for pr in prs:
+        mb = _MERGE_STATE_BADGE.get(pr["merge_state"], "⚪")
+        with st.container(border=True):
+            top = st.columns([1, 4, 2])
+            with top[0]:
+                st.markdown(f"### #{pr['number']}")
+            with top[1]:
+                st.write(pr["title"])
+                st.caption(f"branch: `{pr['branch']}`")
+            with top[2]:
+                st.write(f"{mb} {pr['merge_state']}")
+                st.caption(
+                    f"checks: {pr['checks_success']}/"
+                    f"{pr['checks_total']} ✓"
+                    + (f" · {pr['checks_failure']} ✗"
+                       if pr['checks_failure'] else "")
+                    + (f" · {pr['checks_running']} ⟳"
+                       if pr['checks_running'] else "")
+                )
+    st.divider()
+    st.subheader("Recently merged (last 5)")
+    merged = state.get("merged_recent") or []
+    for m in merged:
+        st.text(
+            f"#{m['number']} · {m['title'][:80]}  "
+            f"({(m.get('merged_at') or '')[:10]})"
+        )
+
+
+def _render_mc_runs(state: dict) -> None:
+    st.subheader("Recent runs")
+    runs = state.get("recent_runs") or []
+    if not runs:
+        st.caption("(no run dirs found under runs/)")
+        return
+    for r in runs:
+        f0 = r.get("f0_verdict") or "—"
+        f0e = _VERDICT_BADGE.get(f0, "⚪")
+        sb = r.get("structural_blockers_count", 0)
+        sw = r.get("structural_warnings_count", 0)
+        fid = r.get("fidelity_score")
+        skp = "📦" if r.get("has_skp") else "—"
+        with st.container(border=True):
+            cols = st.columns([4, 1, 1, 1, 1])
+            with cols[0]:
+                st.write(f"**{r['run_id']}**")
+                st.caption(r['run_dir'])
+            with cols[1]:
+                st.metric("F0", f"{f0e} {f0}")
+            with cols[2]:
+                st.metric(
+                    "fidelity",
+                    f"{fid:.3f}" if fid is not None else "—",
+                )
+            with cols[3]:
+                st.metric("struct.", f"{sb}/{sw}",
+                          help="blockers / warnings")
+            with cols[4]:
+                st.metric("SKP", skp)
+
+
+def _render_mc_gates(state: dict) -> None:
+    st.subheader("Smoke gates per recent run")
+    runs = state.get("recent_runs") or []
+    if not runs:
+        st.caption("(no run dirs found)")
+        return
+    for r in runs[:5]:
+        gates = gates_summary(Path(r['run_dir']))
+        if not gates["found"]:
+            st.text(f"{r['run_id']}: (no smoke report)")
+            continue
+        verdict = gates["verdict"] or "?"
+        ve = _VERDICT_BADGE.get(verdict, "⚪")
+        with st.expander(
+            f"{ve} {r['run_id']} — overall verdict {verdict}",
+            expanded=False,
+        ):
+            for g in gates["gates"]:
+                gs = (g.get("status") or "").lower()
+                ge = _VERDICT_BADGE.get(gs, "⚪")
+                msg = (g.get("message") or "")[:160]
+                st.text(f"{ge}  {g['name']:<40}  {msg}")
+
+
+def _render_mc_artifacts(limit: int) -> None:
+    st.subheader(f"Recent artifacts (last {limit})")
+    arts = recent_artifacts(REPO_ROOT, limit=limit)
+    if not arts:
+        st.caption("(no artifacts found under runs/ or docs/diagnostics/)")
+        return
+    cols = st.columns(3)
+    for idx, p in enumerate(arts):
+        col = cols[idx % 3]
+        with col:
+            with st.container(border=True):
+                rel = (
+                    str(p.relative_to(REPO_ROOT))
+                    if p.is_relative_to(REPO_ROOT) else str(p)
+                )
+                st.caption(rel)
+                if p.suffix.lower() in (".png", ".svg"):
+                    try:
+                        st.image(str(p), use_container_width=True)
+                    except Exception as e:  # noqa: BLE001
+                        st.code(f"failed to render: {e}")
+                elif p.suffix.lower() == ".skp":
+                    sz = p.stat().st_size
+                    st.write(f"📦 SKP · {sz:,} bytes")
+                try:
+                    mt = p.stat().st_mtime
+                    from datetime import datetime as _dt
+                    st.caption(
+                        _dt.fromtimestamp(mt).strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        )
+                    )
+                except OSError:
+                    pass
+
+
+def _render_mc_blockers(state: dict) -> None:
+    st.subheader("Blockers (parsed from .ai_bridge/TODO_NEXT.md)")
+    rows = state.get("blockers") or []
+    if not rows:
+        st.success("No headings of form `## 🔴/🟡/🟢 Pn — Title` parsed.")
+    red = [r for r in rows if r["color"] == "RED"]
+    yellow = [r for r in rows if r["color"] == "YELLOW"]
+    green = [r for r in rows if r["color"] == "GREEN"]
+    if red:
+        st.markdown("### 🔴 RED")
+        for r in red:
+            st.write(f"**{r['priority']}** — {r['title']}")
+    if yellow:
+        st.markdown("### 🟡 YELLOW")
+        for r in yellow:
+            st.write(f"{r['priority']} — {r['title']}")
+    if green:
+        st.markdown("### 🟢 GREEN")
+        for r in green:
+            st.write(f"{r['priority']} — {r['title']}")
+    st.divider()
+    st.subheader("HANDOFF.md excerpt")
+    excerpt = handoff_excerpt(REPO_ROOT, max_lines=30)
+    if excerpt:
+        st.code(excerpt, language="markdown")
+    else:
+        st.caption("(.ai_bridge/HANDOFF.md not found)")
 
 
 if __name__ == "__main__":

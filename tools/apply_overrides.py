@@ -62,14 +62,25 @@ VALID_OPENING_KINDS = {
 
 VALID_SUSPECT_SEVERITIES = {"low", "medium", "high"}
 
-# Precedence ranks for ADR-001 §2.5. Higher rank wins.
+# Precedence ranks for ADR-001 §2.5 + ADR-002. Higher rank wins.
+# ``room_polygon_override`` shares rank 2 with the other element-shape
+# overrides because they touch DISJOINT fields on the same room
+# (polygon vs name) and both are meant to apply, in created_at order.
 _PRECEDENCE: dict[str, int] = {
     "reject_element": 4,
     "mark_suspect": 3,
     "opening_kind_override": 2,
     "opening_connects_override": 2,
     "room_label_override": 2,
+    "room_polygon_override": 2,  # ADR-002
     "approve_element": 1,
+}
+
+VALID_POLYGON_EDIT_METHODS = {
+    "manual_draw",
+    "snap_to_walls",
+    "trace_pdf",
+    "from_proposed_action",
 }
 
 
@@ -148,6 +159,36 @@ def _validate_override_payload(override: dict, consensus: dict) -> str | None:
         new_name = payload.get("new_name")
         if not isinstance(new_name, str) or not new_name.strip():
             return "room_label_override.new_name must be non-empty string"
+    elif otype == "room_polygon_override":
+        # ADR-002 §2.4 — hard validation only. Soft checks are the
+        # cockpit's responsibility (cockpit/overrides.py:validate_override_warnings).
+        if kind != "room":
+            return "room_polygon_override target.kind must be 'room'"
+        edit_method = payload.get("edit_method")
+        if edit_method not in VALID_POLYGON_EDIT_METHODS:
+            return (
+                f"room_polygon_override.edit_method {edit_method!r} "
+                f"not in {sorted(VALID_POLYGON_EDIT_METHODS)}"
+            )
+        pts = payload.get("new_polygon_pts")
+        if not isinstance(pts, list) or len(pts) < 3:
+            return ("room_polygon_override.new_polygon_pts must be a "
+                    "list of >=3 [x,y] pairs")
+        for pt in pts:
+            if (not isinstance(pt, (list, tuple))
+                    or len(pt) != 2
+                    or not isinstance(pt[0], (int, float))
+                    or not isinstance(pt[1], (int, float))):
+                return ("room_polygon_override.new_polygon_pts entries "
+                        "must be [x,y] pairs of numbers")
+        area_pts2 = payload.get("estimated_area_pts2")
+        area_m2 = payload.get("estimated_area_m2")
+        if not isinstance(area_pts2, (int, float)) or area_pts2 <= 0:
+            return ("room_polygon_override.estimated_area_pts2 must be "
+                    "a positive number")
+        if not isinstance(area_m2, (int, float)) or area_m2 <= 0:
+            return ("room_polygon_override.estimated_area_m2 must be "
+                    "a positive number")
     return None
 
 
@@ -241,6 +282,23 @@ def _apply_to_room(room: dict, override: dict) -> None:
             room["_name_original"] = room.get("name")
         room["name"] = new_name
         room["source"] = "manual"
+    elif otype == "room_polygon_override":
+        # ADR-002 §2.5 — preserve originals, replace geometry, surface
+        # `_edit_method` and optional `_source_proposed_action_id`.
+        if "polygon_pts" in room and "_polygon_pts_original" not in room:
+            room["_polygon_pts_original"] = room.get("polygon_pts")
+        if "area_pts2" in room and "_area_pts2_original" not in room:
+            room["_area_pts2_original"] = room.get("area_pts2")
+        if "area_m2" in room and "_area_m2_original" not in room:
+            room["_area_m2_original"] = room.get("area_m2")
+        room["polygon_pts"] = list(payload.get("new_polygon_pts") or [])
+        room["area_pts2"] = float(payload.get("estimated_area_pts2") or 0.0)
+        room["area_m2"] = float(payload.get("estimated_area_m2") or 0.0)
+        room["source"] = "manual"
+        room["_edit_method"] = payload.get("edit_method")
+        fpa_id = payload.get("from_proposed_action_id")
+        if fpa_id:
+            room["_source_proposed_action_id"] = fpa_id
     elif otype == "mark_suspect":
         room["_suspect"] = {
             "severity": payload.get("severity"),
@@ -288,6 +346,7 @@ def apply_overrides(
         "applied_at": _utc_now(),
         "overrides_applied_count": 0,
         "overrides_dropped_count": 0,
+        "polygon_overrides_applied_count": 0,  # ADR-002 §2.6
         "warnings": [],
         "block_skp_export": False,
         "block_reason": None,
@@ -394,6 +453,8 @@ def apply_overrides(
                 _apply_to_opening(target_dict, ov)
             else:
                 _apply_to_room(target_dict, ov)
+            if otype == "room_polygon_override":
+                metadata["polygon_overrides_applied_count"] += 1
             applied_count += 1
 
     if rejected_opening_ids:

@@ -1,3 +1,487 @@
+# Handoff — 2026-05-25 (post #172 merge; Slice 6b shipped, polygon-override loop closed)
+
+> Most recent session's exit state. Next session reads this FIRST
+> after `CLAUDE.md`.
+>
+> **Canonical onboarding (stable, NOT session log):**
+> [`../docs/HANDOFF.md`](../docs/HANDOFF.md).
+> **Canonical project state:**
+> [`../docs/PROJECT_STATE.md`](../docs/PROJECT_STATE.md) §9 (update log).
+> **Multi-agent coordination rule:**
+> [`../docs/AGENT_COORDINATION.md`](../docs/AGENT_COORDINATION.md).
+
+## This turn — worktree + branch
+
+| Field | Value |
+|---|---|
+| Agent ID | `claude-main` |
+| Worktree | `D:\Claude\worktrees\sketchup-claude-handoff-172` |
+| Branch | `chore/handoff-post-172-merge` (fresh from `origin/develop`) |
+| Canonical clone | `D:\Claude\microservices\plan-extract-v2` — read-only this session |
+
+## Recently merged on `origin/develop`
+
+| PR | Merged at (UTC) | Merge commit | Title |
+|---|---|---|---|
+| #170 | 2026-05-24 | `912fc42` | fix(rooms): repair Floor_r001 soft-barrier split (supersedes #144) |
+| #171 | 2026-05-24 | `63f8df3` | feat(tools): restore soft-barrier and room polygon diagnostics |
+| **#172** | **2026-05-25T01:28:55Z** | **`2c61387`** | **feat(cockpit): Slice 6b — room_polygon_override producer rule + chip handler + text-area UX** |
+
+**Current `origin/develop` HEAD:** `2c61387` (= PR #172 squash merge).
+
+Worktree `sketchup-claude-slice-6b` removed from git registry
+post-merge (filesystem residue at
+`D:/Claude/worktrees/sketchup-claude-slice-6b` retained due to
+Windows file lock — git no longer tracks it; safe to delete
+manually when convenient).
+
+## Slice 6 status (ADR-002)
+
+| Slice | Status | PR | Notes |
+|---|---|---|---|
+| 6a — data plane (`room_polygon_override` schema + apply + fidelity metadata) | **MERGED** | #124 `f01a9ae` | Pre-this-session |
+| 6b — producer rule + cockpit chip handler + text-area UX | **MERGED** | #172 `2c61387` | This session |
+| 6c — F0 emit `manual_polygon_room_count` + Pre-SKP pane | **NOT STARTED** | — | Deferred; do not start without explicit trigger |
+| 6d — graphical polygon edit UX | DEFERRED | — | Per ADR-002 §4, waits for Phase 3 (FastAPI + SPA) |
+| 6e — `amended_consensus.json` for SKP exporter | DEFERRED | — | Per ADR-002 §4 + §2.8, waits for review case + SU geometry validation |
+
+## Operational notes for next session
+
+1. **Slice 6c is the next natural step in the polygon-override chain.** Touchpoints documented in ADR-002 §4: `scripts/smoke/smoke_skp_export.py` gate F0 (emit `manual_polygon_room_count`, WARN trigger on 5pt-jump), `cockpit/history_view.py` Pre-SKP pane line, 2 new test files. ~15 tests · ~80 LOC. LOW risk.
+2. **Do not start 6c without explicit trigger.** Per user policy: stop after #172 unless asked to continue.
+3. **Polygon chips on the Review tab** now seed the editor (do not auto-save). When testing manually: open cockpit on a `runs/<id>/` directory with a `proposed_actions.json` containing `expand_room_polygon` / `shrink_room_polygon` chips → "Open in editor" button → text-area pre-fills with `suggested_polygon_pts` → Save button writes the override.
+4. **Producer rule activation:** the new `_rule_polygon_correction` fires when `fidelity_report.warnings[]` contains strings matching `"ROOM area X: observed Y m^2 vs expected [LO, HI]"`. Smoke this by running the fidelity engine on planta_74 in `apply_overrides=False` mode and inspecting the resulting `proposed_actions.json`.
+
+## Worktrees alive at this snapshot
+
+```
+D:/Claude/microservices/plan-extract-v2     (canonical clone — develop)
+D:/Claude/worktrees/_wt_148_clean           (peer agent — feat/spec-yaml-linter-clean)
+D:/Claude/worktrees/sketchup-claude-handoff-172   (this session — removed after #172.handoff PR merges)
+```
+
+## Coordination rule (active, do not forget)
+
+Per `docs/AGENT_COORDINATION.md` §0: multiple autonomous agents MUST
+NEVER share the same physical working directory. `git worktree add`
+per agent / per session is the default. Lock files are advisory.
+
+This handoff PR was branched from `origin/develop @ 2c61387` in a
+fresh worktree per the rule.
+
+---
+
+(historical entry below — kept for chronological audit trail)
+
+# Handoff — 2026-05-24 (post #165 merge; Wave 2 closed, repo hygiene returns to product focus)
+
+> Most recent session's exit state. Next session reads this FIRST
+> after `CLAUDE.md`.
+>
+> **Canonical onboarding (stable, NOT session log):**
+> [`../docs/HANDOFF.md`](../docs/HANDOFF.md).
+> **Canonical project state:**
+> [`../docs/PROJECT_STATE.md`](../docs/PROJECT_STATE.md) §9 (update log).
+> **Multi-agent coordination rule:**
+> [`../docs/AGENT_COORDINATION.md`](../docs/AGENT_COORDINATION.md).
+
+## This turn — worktree + branch
+
+| Field | Value |
+|---|---|
+| Agent ID | `claude-main` |
+| Worktree | `D:\Claude\worktrees\sketchup-claude-handoff` |
+| Branch | `chore/handoff-post-w2-merge` (fresh from `origin/develop`) |
+| Canonical clone | `D:\Claude\microservices\plan-extract-v2` — read-only this session |
+
+## Recently merged on `origin/develop`
+
+| PR | Merged at (UTC) | Merge commit | Title |
+|---|---|---|---|
+| #158 | 2026-05-24T15:29:40Z | `3e1a290` | chore(repo): repository health gate + canonical hygiene governance |
+| #161 | 2026-05-24 (earlier) | `f77e1eb` | docs(protocol): LL-019 multi-agent coordination protocol |
+| #160 | 2026-05-24T16:31:12Z | `cf25f28` | chore(repo): W001 Wave 1 — root prototype cleanup (16 → 10) |
+| #162 | 2026-05-24T16:47:27Z | `7ff2182` | docs(repo): codify multi-agent worktree-isolation policy |
+| #163 | 2026-05-24 | `ffa5a4d` | docs: clean docs foundations without stale SDD stack commits |
+| #164 | 2026-05-24 | `b01b194` | fix(openings+walls): wall-hosted window semantics + canonical shell + quadrado (supersedes #156) |
+| #165 | 2026-05-24T20:01:38Z | `ef85206` | chore(repo): W001 Wave 2 — root-script allowlist (10 → 0; zero file moves) |
+
+**Current `origin/develop` HEAD:** `ef85206` (= PR #165 squash merge).
+
+Worktrees cleaned up after merge:
+`D:/Claude/worktrees/sketchup-claude-main` (post #162),
+`D:/Claude/worktrees/sketchup-claude-main-wave2` (post #165).
+
+## Repo Health Gate baselines (locked here)
+
+| Metric | Value | Notes |
+|---|---|---|
+| **W001 (loose-script-root)** | **0** | Zero loose root Python files unexpected at this point. |
+| **I003 (intentional-root-script)** | **10** | 5 deprecation wrappers + 5 standalone scripts, each with cited rationale in `ROOT_PY_KEEP_AT_ROOT` (`tools/repo_health_gate.py`). Informational only — does NOT gate CI. |
+| W002 (md-no-status) | 48 | Pre-policy deferral per `REPO_HYGIENE.md` §2 ("Do not run a bulk rewrite"). Status: headers ship when each doc is next touched. |
+| ERROR (any code) | 0 | CI green on `develop`. |
+
+## Operational rules to remember (do NOT relax)
+
+1. **`ROOT_PY_KEEP_AT_ROOT` is not permission to add more root scripts.**
+   It is a *closed allowlist* of files that already exist at root with
+   a documented trigger condition. Adding a NEW root Python file
+   means it should land under `tools/` or `scripts/`, not the
+   allowlist. New W001 firings on a PR are the gate doing its job.
+
+2. **The 10 I003 entries each cite their move-trigger.**
+   When a trigger fires (e.g., maintainer confirms "I do not use
+   `crop_legend.py` manually"; raster pipeline officially retired;
+   all wrapper clients migrate to `renderers.*`), the workflow is
+   strictly: remove the allowlist entry → run the gate → the file
+   re-fires W001 → `git mv` to `tools/legacy/` (or `git rm` if
+   truly orphan) in a focused PR. NOT bulk edits.
+
+3. **Repo hygiene is now policy-stable; product/fidelity/SKP work
+   is the focus.** Per user's directive, the next cleanup wave only
+   happens with a concrete trigger:
+     (a) a preserved root script is proven unused by `rg` AND no
+         human/manual workflow depends on it, OR
+     (b) a wrapper is no longer needed because all clients migrated
+         to `renderers.*`, OR
+     (c) the raster legacy path is officially retired, OR
+     (d) a new root Python file appears and is not allowlisted with
+         rationale, OR
+     (e) a gate starts failing.
+   Otherwise: stop the hygiene loop and ship product work.
+
+4. **Multi-agent worktree rule is in force** (`docs/AGENT_COORDINATION.md`
+   §0). Never share the canonical clone with peer agents. Always
+   `git worktree add` fresh from updated `origin/develop`.
+
+## Where to register your handoff between agents:
+
+---
+
+# Handoff — 2026-05-24 (post #158/#160/#161/#162 merge; Wave 2 cleanup starting)
+
+> Most recent session's exit state. Next session reads this FIRST
+> after `CLAUDE.md`.
+>
+> **Canonical onboarding (stable, NOT session log):**
+> [`../docs/HANDOFF.md`](../docs/HANDOFF.md).
+> **Canonical project state:**
+> [`../docs/PROJECT_STATE.md`](../docs/PROJECT_STATE.md).
+> **Multi-agent coordination rule:**
+> [`../docs/AGENT_COORDINATION.md`](../docs/AGENT_COORDINATION.md) — §0
+> root rule (worktree per agent, lock files advisory only).
+
+## This turn — worktree + branch
+
+| Field | Value |
+|---|---|
+| Agent ID | `claude-main` |
+| Worktree | `D:\Claude\worktrees\sketchup-claude-main-wave2` |
+| Branch | `chore/repo-cleanup-wave-2-root-scripts` (fresh from `origin/develop`) |
+| Canonical clone | `D:\Claude\microservices\plan-extract-v2` — **read-only this session** |
+
+## Last known good state — `origin/develop` HEAD = `7ff2182`
+
+Recently merged on `develop`:
+
+| PR | Merged at (UTC) | Merge commit | Title |
+|---|---|---|---|
+| #158 | 2026-05-24T15:29:40Z | `3e1a290` | chore(repo): repository health gate + canonical hygiene governance |
+| #160 | 2026-05-24T16:31:12Z | `cf25f28` | chore(repo): W001 Wave 1 — root prototype cleanup (16 → 10) |
+| #161 | 2026-05-24 (earlier) | `f77e1eb` | docs(protocol): LL-019 multi-agent coordination protocol |
+| #162 | 2026-05-24T16:47:27Z | `7ff2182` | docs(repo): codify multi-agent worktree-isolation policy |
+
+Branches deleted out-of-band this cycle (auto-deleted via PR
+`--delete-branch`):
+`chore/repo-governance-anti-forgetting`,
+`chore/repo-cleanup-w1-fresh`,
+`chore/agent-coordination-worktree-policy`.
+
+Other live worktrees observed at this snapshot:
+`D:/Claude/microservices/sketchup-mcp-pr156-repair`
+(branch `fix/pr156-window-semantics-repair`).
+
+## Wave 2 plan (starts this turn)
+
+- **Scope:** the 10 remaining W001 warnings on `develop` (5 standalone
+  scripts at root: `analyze_overpoly.py`, `crop_legend.py`,
+  `make_test_pdf.py`, `peek_pdf.py`, `preprocess_walls.py`; plus 5
+  deprecation-wrapper `render_*.py` files at root).
+- **Branch:** `chore/repo-cleanup-wave-2-root-scripts` (this worktree
+  only — must not reuse the #162 branch / worktree, both already
+  deleted).
+- **No docs / policy work in this PR.** Cleanup-only.
+- **`rg` proof required** before any delete; per
+  `docs/REPO_HYGIENE.md` §3 don't-delete-blindly protocol.
+- **Before / after warning count** must appear in the PR body
+  (target: 10 → ≤5 W001).
+
+## Coordination rule (active, do not forget)
+
+Per `docs/AGENT_COORDINATION.md` §0: multiple autonomous agents MUST
+NEVER share the same physical working directory. `git worktree add`
+per agent / per session is the default. Lock files are advisory.
+
+Wave 2 starts only in a fresh worktree from updated `origin/develop`
+(this entry is the proof: the cleanup branch was branched from
+`7ff2182` after fetch/prune, in the worktree path above).
+
+---
+
+(historical entry below — kept for chronological audit trail)
+
+# Handoff — 2026-05-24 (repo governance + anti-forgetting protocol branch open)
+
+> Most recent session's exit state. Next session reads this FIRST
+> after `CLAUDE.md`.
+>
+> **Canonical onboarding (stable, NOT session log):**
+> [`../docs/HANDOFF.md`](../docs/HANDOFF.md).
+> **Canonical project state:**
+> [`../docs/PROJECT_STATE.md`](../docs/PROJECT_STATE.md).
+
+## Multi-agent coordination signal (added 2026-05-24, LL-019)
+
+> **This file is the public coordination channel between Claude
+> agents working on this repo.** `.ai_triage/` and other gitignored
+> dirs are agent-local only — invisible to peers.
+
+**Before any GitHub mutation** (merge / close / delete branch /
+push) or shared-working-tree change:
+
+1. `git fetch --all --prune` — surface remote deletes + new
+   commits since your last snapshot.
+2. `git rev-parse origin/develop` — confirm base HEAD.
+3. `gh pr view <n>` immediately before any per-PR action — never
+   reuse a value from a previous turn.
+4. Diff snapshot vs current state; report out-of-band changes in
+   the same response that performs the action.
+5. Use `git worktree add` for isolated working trees when peer
+   agents may be using the main checkout.
+6. Do not trust snapshots > 30–60 s for destructive actions.
+
+**Last known good state** (refresh before acting):
+- `origin/develop` HEAD: `3e1a290` (chore(repo): repository
+  health gate + canonical hygiene governance, PR #158, merged
+  2026-05-24T15:29:40Z).
+- Branches deleted out-of-band recently: `dashboard/architecture-sre-radar`,
+  `dashboard/project-roadmap`, `chore/repo-governance-anti-forgetting`
+  (auto-deleted after PR #158 merge).
+- Open PRs at last snapshot: 8 (#143, #144, #145, #146, #147,
+  #148, #149, #156); plus #159 (`chore/repo-health-allow-specs-dir`)
+  opened by a parallel agent around the same time.
+
+**Full procedure:**
+[`../docs/AGENT_COORDINATION.md`](../docs/AGENT_COORDINATION.md).
+**Rule (short form):** CLAUDE.md §22. **Lesson:**
+`docs/learning/lessons_learned.md` LL-019.
+
+**Where to register your handoff between agents:**
+- **This file** (`.ai_bridge/HANDOFF.md`) — most recent exit
+  state, what you just did, what's safe to pick up next.
+- `.ai_bridge/CURRENT_STATE.md` — running state of the active
+  project (longer-lived than HANDOFF).
+- `.ai_bridge/TODO_NEXT.md` — pending work for the next agent.
+- Commit messages and PR titles — the public, durable signal.
+
+## Status — `chore/repo-governance-anti-forgetting` branched from develop @ `14212ea`; doc-only + new gate; no source touched
+
+User requested a structural repo-governance pass on 2026-05-24
+(verbatim: "repo hygiene + project state durability +
+anti-forgetting protocol"). Branch carries doc additions + a new
+state-check script + a hygiene report. No source code changed, no
+files deleted, no files archived (per the 3 prior audits' converging
+"preserve unless trigger" conclusion + the user's explicit scope
+choice on this run: governance-only, not archival).
+
+### What landed (this branch)
+
+- **Canonical state docs (`docs/`):**
+  - [`docs/PROJECT_STATE.md`](../docs/PROJECT_STATE.md) — single source
+    of truth for current state, canonical fixtures, gates, permanent
+    rules; explicit pointer to the 3-commit in-flight feature branch.
+  - [`docs/HANDOFF.md`](../docs/HANDOFF.md) — stable canonical
+    onboarding (read order, setup steps, where-to-find-what, common
+    pitfalls). Distinct from this file (session log).
+  - [`docs/REPO_HYGIENE.md`](../docs/REPO_HYGIENE.md) — five-category
+    file scheme + status-header policy + don't-delete-blindly
+    protocol.
+  - [`docs/GATES.md`](../docs/GATES.md) — canonical catalogue of all
+    validation gates with command + cost + failure signature.
+  - [`docs/ANTI_FORGETTING.md`](../docs/ANTI_FORGETTING.md) — 10
+    permanent rules with reasoning, how-to-apply, and gates that
+    enforce each.
+- **New validation gate:**
+  - `scripts/project_state_check.py` — asserts canonical docs +
+    fixtures + gate test files all exist.
+  - `tests/test_project_state_check.py` — pytest wrapper for CI.
+- **Hygiene report:**
+  - `reports/repo_hygiene_report.md` — full inventory of all 121
+    `.md` files + 17 root `.py` files classified into the 5
+    categories.
+
+### What did NOT change
+
+- Zero source code touched.
+- Zero files deleted.
+- Zero files archived.
+- `CLAUDE.md` unchanged on this branch (the new docs are pointers
+  into it; not replacements).
+- `runs/`, `patches/`, `vendor/` untouched per §1 hard rule.
+- `feature/window-aperture-semantics` left alone (still 3 commits
+  ahead of develop; needs its own PR).
+
+### Trigger context
+
+User's prompt cited symptoms that motivated this branch:
+- difficulty resuming on another computer / with another person;
+- unclear which `.md` are current vs obsolete;
+- decisions that "worked" getting lost between machines;
+- progress depending on local context / prints / outputs / memory;
+- Claude occasionally repeating already-fixed mistakes;
+- no single source of truth on project state.
+
+This branch addresses all six by establishing canonical docs +
+explicit permanent rules + a validation gate.
+
+### Next-session top ROI
+
+1. 🟢 Open PR `chore/repo-governance-anti-forgetting → develop`.
+   Doc-only + new gate + 1 new test. Squash merge.
+2. 🟡 **P1 — Merge `feature/window-aperture-semantics`.** 3 commits
+   with quadrado canonical work, wall-shell canonicalisation, window
+   aperture 3D carve. Reference: see `docs/PROJECT_STATE.md` §2.
+3. 🟡 P1 — Slice 6a — `room_polygon_override` schema + apply layer.
+
+### Trigger watch (when to re-run hygiene cycle 4)
+
+Per `docs/ops/repo_hygiene_audit_2026-05-10.md` §"Triggers de retirada"
+— monitor for any of:
+- Raster pipeline officially retired (CLAUDE.md §10 stops marking
+  raster as OUTDATED-but-kept).
+- `patches/README.md:194` stops citing `PROMPT-RENAN.md`.
+- `tests/test_renderers_migration.py` future-release gate declared
+  closed.
+- Explicit human decision to archive `runs/` (amends §1 hard rule).
+
+None of these have fired yet. Next hygiene cycle is **on hold** until
+one does.
+
+---
+
+# Handoff — 2026-05-13 (PR #121 merged — human-walls protocol shipped end-to-end)
+
+> Most recent session's exit state. Next session reads this FIRST
+> after `CLAUDE.md`.
+
+## Status — PR #121 merged at `39a8f3a`; develop fast-forwarded; one advisory issue filed
+
+The 8-commit `feat/human-walls-protocol` branch landed as a single
+squash commit on develop. The branch shipped the whole `human-walls`
++ `human-soft-barriers` protocol end-to-end against `planta_74`,
+including the human-painted soft-barrier `h_sb000` (outer parapet),
+the 35-wall augmented consensus, the 4-axis fidelity verdict
+(`tools/verify_fidelities.py`), and 2 prior corrections in
+`tools/find_loop_closure_candidates.py`.
+
+### What landed (+11 423 LOC)
+
+- **`tools/verify_fidelities.py`** — 4-axis verdict
+  (`wall_fidelity`, `soft_barrier_fidelity`, `semantic_room_fidelity`,
+  `global_visual_fidelity`) with `--operator-confirmed-visual`
+  override for the advisory axis.
+- **`tools/find_loop_closure_candidates.py`** — `PLANTA_74_PAIR_PRIORS`
+  dictionary; final 2 priors corrected 2026-05-13 (A.S./TERRACO
+  TECNICO + TERRACO SOCIAL/TERRACO TECNICO from
+  `human_soft_barrier(peitoril)` → `semantic_room_split(open_plan)`).
+- **`tools/extract_human_soft_barriers.py` +
+  `tools/apply_human_soft_barriers.py`** — soft-barriers half of the
+  protocol (cyan paint → `consensus.soft_barriers`).
+- **`tools/extract_human_walls.py` + `tools/apply_human_walls.py` +
+  `tools/render_human_walls_annotation_base.py` +
+  `tools/render_human_soft_barriers_annotation_base.py`** — walls +
+  soft-barriers full reviewer-paint workflow.
+- **`tools/detect_door_glyphs.py` +
+  `tools/render_door_glyph_overlay.py`** — additional door-detector
+  artefact (out-of-scope but tagged along with the protocol).
+- **`tools/render_cell_leak_debug.py` +
+  `tools/render_diagnostic_for_user.py`** — diagnostic dumps used to
+  obtain operator verbal confirmation of the 2026-05-13 prior flip.
+- **`docs/protocols/human_soft_barriers_protocol.md`** — companion
+  protocol doc.
+- **35-wall augmented consensus at
+  `fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json`**
+  with all 12 human openings hosted and 1 soft barrier applied.
+
+### 4-axis verdict — final state at merge
+
+| Axis                     | Verdict | Notes                                                  |
+|--------------------------|---------|--------------------------------------------------------|
+| `wall_fidelity`          | PASS    | `h_o005` cut_into_wall via host `h_w000`               |
+| `soft_barrier_fidelity`  | PASS    | 0 cells need a soft_barrier post 2026-05-13 prior flip |
+| `semantic_room_fidelity` | PASS    | SALA DE JANTAR \| SALA DE ESTAR labels preserved       |
+| `global_visual_fidelity` | **WARN**| Operator verbally waived visual review (advisory only) |
+
+Top-level verdict: WARN (advisory; merge unblocked by hard axes).
+
+### Visual-confirm advisory parked
+
+The operator declined to compare `side_by_side_pdf_vs_skp_FINAL.png`
+against the PDF in this cycle. Decision documented at
+[`fixtures/planta_74/operator_acknowledgment_2026-05-13.md`](../fixtures/planta_74/operator_acknowledgment_2026-05-13.md).
+Follow-up filed as **issue #122**
+(`planta_74: close global_visual_fidelity WARN advisory`); body in
+[`.ai_bridge/pr_bodies/ISSUE_BODY_visual_confirm_pendente.md`](pr_bodies/ISSUE_BODY_visual_confirm_pendente.md).
+Close conditions in the issue body. Re-run with
+`--operator-confirmed-visual` once a reviewer (operator OR LLM via
+GPT-bridge / local Ollama) confirms.
+
+### Next-session top ROI
+
+Per `.ai_bridge/TODO_NEXT.md`:
+
+1. 🟡 **P1 — Slice 6a** — `room_polygon_override` schema + apply
+   layer (ADR-002 §4). ~25 new tests. Touches `cockpit/overrides.py`,
+   `tools/apply_overrides.py`, `tools/fidelity/compare_generated_to_expected.py`.
+2. 🟡 P1 — Slice 6b — chip promotion + text-area polygon entry UX
+   (depends on 6a landing).
+3. 🟡 P1 — Cycle 6 (Stage 1.6 SU integration) — wire autorun
+   inspector into `gate_f`. SU runtime, needs focused session.
+
+---
+
+# Handoff — 2026-05-10 (Cycle 3 hygiene audit shipped — audit-only, hygiene loop paused)
+
+> Most recent session's exit state. Next session reads this FIRST
+> after `CLAUDE.md`. Append-only is fine but the top entry must
+> always be the latest.
+
+## Status — Cycle 3 hygiene audit landed (PR #108, merge `530310a`); develop @ `530310a`
+
+3 audits consecutivos (PR #73 / 2026-05-06, diagnostic 2026-05-08, **PR #108 / 2026-05-10**) convergem em "preserve-only". Cleanup do cluster legacy (`proto_*`, `peek_pdf`, `crop_legend`, `analyze_overpoly`, `render_*` wrappers, `PROMPT-*.md`) **não progride** sem trigger humano explícito. Por decisão do maintainer, **hygiene loop pausa aqui** — não rodar novo ciclo de hygiene até trigger real disparar (lista abaixo).
+
+### Achados de Cycle 3
+
+- 28 candidatos da raiz inventariados em [`docs/ops/repo_hygiene_audit_2026-05-10.md`](../docs/ops/repo_hygiene_audit_2026-05-10.md).
+- Mudança de evidência vs Cycle 1 (PR #73): refs em `docs/ROADMAP.md` / `docs/repo_hardening_plan.md` / `pyproject.toml` que justificavam preservação **sumiram**.
+- Refs ainda preservadas em `docs/_archive/2026-04-f1-cycle/*` (frozen by §1) + `patches/README.md:194` (PROMPT-RENAN como autoridade de invariantes — load-bearing).
+- 0 deletions, 0 archives, 0 source touched. PR doc-only mergeada após CI 3/3 verde.
+- Suite estável: 301 passed, 4 skipped, 0 failed (renderers_migration + proto_cli + cli + smoke_gate_* + cockpit_* + truth_gate + fidelity_*).
+
+### Regra nova (vigente a partir de 2026-05-10)
+
+**Não iniciar novo ciclo de repo hygiene até existir trigger real:**
+
+- Raster pipeline oficialmente aposentado (CLAUDE.md §10 deixar de marcar raster como OUTDATED-but-kept).
+- `patches/README.md:194` deixar de citar `PROMPT-RENAN.md` como autoridade de invariantes.
+- `tests/test_renderers_migration.py` "future release" gate explicitamente declarado fechado (próximo refactor major do `renderers/` package).
+- Decisão humana explícita pra arquivar `runs/` (amendment a §1 hard-rule).
+- Aparecer arquivo claramente temporário/orphan que NÃO esteja no inventário do audit 2026-05-10.
+
+Sem trigger, hygiene não vira loop recorrente.
+
+---
+
 # Handoff — 2026-05-09 (autonomous-loop wave: 10 PRs end-to-end + dogfood proof)
 
 > Most recent session's exit state. Next session reads this FIRST
