@@ -84,6 +84,8 @@ CANONICAL_TOP_LEVEL_DIRS = frozenset({
     "docs", "scripts", "specs", "tools", "tests", "fixtures",
     "ground_truth", "references", "reports", "runs", "vendor",
     "out", "review",
+    # Tracked deliverables (docs/ARTIFACT_POLICY.md)
+    "artifacts",
     # Hidden / tooling
     ".github", ".claude", ".ai_bridge", ".venv", ".git", ".pytest_cache",
     ".ruff_cache", ".mypy_cache",
@@ -126,6 +128,11 @@ GENERATED_ALLOWED_PREFIXES = (
     "tools/synth/",                 # synthetic-corpus assets
     ".ai_bridge/",
     "sketchup_mcp_server/",         # ruby plugin assets
+    # Artifact policy (docs/ARTIFACT_POLICY.md) — the .skp deliverable
+    # MUST be committed here when a PR claims SKP success. Both subtrees
+    # are tracked.
+    "artifacts/human_review/",      # Felipe-facing .skp + render + README
+    "artifacts/agent_inputs/",      # agent/test plane (JSON + reports)
 )
 
 # Specific tracked files at unusual paths that have been explicitly

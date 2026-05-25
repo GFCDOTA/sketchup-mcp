@@ -1033,3 +1033,56 @@ Full procedure with copy-paste snippets:
 See LL-019 (the lesson + incident timeline),
 LL-018 (same operational philosophy applied to credentials),
 LL-012 (fix tooling access before falling back to manual).
+
+---
+
+## 23. Artifact policy — `.skp` is the deliverable
+
+> **Root rule:** `.skp` is the primary deliverable of this project.
+> Do NOT treat every `.skp` as disposable just because `/runs/` is
+> gitignored.
+>
+> Canonical policy: [`docs/ARTIFACT_POLICY.md`](docs/ARTIFACT_POLICY.md)
+> (the long form with promotion procedure + LFS escape hatch).
+
+**Two-folder split** (both tracked, neither gitignored):
+
+```
+artifacts/
+  human_review/<plant>/       ← Felipe / reviewer-facing
+    <plant>_<descriptor>.skp  ← THE DELIVERABLE
+    <plant>_<descriptor>.png  ← optional supporting render
+    README.md
+  agent_inputs/<plant>/       ← agent / test plane (JSON / reports / pointer doc)
+    README.md
+```
+
+**Promote `runs/<id>/foo.skp` → `artifacts/human_review/<plant>/`
+when ANY of these is true:** canonical success / user review /
+fidelity comparison / claimed working output / demo proof.
+
+**Inviolable**: **No PR may claim "SKP generated successfully"
+unless the reviewable `.skp` is committed in
+`artifacts/human_review/<plant>/`.** If you cannot commit the
+`.skp` (size > LFS threshold, missing SU, etc.) the task FAILS —
+do not silently drop the deliverable.
+
+**Gate enforcement:** `tools/repo_health_gate.py` allows
+`artifacts/human_review/` and `artifacts/agent_inputs/` as
+valid tracked paths for `.skp` (and other generated suffixes);
+tracked `.skp` files outside those paths still fire `E002`
+(`generated-in-wrong-path`).
+
+**File size:** for `.skp` > 5 MB, configure Git LFS first
+(`git lfs track "artifacts/human_review/**/*.skp"`); do NOT
+skip the commit. The gate's `E005 heavy-file-no-allowlist`
+fires at 5 MB as the "configure LFS now" signal.
+
+**Migration of existing tracked `.skp` files:** policy is
+forward-looking. `fixtures/planta_74/skp_final_model.skp` stays
+at its current path until a future PR refreshes that build (per
+ARTIFACT_POLICY §6). Do NOT mass-move.
+
+See `docs/ARTIFACT_POLICY.md` for: full promotion procedure,
+agent_inputs vs human_review boundary, what does NOT belong in
+`artifacts/`, LFS configuration commands.

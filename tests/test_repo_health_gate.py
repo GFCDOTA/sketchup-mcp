@@ -216,6 +216,68 @@ def test_allowlisted_root_script_emits_i003_not_w001():
     )
 
 
+def test_artifact_human_review_skp_does_not_fire_e002(tmp_path: Path):
+    """A tracked .skp under artifacts/human_review/ MUST be allowed
+    (no E002 generated-in-wrong-path). Verifies docs/ARTIFACT_POLICY.md
+    gate enforcement contract."""
+    repo = _init_mini_repo(tmp_path)
+    art = repo / "artifacts" / "human_review" / "quadrado"
+    art.mkdir(parents=True)
+    (art / "quadrado_canonical.skp").write_bytes(b"fake-skp-bytes")
+    (art / "quadrado_canonical.png").write_bytes(b"\x89PNG\r\n\x1a\n" + b"x" * 64)
+    (art / "README.md").write_text(
+        "# quadrado\n\n> **Status:** Canonical\n",
+        encoding="utf-8",
+    )
+    _commit_all(repo, "add artifact")
+    proc = _run_in_repo(repo, ["--mode", "audit", "--json", "--no-report"])
+    assert proc.returncode == 0, proc.stderr
+    payload = json.loads(proc.stdout)
+    e002_paths = {f["path"] for f in payload["findings"] if f["code"] == "E002"}
+    assert "artifacts/human_review/quadrado/quadrado_canonical.skp" not in e002_paths
+    assert "artifacts/human_review/quadrado/quadrado_canonical.png" not in e002_paths
+
+
+def test_skp_outside_artifacts_still_fires_e002(tmp_path: Path):
+    """A tracked .skp outside artifacts/ + the other allowed prefixes
+    MUST fire E002. Guards against the bury-the-deliverable failure
+    mode the artifact policy exists to prevent."""
+    repo = _init_mini_repo(tmp_path)
+    rogue_dir = repo / "scratch_dir"
+    rogue_dir.mkdir()
+    (rogue_dir / "rogue.skp").write_bytes(b"fake-skp")
+    _commit_all(repo, "add rogue skp")
+    proc = _run_in_repo(repo, ["--mode", "audit", "--json", "--no-report"])
+    payload = json.loads(proc.stdout)
+    e002 = [f for f in payload["findings"] if f["code"] == "E002"]
+    paths = {f["path"] for f in e002}
+    assert "scratch_dir/rogue.skp" in paths, (
+        "E002 must fire on .skp outside the artifact allow-list"
+    )
+
+
+def test_artifacts_top_level_dir_is_canonical(tmp_path: Path):
+    """`artifacts/` is a canonical top-level dir per ARTIFACT_POLICY;
+    a PR introducing it MUST NOT fire E003 new-dir-not-canonical."""
+    repo = _init_mini_repo(tmp_path)
+    _commit_all(repo, "base")
+    base_sha = subprocess.run(["git", "rev-parse", "HEAD"], cwd=repo,
+                                capture_output=True, text=True,
+                                check=True).stdout.strip()
+    art = repo / "artifacts" / "human_review" / "quadrado"
+    art.mkdir(parents=True)
+    (art / "quadrado.skp").write_bytes(b"fake")
+    _commit_all(repo, "add artifact")
+    proc = _run_in_repo(repo, ["--mode", "check", "--base", base_sha,
+                                "--json", "--no-report"])
+    payload = json.loads(proc.stdout)
+    e003 = [f for f in payload["findings"] if f["code"] == "E003"]
+    paths = {f["path"] for f in e003}
+    assert "artifacts/" not in paths, (
+        f"artifacts/ must be canonical, but E003 fired: {paths}"
+    )
+
+
 def test_stale_keep_at_root_entry_emits_i003(tmp_path: Path):
     """If an allowlisted filename is no longer tracked, I003 fires
     with category 'stale-keep-at-root-entry' so the operator prunes
