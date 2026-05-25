@@ -44,6 +44,7 @@ from cockpit.history_view import (
 )
 from cockpit.overrides import (
     OPENING_KIND_VALUES,
+    PT_TO_M,
     SUSPECT_SEVERITIES,
     load_overrides,
     overrides_apply_view,
@@ -51,6 +52,8 @@ from cockpit.overrides import (
     remove_override,
     save_override,
     set_block_skp_export,
+    validate_override_payload,
+    validate_override_warnings,
 )
 from cockpit.project_status import (
     blockers_from_todo,
@@ -66,10 +69,12 @@ from cockpit.project_status import (
     recent_runs,
 )
 from cockpit.proposed_actions import (
+    POLYGON_PROPOSED_ACTION_TYPES,
     action_already_applied,
     actions_for_target,
     apply_proposed_action,
     load_proposed_actions,
+    proposed_action_to_override_payload,
 )
 from cockpit.render_overlay import (
     PT_TO_M_DEFAULT,
@@ -1309,6 +1314,85 @@ def _render_room_review_row(*,
                         do_approve=bool(do_approve),
                     )
 
+        # ---- Slice 6b — polygon edit text-area (room_polygon_override)
+        # The expander defaults closed so it never adds noise for rooms
+        # the reviewer isn't editing. Producer chips
+        # (expand_room_polygon / shrink_room_polygon) auto-open it +
+        # pre-fill via session_state (see _render_proposed_action_chips).
+        _polygon_textarea_key = f"room_poly_text_{eid}"
+        _polygon_open_key = f"room_poly_open_{eid}"
+        _polygon_chip_id_key = f"room_poly_chip_id_{eid}"
+        _polygon_method_key = f"room_poly_method_{eid}"
+        # Default text = current polygon JSON. Override with the chip's
+        # suggested polygon if a chip just pre-filled this key.
+        if _polygon_textarea_key in st.session_state:
+            initial_text = st.session_state[_polygon_textarea_key]
+        else:
+            initial_text = json.dumps(poly, indent=2)
+        chip_seeded = st.session_state.pop(_polygon_open_key, False)
+        with st.expander(
+            f"✏️ Edit polygon · `{eid}`",
+            expanded=bool(chip_seeded),
+        ):
+            method_default = st.session_state.pop(
+                _polygon_method_key, "manual_draw",
+            )
+            method = st.radio(
+                f"polygon edit method · `{eid}`",
+                options=[
+                    "manual_draw", "snap_to_walls",
+                    "from_proposed_action",
+                ],
+                index=(
+                    ["manual_draw", "snap_to_walls", "from_proposed_action"]
+                    .index(method_default)
+                    if method_default in (
+                        "manual_draw", "snap_to_walls", "from_proposed_action",
+                    )
+                    else 0
+                ),
+                horizontal=True,
+                key=f"room_poly_method_radio_{eid}",
+                help=(
+                    "Audit-trail tag — records HOW you arrived at this "
+                    "polygon. `from_proposed_action` is auto-selected "
+                    "when you click an expand/shrink chip."
+                ),
+            )
+            new_pts_text = st.text_area(
+                f"polygon JSON · `{eid}` (≥3 [x, y] PDF-point pairs)",
+                value=initial_text,
+                height=180,
+                key=_polygon_textarea_key,
+                help=(
+                    "Override the detector's polygon for this room. "
+                    "Validated as a simple polygon with area > 0; soft "
+                    "warnings surfaced before save (ADR-002 §2.4)."
+                ),
+            )
+            pcols = st.columns([5, 2])
+            with pcols[1]:
+                if st.button(
+                    "Save polygon override", key=f"room_poly_save_{eid}",
+                ):
+                    try:
+                        parsed = json.loads(new_pts_text)
+                    except json.JSONDecodeError as e:
+                        st.error(f"invalid JSON: {e}")
+                    else:
+                        chip_id = st.session_state.pop(
+                            _polygon_chip_id_key, None,
+                        )
+                        _save_room_polygon_override(
+                            run_dir=run_dir,
+                            consensus_path=consensus_path,
+                            consensus=consensus,
+                            room_id=eid,
+                            new_polygon_pts=parsed,
+                            edit_method=method,
+                            from_proposed_action_id=chip_id,
+                        )
+
         _render_proposed_action_chips(
             target_kind="room", target_id=eid,
             proposed_actions=proposed_actions,
@@ -1364,6 +1448,14 @@ def _render_proposed_action_chips(*,
                 "`request_human_review` "
                 f"({', '.join(str(c) for c in codes) or 'no codes'})"
             )
+        elif a_type in POLYGON_PROPOSED_ACTION_TYPES:
+            cur = payload.get("current_area_m2", "?")
+            tgt = payload.get("target_area_m2", "?")
+            sf = payload.get("scale_factor", "?")
+            chip_summary = (
+                f"`{a_type}` (area {cur} → {tgt} m²; scale {sf}). "
+                "Click ‘Open in editor’ to review/edit before save."
+            )
         else:
             chip_summary = f"`{a_type}` (no Slice 4 mapping)"
         c1, c2 = st.columns([5, 2])
@@ -1387,6 +1479,47 @@ def _render_proposed_action_chips(*,
                     key=f"chip_apply_{target_kind}_{target_id}_{a_id}",
                     disabled=True,
                 )
+            elif a_type in POLYGON_PROPOSED_ACTION_TYPES:
+                # Slice 6b — polygon chips DO NOT auto-save. They
+                # pre-fill the room polygon text-area; human reviews,
+                # edits, and clicks Save in the expander.
+                if st.button(
+                    "Open in editor",
+                    key=f"chip_open_{target_kind}_{target_id}_{a_id}",
+                ):
+                    promoted = proposed_action_to_override_payload(action)
+                    if promoted is None:
+                        st.error(
+                            "chip payload is malformed (missing "
+                            "suggested_polygon_pts); refusing to seed editor."
+                        )
+                    else:
+                        suggested_pts = (
+                            promoted.get("payload", {})
+                            .get("new_polygon_pts") or []
+                        )
+                        # Seed the polygon text-area via session_state
+                        # then trigger a rerun so the expander opens
+                        # with the new prefill.
+                        st.session_state[
+                            f"room_poly_text_{target_id}"
+                        ] = json.dumps(suggested_pts, indent=2)
+                        st.session_state[
+                            f"room_poly_open_{target_id}"
+                        ] = True
+                        st.session_state[
+                            f"room_poly_chip_id_{target_id}"
+                        ] = a_id
+                        st.session_state[
+                            f"room_poly_method_{target_id}"
+                        ] = "from_proposed_action"
+                        st.info(
+                            f"Seeded polygon editor for `room:{target_id}` "
+                            f"from chip `{a_id}`. Scroll to the "
+                            "‘✏️ Edit polygon’ expander above, review/edit, "
+                            "then click ‘Save polygon override’."
+                        )
+                        st.rerun()
             else:
                 if st.button(
                     "Apply suggestion",
@@ -1494,6 +1627,99 @@ def _apply_element_overrides(*,
     if errors:
         for er in errors:
             st.error(er)
+
+
+def _save_room_polygon_override(*,
+                                  run_dir: Path,
+                                  consensus_path: Path,
+                                  consensus: dict,
+                                  room_id: str,
+                                  new_polygon_pts: list,
+                                  edit_method: str,
+                                  from_proposed_action_id: str | None) -> None:
+    """Slice 6b — save a ``room_polygon_override`` from the polygon
+    text-area in the Review tab.
+
+    Computes ``estimated_area_pts2`` + ``estimated_area_m2`` from the
+    new vertex list (shoelace), runs the existing hard + soft validators
+    (``validate_override_payload`` + ``validate_override_warnings``)
+    BEFORE calling ``save_override``, and surfaces soft warnings as a
+    yellow callout per ADR-002 §2.4.
+
+    Honors the Slice 6b constraint "no automatic destructive polygon
+    edits": this helper is only ever invoked from the explicit
+    "Save polygon override" button (never from a chip click).
+    """
+    # Shape guard before computing area (avoid silent garbage).
+    if not isinstance(new_polygon_pts, list) or len(new_polygon_pts) < 3:
+        st.error(
+            "Polygon must be a JSON list of ≥3 [x, y] PDF-point pairs."
+        )
+        return
+    pts_normalised: list[list[float]] = []
+    for pt in new_polygon_pts:
+        if (not isinstance(pt, (list, tuple))
+                or len(pt) != 2
+                or not isinstance(pt[0], (int, float))
+                or not isinstance(pt[1], (int, float))):
+            st.error(
+                "Each polygon vertex must be a [x, y] pair of numbers."
+            )
+            return
+        pts_normalised.append([float(pt[0]), float(pt[1])])
+    # Shoelace area, absolute.
+    n = len(pts_normalised)
+    total = 0.0
+    for i in range(n):
+        x0, y0 = pts_normalised[i]
+        x1, y1 = pts_normalised[(i + 1) % n]
+        total += x0 * y1 - x1 * y0
+    area_pts2 = abs(total) / 2.0
+    if area_pts2 <= 0:
+        st.error("Polygon has zero area — refusing to save.")
+        return
+    area_m2 = area_pts2 * (PT_TO_M ** 2)
+    payload: dict = {
+        "new_polygon_pts": pts_normalised,
+        "edit_method": edit_method,
+        "estimated_area_pts2": float(area_pts2),
+        "estimated_area_m2": float(area_m2),
+    }
+    if from_proposed_action_id:
+        payload["from_proposed_action_id"] = str(from_proposed_action_id)
+    override = {
+        "type": "room_polygon_override",
+        "target": {"kind": "room", "id": str(room_id)},
+        "payload": payload,
+        "reason": (
+            f"set via cockpit Review tab polygon text-area "
+            f"(edit_method={edit_method})"
+        ),
+    }
+    # Hard validation first — surface errors and abort.
+    errors = validate_override_payload(override, consensus=consensus)
+    if errors:
+        for er in errors:
+            st.error(f"polygon override validation failed: {er}")
+        return
+    # Soft warnings — non-blocking; surface as yellow callouts.
+    warnings = validate_override_warnings(override, consensus=consensus)
+    for w in warnings:
+        st.warning(f"polygon soft check: {w}")
+    try:
+        save_override(
+            run_dir, override, audit_actor="human",
+            consensus_path=consensus_path, consensus=consensus,
+            source_proposed_action_id=from_proposed_action_id,
+        )
+    except Exception as e:  # noqa: BLE001
+        st.error(f"save_override failed: {e}")
+        return
+    st.success(
+        f"Saved room_polygon_override on `room:{room_id}` "
+        f"(area={area_m2:.2f} m²; edit_method={edit_method}). "
+        "Reload the page to see the updated audit trail."
+    )
 
 
 def _render_expected_panel(consensus: dict,
