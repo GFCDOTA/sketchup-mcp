@@ -19,14 +19,14 @@ colinear + re-extração adaptativa, já integrada no main
 (`classify/service.py` + `extract/service.py` desde `a11724a`). Ver
 `../README.md` para detalhes.
 
-O ingest atual é SVG-first (ver `../../docs/SVG-INGEST-INTEGRATION.md`);
-o raster virou fallback legado. Patches 07/08 foram desenhados para
-o pipeline raster e precisariam ser reavaliados à luz da nova
-arquitetura antes de qualquer aplicação.
+O ingest atual é SVG-first (`tools/build_vector_consensus.py` +
+`tools/extract_openings_vector.py`); o raster virou fallback legado.
+Patches 07/08 foram desenhados para o pipeline raster e precisariam
+ser reavaliados à luz da nova arquitetura antes de qualquer aplicação.
 
 ## Se for reativar um patch arquivado
 
-1. Reler o veredicto em `../../docs/SOLUTION-FINAL.md`.
+1. Reler o veredicto em `../../docs/_archive/2026-04-f1-cycle/SOLUTION-FINAL.md`.
 2. Abrir branch dedicado (`spike/patch-NN-...`).
 3. Adicionar dependências ao `requirements.txt` (patch 07 → `scipy`;
    patch 08 → `torch`, `torchvision`, `gdown`, `scikit-image`).
