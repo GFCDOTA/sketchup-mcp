@@ -1,24 +1,5 @@
-# Prefer pyproject.toml / uv for development; requirements.txt is legacy compatibility.
-# Keep in sync manually with pyproject.toml; if you edit this, edit pyproject.toml too.
-fastapi>=0.115,<1.0
-uvicorn[standard]>=0.30,<1.0
-numpy>=1.26,<3.0
-opencv-python-headless>=4.10,<5.0
-pypdfium2>=4.30,<5.0
+# Legacy requirements file. Prefer `pip install -e ".[dev]"` (reads pyproject.toml).
 shapely>=2.0,<3.0
-networkx>=3.3,<4.0
-pydantic>=2.8,<3.0
-jsonschema>=4.0
+pypdfium2>=4.30,<5.0
 Pillow>=10.0,<12.0
-matplotlib>=3.7,<4.0
 pytest>=8.3,<9.0
-pytest-xdist>=3.6,<4.0
-
-# Oracle / architect (scripts/oracle/) — optional
-# Phase 1: LLM-as-architect
-anthropic>=0.39
-# Phase 2: CubiCasa5K DL oracle
-torch>=2.1
-torchvision>=0.16
-gdown>=5.1
-scikit-image>=0.22
