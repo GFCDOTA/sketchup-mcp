@@ -1,9 +1,9 @@
 # Repo Health Report
 
 > **Status:** Generated (do not edit). Produced by `tools/repo_health_gate.py`.
-> **Generated:** 2026-05-26T03:33:10+00:00
-> **Branch:** chore/md-cleanup-pass-3
-> **Commit:** 6780b4e
+> **Generated:** 2026-05-26T03:43:28+00:00
+> **Branch:** chore/cleanup-pass-4
+> **Commit:** 317edda
 > **Base (--base):** (none)
 
 ## Summary

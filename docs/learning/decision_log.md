@@ -72,12 +72,17 @@ inputs + parameters + stage code as the cache key.
 **Rationale:** Path-based cache breaks on rename/copy/edit-without-rename.
 Content-based cache is correct by construction.
 **Trade-off:** Hash cost (negligible for PDF < 50 MB).
-**Implementation:** Specified in
-`docs/_archive/2026-05-md-cleanup/cache_design.md` and
-`docs/_archive/2026-05-md-cleanup/cache_keys.md`. Sequenced in
-`docs/_archive/2026-05-md-cleanup/cache_rollout_plan.md` (13 PRs, opt-in first).
-**Status:** Documented only. PR 1 (infrastructure without callers)
-to be opened in `perf/cache-infrastructure` branch.
+**Implementation note:** The detailed cache_design / cache_keys / cache_rollout_plan
+docs originally drafted alongside this decision were unimplemented
+proposals; pruned from the archive on 2026-05-26 (PR #181's hygiene
+pass) since the SHA256-key principle above is the only load-bearing
+takeaway — git history preserves the original `cache_*.md` content if
+ever needed. Partial implementation already live as content-hash cache
+for SKP export in `tools/skp_from_consensus.py` +
+`tools/build_plan_shell_skp.py` (`<out_skp>.metadata.json` sidecar);
+see CLAUDE.md §3 step 5 + `docs/performance/skip_unchanged_skp.md`.
+**Status:** Cache pattern partially implemented for SKP export step;
+no broader pipeline-wide cache scheduled.
 
 ## DL-007 — Ruff conservative selects, no autofix
 
