@@ -89,5 +89,23 @@ SU 2026 must be installed at:
 The Ruby exporter runs as an autorun plugin from
 `%APPDATA%\SketchUp\SketchUp 2026\SketchUp\Plugins\` — the Python
 launcher writes a control file and invokes the Ruby script via SU.
-Mode default is `interactive` (does NOT auto-terminate SU); pass
-`--mode headless` for CI.
+
+## SU runner mode — DO NOT pass `--mode headless` for local builds
+
+Mode default is `interactive` (does NOT auto-terminate SU). For local
+runs (a human is at the keyboard), ALWAYS use the default — the SU
+window stays open after the `.skp` is saved so you can inspect
+visually.
+
+`--mode headless` is for CI only (terminates the launched SU child
+PID after the done marker fires). On a local machine it makes SU
+"close by itself" the moment the build finishes, which looks like a
+bug. **Never pass `--mode headless` from a developer terminal.**
+
+```bash
+# CORRECT — SU stays open after build, you can inspect
+python -m tools.build_plan_shell_skp <consensus.json> --out <out.skp>
+
+# WRONG locally — SU closes itself after build
+python -m tools.build_plan_shell_skp <consensus.json> --out <out.skp> --mode headless
+```
