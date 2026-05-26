@@ -1,9 +1,9 @@
 # Repo Health Report
 
 > **Status:** Generated (do not edit). Produced by `tools/repo_health_gate.py`.
-> **Generated:** 2026-05-24T16:56:27+00:00
-> **Branch:** chore/repo-cleanup-wave-2-root-scripts
-> **Commit:** 510d1c2
+> **Generated:** 2026-05-26T02:38:17+00:00
+> **Branch:** chore/md-cleanup-pass-2
+> **Commit:** d0bca39
 > **Base (--base):** (none)
 
 ## Summary
@@ -11,13 +11,14 @@
 | Severity | Count |
 |---|---|
 | error   | 0  |
-| warning | 48 |
-| info    | 10 |
+| warning | 50 |
+| info    | 11 |
 
 ## Warnings
 
 | Code | Category | File | Message | Auto-fix? |
 |---|---|---|---|---|
+| W002 | md-no-status | `PROMPT-FELIPE.md` | PROMPT-FELIPE.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched. | no |
 | W002 | md-no-status | `docs/SCHEMA-COHERENCE-REPORT.md` | docs/SCHEMA-COHERENCE-REPORT.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched. | no |
 | W002 | md-no-status | `docs/SCHEMA-V2.md` | docs/SCHEMA-V2.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched. | no |
 | W002 | md-no-status | `docs/SOLUTION.md` | docs/SOLUTION.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched. | no |
@@ -50,6 +51,7 @@
 | W002 | md-no-status | `docs/learning/validation_matrix.md` | docs/learning/validation_matrix.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched. | no |
 | W002 | md-no-status | `docs/operational_roadmap.md` | docs/operational_roadmap.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched. | no |
 | W002 | md-no-status | `docs/ops/repo_hygiene_audit_2026-05-10.md` | docs/ops/repo_hygiene_audit_2026-05-10.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched. | no |
+| W002 | md-no-status | `docs/performance/cache_design.md` | docs/performance/cache_design.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched. | no |
 | W002 | md-no-status | `docs/performance/cache_keys.md` | docs/performance/cache_keys.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched. | no |
 | W002 | md-no-status | `docs/performance/cache_rollout_plan.md` | docs/performance/cache_rollout_plan.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched. | no |
 | W002 | md-no-status | `docs/performance/current_perf_baseline.md` | docs/performance/current_perf_baseline.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched. | no |
@@ -71,6 +73,7 @@
 
 | Code | Category | File | Message | Auto-fix? |
 |---|---|---|---|---|
+| I002 | archived-wrong-location | `reports/current/repo_health_report.md` | reports/current/repo_health_report.md declares Status: Archived but is not under docs/_archive/. Move it (with the explicit `git mv`) to a date-scoped archive subdir. | no |
 | I003 | intentional-root-script | `analyze_overpoly.py` | kept at root: reproducible-script CLI cited at docs/_archive/2026-04-f1-cycle/OVER-POLYGONIZATION-ANALYSIS.md:220 (`python analyze_overpoly.py`); moving would break the archive's reproducibility instruction — archive is frozen per CLAUDE.md §1 hard rule | no |
 | I003 | intentional-root-script | `crop_legend.py` | kept at root: historical baseline per docs/ops/repo_hygiene_audit_2026-05-10.md §60; deferred until raster-pipeline-retirement OR maintainer confirms 'not used manually' | no |
 | I003 | intentional-root-script | `make_test_pdf.py` | kept at root: active fixture builder per docs/ops/repo_hygiene_audit_2026-05-10.md §211 ('mantém'); generates inviolable canonical test_plan.pdf — no removal trigger exists | no |
@@ -84,6 +87,7 @@
 
 ## Requires human decision
 
+- [W002] `PROMPT-FELIPE.md` — PROMPT-FELIPE.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched.
 - [W002] `docs/SCHEMA-COHERENCE-REPORT.md` — docs/SCHEMA-COHERENCE-REPORT.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched.
 - [W002] `docs/SCHEMA-V2.md` — docs/SCHEMA-V2.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched.
 - [W002] `docs/SOLUTION.md` — docs/SOLUTION.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched.
@@ -116,6 +120,7 @@
 - [W002] `docs/learning/validation_matrix.md` — docs/learning/validation_matrix.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched.
 - [W002] `docs/operational_roadmap.md` — docs/operational_roadmap.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched.
 - [W002] `docs/ops/repo_hygiene_audit_2026-05-10.md` — docs/ops/repo_hygiene_audit_2026-05-10.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched.
+- [W002] `docs/performance/cache_design.md` — docs/performance/cache_design.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched.
 - [W002] `docs/performance/cache_keys.md` — docs/performance/cache_keys.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched.
 - [W002] `docs/performance/cache_rollout_plan.md` — docs/performance/cache_rollout_plan.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched.
 - [W002] `docs/performance/current_perf_baseline.md` — docs/performance/current_perf_baseline.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched.

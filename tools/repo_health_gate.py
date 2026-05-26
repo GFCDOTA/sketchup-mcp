@@ -98,7 +98,7 @@ STATUS_HEADER_RE = re.compile(r"^\s*>?\s*\*?\*?Status:\*?\*?\s*", re.MULTILINE)
 # from path / they're top-level intentional docs that pre-date the policy).
 ROOT_MD_EXEMPT = frozenset({
     "README.md", "CHANGELOG.md", "CLAUDE.md", "OVERVIEW.md", "AGENTS.md",
-    "PROMPT-FELIPE.md", "PROMPT-RENAN.md",
+    "PROMPT-RENAN.md",
 })
 
 # Tmp / backup file patterns banned from git index (E001).
