@@ -4,96 +4,38 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sketchup-mcp"
-version = "0.1.0"
-description = "Floor-plan PDF -> observed_model.json pipeline, with optional MCP server."
+version = "0.2.0"
+description = "Minimal PDF floor-plan -> SketchUp .skp pipeline."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "Proprietary" }
 authors = [{ name = "Felipe (GFCDOTA)" }]
-keywords = ["sketchup", "floor-plan", "pdf", "extraction", "mcp"]
+keywords = ["sketchup", "floor-plan", "pdf"]
 classifiers = [
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Operating System :: Microsoft :: Windows",
-  "Operating System :: POSIX :: Linux",
-  "Topic :: Scientific/Engineering :: Image Recognition",
 ]
 
 dependencies = [
-  "fastapi>=0.115,<1.0",
-  "uvicorn[standard]>=0.30,<1.0",
-  "numpy>=1.26,<3.0",
-  "opencv-python-headless>=4.10,<5.0",
-  "pypdfium2>=4.30,<5.0",
   "shapely>=2.0,<3.0",
-  "networkx>=3.3,<4.0",
-  "pydantic>=2.8,<3.0",
-  "jsonschema>=4.0",
-  "mcp>=1.27,<2.0",
+  "pypdfium2>=4.30,<5.0",
   "Pillow>=10.0,<12.0",
-  "matplotlib>=3.7,<4.0",
-  # Used by tools/spec_harness.py + tools/lint_specs.py +
-  # tools/new_spec_contract.py + tools/spec_coverage_report.py.
-  # Previously pulled in transitively by `mcp` / `anthropic`;
-  # promoted to explicit dep so SDD framework keeps working if a
-  # transitive provider ever drops it (2026-05-21).
-  "PyYAML>=6.0,<7.0",
 ]
 
 [project.optional-dependencies]
-dl = [
-  "anthropic>=0.39",
-  "torch>=2.1",
-  "torchvision>=0.16",
-  "gdown>=5.1",
-  "scikit-image>=0.22",
-]
 dev = [
   "pytest>=8.3,<9.0",
-  "pytest-xdist>=3.6,<4.0",
   "ruff>=0.6,<1.0",
 ]
-cockpit = [
-  # Validation Cockpit MVP (Cycle 12, 2026-05-08).
-  # Streamlit-based local UI to visualize what the pipeline
-  # understood from a PDF before SKP generation. Optional extra
-  # so the core pipeline stays lean. Install via:
-  #   pip install -e ".[cockpit]"
-  "streamlit>=1.57,<2.0",
-]
-
-[project.scripts]
-sketchup-mcp-server = "sketchup_mcp_server.server:main"
 
 [project.urls]
 Repository = "https://github.com/GFCDOTA/sketchup-mcp"
 
 [tool.setuptools.packages.find]
-include = [
-  "model*",
-  "extract*",
-  "classify*",
-  "openings*",
-  "topology*",
-  "ingest*",
-  "debug*",
-  "roi*",
-  "api*",
-  "sketchup_mcp_server*",
-  "cockpit*",
-  "renderers*",
-]
-exclude = [
-  "tests*",
-  "tools*",
-  "scripts*",
-  "runs*",
-  "vendor*",
-  "docs*",
-  "patches*",
-  "validator*",
-]
+include = ["tools*"]
+exclude = ["tests*", "runs*", "docs*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -103,21 +45,11 @@ addopts = "-ra"
 [tool.ruff]
 line-length = 100
 target-version = "py312"
-extend-exclude = [
-  ".venv",
-  "venv",
-  "vendor",
-  "runs",
-  "patches/archive",
-  "__pycache__",
-  "build",
-  "dist",
-  "*.egg-info",
-]
+extend-exclude = [".venv", "venv", "runs", "__pycache__", "build", "dist", "*.egg-info"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]
-ignore = ["E501"]  # line-too-long: deferred; many existing long lines
+ignore = ["E501"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["F401", "F811"]
