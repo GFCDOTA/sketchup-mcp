@@ -1,9 +1,9 @@
 # Repo Health Report
 
 > **Status:** Generated (do not edit). Produced by `tools/repo_health_gate.py`.
-> **Generated:** 2026-05-26T02:38:17+00:00
-> **Branch:** chore/md-cleanup-pass-2
-> **Commit:** d0bca39
+> **Generated:** 2026-05-26T03:33:10+00:00
+> **Branch:** chore/md-cleanup-pass-3
+> **Commit:** 6780b4e
 > **Base (--base):** (none)
 
 ## Summary
@@ -11,17 +11,15 @@
 | Severity | Count |
 |---|---|
 | error   | 0  |
-| warning | 50 |
+| warning | 45 |
 | info    | 11 |
 
 ## Warnings
 
 | Code | Category | File | Message | Auto-fix? |
 |---|---|---|---|---|
-| W002 | md-no-status | `PROMPT-FELIPE.md` | PROMPT-FELIPE.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched. | no |
 | W002 | md-no-status | `docs/SCHEMA-COHERENCE-REPORT.md` | docs/SCHEMA-COHERENCE-REPORT.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched. | no |
 | W002 | md-no-status | `docs/SCHEMA-V2.md` | docs/SCHEMA-V2.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched. | no |
-| W002 | md-no-status | `docs/SOLUTION.md` | docs/SOLUTION.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched. | no |
 | W002 | md-no-status | `docs/agents/agent_operating_model.md` | docs/agents/agent_operating_model.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched. | no |
 | W002 | md-no-status | `docs/agents/ci_guardian.md` | docs/agents/ci_guardian.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched. | no |
 | W002 | md-no-status | `docs/agents/docs_maintainer.md` | docs/agents/docs_maintainer.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched. | no |
@@ -51,9 +49,6 @@
 | W002 | md-no-status | `docs/learning/validation_matrix.md` | docs/learning/validation_matrix.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched. | no |
 | W002 | md-no-status | `docs/operational_roadmap.md` | docs/operational_roadmap.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched. | no |
 | W002 | md-no-status | `docs/ops/repo_hygiene_audit_2026-05-10.md` | docs/ops/repo_hygiene_audit_2026-05-10.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched. | no |
-| W002 | md-no-status | `docs/performance/cache_design.md` | docs/performance/cache_design.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched. | no |
-| W002 | md-no-status | `docs/performance/cache_keys.md` | docs/performance/cache_keys.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched. | no |
-| W002 | md-no-status | `docs/performance/cache_rollout_plan.md` | docs/performance/cache_rollout_plan.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched. | no |
 | W002 | md-no-status | `docs/performance/current_perf_baseline.md` | docs/performance/current_perf_baseline.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched. | no |
 | W002 | md-no-status | `docs/performance/skip_unchanged_skp.md` | docs/performance/skip_unchanged_skp.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched. | no |
 | W002 | md-no-status | `docs/png_history_protocol.md` | docs/png_history_protocol.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched. | no |
@@ -87,10 +82,8 @@
 
 ## Requires human decision
 
-- [W002] `PROMPT-FELIPE.md` — PROMPT-FELIPE.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched.
 - [W002] `docs/SCHEMA-COHERENCE-REPORT.md` — docs/SCHEMA-COHERENCE-REPORT.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched.
 - [W002] `docs/SCHEMA-V2.md` — docs/SCHEMA-V2.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched.
-- [W002] `docs/SOLUTION.md` — docs/SOLUTION.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched.
 - [W002] `docs/agents/agent_operating_model.md` — docs/agents/agent_operating_model.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched.
 - [W002] `docs/agents/ci_guardian.md` — docs/agents/ci_guardian.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched.
 - [W002] `docs/agents/docs_maintainer.md` — docs/agents/docs_maintainer.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched.
@@ -120,9 +113,6 @@
 - [W002] `docs/learning/validation_matrix.md` — docs/learning/validation_matrix.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched.
 - [W002] `docs/operational_roadmap.md` — docs/operational_roadmap.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched.
 - [W002] `docs/ops/repo_hygiene_audit_2026-05-10.md` — docs/ops/repo_hygiene_audit_2026-05-10.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched.
-- [W002] `docs/performance/cache_design.md` — docs/performance/cache_design.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched.
-- [W002] `docs/performance/cache_keys.md` — docs/performance/cache_keys.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched.
-- [W002] `docs/performance/cache_rollout_plan.md` — docs/performance/cache_rollout_plan.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched.
 - [W002] `docs/performance/current_perf_baseline.md` — docs/performance/current_perf_baseline.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched.
 - [W002] `docs/performance/skip_unchanged_skp.md` — docs/performance/skip_unchanged_skp.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched.
 - [W002] `docs/png_history_protocol.md` — docs/png_history_protocol.md has no `Status:` header (docs/REPO_HYGIENE.md §2). Add Canonical / Active / Archived / Generated / Delete candidate when next touched.
