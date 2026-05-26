@@ -73,9 +73,9 @@ inputs + parameters + stage code as the cache key.
 Content-based cache is correct by construction.
 **Trade-off:** Hash cost (negligible for PDF < 50 MB).
 **Implementation:** Specified in
-`docs/performance/cache_design.md` and
-`docs/performance/cache_keys.md`. Sequenced in
-`docs/performance/cache_rollout_plan.md` (13 PRs, opt-in first).
+`docs/_archive/2026-05-md-cleanup/cache_design.md` and
+`docs/_archive/2026-05-md-cleanup/cache_keys.md`. Sequenced in
+`docs/_archive/2026-05-md-cleanup/cache_rollout_plan.md` (13 PRs, opt-in first).
 **Status:** Documented only. PR 1 (infrastructure without callers)
 to be opened in `perf/cache-infrastructure` branch.
 
