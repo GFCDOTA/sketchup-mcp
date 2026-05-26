@@ -134,7 +134,7 @@ A galeria de Plantas mostra renders + comparações. Oráculo lista runs com dia
 
 - `tests/` — pytest com fixtures sintéticas (sem PDF real); valida invariantes
 - `tests/fixtures/` — modelos sintéticos canônicos
-- `docs/` — análises arquiteturais (`ANALYSIS.md`, `CAUSA-RAIZ.md`, `SOLUTION.md`, `validator_protocol.md`, `openings_vector_v0.md`, `png_history_protocol.md`, etc.)
+- `docs/` — análises arquiteturais (`validator_protocol.md`, `openings_vector_v0.md`, `png_history_protocol.md`, `SCHEMA-V2.md`, `pipeline_overview.md`, etc.); F1-cycle root-cause docs em `docs/_archive/2026-04-f1-cycle/`
 - `patches/` — propostas de melhoria não-aplicadas (LSD, CubiCasa5K DL oracle)
 - `scripts/oracle/` — integração com LLM-as-architect e CubiCasa5K
 - `scripts/preview/` — renderers Blender headless
@@ -414,7 +414,7 @@ A divisão natural é **por camada do pipeline**. Cada camada conversa pelo sche
 - ❌ **SU2026 trial dialog** — sem admin no `C:\Program Files\…`, o launcher precisa do bootstrap fix (passar .skp positional) — já implementado em `skp_from_consensus.py`.
 - ❌ **Sem regression alerting** — validator scoreia mas não diffa contra histórico.
 - ❌ **Janelas não detectadas** — `extract_openings_vector.py` só pega arcos de porta, não pares de linhas paralelas de janela.
-- ❌ **Pipeline raster despedaça plantas complexas** — ver [`docs/CAUSA-RAIZ.md`](docs/CAUSA-RAIZ.md).
+- ⚠️ **Pipeline raster despedaça plantas complexas** — superseded por vector pipeline (`tools/build_vector_consensus.py`); raster mantido como legacy. Histórico do diagnóstico em `docs/_archive/2026-04-f1-cycle/SOLUTION-FINAL.md`.
 - Patches 03 (`b798881`) and 04 (`7fb1d80`) APPLIED. Patch 02 (density-trigger) PENDING empirical sweep. Patches 07-09 in `patches/archive/` are HIGH risk and require explicit human approval per CLAUDE.md §1 hard rule #5.
 
 ### Limitações
@@ -430,8 +430,8 @@ A divisão natural é **por camada do pipeline**. Cada camada conversa pelo sche
 | Procura | Onde |
 |---|---|
 | Como o pipeline roda end-to-end | [`README.md`](README.md) §2 + este doc §5 |
-| Por que o pipeline despedaça plantas | [`docs/CAUSA-RAIZ.md`](docs/CAUSA-RAIZ.md) |
-| Roadmap de melhorias propostas | [`docs/ROADMAP.md`](docs/ROADMAP.md), [`docs/SOLUTION-FINAL.md`](docs/SOLUTION-FINAL.md) |
+| Por que o pipeline raster despedaçava plantas (histórico) | [`docs/_archive/2026-04-f1-cycle/SOLUTION-FINAL.md`](docs/_archive/2026-04-f1-cycle/SOLUTION-FINAL.md) |
+| Roadmap de melhorias | [`docs/operational_roadmap.md`](docs/operational_roadmap.md), [`.ai_bridge/TODO_NEXT.md`](.ai_bridge/TODO_NEXT.md) |
 | Schema do `observed_model.json` v2.x | [`docs/SCHEMA-V2.md`](docs/SCHEMA-V2.md) |
 | Schema do `consensus_model.json` 1.0.0 | inline em `tools/build_vector_consensus.py` + memory `project_consensus_model_schema` |
 | Validator (scorers, REST API) | [`docs/validator_protocol.md`](docs/validator_protocol.md) |
