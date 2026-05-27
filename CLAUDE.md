@@ -80,6 +80,29 @@ git add artifacts/<plant>/
 git commit -m "feat(artifacts): commit <plant> SKP + renders + report"
 ```
 
+## Room fidelity baseline — honest cells vs semantic ambients
+
+The `planta_74` consensus emits **8 closed-cell room polygons** but
+the source planta de vendas carries **11 semantic ambients**. Two
+cells merge multiple ambients (open-plan layout — no wall traces
+between them in the PDF):
+
+- `r001`: `A.S. | TERRACO SOCIAL | TERRACO TECNICO` (3 ambients)
+- `r002`: `SALA DE JANTAR | SALA DE ESTAR` (2 ambients)
+
+This is **honest** — polygonize closes cells only where wall geometry
+exists. Inventing split walls to hit "11 rooms" would violate Hard
+Rule #1. Labels are preserved with `|` so the audit trail survives.
+
+**Fidelity verdict for merged cells:** `room_fidelity = WARN`, NOT
+FAIL. The geometry matches the PDF honestly; only semantic
+granularity is below the planta-de-vendas labelling.
+
+**Backlog:** a `semantic_zones` overlay (computed from human-painted
+PNG annotations — cyan blobs for peitoril) could split the merged
+cells without forging wall geometry. Not a blocker for the canonical
+SKP. Track separately when prioritised.
+
 ## Hard rules
 
 1. **NEVER invent walls / rooms / openings.** The consensus is the

@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "tool": "build_plan_shell_skp",
   "consensus_path": "E:/Claude/sketchup-mcp/fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json",
-  "skp_path": "E:/Claude/sketchup-mcp/runs/planta_74/model.skp",
+  "skp_path": "E:/Claude/sketchup-mcp/runs/planta_74/planta_74.skp",
   "shell_json_path": "E:/Claude/sketchup-mcp/runs/planta_74/_shell_polygon.json",
   "soft_barriers_mode": "groups",
   "plan_shell": {
