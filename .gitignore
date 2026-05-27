@@ -23,12 +23,24 @@ build/
 .idea/
 .vscode/
 # .claude/ — ignore by default (local settings, projects state) but
-# version the team-shared subdirs (constitution, agents, commands, hooks)
+# version the team-shared subdirs (constitution, agents, commands, hooks,
+# skills, specs, memory, plans, docs, evals + CLAUDE.md + README.md +
+# constitution.md). scratch/ stays ignored — it's for rascunhos
+# descartáveis.
 .claude/*
 !.claude/agents/
 !.claude/commands/
 !.claude/hooks/
+!.claude/skills/
+!.claude/specs/
+!.claude/memory/
+!.claude/plans/
+!.claude/docs/
+!.claude/evals/
 !.claude/settings.json
+!.claude/CLAUDE.md
+!.claude/README.md
+!.claude/constitution.md
 .DS_Store
 Thumbs.db
 # vendored CubiCasa5K (dev-time oracle, manual setup — see vendor/CubiCasa5k/README.md)
