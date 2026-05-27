@@ -49,6 +49,37 @@ python -m tools.build_plan_shell_skp \
 
 PDF source at repo root: `planta_74.pdf`.
 
+## Output convention — `runs/` vs `artifacts/`
+
+| Path | Tracked? | When to use |
+|---|---|---|
+| `runs/<plant>/` | **gitignored** | Working build output. Default `--out runs/<plant>/<plant>.skp` lands here. Scratch — safe to delete locally. |
+| `artifacts/<plant>/` | **tracked** | Promoted canonical deliverable. Commit when the build passes contract tests and you want it on `develop`/`main` for human review. |
+
+Each promoted plant under `artifacts/<plant>/` carries:
+- `<plant>.skp` — the SketchUp deliverable
+- `<plant>.skp.metadata.json` — consensus SHA256 sidecar (cache key)
+- `<plant>_iso.png` + `<plant>_top.png` — auto renders from `write_image`
+- `geometry_report.json` — Python stats + SU counts + gate self-check
+- `side_by_side_pdf_vs_skp.png` — PDF underlay vs SKP comparison
+- `README.md` — build provenance + reproduce command
+
+**Build → promote flow:**
+
+```bash
+# 1. Build into the scratch dir
+python -m tools.build_plan_shell_skp <consensus.json> --out runs/<plant>/<plant>.skp
+
+# 2. Validate
+python -m pytest tests/ -q
+
+# 3. Promote to tracked artifacts when ready
+mkdir -p artifacts/<plant>
+cp runs/<plant>/* artifacts/<plant>/
+git add artifacts/<plant>/
+git commit -m "feat(artifacts): commit <plant> SKP + renders + report"
+```
+
 ## Hard rules
 
 1. **NEVER invent walls / rooms / openings.** The consensus is the
