@@ -17,7 +17,6 @@
 > | Role | Path |
 > |---|---|
 > | Input consensus (with window) | `fixtures/quadrado/consensus_with_window.json` |
-> | Input consensus (empty room) | `fixtures/quadrado/consensus_empty.json` |
 > | Expected `_shell_polygon.json` | `docs/specs/_assets/quadrado_canonical_shell_polygon.json` |
 > | Expected geometry report | `docs/specs/_assets/quadrado_canonical_geometry_report.json` |
 > | Reference 3D render | `docs/specs/_assets/quadrado_canonical_success_render.png` |

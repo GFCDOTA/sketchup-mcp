@@ -23,8 +23,6 @@ The quadrado fixture is the smoke gate for every change:
 | Role | Path |
 |---|---|
 | Input consensus (1 window) | `fixtures/quadrado/consensus_with_window.json` |
-| Input consensus (empty) | `fixtures/quadrado/consensus_empty.json` |
-| Input consensus (4 uniform windows) | `fixtures/quadrado/consensus_uniform_4windows.json` |
 | Expected shell polygon | `docs/specs/_assets/quadrado_canonical_shell_polygon.json` |
 | Expected geometry report | `docs/specs/_assets/quadrado_canonical_geometry_report.json` |
 | Reference render | `docs/specs/_assets/quadrado_canonical_success_render.png` |
@@ -49,7 +47,7 @@ python -m tools.build_plan_shell_skp \
   --out runs/planta_74/model.skp
 ```
 
-PDF sources at repo root: `planta_74.pdf` + `planta_74_clean.pdf`.
+PDF source at repo root: `planta_74.pdf`.
 
 ## Hard rules
 

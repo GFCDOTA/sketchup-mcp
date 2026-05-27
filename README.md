@@ -6,7 +6,7 @@ walls + openings + rooms.
 ## Quickstart
 
 ```bash
-# Install dev deps
+# Install dev deps (reads pyproject.toml)
 pip install -e ".[dev]"
 
 # Run the contract tests (Python-only, no SketchUp needed)
@@ -59,8 +59,8 @@ tools/
   quadrado/render_view.{py,rb} # Render helper for SKP
 
 fixtures/
-  quadrado/                  # Canonical micro-fixtures (3 variants)
-  planta_74/                 # Real apartment consensus (35 walls)
+  quadrado/consensus_with_window.json   # Canonical micro-fixture
+  planta_74/consensus_with_human_walls_and_soft_barriers.json  # Real apartment (35 walls)
 
 tests/
   test_quadrado_canonical_smoke.py
@@ -73,7 +73,7 @@ docs/specs/
   quadrado_demo_spec.md      # Canonical reference spec
   _assets/                   # Expected shell + report + render
 
-planta_74.pdf / planta_74_clean.pdf  # Source PDFs
+planta_74.pdf                # Source PDF
 ```
 
 ## Consensus schema (informal)
