@@ -47,6 +47,8 @@ Quebrar uma dessas é RED. Ver `@.claude/memory/operational_rules.md`
 
 ## Load order
 
+@.claude/constitution.md
+
 @.claude/memory/project_context.md
 @.claude/memory/current_state.md
 @.claude/memory/operational_rules.md
@@ -60,6 +62,9 @@ Quebrar uma dessas é RED. Ver `@.claude/memory/operational_rules.md`
 @.claude/specs/fidelity_gate.md
 @.claude/specs/skp_artifact_layout.md
 
+@.claude/evals/eval_strategy.md
+@.claude/evals/fidelity_rubric.md
+
 @.claude/plans/active_work.md
 @.claude/plans/next_actions.md
 
@@ -70,9 +75,12 @@ Estes são consultados quando relevantes, não importados sempre:
 - `.claude/specs/perfect_reference_strategy.md`
 - `.claude/specs/sdd_and_harness_engineering.md`
 - `.claude/specs/repository_hygiene.md`
+- `.claude/specs/templates/*` (use ao criar nova feature/spec)
+- `.claude/evals/regression_matrix.md`
 - `.claude/plans/roadmap.md`
 - `.claude/plans/stopped_work.md`
 - `.claude/docs/index.md`
+- `.claude/docs/audits/*` (histórico, não regra viva)
 
 ## Skills
 

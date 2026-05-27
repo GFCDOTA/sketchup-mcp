@@ -9,6 +9,7 @@ repo) exceto `scratch/`.
 ```
 .claude/
 ├── CLAUDE.md              ← bootloader curto com @imports
+├── constitution.md        ← 7 princípios load-bearing (vence sobre tudo)
 ├── README.md              ← este arquivo
 ├── memory/                ← contexto vivo do projeto
 │   ├── project_context.md
@@ -25,7 +26,15 @@ repo) exceto `scratch/`.
 │   ├── perfect_reference_strategy.md
 │   ├── skp_artifact_layout.md
 │   ├── sdd_and_harness_engineering.md
-│   └── repository_hygiene.md
+│   ├── repository_hygiene.md
+│   └── templates/         ← templates pra novas features/specs
+│       ├── feature_spec_template.md
+│       ├── fidelity_spec_template.md
+│       └── artifact_contract_template.md
+├── evals/                 ← como medimos progresso real
+│   ├── eval_strategy.md
+│   ├── fidelity_rubric.md
+│   └── regression_matrix.md
 ├── plans/                 ← estado curto / próximos passos
 │   ├── roadmap.md
 │   ├── next_actions.md
@@ -38,7 +47,9 @@ repo) exceto `scratch/`.
 │   ├── repo-governance/SKILL.md
 │   └── multi-agent-handoff/SKILL.md
 ├── docs/
-│   └── index.md           ← índice navegável
+│   ├── index.md           ← índice navegável
+│   └── audits/            ← audit logs pontuais (histórico)
+│       └── 2026-05-27_claude_structure_audit.md
 └── scratch/               ← rascunhos locais, IGNORADA pelo git
 ```
 
@@ -46,11 +57,13 @@ repo) exceto `scratch/`.
 
 | Pasta | Vai aqui | NÃO vai aqui |
 |---|---|---|
+| `constitution.md` | 7 princípios load-bearing. Vence sobre qualquer outro `.md` em conflito. | Regra operacional detalhada (vai em `memory/` ou `specs/`) |
 | `memory/` | Regra viva permanente, contexto que decai (current_state), aprendizado durável | Tarefas atuais, planos próximos, logs de PR |
-| `specs/` | Contrato de produto, fidelidade, layout, hygiene | Snapshot de PR / branch, estado-do-dia |
+| `specs/` | Contrato de produto, fidelidade, layout, hygiene + `templates/` pra novas | Snapshot de PR / branch, estado-do-dia |
+| `evals/` | Estratégia de medição, rubric, matriz feature × gate | Spec de produto (vai em `specs/`) |
 | `plans/` | Roadmap, fila curta, branch em curso, work pausado | Specs longas, regra permanente |
 | `skills/` | Operação por área com SKILL.md frontmatter | Especificação / regra geral |
-| `docs/` | Índice + pointers humanos | Cópia de conteúdo de outros .md |
+| `docs/` | Índice + pointers humanos + `audits/` (histórico) | Cópia de conteúdo de outros `.md` |
 | `scratch/` | Rascunhos, experimentos descartáveis | Qualquer coisa que vale a pena commitar |
 
 ## Política de atualização

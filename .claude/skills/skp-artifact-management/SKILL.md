@@ -50,15 +50,26 @@ cp runs/<plant>/<plant>_iso.png artifacts/<plant>/
 cp runs/<plant>/<plant>_top.png artifacts/<plant>/
 cp runs/<plant>/geometry_report.json artifacts/<plant>/
 
-# 4. Gerar/atualizar side-by-side comparativo
+# 4. Copiar sidecar do build
+cp runs/<plant>/<plant>.skp.metadata.json artifacts/<plant>/
+
+# 5. REWRITE o sidecar pra apontar paths canônicos
+#    (sem rewrite, skp_path fica apontando pra runs/ = contradição)
+python -c "
+import json, sys
+p = 'artifacts/<plant>/<plant>.skp.metadata.json'
+m = json.load(open(p))
+m['source_run_path'] = m.get('skp_path')
+m['skp_path'] = 'artifacts/<plant>/<plant>.skp'
+json.dump(m, open(p,'w'), indent=2)
+"
+
+# 6. Gerar/atualizar side-by-side comparativo
 # (TODO — confirmar comando exato no repo)
 
-# 5. Atualizar metadata sidecar com SHA do consensus
-# (ver specs/skp_artifact_layout.md § sidecar)
+# 7. Atualizar README de provenance
 
-# 6. Atualizar README de provenance
-
-# 7. Commit
+# 8. Commit
 git add artifacts/<plant>/
 git commit -m "feat(artifacts): refresh <plant> SKP + renders + report"
 ```

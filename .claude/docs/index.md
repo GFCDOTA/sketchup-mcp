@@ -5,6 +5,7 @@ aponta pra source-of-truth, não pra cópia.
 
 ## Onde começar
 
+- **Constituição (load-bearing)**: [`constitution.md`](../constitution.md)
 - **Estrutura geral**: [`README.md`](../README.md)
 - **Bootloader / load order**: [`CLAUDE.md`](../CLAUDE.md)
 
@@ -32,6 +33,22 @@ aponta pra source-of-truth, não pra cópia.
 | [`specs/sdd_and_harness_engineering.md`](../specs/sdd_and_harness_engineering.md) | Spec → fixture → teste → artifact |
 | [`specs/repository_hygiene.md`](../specs/repository_hygiene.md) | Triggers reais pra cleanup |
 
+### Templates (usar ao criar nova feature/spec)
+
+| Template | Quando |
+|---|---|
+| [`specs/templates/feature_spec_template.md`](../specs/templates/feature_spec_template.md) | Nova feature FP-NNN |
+| [`specs/templates/fidelity_spec_template.md`](../specs/templates/fidelity_spec_template.md) | Documentar veredito de fidelidade de um build |
+| [`specs/templates/artifact_contract_template.md`](../specs/templates/artifact_contract_template.md) | Documentar contrato de artifact (input/output/schema) |
+
+## Evals — como medimos progresso
+
+| Arquivo | Pra que serve |
+|---|---|
+| [`evals/eval_strategy.md`](../evals/eval_strategy.md) | 3 camadas: contract suite / gates_self_check / rubric humano |
+| [`evals/fidelity_rubric.md`](../evals/fidelity_rubric.md) | Rubric A/B/C/D OK/WARN/FAIL pra Camada 3 |
+| [`evals/regression_matrix.md`](../evals/regression_matrix.md) | Matriz feature × gate histórica |
+
 ## Plans — estado curto
 
 | Arquivo | Pra que serve |
@@ -50,6 +67,12 @@ aponta pra source-of-truth, não pra cópia.
 | [`skills/skp-artifact-management`](../skills/skp-artifact-management/SKILL.md) | Promotion runs/ → artifacts/ |
 | [`skills/repo-governance`](../skills/repo-governance/SKILL.md) | PR / branch / merge / hygiene |
 | [`skills/multi-agent-handoff`](../skills/multi-agent-handoff/SKILL.md) | Trabalho paralelo / handoff |
+
+## Audits — histórico de revisões
+
+| Arquivo | Tópico |
+|---|---|
+| [`docs/audits/2026-05-27_claude_structure_audit.md`](audits/2026-05-27_claude_structure_audit.md) | Audit da estrutura `.claude/` pós PR #194 + patch P1 |
 
 ## Pontos de saída pro resto do repo
 

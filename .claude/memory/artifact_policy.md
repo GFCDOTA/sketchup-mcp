@@ -76,10 +76,22 @@ SKP, declarar sucesso exige:
 
 Se faltar 1+ dos 5, status é **incompleto**, não sucesso.
 
+## Sidecar metadata — gotcha de promotion
+
+O builder (`tools/build_plan_shell_skp.py` → `write_metadata`)
+escreve o sidecar com `skp_path` apontando pro path do build
+(`runs/<plant>/<plant>.skp`). Quando promove pra
+`artifacts/<plant>/`, **rewrite obrigatório**:
+
+- `skp_path` ← `artifacts/<plant>/<plant>.skp` (canonical)
+- `source_run_path` ← `runs/<plant>/<plant>.skp` (provenance, novo)
+
+Caso contrário o sidecar canônico contradiz a Constitution #1
+("SKP é o artefato principal" e mora em `artifacts/`). Schema
+detalhado em `specs/skp_artifact_layout.md`.
+
 ## TODO — validar contra repo
 
 - [ ] Confirmar que `artifacts/review/<plant>/` é convenção
       estabelecida (vi `artifacts/review/planta_74/` no listing)
       ou foi staging pontual de PR #192
-- [ ] Confirmar se `<plant>.skp.metadata.json` está no schema
-      atual ou é proposto

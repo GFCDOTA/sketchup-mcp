@@ -31,14 +31,35 @@ review humano antes de merge.
 
 ## Continuar automaticamente vs parar
 
-- **DONE IS NOT STOP**: escopo concluído não é fim de sessão.
-  Registrar em `.ai_bridge/` (quando aplicável), atualizar
-  `plans/next_actions.md`, escolher próximo item de ROI.
-- **NAO PARE mode**: gatilho verbal do humano ("continue", "não
-  pare", "autônomo") = aplicar DONE-IS-NOT-STOP imediatamente.
-  Reduzir fila de PRs abertas conta como avanço; não tratar fila
-  como bloqueador.
-- **Parar** somente nos critérios RED acima.
+**Natural slice complete IS a valid stop.** Concluir o escopo
+declarado de uma branch / PR / ciclo é parada válida. Não criar
+ciclo novo de governance / docs / refactor / hygiene só porque
+não tem blocker RED.
+
+**Continuar automaticamente** somente se houver próximo item de
+ROI claro ligado a um destes:
+
+1. **SKP fidelity** — gerar / refinar `.skp` em `artifacts/<plant>/`
+2. **Artifact quality** — render side-by-side, report, sidecar
+   inconsistente
+3. **Failing gate** — teste vermelho, gate self-check FAIL,
+   contract suite quebrada
+4. **Active PR cleanup** — PR aberta esperando merge / review
+   response / fix
+5. **User-requested milestone** — item explícito do humano OU
+   linha em `plans/next_actions.md`
+
+Sem encaixe em 1–5 = parar e reportar. Não inventar próxima
+auditoria, próxima doc, próxima limpeza.
+
+**Verbal override (`NAO PARE` mode):** se o humano disser
+explicitamente "continue / não pare / autônomo / nao pare", a
+porta abre pra escolher próximo item mesmo se ele não encaixar
+trivialmente em 1–5 — desde que ainda passe filtro de produto-ROI
+(reduzir fila de PRs, fechar trabalho parado, etc. CONTA;
+inventar governance doc não conta).
+
+**Parar imediatamente** nos critérios RED da seção acima.
 
 ## Consulta a LLM externo
 

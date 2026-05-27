@@ -2,7 +2,8 @@
   "schema_version": "1.0.0",
   "exporter": "build_plan_shell_skp",
   "consensus_sha256": "e1b1a53d0e8c552c98e316a3e0553dfb0a4cbd282366627445336a6ad4b0f54f",
-  "skp_path": "E:\\Claude\\sketchup-mcp\\runs\\planta_74\\planta_74.skp",
+  "skp_path": "artifacts/planta_74/planta_74.skp",
+  "source_run_path": "runs/planta_74/planta_74.skp",
   "created_at": "2026-05-27T06:36:10Z",
   "sketchup_path": "C:\\Program Files\\SketchUp\\SketchUp 2026\\SketchUp\\SketchUp.exe",
   "command": "C:\\Program Files\\SketchUp\\SketchUp 2026\\SketchUp\\SketchUp.exe E:\\Claude\\sketchup-mcp\\runs\\planta_74\\_bootstrap.skp"

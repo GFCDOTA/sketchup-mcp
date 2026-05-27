@@ -36,18 +36,39 @@ artifacts/
 
 ### `<plant>.skp.metadata.json` (sidecar)
 
+Schema real produzido por `tools/build_plan_shell_skp.py`
+(`write_metadata`), com extensão pra artifact promovido:
+
 ```json
 {
-  "consensus_path": "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json",
+  "schema_version": "1.0.0",
+  "exporter": "build_plan_shell_skp",
   "consensus_sha256": "<64 hex>",
-  "builder_version": "<git SHA do tools/build_plan_shell_skp.{py,rb}>",
-  "built_at_utc": "2026-05-27T13:42:00Z",
-  "su_version": "2026"
+  "skp_path": "artifacts/<plant>/<plant>.skp",
+  "source_run_path": "runs/<plant>/<plant>.skp",
+  "created_at": "2026-05-27T13:42:00Z",
+  "sketchup_path": "C:\\Program Files\\SketchUp\\SketchUp 2026\\SketchUp\\SketchUp.exe",
+  "command": "<exact command used to invoke SU>"
 }
 ```
 
-Função: cache key pra invalidação. Se `consensus_sha256` ou
-`builder_version` mudarem, o SKP é stale.
+**Função**: cache key pra invalidação. `should_skip()` em
+`build_plan_shell_skp.py` compara `consensus_sha256` + `exporter`
+tag. Se qualquer um diverge da build atual, o `.skp` é stale e o
+build re-executa.
+
+**Promotion SOP**: o `write_metadata()` produzido pelo builder
+escreve `skp_path` apontando pro path do build (geralmente
+`runs/<plant>/<plant>.skp`). Ao promover pra `artifacts/<plant>/`,
+**rewrite o sidecar**:
+
+- `skp_path` ← path canônico do artifact (`artifacts/<plant>/<plant>.skp`)
+- `source_run_path` ← path original do build (`runs/<plant>/<plant>.skp`)
+- demais campos preservados
+
+Sem esse rewrite, o sidecar canônico aponta pra `runs/` —
+contradição com a regra "`runs/` é scratch, `artifacts/` é
+deliverable" (Constitution #1, `memory/artifact_policy.md`).
 
 ### `README.md` (provenance)
 
@@ -108,12 +129,27 @@ FP-026 (stub review):
 - `wall_stub_report.json`
 - `README.md`
 
-## TODO — validar contra repo
+## Schema status (2026-05-27)
 
-- [ ] Confirmar schema de `<plant>.skp.metadata.json` atual (ler
-      o arquivo em `artifacts/planta_74/`)
-- [ ] Confirmar formato do `geometry_report.json` (campos
-      obrigatórios)
-- [ ] Decidir se `<plant>.skp.metadata.json` é gerado
-      automaticamente pelo builder ou criado manualmente na
-      promotion
+- ✅ `<plant>.skp.metadata.json` schema confirmado em
+  `tools/build_plan_shell_skp.py` (`write_metadata` linha ~611).
+  Resolvido por audit P1 desta data: extensão com `source_run_path`
+  pra distinguir build path vs canonical path.
+- ✅ `geometry_report.json` schema mapeado em
+  `specs/fidelity_gate.md` § "Campos relevantes". Top-level keys:
+  `plan_shell`, `floor_groups`, `soft_barrier_groups`, `totals`,
+  `groups_diagnostic[]`, `shell_stats_from_python`, `gates_self_check`.
+- ✅ Decisão: sidecar é **gerado automaticamente** pelo builder
+  (campo `skp_path` aponta pro build path em `runs/`). Promotion
+  pra `artifacts/<plant>/` **deve rewrite** o sidecar pra apontar
+  `skp_path` ao path canônico e adicionar `source_run_path`. Esse
+  rewrite é manual hoje — TODO produto: automatizar via
+  `tools/promote_artifact.py` (não criado ainda).
+
+## TODO follow-ups
+
+- [ ] Criar `tools/promote_artifact.py` que faz cp + sidecar rewrite
+      + provenance README stub de uma vez
+- [ ] Bump `schema_version` pra `1.1.0` quando `source_run_path`
+      virar campo padrão (depende do builder também passar a
+      escrever)
