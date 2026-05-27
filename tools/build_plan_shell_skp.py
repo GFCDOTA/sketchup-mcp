@@ -61,7 +61,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from shapely.geometry import MultiPolygon, Polygon, box
+from shapely.geometry import MultiPolygon, Point, Polygon, box
 from shapely.ops import unary_union
 
 from tools.disarm_sketchup_autoruns import disarm as disarm_autoruns
@@ -139,25 +139,33 @@ def is_window_aperture(op: dict) -> bool:
 
 # ---- core geometry ---------------------------------------------------
 
-def wall_footprint(wall: dict, extend_endpoints: bool = True) -> Polygon:
+def wall_footprint(wall: dict, extend_endpoints: bool = True,
+                   extend_start: bool | None = None,
+                   extend_end: bool | None = None) -> Polygon:
     """Return the 2D rectangle this wall occupies, in PDF points.
 
     Mirrors the corner computation in consume_consensus.rb's
     ``add_wall_volume`` (lines 67-90): horizontal walls hug the y-axis
     (thickness in y), vertical walls hug the x-axis (thickness in x).
 
-    When ``extend_endpoints`` is True (default), each wall extends by
-    half-thickness along its own axis at BOTH endpoints. This is the
-    canonical corner-completion rule (LL-017 / FP-025): at a junction
-    where two perpendicular walls meet, BOTH must extend halfway into
-    each other so the outer corner is a clean L-shape (not a stepped
-    notch). Without this, `unary_union` leaves a `2*half × 2*half`
-    L-shaped notch at every junction outer corner — the FP-025
-    "tecos" signature.
+    Endpoint extension is **per-side**, so each end of the wall can
+    independently extend by half-thickness or not:
 
-    The extension is harmless at non-junction endpoints (free wall
-    ends): the resulting stub is a tiny `half × half` square at the
-    wall's terminus, identical to the existing wall thickness.
+    - ``extend_endpoints`` (default True) sets the default for BOTH ends.
+    - ``extend_start`` / ``extend_end`` override per side when explicit
+      (None = follow ``extend_endpoints``).
+
+    The canonical corner-completion rule (LL-017 / FP-025) is: at a
+    junction where two perpendicular walls meet, BOTH must extend
+    halfway into each other so the outer corner is a clean L-shape
+    (not a stepped notch). At a **free** wall end (no perpendicular
+    wall absorbing the extension), extending creates a visible
+    half-thickness stub sticking out into space — the LL-017 stub
+    anti-pattern. Pass ``extend_end=False`` (or ``extend_start=False``)
+    on those sides to trim the stub.
+
+    See ``_classify_endpoint_junctions`` for the automatic per-end
+    classification used by ``build_shell_polygon``.
     """
     s = wall["start"]
     e = wall["end"]
@@ -165,22 +173,86 @@ def wall_footprint(wall: dict, extend_endpoints: bool = True) -> Polygon:
     if t is None:
         raise ValueError(f"wall {wall.get('id')} missing thickness")
     half = t / 2.0
-    ext = half if extend_endpoints else 0.0
+    es = extend_endpoints if extend_start is None else extend_start
+    ee = extend_endpoints if extend_end is None else extend_end
+    # Resolve per-axis: 'start' is the lower coord side, 'end' is the upper.
     ori = wall.get("orientation")
     if ori == "h":
-        x0 = min(s[0], e[0]) - ext
-        x1 = max(s[0], e[0]) + ext
+        s_low, s_high = (es, ee) if s[0] <= e[0] else (ee, es)
+        x0 = min(s[0], e[0]) - (half if s_low else 0.0)
+        x1 = max(s[0], e[0]) + (half if s_high else 0.0)
         cy = s[1]
         return box(x0, cy - half, x1, cy + half)
     if ori == "v":
+        s_low, s_high = (es, ee) if s[1] <= e[1] else (ee, es)
         cx = s[0]
-        y0 = min(s[1], e[1]) - ext
-        y1 = max(s[1], e[1]) + ext
+        y0 = min(s[1], e[1]) - (half if s_low else 0.0)
+        y1 = max(s[1], e[1]) + (half if s_high else 0.0)
         return box(cx - half, y0, cx + half, y1)
     raise ValueError(
         f"wall {wall.get('id')} has unsupported orientation={ori!r}; "
         "this exporter only handles axis-aligned walls"
     )
+
+
+# ---- junction-aware endpoint classification (LL-017 stub trim) ------
+
+# Tolerance for "endpoint falls inside another wall's raw footprint".
+# Slightly larger than 0 so endpoints exactly on a wall edge are caught.
+JUNCTION_TOL_PTS = 0.5
+
+
+def _classify_endpoint_junctions(
+    walls: list[dict],
+) -> dict[str, tuple[bool, bool]]:
+    """Return ``{wall_id: (start_is_junction, end_is_junction)}``.
+
+    A wall endpoint is a **junction** iff a buffered version of any
+    **perpendicular** wall's raw (un-extended) footprint contains it.
+    Buffered by ``JUNCTION_TOL_PTS`` so endpoints exactly on a wall
+    edge count.
+
+    The perpendicularity requirement is critical for the LL-017 stub
+    trim: extending into a PERPENDICULAR neighbour closes a T/L
+    corner cleanly (the extension is absorbed by the other wall's
+    body across the perpendicular axis). Extending into a PARALLEL
+    neighbour that just happens to overlap in 2D — e.g. a
+    human-painted partition sitting offset by ~thickness from a
+    structural wall — would shoot past the parallel wall's own end
+    and create a stub anyway.
+
+    Free endpoints (return ``False``) terminate in open space; their
+    half-thickness extension would create the LL-017 stub
+    anti-pattern, so callers should pass ``extend_start=False`` /
+    ``extend_end=False`` accordingly.
+
+    Implementation note: O(n²) but n is small (planta_74 has 35
+    walls). A spatial index would only help if n grew past ~500.
+    """
+    raw_fps = {
+        w["id"]: wall_footprint(w, extend_endpoints=False) for w in walls
+    }
+    orients = {w["id"]: w.get("orientation") for w in walls}
+    out: dict[str, tuple[bool, bool]] = {}
+    for w in walls:
+        wid = w["id"]
+        own_orient = orients[wid]
+
+        def is_junction(p: list[float]) -> bool:
+            pt = Point(p)
+            for other_id, fp in raw_fps.items():
+                if other_id == wid:
+                    continue
+                # Skip parallel neighbours — their containment does
+                # NOT represent a corner to close (LL-017 stub trim).
+                if orients[other_id] == own_orient:
+                    continue
+                if fp.buffer(JUNCTION_TOL_PTS).contains(pt):
+                    return True
+            return False
+
+        out[wid] = (is_junction(w["start"]), is_junction(w["end"]))
+    return out
 
 
 # ---- canonicalisation (LL-017 / FP-025) ----------------------------
@@ -289,8 +361,25 @@ def build_shell_polygon(consensus: dict) -> tuple[list[Polygon], dict]:
     openings = consensus.get("openings", [])
     default_thickness = consensus.get("wall_thickness_pts")
 
-    # [1] wall footprints
-    wall_boxes = [wall_footprint(w) for w in walls]
+    # [1] wall footprints (junction-aware extension — LL-017 stub trim)
+    # Classify each wall endpoint as junction-or-free. Extend by half-
+    # thickness only at junction endpoints (where extension closes a
+    # corner with a perpendicular wall). At free endpoints, do not
+    # extend — extending into open space creates the LL-017 stub
+    # anti-pattern (half-thickness rectangle sticking out past where
+    # the wall actually terminates per the consensus / PDF).
+    junctions = _classify_endpoint_junctions(walls)
+    free_end_count = sum(
+        (0 if a else 1) + (0 if b else 1) for (a, b) in junctions.values()
+    )
+    wall_boxes = [
+        wall_footprint(
+            w,
+            extend_start=junctions[w["id"]][0],
+            extend_end=junctions[w["id"]][1],
+        )
+        for w in walls
+    ]
 
     # [2] union
     shell = unary_union(wall_boxes)
@@ -415,6 +504,13 @@ def build_shell_polygon(consensus: dict) -> tuple[list[Polygon], dict]:
         "input_openings": len(openings),
         "openings_carved": len(carve_rects),
         "window_apertures_3d": len(window_apertures),
+        # LL-017 stub trim — count of endpoints that were classified as
+        # FREE (not at a junction) and therefore had their half-thickness
+        # extension dropped. Quadrado-healthy on a fully-closed fixture
+        # is 0; planta_74 has many because most interior walls don't
+        # share endpoints with neighbours.
+        "endpoints_free": free_end_count,
+        "endpoints_junction": 2 * len(walls) - free_end_count,
         # Split into two buckets: by_origin is legitimate (wall_gap
         # origin; gap is already in the wall data, no carve needed).
         # by_error is a real failure (missing wall_id, zero width,

@@ -23,6 +23,7 @@ from shapely.geometry import Polygon
 
 from tools.build_plan_shell_skp import (
     _canonicalise_axis_aligned_ring,
+    _classify_endpoint_junctions,
     build_shell_polygon,
     canonicalise_axis_aligned_polygon,
     wall_footprint,
@@ -291,3 +292,115 @@ def test_planta_74_no_slivers_after_canonicalise():
     for i, p in enumerate(polys):
         assert p.is_valid, f"piece[{i}] is invalid after canonicalise"
         assert p.area > 0.5, f"piece[{i}] area = {p.area:.3f} (sliver)"
+
+
+# ---- LL-017 stub trim (junction-aware extension) ====================
+
+
+def test_classify_endpoint_junctions_quadrado_all_junctions():
+    """Quadrado: all 4 walls share corners — every endpoint is junction."""
+    cons = _quadrado_consensus()
+    j = _classify_endpoint_junctions(cons["walls"])
+    for wid, (a, b) in j.items():
+        assert a is True and b is True, (
+            f"wall {wid} should have both endpoints as junctions; got {(a, b)}"
+        )
+
+
+def test_classify_endpoint_junctions_isolated_wall_both_free():
+    """An isolated wall surrounded by nothing has both endpoints FREE."""
+    cons = {
+        "wall_thickness_pts": 5.4,
+        "walls": [
+            {"id": "lonely", "start": [100.0, 100.0], "end": [200.0, 100.0],
+             "thickness": 5.4, "orientation": "h"},
+        ],
+        "rooms": [], "openings": [], "soft_barriers": [],
+    }
+    j = _classify_endpoint_junctions(cons["walls"])
+    assert j["lonely"] == (False, False)
+
+
+def test_classify_endpoint_junctions_t_junction():
+    """Wall A's endpoint inside wall B's body → A's endpoint is junction."""
+    walls = [
+        # Long horizontal spine
+        {"id": "spine", "start": [0.0, 100.0], "end": [200.0, 100.0],
+         "thickness": 5.4, "orientation": "h"},
+        # Vertical stub whose top endpoint hits the spine's body
+        {"id": "stub", "start": [100.0, 50.0], "end": [100.0, 100.0],
+         "thickness": 5.4, "orientation": "v"},
+    ]
+    j = _classify_endpoint_junctions(walls)
+    # Stub's TOP endpoint is at (100, 100) which is inside spine's box.
+    # Stub's bottom endpoint (100, 50) is free.
+    assert j["stub"][1] is True, "stub end should be junction (hits spine)"
+    assert j["stub"][0] is False, "stub start should be FREE"
+
+
+@pytest.mark.skipif(
+    not PLANTA_74_CONSENSUS.exists(),
+    reason="planta_74 consensus fixture not present",
+)
+def test_planta_74_free_endpoints_have_no_stub_extension():
+    """LL-017 stub trim regression — at every wall classified as FREE
+    on a given side, the shell polygon must NOT extend by half-thickness
+    past the wall's centerline endpoint on that side. This is the
+    operational test for the stub anti-pattern: a stub is exactly that
+    extension."""
+    consensus = json.loads(PLANTA_74_CONSENSUS.read_text(encoding="utf-8"))
+    walls = consensus["walls"]
+    polys, stats = build_shell_polygon(consensus)
+    junctions = _classify_endpoint_junctions(walls)
+
+    # The endpoints_free / endpoints_junction stats must match the
+    # walls fixture exactly so that any consensus regression surfaces
+    # here. Locked numbers for the current planta_74 baseline with
+    # perpendicular-only junction detection:
+    assert stats["endpoints_junction"] == 27
+    assert stats["endpoints_free"] == 43
+    assert stats["endpoints_junction"] + stats["endpoints_free"] == 2 * len(walls)
+
+    # For each FREE side, the wall's OWN footprint must terminate at
+    # the centerline endpoint — no half-thickness extension past it.
+    # (We check per-wall rather than against the shell union because
+    # the shell union conflates with other walls' bodies — a long
+    # perpendicular outer wall whose body legitimately crosses the
+    # would-be-stub region of an interior wall would cause false
+    # positives on a union test.)
+    TOL = 0.05  # tolerance for buffer-close-gap epsilon
+    for w in walls:
+        js, je = junctions[w["id"]]
+        fp = wall_footprint(
+            w,
+            extend_start=js,
+            extend_end=je,
+        )
+        x0, y0, x1, y1 = fp.bounds
+        s, e = w["start"], w["end"]
+        if w["orientation"] == "h":
+            wall_x_min = min(s[0], e[0])
+            wall_x_max = max(s[0], e[0])
+            if not js:
+                assert x0 >= wall_x_min - TOL, (
+                    f"wall {w['id']} h: FREE start but footprint x0={x0:.3f}"
+                    f" < wall_x_min={wall_x_min:.3f} (stub extension)"
+                )
+            if not je:
+                assert x1 <= wall_x_max + TOL, (
+                    f"wall {w['id']} h: FREE end but footprint x1={x1:.3f}"
+                    f" > wall_x_max={wall_x_max:.3f} (stub extension)"
+                )
+        else:  # vertical
+            wall_y_min = min(s[1], e[1])
+            wall_y_max = max(s[1], e[1])
+            if not js:
+                assert y0 >= wall_y_min - TOL, (
+                    f"wall {w['id']} v: FREE start but footprint y0={y0:.3f}"
+                    f" < wall_y_min={wall_y_min:.3f} (stub extension)"
+                )
+            if not je:
+                assert y1 <= wall_y_max + TOL, (
+                    f"wall {w['id']} v: FREE end but footprint y1={y1:.3f}"
+                    f" > wall_y_max={wall_y_max:.3f} (stub extension)"
+                )
