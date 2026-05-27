@@ -46,7 +46,7 @@ o rev-parse pode pegar ref stale. Sequencial.
 
 ```bash
 "/c/Program Files/GitHub CLI/gh.exe" pr create \
-  --repo fmodesto30/sketchup-mcp \
+  --repo GFCDOTA/sketchup-mcp \
   --base develop \
   --head <branch> \
   --title "<title>" \
@@ -55,7 +55,7 @@ o rev-parse pode pegar ref stale. Sequencial.
 EOF
 ```
 
-**Sempre `--repo fmodesto30/sketchup-mcp`** e **sempre
+**Sempre `--repo GFCDOTA/sketchup-mcp`** e **sempre
 `--body-file -` com heredoc** (evita escape hell no body).
 
 NÃO propor "abrir PR manual no browser" — está superseded

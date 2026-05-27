@@ -4,7 +4,7 @@ Contexto estável. Não é estado-do-dia (esse vai em `current_state.md`).
 
 ## Identidade
 
-Repo `sketchup-mcp` (privado, owner `fmodesto30`). Pipeline mínimo
+Repo `sketchup-mcp` (privado, owner `GFCDOTA`). Pipeline mínimo
 pra gerar um `.skp` SketchUp a partir de um consensus JSON que
 descreve walls + openings + rooms + soft barriers em PDF-points.
 

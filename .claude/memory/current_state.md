@@ -46,7 +46,7 @@
 
 ## TODO — verificar live
 
-- [ ] `gh pr list --repo fmodesto30/sketchup-mcp --state open` pra
+- [ ] `gh pr list --repo GFCDOTA/sketchup-mcp --state open` pra
       ver se tem PR aberta não listada aqui
 - [ ] Confirmar que não há working trees paralelos em outros agentes
       (`git worktree list`)

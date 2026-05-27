@@ -21,7 +21,7 @@ Este arquivo nasceu vazio nesta reorganização. Próxima auditoria
 de hygiene (ver `specs/repository_hygiene.md`) deve verificar:
 
 - [ ] `git branch -a` → branches locais / remotas sem PR aberto
-- [ ] `gh pr list --repo fmodesto30/sketchup-mcp --state closed
+- [ ] `gh pr list --repo GFCDOTA/sketchup-mcp --state closed
       --search "is:closed -is:merged"` → PRs fechadas sem merge
 - [ ] `.ai_bridge/HANDOFF.md` (se existir) → handoffs pendentes
 

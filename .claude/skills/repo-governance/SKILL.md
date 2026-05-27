@@ -32,7 +32,7 @@ Detalhes em `memory/git_workflow.md`.
 
 ```bash
 "/c/Program Files/GitHub CLI/gh.exe" pr create \
-  --repo fmodesto30/sketchup-mcp \
+  --repo GFCDOTA/sketchup-mcp \
   --base develop \
   --head <branch> \
   --title "<title>" \
@@ -47,7 +47,7 @@ Detalhes em `memory/git_workflow.md`.
 EOF
 ```
 
-- Sempre `--repo fmodesto30/sketchup-mcp`
+- Sempre `--repo GFCDOTA/sketchup-mcp`
 - Sempre `--body-file -` com heredoc (escape hell se inline)
 - Sempre `--base develop` (Hard Rule #4)
 
