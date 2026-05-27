@@ -25,11 +25,12 @@ the minimal pipeline.
 | Openings | 12 (7 interior_door + 4 window + 1 glazed_balcony) — all `geometry_origin: human_annotation` |
 | Rooms | 8 |
 | Soft barriers | 9 |
-| Shell pieces | 7 (after union+carve+canonicalise) |
+| Shell pieces | 8 (after union+carve+canonicalise+stub-trim) |
 | Window apertures (3D) | 4 (peitoril + verga preserved per ADR-007 semantics) |
 | Slivers removed | 0 |
 | Redundant vertices dropped | 0 |
-| Total shell area | 11583.4 pts² |
+| Endpoint classification | 27 junction (extend) / 43 free (no extend — LL-017 stub trim) |
+| Total shell area | 11045.9 pts² (was 11583.4 before stub trim; -537 pts² = ~13 stubs removed) |
 | SU model bounds | 28 top-level groups, 54 faces, 962 edges |
 | Gates self-check | ✅ 4/4 PASS (`plan_shell_group_exists`, `wall_shell_is_single_group`, `floors_separated_from_walls`, `default_material_faces_zero`) |
 
