@@ -1,0 +1,379 @@
+{
+  "schema_version": "fp026.wall_stub_report.v1",
+  "fixture": "planta_74",
+  "source_consensus": "fixtures\\planta_74\\consensus_with_human_walls_and_soft_barriers.json",
+  "source_pdf": "planta_74.pdf",
+  "summary": {
+    "total_candidates": 14,
+    "fail": 0,
+    "warn": 0,
+    "pass": 14,
+    "stage_breakdown": {
+      "post_canonicalise": 14
+    }
+  },
+  "candidates": [
+    {
+      "stub_id": "spur_000",
+      "stage_detected": "post_canonicalise",
+      "bbox": [
+        254.9844207763672,
+        625.2216186523438,
+        262.30322265625,
+        677.6556396484375
+      ],
+      "centroid": [
+        258.6438217163086,
+        651.4386291503906
+      ],
+      "area_pts2": 383.7542,
+      "long_axis_pts": 52.434,
+      "short_axis_pts": 7.3188,
+      "touches_wall_ids": [
+        "w002",
+        "w005",
+        "w007"
+      ],
+      "near_opening_ids": [],
+      "classification": "valid_wall_return",
+      "verdict": "PASS",
+      "evidence": "spur supported by consensus centerline"
+    },
+    {
+      "stub_id": "spur_001",
+      "stage_detected": "post_canonicalise",
+      "bbox": [
+        254.9844207763672,
+        625.2216186523438,
+        262.30322265625,
+        630.6204223632812
+      ],
+      "centroid": [
+        258.64382171630865,
+        627.9210205078124
+      ],
+      "area_pts2": 39.5128,
+      "long_axis_pts": 7.3188,
+      "short_axis_pts": 5.3988,
+      "touches_wall_ids": [
+        "w005",
+        "w007"
+      ],
+      "near_opening_ids": [],
+      "classification": "valid_wall_return",
+      "verdict": "PASS",
+      "evidence": "spur supported by consensus centerline"
+    },
+    {
+      "stub_id": "spur_002",
+      "stage_detected": "post_canonicalise",
+      "bbox": [
+        489.921630859375,
+        521.9100341796875,
+        496.22,
+        622.8216552734375
+      ],
+      "centroid": [
+        493.07081542968757,
+        572.3658447265625
+      ],
+      "area_pts2": 635.5786,
+      "long_axis_pts": 100.9116,
+      "short_axis_pts": 6.2984,
+      "touches_wall_ids": [
+        "w010",
+        "w014",
+        "w017"
+      ],
+      "near_opening_ids": [],
+      "classification": "valid_wall_return",
+      "verdict": "PASS",
+      "evidence": "spur supported by consensus centerline"
+    },
+    {
+      "stub_id": "spur_003",
+      "stage_detected": "post_canonicalise",
+      "bbox": [
+        489.921630859375,
+        617.421630859375,
+        496.22,
+        622.8216552734375
+      ],
+      "centroid": [
+        493.07081542968757,
+        620.1216430664061
+      ],
+      "area_pts2": 34.0113,
+      "long_axis_pts": 6.2984,
+      "short_axis_pts": 5.4,
+      "touches_wall_ids": [
+        "w010",
+        "w014"
+      ],
+      "near_opening_ids": [],
+      "classification": "valid_wall_return",
+      "verdict": "PASS",
+      "evidence": "spur supported by consensus centerline"
+    },
+    {
+      "stub_id": "spur_004",
+      "stage_detected": "post_canonicalise",
+      "bbox": [
+        466.5240173339844,
+        516.51123046875,
+        503.12042236328125,
+        521.9100341796875
+      ],
+      "centroid": [
+        484.82221984863276,
+        519.2106323242188
+      ],
+      "area_pts2": 197.5768,
+      "long_axis_pts": 36.5964,
+      "short_axis_pts": 5.3988,
+      "touches_wall_ids": [
+        "w014",
+        "w017"
+      ],
+      "near_opening_ids": [],
+      "classification": "valid_wall_return",
+      "verdict": "PASS",
+      "evidence": "spur supported by consensus centerline"
+    },
+    {
+      "stub_id": "spur_005",
+      "stage_detected": "post_canonicalise",
+      "bbox": [
+        336.09600830078125,
+        481.4748229980469,
+        343.8960266113281,
+        486.99481201171875
+      ],
+      "centroid": [
+        339.9960174560547,
+        484.23481750488287
+      ],
+      "area_pts2": 43.056,
+      "long_axis_pts": 7.8,
+      "short_axis_pts": 5.52,
+      "touches_wall_ids": [
+        "w024",
+        "w026",
+        "w027"
+      ],
+      "near_opening_ids": [],
+      "classification": "valid_wall_return",
+      "verdict": "PASS",
+      "evidence": "spur supported by consensus centerline"
+    },
+    {
+      "stub_id": "spur_006",
+      "stage_detected": "post_canonicalise",
+      "bbox": [
+        322.8984069824219,
+        454.35723876953125,
+        336.09600830078125,
+        459.7560119628906
+      ],
+      "centroid": [
+        329.4972076416015,
+        457.05662536621094
+      ],
+      "area_pts2": 71.2509,
+      "long_axis_pts": 13.1976,
+      "short_axis_pts": 5.3988,
+      "touches_wall_ids": [
+        "w027",
+        "w029"
+      ],
+      "near_opening_ids": [],
+      "classification": "valid_wall_return",
+      "verdict": "PASS",
+      "evidence": "spur supported by consensus centerline"
+    },
+    {
+      "stub_id": "spur_007",
+      "stage_detected": "post_canonicalise",
+      "bbox": [
+        123.66,
+        577.5859999999999,
+        124.91521453857422,
+        582.986
+      ],
+      "centroid": [
+        124.28760726928711,
+        580.286
+      ],
+      "area_pts2": 6.7782,
+      "long_axis_pts": 5.4,
+      "short_axis_pts": 1.2552,
+      "touches_wall_ids": [
+        "w020",
+        "h_w000"
+      ],
+      "near_opening_ids": [],
+      "classification": "valid_wall_return",
+      "verdict": "PASS",
+      "evidence": "spur supported by consensus centerline"
+    },
+    {
+      "stub_id": "spur_008",
+      "stage_detected": "post_canonicalise",
+      "bbox": [
+        124.91521453857422,
+        582.986,
+        130.31521606445312,
+        613.2216186523438
+      ],
+      "centroid": [
+        127.61521530151369,
+        598.1038093261719
+      ],
+      "area_pts2": 163.2724,
+      "long_axis_pts": 30.2356,
+      "short_axis_pts": 5.4,
+      "touches_wall_ids": [
+        "w020",
+        "h_w000",
+        "h_w001"
+      ],
+      "near_opening_ids": [],
+      "classification": "valid_wall_return",
+      "verdict": "PASS",
+      "evidence": "spur supported by consensus centerline"
+    },
+    {
+      "stub_id": "spur_009",
+      "stage_detected": "post_canonicalise",
+      "bbox": [
+        131.91,
+        577.5859999999999,
+        135.09199999999998,
+        582.986
+      ],
+      "centroid": [
+        133.50099999999998,
+        580.2860000000001
+      ],
+      "area_pts2": 17.1828,
+      "long_axis_pts": 5.4,
+      "short_axis_pts": 3.182,
+      "touches_wall_ids": [
+        "h_w000",
+        "h_w001"
+      ],
+      "near_opening_ids": [],
+      "classification": "valid_wall_return",
+      "verdict": "PASS",
+      "evidence": "spur supported by consensus centerline"
+    },
+    {
+      "stub_id": "spur_010",
+      "stage_detected": "post_canonicalise",
+      "bbox": [
+        124.91521453857422,
+        508.7124328613281,
+        132.23521423339844,
+        514.1112670898438
+      ],
+      "centroid": [
+        128.57521438598633,
+        511.41184997558594
+      ],
+      "area_pts2": 39.5195,
+      "long_axis_pts": 7.32,
+      "short_axis_pts": 5.3988,
+      "touches_wall_ids": [
+        "w020",
+        "w022",
+        "h_w001"
+      ],
+      "near_opening_ids": [],
+      "classification": "valid_wall_return",
+      "verdict": "PASS",
+      "evidence": "spur supported by consensus centerline"
+    },
+    {
+      "stub_id": "spur_011",
+      "stage_detected": "post_canonicalise",
+      "bbox": [
+        124.91521453857422,
+        508.7124328613281,
+        132.23521423339844,
+        577.5859999999999
+      ],
+      "centroid": [
+        128.57521438598633,
+        543.1492164306641
+      ],
+      "area_pts2": 504.1545,
+      "long_axis_pts": 68.8736,
+      "short_axis_pts": 7.32,
+      "touches_wall_ids": [
+        "w020",
+        "w022",
+        "h_w000",
+        "h_w001"
+      ],
+      "near_opening_ids": [],
+      "classification": "valid_wall_return",
+      "verdict": "PASS",
+      "evidence": "spur supported by consensus centerline"
+    },
+    {
+      "stub_id": "spur_012",
+      "stage_detected": "post_canonicalise",
+      "bbox": [
+        124.91521453857422,
+        677.6556396484375,
+        132.23521423339844,
+        683.0556030273438
+      ],
+      "centroid": [
+        128.57521438598633,
+        680.3556213378906
+      ],
+      "area_pts2": 39.5277,
+      "long_axis_pts": 7.32,
+      "short_axis_pts": 5.4,
+      "touches_wall_ids": [
+        "w001",
+        "w003"
+      ],
+      "near_opening_ids": [],
+      "classification": "valid_wall_return",
+      "verdict": "PASS",
+      "evidence": "spur supported by consensus centerline"
+    },
+    {
+      "stub_id": "spur_013",
+      "stage_detected": "post_canonicalise",
+      "bbox": [
+        124.91521453857422,
+        677.6556396484375,
+        132.23521423339844,
+        695.054443359375
+      ],
+      "centroid": [
+        128.57521438598633,
+        686.3550415039064
+      ],
+      "area_pts2": 127.3592,
+      "long_axis_pts": 17.3988,
+      "short_axis_pts": 7.32,
+      "touches_wall_ids": [
+        "w000",
+        "w001",
+        "w003"
+      ],
+      "near_opening_ids": [],
+      "classification": "valid_wall_return",
+      "verdict": "PASS",
+      "evidence": "spur supported by consensus centerline"
+    }
+  ],
+  "thresholds": {
+    "STUB_MAX_LENGTH_RATIO": 1.5,
+    "STUB_WIDTH_TOLERANCE": 0.2
+  }
+}
