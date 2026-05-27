@@ -62,6 +62,12 @@ fixtures/
   quadrado/consensus_with_window.json   # Canonical micro-fixture
   planta_74/consensus_with_human_walls_and_soft_barriers.json  # Real apartment (35 walls)
 
+artifacts/                              # Tracked canonical deliverables
+  planta_74/planta_74.skp               # ← THE deliverable
+  planta_74/planta_74_{iso,top}.png     # Auto renders
+  planta_74/geometry_report.json
+  planta_74/README.md                   # Build provenance
+
 tests/
   test_quadrado_canonical_smoke.py
   test_wall_shell_canonical.py
