@@ -61,6 +61,7 @@ Quebrar uma dessas é RED. Ver `@.claude/memory/operational_rules.md`
 @.claude/specs/product_goal.md
 @.claude/specs/fidelity_gate.md
 @.claude/specs/skp_artifact_layout.md
+@.claude/specs/skp_proof_of_progress_gate.md
 
 @.claude/evals/eval_strategy.md
 @.claude/evals/fidelity_rubric.md
@@ -89,6 +90,8 @@ Auto-discovered em `.claude/skills/*/SKILL.md`:
 - `pdf-to-skp-pipeline` — build do `.skp` a partir de consensus
 - `fidelity-review` — SKP vs PDF review checklist
 - `skp-artifact-management` — promotion runs/ → artifacts/
+- `generate-and-compare-skp-after-change` — gerar SKP + comparar
+  before/after após mudança de fidelidade (Constitution #8)
 - `repo-governance` — PR / branch / merge / hygiene
 - `multi-agent-handoff` — coordenação multi-agent / worktrees
 

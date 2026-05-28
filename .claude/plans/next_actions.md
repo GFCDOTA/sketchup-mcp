@@ -3,46 +3,69 @@
 Fila curta. Máximo 5 itens. Adicionar novo só se houver espaço E
 valor claro pro produto.
 
-> **Snapshot:** 2026-05-27. Decai rápido.
+> **Snapshot:** 2026-05-28. Decai rápido.
 
 ## Fila atual
 
-### 1. Concluir esta reorganização do `.claude/`
+### 1. Mergear `feat/skp-proof-of-progress-gate`
 
-- **Objetivo:** Branch `chore/organize-claude-knowledge-base`
-  mergeada em `develop`
-- **Por quê:** Base operacional pra agentes futuros saberem onde
-  achar regras vivas, specs, plans, skills. Sem isso, contexto
-  fragmenta em CLAUDE.md gigantes.
-- **Arquivos prováveis:** `.claude/` (este PR)
-- **Validação:** README.md explica estrutura, `.claude/CLAUDE.md`
-  vira bootloader, gitignore libera subdirs, `.skp` policy
-  documentada, multi-agent rules cravadas
-- **Critério de parada:** PR aberto contra `develop`
+- **Objetivo:** Constitution #8 + spec + skill + template
+  cravados em `develop`
+- **Por quê:** Garantir que toda PR futura de fidelidade gere
+  evidência human-facing automaticamente, sem o humano cobrar
+- **Status:** PR em criação após este commit
+- **Critério de parada:** PR mergeada
 
-### 2. Auditar TODOs deixados nesta reorganização
+### 2. (follow-up) Tool `tools/check_skp_proof_of_progress.py`
 
-- **Objetivo:** Cada `TODO` em `.claude/**/*.md` resolvido ou
-  movido pra issue
-- **Por quê:** TODOs são honest markers de "preciso validar
-  contra repo real". Deixar eternos vira ruído.
-- **Arquivos prováveis:** `.claude/memory/*.md`,
-  `.claude/specs/*.md`, `.claude/skills/*/SKILL.md`
-- **Validação:** `rg -n "TODO" .claude/` retorna lista vazia OU
-  só TODOs com link pra issue
-- **Critério de parada:** lista enxugada
+- **Objetivo:** Implementar o gate sugerido em
+  `specs/skp_proof_of_progress_gate.md` § "Testes / gates
+  automáticos"
+- **Por quê:** O texto sozinho depende de reviewer humano cobrar;
+  o gate executável protege automaticamente
+- **Arquivos prováveis:** `tools/check_skp_proof_of_progress.py`
+  + `.github/workflows/check-skp-proof-of-progress.yml` (se CI
+  for adotada) + teste cobrindo a tool
+- **Validação esperada:** PR de builder sem artifact review é
+  bloqueada automaticamente
+- **Critério de parada:** tool + CI verde rodando em PR de teste
+- **NÃO INICIAR** sem ok explícito do humano — categoria 5
+  pendente
 
-### 3. (placeholder)
+### 3. (follow-up) Aplicar o gate na próxima PR de builder
 
-- TODO: definir próximo item de ROI quando #1 e #2 fecharem
+- **Objetivo:** Exercitar o fluxo em uma PR real de melhoria
+  (e.g. próximo fix em wall canonicalisation ou opening routing)
+- **Por quê:** Dogfooding da regra antes de virar obrigação cega
+- **Critério de parada:** primeiro `artifacts/review/<plant>/<cycle>/`
+  com `regression_summary.md` mergeado
 
-### 4. (placeholder)
+### 4. (follow-up) Validar Python install local do user
 
-### 5. (placeholder)
+- **Objetivo:** Confirmar com o humano se Python 3.12 oficial em
+  `AppData/Local/Programs/Python/Python312/` foi removido
+  intencionalmente, ou se precisa reinstalar
+- **Por quê:** Hoje só funciona via `uv`-managed Python. Outros
+  agentes/sessões podem encontrar erro 0x80070002
+- **Critério de parada:** decisão do humano (reinstalar / aceitar
+  uv-only) + memory atualizada
+
+### 5. (follow-up) Adicionar matplotlib ao `pyproject.toml`
+
+- **Objetivo:** `tools/diagnose_wall_stubs.py` (PR #193) importa
+  matplotlib mas não está em `pyproject.toml [project.dependencies]`
+- **Por quê:** Quebra `pytest --collect` em ambientes sem
+  matplotlib pré-instalado
+- **Arquivos prováveis:** `pyproject.toml` (1 linha)
+- **Validação esperada:** `uv pip install -e ".[dev]"` numa venv
+  fresh deixa o pytest verde sem `uv pip install matplotlib`
+  manual
+- **Critério de parada:** PR mergeada
 
 ## Regra de fila
 
 Concluir a fila → escolher próximo item **só se houver valor
 claro pro produto** (gerar/revisar `.skp` fiel). Não inventar
 trabalho cosmético. Ver `specs/product_goal.md` § "Critérios de
-avanço real".
+avanço real" e `memory/operational_rules.md` § "Continuar
+automaticamente vs parar" (5 categorias).

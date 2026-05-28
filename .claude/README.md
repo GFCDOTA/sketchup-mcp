@@ -25,12 +25,14 @@ repo) exceto `scratch/`.
 │   ├── fidelity_gate.md
 │   ├── perfect_reference_strategy.md
 │   ├── skp_artifact_layout.md
+│   ├── skp_proof_of_progress_gate.md  ← "No SKP, no progress" (Constitution #8)
 │   ├── sdd_and_harness_engineering.md
 │   ├── repository_hygiene.md
 │   └── templates/         ← templates pra novas features/specs
 │       ├── feature_spec_template.md
 │       ├── fidelity_spec_template.md
-│       └── artifact_contract_template.md
+│       ├── artifact_contract_template.md
+│       └── regression_summary_template.md  ← pro SKP Proof-of-Progress Gate
 ├── evals/                 ← como medimos progresso real
 │   ├── eval_strategy.md
 │   ├── fidelity_rubric.md
@@ -44,6 +46,7 @@ repo) exceto `scratch/`.
 │   ├── pdf-to-skp-pipeline/SKILL.md
 │   ├── fidelity-review/SKILL.md
 │   ├── skp-artifact-management/SKILL.md
+│   ├── generate-and-compare-skp-after-change/SKILL.md
 │   ├── repo-governance/SKILL.md
 │   └── multi-agent-handoff/SKILL.md
 ├── docs/
