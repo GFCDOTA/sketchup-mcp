@@ -59,17 +59,29 @@ isoladas quando houver paralelismo. Mudança out-of-band detectada
 
 ## 8. No SKP, no progress
 
-Toda mudança que afete ou alegue afetar fidelidade arquitetônica
-(builder, walls, openings, rooms, soft_barriers, consensus
-schema, renderer, artifact policy) **deve** gerar um `.skp` novo
-em pasta human-facing (`artifacts/review/<plant>/<cycle>/`) com
-renders + report + `regression_summary.md`. Sem isso, a melhoria
-**não está concluída**. `/runs/` é scratch — `.skp` em `/runs/`
-sozinho NÃO conta como evidência. Spec completa em
-[`specs/skp_proof_of_progress_gate.md`](specs/skp_proof_of_progress_gate.md).
+Toda **SKP-affecting PR** (path-triggered — ver spec) deve
+entregar **um** `.skp` final em pasta human-facing
+(`artifacts/review/<plant>/<branch_or_pr>/final/`) + renders top
+e iso + `regression_summary.md` com **evidência específica por
+axis**. Sem isso, melhoria **não está concluída**. `/runs/` é
+scratch — `.skp` lá sozinho NÃO conta como evidência.
 
-Exceções (puramente textual / infra sem afetar modelo) listadas
-na spec, mas em dúvida: **aplica**.
+**Escape hatch**: PRs doc-only / test-only / CI-only podem
+marcar `SKP-proof: N/A` no body, justificando por que nenhum
+path SKP-affecting foi tocado.
+
+**Intermediários** (attempt_0/1/2) ficam em `/runs/` ou CI
+artifacts — **não commitar por default**. Só commitar attempt
+intermediário quando ele documenta uma decisão chave (regressão
+identificada + fix aplicado).
+
+**Não exigir pixel-perfect hard gate** — renders são evidência
+de review, não diff bit-exato. Hard FAILs reservados pra
+absurdos (missing SKP, missing render, window count mismatch,
+floating door, orphan glass sem source).
+
+Spec completa em
+[`specs/skp_proof_of_progress_gate.md`](specs/skp_proof_of_progress_gate.md).
 
 ---
 
