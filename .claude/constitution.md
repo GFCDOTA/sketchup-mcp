@@ -57,7 +57,21 @@ isoladas quando houver paralelismo. Mudança out-of-band detectada
 = parar e reconciliar. Ver
 [`memory/multi_agent_coordination.md`](memory/multi_agent_coordination.md).
 
+## 8. No SKP, no progress
+
+Toda mudança que afete ou alegue afetar fidelidade arquitetônica
+(builder, walls, openings, rooms, soft_barriers, consensus
+schema, renderer, artifact policy) **deve** gerar um `.skp` novo
+em pasta human-facing (`artifacts/review/<plant>/<cycle>/`) com
+renders + report + `regression_summary.md`. Sem isso, a melhoria
+**não está concluída**. `/runs/` é scratch — `.skp` em `/runs/`
+sozinho NÃO conta como evidência. Spec completa em
+[`specs/skp_proof_of_progress_gate.md`](specs/skp_proof_of_progress_gate.md).
+
+Exceções (puramente textual / infra sem afetar modelo) listadas
+na spec, mas em dúvida: **aplica**.
+
 ---
 
-Estes 7 pontos são **constituição**. Mudança aqui exige PR
+Estes 8 pontos são **constituição**. Mudança aqui exige PR
 explícita e justificativa. Tudo o mais é regulamentação.

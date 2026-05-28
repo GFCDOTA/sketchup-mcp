@@ -85,3 +85,22 @@ aberta pra inspeção visual. (PR #186 cravou regra.)
 Visual fidelity (PNG comparativo) é informativo. Gate de
 contrato é teste Python (`tests/`). Os dois precisam passar — um
 não substitui o outro.
+
+## 12. No SKP, no progress (LL-021)
+
+Toda PR que promete melhorar fidelidade arquitetônica deve gerar
+`.skp` novo em pasta human-facing (`artifacts/review/<plant>/<cycle>/`)
+com renders + comparação antes/depois + `regression_summary.md`.
+
+Por quê: já tivemos casos (2026-05-27, pós PR #194) onde o gate
+machine-readable (`gates_self_check = true`) passava mas o humano
+levantou suspeita visual de regressão de openings. Só rodando
+build fresh e comparando contagens deu pra dismissar a hipótese
+(invariantes pinados em PR #195).
+
+`gates_self_check = true` sozinho não prova fidelidade.
+`.skp` em `/runs/` (scratch) não serve pra revisão.
+
+Constituição #8 cravou. Operacional em
+[`specs/skp_proof_of_progress_gate.md`](../specs/skp_proof_of_progress_gate.md).
+Skill `generate-and-compare-skp-after-change` implementa.

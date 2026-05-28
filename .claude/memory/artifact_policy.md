@@ -76,6 +76,21 @@ SKP, declarar sucesso exige:
 
 Se faltar 1+ dos 5, status é **incompleto**, não sucesso.
 
+## SKP Proof-of-Progress Gate (Constitution #8)
+
+Toda PR que afete fidelidade arquitetônica adiciona um **6º
+requisito**: artefatos de comparação antes/depois em
+`artifacts/review/<plant>/<cycle>/` + `regression_summary.md`.
+
+Detalhe completo em
+[`specs/skp_proof_of_progress_gate.md`](../specs/skp_proof_of_progress_gate.md).
+Skill operacional em
+[`skills/generate-and-compare-skp-after-change/SKILL.md`](../skills/generate-and-compare-skp-after-change/SKILL.md).
+
+Resumo: se a mudança toca builder / consensus / renderer / kind
+routing / wall canonicalisation, **gerar SKP novo + renders +
+comparação não é opcional, é parte da PR**.
+
 ## Sidecar metadata — gotcha de promotion
 
 O builder (`tools/build_plan_shell_skp.py` → `write_metadata`)

@@ -30,6 +30,7 @@ aponta pra source-of-truth, não pra cópia.
 | [`specs/fidelity_gate.md`](../specs/fidelity_gate.md) | Dimensões de fidelidade |
 | [`specs/perfect_reference_strategy.md`](../specs/perfect_reference_strategy.md) | Tiers de verdade, truth cards |
 | [`specs/skp_artifact_layout.md`](../specs/skp_artifact_layout.md) | Paths, naming, metadata |
+| [`specs/skp_proof_of_progress_gate.md`](../specs/skp_proof_of_progress_gate.md) | "No SKP, no progress" — toda PR de fidelidade gera SKP + comparação |
 | [`specs/sdd_and_harness_engineering.md`](../specs/sdd_and_harness_engineering.md) | Spec → fixture → teste → artifact |
 | [`specs/repository_hygiene.md`](../specs/repository_hygiene.md) | Triggers reais pra cleanup |
 
@@ -40,6 +41,7 @@ aponta pra source-of-truth, não pra cópia.
 | [`specs/templates/feature_spec_template.md`](../specs/templates/feature_spec_template.md) | Nova feature FP-NNN |
 | [`specs/templates/fidelity_spec_template.md`](../specs/templates/fidelity_spec_template.md) | Documentar veredito de fidelidade de um build |
 | [`specs/templates/artifact_contract_template.md`](../specs/templates/artifact_contract_template.md) | Documentar contrato de artifact (input/output/schema) |
+| [`specs/templates/regression_summary_template.md`](../specs/templates/regression_summary_template.md) | Preencher `regression_summary.md` em `artifacts/review/<plant>/<cycle>/` |
 
 ## Evals — como medimos progresso
 
@@ -65,6 +67,7 @@ aponta pra source-of-truth, não pra cópia.
 | [`skills/pdf-to-skp-pipeline`](../skills/pdf-to-skp-pipeline/SKILL.md) | Build do `.skp` a partir de consensus |
 | [`skills/fidelity-review`](../skills/fidelity-review/SKILL.md) | Review SKP vs PDF |
 | [`skills/skp-artifact-management`](../skills/skp-artifact-management/SKILL.md) | Promotion runs/ → artifacts/ |
+| [`skills/generate-and-compare-skp-after-change`](../skills/generate-and-compare-skp-after-change/SKILL.md) | Gerar SKP novo + comparar before/after (Constitution #8) |
 | [`skills/repo-governance`](../skills/repo-governance/SKILL.md) | PR / branch / merge / hygiene |
 | [`skills/multi-agent-handoff`](../skills/multi-agent-handoff/SKILL.md) | Trabalho paralelo / handoff |
 

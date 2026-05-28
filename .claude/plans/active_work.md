@@ -8,59 +8,64 @@ Branch em curso, objetivo, escopo, validação.
 
 ## Branch atual
 
-`chore/organize-claude-knowledge-base`
+`feat/skp-proof-of-progress-gate`
 
-- Base: `origin/develop` em `2aafd04`
-- Criada em: 2026-05-27
+- Base: `origin/develop` em `04cb25b` (post-merge PR #195)
+- Criada em: 2026-05-28
 
 ## Objetivo
 
-Transformar `.claude/` numa base operacional do projeto:
-contexto, regras, specs, skills, plans separados em arquivos
-pequenos. `CLAUDE.md` raiz vira stub de auto-load; `.claude/CLAUDE.md`
-vira bootloader curto com `@imports`.
-
-Detalhe completo do plano em `specs/repository_hygiene.md` (não)
-— este escopo é organização de conhecimento, não cleanup de
-código.
+Cravar a regra permanente **No SKP, no progress** /
+**SKP Proof-of-Progress Gate**: toda PR que afete fidelidade
+arquitetônica precisa gerar SKP novo + renders + comparação
+antes/depois em pasta human-facing (`artifacts/review/<plant>/<cycle>/`)
+com `regression_summary.md`.
 
 ## Escopo permitido
 
-- Criar / atualizar arquivos sob `.claude/`
-- Atualizar `.gitignore` pra liberar subdirs versionados
-- Substituir `.claude/CLAUDE.md` por bootloader
-- Stub em raiz `CLAUDE.md` → `@.claude/CLAUDE.md`
+- Spec canônica em `.claude/specs/skp_proof_of_progress_gate.md`
+- Skill operacional `generate-and-compare-skp-after-change`
+- Template `regression_summary_template.md`
+- Adicionar princípio #8 na Constitution
+- LL-021 / lição #12 em `memory/lessons_learned.md`
+- Reforço em `memory/artifact_policy.md` (referência ao gate)
+- Atualizar bootloader CLAUDE.md (@import novo spec)
+- Atualizar README.md + docs/index.md (refletir novos arquivos)
+- Atualizar plans/active_work + next_actions + memory/current_state
+- Audit log em `docs/audits/2026-05-28_*.md`
 
 ## Fora de escopo
 
-- Tocar `tools/`, `tests/`, `fixtures/`, `artifacts/`
-- Mudar comportamento do pipeline
-- Refactor de código Python / Ruby
-- Cleanup de `docs/` (separar em outra PR)
+- Tocar `tools/`, `tests/`, `fixtures/`, `artifacts/<plant>/`
+- Criar `tools/check_skp_proof_of_progress.py` (gate automatizado
+  CI) — fica como follow-up TODO documentado na spec
+- Aplicar a regra retroativamente a PRs anteriores
+- Regenerar `.skp` de planta_74 nesta PR (regra é normativa, não
+  exercitada aqui)
 
 ## Comandos de validação
 
 ```bash
-# Gitignore não está ignorando os subdirs novos
-git -C /e/Claude/sketchup-mcp check-ignore -v \
-  .claude/CLAUDE.md \
-  .claude/README.md \
-  .claude/memory/project_context.md \
-  .claude/specs/product_goal.md \
-  .claude/plans/roadmap.md \
-  .claude/skills/pdf-to-skp-pipeline/SKILL.md \
-  .claude/docs/index.md
-# Esperado: tudo sai "ok" (não ignorado) exceto scratch/
+# Gitignore não está ignorando os novos arquivos
+git check-ignore -v \
+  .claude/specs/skp_proof_of_progress_gate.md \
+  .claude/skills/generate-and-compare-skp-after-change/SKILL.md \
+  .claude/specs/templates/regression_summary_template.md \
+  .claude/docs/audits/2026-05-28_skp_proof_of_progress_gate.md
+# Esperado: tudo "not ignored"
 
-# Scratch continua ignorada
-git -C /e/Claude/sketchup-mcp check-ignore -v .claude/scratch/x.md
-# Esperado: scratch é ignored
+# Imports do bootloader resolvem
+cat .claude/CLAUDE.md CLAUDE.md | grep -oE '@\.claude/[a-zA-Z_/-]+\.md' | sed 's/@//' | sort -u | while read f; do test -f "$f" && echo OK $f || echo MISS $f; done
+# Esperado: todos OK
 
-# Contract suite ainda verde (não toquei código mas vale conferir)
-python -m pytest tests/ -q
+# Contract suite ainda verde
+.venv/Scripts/python.exe -m pytest tests/ -q
+# Esperado: 89 passed, 5 skipped (sem mexer em código)
 ```
 
 ## Status
 
-Em curso. Próximo passo: validar gates → commit único → push →
-PR contra `develop`.
+Em curso. Spec + skill + template + constitution + lessons +
+artifact_policy + bootloader + README + index + plans atualizados.
+Audit log a criar. Próximo: validar, commit, push, PR contra
+`develop`.
