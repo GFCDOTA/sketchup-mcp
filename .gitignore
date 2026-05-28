@@ -19,6 +19,10 @@ build/
 /runs/
 /review/
 *.log
+# FP-030 Visual Oracle Gate — only `final/` of each review run is
+# committed; intermediate `attempt_N/` directories stay scratch
+# per Constitution #8 refinement (PR #197).
+artifacts/review/*/*/attempt_*/
 # editor / os
 .idea/
 .vscode/

@@ -1,0 +1,13 @@
+{
+  "id": "bad_wall_stubs_labelled",
+  "expected_verdict": "FAIL",
+  "expected_findings": [
+    {
+      "type": "wall_stub",
+      "severity": "FAIL",
+      "axis": "wall_fidelity",
+      "evidence": "Labelled S1-S8 examples show short overhanging caps/residual stubs at endpoints and joins."
+    }
+  ],
+  "source": "labelled derivative of real marked screenshot"
+}

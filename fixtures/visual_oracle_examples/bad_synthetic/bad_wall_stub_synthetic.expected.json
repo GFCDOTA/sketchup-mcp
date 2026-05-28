@@ -1,0 +1,13 @@
+{
+  "id": "bad_wall_stub_synthetic",
+  "expected_verdict": "FAIL",
+  "expected_findings": [
+    {
+      "type": "wall_stub",
+      "severity": "FAIL",
+      "axis": "wall_fidelity",
+      "evidence": "Short wall protrusion extends beyond a wall junction without support."
+    }
+  ],
+  "source": "synthetic visual oracle training diagram, not architectural ground truth"
+}

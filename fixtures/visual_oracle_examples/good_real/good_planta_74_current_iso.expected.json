@@ -1,0 +1,7 @@
+{
+  "id": "good_planta_74_current_iso",
+  "expected_verdict": "PASS",
+  "expected_findings": [],
+  "source": "real iso render from artifacts/planta_74/planta_74_iso.png (canonical baseline as of 2026-05-27 build, commit 04cb25b; consensus SHA e1b1a53d0e8c552c98e316a3e0553dfb0a4cbd282366627445336a6ad4b0f54f).",
+  "context": "Window apertures preserve sill/lintel (height_m=1.2 starting at z=0.9), doors full-height (height_m=2.1), soft barriers at parapet height (height_m=1.1), glazed_balcony full-height (height_m=2.7). No floating doors, no orphan glass panels, no misplaced soft barriers."
+}

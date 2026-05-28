@@ -1,0 +1,7 @@
+{
+  "id": "good_planta_74_current_side_by_side",
+  "expected_verdict": "PASS",
+  "expected_findings": [],
+  "source": "real PDF vs SKP side-by-side composite from artifacts/planta_74/side_by_side_pdf_vs_skp.png (canonical baseline as of 2026-05-27).",
+  "context": "Left: planta_74.pdf reference. Center: SKP top. Right: SKP iso. Geometric proportions match PDF; openings located at PDF positions; ambient rooms colored honestly with merged-cell labels preserved (open-plan r001/r002 documented as WARN-justified)."
+}

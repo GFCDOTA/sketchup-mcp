@@ -1,0 +1,13 @@
+{
+  "id": "bad_wall_stubs_marked",
+  "expected_verdict": "FAIL",
+  "expected_findings": [
+    {
+      "type": "wall_stub",
+      "severity": "FAIL",
+      "axis": "wall_fidelity",
+      "evidence": "Multiple short residual wall caps/stubs are visible at wall endpoints and junctions."
+    }
+  ],
+  "source": "real marked screenshot from planta_74 SKP render"
+}

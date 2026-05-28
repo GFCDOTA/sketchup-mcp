@@ -1,0 +1,13 @@
+{
+  "id": "bad_missing_wall_continuation_synthetic",
+  "expected_verdict": "FAIL",
+  "expected_findings": [
+    {
+      "type": "missing_wall_continuation",
+      "severity": "FAIL",
+      "axis": "wall_fidelity",
+      "evidence": "Wall continuity is broken without an associated door/window/opening source."
+    }
+  ],
+  "source": "synthetic visual oracle training diagram, not architectural ground truth"
+}

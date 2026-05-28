@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "visual_findings.v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "fixture",
+    "attempt",
+    "top_level_verdict",
+    "axes",
+    "findings"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "visual_findings.v1"
+    },
+    "fixture": {
+      "type": "string"
+    },
+    "attempt": {
+      "type": "string"
+    },
+    "top_level_verdict": {
+      "enum": [
+        "PASS",
+        "WARN",
+        "FAIL"
+      ]
+    },
+    "axes": {
+      "type": "object"
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "severity",
+          "axis",
+          "type",
+          "location",
+          "evidence_image",
+          "evidence"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "severity": {
+            "enum": [
+              "WARN",
+              "FAIL"
+            ]
+          },
+          "axis": {
+            "enum": [
+              "wall_fidelity",
+              "door_fidelity",
+              "window_fidelity",
+              "room_fidelity",
+              "scale_rotation",
+              "global_visual"
+            ]
+          },
+          "type": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "evidence_image": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "source_check": {
+            "type": "string"
+          },
+          "suspected_owner": {
+            "type": "string"
+          },
+          "proposed_fix": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "id": "bad_current_top_suspicious",
+  "expected_verdict": "WARN",
+  "expected_findings": [
+    {
+      "type": "global_visual_fail",
+      "severity": "WARN",
+      "axis": "global_visual",
+      "evidence": "Top view should be reviewed for unusual panels, floating doors, stubs, and wall continuity."
+    }
+  ],
+  "source": "real SKP top screenshot"
+}

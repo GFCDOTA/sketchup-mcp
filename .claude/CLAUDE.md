@@ -88,10 +88,13 @@ Estes são consultados quando relevantes, não importados sempre:
 Auto-discovered em `.claude/skills/*/SKILL.md`:
 
 - `pdf-to-skp-pipeline` — build do `.skp` a partir de consensus
-- `fidelity-review` — SKP vs PDF review checklist
+- `fidelity-review` — SKP vs PDF review checklist (humano)
 - `skp-artifact-management` — promotion runs/ → artifacts/
 - `generate-and-compare-skp-after-change` — gerar SKP + comparar
   before/after após mudança de fidelidade (Constitution #8)
+- `skp-visual-self-correction` — Visual Oracle Gate (FP-030);
+  detecta floating door / orphan glass / window count mismatch /
+  bad aperture / floor leak; loop até 3 attempts
 - `repo-governance` — PR / branch / merge / hygiene
 - `multi-agent-handoff` — coordenação multi-agent / worktrees
 

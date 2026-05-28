@@ -1,0 +1,6 @@
+{
+  "id": "good_clean_shell_hosted_openings_synthetic",
+  "expected_verdict": "PASS",
+  "expected_findings": [],
+  "source": "synthetic positive reference diagram"
+}
