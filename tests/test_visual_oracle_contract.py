@@ -104,6 +104,66 @@ def test_ambiguous_wall_stub_examples_carry_ambiguity_note():
             )
 
 
+# ---- confidence tiers (FP-030 example policy) -----------------------
+
+
+VALID_CONFIDENCE_TIERS = {
+    "good_real_baseline",
+    "bad_real_confirmed",
+    "bad_real_ambiguous",
+    "good_synthetic_teaching",
+    "bad_synthetic_teaching",
+}
+
+
+def test_manifest_declares_confidence_tiers_dictionary():
+    """Manifest must publish the 5-tier vocabulary so consumers know
+    the canonical names."""
+    data = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    tiers = data.get("confidence_tiers")
+    assert isinstance(tiers, dict)
+    assert set(tiers.keys()) == VALID_CONFIDENCE_TIERS, (
+        f"manifest confidence_tiers keys must be exactly the 5 "
+        f"canonical names; got {set(tiers.keys())}"
+    )
+
+
+def test_every_example_has_confidence_tier():
+    data = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    for ex in data["examples"]:
+        tier = ex.get("confidence_tier")
+        assert tier in VALID_CONFIDENCE_TIERS, (
+            f"{ex['id']} has invalid or missing confidence_tier: {tier}"
+        )
+
+
+def test_bad_real_ambiguous_examples_are_WARN_only():
+    """bad_real_ambiguous can contribute to WARN but NEVER train hard
+    FAIL. The manifest verdict reflects this."""
+    data = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    for ex in data["examples"]:
+        if ex.get("confidence_tier") == "bad_real_ambiguous":
+            assert ex["expected_verdict"] in {"WARN"}, (
+                f"{ex['id']} is bad_real_ambiguous but verdict is "
+                f"{ex['expected_verdict']}; must be WARN per FP-030 § "
+                f"confidence tiers"
+            )
+
+
+def test_bad_wall_stubs_have_ambiguous_or_false_positive_regions():
+    """bad_wall_stubs_*.expected.json must list the false-positive
+    region categories so oracle can disambiguate before flagging."""
+    base = MANIFEST.parent
+    for stub_id in ("bad_wall_stubs_labelled", "bad_wall_stubs_marked"):
+        exp_path = base / "bad_real" / f"{stub_id}.expected.json"
+        exp = json.loads(exp_path.read_text(encoding="utf-8"))
+        regions = exp.get("ambiguous_or_false_positive_regions")
+        assert isinstance(regions, list) and regions, (
+            f"{stub_id}.expected.json must carry non-empty "
+            f"ambiguous_or_false_positive_regions array"
+        )
+
+
 # ---- schema shape ---------------------------------------------------
 
 

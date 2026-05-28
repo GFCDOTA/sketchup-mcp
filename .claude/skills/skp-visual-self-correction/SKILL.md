@@ -129,6 +129,22 @@ Next command: <comando exato pro humano>
 - [`skp-artifact-management`](../skp-artifact-management/SKILL.md) — promotion + sidecar
 - [`fidelity-review`](../fidelity-review/SKILL.md) — checklist humano original
 
+## Confidence-tier rule (training data discipline)
+
+Quando inspecionar exemplos em
+`fixtures/visual_oracle_examples/manifest.json`, respeitar o
+`confidence_tier` de cada entry:
+
+- `bad_real_confirmed` → pode contribuir pra hard FAIL
+- `bad_real_ambiguous` → **WARN only**, nunca hard FAIL
+- `bad_synthetic_teaching` → didático, não golden absoluto
+- `good_real_baseline` → strong PASS reference
+- `good_synthetic_teaching` → didático positivo
+
+Exemplos com `ambiguous_or_false_positive_regions` (e.g.
+`bad_wall_stubs_*`) requerem cross-check com a FP-026 detector
+(`tools/diagnose_wall_stubs.py`) antes de qualquer FAIL.
+
 ## Anti-padrões
 
 - Declarar progress sem rodar `run_skp_visual_review`
@@ -136,3 +152,5 @@ Next command: <comando exato pro humano>
 - Marcar `global_visual` PASS sem ler PNGs inline
 - Aplicar fix que inventa geometria pra "limpar" um FAIL
 - Auto-fixar entre attempts sem source attribution
+- Treinar hard FAIL a partir de `bad_real_ambiguous` (door jambs
+  não são stubs)

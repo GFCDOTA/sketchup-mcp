@@ -1,13 +1,20 @@
 {
   "id": "bad_wall_stubs_labelled",
-  "expected_verdict": "FAIL",
+  "confidence_tier": "bad_real_ambiguous",
+  "expected_verdict": "WARN",
   "expected_findings": [
     {
       "type": "wall_stub",
-      "severity": "FAIL",
+      "severity": "WARN",
       "axis": "wall_fidelity",
-      "evidence": "Labelled S1-S8 examples show short overhanging caps/residual stubs at endpoints and joins."
+      "evidence": "Labelled S1-S8 examples; SOME show short overhanging caps/residual stubs at endpoints, OTHERS coincide with legitimate door jambs / window mullions that frame openings. Use FP-026 detector (tools/diagnose_wall_stubs.py) to disambiguate before flagging."
     }
   ],
+  "ambiguous_or_false_positive_regions": [
+    "possible door jamb (wall portion framing a door opening — legitimate geometry)",
+    "possible window mullion (wall portion between/around window aperture — legitimate)",
+    "possible valid opening detail (e.g. opening reveal, jamb shadow at carve edge)"
+  ],
+  "training_note": "Per FP-030 confidence-tier policy (bad_real_ambiguous): this example may contribute to WARN but MUST NOT train hard FAIL heuristics. Door jambs and window mullions are legitimate geometry and must never be classified as wall_stub.",
   "source": "labelled derivative of real marked screenshot"
 }

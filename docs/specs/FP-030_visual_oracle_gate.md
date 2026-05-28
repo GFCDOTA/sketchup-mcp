@@ -124,22 +124,55 @@ Stop early on:
 - BLOCKED (SU unavailable, consensus missing, etc.) — written
   to `regression_summary.md` with next command
 
-## Example policy
+## Example policy — 5 confidence tiers
 
-Real SKP screenshots are preferred over synthetic diagrams.
-`fixtures/visual_oracle_examples/manifest.json` lists:
+Each example in `fixtures/visual_oracle_examples/manifest.json`
+carries a `confidence_tier` controlling **how it can train the
+oracle**:
 
-- 4 PASS examples (3 `good_real` from current canonical + 1
-  `good_synthetic`)
-- 7 `bad_real` examples (with `ambiguity_note` where
-  annotations include legitimate jambs as well as real stubs)
-- 8 `bad_synthetic` diagrams teaching each negative class
+| Tier | Use | Can train hard FAIL? |
+|---|---|---|
+| `good_real_baseline` | Strong PASS reference from current canonical artifact | n/a (positive) |
+| `bad_real_confirmed` | Strong FAIL example, defect clearly localised and NOT coinciding with legitimate geometry | ✅ yes |
+| `bad_real_ambiguous` | Real screenshot with annotations that MAY include false-positive regions (e.g. door jambs marked as wall stubs) | ❌ no — WARN only |
+| `good_synthetic_teaching` | Didactic positive diagram | n/a (positive) |
+| `bad_synthetic_teaching` | Didactic negative diagram for a single category | ✅ yes (with caveat: synthetic, not golden absolute) |
 
-The `bad_wall_stubs_labelled` and `bad_wall_stubs_marked` images
-carry an `ambiguity_note` documenting that visual annotations
-include door jambs (correct geometry) alongside real stubs. The
-oracle must cross-check with the FP-026 detector
-(`tools/diagnose_wall_stubs.py`) before flagging.
+**Confidence weighting** (oracle decision logic):
+
+1. `bad_real_confirmed` = strong weight; localised, unambiguous
+2. `good_real_baseline` = strong weight; canonical positive
+3. `bad_real_ambiguous` = WARN-only, **never** hard FAIL
+4. `bad_synthetic_teaching` = didactic; learns category but not
+   absolute ground truth
+5. `good_synthetic_teaching` = didactic positive
+
+**Rule**: a real bad example may teach the oracle but must NOT
+teach a false positive as FAIL. The `bad_wall_stubs_*` images
+carry red circles over both real residual stubs AND legitimate
+door jambs / window mullions; classified as `bad_real_ambiguous`
+they contribute WARN only.
+
+### Disambiguating `bad_wall_stubs_*`
+
+When the oracle inspects a region flagged by these examples, it
+must cross-check the FP-026 detector
+(`tools/diagnose_wall_stubs.py`) before issuing a FAIL. Each
+ambiguous example carries an `ambiguous_or_false_positive_regions`
+list in its `.expected.json` enumerating likely false positives:
+
+- `"possible door jamb"` — legitimate wall framing a door
+- `"possible window mullion"` — legitimate wall around a window aperture
+- `"possible valid opening detail"` — opening reveal / jamb shadow
+
+### Current example inventory
+
+- **4 PASS** (3 `good_real_baseline` from current canonical + 1 `good_synthetic_teaching`)
+- **2 `bad_real_confirmed`** (`bad_orphan_glass_parapet_*`)
+- **5 `bad_real_ambiguous`** (`bad_current_*_suspicious`, `bad_suspicious_openings_iso`, `bad_wall_stubs_*`)
+- **8 `bad_synthetic_teaching`** (each negative class)
+
+Total: 19 examples.
 
 ## Schema (`visual_findings.v1`)
 
