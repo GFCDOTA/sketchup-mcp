@@ -45,6 +45,11 @@ ORACLE_BRIDGE_URL = "http://localhost:8765"
 ORACLE_BRIDGE_HEALTH_TIMEOUT_SEC = 5
 ORACLE_BRIDGE_CALL_TIMEOUT_SEC = 120
 
+OLLAMA_URL = "http://localhost:11434"
+OLLAMA_HEALTH_TIMEOUT_SEC = 5
+OLLAMA_GENERATE_TIMEOUT_SEC = 600
+OLLAMA_DEFAULT_VISION_MODEL = "qwen2.5vl:7b"
+
 VISUAL_FINDINGS_SCHEMA_VERSION = "visual_findings.v1"
 
 
@@ -354,6 +359,265 @@ class ChatGPTBridgeImageProvider(OracleProvider):
         )
 
 
+class OllamaVisionProvider(OracleProvider):
+    """Local Ollama vision model (default: qwen2.5vl:7b).
+
+    Why this is the maturity-3 backend:
+    - Already installed on the host (cf. `ask_qwen_vision.py` pattern)
+    - Runs entirely offline at `http://localhost:11434`
+    - No API key, no token usage, no network egress
+    - Accepts base64-encoded images natively via `images` field
+
+    Behaviour:
+    - probe() hits `/api/tags`, looks for the configured vision model
+    - call() POSTs `/api/generate` with the prompt + images + JSON-only
+      instruction; parses the model response; normalises into v1
+    - If the model returns prose around the JSON, attempts to extract
+      the first balanced `{...}` block before giving up
+    """
+    name = "ollama_vision"
+
+    def __init__(
+        self, url: str = OLLAMA_URL, model: str = OLLAMA_DEFAULT_VISION_MODEL,
+    ):
+        self.url = url
+        self.model = model
+
+    def probe(self) -> tuple[bool, str]:
+        try:
+            req = urllib.request.Request(f"{self.url}/api/tags", method="GET")
+            with urllib.request.urlopen(
+                req, timeout=OLLAMA_HEALTH_TIMEOUT_SEC,
+            ) as resp:
+                if resp.status != 200:
+                    return False, f"ollama /api/tags returned {resp.status}"
+                body = json.loads(resp.read().decode("utf-8"))
+        except (urllib.error.URLError, urllib.error.HTTPError,
+                TimeoutError, OSError, json.JSONDecodeError) as e:
+            return False, f"ollama unreachable at {self.url}: {e!r}"
+
+        installed = [m.get("name") for m in body.get("models", [])]
+        if self.model not in installed:
+            return False, (
+                f"ollama reachable but model {self.model!r} not installed; "
+                f"available={installed}; run `ollama pull {self.model}`"
+            )
+        return True, f"ollama healthy; model {self.model!r} installed"
+
+    # Max edge length when shipping images to a vision model. Context-
+    # window overflow on qwen2.5vl:7b kicks in around 200-300 KB total
+    # for 2+ large PNGs; resizing to 900 px keeps the payload safe while
+    # leaving enough detail for architectural review.
+    IMAGE_MAX_DIM_PX = 900
+
+    def _build_compact_prompt(self, req: OracleRequest) -> str:
+        """Render a vision-friendly compact prompt.
+
+        The full FP-030 reviewer prompt (~5 KB) overflows qwen2.5vl:7b's
+        context window when combined with 3 resized images. This method
+        compresses to a short rubric + the strict v1 JSON schema + a
+        one-line context summary. Trades verbosity for the ability to
+        actually run on the local vision model.
+        """
+        gates = req.context.get("gates_self_check", {}) if isinstance(req.context, dict) else {}
+        stats = req.context.get("shell_stats_from_python", {}) if isinstance(req.context, dict) else {}
+        ctx_one_line = (
+            f"gates_ok={sum(1 for v in gates.values() if v is True)}/{len(gates)} "
+            f"walls={stats.get('input_walls','?')} "
+            f"windows3d={stats.get('window_apertures_3d','?')}"
+        )
+        return (
+            "You are an architectural visual fidelity reviewer for a "
+            "SketchUp floor-plan pipeline. You see 2-3 renders "
+            "(top, isometric, side-by-side vs PDF). "
+            "Return ONLY a JSON object, no prose around it.\n\n"
+            "Schema:\n"
+            "{\n"
+            '  "schema_version": "visual_findings.v1",\n'
+            '  "top_level_verdict": "PASS|WARN|FAIL",\n'
+            '  "confidence": "low|medium|high",\n'
+            '  "axes": {\n'
+            '    "wall_fidelity":   {"verdict":"PASS|WARN|FAIL","evidence":"..."},\n'
+            '    "door_fidelity":   {"verdict":"PASS|WARN|FAIL","evidence":"..."},\n'
+            '    "window_fidelity": {"verdict":"PASS|WARN|FAIL","evidence":"..."},\n'
+            '    "room_fidelity":   {"verdict":"PASS|WARN|FAIL","evidence":"..."},\n'
+            '    "scale_rotation":  {"verdict":"PASS|WARN|FAIL","evidence":"..."},\n'
+            '    "global_visual":   {"verdict":"PASS|WARN|FAIL","evidence":"..."}\n'
+            '  },\n'
+            '  "findings": []\n'
+            "}\n\n"
+            "Findings can include: floating_door, orphan_glass_panel, "
+            "wall_stub, missing_wall_continuation, misplaced_window, "
+            "full_height_window_void, floor_leak, misplaced_soft_barrier, "
+            "global_visual_fail. Each finding: "
+            '{"id":"vf_001","severity":"FAIL|WARN","axis":"<axis>",'
+            '"type":"<type>","location":"...","evidence_image":"model_iso.png",'
+            '"evidence":"..."}.\n\n'
+            f"Geometry context: {ctx_one_line}.\n"
+        )
+
+    def _b64_image(self, path: Path) -> str:
+        """Read + resize + base64. Resize protects the context window."""
+        import base64
+        import io
+        from PIL import Image
+
+        with Image.open(path) as img:
+            if img.width > self.IMAGE_MAX_DIM_PX or img.height > self.IMAGE_MAX_DIM_PX:
+                img.thumbnail(
+                    (self.IMAGE_MAX_DIM_PX, self.IMAGE_MAX_DIM_PX),
+                    Image.LANCZOS,
+                )
+                buf = io.BytesIO()
+                img.save(buf, format="PNG", optimize=True)
+                return base64.b64encode(buf.getvalue()).decode("ascii")
+        # Small enough — send as-is
+        return base64.b64encode(path.read_bytes()).decode("ascii")
+
+    def _extract_first_json_object(self, text: str) -> dict | None:
+        """Find the first balanced {...} in `text` and json.loads it.
+
+        Vision models often wrap JSON in markdown fences or prose. This
+        extractor scans for the first `{` and walks the brace depth to
+        find the matching `}`."""
+        i = text.find("{")
+        if i < 0:
+            return None
+        depth = 0
+        in_str = False
+        esc = False
+        for j in range(i, len(text)):
+            c = text[j]
+            if esc:
+                esc = False
+                continue
+            if c == "\\":
+                esc = True
+                continue
+            if c == '"':
+                in_str = not in_str
+                continue
+            if in_str:
+                continue
+            if c == "{":
+                depth += 1
+            elif c == "}":
+                depth -= 1
+                if depth == 0:
+                    blob = text[i:j + 1]
+                    try:
+                        return json.loads(blob)
+                    except json.JSONDecodeError:
+                        return None
+        return None
+
+    def call(self, req: OracleRequest, *, out_dir: Path) -> OracleResponse:
+        try:
+            req.validate()
+        except (ValueError, FileNotFoundError) as e:
+            return OracleResponse(
+                provider=self.name, status="invalid_response",
+                detail=f"request validation failed: {e}",
+            )
+
+        available, detail = self.probe()
+        if not available:
+            pkg = write_oracle_request_package(
+                out_dir, req, status="unavailable", reason=detail,
+            )
+            return OracleResponse(
+                provider=self.name, status="unavailable", detail=detail,
+                package_dir=pkg,
+            )
+
+        # Build a compact, vision-friendly prompt. The full FP-030
+        # reviewer.md (~5 KB) overflows qwen2.5vl:7b's context window
+        # when combined with 3 resized images, returning HTTP 500.
+        # We compress to a short rubric + the strict JSON schema, plus
+        # a one-line context summary.
+        full_prompt = self._build_compact_prompt(req)
+
+        # NOTE: we intentionally do NOT use ollama's `format: json` for
+        # the multi-image case. Empirical: qwen2.5vl:7b returns
+        # `{"<|im_start|>":1}`-style token corruption when forced JSON
+        # mode is combined with 2+ images. The prompt asks for strict
+        # JSON output and `_extract_first_json_object` handles the
+        # markdown-fenced response.
+        payload = {
+            "model": self.model,
+            "prompt": full_prompt,
+            "images": [self._b64_image(p) for p in req.image_paths],
+            "stream": False,
+            "options": {"num_predict": 2000, "temperature": 0.3},
+        }
+        data = json.dumps(payload).encode("utf-8")
+        http_req = urllib.request.Request(
+            f"{self.url}/api/generate",
+            data=data,
+            method="POST",
+            headers={"Content-Type": "application/json"},
+        )
+        try:
+            with urllib.request.urlopen(
+                http_req, timeout=OLLAMA_GENERATE_TIMEOUT_SEC,
+            ) as resp:
+                outer = json.loads(resp.read().decode("utf-8"))
+        except (urllib.error.URLError, urllib.error.HTTPError,
+                TimeoutError, OSError, json.JSONDecodeError) as e:
+            pkg = write_oracle_request_package(
+                out_dir, req, status="unavailable",
+                reason=f"ollama /api/generate failed: {e!r}",
+            )
+            return OracleResponse(
+                provider=self.name, status="unavailable",
+                detail=f"network/parse error: {e!r}",
+                package_dir=pkg,
+            )
+
+        # The Ollama response has the form:
+        # {"model": ..., "response": "<text>", "done": true, ...}
+        # We keep the full outer object as raw for transparency.
+        raw_text = outer.get("response", "")
+        parsed = self._extract_first_json_object(raw_text)
+        if parsed is None:
+            pkg = write_oracle_request_package(
+                out_dir, req, status="invalid_response",
+                reason=(
+                    "ollama returned text but no parseable JSON object "
+                    "was found in the response"
+                ),
+            )
+            return OracleResponse(
+                provider=self.name, status="invalid_response",
+                detail="model output not parseable as JSON",
+                raw=outer, package_dir=pkg,
+            )
+
+        normalized = _normalize_to_visual_findings(parsed)
+        if normalized is None:
+            pkg = write_oracle_request_package(
+                out_dir, req, status="invalid_response",
+                reason=(
+                    "ollama returned JSON but it did not match "
+                    "visual_findings.v1 (missing top_level_verdict, "
+                    "axes object, or required keys)"
+                ),
+            )
+            return OracleResponse(
+                provider=self.name, status="invalid_response",
+                detail="response did not normalize to v1",
+                raw={"outer": outer, "parsed": parsed},
+                package_dir=pkg,
+            )
+
+        return OracleResponse(
+            provider=self.name, status="ok",
+            detail=f"ollama {self.model} returned valid visual_findings.v1",
+            raw={"outer": outer, "parsed": parsed},
+            normalized_findings=normalized,
+        )
+
+
 class FutureVisionAPIProvider(OracleProvider):
     """Stub for a future Anthropic/OpenAI Vision API integration.
 
@@ -458,6 +722,7 @@ def _normalize_to_visual_findings(raw: dict) -> dict | None:
 _REGISTRY: dict[str, type[OracleProvider]] = {
     "none": NoneProvider,
     "chatgpt_bridge_image": ChatGPTBridgeImageProvider,
+    "ollama_vision": OllamaVisionProvider,
     "future_vision_api": FutureVisionAPIProvider,
 }
 

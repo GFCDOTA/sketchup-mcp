@@ -20,7 +20,8 @@ import pytest
 
 from tools.oracle_providers import (
     ChatGPTBridgeImageProvider, FutureVisionAPIProvider,
-    NoneProvider, OracleRequest, OracleResponse,
+    NoneProvider, OllamaVisionProvider,
+    OracleRequest, OracleResponse,
     VISUAL_FINDINGS_SCHEMA_VERSION,
     _normalize_to_visual_findings,
     available_provider_names, get_provider,
@@ -46,9 +47,14 @@ def _make_request(tmp_path: Path) -> OracleRequest:
 # ---- registry --------------------------------------------------------
 
 
-def test_registry_exposes_three_providers():
+def test_registry_exposes_four_providers():
     names = available_provider_names()
-    assert names == ["chatgpt_bridge_image", "future_vision_api", "none"]
+    assert names == [
+        "chatgpt_bridge_image",
+        "future_vision_api",
+        "none",
+        "ollama_vision",
+    ]
 
 
 def test_get_provider_unknown_raises():
@@ -63,6 +69,8 @@ def test_get_provider_returns_instance():
     assert isinstance(p, NoneProvider)
     p = get_provider("future_vision_api")
     assert isinstance(p, FutureVisionAPIProvider)
+    p = get_provider("ollama_vision")
+    assert isinstance(p, OllamaVisionProvider)
 
 
 # ---- OracleRequest validation ----------------------------------------
@@ -253,6 +261,51 @@ def test_normalize_rejects_non_dict_input():
     assert _normalize_to_visual_findings("not a dict") is None  # type: ignore[arg-type]
     assert _normalize_to_visual_findings(None) is None  # type: ignore[arg-type]
     assert _normalize_to_visual_findings([]) is None  # type: ignore[arg-type]
+
+
+# ---- OllamaVisionProvider --------------------------------------------
+
+
+def test_ollama_provider_probe_returns_false_when_unreachable():
+    p = OllamaVisionProvider(url="http://127.0.0.1:1")
+    ok, detail = p.probe()
+    assert ok is False
+    assert "unreachable" in detail.lower() or "127.0.0.1:1" in detail
+
+
+def test_ollama_provider_call_writes_package_on_unavailable(tmp_path: Path):
+    p = OllamaVisionProvider(url="http://127.0.0.1:1")
+    req = _make_request(tmp_path)
+    out_dir = tmp_path / "out"
+    out_dir.mkdir()
+    resp = p.call(req, out_dir=out_dir)
+    assert resp.status == "unavailable"
+    assert resp.package_dir is not None
+    assert resp.package_dir.exists()
+
+
+def test_ollama_extract_first_json_object_balanced():
+    p = OllamaVisionProvider()
+    text = 'Here is the result: {"a": 1, "b": {"c": [2,3]}} and some prose'
+    out = p._extract_first_json_object(text)
+    assert out == {"a": 1, "b": {"c": [2, 3]}}
+
+
+def test_ollama_extract_first_json_object_handles_string_with_braces():
+    p = OllamaVisionProvider()
+    text = '{"verdict": "PASS", "msg": "an open { brace inside string"}'
+    out = p._extract_first_json_object(text)
+    assert out == {"verdict": "PASS", "msg": "an open { brace inside string"}
+
+
+def test_ollama_extract_first_json_object_none_when_absent():
+    p = OllamaVisionProvider()
+    assert p._extract_first_json_object("just prose, no braces") is None
+
+
+def test_ollama_extract_first_json_object_none_on_unbalanced():
+    p = OllamaVisionProvider()
+    assert p._extract_first_json_object('{"a": 1, "b": {') is None
 
 
 def test_normalize_carries_findings_through():

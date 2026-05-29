@@ -1018,6 +1018,18 @@ def main() -> int:
             findings.append(f_out)
         axes = axes_verdict_from_findings(findings)
         verdict = top_level_verdict(findings, axes)
+        # Write the deterministic-only visual_findings.json into final/
+        # (the oracle call below may overwrite with normalized result)
+        canonical_findings_doc = {
+            "schema_version": SCHEMA_VERSION,
+            "fixture": fixture,
+            "attempt": "canonical",
+            "top_level_verdict": verdict,
+            "axes": axes,
+            "findings": findings,
+            "source": "deterministic_only",
+        }
+        _write_json(final_dir / "visual_findings.json", canonical_findings_doc)
         attempts = [{
             "attempt": "canonical", "rc": 0, "blocked": False,
             "verdict": verdict, "findings_count": len(findings),
@@ -1117,6 +1129,28 @@ def main() -> int:
             _write_json(final_dir / "visual_oracle_normalized.json",
                         oracle_resp.normalized_findings)
             print("[oracle] response normalized and saved")
+            # If oracle returned a usable verdict, merge into the
+            # canonical visual_findings.json: oracle takes precedence
+            # for qualitative axes (global_visual, scale_rotation) and
+            # complements deterministic findings.
+            if oracle_resp.status == "ok":
+                merged = dict(oracle_resp.normalized_findings)
+                merged["fixture"] = fixture
+                merged["attempt"] = "final"
+                # Carry deterministic findings if any
+                det_findings = attempts[-1].get("findings", [])
+                if det_findings:
+                    merged["deterministic_findings"] = det_findings
+                _write_json(final_dir / "visual_findings.json", merged)
+                print(
+                    "[oracle] visual_findings.json overwritten with "
+                    "oracle-led merged verdict"
+                )
+                # Update in-memory attempt so regression_summary reflects
+                # the oracle-promoted verdict (instead of the deterministic
+                # WARN fallback on qualitative axes).
+                attempts[-1]["verdict"] = merged.get("top_level_verdict", "PASS")
+                attempts[-1]["axes"] = merged.get("axes", attempts[-1].get("axes", {}))
 
         print(
             f"[oracle] provider={oracle_resp.provider} "
