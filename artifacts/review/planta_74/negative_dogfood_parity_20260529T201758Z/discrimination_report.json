@@ -1,0 +1,145 @@
+{
+  "schema_version": "negative_dogfood.v2",
+  "fixture": "planta_74",
+  "timestamp": "2026-05-29T20:18:19Z",
+  "method": "production-parity (top+iso+side_by_side+context); corrupt top only",
+  "recipe": {
+    "op": "erase_top_exterior_wall_segment",
+    "defect_class": "missing_wall_continuation",
+    "source_render": "planta_74_top.png",
+    "rect": [
+      400,
+      92,
+      740,
+      122
+    ],
+    "ref_point": [
+      1300,
+      30
+    ]
+  },
+  "corruption": {
+    "rect": [
+      400,
+      92,
+      740,
+      122
+    ],
+    "ref_point": [
+      1300,
+      30
+    ],
+    "fill_rgb": [
+      191,
+      191,
+      198
+    ],
+    "image_size": [
+      1600,
+      1200
+    ],
+    "src_sha256": "b6a905f10e8a011221bb13031770818fecabf6d910bdb19cbfe02a77cb0cc0a5",
+    "out_sha256": "717e92f730e5907b3022e74ec278fa466522810e6dddf90baa8004033d04da27"
+  },
+  "clean_oracle": {
+    "status": "ok",
+    "detail": "ollama qwen2.5vl:7b returned valid visual_findings.v1",
+    "verdict": "PASS",
+    "images": [
+      "clean_top.png",
+      "clean_iso.png",
+      "clean_side_by_side.png"
+    ],
+    "normalized": {
+      "schema_version": "visual_findings.v1",
+      "top_level_verdict": "PASS",
+      "axes": {
+        "room_fidelity": {
+          "verdict": "PASS",
+          "evidence": "Rooms are correctly defined and aligned."
+        },
+        "window_fidelity": {
+          "verdict": "PASS",
+          "evidence": "Windows are correctly placed and aligned."
+        },
+        "scale_rotation": {
+          "verdict": "PASS",
+          "evidence": "The model is correctly scaled and oriented."
+        },
+        "wall_fidelity": {
+          "verdict": "PASS",
+          "evidence": "All walls are correctly aligned and continuous."
+        },
+        "global_visual": {
+          "verdict": "PASS",
+          "evidence": "The model appears consistent across all views and no floating elements are observed."
+        },
+        "door_fidelity": {
+          "verdict": "PASS",
+          "evidence": "Doors are correctly placed and aligned."
+        }
+      },
+      "findings": [],
+      "source": "oracle_bridge",
+      "raw_confidence": "high"
+    }
+  },
+  "corrupted_oracle": {
+    "status": "ok",
+    "detail": "ollama qwen2.5vl:7b returned valid visual_findings.v1",
+    "verdict": "PASS",
+    "images": [
+      "corrupted_top.png",
+      "clean_iso.png",
+      "corrupted_side_by_side.png"
+    ],
+    "normalized": {
+      "schema_version": "visual_findings.v1",
+      "top_level_verdict": "PASS",
+      "axes": {
+        "room_fidelity": {
+          "verdict": "PASS",
+          "evidence": "Rooms are correctly defined and aligned."
+        },
+        "window_fidelity": {
+          "verdict": "PASS",
+          "evidence": "Windows are correctly placed and aligned."
+        },
+        "scale_rotation": {
+          "verdict": "PASS",
+          "evidence": "The model is correctly scaled and oriented."
+        },
+        "wall_fidelity": {
+          "verdict": "PASS",
+          "evidence": "All walls appear correctly aligned and continuous."
+        },
+        "global_visual": {
+          "verdict": "PASS",
+          "evidence": "The overall visual representation is accurate and coherent."
+        },
+        "door_fidelity": {
+          "verdict": "PASS",
+          "evidence": "Doors are correctly placed and aligned."
+        }
+      },
+      "findings": [],
+      "source": "oracle_bridge",
+      "raw_confidence": "high"
+    }
+  },
+  "conclusive": true,
+  "criteria": {
+    "primary_top_level": {
+      "clean_verdict": "PASS",
+      "corrupted_verdict": "PASS",
+      "discriminated": false
+    },
+    "primary_pass": false,
+    "secondary_finding_level": {
+      "clean_gap_findings": 0,
+      "corrupted_gap_findings": 0,
+      "new_localized_gap": false
+    }
+  },
+  "result": "NOT_DISCRIMINATED"
+}

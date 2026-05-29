@@ -200,8 +200,8 @@ def test_mode_off_does_not_call_gate_even_with_trigger(tmp_path: Path):
 
 
 def test_mode_auto_writes_question_for_planta_74_case(tmp_path: Path, monkeypatch):
-    """Forces bridge offline by using a closed port; default mode writes
-    SKIPPED_OFFLINE without blocking."""
+    """Bridge forced offline (hermetic); default mode writes SKIPPED_OFFLINE
+    without blocking."""
     # Redirect .ai_bridge to a tmp dir so we do not pollute the repo
     fake_repo = tmp_path / "repo"
     fake_repo.mkdir()
@@ -209,6 +209,13 @@ def test_mode_auto_writes_question_for_planta_74_case(tmp_path: Path, monkeypatc
     (fake_repo / ".ai_bridge" / "responses").mkdir(parents=True)
     monkeypatch.setattr(
         "tools.run_skp_visual_review.REPO_ROOT", fake_repo,
+    )
+    # Hermetic: force the gate to see the bridge as offline regardless of
+    # whether a real bridge is running on localhost (it is, during the
+    # autonomous work loop). Without this the test depends on network state.
+    monkeypatch.setattr(
+        "tools.ask_gpt_gate.probe_bridge",
+        lambda *a, **k: (False, "forced offline (test)"),
     )
 
     attempts = _planta_74_attempts()
@@ -236,6 +243,11 @@ def test_mode_required_offline_returns_block_required(tmp_path: Path, monkeypatc
     fake_repo.mkdir()
     monkeypatch.setattr(
         "tools.run_skp_visual_review.REPO_ROOT", fake_repo,
+    )
+    # Hermetic: force offline regardless of a live localhost bridge.
+    monkeypatch.setattr(
+        "tools.ask_gpt_gate.probe_bridge",
+        lambda *a, **k: (False, "forced offline (test)"),
     )
     attempts = _planta_74_attempts()
     block_required = _maybe_run_gpt_consult(

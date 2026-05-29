@@ -1,13 +1,40 @@
 # Handoff — sketchup-mcp
 
-> Fio da meada entre sessões. Última atualização: **2026-05-29 05:20 UTC** (post-PR #202 merge).
+> Fio da meada entre sessões. Última atualização: **2026-05-29 20:25 UTC** (autonomous loop — bridge ONLINE).
 > Leia primeiro ao iniciar sessão.
+
+## 2026-05-29 (autonomous loop) — bridge ONLINE + oracle non-discrimination finding
+
+**Bridge:** o ChatGPT bridge (`localhost:8765`) está ONLINE e operacional.
+Runbook de ops em `E:\chatgpt-bridge\` (start/check/restart/smoke + README;
+fix da janela-na-tray via AUMID). GPT Auto-Consult Gate provado end-to-end
+(`--gpt-consult required` salva resposta real em `.ai_bridge/responses/`).
+
+**Finding (negative dogfood):** `tools/negative_dogfood.py` injeta um defeito
+determinístico (apaga um segmento da parede externa superior) no render REAL do
+`planta_74` e roda `ollama_vision` em clean vs corrupted com paridade de input
+de produção (top+iso+side_by_side+contexto, corrompendo só o top). Resultado
+**conclusivo**: clean=PASS, corrupted=PASS — o oracle retorna PASS confiante
+(findings=[], confidence high, "walls continuous") mesmo com a parede claramente
+faltando. → **A oracle PASS NÃO é autoritativa**: produz falsos-negativos
+confiantes em renders reais. Confirma empiricamente a agregação
+`worst(oracle, deterministic, known_warnings)`. Escopo: qwen2.5vl:7b por este
+caminho de input, não "todo vision model".
+Evidência: `artifacts/review/planta_74/negative_dogfood_parity_*/`.
+Peer-review GPT (3 consultas) em `.ai_bridge/responses/2026052920*`.
+
+**Hermetic tests:** `tests/test_auto_gpt_consult_wiring.py` agora força a bridge
+offline via monkeypatch (antes dependiam da bridge estar down; quebravam local
+com a bridge online). Suite: **218 passed, 5 skipped**.
+
+**Próxima prioridade (atualizada por este finding):** investir no caminho
+DETERMINÍSTICO — overlay/diff geométrico PDF-vs-SKP (roadmap #2) e detectores
+positional (roadmap #3) — NÃO em mais confiança na oracle. FP-031 só com FAIL real.
 
 ## Estado de develop
 
-- **HEAD**: `83a75cf` (PR #202 — FP-030 maturity jump ~35% → ~60%)
-- **Anterior**: `43953f7` (PR #201), `f957391` (PR #200), `bdb8d77` (PR #199), `c8b27a9` (PR #198)
-- **Testes**: 139 passed, 5 skipped
+- **HEAD**: `030a42d` (PR #208 — LL-024 auto-trigger GPT consult); ver seção do topo p/ o trabalho mais recente (#203–#208 + negative dogfood)
+- **Testes**: 218 passed, 5 skipped
 - **Branches locais limpas**
 
 ## Maturity jump landed (#202 merged)
@@ -203,7 +230,7 @@ User abriu `model.skp` no SU 2026 e enviou screenshot. Cross-check contra `plant
 
 ## Bridge status
 
-- `localhost:8765` (ChatGPT bridge) testada **offline** durante sessão noturna 2026-05-28
+- `localhost:8765` (ChatGPT bridge) **ONLINE** desde 2026-05-29 (ver seção do topo). Runbook em `E:\chatgpt-bridge\`.
 - Q1 (Constitution #8 friction tax) resolvida com análise do próprio user
 - Q2 / Q3 ainda em backlog, esperando trigger real
 
