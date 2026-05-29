@@ -50,6 +50,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from tools.oracle_providers import (
+    OracleRequest, available_provider_names, get_provider,
+    write_oracle_request_package,
+)
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCHEMA_VERSION = "visual_findings.v1"
 
@@ -693,18 +698,29 @@ def classify_maturity(
     renders_ok: bool,
     side_by_side_ok: bool,
     deterministic_run: bool,
-    oracle_status: str,  # "ok" | "unavailable" | "n/a"
+    oracle_status: str,
     fail_findings: int,
 ) -> tuple[dict, int]:
-    """Return (rows, estimated_pct). Honest classification."""
+    """Return (rows, estimated_pct). Honest classification.
+
+    `oracle_status` is one of:
+    - `ok`               — provider returned valid normalized findings
+    - `unavailable`      — provider could not be reached
+    - `incompatible`     — reachable but cannot accept image payload
+    - `not_implemented`  — provider is a stub (future_vision_api)
+    - `invalid_response` — returned but payload could not be parsed
+    - `n/a`              — --oracle none
+    """
     rows = []
     pct = 0
+
     def row(layer, status, notes=""):
         rows.append({"layer": layer, "status": status, "notes": notes})
+
     if skp_ok:
         row("SKP generation", "PASS"); pct += 15
     else:
-        row("SKP generation", "FAIL", "no .skp produced")
+        row("SKP generation", "FAIL", "no .skp produced (or --image-source canonical)")
     if renders_ok:
         row("Render generation", "PASS"); pct += 10
     else:
@@ -718,19 +734,32 @@ def classify_maturity(
             f"10 checks ran; {fail_findings} FAIL finding(s)"); pct += 20
     else:
         row("Deterministic checks", "FAIL")
+
     if oracle_status == "ok":
-        row("Visual oracle bridge", "PASS", "responded with verdict"); pct += 25
+        row("Visual oracle bridge", "PASS",
+            "provider returned normalized v1 findings"); pct += 25
     elif oracle_status == "unavailable":
         row("Visual oracle bridge", "WARN",
-            "bridge unreachable; deterministic-only mode"); pct += 5
+            "provider unreachable; package written for manual review"); pct += 5
+    elif oracle_status == "incompatible":
+        row("Visual oracle bridge", "WARN",
+            "provider reachable but rejected image payload; package written"); pct += 5
+    elif oracle_status == "not_implemented":
+        row("Visual oracle bridge", "WARN",
+            "provider is a stub; package written"); pct += 5
+    elif oracle_status == "invalid_response":
+        row("Visual oracle bridge", "WARN",
+            "provider returned but payload could not be normalized; package written"); pct += 5
     else:
         row("Visual oracle bridge", "N/A", "--oracle none"); pct += 0
+
     if oracle_status == "ok":
         row("Human review required", "no",
             "oracle bridge + deterministic checks cover decision")
     else:
         row("Human review required", "yes",
-            "qualitative axes (global_visual, scale_rotation) still need human/agent inline review")
+            "qualitative axes still need human/agent inline OR external review of oracle_request_package")
+
     pct = min(pct, 70 if oracle_status != "ok" else 85)
     return {"rows": rows, "estimated_pct": pct}, pct
 
@@ -741,9 +770,14 @@ def classify_maturity(
 def write_regression_summary(
     final_dir: Path, attempts: list[dict], fixture: str,
     consensus_path: Path, oracle_status: str, oracle_status_detail: str,
+    blocked_by_require_oracle: bool = False,
 ) -> None:
     final_dir.mkdir(parents=True, exist_ok=True)
     last = attempts[-1]
+    effective_verdict = (
+        "BLOCKED" if blocked_by_require_oracle
+        else last.get("verdict", "BLOCKED")
+    )
 
     has_skp = (final_dir / "model.skp").exists()
     has_top = (final_dir / "model_top.png").exists()
@@ -780,8 +814,15 @@ def write_regression_summary(
             )
     lines.extend([
         "",
-        f"## Final verdict: **{last.get('verdict', 'BLOCKED')}**",
-        "",
+        f"## Final verdict: **{effective_verdict}**",
+        ""
+        + (
+            f"> **BLOCKED reason**: --require-oracle was set but oracle "
+            f"status = `{oracle_status}` ({oracle_status_detail}). "
+            f"See `oracle_request_package/` for the request that would have "
+            f"been sent.\n"
+            if blocked_by_require_oracle else ""
+        ),
         "## Axes (last attempt)",
         "",
         "| Axis | Verdict | Evidence |",
@@ -872,12 +913,34 @@ def main() -> int:
     parser.add_argument("--pdf", type=Path,
                         help="Override PDF path for side-by-side")
     parser.add_argument(
-        "--oracle", choices=["none", "chatgpt_bridge"], default="none",
-        help="Visual oracle backend (default: none = deterministic only)",
+        "--oracle",
+        choices=available_provider_names(),
+        default="none",
+        help=(
+            "Visual oracle backend (default: none = deterministic only). "
+            "chatgpt_bridge_image: tries multipart POST to localhost:8765, "
+            "writes oracle_request_package on incompatibility. "
+            "future_vision_api: stub; not_implemented status."
+        ),
     )
     parser.add_argument(
         "--require-oracle", action="store_true",
-        help="If oracle is requested but unavailable, BLOCK the run",
+        help=(
+            "If oracle is requested but did not return status=ok "
+            "(unavailable/incompatible/not_implemented/invalid_response), "
+            "BLOCK the run with a non-zero exit code."
+        ),
+    )
+    parser.add_argument(
+        "--image-source",
+        choices=["build", "canonical"],
+        default="build",
+        help=(
+            "Where the images for oracle/composer come from. "
+            "build (default): build fresh SKP + renders. "
+            "canonical: skip build, reuse artifacts/<fixture>/*.png as inputs. "
+            "Useful to test the oracle path without consuming SU time."
+        ),
     )
     parser.add_argument(
         "--prompt-file", type=Path,
@@ -912,76 +975,167 @@ def main() -> int:
     out_attempts_dir.mkdir(parents=True, exist_ok=True)
     pdf_path = args.pdf
 
-    # Oracle pre-flight
+    # Resolve provider (always; `none` is a no-op provider)
+    provider = get_provider(args.oracle)
     oracle_status = "n/a"
-    oracle_status_detail = "--oracle none (deterministic-only mode)"
-    if args.oracle == "chatgpt_bridge":
-        if check_oracle_bridge_available():
-            oracle_status = "ok"
-            oracle_status_detail = "bridge healthy at /health"
-        else:
-            oracle_status = "unavailable"
-            oracle_status_detail = f"bridge unreachable at {ORACLE_BRIDGE_URL}"
-            if args.require_oracle:
-                write_blocked_summary(
-                    out_attempts_dir / "final",
-                    oracle_status_detail,
-                    "Start the ChatGPT bridge at localhost:8765, or rerun without --require-oracle.",
-                )
-                print(f"[oracle] BLOCKED: {oracle_status_detail}")
-                return 3
+    oracle_status_detail = f"--oracle {args.oracle}"
 
-    attempts: list[dict] = []
-    for i in range(args.max_attempts):
-        result = run_attempt(
-            i, fixture, consensus, runs_dir, out_attempts_dir,
-            args.python_exe, pdf_path,
-        )
-        attempts.append(result)
-        if result.get("blocked"):
-            print(f"[attempt {i}] BLOCKED: {result['reason']}")
-            break
-        verdict = result.get("verdict")
-        if verdict in {"PASS", "WARN"}:
-            print(f"[attempt {i}] stop early on verdict={verdict}")
-            break
-        print(
-            f"[attempt {i}] FAIL detected — MVP does not auto-fix. "
-            "Stopping; inspect findings and apply source-supported fix."
-        )
-        break
-
-    # Promote last attempt → final/
     final_dir = out_attempts_dir / "final"
-    last_attempt_dir = out_attempts_dir / f"attempt_{attempts[-1]['attempt']}"
-    if last_attempt_dir.exists() and not attempts[-1].get("blocked"):
-        final_dir.mkdir(parents=True, exist_ok=True)
-        for name in (
-            "model.skp", "model_top.png", "model_iso.png",
-            "geometry_report.json", "visual_findings.json",
-            "side_by_side_pdf_vs_skp.png",
-        ):
-            src = last_attempt_dir / name
-            if src.exists():
-                shutil.copy2(src, final_dir / name)
 
-        # Optional oracle call on final artifacts
-        if args.oracle == "chatgpt_bridge" and oracle_status == "ok":
-            try:
-                prompt_text = args.prompt_file.read_text(encoding="utf-8")
-                raw = call_oracle_bridge(
-                    top_path=final_dir / "model_top.png",
-                    iso_path=final_dir / "model_iso.png",
-                    side_by_side_path=final_dir / "side_by_side_pdf_vs_skp.png",
-                    geometry_report=attempts[-1].get("report", {}),
-                    prompt_text=prompt_text,
-                )
-                _write_json(final_dir / "visual_oracle_raw_response.json", raw)
-                print("[oracle] response saved to visual_oracle_raw_response.json")
-            except Exception as e:
-                oracle_status = "unavailable"
-                oracle_status_detail = f"bridge call failed: {e!r}"
-                print(f"[oracle] call failed: {e!r}")
+    # --image-source canonical: skip the builder, reuse the canonical
+    # artifacts/<fixture>/*.png as inputs to the oracle/composer.
+    if args.image_source == "canonical":
+        canonical_dir = REPO_ROOT / "artifacts" / fixture
+        canonical_top = canonical_dir / f"{fixture}_top.png"
+        canonical_iso = canonical_dir / f"{fixture}_iso.png"
+        canonical_report = canonical_dir / "geometry_report.json"
+        missing = [p for p in (canonical_top, canonical_iso, canonical_report)
+                   if not p.exists()]
+        if missing:
+            write_blocked_summary(
+                final_dir,
+                f"--image-source canonical but inputs missing: {missing}",
+                f"build the canonical artifact at artifacts/{fixture}/ first",
+            )
+            return 4
+        final_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(canonical_top, final_dir / "model_top.png")
+        shutil.copy2(canonical_iso, final_dir / "model_iso.png")
+        shutil.copy2(canonical_report, final_dir / "geometry_report.json")
+        # Side-by-side compose from canonical
+        sxs_path, sxs_err = build_side_by_side(final_dir, pdf_path, fixture)
+        if sxs_err:
+            print(f"[side_by_side] FAILED: {sxs_err}")
+        # Synthesize a single "attempt" record from canonical
+        report = _load_json(canonical_report)
+        consensus_data = _load_json(consensus)
+        findings_raw = inspect_report(report, consensus_data)
+        findings = []
+        for i, f in enumerate(findings_raw, start=1):
+            f_out = dict(f)
+            f_out["id"] = f"vf_{i:03d}"
+            f_out.setdefault("evidence_image", "model_iso.png")
+            findings.append(f_out)
+        axes = axes_verdict_from_findings(findings)
+        verdict = top_level_verdict(findings, axes)
+        attempts = [{
+            "attempt": "canonical", "rc": 0, "blocked": False,
+            "verdict": verdict, "findings_count": len(findings),
+            "findings": findings, "axes": axes,
+            "attempt_dir": str(final_dir),
+            "input_summary": {
+                "input_walls": report.get("shell_stats_from_python", {}).get("input_walls"),
+                "openings_carved": report.get("shell_stats_from_python", {}).get("openings_carved"),
+                "window_apertures_3d": report.get("shell_stats_from_python", {}).get("window_apertures_3d"),
+                "slivers_removed": report.get("shell_stats_from_python", {}).get("slivers_removed"),
+                "consensus_kind_counts": _count_consensus_kinds(consensus_data),
+                "group_counts": _group_counts(report),
+            },
+            "side_by_side": sxs_path,
+            "side_by_side_err": sxs_err,
+            "report": report,
+        }]
+    else:
+        # --image-source build: run the full build attempt loop
+        attempts = []
+        for i in range(args.max_attempts):
+            result = run_attempt(
+                i, fixture, consensus, runs_dir, out_attempts_dir,
+                args.python_exe, pdf_path,
+            )
+            attempts.append(result)
+            if result.get("blocked"):
+                print(f"[attempt {i}] BLOCKED: {result['reason']}")
+                break
+            verdict = result.get("verdict")
+            if verdict in {"PASS", "WARN"}:
+                print(f"[attempt {i}] stop early on verdict={verdict}")
+                break
+            print(
+                f"[attempt {i}] FAIL detected — MVP does not auto-fix. "
+                "Stopping; inspect findings and apply source-supported fix."
+            )
+            break
+
+        # Promote last attempt → final/
+        last_attempt_dir = out_attempts_dir / f"attempt_{attempts[-1]['attempt']}"
+        if last_attempt_dir.exists() and not attempts[-1].get("blocked"):
+            final_dir.mkdir(parents=True, exist_ok=True)
+            for name in (
+                "model.skp", "model_top.png", "model_iso.png",
+                "geometry_report.json", "visual_findings.json",
+                "side_by_side_pdf_vs_skp.png",
+            ):
+                src = last_attempt_dir / name
+                if src.exists():
+                    shutil.copy2(src, final_dir / name)
+
+    # Oracle call via provider (skipped for `none`)
+    if args.oracle != "none" and not attempts[-1].get("blocked"):
+        try:
+            prompt_text = args.prompt_file.read_text(encoding="utf-8")
+        except FileNotFoundError:
+            prompt_text = (
+                "You are a visual oracle. Review the images and return "
+                "JSON per visual_findings.v1."
+            )
+
+        image_paths: list[Path] = []
+        for name in ("model_top.png", "model_iso.png",
+                     "side_by_side_pdf_vs_skp.png"):
+            p = final_dir / name
+            if p.exists():
+                image_paths.append(p)
+
+        report_excerpt = {
+            "gates_self_check": attempts[-1].get("report", {}).get(
+                "gates_self_check", {}
+            ),
+            "shell_stats_from_python": {
+                k: v
+                for k, v in attempts[-1].get("report", {}).get(
+                    "shell_stats_from_python", {}
+                ).items()
+                if not isinstance(v, (list, dict))
+            },
+        }
+        req = OracleRequest(
+            prompt=prompt_text,
+            image_paths=image_paths,
+            context=report_excerpt,
+            expected_schema={"schema_version": SCHEMA_VERSION},
+        )
+        oracle_resp = provider.call(req, out_dir=final_dir)
+        oracle_status = oracle_resp.status
+        oracle_status_detail = oracle_resp.detail
+
+        # Persist raw + normalized
+        if oracle_resp.raw is not None:
+            _write_json(final_dir / "visual_oracle_raw_response.json",
+                        oracle_resp.raw)
+        if oracle_resp.normalized_findings is not None:
+            _write_json(final_dir / "visual_oracle_normalized.json",
+                        oracle_resp.normalized_findings)
+            print("[oracle] response normalized and saved")
+
+        print(
+            f"[oracle] provider={oracle_resp.provider} "
+            f"status={oracle_resp.status} :: {oracle_resp.detail}"
+        )
+        if oracle_resp.package_dir is not None:
+            print(
+                f"[oracle] request package written to "
+                f"{_safe_rel(oracle_resp.package_dir)}"
+            )
+
+        if args.require_oracle and oracle_status != "ok":
+            print(f"[oracle] BLOCKED: --require-oracle + status={oracle_status}")
+            write_regression_summary(
+                final_dir, attempts, fixture, consensus,
+                oracle_status, oracle_status_detail,
+                blocked_by_require_oracle=True,
+            )
+            return 3
 
     write_regression_summary(
         final_dir, attempts, fixture, consensus,
