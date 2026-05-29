@@ -1,0 +1,46 @@
+{
+  "schema_version": "visual_findings.v1",
+  "fixture": "blocked",
+  "attempt": "blocked",
+  "top_level_verdict": "FAIL",
+  "axes": {
+    "wall_fidelity": {
+      "verdict": "FAIL",
+      "evidence": "bridge unreachable at http://localhost:8765"
+    },
+    "door_fidelity": {
+      "verdict": "FAIL",
+      "evidence": "bridge unreachable at http://localhost:8765"
+    },
+    "window_fidelity": {
+      "verdict": "FAIL",
+      "evidence": "bridge unreachable at http://localhost:8765"
+    },
+    "room_fidelity": {
+      "verdict": "FAIL",
+      "evidence": "bridge unreachable at http://localhost:8765"
+    },
+    "scale_rotation": {
+      "verdict": "FAIL",
+      "evidence": "bridge unreachable at http://localhost:8765"
+    },
+    "global_visual": {
+      "verdict": "FAIL",
+      "evidence": "bridge unreachable at http://localhost:8765"
+    }
+  },
+  "findings": [
+    {
+      "id": "vf_blocked",
+      "severity": "FAIL",
+      "axis": "global_visual",
+      "type": "global_visual_fail",
+      "location": "n/a",
+      "evidence_image": "n/a",
+      "evidence": "bridge unreachable at http://localhost:8765",
+      "source_check": "tooling",
+      "suspected_owner": "tooling",
+      "proposed_fix": "Start the ChatGPT bridge at localhost:8765, or rerun without --require-oracle."
+    }
+  ]
+}
