@@ -145,13 +145,50 @@ o existente, removendo Felipe do meio.
 - Does NOT consult GPT for every trivial change
 - Does NOT fabricate a response when the bridge is offline
 
+## Auto-trigger wiring (post-#207 iteration)
+
+`tools/run_skp_visual_review.py` now invokes the gate automatically. The
+agent no longer routes architectural / merge / known-warning questions
+through the user. Behaviour:
+
+```
+--gpt-consult off       never invoke
+--gpt-consult auto      (default) invoke on canonical trigger;
+                        skip honestly when bridge offline
+--gpt-consult required  invoke on canonical trigger;
+                        exit code 5 when status != ok
+```
+
+Trigger priority used by `detect_gpt_consult_trigger(state)`:
+
+1. `final_verdict == "FAIL"`            -> `final_fail_non_obvious_fix`
+2. `final_verdict == "BLOCKED"`         -> `require_oracle_blocks_backend`
+3. `oracle_status in unavailable/incompatible/blocked`
+                                         -> `require_oracle_blocks_backend`
+4. **`oracle_verdict == "PASS"` AND known warnings carry**
+                                         -> `oracle_pass_but_known_warnings`
+5. `carried_known_warnings_verdict == "WARN_documented"`
+                                         -> `oracle_pass_but_known_warnings`
+6. `oracle_verdict != final_verdict` (generic disagreement, catch-all)
+                                         -> `oracle_verdict_neq_final_verdict`
+
+The specific known-warnings trigger fires BEFORE the generic
+disagreement trigger so the planta_74 canonical case lands on the
+right question.
+
+Pipeline state stashed on `attempts[-1]["gpt_consult"]` and the
+regression summary renders a "GPT Auto-Consult Gate (LL-024)" section
+with mode/triggered/trigger/status/question_file/response_file/decision.
+
 ## Follow-up (only with explicit user trigger)
 
 - Cache: scan `.ai_bridge/responses/` before invoking to avoid duplicate
-  questions
-- Inline auto-trigger from `run_skp_visual_review.py` when verdict
-  divergence is detected (currently the agent decides per-turn)
+  questions across runs
 - Bridge with broader response timeout for complex questions
+- Auto-fill the `decision` field in the response file by parsing the
+  GPT reply structure
+- Auto-trigger from other tools (e.g. `tools/build_plan_shell_skp.py`
+  on builder regressions)
 
 ## Related
 
