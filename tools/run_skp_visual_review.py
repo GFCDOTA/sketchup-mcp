@@ -54,6 +54,11 @@ from tools.oracle_providers import (
     OracleRequest, available_provider_names, get_provider,
     write_oracle_request_package,
 )
+from tools.ask_gpt_gate import (
+    CANONICAL_TRIGGERS as GPT_CANONICAL_TRIGGERS,
+    GateInput as GPTGateInput,
+    run_gate as run_gpt_gate,
+)
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCHEMA_VERSION = "visual_findings.v1"
@@ -78,6 +83,82 @@ def worst_verdict(*verdicts: str) -> str:
     if not valid:
         return "PASS"
     return max(valid, key=lambda v: _VERDICT_RANK.get(v, 0))
+
+
+# ---- GPT auto-consult trigger detection ----------------------------
+
+
+_GPT_TRIGGER_QUESTIONS = {
+    "final_fail_non_obvious_fix": (
+        "Visual oracle pipeline produced final_verdict=FAIL on a "
+        "deliberate validation run. What is the highest-ROI "
+        "source-supported fix? Should we patch builder, consensus, "
+        "renderer, or open a new spec? Stay strict: no inventing geometry."
+    ),
+    "require_oracle_blocks_backend": (
+        "Visual oracle required (--require-oracle or --gpt-consult required) "
+        "but the chosen backend cannot deliver. Should we (A) extend the "
+        "backend, (B) switch to a different provider, or (C) accept the "
+        "BLOCKED state until backend is fixed?"
+    ),
+    "oracle_verdict_neq_final_verdict": (
+        "Oracle verdict and final aggregate verdict disagree. Which path "
+        "correctly reflects the model state, and should the PR merge under "
+        "the final aggregate?"
+    ),
+    "oracle_pass_but_known_warnings": (
+        "The visual oracle returned PASS, but known architectural warnings "
+        "carried for this fixture keep final_verdict at WARN_documented. "
+        "Should this validation merge, block, or require another fix? "
+        "What is the risk of merging while these warnings remain?"
+    ),
+}
+
+
+def detect_gpt_consult_trigger(state: dict) -> str | None:
+    """Detect canonical GPT-consult trigger from pipeline state.
+
+    Returns the trigger name (one of GPT_CANONICAL_TRIGGERS) or None
+    when no trigger applies. Priority:
+
+    1. final_verdict == "FAIL"            -> final_fail_non_obvious_fix
+    2. final_verdict == "BLOCKED" / oracle status unavailable/incompatible/blocked
+                                          -> require_oracle_blocks_backend
+    3. oracle_verdict != final_verdict    -> oracle_verdict_neq_final_verdict
+    4. oracle PASS + known warnings carry -> oracle_pass_but_known_warnings
+    5. carried_known_warnings_verdict == WARN_documented (defensive)
+                                          -> oracle_pass_but_known_warnings
+    """
+    oracle_v = state.get("oracle_verdict")
+    final_v = state.get("final_verdict") or state.get("top_level_verdict")
+    carried_v = state.get("carried_known_warnings_verdict")
+    known = state.get("known_warnings_carried", [])
+    oracle_status = state.get("oracle_status")
+
+    if final_v == "FAIL":
+        return "final_fail_non_obvious_fix"
+    if final_v == "BLOCKED":
+        return "require_oracle_blocks_backend"
+    if oracle_status in ("unavailable", "incompatible", "blocked"):
+        return "require_oracle_blocks_backend"
+    # The known-warnings case is a *specific* form of disagreement and
+    # must be evaluated before the generic "oracle != final" trigger,
+    # otherwise the planta_74 canonical case fires the wrong question.
+    if oracle_v == "PASS" and known:
+        return "oracle_pass_but_known_warnings"
+    if carried_v == "WARN_documented":
+        return "oracle_pass_but_known_warnings"
+    if oracle_v and final_v and oracle_v != final_v:
+        return "oracle_verdict_neq_final_verdict"
+    return None
+
+
+def question_for_trigger(trigger: str) -> str:
+    return _GPT_TRIGGER_QUESTIONS.get(
+        trigger,
+        "An auto-trigger fired but no canonical question is registered. "
+        "Please advise.",
+    )
 
 
 def load_known_warnings(fixture: str) -> list[dict]:
@@ -870,6 +951,45 @@ def write_regression_summary(
             for w in known_list:
                 verdict_block.append(f"- {w}")
 
+    # ---- LL-024 GPT Auto-Consult Gate block ----
+    gpt_consult = last.get("gpt_consult")
+    gpt_block: list[str] = []
+    if gpt_consult is not None:
+        gpt_block.extend([
+            "",
+            "## GPT Auto-Consult Gate (LL-024)",
+            "",
+            "| Field | Value |",
+            "|---|---|",
+            f"| mode | `{gpt_consult.get('mode')}` |",
+            f"| triggered | `{'yes' if gpt_consult.get('triggered') else 'no'}` |",
+            f"| trigger | `{gpt_consult.get('trigger') or 'n/a'}` |",
+            f"| status | `{gpt_consult.get('status')}` |",
+            f"| question_file | `{gpt_consult.get('question_path') or 'n/a'}` |",
+            f"| response_file | `{gpt_consult.get('response_path') or 'n/a'}` |",
+            f"| decision | `{gpt_consult.get('decision') or 'unknown'}` |",
+            "",
+        ])
+        status = gpt_consult.get("status")
+        mode = gpt_consult.get("mode")
+        if gpt_consult.get("triggered"):
+            if status == "ok":
+                gpt_block.append(
+                    "> GPT bridge responded. See `response_file` for the raw "
+                    "answer; fill in `decision` after acting on it."
+                )
+            elif status == "SKIPPED_OFFLINE":
+                gpt_block.append(
+                    "> GPT consult was triggered but skipped because bridge "
+                    "is offline. The question was still written to "
+                    "`.ai_bridge/questions/`."
+                )
+            elif status == "BLOCKED_BRIDGE_OFFLINE":
+                gpt_block.append(
+                    "> GPT consult was required but bridge is offline. "
+                    "Validation BLOCKED."
+                )
+
     lines.extend([
         "",
         f"## Final verdict: **{effective_verdict}**",
@@ -882,6 +1002,7 @@ def write_regression_summary(
             if blocked_by_require_oracle else ""
         ),
         *verdict_block,
+        *gpt_block,
         "## Axes (last attempt)",
         "",
         "| Axis | Verdict | Evidence |",
@@ -958,6 +1079,165 @@ def write_regression_summary(
     )
 
 
+# --- GPT auto-consult wiring -----------------------------------------
+
+
+def _build_consult_state(
+    attempts: list[dict], oracle_status: str | None,
+) -> dict:
+    """Pipeline state shape used by detect_gpt_consult_trigger."""
+    if not attempts:
+        return {}
+    last = attempts[-1]
+    return {
+        "oracle_verdict": last.get("oracle_verdict"),
+        "deterministic_verdict": last.get("deterministic_verdict"),
+        "carried_known_warnings_verdict": last.get("carried_known_warnings_verdict"),
+        "final_verdict": last.get("verdict"),
+        "top_level_verdict": last.get("verdict"),
+        "known_warnings_carried": last.get("known_warnings_carried", []),
+        "oracle_status": oracle_status,
+    }
+
+
+def _maybe_run_gpt_consult(
+    mode: str,
+    attempts: list[dict],
+    fixture: str,
+    final_dir: Path,
+    *,
+    oracle_status: str | None,
+    oracle_status_detail: str | None,
+    require_oracle_block: bool,
+) -> bool:
+    """Run the LL-024 GPT Auto-Consult Gate when triggered.
+
+    Stashes the result on ``attempts[-1]['gpt_consult']`` so the summary
+    writer can render it. Returns True only when ``mode == 'required'``
+    and the gate could not deliver — caller should set exit code != 0.
+    """
+    if mode == "off":
+        if attempts:
+            attempts[-1]["gpt_consult"] = {
+                "mode": mode, "triggered": False,
+                "trigger": None, "status": "not_applicable",
+                "detail": "--gpt-consult off",
+            }
+        return False
+
+    state = _build_consult_state(attempts, oracle_status)
+    if require_oracle_block:
+        # Override final to surface trigger #5 when --require-oracle blocked
+        state["final_verdict"] = "BLOCKED"
+        state["top_level_verdict"] = "BLOCKED"
+
+    trigger = detect_gpt_consult_trigger(state)
+    if trigger is None:
+        if attempts:
+            attempts[-1]["gpt_consult"] = {
+                "mode": mode, "triggered": False, "trigger": None,
+                "status": "not_applicable",
+                "detail": "no canonical trigger fired",
+            }
+        return False
+
+    question = question_for_trigger(trigger)
+    repo_state = {
+        "branch": _git_branch_safe(),
+        "develop_sha": _git_sha_safe(),
+        "fixture": fixture,
+        "oracle_status": oracle_status,
+    }
+    artifact_paths = {
+        name: str(final_dir / name)
+        for name in (
+            "model.skp", "model_top.png", "model_iso.png",
+            "side_by_side_pdf_vs_skp.png", "geometry_report.json",
+            "visual_findings.json", "regression_summary.md",
+            "visual_oracle_raw_response.json",
+            "visual_oracle_normalized.json",
+        )
+    }
+    context = dict(state)
+    context["artifacts"] = artifact_paths
+    context["fixture"] = fixture
+    context["oracle_status_detail"] = oracle_status_detail
+
+    gate_input = GPTGateInput(
+        trigger=trigger, question=question,
+        context=context, repo_state=repo_state,
+    )
+    # Always write to the repo-level .ai_bridge/ dirs
+    q_dir = REPO_ROOT / ".ai_bridge" / "questions"
+    r_dir = REPO_ROOT / ".ai_bridge" / "responses"
+    result = run_gpt_gate(
+        gate_input,
+        questions_dir=q_dir, responses_dir=r_dir,
+        # In `required` mode, we want the gate itself to NOT exit early;
+        # this orchestrator handles the BLOCKED state and reports the
+        # final answer to the caller via the return value.
+        require_consult=False,
+    )
+
+    consult_record = {
+        "mode": mode, "triggered": True, "trigger": trigger,
+        "status": result.status, "detail": result.detail,
+        "question_path": (
+            _safe_rel(result.question_path) if result.question_path else None
+        ),
+        "response_path": (
+            _safe_rel(result.response_path) if result.response_path else None
+        ),
+        "decision": "merge" if result.status == "ok" else "unknown",
+    }
+    if attempts:
+        attempts[-1]["gpt_consult"] = consult_record
+
+    print(
+        f"[gpt-consult] mode={mode} trigger={trigger} "
+        f"status={result.status}"
+    )
+    if result.question_path:
+        print(f"[gpt-consult] question: {_safe_rel(result.question_path)}")
+    if result.response_path:
+        print(f"[gpt-consult] response: {_safe_rel(result.response_path)}")
+
+    # In required mode, anything other than `ok` blocks
+    if mode == "required" and result.status != "ok":
+        print(
+            f"[gpt-consult] BLOCKED: --gpt-consult required + "
+            f"status={result.status}"
+        )
+        return True
+    return False
+
+
+def _git_branch_safe() -> str | None:
+    try:
+        out = subprocess.run(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            cwd=str(REPO_ROOT), capture_output=True, text=True, timeout=10,
+        )
+        if out.returncode == 0:
+            return (out.stdout or "").strip()
+    except Exception:
+        pass
+    return None
+
+
+def _git_sha_safe() -> str | None:
+    try:
+        out = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            cwd=str(REPO_ROOT), capture_output=True, text=True, timeout=10,
+        )
+        if out.returncode == 0:
+            return (out.stdout or "").strip()
+    except Exception:
+        pass
+    return None
+
+
 # --- entrypoint -------------------------------------------------------
 
 
@@ -988,6 +1268,20 @@ def main() -> int:
             "If oracle is requested but did not return status=ok "
             "(unavailable/incompatible/not_implemented/invalid_response), "
             "BLOCK the run with a non-zero exit code."
+        ),
+    )
+    parser.add_argument(
+        "--gpt-consult",
+        choices=["off", "auto", "required"],
+        default="auto",
+        help=(
+            "LL-024 GPT Auto-Consult Gate mode. "
+            "off: never invoke. "
+            "auto (default): invoke when a canonical trigger fires "
+            "(see tools.run_skp_visual_review.detect_gpt_consult_trigger); "
+            "if bridge offline, write question file and continue. "
+            "required: same triggers, but BLOCK with non-zero exit when "
+            "the bridge cannot deliver."
         ),
     )
     parser.add_argument(
@@ -1285,6 +1579,13 @@ def main() -> int:
 
         if args.require_oracle and oracle_status != "ok":
             print(f"[oracle] BLOCKED: --require-oracle + status={oracle_status}")
+            # Run GPT auto-consult on the BLOCKED case too (trigger #5/#6)
+            _maybe_run_gpt_consult(
+                args.gpt_consult, attempts, fixture, final_dir,
+                oracle_status=oracle_status,
+                oracle_status_detail=oracle_status_detail,
+                require_oracle_block=True,
+            )
             write_regression_summary(
                 final_dir, attempts, fixture, consensus,
                 oracle_status, oracle_status_detail,
@@ -1292,12 +1593,20 @@ def main() -> int:
             )
             return 3
 
+    # ----- GPT Auto-Consult Gate (LL-024) ---------------------------
+    consult_block_required = _maybe_run_gpt_consult(
+        args.gpt_consult, attempts, fixture, final_dir,
+        oracle_status=oracle_status,
+        oracle_status_detail=oracle_status_detail,
+        require_oracle_block=False,
+    )
+
     write_regression_summary(
         final_dir, attempts, fixture, consensus,
         oracle_status, oracle_status_detail,
     )
     print(f"\n=== Done. Final dir: {_safe_rel(final_dir)} ===")
-    return 0
+    return 5 if consult_block_required else 0
 
 
 if __name__ == "__main__":
