@@ -29,7 +29,42 @@
       "evidence": "Inline review of both model_top.png (top-down) and model_iso.png (isometric): no floating geometry, no orphan glass panels, no misplaced soft barriers, no obvious wall stubs, no floor leaks. Openings well-placed; window peitoril/verga visible in iso; soft_barriers visible at parapet height along terrace edges; glazed_balcony tall on west facade. Overall architectural plausibility matches the baseline canonical at artifacts/planta_74/."
     }
   },
-  "findings": [],
+  "findings": [
+    {
+      "id": "vf_001",
+      "severity": "WARN",
+      "axis": "wall_fidelity",
+      "type": "interior_soft_barrier_needs_pdf_confirmation",
+      "location": "SoftBarrier_Group_7 @ bbox_m=(11.52,16.90)-(14.28,20.87), footprint=10.95m^2, host=BANHO 02 area",
+      "evidence_image": "model_iso.png",
+      "evidence": "sb007 (25-vertex polyline wrapping BANHO 02 perimeter into SUITE 02 border) renders correctly at peitoril height (1.10m). PDF planta_74.pdf does NOT carry an explicit PEITORIL/MURETA H=X.XXM label in this area (visible PDF labels: PEITORIL H=1,10M at south TERRACO SOCIAL boundary, MURETA H=0,70M at TERRACO TECNICO). Likely interpretations: (a) continuation of the terrace parapet wrapping the BANHO 02 wall; (b) shower enclosure half-wall; (c) vanity counter. Architecturally plausible but not source-confirmed.",
+      "source_check": "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json soft_barriers[id=sb007] (human_annotation); cross-check vs planta_74.pdf around BANHO 02 area.",
+      "suspected_owner": "consensus_annotation",
+      "proposed_fix": "If incorrect, ask human annotator to confirm whether sb007 represents the terrace parapet continuation OR a separate BANHO 02 feature; if separate, label PDF region and update consensus annotation provenance. Do NOT delete without confirmation (Hard Rule #1)."
+    },
+    {
+      "id": "vf_002",
+      "severity": "WARN",
+      "axis": "wall_fidelity",
+      "type": "soft_barrier_sliver_not_visible",
+      "location": "SoftBarrier_Group_1 @ bbox_m=(11.64,21.91)-(11.83,21.95), footprint=0.01m^2",
+      "evidence_image": "model_iso.png",
+      "evidence": "Degenerate SoftBarrier_Group with footprint 0.01m^2 (19cm x 4cm slice). Not visible in renders at the current camera distance. Does NOT correspond to a single consensus sb_* entry by bbox match — likely a residual segment that escaped the wall_overlap filter (2 entries already skipped with wall_overlap=12). NOT a builder bug per Hard Rule #1 (sliver could be a legitimate thin element).",
+      "source_check": "geometry_report.groups_diagnostic[name=SoftBarrier_Group_1]; consensus.soft_barriers polyline segments near (11.64, 21.91).",
+      "suspected_owner": "builder_soft_barrier_emission",
+      "proposed_fix": "Document as finding only. Do NOT implement min-footprint filter — threshold is policy choice that may drop legitimate thin elements (e.g. partial-height fins, finger walls). If the sliver becomes visually relevant in a future build, revisit via FP-031 (auto-fix loop) with proper safe-edit policy."
+    }
+  ],
+  "verified_passes": [
+    {
+      "id": "vp_001",
+      "axis": "wall_fidelity",
+      "type": "interior_soft_barrier_confirmed_against_pdf",
+      "location": "SoftBarrier_Group_5 @ bbox_m=(7.47,15.94)-(10.51,20.76), footprint=14.64m^2",
+      "evidence": "sb005 (17-vertex L-polyline from south TERRACO TECNICO at y=15.96 up to north edge of SUITE 02/SALA DE ESTAR at y=20.55, x=7.5-10.5). PDF planta_74.pdf explicitly labels PEITORIL H=1,10M in this region (between TERRACO TECNICO and SUITE 02; south edge of TERRACO SOCIAL). Group_5 height_m=1.10 matches exactly. CONFIRMED real architectural element.",
+      "source_check": "PDF visual inspection 2026-05-28; consensus.soft_barriers[id=sb005] (human_annotation)."
+    }
+  ],
   "input_summary": {
     "input_walls": 35,
     "openings_carved": 8,

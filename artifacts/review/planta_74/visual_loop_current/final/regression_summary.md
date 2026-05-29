@@ -69,6 +69,68 @@ from heuristics on a known-good build.
 
 `none observed`.
 
+## Iteration 2 — Soft barrier verification (post-print review)
+
+After user opened `model.skp` in SketchUp 2026 and submitted a fresh
+3D screenshot, two interior soft barriers were flagged for source
+verification: `SoftBarrier_Group_5` and `SoftBarrier_Group_7`.
+Data-driven cross-check vs `planta_74.pdf`:
+
+### `SoftBarrier_Group_5` → **PASS** (confirmed against PDF)
+
+- Maps to `consensus.soft_barriers[id=sb005]` (17-vertex L-polyline,
+  human_annotation)
+- bbox_m: (7.47, 15.94) – (10.51, 20.76), footprint 14.6m^2,
+  height 1.10m
+- **PDF evidence**: planta_74.pdf explicitly labels `PEITORIL H=1,10M`
+  twice — once at south TERRACO SOCIAL boundary, once between TERRACO
+  TECNICO and SUITE 02. Group_5 height (1.10m) and polyline path match
+  exactly the second label.
+- Verdict: real architectural element, correctly placed.
+
+### `SoftBarrier_Group_7` → **WARN** (plausible, not source-confirmed)
+
+- Maps to `consensus.soft_barriers[id=sb007]` (25-vertex polyline
+  wrapping BANHO 02 perimeter into SUITE 02 border)
+- bbox_m: (11.52, 16.90) – (14.28, 20.87), footprint 10.95m^2,
+  height 1.10m
+- **PDF evidence**: no explicit PEITORIL/MURETA label in this area.
+  Visible labels: `PEITORIL H=1,10M` (south terrace), `MURETA H=0,70M`
+  (TERRACO TECNICO).
+- Plausible interpretations: (a) terrace parapet continuation
+  wrapping BANHO 02; (b) shower enclosure half-wall;
+  (c) vanity counter. Architecturally reasonable, but cannot be
+  confirmed PASS without human annotator confirmation.
+- Verdict: human-annotated soft barrier; requires explicit human
+  re-check or PDF dimension confirmation before promotion to PASS.
+
+### `SoftBarrier_Group_1` → finding only (not patched)
+
+- Bbox_m: (11.64, 21.91) – (11.83, 21.95), footprint 0.01m^2 (19cm x 4cm).
+- Not visible at render camera distance.
+- Recorded as finding `vf_002`. No patch — sliver threshold for
+  soft barriers is a policy choice (FP-031 territory), not a bug fix.
+- Per Hard Rule #1: do not delete geometry without source attribution.
+
+## Updated final verdict
+
+**WARN — 2 findings, 1 confirmed PASS** (raised from WARN findings=0)
+
+`room_fidelity` WARN (8 cells vs 11 ambients) remains the dominant
+top-level driver. New `wall_fidelity` findings (Group_7, Group_1)
+are WARN, not FAIL. No auto-fix applied per FP-030 MVP scope.
+
+### Why no patch was applied
+
+Per user-confirmed scope of this iteration:
+
+1. `Group_7` interior parapet is human-annotated input. Modifying it
+   risks invalidating an annotation that may be correct.
+2. `Group_1` sliver is invisible. Filtering would be a policy
+   choice that could drop legitimate thin elements in future builds.
+3. Auto-fix loop with safe-edit policy belongs to FP-031, not the
+   FP-030 MVP.
+
 Specifically verified:
 
 - Window count invariant (PR #195): `window_apertures_3d = 4 == count(kind=window) = 4` ✅
