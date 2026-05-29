@@ -2,8 +2,30 @@
 
 ## Status
 
-MVP delivered in `feat/fp-030-visual-oracle-gate` (2026-05-28).
+- **2026-05-28**: MVP delivered in `feat/fp-030-visual-oracle-gate`. Maturity ~35% (artifact generator + Claude inline review).
+- **2026-05-29 (maturity 2)**: Side-by-side composer official, expanded deterministic checks, oracle bridge mode + `--require-oracle`, negative fixtures proving FAIL detection. Maturity ~60% without bridge, target 70-85% with bridge.
+
 Skill `skp-visual-self-correction` operacionaliza o loop.
+
+## Maturity classification (per regression_summary)
+
+The script emits a `Validator maturity` table in every `regression_summary.md`:
+
+| Layer | When PASS | Weight |
+|---|---|---|
+| SKP generation | `.skp` produced | 15% |
+| Render generation | top + iso PNGs present | 10% |
+| Side-by-side composite | `side_by_side_pdf_vs_skp.png` present | 10% |
+| Deterministic checks | 10 heuristics ran | 20% |
+| Visual oracle bridge | bridge responded with verdict | up to 25% |
+| Human review required | covered by deterministic + oracle | (boolean) |
+
+**Honest caps**:
+- Without functional visual oracle bridge: **max ~70%**
+- With bridge + bounded positional heuristics: **~80–90%**
+- **100% is not promised** (room for unknown unknowns)
+
+Without an active bridge, the qualitative axes (`global_visual`, `scale_rotation`) default to **WARN: needs human/agent inline review** — they can be promoted to PASS by a Claude inline pass, but the validator itself does NOT claim to have decided them.
 
 ## Problem
 
@@ -65,17 +87,49 @@ artifacts/review/<fixture>/<run_id>/final/
 
 ## Blocking visual findings (hard FAIL)
 
-The deterministic heuristics in `tools/run_skp_visual_review.py`
-hard-FAIL the build if any of these are detected:
+The deterministic heuristics in `tools/run_skp_visual_review.py` hard-FAIL the build if any of these are detected:
 
-| Type | Detection |
-|---|---|
-| `gates_self_check_fail` | Any boolean in `geometry_report.gates_self_check` is `false` |
-| `window_count_mismatch` | `window_apertures_3d` != count of `kind_v5=="window"` in consensus |
-| `floating_door` | `DoorLeaf_Group.bbox_m.min[2]` > 0.05m (door off floor) |
-| `orphan_glass_panel` | `WindowGlass_Group_<id>` with no matching `id` in `consensus.openings` of kind=window |
-| `bad_window_aperture` | `WindowGlass_Group.height_m` outside [0.9, 1.5]m range |
-| `floor_leak` | `floor_groups.present == false` OR `count == 0` |
+| Type | Detection | Added |
+|---|---|---|
+| `gates_self_check_fail` | Any boolean in `geometry_report.gates_self_check` is `false` | MVP |
+| `window_count_mismatch` | `window_apertures_3d` != count(kind=window) | MVP |
+| `door_count_mismatch` | `DoorLeaf_Group` count != count(interior_door) | maturity 2 |
+| `glazed_balcony_count_mismatch` | `GlazedBalcony_Group` count != count(glazed_balcony) | maturity 2 |
+| `floating_door` | `DoorLeaf_Group.bbox_m.min[2]` > 0.05m | MVP |
+| `orphan_glass_panel` | `WindowGlass_Group_<id>` not in consensus windows | MVP |
+| `soft_barrier_routed_as_window` | `WindowGlass_Group_<id>` matches a soft_barrier id | maturity 2 |
+| `duplicate_window_application` | Same WindowGlass opening id seen twice | maturity 2 |
+| `bad_window_aperture` | `WindowGlass_Group.height_m` outside [0.9, 1.5]m | MVP |
+| `full_height_window_void` | `WindowGlass_Group.bbox_m.min[2]` < 0.3m (no peitoril) | maturity 2 |
+| `floor_leak` (basic) | `floor_groups.present == false` OR `count == 0` | MVP |
+
+**`floor_leak` exterior detection** (floor extends beyond wall envelope) is **NOT implemented** — flagged honestly as `not_implemented` in the maturity classification. Adding it requires bbox-vs-shell intersection logic.
+
+## Negative fixtures — prove the validator reproves
+
+`fixtures/visual_oracle_negative/` contains 3 synthetic broken reports + tests that assert FAIL:
+
+| Folder | Broken in | Caught by |
+|---|---|---|
+| `floating_door/` | DoorLeaf z_min > 0.5m | `floating_door` |
+| `orphan_glass/` | WindowGlass id not in consensus | `orphan_glass_panel` + `window_count_mismatch` |
+| `full_height_window/` | WindowGlass height_m=2.7 + z_min=0 | `bad_window_aperture` + `full_height_window_void` |
+
+Tested by `tests/test_visual_oracle_negative_fixtures.py`. A planta_74 sanity test also asserts the real build does NOT trip any of these.
+
+## Oracle bridge mode
+
+`tools/run_skp_visual_review.py --oracle chatgpt_bridge`:
+
+- Probes `http://localhost:8765/health` with a 5s timeout
+- If reachable: POSTs the 3 PNGs (base64) + minimal report context to `/ask`
+- Expects JSON response shape per `tools/prompts/visual_oracle_reviewer.md`
+- Saves raw response to `final/visual_oracle_raw_response.json`
+- Normalises to `visual_findings.json` (TODO maturity 3: actual normalisation; currently leaves both files side by side)
+
+If bridge unreachable:
+- Default behaviour: `oracle_status = "unavailable"`, deterministic-only mode, qualitative axes stay WARN
+- With `--require-oracle`: writes BLOCKED summary with the next command, exits 3
 
 Other classes (taught by synthetic examples) are not yet
 auto-detected but are part of the manifest taxonomy:
