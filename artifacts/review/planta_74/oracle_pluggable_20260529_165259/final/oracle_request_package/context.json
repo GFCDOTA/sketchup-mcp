@@ -1,0 +1,23 @@
+{
+  "gates_self_check": {
+    "plan_shell_group_exists": true,
+    "wall_shell_is_single_group": true,
+    "floors_separated_from_walls": true,
+    "default_material_faces_zero": true
+  },
+  "shell_stats_from_python": {
+    "input_walls": 35,
+    "input_openings": 12,
+    "openings_carved": 8,
+    "window_apertures_3d": 4,
+    "endpoints_free": 43,
+    "endpoints_junction": 27,
+    "shell_pieces_after_union": 8,
+    "shell_pieces_after_sliver_filter": 8,
+    "slivers_removed": 0,
+    "redundant_vertices_dropped": 0,
+    "snap_eps_pts": 0.1,
+    "min_sliver_area_pts2": 0.5,
+    "total_shell_area_pts2": 11045.9334
+  }
+}

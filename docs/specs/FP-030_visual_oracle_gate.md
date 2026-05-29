@@ -117,19 +117,55 @@ The deterministic heuristics in `tools/run_skp_visual_review.py` hard-FAIL the b
 
 Tested by `tests/test_visual_oracle_negative_fixtures.py`. A planta_74 sanity test also asserts the real build does NOT trip any of these.
 
-## Oracle bridge mode
+## Oracle providers (maturity 3, pluggable)
 
-`tools/run_skp_visual_review.py --oracle chatgpt_bridge`:
+`tools/run_skp_visual_review.py --oracle <provider>` selects an oracle backend from `tools/oracle_providers.py`:
 
-- Probes `http://localhost:8765/health` with a 5s timeout
-- If reachable: POSTs the 3 PNGs (base64) + minimal report context to `/ask`
-- Expects JSON response shape per `tools/prompts/visual_oracle_reviewer.md`
-- Saves raw response to `final/visual_oracle_raw_response.json`
-- Normalises to `visual_findings.json` (TODO maturity 3: actual normalisation; currently leaves both files side by side)
+| Provider | Behaviour |
+|---|---|
+| `none` | No oracle attempted. Qualitative axes default to WARN. |
+| `chatgpt_bridge_image` | Multipart POST to `localhost:8765/ask` with images + prompt + context. If bridge offline OR rejects images (current bridge is text-only per `bridge.py:55-56` `AskRequest(BaseModel): prompt: str`), writes an `oracle_request_package/` to `final/`. |
+| `future_vision_api` | Stub. Returns `not_implemented`, writes the same request package. Replace with a real Anthropic / OpenAI SDK call. |
 
-If bridge unreachable:
-- Default behaviour: `oracle_status = "unavailable"`, deterministic-only mode, qualitative axes stay WARN
-- With `--require-oracle`: writes BLOCKED summary with the next command, exits 3
+### Provider contract
+
+`OracleProvider.call(req: OracleRequest, out_dir: Path) -> OracleResponse`
+
+`OracleResponse.status` is one of:
+
+- `ok` — provider returned a payload that normalised cleanly to `visual_findings.v1`
+- `unavailable` — provider could not be reached
+- `incompatible` — reachable but rejected the request shape
+- `not_implemented` — stub provider
+- `invalid_response` — returned but the payload could not be normalised
+
+For every non-`ok` status, the provider writes an `oracle_request_package/` directory in `out_dir/` with:
+
+- `prompt.md`
+- `images/` (model_top, model_iso, side_by_side)
+- `context.json`
+- `expected_schema.json`
+- `README.md` with status + reason + how-to-use
+
+This is the universal escape hatch: even if no automated oracle works, the operator gets a self-contained directory that can be dragged into ChatGPT manually for review.
+
+### `--require-oracle`
+
+If oracle status ≠ `ok` AND `--require-oracle` is set:
+
+- `regression_summary.md` final verdict = `BLOCKED`
+- Top of summary carries the BLOCKED reason and points to `oracle_request_package/`
+- Script exits with code 3
+
+### `--image-source canonical`
+
+Skips the SU build and reuses the canonical `artifacts/<fixture>/<fixture>_{top,iso}.png` + `geometry_report.json`. Useful for:
+
+- Testing the oracle / provider path without consuming SU time
+- Running the validator in environments where SU 2026 is not installed
+- Quick iteration on the oracle prompt or provider implementation
+
+The deterministic checks still run against the canonical report.
 
 Other classes (taught by synthetic examples) are not yet
 auto-detected but are part of the manifest taxonomy:
