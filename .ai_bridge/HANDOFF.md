@@ -1,12 +1,25 @@
 # Handoff — sketchup-mcp
 
-> Fio da meada entre sessões. Última atualização: **2026-05-29 04:35 UTC** (post-PR #200).
+> Fio da meada entre sessões. Última atualização: **2026-05-29 05:00 UTC** (post-maturity-jump).
 > Leia primeiro ao iniciar sessão.
 
 ## Estado de develop
 
-- **HEAD**: `f957391` (PR #200 — evidence/planta_74 manual validation)
-- **Anterior**: `bdb8d77` (PR #199), `c8b27a9` (PR #198), `8d4462f` (PR #197), `510140d` (PR #196)
+- **HEAD**: `43953f7` (PR #201 — HANDOFF.md update post-#200)
+- **Working branch**: `feat/fp-030-visual-oracle-maturity-jump` (em curso, PR a abrir)
+- **Anterior**: `f957391` (PR #200), `bdb8d77` (PR #199), `c8b27a9` (PR #198)
+
+## Maturity jump em curso (target PR #202+)
+
+Cravando o salto de ~35% → ~60% no Visual Oracle:
+
+- `tools/compose_side_by_side.py` — composer oficial substituindo ad-hoc PIL (PR #200)
+- `tools/run_skp_visual_review.py` — 10 deterministic checks (era 6); composer integration; `--oracle none|chatgpt_bridge`; `--require-oracle`
+- `tools/prompts/visual_oracle_reviewer.md` — prompt fixo com JSON estrito
+- `fixtures/visual_oracle_negative/` — 3 fixtures sintéticas que comprovam FAIL
+- `tests/test_side_by_side_composer.py`, `test_skp_visual_review_contract.py`, `test_visual_oracle_negative_fixtures.py` — 30 testes novos
+- Maturity classification honesta em `regression_summary.md` (cap 70% sem bridge, 85% com bridge, 100% nunca)
+- Dogfooded em `artifacts/review/planta_74/visual_oracle_bridge_20260529_maturity2/`
 - **Testes**: 109 passed, 5 skipped (sem regressão; 5 skipped são geometry tests que esperam quadrado SKP pre-built)
 - **Constitution**: 8 princípios load-bearing cravados em `.claude/constitution.md`
 - **Visual Oracle**: MVP entregue + dogfooded na `planta_74`

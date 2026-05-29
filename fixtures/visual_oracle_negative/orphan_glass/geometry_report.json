@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0.0",
+  "tool": "synthetic_negative_fixture",
+  "consensus_path": "fixtures/visual_oracle_negative/orphan_glass/consensus.json",
+  "skp_path": "n/a (synthetic)",
+  "plan_shell": {"present": true, "faces": 6, "edges": 12, "sub_groups": 1},
+  "floor_groups": {"present": true, "count": 1, "failed_count": 0, "failed_records": [], "records": []},
+  "soft_barrier_groups": {"present": true, "count": 0, "skipped_count": 0, "skip_reasons": []},
+  "totals": {"top_level_groups": 4, "faces": 12, "edges": 24},
+  "groups_diagnostic": [
+    {
+      "name": "PlanShell_Group",
+      "primary_material": "plan_wall",
+      "bbox_m": {"min": [3.5, 3.5, 0.0], "max": [7.0, 3.7, 2.7]},
+      "height_m": 2.7, "footprint_bbox_m2": 0.7
+    },
+    {
+      "name": "WindowGlass_Group_win_legit",
+      "primary_material": "plan_window_glass",
+      "bbox_m": {"min": [5.0, 3.5, 0.9], "max": [5.8, 3.5, 2.1]},
+      "height_m": 1.2, "footprint_bbox_m2": 0.0
+    },
+    {
+      "name": "WindowGlass_Group_ghost_xyz",
+      "primary_material": "plan_window_glass",
+      "bbox_m": {"min": [6.0, 3.6, 0.9], "max": [6.8, 3.6, 2.1]},
+      "height_m": 1.2, "footprint_bbox_m2": 0.0
+    }
+  ],
+  "shell_stats_from_python": {
+    "input_walls": 1,
+    "input_openings": 1,
+    "openings_carved": 1,
+    "window_apertures_3d": 2,
+    "endpoints_free": 2,
+    "endpoints_junction": 0,
+    "shell_pieces_after_union": 1,
+    "shell_pieces_after_sliver_filter": 1,
+    "slivers_removed": 0,
+    "snap_eps_pts": 0.1,
+    "min_sliver_area_pts2": 0.5,
+    "window_apertures": []
+  },
+  "gates_self_check": {
+    "plan_shell_group_exists": true,
+    "wall_shell_is_single_group": true,
+    "floors_separated_from_walls": true,
+    "default_material_faces_zero": true
+  }
+}

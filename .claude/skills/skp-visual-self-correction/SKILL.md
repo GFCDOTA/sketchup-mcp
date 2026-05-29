@@ -129,6 +129,29 @@ Next command: <comando exato pro humano>
 - [`skp-artifact-management`](../skp-artifact-management/SKILL.md) — promotion + sidecar
 - [`fidelity-review`](../fidelity-review/SKILL.md) — checklist humano original
 
+## Oracle bridge mode (maturity 2+)
+
+`--oracle chatgpt_bridge` activates the visual oracle bridge path.
+The script:
+
+1. Probes `localhost:8765/health` with 5s timeout
+2. If reachable: POSTs 3 PNGs (b64) + minimal report context to `/ask`
+3. Saves raw response to `final/visual_oracle_raw_response.json`
+4. If unreachable: marks `oracle_status="unavailable"` and continues with deterministic-only (qualitative axes stay WARN)
+5. With `--require-oracle`: bridge unreachable becomes BLOCKED
+
+Without an active bridge, Claude inline becomes the visual reviewer
+for qualitative axes (`global_visual`, `scale_rotation`).
+
+## Maturity classification
+
+Every run prints a maturity table in `regression_summary.md`. Honest
+caps:
+
+- Deterministic-only: **max ~70%**
+- Bridge available + heuristics: **80–90%**
+- **NEVER claim 100%**
+
 ## Confidence-tier rule (training data discipline)
 
 Quando inspecionar exemplos em

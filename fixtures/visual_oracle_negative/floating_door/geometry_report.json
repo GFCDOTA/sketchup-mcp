@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0.0",
+  "tool": "synthetic_negative_fixture",
+  "consensus_path": "fixtures/visual_oracle_negative/floating_door/consensus.json",
+  "skp_path": "n/a (synthetic)",
+  "plan_shell": {"present": true, "faces": 6, "edges": 12, "sub_groups": 1},
+  "floor_groups": {"present": true, "count": 1, "failed_count": 0, "failed_records": [], "records": []},
+  "soft_barrier_groups": {"present": true, "count": 0, "skipped_count": 0, "skip_reasons": []},
+  "totals": {"top_level_groups": 3, "faces": 24, "edges": 50},
+  "groups_diagnostic": [
+    {
+      "name": "PlanShell_Group",
+      "entity_count": 1, "face_count": 6, "edge_count": 12,
+      "primary_material": "plan_wall",
+      "bbox_m": {"min": [3.5, 3.5, 0.0], "max": [7.0, 3.7, 2.7]},
+      "height_m": 2.7, "footprint_bbox_m2": 0.7
+    },
+    {
+      "name": "DoorLeaf_Group_door_a",
+      "entity_count": 18, "face_count": 6, "edge_count": 12,
+      "primary_material": "plan_door",
+      "bbox_m": {"min": [5.0, 3.5, 1.2], "max": [5.8, 3.7, 3.3]},
+      "height_m": 2.1, "footprint_bbox_m2": 0.16
+    }
+  ],
+  "shell_stats_from_python": {
+    "input_walls": 1,
+    "input_openings": 1,
+    "openings_carved": 1,
+    "window_apertures_3d": 0,
+    "endpoints_free": 2,
+    "endpoints_junction": 0,
+    "shell_pieces_after_union": 1,
+    "shell_pieces_after_sliver_filter": 1,
+    "slivers_removed": 0,
+    "snap_eps_pts": 0.1,
+    "min_sliver_area_pts2": 0.5,
+    "window_apertures": []
+  },
+  "gates_self_check": {
+    "plan_shell_group_exists": true,
+    "wall_shell_is_single_group": true,
+    "floors_separated_from_walls": true,
+    "default_material_faces_zero": true
+  }
+}
