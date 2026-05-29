@@ -1,0 +1,13 @@
+{
+  "id": "bad_misplaced_window_synthetic",
+  "expected_verdict": "FAIL",
+  "expected_findings": [
+    {
+      "type": "misplaced_window",
+      "severity": "FAIL",
+      "axis": "window_fidelity",
+      "evidence": "A window/opening exists on an unsupported wall location."
+    }
+  ],
+  "source": "synthetic visual oracle training diagram, not architectural ground truth"
+}

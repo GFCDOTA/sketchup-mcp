@@ -68,6 +68,7 @@ aponta pra source-of-truth, não pra cópia.
 | [`skills/fidelity-review`](../skills/fidelity-review/SKILL.md) | Review SKP vs PDF |
 | [`skills/skp-artifact-management`](../skills/skp-artifact-management/SKILL.md) | Promotion runs/ → artifacts/ |
 | [`skills/generate-and-compare-skp-after-change`](../skills/generate-and-compare-skp-after-change/SKILL.md) | Gerar SKP novo + comparar before/after (Constitution #8) |
+| [`skills/skp-visual-self-correction`](../skills/skp-visual-self-correction/SKILL.md) | Visual Oracle Gate (FP-030); deterministic findings + qualitative axes |
 | [`skills/repo-governance`](../skills/repo-governance/SKILL.md) | PR / branch / merge / hygiene |
 | [`skills/multi-agent-handoff`](../skills/multi-agent-handoff/SKILL.md) | Trabalho paralelo / handoff |
 
@@ -81,6 +82,12 @@ aponta pra source-of-truth, não pra cópia.
 
 - `../../README.md` — Quickstart, pipeline overview, schema
 - `../../docs/specs/` — Specs históricos (FP-NNN), assets canônicos
+  - `FP-030_visual_oracle_gate.md` — Visual Oracle Gate
 - `../../artifacts/<plant>/` — Deliverables canônicos
-- `../../tests/` — Contract suite
+- `../../artifacts/review/<plant>/<run_id>/final/` — Review artifacts pra PR
+- `../../tests/` — Contract suite (`test_visual_oracle_contract.py` inclusive)
+- `../../tools/run_skp_visual_review.py` — FP-030 runner
+- `../../tools/prompts/visual_oracle_reviewer.md` — prompt pra agente de visão
+- `../../schemas/visual_findings.schema.json` — JSON Schema v1
+- `../../fixtures/visual_oracle_examples/` — 19 exemplos seed (good_real + bad_real + synthetic)
 - `../../planta_74.pdf` — PDF source da planta real

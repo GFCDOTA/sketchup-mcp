@@ -1,0 +1,13 @@
+{
+  "id": "bad_full_height_window_void_synthetic",
+  "expected_verdict": "FAIL",
+  "expected_findings": [
+    {
+      "type": "bad_window_aperture",
+      "severity": "FAIL",
+      "axis": "window_fidelity",
+      "evidence": "Window removes wall from floor to top instead of preserving sill and lintel masses."
+    }
+  ],
+  "source": "synthetic visual oracle training diagram, not architectural ground truth"
+}

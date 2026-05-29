@@ -1,0 +1,20 @@
+{
+  "id": "bad_wall_stubs_marked",
+  "confidence_tier": "bad_real_ambiguous",
+  "expected_verdict": "WARN",
+  "expected_findings": [
+    {
+      "type": "wall_stub",
+      "severity": "WARN",
+      "axis": "wall_fidelity",
+      "evidence": "Red circles cover multiple regions, but cross-checking with FP-026 detector (tools/diagnose_wall_stubs.py) shows several circled areas are door jambs / window mullions — correct geometry, NOT residual stubs."
+    }
+  ],
+  "ambiguous_or_false_positive_regions": [
+    "possible door jamb (wall portion framing a door opening — legitimate geometry)",
+    "possible window mullion (wall portion between/around window aperture — legitimate)",
+    "possible valid opening detail (e.g. opening reveal, jamb shadow at carve edge)"
+  ],
+  "training_note": "Per FP-030 confidence-tier policy (bad_real_ambiguous): this example may contribute to WARN but MUST NOT train hard FAIL heuristics. The FP-026 stub detector remains the authority for confirmed wall_stub findings.",
+  "source": "real marked screenshot from planta_74 SKP render"
+}

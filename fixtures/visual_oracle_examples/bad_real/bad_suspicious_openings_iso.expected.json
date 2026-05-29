@@ -1,0 +1,13 @@
+{
+  "id": "bad_suspicious_openings_iso",
+  "expected_verdict": "WARN",
+  "expected_findings": [
+    {
+      "type": "suspect_opening_or_barrier_routing",
+      "severity": "WARN",
+      "axis": "window_fidelity",
+      "evidence": "Render should be cross-checked for WindowGlass_Group vs kind=window, soft_barrier routing, and glazed_balcony separation."
+    }
+  ],
+  "source": "real SKP iso screenshot"
+}

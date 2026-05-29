@@ -1,0 +1,13 @@
+{
+  "id": "bad_orphan_glass_panel_synthetic",
+  "expected_verdict": "FAIL",
+  "expected_findings": [
+    {
+      "type": "orphan_glass_panel",
+      "severity": "FAIL",
+      "axis": "window_fidelity",
+      "evidence": "Translucent panel is not hosted by a wall opening, balcony door, or known soft barrier."
+    }
+  ],
+  "source": "synthetic visual oracle training diagram, not architectural ground truth"
+}

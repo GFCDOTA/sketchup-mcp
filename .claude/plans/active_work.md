@@ -8,64 +8,83 @@ Branch em curso, objetivo, escopo, validação.
 
 ## Branch atual
 
-`feat/skp-proof-of-progress-gate`
+`feat/fp-030-visual-oracle-gate`
 
-- Base: `origin/develop` em `04cb25b` (post-merge PR #195)
-- Criada em: 2026-05-28
+- Base: `origin/develop` em `510140d` (post-merge PR #196 "SKP Proof-of-Progress Gate")
+- Criada em: 2026-05-28 (sessão noturna autônoma)
 
 ## Objetivo
 
-Cravar a regra permanente **No SKP, no progress** /
-**SKP Proof-of-Progress Gate**: toda PR que afete fidelidade
-arquitetônica precisa gerar SKP novo + renders + comparação
-antes/depois em pasta human-facing (`artifacts/review/<plant>/<cycle>/`)
-com `regression_summary.md`.
+Implementar o MVP do **Visual Oracle Gate (FP-030)** com:
+1. Spec `docs/specs/FP-030_visual_oracle_gate.md`
+2. Skill `.claude/skills/skp-visual-self-correction/`
+3. Manifest de exemplos visuais
+4. Schema `visual_findings.v1`
+5. Script MVP `tools/run_skp_visual_review.py` (não placeholder — heurísticas reais)
+6. Execução real na `planta_74`
+7. `.skp` + renders + findings + summary em `artifacts/review/planta_74/visual_loop_current/final/`
+8. Test contract em `tests/test_visual_oracle_contract.py`
+
+Princípio: "No SKP, no progress. No visual proof, no progress.
+The user is not the visual regression detector."
 
 ## Escopo permitido
 
-- Spec canônica em `.claude/specs/skp_proof_of_progress_gate.md`
-- Skill operacional `generate-and-compare-skp-after-change`
-- Template `regression_summary_template.md`
-- Adicionar princípio #8 na Constitution
-- LL-021 / lição #12 em `memory/lessons_learned.md`
-- Reforço em `memory/artifact_policy.md` (referência ao gate)
-- Atualizar bootloader CLAUDE.md (@import novo spec)
-- Atualizar README.md + docs/index.md (refletir novos arquivos)
-- Atualizar plans/active_work + next_actions + memory/current_state
-- Audit log em `docs/audits/2026-05-28_*.md`
+- Criar `docs/specs/FP-030_visual_oracle_gate.md`
+- Criar skill `.claude/skills/skp-visual-self-correction/SKILL.md`
+- Criar `fixtures/visual_oracle_examples/` (19 examples: 3 good_real + 1 good_synthetic + 7 bad_real + 8 bad_synthetic)
+- Criar `schemas/visual_findings.schema.json`
+- Criar `tools/prompts/visual_oracle_reviewer.md`
+- Implementar `tools/run_skp_visual_review.py` (heurísticas: gates_self_check, window count match, floating door, orphan glass, bad window aperture, floor leak)
+- Criar `tests/test_visual_oracle_contract.py` (16 tests)
+- Atualizar `.claude/CLAUDE.md` + README + index pra mencionar a nova skill
+- Rodar visual review **real** na `planta_74` → produz `artifacts/review/planta_74/visual_loop_current/final/` com 6 arquivos
+- Promover qualitative axes via inline Claude review
 
-## Fora de escopo
+## Fora de escopo (follow-ups)
 
-- Tocar `tools/`, `tests/`, `fixtures/`, `artifacts/<plant>/`
-- Criar `tools/check_skp_proof_of_progress.py` (gate automatizado
-  CI) — fica como follow-up TODO documentado na spec
-- Aplicar a regra retroativamente a PRs anteriores
-- Regenerar `.skp` de planta_74 nesta PR (regra é normativa, não
-  exercitada aqui)
+- `tools/check_skp_proof_of_progress.py` (CI gate) — categoria 5 pendente
+- Auto-fix loop entre attempts — MVP só inspeciona e reporta
+- Side-by-side composite generator
+- Vision API integration
+- Wider negative class coverage (misplaced_soft_barrier, etc.) — heurísticas posicionais
 
 ## Comandos de validação
 
 ```bash
-# Gitignore não está ignorando os novos arquivos
-git check-ignore -v \
-  .claude/specs/skp_proof_of_progress_gate.md \
-  .claude/skills/generate-and-compare-skp-after-change/SKILL.md \
-  .claude/specs/templates/regression_summary_template.md \
-  .claude/docs/audits/2026-05-28_skp_proof_of_progress_gate.md
-# Esperado: tudo "not ignored"
+# Suite verde
+.venv/Scripts/python.exe -m pytest tests/ -q
+# Esperado: ≥105 passed (89 baseline + 16 contract test) + 5 skipped
 
-# Imports do bootloader resolvem
-cat .claude/CLAUDE.md CLAUDE.md | grep -oE '@\.claude/[a-zA-Z_/-]+\.md' | sed 's/@//' | sort -u | while read f; do test -f "$f" && echo OK $f || echo MISS $f; done
+# Bootloader @imports resolvem
+cat .claude/CLAUDE.md CLAUDE.md | grep -oE '@\.claude/[a-zA-Z_/-]+\.md' \
+  | sed 's/@//' | sort -u \
+  | while read f; do test -f "$f" && echo OK $f || echo MISS $f; done
 # Esperado: todos OK
 
-# Contract suite ainda verde
-.venv/Scripts/python.exe -m pytest tests/ -q
-# Esperado: 89 passed, 5 skipped (sem mexer em código)
+# Rerun do visual review (idempotente, com --force-skp)
+.venv/Scripts/python.exe -m tools.run_skp_visual_review \
+  --fixture planta_74 \
+  --out artifacts/review/planta_74/visual_loop_current \
+  --max-attempts 3
+# Esperado: verdict=WARN, 0 findings, artefatos em final/
 ```
 
 ## Status
 
-Em curso. Spec + skill + template + constitution + lessons +
-artifact_policy + bootloader + README + index + plans atualizados.
-Audit log a criar. Próximo: validar, commit, push, PR contra
-`develop`.
+**Concluído** (sessão autônoma 2026-05-28):
+- Spec, skill, manifest, schema, prompt, tool, test — todos criados
+- Visual review rodou na planta_74 com sucesso (verdict=WARN documentado)
+- Claude inline review promoveu qualitative axes (global_visual + scale_rotation) pra PASS
+- regression_summary.md preenchido com evidência específica por axis
+- `tools/run_skp_visual_review.py` bug fixes aplicados (`relative_to` safe, `--force-skp` sempre, mapping `model_*.png`)
+
+**Aguardando**:
+- User wake up + review do PR #198 (Visual Oracle Gate)
+- User decide se mergea OU se quer ajustes
+- User decide se autoriza item #2 da fila (`tools/check_skp_proof_of_progress.py`)
+
+## PRs abertas pelo user (estado quando o user dormiu)
+
+- **#197** (refine Constitution #8 friction-tax review) — pre-merge ajustes pra #196 que mergeou enquanto rodava. **Aguardando review.**
+- **#198** (FP-030 Visual Oracle Gate, este PR) — **aguardando review** após dogfooding.

@@ -1,0 +1,7 @@
+{
+  "id": "good_planta_74_current_top",
+  "expected_verdict": "PASS",
+  "expected_findings": [],
+  "source": "real top render from artifacts/planta_74/planta_74_top.png (canonical baseline as of 2026-05-27 build, commit 04cb25b; consensus SHA e1b1a53d0e8c552c98e316a3e0553dfb0a4cbd282366627445336a6ad4b0f54f).",
+  "context": "All 4 gates_self_check true. 35 walls extruded, 0 slivers, 8 closed cells, 4 window apertures 3D, 7 doors 2D, 1 glazed_balcony, 7 soft_barriers."
+}

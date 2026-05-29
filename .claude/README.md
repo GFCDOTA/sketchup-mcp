@@ -47,6 +47,7 @@ repo) exceto `scratch/`.
 │   ├── fidelity-review/SKILL.md
 │   ├── skp-artifact-management/SKILL.md
 │   ├── generate-and-compare-skp-after-change/SKILL.md
+│   ├── skp-visual-self-correction/SKILL.md  ← FP-030 Visual Oracle Gate
 │   ├── repo-governance/SKILL.md
 │   └── multi-agent-handoff/SKILL.md
 ├── docs/

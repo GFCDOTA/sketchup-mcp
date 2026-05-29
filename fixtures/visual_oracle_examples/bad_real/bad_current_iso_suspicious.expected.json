@@ -1,0 +1,13 @@
+{
+  "id": "bad_current_iso_suspicious",
+  "expected_verdict": "WARN",
+  "expected_findings": [
+    {
+      "type": "global_visual_fail",
+      "severity": "WARN",
+      "axis": "global_visual",
+      "evidence": "Iso view should be reviewed for habitability, host context, and misplaced glass/soft barriers."
+    }
+  ],
+  "source": "real SKP iso screenshot"
+}
