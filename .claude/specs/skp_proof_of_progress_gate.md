@@ -32,68 +32,123 @@ A constituição já diz "SKP é o artefato principal" (#1) e "sem
 operacionaliza essas duas regras pra qualquer PR que toque
 fidelidade arquitetônica.
 
-## Quando este gate aplica
+## Quando este gate aplica — path triggers
 
-Aplica a **qualquer alteração** que toque ou alegue tocar:
+PR é **SKP-affecting** (aplica gate) se mexer em qualquer um:
 
-- Geração de `.skp` (`tools/build_plan_shell_skp.{py,rb}`)
-- Walls / wall shell / stubs / canonicalização
-- Openings — portas, janelas, glazed_balcony, kind_v5 routing
-- Rooms / floors / labels / soft_barriers
-- Fidelity reports (`geometry_report.json`)
-- Renderer (Ruby `write_image`, side-by-side composer)
-- Artifact policy (paths, naming, sidecar schema)
-- Consensus schema usado pelo build
-- Builder Python OU Ruby
-- Validação visual
+| Path / area | Por quê |
+|---|---|
+| `tools/build_plan_shell_skp.{py,rb}` | builder direto |
+| `tools/quadrado/render_view.{py,rb}` | renderer |
+| `tools/su_runner_safety.py` | runtime mode |
+| `fixtures/<plant>/*.json` (consensus) | input do build |
+| Qualquer novo `tools/build_*.{py,rb}` ou `tools/render_*.*` | builder/renderer nascente |
+| `docs/specs/` contratos de consensus / `geometry_report.json` schema | contrato downstream |
+| `artifacts/<plant>/*` (substituição de baseline) | promoção canonical |
 
-**Heurística PR body**: se o body mencionar "melhora fidelity",
-"corrige wall", "corrige janela", "corrige room", "corrige
-artifact", "melhora SKP", ou similar, este gate **aplica**.
+**Heurística PR body adicional**: se o body alega "melhora
+fidelity / corrige wall / corrige janela / corrige room /
+corrige artifact / melhora SKP / refresh planta", o gate aplica
+mesmo se o diff for em path indireto.
 
-## Quando NÃO aplica
+## Quando NÃO aplica — escape hatch
 
-Não aplica a mudanças puramente textuais ou infra que **não
-afetam o modelo**:
+PR pode marcar `SKP-proof: N/A` no body se for **exclusivamente**:
 
-- Typo em docs / README / comments
-- CI / workflows sem mudar build behaviour
-- Refactor com prova de equivalência (testes mostram
-  byte-equivalent ou report-equivalent output)
-- Mudança em `.claude/` (documentação operacional do agente)
-- Mudança em `.gitignore` / `.github/` / `pyproject.toml`
-  metadata sem afetar deps
-- Adição de teste que pina invariante já satisfeito (defense-in-
-  depth puro — ver PR #195)
+- Doc-only (`README.md`, comments, `.md` em `.claude/`, `docs/`
+  sem contrato técnico)
+- Test-only sem mudar fixture / builder / consensus
+- CI-only (`.github/workflows/`) sem mudar comportamento de build
+- Refactor com **prova de output-equivalence** (teste que
+  compara `geometry_report.json` antes/depois byte- ou
+  report-equivalent)
+- Mudança em `.claude/` (knowledge base operacional do agente)
+- `.gitignore` / `pyproject.toml` metadata sem afetar deps
+- Adição de teste que pina invariante já satisfeito (PR #195
+  style)
 
-Em dúvida: aplica. Custo de gerar SKP novo é baixo (~30-60s),
-custo de não ter prova de progresso é alto.
-
-## Artefatos obrigatórios
-
-Após cada alteração relevante, gerar e versionar em pasta
-human-facing/reviewable:
+Formato do escape hatch no PR body:
 
 ```
-artifacts/review/<plant>/<cycle_or_pr>/
-├── <plant>_after.skp                  ← obrigatório
-├── <plant>_before.skp                 ← se aplicável (ou referenciar)
-├── model_top_after.png                ← obrigatório
-├── model_top_before.png               ← se aplicável
-├── model_iso_after.png                ← obrigatório
-├── model_iso_before.png               ← se aplicável
-├── side_by_side_before_after.png      ← obrigatório quando possível
-├── geometry_report_after.json         ← obrigatório
-├── geometry_report_before.json        ← se aplicável
-├── fidelity_report_after.json         ← se existir
-├── fidelity_report_before.json        ← se existir
-└── regression_summary.md              ← obrigatório
+SKP-proof: N/A
+Reason: <doc-only|test-only|ci-only|.claude/|refactor-equivalence>
+Justification: <1 frase explicando por que nenhum path
+SKP-affecting foi tocado>
 ```
+
+**NÃO usar "in doubt: applies" como regra cega.** Tax processual
+mata velocidade. Path triggers + escape hatch dão cobertura
+sem over-coverage.
+
+## Artefatos obrigatórios — final único
+
+Política em camadas pra evitar repo bloat: **um conjunto final
+commitado**, intermediários ficam scratch.
+
+### Commitar SEMPRE (final canônico desta PR)
+
+```
+artifacts/review/<plant>/<branch_or_pr>/final/
+├── <plant>_after.skp                  ← THE deliverable desta PR
+├── model_top_after.png                ← render top final
+├── model_iso_after.png OU             ← um dos dois (ambos é OK)
+├── side_by_side_pdf_vs_skp.png        ← side-by-side é melhor que iso isolado
+├── geometry_report_after.json         ← stats + gates_self_check
+├── visual_findings.json               ← quando review visual em escopo
+└── regression_summary.md              ← com veredito + evidência específica
+```
+
+### NÃO commitar por default (intermediários / debug)
+
+- `attempt_0/`, `attempt_1/`, `attempt_2/` completos
+- Debug overlays pesados (e.g. wall_stub_overlay.png variants)
+- Renders duplicados, intermediate geometry dumps
+- `_shell_polygon.json` (intermediate)
+- Multiple .skp por attempt
+
+Estes ficam em `/runs/<plant>/...` (já gitignored) ou em CI
+artifacts (retention default 90 dias quando CI for adotada).
+
+### Exceção pra commitar intermediário
+
+Só commitar attempt intermediário quando ele documenta uma
+**decisão-chave** registrada no `regression_summary.md`:
+"attempt_1 detectou regressão X → fix em commit Y → attempt_2
+confirma resolução". Caso contrário, intermediário é ruído
+histórico.
+
+### Baseline (`before`)
 
 **Não duplicar `.skp before` à toa.** Se o baseline já mora em
 `artifacts/<plant>/<plant>.skp` (canonical promovido) ou num
-artifact review anterior, **referenciar o path + commit SHA**
-no `regression_summary.md` em vez de copiar.
+artifact review anterior, **referenciar path + commit SHA** no
+`regression_summary.md`. Cópia só quando o canonical não existe
+ou vai ser substituído nesta PR.
+
+### Git LFS — não usar ainda
+
+`.skp` típico é ~140KB, renders ~200KB. Em 50 PRs ≈ 25-40MB.
+GitHub recomenda repos < 1GB; 5GB é hard limit. Não migrar pra
+LFS preventivamente — começar com a política de retenção (final
+único, no commit de intermediários). Se passar de 200-500MB
+total, reavaliar.
+
+### Pixel-perfect — não fazer hard gate
+
+Renders dependem de GPU, driver, fontes, versão SU. Pixel-diff
+hard gate vai gerar flakiness em ambientes diferentes (CI vs
+local vs outra máquina). **Renders são evidência de review
+humano**, não diff bit-exato.
+
+Hard gate reserved pra **absurdos categóricos**:
+
+- `.skp` ausente
+- Renders ausentes
+- `window_apertures_3d != count(kind=window)` (PR #195 cobriu)
+- `floating_door` confirmado (door sem wall_id válido)
+- `orphan_glass_panel` confirmado (WindowGlass_Group sem
+  source opening)
+- Qualquer `gates_self_check` em `false`
 
 ## Separação de pastas (reforça `artifact_policy.md`)
 
@@ -171,20 +226,48 @@ cp runs/<plant>/geometry_report.json  artifacts/review/<plant>/<cycle_or_pr>/geo
 git add artifacts/review/<plant>/<cycle_or_pr>/
 ```
 
-## Critérios de bloqueio
+## Critérios de bloqueio — hard gates categóricos
 
-A PR é **incompleta** se qualquer condição abaixo é verdadeira:
+PR é **incompleta** (hard block, não merge) se qualquer:
 
-1. Não gerou `.skp`
-2. Gerou `.skp` mas só em `/runs/` (não promovido)
-3. Não gerou render `top` e `iso`
-4. Não comparou contra baseline (sem `regression_summary.md`)
-5. Declarou melhoria sem evidência visual
-6. Corrigiu um bug mas introduziu regressão crítica não
-   justificada
-7. Alterou builder/consensus sem provar impacto no SKP
+1. **`.skp` final ausente** em `artifacts/review/<plant>/<branch>/final/`
+2. **`.skp` apenas em `/runs/`** (não promovido) — scratch não conta
+3. **Sem render** top OU iso OU side-by-side em `final/`
+4. **Sem `regression_summary.md`** com veredito explícito (PASS/WARN/FAIL)
+5. **PR alegou melhoria visual mas sem evidência visual** no summary
+6. **Regressão crítica** introduzida sem justificativa aceita
+7. **Builder/consensus alterado sem build comprovando impacto**
+8. **`gates_self_check` regrediu** (qualquer boolean true → false)
+9. **Window count mismatch** (`window_apertures_3d != count(kind=window)`)
+10. **Floating door / orphan glass** confirmado por análise do report
 
-Bloqueio = não merge. Reviewer humano DEVE cobrar.
+Reviewer humano DEVE cobrar bloqueios 1-7. Bloqueios 8-10 são
+automatizáveis pelo gate executável (item follow-up,
+[`plans/next_actions.md`](../plans/next_actions.md) #2).
+
+## Anti-checklist-theater: evidência específica obrigatória
+
+Cada axis no `regression_summary.md` exige **frase concreta** ou
+fica BLOQUEADO. Exemplo de evidência:
+
+❌ Ruim (vira teatro):
+```
+wall_fidelity: PASS — ok
+```
+
+✅ Bom (evidência específica):
+```
+wall_fidelity: PASS — top render mostra L-shell externa contínua
+sem stubs; comparado ao baseline a01b2c3, 0 slivers (vs 0 antes),
+35 walls extrudadas (vs 35 antes); canto superior-direito que
+tinha resíduo em #192 continua limpo.
+```
+
+`PASS` sem evidência específica = falso, equivale a `WARN`.
+
+`N/A` é permitido por axis quando a PR comprovadamente não toca
+aquela área (e.g. PR só de window routing → axis `room_fidelity`
+pode ser `N/A — sem mudança em wall geometry ou floor polygonize`).
 
 ## Critério de sucesso
 

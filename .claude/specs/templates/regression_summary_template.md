@@ -49,15 +49,34 @@ mais finos que LL-017 threshold antigo deixava passar.">
 
 ## Before / After comparison
 
-| Eixo | Before | After | Verdict | Evidência |
+> **Regra anti-checklist-theater**: cada axis exige evidência
+> **específica e concreta**. "PASS — ok" não conta; equivale a
+> WARN. Use `N/A — <razão>` quando a PR comprovadamente não
+> toca essa área.
+
+| Eixo | Before | After | Verdict | Evidência específica |
 |---|---|---|---|---|
-| `wall_fidelity` | <stats / count> | <stats / count> | PASS/WARN/FAIL | <link/print> |
-| `door_fidelity` | <count + routing> | <count + routing> | PASS/WARN/FAIL | <link/print> |
-| `window_fidelity` | <count + peitoril ok?> | <count + peitoril ok?> | PASS/WARN/FAIL | <link/print> |
-| `room_fidelity` | <cell count + labels> | <cell count + labels> | PASS/WARN/FAIL | <link/print> |
-| `scale_rotation` | <dim deltas vs PDF> | <dim deltas vs PDF> | PASS/WARN/FAIL | <link/print> |
-| `global_visual` | <qualidade side-by-side> | <qualidade side-by-side> | PASS/WARN/FAIL | <link/print> |
-| `gates_self_check` | <4 booleans> | <4 booleans> | PASS/WARN/FAIL | report JSON |
+| `wall_fidelity` | <stats / count> | <stats / count> | PASS/WARN/FAIL/N-A | <frase concreta: count exato, regiões do render, comparação> |
+| `door_fidelity` | <count + routing> | <count + routing> | PASS/WARN/FAIL/N-A | <frase concreta> |
+| `window_fidelity` | <count + peitoril ok?> | <count + peitoril ok?> | PASS/WARN/FAIL/N-A | <frase concreta> |
+| `room_fidelity` | <cell count + labels> | <cell count + labels> | PASS/WARN/FAIL/N-A | <frase concreta> |
+| `scale_rotation` | <dim deltas vs PDF> | <dim deltas vs PDF> | PASS/WARN/FAIL/N-A | <frase concreta> |
+| `global_visual` | <qualidade side-by-side> | <qualidade side-by-side> | PASS/WARN/FAIL/N-A | <frase concreta com referência à imagem> |
+| `gates_self_check` | <4 booleans> | <4 booleans> | PASS/WARN/FAIL | os 4 nomes + valores; FAIL = regressão true→false |
+
+Exemplo bom (evidência específica):
+
+```
+wall_fidelity | 35 walls, 0 slivers | 35 walls, 0 slivers | PASS |
+top render mostra L-shell externa contínua sem stubs; comparado
+ao baseline <SHA>, regiões NW e SE limpas; FP-026 invariant preservado.
+```
+
+Exemplo ruim (checklist theater — REJEITAR em review):
+
+```
+wall_fidelity | ok | ok | PASS | ok
+```
 
 ### Counts diff (do `geometry_report.json`)
 
