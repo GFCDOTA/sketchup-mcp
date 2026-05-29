@@ -12,7 +12,8 @@ import pytest
 
 from tools.run_skp_visual_review import (
     AXES, ORACLE_BRIDGE_URL, SCHEMA_VERSION, check_oracle_bridge_available,
-    classify_maturity, write_blocked_summary,
+    classify_maturity, load_known_warnings, worst_verdict,
+    write_blocked_summary,
 )
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -114,6 +115,72 @@ def test_maturity_bridge_unavailable_warn():
     bridge_row = [r for r in data["rows"] if r["layer"] == "Visual oracle bridge"][0]
     assert bridge_row["status"] == "WARN"
     assert pct <= 70
+
+
+# ---- verdict aggregation --------------------------------------------
+
+
+def test_worst_verdict_pass_pass_pass():
+    assert worst_verdict("PASS", "PASS", "PASS") == "PASS"
+
+
+def test_worst_verdict_pass_warn_pass():
+    assert worst_verdict("PASS", "WARN", "PASS") == "WARN"
+
+
+def test_worst_verdict_warn_documented_below_warn():
+    assert worst_verdict("WARN_documented", "WARN") == "WARN"
+
+
+def test_worst_verdict_warn_documented_above_pass():
+    assert worst_verdict("PASS", "WARN_documented") == "WARN_documented"
+
+
+def test_worst_verdict_fail_dominates():
+    assert worst_verdict("FAIL", "PASS", "WARN_documented") == "FAIL"
+
+
+def test_worst_verdict_blocked_is_top():
+    assert worst_verdict("BLOCKED", "FAIL", "PASS") == "BLOCKED"
+
+
+def test_worst_verdict_empty_returns_pass():
+    assert worst_verdict() == "PASS"
+
+
+# ---- known_warnings carry policy ------------------------------------
+
+
+def test_known_warnings_planta_74_present():
+    warns = load_known_warnings("planta_74")
+    assert isinstance(warns, list)
+    assert len(warns) >= 3
+    ids = {w.get("id") for w in warns}
+    assert "room_fidelity_open_plan" in ids
+    assert "sb007_ambiguous" in ids
+    assert "sb_sliver_group_1" in ids
+
+
+def test_known_warnings_unknown_fixture_empty():
+    assert load_known_warnings("does_not_exist_fixture_xyz") == []
+
+
+def test_known_warnings_planta_74_carry_axes():
+    warns = load_known_warnings("planta_74")
+    for w in warns:
+        assert w.get("axis") in {
+            "wall_fidelity", "door_fidelity", "window_fidelity",
+            "room_fidelity", "scale_rotation", "global_visual",
+        }
+
+
+def test_known_warnings_carry_forces_final_warn_documented_when_oracle_pass():
+    """Oracle PASS + planta_74 known warnings = WARN_documented final."""
+    warns = load_known_warnings("planta_74")
+    assert warns
+    final = worst_verdict("PASS", "PASS",
+                          "WARN_documented" if warns else "PASS")
+    assert final == "WARN_documented"
 
 
 # ---- final artifact mandatory list ----------------------------------

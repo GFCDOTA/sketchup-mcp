@@ -58,6 +58,39 @@ from tools.oracle_providers import (
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCHEMA_VERSION = "visual_findings.v1"
 
+# Verdict severity ranking. `WARN_documented` is a final-verdict-only
+# state used when known architectural WARNs are carried for a fixture
+# even though the oracle/deterministic checks would say PASS.
+_VERDICT_RANK = {
+    "PASS": 0,
+    "WARN_documented": 1,
+    "WARN": 2,
+    "FAIL": 3,
+    "BLOCKED": 4,
+}
+
+
+def worst_verdict(*verdicts: str) -> str:
+    """Return the most severe verdict. Empty input -> PASS."""
+    if not verdicts:
+        return "PASS"
+    valid = [v for v in verdicts if v]
+    if not valid:
+        return "PASS"
+    return max(valid, key=lambda v: _VERDICT_RANK.get(v, 0))
+
+
+def load_known_warnings(fixture: str) -> list[dict]:
+    """Load fixtures/<fixture>/known_warnings.json or return []."""
+    path = REPO_ROOT / "fixtures" / fixture / "known_warnings.json"
+    if not path.exists():
+        return []
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        return data.get("warnings", []) or []
+    except (json.JSONDecodeError, OSError):
+        return []
+
 AXES = [
     "wall_fidelity",
     "door_fidelity",
@@ -812,6 +845,31 @@ def write_regression_summary(
                 f"| {a['attempt']} | {a['verdict']} | "
                 f"{a['findings_count']} findings ({_safe_rel(Path(a['attempt_dir']))}) |"
             )
+    # Verdict aggregation block (only when oracle ran with status=ok)
+    oracle_v = last.get("oracle_verdict")
+    det_v = last.get("deterministic_verdict")
+    carried_v = last.get("carried_known_warnings_verdict")
+    known_list = last.get("known_warnings_carried", [])
+    verdict_block: list[str] = []
+    if oracle_v is not None:
+        verdict_block.extend([
+            "",
+            "## Verdict aggregation",
+            "",
+            f"- **oracle_verdict**: `{oracle_v}`",
+            f"- **deterministic_verdict**: `{det_v}`",
+            f"- **carried_known_warnings_verdict**: `{carried_v}`",
+            f"- **final_verdict = worst(oracle, deterministic, carried_known_warnings)** = `{effective_verdict}`",
+            "",
+            "> The visual oracle provider is working, but its PASS does",
+            "> not override known architectural WARNs. The canonical",
+            f"> `{fixture}` status remains the aggregate above.",
+        ])
+        if known_list:
+            verdict_block.extend(["", "### Known warnings carried for this fixture", ""])
+            for w in known_list:
+                verdict_block.append(f"- {w}")
+
     lines.extend([
         "",
         f"## Final verdict: **{effective_verdict}**",
@@ -823,6 +881,7 @@ def write_regression_summary(
             f"been sent.\n"
             if blocked_by_require_oracle else ""
         ),
+        *verdict_block,
         "## Axes (last attempt)",
         "",
         "| Axis | Verdict | Evidence |",
@@ -1134,23 +1193,85 @@ def main() -> int:
             # for qualitative axes (global_visual, scale_rotation) and
             # complements deterministic findings.
             if oracle_resp.status == "ok":
-                merged = dict(oracle_resp.normalized_findings)
+                normalized = oracle_resp.normalized_findings
+                oracle_verdict = normalized.get("top_level_verdict", "PASS")
+                # deterministic_verdict from actual findings (ignoring
+                # qualitative-auto-WARN fallback)
+                det_findings_for_agg = attempts[-1].get("findings", [])
+                if any(f.get("severity") == "FAIL" for f in det_findings_for_agg):
+                    deterministic_verdict = "FAIL"
+                elif any(f.get("severity") == "WARN" for f in det_findings_for_agg):
+                    deterministic_verdict = "WARN"
+                else:
+                    deterministic_verdict = "PASS"
+
+                # Known WARNs carried for this fixture
+                known = load_known_warnings(fixture)
+                known_descriptions = [
+                    f"{w.get('axis','?')}: {w.get('description','')}"
+                    for w in known
+                ]
+                carried_warnings_verdict = (
+                    "WARN_documented" if known else "PASS"
+                )
+
+                # worst(oracle, deterministic, carried_known_warnings)
+                final_v = worst_verdict(
+                    oracle_verdict,
+                    deterministic_verdict,
+                    carried_warnings_verdict,
+                )
+
+                # Per-axis: downgrade oracle PASS to WARN where known
+                # warnings apply
+                axes_out = dict(normalized.get("axes", {}))
+                axes_with_known = {w.get("axis") for w in known if w.get("axis")}
+                for ax_name in axes_with_known:
+                    a = axes_out.get(ax_name) or {}
+                    if a.get("verdict") == "PASS":
+                        a["verdict"] = "WARN"
+                        a["evidence"] = (
+                            (a.get("evidence", "") + " | ").lstrip(" |")
+                            + "Downgraded by known_warnings_carried for this fixture."
+                        )
+                        axes_out[ax_name] = a
+
+                merged = dict(normalized)
                 merged["fixture"] = fixture
                 merged["attempt"] = "final"
-                # Carry deterministic findings if any
+                merged["axes"] = axes_out
+                merged["oracle_verdict"] = oracle_verdict
+                merged["deterministic_verdict"] = deterministic_verdict
+                merged["carried_known_warnings_verdict"] = carried_warnings_verdict
+                merged["known_warnings_carried"] = known_descriptions
+                merged["final_verdict"] = final_v
+                merged["top_level_verdict"] = final_v
+                merged["aggregation_note"] = (
+                    "final_verdict = worst(oracle_verdict, "
+                    "deterministic_verdict, carried_known_warnings_verdict). "
+                    "The visual oracle provider is working, but its PASS does "
+                    "not override known architectural WARNs."
+                )
                 det_findings = attempts[-1].get("findings", [])
                 if det_findings:
                     merged["deterministic_findings"] = det_findings
                 _write_json(final_dir / "visual_findings.json", merged)
                 print(
-                    "[oracle] visual_findings.json overwritten with "
-                    "oracle-led merged verdict"
+                    f"[oracle] verdicts: oracle={oracle_verdict} "
+                    f"deterministic={deterministic_verdict} "
+                    f"carried_known={carried_warnings_verdict} "
+                    f"-> final={final_v}"
                 )
-                # Update in-memory attempt so regression_summary reflects
-                # the oracle-promoted verdict (instead of the deterministic
-                # WARN fallback on qualitative axes).
-                attempts[-1]["verdict"] = merged.get("top_level_verdict", "PASS")
-                attempts[-1]["axes"] = merged.get("axes", attempts[-1].get("axes", {}))
+
+                # Update in-memory attempt for regression_summary
+                attempts[-1]["verdict"] = final_v
+                attempts[-1]["axes"] = axes_out
+                attempts[-1]["oracle_verdict"] = oracle_verdict
+                attempts[-1]["deterministic_verdict"] = deterministic_verdict
+                attempts[-1]["carried_known_warnings_verdict"] = (
+                    carried_warnings_verdict
+                )
+                attempts[-1]["known_warnings_carried"] = known_descriptions
 
         print(
             f"[oracle] provider={oracle_resp.provider} "

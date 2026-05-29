@@ -1,0 +1,28 @@
+{
+  "schema_version": "known_warnings.v1",
+  "fixture": "planta_74",
+  "purpose": "Architectural WARNs that are documented baseline and MUST persist in the final verdict regardless of what any oracle says. An oracle PASS does NOT override these. They prevent the final verdict from declaring PASS when known imperfections still apply.",
+  "warnings": [
+    {
+      "id": "room_fidelity_open_plan",
+      "axis": "room_fidelity",
+      "description": "8 cells vs 11 semantic ambients, open-plan documented",
+      "source": "lessons_learned.md #4; PRs #191, #198, #200",
+      "resolution_path": "semantic_zones overlay tool (backlog)"
+    },
+    {
+      "id": "sb007_ambiguous",
+      "axis": "wall_fidelity",
+      "description": "SoftBarrier_Group_7 / sb007: plausible architectural element wrapping BANHO 02 perimeter, but no explicit PEITORIL/MURETA label in PDF",
+      "source": "carried from PR #200 iteration 2 + PR #202 dogfooding #2",
+      "resolution_path": "human annotator confirmation OR PDF cross-check"
+    },
+    {
+      "id": "sb_sliver_group_1",
+      "axis": "wall_fidelity",
+      "description": "SoftBarrier_Group_1: 0.01 m^2 sliver (19cm x 4cm), not visible at render distance, policy choice",
+      "source": "carried from PR #200 iteration 2 + PR #202 dogfooding #2",
+      "resolution_path": "policy decision on sliver threshold OR FP-031 if it becomes visually relevant"
+    }
+  ]
+}

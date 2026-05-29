@@ -1,0 +1,45 @@
+{
+  "schema_version": "visual_findings.v1",
+  "top_level_verdict": "WARN_documented",
+  "axes": {
+    "window_fidelity": {
+      "verdict": "PASS",
+      "evidence": "Windows are correctly represented and aligned."
+    },
+    "global_visual": {
+      "verdict": "PASS",
+      "evidence": "The overall visual representation is accurate and consistent with the PDF floor plan."
+    },
+    "room_fidelity": {
+      "verdict": "WARN",
+      "evidence": "Rooms are correctly represented and aligned. | Downgraded by known_warnings_carried for this fixture."
+    },
+    "scale_rotation": {
+      "verdict": "PASS",
+      "evidence": "The model is correctly scaled and oriented."
+    },
+    "wall_fidelity": {
+      "verdict": "WARN",
+      "evidence": "All walls appear to be correctly represented. | Downgraded by known_warnings_carried for this fixture."
+    },
+    "door_fidelity": {
+      "verdict": "PASS",
+      "evidence": "Doors are correctly represented and aligned."
+    }
+  },
+  "findings": [],
+  "source": "oracle_bridge",
+  "raw_confidence": "high",
+  "fixture": "planta_74",
+  "attempt": "final",
+  "oracle_verdict": "PASS",
+  "deterministic_verdict": "PASS",
+  "carried_known_warnings_verdict": "WARN_documented",
+  "known_warnings_carried": [
+    "room_fidelity: 8 cells vs 11 semantic ambients, open-plan documented",
+    "wall_fidelity: SoftBarrier_Group_7 / sb007: plausible architectural element wrapping BANHO 02 perimeter, but no explicit PEITORIL/MURETA label in PDF",
+    "wall_fidelity: SoftBarrier_Group_1: 0.01 m^2 sliver (19cm x 4cm), not visible at render distance, policy choice"
+  ],
+  "final_verdict": "WARN_documented",
+  "aggregation_note": "final_verdict = worst(oracle_verdict, deterministic_verdict, carried_known_warnings_verdict). The visual oracle provider is working, but its PASS does not override known architectural WARNs."
+}
