@@ -1,15 +1,50 @@
 # Handoff — sketchup-mcp
 
-> Fio da meada entre sessões. Última atualização: **2026-05-29 02:04 UTC**.
+> Fio da meada entre sessões. Última atualização: **2026-05-29 04:35 UTC** (post-PR #200).
 > Leia primeiro ao iniciar sessão.
 
 ## Estado de develop
 
-- **HEAD**: `c8b27a9` (PR #198 — FP-030 Visual Oracle Gate MVP)
-- **Anterior**: `8d4462f` (PR #197), `510140d` (PR #196), `04cb25b` (PR #195), `c299d44` (PR #194)
+- **HEAD**: `f957391` (PR #200 — evidence/planta_74 manual validation)
+- **Anterior**: `bdb8d77` (PR #199), `c8b27a9` (PR #198), `8d4462f` (PR #197), `510140d` (PR #196)
 - **Testes**: 109 passed, 5 skipped (sem regressão; 5 skipped são geometry tests que esperam quadrado SKP pre-built)
 - **Constitution**: 8 princípios load-bearing cravados em `.claude/constitution.md`
 - **Visual Oracle**: MVP entregue + dogfooded na `planta_74`
+
+## Atualização pós-milestone (#200 — fresh validation)
+
+### #200 — evidence(planta_74) Visual Oracle Gate dogfooding #2
+
+Merge: `f957391` (2026-05-29 04:32 UTC).
+
+User-requested fresh build após milestone closure. Exercitou
+explicitamente o priority #1 do roadmap ("provar Visual Oracle
+numa PR real de builder").
+
+**Veredito final**: `WARN_documented` (sem FAIL).
+
+```
+PASS: wall_fidelity, door_fidelity, window_fidelity,
+      scale_rotation, global_visual, gates_self_check (4/4)
+WARN: room_fidelity (8 vs 11), sb007, sb_sliver (Group_1)
+FAIL: none
+```
+
+**Artifacts em `artifacts/review/planta_74/manual_validation_20260529_041751/final/`**:
+- `model.skp` (150.8 KB)
+- `model_top.png`, `model_iso.png`
+- `side_by_side_pdf_vs_skp.png` (245 KB, **ad-hoc PIL + pypdfium2**, NÃO promovido pra `tools/`)
+- `geometry_report.json`, `visual_findings.json`
+- `regression_summary.md`
+
+**Ressalva importante (registrada pelo user)**: esta PR valida o
+**fluxo do Visual Oracle Gate**, mas ainda **não é prova
+completa numa PR real de builder**. A prova definitiva virá na
+próxima PR que altere builder / consensus / renderer e o oracle
+precisar comparar antes/depois de mudança funcional real.
+
+**Side-by-side composer**: virou próximo item natural, mas
+**permanece follow-up #2** — só iniciar com trigger explícito.
 
 ## PRs mergeadas neste ciclo (28 → 29 de maio)
 
