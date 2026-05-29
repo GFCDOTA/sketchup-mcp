@@ -95,6 +95,8 @@ Auto-discovered em `.claude/skills/*/SKILL.md`:
 - `skp-visual-self-correction` — Visual Oracle Gate (FP-030);
   detecta floating door / orphan glass / window count mismatch /
   bad aperture / floor leak; loop até 3 attempts
+- `gpt-auto-consult-gate` — LL-024; consulta ChatGPT bridge text-only
+  automaticamente em decisão real (9 triggers canônicos)
 - `repo-governance` — PR / branch / merge / hygiene
 - `multi-agent-handoff` — coordenação multi-agent / worktrees
 
