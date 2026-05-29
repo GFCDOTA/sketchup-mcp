@@ -125,7 +125,26 @@ Tested by `tests/test_visual_oracle_negative_fixtures.py`. A planta_74 sanity te
 |---|---|
 | `none` | No oracle attempted. Qualitative axes default to WARN. |
 | `chatgpt_bridge_image` | Multipart POST to `localhost:8765/ask` with images + prompt + context. If bridge offline OR rejects images (current bridge is text-only per `bridge.py:55-56` `AskRequest(BaseModel): prompt: str`), writes an `oracle_request_package/` to `final/`. |
+| `ollama_vision` | **Real visual backend (maturity 3)**. POSTs to `localhost:11434/api/generate` with `qwen2.5vl:7b` model. Resizes images to ≤900px to fit context window. Compact built-in prompt (~1.5KB) avoids the HTTP 500 the full FP-030 reviewer prompt triggers on 2+ images. Uses brace-walking JSON extractor to parse the response (handles markdown fences). |
 | `future_vision_api` | Stub. Returns `not_implemented`, writes the same request package. Replace with a real Anthropic / OpenAI SDK call. |
+
+### `ollama_vision` setup
+
+Pre-requisites:
+- Ollama running at `localhost:11434`
+- `qwen2.5vl:7b` installed (`ollama pull qwen2.5vl:7b`, ~6 GB)
+
+Empirical findings during this PR's implementation:
+- **Forced `format: "json"` corrupts output** when combined with 2+ images. Drops to `{"<|im_start|>":1}`-style token garbage. We do NOT use it.
+- **Full FP-030 reviewer prompt (~5 KB) + 3 images = HTTP 500**. Context window of `qwen2.5vl:7b` is exceeded. The provider builds a compact prompt instead.
+- **Resize images to 900px max edge** — full-resolution renders (especially the 577 KB side-by-side composite) overflow the context.
+- **Temperature 0.3** matches the working pattern in `E:/chatgpt-bridge/ask_qwen_vision.py`.
+
+When `status=ok`, the orchestrator:
+- Writes `visual_oracle_raw_response.json` with the full outer Ollama envelope
+- Writes `visual_oracle_normalized.json` with the v1-shaped findings
+- **Overwrites `visual_findings.json`** with the oracle-led merged verdict (deterministic findings carried in `deterministic_findings` field if any)
+- Updates the in-memory attempt verdict so `regression_summary.md` reflects the oracle decision (not the deterministic WARN fallback)
 
 ### Provider contract
 
