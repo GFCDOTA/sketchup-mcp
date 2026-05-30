@@ -622,21 +622,30 @@ end
 #      touching the wall shell).
 
 def find_wall_face_for_aperture(piece_ents, host_wall, cx_in, cy_in,
-                                  half_w_in, slab_floor_in, slab_ceiling_in)
+                                  half_w_in, slab_floor_in, slab_ceiling_in,
+                                  host_at, tol)
+  # host_at = host wall's perpendicular position (y for 'h', x for 'v'), inches;
+  # tol = match tolerance (~half wall thickness + margin).
+  # FP-031: require the candidate face to belong to the HOST wall. Without this
+  # the find() returned the first face merely spanning the aperture's x/y-range
+  # — often a different parallel facade — carving the hole on the wrong wall.
+  # Returning nil here (no host face) lets the caller fall back to a panel.
   ori = host_wall['orientation']
   piece_ents.grep(Sketchup::Face).find do |f|
     next false if f.normal.z.abs > 0.01  # skip top/bottom (annular floor/ceiling)
     if ori == 'h'
       next false unless f.normal.y.abs > 0.99
       bb = f.bounds
-      bb.min.x <= cx_in - half_w_in + 0.5 &&
+      (bb.min.y - host_at).abs <= tol &&
+        bb.min.x <= cx_in - half_w_in + 0.5 &&
         bb.max.x >= cx_in + half_w_in - 0.5 &&
         bb.min.z < slab_floor_in + 0.5 &&
         bb.max.z > slab_ceiling_in - 0.5
     else
       next false unless f.normal.x.abs > 0.99
       bb = f.bounds
-      bb.min.y <= cy_in - half_w_in + 0.5 &&
+      (bb.min.x - host_at).abs <= tol &&
+        bb.min.y <= cy_in - half_w_in + 0.5 &&
         bb.max.y >= cy_in + half_w_in - 0.5 &&
         bb.min.z < slab_floor_in + 0.5 &&
         bb.max.z > slab_ceiling_in - 0.5
@@ -657,6 +666,11 @@ def build_window_aperture_3d(parent_ents, opening, host_wall, thickness_pt,
   sill_in = WINDOW_SILL_IN
   head_in = WINDOW_HEAD_IN
   thickness_in = thickness_pt.to_f * PT_TO_IN
+  # Host wall's perpendicular position + tolerance (FP-031), so the aperture
+  # only carves the host wall (mirrors the glass, which uses host_wall.start).
+  host_at_in = (ori == 'h' ? host_wall['start'][1].to_f
+                           : host_wall['start'][0].to_f) * PT_TO_IN
+  face_tol_in = thickness_in + 4.0  # ~half thickness + margin; << wall spacing
 
   plan_shell = parent_ents.grep(Sketchup::Group)
                           .find { |g| g.name == 'PlanShell_Group' }
@@ -670,6 +684,7 @@ def build_window_aperture_3d(parent_ents, opening, host_wall, thickness_pt,
     ents = piece.entities
     target = find_wall_face_for_aperture(
       ents, host_wall, cx_in, cy_in, half_w_in, 0.0, WALL_HEIGHT_IN,
+      host_at_in, face_tol_in,
     )
     if target.nil?
       carve_diag << "#{piece.name}: no candidate face"
@@ -1139,16 +1154,23 @@ openings.each_with_index do |op, i|
       passage_built += 1 if res['ok']
     end
   when 'window'
-    # ADR-007 / FP-024: windows are wall-hosted partial-height
-    # apertures. Carve in 3D (post-extrude) so wall mass remains
-    # below sill and above head. The legacy build_window_panel
-    # (3-band sill/glass/lintel infill of a full-height carve)
-    # produced door-like / shaft-like voids and is no longer
-    # called for window kinds. Glazed_balcony (porta-vidro) is
-    # genuinely full-height and continues to use the 2D carve +
-    # build_glazed_balcony path below.
+    # Preferred: 3D aperture (peitoril/verga preserved, see-through glass) —
+    # works when the window sits on a clean solid host wall (e.g. quadrado).
+    # find_wall_face_for_aperture now requires the face to belong to the HOST
+    # wall (FP-031), so it returns ok=false instead of carving a wrong parallel
+    # facade. FALLBACK: when no host face is found (planta_74's broken wall_id /
+    # gap-hosted windows), place the window as a PANEL at the opening center
+    # (peitoril 0-0.9 / glass 0.9-2.1 / verga 2.1-2.7 at cx / host.start.y) —
+    # the exact spot the glass resolves to and the PDF provenance audit
+    # confirmed. This keeps quadrado's see-through window unchanged while
+    # placing planta_74's windows on the correct wall, not an invented one.
     res = build_window_aperture_3d(model.active_entities, op, host,
                                    thickness_pt, glass_mat, i)
+    unless res['ok']
+      res = build_window_panel(model.active_entities, op, host,
+                               thickness_pt, sill_mat, glass_mat, lintel_mat, i)
+      res['via_panel_fallback'] = true if res['ok']
+    end
     window_built += 1 if res['ok']
     opening_skips << "op[#{i}] window: #{res['reason']}" unless res['ok']
   when 'glazed_balcony'
