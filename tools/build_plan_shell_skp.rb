@@ -25,7 +25,12 @@
 
 require 'json'
 
-PT_TO_M  = 0.19 / 5.4         # matches consume_consensus.rb calibration
+# Default = wall-thickness anchor (0.19 m wall / 5.4 pt), matches
+# consume_consensus.rb. Per-build override via ENV['PT_TO_M'] so a plan whose
+# real wall thickness differs (e.g. planta_74, PDF cotas -> ~0.0252 m/pt) can be
+# built at its correct scale WITHOUT changing the global default (quadrado etc.
+# keep 0.0352) and WITHOUT mutating any input fixture.
+PT_TO_M  = (ENV['PT_TO_M'].to_s.strip.empty? ? (0.19 / 5.4) : ENV['PT_TO_M'].to_f)
 M_TO_IN  = 39.3700787402
 PT_TO_IN = PT_TO_M * M_TO_IN
 

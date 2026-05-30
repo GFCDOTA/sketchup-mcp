@@ -1,7 +1,45 @@
 # Handoff — sketchup-mcp
 
-> Fio da meada entre sessões. Última atualização: **2026-05-29 20:25 UTC** (autonomous loop — bridge ONLINE).
+> Fio da meada entre sessões. Última atualização: **2026-05-30 18:10 UTC** (planta_74 geometria FIEL ao PDF; scale fix via env-override; PR aberto).
 > Leia primeiro ao iniciar sessão.
+
+## 2026-05-30 (autônomo, OFFLINE_DATA_ONLY) — geometria FIEL; scale = único CONFIRMED_BUG, fix landed
+
+PDF-overlay (`tools/pdf_overlay_verify.py`) provou: **geometria/layout do planta_74 é
+FIEL ao PDF**. As 5 suspeitas visuais → FALSE_ALARM / GEOMETRY_OK_RENDER_LEGIBILITY /
+WARN_DOCUMENTED (arcos de porta batem ratio ~1.0 → portas largas são reais; paredes
+assentam no perímetro c/ degraus; cômodos dentro das paredes; vidro no lugar mas render
+não comunica; open-plan documentado). **Único CONFIRMED_BUG = escala** (PT_TO_M 0.0352
+vs cotas 5.45/2.60/2.40 → 0.0252, ~1.4× grande). **Fix:** `ENV['PT_TO_M']` override no
+`build_plan_shell_skp.rb` (default intocado, quadrado seguro, sem mutar fixture); @0.0252
+→ 12.71×7.53m, gates ✓, pytest 223 ✓. Evidência: `artifacts/review/planta_74/visual_regression_20260530T180822Z/`.
+**Resta a trilha de REPRESENTAÇÃO** (folha de porta full-height, legibilidade do vidro,
+soft-barrier sólido) — não é geometria; precisa iteração visual (flat-door foi WORSE → revertido).
+
+--- histórico abaixo (estado BLOCKED, superado pela verificação autônoma por dados) ---
+
+planta_74 SKP é **FAIL visual** vs PDF (portas-painel, blocos, floors, escala).
+Fluxo de correção travado: julgamento visual de render **só** via GPT no
+Chrome/Claude-in-Chrome (ChatGPT desktop via computer-use é PROIBIDO — rouba a
+tela; `/ask` text-only é só pra decisão textual, nunca imagem). `list_connected_browsers`
+= `[]` → não dá pra revisar. **Não autojulgar IMPROVED/SAME/WORSE. Não promover SKP.**
+
+**Estado preservado (não aplicar nada sem visual review):**
+- Patch de portas (`DOOR_HEIGHT_M 2.10→0.02`) classificado WORSE por mim e **REVERTIDO** (builder limpo). Aguarda confirmação do GPT via Chrome.
+- Montage 3-way: `artifacts/review/planta_74/visual_regression_20260530T042308Z/montage_pdf_before_after.png`
+- Pergunta+critério prontos: `artifacts/review/planta_74/visual_regression_20260530T042308Z/gpt_visual_review_REQUEST.md`
+- **Escala candidata (evidência determinística, NÃO aplicada):** `artifacts/review/planta_74/scale_anchor_candidate_report.md` — `PT_TO_M ≈ 0.0252 m/pt` (cotas 5.45/2.60/2.40; builder atual 0.0352 = ~1.40× grande). É *candidata*, não "corrigida".
+
+**ESCALA — experimento JÁ PREPARADO (evidência pronta, falta só o GPT julgar via Chrome):**
+- SKP experimental `PT_TO_M=0.0252` em `runs/planta_74/scale_candidate/` (model.skp + renders). Builder revertido (git limpo, 0.0352). PlanShell 17.74×10.51 → **12.71×7.53 m**.
+- Montage `PDF × baseline × scale_candidate`: `artifacts/review/planta_74/visual_regression_20260530T061448Z/montage_pdf_before_after.png`
+- Relatório: `…/visual_regression_20260530T061448Z/scale_experiment_report.md` (status `AWAITING_GPT_VISUAL_REVIEW_CHROME`; nota técnica: renders usam zoom_extents → comparar proporção altura-de-parede/pé-direito, não layout).
+
+**Quando o Chrome conectar (`list_connected_browsers` != `[]`):**
+1. Subir esse montage no ChatGPT web → pedir **IMPROVED / SAME / WORSE** (candidate vs baseline vs PDF no conjunto). Gravar resposta no review artifact.
+2. **IMPROVED** → preparar patch/PR pequeno do PT_TO_M (PASS PARCIAL se o conjunto ainda FAIL). **SAME/WORSE** → descartar, manter como evidência, NÃO promover.
+- Não autojulgar. `/ask` text-only nunca pra imagem. Review do montage de PORTA (revertido) é secundário.
+
 
 ## 2026-05-29 (autonomous loop) — bridge ONLINE + oracle non-discrimination finding
 
