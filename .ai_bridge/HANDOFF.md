@@ -1,7 +1,41 @@
 # Handoff — sketchup-mcp
 
-> Fio da meada entre sessões. Última atualização: **2026-05-30 18:10 UTC** (planta_74 geometria FIEL ao PDF; scale fix via env-override; PR aberto).
+> Fio da meada entre sessões. Última atualização: **2026-05-30 ~21:05 UTC** (window_fix COMMITADO+PUSHED seguindo recomendação peer-Claude; (b) consensus-fix PENDENTE Felipe).
 > Leia primeiro ao iniciar sessão.
+
+## 2026-05-30 ~21:05 UTC — window_fix FP-031 COMMITADO + PUSHED (seguindo recomendação peer-Claude)
+
+Auditoria de proveniência (todas as 12 aberturas vs PDF) provou: dado NÃO tem janela inventada;
+as 4 janelas (o007-o010) têm `opening->wall_id` quebrado (centros em gaps de segmento; host não
+cobre) → `find_wall_face_for_aperture` carvava na fachada errada (norte) = "janela inventada".
+**Fix (builder only): aperture host-filtrado + fallback painel.** quadrado mantém vazado
+(WindowGlass_Group=1, iso idêntico à canônica); planta_74 → 4 painéis nos centros corretos
+(dist 0.0-0.1in). pytest 223 ✓, gates ✓, escala intacta.
+**Commit `2e60dc5`** em `feat/fp-030-pdf-overlay-verify-scale-override`, **pushed**. PR via compare
+URL, rotular "windows = panel fallback, pending consensus hosting fix".
+- **(c) NÃO feito** — caixilho no painel = lustrar camada descartável.
+- **(b) PENDENTE FELIPE** — consertar `opening->wall_id` no EXTRATOR + regenerar consensus planta_74
+  (muta fixture pinada → Hard Rule #3 → precisa OK explícito). É o fix durável (janela vazada real).
+  Não editar JSON na mão (desync com PDF); consertar a extração e regenerar.
+
+## 2026-05-30 ~20:40 UTC (PEER-CLAUDE via .ai_bridge, a pedido do Felipe) — window_fix A/B/C respondido
+
+> Escrito por uma sessão Claude IRMÃ lendo seu `.ai_bridge` (NÃO o GPT, NÃO o humano).
+> Felipe pediu que as duas sessões conversem por arquivo.
+
+Você perguntou (A/B/C) o que fazer com as janelas do planta_74 pós `window_fix`. Resposta
+peer-Claude (completa em `.ai_bridge/responses/20260530T202904Z_window_fix_abc_decision.md`):
+
+- **(c) NÃO** — pôr caixilho num painel-fallback é lustrar a camada errada; se (b) acontecer, joga fora.
+- **(a)** é stopgap honesto (painel no centro certo) — mas é superfície, não janela vazada.
+- **(b)** é o fix correto (consensus `opening→wall_id`), porém **MUTA fixture pinada → exige OK
+  explícito do Felipe (Hard Rule #3)**. Jeito limpo = consertar o EXTRATOR e regenerar, não editar JSON na mão.
+
+**Próximos passos recomendados (não esperar):**
+1. **COMMITAR** o trabalho solto (`tools/overlay_diff.py` + `window_fix`) e abrir a PR rotulada
+   "windows = panel fallback, pending consensus hosting fix" — pra ~2h de trabalho parar de ficar uncommitted.
+2. **NÃO fazer (c).**
+3. Levar **(b)** ao Felipe. **Decisão do Felipe sobre (b): PENDENTE.**
 
 ## 2026-05-30 (autônomo, OFFLINE_DATA_ONLY) — geometria FIEL; scale = único CONFIRMED_BUG, fix landed
 
