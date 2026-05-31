@@ -308,3 +308,18 @@ def test_learnings_every_entry_has_prevention():
     for x in d["learnings"]:
         assert x["como_prevenir_regressao"]  # the anti-regression field, mandatory
         assert {"id", "falha_observada", "como_corrigimos"} <= set(x)
+
+
+def test_status_score_enum():
+    import tools.claude_bridge.server as srv
+    d = srv.status()
+    assert d["score"] in ("GREEN", "YELLOW", "RED")
+    assert {"reason", "gate", "sessions", "pending_gate", "open_difficulties"} <= set(d)
+
+
+def test_next_best_actions_sorted_by_roi():
+    import tools.claude_bridge.server as srv
+    d = srv.next_best_actions()
+    rois = [a["roi"] for a in d["actions"]]
+    assert rois == sorted(rois, reverse=True)
+    assert all("roi" in a and "proxima_acao" in a for a in d["actions"])

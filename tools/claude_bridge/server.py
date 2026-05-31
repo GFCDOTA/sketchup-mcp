@@ -1081,6 +1081,76 @@ def gate_ledger() -> dict:
             "answered": answered, "pending": len(entries) - answered}
 
 
+def status() -> dict:
+    """Command Center: aggregate everything into a GREEN/YELLOW/RED project score.
+    RED if any HIGH+OPEN difficulty or a pending gate consult; YELLOW if any OPEN/dirty;
+    else GREEN."""
+    sess = claude_sessions()
+    gl = gate_ledger()
+    gi = git_inventory()
+    tl = skp_timeline()
+    dif = difficulties()
+    open_diffs = [d for d in dif["difficulties"] if d.get("status") == "OPEN"]
+    high_open = [d for d in open_diffs if d.get("severidade") == "HIGH"]
+    pending = gl.get("pending", 0)
+    dirty = gi.get("dirty", [])
+    stopped = sum(1 for s in sess.get("sessions", []) if s.get("state") == "STOPPED")
+    if high_open or pending > 0:
+        score = "RED"
+    elif open_diffs or dirty:
+        score = "YELLOW"
+    else:
+        score = "GREEN"
+    reasons = []
+    if high_open:
+        reasons.append(f"{len(high_open)} dificuldade(s) HIGH OPEN")
+    if pending:
+        reasons.append(f"{pending} consult(s) esperando o gate")
+    if dirty:
+        reasons.append(f"{len(dirty)} repo(s) dirty")
+    if open_diffs and not high_open:
+        reasons.append(f"{len(open_diffs)} dificuldade(s) OPEN")
+    if not reasons:
+        reasons.append("tudo limpo")
+    return {"score": score, "reason": "; ".join(reasons), "gate": "UP",
+            "sessions": {"total": sess.get("total", 0), "stopped": stopped},
+            "pending_gate": pending, "dirty_repos": dirty,
+            "open_difficulties": len(open_diffs), "high_open": [d["id"] for d in high_open],
+            "canonical_skp": {k: v.get("verdict") for k, v in tl.get("canonical", {}).items()}}
+
+
+_NBA_SEED = [
+    {"titulo": "Auto-extrator vetorial PDF->consensus (walls = filled paths)", "tipo": "produto",
+     "impacto": 5, "esforco": 5, "proxima_acao": "só após 2a planta no loop manual; validar contra a planta_74 anotada"},
+    {"titulo": "2a planta real como forcing function", "tipo": "produto",
+     "impacto": 5, "esforco": 3, "proxima_acao": "Felipe fornece PDF + âncora física; anotar consensus juntos"},
+    {"titulo": "Worktree-lock (fix-raiz da colisão multi-agent)", "tipo": "infra",
+     "impacto": 3, "esforco": 2, "proxima_acao": "/lock keyed por session_id + ownership de branch"},
+    {"titulo": "Consolidar serving pro launcher canônico + remover wt-dash", "tipo": "infra",
+     "impacto": 3, "esforco": 2, "proxima_acao": "quando feat/banho2-glass sincronizar develop, repointar + remover wt-dash"},
+    {"titulo": "Watchdog do gate (auto-restart se /health cair)", "tipo": "infra",
+     "impacto": 2, "esforco": 2, "proxima_acao": "scheduled task (admin) ou loop de health-check"},
+    {"titulo": "Tier do oráculo (Opus pesado / Sonnet rotina)", "tipo": "gate",
+     "impacto": 2, "esforco": 3, "proxima_acao": "rotear por peso da decisão no multi-oracle"},
+]
+
+
+def next_best_actions() -> dict:
+    """Prioritized backlog by ROI = impacto/esforço (OPEN difficulties + opportunity seed)."""
+    items = []
+    for d in difficulties()["difficulties"]:
+        if d.get("status") == "OPEN":
+            imp = {"HIGH": 5, "MED": 3, "LOW": 2}.get(d.get("severidade"), 3)
+            items.append({"titulo": "[DIFF] " + d["titulo"], "tipo": "dificuldade",
+                          "impacto": imp, "esforco": 3,
+                          "proxima_acao": d.get("next_hypothesis", "-")})
+    items += [dict(x) for x in _NBA_SEED]
+    for x in items:
+        x["roi"] = round(x["impacto"] / max(1, x["esforco"]), 2)
+    items.sort(key=lambda x: x["roi"], reverse=True)
+    return {"actions": items}
+
+
 class Handler(BaseHTTPRequestHandler):
     def _send(self, code, obj):
         body = json.dumps(obj, ensure_ascii=False).encode("utf-8")
@@ -1140,6 +1210,10 @@ class Handler(BaseHTTPRequestHandler):
             self._send(200, skp_timeline())
         elif p == "/api/learnings":
             self._send(200, learnings())
+        elif p == "/api/status":
+            self._send(200, status())
+        elif p == "/api/next-best-actions":
+            self._send(200, next_best_actions())
         elif p == "/artifact":
             f = safe_artifact((parse_qs(u.query).get("path") or [""])[0])
             if not f:

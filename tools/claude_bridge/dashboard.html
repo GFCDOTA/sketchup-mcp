@@ -50,7 +50,9 @@ ul.opp{list-style:none;padding:0;margin:0;} ul.opp li{padding:9px 0;border-botto
 <main>
 
 <section id="home">
+<div id="status-banner" class="muted" style="margin-bottom:18px">carregando placar do projeto...</div>
 <div class="wrap">
+<div class="card full"><h2>Próxima melhor ação (ROI = impacto/esforço)</h2><div id="nba" class="muted">carregando...</div></div>
 <div class="card full"><h2>Pipeline PDF → SKP (como o sketchup-mcp processa)</h2>
 <div class="pipe">
 <div class="stg pdf">PDF<small>planta</small></div><div class="arr">→</div>
@@ -231,7 +233,7 @@ function route(){
   let h=(location.hash||'#home').slice(1); if(TABS.indexOf(h)<0)h='home';
   TABS.forEach(function(t){var s=$(t); if(s)s.className=(t===h?'active':'');});
   document.querySelectorAll('nav a').forEach(function(a){a.className=(a.getAttribute('href')==='#'+h?'active':'');});
-  if(h==='home'){loadCommits();loadSysSummary();}
+  if(h==='home'){loadStatus();loadCommits();loadSysSummary();}
   if(h==='sessoes')loadSessoes();
   if(h==='gate')loadGate();
   if(h==='git')loadGit();
@@ -255,6 +257,17 @@ async function pollHome(){
   }catch(e){}
   try{const ev=await (await fetch('/events',{cache:'no-store'})).json();
     if($('feed'))$('feed').innerHTML=ev.slice().reverse().map(function(e){var x=e.kind==='consult'?('mode='+(e.mode||'default')+' · '+(e.dur_sec==null?'?':e.dur_sec)+'s · q'+(e.q_chars==null?'?':e.q_chars)):('cycle='+(e.cycle==null?'?':e.cycle)+' · '+esc(e.session_id||'')+' '+esc(e.last_action||''));return '<div class="ev"><span class="t">'+fmtTime(e.t)+'</span><span class="k '+esc(e.kind)+'">'+esc(e.kind)+'</span><span>'+x+'</span></div>';}).join('')||'<div class="muted">sem atividade</div>';
+  }catch(e){}
+}
+async function loadStatus(){
+  try{const s=await (await fetch('/api/status')).json();
+    var clr=s.score==='GREEN'?'var(--ok)':s.score==='YELLOW'?'var(--warn)':'var(--bad)';
+    var b=$('status-banner');
+    b.style.cssText='padding:14px 18px;border-radius:10px;font-weight:700;font-size:15px;margin-bottom:18px;border:1px solid '+clr+';color:'+clr+';background:rgba(128,128,128,.06)';
+    b.innerHTML='PROJETO: '+esc(s.score)+' &nbsp;<span style="font-weight:400;color:var(--dim);font-size:13px">'+esc(s.reason)+'</span><div style="font-weight:400;font-size:12px;color:var(--dim);margin-top:6px">gate '+esc(s.gate)+' · sessões '+s.sessions.total+' ('+s.sessions.stopped+' paradas) · esperando-gate '+s.pending_gate+' · dirty '+(s.dirty_repos||[]).length+' · dificuldades OPEN '+s.open_difficulties+'</div>';
+  }catch(e){if($('status-banner'))$('status-banner').textContent='placar indisponível';}
+  try{const n=await (await fetch('/api/next-best-actions')).json();
+    if($('nba'))$('nba').innerHTML=(n.actions||[]).slice(0,3).map(function(a){return '<div style="padding:6px 0;border-bottom:1px solid #21262d"><div style="display:flex;justify-content:space-between;gap:10px"><b>'+esc(a.titulo)+'</b><span style="color:var(--accent);white-space:nowrap">ROI '+a.roi+'</span></div><div class="muted">→ '+esc(a.proxima_acao)+'</div></div>';}).join('')||'<span class="muted">sem ações</span>';
   }catch(e){}
 }
 async function loadCommits(){
