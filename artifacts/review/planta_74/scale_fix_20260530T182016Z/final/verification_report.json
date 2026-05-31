@@ -1,0 +1,27 @@
+{
+  "mode": "OFFLINE_DATA_ONLY",
+  "fixture": "planta_74",
+  "gate": "tools/pdf_overlay_verify.py (consensus-on-PDF overlay + PDF door-arc) + opening_audit + geometry_report",
+  "calibration_note": "Not claiming geometry is faithful. The suspicions verified so far have NOT confirmed a geometric bug; current problems are scale + representation/legibility.",
+  "buckets": {
+    "SCALE_BUG": [
+      {"item": "pt_to_m anchor", "evidence": "0.0352 vs cotas 5.45/2.60/2.40 -> ~0.0252 (~1.40x too big)", "status": "CONFIRMED, fixed via env override; planta_74 @0.0252 -> 12.71x7.53m"}
+    ],
+    "GEOMETRY_BUG": [],
+    "RENDER_LEGIBILITY_BUG": [
+      {"item": "glass / windows", "evidence": "5 glass elements 0.05-0.09m from openings (placed); render does not communicate thin/transparent glass"}
+    ],
+    "FALSE_ALARM": [
+      {"item": "doors too big", "evidence": "7 PDF arcs vs consensus widths ratio 0.98-1.09; wide doors are real in the PDF"},
+      {"item": "external wall chamfered", "evidence": "walls land on PDF perimeter incl. steps; 35 walls axis-aligned"},
+      {"item": "floor leak", "evidence": "rooms fill within walls; gates floors_separated=true"}
+    ],
+    "WARN_DOCUMENTED": [
+      {"item": "rooms not closed / circulation", "evidence": "open-plan 8 cells vs 11 ambients (known_warnings)"}
+    ],
+    "INCONCLUSIVE": []
+  },
+  "chosen_patch": "SCALE_BUG via ENV['PT_TO_M'] (default unchanged, no fixture mutation)",
+  "no_regression": "pytest 223 passed, 5 skipped; gates_self_check all pass",
+  "acceptance": "PARTIAL - scale axis only (data-confirmed). Representation/legibility open. Not full-plan acceptance."
+}

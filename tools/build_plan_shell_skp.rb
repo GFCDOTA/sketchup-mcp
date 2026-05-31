@@ -25,7 +25,12 @@
 
 require 'json'
 
-PT_TO_M  = 0.19 / 5.4         # matches consume_consensus.rb calibration
+# Default = wall-thickness anchor (0.19 m wall / 5.4 pt), matches
+# consume_consensus.rb. Per-build override via ENV['PT_TO_M'] so a plan whose
+# real wall thickness differs (e.g. planta_74, PDF cotas -> ~0.0252 m/pt) can be
+# built at its correct scale WITHOUT changing the global default (quadrado etc.
+# keep 0.0352) and WITHOUT mutating any input fixture.
+PT_TO_M  = (ENV['PT_TO_M'].to_s.strip.empty? ? (0.19 / 5.4) : ENV['PT_TO_M'].to_f)
 M_TO_IN  = 39.3700787402
 PT_TO_IN = PT_TO_M * M_TO_IN
 
@@ -617,21 +622,30 @@ end
 #      touching the wall shell).
 
 def find_wall_face_for_aperture(piece_ents, host_wall, cx_in, cy_in,
-                                  half_w_in, slab_floor_in, slab_ceiling_in)
+                                  half_w_in, slab_floor_in, slab_ceiling_in,
+                                  host_at, tol)
+  # host_at = host wall's perpendicular position (y for 'h', x for 'v'), inches;
+  # tol = match tolerance (~half wall thickness + margin).
+  # FP-031: require the candidate face to belong to the HOST wall. Without this
+  # the find() returned the first face merely spanning the aperture's x/y-range
+  # — often a different parallel facade — carving the hole on the wrong wall.
+  # Returning nil here (no host face) lets the caller fall back to a panel.
   ori = host_wall['orientation']
   piece_ents.grep(Sketchup::Face).find do |f|
     next false if f.normal.z.abs > 0.01  # skip top/bottom (annular floor/ceiling)
     if ori == 'h'
       next false unless f.normal.y.abs > 0.99
       bb = f.bounds
-      bb.min.x <= cx_in - half_w_in + 0.5 &&
+      (bb.min.y - host_at).abs <= tol &&
+        bb.min.x <= cx_in - half_w_in + 0.5 &&
         bb.max.x >= cx_in + half_w_in - 0.5 &&
         bb.min.z < slab_floor_in + 0.5 &&
         bb.max.z > slab_ceiling_in - 0.5
     else
       next false unless f.normal.x.abs > 0.99
       bb = f.bounds
-      bb.min.y <= cy_in - half_w_in + 0.5 &&
+      (bb.min.x - host_at).abs <= tol &&
+        bb.min.y <= cy_in - half_w_in + 0.5 &&
         bb.max.y >= cy_in + half_w_in - 0.5 &&
         bb.min.z < slab_floor_in + 0.5 &&
         bb.max.z > slab_ceiling_in - 0.5
@@ -652,6 +666,11 @@ def build_window_aperture_3d(parent_ents, opening, host_wall, thickness_pt,
   sill_in = WINDOW_SILL_IN
   head_in = WINDOW_HEAD_IN
   thickness_in = thickness_pt.to_f * PT_TO_IN
+  # Host wall's perpendicular position + tolerance (FP-031), so the aperture
+  # only carves the host wall (mirrors the glass, which uses host_wall.start).
+  host_at_in = (ori == 'h' ? host_wall['start'][1].to_f
+                           : host_wall['start'][0].to_f) * PT_TO_IN
+  face_tol_in = thickness_in + 4.0  # ~half thickness + margin; << wall spacing
 
   plan_shell = parent_ents.grep(Sketchup::Group)
                           .find { |g| g.name == 'PlanShell_Group' }
@@ -665,6 +684,7 @@ def build_window_aperture_3d(parent_ents, opening, host_wall, thickness_pt,
     ents = piece.entities
     target = find_wall_face_for_aperture(
       ents, host_wall, cx_in, cy_in, half_w_in, 0.0, WALL_HEIGHT_IN,
+      host_at_in, face_tol_in,
     )
     if target.nil?
       carve_diag << "#{piece.name}: no candidate face"
@@ -772,7 +792,7 @@ def setup_iso_camera(model)
   view.zoom_extents
 end
 
-def setup_top_camera(model)
+def setup_top_camera(model, img_w = 1600, img_h = 1200)
   view = model.active_view
   bbox = model.bounds
   center = bbox.center
@@ -782,9 +802,18 @@ def setup_top_camera(model)
     eye, center, Geom::Vector3d.new(0, 1, 0),
   )
   cam.perspective = false
-  cam.height = diag * 1.05
+  # FP-031 #29: DETERMINISTIC ortho-top fit to the IMAGE aspect — NOT
+  # view.zoom_extents, which fits the SU *window* aspect and then clips the
+  # model in the fixed-aspect PNG (so the perimeter falls off-frame and the
+  # wall-presence gate cannot verify it). Set cam.height to contain the model
+  # bounds in the img_w:img_h aspect + a small margin, centred on the model.
+  # Result: the whole plan is always in-frame and the pixel projection is
+  # reproducible (independent of the SU window size).
+  aspect = img_w.to_f / img_h.to_f
+  model_w = bbox.max.x - bbox.min.x
+  model_h = bbox.max.y - bbox.min.y
+  cam.height = [model_h, model_w / aspect].max * 1.06
   view.camera = cam
-  view.zoom_extents
 end
 
 def write_png(model, path, width = 1600, height = 1200)
@@ -797,6 +826,39 @@ def write_png(model, path, width = 1600, height = 1200)
     :transparent => false,
   }
   model.active_view.write_image(options)
+end
+
+# FP-031 #2: emit the EXACT top-view projection so the deterministic
+# wall-presence gate (tools/overlay_diff.py) needs zero pixel calibration.
+# Writes a sidecar `<png>.proj.json` (additive — does NOT change the render).
+# Must be called while the TOP camera is active, right after zoom_extents and
+# before any other view mutation (view.screen_coords is viewport-dependent).
+def write_top_projection_sidecar(model, png_path, width, height)
+  return if png_path.nil? || png_path.to_s.empty?
+  view = model.active_view
+  cam  = view.camera
+  bb   = model.bounds
+  samples_in = [
+    [bb.min.x, bb.min.y], [bb.max.x, bb.min.y], [bb.max.x, bb.max.y],
+    [bb.min.x, bb.max.y], [bb.center.x, bb.center.y],
+  ]
+  samples = samples_in.map do |xi, yi|
+    sp = view.screen_coords(Geom::Point3d.new(xi, yi, 0.0))
+    { 'world_pt' => [xi / PT_TO_IN, yi / PT_TO_IN],   # back to pdf-points
+      'world_in' => [xi, yi],
+      'screen_px' => [sp.x.to_f, sp.y.to_f] }
+  end
+  data = {
+    'mode' => 'ortho_top',
+    'png' => File.basename(png_path.to_s),
+    'img_w' => width, 'img_h' => height,
+    'vp_w' => view.vpwidth, 'vp_h' => view.vpheight,
+    'cam_height_in' => cam.height.to_f,
+    'cam_target_in' => [cam.target.x.to_f, cam.target.y.to_f],
+    'pt_to_in' => PT_TO_IN,
+    'samples' => samples,
+  }
+  File.write(png_path.to_s + '.proj.json', JSON.pretty_generate(data))
 end
 
 # ---- geometry report ----------------------------------------------
@@ -1134,16 +1196,23 @@ openings.each_with_index do |op, i|
       passage_built += 1 if res['ok']
     end
   when 'window'
-    # ADR-007 / FP-024: windows are wall-hosted partial-height
-    # apertures. Carve in 3D (post-extrude) so wall mass remains
-    # below sill and above head. The legacy build_window_panel
-    # (3-band sill/glass/lintel infill of a full-height carve)
-    # produced door-like / shaft-like voids and is no longer
-    # called for window kinds. Glazed_balcony (porta-vidro) is
-    # genuinely full-height and continues to use the 2D carve +
-    # build_glazed_balcony path below.
+    # Preferred: 3D aperture (peitoril/verga preserved, see-through glass) —
+    # works when the window sits on a clean solid host wall (e.g. quadrado).
+    # find_wall_face_for_aperture now requires the face to belong to the HOST
+    # wall (FP-031), so it returns ok=false instead of carving a wrong parallel
+    # facade. FALLBACK: when no host face is found (planta_74's broken wall_id /
+    # gap-hosted windows), place the window as a PANEL at the opening center
+    # (peitoril 0-0.9 / glass 0.9-2.1 / verga 2.1-2.7 at cx / host.start.y) —
+    # the exact spot the glass resolves to and the PDF provenance audit
+    # confirmed. This keeps quadrado's see-through window unchanged while
+    # placing planta_74's windows on the correct wall, not an invented one.
     res = build_window_aperture_3d(model.active_entities, op, host,
                                    thickness_pt, glass_mat, i)
+    unless res['ok']
+      res = build_window_panel(model.active_entities, op, host,
+                               thickness_pt, sill_mat, glass_mat, lintel_mat, i)
+      res['via_panel_fallback'] = true if res['ok']
+    end
     window_built += 1 if res['ok']
     opening_skips << "op[#{i}] window: #{res['reason']}" unless res['ok']
   when 'glazed_balcony'
@@ -1186,7 +1255,9 @@ end
 if outpng_top
   setup_top_camera(model)
   write_png(model, outpng_top)
-  puts "[rb] wrote #{outpng_top}"
+  # Capture the exact projection while the top camera is still active.
+  write_top_projection_sidecar(model, outpng_top, 1600, 1200)
+  puts "[rb] wrote #{outpng_top} (+ .proj.json)"
 end
 
 # 6. Save .skp last (this is the launcher's exit signal)

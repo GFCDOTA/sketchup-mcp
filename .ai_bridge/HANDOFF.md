@@ -1,7 +1,120 @@
 # Handoff — sketchup-mcp
 
-> Fio da meada entre sessões. Última atualização: **2026-05-29 20:25 UTC** (autonomous loop — bridge ONLINE).
+> Fio da meada entre sessões. Última atualização: **2026-05-31 ~00:00 UTC** (/loop modo B: #29 câmera determinística ENTREGUE; #28 regen consensus AUTÔNOMO feito → janelas viram aperture vazado; PAROU em VISUAL_REVIEW pra promoção).
 > Leia primeiro ao iniciar sessão.
+
+## 2026-05-31 ~00:00 UTC — /loop modo B: #29 done, #28 regen done → VISUAL_REVIEW
+
+- **#29 câmera top determinística** (`cdc100f`): fit 4:3 explícito (não zoom_extents) → 0 paredes clipadas,
+  gate `overlay_diff` cobre as 35. Fecha a limitação do #2.
+- **#28 regen consensus** (gate :8765 = GO approach B; `930bb70`): `tools/regenerate_consensus.py` merge
+  colinear (35→19 walls, duplicata absorvida) + re-host openings → **opening_host PASS(0/12), wall_overlap
+  PASS(0)**. Rebuild do candidato: janelas **painel→APERTURE vazado ×4** (find_wall_face acha a face sólida
+  na parede contínua), gates ✓, overlay PASS. Determinístico sólido. Ver LL-032.
+- **PAROU em VISUAL_REVIEW**: a promoção (substituir a fixture pinada `consensus_with_human_walls…json` pelo
+  candidato + re-pin smoke) muda o render → decisão do Felipe. Candidato + before/after + doc em
+  `artifacts/review/planta_74/regen_candidate_20260531/`. Fixture canônica **intocada**.
+- pytest **246 ✓**. Commits do loop: cdc100f, 930bb70 (+ este handoff).
+
+## 2026-05-30 ~23:20 UTC — /loop: suite de gates determinísticos COMPLETA + backlog limpo
+
+Ciclos curtos, commit por slice. **Suite determinística (consensus/render, sem SU/PDF/rede):**
+- `tools/overlay_diff.py` — wall-presence no render top via projeção EXATA do sidecar (#2, `88a28e3`).
+- `tools/opening_host_audit.py` — opening↔host-wall (#3, `fb1b0c8`): planta_74 9/12 FAIL.
+- `tools/wall_overlap_audit.py` — parede duplicada/sobreposta (#3b, `3aef1b4`): planta_74 1 (h_w001≈w020).
+- `tools/run_deterministic_gates.py` — runner único CI-able (`482018e`): planta_74 FAIL, quadrado PASS.
+pytest **242 ✓**. Explorei openings-fora-do-plano / duplicados / rooms-degenerados / wall_id-pendurado = **0**
+(classes limpas). **Backlog determinístico de bug-finding ESGOTADO** → parei sem inventar ciclo.
+**Fidelidade real restante = NEEDS-HUMAN:** #28 (extrator opening→wall_id + regenerar consensus, dropar
+duplicata; muta fixture) e #29 (câmera top determinística; muda render). Detectores PROVAM o problema; o fix
+é do Felipe. Ver LL-031.
+
+## 2026-05-30 ~21:40 UTC — NÃO PARE: roadmap #2 + #3 entregues (autônomo)
+
+Ciclos contínuos, commit por slice, consulta ao gate :8765 (peer-Claude, GO no sidecar). Branch `feat/fp-030-…`.
+- **#2 — overlay_diff vira GATE REAL** (`88a28e3`): calibração pdf-pt→pixel era subdeterminada (zoom_extents);
+  fix = builder emite projeção EXATA num sidecar `<png>.proj.json` (cam.height+cam.target pós-zoom_extents, via
+  `view.screen_coords`/ortho). `affine_from_sidecar` → zero erro. Coverage só in-frame; pula paredes clipadas pelo
+  frame 4:3; dark_mask 160 pega parapeito. Real: planta_74 limpo→PASS, parede apagada→FAIL. tests +3.
+  ⚠️ **LIMITAÇÃO (task #29, NEEDS-HUMAN visual):** render clipa o perímetro (zoom_extents ajusta ao aspecto da
+  janela do SU, não ao 4:3 do PNG). Verificar perímetro exige câmera determinística = muda render = OK do Felipe.
+- **#3 — detector posicional opening↔host-wall** (`fb1b0c8`): `tools/opening_host_audit.py`, puro consensus-only
+  (sem PDF/SKP/SU). Pega a classe FP-031: host_mismatch / off_host_segment / width_exceeds_host. quadrado→PASS,
+  planta_74→FAIL 9/12 (janelas h_o007/8/10 + varanda + portas o000-003 com host solto). tests +6. pytest 232 ✓.
+- **(b) — task #28 NEEDS-HUMAN:** consertar `opening→wall_id` no EXTRATOR + regenerar consensus planta_74 (muta
+  fixture, Hard Rule #3). É a raiz do que #3 quantifica. PENDENTE Felipe.
+
+## 2026-05-30 ~21:05 UTC — window_fix FP-031 COMMITADO + PUSHED (seguindo recomendação peer-Claude)
+
+Auditoria de proveniência (todas as 12 aberturas vs PDF) provou: dado NÃO tem janela inventada;
+as 4 janelas (o007-o010) têm `opening->wall_id` quebrado (centros em gaps de segmento; host não
+cobre) → `find_wall_face_for_aperture` carvava na fachada errada (norte) = "janela inventada".
+**Fix (builder only): aperture host-filtrado + fallback painel.** quadrado mantém vazado
+(WindowGlass_Group=1, iso idêntico à canônica); planta_74 → 4 painéis nos centros corretos
+(dist 0.0-0.1in). pytest 223 ✓, gates ✓, escala intacta.
+**Commit `2e60dc5`** em `feat/fp-030-pdf-overlay-verify-scale-override`, **pushed**. PR via compare
+URL, rotular "windows = panel fallback, pending consensus hosting fix".
+- **(c) NÃO feito** — caixilho no painel = lustrar camada descartável.
+- **(b) PENDENTE FELIPE** — consertar `opening->wall_id` no EXTRATOR + regenerar consensus planta_74
+  (muta fixture pinada → Hard Rule #3 → precisa OK explícito). É o fix durável (janela vazada real).
+  Não editar JSON na mão (desync com PDF); consertar a extração e regenerar.
+
+## 2026-05-30 ~20:40 UTC (PEER-CLAUDE via .ai_bridge, a pedido do Felipe) — window_fix A/B/C respondido
+
+> Escrito por uma sessão Claude IRMÃ lendo seu `.ai_bridge` (NÃO o GPT, NÃO o humano).
+> Felipe pediu que as duas sessões conversem por arquivo.
+
+Você perguntou (A/B/C) o que fazer com as janelas do planta_74 pós `window_fix`. Resposta
+peer-Claude (completa em `.ai_bridge/responses/20260530T202904Z_window_fix_abc_decision.md`):
+
+- **(c) NÃO** — pôr caixilho num painel-fallback é lustrar a camada errada; se (b) acontecer, joga fora.
+- **(a)** é stopgap honesto (painel no centro certo) — mas é superfície, não janela vazada.
+- **(b)** é o fix correto (consensus `opening→wall_id`), porém **MUTA fixture pinada → exige OK
+  explícito do Felipe (Hard Rule #3)**. Jeito limpo = consertar o EXTRATOR e regenerar, não editar JSON na mão.
+
+**Próximos passos recomendados (não esperar):**
+1. **COMMITAR** o trabalho solto (`tools/overlay_diff.py` + `window_fix`) e abrir a PR rotulada
+   "windows = panel fallback, pending consensus hosting fix" — pra ~2h de trabalho parar de ficar uncommitted.
+2. **NÃO fazer (c).**
+3. Levar **(b)** ao Felipe. **Decisão do Felipe sobre (b): PENDENTE.**
+
+## 2026-05-30 (autônomo, OFFLINE_DATA_ONLY) — geometria FIEL; scale = único CONFIRMED_BUG, fix landed
+
+PDF-overlay (`tools/pdf_overlay_verify.py`) provou: **geometria/layout do planta_74 é
+FIEL ao PDF**. As 5 suspeitas visuais → FALSE_ALARM / GEOMETRY_OK_RENDER_LEGIBILITY /
+WARN_DOCUMENTED (arcos de porta batem ratio ~1.0 → portas largas são reais; paredes
+assentam no perímetro c/ degraus; cômodos dentro das paredes; vidro no lugar mas render
+não comunica; open-plan documentado). **Único CONFIRMED_BUG = escala** (PT_TO_M 0.0352
+vs cotas 5.45/2.60/2.40 → 0.0252, ~1.4× grande). **Fix:** `ENV['PT_TO_M']` override no
+`build_plan_shell_skp.rb` (default intocado, quadrado seguro, sem mutar fixture); @0.0252
+→ 12.71×7.53m, gates ✓, pytest 223 ✓. Evidência: `artifacts/review/planta_74/visual_regression_20260530T180822Z/`.
+**Resta a trilha de REPRESENTAÇÃO** (folha de porta full-height, legibilidade do vidro,
+soft-barrier sólido) — não é geometria; precisa iteração visual (flat-door foi WORSE → revertido).
+
+--- histórico abaixo (estado BLOCKED, superado pela verificação autônoma por dados) ---
+
+planta_74 SKP é **FAIL visual** vs PDF (portas-painel, blocos, floors, escala).
+Fluxo de correção travado: julgamento visual de render **só** via GPT no
+Chrome/Claude-in-Chrome (ChatGPT desktop via computer-use é PROIBIDO — rouba a
+tela; `/ask` text-only é só pra decisão textual, nunca imagem). `list_connected_browsers`
+= `[]` → não dá pra revisar. **Não autojulgar IMPROVED/SAME/WORSE. Não promover SKP.**
+
+**Estado preservado (não aplicar nada sem visual review):**
+- Patch de portas (`DOOR_HEIGHT_M 2.10→0.02`) classificado WORSE por mim e **REVERTIDO** (builder limpo). Aguarda confirmação do GPT via Chrome.
+- Montage 3-way: `artifacts/review/planta_74/visual_regression_20260530T042308Z/montage_pdf_before_after.png`
+- Pergunta+critério prontos: `artifacts/review/planta_74/visual_regression_20260530T042308Z/gpt_visual_review_REQUEST.md`
+- **Escala candidata (evidência determinística, NÃO aplicada):** `artifacts/review/planta_74/scale_anchor_candidate_report.md` — `PT_TO_M ≈ 0.0252 m/pt` (cotas 5.45/2.60/2.40; builder atual 0.0352 = ~1.40× grande). É *candidata*, não "corrigida".
+
+**ESCALA — experimento JÁ PREPARADO (evidência pronta, falta só o GPT julgar via Chrome):**
+- SKP experimental `PT_TO_M=0.0252` em `runs/planta_74/scale_candidate/` (model.skp + renders). Builder revertido (git limpo, 0.0352). PlanShell 17.74×10.51 → **12.71×7.53 m**.
+- Montage `PDF × baseline × scale_candidate`: `artifacts/review/planta_74/visual_regression_20260530T061448Z/montage_pdf_before_after.png`
+- Relatório: `…/visual_regression_20260530T061448Z/scale_experiment_report.md` (status `AWAITING_GPT_VISUAL_REVIEW_CHROME`; nota técnica: renders usam zoom_extents → comparar proporção altura-de-parede/pé-direito, não layout).
+
+**Quando o Chrome conectar (`list_connected_browsers` != `[]`):**
+1. Subir esse montage no ChatGPT web → pedir **IMPROVED / SAME / WORSE** (candidate vs baseline vs PDF no conjunto). Gravar resposta no review artifact.
+2. **IMPROVED** → preparar patch/PR pequeno do PT_TO_M (PASS PARCIAL se o conjunto ainda FAIL). **SAME/WORSE** → descartar, manter como evidência, NÃO promover.
+- Não autojulgar. `/ask` text-only nunca pra imagem. Review do montage de PORTA (revertido) é secundário.
+
 
 ## 2026-05-29 (autonomous loop) — bridge ONLINE + oracle non-discrimination finding
 
