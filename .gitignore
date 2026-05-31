@@ -71,3 +71,7 @@ vendor/CubiCasa5k/repo/
 
 # per-cycle repo-health JSON dumps (markdown stays tracked)
 reports/current/*.json
+
+# claude-bridge — token OAuth headless (assinatura) é SEGREDO local; NUNCA commitar
+tools/claude_bridge/.oauth_token
+tools/claude_bridge/*.log
