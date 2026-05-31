@@ -44,7 +44,7 @@ ul.opp{list-style:none;padding:0;margin:0;} ul.opp li{padding:9px 0;border-botto
 <h1>🏗️ SketchUp Creator</h1>
 <span id="status" class="badge off">...</span>
 <nav>
-<a href="#home">Home</a><a href="#sessoes">Sessões</a><a href="#planta">Planta</a><a href="#dificuldades">Dificuldades</a><a href="#lixao">Lixão</a><a href="#oportunidades">Oportunidades</a><a href="#docs">Docs</a><a href="#ecossistema">Ecossistema</a>
+<a href="#home">Home</a><a href="#sessoes">Sessões</a><a href="#gate">Gate</a><a href="#planta">Planta</a><a href="#dificuldades">Dificuldades</a><a href="#lixao">Lixão</a><a href="#oportunidades">Oportunidades</a><a href="#docs">Docs</a><a href="#ecossistema">Ecossistema</a>
 </nav>
 </header>
 <main>
@@ -75,6 +75,13 @@ ul.opp{list-style:none;padding:0;margin:0;} ul.opp li{padding:9px 0;border-botto
 <div id="sess-alarm" class="alarm ok">checando...</div>
 <div class="card full"><h2>Sessões Claude Code (estão paradas? esperando o gate?)</h2>
 <div id="sess-wrap"><span class="muted">lendo ~/.claude/projects...</span></div></div>
+</section>
+
+<section id="gate">
+<div id="gate-alarm" class="alarm ok">carregando ledger...</div>
+<div class="card full"><h2>Gate / ChatGPT Ledger — o oráculo ajudou ou virou teatro?</h2>
+<div id="gate-stats" class="muted" style="margin-bottom:12px"></div>
+<table><thead><tr><th>quando</th><th>trigger</th><th>respondido?</th><th>veredito</th><th>latência</th></tr></thead><tbody id="gate-rows"></tbody></table></div>
 </section>
 
 <section id="planta">
@@ -212,13 +219,14 @@ function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
 function fmtAge(s){if(s==null)return '-';if(s<90)return s+'s';if(s<5400)return Math.round(s/60)+'m';if(s<86400)return Math.round(s/3600)+'h';return Math.round(s/86400)+'d';}
 function fmtTime(t){try{return new Date(t*1000).toLocaleTimeString('pt-br');}catch(e){return '';}}
 function kv(k,v){return '<div class="kv"><span>'+k+'</span><span>'+esc(v)+'</span></div>';}
-const TABS=['home','sessoes','planta','dificuldades','lixao','oportunidades','docs','ecossistema'];
+const TABS=['home','sessoes','gate','planta','dificuldades','lixao','oportunidades','docs','ecossistema'];
 function route(){
   let h=(location.hash||'#home').slice(1); if(TABS.indexOf(h)<0)h='home';
   TABS.forEach(function(t){var s=$(t); if(s)s.className=(t===h?'active':'');});
   document.querySelectorAll('nav a').forEach(function(a){a.className=(a.getAttribute('href')==='#'+h?'active':'');});
   if(h==='home')loadCommits();
   if(h==='sessoes')loadSessoes();
+  if(h==='gate')loadGate();
   if(h==='planta')loadPlant();
   if(h==='lixao')loadLixao();
   if(h==='dificuldades')loadDiff();
@@ -250,9 +258,18 @@ async function loadSessoes(){
   try{const d=await (await fetch('/api/claude-sessions')).json();
     if((d.pending_gate||[]).length){al.className='alarm bad';al.innerHTML='🚨 '+d.pending_gate.length+' consult(s) ESPERANDO o gate (pergunta sem resposta gravada): '+d.pending_gate.map(function(p){return esc(p.q)+' ('+fmtAge(p.age_sec)+')';}).join(' · ');}
     else{al.className='alarm ok';al.textContent='✅ Nenhum consult pendente — toda pergunta ao gate tem resposta gravada.';}
-    var rows=(d.sessions||[]).map(function(s){return '<tr><td><span class="flag '+s.state+'">'+s.state+'</span></td><td>'+fmtAge(s.idle_sec)+'</td><td>'+esc(s.project)+'</td><td class="muted">'+esc(s.id)+'</td><td>'+esc(s.desc||'(sem descritor)')+'</td></tr>';}).join('');
-    w.innerHTML='<div class="muted" style="margin-bottom:10px"><b style="color:var(--txt)">'+d.total+'</b> sessões Claude Code no total (top '+(d.sessions||[]).length+' por atividade). ACTIVE&lt;5min · IDLE&lt;1h · STOPPED&gt;1h. "parada há" = tempo desde a última escrita no transcript.</div><table><thead><tr><th>estado</th><th>parada há</th><th>projeto</th><th>id</th><th>descritor (1ª mensagem)</th></tr></thead><tbody>'+rows+'</tbody></table>';
+    var rows=(d.sessions||[]).map(function(s){return '<tr><td><span class="flag '+s.state+'">'+s.state+'</span></td><td>'+fmtAge(s.idle_sec)+'</td><td class="muted">'+esc(s.reason||'')+'</td><td>'+esc(s.project)+'</td><td class="muted">'+esc(s.id)+'</td><td>'+esc(s.desc||'(sem descritor)')+'</td></tr>';}).join('');
+    w.innerHTML='<div class="muted" style="margin-bottom:10px"><b style="color:var(--txt)">'+d.total+'</b> sessões Claude Code no total (top '+(d.sessions||[]).length+' por atividade). ACTIVE&lt;5min · IDLE&lt;1h · STOPPED&gt;1h. "parada há" = tempo desde a última escrita no transcript.</div><table><thead><tr><th>estado</th><th>parada há</th><th>motivo</th><th>projeto</th><th>id</th><th>descritor (1ª mensagem)</th></tr></thead><tbody>'+rows+'</tbody></table>';
   }catch(e){w.innerHTML='<span class="muted">erro: '+esc(e)+'</span>';}
+}
+async function loadGate(){
+  var al=$('gate-alarm'),st=$('gate-stats'),rb=$('gate-rows');
+  try{const d=await (await fetch('/api/gate-ledger')).json();
+    if(d.pending>0){al.className='alarm bad';al.textContent='🚨 '+d.pending+' pergunta(s) SEM resposta do gate (pendente/teatro). Respondidas: '+d.answered+'/'+d.total+'.';}
+    else{al.className='alarm ok';al.textContent='✅ Todas as '+d.total+' perguntas ao gate foram respondidas.';}
+    st.innerHTML='<b style="color:var(--txt)">'+d.total+'</b> consults · '+d.answered+' respondidos · '+d.pending+' pendentes';
+    rb.innerHTML=(d.entries||[]).map(function(e){var v=e.verdict?('<span class="flag '+(e.verdict==='GO'?'OK':(e.verdict==='NO-GO'?'PARALYZED':'IDLE'))+'">'+e.verdict+'</span>'):'<span class="muted">-</span>';return '<tr><td>'+fmtAge(e.age_sec)+' atrás</td><td>'+esc(e.trigger)+'</td><td>'+(e.answered?'<span class="flag OK">sim</span>':'<span class="flag STOPPED">PENDENTE</span>')+'</td><td>'+v+'</td><td>'+(e.latency_sec==null?'-':fmtAge(e.latency_sec))+'</td></tr>';}).join('')||'<tr><td colspan=5 class="muted">nenhum consult ainda</td></tr>';
+  }catch(e){al.className='alarm bad';al.textContent='erro: '+e;}
 }
 async function loadPlant(){
   var g=$('plant-gallery'); g.innerHTML='<span class="muted">carregando...</span>';

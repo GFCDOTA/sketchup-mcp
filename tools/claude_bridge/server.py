@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -557,8 +558,11 @@ def claude_sessions() -> dict:
                     continue
                 state = ("ACTIVE" if age < 300 else
                          "IDLE" if age < 3600 else "STOPPED")
+                reason = ("rodando agora" if age < 300 else
+                          "ociosa (sem escrita recente)" if age < 3600 else
+                          "parada / encerrada")
                 out.append({"id": js.stem[:8], "project": d.name,
-                            "desc": _first_user_text(js),
+                            "desc": _first_user_text(js), "reason": reason,
                             "idle_sec": round(age), "state": state})
     out.sort(key=lambda s: s["idle_sec"])
     qd = REPO_ROOT / ".ai_bridge" / "questions"
@@ -600,6 +604,45 @@ def recent_commits(n: int = 12) -> dict:
     except (OSError, subprocess.SubprocessError):
         lines = []
     return {"commits": lines}
+
+
+_VERDICT_RE = re.compile(r"(?im)verdict\s*[:\-]\s*(GO|NO-GO|MORE-INFO|VISUAL_REVIEW)")
+
+
+def _extract_verdict(txt: str):
+    m = _VERDICT_RE.search(txt or "")
+    return m.group(1).upper() if m else None
+
+
+def gate_ledger() -> dict:
+    """The gate Q&A history: question/response pairs, which are still pending
+    (waiting on the gate), latency, and the verdict the gate gave. Answers 'o
+    gate ajudou ou só virou teatro?'."""
+    qd = REPO_ROOT / ".ai_bridge" / "questions"
+    rd = REPO_ROOT / ".ai_bridge" / "responses"
+    rmap = {p.stem: p for p in rd.glob("*.md")} if rd.is_dir() else {}
+    entries = []
+    if qd.is_dir():
+        for q in sorted(qd.glob("*.md"), key=lambda p: p.name, reverse=True):
+            try:
+                qt = q.stat().st_mtime
+            except OSError:
+                qt = 0
+            r = rmap.get(q.stem)
+            verdict = latency = None
+            if r is not None:
+                try:
+                    latency = max(0, round(r.stat().st_mtime - qt))
+                    verdict = _extract_verdict(r.read_text("utf-8", errors="replace"))
+                except OSError:
+                    pass
+            trig = q.stem.split("_", 1)[-1] if "_" in q.stem else q.stem
+            entries.append({"id": q.stem, "trigger": trig,
+                            "answered": r is not None, "verdict": verdict,
+                            "latency_sec": latency, "age_sec": round(time.time() - qt)})
+    answered = sum(1 for e in entries if e["answered"])
+    return {"entries": entries[:80], "total": len(entries),
+            "answered": answered, "pending": len(entries) - answered}
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -647,6 +690,8 @@ class Handler(BaseHTTPRequestHandler):
             self._send(200, ecosystem())
         elif p == "/api/recent-commits":
             self._send(200, recent_commits())
+        elif p == "/api/gate-ledger":
+            self._send(200, gate_ledger())
         elif p == "/artifact":
             f = safe_artifact((parse_qs(u.query).get("path") or [""])[0])
             if not f:

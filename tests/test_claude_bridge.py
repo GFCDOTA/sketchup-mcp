@@ -193,3 +193,18 @@ def test_recent_commits_shape():
     import tools.claude_bridge.server as srv
     d = srv.recent_commits()
     assert "commits" in d and isinstance(d["commits"], list)
+
+
+def test_gate_ledger_shape_and_invariant():
+    import tools.claude_bridge.server as srv
+    d = srv.gate_ledger()
+    assert {"entries", "total", "answered", "pending"} <= set(d)
+    assert d["total"] == d["answered"] + d["pending"]
+
+
+def test_extract_verdict():
+    import tools.claude_bridge.server as srv
+    assert srv._extract_verdict("- Verdict: GO\n- Confidence: high") == "GO"
+    assert srv._extract_verdict("Verdict: NO-GO\n...") == "NO-GO"
+    assert srv._extract_verdict("- Verdict: VISUAL_REVIEW") == "VISUAL_REVIEW"
+    assert srv._extract_verdict("nada de veredito aqui") is None
