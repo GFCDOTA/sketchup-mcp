@@ -91,3 +91,45 @@ processo que roda ciclos do `autonomous-fidelity-loop` **sem sessão interativa*
 
 Cada fatia respeita Hard Rules + modo B. Specs irmãos: `fidelity_gate.md`,
 `sdd_and_harness_engineering.md`.
+
+## 6. Evolução pós-feedback (da sessão de trabalho, 2026-05-31)
+
+Feedback real de uso — da sessão que CONSOME o gate. Endereça os limites do
+"Claude consultando Claude". A peça (6.1) conserta a raiz: **não-independência**.
+
+### 6.1 Multi-oracle routing — PRIORIDADE (o conserto da não-independência)
+Peer-Claude **compartilha os pontos cegos** de quem pergunta (mesma família de modelo)
+→ NÃO é checagem independente. O gate passa a rotear por **necessidade** (via
+`oracle_providers.py`, já plugável):
+- **Claude** (`:8765`): afiar raciocínio + nomear risco. Default p/ decisão técnica/A-B-C.
+- **ChatGPT / LLM local**: **segunda opinião INDEPENDENTE** (outro modelo) — quando a
+  decisão é arriscada e você quer um sinal que NÃO compartilhe o viés do Claude.
+- **Determinístico** (overlay_diff / opening_host_audit / pytest): **ground truth** —
+  quando existe check objetivo, ele MANDA sobre qualquer oracle.
+- Regra de ouro: afirmação factual do oracle sobre algo que ele **não vê** → verificar
+  determinístico, nunca aceitar por fé. (É a constituição do projeto aplicada ao gate.)
+
+### 6.2 Red-team mode (antídoto do viés de concordância)
+Modo opcional (`mode: "redteam"` no request) onde o oracle **argumenta CONTRA** a opção
+pra qual o asker já pende, em vez de só rankear. Pega o "ele tende a concordar comigo".
+
+### 6.3 File-fetch read-only (cego a artefato → para de chutar fato)
+O oracle pode **pedir um arquivo** (consensus.json, geometry_report.json) quando precisa
+de fato que não está no prompt: responde `Verdict: MORE-INFO` + `need_files: [...]`; o
+asker reenvia com os arquivos. Escopo **read-only**, allowlist de paths (nunca segredo /
+`.oauth_token`).
+
+### 6.4 Confiança + assumptions no Verdict (diz o que verificar)
+O schema do Verdict (§1) ganha: `confidence: high|medium|low` e `assumptions: [...]`
+(o que ele assumiu / NÃO conseguiu verificar). Assim o asker sabe **qual parte checar
+determinísticamente** vs aceitar. Barato, alto valor.
+
+### 6.5 Robustez do bridge (bugs reais de integração)
+- **UTF-8**: `decode("utf-8", errors="replace")` no read; nunca 500 por byte não-ASCII
+  (engasgou no "ã"). Content-Length em **bytes** nos dois lados.
+- **Campo flexível**: aceitar `prompt` OU `question` no `/ask` (asker não adivinha).
+- **`/health` expõe o schema**: `{ok, oracle, ask_field, verdict_enum}` — auto-documenta
+  o contrato (a sessão descobriu o campo por erro; isso resolve).
+
+> Ordem sugerida: **6.5** (bugs, rápido) → **6.4** (schema) → **6.2** (red-team) →
+> **6.3** (file-fetch) → **6.1** (multi-oracle, o maior). Cada um = fatia + teste + audit.
