@@ -14,8 +14,10 @@ Auth: `claude -p` headless precisa de um token OAuth. Rode `claude setup-token` 
 exporte CLAUDE_CODE_OAUTH_TOKEN (o start.ps1 carrega de um `.oauth_token` local, que é
 gitignorado — NUNCA commitar o token).
 
-Limites (reforçados no system prompt): NUNCA aprovar mutação de fixture canônica
-(Hard Rule #3) nem dar veredito visual IMPROVED/SAME/WORSE -> Verdict: NEEDS-HUMAN.
+Política (no system prompt): MODO B — autonomia delegada. O oracle decide sozinho
+(técnico / fixture / merges) com base em evidência determinística; o ÚNICO gate humano
+é Verdict: VISUAL_REVIEW, quando a APARÊNCIA da planta muda e só o olho do humano valida
+vs o PDF. Nunca dá veredito visual IMPROVED/SAME/WORSE sozinho.
 
 Uso:
     python server.py                 # serve em 127.0.0.1:8765
@@ -33,21 +35,25 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 CLAUDE_TIMEOUT = 240  # segundos por resposta; estoura -> erro 500, nunca trava infinito
 
-SYSTEM = """You are the CLAUDE ORACLE answering a decision question from a Claude Code \
-session working on the repo `sketchup-mcp` (PDF floorplan -> faithful SketchUp .skp).
-Answer ONLY in this format, no markdown fences, no fluff:
+SYSTEM = """You are the CLAUDE ORACLE for the sketchup-mcp fidelity project. The human (Felipe)
+delegated FULL AUTONOMY to you for everything EXCEPT the visual look of the plant ("modo B").
+DECIDE — never punt to the human except for VISUAL_REVIEW.
 
-- Verdict: GO / NO-GO / NEEDS-HUMAN / MORE-INFO
-- Reasoning: 2-4 sentences, technical, critical (no rubber-stamping)
+Answer ONLY in this format, no fences, no fluff:
+- Verdict: GO / NO-GO / MORE-INFO / VISUAL_REVIEW
+- Reasoning: 2-4 sentences, technical, critical
 - Risks: bullets
-- Suggested next action: 1-2 lines, start with the single highest-leverage step
+- Suggested next action: 1-2 lines, highest-leverage first
 
-HARD BOUNDARIES (never cross — the asker's project rules):
-- NEVER approve mutating a canonical fixture (fixtures/quadrado, fixtures/planta_74,
-  consensus.json). That needs the human's explicit OK -> answer Verdict: NEEDS-HUMAN.
-- NEVER give a visual fidelity verdict (IMPROVED/SAME/WORSE) — that is the human's or
-  GPT-via-Chrome's call -> Verdict: NEEDS-HUMAN.
-- Prefer fixing root causes (data/extraction) over piling workarounds in the builder.
+DECIDE AUTONOMOUSLY (no human): technical / architectural / A-B-C / refactor / gates /
+consensus & fixture regeneration / merges -- based on the DETERMINISTIC evidence given
+(overlay_diff vs PDF, opening_host_audit, pytest). Prefer fixing root causes over workarounds.
+
+THE ONLY HUMAN GATE = VISUAL_REVIEW: use it ONLY when a change alters the plant's APPEARANCE such
+that only a human eye can validate it vs the PDF (geometry/render/representation changed, or a
+regenerated fixture is about to be PROMOTED to canonical). Then Verdict: VISUAL_REVIEW and state
+exactly what before/after-vs-PDF to show Felipe. Do NOT give IMPROVED/SAME/WORSE yourself
+(proven unreliable -- negative_dogfood); that is Felipe's call once summoned.
 """
 
 
@@ -111,6 +117,13 @@ class Handler(BaseHTTPRequestHandler):
         pass  # silencia o log default do http.server
 
 
+class Server(ThreadingHTTPServer):
+    # allow_reuse_address=False: no Windows o SO_REUSEADDR deixaria 2+ servers bindarem
+    # o mesmo :8765 (zumbis empilhados respondendo com SYSTEM velho). Com False, um
+    # segundo start FALHA ALTO (OSError) em vez de empilhar silenciosamente.
+    allow_reuse_address = False
+
+
 def main():
     ap = argparse.ArgumentParser(description="Claude oracle HTTP (drop-in do :8765)")
     ap.add_argument("--host", default="127.0.0.1")
@@ -126,7 +139,11 @@ def main():
             print(f"selftest FALHOU: {e}")
         return
 
-    srv = ThreadingHTTPServer((args.host, args.port), Handler)
+    try:
+        srv = Server((args.host, args.port), Handler)
+    except OSError as e:
+        print(f"NAO subiu em {args.host}:{args.port} (ja em uso? outro server no ar): {e}")
+        return
     print(f"claude-bridge HTTP em http://{args.host}:{args.port} (/health, POST /ask) | claude={claude_bin()}")
     print("Ctrl+C pra parar.")
     try:

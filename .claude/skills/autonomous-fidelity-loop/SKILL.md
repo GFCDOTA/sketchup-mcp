@@ -34,9 +34,10 @@ do loop = um ciclo. Não pasteie prompt solto — invoque esta skill (ou diga "n
    **NEEDS-HUMAN bloqueante**, ou **backlog determinístico esgotado** (reporte
    "backlog limpo, parando — sem inventar ciclo"). Fora isso → próximo ciclo.
 
-## Hard rules herdadas (não furar)
-- Nunca mutar fixture canônica sem OK explícito do Felipe (Hard Rule #3) → NEEDS-HUMAN.
-- Nunca dar veredito visual IMPROVED/SAME/WORSE (é do humano / GPT-via-Chrome) → NEEDS-HUMAN.
+## Modo B — autonomia delegada (não furar)
+- Fixture/consensus: regenerar/corrigir é **AUTÔNOMO** (decide e faz). Mas **PROMOVER pra
+  canônica** dispara `VISUAL_REVIEW` (olho do Felipe vs PDF) antes de virar ground-truth.
+- Veredito visual IMPROVED/SAME/WORSE: **nunca** auto (não-confiável) → `VISUAL_REVIEW`.
 - Develop-first; commit por slice; `--mode headless` proibido em dev local.
 
 ## Limites honestos (dizer ao Felipe, não fingir)

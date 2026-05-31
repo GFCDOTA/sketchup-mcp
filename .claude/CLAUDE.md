@@ -58,9 +58,12 @@ Quem atende o `:8765` é configurável:
   `tools/claude_bridge/README.md`.
 - **ChatGPT** bridge (`E:\chatgpt-bridge\`) — alternativa.
 
-O bridge é **conselheiro, não decisor**: força `NEEDS-HUMAN` em mutação de
-fixture (Hard Rule #3) e veredito visual (IMPROVED/SAME/WORSE). Se o `:8765`
-estiver offline, o gate degrada pra `SKIPPED_OFFLINE` (não fabrica resposta).
+O bridge roda em **modo B (autonomia delegada pelo Felipe)**: decide sozinho
+o técnico / fixture / merges com base em evidência determinística. O **único gate
+humano é `VISUAL_REVIEW`** — quando a APARÊNCIA da planta muda e só o olho do Felipe
+valida vs o PDF (aí ele entra). Veredito visual IMPROVED/SAME/WORSE **nunca** é auto
+(comprovadamente não-confiável — negative_dogfood). Se o `:8765` cair, o gate degrada
+pra `SKIPPED_OFFLINE` (não fabrica resposta).
 
 ## Load order
 
