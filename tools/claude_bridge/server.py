@@ -116,6 +116,37 @@ def parse_ask_payload(raw: bytes) -> str:
     return ""
 
 
+REDTEAM_PREFIX = (
+    "RED-TEAM MODE (gate framework §6.2). The asker probably already leans toward "
+    "one option — do NOT just rank. First argue the STRONGEST case AGAINST the "
+    "option that looks preferred and name the failure mode that would make it "
+    "wrong; only then give your Verdict. If the preferred option still wins after "
+    "you steelman the opposition, say so explicitly. This exists to counter the "
+    "agreement bias of one Claude consulting another."
+)
+
+
+def parse_ask_mode(raw: bytes) -> str:
+    """Extract the optional `mode` from an /ask body (e.g. 'redteam'). '' if none."""
+    if not raw:
+        return ""
+    try:
+        data = json.loads(raw.decode("utf-8", errors="replace"))
+    except (ValueError, UnicodeError):
+        return ""
+    if not isinstance(data, dict):
+        return ""
+    return str(data.get("mode") or "").strip().lower()
+
+
+def apply_mode(prompt: str, mode: str) -> str:
+    """Wrap the question per mode. `redteam` prepends a steelman-the-opposition
+    instruction; any other / empty mode is a no-op."""
+    if mode == "redteam" and prompt:
+        return f"{REDTEAM_PREFIX}\n\n=== DECISION ===\n\n{prompt}"
+    return prompt
+
+
 def health_payload() -> dict:
     """Self-documenting /health: exposes the /ask contract (which field to send,
     what verdicts come back) so the caller never reverse-engineers it."""
@@ -124,6 +155,7 @@ def health_payload() -> dict:
         "oracle": "claude",
         "ask_field": list(ASK_FIELDS),
         "verdict_enum": list(VERDICT_ENUM),
+        "modes": ["default", "redteam"],
     }
 
 
@@ -148,11 +180,13 @@ class Handler(BaseHTTPRequestHandler):
             return
         try:
             n = int(self.headers.get("Content-Length") or 0)
-            prompt = parse_ask_payload(self.rfile.read(n) if n else b"")
+            body = self.rfile.read(n) if n else b""
+            prompt = parse_ask_payload(body)
             if not prompt:
                 self._send(400, {"error": "empty question (send 'prompt' or 'question')"})
                 return
-            self._send(200, {"response": ask_claude(prompt)})
+            question = apply_mode(prompt, parse_ask_mode(body))
+            self._send(200, {"response": ask_claude(question)})
         except Exception as e:  # devolve erro honesto; nao fabrica resposta
             self._send(500, {"error": f"{type(e).__name__}: {e}"})
 

@@ -9,7 +9,9 @@ import json
 from tools.claude_bridge.server import (
     ASK_FIELDS,
     VERDICT_ENUM,
+    apply_mode,
     health_payload,
+    parse_ask_mode,
     parse_ask_payload,
 )
 
@@ -57,3 +59,30 @@ def test_health_exposes_contract():
     assert "prompt" in h["ask_field"] and "question" in h["ask_field"]
     assert set(h["verdict_enum"]) == set(VERDICT_ENUM)
     assert "VISUAL_REVIEW" in h["verdict_enum"]
+
+
+# ---- §6.2 red-team mode ----
+def test_parse_ask_mode_redteam():
+    assert parse_ask_mode(_body({"prompt": "q", "mode": "redteam"})) == "redteam"
+    assert parse_ask_mode(_body({"prompt": "q", "mode": "REDTEAM"})) == "redteam"
+
+
+def test_parse_ask_mode_default_blank():
+    assert parse_ask_mode(_body({"prompt": "q"})) == ""
+    assert parse_ask_mode(b"") == ""
+
+
+def test_apply_mode_redteam_prepends_steelman():
+    out = apply_mode("Should we do A or B?", "redteam")
+    assert "AGAINST" in out
+    assert "Should we do A or B?" in out
+    assert len(out) > len("Should we do A or B?")
+
+
+def test_apply_mode_default_is_noop():
+    assert apply_mode("Q", "") == "Q"
+    assert apply_mode("Q", "whatever") == "Q"
+
+
+def test_health_advertises_redteam_mode():
+    assert "redteam" in health_payload()["modes"]
