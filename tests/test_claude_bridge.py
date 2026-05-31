@@ -265,3 +265,20 @@ def test_skp_inventory_v2_shape():
     d = srv.skp_inventory_v2()
     assert {"total", "total_mb", "dup_groups", "by_category", "files"} <= set(d)
     assert isinstance(d["files"], list)
+
+
+def test_difficulties_every_entry_has_why_not_fixed():
+    import tools.claude_bridge.server as srv
+    d = srv.difficulties()
+    assert {"difficulties", "total", "source"} <= set(d)
+    assert d["total"] >= 6
+    for x in d["difficulties"]:
+        assert x["why_not_fixed_yet"]  # mandatory + non-empty in EVERY entry
+        assert {"id", "titulo", "status", "severidade", "acceptance_criteria"} <= set(x)
+
+
+def test_read_jsonl_tolerates_garbage(tmp_path):
+    import tools.claude_bridge.server as srv
+    p = tmp_path / "x.jsonl"
+    p.write_text('{"a": 1}\nGARBAGE NOT JSON\n\n{"b": 2}\n', encoding="utf-8")
+    assert srv._read_jsonl(p) == [{"a": 1}, {"b": 2}]

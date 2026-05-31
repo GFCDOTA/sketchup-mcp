@@ -100,15 +100,8 @@ ul.opp{list-style:none;padding:0;margin:0;} ul.opp li{padding:9px 0;border-botto
 <section id="dificuldades">
 <div id="alarm" class="alarm ok">checando patinagem...</div>
 <div class="wrap">
-<div class="card full"><h2>Maiores dificuldades do serviço MCP</h2>
-<ul class="opp">
-<li><b>Consensus é autoria HUMANA</b> — não existe extrator PDF→consensus (raster+Hough fabricava parede falsa). Gargalo pra qualquer planta nova. <span class="tag">produto</span></li>
-<li><b>Escala precisa de âncora física</b> — uma dimensão real conhecida vira o PT_TO_M; sem ela = BLOCKED (nunca chutar). <span class="tag">extração</span></li>
-<li><b>Fidelidade de abertura de janela</b> — peitoril/verga; vidro errado no banho 2 corrigido recentemente. <span class="tag">render</span></li>
-<li><b>Multi-agent: colisão de worktree</b> — sessões dividindo 1 worktree quase clobberam; orquestrador VÊ, isolamento PREVINE (follow-up). <span class="tag">infra</span></li>
-<li><b>Julgamento visual não é auto-confiável</b> — negative_dogfood; depende de VISUAL_REVIEW humano. <span class="tag">gate</span></li>
-<li><b>Constantes do builder hardcoded</b> — alturas/escala/crop p/ planta_74; blueprint pronto, espera árvore esfriar. <span class="tag">generalização</span></li>
-</ul>
+<div class="card full"><h2>Backlog de dificuldades (vivo) — por que ainda não foi tratado</h2>
+<div id="diff-backlog" class="muted">carregando...</div>
 <div class="muted" style="margin-top:10px">Como o MCP usa o gate pra continuar: roteia decisões reais (9 triggers) pro <code>:8765</code> em modo B; se uma sessão fica <b>PARALYZED</b> (cycle congelado) ou há consult sem resposta, o alarme dispara — aí use o Q&A.</div></div>
 <div class="card full"><h2>Q&A — pergunta direto pro gate (Opus 4.8)</h2>
 <textarea id="qa-q" placeholder="Ex.: 'A sessão está patinando no opening_host da planta_74, opção A/B/C?'"></textarea>
@@ -295,6 +288,10 @@ async function loadDiff(){
     else if(st.length){a.className='alarm bad';a.textContent='⚠️ '+st.map(function(e){return e[0];}).join(', ')+' STALLED (sem heartbeat) — sessão pode ter caído.';}
     else{a.className='alarm ok';a.textContent='✅ Tudo progredindo — nenhuma sessão PARALYZED/STALLED.';}
   }catch(e){var a=$('alarm');a.className='alarm bad';a.textContent='gate offline — não dá pra checar patinagem';}
+  try{const dd=await (await fetch('/api/difficulties')).json();
+    var SEV={HIGH:'var(--bad)',MED:'var(--warn)',LOW:'var(--dim)'},ST={OPEN:'var(--bad)',MITIGATED:'var(--warn)',FIXED:'var(--ok)',REGRESSED:'var(--bad)'};
+    $('diff-backlog').innerHTML='<div class="muted" style="margin-bottom:10px">'+dd.total+' dificuldades · fonte: '+esc(dd.source)+'</div>'+(dd.difficulties||[]).map(function(d){return '<div class="card" style="margin-bottom:12px;border-left:3px solid '+(SEV[d.severidade]||'var(--dim)')+'"><div style="display:flex;justify-content:space-between;gap:10px"><b style="color:var(--accent)">'+esc(d.id)+' · '+esc(d.titulo)+'</b><span class="flag" style="color:'+(ST[d.status]||'var(--dim)')+';white-space:nowrap">'+esc(d.status)+' · '+esc(d.severidade)+'</span></div><div class="muted" style="margin:6px 0">'+esc(d.sintoma)+'</div><div style="background:rgba(248,81,73,.08);border:1px solid var(--bad);border-radius:6px;padding:8px;margin:8px 0"><b style="color:var(--bad)">por que ainda não foi tratado:</b> '+esc(d.why_not_fixed_yet)+'</div><div class="muted">tentativas: '+((d.attempts||[]).map(esc).join(" · ")||"-")+'</div><div class="muted">gate ajudou: <b>'+esc(d.gate_helped)+'</b> · próxima hipótese: '+esc(d.next_hypothesis)+'</div><div class="muted">aceite: '+esc(d.acceptance_criteria)+'</div></div>';}).join('');
+  }catch(e){if($('diff-backlog'))$('diff-backlog').innerHTML='<span class="muted">erro: '+esc(e)+'</span>';}
 }
 async function askGate(){
   var q=$('qa-q').value.trim(); if(!q)return; var r=$('qa-resp'); r.className='qa-resp';

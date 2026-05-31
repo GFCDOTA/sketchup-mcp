@@ -608,6 +608,97 @@ def recent_commits(n: int = 12) -> dict:
     return {"commits": lines}
 
 
+def _read_jsonl(path: Path) -> list:
+    """Tolerant JSONL read: skips blank/corrupt lines, never raises."""
+    out = []
+    try:
+        for ln in path.read_text("utf-8", errors="replace").splitlines():
+            ln = ln.strip()
+            if not ln:
+                continue
+            try:
+                out.append(json.loads(ln))
+            except ValueError:
+                pass
+    except OSError:
+        pass
+    return out
+
+
+# Seed of the living difficulties backlog. The .ai_bridge/creator_difficulties.jsonl
+# (if present) overrides this; otherwise this built-in seed is served. Every entry
+# MUST carry why_not_fixed_yet — the field that turns "known problem" into "actionable".
+_DEFAULT_DIFFICULTIES = [
+    {"id": "DIFF-001", "titulo": "Consensus é autoria humana (sem extrator PDF→consensus)",
+     "sintoma": "não há pipeline que extraia walls/openings de um PDF novo; raster+Hough fabricava parede falsa",
+     "severidade": "HIGH", "status": "OPEN",
+     "why_not_fixed_yet": "extrator vetorial confiável é grande e arriscado; decidiu-se provar o loop manual em >=2 plantas antes de investir",
+     "attempts": ["raster+Hough (abandonado: fabricava falsos)", "build_vector_consensus (abandonado)"],
+     "gate_helped": "parcial", "next_hypothesis": "walls = filled paths do PDF, validado contra a planta_74 já anotada",
+     "acceptance_criteria": "uma 2a planta gera consensus sem anotação manual e passa os gates determinísticos"},
+    {"id": "DIFF-002", "titulo": "Escala precisa de âncora física",
+     "sintoma": "PDF→metros sem uma dimensão real conhecida vira chute",
+     "severidade": "HIGH", "status": "MITIGATED",
+     "why_not_fixed_yet": "depende de input humano por planta (uma cota/espessura real) — é requisito de dado, não bug",
+     "attempts": ["PT_TO_M = wall_thickness_pts/0.19 (planta_74)"],
+     "gate_helped": "nao", "next_hypothesis": "plant.json carrega wall_thickness_m por planta; sem âncora = BLOCKED",
+     "acceptance_criteria": "toda planta nova declara a âncora; nunca usar default 0.0254/72"},
+    {"id": "DIFF-003", "titulo": "Fidelidade de abertura de janela (peitoril/verga)",
+     "sintoma": "janela carved full-height ou vidro órfão/fora do lugar (ex.: banho 2)",
+     "severidade": "MED", "status": "FIXED",
+     "why_not_fixed_yet": "corrigido recentemente (528e302 usa espessura da wall hospedeira) — manter sob watch p/ regressão",
+     "attempts": ["3D aperture path preservando peitoril+verga", "host-wall thickness fix (banho 2)"],
+     "gate_helped": "sim", "next_hypothesis": "-",
+     "acceptance_criteria": "window_apertures_3d == count(kind=window), sem vidro órfão"},
+    {"id": "DIFF-004", "titulo": "Colisão de worktree multi-agent",
+     "sintoma": "sessões dividindo 1 worktree movem o branch sob a outra; quase clobber",
+     "severidade": "MED", "status": "OPEN",
+     "why_not_fixed_yet": "o orquestrador só DETECTA (heartbeat/PARALYZED); o fix-raiz (lock/isolamento de worktree) é follow-up aberto, não implementado",
+     "attempts": ["orquestrador de liveness (detecção)", "worktrees isolados (wt-dash/wt-gh)"],
+     "gate_helped": "sim", "next_hypothesis": "/lock keyed por session_id + ownership de branch",
+     "acceptance_criteria": "duas sessões rodam sem clobber; lock visível no painel"},
+    {"id": "DIFF-005", "titulo": "Julgamento visual não é auto-confiável",
+     "sintoma": "oracle de visão deu PASS em planta com parede externa apagada (negative_dogfood)",
+     "severidade": "HIGH", "status": "MITIGATED",
+     "why_not_fixed_yet": "LLM visual não pode ser ground truth — é decisão de design (só humano/GPT-Chrome valida), não bug a consertar",
+     "attempts": ["visual oracle rebaixado a conselheiro", "overlay_diff determinístico decide"],
+     "gate_helped": "sim", "next_hypothesis": "determinístico decide; visual só aconselha + VISUAL_REVIEW humano",
+     "acceptance_criteria": "nenhum PASS visual auto-promove fixture; VISUAL_REVIEW obrigatório"},
+    {"id": "DIFF-006", "titulo": "Constantes do builder hardcoded p/ planta_74",
+     "sintoma": "alturas (2.70/0.90/2.10/1.10) e crop/escala fixos no build_plan_shell_skp",
+     "severidade": "LOW", "status": "OPEN",
+     "why_not_fixed_yet": "é o arquivo mais QUENTE (fidelidade em voo) e a config não tem consumidor até existir 2a planta = seria infra-pela-infra; blueprint pronto esperando a árvore esfriar",
+     "attempts": ["blueprint generalize_builder_constants.md (groundwork não-colidente)"],
+     "gate_helped": "sim", "next_hypothesis": "plant.json com heights/crop, defaults não-quebra, swap-in quando quieto",
+     "acceptance_criteria": "planta_74 inalterada sem plant.json; 2a planta respeita os valores dela"},
+]
+
+
+def difficulties() -> dict:
+    """Living difficulties backlog. Reads .ai_bridge/creator_difficulties.jsonl if
+    present (appendable by sessions), else the built-in seed. Normalizes so EVERY
+    entry has why_not_fixed_yet."""
+    items = _read_jsonl(REPO_ROOT / ".ai_bridge" / "creator_difficulties.jsonl")
+    src = "jsonl" if items else "builtin-seed"
+    if not items:
+        items = _DEFAULT_DIFFICULTIES
+    norm = []
+    for d in items:
+        norm.append({
+            "id": d.get("id", "DIFF-???"),
+            "titulo": d.get("titulo") or d.get("title") or "?",
+            "sintoma": d.get("sintoma", ""),
+            "severidade": d.get("severidade", "MED"),
+            "status": d.get("status", "OPEN"),
+            "why_not_fixed_yet": d.get("why_not_fixed_yet") or "UNKNOWN — campo ausente, investigar",
+            "attempts": d.get("attempts", []),
+            "gate_helped": d.get("gate_helped", "?"),
+            "next_hypothesis": d.get("next_hypothesis", "-"),
+            "acceptance_criteria": d.get("acceptance_criteria", "-"),
+        })
+    return {"difficulties": norm, "total": len(norm), "source": src}
+
+
 def _sha256(p: Path) -> str:
     h = hashlib.sha256()
     try:
@@ -915,6 +1006,8 @@ class Handler(BaseHTTPRequestHandler):
             self._send(200, git_inventory())
         elif p == "/api/skp-inventory-v2":
             self._send(200, skp_inventory_v2())
+        elif p == "/api/difficulties":
+            self._send(200, difficulties())
         elif p == "/artifact":
             f = safe_artifact((parse_qs(u.query).get("path") or [""])[0])
             if not f:
