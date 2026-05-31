@@ -299,12 +299,40 @@ th{color:var(--dim);font-weight:500;}
 .dot.up{background:var(--ok);}
 .dot.down{background:var(--bad);}
 .full{grid-column:1 / -1;}
+.pipe{display:flex;align-items:stretch;gap:6px;flex-wrap:wrap;}
+.stg{flex:1;min-width:84px;background:#0d1117;border:1px solid var(--line);border-radius:8px;padding:10px 6px;text-align:center;font-size:12px;font-weight:600;display:flex;flex-direction:column;justify-content:center;}
+.stg small{display:block;color:var(--dim);font-weight:400;margin-top:4px;font-size:10px;}
+.stg.pdf{border-color:#6e7681;}
+.stg.human{border-color:var(--warn);background:rgba(210,153,34,.08);}
+.stg.auto{border-color:var(--accent);background:rgba(88,166,255,.07);}
+.stg.gate{border-color:var(--ok);background:rgba(63,185,80,.07);}
+.stg.ok{border-color:var(--ok);background:rgba(63,185,80,.15);}
+.arr{display:flex;align-items:center;color:var(--dim);font-size:18px;}
+.legend{margin-top:12px;display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--dim);align-items:center;}
+.lg{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:middle;}
+.lg.auto{background:rgba(88,166,255,.6);}
+.lg.human{background:rgba(210,153,34,.7);}
+.lg.gate{background:rgba(63,185,80,.6);}
+.lg.ok{background:var(--ok);}
 footer{padding:0 24px 24px;color:var(--dim);font-size:12px;}
 </style></head><body>
 <header><h1>&#127899; Claude Gate - Operacional</h1>
 <span id="status" class="badge off">CHECANDO...</span>
 <span id="updated" style="color:var(--dim);font-size:12px;"></span></header>
 <div class="wrap">
+<div class="card full"><h2>Pipeline PDF -&gt; SKP (como o sketchup-mcp processa)</h2>
+<div class="pipe">
+<div class="stg pdf">PDF<small>planta</small></div><div class="arr">&#8594;</div>
+<div class="stg human">anotacao<small>HUMANO</small></div><div class="arr">&#8594;</div>
+<div class="stg auto">consensus.json<small>walls/openings/rooms</small></div><div class="arr">&#8594;</div>
+<div class="stg auto">build_shell<small>.py shapely</small></div><div class="arr">&#8594;</div>
+<div class="stg auto">.skp + renders<small>.rb SketchUp</small></div><div class="arr">&#8594;</div>
+<div class="stg gate">gates det.<small>opening_host/overlay</small></div><div class="arr">&#8594;</div>
+<div class="stg human">VISUAL_REVIEW<small>HUMANO vs PDF</small></div><div class="arr">&#8594;</div>
+<div class="stg ok">artifacts/<small>deliverable</small></div>
+</div>
+<div class="legend"><span><span class="lg auto"></span>automatico</span><span><span class="lg human"></span>gate humano</span><span><span class="lg gate"></span>deterministico (ground truth)</span><span><span class="lg ok"></span>entrega</span></div>
+<div style="margin-top:10px;color:var(--dim);font-size:12px;">O oraculo :8765 (modo B, Opus 4.8) decide as bifurcacoes tecnicas ao longo do fluxo. So o VISUAL_REVIEW sobe pro humano.</div></div>
 <div class="card"><h2>Health</h2><div id="health"></div></div>
 <div class="card"><h2>Health timeline</h2><div id="timeline" class="timeline"></div>
 <div style="margin-top:10px;color:var(--dim);font-size:12px;">verde=online | vermelho=offline | refresh 5s</div></div>
