@@ -104,3 +104,15 @@ build fresh e comparando contagens deu pra dismissar a hipótese
 Constituição #8 cravou. Operacional em
 [`specs/skp_proof_of_progress_gate.md`](../specs/skp_proof_of_progress_gate.md).
 Skill `generate-and-compare-skp-after-change` implementa.
+
+## LL-031 (2026-05-30) — consensus do planta_74 tem qualidade de dado SOLTA
+
+Detectores determinísticos (consensus-only) acharam: **9/12 openings com host
+errado** (`opening_host_audit`: o007/8/10 janelas, varanda, portas em segmento
+curto) + **1 parede duplicada** (`wall_overlap_audit`: h_w001 ≈ w020, x 127.6 vs
+129.2, overlap 97pt). Render "passa" mascarando isso (portas/painel não usam o
+host; duplicata some no union do shell) → **visual auto-julgado dá falso PASS**.
+Regra: rodar os detectores determinísticos ANTES de confiar no render. O FIX de
+dado (corrigir extrator + regenerar consensus, dropar duplicata) MUTA fixture →
+**NEEDS-HUMAN** (Hard Rule #3), nunca auto-aplicar. Builder já contorna o host
+errado (aperture host-filtrado + fallback painel, FP-031).
