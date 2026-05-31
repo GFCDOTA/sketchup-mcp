@@ -44,7 +44,7 @@ ul.opp{list-style:none;padding:0;margin:0;} ul.opp li{padding:9px 0;border-botto
 <h1>🏗️ SketchUp Creator</h1>
 <span id="status" class="badge off">...</span>
 <nav>
-<a href="#home">Home</a><a href="#sessoes">Sessões</a><a href="#gate">Gate</a><a href="#git">Git</a><a href="#planta">SKP</a><a href="#dificuldades">Dificuldades</a><a href="#lixao">Lixão</a><a href="#oportunidades">Oportunidades</a><a href="#docs">Docs</a><a href="#ecossistema">Ecossistema</a>
+<a href="#home">Home</a><a href="#sessoes">Sessões</a><a href="#gate">Gate</a><a href="#git">Git</a><a href="#planta">SKP</a><a href="#dificuldades">Dificuldades</a><a href="#aprendizados">Aprendizados</a><a href="#lixao">Lixão</a><a href="#oportunidades">Oportunidades</a><a href="#docs">Docs</a><a href="#ecossistema">Ecossistema</a>
 </nav>
 </header>
 <main>
@@ -111,6 +111,11 @@ ul.opp{list-style:none;padding:0;margin:0;} ul.opp li{padding:9px 0;border-botto
 <button onclick="askGate()">perguntar ao gate</button>
 <div id="qa-resp" class="qa-resp muted">a resposta do oráculo aparece aqui (pode levar até ~1min com Opus+xhigh)</div></div>
 </div>
+</section>
+
+<section id="aprendizados">
+<div class="card full"><h2>Aprendizados / Failure Patterns — memória operacional anti-burrice</h2>
+<div id="learn-wrap" class="muted">carregando...</div></div>
 </section>
 
 <section id="lixao">
@@ -221,7 +226,7 @@ function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
 function fmtAge(s){if(s==null)return '-';if(s<90)return s+'s';if(s<5400)return Math.round(s/60)+'m';if(s<86400)return Math.round(s/3600)+'h';return Math.round(s/86400)+'d';}
 function fmtTime(t){try{return new Date(t*1000).toLocaleTimeString('pt-br');}catch(e){return '';}}
 function kv(k,v){return '<div class="kv"><span>'+k+'</span><span>'+esc(v)+'</span></div>';}
-const TABS=['home','sessoes','gate','git','planta','dificuldades','lixao','oportunidades','docs','ecossistema'];
+const TABS=['home','sessoes','gate','git','planta','dificuldades','aprendizados','lixao','oportunidades','docs','ecossistema'];
 function route(){
   let h=(location.hash||'#home').slice(1); if(TABS.indexOf(h)<0)h='home';
   TABS.forEach(function(t){var s=$(t); if(s)s.className=(t===h?'active':'');});
@@ -233,6 +238,7 @@ function route(){
   if(h==='planta')loadPlant();
   if(h==='lixao')loadLixao();
   if(h==='dificuldades')loadDiff();
+  if(h==='aprendizados')loadLearnings();
   if(h==='ecossistema')loadEco();
 }
 window.addEventListener('hashchange',route);
@@ -291,6 +297,13 @@ async function loadPlant(){
       return '<div style="border-bottom:1px solid #21262d;padding:10px 0"><div style="display:flex;justify-content:space-between;gap:10px"><b>'+esc(r.run)+'</b><span class="muted">'+fl+' · '+fmtAge(r.age_sec)+' atrás · '+r.n_pngs+' renders</span></div><div style="margin-top:8px;display:flex;flex-wrap:wrap">'+(thumbs||'<span class="muted">sem render</span>')+'</div></div>';
     }).join('')||'<span class="muted">sem ciclos em artifacts/review</span>';
   }catch(e){g.innerHTML='<span class="muted">erro: '+esc(e)+'</span>';}
+}
+async function loadLearnings(){
+  var w=$('learn-wrap'); w.innerHTML='<span class="muted">carregando...</span>';
+  try{const d=await (await fetch('/api/learnings')).json();
+    var SC={APPLIED:'var(--ok)',LEARNED:'var(--accent)'};
+    w.innerHTML='<div class="muted" style="margin-bottom:10px">'+d.total+' padrões · fonte: '+esc(d.source)+'</div>'+(d.learnings||[]).map(function(l){return '<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:10px"><b style="color:var(--accent)">'+esc(l.id)+' · '+esc(l.falha_observada)+'</b><span class="flag" style="color:'+(SC[l.status]||"var(--dim)")+';white-space:nowrap">'+esc(l.status)+'</span></div><div class="muted" style="margin:6px 0">causa: '+esc(l.causa_provavel)+' · detectado por: '+esc(l.como_detectamos)+'</div><div class="muted">correção: '+esc(l.como_corrigimos)+'</div><div style="background:rgba(63,185,80,.08);border:1px solid var(--ok);border-radius:6px;padding:8px;margin:8px 0"><b style="color:var(--ok)">prevenção de regressão:</b> '+esc(l.como_prevenir_regressao)+'</div><div class="muted">artefato: '+esc(l.artefato)+'</div></div>';}).join('');
+  }catch(e){w.innerHTML='<span class="muted">erro: '+esc(e)+'</span>';}
 }
 async function loadDiff(){
   try{const s=await (await fetch('/sessions')).json();

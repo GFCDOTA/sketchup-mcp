@@ -699,6 +699,65 @@ def difficulties() -> dict:
     return {"difficulties": norm, "total": len(norm), "source": src}
 
 
+# Learning Loop seed — failure patterns turned into operational memory so the
+# system stops repeating the same mistake. Every entry MUST have como_prevenir_regressao.
+_DEFAULT_LEARNINGS = [
+    {"id": "FP-031", "falha_observada": "visual oracle deu PASS em planta com parede externa apagada",
+     "causa_provavel": "LLM de visão não distingue ausência estrutural sutil + viés de concordância",
+     "como_detectamos": "negative_dogfood (fixtures corrompidas de propósito + teste de discriminação)",
+     "como_corrigimos": "rebaixar o oracle visual a conselheiro; overlay_diff determinístico vira o juiz",
+     "como_prevenir_regressao": "detector DETERMINÍSTICO decide; visual só aconselha; VISUAL_REVIEW humano pra promover",
+     "artefato": "tools/overlay_diff.py + tools/negative_dogfood.py + LL nos memory", "status": "APPLIED"},
+    {"id": "LL-034", "falha_observada": "gate framework §6 (multi-oracle/redteam/confidence) landou VERDE mas DESPLUGADO do caller real",
+     "causa_provavel": "módulos + testes unitários, sem teste de integração que prove o wiring no ask_gpt_gate",
+     "como_detectamos": "review cético + grep (ask_gpt_gate não importava parse_verdict/oracle_router/redteam)",
+     "como_corrigimos": "plugar parse_verdict no run_gate; wirar redteam nos triggers pesados; deletar o 6.1 (independência falsa)",
+     "como_prevenir_regressao": "todo módulo de gate exige teste de INTEGRAÇÃO que prove o caller usando — verde unitário != live",
+     "artefato": "test_run_gate_online_parses_verdict + test_run_gate_sends_redteam", "status": "APPLIED"},
+    {"id": "LL-035", "falha_observada": "claude -p rodado de dentro do repo dispararia o SessionStart hook que sobe o próprio bridge = recursão",
+     "causa_provavel": "claude -p carrega CLAUDE.md/hooks do cwd",
+     "como_detectamos": "análise ao consolidar o bridge no repo (antes de subir)",
+     "como_corrigimos": "rodar claude -p com cwd=tempfile.gettempdir() (fora do repo)",
+     "como_prevenir_regressao": "qualquer claude -p headless do gate usa cwd NEUTRO fora do repo",
+     "artefato": "server.py ask_claude (cwd=workdir)", "status": "APPLIED"},
+    {"id": "LL-021", "falha_observada": "escala PDF→metros chutada (0.0254/72) gera SKP fora de proporção",
+     "causa_provavel": "usar DPI default em vez de uma âncora física real da planta",
+     "como_detectamos": "comparação visual com a planta + regra de extração honesta",
+     "como_corrigimos": "PT_TO_M = wall_thickness_pts / 0.19 (dimensão real conhecida)",
+     "como_prevenir_regressao": "plant.json declara wall_thickness_m; sem âncora = BLOCKED, nunca chutar default",
+     "artefato": "PT_TO_M anchor + spec generalize_builder_constants", "status": "APPLIED"},
+    {"id": "LL-036", "falha_observada": "sessões Claude dividindo um worktree movem o branch sob a outra (quase clobber)",
+     "causa_provavel": "falta de isolamento/lock entre agentes no mesmo checkout",
+     "como_detectamos": "o branch mudou ~5x sob a sessão durante o build do cockpit",
+     "como_corrigimos": "trabalhar em worktrees isolados (wt-dash etc.) + rebase antes do push",
+     "como_prevenir_regressao": "cada sessão no SEU worktree + lock por session_id (follow-up aberto)",
+     "artefato": "orquestrador /sessions (detecção) + chip worktree-lock", "status": "LEARNED"},
+]
+
+
+def learnings() -> dict:
+    """Learning Loop: failure patterns (falha→causa→correção→prevenção→artefato).
+    Reads .ai_bridge/learning_log.jsonl if present, else the built-in seed.
+    Normalizes so EVERY entry has como_prevenir_regressao."""
+    items = _read_jsonl(REPO_ROOT / ".ai_bridge" / "learning_log.jsonl")
+    src = "jsonl" if items else "builtin-seed"
+    if not items:
+        items = _DEFAULT_LEARNINGS
+    norm = []
+    for x in items:
+        norm.append({
+            "id": x.get("id", "FP-???"),
+            "falha_observada": x.get("falha_observada") or x.get("failure") or "?",
+            "causa_provavel": x.get("causa_provavel", ""),
+            "como_detectamos": x.get("como_detectamos", ""),
+            "como_corrigimos": x.get("como_corrigimos", ""),
+            "como_prevenir_regressao": x.get("como_prevenir_regressao") or "UNKNOWN — preencher",
+            "artefato": x.get("artefato", "-"),
+            "status": x.get("status", "LEARNED"),
+        })
+    return {"learnings": norm, "total": len(norm), "source": src}
+
+
 def _sha256(p: Path) -> str:
     h = hashlib.sha256()
     try:
@@ -1079,6 +1138,8 @@ class Handler(BaseHTTPRequestHandler):
             self._send(200, difficulties())
         elif p == "/api/skp-timeline":
             self._send(200, skp_timeline())
+        elif p == "/api/learnings":
+            self._send(200, learnings())
         elif p == "/artifact":
             f = safe_artifact((parse_qs(u.query).get("path") or [""])[0])
             if not f:

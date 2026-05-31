@@ -298,3 +298,13 @@ def test_find_verdict_from_regression_summary(tmp_path):
     assert srv._find_verdict(tmp_path) == "IMPROVED"
     empty = tmp_path / "empty"; empty.mkdir()
     assert srv._find_verdict(empty) is None
+
+
+def test_learnings_every_entry_has_prevention():
+    import tools.claude_bridge.server as srv
+    d = srv.learnings()
+    assert {"learnings", "total", "source"} <= set(d)
+    assert d["total"] >= 5
+    for x in d["learnings"]:
+        assert x["como_prevenir_regressao"]  # the anti-regression field, mandatory
+        assert {"id", "falha_observada", "como_corrigimos"} <= set(x)
