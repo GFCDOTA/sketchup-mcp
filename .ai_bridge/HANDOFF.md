@@ -1,7 +1,20 @@
 # Handoff — sketchup-mcp
 
-> Fio da meada entre sessões. Última atualização: **2026-05-30 ~23:20 UTC** (NÃO PARE/loop: suite determinística COMPLETA — 3 detectores + runner único; backlog det. limpo; 2 NEEDS-HUMAN abertos).
+> Fio da meada entre sessões. Última atualização: **2026-05-31 ~00:00 UTC** (/loop modo B: #29 câmera determinística ENTREGUE; #28 regen consensus AUTÔNOMO feito → janelas viram aperture vazado; PAROU em VISUAL_REVIEW pra promoção).
 > Leia primeiro ao iniciar sessão.
+
+## 2026-05-31 ~00:00 UTC — /loop modo B: #29 done, #28 regen done → VISUAL_REVIEW
+
+- **#29 câmera top determinística** (`cdc100f`): fit 4:3 explícito (não zoom_extents) → 0 paredes clipadas,
+  gate `overlay_diff` cobre as 35. Fecha a limitação do #2.
+- **#28 regen consensus** (gate :8765 = GO approach B; `930bb70`): `tools/regenerate_consensus.py` merge
+  colinear (35→19 walls, duplicata absorvida) + re-host openings → **opening_host PASS(0/12), wall_overlap
+  PASS(0)**. Rebuild do candidato: janelas **painel→APERTURE vazado ×4** (find_wall_face acha a face sólida
+  na parede contínua), gates ✓, overlay PASS. Determinístico sólido. Ver LL-032.
+- **PAROU em VISUAL_REVIEW**: a promoção (substituir a fixture pinada `consensus_with_human_walls…json` pelo
+  candidato + re-pin smoke) muda o render → decisão do Felipe. Candidato + before/after + doc em
+  `artifacts/review/planta_74/regen_candidate_20260531/`. Fixture canônica **intocada**.
+- pytest **246 ✓**. Commits do loop: cdc100f, 930bb70 (+ este handoff).
 
 ## 2026-05-30 ~23:20 UTC — /loop: suite de gates determinísticos COMPLETA + backlog limpo
 

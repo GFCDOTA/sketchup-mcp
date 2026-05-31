@@ -116,3 +116,17 @@ Regra: rodar os detectores determinísticos ANTES de confiar no render. O FIX de
 dado (corrigir extrator + regenerar consensus, dropar duplicata) MUTA fixture →
 **NEEDS-HUMAN** (Hard Rule #3), nunca auto-aplicar. Builder já contorna o host
 errado (aperture host-filtrado + fallback painel, FP-031).
+
+## LL-032 (2026-05-31) — raiz do FP-031 = FRAGMENTAÇÃO COLINEAR; merge resolve
+
+A raiz dos 9/12 host-errado + da duplicata é **fragmentação**: cada parede
+arquitetônica vira vários segmentos colineares curtos com gaps nas aberturas, e o
+opening fica num gap sem host válido. `tools/regenerate_consensus.py` (gate :8765
+= approach B): **merge colinear (mesma orientação/coord-fixa, gap ≤ bridge_gap) +
+re-host openings** → planta_74 walls **35→19**, opening_host **PASS(0/12)**,
+wall_overlap **PASS(0)**. Efeito colateral GRANDE no render: a parede contínua faz
+`find_wall_face_for_aperture` achar a face sólida → as 4 janelas passam de
+**painel-fallback → aperture vazado** (paradigma quadrado). Determinístico
+(gates/overlay/detectores PASS). **Regenerar = autônomo; PROMOVER pra canônica =
+VISUAL_REVIEW** (render muda → Felipe julga). Câmera top agora determinística (#29,
+fit 4:3 explícito, não zoom_extents) → gate cobre 100% das paredes.
