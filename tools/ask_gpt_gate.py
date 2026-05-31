@@ -62,11 +62,13 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
+from tools.gate_verdict import parse_verdict
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 BRIDGE_URL = "http://localhost:8765"
 BRIDGE_HEALTH_TIMEOUT_SEC = 5
-BRIDGE_CALL_TIMEOUT_SEC = 120
+BRIDGE_CALL_TIMEOUT_SEC = 260   # > server CLAUDE_TIMEOUT(240); Opus+xhigh is slow
 
 CANONICAL_TRIGGERS = (
     "oracle_verdict_neq_final_verdict",
@@ -108,6 +110,14 @@ class GateResult:
     question_path: Path | None = None
     response_path: Path | None = None
     raw_response: str | None = None
+    # §6.4 parsed structure (populated when the bridge responds) — gives the
+    # verdict teeth: the asker can act on it programmatically instead of
+    # re-reading prose.
+    verdict: str | None = None
+    confidence: str | None = None
+    assumptions: list | None = None
+    risks: list | None = None
+    next_action: str | None = None
 
 
 # ---- helpers ---------------------------------------------------------
@@ -202,14 +212,28 @@ def write_question_file(
 
 def write_response_file(
     responses_dir: Path, question_path: Path, raw: str,
+    parsed: dict | None = None,
 ) -> Path:
     responses_dir.mkdir(parents=True, exist_ok=True)
     stem = question_path.stem  # same timestamp + trigger
     path = responses_dir / f"{stem}.md"
+    parsed_block = ""
+    if parsed:
+        asum = "; ".join(parsed.get("assumptions") or []) or "—"
+        risks = "; ".join(parsed.get("risks") or []) or "—"
+        parsed_block = (
+            f"## Parsed verdict (§6.4)\n\n"
+            f"- Verdict: {parsed.get('verdict') or '—'}\n"
+            f"- Confidence: {parsed.get('confidence') or '—'}\n"
+            f"- Assumptions: {asum}\n"
+            f"- Risks: {risks}\n"
+            f"- Next action: {parsed.get('next_action') or '—'}\n\n"
+        )
     content = (
         f"# GPT response — {stem.split('_', 1)[-1]}\n\n"
         f"## Timestamp\n\n{_now_utc_iso()}\n\n"
         f"## Question file\n\n`{question_path}`\n\n"
+        f"{parsed_block}"
         f"## Raw response\n\n---\n\n{raw}\n\n"
         f"## Decision taken\n\n"
         f"_To be filled by the agent or operator after acting on the response._\n"
@@ -294,13 +318,21 @@ def run_gate(
             detail=f"bridge call failed: {e!r}",
             question_path=question_path,
         )
-    response_path = write_response_file(responses_dir, question_path, raw)
+    parsed = parse_verdict(raw)
+    response_path = write_response_file(
+        responses_dir, question_path, raw, parsed,
+    )
     return GateResult(
         status="ok",
         detail="bridge responded",
         question_path=question_path,
         response_path=response_path,
         raw_response=raw,
+        verdict=parsed.get("verdict"),
+        confidence=parsed.get("confidence"),
+        assumptions=parsed.get("assumptions"),
+        risks=parsed.get("risks"),
+        next_action=parsed.get("next_action"),
     )
 
 
@@ -369,6 +401,9 @@ def main() -> int:
         print(f"[gate] response: {result.response_path}")
     print(f"[gate] status: {result.status}")
     print(f"[gate] detail: {result.detail}")
+    if result.verdict:
+        print(f"[gate] verdict: {result.verdict} "
+              f"(confidence: {result.confidence or '—'})")
 
     if result.status == "invalid":
         return 2
