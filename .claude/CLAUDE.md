@@ -45,6 +45,26 @@ Quebrar uma dessas é RED. Ver `@.claude/memory/operational_rules.md`
 - **Multi-agent**: nunca assumir exclusividade do repo. Ver
   `@.claude/memory/multi_agent_coordination.md`.
 
+## Oracle de decisão (GPT Auto-Consult Gate → :8765)
+
+Decisões reais (os 9 triggers de `gpt-auto-consult-gate`) são consultadas
+por HTTP em `localhost:8765` (via `tools/ask_gpt_gate.py`). **Roteie a
+decisão pelo gate, não pergunte ao humano no chat** — pelo gate ela é
+respondida automaticamente; no chat ela trava até alguém ver.
+
+Quem atende o `:8765` é configurável:
+- **CLAUDE** (assinatura, sem API key): `tools/claude_bridge/start.ps1`
+  (após `claude setup-token` → `.oauth_token`). Ver
+  `tools/claude_bridge/README.md`.
+- **ChatGPT** bridge (`E:\chatgpt-bridge\`) — alternativa.
+
+O bridge roda em **modo B (autonomia delegada pelo Felipe)**: decide sozinho
+o técnico / fixture / merges com base em evidência determinística. O **único gate
+humano é `VISUAL_REVIEW`** — quando a APARÊNCIA da planta muda e só o olho do Felipe
+valida vs o PDF (aí ele entra). Veredito visual IMPROVED/SAME/WORSE **nunca** é auto
+(comprovadamente não-confiável — negative_dogfood). Se o `:8765` cair, o gate degrada
+pra `SKIPPED_OFFLINE` (não fabrica resposta).
+
 ## Load order
 
 @.claude/constitution.md
@@ -99,6 +119,8 @@ Auto-discovered em `.claude/skills/*/SKILL.md`:
   automaticamente em decisão real (9 triggers canônicos)
 - `repo-governance` — PR / branch / merge / hygiene
 - `multi-agent-handoff` — coordenação multi-agent / worktrees
+- `autonomous-fidelity-loop` — loop contínuo auto-ritmado de fidelidade com
+  log por ciclo; auto-corrige o determinístico, para em patinagem/RED/NEEDS-HUMAN
 
 ## Scratch
 
