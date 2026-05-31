@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="pt-br"><head><meta charset="utf-8">
-<title>Claude Gate - Operacional</title>
+<title>SketchUp Creator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 :root{--bg:#0d1117;--card:#161b22;--line:#30363d;--txt:#e6edf3;--dim:#8b949e;--ok:#3fb950;--bad:#f85149;--warn:#d29922;--accent:#58a6ff;}
@@ -9,7 +9,7 @@ body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.5 ui-monospace,S
 header{display:flex;align-items:center;gap:14px;padding:12px 22px;border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;background:var(--bg);z-index:10;}
 h1{font-size:16px;margin:0;font-weight:700;}
 nav{display:flex;gap:3px;flex-wrap:wrap;margin-left:auto;}
-nav a{padding:6px 12px;border-radius:8px;color:var(--dim);text-decoration:none;font-size:13px;font-weight:600;}
+nav a{padding:6px 11px;border-radius:8px;color:var(--dim);text-decoration:none;font-size:13px;font-weight:600;}
 nav a:hover{color:var(--txt);background:#21262d;}
 nav a.active{color:var(--accent);background:rgba(88,166,255,.12);}
 .badge{padding:5px 12px;border-radius:20px;font-weight:700;font-size:12px;}
@@ -22,15 +22,17 @@ section{display:none;} section.active{display:block;}
 .card h2{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin:0 0 12px;}
 .full{grid-column:1 / -1;}
 .kv{display:flex;justify-content:space-between;padding:3px 0;gap:12px;} .kv span:first-child{color:var(--dim);}
-table{width:100%;border-collapse:collapse;font-size:13px;} th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);} th{color:var(--dim);font-weight:500;}
-.flag{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;}
-.flag.OK{background:rgba(63,185,80,.15);color:var(--ok);} .flag.STALLED{background:rgba(210,153,34,.15);color:var(--warn);} .flag.PARALYZED{background:rgba(248,81,73,.15);color:var(--bad);}
+table{width:100%;border-collapse:collapse;font-size:13px;} th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top;} th{color:var(--dim);font-weight:500;}
+.flag{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;white-space:nowrap;}
+.flag.OK,.flag.ACTIVE{background:rgba(63,185,80,.15);color:var(--ok);}
+.flag.STALLED,.flag.IDLE{background:rgba(210,153,34,.15);color:var(--warn);}
+.flag.PARALYZED,.flag.STOPPED{background:rgba(248,81,73,.15);color:var(--bad);}
 .feed{max-height:300px;overflow:auto;} .ev{display:flex;gap:10px;padding:4px 0;border-bottom:1px solid #21262d;font-size:12px;} .ev .t{color:var(--dim);white-space:nowrap;} .ev .k{font-weight:700;} .ev .k.consult{color:var(--accent);} .ev .k.heartbeat{color:var(--dim);}
 .timeline{display:flex;gap:3px;flex-wrap:wrap;} .dot{width:11px;height:11px;border-radius:3px;background:var(--line);} .dot.up{background:var(--ok);} .dot.down{background:var(--bad);}
 .pipe{display:flex;gap:6px;flex-wrap:wrap;} .stg{flex:1;min-width:82px;background:#0d1117;border:1px solid var(--line);border-radius:8px;padding:10px 6px;text-align:center;font-size:12px;font-weight:600;} .stg small{display:block;color:var(--dim);font-weight:400;margin-top:4px;font-size:10px;} .stg.pdf{border-color:#6e7681;} .stg.human{border-color:var(--warn);background:rgba(210,153,34,.08);} .stg.auto{border-color:var(--accent);background:rgba(88,166,255,.07);} .stg.gate{border-color:var(--ok);background:rgba(63,185,80,.07);} .stg.ok{border-color:var(--ok);background:rgba(63,185,80,.15);} .arr{display:flex;align-items:center;color:var(--dim);}
-.docs details{border:1px solid var(--line);border-radius:6px;margin-bottom:6px;background:#0d1117;} .docs summary{cursor:pointer;padding:8px 12px;font-weight:600;font-size:12px;color:var(--accent);} .docs .d{padding:3px 14px 3px 26px;font-size:12px;border-top:1px solid #21262d;} .docs .d code{color:var(--warn);background:rgba(210,153,34,.08);padding:1px 6px;border-radius:4px;margin-right:7px;}
+.docs details{border:1px solid var(--line);border-radius:6px;margin-bottom:6px;background:#0d1117;} .docs summary{cursor:pointer;padding:8px 12px;font-weight:600;font-size:12px;color:var(--accent);} .docs .d{padding:4px 14px 4px 26px;font-size:12px;border-top:1px solid #21262d;} .docs .d code{color:var(--warn);background:rgba(210,153,34,.08);padding:1px 6px;border-radius:4px;margin-right:7px;}
 pre.diagram{background:#0d1117;border:1px solid var(--line);border-radius:8px;padding:16px;overflow:auto;font-size:11px;line-height:1.4;color:var(--txt);}
-.alarm{padding:16px;border-radius:10px;font-weight:700;font-size:14px;margin-bottom:16px;} .alarm.ok{background:rgba(63,185,80,.12);color:var(--ok);border:1px solid var(--ok);} .alarm.bad{background:rgba(248,81,73,.14);color:var(--bad);border:1px solid var(--bad);}
+.alarm{padding:14px 16px;border-radius:10px;font-weight:700;font-size:13px;margin-bottom:16px;} .alarm.ok{background:rgba(63,185,80,.12);color:var(--ok);border:1px solid var(--ok);} .alarm.bad{background:rgba(248,81,73,.14);color:var(--bad);border:1px solid var(--bad);}
 .gallery{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));} .gallery figure{margin:0;background:#0d1117;border:1px solid var(--line);border-radius:8px;padding:8px;} .gallery img{width:100%;border-radius:4px;display:block;background:#fff;} .gallery figcaption{color:var(--dim);font-size:11px;margin-top:6px;text-align:center;word-break:break-all;}
 textarea{width:100%;background:#0d1117;color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:10px;font-family:inherit;font-size:13px;min-height:70px;}
 button{background:var(--accent);color:#0d1117;border:0;border-radius:8px;padding:8px 16px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px;} button:hover{opacity:.9;}
@@ -39,10 +41,10 @@ ul.opp{list-style:none;padding:0;margin:0;} ul.opp li{padding:9px 0;border-botto
 .muted{color:var(--dim);font-size:12px;}
 </style></head><body>
 <header>
-<h1>🎛️ Claude Gate</h1>
+<h1>🏗️ SketchUp Creator</h1>
 <span id="status" class="badge off">...</span>
 <nav>
-<a href="#home">Home</a><a href="#docs">Docs</a><a href="#planta">Planta</a><a href="#dificuldades">Dificuldades</a><a href="#oportunidades">Oportunidades</a><a href="#lixao">Lixão</a>
+<a href="#home">Home</a><a href="#sessoes">Sessões</a><a href="#planta">Planta</a><a href="#dificuldades">Dificuldades</a><a href="#lixao">Lixão</a><a href="#oportunidades">Oportunidades</a><a href="#docs">Docs</a><a href="#ecossistema">Ecossistema</a>
 </nav>
 </header>
 <main>
@@ -63,9 +65,63 @@ ul.opp{list-style:none;padding:0;margin:0;} ul.opp li{padding:9px 0;border-botto
 <div class="muted" style="margin-top:10px">O oráculo :8765 (modo B, Opus 4.8) decide as bifurcações técnicas. Só o VISUAL_REVIEW sobe pro humano.</div></div>
 <div class="card"><h2>Health</h2><div id="health"></div></div>
 <div class="card"><h2>Health timeline</h2><div id="timeline" class="timeline"></div><div class="muted" style="margin-top:8px">verde=online · vermelho=offline · refresh 5s</div></div>
-<div class="card full"><h2>Sessões (orquestrador de liveness)</h2><table><thead><tr><th>session</th><th>cycle</th><th>idade</th><th>beats iguais</th><th>última ação</th><th>flags</th></tr></thead><tbody id="sessions"></tbody></table></div>
+<div class="card full"><h2>Heartbeats (orquestrador de liveness)</h2><table><thead><tr><th>session</th><th>cycle</th><th>idade</th><th>beats iguais</th><th>última ação</th><th>flags</th></tr></thead><tbody id="sessions"></tbody></table></div>
 <div class="card full"><h2>Atividade (consults + heartbeats)</h2><div id="feed" class="feed"></div></div>
+<div class="card full"><h2>Últimos commits em develop</h2><div id="commits" class="feed"></div></div>
 </div>
+</section>
+
+<section id="sessoes">
+<div id="sess-alarm" class="alarm ok">checando...</div>
+<div class="card full"><h2>Sessões Claude Code (estão paradas? esperando o gate?)</h2>
+<div id="sess-wrap"><span class="muted">lendo ~/.claude/projects...</span></div></div>
+</section>
+
+<section id="planta">
+<div class="card full"><h2>Planta corrigida mais atual — vistas pra análise</h2>
+<div class="muted" style="margin-bottom:12px">Renders do deliverable canônico em <code>artifacts/&lt;plant&gt;/</code> (iso / top / side-by-side vs PDF).</div>
+<div id="plant-gallery" class="gallery"></div></div>
+</section>
+
+<section id="dificuldades">
+<div id="alarm" class="alarm ok">checando patinagem...</div>
+<div class="wrap">
+<div class="card full"><h2>Maiores dificuldades do serviço MCP</h2>
+<ul class="opp">
+<li><b>Consensus é autoria HUMANA</b> — não existe extrator PDF→consensus (raster+Hough fabricava parede falsa). Gargalo pra qualquer planta nova. <span class="tag">produto</span></li>
+<li><b>Escala precisa de âncora física</b> — uma dimensão real conhecida vira o PT_TO_M; sem ela = BLOCKED (nunca chutar). <span class="tag">extração</span></li>
+<li><b>Fidelidade de abertura de janela</b> — peitoril/verga; vidro errado no banho 2 corrigido recentemente. <span class="tag">render</span></li>
+<li><b>Multi-agent: colisão de worktree</b> — sessões dividindo 1 worktree quase clobberam; orquestrador VÊ, isolamento PREVINE (follow-up). <span class="tag">infra</span></li>
+<li><b>Julgamento visual não é auto-confiável</b> — negative_dogfood; depende de VISUAL_REVIEW humano. <span class="tag">gate</span></li>
+<li><b>Constantes do builder hardcoded</b> — alturas/escala/crop p/ planta_74; blueprint pronto, espera árvore esfriar. <span class="tag">generalização</span></li>
+</ul>
+<div class="muted" style="margin-top:10px">Como o MCP usa o gate pra continuar: roteia decisões reais (9 triggers) pro <code>:8765</code> em modo B; se uma sessão fica <b>PARALYZED</b> (cycle congelado) ou há consult sem resposta, o alarme dispara — aí use o Q&A.</div></div>
+<div class="card full"><h2>Q&A — pergunta direto pro gate (Opus 4.8)</h2>
+<textarea id="qa-q" placeholder="Ex.: 'A sessão está patinando no opening_host da planta_74, opção A/B/C?'"></textarea>
+<label class="muted"><input type="checkbox" id="qa-rt"> red-team (o oráculo argumenta CONTRA antes de decidir)</label><br>
+<button onclick="askGate()">perguntar ao gate</button>
+<div id="qa-resp" class="qa-resp muted">a resposta do oráculo aparece aqui (pode levar até ~1min com Opus+xhigh)</div></div>
+</div>
+</section>
+
+<section id="lixao">
+<div class="card full"><h2>🗑️ Lixão — inventário de .skp (governança: usado vs lixo)</h2>
+<div id="lixao-summary" class="muted">escaneando o repo por .skp...</div>
+<div id="lixao-cats"></div></div>
+</section>
+
+<section id="oportunidades">
+<div class="card full"><h2>Oportunidades & melhorias</h2>
+<ul class="opp">
+<li><b>Extrator vetorial PDF→consensus</b> (walls = filled paths) — destrava generalização; só DEPOIS de ≥2 plantas no loop manual. <span class="tag">produto</span></li>
+<li><b>2ª planta real como forcing function</b> — prova a generalização com planta nova, não com abstração. <span class="tag">produto</span></li>
+<li><b>Swap-in das constantes do builder</b> — executar o blueprint quando a árvore esfriar. <span class="tag">generalização</span></li>
+<li><b>Worktree-locking</b> — fix-raiz da colisão multi-agent (chip aberto); o orquestrador só detecta. <span class="tag">infra</span></li>
+<li><b>Tier do oráculo</b> — Opus+xhigh pras pesadas, Sonnet pra rotina (via multi-oracle). <span class="tag">gate</span></li>
+<li><b>Watchdog do gate</b> — auto-restart se /health cair (hoje: hook de login + LIGAR-BRIDGE). <span class="tag">infra</span></li>
+<li><b>Consolidar serving pro repo canônico</b> — sair do worktree wt-dash; aí o Lixão vê o runs/ scratch real. <span class="tag">infra</span></li>
+<li><b>RAG indexado</b> — o file-fetch §6.3 é "RAG-bebê"; indexar depois do pipeline generalizado. <span class="tag">enhancement</span></li>
+</ul></div>
 </section>
 
 <section id="docs">
@@ -91,7 +147,7 @@ ul.opp{list-style:none;padding:0;margin:0;} ul.opp li{padding:9px 0;border-botto
                                                                      v
                           VISUAL_REVIEW (humano/GPT-Chrome)  -->  artifacts/&lt;plant&gt;/
 </pre>
-<div class="muted">Ground truth = os gates DETERMINISTICOS, não um 2º LLM. O único gate humano no fluxo é o VISUAL_REVIEW (+ a autoria do consensus de uma planta nova).</div></div>
+<div class="muted">Ground truth = os gates DETERMINISTICOS, não um 2º LLM. Gates humanos: VISUAL_REVIEW + autoria do consensus de planta nova.</div></div>
 <div class="card full"><h2>Diretório .claude/ — o cérebro do projeto (clique pra expandir)</h2>
 <div class="docs">
 <details><summary>raiz</summary>
@@ -134,58 +190,18 @@ ul.opp{list-style:none;padding:0;margin:0;} ul.opp li{padding:9px 0;border-botto
 <div class="d"><code>autonomous-fidelity-loop</code>loop contínuo de fidelidade (log por ciclo + heartbeat)</div>
 </details>
 <details><summary>evals/ · plans/ · docs/ · scratch/</summary>
-<div class="d"><code>evals/</code>eval_strategy · fidelity_rubric · regression_matrix (como medir fidelidade)</div>
+<div class="d"><code>evals/</code>eval_strategy · fidelity_rubric · regression_matrix</div>
 <div class="d"><code>plans/</code>active_work · next_actions · roadmap · stopped_work</div>
 <div class="d"><code>docs/</code>index · retro 2026-05-31 · adr/0001 (esta arquitetura) · audits/ (3)</div>
-<div class="d"><code>scratch/</code>local-only (gitignored) — rascunhos descartáveis</div>
+<div class="d"><code>scratch/</code>local-only (gitignored)</div>
 </details>
 </div></div>
 </section>
 
-<section id="planta">
-<div class="card full"><h2>Planta corrigida mais atual — vistas pra análise</h2>
-<div class="muted" style="margin-bottom:12px">Renders do deliverable canônico em <code>artifacts/&lt;plant&gt;/</code> (iso / top / side-by-side vs PDF).</div>
-<div id="plant-gallery" class="gallery"></div></div>
-</section>
-
-<section id="dificuldades">
-<div id="alarm" class="alarm ok">checando patinagem...</div>
-<div class="wrap">
-<div class="card full"><h2>Maiores dificuldades do serviço MCP</h2>
-<ul class="opp">
-<li><b>Consensus é autoria HUMANA</b> — não existe extrator PDF→consensus (raster+Hough fabricava parede falsa). É o gargalo pra qualquer planta nova. <span class="tag">produto</span></li>
-<li><b>Escala precisa de âncora física</b> — uma dimensão real conhecida vira o PT_TO_M; sem ela = BLOCKED (nunca chutar 0.0254/72). <span class="tag">extração</span></li>
-<li><b>Fidelidade de abertura de janela</b> — peitoril/verga; histórico de vidro errado (banho 2) corrigido recentemente. <span class="tag">render</span></li>
-<li><b>Multi-agent: colisão de worktree</b> — sessões dividindo 1 worktree quase clobberam; o orquestrador VÊ (PARALYZED), o isolamento de worktree PREVINE (follow-up). <span class="tag">infra</span></li>
-<li><b>Julgamento visual não é auto-confiável</b> — negative_dogfood; depende de VISUAL_REVIEW humano. <span class="tag">gate</span></li>
-<li><b>Constantes do builder hardcoded</b> — alturas/escala/crop p/ planta_74; blueprint pronto, espera a árvore esfriar. <span class="tag">generalização</span></li>
-</ul>
-<div class="muted" style="margin-top:10px">Como o MCP usa o gate pra continuar: roteia decisões reais (9 triggers) pro <code>:8765</code> em modo B; se uma sessão fica <b>PARALYZED</b> (cycle congelado), o alarme acima dispara — aí use o Q&A.</div></div>
-<div class="card full"><h2>Q&A — pergunta direto pro gate (Opus 4.8)</h2>
-<textarea id="qa-q" placeholder="Ex.: 'A sessão está patinando no opening_host da planta_74, opção A/B/C?' — o gate responde Verdict/Confidence/Reasoning..."></textarea>
-<label class="muted"><input type="checkbox" id="qa-rt"> red-team (o oráculo argumenta CONTRA antes de decidir)</label><br>
-<button onclick="askGate()">perguntar ao gate</button>
-<div id="qa-resp" class="qa-resp muted">a resposta do oráculo aparece aqui (pode levar até ~1min com Opus+xhigh)</div></div>
-</div>
-</section>
-
-<section id="oportunidades">
-<div class="card full"><h2>Oportunidades & melhorias</h2>
-<ul class="opp">
-<li><b>Extrator vetorial PDF→consensus</b> (walls = filled paths) — destrava generalização; só DEPOIS de ≥2 plantas no loop manual. <span class="tag">produto</span></li>
-<li><b>2ª planta real como forcing function</b> — prova a generalização com planta nova, não com abstração. <span class="tag">produto</span></li>
-<li><b>Swap-in das constantes do builder</b> — executar o blueprint quando a árvore esfriar (plant.json + defaults não-quebra). <span class="tag">generalização</span></li>
-<li><b>Worktree-locking</b> — fix-raiz da colisão multi-agent (chip aberto); o orquestrador só detecta. <span class="tag">infra</span></li>
-<li><b>Tier do oráculo</b> — Opus+xhigh pras decisões pesadas, Sonnet pra rotina (via multi-oracle). <span class="tag">gate</span></li>
-<li><b>Watchdog do gate</b> — auto-restart se o /health cair (hoje: hook de login + LIGAR-BRIDGE). <span class="tag">infra</span></li>
-<li><b>RAG indexado</b> — o file-fetch §6.3 é "RAG-bebê"; indexar depois do pipeline generalizado. <span class="tag">enhancement</span></li>
-</ul></div>
-</section>
-
-<section id="lixao">
-<div class="card full"><h2>🗑️ Lixão — inventário de .skp (governança: usado vs lixo)</h2>
-<div id="lixao-summary" class="muted">escaneando o repo por .skp...</div>
-<div id="lixao-cats"></div></div>
+<section id="ecossistema">
+<div class="card full"><h2>E:\Claude — o ecossistema na máquina</h2>
+<div id="eco-wrap"><span class="muted">listando E:\Claude...</span></div>
+<div class="muted" style="margin-top:14px">Relacionados (fora de E:\Claude): <code>~/.claude/projects/</code> = transcripts de todas as sessões Claude Code (ver aba Sessões) · <code>E:\chatgpt-bridge</code> = bridge alternativo do ChatGPT desktop (drive-by UIAutomation, mesma porta :8765).</div></div>
 </section>
 
 </main>
@@ -193,17 +209,20 @@ ul.opp{list-style:none;padding:0;margin:0;} ul.opp li{padding:9px 0;border-botto
 const hist=[];
 function $(id){return document.getElementById(id);}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
-function fmtAge(s){if(s==null)return '-';if(s<90)return s+'s';if(s<5400)return Math.round(s/60)+'m';return Math.round(s/3600)+'h';}
+function fmtAge(s){if(s==null)return '-';if(s<90)return s+'s';if(s<5400)return Math.round(s/60)+'m';if(s<86400)return Math.round(s/3600)+'h';return Math.round(s/86400)+'d';}
 function fmtTime(t){try{return new Date(t*1000).toLocaleTimeString('pt-br');}catch(e){return '';}}
 function kv(k,v){return '<div class="kv"><span>'+k+'</span><span>'+esc(v)+'</span></div>';}
-const TABS=['home','docs','planta','dificuldades','oportunidades','lixao'];
+const TABS=['home','sessoes','planta','dificuldades','lixao','oportunidades','docs','ecossistema'];
 function route(){
   let h=(location.hash||'#home').slice(1); if(TABS.indexOf(h)<0)h='home';
   TABS.forEach(function(t){var s=$(t); if(s)s.className=(t===h?'active':'');});
   document.querySelectorAll('nav a').forEach(function(a){a.className=(a.getAttribute('href')==='#'+h?'active':'');});
+  if(h==='home')loadCommits();
+  if(h==='sessoes')loadSessoes();
   if(h==='planta')loadPlant();
   if(h==='lixao')loadLixao();
   if(h==='dificuldades')loadDiff();
+  if(h==='ecossistema')loadEco();
 }
 window.addEventListener('hashchange',route);
 async function pollHome(){
@@ -212,7 +231,7 @@ async function pollHome(){
   const b=$('status'); b.className='badge '+(online?'on':'off'); b.textContent=online?'ONLINE':'OFFLINE';
   hist.push(online); if(hist.length>60)hist.shift();
   if($('timeline'))$('timeline').innerHTML=hist.map(function(u){return '<div class="dot '+(u?'up':'down')+'"></div>';}).join('');
-  if(health&&$('health'))$('health').innerHTML=kv('oracle',health.oracle)+kv('model',health.model||'-')+kv('effort',health.effort||'-')+kv('uptime',fmtAge(health.uptime_sec))+kv('endpoints',(health.endpoints||[]).join(' '));
+  if(health&&$('health'))$('health').innerHTML=kv('oracle',health.oracle)+kv('model',health.model||'-')+kv('effort',health.effort||'-')+kv('uptime',fmtAge(health.uptime_sec))+kv('endpoints',(health.endpoints||[]).length+' rotas');
   if(!online)return;
   try{const s=await (await fetch('/sessions',{cache:'no-store'})).json();
     if($('sessions'))$('sessions').innerHTML=Object.entries(s).map(function(e){var id=e[0],v=e[1];return '<tr><td>'+esc(id)+'</td><td>'+(v.cycle==null?'-':v.cycle)+'</td><td>'+fmtAge(v.age_sec)+'</td><td>'+(v.unchanged_beats||0)+'</td><td>'+esc(v.last_action||'')+'</td><td>'+(v.flags||[]).map(function(f){return '<span class="flag '+f+'">'+f+'</span>';}).join(' ')+'</td></tr>';}).join('')||'<tr><td colspan=6 class="muted">nenhuma sessão batendo ponto</td></tr>';
@@ -220,6 +239,20 @@ async function pollHome(){
   try{const ev=await (await fetch('/events',{cache:'no-store'})).json();
     if($('feed'))$('feed').innerHTML=ev.slice().reverse().map(function(e){var x=e.kind==='consult'?('mode='+(e.mode||'default')+' · '+(e.dur_sec==null?'?':e.dur_sec)+'s · q'+(e.q_chars==null?'?':e.q_chars)):('cycle='+(e.cycle==null?'?':e.cycle)+' · '+esc(e.session_id||'')+' '+esc(e.last_action||''));return '<div class="ev"><span class="t">'+fmtTime(e.t)+'</span><span class="k '+esc(e.kind)+'">'+esc(e.kind)+'</span><span>'+x+'</span></div>';}).join('')||'<div class="muted">sem atividade</div>';
   }catch(e){}
+}
+async function loadCommits(){
+  try{const d=await (await fetch('/api/recent-commits')).json();
+    if($('commits'))$('commits').innerHTML=(d.commits||[]).map(function(c){return '<div class="ev"><span class="t">'+esc(c.slice(0,7))+'</span><span>'+esc(c.slice(8))+'</span></div>';}).join('')||'<div class="muted">sem commits</div>';
+  }catch(e){}
+}
+async function loadSessoes(){
+  var w=$('sess-wrap'),al=$('sess-alarm'); w.innerHTML='<span class="muted">lendo ~/.claude/projects...</span>';
+  try{const d=await (await fetch('/api/claude-sessions')).json();
+    if((d.pending_gate||[]).length){al.className='alarm bad';al.innerHTML='🚨 '+d.pending_gate.length+' consult(s) ESPERANDO o gate (pergunta sem resposta gravada): '+d.pending_gate.map(function(p){return esc(p.q)+' ('+fmtAge(p.age_sec)+')';}).join(' · ');}
+    else{al.className='alarm ok';al.textContent='✅ Nenhum consult pendente — toda pergunta ao gate tem resposta gravada.';}
+    var rows=(d.sessions||[]).map(function(s){return '<tr><td><span class="flag '+s.state+'">'+s.state+'</span></td><td>'+fmtAge(s.idle_sec)+'</td><td>'+esc(s.project)+'</td><td class="muted">'+esc(s.id)+'</td><td>'+esc(s.desc||'(sem descritor)')+'</td></tr>';}).join('');
+    w.innerHTML='<div class="muted" style="margin-bottom:10px"><b style="color:var(--txt)">'+d.total+'</b> sessões Claude Code no total (top '+(d.sessions||[]).length+' por atividade). ACTIVE&lt;5min · IDLE&lt;1h · STOPPED&gt;1h. "parada há" = tempo desde a última escrita no transcript.</div><table><thead><tr><th>estado</th><th>parada há</th><th>projeto</th><th>id</th><th>descritor (1ª mensagem)</th></tr></thead><tbody>'+rows+'</tbody></table>';
+  }catch(e){w.innerHTML='<span class="muted">erro: '+esc(e)+'</span>';}
 }
 async function loadPlant(){
   var g=$('plant-gallery'); g.innerHTML='<span class="muted">carregando...</span>';
@@ -233,8 +266,8 @@ async function loadDiff(){
     var par=Object.entries(s).filter(function(e){return (e[1].flags||[]).indexOf('PARALYZED')>=0;});
     var st=Object.entries(s).filter(function(e){return (e[1].flags||[]).indexOf('STALLED')>=0 && (e[1].flags||[]).indexOf('PARALYZED')<0;});
     var a=$('alarm');
-    if(par.length){a.className='alarm bad';a.textContent='🚨 PATINANDO: '+par.map(function(e){return e[0];}).join(', ')+' — cycle congelado. O gate pode não estar ajudando o suficiente; use o Q&A abaixo pra desbloquear.';}
-    else if(st.length){a.className='alarm bad';a.textContent='⚠️ '+st.map(function(e){return e[0];}).join(', ')+' STALLED (sem heartbeat). Sessão pode ter caído.';}
+    if(par.length){a.className='alarm bad';a.textContent='🚨 PATINANDO: '+par.map(function(e){return e[0];}).join(', ')+' — cycle congelado. O gate pode não estar ajudando; use o Q&A pra desbloquear.';}
+    else if(st.length){a.className='alarm bad';a.textContent='⚠️ '+st.map(function(e){return e[0];}).join(', ')+' STALLED (sem heartbeat) — sessão pode ter caído.';}
     else{a.className='alarm ok';a.textContent='✅ Tudo progredindo — nenhuma sessão PARALYZED/STALLED.';}
   }catch(e){var a=$('alarm');a.className='alarm bad';a.textContent='gate offline — não dá pra checar patinagem';}
 }
@@ -253,6 +286,14 @@ async function loadLixao(){
     var labels={deliverable:['✅ deliverable — artifacts/&lt;plant&gt;/ (canônico, MANTER)','var(--ok)'],review_evidence:['📋 review/ — evidência de feature (pode arquivar os antigos)','var(--accent)'],runs_scratch:['🗑️ runs/ — SCRATCH gitignored (lixo seguro pra apagar)','var(--warn)'],fixtures:['📌 fixtures/ — input canônico','var(--accent)'],other:['❓ outros — investigar (órfão?)','var(--bad)']};
     cc.innerHTML=Object.keys(labels).map(function(k){var items=d.categories[k]||[]; if(!items.length)return ''; var L=labels[k]; var rows=items.map(function(it){return '<tr><td>'+esc(it.path)+'</td><td style="text-align:right;color:var(--dim)">'+it.mb+' MB</td></tr>';}).join(''); return '<div class="card" style="margin-top:14px;border-color:'+L[1]+'"><h2 style="color:'+L[1]+'">'+L[0]+' ('+items.length+')</h2><table>'+rows+'</table></div>';}).join('')||'<div class="muted">nenhum .skp encontrado</div>';
   }catch(e){sm.textContent='erro: '+esc(e);}
+}
+const ECO={'sketchup-mcp':'repo principal: pipeline PDF→SKP + o gate (tools/claude_bridge) + .claude/ (cérebro)','.claude':'config do projeto E:\\\\Claude (onde o chat roda): CLAUDE.md, RTK, memória do chat','claude-bridge':'bridge standalone ORIGINAL (broker.py + server.py + .oauth_token + LIGAR-BRIDGE.cmd) — fallback/legado; o canônico agora é sketchup-mcp/tools/claude_bridge','wt-gh':'git worktree — branch chore/gh-autopilot-skill','wt-dash':'git worktree — branch feat/gate-dashboard; SERVE ESTE painel agora','wt-promote':'git worktree temporário (removido)'};
+async function loadEco(){
+  var w=$('eco-wrap'); w.innerHTML='<span class="muted">listando...</span>';
+  try{const d=await (await fetch('/api/ecosystem')).json();
+    var rows=(d.items||[]).map(function(it){return '<div class="d"><code>'+esc(it.name)+(it.dir?'/':'')+'</code>'+(ECO[it.name]||'—')+'</div>';}).join('');
+    w.innerHTML='<div class="muted" style="margin-bottom:8px">raiz: <code>'+esc(d.root)+'</code></div><div class="docs"><div style="border:1px solid var(--line);border-radius:6px;background:#0d1117">'+rows+'</div></div>';
+  }catch(e){w.innerHTML='<span class="muted">erro: '+esc(e)+'</span>';}
 }
 route(); pollHome(); setInterval(pollHome,5000);
 </script>

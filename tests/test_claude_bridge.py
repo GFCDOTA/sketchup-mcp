@@ -163,9 +163,9 @@ def test_dashboard_html_serves_the_spa():
     import tools.claude_bridge.server as srv
     html = srv.dashboard_html()
     assert "<!doctype html>" in html.lower()
-    assert "Claude Gate" in html
+    assert "SketchUp Creator" in html
     # SPA tabs present (the inline fallback has none of these)
-    assert "#lixao" in html and "#dificuldades" in html and "#planta" in html
+    assert "#lixao" in html and "#sessoes" in html and "#ecossistema" in html
 
 
 def test_safe_artifact_blocks_escape_and_nonimage():
@@ -174,3 +174,22 @@ def test_safe_artifact_blocks_escape_and_nonimage():
     assert srv.safe_artifact("tools/claude_bridge/server.py") is None  # outside artifacts
     assert srv.safe_artifact("artifacts/notes.txt") is None         # under artifacts, non-image
     assert srv.safe_artifact("../.oauth_token") is None             # secret via traversal
+
+
+def test_claude_sessions_shape():
+    import tools.claude_bridge.server as srv
+    d = srv.claude_sessions()
+    assert {"sessions", "pending_gate", "total"} <= set(d)
+    assert isinstance(d["sessions"], list) and isinstance(d["pending_gate"], list)
+
+
+def test_ecosystem_shape():
+    import tools.claude_bridge.server as srv
+    d = srv.ecosystem()
+    assert "items" in d and "root" in d and isinstance(d["items"], list)
+
+
+def test_recent_commits_shape():
+    import tools.claude_bridge.server as srv
+    d = srv.recent_commits()
+    assert "commits" in d and isinstance(d["commits"], list)

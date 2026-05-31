@@ -512,6 +512,96 @@ def safe_artifact(rel: str):
     return p if p.is_file() else None
 
 
+def _first_user_text(jsonl: Path) -> str:
+    """Best-effort: the first user input in a transcript (a human-readable descriptor)."""
+    try:
+        with jsonl.open("r", encoding="utf-8", errors="replace") as f:
+            for _ in range(10):
+                line = f.readline()
+                if not line:
+                    break
+                try:
+                    obj = json.loads(line)
+                except ValueError:
+                    continue
+                if obj.get("type") == "queue-operation" and obj.get("content"):
+                    return str(obj["content"])[:140]
+                m = obj.get("message")
+                if isinstance(m, dict) and m.get("role") == "user":
+                    c = m.get("content")
+                    if isinstance(c, str):
+                        return c[:140]
+                    if isinstance(c, list):
+                        for part in c:
+                            if isinstance(part, dict) and part.get("type") == "text":
+                                return str(part.get("text", ""))[:140]
+    except OSError:
+        pass
+    return ""
+
+
+def claude_sessions() -> dict:
+    """Real Claude Code sessions (~/.claude/projects) + derived state, so we can see
+    if e.g. 'GPT bridge integration' is ACTIVE/IDLE/STOPPED, plus any consult that is
+    still waiting on the gate (a question with no recorded response)."""
+    proj = Path.home() / ".claude" / "projects"
+    out = []
+    if proj.is_dir():
+        for d in proj.iterdir():
+            if not d.is_dir():
+                continue
+            for js in d.glob("*.jsonl"):
+                try:
+                    age = time.time() - js.stat().st_mtime
+                except OSError:
+                    continue
+                state = ("ACTIVE" if age < 300 else
+                         "IDLE" if age < 3600 else "STOPPED")
+                out.append({"id": js.stem[:8], "project": d.name,
+                            "desc": _first_user_text(js),
+                            "idle_sec": round(age), "state": state})
+    out.sort(key=lambda s: s["idle_sec"])
+    qd = REPO_ROOT / ".ai_bridge" / "questions"
+    rd = REPO_ROOT / ".ai_bridge" / "responses"
+    pending = []
+    if qd.is_dir():
+        answered = {p.stem for p in rd.glob("*.md")} if rd.is_dir() else set()
+        for q in sorted(qd.glob("*.md")):
+            if q.stem not in answered:
+                try:
+                    a = round(time.time() - q.stat().st_mtime)
+                except OSError:
+                    a = 0
+                pending.append({"q": q.stem, "age_sec": a})
+    return {"sessions": out[:60], "total": len(out), "pending_gate": pending}
+
+
+def ecosystem() -> dict:
+    """Top-level of E:\\Claude (the machine ecosystem) for the docs page."""
+    root = REPO_ROOT.parent
+    items = []
+    try:
+        for p in sorted(root.iterdir()):
+            items.append({"name": p.name, "dir": p.is_dir()})
+    except OSError:
+        pass
+    return {"root": str(root), "items": items}
+
+
+def recent_commits(n: int = 12) -> dict:
+    """Recent develop commits so the dashboard shows the project is alive."""
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(REPO_ROOT), "log", "--oneline", "-n", str(n),
+             "origin/develop"],
+            capture_output=True, text=True, encoding="utf-8", errors="replace",
+            timeout=10)
+        lines = [ln for ln in (proc.stdout or "").splitlines() if ln.strip()]
+    except (OSError, subprocess.SubprocessError):
+        lines = []
+    return {"commits": lines}
+
+
 class Handler(BaseHTTPRequestHandler):
     def _send(self, code, obj):
         body = json.dumps(obj, ensure_ascii=False).encode("utf-8")
@@ -551,6 +641,12 @@ class Handler(BaseHTTPRequestHandler):
             self._send(200, skp_inventory())
         elif p == "/api/plant":
             self._send(200, plant_info())
+        elif p == "/api/claude-sessions":
+            self._send(200, claude_sessions())
+        elif p == "/api/ecosystem":
+            self._send(200, ecosystem())
+        elif p == "/api/recent-commits":
+            self._send(200, recent_commits())
         elif p == "/artifact":
             f = safe_artifact((parse_qs(u.query).get("path") or [""])[0])
             if not f:
