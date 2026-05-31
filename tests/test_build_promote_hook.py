@@ -44,9 +44,16 @@ def test_infer_plant():
     assert _infer_plant(Path("nowhere/x.json")) == "planta_74"  # fallback
 
 
+def _patch_det(monkeypatch, overall="PASS", gates=None):
+    import tools.run_deterministic_gates as rdg
+    monkeypatch.setattr(rdg, "run_all",
+                        lambda **k: {"overall": overall, "gates": gates or {}})
+
+
 def test_green_build_promotes_to_stable_path(tmp_path, monkeypatch):
     b = _build_dir(tmp_path, {"a": True, "b": True})
     c = _consensus(tmp_path)
+    _patch_det(monkeypatch, "PASS")  # deterministic suite tested separately
     import tools.promote_canonical as pc
     orig = pc.promote
     monkeypatch.setattr(pc, "promote",
@@ -54,6 +61,25 @@ def test_green_build_promotes_to_stable_path(tmp_path, monkeypatch):
     line = _auto_promote(_args(b / "model.skp", c), {"ok": True})
     assert "PROMOTED" in line and "planta_Z" in line
     assert (tmp_path / "artifacts" / "planta_Z" / "planta_Z.skp").read_bytes() == b"SKP"
+
+
+def test_deterministic_fail_blocks_promote(tmp_path, monkeypatch):
+    # self-check gates green, but the deterministic suite FAILs -> no promote.
+    b = _build_dir(tmp_path, {"a": True})
+    c = _consensus(tmp_path)
+    _patch_det(monkeypatch, "FAIL", {"wall_presence": {"verdict": "FAIL"}})
+    line = _auto_promote(_args(b / "model.skp", c), {"ok": True})
+    assert "PROMOTE_SKIPPED" in line and "deterministic" in line
+    assert not (tmp_path / "artifacts" / "planta_Z").exists()
+
+
+def test_deterministic_incomplete_blocks_promote(tmp_path, monkeypatch):
+    b = _build_dir(tmp_path, {"a": True})
+    c = _consensus(tmp_path)
+    _patch_det(monkeypatch, "INCOMPLETE",
+               {"wall_presence": {"verdict": "SKIPPED_NO_SIDECAR"}})
+    line = _auto_promote(_args(b / "model.skp", c), {"ok": True})
+    assert "PROMOTE_SKIPPED" in line and "INCOMPLETE" in line
 
 
 def test_failed_gate_does_not_promote(tmp_path):

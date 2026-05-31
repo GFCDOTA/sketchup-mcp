@@ -920,11 +920,26 @@ def _auto_promote(args, result):
     failed = sorted(k for k, v in gates.items() if not v)
     if failed:
         return f"PROMOTE_SKIPPED self-check gates failed: {failed}"
+    # full deterministic fidelity suite must be green too: opening_host +
+    # wall_overlap + wall_presence (exact projection). The deliverable must
+    # never land at the fixed path with a deterministic FAIL/INCOMPLETE.
+    out_dir = args.out.resolve().parent
+    try:
+        from tools.run_deterministic_gates import run_all
+        det = run_all(consensus_path=str(args.consensus),
+                      render_path=str(out_dir / "model_top.png"))
+    except Exception as e:  # pragma: no cover - defensive
+        return f"PROMOTE_SKIPPED deterministic gates errored: {e}"
+    if det.get("overall") != "PASS":
+        bad = {k: v.get("overall", v.get("verdict"))
+               for k, v in det.get("gates", {}).items()
+               if v.get("overall", v.get("verdict")) != "PASS"}
+        return f"PROMOTE_SKIPPED deterministic gates {det.get('overall')}: {bad}"
     from tools.promote_canonical import promote as _promote
     plant = _infer_plant(args.consensus, args.plant)
-    res = _promote(args.out.resolve().parent, plant)
+    res = _promote(out_dir, plant)
     return (f"PROMOTED -> artifacts/{plant}/{plant}.skp sha={res['sha']} "
-            f"(self-check gates green)")
+            f"(self-check + deterministic gates green)")
 
 
 if __name__ == "__main__":
