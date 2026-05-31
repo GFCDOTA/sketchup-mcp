@@ -1,7 +1,22 @@
 # Handoff — sketchup-mcp
 
-> Fio da meada entre sessões. Última atualização: **2026-05-30 ~21:05 UTC** (window_fix COMMITADO+PUSHED seguindo recomendação peer-Claude; (b) consensus-fix PENDENTE Felipe).
+> Fio da meada entre sessões. Última atualização: **2026-05-30 ~21:40 UTC** (NÃO PARE: roadmap #2 overlay_diff gate + #3 opening-host detector ENTREGUES, commitados+pushed; 2 itens NEEDS-HUMAN abertos).
 > Leia primeiro ao iniciar sessão.
+
+## 2026-05-30 ~21:40 UTC — NÃO PARE: roadmap #2 + #3 entregues (autônomo)
+
+Ciclos contínuos, commit por slice, consulta ao gate :8765 (peer-Claude, GO no sidecar). Branch `feat/fp-030-…`.
+- **#2 — overlay_diff vira GATE REAL** (`88a28e3`): calibração pdf-pt→pixel era subdeterminada (zoom_extents);
+  fix = builder emite projeção EXATA num sidecar `<png>.proj.json` (cam.height+cam.target pós-zoom_extents, via
+  `view.screen_coords`/ortho). `affine_from_sidecar` → zero erro. Coverage só in-frame; pula paredes clipadas pelo
+  frame 4:3; dark_mask 160 pega parapeito. Real: planta_74 limpo→PASS, parede apagada→FAIL. tests +3.
+  ⚠️ **LIMITAÇÃO (task #29, NEEDS-HUMAN visual):** render clipa o perímetro (zoom_extents ajusta ao aspecto da
+  janela do SU, não ao 4:3 do PNG). Verificar perímetro exige câmera determinística = muda render = OK do Felipe.
+- **#3 — detector posicional opening↔host-wall** (`fb1b0c8`): `tools/opening_host_audit.py`, puro consensus-only
+  (sem PDF/SKP/SU). Pega a classe FP-031: host_mismatch / off_host_segment / width_exceeds_host. quadrado→PASS,
+  planta_74→FAIL 9/12 (janelas h_o007/8/10 + varanda + portas o000-003 com host solto). tests +6. pytest 232 ✓.
+- **(b) — task #28 NEEDS-HUMAN:** consertar `opening→wall_id` no EXTRATOR + regenerar consensus planta_74 (muta
+  fixture, Hard Rule #3). É a raiz do que #3 quantifica. PENDENTE Felipe.
 
 ## 2026-05-30 ~21:05 UTC — window_fix FP-031 COMMITADO + PUSHED (seguindo recomendação peer-Claude)
 
