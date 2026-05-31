@@ -1,7 +1,20 @@
 # Handoff — sketchup-mcp
 
-> Fio da meada entre sessões. Última atualização: **2026-05-30 ~21:40 UTC** (NÃO PARE: roadmap #2 overlay_diff gate + #3 opening-host detector ENTREGUES, commitados+pushed; 2 itens NEEDS-HUMAN abertos).
+> Fio da meada entre sessões. Última atualização: **2026-05-30 ~23:20 UTC** (NÃO PARE/loop: suite determinística COMPLETA — 3 detectores + runner único; backlog det. limpo; 2 NEEDS-HUMAN abertos).
 > Leia primeiro ao iniciar sessão.
+
+## 2026-05-30 ~23:20 UTC — /loop: suite de gates determinísticos COMPLETA + backlog limpo
+
+Ciclos curtos, commit por slice. **Suite determinística (consensus/render, sem SU/PDF/rede):**
+- `tools/overlay_diff.py` — wall-presence no render top via projeção EXATA do sidecar (#2, `88a28e3`).
+- `tools/opening_host_audit.py` — opening↔host-wall (#3, `fb1b0c8`): planta_74 9/12 FAIL.
+- `tools/wall_overlap_audit.py` — parede duplicada/sobreposta (#3b, `3aef1b4`): planta_74 1 (h_w001≈w020).
+- `tools/run_deterministic_gates.py` — runner único CI-able (`482018e`): planta_74 FAIL, quadrado PASS.
+pytest **242 ✓**. Explorei openings-fora-do-plano / duplicados / rooms-degenerados / wall_id-pendurado = **0**
+(classes limpas). **Backlog determinístico de bug-finding ESGOTADO** → parei sem inventar ciclo.
+**Fidelidade real restante = NEEDS-HUMAN:** #28 (extrator opening→wall_id + regenerar consensus, dropar
+duplicata; muta fixture) e #29 (câmera top determinística; muda render). Detectores PROVAM o problema; o fix
+é do Felipe. Ver LL-031.
 
 ## 2026-05-30 ~21:40 UTC — NÃO PARE: roadmap #2 + #3 entregues (autônomo)
 
