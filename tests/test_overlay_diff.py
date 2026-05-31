@@ -158,3 +158,18 @@ def test_real_planta74_erased_wall_is_flagged():
     )
     assert any(f["wall_id"] == target["id"] for f in findings), \
         f"erased wall {target['id']} not flagged"
+
+
+@pytestmark_data
+def test_real_planta74_no_wall_clipped_by_frame():
+    # FP-031 #29: the deterministic top camera fits the whole plan in the 4:3
+    # frame, so EVERY consensus wall is in-frame and the gate can verify it
+    # (no perimeter clipping / silent skipping).
+    con = json.loads(CONSENSUS.read_text("utf-8"))
+    proj = json.loads(PROJ.read_text("utf-8"))
+    aff = affine_from_sidecar(proj)
+    shape = (proj["img_h"], proj["img_w"])
+    clipped = [w["id"] for w in con["walls"]
+               if wall_inframe_fraction(aff, tuple(w["start"]),
+                                        tuple(w["end"]), shape) < 0.5]
+    assert clipped == [], f"walls clipped by render frame: {clipped}"

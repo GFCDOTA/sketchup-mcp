@@ -792,7 +792,7 @@ def setup_iso_camera(model)
   view.zoom_extents
 end
 
-def setup_top_camera(model)
+def setup_top_camera(model, img_w = 1600, img_h = 1200)
   view = model.active_view
   bbox = model.bounds
   center = bbox.center
@@ -802,9 +802,18 @@ def setup_top_camera(model)
     eye, center, Geom::Vector3d.new(0, 1, 0),
   )
   cam.perspective = false
-  cam.height = diag * 1.05
+  # FP-031 #29: DETERMINISTIC ortho-top fit to the IMAGE aspect — NOT
+  # view.zoom_extents, which fits the SU *window* aspect and then clips the
+  # model in the fixed-aspect PNG (so the perimeter falls off-frame and the
+  # wall-presence gate cannot verify it). Set cam.height to contain the model
+  # bounds in the img_w:img_h aspect + a small margin, centred on the model.
+  # Result: the whole plan is always in-frame and the pixel projection is
+  # reproducible (independent of the SU window size).
+  aspect = img_w.to_f / img_h.to_f
+  model_w = bbox.max.x - bbox.min.x
+  model_h = bbox.max.y - bbox.min.y
+  cam.height = [model_h, model_w / aspect].max * 1.06
   view.camera = cam
-  view.zoom_extents
 end
 
 def write_png(model, path, width = 1600, height = 1200)
