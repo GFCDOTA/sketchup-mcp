@@ -82,6 +82,16 @@ CANONICAL_TRIGGERS = (
     "user_requested_consult",
 )
 
+# Heavy/high-stakes triggers where one Claude consulting another risks agreement
+# bias -> send mode=redteam so the oracle steelmans the opposition first (gate 6.2,
+# a no-backend self-critique). The 6.1 multi-oracle router was deleted as fake
+# independence / infra-for-infra (gate verdict GO/B, 2026-05-31).
+REDTEAM_TRIGGERS = (
+    "a_b_c_decision_with_tradeoff",
+    "risk_of_inventing_geometry",
+    "big_pr_changes_gate_or_spec",
+)
+
 
 # ---- types -----------------------------------------------------------
 
@@ -242,9 +252,11 @@ def write_response_file(
     return path
 
 
-def call_bridge(prompt: str, url: str = BRIDGE_URL) -> str:
-    """POST {prompt} to /ask. Returns the response text or raises."""
+def call_bridge(prompt: str, url: str = BRIDGE_URL, mode: str = "") -> str:
+    """POST {prompt[, mode]} to /ask. Returns the response text or raises."""
     payload = {"prompt": prompt}
+    if mode:
+        payload["mode"] = mode
     data = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(
         f"{url}/ask",
@@ -305,12 +317,13 @@ def run_gate(
         )
 
     # Bridge is up — record question first, then call
-    bridge_status = f"ONLINE — {detail}"
+    mode = "redteam" if g.trigger in REDTEAM_TRIGGERS else ""
+    bridge_status = f"ONLINE — {detail}" + (f" | mode={mode}" if mode else "")
     question_path = write_question_file(
         questions_dir, g, prompt, bridge_status,
     )
     try:
-        raw = call_bridge(prompt, url=url)
+        raw = call_bridge(prompt, url=url, mode=mode)
     except (urllib.error.URLError, urllib.error.HTTPError,
             TimeoutError, OSError) as e:
         return GateResult(

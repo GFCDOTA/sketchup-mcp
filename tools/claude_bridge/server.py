@@ -86,11 +86,13 @@ def ask_claude(question: str) -> str:
         cmd = (f'"{claude_bin()}" -p --model claude-opus-4-8 --effort xhigh '
                f'--output-format text')
         proc = subprocess.run(cmd, input=prompt, capture_output=True, text=True,
+                              encoding="utf-8", errors="replace",
                               timeout=CLAUDE_TIMEOUT, shell=True, cwd=workdir)
     else:
         proc = subprocess.run([claude_bin(), "-p", "--model", "claude-opus-4-8",
                                "--effort", "xhigh", "--output-format", "text"],
                               input=prompt, capture_output=True, text=True,
+                              encoding="utf-8", errors="replace",
                               timeout=CLAUDE_TIMEOUT, cwd=workdir)
     out = (proc.stdout or "").strip()
     if not out:
