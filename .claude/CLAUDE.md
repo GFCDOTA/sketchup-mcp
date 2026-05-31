@@ -116,6 +116,8 @@ Auto-discovered em `.claude/skills/*/SKILL.md`:
   automaticamente em decisão real (9 triggers canônicos)
 - `repo-governance` — PR / branch / merge / hygiene
 - `multi-agent-handoff` — coordenação multi-agent / worktrees
+- `autonomous-fidelity-loop` — loop contínuo auto-ritmado de fidelidade com
+  log por ciclo; auto-corrige o determinístico, para em patinagem/RED/NEEDS-HUMAN
 
 ## Scratch
 
