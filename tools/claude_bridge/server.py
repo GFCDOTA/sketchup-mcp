@@ -32,7 +32,10 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import threading
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
 
 CLAUDE_TIMEOUT = 240  # segundos por resposta; estoura -> erro 500, nunca trava infinito
 
@@ -170,7 +173,68 @@ def health_payload() -> dict:
         "ask_field": list(ASK_FIELDS),
         "verdict_enum": list(VERDICT_ENUM),
         "modes": ["default", "redteam"],
+        "endpoints": ["/ask", "/health", "/heartbeat", "/sessions"],
     }
+
+
+# --- session liveness orchestrator (gate spec section-5 audit-core, OBSERVE-ONLY) ---
+# The gate is the chokepoint every session consults; sessions also POST a per-cycle
+# heartbeat so we can tell PROGRESS from SILENCE (a session working hard but not
+# consulting looks identical to a dead one). NO actor that kills/restarts peers.
+# Collision PREVENTION is worktree isolation — a separate follow-up, not this.
+STALL_SECONDS = 600     # no heartbeat in 10 min -> STALLED (liveness / wall clock)
+PARALYZED_M = 3         # `cycle` unchanged across this many beats -> PARALYZED
+AUDIT_PATH = Path(__file__).resolve().parents[2] / ".ai_bridge" / "audit" / "audit.jsonl"
+_SESSIONS: dict = {}
+_SESSIONS_LOCK = threading.Lock()
+
+
+def _audit_append(event: dict) -> None:
+    """Best-effort append to the audit-core log; never break a request on a log write."""
+    try:
+        AUDIT_PATH.parent.mkdir(parents=True, exist_ok=True)
+        with AUDIT_PATH.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(event, ensure_ascii=False) + "\n")
+    except OSError:
+        pass
+
+
+def record_heartbeat(session_id: str, cycle, last_action: str = "") -> dict:
+    """Record a per-cycle heartbeat. `cycle` is the monotonic PROGRESS token — the one
+    signal that tells alive-and-progressing apart from alive-but-stuck."""
+    now = time.time()
+    with _SESSIONS_LOCK:
+        s = _SESSIONS.get(session_id, {"cycle": None, "unchanged": 0})
+        s["unchanged"] = s["unchanged"] + 1 if s["cycle"] == cycle else 0
+        s["cycle"] = cycle
+        s["last_seen"] = now
+        s["last_action"] = last_action  # human-readability only, never a flag input
+        _SESSIONS[session_id] = s
+    _audit_append({"t": now, "kind": "heartbeat", "session_id": session_id,
+                   "cycle": cycle, "last_action": last_action})
+    return {"recorded": session_id, "cycle": cycle}
+
+
+def sessions_view() -> dict:
+    """Read model: each session + derived flags. STALLED = silent too long;
+    PARALYZED = still beating but `cycle` frozen (the case passive logging is blind to)."""
+    now = time.time()
+    out = {}
+    with _SESSIONS_LOCK:
+        for sid, s in _SESSIONS.items():
+            flags = []
+            if (now - s.get("last_seen", 0)) > STALL_SECONDS:
+                flags.append("STALLED")
+            if s.get("unchanged", 0) >= PARALYZED_M:
+                flags.append("PARALYZED")
+            out[sid] = {
+                "cycle": s.get("cycle"),
+                "age_sec": round(now - s.get("last_seen", now), 1),
+                "unchanged_beats": s.get("unchanged", 0),
+                "last_action": s.get("last_action", ""),
+                "flags": flags or ["OK"],
+            }
+    return out
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -183,13 +247,20 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_GET(self):
-        if self.path.rstrip("/") == "/health":
+        p = self.path.rstrip("/")
+        if p == "/health":
             self._send(200, health_payload())
+        elif p == "/sessions":
+            self._send(200, sessions_view())
         else:
             self._send(404, {"error": "not found"})
 
     def do_POST(self):
-        if self.path.rstrip("/") != "/ask":
+        path = self.path.rstrip("/")
+        if path == "/heartbeat":
+            self._heartbeat()
+            return
+        if path != "/ask":
             self._send(404, {"error": "not found"})
             return
         try:
@@ -202,6 +273,19 @@ class Handler(BaseHTTPRequestHandler):
             question = apply_mode(prompt, parse_ask_mode(body))
             self._send(200, {"response": ask_claude(question)})
         except Exception as e:  # devolve erro honesto; nao fabrica resposta
+            self._send(500, {"error": f"{type(e).__name__}: {e}"})
+
+    def _heartbeat(self):
+        try:
+            n = int(self.headers.get("Content-Length") or 0)
+            data = json.loads(self.rfile.read(n).decode("utf-8", "replace")) if n else {}
+            sid = str((data or {}).get("session_id") or "").strip()
+            if not sid:
+                self._send(400, {"error": "heartbeat needs session_id"})
+                return
+            self._send(200, record_heartbeat(
+                sid, data.get("cycle"), str(data.get("last_action") or "")))
+        except Exception as e:
             self._send(500, {"error": f"{type(e).__name__}: {e}"})
 
     def log_message(self, *a):

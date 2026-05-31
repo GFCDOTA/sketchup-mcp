@@ -86,3 +86,32 @@ def test_apply_mode_default_is_noop():
 
 def test_health_advertises_redteam_mode():
     assert "redteam" in health_payload()["modes"]
+
+
+# ---- session liveness orchestrator (heartbeat) ----------------------
+
+
+def test_heartbeat_progressing_is_ok():
+    import tools.claude_bridge.server as srv
+    srv._SESSIONS.clear()
+    srv.record_heartbeat("sess-A", 1)
+    srv.record_heartbeat("sess-A", 2)  # cycle advanced -> progressing
+    v = srv.sessions_view()["sess-A"]
+    assert v["cycle"] == 2
+    assert v["flags"] == ["OK"]
+
+
+def test_heartbeat_frozen_cycle_is_paralyzed():
+    import tools.claude_bridge.server as srv
+    srv._SESSIONS.clear()
+    for _ in range(srv.PARALYZED_M + 1):
+        srv.record_heartbeat("sess-B", 7)  # same cycle every beat -> stuck
+    assert "PARALYZED" in srv.sessions_view()["sess-B"]["flags"]
+
+
+def test_heartbeat_stalled_when_silent(monkeypatch):
+    import tools.claude_bridge.server as srv
+    srv._SESSIONS.clear()
+    srv.record_heartbeat("sess-C", 1)
+    monkeypatch.setattr(srv, "STALL_SECONDS", -1)  # make any age count as "too old"
+    assert "STALLED" in srv.sessions_view()["sess-C"]["flags"]
