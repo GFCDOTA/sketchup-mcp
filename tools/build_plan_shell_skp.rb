@@ -819,6 +819,39 @@ def write_png(model, path, width = 1600, height = 1200)
   model.active_view.write_image(options)
 end
 
+# FP-031 #2: emit the EXACT top-view projection so the deterministic
+# wall-presence gate (tools/overlay_diff.py) needs zero pixel calibration.
+# Writes a sidecar `<png>.proj.json` (additive — does NOT change the render).
+# Must be called while the TOP camera is active, right after zoom_extents and
+# before any other view mutation (view.screen_coords is viewport-dependent).
+def write_top_projection_sidecar(model, png_path, width, height)
+  return if png_path.nil? || png_path.to_s.empty?
+  view = model.active_view
+  cam  = view.camera
+  bb   = model.bounds
+  samples_in = [
+    [bb.min.x, bb.min.y], [bb.max.x, bb.min.y], [bb.max.x, bb.max.y],
+    [bb.min.x, bb.max.y], [bb.center.x, bb.center.y],
+  ]
+  samples = samples_in.map do |xi, yi|
+    sp = view.screen_coords(Geom::Point3d.new(xi, yi, 0.0))
+    { 'world_pt' => [xi / PT_TO_IN, yi / PT_TO_IN],   # back to pdf-points
+      'world_in' => [xi, yi],
+      'screen_px' => [sp.x.to_f, sp.y.to_f] }
+  end
+  data = {
+    'mode' => 'ortho_top',
+    'png' => File.basename(png_path.to_s),
+    'img_w' => width, 'img_h' => height,
+    'vp_w' => view.vpwidth, 'vp_h' => view.vpheight,
+    'cam_height_in' => cam.height.to_f,
+    'cam_target_in' => [cam.target.x.to_f, cam.target.y.to_f],
+    'pt_to_in' => PT_TO_IN,
+    'samples' => samples,
+  }
+  File.write(png_path.to_s + '.proj.json', JSON.pretty_generate(data))
+end
+
 # ---- geometry report ----------------------------------------------
 
 def walk_entities(ents, faces_out, edges_out, sub_groups_out)
@@ -1213,7 +1246,9 @@ end
 if outpng_top
   setup_top_camera(model)
   write_png(model, outpng_top)
-  puts "[rb] wrote #{outpng_top}"
+  # Capture the exact projection while the top camera is still active.
+  write_top_projection_sidecar(model, outpng_top, 1600, 1200)
+  puts "[rb] wrote #{outpng_top} (+ .proj.json)"
 end
 
 # 6. Save .skp last (this is the launcher's exit signal)
