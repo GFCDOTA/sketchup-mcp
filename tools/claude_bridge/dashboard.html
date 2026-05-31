@@ -304,12 +304,15 @@ async function askGate(){
     r.textContent=resp.response||resp.error||'(sem resposta)';
   }catch(e){r.textContent='erro: '+e;}
 }
+const LIXCLR={CANONICAL_DELIVERABLE:'var(--ok)',REVIEW_ARTIFACT:'var(--accent)',GENERATED_SCRATCH:'var(--warn)',DUPLICATE:'var(--bad)',UNKNOWN:'var(--bad)'};
+const ACTCLR={KEEP:'var(--ok)',ARCHIVE:'var(--accent)',DELETE_CANDIDATE:'var(--bad)',INVESTIGATE:'var(--warn)'};
 async function loadLixao(){
-  var sm=$('lixao-summary'),cc=$('lixao-cats'); sm.textContent='escaneando o repo por .skp...';
-  try{const d=await (await fetch('/api/skp-inventory')).json();
-    sm.innerHTML='<b style="color:var(--txt);font-size:14px">'+d.total+'</b> arquivos .skp · <b style="color:var(--txt);font-size:14px">'+d.total_mb+' MB</b> total no repo';
-    var labels={deliverable:['✅ deliverable — artifacts/&lt;plant&gt;/ (canônico, MANTER)','var(--ok)'],review_evidence:['📋 review/ — evidência de feature (pode arquivar os antigos)','var(--accent)'],runs_scratch:['🗑️ runs/ — SCRATCH gitignored (lixo seguro pra apagar)','var(--warn)'],fixtures:['📌 fixtures/ — input canônico','var(--accent)'],other:['❓ outros — investigar (órfão?)','var(--bad)']};
-    cc.innerHTML=Object.keys(labels).map(function(k){var items=d.categories[k]||[]; if(!items.length)return ''; var L=labels[k]; var rows=items.map(function(it){return '<tr><td>'+esc(it.path)+'</td><td style="text-align:right;color:var(--dim)">'+it.mb+' MB</td></tr>';}).join(''); return '<div class="card" style="margin-top:14px;border-color:'+L[1]+'"><h2 style="color:'+L[1]+'">'+L[0]+' ('+items.length+')</h2><table>'+rows+'</table></div>';}).join('')||'<div class="muted">nenhum .skp encontrado</div>';
+  var sm=$('lixao-summary'),cc=$('lixao-cats'); sm.textContent='escaneando E:\\Claude + sha256 + git status (read-only)...';
+  try{const d=await (await fetch('/api/skp-inventory-v2')).json();
+    var cats=Object.entries(d.by_category||{}).map(function(e){return e[0]+'='+e[1];}).join(' · ');
+    sm.innerHTML='<b style="color:var(--txt);font-size:14px">'+d.total+'</b> .skp em E:\\Claude · <b style="color:var(--txt)">'+d.total_mb+' MB</b> · <b style="color:var(--bad)">'+d.dup_groups+'</b> grupos duplicados (por hash) · '+cats;
+    var rows=(d.files||[]).map(function(f){var lc=LIXCLR[f.category]||'var(--dim)';var ac=ACTCLR[f.action]||'var(--dim)';return '<tr><td style="color:'+lc+';font-weight:600;white-space:nowrap">'+f.category+'</td><td><span class="flag" style="color:'+ac+';background:rgba(248,81,73,.06)">'+f.action+'</span></td><td>'+esc(f.path)+(f.dup_of?'<br><span class="muted">↳ cópia de '+esc(f.dup_of)+'</span>':'')+'</td><td style="text-align:right">'+f.mb+' MB</td><td class="muted">'+f.git+'</td><td class="muted">'+esc(f.sha)+(f.has_meta?' 📄':'')+'</td></tr>';}).join('');
+    cc.innerHTML='<table style="margin-top:14px"><thead><tr><th>categoria</th><th>ação sugerida</th><th>arquivo (dedup por hash)</th><th>tam</th><th>git</th><th>sha / meta</th></tr></thead><tbody>'+rows+'</tbody></table><div class="muted" style="margin-top:10px">100% read-only — nada é apagado. KEEP=manter · ARCHIVE=arquivar evidência antiga · DELETE_CANDIDATE=lixo/cópia segura · INVESTIGATE=UNKNOWN. 📄=tem metadata/geometry_report. ORPHAN/SUPERSEDED não são auto-detectados na v1 → caem em UNKNOWN→INVESTIGATE.</div>';
   }catch(e){sm.textContent='erro: '+esc(e);}
 }
 const TYPECLR={CANONICAL_REPO:'var(--ok)',WORKTREE:'var(--accent)',BRIDGE_SERVICE:'var(--warn)',CONFIG:'var(--accent)',VENV:'var(--dim)',ARTIFACTS:'var(--ok)',RUNS_SCRATCH:'var(--warn)',GIT_INTERNAL:'var(--bad)',UNKNOWN:'var(--bad)'};

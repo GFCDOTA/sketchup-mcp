@@ -231,3 +231,37 @@ def test_git_inventory_shape_no_crash():
     assert {"repos", "dirty"} <= set(d) and isinstance(d["repos"], list)
     for r in d["repos"]:  # dirs without .git are skipped, so no crash
         assert {"path", "branch", "dirty", "untracked"} <= set(r)
+
+
+def test_sha256_identical_content_same_hash(tmp_path):
+    import tools.claude_bridge.server as srv
+    a = tmp_path / "a.skp"; b = tmp_path / "b.skp"; c = tmp_path / "c.skp"
+    a.write_bytes(b"SAME-BYTES-XYZ"); b.write_bytes(b"SAME-BYTES-XYZ")
+    c.write_bytes(b"different")
+    assert srv._sha256(a) == srv._sha256(b)
+    assert srv._sha256(a) != srv._sha256(c)
+
+
+def test_dedup_by_hash_groups_and_keeper():
+    import tools.claude_bridge.server as srv
+    files = [
+        {"path": "sketchup-mcp/artifacts/p/p.skp", "sha": "AAA", "git": "tracked"},
+        {"path": "sketchup-mcp/runs/p/model.skp", "sha": "AAA", "git": "ignored"},
+        {"path": "wt-gh/artifacts/review/x.skp", "sha": "BBB", "git": "tracked"},
+    ]
+    srv._dedup_and_classify(files)
+    by = {f["path"]: f for f in files}
+    assert by["sketchup-mcp/artifacts/p/p.skp"]["category"] == "CANONICAL_DELIVERABLE"
+    assert by["sketchup-mcp/artifacts/p/p.skp"]["action"] == "KEEP"
+    # same hash as the canonical -> the runs/ copy is a DUPLICATE, not a separate file
+    assert by["sketchup-mcp/runs/p/model.skp"]["category"] == "DUPLICATE"
+    assert by["sketchup-mcp/runs/p/model.skp"]["dup_of"] == "sketchup-mcp/artifacts/p/p.skp"
+    assert by["sketchup-mcp/runs/p/model.skp"]["action"] == "DELETE_CANDIDATE"
+    assert by["wt-gh/artifacts/review/x.skp"]["category"] == "REVIEW_ARTIFACT"
+
+
+def test_skp_inventory_v2_shape():
+    import tools.claude_bridge.server as srv
+    d = srv.skp_inventory_v2()
+    assert {"total", "total_mb", "dup_groups", "by_category", "files"} <= set(d)
+    assert isinstance(d["files"], list)
