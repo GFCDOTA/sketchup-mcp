@@ -314,6 +314,10 @@ th{color:var(--dim);font-weight:500;}
 .lg.human{background:rgba(210,153,34,.7);}
 .lg.gate{background:rgba(63,185,80,.6);}
 .lg.ok{background:var(--ok);}
+.docs details{border:1px solid var(--line);border-radius:6px;margin-bottom:6px;background:#0d1117;}
+.docs summary{cursor:pointer;padding:8px 12px;font-weight:600;font-size:12px;color:var(--accent);}
+.docs .d{padding:3px 14px 3px 26px;font-size:12px;border-top:1px solid #21262d;}
+.docs .d code{color:var(--warn);background:rgba(210,153,34,.08);padding:1px 6px;border-radius:4px;margin-right:7px;}
 footer{padding:0 24px 24px;color:var(--dim);font-size:12px;}
 </style></head><body>
 <header><h1>&#127899; Claude Gate - Operacional</h1>
@@ -340,6 +344,68 @@ footer{padding:0 24px 24px;color:var(--dim);font-size:12px;}
 <table><thead><tr><th>session</th><th>cycle</th><th>idade</th><th>beats iguais</th><th>ultima acao</th><th>flags</th></tr></thead>
 <tbody id="sessions"></tbody></table></div>
 <div class="card full"><h2>Atividade (consults + heartbeats)</h2><div id="feed" class="feed"></div></div>
+<div class="card full"><h2>Diretorio .claude/ — o cerebro do projeto (clique pra expandir)</h2>
+<div class="docs">
+<details><summary>raiz</summary>
+<div class="d"><code>CLAUDE.md</code>bootloader: missao, Hard Rules, ordem de carregamento</div>
+<div class="d"><code>constitution.md</code>principios nao-negociaveis (#1 o .skp e o artefato; #8 no-skp-no-progress)</div>
+<div class="d"><code>README.md</code>orientacao/indice do diretorio</div>
+</details>
+<details><summary>memory/ — memoria persistente (estado + regras vivas)</summary>
+<div class="d"><code>project_context.md</code>o que e o projeto e onde esta</div>
+<div class="d"><code>current_state.md</code>estado atual (feito / em andamento)</div>
+<div class="d"><code>operational_rules.md</code>loop GREEN/YELLOW/RED e quando parar</div>
+<div class="d"><code>git_workflow.md</code>develop-first; disciplina de branch/commit/PR</div>
+<div class="d"><code>multi_agent_coordination.md</code>coordenacao entre sessoes/worktrees (nao clobberar)</div>
+<div class="d"><code>artifact_policy.md</code>hierarquia runs/ vs artifacts/ vs fixtures/ + promotion</div>
+<div class="d"><code>lessons_learned.md</code>licoes LL-NNN acumuladas (releia antes de repetir)</div>
+<div class="d"><code>deprecated_context.md</code>o que ficou obsoleto (nao seguir)</div>
+</details>
+<details><summary>specs/ — especificacoes (o "como deve ser")</summary>
+<div class="d"><code>product_goal.md</code>o objetivo: .skp fiel ao PDF</div>
+<div class="d"><code>fidelity_gate.md</code>o que conta como fiel (campos do geometry_report)</div>
+<div class="d"><code>skp_artifact_layout.md</code>paths/naming/metadata do .skp canonico</div>
+<div class="d"><code>skp_proof_of_progress_gate.md</code>Constitution #8: sem SKP+evidencia, nao e progresso</div>
+<div class="d"><code>gate_framework_and_audit.md</code>o gate de decisao §6 (oraculo/redteam/file-fetch/confidence/audit)</div>
+<div class="d"><code>generalize_builder_constants.md</code>blueprint pra generalizar as constantes do builder</div>
+<div class="d"><code>perfect_reference_strategy.md</code>PDF como ground truth</div>
+<div class="d"><code>sdd_and_harness_engineering.md</code>spec-driven dev + engenharia do harness</div>
+<div class="d"><code>repository_hygiene.md</code>higiene do repo (arquivar obsoletos)</div>
+<div class="d"><code>templates/</code>4 templates: artifact_contract, feature_spec, fidelity_spec, regression_summary</div>
+</details>
+<details><summary>skills/ — 10 capacidades auto-descobertas (cada uma um SKILL.md)</summary>
+<div class="d"><code>pdf-to-skp-pipeline</code>build do .skp a partir do consensus</div>
+<div class="d"><code>fidelity-review</code>checklist SKP vs PDF (humano)</div>
+<div class="d"><code>generate-and-compare-skp-after-change</code>gera SKP + compara before/after</div>
+<div class="d"><code>skp-visual-self-correction</code>Visual Oracle Gate: floating door / orphan glass / etc</div>
+<div class="d"><code>skp-artifact-management</code>promocao runs/ -&gt; artifacts/</div>
+<div class="d"><code>gpt-auto-consult-gate</code>consulta o oraculo :8765 nas decisoes reais (9 triggers)</div>
+<div class="d"><code>gh-autopilot</code>commit -&gt; PR -&gt; merge -&gt; cleanup via gh</div>
+<div class="d"><code>repo-governance</code>PR/branch/merge/hygiene</div>
+<div class="d"><code>multi-agent-handoff</code>coordenacao multi-agent/worktrees</div>
+<div class="d"><code>autonomous-fidelity-loop</code>loop continuo de fidelidade (log por ciclo + heartbeat)</div>
+</details>
+<details><summary>evals/ — avaliacao</summary>
+<div class="d"><code>eval_strategy.md</code>estrategia de avaliacao</div>
+<div class="d"><code>fidelity_rubric.md</code>rubrica de fidelidade (eixos)</div>
+<div class="d"><code>regression_matrix.md</code>matriz de regressao</div>
+</details>
+<details><summary>plans/ — planejamento</summary>
+<div class="d"><code>active_work.md</code>trabalho ativo</div>
+<div class="d"><code>next_actions.md</code>proximas acoes</div>
+<div class="d"><code>roadmap.md</code>roadmap</div>
+<div class="d"><code>stopped_work.md</code>trabalho pausado</div>
+</details>
+<details><summary>docs/ — documentacao + historico</summary>
+<div class="d"><code>index.md</code>indice dos docs</div>
+<div class="d"><code>2026-05-31_agentic_system_retro_roadmap.md</code>retro do sistema agentico + roadmap</div>
+<div class="d"><code>adr/0001-...</code>ADR da arquitetura (gate + pipeline) — este sistema</div>
+<div class="d"><code>audits/</code>3 auditorias (estrutura .claude, friction review, proof-of-progress)</div>
+</details>
+<details><summary>scratch/ — local-only (gitignored)</summary>
+<div class="d">rascunhos descartaveis; nada importante vive aqui</div>
+</details>
+</div></div>
 </div>
 <footer>Servido pelo proprio gate em :8765 - sem stack externa</footer>
 <script>
