@@ -44,7 +44,7 @@ ul.opp{list-style:none;padding:0;margin:0;} ul.opp li{padding:9px 0;border-botto
 <h1>🏗️ SketchUp Creator</h1>
 <span id="status" class="badge off">...</span>
 <nav>
-<a href="#home">Home</a><a href="#sessoes">Sessões</a><a href="#gate">Gate</a><a href="#planta">Planta</a><a href="#dificuldades">Dificuldades</a><a href="#lixao">Lixão</a><a href="#oportunidades">Oportunidades</a><a href="#docs">Docs</a><a href="#ecossistema">Ecossistema</a>
+<a href="#home">Home</a><a href="#sessoes">Sessões</a><a href="#gate">Gate</a><a href="#git">Git</a><a href="#planta">Planta</a><a href="#dificuldades">Dificuldades</a><a href="#lixao">Lixão</a><a href="#oportunidades">Oportunidades</a><a href="#docs">Docs</a><a href="#ecossistema">Ecossistema</a>
 </nav>
 </header>
 <main>
@@ -68,6 +68,7 @@ ul.opp{list-style:none;padding:0;margin:0;} ul.opp li{padding:9px 0;border-botto
 <div class="card full"><h2>Heartbeats (orquestrador de liveness)</h2><table><thead><tr><th>session</th><th>cycle</th><th>idade</th><th>beats iguais</th><th>última ação</th><th>flags</th></tr></thead><tbody id="sessions"></tbody></table></div>
 <div class="card full"><h2>Atividade (consults + heartbeats)</h2><div id="feed" class="feed"></div></div>
 <div class="card full"><h2>Últimos commits em develop</h2><div id="commits" class="feed"></div></div>
+<div class="card full"><h2>Sistema (E:\Claude + Git)</h2><div id="sys-summary" class="muted">carregando...</div></div>
 </div>
 </section>
 
@@ -82,6 +83,12 @@ ul.opp{list-style:none;padding:0;margin:0;} ul.opp li{padding:9px 0;border-botto
 <div class="card full"><h2>Gate / ChatGPT Ledger — o oráculo ajudou ou virou teatro?</h2>
 <div id="gate-stats" class="muted" style="margin-bottom:12px"></div>
 <table><thead><tr><th>quando</th><th>trigger</th><th>respondido?</th><th>veredito</th><th>latência</th></tr></thead><tbody id="gate-rows"></tbody></table></div>
+</section>
+
+<section id="git">
+<div class="card full"><h2>Git Inventory — repos &amp; worktrees em E:\Claude (read-only)</h2>
+<div id="git-summary" class="muted" style="margin-bottom:12px"></div>
+<table><thead><tr><th>path</th><th>tipo</th><th>branch</th><th>HEAD</th><th>estado</th><th>untracked/chg</th><th>último commit</th></tr></thead><tbody id="git-rows"></tbody></table></div>
 </section>
 
 <section id="planta">
@@ -219,14 +226,15 @@ function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
 function fmtAge(s){if(s==null)return '-';if(s<90)return s+'s';if(s<5400)return Math.round(s/60)+'m';if(s<86400)return Math.round(s/3600)+'h';return Math.round(s/86400)+'d';}
 function fmtTime(t){try{return new Date(t*1000).toLocaleTimeString('pt-br');}catch(e){return '';}}
 function kv(k,v){return '<div class="kv"><span>'+k+'</span><span>'+esc(v)+'</span></div>';}
-const TABS=['home','sessoes','gate','planta','dificuldades','lixao','oportunidades','docs','ecossistema'];
+const TABS=['home','sessoes','gate','git','planta','dificuldades','lixao','oportunidades','docs','ecossistema'];
 function route(){
   let h=(location.hash||'#home').slice(1); if(TABS.indexOf(h)<0)h='home';
   TABS.forEach(function(t){var s=$(t); if(s)s.className=(t===h?'active':'');});
   document.querySelectorAll('nav a').forEach(function(a){a.className=(a.getAttribute('href')==='#'+h?'active':'');});
-  if(h==='home')loadCommits();
+  if(h==='home'){loadCommits();loadSysSummary();}
   if(h==='sessoes')loadSessoes();
   if(h==='gate')loadGate();
+  if(h==='git')loadGit();
   if(h==='planta')loadPlant();
   if(h==='lixao')loadLixao();
   if(h==='dificuldades')loadDiff();
@@ -304,12 +312,26 @@ async function loadLixao(){
     cc.innerHTML=Object.keys(labels).map(function(k){var items=d.categories[k]||[]; if(!items.length)return ''; var L=labels[k]; var rows=items.map(function(it){return '<tr><td>'+esc(it.path)+'</td><td style="text-align:right;color:var(--dim)">'+it.mb+' MB</td></tr>';}).join(''); return '<div class="card" style="margin-top:14px;border-color:'+L[1]+'"><h2 style="color:'+L[1]+'">'+L[0]+' ('+items.length+')</h2><table>'+rows+'</table></div>';}).join('')||'<div class="muted">nenhum .skp encontrado</div>';
   }catch(e){sm.textContent='erro: '+esc(e);}
 }
-const ECO={'sketchup-mcp':'repo principal: pipeline PDF→SKP + o gate (tools/claude_bridge) + .claude/ (cérebro)','.claude':'config do projeto E:\\\\Claude (onde o chat roda): CLAUDE.md, RTK, memória do chat','claude-bridge':'bridge standalone ORIGINAL (broker.py + server.py + .oauth_token + LIGAR-BRIDGE.cmd) — fallback/legado; o canônico agora é sketchup-mcp/tools/claude_bridge','wt-gh':'git worktree — branch chore/gh-autopilot-skill','wt-dash':'git worktree — branch feat/gate-dashboard; SERVE ESTE painel agora','wt-promote':'git worktree temporário (removido)'};
+const TYPECLR={CANONICAL_REPO:'var(--ok)',WORKTREE:'var(--accent)',BRIDGE_SERVICE:'var(--warn)',CONFIG:'var(--accent)',VENV:'var(--dim)',ARTIFACTS:'var(--ok)',RUNS_SCRATCH:'var(--warn)',GIT_INTERNAL:'var(--bad)',UNKNOWN:'var(--bad)'};
+async function loadSysSummary(){
+  try{const sm=await (await fetch('/api/system-map')).json(); const gi=await (await fetch('/api/git-inventory')).json();
+    var wts=(gi.repos||[]).filter(function(r){return r.is_worktree;}).length;
+    if($('sys-summary'))$('sys-summary').innerHTML=kv('dirs em E:\\Claude',(sm.items||[]).length)+kv('repos/worktrees',(gi.repos||[]).length+' ('+wts+' worktrees)')+kv('dirty',((gi.dirty||[]).length?'<span style="color:var(--warn)">'+gi.dirty.join(', ')+'</span>':'0 (limpos)'))+kv('UNKNOWN',((sm.unknown||[]).length?'<span style="color:var(--bad)">'+sm.unknown.join(', ')+'</span>':'0'));
+  }catch(e){if($('sys-summary'))$('sys-summary').textContent='erro: '+e;}
+}
+async function loadGit(){
+  var s=$('git-summary'),rb=$('git-rows');
+  try{const d=await (await fetch('/api/git-inventory')).json();
+    s.innerHTML='<b style="color:var(--txt)">'+(d.repos||[]).length+'</b> repos/worktrees · '+((d.dirty||[]).length?('<span style="color:var(--warn)">'+d.dirty.length+' dirty: '+d.dirty.join(', ')+'</span>'):'todos limpos');
+    rb.innerHTML=(d.repos||[]).map(function(r){return '<tr><td><code>'+esc(r.path)+'</code></td><td>'+(r.is_worktree?'worktree':'repo')+'</td><td>'+esc(r.branch)+'</td><td class="muted">'+esc(r.head)+'</td><td>'+(r.dirty?'<span class="flag IDLE">dirty</span>':'<span class="flag OK">limpo</span>')+'</td><td>'+r.untracked+' ?? · '+r.changed+' chg</td><td class="muted">'+esc(r.last_commit)+'</td></tr>';}).join('')||'<tr><td colspan=7 class="muted">nenhum repo</td></tr>';
+  }catch(e){s.textContent='erro: '+e;}
+}
 async function loadEco(){
-  var w=$('eco-wrap'); w.innerHTML='<span class="muted">listando...</span>';
-  try{const d=await (await fetch('/api/ecosystem')).json();
-    var rows=(d.items||[]).map(function(it){return '<div class="d"><code>'+esc(it.name)+(it.dir?'/':'')+'</code>'+(ECO[it.name]||'—')+'</div>';}).join('');
-    w.innerHTML='<div class="muted" style="margin-bottom:8px">raiz: <code>'+esc(d.root)+'</code></div><div class="docs"><div style="border:1px solid var(--line);border-radius:6px;background:#0d1117">'+rows+'</div></div>';
+  var w=$('eco-wrap'); w.innerHTML='<span class="muted">escaneando E:\\Claude...</span>';
+  try{const d=await (await fetch('/api/system-map')).json();
+    var unk=(d.unknown||[]).length?'<div class="alarm bad" style="margin-bottom:12px">❓ '+d.unknown.length+' dir(s) UNKNOWN — investigar: '+d.unknown.join(', ')+'</div>':'';
+    var rows=(d.items||[]).map(function(it){var clr=TYPECLR[it.type]||'var(--dim)';return '<tr><td><code>'+esc(it.name)+'/</code></td><td><span class="flag" style="color:'+clr+';background:rgba(88,166,255,.08)">'+it.type+'</span></td><td>'+esc(it.expl)+'</td><td style="text-align:right">'+(it.mb_capped?'≥':'')+it.mb+' MB</td><td>'+fmtAge(it.modified_sec)+'</td><td>'+(it.has_git?(it.is_worktree?'worktree':'repo'):'-')+'</td><td>'+esc(it.risk)+'</td><td>'+esc(it.can_delete)+'</td></tr>';}).join('');
+    w.innerHTML=unk+'<div class="muted" style="margin-bottom:8px">raiz: <code>'+esc(d.root)+'</code> · tamanho best-effort (≥ = passou do cap de scan)</div><table><thead><tr><th>pasta</th><th>tipo</th><th>o que é</th><th>tamanho</th><th>modif.</th><th>git</th><th>risco</th><th>apagar?</th></tr></thead><tbody>'+rows+'</tbody></table>';
   }catch(e){w.innerHTML='<span class="muted">erro: '+esc(e)+'</span>';}
 }
 route(); pollHome(); setInterval(pollHome,5000);

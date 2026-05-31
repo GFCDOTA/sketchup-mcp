@@ -208,3 +208,26 @@ def test_extract_verdict():
     assert srv._extract_verdict("Verdict: NO-GO\n...") == "NO-GO"
     assert srv._extract_verdict("- Verdict: VISUAL_REVIEW") == "VISUAL_REVIEW"
     assert srv._extract_verdict("nada de veredito aqui") is None
+
+
+def test_system_map_shape():
+    import tools.claude_bridge.server as srv
+    d = srv.system_map()
+    assert {"items", "root", "unknown"} <= set(d)
+    for i in d["items"]:
+        assert {"name", "type", "expl", "risk", "can_delete", "mb"} <= set(i)
+
+
+def test_classify_dir_known_and_unknown(tmp_path):
+    import tools.claude_bridge.server as srv
+    assert srv._classify_dir(tmp_path / "wt-foo")["type"] == "WORKTREE"
+    assert srv._classify_dir(tmp_path / "sketchup-mcp")["type"] == "CANONICAL_REPO"
+    assert srv._classify_dir(tmp_path / "zxqv-random")["type"] == "UNKNOWN"
+
+
+def test_git_inventory_shape_no_crash():
+    import tools.claude_bridge.server as srv
+    d = srv.git_inventory()
+    assert {"repos", "dirty"} <= set(d) and isinstance(d["repos"], list)
+    for r in d["repos"]:  # dirs without .git are skipped, so no crash
+        assert {"path", "branch", "dirty", "untracked"} <= set(r)

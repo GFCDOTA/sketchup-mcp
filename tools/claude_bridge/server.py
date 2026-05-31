@@ -606,6 +606,106 @@ def recent_commits(n: int = 12) -> dict:
     return {"commits": lines}
 
 
+def _dir_size_mb(p: Path, cap: int = 8000):
+    """Best-effort dir size in MB, bounded by `cap` files so big trees (.git) don't
+    hang the endpoint. Returns (mb, capped)."""
+    total = n = 0
+    try:
+        for f in p.rglob("*"):
+            try:
+                if f.is_file():
+                    total += f.stat().st_size
+                    n += 1
+                    if n >= cap:
+                        return round(total / 1e6, 1), True
+            except OSError:
+                pass
+    except OSError:
+        pass
+    return round(total / 1e6, 1), False
+
+
+def _classify_dir(p: Path) -> dict:
+    """Human classification of a top-level E:\\Claude directory."""
+    name = p.name
+    known = {
+        "sketchup-mcp": ("CANONICAL_REPO", "repo principal canônico (pipeline PDF→SKP + gate + .claude/)", "baixo", "não"),
+        "claude-bridge": ("BRIDGE_SERVICE", "bridge standalone original (broker + server + .oauth_token + LIGAR-BRIDGE) — fallback/legado", "médio (contém o token)", "não — guarda o .oauth_token"),
+        ".claude": ("CONFIG", "config/memória do projeto E:\\Claude (onde o chat roda)", "baixo", "não"),
+    }
+    if name in known:
+        t, expl, risk, dele = known[name]
+    elif name.startswith("wt-"):
+        t, expl, risk, dele = ("WORKTREE", "git worktree (checkout isolado de um branch)", "baixo", "sim (git worktree remove)")
+    elif name in (".venv", "venv", "env"):
+        t, expl, risk, dele = ("VENV", "ambiente virtual Python", "baixo", "sim (recriável)")
+    elif name == ".git":
+        t, expl, risk, dele = ("GIT_INTERNAL", "interno do git", "ALTO", "NÃO")
+    elif name in ("runs", "__pycache__", ".pytest_cache", "node_modules"):
+        t, expl, risk, dele = ("RUNS_SCRATCH", "scratch / build output (gitignored)", "baixo", "sim")
+    elif name == "artifacts":
+        t, expl, risk, dele = ("ARTIFACTS", "deliverables versionados", "médio", "não")
+    else:
+        t, expl, risk, dele = ("UNKNOWN", "não classificado — investigar", "?", "?")
+    return {"type": t, "expl": expl, "risk": risk, "can_delete": dele}
+
+
+def system_map() -> dict:
+    """Scan E:\\Claude top-level and explain each dir (the Explorer page)."""
+    root = REPO_ROOT.parent
+    items = []
+    try:
+        entries = sorted(root.iterdir())
+    except OSError:
+        entries = []
+    for p in entries:
+        if not p.is_dir():
+            continue
+        mb, capped = _dir_size_mb(p)
+        try:
+            mod = round(time.time() - p.stat().st_mtime)
+        except OSError:
+            mod = None
+        items.append({"name": p.name, **_classify_dir(p), "mb": mb,
+                      "mb_capped": capped, "modified_sec": mod,
+                      "has_git": (p / ".git").exists(),
+                      "is_worktree": (p / ".git").is_file()})
+    return {"root": str(root), "items": items,
+            "unknown": [i["name"] for i in items if i["type"] == "UNKNOWN"]}
+
+
+def git_inventory() -> dict:
+    """Read-only git state for every repo/worktree under E:\\Claude. Mutates nothing."""
+    root = REPO_ROOT.parent
+
+    def g(p, *args):
+        try:
+            r = subprocess.run(["git", "-C", str(p), *args], capture_output=True,
+                               text=True, encoding="utf-8", errors="replace", timeout=10)
+            return (r.stdout or "").strip()
+        except (OSError, subprocess.SubprocessError):
+            return ""
+
+    repos = []
+    try:
+        candidates = sorted(x for x in root.iterdir() if x.is_dir())
+    except OSError:
+        candidates = []
+    for p in candidates:
+        if not (p / ".git").exists():
+            continue
+        lines = [ln for ln in g(p, "status", "--porcelain").splitlines() if ln.strip()]
+        untracked = sum(1 for ln in lines if ln.startswith("??"))
+        repos.append({"path": p.name, "is_worktree": (p / ".git").is_file(),
+                      "branch": g(p, "rev-parse", "--abbrev-ref", "HEAD"),
+                      "head": g(p, "rev-parse", "--short", "HEAD"),
+                      "remote": g(p, "remote", "get-url", "origin"),
+                      "last_commit": g(p, "log", "-1", "--oneline"),
+                      "dirty": len(lines) > 0, "untracked": untracked,
+                      "changed": len(lines) - untracked})
+    return {"repos": repos, "dirty": [r["path"] for r in repos if r["dirty"]]}
+
+
 _VERDICT_RE = re.compile(r"(?im)verdict\s*[:\-]\s*(GO|NO-GO|MORE-INFO|VISUAL_REVIEW)")
 
 
@@ -692,6 +792,10 @@ class Handler(BaseHTTPRequestHandler):
             self._send(200, recent_commits())
         elif p == "/api/gate-ledger":
             self._send(200, gate_ledger())
+        elif p == "/api/system-map":
+            self._send(200, system_map())
+        elif p == "/api/git-inventory":
+            self._send(200, git_inventory())
         elif p == "/artifact":
             f = safe_artifact((parse_qs(u.query).get("path") or [""])[0])
             if not f:
