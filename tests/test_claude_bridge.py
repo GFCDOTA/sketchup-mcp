@@ -146,3 +146,31 @@ def test_recent_events_parses_tail_skips_garbage(tmp_path, monkeypatch):
     ev = srv.recent_events()
     assert len(ev) == 2  # garbage line skipped, not crashed
     assert ev[-1]["kind"] == "consult"
+
+
+# ---- multi-page app: inventory, plant, artifact serving -------------
+
+
+def test_skp_inventory_shape():
+    import tools.claude_bridge.server as srv
+    inv = srv.skp_inventory()
+    assert "total" in inv and "total_mb" in inv and "categories" in inv
+    assert {"deliverable", "review_evidence", "runs_scratch", "fixtures",
+            "other"} == set(inv["categories"])
+
+
+def test_dashboard_html_serves_the_spa():
+    import tools.claude_bridge.server as srv
+    html = srv.dashboard_html()
+    assert "<!doctype html>" in html.lower()
+    assert "Claude Gate" in html
+    # SPA tabs present (the inline fallback has none of these)
+    assert "#lixao" in html and "#dificuldades" in html and "#planta" in html
+
+
+def test_safe_artifact_blocks_escape_and_nonimage():
+    import tools.claude_bridge.server as srv
+    assert srv.safe_artifact("../../etc/passwd") is None            # traversal
+    assert srv.safe_artifact("tools/claude_bridge/server.py") is None  # outside artifacts
+    assert srv.safe_artifact("artifacts/notes.txt") is None         # under artifacts, non-image
+    assert srv.safe_artifact("../.oauth_token") is None             # secret via traversal

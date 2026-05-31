@@ -36,6 +36,9 @@ import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from urllib.parse import urlparse, parse_qs
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 CLAUDE_TIMEOUT = 240  # segundos por resposta; estoura -> erro 500, nunca trava infinito
 MODEL = "claude-opus-4-8"   # o JUIZ do modo B (Opus 4.8)
@@ -440,6 +443,75 @@ tick();setInterval(tick,5000);
 </script></body></html>"""
 
 
+def dashboard_html() -> str:
+    """Serve the multi-page SPA from dashboard.html (sibling file). Falls back to
+    the inline single-page DASHBOARD_HTML if the file is missing."""
+    try:
+        return (Path(__file__).parent / "dashboard.html").read_text("utf-8")
+    except OSError:
+        return DASHBOARD_HTML
+
+
+def skp_inventory() -> dict:
+    """Scan the repo for .skp and classify by location so the 'Lixao' page can
+    govern what is a deliverable vs evidence vs scratch vs orphan."""
+    cats = {"deliverable": [], "review_evidence": [], "runs_scratch": [],
+            "fixtures": [], "other": []}
+    total_bytes = 0
+    try:
+        paths = list(REPO_ROOT.rglob("*.skp"))
+    except OSError:
+        paths = []
+    for p in paths:
+        try:
+            rel = p.relative_to(REPO_ROOT).as_posix()
+            size = p.stat().st_size
+        except OSError:
+            continue
+        total_bytes += size
+        item = {"path": rel, "mb": round(size / 1e6, 2)}
+        if rel.startswith("artifacts/review/"):
+            cats["review_evidence"].append(item)
+        elif rel.startswith("artifacts/"):
+            cats["deliverable"].append(item)
+        elif rel.startswith("runs/"):
+            cats["runs_scratch"].append(item)
+        elif rel.startswith("fixtures/"):
+            cats["fixtures"].append(item)
+        else:
+            cats["other"].append(item)
+    for v in cats.values():
+        v.sort(key=lambda it: it["mb"], reverse=True)
+    return {"total": sum(len(v) for v in cats.values()),
+            "total_mb": round(total_bytes / 1e6, 1), "categories": cats}
+
+
+def plant_info() -> dict:
+    """Canonical plants + their render PNGs (for the Planta page)."""
+    art = REPO_ROOT / "artifacts"
+    plants = {}
+    if art.is_dir():
+        for d in sorted(art.iterdir()):
+            if d.is_dir() and d.name != "review":
+                pngs = sorted(f"artifacts/{d.name}/{x.name}" for x in d.glob("*.png"))
+                if pngs:
+                    plants[d.name] = pngs
+    return {"plants": plants}
+
+
+def safe_artifact(rel: str):
+    """Resolve `rel` to a real image UNDER artifacts/ or None. Read-only,
+    allowlisted (image suffix), no traversal / no escape."""
+    try:
+        p = (REPO_ROOT / rel).resolve()
+        p.relative_to((REPO_ROOT / "artifacts").resolve())
+    except (ValueError, OSError):
+        return None
+    if p.suffix.lower() not in (".png", ".jpg", ".jpeg", ".svg", ".webp"):
+        return None
+    return p if p.is_file() else None
+
+
 class Handler(BaseHTTPRequestHandler):
     def _send(self, code, obj):
         body = json.dumps(obj, ensure_ascii=False).encode("utf-8")
@@ -457,16 +529,38 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _send_bytes(self, body: bytes, ctype: str):
+        self.send_response(200)
+        self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
     def do_GET(self):
-        p = self.path.rstrip("/")
+        u = urlparse(self.path)
+        p = u.path.rstrip("/")
         if p == "" or p == "/dashboard":
-            self._send_html(DASHBOARD_HTML)
+            self._send_html(dashboard_html())
         elif p == "/health":
             self._send(200, health_payload())
         elif p == "/sessions":
             self._send(200, sessions_view())
         elif p == "/events":
             self._send(200, recent_events())
+        elif p == "/api/skp-inventory":
+            self._send(200, skp_inventory())
+        elif p == "/api/plant":
+            self._send(200, plant_info())
+        elif p == "/artifact":
+            f = safe_artifact((parse_qs(u.query).get("path") or [""])[0])
+            if not f:
+                self._send(404, {"error": "not an allowed artifact image"})
+                return
+            sfx = f.suffix.lower()
+            ctype = ("image/svg+xml" if sfx == ".svg" else
+                     "image/jpeg" if sfx in (".jpg", ".jpeg") else
+                     "image/webp" if sfx == ".webp" else "image/png")
+            self._send_bytes(f.read_bytes(), ctype)
         else:
             self._send(404, {"error": "not found"})
 
