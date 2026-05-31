@@ -130,3 +130,15 @@ wall_overlap **PASS(0)**. Efeito colateral GRANDE no render: a parede contínua 
 (gates/overlay/detectores PASS). **Regenerar = autônomo; PROMOVER pra canônica =
 VISUAL_REVIEW** (render muda → Felipe julga). Câmera top agora determinística (#29,
 fit 4:3 explícito, não zoom_extents) → gate cobre 100% das paredes.
+
+## LL-033 (2026-05-31) — promover fixture move a baseline; repinar testes faz parte
+
+Felipe aprovou (IMPROVED) e o regen virou consensus canônico do planta_74. Promover
+uma fixture pinada **quebra os testes que afirmavam o estado ANTIGO** — e isso é
+ESPERADO, não regressão: 6 testes pinavam o bug (detectores FAIL, wall_shell
+junction=27/free=43, n_walls≥30) e foram repinados pro novo estado (PASS,
+junction=21/free=17, n_walls≥15). Antes de repinar número geométrico, VERIFICAR que
+o novo valor é são (rodei build_shell_polygon: 0 violação de stub LL-017, invariante
+junction+free=2*walls vale). A behavior-de-captura dos detectores fica nos testes
+SINTÉTICOS (não dependem da fixture), então repinar o teste-real-fixture pra PASS não
+perde cobertura. Sempre regenerar o test-data render do build canônico novo.

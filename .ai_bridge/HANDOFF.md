@@ -1,7 +1,25 @@
 # Handoff — sketchup-mcp
 
-> Fio da meada entre sessões. Última atualização: **2026-05-31 ~00:00 UTC** (/loop modo B: #29 câmera determinística ENTREGUE; #28 regen consensus AUTÔNOMO feito → janelas viram aperture vazado; PAROU em VISUAL_REVIEW pra promoção).
+> Fio da meada entre sessões. Última atualização: **2026-05-31 ~00:40 UTC** (#28 PROMOVIDO: regen é o consensus canônico do planta_74; janelas = aperture vazado; pytest 246 ✓).
 > Leia primeiro ao iniciar sessão.
+
+## 2026-05-31 ~00:40 UTC — #28 PROMOVIDO a canônico (Felipe aprovou IMPROVED)
+
+O regen candidate virou a **fixture canônica** `fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json`
+(19 walls merged, openings re-hostados, IDs `m001`-`m019`). Detectores: opening_host **PASS(0/12)**, wall_overlap
+**PASS(0)**. Build canônico: janelas **aperture vazado ×4** (BANHO 02/o009 → host m003, WindowGlass presente =
+confirmado certo, como o Felipe pediu), gates ✓. **6 testes que pinavam o estado bugado antigo foram repinados pro
+novo** (flags→PASS; wall_shell junction 27→21/free 43→17, 0 violação de stub; n_walls≥30→≥15; regen idempotente
+`<=`). test-data render regerado do build canônico. **pytest 246 ✓**. Artefato em
+`artifacts/review/planta_74/canonical_20260531/`. Ver LL-033. → segue /loop.
+
+## 2026-05-31 — VISUAL_REVIEW #28 RESOLVIDO (Felipe): IMPROVED → PROMOVER
+
+Felipe revisou o regen candidate (janelas painel→aperture vazado) vs PDF: **IMPROVED**
+("melhorou demais"; remover o vidro das janelas ajudou; banheiro-2 já estava certa antes —
+confirmar que seguiu certa). → **AÇÃO: promover o regen a consensus canônico** (fixture
+planta_74). OK visual do Felipe DADO (carve-out modo B cumprido). Rodar gates verdes
+(opening_host_audit, pytest) + commit + PR. (Registrado por peer-Claude a pedido do Felipe.)
 
 ## 2026-05-31 ~00:00 UTC — /loop modo B: #29 done, #28 regen done → VISUAL_REVIEW
 

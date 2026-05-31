@@ -32,13 +32,13 @@ def test_clean_consensus_passes_consensus_gates():
 
 
 @pytest.mark.skipif(not _PLANTA.exists(), reason="planta_74 fixture absent")
-def test_planta74_consensus_gates_fail():
+def test_planta74_consensus_gates_pass_after_regen():
+    # FP-031 #28: regenerated canonical consensus passes both consensus gates.
     res = run_all(fixture="planta_74")
-    assert res["overall"] == "FAIL"
-    assert res["gates"]["opening_host"]["overall"] == "FAIL"
-    assert res["gates"]["wall_overlap"]["overall"] == "FAIL"
-    # no render passed -> wall_presence not run
-    assert "wall_presence" not in res["gates"]
+    assert res["overall"] == "PASS"
+    assert res["gates"]["opening_host"]["overall"] == "PASS"
+    assert res["gates"]["wall_overlap"]["overall"] == "PASS"
+    assert "wall_presence" not in res["gates"]  # no render passed
 
 
 @pytest.mark.skipif(not (_PLANTA.exists() and _RENDER.exists()),

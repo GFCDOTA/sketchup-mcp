@@ -355,10 +355,11 @@ def test_planta_74_free_endpoints_have_no_stub_extension():
 
     # The endpoints_free / endpoints_junction stats must match the
     # walls fixture exactly so that any consensus regression surfaces
-    # here. Locked numbers for the current planta_74 baseline with
-    # perpendicular-only junction detection:
-    assert stats["endpoints_junction"] == 27
-    assert stats["endpoints_free"] == 43
+    # here. Locked numbers for the planta_74 baseline AFTER the FP-031
+    # regeneration (collinear walls merged 35->19; junction detection
+    # perpendicular-only):
+    assert stats["endpoints_junction"] == 21
+    assert stats["endpoints_free"] == 17
     assert stats["endpoints_junction"] + stats["endpoints_free"] == 2 * len(walls)
 
     # For each FREE side, the wall's OWN footprint must terminate at

@@ -122,7 +122,7 @@ def test_real_planta74_clean_passes_with_sidecar():
     res = run_gate(str(RENDER), str(CONSENSUS))
     assert res["calibration"] == "sidecar_exact"
     assert res["verdict"] == "PASS", [f["wall_id"] for f in res["findings"]]
-    assert res["n_walls"] >= 30
+    assert res["n_walls"] >= 15   # 19 after the FP-031 collinear merge
 
 
 @pytestmark_data
