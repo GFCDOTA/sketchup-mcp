@@ -1,7 +1,27 @@
 # Handoff — sketchup-mcp
 
-> Fio da meada entre sessões. Última atualização: **2026-05-31 ~00:40 UTC** (#28 PROMOVIDO: regen é o consensus canônico do planta_74; janelas = aperture vazado; pytest 246 ✓).
+> Fio da meada entre sessões. Última atualização: **2026-05-31 ~02:30 UTC** (/loop: gate framework spec §6.5→6.1 ENTREGUE em develop; pytest 277 ✓; bridge precisa RESTART pra ativar).
 > Leia primeiro ao iniciar sessão.
+
+## 2026-05-31 ~02:30 UTC — /loop: gate framework §6 (6.5→6.1) ENTREGUE
+
+Branch `feat/gate-framework` → landada em develop por fatia (push direto, Contents:RW). Commit por
+fatia, teste por fatia, consulta ao :8765 nas decisões. **pytest 277 ✓.**
+- **6.5** (`c2bb561`): bridge robustez — `parse_ask_payload` (UTF-8 errors=replace, aceita
+  `prompt`|`question`), `health_payload` (/health expõe `{ok,oracle,ask_field,verdict_enum,modes}`).
+- **6.4** (`d39b1a1`): `tools/gate_verdict.py` `parse_verdict` + ANSWER_FORMAT; SYSTEM/asker exigem
+  **Confidence + Assumptions** (afirmação sobre o que o oracle não vê → assumptions, não fato).
+- **6.2** (`c9c755d`): red-team mode (`{"mode":"redteam"}` → `apply_mode` força argumentar CONTRA).
+- **6.3** (`83baa1d`): `tools/gate_filefetch.py` — oracle pede arquivo via MORE-INFO+Need-files;
+  allowlist read-only (nunca .oauth_token/.env/*.key/traversal).
+- **6.1** (`ed32fa6`, gate :8765 redteam-consult = GO(B)): `tools/oracle_router.py` `route()` —
+  factual→determinístico (ground-truth vence), risky/independent→família≠Claude, else→claude.
+- ⚠️ **BRIDGE PRECISA RESTART**: o `:8765` rodando tem o server.py VELHO; §6.2-6.5 só ficam LIVE após
+  reiniciar (`tools/claude_bridge/start.ps1`, carrega `.oauth_token`). Código landado; processo stale.
+- **Nota reconcile**: develop NÃO tinha a promoção #28 (só o candidato); cherry-pick `7faed7f` landou
+  (fixture 19 walls, opening_host PASS). Ver LL-034.
+- **Resta do spec (não pedido nesta ordem): §5 audit-core** (audit.jsonl append-only + query/replay +
+  Gate/registry + worker[sob OK Felipe]) — "o coração", delegado ao loop. Próximo chunk natural.
 
 ## 2026-05-31 ~00:40 UTC — #28 PROMOVIDO a canônico (Felipe aprovou IMPROVED)
 

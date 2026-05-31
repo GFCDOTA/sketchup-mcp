@@ -142,3 +142,16 @@ o novo valor é são (rodei build_shell_polygon: 0 violação de stub LL-017, in
 junction+free=2*walls vale). A behavior-de-captura dos detectores fica nos testes
 SINTÉTICOS (não dependem da fixture), então repinar o teste-real-fixture pra PASS não
 perde cobertura. Sempre regenerar o test-data render do build canônico novo.
+
+## LL-034 (2026-05-31) — gate framework §6 + dois aprendizados de processo
+
+(1) **"develop tem X" precisa de verificação empírica.** Felipe disse que develop tinha a
+promoção #28; `git merge-base --is-ancestor` + detector na fixture provaram que NÃO (só o
+candidato 6f93c94). Cherry-pick limpo do commit aprovado (7faed7f) reconciliou. Regra: antes de
+buildar em cima de "develop tem Y", confirme com detector/`is-ancestor`, não com a fala.
+(2) **Mudança no bridge não fica live sem RESTART.** Implementei §6.5-6.1 no `server.py`/módulos e
+landei, mas o `:8765` rodando seguiu com código velho (o `mode:redteam` que pedi no consult foi
+ignorado). Código≠processo: pós-mudança no bridge, reiniciar (`start.ps1`) + validar `/health`.
+(3) **Router puro (sem I/O) = teste sem mock** (`oracle_router.py`): rotear por necessidade —
+factual→determinístico (ground-truth vence), risky→família≠asker (independência real vs Claude-
+consultando-Claude). O cut foi cravado pelo próprio gate :8765.
