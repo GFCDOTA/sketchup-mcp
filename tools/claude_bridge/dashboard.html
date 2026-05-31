@@ -44,7 +44,7 @@ ul.opp{list-style:none;padding:0;margin:0;} ul.opp li{padding:9px 0;border-botto
 <h1>🏗️ SketchUp Creator</h1>
 <span id="status" class="badge off">...</span>
 <nav>
-<a href="#home">Home</a><a href="#sessoes">Sessões</a><a href="#gate">Gate</a><a href="#git">Git</a><a href="#planta">Planta</a><a href="#dificuldades">Dificuldades</a><a href="#lixao">Lixão</a><a href="#oportunidades">Oportunidades</a><a href="#docs">Docs</a><a href="#ecossistema">Ecossistema</a>
+<a href="#home">Home</a><a href="#sessoes">Sessões</a><a href="#gate">Gate</a><a href="#git">Git</a><a href="#planta">SKP</a><a href="#dificuldades">Dificuldades</a><a href="#lixao">Lixão</a><a href="#oportunidades">Oportunidades</a><a href="#docs">Docs</a><a href="#ecossistema">Ecossistema</a>
 </nav>
 </header>
 <main>
@@ -92,9 +92,11 @@ ul.opp{list-style:none;padding:0;margin:0;} ul.opp li{padding:9px 0;border-botto
 </section>
 
 <section id="planta">
-<div class="card full"><h2>Planta corrigida mais atual — vistas pra análise</h2>
-<div class="muted" style="margin-bottom:12px">Renders do deliverable canônico em <code>artifacts/&lt;plant&gt;/</code> (iso / top / side-by-side vs PDF).</div>
+<div class="card full"><h2>SKP canônico atual — vistas pra análise</h2>
+<div id="skp-canonical-verdict" class="muted" style="margin-bottom:10px"></div>
 <div id="plant-gallery" class="gallery"></div></div>
+<div class="card full"><h2>Timeline dos ciclos (before/after + veredito)</h2>
+<div id="skp-timeline-wrap"></div></div>
 </section>
 
 <section id="dificuldades">
@@ -273,10 +275,21 @@ async function loadGate(){
   }catch(e){al.className='alarm bad';al.textContent='erro: '+e;}
 }
 async function loadPlant(){
-  var g=$('plant-gallery'); g.innerHTML='<span class="muted">carregando...</span>';
-  try{const d=await (await fetch('/api/plant')).json(); var html='';
-    Object.entries(d.plants||{}).forEach(function(e){e[1].forEach(function(p){html+='<figure><img loading="lazy" src="/artifact?path='+encodeURIComponent(p)+'"><figcaption>'+esc(p)+'</figcaption></figure>';});});
-    g.innerHTML=html||'<span class="muted">nenhum render em artifacts/&lt;plant&gt;/</span>';
+  var g=$('plant-gallery'),tl=$('skp-timeline-wrap'),cv=$('skp-canonical-verdict');
+  g.innerHTML='<span class="muted">carregando...</span>';
+  var VF={IMPROVED:'OK',PASS:'OK',SAME:'IDLE',WARN:'IDLE',WORSE:'PARALYZED',FAIL:'PARALYZED'};
+  try{const d=await (await fetch('/api/skp-timeline')).json();
+    var html='',verd='';
+    Object.entries(d.canonical||{}).forEach(function(e){var name=e[0],c=e[1];
+      verd+='<b style="color:var(--txt)">'+esc(name)+'</b> — veredito: '+(c.verdict?'<span class="flag '+(VF[c.verdict]||'IDLE')+'">'+c.verdict+'</span>':'<span class="muted">UNKNOWN (sem regression_summary)</span>')+' &nbsp; ';
+      (c.pngs||[]).forEach(function(p){html+='<figure><img loading="lazy" src="/artifact?path='+encodeURIComponent(p)+'"><figcaption>'+esc(p.split("/").pop())+'</figcaption></figure>';});
+    });
+    cv.innerHTML=verd||'<span class="muted">nenhum canônico em artifacts/&lt;plant&gt;/</span>';
+    g.innerHTML=html||'<span class="muted">sem renders canônicos</span>';
+    tl.innerHTML=(d.timeline||[]).map(function(r){var fl=r.verdict?'<span class="flag '+(VF[r.verdict]||'IDLE')+'">'+r.verdict+'</span>':'<span class="muted">—</span>';
+      var thumbs=(r.pngs||[]).map(function(p){return '<img loading="lazy" title="'+esc(p)+'" src="/artifact?path='+encodeURIComponent(p)+'" style="height:78px;border-radius:4px;background:#fff;margin:0 6px 6px 0">';}).join('');
+      return '<div style="border-bottom:1px solid #21262d;padding:10px 0"><div style="display:flex;justify-content:space-between;gap:10px"><b>'+esc(r.run)+'</b><span class="muted">'+fl+' · '+fmtAge(r.age_sec)+' atrás · '+r.n_pngs+' renders</span></div><div style="margin-top:8px;display:flex;flex-wrap:wrap">'+(thumbs||'<span class="muted">sem render</span>')+'</div></div>';
+    }).join('')||'<span class="muted">sem ciclos em artifacts/review</span>';
   }catch(e){g.innerHTML='<span class="muted">erro: '+esc(e)+'</span>';}
 }
 async function loadDiff(){

@@ -914,6 +914,75 @@ def git_inventory() -> dict:
     return {"repos": repos, "dirty": [r["path"] for r in repos if r["dirty"]]}
 
 
+_VERDICT_TL = re.compile(r"(?im)(?:verdict|veredito|overall)\s*[:=]?\s*\**\s*"
+                         r"(IMPROVED|SAME|WORSE|PASS|FAIL|WARN)")
+_VERDICT_ANY = re.compile(r"\b(IMPROVED|SAME|WORSE)\b")
+
+
+def _find_verdict(d: Path):
+    """Best-effort verdict for a SKP run dir: prefer a 'VERDICT:'/'veredito:' line in
+    regression_summary.md / verdict.md / decision.md; else any IMPROVED/SAME/WORSE."""
+    for name in ("regression_summary.md", "verdict.md", "decision.md"):
+        try:
+            hits = list(d.rglob(name))
+        except OSError:
+            hits = []
+        for f in hits:
+            try:
+                txt = f.read_text("utf-8", errors="replace")
+            except OSError:
+                continue
+            m = _VERDICT_TL.search(txt) or _VERDICT_ANY.search(txt)
+            if m:
+                return m.group(1).upper()
+    return None
+
+
+def skp_timeline() -> dict:
+    """Current canonical SKP(s) + the timeline of review cycles (renders + verdict),
+    for before/after analysis. Paths are REPO_ROOT-relative (served via /artifact)."""
+    art = REPO_ROOT / "artifacts"
+    out = {"canonical": {}, "timeline": []}
+    if not art.is_dir():
+        return out
+    for d in sorted(art.iterdir()):
+        if d.is_dir() and d.name != "review":
+            pngs = sorted(f"artifacts/{d.name}/{x.name}" for x in d.glob("*.png"))
+            if pngs or any(d.glob("*.skp")):
+                out["canonical"][d.name] = {"pngs": pngs,
+                                            "has_skp": any(d.glob("*.skp")),
+                                            "verdict": _find_verdict(d)}
+    review = art / "review"
+    runs = []
+    if review.is_dir():
+        for plant in sorted(review.iterdir()):
+            if not plant.is_dir():
+                continue
+            for run in sorted(plant.iterdir()):
+                if not run.is_dir():
+                    continue
+                try:
+                    mt = run.stat().st_mtime
+                except OSError:
+                    mt = 0
+                pngs = []
+                try:
+                    for f in sorted(run.rglob("*.png")):
+                        try:
+                            pngs.append(f.relative_to(REPO_ROOT).as_posix())
+                        except (ValueError, OSError):
+                            pass
+                except OSError:
+                    pass
+                runs.append({"plant": plant.name, "run": run.name,
+                             "mtime": round(mt), "age_sec": round(time.time() - mt),
+                             "verdict": _find_verdict(run),
+                             "pngs": pngs[:4], "n_pngs": len(pngs)})
+    runs.sort(key=lambda r: r["mtime"], reverse=True)
+    out["timeline"] = runs[:40]
+    return out
+
+
 _VERDICT_RE = re.compile(r"(?im)verdict\s*[:\-]\s*(GO|NO-GO|MORE-INFO|VISUAL_REVIEW)")
 
 
@@ -1008,6 +1077,8 @@ class Handler(BaseHTTPRequestHandler):
             self._send(200, skp_inventory_v2())
         elif p == "/api/difficulties":
             self._send(200, difficulties())
+        elif p == "/api/skp-timeline":
+            self._send(200, skp_timeline())
         elif p == "/artifact":
             f = safe_artifact((parse_qs(u.query).get("path") or [""])[0])
             if not f:

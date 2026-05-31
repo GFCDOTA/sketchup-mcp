@@ -282,3 +282,19 @@ def test_read_jsonl_tolerates_garbage(tmp_path):
     p = tmp_path / "x.jsonl"
     p.write_text('{"a": 1}\nGARBAGE NOT JSON\n\n{"b": 2}\n', encoding="utf-8")
     assert srv._read_jsonl(p) == [{"a": 1}, {"b": 2}]
+
+
+def test_skp_timeline_shape():
+    import tools.claude_bridge.server as srv
+    d = srv.skp_timeline()
+    assert "canonical" in d and "timeline" in d
+    assert isinstance(d["timeline"], list) and isinstance(d["canonical"], dict)
+
+
+def test_find_verdict_from_regression_summary(tmp_path):
+    import tools.claude_bridge.server as srv
+    (tmp_path / "regression_summary.md").write_text(
+        "# resumo\n## VERDICT: IMPROVED\nblah", encoding="utf-8")
+    assert srv._find_verdict(tmp_path) == "IMPROVED"
+    empty = tmp_path / "empty"; empty.mkdir()
+    assert srv._find_verdict(empty) is None
