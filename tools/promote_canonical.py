@@ -25,11 +25,15 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 
-# src name -> stable deliverable name
+# src name -> stable deliverable name. The top render's .proj.json sidecar is
+# part of the deliverable: the deterministic wall_presence gate (overlay_diff)
+# only runs when <render>.proj.json sits next to the render. Drop it and the
+# gate self-skips, so the canonical ships unverified for wall presence.
 _MAP = {
     "model.skp": "{plant}.skp",
     "model_iso.png": "{plant}_iso.png",
     "model_top.png": "{plant}_top.png",
+    "model_top.png.proj.json": "{plant}_top.png.proj.json",
     "geometry_report.json": "geometry_report.json",
 }
 

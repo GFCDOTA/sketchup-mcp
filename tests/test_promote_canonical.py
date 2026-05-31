@@ -61,6 +61,26 @@ def test_promote_is_idempotent(tmp_path):
     assert (tmp_path / "artifacts" / "p" / "p.skp").read_bytes() == b"SKPDATA-123"
 
 
+def test_promote_copies_projection_sidecar_renamed(tmp_path):
+    # the .proj.json is part of the deliverable: wall_presence gate needs
+    # <render>.proj.json next to the render (LL-035).
+    src = _fake_build(tmp_path / "b" / "final")
+    (src / "model_top.png.proj.json").write_text('{"cam_height": 1}', encoding="utf-8")
+    promote(src, "planta_S", repo=tmp_path)
+    side = tmp_path / "artifacts" / "planta_S" / "planta_S_top.png.proj.json"
+    assert side.exists()
+    assert side.read_text("utf-8") == '{"cam_height": 1}'
+
+
+def test_promote_without_sidecar_still_works(tmp_path):
+    # a build dir lacking the sidecar must not break promotion (optional file)
+    src = _fake_build(tmp_path / "b" / "final")
+    promote(src, "planta_S", repo=tmp_path)
+    assert (tmp_path / "artifacts" / "planta_S" / "planta_S.skp").exists()
+    assert not (tmp_path / "artifacts" / "planta_S"
+                / "planta_S_top.png.proj.json").exists()
+
+
 def test_promote_requires_model_skp(tmp_path):
     empty = tmp_path / "empty"
     empty.mkdir()

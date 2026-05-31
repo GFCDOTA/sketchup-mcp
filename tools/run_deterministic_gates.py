@@ -8,10 +8,12 @@ verdict + exit code. No SU build, no PDF, no network — pure + fast.
   - opening_host  : opening<->host-wall consistency (tools/opening_host_audit)
   - wall_overlap  : duplicate/overlapping walls   (tools/wall_overlap_audit)
   - wall_presence : consensus walls present in the SKP top render
-                    (tools/overlay_diff, only if --render + <png>.proj.json)
+                    (tools/overlay_diff, when --render + <png>.proj.json exist).
+                    --render given but sidecar MISSING -> overall=INCOMPLETE
+                    (exit 3), never a silent green.
 
-Deterministic only. Visual/fixture judgement is NOT done here (it self-PASSes);
-those stay NEEDS-HUMAN.
+Overall: PASS=0, FAIL=1, INCOMPLETE=3. Deterministic only. Visual/fixture
+judgement is NOT done here (it self-PASSes); those stay NEEDS-HUMAN.
 """
 from __future__ import annotations
 
@@ -48,18 +50,40 @@ def run_all(
         "opening_host": audit_opening_hosts(con),
         "wall_overlap": audit_wall_overlaps(con),
     }
-    if render_path and (Path(str(render_path) + ".proj.json").exists()):
-        from tools.overlay_diff import run_gate
-        cp = consensus_path or ""
-        if not cp and fixture:
-            cp = str(REPO_ROOT / "fixtures" / fixture
-                     / "consensus_with_human_walls_and_soft_barriers.json")
-        gates["wall_presence"] = run_gate(str(render_path), cp)
+    if render_path:
+        sidecar = Path(str(render_path) + ".proj.json")
+        if sidecar.exists():
+            from tools.overlay_diff import run_gate
+            cp = consensus_path or ""
+            if not cp and fixture:
+                cp = str(REPO_ROOT / "fixtures" / fixture
+                         / "consensus_with_human_walls_and_soft_barriers.json")
+            gates["wall_presence"] = run_gate(str(render_path), cp)
+        else:
+            # --render given but the exact-projection sidecar is absent -> the
+            # render gate CANNOT run. Surface as INCOMPLETE (not PASS) so a green
+            # exit requires the render to actually be gated. A loud-print-only
+            # approach stays exit 0, and CI gates on the exit code, so it would
+            # NOT have blocked the canonical that shipped sidecar-less. Distinct
+            # from FAIL: "couldn't run" != "ran and found a discrepancy".
+            # (Oracle :8765 redteam verdict B; LL-035.)
+            gates["wall_presence"] = {
+                "verdict": "SKIPPED_NO_SIDECAR",
+                "sidecar": str(sidecar),
+                "reason": "projection sidecar missing; rebuild or "
+                          "promote_canonical to emit it",
+            }
 
-    def _ok(g: dict) -> bool:
-        return g.get("overall", g.get("verdict")) == "PASS"
+    def _status(g: dict) -> str:
+        return g.get("overall", g.get("verdict"))
 
-    overall = "PASS" if all(_ok(g) for g in gates.values()) else "FAIL"
+    statuses = [_status(g) for g in gates.values()]
+    if any(s == "FAIL" for s in statuses):
+        overall = "FAIL"
+    elif any(s == "SKIPPED_NO_SIDECAR" for s in statuses):
+        overall = "INCOMPLETE"
+    else:
+        overall = "PASS"
     return {"overall": overall, "gates": gates}
 
 
@@ -70,6 +94,8 @@ def _summary_line(name: str, g: dict) -> str:
     if name == "wall_overlap":
         return f"  wall_overlap : {v} ({g['n_overlaps']} overlapping pairs)"
     if name == "wall_presence":
+        if v == "SKIPPED_NO_SIDECAR":
+            return f"  wall_presence: SKIPPED_NO_SIDECAR ({g.get('sidecar')})"
         return (f"  wall_presence: {v} ({len(g['findings'])} flagged, "
                 f"calib={g.get('calibration')})")
     return f"  {name}: {v}"
@@ -89,4 +115,6 @@ if __name__ == "__main__":
     print(f"[deterministic-gates] overall={res['overall']}")
     for name, g in res["gates"].items():
         print(_summary_line(name, g))
-    raise SystemExit(0 if res["overall"] == "PASS" else 1)
+    # exit: PASS=0, FAIL=1, INCOMPLETE=3 (3 not 2 — argparse already uses 2 for
+    # CLI usage errors, so a distinct code avoids collision).
+    raise SystemExit({"PASS": 0, "FAIL": 1, "INCOMPLETE": 3}.get(res["overall"], 1))

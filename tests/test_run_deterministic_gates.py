@@ -56,3 +56,58 @@ def test_planta74_with_render_includes_wall_presence_pass():
 def test_quadrado_consensus_gates_pass():
     res = run_all(consensus_path=str(_QUAD))
     assert res["overall"] == "PASS"
+
+
+# ---- --render given but sidecar MISSING -> INCOMPLETE (not silent green) ----
+
+
+def _write_consensus(tmp_path, walls):
+    import json
+    con = {"wall_thickness_pts": 5.4, "walls": walls, "openings": []}
+    p = tmp_path / "c.json"
+    p.write_text(json.dumps(con), encoding="utf-8")
+    return p
+
+
+def test_render_without_sidecar_is_incomplete(tmp_path):
+    cpath = _write_consensus(
+        tmp_path, [{"id": "a", "start": [0, 0], "end": [100, 0]}])
+    render = tmp_path / "top.png"
+    render.write_bytes(b"x")  # no sibling .proj.json -> wall_presence can't run
+    res = run_all(consensus_path=str(cpath), render_path=str(render))
+    assert res["overall"] == "INCOMPLETE"
+    wp = res["gates"]["wall_presence"]
+    assert wp["verdict"] == "SKIPPED_NO_SIDECAR"
+    assert "sidecar" in wp
+
+
+def test_fail_beats_incomplete(tmp_path):
+    # duplicate walls -> wall_overlap FAIL; render w/o sidecar would be
+    # INCOMPLETE. FAIL must win (a real defect outranks a coverage gap).
+    cpath = _write_consensus(tmp_path, [
+        {"id": "a", "start": [0, 0], "end": [100, 0]},
+        {"id": "b", "start": [0, 0], "end": [100, 0]}])
+    render = tmp_path / "top.png"
+    render.write_bytes(b"x")
+    res = run_all(consensus_path=str(cpath), render_path=str(render))
+    if res["gates"]["wall_overlap"]["overall"] == "FAIL":
+        assert res["overall"] == "FAIL"
+
+
+def test_cli_exit_code_3_on_incomplete(tmp_path):
+    # The crux (oracle :8765): CI gates on the EXIT CODE, not on stdout. A
+    # missing sidecar must produce a non-zero, non-FAIL exit so green can't ship
+    # sidecar-less. 3 (not argparse's usage-error 2).
+    import subprocess
+    import sys
+    cpath = _write_consensus(
+        tmp_path, [{"id": "a", "start": [0, 0], "end": [100, 0]}])
+    render = tmp_path / "top.png"
+    render.write_bytes(b"x")
+    r = subprocess.run(
+        [sys.executable, "-m", "tools.run_deterministic_gates",
+         "--consensus", str(cpath), "--render", str(render)],
+        cwd=REPO, capture_output=True, text=True)
+    assert r.returncode == 3, (r.returncode, r.stdout, r.stderr)
+    assert "INCOMPLETE" in r.stdout
+    assert "SKIPPED_NO_SIDECAR" in r.stdout

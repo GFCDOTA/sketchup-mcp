@@ -155,3 +155,27 @@ ignorado). Código≠processo: pós-mudança no bridge, reiniciar (`start.ps1`) 
 (3) **Router puro (sem I/O) = teste sem mock** (`oracle_router.py`): rotear por necessidade —
 factual→determinístico (ground-truth vence), risky→família≠asker (independência real vs Claude-
 consultando-Claude). O cut foi cravado pelo próprio gate :8765.
+
+## LL-035 (2026-05-31) — o sidecar de projeção é PARTE do deliverable; gate que não roda ≠ verde
+
+Caçando defeito de fidelidade na canônica (loop autônomo), o `run_deterministic_gates`
+mostrava só opening_host + wall_overlap (PASS) — **faltava o `wall_presence`**. Raiz: o gate
+visual-determinístico (`overlay_diff`, projeção exata) **só roda se `<render>.proj.json` existe
+ao lado do render**, e nem o `promote_canonical` nem o snapshot `canonical_20260531/final/`
+copiavam o sidecar. Resultado: a canônica navegou "PASS" com o gate de paredes-no-render NUNCA
+rodando. Dois aprendizados:
+
+(1) **Promotion tem que carregar o sidecar.** O `.proj.json` é deliverable, não scratch — sem ele
+o gate auto-skipa e o `.skp` embarca não-verificado pra presença de parede. Fix: `_MAP` do
+`promote_canonical` inclui `model_top.png.proj.json → <plant>_top.png.proj.json`. O render do
+`runs/glassfix` batia byte-a-byte com o deliverable (sha), então o sidecar do glassfix era VÁLIDO
+e foi copiado sem rebuild. Com ele: `wall_presence PASS (0 flagged, calib=sidecar_exact)`.
+
+(2) **Gate runner enforce por EXIT CODE, não por print** (oráculo :8765, redteam, verdict B sobre
+meu leaning A). Skip silencioso virava exit 0 = CI verde. Um print "loud" continua exit 0 e CI
+faz gate no código, não no stdout — não teria barrado o incidente. Agora: `--render` dado mas
+sidecar ausente → `overall=INCOMPLETE`, **exit 3** (3, não 2 — argparse já usa 2 pra usage-error).
+Distinto de FAIL (exit 1): "não conseguiu rodar" (input faltando) ≠ "rodou e achou divergência".
+Preserva triagem ("regenera o sidecar" vs "geometria errada"). `--render` ausente de propósito
+(run consensus-only) segue PASS. Regra geral: **no silent caps** — cobertura que não rodou vira
+status não-verde, não um warning ignorável.
