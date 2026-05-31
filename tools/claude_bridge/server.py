@@ -31,6 +31,7 @@ import json
 import shutil
 import subprocess
 import sys
+import tempfile
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 CLAUDE_TIMEOUT = 240  # segundos por resposta; estoura -> erro 500, nunca trava infinito
@@ -76,15 +77,21 @@ def claude_bin() -> str:
 def ask_claude(question: str) -> str:
     """Roda `claude -p` headless com SYSTEM + a pergunta. Devolve o texto ou levanta."""
     prompt = SYSTEM + "\n\n=== QUESTION ===\n\n" + question
+    # cwd NEUTRO (temp, FORA do repo): claude -p nao carrega o CLAUDE.md/hooks deste
+    # projeto -> sem prompt de permissao e, critico, sem disparar o SessionStart hook
+    # que sobe ESTE bridge (recursao). Model+effort pinados: Opus 4.8 + xhigh (o JUIZ).
+    workdir = tempfile.gettempdir()
     if sys.platform == "win32":
         # npm instala claude como .CMD -> precisa de shell; prompt vai por STDIN (sem quoting)
-        cmd = f'"{claude_bin()}" -p --output-format text'
+        cmd = (f'"{claude_bin()}" -p --model claude-opus-4-8 --effort xhigh '
+               f'--output-format text')
         proc = subprocess.run(cmd, input=prompt, capture_output=True, text=True,
-                              timeout=CLAUDE_TIMEOUT, shell=True)
+                              timeout=CLAUDE_TIMEOUT, shell=True, cwd=workdir)
     else:
-        proc = subprocess.run([claude_bin(), "-p", "--output-format", "text"],
+        proc = subprocess.run([claude_bin(), "-p", "--model", "claude-opus-4-8",
+                               "--effort", "xhigh", "--output-format", "text"],
                               input=prompt, capture_output=True, text=True,
-                              timeout=CLAUDE_TIMEOUT)
+                              timeout=CLAUDE_TIMEOUT, cwd=workdir)
     out = (proc.stdout or "").strip()
     if not out:
         raise RuntimeError(f"resposta vazia (stderr: {(proc.stderr or '')[:300]})")
