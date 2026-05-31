@@ -58,14 +58,29 @@ def promote(src_final: Path, plant: str, repo: Path = REPO) -> dict:
         prov = str(src_final.resolve().relative_to(repo.resolve()))
     except ValueError:
         prov = str(src_final)
+    # Carry the build sidecar (consensus_sha256 = cache key, build stats) and
+    # rewrite the path fields to the canonical location — the artifact_policy
+    # "promotion gotcha": the canonical sidecar must point at artifacts/, not
+    # the runs/ build path, and must keep the consensus SHA.
+    carried = {}
+    src_sidecar = src_final / "model.skp.metadata.json"
+    if src_sidecar.is_file():
+        try:
+            carried = json.loads(src_sidecar.read_text("utf-8"))
+        except Exception:
+            carried = {}
     meta = {
+        **carried,
         "plant": plant,
         "stable_path": f"artifacts/{plant}/{plant}.skp",
+        "skp_path": f"artifacts/{plant}/{plant}.skp",
+        "source_run_path": carried.get("skp_path") or str(src_final / "model.skp"),
         "promoted_from": prov,
         "skp_sha256": sha,
         "skp_bytes": skp.stat().st_size,
         "files": copied,
-        "note": "latest blessed build; promote via tools/promote_canonical.py",
+        "note": "latest correct build at a fixed path; refresh via "
+                "tools/promote_canonical.py or build_plan_shell_skp --promote",
     }
     (dst / f"{plant}.skp.metadata.json").write_text(
         json.dumps(meta, indent=2) + "\n", encoding="utf-8")

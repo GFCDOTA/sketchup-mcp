@@ -38,6 +38,22 @@ def test_promote_writes_metadata_with_sha_and_provenance(tmp_path):
     assert "runs/glassfix" in meta["promoted_from"].replace("\\", "/")
 
 
+def test_promote_carries_consensus_sha_and_rewrites_paths(tmp_path):
+    src = _fake_build(tmp_path / "runs" / "x")
+    # the sidecar the builder leaves next to the runs/ build skp
+    (src / "model.skp.metadata.json").write_text(json.dumps({
+        "consensus_sha256": "deadbeef" * 8,
+        "skp_path": "runs/x/model.skp",
+    }), encoding="utf-8")
+    promote(src, "planta_Y", repo=tmp_path)
+    meta = json.loads(
+        (tmp_path / "artifacts" / "planta_Y" / "planta_Y.skp.metadata.json")
+        .read_text("utf-8"))
+    assert meta["consensus_sha256"] == "deadbeef" * 8            # carried (cache key)
+    assert meta["skp_path"] == "artifacts/planta_Y/planta_Y.skp"  # rewritten -> canonical
+    assert meta["source_run_path"] == "runs/x/model.skp"         # provenance kept
+
+
 def test_promote_is_idempotent(tmp_path):
     src = _fake_build(tmp_path / "b" / "final")
     promote(src, "p", repo=tmp_path)

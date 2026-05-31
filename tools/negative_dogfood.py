@@ -53,7 +53,10 @@ CORRUPTION_RECIPES: dict[str, dict] = {
         "op": "erase_top_exterior_wall_segment",
         "defect_class": "missing_wall_continuation",
         "source_render": "planta_74_top.png",
-        "rect": (400, 92, 740, 122),
+        # re-pinned for the canonical_20260531 deterministic-camera render
+        # (1600x1200): top perimeter wall band at y~200-224. center (700,212)
+        # avg 94 (dark wall, 83% rect coverage); ref_point avg 193 (bg).
+        "rect": (500, 200, 900, 224),
         "ref_point": (1300, 30),
     },
 }

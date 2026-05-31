@@ -887,6 +887,46 @@ def run(consensus_path: Path, out_skp: Path, *, sketchup_exe: Path,
             print(f"[post-run disarm] removed {p.name}")
 
 
+def _infer_plant(consensus_path, explicit=None):
+    """Plant for --promote: explicit, else fixtures/<plant>/..., else planta_74."""
+    if explicit:
+        return explicit
+    parts = Path(consensus_path).resolve().parts
+    if "fixtures" in parts:
+        i = parts.index("fixtures")
+        if i + 1 < len(parts):
+            return parts[i + 1]
+    return "planta_74"
+
+
+def _auto_promote(args, result):
+    """After a green build, copy it to the stable deliverable artifacts/<plant>/.
+    Returns a status line to print. Gate-guarded: a failed self-check gate, a
+    cached (not rebuilt) build, or a missing report is NOT promoted — we never
+    push a broken/unverified build to the fixed path."""
+    if not getattr(args, "promote", False):
+        return None
+    if not result.get("ok"):
+        return "PROMOTE_SKIPPED build not ok"
+    if result.get("skipped"):
+        return "PROMOTE_SKIPPED build was cached (use --force-skp to rebuild+promote)"
+    report_p = args.out.resolve().parent / "geometry_report.json"
+    try:
+        gates = json.loads(report_p.read_text("utf-8")).get("gates_self_check") or {}
+    except Exception:
+        gates = {}
+    if not gates:
+        return "PROMOTE_SKIPPED no gates_self_check in report"
+    failed = sorted(k for k, v in gates.items() if not v)
+    if failed:
+        return f"PROMOTE_SKIPPED self-check gates failed: {failed}"
+    from tools.promote_canonical import promote as _promote
+    plant = _infer_plant(args.consensus, args.plant)
+    res = _promote(args.out.resolve().parent, plant)
+    return (f"PROMOTED -> artifacts/{plant}/{plant}.skp sha={res['sha']} "
+            f"(self-check gates green)")
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("consensus", type=Path,
@@ -920,6 +960,21 @@ if __name__ == "__main__":
         action="store_true",
         help="Shorthand for --mode interactive (do not terminate SU).",
     )
+    ap.add_argument(
+        "--promote",
+        action="store_true",
+        help="After a successful build whose self-check gates are all green, "
+             "copy it to the stable deliverable artifacts/<plant>/ so the "
+             "latest correct build is always at one fixed path. A failed gate "
+             "or a cached build skips the promote. (Appearance changes still "
+             "go through Felipe's VISUAL_REVIEW before you build with this.)",
+    )
+    ap.add_argument(
+        "--plant",
+        default=None,
+        help="Plant name for --promote (default: inferred from a "
+             "fixtures/<plant>/ consensus path, else 'planta_74').",
+    )
     args = ap.parse_args()
     resolved_mode = parse_mode(default=_default_runner_mode())
     result = run(
@@ -934,4 +989,7 @@ if __name__ == "__main__":
     if result.get("skipped"):
         sha = result.get("consensus_sha256") or ""
         print(f"SKIPPED_UNCHANGED_CONSENSUS sha={sha[:12]}")
+    promo = _auto_promote(args, result)
+    if promo:
+        print(promo)
     raise SystemExit(0 if result.get("ok") else 1)
