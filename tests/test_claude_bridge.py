@@ -115,3 +115,34 @@ def test_heartbeat_stalled_when_silent(monkeypatch):
     srv.record_heartbeat("sess-C", 1)
     monkeypatch.setattr(srv, "STALL_SECONDS", -1)  # make any age count as "too old"
     assert "STALLED" in srv.sessions_view()["sess-C"]["flags"]
+
+
+# ---- operational dashboard ------------------------------------------
+
+
+def test_health_has_model_effort_uptime():
+    import tools.claude_bridge.server as srv
+    h = srv.health_payload()
+    assert h["model"] == "claude-opus-4-8"
+    assert h["effort"] == "xhigh"
+    assert "uptime_sec" in h
+    assert "/" in h["endpoints"] and "/events" in h["endpoints"]
+
+
+def test_dashboard_html_is_a_page():
+    import tools.claude_bridge.server as srv
+    assert srv.DASHBOARD_HTML.lstrip().startswith("<!doctype html>")
+    assert "Claude Gate" in srv.DASHBOARD_HTML
+    assert "/sessions" in srv.DASHBOARD_HTML and "/events" in srv.DASHBOARD_HTML
+
+
+def test_recent_events_parses_tail_skips_garbage(tmp_path, monkeypatch):
+    import tools.claude_bridge.server as srv
+    p = tmp_path / "audit.jsonl"
+    p.write_text(
+        '{"kind":"heartbeat","cycle":1}\nNOT JSON\n{"kind":"consult","mode":"redteam"}\n',
+        encoding="utf-8")
+    monkeypatch.setattr(srv, "AUDIT_PATH", p)
+    ev = srv.recent_events()
+    assert len(ev) == 2  # garbage line skipped, not crashed
+    assert ev[-1]["kind"] == "consult"

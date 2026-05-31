@@ -38,6 +38,9 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 CLAUDE_TIMEOUT = 240  # segundos por resposta; estoura -> erro 500, nunca trava infinito
+MODEL = "claude-opus-4-8"   # o JUIZ do modo B (Opus 4.8)
+EFFORT = "xhigh"            # effort maximo
+STARTED_AT = time.time()    # para o uptime no painel operacional
 
 SYSTEM = """You are the CLAUDE ORACLE for the sketchup-mcp fidelity project. The human (Felipe)
 delegated FULL AUTONOMY to you for everything EXCEPT the visual look of the plant ("modo B").
@@ -86,14 +89,14 @@ def ask_claude(question: str) -> str:
     workdir = tempfile.gettempdir()
     if sys.platform == "win32":
         # npm instala claude como .CMD -> precisa de shell; prompt vai por STDIN (sem quoting)
-        cmd = (f'"{claude_bin()}" -p --model claude-opus-4-8 --effort xhigh '
+        cmd = (f'"{claude_bin()}" -p --model {MODEL} --effort {EFFORT} '
                f'--output-format text')
         proc = subprocess.run(cmd, input=prompt, capture_output=True, text=True,
                               encoding="utf-8", errors="replace",
                               timeout=CLAUDE_TIMEOUT, shell=True, cwd=workdir)
     else:
-        proc = subprocess.run([claude_bin(), "-p", "--model", "claude-opus-4-8",
-                               "--effort", "xhigh", "--output-format", "text"],
+        proc = subprocess.run([claude_bin(), "-p", "--model", MODEL,
+                               "--effort", EFFORT, "--output-format", "text"],
                               input=prompt, capture_output=True, text=True,
                               encoding="utf-8", errors="replace",
                               timeout=CLAUDE_TIMEOUT, cwd=workdir)
@@ -170,10 +173,13 @@ def health_payload() -> dict:
     return {
         "status": "ok",
         "oracle": "claude",
+        "model": MODEL,
+        "effort": EFFORT,
+        "uptime_sec": round(time.time() - STARTED_AT, 1),
         "ask_field": list(ASK_FIELDS),
         "verdict_enum": list(VERDICT_ENUM),
         "modes": ["default", "redteam"],
-        "endpoints": ["/ask", "/health", "/heartbeat", "/sessions"],
+        "endpoints": ["/", "/ask", "/health", "/heartbeat", "/sessions", "/events"],
     }
 
 
@@ -237,6 +243,109 @@ def sessions_view() -> dict:
     return out
 
 
+def recent_events(limit: int = 80) -> list:
+    """Tail of the audit-core log (heartbeats + consults), oldest-to-newest.
+    Powers the operational dashboard 'when was it called' feed."""
+    try:
+        lines = AUDIT_PATH.read_text("utf-8", errors="replace").splitlines()
+    except OSError:
+        return []
+    out = []
+    for ln in lines[-limit:]:
+        try:
+            out.append(json.loads(ln))
+        except ValueError:
+            pass
+    return out
+
+
+# Operational dashboard served by the gate itself (no external stack): polls
+# /health + /sessions + /events every 5s. If this page won't load, the gate is down.
+DASHBOARD_HTML = """<!doctype html>
+<html lang="pt-br"><head><meta charset="utf-8">
+<title>Claude Gate - Operacional</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{--bg:#0d1117;--card:#161b22;--line:#30363d;--txt:#e6edf3;--dim:#8b949e;
+--ok:#3fb950;--bad:#f85149;--warn:#d29922;--accent:#58a6ff;}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--txt);
+font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+header{display:flex;align-items:center;gap:16px;padding:16px 24px;border-bottom:1px solid var(--line);flex-wrap:wrap;}
+h1{font-size:18px;margin:0;font-weight:600;}
+.badge{padding:6px 14px;border-radius:20px;font-weight:700;letter-spacing:.5px;}
+.badge.on{background:rgba(63,185,80,.15);color:var(--ok);border:1px solid var(--ok);}
+.badge.off{background:rgba(248,81,73,.15);color:var(--bad);border:1px solid var(--bad);}
+.wrap{padding:24px;display:grid;gap:20px;grid-template-columns:1fr 1fr;max-width:1100px;}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;}
+.card h2{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin:0 0 12px;}
+.kv{display:flex;justify-content:space-between;padding:3px 0;gap:12px;}
+.kv span:first-child{color:var(--dim);}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);}
+th{color:var(--dim);font-weight:500;}
+.flag{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;}
+.flag.OK{background:rgba(63,185,80,.15);color:var(--ok);}
+.flag.STALLED{background:rgba(210,153,34,.15);color:var(--warn);}
+.flag.PARALYZED{background:rgba(248,81,73,.15);color:var(--bad);}
+.feed{max-height:280px;overflow:auto;}
+.ev{display:flex;gap:10px;padding:4px 0;border-bottom:1px solid #21262d;font-size:12px;}
+.ev .t{color:var(--dim);white-space:nowrap;}
+.ev .k{font-weight:700;}
+.ev .k.consult{color:var(--accent);}
+.ev .k.heartbeat{color:var(--dim);}
+.timeline{display:flex;gap:3px;flex-wrap:wrap;}
+.dot{width:12px;height:12px;border-radius:3px;background:var(--line);}
+.dot.up{background:var(--ok);}
+.dot.down{background:var(--bad);}
+.full{grid-column:1 / -1;}
+footer{padding:0 24px 24px;color:var(--dim);font-size:12px;}
+</style></head><body>
+<header><h1>&#127899; Claude Gate - Operacional</h1>
+<span id="status" class="badge off">CHECANDO...</span>
+<span id="updated" style="color:var(--dim);font-size:12px;"></span></header>
+<div class="wrap">
+<div class="card"><h2>Health</h2><div id="health"></div></div>
+<div class="card"><h2>Health timeline</h2><div id="timeline" class="timeline"></div>
+<div style="margin-top:10px;color:var(--dim);font-size:12px;">verde=online | vermelho=offline | refresh 5s</div></div>
+<div class="card full"><h2>Sessoes (orquestrador)</h2>
+<table><thead><tr><th>session</th><th>cycle</th><th>idade</th><th>beats iguais</th><th>ultima acao</th><th>flags</th></tr></thead>
+<tbody id="sessions"></tbody></table></div>
+<div class="card full"><h2>Atividade (consults + heartbeats)</h2><div id="feed" class="feed"></div></div>
+</div>
+<footer>Servido pelo proprio gate em :8765 - sem stack externa</footer>
+<script>
+const hist=[];
+function fmtAge(s){if(s==null)return '-';if(s<90)return s+'s';if(s<5400)return Math.round(s/60)+'m';return Math.round(s/3600)+'h';}
+function fmtTime(t){try{return new Date(t*1000).toLocaleTimeString('pt-br');}catch(e){return '';}}
+function kv(k,v){return '<div class="kv"><span>'+k+'</span><span>'+v+'</span></div>';}
+async function tick(){
+let online=false,health=null;
+try{const r=await fetch('/health',{cache:'no-store'});health=await r.json();online=r.ok;}catch(e){online=false;}
+const b=document.getElementById('status');
+b.className='badge '+(online?'on':'off');b.textContent=online?'ONLINE':'OFFLINE';
+document.getElementById('updated').textContent='atualizado '+new Date().toLocaleTimeString('pt-br');
+hist.push(online);if(hist.length>60)hist.shift();
+document.getElementById('timeline').innerHTML=hist.map(u=>'<div class="dot '+(u?'up':'down')+'"></div>').join('');
+if(health){document.getElementById('health').innerHTML=
+kv('oracle',health.oracle)+kv('model',health.model||'-')+kv('effort',health.effort||'-')+
+kv('uptime',fmtAge(health.uptime_sec))+kv('modes',(health.modes||[]).join(', '))+
+kv('endpoints',(health.endpoints||[]).join(' '));}
+else{document.getElementById('health').innerHTML='<div style="color:var(--bad)">sem resposta do /health</div>';}
+if(!online)return;
+try{const s=await (await fetch('/sessions',{cache:'no-store'})).json();
+const rows=Object.entries(s).map(function(e){var id=e[0],v=e[1];
+return '<tr><td>'+id+'</td><td>'+(v.cycle==null?'-':v.cycle)+'</td><td>'+fmtAge(v.age_sec)+'</td><td>'+(v.unchanged_beats||0)+'</td><td>'+(v.last_action||'')+'</td><td>'+(v.flags||[]).map(f=>'<span class="flag '+f+'">'+f+'</span>').join(' ')+'</td></tr>';}).join('');
+document.getElementById('sessions').innerHTML=rows||'<tr><td colspan=6 style="color:var(--dim)">nenhuma sessao batendo ponto ainda</td></tr>';}catch(e){}
+try{const ev=await (await fetch('/events',{cache:'no-store'})).json();
+document.getElementById('feed').innerHTML=ev.slice().reverse().map(function(e){
+var extra=e.kind==='consult'?('mode='+(e.mode||'default')+' | '+(e.dur_sec==null?'?':e.dur_sec)+'s | q'+(e.q_chars==null?'?':e.q_chars)):('cycle='+(e.cycle==null?'?':e.cycle)+' | '+(e.session_id||'')+' '+(e.last_action||''));
+return '<div class="ev"><span class="t">'+fmtTime(e.t)+'</span><span class="k '+e.kind+'">'+e.kind+'</span><span>'+extra+'</span></div>';}).join('')||'<div style="color:var(--dim)">sem atividade ainda</div>';}catch(e){}
+}
+tick();setInterval(tick,5000);
+</script></body></html>"""
+
+
 class Handler(BaseHTTPRequestHandler):
     def _send(self, code, obj):
         body = json.dumps(obj, ensure_ascii=False).encode("utf-8")
@@ -246,12 +355,24 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _send_html(self, html: str):
+        body = html.encode("utf-8")
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
     def do_GET(self):
         p = self.path.rstrip("/")
-        if p == "/health":
+        if p == "" or p == "/dashboard":
+            self._send_html(DASHBOARD_HTML)
+        elif p == "/health":
             self._send(200, health_payload())
         elif p == "/sessions":
             self._send(200, sessions_view())
+        elif p == "/events":
+            self._send(200, recent_events())
         else:
             self._send(404, {"error": "not found"})
 
@@ -270,8 +391,14 @@ class Handler(BaseHTTPRequestHandler):
             if not prompt:
                 self._send(400, {"error": "empty question (send 'prompt' or 'question')"})
                 return
-            question = apply_mode(prompt, parse_ask_mode(body))
-            self._send(200, {"response": ask_claude(question)})
+            mode = parse_ask_mode(body)
+            question = apply_mode(prompt, mode)
+            t0 = time.time()
+            answer = ask_claude(question)
+            _audit_append({"t": time.time(), "kind": "consult",
+                           "mode": mode or "default", "q_chars": len(prompt),
+                           "a_chars": len(answer), "dur_sec": round(time.time() - t0, 1)})
+            self._send(200, {"response": answer})
         except Exception as e:  # devolve erro honesto; nao fabrica resposta
             self._send(500, {"error": f"{type(e).__name__}: {e}"})
 
