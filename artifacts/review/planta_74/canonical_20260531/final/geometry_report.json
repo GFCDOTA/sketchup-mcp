@@ -2,14 +2,14 @@
   "schema_version": "1.0.0",
   "tool": "build_plan_shell_skp",
   "consensus_path": "E:/Claude/sketchup-mcp/fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json",
-  "skp_path": "E:/Claude/sketchup-mcp/runs/planta_74/canonical/model.skp",
-  "shell_json_path": "E:/Claude/sketchup-mcp/runs/planta_74/canonical/_shell_polygon.json",
+  "skp_path": "E:/Claude/sketchup-mcp/runs/planta_74/glassfix/model.skp",
+  "shell_json_path": "E:/Claude/sketchup-mcp/runs/planta_74/glassfix/_shell_polygon.json",
   "soft_barriers_mode": "groups",
   "plan_shell": {
-    "faces": 141,
+    "faces": 140,
     "edges": 402,
     "sub_groups": 3,
-    "faces_with_holes": 6,
+    "faces_with_holes": 7,
     "top_or_bottom_faces": 14,
     "default_material_faces": 0,
     "present": true
@@ -102,10 +102,10 @@
     {
       "name": "PlanShell_Group",
       "entity_count": 3,
-      "face_count": 141,
+      "face_count": 140,
       "edge_count": 402,
       "sub_group_count": 3,
-      "lateral_face_count": 127,
+      "lateral_face_count": 126,
       "top_or_bottom_face_count": 14,
       "top_face_count": 7,
       "default_material_face_count": 0,
@@ -136,7 +136,7 @@
       },
       "height_m": 2.7,
       "footprint_bbox_m2": 96.1576,
-      "footprint_top_face_m2": 8.3767
+      "footprint_top_face_m2": 8.3782
     },
     {
       "name": "Floor_Group_r000",

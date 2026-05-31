@@ -665,7 +665,15 @@ def build_window_aperture_3d(parent_ents, opening, host_wall, thickness_pt,
   half_w_in = (w_pt * PT_TO_IN) / 2.0
   sill_in = WINDOW_SILL_IN
   head_in = WINDOW_HEAD_IN
-  thickness_in = thickness_pt.to_f * PT_TO_IN
+  # Use the HOST wall's own thickness for the through-carve, not the global
+  # consensus thickness. FP-031 #28 merged collinear walls and set each merged
+  # wall's thickness to the MEAN of its segments, so a merged wall (e.g. m003 =
+  # 5.52pt) can be THICKER than the global (5.40pt). pushpull(-global) then
+  # stops short of the far face -> no through-hole -> a blind pocket that reads
+  # as a flat dark rectangle, not a glazed window (Felipe: BANHO 2 "só o recorte,
+  # sem vidro"). The shell builds the wall at host_wall['thickness'], so carving
+  # exactly that distance reaches the far face and merges into a clean hole.
+  thickness_in = (host_wall['thickness'] || thickness_pt).to_f * PT_TO_IN
   # Host wall's perpendicular position + tolerance (FP-031), so the aperture
   # only carves the host wall (mirrors the glass, which uses host_wall.start).
   host_at_in = (ori == 'h' ? host_wall['start'][1].to_f
