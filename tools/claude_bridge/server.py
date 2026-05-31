@@ -83,6 +83,43 @@ def ask_claude(question: str) -> str:
     return out
 
 
+# ---- /ask + /health contract (spec gate_framework §6.5) ------------
+ASK_FIELDS = ("prompt", "question")
+VERDICT_ENUM = ("GO", "NO-GO", "MORE-INFO", "VISUAL_REVIEW")
+
+
+def parse_ask_payload(raw: bytes) -> str:
+    """Extract the question text from a raw /ask body.
+
+    - UTF-8 TOLERANT: ``errors="replace"`` — a stray non-ASCII byte (the bridge
+      once 500'd on the "ã" in "NÃO") must never crash the request.
+    - FLEXIBLE FIELD: accepts ``prompt`` OR ``question`` so the caller does not
+      have to guess (the consuming session discovered the field by trial/error).
+    Returns the stripped text, or "" if absent/blank.
+    """
+    if not raw:
+        return ""
+    data = json.loads(raw.decode("utf-8", errors="replace"))
+    if not isinstance(data, dict):
+        return ""
+    for field in ASK_FIELDS:
+        val = data.get(field)
+        if val:
+            return str(val).strip()
+    return ""
+
+
+def health_payload() -> dict:
+    """Self-documenting /health: exposes the /ask contract (which field to send,
+    what verdicts come back) so the caller never reverse-engineers it."""
+    return {
+        "status": "ok",
+        "oracle": "claude",
+        "ask_field": list(ASK_FIELDS),
+        "verdict_enum": list(VERDICT_ENUM),
+    }
+
+
 class Handler(BaseHTTPRequestHandler):
     def _send(self, code, obj):
         body = json.dumps(obj, ensure_ascii=False).encode("utf-8")
@@ -94,7 +131,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         if self.path.rstrip("/") == "/health":
-            self._send(200, {"status": "ok", "oracle": "claude"})
+            self._send(200, health_payload())
         else:
             self._send(404, {"error": "not found"})
 
@@ -104,10 +141,9 @@ class Handler(BaseHTTPRequestHandler):
             return
         try:
             n = int(self.headers.get("Content-Length") or 0)
-            payload = json.loads(self.rfile.read(n).decode("utf-8")) if n else {}
-            prompt = (payload.get("prompt") or "").strip()
+            prompt = parse_ask_payload(self.rfile.read(n) if n else b"")
             if not prompt:
-                self._send(400, {"error": "campo 'prompt' vazio"})
+                self._send(400, {"error": "empty question (send 'prompt' or 'question')"})
                 return
             self._send(200, {"response": ask_claude(prompt)})
         except Exception as e:  # devolve erro honesto; nao fabrica resposta
