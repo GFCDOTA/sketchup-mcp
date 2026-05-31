@@ -1,0 +1,25 @@
+{
+  "id": "bad_orphan_glass_parapet_labelled",
+  "expected_verdict": "FAIL",
+  "expected_findings": [
+    {
+      "type": "orphan_glass_panel",
+      "severity": "FAIL",
+      "axis": "window_fidelity",
+      "evidence": "Label B/E indicate possible translucent panels detached from valid window/soft-barrier context."
+    },
+    {
+      "type": "misplaced_soft_barrier",
+      "severity": "FAIL",
+      "axis": "window_fidelity",
+      "evidence": "Labels C/F indicate soft barrier/parapet placement that must be cross-checked against consensus and PDF."
+    },
+    {
+      "type": "missing_wall_continuation",
+      "severity": "WARN",
+      "axis": "wall_fidelity",
+      "evidence": "Label A/D highlight wall/host context that visually appears incomplete or fragmented."
+    }
+  ],
+  "source": "labelled derivative of real marked screenshot"
+}

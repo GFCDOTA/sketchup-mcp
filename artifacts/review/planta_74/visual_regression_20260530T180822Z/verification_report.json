@@ -1,0 +1,26 @@
+{
+  "mode": "OFFLINE_DATA_ONLY",
+  "fixture": "planta_74",
+  "verifier": ["tools/pdf_overlay_verify.py", "tools/opening_audit.py", "geometry_report", "consensus", "known_warnings"],
+  "headline": "Geometry/layout is FAITHFUL to the PDF (overlay-proven). Only CONFIRMED_BUG = scale.",
+  "findings": [
+    {"suspicion": "doors too big / panels", "verdict": "FALSE_ALARM",
+     "evidence": "7 PDF door swing-arcs measured vs consensus opening widths -> ratio 0.98-1.09; h_o000=1.16m and h_o005=1.25m are genuinely wide doors in the PDF."},
+    {"suspicion": "external right wall chamfered/perimeter", "verdict": "FALSE_ALARM",
+     "evidence": "consensus walls overlay exactly on the PDF perimeter incl. steps; all 35 walls axis-aligned."},
+    {"suspicion": "floor/color leaking to wrong face", "verdict": "FALSE_ALARM",
+     "evidence": "consensus room polygons fill within walls on the overlay; gates floors_separated_from_walls=true, default_material_faces_zero=true."},
+    {"suspicion": "blue glass dominant / windows look empty", "verdict": "GEOMETRY_OK_RENDER_LEGIBILITY_BUG",
+     "evidence": "5 glass elements 0.05-0.09m from opening centers (placed). Geometry correct; render does not communicate thin/transparent glass."},
+    {"suspicion": "central rooms not closed / circulation", "verdict": "WARN_DOCUMENTED",
+     "evidence": "known_warnings.json open-plan: 8 cells vs 11 semantic ambients."}
+  ],
+  "confirmed_bugs": [
+    {"bug": "scale", "verdict": "CONFIRMED_BUG",
+     "evidence": "builder PT_TO_M=0.19/5.4=0.03519 vs PDF cotas 5.45/2.60/2.40 -> ~0.0252 m/pt (~1.40x too big). Overlay proves consensus faithful in pdf-points, so error is purely the pt->m anchor.",
+     "fix": "ENV['PT_TO_M'] override in build_plan_shell_skp.rb (default unchanged, no fixture mutation). planta_74 @0.0252 -> PlanShell 12.71x7.53m, gates pass, pytest 223 passed.",
+     "render_note": "scale change looks subtle (zoom_extents auto-fit); fidelity gain = correct absolute dimensions, cota-proven."}
+  ],
+  "tally": {"FALSE_ALARM": 3, "GEOMETRY_OK_RENDER_LEGIBILITY_BUG": 1, "WARN_DOCUMENTED": 1, "CONFIRMED_BUG": 1},
+  "status": {"geometry_layout": "PASS", "scale": "CONFIRMED_BUG_FIX_MECHANISM_LANDED", "representation": "FAIL_separate_track", "overall_render": "still FAIL on representation"}
+}

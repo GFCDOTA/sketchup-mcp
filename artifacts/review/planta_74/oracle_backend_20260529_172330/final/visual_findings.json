@@ -1,0 +1,35 @@
+{
+  "schema_version": "visual_findings.v1",
+  "top_level_verdict": "PASS",
+  "axes": {
+    "wall_fidelity": {
+      "verdict": "PASS",
+      "evidence": "All walls appear to be correctly represented in the top and isometric views."
+    },
+    "window_fidelity": {
+      "verdict": "PASS",
+      "evidence": "Windows are correctly represented in both views."
+    },
+    "scale_rotation": {
+      "verdict": "PASS",
+      "evidence": "The scale and rotation appear consistent between the top and isometric views."
+    },
+    "door_fidelity": {
+      "verdict": "PASS",
+      "evidence": "Doors are correctly represented in both views."
+    },
+    "global_visual": {
+      "verdict": "PASS",
+      "evidence": "The overall visual representation is consistent and clear in both views."
+    },
+    "room_fidelity": {
+      "verdict": "PASS",
+      "evidence": "Rooms are correctly represented in both views."
+    }
+  },
+  "findings": [],
+  "source": "oracle_bridge",
+  "raw_confidence": "high",
+  "fixture": "planta_74",
+  "attempt": "final"
+}

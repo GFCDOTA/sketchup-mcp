@@ -1,0 +1,13 @@
+{
+  "id": "bad_floor_leak_synthetic",
+  "expected_verdict": "FAIL",
+  "expected_findings": [
+    {
+      "type": "floor_leak",
+      "severity": "FAIL",
+      "axis": "room_fidelity",
+      "evidence": "Floor region extends outside the enclosing wall shell."
+    }
+  ],
+  "source": "synthetic visual oracle training diagram, not architectural ground truth"
+}

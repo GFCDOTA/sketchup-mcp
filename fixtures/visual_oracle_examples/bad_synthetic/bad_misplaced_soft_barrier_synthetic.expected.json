@@ -1,0 +1,13 @@
+{
+  "id": "bad_misplaced_soft_barrier_synthetic",
+  "expected_verdict": "FAIL",
+  "expected_findings": [
+    {
+      "type": "misplaced_soft_barrier",
+      "severity": "FAIL",
+      "axis": "window_fidelity",
+      "evidence": "Soft barrier/parapet crosses a room without source/terrace context."
+    }
+  ],
+  "source": "synthetic visual oracle training diagram, not architectural ground truth"
+}

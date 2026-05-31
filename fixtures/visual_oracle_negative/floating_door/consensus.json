@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0.0",
+  "wall_thickness_pts": 5.4,
+  "plan_id": "negative_floating_door",
+  "walls": [
+    {"id": "w_bottom", "start": [100.0, 100.0], "end": [200.0, 100.0],
+     "thickness": 5.4, "orientation": "h"}
+  ],
+  "rooms": [],
+  "openings": [
+    {
+      "id": "door_a",
+      "wall_id": "w_bottom",
+      "kind_v5": "interior_door",
+      "geometry_origin": "svg_segments",
+      "decision": "clean",
+      "center": [150.0, 100.0],
+      "opening_width_pts": 32.0
+    }
+  ],
+  "soft_barriers": []
+}

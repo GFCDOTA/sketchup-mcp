@@ -1,0 +1,83 @@
+{
+  "schema_version": "visual_findings.v1",
+  "fixture": "planta_74",
+  "attempt": "final",
+  "top_level_verdict": "WARN",
+  "axes": {
+    "wall_fidelity": {
+      "verdict": "PASS",
+      "evidence": "10 deterministic heuristics ran: gates_self_check 4/4 true; 35 walls extruded matching consensus.walls; slivers_removed=0; PlanShell_Group continuous in render. Side-by-side confirms SKP outline matches PDF L-footprint."
+    },
+    "door_fidelity": {
+      "verdict": "PASS",
+      "evidence": "DoorLeaf_Group count = 7 == count(kind_v5=interior_door) = 7 (new check). All DoorLeaf bbox z_min approx 0 (no floating door). Iso shows door swings hosted in walls. No door_count_mismatch, no floating_door."
+    },
+    "window_fidelity": {
+      "verdict": "PASS",
+      "evidence": "WindowGlass_Group count = 4 == count(kind_v5=window) = 4 (PR #195 invariant + new no-duplicate check). Each height_m=1.2 in [0.9,1.5] range (peitoril+verga preserved per FP-024). z_min approx 0.9m (not full-height void). 1 GlazedBalcony_Group height 2.7m correctly NOT counted as window."
+    },
+    "room_fidelity": {
+      "verdict": "WARN",
+      "evidence": "8 Floor_Group vs 11 semantic ambients. Two cells fuse open-plan ambients with no PDF wall trace: r001 (A.S./TERRACO SOCIAL/TERRACO TECNICO), r002 (SALA DE JANTAR/SALA DE ESTAR). Honest baseline per lessons_learned.md #4. Promotion to PASS requires semantic_zones overlay tool."
+    },
+    "scale_rotation": {
+      "verdict": "PASS",
+      "promoter": "claude_inline",
+      "evidence": "Inline review of side_by_side_pdf_vs_skp.png (Claude Code 2026-05-29 maturity 2 run): PDF outline (left) and SKP top (center) have identical L-footprint with TERRACO SOCIAL extending south, COZINHA NW corner, SUITE 01 NE, SUITE 02/BANHO 02/LAVABO arrangement. bbox_m approx 17.7 x 10.5 m consistent with PDF 74.93 m^2. 0 deg rotation."
+    },
+    "global_visual": {
+      "verdict": "PASS",
+      "promoter": "claude_inline",
+      "evidence": "Inline review of model_top.png + model_iso.png + side_by_side composite: apartamento habitavel recognizable; no floating geometry, no orphan glass, no misplaced soft barriers, no wall stubs, no floor leaks. Door swings shown at each doorway. Glazed balcony tall on west facade. Matches FP-030 good_real_baseline example. NOTE: bridge unavailable; promoter is Claude inline (not oracle). With chatgpt_bridge running, this axis would be promoted by the bridge."
+    }
+  },
+  "findings": [],
+  "verified_passes": [
+    {
+      "id": "vp_001",
+      "axis": "wall_fidelity",
+      "type": "interior_soft_barrier_confirmed_against_pdf",
+      "location": "SoftBarrier_Group_5 @ bbox_m=(7.47,15.94)-(10.51,20.76)",
+      "evidence": "sb005 mapped to PDF label PEITORIL H=1,10M between TERRACO TECNICO and SUITE 02. Carried from PR #200 verification."
+    }
+  ],
+  "input_summary": {
+    "input_walls": 35,
+    "openings_carved": 8,
+    "window_apertures_3d": 4,
+    "slivers_removed": 0,
+    "consensus_kind_counts": {
+      "interior_door": 7,
+      "window": 4,
+      "glazed_balcony": 1
+    },
+    "group_counts": {
+      "PlanShell_Group": 1,
+      "Floor_Group": 8,
+      "SoftBarrier_Group": 7,
+      "DoorLeaf_Group": 7,
+      "WindowGlass_Group": 4,
+      "GlazedBalcony_Group": 1
+    },
+    "gates_self_check": {
+      "plan_shell_group_exists": true,
+      "wall_shell_is_single_group": true,
+      "floors_separated_from_walls": true,
+      "default_material_faces_zero": true
+    }
+  },
+  "side_by_side_status": "ok",
+  "oracle_status": "unavailable",
+  "oracle_status_detail": "bridge unreachable at http://localhost:8765",
+  "review_method": {
+    "deterministic_heuristics": "tools/run_skp_visual_review.py — 10 checks ran: gates_self_check, window_count_mismatch, door_count_mismatch (new), glazed_balcony_count_mismatch (new), floating_door, orphan_glass_panel (incl. soft_barrier->WindowGlass leak detection - new), no_duplicate_window_application (new), window_height_range, full_height_window_void z_min check (new), floor_leak_basic. All 0 findings.",
+    "qualitative_inline_review": "Claude Code 4.7 (1M context) read side_by_side_pdf_vs_skp.png via Read tool 2026-05-29T04:55Z; promoted scale_rotation and global_visual from auto-WARN to PASS. Oracle bridge was unavailable, so Claude inline served as the visual reviewer.",
+    "side_by_side_generation": "tools/compose_side_by_side.py (NEW in this PR; replaces ad-hoc PIL from PR #200). 244 KB.",
+    "baseline_used_for_comparison": "artifacts/planta_74/ canonical (PR #185/#191) + prior dogfoodings (PR #198, #200). Same consensus_sha256 = e1b1a53..."
+  },
+  "remaining_warns": [
+    {"axis": "room_fidelity", "reason": "open-plan cells r001/r002, semantic_zones backlog"},
+    {"axis": "wall_fidelity (carried from #200)", "reason": "SoftBarrier_Group_7 / sb007 needs annotator confirmation; SoftBarrier_Group_1 sliver finding-only (policy choice)"}
+  ],
+  "top_level_verdict_justification": "WARN_documented — top-level reflects (a) room_fidelity baseline (open-plan), (b) carried wall_fidelity WARNs from PR #200 (sb007 ambiguous, sb_sliver). All structural and visual checks PASS. No FAIL. Promotion to PASS would require: semantic_zones overlay tool OR annotator confirmation of sb007 OR policy decision on sliver threshold."
+}

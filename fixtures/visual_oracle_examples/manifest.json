@@ -1,0 +1,178 @@
+{
+  "schema_version": "visual_oracle_examples_manifest.v1",
+  "purpose": "Seed examples for Visual Oracle Gate (FP-030). Real screenshots (good_real, bad_real) are preferred as golden truth. Synthetic diagrams teach categories. Each example is classified by `confidence_tier` (see FP-030 spec § 'Example policy — confidence tiers') controlling whether it can train hard FAIL or only WARN.",
+  "confidence_tiers": {
+    "good_real_baseline": "strong PASS reference from current canonical artifact; full weight",
+    "bad_real_confirmed": "strong FAIL example, defect clearly localised and not coinciding with legitimate geometry; full weight",
+    "bad_real_ambiguous": "real screenshot with annotations that may include false-positive regions (e.g. door jambs marked as wall stubs); can contribute to WARN, MUST NOT train hard FAIL",
+    "good_synthetic_teaching": "didactic positive diagram; medium weight",
+    "bad_synthetic_teaching": "didactic negative diagram; medium weight"
+  },
+  "examples": [
+    {
+      "id": "good_planta_74_current_top",
+      "image": "good_real/good_planta_74_current_top.png",
+      "expected_json": "good_real/good_planta_74_current_top.expected.json",
+      "expected_verdict": "PASS",
+      "expected_finding_types": [],
+      "confidence_tier": "good_real_baseline"
+    },
+    {
+      "id": "good_planta_74_current_iso",
+      "image": "good_real/good_planta_74_current_iso.png",
+      "expected_json": "good_real/good_planta_74_current_iso.expected.json",
+      "expected_verdict": "PASS",
+      "expected_finding_types": [],
+      "confidence_tier": "good_real_baseline"
+    },
+    {
+      "id": "good_planta_74_current_side_by_side",
+      "image": "good_real/good_planta_74_current_side_by_side.png",
+      "expected_json": "good_real/good_planta_74_current_side_by_side.expected.json",
+      "expected_verdict": "PASS",
+      "expected_finding_types": [],
+      "confidence_tier": "good_real_baseline"
+    },
+    {
+      "id": "good_clean_shell_hosted_openings_synthetic",
+      "image": "good_synthetic/good_clean_shell_hosted_openings_synthetic.png",
+      "expected_json": "good_synthetic/good_clean_shell_hosted_openings_synthetic.expected.json",
+      "expected_verdict": "PASS",
+      "expected_finding_types": [],
+      "confidence_tier": "good_synthetic_teaching"
+    },
+    {
+      "id": "bad_current_iso_suspicious",
+      "image": "bad_real/bad_current_iso_suspicious.png",
+      "expected_json": "bad_real/bad_current_iso_suspicious.expected.json",
+      "expected_verdict": "WARN",
+      "expected_finding_types": ["global_visual_fail"],
+      "confidence_tier": "bad_real_ambiguous",
+      "note": "Unlabelled iso of an older build; generic WARN smoke without localised defect."
+    },
+    {
+      "id": "bad_current_top_suspicious",
+      "image": "bad_real/bad_current_top_suspicious.png",
+      "expected_json": "bad_real/bad_current_top_suspicious.expected.json",
+      "expected_verdict": "WARN",
+      "expected_finding_types": ["global_visual_fail"],
+      "confidence_tier": "bad_real_ambiguous",
+      "note": "Unlabelled top of an older build; generic WARN smoke."
+    },
+    {
+      "id": "bad_orphan_glass_parapet_labelled",
+      "image": "bad_real/bad_orphan_glass_parapet_labelled.png",
+      "expected_json": "bad_real/bad_orphan_glass_parapet_labelled.expected.json",
+      "expected_verdict": "FAIL",
+      "expected_finding_types": [
+        "orphan_glass_panel",
+        "misplaced_soft_barrier",
+        "missing_wall_continuation"
+      ],
+      "confidence_tier": "bad_real_confirmed"
+    },
+    {
+      "id": "bad_orphan_glass_parapet_marked",
+      "image": "bad_real/bad_orphan_glass_parapet_marked.png",
+      "expected_json": "bad_real/bad_orphan_glass_parapet_marked.expected.json",
+      "expected_verdict": "FAIL",
+      "expected_finding_types": [
+        "orphan_glass_panel",
+        "misplaced_soft_barrier",
+        "unsupported_parapet"
+      ],
+      "confidence_tier": "bad_real_confirmed"
+    },
+    {
+      "id": "bad_suspicious_openings_iso",
+      "image": "bad_real/bad_suspicious_openings_iso.png",
+      "expected_json": "bad_real/bad_suspicious_openings_iso.expected.json",
+      "expected_verdict": "WARN",
+      "expected_finding_types": ["suspect_opening_or_barrier_routing"],
+      "confidence_tier": "bad_real_ambiguous",
+      "note": "Pre-FP-024 build with full-height window voids. Historic negative — current builder routes windows via 3D aperture path."
+    },
+    {
+      "id": "bad_wall_stubs_labelled",
+      "image": "bad_real/bad_wall_stubs_labelled.png",
+      "expected_json": "bad_real/bad_wall_stubs_labelled.expected.json",
+      "expected_verdict": "WARN",
+      "expected_finding_types": ["wall_stub"],
+      "confidence_tier": "bad_real_ambiguous",
+      "ambiguity_note": "Visual annotations include both genuine wall_stubs AND door jambs / window mullions that are CORRECT geometry. Per bad_real_ambiguous rule, this example may contribute to WARN but MUST NOT train hard FAIL heuristics. The FP-026 detector (tools/diagnose_wall_stubs.py) remains the authority for confirmed stubs."
+    },
+    {
+      "id": "bad_wall_stubs_marked",
+      "image": "bad_real/bad_wall_stubs_marked.png",
+      "expected_json": "bad_real/bad_wall_stubs_marked.expected.json",
+      "expected_verdict": "WARN",
+      "expected_finding_types": ["wall_stub"],
+      "confidence_tier": "bad_real_ambiguous",
+      "ambiguity_note": "Same caveat as bad_wall_stubs_labelled: some red circles cover door jambs (correct geometry) rather than residual stubs. Cross-check FP-026 detector."
+    },
+    {
+      "id": "bad_floating_door_synthetic",
+      "image": "bad_synthetic/bad_floating_door_synthetic.png",
+      "expected_json": "bad_synthetic/bad_floating_door_synthetic.expected.json",
+      "expected_verdict": "FAIL",
+      "expected_finding_types": ["floating_door"],
+      "confidence_tier": "bad_synthetic_teaching"
+    },
+    {
+      "id": "bad_floor_leak_synthetic",
+      "image": "bad_synthetic/bad_floor_leak_synthetic.png",
+      "expected_json": "bad_synthetic/bad_floor_leak_synthetic.expected.json",
+      "expected_verdict": "FAIL",
+      "expected_finding_types": ["floor_leak"],
+      "confidence_tier": "bad_synthetic_teaching"
+    },
+    {
+      "id": "bad_full_height_window_void_synthetic",
+      "image": "bad_synthetic/bad_full_height_window_void_synthetic.png",
+      "expected_json": "bad_synthetic/bad_full_height_window_void_synthetic.expected.json",
+      "expected_verdict": "FAIL",
+      "expected_finding_types": ["bad_window_aperture"],
+      "confidence_tier": "bad_synthetic_teaching"
+    },
+    {
+      "id": "bad_misplaced_soft_barrier_synthetic",
+      "image": "bad_synthetic/bad_misplaced_soft_barrier_synthetic.png",
+      "expected_json": "bad_synthetic/bad_misplaced_soft_barrier_synthetic.expected.json",
+      "expected_verdict": "FAIL",
+      "expected_finding_types": ["misplaced_soft_barrier"],
+      "confidence_tier": "bad_synthetic_teaching"
+    },
+    {
+      "id": "bad_misplaced_window_synthetic",
+      "image": "bad_synthetic/bad_misplaced_window_synthetic.png",
+      "expected_json": "bad_synthetic/bad_misplaced_window_synthetic.expected.json",
+      "expected_verdict": "FAIL",
+      "expected_finding_types": ["misplaced_window"],
+      "confidence_tier": "bad_synthetic_teaching"
+    },
+    {
+      "id": "bad_missing_wall_continuation_synthetic",
+      "image": "bad_synthetic/bad_missing_wall_continuation_synthetic.png",
+      "expected_json": "bad_synthetic/bad_missing_wall_continuation_synthetic.expected.json",
+      "expected_verdict": "FAIL",
+      "expected_finding_types": ["missing_wall_continuation"],
+      "confidence_tier": "bad_synthetic_teaching"
+    },
+    {
+      "id": "bad_orphan_glass_panel_synthetic",
+      "image": "bad_synthetic/bad_orphan_glass_panel_synthetic.png",
+      "expected_json": "bad_synthetic/bad_orphan_glass_panel_synthetic.expected.json",
+      "expected_verdict": "FAIL",
+      "expected_finding_types": ["orphan_glass_panel"],
+      "confidence_tier": "bad_synthetic_teaching"
+    },
+    {
+      "id": "bad_wall_stub_synthetic",
+      "image": "bad_synthetic/bad_wall_stub_synthetic.png",
+      "expected_json": "bad_synthetic/bad_wall_stub_synthetic.expected.json",
+      "expected_verdict": "FAIL",
+      "expected_finding_types": ["wall_stub"],
+      "confidence_tier": "bad_synthetic_teaching"
+    }
+  ]
+}

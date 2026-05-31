@@ -1,0 +1,13 @@
+{
+  "id": "bad_floating_door_synthetic",
+  "expected_verdict": "FAIL",
+  "expected_findings": [
+    {
+      "type": "floating_door",
+      "severity": "FAIL",
+      "axis": "door_fidelity",
+      "evidence": "Door leaf is detached from any visible/opening-carved wall host."
+    }
+  ],
+  "source": "synthetic visual oracle training diagram, not architectural ground truth"
+}
