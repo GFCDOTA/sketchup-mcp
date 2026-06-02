@@ -327,6 +327,19 @@ def build_soft_barrier(parent_ents, barrier, material, index,
   pts_pdf = soft_barrier_polyline_pts(barrier)
   return {'ok' => false, 'reason' => 'no polyline_pts'} if pts_pdf.length < 2
 
+  # SOURCE GATE (Felipe 2026-06-02): so renderiza com FONTE EXPLICITA.
+  # sem barrier_type + sem human_annotation => SKIP TOTAL (caso sb000-sb007).
+  # NADA de fallback fisico — nem grade, nem mureta, nem bloco cinza. Fica
+  # ausente do SKP; aparece so como WARN no soft_barrier_source_audit.
+  bt = barrier['barrier_type']
+  has_source = (barrier['geometry_origin'] == 'human_annotation')
+  unless bt && has_source
+    return {'ok' => false,
+            'reason' => "skip(no_source): barrier_type=#{bt.inspect} human_annotation=#{has_source}"}
+  end
+  # GRADE so com autorizacao explicita; peitoril/mureta = elemento baixo opaco.
+  render_grade = (barrier['render_as'] == 'grade' || bt == 'guardrail' || bt == 'railing')
+
   group = parent_ents.add_group
   group.name = "SoftBarrier_Group_#{index}"
 
@@ -367,12 +380,10 @@ def build_soft_barrier(parent_ents, barrier, material, index,
     sub_group.name = "SoftBarrier_#{index}_seg_#{seg_idx}"
     se = sub_group.entities
 
-    # GRADE e OPT-IN: so renderiza grade onde a FONTE e explicita
-    # (barrier['render_as']=='grade' — anotacao humana / regra de varanda).
-    # Sem isso => MURETA OPACA (default). Mata a super-generalizacao
-    # "toda borda baixa vira grade" (bug Felipe 2026-06-02): peitoril/mureta
-    # NAO viram grade automaticamente.
-    if barrier['render_as'] == 'grade'
+    # Ja passou pelo SOURCE GATE (tem barrier_type + fonte). GRADE so se
+    # render_grade (render_as=grade / guardrail / railing); senao peitoril/
+    # mureta = elemento baixo OPACO. NUNCA fallback de peitoril -> grade.
+    if render_grade
       half_t = GRADE_RAIL_THICK_IN / 2.0
       nx = -uy * half_t
       ny =  ux * half_t
