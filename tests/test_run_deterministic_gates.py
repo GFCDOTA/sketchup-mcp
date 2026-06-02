@@ -69,11 +69,22 @@ def _write_consensus(tmp_path, walls):
     return p
 
 
+def _good_render(path):
+    """A valid PNG with content well inside the frame (passes render_bbox), so
+    these tests isolate the sidecar/INCOMPLETE behavior, not framing."""
+    import numpy as np
+    from PIL import Image
+    img = np.full((200, 200, 3), 200, np.uint8)
+    img[60:140, 60:140] = 20  # centered content, margins ~60 >= 32
+    Image.fromarray(img).save(path)
+    return path
+
+
 def test_render_without_sidecar_is_incomplete(tmp_path):
     cpath = _write_consensus(
         tmp_path, [{"id": "a", "start": [0, 0], "end": [100, 0]}])
     render = tmp_path / "top.png"
-    render.write_bytes(b"x")  # no sibling .proj.json -> wall_presence can't run
+    _good_render(render)  # no sibling .proj.json -> wall_presence can't run
     res = run_all(consensus_path=str(cpath), render_path=str(render))
     assert res["overall"] == "INCOMPLETE"
     wp = res["gates"]["wall_presence"]
@@ -88,7 +99,7 @@ def test_fail_beats_incomplete(tmp_path):
         {"id": "a", "start": [0, 0], "end": [100, 0]},
         {"id": "b", "start": [0, 0], "end": [100, 0]}])
     render = tmp_path / "top.png"
-    render.write_bytes(b"x")
+    _good_render(render)
     res = run_all(consensus_path=str(cpath), render_path=str(render))
     if res["gates"]["wall_overlap"]["overall"] == "FAIL":
         assert res["overall"] == "FAIL"
@@ -103,7 +114,7 @@ def test_cli_exit_code_3_on_incomplete(tmp_path):
     cpath = _write_consensus(
         tmp_path, [{"id": "a", "start": [0, 0], "end": [100, 0]}])
     render = tmp_path / "top.png"
-    render.write_bytes(b"x")
+    _good_render(render)
     r = subprocess.run(
         [sys.executable, "-m", "tools.run_deterministic_gates",
          "--consensus", str(cpath), "--render", str(render)],

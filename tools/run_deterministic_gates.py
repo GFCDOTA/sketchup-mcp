@@ -51,6 +51,10 @@ def run_all(
         "wall_overlap": audit_wall_overlaps(con),
     }
     if render_path:
+        # render framing first (pixel-only, no sidecar): a clipped plant
+        # invalidates any visual review (external-review finding #1).
+        from tools.render_bbox_audit import audit_render_bbox
+        gates["render_bbox"] = audit_render_bbox(render_path)
         sidecar = Path(str(render_path) + ".proj.json")
         if sidecar.exists():
             from tools.overlay_diff import run_gate
@@ -93,6 +97,8 @@ def _summary_line(name: str, g: dict) -> str:
         return f"  opening_host : {v} ({g['n_fail']}/{g['n_openings']} openings)"
     if name == "wall_overlap":
         return f"  wall_overlap : {v} ({g['n_overlaps']} overlapping pairs)"
+    if name == "render_bbox":
+        return f"  render_bbox  : {v} (margins {g.get('margins')})"
     if name == "wall_presence":
         if v == "SKIPPED_NO_SIDECAR":
             return f"  wall_presence: SKIPPED_NO_SIDECAR ({g.get('sidecar')})"

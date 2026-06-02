@@ -179,3 +179,24 @@ Distinto de FAIL (exit 1): "não conseguiu rodar" (input faltando) ≠ "rodou e 
 Preserva triagem ("regenera o sidecar" vs "geometria errada"). `--render` ausente de propósito
 (run consensus-only) segue PASS. Regra geral: **no silent caps** — cobertura que não rodou vira
 status não-verde, não um warning ignorável.
+
+## LL-036 (2026-06-02) — review externo julga o que você MANDA; mire a canônica de path fixo
+
+Mandei uma IA externa revisar fidelidade; ela apontou 3 itens "críticos/importantes".
+Verificação determinística contra a canônica ATUAL provou que **2 eram STALE**: ela revisou
+`visual_loop_current/final` (snapshot velho, render CORTADO nas laterais) em vez de
+`artifacts/planta_74/` (canônica de path fixo). #1 "render cortado" já resolvido pela câmera #29
+(margens 44/148 vs 0/29 do velho); #3 "portas 1,16/1,25m" já resolvido pelo regen #28 (todas
+≤0,89m). Só **#4 (8 soft barriers sb000-sb007 sem fonte)** era real.
+
+(1) **Verificar TODO achado de review contra a canônica atual, não contra o artefato revisado.**
+Render (bonito ou feio) não é prova; o que vale é o estado versionado atual.
+(2) **Review externo deve mirar o path fixo `artifacts/<plant>/`** (sempre o último correto),
+NUNCA dirs de review com timestamp/nome enganoso. `visual_loop_current` ("current" mentiroso) foi
+removido pra não enganar de novo.
+(3) Cada achado virou **gate de regressão determinístico**: `render_bbox_audit` (FAIL se conteúdo
+encosta na borda — pegaria o render velho; canônica PASS 44/148), `soft_barrier_source_audit`
+(WARN se barreira vira geometria física a 1,10m sem `barrier_type`/fonte PDF — Hard Rule #1).
+Achado stale vira guarda que prova a canônica limpa; achado real fica WARN pra classificação
+humana/PDF. Pendentes (precisam raster do PDF): swing de porta (#2), overlay PDF↔SKP registrado
+(#5), legibilidade de abertura no render (#6, core já validado).
