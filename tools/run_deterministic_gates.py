@@ -44,6 +44,7 @@ def run_all(
     fixture: str | None = None,
     consensus_path: str | None = None,
     render_path: str | None = None,
+    report_path: str | None = None,
 ) -> dict:
     con = _load_consensus(fixture, consensus_path)
     gates: dict[str, dict] = {
@@ -74,6 +75,17 @@ def run_all(
                           "promote_canonical to emit it",
             }
 
+    if report_path:
+        rep = json.loads(Path(report_path).read_text("utf-8"))
+        # position-fidelity (Felipe 2026-06-02): centro/largura/host de portas+
+        # janelas + alinhamento/cobertura/fechamento da grade, vs o geometry_report.
+        from tools.position_fidelity_gate import compare as _pf_compare
+        _pf = _pf_compare(con, rep)
+        _pf_fails = [f for f in _pf if f.get("verdict") == "FAIL"]
+        gates["position_fidelity"] = {
+            "overall": "FAIL" if _pf_fails else "PASS",
+            "findings": _pf, "n_fail": len(_pf_fails), "n_total": len(_pf)}
+
     def _status(g: dict) -> str:
         return g.get("overall", g.get("verdict"))
 
@@ -93,6 +105,8 @@ def _summary_line(name: str, g: dict) -> str:
         return f"  opening_host : {v} ({g['n_fail']}/{g['n_openings']} openings)"
     if name == "wall_overlap":
         return f"  wall_overlap : {v} ({g['n_overlaps']} overlapping pairs)"
+    if name == "position_fidelity":
+        return f"  position_fid : {v} ({g.get('n_fail')} FAIL de {g.get('n_total')})"
     if name == "wall_presence":
         if v == "SKIPPED_NO_SIDECAR":
             return f"  wall_presence: SKIPPED_NO_SIDECAR ({g.get('sidecar')})"
@@ -109,9 +123,11 @@ if __name__ == "__main__":
     ap.add_argument("--consensus", default=None)
     ap.add_argument("--render", default=None,
                     help="SKP top render PNG (needs sibling .proj.json)")
+    ap.add_argument("--report", default=None,
+                    help="geometry_report.json (liga o position_fidelity_gate)")
     a = ap.parse_args()
     res = run_all(fixture=a.fixture, consensus_path=a.consensus,
-                  render_path=a.render)
+                  render_path=a.render, report_path=a.report)
     print(f"[deterministic-gates] overall={res['overall']}")
     for name, g in res["gates"].items():
         print(_summary_line(name, g))
