@@ -323,3 +323,106 @@ def test_next_best_actions_sorted_by_roi():
     rois = [a["roi"] for a in d["actions"]]
     assert rois == sorted(rois, reverse=True)
     assert all("roi" in a and "proxima_acao" in a for a in d["actions"])
+
+
+# ---- acoes corretivas: o cockpit identifica E corrige (nao fica parado) -----
+
+
+def _bridge_dirs(tmp_path):
+    qd = tmp_path / ".ai_bridge" / "questions"
+    rd = tmp_path / ".ai_bridge" / "responses"
+    qd.mkdir(parents=True)
+    rd.mkdir(parents=True)
+    return qd, rd
+
+
+def _drain(srv, max_iters=100):
+    import time
+    for _ in range(max_iters):
+        if not srv.process_consults_state()["running"]:
+            return
+        time.sleep(0.02)
+
+
+def test_orphan_consults_finds_only_unanswered(tmp_path, monkeypatch):
+    import tools.claude_bridge.server as srv
+    qd, rd = _bridge_dirs(tmp_path)
+    (qd / "q1.md").write_text("pergunta 1", encoding="utf-8")
+    (qd / "q2.md").write_text("pergunta 2", encoding="utf-8")
+    (rd / "q1.md").write_text("ja respondida", encoding="utf-8")
+    monkeypatch.setattr(srv, "REPO_ROOT", tmp_path)
+    orphans = srv._orphan_consults()
+    assert [o["id"] for o in orphans] == ["q2"]  # only the unanswered one
+    assert orphans[0]["text"] == "pergunta 2"
+
+
+def test_process_consults_answers_queue_and_clears_pending(tmp_path, monkeypatch):
+    import tools.claude_bridge.server as srv
+    qd, rd = _bridge_dirs(tmp_path)
+    (qd / "c1.md").write_text("decida isso", encoding="utf-8")
+    (qd / "c2.md").write_text("e isso", encoding="utf-8")
+    monkeypatch.setattr(srv, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(srv, "AUDIT_PATH", tmp_path / "audit.jsonl")
+    monkeypatch.setattr(srv, "ask_claude", lambda q: "analise...\nVerdict: GO")
+    srv._ACTIONS.clear()
+    start = srv.process_consults_start()
+    assert start["started"] == 2 and start["total"] == 2
+    _drain(srv)
+    st = srv.process_consults_state()
+    assert st["done"] == 2 and st["running"] is False
+    assert st["pending_now"] == 0  # respostas gravadas -> fila zerada
+    assert {r["verdict"] for r in st["results"]} == {"GO"}
+    assert (rd / "c1.md").exists() and (rd / "c2.md").exists()
+
+
+def test_process_consults_idempotent_when_empty(tmp_path, monkeypatch):
+    import tools.claude_bridge.server as srv
+    _bridge_dirs(tmp_path)  # sem perguntas
+    monkeypatch.setattr(srv, "REPO_ROOT", tmp_path)
+    srv._ACTIONS.clear()
+    start = srv.process_consults_start()
+    assert start["started"] == 0 and start["running"] is False
+
+
+def test_process_consults_one_error_does_not_kill_queue(tmp_path, monkeypatch):
+    import tools.claude_bridge.server as srv
+    qd, rd = _bridge_dirs(tmp_path)
+    (qd / "a.md").write_text("ok", encoding="utf-8")
+    (qd / "b.md").write_text("boom", encoding="utf-8")
+    monkeypatch.setattr(srv, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(srv, "AUDIT_PATH", tmp_path / "audit.jsonl")
+
+    def fake(q):
+        if "boom" in q:
+            raise RuntimeError("gate down")
+        return "Verdict: GO"
+
+    monkeypatch.setattr(srv, "ask_claude", fake)
+    srv._ACTIONS.clear()
+    srv.process_consults_start()
+    _drain(srv)
+    st = srv.process_consults_state()
+    assert st["done"] == 2  # ambos tentados, erro nao derruba a fila
+    errs = [r for r in st["results"] if r["error"]]
+    assert len(errs) == 1 and "gate down" in errs[0]["error"]
+    assert (rd / "a.md").exists()  # o bom foi gravado mesmo assim
+
+
+def test_actions_overview_maps_every_problem_to_an_action():
+    import tools.claude_bridge.server as srv
+    o = srv.actions_overview()
+    assert {"score", "reason", "actions"} <= set(o)
+    keys = {a["key"] for a in o["actions"]}
+    assert {"process-consults", "dirty-detail", "open-difficulty"} <= keys
+    for a in o["actions"]:
+        assert a["kind"] in ("auto", "diagnose", "manual")
+        assert a["label"] and a["detail"]
+
+
+def test_dirty_detail_shape_no_crash():
+    import tools.claude_bridge.server as srv
+    d = srv.dirty_detail()
+    assert "dirty" in d and isinstance(d["dirty"], list)
+    for r in d["dirty"]:
+        assert r["kind"] in ("review", "guarded", "ignorable")
+        assert {"repo", "branch", "recommendation", "runtime", "real"} <= set(r)

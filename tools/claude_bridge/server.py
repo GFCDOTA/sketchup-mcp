@@ -199,6 +199,9 @@ PARALYZED_M = 3         # `cycle` unchanged across this many beats -> PARALYZED
 AUDIT_PATH = Path(__file__).resolve().parents[2] / ".ai_bridge" / "audit" / "audit.jsonl"
 _SESSIONS: dict = {}
 _SESSIONS_LOCK = threading.Lock()
+# Estado das ACOES corretivas em andamento (process-consults roda em background).
+_ACTIONS: dict = {}
+_ACTIONS_LOCK = threading.Lock()
 
 
 def _audit_append(event: dict) -> None:
@@ -1181,6 +1184,150 @@ def next_best_actions() -> dict:
     return {"actions": items}
 
 
+# --- Acoes corretivas: os PRIMEIROS endpoints de WRITE do cockpit -------------
+# Sancionado pelo Felipe ("cria um botao pra corrigir quando identificado"). Cada
+# acao e ESCOPADA + SEGURA: sem push, sem main, sem mexer em fixtures, sem path
+# controlado pelo cliente. So toca a fila de consults do proprio repo e loga tudo
+# no audit. O que NAO da pra auto-corrigir com seguranca (ex.: dirty na branch de
+# outro agente) vira DIAGNOSTICO read-only — nunca commit cego.
+
+def _orphan_consults() -> list:
+    """Consults (perguntas) sem resposta — a fila que 'espera o gate'."""
+    qd = REPO_ROOT / ".ai_bridge" / "questions"
+    rd = REPO_ROOT / ".ai_bridge" / "responses"
+    if not qd.is_dir():
+        return []
+    answered = {p.stem for p in rd.glob("*.md")} if rd.is_dir() else set()
+    out = []
+    for q in sorted(qd.glob("*.md"), key=lambda p: p.name):
+        if q.stem in answered:
+            continue
+        try:
+            text = q.read_text("utf-8", errors="replace")
+        except OSError:
+            continue
+        out.append({"id": q.stem, "text": text})
+    return out
+
+
+def _process_consults_worker(items: list) -> None:
+    """Thread daemon: cada consult orfao -> gate -> grava resposta. Atualiza _ACTIONS
+    pra a UI acompanhar ao vivo (3->2->1->0). Best-effort por item: um erro nao
+    derruba a fila."""
+    rd = REPO_ROOT / ".ai_bridge" / "responses"
+    try:
+        rd.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        pass
+    for it in items:
+        verdict = err = None
+        t0 = time.time()
+        try:
+            answer = ask_claude(it["text"])
+            verdict = _extract_verdict(answer)
+            (rd / f"{it['id']}.md").write_text(answer, encoding="utf-8")
+            _audit_append({"t": time.time(), "kind": "consult", "mode": "backfill",
+                           "q_chars": len(it["text"]), "a_chars": len(answer),
+                           "dur_sec": round(time.time() - t0, 1)})
+        except Exception as e:  # nao derruba a fila por um item
+            err = f"{type(e).__name__}: {e}"
+        with _ACTIONS_LOCK:
+            st = _ACTIONS.setdefault("process_consults", {})
+            st["done"] = st.get("done", 0) + 1
+            st.setdefault("results", []).append(
+                {"id": it["id"], "verdict": verdict, "error": err,
+                 "dur_sec": round(time.time() - t0, 1)})
+    with _ACTIONS_LOCK:
+        st = _ACTIONS.setdefault("process_consults", {})
+        st["running"] = False
+        st["finished_at"] = time.time()
+
+
+def process_consults_start() -> dict:
+    """Dispara o processamento da fila pendente em background. Idempotente: se ja
+    esta rodando, devolve o estado sem disparar de novo."""
+    with _ACTIONS_LOCK:
+        st = _ACTIONS.get("process_consults")
+        if st and st.get("running"):
+            return {"already_running": True, **st}
+    items = _orphan_consults()
+    state = {"running": len(items) > 0, "total": len(items), "done": 0,
+             "results": [], "started_at": time.time(),
+             "finished_at": None if items else time.time()}
+    with _ACTIONS_LOCK:
+        _ACTIONS["process_consults"] = state
+    if items:
+        threading.Thread(target=_process_consults_worker, args=(items,),
+                         daemon=True).start()
+    return {"started": len(items), **state}
+
+
+def process_consults_state() -> dict:
+    """Estado corrente da acao (UI faz polling enquanto roda)."""
+    with _ACTIONS_LOCK:
+        st = dict(_ACTIONS.get("process_consults") or
+                  {"running": False, "total": 0, "done": 0, "results": []})
+    st["pending_now"] = len(_orphan_consults())
+    return st
+
+
+def dirty_detail() -> dict:
+    """DIAGNOSTICO read-only dos repos dirty: o que mudou + recomendacao honesta.
+    NAO commita nada — em especial nao toca branch de outro agente (regra multi-agent)."""
+    gi = git_inventory()
+    own = REPO_ROOT.name
+    out = []
+    for r in gi.get("repos", []):
+        if not r.get("dirty"):
+            continue
+        p = REPO_ROOT.parent / r["path"]
+        try:
+            res = subprocess.run(["git", "-C", str(p), "status", "--porcelain"],
+                                 capture_output=True, text=True, encoding="utf-8",
+                                 errors="replace", timeout=10)
+            lines = [ln for ln in (res.stdout or "").splitlines() if ln.strip()]
+        except (OSError, subprocess.SubprocessError):
+            lines = []
+        runtime = [ln for ln in lines if ".ai_bridge/" in ln]
+        real = [ln for ln in lines if ".ai_bridge/" not in ln]
+        is_own = r["path"] == own
+        if real:
+            kind, rec = "review", "mudancas reais fora de runtime — revisar e commitar na branch"
+        elif not is_own:
+            kind, rec = "guarded", f"so runtime do .ai_bridge, mas na branch '{r.get('branch')}' de outro agente — NAO commito automatico"
+        else:
+            kind, rec = "ignorable", "so runtime do .ai_bridge no repo do cockpit — seguro gitignorar"
+        out.append({"repo": r["path"], "branch": r.get("branch"), "is_own": is_own,
+                    "runtime": len(runtime), "real": len(real),
+                    "sample": lines[:12], "kind": kind, "recommendation": rec})
+    return {"dirty": out}
+
+
+def actions_overview() -> dict:
+    """Liga cada problema do placard a uma acao concreta: o que e auto-corrigivel num
+    clique vs o que e diagnostico/manual. Drena o painel 'Acoes' da UI."""
+    st = status()
+    pend = gate_ledger().get("pending", 0)
+    dirty = st.get("dirty_repos", [])
+    high = st.get("high_open", [])
+    acts = [
+        {"key": "process-consults", "label": f"Processar {pend} consult(s) pendente(s)",
+         "kind": "auto", "runnable": pend > 0, "method": "POST",
+         "endpoint": "/api/actions/process-consults",
+         "detail": "Manda cada pergunta orfa pro gate (UP) e grava a resposta. Limpa o RED de fila."},
+        {"key": "dirty-detail", "label": f"Diagnosticar {len(dirty)} repo(s) dirty",
+         "kind": "diagnose", "runnable": len(dirty) > 0, "method": "GET",
+         "endpoint": "/api/actions/dirty-detail",
+         "detail": "Mostra o que mudou + recomendacao. Nao commita branch de outro agente."},
+        {"key": "open-difficulty",
+         "label": (f"Abrir trilha: {high[0]}" if high else "Backlog de dificuldades"),
+         "kind": "manual", "runnable": False, "method": None,
+         "endpoint": "/api/difficulties",
+         "detail": "Trabalho de produto (SKP/fidelidade) — sem fix de 1 clique; ver abas Dificuldades + Oportunidades."},
+    ]
+    return {"score": st.get("score"), "reason": st.get("reason"), "actions": acts}
+
+
 class Handler(BaseHTTPRequestHandler):
     def _send(self, code, obj):
         body = json.dumps(obj, ensure_ascii=False).encode("utf-8")
@@ -1244,6 +1391,12 @@ class Handler(BaseHTTPRequestHandler):
             self._send(200, status())
         elif p == "/api/next-best-actions":
             self._send(200, next_best_actions())
+        elif p == "/api/actions":
+            self._send(200, actions_overview())
+        elif p == "/api/actions/process-consults":
+            self._send(200, process_consults_state())
+        elif p == "/api/actions/dirty-detail":
+            self._send(200, dirty_detail())
         elif p == "/artifact":
             f = safe_artifact((parse_qs(u.query).get("path") or [""])[0])
             if not f:
@@ -1261,6 +1414,12 @@ class Handler(BaseHTTPRequestHandler):
         path = self.path.rstrip("/")
         if path == "/heartbeat":
             self._heartbeat()
+            return
+        if path == "/api/actions/process-consults":
+            try:
+                self._send(200, process_consults_start())
+            except Exception as e:
+                self._send(500, {"error": f"{type(e).__name__}: {e}"})
             return
         if path != "/ask":
             self._send(404, {"error": "not found"})

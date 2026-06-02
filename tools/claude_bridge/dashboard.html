@@ -35,7 +35,10 @@ pre.diagram{background:#0d1117;border:1px solid var(--line);border-radius:8px;pa
 .alarm{padding:14px 16px;border-radius:10px;font-weight:700;font-size:13px;margin-bottom:16px;} .alarm.ok{background:rgba(63,185,80,.12);color:var(--ok);border:1px solid var(--ok);} .alarm.bad{background:rgba(248,81,73,.14);color:var(--bad);border:1px solid var(--bad);}
 .gallery{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));} .gallery figure{margin:0;background:#0d1117;border:1px solid var(--line);border-radius:8px;padding:8px;} .gallery img{width:100%;border-radius:4px;display:block;background:#fff;} .gallery figcaption{color:var(--dim);font-size:11px;margin-top:6px;text-align:center;word-break:break-all;}
 textarea{width:100%;background:#0d1117;color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:10px;font-family:inherit;font-size:13px;min-height:70px;}
-button{background:var(--accent);color:#0d1117;border:0;border-radius:8px;padding:8px 16px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px;} button:hover{opacity:.9;}
+button{background:var(--accent);color:#0d1117;border:0;border-radius:8px;padding:8px 16px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px;} button:hover{opacity:.9;} button:disabled{opacity:.4;cursor:not-allowed;}
+.act-row{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid var(--line);}
+.act-btn{margin-top:0;white-space:nowrap;} .act-btn.go{background:var(--ok);}
+.act-out{font-size:12px;color:var(--dim);padding:0 0 6px;}
 .qa-resp{margin-top:12px;white-space:pre-wrap;background:#0d1117;border:1px solid var(--line);border-radius:8px;padding:12px;font-size:12px;min-height:20px;}
 ul.opp{list-style:none;padding:0;margin:0;} ul.opp li{padding:9px 0;border-bottom:1px solid #21262d;font-size:13px;} ul.opp li b{color:var(--accent);} ul.opp li .tag{font-size:10px;color:var(--dim);border:1px solid var(--line);border-radius:10px;padding:1px 7px;margin-left:6px;}
 .muted{color:var(--dim);font-size:12px;}
@@ -75,6 +78,7 @@ ul.opp{list-style:none;padding:0;margin:0;} ul.opp li{padding:9px 0;border-botto
 <section id="home">
 <div id="status-banner" class="muted" style="margin-bottom:18px">carregando placar do projeto...</div>
 <div class="wrap">
+<div class="card full" id="actions-card"><h2>⚡ Ações corretivas <span class="muted" style="font-weight:400;font-size:12px">— identificou, corrige (não fica parado)</span></h2><div id="actions" class="muted">carregando ações...</div></div>
 <div class="card full"><h2>Próxima melhor ação (ROI = impacto/esforço)</h2><div id="nba" class="muted">carregando...</div></div>
 <div class="card full"><h2>Pipeline PDF → SKP (como o sketchup-mcp processa)</h2>
 <div class="pipe">
@@ -256,7 +260,7 @@ function route(){
   let h=(location.hash||'#home').slice(1); if(TABS.indexOf(h)<0)h='home';
   TABS.forEach(function(t){var s=$(t); if(s)s.className=(t===h?'active':'');});
   document.querySelectorAll('nav a').forEach(function(a){a.className=(a.getAttribute('href')==='#'+h?'active':'');});
-  if(h==='home'){loadStatus();loadCommits();loadSysSummary();}
+  if(h==='home'){loadStatus();loadActions();loadCommits();loadSysSummary();}
   if(h==='sessoes')loadSessoes();
   if(h==='gate')loadGate();
   if(h==='git')loadGit();
@@ -292,6 +296,50 @@ async function loadStatus(){
   try{const n=await (await fetch('/api/next-best-actions')).json();
     if($('nba'))$('nba').innerHTML=(n.actions||[]).slice(0,3).map(function(a){return '<div style="padding:6px 0;border-bottom:1px solid #21262d"><div style="display:flex;justify-content:space-between;gap:10px"><b>'+esc(a.titulo)+'</b><span style="color:var(--accent);white-space:nowrap">ROI '+a.roi+'</span></div><div class="muted">→ '+esc(a.proxima_acao)+'</div></div>';}).join('')||'<span class="muted">sem ações</span>';
   }catch(e){}
+}
+async function loadActions(){
+  var box=$('actions'); if(!box) return;
+  try{
+    const d=await (await fetch('/api/actions',{cache:'no-store'})).json();
+    box.innerHTML=(d.actions||[]).map(function(a){
+      var btn;
+      if(a.kind==='auto'){
+        btn=a.runnable?'<button class="act-btn go" onclick="runProcessConsults(this)">Corrigir agora</button>':'<button class="act-btn" disabled>nada pendente</button>';
+      }else if(a.kind==='diagnose'){
+        btn=a.runnable?'<button class="act-btn" onclick="runDirtyDetail(this)">Ver detalhe</button>':'<button class="act-btn" disabled>nada dirty</button>';
+      }else{
+        btn='<button class="act-btn" onclick="location.hash=\'#dificuldades\'">Abrir trilha</button>';
+      }
+      return '<div class="act-row"><div style="min-width:0"><b>'+esc(a.label)+'</b><div class="muted">'+esc(a.detail)+'</div></div>'+btn+'</div><div class="act-out" id="out-'+esc(a.key)+'"></div>';
+    }).join('')||'<span class="muted">sem ações</span>';
+  }catch(e){box.textContent='ações indisponíveis';}
+}
+async function runProcessConsults(btn){
+  var out=$('out-process-consults'); btn.disabled=true; btn.textContent='processando...';
+  if(out)out.innerHTML='<span class="muted">mandando pro gate (Opus 4.8 xhigh — pode levar ~1min por consult)...</span>';
+  try{
+    const start=await (await fetch('/api/actions/process-consults',{method:'POST'})).json();
+    var total=start.total||start.started||0;
+    if(!total){if(out)out.innerHTML='<span class="muted">nada pendente</span>';btn.textContent='nada pendente';return;}
+    var poll=setInterval(async function(){
+      try{
+        const st=await (await fetch('/api/actions/process-consults',{cache:'no-store'})).json();
+        if(out)out.innerHTML='<b>'+(st.done||0)+'/'+(st.total||total)+'</b> processados · pendentes agora: '+st.pending_now+(st.results||[]).map(function(r){return '<div class="muted">• '+esc(r.id)+' → '+(r.error?('ERRO '+esc(r.error)):('verdict '+esc(r.verdict||'(sem verdict)')))+' ('+r.dur_sec+'s)</div>';}).join('');
+        if(!st.running){clearInterval(poll);btn.textContent='✓ feito';loadStatus();}
+      }catch(e){}
+    },2500);
+  }catch(e){if(out)out.innerHTML='<span style="color:var(--bad)">falhou: '+esc(String(e))+'</span>';btn.disabled=false;btn.textContent='Corrigir agora';}
+}
+async function runDirtyDetail(btn){
+  var out=$('out-dirty-detail'); btn.disabled=true; btn.textContent='lendo...';
+  try{
+    const d=await (await fetch('/api/actions/dirty-detail',{cache:'no-store'})).json();
+    if(out)out.innerHTML=(d.dirty||[]).map(function(r){
+      var col=r.kind==='review'?'var(--bad)':r.kind==='guarded'?'var(--warn)':'var(--ok)';
+      return '<div style="padding:6px 0;border-top:1px solid #21262d"><b>'+esc(r.repo)+'</b> <span class="muted">('+esc(r.branch||'')+')</span> — runtime '+r.runtime+' · real '+r.real+'<div style="color:'+col+';font-weight:700;margin:4px 0">'+esc(r.recommendation)+'</div><pre style="white-space:pre-wrap;font-size:11px;color:var(--dim);margin:0">'+esc((r.sample||[]).join('\n'))+'</pre></div>';
+    }).join('')||'<span class="muted">nada dirty</span>';
+  }catch(e){if(out)out.innerHTML='<span style="color:var(--bad)">falhou</span>';}
+  btn.disabled=false;btn.textContent='Ver detalhe';
 }
 async function loadCommits(){
   try{const d=await (await fetch('/api/recent-commits')).json();
