@@ -200,3 +200,23 @@ encosta na borda — pegaria o render velho; canônica PASS 44/148), `soft_barri
 Achado stale vira guarda que prova a canônica limpa; achado real fica WARN pra classificação
 humana/PDF. Pendentes (precisam raster do PDF): swing de porta (#2), overlay PDF↔SKP registrado
 (#5), legibilidade de abertura no render (#6, core já validado).
+
+## LL-037 (2026-06-02) — soft barrier por barrier_type+fonte, não flag global (fim da gangorra)
+
+O builder renderizava TODOS os 9 soft_barriers iguais (slab cinza 1,10m, `PARAPET_RGB`), ligado
+por UM flag global `SOFT_BARRIERS_MODE`. Isso causou o efeito gangorra entre sessões: "tudo vira
+grade" ↔ "nada vira grade / tudo bloco". Os dois são global on/off = desligar a feature, não
+corrigir. Só `h_sb000` tinha fonte (barrier_type=peitoril, human_annotation); `sb000-sb007` eram
+polylines NUS virando bloco físico sem proveniência (viola Hard Rule #1).
+
+Fix (render POR SEGMENTO): `barrier_render_as(sb)` → railing/guardrail = grade; peitoril/mureta/
+parapet = muro baixo; **sem barrier_type/fonte = NÃO renderiza**. O loop grava `sb_records` e o
+`geometry_report.soft_barrier_groups.barriers` expõe por-barreira {id, sourced, rendered,
+render_as}. Build real: **8 unsourced skipped, só h_sb000 renderiza** (low_wall); o bloco cinza
+comprido sumiu. 6/6 gates verdes.
+
+Dois gates novos (deterministas, lêem consensus+report): `railing_exact_match_gate` (esperado vs
+actual: missing/extra/wrong-host/length-delta>10cm = FAIL) e `parapet_not_railing_fallback_gate`
+(unsourced→física = FAIL; remover grade não pode mintar bloco). Micro-fixture sintético prova que
+o builder-flag-global FALHA e o builder-por-tipo+fonte PASSA. Regra: **provenance decide se
+renderiza; o tipo decide como; nada global.** Falta só VISUAL_REVIEW do Felipe (aparência mudou).

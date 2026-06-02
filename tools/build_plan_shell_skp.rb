@@ -243,6 +243,32 @@ end
 # rectangle covering the entire room interior (the 2026-05-20 bug).
 SOFT_BARRIER_THICKNESS_IN = 1.5
 
+# Soft barriers render ONLY when sourced (barrier_type / human confirmation /
+# PDF-text). An unsourced bare polyline is NOT rendered as physical geometry —
+# Hard Rule #1 (never invent). By type: railing/guardrail -> grade material,
+# peitoril/mureta/parapet -> low solid wall. This replaces the old global
+# SOFT_BARRIERS_MODE all-or-nothing that caused the render seesaw.
+RAILING_BARRIER_TYPES  = %w[guardrail railing guarda_corpo guarda-corpo
+                            peitoril_com_grade guarda_corpo_com_grade].freeze
+LOW_WALL_BARRIER_TYPES = %w[peitoril mureta parapet].freeze
+
+def barrier_source(sb)
+  bt = sb['barrier_type']
+  return "barrier_type=#{bt}" if bt && !bt.to_s.strip.empty?
+  return 'human_confirmed' if sb['human_confirmed'] || sb['confirmed']
+  return 'pdf_text' if sb['pdf_text'] || sb['source_label']
+  nil
+end
+
+# Returns 'railing', 'low_wall', or nil (unsourced -> do not render).
+def barrier_render_as(sb)
+  bt = (sb['barrier_type'] || '').to_s.strip.downcase
+  return 'railing'  if RAILING_BARRIER_TYPES.include?(bt)
+  return 'low_wall' if LOW_WALL_BARRIER_TYPES.include?(bt)
+  return 'low_wall' if barrier_source(sb) # sourced but untyped -> conservative
+  nil
+end
+
 def soft_barrier_polyline_pts(barrier)
   # Soft barriers come as polyline arrays (consume_consensus.rb consumes
   # them the same way). Each is a list of [x, y] PDF points.
@@ -303,6 +329,7 @@ def build_soft_barrier(parent_ents, barrier, material, index,
   group.name = "SoftBarrier_Group_#{index}"
 
   segments_built  = 0
+  total_len_in    = 0.0
   segments_skipped_short    = 0
   segments_skipped_overlap  = 0
   segments_skipped_facefail = 0
@@ -350,6 +377,7 @@ def build_soft_barrier(parent_ents, barrier, material, index,
       f.back_material = material
     end
     segments_built += 1
+    total_len_in += len
   end
 
   if segments_built == 0
@@ -366,6 +394,7 @@ def build_soft_barrier(parent_ents, barrier, material, index,
   {
     'ok' => true,
     'group' => group,
+    'length_m'                 => (total_len_in / M_TO_IN).round(3),
     'segments_built'           => segments_built,
     'segments_skipped_short'   => segments_skipped_short,
     'segments_skipped_overlap' => segments_skipped_overlap,
@@ -1033,6 +1062,7 @@ def write_geometry_report(model, report_path, ctx)
       'count'   => sb_grps.length,
       'skipped_count' => ctx[:soft_barriers_skipped] || 0,
       'skip_reasons'  => ctx[:soft_barriers_skip_reasons] || [],
+      'barriers'      => ctx[:soft_barrier_records] || [],
     },
     'totals' => {
       'top_level_groups' => groups.length,
@@ -1110,30 +1140,57 @@ rooms.each_with_index do |room, i|
 end
 puts "[rb] floors: built=#{floors_built} failed=#{floors_failed.length}"
 
-# 3. Soft barriers (optional)
+# 3. Soft barriers — rendered BY barrier_type + source, never global on/off.
+# Unsourced barriers (no barrier_type / confirmation) are NOT emitted as
+# physical geometry (Hard Rule #1). railing/guardrail -> grade material;
+# peitoril/mureta/parapet -> low solid wall. Each decision is recorded in
+# sb_records so the railing gates can verify the SKP against the consensus.
 sb_built = 0
 sb_skipped = 0
 sb_skip_reasons = []
+sb_records = []
 if sb_mode == 'groups'
   parapet_mat = model.materials.add('plan_parapet')
   parapet_mat.color = Sketchup::Color.new(*PARAPET_RGB)
-  # Precompute wall footprints once so FP-006 can reject perimeter
-  # segments without re-deriving the footprint per call.
+  railing_mat = model.materials.add('plan_railing')
+  railing_mat.color = Sketchup::Color.new(60, 62, 70)
   walls_for_overlap = consensus['walls'] || []
   thickness_for_overlap = consensus['wall_thickness_pts'] || 5.4
   wall_footprints = wall_footprints_in_su(
     walls_for_overlap, thickness_for_overlap,
   )
   (consensus['soft_barriers'] || []).each_with_index do |sb, i|
+    sid = sb['id'] || "sb#{i}"
+    render_as = barrier_render_as(sb)
+    if render_as.nil?
+      sb_skipped += 1
+      sb_skip_reasons << "sb[#{i}] #{sid}: unsourced_no_provenance (not rendered)"
+      sb_records << {
+        'id' => sid, 'barrier_type' => sb['barrier_type'],
+        'sourced' => false, 'rendered' => false, 'render_as' => nil,
+        'skip_reason' => 'unsourced_no_provenance',
+      }
+      next
+    end
+    mat = render_as == 'railing' ? railing_mat : parapet_mat
     res = build_soft_barrier(
-      model.active_entities, sb, parapet_mat, i,
-      wall_footprints: wall_footprints,
+      model.active_entities, sb, mat, i, wall_footprints: wall_footprints,
     )
     if res['ok']
       sb_built += 1
+      sb_records << {
+        'id' => sid, 'barrier_type' => sb['barrier_type'],
+        'sourced' => true, 'rendered' => true, 'render_as' => render_as,
+        'host_wall_id' => sb['host_wall_id'], 'length_m' => res['length_m'],
+      }
     else
       sb_skipped += 1
-      sb_skip_reasons << "sb[#{i}]: #{res['reason']}"
+      sb_skip_reasons << "sb[#{i}] #{sid}: #{res['reason']}"
+      sb_records << {
+        'id' => sid, 'barrier_type' => sb['barrier_type'],
+        'sourced' => true, 'rendered' => false, 'render_as' => nil,
+        'skip_reason' => res['reason'],
+      }
     end
   end
 elsif sb_mode == 'skip'
@@ -1247,6 +1304,7 @@ if outreport
     soft_barriers_mode:       sb_mode,
     soft_barriers_skipped:    sb_skipped,
     soft_barriers_skip_reasons: sb_skip_reasons,
+    soft_barrier_records:     sb_records,
     floors_failed:            floors_failed,
     py_stats:                 shell_data['stats'],
   }
