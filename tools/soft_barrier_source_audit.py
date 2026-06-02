@@ -37,8 +37,9 @@ def railing_geometry_gates(con: dict):
     (alignment: offset<=3cm — pega gradil recuado pro centro) e COBRIR a largura
     inteira do segmento (coverage: gap<=5cm cada ponta — pega gradil curto)."""
     pt_to_m = 0.19 / float(con.get("wall_thickness_pts", 5.4) or 5.4)
-    align_tol = 0.03 / pt_to_m   # 3cm em pts
-    cover_tol = 0.05 / pt_to_m   # 5cm em pts
+    align_tol = 0.03 / pt_to_m   # 3cm em pts (offset do host, spec Felipe)
+    cover_tol = 0.10 / pt_to_m   # 10cm em pts (comprimento/cobertura, spec Felipe;
+    #                              permite o grade passar um tico do bbox p/ encostar na parede)
     align_ok = cover_ok = True
     details = []
     for b in con.get("soft_barriers", []):
@@ -49,15 +50,19 @@ def railing_geometry_gates(con: dict):
         if not bb or len(pl) < 2:
             continue
         x0, y0, x1, y1 = bb
+        # FRONT-RUN = segmento mais longo (corrida frontal); resto = retorno de
+        # fechamento. alignment/coverage so no front-run (suporta L de fechamento).
+        fa, fb = max(((pl[i], pl[i + 1]) for i in range(len(pl) - 1)),
+                     key=lambda ab: (ab[1][0] - ab[0][0]) ** 2 + (ab[1][1] - ab[0][1]) ** 2)
         if b.get("orientation", "h") == "h":
-            pos = sum(p[1] for p in pl) / len(pl)
+            pos = (fa[1] + fb[1]) / 2.0
             offset = min(abs(pos - y0), abs(pos - y1))   # colado numa borda, nao no centro
-            lo, hi = min(p[0] for p in pl), max(p[0] for p in pl)
+            lo, hi = min(fa[0], fb[0]), max(fa[0], fb[0])
             miss_l, miss_r = lo - x0, x1 - hi
         else:
-            pos = sum(p[0] for p in pl) / len(pl)
+            pos = (fa[0] + fb[0]) / 2.0
             offset = min(abs(pos - x0), abs(pos - x1))
-            lo, hi = min(p[1] for p in pl), max(p[1] for p in pl)
+            lo, hi = min(fa[1], fb[1]), max(fa[1], fb[1])
             miss_l, miss_r = lo - y0, y1 - hi
         a = offset <= align_tol
         c = abs(miss_l) <= cover_tol and abs(miss_r) <= cover_tol
