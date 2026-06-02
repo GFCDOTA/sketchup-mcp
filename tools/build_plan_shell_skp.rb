@@ -321,7 +321,13 @@ def build_soft_barrier(parent_ents, barrier, material, index,
     # FP-006: drop segments whose midpoint sits inside a wall footprint
     # — those are the building outline that the vector extractor
     # catches as soft_barrier, not real peitoris.
-    if wall_footprints && segment_overlaps_wall?(p1, p2, wall_footprints)
+    # EXCECAO (trust-human, gate :8765 GO opcao B): barreiras com
+    # geometry_origin=human_annotation sao peitoris CONFIRMADOS pelo humano —
+    # nunca dropadas por overlap. Peitoril real encosta na parede pela ponta
+    # (3-pt sample acusa), entao FP-006 so vale pro AUTO-extraido. Restaura
+    # sb005 (PEITORIL H=1,10M) que o regen #28 (merge de paredes) passou a derrubar.
+    trust_human = barrier['geometry_origin'] == 'human_annotation'
+    if wall_footprints && !trust_human && segment_overlaps_wall?(p1, p2, wall_footprints)
       segments_skipped_overlap += 1
       next
     end

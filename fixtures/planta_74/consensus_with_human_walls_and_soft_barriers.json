@@ -4984,7 +4984,10 @@
           212.98801139307034,
           507.8724225247861
         ]
-      ]
+      ],
+      "geometry_origin": "human_annotation",
+      "barrier_type": "peitoril",
+      "height_m": 1.1
     },
     {
       "id": "sb006",
