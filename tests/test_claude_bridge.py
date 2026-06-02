@@ -426,3 +426,29 @@ def test_dirty_detail_shape_no_crash():
     for r in d["dirty"]:
         assert r["kind"] in ("review", "guarded", "ignorable")
         assert {"repo", "branch", "recommendation", "runtime", "real"} <= set(r)
+
+
+def test_classify_processes_splits_desktop_app_from_cli_sessions():
+    import tools.claude_bridge.server as srv
+    procs = [
+        {"ProcessId": 100, "WorkingSetSize": 400 * 1024 * 1024,
+         "CommandLine": r"...app\Claude.exe --type=renderer"},
+        {"ProcessId": 101, "WorkingSetSize": 150 * 1024 * 1024,
+         "CommandLine": r"...app\Claude.exe --type=gpu-process"},
+        {"ProcessId": 200, "WorkingSetSize": 300 * 1024 * 1024,
+         "KernelModeTime": 50 * 10**7, "UserModeTime": 100 * 10**7,
+         "CommandLine": r"claude-code\2.1.156\claude.exe --output-format stream-json --effort max"},
+    ]
+    out = srv._classify_processes(procs)
+    assert out["cli_count"] == 1  # so o claude-code conta como sessao que pode custar
+    assert out["desktop_app"]["processes"] == 2
+    assert out["desktop_app"]["ram_mb"] == 550  # 400 + 150, o app desktop e so RAM
+    s = out["cli_sessions"][0]
+    assert s["pid"] == 200 and s["effort"] == "max" and s["ram_mb"] == 300
+    assert s["cpu_sec"] == 150  # (50+100)*1e7 / 1e7
+
+
+def test_classify_processes_empty_is_zero_cost():
+    import tools.claude_bridge.server as srv
+    out = srv._classify_processes([])
+    assert out["cli_count"] == 0 and out["desktop_app"]["processes"] == 0

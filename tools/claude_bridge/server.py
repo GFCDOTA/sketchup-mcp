@@ -977,6 +977,54 @@ def git_inventory() -> dict:
     return {"repos": repos, "dirty": [r["path"] for r in repos if r["dirty"]]}
 
 
+def _classify_processes(procs: list) -> dict:
+    """Separa os processos 'claude.exe' em APP DESKTOP (Electron: renderer/gpu/utility —
+    so RAM) vs SESSOES CLI (claude-code, stream-json — as que PODEM custar, e so quando
+    geram). Logica pura pra ser testavel sem enumerar processos de verdade."""
+    desktop_ram = desktop_n = 0
+    cli = []
+    for p in procs:
+        cl = p.get("CommandLine") or ""
+        ram = int((p.get("WorkingSetSize") or 0) / (1024 * 1024))
+        if "claude-code" in cl or "stream-json" in cl:
+            cpu = int(((p.get("KernelModeTime") or 0) + (p.get("UserModeTime") or 0)) / 1e7)
+            cli.append({"pid": p.get("ProcessId"), "ram_mb": ram, "cpu_sec": cpu,
+                        "effort": "max" if "--effort max" in cl else "?"})
+        else:
+            desktop_ram += ram
+            desktop_n += 1
+    cli.sort(key=lambda x: x.get("cpu_sec", 0), reverse=True)
+    return {"cli_sessions": cli, "cli_count": len(cli),
+            "desktop_app": {"processes": desktop_n, "ram_mb": desktop_ram}}
+
+
+def live_processes() -> dict:
+    """A VERDADE sobre 'esta gastando dinheiro?'. Token so queima durante geracao ativa:
+    sessao CLI idle = R$0; app desktop aberto = so RAM; transcript parado no disco =
+    historico, R$0. Read-only — nao mata nada."""
+    ps = ("Get-CimInstance Win32_Process -Filter \"name='claude.exe'\" | "
+          "Select-Object ProcessId,WorkingSetSize,KernelModeTime,UserModeTime,CommandLine | "
+          "ConvertTo-Json -Compress")
+    procs = []
+    try:
+        r = subprocess.run(["powershell", "-NoProfile", "-Command", ps],
+                           capture_output=True, text=True, encoding="utf-8",
+                           errors="replace", timeout=15)
+        data = json.loads(r.stdout or "[]")
+        procs = data if isinstance(data, list) else [data]
+    except (OSError, subprocess.SubprocessError, json.JSONDecodeError, ValueError):
+        procs = []
+    out = _classify_processes(procs)
+    n = out["cli_count"]
+    out["verdict"] = ("Nenhuma sessao CLI viva — nada pode estar custando."
+                      if n == 0 else
+                      f"{n} sessao(oes) CLI viva(s), todas idle = R$0. Token so queima gerando.")
+    out["nota"] = ("App Desktop aberto usa RAM (~{} MB), nao dinheiro. Sessao parada e "
+                   "transcript no disco = historico, R$0."
+                   ).format(out["desktop_app"]["ram_mb"])
+    return out
+
+
 _VERDICT_TL = re.compile(r"(?im)(?:verdict|veredito|overall)\s*[:=]?\s*\**\s*"
                          r"(IMPROVED|SAME|WORSE|PASS|FAIL|WARN)")
 _VERDICT_ANY = re.compile(r"\b(IMPROVED|SAME|WORSE)\b")
@@ -1379,6 +1427,8 @@ class Handler(BaseHTTPRequestHandler):
             self._send(200, system_map())
         elif p == "/api/git-inventory":
             self._send(200, git_inventory())
+        elif p == "/api/processes":
+            self._send(200, live_processes())
         elif p == "/api/skp-inventory-v2":
             self._send(200, skp_inventory_v2())
         elif p == "/api/difficulties":

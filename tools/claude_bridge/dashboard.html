@@ -103,6 +103,7 @@ ul.opp{list-style:none;padding:0;margin:0;} ul.opp li{padding:9px 0;border-botto
 
 <section id="sessoes">
 <div id="sess-alarm" class="alarm ok">checando...</div>
+<div class="card full" id="proc-cost-card"><h2>💸 Custo real agora — está gastando dinheiro?</h2><div id="proc-cost" class="muted">checando processos vivos...</div></div>
 <div class="card full"><h2>Sessões Claude Code (estão paradas? esperando o gate?)</h2>
 <div id="sess-wrap"><span class="muted">lendo ~/.claude/projects...</span></div></div>
 </section>
@@ -346,7 +347,21 @@ async function loadCommits(){
     if($('commits'))$('commits').innerHTML=(d.commits||[]).map(function(c){return '<div class="ev"><span class="t">'+esc(c.slice(0,7))+'</span><span>'+esc(c.slice(8))+'</span></div>';}).join('')||'<div class="muted">sem commits</div>';
   }catch(e){}
 }
+async function loadProcCost(){
+  var box=$('proc-cost'); if(!box)return;
+  try{
+    const d=await (await fetch('/api/processes',{cache:'no-store'})).json();
+    var cli=(d.cli_sessions||[]);
+    box.innerHTML='<div style="font-weight:700;color:var(--ok);margin-bottom:6px">✅ '+esc(d.verdict)+'</div>'
+      +'<div class="muted" style="margin-bottom:10px">'+esc(d.nota)+'</div>'
+      +'<table><thead><tr><th>tipo</th><th>processos</th><th>RAM</th><th>CPU total</th><th>custo</th></tr></thead><tbody>'
+      +'<tr><td>app Desktop (Electron)</td><td>'+d.desktop_app.processes+'</td><td>'+d.desktop_app.ram_mb+' MB</td><td>—</td><td style="color:var(--ok)">R$0 (só RAM)</td></tr>'
+      +cli.map(function(s){return '<tr><td>sessão CLI <span class="muted">(effort '+esc(s.effort)+')</span></td><td>pid '+s.pid+'</td><td>'+s.ram_mb+' MB</td><td>'+s.cpu_sec+'s</td><td style="color:var(--ok)">R$0 enquanto idle</td></tr>';}).join('')
+      +'</tbody></table>';
+  }catch(e){box.textContent='processos indisponíveis';}
+}
 async function loadSessoes(){
+  loadProcCost();
   var w=$('sess-wrap'),al=$('sess-alarm'); w.innerHTML='<span class="muted">lendo ~/.claude/projects...</span>';
   try{const d=await (await fetch('/api/claude-sessions')).json();
     if((d.pending_gate||[]).length){al.className='alarm bad';al.innerHTML='🚨 '+d.pending_gate.length+' consult(s) ESPERANDO o gate (pergunta sem resposta gravada): '+d.pending_gate.map(function(p){return esc(p.q)+' ('+fmtAge(p.age_sec)+')';}).join(' · ');}
