@@ -4,22 +4,23 @@ Verdict: IMPROVED
 
 ## SKP canônico atual (2026-06-03)
 
-Guarda-corpo da varanda reproduz o **prédio real** (Living Grand Wish): **mureta de
-concreto na base** (chão → 0,45m) **+ grade metálica em cima** (0,45m → 1,10m), com
-materiais distintos (concreto cinza-claro `plan_parapet` embaixo, metal escuro
-`plan_railing` em cima). Felipe **VISUAL_REVIEW = IMPROVED** (gate PDF × ANTES × AGORA).
+Dois fixes de fidelidade aprovados pelo Felipe (VISUAL_REVIEW = IMPROVED):
 
-### Antes → Agora
-- **Antes:** grade de balaústres do chão (0,03m) ao topo (1,10m), sem base sólida.
-- **Agora:** o `h_sb000` (peitoril `render_as=grade`) gera mureta sólida na base +
-  grade metálica acima — o "cimento embaixo da grade" do prédio.
+1. **Guarda-corpo do prédio real** — mureta de concreto na base (chão → 0,45m) + grade
+   metálica em cima (0,45m → 1,10m), reproduzindo o "cimento embaixo da grade" da fachada.
+   Materiais distintos (`plan_parapet` concreto / `plan_railing` metal).
+2. **Notch-removal** — remoção de **15 corner-notches** (degraus de meia-espessura ~2,7pt)
+   das junções de parede, os "toquinhos". `_remove_small_teeth` na `canonicalise`, **só
+   dentes SIMÉTRICOS** (base reconectada fica axis-aligned, nunca diagonal). As **jambas de
+   vão de porta** (assimétricas, laterais = largura da porta, em m015/m016/m018) foram
+   **preservadas** — não são toquinhos, removê-las apagaria as bordas das portas.
 
-### Geometria / gates
-- deterministic gates: **PASS** (opening_host, wall_overlap, render_bbox,
-  wall_presence sidecar_exact, railing, position_fidelity)
-- `_drop_coincident` + IDs únicos (m020) preservados do rebuild anterior.
+### Gates
+- deterministic gates: **PASS** (opening_host, wall_overlap, render_bbox, wall_presence
+  sidecar_exact, railing, position_fidelity)
+- pytest **365 verde**; 0 paredes tortas (axis-aligned mantido; micro-test verificado).
 
 ### Fonte
-- builder: `tools/build_plan_shell_skp.rb` — bloco `render_grade` (mureta + grade).
-- consensus: `fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json`
-  (intocado; `h_sb000` segue `render_as=grade`, a composição é do builder).
+- `tools/build_plan_shell_skp.rb` — bloco `render_grade` (mureta + grade).
+- `tools/build_plan_shell_skp.py` — `_remove_small_teeth` na `canonicalise_axis_aligned_polygon`.
+- consensus intocado (composição é do builder).

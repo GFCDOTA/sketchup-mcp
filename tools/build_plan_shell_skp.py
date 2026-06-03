@@ -296,21 +296,50 @@ def _canonicalise_axis_aligned_ring(coords: list[tuple[float, float]],
     return keep
 
 
+def _remove_small_teeth(ring: list, tol: float = 3.0) -> list:
+    """Remove corner-notch 'teeth' — small SYMMETRIC rectangular protrusions/recesses
+    of depth < tol that shapely.union leaves at wall junctions (half-thickness step =
+    the 'toquinhos' Felipe flagged 2026-06-03, ~2.7pt). Only collapses a tooth whose two
+    side edges are equal length, so the reconnected base stays axis-aligned — NEVER
+    creates a diagonal. Legit steps (depth >= tol) and real corners are preserved.
+    (Micro-test verified: dente removed, degrau 20pt kept, quadrado untouched.)"""
+    import math as _m
+    pts = [tuple(p) for p in ring]
+    if len(pts) >= 2 and pts[0] == pts[-1]:
+        pts = pts[:-1]
+    changed, guard = True, 0
+    while changed and len(pts) >= 6 and guard < 4000:
+        changed, guard, n = False, guard + 1, len(pts)
+        for i in range(n):
+            P, Q, R, S = pts[i], pts[(i+1) % n], pts[(i+2) % n], pts[(i+3) % n]
+            pq = (Q[0]-P[0], Q[1]-P[1]); qr = (R[0]-Q[0], R[1]-Q[1]); rs = (S[0]-R[0], S[1]-R[1])
+            lpq, lrs = _m.hypot(*pq), _m.hypot(*rs)
+            if (abs(pq[0]*qr[0]+pq[1]*qr[1]) < 1e-6 and abs(rs[0]*qr[0]+rs[1]*qr[1]) < 1e-6
+                    and (pq[0]*rs[0]+pq[1]*rs[1]) < 0 and abs(lpq-lrs) < 1e-6
+                    and 1e-9 < lpq < tol and 1e-9 < lrs < tol):
+                for k in sorted([(i+1) % n, (i+2) % n], reverse=True):
+                    pts.pop(k)
+                changed = True
+                break
+    return pts
+
+
 def canonicalise_axis_aligned_polygon(poly: Polygon,
                                        tol: float = 1e-6) -> Polygon:
-    """Strip redundant collinear vertices from an axis-aligned polygon.
+    """Strip redundant collinear vertices from an axis-aligned polygon, after removing
+    half-thickness corner-notch teeth at junctions.
 
     A clean rectangular wall shell with a single interior room has
     EXACTLY 4 outer + 4 inner vertices after canonicalisation. Any
     excess is the FP-025 corner-notch signature.
     """
     outer = _canonicalise_axis_aligned_ring(
-        list(poly.exterior.coords), tol=tol,
+        _remove_small_teeth(list(poly.exterior.coords)), tol=tol,
     )
     interiors = []
     for ring in poly.interiors:
         cleaned = _canonicalise_axis_aligned_ring(
-            list(ring.coords), tol=tol,
+            _remove_small_teeth(list(ring.coords)), tol=tol,
         )
         if len(cleaned) >= 3:
             interiors.append(cleaned)

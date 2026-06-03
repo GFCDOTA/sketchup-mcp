@@ -2,12 +2,12 @@
   "schema_version": "1.0.0",
   "tool": "build_plan_shell_skp",
   "consensus_path": "E:/Claude/sketchup-mcp/fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json",
-  "skp_path": "E:/Claude/sketchup-mcp/runs/planta_74/mureta_grade_candidate/model.skp",
-  "shell_json_path": "E:/Claude/sketchup-mcp/runs/planta_74/mureta_grade_candidate/_shell_polygon.json",
+  "skp_path": "E:/Claude/sketchup-mcp/runs/planta_74/notch_fix/model.skp",
+  "shell_json_path": "E:/Claude/sketchup-mcp/runs/planta_74/notch_fix/_shell_polygon.json",
   "soft_barriers_mode": "groups",
   "plan_shell": {
-    "faces": 137,
-    "edges": 393,
+    "faces": 109,
+    "edges": 309,
     "sub_groups": 3,
     "faces_with_holes": 7,
     "top_or_bottom_faces": 14,
@@ -179,10 +179,10 @@
     {
       "name": "PlanShell_Group",
       "entity_count": 3,
-      "face_count": 137,
-      "edge_count": 393,
+      "face_count": 109,
+      "edge_count": 309,
       "sub_group_count": 3,
-      "lateral_face_count": 123,
+      "lateral_face_count": 95,
       "top_or_bottom_face_count": 14,
       "top_face_count": 7,
       "default_material_face_count": 0,
@@ -194,7 +194,7 @@
           0.0
         ],
         "max": [
-          770.4941,
+          766.7539,
           970.4645,
           106.2992
         ]
@@ -206,14 +206,14 @@
           0.0
         ],
         "max": [
-          19.5706,
+          19.4755,
           24.6498,
           2.7
         ]
       },
       "height_m": 2.7,
-      "footprint_bbox_m2": 187.4573,
-      "footprint_top_face_m2": 15.9165
+      "footprint_bbox_m2": 186.459,
+      "footprint_top_face_m2": 15.8032
     },
     {
       "name": "Floor_Group_r000",
@@ -1054,7 +1054,7 @@
     "shell_pieces_after_union": 3,
     "shell_pieces_after_sliver_filter": 3,
     "slivers_removed": 0,
-    "redundant_vertices_dropped": 3,
+    "redundant_vertices_dropped": 31,
     "snap_eps_pts": 0.1,
     "min_sliver_area_pts2": 0.5,
     "carving_origins": [
@@ -1062,7 +1062,7 @@
       "svg_arc",
       "svg_segments"
     ],
-    "total_shell_area_pts2": 12036.771,
+    "total_shell_area_pts2": 11945.2422,
     "window_apertures": [
       {
         "id": "h_o007",
