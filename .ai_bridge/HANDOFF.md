@@ -1,7 +1,27 @@
 # Handoff — sketchup-mcp
 
-> Fio da meada entre sessões. Última atualização: **2026-06-03** (cockpit responsivo + score roadmap-aware landados em develop `ea2c37b`; gate :8765 LIVE).
+> Fio da meada entre sessões. Última atualização: **2026-06-03** (fidelidade planta_74 LANDADA em develop `d48798d`; cockpit responsivo + score roadmap-aware antes; gate :8765 LIVE).
 > Leia primeiro ao iniciar sessão.
+
+## 2026-06-03 (tarde) — fidelidade planta_74 LANDADA (jamba + gradil + peitoril)
+
+A `wt-fidelity` (feat/planta74-peitoril) foi landada em develop (`d48798d`, squash). Felipe
+**VISUAL_REVIEW = IMPROVED** (gate PDF×BEFORE×AFTER) e confirmou rebuild==aprovado.
+- **Cascata que o gate visual sozinho NÃO pegaria** (cada um corrigido): (1) ID `m019`
+  DUPLICADO — o `build_shell` indexa walls por id (`{w["id"]: ...}`), o dup colapsava uma
+  parede; o `kitchen_fix` aprovado fora buildado com geometria ambígua → renomeei p/ `m020`.
+  (2) **rebuild necessário** (consensus corrigido ≠ kitchen_fix). (3) SU `add_face` estourava
+  "Duplicate points" → `_drop_coincident` em `serialize_polygons` remove ruído de união
+  shapely (<1e-3 pdf-pt). (4) axis-aligned test tol 1e-6→1e-3 + drift sentinel; junction 21→23.
+- Decisões roteadas ao gate :8765 (modo B): Option A (tolerância) + Option B (dedup).
+- pytest **355 ✓**, deterministic gates **PASS**. canonical `artifacts/planta_74` rebuilt
+  (IDs únicos, consistente). 1 gate auxiliar `soft_barrier_source_audit` standalone dá FAIL de
+  BOOKKEEPING (skip por wall_overlap, não no_source) — resultado built=1 (gradil) é o aprovado.
+- **Painel: YELLOW** (`dirty=wt-dash`, DIFF-001 DEFERRED). LIÇÃO: build via SU autorun precisa
+  do plugin em `%APPDATA%\SketchUp\SketchUp 2026\SketchUp\Plugins\autorun_consume.rb`;
+  ver `autorun_error.txt` ao diagnosticar. SU exe: `C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe`.
+- **Pendente**: `wt-dash` (último dirty — cockpit custo + botões + 3 PNGs canonical divergentes;
+  roadmap = remover). Decisão do Felipe.
 
 ## 2026-06-03 — cockpit responsivo + score distingue roadmap de incêndio (painel RED→YELLOW)
 
