@@ -21,8 +21,14 @@ Felipe pedio "Resolver o YELLOW" via #planta. O sub-fork **port-vs-discard** foi
   minha limpeza reduz superfície mas não atende a aceitação "lock visível no painel"), DIFF-006 (constantes
   builder hardcoded, LOW/roadmap — deferir = mute-button, **NÃO feito**), DIFF-001 (DEFERRED, aceito).
   **GREEN não é verdade hoje** (itens de roadmap reais abertos); não foi forçado.
-- **Pendências honestas (próxima sessão):** (1) `:8765` vivo ainda roda código velho — os painéis Custo real +
-  Ações corretivas só ficam LIVE após restart via `tools/claude_bridge/start.ps1` (preserva `.oauth_token`).
+- **Pendências honestas (próxima sessão):** (1) **RESOLVIDO** — `:8765` reiniciado no server **CONSOLIDADO**
+  (`sketchup-mcp/develop`): painéis Custo real + Ações corretivas + fix do `canonical_skp` todos LIVE (pid novo,
+  oracle claude-opus-4-8). ⚠️ **LIÇÃO**: a remoção do worktree `wt-dash` QUEBROU os launchers EXTERNOS ao repo
+  que hardcodam o path do server — `E:\Claude\SUBIR-COCKPIT.cmd` + `E:\Claude\claude-bridge\gate-watchdog.ps1` +
+  `gate-watchdog-loop.ps1` apontavam `E:\Claude\wt-dash\tools\claude_bridge\server.py` (deletado) → o cockpit caiu
+  e o launcher do Felipe falhou com erro enganoso ("confere o .oauth_token"; o token estava OK). **Repontados os 3
+  p/ `sketchup-mcp\tools\claude_bridge\server.py`.** Regra: SEMPRE grep refs ao path (launchers/.cmd/.ps1/watchdog/
+  Scheduled Task) ANTES de remover worktree.
   (2) worktrees stale `wt-fidelity` (fidelidade landou via squash `d48798d`, mas branch diverge 94 arq/728+/12032−
   c/ HANDOFF velho + review artifacts únicos) e `wt-gh` (`chore/gh-autopilot-skill`, possível outro agente) —
   relacionam-se ao DIFF-004; **não removidos** (não-task, conteúdo único). (3) **RESOLVIDO** —
