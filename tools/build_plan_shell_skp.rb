@@ -324,6 +324,11 @@ GRADE_BOT_Z0 = 0.03 * M_TO_IN
 GRADE_BOT_Z1 = 0.11 * M_TO_IN
 GRADE_TOP_Z0 = (PARAPET_HEIGHT_M - 0.08) * M_TO_IN
 GRADE_TOP_Z1 = PARAPET_HEIGHT_IN
+# Guarda-corpo do PREDIO REAL (Felipe 2026-06-03, ref foto fachada): mureta de
+# concreto na base (cimento) + grade metalica EM CIMA dela. A mureta vai do chao
+# ate MURETA_BASE_M; a grade ocupa dali ate PARAPET_HEIGHT_M (1,10m).
+MURETA_BASE_M  = 0.45
+MURETA_BASE_IN = MURETA_BASE_M * M_TO_IN
 
 def add_grade_box(ents, quad_xy, z0, z1, material)
   # Caixa: face no z0 (4 cantos [x,y]) -> pushpull ate z1. Retorna true se construiu.
@@ -411,6 +416,28 @@ def build_soft_barrier(parent_ents, barrier, material, index,
     # render_grade (render_as=grade / guardrail / railing); senao peitoril/
     # mureta = elemento baixo OPACO. NUNCA fallback de peitoril -> grade.
     if render_grade
+      boxes = 0
+      # (1) MURETA DE CONCRETO na base — o "cimento embaixo da grade" do predio
+      # real (Felipe 2026-06-03). Laje solida do chao ate MURETA_BASE_IN, material
+      # concreto (plan_parapet, cinza claro), distinta da grade metalica acima.
+      concrete = (parent_ents.model.materials['plan_parapet'] rescue nil)
+      mhalf = SOFT_BARRIER_THICKNESS_IN / 2.0
+      mnx = -uy * mhalf
+      mny =  ux * mhalf
+      base_quad = [
+        Geom::Point3d.new(p1.x + mnx, p1.y + mny, 0),
+        Geom::Point3d.new(p2.x + mnx, p2.y + mny, 0),
+        Geom::Point3d.new(p2.x - mnx, p2.y - mny, 0),
+        Geom::Point3d.new(p1.x - mnx, p1.y - mny, 0),
+      ]
+      bface = (se.add_face(base_quad) rescue nil)
+      if bface
+        bface.reverse! if bface.normal.z < 0
+        bface.pushpull(MURETA_BASE_IN)
+        se.grep(Sketchup::Face).each { |f| f.material = (concrete || material); f.back_material = (concrete || material) }
+        boxes += 1
+      end
+      # (2) GRADE METALICA em cima da mureta (MURETA_BASE_IN .. 1,10m).
       half_t = GRADE_RAIL_THICK_IN / 2.0
       nx = -uy * half_t
       ny =  ux * half_t
@@ -418,8 +445,9 @@ def build_soft_barrier(parent_ents, barrier, material, index,
         [p1.x + nx, p1.y + ny], [p2.x + nx, p2.y + ny],
         [p2.x - nx, p2.y - ny], [p1.x - nx, p1.y - ny],
       ]
-      boxes = 0
-      boxes += 1 if add_grade_box(se, rail_quad, GRADE_BOT_Z0, GRADE_BOT_Z1, material)
+      g_bot0 = MURETA_BASE_IN
+      g_bot1 = MURETA_BASE_IN + GRADE_RAIL_THICK_IN
+      boxes += 1 if add_grade_box(se, rail_quad, g_bot0, g_bot1, material)
       boxes += 1 if add_grade_box(se, rail_quad, GRADE_TOP_Z0, GRADE_TOP_Z1, material)
       n_bal = [(len / GRADE_BAL_SPACING_IN).round, 1].max
       bs = GRADE_BAL_SIZE_IN / 2.0
@@ -428,7 +456,7 @@ def build_soft_barrier(parent_ents, barrier, material, index,
         cx = p1.x + dx * t
         cy = p1.y + dy * t
         bal_quad = [[cx - bs, cy - bs], [cx + bs, cy - bs], [cx + bs, cy + bs], [cx - bs, cy + bs]]
-        boxes += 1 if add_grade_box(se, bal_quad, GRADE_BOT_Z1, GRADE_TOP_Z0, material)
+        boxes += 1 if add_grade_box(se, bal_quad, g_bot1, GRADE_TOP_Z0, material)
       end
       ok_seg = boxes > 0
     else
