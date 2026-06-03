@@ -1,7 +1,32 @@
 # Handoff — sketchup-mcp
 
-> Fio da meada entre sessões. Última atualização: **2026-06-03** (fidelidade planta_74 LANDADA em develop `d48798d`; cockpit responsivo + score roadmap-aware antes; gate :8765 LIVE).
+> Fio da meada entre sessões. Última atualização: **2026-06-03 (noite)** (wt-dash portado+consolidado, painel dirty-driver limpo; fidelidade planta_74 LANDADA em `d48798d` antes; gate :8765 LIVE).
 > Leia primeiro ao iniciar sessão.
+
+## 2026-06-03 (noite) — wt-dash PORTADO + consolidado (painel: dirty driver LIMPO)
+
+Felipe pedio "Resolver o YELLOW" via #planta. O sub-fork **port-vs-discard** foi roteado ao gate
+`:8765` = **GO high-confidence** (zero superfície de fidelidade; PNGs dirty = único risco visual, descartados).
+- **Portados pra develop** (cherry-pick LIMPO, sem conflito) os 2 commits de cockpit do antigo `feat/gate-dashboard`:
+  `ee7ebcf` (botões de ação corretiva: `/api/actions` + POST `/api/actions/process-consults` + `/api/actions/dirty-detail`)
+  e `f5b799a` (painel de custo real: `/api/processes` + `_classify_processes`). 403 linhas, **com 8 testes**.
+- **Integridade verificada**: py_compile+AST OK; rotas novas E as de develop (next-best-actions, responsivo,
+  score roadmap-aware) **coexistem**; **pytest 363 ✓** (355→363); smoke de runtime em instância descartável
+  (`:8799`): `/health` `/api/processes` `/api/actions` `/api/actions/dirty-detail` `/api/next-best-actions` `/` → todos **200**.
+- **Descartado** (gate GO): 3 PNGs canônicos dirty do worktree (regen NÃO-validado — clobariam o `d48798d`
+  aprovado) + scratch untracked. Worktree `wt-dash` removido (--force), branch local + **remote
+  `feat/gate-dashboard` deletados**, develop **pushed** (`e21e548..8826297`).
+- **Painel agora**: `dirty_repos: []`. Reason caiu de "1 dirty; 2 OPEN; 1 adiada" → **"2 OPEN; 1 adiada"**.
+  Segue **YELLOW por ROADMAP, não por wt-dash**: DIFF-004 (worktree-lock root-fix NÃO implementado — OPEN real;
+  minha limpeza reduz superfície mas não atende a aceitação "lock visível no painel"), DIFF-006 (constantes
+  builder hardcoded, LOW/roadmap — deferir = mute-button, **NÃO feito**), DIFF-001 (DEFERRED, aceito).
+  **GREEN não é verdade hoje** (itens de roadmap reais abertos); não foi forçado.
+- **Pendências honestas (próxima sessão):** (1) `:8765` vivo ainda roda código velho — os painéis Custo real +
+  Ações corretivas só ficam LIVE após restart via `tools/claude_bridge/start.ps1` (preserva `.oauth_token`).
+  (2) worktrees stale `wt-fidelity` (fidelidade landou via squash `d48798d`, mas branch diverge 94 arq/728+/12032−
+  c/ HANDOFF velho + review artifacts únicos) e `wt-gh` (`chore/gh-autopilot-skill`, possível outro agente) —
+  relacionam-se ao DIFF-004; **não removidos** (não-task, conteúdo único). (3) painel reporta
+  `canonical_skp.planta_74 = null` apesar de `artifacts/planta_74/planta_74.skp` existir — investigar o detector.
 
 ## 2026-06-03 (tarde) — fidelidade planta_74 LANDADA (jamba + gradil + peitoril)
 
