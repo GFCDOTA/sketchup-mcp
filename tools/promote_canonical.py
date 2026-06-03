@@ -88,6 +88,20 @@ def promote(src_final: Path, plant: str, repo: Path = REPO) -> dict:
     }
     (dst / f"{plant}.skp.metadata.json").write_text(
         json.dumps(meta, indent=2) + "\n", encoding="utf-8")
+    # MUST (Felipe 2026-06-03): todo canonical promovido tem regression_summary, pra a
+    # aba #planta NUNCA mostrar verdict UNKNOWN depois de gerar um novo SKP. O veredito
+    # visual (IMPROVED/SAME/WORSE) e do Felipe; aqui so garantimos o arquivo existir, com
+    # um provisorio WARN (= aguardando VISUAL_REVIEW) — sem sobrescrever um ja gravado.
+    rs = dst / "regression_summary.md"
+    if not rs.exists():
+        rs.write_text(
+            f"# Regression Summary — {plant}\n\n"
+            f"Verdict: WARN\n\n"
+            f"SKP promovido de `{prov}` (sha {sha[:12]}).\n"
+            f"Verdict provisorio **WARN** = aguardando VISUAL_REVIEW do Felipe "
+            f"(PDF × ANTES × AGORA). Ao aprovar, troque para `Verdict: IMPROVED`.\n",
+            encoding="utf-8")
+        copied.append("regression_summary.md")
     return {"dst": str(dst.relative_to(repo)), "copied": copied, "sha": sha[:12]}
 
 
