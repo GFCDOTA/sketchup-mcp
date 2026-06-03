@@ -263,18 +263,37 @@ def test_planta_74_no_collinear_redundant_vertices_after_canonicalise():
     reason="planta_74 consensus fixture not present",
 )
 def test_planta_74_all_edges_axis_aligned():
-    """Planta_74 uses axis-aligned walls; the shell must too."""
+    """Planta_74 uses axis-aligned walls; the shell must too.
+
+    Tolerance is 1e-3 pdf-pt (~3.5 um), NOT 1e-6: the shell is a shapely boolean
+    union of rectangles whose thickness carries PDF-extraction noise (e.g. m012
+    5.399517 vs a neighbour 5.398...). A corner where two thicknesses differ
+    unions to a sub-micron off-axis step (~2e-4) inherent to float boolean ops —
+    not a crooked wall. A real non-orthogonal wall gives off-axis = L*sin(theta)
+    over hundreds of pdf-pts, 2-5 orders larger, so 1e-3 still catches it.
+    (Gate :8765 modo B, GO Option A, 2026-06-03 — 1e-6 ~= 3.5 nm is unphysical
+    for PDF-extracted geometry.)
+    """
+    TOL = 1e-3
     consensus = json.loads(PLANTA_74_CONSENSUS.read_text(encoding="utf-8"))
     polys, _ = build_shell_polygon(consensus)
+    max_off = 0.0
     for i, p in enumerate(polys):
         coords = list(p.exterior.coords)
         for (x0, y0), (x1, y1) in zip(coords[:-1], coords[1:]):
-            is_h = abs(y1 - y0) < 1e-6
-            is_v = abs(x1 - x0) < 1e-6
+            is_h = abs(y1 - y0) < TOL
+            is_v = abs(x1 - x0) < TOL
+            max_off = max(max_off, min(abs(y1 - y0), abs(x1 - x0)))
             assert is_h or is_v, (
                 f"piece[{i}] non-axis-aligned edge: "
                 f"({x0:.3f}, {y0:.3f}) -> ({x1:.3f}, {y1:.3f})"
             )
+    # Drift sentinel: union noise sits ~2e-4. If it ever crosses 5e-4 the cause
+    # is geometry change, not float noise — surface it before it nears TOL.
+    assert max_off < 5e-4, (
+        f"max off-axis {max_off:.2e} exceeded the 5e-4 noise floor — likely a "
+        f"real geometry drift hiding under the relaxed {TOL} tolerance"
+    )
 
 
 @pytest.mark.skipif(
@@ -355,10 +374,12 @@ def test_planta_74_free_endpoints_have_no_stub_extension():
 
     # The endpoints_free / endpoints_junction stats must match the
     # walls fixture exactly so that any consensus regression surfaces
-    # here. Locked numbers for the planta_74 baseline AFTER the FP-031
-    # regeneration (collinear walls merged 35->19; junction detection
-    # perpendicular-only):
-    assert stats["endpoints_junction"] == 21
+    # here. Locked numbers for the planta_74 baseline. After the kitchen
+    # jamb wall (m020) closed the missing cozinha jamb, n_walls=20 and the
+    # junction count rose 21->23 (the new wall meets the spine at both
+    # ends); free stays 17. (Felipe VISUAL_REVIEW IMPROVED 2026-06-03,
+    # rebuilt with unique IDs after the m019 duplicate-ID fix.)
+    assert stats["endpoints_junction"] == 23
     assert stats["endpoints_free"] == 17
     assert stats["endpoints_junction"] + stats["endpoints_free"] == 2 * len(walls)
 

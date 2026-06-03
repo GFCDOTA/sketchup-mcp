@@ -544,22 +544,37 @@ def build_shell_polygon(consensus: dict) -> tuple[list[Polygon], dict]:
     return kept, stats
 
 
+def _drop_coincident(coords: list, tol: float = 1e-3) -> list:
+    """Drop consecutive near-coincident vertices + the ring-wrap. shapely's
+    boolean union of float-noisy thicknesses (e.g. m012 5.399517 vs a neighbour)
+    can emit two points <1e-3 pdf-pt apart at a corner; SU's add_face then raises
+    "Duplicate points in array". tol 1e-3 pdf-pt (~3.5 um) removes only that union
+    noise — real vertices are orders larger. (Gate :8765 modo B, Option B,
+    2026-06-03; same noise floor as the axis-aligned test.)
+    """
+    out: list = []
+    for x, y in coords:
+        if not out or abs(out[-1][0] - x) > tol or abs(out[-1][1] - y) > tol:
+            out.append((x, y))
+    if (len(out) > 1 and abs(out[-1][0] - out[0][0]) <= tol
+            and abs(out[-1][1] - out[0][1]) <= tol):
+        out.pop()
+    return out
+
+
 def serialize_polygons(polygons: list[Polygon],
                        consensus: dict, stats: dict) -> dict:
     """Build the dict that the Ruby exporter reads (`_shell_polygon.json`)."""
     pieces = []
     for poly in polygons:
-        outer = list(poly.exterior.coords)
-        # Shapely closes rings (last == first); SU's add_face wants
-        # distinct vertices, so drop the duplicate close.
-        if outer and outer[-1] == outer[0]:
-            outer = outer[:-1]
+        # Drop the shapely ring-close AND any near-coincident union-noise
+        # vertices, else SU add_face raises "Duplicate points in array".
+        outer = _drop_coincident(list(poly.exterior.coords))
         holes = []
         for ring in poly.interiors:
-            h = list(ring.coords)
-            if h and h[-1] == h[0]:
-                h = h[:-1]
-            holes.append([[float(x), float(y)] for x, y in h])
+            h = _drop_coincident(list(ring.coords))
+            if len(h) >= 3:
+                holes.append([[float(x), float(y)] for x, y in h])
         pieces.append({
             "outer": [[float(x), float(y)] for x, y in outer],
             "holes": holes,

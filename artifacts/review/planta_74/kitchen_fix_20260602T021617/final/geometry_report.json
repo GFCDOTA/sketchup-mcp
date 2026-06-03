@@ -1,16 +1,16 @@
 {
   "schema_version": "1.0.0",
   "tool": "build_plan_shell_skp",
-  "consensus_path": "E:/Claude/sketchup-mcp/fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json",
-  "skp_path": "E:/Claude/sketchup-mcp/runs/planta_74/rebuild_20260603/model.skp",
-  "shell_json_path": "E:/Claude/sketchup-mcp/runs/planta_74/rebuild_20260603/_shell_polygon.json",
+  "consensus_path": "E:/Claude/wt-fidelity/fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json",
+  "skp_path": "E:/Claude/wt-fidelity/runs/planta_74/planta_74.skp",
+  "shell_json_path": "E:/Claude/wt-fidelity/runs/planta_74/_shell_polygon.json",
   "soft_barriers_mode": "groups",
   "plan_shell": {
-    "faces": 137,
-    "edges": 393,
-    "sub_groups": 3,
+    "faces": 132,
+    "edges": 372,
+    "sub_groups": 4,
     "faces_with_holes": 7,
-    "top_or_bottom_faces": 14,
+    "top_or_bottom_faces": 16,
     "default_material_faces": 0,
     "present": true
   },
@@ -85,89 +85,14 @@
     "count": 1,
     "skipped_count": 8,
     "skip_reasons": [
-      "sb[0] sb000: unsourced_no_provenance (not rendered)",
-      "sb[1] sb001: unsourced_no_provenance (not rendered)",
-      "sb[2] sb002: unsourced_no_provenance (not rendered)",
-      "sb[3] sb003: unsourced_no_provenance (not rendered)",
-      "sb[4] sb004: unsourced_no_provenance (not rendered)",
-      "sb[5] sb005: unsourced_no_provenance (not rendered)",
-      "sb[6] sb006: unsourced_no_provenance (not rendered)",
-      "sb[7] sb007: unsourced_no_provenance (not rendered)"
-    ],
-    "barriers": [
-      {
-        "id": "sb000",
-        "barrier_type": null,
-        "sourced": false,
-        "rendered": false,
-        "render_as": null,
-        "skip_reason": "unsourced_no_provenance"
-      },
-      {
-        "id": "sb001",
-        "barrier_type": null,
-        "sourced": false,
-        "rendered": false,
-        "render_as": null,
-        "skip_reason": "unsourced_no_provenance"
-      },
-      {
-        "id": "sb002",
-        "barrier_type": null,
-        "sourced": false,
-        "rendered": false,
-        "render_as": null,
-        "skip_reason": "unsourced_no_provenance"
-      },
-      {
-        "id": "sb003",
-        "barrier_type": null,
-        "sourced": false,
-        "rendered": false,
-        "render_as": null,
-        "skip_reason": "unsourced_no_provenance"
-      },
-      {
-        "id": "sb004",
-        "barrier_type": null,
-        "sourced": false,
-        "rendered": false,
-        "render_as": null,
-        "skip_reason": "unsourced_no_provenance"
-      },
-      {
-        "id": "sb005",
-        "barrier_type": null,
-        "sourced": false,
-        "rendered": false,
-        "render_as": null,
-        "skip_reason": "unsourced_no_provenance"
-      },
-      {
-        "id": "sb006",
-        "barrier_type": null,
-        "sourced": false,
-        "rendered": false,
-        "render_as": null,
-        "skip_reason": "unsourced_no_provenance"
-      },
-      {
-        "id": "sb007",
-        "barrier_type": null,
-        "sourced": false,
-        "rendered": false,
-        "render_as": null,
-        "skip_reason": "unsourced_no_provenance"
-      },
-      {
-        "id": "h_sb000",
-        "barrier_type": "peitoril",
-        "sourced": true,
-        "rendered": true,
-        "render_as": "low_wall",
-        "host_wall_id": null,
-        "length_m": 7.568
-      }
+      "sb[0]: skip(no_source): barrier_type=nil human_annotation=false",
+      "sb[1]: skip(no_source): barrier_type=nil human_annotation=false",
+      "sb[2]: skip(no_source): barrier_type=nil human_annotation=false",
+      "sb[3]: skip(no_source): barrier_type=nil human_annotation=false",
+      "sb[4]: skip(no_source): barrier_type=nil human_annotation=false",
+      "sb[5]: skip(no_source): barrier_type=nil human_annotation=false",
+      "sb[6]: skip(no_source): barrier_type=nil human_annotation=false",
+      "sb[7]: skip(no_source): barrier_type=nil human_annotation=false"
     ]
   },
   "totals": {
@@ -178,23 +103,23 @@
   "groups_diagnostic": [
     {
       "name": "PlanShell_Group",
-      "entity_count": 3,
-      "face_count": 137,
-      "edge_count": 393,
-      "sub_group_count": 3,
-      "lateral_face_count": 123,
-      "top_or_bottom_face_count": 14,
-      "top_face_count": 7,
+      "entity_count": 4,
+      "face_count": 132,
+      "edge_count": 372,
+      "sub_group_count": 4,
+      "lateral_face_count": 116,
+      "top_or_bottom_face_count": 16,
+      "top_face_count": 8,
       "default_material_face_count": 0,
-      "primary_material": "plan_wall1",
+      "primary_material": "plan_wall",
       "bbox_in": {
         "min": [
-          68.1588,
+          68.1591,
           556.7599,
           0.0
         ],
         "max": [
-          770.4941,
+          766.7539,
           970.4645,
           106.2992
         ]
@@ -206,14 +131,14 @@
           0.0
         ],
         "max": [
-          19.5706,
+          19.4755,
           24.6498,
           2.7
         ]
       },
       "height_m": 2.7,
-      "footprint_bbox_m2": 187.4573,
-      "footprint_top_face_m2": 15.9165
+      "footprint_bbox_m2": 186.4589,
+      "footprint_top_face_m2": 15.8826
     },
     {
       "name": "Floor_Group_r000",
@@ -1040,8 +965,8 @@
     "input_openings": 12,
     "openings_carved": 8,
     "window_apertures_3d": 4,
-    "endpoints_free": 17,
-    "endpoints_junction": 23,
+    "endpoints_free": 19,
+    "endpoints_junction": 21,
     "openings_skipped_by_origin": [
 
     ],
@@ -1051,8 +976,8 @@
     "openings_skipped": [
 
     ],
-    "shell_pieces_after_union": 3,
-    "shell_pieces_after_sliver_filter": 3,
+    "shell_pieces_after_union": 4,
+    "shell_pieces_after_sliver_filter": 4,
     "slivers_removed": 0,
     "redundant_vertices_dropped": 3,
     "snap_eps_pts": 0.1,
@@ -1062,7 +987,7 @@
       "svg_arc",
       "svg_segments"
     ],
-    "total_shell_area_pts2": 12036.771,
+    "total_shell_area_pts2": 12009.3415,
     "window_apertures": [
       {
         "id": "h_o007",

@@ -80,13 +80,20 @@ def run_all(
             }
 
     if report_path:
-        import json as _json
-        rep = _json.loads(Path(report_path).read_text("utf-8"))
+        rep = json.loads(Path(report_path).read_text("utf-8"))
         from tools.parapet_not_railing_fallback_gate import (
             audit_parapet_not_railing_fallback)
         from tools.railing_exact_match_gate import audit_railing_exact_match
         gates["railing_match"] = audit_railing_exact_match(con, rep)
         gates["parapet_fallback"] = audit_parapet_not_railing_fallback(con, rep)
+        # position-fidelity (Felipe 2026-06-02): centro/largura/host de portas+
+        # janelas + alinhamento/cobertura/fechamento da grade, vs o geometry_report.
+        from tools.position_fidelity_gate import compare as _pf_compare
+        _pf = _pf_compare(con, rep)
+        _pf_fails = [f for f in _pf if f.get("verdict") == "FAIL"]
+        gates["position_fidelity"] = {
+            "overall": "FAIL" if _pf_fails else "PASS",
+            "findings": _pf, "n_fail": len(_pf_fails), "n_total": len(_pf)}
 
     def _status(g: dict) -> str:
         return g.get("overall", g.get("verdict"))
@@ -115,6 +122,8 @@ def _summary_line(name: str, g: dict) -> str:
     if name == "parapet_fallback":
         return (f"  parapet_fallbk: {v} "
                 f"({g.get('n_unsourced_rendered', 0)} unsourced rendered)")
+    if name == "position_fidelity":
+        return f"  position_fid : {v} ({g.get('n_fail')} FAIL de {g.get('n_total')})"
     if name == "wall_presence":
         if v == "SKIPPED_NO_SIDECAR":
             return f"  wall_presence: SKIPPED_NO_SIDECAR ({g.get('sidecar')})"
@@ -132,7 +141,7 @@ if __name__ == "__main__":
     ap.add_argument("--render", default=None,
                     help="SKP top render PNG (needs sibling .proj.json)")
     ap.add_argument("--report", default=None,
-                    help="geometry_report.json (enables the railing gates)")
+                    help="geometry_report.json (liga railing + position_fidelity gates)")
     a = ap.parse_args()
     res = run_all(fixture=a.fixture, consensus_path=a.consensus,
                   render_path=a.render, report_path=a.report)

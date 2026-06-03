@@ -312,6 +312,34 @@ def segment_overlaps_wall?(p1, p2, footprints, tol_in = 1.0)
   end
 end
 
+# ---- grade (guarda-corpo metalico) — render parametrico -------------
+# Peitoril/varanda do planta_74 = GRADE metalica (confirmado pelo render
+# OFICIAL do empreendimento Living Grand Wish Jardim: moldura escura +
+# montantes, ve-se atraves). NAO e laje solida nem vidro cheio. Geramos
+# travessa inferior + corrimao superior + montantes verticais.
+GRADE_RAIL_THICK_IN  = 0.04 * M_TO_IN   # 4cm travessa/corrimao
+GRADE_BAL_SIZE_IN    = 0.02 * M_TO_IN   # 2cm montante (secao quadrada)
+GRADE_BAL_SPACING_IN = 0.12 * M_TO_IN   # ~12cm entre montantes (NBR guarda-corpo)
+GRADE_BOT_Z0 = 0.03 * M_TO_IN
+GRADE_BOT_Z1 = 0.11 * M_TO_IN
+GRADE_TOP_Z0 = (PARAPET_HEIGHT_M - 0.08) * M_TO_IN
+GRADE_TOP_Z1 = PARAPET_HEIGHT_IN
+
+def add_grade_box(ents, quad_xy, z0, z1, material)
+  # Caixa: face no z0 (4 cantos [x,y]) -> pushpull ate z1. Retorna true se construiu.
+  pts = quad_xy.map { |p| Geom::Point3d.new(p[0], p[1], z0) }
+  g = ents.add_group
+  f = (g.entities.add_face(pts) rescue nil)
+  if f.nil?
+    g.erase!
+    return false
+  end
+  f.reverse! if f.normal.z < 0
+  f.pushpull(z1 - z0)
+  g.entities.grep(Sketchup::Face).each { |ff| ff.material = material; ff.back_material = material }
+  true
+end
+
 def build_soft_barrier(parent_ents, barrier, material, index,
                        wall_footprints: nil)
   # Per-segment swept slab. For each consecutive pair (a, b) on the
@@ -324,6 +352,19 @@ def build_soft_barrier(parent_ents, barrier, material, index,
   # tests/test_plan_shell_invariants.py).
   pts_pdf = soft_barrier_polyline_pts(barrier)
   return {'ok' => false, 'reason' => 'no polyline_pts'} if pts_pdf.length < 2
+
+  # SOURCE GATE (Felipe 2026-06-02): so renderiza com FONTE EXPLICITA.
+  # sem barrier_type + sem human_annotation => SKIP TOTAL (caso sb000-sb007).
+  # NADA de fallback fisico — nem grade, nem mureta, nem bloco cinza. Fica
+  # ausente do SKP; aparece so como WARN no soft_barrier_source_audit.
+  bt = barrier['barrier_type']
+  has_source = (barrier['geometry_origin'] == 'human_annotation')
+  unless bt && has_source
+    return {'ok' => false,
+            'reason' => "skip(no_source): barrier_type=#{bt.inspect} human_annotation=#{has_source}"}
+  end
+  # GRADE so com autorizacao explicita; peitoril/mureta = elemento baixo opaco.
+  render_grade = (barrier['render_as'] == 'grade' || bt == 'guardrail' || bt == 'railing')
 
   group = parent_ents.add_group
   group.name = "SoftBarrier_Group_#{index}"
@@ -348,33 +389,74 @@ def build_soft_barrier(parent_ents, barrier, material, index,
     # FP-006: drop segments whose midpoint sits inside a wall footprint
     # — those are the building outline that the vector extractor
     # catches as soft_barrier, not real peitoris.
-    if wall_footprints && segment_overlaps_wall?(p1, p2, wall_footprints)
+    # EXCECAO (trust-human, gate :8765 GO opcao B): barreiras com
+    # geometry_origin=human_annotation sao peitoris CONFIRMADOS pelo humano —
+    # nunca dropadas por overlap. Peitoril real encosta na parede pela ponta
+    # (3-pt sample acusa), entao FP-006 so vale pro AUTO-extraido. Restaura
+    # sb005 (PEITORIL H=1,10M) que o regen #28 (merge de paredes) passou a derrubar.
+    trust_human = barrier['geometry_origin'] == 'human_annotation'
+    if wall_footprints && !trust_human && segment_overlaps_wall?(p1, p2, wall_footprints)
       segments_skipped_overlap += 1
       next
     end
 
-    nx = -dy / len * (SOFT_BARRIER_THICKNESS_IN / 2.0)
-    ny =  dx / len * (SOFT_BARRIER_THICKNESS_IN / 2.0)
-    quad = [
-      Geom::Point3d.new(p1.x + nx, p1.y + ny, 0),
-      Geom::Point3d.new(p2.x + nx, p2.y + ny, 0),
-      Geom::Point3d.new(p2.x - nx, p2.y - ny, 0),
-      Geom::Point3d.new(p1.x - nx, p1.y - ny, 0),
-    ]
+    ux = dx / len
+    uy = dy / len
 
     sub_group = group.entities.add_group
     sub_group.name = "SoftBarrier_#{index}_seg_#{seg_idx}"
-    face = sub_group.entities.add_face(quad) rescue nil
-    if face.nil?
+    se = sub_group.entities
+
+    # Ja passou pelo SOURCE GATE (tem barrier_type + fonte). GRADE so se
+    # render_grade (render_as=grade / guardrail / railing); senao peitoril/
+    # mureta = elemento baixo OPACO. NUNCA fallback de peitoril -> grade.
+    if render_grade
+      half_t = GRADE_RAIL_THICK_IN / 2.0
+      nx = -uy * half_t
+      ny =  ux * half_t
+      rail_quad = [
+        [p1.x + nx, p1.y + ny], [p2.x + nx, p2.y + ny],
+        [p2.x - nx, p2.y - ny], [p1.x - nx, p1.y - ny],
+      ]
+      boxes = 0
+      boxes += 1 if add_grade_box(se, rail_quad, GRADE_BOT_Z0, GRADE_BOT_Z1, material)
+      boxes += 1 if add_grade_box(se, rail_quad, GRADE_TOP_Z0, GRADE_TOP_Z1, material)
+      n_bal = [(len / GRADE_BAL_SPACING_IN).round, 1].max
+      bs = GRADE_BAL_SIZE_IN / 2.0
+      (0..n_bal).each do |k|
+        t = k.to_f / n_bal
+        cx = p1.x + dx * t
+        cy = p1.y + dy * t
+        bal_quad = [[cx - bs, cy - bs], [cx + bs, cy - bs], [cx + bs, cy + bs], [cx - bs, cy + bs]]
+        boxes += 1 if add_grade_box(se, bal_quad, GRADE_BOT_Z1, GRADE_TOP_Z0, material)
+      end
+      ok_seg = boxes > 0
+    else
+      # MURETA OPACA (default): laje fina extrudada ate 1,10m.
+      half_t = SOFT_BARRIER_THICKNESS_IN / 2.0
+      nx = -uy * half_t
+      ny =  ux * half_t
+      quad = [
+        Geom::Point3d.new(p1.x + nx, p1.y + ny, 0),
+        Geom::Point3d.new(p2.x + nx, p2.y + ny, 0),
+        Geom::Point3d.new(p2.x - nx, p2.y - ny, 0),
+        Geom::Point3d.new(p1.x - nx, p1.y - ny, 0),
+      ]
+      face = (se.add_face(quad) rescue nil)
+      if face
+        face.reverse! if face.normal.z < 0
+        face.pushpull(PARAPET_HEIGHT_IN)
+        se.grep(Sketchup::Face).each { |f| f.material = material; f.back_material = material }
+        ok_seg = true
+      else
+        ok_seg = false
+      end
+    end
+
+    unless ok_seg
       sub_group.erase!
       segments_skipped_facefail += 1
       next
-    end
-    face.reverse! if face.normal.z < 0
-    face.pushpull(PARAPET_HEIGHT_IN)
-    sub_group.entities.grep(Sketchup::Face).each do |f|
-      f.material      = material
-      f.back_material = material
     end
     segments_built += 1
     total_len_in += len
