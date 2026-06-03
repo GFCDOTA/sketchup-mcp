@@ -1,7 +1,19 @@
 # Handoff — sketchup-mcp
 
-> Fio da meada entre sessões. Última atualização: **2026-05-31 ~02:30 UTC** (/loop: gate framework spec §6.5→6.1 ENTREGUE em develop; pytest 277 ✓; bridge precisa RESTART pra ativar).
+> Fio da meada entre sessões. Última atualização: **2026-06-03** (cockpit responsivo + score roadmap-aware landados em develop `ea2c37b`; gate :8765 LIVE).
 > Leia primeiro ao iniciar sessão.
+
+## 2026-06-03 — cockpit responsivo + score distingue roadmap de incêndio (painel RED→YELLOW)
+
+Sessão de higiene do cockpit/gate + limpeza de dirty. Landado em develop (`ea2c37b`, push direto Contents:RW — token sem scope PR).
+- **Gate :8765 LIVE** = `tools/claude_bridge/server.py` (Opus-4.8 xhigh) — efetiva a Opção A do consult 20260531 (consolidar no repo; standalone aposentado). Atalho desktop **"SketchUp Cockpit + Gate"** + `tools/claude_bridge/launch_cockpit.ps1` (1-clique: sobe gate+cockpit, abre o dashboard).
+- **dashboard.html responsivo**: media queries (grid 2→1col, nav, tabelas roláveis, galeria); antes tinha **0 @media**. (Lido por request → sem restart.)
+- **score roadmap-aware** (decisão roteada ao gate :8765, modo B, GO high-confidence): dificuldade `DEFERRED` (exige triplet why_not_fixed_yet+next_hypothesis+acceptance_criteria **E** `review_by` não-vencida; **re-open trigger** volta a RED se vencer/perder triplet) conta YELLOW/roadmap, não RED. **DIFF-001 → DEFERRED** (review_by 2026-07-15). Matou o RED-permanente por item de roadmap. Anti-mute-button.
+- **5 consults pendentes resolvidos** (registro de desfecho honesto — bridge vivia offline na época, decisões já tomadas). `.ai_bridge/{questions,responses,audit,*.jsonl}` agora **gitignored** (log efêmero; HANDOFF.md segue versionado).
+- **Também landado**: `opening_aperture_audit` tool+test (5✓), spec `generalize_any_plant`, uv.lock, evidência review planta_74.
+- **PENDENTE (decisão Felipe):**
+  1. **`wt-fidelity`** (`feat/planta74-peitoril`, ahead 9) = trabalho de fidelidade real (jamba cozinha, gradil, peitoril sb005, position_fidelity_gate, wall_exact_match_gate). **Muda geometria → precisa gate visual PDF×BEFORE×AFTER antes de landar.** É o "trabalho preso" — próximo passo natural: gerar o AFTER e montar o trio pra Felipe julgar.
+  2. **`wt-dash`** (`feat/gate-dashboard`, ahead 2) = cockpit "custo real" + "botões corretivos" (não em develop) + 3 PNGs canonical divergentes (regen não-validado). Roadmap quer **remover wt-dash + consolidar serving**. Decidir: portar os 2 commits p/ develop vs descartar.
 
 ## 2026-05-31 ~02:30 UTC — /loop: gate framework §6 (6.5→6.1) ENTREGUE
 
