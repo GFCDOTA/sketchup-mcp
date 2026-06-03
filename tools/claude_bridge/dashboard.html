@@ -232,6 +232,24 @@ body{font-size:14px;}
 
 .timeline{align-items:flex-end;gap:2px;height:26px;}
 .timeline .dot{width:4px;height:22px;border-radius:1px;} .timeline .dot.down{height:7px;}
+
+/* ===== Fase 1: Command Center (LAST UPDATE + próxima ação + alarme + timeline causal) ===== */
+.hero{flex-wrap:wrap;}
+.hero-aside{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:7px;text-align:right;min-width:190px;}
+.hero-upd{font-size:10.5px;color:var(--dim);letter-spacing:.7px;text-transform:uppercase;}
+.hero-upd b{color:var(--accent);font-variant-numeric:tabular-nums;font-weight:700;}
+.hero-next{font-size:12.5px;color:var(--txt);font-weight:600;max-width:380px;line-height:1.4;}
+.hero-next .tag{display:block;color:var(--accent);font-size:9.5px;text-transform:uppercase;letter-spacing:1.2px;font-weight:700;margin-bottom:3px;}
+.hero.red{border-color:rgba(255,77,94,.55);animation:alarm 1.3s infinite;}
+.hero.yellow{border-color:rgba(255,176,46,.5);animation:alarmY 2.4s infinite;}
+@keyframes alarm{0%,100%{box-shadow:0 0 0 1px rgba(255,77,94,.2);}50%{box-shadow:0 0 32px rgba(255,77,94,.5),0 0 0 1px var(--bad);}}
+@keyframes alarmY{0%,100%{box-shadow:0 0 0 1px rgba(255,176,46,.14);}50%{box-shadow:0 0 24px rgba(255,176,46,.35);}}
+.tl{position:relative;padding-left:17px;}
+.tl::before{content:"";position:absolute;left:4px;top:6px;bottom:6px;width:2px;background:linear-gradient(180deg,var(--accent),transparent);opacity:.35;}
+.tl-row{position:relative;padding:6px 0 6px 4px;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--txt);}
+.tl-row::before{content:"";position:absolute;left:-13px;top:11px;width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 7px var(--accent);}
+.tl-row.heartbeat{color:var(--dim);} .tl-row.heartbeat::before{background:var(--dim);box-shadow:none;width:6px;height:6px;left:-12px;}
+.tl-row .tlt{color:var(--dim);font-variant-numeric:tabular-nums;margin-right:9px;}
 </style></head><body>
 <header>
 <h1><span class="logo">◉</span> SketchUp Creator <span class="sub">NOC</span></h1>
@@ -278,7 +296,7 @@ body{font-size:14px;}
 <div class="card"><h2>Health</h2><div id="health"></div></div>
 <div class="card"><h2>Health timeline</h2><div id="timeline" class="timeline"></div><div class="muted" style="margin-top:8px">verde=online · vermelho=offline · refresh 5s</div></div>
 <div class="card full"><h2>Heartbeats (orquestrador de liveness)</h2><table><thead><tr><th>session</th><th>cycle</th><th>idade</th><th>beats iguais</th><th>última ação</th><th>flags</th></tr></thead><tbody id="sessions"></tbody></table></div>
-<div class="card full"><h2>Atividade (consults + heartbeats)</h2><div id="feed" class="feed"></div></div>
+<div class="card full"><h2>📈 Timeline — o que aconteceu (consults + heartbeats)</h2><div id="feed" class="feed"></div></div>
 </div>
 
 <div class="grp">📦 Git &amp; Sistema</div>
@@ -472,7 +490,7 @@ async function pollHome(){
     if($('sessions'))$('sessions').innerHTML=Object.entries(s).map(function(e){var id=e[0],v=e[1];return '<tr><td>'+esc(id)+'</td><td>'+(v.cycle==null?'-':v.cycle)+'</td><td>'+fmtAge(v.age_sec)+'</td><td>'+(v.unchanged_beats||0)+'</td><td>'+esc(v.last_action||'')+'</td><td>'+(v.flags||[]).map(function(f){return '<span class="flag '+f+'">'+f+'</span>';}).join(' ')+'</td></tr>';}).join('')||'<tr><td colspan=6 class="muted">nenhuma sessão batendo ponto</td></tr>';
   }catch(e){}
   try{const ev=await (await fetch('/events',{cache:'no-store'})).json();
-    if($('feed'))$('feed').innerHTML=ev.slice().reverse().map(function(e){var x=e.kind==='consult'?('mode='+(e.mode||'default')+' · '+(e.dur_sec==null?'?':e.dur_sec)+'s · q'+(e.q_chars==null?'?':e.q_chars)):('cycle='+(e.cycle==null?'?':e.cycle)+' · '+esc(e.session_id||'')+' '+esc(e.last_action||''));return '<div class="ev"><span class="t">'+fmtTime(e.t)+'</span><span class="k '+esc(e.kind)+'">'+esc(e.kind)+'</span><span>'+x+'</span></div>';}).join('')||'<div class="muted">sem atividade</div>';
+    if($('feed')){var rows=ev.slice().reverse().map(function(e){var x=e.kind==='consult'?('perguntou ao gate · '+(e.mode||'default')+' · '+(e.dur_sec==null?'?':e.dur_sec)+'s'):('heartbeat · cycle '+(e.cycle==null?'?':e.cycle)+' · '+esc(e.session_id||'')+(e.last_action?(' · '+esc(e.last_action)):''));return '<div class="tl-row '+esc(e.kind)+'"><span class="tlt">'+fmtTime(e.t)+'</span>'+x+'</div>';}).join('');$('feed').innerHTML=rows?('<div class="tl">'+rows+'</div>'):'<div class="muted">sem atividade</div>';}
   }catch(e){}
 }
 async function loadStatus(){
@@ -480,11 +498,12 @@ async function loadStatus(){
     var clr=s.score==='GREEN'?'var(--ok)':s.score==='YELLOW'?'var(--warn)':'var(--bad)';
     var b=$('status-banner');
     b.className='hero '+String(s.score).toLowerCase();
-    b.innerHTML='<div class="hero-score"><span class="hero-dot"></span>'+esc(s.score)+'</div><div class="hero-body"><div class="hero-reason">'+esc(s.reason)+'</div><div class="hero-sub">gate '+esc(s.gate)+' · '+s.sessions.total+' sessões ('+s.sessions.stopped+' paradas) · fila-gate '+s.pending_gate+' · dirty '+(s.dirty_repos||[]).length+' · dificuldades OPEN '+s.open_difficulties+'</div></div>';
+    b.innerHTML='<div class="hero-score"><span class="hero-dot"></span>'+esc(s.score)+'</div><div class="hero-body"><div class="hero-reason">'+esc(s.reason)+'</div><div class="hero-sub">gate '+esc(s.gate)+' · '+s.sessions.total+' sessões ('+s.sessions.stopped+' paradas) · fila-gate '+s.pending_gate+' · dirty '+(s.dirty_repos||[]).length+' · dificuldades OPEN '+s.open_difficulties+'</div></div><div class="hero-aside"><div class="hero-upd">ATUALIZADO <b>'+new Date().toLocaleTimeString('pt-br')+'</b></div><div class="hero-next" id="hero-next"><span class="muted">—</span></div></div>';
     var k=$('kpi'); if(k){var T=[['PROJETO',s.score,clr],['SESSÕES',s.sessions.total,'var(--accent)'],['PARADAS',s.sessions.stopped,'var(--dim)'],['FILA GATE',s.pending_gate,s.pending_gate>0?'var(--bad)':'var(--ok)'],['DIRTY',(s.dirty_repos||[]).length,(s.dirty_repos||[]).length>0?'var(--warn)':'var(--ok)'],['DIFIC. OPEN',s.open_difficulties,s.open_difficulties>0?'var(--warn)':'var(--ok)']];k.innerHTML=T.map(function(t){return '<div class="kpi"><div class="kpi-n" style="color:'+t[2]+'">'+esc(t[1])+'</div><div class="kpi-l">'+t[0]+'</div></div>';}).join('');}
   }catch(e){if($('status-banner'))$('status-banner').textContent='placar indisponível';}
-  try{const n=await (await fetch('/api/next-best-actions')).json();
-    if($('nba'))$('nba').innerHTML=(n.actions||[]).slice(0,3).map(function(a){return '<div style="padding:6px 0;border-bottom:1px solid #21262d"><div style="display:flex;justify-content:space-between;gap:10px"><b>'+esc(a.titulo)+'</b><span style="color:var(--accent);white-space:nowrap">ROI '+a.roi+'</span></div><div class="muted">→ '+esc(a.proxima_acao)+'</div></div>';}).join('')||'<span class="muted">sem ações</span>';
+  try{const n=await (await fetch('/api/next-best-actions')).json();var A=(n.actions||[]);
+    if($('nba'))$('nba').innerHTML=A.slice(0,3).map(function(a){return '<div style="padding:6px 0;border-bottom:1px solid var(--line)"><div style="display:flex;justify-content:space-between;gap:10px"><b>'+esc(a.titulo)+'</b><span style="color:var(--accent);white-space:nowrap">ROI '+a.roi+'</span></div><div class="muted">→ '+esc(a.proxima_acao)+'</div></div>';}).join('')||'<span class="muted">sem ações</span>';
+    if($('hero-next'))$('hero-next').innerHTML=A.length?('<span class="tag">▶ próxima ação · ROI '+A[0].roi+'</span>'+esc(A[0].titulo)):'<span class="muted">sem ação pendente</span>';
   }catch(e){}
 }
 async function loadActions(){
@@ -652,6 +671,7 @@ document.addEventListener('click',function(e){var t=e.target;if(t&&t.tagName==='
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){var lb=document.getElementById('lightbox');if(lb)lb.classList.remove('open');}});
 function tick(){var c=$('hclock');if(c)c.textContent=new Date().toLocaleTimeString('pt-br');}
 route(); pollHome(); tick(); setInterval(pollHome,5000); setInterval(tick,1000);
+setInterval(function(){var h=$('home');if(h&&h.classList.contains('active'))loadStatus();},5000);
 </script>
 <div class="lb" id="lightbox" onclick="this.classList.remove('open')"><img id="lb-img" alt="render em tela cheia"></div>
 </body></html>
