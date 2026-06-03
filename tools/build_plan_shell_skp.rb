@@ -312,18 +312,26 @@ def segment_overlaps_wall?(p1, p2, footprints, tol_in = 1.0)
   end
 end
 
-# ---- grade (guarda-corpo metalico) — render parametrico -------------
-# Peitoril/varanda do planta_74 = GRADE metalica (confirmado pelo render
-# OFICIAL do empreendimento Living Grand Wish Jardim: moldura escura +
-# montantes, ve-se atraves). NAO e laje solida nem vidro cheio. Geramos
-# travessa inferior + corrimao superior + montantes verticais.
-GRADE_RAIL_THICK_IN  = 0.04 * M_TO_IN   # 4cm travessa/corrimao
-GRADE_BAL_SIZE_IN    = 0.02 * M_TO_IN   # 2cm montante (secao quadrada)
-GRADE_BAL_SPACING_IN = 0.12 * M_TO_IN   # ~12cm entre montantes (NBR guarda-corpo)
+# ---- guarda-corpo (varanda planta_74) — render parametrico ----------
+# EVOLUCAO (Felipe 2026-06-03): a foto da fachada real + o componente do
+# 3DW ("Peitoril de vidro") mostram VIDRO translucido azulado entre
+# montantes tubulares, com corrimao de cano e mureta de concreto na base —
+# nao a grade de balaustres densos do palpite anterior. Geramos: mureta +
+# painel de vidro + montantes espacados + corrimao (ver build_soft_barrier).
+GRADE_RAIL_THICK_IN  = 0.04 * M_TO_IN   # 4cm corrimao (cano)
+GRADE_BAL_SIZE_IN    = 0.02 * M_TO_IN   # (legado) 2cm balaustre — nao mais usado
+GRADE_BAL_SPACING_IN = 0.12 * M_TO_IN   # (legado) ~12cm — nao mais usado
 GRADE_BOT_Z0 = 0.03 * M_TO_IN
 GRADE_BOT_Z1 = 0.11 * M_TO_IN
 GRADE_TOP_Z0 = (PARAPET_HEIGHT_M - 0.08) * M_TO_IN
 GRADE_TOP_Z1 = PARAPET_HEIGHT_IN
+# Painel de VIDRO + montantes tubulares (calibrado pelo componente do 3DW que
+# o Felipe baixou: bounds/material extraidos via inspect_peitoril.rb).
+GLASS_THICK_IN        = 0.012 * M_TO_IN  # 12mm — painel de vidro fino
+GLASS_RGB             = [124, 138, 181]  # azulado, extraido do componente
+GLASS_ALPHA           = 0.45             # translucido (componente media 0.52)
+GRADE_POST_SIZE_IN    = 0.05  * M_TO_IN  # 5cm — montante tubular (secao)
+GRADE_POST_SPACING_IN = 1.0   * M_TO_IN  # ~1,0m entre montantes
 # Guarda-corpo do PREDIO REAL (Felipe 2026-06-03, ref foto fachada): mureta de
 # concreto na base (cimento) + grade metalica EM CIMA dela. A mureta vai do chao
 # ate MURETA_BASE_M; a grade ocupa dali ate PARAPET_HEIGHT_M (1,10m).
@@ -437,7 +445,12 @@ def build_soft_barrier(parent_ents, barrier, material, index,
         se.grep(Sketchup::Face).each { |f| f.material = (concrete || material); f.back_material = (concrete || material) }
         boxes += 1
       end
-      # (2) GRADE METALICA em cima da mureta (MURETA_BASE_IN .. 1,10m).
+      # (2) GUARDA-CORPO DE VIDRO em cima da mureta (MURETA_BASE_IN .. 1,10m).
+      # Replica o componente "Peitoril de vidro" do 3DW que o Felipe baixou
+      # (2026-06-03): PAINEL DE VIDRO translucido azulado + MONTANTES tubulares
+      # espacados + CORRIMAO de cano no topo. Substitui os balaustres densos
+      # (antes parecia cerca; agora e a varanda de vidro da fachada real).
+      glass_mat = (parent_ents.model.materials['plan_glass'] rescue nil) || material
       half_t = GRADE_RAIL_THICK_IN / 2.0
       nx = -uy * half_t
       ny =  ux * half_t
@@ -445,18 +458,26 @@ def build_soft_barrier(parent_ents, barrier, material, index,
         [p1.x + nx, p1.y + ny], [p2.x + nx, p2.y + ny],
         [p2.x - nx, p2.y - ny], [p1.x - nx, p1.y - ny],
       ]
-      g_bot0 = MURETA_BASE_IN
-      g_bot1 = MURETA_BASE_IN + GRADE_RAIL_THICK_IN
-      boxes += 1 if add_grade_box(se, rail_quad, g_bot0, g_bot1, material)
+      # (2a) CORRIMAO tubular (metal) no topo (1,02m .. 1,10m).
       boxes += 1 if add_grade_box(se, rail_quad, GRADE_TOP_Z0, GRADE_TOP_Z1, material)
-      n_bal = [(len / GRADE_BAL_SPACING_IN).round, 1].max
-      bs = GRADE_BAL_SIZE_IN / 2.0
-      (0..n_bal).each do |k|
-        t = k.to_f / n_bal
+      # (2b) PAINEL DE VIDRO: laje fina translucida, da mureta ao corrimao.
+      ghalf = GLASS_THICK_IN / 2.0
+      gnx = -uy * ghalf
+      gny =  ux * ghalf
+      glass_quad = [
+        [p1.x + gnx, p1.y + gny], [p2.x + gnx, p2.y + gny],
+        [p2.x - gnx, p2.y - gny], [p1.x - gnx, p1.y - gny],
+      ]
+      boxes += 1 if add_grade_box(se, glass_quad, MURETA_BASE_IN, GRADE_TOP_Z0, glass_mat)
+      # (2c) MONTANTES tubulares (metal) espacados, da mureta ao topo.
+      n_post = [(len / GRADE_POST_SPACING_IN).round, 1].max
+      ps = GRADE_POST_SIZE_IN / 2.0
+      (0..n_post).each do |k|
+        t = k.to_f / n_post
         cx = p1.x + dx * t
         cy = p1.y + dy * t
-        bal_quad = [[cx - bs, cy - bs], [cx + bs, cy - bs], [cx + bs, cy + bs], [cx - bs, cy + bs]]
-        boxes += 1 if add_grade_box(se, bal_quad, g_bot1, GRADE_TOP_Z0, material)
+        post_quad = [[cx - ps, cy - ps], [cx + ps, cy - ps], [cx + ps, cy + ps], [cx - ps, cy + ps]]
+        boxes += 1 if add_grade_box(se, post_quad, MURETA_BASE_IN, GRADE_TOP_Z1, material)
       end
       ok_seg = boxes > 0
     else
@@ -1264,6 +1285,10 @@ if sb_mode == 'groups'
   parapet_mat.color = Sketchup::Color.new(*PARAPET_RGB)
   railing_mat = model.materials.add('plan_railing')
   railing_mat.color = Sketchup::Color.new(60, 62, 70)
+  # Vidro translucido azulado do guarda-corpo (calibrado pelo componente 3DW).
+  glass_mat = model.materials.add('plan_glass')
+  glass_mat.color = Sketchup::Color.new(*GLASS_RGB)
+  glass_mat.alpha = GLASS_ALPHA
   walls_for_overlap = consensus['walls'] || []
   thickness_for_overlap = consensus['wall_thickness_pts'] || 5.4
   wall_footprints = wall_footprints_in_su(
