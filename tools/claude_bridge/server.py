@@ -1059,9 +1059,12 @@ def skp_timeline() -> dict:
     for d in sorted(art.iterdir()):
         if d.is_dir() and d.name != "review":
             pngs = sorted(f"artifacts/{d.name}/{x.name}" for x in d.glob("*.png"))
-            if pngs or any(d.glob("*.skp")):
+            skps = sorted(f"artifacts/{d.name}/{x.name}" for x in d.glob("*.skp"))
+            if pngs or skps:
                 out["canonical"][d.name] = {"pngs": pngs,
-                                            "has_skp": any(d.glob("*.skp")),
+                                            "skp": skps[0] if skps else None,
+                                            "skps": skps,
+                                            "has_skp": bool(skps),
                                             "verdict": _find_verdict(d)}
     review = art / "review"
     runs = []
@@ -1197,7 +1200,9 @@ def status() -> dict:
             "pending_gate": pending, "dirty_repos": dirty,
             "open_difficulties": len(open_diffs), "high_open": [d["id"] for d in high_open],
             "deferred": [d["id"] for d in deferred],
-            "canonical_skp": {k: v.get("verdict") for k, v in tl.get("canonical", {}).items()}}
+            "canonical_skp": {k: {"skp": v.get("skp"), "has_skp": v.get("has_skp", False),
+                                  "verdict": v.get("verdict")}
+                              for k, v in tl.get("canonical", {}).items()}}
 
 
 _NBA_SEED = [

@@ -317,6 +317,34 @@ def test_status_score_enum():
     assert {"reason", "gate", "sessions", "pending_gate", "open_difficulties"} <= set(d)
 
 
+def test_canonical_skp_points_to_existing_skp(tmp_path, monkeypatch):
+    """Regressao: o resumo /api/status colapsava canonical -> verdict, entao um .skp
+    canonico SEM arquivo de veredito aparecia null (parecia 'sem SKP'). O detector
+    deve apontar o .skp existente, independente do verdict."""
+    import tools.claude_bridge.server as srv
+    plant = tmp_path / "artifacts" / "demo_plant"
+    plant.mkdir(parents=True)
+    (plant / "model.skp").write_bytes(b"SKP")
+    (plant / "demo_top.png").write_bytes(b"PNG")
+    monkeypatch.setattr(srv, "REPO_ROOT", tmp_path)
+    c = srv.skp_timeline()["canonical"]["demo_plant"]
+    assert c["has_skp"] is True
+    assert c["skp"] and c["skp"].endswith("model.skp")  # aponta o arquivo, nao null
+    assert c["verdict"] is None  # sem verdict file: verdict null, mas o skp segue presente
+
+
+def test_status_canonical_skp_shape_and_planta_74():
+    """No repo real cada canonical_skp e {skp, has_skp, verdict}; a planta_74 tem .skp
+    commitado -> NAO pode mais sair null so por faltar verdict."""
+    import tools.claude_bridge.server as srv
+    cs = srv.status()["canonical_skp"]
+    assert isinstance(cs, dict)
+    for info in cs.values():
+        assert {"skp", "has_skp", "verdict"} <= set(info)
+    assert "planta_74" in cs and cs["planta_74"]["has_skp"] is True
+    assert cs["planta_74"]["skp"] and cs["planta_74"]["skp"].endswith(".skp")
+
+
 def test_next_best_actions_sorted_by_roi():
     import tools.claude_bridge.server as srv
     d = srv.next_best_actions()

@@ -25,8 +25,11 @@ Felipe pedio "Resolver o YELLOW" via #planta. O sub-fork **port-vs-discard** foi
   Ações corretivas só ficam LIVE após restart via `tools/claude_bridge/start.ps1` (preserva `.oauth_token`).
   (2) worktrees stale `wt-fidelity` (fidelidade landou via squash `d48798d`, mas branch diverge 94 arq/728+/12032−
   c/ HANDOFF velho + review artifacts únicos) e `wt-gh` (`chore/gh-autopilot-skill`, possível outro agente) —
-  relacionam-se ao DIFF-004; **não removidos** (não-task, conteúdo único). (3) painel reporta
-  `canonical_skp.planta_74 = null` apesar de `artifacts/planta_74/planta_74.skp` existir — investigar o detector.
+  relacionam-se ao DIFF-004; **não removidos** (não-task, conteúdo único). (3) **RESOLVIDO** —
+  `canonical_skp.planta_74` saía `null` porque `/api/status` colapsava `canonical → verdict` (e a planta_74
+  não tem verdict file no dir canônico). `skp_timeline` agora expõe o path do `.skp` (`skp`/`skps`/`has_skp`)
+  e o status reporta `{skp, has_skp, verdict}` → planta_74 = `{skp: artifacts/planta_74/planta_74.skp,
+  has_skp: true, verdict: null}`. +2 testes (hermético + repo real), pytest 365 ✓.
 
 ## 2026-06-03 (tarde) — fidelidade planta_74 LANDADA (jamba + gradil + peitoril)
 
