@@ -2,8 +2,8 @@
   "schema_version": "1.0.0",
   "tool": "build_plan_shell_skp",
   "consensus_path": "E:/Claude/sketchup-mcp/fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json",
-  "skp_path": "E:/Claude/sketchup-mcp/runs/planta_74/notch_fix/model.skp",
-  "shell_json_path": "E:/Claude/sketchup-mcp/runs/planta_74/notch_fix/_shell_polygon.json",
+  "skp_path": "E:/Claude/sketchup-mcp/runs/planta_74/planta_74.skp",
+  "shell_json_path": "E:/Claude/sketchup-mcp/runs/planta_74/_shell_polygon.json",
   "soft_barriers_mode": "groups",
   "plan_shell": {
     "faces": 109,
@@ -530,41 +530,41 @@
     {
       "name": "SoftBarrier_Group_8",
       "entity_count": 2,
-      "face_count": 426,
-      "edge_count": 852,
-      "sub_group_count": 71,
-      "lateral_face_count": 284,
-      "top_or_bottom_face_count": 142,
-      "top_face_count": 71,
+      "face_count": 96,
+      "edge_count": 192,
+      "sub_group_count": 16,
+      "lateral_face_count": 64,
+      "top_or_bottom_face_count": 32,
+      "top_face_count": 16,
       "default_material_face_count": 0,
       "primary_material": "plan_parapet",
       "bbox_in": {
         "min": [
-          142.2864,
-          557.4685,
+          141.6958,
+          557.2717,
           0.0
         ],
         "max": [
-          366.4723,
-          633.5885,
+          366.6691,
+          634.1791,
           43.3071
         ]
       },
       "bbox_m": {
         "min": [
-          3.6141,
-          14.1597,
+          3.5991,
+          14.1547,
           0.0
         ],
         "max": [
-          9.3084,
-          16.0931,
+          9.3134,
+          16.1081,
           1.1
         ]
       },
       "height_m": 1.1,
-      "footprint_bbox_m2": 11.0097,
-      "footprint_top_face_m2": 0.9198
+      "footprint_bbox_m2": 11.1626,
+      "footprint_top_face_m2": 0.7069
     },
     {
       "name": "DoorLeaf_Group_h_o000",
