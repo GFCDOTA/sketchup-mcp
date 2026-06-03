@@ -260,7 +260,7 @@ body{font-size:14px;}
 <span class="seg opt">ORACLE&nbsp;<b id="horacle">—</b></span>
 </div>
 <nav>
-<a href="#home">Home</a><a href="#sessoes">Sessões</a><a href="#gate">Gate</a><a href="#git">Git</a><a href="#planta">SKP</a><a href="#dificuldades">Dificuldades</a><a href="#aprendizados">Aprendizados</a><a href="#lixao">Lixão</a><a href="#oportunidades">Oportunidades</a><a href="#docs">Docs</a><a href="#ecossistema">Ecossistema</a>
+<a href="#home">Home</a><a href="#sessoes">Sessões</a><a href="#gate">Gate</a><a href="#review-skp">Review SKP</a><a href="#repo">Repo</a><a href="#backlog">Backlog</a><a href="#artifacts">Artifacts</a><a href="#docs">Docs</a>
 </nav>
 </header>
 <main>
@@ -461,20 +461,27 @@ function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
 function fmtAge(s){if(s==null)return '-';if(s<90)return s+'s';if(s<5400)return Math.round(s/60)+'m';if(s<86400)return Math.round(s/3600)+'h';return Math.round(s/86400)+'d';}
 function fmtTime(t){try{return new Date(t*1000).toLocaleTimeString('pt-br');}catch(e){return '';}}
 function kv(k,v){return '<div class="kv"><span>'+k+'</span><span>'+esc(v)+'</span></div>';}
-const TABS=['home','sessoes','gate','git','planta','dificuldades','aprendizados','lixao','oportunidades','docs','ecossistema'];
+// 2A — consolidacao das 8 abas (nav). NAO move/apaga conteudo: cada aba nova mapeia
+// p/ as secoes existentes que ela mostra; hashes antigos continuam validos via HASHALIAS.
+const TABS=['home','sessoes','gate','review-skp','repo','backlog','artifacts','docs'];
+const TABMAP={home:['home'],sessoes:['sessoes'],gate:['gate'],'review-skp':['planta'],repo:['git','ecossistema'],backlog:['dificuldades','oportunidades','aprendizados'],artifacts:['lixao'],docs:['docs']};
+const HASHALIAS={planta:'review-skp',git:'repo',ecossistema:'repo',dificuldades:'backlog',oportunidades:'backlog',aprendizados:'backlog',lixao:'artifacts'};
+const ALLSEC=['home','sessoes','gate','planta','git','ecossistema','dificuldades','oportunidades','aprendizados','lixao','docs'];
 function route(){
-  let h=(location.hash||'#home').slice(1); if(TABS.indexOf(h)<0)h='home';
-  TABS.forEach(function(t){var s=$(t); if(s)s.className=(t===h?'active':'');});
+  let raw=(location.hash||'#home').slice(1);
+  let h=HASHALIAS[raw]||raw; if(!TABMAP[h])h='home';
+  const show=TABMAP[h];
+  ALLSEC.forEach(function(id){var s=$(id); if(s)s.className=(show.indexOf(id)>=0?'active':'');});
   document.querySelectorAll('nav a').forEach(function(a){a.className=(a.getAttribute('href')==='#'+h?'active':'');});
-  if(h==='home'){loadStatus();loadActions();loadCommits();loadSysSummary();}
-  if(h==='sessoes')loadSessoes();
-  if(h==='gate')loadGate();
-  if(h==='git')loadGit();
-  if(h==='planta')loadPlant();
-  if(h==='lixao')loadLixao();
-  if(h==='dificuldades')loadDiff();
-  if(h==='aprendizados')loadLearnings();
-  if(h==='ecossistema')loadEco();
+  if(show.indexOf('home')>=0){loadStatus();loadActions();loadCommits();loadSysSummary();}
+  if(show.indexOf('sessoes')>=0)loadSessoes();
+  if(show.indexOf('gate')>=0)loadGate();
+  if(show.indexOf('git')>=0)loadGit();
+  if(show.indexOf('ecossistema')>=0)loadEco();
+  if(show.indexOf('planta')>=0)loadPlant();
+  if(show.indexOf('lixao')>=0)loadLixao();
+  if(show.indexOf('dificuldades')>=0)loadDiff();
+  if(show.indexOf('aprendizados')>=0)loadLearnings();
 }
 window.addEventListener('hashchange',route);
 async function pollHome(){
