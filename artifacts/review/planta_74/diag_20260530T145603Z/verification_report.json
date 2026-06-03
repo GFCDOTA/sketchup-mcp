@@ -1,0 +1,51 @@
+{
+  "mode": "OFFLINE_DATA_ONLY",
+  "timestamp": "20260530T145603Z",
+  "artifact": "runs/planta_74 (latest)",
+  "data_sources": [
+    "consensus",
+    "geometry_report.json",
+    "known_warnings.json",
+    "opening_audit transform"
+  ],
+  "findings": [
+    {
+      "suspicion": "doors too big / panels",
+      "lead": "brown leaves look oversized / like panels",
+      "verdict": "NEEDS_PDF_OVERLAY",
+      "evidence": "widths from data: [('h_o000', 1.16), ('h_o001', 0.9), ('h_o002', 0.86), ('h_o003', 0.97), ('h_o004', 0.96), ('h_o005', 1.25), ('h_o006', 0.81)]; 2 are >1.0m ([('h_o000', 1.16), ('h_o005', 1.25)]); all come from human_annotation opening_width_pts so SKP is faithful to the annotation — whether 1.16/1.25m matches the PDF door arc is unverified. Separately the leaf renders full-height-solid = GEOMETRY_OK_RENDER_LEGIBILITY (representation), known."
+    },
+    {
+      "suspicion": "blue glass dominant / windows look empty",
+      "lead": "windows read as empty holes; big blue panel dominates",
+      "verdict": "GEOMETRY_OK_RENDER_LEGIBILITY_BUG",
+      "evidence": "all 5 glass elements within 0.05-0.09m of their opening centers (in place): [('h_o007', 0.06), ('h_o008', 0.07), ('h_o009', 0.05), ('h_o010', 0.09), ('h_o011', 0.08)]. Geometry is correct; the render does not communicate the thin/transparent glass (windows look empty; glazed_balcony 2.756x0.19x2.7m reads as a dominant panel)."
+    },
+    {
+      "suspicion": "external right wall chamfered/angled",
+      "lead": "right perimeter looks angled/chamfered",
+      "verdict": "NEEDS_PDF_OVERLAY",
+      "evidence": "all 35 walls are axis-aligned (h/v); non-axis walls = [] (none). So there is NO real angled wall — it is a STEPPED corner made of short h/v segments. Whether the step matches the PDF needs a top-down overlay."
+    },
+    {
+      "suspicion": "floor/color leaking onto wall face",
+      "lead": "some color looks applied to wall faces / floor leak",
+      "verdict": "NEEDS_PDF_OVERLAY",
+      "evidence": "gates_self_check.floors_separated_from_walls=True, default_material_faces_zero=True -> floors are separate Floor_Groups (flat z=0), walls painted wall_rgb; color-on-wall-face is unlikely (FALSE_ALARM in data). 'Floor leaks past room contour' is NOT verifiable in data alone -> needs top-down PDF overlay."
+    },
+    {
+      "suspicion": "central rooms not closed / circulation unclear",
+      "lead": "central rooms look open; can't read circulation",
+      "verdict": "WARN_DOCUMENTED",
+      "evidence": "known_warnings.json documents open-plan: '8 cells vs 11 semantic ambients, open-plan documented'. The open-plan (8 cells vs 11 ambients) is a documented baseline = WARN_DOCUMENTED. Any wall genuinely MISSING beyond that = NEEDS_PDF_OVERLAY (not provable from iso)."
+    }
+  ],
+  "tally": {
+    "CONFIRMED_BUG": 0,
+    "FALSE_ALARM": 0,
+    "INCONCLUSIVE": 0,
+    "NEEDS_PDF_OVERLAY": 3,
+    "GEOMETRY_OK_RENDER_LEGIBILITY_BUG": 1,
+    "WARN_DOCUMENTED": 1
+  }
+}
