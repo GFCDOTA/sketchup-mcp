@@ -46,6 +46,11 @@ ul.opp{list-style:none;padding:0;margin:0;} ul.opp li{padding:9px 0;border-botto
 .card{overflow-x:auto;}
 /* imagens/galeria nunca passam da largura disponivel */
 .gallery img{max-width:100%;height:auto;}
+/* lightbox: clicar em qualquer render abre em tela cheia (zoom) */
+.lb{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center;z-index:300;cursor:zoom-out;padding:18px;}
+.lb.open{display:flex;}
+.lb img{max-width:97vw;max-height:97vh;border:1px solid #444;border-radius:6px;background:#fff;}
+.gallery img,#plant-gallery img,#skp-timeline-wrap img{cursor:zoom-in;}
 /* ---------- responsivo ---------- */
 @media (max-width:860px){
   .wrap{grid-template-columns:1fr;}
@@ -459,6 +464,9 @@ async function loadEco(){
     w.innerHTML=unk+'<div class="muted" style="margin-bottom:8px">raiz: <code>'+esc(d.root)+'</code> · tamanho best-effort (≥ = passou do cap de scan)</div><table><thead><tr><th>pasta</th><th>tipo</th><th>o que é</th><th>tamanho</th><th>modif.</th><th>git</th><th>risco</th><th>apagar?</th></tr></thead><tbody>'+rows+'</tbody></table>';
   }catch(e){w.innerHTML='<span class="muted">erro: '+esc(e)+'</span>';}
 }
+document.addEventListener('click',function(e){var t=e.target;if(t&&t.tagName==='IMG'&&/\/artifact\?/.test(t.getAttribute('src')||'')){var lb=document.getElementById('lightbox');if(lb){document.getElementById('lb-img').src=t.src;lb.classList.add('open');}}});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){var lb=document.getElementById('lightbox');if(lb)lb.classList.remove('open');}});
 route(); pollHome(); setInterval(pollHome,5000);
 </script>
+<div class="lb" id="lightbox" onclick="this.classList.remove('open')"><img id="lb-img" alt="render em tela cheia"></div>
 </body></html>
