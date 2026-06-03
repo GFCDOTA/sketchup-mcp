@@ -631,7 +631,7 @@ def _read_jsonl(path: Path) -> list:
 _DEFAULT_DIFFICULTIES = [
     {"id": "DIFF-001", "titulo": "Consensus é autoria humana (sem extrator PDF→consensus)",
      "sintoma": "não há pipeline que extraia walls/openings de um PDF novo; raster+Hough fabricava parede falsa",
-     "severidade": "HIGH", "status": "OPEN",
+     "severidade": "HIGH", "status": "DEFERRED", "review_by": "2026-07-15",
      "why_not_fixed_yet": "extrator vetorial confiável é grande e arriscado; decidiu-se provar o loop manual em >=2 plantas antes de investir",
      "attempts": ["raster+Hough (abandonado: fabricava falsos)", "build_vector_consensus (abandonado)"],
      "gate_helped": "parcial", "next_hypothesis": "walls = filled paths do PDF, validado contra a planta_74 já anotada",
@@ -695,6 +695,7 @@ def difficulties() -> dict:
             "gate_helped": d.get("gate_helped", "?"),
             "next_hypothesis": d.get("next_hypothesis", "-"),
             "acceptance_criteria": d.get("acceptance_criteria", "-"),
+            "review_by": d.get("review_by", ""),
         })
     return {"difficulties": norm, "total": len(norm), "source": src}
 
@@ -1081,23 +1082,49 @@ def gate_ledger() -> dict:
             "answered": answered, "pending": len(entries) - answered}
 
 
+_DEFER_TRIPLET = ("why_not_fixed_yet", "next_hypothesis", "acceptance_criteria")
+
+
+def _validly_deferred(d: dict) -> bool:
+    """DEFERRED so conta como divida-aceita/roadmap (YELLOW, nunca RED) sob guardas
+    (decisao do gate :8765, 2026-06-03 — anti-mute-button): exige o triplet completo
+    (why_not_fixed_yet + next_hypothesis + acceptance_criteria) E uma review_by ainda
+    nao-vencida. Sem isso NAO se esconde atras de DEFERRED — reabre e volta a contar
+    como travado (RED se HIGH). Re-open trigger: passou a review_by -> reabre."""
+    if d.get("status") != "DEFERRED":
+        return False
+    for k in _DEFER_TRIPLET:
+        v = str(d.get(k) or "").strip()
+        if v in ("", "-") or v.startswith("UNKNOWN"):
+            return False
+    rb = str(d.get("review_by") or "").strip()
+    if rb and time.strftime("%Y-%m-%d") >= rb:
+        return False
+    return True
+
+
 def status() -> dict:
     """Command Center: aggregate everything into a GREEN/YELLOW/RED project score.
-    RED if any HIGH+OPEN difficulty or a pending gate consult; YELLOW if any OPEN/dirty;
-    else GREEN."""
+    RED se houver HIGH+OPEN ou consult pendente; YELLOW se houver OPEN/dirty/DEFERRED
+    (roadmap/divida aceita); senao GREEN. DEFERRED so vale com triplet + review_by valida
+    (anti-gaming, gate :8765 2026-06-03) — senao reabre como OPEN."""
     sess = claude_sessions()
     gl = gate_ledger()
     gi = git_inventory()
     tl = skp_timeline()
     dif = difficulties()
-    open_diffs = [d for d in dif["difficulties"] if d.get("status") == "OPEN"]
+    all_diffs = dif["difficulties"]
+    deferred = [d for d in all_diffs if _validly_deferred(d)]
+    # DEFERRED vencido / sem o triplet NAO se esconde: reabre e volta a contar como travado.
+    reopened = [d for d in all_diffs if d.get("status") == "DEFERRED" and not _validly_deferred(d)]
+    open_diffs = [d for d in all_diffs if d.get("status") == "OPEN"] + reopened
     high_open = [d for d in open_diffs if d.get("severidade") == "HIGH"]
     pending = gl.get("pending", 0)
     dirty = gi.get("dirty", [])
     stopped = sum(1 for s in sess.get("sessions", []) if s.get("state") == "STOPPED")
     if high_open or pending > 0:
         score = "RED"
-    elif open_diffs or dirty:
+    elif open_diffs or dirty or deferred:
         score = "YELLOW"
     else:
         score = "GREEN"
@@ -1110,12 +1137,15 @@ def status() -> dict:
         reasons.append(f"{len(dirty)} repo(s) dirty")
     if open_diffs and not high_open:
         reasons.append(f"{len(open_diffs)} dificuldade(s) OPEN")
+    if deferred:
+        reasons.append(f"{len(deferred)} adiada(s) (roadmap/aceita)")
     if not reasons:
         reasons.append("tudo limpo")
     return {"score": score, "reason": "; ".join(reasons), "gate": "UP",
             "sessions": {"total": sess.get("total", 0), "stopped": stopped},
             "pending_gate": pending, "dirty_repos": dirty,
             "open_difficulties": len(open_diffs), "high_open": [d["id"] for d in high_open],
+            "deferred": [d["id"] for d in deferred],
             "canonical_skp": {k: v.get("verdict") for k, v in tl.get("canonical", {}).items()}}
 
 

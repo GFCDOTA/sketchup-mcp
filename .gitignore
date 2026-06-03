@@ -75,3 +75,12 @@ reports/current/*.json
 # claude-bridge — token OAuth headless (assinatura) é SEGREDO local; NUNCA commitar
 tools/claude_bridge/.oauth_token
 tools/claude_bridge/*.log
+
+# .ai_bridge: HANDOFF.md (e DECISIONS) sao versionados; questions/responses/audit/jsonl
+# e dumps de consulta ao oraculo sao LOG EFEMERO local -> nao versionar.
+.ai_bridge/questions/
+.ai_bridge/responses/
+.ai_bridge/audit/
+.ai_bridge/*.jsonl
+.ai_bridge/*_decision_*.md
+.ai_bridge/oracle_*.md
