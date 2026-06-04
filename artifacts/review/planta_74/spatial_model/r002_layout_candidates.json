@@ -1,0 +1,215 @@
+{
+  "stage": "BC_layout_candidates",
+  "room_id": "r002",
+  "tv_wall": {
+    "confidence": "ambiguous",
+    "best": null,
+    "best_candidate": "m013",
+    "candidates": [
+      {
+        "wall_id": "m013",
+        "score": 22.5,
+        "type": "internal",
+        "length_m": 3.49,
+        "depth_m": 3.62,
+        "reasons": [
+          "parede interna/divisoria (-10)",
+          "comprimento 3.49m (+17)",
+          "profundidade 3.6m ok p/ sofa->TV (+15)"
+        ]
+      },
+      {
+        "wall_id": "m015",
+        "score": -1.8,
+        "type": "internal",
+        "length_m": 1.65,
+        "depth_m": 4.51,
+        "reasons": [
+          "parede interna/divisoria (-10)",
+          "comprimento 1.65m (+8)",
+          "porta/arco de giro perto da ponta (-15)",
+          "profundidade 4.5m ok p/ sofa->TV (+15)"
+        ]
+      },
+      {
+        "wall_id": "m014",
+        "score": -18.1,
+        "type": "internal",
+        "length_m": 4.39,
+        "depth_m": 0.67,
+        "reasons": [
+          "parede interna/divisoria (-10)",
+          "comprimento 4.39m (+22)",
+          "profundidade so 0.7m p/ sofa->TV (-30)"
+        ]
+      }
+    ],
+    "limitations": [
+      "score heuristico — validar no SketchUp / olho humano",
+      "nao considera vista, iluminacao natural nem estilo",
+      "AMBIGUOUS = nao cravar; oferecer top-2 ao humano"
+    ]
+  },
+  "candidates": [
+    {
+      "template": "sofa_contra_parede",
+      "along_offset_m": 0.5,
+      "valid": true,
+      "score": 100,
+      "gates": {
+        "sem_colisao": true,
+        "passagem_080": true,
+        "sofa_para_tv": true,
+        "dist_sofa_tv_ok": true,
+        "proporcao_ok": true
+      },
+      "sofa_tv_dist_m": 3.11,
+      "violations": [],
+      "furniture": [
+        {
+          "kind": "rack_tv",
+          "bbox_m": [
+            4.62,
+            19.43,
+            5.07,
+            21.23
+          ],
+          "facing": null
+        },
+        {
+          "kind": "sofa_3",
+          "bbox_m": [
+            7.22,
+            19.23,
+            8.17,
+            21.43
+          ],
+          "facing": "tv"
+        },
+        {
+          "kind": "mesa_centro",
+          "bbox_m": [
+            5.83,
+            19.83,
+            6.43,
+            20.83
+          ],
+          "facing": null
+        }
+      ]
+    },
+    {
+      "template": "sofa_flutuante_setoriza",
+      "along_offset_m": 0.5,
+      "valid": true,
+      "score": 100,
+      "gates": {
+        "sem_colisao": true,
+        "passagem_080": true,
+        "sofa_para_tv": true,
+        "dist_sofa_tv_ok": true,
+        "proporcao_ok": true
+      },
+      "sofa_tv_dist_m": 2.38,
+      "violations": [],
+      "furniture": [
+        {
+          "kind": "rack_tv",
+          "bbox_m": [
+            4.62,
+            19.43,
+            5.07,
+            21.23
+          ],
+          "facing": null
+        },
+        {
+          "kind": "sofa_3",
+          "bbox_m": [
+            6.49,
+            19.23,
+            7.44,
+            21.43
+          ],
+          "facing": "tv"
+        },
+        {
+          "kind": "mesa_centro",
+          "bbox_m": [
+            5.46,
+            19.83,
+            6.06,
+            20.83
+          ],
+          "facing": null
+        }
+      ]
+    },
+    {
+      "template": "sofa_mais_poltrona",
+      "along_offset_m": 0.5,
+      "valid": true,
+      "score": 100,
+      "gates": {
+        "sem_colisao": true,
+        "passagem_080": true,
+        "sofa_para_tv": true,
+        "dist_sofa_tv_ok": true,
+        "proporcao_ok": true
+      },
+      "sofa_tv_dist_m": 3.11,
+      "violations": [],
+      "furniture": [
+        {
+          "kind": "rack_tv",
+          "bbox_m": [
+            4.62,
+            19.43,
+            5.07,
+            21.23
+          ],
+          "facing": null
+        },
+        {
+          "kind": "sofa_3",
+          "bbox_m": [
+            7.22,
+            19.23,
+            8.17,
+            21.43
+          ],
+          "facing": "tv"
+        },
+        {
+          "kind": "poltrona",
+          "bbox_m": [
+            6.82,
+            21.63,
+            7.67,
+            22.48
+          ],
+          "facing": "tv"
+        }
+      ]
+    }
+  ],
+  "result": "OK",
+  "best_template": "sofa_contra_parede",
+  "ranking": [
+    [
+      "sofa_contra_parede",
+      100,
+      true
+    ],
+    [
+      "sofa_flutuante_setoriza",
+      100,
+      true
+    ],
+    [
+      "sofa_mais_poltrona",
+      100,
+      true
+    ]
+  ]
+}
