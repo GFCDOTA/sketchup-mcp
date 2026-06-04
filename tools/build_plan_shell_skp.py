@@ -61,7 +61,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from shapely.geometry import MultiPolygon, Point, Polygon, box
+from shapely.geometry import LineString, MultiPolygon, Point, Polygon, box
 from shapely.ops import unary_union
 
 from tools.disarm_sketchup_autoruns import disarm as disarm_autoruns
@@ -591,6 +591,192 @@ def _drop_coincident(coords: list, tol: float = 1e-3) -> list:
     return out
 
 
+# ---- room floors (slabs that reach the wall inner faces) -------------
+# Felipe 2026-06-04: "isso ai vai ser o piso e ele TEM QUE ENCOSTAR na parede".
+# The room polygon from consensus is recessed / slightly misaligned from the
+# wall faces, leaving a gray gap between the colored slab and the wall. Instead
+# of trusting that polygon, we fill the FREE-SPACE CELL the room lives in
+# (apartment envelope minus the wall mass): the cell is bounded *exactly* by the
+# wall inner faces, so the slab reaches the wall with no gap and tucks slightly
+# under it. Integrated rooms that share one cell (sala+cozinha, no solid wall
+# between) are split back apart by their room polygons.
+FLOOR_SNAP_EPS_PTS = 6.0
+FLOOR_CELL_MIN_AREA_PTS2 = 50.0
+FLOOR_UNDER_FRAC = 0.4          # tuck slab 0.4*thickness under the wall: reaches
+#                                 the inner face + hides the seam, but two
+#                                 adjacent slabs (0.4+0.4=0.8<1) never overlap.
+#                                 Swept 0.3-0.6: <=0.45 gives ZERO slab overlap.
+FLOOR_SIMPLIFY_TOL_PTS = 0.5    # kill boolean-noise micro-edges before SU add_face
+
+
+def _floor_snap_coords(ring: list, eps: float) -> list:
+    """Group near-equal x's (and y's) and move each to the group mean — kills
+    the micro-teeth ('toquinhos') the room polygon inherits from wall junctions.
+    Mirrors the Ruby snap_coords so both paths agree."""
+    pts = [[float(p[0]), float(p[1])] for p in ring]
+    for dim in (0, 1):
+        vals = sorted({p[dim] for p in pts})
+        if not vals:
+            continue
+        m: dict = {}
+        group = [vals[0]]
+        for v in vals[1:]:
+            if v - group[-1] < eps:
+                group.append(v)
+            else:
+                avg = sum(group) / len(group)
+                for g in group:
+                    m[g] = avg
+                group = [v]
+        avg = sum(group) / len(group)
+        for g in group:
+            m[g] = avg
+        for p in pts:
+            p[dim] = m[p[dim]]
+    return [(p[0], p[1]) for p in pts]
+
+
+def _floor_dedup(ring: list, eps: float = 0.05) -> list:
+    if not ring:
+        return ring
+    out = [ring[0]]
+    for p in ring[1:]:
+        if abs(p[0] - out[-1][0]) > eps or abs(p[1] - out[-1][1]) > eps:
+            out.append(p)
+    if (len(out) >= 2 and abs(out[0][0] - out[-1][0]) < eps
+            and abs(out[0][1] - out[-1][1]) < eps):
+        out.pop()
+    return out
+
+
+def _floor_drop_collinear(ring: list, eps: float = 1e-4) -> list:
+    n = len(ring)
+    if n < 3:
+        return ring
+    out = []
+    for i in range(n):
+        a, b, c = ring[(i - 1) % n], ring[i], ring[(i + 1) % n]
+        if abs((b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])) > eps:
+            out.append(b)
+    return out
+
+
+def _floor_clean_ring(raw: list) -> list:
+    r = _floor_dedup(raw)
+    r = _floor_snap_coords(r, FLOOR_SNAP_EPS_PTS)
+    r = _floor_dedup(r)
+    r = _floor_drop_collinear(r)
+    r = _floor_dedup(r)
+    return r
+
+
+def compute_room_floors(consensus: dict) -> dict:
+    """Return {room_id: [[x, y], ...]} — each room's floor ring expanded to the
+    inner faces of its surrounding walls (no gray gap), in PDF points. Rooms with
+    no resolvable cell are omitted (Ruby falls back to its snap path)."""
+    rooms = consensus.get("rooms", []) or []
+    walls = consensus.get("walls", []) or []
+    if not rooms or not walls:
+        return {}
+    wt = float(consensus.get("wall_thickness_pts") or 5.4)
+    wp = []
+    for w in walls:
+        try:
+            wp.append(wall_footprint(w, extend_endpoints=True))
+        except Exception:
+            continue
+    if not wp:
+        return {}
+    wall_mass = unary_union(wp)
+    # soft barriers (guarda-corpo) close the envelope where the varanda has a
+    # rail instead of a wall — without them the cell would leak past the facade.
+    sb_lines = []
+    for s in consensus.get("soft_barriers", []) or []:
+        pl = s.get("polyline_pts") or []
+        if len(pl) >= 2:
+            sb_lines.append(LineString([(float(x), float(y)) for x, y in pl])
+                            .buffer(wt / 2.0, cap_style=2, join_style=2))
+    env_src = unary_union(wp + sb_lines)
+    egeoms = list(env_src.geoms) if isinstance(env_src, MultiPolygon) else [env_src]
+    envelope = unary_union([Polygon(g.exterior) for g in egeoms])
+
+    free = envelope.difference(wall_mass)
+    cells = [g for g in (free.geoms if isinstance(free, MultiPolygon) else [free])
+             if g.area > FLOOR_CELL_MIN_AREA_PTS2]
+
+    polys: list = []
+    for rm in rooms:
+        raw = [(float(p[0]), float(p[1])) for p in (rm.get("polygon_pts") or [])]
+        if len(raw) >= 2 and raw[0] == raw[-1]:
+            raw = raw[:-1]
+        ring = _floor_clean_ring(raw)
+        p = Polygon(ring) if len(ring) >= 3 else None
+        if p is not None and not p.is_valid:
+            p = p.buffer(0)
+        polys.append(p if (p is not None and not p.is_empty) else None)
+
+    under = wt * FLOOR_UNDER_FRAC
+    floor_by_room: list = [None] * len(polys)
+    for cell in cells:
+        here = [i for i, p in enumerate(polys)
+                if p is not None and cell.intersection(p).area > FLOOR_CELL_MIN_AREA_PTS2]
+        if not here:
+            continue
+        tucked = cell.buffer(under, join_style=2).intersection(envelope)
+        if len(here) == 1:
+            floor_by_room[here[0]] = tucked
+            continue
+        # multiple rooms share this cell (integrated, no solid wall between) —
+        # split it back apart by the room polygons; leftover gap -> nearest room.
+        here.sort(key=lambda i: -polys[i].area)
+        assigned = None
+        parts: dict = {}
+        for i in here:
+            piece = polys[i].buffer(under, join_style=2).intersection(tucked)
+            if assigned is not None:
+                piece = piece.difference(assigned)
+            parts[i] = piece
+            assigned = piece if assigned is None else unary_union([assigned, piece])
+        resto = tucked.difference(assigned) if assigned is not None else tucked
+        if not resto.is_empty:
+            for piece in (resto.geoms if isinstance(resto, MultiPolygon) else [resto]):
+                if piece.is_empty:
+                    continue
+                nearest = min(here, key=lambda i: polys[i].distance(piece))
+                parts[nearest] = unary_union([parts[nearest], piece])
+        for i in here:
+            floor_by_room[i] = parts[i]
+
+    out: dict = {}
+    for i, rm in enumerate(rooms):
+        floor = floor_by_room[i]
+        if floor is None or floor.is_empty:
+            continue
+        if isinstance(floor, MultiPolygon):
+            floor = max(floor.geoms, key=lambda g: g.area)
+        floor = floor.simplify(FLOOR_SIMPLIFY_TOL_PTS, preserve_topology=True)
+        if floor.is_empty or floor.geom_type != "Polygon":
+            continue
+        outer = _drop_coincident(list(floor.exterior.coords))
+        if len(outer) < 3:
+            continue
+        # Preserve holes: when an integrated room (sala) wraps another (cozinha),
+        # the cozinha is a HOLE in sala's slab. Dropping it (exterior-only) would
+        # double-cover the cozinha. Ruby's build_floor cuts each hole like the
+        # shell does (add inner face -> erase, leaving the hole topology).
+        holes = []
+        for ring in floor.interiors:
+            h = _drop_coincident(list(ring.coords))
+            if len(h) >= 3 and abs(Polygon(h).area) > FLOOR_CELL_MIN_AREA_PTS2:
+                holes.append([[float(x), float(y)] for x, y in h])
+        rid = str(rm.get("id") or f"r{i}")
+        out[rid] = {
+            "outer": [[float(x), float(y)] for x, y in outer],
+            "holes": holes,
+        }
+    return out
+
+
 def serialize_polygons(polygons: list[Polygon],
                        consensus: dict, stats: dict) -> dict:
     """Build the dict that the Ruby exporter reads (`_shell_polygon.json`)."""
@@ -617,6 +803,9 @@ def serialize_polygons(polygons: list[Polygon],
         "page_size_pts": consensus.get("page_size_pts"),
         "polygons": pieces,
         "rooms": consensus.get("rooms", []),
+        # Pre-computed floor rings (slab reaches the wall inner faces, no gap).
+        # Ruby's build_floor uses room_floors[id] when present, else its snap path.
+        "room_floors": compute_room_floors(consensus),
         "soft_barriers": consensus.get("soft_barriers", []),
         # ADR-007 / FP-024: surface window_apertures at top level so
         # the Ruby exporter can iterate without unpacking stats.

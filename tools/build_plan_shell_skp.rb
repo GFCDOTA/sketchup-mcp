@@ -210,9 +210,74 @@ def dedupe_consecutive_pts(pts, eps = 0.001)
   result
 end
 
-def build_floor(parent_ents, room, material, room_index)
+# Snap de coordenadas: agrupa os x's (e os y's) que estao a < eps um do outro e
+# move pro valor medio do grupo. Mata os MICRO-DEGRAUS (toquinhos de ~meia/uma
+# espessura de parede) que o room polygon herda das juncoes -> piso liso, sem
+# "formiga comendo" os cantos (Felipe 2026-06-04). Reentrancias REAIS (cantos em
+# L, nichos de banheiro) sao > eps e ficam preservadas. Micro-test: 130-224v ->
+# 4-18v sem deformar as formas.
+FLOOR_SNAP_EPS_PT = 6.0
+
+def snap_coords(ring, eps)
+  pts = ring.map { |p| [p[0].to_f, p[1].to_f] }
+  [0, 1].each do |dim|
+    vals = pts.map { |p| p[dim] }.uniq.sort
+    next if vals.empty?
+    m = {}
+    group = [vals[0]]
+    vals[1..-1].each do |v|
+      if v - group.last < eps
+        group << v
+      else
+        avg = group.sum / group.length
+        group.each { |g| m[g] = avg }
+        group = [v]
+      end
+    end
+    avg = group.sum / group.length
+    group.each { |g| m[g] = avg }
+    pts.each { |p| p[dim] = m[p[dim]] }
+  end
+  pts
+end
+
+def drop_collinear_pts(ring, eps = 1e-4)
+  n = ring.length
+  return ring if n < 3
+  out = []
+  n.times do |i|
+    a, b, c = ring[(i - 1) % n], ring[i], ring[(i + 1) % n]
+    cross = (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
+    out << b if cross.abs > eps
+  end
+  out
+end
+
+def build_floor(parent_ents, room, material, room_index, prefab = nil)
   raw_pts = room['polygon_pts'] || []
-  poly_pts = dedupe_consecutive_pts(raw_pts)
+  holes = []
+  if prefab.is_a?(Hash) && prefab['outer'].is_a?(Array) &&
+     prefab['outer'].length >= 3
+    # Piso ja resolvido no Python (compute_room_floors): preenche a CELULA do
+    # comodo ate as FACES INTERNAS das paredes -> encosta sem gap e tuca sob a
+    # parede (Felipe 2026-06-04). So dedup de seguranca; NAO re-snapar/drop:
+    # ja veio limpo, e re-snapar deformaria/reabriria o gap. holes = comodo
+    # integrado embutido (ex: cozinha cercada pela sala) -> recortado abaixo.
+    poly_pts = dedupe_consecutive_pts(prefab['outer'])
+    holes = (prefab['holes'] || []).map { |h| dedupe_consecutive_pts(h) }
+                                   .select { |h| h.length >= 3 }
+    floor_src = 'python_cell'
+  else
+    # Fallback: micro-degraus dos cantos (toquinhos) -> piso liso. dedup FINAL
+    # remove a aresta-ZERO que o drop_collinear deixa (2 vertices coincidentes
+    # adjacentes); sem isso o SU recusa add_face por "ponto duplicado" e o piso
+    # do comodo SOME (foi o que apagou o terraco/r001).
+    poly_pts = dedupe_consecutive_pts(raw_pts)
+    poly_pts = dedupe_consecutive_pts(drop_collinear_pts(
+      dedupe_consecutive_pts(snap_coords(poly_pts, FLOOR_SNAP_EPS_PT)),
+    ))
+    floor_src = 'ruby_snap'
+  end
   if poly_pts.length < 3
     return {
       'ok' => false,
@@ -227,14 +292,36 @@ def build_floor(parent_ents, room, material, room_index)
 
   begin
     pts = poly_pts.map { |p| pdf_pt_to_su(p) }
-    face = ents.add_face(pts)
-    if face.nil?
+    outer_face = ents.add_face(pts)
+    if outer_face.nil?
       group.erase!
       return {
         'ok' => false,
         'reason' => "add_face returned nil (raw=#{raw_pts.length} " \
                     "deduped=#{poly_pts.length}; polygon may be " \
                     "self-intersecting or non-planar)",
+      }
+    end
+    # Recorta cada buraco (comodo embutido). Mesmo idiom do shell: add_face do
+    # furo -> erase! a face interna; as arestas ficam e delimitam o donut.
+    holes_cut = 0
+    holes.each do |hole|
+      hpts = hole.map { |p| pdf_pt_to_su(p) }
+      inner = ents.add_face(hpts)
+      if inner && inner.valid?
+        inner.erase!
+        holes_cut += 1
+      end
+    end
+    # Re-busca a face (apos recortar furos): prefere a multi-loop (donut); no
+    # group so existem as faces que acabamos de criar.
+    face = ents.grep(Sketchup::Face).find { |f| f.loops.length > 1 }
+    face ||= ents.grep(Sketchup::Face).first
+    if face.nil?
+      group.erase!
+      return {
+        'ok' => false,
+        'reason' => "no floor face after hole carve (raw=#{raw_pts.length})",
       }
     end
     face.reverse! if face.normal.z < 0
@@ -246,6 +333,8 @@ def build_floor(parent_ents, room, material, room_index)
       'area_in2' => face.area.round(2),
       'raw_pts'  => raw_pts.length,
       'deduped_pts' => poly_pts.length,
+      'holes_cut' => holes_cut,
+      'source'   => floor_src,
     }
   rescue StandardError => e
     group.erase! if group && group.valid?
@@ -1384,14 +1473,18 @@ puts "[rb] shell: solid=#{shell_result['pieces_solid']} " \
 
 # 2. Floors (one per room)
 rooms = consensus['rooms'] || []
+room_floors = shell_data['room_floors'] || {}
 floors_built  = 0
 floors_failed = []
+floors_prefab = 0
 rooms.each_with_index do |room, i|
   palette_rgb = ROOM_PALETTE[i % ROOM_PALETTE.length]
   mat_name = "floor_#{room['id'] || i}"
   mat = model.materials.add(mat_name)
   mat.color = Sketchup::Color.new(*palette_rgb)
-  res = build_floor(model.active_entities, room, mat, i)
+  rid = (room['id'] || "r#{i}").to_s
+  res = build_floor(model.active_entities, room, mat, i, room_floors[rid])
+  floors_prefab += 1 if res['ok'] && res['source'] == 'python_cell'
   if res['ok']
     floors_built += 1
   else
@@ -1404,7 +1497,8 @@ rooms.each_with_index do |room, i|
     puts "[rb] floor FAILED for #{room['name'] || room['id']}: #{res['reason']}"
   end
 end
-puts "[rb] floors: built=#{floors_built} failed=#{floors_failed.length}"
+puts "[rb] floors: built=#{floors_built} failed=#{floors_failed.length} " \
+     "(prefab_cell=#{floors_prefab})"
 
 # 3. Soft barriers — rendered BY barrier_type + source, never global on/off.
 # Unsourced barriers (no barrier_type / confirmation) are NOT emitted as
@@ -1596,6 +1690,33 @@ if outpng_top
   # Capture the exact projection while the top camera is still active.
   write_top_projection_sidecar(model, outpng_top, 1600, 1200)
   puts "[rb] wrote #{outpng_top} (+ .proj.json)"
+
+  # Prova visual do piso: MESMA camera top, mas SO os Floor_Groups visiveis
+  # (paredes/janelas/portas ocultas) -> inspeciona overlap / buraco escondido /
+  # vazamento sem a parede tapando (Felipe 2026-06-04). Restaura a visibilidade
+  # antes do save pro .skp continuar completo.
+  floors_png = if outpng_top =~ /_top\.png\z/i
+                 outpng_top.sub(/_top\.png\z/i, '_floors_top.png')
+               else
+                 outpng_top.sub(/\.png\z/i, '') + '_floors.png'
+               end
+  hidden_for_floors = []
+  begin
+    model.active_entities.each do |e|
+      next unless e.respond_to?(:hidden?) && e.respond_to?(:name)
+      is_floor = e.name.to_s.start_with?('Floor_Group_')
+      if !is_floor && !e.hidden?
+        e.hidden = true
+        hidden_for_floors << e
+      end
+    end
+    write_png(model, floors_png)   # camera top inalterada -> enquadramento igual
+    puts "[rb] wrote #{floors_png} (floors-only, paredes ocultas)"
+  rescue StandardError => err
+    puts "[rb] floors-only render skipped: #{err.class}: #{err.message}"
+  ensure
+    hidden_for_floors.each { |e| e.hidden = false if e.valid? }
+  end
 end
 
 # 6. Save .skp last (this is the launcher's exit signal)
