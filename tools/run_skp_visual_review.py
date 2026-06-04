@@ -419,7 +419,10 @@ def _check_no_duplicate_window_application(report: dict) -> list[dict]:
 
 
 def _check_window_height(report: dict, eps: float = 0.1) -> list[dict]:
-    """Window glass groups must have height in [0.9, 1.5]m (FP-024 peitoril+verga)."""
+    """Window glass groups: altura em [0.9, 1.5]m (janela normal, FP-024
+    peitoril+verga). EXCECAO: BASCULANTE — janela baixa LEGITIMA quando esta alta
+    na parede (z_min >= 1.3m, peitoril ~1,5m de banheiro/servico) -> [0.4, 1.0]m.
+    O check de full-height void continua via _check_window_z_min_nonzero."""
     findings: list[dict] = []
     for g in report.get("groups_diagnostic", []):
         if not g.get("name", "").startswith("WindowGlass_Group"):
@@ -427,13 +430,18 @@ def _check_window_height(report: dict, eps: float = 0.1) -> list[dict]:
         h = g.get("height_m")
         if h is None:
             continue
-        if h < (0.9 - eps) or h > (1.5 + eps):
+        zmin = (g.get("bbox_m", {}).get("min") or [0, 0, 0])[2]
+        is_basculante = zmin >= 1.3   # peitoril alto -> basculante (janela baixa OK)
+        lo, hi = (0.4, 1.0) if is_basculante else (0.9, 1.5)
+        if h < (lo - eps) or h > (hi + eps):
             findings.append({
                 "severity": "FAIL",
                 "axis": "window_fidelity",
                 "type": "bad_window_aperture",
                 "location": f"groups_diagnostic[name={g['name']}].height_m={h}",
-                "evidence": f"window aperture height_m={h:.3f} outside expected range [0.9, 1.5]m; peitoril/verga likely missing — possibly full-height void.",
+                "evidence": f"window aperture height_m={h:.3f} fora do range esperado "
+                            f"[{lo}, {hi}]m ({'basculante' if is_basculante else 'janela'}); "
+                            f"peitoril/verga provavelmente faltando — possivel full-height void.",
                 "source_check": "tools/build_plan_shell_skp.rb window_aperture_z",
                 "suspected_owner": "builder",
                 "proposed_fix": "Confirm FP-024 partial-height aperture path is active (not 2D full-height carve).",

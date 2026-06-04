@@ -55,10 +55,32 @@ DOOR_RGB         = [140, 95, 55]   # madeira escura
 DOOR_SWING_DEG   = 30.0            # visual swing angle
 
 # Window panel (for kind=window). 3 bands: sill / glass / lintel.
-WINDOW_SILL_M    = 0.90            # peitoril height
+WINDOW_SILL_M    = 1.10            # peitoril quarto/sala (norma): 1,10m -> janela 1,00m
 WINDOW_HEAD_M    = 2.10            # verga bottom
 WINDOW_SILL_IN   = WINDOW_SILL_M * M_TO_IN
 WINDOW_HEAD_IN   = WINDOW_HEAD_M * M_TO_IN
+# Esquadria parametrica (Felipe 2026-06-03, calibrada pela "Janela 1" do 3DW):
+# moldura branca de PERFIL FIXO + montante central + vidro verde. Os perfis tem
+# espessura CONSTANTE (nao escalam) -> encaixa em qualquer vao sem distorcer; so
+# o vidro muda de tamanho. Resolve o "esticar o componente fica uma merda".
+WINDOW_FRAME_W_IN     = 0.05 * M_TO_IN   # 5cm perfil de moldura/montante
+WINDOW_FRAME_DEPTH_IN = 0.08 * M_TO_IN   # 8cm profundidade (da volume 3D)
+WINDOW_FRAME_RGB      = [238, 238, 240]  # branco esquadria
+WINDOW_GLASS_RGB      = [198, 222, 212]  # vidro verde-agua (como a Janela 1)
+WINDOW_GLASS_ALPHA    = 0.32
+# Caixa de persiana no topo (estilo "Janela 4" do 3DW): volume branco saliente
+# ocupando o topo do vao; a janela (vidro) ocupa o resto abaixo. Liga/desliga
+# pra comparar Janela 1 (sem) vs Janela 4 (com).
+WINDOW_HAS_SHUTTER    = true
+WINDOW_SHUTTER_H_IN   = 0.25 * M_TO_IN   # 25cm caixa de persiana
+# Janelas estreitas (largura <= this) viram BASCULANTE (laminas horizontais, sem
+# montante nem persiana) — as pequenas de banheiro/servico (Felipe 2026-06-04).
+BASCULANTE_MAX_W_IN   = 1.20 * M_TO_IN
+BASCULANTE_OPEN_RAD   = 15.0 * Math::PI / 180.0   # folha aberta ~15deg (cara de basculante)
+# Basculante fica ALTO na parede (perto do teto): peitoril ~1,50m -> altura ~0,60m
+# ate a verga 2,10m (padrao banheiro ~60x60cm, peitoril 1,50-1,60m). Embaixo
+# (0,90..1,50) vira parede solida. Altura NAO vem do PDF — padrao de norma.
+BASCULANTE_SILL_IN    = 1.50 * M_TO_IN
 GLASS_RGB        = [180, 220, 240] # azul-glass
 GLASS_ALPHA      = 0.45
 LINTEL_RGB       = [110, 115, 120]
@@ -813,6 +835,106 @@ def find_wall_face_for_aperture(piece_ents, host_wall, cx_in, cy_in,
   end
 end
 
+def build_window_frame_h(ents, cx, half_w, sill, head, y_plane, frame_mat, glass_mat)
+  # Esquadria parametrica numa parede horizontal (plano y = y_plane).
+  # Moldura (base/topo/2 laterais) + montante central de PERFIL FIXO (nao escala)
+  # + 2 panes de vidro. Adapta a qualquer largura/altura sem distorcer.
+  fw = WINDOW_FRAME_W_IN
+  fd = WINDOW_FRAME_DEPTH_IN
+  x0 = cx - half_w
+  x1 = cx + half_w
+  add_box = lambda do |bx0, bx1, bz0, bz1, depth, mat|
+    next if (bx1 - bx0).abs < 1e-6 || (bz1 - bz0).abs < 1e-6
+    g = ents.add_group
+    yf = y_plane - depth / 2.0
+    f = g.entities.add_face([
+      Geom::Point3d.new(bx0, yf, bz0), Geom::Point3d.new(bx1, yf, bz0),
+      Geom::Point3d.new(bx1, yf, bz1), Geom::Point3d.new(bx0, yf, bz1)
+    ])
+    next if f.nil?
+    f.reverse! if f.normal.y < 0
+    f.pushpull(depth)
+    g.entities.grep(Sketchup::Face).each { |ff| ff.material = mat; ff.back_material = mat }
+  end
+  # Caixa de persiana no topo (Janela 4) — volume saliente; janela ocupa o resto.
+  win_head = head
+  if WINDOW_HAS_SHUTTER && (head - sill) > (WINDOW_SHUTTER_H_IN + 4.0 * fw)
+    win_head = head - WINDOW_SHUTTER_H_IN
+    add_box.call(x0, x1, win_head, head, fd * 1.7, frame_mat)    # caixa de persiana (saliente)
+  end
+  add_box.call(x0, x1, sill, sill + fw, fd, frame_mat)                          # base
+  add_box.call(x0, x1, win_head - fw, win_head, fd, frame_mat)                  # topo
+  add_box.call(x0, x0 + fw, sill, win_head, fd, frame_mat)                      # lateral esq
+  add_box.call(x1 - fw, x1, sill, win_head, fd, frame_mat)                      # lateral dir
+  add_box.call(cx - fw / 2.0, cx + fw / 2.0, sill + fw, win_head - fw, fd, frame_mat)  # montante central
+  add_glass = lambda do |gx0, gx1|
+    next if (gx1 - gx0).abs < 1e-6
+    g = ents.add_group
+    f = g.entities.add_face([
+      Geom::Point3d.new(gx0, y_plane, sill + fw), Geom::Point3d.new(gx1, y_plane, sill + fw),
+      Geom::Point3d.new(gx1, y_plane, win_head - fw), Geom::Point3d.new(gx0, y_plane, win_head - fw)
+    ])
+    next if f.nil?
+    f.material = glass_mat
+    f.back_material = glass_mat
+  end
+  add_glass.call(x0 + fw, cx - fw / 2.0)   # pane esquerdo
+  add_glass.call(cx + fw / 2.0, x1 - fw)   # pane direito
+end
+
+def build_window_basculante_h(frame_ents, sash_group, cx, half_w, sill, head, y_plane, frame_mat, glass_mat, out_dir)
+  # Basculante: moldura externa FIXA em frame_ents (= WindowGlass, valida no
+  # position_fidelity) + 1 FOLHA inclinada em sash_group (grupo SEPARADO). O vao
+  # ja foi carvado SO na altura do basculante (sill = BASCULANTE_SILL_IN), entao a
+  # parede abaixo esta intacta — sem bloco de preenchimento. Folha rotacionada.
+  fw = WINDOW_FRAME_W_IN
+  fd = WINDOW_FRAME_DEPTH_IN
+  ff = 0.03 * M_TO_IN    # perfil fino da folha
+  x0 = cx - half_w
+  x1 = cx + half_w
+  add_box = lambda do |container, bx0, bx1, bz0, bz1, depth, mat|
+    next if (bx1 - bx0).abs < 1e-6 || (bz1 - bz0).abs < 1e-6
+    g = container.add_group
+    yf = y_plane - depth / 2.0
+    f = g.entities.add_face([
+      Geom::Point3d.new(bx0, yf, bz0), Geom::Point3d.new(bx1, yf, bz0),
+      Geom::Point3d.new(bx1, yf, bz1), Geom::Point3d.new(bx0, yf, bz1)
+    ])
+    next if f.nil?
+    f.reverse! if f.normal.y < 0
+    f.pushpull(depth)
+    g.entities.grep(Sketchup::Face).each { |x| x.material = mat; x.back_material = mat }
+  end
+  # moldura externa FIXA do basculante (sill .. head; sill ja e o peitoril alto)
+  add_box.call(frame_ents, x0, x1, sill, sill + fw, fd, frame_mat)        # base
+  add_box.call(frame_ents, x0, x1, head - fw, head, fd, frame_mat)        # topo
+  add_box.call(frame_ents, x0, x0 + fw, sill, head, fd, frame_mat)        # lateral esq
+  add_box.call(frame_ents, x1 - fw, x1, sill, head, fd, frame_mat)        # lateral dir
+  # FOLHA (moldura fina + vidro) -> sash_group, construida reta, depois inclinada.
+  inner_lo = sill + fw
+  inner_hi = head - fw
+  fx0 = x0 + fw
+  fx1 = x1 - fw
+  se = sash_group.entities
+  add_box.call(se, fx0, fx1, inner_lo, inner_lo + ff, fd * 0.6, frame_mat)  # base folha
+  add_box.call(se, fx0, fx1, inner_hi - ff, inner_hi, fd * 0.6, frame_mat)  # topo folha
+  add_box.call(se, fx0, fx0 + ff, inner_lo, inner_hi, fd * 0.6, frame_mat)  # lat esq
+  add_box.call(se, fx1 - ff, fx1, inner_lo, inner_hi, fd * 0.6, frame_mat)  # lat dir
+  gv = se.add_group                                                # vidro da folha
+  vf = gv.entities.add_face([
+    Geom::Point3d.new(fx0 + ff, y_plane, inner_lo + ff), Geom::Point3d.new(fx1 - ff, y_plane, inner_lo + ff),
+    Geom::Point3d.new(fx1 - ff, y_plane, inner_hi - ff), Geom::Point3d.new(fx0 + ff, y_plane, inner_hi - ff)
+  ])
+  if vf
+    vf.material = glass_mat
+    vf.back_material = glass_mat
+  end
+  # inclina a folha: pivot no TOPO, base abre pra fora (out_dir).
+  pivot = Geom::Point3d.new(cx, y_plane, inner_hi)
+  rot = Geom::Transformation.rotation(pivot, Geom::Vector3d.new(1, 0, 0), out_dir * BASCULANTE_OPEN_RAD)
+  sash_group.transform!(rot)
+end
+
 def build_window_aperture_3d(parent_ents, opening, host_wall, thickness_pt,
                               glass_mat, index)
   oid = opening['id'] || index.to_s
@@ -823,7 +945,10 @@ def build_window_aperture_3d(parent_ents, opening, host_wall, thickness_pt,
   cx_in = cx_pt * PT_TO_IN
   cy_in = cy_pt * PT_TO_IN
   half_w_in = (w_pt * PT_TO_IN) / 2.0
-  sill_in = WINDOW_SILL_IN
+  # Basculante carva SO a sua altura (peitoril alto BASCULANTE_SILL_IN ate a verga)
+  # -> a parede ABAIXO fica intacta e lisa (sem bloco/quadrado de preenchimento).
+  is_basc = (ori == 'h') && ((w_pt * PT_TO_IN) <= BASCULANTE_MAX_W_IN)
+  sill_in = is_basc ? BASCULANTE_SILL_IN : WINDOW_SILL_IN
   head_in = WINDOW_HEAD_IN
   # Use the HOST wall's own thickness for the through-carve, not the global
   # consensus thickness. FP-031 #28 merged collinear walls and set each merged
@@ -896,15 +1021,25 @@ def build_window_aperture_3d(parent_ents, opening, host_wall, thickness_pt,
     end
     carve_succeeded = true
 
-    # Glass pane at mid-thickness — separate top-level group.
+    # Esquadria (moldura branca + montante + vidro verde) no plano da parede.
+    # 'h': esquadria parametrica de perfil fixo (build_window_frame_h). 'v':
+    # vidro simples por enquanto (nenhuma janela 'v' na planta_74; TODO frame_v).
+    glass_group = parent_ents.add_group
+    glass_group.name = "WindowGlass_Group_#{oid}"
+    frame_mat = (parent_ents.model.materials['plan_window_frame'] rescue nil) || glass_mat
     if ori == 'h'
       mid_y_in = host_wall['start'][1].to_f * PT_TO_IN
-      glass_pts = [
-        Geom::Point3d.new(cx_in - half_w_in, mid_y_in, sill_in),
-        Geom::Point3d.new(cx_in + half_w_in, mid_y_in, sill_in),
-        Geom::Point3d.new(cx_in + half_w_in, mid_y_in, head_in),
-        Geom::Point3d.new(cx_in - half_w_in, mid_y_in, head_in),
-      ]
+      if is_basc
+        shell_cy = (plan_shell.bounds.center.y rescue mid_y_in)
+        out_dir = (mid_y_in >= shell_cy) ? 1.0 : -1.0   # exterior = longe do centro
+        sash_group = parent_ents.add_group
+        sash_group.name = "WindowSash_Group_#{oid}"
+        build_window_basculante_h(glass_group.entities, sash_group, cx_in, half_w_in,
+                                  sill_in, head_in, mid_y_in, frame_mat, glass_mat, out_dir)
+      else
+        build_window_frame_h(glass_group.entities, cx_in, half_w_in,
+                             sill_in, head_in, mid_y_in, frame_mat, glass_mat)
+      end
     else
       mid_x_in = host_wall['start'][0].to_f * PT_TO_IN
       glass_pts = [
@@ -913,14 +1048,11 @@ def build_window_aperture_3d(parent_ents, opening, host_wall, thickness_pt,
         Geom::Point3d.new(mid_x_in, cy_in + half_w_in, head_in),
         Geom::Point3d.new(mid_x_in, cy_in - half_w_in, head_in),
       ]
-    end
-
-    glass_group = parent_ents.add_group
-    glass_group.name = "WindowGlass_Group_#{oid}"
-    glass_face = glass_group.entities.add_face(glass_pts)
-    if glass_face
-      glass_face.material = glass_mat
-      glass_face.back_material = glass_mat
+      glass_face = glass_group.entities.add_face(glass_pts)
+      if glass_face
+        glass_face.material = glass_mat
+        glass_face.back_material = glass_mat
+      end
     end
 
     break
@@ -1351,8 +1483,10 @@ door_mat.color = Sketchup::Color.new(*DOOR_RGB)
 sill_mat = model.materials.add('plan_window_sill')
 sill_mat.color = Sketchup::Color.new(*PARAPET_RGB)
 glass_mat = model.materials.add('plan_window_glass')
-glass_mat.color = Sketchup::Color.new(*GLASS_RGB)
-glass_mat.alpha = GLASS_ALPHA
+glass_mat.color = Sketchup::Color.new(*WINDOW_GLASS_RGB)
+glass_mat.alpha = WINDOW_GLASS_ALPHA
+frame_mat = model.materials.add('plan_window_frame')
+frame_mat.color = Sketchup::Color.new(*WINDOW_FRAME_RGB)
 lintel_mat = model.materials.add('plan_window_lintel')
 lintel_mat.color = Sketchup::Color.new(*LINTEL_RGB)
 passage_mat = model.materials.add('plan_passage_marker')
