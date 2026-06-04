@@ -164,8 +164,12 @@ def test_dashboard_html_serves_the_spa():
     html = srv.dashboard_html()
     assert "<!doctype html>" in html.lower()
     assert "SketchUp Creator" in html
-    # SPA tabs present (the inline fallback has none of these)
-    assert "#lixao" in html and "#sessoes" in html and "#ecossistema" in html
+    # SPA tabs present (the inline fallback DASHBOARD_HTML has none of these).
+    # 8-tab nav consolidated in cockpit Fase 2A (commit 6a4b846); update this
+    # list if the nav changes again.
+    for tab in ("#home", "#sessoes", "#gate", "#review-skp",
+                "#repo", "#backlog", "#artifacts", "#docs"):
+        assert tab in html, f"missing SPA tab {tab}"
 
 
 def test_safe_artifact_blocks_escape_and_nonimage():
