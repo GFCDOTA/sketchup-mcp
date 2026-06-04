@@ -186,7 +186,7 @@
       "top_or_bottom_face_count": 14,
       "top_face_count": 7,
       "default_material_face_count": 0,
-      "primary_material": "plan_wall1",
+      "primary_material": "plan_wall2",
       "bbox_in": {
         "min": [
           68.1588,
@@ -225,7 +225,7 @@
       "top_or_bottom_face_count": 1,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "floor_r1",
+      "primary_material": "floor_r9",
       "bbox_in": {
         "min": [
           465.5748,
@@ -264,7 +264,7 @@
       "top_or_bottom_face_count": 1,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "floor_r2",
+      "primary_material": "floor_r10",
       "bbox_in": {
         "min": [
           78.1319,
@@ -303,7 +303,7 @@
       "top_or_bottom_face_count": 1,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "floor_r3",
+      "primary_material": "floor_r11",
       "bbox_in": {
         "min": [
           181.622,
@@ -342,7 +342,7 @@
       "top_or_bottom_face_count": 1,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "floor_r4",
+      "primary_material": "floor_r12",
       "bbox_in": {
         "min": [
           330.2781,
@@ -381,7 +381,7 @@
       "top_or_bottom_face_count": 1,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "floor_r5",
+      "primary_material": "floor_r13",
       "bbox_in": {
         "min": [
           77.9657,
@@ -420,7 +420,7 @@
       "top_or_bottom_face_count": 1,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "floor_r6",
+      "primary_material": "floor_r14",
       "bbox_in": {
         "min": [
           686.1402,
@@ -459,7 +459,7 @@
       "top_or_bottom_face_count": 1,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "floor_r7",
+      "primary_material": "floor_r15",
       "bbox_in": {
         "min": [
           465.5748,
@@ -498,7 +498,7 @@
       "top_or_bottom_face_count": 1,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "floor_r8",
+      "primary_material": "floor_r16",
       "bbox_in": {
         "min": [
           362.5224,
@@ -537,7 +537,7 @@
       "top_or_bottom_face_count": 32,
       "top_face_count": 16,
       "default_material_face_count": 0,
-      "primary_material": "plan_parapet1",
+      "primary_material": "plan_parapet2",
       "bbox_in": {
         "min": [
           141.6958,
@@ -576,7 +576,7 @@
       "top_or_bottom_face_count": 2,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "plan_door1",
+      "primary_material": "plan_door2",
       "bbox_in": {
         "min": [
           187.3827,
@@ -615,7 +615,7 @@
       "top_or_bottom_face_count": 2,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "plan_door1",
+      "primary_material": "plan_door2",
       "bbox_in": {
         "min": [
           364.9072,
@@ -654,7 +654,7 @@
       "top_or_bottom_face_count": 2,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "plan_door1",
+      "primary_material": "plan_door2",
       "bbox_in": {
         "min": [
           686.5981,
@@ -693,7 +693,7 @@
       "top_or_bottom_face_count": 2,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "plan_door1",
+      "primary_material": "plan_door2",
       "bbox_in": {
         "min": [
           446.5256,
@@ -732,7 +732,7 @@
       "top_or_bottom_face_count": 2,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "plan_door1",
+      "primary_material": "plan_door2",
       "bbox_in": {
         "min": [
           413.985,
@@ -771,7 +771,7 @@
       "top_or_bottom_face_count": 2,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "plan_door1",
+      "primary_material": "plan_door2",
       "bbox_in": {
         "min": [
           121.434,
@@ -810,7 +810,7 @@
       "top_or_bottom_face_count": 2,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "plan_door1",
+      "primary_material": "plan_door2",
       "bbox_in": {
         "min": [
           449.6694,
@@ -937,7 +937,7 @@
         "max": [
           640.9917,
           721.9103,
-          82.6772
+          90.5512
         ]
       },
       "bbox_m": {
@@ -949,10 +949,10 @@
         "max": [
           16.2812,
           18.3365,
-          2.1
+          2.3
         ]
       },
-      "height_m": 1.0,
+      "height_m": 1.2,
       "footprint_bbox_m2": 0.2808,
       "footprint_top_face_m2": 0.6231
     },
@@ -1054,7 +1054,7 @@
         "max": [
           445.0628,
           635.8119,
-          82.6772
+          90.5512
         ]
       },
       "bbox_m": {
@@ -1066,10 +1066,10 @@
         "max": [
           11.3046,
           16.1496,
-          2.1
+          2.3
         ]
       },
-      "height_m": 1.0,
+      "height_m": 1.2,
       "footprint_bbox_m2": 0.245,
       "footprint_top_face_m2": 0.5453
     },
@@ -1083,7 +1083,7 @@
       "top_or_bottom_face_count": 2,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "plan_window_glass1",
+      "primary_material": "plan_window_glass2",
       "bbox_in": {
         "min": [
           188.1701,

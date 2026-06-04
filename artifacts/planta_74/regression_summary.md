@@ -2,44 +2,40 @@
 
 Verdict: IMPROVED
 
-## SKP canônico atual (2026-06-04) — esquadrias de janela
+## SKP canônico atual (2026-06-04) — janelas: esquadria + proporção
 
-**VISUAL_REVIEW = IMPROVED** (Felipe, 2026-06-04: "ficou daora demais").
+**VISUAL_REVIEW = IMPROVED** (Felipe, 2026-06-04).
 
-### Mudança desta rodada — janelas viram esquadria de verdade
-Antes as janelas eram "buraco + vidro plano". Agora:
+### Esta rodada — proporção das janelas de quarto (1,80 × 1,20m)
+Ajuste de altura/peitoril das janelas de dormitório, validado por consulta ao
+GPT + foto real (tour Matterport da SUITE 02):
+- Peitoril **1,10m** → verga **2,30m** → janela de **1,20m** de altura.
+- SUITE 02 (h_o010, largura 1,80m do PDF) = **1,5:1**.
+- SUITE 01 (h_o008, largura 2,06m do PDF) = 1,72:1 — mesma altura/peitoril; a
+  largura é do PDF (não inventada).
+- Verga do BASCULANTE separada (2,10m) → basculantes intocados (0,73 × 0,60m).
 
-1. **Janelas de quarto** (h_o008 2,06m / h_o010 1,80m): esquadria de **correr 2
-   folhas** (moldura branca + montante central + vidro verde) + **caixa de
-   persiana** branca no topo. Peitoril **1,10m** → verga 2,10m (janela 1,00m).
-2. **Basculantes** (h_o007 / h_o009, 0,73m): **folha de vidro inclinada** abrindo
-   pra fora (pivota no topo), peitoril alto **1,50m** → 0,60m de altura (quadrado),
-   parede sólida abaixo. Carve só na altura do basculante (sem bloco de
-   preenchimento). Folha num grupo separado (`WindowSash_Group`) pra não deslocar
-   o centroide do vão no position_fidelity.
-
-Tudo **perfil fixo** (não distorce em vão nenhum), calibrado pelos componentes do
-3DW ("Janela 1/4" + "basculante") que o Felipe baixou — estilo replicado, tamanho
-do PDF. **Largura/posição do PDF; altura/peitoril de norma** (pesquisa web).
+> **PREMISSA ARQUITETÔNICA PROVÁVEL** (não dimensão normativa obrigatória): a
+> altura não consta no PDF; adotada por consulta ao GPT + prática de apto
+> residencial médio-alto + referência visual da foto real. Largura/posição = PDF.
 
 ### Mantido das rodadas anteriores
-- **Guarda-corpo de vidro** na varanda (mureta + vidro + corrimão).
-- **Notch-removal** (15 toquinhos das junções de parede).
+- Esquadria de janela: correr 2 folhas (moldura + montante + vidro verde) +
+  caixa de persiana; basculante com folha de vidro inclinada (banheiros).
+- Guarda-corpo de vidro na varanda (mureta + vidro + corrimão).
+- Notch-removal (toquinhos das junções de parede).
 
 ### Fonte
-- `tools/build_plan_shell_skp.rb` — `build_window_frame_h` (esquadria + persiana),
-  `build_window_basculante_h` (folha inclinada), `build_window_aperture_3d` (carve
-  condicional do sill por tipo); constantes `WINDOW_*` / `BASCULANTE_*` /
-  `WINDOW_SILL_M=1,10`.
-- `tools/run_skp_visual_review.py` — `_check_window_height` reconhece basculante
-  (janela baixa legítima quando z_min ≥ 1,3m); não afrouxa pra janela normal.
-- consensus **intocado** (composição é do builder).
+- `tools/build_plan_shell_skp.rb` — `WINDOW_SILL_M=1.10` / `WINDOW_HEAD_M=2.30`
+  (correr 1,20m); `BASCULANTE_SILL_IN=1.50` / `BASCULANTE_HEAD_IN=2.10`
+  (basculante 0,60m); `build_window_frame_h` / `build_window_basculante_h`.
+- `tools/run_skp_visual_review.py` — `_check_window_height` reconhece basculante.
+- consensus **intocado**.
 
 ### Gates
-- deterministic gates: **PASS** (overall) — opening_host, wall_overlap,
-  render_bbox, wall_presence, railing_match, parapet, position_fidelity.
-- pytest: **365 green** (visual_oracle `bad_window_aperture` atualizado p/ basculante).
-- canonical sha `53155bc6`.
+- deterministic gates: **PASS** (overall).
+- pytest: **365 green**.
+- canonical sha `301d3361`.
 
-### Evidência visual
-- `artifacts/review/planta_74/janelas-esquadria/` (antes/depois + basculante).
+### Evidência
+- `artifacts/review/planta_74/bedroom-window-ratio/` + `janelas-esquadria/`.

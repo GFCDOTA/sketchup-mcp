@@ -55,10 +55,13 @@ DOOR_RGB         = [140, 95, 55]   # madeira escura
 DOOR_SWING_DEG   = 30.0            # visual swing angle
 
 # Window panel (for kind=window). 3 bands: sill / glass / lintel.
-WINDOW_SILL_M    = 1.10            # peitoril quarto/sala (norma): 1,10m -> janela 1,00m
-WINDOW_HEAD_M    = 2.10            # verga bottom
+WINDOW_SILL_M    = 1.10            # peitoril quarto (GPT + NBR 15575: cama encostada embaixo)
+WINDOW_HEAD_M    = 2.30            # verga: janela de quarto 1,20m -> proporcao 1,5:1 (GPT)
 WINDOW_SILL_IN   = WINDOW_SILL_M * M_TO_IN
 WINDOW_HEAD_IN   = WINDOW_HEAD_M * M_TO_IN
+# Verga do BASCULANTE: separada da janela de correr (que subiu p/ 2,30m). Mantem o
+# basculante baixo (~0,60m): peitoril 1,50m -> verga 2,10m.
+BASCULANTE_HEAD_IN = 2.10 * M_TO_IN
 # Esquadria parametrica (Felipe 2026-06-03, calibrada pela "Janela 1" do 3DW):
 # moldura branca de PERFIL FIXO + montante central + vidro verde. Os perfis tem
 # espessura CONSTANTE (nao escalam) -> encaixa em qualquer vao sem distorcer; so
@@ -949,7 +952,7 @@ def build_window_aperture_3d(parent_ents, opening, host_wall, thickness_pt,
   # -> a parede ABAIXO fica intacta e lisa (sem bloco/quadrado de preenchimento).
   is_basc = (ori == 'h') && ((w_pt * PT_TO_IN) <= BASCULANTE_MAX_W_IN)
   sill_in = is_basc ? BASCULANTE_SILL_IN : WINDOW_SILL_IN
-  head_in = WINDOW_HEAD_IN
+  head_in = is_basc ? BASCULANTE_HEAD_IN : WINDOW_HEAD_IN
   # Use the HOST wall's own thickness for the through-carve, not the global
   # consensus thickness. FP-031 #28 merged collinear walls and set each merged
   # wall's thickness to the MEAN of its segments, so a merged wall (e.g. m003 =
