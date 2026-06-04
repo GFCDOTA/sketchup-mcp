@@ -2,7 +2,44 @@
 
 Verdict: IMPROVED
 
-## SKP canônico atual (2026-06-04) — janelas: esquadria + proporção
+## SKP canônico atual (2026-06-04) — piso encosta na parede (células)
+
+**VISUAL_REVIEW = IMPROVED** (Felipe, 2026-06-04 — "melhorou bastante; o piso
+está encostando nas paredes muito melhor e a sensação de chão comido sumiu").
+
+### Problema
+O piso de cada cômodo vinha do `polygon_pts` do consensus, que é **recuado /
+desalinhado** da face interna da parede → faixa cinza serrilhada ("formiga
+comendo") entre o piso colorido e a parede.
+
+### Fix — preencher a CÉLULA do espaço livre (não o polígono recuado)
+`compute_room_floors()` (Python) computa, por cômodo:
+- **envelope** do apê = união das paredes + guarda-corpos (soft_barriers),
+  buracos preenchidos — fecha a varanda (rail, não parede);
+- **célula** = `envelope − massa_das_paredes` → delimitada *exatamente* pela
+  face interna das paredes; o piso encosta sem gap;
+- **tuck** de `0.4×espessura` sob a parede (esconde a junta). Sweep 0.3–0.6:
+  `≤0.45` dá **zero overlap** entre pisos adjacentes (0.6 dava 1354pt²);
+- comodos **integrados** que dividem uma célula (SALA+COZINHA, sem parede entre
+  eles) são separados pelos polígonos; a cozinha vira um **hole** no piso da
+  sala (Ruby `build_floor` recorta o furo como o shell faz).
+
+### Validação (sem chute visual)
+- overlap entre pisos = **0.0pt²**; 8 Floor_Groups, todos shapely-válidos;
+- render **floors-only** (paredes ocultas) `planta_74_floors_top.png`: sem
+  overlap, sem buraco escondido, terraço sem vazamento — as 3 checagens do Felipe;
+- deterministic gates **PASS**; heurísticas visuais **0 findings**; pytest **365**.
+
+### Fonte
+- `tools/build_plan_shell_skp.py` — `compute_room_floors`, `FLOOR_UNDER_FRAC=0.4`,
+  serializa `room_floors` (outer+holes) no `_shell_polygon.json`.
+- `tools/build_plan_shell_skp.rb` — `build_floor` usa `room_floors[id]` (sem
+  re-snapar) + recorta holes; render extra `*_floors_top.png` (paredes ocultas).
+- consensus **intocado**.
+
+---
+
+## Rodada anterior (2026-06-04) — janelas: esquadria + proporção
 
 **VISUAL_REVIEW = IMPROVED** (Felipe, 2026-06-04).
 

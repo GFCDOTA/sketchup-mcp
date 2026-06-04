@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "tool": "build_plan_shell_skp",
   "consensus_path": "E:/Claude/sketchup-mcp/fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json",
-  "skp_path": "E:/Claude/sketchup-mcp/runs/planta_74/planta_74.skp",
+  "skp_path": "E:/Claude/sketchup-mcp/runs/planta_74/model.skp",
   "shell_json_path": "E:/Claude/sketchup-mcp/runs/planta_74/_shell_polygon.json",
   "soft_barriers_mode": "groups",
   "plan_shell": {
@@ -25,58 +25,58 @@
       {
         "name": "Floor_Group_r000",
         "faces": 1,
-        "edges": 130,
-        "area_in2": 43826.98,
-        "area_m2": 28.2754
+        "edges": 16,
+        "area_in2": 48329.6,
+        "area_m2": 31.1803
       },
       {
         "name": "Floor_Group_r001",
         "faces": 1,
-        "edges": 193,
-        "area_in2": 43726.45,
-        "area_m2": 28.2106
+        "edges": 24,
+        "area_in2": 56232.78,
+        "area_m2": 36.2791
       },
       {
         "name": "Floor_Group_r002",
         "faces": 1,
-        "edges": 224,
-        "area_in2": 39403.76,
-        "area_m2": 25.4217
+        "edges": 28,
+        "area_in2": 44850.77,
+        "area_m2": 28.9359
       },
       {
         "name": "Floor_Group_r003",
         "faces": 1,
-        "edges": 109,
-        "area_in2": 21614.12,
-        "area_m2": 13.9446
+        "edges": 12,
+        "area_in2": 24222.49,
+        "area_m2": 15.6274
       },
       {
         "name": "Floor_Group_r004",
         "faces": 1,
-        "edges": 38,
-        "area_in2": 14583.39,
-        "area_m2": 9.4086
+        "edges": 8,
+        "area_in2": 15864.86,
+        "area_m2": 10.2354
       },
       {
         "name": "Floor_Group_r005",
         "faces": 1,
-        "edges": 63,
-        "area_in2": 8356.43,
-        "area_m2": 5.3912
+        "edges": 4,
+        "area_in2": 10941.02,
+        "area_m2": 7.0587
       },
       {
         "name": "Floor_Group_r006",
         "faces": 1,
-        "edges": 63,
-        "area_in2": 7515.72,
-        "area_m2": 4.8488
+        "edges": 8,
+        "area_in2": 10021.46,
+        "area_m2": 6.4654
       },
       {
         "name": "Floor_Group_r007",
         "faces": 1,
-        "edges": 42,
-        "area_in2": 4998.76,
-        "area_m2": 3.225
+        "edges": 4,
+        "area_in2": 7354.75,
+        "area_m2": 4.745
       }
     ]
   },
@@ -173,7 +173,7 @@
   "totals": {
     "top_level_groups": 24,
     "faces": 50,
-    "edges": 946
+    "edges": 188
   },
   "groups_diagnostic": [
     {
@@ -186,7 +186,7 @@
       "top_or_bottom_face_count": 14,
       "top_face_count": 7,
       "default_material_face_count": 0,
-      "primary_material": "plan_wall2",
+      "primary_material": "plan_wall4",
       "bbox_in": {
         "min": [
           68.1588,
@@ -217,315 +217,315 @@
     },
     {
       "name": "Floor_Group_r000",
-      "entity_count": 131,
+      "entity_count": 17,
       "face_count": 1,
-      "edge_count": 130,
+      "edge_count": 16,
       "sub_group_count": 0,
       "lateral_face_count": 0,
       "top_or_bottom_face_count": 1,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "floor_r9",
+      "primary_material": "floor_r25",
       "bbox_in": {
         "min": [
-          465.5748,
-          722.9724,
+          462.583,
+          719.9806,
           0.0
         ],
         "max": [
-          757.4456,
-          936.8901,
+          762.2654,
+          941.7099,
           0.0
         ]
       },
       "bbox_m": {
         "min": [
-          11.8256,
-          18.3635,
+          11.7496,
+          18.2875,
           0.0
         ],
         "max": [
-          19.2391,
-          23.797,
+          19.3615,
+          23.9194,
           0.0
         ]
       },
       "height_m": 0.0,
-      "footprint_bbox_m2": 40.2814,
-      "footprint_top_face_m2": 28.2754
+      "footprint_bbox_m2": 42.8698,
+      "footprint_top_face_m2": 31.1803
     },
     {
       "name": "Floor_Group_r001",
-      "entity_count": 194,
+      "entity_count": 25,
       "face_count": 1,
-      "edge_count": 193,
+      "edge_count": 24,
       "sub_group_count": 0,
       "lateral_face_count": 0,
       "top_or_bottom_face_count": 1,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "floor_r10",
+      "primary_material": "floor_r26",
       "bbox_in": {
         "min": [
-          78.1319,
-          554.4326,
+          64.3367,
+          549.1968,
           0.0
         ],
         "max": [
-          363.5198,
-          800.0973,
+          379.893,
+          965.8115,
           0.0
         ]
       },
       "bbox_m": {
         "min": [
-          1.9845,
-          14.0826,
+          1.6342,
+          13.9496,
           0.0
         ],
         "max": [
-          9.2334,
-          20.3225,
+          9.6493,
+          24.5316,
           0.0
         ]
       },
       "height_m": 0.0,
-      "footprint_bbox_m2": 45.232,
-      "footprint_top_face_m2": 28.2106
+      "footprint_bbox_m2": 84.8162,
+      "footprint_top_face_m2": 36.2791
     },
     {
       "name": "Floor_Group_r002",
-      "entity_count": 225,
+      "entity_count": 29,
       "face_count": 1,
-      "edge_count": 224,
+      "edge_count": 28,
       "sub_group_count": 0,
       "lateral_face_count": 0,
       "top_or_bottom_face_count": 1,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "floor_r11",
+      "primary_material": "floor_r27",
       "bbox_in": {
         "min": [
-          181.622,
-          712.1703,
+          72.6469,
+          709.1774,
           0.0
         ],
         "max": [
-          458.0959,
-          938.7186,
+          461.0881,
+          965.8115,
           0.0
         ]
       },
       "bbox_m": {
         "min": [
-          4.6132,
-          18.0891,
+          1.8452,
+          18.0131,
           0.0
         ],
         "max": [
-          11.6356,
-          23.8435,
+          11.7116,
+          24.5316,
           0.0
         ]
       },
       "height_m": 0.0,
-      "footprint_bbox_m2": 40.4094,
-      "footprint_top_face_m2": 25.4217
+      "footprint_bbox_m2": 64.3142,
+      "footprint_top_face_m2": 28.9359
     },
     {
       "name": "Floor_Group_r003",
-      "entity_count": 110,
+      "entity_count": 13,
       "face_count": 1,
-      "edge_count": 109,
+      "edge_count": 12,
       "sub_group_count": 0,
       "lateral_face_count": 0,
       "top_or_bottom_face_count": 1,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "floor_r12",
+      "primary_material": "floor_r28",
       "bbox_in": {
         "min": [
-          330.2781,
-          636.874,
+          325.4571,
+          633.8822,
           0.0
         ],
         "max": [
-          458.0959,
-          809.5696,
+          461.0881,
+          812.5615,
           0.0
         ]
       },
       "bbox_m": {
         "min": [
-          8.3891,
-          16.1766,
+          8.2666,
+          16.1006,
           0.0
         ],
         "max": [
-          11.6356,
-          20.5631,
+          11.7116,
+          20.6391,
           0.0
         ]
       },
       "height_m": 0.0,
-      "footprint_bbox_m2": 14.241,
-      "footprint_top_face_m2": 13.9446
+      "footprint_bbox_m2": 15.6351,
+      "footprint_top_face_m2": 15.6274
     },
     {
       "name": "Floor_Group_r004",
-      "entity_count": 39,
+      "entity_count": 9,
       "face_count": 1,
-      "edge_count": 38,
+      "edge_count": 8,
       "sub_group_count": 0,
       "lateral_face_count": 0,
       "top_or_bottom_face_count": 1,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "floor_r13",
+      "primary_material": "floor_r29",
       "bbox_in": {
         "min": [
-          77.9657,
-          807.5776,
+          74.9738,
+          804.9188,
           0.0
         ],
         "max": [
-          174.1431,
-          961.1581,
+          174.6299,
+          964.15,
           0.0
         ]
       },
       "bbox_m": {
         "min": [
-          1.9803,
-          20.5125,
+          1.9043,
+          20.4449,
           0.0
         ],
         "max": [
-          4.4232,
-          24.4134,
+          4.4356,
+          24.4894,
           0.0
         ]
       },
       "height_m": 0.0,
-      "footprint_bbox_m2": 9.5297,
-      "footprint_top_face_m2": 9.4086
+      "footprint_bbox_m2": 10.2376,
+      "footprint_top_face_m2": 10.2354
     },
     {
       "name": "Floor_Group_r005",
-      "entity_count": 64,
+      "entity_count": 5,
       "face_count": 1,
-      "edge_count": 63,
+      "edge_count": 4,
       "sub_group_count": 0,
       "lateral_face_count": 0,
       "top_or_bottom_face_count": 1,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "floor_r14",
+      "primary_material": "floor_r30",
       "bbox_in": {
         "min": [
-          686.1402,
-          722.9724,
+          683.1493,
+          719.9806,
           0.0
         ],
         "max": [
-          757.4456,
-          855.2798,
+          762.2654,
+          858.2712,
           0.0
         ]
       },
       "bbox_m": {
         "min": [
-          17.428,
-          18.3635,
+          17.352,
+          18.2875,
           0.0
         ],
         "max": [
-          19.2391,
-          21.7241,
+          19.3615,
+          21.8001,
           0.0
         ]
       },
       "height_m": 0.0,
-      "footprint_bbox_m2": 6.0866,
-      "footprint_top_face_m2": 5.3912
+      "footprint_bbox_m2": 7.0587,
+      "footprint_top_face_m2": 7.0587
     },
     {
       "name": "Floor_Group_r006",
-      "entity_count": 64,
+      "entity_count": 9,
       "face_count": 1,
-      "edge_count": 63,
+      "edge_count": 8,
       "sub_group_count": 0,
       "lateral_face_count": 0,
       "top_or_bottom_face_count": 1,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "floor_r15",
+      "primary_material": "floor_r31",
       "bbox_in": {
         "min": [
-          465.5748,
-          674.5235,
+          462.583,
+          671.6145,
           0.0
         ],
         "max": [
-          528.904,
-          807.7424,
+          533.7236,
+          812.5615,
           0.0
         ]
       },
       "bbox_m": {
         "min": [
-          11.8256,
-          17.1329,
+          11.7496,
+          17.059,
           0.0
         ],
         "max": [
-          13.4342,
-          20.5167,
+          13.5566,
+          20.6391,
           0.0
         ]
       },
       "height_m": 0.0,
-      "footprint_bbox_m2": 5.443,
-      "footprint_top_face_m2": 4.8488
+      "footprint_bbox_m2": 6.4691,
+      "footprint_top_face_m2": 6.4654
     },
     {
       "name": "Floor_Group_r007",
-      "entity_count": 43,
+      "entity_count": 5,
       "face_count": 1,
-      "edge_count": 42,
+      "edge_count": 4,
       "sub_group_count": 0,
       "lateral_face_count": 0,
       "top_or_bottom_face_count": 1,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "floor_r16",
+      "primary_material": "floor_r32",
       "bbox_in": {
         "min": [
-          362.5224,
-          873.5636,
+          357.7023,
+          870.571,
           0.0
         ],
         "max": [
-          442.8056,
-          936.8901,
+          461.0881,
+          941.7099,
           0.0
         ]
       },
       "bbox_m": {
         "min": [
-          9.2081,
-          22.1885,
+          9.0856,
+          22.1125,
           0.0
         ],
         "max": [
-          11.2473,
-          23.797,
+          11.7116,
+          23.9194,
           0.0
         ]
       },
       "height_m": 0.0,
-      "footprint_bbox_m2": 3.28,
-      "footprint_top_face_m2": 3.225
+      "footprint_bbox_m2": 4.745,
+      "footprint_top_face_m2": 4.745
     },
     {
       "name": "SoftBarrier_Group_8",
@@ -537,7 +537,7 @@
       "top_or_bottom_face_count": 32,
       "top_face_count": 16,
       "default_material_face_count": 0,
-      "primary_material": "plan_parapet2",
+      "primary_material": "plan_parapet4",
       "bbox_in": {
         "min": [
           141.6958,
@@ -576,7 +576,7 @@
       "top_or_bottom_face_count": 2,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "plan_door2",
+      "primary_material": "plan_door4",
       "bbox_in": {
         "min": [
           187.3827,
@@ -615,7 +615,7 @@
       "top_or_bottom_face_count": 2,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "plan_door2",
+      "primary_material": "plan_door4",
       "bbox_in": {
         "min": [
           364.9072,
@@ -654,7 +654,7 @@
       "top_or_bottom_face_count": 2,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "plan_door2",
+      "primary_material": "plan_door4",
       "bbox_in": {
         "min": [
           686.5981,
@@ -693,7 +693,7 @@
       "top_or_bottom_face_count": 2,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "plan_door2",
+      "primary_material": "plan_door4",
       "bbox_in": {
         "min": [
           446.5256,
@@ -732,7 +732,7 @@
       "top_or_bottom_face_count": 2,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "plan_door2",
+      "primary_material": "plan_door4",
       "bbox_in": {
         "min": [
           413.985,
@@ -771,7 +771,7 @@
       "top_or_bottom_face_count": 2,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "plan_door2",
+      "primary_material": "plan_door4",
       "bbox_in": {
         "min": [
           121.434,
@@ -810,7 +810,7 @@
       "top_or_bottom_face_count": 2,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "plan_door2",
+      "primary_material": "plan_door4",
       "bbox_in": {
         "min": [
           449.6694,
@@ -1083,7 +1083,7 @@
       "top_or_bottom_face_count": 2,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "plan_window_glass2",
+      "primary_material": "plan_window_glass4",
       "bbox_in": {
         "min": [
           188.1701,

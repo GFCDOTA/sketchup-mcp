@@ -11,6 +11,7 @@ the minimal pipeline.
 | `planta_74.skp.metadata.json` | Cache sidecar — consensus SHA256 + build provenance |
 | `planta_74_iso.png` | Isometric render (auto from SU `write_image`) |
 | `planta_74_top.png` | Top render |
+| `planta_74_floors_top.png` | Top render with walls hidden — floor-slab proof (no overlap / no hidden hole / no leak) |
 | `side_by_side_pdf_vs_skp.png` | PDF underlay vs SKP top vs SKP iso composite |
 | `geometry_report.json` | 4-axis gate self-check + Python stats + SU counts |
 
