@@ -16,8 +16,13 @@ comendo") entre o piso colorido e a parede.
 `compute_room_floors()` (Python) computa, por cômodo:
 - **envelope** do apê = união das paredes + guarda-corpos (soft_barriers),
   buracos preenchidos — fecha a varanda (rail, não parede);
-- **célula** = `envelope − massa_das_paredes` → delimitada *exatamente* pela
-  face interna das paredes; o piso encosta sem gap;
+- **célula** = `envelope − (massa_das_paredes ∪ guarda-corpos)` → delimitada
+  *exatamente* pela face interna das paredes E dos guarda-corpos; o piso encosta
+  sem gap. Subtrair o **guarda-corpo** (não só a parede) foi o 2º fix: sem isso
+  a célula da varanda ia até a borda EXTERNA do guarda-corpo de vidro e o piso
+  aparecia além do vidro (transparente) — Felipe viu "verde vazando por baixo da
+  parede". Com o fix o vazamento do terraço caiu **5089→718pt²** e o piso pra
+  fora do apê = **0pt²**;
 - **tuck** de `0.4×espessura` sob a parede (esconde a junta). Sweep 0.3–0.6:
   `≤0.45` dá **zero overlap** entre pisos adjacentes (0.6 dava 1354pt²);
 - comodos **integrados** que dividem uma célula (SALA+COZINHA, sem parede entre
@@ -26,6 +31,8 @@ comendo") entre o piso colorido e a parede.
 
 ### Validação (sem chute visual)
 - overlap entre pisos = **0.0pt²**; 8 Floor_Groups, todos shapely-válidos;
+- **135/135 vértices de piso são estruturais** (caem sobre parede/guarda-corpo
+  do consensus) — os recortes contornam pilastras reais, não são artefato;
 - render **floors-only** (paredes ocultas) `planta_74_floors_top.png`: sem
   overlap, sem buraco escondido, terraço sem vazamento — as 3 checagens do Felipe;
 - deterministic gates **PASS**; heurísticas visuais **0 findings**; pytest **365**.

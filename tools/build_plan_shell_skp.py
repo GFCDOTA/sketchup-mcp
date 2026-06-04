@@ -700,7 +700,13 @@ def compute_room_floors(consensus: dict) -> dict:
     egeoms = list(env_src.geoms) if isinstance(env_src, MultiPolygon) else [env_src]
     envelope = unary_union([Polygon(g.exterior) for g in egeoms])
 
-    free = envelope.difference(wall_mass)
+    # The cell stops at the inner face of BOTH walls and soft barriers. Without
+    # subtracting the barriers, the varanda cell ran to the OUTER edge of the
+    # glass guard-rail, so the slab poked past the (transparent) glass — visible
+    # as the floor "leaking past the wall" (Felipe 2026-06-04). Subtracting the
+    # rail makes the slab stop at its inner face (+ the small tuck under it).
+    barrier_mass = unary_union([wall_mass, *sb_lines]) if sb_lines else wall_mass
+    free = envelope.difference(barrier_mass)
     cells = [g for g in (free.geoms if isinstance(free, MultiPolygon) else [free])
              if g.area > FLOOR_CELL_MIN_AREA_PTS2]
 
