@@ -71,6 +71,11 @@ Build do cérebro: `ollama create interior-designer -f .claude/skills/interior-d
   do modelo → botão **Download** → item **"SketchUp File"** do dropdown (USDZ/GLB/
   Collada são alternativas). O arquivo cai em `~/Downloads` com nome do componente-raiz
   (ex `Group_60.skp`).
+- **Limite de download (conta grátis) = 5/dia.** Cada clique BEM-SUCEDIDO em
+  "SketchUp File" **conta 1** — re-tentativa no escuro QUEIMA o limite. Tática:
+  confirmar o download na 1ª (checar `~/Downloads`), NUNCA re-clicar sem checar. Ao
+  bater: modal "You've reached your daily download limit" com oferta de vídeo pra +5
+  (mas com adblock o player fica "NaN:NaN" e não carrega). Reseta no dia seguinte.
 - **Screenshot da extensão Chrome NÃO renderiza os thumbnails** até dar **scroll**
   (lazy-load). Padrão: navigate → wait → scroll down → scroll up → screenshot. O
   `get_page_text` enxerga o DOM mesmo quando o screenshot está em branco.
@@ -86,6 +91,22 @@ Build do cérebro: `ollama create interior-designer -f .claude/skills/interior-d
 - `tools/furnish_plan.rb` — insere/auto-escala/render no SketchUp.
 - `runs/<plant>/_furniture/` — componentes baixados.
 - `runs/<plant>/planta_<plant>_vN.skp` — variantes mobiliadas.
+
+## Estado da missão (2026-06-04) — RETOMAR AQUI
+
+**Feito:** pipeline + skill + modelo `interior-designer` commitados (`develop`).
+2 sofás cinza-escuro baixados, auto-escalados e validados (gate dimensão PASS):
+- `runs/planta_74/planta_74_v2.skp` — Kivik (cinza escuro, em L)
+- `runs/planta_74/planta_74_v3.skp` — Tufted (preto, capitonê)
+
+**Parou porque:** limite diário de download (5) batido; vídeo de +5 não carrega (adblock).
+
+**Retomar a SALA COMPLETA** (quando o limite resetar / adblock pausado):
+1. baixar **rack TV** + **mesa de centro** cinza-escuro (já estava na página
+   `tv-rack` do Danne, 3.7 MB, quando travou).
+2. estender `furnish_plan` pra **múltiplos móveis por variante** (job = lista de
+   itens) + mapear `parede_N/S/L/O`/`centro` → coords (do bbox do cômodo).
+3. gerar `v2`/`v3` = **sala mobiliada** (rack+mesa fixos) **× sofá** variável.
 
 ## Próximo nível (backlog)
 
