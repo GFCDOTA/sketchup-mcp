@@ -1,0 +1,336 @@
+{
+  "room_id": "r000",
+  "room_name": "SUITE 01",
+  "area_m2": 29.3,
+  "candidates": [
+    {
+      "headboard_wall": "m019",
+      "rank": 0,
+      "valid": false,
+      "score": -999,
+      "reason": [
+        "cama king não coube na parede da cabeceira"
+      ]
+    },
+    {
+      "headboard_wall": "m017",
+      "rank": 1,
+      "valid": false,
+      "score": -999,
+      "reason": [
+        "cama king não coube na parede da cabeceira"
+      ]
+    },
+    {
+      "headboard_wall": "m018",
+      "rank": 2,
+      "valid": true,
+      "score": 90,
+      "hard": {
+        "dentro_do_quarto": true,
+        "nao_invade_parede": true,
+        "nao_bloqueia_porta": true,
+        "nao_bloqueia_janela": true,
+        "passagem_min_060": true
+      },
+      "violations": [],
+      "breakdown": {
+        "cama_parede_limpa": 30,
+        "simetria_criados": 20,
+        "circulacao": 20,
+        "tapete": 10,
+        "banco_dresser": 10
+      },
+      "clearances_m": {
+        "lateral": 0.79,
+        "pe": 3.32,
+        "passagem_ok": true
+      },
+      "downgrades": [
+        "guarda-roupa não coube com frente livre"
+      ],
+      "layout": [
+        {
+          "name": "cama_king",
+          "type": "bed",
+          "x_m": 16.19,
+          "y_m": 20.04,
+          "width_m": 2.03,
+          "depth_m": 1.93,
+          "rotation": 0,
+          "anchor_wall": "m018",
+          "reason": "âncora; cabeceira em parede limpa; centralizada"
+        },
+        {
+          "name": "tapete",
+          "type": "rug",
+          "x_m": 15.51,
+          "y_m": 20.04,
+          "width_m": 3.4,
+          "depth_m": 2.8,
+          "rotation": 0,
+          "anchor_wall": "m018",
+          "reason": "sob a cama, sai nas laterais e no pé"
+        },
+        {
+          "name": "criado_mudo_dir",
+          "type": "nightstand",
+          "x_m": 16.98,
+          "y_m": 21.26,
+          "width_m": 0.45,
+          "depth_m": 0.5,
+          "rotation": 0,
+          "anchor_wall": "m018",
+          "reason": "flanqueando a cabeceira (simétrico)"
+        },
+        {
+          "name": "criado_mudo_esq",
+          "type": "nightstand",
+          "x_m": 16.98,
+          "y_m": 18.83,
+          "width_m": 0.45,
+          "depth_m": 0.5,
+          "rotation": 0,
+          "anchor_wall": "m018",
+          "reason": "flanqueando a cabeceira (simétrico)"
+        },
+        {
+          "name": "banco",
+          "type": "bench",
+          "x_m": 14.9,
+          "y_m": 20.04,
+          "width_m": 0.45,
+          "depth_m": 1.4,
+          "rotation": 0,
+          "anchor_wall": null,
+          "reason": "aos pés da cama, centralizado"
+        },
+        {
+          "name": "dresser",
+          "type": "dresser",
+          "x_m": 19.03,
+          "y_m": 22.69,
+          "width_m": 0.45,
+          "depth_m": 1.6,
+          "rotation": 0,
+          "anchor_wall": "m019",
+          "reason": "parede livre, baixa, sem competir com guarda-roupa"
+        },
+        {
+          "name": "poltrona",
+          "type": "armchair",
+          "x_m": 12.25,
+          "y_m": 23.32,
+          "width_m": 0.8,
+          "depth_m": 0.8,
+          "rotation": 0,
+          "anchor_wall": null,
+          "reason": "canto livre perto da janela (leitura)"
+        },
+        {
+          "name": "mesa_lateral",
+          "type": "side_table",
+          "x_m": 12.9,
+          "y_m": 23.12,
+          "width_m": 0.4,
+          "depth_m": 0.4,
+          "rotation": 0,
+          "anchor_wall": null,
+          "reason": "ao lado da poltrona"
+        }
+      ]
+    }
+  ],
+  "headboard_ranking": [
+    {
+      "wall": "m019",
+      "score": 67.4,
+      "clean": true,
+      "has_window": false,
+      "has_door": false
+    },
+    {
+      "wall": "m017",
+      "score": 57.2,
+      "clean": true,
+      "has_window": false,
+      "has_door": false
+    },
+    {
+      "wall": "m018",
+      "score": 56.8,
+      "clean": true,
+      "has_window": false,
+      "has_door": false
+    },
+    {
+      "wall": "m005",
+      "score": 47.0,
+      "clean": false,
+      "has_window": true,
+      "has_door": false
+    },
+    {
+      "wall": "m010",
+      "score": 45.4,
+      "clean": false,
+      "has_window": false,
+      "has_door": true
+    },
+    {
+      "wall": "m016",
+      "score": 8.4,
+      "clean": false,
+      "has_window": false,
+      "has_door": true
+    },
+    {
+      "wall": "m007",
+      "score": -2.4,
+      "clean": false,
+      "has_window": false,
+      "has_door": true
+    },
+    {
+      "wall": "m009",
+      "score": -15.8,
+      "clean": false,
+      "has_window": false,
+      "has_door": true
+    },
+    {
+      "wall": "m008",
+      "score": -18.8,
+      "clean": false,
+      "has_window": false,
+      "has_door": true
+    }
+  ],
+  "result": "OK",
+  "chosen": "m018",
+  "chosen_score": 90,
+  "winner_layout": [
+    {
+      "name": "cama_king",
+      "type": "bed",
+      "x_m": 16.19,
+      "y_m": 20.04,
+      "width_m": 2.03,
+      "depth_m": 1.93,
+      "rotation": 0,
+      "anchor_wall": "m018",
+      "reason": "âncora; cabeceira em parede limpa; centralizada"
+    },
+    {
+      "name": "tapete",
+      "type": "rug",
+      "x_m": 15.51,
+      "y_m": 20.04,
+      "width_m": 3.4,
+      "depth_m": 2.8,
+      "rotation": 0,
+      "anchor_wall": "m018",
+      "reason": "sob a cama, sai nas laterais e no pé"
+    },
+    {
+      "name": "criado_mudo_dir",
+      "type": "nightstand",
+      "x_m": 16.98,
+      "y_m": 21.26,
+      "width_m": 0.45,
+      "depth_m": 0.5,
+      "rotation": 0,
+      "anchor_wall": "m018",
+      "reason": "flanqueando a cabeceira (simétrico)"
+    },
+    {
+      "name": "criado_mudo_esq",
+      "type": "nightstand",
+      "x_m": 16.98,
+      "y_m": 18.83,
+      "width_m": 0.45,
+      "depth_m": 0.5,
+      "rotation": 0,
+      "anchor_wall": "m018",
+      "reason": "flanqueando a cabeceira (simétrico)"
+    },
+    {
+      "name": "banco",
+      "type": "bench",
+      "x_m": 14.9,
+      "y_m": 20.04,
+      "width_m": 0.45,
+      "depth_m": 1.4,
+      "rotation": 0,
+      "anchor_wall": null,
+      "reason": "aos pés da cama, centralizado"
+    },
+    {
+      "name": "dresser",
+      "type": "dresser",
+      "x_m": 19.03,
+      "y_m": 22.69,
+      "width_m": 0.45,
+      "depth_m": 1.6,
+      "rotation": 0,
+      "anchor_wall": "m019",
+      "reason": "parede livre, baixa, sem competir com guarda-roupa"
+    },
+    {
+      "name": "poltrona",
+      "type": "armchair",
+      "x_m": 12.25,
+      "y_m": 23.32,
+      "width_m": 0.8,
+      "depth_m": 0.8,
+      "rotation": 0,
+      "anchor_wall": null,
+      "reason": "canto livre perto da janela (leitura)"
+    },
+    {
+      "name": "mesa_lateral",
+      "type": "side_table",
+      "x_m": 12.9,
+      "y_m": 23.12,
+      "width_m": 0.4,
+      "depth_m": 0.4,
+      "rotation": 0,
+      "anchor_wall": null,
+      "reason": "ao lado da poltrona"
+    }
+  ],
+  "ranking": [
+    {
+      "rank": 1,
+      "wall": "m018",
+      "score": 90,
+      "valid": true,
+      "breakdown": {
+        "cama_parede_limpa": 30,
+        "simetria_criados": 20,
+        "circulacao": 20,
+        "tapete": 10,
+        "banco_dresser": 10
+      },
+      "downgrades": [
+        "guarda-roupa não coube com frente livre"
+      ]
+    },
+    {
+      "rank": 2,
+      "wall": "m019",
+      "score": -999,
+      "valid": false,
+      "breakdown": null,
+      "downgrades": null
+    },
+    {
+      "rank": 3,
+      "wall": "m017",
+      "score": -999,
+      "valid": false,
+      "breakdown": null,
+      "downgrades": null
+    }
+  ]
+}
