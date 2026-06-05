@@ -278,24 +278,37 @@ ul.attn li .go{margin-left:auto;font-size:9.5px;color:var(--accent);text-transfo
 .md-q{margin:10px 0;padding:9px 14px;border-left:3px solid var(--accent);background:rgba(43,212,255,.06);color:var(--dim);border-radius:0 6px 6px 0;}
 .md-hr{border:0;border-top:1px solid var(--line2);margin:20px 0;}
 #cerebro-body strong{color:var(--txt);} #cerebro-body table{margin:10px 0;}
-/* ===== aba Cérebro: fluxo animado (emojis + setas) ===== */
-.cog-flow{display:flex;flex-direction:column;align-items:center;gap:0;margin:8px 0 20px;}
-.cog-node{opacity:0;transform:translateY(12px);width:100%;max-width:600px;background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line2);border-radius:12px;padding:11px 16px;display:flex;align-items:center;gap:13px;}
-.cog-flow.play .cog-node{animation:cogIn .5s cubic-bezier(.2,.8,.2,1) forwards;}
-.cog-node .ic{font-size:23px;flex:none;filter:drop-shadow(0 0 7px rgba(43,212,255,.45));}
-.cog-node .tx b{color:var(--txt);font-size:13.5px;} .cog-node .tx small{display:block;color:var(--dim);font-size:11px;margin-top:2px;line-height:1.4;}
-.cog-node.c-accent{border-color:rgba(43,212,255,.55);box-shadow:0 0 16px -6px var(--accent);}
-.cog-node.c-ok{border-color:rgba(39,224,138,.5);box-shadow:0 0 16px -6px var(--ok);}
-.cog-node.c-warn{border-color:rgba(255,176,46,.55);}
-.cog-node.c-bad{border-color:rgba(255,77,94,.55);}
-.cog-arrow{opacity:0;color:var(--accent);font-size:22px;line-height:1;padding:4px 0;text-shadow:0 0 10px rgba(43,212,255,.6);}
-.cog-flow.play .cog-arrow{animation:cogArrow .45s ease forwards;}
-.cog-flow.play .cog-node.c-ok{animation:cogIn .5s cubic-bezier(.2,.8,.2,1) forwards, cogGlow 2.2s ease-in-out infinite 2.6s;}
-@keyframes cogIn{to{opacity:1;transform:translateY(0);}}
-@keyframes cogArrow{0%{opacity:0;transform:translateY(-5px);}100%{opacity:.75;transform:translateY(0);}}
-@keyframes cogGlow{0%,100%{box-shadow:0 0 16px -6px var(--ok);}50%{box-shadow:0 0 22px -2px var(--ok);}}
+/* ===== aba Cérebro: LINHA DE EXECUÇÃO COGNITIVA (horizontal, cyberpunk) ===== */
+.claude-flow{position:relative;margin:8px 0 22px;}
+.claude-flow-track{display:flex;align-items:stretch;overflow-x:auto;padding:6px 2px 14px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;}
+.claude-flow-track::-webkit-scrollbar{height:8px;}
+.claude-flow-step{position:relative;flex:0 0 auto;min-width:205px;max-width:230px;scroll-snap-align:start;display:flex;flex-direction:column;gap:5px;
+  background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line2);border-radius:12px;padding:14px 15px;transition:.15s;}
+.claude-flow-track.play .claude-flow-step{animation:flowIn .5s cubic-bezier(.2,.8,.2,1) both;}
+.claude-flow-step:hover{transform:translateY(-2px);border-color:rgba(43,212,255,.5);box-shadow:0 0 18px -6px var(--accent);}
+.claude-flow-step .ic{font-size:30px;line-height:1;filter:drop-shadow(0 0 8px rgba(43,212,255,.4));}
+.claude-flow-step b{color:var(--txt);font-size:13.5px;letter-spacing:.2px;}
+.claude-flow-step small{color:var(--dim);font-size:11px;line-height:1.45;}
+.step-badge{align-self:flex-start;margin-top:auto;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:var(--accent-dim);color:var(--accent);border:1px solid rgba(43,212,255,.4);}
+.step-badge.bad{background:var(--bad-dim);color:#ff8d97;border-color:rgba(255,77,94,.5);}
+.step-badge.ok{background:var(--ok-dim);color:var(--ok);border-color:rgba(39,224,138,.5);}
+.claude-flow-step.entry-green{border-left:3px solid var(--ok);}
+.claude-flow-step.entry{border-left:3px solid var(--accent);}
+.claude-flow-step.critical{border-left:3px solid var(--warn);background:linear-gradient(180deg,rgba(255,176,46,.08),var(--card));}
+.claude-flow-step.memory{border-left:3px solid #a371f7;}
+.claude-flow-step.spec{border-left:3px solid var(--accent);}
+.claude-flow-step.skill{border-left:3px solid #2bd4ff;}
+.claude-flow-step.task{border-left:3px solid var(--warn);}
+.claude-flow-step.exec{border-left:3px solid var(--accent);}
+.claude-flow-step.output{border-left:3px solid var(--ok);background:linear-gradient(180deg,rgba(39,224,138,.08),var(--card));box-shadow:0 0 16px -7px var(--ok);}
+.claude-flow-step .human{color:var(--warn);font-weight:700;}
+.flow-arrow{flex:0 0 auto;display:flex;align-items:center;justify-content:center;width:30px;color:var(--accent);font-size:20px;opacity:.8;text-shadow:0 0 10px rgba(43,212,255,.7);}
+.claude-flow-track.play .flow-arrow{animation:flowArrow .45s ease both;}
+@keyframes flowIn{from{transform:translateX(-16px);}to{transform:translateX(0);}}
+@keyframes flowArrow{from{transform:translateX(-6px);}to{transform:translateX(0);}}
 .cog-replay{cursor:pointer;font-size:12px;color:var(--accent);border:1px solid var(--line2);border-radius:6px;padding:4px 11px;background:transparent;font-family:var(--mono);transition:.12s;}
 .cog-replay:hover{border-color:var(--accent);box-shadow:var(--glow-accent);}
+@media(max-width:760px){.claude-flow-track{scroll-snap-type:x mandatory;}.claude-flow-step{min-width:80vw;max-width:80vw;}}
 </style></head><body>
 <header>
 <h1><span class="logo">◉</span> SketchUp Creator <span class="sub">NOC</span></h1>
@@ -432,28 +445,28 @@ ul.attn li .go{margin-left:auto;font-size:9.5px;color:var(--accent);text-transfo
 <section id="cerebro">
 <div class="card full"><h2>🧠 Cérebro do Claude — como ele pensa, decide e executa neste repo</h2>
 <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px">
-<div class="muted">⚡ Fluxo de uma sessão (toca ao abrir):</div>
+<div class="muted">⚡ Linha de execução cognitiva — esquerda → direita (toca ao abrir):</div>
 <button class="cog-replay" onclick="replayCog()">▶ tocar de novo</button>
 </div>
-<div id="cog-flow" class="cog-flow">
-<div class="cog-node c-accent"><span class="ic">🟢</span><span class="tx"><b>Sessão inicia</b><small>você abre o Claude dentro do repo</small></span></div>
-<div class="cog-arrow">↓</div>
-<div class="cog-node"><span class="ic">📖</span><span class="tx"><b>CLAUDE.md</b><small>missão + Hard Rules + ordem de carga (o entry point)</small></span></div>
-<div class="cog-arrow">↓</div>
-<div class="cog-node c-bad"><span class="ic">⚖️</span><span class="tx"><b>Constitution #1..#8</b><small>vence qualquer conflito · quebrar uma regra = 🔴 RED</small></span></div>
-<div class="cog-arrow">↓</div>
-<div class="cog-node"><span class="ic">🧠</span><span class="tx"><b>Memory</b><small>estado + regras vivas: GREEN/YELLOW/RED · git · artifacts · lições</small></span></div>
-<div class="cog-arrow">↓</div>
-<div class="cog-node"><span class="ic">📐</span><span class="tx"><b>Specs</b><small>product_goal · fidelity_gate · proof-of-progress</small></span></div>
-<div class="cog-arrow">↓</div>
-<div class="cog-node c-accent"><span class="ic">🛠️</span><span class="tx"><b>Skills</b><small>auto-descobertas — acendem pelo gatilho da task</small></span></div>
-<div class="cog-arrow">↓</div>
-<div class="cog-node c-warn"><span class="ic">🎯</span><span class="tx"><b>Task do usuário</b><small>ex.: "corrige a fidelidade da planta_74"</small></span></div>
-<div class="cog-arrow">↓</div>
-<div class="cog-node"><span class="ic">⚙️</span><span class="tx"><b>Execução</b><small>build .skp → 🏛️ Gate :8765 decide → 👁️ Visual Review (humano)</small></span></div>
-<div class="cog-arrow">↓</div>
-<div class="cog-node c-ok"><span class="ic">📦</span><span class="tx"><b>Artifact</b><small>.skp fiel versionado em artifacts/&lt;plant&gt;/ ✅</small></span></div>
-</div>
+<div class="claude-flow"><div class="claude-flow-track" id="cog-flow">
+<div class="claude-flow-step entry-green"><span class="ic">🟢</span><b>Sessão inicia</b><small>Você abre o Claude dentro do repo.</small></div>
+<div class="flow-arrow">→</div>
+<div class="claude-flow-step entry"><span class="ic">📖</span><b>CLAUDE.md</b><small>Missão, Hard Rules e ordem de carga. Entry point da sessão.</small><span class="step-badge">ENTRY POINT</span></div>
+<div class="flow-arrow">→</div>
+<div class="claude-flow-step critical"><span class="ic">⚖️</span><b>Constitution #1..#8</b><small>Vence conflitos. Quebrar regra vira RED.</small><span class="step-badge bad">REGRA MÁXIMA</span></div>
+<div class="flow-arrow">→</div>
+<div class="claude-flow-step memory"><span class="ic">🧠</span><b>Memory</b><small>Estado vivo: GREEN/YELLOW/RED, git, artifacts, lições e regras.</small></div>
+<div class="flow-arrow">→</div>
+<div class="claude-flow-step spec"><span class="ic">📐</span><b>Specs</b><small>Product goal, fidelity gate e proof-of-progress.</small></div>
+<div class="flow-arrow">→</div>
+<div class="claude-flow-step skill"><span class="ic">🛠️</span><b>Skills</b><small>Capacidades auto-descobertas, acionadas pelo gatilho da task.</small></div>
+<div class="flow-arrow">→</div>
+<div class="claude-flow-step task"><span class="ic">🎯</span><b>Task</b><small>Ex.: "corrige a fidelidade da planta_74".</small></div>
+<div class="flow-arrow">→</div>
+<div class="claude-flow-step exec"><span class="ic">⚙️</span><b>Execução</b><small>Build .skp, gates determinísticos, Gate :8765 e <span class="human">Visual Review</span>.</small></div>
+<div class="flow-arrow">→</div>
+<div class="claude-flow-step output"><span class="ic">📦</span><b>Artifact final</b><small>.skp fiel, versionado em artifacts/&lt;plant&gt;/.</small><span class="step-badge ok">OUTPUT</span></div>
+</div></div>
 <div id="cerebro-head" class="muted" style="margin:16px 0 12px">carregando...</div>
 <div id="cerebro-body" class="muted">renderizando...</div>
 </div>
