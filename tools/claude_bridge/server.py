@@ -199,6 +199,10 @@ def health_payload() -> dict:
 STALL_SECONDS = 600     # no heartbeat in 10 min -> STALLED (liveness / wall clock)
 PARALYZED_M = 3         # `cycle` unchanged across this many beats -> PARALYZED
 AUDIT_PATH = Path(__file__).resolve().parents[2] / ".ai_bridge" / "audit" / "audit.jsonl"
+# Thresholds de visibilidade operacional (configuraveis). UP/DOWN nao basta:
+GATE_IDLE_WARN_SEC = 24 * 3600   # gate UP sem consulta ha > 24h -> ONLINE_IDLE (warn)
+GATE_IDLE_BAD_SEC = 72 * 3600    # > 72h -> ocioso/stale (bad)
+SOURCE_STALE_MARGIN_SEC = 3600   # legacy .md mais velho que o audit por > 1h -> STALE_SOURCE
 _SESSIONS: dict = {}
 _SESSIONS_LOCK = threading.Lock()
 # Estado das ACOES corretivas em andamento (process-consults roda em background).
@@ -268,6 +272,182 @@ def recent_events(limit: int = 80) -> list:
         except ValueError:
             pass
     return out
+
+
+# --- Visibilidade operacional: ultima atividade + fonte REAL do gate ----------
+# O painel nao pode parecer vivo quando esta ocioso, nem mostrar a aba Gate com
+# fonte velha como se fosse atual. audit.jsonl e a fonte PRIMARIA de consults
+# recentes; questions/responses .md sao LEGACY/fallback. UNKNOWN explicito quando
+# nao ha fonte — nunca inventa.
+
+def _fmt_dt(t):
+    try:
+        return time.strftime("%d/%m %H:%M", time.localtime(t))
+    except Exception:
+        return "?"
+
+
+def _newest_mtime(*iters):
+    newest = None
+    for it in iters:
+        try:
+            for p in it:
+                try:
+                    m = p.stat().st_mtime
+                except OSError:
+                    continue
+                if newest is None or m > newest:
+                    newest = m
+        except OSError:
+            pass
+    return newest
+
+
+def _audit_scan() -> dict:
+    """Varre TODO o audit.jsonl (nao so o tail): t do evento mais novo (qualquer kind),
+    t do consult mais novo, e os consults recentes (dado REAL pra aba Gate)."""
+    last_event = last_consult = None
+    consults = []
+    try:
+        lines = AUDIT_PATH.read_text("utf-8", errors="replace").splitlines()
+    except OSError:
+        lines = []
+    for ln in lines:
+        try:
+            e = json.loads(ln)
+        except ValueError:
+            continue
+        t = e.get("t")
+        if not isinstance(t, (int, float)):
+            continue
+        if last_event is None or t > last_event:
+            last_event = t
+        if e.get("kind") == "consult":
+            if last_consult is None or t > last_consult:
+                last_consult = t
+            consults.append(e)
+    consults.sort(key=lambda e: e.get("t", 0), reverse=True)
+    return {"last_event": last_event, "last_consult": last_consult, "consults": consults}
+
+
+def _classify_gate_source(audit_consult_at, legacy_q_at, margin=SOURCE_STALE_MARGIN_SEC):
+    """PURA (testavel): qual a fonte do gate e se a legacy esta stale vs o audit."""
+    has_a = audit_consult_at is not None
+    has_l = legacy_q_at is not None
+    if has_a and has_l:
+        source = "mixed"
+    elif has_a:
+        source = "audit.jsonl"
+    elif has_l:
+        source = "questions/responses legacy"
+    else:
+        source = "unavailable"
+    stale = bool(has_a and has_l and (audit_consult_at - legacy_q_at) > margin)
+    return source, stale
+
+
+def _classify_gate_state(up, last_consult_at, now, pending, stalled, source_stale,
+                         warn=GATE_IDLE_WARN_SEC, bad=GATE_IDLE_BAD_SEC):
+    """PURA (testavel): estado honesto do gate. UP/DOWN sozinho nao basta."""
+    if not up:
+        return "DOWN", "bad"
+    if last_consult_at is None:
+        return "UNKNOWN", "warn"
+    if pending > 0 or stalled > 0:
+        return "BLOCKED", "bad"
+    if source_stale:
+        return "STALE_SOURCE", "warn"
+    idle = now - last_consult_at
+    if idle > bad:
+        return "ONLINE_IDLE", "bad"
+    if idle > warn:
+        return "ONLINE_IDLE", "warn"
+    return "ONLINE_ACTIVE", "ok"
+
+
+def _gate_source_info() -> dict:
+    """Fonte real do gate + staleness + consults recentes do audit (pra aba Gate)."""
+    now = time.time()
+    aud = _audit_scan()
+    qd = REPO_ROOT / ".ai_bridge" / "questions"
+    rd = REPO_ROOT / ".ai_bridge" / "responses"
+    legacy_q = _newest_mtime(qd.glob("*.md")) if qd.is_dir() else None
+    legacy_r = _newest_mtime(rd.glob("*.md")) if rd.is_dir() else None
+    audit_c = aud["last_consult"]
+    source, stale = _classify_gate_source(audit_c, legacy_q)
+    reason = None
+    if stale:
+        reason = ("fonte legacy stale: questions/responses ultimo em " + _fmt_dt(legacy_q)
+                  + ", mas audit tem consult em " + _fmt_dt(audit_c))
+    return {
+        "source": source, "source_stale": stale, "stale_reason": reason,
+        "audit_last_consult_at": audit_c,
+        "legacy_last_question_at": legacy_q, "legacy_last_response_at": legacy_r,
+        "audit_consults": [{"age_sec": round(now - e.get("t", now)), "mode": e.get("mode", "default"),
+                            "dur_sec": e.get("dur_sec"), "q_chars": e.get("q_chars"),
+                            "a_chars": e.get("a_chars")} for e in aud["consults"][:20]],
+    }
+
+
+def activity_summary() -> dict:
+    """Visibilidade operacional honesta: ultima atividade, ociosidade do gate, fonte
+    real + staleness, sessoes vivas/paradas, ultimo artifact. UNKNOWN explicito."""
+    now = time.time()
+    up = True  # se /api/activity responde, ESTE gate esta servindo (o watchdog cobre o DOWN)
+    src = _gate_source_info()
+    aud = _audit_scan()
+    audit_c = src["audit_last_consult_at"]
+    legacy_q = src["legacy_last_question_at"]
+    legacy_r = src["legacy_last_response_at"]
+
+    cand_consult = [x for x in (audit_c, legacy_q) if x]
+    cand_resp = [x for x in (audit_c, legacy_r) if x]
+    last_consult = max(cand_consult) if cand_consult else None
+    last_response = max(cand_resp) if cand_resp else None
+    gate_idle = (now - last_consult) if last_consult else None
+
+    sv = sessions_view()
+    active = sum(1 for v in sv.values() if v.get("flags") == ["OK"])
+    stalled = sum(1 for v in sv.values()
+                  if "STALLED" in v.get("flags", []) or "PARALYZED" in v.get("flags", []))
+
+    live_last = None
+    with _SESSIONS_LOCK:
+        for s in _SESSIONS.values():
+            ls = s.get("last_seen")
+            if ls and (live_last is None or ls > live_last):
+                live_last = ls
+    cand_act = [x for x in (aud["last_event"], live_last) if x]
+    last_activity = max(cand_act) if cand_act else None
+
+    art = REPO_ROOT / "artifacts"
+    last_artifact = _newest_mtime(art.glob("**/*.skp"), art.glob("**/*.png")) if art.is_dir() else None
+
+    try:
+        pending = len(_orphan_consults())
+    except Exception:
+        pending = 0
+
+    state, sev = _classify_gate_state(up, last_consult, now, pending, stalled, src["source_stale"])
+
+    def age(t):
+        return round(now - t) if t else None
+
+    return {
+        "now": now, "up": up,
+        "gate_state": state, "gate_state_sev": sev,
+        "last_activity_at": last_activity, "last_activity_age_sec": age(last_activity),
+        "last_gate_consult_at": last_consult, "last_gate_consult_age_sec": age(last_consult),
+        "last_gate_response_at": last_response, "last_gate_response_age_sec": age(last_response),
+        "gate_idle_age_sec": (round(gate_idle) if gate_idle is not None else None),
+        "gate_source": src["source"], "gate_source_stale": src["source_stale"],
+        "stale_reason": src["stale_reason"],
+        "active_sessions_now": active, "stalled_sessions_now": stalled,
+        "last_artifact_at": last_artifact, "last_artifact_age_sec": age(last_artifact),
+        "pending_gate": pending,
+        "thresholds": {"idle_warn_sec": GATE_IDLE_WARN_SEC, "idle_bad_sec": GATE_IDLE_BAD_SEC,
+                       "source_stale_margin_sec": SOURCE_STALE_MARGIN_SEC},
+    }
 
 
 # Operational dashboard served by the gate itself (no external stack): polls
@@ -686,8 +866,10 @@ def gate_ledger() -> dict:
                             "answered": r is not None, "verdict": verdict,
                             "latency_sec": latency, "age_sec": round(time.time() - qt)})
     answered = sum(1 for e in entries if e["answered"])
-    return {"entries": entries[:80], "total": len(entries),
-            "answered": answered, "pending": len(entries) - answered}
+    out = {"entries": entries[:80], "total": len(entries),
+           "answered": answered, "pending": len(entries) - answered}
+    out.update(_gate_source_info())  # fonte REAL (audit vs legacy) + staleness + consults recentes
+    return out
 
 
 _DEFER_TRIPLET = ("why_not_fixed_yet", "next_hypothesis", "acceptance_criteria")
@@ -1172,6 +1354,7 @@ GET_ROUTES = {
     "/api/processes": _json_route(live_processes),
     "/api/local-llms": _json_route(local_llms),
     "/api/llm-usage": _json_route(llm_usage),
+    "/api/activity": _json_route(activity_summary),
     "/api/skp-inventory-v2": _json_route(skp_inventory_v2),
     "/api/difficulties": _json_route(difficulties),
     "/api/skp-timeline": _json_route(skp_timeline),

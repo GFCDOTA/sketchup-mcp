@@ -288,6 +288,7 @@ ul.attn li .go{margin-left:auto;font-size:9.5px;color:var(--accent);text-transfo
 <section id="home">
 <div id="status-banner" class="hero red">carregando placar do projeto...</div>
 <div id="kpi" class="kpi-row"></div>
+<div class="card full" id="activity-card"><h2>📡 Liveness &amp; atividade — vivo, ocioso, ou lendo fonte velha?</h2><div id="activity" class="muted">checando atividade...</div></div>
 
 <div class="grp">🚨 Precisa de você</div>
 <div class="wrap">
@@ -324,7 +325,8 @@ ul.attn li .go{margin-left:auto;font-size:9.5px;color:var(--accent);text-transfo
 
 <section id="gate">
 <div id="gate-alarm" class="alarm ok">carregando ledger...</div>
-<div class="card full"><h2>Gate / ChatGPT Ledger — o oráculo ajudou ou virou teatro?</h2>
+<div class="card full" id="gate-source-card"><h2>Fonte do Gate &amp; consultas REAIS recentes (audit.jsonl)</h2><div id="gate-source" class="muted">checando fonte...</div><div id="gate-recent" style="margin-top:10px"></div></div>
+<div class="card full"><h2>Ledger legacy (questions/responses .md) — histórico, pode estar stale</h2>
 <div id="gate-stats" class="muted" style="margin-bottom:12px"></div>
 <table><thead><tr><th>quando</th><th>trigger</th><th>respondido?</th><th>veredito</th><th>latência</th></tr></thead><tbody id="gate-rows"></tbody></table></div>
 </section>
@@ -510,7 +512,7 @@ function route(){
   const show=TABMAP[h];
   ALLSEC.forEach(function(id){var s=$(id); if(s)s.className=(show.indexOf(id)>=0?'active':'');});
   document.querySelectorAll('nav a').forEach(function(a){a.className=(a.getAttribute('href')==='#'+h?'active':'');});
-  if(show.indexOf('home')>=0){loadStatus();loadActions();loadLocalAI();}
+  if(show.indexOf('home')>=0){loadStatus();loadActions();loadLocalAI();loadActivity();}
   if(show.indexOf('sessoes')>=0)loadSessoes();
   if(show.indexOf('gate')>=0)loadGate();
   if(show.indexOf('git')>=0){loadGit();loadCommits();loadSysSummary();}
@@ -664,12 +666,41 @@ async function loadSessoes(){
     w.innerHTML='<div class="muted" style="margin-bottom:10px"><b style="color:var(--txt)">'+d.total+'</b> sessões Claude Code no total (top '+(d.sessions||[]).length+' por atividade). ACTIVE&lt;5min · IDLE&lt;1h · STOPPED&gt;1h. "parada há" = tempo desde a última escrita no transcript.</div><table><thead><tr><th>estado</th><th>parada há</th><th>motivo</th><th>projeto</th><th>id</th><th>descritor (1ª mensagem)</th></tr></thead><tbody>'+rows+'</tbody></table>';
   }catch(e){w.innerHTML='<span class="muted">erro: '+esc(e)+'</span>';}
 }
+function whenTxt(sec){return (sec==null)?'UNKNOWN':('há '+fmtAge(sec));}
+async function loadActivity(){
+  var el=$('activity'); if(!el)return;
+  var d;
+  try{ d=await (await fetch('/api/activity',{cache:'no-store'})).json(); }
+  catch(e){ el.innerHTML='<div class="alarm bad" style="margin:0">/api/activity indisponível — gate offline?</div>'; return; }
+  var SEV={ok:'var(--ok)',warn:'var(--warn)',bad:'var(--bad)'};
+  var TXT={ONLINE_ACTIVE:'ONLINE · ATIVO',ONLINE_IDLE:'ONLINE · OCIOSO',STALE_SOURCE:'FONTE VELHA',BLOCKED:'BLOQUEADO',DOWN:'DOWN',UNKNOWN:'SEM FONTE'};
+  var sc=SEV[d.gate_state_sev]||'var(--dim)';
+  var banner='';
+  if(d.gate_state!=='ONLINE_ACTIVE'){
+    var msg=d.gate_state==='ONLINE_IDLE'?('Gate ONLINE mas OCIOSO '+whenTxt(d.gate_idle_age_sec)+' — vivo, mas ninguém está consultando.')
+      :d.gate_state==='STALE_SOURCE'?('Gate exibindo FONTE VELHA. '+(d.stale_reason||''))
+      :d.gate_state==='BLOCKED'?('Gate BLOQUEADO — pendência humana ou sessão travada.')
+      :d.gate_state==='UNKNOWN'?('Sem fonte confiável de atividade — não dá pra afirmar que o gate está sendo usado.')
+      :'Gate DOWN.';
+    banner='<div class="alarm '+(d.gate_state_sev==='bad'?'bad':'ok')+'" style="margin:0 0 12px;border-color:'+sc+';color:'+sc+'">'+esc(msg)+'</div>';
+  }
+  el.innerHTML=banner
+    +'<div style="margin-bottom:10px"><span class="badge" style="background:transparent;border:1px solid '+sc+';color:'+sc+'">'+(TXT[d.gate_state]||d.gate_state)+'</span> <span class="muted">fonte: <b style="color:var(--txt)">'+esc(d.gate_source)+'</b>'+(d.gate_source_stale?' <span style="color:var(--bad)">STALE</span>':'')+'</span></div>'
+    +kv('Última atividade',whenTxt(d.last_activity_age_sec))
+    +kv('Última consulta ao gate',whenTxt(d.last_gate_consult_age_sec))
+    +kv('Última resposta do gate',whenTxt(d.last_gate_response_age_sec))
+    +kv('Gate ocioso',whenTxt(d.gate_idle_age_sec))
+    +kv('Último artifact/SKP',whenTxt(d.last_artifact_age_sec))
+    +kv('Sessões agora',(d.active_sessions_now||0)+' ativas · '+(d.stalled_sessions_now||0)+' paradas/travadas');
+}
 async function loadGate(){
-  var al=$('gate-alarm'),st=$('gate-stats'),rb=$('gate-rows');
+  var al=$('gate-alarm'),st=$('gate-stats'),rb=$('gate-rows'),gs=$('gate-source'),gr=$('gate-recent');
   try{const d=await (await fetch('/api/gate-ledger')).json();
-    if(d.pending>0){al.className='alarm bad';al.textContent='🚨 '+d.pending+' pergunta(s) SEM resposta do gate (pendente/teatro). Respondidas: '+d.answered+'/'+d.total+'.';}
-    else{al.className='alarm ok';al.textContent='✅ Todas as '+d.total+' perguntas ao gate foram respondidas.';}
-    st.innerHTML='<b style="color:var(--txt)">'+d.total+'</b> consults · '+d.answered+' respondidos · '+d.pending+' pendentes';
+    if(gs){gs.innerHTML='fonte primária: <b style="color:var(--txt)">'+esc(d.source||'?')+'</b> '+(d.source_stale?'<span class="flag STOPPED">STALE</span>':'<span class="flag OK">ok</span>')+(d.stale_reason?('<div class="alarm bad" style="margin:10px 0 0">'+esc(d.stale_reason)+'</div>'):'');}
+    if(gr){var ac=d.audit_consults||[];gr.innerHTML='<div class="muted" style="margin-bottom:6px">consultas REAIS recentes (audit.jsonl) — '+ac.length+':</div>'+(ac.length?('<table><thead><tr><th>quando</th><th>modo</th><th>duração</th><th>q/a chars</th></tr></thead><tbody>'+ac.map(function(e){return '<tr><td>'+fmtAge(e.age_sec)+' atrás</td><td>'+esc(e.mode||'default')+'</td><td>'+(e.dur_sec==null?'-':e.dur_sec+'s')+'</td><td class="muted">'+(e.q_chars||'?')+' / '+(e.a_chars||'?')+'</td></tr>';}).join('')+'</tbody></table>'):'<span class="muted">nenhuma consulta no audit.jsonl</span>');}
+    if(d.pending>0){al.className='alarm bad';al.textContent='🚨 '+d.pending+' pergunta(s) SEM resposta (legacy). Respondidas: '+d.answered+'/'+d.total+'.';}
+    else{al.className='alarm ok';al.textContent='✅ Legacy: '+d.total+' perguntas, todas respondidas.';}
+    st.innerHTML='<b style="color:var(--txt)">'+d.total+'</b> registros legacy · '+d.answered+' respondidos · '+d.pending+' pendentes';
     rb.innerHTML=(d.entries||[]).map(function(e){var v=e.verdict?('<span class="flag '+(e.verdict==='GO'?'OK':(e.verdict==='NO-GO'?'PARALYZED':'IDLE'))+'">'+e.verdict+'</span>'):'<span class="muted">-</span>';return '<tr><td>'+fmtAge(e.age_sec)+' atrás</td><td>'+esc(e.trigger)+'</td><td>'+(e.answered?'<span class="flag OK">sim</span>':'<span class="flag STOPPED">PENDENTE</span>')+'</td><td>'+v+'</td><td>'+(e.latency_sec==null?'-':fmtAge(e.latency_sec))+'</td></tr>';}).join('')||'<tr><td colspan=5 class="muted">nenhum consult ainda</td></tr>';
   }catch(e){al.className='alarm bad';al.textContent='erro: '+e;}
 }
@@ -795,7 +826,7 @@ async function loadLLMs(){
 }
 function tick(){var c=$('hclock');if(c)c.textContent=new Date().toLocaleTimeString('pt-br');}
 route(); pollHome(); tick(); setInterval(pollHome,5000); setInterval(tick,1000);
-setInterval(function(){var h=$('home');if(h&&h.classList.contains('active'))loadStatus();},5000);
+setInterval(function(){var h=$('home');if(h&&h.classList.contains('active')){loadStatus();loadActivity();}},5000);
 loadLocalAI(); setInterval(loadLocalAI,10000);
 </script>
 <div class="lb" id="lightbox" onclick="this.classList.remove('open')"><img id="lb-img" alt="render em tela cheia"></div>
