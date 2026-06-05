@@ -66,7 +66,7 @@
       },
       "soft": {
         "orientacao_sofa_tv": 15.0,
-        "dist_sofa_tv": 21.7,
+        "dist_sofa_tv": 25.0,
         "sofa_longe_porta": 15.0,
         "alinhamento_sofa_tv": 10.0,
         "parede_tv": 12.0,
@@ -74,20 +74,20 @@
         "proporcao": 5.5,
         "composicao": 7.0
       },
-      "soft_score": 90.9,
-      "total_score": 90.9,
+      "soft_score": 94.2,
+      "total_score": 94.2,
       "penalties": [
-        "sofa-TV 3.11m fora do ideal (dev 0.11m, -3)",
         "parede-TV interna/divisoria (nao e parede de fundo, -3)",
         "proporcao moveis/sala 0.16 fora de 0.25-0.45"
       ],
       "reasons": [
         "sofa orientado para a TV (+15)",
+        "sofa-TV 2.8m no ideal 2.6-3.0 (+25)",
         "composicao: eixo focal 0.0m (+7.0)"
       ],
       "metrics": {
-        "sofa_tv_dist_m": 3.11,
-        "sofa_door_min_m": 1.63,
+        "sofa_tv_dist_m": 2.8,
+        "sofa_door_min_m": 1.45,
         "lateral_offset_m": 0.0,
         "tv_depth_m": 3.62,
         "tv_wall_type": "internal",
@@ -96,12 +96,6 @@
       },
       "violations": [],
       "anti_patterns": [
-        {
-          "rule_id": "RL-06",
-          "name": "distancia_sofa_tv_plausivel",
-          "severity": "soft",
-          "evidence": "sofa-TV 3.11 m fora do ideal (2.6, 3.0)"
-        },
         {
           "rule_id": "RL-05",
           "name": "parede_tv_por_profundidade",
@@ -129,9 +123,9 @@
         {
           "kind": "sofa_3",
           "bbox_m": [
-            7.22,
+            6.91,
             19.23,
-            8.17,
+            7.86,
             21.43
           ],
           "facing": "tv"
@@ -139,9 +133,9 @@
         {
           "kind": "mesa_centro",
           "bbox_m": [
-            5.83,
+            5.67,
             19.83,
-            6.43,
+            6.27,
             20.83
           ],
           "facing": null
@@ -260,7 +254,7 @@
       },
       "soft": {
         "orientacao_sofa_tv": 15.0,
-        "dist_sofa_tv": 21.7,
+        "dist_sofa_tv": 25.0,
         "sofa_longe_porta": 15.0,
         "alinhamento_sofa_tv": 10.0,
         "parede_tv": 12.0,
@@ -268,20 +262,20 @@
         "proporcao": 6.0,
         "composicao": 0.0
       },
-      "soft_score": 84.6,
-      "total_score": 84.6,
+      "soft_score": 87.9,
+      "total_score": 87.9,
       "penalties": [
-        "sofa-TV 3.11m fora do ideal (dev 0.11m, -3)",
         "parede-TV interna/divisoria (nao e parede de fundo, -3)",
         "proporcao moveis/sala 0.17 fora de 0.25-0.45",
         "composicao fraca (sem tapete ancorando / eixo focal)"
       ],
       "reasons": [
-        "sofa orientado para a TV (+15)"
+        "sofa orientado para a TV (+15)",
+        "sofa-TV 2.8m no ideal 2.6-3.0 (+25)"
       ],
       "metrics": {
-        "sofa_tv_dist_m": 3.11,
-        "sofa_door_min_m": 1.63,
+        "sofa_tv_dist_m": 2.8,
+        "sofa_door_min_m": 1.45,
         "lateral_offset_m": 0.0,
         "tv_depth_m": 3.62,
         "tv_wall_type": "internal",
@@ -290,12 +284,6 @@
       },
       "violations": [],
       "anti_patterns": [
-        {
-          "rule_id": "RL-06",
-          "name": "distancia_sofa_tv_plausivel",
-          "severity": "soft",
-          "evidence": "sofa-TV 3.11 m fora do ideal (2.6, 3.0)"
-        },
         {
           "rule_id": "RL-05",
           "name": "parede_tv_por_profundidade",
@@ -323,9 +311,9 @@
         {
           "kind": "sofa_3",
           "bbox_m": [
-            7.22,
+            6.91,
             19.23,
-            8.17,
+            7.86,
             21.43
           ],
           "facing": "tv"
@@ -333,9 +321,9 @@
         {
           "kind": "poltrona",
           "bbox_m": [
-            6.82,
+            6.51,
             21.63,
-            7.67,
+            7.36,
             22.48
           ],
           "facing": "tv"
@@ -345,7 +333,7 @@
     {
       "template": "estar_ancorado",
       "template_order": 3,
-      "along_offset_m": 2.0,
+      "along_offset_m": 1.5,
       "valid": true,
       "hard_gates": {
         "nao_invade_parede": true,
@@ -357,63 +345,50 @@
       },
       "soft": {
         "orientacao_sofa_tv": 15.0,
-        "dist_sofa_tv": 21.7,
+        "dist_sofa_tv": 25.0,
         "sofa_longe_porta": 15.0,
         "alinhamento_sofa_tv": 10.0,
         "parede_tv": 12.0,
-        "respiro": 5.8,
-        "proporcao": 8.0,
+        "respiro": 6.7,
+        "proporcao": 10.0,
         "composicao": 15.0
       },
-      "soft_score": 102.5,
-      "total_score": 102.5,
+      "soft_score": 108.7,
+      "total_score": 108.7,
       "penalties": [
-        "sofa-TV 3.11m fora do ideal (dev 0.11m, -3)",
-        "parede-TV interna/divisoria (nao e parede de fundo, -3)",
-        "proporcao moveis/sala 0.21 fora de 0.25-0.45"
+        "parede-TV interna/divisoria (nao e parede de fundo, -3)"
       ],
       "reasons": [
         "sofa orientado para a TV (+15)",
+        "sofa-TV 2.8m no ideal 2.6-3.0 (+25)",
         "composicao: tapete ancora 3, eixo focal 0.0m (+15.0)"
       ],
       "metrics": {
-        "sofa_tv_dist_m": 3.11,
-        "sofa_door_min_m": 1.57,
+        "sofa_tv_dist_m": 2.8,
+        "sofa_door_min_m": 1.86,
         "lateral_offset_m": 0.0,
         "tv_depth_m": 3.62,
         "tv_wall_type": "internal",
-        "free_ratio": 0.79,
-        "fill_ratio": 0.21
+        "free_ratio": 0.75,
+        "fill_ratio": 0.25
       },
       "violations": [],
       "anti_patterns": [
-        {
-          "rule_id": "RL-06",
-          "name": "distancia_sofa_tv_plausivel",
-          "severity": "soft",
-          "evidence": "sofa-TV 3.11 m fora do ideal (2.6, 3.0)"
-        },
         {
           "rule_id": "RL-05",
           "name": "parede_tv_por_profundidade",
           "severity": "soft",
           "evidence": "parede-TV interna/divisoria, nao de fundo"
-        },
-        {
-          "rule_id": "RL-13",
-          "name": "proporcao_e_respiro",
-          "severity": "soft",
-          "evidence": "proporcao moveis/sala 0.21 fora de (0.25, 0.45)"
         }
       ],
       "furniture": [
         {
           "kind": "tapete",
           "bbox_m": [
-            5.27,
-            20.31,
-            7.52,
-            23.23
+            5.3,
+            19.61,
+            7.2,
+            22.93
           ],
           "facing": null
         },
@@ -421,39 +396,39 @@
           "kind": "rack_tv",
           "bbox_m": [
             4.62,
-            20.73,
-            5.07,
-            22.93
+            20.03,
+            5.1,
+            22.64
           ],
           "facing": null
         },
         {
           "kind": "mesa_centro",
           "bbox_m": [
-            6.17,
-            21.33,
-            6.77,
-            22.33
+            5.75,
+            20.73,
+            6.45,
+            21.93
           ],
           "facing": null
         },
         {
           "kind": "sofa_3",
           "bbox_m": [
-            7.22,
-            20.73,
-            8.17,
-            22.93
+            6.9,
+            20.03,
+            7.88,
+            22.63
           ],
           "facing": "tv"
         },
         {
           "kind": "poltrona",
           "bbox_m": [
-            5.88,
-            19.85,
-            7.06,
-            21.03
+            5.5,
+            19.15,
+            6.69,
+            20.33
           ],
           "facing": "tv"
         }
@@ -540,41 +515,37 @@
     {
       "rank": 1,
       "template": "estar_ancorado",
-      "total_score": 102.5,
+      "total_score": 108.7,
       "valid": true,
       "soft_breakdown": {
         "orientacao_sofa_tv": 15.0,
-        "dist_sofa_tv": 21.7,
+        "dist_sofa_tv": 25.0,
         "sofa_longe_porta": 15.0,
         "alinhamento_sofa_tv": 10.0,
         "parede_tv": 12.0,
-        "respiro": 5.8,
-        "proporcao": 8.0,
+        "respiro": 6.7,
+        "proporcao": 10.0,
         "composicao": 15.0
       },
       "penalties": [
-        "sofa-TV 3.11m fora do ideal (dev 0.11m, -3)",
-        "parede-TV interna/divisoria (nao e parede de fundo, -3)",
-        "proporcao moveis/sala 0.21 fora de 0.25-0.45"
+        "parede-TV interna/divisoria (nao e parede de fundo, -3)"
       ],
       "anti_patterns": [
-        "RL-06",
-        "RL-05",
-        "RL-13"
+        "RL-05"
       ],
       "tie_break": {
-        "offset_m": 2.0,
+        "offset_m": 1.5,
         "template_order": 3
       }
     },
     {
       "rank": 2,
       "template": "sofa_contra_parede",
-      "total_score": 90.9,
+      "total_score": 94.2,
       "valid": true,
       "soft_breakdown": {
         "orientacao_sofa_tv": 15.0,
-        "dist_sofa_tv": 21.7,
+        "dist_sofa_tv": 25.0,
         "sofa_longe_porta": 15.0,
         "alinhamento_sofa_tv": 10.0,
         "parede_tv": 12.0,
@@ -583,12 +554,10 @@
         "composicao": 7.0
       },
       "penalties": [
-        "sofa-TV 3.11m fora do ideal (dev 0.11m, -3)",
         "parede-TV interna/divisoria (nao e parede de fundo, -3)",
         "proporcao moveis/sala 0.16 fora de 0.25-0.45"
       ],
       "anti_patterns": [
-        "RL-06",
         "RL-05",
         "RL-13"
       ],
@@ -599,6 +568,35 @@
     },
     {
       "rank": 3,
+      "template": "sofa_mais_poltrona",
+      "total_score": 87.9,
+      "valid": true,
+      "soft_breakdown": {
+        "orientacao_sofa_tv": 15.0,
+        "dist_sofa_tv": 25.0,
+        "sofa_longe_porta": 15.0,
+        "alinhamento_sofa_tv": 10.0,
+        "parede_tv": 12.0,
+        "respiro": 4.9,
+        "proporcao": 6.0,
+        "composicao": 0.0
+      },
+      "penalties": [
+        "parede-TV interna/divisoria (nao e parede de fundo, -3)",
+        "proporcao moveis/sala 0.17 fora de 0.25-0.45",
+        "composicao fraca (sem tapete ancorando / eixo focal)"
+      ],
+      "anti_patterns": [
+        "RL-05",
+        "RL-13"
+      ],
+      "tie_break": {
+        "offset_m": 0.5,
+        "template_order": 2
+      }
+    },
+    {
+      "rank": 4,
       "template": "sofa_flutuante_setoriza",
       "total_score": 87.6,
       "valid": true,
@@ -626,37 +624,6 @@
         "offset_m": 0.5,
         "template_order": 1
       }
-    },
-    {
-      "rank": 4,
-      "template": "sofa_mais_poltrona",
-      "total_score": 84.6,
-      "valid": true,
-      "soft_breakdown": {
-        "orientacao_sofa_tv": 15.0,
-        "dist_sofa_tv": 21.7,
-        "sofa_longe_porta": 15.0,
-        "alinhamento_sofa_tv": 10.0,
-        "parede_tv": 12.0,
-        "respiro": 4.9,
-        "proporcao": 6.0,
-        "composicao": 0.0
-      },
-      "penalties": [
-        "sofa-TV 3.11m fora do ideal (dev 0.11m, -3)",
-        "parede-TV interna/divisoria (nao e parede de fundo, -3)",
-        "proporcao moveis/sala 0.17 fora de 0.25-0.45",
-        "composicao fraca (sem tapete ancorando / eixo focal)"
-      ],
-      "anti_patterns": [
-        "RL-06",
-        "RL-05",
-        "RL-13"
-      ],
-      "tie_break": {
-        "offset_m": 0.5,
-        "template_order": 2
-      }
     }
   ],
   "anti_patterns_flagged": [
@@ -667,16 +634,16 @@
       "count": 4
     },
     {
-      "rule_id": "RL-06",
-      "name": "distancia_sofa_tv_plausivel",
-      "severity": "soft",
-      "count": 4
-    },
-    {
       "rule_id": "RL-13",
       "name": "proporcao_e_respiro",
       "severity": "soft",
-      "count": 4
+      "count": 3
+    },
+    {
+      "rule_id": "RL-06",
+      "name": "distancia_sofa_tv_plausivel",
+      "severity": "soft",
+      "count": 1
     }
   ]
 }
