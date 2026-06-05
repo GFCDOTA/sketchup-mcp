@@ -1,0 +1,112 @@
+# place_layout_skp.rb — desenha o layout VENCEDOR como PLACEHOLDERS (boxes
+# coloridos extrudados) no shell da planta_74 ja aberto, renderiza before/after.
+# Rodado via:  SketchUp.exe <base.skp> -RubyStartup place_layout_skp.rb
+# Params via ENV:
+#   LAYOUT_BOXES = JSON [{kind,x0,y0,x1,y1 (SU in),h_in,rgb:[r,g,b],label,ambiguous}]
+#   LAYOUT_OUT / LAYOUT_BEFORE / LAYOUT_AFTER_TOP / LAYOUT_AFTER_ISO / LAYOUT_LOG
+# Placeholders, NAO 3D Warehouse. Felipe 2026-06-04 (gate :8765 opcao A).
+require 'json'
+
+def pl_top_camera(model)
+  view = model.active_view
+  bbox = model.bounds
+  center = bbox.center
+  eye = Geom::Point3d.new(center.x, center.y, center.z + bbox.diagonal * 5.0)
+  cam = Sketchup::Camera.new(eye, center, Geom::Vector3d.new(0, 1, 0))
+  cam.perspective = false
+  mw = bbox.max.x - bbox.min.x
+  mh = bbox.max.y - bbox.min.y
+  cam.height = [mh, mw / (1600.0 / 1200.0)].max * 1.06
+  view.camera = cam
+end
+
+def pl_iso_camera(model)
+  view = model.active_view
+  bbox = model.bounds
+  center = bbox.center
+  diag = bbox.diagonal
+  d = diag * 5.0
+  eye = Geom::Point3d.new(center.x + d * 0.5, center.y - d * 0.6, center.z + d * 0.7)
+  cam = Sketchup::Camera.new(eye, center, Geom::Vector3d.new(0, 0, 1))
+  cam.perspective = false
+  cam.height = diag * 1.2
+  view.camera = cam
+  view.zoom_extents
+end
+
+def pl_png(model, path)
+  model.active_view.write_image(
+    filename: path, width: 1600, height: 1200, antialias: true, transparent: false)
+end
+
+def pl_material(model, name, rgb)
+  m = model.materials[name]
+  return m if m
+  m = model.materials.add(name)
+  m.color = Sketchup::Color.new(rgb[0], rgb[1], rgb[2])
+  m.alpha = 1.0
+  m
+end
+
+def pl_run
+  boxes = JSON.parse(ENV['LAYOUT_BOXES'] || '[]')
+  model = Sketchup.active_model
+  log = []
+
+  # BEFORE: shell puro (sem moveis)
+  if ENV['LAYOUT_BEFORE']
+    pl_top_camera(model)
+    pl_png(model, ENV['LAYOUT_BEFORE'])
+    log << "BEFORE render -> #{File.basename(ENV['LAYOUT_BEFORE'])}"
+  end
+
+  parent = model.active_entities.add_group
+  parent.name = 'Layout_placeholders'
+  pents = parent.entities
+  placed = 0
+  boxes.each do |b|
+    begin
+      h = b['h_in'].to_f
+      g = pents.add_group
+      g.name = b['label'] || b['kind']
+      # desenha o POLIGONO real (cantos), preservando rotacao de moveis angulados
+      pts = (b['corners'] || []).map { |c| Geom::Point3d.new(c[0].to_f, c[1].to_f, 0) }
+      face = g.entities.add_face(pts)
+      # extrudar SEMPRE pra cima (independente da normal da face)
+      dir = face.normal.z >= 0 ? h : -h
+      face.pushpull(dir)
+      mat = pl_material(model, "ph_#{b['kind']}", b['rgb'] || [120, 120, 120])
+      g.material = mat
+      placed += 1
+      bw = (b['x1'].to_f - b['x0'].to_f).round
+      bd = (b['y1'].to_f - b['y0'].to_f).round
+      tag = b['ambiguous'] ? ' [TV AMBIGUOUS]' : ''
+      log << "  #{b['kind']} bbox #{bw}x#{bd}x#{h.round} in#{tag}"
+    rescue StandardError => e
+      log << "  FAIL #{b['kind']}: #{e.class}: #{e.message}"
+    end
+  end
+  log << "placed #{placed}/#{boxes.size} placeholders"
+
+  # AFTER: shell + moveis
+  if ENV['LAYOUT_AFTER_TOP']
+    pl_top_camera(model)
+    pl_png(model, ENV['LAYOUT_AFTER_TOP'])
+    log << "AFTER top -> #{File.basename(ENV['LAYOUT_AFTER_TOP'])}"
+  end
+  if ENV['LAYOUT_AFTER_ISO']
+    pl_iso_camera(model)
+    pl_png(model, ENV['LAYOUT_AFTER_ISO'])
+    log << "AFTER iso -> #{File.basename(ENV['LAYOUT_AFTER_ISO'])}"
+  end
+
+  if ENV['LAYOUT_OUT']
+    model.save(ENV['LAYOUT_OUT'])
+    log << "saved -> #{File.basename(ENV['LAYOUT_OUT'])}"
+  end
+
+  # LOG por ultimo: e o sinal de "done" pro Python
+  File.write(ENV['LAYOUT_LOG'] || 'layout_place_log.txt', log.join("\n"))
+end
+
+pl_run
