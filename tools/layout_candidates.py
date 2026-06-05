@@ -149,11 +149,15 @@ def template_estar_ancorado(s):
         rack_w_m = min(2.40, max(rack_w_m, s.get("wall_len_m", rack_w_m) * 0.85))
     rw = M(rack_w_m)
     sp = max(dep - sd - M(MARGIN_M), M(SOFA_TV_MIN))            # sofa na parede oposta
-    # tapete: do respiro do rack (0.20) ate entrar 0.30 sob a frente do sofa,
-    # excede o sofa 0.30 de cada lado (regras universais da spec)
+    pw, pd = M(FURN["poltrona"][0]), M(FURN["poltrona"][1])
+    pol_off = M(0.30)                                          # poltrona ~30cm pro canto (refino GPT)
+    # tapete: do respiro do rack (0.20) ate entrar 0.30 sob a frente do sofa;
+    # excede 0.30 de cada lado E estende +pol_off pro lado da poltrona, pra
+    # mante-la conectada (>=20% sobre o tapete; "rug supports" da spec GPT).
     rug_start = M(MARGIN_M) + rd + M(0.20)
     rug_perp = max(M(0.40), (sp + M(0.30)) - rug_start)
-    items = [_item("tapete", _fbox(o, f, sg, ac, rug_start, sw + 2 * M(0.30), rug_perp),
+    rug_w = sw + 2 * M(0.30) + pol_off
+    items = [_item("tapete", _fbox(o, f, sg, ac - pol_off / 2, rug_start, rug_w, rug_perp),
                    decorative=True)]
     items.append(_item("rack_tv", _fbox(o, f, sg, ac, M(MARGIN_M), rw, rd)))
     mp = max(M(MARGIN_M) + rd + M(0.20), sp - M(0.45) - md)     # mesa 0.45 da frente
@@ -163,10 +167,9 @@ def template_estar_ancorado(s):
     apw, apd = M(FURN["aparador"][0]), M(FURN["aparador"][1])   # aparador condicional
     if dep - (sp + sd) >= apd + M(0.80):
         items.append(_item("aparador", _fbox(o, f, sg, ac, sp + sd + M(0.05), apw, apd)))
-    # P3 (GPT): poltrona secundaria na lateral do conjunto, na profundidade da
-    # mesa, sobre o tapete, angulada ~35deg pra "fechar a conversa" sofa/mesa.
-    pw, pd = M(FURN["poltrona"][0]), M(FURN["poltrona"][1])
-    pol = _fbox(o, f, sg, ac - sw / 2 - pw * 0.2, mp + md / 2 - pd / 2, pw, pd)
+    # P3 (GPT refino): poltrona ~30cm no canto lateral do grupo (em direcao a
+    # varanda), sobre o tapete estendido, angulada ~35deg pra fechar a conversa.
+    pol = _fbox(o, f, sg, ac - sw / 2 - pw * 0.2 - pol_off, mp + md / 2 - pd / 2, pw, pd)
     items.append(_item("poltrona", shp_rotate(pol, 35, origin="centroid"),
                        facing="tv", rotated_deg=35))
     return items
