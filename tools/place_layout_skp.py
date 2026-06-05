@@ -18,7 +18,8 @@ import sys
 import time
 from pathlib import Path
 
-from tools.layout_candidates import EXTRA_TEMPLATES, TEMPLATES, _tv_setup, run
+from tools.layout_candidates import (EXTRA_TEMPLATES, M, TEMPLATES, _tv_setup,
+                                     run, score)
 
 ROOT = Path(r"E:\Claude\sketchup-mcp")
 SKETCHUP_EXE = r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
@@ -53,8 +54,26 @@ def build_boxes(con, room_id, template_name=None):
             return None, {"result": "NO_TEMPLATE",
                           "reason": f"template '{template_name}' desconhecido",
                           "tv_wall": out["tv_wall"]}
-        items_raw = fn(tv)
+        # along-search: desliza o conjunto ao longo da parede-TV ate a melhor
+        # posicao que passa os HARD GATES (circulacao numerica), como os 3
+        # templates do ranking ja fazem. O tapete decorativo nao conta (score
+        # ignora) e a poltrona e condicional (sai se bloqueia).
+        # range curto: o rack precisa ficar NA parede-TV (offset grande desliza
+        # o rack pra fora). A poltrona e condicional (sai se bloqueia).
+        best = None
+        for off in (0.0, 0.2, -0.2, 0.35, -0.35):
+            tv2 = dict(tv, along_c=tv["along_c"] + M(off))
+            its = fn(tv2)
+            res = score(its, sm, tv2)
+            key = (res["valid"], res["total_score"], -abs(off))
+            if best is None or key > best[0]:
+                best = (key, off, its, res)
+        _, off, items_raw, val = best
         out["chosen_candidate"] = template_name
+        out["template_offset_m"] = round(off, 2)
+        out["template_validation"] = {
+            "valid": val["valid"], "hard_gates": val["hard_gates"],
+            "violations": val["violations"], "metrics": val["metrics"]}
     elif out["result"] != "OK":
         return None, out
     else:
@@ -105,6 +124,15 @@ def main():
                   f"y[{b['y0']:.0f}..{b['y1']:.0f}] h={b['h_in']:.0f} rgb={b['rgb']}")
         if out.get("tv_wall_uncertainty"):
             print(f"  /!\\ {out['tv_wall_uncertainty']}")
+        if out.get("template_offset_m") is not None:
+            print(f"  along-offset escolhido: {out['template_offset_m']} m")
+        v = out.get("template_validation")
+        if v:
+            print(f"  VALIDACAO hard gates: valid={v['valid']}")
+            print("    " + "  ".join(f"{k}={'OK' if ok else 'X'}"
+                                     for k, ok in v["hard_gates"].items()))
+            if v["violations"]:
+                print(f"    violations: {v['violations']}")
         return
 
     chosen = out["chosen_candidate"]
