@@ -238,7 +238,7 @@ def test_git_inventory_shape_no_crash():
 
 
 def test_sha256_identical_content_same_hash(tmp_path):
-    import tools.claude_bridge.server as srv
+    import tools.claude_bridge.skp_inventory as srv
     a = tmp_path / "a.skp"; b = tmp_path / "b.skp"; c = tmp_path / "c.skp"
     a.write_bytes(b"SAME-BYTES-XYZ"); b.write_bytes(b"SAME-BYTES-XYZ")
     c.write_bytes(b"different")
@@ -247,7 +247,7 @@ def test_sha256_identical_content_same_hash(tmp_path):
 
 
 def test_dedup_by_hash_groups_and_keeper():
-    import tools.claude_bridge.server as srv
+    import tools.claude_bridge.skp_inventory as srv
     files = [
         {"path": "sketchup-mcp/artifacts/p/p.skp", "sha": "AAA", "git": "tracked"},
         {"path": "sketchup-mcp/runs/p/model.skp", "sha": "AAA", "git": "ignored"},
