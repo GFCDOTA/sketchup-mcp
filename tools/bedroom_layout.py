@@ -219,8 +219,12 @@ def build_arrangement(sm, hb, bed_key, bed_off, win_zone, comodo, circ_u):
     (condicional) + guarda-roupa (condicional, melhor parede alternativa)."""
     o, face, sgn, ac = hb["orient"], hb["face"], hb["sgn"], hb["along_c"] + M(bed_off)
     bw, bl, _ = BED_SIZES[bed_key]
+    # facing = cabeceira -> pe (perpendicular a parede, entrando no comodo). Pro
+    # diagrama mostrar a orientacao e pro componente real (depois) ser colocado
+    # virado certo.
+    bed_facing = (sgn, 0.0) if o == "v" else (0.0, sgn)
     items = [{"kind": "bed", "box": _fbox(o, face, sgn, ac, M(MARGIN_M), M(bw), M(bl)),
-              "size": bed_key}]
+              "size": bed_key, "facing": bed_facing}]
     # criados-mudos flanqueando, encostados na MESMA parede (condicional)
     nw, nd = NIGHTSTAND
     for side in (1, -1):
@@ -251,7 +255,9 @@ def build_arrangement(sm, hb, bed_key, bed_off, win_zone, comodo, circ_u):
                 continue
             if any(front.intersection(p).area > M(0.02) ** 2 for p in placed):
                 continue
-            items.append({"kind": "wardrobe", "box": wbox, "wall": ws["id"]})
+            w_facing = (ws["sgn"], 0.0) if ws["orient"] == "v" else (0.0, ws["sgn"])
+            items.append({"kind": "wardrobe", "box": wbox, "wall": ws["id"],
+                          "facing": w_facing})   # porta abre pro comodo
             break
         if any(it["kind"] == "wardrobe" for it in items):
             break
@@ -503,6 +509,13 @@ def plot(sm, out, out_png):
             ax.fill(*b.exterior.xy, color=COL.get(it["kind"], "0.4"), alpha=0.85, zorder=5)
             ax.annotate(it["kind"], (b.centroid.x, b.centroid.y), color="white",
                         fontsize=7, ha="center", va="center", zorder=6)
+            fac = it.get("facing")          # seta de ORIENTACAO (facing) da peca
+            if fac:
+                L = M(0.55)
+                ax.annotate("", xy=(b.centroid.x + fac[0] * L, b.centroid.y + fac[1] * L),
+                            xytext=(b.centroid.x, b.centroid.y),
+                            arrowprops=dict(arrowstyle="-|>", color="#ffd600", lw=2.5),
+                            zorder=9)
         win = c["headboard_wall"] == chosen_wall
         tag = "OK" if c["valid"] else "INVALIDO"
         title = (f"#{rank_of.get(c['headboard_wall'], '?')}{'  WINNER' if win else ''}  "
@@ -525,7 +538,8 @@ def plot(sm, out, out_png):
         sub += f" | WINNER cabeceira {chosen_wall}"
     fig.suptitle(sub, fontsize=12)
     fig.text(0.5, 0.01, "azul=cama  teal=criado-mudo  roxo=guarda-roupa  "
-             "ciano=janela  marrom=porta  vermelho=circulacao", ha="center", fontsize=8)
+             "ciano=janela  marrom=porta  vermelho=circulacao  "
+             "SETA AMARELA=frente/orientacao do movel", ha="center", fontsize=8)
     plt.tight_layout(rect=[0, 0.02, 1, 1])
     plt.savefig(out_png, dpi=85)
     plt.close(fig)
