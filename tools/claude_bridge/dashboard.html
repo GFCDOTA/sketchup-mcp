@@ -250,6 +250,25 @@ body{font-size:14px;}
 .tl-row::before{content:"";position:absolute;left:-13px;top:11px;width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 7px var(--accent);}
 .tl-row.heartbeat{color:var(--dim);} .tl-row.heartbeat::before{background:var(--dim);box-shadow:none;width:6px;height:6px;left:-12px;}
 .tl-row .tlt{color:var(--dim);font-variant-numeric:tabular-nums;margin-right:9px;}
+/* ===== v3 NOC: Home single-pane — tiles semáforo + sparkline + atenção + pipe slim ===== */
+.kpi.ok{background:linear-gradient(180deg,var(--ok-dim),var(--card));border-color:rgba(39,224,138,.4);} .kpi.ok .kpi-n{color:var(--ok);}
+.kpi.warn{background:linear-gradient(180deg,var(--warn-dim),var(--card));border-color:rgba(255,176,46,.42);} .kpi.warn .kpi-n{color:var(--warn);}
+.kpi.bad{background:linear-gradient(180deg,var(--bad-dim),var(--card));border-color:rgba(255,77,94,.5);box-shadow:var(--glow-bad);} .kpi.bad .kpi-n{color:var(--bad);}
+.kpi.bad::after{background:linear-gradient(90deg,transparent,var(--bad),transparent);}
+.kpi.dim{border-color:var(--line2);} .kpi.dim .kpi-n{color:var(--dim);}
+.kpi.link{cursor:pointer;transition:.12s;}
+.kpi.link:hover{transform:translateY(-1px);border-color:rgba(43,212,255,.55);box-shadow:var(--glow-accent);}
+.kpi.link::before{content:"↗";position:absolute;top:7px;right:10px;font-size:10px;color:var(--dim);opacity:.5;}
+.kpi-sub{font-size:9.5px;color:var(--dim);margin-top:4px;letter-spacing:.3px;text-transform:none;font-weight:600;}
+.spark{display:flex;align-items:center;gap:12px;padding:7px 0;border-bottom:1px dashed rgba(255,255,255,.05);} .spark:last-child{border-bottom:0;}
+.spark .sl{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.8px;min-width:130px;}
+.spark svg{display:block;flex:1;} .spark .sv{font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--txt);min-width:30px;text-align:right;}
+ul.attn{list-style:none;margin:0;padding:0;}
+ul.attn li{display:flex;align-items:center;gap:11px;padding:9px 2px;border-bottom:1px solid rgba(255,255,255,.05);font-size:12.5px;cursor:pointer;} ul.attn li:last-child{border-bottom:0;}
+ul.attn li:hover{background:rgba(43,212,255,.05);}
+ul.attn li .sev{width:9px;height:9px;border-radius:50%;flex:none;} ul.attn li .sev.bad{background:var(--bad);box-shadow:0 0 8px var(--bad);} ul.attn li .sev.warn{background:var(--warn);box-shadow:0 0 6px var(--warn);}
+ul.attn li .go{margin-left:auto;font-size:9.5px;color:var(--accent);text-transform:uppercase;letter-spacing:.6px;white-space:nowrap;}
+.pipe.slim{gap:4px;} .pipe.slim .stg{min-width:0;flex:1;padding:7px 4px;font-size:10px;} .pipe.slim .stg small{display:none;} .pipe.slim .arr{font-size:11px;}
 </style></head><body>
 <header>
 <h1><span class="logo">◉</span> SketchUp Creator <span class="sub">NOC</span></h1>
@@ -258,9 +277,10 @@ body{font-size:14px;}
 <span class="seg"><span class="clock" id="hclock">--:--:--</span></span>
 <span class="seg opt">UPTIME&nbsp;<b id="huptime">—</b></span>
 <span class="seg opt">ORACLE&nbsp;<b id="horacle">—</b></span>
+<span class="seg opt" id="hllm">🤖 —</span>
 </div>
 <nav>
-<a href="#home">Home</a><a href="#sessoes">Sessões</a><a href="#gate">Gate</a><a href="#review-skp">Review SKP</a><a href="#repo">Repo</a><a href="#backlog">Backlog</a><a href="#artifacts">Artifacts</a><a href="#docs">Docs</a>
+<a href="#home">Home</a><a href="#sessoes">Sessões</a><a href="#gate">Gate</a><a href="#review-skp">Review SKP</a><a href="#repo">Repo</a><a href="#backlog">Backlog</a><a href="#artifacts">Artifacts</a><a href="#llms">🤖 IAs locais</a><a href="#docs">Docs</a>
 </nav>
 </header>
 <main>
@@ -269,16 +289,19 @@ body{font-size:14px;}
 <div id="status-banner" class="hero red">carregando placar do projeto...</div>
 <div id="kpi" class="kpi-row"></div>
 
-<div class="grp">⚡ Ação</div>
+<div class="grp">🚨 Precisa de você</div>
 <div class="wrap">
-<div class="card full" id="actions-card"><h2>⚡ Ações corretivas <span class="muted" style="font-weight:400;font-size:12px">— identificou, corrige (não fica parado)</span></h2><div id="actions" class="muted">carregando ações...</div></div>
-<div class="card full"><h2>Próxima melhor ação (ROI = impacto/esforço)</h2><div id="nba" class="muted">carregando...</div></div>
+<div class="card full" id="attn-card"><h2>Atenção agora</h2><div id="attn" class="muted">checando pendências...</div></div>
+<div class="card"><h2>⚡ Ações corretivas</h2><div id="actions" class="muted">carregando ações...</div></div>
+<div class="card"><h2>🎯 Próxima melhor ação (ROI)</h2><div id="nba" class="muted">carregando...</div></div>
 </div>
 
-<div class="grp">🔧 Pipeline PDF → SKP</div>
+<div class="grp">📈 Pulso</div>
 <div class="wrap">
-<div class="card full"><h2>Pipeline PDF → SKP (como o sketchup-mcp processa)</h2>
-<div class="pipe">
+<div class="card"><h2>Disponibilidade do gate</h2><div id="timeline" class="timeline"></div><div class="muted" style="margin-top:8px">verde=online · vermelho=offline · 5s</div></div>
+<div class="card"><h2>Tendências (janela ~3min)</h2><div id="sparklines"><span class="muted">acumulando amostras...</span></div></div>
+<div class="card full"><h2>Pipeline PDF → SKP</h2>
+<div class="pipe slim">
 <div class="stg pdf">PDF<small>planta</small></div><div class="arr">→</div>
 <div class="stg human">anotação<small>HUMANO</small></div><div class="arr">→</div>
 <div class="stg auto">consensus.json<small>walls/openings/rooms</small></div><div class="arr">→</div>
@@ -288,21 +311,7 @@ body{font-size:14px;}
 <div class="stg human">VISUAL_REVIEW<small>HUMANO vs PDF</small></div><div class="arr">→</div>
 <div class="stg ok">artifacts/<small>deliverable</small></div>
 </div>
-<div class="muted" style="margin-top:10px">O oráculo :8765 (modo B, Opus 4.8) decide as bifurcações técnicas. Só o VISUAL_REVIEW sobe pro humano.</div></div>
-</div>
-
-<div class="grp">📡 Operação</div>
-<div class="wrap">
-<div class="card"><h2>Health</h2><div id="health"></div></div>
-<div class="card"><h2>Health timeline</h2><div id="timeline" class="timeline"></div><div class="muted" style="margin-top:8px">verde=online · vermelho=offline · refresh 5s</div></div>
-<div class="card full"><h2>Heartbeats (orquestrador de liveness)</h2><table><thead><tr><th>session</th><th>cycle</th><th>idade</th><th>beats iguais</th><th>última ação</th><th>flags</th></tr></thead><tbody id="sessions"></tbody></table></div>
-<div class="card full"><h2>📈 Timeline — o que aconteceu (consults + heartbeats)</h2><div id="feed" class="feed"></div></div>
-</div>
-
-<div class="grp">📦 Git &amp; Sistema</div>
-<div class="wrap">
-<div class="card full"><h2>Últimos commits em develop</h2><div id="commits" class="feed"></div></div>
-<div class="card full"><h2>Sistema (E:\Claude + Git)</h2><div id="sys-summary" class="muted">carregando...</div></div>
+<div class="muted" style="margin-top:8px">Oráculo :8765 (modo B, Opus 4.8) decide as bifurcações técnicas. Só o VISUAL_REVIEW sobe pro humano.</div></div>
 </div>
 </section>
 
@@ -324,6 +333,8 @@ body{font-size:14px;}
 <div class="card full"><h2>Git Inventory — repos &amp; worktrees em E:\Claude (read-only)</h2>
 <div id="git-summary" class="muted" style="margin-bottom:12px"></div>
 <table><thead><tr><th>path</th><th>tipo</th><th>branch</th><th>HEAD</th><th>estado</th><th>untracked/chg</th><th>último commit</th></tr></thead><tbody id="git-rows"></tbody></table></div>
+<div class="card full"><h2>Últimos commits em develop</h2><div id="commits" class="feed"></div></div>
+<div class="card full"><h2>Sistema (E:\Claude + Git)</h2><div id="sys-summary" class="muted">carregando...</div></div>
 </section>
 
 <section id="planta">
@@ -371,6 +382,14 @@ body{font-size:14px;}
 <li><b>Consolidar serving pro repo canônico</b> — sair do worktree wt-dash; aí o Lixão vê o runs/ scratch real. <span class="tag">infra</span></li>
 <li><b>RAG indexado</b> — o file-fetch §6.3 é "RAG-bebê"; indexar depois do pipeline generalizado. <span class="tag">enhancement</span></li>
 </ul></div>
+</section>
+
+<section id="llms">
+<div class="card full"><h2>🤖 IAs locais (Ollama) — acionamentos &amp; papéis</h2>
+<div id="llms-summary" class="muted" style="margin-bottom:12px">carregando uso dos modelos...</div>
+<table><thead><tr><th>modelo</th><th>papel (pra quê)</th><th>status</th><th>acionamentos</th><th>último uso</th><th>médio</th><th style="text-align:right">tam.</th></tr></thead><tbody id="llms-rows"></tbody></table>
+<div class="muted" style="margin-top:10px">Acionamentos reconstruídos do log do Ollama (<code>server*.log</code>): cada <code>POST /api/generate|chat</code> pareado com o modelo carregado no momento. O Ollama não expõe contador por modelo via API — a janela é o que os logs rotacionados guardam. <b>0 acionamentos</b> = sem registro nessa janela (provavelmente ocioso).</div>
+</div>
 </section>
 
 <section id="docs">
@@ -461,56 +480,116 @@ function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
 function fmtAge(s){if(s==null)return '-';if(s<90)return s+'s';if(s<5400)return Math.round(s/60)+'m';if(s<86400)return Math.round(s/3600)+'h';return Math.round(s/86400)+'d';}
 function fmtTime(t){try{return new Date(t*1000).toLocaleTimeString('pt-br');}catch(e){return '';}}
 function kv(k,v){return '<div class="kv"><span>'+k+'</span><span>'+esc(v)+'</span></div>';}
+// ---- v3 NOC: estado compartilhado + sparklines (vanilla, sem lib) ----
+let _health=null,_llm=null,_sessFlags={paralyzed:[],stalled:[]};
+const SPARKMAX=40; // ~3min @ 5s
+const series={sessActive:[],gateRate:[],llmOn:[]};
+function pushSeries(name,val){var a=series[name];if(!a)return;a.push(Number(val)||0);if(a.length>SPARKMAX)a.shift();}
+function sparkline(arr,color){
+  var w=130,h=26,c=color||'#2bd4ff';
+  if(!arr||arr.length<2)return '<svg width="'+w+'" height="'+h+'"></svg>';
+  var max=Math.max.apply(null,arr.concat([1])),min=Math.min.apply(null,arr.concat([0])),rng=(max-min)||1,n=arr.length;
+  var pts=arr.map(function(v,i){var x=(i*(w-2)/(n-1))+1,y=h-1-((v-min)/rng)*(h-3);return x.toFixed(1)+','+y.toFixed(1);}).join(' ');
+  return '<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none"><polyline fill="none" stroke="'+c+'" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" points="'+pts+'"/></svg>';
+}
+function renderSparks(){
+  var el=$('sparklines'); if(!el)return;
+  var rows=[['sessões ativas',series.sessActive,'#27e08a'],['consults/janela',series.gateRate,'#2bd4ff'],['LLMs on',series.llmOn,'#ffb02e']];
+  el.innerHTML=rows.map(function(r){var a=r[1],last=a.length?a[a.length-1]:0;return '<div class="spark"><span class="sl">'+r[0]+'</span>'+sparkline(a,r[2])+'<span class="sv">'+last+'</span></div>';}).join('');
+}
+function tile(h,cls,val,label,sub){return '<div class="kpi link '+cls+'" data-hash="'+h+'"><div class="kpi-n">'+esc(val)+'</div><div class="kpi-l">'+label+'</div>'+(sub?'<div class="kpi-sub">'+esc(sub)+'</div>':'')+'</div>';}
 // 2A — consolidacao das 8 abas (nav). NAO move/apaga conteudo: cada aba nova mapeia
 // p/ as secoes existentes que ela mostra; hashes antigos continuam validos via HASHALIAS.
-const TABS=['home','sessoes','gate','review-skp','repo','backlog','artifacts','docs'];
-const TABMAP={home:['home'],sessoes:['sessoes'],gate:['gate'],'review-skp':['planta'],repo:['git','ecossistema'],backlog:['dificuldades','oportunidades','aprendizados'],artifacts:['lixao'],docs:['docs']};
+const TABS=['home','sessoes','gate','review-skp','repo','backlog','artifacts','llms','docs'];
+const TABMAP={home:['home'],sessoes:['sessoes'],gate:['gate'],'review-skp':['planta'],repo:['git','ecossistema'],backlog:['dificuldades','oportunidades','aprendizados'],artifacts:['lixao'],llms:['llms'],docs:['docs']};
 const HASHALIAS={planta:'review-skp',git:'repo',ecossistema:'repo',dificuldades:'backlog',oportunidades:'backlog',aprendizados:'backlog',lixao:'artifacts'};
-const ALLSEC=['home','sessoes','gate','planta','git','ecossistema','dificuldades','oportunidades','aprendizados','lixao','docs'];
+const ALLSEC=['home','sessoes','gate','planta','git','ecossistema','dificuldades','oportunidades','aprendizados','lixao','llms','docs'];
 function route(){
   let raw=(location.hash||'#home').slice(1);
   let h=HASHALIAS[raw]||raw; if(!TABMAP[h])h='home';
   const show=TABMAP[h];
   ALLSEC.forEach(function(id){var s=$(id); if(s)s.className=(show.indexOf(id)>=0?'active':'');});
   document.querySelectorAll('nav a').forEach(function(a){a.className=(a.getAttribute('href')==='#'+h?'active':'');});
-  if(show.indexOf('home')>=0){loadStatus();loadActions();loadCommits();loadSysSummary();}
+  if(show.indexOf('home')>=0){loadStatus();loadActions();loadLocalAI();}
   if(show.indexOf('sessoes')>=0)loadSessoes();
   if(show.indexOf('gate')>=0)loadGate();
-  if(show.indexOf('git')>=0)loadGit();
+  if(show.indexOf('git')>=0){loadGit();loadCommits();loadSysSummary();}
   if(show.indexOf('ecossistema')>=0)loadEco();
   if(show.indexOf('planta')>=0)loadPlant();
   if(show.indexOf('lixao')>=0)loadLixao();
   if(show.indexOf('dificuldades')>=0)loadDiff();
   if(show.indexOf('aprendizados')>=0)loadLearnings();
+  if(show.indexOf('llms')>=0)loadLLMs();
 }
 window.addEventListener('hashchange',route);
 async function pollHome(){
   let online=false,health=null;
   try{const r=await fetch('/health',{cache:'no-store'});health=await r.json();online=r.ok;}catch(e){}
-  const b=$('status'); b.className='badge '+(online?'on':'off'); b.textContent=online?'ONLINE':'OFFLINE';
+  _health=health;
+  const b=$('status'); if(b){b.className='badge '+(online?'on':'off'); b.textContent=online?'ONLINE':'OFFLINE';}
   hist.push(online); if(hist.length>60)hist.shift();
   if($('timeline'))$('timeline').innerHTML=hist.map(function(u){return '<div class="dot '+(u?'up':'down')+'"></div>';}).join('');
-  if(health&&$('health'))$('health').innerHTML=kv('oracle',health.oracle)+kv('model',health.model||'-')+kv('effort',health.effort||'-')+kv('uptime',fmtAge(health.uptime_sec))+kv('endpoints',(health.endpoints||[]).length+' rotas');
   if(health){var _hu=$('huptime');if(_hu)_hu.textContent=fmtAge(health.uptime_sec);var _ho=$('horacle');if(_ho)_ho.textContent=(health.model||health.oracle||'-');}
-  if(!online)return;
+  if(!online){renderSparks();return;}
   try{const s=await (await fetch('/sessions',{cache:'no-store'})).json();
-    if($('sessions'))$('sessions').innerHTML=Object.entries(s).map(function(e){var id=e[0],v=e[1];return '<tr><td>'+esc(id)+'</td><td>'+(v.cycle==null?'-':v.cycle)+'</td><td>'+fmtAge(v.age_sec)+'</td><td>'+(v.unchanged_beats||0)+'</td><td>'+esc(v.last_action||'')+'</td><td>'+(v.flags||[]).map(function(f){return '<span class="flag '+f+'">'+f+'</span>';}).join(' ')+'</td></tr>';}).join('')||'<tr><td colspan=6 class="muted">nenhuma sessão batendo ponto</td></tr>';
+    var vals=Object.keys(s).map(function(k){return s[k];});
+    _sessFlags={paralyzed:[],stalled:[]};
+    vals.forEach(function(v){var f=v.flags||[];if(f.indexOf('PARALYZED')>=0)_sessFlags.paralyzed.push(v);else if(f.indexOf('STALLED')>=0)_sessFlags.stalled.push(v);});
+    pushSeries('sessActive',vals.filter(function(v){return (v.flags||[]).indexOf('OK')>=0;}).length);
   }catch(e){}
   try{const ev=await (await fetch('/events',{cache:'no-store'})).json();
-    if($('feed')){var rows=ev.slice().reverse().map(function(e){var x=e.kind==='consult'?('perguntou ao gate · '+(e.mode||'default')+' · '+(e.dur_sec==null?'?':e.dur_sec)+'s'):('heartbeat · cycle '+(e.cycle==null?'?':e.cycle)+' · '+esc(e.session_id||'')+(e.last_action?(' · '+esc(e.last_action)):''));return '<div class="tl-row '+esc(e.kind)+'"><span class="tlt">'+fmtTime(e.t)+'</span>'+x+'</div>';}).join('');$('feed').innerHTML=rows?('<div class="tl">'+rows+'</div>'):'<div class="muted">sem atividade</div>';}
+    pushSeries('gateRate',(ev||[]).filter(function(e){return e.kind==='consult';}).length);
   }catch(e){}
+  renderSparks();
 }
 async function loadStatus(){
-  try{const s=await (await fetch('/api/status')).json();
-    var clr=s.score==='GREEN'?'var(--ok)':s.score==='YELLOW'?'var(--warn)':'var(--bad)';
-    var b=$('status-banner');
-    b.className='hero '+String(s.score).toLowerCase();
-    b.innerHTML='<div class="hero-score"><span class="hero-dot"></span>'+esc(s.score)+'</div><div class="hero-body"><div class="hero-reason">'+esc(s.reason)+'</div><div class="hero-sub">gate '+esc(s.gate)+' · '+s.sessions.total+' sessões ('+s.sessions.stopped+' paradas) · fila-gate '+s.pending_gate+' · dirty '+(s.dirty_repos||[]).length+' · dificuldades OPEN '+s.open_difficulties+'</div></div><div class="hero-aside"><div class="hero-upd">ATUALIZADO <b>'+new Date().toLocaleTimeString('pt-br')+'</b></div><div class="hero-next" id="hero-next"><span class="muted">—</span></div></div>';
-    var k=$('kpi'); if(k){var T=[['PROJETO',s.score,clr],['SESSÕES',s.sessions.total,'var(--accent)'],['PARADAS',s.sessions.stopped,'var(--dim)'],['FILA GATE',s.pending_gate,s.pending_gate>0?'var(--bad)':'var(--ok)'],['DIRTY',(s.dirty_repos||[]).length,(s.dirty_repos||[]).length>0?'var(--warn)':'var(--ok)'],['DIFIC. OPEN',s.open_difficulties,s.open_difficulties>0?'var(--warn)':'var(--ok)']];k.innerHTML=T.map(function(t){return '<div class="kpi"><div class="kpi-n" style="color:'+t[2]+'">'+esc(t[1])+'</div><div class="kpi-l">'+t[0]+'</div></div>';}).join('');}
-  }catch(e){if($('status-banner'))$('status-banner').textContent='placar indisponível';}
+  var s=null,ledger=null;
+  try{s=await (await fetch('/api/status',{cache:'no-store'})).json();}catch(e){if($('status-banner'))$('status-banner').textContent='placar indisponível';return;}
+  try{ledger=await (await fetch('/api/gate-ledger',{cache:'no-store'})).json();}catch(e){}
+  var stopped=s.sessions.stopped||0,dirty=(s.dirty_repos||[]).length,high=(s.high_open||[]).length,pend=s.pending_gate||0;
+  var visEntries=((ledger&&ledger.entries)||[]).filter(function(e){return e.verdict==='VISUAL_REVIEW';});
+  var canon=s.canonical_skp||{};
+  var canonNoVerdict=Object.keys(canon).filter(function(k){return canon[k]&&canon[k].has_skp&&!canon[k].verdict;});
+  var visBad=visEntries.length>0,visWarn=!visBad&&canonNoVerdict.length>0,visN=visEntries.length||canonNoVerdict.length;
+  var b=$('status-banner');
+  if(b){b.className='hero '+String(s.score).toLowerCase();
+    b.innerHTML='<div class="hero-score"><span class="hero-dot"></span>'+esc(s.score)+'</div><div class="hero-body"><div class="hero-reason">'+esc(s.reason)+'</div></div><div class="hero-aside"><div class="hero-upd">ATUALIZADO <b>'+new Date().toLocaleTimeString('pt-br')+'</b></div></div>';}
+  var k=$('kpi');
+  if(k){
+    var sessCls=_sessFlags.paralyzed.length?'bad':(stopped>0?'warn':'ok');
+    var gateCls=pend===0?'ok':(pend<=2?'warn':'bad');
+    var visCls=visBad?'bad':(visWarn?'warn':'ok');
+    var highCls=high===0?'ok':(high>=2?'bad':'warn');
+    var llmCls=!_llm?'dim':(!_llm.up?'bad':((_llm.running||[]).length?'ok':'warn'));
+    k.innerHTML=[
+      tile('#backlog',s.score==='GREEN'?'ok':(s.score==='YELLOW'?'warn':'bad'),s.score,'PROJETO',''),
+      tile('#sessoes',sessCls,s.sessions.total,'SESSÕES',stopped+' paradas'+(_sessFlags.paralyzed.length?' · '+_sessFlags.paralyzed.length+' travada(s)':'')),
+      tile('#gate',gateCls,pend,'FILA GATE',pend?'sem resposta':'respondido'),
+      tile('#review-skp',visCls,visN,'VISUAL REVIEW',visN?'precisa do seu olho':'nada pendente'),
+      tile('#repo',dirty?'warn':'ok',dirty,'DIRTY REPOS',dirty?'sujo(s)':'limpos'),
+      tile('#backlog',highCls,high,'DIFIC. HIGH',(s.open_difficulties||0)+' OPEN'),
+      tile('#docs',_health?'ok':'dim',_health?'UP':'DOWN','ORÁCULO',_health?(_health.model||''):'gate off'),
+      tile('#llms',llmCls,_llm?((_llm.running||[]).length+'/'+(_llm.count||0)):'—','LLMs ON',(_llm&&!_llm.up)?'ollama off':'em memória')
+    ].join('');
+  }
+  var att=$('attn'),attCard=$('attn-card');
+  if(att){
+    var items=[];
+    if(visEntries.length)items.push(['bad','#review-skp','VISUAL_REVIEW pendente — SKP mudou, precisa do seu olho vs PDF']);
+    if(canonNoVerdict.length)items.push(['warn','#review-skp',canonNoVerdict.length+' SKP canônico sem veredito — revisar']);
+    if(pend>0)items.push(['bad','#gate',pend+' consult(s) ao gate sem resposta']);
+    _sessFlags.paralyzed.forEach(function(v){items.push(['bad','#sessoes','sessão PARALYZED (travada): '+((v&&v.last_action)?esc(v.last_action):'cycle congelado')]);});
+    if(_sessFlags.stalled.length)items.push(['warn','#sessoes',_sessFlags.stalled.length+' sessão(ões) STALLED (patinando)']);
+    if(high>0)items.push(['bad','#backlog',high+' dificuldade(s) HIGH aberta(s)']);
+    if(items.length){
+      if(attCard)attCard.className='card full';
+      att.innerHTML='<ul class="attn">'+items.map(function(it){return '<li data-hash="'+it[1]+'"><span class="sev '+it[0]+'"></span><span>'+it[2]+'</span><span class="go">abrir ↗</span></li>';}).join('')+'</ul>';
+    }else{
+      att.innerHTML='<div class="alarm ok" style="margin:0">tudo verde — nada pendente, nenhuma ação humana necessária</div>';
+    }
+  }
   try{const n=await (await fetch('/api/next-best-actions')).json();var A=(n.actions||[]);
-    if($('nba'))$('nba').innerHTML=A.slice(0,3).map(function(a){return '<div style="padding:6px 0;border-bottom:1px solid var(--line)"><div style="display:flex;justify-content:space-between;gap:10px"><b>'+esc(a.titulo)+'</b><span style="color:var(--accent);white-space:nowrap">ROI '+a.roi+'</span></div><div class="muted">→ '+esc(a.proxima_acao)+'</div></div>';}).join('')||'<span class="muted">sem ações</span>';
-    if($('hero-next'))$('hero-next').innerHTML=A.length?('<span class="tag">▶ próxima ação · ROI '+A[0].roi+'</span>'+esc(A[0].titulo)):'<span class="muted">sem ação pendente</span>';
+    if($('nba'))$('nba').innerHTML=A.slice(0,1).map(function(a){return '<div><div style="display:flex;justify-content:space-between;gap:10px"><b>'+esc(a.titulo)+'</b><span style="color:var(--accent);white-space:nowrap">ROI '+a.roi+'</span></div><div class="muted" style="margin-top:4px">→ '+esc(a.proxima_acao)+'</div></div>';}).join('')||'<span class="muted">sem ação pendente</span>';
   }catch(e){}
 }
 async function loadActions(){
@@ -676,9 +755,48 @@ async function loadEco(){
 }
 document.addEventListener('click',function(e){var t=e.target;if(t&&t.tagName==='IMG'&&/\/artifact\?/.test(t.getAttribute('src')||'')){var lb=document.getElementById('lightbox');if(lb){document.getElementById('lb-img').src=t.src;lb.classList.add('open');}}});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){var lb=document.getElementById('lightbox');if(lb)lb.classList.remove('open');}});
+document.addEventListener('click',function(e){var el=(e.target&&e.target.closest)?e.target.closest('[data-hash]'):null;if(el){location.hash=el.getAttribute('data-hash');}});
+function shortModel(n){return String(n).replace(/:latest$/,'');}
+async function loadLocalAI(){
+  var d=null;
+  try{ d=await (await fetch('/api/local-llms',{cache:'no-store'})).json(); }catch(e){ d={up:false,error:String(e)}; }
+  _llm=d; pushSeries('llmOn',(d.running||[]).length); renderSparks();
+  var hl=$('hllm');
+  if(hl){
+    if(!d.up){ hl.innerHTML='🤖 <span class="badge off">OLLAMA OFF</span>'; }
+    else{ var r=d.running||[];
+      hl.innerHTML = r.length
+        ? '🤖 '+r.map(function(n){return '<b>'+esc(shortModel(n))+'</b> <span class="badge on">on</span>';}).join(' ')
+        : '🤖 <span class="muted">'+(d.count||0)+' modelos · 0 on</span>';
+    }
+  }
+  var el=$('localai'); if(!el) return;
+  if(!d.up){el.innerHTML='<span class="badge off">OLLAMA OFF</span> <span class="muted">'+esc(d.error||'daemon :11434 não responde')+'</span>';return;}
+  var rows=(d.models||[]).map(function(m){
+    return '<tr><td>'+(m.icon||'')+' <b>'+esc(m.name)+'</b>'+(m.running?' <span class="badge on">on</span>':'')+'</td><td class="muted">'+esc(m.role||'')+'</td><td class="muted">'+esc(m.params||'')+'</td><td style="text-align:right">'+m.gb+' GB</td></tr>';
+  }).join('')||'<tr><td colspan=4 class="muted">nenhum modelo instalado</td></tr>';
+  el.innerHTML='<div style="margin-bottom:10px"><span class="badge on">OLLAMA UP</span> <span class="muted">v'+esc(d.version||'?')+' · '+d.count+' modelos · '+(d.running||[]).length+' on</span></div><table><thead><tr><th>modelo</th><th>papel</th><th>params</th><th style="text-align:right">tam.</th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+async function loadLLMs(){
+  var sm=$('llms-summary'), rb=$('llms-rows'); if(!rb)return;
+  try{
+    const d=await (await fetch('/api/llm-usage',{cache:'no-store'})).json();
+    if(!d.up){sm.innerHTML='<span class="badge off">OLLAMA OFF</span>';rb.innerHTML='';return;}
+    var ms=d.models||[];
+    var used=ms.filter(function(m){return m.calls>0;}).length;
+    var on=ms.filter(function(m){return m.running;}).length;
+    sm.innerHTML='<b style="color:var(--txt)">'+d.total_calls+'</b> acionamentos no histórico · <b>'+used+'</b> de '+ms.length+' já usado(s) · '+on+' ativo(s) agora · '+d.log_files+' arquivo(s) de log';
+    rb.innerHTML=ms.map(function(m){
+      var st=m.running?'<span class="badge on">ativo</span>':(m.installed?'<span class="flag OK">instalado</span>':'<span class="flag IDLE">removido</span>');
+      var calls=m.calls>0?('<b>'+m.calls+'</b>'):'<span class="muted">0</span>';
+      return '<tr><td>'+(m.icon||'')+' <b>'+esc(m.name)+'</b></td><td class="muted">'+esc(m.role||'')+'</td><td>'+st+'</td><td>'+calls+'</td><td class="muted">'+esc(m.last_ts||'—')+'</td><td class="muted">'+(m.avg_ms?(m.avg_ms+'ms'):'—')+'</td><td class="muted" style="text-align:right">'+m.gb+' GB</td></tr>';
+    }).join('')||'<tr><td colspan=7 class="muted">nenhum modelo</td></tr>';
+  }catch(e){if(sm)sm.innerHTML='<span class="badge off">erro</span> <span class="muted">'+esc(e)+'</span>';}
+}
 function tick(){var c=$('hclock');if(c)c.textContent=new Date().toLocaleTimeString('pt-br');}
 route(); pollHome(); tick(); setInterval(pollHome,5000); setInterval(tick,1000);
 setInterval(function(){var h=$('home');if(h&&h.classList.contains('active'))loadStatus();},5000);
+loadLocalAI(); setInterval(loadLocalAI,10000);
 </script>
 <div class="lb" id="lightbox" onclick="this.classList.remove('open')"><img id="lb-img" alt="render em tela cheia"></div>
 </body></html>
