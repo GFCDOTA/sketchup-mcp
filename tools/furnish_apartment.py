@@ -74,9 +74,15 @@ def main():
     after_top = OUT_DIR / "planta_74_furnished_after_top.png"
     after_iso = OUT_DIR / "planta_74_furnished_after_iso.png"
     log_path = OUT_DIR / "planta_74_furnished_log.txt"
+    # mata o SketchUp ANTES de apagar os arquivos (senao o .skp fica travado)
+    subprocess.run(["taskkill", "/F", "/IM", "SketchUp.exe"], capture_output=True)
+    time.sleep(1)
     for p in (skp_out, before, after_top, after_iso, log_path):
-        if p.exists():
-            p.unlink()
+        try:
+            if p.exists():
+                p.unlink()
+        except PermissionError:
+            pass
 
     env = os.environ.copy()
     env["LAYOUT_BOXES"] = json.dumps(boxes)
