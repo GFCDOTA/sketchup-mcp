@@ -92,6 +92,26 @@
         "fill_ratio": 0.16
       },
       "violations": [],
+      "anti_patterns": [
+        {
+          "rule_id": "RL-06",
+          "name": "distancia_sofa_tv_plausivel",
+          "severity": "soft",
+          "evidence": "sofa-TV 3.11 m fora do ideal (2.6, 3.0)"
+        },
+        {
+          "rule_id": "RL-05",
+          "name": "parede_tv_por_profundidade",
+          "severity": "soft",
+          "evidence": "parede-TV interna/divisoria, nao de fundo"
+        },
+        {
+          "rule_id": "RL-13",
+          "name": "proporcao_e_respiro",
+          "severity": "soft",
+          "evidence": "proporcao moveis/sala 0.16 fora de (0.25, 0.45)"
+        }
+      ],
       "furniture": [
         {
           "kind": "rack_tv",
@@ -166,6 +186,26 @@
         "fill_ratio": 0.16
       },
       "violations": [],
+      "anti_patterns": [
+        {
+          "rule_id": "RL-06",
+          "name": "distancia_sofa_tv_plausivel",
+          "severity": "soft",
+          "evidence": "sofa-TV 2.38 m fora do ideal (2.6, 3.0)"
+        },
+        {
+          "rule_id": "RL-05",
+          "name": "parede_tv_por_profundidade",
+          "severity": "soft",
+          "evidence": "parede-TV interna/divisoria, nao de fundo"
+        },
+        {
+          "rule_id": "RL-13",
+          "name": "proporcao_e_respiro",
+          "severity": "soft",
+          "evidence": "proporcao moveis/sala 0.16 fora de (0.25, 0.45)"
+        }
+      ],
       "furniture": [
         {
           "kind": "rack_tv",
@@ -240,6 +280,26 @@
         "fill_ratio": 0.17
       },
       "violations": [],
+      "anti_patterns": [
+        {
+          "rule_id": "RL-06",
+          "name": "distancia_sofa_tv_plausivel",
+          "severity": "soft",
+          "evidence": "sofa-TV 3.11 m fora do ideal (2.6, 3.0)"
+        },
+        {
+          "rule_id": "RL-05",
+          "name": "parede_tv_por_profundidade",
+          "severity": "soft",
+          "evidence": "parede-TV interna/divisoria, nao de fundo"
+        },
+        {
+          "rule_id": "RL-13",
+          "name": "proporcao_e_respiro",
+          "severity": "soft",
+          "evidence": "proporcao moveis/sala 0.17 fora de (0.25, 0.45)"
+        }
+      ],
       "furniture": [
         {
           "kind": "rack_tv",
@@ -274,6 +334,80 @@
       ]
     }
   ],
+  "rules_source": "tools/layout_rules.py",
+  "rules": [
+    {
+      "id": "RL-01",
+      "kind": "process",
+      "name": "layout_antes_de_asset"
+    },
+    {
+      "id": "RL-02",
+      "kind": "process",
+      "name": "placeholder_antes_de_3dw"
+    },
+    {
+      "id": "RL-03",
+      "kind": "soft",
+      "name": "sofa_precisa_parede_focal"
+    },
+    {
+      "id": "RL-04",
+      "kind": "soft",
+      "name": "sofa_nao_flutuante_sem_funcao"
+    },
+    {
+      "id": "RL-05",
+      "kind": "soft",
+      "name": "parede_tv_por_profundidade"
+    },
+    {
+      "id": "RL-06",
+      "kind": "soft",
+      "name": "distancia_sofa_tv_plausivel"
+    },
+    {
+      "id": "RL-07",
+      "kind": "hard",
+      "name": "nao_bloquear_circulacao"
+    },
+    {
+      "id": "RL-08",
+      "kind": "hard",
+      "name": "nao_bloquear_aberturas"
+    },
+    {
+      "id": "RL-09",
+      "kind": "hard",
+      "name": "nao_atravessar_parede"
+    },
+    {
+      "id": "RL-10",
+      "kind": "hard",
+      "name": "passagem_minima"
+    },
+    {
+      "id": "RL-11",
+      "kind": "process",
+      "name": "ambiguous_explica_incerteza"
+    },
+    {
+      "id": "RL-12",
+      "kind": "process",
+      "name": "no_valid_layout_honesto"
+    },
+    {
+      "id": "RL-13",
+      "kind": "soft",
+      "name": "proporcao_e_respiro"
+    },
+    {
+      "id": "RL-14",
+      "kind": "hard",
+      "name": "dentro_do_comodo"
+    }
+  ],
+  "tv_wall_uncertainty": "RL-11: parede-TV AMBIGUOUS - usando best_candidate m013 mas ha 3 candidatas proximas; layout gerado COM ressalva, nao cravado.",
   "result": "OK",
   "chosen_candidate": "sofa_mais_poltrona",
   "ranking": [
@@ -295,6 +429,11 @@
         "sofa-TV 3.11m fora do ideal (dev 0.11m, -3)",
         "parede-TV interna/divisoria (nao e parede de fundo, -3)",
         "proporcao moveis/sala 0.17 fora de 0.25-0.45"
+      ],
+      "anti_patterns": [
+        "RL-06",
+        "RL-05",
+        "RL-13"
       ],
       "tie_break": {
         "offset_m": 0.5,
@@ -320,6 +459,11 @@
         "parede-TV interna/divisoria (nao e parede de fundo, -3)",
         "proporcao moveis/sala 0.16 fora de 0.25-0.45"
       ],
+      "anti_patterns": [
+        "RL-06",
+        "RL-05",
+        "RL-13"
+      ],
       "tie_break": {
         "offset_m": 0.5,
         "template_order": 0
@@ -344,10 +488,35 @@
         "parede-TV interna/divisoria (nao e parede de fundo, -3)",
         "proporcao moveis/sala 0.16 fora de 0.25-0.45"
       ],
+      "anti_patterns": [
+        "RL-06",
+        "RL-05",
+        "RL-13"
+      ],
       "tie_break": {
         "offset_m": 0.5,
         "template_order": 1
       }
+    }
+  ],
+  "anti_patterns_flagged": [
+    {
+      "rule_id": "RL-05",
+      "name": "parede_tv_por_profundidade",
+      "severity": "soft",
+      "count": 3
+    },
+    {
+      "rule_id": "RL-06",
+      "name": "distancia_sofa_tv_plausivel",
+      "severity": "soft",
+      "count": 3
+    },
+    {
+      "rule_id": "RL-13",
+      "name": "proporcao_e_respiro",
+      "severity": "soft",
+      "count": 3
     }
   ]
 }

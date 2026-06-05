@@ -21,6 +21,11 @@ from pathlib import Path
 from shapely.geometry import Point, box
 from shapely.ops import unary_union
 
+from tools.layout_rules import (FILL_IDEAL, RESPIRO_IDEAL, RULES, flag_anti_patterns)
+from tools.layout_rules import IDEAL_SOFA_TV as SOFA_TV_IDEAL
+from tools.layout_rules import MAX_SOFA_TV as SOFA_TV_MAX
+from tools.layout_rules import MIN_SOFA_TV as SOFA_TV_MIN
+from tools.layout_rules import PASSAGE_MIN_M as PASSAGE_M
 from tools.spatial_model import (PT_TO_M, _tv_depth_m, _wall_mid,
                                  build_spatial_model, wall_footprint)
 
@@ -37,11 +42,8 @@ FURN = {
     "mesa_centro": (1.00, 0.60),
     "poltrona": (0.85, 0.85),
 }
-PASSAGE_M = 0.80
-SOFA_TV_MIN, SOFA_TV_MAX = 2.3, 4.0
-SOFA_TV_IDEAL = (2.6, 3.0)   # faixa ideal de distancia sofa<->TV (m)
-FILL_IDEAL = (0.25, 0.45)    # area de moveis / area util ideal
-RESPIRO_IDEAL = 0.60         # fracao de area livre alvo (sobra sem ficar vazio)
+# thresholds de REGRA (SOFA_TV_*, FILL_IDEAL, RESPIRO_IDEAL, PASSAGE_M) vem de
+# tools.layout_rules (fonte unica das regras). Aqui so os de implementacao:
 MARGIN_M = 0.03        # recuo do movel da face da parede (encosta sem cravar)
 TOL_CIRC_M2 = 0.02     # quase-zero: movel NAO pode bloquear circulacao/abertura
 TOL_WALL_M2 = 0.06     # toque leve na parede e OK (movel encosta)
@@ -246,14 +248,44 @@ def score(items, sm, tv):
     }
 
 
+def _aggregate_flags(out):
+    """Agrega os anti-patterns flagrados em todos os candidatos -> resumo."""
+    seen = {}
+    for c in out.get("candidates", []):
+        for a in c.get("anti_patterns", []):
+            e = seen.setdefault(a["rule_id"], {"rule_id": a["rule_id"], "name": a["name"],
+                                               "severity": a["severity"], "count": 0})
+            e["count"] += 1
+    return sorted(seen.values(), key=lambda x: (-x["count"], x["rule_id"]))
+
+
+def _tv_uncertainty_note(tv_wall):
+    """RL-11: se a parede-TV for AMBIGUOUS, explica a incerteza (nao crava)."""
+    conf = tv_wall.get("confidence")
+    if conf == "ambiguous":
+        cands = tv_wall.get("candidates") or tv_wall.get("ranking") or []
+        return (f"RL-11: parede-TV AMBIGUOUS - usando best_candidate "
+                f"{tv_wall.get('best_candidate')} mas ha {len(cands)} candidatas "
+                f"proximas; layout gerado COM ressalva, nao cravado.")
+    if conf == "none":
+        return "RL-11: sem parede-TV confiavel - orientacao do sofa fica indefinida."
+    return None
+
+
 def run(con, room_id):
     sm = build_spatial_model(con, room_id)
     tv = _tv_setup(sm)
     out = {"stage": "BC_layout_candidates", "room_id": room_id,
-           "tv_wall": sm["tv_wall_candidate"], "candidates": []}
+           "tv_wall": sm["tv_wall_candidate"], "candidates": [],
+           "rules_source": "tools/layout_rules.py",
+           "rules": [{"id": r["id"], "kind": r["kind"], "name": r["name"]} for r in RULES]}
+    note = _tv_uncertainty_note(sm["tv_wall_candidate"])
+    if note:
+        out["tv_wall_uncertainty"] = note
     if tv is None:
         out["result"] = "NO_VALID_LAYOUT"
         out["reason"] = "sem parede-TV candidata (Etapa A)"
+        out["anti_patterns_flagged"] = []
         return sm, out
     for ti, (name, fn) in enumerate(TEMPLATES):
         # busca leve: desliza o conjunto ao longo da parede-TV ate a melhor
@@ -269,6 +301,7 @@ def run(con, room_id):
         _, off, items, res = best
         out["candidates"].append({
             "template": name, "template_order": ti, "along_offset_m": round(off, 2), **res,
+            "anti_patterns": flag_anti_patterns(res),   # regras violadas (feedback loop)
             "furniture": [{"kind": it["kind"],
                            "bbox_m": [round(it["box"].bounds[i] * PT_TO_M, 2) for i in range(4)],
                            "facing": it.get("facing")} for it in items],
@@ -280,8 +313,10 @@ def run(con, room_id):
         out["result"] = "NO_VALID_LAYOUT"
         out["reason"] = "nenhum dos 3 templates passou nos gates duros"
         out["ranking"] = [{"template": c["template"], "total_score": 0.0,
-                           "valid": False, "blocked_by": c["violations"]}
+                           "valid": False, "blocked_by": c["violations"],
+                           "anti_patterns": [a["rule_id"] for a in c["anti_patterns"]]}
                           for c in out["candidates"]]
+        out["anti_patterns_flagged"] = _aggregate_flags(out)
         return sm, out
 
     # ranking DETERMINISTICO: total_score desc; tie-break -> menor offset lateral
@@ -294,6 +329,7 @@ def run(con, room_id):
     out["ranking"] = [{"rank": i + 1, "template": c["template"],
                        "total_score": c["total_score"], "valid": c["valid"],
                        "soft_breakdown": c["soft"], "penalties": c["penalties"],
+                       "anti_patterns": [a["rule_id"] for a in c["anti_patterns"]],
                        "tie_break": {"offset_m": abs(c["along_offset_m"]),
                                      "template_order": c["template_order"]}}
                       for i, c in enumerate(order)]
@@ -302,6 +338,7 @@ def run(con, room_id):
         out["tie_note"] = (f"{len(tops)} candidatos empataram em {order[0]['total_score']} pts; "
                            f"desempate deterministico (menor offset lateral -> ordem do template) "
                            f"-> {order[0]['template']}")
+    out["anti_patterns_flagged"] = _aggregate_flags(out)
     return sm, out
 
 
@@ -339,6 +376,10 @@ def plot(sm, out, out_png):
             title += "\n-: " + "; ".join(p.split("(")[0].strip() for p in c["penalties"][:2])[:62]
         elif not c["valid"]:
             title += "\nblocked: " + "; ".join(c["violations"])[:58]
+        aps = c.get("anti_patterns", [])
+        if aps:
+            ids = sorted({a["rule_id"] for a in aps})
+            title += "\nregras: " + ", ".join(ids)[:58]
         ax.set_title(title, fontsize=9,
                      fontweight="bold" if win else "normal",
                      color="#0d47a1" if win else "black")
@@ -378,6 +419,8 @@ def main():
 
     print(f"SALA {args.room} | TV candidate: {out['tv_wall']['confidence']} "
           f"({out['tv_wall'].get('best_candidate')})")
+    if out.get("tv_wall_uncertainty"):
+        print(f"  /!\\ {out['tv_wall_uncertainty']}")
     for c in out["candidates"]:
         m = c["metrics"]
         print(f"  {c['template']:24} total={c['total_score']:5} valid={c['valid']} "
@@ -388,6 +431,8 @@ def main():
             print(f"      x HARD: {v}")
         for p in c["penalties"]:
             print(f"      - {p}")
+        for a in c["anti_patterns"]:
+            print(f"      ! {a['rule_id']} [{a['severity']}] {a['name']}: {a['evidence']}")
     print(f"=> RESULTADO: {out['result']}")
     if out["result"] == "OK":
         print(f"   RANKING: " + " > ".join(f"{r['template']}={r['total_score']}" for r in out["ranking"]))
@@ -396,6 +441,10 @@ def main():
             print(f"   TIE: {out['tie_note']}")
     else:
         print(f"   ({out.get('reason')})")
+    if out.get("anti_patterns_flagged"):
+        print("   REGRAS DISPARADAS (feedback loop):")
+        for a in out["anti_patterns_flagged"]:
+            print(f"     {a['rule_id']} [{a['severity']:4}] {a['name']} x{a['count']}")
     print(f"-> {out_dir}/")
 
 
