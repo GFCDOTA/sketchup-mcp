@@ -89,11 +89,11 @@ def _fbox(orient, face, sgn, along_c, perp_d, w_along, w_perp):
     return box(pa, a0, pb, a1) if orient == "v" else box(a0, pa, a1, pb)
 
 
-def _tv_setup(sm):
+def _tv_setup(sm, wall_id=None):
     g = sm["_geom"]
     walls, cell = g["walls"], g["cell"]
-    tid = sm["tv_wall_candidate"].get("best_candidate")
-    if not tid:
+    tid = wall_id or sm["tv_wall_candidate"].get("best_candidate")
+    if not tid or tid not in walls:
         return None
     w = walls[tid]
     wt = float(g["con"]["wall_thickness_pts"])
@@ -431,26 +431,37 @@ def run(con, room_id):
         out["reason"] = "sem parede-TV candidata (Etapa A)"
         out["anti_patterns_flagged"] = []
         return sm, out
-    for ti, (name, fn) in enumerate(TEMPLATES):
-        # busca leve: desliza o conjunto ao longo da parede-TV ate a melhor
-        # posicao valida (designer ajusta pra fugir de porta/circulacao)
-        best = None
-        for off in (0.0, 0.5, -0.5, 1.0, -1.0, 1.5, -1.5, 2.0, -2.0):
-            tv2 = dict(tv, along_c=tv["along_c"] + M(off))
-            items = fn(tv2)
-            res = score(items, sm, tv2)
-            key = (res["valid"], res["total_score"], -abs(off))
-            if best is None or key > best[0]:
-                best = (key, off, items, res)
-        _, off, items, res = best
-        out["candidates"].append({
-            "template": name, "template_order": ti, "along_offset_m": round(off, 2), **res,
-            "anti_patterns": flag_anti_patterns(res),   # regras violadas (feedback loop)
-            "furniture": [{"kind": it["kind"],
-                           "bbox_m": [round(it["box"].bounds[i] * PT_TO_M, 2) for i in range(4)],
-                           "facing": it.get("facing")} for it in items],
-            "_items": items,
-        })
+    # top-K paredes-TV (passo 3-4 do pipeline GPT): tenta as candidatas mais bem
+    # ranqueadas e deixa o RANKING escolher a que da layout valido — uma parede
+    # boa de profundidade pode jogar o sofa em cima de porta (ex sala pequena);
+    # outra parede resolve.
+    tv_cands = [c["wall_id"] for c in sm["tv_wall_candidate"].get("candidates", [])][:3]
+    top_walls = [w for w in (tv_cands or [sm["tv_wall_candidate"].get("best_candidate")]) if w]
+    for wi, wid in enumerate(top_walls):
+        tvw = _tv_setup(sm, wid)
+        if tvw is None:
+            continue
+        for ti, (name, fn) in enumerate(TEMPLATES):
+            # busca leve: desliza o conjunto ao longo da parede-TV ate a melhor
+            # posicao valida (designer ajusta pra fugir de porta/circulacao)
+            best = None
+            for off in (0.0, 0.5, -0.5, 1.0, -1.0, 1.5, -1.5, 2.0, -2.0):
+                tv2 = dict(tvw, along_c=tvw["along_c"] + M(off))
+                items = fn(tv2)
+                res = score(items, sm, tv2)
+                key = (res["valid"], res["total_score"], -abs(off))
+                if best is None or key > best[0]:
+                    best = (key, off, items, res)
+            _, off, items, res = best
+            out["candidates"].append({
+                "template": name, "template_order": ti, "tv_wall": wid, "tv_wall_rank": wi,
+                "along_offset_m": round(off, 2), **res,
+                "anti_patterns": flag_anti_patterns(res),   # regras violadas (feedback loop)
+                "furniture": [{"kind": it["kind"],
+                               "bbox_m": [round(it["box"].bounds[i] * PT_TO_M, 2) for i in range(4)],
+                               "facing": it.get("facing")} for it in items],
+                "_items": items,
+            })
 
     valid = [c for c in out["candidates"] if c["valid"]]
     if not valid:
@@ -466,11 +477,13 @@ def run(con, room_id):
     # ranking DETERMINISTICO: total_score desc; tie-break -> menor offset lateral
     # (mais central), depois ordem do template (estavel).
     def rk(c):
-        return (-c["total_score"], abs(c["along_offset_m"]), c["template_order"])
+        return (-c["total_score"], c.get("tv_wall_rank", 0),
+                abs(c["along_offset_m"]), c["template_order"])
     order = sorted(out["candidates"], key=rk)
     out["result"] = "OK"
     out["chosen_candidate"] = order[0]["template"]
-    out["ranking"] = [{"rank": i + 1, "template": c["template"],
+    out["chosen_tv_wall"] = order[0].get("tv_wall")
+    out["ranking"] = [{"rank": i + 1, "template": c["template"], "tv_wall": c.get("tv_wall"),
                        "total_score": c["total_score"], "valid": c["valid"],
                        "soft_breakdown": c["soft"], "penalties": c["penalties"],
                        "anti_patterns": [a["rule_id"] for a in c["anti_patterns"]],
@@ -494,7 +507,8 @@ def plot(sm, out, out_png):
     cell, usable, circ = g["cell"], g["usable"], g["circ"]
     COL = {"sofa_3": "#1565c0", "sofa_2": "#1565c0", "rack_tv": "#6a1b9a",
            "mesa_centro": "#ef6c00", "poltrona": "#00838f"}
-    cands = out["candidates"]
+    # top-6 por score (com top-K paredes-TV ha ate 12 candidatos; nao plotar todos)
+    cands = sorted(out["candidates"], key=lambda c: -c["total_score"])[:6]
     chosen = out.get("chosen_candidate")
     rank_of = {r["template"]: r.get("rank", "?") for r in out.get("ranking", [])}
     fig, axes = plt.subplots(1, len(cands), figsize=(6 * len(cands), 8.5))

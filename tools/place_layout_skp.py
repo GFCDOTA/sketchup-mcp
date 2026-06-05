@@ -77,7 +77,11 @@ def build_boxes(con, room_id, template_name=None):
     elif out["result"] != "OK":
         return None, out
     else:
-        cand = next(c for c in out["candidates"] if c["template"] == out["chosen_candidate"])
+        cw = out.get("chosen_tv_wall")
+        cand = next((c for c in out["candidates"]
+                     if c["template"] == out["chosen_candidate"] and c.get("tv_wall") == cw), None)
+        if cand is None:
+            cand = next(c for c in out["candidates"] if c["template"] == out["chosen_candidate"])
         items_raw = cand["_items"]
     boxes = []
     for it in items_raw:
