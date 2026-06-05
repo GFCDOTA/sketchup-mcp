@@ -50,6 +50,31 @@ MARGIN_M = 0.03        # recuo do movel da face da parede (encosta sem cravar)
 TOL_CIRC_M2 = 0.02     # quase-zero: movel NAO pode bloquear circulacao/abertura
 TOL_WALL_M2 = 0.06     # toque leve na parede e OK (movel encosta)
 COMODO_FOLGA_M = 0.06  # folga p/ "dentro do comodo" (borda da celula)
+SOFA_TV_TARGET_M = 2.8  # distancia-alvo sofa<->TV (centro), dentro do ideal
+
+# programa de moveis por TAMANHO de sala (spec GPT 1.3): sala pequena nao entope
+# (movel menor); grande nao boia (movel maior). (largura ao-longo, profund) em m.
+SIZE_FURN = {
+    "small":  {"sofa_3": (1.80, 0.88), "rack_tv": (1.40, 0.40), "mesa_centro": (0.80, 0.45)},
+    "medium": {"sofa_3": (2.20, 0.95), "rack_tv": (1.80, 0.45), "mesa_centro": (1.00, 0.60)},
+    "large":  {"sofa_3": (2.60, 0.98), "rack_tv": (2.20, 0.48), "mesa_centro": (1.20, 0.70)},
+}
+
+
+def _room_size(cell_area_pt2):
+    a = cell_area_pt2 * PT_TO_M ** 2
+    return "small" if a < 12 else ("medium" if a <= 25 else "large")
+
+
+def _sofa_perp(dep, sd):
+    """Distancia (perp) da face da TV ate onde o sofa COMECA. Mira o ideal
+    (~2.8 m de centro): flutua quando a sala e funda, encosta na parede oposta
+    quando e rasa, nunca mais perto que SOFA_TV_MIN. Generaliza — antes os
+    templates 'colavam o sofa na parede oposta' (sp=dep-sd), que so dava
+    distancia plausivel na profundidade especifica da planta_74."""
+    target = M(SOFA_TV_TARGET_M) - sd / 2.0
+    near = M(SOFA_TV_MIN) - sd / 2.0
+    return min(max(target, near), dep - sd - M(MARGIN_M))
 
 
 def _fbox(orient, face, sgn, along_c, perp_d, w_along, w_perp):
@@ -98,7 +123,7 @@ def template_sofa_wall(s):
     o, f, sg, ac, dep = s["orient"], s["face"], s["sgn"], s["along_c"], s["depth"]
     rw, rd = M(FURN["rack_tv"][0]), M(FURN["rack_tv"][1])
     sw, sd = M(FURN["sofa_3"][0]), M(FURN["sofa_3"][1])
-    sp = max(dep - sd - M(MARGIN_M), M(SOFA_TV_MIN))
+    sp = _sofa_perp(dep, sd)
     mw, md = M(FURN["mesa_centro"][0]), M(FURN["mesa_centro"][1])
     mp = (rd + sp) / 2 - md / 2
     return [_item("rack_tv", _fbox(o, f, sg, ac, M(MARGIN_M), rw, rd)),
@@ -124,7 +149,7 @@ def template_sofa_poltrona(s):
     o, f, sg, ac, dep = s["orient"], s["face"], s["sgn"], s["along_c"], s["depth"]
     rw, rd = M(FURN["rack_tv"][0]), M(FURN["rack_tv"][1])
     sw, sd = M(FURN["sofa_3"][0]), M(FURN["sofa_3"][1])
-    sp = max(dep - sd - M(MARGIN_M), M(SOFA_TV_MIN))
+    sp = _sofa_perp(dep, sd)
     pw, pd = M(FURN["poltrona"][0]), M(FURN["poltrona"][1])
     items = [_item("rack_tv", _fbox(o, f, sg, ac, M(MARGIN_M), rw, rd)),
              _item("sofa_3", _fbox(o, f, sg, ac, sp, sw, sd), facing="tv", dist_m=round((sp + sd / 2) * PT_TO_M, 2))]
@@ -140,17 +165,19 @@ def template_estar_ancorado(s):
     POLTRONA na lateral, sobre o tapete e ANGULADA ~35deg (fecha a conversa).
     Tapete e decorativo (chao), nao bloqueante."""
     o, f, sg, ac, dep = s["orient"], s["face"], s["sgn"], s["along_c"], s["depth"]
-    rd = M(FURN["rack_tv"][1])
-    sw, sd = M(FURN["sofa_3"][0]), M(FURN["sofa_3"][1])
-    mw, md = M(FURN["mesa_centro"][0]), M(FURN["mesa_centro"][1])
-    # P2 (GPT): parede-TV ambigua/curta -> rack mais largo (peso visual), ate 85%
-    # da parede (cap 2.40 m), nunca menor que a base 1.80 m.
-    rack_w_m = FURN["rack_tv"][0]
+    g = s.get("_geom")
+    size = _room_size(g["cell"].area) if g is not None else "medium"
+    fr = SIZE_FURN[size]                                       # dimensoes por tamanho de sala
+    rd = M(fr["rack_tv"][1])
+    sw, sd = M(fr["sofa_3"][0]), M(fr["sofa_3"][1])
+    mw, md = M(fr["mesa_centro"][0]), M(fr["mesa_centro"][1])
+    # P2 (GPT): parede-TV ambigua/curta -> rack mais largo (peso visual), ate 75%
+    # da parede / 1.3x a base do size; nunca menor que a base.
+    rack_w_m = fr["rack_tv"][0]
     if s.get("ambiguous"):
-        # peso visual SEM invadir a circulacao das aberturas adjacentes a parede-TV
-        rack_w_m = min(2.20, max(rack_w_m, s.get("wall_len_m", rack_w_m) * 0.75))
+        rack_w_m = min(fr["rack_tv"][0] * 1.3, max(rack_w_m, s.get("wall_len_m", rack_w_m) * 0.75))
     rw = M(rack_w_m)
-    sp = max(dep - sd - M(MARGIN_M), M(SOFA_TV_MIN))            # sofa na parede oposta
+    sp = _sofa_perp(dep, sd)                                   # sofa a distancia-alvo (flutua se funda)
     pw, pd = M(FURN["poltrona"][0]), M(FURN["poltrona"][1])
     pol_off = M(0.12)                                          # poltrona pro canto SEM vazar (gate)
     # tapete: do respiro do rack (0.20) ate entrar 0.30 sob a frente do sofa;
