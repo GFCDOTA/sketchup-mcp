@@ -203,6 +203,9 @@ AUDIT_PATH = Path(__file__).resolve().parents[2] / ".ai_bridge" / "audit" / "aud
 GATE_IDLE_WARN_SEC = 24 * 3600   # gate UP sem consulta ha > 24h -> ONLINE_IDLE (warn)
 GATE_IDLE_BAD_SEC = 72 * 3600    # > 72h -> ocioso/stale (bad)
 SOURCE_STALE_MARGIN_SEC = 3600   # legacy .md mais velho que o audit por > 1h -> STALE_SOURCE
+_AIB = REPO_ROOT / ".ai_bridge"
+QUESTIONS_DIR = _AIB / "questions"   # consults legacy (pergunta)
+RESPONSES_DIR = _AIB / "responses"   # consults legacy (resposta)
 _SESSIONS: dict = {}
 _SESSIONS_LOCK = threading.Lock()
 # Estado das ACOES corretivas em andamento (process-consults roda em background).
@@ -369,8 +372,8 @@ def _gate_source_info() -> dict:
     """Fonte real do gate + staleness + consults recentes do audit (pra aba Gate)."""
     now = time.time()
     aud = _audit_scan()
-    qd = REPO_ROOT / ".ai_bridge" / "questions"
-    rd = REPO_ROOT / ".ai_bridge" / "responses"
+    qd = QUESTIONS_DIR
+    rd = RESPONSES_DIR
     legacy_q = _newest_mtime(qd.glob("*.md")) if qd.is_dir() else None
     legacy_r = _newest_mtime(rd.glob("*.md")) if rd.is_dir() else None
     audit_c = aud["last_consult"]
@@ -381,7 +384,7 @@ def _gate_source_info() -> dict:
                   + ", mas audit tem consult em " + _fmt_dt(audit_c))
     return {
         "source": source, "source_stale": stale, "stale_reason": reason,
-        "audit_last_consult_at": audit_c,
+        "audit_last_consult_at": audit_c, "audit_last_event_at": aud["last_event"],
         "legacy_last_question_at": legacy_q, "legacy_last_response_at": legacy_r,
         "audit_consults": [{"age_sec": round(now - e.get("t", now)), "mode": e.get("mode", "default"),
                             "dur_sec": e.get("dur_sec"), "q_chars": e.get("q_chars"),
@@ -395,7 +398,6 @@ def activity_summary() -> dict:
     now = time.time()
     up = True  # se /api/activity responde, ESTE gate esta servindo (o watchdog cobre o DOWN)
     src = _gate_source_info()
-    aud = _audit_scan()
     audit_c = src["audit_last_consult_at"]
     legacy_q = src["legacy_last_question_at"]
     legacy_r = src["legacy_last_response_at"]
@@ -417,7 +419,7 @@ def activity_summary() -> dict:
             ls = s.get("last_seen")
             if ls and (live_last is None or ls > live_last):
                 live_last = ls
-    cand_act = [x for x in (aud["last_event"], live_last) if x]
+    cand_act = [x for x in (src["audit_last_event_at"], live_last) if x]
     last_activity = max(cand_act) if cand_act else None
 
     art = REPO_ROOT / "artifacts"
@@ -718,8 +720,8 @@ def claude_sessions() -> dict:
                             "desc": _first_user_text(js), "reason": reason,
                             "idle_sec": round(age), "state": state})
     out.sort(key=lambda s: s["idle_sec"])
-    qd = REPO_ROOT / ".ai_bridge" / "questions"
-    rd = REPO_ROOT / ".ai_bridge" / "responses"
+    qd = QUESTIONS_DIR
+    rd = RESPONSES_DIR
     pending = []
     if qd.is_dir():
         answered = {p.stem for p in rd.glob("*.md")} if rd.is_dir() else set()
@@ -843,8 +845,8 @@ def gate_ledger() -> dict:
     """The gate Q&A history: question/response pairs, which are still pending
     (waiting on the gate), latency, and the verdict the gate gave. Answers 'o
     gate ajudou ou só virou teatro?'."""
-    qd = REPO_ROOT / ".ai_bridge" / "questions"
-    rd = REPO_ROOT / ".ai_bridge" / "responses"
+    qd = QUESTIONS_DIR
+    rd = RESPONSES_DIR
     rmap = {p.stem: p for p in rd.glob("*.md")} if rd.is_dir() else {}
     entries = []
     if qd.is_dir():
@@ -982,8 +984,8 @@ def next_best_actions() -> dict:
 
 def _orphan_consults() -> list:
     """Consults (perguntas) sem resposta — a fila que 'espera o gate'."""
-    qd = REPO_ROOT / ".ai_bridge" / "questions"
-    rd = REPO_ROOT / ".ai_bridge" / "responses"
+    qd = QUESTIONS_DIR
+    rd = RESPONSES_DIR
     if not qd.is_dir():
         return []
     answered = {p.stem for p in rd.glob("*.md")} if rd.is_dir() else set()
@@ -1003,7 +1005,7 @@ def _process_consults_worker(items: list) -> None:
     """Thread daemon: cada consult orfao -> gate -> grava resposta. Atualiza _ACTIONS
     pra a UI acompanhar ao vivo (3->2->1->0). Best-effort por item: um erro nao
     derruba a fila."""
-    rd = REPO_ROOT / ".ai_bridge" / "responses"
+    rd = RESPONSES_DIR
     try:
         rd.mkdir(parents=True, exist_ok=True)
     except OSError:
