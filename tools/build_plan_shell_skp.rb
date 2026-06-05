@@ -34,9 +34,11 @@ PT_TO_M  = (ENV['PT_TO_M'].to_s.strip.empty? ? (0.19 / 5.4) : ENV['PT_TO_M'].to_
 M_TO_IN  = 39.3700787402
 PT_TO_IN = PT_TO_M * M_TO_IN
 
-WALL_HEIGHT_M    = 2.70
+# Architectural heights — ENV-overridable per plant (mirrors PT_TO_M above);
+# defaults = BR residential norm. ENV unset -> planta_74 unchanged. (DIFF-006)
+WALL_HEIGHT_M    = (ENV['WALL_HEIGHT_M'].to_s.strip.empty? ? 2.70 : ENV['WALL_HEIGHT_M'].to_f)
 WALL_HEIGHT_IN   = WALL_HEIGHT_M * M_TO_IN
-PARAPET_HEIGHT_M = 1.10
+PARAPET_HEIGHT_M = (ENV['PARAPET_HEIGHT_M'].to_s.strip.empty? ? 1.10 : ENV['PARAPET_HEIGHT_M'].to_f)
 PARAPET_HEIGHT_IN = PARAPET_HEIGHT_M * M_TO_IN
 
 WALL_RGB    = [78, 78, 78]     # same as consume_consensus.rb wall_dark
@@ -47,7 +49,7 @@ PARAPET_RGB = [130, 135, 140]  # same as consume_consensus.rb parapet
 # docs/grounding/constants_provenance.md as inherited_from_consume_consensus.
 
 # Door leaf (for kind=interior_door / door_arc)
-DOOR_HEIGHT_M    = 2.10
+DOOR_HEIGHT_M    = (ENV['DOOR_HEIGHT_M'].to_s.strip.empty? ? 2.10 : ENV['DOOR_HEIGHT_M'].to_f)
 DOOR_THICK_M     = 0.04
 DOOR_HEIGHT_IN   = DOOR_HEIGHT_M * M_TO_IN
 DOOR_THICK_IN    = DOOR_THICK_M  * M_TO_IN
@@ -55,8 +57,8 @@ DOOR_RGB         = [140, 95, 55]   # madeira escura
 DOOR_SWING_DEG   = 30.0            # visual swing angle
 
 # Window panel (for kind=window). 3 bands: sill / glass / lintel.
-WINDOW_SILL_M    = 1.10            # peitoril quarto (GPT + NBR 15575: cama encostada embaixo)
-WINDOW_HEAD_M    = 2.30            # verga: janela de quarto 1,20m -> proporcao 1,5:1 (GPT)
+WINDOW_SILL_M    = (ENV['WINDOW_SILL_M'].to_s.strip.empty? ? 1.10 : ENV['WINDOW_SILL_M'].to_f)  # peitoril quarto (GPT + NBR 15575: cama encostada embaixo)
+WINDOW_HEAD_M    = (ENV['WINDOW_HEAD_M'].to_s.strip.empty? ? 2.30 : ENV['WINDOW_HEAD_M'].to_f)  # verga: janela de quarto 1,20m -> proporcao 1,5:1 (GPT)
 WINDOW_SILL_IN   = WINDOW_SILL_M * M_TO_IN
 WINDOW_HEAD_IN   = WINDOW_HEAD_M * M_TO_IN
 # Verga do BASCULANTE: separada da janela de correr (que subiu p/ 2,30m). Mantem o

@@ -670,8 +670,8 @@ _DEFAULT_DIFFICULTIES = [
     {"id": "DIFF-006", "titulo": "Constantes do builder hardcoded p/ planta_74",
      "sintoma": "alturas (2.70/0.90/2.10/1.10) e crop/escala fixos no build_plan_shell_skp",
      "severidade": "LOW", "status": "OPEN",
-     "why_not_fixed_yet": "é o arquivo mais QUENTE (fidelidade em voo) e a config não tem consumidor até existir 2a planta = seria infra-pela-infra; blueprint pronto esperando a árvore esfriar",
-     "attempts": ["blueprint generalize_builder_constants.md (groundwork não-colidente)"],
+     "why_not_fixed_yet": "alturas: FEITO (ENV-override, defaults BR pinados por teste, planta_74 inalterada). Resta: crop/page do PDF + a 2a planta como consumidor real (plant.json) — sem ela o resto e infra-pela-infra",
+     "attempts": ["alturas WALL/PARAPET/DOOR/WINDOW_SILL/WINDOW_HEAD viraram ENV-override (mesmo padrao do PT_TO_M); tests/test_builder_constants_env.py trava os defaults; runtime confirma em build SU"],
      "gate_helped": "sim", "next_hypothesis": "plant.json com heights/crop, defaults não-quebra, swap-in quando quieto",
      "acceptance_criteria": "planta_74 inalterada sem plant.json; 2a planta respeita os valores dela"},
 ]
