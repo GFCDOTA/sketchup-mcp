@@ -282,7 +282,7 @@ def test_difficulties_every_entry_has_why_not_fixed():
 
 
 def test_read_jsonl_tolerates_garbage(tmp_path):
-    import tools.claude_bridge.server as srv
+    import tools.claude_bridge.knowledge_log as srv
     p = tmp_path / "x.jsonl"
     p.write_text('{"a": 1}\nGARBAGE NOT JSON\n\n{"b": 2}\n', encoding="utf-8")
     assert srv._read_jsonl(p) == [{"a": 1}, {"b": 2}]
