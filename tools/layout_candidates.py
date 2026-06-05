@@ -85,7 +85,8 @@ def _tv_setup(sm):
             "face": face, "along_c": along_c,
             "depth": _tv_depth_m(w, g["usable"]) / PT_TO_M,
             "wall_len_m": wall_len_m,
-            "ambiguous": sm["tv_wall_candidate"].get("confidence") == "ambiguous"}
+            "ambiguous": sm["tv_wall_candidate"].get("confidence") == "ambiguous",
+            "_geom": g}
 
 
 def _item(kind, b, **kw):
@@ -146,11 +147,12 @@ def template_estar_ancorado(s):
     # da parede (cap 2.40 m), nunca menor que a base 1.80 m.
     rack_w_m = FURN["rack_tv"][0]
     if s.get("ambiguous"):
-        rack_w_m = min(2.40, max(rack_w_m, s.get("wall_len_m", rack_w_m) * 0.85))
+        # peso visual SEM invadir a circulacao das aberturas adjacentes a parede-TV
+        rack_w_m = min(2.20, max(rack_w_m, s.get("wall_len_m", rack_w_m) * 0.75))
     rw = M(rack_w_m)
     sp = max(dep - sd - M(MARGIN_M), M(SOFA_TV_MIN))            # sofa na parede oposta
     pw, pd = M(FURN["poltrona"][0]), M(FURN["poltrona"][1])
-    pol_off = M(0.30)                                          # poltrona ~30cm pro canto (refino GPT)
+    pol_off = M(0.12)                                          # poltrona pro canto SEM vazar (gate)
     # tapete: do respiro do rack (0.20) ate entrar 0.30 sob a frente do sofa;
     # excede 0.30 de cada lado E estende +pol_off pro lado da poltrona, pra
     # mante-la conectada (>=20% sobre o tapete; "rug supports" da spec GPT).
@@ -167,11 +169,21 @@ def template_estar_ancorado(s):
     apw, apd = M(FURN["aparador"][0]), M(FURN["aparador"][1])   # aparador condicional
     if dep - (sp + sd) >= apd + M(0.80):
         items.append(_item("aparador", _fbox(o, f, sg, ac, sp + sd + M(0.05), apw, apd)))
-    # P3 (GPT refino): poltrona ~30cm no canto lateral do grupo (em direcao a
-    # varanda), sobre o tapete estendido, angulada ~35deg pra fechar a conversa.
-    pol = _fbox(o, f, sg, ac - sw / 2 - pw * 0.2 - pol_off, mp + md / 2 - pd / 2, pw, pd)
-    items.append(_item("poltrona", shp_rotate(pol, 35, origin="centroid"),
-                       facing="tv", rotated_deg=35))
+    # P3 (GPT refino): poltrona no canto lateral, angulada ~35deg. CONDICIONAL:
+    # so entra se NAO bloquear circulacao nem sair do comodo (regra GPT "core
+    # valido > opcional bonito" — nao forca poltrona jogada).
+    pol = shp_rotate(_fbox(o, f, sg, ac - sw / 2 - pw * 0.2 - pol_off,
+                           mp + md / 2 - pd / 2, pw, pd), 35, origin="centroid")
+    g = s.get("_geom")
+    blocks = False
+    if g is not None:
+        circ_u = unary_union(g["circ"]) if g["circ"] else None
+        comodo = g["cell"].buffer(M(COMODO_FOLGA_M))
+        tol = TOL_CIRC_M2 / PT_TO_M ** 2
+        blocks = (circ_u is not None and pol.intersection(circ_u).area > tol) \
+            or (not comodo.contains(pol))
+    if not blocks:
+        items.append(_item("poltrona", pol, facing="tv", rotated_deg=35))
     return items
 
 
@@ -197,8 +209,11 @@ def score(items, sm, tv):
     comodo = cell.buffer(M(COMODO_FOLGA_M))
 
     # ---------- HARD GATES (binarios) ----------
+    # tapete e decorativo (chao): NAO conta como obstaculo de parede/circulacao/
+    # passagem (a pessoa anda sobre ele). So moveis solidos bloqueiam.
+    solid = [it for it in items if not it.get("decorative")]
     hits_wall = hits_circ = out_room = False
-    for it in items:
+    for it in solid:
         if circ_u is not None and it["box"].intersection(circ_u).area > tol_circ:
             hits_circ = True
         if it["box"].intersection(wfoot).area > tol_wall:
@@ -206,7 +221,7 @@ def score(items, sm, tv):
         if not comodo.contains(it["box"]):
             out_room = True
     free = usable
-    for it in items:
+    for it in solid:
         free = free.difference(it["box"])
     passage_ok = not free.buffer(-M(PASSAGE_M) / 2).is_empty
     hard = {"nao_invade_parede": not hits_wall,
@@ -277,7 +292,7 @@ def score(items, sm, tv):
         pen.append(f"comprime o comodo (area livre {free_ratio} < 0.45)")
 
     # proporcao moveis/sala (10)
-    fill = round(sum(it["box"].area for it in items) / usable.area, 2)
+    fill = round(sum(it["box"].area for it in items if not it.get("decorative")) / usable.area, 2)
     flo, fhi = FILL_IDEAL
     if flo <= fill <= fhi:
         soft["proporcao"] = 10.0
