@@ -280,7 +280,7 @@ ul.attn li .go{margin-left:auto;font-size:9.5px;color:var(--accent);text-transfo
 <span class="seg opt" id="hllm">🤖 —</span>
 </div>
 <nav>
-<a href="#home">Home</a><a href="#sessoes">Sessões</a><a href="#gate">Gate</a><a href="#review-skp">Review SKP</a><a href="#repo">Repo</a><a href="#backlog">Backlog</a><a href="#artifacts">Artifacts</a><a href="#llms">🤖 IAs locais</a><a href="#docs">Docs</a>
+<a href="#home">Home</a><a href="#sessoes">Sessões</a><a href="#gate">Gate</a><a href="#review-skp">Review SKP</a><a href="#repo">Repo</a><a href="#backlog">Backlog</a><a href="#artifacts">Artifacts</a><a href="#llms">🤖 IAs locais</a><a href="#arquivos">📂 Arquivos</a><a href="#docs">Docs</a>
 </nav>
 </header>
 <main>
@@ -394,6 +394,14 @@ ul.attn li .go{margin-left:auto;font-size:9.5px;color:var(--accent);text-transfo
 </div>
 </section>
 
+<section id="arquivos">
+<div class="card full"><h2>📂 Arquivos do projeto — o que foi mexido nos últimos processamentos</h2>
+<div id="files-summary" class="muted" style="margin-bottom:12px">escaneando .py/.md...</div>
+<table><thead><tr><th>arquivo</th><th>tipo</th><th>atualizado</th><th>o que faz (do próprio arquivo)</th></tr></thead><tbody id="files-rows"></tbody></table>
+<div class="muted" style="margin-top:10px">Descrição = docstring do módulo (.py) ou 1º heading (.md), extraída do arquivo — não inventada. "Atualizado" = mtime (proxy de uso recente), não rastreamento de execução.</div>
+</div>
+</section>
+
 <section id="docs">
 <div class="card full"><h2>Arquitetura do ecossistema</h2>
 <pre class="diagram">  SESSOES CLAUDE (loops autonomos / chat)
@@ -502,10 +510,10 @@ function renderSparks(){
 function tile(h,cls,val,label,sub){return '<div class="kpi link '+cls+'" data-hash="'+h+'"><div class="kpi-n">'+esc(val)+'</div><div class="kpi-l">'+label+'</div>'+(sub?'<div class="kpi-sub">'+esc(sub)+'</div>':'')+'</div>';}
 // 2A — consolidacao das 8 abas (nav). NAO move/apaga conteudo: cada aba nova mapeia
 // p/ as secoes existentes que ela mostra; hashes antigos continuam validos via HASHALIAS.
-const TABS=['home','sessoes','gate','review-skp','repo','backlog','artifacts','llms','docs'];
-const TABMAP={home:['home'],sessoes:['sessoes'],gate:['gate'],'review-skp':['planta'],repo:['git','ecossistema'],backlog:['dificuldades','oportunidades','aprendizados'],artifacts:['lixao'],llms:['llms'],docs:['docs']};
+const TABS=['home','sessoes','gate','review-skp','repo','backlog','artifacts','llms','arquivos','docs'];
+const TABMAP={home:['home'],sessoes:['sessoes'],gate:['gate'],'review-skp':['planta'],repo:['git','ecossistema'],backlog:['dificuldades','oportunidades','aprendizados'],artifacts:['lixao'],llms:['llms'],arquivos:['arquivos'],docs:['docs']};
 const HASHALIAS={planta:'review-skp',git:'repo',ecossistema:'repo',dificuldades:'backlog',oportunidades:'backlog',aprendizados:'backlog',lixao:'artifacts'};
-const ALLSEC=['home','sessoes','gate','planta','git','ecossistema','dificuldades','oportunidades','aprendizados','lixao','llms','docs'];
+const ALLSEC=['home','sessoes','gate','planta','git','ecossistema','dificuldades','oportunidades','aprendizados','lixao','llms','arquivos','docs'];
 function route(){
   let raw=(location.hash||'#home').slice(1);
   let h=HASHALIAS[raw]||raw; if(!TABMAP[h])h='home';
@@ -522,6 +530,7 @@ function route(){
   if(show.indexOf('dificuldades')>=0)loadDiff();
   if(show.indexOf('aprendizados')>=0)loadLearnings();
   if(show.indexOf('llms')>=0)loadLLMs();
+  if(show.indexOf('arquivos')>=0)loadFiles();
 }
 window.addEventListener('hashchange',route);
 async function pollHome(){
@@ -823,6 +832,16 @@ async function loadLLMs(){
       return '<tr><td>'+(m.icon||'')+' <b>'+esc(m.name)+'</b></td><td class="muted">'+esc(m.role||'')+'</td><td>'+st+'</td><td>'+calls+'</td><td class="muted">'+esc(m.last_ts||'—')+'</td><td class="muted">'+(m.avg_ms?(m.avg_ms+'ms'):'—')+'</td><td class="muted" style="text-align:right">'+m.gb+' GB</td></tr>';
     }).join('')||'<tr><td colspan=7 class="muted">nenhum modelo</td></tr>';
   }catch(e){if(sm)sm.innerHTML='<span class="badge off">erro</span> <span class="muted">'+esc(e)+'</span>';}
+}
+async function loadFiles(){
+  var sm=$('files-summary'),rb=$('files-rows'); if(!rb)return;
+  try{
+    const d=await (await fetch('/api/files',{cache:'no-store'})).json();
+    sm.innerHTML='<b style="color:var(--txt)">'+d.shown+'</b> de '+d.total+' arquivos .py/.md ('+(d.scanned_roots||[]).join(', ')+') · ordenados por última modificação';
+    rb.innerHTML=(d.files||[]).map(function(f){
+      return '<tr><td><code>'+esc(f.path)+'</code></td><td><span class="flag '+(f.kind==='py'?'OK':'IDLE')+'">'+esc(f.kind)+'</span></td><td class="muted" style="white-space:nowrap">'+fmtAge(f.age_sec)+' atrás</td><td class="muted">'+(f.desc?esc(f.desc):'<span style="opacity:.55">(sem descrição no arquivo)</span>')+'</td></tr>';
+    }).join('')||'<tr><td colspan=4 class="muted">nenhum arquivo</td></tr>';
+  }catch(e){if(sm)sm.innerHTML='<span class="muted">erro: '+esc(e)+'</span>';}
 }
 function tick(){var c=$('hclock');if(c)c.textContent=new Date().toLocaleTimeString('pt-br');}
 route(); pollHome(); tick(); setInterval(pollHome,5000); setInterval(tick,1000);

@@ -1125,6 +1125,75 @@ def actions_overview() -> dict:
 # advertised contract can never drift from what is actually routed (it had: the
 # old hardcoded list named 6 of ~26 real routes).
 
+_FILES_EXCLUDE = (".venv", "__pycache__", ".git", "node_modules", "runs", ".pytest_cache", ".mypy_cache")
+
+
+def _py_desc(path) -> str:
+    """Descricao HONESTA de um .py: docstring do modulo (1a linha). Vazio se nao houver."""
+    import ast
+    try:
+        doc = ast.get_docstring(ast.parse(path.read_text("utf-8", errors="replace")))
+        if doc:
+            return doc.strip().splitlines()[0].strip()[:160]
+    except Exception:
+        pass
+    return ""
+
+
+def _md_desc(path) -> str:
+    """Descricao HONESTA de um .md: 1o heading/linha nao-vazia (sem #). Vazio se nada."""
+    try:
+        for ln in path.read_text("utf-8", errors="replace").splitlines():
+            s = ln.strip()
+            if not s or s == "---":
+                continue
+            s = s.lstrip("#").strip()
+            if s:
+                return s[:160]
+    except Exception:
+        pass
+    return ""
+
+
+def recent_files(limit: int = 80) -> dict:
+    """Inventario de .py/.md modificados recentemente — proxy de 'o que foi mexido nos
+    ultimos processamentos'. mtime = ultima atualizacao; descricao EXTRAIDA do proprio
+    arquivo (docstring/heading), nunca inventada. NAO e rastreamento de execucao."""
+    now = time.time()
+    globs = [
+        REPO_ROOT.glob("*.py"), REPO_ROOT.glob("*.md"),
+        (REPO_ROOT / "tools").glob("**/*.py"), (REPO_ROOT / "tools").glob("**/*.md"),
+        (REPO_ROOT / ".claude").glob("**/*.md"),
+        (REPO_ROOT / "docs").glob("**/*.md"),
+    ]
+    out: dict = {}
+    for g in globs:
+        try:
+            for p in g:
+                parts = str(p).replace("\\", "/").split("/")
+                if any(x in parts for x in _FILES_EXCLUDE):
+                    continue
+                key = str(p)
+                if key in out or not p.is_file():
+                    continue
+                try:
+                    mt = p.stat().st_mtime
+                except OSError:
+                    continue
+                kind = p.suffix.lstrip(".")
+                out[key] = {
+                    "path": str(p.relative_to(REPO_ROOT)).replace("\\", "/"),
+                    "kind": kind, "mtime": mt, "age_sec": round(now - mt),
+                    "desc": _py_desc(p) if kind == "py" else _md_desc(p),
+                }
+        except OSError:
+            pass
+    rows = sorted(out.values(), key=lambda r: r["mtime"], reverse=True)[:limit]
+    return {"files": rows, "total": len(out), "shown": len(rows),
+            "scanned_roots": ["(raiz)", "tools/", ".claude/", "docs/"],
+            "note": "ordenado por mtime (proxy de uso recente, nao execucao); descricao do proprio arquivo"}
+
+
 def _json_route(fn):
     """Adapt a zero-arg data function into a GET handler that sends it as JSON 200."""
     def handler(req, _url):
@@ -1355,6 +1424,7 @@ GET_ROUTES = {
     "/api/local-llms": _json_route(local_llms),
     "/api/llm-usage": _json_route(llm_usage),
     "/api/activity": _json_route(activity_summary),
+    "/api/files": _json_route(recent_files),
     "/api/skp-inventory-v2": _json_route(skp_inventory_v2),
     "/api/difficulties": _json_route(difficulties),
     "/api/skp-timeline": _json_route(skp_timeline),
