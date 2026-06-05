@@ -480,11 +480,108 @@ def plot(sm, out, out_png, tag=""):
     plt.close(fig)
 
 
+EXPECTED = {"bed": "cama king", "nightstand": "criados-mudos", "rug": "tapete",
+            "wardrobe": "guarda-roupa", "bench": "banco", "dresser": "dresser",
+            "armchair": "poltrona", "side_table": "mesa lateral"}
+
+
+def to_markdown(out, tag):
+    L = [f"# Quarto KING designer — relatório ({tag}, '{out.get('room_name')}')", "",
+         f"área {out.get('area_m2')} m² | resultado **{out['result']}**", ""]
+    if out["result"] == "OK":
+        win = next(c for c in out["candidates"] if c["headboard_wall"] == out["chosen"])
+        cl = win.get("clearances_m", {})
+        L.append(f"## Vencedor: cabeceira `{out['chosen']}` — **{out['chosen_score']} pts**")
+        L.append(f"- clearances: lateral {cl.get('lateral')} m, pé {cl.get('pe')} m, "
+                 f"passagem {'OK' if cl.get('passagem_ok') else 'APERTADA'}")
+        L.append("- score: " + ", ".join(f"{k}={v}" for k, v in win.get("breakdown", {}).items()))
+        if win.get("downgrades"):
+            L.append("- downgrades: " + "; ".join(win["downgrades"]))
+        L.append("- móveis:")
+        for p in out.get("winner_layout", []):
+            L.append(f"  - **{p['name']}** ({p['type']}) {p['width_m']}×{p['depth_m']} m "
+                     f"@({p['x_m']},{p['y_m']}) parede `{p.get('anchor_wall')}` — {p.get('reason')}")
+        present = {p["type"] for p in out.get("winner_layout", [])}
+        omit = [v for k, v in EXPECTED.items() if k not in present]
+        if omit:
+            L.append("- **omitidos** (não couberam com folga / sem espaço): " + ", ".join(omit))
+    else:
+        L.append(f"- {out.get('reason')}")
+    L.append("")
+    L.append("## Candidatos testados (paredes de cabeceira)")
+    for c in sorted(out.get("candidates", []), key=lambda x: -x.get("score", -999)):
+        viol = c.get("violations") or ([] if c.get("valid") else [c.get("reason")])
+        L.append(f"- cabeceira `{c['headboard_wall']}` — score {c.get('score')}, "
+                 f"valid={c.get('valid')}" + (f" — bloqueios: {viol}" if viol else ""))
+    return "\n".join(L)
+
+
+def _items_to_boxes(items):
+    """Converte os items do designer pro formato place_layout (boxes SU inches)."""
+    pt_to_in = (0.19 / 5.4) * 39.3700787402
+    boxes = []
+    for it in items:
+        b = it["box"]
+        if b.is_empty or b.geom_type != "Polygon":
+            continue
+        x0, y0, x1, y1 = b.bounds
+        corners = [[round(px * pt_to_in, 2), round(py * pt_to_in, 2)]
+                   for px, py in list(b.exterior.coords)[:-1]]
+        boxes.append({"kind": it["type"], "x0": x0 * pt_to_in, "y0": y0 * pt_to_in,
+                      "x1": x1 * pt_to_in, "y1": y1 * pt_to_in, "corners": corners,
+                      "h_in": HEIGHT.get(it["type"], 0.5) * 39.3700787402,
+                      "rgb": RGB.get(it["type"], [120, 120, 120]), "label": it["name"],
+                      "ambiguous": False, "decorative": bool(it.get("decorative"))})
+    return boxes
+
+
+def build_skp(out_dir, tag, items):
+    """Materializa o quarto (coords planta_74) no shell real via place_layout_skp.rb.
+    Só faz sentido p/ comodo real (r000); sintético não tem shell. Launch SU."""
+    import os
+    import subprocess
+    import time
+    root = Path(__file__).resolve().parents[1]
+    su = r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
+    base = root / "artifacts/planta_74/planta_74.skp"
+    rb = root / "tools/place_layout_skp.rb"
+    boxes = _items_to_boxes(items)
+    skp = out_dir / f"bedroom_designer_{tag}.skp"
+    paths = {"LAYOUT_OUT": skp, "LAYOUT_BEFORE": out_dir / f"bedroom_designer_{tag}_before.png",
+             "LAYOUT_AFTER_TOP": out_dir / f"bedroom_designer_{tag}_after_top.png",
+             "LAYOUT_AFTER_ISO": out_dir / f"bedroom_designer_{tag}_after_iso.png",
+             "LAYOUT_LOG": out_dir / f"bedroom_designer_{tag}_skp_log.txt"}
+    subprocess.run(["taskkill", "/F", "/IM", "SketchUp.exe"], capture_output=True)
+    time.sleep(1)
+    for p in list(paths.values()):
+        try:
+            if p.exists():
+                p.unlink()
+        except PermissionError:
+            pass
+    env = os.environ.copy()
+    env["LAYOUT_BOXES"] = json.dumps(boxes)
+    for k, p in paths.items():
+        env[k] = str(p).replace("\\", "/")
+    subprocess.Popen([su, str(base), "-RubyStartup", str(rb)], env=env,
+                     creationflags=getattr(subprocess, "DETACHED_PROCESS", 0))
+    log = paths["LAYOUT_LOG"]
+    deadline = time.time() + 240
+    while time.time() < deadline:
+        if log.exists():
+            time.sleep(2)
+            break
+        time.sleep(1)
+    subprocess.run(["taskkill", "/F", "/IM", "SketchUp.exe"], capture_output=True)
+    return skp if skp.exists() else None
+
+
 def main():
     from tools.make_synthetic_bedrooms import rect_bedroom
     ap = argparse.ArgumentParser()
     ap.add_argument("--room", default="r000")
     ap.add_argument("--synthetic", action="store_true", help="quarto king sintetico limpo")
+    ap.add_argument("--skp", action="store_true", help="gera SKP placeholder (so comodo real)")
     ap.add_argument("--out-dir", default="artifacts/planta_74/furnished")
     args = ap.parse_args()
     if args.synthetic:
@@ -517,7 +614,11 @@ def main():
         c.pop("_items", None)
     (od / f"bedroom_designer_{tag}.json").write_text(
         json.dumps(clean, indent=2, ensure_ascii=False), encoding="utf-8")
-    print(f"  -> {od}/bedroom_designer_{tag}.json")
+    (od / f"bedroom_designer_{tag}.md").write_text(to_markdown(out, tag), encoding="utf-8")
+    print(f"  -> {od}/bedroom_designer_{tag}.json + .md")
+    if args.skp and out["result"] == "OK" and not args.synthetic:
+        skp = build_skp(od, tag, out["_winner_items"])
+        print(f"  -> SKP: {skp.name if skp else 'FALHOU (sem log do SU)'}")
 
 
 if __name__ == "__main__":
