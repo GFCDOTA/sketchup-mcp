@@ -338,12 +338,14 @@ def score(items, sm, hb):
     else:
         soft["guarda_roupa"] = 0.0; pen.append("sem guarda-roupa que coube com folga")
 
-    # evitar cabeceira sob janela (15) — soft, nao hard (Consult 1)
+    # evitar cabeceira sob janela (25) — soft forte (Felipe 2026-06-05: preferir
+    # parede LIMPA de cabeceira mesmo perdendo guarda-roupa). Nao e hard: em
+    # quarto sem parede limpa que caiba, ainda degrada pra janela (Consult 1).
     if hb.get("has_window"):
         soft["cabeceira_sem_janela"] = 0.0
-        pen.append("cabeceira sob/na parede da janela (-15)")
+        pen.append("cabeceira sob/na parede da janela (-25)")
     else:
-        soft["cabeceira_sem_janela"] = 15.0
+        soft["cabeceira_sem_janela"] = 25.0
 
     soft_score = round(sum(soft.values()), 1)
     return {"valid": valid, "hard_gates": hard, "soft": soft, "soft_score": soft_score,

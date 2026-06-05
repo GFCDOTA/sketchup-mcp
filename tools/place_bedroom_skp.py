@@ -27,7 +27,9 @@ SKETCHUP_EXE = r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
 PT_TO_IN = (0.19 / 5.4) * 39.3700787402
 CONSENSUS = ROOT / "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json"
 BASE_SKP = ROOT / "artifacts/planta_74/planta_74.skp"
-OUT_DIR = ROOT / "runs/planta_74"
+# PASTA CANONICA fixa do mobiliado (NAO scratch): committed + servida + GitHub.
+# Felipe 2026-06-05: parar de espalhar .skp em runs/ — UMA pasta so, sempre.
+OUT_DIR = ROOT / "artifacts/planta_74/furnished"
 RB = ROOT / "tools/place_layout_skp.rb"   # generico, reutilizado (nao alterado)
 
 # altura de extrusao (m) + cor RGB (= cores do diagrama 2D) por tipo de movel
