@@ -484,3 +484,39 @@ def test_classify_processes_empty_is_zero_cost():
     import tools.claude_bridge.server as srv
     out = srv._classify_processes([])
     assert out["cli_count"] == 0 and out["desktop_app"]["processes"] == 0
+
+
+# ---- route table (Command pattern) — replaces the do_GET/do_POST if/elif ------
+
+
+def test_route_tables_are_callable_and_cover_known_paths():
+    """Regression guard vs the old 28-branch if/elif: every path the cockpit and
+    ask_gpt_gate rely on must stay routed, and every route value must be callable."""
+    import tools.claude_bridge.server as srv
+    assert all(callable(h) for h in srv.GET_ROUTES.values())
+    assert all(callable(h) for h in srv.POST_ROUTES.values())
+    # "" is the rstrip'd form of "/" and "/dashboard"
+    expected_get = {
+        "", "/dashboard", "/health", "/sessions", "/events",
+        "/api/skp-inventory", "/api/plant", "/api/claude-sessions",
+        "/api/ecosystem", "/api/recent-commits", "/api/gate-ledger",
+        "/api/system-map", "/api/git-inventory", "/api/processes",
+        "/api/skp-inventory-v2", "/api/difficulties", "/api/skp-timeline",
+        "/api/learnings", "/api/status", "/api/next-best-actions",
+        "/api/actions", "/api/actions/process-consults",
+        "/api/actions/dirty-detail", "/artifact",
+    }
+    assert expected_get <= set(srv.GET_ROUTES)
+    assert {"/ask", "/heartbeat", "/api/actions/process-consults"} <= set(srv.POST_ROUTES)
+
+
+def test_health_endpoints_are_single_source_of_truth():
+    """/health.endpoints must be DERIVED from the route tables (no drift). The old
+    hardcoded list named 6 of ~26 real routes; the dashboard shows this count."""
+    import tools.claude_bridge.server as srv
+    assert set(srv.health_payload()["endpoints"]) == set(srv.advertised_endpoints())
+    eps = srv.health_payload()["endpoints"]
+    for e in ("/", "/ask", "/health", "/events", "/api/status"):
+        assert e in eps
+    assert "" not in eps  # the "" route key is advertised as "/", never empty
+    assert len(eps) >= 20  # the real surface, not the stale 6

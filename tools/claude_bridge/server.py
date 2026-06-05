@@ -185,7 +185,7 @@ def health_payload() -> dict:
         "ask_field": list(ASK_FIELDS),
         "verdict_enum": list(VERDICT_ENUM),
         "modes": ["default", "redteam"],
-        "endpoints": ["/", "/ask", "/health", "/heartbeat", "/sessions", "/events"],
+        "endpoints": advertised_endpoints(),
     }
 
 
@@ -1381,6 +1381,116 @@ def actions_overview() -> dict:
     return {"score": st.get("score"), "reason": st.get("reason"), "actions": acts}
 
 
+# --- Route table (Command pattern) -------------------------------------------
+# Replaces a ~28-branch if/elif in do_GET/do_POST: each path maps to a small
+# command `handler(req, url)`. Adding an endpoint is now ONE entry here instead of
+# editing the dispatch chain AND the /health docs separately (Open/Closed + DRY).
+# `advertised_endpoints()` derives /health's `endpoints` from these tables so the
+# advertised contract can never drift from what is actually routed (it had: the
+# old hardcoded list named 6 of ~26 real routes).
+
+def _json_route(fn):
+    """Adapt a zero-arg data function into a GET handler that sends it as JSON 200."""
+    def handler(req, _url):
+        req._send(200, fn())
+    return handler
+
+
+def _html_route(fn):
+    """Adapt a zero-arg HTML producer into a GET handler that sends text/html."""
+    def handler(req, _url):
+        req._send_html(fn())
+    return handler
+
+
+def _artifact_route(req, url):
+    """Serve a whitelisted artifact image (path validated by safe_artifact)."""
+    f = safe_artifact((parse_qs(url.query).get("path") or [""])[0])
+    if not f:
+        req._send(404, {"error": "not an allowed artifact image"})
+        return
+    sfx = f.suffix.lower()
+    ctype = ("image/svg+xml" if sfx == ".svg" else
+             "image/jpeg" if sfx in (".jpg", ".jpeg") else
+             "image/webp" if sfx == ".webp" else "image/png")
+    req._send_bytes(f.read_bytes(), ctype)
+
+
+def _ask_route(req, _url):
+    """POST /ask — the oracle consult. Honest 500 on failure; never fabricates."""
+    try:
+        n = int(req.headers.get("Content-Length") or 0)
+        body = req.rfile.read(n) if n else b""
+        prompt = parse_ask_payload(body)
+        if not prompt:
+            req._send(400, {"error": "empty question (send 'prompt' or 'question')"})
+            return
+        mode = parse_ask_mode(body)
+        question = apply_mode(prompt, mode)
+        t0 = time.time()
+        answer = ask_claude(question)
+        _audit_append({"t": time.time(), "kind": "consult",
+                       "mode": mode or "default", "q_chars": len(prompt),
+                       "a_chars": len(answer), "dur_sec": round(time.time() - t0, 1)})
+        req._send(200, {"response": answer})
+    except Exception as e:  # devolve erro honesto; nao fabrica resposta
+        req._send(500, {"error": f"{type(e).__name__}: {e}"})
+
+
+def _heartbeat_route(req, _url):
+    req._heartbeat()
+
+
+def _process_consults_start_route(req, _url):
+    try:
+        req._send(200, process_consults_start())
+    except Exception as e:
+        req._send(500, {"error": f"{type(e).__name__}: {e}"})
+
+
+# path (rstrip'd of trailing "/") -> command. "" is the form "/" and "/dashboard"
+# reduce to. GET strips the query (urlparse); POST matches the raw path, as before.
+GET_ROUTES = {
+    "": _html_route(dashboard_html),
+    "/dashboard": _html_route(dashboard_html),
+    "/health": _json_route(health_payload),
+    "/sessions": _json_route(sessions_view),
+    "/events": _json_route(recent_events),
+    "/api/skp-inventory": _json_route(skp_inventory),
+    "/api/plant": _json_route(plant_info),
+    "/api/claude-sessions": _json_route(claude_sessions),
+    "/api/ecosystem": _json_route(ecosystem),
+    "/api/recent-commits": _json_route(recent_commits),
+    "/api/gate-ledger": _json_route(gate_ledger),
+    "/api/system-map": _json_route(system_map),
+    "/api/git-inventory": _json_route(git_inventory),
+    "/api/processes": _json_route(live_processes),
+    "/api/skp-inventory-v2": _json_route(skp_inventory_v2),
+    "/api/difficulties": _json_route(difficulties),
+    "/api/skp-timeline": _json_route(skp_timeline),
+    "/api/learnings": _json_route(learnings),
+    "/api/status": _json_route(status),
+    "/api/next-best-actions": _json_route(next_best_actions),
+    "/api/actions": _json_route(actions_overview),
+    "/api/actions/process-consults": _json_route(process_consults_state),
+    "/api/actions/dirty-detail": _json_route(dirty_detail),
+    "/artifact": _artifact_route,
+}
+
+POST_ROUTES = {
+    "/ask": _ask_route,
+    "/heartbeat": _heartbeat_route,
+    "/api/actions/process-consults": _process_consults_start_route,
+}
+
+
+def advertised_endpoints() -> list[str]:
+    """Single source of truth for /health's `endpoints`: every served path, derived
+    from the route tables so it can never drift from what do_GET/do_POST route."""
+    gets = {("/" if p == "" else p) for p in GET_ROUTES}
+    return sorted(gets | set(POST_ROUTES))
+
+
 class Handler(BaseHTTPRequestHandler):
     def _send(self, code, obj):
         body = json.dumps(obj, ensure_ascii=False).encode("utf-8")
@@ -1407,95 +1517,18 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         u = urlparse(self.path)
-        p = u.path.rstrip("/")
-        if p == "" or p == "/dashboard":
-            self._send_html(dashboard_html())
-        elif p == "/health":
-            self._send(200, health_payload())
-        elif p == "/sessions":
-            self._send(200, sessions_view())
-        elif p == "/events":
-            self._send(200, recent_events())
-        elif p == "/api/skp-inventory":
-            self._send(200, skp_inventory())
-        elif p == "/api/plant":
-            self._send(200, plant_info())
-        elif p == "/api/claude-sessions":
-            self._send(200, claude_sessions())
-        elif p == "/api/ecosystem":
-            self._send(200, ecosystem())
-        elif p == "/api/recent-commits":
-            self._send(200, recent_commits())
-        elif p == "/api/gate-ledger":
-            self._send(200, gate_ledger())
-        elif p == "/api/system-map":
-            self._send(200, system_map())
-        elif p == "/api/git-inventory":
-            self._send(200, git_inventory())
-        elif p == "/api/processes":
-            self._send(200, live_processes())
-        elif p == "/api/skp-inventory-v2":
-            self._send(200, skp_inventory_v2())
-        elif p == "/api/difficulties":
-            self._send(200, difficulties())
-        elif p == "/api/skp-timeline":
-            self._send(200, skp_timeline())
-        elif p == "/api/learnings":
-            self._send(200, learnings())
-        elif p == "/api/status":
-            self._send(200, status())
-        elif p == "/api/next-best-actions":
-            self._send(200, next_best_actions())
-        elif p == "/api/actions":
-            self._send(200, actions_overview())
-        elif p == "/api/actions/process-consults":
-            self._send(200, process_consults_state())
-        elif p == "/api/actions/dirty-detail":
-            self._send(200, dirty_detail())
-        elif p == "/artifact":
-            f = safe_artifact((parse_qs(u.query).get("path") or [""])[0])
-            if not f:
-                self._send(404, {"error": "not an allowed artifact image"})
-                return
-            sfx = f.suffix.lower()
-            ctype = ("image/svg+xml" if sfx == ".svg" else
-                     "image/jpeg" if sfx in (".jpg", ".jpeg") else
-                     "image/webp" if sfx == ".webp" else "image/png")
-            self._send_bytes(f.read_bytes(), ctype)
-        else:
+        handler = GET_ROUTES.get(u.path.rstrip("/"))
+        if handler is None:
             self._send(404, {"error": "not found"})
+            return
+        handler(self, u)
 
     def do_POST(self):
-        path = self.path.rstrip("/")
-        if path == "/heartbeat":
-            self._heartbeat()
-            return
-        if path == "/api/actions/process-consults":
-            try:
-                self._send(200, process_consults_start())
-            except Exception as e:
-                self._send(500, {"error": f"{type(e).__name__}: {e}"})
-            return
-        if path != "/ask":
+        handler = POST_ROUTES.get(self.path.rstrip("/"))
+        if handler is None:
             self._send(404, {"error": "not found"})
             return
-        try:
-            n = int(self.headers.get("Content-Length") or 0)
-            body = self.rfile.read(n) if n else b""
-            prompt = parse_ask_payload(body)
-            if not prompt:
-                self._send(400, {"error": "empty question (send 'prompt' or 'question')"})
-                return
-            mode = parse_ask_mode(body)
-            question = apply_mode(prompt, mode)
-            t0 = time.time()
-            answer = ask_claude(question)
-            _audit_append({"t": time.time(), "kind": "consult",
-                           "mode": mode or "default", "q_chars": len(prompt),
-                           "a_chars": len(answer), "dur_sec": round(time.time() - t0, 1)})
-            self._send(200, {"response": answer})
-        except Exception as e:  # devolve erro honesto; nao fabrica resposta
-            self._send(500, {"error": f"{type(e).__name__}: {e}"})
+        handler(self, None)
 
     def _heartbeat(self):
         try:
