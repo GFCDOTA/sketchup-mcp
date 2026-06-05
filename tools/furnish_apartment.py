@@ -19,10 +19,12 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))   # roda standalone
+from tools.bathroom_layout import build_boxes as bath_boxes   # noqa: E402
 from tools.kitchen_layout import build_boxes as kitchen_boxes   # noqa: E402
 from tools.place_bedroom_skp import build_boxes as bedroom_boxes   # noqa: E402
 from tools.place_layout_skp import build_boxes as living_boxes   # noqa: E402
-from tools.room_type import BEDROOM, KITCHEN, LIVING, classify_rooms   # noqa: E402
+from tools.room_type import (BATHROOM, BEDROOM, KITCHEN, LIVING,   # noqa: E402
+                             classify_rooms)
 
 ROOT = Path(__file__).resolve().parents[1]
 SKETCHUP_EXE = r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
@@ -32,7 +34,8 @@ OUT_DIR = ROOT / "artifacts/planta_74/furnished"   # pasta UNICA fixa
 RB = ROOT / "tools/place_layout_skp.rb"
 
 # dispatch por tipo de comodo (cresce conforme novos brains entram)
-BRAINS = {BEDROOM: bedroom_boxes, KITCHEN: kitchen_boxes, LIVING: living_boxes}
+BRAINS = {BEDROOM: bedroom_boxes, KITCHEN: kitchen_boxes, LIVING: living_boxes,
+          BATHROOM: bath_boxes}
 
 
 def collect_boxes(con):
