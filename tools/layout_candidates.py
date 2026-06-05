@@ -189,10 +189,10 @@ def template_estar_ancorado(s):
 
 TEMPLATES = [("sofa_contra_parede", template_sofa_wall),
              ("sofa_flutuante_setoriza", template_sofa_float),
-             ("sofa_mais_poltrona", template_sofa_poltrona)]
+             ("sofa_mais_poltrona", template_sofa_poltrona),
+             ("estar_ancorado", template_estar_ancorado)]
 
-# templates extras (composicao), materializaveis direto sem passar pelo ranking
-# do score atual — o score de composicao ainda nao premia tapete/aparador.
+# tambem acessivel por nome p/ materializacao direta (place_layout --template)
 EXTRA_TEMPLATES = {"estar_ancorado": template_estar_ancorado}
 
 
@@ -224,11 +224,19 @@ def score(items, sm, tv):
     for it in solid:
         free = free.difference(it["box"])
     passage_ok = not free.buffer(-M(PASSAGE_M) / 2).is_empty
+    # gate: o rack/TV deve ficar ENCOSTADO na parede-TV (o along-search nao pode
+    # desliza-lo pra fora da parede focal pra burlar os outros gates).
+    rack_it = next((it for it in items if it["kind"] == "rack_tv"), None)
+    rack_on_wall = True
+    if rack_it is not None and tv.get("id") in walls:
+        tvwall = wall_footprint(walls[tv["id"]], extend_endpoints=True)
+        rack_on_wall = rack_it["box"].distance(tvwall) < M(0.15)
     hard = {"nao_invade_parede": not hits_wall,
             "nao_bloqueia_circulacao": not hits_circ,
             "nao_bloqueia_porta_janela": not hits_circ,   # circ ja inclui aberturas
             "dentro_do_comodo": not out_room,
-            "passagem_min_080": passage_ok}
+            "passagem_min_080": passage_ok,
+            "rack_na_parede_tv": rack_on_wall}
     valid = all(hard.values())
 
     # ---------- SOFT (continuo) ----------
@@ -300,6 +308,33 @@ def score(items, sm, tv):
         dev = min(abs(fill - flo), abs(fill - fhi))
         soft["proporcao"] = round(max(0.0, 10 - dev * 50), 1)
         pen.append(f"proporcao moveis/sala {fill} fora de {flo}-{fhi}")
+
+    # composicao (spec GPT slice 2): premia ANCORAGEM (tapete unindo o grupo) +
+    # EIXO FOCAL (rack-mesa-sofa centros alinhados). Explica por que a composicao
+    # vence — nao so "tem mais movel".
+    rug = next((it for it in items if it.get("decorative")), None)
+    mesa = next((it for it in items if it["kind"] == "mesa_centro"), None)
+    comp, comp_bits = 0.0, []
+    if rug is not None:
+        on_rug = [it for it in items
+                  if it["kind"] in ("sofa_3", "sofa_2", "mesa_centro", "poltrona")
+                  and it["box"].intersection(rug["box"]).area > 0.3 * it["box"].area]
+        if on_rug:
+            comp += min(8.0, 4.0 * len(on_rug))        # ate 8: tapete ancora 2+ pecas
+            comp_bits.append(f"tapete ancora {len(on_rug)}")
+    if rack and sofa and mesa is not None:
+        ax = (lambda p: p.x) if tv["orient"] == "h" else (lambda p: p.y)
+        cc = [ax(rack["box"].centroid), ax(mesa["box"].centroid), ax(sofa["box"].centroid)]
+        spread = (max(cc) - min(cc)) * PT_TO_M
+        fa = round(7.0 * max(0.0, 1 - spread / 0.4), 1)  # ate 7: eixo focal alinhado
+        comp += fa
+        if fa >= 4:
+            comp_bits.append(f"eixo focal {round(spread, 2)}m")
+    soft["composicao"] = round(comp, 1)
+    if comp_bits:
+        reasons.append("composicao: " + ", ".join(comp_bits) + f" (+{round(comp,1)})")
+    else:
+        pen.append("composicao fraca (sem tapete ancorando / eixo focal)")
 
     soft_score = round(sum(soft.values()), 1)
     return {
