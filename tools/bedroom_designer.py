@@ -93,8 +93,10 @@ def _free_after(usable, solids):
     return free
 
 
-def build_layout(sm, hb):
-    """Monta um candidato (P0+P1+P2) com a cabeceira na parede hb (centralizada).
+def build_layout(sm, hb, minimalist=True):
+    """Monta um candidato com a cabeceira na parede hb (cama centralizada).
+    minimalist (default, pos review GPT): P0 (cama+criados+tapete+guarda-roupa) +
+    no MAXIMO o dresser. --full re-habilita banco/poltrona/mesa (vira showroom).
     Devolve (items, downgrades)."""
     g = sm["_geom"]
     cell, usable = g["cell"], g["usable"]
@@ -161,12 +163,8 @@ def build_layout(sm, hb):
     else:
         downgrades.append("guarda-roupa não coube com frente livre")
 
-    # --- P1: banco/ottoman aos pés (centralizado com a cama) ---
-    banco = _place_foot(o, face, sgn, ac, bl, BANCO, comodo, circ_u, items, usable)
-    if banco is not None:
-        items.append(banco)
-
-    # --- P1: dresser/cômoda em parede livre (não a da cabeceira nem do armário) ---
+    # --- secundario: dresser/comoda baixa numa parede livre (UNICO extra do
+    # minimalista; GPT review 2026-06: nucleo + 'talvez dresser') ---
     used = {hb["id"]} | {it.get("anchor_wall") for it in items if it.get("type") == "wardrobe"}
     dresser = _place_against(sm, [c for c in _wardrobe_walls(sm, hb["id"]) if c[1]["id"] not in used],
                              DRESSER[0], DRESSER[1], items, comodo, circ_u, win_zone,
@@ -174,16 +172,21 @@ def build_layout(sm, hb):
     if dresser is not None:
         dresser["name"] = "dresser"
         dresser["type"] = "dresser"
-        dresser["reason"] = "parede livre, baixa, sem competir com guarda-roupa"
+        dresser["reason"] = "comoda baixa em parede livre, sem competir com guarda-roupa"
         items.append(dresser)
 
-    # --- P2: poltrona num canto livre perto da janela (só se sobrar) ---
-    polt = _place_corner(sm, POLTRONA, comodo, circ_u, win_zone, items, near_window=True)
-    if polt is not None:
-        items.append(polt)
-        mesa = _place_beside(polt, MESA_LAT, comodo, circ_u, items)
-        if mesa is not None:
-            items.append(mesa)
+    # --- extras (banco aos pes + poltrona/mesa): SO no modo --full. GPT review
+    # 2026-06: no minimalista isso vira 'showroom'/excessivo, intencao fraca. ---
+    if not minimalist:
+        banco = _place_foot(o, face, sgn, ac, bl, BANCO, comodo, circ_u, items, usable)
+        if banco is not None:
+            items.append(banco)
+        polt = _place_corner(sm, POLTRONA, comodo, circ_u, win_zone, items, near_window=True)
+        if polt is not None:
+            items.append(polt)
+            mesa = _place_beside(polt, MESA_LAT, comodo, circ_u, items)
+            if mesa is not None:
+                items.append(mesa)
 
     return items, downgrades
 
@@ -374,10 +377,10 @@ def _piece_json(it):
             "rotation": 0, "anchor_wall": it.get("anchor_wall"), "reason": it.get("reason")}
 
 
-def run(con, room_id):
+def run(con, room_id, minimalist=True):
     sm = build_spatial_model(con, room_id)
     out = {"room_id": room_id, "room_name": sm.get("room_name"), "area_m2": sm["area_m2"],
-           "candidates": []}
+           "minimalist": minimalist, "candidates": []}
     top, allhb = _headboard_candidates(sm, M(KING[0]), k=3)
     out["headboard_ranking"] = [{"wall": h["wall_id"], "score": h["score"], "clean": h["clean"],
                                  "has_window": h["has_window"], "has_door": h["has_door"]}
@@ -392,7 +395,7 @@ def run(con, room_id):
             continue
         hb["has_window"] = h["has_window"]
         hb["has_door"] = h["has_door"]
-        items, downs = build_layout(sm, hb)
+        items, downs = build_layout(sm, hb, minimalist)
         if items is None:
             out["candidates"].append({"headboard_wall": h["wall_id"], "rank": rank,
                                       "valid": False, "score": -999, "reason": downs})
@@ -582,6 +585,7 @@ def main():
     ap.add_argument("--room", default="r000")
     ap.add_argument("--synthetic", action="store_true", help="quarto king sintetico limpo")
     ap.add_argument("--skp", action="store_true", help="gera SKP placeholder (so comodo real)")
+    ap.add_argument("--full", action="store_true", help="modo cheio (banco/poltrona/mesa); default = minimalista")
     ap.add_argument("--out-dir", default="artifacts/planta_74/furnished")
     args = ap.parse_args()
     if args.synthetic:
@@ -591,8 +595,9 @@ def main():
         con = json.loads(Path("fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json")
                          .read_text("utf-8"))
         room, tag = args.room, args.room
-    sm, out = run(con, room)
-    print(f"QUARTO {tag} ('{out.get('room_name')}') {out['area_m2']}m2 | {out['result']}")
+    sm, out = run(con, room, minimalist=not args.full)
+    mode = "FULL" if args.full else "MINIMALISTA"
+    print(f"QUARTO {tag} ('{out.get('room_name')}') {out['area_m2']}m2 | {out['result']} | {mode}")
     if out["result"] == "OK":
         print(f"  vencedor cabeceira {out['chosen']} | score {out['chosen_score']}")
         for p in out["winner_layout"]:

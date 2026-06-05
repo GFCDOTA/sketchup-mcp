@@ -2,12 +2,13 @@
   "room_id": "bedroom",
   "room_name": "SUITE MASTER KING",
   "area_m2": 22.6,
+  "minimalist": true,
   "candidates": [
     {
       "headboard_wall": "wR",
       "rank": 0,
       "valid": true,
-      "score": 105,
+      "score": 100,
       "hard": {
         "dentro_do_quarto": true,
         "nao_invade_parede": true,
@@ -22,7 +23,7 @@
         "circulacao": 20,
         "guarda_roupa": 15,
         "tapete": 10,
-        "banco_dresser": 10
+        "banco_dresser": 5
       },
       "clearances_m": {
         "lateral": 1.52,
@@ -87,17 +88,6 @@
           "reason": "parede lateral/oposta limpa, com frente livre"
         },
         {
-          "name": "banco",
-          "type": "bench",
-          "x_m": 2.17,
-          "y_m": 2.5,
-          "width_m": 0.45,
-          "depth_m": 1.4,
-          "rotation": 0,
-          "anchor_wall": null,
-          "reason": "aos pés da cama, centralizado"
-        },
-        {
           "name": "dresser",
           "type": "dresser",
           "x_m": 0.85,
@@ -106,29 +96,7 @@
           "depth_m": 0.45,
           "rotation": 0,
           "anchor_wall": "wT",
-          "reason": "parede livre, baixa, sem competir com guarda-roupa"
-        },
-        {
-          "name": "poltrona",
-          "type": "armchair",
-          "x_m": 4.08,
-          "y_m": 4.48,
-          "width_m": 0.8,
-          "depth_m": 0.8,
-          "rotation": 0,
-          "anchor_wall": null,
-          "reason": "canto livre perto da janela (leitura)"
-        },
-        {
-          "name": "mesa_lateral",
-          "type": "side_table",
-          "x_m": 3.03,
-          "y_m": 4.28,
-          "width_m": 0.4,
-          "depth_m": 0.4,
-          "rotation": 0,
-          "anchor_wall": null,
-          "reason": "ao lado da poltrona"
+          "reason": "comoda baixa em parede livre, sem competir com guarda-roupa"
         }
       ]
     },
@@ -136,7 +104,7 @@
       "headboard_wall": "wB",
       "rank": 1,
       "valid": true,
-      "score": 105,
+      "score": 100,
       "hard": {
         "dentro_do_quarto": true,
         "nao_invade_parede": true,
@@ -151,7 +119,7 @@
         "circulacao": 20,
         "guarda_roupa": 15,
         "tapete": 10,
-        "banco_dresser": 10
+        "banco_dresser": 5
       },
       "clearances_m": {
         "lateral": 1.32,
@@ -216,17 +184,6 @@
           "reason": "parede lateral/oposta limpa, com frente livre"
         },
         {
-          "name": "banco",
-          "type": "bench",
-          "x_m": 2.3,
-          "y_m": 2.43,
-          "width_m": 1.4,
-          "depth_m": 0.45,
-          "rotation": 0,
-          "anchor_wall": null,
-          "reason": "aos pés da cama, centralizado"
-        },
-        {
           "name": "dresser",
           "type": "dresser",
           "x_m": 0.85,
@@ -235,7 +192,7 @@
           "depth_m": 0.45,
           "rotation": 0,
           "anchor_wall": "wT",
-          "reason": "parede livre, baixa, sem competir com guarda-roupa"
+          "reason": "comoda baixa em parede livre, sem competir com guarda-roupa"
         }
       ]
     },
@@ -281,7 +238,7 @@
   ],
   "result": "OK",
   "chosen": "wR",
-  "chosen_score": 105,
+  "chosen_score": 100,
   "winner_layout": [
     {
       "name": "cama_king",
@@ -339,17 +296,6 @@
       "reason": "parede lateral/oposta limpa, com frente livre"
     },
     {
-      "name": "banco",
-      "type": "bench",
-      "x_m": 2.17,
-      "y_m": 2.5,
-      "width_m": 0.45,
-      "depth_m": 1.4,
-      "rotation": 0,
-      "anchor_wall": null,
-      "reason": "aos pés da cama, centralizado"
-    },
-    {
       "name": "dresser",
       "type": "dresser",
       "x_m": 0.85,
@@ -358,36 +304,14 @@
       "depth_m": 0.45,
       "rotation": 0,
       "anchor_wall": "wT",
-      "reason": "parede livre, baixa, sem competir com guarda-roupa"
-    },
-    {
-      "name": "poltrona",
-      "type": "armchair",
-      "x_m": 4.08,
-      "y_m": 4.48,
-      "width_m": 0.8,
-      "depth_m": 0.8,
-      "rotation": 0,
-      "anchor_wall": null,
-      "reason": "canto livre perto da janela (leitura)"
-    },
-    {
-      "name": "mesa_lateral",
-      "type": "side_table",
-      "x_m": 3.03,
-      "y_m": 4.28,
-      "width_m": 0.4,
-      "depth_m": 0.4,
-      "rotation": 0,
-      "anchor_wall": null,
-      "reason": "ao lado da poltrona"
+      "reason": "comoda baixa em parede livre, sem competir com guarda-roupa"
     }
   ],
   "ranking": [
     {
       "rank": 1,
       "wall": "wR",
-      "score": 105,
+      "score": 100,
       "valid": true,
       "breakdown": {
         "cama_parede_limpa": 30,
@@ -395,14 +319,14 @@
         "circulacao": 20,
         "guarda_roupa": 15,
         "tapete": 10,
-        "banco_dresser": 10
+        "banco_dresser": 5
       },
       "downgrades": []
     },
     {
       "rank": 2,
       "wall": "wB",
-      "score": 105,
+      "score": 100,
       "valid": true,
       "breakdown": {
         "cama_parede_limpa": 30,
@@ -410,7 +334,7 @@
         "circulacao": 20,
         "guarda_roupa": 15,
         "tapete": 10,
-        "banco_dresser": 10
+        "banco_dresser": 5
       },
       "downgrades": []
     },
