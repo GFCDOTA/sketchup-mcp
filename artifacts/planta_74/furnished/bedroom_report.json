@@ -1,0 +1,247 @@
+{
+  "plant": "planta_74",
+  "stage": "bedroom_layout",
+  "rooms": [
+    {
+      "id": "r000",
+      "name": "SUITE 01",
+      "room_type": "BEDROOM",
+      "room_type_source": "name_regex",
+      "status": "OK",
+      "area_m2": 29.3,
+      "bed_size": "king",
+      "bed_size_target": "king",
+      "chosen": {
+        "headboard_wall": "m018",
+        "total_score": 110.0,
+        "furniture": [
+          {
+            "kind": "bed",
+            "bbox_m": [
+              15.18,
+              19.08,
+              17.21,
+              21.01
+            ]
+          },
+          {
+            "kind": "nightstand",
+            "bbox_m": [
+              16.81,
+              21.01,
+              17.21,
+              21.51
+            ]
+          },
+          {
+            "kind": "nightstand",
+            "bbox_m": [
+              16.81,
+              18.58,
+              17.21,
+              19.08
+            ]
+          },
+          {
+            "kind": "wardrobe",
+            "bbox_m": [
+              13.7,
+              18.65,
+              14.3,
+              21.05
+            ]
+          }
+        ],
+        "score_breakdown": {
+          "folga_lateral": 20.0,
+          "folga_pe": 15.0,
+          "centralizada": 15.0,
+          "criados": 15.0,
+          "guarda_roupa": 20.0,
+          "cabeceira_sem_janela": 25.0
+        },
+        "reasons": [
+          "folga lateral 0.79m (+20)",
+          "folga pe 3.32m (+15)",
+          "2 criados-mudos (+15)",
+          "guarda-roupa com frente livre (+20)"
+        ],
+        "metrics": {
+          "bed_size": "king",
+          "side_clear_m": 0.79,
+          "foot_clear_m": 3.32,
+          "center_off_m": 0.0,
+          "n_nightstands": 2,
+          "has_wardrobe": true,
+          "headboard_has_window": false
+        }
+      },
+      "rejected": [
+        {
+          "headboard_wall": "m019",
+          "valid": false,
+          "total_score": 0.0,
+          "blocked_by": [
+            "dentro_do_comodo",
+            "nao_bloqueia_circulacao",
+            "nao_bloqueia_porta",
+            "nao_invade_abertura",
+            "nao_invade_parede"
+          ],
+          "penalties": [
+            "so 1 criado-mudo (ideal 2)"
+          ]
+        },
+        {
+          "headboard_wall": "m017",
+          "valid": true,
+          "total_score": 95.6,
+          "blocked_by": [],
+          "penalties": [
+            "cama descentralizada 1.2m"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "r001",
+      "name": "A.S. | TERRACO SOCIAL | TERRACO TECNICO",
+      "room_type": "SERVICE",
+      "room_type_source": "name_regex",
+      "status": "SKIPPED",
+      "reason": "tipo SERVICE: brain de quarto so mobilia BEDROOM"
+    },
+    {
+      "id": "r002",
+      "name": "SALA DE JANTAR | SALA DE ESTAR",
+      "room_type": "LIVING",
+      "room_type_source": "name_regex",
+      "status": "SKIPPED",
+      "reason": "tipo LIVING: brain de quarto so mobilia BEDROOM"
+    },
+    {
+      "id": "r003",
+      "name": "SUITE 02",
+      "room_type": "BEDROOM",
+      "room_type_source": "name_regex",
+      "status": "OK",
+      "area_m2": 14.7,
+      "bed_size": "queen",
+      "bed_size_target": "queen",
+      "chosen": {
+        "headboard_wall": "m014",
+        "total_score": 90.0,
+        "furniture": [
+          {
+            "kind": "bed",
+            "bbox_m": [
+              8.37,
+              17.58,
+              10.35,
+              19.16
+            ]
+          },
+          {
+            "kind": "nightstand",
+            "bbox_m": [
+              8.37,
+              19.16,
+              8.77,
+              19.66
+            ]
+          },
+          {
+            "kind": "nightstand",
+            "bbox_m": [
+              8.37,
+              17.08,
+              8.77,
+              17.58
+            ]
+          }
+        ],
+        "score_breakdown": {
+          "folga_lateral": 20.0,
+          "folga_pe": 15.0,
+          "centralizada": 15.0,
+          "criados": 15.0,
+          "guarda_roupa": 0.0,
+          "cabeceira_sem_janela": 25.0
+        },
+        "reasons": [
+          "folga lateral 1.38m (+20)",
+          "folga pe 1.36m (+15)",
+          "2 criados-mudos (+15)"
+        ],
+        "metrics": {
+          "bed_size": "queen",
+          "side_clear_m": 1.38,
+          "foot_clear_m": 1.36,
+          "center_off_m": 0.0,
+          "n_nightstands": 2,
+          "has_wardrobe": false,
+          "headboard_has_window": false
+        }
+      },
+      "rejected": [
+        {
+          "headboard_wall": "m002",
+          "valid": true,
+          "total_score": 74.3,
+          "blocked_by": [],
+          "penalties": [
+            "folga lateral 0.53m < 0.6m",
+            "cama descentralizada 0.4m",
+            "cabeceira sob/na parede da janela (-25)"
+          ]
+        },
+        {
+          "headboard_wall": "m003",
+          "valid": false,
+          "total_score": 0.0,
+          "blocked_by": [
+            "dentro_do_comodo"
+          ],
+          "penalties": [
+            "folga lateral 0.0m < 0.6m",
+            "folga pe 0.0m < 0.6m",
+            "so 0 criado-mudo (ideal 2)",
+            "cabeceira sob/na parede da janela (-25)"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "r004",
+      "name": "COZINHA",
+      "room_type": "KITCHEN",
+      "room_type_source": "name_regex",
+      "status": "SKIPPED",
+      "reason": "tipo KITCHEN: brain de quarto so mobilia BEDROOM"
+    },
+    {
+      "id": "r005",
+      "name": "BANHO 01",
+      "room_type": "BATHROOM",
+      "room_type_source": "name_regex",
+      "status": "SKIPPED",
+      "reason": "tipo BATHROOM: brain de quarto so mobilia BEDROOM"
+    },
+    {
+      "id": "r006",
+      "name": "BANHO 02",
+      "room_type": "BATHROOM",
+      "room_type_source": "name_regex",
+      "status": "SKIPPED",
+      "reason": "tipo BATHROOM: brain de quarto so mobilia BEDROOM"
+    },
+    {
+      "id": "r007",
+      "name": "LAVABO",
+      "room_type": "BATHROOM",
+      "room_type_source": "name_regex",
+      "status": "SKIPPED",
+      "reason": "tipo BATHROOM: brain de quarto so mobilia BEDROOM"
+    }
+  ]
+}

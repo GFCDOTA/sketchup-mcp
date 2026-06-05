@@ -1,0 +1,112 @@
+{
+  "wall_thickness_pts": 5.4,
+  "walls": [
+    {
+      "id": "wB",
+      "start": [
+        0,
+        0
+      ],
+      "end": [
+        99.47,
+        0
+      ],
+      "orientation": "h",
+      "thickness": 5.4
+    },
+    {
+      "id": "wR",
+      "start": [
+        99.47,
+        0
+      ],
+      "end": [
+        99.47,
+        113.68
+      ],
+      "orientation": "v",
+      "thickness": 5.4
+    },
+    {
+      "id": "wT",
+      "start": [
+        0,
+        113.68
+      ],
+      "end": [
+        99.47,
+        113.68
+      ],
+      "orientation": "h",
+      "thickness": 5.4
+    },
+    {
+      "id": "wL",
+      "start": [
+        0,
+        0
+      ],
+      "end": [
+        0,
+        113.68
+      ],
+      "orientation": "v",
+      "thickness": 5.4
+    }
+  ],
+  "openings": [
+    {
+      "id": "door1",
+      "kind_v5": "interior_door",
+      "kind": "interior_door",
+      "wall_id": "wL",
+      "center": [
+        0.0,
+        20.46
+      ],
+      "opening_width_pts": 22.74,
+      "geometry_origin": "synthetic"
+    },
+    {
+      "id": "win1",
+      "kind_v5": "window",
+      "kind": "window",
+      "wall_id": "wT",
+      "center": [
+        49.73,
+        113.68
+      ],
+      "opening_width_pts": 34.11,
+      "geometry_origin": "synthetic"
+    }
+  ],
+  "rooms": [
+    {
+      "id": "bedroom",
+      "name": "SUITE 02",
+      "polygon_pts": [
+        [
+          0,
+          0
+        ],
+        [
+          99.47368421052632,
+          0
+        ],
+        [
+          99.47368421052632,
+          113.6842105263158
+        ],
+        [
+          0,
+          113.6842105263158
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    }
+  ],
+  "soft_barriers": []
+}

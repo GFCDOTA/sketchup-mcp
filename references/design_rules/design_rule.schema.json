@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DesignRuleCard",
+  "type": "object",
+  "required": [
+    "id",
+    "room_type",
+    "rule_type",
+    "description",
+    "source",
+    "implementation_target"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "room_type": {
+      "type": "string",
+      "enum": [
+        "BEDROOM",
+        "LIVING",
+        "KITCHEN",
+        "BATHROOM",
+        "SERVICE",
+        "BALCONY",
+        "UNKNOWN"
+      ]
+    },
+    "rule_type": {
+      "type": "string",
+      "enum": [
+        "DIMENSION",
+        "HARD_GATE",
+        "SOFT_SCORE",
+        "COMPONENT_MODELING",
+        "DOCUMENTATION"
+      ]
+    },
+    "description": {
+      "type": "string"
+    },
+    "value_m": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "dimensions_m": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "width": {
+          "type": "number"
+        },
+        "depth": {
+          "type": "number"
+        },
+        "height": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": true
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "kind",
+        "title"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "uploaded_pdf",
+            "web",
+            "project_decision",
+            "designer_default"
+          ]
+        },
+        "title": {
+          "type": "string"
+        },
+        "page": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "implementation_target": {
+      "type": "string"
+    },
+    "test_expectation": {
+      "type": "string"
+    }
+  }
+}

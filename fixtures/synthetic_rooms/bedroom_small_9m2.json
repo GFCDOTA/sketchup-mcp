@@ -1,0 +1,112 @@
+{
+  "wall_thickness_pts": 5.4,
+  "walls": [
+    {
+      "id": "wB",
+      "start": [
+        0,
+        0
+      ],
+      "end": [
+        85.26,
+        0
+      ],
+      "orientation": "h",
+      "thickness": 5.4
+    },
+    {
+      "id": "wR",
+      "start": [
+        85.26,
+        0
+      ],
+      "end": [
+        85.26,
+        85.26
+      ],
+      "orientation": "v",
+      "thickness": 5.4
+    },
+    {
+      "id": "wT",
+      "start": [
+        0,
+        85.26
+      ],
+      "end": [
+        85.26,
+        85.26
+      ],
+      "orientation": "h",
+      "thickness": 5.4
+    },
+    {
+      "id": "wL",
+      "start": [
+        0,
+        0
+      ],
+      "end": [
+        0,
+        85.26
+      ],
+      "orientation": "v",
+      "thickness": 5.4
+    }
+  ],
+  "openings": [
+    {
+      "id": "door1",
+      "kind_v5": "interior_door",
+      "kind": "interior_door",
+      "wall_id": "wL",
+      "center": [
+        0.0,
+        15.35
+      ],
+      "opening_width_pts": 22.74,
+      "geometry_origin": "synthetic"
+    },
+    {
+      "id": "win1",
+      "kind_v5": "window",
+      "kind": "window",
+      "wall_id": "wT",
+      "center": [
+        42.63,
+        85.26
+      ],
+      "opening_width_pts": 34.11,
+      "geometry_origin": "synthetic"
+    }
+  ],
+  "rooms": [
+    {
+      "id": "bedroom",
+      "name": "QUARTO PEQUENO",
+      "polygon_pts": [
+        [
+          0,
+          0
+        ],
+        [
+          85.26315789473685,
+          0
+        ],
+        [
+          85.26315789473685,
+          85.26315789473685
+        ],
+        [
+          0,
+          85.26315789473685
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    }
+  ],
+  "soft_barriers": []
+}

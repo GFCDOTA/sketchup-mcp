@@ -1,0 +1,93 @@
+[
+  {
+    "id": "NIGHTSTAND_DIM_GASPAR",
+    "room_type": "BEDROOM",
+    "rule_type": "COMPONENT_MODELING",
+    "description": "Criado-mudo (modelo do livro): caixa 0.59x0.435x0.45 m; tampo 0.65x0.48x0.025 m (sobra ~0.03 m por lado, com bisote); madeira ~0.018 m. Anatomia: caixa + tampo + pes + gaveta + puxador.",
+    "dimensions_m": {"width": 0.59, "depth": 0.435, "height": 0.45, "top_width": 0.65, "top_depth": 0.48, "top_thickness": 0.025, "panel_thickness": 0.018},
+    "source": {"kind": "uploaded_pdf", "title": "SketchUp para design de moveis (Joao Gaspar)", "page": 48, "url": null},
+    "implementation_target": "tools/bedroom_layout.py (NIGHTSTAND) + futuro componente SKP",
+    "test_expectation": "Criado-mudo real ~0.59x0.435 m; placeholder atual 0.50x0.40 e simplificacao consciente."
+  },
+  {
+    "id": "WARDROBE_DIM_GASPAR",
+    "room_type": "BEDROOM",
+    "rule_type": "COMPONENT_MODELING",
+    "description": "Guarda-roupa (modelo do livro): estrutura/painel altura ~2.10 m; madeira 0.018 m; portas ~0.45 m de largura (alturas ~2.01 m total e ~1.59 m superior). Anatomia: estrutura + gavetas + portas + puxador.",
+    "dimensions_m": {"height": 2.10, "panel_thickness": 0.018, "door_width": 0.45, "door_height_full": 2.01, "door_height_upper": 1.59, "depth": 0.60},
+    "source": {"kind": "uploaded_pdf", "title": "SketchUp para design de moveis (Joao Gaspar)", "page": 77, "url": null},
+    "implementation_target": "tools/bedroom_layout.py (WARDROBE_*) + futuro componente SKP",
+    "test_expectation": "Altura do guarda-roupa ~2.10 m (placeholder usa 2.20); largura em modulos de ~0.45 m por porta."
+  },
+  {
+    "id": "WARDROBE_DOOR_MODULE",
+    "room_type": "BEDROOM",
+    "rule_type": "DIMENSION",
+    "description": "Guarda-roupa modula em portas de ~0.45 m. Largura util ~= n_portas x 0.45 m (ex.: 1.80 m = 4 portas).",
+    "value_m": 0.45,
+    "source": {"kind": "uploaded_pdf", "title": "SketchUp para design de moveis (Joao Gaspar)", "page": 77, "url": null},
+    "implementation_target": "tools/bedroom_layout.py (arredondar WARDROBE_W_BY_SIZE a multiplo de ~0.45 m)",
+    "test_expectation": "Largura do guarda-roupa snap a multiplo de ~0.45 m quando virar componente."
+  },
+  {
+    "id": "PANEL_THICKNESS_MDF",
+    "room_type": "UNKNOWN",
+    "rule_type": "DIMENSION",
+    "description": "Espessura padrao de painel de madeira/MDF em movel planejado: 0.018 m (1.8 cm). Usar nas chapas/tampos de componentes reais.",
+    "value_m": 0.018,
+    "source": {"kind": "uploaded_pdf", "title": "SketchUp para design de moveis (Joao Gaspar)", "page": 49, "url": null},
+    "implementation_target": "futuros componentes SKP (espessura de chapa)",
+    "test_expectation": "Pecas planas de componente usam espessura 0.018 m."
+  },
+  {
+    "id": "BED_DIM_QUEEN_DEFAULT",
+    "room_type": "BEDROOM",
+    "rule_type": "DIMENSION",
+    "description": "Cama queen como default em suite media/grande quando os clearances passam.",
+    "dimensions_m": {"width": 1.58, "depth": 1.98, "height": 0.55},
+    "source": {"kind": "designer_default", "title": "Defaults de mobiliario residencial + ChatGPT consult", "page": null, "url": null},
+    "implementation_target": "tools/bedroom_layout.py (BED_SIZES, _bed_order)",
+    "test_expectation": "Em quarto >=14 m2, queen vence se porta/janela/circulacao passam; fallback casal se falhar."
+  },
+  {
+    "id": "BED_HARD_HEADBOARD_ON_WALL",
+    "room_type": "BEDROOM",
+    "rule_type": "HARD_GATE",
+    "description": "Cama deve ter a cabeceira encostada em uma parede valida.",
+    "value_m": null,
+    "source": {"kind": "project_decision", "title": "Auto-mobiliado bedroom brain", "page": null, "url": null},
+    "implementation_target": "tools/bedroom_layout.py (hard gate cabeceira_na_parede)",
+    "test_expectation": "Candidato com cabeceira solta rejeitado (gate False)."
+  },
+  {
+    "id": "WARDROBE_FRONT_CLEARANCE",
+    "room_type": "BEDROOM",
+    "rule_type": "HARD_GATE",
+    "description": "Guarda-roupa precisa de frente livre minima: 0.75 m (porta de correr) / 1.00 m (porta de abrir).",
+    "value_m": 0.75,
+    "dimensions_m": {"front_sliding": 0.75, "front_hinged": 1.00},
+    "source": {"kind": "designer_default", "title": "Ollama interior-designer (consult 2026-06-05)", "page": null, "url": null},
+    "implementation_target": "tools/bedroom_layout.py (hard gate guarda_roupa_frente_livre, WARDROBE_FRONT_MIN)",
+    "test_expectation": "Candidato com <0.75 m na frente do guarda-roupa rejeitado."
+  },
+  {
+    "id": "BED_WINDOW_SOFT_NOT_HARD",
+    "room_type": "BEDROOM",
+    "rule_type": "SOFT_SCORE",
+    "description": "Cabeceira sob janela: penalidade forte (soft), nao proibida (quarto pequeno pode exigir). Movel ALTO (guarda-roupa) cobrindo janela: hard.",
+    "value_m": null,
+    "source": {"kind": "designer_default", "title": "Ollama interior-designer + ChatGPT", "page": null, "url": null},
+    "implementation_target": "tools/bedroom_layout.py (soft cabeceira_sem_janela + hard nao_bloqueia_janela)",
+    "test_expectation": "Parede de cabeceira limpa vence parede com janela quando ambas viaveis."
+  },
+  {
+    "id": "KITCHEN_COUNTER_BASIC",
+    "room_type": "KITCHEN",
+    "rule_type": "DIMENSION",
+    "description": "Bancada de cozinha: altura ~0.90 m, profundidade ~0.60 m. Armario superior inicia ~1.40 m do piso, profundidade ~0.35 m. Torre/coluna (forno/geladeira) ~0.60-0.70 m de profundidade.",
+    "dimensions_m": {"counter_height": 0.90, "counter_depth": 0.60, "upper_start_height": 1.40, "upper_depth": 0.35, "tower_depth": 0.65},
+    "source": {"kind": "designer_default", "title": "Ergonomia de cozinha residencial", "page": null, "url": null},
+    "implementation_target": "tools/kitchen_layout.py (proxima fatia: cozinha planejada)",
+    "test_expectation": "Bancada 0.90 alt / 0.60 prof; superior 0.35 prof a 1.40 m; circulacao >= 0.90 m entre bancadas frontais."
+  }
+]

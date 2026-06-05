@@ -84,3 +84,8 @@ tools/claude_bridge/*.log
 .ai_bridge/*.jsonl
 .ai_bridge/*_decision_*.md
 .ai_bridge/oracle_*.md
+
+# pdf_knowledge: indice e PDFs licenciados NAO commitar
+tools/pdf_knowledge/output/
+references/pdfs/
+*.pdf_pages.jsonl
