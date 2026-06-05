@@ -1002,6 +1002,157 @@ def _process_consults_start_route(req, _url):
         req._send(500, {"error": f"{type(e).__name__}: {e}"})
 
 
+def local_llms() -> dict:
+    """Local LLM fleet (Ollama on :11434): which models are installed and which are
+    loaded in memory right now. Best-effort; returns up=False if the daemon is down.
+    Powers the NOC 'Fleet local' card."""
+    import urllib.request
+
+    base = "http://127.0.0.1:11434"
+    out = {"up": False, "version": "", "count": 0, "models": [], "running": []}
+
+    def _get(path):
+        with urllib.request.urlopen(base + path, timeout=2) as r:
+            return json.loads(r.read().decode("utf-8"))
+
+    try:
+        tags = _get("/api/tags")
+    except Exception as e:
+        out["error"] = f"{type(e).__name__}: {e}"
+        return out
+    out["up"] = True
+
+    running = set()
+    try:
+        running = {m.get("name", "") for m in (_get("/api/ps").get("models") or [])}
+    except Exception:
+        pass
+    try:
+        out["version"] = _get("/api/version").get("version", "")
+    except Exception:
+        pass
+
+    models = []
+    for m in (tags.get("models") or []):
+        det = m.get("details") or {}
+        name = m.get("name", "?")
+        icon, role = _llm_role(name)
+        models.append({
+            "name": name,
+            "gb": round((m.get("size") or 0) / (1024 ** 3), 1),
+            "params": det.get("parameter_size", ""),
+            "quant": det.get("quantization_level", ""),
+            "family": det.get("family", ""),
+            "running": name in running,
+            "icon": icon,
+            "role": role,
+        })
+    # carregados em memoria primeiro, depois alfabetico
+    models.sort(key=lambda x: (not x["running"], x["name"]))
+    out["models"] = models
+    out["count"] = len(models)
+    out["running"] = sorted(n for n in running if n)
+    return out
+
+
+# --- Fleet local: papel de cada modelo + acionamentos (parse do log Ollama) --
+LLM_ROLES = {
+    "planta-assistant": ("\U0001F3E0", "Decisões de planta / arquitetura"),
+    "coder-assistant": ("\U0001F4BB", "Código SketchUp / Ruby"),
+    "qwen2.5-coder": ("\U0001F4BB", "Código (geral)"),
+    "deepseek-r1": ("\U0001F9E0", "Raciocínio / decisão técnica"),
+    "qwen2.5vl": ("\U0001F441️", "Visão — review visual (FP-030)"),
+    "moondream": ("\U0001F441️", "Visão leve / caption"),
+    "interior-designer": ("\U0001F6CB️", "Mobiliar / design de interiores"),
+    "llama3.1": ("\U0001F4AC", "Geral / fallback"),
+}
+
+
+def _llm_role(name: str):
+    base = (name or "").split(":")[0]
+    return LLM_ROLES.get(base, ("\U0001F916", "—"))
+
+
+def llm_usage() -> dict:
+    """Acionamentos por modelo, reconstruídos do log do Ollama (server*.log).
+    Pareia cada `POST /api/(generate|chat|embeddings)` (linha GIN) com o
+    último `template selection model=<nome>` (modelo carregado naquele
+    instante). O Ollama não expõe contador por modelo via API; a janela
+    é o que os logs rotacionados ainda guardam. 0 = sem registro na janela."""
+    import os
+
+    out = {"up": False, "total_calls": 0, "log_files": 0, "models": []}
+    appdata = os.environ.get("LOCALAPPDATA", "")
+    logdir = Path(appdata) / "Ollama" if appdata else None
+
+    stats = {}
+    total = 0
+    files = []
+    if logdir and logdir.is_dir():
+        files = sorted(logdir.glob("server*.log"), key=lambda p: p.stat().st_mtime)
+    sel_re = re.compile(r'msg="template selection" model=\S*/([^/\s]+)')
+    gin_re = re.compile(r'\[GIN\]\s+([\d/]+ - [\d:]+).*?\|\s*POST\s+"/api/(?:generate|chat|embeddings|embed)"')
+    dur_re = re.compile(r'\|\s*([\d.]+)(ms|µs|μs|us|s|m)\s*\|')
+    cur = None
+    for f in files:
+        try:
+            text = f.read_text("utf-8", errors="replace")
+        except OSError:
+            continue
+        for line in text.splitlines():
+            m = sel_re.search(line)
+            if m:
+                cur = m.group(1)
+                continue
+            g = gin_re.search(line)
+            if not g:
+                continue
+            model = cur or "(desconhecido)"
+            st = stats.setdefault(model, {"calls": 0, "last_ts": "", "ms_total": 0.0})
+            st["calls"] += 1
+            st["last_ts"] = g.group(1)
+            total += 1
+            d = dur_re.search(line)
+            if d:
+                v, u = float(d.group(1)), d.group(2)
+                st["ms_total"] += (v / 1000 if u in ("µs", "μs", "us")
+                                   else v if u == "ms"
+                                   else v * 60000 if u == "m"
+                                   else v * 1000)
+
+    base = local_llms()
+    out["up"] = base.get("up", False)
+    running = set(base.get("running") or [])
+    seen, rows = set(), []
+    for mm in base.get("models") or []:
+        name = mm["name"]
+        st = stats.get(name) or {}
+        calls = st.get("calls", 0)
+        rows.append({
+            "name": name, "icon": mm.get("icon", "\U0001F916"), "role": mm.get("role", "—"),
+            "installed": True, "running": name in running,
+            "calls": calls, "last_ts": st.get("last_ts", ""),
+            "avg_ms": round(st["ms_total"] / calls) if calls else 0,
+            "gb": mm.get("gb", 0),
+        })
+        seen.add(name)
+    for name, st in stats.items():
+        if name in seen:
+            continue
+        icon, role = _llm_role(name)
+        rows.append({
+            "name": name, "icon": icon, "role": role,
+            "installed": False, "running": False,
+            "calls": st["calls"], "last_ts": st["last_ts"],
+            "avg_ms": round(st["ms_total"] / st["calls"]) if st["calls"] else 0, "gb": 0,
+        })
+    rows.sort(key=lambda r: (-r["calls"], r["name"]))
+    out["total_calls"] = total
+    out["log_files"] = len(files)
+    out["models"] = rows
+    return out
+
+
 # path (rstrip'd of trailing "/") -> command. "" is the form "/" and "/dashboard"
 # reduce to. GET strips the query (urlparse); POST matches the raw path, as before.
 GET_ROUTES = {
@@ -1019,6 +1170,8 @@ GET_ROUTES = {
     "/api/system-map": _json_route(system_map),
     "/api/git-inventory": _json_route(git_inventory),
     "/api/processes": _json_route(live_processes),
+    "/api/local-llms": _json_route(local_llms),
+    "/api/llm-usage": _json_route(llm_usage),
     "/api/skp-inventory-v2": _json_route(skp_inventory_v2),
     "/api/difficulties": _json_route(difficulties),
     "/api/skp-timeline": _json_route(skp_timeline),
