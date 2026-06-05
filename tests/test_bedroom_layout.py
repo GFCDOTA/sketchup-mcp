@@ -16,7 +16,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.bedroom_layout import run
+from tools.bedroom_layout import _bed_order, run
 
 REPO = Path(__file__).resolve().parents[1]
 SYN = REPO / "fixtures" / "synthetic_rooms"
@@ -104,3 +104,39 @@ def test_planta_74_suites_furnish(room, bed):
     assert ch["hard_gates"]["cabeceira_na_parede"]
     assert ch["hard_gates"]["nao_bloqueia_porta"]
     assert ch["hard_gates"]["dentro_do_comodo"]
+
+
+# ---- novos gates + fallback de cama (spec Felipe 2026-06-05) ----
+
+def test_bed_order_fallback_chains():
+    assert _bed_order(8, 2.5) == ["single"]
+    assert _bed_order(12, 2.8) == ["double", "single"]
+    assert _bed_order(16, 3.0) == ["queen", "double", "single"]
+    assert _bed_order(25, 3.8) == ["king", "queen", "double"]   # largo -> tenta king
+    assert _bed_order(25, 3.0) == ["queen", "double"]           # estreito -> sem king
+
+
+@pytest.mark.parametrize("fname,_bed", SYN_CASES)
+def test_new_hard_gates_present_and_pass(fname, _bed):
+    sm, out = _run(SYN / fname, "bedroom")
+    hg = _chosen(out)["hard_gates"]
+    for g in ("nao_invade_abertura", "nao_bloqueia_janela", "guarda_roupa_frente_livre"):
+        assert hg.get(g) is True, f"{g} ausente/falhou em {fname}"
+
+
+@pytest.mark.skipif(not _PLANTA.exists(), reason="planta_74 fixture absent")
+def test_fallback_machinery_recorded():
+    """run() registra alvo + tentativas de tamanho de cama (mesmo sem disparar)."""
+    sm, out = _run(_PLANTA, "r003")
+    assert out["bed_size_target"] == "queen"
+    assert isinstance(out.get("bed_tried"), list) and out["bed_tried"]
+    order = ["single", "double", "queen", "king"]
+    assert order.index(out["bed_size"]) <= order.index(out["bed_size_target"])
+
+
+def test_wardrobe_when_present_has_front_gate_true():
+    """Se ha guarda-roupa no vencedor, o hard gate de frente livre passa."""
+    sm, out = _run(SYN / "bedroom_large_18m2.json", "bedroom")
+    ch = _chosen(out)
+    if ch["metrics"]["has_wardrobe"]:
+        assert ch["hard_gates"]["guarda_roupa_frente_livre"] is True

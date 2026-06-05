@@ -63,15 +63,19 @@ def _room_size(area_m2):
     return "small" if area_m2 < 12 else ("medium" if area_m2 <= 20 else "large")
 
 
-def _bed_key(area_m2, min_dim_m):
-    """Consult 2: cama por area. king so se o comodo for largo o suficiente."""
+def _bed_order(area_m2, min_dim_m):
+    """Ordem de tentativa de cama (maior plausivel -> menor = FALLBACK de tamanho,
+    spec Felipe): <10 solteiro; 10-14 casal; 14-18 queen->casal->solteiro; 18+
+    queen default + king SO se o comodo for largo (min_dim >= 3.60 m), com fallback."""
     if area_m2 < 10:
-        return "single"
+        return ["single"]
     if area_m2 < 14:
-        return "double"
-    if area_m2 >= 22 and min_dim_m >= KING_MIN_ROOM_DIM_M:
-        return "king"
-    return "queen"
+        return ["double", "single"]
+    if area_m2 < 18:
+        return ["queen", "double", "single"]
+    if min_dim_m >= KING_MIN_ROOM_DIM_M:
+        return ["king", "queen", "double"]
+    return ["queen", "double"]
 
 
 def _fbox(orient, face, sgn, along_c, perp_d, w_along, w_perp):
@@ -179,6 +183,46 @@ def _window_zones(sm):
         else:
             zs.append(box(cx - wt, cy - hw, cx + wt, cy + hw))
     return unary_union(zs) if zs else None
+
+
+def _door_zones(sm):
+    """Pegadas (no plano) das aberturas de PORTA/passagem/porta-vidro — nenhum
+    movel pode invadir (cama em cima da abertura da porta = hard gate)."""
+    g = sm["_geom"]
+    walls = g["walls"]
+    rw = set(g["room_walls"])
+    wt = float(g["con"]["wall_thickness_pts"])
+    door_kinds = {"interior_door", "interior_passage", "glazed_balcony"}
+    zs = []
+    for o in g["con"]["openings"]:
+        k = o.get("kind_v5") or o.get("kind")
+        if o["wall_id"] not in rw or k not in door_kinds:
+            continue
+        w = walls[o["wall_id"]]
+        cx, cy = o["center"]
+        hw = o["opening_width_pts"] / 2.0
+        if w["orientation"] == "h":
+            zs.append(box(cx - hw, cy - wt, cx + hw, cy + wt))
+        else:
+            zs.append(box(cx - wt, cy - hw, cx + wt, cy + hw))
+    return unary_union(zs) if zs else None
+
+
+def _front_strip(box_geom, facing, depth_m):
+    """Faixa que precisa ficar LIVRE na frente de um movel, na direcao `facing`
+    (ex. frente do guarda-roupa). None se facing indefinido."""
+    minx, miny, maxx, maxy = box_geom.bounds
+    fx, fy = facing
+    d = M(depth_m)
+    if fx > 0:
+        return box(maxx, miny, maxx + d, maxy)
+    if fx < 0:
+        return box(minx - d, miny, minx, maxy)
+    if fy > 0:
+        return box(minx, maxy, maxx, maxy + d)
+    if fy < 0:
+        return box(minx, miny - d, maxx, miny)
+    return None
 
 
 def _inside(itbox, comodo):
@@ -290,12 +334,31 @@ def score(items, sm, hb):
     for it in solid:
         free = free.difference(it["box"])
     passage_ok = not free.buffer(-M(PASSAGE_M) / 2).is_empty
+    # janela: movel SOLIDO (qualquer um menos a cama) nao pode cobrir a janela
+    # (hard). Cama sob janela e SOFT (cabeceira_sem_janela), nao proibida.
+    blocks_window = any(_hits(it["box"], win_zone, TOL_CIRC_M2)
+                        for it in solid if it["kind"] != "bed")
+    # abertura de porta: NENHUM movel pode invadir o vao (cama em cima da porta).
+    door_zone = _door_zones(sm)
+    invades_opening = any(_hits(it["box"], door_zone, TOL_CIRC_M2) for it in solid)
+    # guarda-roupa: frente livre >= WARDROBE_FRONT_MIN (hard, se houver armario).
+    ward_front_ok = True
+    if ward is not None:
+        front = _front_strip(ward["box"], ward.get("facing", (0.0, 0.0)), WARDROBE_FRONT_MIN)
+        others = [it["box"] for it in items if it is not ward]
+        ward_front_ok = bool(front is not None
+                             and comodo.contains(front.buffer(-M(0.02)))
+                             and not any(front.intersection(o).area > (M(0.05) ** 2)
+                                         for o in others))
 
     hard = {"dentro_do_comodo": not out_room,
             "nao_bloqueia_circulacao": not hits_circ,
-            "nao_bloqueia_porta": not hits_circ,    # circ ja inclui giro de porta
+            "nao_bloqueia_porta": not hits_circ,        # circ inclui giro de porta
+            "nao_invade_abertura": not invades_opening,
+            "nao_bloqueia_janela": not blocks_window,
             "cabeceira_na_parede": headboard_touches,
             "nao_invade_parede": not hits_wall,
+            "guarda_roupa_frente_livre": ward_front_ok,
             "passagem_min_060": passage_ok}
     valid = all(hard.values())
 
@@ -411,55 +474,67 @@ def run(con, room_id):
     area = sm["area_m2"]
     bx = g["cell"].bounds
     min_dim_m = min(bx[2] - bx[0], bx[3] - bx[1]) * PT_TO_M
-    bed_key = _bed_key(area, min_dim_m)
-    bw = BED_SIZES[bed_key][0]
+    bed_order = _bed_order(area, min_dim_m)
 
     out = {"stage": "bedroom_layout", "room_id": room_id,
            "room_name": sm.get("room_name"), "area_m2": area,
-           "bed_size": bed_key, "candidates": []}
+           "bed_size_target": bed_order[0], "bed_size": bed_order[-1],
+           "bed_tried": [], "candidates": []}
 
-    top_hb, all_hb = _headboard_candidates(sm, M(bw), k=3)
-    out["headboard_ranking"] = [{"wall_id": h["wall_id"], "score": h["score"],
-                                 "clean": h["clean"], "has_window": h["has_window"],
-                                 "has_door": h["has_door"]}
-                                for h in all_hb]
-    if not top_hb:
+    chosen_bed = None
+    for bed_key in bed_order:                       # FALLBACK de tamanho de cama
+        bw = BED_SIZES[bed_key][0]
+        top_hb, all_hb = _headboard_candidates(sm, M(bw), k=3)
+        out["headboard_ranking"] = [{"wall_id": h["wall_id"], "score": h["score"],
+                                     "clean": h["clean"], "has_window": h["has_window"],
+                                     "has_door": h["has_door"]} for h in all_hb]
+        cands = []
+        for rank, h in enumerate(top_hb):
+            hb = _wall_setup(sm, h["wall_id"])
+            if hb is None:
+                continue
+            hb["has_window"] = h["has_window"]
+            best = None
+            for off in (0.0, 0.4, -0.4, 0.8, -0.8, 1.2, -1.2):
+                items = build_arrangement(sm, hb, bed_key, off, win_zone, comodo, circ_u)
+                res = score(items, sm, hb)
+                key = (res["valid"], res["total_score"], -abs(off))
+                if best is None or key > best[0]:
+                    best = (key, off, items, res)
+            if best is None:
+                continue
+            _, off, items, res = best
+            cands.append({
+                "headboard_wall": h["wall_id"], "headboard_rank": rank,
+                "along_offset_m": round(off, 2), **res,
+                "furniture": [{"kind": it["kind"],
+                               "bbox_m": [round(it["box"].bounds[i] * PT_TO_M, 2) for i in range(4)]}
+                              for it in items],
+                "_items": items})
+        n_valid = sum(1 for c in cands if c["valid"])
+        out["bed_tried"].append({"bed": bed_key, "n_valid": n_valid})
+        out["candidates"] = cands
+        if n_valid > 0:
+            chosen_bed = bed_key
+            break
+
+    out["bed_size"] = chosen_bed or bed_order[-1]
+    if chosen_bed is None:
         out["result"] = "NO_VALID_LAYOUT"
-        out["reason"] = f"nenhuma parede comporta a cabeceira (cama {bed_key} {bw}m)"
-        return sm, out
-
-    for rank, h in enumerate(top_hb):
-        hb = _wall_setup(sm, h["wall_id"])
-        if hb is None:
-            continue
-        hb["has_window"] = h["has_window"]
-        best = None
-        for off in (0.0, 0.4, -0.4, 0.8, -0.8, 1.2, -1.2):
-            items = build_arrangement(sm, hb, bed_key, off, win_zone, comodo, circ_u)
-            res = score(items, sm, hb)
-            key = (res["valid"], res["total_score"], -abs(off))
-            if best is None or key > best[0]:
-                best = (key, off, items, res)
-        _, off, items, res = best
-        out["candidates"].append({
-            "headboard_wall": h["wall_id"], "headboard_rank": rank,
-            "along_offset_m": round(off, 2), **res,
-            "furniture": [{"kind": it["kind"],
-                           "bbox_m": [round(it["box"].bounds[i] * PT_TO_M, 2) for i in range(4)]}
-                          for it in items],
-            "_items": items})
-
-    valid = [c for c in out["candidates"] if c["valid"]]
-    if not valid:
-        out["result"] = "NO_VALID_LAYOUT"
-        out["reason"] = "nenhum candidato passou os hard gates"
+        out["reason"] = (f"nenhum tamanho de cama {bed_order} passou os hard gates "
+                         f"(tentado: {out['bed_tried']})")
         out["ranking"] = [{"headboard_wall": c["headboard_wall"], "total_score": 0.0,
                            "valid": False, "blocked_by": c["violations"]}
                           for c in out["candidates"]]
         return sm, out
 
+    if chosen_bed != bed_order[0]:
+        out["fallback"] = {"from": bed_order[0], "to": chosen_bed,
+                           "reason": "cama alvo nao passou os hard gates",
+                           "tried": out["bed_tried"]}
+
     def rk(c):
-        return (-c["total_score"], c["headboard_rank"], abs(c["along_offset_m"]))
+        return (not c["valid"], -c["total_score"], c["headboard_rank"], abs(c["along_offset_m"]))
     order = sorted(out["candidates"], key=rk)
     out["result"] = "OK"
     out["chosen"] = {"headboard_wall": order[0]["headboard_wall"],
