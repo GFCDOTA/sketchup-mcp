@@ -19,24 +19,13 @@ o baseline KNOWN-GOOD (que tinha as paredes completas), nao o consensus atual.
 from __future__ import annotations
 
 import argparse
-import json
 import math
 import sys
-from pathlib import Path
+
+from tools.gate_util import load_json, pt_seg_dist
 
 MISSING_PT = 8.0      # trecho contiguo sem cobertura p/ contar como faltante (~0.2m)
 JUNCTION_GAP_PT = 6.0  # endpoint solto vs parede mais proxima (~0.15m em pdf-pt)
-
-
-def _load(p: str) -> dict:
-    return json.loads(Path(p).read_text("utf-8-sig"))
-
-
-def _d_pt_seg(px, py, ax, ay, bx, by) -> float:
-    dx, dy = bx - ax, by - ay
-    L2 = dx * dx + dy * dy
-    t = 0.0 if L2 == 0 else max(0.0, min(1.0, ((px - ax) * dx + (py - ay) * dy) / L2))
-    return math.hypot(px - (ax + t * dx), py - (ay + t * dy))
 
 
 def _max_uncovered(w, walls, eps) -> tuple:
@@ -47,7 +36,7 @@ def _max_uncovered(w, walls, eps) -> tuple:
     for i in range(n + 1):
         t = i / n
         px, py = ax + t * (bx - ax), ay + t * (by - ay)
-        if not any(_d_pt_seg(px, py, ww["start"][0], ww["start"][1],
+        if not any(pt_seg_dist(px, py, ww["start"][0], ww["start"][1],
                              ww["end"][0], ww["end"][1]) <= eps for ww in walls):
             run += 1
             if run > best:
@@ -92,12 +81,12 @@ def audit(expected: dict, observed: dict, eps=4.0,
         for ep in (w["start"], w["end"]):
             # era junction no baseline? (toca outra parede do baseline, nao a si mesma)
             touches_exp = sum(1 for ww in exp_w if ww is not w and
-                              _d_pt_seg(ep[0], ep[1], ww["start"][0], ww["start"][1],
+                              pt_seg_dist(ep[0], ep[1], ww["start"][0], ww["start"][1],
                                         ww["end"][0], ww["end"][1]) <= eps)
             if touches_exp == 0:
                 continue
             # no observado, ha parede encostando nesse ponto?
-            d_obs = min((_d_pt_seg(ep[0], ep[1], ww["start"][0], ww["start"][1],
+            d_obs = min((pt_seg_dist(ep[0], ep[1], ww["start"][0], ww["start"][1],
                                    ww["end"][0], ww["end"][1]) for ww in obs_w), default=99)
             if d_obs > junction_gap:
                 findings.append({"gate": "wall_endpoint_connectivity",
@@ -117,7 +106,7 @@ def audit(expected: dict, observed: dict, eps=4.0,
 
 
 def run(expected_path: str, observed_path: str) -> int:
-    res = audit(_load(expected_path), _load(observed_path))
+    res = audit(load_json(expected_path), load_json(observed_path))
     print(f"wall_exact_match/connectivity: {res['overall']} ({res['n_findings']} achados)")
     for f in res["findings"]:
         extra = (f"uncov={f.get('uncovered_pt')}pt" if "uncovered_pt" in f

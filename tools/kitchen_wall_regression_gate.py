@@ -13,10 +13,10 @@ Verde = "nenhuma parede nova na regiao vs baseline", != "modelo fiel".
 from __future__ import annotations
 
 import argparse
-import json
 import math
 import sys
-from pathlib import Path
+
+from tools.gate_util import load_json, pt_seg_dist
 
 # Regiao COZINHA / SALA DE JANTAR / SALA DE ESTAR (open-plan), em pdf-points.
 # Acima da frente do terraco (y>~458, que e a faixa do gradil — preservada),
@@ -24,17 +24,6 @@ from pathlib import Path
 KITCHEN_SALA_BBOX = (49.0, 458.0, 555.0, 695.0)  # x0, y0, x1, y1
 EPS_PT = 4.0          # tolerancia p/ "coberto por parede do baseline"
 MIN_NEW_PT = 18.0     # trecho novo minimo p/ contar como parede nova (~0.5m)
-
-
-def _load(p: str) -> dict:
-    return json.loads(Path(p).read_text("utf-8-sig"))
-
-
-def _dist_pt_seg(px, py, ax, ay, bx, by) -> float:
-    dx, dy = bx - ax, by - ay
-    L2 = dx * dx + dy * dy
-    t = 0.0 if L2 == 0 else max(0.0, min(1.0, ((px - ax) * dx + (py - ay) * dy) / L2))
-    return math.hypot(px - (ax + t * dx), py - (ay + t * dy))
 
 
 def _in_region(w, bbox) -> bool:
@@ -53,7 +42,7 @@ def _max_uncovered_run(w, base_walls, eps) -> tuple:
     for i in range(n + 1):
         t = i / n
         px, py = ax + t * (bx - ax), ay + t * (by - ay)
-        covered = any(_dist_pt_seg(px, py, ww["start"][0], ww["start"][1],
+        covered = any(pt_seg_dist(px, py, ww["start"][0], ww["start"][1],
                                    ww["end"][0], ww["end"][1]) <= eps for ww in base_walls)
         if not covered:
             run += 1
@@ -93,7 +82,7 @@ def audit(baseline: dict, current: dict, bbox=KITCHEN_SALA_BBOX,
 
 
 def run(baseline_path: str, current_path: str) -> int:
-    res = audit(_load(baseline_path), _load(current_path))
+    res = audit(load_json(baseline_path), load_json(current_path))
     print(f"kitchen_wall_regression_gate: {res['overall']} "
           f"({res['n_findings']} parede(s) nova(s) na regiao cozinha/sala)")
     for f in res["findings"]:

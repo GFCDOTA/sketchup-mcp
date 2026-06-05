@@ -27,6 +27,8 @@ import math
 import sys
 from pathlib import Path
 
+from tools.gate_util import pt_seg_dist
+
 TOL = {
     "center_m": 0.10,        # centro de abertura
     "size_m": 0.10,          # largura/comprimento
@@ -93,14 +95,7 @@ def derive_scale(consensus: dict, groups: dict) -> float:
 
 def _pt_dist_to_seg_m(px, py, ax, ay, bx, by, s) -> float:
     """distancia ponto->segmento, em metros (entradas em pts, s=pt_to_m)."""
-    dx, dy = bx - ax, by - ay
-    L2 = dx * dx + dy * dy
-    if L2 == 0:
-        t = 0.0
-    else:
-        t = max(0.0, min(1.0, ((px - ax) * dx + (py - ay) * dy) / L2))
-    cx, cy = ax + t * dx, ay + t * dy
-    return math.hypot(px - cx, py - cy) * s
+    return pt_seg_dist(px, py, ax, ay, bx, by) * s
 
 
 def compare(consensus: dict, report: dict, tol: dict = None) -> list:
