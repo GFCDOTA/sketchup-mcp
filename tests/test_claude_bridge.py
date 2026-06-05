@@ -223,7 +223,7 @@ def test_system_map_shape():
 
 
 def test_classify_dir_known_and_unknown(tmp_path):
-    import tools.claude_bridge.server as srv
+    import tools.claude_bridge.system_inventory as srv
     assert srv._classify_dir(tmp_path / "wt-foo")["type"] == "WORKTREE"
     assert srv._classify_dir(tmp_path / "sketchup-mcp")["type"] == "CANONICAL_REPO"
     assert srv._classify_dir(tmp_path / "zxqv-random")["type"] == "UNKNOWN"
@@ -461,7 +461,7 @@ def test_dirty_detail_shape_no_crash():
 
 
 def test_classify_processes_splits_desktop_app_from_cli_sessions():
-    import tools.claude_bridge.server as srv
+    import tools.claude_bridge.system_inventory as srv
     procs = [
         {"ProcessId": 100, "WorkingSetSize": 400 * 1024 * 1024,
          "CommandLine": r"...app\Claude.exe --type=renderer"},
@@ -481,7 +481,7 @@ def test_classify_processes_splits_desktop_app_from_cli_sessions():
 
 
 def test_classify_processes_empty_is_zero_cost():
-    import tools.claude_bridge.server as srv
+    import tools.claude_bridge.system_inventory as srv
     out = srv._classify_processes([])
     assert out["cli_count"] == 0 and out["desktop_app"]["processes"] == 0
 
