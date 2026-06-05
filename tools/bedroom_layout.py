@@ -464,11 +464,77 @@ def run(con, room_id):
     return sm, out
 
 
+def plot(sm, out, out_png):
+    """Diagrama (plan) dos candidatos de quarto, espelhando layout_candidates.plot.
+    Vencedor com borda azul. Marca janela (ciano) e porta (marrom) pra revisao
+    da relacao cabeceira<->janela. ARTEFATO DE VISUAL_REVIEW (humano julga)."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    g = sm["_geom"]
+    cell, usable, circ = g["cell"], g["usable"], g["circ"]
+    COL = {"bed": "#1565c0", "nightstand": "#00838f", "wardrobe": "#6a1b9a"}
+    cands = out["candidates"][:3]
+    if not cands:
+        return
+    chosen_wall = out.get("chosen", {}).get("headboard_wall")
+    rank_of = {r["headboard_wall"]: r.get("rank", "?") for r in out.get("ranking", [])}
+    fig, axes = plt.subplots(1, len(cands), figsize=(6 * len(cands), 8.5))
+    if len(cands) == 1:
+        axes = [axes]
+    for ax, c in zip(axes, cands):
+        ax.fill(*cell.exterior.xy, color="0.88", zorder=1)
+        if usable.geom_type == "Polygon":
+            ax.fill(*usable.exterior.xy, color="#c8f7c5", alpha=0.6, zorder=2)
+        for r in circ:
+            if r.geom_type == "Polygon":
+                ax.fill(*r.exterior.xy, color="#ff8a80", alpha=0.55, hatch="//", zorder=3)
+        for o in g["con"]["openings"]:                 # janela (ciano) / porta (marrom)
+            if o["wall_id"] not in g["room_walls"]:
+                continue
+            kind = o.get("kind_v5") or o.get("kind")
+            cx, cy = o["center"]
+            ax.plot(cx, cy, marker="s", markersize=9, zorder=7,
+                    color="#00b0ff" if kind == "window" else "#8d6e63")
+        for it in c["_items"]:
+            b = it["box"]
+            ax.fill(*b.exterior.xy, color=COL.get(it["kind"], "0.4"), alpha=0.85, zorder=5)
+            ax.annotate(it["kind"], (b.centroid.x, b.centroid.y), color="white",
+                        fontsize=7, ha="center", va="center", zorder=6)
+        win = c["headboard_wall"] == chosen_wall
+        tag = "OK" if c["valid"] else "INVALIDO"
+        title = (f"#{rank_of.get(c['headboard_wall'], '?')}{'  WINNER' if win else ''}  "
+                 f"cabeceira {c['headboard_wall']}\ntotal {c['total_score']} [{tag}]")
+        if c["valid"] and c["penalties"]:
+            title += "\n-: " + "; ".join(c["penalties"][:2])[:60]
+        elif not c["valid"]:
+            title += "\nblocked: " + "; ".join(c["violations"])[:58]
+        ax.set_title(title, fontsize=9, fontweight="bold" if win else "normal",
+                     color="#0d47a1" if win else "black")
+        if win:
+            for sp in ax.spines.values():
+                sp.set_edgecolor("#0d47a1")
+                sp.set_linewidth(3.5)
+        ax.set_aspect("equal")
+        ax.invert_yaxis()
+    sub = (f"Bedroom layout {out['room_id']} ('{out.get('room_name')}') | "
+           f"{out['result']} | cama {out['bed_size']}")
+    if out["result"] == "OK":
+        sub += f" | WINNER cabeceira {chosen_wall}"
+    fig.suptitle(sub, fontsize=12)
+    fig.text(0.5, 0.01, "azul=cama  teal=criado-mudo  roxo=guarda-roupa  "
+             "ciano=janela  marrom=porta  vermelho=circulacao", ha="center", fontsize=8)
+    plt.tight_layout(rect=[0, 0.02, 1, 1])
+    plt.savefig(out_png, dpi=85)
+    plt.close(fig)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--consensus",
                     default="fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json")
     ap.add_argument("--room", default="r003")
+    ap.add_argument("--out-dir", default=None, help="salva PNG + JSON do diagrama")
     args = ap.parse_args()
     con = json.loads(Path(args.consensus).read_text("utf-8"))
     sm, out = run(con, args.room)
