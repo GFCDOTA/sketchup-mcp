@@ -1194,6 +1194,19 @@ def recent_files(limit: int = 80) -> dict:
             "note": "ordenado por mtime (proxy de uso recente, nao execucao); descricao do proprio arquivo"}
 
 
+def cognitive_doc() -> dict:
+    """Serve o CLAUDE_COGNITIVE_ARCHITECTURE.md (raiz do repo) como texto, pra aba
+    'Cerebro' renderizar. Fonte UNICA de verdade — a aba nao duplica o conteudo."""
+    p = REPO_ROOT / "CLAUDE_COGNITIVE_ARCHITECTURE.md"
+    try:
+        txt = p.read_text("utf-8", errors="replace")
+        mt = p.stat().st_mtime
+        return {"exists": True, "text": txt, "mtime": mt, "age_sec": round(time.time() - mt)}
+    except OSError:
+        return {"exists": False, "text": "",
+                "note": "CLAUDE_COGNITIVE_ARCHITECTURE.md nao encontrado na raiz do repo"}
+
+
 def _json_route(fn):
     """Adapt a zero-arg data function into a GET handler that sends it as JSON 200."""
     def handler(req, _url):
@@ -1425,6 +1438,7 @@ GET_ROUTES = {
     "/api/llm-usage": _json_route(llm_usage),
     "/api/activity": _json_route(activity_summary),
     "/api/files": _json_route(recent_files),
+    "/api/cognitive": _json_route(cognitive_doc),
     "/api/skp-inventory-v2": _json_route(skp_inventory_v2),
     "/api/difficulties": _json_route(difficulties),
     "/api/skp-timeline": _json_route(skp_timeline),
