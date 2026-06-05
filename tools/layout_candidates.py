@@ -18,6 +18,7 @@ import argparse
 import json
 from pathlib import Path
 
+from shapely.affinity import rotate as shp_rotate
 from shapely.geometry import Point, box
 from shapely.ops import unary_union
 
@@ -41,6 +42,7 @@ FURN = {
     "rack_tv": (1.80, 0.45),
     "mesa_centro": (1.00, 0.60),
     "poltrona": (0.85, 0.85),
+    "aparador": (1.60, 0.32),
 }
 # thresholds de REGRA (SOFA_TV_*, FILL_IDEAL, RESPIRO_IDEAL, PASSAGE_M) vem de
 # tools.layout_rules (fonte unica das regras). Aqui so os de implementacao:
@@ -76,9 +78,14 @@ def _tv_setup(sm):
     else:
         sgn = 1 if cell.distance(Point(cx, cy + d)) < cell.distance(Point(cx, cy - d)) else -1
         face, along_c = cy + sgn * wt / 2, cx
+    sx, sy = w["start"]
+    ex, ey = w["end"]
+    wall_len_m = ((ex - sx) ** 2 + (ey - sy) ** 2) ** 0.5 * PT_TO_M
     return {"id": tid, "wall": w, "orient": w["orientation"], "sgn": sgn,
             "face": face, "along_c": along_c,
-            "depth": _tv_depth_m(w, g["usable"]) / PT_TO_M}
+            "depth": _tv_depth_m(w, g["usable"]) / PT_TO_M,
+            "wall_len_m": wall_len_m,
+            "ambiguous": sm["tv_wall_candidate"].get("confidence") == "ambiguous"}
 
 
 def _item(kind, b, **kw):
@@ -125,9 +132,53 @@ def template_sofa_poltrona(s):
     return items
 
 
+def template_estar_ancorado(s):
+    """T4 (spec GPT, docs/interiors/gpt_composition_spec.md): CORE ANCORADO +
+    peca secundaria. rack (peso visual maior se parede-TV ambigua) + mesa 0.45 da
+    frente do sofa + TAPETE grande (une o conjunto) + aparador condicional +
+    POLTRONA na lateral, sobre o tapete e ANGULADA ~35deg (fecha a conversa).
+    Tapete e decorativo (chao), nao bloqueante."""
+    o, f, sg, ac, dep = s["orient"], s["face"], s["sgn"], s["along_c"], s["depth"]
+    rd = M(FURN["rack_tv"][1])
+    sw, sd = M(FURN["sofa_3"][0]), M(FURN["sofa_3"][1])
+    mw, md = M(FURN["mesa_centro"][0]), M(FURN["mesa_centro"][1])
+    # P2 (GPT): parede-TV ambigua/curta -> rack mais largo (peso visual), ate 85%
+    # da parede (cap 2.40 m), nunca menor que a base 1.80 m.
+    rack_w_m = FURN["rack_tv"][0]
+    if s.get("ambiguous"):
+        rack_w_m = min(2.40, max(rack_w_m, s.get("wall_len_m", rack_w_m) * 0.85))
+    rw = M(rack_w_m)
+    sp = max(dep - sd - M(MARGIN_M), M(SOFA_TV_MIN))            # sofa na parede oposta
+    # tapete: do respiro do rack (0.20) ate entrar 0.30 sob a frente do sofa,
+    # excede o sofa 0.30 de cada lado (regras universais da spec)
+    rug_start = M(MARGIN_M) + rd + M(0.20)
+    rug_perp = max(M(0.40), (sp + M(0.30)) - rug_start)
+    items = [_item("tapete", _fbox(o, f, sg, ac, rug_start, sw + 2 * M(0.30), rug_perp),
+                   decorative=True)]
+    items.append(_item("rack_tv", _fbox(o, f, sg, ac, M(MARGIN_M), rw, rd)))
+    mp = max(M(MARGIN_M) + rd + M(0.20), sp - M(0.45) - md)     # mesa 0.45 da frente
+    items.append(_item("mesa_centro", _fbox(o, f, sg, ac, mp, mw, md)))
+    items.append(_item("sofa_3", _fbox(o, f, sg, ac, sp, sw, sd),
+                       facing="tv", dist_m=round((sp + sd / 2) * PT_TO_M, 2)))
+    apw, apd = M(FURN["aparador"][0]), M(FURN["aparador"][1])   # aparador condicional
+    if dep - (sp + sd) >= apd + M(0.80):
+        items.append(_item("aparador", _fbox(o, f, sg, ac, sp + sd + M(0.05), apw, apd)))
+    # P3 (GPT): poltrona secundaria na lateral do conjunto, na profundidade da
+    # mesa, sobre o tapete, angulada ~35deg pra "fechar a conversa" sofa/mesa.
+    pw, pd = M(FURN["poltrona"][0]), M(FURN["poltrona"][1])
+    pol = _fbox(o, f, sg, ac - sw / 2 - pw * 0.2, mp + md / 2 - pd / 2, pw, pd)
+    items.append(_item("poltrona", shp_rotate(pol, 35, origin="centroid"),
+                       facing="tv", rotated_deg=35))
+    return items
+
+
 TEMPLATES = [("sofa_contra_parede", template_sofa_wall),
              ("sofa_flutuante_setoriza", template_sofa_float),
              ("sofa_mais_poltrona", template_sofa_poltrona)]
+
+# templates extras (composicao), materializaveis direto sem passar pelo ranking
+# do score atual — o score de composicao ainda nao premia tapete/aparador.
+EXTRA_TEMPLATES = {"estar_ancorado": template_estar_ancorado}
 
 
 def score(items, sm, tv):
