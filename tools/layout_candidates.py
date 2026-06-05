@@ -74,7 +74,9 @@ def _sofa_perp(dep, sd):
     distancia plausivel na profundidade especifica da planta_74."""
     target = M(SOFA_TV_TARGET_M) - sd / 2.0
     near = M(SOFA_TV_MIN) - sd / 2.0
-    return min(max(target, near), dep - sd - M(MARGIN_M))
+    # folga 0.20 m da parede oposta: depth e medido ate ~centro-linha da parede
+    # oposta, mas o sofa e posicionado da face — sem isso ele invade em sala rasa.
+    return min(max(target, near), dep - sd - M(0.20))
 
 
 def _fbox(orient, face, sgn, along_c, perp_d, w_along, w_perp):
@@ -168,8 +170,16 @@ def template_estar_ancorado(s):
     g = s.get("_geom")
     size = _room_size(g["cell"].area) if g is not None else "medium"
     fr = SIZE_FURN[size]                                       # dimensoes por tamanho de sala
-    rd = M(fr["rack_tv"][1])
-    sw, sd = M(fr["sofa_3"][0]), M(fr["sofa_3"][1])
+    # modo NARROW (sala-corredor, room_modes.md): largura curta < 2.70 m -> rack
+    # e sofa SLIM (profundidade) e SEM mesa de centro (nao cabe no eixo curto).
+    short_dim_m = 99.0
+    if g is not None:
+        bx = g["cell"].bounds
+        short_dim_m = min(bx[2] - bx[0], bx[3] - bx[1]) * PT_TO_M
+    narrow = short_dim_m < 2.70
+    rd = M(0.35 if narrow else fr["rack_tv"][1])
+    sw = M(fr["sofa_3"][0])
+    sd = M(0.85 if narrow else fr["sofa_3"][1])
     mw, md = M(fr["mesa_centro"][0]), M(fr["mesa_centro"][1])
     # P2 (GPT): parede-TV ambigua/curta -> rack mais largo (peso visual), ate 75%
     # da parede / 1.3x a base do size; nunca menor que a base.
@@ -189,8 +199,11 @@ def template_estar_ancorado(s):
     items = [_item("tapete", _fbox(o, f, sg, ac - pol_off / 2, rug_start, rug_w, rug_perp),
                    decorative=True)]
     items.append(_item("rack_tv", _fbox(o, f, sg, ac, M(MARGIN_M), rw, rd)))
-    mp = max(M(MARGIN_M) + rd + M(0.20), sp - M(0.45) - md)     # mesa 0.45 da frente
-    items.append(_item("mesa_centro", _fbox(o, f, sg, ac, mp, mw, md)))
+    if narrow:                                                 # corredor: sem mesa de centro
+        mp = (M(MARGIN_M) + rd + sp) / 2.0
+    else:
+        mp = max(M(MARGIN_M) + rd + M(0.20), sp - M(0.45) - md)     # mesa 0.45 da frente
+        items.append(_item("mesa_centro", _fbox(o, f, sg, ac, mp, mw, md)))
     items.append(_item("sofa_3", _fbox(o, f, sg, ac, sp, sw, sd),
                        facing="tv", dist_m=round((sp + sd / 2) * PT_TO_M, 2)))
     apw, apd = M(FURN["aparador"][0]), M(FURN["aparador"][1])   # aparador condicional
