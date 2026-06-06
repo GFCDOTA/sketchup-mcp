@@ -9,7 +9,19 @@
 
 ## Estado (atualizado por ciclo)
 
-- **Fase atual: 2 (Bedroom placement)** — Fases 0 e 1 fechadas GREEN.
+- **Fase atual: 2 (Bedroom placement) — determinístico GREEN; GPT visual BLOCKED (infra).**
+  - BedPlacementGate (`interior/validators/bed_placement_gate.py`, commit 523894c): valida
+    cama (ancorada+cabeceira-parede-limpa+não-bloqueia-porta+orientação) + guarda-roupa
+    (ancorado+frente-livre+não-bloqueia-porta) + criados (flanqueiam) + circulação. Fixtures
+    erro (rotacionada/flutuando/bloqueando-porta=FAIL) + quarto-válido=PASS. r000/r003 reais
+    = **PASS** (cabeceira m018/m014 limpas, wardrobe+nightstands PASS). Sem regressão.
+  - validation_report phase2_bedroom = GREEN (4 gates). bedroom_placement_report.json gerado.
+  - **PENDENTE/YELLOW: veredito GPT Modo B do quarto + veredito visual da CAMA (c0521d3).**
+    Bloqueado por INFRA de anexo-de-imagem ao ChatGPT: clipboard SetImage trava persistente
+    (10+ retries Clear+STA), upload_image não acessa imageId de screenshot, file_upload rejeita
+    path do worktree, screenshot do PNG servido corta (tamanho nativo>viewport). NÃO autojulgar.
+    Retry próximo ciclo. O placement é deterministicamente PASS (gate cobre as dimensões do schema).
+- Fases 0 e 1 fechadas GREEN.
 - Fase 1 GREEN: `interior/planners/placement_brain.py` (FurniturePlacementBrain base:
   RoomGraph+CirculationGraph+NoFurnitureZones+WallAffordanceMap+CandidateLayout+ScoreBreakdown
   + `place_against_wall(ftype,w,d)` genérico). wall_affordance generalizado (bed_score/wardrobe_score).
