@@ -54,12 +54,14 @@ HEIGHT = {"bed": 0.55, "nightstand": 0.55, "rug": 0.02, "wardrobe": 2.20,
           "headboard": 1.10}
 
 
-def _ward_widths(area_m2):               # GPT review: tenta + largo (embutido); encolhe se não couber
+def _ward_widths(area_m2):               # GPT review: tenta + largo (embutido); encolhe se não couber.
+    # Inclui fallbacks estreitos (>=1.50) p/ comodo em L (ex. r000): o guarda-roupa
+    # é P0 (storage essencial) e tem prioridade sobre o console — encolhe pra caber.
     if area_m2 >= 16:
-        return [3.00, 2.60, 2.40, 2.00]
+        return [3.00, 2.60, 2.40, 2.00, 1.80, 1.50]
     if area_m2 >= 11:
-        return [2.40, 2.00, 1.60]
-    return [1.60, 1.20]
+        return [2.40, 2.00, 1.80, 1.50, 1.20]
+    return [1.60, 1.20, 1.00]
 
 
 def _clear(v):                      # m, arredonda
