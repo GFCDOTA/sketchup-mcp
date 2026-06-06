@@ -68,12 +68,13 @@ def pl_run
   boxes.each do |b|
     begin
       h = b['h_in'].to_f
+      z0 = (b['z0_in'] || 0).to_f      # base elevada (ex.: armario aereo flutua sobre a bancada)
       g = pents.add_group
       g.name = b['label'] || b['kind']
-      # desenha o POLIGONO real (cantos), preservando rotacao de moveis angulados
-      pts = (b['corners'] || []).map { |c| Geom::Point3d.new(c[0].to_f, c[1].to_f, 0) }
+      # desenha o POLIGONO real (cantos) na cota z0, preservando rotacao
+      pts = (b['corners'] || []).map { |c| Geom::Point3d.new(c[0].to_f, c[1].to_f, z0) }
       face = g.entities.add_face(pts)
-      # extrudar SEMPRE pra cima (independente da normal da face)
+      # extrudar SEMPRE pra cima (z0 -> z0+h)
       dir = face.normal.z >= 0 ? h : -h
       face.pushpull(dir)
       mat = pl_material(model, "ph_#{b['kind']}", b['rgb'] || [120, 120, 120])

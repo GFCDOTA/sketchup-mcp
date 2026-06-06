@@ -11,26 +11,28 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from shapely.ops import unary_union   # noqa: E402
-from tools.bedroom_layout import M, _fbox, _wall_setup   # noqa: E402
+from tools.bedroom_layout import M, _fbox, _wall_setup, _window_zones   # noqa: E402
 from tools.spatial_model import PT_TO_M, build_spatial_model   # noqa: E402
 
 PT_TO_IN = (0.19 / 5.4) * 39.3700787402
 COUNTER_DEPTH = 0.60
 COUNTER_H = 0.90
 TORRE_W, TORRE_D, TORRE_H = 0.60, 0.62, 2.10   # coluna forno+microondas (GPT review)
+AEREO_DEPTH, AEREO_Z0, AEREO_H = 0.35, 1.50, 0.70   # armário aéreo sobre a bancada (GPT review)
 RGB_COUNTER = [176, 166, 150]
 RGB_TORRE = [69, 90, 100]                       # cinza-escuro eletrodoméstico
+RGB_AEREO = [150, 140, 124]                     # bege-escuro (madeira)
 DOOR_KINDS = {"interior_door", "interior_passage", "glazed_balcony"}
 
 
-def _to_box(kind, shp, h_m, rgb):
+def _to_box(kind, shp, h_m, rgb, z0_m=0.0):
     x0, y0, x1, y1 = shp.bounds
     corners = [[round(px * PT_TO_IN, 2), round(py * PT_TO_IN, 2)]
                for px, py in list(shp.exterior.coords)[:-1]]
     return {"kind": kind, "x0": x0 * PT_TO_IN, "y0": y0 * PT_TO_IN,
             "x1": x1 * PT_TO_IN, "y1": y1 * PT_TO_IN, "corners": corners,
-            "h_in": h_m * 39.3700787402, "rgb": rgb, "label": kind,
-            "ambiguous": False, "decorative": False}
+            "h_in": h_m * 39.3700787402, "z0_in": z0_m * 39.3700787402,
+            "rgb": rgb, "label": kind, "ambiguous": False, "decorative": False}
 
 
 def build_boxes(con, room_id):
@@ -116,8 +118,34 @@ def build_boxes(con, room_id):
             items.append(_to_box("torre", spot, TORRE_H, RGB_TORRE))
             n_torre = 1
             break
+
+    # ARMARIOS AEREOS sobre a bancada (GPT review P2: bancada embaixo + aereo em cima =
+    # cozinha planejada real). Faixa rasa ELEVADA (z0=1.5m) na parede da bancada,
+    # recortada ao comodo, FORA da janela (nao bloquear) e fora da circulacao.
+    win_zone = _window_zones(sm)
+    n_aereo = 0
+    for wid in used:
+        ws = _wall_setup(sm, wid)
+        w = next((x for x in sm["walls"] if x["id"] == wid), None)
+        if ws is None or w is None:
+            continue
+        strip = _fbox(ws["orient"], ws["face"], ws["sgn"], ws["along_c"], M(0.03),
+                      M(w["length_m"] + 0.6), M(AEREO_DEPTH)).intersection(cell)
+        if circ_u is not None:
+            strip = strip.difference(circ_u)
+        if win_zone is not None:
+            strip = strip.difference(win_zone)
+        if strip.is_empty:
+            continue
+        if strip.geom_type == "MultiPolygon":
+            strip = max(strip.geoms, key=lambda g: g.area)
+        if strip.geom_type != "Polygon" or strip.area < (0.20 / PT_TO_M ** 2):
+            continue
+        items.append(_to_box("aereo", strip, AEREO_H, RGB_AEREO, z0_m=AEREO_Z0))
+        n_aereo += 1
     return items, {"result": "OK", "room_name": sm.get("room_name"),
-                   "n_counters": len(used), "n_torre": n_torre, "walls": used}
+                   "n_counters": len(used), "n_torre": n_torre, "n_aereo": n_aereo,
+                   "walls": used}
 
 
 if __name__ == "__main__":
