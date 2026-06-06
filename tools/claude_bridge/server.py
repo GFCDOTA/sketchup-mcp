@@ -950,12 +950,12 @@ _NBA_SEED = [
      "impacto": 5, "esforco": 3, "proxima_acao": "Felipe fornece PDF + âncora física; anotar consensus juntos"},
     {"titulo": "Worktree-lock (fix-raiz da colisão multi-agent)", "tipo": "infra",
      "impacto": 3, "esforco": 2, "proxima_acao": "/lock keyed por session_id + ownership de branch"},
-    {"titulo": "Consolidar serving pro launcher canônico + remover wt-dash", "tipo": "infra",
-     "impacto": 3, "esforco": 2, "proxima_acao": "quando feat/banho2-glass sincronizar develop, repointar + remover wt-dash"},
-    {"titulo": "Watchdog do gate (auto-restart se /health cair)", "tipo": "infra",
-     "impacto": 2, "esforco": 2, "proxima_acao": "scheduled task (admin) ou loop de health-check"},
     {"titulo": "Tier do oráculo (Opus pesado / Sonnet rotina)", "tipo": "gate",
      "impacto": 2, "esforco": 3, "proxima_acao": "rotear por peso da decisão no multi-oracle"},
+    {"titulo": "Swap-in das constantes do builder (generalize_builder_constants)", "tipo": "generalização",
+     "impacto": 3, "esforco": 4, "proxima_acao": "executar o blueprint quando a árvore esfriar; precisa build SU + consumidor real (DIFF-006 foi revertido)"},
+    {"titulo": "RAG indexado das fontes (file-fetch §6.3 é o RAG-bebê)", "tipo": "enhancement",
+     "impacto": 2, "esforco": 4, "proxima_acao": "indexar fontes depois do pipeline generalizar"},
 ]
 
 
