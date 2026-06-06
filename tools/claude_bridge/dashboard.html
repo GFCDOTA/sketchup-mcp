@@ -76,6 +76,9 @@ tbody tr{transition:background .1s;} tbody tr:hover{background:rgba(43,212,255,.
 .flag.OK,.flag.ACTIVE{background:var(--ok-dim);color:var(--ok);border-color:rgba(39,224,138,.4);}
 .flag.STALLED,.flag.IDLE{background:var(--warn-dim);color:var(--warn);border-color:rgba(255,176,46,.4);}
 .flag.PARALYZED,.flag.STOPPED{background:var(--bad-dim);color:var(--bad);border-color:rgba(255,77,94,.4);}
+.flag.PARALYZED{background:var(--bad-dim);color:var(--bad);border-color:rgba(255,77,94,.55);}
+.flag.STALLED{background:var(--warn-dim);color:var(--warn);border-color:rgba(255,176,46,.4);}
+.flag.OK{background:var(--ok-dim);color:var(--ok);border-color:rgba(39,224,138,.4);}
 
 .feed{max-height:320px;overflow:auto;}
 .ev{display:flex;gap:10px;padding:5px 2px;border-bottom:1px solid rgba(255,255,255,.045);font-size:11.5px;}
@@ -335,10 +338,13 @@ details.audit .audit-body{padding:6px 16px 16px;}
 </section>
 
 <section id="sessoes">
-<div id="sess-alarm" class="alarm ok">checando...</div>
-<div class="card full" id="proc-cost-card"><h2>💸 Custo real agora — está gastando dinheiro?</h2><div id="proc-cost" class="muted">checando processos vivos...</div></div>
-<div class="card full"><h2>Sessões Claude Code (estão paradas? esperando o gate?)</h2>
-<div id="sess-wrap"><span class="muted">lendo ~/.claude/projects...</span></div></div>
+<div class="card full" id="sess-need-card"><h2>🛎️ Precisa de mim agora</h2>
+<div class="muted" style="margin-bottom:10px">Fila de atenção: consults sem resposta no gate + sessões <b>PARALYZED</b> (cycle congelado, exigem você). Ordenado por urgência — é só isto que pede ação.</div>
+<div id="sess-need"><span class="muted">checando...</span></div></div>
+<div class="card full"><h2>🟢 Trabalhando agora <span class="muted" style="font-weight:400;font-size:12px">— ativas &amp; ociosas (&lt;1h)</span></h2>
+<div id="sess-live"><span class="muted">lendo ~/.claude/projects...</span></div></div>
+<div class="card full"><h2>🗂️ Histórico — sessões paradas <button onclick="toggleStopped()" style="font-size:11px;margin-left:8px">ver/ocultar (<span id="sess-stopped-n">…</span>)</button></h2>
+<div id="sess-stopped" style="display:none;margin-top:10px"><span class="muted">…</span></div></div>
 </section>
 
 <section id="gate">
@@ -725,15 +731,37 @@ async function loadProcCost(){
       +'</tbody></table>';
   }catch(e){box.textContent='processos indisponíveis';}
 }
+function toggleStopped(){var e=$('sess-stopped');if(e)e.style.display=(e.style.display==='none'?'block':'none');}
 async function loadSessoes(){
-  loadProcCost();
-  var w=$('sess-wrap'),al=$('sess-alarm'); w.innerHTML='<span class="muted">lendo ~/.claude/projects...</span>';
-  try{const d=await (await fetch('/api/claude-sessions')).json();
-    if((d.pending_gate||[]).length){al.className='alarm bad';al.innerHTML='🚨 '+d.pending_gate.length+' consult(s) ESPERANDO o gate (pergunta sem resposta gravada): '+d.pending_gate.map(function(p){return esc(p.q)+' ('+fmtAge(p.age_sec)+')';}).join(' · ');}
-    else{al.className='alarm ok';al.textContent='✅ Nenhum consult pendente — toda pergunta ao gate tem resposta gravada.';}
-    var rows=(d.sessions||[]).map(function(s){return '<tr><td><span class="flag '+s.state+'">'+s.state+'</span></td><td>'+fmtAge(s.idle_sec)+'</td><td class="muted">'+esc(s.reason||'')+'</td><td>'+esc(s.project)+'</td><td class="muted">'+esc(s.id)+'</td><td>'+esc(s.desc||'(sem descritor)')+'</td></tr>';}).join('');
-    w.innerHTML='<div class="muted" style="margin-bottom:10px"><b style="color:var(--txt)">'+d.total+'</b> sessões Claude Code no total (top '+(d.sessions||[]).length+' por atividade). ACTIVE&lt;5min · IDLE&lt;1h · STOPPED&gt;1h. "parada há" = tempo desde a última escrita no transcript.</div><table><thead><tr><th>estado</th><th>parada há</th><th>motivo</th><th>projeto</th><th>id</th><th>descritor (1ª mensagem)</th></tr></thead><tbody>'+rows+'</tbody></table>';
-  }catch(e){w.innerHTML='<span class="muted">erro: '+esc(e)+'</span>';}
+  var need=$('sess-need'),live=$('sess-live'),stop=$('sess-stopped');
+  var cs,orch;
+  try{cs=await (await fetch('/api/claude-sessions',{cache:'no-store'})).json();}catch(e){cs={sessions:[],total:0,pending_gate:[]};}
+  try{orch=await (await fetch('/sessions',{cache:'no-store'})).json();}catch(e){orch={};}
+  // ---- PRECISA DE MIM (herói; travadas vêm da PRÓPRIA fonte /sessions, não dependem de join) ----
+  var pend=cs.pending_gate||[],paralyzed=[],stalled=[];
+  Object.keys(orch||{}).forEach(function(sid){var v=orch[sid]||{},f=v.flags||[];
+    if(f.indexOf('PARALYZED')>=0)paralyzed.push([sid,v]);else if(f.indexOf('STALLED')>=0)stalled.push([sid,v]);});
+  var ni=[];
+  pend.forEach(function(p){ni.push('<div class="alarm bad" style="margin:0 0 8px">🚨 <b>Consult sem resposta no gate</b> — <code>'+esc(p.q)+'</code> <span class="muted">('+fmtAge(p.age_sec)+' esperando)</span></div>');});
+  paralyzed.forEach(function(x){ni.push('<div class="alarm bad" style="margin:0 0 8px">🧊 <b>Sessão PARALYZED</b> <code>'+esc(String(x[0]).slice(0,8))+'</code> — cycle congelado'+(x[1].last_action?' em: '+esc(x[1].last_action):'')+' <span class="muted">('+fmtAge(x[1].age_sec)+', '+(x[1].unchanged_beats||0)+' beats sem mudança)</span></div>');});
+  need.innerHTML=ni.length?ni.join(''):'<div class="alarm ok" style="margin:0">✅ Nada te esperando — 0 consult pendente, 0 sessão travada (PARALYZED).</div>';
+  if(stalled.length)need.innerHTML+='<div class="muted" style="margin-top:8px">↩️ '+stalled.length+' sessão(ões) STALLED (sem heartbeat) — o loop costuma retomar sozinho; só aja se persistir.</div>';
+  // ---- TRABALHANDO AGORA (ACTIVE+IDLE) ----
+  function orchFor(id){var ks=Object.keys(orch||{}).filter(function(sid){return String(sid).slice(0,8)===id;});return ks.length?orch[ks[0]]:null;}
+  var liveS=(cs.sessions||[]).filter(function(s){return s.state!=='STOPPED';});
+  if(liveS.length){
+    live.innerHTML='<table><thead><tr><th>estado</th><th>há</th><th>projeto</th><th>orquestrador</th><th>id</th><th>contexto (1ª msg)</th></tr></thead><tbody>'
+      +liveS.map(function(s){var o=orchFor(s.id);
+        var oc=o?('<span class="flag '+esc(o.flags[0])+'">'+esc(o.flags.join(' '))+'</span>'+(o.cycle!=null?' <span class="muted">cycle '+esc(String(o.cycle))+'</span>':'')):'<span class="muted">—</span>';
+        return '<tr><td><span class="flag '+s.state+'">'+s.state+'</span></td><td>'+fmtAge(s.idle_sec)+'</td><td>'+esc(s.project)+'</td><td>'+oc+'</td><td class="muted">'+esc(s.id)+'</td><td>'+esc(s.desc||'(sem descritor)')+'</td></tr>';}).join('')
+      +'</tbody></table>';
+  }else{live.innerHTML='<span class="muted">nenhuma sessão ativa ou ociosa agora — tudo parado.</span>';}
+  // ---- HISTÓRICO (STOPPED) colapsado ----
+  var stoppedS=(cs.sessions||[]).filter(function(s){return s.state==='STOPPED';});
+  var n=$('sess-stopped-n');if(n)n.textContent=stoppedS.length;
+  stop.innerHTML='<div class="muted" style="margin-bottom:8px"><b style="color:var(--txt)">'+(cs.total||0)+'</b> sessões no total na máquina · '+stoppedS.length+' paradas (top por recência). Arquivo — sem ação.</div>'
+    +'<table><thead><tr><th>há</th><th>projeto</th><th>id</th><th>contexto (1ª msg)</th></tr></thead><tbody>'
+    +stoppedS.map(function(s){return '<tr><td>'+fmtAge(s.idle_sec)+'</td><td>'+esc(s.project)+'</td><td class="muted">'+esc(s.id)+'</td><td class="muted">'+esc(s.desc||'')+'</td></tr>';}).join('')+'</tbody></table>';
 }
 function whenTxt(sec){return (sec==null)?'UNKNOWN':('há '+fmtAge(sec));}
 async function loadActivity(){
