@@ -68,6 +68,10 @@ vendor/CubiCasa5k/repo/
 *.swp
 *.orig
 *.rej
+# SketchUp auto-backup (.skb) + per-run SU launch logs — scratch, regenerated each build
+*.skb
+*_place_log.txt
+*_furnished_log.txt
 
 # per-cycle repo-health JSON dumps (markdown stays tracked)
 reports/current/*.json

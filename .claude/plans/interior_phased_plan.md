@@ -1,0 +1,65 @@
+# Plano faseado — Sistema de Interiores (mobiliário SketchUp)
+
+> Handoff/tracker do loop autônomo. Fases sequenciais com gate explícito.
+> Só avança de fase com gate GREEN. YELLOW = corrige no escopo. RED = para + registra.
+> Regras globais: não mexer em parede/janela/shell; não bloco único no móvel principal;
+> não usar Enscape/V-Ray/Trimble antes do core (placement+anatomia) passar; não MCP agora
+> (adapters internos primeiro); sucesso = `.skp` versionado + renders + validation_report;
+> mudança de aparência relevante = consultar GPT (Modo B, schema textual, sem gerar imagem).
+
+## Estado (atualizado por ciclo)
+
+- **Fase atual: 1 (FurniturePlacementBrain base)** — Fase 0 fechada GREEN.
+- Branch: `feat/mobiliar-bedroom-layout` (sync com remote). develop +13 commits out-of-band
+  (cockpit/dashboard — não tocam mobília; sem conflito). 26 ahead de develop.
+- Python: a instalação user-level quebrou → usar venv `E:\Claude\sketchup-mcp\.venv\Scripts\python.exe`.
+
+## Marco da SALA (GPT-validado)
+
+- SofaPlacementBrain existe: `interior/planners/living_room_planner.py` (plan_living: solver
+  TV-wall limpa + sofá de frente, fora circulação).
+- SofaPlacementGate existe: `interior/validators/sofa_placement_gate.py` (ancorado/frente-foco/
+  fora-circulação/clearance/justificativa; fixtures flutuando/rotacionado/corredor=FAIL, solver=PASS).
+- Sofá placement **FAIL→PASS** confirmado pelo GPT ("agora existe um estar de verdade").
+- Sofá objeto: materiais linho+madeira + bevel almofadas (GPT PASS visual). Braço frustum.
+- **WARN/future (não bloqueia): arredondamento total da silhueta do braço (aresta vertical) — precisa fillet.**
+
+## Componentes golden já construídos
+
+- Sofá: `tools/sofa_builder.py` + `furniture_anatomy_spec.SofaSpec` + `sofa_gate.py` + `furniture_visual_gate.py`.
+- Cama: `tools/bed_builder.py` + `BedSpec` + `interior/validators/bed_gate.py` (PASS king/queen/casal/solteiro).
+  Aplicada em r000/r003. **PENDENTE: veredito GPT visual da cama (clipboard travou; retry).**
+- Apê inteiro: `tools/furnish_apartment.py` (BRAINS por tipo) → `planta_74_furnished.skp` (53 placeholders).
+
+## Próximos gaps (ordem do plano)
+
+- **Fase 1**: extrair FurniturePlacementBrain base genérico (RoomGraph/CirculationGraph/
+  NoFurnitureZones/WallAffordanceMap/CandidateLayout/ScoreBreakdown) sem quebrar a sala.
+- **Fase 2**: BedPlacementBrain + WardrobePlacementBrain + NightstandPlacement + fixtures + GPT verdict.
+- **Fase 3**: anatomia dos quartos (BedBuilder feito; WardrobeBuilder + NightstandBuilder + AnatomyGate).
+- **Fase 4**: RenderProvider abstraction (só sketchup_basic_provider funcional; Enscape/V-Ray stubs).
+- **Fase 5**: spike técnica Enscape/V-Ray/Trimble/MCP (doc honesto, sem inventar API).
+- **Fases 6-10**: Enscape preview / Asset catalog / V-Ray final / cena integrada / learning loop.
+
+## Gates por fase (resumo)
+
+| Fase | Gate GREEN = |
+|---|---|
+| 0 | baseline gerado, artifact localizado, tree explicado, report escrito ✅ |
+| 1 | sofá fixtures verdes, brain base existe, score+rejected no report, sala não regrediu |
+| 2 | quarto fixture PASS, planta sem regressão, GPT não-FAIL em placement/circulation |
+| 3 | cama/guarda-roupa/criado não-bloco, layout passa, GPT object anatomy não-FAIL |
+| 4 | renders via provider básico ok, paths não quebrados, Enscape/V-Ray documentados |
+
+## Validation report
+
+`artifacts/review/interior/validation_report.{json,md}` — gerado por
+`python -m interior.validators.validation_report <phase_tag>`. Baseline Fase 0 = **GREEN**.
+
+## Learning (LL-FURN)
+
+- LL-FURN-001: móvel com quinas retas parece bloco; bevel ajuda, fillet real é etapa premium.
+- LL-FURN-002: placement passa ANTES de render premium.
+- LL-FURN-003: cama precisa de cabeceira em parede limpa.
+- LL-FURN-005: Enscape = preview; V-Ray = final.
+- LL-FURN-006: ambiente estilizado → gerar referência GPT (Modo A) + DesignIntentSpec ANTES de construir.
