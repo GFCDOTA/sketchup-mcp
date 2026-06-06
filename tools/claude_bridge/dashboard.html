@@ -403,20 +403,6 @@ details.audit .audit-body{padding:6px 16px 16px;}
 <div id="lixao-cats"></div></div>
 </section>
 
-<section id="oportunidades">
-<div class="card full"><h2>💡 Oportunidades & melhorias <button onclick="toggleOpps()" style="font-size:11px;margin-left:8px">ver/ocultar</button></h2>
-<div class="muted" style="margin-bottom:6px">⚠️ Wishlist MANUAL e possivelmente desatualizada — alguns itens já podem estar feitos. A fonte de verdade do "o que fazer" é <b>Próxima melhor ação (ROI)</b> lá em cima.</div>
-<div id="opps-wrap" style="display:none"><ul class="opp">
-<li><b>Extrator vetorial PDF→consensus</b> (walls = filled paths) — destrava generalização; só DEPOIS de ≥2 plantas no loop manual. <span class="tag">produto</span></li>
-<li><b>2ª planta real como forcing function</b> — prova a generalização com planta nova, não com abstração. <span class="tag">produto</span></li>
-<li><b>Swap-in das constantes do builder</b> — executar o blueprint quando a árvore esfriar. <span class="tag">generalização</span></li>
-<li><b>Worktree-locking</b> — fix-raiz da colisão multi-agent (chip aberto); o orquestrador só detecta. <span class="tag">infra</span></li>
-<li><b>Tier do oráculo</b> — Opus+xhigh pras pesadas, Sonnet pra rotina (via multi-oracle). <span class="tag">gate</span></li>
-<li><b>Watchdog do gate</b> — auto-restart se /health cair (hoje: hook de login + LIGAR-BRIDGE). <span class="tag">infra</span></li>
-<li><b>Consolidar serving pro repo canônico</b> — sair do worktree wt-dash; aí o Lixão vê o runs/ scratch real. <span class="tag">infra</span></li>
-<li><b>RAG indexado</b> — o file-fetch §6.3 é "RAG-bebê"; indexar depois do pipeline generalizado. <span class="tag">enhancement</span></li>
-</ul></div></div>
-</section>
 
 <section id="llms">
 <div class="card full"><h2>🤖 IAs locais (Ollama) — acionamentos &amp; papéis</h2>
@@ -584,9 +570,9 @@ function tile(h,cls,val,label,sub){return '<div class="kpi link '+cls+'" data-ha
 // 2A — consolidacao das 8 abas (nav). NAO move/apaga conteudo: cada aba nova mapeia
 // p/ as secoes existentes que ela mostra; hashes antigos continuam validos via HASHALIAS.
 const TABS=['home','sessoes','gate','review-skp','repo','backlog','artifacts','llms','arquivos','cerebro','docs'];
-const TABMAP={home:['home'],sessoes:['sessoes'],gate:['gate'],'review-skp':['planta'],repo:['git','ecossistema'],backlog:['dificuldades','oportunidades','aprendizados'],artifacts:['lixao'],llms:['llms'],arquivos:['arquivos'],cerebro:['cerebro'],docs:['docs']};
-const HASHALIAS={planta:'review-skp',git:'repo',ecossistema:'repo',dificuldades:'backlog',oportunidades:'backlog',aprendizados:'backlog',lixao:'artifacts'};
-const ALLSEC=['home','sessoes','gate','planta','git','ecossistema','dificuldades','oportunidades','aprendizados','lixao','llms','arquivos','cerebro','docs'];
+const TABMAP={home:['home'],sessoes:['sessoes'],gate:['gate'],'review-skp':['planta'],repo:['git','ecossistema'],backlog:['dificuldades','aprendizados'],artifacts:['lixao'],llms:['llms'],arquivos:['arquivos'],cerebro:['cerebro'],docs:['docs']};
+const HASHALIAS={planta:'review-skp',git:'repo',ecossistema:'repo',dificuldades:'backlog',aprendizados:'backlog',lixao:'artifacts'};
+const ALLSEC=['home','sessoes','gate','planta','git','ecossistema','dificuldades','aprendizados','lixao','llms','arquivos','cerebro','docs'];
 function route(){
   let raw=(location.hash||'#home').slice(1);
   let h=HASHALIAS[raw]||raw; if(!TABMAP[h])h='home';
@@ -829,7 +815,6 @@ async function loadPlant(){
 }
 function toggleResolved(){var e=$('diff-resolved');if(e)e.style.display=(e.style.display==='none'?'block':'none');}
 function toggleLearn(){var e=$('learn-rest');if(e)e.style.display=(e.style.display==='none'?'block':'none');}
-function toggleOpps(){var e=$('opps-wrap');if(e)e.style.display=(e.style.display==='none'?'block':'none');}
 async function loadNbaList(){
   var w=$('nba-list'); if(!w)return;
   try{const n=await (await fetch('/api/next-best-actions',{cache:'no-store'})).json();var A=(n.actions||[]);
