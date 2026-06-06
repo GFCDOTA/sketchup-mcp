@@ -1,5 +1,5 @@
 {
-  "phase": "phase2_bedroom",
+  "phase": "phase3_wardrobe",
   "gates": [
     {
       "gate": "SofaPlacementGate",
@@ -83,6 +83,30 @@
       ]
     },
     {
+      "gate": "WardrobeGate (anatomy)",
+      "pass": true,
+      "widths": [
+        {
+          "width": 1.2,
+          "result": "PASS",
+          "n_parts": 6,
+          "n_doors": 2
+        },
+        {
+          "width": 1.8,
+          "result": "PASS",
+          "n_parts": 8,
+          "n_doors": 3
+        },
+        {
+          "width": 2.4,
+          "result": "PASS",
+          "n_parts": 8,
+          "n_doors": 3
+        }
+      ]
+    },
+    {
       "gate": "BedPlacementGate",
       "pass": true,
       "real_rooms": [
@@ -127,15 +151,15 @@
   "artifacts": {
     "planta_74_furnished.skp": {
       "exists": true,
-      "bytes": 269770
+      "bytes": 277922
     },
     "apartment_after_top.png": {
       "exists": true,
-      "bytes": 34105
+      "bytes": 34398
     },
     "apartment_after_iso.png": {
       "exists": true,
-      "bytes": 175457
+      "bytes": 178317
     },
     "sala_solver_top.png": {
       "exists": true,

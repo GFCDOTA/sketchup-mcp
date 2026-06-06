@@ -40,31 +40,49 @@ def bedroom_designer_boxes(con, room_id):
     GOLDEN composta (bed_builder: plinto+estrado+colchao+travesseiros+manta, material
     por papel + bevel) no MESMO footprint/facing. Substitui o place_bedroom_skp antigo."""
     from tools.bed_builder import build_bed, place_bed_boxes
-    from tools.furniture_anatomy_spec import bed_spec
+    from tools.furniture_anatomy_spec import bed_spec, wardrobe_spec
+    from tools.wardrobe_builder import build_wardrobe, place_wardrobe_boxes
     sm, out = bedroom_designer.run(con, room_id, minimalist=True)
     if out.get("result") != "OK":
         return None, out
     items = out["_winner_items"]
     boxes = bedroom_designer._items_to_boxes(items)
+    pt_m = 0.19 / 5.4
+    pt_in = pt_m * 39.3700787402
+
+    def _wd_facing(it, default=(0.0, 1.0)):
+        f = it.get("facing") or default
+        return (float(f[0]), float(f[1]))
+
+    def _wd_dims(box, facing):
+        x0, y0, x1, y1 = box.bounds
+        fx, fy = facing
+        if abs(fy) >= abs(fx):                      # corre em X (largura), profundidade em Y
+            return (x1 - x0) * pt_m, (y1 - y0) * pt_m, ((x0 + x1) / 2 * pt_in, (y0 + y1) / 2 * pt_in)
+        return (y1 - y0) * pt_m, (x1 - x0) * pt_m, ((x0 + x1) / 2 * pt_in, (y0 + y1) / 2 * pt_in)
+
     bed_item = next((it for it in items if it.get("type") == "bed"), None)
     if bed_item is not None:
-        pt_m = 0.19 / 5.4
-        pt_in = pt_m * 39.3700787402
-        bx0, by0, bx1, by1 = bed_item["box"].bounds
-        fx, fy = bed_item["facing"]
-        if abs(fy) >= abs(fx):                      # cama corre em Y (comprimento)
-            w_pdf, l_pdf = (bx1 - bx0), (by1 - by0)
-        else:                                       # cama corre em X
-            w_pdf, l_pdf = (by1 - by0), (bx1 - bx0)
-        cen = ((bx0 + bx1) / 2 * pt_in, (by0 + by1) / 2 * pt_in)
+        fx, fy = _wd_facing(bed_item)
+        w_m, l_m, cen = _wd_dims(bed_item["box"], (fx, fy))
         nm = str(bed_item.get("name", ""))
         size = next((s for s in ("king", "queen", "casal", "solteiro") if s in nm), "king")
-        parts, _ = build_bed(bed_spec(size, width=round(w_pdf * pt_m, 3),
-                                      length=round(l_pdf * pt_m, 3)))
+        parts, _ = build_bed(bed_spec(size, width=round(w_m, 3), length=round(l_m, 3)))
         bed_parts = place_bed_boxes(parts, cen, (fx, fy))
         boxes = [b for b in boxes if b.get("kind") != "bed"] + bed_parts
         out["bed_parametric"] = {"size": size, "n_parts": len(bed_parts),
-                                 "W_m": round(w_pdf * pt_m, 2), "L_m": round(l_pdf * pt_m, 2)}
+                                 "W_m": round(w_m, 2), "L_m": round(l_m, 2)}
+
+    # GUARDA-ROUPA golden (corpo+portas+puxadores+rodape) no mesmo footprint/facing (portas
+    # viram p/ dentro do quarto). Troca o bloco roxo liso 'wardrobe'.
+    wd_item = next((it for it in items if it.get("type") == "wardrobe"), None)
+    if wd_item is not None:
+        wfx, wfy = _wd_facing(wd_item)
+        ww_m, wd_m, wcen = _wd_dims(wd_item["box"], (wfx, wfy))
+        wparts, _ = build_wardrobe(wardrobe_spec(width=round(ww_m, 3), depth=round(max(wd_m, 0.45), 3)))
+        wboxes = place_wardrobe_boxes(wparts, wcen, (wfx, wfy))
+        boxes = [b for b in boxes if b.get("kind") != "wardrobe"] + wboxes
+        out["wardrobe_parametric"] = {"n_parts": len(wboxes), "W_m": round(ww_m, 2), "D_m": round(wd_m, 2)}
     return boxes, out
 
 

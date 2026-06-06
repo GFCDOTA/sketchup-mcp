@@ -60,6 +60,20 @@ def _bed():
     return {"gate": "BedGate (anatomy+visual)", "pass": ok, "sizes": rows}
 
 
+def _wardrobe():
+    from interior.validators.wardrobe_gate import wardrobe_gate
+    from tools.furniture_anatomy_spec import wardrobe_spec
+    from tools.wardrobe_builder import build_wardrobe
+    rows, ok = [], True
+    for w in (1.2, 1.8, 2.4):
+        s = wardrobe_spec(width=w)
+        parts, _ = build_wardrobe(s)
+        r = wardrobe_gate(s, parts)
+        ok = ok and r["result"] == "PASS"
+        rows.append({"width": w, "result": r["result"], "n_parts": r["n_parts"], "n_doors": r["n_doors"]})
+    return {"gate": "WardrobeGate (anatomy)", "pass": ok, "widths": rows}
+
+
 def _bedroom_placement():
     """Fase 2: gate de PLACEMENT do quarto — quartos reais r000/r003 PASS + fixtures
     de erro FAIL como esperado."""
@@ -94,7 +108,7 @@ def _artifacts():
 
 
 def build_report(phase="phase0_baseline"):
-    gates = [_placement(), _sofa_anatomy_visual(), _bed(), _bedroom_placement()]
+    gates = [_placement(), _sofa_anatomy_visual(), _bed(), _wardrobe(), _bedroom_placement()]
     arts = _artifacts()
     all_pass = all(g["pass"] for g in gates)
     arts_ok = all(a["exists"] for a in arts.values())

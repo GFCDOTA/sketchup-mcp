@@ -148,6 +148,53 @@ def bed_spec(size="king", **overrides):
     return s.validate()
 
 
+# ---------------------------------------------------------------- GUARDA-ROUPA (wardrobe)
+WARDROBE_REQUIRED_PARTS = ("corpo", "porta", "puxador", "rodape")
+
+
+@dataclass
+class WardrobeSpec:
+    """Anatomia parametrica de um GUARDA-ROUPA. Dims em m. Convencao: X=largura (ao longo
+    da parede), Y=profundidade (frente=0=-Y vira p/ dentro do quarto), Z=altura. Pecas
+    SEPARADAS: rodape recuado + corpo + N portas (com frestas/divisoes) + puxadores."""
+    width: float = 1.80          # X
+    depth: float = 0.58          # Y (profundidade real de guarda-roupa)
+    height: float = 2.20         # Z
+    plinth_h: float = 0.08       # rodape recuado
+    door_t: float = 0.03         # espessura da porta (proud da frente)
+    door_gap: float = 0.02       # fresta entre portas (divisao vertical)
+    handle_h: float = 0.40       # altura util do puxador
+    body_rgb: tuple = (96, 74, 54)      # corpo madeira escura
+    door_rgb: tuple = (132, 106, 78)    # portas madeira/laca mais clara (le como painel)
+    handle_rgb: tuple = (44, 44, 48)    # puxador metal escuro
+    plinth_rgb: tuple = (60, 46, 34)    # rodape mais escuro
+
+    def n_doors(self):
+        return 3 if self.width >= 1.8 else (2 if self.width >= 0.9 else 1)
+
+    def validate(self):
+        assert self.height > self.plinth_h
+        assert self.width > 0 and self.depth > 0
+        return self
+
+    def bbox_m(self):
+        return (round(self.width, 3), round(self.depth, 3), round(self.height, 3))
+
+    def to_dict(self):
+        d = asdict(self)
+        d["bbox_m"] = self.bbox_m()
+        d["n_doors"] = self.n_doors()
+        d["required_parts"] = list(WARDROBE_REQUIRED_PARTS)
+        return d
+
+
+def wardrobe_spec(width=1.80, depth=0.58, height=2.20, **overrides):
+    s = WardrobeSpec(width=width, depth=depth, height=height)
+    for k, v in overrides.items():
+        setattr(s, k, v)
+    return s.validate()
+
+
 if __name__ == "__main__":
     import json
     for v in VARIANTS:
@@ -159,3 +206,7 @@ if __name__ == "__main__":
     for sz in BED_SIZES:
         s = bed_spec(sz)
         print(f"{sz:10} bbox_m={s.bbox_m()} required={list(BED_REQUIRED_PARTS)}")
+    print("\n--- guarda-roupas ---")
+    for w in (1.2, 1.8, 2.4):
+        s = wardrobe_spec(width=w)
+        print(f"W={w} bbox_m={s.bbox_m()} portas={s.n_doors()} required={list(WARDROBE_REQUIRED_PARTS)}")
