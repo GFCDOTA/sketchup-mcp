@@ -89,3 +89,6 @@ tools/claude_bridge/*.log
 tools/pdf_knowledge/output/
 references/pdfs/
 *.pdf_pages.jsonl
+
+# Furniture asset cache (3D Warehouse .skp) — licenca combined-work, nunca espelhar no repo publico
+assets/third_party_cache/
