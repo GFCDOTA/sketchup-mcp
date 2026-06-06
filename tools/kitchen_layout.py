@@ -17,7 +17,9 @@ from tools.spatial_model import PT_TO_M, build_spatial_model   # noqa: E402
 PT_TO_IN = (0.19 / 5.4) * 39.3700787402
 COUNTER_DEPTH = 0.60
 COUNTER_H = 0.90
+TORRE_W, TORRE_D, TORRE_H = 0.60, 0.62, 2.10   # coluna forno+microondas (GPT review)
 RGB_COUNTER = [176, 166, 150]
+RGB_TORRE = [69, 90, 100]                       # cinza-escuro eletrodoméstico
 DOOR_KINDS = {"interior_door", "interior_passage", "glazed_balcony"}
 
 
@@ -75,8 +77,47 @@ def build_boxes(con, room_id):
     if not items:
         return None, {"result": "NO_VALID_LAYOUT", "room_name": sm.get("room_name"),
                       "reason": "bancada nao coube dentro do comodo"}
+
+    # TORRE/coluna alta (forno+microondas) numa PONTA da bancada (GPT review: cozinha
+    # sem torre fica "blocos de bancada", incompleta). Desliza na parede-bancada com o
+    # range RECORTADO ao comodo (parede compartilhada nao joga a torre pra fora),
+    # ponta-cega primeiro, dentro do comodo e fora da circulacao.
+    n_torre = 0
+    minx, miny, maxx, maxy = cell.bounds
+    for wid in used:
+        ws0 = _wall_setup(sm, wid)
+        if ws0 is None:
+            continue
+        if ws0["orient"] == "v":
+            a_lo, a_hi = max(ws0["along_lo"], miny), min(ws0["along_hi"], maxy)
+        else:
+            a_lo, a_hi = max(ws0["along_lo"], minx), min(ws0["along_hi"], maxx)
+        lo, hi = a_lo + M(TORRE_W / 2 + 0.03), a_hi - M(TORRE_W / 2 + 0.03)
+        if hi <= lo:
+            continue
+        n = max(1, int((hi - lo) / M(0.12)))
+        mid = (lo + hi) / 2
+        spot = None
+        for i in sorted(range(n + 1), key=lambda j: -abs((lo + (hi - lo) * j / n) - mid)):
+            ac = lo + (hi - lo) * i / n
+            t = _fbox(ws0["orient"], ws0["face"], ws0["sgn"], ac, M(0.03),
+                      M(TORRE_W), M(TORRE_D)).intersection(cell)
+            if t.is_empty:
+                continue
+            if t.geom_type == "MultiPolygon":
+                t = max(t.geoms, key=lambda g: g.area)
+            if t.geom_type != "Polygon" or t.area < (0.20 / PT_TO_M ** 2):
+                continue
+            if circ_u is not None and not t.intersection(circ_u).is_empty:
+                continue
+            spot = t
+            break
+        if spot is not None:
+            items.append(_to_box("torre", spot, TORRE_H, RGB_TORRE))
+            n_torre = 1
+            break
     return items, {"result": "OK", "room_name": sm.get("room_name"),
-                   "n_counters": len(items), "walls": used}
+                   "n_counters": len(used), "n_torre": n_torre, "walls": used}
 
 
 if __name__ == "__main__":

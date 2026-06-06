@@ -43,8 +43,17 @@ def bedroom_designer_boxes(con, room_id):
     return bedroom_designer._items_to_boxes(out["_winner_items"]), out
 
 
+def living_room_boxes(con, room_id):
+    """Sala: roda o brain de layout e DROPA a poltrona (GPT review: removê-la deixa
+    a sala mais minimalista e a circulação livre). Mantém sofá + tapete + mesa + rack."""
+    boxes, out = living_boxes(con, room_id)
+    if boxes:
+        boxes = [b for b in boxes if b.get("kind") != "poltrona"]
+    return boxes, out
+
+
 # dispatch por tipo de comodo (cresce conforme novos brains entram)
-BRAINS = {BEDROOM: bedroom_designer_boxes, KITCHEN: kitchen_boxes, LIVING: living_boxes,
+BRAINS = {BEDROOM: bedroom_designer_boxes, KITCHEN: kitchen_boxes, LIVING: living_room_boxes,
           BATHROOM: bath_boxes}
 
 
