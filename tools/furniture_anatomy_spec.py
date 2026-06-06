@@ -34,11 +34,12 @@ class SofaSpec:
     arm_height: float = 0.62         # Z (topo do braco)
     foot_height: float = 0.10        # Z dos pes
     cushion_thickness: float = 0.15  # espessura da almofada do assento
-    cushion_gap: float = 0.03        # VINCO visivel entre almofadas (anti-caixa-unica)
+    cushion_gap: float = 0.05        # VINCO/costura entre almofadas (GPT: fresta natural)
+    cushion_bevel: float = 0.04      # chanfro/topo inset das almofadas (GPT: menos cubico)
     chaise_depth: float = 1.60       # Y total da perna-chaise (deita as pernas)
     chaise_width: float = 0.95       # X da chaise
-    fabric_rgb: tuple = (96, 100, 107)   # tecido cinza-escuro (visivel; KIVIK ~37,38,34)
-    feet_rgb: tuple = (38, 38, 40)       # pes escuros
+    fabric_rgb: tuple = (182, 172, 153)  # tecido neutro linho/bege (GPT: nao cinza chapado)
+    feet_rgb: tuple = (48, 40, 32)       # pes madeira escura
 
     def validate(self):
         assert self.variant in VARIANTS, f"variant invalido: {self.variant}"

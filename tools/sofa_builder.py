@@ -45,9 +45,9 @@ def build_sofa(spec: SofaSpec):
     bh = H
     gap, n = spec.cushion_gap, spec.seats
     fab, feet = tuple(spec.fabric_rgb), tuple(spec.feet_rgb)
-    base_rgb = _darker(fab, 0.80)
-    cush_rgb = fab
-    back_rgb = _darker(fab, 1.0)
+    base_rgb = _darker(fab, 0.62)        # estrutura/madeira da base: bem mais escura (contraste)
+    cush_rgb = fab                       # tecido linho (assentos)
+    back_rgb = _darker(fab, 0.88)        # encosto levemente mais escuro (sombra/profundidade)
     Dtot = D if spec.variant == "straight" else max(D, spec.chaise_depth)
     cw = spec.chaise_width
     base_top = sh - ct
