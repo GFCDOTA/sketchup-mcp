@@ -84,6 +84,9 @@ tools/claude_bridge/*.log
 .ai_bridge/*.jsonl
 .ai_bridge/*_decision_*.md
 .ai_bridge/oracle_*.md
+# NOC dispatcher: ledger + lock sao runtime (queue.jsonl e' seed, versiona)
+.ai_bridge/noc/actions.jsonl
+.ai_bridge/noc/dispatcher.lock
 
 # pdf_knowledge: indice e PDFs licenciados NAO commitar
 tools/pdf_knowledge/output/
