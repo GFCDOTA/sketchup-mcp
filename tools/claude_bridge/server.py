@@ -1209,6 +1209,179 @@ def cognitive_doc() -> dict:
                 "note": "CLAUDE_COGNITIVE_ARCHITECTURE.md nao encontrado na raiz do repo"}
 
 
+# === ESTADO VIVO DO CEREBRO (aba Cerebro) ====================================
+# Transforma a aba Cerebro de "doc vivo" em cockpit: o que a sessao carrega (do
+# CLAUDE.md) e quao FRESCO esta, o gate atual, o artefato canonico e a proxima
+# acao. TUDO derivado de arquivos/endpoints REAIS — nada fabricado (Hard Rule
+# nao-fabricar). O que NAO da pra saber em runtime (qual skill esta acionada
+# AGORA) e reportado como tal, nunca chutado.
+
+_STATE_AGING_SEC = 2 * 24 * 3600    # arquivo de estado > 2 dias -> AGING
+_STATE_STALE_SEC = 5 * 24 * 3600    # > 5 dias -> STALE
+_MANDATORY_SKILLS = {"generate-and-compare-skp-after-change"}  # Constitution #8: pos-mudanca
+
+
+def _git_out(args, timeout=4):
+    """Best-effort `git -C REPO_ROOT <args>` -> stdout stripado, ou None se git/repo
+    indisponivel. Mesmo padrao do system_inventory (nunca derruba o request)."""
+    try:
+        p = subprocess.run(["git", "-C", str(REPO_ROOT)] + list(args),
+                           capture_output=True, text=True, timeout=timeout)
+        if p.returncode == 0:
+            return p.stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return None
+
+
+def _file_state(rel: str) -> dict:
+    """Presenca + frescor (mtime) de um arquivo cognitivo (REPO_ROOT-relativo).
+    Ausente = badge MISSING (um @import pendurado e' sinal honesto, nao erro mudo)."""
+    p = REPO_ROOT / rel
+    try:
+        mt = p.stat().st_mtime
+    except OSError:
+        return {"path": rel, "exists": False, "badge": "MISSING", "age_sec": None}
+    return {"path": rel, "exists": True, "age_sec": round(time.time() - mt), "badge": "LIVE"}
+
+
+def _loaded_from_claude_md() -> list:
+    """A ordem de auto-load REAL: parseia as linhas `@.claude/...` do .claude/CLAUDE.md
+    (fonte viva). Cada item = presenca + frescor. Auto-atualiza se o CLAUDE.md mudar."""
+    md = REPO_ROOT / ".claude" / "CLAUDE.md"
+    try:
+        txt = md.read_text("utf-8", errors="replace")
+    except OSError:
+        return []
+    seen, out = set(), []
+    for m in re.finditer(r"(?m)^@(\.claude/\S+)", txt):
+        rel = m.group(1)
+        if rel not in seen:
+            seen.add(rel)
+            out.append(_file_state(rel))
+    return out
+
+
+def _current_state_freshness() -> dict:
+    """current_state.md e' o 'snapshot do dia' (decai rapido — o doc cognitivo diz isso).
+    Staleness HONESTA = commits-behind no git desde o ultimo commit do arquivo + idade
+    local (mtime). Sem git -> so mtime (commits_behind=None)."""
+    rel = ".claude/memory/current_state.md"
+    st = _file_state(rel)
+    behind = None
+    last = _git_out(["log", "-1", "--format=%H", "--", rel])
+    if last:
+        cnt = _git_out(["rev-list", "--count", f"{last}..HEAD"])
+        if cnt and cnt.isdigit():
+            behind = int(cnt)
+    st["commits_behind"] = behind
+    age = st.get("age_sec")
+    if not st["exists"]:
+        st["badge"], st["why"] = "MISSING", "arquivo ausente"
+    elif (behind is not None and behind > 5) or (age is not None and age > _STATE_STALE_SEC):
+        st["badge"], st["why"] = "STALE", (f"{behind} commits atras" if behind else "muito velho — reconferir vs git")
+    elif (behind is not None and behind > 0) or (age is not None and age > _STATE_AGING_SEC):
+        st["badge"], st["why"] = "AGING", (f"{behind} commit(s) atras" if behind else "envelhecendo")
+    else:
+        st["badge"], st["why"] = "LIVE", "fresco"
+    return st
+
+
+def _skill_cards() -> list:
+    """Painel de capacidades: cada .claude/skills/*/SKILL.md -> nome + descricao, lidos
+    do proprio arquivo (frontmatter `description:` ou 1o heading). Nao fabricado."""
+    base = REPO_ROOT / ".claude" / "skills"
+    cards = []
+    if not base.is_dir():
+        return cards
+    for d in sorted(base.iterdir()):
+        sk = d / "SKILL.md"
+        if not sk.is_file():
+            continue
+        try:
+            txt = sk.read_text("utf-8", errors="replace")
+        except OSError:
+            txt = ""
+        desc = ""
+        m = re.search(r"(?m)^description:\s*(.+)$", txt)
+        if m:
+            desc = m.group(1).strip().strip("\"'")
+        else:
+            h = re.search(r"(?m)^#\s+(.+)$", txt)
+            if h:
+                desc = h.group(1).strip()
+        try:
+            age = round(time.time() - sk.stat().st_mtime)
+        except OSError:
+            age = None
+        cards.append({"name": d.name, "desc": desc[:170], "age_sec": age,
+                      "mandatory": d.name in _MANDATORY_SKILLS})
+    return cards
+
+
+def brain_state() -> dict:
+    """Estado VIVO da aba Cerebro: o que a sessao carrega (do CLAUDE.md) + frescor,
+    o gate atual, o artefato canonico e a proxima acao (ROI). Reusa os endpoints
+    existentes (gate_ledger/skp_timeline/next_best_actions) — fonte unica, sem
+    duplicar logica. Cada sub-call e' guardada: uma falha vira sinal, nao 500."""
+    claude_md = _file_state(".claude/CLAUDE.md")
+    loaded = _loaded_from_claude_md()
+    current_state = _current_state_freshness()
+
+    # gate atual: livre / esperando consults / oraculo offline (reusa o ledger)
+    try:
+        pending = gate_ledger().get("pending", 0)
+    except Exception:
+        pending = 0
+    claude_ok = bool(shutil.which("claude") or shutil.which("claude.cmd"))
+    if not claude_ok:
+        gate = {"badge": "DEPRECATED", "label": "oraculo offline (claude nao no PATH)"}
+    elif pending > 0:
+        gate = {"badge": "STALE", "label": f"{pending} consult(s) esperando o gate"}
+    else:
+        gate = {"badge": "LIVE", "label": f"livre · oraculo {MODEL} (modo B)"}
+
+    # artefato canonico atual (reusa o timeline): o 1o com .skp; senao o 1o que exista
+    artifact = None
+    try:
+        canon = skp_timeline().get("canonical", {})
+    except Exception:
+        canon = {}
+    for plant, info in canon.items():
+        if info.get("has_skp"):
+            artifact = {"plant": plant, "skp": info.get("skp"), "verdict": info.get("verdict"),
+                        "badge": "LIVE" if info.get("verdict") else "DRAFT"}
+            break
+    if artifact is None and canon:
+        plant = next(iter(canon))
+        artifact = {"plant": plant, "skp": None,
+                    "verdict": canon[plant].get("verdict"), "badge": "DRAFT"}
+
+    # proxima acao recomendada (reusa o backlog por ROI — top item)
+    try:
+        acts = next_best_actions().get("actions", [])
+    except Exception:
+        acts = []
+    next_action = acts[0] if acts else None
+
+    skills = _skill_cards()
+    return {
+        "claude_md": claude_md,
+        "loaded": loaded,
+        "current_state": current_state,
+        "gate": gate,
+        "artifact": artifact,
+        "next_action": next_action,
+        "skills": skills,
+        "mandatory_skills": sorted(_MANDATORY_SKILLS),
+        "skill_runtime_note": ("qual skill esta acionada AGORA nao e' rastreavel em runtime — "
+                               "so a DISPONIBILIDADE e' honesta; a skill 'acende' pelo gatilho da task"),
+        "counts": {"loaded": len(loaded),
+                   "loaded_missing": sum(1 for x in loaded if not x.get("exists")),
+                   "skills": len(skills)},
+    }
+
+
 def _json_route(fn):
     """Adapt a zero-arg data function into a GET handler that sends it as JSON 200."""
     def handler(req, _url):
@@ -1441,6 +1614,7 @@ GET_ROUTES = {
     "/api/activity": _json_route(activity_summary),
     "/api/files": _json_route(recent_files),
     "/api/cognitive": _json_route(cognitive_doc),
+    "/api/brain-state": _json_route(brain_state),
     "/api/skp-inventory-v2": _json_route(skp_inventory_v2),
     "/api/difficulties": _json_route(difficulties),
     "/api/skp-timeline": _json_route(skp_timeline),

@@ -109,6 +109,7 @@ pre.diagram{background:var(--bg-elev);border:1px solid var(--line2);border-radiu
 .alarm.ok{background:var(--ok-dim);color:var(--ok);border-color:rgba(39,224,138,.42);} .alarm.ok::before{background:var(--ok);box-shadow:0 0 9px var(--ok);}
 .alarm.bad{background:var(--bad-dim);color:#ff8d97;border-color:rgba(255,77,94,.5);box-shadow:var(--glow-bad);}
 .alarm.bad::before{background:var(--bad);box-shadow:0 0 11px var(--bad);animation:pulse 1.1s infinite;}
+.alarm.warn{background:var(--warn-dim);color:#ffd071;border-color:rgba(255,176,46,.5);} .alarm.warn::before{background:var(--warn);box-shadow:0 0 10px var(--warn);}
 
 .gallery{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));}
 .gallery figure{margin:0;background:var(--bg-elev);border:1px solid var(--line2);border-radius:9px;padding:8px;transition:.15s;}
@@ -246,6 +247,46 @@ ul.attn li .go{margin-left:auto;font-size:9.5px;color:var(--accent);text-transfo
 .cog-replay{cursor:pointer;font-size:12px;color:var(--accent);border:1px solid var(--line2);border-radius:6px;padding:4px 11px;background:transparent;font-family:var(--mono);transition:.12s;}
 .cog-replay:hover{border-color:var(--accent);box-shadow:var(--glow-accent);}
 @media(max-width:760px){.claude-flow-track{scroll-snap-type:x mandatory;}.claude-flow-step{min-width:80vw;max-width:80vw;}}
+/* ===== aba Cérebro: ESTADO VIVO (badges + painel + próxima ação + skills + camadas) ===== */
+.bdg{display:inline-flex;align-items:center;gap:5px;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:5px;border:1px solid transparent;white-space:nowrap;font-family:var(--mono);vertical-align:middle;}
+.bdg::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 7px currentColor;}
+.bdg.live{background:var(--ok-dim);color:var(--ok);border-color:rgba(39,224,138,.45);}
+.bdg.aging{background:var(--warn-dim);color:var(--warn);border-color:rgba(255,176,46,.4);}
+.bdg.stale{background:var(--warn-dim);color:#ffd071;border-color:rgba(255,176,46,.55);}
+.bdg.draft{background:rgba(163,185,206,.12);color:var(--dim);border-color:var(--line2);} .bdg.draft::before{box-shadow:none;opacity:.6;}
+.bdg.proposto{background:var(--accent-dim);color:var(--accent);border-color:rgba(43,212,255,.45);}
+.bdg.blueprint{background:rgba(163,113,247,.13);color:#c4a7ff;border-color:rgba(163,113,247,.45);}
+.bdg.deprecated{background:var(--bad-dim);color:var(--bad);border-color:rgba(255,77,94,.45);text-decoration:line-through;}
+.bdg.missing{background:var(--bad-dim);color:var(--bad);border-color:rgba(255,77,94,.5);}
+.bstate{width:100%;border-collapse:collapse;margin:2px 0 4px;}
+.bstate td{padding:9px 10px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:top;font-size:12.5px;}
+.bstate tr:last-child td{border-bottom:0;} .bstate tr:hover td{background:rgba(43,212,255,.035);}
+.bstate td.k{color:var(--dim);text-transform:uppercase;font-size:10px;letter-spacing:.7px;width:150px;white-space:nowrap;}
+.bstate td.v{color:var(--txt);} .bstate td.v code{font-size:11.5px;color:var(--accent);}
+.bstate .sub{color:var(--dim);font-size:11px;margin-top:3px;line-height:1.5;}
+.bstate a{color:var(--accent);text-decoration:none;} .bstate a:hover{text-decoration:underline;}
+.next-act{margin:6px 0 4px;padding:14px 17px;border-radius:11px;border:1px solid rgba(43,212,255,.4);
+  background:linear-gradient(135deg,rgba(43,212,255,.11),rgba(43,212,255,.015));box-shadow:inset 0 0 26px rgba(43,212,255,.06);}
+.next-act .lbl{font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent);font-weight:800;margin-bottom:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.next-act .ttl{font-size:14.5px;font-weight:700;color:var(--txt);line-height:1.4;}
+.next-act .meta{margin-top:7px;font-size:11.5px;color:var(--dim);line-height:1.55;}
+.skgrid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));margin:4px 0 6px;}
+.skcard{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line2);border-radius:10px;padding:12px 13px;transition:.14s;border-left:3px solid #2bd4ff;}
+.skcard:hover{transform:translateY(-2px);border-color:rgba(43,212,255,.45);box-shadow:0 0 16px -7px var(--accent);}
+.skcard.req{border-left-color:var(--warn);}
+.skcard .skh{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;}
+.skcard .skn{font-weight:700;color:var(--txt);font-size:12px;font-family:var(--mono);word-break:break-word;line-height:1.3;}
+.skcard .skd{color:var(--dim);font-size:11px;line-height:1.5;}
+.layer-h{display:flex;align-items:center;gap:10px;margin:22px 0 8px;font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:var(--dim);font-weight:800;}
+.layer-h::after{content:"";flex:1;height:1px;background:var(--line2);}
+.layer-h .n{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:5px;background:var(--accent-dim);color:var(--accent);font-size:11px;border:1px solid rgba(43,212,255,.4);}
+details.audit{margin-top:2px;border:1px solid var(--line2);border-radius:10px;overflow:hidden;}
+details.audit>summary{cursor:pointer;padding:12px 15px;background:var(--card2);color:var(--txt);font-weight:700;font-size:13px;list-style:none;display:flex;align-items:center;gap:9px;}
+details.audit>summary::-webkit-details-marker{display:none;}
+details.audit>summary::before{content:"▸";color:var(--accent);transition:.15s;display:inline-block;}
+details.audit[open]>summary::before{transform:rotate(90deg);}
+details.audit>summary:hover{background:var(--card);}
+details.audit .audit-body{padding:6px 16px 16px;}
 </style></head><body>
 <header>
 <h1><span class="logo">◉</span> SketchUp Creator <span class="sub">NOC</span></h1>
@@ -380,11 +421,14 @@ ul.attn li .go{margin-left:auto;font-size:9.5px;color:var(--accent);text-transfo
 </section>
 
 <section id="cerebro">
-<div class="card full"><h2>🧠 Cérebro do Claude — como ele pensa, decide e executa neste repo</h2>
-<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px">
-<div class="muted">⚡ Linha de execução cognitiva — esquerda → direita (toca ao abrir):</div>
-<button class="cog-replay" onclick="replayCog()">▶ tocar de novo</button>
-</div>
+<div class="card full"><h2>🧠 Cérebro do Claude — mapa mental + estado vivo + próxima ação</h2>
+
+<div class="layer-h"><span class="n">1</span> Estado operacional — o que está vivo agora</div>
+<div id="brain-live" class="muted">lendo estado vivo...</div>
+<div id="brain-next"></div>
+
+<div class="layer-h"><span class="n">2</span> Fluxo de execução cognitiva
+<button class="cog-replay" style="margin-left:auto" onclick="replayCog()">▶ tocar de novo</button></div>
 <div class="claude-flow"><div class="claude-flow-track" id="cog-flow">
 <div class="claude-flow-step entry-green"><span class="ic">🟢</span><b>Sessão inicia</b><small>Você abre o Claude dentro do repo.</small></div>
 <div class="flow-arrow">→</div>
@@ -404,8 +448,16 @@ ul.attn li .go{margin-left:auto;font-size:9.5px;color:var(--accent);text-transfo
 <div class="flow-arrow">→</div>
 <div class="claude-flow-step output"><span class="ic">📦</span><b>Artifact final</b><small>.skp fiel, versionado em artifacts/&lt;plant&gt;/.</small><span class="step-badge ok">OUTPUT</span></div>
 </div></div>
-<div id="cerebro-head" class="muted" style="margin:16px 0 12px">carregando...</div>
+
+<div class="layer-h"><span class="n">+</span> Capacidades (skills) — gatilho → saída</div>
+<div id="brain-skills" class="muted">listando skills...</div>
+
+<div class="layer-h"><span class="n">3</span> Arquitetura completa (auditoria)</div>
+<details class="audit"><summary>📖 Documento completo — CLAUDE_COGNITIVE_ARCHITECTURE.md <span id="cerebro-head-inline" class="muted" style="font-weight:400;font-size:11px;margin-left:auto"></span></summary>
+<div class="audit-body">
+<div id="cerebro-head" class="muted" style="margin:6px 0 12px">carregando...</div>
 <div id="cerebro-body" class="muted">renderizando...</div>
+</div></details>
 </div>
 </section>
 
@@ -880,13 +932,61 @@ function replayCog(){
   void f.offsetWidth;  // força reflow pra reiniciar as animações
   f.classList.add('play');
 }
-async function loadCerebro(){
+async function loadCerebro(){ replayCog(); loadBrainState(); loadCerebroDoc(); }
+function bdg(b){var c=String(b||'?').toLowerCase();return '<span class="bdg '+c+'">'+esc(b||'?')+'</span>';}
+function _worstBadge(items){
+  var order={MISSING:5,DEPRECATED:5,STALE:4,AGING:3,DRAFT:2,LIVE:1},w='LIVE',wv=1;
+  (items||[]).forEach(function(it){var v=order[String(it.badge||'LIVE').toUpperCase()]||0;if(v>wv){wv=v;w=String(it.badge).toUpperCase();}});
+  return w;
+}
+function _grp(loaded,prefix){return (loaded||[]).filter(function(x){return String(x.path||'').indexOf(prefix)===0;});}
+function _cnt(items){return items.filter(function(x){return x.exists;}).length+'/'+items.length;}
+function _miss(items){var m=items.filter(function(x){return !x.exists;});return m.length?' '+bdg('MISSING')+' <span class="muted" style="font-size:10px">'+m.map(function(x){return esc(String(x.path).split('/').pop());}).join(', ')+'</span>':'';}
+function _brow(k,v){return '<tr><td class="k">'+k+'</td><td class="v">'+v+'</td></tr>';}
+async function loadBrainState(){
+  var live=$('brain-live'),nx=$('brain-next'),sk=$('brain-skills'); if(!live)return;
+  try{
+    const r=await fetch('/api/brain-state',{cache:'no-store'});
+    if(r.status===404){
+      live.innerHTML='<div class="alarm warn" style="margin:0">⏳ estado vivo disponível após <b>reiniciar o cockpit</b> — o endpoint <code>/api/brain-state</code> é novo (server.py). A arquitetura abaixo já está ativa.</div>';
+      if(nx)nx.innerHTML=''; if(sk)sk.innerHTML=''; return;
+    }
+    const d=await r.json();
+    var L=d.loaded||[];
+    var mem=_grp(L,'.claude/memory/'),spc=_grp(L,'.claude/specs/'),evl=_grp(L,'.claude/evals/'),pln=_grp(L,'.claude/plans/');
+    var con=L.filter(function(x){return x.path==='.claude/constitution.md';})[0]||{badge:'MISSING',age_sec:null};
+    var cm=d.claude_md||{badge:'MISSING',age_sec:null}, cur=d.current_state||{};
+    var rows='';
+    rows+=_brow('CLAUDE.md', bdg(cm.badge)+'<div class="sub">entry point · auto-load via @import · há '+fmtAge(cm.age_sec)+'</div>');
+    rows+=_brow('Constitution', bdg(con.badge)+'<div class="sub">vence conflitos (#1..#8) · há '+fmtAge(con.age_sec)+'</div>');
+    rows+=_brow('Memory', bdg(_worstBadge(mem))+' '+_cnt(mem)+' arquivos'+_miss(mem)+
+      '<div class="sub">current_state.md: '+bdg(cur.badge)+' '+esc(cur.why||'')+
+      (cur.commits_behind!=null?' · <b>'+cur.commits_behind+'</b> commit(s) atrás no git':'')+'</div>');
+    rows+=_brow('Specs críticas', bdg(_worstBadge(spc))+' '+_cnt(spc)+' carregadas'+_miss(spc));
+    rows+=_brow('Evals · Plans', bdg(_worstBadge(evl.concat(pln)))+' evals '+_cnt(evl)+' · plans '+_cnt(pln)+_miss(evl.concat(pln)));
+    rows+=_brow('Skill ativa', bdg('DRAFT')+' runtime n/d<div class="sub">'+((d.counts||{}).skills||0)+' disponíveis · acende pelo gatilho da task — '+esc(d.skill_runtime_note||'não rastreável em runtime')+'</div>');
+    var g=d.gate||{}; rows+=_brow('Gate atual', bdg(g.badge)+' '+esc(g.label||'-'));
+    var a=d.artifact;
+    rows+= a ? _brow('Artifact atual', bdg(a.badge)+' '+(a.skp?'<code>'+esc(a.skp)+'</code>':'<span class="muted">sem .skp canônico ainda</span>')+
+      '<div class="sub">planta <b>'+esc(a.plant)+'</b> · veredito '+esc(a.verdict||'—')+' · <a href="#review-skp">ver na aba Review SKP →</a></div>')
+      : _brow('Artifact atual', bdg('MISSING')+'<div class="sub">nenhum artifacts/&lt;plant&gt;/ canônico</div>');
+    live.innerHTML='<table class="bstate">'+rows+'</table>';
+    if(nx){var act=d.next_action; nx.innerHTML = act ?
+      '<div class="next-act"><div class="lbl">🎯 Próxima ação recomendada '+(act.roi!=null?'<span class="bdg proposto">ROI '+esc(act.roi)+'</span>':'')+'</div>'+
+      '<div class="ttl">'+esc(act.titulo||'-')+'</div><div class="meta">→ '+esc(act.proxima_acao||'')+'</div>'+
+      '<div class="meta">tipo: '+esc(act.tipo||'-')+' · impacto '+esc(act.impacto)+' / esforço '+esc(act.esforco)+' · <a href="#backlog">backlog completo por ROI →</a></div></div>' : '';}
+    if(sk){var S=d.skills||[]; sk.innerHTML = S.length ?
+      '<div class="skgrid">'+S.map(function(s){return '<div class="skcard'+(s.mandatory?' req':'')+'"><div class="skh"><span class="skn">'+esc(s.name)+'</span>'+(s.mandatory?'<span class="bdg stale">pós-mudança</span>':'')+'</div><div class="skd">'+esc(s.desc||'—')+'</div></div>';}).join('')+'</div>'
+      : '<span class="muted">nenhuma skill encontrada</span>';}
+  }catch(e){live.innerHTML='<span class="muted">erro no estado vivo: '+esc(e)+'</span>';}
+}
+async function loadCerebroDoc(){
   var el=$('cerebro-body'),hd=$('cerebro-head'); if(!el)return;
-  replayCog();
   try{
     const d=await (await fetch('/api/cognitive',{cache:'no-store'})).json();
     if(!d.exists){el.innerHTML='<div class="alarm bad" style="margin:0">'+esc(d.note||'doc não encontrado')+'</div>';return;}
     if(hd)hd.innerHTML='fonte: <code>CLAUDE_COGNITIVE_ARCHITECTURE.md</code> · atualizado há '+fmtAge(d.age_sec)+' · '+d.text.length+' chars';
+    var hi=$('cerebro-head-inline'); if(hi)hi.textContent='('+Math.round(d.text.length/1000)+'k chars · há '+fmtAge(d.age_sec)+')';
     el.innerHTML=mdToHtml(d.text);
   }catch(e){el.innerHTML='<span class="muted">erro: '+esc(e)+'</span>';}
 }
