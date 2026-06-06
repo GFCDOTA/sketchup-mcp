@@ -30,8 +30,11 @@ end
 
 BEVEL_IN = 0.04 * 39.3700787402   # ~4cm de chanfro/topo inset nas almofadas
 
-# desenha o solido; se bevel>0, faz o TOPO inset (frustum) -> almofada menos cubica
-def fz_solid(ents, corners, z0, h, bevel)
+# desenha o solido com chanfro no topo. mode:
+#   'lid'     -> topo inset LEVANTADO (degrau) — bom p/ ALMOFADA (GPT aprovou)
+#   'frustum' -> topo inset via faces INCLINADAS (sem degrau) — casca estofada do BRACO
+#                (GPT: "suavizar silhueta externa, volume estofado, nao bloco com tampa")
+def fz_solid(ents, corners, z0, h, bevel, mode = 'lid')
   pts = corners.map { |c| Geom::Point3d.new(c[0].to_f, c[1].to_f, z0) }
   face = ents.add_face(pts)
   if bevel <= 0 || h <= bevel * 1.6
@@ -43,11 +46,23 @@ def fz_solid(ents, corners, z0, h, bevel)
   top = ents.grep(Sketchup::Face).find { |f| f.normal.z.abs > 0.9 && (f.bounds.center.z - topz).abs < 0.3 }
   return unless top
   bb = top.bounds
-  x0, y0, x1, y1 = bb.min.x + bevel, bb.min.y + bevel, bb.max.x - bevel, bb.max.y - bevel
-  return if x1 <= x0 || y1 <= y0
-  ip = [[x0, y0, topz], [x1, y0, topz], [x1, y1, topz], [x0, y1, topz]].map { |p| Geom::Point3d.new(*p) }
-  iface = ents.add_face(ip)        # divide o topo
-  iface.pushpull(bevel)            # levanta o miolo -> topo inset/chanfrado
+  ix0, iy0, ix1, iy1 = bb.min.x + bevel, bb.min.y + bevel, bb.max.x - bevel, bb.max.y - bevel
+  return if ix1 <= ix0 || iy1 <= iy0
+  th = z0 + h
+  if mode == 'frustum'
+    bp = [[bb.min.x, bb.min.y, topz], [bb.max.x, bb.min.y, topz],
+          [bb.max.x, bb.max.y, topz], [bb.min.x, bb.max.y, topz]].map { |p| Geom::Point3d.new(*p) }
+    tp = [[ix0, iy0, th], [ix1, iy0, th], [ix1, iy1, th], [ix0, iy1, th]].map { |p| Geom::Point3d.new(*p) }
+    top.erase!                       # tira a tampa plana; reconstroi inclinada
+    4.times do |i|
+      j = (i + 1) % 4
+      begin; ents.add_face(bp[i], bp[j], tp[j], tp[i]); rescue StandardError; end   # quad inclinado
+    end
+    begin; ents.add_face(tp); rescue StandardError; end                            # tampa inset
+  else
+    ip = [[ix0, iy0, topz], [ix1, iy0, topz], [ix1, iy1, topz], [ix0, iy1, topz]].map { |p| Geom::Point3d.new(*p) }
+    ents.add_face(ip).pushpull(bevel)   # levanta o miolo -> topo inset (degrau)
+  end
 end
 
 def fz_run
@@ -66,7 +81,8 @@ def fz_run
       g = parent.entities.add_group
       g.name = b['label'] || b['kind']
       bevel = %w[seat_cushion back_cushion arm].include?(b['kind']) ? BEVEL_IN : 0.0
-      fz_solid(g.entities, b['corners'] || [], z0, h, bevel)
+      mode = b['kind'] == 'arm' ? 'frustum' : 'lid'   # braco = casca inclinada; almofada = inset
+      fz_solid(g.entities, b['corners'] || [], z0, h, bevel, mode)
       g.material = fz_material(model, "fz_#{b['label']}", b['rgb'] || [120, 120, 120])
       placed += 1
     rescue StandardError => e

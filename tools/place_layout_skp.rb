@@ -84,8 +84,17 @@ def pl_run
           bb = top.bounds
           ix0, iy0, ix1, iy1 = bb.min.x + bev, bb.min.y + bev, bb.max.x - bev, bb.max.y - bev
           if ix1 > ix0 && iy1 > iy0
-            ip = [[ix0, iy0, topz], [ix1, iy0, topz], [ix1, iy1, topz], [ix0, iy1, topz]].map { |p| Geom::Point3d.new(*p) }
-            g.entities.add_face(ip).pushpull(bev)
+            th = z0 + h
+            if b['kind'] == 'arm'   # braco = casca INCLINADA (frustum), sem degrau (GPT)
+              bp = [[bb.min.x, bb.min.y, topz], [bb.max.x, bb.min.y, topz], [bb.max.x, bb.max.y, topz], [bb.min.x, bb.max.y, topz]].map { |p| Geom::Point3d.new(*p) }
+              tp = [[ix0, iy0, th], [ix1, iy0, th], [ix1, iy1, th], [ix0, iy1, th]].map { |p| Geom::Point3d.new(*p) }
+              top.erase!
+              4.times { |i| j = (i + 1) % 4; begin; g.entities.add_face(bp[i], bp[j], tp[j], tp[i]); rescue StandardError; end }
+              begin; g.entities.add_face(tp); rescue StandardError; end
+            else                    # almofada = topo inset levantado (degrau) — GPT aprovou
+              ip = [[ix0, iy0, topz], [ix1, iy0, topz], [ix1, iy1, topz], [ix0, iy1, topz]].map { |p| Geom::Point3d.new(*p) }
+              g.entities.add_face(ip).pushpull(bev)
+            end
           end
         end
       else
