@@ -43,34 +43,67 @@ def bedroom_designer_boxes(con, room_id):
     return bedroom_designer._items_to_boxes(out["_winner_items"]), out
 
 
+def _oriented_box(kind, center_in, facing, w_m, d_m, z0_m, h_m, rgb, label=None):
+    """Caixa (rack/mesa/tapete) centrada em center_in (shell inches) com a FRENTE
+    (-Y local) apontando 'facing'. Mesma rotacao do place_sofa_boxes -> qualquer
+    angulo. w=largura (perp ao facing), d=profundidade (ao longo do facing)."""
+    import math
+    M2IN = 39.3700787402
+    cx, cy = center_in
+    fx, fy = facing
+    nrm = math.hypot(fx, fy) or 1.0
+    fx, fy = fx / nrm, fy / nrm
+    theta = math.atan2(fx, -fy)
+    ct, st = math.cos(theta), math.sin(theta)
+    corners = []
+    for lx, ly in ((-w_m / 2, -d_m / 2), (w_m / 2, -d_m / 2),
+                   (w_m / 2, d_m / 2), (-w_m / 2, d_m / 2)):
+        wx, wy = lx * ct - ly * st, lx * st + ly * ct
+        corners.append([round(cx + wx * M2IN, 2), round(cy + wy * M2IN, 2)])
+    xs = [c[0] for c in corners]
+    ys = [c[1] for c in corners]
+    return {"kind": kind, "x0": min(xs), "y0": min(ys), "x1": max(xs), "y1": max(ys),
+            "corners": corners, "h_in": round(h_m * M2IN, 2), "z0_in": round(z0_m * M2IN, 2),
+            "rgb": rgb, "label": label or kind, "ambiguous": False, "decorative": False}
+
+
 def living_room_boxes(con, room_id):
-    """Sala: troca o placeholder sofa_3 pelo SOFA PARAMETRICO (SofaBuilder), virado
-    pra TV/rack; dropa a poltrona (GPT review); mantem rack/mesa/tapete."""
+    """Sala via COMMON SENSE ENGINE (placement solver): o sofa GOLDEN deixa de
+    flutuar no centro — fica ANCORADO numa parede de FRENTE pra TV (eixo sofa->rack),
+    fora da circulacao; rack de MADEIRA na parede-TV (limpa), mesa de centro + tapete
+    no eixo entre os dois. Corrige o veredito do GPT (objeto PASS, placement FAIL):
+    o solver rejeita sofa em circulacao / sem eixo pra TV. Fallback: brain antigo."""
     from tools.sofa_builder import build_sofa, place_sofa_boxes, sofa_spec
-    boxes, out = living_boxes(con, room_id)
-    if not boxes:
+    from interior.planners.living_room_planner import plan_living
+    plan = plan_living(con, room_id)
+    if plan.get("result") != "OK":
+        boxes, out = living_boxes(con, room_id)            # fallback: brain antigo
+        if boxes:
+            boxes = [b for b in boxes if b.get("kind") != "poltrona"]
+        out = dict(out or {}); out["placement"] = f"fallback_brain ({plan.get('result')})"
         return boxes, out
-    boxes = [b for b in boxes if b.get("kind") != "poltrona"]
-    sofa = next((b for b in boxes if b["kind"] == "sofa_3"), None)
-    rack = next((b for b in boxes if b["kind"] == "rack_tv"), None)
-    if sofa is None:
-        return boxes, out
-    pt_in = 39.3700787402
-    scx, scy = (sofa["x0"] + sofa["x1"]) / 2, (sofa["y0"] + sofa["y1"]) / 2
-    w_in, d_in = abs(sofa["x1"] - sofa["x0"]), abs(sofa["y1"] - sofa["y0"])
-    width_m = max(w_in, d_in) / pt_in           # ao longo da parede
-    depth_m = min(max(min(w_in, d_in) / pt_in, 0.88), 1.00)
-    if rack is not None:                         # frente do sofa -> rack/TV
-        rcx, rcy = (rack["x0"] + rack["x1"]) / 2, (rack["y0"] + rack["y1"]) / 2
-        facing = (rcx - scx, rcy - scy)
-    else:
-        facing = (-1.0, 0.0)
-    parts, _ = build_sofa(sofa_spec("straight", seats=3,
-                                    width=round(width_m, 3), depth=round(depth_m, 3)))
-    sofa_parts = place_sofa_boxes(parts, (scx, scy), facing)
-    boxes = [b for b in boxes if b["kind"] != "sofa_3"] + sofa_parts
-    out["sofa_parametric"] = {"n_parts": len(sofa_parts), "width_m": round(width_m, 2),
-                              "depth_m": round(depth_m, 2), "facing": [round(facing[0], 1), round(facing[1], 1)]}
+    p = plan["plan"]
+    sofa_c = tuple(p["sofa"]["center_in"]); sofa_f = tuple(p["sofa"]["facing"])
+    rack_c = tuple(p["tv_rack"]["center_in"]); rack_f = tuple(p["tv_rack"]["facing"])
+    width_m = round(p["sofa"]["width_m"], 3)
+    parts, _ = build_sofa(sofa_spec("straight", seats=3, width=width_m, depth=0.95))
+    boxes = place_sofa_boxes(parts, sofa_c, sofa_f)         # sofa de frente pra TV
+    # mesa + tapete AGRUPADOS perto do sofa (nao esticados ate o rack); rack na parede-TV
+    import math as _m
+    fnx, fny = sofa_f
+    _fn = _m.hypot(fnx, fny) or 1.0
+    fnx, fny = fnx / _fn, fny / _fn
+    M2IN = 39.3700787402
+
+    def _ahead(dist_m):                                     # ponto 'dist_m' a frente do sofa
+        return (sofa_c[0] + fnx * dist_m * M2IN, sofa_c[1] + fny * dist_m * M2IN)
+
+    boxes.append(_oriented_box("rack_tv", rack_c, rack_f, 1.80, 0.40, 0.0, 0.50, [120, 85, 55]))
+    boxes.append(_oriented_box("tapete", _ahead(0.95), sofa_f, 2.40, 1.60, 0.0, 0.02, [165, 156, 140]))
+    boxes.append(_oriented_box("mesa_centro", _ahead(1.15), sofa_f, 1.00, 0.55, 0.0, 0.40, [92, 72, 56]))
+    out = {"result": "OK", "room_name": plan.get("room_name"), "n_placed": len(boxes),
+           "placement": "common_sense_solver", "tv_wall": plan.get("tv_wall"),
+           "sofa_wall": p["sofa"]["wall_id"], "view_dist_m": p["sofa"]["rule"]}
     return boxes, out
 
 
