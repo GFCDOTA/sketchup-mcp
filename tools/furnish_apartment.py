@@ -44,11 +44,33 @@ def bedroom_designer_boxes(con, room_id):
 
 
 def living_room_boxes(con, room_id):
-    """Sala: roda o brain de layout e DROPA a poltrona (GPT review: removê-la deixa
-    a sala mais minimalista e a circulação livre). Mantém sofá + tapete + mesa + rack."""
+    """Sala: troca o placeholder sofa_3 pelo SOFA PARAMETRICO (SofaBuilder), virado
+    pra TV/rack; dropa a poltrona (GPT review); mantem rack/mesa/tapete."""
+    from tools.sofa_builder import build_sofa, place_sofa_boxes, sofa_spec
     boxes, out = living_boxes(con, room_id)
-    if boxes:
-        boxes = [b for b in boxes if b.get("kind") != "poltrona"]
+    if not boxes:
+        return boxes, out
+    boxes = [b for b in boxes if b.get("kind") != "poltrona"]
+    sofa = next((b for b in boxes if b["kind"] == "sofa_3"), None)
+    rack = next((b for b in boxes if b["kind"] == "rack_tv"), None)
+    if sofa is None:
+        return boxes, out
+    pt_in = 39.3700787402
+    scx, scy = (sofa["x0"] + sofa["x1"]) / 2, (sofa["y0"] + sofa["y1"]) / 2
+    w_in, d_in = abs(sofa["x1"] - sofa["x0"]), abs(sofa["y1"] - sofa["y0"])
+    width_m = max(w_in, d_in) / pt_in           # ao longo da parede
+    depth_m = min(max(min(w_in, d_in) / pt_in, 0.88), 1.00)
+    if rack is not None:                         # frente do sofa -> rack/TV
+        rcx, rcy = (rack["x0"] + rack["x1"]) / 2, (rack["y0"] + rack["y1"]) / 2
+        facing = (rcx - scx, rcy - scy)
+    else:
+        facing = (-1.0, 0.0)
+    parts, _ = build_sofa(sofa_spec("straight", seats=3,
+                                    width=round(width_m, 3), depth=round(depth_m, 3)))
+    sofa_parts = place_sofa_boxes(parts, (scx, scy), facing)
+    boxes = [b for b in boxes if b["kind"] != "sofa_3"] + sofa_parts
+    out["sofa_parametric"] = {"n_parts": len(sofa_parts), "width_m": round(width_m, 2),
+                              "depth_m": round(depth_m, 2), "facing": [round(facing[0], 1), round(facing[1], 1)]}
     return boxes, out
 
 

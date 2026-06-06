@@ -117,6 +117,41 @@ def build_sofa(spec: SofaSpec):
     return parts, meta
 
 
+def place_sofa_boxes(parts, center_in, facing):
+    """Posiciona o sofa (parts em m, frente=-Y local) na PLANTA: rotaciona pra a
+    frente apontar 'facing' (vetor 2D, ex. sofa->TV) e translada pro center_in (em
+    inches, coords do shell). Desenha cantos ROTACIONADOS (place_layout_skp.rb usa
+    add_face(corners)), entao qualquer angulo funciona."""
+    import math
+    cx_in, cy_in = center_in
+    fx, fy = facing
+    nrm = math.hypot(fx, fy) or 1.0
+    fx, fy = fx / nrm, fy / nrm
+    theta = math.atan2(fx, -fy)        # frente local (0,-1) -> facing
+    ct, st = math.cos(theta), math.sin(theta)
+    W = max(p["x1"] for p in parts)
+    D = max(p["y1"] for p in parts)
+    cxl, cyl = W / 2.0, D / 2.0        # centro local do sofa
+    boxes = []
+    for p in parts:
+        corners = []
+        for lx, ly in ((p["x0"], p["y0"]), (p["x1"], p["y0"]),
+                       (p["x1"], p["y1"]), (p["x0"], p["y1"])):
+            rx, ry = lx - cxl, ly - cyl
+            wx, wy = rx * ct - ry * st, rx * st + ry * ct
+            corners.append([round(cx_in + wx * PT_TO_IN, 2), round(cy_in + wy * PT_TO_IN, 2)])
+        xs = [c[0] for c in corners]
+        ys = [c[1] for c in corners]
+        boxes.append({
+            "kind": p["kind"], "x0": min(xs), "y0": min(ys), "x1": max(xs), "y1": max(ys),
+            "corners": corners,
+            "h_in": round((p["z1"] - p["z0"]) * PT_TO_IN, 2),
+            "z0_in": round(p["z0"] * PT_TO_IN, 2),
+            "rgb": p["rgb"], "label": p["label"], "ambiguous": False, "decorative": False,
+        })
+    return boxes
+
+
 def parts_to_boxes(parts, ox=0.0, oy=0.0):
     """Converte parts (m) pro formato boxes do place_layout_skp.rb (in inches, z0_in,
     h_in, corners). ox/oy desloca o sofa (p/ posicionar varios fixtures lado a lado)."""
