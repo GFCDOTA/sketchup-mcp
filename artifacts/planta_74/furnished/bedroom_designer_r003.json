@@ -1,30 +1,13 @@
 {
-  "room_id": "r000",
-  "room_name": "SUITE 01",
-  "area_m2": 29.3,
+  "room_id": "r003",
+  "room_name": "SUITE 02",
+  "area_m2": 14.7,
   "minimalist": true,
+  "bed_size": "queen",
   "candidates": [
     {
-      "headboard_wall": "m019",
+      "headboard_wall": "m014",
       "rank": 0,
-      "valid": false,
-      "score": -999,
-      "reason": [
-        "cama king não coube na parede da cabeceira"
-      ]
-    },
-    {
-      "headboard_wall": "m017",
-      "rank": 1,
-      "valid": false,
-      "score": -999,
-      "reason": [
-        "cama king não coube na parede da cabeceira"
-      ]
-    },
-    {
-      "headboard_wall": "m018",
-      "rank": 2,
       "valid": true,
       "score": 105,
       "hard": {
@@ -45,127 +28,131 @@
         "banco_dresser": 5
       },
       "clearances_m": {
-        "lateral": 0.79,
-        "pe": 3.29,
+        "lateral": 1.38,
+        "pe": 1.28,
         "passagem_ok": true
       },
       "downgrades": [],
       "layout": [
         {
-          "name": "cama_king",
+          "name": "cama_queen",
           "type": "bed",
-          "x_m": 16.16,
-          "y_m": 20.04,
+          "x_m": 9.42,
+          "y_m": 18.37,
           "width_m": 2.03,
-          "depth_m": 1.93,
+          "depth_m": 1.58,
           "rotation": 0,
-          "anchor_wall": "m018",
+          "anchor_wall": "m014",
           "reason": "âncora; cabeceira em parede limpa; centralizada"
         },
         {
           "name": "cabeceira",
           "type": "headboard",
-          "x_m": 17.21,
-          "y_m": 20.04,
+          "x_m": 8.37,
+          "y_m": 18.37,
           "width_m": 0.06,
-          "depth_m": 1.93,
+          "depth_m": 1.58,
           "rotation": 0,
-          "anchor_wall": "m018",
+          "anchor_wall": "m014",
           "reason": "painel fino na parede; a cama encosta (leitura intencional)"
         },
         {
           "name": "tapete",
           "type": "rug",
-          "x_m": 15.51,
-          "y_m": 20.04,
+          "x_m": 10.07,
+          "y_m": 18.37,
           "width_m": 3.4,
           "depth_m": 2.8,
           "rotation": 0,
-          "anchor_wall": "m018",
+          "anchor_wall": "m014",
           "reason": "sob a cama, sai nas laterais e no pé"
         },
         {
           "name": "criado_mudo_dir",
           "type": "nightstand",
-          "x_m": 16.98,
-          "y_m": 21.28,
+          "x_m": 8.6,
+          "y_m": 19.43,
           "width_m": 0.4,
           "depth_m": 0.45,
           "rotation": 0,
-          "anchor_wall": "m018",
+          "anchor_wall": "m014",
           "reason": "flanqueando a cabeceira (simétrico, folga mínima)"
         },
         {
           "name": "criado_mudo_esq",
           "type": "nightstand",
-          "x_m": 16.98,
-          "y_m": 18.8,
+          "x_m": 8.6,
+          "y_m": 17.3,
           "width_m": 0.4,
           "depth_m": 0.45,
           "rotation": 0,
-          "anchor_wall": "m018",
+          "anchor_wall": "m014",
           "reason": "flanqueando a cabeceira (simétrico, folga mínima)"
         },
         {
           "name": "guarda_roupa",
           "type": "wardrobe",
-          "x_m": 18.96,
-          "y_m": 22.89,
-          "width_m": 0.6,
-          "depth_m": 1.8,
+          "x_m": 9.71,
+          "y_m": 20.23,
+          "width_m": 1.5,
+          "depth_m": 0.6,
           "rotation": 0,
-          "anchor_wall": "m019",
-          "reason": "parede limpa, frente livre, 1.80 m (planejado linear)"
+          "anchor_wall": "m007",
+          "reason": "parede limpa, frente livre, 1.50 m (planejado linear)"
         },
         {
           "name": "dresser",
           "type": "dresser",
-          "x_m": 13.9,
-          "y_m": 19.4,
+          "x_m": 11.41,
+          "y_m": 18.71,
           "width_m": 0.4,
           "depth_m": 1.6,
           "rotation": 0,
-          "anchor_wall": "m017",
+          "anchor_wall": "m016",
           "reason": "comoda baixa em parede livre, sem competir com guarda-roupa"
         }
+      ]
+    },
+    {
+      "headboard_wall": "m002",
+      "rank": 1,
+      "valid": false,
+      "score": -999,
+      "reason": [
+        "cama king não coube na parede da cabeceira"
+      ]
+    },
+    {
+      "headboard_wall": "m003",
+      "rank": 2,
+      "valid": false,
+      "score": -999,
+      "reason": [
+        "cama king não coube na parede da cabeceira"
       ]
     }
   ],
   "headboard_ranking": [
     {
-      "wall": "m019",
-      "score": 67.4,
+      "wall": "m014",
+      "score": 62.0,
       "clean": true,
       "has_window": false,
       "has_door": false
     },
     {
-      "wall": "m017",
-      "score": 57.2,
-      "clean": true,
-      "has_window": false,
-      "has_door": false
-    },
-    {
-      "wall": "m018",
-      "score": 56.8,
-      "clean": true,
-      "has_window": false,
-      "has_door": false
-    },
-    {
-      "wall": "m005",
-      "score": 47.0,
+      "wall": "m002",
+      "score": 35.4,
       "clean": false,
       "has_window": true,
       "has_door": false
     },
     {
-      "wall": "m010",
-      "score": 45.4,
+      "wall": "m003",
+      "score": 22.1,
       "clean": false,
-      "has_window": false,
-      "has_door": true
+      "has_window": true,
+      "has_door": false
     },
     {
       "wall": "m016",
@@ -182,106 +169,99 @@
       "has_door": true
     },
     {
-      "wall": "m009",
-      "score": -15.8,
-      "clean": false,
-      "has_window": false,
-      "has_door": true
-    },
-    {
-      "wall": "m008",
-      "score": -18.8,
+      "wall": "m004",
+      "score": -10.2,
       "clean": false,
       "has_window": false,
       "has_door": true
     }
   ],
   "result": "OK",
-  "chosen": "m018",
+  "chosen": "m014",
   "chosen_score": 105,
   "winner_layout": [
     {
-      "name": "cama_king",
+      "name": "cama_queen",
       "type": "bed",
-      "x_m": 16.16,
-      "y_m": 20.04,
+      "x_m": 9.42,
+      "y_m": 18.37,
       "width_m": 2.03,
-      "depth_m": 1.93,
+      "depth_m": 1.58,
       "rotation": 0,
-      "anchor_wall": "m018",
+      "anchor_wall": "m014",
       "reason": "âncora; cabeceira em parede limpa; centralizada"
     },
     {
       "name": "cabeceira",
       "type": "headboard",
-      "x_m": 17.21,
-      "y_m": 20.04,
+      "x_m": 8.37,
+      "y_m": 18.37,
       "width_m": 0.06,
-      "depth_m": 1.93,
+      "depth_m": 1.58,
       "rotation": 0,
-      "anchor_wall": "m018",
+      "anchor_wall": "m014",
       "reason": "painel fino na parede; a cama encosta (leitura intencional)"
     },
     {
       "name": "tapete",
       "type": "rug",
-      "x_m": 15.51,
-      "y_m": 20.04,
+      "x_m": 10.07,
+      "y_m": 18.37,
       "width_m": 3.4,
       "depth_m": 2.8,
       "rotation": 0,
-      "anchor_wall": "m018",
+      "anchor_wall": "m014",
       "reason": "sob a cama, sai nas laterais e no pé"
     },
     {
       "name": "criado_mudo_dir",
       "type": "nightstand",
-      "x_m": 16.98,
-      "y_m": 21.28,
+      "x_m": 8.6,
+      "y_m": 19.43,
       "width_m": 0.4,
       "depth_m": 0.45,
       "rotation": 0,
-      "anchor_wall": "m018",
+      "anchor_wall": "m014",
       "reason": "flanqueando a cabeceira (simétrico, folga mínima)"
     },
     {
       "name": "criado_mudo_esq",
       "type": "nightstand",
-      "x_m": 16.98,
-      "y_m": 18.8,
+      "x_m": 8.6,
+      "y_m": 17.3,
       "width_m": 0.4,
       "depth_m": 0.45,
       "rotation": 0,
-      "anchor_wall": "m018",
+      "anchor_wall": "m014",
       "reason": "flanqueando a cabeceira (simétrico, folga mínima)"
     },
     {
       "name": "guarda_roupa",
       "type": "wardrobe",
-      "x_m": 18.96,
-      "y_m": 22.89,
-      "width_m": 0.6,
-      "depth_m": 1.8,
+      "x_m": 9.71,
+      "y_m": 20.23,
+      "width_m": 1.5,
+      "depth_m": 0.6,
       "rotation": 0,
-      "anchor_wall": "m019",
-      "reason": "parede limpa, frente livre, 1.80 m (planejado linear)"
+      "anchor_wall": "m007",
+      "reason": "parede limpa, frente livre, 1.50 m (planejado linear)"
     },
     {
       "name": "dresser",
       "type": "dresser",
-      "x_m": 13.9,
-      "y_m": 19.4,
+      "x_m": 11.41,
+      "y_m": 18.71,
       "width_m": 0.4,
       "depth_m": 1.6,
       "rotation": 0,
-      "anchor_wall": "m017",
+      "anchor_wall": "m016",
       "reason": "comoda baixa em parede livre, sem competir com guarda-roupa"
     }
   ],
   "ranking": [
     {
       "rank": 1,
-      "wall": "m018",
+      "wall": "m014",
       "score": 105,
       "valid": true,
       "breakdown": {
@@ -297,7 +277,7 @@
     },
     {
       "rank": 2,
-      "wall": "m019",
+      "wall": "m002",
       "score": -999,
       "valid": false,
       "breakdown": null,
@@ -305,7 +285,7 @@
     },
     {
       "rank": 3,
-      "wall": "m017",
+      "wall": "m003",
       "score": -999,
       "valid": false,
       "breakdown": null,

@@ -7,9 +7,9 @@
 # Placeholders, NAO 3D Warehouse. Felipe 2026-06-04 (gate :8765 opcao A).
 require 'json'
 
-def pl_top_camera(model)
+def pl_top_camera(model, bbox = nil)
   view = model.active_view
-  bbox = model.bounds
+  bbox ||= model.bounds
   center = bbox.center
   eye = Geom::Point3d.new(center.x, center.y, center.z + bbox.diagonal * 5.0)
   cam = Sketchup::Camera.new(eye, center, Geom::Vector3d.new(0, 1, 0))
@@ -20,9 +20,10 @@ def pl_top_camera(model)
   view.camera = cam
 end
 
-def pl_iso_camera(model)
+def pl_iso_camera(model, bbox = nil)
   view = model.active_view
-  bbox = model.bounds
+  custom = !bbox.nil?
+  bbox ||= model.bounds
   center = bbox.center
   diag = bbox.diagonal
   d = diag * 5.0
@@ -31,7 +32,7 @@ def pl_iso_camera(model)
   cam.perspective = false
   cam.height = diag * 1.2
   view.camera = cam
-  view.zoom_extents
+  view.zoom_extents unless custom   # custom bbox = enquadra so o comodo, nao o apê
 end
 
 def pl_png(model, path)
@@ -67,12 +68,13 @@ def pl_run
   boxes.each do |b|
     begin
       h = b['h_in'].to_f
+      z0 = (b['z0_in'] || 0).to_f      # base elevada (ex.: armario aereo flutua sobre a bancada)
       g = pents.add_group
       g.name = b['label'] || b['kind']
-      # desenha o POLIGONO real (cantos), preservando rotacao de moveis angulados
-      pts = (b['corners'] || []).map { |c| Geom::Point3d.new(c[0].to_f, c[1].to_f, 0) }
+      # desenha o POLIGONO real (cantos) na cota z0, preservando rotacao
+      pts = (b['corners'] || []).map { |c| Geom::Point3d.new(c[0].to_f, c[1].to_f, z0) }
       face = g.entities.add_face(pts)
-      # extrudar SEMPRE pra cima (independente da normal da face)
+      # extrudar SEMPRE pra cima (z0 -> z0+h)
       dir = face.normal.z >= 0 ? h : -h
       face.pushpull(dir)
       mat = pl_material(model, "ph_#{b['kind']}", b['rgb'] || [120, 120, 120])
@@ -88,14 +90,23 @@ def pl_run
   end
   log << "placed #{placed}/#{boxes.size} placeholders"
 
-  # AFTER: shell + moveis
+  # AFTER: shell + moveis. LAYOUT_ZOOM_GROUP enquadra SO o comodo mobiliado
+  # (bounds do grupo de moveis + folga p/ pegar as paredes), nao o apê inteiro.
+  zoom_bb = nil
+  if ENV['LAYOUT_ZOOM_GROUP'] && placed > 0
+    pb = parent.bounds
+    zoom_bb = Geom::BoundingBox.new
+    pad = 48.0   # ~1.2 m de folga
+    zoom_bb.add([pb.min.x - pad, pb.min.y - pad, pb.min.z])
+    zoom_bb.add([pb.max.x + pad, pb.max.y + pad, pb.max.z + pad])
+  end
   if ENV['LAYOUT_AFTER_TOP']
-    pl_top_camera(model)
+    pl_top_camera(model, zoom_bb)
     pl_png(model, ENV['LAYOUT_AFTER_TOP'])
     log << "AFTER top -> #{File.basename(ENV['LAYOUT_AFTER_TOP'])}"
   end
   if ENV['LAYOUT_AFTER_ISO']
-    pl_iso_camera(model)
+    pl_iso_camera(model, zoom_bb)
     pl_png(model, ENV['LAYOUT_AFTER_ISO'])
     log << "AFTER iso -> #{File.basename(ENV['LAYOUT_AFTER_ISO'])}"
   end

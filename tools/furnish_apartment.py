@@ -19,9 +19,9 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))   # roda standalone
+from tools import bedroom_designer   # noqa: E402  (quartos: brain novo GPT-approved)
 from tools.bathroom_layout import build_boxes as bath_boxes   # noqa: E402
 from tools.kitchen_layout import build_boxes as kitchen_boxes   # noqa: E402
-from tools.place_bedroom_skp import build_boxes as bedroom_boxes   # noqa: E402
 from tools.place_layout_skp import build_boxes as living_boxes   # noqa: E402
 from tools.room_type import (BATHROOM, BEDROOM, KITCHEN, LIVING,   # noqa: E402
                              classify_rooms)
@@ -33,8 +33,27 @@ BASE_SKP = ROOT / "artifacts/planta_74/planta_74.skp"
 OUT_DIR = ROOT / "artifacts/planta_74/furnished"   # pasta UNICA fixa
 RB = ROOT / "tools/place_layout_skp.rb"
 
+def bedroom_designer_boxes(con, room_id):
+    """Adapter: roda o bedroom_designer (cama por tamanho do quarto + cabeceira +
+    criados + tapete + guarda-roupa + console; GPT-approved) e devolve os boxes no
+    formato place_layout. Substitui o place_bedroom_skp antigo nos quartos."""
+    sm, out = bedroom_designer.run(con, room_id, minimalist=True)
+    if out.get("result") != "OK":
+        return None, out
+    return bedroom_designer._items_to_boxes(out["_winner_items"]), out
+
+
+def living_room_boxes(con, room_id):
+    """Sala: roda o brain de layout e DROPA a poltrona (GPT review: removê-la deixa
+    a sala mais minimalista e a circulação livre). Mantém sofá + tapete + mesa + rack."""
+    boxes, out = living_boxes(con, room_id)
+    if boxes:
+        boxes = [b for b in boxes if b.get("kind") != "poltrona"]
+    return boxes, out
+
+
 # dispatch por tipo de comodo (cresce conforme novos brains entram)
-BRAINS = {BEDROOM: bedroom_boxes, KITCHEN: kitchen_boxes, LIVING: living_boxes,
+BRAINS = {BEDROOM: bedroom_designer_boxes, KITCHEN: kitchen_boxes, LIVING: living_room_boxes,
           BATHROOM: bath_boxes}
 
 

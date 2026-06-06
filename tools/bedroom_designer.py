@@ -25,13 +25,19 @@ from tools.spatial_model import PT_TO_M, build_spatial_model
 
 # --- móveis (m): (largura ao-longo da parede, profundidade perp, altura) ---
 KING = (1.93, 2.03, 0.55)
-NIGHTSTAND = (0.50, 0.45, 0.60)
+QUEEN = (1.58, 2.03, 0.55)          # quarto secundário: king engole o guarda-roupa
+CASAL = (1.38, 1.88, 0.50)
+SOLTEIRO = (0.88, 1.88, 0.45)
+NIGHTSTAND = (0.45, 0.40, 0.55)     # GPT review: criado menor/compacto, leve
 RUG = (2.80, 3.40, 0.02)
 WARDROBE_DEPTH, WARDROBE_H = 0.60, 2.20
+HEADBOARD_DEPTH, HEADBOARD_H = 0.06, 1.10   # painel fino na parede da cabeceira (GPT)
 BANCO = (1.40, 0.45, 0.45)          # ottoman aos pés
-DRESSER = (1.60, 0.45, 0.80)        # cômoda baixa
+DRESSER = (1.60, 0.40, 0.50)        # GPT review: console BAIXO e comprido (não cômoda pesada)
 POLTRONA = (0.80, 0.80, 0.80)
 MESA_LAT = (0.40, 0.40, 0.45)
+NS_GAP = 0.05                       # folga visual cama<->criado (GPT review)
+BED_PERP = HEADBOARD_DEPTH          # cama encosta no painel, não na parede crua
 
 # clearances (m): (ideal, mínimo)
 SIDE = (0.60, 0.45)                 # laterais da cama
@@ -45,13 +51,20 @@ COMODO_FOLGA = 0.06
 
 RGB = {"bed": [21, 101, 192], "nightstand": [0, 131, 143], "rug": [201, 185, 160],
        "wardrobe": [106, 27, 154], "bench": [120, 144, 156], "dresser": [141, 110, 99],
-       "armchair": [0, 150, 136], "side_table": [255, 171, 64]}
-HEIGHT = {"bed": 0.55, "nightstand": 0.60, "rug": 0.02, "wardrobe": 2.20,
-          "bench": 0.45, "dresser": 0.80, "armchair": 0.80, "side_table": 0.45}
+       "armchair": [0, 150, 136], "side_table": [255, 171, 64], "headboard": [121, 85, 72]}
+HEIGHT = {"bed": 0.55, "nightstand": 0.55, "rug": 0.02, "wardrobe": 2.20,
+          "bench": 0.45, "dresser": 0.50, "armchair": 0.80, "side_table": 0.45,
+          "headboard": 1.10}
 
 
-def _ward_width(area_m2):
-    return 2.40 if area_m2 >= 16 else (1.80 if area_m2 >= 11 else 1.20)
+def _ward_widths(area_m2):               # GPT review: tenta + largo (embutido); encolhe se não couber.
+    # Inclui fallbacks estreitos (>=1.50) p/ comodo em L (ex. r000): o guarda-roupa
+    # é P0 (storage essencial) e tem prioridade sobre o console — encolhe pra caber.
+    if area_m2 >= 16:
+        return [3.00, 2.60, 2.40, 2.00, 1.80, 1.50]
+    if area_m2 >= 11:
+        return [2.40, 2.00, 1.80, 1.50, 1.20]
+    return [1.60, 1.20, 1.00]
 
 
 def _clear(v):                      # m, arredonda
@@ -63,23 +76,27 @@ def _bbox_m(b):
 
 
 def _wardrobe_walls(sm, exclude_id):
-    """Paredes p/ guarda-roupa/dresser (!= cabeceira): limpa de porta; ranqueadas
-    por comprimento + bônus se limpa de janela. Devolve setups."""
+    """Paredes p/ guarda-roupa/dresser (!= cabeceira). Ranqueia por comprimento +
+    bônus se limpa de janela. INCLUI paredes com PORTA (o circ_u/door-zone mantém o
+    móvel longe do vão/giro, e o trecho limpo ao lado da porta serve) mas penaliza;
+    exclui só passagem/porta-balcão (vãos full-height que não dá pra bloquear) e
+    paredes curtas. (review suite02: só sobravam paredes de janela)."""
     by = {}
     for o in sm["openings"]:
         by.setdefault(o["wall_id"], []).append(o["kind"])
-    door_kinds = {"interior_door", "interior_passage", "glazed_balcony"}
+    block_kinds = {"interior_passage", "glazed_balcony"}   # vão full-height: nunca bloquear
     out = []
     for wr in sm["walls"]:
         if wr["id"] == exclude_id or wr["length_m"] < 1.0:
             continue
         kinds = by.get(wr["id"], [])
-        if any(k in door_kinds for k in kinds):
+        if any(k in block_kinds for k in kinds):
             continue
         ws = _wall_setup(sm, wr["id"])
         if ws is None:
             continue
-        s = wr["length_m"] * 5 + (15 if "window" not in kinds else 0)
+        has_door = "interior_door" in kinds
+        s = wr["length_m"] * 5 + (15 if "window" not in kinds else 0) - (20 if has_door else 0)
         out.append((s, ws, "window" in kinds))
     out.sort(key=lambda x: -x[0])
     return out
@@ -93,8 +110,23 @@ def _free_after(usable, solids):
     return free
 
 
-def build_layout(sm, hb):
-    """Monta um candidato (P0+P1+P2) com a cabeceira na parede hb (centralizada).
+def _bed_for_area(area_m2):
+    """Maior cama coerente com o tamanho do quarto. Designer ESCOLHE a cama: king
+    num quarto pequeno engole o guarda-roupa (review suite02). Não enfia king."""
+    if area_m2 >= 18:
+        return "king", KING
+    if area_m2 >= 13:
+        return "queen", QUEEN
+    if area_m2 >= 9:
+        return "casal", CASAL
+    return "solteiro", SOLTEIRO
+
+
+def build_layout(sm, hb, bed_dims=KING, bed_label="king", minimalist=True):
+    """Monta um candidato com a cabeceira na parede hb (cama centralizada).
+    bed_dims/bed_label: tamanho da cama escolhido conforme o tamanho do quarto.
+    minimalist (default, pos review GPT): P0 (cama+criados+tapete+guarda-roupa) +
+    no MAXIMO o dresser. --full re-habilita banco/poltrona/mesa (vira showroom).
     Devolve (items, downgrades)."""
     g = sm["_geom"]
     cell, usable = g["cell"], g["usable"]
@@ -105,16 +137,18 @@ def build_layout(sm, hb):
         circ.append(dz)
     circ_u = unary_union(circ) if circ else None
     win_zone = _window_zones(sm)
+    wfoot = unary_union([wall_footprint(g["walls"][wid], extend_endpoints=True)
+                         for wid in g["room_walls"]])
     o, face, sgn, ac = hb["orient"], hb["face"], hb["sgn"], hb["along_c"]
     items, downgrades = [], []
 
-    # --- P0: cama king CENTRALIZADA (desliza só se centralizada não couber) ---
-    bw, bl, _ = KING
+    # --- P0: cama CENTRALIZADA (tamanho conforme o quarto; desliza se não couber) ---
+    bw, bl, _ = bed_dims
     bed = None
     for off in (0.0, 0.3, -0.3, 0.6, -0.6):
-        b = _fbox(o, face, sgn, ac + M(off), M(MARGIN_M), M(bw), M(bl))
+        b = _fbox(o, face, sgn, ac + M(off), M(BED_PERP), M(bw), M(bl))
         if comodo.contains(b) and not _hit(b, circ_u) and not _hit(b, win_zone):
-            bed = {"name": "cama_king", "type": "bed", "box": b, "facing": _facing(o, sgn),
+            bed = {"name": f"cama_{bed_label}", "type": "bed", "box": b, "facing": _facing(o, sgn),
                    "anchor_wall": hb["id"], "reason": "âncora; cabeceira em parede limpa; centralizada",
                    "off": off}
             ac = ac + M(off)
@@ -122,6 +156,13 @@ def build_layout(sm, hb):
     if bed is None:
         return None, ["cama king não coube na parede da cabeceira"]
     items.append(bed)
+
+    # --- P0: cabeceira/painel fino contra a parede, atrás da cama (GPT review: a
+    # cama precisa "encostar" num painel pra parecer intencional, não bloco solto) ---
+    hbp = _fbox(o, face, sgn, ac, M(0.0), M(bw), M(HEADBOARD_DEPTH))
+    items.append({"name": "cabeceira", "type": "headboard", "box": hbp,
+                  "anchor_wall": hb["id"],
+                  "reason": "painel fino na parede; a cama encosta (leitura intencional)"})
 
     # --- P0: TAPETE grande sob a cama (decorativo; sai da parede e estende no
     # pé/laterais; pode sobrepor cama/criados pois é piso) ---
@@ -135,55 +176,61 @@ def build_layout(sm, hb):
                       "box": rug.intersection(comodo), "decorative": True,
                       "anchor_wall": hb["id"], "reason": "sob a cama (recortado ao quarto)"})
 
-    # --- P0: criados-mudos simétricos ---
+    # --- P0: criados-mudos simétricos, alinhados à LINHA DA CABECEIRA, com folga
+    # mínima da cama (GPT review: criados menores/leves, não colados no bloco) ---
     nw, nd, _ = NIGHTSTAND
     placed_n = 0
     for side in (1, -1):
-        ns_ac = ac + side * (M(bw) / 2 + M(nw) / 2)
-        ns = _fbox(o, face, sgn, ns_ac, M(MARGIN_M), M(nw), M(nd))
+        ns_ac = ac + side * (M(bw) / 2 + M(nw) / 2 + M(NS_GAP))
+        ns = _fbox(o, face, sgn, ns_ac, M(BED_PERP), M(nw), M(nd))
         if comodo.contains(ns) and not _hit(ns, circ_u) and not _ov(ns, items):
             items.append({"name": f"criado_mudo_{'dir' if side > 0 else 'esq'}", "type": "nightstand",
                           "box": ns, "anchor_wall": hb["id"],
-                          "reason": "flanqueando a cabeceira (simétrico)"})
+                          "reason": "flanqueando a cabeceira (simétrico, folga mínima)"})
             placed_n += 1
     if placed_n < 2:
         downgrades.append(f"criados-mudos: só {placed_n} coube(ram) (ideal 2)")
 
-    # --- P0: guarda-roupa em parede alternativa (frente livre) ---
-    ward_w = _ward_width(sm["area_m2"])
-    ward = _place_against(sm, _wardrobe_walls(sm, hb["id"]), ward_w, WARDROBE_DEPTH,
-                          items, comodo, circ_u, win_zone, front=WARD_FRONT[1], tall=True)
-    if ward is not None:
-        ward["name"] = "guarda_roupa"
-        ward["type"] = "wardrobe"
-        ward["reason"] = "parede lateral/oposta limpa, com frente livre"
-        items.append(ward)
-    else:
+    # --- P0: guarda-roupa em parede alternativa (frente livre). GPT review: tenta
+    # o mais largo possível (parecer planejado/embutido) e só encolhe se não couber. ---
+    ward = None
+    for ww in _ward_widths(sm["area_m2"]):
+        ward = _place_against(sm, _wardrobe_walls(sm, hb["id"]), ww, WARDROBE_DEPTH,
+                              items, comodo, circ_u, win_zone, front=WARD_FRONT[1], tall=True,
+                              wfoot=wfoot)
+        if ward is not None:
+            ward["name"] = "guarda_roupa"
+            ward["type"] = "wardrobe"
+            ward["reason"] = f"parede limpa, frente livre, {ww:.2f} m (planejado linear)"
+            items.append(ward)
+            break
+    if ward is None:
         downgrades.append("guarda-roupa não coube com frente livre")
 
-    # --- P1: banco/ottoman aos pés (centralizado com a cama) ---
-    banco = _place_foot(o, face, sgn, ac, bl, BANCO, comodo, circ_u, items, usable)
-    if banco is not None:
-        items.append(banco)
-
-    # --- P1: dresser/cômoda em parede livre (não a da cabeceira nem do armário) ---
+    # --- secundario: dresser/comoda baixa numa parede livre (UNICO extra do
+    # minimalista; GPT review 2026-06: nucleo + 'talvez dresser') ---
     used = {hb["id"]} | {it.get("anchor_wall") for it in items if it.get("type") == "wardrobe"}
     dresser = _place_against(sm, [c for c in _wardrobe_walls(sm, hb["id"]) if c[1]["id"] not in used],
                              DRESSER[0], DRESSER[1], items, comodo, circ_u, win_zone,
-                             front=0.60, tall=False)
+                             front=0.60, tall=True, wfoot=wfoot)   # tall=True: console foge da janela
     if dresser is not None:
         dresser["name"] = "dresser"
         dresser["type"] = "dresser"
-        dresser["reason"] = "parede livre, baixa, sem competir com guarda-roupa"
+        dresser["reason"] = "comoda baixa em parede livre, sem competir com guarda-roupa"
         items.append(dresser)
 
-    # --- P2: poltrona num canto livre perto da janela (só se sobrar) ---
-    polt = _place_corner(sm, POLTRONA, comodo, circ_u, win_zone, items, near_window=True)
-    if polt is not None:
-        items.append(polt)
-        mesa = _place_beside(polt, MESA_LAT, comodo, circ_u, items)
-        if mesa is not None:
-            items.append(mesa)
+    # --- extras (banco aos pes + poltrona/mesa): SO no modo --full. GPT review
+    # 2026-06: no minimalista isso vira 'showroom'/excessivo, intencao fraca. ---
+    if not minimalist:
+        banco = _place_foot(o, face, sgn, ac, bl, BANCO, comodo, circ_u, items, usable)
+        if banco is not None:
+            items.append(banco)
+        polt = _place_corner(sm, POLTRONA, comodo, circ_u, win_zone, items, near_window=True)
+        if polt is not None:
+            items.append(polt)
+            mesa = _place_beside(polt, MESA_LAT, comodo, circ_u, items)
+            if mesa is not None:
+                items.append(mesa)
 
     return items, downgrades
 
@@ -202,14 +249,20 @@ def _ov(b, items):
                for it in items if not it.get("decorative"))
 
 
-def _place_against(sm, wall_setups, w_m, d_m, items, comodo, circ_u, win_zone, front, tall):
-    """Move encostado numa das paredes (com slide), frente livre >= front."""
+def _place_against(sm, wall_setups, w_m, d_m, items, comodo, circ_u, win_zone, front, tall,
+                   wfoot=None, prefer_center=True):
+    """Move encostado numa das paredes (com slide), frente livre >= front. Com
+    prefer_center, escolhe o ponto mais perto do MEIO do trecho livre (GPT review:
+    móvel não deve parecer 'grudado no canto'). wfoot = footprint das paredes: rejeita
+    spots que invadem a parede (ex.: móvel largo encostando na parede perpendicular)."""
     for _s, ws, _win in wall_setups:
         lo = ws["along_lo"] + M(w_m / 2 + 0.05)
         hi = ws["along_hi"] - M(w_m / 2 + 0.05)
         if hi <= lo:
             continue
         n = max(1, int((hi - lo) / M(0.15)))
+        mid = (lo + hi) / 2
+        cands = []
         for i in range(n + 1):
             ac = lo + (hi - lo) * i / n
             b = _fbox(ws["orient"], ws["face"], ws["sgn"], ac, M(MARGIN_M), M(w_m), M(d_m))
@@ -218,9 +271,16 @@ def _place_against(sm, wall_setups, w_m, d_m, items, comodo, circ_u, win_zone, f
                 continue
             if tall and _hit(b, win_zone):
                 continue
+            if wfoot is not None and b.intersection(wfoot).area > (0.06 / PT_TO_M ** 2):
+                continue
             if not comodo.contains(fr.buffer(-M(0.02))) or _ov(fr, items):
                 continue
-            return {"box": b, "anchor_wall": ws["id"], "facing": _facing(ws["orient"], ws["sgn"])}
+            cands.append((abs(ac - mid), {"box": b, "anchor_wall": ws["id"],
+                                          "facing": _facing(ws["orient"], ws["sgn"])}))
+        if cands:
+            if prefer_center:
+                cands.sort(key=lambda c: c[0])
+            return cands[0][1]
     return None
 
 
@@ -318,7 +378,9 @@ def score(items, sm, hb, downgrades):
     rug = next((it for it in items if it["type"] == "rug"), None)
 
     out_room = any(not comodo.contains(it["box"]) for it in solids)
-    hits_wall = any(it["box"].intersection(wfoot).area > (0.06 / PT_TO_M ** 2) for it in solids)
+    # a cabeceira é um painel projetado PRA ficar na parede — não conta como invasão
+    hits_wall = any(it["box"].intersection(wfoot).area > (0.06 / PT_TO_M ** 2)
+                    for it in solids if it["type"] != "headboard")
     hits_door = any(_hit(it["box"], circ_u) for it in solids)
     hits_win = any(_hit(it["box"], win_zone) for it in solids)
     free = usable
@@ -356,6 +418,8 @@ def score(items, sm, hb, downgrades):
         pts += 15; bd["guarda_roupa"] = 15
     if rug is not None:
         pts += 10; bd["tapete"] = 10
+    if any(it["type"] == "headboard" for it in items):
+        pts += 5; bd["cama_com_cabeceira"] = 5
     extras = sum(1 for it in items if it["type"] in ("bench", "dresser"))
     if extras:
         pts += 5 * min(extras, 2); bd["banco_dresser"] = 5 * min(extras, 2)
@@ -374,17 +438,18 @@ def _piece_json(it):
             "rotation": 0, "anchor_wall": it.get("anchor_wall"), "reason": it.get("reason")}
 
 
-def run(con, room_id):
+def run(con, room_id, minimalist=True):
     sm = build_spatial_model(con, room_id)
+    bed_label, bed_dims = _bed_for_area(sm["area_m2"])
     out = {"room_id": room_id, "room_name": sm.get("room_name"), "area_m2": sm["area_m2"],
-           "candidates": []}
-    top, allhb = _headboard_candidates(sm, M(KING[0]), k=3)
+           "minimalist": minimalist, "bed_size": bed_label, "candidates": []}
+    top, allhb = _headboard_candidates(sm, M(bed_dims[0]), k=3)
     out["headboard_ranking"] = [{"wall": h["wall_id"], "score": h["score"], "clean": h["clean"],
                                  "has_window": h["has_window"], "has_door": h["has_door"]}
                                 for h in allhb]
     if not top:
         out["result"] = "NO_VALID_LAYOUT"
-        out["reason"] = "nenhuma parede comporta a cama king (1.93 m)"
+        out["reason"] = f"nenhuma parede comporta a cama {bed_label} ({bed_dims[0]:.2f} m)"
         return sm, out
     for rank, h in enumerate(top):
         hb = _wall_setup(sm, h["wall_id"])
@@ -392,7 +457,7 @@ def run(con, room_id):
             continue
         hb["has_window"] = h["has_window"]
         hb["has_door"] = h["has_door"]
-        items, downs = build_layout(sm, hb)
+        items, downs = build_layout(sm, hb, bed_dims, bed_label, minimalist)
         if items is None:
             out["candidates"].append({"headboard_wall": h["wall_id"], "rank": rank,
                                       "valid": False, "score": -999, "reason": downs})
@@ -463,7 +528,7 @@ def plot(sm, out, out_png, tag=""):
             ax.annotate("", xy=(b.centroid.x + fac[0] * L, b.centroid.y + fac[1] * L),
                         xytext=(b.centroid.x, b.centroid.y),
                         arrowprops=dict(arrowstyle="-|>", color="#ffd600", lw=2.3), zorder=7)
-    sub = f"Quarto KING designer {tag} ('{out.get('room_name')}') | {out['result']}"
+    sub = f"Quarto {out.get('bed_size', '').upper()} designer {tag} ('{out.get('room_name')}') | {out['result']}"
     if out["result"] == "OK":
         win = next(c for c in out["candidates"] if c["headboard_wall"] == out["chosen"])
         cl = win.get("clearances_m", {})
@@ -472,17 +537,17 @@ def plot(sm, out, out_png, tag=""):
     ax.set_title(sub, fontsize=10)
     ax.set_aspect("equal")
     ax.invert_yaxis()
-    fig.text(0.5, 0.015, "azul=cama  teal=criado  bege=tapete  roxo=guarda-roupa  "
-             "cinza=banco  marrom=dresser  verde=poltrona  amarelo=mesa  "
-             "seta amarela=frente  ciano=janela", ha="center", fontsize=7)
+    fig.text(0.5, 0.015, "azul=cama  madeira=cabeceira  teal=criado  bege=tapete  "
+             "roxo=guarda-roupa  cinza=banco  marrom=dresser  verde=poltrona  "
+             "amarelo=mesa  seta=frente  ciano=janela", ha="center", fontsize=7)
     plt.tight_layout(rect=[0, 0.03, 1, 1])
     plt.savefig(out_png, dpi=90)
     plt.close(fig)
 
 
-EXPECTED = {"bed": "cama king", "nightstand": "criados-mudos", "rug": "tapete",
-            "wardrobe": "guarda-roupa", "bench": "banco", "dresser": "dresser",
-            "armchair": "poltrona", "side_table": "mesa lateral"}
+EXPECTED = {"bed": "cama king", "headboard": "cabeceira", "nightstand": "criados-mudos",
+            "rug": "tapete", "wardrobe": "guarda-roupa", "bench": "banco",
+            "dresser": "dresser", "armchair": "poltrona", "side_table": "mesa lateral"}
 
 
 def to_markdown(out, tag):
@@ -561,10 +626,12 @@ def build_skp(out_dir, tag, items):
             pass
     env = os.environ.copy()
     env["LAYOUT_BOXES"] = json.dumps(boxes)
+    env["LAYOUT_ZOOM_GROUP"] = "1"   # renders enquadram só o quarto, não o apê inteiro
     for k, p in paths.items():
         env[k] = str(p).replace("\\", "/")
-    subprocess.Popen([su, str(base), "-RubyStartup", str(rb)], env=env,
-                     creationflags=getattr(subprocess, "DETACHED_PROCESS", 0))
+    # SU precisa de JANELA real pra renderizar (write_image): DETACHED_PROCESS
+    # quebra os renders silenciosamente (o log nunca sai). Launch janelado.
+    subprocess.Popen([su, str(base), "-RubyStartup", str(rb)], env=env)
     log = paths["LAYOUT_LOG"]
     deadline = time.time() + 240
     while time.time() < deadline:
@@ -582,6 +649,7 @@ def main():
     ap.add_argument("--room", default="r000")
     ap.add_argument("--synthetic", action="store_true", help="quarto king sintetico limpo")
     ap.add_argument("--skp", action="store_true", help="gera SKP placeholder (so comodo real)")
+    ap.add_argument("--full", action="store_true", help="modo cheio (banco/poltrona/mesa); default = minimalista")
     ap.add_argument("--out-dir", default="artifacts/planta_74/furnished")
     args = ap.parse_args()
     if args.synthetic:
@@ -591,8 +659,9 @@ def main():
         con = json.loads(Path("fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json")
                          .read_text("utf-8"))
         room, tag = args.room, args.room
-    sm, out = run(con, room)
-    print(f"QUARTO {tag} ('{out.get('room_name')}') {out['area_m2']}m2 | {out['result']}")
+    sm, out = run(con, room, minimalist=not args.full)
+    mode = "FULL" if args.full else "MINIMALISTA"
+    print(f"QUARTO {tag} ('{out.get('room_name')}') {out['area_m2']}m2 | {out['result']} | {mode}")
     if out["result"] == "OK":
         print(f"  vencedor cabeceira {out['chosen']} | score {out['chosen_score']}")
         for p in out["winner_layout"]:
