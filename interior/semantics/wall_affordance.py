@@ -61,9 +61,25 @@ def wall_affordance(con, room_id, graph=None):
             tv = round(tv, 1)
         sofa = (L * 10.0 + (25 if clean else 0) - (50 if has_door else 0)
                 - (20 if has_win else 0) - (60 if has_bal else 0))
+        # cama: cabeceira exige parede LIMPA (regra prof.) + longa o bastante (>=1.6m
+        # p/ casal/king). nao-limpa DESQUALIFICA como a TV.
+        if clean:
+            bed = L * 12.0 + 25.0 - (40 if L < 1.6 else 0)
+        else:
+            bed = -100.0 + L
+        # guarda-roupa: parede LONGA util; porta/balcao desqualifica (nao pode bloquear),
+        # janela penaliza (mas pode caber acima), limpa e longa pontua alto.
+        if has_door or has_bal:
+            wardrobe = -100.0 + L
+        elif has_win:
+            wardrobe = L * 8.0
+        else:
+            wardrobe = L * 13.0 + 20.0 - (40 if L < 1.5 else 0)
         walls.append({"wall_id": wid, "length_m": round(L, 2), "openings": kinds,
                       "clean": clean, "neighbors": nb,
-                      "tv_score": round(tv, 1), "sofa_score": round(sofa, 1), "notes": notes})
+                      "tv_score": round(tv, 1), "sofa_score": round(sofa, 1),
+                      "bed_score": round(bed, 1), "wardrobe_score": round(wardrobe, 1),
+                      "notes": notes})
     walls.sort(key=lambda x: -x["tv_score"])
     best = [w for w in walls if w["tv_score"] > 0]
     rejected = [w for w in walls if w["tv_score"] <= 0]

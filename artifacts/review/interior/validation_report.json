@@ -1,5 +1,5 @@
 {
-  "phase": "phase0_baseline",
+  "phase": "phase1_brain_base",
   "gates": [
     {
       "gate": "SofaPlacementGate",

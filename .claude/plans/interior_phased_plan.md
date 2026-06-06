@@ -9,7 +9,18 @@
 
 ## Estado (atualizado por ciclo)
 
-- **Fase atual: 1 (FurniturePlacementBrain base)** — Fase 0 fechada GREEN.
+- **Fase atual: 2 (Bedroom placement)** — Fases 0 e 1 fechadas GREEN.
+- Fase 1 GREEN: `interior/planners/placement_brain.py` (FurniturePlacementBrain base:
+  RoomGraph+CirculationGraph+NoFurnitureZones+WallAffordanceMap+CandidateLayout+ScoreBreakdown
+  + `place_against_wall(ftype,w,d)` genérico). wall_affordance generalizado (bed_score/wardrobe_score).
+  Sala NÃO regrediu (validation_report GREEN). Nuance: o base escolhe a melhor parede por
+  score+circulação (serve cama/guarda-roupa direto); o SOFÁ mantém a restrição extra "frente
+  pra TV" no living_room_planner (não foi tocado — marco preservado).
+- **Fase 2 approach**: BedPlacementBrain = `brain.place_against_wall("bed", w, d)` (cabeceira na
+  melhor parede LIMPA via bed_score, frente p/ dentro) + NightstandPlacement (flanqueia a cama,
+  só 2 se couber). WardrobePlacementBrain = `place_against_wall("wardrobe", ...)`. Fixtures de erro
+  obrigatórias (cama bloqueando porta / sem cabeceira limpa / rotacionada / circulação; guarda-roupa
+  bloqueando porta / sem frente livre = FAIL; quarto válido = PASS) + GPT verdict textual (Modo B).
 - Branch: `feat/mobiliar-bedroom-layout` (sync com remote). develop +13 commits out-of-band
   (cockpit/dashboard — não tocam mobília; sem conflito). 26 ahead de develop.
 - Python: a instalação user-level quebrou → usar venv `E:\Claude\sketchup-mcp\.venv\Scripts\python.exe`.
