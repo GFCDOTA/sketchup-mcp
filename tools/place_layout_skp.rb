@@ -71,12 +71,26 @@ def pl_run
       z0 = (b['z0_in'] || 0).to_f      # base elevada (ex.: armario aereo flutua sobre a bancada)
       g = pents.add_group
       g.name = b['label'] || b['kind']
-      # desenha o POLIGONO real (cantos) na cota z0, preservando rotacao
+      # desenha o POLIGONO real (cantos) na cota z0; almofadas ganham chanfro no topo
+      # (Visual Quality Layer: nao parecer cubo/game asset)
       pts = (b['corners'] || []).map { |c| Geom::Point3d.new(c[0].to_f, c[1].to_f, z0) }
+      bev = %w[seat_cushion back_cushion].include?(b['kind']) ? (0.04 * 39.3700787402) : 0.0
       face = g.entities.add_face(pts)
-      # extrudar SEMPRE pra cima (z0 -> z0+h)
-      dir = face.normal.z >= 0 ? h : -h
-      face.pushpull(dir)
+      if bev > 0 && h > bev * 1.6
+        face.pushpull(face.normal.z >= 0 ? (h - bev) : -(h - bev))
+        topz = z0 + h - bev
+        top = g.entities.grep(Sketchup::Face).find { |f| f.normal.z.abs > 0.9 && (f.bounds.center.z - topz).abs < 0.3 }
+        if top
+          bb = top.bounds
+          ix0, iy0, ix1, iy1 = bb.min.x + bev, bb.min.y + bev, bb.max.x - bev, bb.max.y - bev
+          if ix1 > ix0 && iy1 > iy0
+            ip = [[ix0, iy0, topz], [ix1, iy0, topz], [ix1, iy1, topz], [ix0, iy1, topz]].map { |p| Geom::Point3d.new(*p) }
+            g.entities.add_face(ip).pushpull(bev)
+          end
+        end
+      else
+        face.pushpull(face.normal.z >= 0 ? h : -h)
+      end
       mat = pl_material(model, "ph_#{b['kind']}", b['rgb'] || [120, 120, 120])
       g.material = mat
       placed += 1
