@@ -1433,6 +1433,22 @@ def noc_actions() -> dict:
             "note": "atuador = noc_dispatcher.py (processo a parte); este card so observa o ledger"}
 
 
+def marcos() -> dict:
+    """Marcos / subidas de nivel do projeto (timeline curada, versionada em
+    tools/claude_bridge/marcos.json). Ordena por nivel desc (mais recente no topo).
+    So leitura — a curadoria vive no JSON, nada fabricado aqui."""
+    p = REPO_ROOT / "tools" / "claude_bridge" / "marcos.json"
+    try:
+        data = json.loads(p.read_text("utf-8"))
+    except (OSError, ValueError) as e:
+        return {"exists": False, "marcos": [], "note": f"marcos.json indisponivel: {type(e).__name__}"}
+    if not isinstance(data, list):
+        data = []
+    data = sorted(data, key=lambda m: m.get("nivel", 0), reverse=True)
+    return {"exists": True, "marcos": data, "count": len(data),
+            "current_level": max((m.get("nivel", 0) for m in data), default=0)}
+
+
 def _json_route(fn):
     """Adapt a zero-arg data function into a GET handler that sends it as JSON 200."""
     def handler(req, _url):
@@ -1667,6 +1683,7 @@ GET_ROUTES = {
     "/api/cognitive": _json_route(cognitive_doc),
     "/api/brain-state": _json_route(brain_state),
     "/api/noc-actions": _json_route(noc_actions),
+    "/api/marcos": _json_route(marcos),
     "/api/skp-inventory-v2": _json_route(skp_inventory_v2),
     "/api/difficulties": _json_route(difficulties),
     "/api/skp-timeline": _json_route(skp_timeline),
