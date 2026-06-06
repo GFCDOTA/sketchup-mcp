@@ -98,6 +98,10 @@ def living_room_boxes(con, room_id):
     def _ahead(dist_m):                                     # ponto 'dist_m' a frente do sofa
         return (sofa_c[0] + fnx * dist_m * M2IN, sofa_c[1] + fny * dist_m * M2IN)
 
+    # GPT (ajuste fino do placement PASS): CENTRALIZAR o rack/TV no eixo do sofa —
+    # projeta o rack no eixo de facing do sofa (sofa->mesa->tapete->rack colineares).
+    dist_fwd = (rack_c[0] - sofa_c[0]) * fnx + (rack_c[1] - sofa_c[1]) * fny
+    rack_c = (sofa_c[0] + fnx * dist_fwd, sofa_c[1] + fny * dist_fwd)
     boxes.append(_oriented_box("rack_tv", rack_c, rack_f, 1.80, 0.40, 0.0, 0.50, [120, 85, 55]))
     boxes.append(_oriented_box("tapete", _ahead(0.95), sofa_f, 2.40, 1.60, 0.0, 0.02, [165, 156, 140]))
     boxes.append(_oriented_box("mesa_centro", _ahead(1.15), sofa_f, 1.00, 0.55, 0.0, 0.40, [92, 72, 56]))

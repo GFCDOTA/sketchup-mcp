@@ -74,7 +74,7 @@ def pl_run
       # desenha o POLIGONO real (cantos) na cota z0; almofadas ganham chanfro no topo
       # (Visual Quality Layer: nao parecer cubo/game asset)
       pts = (b['corners'] || []).map { |c| Geom::Point3d.new(c[0].to_f, c[1].to_f, z0) }
-      bev = %w[seat_cushion back_cushion].include?(b['kind']) ? (0.04 * 39.3700787402) : 0.0
+      bev = %w[seat_cushion back_cushion arm].include?(b['kind']) ? (0.04 * 39.3700787402) : 0.0
       face = g.entities.add_face(pts)
       if bev > 0 && h > bev * 1.6
         face.pushpull(face.normal.z >= 0 ? (h - bev) : -(h - bev))
