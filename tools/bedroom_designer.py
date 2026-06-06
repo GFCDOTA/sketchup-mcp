@@ -603,10 +603,12 @@ def build_skp(out_dir, tag, items):
             pass
     env = os.environ.copy()
     env["LAYOUT_BOXES"] = json.dumps(boxes)
+    env["LAYOUT_ZOOM_GROUP"] = "1"   # renders enquadram só o quarto, não o apê inteiro
     for k, p in paths.items():
         env[k] = str(p).replace("\\", "/")
-    subprocess.Popen([su, str(base), "-RubyStartup", str(rb)], env=env,
-                     creationflags=getattr(subprocess, "DETACHED_PROCESS", 0))
+    # SU precisa de JANELA real pra renderizar (write_image): DETACHED_PROCESS
+    # quebra os renders silenciosamente (o log nunca sai). Launch janelado.
+    subprocess.Popen([su, str(base), "-RubyStartup", str(rb)], env=env)
     log = paths["LAYOUT_LOG"]
     deadline = time.time() + 240
     while time.time() < deadline:
