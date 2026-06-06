@@ -21,6 +21,15 @@
     (10+ retries Clear+STA), upload_image não acessa imageId de screenshot, file_upload rejeita
     path do worktree, screenshot do PNG servido corta (tamanho nativo>viewport). NÃO autojulgar.
     Retry próximo ciclo. O placement é deterministicamente PASS (gate cobre as dimensões do schema).
+    - **DIAGNÓSTICO clipboard**: SetText E SetImage falham (não é só imagem); GetOpenClipboardWindow=0
+      (ninguém segura o clipboard aberto) → acesso à window-station/desktop interativo no contexto
+      do shell. Funcionou cedo na sessão (sofá) → INTERMITENTE/ambiental (lock de tela/sessão), não
+      um app travando. NÃO solúvel por código. Retry oportunístico; se persistir = NEEDS-HUMAN p/ os
+      passos GPT-visual (Felipe pode fazer o consult manual OU destravar a sessão).
+    - **PLANO FORWARD**: não bloquear o determinístico. Próximo ciclo: (a) retry image-attach; se OK,
+      limpar backlog GPT (cama c0521d3 + quarto placement); (b) avançar Fase 3 anatomia determinística
+      (WardrobeBuilder + NightstandBuilder golden + anatomy gates) — construção não precisa de GPT;
+      o veredito VISUAL fica na fila até o anexo voltar.
 - Fases 0 e 1 fechadas GREEN.
 - Fase 1 GREEN: `interior/planners/placement_brain.py` (FurniturePlacementBrain base:
   RoomGraph+CirculationGraph+NoFurnitureZones+WallAffordanceMap+CandidateLayout+ScoreBreakdown
