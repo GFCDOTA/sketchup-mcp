@@ -6,85 +6,54 @@ Branch em curso, objetivo, escopo, validação.
 > arquivo estiver stale, qualquer agente deve reconciliar antes
 > de operar.
 
-## Branch atual
+> **Snapshot:** 2026-06-06.
 
-`feat/fp-030-visual-oracle-gate`
+## Contexto da sessão (2026-06-06)
 
-- Base: `origin/develop` em `510140d` (post-merge PR #196 "SKP Proof-of-Progress Gate")
-- Criada em: 2026-05-28 (sessão noturna autônoma)
+Sessão de **higiene de repo + reconciliação**, sem tocar a superfície de
+fidelidade do `.skp` (ambiente remoto sem SketchUp — geometria não valida
+aqui). Foco: destravar o suite de testes e reconciliar branches/docs.
 
-## Objetivo
+## Branches / PRs em voo
 
-Implementar o MVP do **Visual Oracle Gate (FP-030)** com:
-1. Spec `docs/specs/FP-030_visual_oracle_gate.md`
-2. Skill `.claude/skills/skp-visual-self-correction/`
-3. Manifest de exemplos visuais
-4. Schema `visual_findings.v1`
-5. Script MVP `tools/run_skp_visual_review.py` (não placeholder — heurísticas reais)
-6. Execução real na `planta_74`
-7. `.skp` + renders + findings + summary em `artifacts/review/planta_74/visual_loop_current/final/`
-8. Test contract em `tests/test_visual_oracle_contract.py`
+Todos **draft → `develop`** (Hard Rule #4):
 
-Princípio: "No SKP, no progress. No visual proof, no progress.
-The user is not the visual regression detector."
+| PR | Branch | O quê | Risco |
+|---|---|---|---|
+| #222 | `feat/noc-dispatcher` | atuador do NOC (dispatcher + worktree-lock) | MED — muda `:8765` vivo, bem-railed, não auto-merge |
+| #223 | `chore/noc-t1` | doc `NOC_DISPATCHER.md` (output dogfooded da task T1) | baixo; mergear **depois** do #222 |
+| #224 | `chore/refresh-nba-seed` | cura `_NBA_SEED` (remove 2 itens já feitos) | baixo, independente |
+| #225 | `claude/repo-overview-NDPaj` | `fix(deps)` matplotlib+numpy | baixo; **destrava `pytest`** (coleção quebrava) |
+| #226 | `fix/consult-path-resolution` | `fix(cockpit)` resolve consult paths em call-time | baixo; conserta 4 testes, prod byte-equivalente |
 
-## Escopo permitido
+## Feito nesta sessão
 
-- Criar `docs/specs/FP-030_visual_oracle_gate.md`
-- Criar skill `.claude/skills/skp-visual-self-correction/SKILL.md`
-- Criar `fixtures/visual_oracle_examples/` (19 examples: 3 good_real + 1 good_synthetic + 7 bad_real + 8 bad_synthetic)
-- Criar `schemas/visual_findings.schema.json`
-- Criar `tools/prompts/visual_oracle_reviewer.md`
-- Implementar `tools/run_skp_visual_review.py` (heurísticas: gates_self_check, window count match, floating door, orphan glass, bad window aperture, floor leak)
-- Criar `tests/test_visual_oracle_contract.py` (16 tests)
-- Atualizar `.claude/CLAUDE.md` + README + index pra mencionar a nova skill
-- Rodar visual review **real** na `planta_74` → produz `artifacts/review/planta_74/visual_loop_current/final/` com 6 arquivos
-- Promover qualitative axes via inline Claude review
-
-## Fora de escopo (follow-ups)
-
-- `tools/check_skp_proof_of_progress.py` (CI gate) — categoria 5 pendente
-- Auto-fix loop entre attempts — MVP só inspeciona e reporta
-- Side-by-side composite generator
-- Vision API integration
-- Wider negative class coverage (misplaced_soft_barrier, etc.) — heurísticas posicionais
+- **`main` == `develop`** reconciliadas em `73eb9da` (FF limpo; `develop`
+  estava 292 commits atrás).
+- **Revisão das branches órfãs** → viraram PRs #222–224.
+- **2 bugs reais** achados + corrigidos com prova em venv limpo (#225, #226):
+  antes `Interrupted: 1 error during collection`; depois **467 passed, 5 skipped**.
+- **Docs reconciliados** (este branch `chore/refresh-stale-docs`): `current_state.md`
+  (folded do `chore/refresh-current-state`, atualizado p/ hoje), `active_work.md`,
+  `next_actions.md`.
 
 ## Comandos de validação
 
 ```bash
-# Suite verde
-.venv/Scripts/python.exe -m pytest tests/ -q
-# Esperado: ≥105 passed (89 baseline + 16 contract test) + 5 skipped
+# Suite verde (precisa do #225 mergeado OU matplotlib/numpy instalados)
+python -m pytest tests/ -q          # esperado: 467 passed, 5 skipped
+
+# main == develop
+git rev-parse origin/main origin/develop   # mesmo SHA
 
 # Bootloader @imports resolvem
 cat .claude/CLAUDE.md CLAUDE.md | grep -oE '@\.claude/[a-zA-Z_/-]+\.md' \
   | sed 's/@//' | sort -u \
   | while read f; do test -f "$f" && echo OK $f || echo MISS $f; done
-# Esperado: todos OK
-
-# Rerun do visual review (idempotente, com --force-skp)
-.venv/Scripts/python.exe -m tools.run_skp_visual_review \
-  --fixture planta_74 \
-  --out artifacts/review/planta_74/visual_loop_current \
-  --max-attempts 3
-# Esperado: verdict=WARN, 0 findings, artefatos em final/
 ```
 
-## Status
+## Aguardando
 
-**Concluído** (sessão autônoma 2026-05-28):
-- Spec, skill, manifest, schema, prompt, tool, test — todos criados
-- Visual review rodou na planta_74 com sucesso (verdict=WARN documentado)
-- Claude inline review promoveu qualitative axes (global_visual + scale_rotation) pra PASS
-- regression_summary.md preenchido com evidência específica por axis
-- `tools/run_skp_visual_review.py` bug fixes aplicados (`relative_to` safe, `--force-skp` sempre, mapping `model_*.png`)
-
-**Aguardando**:
-- User wake up + review do PR #198 (Visual Oracle Gate)
-- User decide se mergea OU se quer ajustes
-- User decide se autoriza item #2 da fila (`tools/check_skp_proof_of_progress.py`)
-
-## PRs abertas pelo user (estado quando o user dormiu)
-
-- **#197** (refine Constitution #8 friction-tax review) — pre-merge ajustes pra #196 que mergeou enquanto rodava. **Aguardando review.**
-- **#198** (FP-030 Visual Oracle Gate, este PR) — **aguardando review** após dogfooding.
+- Review humano + merge dos PRs #222–226 (ordem sugerida: #225 → #226 → #222 → #223; #224 a qualquer hora).
+- Decisão sobre fechar `chore/refresh-current-state` (conteúdo único folded aqui).
+- `feat/mobiliar-bedroom-layout` é **WIP de peer vivo** — hands-off.
