@@ -80,11 +80,11 @@ def test_quadrado_clean_passes():
 @pytest.mark.skipif(
     _load("planta_74", "consensus_with_human_walls_and_soft_barriers.json") is None,
     reason="planta_74 fixture absent")
-def test_planta74_flags_mishosted_windows():
+def test_planta74_openings_well_hosted_after_regen():
+    # FP-031 #28: the regenerated canonical consensus (merged collinear walls +
+    # re-hosted openings) now hosts every opening correctly. The catch-behaviour
+    # is covered by the synthetic tests above.
     con = _load("planta_74", "consensus_with_human_walls_and_soft_barriers.json")
     rep = audit_opening_hosts(con)
-    assert rep["overall"] == "FAIL"
-    failed = {f["opening"] for f in rep["openings"] if f["verdict"] == "FAIL"}
-    # the FP-031 windows must be caught
-    for wid in ("h_o007", "h_o008", "h_o010"):
-        assert wid in failed, f"{wid} (mis-hosted window) not flagged"
+    assert rep["overall"] == "PASS", [
+        f for f in rep["openings"] if f["verdict"] == "FAIL"]

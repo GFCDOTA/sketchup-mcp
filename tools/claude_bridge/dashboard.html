@@ -1,0 +1,999 @@
+<!doctype html>
+<html lang="pt-br"><head><meta charset="utf-8">
+<title>SketchUp Creator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{
+--bg:#070c12;--bg-elev:#0a1119;--card:#0c1420;--card2:#0e1826;
+--line:#16222f;--line2:#22333f;
+--txt:#dceaf6;--dim:#a3b9ce;
+--ok:#27e08a;--bad:#ff4d5e;--warn:#ffb02e;--accent:#2bd4ff;
+--ok-dim:rgba(39,224,138,.13);--bad-dim:rgba(255,77,94,.13);--warn-dim:rgba(255,176,46,.13);--accent-dim:rgba(43,212,255,.11);
+--glow-ok:0 0 14px rgba(39,224,138,.32);--glow-bad:0 0 16px rgba(255,77,94,.38);--glow-accent:0 0 14px rgba(43,212,255,.28);
+--mono:ui-monospace,"Cascadia Code","JetBrains Mono",SFMono-Regular,Menlo,Consolas,monospace;}
+/* (camada base legada removida no refactor 2026-06-05 — era 100% sobrescrita
+   pela camada NOC abaixo; selectors body/header/nav/.card/.badge/table/.flag/
+   .alarm/.gallery/button/.lb/etc. todos redefinidos em seguida) */
+/* ============================================================
+   NOC / COMMAND-CENTER THEME  (camada unica — pos-colapso)
+   ============================================================ */
+*{box-sizing:border-box;}
+html{scrollbar-color:#2a3d4d #0a0f15;}
+body{margin:0;color:var(--txt);min-height:100vh;font:13px/1.55 var(--mono);-webkit-font-smoothing:antialiased;
+  background:radial-gradient(1100px 560px at 82% -8%,rgba(43,212,255,.07),transparent 60%),radial-gradient(820px 460px at -5% 2%,rgba(39,224,138,.05),transparent 55%),linear-gradient(180deg,#070d14,#05080d 60%,#04070b);
+  background-attachment:fixed;}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;
+  background-image:linear-gradient(rgba(43,212,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(43,212,255,.035) 1px,transparent 1px);
+  background-size:44px 44px;-webkit-mask-image:radial-gradient(circle at 50% 22%,#000,transparent 88%);mask-image:radial-gradient(circle at 50% 22%,#000,transparent 88%);}
+::selection{background:rgba(43,212,255,.32);color:#fff;}
+::-webkit-scrollbar{width:10px;height:10px;} ::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:#22323f;border-radius:6px;border:2px solid transparent;background-clip:content-box;}
+::-webkit-scrollbar-thumb:hover{background:#30485a;background-clip:content-box;}
+
+header{display:flex;align-items:center;gap:16px;padding:10px 20px;flex-wrap:wrap;position:sticky;top:0;z-index:20;
+  background:linear-gradient(180deg,rgba(10,17,26,.97),rgba(7,12,19,.9));-webkit-backdrop-filter:blur(9px);backdrop-filter:blur(9px);
+  border-bottom:1px solid var(--line2);box-shadow:0 1px 0 rgba(43,212,255,.13),0 14px 34px -22px #000;}
+h1{font-size:14px;margin:0;font-weight:800;letter-spacing:.6px;display:flex;align-items:center;gap:9px;white-space:nowrap;text-transform:uppercase;}
+h1 .logo{color:var(--accent);font-size:15px;filter:drop-shadow(0 0 7px rgba(43,212,255,.7));}
+h1 .sub{color:var(--dim);font-weight:700;font-size:10px;letter-spacing:2.5px;padding:2px 6px;border:1px solid var(--line2);border-radius:4px;}
+.hstat{display:flex;align-items:center;gap:15px;font-size:10.5px;color:var(--dim);letter-spacing:.6px;text-transform:uppercase;}
+.hstat .seg{display:flex;align-items:center;gap:6px;} .hstat b{color:var(--txt);font-weight:700;text-transform:none;letter-spacing:0;}
+.clock{color:var(--accent);font-weight:800;letter-spacing:1.5px;font-variant-numeric:tabular-nums;text-shadow:0 0 10px rgba(43,212,255,.5);}
+
+.badge{padding:5px 13px;border-radius:6px;font-weight:800;font-size:10.5px;letter-spacing:1.8px;border:1px solid transparent;display:inline-flex;align-items:center;}
+.badge::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:8px;}
+.badge.on{background:var(--ok-dim);color:var(--ok);border-color:rgba(39,224,138,.45);box-shadow:var(--glow-ok);}
+.badge.on::before{background:var(--ok);box-shadow:0 0 9px var(--ok);animation:pulse 1.8s infinite;}
+.badge.off{background:var(--bad-dim);color:var(--bad);border-color:rgba(255,77,94,.45);box-shadow:var(--glow-bad);}
+.badge.off::before{background:var(--bad);box-shadow:0 0 9px var(--bad);animation:blink 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}} @keyframes blink{50%{opacity:.2;}}
+
+nav{display:flex;gap:2px;flex-wrap:wrap;margin-left:auto;}
+nav a{padding:6px 11px;border-radius:6px;color:var(--dim);text-decoration:none;font-size:12px;font-weight:600;letter-spacing:.3px;border:1px solid transparent;transition:.12s;}
+nav a:hover{color:var(--txt);background:rgba(43,212,255,.07);border-color:var(--line2);}
+nav a.active{color:var(--accent);background:rgba(43,212,255,.1);border-color:rgba(43,212,255,.38);box-shadow:inset 0 0 13px rgba(43,212,255,.09);}
+
+main{padding:22px;max-width:1320px;margin:0 auto;position:relative;z-index:1;}
+section{display:none;} section.active{display:block;animation:fade .25s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
+.wrap{display:grid;gap:16px;grid-template-columns:1fr 1fr;}
+
+.card{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:11px;padding:15px 17px 16px;position:relative;overflow-x:auto;
+  box-shadow:0 1px 0 rgba(255,255,255,.025) inset,0 18px 36px -30px #000;}
+.card::after{content:"";position:absolute;left:14px;right:14px;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(43,212,255,.5),transparent);opacity:.6;}
+.card h2{font-size:11px;text-transform:uppercase;letter-spacing:1.7px;color:var(--accent);margin:0 0 13px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.card h2::before{content:"";width:6px;height:6px;background:var(--accent);box-shadow:0 0 8px var(--accent);border-radius:1px;flex:none;}
+.full{grid-column:1 / -1;}
+.kv{display:flex;justify-content:space-between;padding:5px 0;gap:12px;border-bottom:1px dashed rgba(255,255,255,.035);}
+.kv span:first-child{color:var(--dim);} .kv span:last-child{color:var(--txt);font-weight:600;}
+
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:top;}
+th{color:var(--accent);font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.9px;border-bottom:1px solid var(--line2);background:rgba(43,212,255,.04);}
+tbody tr{transition:background .1s;} tbody tr:hover{background:rgba(43,212,255,.045);}
+
+.flag{padding:2px 9px;border-radius:5px;font-size:10px;font-weight:800;white-space:nowrap;letter-spacing:.7px;border:1px solid transparent;text-transform:uppercase;}
+.flag.OK,.flag.ACTIVE{background:var(--ok-dim);color:var(--ok);border-color:rgba(39,224,138,.4);}
+.flag.STALLED,.flag.IDLE{background:var(--warn-dim);color:var(--warn);border-color:rgba(255,176,46,.4);}
+.flag.PARALYZED,.flag.STOPPED{background:var(--bad-dim);color:var(--bad);border-color:rgba(255,77,94,.4);}
+
+.feed{max-height:320px;overflow:auto;}
+.ev{display:flex;gap:10px;padding:5px 2px;border-bottom:1px solid rgba(255,255,255,.045);font-size:11.5px;}
+.ev .t{color:var(--dim);white-space:nowrap;font-variant-numeric:tabular-nums;}
+.ev .k{font-weight:800;text-transform:uppercase;font-size:9.5px;letter-spacing:.6px;padding-top:1px;}
+.ev .k.consult{color:var(--accent);} .ev .k.heartbeat{color:var(--dim);}
+
+.timeline{display:flex;gap:3px;flex-wrap:wrap;}
+.dot{width:11px;height:11px;border-radius:3px;background:var(--line2);}
+.dot.up{background:var(--ok);box-shadow:0 0 7px rgba(39,224,138,.55);} .dot.down{background:var(--bad);box-shadow:0 0 7px rgba(255,77,94,.55);}
+
+.pipe{display:flex;gap:7px;flex-wrap:wrap;}
+.stg{flex:1;min-width:84px;background:var(--bg-elev);border:1px solid var(--line2);border-radius:8px;padding:11px 7px;text-align:center;font-size:11.5px;font-weight:700;}
+.stg small{display:block;color:var(--dim);font-weight:500;margin-top:4px;font-size:9px;text-transform:uppercase;letter-spacing:.4px;}
+.stg.pdf{border-color:#47596b;}
+.stg.human{border-color:rgba(255,176,46,.55);background:var(--warn-dim);color:#ffd98a;}
+.stg.auto{border-color:rgba(43,212,255,.45);background:var(--accent-dim);}
+.stg.gate{border-color:rgba(39,224,138,.45);background:var(--ok-dim);}
+.stg.ok{border-color:var(--ok);background:rgba(39,224,138,.18);box-shadow:var(--glow-ok);color:var(--ok);}
+.arr{display:flex;align-items:center;color:var(--accent);opacity:.45;}
+
+.docs details{border:1px solid var(--line);border-radius:7px;margin-bottom:6px;background:var(--bg-elev);}
+.docs summary{cursor:pointer;padding:9px 13px;font-weight:700;font-size:12px;color:var(--accent);}
+.docs .d{padding:5px 14px 5px 26px;font-size:11.5px;border-top:1px solid var(--line);}
+.docs .d code{color:var(--warn);background:var(--warn-dim);padding:1px 6px;border-radius:4px;margin-right:7px;}
+
+pre.diagram{background:var(--bg-elev);border:1px solid var(--line2);border-radius:9px;padding:16px;overflow:auto;font-size:11px;line-height:1.45;color:var(--txt);box-shadow:inset 0 0 34px rgba(0,0,0,.45);}
+
+.alarm{padding:13px 16px;border-radius:10px;font-weight:700;font-size:12.5px;margin-bottom:16px;border:1px solid;display:flex;align-items:center;gap:11px;}
+.alarm::before{content:"";width:9px;height:9px;border-radius:50%;flex:none;}
+.alarm.ok{background:var(--ok-dim);color:var(--ok);border-color:rgba(39,224,138,.42);} .alarm.ok::before{background:var(--ok);box-shadow:0 0 9px var(--ok);}
+.alarm.bad{background:var(--bad-dim);color:#ff8d97;border-color:rgba(255,77,94,.5);box-shadow:var(--glow-bad);}
+.alarm.bad::before{background:var(--bad);box-shadow:0 0 11px var(--bad);animation:pulse 1.1s infinite;}
+.alarm.warn{background:var(--warn-dim);color:#ffd071;border-color:rgba(255,176,46,.5);} .alarm.warn::before{background:var(--warn);box-shadow:0 0 10px var(--warn);}
+
+.gallery{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));}
+.gallery figure{margin:0;background:var(--bg-elev);border:1px solid var(--line2);border-radius:9px;padding:8px;transition:.15s;}
+.gallery figure:hover{border-color:rgba(43,212,255,.55);box-shadow:var(--glow-accent);}
+.gallery img{width:100%;max-width:100%;height:auto;border-radius:5px;display:block;background:#fff;}
+.gallery figcaption{color:var(--dim);font-size:10.5px;margin-top:7px;text-align:center;word-break:break-all;letter-spacing:.3px;}
+
+textarea{width:100%;background:var(--bg-elev);color:var(--txt);border:1px solid var(--line2);border-radius:8px;padding:11px;font-family:var(--mono);font-size:12.5px;min-height:72px;}
+textarea:focus{outline:none;border-color:rgba(43,212,255,.55);box-shadow:var(--glow-accent);}
+button{background:linear-gradient(180deg,var(--accent),#10a9d7);color:#04121a;border:0;border-radius:7px;padding:8px 16px;font-weight:800;cursor:pointer;font-family:var(--mono);margin-top:8px;letter-spacing:.5px;transition:.12s;}
+button:hover{box-shadow:var(--glow-accent);transform:translateY(-1px);} button:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+
+.act-row{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:11px 0;border-bottom:1px solid var(--line);}
+.act-btn{margin-top:0;white-space:nowrap;} .act-btn.go{background:linear-gradient(180deg,var(--ok),#16b46c);color:#04140b;}
+.act-out{font-size:11.5px;color:var(--dim);padding:0 0 6px;}
+.qa-resp{margin-top:12px;white-space:pre-wrap;background:var(--bg-elev);border:1px solid var(--line2);border-radius:8px;padding:13px;font-size:12px;min-height:20px;line-height:1.6;}
+
+ul.opp{list-style:none;padding:0;margin:0;} ul.opp li{padding:10px 0;border-bottom:1px solid var(--line);font-size:12.5px;} ul.opp li b{color:var(--accent);}
+ul.opp li .tag{font-size:9px;color:var(--dim);border:1px solid var(--line2);border-radius:10px;padding:1px 8px;margin-left:6px;text-transform:uppercase;letter-spacing:.5px;}
+.muted{color:var(--dim);font-size:11.5px;}
+code{color:var(--warn);background:rgba(255,176,46,.08);padding:0 4px;border-radius:3px;}
+
+.lb{position:fixed;inset:0;background:rgba(2,5,9,.93);display:none;align-items:center;justify-content:center;z-index:300;cursor:zoom-out;padding:18px;-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);}
+.lb.open{display:flex;} .lb img{max-width:97vw;max-height:97vh;border:1px solid #2a3f50;border-radius:6px;background:#fff;box-shadow:0 0 70px rgba(43,212,255,.22);}
+.gallery img,#plant-gallery img,#skp-timeline-wrap img{cursor:zoom-in;}
+
+@media (max-width:880px){
+  .wrap{grid-template-columns:1fr;} main{padding:16px 13px;} header{padding:9px 13px;gap:10px;}
+  nav{margin-left:0;width:100%;gap:2px;order:4;} .hstat{margin-left:auto;} nav a{padding:5px 9px;font-size:11px;} .gallery{grid-template-columns:1fr;}
+}
+@media (max-width:520px){
+  main{padding:12px 10px;} nav a{padding:4px 7px;font-size:10.5px;} .stg{min-width:70px;font-size:11px;} .card{padding:13px 13px;} h1 .sub{display:none;} .hstat .seg.opt{display:none;}
+}
+/* ===== v2 (Felipe): HERO + KPI + GRUPOS + sparkline + fonte maior ===== */
+body{font-size:14px;}
+.muted{font-size:12px;} table{font-size:13px;} th{font-size:10.5px;} .card h2{font-size:11.5px;} .ev{font-size:12px;} nav a{font-size:12.5px;} .flag{font-size:10.5px;} .kv{font-size:13px;} .stg{font-size:12px;} .stg small{font-size:9.5px;} .act-out,.qa-resp,.docs .d,ul.opp li{font-size:12.5px;}
+
+.hero{display:flex;align-items:center;gap:20px;margin-bottom:14px;padding:16px 22px;border-radius:13px;border:1px solid var(--line2);background:linear-gradient(180deg,var(--card2),var(--card));position:relative;overflow:hidden;box-shadow:0 18px 40px -30px #000;}
+.hero::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;}
+.hero.green::before{background:var(--ok);box-shadow:0 0 24px var(--ok);}
+.hero.yellow::before{background:var(--warn);box-shadow:0 0 24px var(--warn);}
+.hero.red::before{background:var(--bad);box-shadow:0 0 24px var(--bad);}
+.hero-score{display:flex;align-items:center;gap:12px;font-size:31px;font-weight:800;letter-spacing:1.5px;white-space:nowrap;}
+.hero.green .hero-score{color:var(--ok);text-shadow:0 0 20px rgba(39,224,138,.5);}
+.hero.yellow .hero-score{color:var(--warn);text-shadow:0 0 20px rgba(255,176,46,.5);}
+.hero.red .hero-score{color:var(--bad);text-shadow:0 0 20px rgba(255,77,94,.55);}
+.hero-dot{width:13px;height:13px;border-radius:50%;background:currentColor;box-shadow:0 0 15px currentColor;animation:pulse 1.8s infinite;}
+.hero-body{min-width:0;} .hero-reason{color:var(--txt);font-size:14px;font-weight:600;line-height:1.45;} .hero-sub{color:var(--dim);font-size:12px;margin-top:5px;}
+
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(142px,1fr));gap:12px;margin-bottom:6px;}
+.kpi{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden;}
+.kpi::after{content:"";position:absolute;left:13px;right:13px;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(43,212,255,.45),transparent);}
+.kpi-n{font-size:27px;font-weight:800;line-height:1;letter-spacing:.5px;font-variant-numeric:tabular-nums;}
+.kpi-l{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:1.3px;margin-top:8px;font-weight:700;}
+
+.grp{display:flex;align-items:center;gap:13px;margin:28px 2px 14px;font-size:11px;font-weight:800;letter-spacing:2.2px;text-transform:uppercase;color:var(--accent);}
+.grp::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,rgba(43,212,255,.4),transparent);}
+
+.timeline{align-items:flex-end;gap:2px;height:26px;}
+.timeline .dot{width:4px;height:22px;border-radius:1px;} .timeline .dot.down{height:7px;}
+
+/* ===== Fase 1: Command Center (LAST UPDATE + próxima ação + alarme + timeline causal) ===== */
+.hero{flex-wrap:wrap;}
+.hero-aside{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:7px;text-align:right;min-width:190px;}
+.hero-upd{font-size:10.5px;color:var(--dim);letter-spacing:.7px;text-transform:uppercase;}
+.hero-upd b{color:var(--accent);font-variant-numeric:tabular-nums;font-weight:700;}
+.hero-next{font-size:12.5px;color:var(--txt);font-weight:600;max-width:380px;line-height:1.4;}
+.hero-next .tag{display:block;color:var(--accent);font-size:9.5px;text-transform:uppercase;letter-spacing:1.2px;font-weight:700;margin-bottom:3px;}
+.hero.red{border-color:rgba(255,77,94,.55);animation:alarm 1.3s infinite;}
+.hero.yellow{border-color:rgba(255,176,46,.5);animation:alarmY 2.4s infinite;}
+@keyframes alarm{0%,100%{box-shadow:0 0 0 1px rgba(255,77,94,.2);}50%{box-shadow:0 0 32px rgba(255,77,94,.5),0 0 0 1px var(--bad);}}
+@keyframes alarmY{0%,100%{box-shadow:0 0 0 1px rgba(255,176,46,.14);}50%{box-shadow:0 0 24px rgba(255,176,46,.35);}}
+.tl{position:relative;padding-left:17px;}
+.tl::before{content:"";position:absolute;left:4px;top:6px;bottom:6px;width:2px;background:linear-gradient(180deg,var(--accent),transparent);opacity:.35;}
+.tl-row{position:relative;padding:6px 0 6px 4px;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--txt);}
+.tl-row::before{content:"";position:absolute;left:-13px;top:11px;width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 7px var(--accent);}
+.tl-row.heartbeat{color:var(--dim);} .tl-row.heartbeat::before{background:var(--dim);box-shadow:none;width:6px;height:6px;left:-12px;}
+.tl-row .tlt{color:var(--dim);font-variant-numeric:tabular-nums;margin-right:9px;}
+/* ===== v3 NOC: Home single-pane — tiles semáforo + sparkline + atenção + pipe slim ===== */
+.kpi.ok{background:linear-gradient(180deg,var(--ok-dim),var(--card));border-color:rgba(39,224,138,.4);} .kpi.ok .kpi-n{color:var(--ok);}
+.kpi.warn{background:linear-gradient(180deg,var(--warn-dim),var(--card));border-color:rgba(255,176,46,.42);} .kpi.warn .kpi-n{color:var(--warn);}
+.kpi.bad{background:linear-gradient(180deg,var(--bad-dim),var(--card));border-color:rgba(255,77,94,.5);box-shadow:var(--glow-bad);} .kpi.bad .kpi-n{color:var(--bad);}
+.kpi.bad::after{background:linear-gradient(90deg,transparent,var(--bad),transparent);}
+.kpi.dim{border-color:var(--line2);} .kpi.dim .kpi-n{color:var(--dim);}
+.kpi.link{cursor:pointer;transition:.12s;}
+.kpi.link:hover{transform:translateY(-1px);border-color:rgba(43,212,255,.55);box-shadow:var(--glow-accent);}
+.kpi.link::before{content:"↗";position:absolute;top:7px;right:10px;font-size:10px;color:var(--dim);opacity:.5;}
+.kpi-sub{font-size:9.5px;color:var(--dim);margin-top:4px;letter-spacing:.3px;text-transform:none;font-weight:600;}
+.spark{display:flex;align-items:center;gap:12px;padding:7px 0;border-bottom:1px dashed rgba(255,255,255,.05);} .spark:last-child{border-bottom:0;}
+.spark .sl{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.8px;min-width:130px;}
+.spark svg{display:block;flex:1;} .spark .sv{font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--txt);min-width:30px;text-align:right;}
+ul.attn{list-style:none;margin:0;padding:0;}
+ul.attn li{display:flex;align-items:center;gap:11px;padding:9px 2px;border-bottom:1px solid rgba(255,255,255,.05);font-size:12.5px;cursor:pointer;} ul.attn li:last-child{border-bottom:0;}
+ul.attn li:hover{background:rgba(43,212,255,.05);}
+ul.attn li .sev{width:9px;height:9px;border-radius:50%;flex:none;} ul.attn li .sev.bad{background:var(--bad);box-shadow:0 0 8px var(--bad);} ul.attn li .sev.warn{background:var(--warn);box-shadow:0 0 6px var(--warn);}
+ul.attn li .go{margin-left:auto;font-size:9.5px;color:var(--accent);text-transform:uppercase;letter-spacing:.6px;white-space:nowrap;}
+.pipe.slim{gap:4px;} .pipe.slim .stg{min-width:0;flex:1;padding:7px 4px;font-size:10px;} .pipe.slim .stg small{display:none;} .pipe.slim .arr{font-size:11px;}
+/* ===== aba Cérebro: render de markdown (vanilla) ===== */
+.md-h{color:var(--accent);margin:18px 0 8px;line-height:1.3;font-weight:700;}
+.md-h1{font-size:19px;border-bottom:1px solid var(--line2);padding-bottom:6px;margin-top:26px;}
+.md-h2{font-size:15px;} .md-h3{font-size:13px;color:var(--txt);}
+.md-p{margin:8px 0;line-height:1.6;color:var(--txt);}
+.md-list{margin:8px 0 8px 2px;padding-left:20px;} .md-list li{margin:3px 0;line-height:1.55;}
+.md-q{margin:10px 0;padding:9px 14px;border-left:3px solid var(--accent);background:rgba(43,212,255,.06);color:var(--dim);border-radius:0 6px 6px 0;}
+.md-hr{border:0;border-top:1px solid var(--line2);margin:20px 0;}
+#cerebro-body strong{color:var(--txt);} #cerebro-body table{margin:10px 0;}
+/* ===== aba Cérebro: LINHA DE EXECUÇÃO COGNITIVA (horizontal, cyberpunk) ===== */
+.claude-flow{position:relative;margin:8px 0 22px;}
+.claude-flow-track{display:flex;align-items:stretch;overflow-x:auto;padding:6px 2px 14px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;}
+.claude-flow-track::-webkit-scrollbar{height:8px;}
+.claude-flow-step{position:relative;flex:0 0 auto;min-width:205px;max-width:230px;scroll-snap-align:start;display:flex;flex-direction:column;gap:5px;
+  background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line2);border-radius:12px;padding:14px 15px;transition:.15s;}
+.claude-flow-track.play .claude-flow-step{animation:flowIn .5s cubic-bezier(.2,.8,.2,1) both;}
+.claude-flow-step:hover{transform:translateY(-2px);border-color:rgba(43,212,255,.5);box-shadow:0 0 18px -6px var(--accent);}
+.claude-flow-step .ic{font-size:30px;line-height:1;filter:drop-shadow(0 0 8px rgba(43,212,255,.4));}
+.claude-flow-step b{color:var(--txt);font-size:13.5px;letter-spacing:.2px;}
+.claude-flow-step small{color:var(--dim);font-size:11px;line-height:1.45;}
+.step-badge{align-self:flex-start;margin-top:auto;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:var(--accent-dim);color:var(--accent);border:1px solid rgba(43,212,255,.4);}
+.step-badge.bad{background:var(--bad-dim);color:#ff8d97;border-color:rgba(255,77,94,.5);}
+.step-badge.ok{background:var(--ok-dim);color:var(--ok);border-color:rgba(39,224,138,.5);}
+.claude-flow-step.entry-green{border-left:3px solid var(--ok);}
+.claude-flow-step.entry{border-left:3px solid var(--accent);}
+.claude-flow-step.critical{border-left:3px solid var(--warn);background:linear-gradient(180deg,rgba(255,176,46,.08),var(--card));}
+.claude-flow-step.memory{border-left:3px solid #a371f7;}
+.claude-flow-step.spec{border-left:3px solid var(--accent);}
+.claude-flow-step.skill{border-left:3px solid #2bd4ff;}
+.claude-flow-step.task{border-left:3px solid var(--warn);}
+.claude-flow-step.exec{border-left:3px solid var(--accent);}
+.claude-flow-step.output{border-left:3px solid var(--ok);background:linear-gradient(180deg,rgba(39,224,138,.08),var(--card));box-shadow:0 0 16px -7px var(--ok);}
+.claude-flow-step .human{color:var(--warn);font-weight:700;}
+.flow-arrow{flex:0 0 auto;display:flex;align-items:center;justify-content:center;width:30px;color:var(--accent);font-size:20px;opacity:.8;text-shadow:0 0 10px rgba(43,212,255,.7);}
+.claude-flow-track.play .flow-arrow{animation:flowArrow .45s ease both;}
+@keyframes flowIn{from{transform:translateX(-16px);}to{transform:translateX(0);}}
+@keyframes flowArrow{from{transform:translateX(-6px);}to{transform:translateX(0);}}
+.cog-replay{cursor:pointer;font-size:12px;color:var(--accent);border:1px solid var(--line2);border-radius:6px;padding:4px 11px;background:transparent;font-family:var(--mono);transition:.12s;}
+.cog-replay:hover{border-color:var(--accent);box-shadow:var(--glow-accent);}
+@media(max-width:760px){.claude-flow-track{scroll-snap-type:x mandatory;}.claude-flow-step{min-width:80vw;max-width:80vw;}}
+/* ===== aba Cérebro: ESTADO VIVO (badges + painel + próxima ação + skills + camadas) ===== */
+.bdg{display:inline-flex;align-items:center;gap:5px;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:5px;border:1px solid transparent;white-space:nowrap;font-family:var(--mono);vertical-align:middle;}
+.bdg::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 7px currentColor;}
+.bdg.live{background:var(--ok-dim);color:var(--ok);border-color:rgba(39,224,138,.45);}
+.bdg.aging{background:var(--warn-dim);color:var(--warn);border-color:rgba(255,176,46,.4);}
+.bdg.stale{background:var(--warn-dim);color:#ffd071;border-color:rgba(255,176,46,.55);}
+.bdg.draft{background:rgba(163,185,206,.12);color:var(--dim);border-color:var(--line2);} .bdg.draft::before{box-shadow:none;opacity:.6;}
+.bdg.proposto{background:var(--accent-dim);color:var(--accent);border-color:rgba(43,212,255,.45);}
+.bdg.blueprint{background:rgba(163,113,247,.13);color:#c4a7ff;border-color:rgba(163,113,247,.45);}
+.bdg.deprecated{background:var(--bad-dim);color:var(--bad);border-color:rgba(255,77,94,.45);text-decoration:line-through;}
+.bdg.missing{background:var(--bad-dim);color:var(--bad);border-color:rgba(255,77,94,.5);}
+.bstate{width:100%;border-collapse:collapse;margin:2px 0 4px;}
+.bstate td{padding:9px 10px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:top;font-size:12.5px;}
+.bstate tr:last-child td{border-bottom:0;} .bstate tr:hover td{background:rgba(43,212,255,.035);}
+.bstate td.k{color:var(--dim);text-transform:uppercase;font-size:10px;letter-spacing:.7px;width:150px;white-space:nowrap;}
+.bstate td.v{color:var(--txt);} .bstate td.v code{font-size:11.5px;color:var(--accent);}
+.bstate .sub{color:var(--dim);font-size:11px;margin-top:3px;line-height:1.5;}
+.bstate a{color:var(--accent);text-decoration:none;} .bstate a:hover{text-decoration:underline;}
+.next-act{margin:6px 0 4px;padding:14px 17px;border-radius:11px;border:1px solid rgba(43,212,255,.4);
+  background:linear-gradient(135deg,rgba(43,212,255,.11),rgba(43,212,255,.015));box-shadow:inset 0 0 26px rgba(43,212,255,.06);}
+.next-act .lbl{font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent);font-weight:800;margin-bottom:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.next-act .ttl{font-size:14.5px;font-weight:700;color:var(--txt);line-height:1.4;}
+.next-act .meta{margin-top:7px;font-size:11.5px;color:var(--dim);line-height:1.55;}
+.skgrid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));margin:4px 0 6px;}
+.skcard{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line2);border-radius:10px;padding:12px 13px;transition:.14s;border-left:3px solid #2bd4ff;}
+.skcard:hover{transform:translateY(-2px);border-color:rgba(43,212,255,.45);box-shadow:0 0 16px -7px var(--accent);}
+.skcard.req{border-left-color:var(--warn);}
+.skcard .skh{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;}
+.skcard .skn{font-weight:700;color:var(--txt);font-size:12px;font-family:var(--mono);word-break:break-word;line-height:1.3;}
+.skcard .skd{color:var(--dim);font-size:11px;line-height:1.5;}
+.layer-h{display:flex;align-items:center;gap:10px;margin:22px 0 8px;font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:var(--dim);font-weight:800;}
+.layer-h::after{content:"";flex:1;height:1px;background:var(--line2);}
+.layer-h .n{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:5px;background:var(--accent-dim);color:var(--accent);font-size:11px;border:1px solid rgba(43,212,255,.4);}
+details.audit{margin-top:2px;border:1px solid var(--line2);border-radius:10px;overflow:hidden;}
+details.audit>summary{cursor:pointer;padding:12px 15px;background:var(--card2);color:var(--txt);font-weight:700;font-size:13px;list-style:none;display:flex;align-items:center;gap:9px;}
+details.audit>summary::-webkit-details-marker{display:none;}
+details.audit>summary::before{content:"▸";color:var(--accent);transition:.15s;display:inline-block;}
+details.audit[open]>summary::before{transform:rotate(90deg);}
+details.audit>summary:hover{background:var(--card);}
+details.audit .audit-body{padding:6px 16px 16px;}
+</style></head><body>
+<header>
+<h1><span class="logo">◉</span> SketchUp Creator <span class="sub">NOC</span></h1>
+<span id="status" class="badge off">...</span>
+<div class="hstat">
+<span class="seg"><span class="clock" id="hclock">--:--:--</span></span>
+<span class="seg opt">UPTIME&nbsp;<b id="huptime">—</b></span>
+<span class="seg opt">ORACLE&nbsp;<b id="horacle">—</b></span>
+<span class="seg opt" id="hllm">🤖 —</span>
+</div>
+<nav>
+<a href="#home">Home</a><a href="#sessoes">Sessões</a><a href="#gate">Gate</a><a href="#review-skp">Review SKP</a><a href="#repo">Repo</a><a href="#backlog">Backlog</a><a href="#artifacts">Artifacts</a><a href="#llms">🤖 IAs locais</a><a href="#arquivos">📂 Arquivos</a><a href="#cerebro">🧠 Cérebro</a><a href="#docs">Docs</a>
+</nav>
+</header>
+<main>
+
+<section id="home">
+<div id="status-banner" class="hero red">carregando placar do projeto...</div>
+<div id="kpi" class="kpi-row"></div>
+<div class="card full" id="activity-card"><h2>📡 Liveness &amp; atividade — vivo, ocioso, ou lendo fonte velha?</h2><div id="activity" class="muted">checando atividade...</div></div>
+
+<div class="grp">🚨 Precisa de você</div>
+<div class="wrap">
+<div class="card full" id="attn-card"><h2>Atenção agora</h2><div id="attn" class="muted">checando pendências...</div></div>
+<div class="card"><h2>⚡ Ações corretivas</h2><div id="actions" class="muted">carregando ações...</div></div>
+<div class="card"><h2>🎯 Próxima melhor ação (ROI)</h2><div id="nba" class="muted">carregando...</div></div>
+</div>
+
+<div class="grp">📈 Pulso</div>
+<div class="wrap">
+<div class="card"><h2>Disponibilidade do gate</h2><div id="timeline" class="timeline"></div><div class="muted" style="margin-top:8px">verde=online · vermelho=offline · 5s</div></div>
+<div class="card"><h2>Tendências (janela ~3min)</h2><div id="sparklines"><span class="muted">acumulando amostras...</span></div></div>
+<div class="card full"><h2>Pipeline PDF → SKP</h2>
+<div class="pipe slim">
+<div class="stg pdf">PDF<small>planta</small></div><div class="arr">→</div>
+<div class="stg human">anotação<small>HUMANO</small></div><div class="arr">→</div>
+<div class="stg auto">consensus.json<small>walls/openings/rooms</small></div><div class="arr">→</div>
+<div class="stg auto">build_shell<small>.py shapely</small></div><div class="arr">→</div>
+<div class="stg auto">.skp + renders<small>.rb SketchUp</small></div><div class="arr">→</div>
+<div class="stg gate">gates det.<small>opening_host/overlay</small></div><div class="arr">→</div>
+<div class="stg human">VISUAL_REVIEW<small>HUMANO vs PDF</small></div><div class="arr">→</div>
+<div class="stg ok">artifacts/<small>deliverable</small></div>
+</div>
+<div class="muted" style="margin-top:8px">Oráculo :8765 (modo B, Opus 4.8) decide as bifurcações técnicas. Só o VISUAL_REVIEW sobe pro humano.</div></div>
+</div>
+</section>
+
+<section id="sessoes">
+<div id="sess-alarm" class="alarm ok">checando...</div>
+<div class="card full" id="proc-cost-card"><h2>💸 Custo real agora — está gastando dinheiro?</h2><div id="proc-cost" class="muted">checando processos vivos...</div></div>
+<div class="card full"><h2>Sessões Claude Code (estão paradas? esperando o gate?)</h2>
+<div id="sess-wrap"><span class="muted">lendo ~/.claude/projects...</span></div></div>
+</section>
+
+<section id="gate">
+<div id="gate-alarm" class="alarm ok">carregando ledger...</div>
+<div class="card full" id="gate-source-card"><h2>Fonte do Gate &amp; consultas REAIS recentes (audit.jsonl)</h2><div id="gate-source" class="muted">checando fonte...</div><div id="gate-recent" style="margin-top:10px"></div></div>
+<div class="card full"><h2>Ledger legacy (questions/responses .md) — histórico, pode estar stale</h2>
+<div id="gate-stats" class="muted" style="margin-bottom:12px"></div>
+<table><thead><tr><th>quando</th><th>trigger</th><th>respondido?</th><th>veredito</th><th>latência</th></tr></thead><tbody id="gate-rows"></tbody></table></div>
+</section>
+
+<section id="git">
+<div class="card full"><h2>Git Inventory — repos &amp; worktrees em E:\Claude (read-only)</h2>
+<div id="git-summary" class="muted" style="margin-bottom:12px"></div>
+<table><thead><tr><th>path</th><th>tipo</th><th>branch</th><th>HEAD</th><th>estado</th><th>untracked/chg</th><th>último commit</th></tr></thead><tbody id="git-rows"></tbody></table></div>
+<div class="card full"><h2>Últimos commits em develop</h2><div id="commits" class="feed"></div></div>
+<div class="card full"><h2>Sistema (E:\Claude + Git)</h2><div id="sys-summary" class="muted">carregando...</div></div>
+</section>
+
+<section id="planta">
+<div class="card full"><h2>SKP canônico atual — vistas pra análise</h2>
+<div id="skp-canonical-verdict" class="muted" style="margin-bottom:10px"></div>
+<div id="plant-gallery" class="gallery"></div></div>
+<div class="card full"><h2>Timeline dos ciclos (before/after + veredito)</h2>
+<div id="skp-timeline-wrap"></div></div>
+</section>
+
+<section id="dificuldades">
+<div id="alarm" class="alarm ok">checando patinagem...</div>
+<div class="wrap">
+<div class="card full"><h2>Backlog de dificuldades (vivo) — por que ainda não foi tratado</h2>
+<div id="diff-backlog" class="muted">carregando...</div>
+<div class="muted" style="margin-top:10px">Como o MCP usa o gate pra continuar: roteia decisões reais (9 triggers) pro <code>:8765</code> em modo B; se uma sessão fica <b>PARALYZED</b> (cycle congelado) ou há consult sem resposta, o alarme dispara — aí use o Q&A.</div></div>
+<div class="card full"><h2>Q&A — pergunta direto pro gate (Opus 4.8)</h2>
+<textarea id="qa-q" placeholder="Ex.: 'A sessão está patinando no opening_host da planta_74, opção A/B/C?'"></textarea>
+<label class="muted"><input type="checkbox" id="qa-rt"> red-team (o oráculo argumenta CONTRA antes de decidir)</label><br>
+<button onclick="askGate()">perguntar ao gate</button>
+<div id="qa-resp" class="qa-resp muted">a resposta do oráculo aparece aqui (pode levar até ~1min com Opus+xhigh)</div></div>
+</div>
+</section>
+
+<section id="aprendizados">
+<div class="card full"><h2>Aprendizados / Failure Patterns — memória operacional anti-burrice</h2>
+<div id="learn-wrap" class="muted">carregando...</div></div>
+</section>
+
+<section id="lixao">
+<div class="card full"><h2>🗑️ Lixão — inventário de .skp (governança: usado vs lixo)</h2>
+<div id="lixao-summary" class="muted">escaneando o repo por .skp...</div>
+<div id="lixao-cats"></div></div>
+</section>
+
+<section id="oportunidades">
+<div class="card full"><h2>Oportunidades & melhorias</h2>
+<ul class="opp">
+<li><b>Extrator vetorial PDF→consensus</b> (walls = filled paths) — destrava generalização; só DEPOIS de ≥2 plantas no loop manual. <span class="tag">produto</span></li>
+<li><b>2ª planta real como forcing function</b> — prova a generalização com planta nova, não com abstração. <span class="tag">produto</span></li>
+<li><b>Swap-in das constantes do builder</b> — executar o blueprint quando a árvore esfriar. <span class="tag">generalização</span></li>
+<li><b>Worktree-locking</b> — fix-raiz da colisão multi-agent (chip aberto); o orquestrador só detecta. <span class="tag">infra</span></li>
+<li><b>Tier do oráculo</b> — Opus+xhigh pras pesadas, Sonnet pra rotina (via multi-oracle). <span class="tag">gate</span></li>
+<li><b>Watchdog do gate</b> — auto-restart se /health cair (hoje: hook de login + LIGAR-BRIDGE). <span class="tag">infra</span></li>
+<li><b>Consolidar serving pro repo canônico</b> — sair do worktree wt-dash; aí o Lixão vê o runs/ scratch real. <span class="tag">infra</span></li>
+<li><b>RAG indexado</b> — o file-fetch §6.3 é "RAG-bebê"; indexar depois do pipeline generalizado. <span class="tag">enhancement</span></li>
+</ul></div>
+</section>
+
+<section id="llms">
+<div class="card full"><h2>🤖 IAs locais (Ollama) — acionamentos &amp; papéis</h2>
+<div id="llms-summary" class="muted" style="margin-bottom:12px">carregando uso dos modelos...</div>
+<table><thead><tr><th>modelo</th><th>papel (pra quê)</th><th>status</th><th>acionamentos</th><th>último uso</th><th>médio</th><th style="text-align:right">tam.</th></tr></thead><tbody id="llms-rows"></tbody></table>
+<div class="muted" style="margin-top:10px">Acionamentos reconstruídos do log do Ollama (<code>server*.log</code>): cada <code>POST /api/generate|chat</code> pareado com o modelo carregado no momento. O Ollama não expõe contador por modelo via API — a janela é o que os logs rotacionados guardam. <b>0 acionamentos</b> = sem registro nessa janela (provavelmente ocioso).</div>
+</div>
+</section>
+
+<section id="arquivos">
+<div class="card full"><h2>📂 Arquivos do projeto — o que foi mexido nos últimos processamentos</h2>
+<div id="files-summary" class="muted" style="margin-bottom:12px">escaneando .py/.md...</div>
+<table><thead><tr><th>arquivo</th><th>tipo</th><th>atualizado</th><th>o que faz (do próprio arquivo)</th></tr></thead><tbody id="files-rows"></tbody></table>
+<div class="muted" style="margin-top:10px">Descrição = docstring do módulo (.py) ou 1º heading (.md), extraída do arquivo — não inventada. "Atualizado" = mtime (proxy de uso recente), não rastreamento de execução.</div>
+</div>
+</section>
+
+<section id="cerebro">
+<div class="card full"><h2>🧠 Cérebro do Claude — mapa mental + estado vivo + próxima ação</h2>
+
+<div class="layer-h"><span class="n">1</span> Estado operacional — o que está vivo agora</div>
+<div id="brain-live" class="muted">lendo estado vivo...</div>
+<div id="brain-next"></div>
+
+<div class="layer-h"><span class="n">2</span> Fluxo de execução cognitiva
+<button class="cog-replay" style="margin-left:auto" onclick="replayCog()">▶ tocar de novo</button></div>
+<div class="claude-flow"><div class="claude-flow-track" id="cog-flow">
+<div class="claude-flow-step entry-green"><span class="ic">🟢</span><b>Sessão inicia</b><small>Você abre o Claude dentro do repo.</small></div>
+<div class="flow-arrow">→</div>
+<div class="claude-flow-step entry"><span class="ic">📖</span><b>CLAUDE.md</b><small>Missão, Hard Rules e ordem de carga. Entry point da sessão.</small><span class="step-badge">ENTRY POINT</span></div>
+<div class="flow-arrow">→</div>
+<div class="claude-flow-step critical"><span class="ic">⚖️</span><b>Constitution #1..#8</b><small>Vence conflitos. Quebrar regra vira RED.</small><span class="step-badge bad">REGRA MÁXIMA</span></div>
+<div class="flow-arrow">→</div>
+<div class="claude-flow-step memory"><span class="ic">🧠</span><b>Memory</b><small>Estado vivo: GREEN/YELLOW/RED, git, artifacts, lições e regras.</small></div>
+<div class="flow-arrow">→</div>
+<div class="claude-flow-step spec"><span class="ic">📐</span><b>Specs</b><small>Product goal, fidelity gate e proof-of-progress.</small></div>
+<div class="flow-arrow">→</div>
+<div class="claude-flow-step skill"><span class="ic">🛠️</span><b>Skills</b><small>Capacidades auto-descobertas, acionadas pelo gatilho da task.</small></div>
+<div class="flow-arrow">→</div>
+<div class="claude-flow-step task"><span class="ic">🎯</span><b>Task</b><small>Ex.: "corrige a fidelidade da planta_74".</small></div>
+<div class="flow-arrow">→</div>
+<div class="claude-flow-step exec"><span class="ic">⚙️</span><b>Execução</b><small>Build .skp, gates determinísticos, Gate :8765 e <span class="human">Visual Review</span>.</small></div>
+<div class="flow-arrow">→</div>
+<div class="claude-flow-step output"><span class="ic">📦</span><b>Artifact final</b><small>.skp fiel, versionado em artifacts/&lt;plant&gt;/.</small><span class="step-badge ok">OUTPUT</span></div>
+</div></div>
+
+<div class="layer-h"><span class="n">+</span> Capacidades (skills) — gatilho → saída</div>
+<div id="brain-skills" class="muted">listando skills...</div>
+
+<div class="layer-h"><span class="n">3</span> Arquitetura completa (auditoria)</div>
+<details class="audit"><summary>📖 Documento completo — CLAUDE_COGNITIVE_ARCHITECTURE.md <span id="cerebro-head-inline" class="muted" style="font-weight:400;font-size:11px;margin-left:auto"></span></summary>
+<div class="audit-body">
+<div id="cerebro-head" class="muted" style="margin:6px 0 12px">carregando...</div>
+<div id="cerebro-body" class="muted">renderizando...</div>
+</div></details>
+</div>
+</section>
+
+<section id="docs">
+<div class="card full"><h2>Arquitetura do ecossistema</h2>
+<pre class="diagram">  SESSOES CLAUDE (loops autonomos / chat)
+        | POST /ask {prompt,mode}        | POST /heartbeat {session_id,cycle}
+        v                                v
+  +--------------------------------------------------------------+
+  |  GATE  :8765   (oraculo de decisao, MODO B)                  |
+  |  motor: claude -p  Opus 4.8 + effort xhigh  (na assinatura)  |
+  |  rotas: /(painel) /health /sessions /events /api/* /artifact |
+  +------------------+-----------------------------+-------------+
+       decide A/B/C  |                             | append
+                     v                             v
+        bifurcacoes tecnicas        .ai_bridge/audit/audit.jsonl (audit-core)
+                     |
+                     v
+  PDF --(HUMANO)--> consensus.json --> build_shell(.py/.rb) --> .skp + renders
+                                                                     |
+              gates DETERMINISTICOS (ground truth)                   v
+              opening_host . wall_overlap . overlay_diff(vs PDF) . self-check
+                                                                     | PASS
+                                                                     v
+                          VISUAL_REVIEW (humano/GPT-Chrome)  -->  artifacts/&lt;plant&gt;/
+</pre>
+<div class="muted">Ground truth = os gates DETERMINISTICOS, não um 2º LLM. Gates humanos: VISUAL_REVIEW + autoria do consensus de planta nova.</div></div>
+<div class="card full"><h2>Diretório .claude/ — o cérebro do projeto (clique pra expandir)</h2>
+<div class="docs">
+<details><summary>raiz</summary>
+<div class="d"><code>CLAUDE.md</code>bootloader: missão, Hard Rules, ordem de carregamento</div>
+<div class="d"><code>constitution.md</code>princípios não-negociáveis (#1 o .skp é o artefato; #8 no-skp-no-progress)</div>
+<div class="d"><code>README.md</code>orientação/índice do diretório</div>
+</details>
+<details><summary>memory/ — memória persistente (estado + regras vivas)</summary>
+<div class="d"><code>project_context.md</code>o que é o projeto e onde está</div>
+<div class="d"><code>current_state.md</code>estado atual (feito / em andamento)</div>
+<div class="d"><code>operational_rules.md</code>loop GREEN/YELLOW/RED e quando parar</div>
+<div class="d"><code>git_workflow.md</code>develop-first; disciplina de branch/commit/PR</div>
+<div class="d"><code>multi_agent_coordination.md</code>coordenação entre sessões/worktrees (não clobberar)</div>
+<div class="d"><code>artifact_policy.md</code>hierarquia runs/ vs artifacts/ vs fixtures/ + promotion</div>
+<div class="d"><code>lessons_learned.md</code>lições LL-NNN acumuladas (releia antes de repetir)</div>
+<div class="d"><code>deprecated_context.md</code>o que ficou obsoleto (não seguir)</div>
+</details>
+<details><summary>specs/ — especificações (o "como deve ser")</summary>
+<div class="d"><code>product_goal.md</code>o objetivo: .skp fiel ao PDF</div>
+<div class="d"><code>fidelity_gate.md</code>o que conta como fiel (campos do geometry_report)</div>
+<div class="d"><code>skp_artifact_layout.md</code>paths/naming/metadata do .skp canônico</div>
+<div class="d"><code>skp_proof_of_progress_gate.md</code>Constitution #8: sem SKP+evidência, não é progresso</div>
+<div class="d"><code>gate_framework_and_audit.md</code>o gate de decisão §6 (oráculo/redteam/file-fetch/confidence/audit)</div>
+<div class="d"><code>generalize_builder_constants.md</code>blueprint pra generalizar as constantes do builder</div>
+<div class="d"><code>perfect_reference_strategy.md</code>PDF como ground truth</div>
+<div class="d"><code>sdd_and_harness_engineering.md</code>spec-driven dev + engenharia do harness</div>
+<div class="d"><code>repository_hygiene.md</code>higiene do repo (arquivar obsoletos)</div>
+<div class="d"><code>templates/</code>4 templates: artifact_contract, feature_spec, fidelity_spec, regression_summary</div>
+</details>
+<details><summary>skills/ — 10 capacidades auto-descobertas (cada uma um SKILL.md)</summary>
+<div class="d"><code>pdf-to-skp-pipeline</code>build do .skp a partir do consensus</div>
+<div class="d"><code>fidelity-review</code>checklist SKP vs PDF (humano)</div>
+<div class="d"><code>generate-and-compare-skp-after-change</code>gera SKP + compara before/after</div>
+<div class="d"><code>skp-visual-self-correction</code>Visual Oracle Gate: floating door / orphan glass / etc</div>
+<div class="d"><code>skp-artifact-management</code>promoção runs/ → artifacts/</div>
+<div class="d"><code>gpt-auto-consult-gate</code>consulta o oráculo :8765 nas decisões reais (9 triggers)</div>
+<div class="d"><code>gh-autopilot</code>commit → PR → merge → cleanup via gh</div>
+<div class="d"><code>repo-governance</code>PR/branch/merge/hygiene</div>
+<div class="d"><code>multi-agent-handoff</code>coordenação multi-agent/worktrees</div>
+<div class="d"><code>autonomous-fidelity-loop</code>loop contínuo de fidelidade (log por ciclo + heartbeat)</div>
+</details>
+<details><summary>evals/ · plans/ · docs/ · scratch/</summary>
+<div class="d"><code>evals/</code>eval_strategy · fidelity_rubric · regression_matrix</div>
+<div class="d"><code>plans/</code>active_work · next_actions · roadmap · stopped_work</div>
+<div class="d"><code>docs/</code>index · retro 2026-05-31 · adr/0001 (esta arquitetura) · audits/ (3)</div>
+<div class="d"><code>scratch/</code>local-only (gitignored)</div>
+</details>
+</div></div>
+</section>
+
+<section id="ecossistema">
+<div class="card full"><h2>E:\Claude — o ecossistema na máquina</h2>
+<div id="eco-wrap"><span class="muted">listando E:\Claude...</span></div>
+<div class="muted" style="margin-top:14px">Relacionados (fora de E:\Claude): <code>~/.claude/projects/</code> = transcripts de todas as sessões Claude Code (ver aba Sessões) · <code>E:\chatgpt-bridge</code> = bridge alternativo do ChatGPT desktop (drive-by UIAutomation, mesma porta :8765).</div></div>
+</section>
+
+</main>
+<script>
+const hist=[];
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+function fmtAge(s){if(s==null)return '-';if(s<90)return s+'s';if(s<5400)return Math.round(s/60)+'m';if(s<86400)return Math.round(s/3600)+'h';return Math.round(s/86400)+'d';}
+function fmtTime(t){try{return new Date(t*1000).toLocaleTimeString('pt-br');}catch(e){return '';}}
+function kv(k,v){return '<div class="kv"><span>'+k+'</span><span>'+esc(v)+'</span></div>';}
+// ---- v3 NOC: estado compartilhado + sparklines (vanilla, sem lib) ----
+let _health=null,_llm=null,_sessFlags={paralyzed:[],stalled:[]};
+const SPARKMAX=40; // ~3min @ 5s
+const series={sessActive:[],gateRate:[],llmOn:[]};
+function pushSeries(name,val){var a=series[name];if(!a)return;a.push(Number(val)||0);if(a.length>SPARKMAX)a.shift();}
+function sparkline(arr,color){
+  var w=130,h=26,c=color||'#2bd4ff';
+  if(!arr||arr.length<2)return '<svg width="'+w+'" height="'+h+'"></svg>';
+  var max=Math.max.apply(null,arr.concat([1])),min=Math.min.apply(null,arr.concat([0])),rng=(max-min)||1,n=arr.length;
+  var pts=arr.map(function(v,i){var x=(i*(w-2)/(n-1))+1,y=h-1-((v-min)/rng)*(h-3);return x.toFixed(1)+','+y.toFixed(1);}).join(' ');
+  return '<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none"><polyline fill="none" stroke="'+c+'" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" points="'+pts+'"/></svg>';
+}
+function renderSparks(){
+  var el=$('sparklines'); if(!el)return;
+  var rows=[['sessões ativas',series.sessActive,'#27e08a'],['consults/janela',series.gateRate,'#2bd4ff'],['LLMs on',series.llmOn,'#ffb02e']];
+  el.innerHTML=rows.map(function(r){var a=r[1],last=a.length?a[a.length-1]:0;return '<div class="spark"><span class="sl">'+r[0]+'</span>'+sparkline(a,r[2])+'<span class="sv">'+last+'</span></div>';}).join('');
+}
+function tile(h,cls,val,label,sub){return '<div class="kpi link '+cls+'" data-hash="'+h+'"><div class="kpi-n">'+esc(val)+'</div><div class="kpi-l">'+label+'</div>'+(sub?'<div class="kpi-sub">'+esc(sub)+'</div>':'')+'</div>';}
+// 2A — consolidacao das 8 abas (nav). NAO move/apaga conteudo: cada aba nova mapeia
+// p/ as secoes existentes que ela mostra; hashes antigos continuam validos via HASHALIAS.
+const TABS=['home','sessoes','gate','review-skp','repo','backlog','artifacts','llms','arquivos','cerebro','docs'];
+const TABMAP={home:['home'],sessoes:['sessoes'],gate:['gate'],'review-skp':['planta'],repo:['git','ecossistema'],backlog:['dificuldades','oportunidades','aprendizados'],artifacts:['lixao'],llms:['llms'],arquivos:['arquivos'],cerebro:['cerebro'],docs:['docs']};
+const HASHALIAS={planta:'review-skp',git:'repo',ecossistema:'repo',dificuldades:'backlog',oportunidades:'backlog',aprendizados:'backlog',lixao:'artifacts'};
+const ALLSEC=['home','sessoes','gate','planta','git','ecossistema','dificuldades','oportunidades','aprendizados','lixao','llms','arquivos','cerebro','docs'];
+function route(){
+  let raw=(location.hash||'#home').slice(1);
+  let h=HASHALIAS[raw]||raw; if(!TABMAP[h])h='home';
+  const show=TABMAP[h];
+  ALLSEC.forEach(function(id){var s=$(id); if(s)s.className=(show.indexOf(id)>=0?'active':'');});
+  document.querySelectorAll('nav a').forEach(function(a){a.className=(a.getAttribute('href')==='#'+h?'active':'');});
+  if(show.indexOf('home')>=0){loadStatus();loadActions();loadLocalAI();loadActivity();}
+  if(show.indexOf('sessoes')>=0)loadSessoes();
+  if(show.indexOf('gate')>=0)loadGate();
+  if(show.indexOf('git')>=0){loadGit();loadCommits();loadSysSummary();}
+  if(show.indexOf('ecossistema')>=0)loadEco();
+  if(show.indexOf('planta')>=0)loadPlant();
+  if(show.indexOf('lixao')>=0)loadLixao();
+  if(show.indexOf('dificuldades')>=0)loadDiff();
+  if(show.indexOf('aprendizados')>=0)loadLearnings();
+  if(show.indexOf('llms')>=0)loadLLMs();
+  if(show.indexOf('arquivos')>=0)loadFiles();
+  if(show.indexOf('cerebro')>=0)loadCerebro();
+}
+window.addEventListener('hashchange',route);
+async function pollHome(){
+  let online=false,health=null;
+  try{const r=await fetch('/health',{cache:'no-store'});health=await r.json();online=r.ok;}catch(e){}
+  _health=health;
+  const b=$('status'); if(b){b.className='badge '+(online?'on':'off'); b.textContent=online?'ONLINE':'OFFLINE';}
+  hist.push(online); if(hist.length>60)hist.shift();
+  if($('timeline'))$('timeline').innerHTML=hist.map(function(u){return '<div class="dot '+(u?'up':'down')+'"></div>';}).join('');
+  if(health){var _hu=$('huptime');if(_hu)_hu.textContent=fmtAge(health.uptime_sec);var _ho=$('horacle');if(_ho)_ho.textContent=(health.model||health.oracle||'-');}
+  if(!online){renderSparks();return;}
+  try{const s=await (await fetch('/sessions',{cache:'no-store'})).json();
+    var vals=Object.keys(s).map(function(k){return s[k];});
+    _sessFlags={paralyzed:[],stalled:[]};
+    vals.forEach(function(v){var f=v.flags||[];if(f.indexOf('PARALYZED')>=0)_sessFlags.paralyzed.push(v);else if(f.indexOf('STALLED')>=0)_sessFlags.stalled.push(v);});
+    pushSeries('sessActive',vals.filter(function(v){return (v.flags||[]).indexOf('OK')>=0;}).length);
+  }catch(e){}
+  try{const ev=await (await fetch('/events',{cache:'no-store'})).json();
+    pushSeries('gateRate',(ev||[]).filter(function(e){return e.kind==='consult';}).length);
+  }catch(e){}
+  renderSparks();
+}
+async function loadStatus(){
+  var s=null,ledger=null;
+  try{s=await (await fetch('/api/status',{cache:'no-store'})).json();}catch(e){if($('status-banner'))$('status-banner').textContent='placar indisponível';return;}
+  try{ledger=await (await fetch('/api/gate-ledger',{cache:'no-store'})).json();}catch(e){}
+  var stopped=s.sessions.stopped||0,dirty=(s.dirty_repos||[]).length,high=(s.high_open||[]).length,pend=s.pending_gate||0;
+  var visEntries=((ledger&&ledger.entries)||[]).filter(function(e){return e.verdict==='VISUAL_REVIEW';});
+  var canon=s.canonical_skp||{};
+  var canonNoVerdict=Object.keys(canon).filter(function(k){return canon[k]&&canon[k].has_skp&&!canon[k].verdict;});
+  var visBad=visEntries.length>0,visWarn=!visBad&&canonNoVerdict.length>0,visN=visEntries.length||canonNoVerdict.length;
+  var b=$('status-banner');
+  if(b){b.className='hero '+String(s.score).toLowerCase();
+    b.innerHTML='<div class="hero-score"><span class="hero-dot"></span>'+esc(s.score)+'</div><div class="hero-body"><div class="hero-reason">'+esc(s.reason)+'</div></div><div class="hero-aside"><div class="hero-upd">ATUALIZADO <b>'+new Date().toLocaleTimeString('pt-br')+'</b></div></div>';}
+  var k=$('kpi');
+  if(k){
+    var sessCls=_sessFlags.paralyzed.length?'bad':(stopped>0?'warn':'ok');
+    var gateCls=pend===0?'ok':(pend<=2?'warn':'bad');
+    var visCls=visBad?'bad':(visWarn?'warn':'ok');
+    var highCls=high===0?'ok':(high>=2?'bad':'warn');
+    var llmCls=!_llm?'dim':(!_llm.up?'bad':((_llm.running||[]).length?'ok':'warn'));
+    k.innerHTML=[
+      tile('#backlog',s.score==='GREEN'?'ok':(s.score==='YELLOW'?'warn':'bad'),s.score,'PROJETO',''),
+      tile('#sessoes',sessCls,s.sessions.total,'SESSÕES',stopped+' paradas'+(_sessFlags.paralyzed.length?' · '+_sessFlags.paralyzed.length+' travada(s)':'')),
+      tile('#gate',gateCls,pend,'FILA GATE',pend?'sem resposta':'respondido'),
+      tile('#review-skp',visCls,visN,'VISUAL REVIEW',visN?'precisa do seu olho':'nada pendente'),
+      tile('#repo',dirty?'warn':'ok',dirty,'DIRTY REPOS',dirty?'sujo(s)':'limpos'),
+      tile('#backlog',highCls,high,'DIFIC. HIGH',(s.open_difficulties||0)+' OPEN'),
+      tile('#docs',_health?'ok':'dim',_health?'UP':'DOWN','ORÁCULO',_health?(_health.model||''):'gate off'),
+      tile('#llms',llmCls,_llm?((_llm.running||[]).length+'/'+(_llm.count||0)):'—','LLMs ON',(_llm&&!_llm.up)?'ollama off':'em memória')
+    ].join('');
+  }
+  var att=$('attn'),attCard=$('attn-card');
+  if(att){
+    var items=[];
+    if(visEntries.length)items.push(['bad','#review-skp','VISUAL_REVIEW pendente — SKP mudou, precisa do seu olho vs PDF']);
+    if(canonNoVerdict.length)items.push(['warn','#review-skp',canonNoVerdict.length+' SKP canônico sem veredito — revisar']);
+    if(pend>0)items.push(['bad','#gate',pend+' consult(s) ao gate sem resposta']);
+    _sessFlags.paralyzed.forEach(function(v){items.push(['bad','#sessoes','sessão PARALYZED (travada): '+((v&&v.last_action)?esc(v.last_action):'cycle congelado')]);});
+    if(_sessFlags.stalled.length)items.push(['warn','#sessoes',_sessFlags.stalled.length+' sessão(ões) STALLED (patinando)']);
+    if(high>0)items.push(['bad','#backlog',high+' dificuldade(s) HIGH aberta(s)']);
+    if(items.length){
+      if(attCard)attCard.className='card full';
+      att.innerHTML='<ul class="attn">'+items.map(function(it){return '<li data-hash="'+it[1]+'"><span class="sev '+it[0]+'"></span><span>'+it[2]+'</span><span class="go">abrir ↗</span></li>';}).join('')+'</ul>';
+    }else{
+      att.innerHTML='<div class="alarm ok" style="margin:0">tudo verde — nada pendente, nenhuma ação humana necessária</div>';
+    }
+  }
+  try{const n=await (await fetch('/api/next-best-actions')).json();var A=(n.actions||[]);
+    if($('nba'))$('nba').innerHTML=A.slice(0,1).map(function(a){return '<div><div style="display:flex;justify-content:space-between;gap:10px"><b>'+esc(a.titulo)+'</b><span style="color:var(--accent);white-space:nowrap">ROI '+a.roi+'</span></div><div class="muted" style="margin-top:4px">→ '+esc(a.proxima_acao)+'</div></div>';}).join('')||'<span class="muted">sem ação pendente</span>';
+  }catch(e){}
+}
+async function loadActions(){
+  var box=$('actions'); if(!box) return;
+  try{
+    const d=await (await fetch('/api/actions',{cache:'no-store'})).json();
+    box.innerHTML=(d.actions||[]).map(function(a){
+      var btn;
+      if(a.kind==='auto'){
+        btn=a.runnable?'<button class="act-btn go" onclick="runProcessConsults(this)">Corrigir agora</button>':'<button class="act-btn" disabled>nada pendente</button>';
+      }else if(a.kind==='diagnose'){
+        btn=a.runnable?'<button class="act-btn" onclick="runDirtyDetail(this)">Ver detalhe</button>':'<button class="act-btn" disabled>nada dirty</button>';
+      }else{
+        btn='<button class="act-btn" onclick="location.hash=\'#dificuldades\'">Abrir trilha</button>';
+      }
+      return '<div class="act-row"><div style="min-width:0"><b>'+esc(a.label)+'</b><div class="muted">'+esc(a.detail)+'</div></div>'+btn+'</div><div class="act-out" id="out-'+esc(a.key)+'"></div>';
+    }).join('')||'<span class="muted">sem ações</span>';
+  }catch(e){box.textContent='ações indisponíveis';}
+}
+async function runProcessConsults(btn){
+  var out=$('out-process-consults'); btn.disabled=true; btn.textContent='processando...';
+  if(out)out.innerHTML='<span class="muted">mandando pro gate (Opus 4.8 xhigh — pode levar ~1min por consult)...</span>';
+  try{
+    const start=await (await fetch('/api/actions/process-consults',{method:'POST'})).json();
+    var total=start.total||start.started||0;
+    if(!total){if(out)out.innerHTML='<span class="muted">nada pendente</span>';btn.textContent='nada pendente';return;}
+    var poll=setInterval(async function(){
+      try{
+        const st=await (await fetch('/api/actions/process-consults',{cache:'no-store'})).json();
+        if(out)out.innerHTML='<b>'+(st.done||0)+'/'+(st.total||total)+'</b> processados · pendentes agora: '+st.pending_now+(st.results||[]).map(function(r){return '<div class="muted">• '+esc(r.id)+' → '+(r.error?('ERRO '+esc(r.error)):('verdict '+esc(r.verdict||'(sem verdict)')))+' ('+r.dur_sec+'s)</div>';}).join('');
+        if(!st.running){clearInterval(poll);btn.textContent='✓ feito';loadStatus();}
+      }catch(e){}
+    },2500);
+  }catch(e){if(out)out.innerHTML='<span style="color:var(--bad)">falhou: '+esc(String(e))+'</span>';btn.disabled=false;btn.textContent='Corrigir agora';}
+}
+async function runDirtyDetail(btn){
+  var out=$('out-dirty-detail'); btn.disabled=true; btn.textContent='lendo...';
+  try{
+    const d=await (await fetch('/api/actions/dirty-detail',{cache:'no-store'})).json();
+    if(out)out.innerHTML=(d.dirty||[]).map(function(r){
+      var col=r.kind==='review'?'var(--bad)':r.kind==='guarded'?'var(--warn)':'var(--ok)';
+      return '<div style="padding:6px 0;border-top:1px solid #21262d"><b>'+esc(r.repo)+'</b> <span class="muted">('+esc(r.branch||'')+')</span> — runtime '+r.runtime+' · real '+r.real+'<div style="color:'+col+';font-weight:700;margin:4px 0">'+esc(r.recommendation)+'</div><pre style="white-space:pre-wrap;font-size:11px;color:var(--dim);margin:0">'+esc((r.sample||[]).join('\n'))+'</pre></div>';
+    }).join('')||'<span class="muted">nada dirty</span>';
+  }catch(e){if(out)out.innerHTML='<span style="color:var(--bad)">falhou</span>';}
+  btn.disabled=false;btn.textContent='Ver detalhe';
+}
+async function loadCommits(){
+  try{const d=await (await fetch('/api/recent-commits')).json();
+    if($('commits'))$('commits').innerHTML=(d.commits||[]).map(function(c){return '<div class="ev"><span class="t">'+esc(c.slice(0,7))+'</span><span>'+esc(c.slice(8))+'</span></div>';}).join('')||'<div class="muted">sem commits</div>';
+  }catch(e){}
+}
+async function loadProcCost(){
+  var box=$('proc-cost'); if(!box)return;
+  try{
+    const d=await (await fetch('/api/processes',{cache:'no-store'})).json();
+    var cli=(d.cli_sessions||[]);
+    box.innerHTML='<div style="font-weight:700;color:var(--ok);margin-bottom:6px">✅ '+esc(d.verdict)+'</div>'
+      +'<div class="muted" style="margin-bottom:10px">'+esc(d.nota)+'</div>'
+      +'<table><thead><tr><th>tipo</th><th>processos</th><th>RAM</th><th>CPU total</th><th>custo</th></tr></thead><tbody>'
+      +'<tr><td>app Desktop (Electron)</td><td>'+d.desktop_app.processes+'</td><td>'+d.desktop_app.ram_mb+' MB</td><td>—</td><td style="color:var(--ok)">R$0 (só RAM)</td></tr>'
+      +cli.map(function(s){return '<tr><td>sessão CLI <span class="muted">(effort '+esc(s.effort)+')</span></td><td>pid '+s.pid+'</td><td>'+s.ram_mb+' MB</td><td>'+s.cpu_sec+'s</td><td style="color:var(--ok)">R$0 enquanto idle</td></tr>';}).join('')
+      +'</tbody></table>';
+  }catch(e){box.textContent='processos indisponíveis';}
+}
+async function loadSessoes(){
+  loadProcCost();
+  var w=$('sess-wrap'),al=$('sess-alarm'); w.innerHTML='<span class="muted">lendo ~/.claude/projects...</span>';
+  try{const d=await (await fetch('/api/claude-sessions')).json();
+    if((d.pending_gate||[]).length){al.className='alarm bad';al.innerHTML='🚨 '+d.pending_gate.length+' consult(s) ESPERANDO o gate (pergunta sem resposta gravada): '+d.pending_gate.map(function(p){return esc(p.q)+' ('+fmtAge(p.age_sec)+')';}).join(' · ');}
+    else{al.className='alarm ok';al.textContent='✅ Nenhum consult pendente — toda pergunta ao gate tem resposta gravada.';}
+    var rows=(d.sessions||[]).map(function(s){return '<tr><td><span class="flag '+s.state+'">'+s.state+'</span></td><td>'+fmtAge(s.idle_sec)+'</td><td class="muted">'+esc(s.reason||'')+'</td><td>'+esc(s.project)+'</td><td class="muted">'+esc(s.id)+'</td><td>'+esc(s.desc||'(sem descritor)')+'</td></tr>';}).join('');
+    w.innerHTML='<div class="muted" style="margin-bottom:10px"><b style="color:var(--txt)">'+d.total+'</b> sessões Claude Code no total (top '+(d.sessions||[]).length+' por atividade). ACTIVE&lt;5min · IDLE&lt;1h · STOPPED&gt;1h. "parada há" = tempo desde a última escrita no transcript.</div><table><thead><tr><th>estado</th><th>parada há</th><th>motivo</th><th>projeto</th><th>id</th><th>descritor (1ª mensagem)</th></tr></thead><tbody>'+rows+'</tbody></table>';
+  }catch(e){w.innerHTML='<span class="muted">erro: '+esc(e)+'</span>';}
+}
+function whenTxt(sec){return (sec==null)?'UNKNOWN':('há '+fmtAge(sec));}
+async function loadActivity(){
+  var el=$('activity'); if(!el)return;
+  var d;
+  try{ d=await (await fetch('/api/activity',{cache:'no-store'})).json(); }
+  catch(e){ el.innerHTML='<div class="alarm bad" style="margin:0">/api/activity indisponível — gate offline?</div>'; return; }
+  var SEV={ok:'var(--ok)',warn:'var(--warn)',bad:'var(--bad)'};
+  var TXT={ONLINE_ACTIVE:'ONLINE · ATIVO',ONLINE_IDLE:'ONLINE · OCIOSO',STALE_SOURCE:'FONTE VELHA',BLOCKED:'BLOQUEADO',DOWN:'DOWN',UNKNOWN:'SEM FONTE'};
+  var sc=SEV[d.gate_state_sev]||'var(--dim)';
+  var banner='';
+  if(d.gate_state!=='ONLINE_ACTIVE'){
+    var msg=d.gate_state==='ONLINE_IDLE'?('Gate ONLINE mas OCIOSO '+whenTxt(d.gate_idle_age_sec)+' — vivo, mas ninguém está consultando.')
+      :d.gate_state==='STALE_SOURCE'?('Gate exibindo FONTE VELHA. '+(d.stale_reason||''))
+      :d.gate_state==='BLOCKED'?('Gate BLOQUEADO — pendência humana ou sessão travada.')
+      :d.gate_state==='UNKNOWN'?('Sem fonte confiável de atividade — não dá pra afirmar que o gate está sendo usado.')
+      :'Gate DOWN.';
+    banner='<div class="alarm '+(d.gate_state_sev==='bad'?'bad':'ok')+'" style="margin:0 0 12px;border-color:'+sc+';color:'+sc+'">'+esc(msg)+'</div>';
+  }
+  el.innerHTML=banner
+    +'<div style="margin-bottom:10px"><span class="badge" style="background:transparent;border:1px solid '+sc+';color:'+sc+'">'+(TXT[d.gate_state]||d.gate_state)+'</span> <span class="muted">fonte: <b style="color:var(--txt)">'+esc(d.gate_source)+'</b>'+(d.gate_source_stale?' <span style="color:var(--bad)">STALE</span>':'')+'</span></div>'
+    +kv('Última atividade',whenTxt(d.last_activity_age_sec))
+    +kv('Última consulta ao gate',whenTxt(d.last_gate_consult_age_sec))
+    +kv('Última resposta do gate',whenTxt(d.last_gate_response_age_sec))
+    +kv('Gate ocioso',whenTxt(d.gate_idle_age_sec))
+    +kv('Último artifact/SKP',whenTxt(d.last_artifact_age_sec))
+    +kv('Sessões agora',(d.active_sessions_now||0)+' ativas · '+(d.stalled_sessions_now||0)+' paradas/travadas');
+}
+async function loadGate(){
+  var al=$('gate-alarm'),st=$('gate-stats'),rb=$('gate-rows'),gs=$('gate-source'),gr=$('gate-recent');
+  try{const d=await (await fetch('/api/gate-ledger')).json();
+    if(gs){gs.innerHTML='fonte primária: <b style="color:var(--txt)">'+esc(d.source||'?')+'</b> '+(d.source_stale?'<span class="flag STOPPED">STALE</span>':'<span class="flag OK">ok</span>')+(d.stale_reason?('<div class="alarm bad" style="margin:10px 0 0">'+esc(d.stale_reason)+'</div>'):'');}
+    if(gr){var ac=d.audit_consults||[];gr.innerHTML='<div class="muted" style="margin-bottom:6px">consultas REAIS recentes (audit.jsonl) — '+ac.length+':</div>'+(ac.length?('<table><thead><tr><th>quando</th><th>modo</th><th>duração</th><th>q/a chars</th></tr></thead><tbody>'+ac.map(function(e){return '<tr><td>'+fmtAge(e.age_sec)+' atrás</td><td>'+esc(e.mode||'default')+'</td><td>'+(e.dur_sec==null?'-':e.dur_sec+'s')+'</td><td class="muted">'+(e.q_chars||'?')+' / '+(e.a_chars||'?')+'</td></tr>';}).join('')+'</tbody></table>'):'<span class="muted">nenhuma consulta no audit.jsonl</span>');}
+    if(d.pending>0){al.className='alarm bad';al.textContent='🚨 '+d.pending+' pergunta(s) SEM resposta (legacy). Respondidas: '+d.answered+'/'+d.total+'.';}
+    else{al.className='alarm ok';al.textContent='✅ Legacy: '+d.total+' perguntas, todas respondidas.';}
+    st.innerHTML='<b style="color:var(--txt)">'+d.total+'</b> registros legacy · '+d.answered+' respondidos · '+d.pending+' pendentes';
+    rb.innerHTML=(d.entries||[]).map(function(e){var v=e.verdict?('<span class="flag '+(e.verdict==='GO'?'OK':(e.verdict==='NO-GO'?'PARALYZED':'IDLE'))+'">'+e.verdict+'</span>'):'<span class="muted">-</span>';return '<tr><td>'+fmtAge(e.age_sec)+' atrás</td><td>'+esc(e.trigger)+'</td><td>'+(e.answered?'<span class="flag OK">sim</span>':'<span class="flag STOPPED">PENDENTE</span>')+'</td><td>'+v+'</td><td>'+(e.latency_sec==null?'-':fmtAge(e.latency_sec))+'</td></tr>';}).join('')||'<tr><td colspan=5 class="muted">nenhum consult ainda</td></tr>';
+  }catch(e){al.className='alarm bad';al.textContent='erro: '+e;}
+}
+async function loadPlant(){
+  var g=$('plant-gallery'),tl=$('skp-timeline-wrap'),cv=$('skp-canonical-verdict');
+  g.innerHTML='<span class="muted">carregando...</span>';
+  var VF={IMPROVED:'OK',PASS:'OK',SAME:'IDLE',WARN:'IDLE',WORSE:'PARALYZED',FAIL:'PARALYZED'};
+  try{const d=await (await fetch('/api/skp-timeline')).json();
+    var html='',verd='';
+    Object.entries(d.canonical||{}).forEach(function(e){var name=e[0],c=e[1];
+      verd+='<b style="color:var(--txt)">'+esc(name)+'</b> — veredito: '+(c.verdict?'<span class="flag '+(VF[c.verdict]||'IDLE')+'">'+c.verdict+'</span>':'<span class="muted">UNKNOWN (sem regression_summary)</span>')+' &nbsp; ';
+      (c.pngs||[]).forEach(function(p){html+='<figure><img loading="lazy" src="/artifact?path='+encodeURIComponent(p)+'"><figcaption>'+esc(p.split("/").pop())+'</figcaption></figure>';});
+    });
+    cv.innerHTML=verd||'<span class="muted">nenhum canônico em artifacts/&lt;plant&gt;/</span>';
+    g.innerHTML=html||'<span class="muted">sem renders canônicos</span>';
+    tl.innerHTML=(d.timeline||[]).map(function(r){var fl=r.verdict?'<span class="flag '+(VF[r.verdict]||'IDLE')+'">'+r.verdict+'</span>':'<span class="muted">—</span>';
+      var thumbs=(r.pngs||[]).map(function(p){return '<img loading="lazy" title="'+esc(p)+'" src="/artifact?path='+encodeURIComponent(p)+'" style="height:78px;border-radius:4px;background:#fff;margin:0 6px 6px 0">';}).join('');
+      return '<div style="border-bottom:1px solid #21262d;padding:10px 0"><div style="display:flex;justify-content:space-between;gap:10px"><b>'+esc(r.run)+'</b><span class="muted">'+fl+' · '+fmtAge(r.age_sec)+' atrás · '+r.n_pngs+' renders</span></div><div style="margin-top:8px;display:flex;flex-wrap:wrap">'+(thumbs||'<span class="muted">sem render</span>')+'</div></div>';
+    }).join('')||'<span class="muted">sem ciclos em artifacts/review</span>';
+  }catch(e){g.innerHTML='<span class="muted">erro: '+esc(e)+'</span>';}
+}
+async function loadLearnings(){
+  var w=$('learn-wrap'); w.innerHTML='<span class="muted">carregando...</span>';
+  try{const d=await (await fetch('/api/learnings')).json();
+    var SC={APPLIED:'var(--ok)',LEARNED:'var(--accent)'};
+    w.innerHTML='<div class="muted" style="margin-bottom:10px">'+d.total+' padrões · fonte: '+esc(d.source)+'</div>'+(d.learnings||[]).map(function(l){return '<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:10px"><b style="color:var(--accent)">'+esc(l.id)+' · '+esc(l.falha_observada)+'</b><span class="flag" style="color:'+(SC[l.status]||"var(--dim)")+';white-space:nowrap">'+esc(l.status)+'</span></div><div class="muted" style="margin:6px 0">causa: '+esc(l.causa_provavel)+' · detectado por: '+esc(l.como_detectamos)+'</div><div class="muted">correção: '+esc(l.como_corrigimos)+'</div><div style="background:rgba(63,185,80,.08);border:1px solid var(--ok);border-radius:6px;padding:8px;margin:8px 0"><b style="color:var(--ok)">prevenção de regressão:</b> '+esc(l.como_prevenir_regressao)+'</div><div class="muted">artefato: '+esc(l.artefato)+'</div></div>';}).join('');
+  }catch(e){w.innerHTML='<span class="muted">erro: '+esc(e)+'</span>';}
+}
+async function loadDiff(){
+  try{const s=await (await fetch('/sessions')).json();
+    var par=Object.entries(s).filter(function(e){return (e[1].flags||[]).indexOf('PARALYZED')>=0;});
+    var st=Object.entries(s).filter(function(e){return (e[1].flags||[]).indexOf('STALLED')>=0 && (e[1].flags||[]).indexOf('PARALYZED')<0;});
+    var a=$('alarm');
+    if(par.length){a.className='alarm bad';a.textContent='🚨 PATINANDO: '+par.map(function(e){return e[0];}).join(', ')+' — cycle congelado. O gate pode não estar ajudando; use o Q&A pra desbloquear.';}
+    else if(st.length){a.className='alarm bad';a.textContent='⚠️ '+st.map(function(e){return e[0];}).join(', ')+' STALLED (sem heartbeat) — sessão pode ter caído.';}
+    else{a.className='alarm ok';a.textContent='✅ Tudo progredindo — nenhuma sessão PARALYZED/STALLED.';}
+  }catch(e){var a=$('alarm');a.className='alarm bad';a.textContent='gate offline — não dá pra checar patinagem';}
+  try{const dd=await (await fetch('/api/difficulties')).json();
+    var SEV={HIGH:'var(--bad)',MED:'var(--warn)',LOW:'var(--dim)'},ST={OPEN:'var(--bad)',MITIGATED:'var(--warn)',FIXED:'var(--ok)',REGRESSED:'var(--bad)',DEFERRED:'var(--accent)'};
+    $('diff-backlog').innerHTML='<div class="muted" style="margin-bottom:10px">'+dd.total+' dificuldades · fonte: '+esc(dd.source)+'</div>'+(dd.difficulties||[]).map(function(d){return '<div class="card" style="margin-bottom:12px;border-left:3px solid '+(SEV[d.severidade]||'var(--dim)')+'"><div style="display:flex;justify-content:space-between;gap:10px"><b style="color:var(--accent)">'+esc(d.id)+' · '+esc(d.titulo)+'</b><span class="flag" style="color:'+(ST[d.status]||'var(--dim)')+';white-space:nowrap">'+esc(d.status)+(d.review_by?' · revisar '+esc(d.review_by):'')+' · '+esc(d.severidade)+'</span></div><div class="muted" style="margin:6px 0">'+esc(d.sintoma)+'</div><div style="background:rgba(248,81,73,.08);border:1px solid var(--bad);border-radius:6px;padding:8px;margin:8px 0"><b style="color:var(--bad)">por que ainda não foi tratado:</b> '+esc(d.why_not_fixed_yet)+'</div><div class="muted">tentativas: '+((d.attempts||[]).map(esc).join(" · ")||"-")+'</div><div class="muted">gate ajudou: <b>'+esc(d.gate_helped)+'</b> · próxima hipótese: '+esc(d.next_hypothesis)+'</div><div class="muted">aceite: '+esc(d.acceptance_criteria)+'</div></div>';}).join('');
+  }catch(e){if($('diff-backlog'))$('diff-backlog').innerHTML='<span class="muted">erro: '+esc(e)+'</span>';}
+}
+async function askGate(){
+  var q=$('qa-q').value.trim(); if(!q)return; var r=$('qa-resp'); r.className='qa-resp';
+  r.textContent='consultando o gate (Opus 4.8'+($('qa-rt').checked?' + red-team':'')+')... pode levar até ~1min';
+  try{var body={prompt:q}; if($('qa-rt').checked)body.mode='redteam';
+    const resp=await (await fetch('/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})).json();
+    r.textContent=resp.response||resp.error||'(sem resposta)';
+  }catch(e){r.textContent='erro: '+e;}
+}
+const LIXCLR={CANONICAL_DELIVERABLE:'var(--ok)',REVIEW_ARTIFACT:'var(--accent)',GENERATED_SCRATCH:'var(--warn)',DUPLICATE:'var(--bad)',UNKNOWN:'var(--bad)'};
+const ACTCLR={KEEP:'var(--ok)',ARCHIVE:'var(--accent)',DELETE_CANDIDATE:'var(--bad)',INVESTIGATE:'var(--warn)'};
+async function loadLixao(){
+  var sm=$('lixao-summary'),cc=$('lixao-cats'); sm.textContent='escaneando E:\\Claude + sha256 + git status (read-only)...';
+  try{const d=await (await fetch('/api/skp-inventory-v2')).json();
+    var cats=Object.entries(d.by_category||{}).map(function(e){return e[0]+'='+e[1];}).join(' · ');
+    sm.innerHTML='<b style="color:var(--txt);font-size:14px">'+d.total+'</b> .skp em E:\\Claude · <b style="color:var(--txt)">'+d.total_mb+' MB</b> · <b style="color:var(--bad)">'+d.dup_groups+'</b> grupos duplicados (por hash) · '+cats;
+    var rows=(d.files||[]).map(function(f){var lc=LIXCLR[f.category]||'var(--dim)';var ac=ACTCLR[f.action]||'var(--dim)';return '<tr><td style="color:'+lc+';font-weight:600;white-space:nowrap">'+f.category+'</td><td><span class="flag" style="color:'+ac+';background:rgba(248,81,73,.06)">'+f.action+'</span></td><td>'+esc(f.path)+(f.dup_of?'<br><span class="muted">↳ cópia de '+esc(f.dup_of)+'</span>':'')+'</td><td style="text-align:right">'+f.mb+' MB</td><td class="muted">'+f.git+'</td><td class="muted">'+esc(f.sha)+(f.has_meta?' 📄':'')+'</td></tr>';}).join('');
+    cc.innerHTML='<table style="margin-top:14px"><thead><tr><th>categoria</th><th>ação sugerida</th><th>arquivo (dedup por hash)</th><th>tam</th><th>git</th><th>sha / meta</th></tr></thead><tbody>'+rows+'</tbody></table><div class="muted" style="margin-top:10px">100% read-only — nada é apagado. KEEP=manter · ARCHIVE=arquivar evidência antiga · DELETE_CANDIDATE=lixo/cópia segura · INVESTIGATE=UNKNOWN. 📄=tem metadata/geometry_report. ORPHAN/SUPERSEDED não são auto-detectados na v1 → caem em UNKNOWN→INVESTIGATE.</div>';
+  }catch(e){sm.textContent='erro: '+esc(e);}
+}
+const TYPECLR={CANONICAL_REPO:'var(--ok)',WORKTREE:'var(--accent)',BRIDGE_SERVICE:'var(--warn)',CONFIG:'var(--accent)',VENV:'var(--dim)',ARTIFACTS:'var(--ok)',RUNS_SCRATCH:'var(--warn)',GIT_INTERNAL:'var(--bad)',UNKNOWN:'var(--bad)'};
+async function loadSysSummary(){
+  try{const sm=await (await fetch('/api/system-map')).json(); const gi=await (await fetch('/api/git-inventory')).json();
+    var wts=(gi.repos||[]).filter(function(r){return r.is_worktree;}).length;
+    if($('sys-summary'))$('sys-summary').innerHTML=kv('dirs em E:\\Claude',(sm.items||[]).length)+kv('repos/worktrees',(gi.repos||[]).length+' ('+wts+' worktrees)')+kv('dirty',((gi.dirty||[]).length?'<span style="color:var(--warn)">'+gi.dirty.join(', ')+'</span>':'0 (limpos)'))+kv('UNKNOWN',((sm.unknown||[]).length?'<span style="color:var(--bad)">'+sm.unknown.join(', ')+'</span>':'0'));
+  }catch(e){if($('sys-summary'))$('sys-summary').textContent='erro: '+e;}
+}
+async function loadGit(){
+  var s=$('git-summary'),rb=$('git-rows');
+  try{const d=await (await fetch('/api/git-inventory')).json();
+    s.innerHTML='<b style="color:var(--txt)">'+(d.repos||[]).length+'</b> repos/worktrees · '+((d.dirty||[]).length?('<span style="color:var(--warn)">'+d.dirty.length+' dirty: '+d.dirty.join(', ')+'</span>'):'todos limpos');
+    rb.innerHTML=(d.repos||[]).map(function(r){return '<tr><td><code>'+esc(r.path)+'</code></td><td>'+(r.is_worktree?'worktree':'repo')+'</td><td>'+esc(r.branch)+'</td><td class="muted">'+esc(r.head)+'</td><td>'+(r.dirty?'<span class="flag IDLE">dirty</span>':'<span class="flag OK">limpo</span>')+'</td><td>'+r.untracked+' ?? · '+r.changed+' chg</td><td class="muted">'+esc(r.last_commit)+'</td></tr>';}).join('')||'<tr><td colspan=7 class="muted">nenhum repo</td></tr>';
+  }catch(e){s.textContent='erro: '+e;}
+}
+async function loadEco(){
+  var w=$('eco-wrap'); w.innerHTML='<span class="muted">escaneando E:\\Claude...</span>';
+  try{const d=await (await fetch('/api/system-map')).json();
+    var unk=(d.unknown||[]).length?'<div class="alarm bad" style="margin-bottom:12px">❓ '+d.unknown.length+' dir(s) UNKNOWN — investigar: '+d.unknown.join(', ')+'</div>':'';
+    var rows=(d.items||[]).map(function(it){var clr=TYPECLR[it.type]||'var(--dim)';return '<tr><td><code>'+esc(it.name)+'/</code></td><td><span class="flag" style="color:'+clr+';background:rgba(88,166,255,.08)">'+it.type+'</span></td><td>'+esc(it.expl)+'</td><td style="text-align:right">'+(it.mb_capped?'≥':'')+it.mb+' MB</td><td>'+fmtAge(it.modified_sec)+'</td><td>'+(it.has_git?(it.is_worktree?'worktree':'repo'):'-')+'</td><td>'+esc(it.risk)+'</td><td>'+esc(it.can_delete)+'</td></tr>';}).join('');
+    w.innerHTML=unk+'<div class="muted" style="margin-bottom:8px">raiz: <code>'+esc(d.root)+'</code> · tamanho best-effort (≥ = passou do cap de scan)</div><table><thead><tr><th>pasta</th><th>tipo</th><th>o que é</th><th>tamanho</th><th>modif.</th><th>git</th><th>risco</th><th>apagar?</th></tr></thead><tbody>'+rows+'</tbody></table>';
+  }catch(e){w.innerHTML='<span class="muted">erro: '+esc(e)+'</span>';}
+}
+document.addEventListener('click',function(e){var t=e.target;if(t&&t.tagName==='IMG'&&/\/artifact\?/.test(t.getAttribute('src')||'')){var lb=document.getElementById('lightbox');if(lb){document.getElementById('lb-img').src=t.src;lb.classList.add('open');}}});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){var lb=document.getElementById('lightbox');if(lb)lb.classList.remove('open');}});
+document.addEventListener('click',function(e){var el=(e.target&&e.target.closest)?e.target.closest('[data-hash]'):null;if(el){location.hash=el.getAttribute('data-hash');}});
+function shortModel(n){return String(n).replace(/:latest$/,'');}
+async function loadLocalAI(){
+  var d=null;
+  try{ d=await (await fetch('/api/local-llms',{cache:'no-store'})).json(); }catch(e){ d={up:false,error:String(e)}; }
+  _llm=d; pushSeries('llmOn',(d.running||[]).length); renderSparks();
+  var hl=$('hllm');
+  if(hl){
+    if(!d.up){ hl.innerHTML='🤖 <span class="badge off">OLLAMA OFF</span>'; }
+    else{ var r=d.running||[];
+      hl.innerHTML = r.length
+        ? '🤖 '+r.map(function(n){return '<b>'+esc(shortModel(n))+'</b> <span class="badge on">on</span>';}).join(' ')
+        : '🤖 <span class="muted">'+(d.count||0)+' modelos · 0 on</span>';
+    }
+  }
+  var el=$('localai'); if(!el) return;
+  if(!d.up){el.innerHTML='<span class="badge off">OLLAMA OFF</span> <span class="muted">'+esc(d.error||'daemon :11434 não responde')+'</span>';return;}
+  var rows=(d.models||[]).map(function(m){
+    return '<tr><td>'+(m.icon||'')+' <b>'+esc(m.name)+'</b>'+(m.running?' <span class="badge on">on</span>':'')+'</td><td class="muted">'+esc(m.role||'')+'</td><td class="muted">'+esc(m.params||'')+'</td><td style="text-align:right">'+m.gb+' GB</td></tr>';
+  }).join('')||'<tr><td colspan=4 class="muted">nenhum modelo instalado</td></tr>';
+  el.innerHTML='<div style="margin-bottom:10px"><span class="badge on">OLLAMA UP</span> <span class="muted">v'+esc(d.version||'?')+' · '+d.count+' modelos · '+(d.running||[]).length+' on</span></div><table><thead><tr><th>modelo</th><th>papel</th><th>params</th><th style="text-align:right">tam.</th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+async function loadLLMs(){
+  var sm=$('llms-summary'), rb=$('llms-rows'); if(!rb)return;
+  try{
+    const d=await (await fetch('/api/llm-usage',{cache:'no-store'})).json();
+    if(!d.up){sm.innerHTML='<span class="badge off">OLLAMA OFF</span>';rb.innerHTML='';return;}
+    var ms=d.models||[];
+    var used=ms.filter(function(m){return m.calls>0;}).length;
+    var on=ms.filter(function(m){return m.running;}).length;
+    sm.innerHTML='<b style="color:var(--txt)">'+d.total_calls+'</b> acionamentos no histórico · <b>'+used+'</b> de '+ms.length+' já usado(s) · '+on+' ativo(s) agora · '+d.log_files+' arquivo(s) de log';
+    rb.innerHTML=ms.map(function(m){
+      var st=m.running?'<span class="badge on">ativo</span>':(m.installed?'<span class="flag OK">instalado</span>':'<span class="flag IDLE">removido</span>');
+      var calls=m.calls>0?('<b>'+m.calls+'</b>'):'<span class="muted">0</span>';
+      return '<tr><td>'+(m.icon||'')+' <b>'+esc(m.name)+'</b></td><td class="muted">'+esc(m.role||'')+'</td><td>'+st+'</td><td>'+calls+'</td><td class="muted">'+esc(m.last_ts||'—')+'</td><td class="muted">'+(m.avg_ms?(m.avg_ms+'ms'):'—')+'</td><td class="muted" style="text-align:right">'+m.gb+' GB</td></tr>';
+    }).join('')||'<tr><td colspan=7 class="muted">nenhum modelo</td></tr>';
+  }catch(e){if(sm)sm.innerHTML='<span class="badge off">erro</span> <span class="muted">'+esc(e)+'</span>';}
+}
+async function loadFiles(){
+  var sm=$('files-summary'),rb=$('files-rows'); if(!rb)return;
+  try{
+    const d=await (await fetch('/api/files',{cache:'no-store'})).json();
+    sm.innerHTML='<b style="color:var(--txt)">'+d.shown+'</b> de '+d.total+' arquivos .py/.md ('+(d.scanned_roots||[]).join(', ')+') · ordenados por última modificação';
+    rb.innerHTML=(d.files||[]).map(function(f){
+      return '<tr><td><code>'+esc(f.path)+'</code></td><td><span class="flag '+(f.kind==='py'?'OK':'IDLE')+'">'+esc(f.kind)+'</span></td><td class="muted" style="white-space:nowrap">'+fmtAge(f.age_sec)+' atrás</td><td class="muted">'+(f.desc?esc(f.desc):'<span style="opacity:.55">(sem descrição no arquivo)</span>')+'</td></tr>';
+    }).join('')||'<tr><td colspan=4 class="muted">nenhum arquivo</td></tr>';
+  }catch(e){if(sm)sm.innerHTML='<span class="muted">erro: '+esc(e)+'</span>';}
+}
+function mdInline(s){return s.replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');}
+function mdToHtml(src){
+  src=String(src).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  var L=src.split('\n'),out=[],i=0;
+  while(i<L.length){
+    var ln=L[i];
+    if(/^```/.test(ln)){var b=[];i++;while(i<L.length&&!/^```/.test(L[i])){b.push(L[i]);i++;}i++;out.push('<pre class="diagram">'+b.join('\n')+'</pre>');continue;}
+    if(/^\|/.test(ln)&&i+1<L.length&&/^\|[\s:|-]+\|?\s*$/.test(L[i+1])){
+      var rows=[];while(i<L.length&&/^\|/.test(L[i])){rows.push(L[i]);i++;}
+      var hd=rows[0].split('|').slice(1,-1).map(function(c){return c.trim();});
+      var bd=rows.slice(2).map(function(r){return r.split('|').slice(1,-1).map(function(c){return c.trim();});});
+      out.push('<table><thead><tr>'+hd.map(function(h){return '<th>'+mdInline(h)+'</th>';}).join('')+'</tr></thead><tbody>'+bd.map(function(r){return '<tr>'+r.map(function(c){return '<td>'+mdInline(c)+'</td>';}).join('')+'</tr>';}).join('')+'</tbody></table>');continue;}
+    var h=ln.match(/^(#{1,4})\s+(.*)$/);
+    if(h){var lv=h[1].length;out.push('<div class="md-h md-h'+lv+'">'+mdInline(h[2])+'</div>');i++;continue;}
+    if(/^---+\s*$/.test(ln)){out.push('<hr class="md-hr">');i++;continue;}
+    if(/^>\s?/.test(ln)){var q=[];while(i<L.length&&/^>\s?/.test(L[i])){q.push(L[i].replace(/^>\s?/,''));i++;}out.push('<blockquote class="md-q">'+q.map(mdInline).join('<br>')+'</blockquote>');continue;}
+    if(/^\s*[-*]\s+/.test(ln)||/^\s*\d+\.\s+/.test(ln)){var it=[],od=/^\s*\d+\./.test(ln);while(i<L.length&&(/^\s*[-*]\s+/.test(L[i])||/^\s*\d+\.\s+/.test(L[i]))){it.push(L[i].replace(/^\s*(?:[-*]|\d+\.)\s+/,''));i++;}out.push('<'+(od?'ol':'ul')+' class="md-list">'+it.map(function(x){return '<li>'+mdInline(x)+'</li>';}).join('')+'</'+(od?'ol':'ul')+'>');continue;}
+    if(/^\s*$/.test(ln)){i++;continue;}
+    out.push('<p class="md-p">'+mdInline(ln)+'</p>');i++;
+  }
+  return out.join('');
+}
+function replayCog(){
+  var f=$('cog-flow'); if(!f)return;
+  f.classList.remove('play');
+  for(var i=0;i<f.children.length;i++){ f.children[i].style.animationDelay=(i*0.13)+'s'; }
+  void f.offsetWidth;  // força reflow pra reiniciar as animações
+  f.classList.add('play');
+}
+async function loadCerebro(){ replayCog(); loadBrainState(); loadCerebroDoc(); }
+function bdg(b){var c=String(b||'?').toLowerCase();return '<span class="bdg '+c+'">'+esc(b||'?')+'</span>';}
+function _worstBadge(items){
+  var order={MISSING:5,DEPRECATED:5,STALE:4,AGING:3,DRAFT:2,LIVE:1},w='LIVE',wv=1;
+  (items||[]).forEach(function(it){var v=order[String(it.badge||'LIVE').toUpperCase()]||0;if(v>wv){wv=v;w=String(it.badge).toUpperCase();}});
+  return w;
+}
+function _grp(loaded,prefix){return (loaded||[]).filter(function(x){return String(x.path||'').indexOf(prefix)===0;});}
+function _cnt(items){return items.filter(function(x){return x.exists;}).length+'/'+items.length;}
+function _miss(items){var m=items.filter(function(x){return !x.exists;});return m.length?' '+bdg('MISSING')+' <span class="muted" style="font-size:10px">'+m.map(function(x){return esc(String(x.path).split('/').pop());}).join(', ')+'</span>':'';}
+function _brow(k,v){return '<tr><td class="k">'+k+'</td><td class="v">'+v+'</td></tr>';}
+async function loadBrainState(){
+  var live=$('brain-live'),nx=$('brain-next'),sk=$('brain-skills'); if(!live)return;
+  try{
+    const r=await fetch('/api/brain-state',{cache:'no-store'});
+    if(r.status===404){
+      live.innerHTML='<div class="alarm warn" style="margin:0">⏳ estado vivo disponível após <b>reiniciar o cockpit</b> — o endpoint <code>/api/brain-state</code> é novo (server.py). A arquitetura abaixo já está ativa.</div>';
+      if(nx)nx.innerHTML=''; if(sk)sk.innerHTML=''; return;
+    }
+    const d=await r.json();
+    var L=d.loaded||[];
+    var mem=_grp(L,'.claude/memory/'),spc=_grp(L,'.claude/specs/'),evl=_grp(L,'.claude/evals/'),pln=_grp(L,'.claude/plans/');
+    var con=L.filter(function(x){return x.path==='.claude/constitution.md';})[0]||{badge:'MISSING',age_sec:null};
+    var cm=d.claude_md||{badge:'MISSING',age_sec:null}, cur=d.current_state||{};
+    var rows='';
+    rows+=_brow('CLAUDE.md', bdg(cm.badge)+'<div class="sub">entry point · auto-load via @import · há '+fmtAge(cm.age_sec)+'</div>');
+    rows+=_brow('Constitution', bdg(con.badge)+'<div class="sub">vence conflitos (#1..#8) · há '+fmtAge(con.age_sec)+'</div>');
+    rows+=_brow('Memory', bdg(_worstBadge(mem))+' '+_cnt(mem)+' arquivos'+_miss(mem)+
+      '<div class="sub">current_state.md: '+bdg(cur.badge)+' '+esc(cur.why||'')+
+      (cur.commits_behind!=null?' · <b>'+cur.commits_behind+'</b> commit(s) atrás no git':'')+'</div>');
+    rows+=_brow('Specs críticas', bdg(_worstBadge(spc))+' '+_cnt(spc)+' carregadas'+_miss(spc));
+    rows+=_brow('Evals · Plans', bdg(_worstBadge(evl.concat(pln)))+' evals '+_cnt(evl)+' · plans '+_cnt(pln)+_miss(evl.concat(pln)));
+    rows+=_brow('Skill ativa', bdg('DRAFT')+' runtime n/d<div class="sub">'+((d.counts||{}).skills||0)+' disponíveis · acende pelo gatilho da task — '+esc(d.skill_runtime_note||'não rastreável em runtime')+'</div>');
+    var g=d.gate||{}; rows+=_brow('Gate atual', bdg(g.badge)+' '+esc(g.label||'-'));
+    var a=d.artifact;
+    rows+= a ? _brow('Artifact atual', bdg(a.badge)+' '+(a.skp?'<code>'+esc(a.skp)+'</code>':'<span class="muted">sem .skp canônico ainda</span>')+
+      '<div class="sub">planta <b>'+esc(a.plant)+'</b> · veredito '+esc(a.verdict||'—')+' · <a href="#review-skp">ver na aba Review SKP →</a></div>')
+      : _brow('Artifact atual', bdg('MISSING')+'<div class="sub">nenhum artifacts/&lt;plant&gt;/ canônico</div>');
+    live.innerHTML='<table class="bstate">'+rows+'</table>';
+    if(nx){var act=d.next_action; nx.innerHTML = act ?
+      '<div class="next-act"><div class="lbl">🎯 Próxima ação recomendada '+(act.roi!=null?'<span class="bdg proposto">ROI '+esc(act.roi)+'</span>':'')+'</div>'+
+      '<div class="ttl">'+esc(act.titulo||'-')+'</div><div class="meta">→ '+esc(act.proxima_acao||'')+'</div>'+
+      '<div class="meta">tipo: '+esc(act.tipo||'-')+' · impacto '+esc(act.impacto)+' / esforço '+esc(act.esforco)+' · <a href="#backlog">backlog completo por ROI →</a></div></div>' : '';}
+    if(sk){var S=d.skills||[]; sk.innerHTML = S.length ?
+      '<div class="skgrid">'+S.map(function(s){return '<div class="skcard'+(s.mandatory?' req':'')+'"><div class="skh"><span class="skn">'+esc(s.name)+'</span>'+(s.mandatory?'<span class="bdg stale">pós-mudança</span>':'')+'</div><div class="skd">'+esc(s.desc||'—')+'</div></div>';}).join('')+'</div>'
+      : '<span class="muted">nenhuma skill encontrada</span>';}
+  }catch(e){live.innerHTML='<span class="muted">erro no estado vivo: '+esc(e)+'</span>';}
+}
+async function loadCerebroDoc(){
+  var el=$('cerebro-body'),hd=$('cerebro-head'); if(!el)return;
+  try{
+    const d=await (await fetch('/api/cognitive',{cache:'no-store'})).json();
+    if(!d.exists){el.innerHTML='<div class="alarm bad" style="margin:0">'+esc(d.note||'doc não encontrado')+'</div>';return;}
+    if(hd)hd.innerHTML='fonte: <code>CLAUDE_COGNITIVE_ARCHITECTURE.md</code> · atualizado há '+fmtAge(d.age_sec)+' · '+d.text.length+' chars';
+    var hi=$('cerebro-head-inline'); if(hi)hi.textContent='('+Math.round(d.text.length/1000)+'k chars · há '+fmtAge(d.age_sec)+')';
+    el.innerHTML=mdToHtml(d.text);
+  }catch(e){el.innerHTML='<span class="muted">erro: '+esc(e)+'</span>';}
+}
+function tick(){var c=$('hclock');if(c)c.textContent=new Date().toLocaleTimeString('pt-br');}
+route(); pollHome(); tick(); setInterval(pollHome,5000); setInterval(tick,1000);
+setInterval(function(){var h=$('home');if(h&&h.classList.contains('active')){loadStatus();loadActivity();}},5000);
+loadLocalAI(); setInterval(loadLocalAI,10000);
+</script>
+<div class="lb" id="lightbox" onclick="this.classList.remove('open')"><img id="lb-img" alt="render em tela cheia"></div>
+</body></html>

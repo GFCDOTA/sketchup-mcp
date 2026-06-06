@@ -55,10 +55,35 @@ DOOR_RGB         = [140, 95, 55]   # madeira escura
 DOOR_SWING_DEG   = 30.0            # visual swing angle
 
 # Window panel (for kind=window). 3 bands: sill / glass / lintel.
-WINDOW_SILL_M    = 0.90            # peitoril height
-WINDOW_HEAD_M    = 2.10            # verga bottom
+WINDOW_SILL_M    = 1.10            # peitoril quarto (GPT + NBR 15575: cama encostada embaixo)
+WINDOW_HEAD_M    = 2.30            # verga: janela de quarto 1,20m -> proporcao 1,5:1 (GPT)
 WINDOW_SILL_IN   = WINDOW_SILL_M * M_TO_IN
 WINDOW_HEAD_IN   = WINDOW_HEAD_M * M_TO_IN
+# Verga do BASCULANTE: separada da janela de correr (que subiu p/ 2,30m). Mantem o
+# basculante baixo (~0,60m): peitoril 1,50m -> verga 2,10m.
+BASCULANTE_HEAD_IN = 2.10 * M_TO_IN
+# Esquadria parametrica (Felipe 2026-06-03, calibrada pela "Janela 1" do 3DW):
+# moldura branca de PERFIL FIXO + montante central + vidro verde. Os perfis tem
+# espessura CONSTANTE (nao escalam) -> encaixa em qualquer vao sem distorcer; so
+# o vidro muda de tamanho. Resolve o "esticar o componente fica uma merda".
+WINDOW_FRAME_W_IN     = 0.05 * M_TO_IN   # 5cm perfil de moldura/montante
+WINDOW_FRAME_DEPTH_IN = 0.08 * M_TO_IN   # 8cm profundidade (da volume 3D)
+WINDOW_FRAME_RGB      = [238, 238, 240]  # branco esquadria
+WINDOW_GLASS_RGB      = [198, 222, 212]  # vidro verde-agua (como a Janela 1)
+WINDOW_GLASS_ALPHA    = 0.32
+# Caixa de persiana no topo (estilo "Janela 4" do 3DW): volume branco saliente
+# ocupando o topo do vao; a janela (vidro) ocupa o resto abaixo. Liga/desliga
+# pra comparar Janela 1 (sem) vs Janela 4 (com).
+WINDOW_HAS_SHUTTER    = true
+WINDOW_SHUTTER_H_IN   = 0.25 * M_TO_IN   # 25cm caixa de persiana
+# Janelas estreitas (largura <= this) viram BASCULANTE (laminas horizontais, sem
+# montante nem persiana) — as pequenas de banheiro/servico (Felipe 2026-06-04).
+BASCULANTE_MAX_W_IN   = 1.20 * M_TO_IN
+BASCULANTE_OPEN_RAD   = 15.0 * Math::PI / 180.0   # folha aberta ~15deg (cara de basculante)
+# Basculante fica ALTO na parede (perto do teto): peitoril ~1,50m -> altura ~0,60m
+# ate a verga 2,10m (padrao banheiro ~60x60cm, peitoril 1,50-1,60m). Embaixo
+# (0,90..1,50) vira parede solida. Altura NAO vem do PDF — padrao de norma.
+BASCULANTE_SILL_IN    = 1.50 * M_TO_IN
 GLASS_RGB        = [180, 220, 240] # azul-glass
 GLASS_ALPHA      = 0.45
 LINTEL_RGB       = [110, 115, 120]
@@ -185,9 +210,74 @@ def dedupe_consecutive_pts(pts, eps = 0.001)
   result
 end
 
-def build_floor(parent_ents, room, material, room_index)
+# Snap de coordenadas: agrupa os x's (e os y's) que estao a < eps um do outro e
+# move pro valor medio do grupo. Mata os MICRO-DEGRAUS (toquinhos de ~meia/uma
+# espessura de parede) que o room polygon herda das juncoes -> piso liso, sem
+# "formiga comendo" os cantos (Felipe 2026-06-04). Reentrancias REAIS (cantos em
+# L, nichos de banheiro) sao > eps e ficam preservadas. Micro-test: 130-224v ->
+# 4-18v sem deformar as formas.
+FLOOR_SNAP_EPS_PT = 6.0
+
+def snap_coords(ring, eps)
+  pts = ring.map { |p| [p[0].to_f, p[1].to_f] }
+  [0, 1].each do |dim|
+    vals = pts.map { |p| p[dim] }.uniq.sort
+    next if vals.empty?
+    m = {}
+    group = [vals[0]]
+    vals[1..-1].each do |v|
+      if v - group.last < eps
+        group << v
+      else
+        avg = group.sum / group.length
+        group.each { |g| m[g] = avg }
+        group = [v]
+      end
+    end
+    avg = group.sum / group.length
+    group.each { |g| m[g] = avg }
+    pts.each { |p| p[dim] = m[p[dim]] }
+  end
+  pts
+end
+
+def drop_collinear_pts(ring, eps = 1e-4)
+  n = ring.length
+  return ring if n < 3
+  out = []
+  n.times do |i|
+    a, b, c = ring[(i - 1) % n], ring[i], ring[(i + 1) % n]
+    cross = (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
+    out << b if cross.abs > eps
+  end
+  out
+end
+
+def build_floor(parent_ents, room, material, room_index, prefab = nil)
   raw_pts = room['polygon_pts'] || []
-  poly_pts = dedupe_consecutive_pts(raw_pts)
+  holes = []
+  if prefab.is_a?(Hash) && prefab['outer'].is_a?(Array) &&
+     prefab['outer'].length >= 3
+    # Piso ja resolvido no Python (compute_room_floors): preenche a CELULA do
+    # comodo ate as FACES INTERNAS das paredes -> encosta sem gap e tuca sob a
+    # parede (Felipe 2026-06-04). So dedup de seguranca; NAO re-snapar/drop:
+    # ja veio limpo, e re-snapar deformaria/reabriria o gap. holes = comodo
+    # integrado embutido (ex: cozinha cercada pela sala) -> recortado abaixo.
+    poly_pts = dedupe_consecutive_pts(prefab['outer'])
+    holes = (prefab['holes'] || []).map { |h| dedupe_consecutive_pts(h) }
+                                   .select { |h| h.length >= 3 }
+    floor_src = 'python_cell'
+  else
+    # Fallback: micro-degraus dos cantos (toquinhos) -> piso liso. dedup FINAL
+    # remove a aresta-ZERO que o drop_collinear deixa (2 vertices coincidentes
+    # adjacentes); sem isso o SU recusa add_face por "ponto duplicado" e o piso
+    # do comodo SOME (foi o que apagou o terraco/r001).
+    poly_pts = dedupe_consecutive_pts(raw_pts)
+    poly_pts = dedupe_consecutive_pts(drop_collinear_pts(
+      dedupe_consecutive_pts(snap_coords(poly_pts, FLOOR_SNAP_EPS_PT)),
+    ))
+    floor_src = 'ruby_snap'
+  end
   if poly_pts.length < 3
     return {
       'ok' => false,
@@ -202,14 +292,36 @@ def build_floor(parent_ents, room, material, room_index)
 
   begin
     pts = poly_pts.map { |p| pdf_pt_to_su(p) }
-    face = ents.add_face(pts)
-    if face.nil?
+    outer_face = ents.add_face(pts)
+    if outer_face.nil?
       group.erase!
       return {
         'ok' => false,
         'reason' => "add_face returned nil (raw=#{raw_pts.length} " \
                     "deduped=#{poly_pts.length}; polygon may be " \
                     "self-intersecting or non-planar)",
+      }
+    end
+    # Recorta cada buraco (comodo embutido). Mesmo idiom do shell: add_face do
+    # furo -> erase! a face interna; as arestas ficam e delimitam o donut.
+    holes_cut = 0
+    holes.each do |hole|
+      hpts = hole.map { |p| pdf_pt_to_su(p) }
+      inner = ents.add_face(hpts)
+      if inner && inner.valid?
+        inner.erase!
+        holes_cut += 1
+      end
+    end
+    # Re-busca a face (apos recortar furos): prefere a multi-loop (donut); no
+    # group so existem as faces que acabamos de criar.
+    face = ents.grep(Sketchup::Face).find { |f| f.loops.length > 1 }
+    face ||= ents.grep(Sketchup::Face).first
+    if face.nil?
+      group.erase!
+      return {
+        'ok' => false,
+        'reason' => "no floor face after hole carve (raw=#{raw_pts.length})",
       }
     end
     face.reverse! if face.normal.z < 0
@@ -221,6 +333,8 @@ def build_floor(parent_ents, room, material, room_index)
       'area_in2' => face.area.round(2),
       'raw_pts'  => raw_pts.length,
       'deduped_pts' => poly_pts.length,
+      'holes_cut' => holes_cut,
+      'source'   => floor_src,
     }
   rescue StandardError => e
     group.erase! if group && group.valid?
@@ -242,6 +356,32 @@ end
 # room renders as a 3 m × 3.8 cm strip (~0.12 m²), not as a 3 m × Y
 # rectangle covering the entire room interior (the 2026-05-20 bug).
 SOFT_BARRIER_THICKNESS_IN = 1.5
+
+# Soft barriers render ONLY when sourced (barrier_type / human confirmation /
+# PDF-text). An unsourced bare polyline is NOT rendered as physical geometry —
+# Hard Rule #1 (never invent). By type: railing/guardrail -> grade material,
+# peitoril/mureta/parapet -> low solid wall. This replaces the old global
+# SOFT_BARRIERS_MODE all-or-nothing that caused the render seesaw.
+RAILING_BARRIER_TYPES  = %w[guardrail railing guarda_corpo guarda-corpo
+                            peitoril_com_grade guarda_corpo_com_grade].freeze
+LOW_WALL_BARRIER_TYPES = %w[peitoril mureta parapet].freeze
+
+def barrier_source(sb)
+  bt = sb['barrier_type']
+  return "barrier_type=#{bt}" if bt && !bt.to_s.strip.empty?
+  return 'human_confirmed' if sb['human_confirmed'] || sb['confirmed']
+  return 'pdf_text' if sb['pdf_text'] || sb['source_label']
+  nil
+end
+
+# Returns 'railing', 'low_wall', or nil (unsourced -> do not render).
+def barrier_render_as(sb)
+  bt = (sb['barrier_type'] || '').to_s.strip.downcase
+  return 'railing'  if RAILING_BARRIER_TYPES.include?(bt)
+  return 'low_wall' if LOW_WALL_BARRIER_TYPES.include?(bt)
+  return 'low_wall' if barrier_source(sb) # sourced but untyped -> conservative
+  nil
+end
 
 def soft_barrier_polyline_pts(barrier)
   # Soft barriers come as polyline arrays (consume_consensus.rb consumes
@@ -286,6 +426,47 @@ def segment_overlaps_wall?(p1, p2, footprints, tol_in = 1.0)
   end
 end
 
+# ---- guarda-corpo (varanda planta_74) — render parametrico ----------
+# EVOLUCAO (Felipe 2026-06-03): a foto da fachada real + o componente do
+# 3DW ("Peitoril de vidro") mostram VIDRO translucido azulado entre
+# montantes tubulares, com corrimao de cano e mureta de concreto na base —
+# nao a grade de balaustres densos do palpite anterior. Geramos: mureta +
+# painel de vidro + montantes espacados + corrimao (ver build_soft_barrier).
+GRADE_RAIL_THICK_IN  = 0.04 * M_TO_IN   # 4cm corrimao (cano)
+GRADE_BAL_SIZE_IN    = 0.02 * M_TO_IN   # (legado) 2cm balaustre — nao mais usado
+GRADE_BAL_SPACING_IN = 0.12 * M_TO_IN   # (legado) ~12cm — nao mais usado
+GRADE_BOT_Z0 = 0.03 * M_TO_IN
+GRADE_BOT_Z1 = 0.11 * M_TO_IN
+GRADE_TOP_Z0 = (PARAPET_HEIGHT_M - 0.08) * M_TO_IN
+GRADE_TOP_Z1 = PARAPET_HEIGHT_IN
+# Painel de VIDRO + montantes tubulares (calibrado pelo componente do 3DW que
+# o Felipe baixou: bounds/material extraidos via inspect_peitoril.rb).
+GLASS_THICK_IN        = 0.012 * M_TO_IN  # 12mm — painel de vidro fino
+GLASS_RGB             = [124, 138, 181]  # azulado, extraido do componente
+GLASS_ALPHA           = 0.45             # translucido (componente media 0.52)
+GRADE_POST_SIZE_IN    = 0.05  * M_TO_IN  # 5cm — montante tubular (secao)
+GRADE_POST_SPACING_IN = 1.0   * M_TO_IN  # ~1,0m entre montantes
+# Guarda-corpo do PREDIO REAL (Felipe 2026-06-03, ref foto fachada): mureta de
+# concreto na base (cimento) + grade metalica EM CIMA dela. A mureta vai do chao
+# ate MURETA_BASE_M; a grade ocupa dali ate PARAPET_HEIGHT_M (1,10m).
+MURETA_BASE_M  = 0.45
+MURETA_BASE_IN = MURETA_BASE_M * M_TO_IN
+
+def add_grade_box(ents, quad_xy, z0, z1, material)
+  # Caixa: face no z0 (4 cantos [x,y]) -> pushpull ate z1. Retorna true se construiu.
+  pts = quad_xy.map { |p| Geom::Point3d.new(p[0], p[1], z0) }
+  g = ents.add_group
+  f = (g.entities.add_face(pts) rescue nil)
+  if f.nil?
+    g.erase!
+    return false
+  end
+  f.reverse! if f.normal.z < 0
+  f.pushpull(z1 - z0)
+  g.entities.grep(Sketchup::Face).each { |ff| ff.material = material; ff.back_material = material }
+  true
+end
+
 def build_soft_barrier(parent_ents, barrier, material, index,
                        wall_footprints: nil)
   # Per-segment swept slab. For each consecutive pair (a, b) on the
@@ -299,10 +480,24 @@ def build_soft_barrier(parent_ents, barrier, material, index,
   pts_pdf = soft_barrier_polyline_pts(barrier)
   return {'ok' => false, 'reason' => 'no polyline_pts'} if pts_pdf.length < 2
 
+  # SOURCE GATE (Felipe 2026-06-02): so renderiza com FONTE EXPLICITA.
+  # sem barrier_type + sem human_annotation => SKIP TOTAL (caso sb000-sb007).
+  # NADA de fallback fisico — nem grade, nem mureta, nem bloco cinza. Fica
+  # ausente do SKP; aparece so como WARN no soft_barrier_source_audit.
+  bt = barrier['barrier_type']
+  has_source = (barrier['geometry_origin'] == 'human_annotation')
+  unless bt && has_source
+    return {'ok' => false,
+            'reason' => "skip(no_source): barrier_type=#{bt.inspect} human_annotation=#{has_source}"}
+  end
+  # GRADE so com autorizacao explicita; peitoril/mureta = elemento baixo opaco.
+  render_grade = (barrier['render_as'] == 'grade' || bt == 'guardrail' || bt == 'railing')
+
   group = parent_ents.add_group
   group.name = "SoftBarrier_Group_#{index}"
 
   segments_built  = 0
+  total_len_in    = 0.0
   segments_skipped_short    = 0
   segments_skipped_overlap  = 0
   segments_skipped_facefail = 0
@@ -321,35 +516,113 @@ def build_soft_barrier(parent_ents, barrier, material, index,
     # FP-006: drop segments whose midpoint sits inside a wall footprint
     # — those are the building outline that the vector extractor
     # catches as soft_barrier, not real peitoris.
-    if wall_footprints && segment_overlaps_wall?(p1, p2, wall_footprints)
+    # EXCECAO (trust-human, gate :8765 GO opcao B): barreiras com
+    # geometry_origin=human_annotation sao peitoris CONFIRMADOS pelo humano —
+    # nunca dropadas por overlap. Peitoril real encosta na parede pela ponta
+    # (3-pt sample acusa), entao FP-006 so vale pro AUTO-extraido. Restaura
+    # sb005 (PEITORIL H=1,10M) que o regen #28 (merge de paredes) passou a derrubar.
+    trust_human = barrier['geometry_origin'] == 'human_annotation'
+    if wall_footprints && !trust_human && segment_overlaps_wall?(p1, p2, wall_footprints)
       segments_skipped_overlap += 1
       next
     end
 
-    nx = -dy / len * (SOFT_BARRIER_THICKNESS_IN / 2.0)
-    ny =  dx / len * (SOFT_BARRIER_THICKNESS_IN / 2.0)
-    quad = [
-      Geom::Point3d.new(p1.x + nx, p1.y + ny, 0),
-      Geom::Point3d.new(p2.x + nx, p2.y + ny, 0),
-      Geom::Point3d.new(p2.x - nx, p2.y - ny, 0),
-      Geom::Point3d.new(p1.x - nx, p1.y - ny, 0),
-    ]
+    ux = dx / len
+    uy = dy / len
 
     sub_group = group.entities.add_group
     sub_group.name = "SoftBarrier_#{index}_seg_#{seg_idx}"
-    face = sub_group.entities.add_face(quad) rescue nil
-    if face.nil?
+    se = sub_group.entities
+
+    # Ja passou pelo SOURCE GATE (tem barrier_type + fonte). GRADE so se
+    # render_grade (render_as=grade / guardrail / railing); senao peitoril/
+    # mureta = elemento baixo OPACO. NUNCA fallback de peitoril -> grade.
+    if render_grade
+      boxes = 0
+      # (1) MURETA DE CONCRETO na base — o "cimento embaixo da grade" do predio
+      # real (Felipe 2026-06-03). Laje solida do chao ate MURETA_BASE_IN, material
+      # concreto (plan_parapet, cinza claro), distinta da grade metalica acima.
+      concrete = (parent_ents.model.materials['plan_parapet'] rescue nil)
+      mhalf = SOFT_BARRIER_THICKNESS_IN / 2.0
+      mnx = -uy * mhalf
+      mny =  ux * mhalf
+      base_quad = [
+        Geom::Point3d.new(p1.x + mnx, p1.y + mny, 0),
+        Geom::Point3d.new(p2.x + mnx, p2.y + mny, 0),
+        Geom::Point3d.new(p2.x - mnx, p2.y - mny, 0),
+        Geom::Point3d.new(p1.x - mnx, p1.y - mny, 0),
+      ]
+      bface = (se.add_face(base_quad) rescue nil)
+      if bface
+        bface.reverse! if bface.normal.z < 0
+        bface.pushpull(MURETA_BASE_IN)
+        se.grep(Sketchup::Face).each { |f| f.material = (concrete || material); f.back_material = (concrete || material) }
+        boxes += 1
+      end
+      # (2) GUARDA-CORPO DE VIDRO em cima da mureta (MURETA_BASE_IN .. 1,10m).
+      # Replica o componente "Peitoril de vidro" do 3DW que o Felipe baixou
+      # (2026-06-03): PAINEL DE VIDRO translucido azulado + MONTANTES tubulares
+      # espacados + CORRIMAO de cano no topo. Substitui os balaustres densos
+      # (antes parecia cerca; agora e a varanda de vidro da fachada real).
+      glass_mat = (parent_ents.model.materials['plan_glass'] rescue nil) || material
+      half_t = GRADE_RAIL_THICK_IN / 2.0
+      nx = -uy * half_t
+      ny =  ux * half_t
+      rail_quad = [
+        [p1.x + nx, p1.y + ny], [p2.x + nx, p2.y + ny],
+        [p2.x - nx, p2.y - ny], [p1.x - nx, p1.y - ny],
+      ]
+      # (2a) CORRIMAO tubular (metal) no topo (1,02m .. 1,10m).
+      boxes += 1 if add_grade_box(se, rail_quad, GRADE_TOP_Z0, GRADE_TOP_Z1, material)
+      # (2b) PAINEL DE VIDRO: laje fina translucida, da mureta ao corrimao.
+      ghalf = GLASS_THICK_IN / 2.0
+      gnx = -uy * ghalf
+      gny =  ux * ghalf
+      glass_quad = [
+        [p1.x + gnx, p1.y + gny], [p2.x + gnx, p2.y + gny],
+        [p2.x - gnx, p2.y - gny], [p1.x - gnx, p1.y - gny],
+      ]
+      boxes += 1 if add_grade_box(se, glass_quad, MURETA_BASE_IN, GRADE_TOP_Z0, glass_mat)
+      # (2c) MONTANTES tubulares (metal) espacados, da mureta ao topo.
+      n_post = [(len / GRADE_POST_SPACING_IN).round, 1].max
+      ps = GRADE_POST_SIZE_IN / 2.0
+      (0..n_post).each do |k|
+        t = k.to_f / n_post
+        cx = p1.x + dx * t
+        cy = p1.y + dy * t
+        post_quad = [[cx - ps, cy - ps], [cx + ps, cy - ps], [cx + ps, cy + ps], [cx - ps, cy + ps]]
+        boxes += 1 if add_grade_box(se, post_quad, MURETA_BASE_IN, GRADE_TOP_Z1, material)
+      end
+      ok_seg = boxes > 0
+    else
+      # MURETA OPACA (default): laje fina extrudada ate 1,10m.
+      half_t = SOFT_BARRIER_THICKNESS_IN / 2.0
+      nx = -uy * half_t
+      ny =  ux * half_t
+      quad = [
+        Geom::Point3d.new(p1.x + nx, p1.y + ny, 0),
+        Geom::Point3d.new(p2.x + nx, p2.y + ny, 0),
+        Geom::Point3d.new(p2.x - nx, p2.y - ny, 0),
+        Geom::Point3d.new(p1.x - nx, p1.y - ny, 0),
+      ]
+      face = (se.add_face(quad) rescue nil)
+      if face
+        face.reverse! if face.normal.z < 0
+        face.pushpull(PARAPET_HEIGHT_IN)
+        se.grep(Sketchup::Face).each { |f| f.material = material; f.back_material = material }
+        ok_seg = true
+      else
+        ok_seg = false
+      end
+    end
+
+    unless ok_seg
       sub_group.erase!
       segments_skipped_facefail += 1
       next
     end
-    face.reverse! if face.normal.z < 0
-    face.pushpull(PARAPET_HEIGHT_IN)
-    sub_group.entities.grep(Sketchup::Face).each do |f|
-      f.material      = material
-      f.back_material = material
-    end
     segments_built += 1
+    total_len_in += len
   end
 
   if segments_built == 0
@@ -366,6 +639,7 @@ def build_soft_barrier(parent_ents, barrier, material, index,
   {
     'ok' => true,
     'group' => group,
+    'length_m'                 => (total_len_in / M_TO_IN).round(3),
     'segments_built'           => segments_built,
     'segments_skipped_short'   => segments_skipped_short,
     'segments_skipped_overlap' => segments_skipped_overlap,
@@ -653,6 +927,106 @@ def find_wall_face_for_aperture(piece_ents, host_wall, cx_in, cy_in,
   end
 end
 
+def build_window_frame_h(ents, cx, half_w, sill, head, y_plane, frame_mat, glass_mat)
+  # Esquadria parametrica numa parede horizontal (plano y = y_plane).
+  # Moldura (base/topo/2 laterais) + montante central de PERFIL FIXO (nao escala)
+  # + 2 panes de vidro. Adapta a qualquer largura/altura sem distorcer.
+  fw = WINDOW_FRAME_W_IN
+  fd = WINDOW_FRAME_DEPTH_IN
+  x0 = cx - half_w
+  x1 = cx + half_w
+  add_box = lambda do |bx0, bx1, bz0, bz1, depth, mat|
+    next if (bx1 - bx0).abs < 1e-6 || (bz1 - bz0).abs < 1e-6
+    g = ents.add_group
+    yf = y_plane - depth / 2.0
+    f = g.entities.add_face([
+      Geom::Point3d.new(bx0, yf, bz0), Geom::Point3d.new(bx1, yf, bz0),
+      Geom::Point3d.new(bx1, yf, bz1), Geom::Point3d.new(bx0, yf, bz1)
+    ])
+    next if f.nil?
+    f.reverse! if f.normal.y < 0
+    f.pushpull(depth)
+    g.entities.grep(Sketchup::Face).each { |ff| ff.material = mat; ff.back_material = mat }
+  end
+  # Caixa de persiana no topo (Janela 4) — volume saliente; janela ocupa o resto.
+  win_head = head
+  if WINDOW_HAS_SHUTTER && (head - sill) > (WINDOW_SHUTTER_H_IN + 4.0 * fw)
+    win_head = head - WINDOW_SHUTTER_H_IN
+    add_box.call(x0, x1, win_head, head, fd * 1.7, frame_mat)    # caixa de persiana (saliente)
+  end
+  add_box.call(x0, x1, sill, sill + fw, fd, frame_mat)                          # base
+  add_box.call(x0, x1, win_head - fw, win_head, fd, frame_mat)                  # topo
+  add_box.call(x0, x0 + fw, sill, win_head, fd, frame_mat)                      # lateral esq
+  add_box.call(x1 - fw, x1, sill, win_head, fd, frame_mat)                      # lateral dir
+  add_box.call(cx - fw / 2.0, cx + fw / 2.0, sill + fw, win_head - fw, fd, frame_mat)  # montante central
+  add_glass = lambda do |gx0, gx1|
+    next if (gx1 - gx0).abs < 1e-6
+    g = ents.add_group
+    f = g.entities.add_face([
+      Geom::Point3d.new(gx0, y_plane, sill + fw), Geom::Point3d.new(gx1, y_plane, sill + fw),
+      Geom::Point3d.new(gx1, y_plane, win_head - fw), Geom::Point3d.new(gx0, y_plane, win_head - fw)
+    ])
+    next if f.nil?
+    f.material = glass_mat
+    f.back_material = glass_mat
+  end
+  add_glass.call(x0 + fw, cx - fw / 2.0)   # pane esquerdo
+  add_glass.call(cx + fw / 2.0, x1 - fw)   # pane direito
+end
+
+def build_window_basculante_h(frame_ents, sash_group, cx, half_w, sill, head, y_plane, frame_mat, glass_mat, out_dir)
+  # Basculante: moldura externa FIXA em frame_ents (= WindowGlass, valida no
+  # position_fidelity) + 1 FOLHA inclinada em sash_group (grupo SEPARADO). O vao
+  # ja foi carvado SO na altura do basculante (sill = BASCULANTE_SILL_IN), entao a
+  # parede abaixo esta intacta — sem bloco de preenchimento. Folha rotacionada.
+  fw = WINDOW_FRAME_W_IN
+  fd = WINDOW_FRAME_DEPTH_IN
+  ff = 0.03 * M_TO_IN    # perfil fino da folha
+  x0 = cx - half_w
+  x1 = cx + half_w
+  add_box = lambda do |container, bx0, bx1, bz0, bz1, depth, mat|
+    next if (bx1 - bx0).abs < 1e-6 || (bz1 - bz0).abs < 1e-6
+    g = container.add_group
+    yf = y_plane - depth / 2.0
+    f = g.entities.add_face([
+      Geom::Point3d.new(bx0, yf, bz0), Geom::Point3d.new(bx1, yf, bz0),
+      Geom::Point3d.new(bx1, yf, bz1), Geom::Point3d.new(bx0, yf, bz1)
+    ])
+    next if f.nil?
+    f.reverse! if f.normal.y < 0
+    f.pushpull(depth)
+    g.entities.grep(Sketchup::Face).each { |x| x.material = mat; x.back_material = mat }
+  end
+  # moldura externa FIXA do basculante (sill .. head; sill ja e o peitoril alto)
+  add_box.call(frame_ents, x0, x1, sill, sill + fw, fd, frame_mat)        # base
+  add_box.call(frame_ents, x0, x1, head - fw, head, fd, frame_mat)        # topo
+  add_box.call(frame_ents, x0, x0 + fw, sill, head, fd, frame_mat)        # lateral esq
+  add_box.call(frame_ents, x1 - fw, x1, sill, head, fd, frame_mat)        # lateral dir
+  # FOLHA (moldura fina + vidro) -> sash_group, construida reta, depois inclinada.
+  inner_lo = sill + fw
+  inner_hi = head - fw
+  fx0 = x0 + fw
+  fx1 = x1 - fw
+  se = sash_group.entities
+  add_box.call(se, fx0, fx1, inner_lo, inner_lo + ff, fd * 0.6, frame_mat)  # base folha
+  add_box.call(se, fx0, fx1, inner_hi - ff, inner_hi, fd * 0.6, frame_mat)  # topo folha
+  add_box.call(se, fx0, fx0 + ff, inner_lo, inner_hi, fd * 0.6, frame_mat)  # lat esq
+  add_box.call(se, fx1 - ff, fx1, inner_lo, inner_hi, fd * 0.6, frame_mat)  # lat dir
+  gv = se.add_group                                                # vidro da folha
+  vf = gv.entities.add_face([
+    Geom::Point3d.new(fx0 + ff, y_plane, inner_lo + ff), Geom::Point3d.new(fx1 - ff, y_plane, inner_lo + ff),
+    Geom::Point3d.new(fx1 - ff, y_plane, inner_hi - ff), Geom::Point3d.new(fx0 + ff, y_plane, inner_hi - ff)
+  ])
+  if vf
+    vf.material = glass_mat
+    vf.back_material = glass_mat
+  end
+  # inclina a folha: pivot no TOPO, base abre pra fora (out_dir).
+  pivot = Geom::Point3d.new(cx, y_plane, inner_hi)
+  rot = Geom::Transformation.rotation(pivot, Geom::Vector3d.new(1, 0, 0), out_dir * BASCULANTE_OPEN_RAD)
+  sash_group.transform!(rot)
+end
+
 def build_window_aperture_3d(parent_ents, opening, host_wall, thickness_pt,
                               glass_mat, index)
   oid = opening['id'] || index.to_s
@@ -663,9 +1037,20 @@ def build_window_aperture_3d(parent_ents, opening, host_wall, thickness_pt,
   cx_in = cx_pt * PT_TO_IN
   cy_in = cy_pt * PT_TO_IN
   half_w_in = (w_pt * PT_TO_IN) / 2.0
-  sill_in = WINDOW_SILL_IN
-  head_in = WINDOW_HEAD_IN
-  thickness_in = thickness_pt.to_f * PT_TO_IN
+  # Basculante carva SO a sua altura (peitoril alto BASCULANTE_SILL_IN ate a verga)
+  # -> a parede ABAIXO fica intacta e lisa (sem bloco/quadrado de preenchimento).
+  is_basc = (ori == 'h') && ((w_pt * PT_TO_IN) <= BASCULANTE_MAX_W_IN)
+  sill_in = is_basc ? BASCULANTE_SILL_IN : WINDOW_SILL_IN
+  head_in = is_basc ? BASCULANTE_HEAD_IN : WINDOW_HEAD_IN
+  # Use the HOST wall's own thickness for the through-carve, not the global
+  # consensus thickness. FP-031 #28 merged collinear walls and set each merged
+  # wall's thickness to the MEAN of its segments, so a merged wall (e.g. m003 =
+  # 5.52pt) can be THICKER than the global (5.40pt). pushpull(-global) then
+  # stops short of the far face -> no through-hole -> a blind pocket that reads
+  # as a flat dark rectangle, not a glazed window (Felipe: BANHO 2 "só o recorte,
+  # sem vidro"). The shell builds the wall at host_wall['thickness'], so carving
+  # exactly that distance reaches the far face and merges into a clean hole.
+  thickness_in = (host_wall['thickness'] || thickness_pt).to_f * PT_TO_IN
   # Host wall's perpendicular position + tolerance (FP-031), so the aperture
   # only carves the host wall (mirrors the glass, which uses host_wall.start).
   host_at_in = (ori == 'h' ? host_wall['start'][1].to_f
@@ -728,15 +1113,25 @@ def build_window_aperture_3d(parent_ents, opening, host_wall, thickness_pt,
     end
     carve_succeeded = true
 
-    # Glass pane at mid-thickness — separate top-level group.
+    # Esquadria (moldura branca + montante + vidro verde) no plano da parede.
+    # 'h': esquadria parametrica de perfil fixo (build_window_frame_h). 'v':
+    # vidro simples por enquanto (nenhuma janela 'v' na planta_74; TODO frame_v).
+    glass_group = parent_ents.add_group
+    glass_group.name = "WindowGlass_Group_#{oid}"
+    frame_mat = (parent_ents.model.materials['plan_window_frame'] rescue nil) || glass_mat
     if ori == 'h'
       mid_y_in = host_wall['start'][1].to_f * PT_TO_IN
-      glass_pts = [
-        Geom::Point3d.new(cx_in - half_w_in, mid_y_in, sill_in),
-        Geom::Point3d.new(cx_in + half_w_in, mid_y_in, sill_in),
-        Geom::Point3d.new(cx_in + half_w_in, mid_y_in, head_in),
-        Geom::Point3d.new(cx_in - half_w_in, mid_y_in, head_in),
-      ]
+      if is_basc
+        shell_cy = (plan_shell.bounds.center.y rescue mid_y_in)
+        out_dir = (mid_y_in >= shell_cy) ? 1.0 : -1.0   # exterior = longe do centro
+        sash_group = parent_ents.add_group
+        sash_group.name = "WindowSash_Group_#{oid}"
+        build_window_basculante_h(glass_group.entities, sash_group, cx_in, half_w_in,
+                                  sill_in, head_in, mid_y_in, frame_mat, glass_mat, out_dir)
+      else
+        build_window_frame_h(glass_group.entities, cx_in, half_w_in,
+                             sill_in, head_in, mid_y_in, frame_mat, glass_mat)
+      end
     else
       mid_x_in = host_wall['start'][0].to_f * PT_TO_IN
       glass_pts = [
@@ -745,14 +1140,11 @@ def build_window_aperture_3d(parent_ents, opening, host_wall, thickness_pt,
         Geom::Point3d.new(mid_x_in, cy_in + half_w_in, head_in),
         Geom::Point3d.new(mid_x_in, cy_in - half_w_in, head_in),
       ]
-    end
-
-    glass_group = parent_ents.add_group
-    glass_group.name = "WindowGlass_Group_#{oid}"
-    glass_face = glass_group.entities.add_face(glass_pts)
-    if glass_face
-      glass_face.material = glass_mat
-      glass_face.back_material = glass_mat
+      glass_face = glass_group.entities.add_face(glass_pts)
+      if glass_face
+        glass_face.material = glass_mat
+        glass_face.back_material = glass_mat
+      end
     end
 
     break
@@ -1025,6 +1417,7 @@ def write_geometry_report(model, report_path, ctx)
       'count'   => sb_grps.length,
       'skipped_count' => ctx[:soft_barriers_skipped] || 0,
       'skip_reasons'  => ctx[:soft_barriers_skip_reasons] || [],
+      'barriers'      => ctx[:soft_barrier_records] || [],
     },
     'totals' => {
       'top_level_groups' => groups.length,
@@ -1080,14 +1473,18 @@ puts "[rb] shell: solid=#{shell_result['pieces_solid']} " \
 
 # 2. Floors (one per room)
 rooms = consensus['rooms'] || []
+room_floors = shell_data['room_floors'] || {}
 floors_built  = 0
 floors_failed = []
+floors_prefab = 0
 rooms.each_with_index do |room, i|
   palette_rgb = ROOM_PALETTE[i % ROOM_PALETTE.length]
   mat_name = "floor_#{room['id'] || i}"
   mat = model.materials.add(mat_name)
   mat.color = Sketchup::Color.new(*palette_rgb)
-  res = build_floor(model.active_entities, room, mat, i)
+  rid = (room['id'] || "r#{i}").to_s
+  res = build_floor(model.active_entities, room, mat, i, room_floors[rid])
+  floors_prefab += 1 if res['ok'] && res['source'] == 'python_cell'
   if res['ok']
     floors_built += 1
   else
@@ -1100,32 +1497,64 @@ rooms.each_with_index do |room, i|
     puts "[rb] floor FAILED for #{room['name'] || room['id']}: #{res['reason']}"
   end
 end
-puts "[rb] floors: built=#{floors_built} failed=#{floors_failed.length}"
+puts "[rb] floors: built=#{floors_built} failed=#{floors_failed.length} " \
+     "(prefab_cell=#{floors_prefab})"
 
-# 3. Soft barriers (optional)
+# 3. Soft barriers — rendered BY barrier_type + source, never global on/off.
+# Unsourced barriers (no barrier_type / confirmation) are NOT emitted as
+# physical geometry (Hard Rule #1). railing/guardrail -> grade material;
+# peitoril/mureta/parapet -> low solid wall. Each decision is recorded in
+# sb_records so the railing gates can verify the SKP against the consensus.
 sb_built = 0
 sb_skipped = 0
 sb_skip_reasons = []
+sb_records = []
 if sb_mode == 'groups'
   parapet_mat = model.materials.add('plan_parapet')
   parapet_mat.color = Sketchup::Color.new(*PARAPET_RGB)
-  # Precompute wall footprints once so FP-006 can reject perimeter
-  # segments without re-deriving the footprint per call.
+  railing_mat = model.materials.add('plan_railing')
+  railing_mat.color = Sketchup::Color.new(60, 62, 70)
+  # Vidro translucido azulado do guarda-corpo (calibrado pelo componente 3DW).
+  glass_mat = model.materials.add('plan_glass')
+  glass_mat.color = Sketchup::Color.new(*GLASS_RGB)
+  glass_mat.alpha = GLASS_ALPHA
   walls_for_overlap = consensus['walls'] || []
   thickness_for_overlap = consensus['wall_thickness_pts'] || 5.4
   wall_footprints = wall_footprints_in_su(
     walls_for_overlap, thickness_for_overlap,
   )
   (consensus['soft_barriers'] || []).each_with_index do |sb, i|
+    sid = sb['id'] || "sb#{i}"
+    render_as = barrier_render_as(sb)
+    if render_as.nil?
+      sb_skipped += 1
+      sb_skip_reasons << "sb[#{i}] #{sid}: unsourced_no_provenance (not rendered)"
+      sb_records << {
+        'id' => sid, 'barrier_type' => sb['barrier_type'],
+        'sourced' => false, 'rendered' => false, 'render_as' => nil,
+        'skip_reason' => 'unsourced_no_provenance',
+      }
+      next
+    end
+    mat = render_as == 'railing' ? railing_mat : parapet_mat
     res = build_soft_barrier(
-      model.active_entities, sb, parapet_mat, i,
-      wall_footprints: wall_footprints,
+      model.active_entities, sb, mat, i, wall_footprints: wall_footprints,
     )
     if res['ok']
       sb_built += 1
+      sb_records << {
+        'id' => sid, 'barrier_type' => sb['barrier_type'],
+        'sourced' => true, 'rendered' => true, 'render_as' => render_as,
+        'host_wall_id' => sb['host_wall_id'], 'length_m' => res['length_m'],
+      }
     else
       sb_skipped += 1
-      sb_skip_reasons << "sb[#{i}]: #{res['reason']}"
+      sb_skip_reasons << "sb[#{i}] #{sid}: #{res['reason']}"
+      sb_records << {
+        'id' => sid, 'barrier_type' => sb['barrier_type'],
+        'sourced' => true, 'rendered' => false, 'render_as' => nil,
+        'skip_reason' => res['reason'],
+      }
     end
   end
 elsif sb_mode == 'skip'
@@ -1151,8 +1580,10 @@ door_mat.color = Sketchup::Color.new(*DOOR_RGB)
 sill_mat = model.materials.add('plan_window_sill')
 sill_mat.color = Sketchup::Color.new(*PARAPET_RGB)
 glass_mat = model.materials.add('plan_window_glass')
-glass_mat.color = Sketchup::Color.new(*GLASS_RGB)
-glass_mat.alpha = GLASS_ALPHA
+glass_mat.color = Sketchup::Color.new(*WINDOW_GLASS_RGB)
+glass_mat.alpha = WINDOW_GLASS_ALPHA
+frame_mat = model.materials.add('plan_window_frame')
+frame_mat.color = Sketchup::Color.new(*WINDOW_FRAME_RGB)
 lintel_mat = model.materials.add('plan_window_lintel')
 lintel_mat.color = Sketchup::Color.new(*LINTEL_RGB)
 passage_mat = model.materials.add('plan_passage_marker')
@@ -1239,6 +1670,7 @@ if outreport
     soft_barriers_mode:       sb_mode,
     soft_barriers_skipped:    sb_skipped,
     soft_barriers_skip_reasons: sb_skip_reasons,
+    soft_barrier_records:     sb_records,
     floors_failed:            floors_failed,
     py_stats:                 shell_data['stats'],
   }
@@ -1258,6 +1690,33 @@ if outpng_top
   # Capture the exact projection while the top camera is still active.
   write_top_projection_sidecar(model, outpng_top, 1600, 1200)
   puts "[rb] wrote #{outpng_top} (+ .proj.json)"
+
+  # Prova visual do piso: MESMA camera top, mas SO os Floor_Groups visiveis
+  # (paredes/janelas/portas ocultas) -> inspeciona overlap / buraco escondido /
+  # vazamento sem a parede tapando (Felipe 2026-06-04). Restaura a visibilidade
+  # antes do save pro .skp continuar completo.
+  floors_png = if outpng_top =~ /_top\.png\z/i
+                 outpng_top.sub(/_top\.png\z/i, '_floors_top.png')
+               else
+                 outpng_top.sub(/\.png\z/i, '') + '_floors.png'
+               end
+  hidden_for_floors = []
+  begin
+    model.active_entities.each do |e|
+      next unless e.respond_to?(:hidden?) && e.respond_to?(:name)
+      is_floor = e.name.to_s.start_with?('Floor_Group_')
+      if !is_floor && !e.hidden?
+        e.hidden = true
+        hidden_for_floors << e
+      end
+    end
+    write_png(model, floors_png)   # camera top inalterada -> enquadramento igual
+    puts "[rb] wrote #{floors_png} (floors-only, paredes ocultas)"
+  rescue StandardError => err
+    puts "[rb] floors-only render skipped: #{err.class}: #{err.message}"
+  ensure
+    hidden_for_floors.each { |e| e.hidden = false if e.valid? }
+  end
 end
 
 # 6. Save .skp last (this is the launcher's exit signal)

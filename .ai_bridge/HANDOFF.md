@@ -1,7 +1,124 @@
 # Handoff — sketchup-mcp
 
-> Fio da meada entre sessões. Última atualização: **2026-05-30 ~23:20 UTC** (NÃO PARE/loop: suite determinística COMPLETA — 3 detectores + runner único; backlog det. limpo; 2 NEEDS-HUMAN abertos).
+> Fio da meada entre sessões. Última atualização: **2026-06-03 (noite)** (wt-dash portado+consolidado, painel dirty-driver limpo; fidelidade planta_74 LANDADA em `d48798d` antes; gate :8765 LIVE).
 > Leia primeiro ao iniciar sessão.
+
+## 2026-06-03 (noite) — wt-dash PORTADO + consolidado (painel: dirty driver LIMPO)
+
+Felipe pedio "Resolver o YELLOW" via #planta. O sub-fork **port-vs-discard** foi roteado ao gate
+`:8765` = **GO high-confidence** (zero superfície de fidelidade; PNGs dirty = único risco visual, descartados).
+- **Portados pra develop** (cherry-pick LIMPO, sem conflito) os 2 commits de cockpit do antigo `feat/gate-dashboard`:
+  `ee7ebcf` (botões de ação corretiva: `/api/actions` + POST `/api/actions/process-consults` + `/api/actions/dirty-detail`)
+  e `f5b799a` (painel de custo real: `/api/processes` + `_classify_processes`). 403 linhas, **com 8 testes**.
+- **Integridade verificada**: py_compile+AST OK; rotas novas E as de develop (next-best-actions, responsivo,
+  score roadmap-aware) **coexistem**; **pytest 363 ✓** (355→363); smoke de runtime em instância descartável
+  (`:8799`): `/health` `/api/processes` `/api/actions` `/api/actions/dirty-detail` `/api/next-best-actions` `/` → todos **200**.
+- **Descartado** (gate GO): 3 PNGs canônicos dirty do worktree (regen NÃO-validado — clobariam o `d48798d`
+  aprovado) + scratch untracked. Worktree `wt-dash` removido (--force), branch local + **remote
+  `feat/gate-dashboard` deletados**, develop **pushed** (`e21e548..8826297`).
+- **Painel agora**: `dirty_repos: []`. Reason caiu de "1 dirty; 2 OPEN; 1 adiada" → **"2 OPEN; 1 adiada"**.
+  Segue **YELLOW por ROADMAP, não por wt-dash**: DIFF-004 (worktree-lock root-fix NÃO implementado — OPEN real;
+  minha limpeza reduz superfície mas não atende a aceitação "lock visível no painel"), DIFF-006 (constantes
+  builder hardcoded, LOW/roadmap — deferir = mute-button, **NÃO feito**), DIFF-001 (DEFERRED, aceito).
+  **GREEN não é verdade hoje** (itens de roadmap reais abertos); não foi forçado.
+- **Pendências honestas (próxima sessão):** (1) **RESOLVIDO** — `:8765` reiniciado no server **CONSOLIDADO**
+  (`sketchup-mcp/develop`): painéis Custo real + Ações corretivas + fix do `canonical_skp` todos LIVE (pid novo,
+  oracle claude-opus-4-8). ⚠️ **LIÇÃO**: a remoção do worktree `wt-dash` QUEBROU os launchers EXTERNOS ao repo
+  que hardcodam o path do server — `E:\Claude\SUBIR-COCKPIT.cmd` + `E:\Claude\claude-bridge\gate-watchdog.ps1` +
+  `gate-watchdog-loop.ps1` apontavam `E:\Claude\wt-dash\tools\claude_bridge\server.py` (deletado) → o cockpit caiu
+  e o launcher do Felipe falhou com erro enganoso ("confere o .oauth_token"; o token estava OK). **Repontados os 3
+  p/ `sketchup-mcp\tools\claude_bridge\server.py`.** Regra: SEMPRE grep refs ao path (launchers/.cmd/.ps1/watchdog/
+  Scheduled Task) ANTES de remover worktree.
+  (2) worktrees stale `wt-fidelity` (fidelidade landou via squash `d48798d`, mas branch diverge 94 arq/728+/12032−
+  c/ HANDOFF velho + review artifacts únicos) e `wt-gh` (`chore/gh-autopilot-skill`, possível outro agente) —
+  relacionam-se ao DIFF-004; **não removidos** (não-task, conteúdo único). (3) **RESOLVIDO** —
+  `canonical_skp.planta_74` saía `null` porque `/api/status` colapsava `canonical → verdict` (e a planta_74
+  não tem verdict file no dir canônico). `skp_timeline` agora expõe o path do `.skp` (`skp`/`skps`/`has_skp`)
+  e o status reporta `{skp, has_skp, verdict}` → planta_74 = `{skp: artifacts/planta_74/planta_74.skp,
+  has_skp: true, verdict: null}`. +2 testes (hermético + repo real), pytest 365 ✓.
+
+## 2026-06-03 (tarde) — fidelidade planta_74 LANDADA (jamba + gradil + peitoril)
+
+A `wt-fidelity` (feat/planta74-peitoril) foi landada em develop (`d48798d`, squash). Felipe
+**VISUAL_REVIEW = IMPROVED** (gate PDF×BEFORE×AFTER) e confirmou rebuild==aprovado.
+- **Cascata que o gate visual sozinho NÃO pegaria** (cada um corrigido): (1) ID `m019`
+  DUPLICADO — o `build_shell` indexa walls por id (`{w["id"]: ...}`), o dup colapsava uma
+  parede; o `kitchen_fix` aprovado fora buildado com geometria ambígua → renomeei p/ `m020`.
+  (2) **rebuild necessário** (consensus corrigido ≠ kitchen_fix). (3) SU `add_face` estourava
+  "Duplicate points" → `_drop_coincident` em `serialize_polygons` remove ruído de união
+  shapely (<1e-3 pdf-pt). (4) axis-aligned test tol 1e-6→1e-3 + drift sentinel; junction 21→23.
+- Decisões roteadas ao gate :8765 (modo B): Option A (tolerância) + Option B (dedup).
+- pytest **355 ✓**, deterministic gates **PASS**. canonical `artifacts/planta_74` rebuilt
+  (IDs únicos, consistente). 1 gate auxiliar `soft_barrier_source_audit` standalone dá FAIL de
+  BOOKKEEPING (skip por wall_overlap, não no_source) — resultado built=1 (gradil) é o aprovado.
+- **Painel: YELLOW** (`dirty=wt-dash`, DIFF-001 DEFERRED). LIÇÃO: build via SU autorun precisa
+  do plugin em `%APPDATA%\SketchUp\SketchUp 2026\SketchUp\Plugins\autorun_consume.rb`;
+  ver `autorun_error.txt` ao diagnosticar. SU exe: `C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe`.
+- **Pendente**: `wt-dash` (último dirty — cockpit custo + botões + 3 PNGs canonical divergentes;
+  roadmap = remover). Decisão do Felipe.
+
+## 2026-06-03 — cockpit responsivo + score distingue roadmap de incêndio (painel RED→YELLOW)
+
+Sessão de higiene do cockpit/gate + limpeza de dirty. Landado em develop (`ea2c37b`, push direto Contents:RW — token sem scope PR).
+- **Gate :8765 LIVE** = `tools/claude_bridge/server.py` (Opus-4.8 xhigh) — efetiva a Opção A do consult 20260531 (consolidar no repo; standalone aposentado). Atalho desktop **"SketchUp Cockpit + Gate"** + `tools/claude_bridge/launch_cockpit.ps1` (1-clique: sobe gate+cockpit, abre o dashboard).
+- **dashboard.html responsivo**: media queries (grid 2→1col, nav, tabelas roláveis, galeria); antes tinha **0 @media**. (Lido por request → sem restart.)
+- **score roadmap-aware** (decisão roteada ao gate :8765, modo B, GO high-confidence): dificuldade `DEFERRED` (exige triplet why_not_fixed_yet+next_hypothesis+acceptance_criteria **E** `review_by` não-vencida; **re-open trigger** volta a RED se vencer/perder triplet) conta YELLOW/roadmap, não RED. **DIFF-001 → DEFERRED** (review_by 2026-07-15). Matou o RED-permanente por item de roadmap. Anti-mute-button.
+- **5 consults pendentes resolvidos** (registro de desfecho honesto — bridge vivia offline na época, decisões já tomadas). `.ai_bridge/{questions,responses,audit,*.jsonl}` agora **gitignored** (log efêmero; HANDOFF.md segue versionado).
+- **Também landado**: `opening_aperture_audit` tool+test (5✓), spec `generalize_any_plant`, uv.lock, evidência review planta_74.
+- **PENDENTE (decisão Felipe):**
+  1. **`wt-fidelity`** (`feat/planta74-peitoril`, ahead 9) = trabalho de fidelidade real (jamba cozinha, gradil, peitoril sb005, position_fidelity_gate, wall_exact_match_gate). **Muda geometria → precisa gate visual PDF×BEFORE×AFTER antes de landar.** É o "trabalho preso" — próximo passo natural: gerar o AFTER e montar o trio pra Felipe julgar.
+  2. **`wt-dash`** (`feat/gate-dashboard`, ahead 2) = cockpit "custo real" + "botões corretivos" (não em develop) + 3 PNGs canonical divergentes (regen não-validado). Roadmap quer **remover wt-dash + consolidar serving**. Decidir: portar os 2 commits p/ develop vs descartar.
+
+## 2026-05-31 ~02:30 UTC — /loop: gate framework §6 (6.5→6.1) ENTREGUE
+
+Branch `feat/gate-framework` → landada em develop por fatia (push direto, Contents:RW). Commit por
+fatia, teste por fatia, consulta ao :8765 nas decisões. **pytest 277 ✓.**
+- **6.5** (`c2bb561`): bridge robustez — `parse_ask_payload` (UTF-8 errors=replace, aceita
+  `prompt`|`question`), `health_payload` (/health expõe `{ok,oracle,ask_field,verdict_enum,modes}`).
+- **6.4** (`d39b1a1`): `tools/gate_verdict.py` `parse_verdict` + ANSWER_FORMAT; SYSTEM/asker exigem
+  **Confidence + Assumptions** (afirmação sobre o que o oracle não vê → assumptions, não fato).
+- **6.2** (`c9c755d`): red-team mode (`{"mode":"redteam"}` → `apply_mode` força argumentar CONTRA).
+- **6.3** (`83baa1d`): `tools/gate_filefetch.py` — oracle pede arquivo via MORE-INFO+Need-files;
+  allowlist read-only (nunca .oauth_token/.env/*.key/traversal).
+- **6.1** (`ed32fa6`, gate :8765 redteam-consult = GO(B)): `tools/oracle_router.py` `route()` —
+  factual→determinístico (ground-truth vence), risky/independent→família≠Claude, else→claude.
+- ⚠️ **BRIDGE PRECISA RESTART**: o `:8765` rodando tem o server.py VELHO; §6.2-6.5 só ficam LIVE após
+  reiniciar (`tools/claude_bridge/start.ps1`, carrega `.oauth_token`). Código landado; processo stale.
+- **Nota reconcile**: develop NÃO tinha a promoção #28 (só o candidato); cherry-pick `7faed7f` landou
+  (fixture 19 walls, opening_host PASS). Ver LL-034.
+- **Resta do spec (não pedido nesta ordem): §5 audit-core** (audit.jsonl append-only + query/replay +
+  Gate/registry + worker[sob OK Felipe]) — "o coração", delegado ao loop. Próximo chunk natural.
+
+## 2026-05-31 ~00:40 UTC — #28 PROMOVIDO a canônico (Felipe aprovou IMPROVED)
+
+O regen candidate virou a **fixture canônica** `fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json`
+(19 walls merged, openings re-hostados, IDs `m001`-`m019`). Detectores: opening_host **PASS(0/12)**, wall_overlap
+**PASS(0)**. Build canônico: janelas **aperture vazado ×4** (BANHO 02/o009 → host m003, WindowGlass presente =
+confirmado certo, como o Felipe pediu), gates ✓. **6 testes que pinavam o estado bugado antigo foram repinados pro
+novo** (flags→PASS; wall_shell junction 27→21/free 43→17, 0 violação de stub; n_walls≥30→≥15; regen idempotente
+`<=`). test-data render regerado do build canônico. **pytest 246 ✓**. Artefato em
+`artifacts/review/planta_74/canonical_20260531/`. Ver LL-033. → segue /loop.
+
+## 2026-05-31 — VISUAL_REVIEW #28 RESOLVIDO (Felipe): IMPROVED → PROMOVER
+
+Felipe revisou o regen candidate (janelas painel→aperture vazado) vs PDF: **IMPROVED**
+("melhorou demais"; remover o vidro das janelas ajudou; banheiro-2 já estava certa antes —
+confirmar que seguiu certa). → **AÇÃO: promover o regen a consensus canônico** (fixture
+planta_74). OK visual do Felipe DADO (carve-out modo B cumprido). Rodar gates verdes
+(opening_host_audit, pytest) + commit + PR. (Registrado por peer-Claude a pedido do Felipe.)
+
+## 2026-05-31 ~00:00 UTC — /loop modo B: #29 done, #28 regen done → VISUAL_REVIEW
+
+- **#29 câmera top determinística** (`cdc100f`): fit 4:3 explícito (não zoom_extents) → 0 paredes clipadas,
+  gate `overlay_diff` cobre as 35. Fecha a limitação do #2.
+- **#28 regen consensus** (gate :8765 = GO approach B; `930bb70`): `tools/regenerate_consensus.py` merge
+  colinear (35→19 walls, duplicata absorvida) + re-host openings → **opening_host PASS(0/12), wall_overlap
+  PASS(0)**. Rebuild do candidato: janelas **painel→APERTURE vazado ×4** (find_wall_face acha a face sólida
+  na parede contínua), gates ✓, overlay PASS. Determinístico sólido. Ver LL-032.
+- **PAROU em VISUAL_REVIEW**: a promoção (substituir a fixture pinada `consensus_with_human_walls…json` pelo
+  candidato + re-pin smoke) muda o render → decisão do Felipe. Candidato + before/after + doc em
+  `artifacts/review/planta_74/regen_candidate_20260531/`. Fixture canônica **intocada**.
+- pytest **246 ✓**. Commits do loop: cdc100f, 930bb70 (+ este handoff).
 
 ## 2026-05-30 ~23:20 UTC — /loop: suite de gates determinísticos COMPLETA + backlog limpo
 

@@ -1,10 +1,23 @@
 {
   "schema_version": "1.0.0",
   "exporter": "build_plan_shell_skp",
-  "consensus_sha256": "e1b1a53d0e8c552c98e316a3e0553dfb0a4cbd282366627445336a6ad4b0f54f",
+  "consensus_sha256": "1fa2e485b03ae239ee3ab456e719565ed872b663640f277343ebe3aff54a8fcd",
   "skp_path": "artifacts/planta_74/planta_74.skp",
-  "source_run_path": "runs/planta_74/planta_74.skp",
-  "created_at": "2026-05-27T06:36:10Z",
+  "created_at": "2026-06-04T20:27:49Z",
   "sketchup_path": "C:\\Program Files\\SketchUp\\SketchUp 2026\\SketchUp\\SketchUp.exe",
-  "command": "C:\\Program Files\\SketchUp\\SketchUp 2026\\SketchUp\\SketchUp.exe E:\\Claude\\sketchup-mcp\\runs\\planta_74\\_bootstrap.skp"
+  "command": "C:\\Program Files\\SketchUp\\SketchUp 2026\\SketchUp\\SketchUp.exe E:\\Claude\\sketchup-mcp\\runs\\planta_74\\planta_74.skp",
+  "plant": "planta_74",
+  "stable_path": "artifacts/planta_74/planta_74.skp",
+  "source_run_path": "E:\\Claude\\sketchup-mcp\\runs\\planta_74\\model.skp",
+  "promoted_from": "runs\\planta_74",
+  "skp_sha256": "be272a18fe2776282e01c89316abf5ee28caac1c25ef486aa16854c1592e9c73",
+  "skp_bytes": 156594,
+  "files": [
+    "planta_74.skp",
+    "planta_74_iso.png",
+    "planta_74_top.png",
+    "planta_74_top.png.proj.json",
+    "geometry_report.json"
+  ],
+  "note": "latest correct build at a fixed path; refresh via tools/promote_canonical.py or build_plan_shell_skp --promote"
 }

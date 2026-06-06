@@ -170,6 +170,66 @@ def test_run_gate_invalid_trigger_returns_invalid_no_files(tmp_path: Path):
     assert not (tmp_path / "q").exists() or not list((tmp_path / "q").iterdir())
 
 
+# ---- run_gate online parsing (§6.4 wired) ---------------------------
+
+
+def test_run_gate_online_parses_verdict(tmp_path: Path, monkeypatch):
+    """§6.4 wired: when the bridge responds, run_gate parses the verdict so
+    the asker can act on it programmatically — not just re-read prose."""
+    import tools.ask_gpt_gate as gate
+    raw = (
+        "- Verdict: NO-GO\n"
+        "- Confidence: high\n"
+        "- Reasoning: the change mutates a canonical fixture.\n"
+        "- Assumptions:\n"
+        "  - the smoke suite pins this fixture\n"
+        "- Risks:\n"
+        "  - silent regression\n"
+        "- Suggested next action: revert and branch\n"
+    )
+    monkeypatch.setattr(
+        gate, "probe_bridge", lambda url=gate.BRIDGE_URL: (True, "ok"))
+    monkeypatch.setattr(
+        gate, "call_bridge", lambda prompt, url=gate.BRIDGE_URL, mode="": raw)
+    g = GateInput(
+        trigger="user_requested_consult", question="merge?", context={})
+    result = run_gate(
+        g, questions_dir=tmp_path / "q", responses_dir=tmp_path / "r")
+    assert result.status == "ok"
+    assert result.verdict == "NO-GO"
+    assert result.confidence == "high"
+    assert result.assumptions and any(
+        "smoke suite" in a for a in result.assumptions)
+    assert result.raw_response == raw
+    body = result.response_path.read_text(encoding="utf-8")
+    assert "Parsed verdict" in body
+    assert "NO-GO" in body
+
+
+def test_run_gate_sends_redteam_on_heavy_trigger(tmp_path: Path, monkeypatch):
+    """6.2 wired: heavy/high-stakes triggers steelman the opposition (mode=redteam);
+    routine triggers send no mode."""
+    import tools.ask_gpt_gate as gate
+    captured = {}
+
+    def fake_call(prompt, url=gate.BRIDGE_URL, mode=""):
+        captured["mode"] = mode
+        return "- Verdict: GO\n- Confidence: high\n"
+
+    monkeypatch.setattr(gate, "probe_bridge", lambda url=gate.BRIDGE_URL: (True, "ok"))
+    monkeypatch.setattr(gate, "call_bridge", fake_call)
+
+    run_gate(
+        GateInput(trigger="a_b_c_decision_with_tradeoff", question="A or B?", context={}),
+        questions_dir=tmp_path / "q", responses_dir=tmp_path / "r")
+    assert captured["mode"] == "redteam"
+
+    run_gate(
+        GateInput(trigger="oracle_pass_but_known_warnings", question="merge?", context={}),
+        questions_dir=tmp_path / "q2", responses_dir=tmp_path / "r2")
+    assert captured["mode"] == ""
+
+
 # ---- repo structure --------------------------------------------------
 
 

@@ -1,0 +1,33 @@
+{
+  "schema_version": "visual_findings.v1",
+  "top_level_verdict": "PASS",
+  "axes": {
+    "global_visual": {
+      "verdict": "PASS",
+      "evidence": "The overall visual representation is accurate and consistent with the PDF."
+    },
+    "wall_fidelity": {
+      "verdict": "PASS",
+      "evidence": "All walls appear correctly aligned and continuous."
+    },
+    "room_fidelity": {
+      "verdict": "PASS",
+      "evidence": "Rooms are correctly defined and aligned."
+    },
+    "window_fidelity": {
+      "verdict": "PASS",
+      "evidence": "Windows are correctly placed and aligned."
+    },
+    "door_fidelity": {
+      "verdict": "PASS",
+      "evidence": "Doors are correctly placed and aligned."
+    },
+    "scale_rotation": {
+      "verdict": "PASS",
+      "evidence": "The scale and rotation of the model are consistent with the PDF."
+    }
+  },
+  "findings": [],
+  "source": "oracle_bridge",
+  "raw_confidence": "high"
+}

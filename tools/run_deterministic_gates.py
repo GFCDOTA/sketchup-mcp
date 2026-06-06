@@ -8,10 +8,12 @@ verdict + exit code. No SU build, no PDF, no network — pure + fast.
   - opening_host  : opening<->host-wall consistency (tools/opening_host_audit)
   - wall_overlap  : duplicate/overlapping walls   (tools/wall_overlap_audit)
   - wall_presence : consensus walls present in the SKP top render
-                    (tools/overlay_diff, only if --render + <png>.proj.json)
+                    (tools/overlay_diff, when --render + <png>.proj.json exist).
+                    --render given but sidecar MISSING -> overall=INCOMPLETE
+                    (exit 3), never a silent green.
 
-Deterministic only. Visual/fixture judgement is NOT done here (it self-PASSes);
-those stay NEEDS-HUMAN.
+Overall: PASS=0, FAIL=1, INCOMPLETE=3. Deterministic only. Visual/fixture
+judgement is NOT done here (it self-PASSes); those stay NEEDS-HUMAN.
 """
 from __future__ import annotations
 
@@ -42,24 +44,67 @@ def run_all(
     fixture: str | None = None,
     consensus_path: str | None = None,
     render_path: str | None = None,
+    report_path: str | None = None,
 ) -> dict:
     con = _load_consensus(fixture, consensus_path)
     gates: dict[str, dict] = {
         "opening_host": audit_opening_hosts(con),
         "wall_overlap": audit_wall_overlaps(con),
     }
-    if render_path and (Path(str(render_path) + ".proj.json").exists()):
-        from tools.overlay_diff import run_gate
-        cp = consensus_path or ""
-        if not cp and fixture:
-            cp = str(REPO_ROOT / "fixtures" / fixture
-                     / "consensus_with_human_walls_and_soft_barriers.json")
-        gates["wall_presence"] = run_gate(str(render_path), cp)
+    if render_path:
+        # render framing first (pixel-only, no sidecar): a clipped plant
+        # invalidates any visual review (external-review finding #1).
+        from tools.render_bbox_audit import audit_render_bbox
+        gates["render_bbox"] = audit_render_bbox(render_path)
+        sidecar = Path(str(render_path) + ".proj.json")
+        if sidecar.exists():
+            from tools.overlay_diff import run_gate
+            cp = consensus_path or ""
+            if not cp and fixture:
+                cp = str(REPO_ROOT / "fixtures" / fixture
+                         / "consensus_with_human_walls_and_soft_barriers.json")
+            gates["wall_presence"] = run_gate(str(render_path), cp)
+        else:
+            # --render given but the exact-projection sidecar is absent -> the
+            # render gate CANNOT run. Surface as INCOMPLETE (not PASS) so a green
+            # exit requires the render to actually be gated. A loud-print-only
+            # approach stays exit 0, and CI gates on the exit code, so it would
+            # NOT have blocked the canonical that shipped sidecar-less. Distinct
+            # from FAIL: "couldn't run" != "ran and found a discrepancy".
+            # (Oracle :8765 redteam verdict B; LL-035.)
+            gates["wall_presence"] = {
+                "verdict": "SKIPPED_NO_SIDECAR",
+                "sidecar": str(sidecar),
+                "reason": "projection sidecar missing; rebuild or "
+                          "promote_canonical to emit it",
+            }
 
-    def _ok(g: dict) -> bool:
-        return g.get("overall", g.get("verdict")) == "PASS"
+    if report_path:
+        rep = json.loads(Path(report_path).read_text("utf-8"))
+        from tools.parapet_not_railing_fallback_gate import (
+            audit_parapet_not_railing_fallback)
+        from tools.railing_exact_match_gate import audit_railing_exact_match
+        gates["railing_match"] = audit_railing_exact_match(con, rep)
+        gates["parapet_fallback"] = audit_parapet_not_railing_fallback(con, rep)
+        # position-fidelity (Felipe 2026-06-02): centro/largura/host de portas+
+        # janelas + alinhamento/cobertura/fechamento da grade, vs o geometry_report.
+        from tools.position_fidelity_gate import compare as _pf_compare
+        _pf = _pf_compare(con, rep)
+        _pf_fails = [f for f in _pf if f.get("verdict") == "FAIL"]
+        gates["position_fidelity"] = {
+            "overall": "FAIL" if _pf_fails else "PASS",
+            "findings": _pf, "n_fail": len(_pf_fails), "n_total": len(_pf)}
 
-    overall = "PASS" if all(_ok(g) for g in gates.values()) else "FAIL"
+    def _status(g: dict) -> str:
+        return g.get("overall", g.get("verdict"))
+
+    statuses = [_status(g) for g in gates.values()]
+    if any(s == "FAIL" for s in statuses):
+        overall = "FAIL"
+    elif any(s == "SKIPPED_NO_SIDECAR" for s in statuses):
+        overall = "INCOMPLETE"
+    else:
+        overall = "PASS"
     return {"overall": overall, "gates": gates}
 
 
@@ -69,7 +114,19 @@ def _summary_line(name: str, g: dict) -> str:
         return f"  opening_host : {v} ({g['n_fail']}/{g['n_openings']} openings)"
     if name == "wall_overlap":
         return f"  wall_overlap : {v} ({g['n_overlaps']} overlapping pairs)"
+    if name == "render_bbox":
+        return f"  render_bbox  : {v} (margins {g.get('margins')})"
+    if name == "railing_match":
+        return (f"  railing_match: {v} (exp={g.get('n_expected')} "
+                f"act={g.get('n_actual')}, {len(g.get('findings', []))} findings)")
+    if name == "parapet_fallback":
+        return (f"  parapet_fallbk: {v} "
+                f"({g.get('n_unsourced_rendered', 0)} unsourced rendered)")
+    if name == "position_fidelity":
+        return f"  position_fid : {v} ({g.get('n_fail')} FAIL de {g.get('n_total')})"
     if name == "wall_presence":
+        if v == "SKIPPED_NO_SIDECAR":
+            return f"  wall_presence: SKIPPED_NO_SIDECAR ({g.get('sidecar')})"
         return (f"  wall_presence: {v} ({len(g['findings'])} flagged, "
                 f"calib={g.get('calibration')})")
     return f"  {name}: {v}"
@@ -83,10 +140,14 @@ if __name__ == "__main__":
     ap.add_argument("--consensus", default=None)
     ap.add_argument("--render", default=None,
                     help="SKP top render PNG (needs sibling .proj.json)")
+    ap.add_argument("--report", default=None,
+                    help="geometry_report.json (liga railing + position_fidelity gates)")
     a = ap.parse_args()
     res = run_all(fixture=a.fixture, consensus_path=a.consensus,
-                  render_path=a.render)
+                  render_path=a.render, report_path=a.report)
     print(f"[deterministic-gates] overall={res['overall']}")
     for name, g in res["gates"].items():
         print(_summary_line(name, g))
-    raise SystemExit(0 if res["overall"] == "PASS" else 1)
+    # exit: PASS=0, FAIL=1, INCOMPLETE=3 (3 not 2 — argparse already uses 2 for
+    # CLI usage errors, so a distinct code avoids collision).
+    raise SystemExit({"PASS": 0, "FAIL": 1, "INCOMPLETE": 3}.get(res["overall"], 1))

@@ -62,11 +62,13 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
+from tools.gate_verdict import parse_verdict
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 BRIDGE_URL = "http://localhost:8765"
 BRIDGE_HEALTH_TIMEOUT_SEC = 5
-BRIDGE_CALL_TIMEOUT_SEC = 120
+BRIDGE_CALL_TIMEOUT_SEC = 260   # > server CLAUDE_TIMEOUT(240); Opus+xhigh is slow
 
 CANONICAL_TRIGGERS = (
     "oracle_verdict_neq_final_verdict",
@@ -78,6 +80,16 @@ CANONICAL_TRIGGERS = (
     "require_oracle_blocks_backend",
     "big_pr_changes_gate_or_spec",
     "user_requested_consult",
+)
+
+# Heavy/high-stakes triggers where one Claude consulting another risks agreement
+# bias -> send mode=redteam so the oracle steelmans the opposition first (gate 6.2,
+# a no-backend self-critique). The 6.1 multi-oracle router was deleted as fake
+# independence / infra-for-infra (gate verdict GO/B, 2026-05-31).
+REDTEAM_TRIGGERS = (
+    "a_b_c_decision_with_tradeoff",
+    "risk_of_inventing_geometry",
+    "big_pr_changes_gate_or_spec",
 )
 
 
@@ -108,6 +120,14 @@ class GateResult:
     question_path: Path | None = None
     response_path: Path | None = None
     raw_response: str | None = None
+    # §6.4 parsed structure (populated when the bridge responds) — gives the
+    # verdict teeth: the asker can act on it programmatically instead of
+    # re-reading prose.
+    verdict: str | None = None
+    confidence: str | None = None
+    assumptions: list | None = None
+    risks: list | None = None
+    next_action: str | None = None
 
 
 # ---- helpers ---------------------------------------------------------
@@ -171,8 +191,10 @@ def build_prompt(g: GateInput) -> str:
         "",
         "Respond with a short structured answer:",
         "",
-        "- **Verdict**: GO / NO-GO / MORE-INFO",
+        "- **Verdict**: GO / NO-GO / MORE-INFO / VISUAL_REVIEW",
+        "- **Confidence**: high / medium / low",
         "- **Reasoning**: 2-4 sentences",
+        "- **Assumptions**: bullets — what you ASSUMED or could NOT verify",
         "- **Risks**: bullets, what could go wrong",
         "- **Suggested next action**: 1-2 lines",
         "",
@@ -200,14 +222,28 @@ def write_question_file(
 
 def write_response_file(
     responses_dir: Path, question_path: Path, raw: str,
+    parsed: dict | None = None,
 ) -> Path:
     responses_dir.mkdir(parents=True, exist_ok=True)
     stem = question_path.stem  # same timestamp + trigger
     path = responses_dir / f"{stem}.md"
+    parsed_block = ""
+    if parsed:
+        asum = "; ".join(parsed.get("assumptions") or []) or "—"
+        risks = "; ".join(parsed.get("risks") or []) or "—"
+        parsed_block = (
+            f"## Parsed verdict (§6.4)\n\n"
+            f"- Verdict: {parsed.get('verdict') or '—'}\n"
+            f"- Confidence: {parsed.get('confidence') or '—'}\n"
+            f"- Assumptions: {asum}\n"
+            f"- Risks: {risks}\n"
+            f"- Next action: {parsed.get('next_action') or '—'}\n\n"
+        )
     content = (
         f"# GPT response — {stem.split('_', 1)[-1]}\n\n"
         f"## Timestamp\n\n{_now_utc_iso()}\n\n"
         f"## Question file\n\n`{question_path}`\n\n"
+        f"{parsed_block}"
         f"## Raw response\n\n---\n\n{raw}\n\n"
         f"## Decision taken\n\n"
         f"_To be filled by the agent or operator after acting on the response._\n"
@@ -216,9 +252,11 @@ def write_response_file(
     return path
 
 
-def call_bridge(prompt: str, url: str = BRIDGE_URL) -> str:
-    """POST {prompt} to /ask. Returns the response text or raises."""
+def call_bridge(prompt: str, url: str = BRIDGE_URL, mode: str = "") -> str:
+    """POST {prompt[, mode]} to /ask. Returns the response text or raises."""
     payload = {"prompt": prompt}
+    if mode:
+        payload["mode"] = mode
     data = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(
         f"{url}/ask",
@@ -279,12 +317,13 @@ def run_gate(
         )
 
     # Bridge is up — record question first, then call
-    bridge_status = f"ONLINE — {detail}"
+    mode = "redteam" if g.trigger in REDTEAM_TRIGGERS else ""
+    bridge_status = f"ONLINE — {detail}" + (f" | mode={mode}" if mode else "")
     question_path = write_question_file(
         questions_dir, g, prompt, bridge_status,
     )
     try:
-        raw = call_bridge(prompt, url=url)
+        raw = call_bridge(prompt, url=url, mode=mode)
     except (urllib.error.URLError, urllib.error.HTTPError,
             TimeoutError, OSError) as e:
         return GateResult(
@@ -292,13 +331,21 @@ def run_gate(
             detail=f"bridge call failed: {e!r}",
             question_path=question_path,
         )
-    response_path = write_response_file(responses_dir, question_path, raw)
+    parsed = parse_verdict(raw)
+    response_path = write_response_file(
+        responses_dir, question_path, raw, parsed,
+    )
     return GateResult(
         status="ok",
         detail="bridge responded",
         question_path=question_path,
         response_path=response_path,
         raw_response=raw,
+        verdict=parsed.get("verdict"),
+        confidence=parsed.get("confidence"),
+        assumptions=parsed.get("assumptions"),
+        risks=parsed.get("risks"),
+        next_action=parsed.get("next_action"),
     )
 
 
@@ -367,6 +414,9 @@ def main() -> int:
         print(f"[gate] response: {result.response_path}")
     print(f"[gate] status: {result.status}")
     print(f"[gate] detail: {result.detail}")
+    if result.verdict:
+        print(f"[gate] verdict: {result.verdict} "
+              f"(confidence: {result.confidence or '—'})")
 
     if result.status == "invalid":
         return 2

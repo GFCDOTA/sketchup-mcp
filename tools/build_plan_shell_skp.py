@@ -61,7 +61,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from shapely.geometry import MultiPolygon, Point, Polygon, box
+from shapely.geometry import LineString, MultiPolygon, Point, Polygon, box
 from shapely.ops import unary_union
 
 from tools.disarm_sketchup_autoruns import disarm as disarm_autoruns
@@ -296,21 +296,50 @@ def _canonicalise_axis_aligned_ring(coords: list[tuple[float, float]],
     return keep
 
 
+def _remove_small_teeth(ring: list, tol: float = 3.0) -> list:
+    """Remove corner-notch 'teeth' — small SYMMETRIC rectangular protrusions/recesses
+    of depth < tol that shapely.union leaves at wall junctions (half-thickness step =
+    the 'toquinhos' Felipe flagged 2026-06-03, ~2.7pt). Only collapses a tooth whose two
+    side edges are equal length, so the reconnected base stays axis-aligned — NEVER
+    creates a diagonal. Legit steps (depth >= tol) and real corners are preserved.
+    (Micro-test verified: dente removed, degrau 20pt kept, quadrado untouched.)"""
+    import math as _m
+    pts = [tuple(p) for p in ring]
+    if len(pts) >= 2 and pts[0] == pts[-1]:
+        pts = pts[:-1]
+    changed, guard = True, 0
+    while changed and len(pts) >= 6 and guard < 4000:
+        changed, guard, n = False, guard + 1, len(pts)
+        for i in range(n):
+            P, Q, R, S = pts[i], pts[(i+1) % n], pts[(i+2) % n], pts[(i+3) % n]
+            pq = (Q[0]-P[0], Q[1]-P[1]); qr = (R[0]-Q[0], R[1]-Q[1]); rs = (S[0]-R[0], S[1]-R[1])
+            lpq, lrs = _m.hypot(*pq), _m.hypot(*rs)
+            if (abs(pq[0]*qr[0]+pq[1]*qr[1]) < 1e-6 and abs(rs[0]*qr[0]+rs[1]*qr[1]) < 1e-6
+                    and (pq[0]*rs[0]+pq[1]*rs[1]) < 0 and abs(lpq-lrs) < 1e-6
+                    and 1e-9 < lpq < tol and 1e-9 < lrs < tol):
+                for k in sorted([(i+1) % n, (i+2) % n], reverse=True):
+                    pts.pop(k)
+                changed = True
+                break
+    return pts
+
+
 def canonicalise_axis_aligned_polygon(poly: Polygon,
                                        tol: float = 1e-6) -> Polygon:
-    """Strip redundant collinear vertices from an axis-aligned polygon.
+    """Strip redundant collinear vertices from an axis-aligned polygon, after removing
+    half-thickness corner-notch teeth at junctions.
 
     A clean rectangular wall shell with a single interior room has
     EXACTLY 4 outer + 4 inner vertices after canonicalisation. Any
     excess is the FP-025 corner-notch signature.
     """
     outer = _canonicalise_axis_aligned_ring(
-        list(poly.exterior.coords), tol=tol,
+        _remove_small_teeth(list(poly.exterior.coords)), tol=tol,
     )
     interiors = []
     for ring in poly.interiors:
         cleaned = _canonicalise_axis_aligned_ring(
-            list(ring.coords), tol=tol,
+            _remove_small_teeth(list(ring.coords)), tol=tol,
         )
         if len(cleaned) >= 3:
             interiors.append(cleaned)
@@ -544,22 +573,229 @@ def build_shell_polygon(consensus: dict) -> tuple[list[Polygon], dict]:
     return kept, stats
 
 
+def _drop_coincident(coords: list, tol: float = 1e-3) -> list:
+    """Drop consecutive near-coincident vertices + the ring-wrap. shapely's
+    boolean union of float-noisy thicknesses (e.g. m012 5.399517 vs a neighbour)
+    can emit two points <1e-3 pdf-pt apart at a corner; SU's add_face then raises
+    "Duplicate points in array". tol 1e-3 pdf-pt (~3.5 um) removes only that union
+    noise — real vertices are orders larger. (Gate :8765 modo B, Option B,
+    2026-06-03; same noise floor as the axis-aligned test.)
+    """
+    out: list = []
+    for x, y in coords:
+        if not out or abs(out[-1][0] - x) > tol or abs(out[-1][1] - y) > tol:
+            out.append((x, y))
+    if (len(out) > 1 and abs(out[-1][0] - out[0][0]) <= tol
+            and abs(out[-1][1] - out[0][1]) <= tol):
+        out.pop()
+    return out
+
+
+# ---- room floors (slabs that reach the wall inner faces) -------------
+# Felipe 2026-06-04: "isso ai vai ser o piso e ele TEM QUE ENCOSTAR na parede".
+# The room polygon from consensus is recessed / slightly misaligned from the
+# wall faces, leaving a gray gap between the colored slab and the wall. Instead
+# of trusting that polygon, we fill the FREE-SPACE CELL the room lives in
+# (apartment envelope minus the wall mass): the cell is bounded *exactly* by the
+# wall inner faces, so the slab reaches the wall with no gap and tucks slightly
+# under it. Integrated rooms that share one cell (sala+cozinha, no solid wall
+# between) are split back apart by their room polygons.
+FLOOR_SNAP_EPS_PTS = 6.0
+FLOOR_CELL_MIN_AREA_PTS2 = 50.0
+FLOOR_UNDER_FRAC = 0.4          # tuck slab 0.4*thickness under the wall: reaches
+#                                 the inner face + hides the seam, but two
+#                                 adjacent slabs (0.4+0.4=0.8<1) never overlap.
+#                                 Swept 0.3-0.6: <=0.45 gives ZERO slab overlap.
+FLOOR_SIMPLIFY_TOL_PTS = 0.5    # kill boolean-noise micro-edges before SU add_face
+
+
+def _floor_snap_coords(ring: list, eps: float) -> list:
+    """Group near-equal x's (and y's) and move each to the group mean — kills
+    the micro-teeth ('toquinhos') the room polygon inherits from wall junctions.
+    Mirrors the Ruby snap_coords so both paths agree."""
+    pts = [[float(p[0]), float(p[1])] for p in ring]
+    for dim in (0, 1):
+        vals = sorted({p[dim] for p in pts})
+        if not vals:
+            continue
+        m: dict = {}
+        group = [vals[0]]
+        for v in vals[1:]:
+            if v - group[-1] < eps:
+                group.append(v)
+            else:
+                avg = sum(group) / len(group)
+                for g in group:
+                    m[g] = avg
+                group = [v]
+        avg = sum(group) / len(group)
+        for g in group:
+            m[g] = avg
+        for p in pts:
+            p[dim] = m[p[dim]]
+    return [(p[0], p[1]) for p in pts]
+
+
+def _floor_dedup(ring: list, eps: float = 0.05) -> list:
+    if not ring:
+        return ring
+    out = [ring[0]]
+    for p in ring[1:]:
+        if abs(p[0] - out[-1][0]) > eps or abs(p[1] - out[-1][1]) > eps:
+            out.append(p)
+    if (len(out) >= 2 and abs(out[0][0] - out[-1][0]) < eps
+            and abs(out[0][1] - out[-1][1]) < eps):
+        out.pop()
+    return out
+
+
+def _floor_drop_collinear(ring: list, eps: float = 1e-4) -> list:
+    n = len(ring)
+    if n < 3:
+        return ring
+    out = []
+    for i in range(n):
+        a, b, c = ring[(i - 1) % n], ring[i], ring[(i + 1) % n]
+        if abs((b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])) > eps:
+            out.append(b)
+    return out
+
+
+def _floor_clean_ring(raw: list) -> list:
+    r = _floor_dedup(raw)
+    r = _floor_snap_coords(r, FLOOR_SNAP_EPS_PTS)
+    r = _floor_dedup(r)
+    r = _floor_drop_collinear(r)
+    r = _floor_dedup(r)
+    return r
+
+
+def compute_room_floors(consensus: dict) -> dict:
+    """Return {room_id: [[x, y], ...]} — each room's floor ring expanded to the
+    inner faces of its surrounding walls (no gray gap), in PDF points. Rooms with
+    no resolvable cell are omitted (Ruby falls back to its snap path)."""
+    rooms = consensus.get("rooms", []) or []
+    walls = consensus.get("walls", []) or []
+    if not rooms or not walls:
+        return {}
+    wt = float(consensus.get("wall_thickness_pts") or 5.4)
+    wp = []
+    for w in walls:
+        try:
+            wp.append(wall_footprint(w, extend_endpoints=True))
+        except Exception:
+            continue
+    if not wp:
+        return {}
+    wall_mass = unary_union(wp)
+    # soft barriers (guarda-corpo) close the envelope where the varanda has a
+    # rail instead of a wall — without them the cell would leak past the facade.
+    sb_lines = []
+    for s in consensus.get("soft_barriers", []) or []:
+        pl = s.get("polyline_pts") or []
+        if len(pl) >= 2:
+            sb_lines.append(LineString([(float(x), float(y)) for x, y in pl])
+                            .buffer(wt / 2.0, cap_style=2, join_style=2))
+    env_src = unary_union(wp + sb_lines)
+    egeoms = list(env_src.geoms) if isinstance(env_src, MultiPolygon) else [env_src]
+    envelope = unary_union([Polygon(g.exterior) for g in egeoms])
+
+    # The cell stops at the inner face of BOTH walls and soft barriers. Without
+    # subtracting the barriers, the varanda cell ran to the OUTER edge of the
+    # glass guard-rail, so the slab poked past the (transparent) glass — visible
+    # as the floor "leaking past the wall" (Felipe 2026-06-04). Subtracting the
+    # rail makes the slab stop at its inner face (+ the small tuck under it).
+    barrier_mass = unary_union([wall_mass, *sb_lines]) if sb_lines else wall_mass
+    free = envelope.difference(barrier_mass)
+    cells = [g for g in (free.geoms if isinstance(free, MultiPolygon) else [free])
+             if g.area > FLOOR_CELL_MIN_AREA_PTS2]
+
+    polys: list = []
+    for rm in rooms:
+        raw = [(float(p[0]), float(p[1])) for p in (rm.get("polygon_pts") or [])]
+        if len(raw) >= 2 and raw[0] == raw[-1]:
+            raw = raw[:-1]
+        ring = _floor_clean_ring(raw)
+        p = Polygon(ring) if len(ring) >= 3 else None
+        if p is not None and not p.is_valid:
+            p = p.buffer(0)
+        polys.append(p if (p is not None and not p.is_empty) else None)
+
+    under = wt * FLOOR_UNDER_FRAC
+    floor_by_room: list = [None] * len(polys)
+    for cell in cells:
+        here = [i for i, p in enumerate(polys)
+                if p is not None and cell.intersection(p).area > FLOOR_CELL_MIN_AREA_PTS2]
+        if not here:
+            continue
+        tucked = cell.buffer(under, join_style=2).intersection(envelope)
+        if len(here) == 1:
+            floor_by_room[here[0]] = tucked
+            continue
+        # multiple rooms share this cell (integrated, no solid wall between) —
+        # split it back apart by the room polygons; leftover gap -> nearest room.
+        here.sort(key=lambda i: -polys[i].area)
+        assigned = None
+        parts: dict = {}
+        for i in here:
+            piece = polys[i].buffer(under, join_style=2).intersection(tucked)
+            if assigned is not None:
+                piece = piece.difference(assigned)
+            parts[i] = piece
+            assigned = piece if assigned is None else unary_union([assigned, piece])
+        resto = tucked.difference(assigned) if assigned is not None else tucked
+        if not resto.is_empty:
+            for piece in (resto.geoms if isinstance(resto, MultiPolygon) else [resto]):
+                if piece.is_empty:
+                    continue
+                nearest = min(here, key=lambda i: polys[i].distance(piece))
+                parts[nearest] = unary_union([parts[nearest], piece])
+        for i in here:
+            floor_by_room[i] = parts[i]
+
+    out: dict = {}
+    for i, rm in enumerate(rooms):
+        floor = floor_by_room[i]
+        if floor is None or floor.is_empty:
+            continue
+        if isinstance(floor, MultiPolygon):
+            floor = max(floor.geoms, key=lambda g: g.area)
+        floor = floor.simplify(FLOOR_SIMPLIFY_TOL_PTS, preserve_topology=True)
+        if floor.is_empty or floor.geom_type != "Polygon":
+            continue
+        outer = _drop_coincident(list(floor.exterior.coords))
+        if len(outer) < 3:
+            continue
+        # Preserve holes: when an integrated room (sala) wraps another (cozinha),
+        # the cozinha is a HOLE in sala's slab. Dropping it (exterior-only) would
+        # double-cover the cozinha. Ruby's build_floor cuts each hole like the
+        # shell does (add inner face -> erase, leaving the hole topology).
+        holes = []
+        for ring in floor.interiors:
+            h = _drop_coincident(list(ring.coords))
+            if len(h) >= 3 and abs(Polygon(h).area) > FLOOR_CELL_MIN_AREA_PTS2:
+                holes.append([[float(x), float(y)] for x, y in h])
+        rid = str(rm.get("id") or f"r{i}")
+        out[rid] = {
+            "outer": [[float(x), float(y)] for x, y in outer],
+            "holes": holes,
+        }
+    return out
+
+
 def serialize_polygons(polygons: list[Polygon],
                        consensus: dict, stats: dict) -> dict:
     """Build the dict that the Ruby exporter reads (`_shell_polygon.json`)."""
     pieces = []
     for poly in polygons:
-        outer = list(poly.exterior.coords)
-        # Shapely closes rings (last == first); SU's add_face wants
-        # distinct vertices, so drop the duplicate close.
-        if outer and outer[-1] == outer[0]:
-            outer = outer[:-1]
+        # Drop the shapely ring-close AND any near-coincident union-noise
+        # vertices, else SU add_face raises "Duplicate points in array".
+        outer = _drop_coincident(list(poly.exterior.coords))
         holes = []
         for ring in poly.interiors:
-            h = list(ring.coords)
-            if h and h[-1] == h[0]:
-                h = h[:-1]
-            holes.append([[float(x), float(y)] for x, y in h])
+            h = _drop_coincident(list(ring.coords))
+            if len(h) >= 3:
+                holes.append([[float(x), float(y)] for x, y in h])
         pieces.append({
             "outer": [[float(x), float(y)] for x, y in outer],
             "holes": holes,
@@ -573,6 +809,9 @@ def serialize_polygons(polygons: list[Polygon],
         "page_size_pts": consensus.get("page_size_pts"),
         "polygons": pieces,
         "rooms": consensus.get("rooms", []),
+        # Pre-computed floor rings (slab reaches the wall inner faces, no gap).
+        # Ruby's build_floor uses room_floors[id] when present, else its snap path.
+        "room_floors": compute_room_floors(consensus),
         "soft_barriers": consensus.get("soft_barriers", []),
         # ADR-007 / FP-024: surface window_apertures at top level so
         # the Ruby exporter can iterate without unpacking stats.
@@ -887,6 +1126,61 @@ def run(consensus_path: Path, out_skp: Path, *, sketchup_exe: Path,
             print(f"[post-run disarm] removed {p.name}")
 
 
+def _infer_plant(consensus_path, explicit=None):
+    """Plant for --promote: explicit, else fixtures/<plant>/..., else planta_74."""
+    if explicit:
+        return explicit
+    parts = Path(consensus_path).resolve().parts
+    if "fixtures" in parts:
+        i = parts.index("fixtures")
+        if i + 1 < len(parts):
+            return parts[i + 1]
+    return "planta_74"
+
+
+def _auto_promote(args, result):
+    """After a green build, copy it to the stable deliverable artifacts/<plant>/.
+    Returns a status line to print. Gate-guarded: a failed self-check gate, a
+    cached (not rebuilt) build, or a missing report is NOT promoted — we never
+    push a broken/unverified build to the fixed path."""
+    if not getattr(args, "promote", False):
+        return None
+    if not result.get("ok"):
+        return "PROMOTE_SKIPPED build not ok"
+    if result.get("skipped"):
+        return "PROMOTE_SKIPPED build was cached (use --force-skp to rebuild+promote)"
+    report_p = args.out.resolve().parent / "geometry_report.json"
+    try:
+        gates = json.loads(report_p.read_text("utf-8")).get("gates_self_check") or {}
+    except Exception:
+        gates = {}
+    if not gates:
+        return "PROMOTE_SKIPPED no gates_self_check in report"
+    failed = sorted(k for k, v in gates.items() if not v)
+    if failed:
+        return f"PROMOTE_SKIPPED self-check gates failed: {failed}"
+    # full deterministic fidelity suite must be green too: opening_host +
+    # wall_overlap + wall_presence (exact projection). The deliverable must
+    # never land at the fixed path with a deterministic FAIL/INCOMPLETE.
+    out_dir = args.out.resolve().parent
+    try:
+        from tools.run_deterministic_gates import run_all
+        det = run_all(consensus_path=str(args.consensus),
+                      render_path=str(out_dir / "model_top.png"))
+    except Exception as e:  # pragma: no cover - defensive
+        return f"PROMOTE_SKIPPED deterministic gates errored: {e}"
+    if det.get("overall") != "PASS":
+        bad = {k: v.get("overall", v.get("verdict"))
+               for k, v in det.get("gates", {}).items()
+               if v.get("overall", v.get("verdict")) != "PASS"}
+        return f"PROMOTE_SKIPPED deterministic gates {det.get('overall')}: {bad}"
+    from tools.promote_canonical import promote as _promote
+    plant = _infer_plant(args.consensus, args.plant)
+    res = _promote(out_dir, plant)
+    return (f"PROMOTED -> artifacts/{plant}/{plant}.skp sha={res['sha']} "
+            f"(self-check + deterministic gates green)")
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("consensus", type=Path,
@@ -920,6 +1214,21 @@ if __name__ == "__main__":
         action="store_true",
         help="Shorthand for --mode interactive (do not terminate SU).",
     )
+    ap.add_argument(
+        "--promote",
+        action="store_true",
+        help="After a successful build whose self-check gates are all green, "
+             "copy it to the stable deliverable artifacts/<plant>/ so the "
+             "latest correct build is always at one fixed path. A failed gate "
+             "or a cached build skips the promote. (Appearance changes still "
+             "go through Felipe's VISUAL_REVIEW before you build with this.)",
+    )
+    ap.add_argument(
+        "--plant",
+        default=None,
+        help="Plant name for --promote (default: inferred from a "
+             "fixtures/<plant>/ consensus path, else 'planta_74').",
+    )
     args = ap.parse_args()
     resolved_mode = parse_mode(default=_default_runner_mode())
     result = run(
@@ -934,4 +1243,7 @@ if __name__ == "__main__":
     if result.get("skipped"):
         sha = result.get("consensus_sha256") or ""
         print(f"SKIPPED_UNCHANGED_CONSENSUS sha={sha[:12]}")
+    promo = _auto_promote(args, result)
+    if promo:
+        print(promo)
     raise SystemExit(0 if result.get("ok") else 1)

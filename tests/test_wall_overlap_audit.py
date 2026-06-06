@@ -68,9 +68,10 @@ def test_quadrado_no_overlaps():
 @pytest.mark.skipif(
     _load("planta_74", "consensus_with_human_walls_and_soft_barriers.json") is None,
     reason="planta_74 fixture absent")
-def test_planta74_flags_duplicate_wall():
+def test_planta74_no_duplicate_walls_after_regen():
+    # FP-031 #28: the duplicate (h_w001 ~ w020) was absorbed by the collinear
+    # merge in the regenerated canonical consensus.
     rep = audit_wall_overlaps(
         _load("planta_74", "consensus_with_human_walls_and_soft_barriers.json"))
-    assert rep["overall"] == "FAIL"
-    pairs = [{f["wall_a"], f["wall_b"]} for f in rep["overlaps"]]
-    assert {"w020", "h_w001"} in pairs
+    assert rep["overall"] == "PASS"
+    assert rep["n_overlaps"] == 0

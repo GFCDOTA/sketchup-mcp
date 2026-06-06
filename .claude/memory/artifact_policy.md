@@ -22,30 +22,39 @@ de declarar canônico.
 
 ## Promotion flow (runs/ → artifacts/)
 
+O deliverable estável `artifacts/<plant>/<plant>.skp` é **um path fixo, sem
+timestamp, que sempre aponta pro último build correto**. Não cace pasta
+`artifacts/review/<plant>/<ts>/final/` — o canônico mora no path fixo.
+
+**Automático (preferido) — build + promove num comando só.** `--promote` copia
+o build pro deliverable estável quando os self-check gates passam:
+
 ```bash
-# 1. Build cai em runs/
 python -m tools.build_plan_shell_skp \
   fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json \
-  --out runs/planta_74/model.skp
-
-# 2. Validar (gates do repo)
-python -m pytest tests/ -q
-
-# 3. Promover (cópia explícita, não move)
-mkdir -p artifacts/planta_74
-cp runs/planta_74/model.skp artifacts/planta_74/planta_74.skp
-cp runs/planta_74/model_iso.png artifacts/planta_74/planta_74_iso.png
-cp runs/planta_74/model_top.png artifacts/planta_74/planta_74_top.png
-cp runs/planta_74/geometry_report.json artifacts/planta_74/geometry_report.json
-# + side-by-side, metadata sidecar, README de provenance
-
-# 4. Commit como artifact tracked
-git add artifacts/planta_74/
-git commit -m "feat(artifacts): refresh planta_74 SKP + renders + report"
+  --out runs/planta_74/model.skp --promote
+# -> PROMOTED -> artifacts/planta_74/planta_74.skp (self-check gates green)
+git add artifacts/planta_74/ && git commit -m "feat(artifacts): refresh planta_74"
 ```
 
-Ver `specs/skp_artifact_layout.md` pra paths exatos e metadata
-exigida.
+Gate-guarded: **gate vermelho / build cached / report ausente NÃO promove** —
+nunca empurra build quebrado ou não-verificado pro path fixo.
+
+**Promover um build que já existe** (ex.: um review snapshot aprovado):
+
+```bash
+python -m tools.promote_canonical --src artifacts/review/planta_74/<ts>/final
+```
+
+`promote_canonical` copia skp + renders + report e reescreve o metadata sidecar
+(sha + provenance) — sem cp-dance manual, sem esquecer um arquivo.
+
+⚠️ **VISUAL_REVIEW continua valendo.** `--promote` não substitui o olho do
+Felipe: se a mudança altera a APARÊNCIA da planta, mostre o before/after, ele
+aprova, e **só aí** você builda com `--promote`. O flag automatiza a *cópia*, não
+o *veredito visual*. (Rebuild da mesma aparência aprovada → `--promote` livre.)
+
+Ver `specs/skp_artifact_layout.md` pra paths exatos e metadata exigida.
 
 ## O que cada `.skp` canônico precisa carregar
 
@@ -91,19 +100,20 @@ Resumo: se a mudança toca builder / consensus / renderer / kind
 routing / wall canonicalisation, **gerar SKP novo + renders +
 comparação não é opcional, é parte da PR**.
 
-## Sidecar metadata — gotcha de promotion
+## Sidecar metadata — gotcha de promotion (auto-tratada)
 
-O builder (`tools/build_plan_shell_skp.py` → `write_metadata`)
-escreve o sidecar com `skp_path` apontando pro path do build
-(`runs/<plant>/<plant>.skp`). Quando promove pra
-`artifacts/<plant>/`, **rewrite obrigatório**:
+O builder (`write_metadata`) escreve o sidecar do build com `skp_path`
+apontando pro path do build (`runs/<plant>/<plant>.skp`). Ao promover, o
+sidecar canônico precisa de **rewrite**:
 
 - `skp_path` ← `artifacts/<plant>/<plant>.skp` (canonical)
-- `source_run_path` ← `runs/<plant>/<plant>.skp` (provenance, novo)
+- `source_run_path` ← `runs/<plant>/<plant>.skp` (provenance)
+- `consensus_sha256` ← **carregado** do sidecar do build (cache key)
 
-Caso contrário o sidecar canônico contradiz a Constitution #1
-("SKP é o artefato principal" e mora em `artifacts/`). Schema
-detalhado em `specs/skp_artifact_layout.md`.
+Isto é **feito automaticamente** por `tools/promote_canonical.py` (e portanto
+pelo `build_plan_shell_skp --promote`): ele lê o sidecar do build, carrega o
+`consensus_sha256` + stats, e reescreve os campos de path pro canônico. Não
+precisa editar à mão. Schema detalhado em `specs/skp_artifact_layout.md`.
 
 ## TODO — validar contra repo
 

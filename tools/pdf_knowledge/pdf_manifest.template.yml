@@ -1,0 +1,53 @@
+# Ajuste os paths para o local real dentro do repo sketchup-mcp.
+# Não commitar os PDFs se forem materiais privados/licenciados.
+
+pdfs:
+  - id: sketchup_design_moveis
+    title: "SketchUp para design de móveis"
+    path: "references/pdfs/Sketchup Para Design De Móveis João Gaspar.pdf"
+    role:
+      - "modelagem de móveis"
+      - "peças, montagem e componentes"
+      - "criado-mudo, guarda-roupa, rack, cristaleira"
+
+  - id: sketchup_pro_avancado_2015
+    title: "SketchUp Pro Avançado"
+    path: "references/pdfs/Sketchup Pro Avançado João Gaspar.pdf"
+    role:
+      - "modelagem avançada"
+      - "plugins"
+      - "componentes dinâmicos"
+      - "organização de modelo"
+
+  - id: google_sketchup_pro_avancado_2011
+    title: "Google SketchUp Pro Avançado"
+    path: "references/pdfs/Google Sketchup Pro Avançado João Gaspar.pdf"
+    role:
+      - "modelagem avançada"
+      - "texturização"
+      - "organização/apresentação"
+
+  - id: sketchup_layout
+    title: "SketchUp LayOut passo a passo"
+    path: "references/pdfs/Sketchup Layout Passo A Passo João Gaspar.pdf"
+    role:
+      - "documentação"
+      - "pranchas"
+      - "viewports"
+      - "cotas"
+
+  - id: colecoes_blocos
+    title: "As 50 melhores coleções de blocos para SketchUp"
+    path: "references/pdfs/Ebook interativo - 50 COLEÇÕES SKETCHUP.pdf"
+    role:
+      - "referências de blocos"
+      - "categorias de móveis"
+      - "quarto, cozinha, banheiro, sala"
+
+  - id: prompts_ia
+    title: "Prompts que Fazem a Diferença"
+    path: "references/pdfs/Prompts que Fazem a Diferenca_ - Mike Reuben(1).pdf"
+    role:
+      - "estruturação de prompts"
+      - "consulta multi-modelo"
+      - "pesquisa e análise"

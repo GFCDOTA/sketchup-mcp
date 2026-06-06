@@ -19,6 +19,16 @@ do loop = um ciclo. Não pasteie prompt solto — invoque esta skill (ou diga "n
 [ciclo N | HH:MM] fiz: <slice> | gate(:8765): <GO/NO-GO/—> | dets: overlay_diff=<PASS/FAIL> opening_host=<x/12> | tests: <n✓> | ESTADO: PROGREDINDO | PATINANDO | BLOCKED | aprendi: <1 frase ou —>
 ```
 
+## Heartbeat por ciclo (orquestrador de liveness em `:8765`)
+Todo ciclo, **bata ponto** no gate pra outra sessão / o Felipe saber se você progride ou travou:
+```
+POST http://localhost:8765/heartbeat  {"session_id":"<id estavel>","cycle":<N>,"last_action":"<frase curta>"}
+```
+`cycle` é o **token de progresso monotônico** (incrementa a cada ciclo REAL) — é o sinal que
+distingue *progredindo* de *vivo-mas-travado*. Quem observa: `GET :8765/sessions` → flags
+`STALLED` (sem ponto há >10min) / `PARALYZED` (mesmo `cycle` por 3+ pontos) / `OK`.
+Best-effort: se o POST falhar, **siga o ciclo** (heartbeat nunca trava o trabalho).
+
 ## Regras do ciclo
 
 1. **PERCEBER erro (determinístico):** rode `tools/overlay_diff` + `tools/opening_host_audit`

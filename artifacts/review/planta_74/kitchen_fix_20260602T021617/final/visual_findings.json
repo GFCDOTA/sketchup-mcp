@@ -1,0 +1,53 @@
+{
+  "schema_version": "visual_findings.v1",
+  "fixture": "planta_74",
+  "attempt": "attempt_0",
+  "top_level_verdict": "WARN",
+  "axes": {
+    "wall_fidelity": {
+      "verdict": "PASS",
+      "evidence": "No deterministic finding produced for this axis."
+    },
+    "door_fidelity": {
+      "verdict": "PASS",
+      "evidence": "No deterministic finding produced for this axis."
+    },
+    "window_fidelity": {
+      "verdict": "PASS",
+      "evidence": "No deterministic finding produced for this axis."
+    },
+    "room_fidelity": {
+      "verdict": "PASS",
+      "evidence": "No deterministic finding produced for this axis."
+    },
+    "scale_rotation": {
+      "verdict": "WARN",
+      "evidence": "Numeric heuristics cannot decide this axis; needs human/agent or oracle inline review of render PNGs and side-by-side composite."
+    },
+    "global_visual": {
+      "verdict": "WARN",
+      "evidence": "Numeric heuristics cannot decide this axis; needs human/agent or oracle inline review of render PNGs and side-by-side composite."
+    }
+  },
+  "findings": [],
+  "input_summary": {
+    "input_walls": 20,
+    "openings_carved": 8,
+    "window_apertures_3d": 4,
+    "slivers_removed": 0,
+    "consensus_kind_counts": {
+      "interior_door": 7,
+      "window": 4,
+      "glazed_balcony": 1
+    },
+    "group_counts": {
+      "PlanShell_Group": 1,
+      "Floor_Group": 8,
+      "SoftBarrier_Group": 1,
+      "DoorLeaf_Group": 7,
+      "WindowGlass_Group": 4,
+      "GlazedBalcony_Group": 1
+    }
+  },
+  "side_by_side_status": "ok"
+}

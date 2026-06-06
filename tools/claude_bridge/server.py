@@ -28,12 +28,27 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import shutil
 import subprocess
 import sys
+import tempfile
+import threading
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+from urllib.parse import parse_qs, urlparse
+
+from tools.claude_bridge.knowledge_log import difficulties, learnings
+from tools.claude_bridge.skp_inventory import skp_inventory, skp_inventory_v2
+from tools.claude_bridge.system_inventory import git_inventory, live_processes, system_map
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 CLAUDE_TIMEOUT = 240  # segundos por resposta; estoura -> erro 500, nunca trava infinito
+MODEL = "claude-opus-4-8"   # o JUIZ do modo B (Opus 4.8)
+EFFORT = "xhigh"            # effort maximo
+STARTED_AT = time.time()    # para o uptime no painel operacional
 
 SYSTEM = """You are the CLAUDE ORACLE for the sketchup-mcp fidelity project. The human (Felipe)
 delegated FULL AUTONOMY to you for everything EXCEPT the visual look of the plant ("modo B").
@@ -41,9 +56,21 @@ DECIDE — never punt to the human except for VISUAL_REVIEW.
 
 Answer ONLY in this format, no fences, no fluff:
 - Verdict: GO / NO-GO / MORE-INFO / VISUAL_REVIEW
+- Confidence: high / medium / low
 - Reasoning: 2-4 sentences, technical, critical
+- Assumptions: bullets — what you ASSUMED or could NOT verify from the prompt
 - Risks: bullets
 - Suggested next action: 1-2 lines, highest-leverage first
+
+Confidence + Assumptions are MANDATORY (gate framework §6.4): the asker uses your
+`assumptions` to decide what to re-check deterministically vs accept. A factual
+claim about something you cannot see in the prompt belongs in `assumptions`
+(low/medium confidence), never stated as fact.
+
+FILE-FETCH (§6.3): when a decision hinges on a file you were NOT given (a
+consensus.json, geometry_report.json, a test), do NOT guess its contents — answer
+Verdict: MORE-INFO and add a line `Need-files: <comma-separated repo paths>`. The
+asker re-sends the prompt with those files (read-only) so you can decide on facts.
 
 DECIDE AUTONOMOUSLY (no human): technical / architectural / A-B-C / refactor / gates /
 consensus & fixture regeneration / merges -- based on the DETERMINISTIC evidence given
@@ -64,15 +91,23 @@ def claude_bin() -> str:
 def ask_claude(question: str) -> str:
     """Roda `claude -p` headless com SYSTEM + a pergunta. Devolve o texto ou levanta."""
     prompt = SYSTEM + "\n\n=== QUESTION ===\n\n" + question
+    # cwd NEUTRO (temp, FORA do repo): claude -p nao carrega o CLAUDE.md/hooks deste
+    # projeto -> sem prompt de permissao e, critico, sem disparar o SessionStart hook
+    # que sobe ESTE bridge (recursao). Model+effort pinados: Opus 4.8 + xhigh (o JUIZ).
+    workdir = tempfile.gettempdir()
     if sys.platform == "win32":
         # npm instala claude como .CMD -> precisa de shell; prompt vai por STDIN (sem quoting)
-        cmd = f'"{claude_bin()}" -p --output-format text'
+        cmd = (f'"{claude_bin()}" -p --model {MODEL} --effort {EFFORT} '
+               f'--output-format text')
         proc = subprocess.run(cmd, input=prompt, capture_output=True, text=True,
-                              timeout=CLAUDE_TIMEOUT, shell=True)
+                              encoding="utf-8", errors="replace",
+                              timeout=CLAUDE_TIMEOUT, shell=True, cwd=workdir)
     else:
-        proc = subprocess.run([claude_bin(), "-p", "--output-format", "text"],
+        proc = subprocess.run([claude_bin(), "-p", "--model", MODEL,
+                               "--effort", EFFORT, "--output-format", "text"],
                               input=prompt, capture_output=True, text=True,
-                              timeout=CLAUDE_TIMEOUT)
+                              encoding="utf-8", errors="replace",
+                              timeout=CLAUDE_TIMEOUT, cwd=workdir)
     out = (proc.stdout or "").strip()
     if not out:
         raise RuntimeError(f"resposta vazia (stderr: {(proc.stderr or '')[:300]})")
@@ -81,6 +116,1529 @@ def ask_claude(question: str) -> str:
         raise RuntimeError("claude headless NAO autenticado — rode `claude setup-token` "
                            "e exporte CLAUDE_CODE_OAUTH_TOKEN")
     return out
+
+
+# ---- /ask + /health contract (spec gate_framework §6.5) ------------
+ASK_FIELDS = ("prompt", "question")
+VERDICT_ENUM = ("GO", "NO-GO", "MORE-INFO", "VISUAL_REVIEW")
+
+
+def parse_ask_payload(raw: bytes) -> str:
+    """Extract the question text from a raw /ask body.
+
+    - UTF-8 TOLERANT: ``errors="replace"`` — a stray non-ASCII byte (the bridge
+      once 500'd on the "ã" in "NÃO") must never crash the request.
+    - FLEXIBLE FIELD: accepts ``prompt`` OR ``question`` so the caller does not
+      have to guess (the consuming session discovered the field by trial/error).
+    Returns the stripped text, or "" if absent/blank.
+    """
+    if not raw:
+        return ""
+    data = json.loads(raw.decode("utf-8", errors="replace"))
+    if not isinstance(data, dict):
+        return ""
+    for field in ASK_FIELDS:
+        val = data.get(field)
+        if val:
+            return str(val).strip()
+    return ""
+
+
+REDTEAM_PREFIX = (
+    "RED-TEAM MODE (gate framework §6.2). The asker probably already leans toward "
+    "one option — do NOT just rank. First argue the STRONGEST case AGAINST the "
+    "option that looks preferred and name the failure mode that would make it "
+    "wrong; only then give your Verdict. If the preferred option still wins after "
+    "you steelman the opposition, say so explicitly. This exists to counter the "
+    "agreement bias of one Claude consulting another."
+)
+
+
+def parse_ask_mode(raw: bytes) -> str:
+    """Extract the optional `mode` from an /ask body (e.g. 'redteam'). '' if none."""
+    if not raw:
+        return ""
+    try:
+        data = json.loads(raw.decode("utf-8", errors="replace"))
+    except (ValueError, UnicodeError):
+        return ""
+    if not isinstance(data, dict):
+        return ""
+    return str(data.get("mode") or "").strip().lower()
+
+
+def apply_mode(prompt: str, mode: str) -> str:
+    """Wrap the question per mode. `redteam` prepends a steelman-the-opposition
+    instruction; any other / empty mode is a no-op."""
+    if mode == "redteam" and prompt:
+        return f"{REDTEAM_PREFIX}\n\n=== DECISION ===\n\n{prompt}"
+    return prompt
+
+
+def health_payload() -> dict:
+    """Self-documenting /health: exposes the /ask contract (which field to send,
+    what verdicts come back) so the caller never reverse-engineers it."""
+    return {
+        "status": "ok",
+        "oracle": "claude",
+        "model": MODEL,
+        "effort": EFFORT,
+        "uptime_sec": round(time.time() - STARTED_AT, 1),
+        "ask_field": list(ASK_FIELDS),
+        "verdict_enum": list(VERDICT_ENUM),
+        "modes": ["default", "redteam"],
+        "endpoints": advertised_endpoints(),
+    }
+
+
+# --- session liveness orchestrator (gate spec section-5 audit-core, OBSERVE-ONLY) ---
+# The gate is the chokepoint every session consults; sessions also POST a per-cycle
+# heartbeat so we can tell PROGRESS from SILENCE (a session working hard but not
+# consulting looks identical to a dead one). NO actor that kills/restarts peers.
+# Collision PREVENTION is worktree isolation — a separate follow-up, not this.
+STALL_SECONDS = 600     # no heartbeat in 10 min -> STALLED (liveness / wall clock)
+PARALYZED_M = 3         # `cycle` unchanged across this many beats -> PARALYZED
+AUDIT_PATH = Path(__file__).resolve().parents[2] / ".ai_bridge" / "audit" / "audit.jsonl"
+# Thresholds de visibilidade operacional (configuraveis). UP/DOWN nao basta:
+GATE_IDLE_WARN_SEC = 24 * 3600   # gate UP sem consulta ha > 24h -> ONLINE_IDLE (warn)
+GATE_IDLE_BAD_SEC = 72 * 3600    # > 72h -> ocioso/stale (bad)
+SOURCE_STALE_MARGIN_SEC = 3600   # legacy .md mais velho que o audit por > 1h -> STALE_SOURCE
+_AIB = REPO_ROOT / ".ai_bridge"
+QUESTIONS_DIR = _AIB / "questions"   # consults legacy (pergunta)
+RESPONSES_DIR = _AIB / "responses"   # consults legacy (resposta)
+_SESSIONS: dict = {}
+_SESSIONS_LOCK = threading.Lock()
+# Estado das ACOES corretivas em andamento (process-consults roda em background).
+_ACTIONS: dict = {}
+_ACTIONS_LOCK = threading.Lock()
+
+
+def _audit_append(event: dict) -> None:
+    """Best-effort append to the audit-core log; never break a request on a log write."""
+    try:
+        AUDIT_PATH.parent.mkdir(parents=True, exist_ok=True)
+        with AUDIT_PATH.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(event, ensure_ascii=False) + "\n")
+    except OSError:
+        pass
+
+
+def record_heartbeat(session_id: str, cycle, last_action: str = "") -> dict:
+    """Record a per-cycle heartbeat. `cycle` is the monotonic PROGRESS token — the one
+    signal that tells alive-and-progressing apart from alive-but-stuck."""
+    now = time.time()
+    with _SESSIONS_LOCK:
+        s = _SESSIONS.get(session_id, {"cycle": None, "unchanged": 0})
+        s["unchanged"] = s["unchanged"] + 1 if s["cycle"] == cycle else 0
+        s["cycle"] = cycle
+        s["last_seen"] = now
+        s["last_action"] = last_action  # human-readability only, never a flag input
+        _SESSIONS[session_id] = s
+    _audit_append({"t": now, "kind": "heartbeat", "session_id": session_id,
+                   "cycle": cycle, "last_action": last_action})
+    return {"recorded": session_id, "cycle": cycle}
+
+
+def sessions_view() -> dict:
+    """Read model: each session + derived flags. STALLED = silent too long;
+    PARALYZED = still beating but `cycle` frozen (the case passive logging is blind to)."""
+    now = time.time()
+    out = {}
+    with _SESSIONS_LOCK:
+        for sid, s in _SESSIONS.items():
+            flags = []
+            if (now - s.get("last_seen", 0)) > STALL_SECONDS:
+                flags.append("STALLED")
+            if s.get("unchanged", 0) >= PARALYZED_M:
+                flags.append("PARALYZED")
+            out[sid] = {
+                "cycle": s.get("cycle"),
+                "age_sec": round(now - s.get("last_seen", now), 1),
+                "unchanged_beats": s.get("unchanged", 0),
+                "last_action": s.get("last_action", ""),
+                "flags": flags or ["OK"],
+            }
+    return out
+
+
+def recent_events(limit: int = 80) -> list:
+    """Tail of the audit-core log (heartbeats + consults), oldest-to-newest.
+    Powers the operational dashboard 'when was it called' feed."""
+    try:
+        lines = AUDIT_PATH.read_text("utf-8", errors="replace").splitlines()
+    except OSError:
+        return []
+    out = []
+    for ln in lines[-limit:]:
+        try:
+            out.append(json.loads(ln))
+        except ValueError:
+            pass
+    return out
+
+
+# --- Visibilidade operacional: ultima atividade + fonte REAL do gate ----------
+# O painel nao pode parecer vivo quando esta ocioso, nem mostrar a aba Gate com
+# fonte velha como se fosse atual. audit.jsonl e a fonte PRIMARIA de consults
+# recentes; questions/responses .md sao LEGACY/fallback. UNKNOWN explicito quando
+# nao ha fonte — nunca inventa.
+
+def _fmt_dt(t):
+    try:
+        return time.strftime("%d/%m %H:%M", time.localtime(t))
+    except Exception:
+        return "?"
+
+
+def _newest_mtime(*iters):
+    newest = None
+    for it in iters:
+        try:
+            for p in it:
+                try:
+                    m = p.stat().st_mtime
+                except OSError:
+                    continue
+                if newest is None or m > newest:
+                    newest = m
+        except OSError:
+            pass
+    return newest
+
+
+def _audit_scan() -> dict:
+    """Varre TODO o audit.jsonl (nao so o tail): t do evento mais novo (qualquer kind),
+    t do consult mais novo, e os consults recentes (dado REAL pra aba Gate)."""
+    last_event = last_consult = None
+    consults = []
+    try:
+        lines = AUDIT_PATH.read_text("utf-8", errors="replace").splitlines()
+    except OSError:
+        lines = []
+    for ln in lines:
+        try:
+            e = json.loads(ln)
+        except ValueError:
+            continue
+        t = e.get("t")
+        if not isinstance(t, (int, float)):
+            continue
+        if last_event is None or t > last_event:
+            last_event = t
+        if e.get("kind") == "consult":
+            if last_consult is None or t > last_consult:
+                last_consult = t
+            consults.append(e)
+    consults.sort(key=lambda e: e.get("t", 0), reverse=True)
+    return {"last_event": last_event, "last_consult": last_consult, "consults": consults}
+
+
+def _classify_gate_source(audit_consult_at, legacy_q_at, margin=SOURCE_STALE_MARGIN_SEC):
+    """PURA (testavel): qual a fonte do gate e se a legacy esta stale vs o audit."""
+    has_a = audit_consult_at is not None
+    has_l = legacy_q_at is not None
+    if has_a and has_l:
+        source = "mixed"
+    elif has_a:
+        source = "audit.jsonl"
+    elif has_l:
+        source = "questions/responses legacy"
+    else:
+        source = "unavailable"
+    stale = bool(has_a and has_l and (audit_consult_at - legacy_q_at) > margin)
+    return source, stale
+
+
+def _classify_gate_state(up, last_consult_at, now, pending, stalled, source_stale,
+                         warn=GATE_IDLE_WARN_SEC, bad=GATE_IDLE_BAD_SEC):
+    """PURA (testavel): estado honesto do gate. UP/DOWN sozinho nao basta."""
+    if not up:
+        return "DOWN", "bad"
+    if last_consult_at is None:
+        return "UNKNOWN", "warn"
+    if pending > 0 or stalled > 0:
+        return "BLOCKED", "bad"
+    if source_stale:
+        return "STALE_SOURCE", "warn"
+    idle = now - last_consult_at
+    if idle > bad:
+        return "ONLINE_IDLE", "bad"
+    if idle > warn:
+        return "ONLINE_IDLE", "warn"
+    return "ONLINE_ACTIVE", "ok"
+
+
+def _gate_source_info() -> dict:
+    """Fonte real do gate + staleness + consults recentes do audit (pra aba Gate)."""
+    now = time.time()
+    aud = _audit_scan()
+    qd = QUESTIONS_DIR
+    rd = RESPONSES_DIR
+    legacy_q = _newest_mtime(qd.glob("*.md")) if qd.is_dir() else None
+    legacy_r = _newest_mtime(rd.glob("*.md")) if rd.is_dir() else None
+    audit_c = aud["last_consult"]
+    source, stale = _classify_gate_source(audit_c, legacy_q)
+    reason = None
+    if stale:
+        reason = ("fonte legacy stale: questions/responses ultimo em " + _fmt_dt(legacy_q)
+                  + ", mas audit tem consult em " + _fmt_dt(audit_c))
+    return {
+        "source": source, "source_stale": stale, "stale_reason": reason,
+        "audit_last_consult_at": audit_c, "audit_last_event_at": aud["last_event"],
+        "legacy_last_question_at": legacy_q, "legacy_last_response_at": legacy_r,
+        "audit_consults": [{"age_sec": round(now - e.get("t", now)), "mode": e.get("mode", "default"),
+                            "dur_sec": e.get("dur_sec"), "q_chars": e.get("q_chars"),
+                            "a_chars": e.get("a_chars")} for e in aud["consults"][:20]],
+    }
+
+
+def activity_summary() -> dict:
+    """Visibilidade operacional honesta: ultima atividade, ociosidade do gate, fonte
+    real + staleness, sessoes vivas/paradas, ultimo artifact. UNKNOWN explicito."""
+    now = time.time()
+    up = True  # se /api/activity responde, ESTE gate esta servindo (o watchdog cobre o DOWN)
+    src = _gate_source_info()
+    audit_c = src["audit_last_consult_at"]
+    legacy_q = src["legacy_last_question_at"]
+    legacy_r = src["legacy_last_response_at"]
+
+    cand_consult = [x for x in (audit_c, legacy_q) if x]
+    cand_resp = [x for x in (audit_c, legacy_r) if x]
+    last_consult = max(cand_consult) if cand_consult else None
+    last_response = max(cand_resp) if cand_resp else None
+    gate_idle = (now - last_consult) if last_consult else None
+
+    sv = sessions_view()
+    active = sum(1 for v in sv.values() if v.get("flags") == ["OK"])
+    stalled = sum(1 for v in sv.values()
+                  if "STALLED" in v.get("flags", []) or "PARALYZED" in v.get("flags", []))
+
+    live_last = None
+    with _SESSIONS_LOCK:
+        for s in _SESSIONS.values():
+            ls = s.get("last_seen")
+            if ls and (live_last is None or ls > live_last):
+                live_last = ls
+    cand_act = [x for x in (src["audit_last_event_at"], live_last) if x]
+    last_activity = max(cand_act) if cand_act else None
+
+    art = REPO_ROOT / "artifacts"
+    last_artifact = _newest_mtime(art.glob("**/*.skp"), art.glob("**/*.png")) if art.is_dir() else None
+
+    try:
+        pending = len(_orphan_consults())
+    except Exception:
+        pending = 0
+
+    state, sev = _classify_gate_state(up, last_consult, now, pending, stalled, src["source_stale"])
+
+    def age(t):
+        return round(now - t) if t else None
+
+    return {
+        "now": now, "up": up,
+        "gate_state": state, "gate_state_sev": sev,
+        "last_activity_at": last_activity, "last_activity_age_sec": age(last_activity),
+        "last_gate_consult_at": last_consult, "last_gate_consult_age_sec": age(last_consult),
+        "last_gate_response_at": last_response, "last_gate_response_age_sec": age(last_response),
+        "gate_idle_age_sec": (round(gate_idle) if gate_idle is not None else None),
+        "gate_source": src["source"], "gate_source_stale": src["source_stale"],
+        "stale_reason": src["stale_reason"],
+        "active_sessions_now": active, "stalled_sessions_now": stalled,
+        "last_artifact_at": last_artifact, "last_artifact_age_sec": age(last_artifact),
+        "pending_gate": pending,
+        "thresholds": {"idle_warn_sec": GATE_IDLE_WARN_SEC, "idle_bad_sec": GATE_IDLE_BAD_SEC,
+                       "source_stale_margin_sec": SOURCE_STALE_MARGIN_SEC},
+    }
+
+
+# Operational dashboard served by the gate itself (no external stack): polls
+# /health + /sessions + /events every 5s. If this page won't load, the gate is down.
+DASHBOARD_HTML = """<!doctype html>
+<html lang="pt-br"><head><meta charset="utf-8">
+<title>Claude Gate - Operacional</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{--bg:#0d1117;--card:#161b22;--line:#30363d;--txt:#e6edf3;--dim:#8b949e;
+--ok:#3fb950;--bad:#f85149;--warn:#d29922;--accent:#58a6ff;}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--txt);
+font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+header{display:flex;align-items:center;gap:16px;padding:16px 24px;border-bottom:1px solid var(--line);flex-wrap:wrap;}
+h1{font-size:18px;margin:0;font-weight:600;}
+.badge{padding:6px 14px;border-radius:20px;font-weight:700;letter-spacing:.5px;}
+.badge.on{background:rgba(63,185,80,.15);color:var(--ok);border:1px solid var(--ok);}
+.badge.off{background:rgba(248,81,73,.15);color:var(--bad);border:1px solid var(--bad);}
+.wrap{padding:24px;display:grid;gap:20px;grid-template-columns:1fr 1fr;max-width:1100px;}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;}
+.card h2{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin:0 0 12px;}
+.kv{display:flex;justify-content:space-between;padding:3px 0;gap:12px;}
+.kv span:first-child{color:var(--dim);}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);}
+th{color:var(--dim);font-weight:500;}
+.flag{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;}
+.flag.OK{background:rgba(63,185,80,.15);color:var(--ok);}
+.flag.STALLED{background:rgba(210,153,34,.15);color:var(--warn);}
+.flag.PARALYZED{background:rgba(248,81,73,.15);color:var(--bad);}
+.feed{max-height:280px;overflow:auto;}
+.ev{display:flex;gap:10px;padding:4px 0;border-bottom:1px solid #21262d;font-size:12px;}
+.ev .t{color:var(--dim);white-space:nowrap;}
+.ev .k{font-weight:700;}
+.ev .k.consult{color:var(--accent);}
+.ev .k.heartbeat{color:var(--dim);}
+.timeline{display:flex;gap:3px;flex-wrap:wrap;}
+.dot{width:12px;height:12px;border-radius:3px;background:var(--line);}
+.dot.up{background:var(--ok);}
+.dot.down{background:var(--bad);}
+.full{grid-column:1 / -1;}
+.pipe{display:flex;align-items:stretch;gap:6px;flex-wrap:wrap;}
+.stg{flex:1;min-width:84px;background:#0d1117;border:1px solid var(--line);border-radius:8px;padding:10px 6px;text-align:center;font-size:12px;font-weight:600;display:flex;flex-direction:column;justify-content:center;}
+.stg small{display:block;color:var(--dim);font-weight:400;margin-top:4px;font-size:10px;}
+.stg.pdf{border-color:#6e7681;}
+.stg.human{border-color:var(--warn);background:rgba(210,153,34,.08);}
+.stg.auto{border-color:var(--accent);background:rgba(88,166,255,.07);}
+.stg.gate{border-color:var(--ok);background:rgba(63,185,80,.07);}
+.stg.ok{border-color:var(--ok);background:rgba(63,185,80,.15);}
+.arr{display:flex;align-items:center;color:var(--dim);font-size:18px;}
+.legend{margin-top:12px;display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--dim);align-items:center;}
+.lg{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:middle;}
+.lg.auto{background:rgba(88,166,255,.6);}
+.lg.human{background:rgba(210,153,34,.7);}
+.lg.gate{background:rgba(63,185,80,.6);}
+.lg.ok{background:var(--ok);}
+.docs details{border:1px solid var(--line);border-radius:6px;margin-bottom:6px;background:#0d1117;}
+.docs summary{cursor:pointer;padding:8px 12px;font-weight:600;font-size:12px;color:var(--accent);}
+.docs .d{padding:3px 14px 3px 26px;font-size:12px;border-top:1px solid #21262d;}
+.docs .d code{color:var(--warn);background:rgba(210,153,34,.08);padding:1px 6px;border-radius:4px;margin-right:7px;}
+footer{padding:0 24px 24px;color:var(--dim);font-size:12px;}
+</style></head><body>
+<header><h1>&#127899; Claude Gate - Operacional</h1>
+<span id="status" class="badge off">CHECANDO...</span>
+<span id="updated" style="color:var(--dim);font-size:12px;"></span></header>
+<div class="wrap">
+<div class="card full"><h2>Pipeline PDF -&gt; SKP (como o sketchup-mcp processa)</h2>
+<div class="pipe">
+<div class="stg pdf">PDF<small>planta</small></div><div class="arr">&#8594;</div>
+<div class="stg human">anotacao<small>HUMANO</small></div><div class="arr">&#8594;</div>
+<div class="stg auto">consensus.json<small>walls/openings/rooms</small></div><div class="arr">&#8594;</div>
+<div class="stg auto">build_shell<small>.py shapely</small></div><div class="arr">&#8594;</div>
+<div class="stg auto">.skp + renders<small>.rb SketchUp</small></div><div class="arr">&#8594;</div>
+<div class="stg gate">gates det.<small>opening_host/overlay</small></div><div class="arr">&#8594;</div>
+<div class="stg human">VISUAL_REVIEW<small>HUMANO vs PDF</small></div><div class="arr">&#8594;</div>
+<div class="stg ok">artifacts/<small>deliverable</small></div>
+</div>
+<div class="legend"><span><span class="lg auto"></span>automatico</span><span><span class="lg human"></span>gate humano</span><span><span class="lg gate"></span>deterministico (ground truth)</span><span><span class="lg ok"></span>entrega</span></div>
+<div style="margin-top:10px;color:var(--dim);font-size:12px;">O oraculo :8765 (modo B, Opus 4.8) decide as bifurcacoes tecnicas ao longo do fluxo. So o VISUAL_REVIEW sobe pro humano.</div></div>
+<div class="card"><h2>Health</h2><div id="health"></div></div>
+<div class="card"><h2>Health timeline</h2><div id="timeline" class="timeline"></div>
+<div style="margin-top:10px;color:var(--dim);font-size:12px;">verde=online | vermelho=offline | refresh 5s</div></div>
+<div class="card full"><h2>Sessoes (orquestrador)</h2>
+<table><thead><tr><th>session</th><th>cycle</th><th>idade</th><th>beats iguais</th><th>ultima acao</th><th>flags</th></tr></thead>
+<tbody id="sessions"></tbody></table></div>
+<div class="card full"><h2>Atividade (consults + heartbeats)</h2><div id="feed" class="feed"></div></div>
+<div class="card full"><h2>Diretorio .claude/ — o cerebro do projeto (clique pra expandir)</h2>
+<div class="docs">
+<details><summary>raiz</summary>
+<div class="d"><code>CLAUDE.md</code>bootloader: missao, Hard Rules, ordem de carregamento</div>
+<div class="d"><code>constitution.md</code>principios nao-negociaveis (#1 o .skp e o artefato; #8 no-skp-no-progress)</div>
+<div class="d"><code>README.md</code>orientacao/indice do diretorio</div>
+</details>
+<details><summary>memory/ — memoria persistente (estado + regras vivas)</summary>
+<div class="d"><code>project_context.md</code>o que e o projeto e onde esta</div>
+<div class="d"><code>current_state.md</code>estado atual (feito / em andamento)</div>
+<div class="d"><code>operational_rules.md</code>loop GREEN/YELLOW/RED e quando parar</div>
+<div class="d"><code>git_workflow.md</code>develop-first; disciplina de branch/commit/PR</div>
+<div class="d"><code>multi_agent_coordination.md</code>coordenacao entre sessoes/worktrees (nao clobberar)</div>
+<div class="d"><code>artifact_policy.md</code>hierarquia runs/ vs artifacts/ vs fixtures/ + promotion</div>
+<div class="d"><code>lessons_learned.md</code>licoes LL-NNN acumuladas (releia antes de repetir)</div>
+<div class="d"><code>deprecated_context.md</code>o que ficou obsoleto (nao seguir)</div>
+</details>
+<details><summary>specs/ — especificacoes (o "como deve ser")</summary>
+<div class="d"><code>product_goal.md</code>o objetivo: .skp fiel ao PDF</div>
+<div class="d"><code>fidelity_gate.md</code>o que conta como fiel (campos do geometry_report)</div>
+<div class="d"><code>skp_artifact_layout.md</code>paths/naming/metadata do .skp canonico</div>
+<div class="d"><code>skp_proof_of_progress_gate.md</code>Constitution #8: sem SKP+evidencia, nao e progresso</div>
+<div class="d"><code>gate_framework_and_audit.md</code>o gate de decisao §6 (oraculo/redteam/file-fetch/confidence/audit)</div>
+<div class="d"><code>generalize_builder_constants.md</code>blueprint pra generalizar as constantes do builder</div>
+<div class="d"><code>perfect_reference_strategy.md</code>PDF como ground truth</div>
+<div class="d"><code>sdd_and_harness_engineering.md</code>spec-driven dev + engenharia do harness</div>
+<div class="d"><code>repository_hygiene.md</code>higiene do repo (arquivar obsoletos)</div>
+<div class="d"><code>templates/</code>4 templates: artifact_contract, feature_spec, fidelity_spec, regression_summary</div>
+</details>
+<details><summary>skills/ — 10 capacidades auto-descobertas (cada uma um SKILL.md)</summary>
+<div class="d"><code>pdf-to-skp-pipeline</code>build do .skp a partir do consensus</div>
+<div class="d"><code>fidelity-review</code>checklist SKP vs PDF (humano)</div>
+<div class="d"><code>generate-and-compare-skp-after-change</code>gera SKP + compara before/after</div>
+<div class="d"><code>skp-visual-self-correction</code>Visual Oracle Gate: floating door / orphan glass / etc</div>
+<div class="d"><code>skp-artifact-management</code>promocao runs/ -&gt; artifacts/</div>
+<div class="d"><code>gpt-auto-consult-gate</code>consulta o oraculo :8765 nas decisoes reais (9 triggers)</div>
+<div class="d"><code>gh-autopilot</code>commit -&gt; PR -&gt; merge -&gt; cleanup via gh</div>
+<div class="d"><code>repo-governance</code>PR/branch/merge/hygiene</div>
+<div class="d"><code>multi-agent-handoff</code>coordenacao multi-agent/worktrees</div>
+<div class="d"><code>autonomous-fidelity-loop</code>loop continuo de fidelidade (log por ciclo + heartbeat)</div>
+</details>
+<details><summary>evals/ — avaliacao</summary>
+<div class="d"><code>eval_strategy.md</code>estrategia de avaliacao</div>
+<div class="d"><code>fidelity_rubric.md</code>rubrica de fidelidade (eixos)</div>
+<div class="d"><code>regression_matrix.md</code>matriz de regressao</div>
+</details>
+<details><summary>plans/ — planejamento</summary>
+<div class="d"><code>active_work.md</code>trabalho ativo</div>
+<div class="d"><code>next_actions.md</code>proximas acoes</div>
+<div class="d"><code>roadmap.md</code>roadmap</div>
+<div class="d"><code>stopped_work.md</code>trabalho pausado</div>
+</details>
+<details><summary>docs/ — documentacao + historico</summary>
+<div class="d"><code>index.md</code>indice dos docs</div>
+<div class="d"><code>2026-05-31_agentic_system_retro_roadmap.md</code>retro do sistema agentico + roadmap</div>
+<div class="d"><code>adr/0001-...</code>ADR da arquitetura (gate + pipeline) — este sistema</div>
+<div class="d"><code>audits/</code>3 auditorias (estrutura .claude, friction review, proof-of-progress)</div>
+</details>
+<details><summary>scratch/ — local-only (gitignored)</summary>
+<div class="d">rascunhos descartaveis; nada importante vive aqui</div>
+</details>
+</div></div>
+</div>
+<footer>Servido pelo proprio gate em :8765 - sem stack externa</footer>
+<script>
+const hist=[];
+function fmtAge(s){if(s==null)return '-';if(s<90)return s+'s';if(s<5400)return Math.round(s/60)+'m';return Math.round(s/3600)+'h';}
+function fmtTime(t){try{return new Date(t*1000).toLocaleTimeString('pt-br');}catch(e){return '';}}
+function kv(k,v){return '<div class="kv"><span>'+k+'</span><span>'+v+'</span></div>';}
+async function tick(){
+let online=false,health=null;
+try{const r=await fetch('/health',{cache:'no-store'});health=await r.json();online=r.ok;}catch(e){online=false;}
+const b=document.getElementById('status');
+b.className='badge '+(online?'on':'off');b.textContent=online?'ONLINE':'OFFLINE';
+document.getElementById('updated').textContent='atualizado '+new Date().toLocaleTimeString('pt-br');
+hist.push(online);if(hist.length>60)hist.shift();
+document.getElementById('timeline').innerHTML=hist.map(u=>'<div class="dot '+(u?'up':'down')+'"></div>').join('');
+if(health){document.getElementById('health').innerHTML=
+kv('oracle',health.oracle)+kv('model',health.model||'-')+kv('effort',health.effort||'-')+
+kv('uptime',fmtAge(health.uptime_sec))+kv('modes',(health.modes||[]).join(', '))+
+kv('endpoints',(health.endpoints||[]).join(' '));}
+else{document.getElementById('health').innerHTML='<div style="color:var(--bad)">sem resposta do /health</div>';}
+if(!online)return;
+try{const s=await (await fetch('/sessions',{cache:'no-store'})).json();
+const rows=Object.entries(s).map(function(e){var id=e[0],v=e[1];
+return '<tr><td>'+id+'</td><td>'+(v.cycle==null?'-':v.cycle)+'</td><td>'+fmtAge(v.age_sec)+'</td><td>'+(v.unchanged_beats||0)+'</td><td>'+(v.last_action||'')+'</td><td>'+(v.flags||[]).map(f=>'<span class="flag '+f+'">'+f+'</span>').join(' ')+'</td></tr>';}).join('');
+document.getElementById('sessions').innerHTML=rows||'<tr><td colspan=6 style="color:var(--dim)">nenhuma sessao batendo ponto ainda</td></tr>';}catch(e){}
+try{const ev=await (await fetch('/events',{cache:'no-store'})).json();
+document.getElementById('feed').innerHTML=ev.slice().reverse().map(function(e){
+var extra=e.kind==='consult'?('mode='+(e.mode||'default')+' | '+(e.dur_sec==null?'?':e.dur_sec)+'s | q'+(e.q_chars==null?'?':e.q_chars)):('cycle='+(e.cycle==null?'?':e.cycle)+' | '+(e.session_id||'')+' '+(e.last_action||''));
+return '<div class="ev"><span class="t">'+fmtTime(e.t)+'</span><span class="k '+e.kind+'">'+e.kind+'</span><span>'+extra+'</span></div>';}).join('')||'<div style="color:var(--dim)">sem atividade ainda</div>';}catch(e){}
+}
+tick();setInterval(tick,5000);
+</script></body></html>"""
+
+
+def dashboard_html() -> str:
+    """Serve the multi-page SPA from dashboard.html (sibling file). Falls back to
+    the inline single-page DASHBOARD_HTML if the file is missing."""
+    try:
+        return (Path(__file__).parent / "dashboard.html").read_text("utf-8")
+    except OSError:
+        return DASHBOARD_HTML
+
+
+def plant_info() -> dict:
+    """Canonical plants + their render PNGs (for the Planta page)."""
+    art = REPO_ROOT / "artifacts"
+    plants = {}
+    if art.is_dir():
+        for d in sorted(art.iterdir()):
+            if d.is_dir() and d.name != "review":
+                pngs = sorted(f"artifacts/{d.name}/{x.name}" for x in d.glob("*.png"))
+                if pngs:
+                    plants[d.name] = pngs
+    return {"plants": plants}
+
+
+def safe_artifact(rel: str):
+    """Resolve `rel` to a real image UNDER artifacts/ or None. Read-only,
+    allowlisted (image suffix), no traversal / no escape."""
+    try:
+        p = (REPO_ROOT / rel).resolve()
+        p.relative_to((REPO_ROOT / "artifacts").resolve())
+    except (ValueError, OSError):
+        return None
+    if p.suffix.lower() not in (".png", ".jpg", ".jpeg", ".svg", ".webp"):
+        return None
+    return p if p.is_file() else None
+
+
+def _first_user_text(jsonl: Path) -> str:
+    """Best-effort: the first user input in a transcript (a human-readable descriptor)."""
+    try:
+        with jsonl.open("r", encoding="utf-8", errors="replace") as f:
+            for _ in range(10):
+                line = f.readline()
+                if not line:
+                    break
+                try:
+                    obj = json.loads(line)
+                except ValueError:
+                    continue
+                if obj.get("type") == "queue-operation" and obj.get("content"):
+                    return str(obj["content"])[:140]
+                m = obj.get("message")
+                if isinstance(m, dict) and m.get("role") == "user":
+                    c = m.get("content")
+                    if isinstance(c, str):
+                        return c[:140]
+                    if isinstance(c, list):
+                        for part in c:
+                            if isinstance(part, dict) and part.get("type") == "text":
+                                return str(part.get("text", ""))[:140]
+    except OSError:
+        pass
+    return ""
+
+
+def claude_sessions() -> dict:
+    """Real Claude Code sessions (~/.claude/projects) + derived state, so we can see
+    if e.g. 'GPT bridge integration' is ACTIVE/IDLE/STOPPED, plus any consult that is
+    still waiting on the gate (a question with no recorded response)."""
+    proj = Path.home() / ".claude" / "projects"
+    out = []
+    if proj.is_dir():
+        for d in proj.iterdir():
+            if not d.is_dir():
+                continue
+            for js in d.glob("*.jsonl"):
+                try:
+                    age = time.time() - js.stat().st_mtime
+                except OSError:
+                    continue
+                state = ("ACTIVE" if age < 300 else
+                         "IDLE" if age < 3600 else "STOPPED")
+                reason = ("rodando agora" if age < 300 else
+                          "ociosa (sem escrita recente)" if age < 3600 else
+                          "parada / encerrada")
+                out.append({"id": js.stem[:8], "project": d.name,
+                            "desc": _first_user_text(js), "reason": reason,
+                            "idle_sec": round(age), "state": state})
+    out.sort(key=lambda s: s["idle_sec"])
+    qd = QUESTIONS_DIR
+    rd = RESPONSES_DIR
+    pending = []
+    if qd.is_dir():
+        answered = {p.stem for p in rd.glob("*.md")} if rd.is_dir() else set()
+        for q in sorted(qd.glob("*.md")):
+            if q.stem not in answered:
+                try:
+                    a = round(time.time() - q.stat().st_mtime)
+                except OSError:
+                    a = 0
+                pending.append({"q": q.stem, "age_sec": a})
+    return {"sessions": out[:60], "total": len(out), "pending_gate": pending}
+
+
+def ecosystem() -> dict:
+    """Top-level of E:\\Claude (the machine ecosystem) for the docs page."""
+    root = REPO_ROOT.parent
+    items = []
+    try:
+        for p in sorted(root.iterdir()):
+            items.append({"name": p.name, "dir": p.is_dir()})
+    except OSError:
+        pass
+    return {"root": str(root), "items": items}
+
+
+def recent_commits(n: int = 12) -> dict:
+    """Recent develop commits so the dashboard shows the project is alive."""
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(REPO_ROOT), "log", "--oneline", "-n", str(n),
+             "origin/develop"],
+            capture_output=True, text=True, encoding="utf-8", errors="replace",
+            timeout=10)
+        lines = [ln for ln in (proc.stdout or "").splitlines() if ln.strip()]
+    except (OSError, subprocess.SubprocessError):
+        lines = []
+    return {"commits": lines}
+
+
+_VERDICT_TL = re.compile(r"(?im)(?:verdict|veredito|overall)\s*[:=]?\s*\**\s*"
+                         r"(IMPROVED|SAME|WORSE|PASS|FAIL|WARN)")
+_VERDICT_ANY = re.compile(r"\b(IMPROVED|SAME|WORSE)\b")
+
+
+def _find_verdict(d: Path):
+    """Best-effort verdict for a SKP run dir: prefer a 'VERDICT:'/'veredito:' line in
+    regression_summary.md / verdict.md / decision.md; else any IMPROVED/SAME/WORSE."""
+    for name in ("regression_summary.md", "verdict.md", "decision.md"):
+        try:
+            hits = list(d.rglob(name))
+        except OSError:
+            hits = []
+        for f in hits:
+            try:
+                txt = f.read_text("utf-8", errors="replace")
+            except OSError:
+                continue
+            m = _VERDICT_TL.search(txt) or _VERDICT_ANY.search(txt)
+            if m:
+                return m.group(1).upper()
+    return None
+
+
+def skp_timeline() -> dict:
+    """Current canonical SKP(s) + the timeline of review cycles (renders + verdict),
+    for before/after analysis. Paths are REPO_ROOT-relative (served via /artifact)."""
+    art = REPO_ROOT / "artifacts"
+    out = {"canonical": {}, "timeline": []}
+    if not art.is_dir():
+        return out
+    for d in sorted(art.iterdir()):
+        if d.is_dir() and d.name != "review":
+            pngs = sorted(f"artifacts/{d.name}/{x.name}" for x in d.glob("*.png"))
+            skps = sorted(f"artifacts/{d.name}/{x.name}" for x in d.glob("*.skp"))
+            if pngs or skps:
+                out["canonical"][d.name] = {"pngs": pngs,
+                                            "skp": skps[0] if skps else None,
+                                            "skps": skps,
+                                            "has_skp": bool(skps),
+                                            "verdict": _find_verdict(d)}
+    review = art / "review"
+    runs = []
+    if review.is_dir():
+        for plant in sorted(review.iterdir()):
+            if not plant.is_dir():
+                continue
+            for run in sorted(plant.iterdir()):
+                if not run.is_dir():
+                    continue
+                try:
+                    mt = run.stat().st_mtime
+                except OSError:
+                    mt = 0
+                pngs = []
+                try:
+                    for f in sorted(run.rglob("*.png")):
+                        try:
+                            pngs.append(f.relative_to(REPO_ROOT).as_posix())
+                        except (ValueError, OSError):
+                            pass
+                except OSError:
+                    pass
+                runs.append({"plant": plant.name, "run": run.name,
+                             "mtime": round(mt), "age_sec": round(time.time() - mt),
+                             "verdict": _find_verdict(run),
+                             "pngs": pngs[:4], "n_pngs": len(pngs)})
+    runs.sort(key=lambda r: r["mtime"], reverse=True)
+    out["timeline"] = runs[:40]
+    return out
+
+
+_VERDICT_RE = re.compile(r"(?im)verdict\s*[:\-]\s*(GO|NO-GO|MORE-INFO|VISUAL_REVIEW)")
+
+
+def _extract_verdict(txt: str):
+    m = _VERDICT_RE.search(txt or "")
+    return m.group(1).upper() if m else None
+
+
+def gate_ledger() -> dict:
+    """The gate Q&A history: question/response pairs, which are still pending
+    (waiting on the gate), latency, and the verdict the gate gave. Answers 'o
+    gate ajudou ou só virou teatro?'."""
+    qd = QUESTIONS_DIR
+    rd = RESPONSES_DIR
+    rmap = {p.stem: p for p in rd.glob("*.md")} if rd.is_dir() else {}
+    entries = []
+    if qd.is_dir():
+        for q in sorted(qd.glob("*.md"), key=lambda p: p.name, reverse=True):
+            try:
+                qt = q.stat().st_mtime
+            except OSError:
+                qt = 0
+            r = rmap.get(q.stem)
+            verdict = latency = None
+            if r is not None:
+                try:
+                    latency = max(0, round(r.stat().st_mtime - qt))
+                    verdict = _extract_verdict(r.read_text("utf-8", errors="replace"))
+                except OSError:
+                    pass
+            trig = q.stem.split("_", 1)[-1] if "_" in q.stem else q.stem
+            entries.append({"id": q.stem, "trigger": trig,
+                            "answered": r is not None, "verdict": verdict,
+                            "latency_sec": latency, "age_sec": round(time.time() - qt)})
+    answered = sum(1 for e in entries if e["answered"])
+    out = {"entries": entries[:80], "total": len(entries),
+           "answered": answered, "pending": len(entries) - answered}
+    out.update(_gate_source_info())  # fonte REAL (audit vs legacy) + staleness + consults recentes
+    return out
+
+
+_DEFER_TRIPLET = ("why_not_fixed_yet", "next_hypothesis", "acceptance_criteria")
+
+
+def _validly_deferred(d: dict) -> bool:
+    """DEFERRED so conta como divida-aceita/roadmap (YELLOW, nunca RED) sob guardas
+    (decisao do gate :8765, 2026-06-03 — anti-mute-button): exige o triplet completo
+    (why_not_fixed_yet + next_hypothesis + acceptance_criteria) E uma review_by ainda
+    nao-vencida. Sem isso NAO se esconde atras de DEFERRED — reabre e volta a contar
+    como travado (RED se HIGH). Re-open trigger: passou a review_by -> reabre."""
+    if d.get("status") != "DEFERRED":
+        return False
+    for k in _DEFER_TRIPLET:
+        v = str(d.get(k) or "").strip()
+        if v in ("", "-") or v.startswith("UNKNOWN"):
+            return False
+    rb = str(d.get("review_by") or "").strip()
+    if rb and time.strftime("%Y-%m-%d") >= rb:
+        return False
+    return True
+
+
+def status() -> dict:
+    """Command Center: aggregate everything into a GREEN/YELLOW/RED project score.
+    RED se houver HIGH+OPEN ou consult pendente; YELLOW se houver OPEN/dirty/DEFERRED
+    (roadmap/divida aceita); senao GREEN. DEFERRED so vale com triplet + review_by valida
+    (anti-gaming, gate :8765 2026-06-03) — senao reabre como OPEN."""
+    sess = claude_sessions()
+    gl = gate_ledger()
+    gi = git_inventory()
+    tl = skp_timeline()
+    dif = difficulties()
+    all_diffs = dif["difficulties"]
+    deferred = [d for d in all_diffs if _validly_deferred(d)]
+    # DEFERRED vencido / sem o triplet NAO se esconde: reabre e volta a contar como travado.
+    reopened = [d for d in all_diffs if d.get("status") == "DEFERRED" and not _validly_deferred(d)]
+    open_diffs = [d for d in all_diffs if d.get("status") == "OPEN"] + reopened
+    high_open = [d for d in open_diffs if d.get("severidade") == "HIGH"]
+    pending = gl.get("pending", 0)
+    dirty = gi.get("dirty", [])
+    stopped = sum(1 for s in sess.get("sessions", []) if s.get("state") == "STOPPED")
+    if high_open or pending > 0:
+        score = "RED"
+    elif open_diffs or dirty or deferred:
+        score = "YELLOW"
+    else:
+        score = "GREEN"
+    reasons = []
+    if high_open:
+        reasons.append(f"{len(high_open)} dificuldade(s) HIGH OPEN")
+    if pending:
+        reasons.append(f"{pending} consult(s) esperando o gate")
+    if dirty:
+        reasons.append(f"{len(dirty)} repo(s) dirty")
+    if open_diffs and not high_open:
+        reasons.append(f"{len(open_diffs)} dificuldade(s) OPEN")
+    if deferred:
+        reasons.append(f"{len(deferred)} adiada(s) (roadmap/aceita)")
+    if not reasons:
+        reasons.append("tudo limpo")
+    return {"score": score, "reason": "; ".join(reasons), "gate": "UP",
+            "sessions": {"total": sess.get("total", 0), "stopped": stopped},
+            "pending_gate": pending, "dirty_repos": dirty,
+            "open_difficulties": len(open_diffs), "high_open": [d["id"] for d in high_open],
+            "deferred": [d["id"] for d in deferred],
+            "canonical_skp": {k: {"skp": v.get("skp"), "has_skp": v.get("has_skp", False),
+                                  "verdict": v.get("verdict")}
+                              for k, v in tl.get("canonical", {}).items()}}
+
+
+_NBA_SEED = [
+    {"titulo": "Auto-extrator vetorial PDF->consensus (walls = filled paths)", "tipo": "produto",
+     "impacto": 5, "esforco": 5, "proxima_acao": "só após 2a planta no loop manual; validar contra a planta_74 anotada"},
+    {"titulo": "2a planta real como forcing function", "tipo": "produto",
+     "impacto": 5, "esforco": 3, "proxima_acao": "Felipe fornece PDF + âncora física; anotar consensus juntos"},
+    {"titulo": "Worktree-lock (fix-raiz da colisão multi-agent)", "tipo": "infra",
+     "impacto": 3, "esforco": 2, "proxima_acao": "/lock keyed por session_id + ownership de branch"},
+    {"titulo": "Consolidar serving pro launcher canônico + remover wt-dash", "tipo": "infra",
+     "impacto": 3, "esforco": 2, "proxima_acao": "quando feat/banho2-glass sincronizar develop, repointar + remover wt-dash"},
+    {"titulo": "Watchdog do gate (auto-restart se /health cair)", "tipo": "infra",
+     "impacto": 2, "esforco": 2, "proxima_acao": "scheduled task (admin) ou loop de health-check"},
+    {"titulo": "Tier do oráculo (Opus pesado / Sonnet rotina)", "tipo": "gate",
+     "impacto": 2, "esforco": 3, "proxima_acao": "rotear por peso da decisão no multi-oracle"},
+]
+
+
+def next_best_actions() -> dict:
+    """Prioritized backlog by ROI = impacto/esforço (OPEN difficulties + opportunity seed)."""
+    items = []
+    for d in difficulties()["difficulties"]:
+        if d.get("status") == "OPEN":
+            imp = {"HIGH": 5, "MED": 3, "LOW": 2}.get(d.get("severidade"), 3)
+            items.append({"titulo": "[DIFF] " + d["titulo"], "tipo": "dificuldade",
+                          "impacto": imp, "esforco": 3,
+                          "proxima_acao": d.get("next_hypothesis", "-")})
+    items += [dict(x) for x in _NBA_SEED]
+    for x in items:
+        x["roi"] = round(x["impacto"] / max(1, x["esforco"]), 2)
+    items.sort(key=lambda x: x["roi"], reverse=True)
+    return {"actions": items}
+
+
+# --- Acoes corretivas: os PRIMEIROS endpoints de WRITE do cockpit -------------
+# Sancionado pelo Felipe ("cria um botao pra corrigir quando identificado"). Cada
+# acao e ESCOPADA + SEGURA: sem push, sem main, sem mexer em fixtures, sem path
+# controlado pelo cliente. So toca a fila de consults do proprio repo e loga tudo
+# no audit. O que NAO da pra auto-corrigir com seguranca (ex.: dirty na branch de
+# outro agente) vira DIAGNOSTICO read-only — nunca commit cego.
+
+def _orphan_consults() -> list:
+    """Consults (perguntas) sem resposta — a fila que 'espera o gate'."""
+    qd = QUESTIONS_DIR
+    rd = RESPONSES_DIR
+    if not qd.is_dir():
+        return []
+    answered = {p.stem for p in rd.glob("*.md")} if rd.is_dir() else set()
+    out = []
+    for q in sorted(qd.glob("*.md"), key=lambda p: p.name):
+        if q.stem in answered:
+            continue
+        try:
+            text = q.read_text("utf-8", errors="replace")
+        except OSError:
+            continue
+        out.append({"id": q.stem, "text": text})
+    return out
+
+
+def _process_consults_worker(items: list) -> None:
+    """Thread daemon: cada consult orfao -> gate -> grava resposta. Atualiza _ACTIONS
+    pra a UI acompanhar ao vivo (3->2->1->0). Best-effort por item: um erro nao
+    derruba a fila."""
+    rd = RESPONSES_DIR
+    try:
+        rd.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        pass
+    for it in items:
+        verdict = err = None
+        t0 = time.time()
+        try:
+            answer = ask_claude(it["text"])
+            verdict = _extract_verdict(answer)
+            (rd / f"{it['id']}.md").write_text(answer, encoding="utf-8")
+            _audit_append({"t": time.time(), "kind": "consult", "mode": "backfill",
+                           "q_chars": len(it["text"]), "a_chars": len(answer),
+                           "dur_sec": round(time.time() - t0, 1)})
+        except Exception as e:  # nao derruba a fila por um item
+            err = f"{type(e).__name__}: {e}"
+        with _ACTIONS_LOCK:
+            st = _ACTIONS.setdefault("process_consults", {})
+            st["done"] = st.get("done", 0) + 1
+            st.setdefault("results", []).append(
+                {"id": it["id"], "verdict": verdict, "error": err,
+                 "dur_sec": round(time.time() - t0, 1)})
+    with _ACTIONS_LOCK:
+        st = _ACTIONS.setdefault("process_consults", {})
+        st["running"] = False
+        st["finished_at"] = time.time()
+
+
+def process_consults_start() -> dict:
+    """Dispara o processamento da fila pendente em background. Idempotente: se ja
+    esta rodando, devolve o estado sem disparar de novo."""
+    with _ACTIONS_LOCK:
+        st = _ACTIONS.get("process_consults")
+        if st and st.get("running"):
+            return {"already_running": True, **st}
+    items = _orphan_consults()
+    state = {"running": len(items) > 0, "total": len(items), "done": 0,
+             "results": [], "started_at": time.time(),
+             "finished_at": None if items else time.time()}
+    with _ACTIONS_LOCK:
+        _ACTIONS["process_consults"] = state
+    if items:
+        threading.Thread(target=_process_consults_worker, args=(items,),
+                         daemon=True).start()
+    return {"started": len(items), **state}
+
+
+def process_consults_state() -> dict:
+    """Estado corrente da acao (UI faz polling enquanto roda)."""
+    with _ACTIONS_LOCK:
+        st = dict(_ACTIONS.get("process_consults") or
+                  {"running": False, "total": 0, "done": 0, "results": []})
+    st["pending_now"] = len(_orphan_consults())
+    return st
+
+
+def dirty_detail() -> dict:
+    """DIAGNOSTICO read-only dos repos dirty: o que mudou + recomendacao honesta.
+    NAO commita nada — em especial nao toca branch de outro agente (regra multi-agent)."""
+    gi = git_inventory()
+    own = REPO_ROOT.name
+    out = []
+    for r in gi.get("repos", []):
+        if not r.get("dirty"):
+            continue
+        p = REPO_ROOT.parent / r["path"]
+        try:
+            res = subprocess.run(["git", "-C", str(p), "status", "--porcelain"],
+                                 capture_output=True, text=True, encoding="utf-8",
+                                 errors="replace", timeout=10)
+            lines = [ln for ln in (res.stdout or "").splitlines() if ln.strip()]
+        except (OSError, subprocess.SubprocessError):
+            lines = []
+        runtime = [ln for ln in lines if ".ai_bridge/" in ln]
+        real = [ln for ln in lines if ".ai_bridge/" not in ln]
+        is_own = r["path"] == own
+        if real:
+            kind, rec = "review", "mudancas reais fora de runtime — revisar e commitar na branch"
+        elif not is_own:
+            kind, rec = "guarded", f"so runtime do .ai_bridge, mas na branch '{r.get('branch')}' de outro agente — NAO commito automatico"
+        else:
+            kind, rec = "ignorable", "so runtime do .ai_bridge no repo do cockpit — seguro gitignorar"
+        out.append({"repo": r["path"], "branch": r.get("branch"), "is_own": is_own,
+                    "runtime": len(runtime), "real": len(real),
+                    "sample": lines[:12], "kind": kind, "recommendation": rec})
+    return {"dirty": out}
+
+
+def actions_overview() -> dict:
+    """Liga cada problema do placard a uma acao concreta: o que e auto-corrigivel num
+    clique vs o que e diagnostico/manual. Drena o painel 'Acoes' da UI."""
+    st = status()
+    pend = gate_ledger().get("pending", 0)
+    dirty = st.get("dirty_repos", [])
+    high = st.get("high_open", [])
+    acts = [
+        {"key": "process-consults", "label": f"Processar {pend} consult(s) pendente(s)",
+         "kind": "auto", "runnable": pend > 0, "method": "POST",
+         "endpoint": "/api/actions/process-consults",
+         "detail": "Manda cada pergunta orfa pro gate (UP) e grava a resposta. Limpa o RED de fila."},
+        {"key": "dirty-detail", "label": f"Diagnosticar {len(dirty)} repo(s) dirty",
+         "kind": "diagnose", "runnable": len(dirty) > 0, "method": "GET",
+         "endpoint": "/api/actions/dirty-detail",
+         "detail": "Mostra o que mudou + recomendacao. Nao commita branch de outro agente."},
+        {"key": "open-difficulty",
+         "label": (f"Abrir trilha: {high[0]}" if high else "Backlog de dificuldades"),
+         "kind": "manual", "runnable": False, "method": None,
+         "endpoint": "/api/difficulties",
+         "detail": "Trabalho de produto (SKP/fidelidade) — sem fix de 1 clique; ver abas Dificuldades + Oportunidades."},
+    ]
+    return {"score": st.get("score"), "reason": st.get("reason"), "actions": acts}
+
+
+# --- Route table (Command pattern) -------------------------------------------
+# Replaces a ~28-branch if/elif in do_GET/do_POST: each path maps to a small
+# command `handler(req, url)`. Adding an endpoint is now ONE entry here instead of
+# editing the dispatch chain AND the /health docs separately (Open/Closed + DRY).
+# `advertised_endpoints()` derives /health's `endpoints` from these tables so the
+# advertised contract can never drift from what is actually routed (it had: the
+# old hardcoded list named 6 of ~26 real routes).
+
+_FILES_EXCLUDE = (".venv", "__pycache__", ".git", "node_modules", "runs", ".pytest_cache", ".mypy_cache")
+
+
+def _py_desc(path) -> str:
+    """Descricao HONESTA de um .py: docstring do modulo (1a linha). Vazio se nao houver."""
+    import ast
+    try:
+        doc = ast.get_docstring(ast.parse(path.read_text("utf-8", errors="replace")))
+        if doc:
+            return doc.strip().splitlines()[0].strip()[:160]
+    except Exception:
+        pass
+    return ""
+
+
+def _md_desc(path) -> str:
+    """Descricao HONESTA de um .md: 1o heading/linha nao-vazia (sem #). Vazio se nada."""
+    try:
+        for ln in path.read_text("utf-8", errors="replace").splitlines():
+            s = ln.strip()
+            if not s or s == "---":
+                continue
+            s = s.lstrip("#").strip()
+            if s:
+                return s[:160]
+    except Exception:
+        pass
+    return ""
+
+
+def recent_files(limit: int = 80) -> dict:
+    """Inventario de .py/.md modificados recentemente — proxy de 'o que foi mexido nos
+    ultimos processamentos'. mtime = ultima atualizacao; descricao EXTRAIDA do proprio
+    arquivo (docstring/heading), nunca inventada. NAO e rastreamento de execucao."""
+    now = time.time()
+    globs = [
+        REPO_ROOT.glob("*.py"), REPO_ROOT.glob("*.md"),
+        (REPO_ROOT / "tools").glob("**/*.py"), (REPO_ROOT / "tools").glob("**/*.md"),
+        (REPO_ROOT / ".claude").glob("**/*.md"),
+        (REPO_ROOT / "docs").glob("**/*.md"),
+    ]
+    out: dict = {}
+    for g in globs:
+        try:
+            for p in g:
+                parts = str(p).replace("\\", "/").split("/")
+                if any(x in parts for x in _FILES_EXCLUDE):
+                    continue
+                key = str(p)
+                if key in out or not p.is_file():
+                    continue
+                try:
+                    mt = p.stat().st_mtime
+                except OSError:
+                    continue
+                kind = p.suffix.lstrip(".")
+                out[key] = {
+                    "path": str(p.relative_to(REPO_ROOT)).replace("\\", "/"),
+                    "kind": kind, "mtime": mt, "age_sec": round(now - mt),
+                    "desc": _py_desc(p) if kind == "py" else _md_desc(p),
+                }
+        except OSError:
+            pass
+    rows = sorted(out.values(), key=lambda r: r["mtime"], reverse=True)[:limit]
+    return {"files": rows, "total": len(out), "shown": len(rows),
+            "scanned_roots": ["(raiz)", "tools/", ".claude/", "docs/"],
+            "note": "ordenado por mtime (proxy de uso recente, nao execucao); descricao do proprio arquivo"}
+
+
+def cognitive_doc() -> dict:
+    """Serve o CLAUDE_COGNITIVE_ARCHITECTURE.md (raiz do repo) como texto, pra aba
+    'Cerebro' renderizar. Fonte UNICA de verdade — a aba nao duplica o conteudo."""
+    p = REPO_ROOT / "CLAUDE_COGNITIVE_ARCHITECTURE.md"
+    try:
+        txt = p.read_text("utf-8", errors="replace")
+        mt = p.stat().st_mtime
+        return {"exists": True, "text": txt, "mtime": mt, "age_sec": round(time.time() - mt)}
+    except OSError:
+        return {"exists": False, "text": "",
+                "note": "CLAUDE_COGNITIVE_ARCHITECTURE.md nao encontrado na raiz do repo"}
+
+
+# === ESTADO VIVO DO CEREBRO (aba Cerebro) ====================================
+# Transforma a aba Cerebro de "doc vivo" em cockpit: o que a sessao carrega (do
+# CLAUDE.md) e quao FRESCO esta, o gate atual, o artefato canonico e a proxima
+# acao. TUDO derivado de arquivos/endpoints REAIS — nada fabricado (Hard Rule
+# nao-fabricar). O que NAO da pra saber em runtime (qual skill esta acionada
+# AGORA) e reportado como tal, nunca chutado.
+
+_STATE_AGING_SEC = 2 * 24 * 3600    # arquivo de estado > 2 dias -> AGING
+_STATE_STALE_SEC = 5 * 24 * 3600    # > 5 dias -> STALE
+_MANDATORY_SKILLS = {"generate-and-compare-skp-after-change"}  # Constitution #8: pos-mudanca
+
+
+def _git_out(args, timeout=4):
+    """Best-effort `git -C REPO_ROOT <args>` -> stdout stripado, ou None se git/repo
+    indisponivel. Mesmo padrao do system_inventory (nunca derruba o request)."""
+    try:
+        p = subprocess.run(["git", "-C", str(REPO_ROOT)] + list(args),
+                           capture_output=True, text=True, timeout=timeout)
+        if p.returncode == 0:
+            return p.stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return None
+
+
+def _file_state(rel: str) -> dict:
+    """Presenca + frescor (mtime) de um arquivo cognitivo (REPO_ROOT-relativo).
+    Ausente = badge MISSING (um @import pendurado e' sinal honesto, nao erro mudo)."""
+    p = REPO_ROOT / rel
+    try:
+        mt = p.stat().st_mtime
+    except OSError:
+        return {"path": rel, "exists": False, "badge": "MISSING", "age_sec": None}
+    return {"path": rel, "exists": True, "age_sec": round(time.time() - mt), "badge": "LIVE"}
+
+
+def _loaded_from_claude_md() -> list:
+    """A ordem de auto-load REAL: parseia as linhas `@.claude/...` do .claude/CLAUDE.md
+    (fonte viva). Cada item = presenca + frescor. Auto-atualiza se o CLAUDE.md mudar."""
+    md = REPO_ROOT / ".claude" / "CLAUDE.md"
+    try:
+        txt = md.read_text("utf-8", errors="replace")
+    except OSError:
+        return []
+    seen, out = set(), []
+    for m in re.finditer(r"(?m)^@(\.claude/\S+)", txt):
+        rel = m.group(1)
+        if rel not in seen:
+            seen.add(rel)
+            out.append(_file_state(rel))
+    return out
+
+
+def _current_state_freshness() -> dict:
+    """current_state.md e' o 'snapshot do dia' (decai rapido — o doc cognitivo diz isso).
+    Staleness HONESTA = commits-behind no git desde o ultimo commit do arquivo + idade
+    local (mtime). Sem git -> so mtime (commits_behind=None)."""
+    rel = ".claude/memory/current_state.md"
+    st = _file_state(rel)
+    behind = None
+    last = _git_out(["log", "-1", "--format=%H", "--", rel])
+    if last:
+        cnt = _git_out(["rev-list", "--count", f"{last}..HEAD"])
+        if cnt and cnt.isdigit():
+            behind = int(cnt)
+    st["commits_behind"] = behind
+    age = st.get("age_sec")
+    if not st["exists"]:
+        st["badge"], st["why"] = "MISSING", "arquivo ausente"
+    elif (behind is not None and behind > 5) or (age is not None and age > _STATE_STALE_SEC):
+        st["badge"], st["why"] = "STALE", (f"{behind} commits atras" if behind else "muito velho — reconferir vs git")
+    elif (behind is not None and behind > 0) or (age is not None and age > _STATE_AGING_SEC):
+        st["badge"], st["why"] = "AGING", (f"{behind} commit(s) atras" if behind else "envelhecendo")
+    else:
+        st["badge"], st["why"] = "LIVE", "fresco"
+    return st
+
+
+def _skill_cards() -> list:
+    """Painel de capacidades: cada .claude/skills/*/SKILL.md -> nome + descricao, lidos
+    do proprio arquivo (frontmatter `description:` ou 1o heading). Nao fabricado."""
+    base = REPO_ROOT / ".claude" / "skills"
+    cards = []
+    if not base.is_dir():
+        return cards
+    for d in sorted(base.iterdir()):
+        sk = d / "SKILL.md"
+        if not sk.is_file():
+            continue
+        try:
+            txt = sk.read_text("utf-8", errors="replace")
+        except OSError:
+            txt = ""
+        desc = ""
+        m = re.search(r"(?m)^description:\s*(.+)$", txt)
+        if m:
+            desc = m.group(1).strip().strip("\"'")
+        else:
+            h = re.search(r"(?m)^#\s+(.+)$", txt)
+            if h:
+                desc = h.group(1).strip()
+        try:
+            age = round(time.time() - sk.stat().st_mtime)
+        except OSError:
+            age = None
+        cards.append({"name": d.name, "desc": desc[:170], "age_sec": age,
+                      "mandatory": d.name in _MANDATORY_SKILLS})
+    return cards
+
+
+def brain_state() -> dict:
+    """Estado VIVO da aba Cerebro: o que a sessao carrega (do CLAUDE.md) + frescor,
+    o gate atual, o artefato canonico e a proxima acao (ROI). Reusa os endpoints
+    existentes (gate_ledger/skp_timeline/next_best_actions) — fonte unica, sem
+    duplicar logica. Cada sub-call e' guardada: uma falha vira sinal, nao 500."""
+    claude_md = _file_state(".claude/CLAUDE.md")
+    loaded = _loaded_from_claude_md()
+    current_state = _current_state_freshness()
+
+    # gate atual: livre / esperando consults / oraculo offline (reusa o ledger)
+    try:
+        pending = gate_ledger().get("pending", 0)
+    except Exception:
+        pending = 0
+    claude_ok = bool(shutil.which("claude") or shutil.which("claude.cmd"))
+    if not claude_ok:
+        gate = {"badge": "DEPRECATED", "label": "oraculo offline (claude nao no PATH)"}
+    elif pending > 0:
+        gate = {"badge": "STALE", "label": f"{pending} consult(s) esperando o gate"}
+    else:
+        gate = {"badge": "LIVE", "label": f"livre · oraculo {MODEL} (modo B)"}
+
+    # artefato canonico atual (reusa o timeline): o 1o com .skp; senao o 1o que exista
+    artifact = None
+    try:
+        canon = skp_timeline().get("canonical", {})
+    except Exception:
+        canon = {}
+    for plant, info in canon.items():
+        if info.get("has_skp"):
+            artifact = {"plant": plant, "skp": info.get("skp"), "verdict": info.get("verdict"),
+                        "badge": "LIVE" if info.get("verdict") else "DRAFT"}
+            break
+    if artifact is None and canon:
+        plant = next(iter(canon))
+        artifact = {"plant": plant, "skp": None,
+                    "verdict": canon[plant].get("verdict"), "badge": "DRAFT"}
+
+    # proxima acao recomendada (reusa o backlog por ROI — top item)
+    try:
+        acts = next_best_actions().get("actions", [])
+    except Exception:
+        acts = []
+    next_action = acts[0] if acts else None
+
+    skills = _skill_cards()
+    return {
+        "claude_md": claude_md,
+        "loaded": loaded,
+        "current_state": current_state,
+        "gate": gate,
+        "artifact": artifact,
+        "next_action": next_action,
+        "skills": skills,
+        "mandatory_skills": sorted(_MANDATORY_SKILLS),
+        "skill_runtime_note": ("qual skill esta acionada AGORA nao e' rastreavel em runtime — "
+                               "so a DISPONIBILIDADE e' honesta; a skill 'acende' pelo gatilho da task"),
+        "counts": {"loaded": len(loaded),
+                   "loaded_missing": sum(1 for x in loaded if not x.get("exists")),
+                   "skills": len(skills)},
+    }
+
+
+def _json_route(fn):
+    """Adapt a zero-arg data function into a GET handler that sends it as JSON 200."""
+    def handler(req, _url):
+        req._send(200, fn())
+    return handler
+
+
+def _html_route(fn):
+    """Adapt a zero-arg HTML producer into a GET handler that sends text/html."""
+    def handler(req, _url):
+        req._send_html(fn())
+    return handler
+
+
+def _artifact_route(req, url):
+    """Serve a whitelisted artifact image (path validated by safe_artifact)."""
+    f = safe_artifact((parse_qs(url.query).get("path") or [""])[0])
+    if not f:
+        req._send(404, {"error": "not an allowed artifact image"})
+        return
+    sfx = f.suffix.lower()
+    ctype = ("image/svg+xml" if sfx == ".svg" else
+             "image/jpeg" if sfx in (".jpg", ".jpeg") else
+             "image/webp" if sfx == ".webp" else "image/png")
+    req._send_bytes(f.read_bytes(), ctype)
+
+
+def _ask_route(req, _url):
+    """POST /ask — the oracle consult. Honest 500 on failure; never fabricates."""
+    try:
+        n = int(req.headers.get("Content-Length") or 0)
+        body = req.rfile.read(n) if n else b""
+        prompt = parse_ask_payload(body)
+        if not prompt:
+            req._send(400, {"error": "empty question (send 'prompt' or 'question')"})
+            return
+        mode = parse_ask_mode(body)
+        question = apply_mode(prompt, mode)
+        t0 = time.time()
+        answer = ask_claude(question)
+        _audit_append({"t": time.time(), "kind": "consult",
+                       "mode": mode or "default", "q_chars": len(prompt),
+                       "a_chars": len(answer), "dur_sec": round(time.time() - t0, 1)})
+        req._send(200, {"response": answer})
+    except Exception as e:  # devolve erro honesto; nao fabrica resposta
+        req._send(500, {"error": f"{type(e).__name__}: {e}"})
+
+
+def _heartbeat_route(req, _url):
+    req._heartbeat()
+
+
+def _process_consults_start_route(req, _url):
+    try:
+        req._send(200, process_consults_start())
+    except Exception as e:
+        req._send(500, {"error": f"{type(e).__name__}: {e}"})
+
+
+def local_llms() -> dict:
+    """Local LLM fleet (Ollama on :11434): which models are installed and which are
+    loaded in memory right now. Best-effort; returns up=False if the daemon is down.
+    Powers the NOC 'Fleet local' card."""
+    import urllib.request
+
+    base = "http://127.0.0.1:11434"
+    out = {"up": False, "version": "", "count": 0, "models": [], "running": []}
+
+    def _get(path):
+        with urllib.request.urlopen(base + path, timeout=2) as r:
+            return json.loads(r.read().decode("utf-8"))
+
+    try:
+        tags = _get("/api/tags")
+    except Exception as e:
+        out["error"] = f"{type(e).__name__}: {e}"
+        return out
+    out["up"] = True
+
+    running = set()
+    try:
+        running = {m.get("name", "") for m in (_get("/api/ps").get("models") or [])}
+    except Exception:
+        pass
+    try:
+        out["version"] = _get("/api/version").get("version", "")
+    except Exception:
+        pass
+
+    models = []
+    for m in (tags.get("models") or []):
+        det = m.get("details") or {}
+        name = m.get("name", "?")
+        icon, role = _llm_role(name)
+        models.append({
+            "name": name,
+            "gb": round((m.get("size") or 0) / (1024 ** 3), 1),
+            "params": det.get("parameter_size", ""),
+            "quant": det.get("quantization_level", ""),
+            "family": det.get("family", ""),
+            "running": name in running,
+            "icon": icon,
+            "role": role,
+        })
+    # carregados em memoria primeiro, depois alfabetico
+    models.sort(key=lambda x: (not x["running"], x["name"]))
+    out["models"] = models
+    out["count"] = len(models)
+    out["running"] = sorted(n for n in running if n)
+    return out
+
+
+# --- Fleet local: papel de cada modelo + acionamentos (parse do log Ollama) --
+LLM_ROLES = {
+    "planta-assistant": ("\U0001F3E0", "Decisões de planta / arquitetura"),
+    "coder-assistant": ("\U0001F4BB", "Código SketchUp / Ruby"),
+    "qwen2.5-coder": ("\U0001F4BB", "Código (geral)"),
+    "deepseek-r1": ("\U0001F9E0", "Raciocínio / decisão técnica"),
+    "qwen2.5vl": ("\U0001F441️", "Visão — review visual (FP-030)"),
+    "moondream": ("\U0001F441️", "Visão leve / caption"),
+    "interior-designer": ("\U0001F6CB️", "Mobiliar / design de interiores"),
+    "llama3.1": ("\U0001F4AC", "Geral / fallback"),
+}
+
+
+def _llm_role(name: str):
+    base = (name or "").split(":")[0]
+    return LLM_ROLES.get(base, ("\U0001F916", "—"))
+
+
+def llm_usage() -> dict:
+    """Acionamentos por modelo, reconstruídos do log do Ollama (server*.log).
+    Pareia cada `POST /api/(generate|chat|embeddings)` (linha GIN) com o
+    último `template selection model=<nome>` (modelo carregado naquele
+    instante). O Ollama não expõe contador por modelo via API; a janela
+    é o que os logs rotacionados ainda guardam. 0 = sem registro na janela."""
+    import os
+
+    out = {"up": False, "total_calls": 0, "log_files": 0, "models": []}
+    appdata = os.environ.get("LOCALAPPDATA", "")
+    logdir = Path(appdata) / "Ollama" if appdata else None
+
+    stats = {}
+    total = 0
+    files = []
+    if logdir and logdir.is_dir():
+        files = sorted(logdir.glob("server*.log"), key=lambda p: p.stat().st_mtime)
+    sel_re = re.compile(r'msg="template selection" model=\S*/([^/\s]+)')
+    gin_re = re.compile(r'\[GIN\]\s+([\d/]+ - [\d:]+).*?\|\s*POST\s+"/api/(?:generate|chat|embeddings|embed)"')
+    dur_re = re.compile(r'\|\s*([\d.]+)(ms|µs|μs|us|s|m)\s*\|')
+    cur = None
+    for f in files:
+        try:
+            text = f.read_text("utf-8", errors="replace")
+        except OSError:
+            continue
+        for line in text.splitlines():
+            m = sel_re.search(line)
+            if m:
+                cur = m.group(1)
+                continue
+            g = gin_re.search(line)
+            if not g:
+                continue
+            model = cur or "(desconhecido)"
+            st = stats.setdefault(model, {"calls": 0, "last_ts": "", "ms_total": 0.0})
+            st["calls"] += 1
+            st["last_ts"] = g.group(1)
+            total += 1
+            d = dur_re.search(line)
+            if d:
+                v, u = float(d.group(1)), d.group(2)
+                st["ms_total"] += (v / 1000 if u in ("µs", "μs", "us")
+                                   else v if u == "ms"
+                                   else v * 60000 if u == "m"
+                                   else v * 1000)
+
+    base = local_llms()
+    out["up"] = base.get("up", False)
+    running = set(base.get("running") or [])
+    seen, rows = set(), []
+    for mm in base.get("models") or []:
+        name = mm["name"]
+        st = stats.get(name) or {}
+        calls = st.get("calls", 0)
+        rows.append({
+            "name": name, "icon": mm.get("icon", "\U0001F916"), "role": mm.get("role", "—"),
+            "installed": True, "running": name in running,
+            "calls": calls, "last_ts": st.get("last_ts", ""),
+            "avg_ms": round(st["ms_total"] / calls) if calls else 0,
+            "gb": mm.get("gb", 0),
+        })
+        seen.add(name)
+    for name, st in stats.items():
+        if name in seen:
+            continue
+        icon, role = _llm_role(name)
+        rows.append({
+            "name": name, "icon": icon, "role": role,
+            "installed": False, "running": False,
+            "calls": st["calls"], "last_ts": st["last_ts"],
+            "avg_ms": round(st["ms_total"] / st["calls"]) if st["calls"] else 0, "gb": 0,
+        })
+    rows.sort(key=lambda r: (-r["calls"], r["name"]))
+    out["total_calls"] = total
+    out["log_files"] = len(files)
+    out["models"] = rows
+    return out
+
+
+# path (rstrip'd of trailing "/") -> command. "" is the form "/" and "/dashboard"
+# reduce to. GET strips the query (urlparse); POST matches the raw path, as before.
+GET_ROUTES = {
+    "": _html_route(dashboard_html),
+    "/dashboard": _html_route(dashboard_html),
+    "/health": _json_route(health_payload),
+    "/sessions": _json_route(sessions_view),
+    "/events": _json_route(recent_events),
+    "/api/skp-inventory": _json_route(skp_inventory),
+    "/api/plant": _json_route(plant_info),
+    "/api/claude-sessions": _json_route(claude_sessions),
+    "/api/ecosystem": _json_route(ecosystem),
+    "/api/recent-commits": _json_route(recent_commits),
+    "/api/gate-ledger": _json_route(gate_ledger),
+    "/api/system-map": _json_route(system_map),
+    "/api/git-inventory": _json_route(git_inventory),
+    "/api/processes": _json_route(live_processes),
+    "/api/local-llms": _json_route(local_llms),
+    "/api/llm-usage": _json_route(llm_usage),
+    "/api/activity": _json_route(activity_summary),
+    "/api/files": _json_route(recent_files),
+    "/api/cognitive": _json_route(cognitive_doc),
+    "/api/brain-state": _json_route(brain_state),
+    "/api/skp-inventory-v2": _json_route(skp_inventory_v2),
+    "/api/difficulties": _json_route(difficulties),
+    "/api/skp-timeline": _json_route(skp_timeline),
+    "/api/learnings": _json_route(learnings),
+    "/api/status": _json_route(status),
+    "/api/next-best-actions": _json_route(next_best_actions),
+    "/api/actions": _json_route(actions_overview),
+    "/api/actions/process-consults": _json_route(process_consults_state),
+    "/api/actions/dirty-detail": _json_route(dirty_detail),
+    "/artifact": _artifact_route,
+}
+
+POST_ROUTES = {
+    "/ask": _ask_route,
+    "/heartbeat": _heartbeat_route,
+    "/api/actions/process-consults": _process_consults_start_route,
+}
+
+
+def advertised_endpoints() -> list[str]:
+    """Single source of truth for /health's `endpoints`: every served path, derived
+    from the route tables so it can never drift from what do_GET/do_POST route."""
+    gets = {("/" if p == "" else p) for p in GET_ROUTES}
+    return sorted(gets | set(POST_ROUTES))
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -92,25 +1650,47 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-    def do_GET(self):
-        if self.path.rstrip("/") == "/health":
-            self._send(200, {"status": "ok", "oracle": "claude"})
-        else:
-            self._send(404, {"error": "not found"})
+    def _send_html(self, html: str):
+        body = html.encode("utf-8")
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
 
-    def do_POST(self):
-        if self.path.rstrip("/") != "/ask":
+    def _send_bytes(self, body: bytes, ctype: str):
+        self.send_response(200)
+        self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def do_GET(self):
+        u = urlparse(self.path)
+        handler = GET_ROUTES.get(u.path.rstrip("/"))
+        if handler is None:
             self._send(404, {"error": "not found"})
             return
+        handler(self, u)
+
+    def do_POST(self):
+        handler = POST_ROUTES.get(self.path.rstrip("/"))
+        if handler is None:
+            self._send(404, {"error": "not found"})
+            return
+        handler(self, None)
+
+    def _heartbeat(self):
         try:
             n = int(self.headers.get("Content-Length") or 0)
-            payload = json.loads(self.rfile.read(n).decode("utf-8")) if n else {}
-            prompt = (payload.get("prompt") or "").strip()
-            if not prompt:
-                self._send(400, {"error": "campo 'prompt' vazio"})
+            data = json.loads(self.rfile.read(n).decode("utf-8", "replace")) if n else {}
+            sid = str((data or {}).get("session_id") or "").strip()
+            if not sid:
+                self._send(400, {"error": "heartbeat needs session_id"})
                 return
-            self._send(200, {"response": ask_claude(prompt)})
-        except Exception as e:  # devolve erro honesto; nao fabrica resposta
+            self._send(200, record_heartbeat(
+                sid, data.get("cycle"), str(data.get("last_action") or "")))
+        except Exception as e:
             self._send(500, {"error": f"{type(e).__name__}: {e}"})
 
     def log_message(self, *a):

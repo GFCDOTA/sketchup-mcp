@@ -1,0 +1,173 @@
+{
+  "schema_version": "negative_dogfood.v1",
+  "fixture": "planta_74",
+  "timestamp": "2026-05-29T20:12:46Z",
+  "recipe": {
+    "op": "erase_top_exterior_wall_segment",
+    "defect_class": "missing_wall_continuation",
+    "source_render": "planta_74_top.png",
+    "rect": [
+      400,
+      92,
+      740,
+      122
+    ],
+    "ref_point": [
+      1300,
+      30
+    ]
+  },
+  "corruption": {
+    "rect": [
+      400,
+      92,
+      740,
+      122
+    ],
+    "ref_point": [
+      1300,
+      30
+    ],
+    "fill_rgb": [
+      191,
+      191,
+      198
+    ],
+    "image_size": [
+      1600,
+      1200
+    ],
+    "src_sha256": "b6a905f10e8a011221bb13031770818fecabf6d910bdb19cbfe02a77cb0cc0a5",
+    "out_sha256": "717e92f730e5907b3022e74ec278fa466522810e6dddf90baa8004033d04da27"
+  },
+  "clean_oracle": {
+    "status": "ok",
+    "detail": "ollama qwen2.5vl:7b returned valid visual_findings.v1",
+    "verdict": "FAIL",
+    "normalized": {
+      "schema_version": "visual_findings.v1",
+      "top_level_verdict": "FAIL",
+      "axes": {
+        "global_visual": {
+          "verdict": "FAIL",
+          "evidence": "The overall visual of the floor plan is not consistent, indicating issues with wall and room boundaries."
+        },
+        "room_fidelity": {
+          "verdict": "FAIL",
+          "evidence": "The room boundaries are not properly defined, indicating a wall stub."
+        },
+        "window_fidelity": {
+          "verdict": "PASS",
+          "evidence": "Windows appear correctly placed."
+        },
+        "wall_fidelity": {
+          "verdict": "FAIL",
+          "evidence": "The walls are not properly connected, indicating a wall stub."
+        },
+        "scale_rotation": {
+          "verdict": "PASS",
+          "evidence": "The scale and rotation appear correct."
+        },
+        "door_fidelity": {
+          "verdict": "PASS",
+          "evidence": "Doors appear correctly placed."
+        }
+      },
+      "findings": [
+        {
+          "id": "vf_001",
+          "severity": "FAIL",
+          "axis": "wall_fidelity",
+          "type": "wall_stub",
+          "location": "The left wall and the wall on the right side of the image appear to be incomplete.",
+          "evidence_image": "model_iso.png",
+          "evidence": "The walls are not properly connected, indicating a wall stub."
+        },
+        {
+          "id": "vf_002",
+          "severity": "FAIL",
+          "axis": "room_fidelity",
+          "type": "wall_stub",
+          "location": "The room boundaries are not properly defined, indicating a wall stub.",
+          "evidence_image": "model_iso.png",
+          "evidence": "The room boundaries are not properly defined, indicating a wall stub."
+        }
+      ],
+      "source": "oracle_bridge",
+      "raw_confidence": "medium"
+    }
+  },
+  "corrupted_oracle": {
+    "status": "ok",
+    "detail": "ollama qwen2.5vl:7b returned valid visual_findings.v1",
+    "verdict": "FAIL",
+    "normalized": {
+      "schema_version": "visual_findings.v1",
+      "top_level_verdict": "FAIL",
+      "axes": {
+        "global_visual": {
+          "verdict": "FAIL",
+          "evidence": "The overall visual is confusing due to overlapping walls and missing enclosure."
+        },
+        "room_fidelity": {
+          "verdict": "FAIL",
+          "evidence": "The rooms are not properly defined, with overlapping walls."
+        },
+        "window_fidelity": {
+          "verdict": "FAIL",
+          "evidence": "Windows are not fully enclosed, with visible gaps."
+        },
+        "wall_fidelity": {
+          "verdict": "FAIL",
+          "evidence": "The walls are not properly connected, creating floating sections."
+        },
+        "scale_rotation": {
+          "verdict": "PASS",
+          "evidence": "The scale and rotation appear correct."
+        },
+        "door_fidelity": {
+          "verdict": "PASS",
+          "evidence": "Doors are correctly placed and aligned."
+        }
+      },
+      "findings": [
+        {
+          "id": "vf_001",
+          "severity": "FAIL",
+          "axis": "wall_fidelity",
+          "type": "wall_stub",
+          "location": "left side of the image",
+          "evidence_image": "model_top.png",
+          "evidence": "The left wall is not properly connected, creating a floating section."
+        },
+        {
+          "id": "vf_002",
+          "severity": "FAIL",
+          "axis": "window_fidelity",
+          "type": "full_height_window_void",
+          "location": "top center of the image",
+          "evidence_image": "model_top.png",
+          "evidence": "The window is not fully enclosed, with visible gaps."
+        },
+        {
+          "id": "vf_003",
+          "severity": "FAIL",
+          "axis": "room_fidelity",
+          "type": "missing_wall_continuation",
+          "location": "bottom left of the image",
+          "evidence_image": "model_top.png",
+          "evidence": "The bottom left room is not properly defined, with overlapping walls."
+        }
+      ],
+      "source": "oracle_bridge",
+      "raw_confidence": "medium"
+    }
+  },
+  "conclusive": true,
+  "decision": {
+    "clean_verdict": "FAIL",
+    "corrupted_verdict": "FAIL",
+    "discriminated": false
+  },
+  "result": "NOT_DISCRIMINATED"
+}

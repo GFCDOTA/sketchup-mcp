@@ -1,0 +1,220 @@
+{
+  "stage": "A_spatial_model",
+  "room_id": "r002",
+  "room_name": "SALA DE JANTAR | SALA DE ESTAR",
+  "area_m2": 27.2,
+  "usable_area_m2": 21.4,
+  "walls": [
+    {
+      "id": "m004",
+      "type": "internal",
+      "length_m": 3.95,
+      "orientation": "h",
+      "openings": [
+        "h_o011"
+      ],
+      "blind": false
+    },
+    {
+      "id": "m006",
+      "type": "internal",
+      "length_m": 2.83,
+      "orientation": "h",
+      "openings": [
+        "h_o005"
+      ],
+      "blind": false
+    },
+    {
+      "id": "m007",
+      "type": "internal",
+      "length_m": 5.52,
+      "orientation": "h",
+      "openings": [
+        "h_o004"
+      ],
+      "blind": false
+    },
+    {
+      "id": "m009",
+      "type": "internal",
+      "length_m": 2.85,
+      "orientation": "h",
+      "openings": [
+        "h_o001"
+      ],
+      "blind": false
+    },
+    {
+      "id": "m010",
+      "type": "internal",
+      "length_m": 15.08,
+      "orientation": "h",
+      "openings": [
+        "h_o000"
+      ],
+      "blind": false
+    },
+    {
+      "id": "m013",
+      "type": "internal",
+      "length_m": 3.49,
+      "orientation": "v",
+      "openings": [],
+      "blind": true
+    },
+    {
+      "id": "m014",
+      "type": "internal",
+      "length_m": 4.39,
+      "orientation": "v",
+      "openings": [],
+      "blind": true
+    },
+    {
+      "id": "m015",
+      "type": "internal",
+      "length_m": 1.65,
+      "orientation": "v",
+      "openings": [],
+      "blind": true
+    },
+    {
+      "id": "m016",
+      "type": "internal",
+      "length_m": 7.67,
+      "orientation": "v",
+      "openings": [
+        "h_o003",
+        "h_o006"
+      ],
+      "blind": false
+    }
+  ],
+  "wall_counts": {
+    "border": 0,
+    "internal": 9,
+    "blind_useful": 3
+  },
+  "openings": [
+    {
+      "id": "h_o000",
+      "kind": "interior_door",
+      "wall_id": "m010",
+      "center": [
+        152.308,
+        680.3556213378906
+      ]
+    },
+    {
+      "id": "h_o001",
+      "kind": "interior_door",
+      "wall_id": "m009",
+      "center": [
+        276.7255,
+        627.9210205078125
+      ]
+    },
+    {
+      "id": "h_o003",
+      "kind": "interior_door",
+      "wall_id": "m016",
+      "center": [
+        333.39662170410156,
+        606.892
+      ]
+    },
+    {
+      "id": "h_o004",
+      "kind": "interior_door",
+      "wall_id": "m007",
+      "center": [
+        313.12300000000005,
+        587.1240539550781
+      ]
+    },
+    {
+      "id": "h_o005",
+      "kind": "interior_door",
+      "wall_id": "m006",
+      "center": [
+        105.9455,
+        580.1895
+      ]
+    },
+    {
+      "id": "h_o006",
+      "kind": "interior_door",
+      "wall_id": "m016",
+      "center": [
+        333.39662170410156,
+        569.909
+      ]
+    },
+    {
+      "id": "h_o011",
+      "kind": "glazed_balcony",
+      "wall_id": "m004",
+      "center": [
+        175.005,
+        511.41184997558594
+      ]
+    }
+  ],
+  "circulation_area_m2": 5.8,
+  "blind_wall_candidates": [
+    "m013",
+    "m014",
+    "m015"
+  ],
+  "tv_wall_candidate": {
+    "confidence": "ambiguous",
+    "best": null,
+    "best_candidate": "m013",
+    "candidates": [
+      {
+        "wall_id": "m013",
+        "score": 22.5,
+        "type": "internal",
+        "length_m": 3.49,
+        "depth_m": 3.62,
+        "reasons": [
+          "parede interna/divisoria (-10)",
+          "comprimento 3.49m (+17)",
+          "profundidade 3.6m ok p/ sofa->TV (+15)"
+        ]
+      },
+      {
+        "wall_id": "m015",
+        "score": -1.8,
+        "type": "internal",
+        "length_m": 1.65,
+        "depth_m": 4.51,
+        "reasons": [
+          "parede interna/divisoria (-10)",
+          "comprimento 1.65m (+8)",
+          "porta/arco de giro perto da ponta (-15)",
+          "profundidade 4.5m ok p/ sofa->TV (+15)"
+        ]
+      },
+      {
+        "wall_id": "m014",
+        "score": -18.1,
+        "type": "internal",
+        "length_m": 4.39,
+        "depth_m": 0.67,
+        "reasons": [
+          "parede interna/divisoria (-10)",
+          "comprimento 4.39m (+22)",
+          "profundidade so 0.7m p/ sofa->TV (-30)"
+        ]
+      }
+    ],
+    "limitations": [
+      "score heuristico — validar no SketchUp / olho humano",
+      "nao considera vista, iluminacao natural nem estilo",
+      "AMBIGUOUS = nao cravar; oferecer top-2 ao humano"
+    ]
+  },
+  "note": "Etapa A: NAO decide mobilia. Mapeia onde PODE/NAO PODE por movel. tv_wall_candidate e palpite ranqueado, nao decisao final."
+}

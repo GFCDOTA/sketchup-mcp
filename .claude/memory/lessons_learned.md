@@ -116,3 +116,107 @@ Regra: rodar os detectores determinísticos ANTES de confiar no render. O FIX de
 dado (corrigir extrator + regenerar consensus, dropar duplicata) MUTA fixture →
 **NEEDS-HUMAN** (Hard Rule #3), nunca auto-aplicar. Builder já contorna o host
 errado (aperture host-filtrado + fallback painel, FP-031).
+
+## LL-032 (2026-05-31) — raiz do FP-031 = FRAGMENTAÇÃO COLINEAR; merge resolve
+
+A raiz dos 9/12 host-errado + da duplicata é **fragmentação**: cada parede
+arquitetônica vira vários segmentos colineares curtos com gaps nas aberturas, e o
+opening fica num gap sem host válido. `tools/regenerate_consensus.py` (gate :8765
+= approach B): **merge colinear (mesma orientação/coord-fixa, gap ≤ bridge_gap) +
+re-host openings** → planta_74 walls **35→19**, opening_host **PASS(0/12)**,
+wall_overlap **PASS(0)**. Efeito colateral GRANDE no render: a parede contínua faz
+`find_wall_face_for_aperture` achar a face sólida → as 4 janelas passam de
+**painel-fallback → aperture vazado** (paradigma quadrado). Determinístico
+(gates/overlay/detectores PASS). **Regenerar = autônomo; PROMOVER pra canônica =
+VISUAL_REVIEW** (render muda → Felipe julga). Câmera top agora determinística (#29,
+fit 4:3 explícito, não zoom_extents) → gate cobre 100% das paredes.
+
+## LL-033 (2026-05-31) — promover fixture move a baseline; repinar testes faz parte
+
+Felipe aprovou (IMPROVED) e o regen virou consensus canônico do planta_74. Promover
+uma fixture pinada **quebra os testes que afirmavam o estado ANTIGO** — e isso é
+ESPERADO, não regressão: 6 testes pinavam o bug (detectores FAIL, wall_shell
+junction=27/free=43, n_walls≥30) e foram repinados pro novo estado (PASS,
+junction=21/free=17, n_walls≥15). Antes de repinar número geométrico, VERIFICAR que
+o novo valor é são (rodei build_shell_polygon: 0 violação de stub LL-017, invariante
+junction+free=2*walls vale). A behavior-de-captura dos detectores fica nos testes
+SINTÉTICOS (não dependem da fixture), então repinar o teste-real-fixture pra PASS não
+perde cobertura. Sempre regenerar o test-data render do build canônico novo.
+
+## LL-034 (2026-05-31) — gate framework §6 + dois aprendizados de processo
+
+(1) **"develop tem X" precisa de verificação empírica.** Felipe disse que develop tinha a
+promoção #28; `git merge-base --is-ancestor` + detector na fixture provaram que NÃO (só o
+candidato 6f93c94). Cherry-pick limpo do commit aprovado (7faed7f) reconciliou. Regra: antes de
+buildar em cima de "develop tem Y", confirme com detector/`is-ancestor`, não com a fala.
+(2) **Mudança no bridge não fica live sem RESTART.** Implementei §6.5-6.1 no `server.py`/módulos e
+landei, mas o `:8765` rodando seguiu com código velho (o `mode:redteam` que pedi no consult foi
+ignorado). Código≠processo: pós-mudança no bridge, reiniciar (`start.ps1`) + validar `/health`.
+(3) **Router puro (sem I/O) = teste sem mock** (`oracle_router.py`): rotear por necessidade —
+factual→determinístico (ground-truth vence), risky→família≠asker (independência real vs Claude-
+consultando-Claude). O cut foi cravado pelo próprio gate :8765.
+
+## LL-035 (2026-05-31) — o sidecar de projeção é PARTE do deliverable; gate que não roda ≠ verde
+
+Caçando defeito de fidelidade na canônica (loop autônomo), o `run_deterministic_gates`
+mostrava só opening_host + wall_overlap (PASS) — **faltava o `wall_presence`**. Raiz: o gate
+visual-determinístico (`overlay_diff`, projeção exata) **só roda se `<render>.proj.json` existe
+ao lado do render**, e nem o `promote_canonical` nem o snapshot `canonical_20260531/final/`
+copiavam o sidecar. Resultado: a canônica navegou "PASS" com o gate de paredes-no-render NUNCA
+rodando. Dois aprendizados:
+
+(1) **Promotion tem que carregar o sidecar.** O `.proj.json` é deliverable, não scratch — sem ele
+o gate auto-skipa e o `.skp` embarca não-verificado pra presença de parede. Fix: `_MAP` do
+`promote_canonical` inclui `model_top.png.proj.json → <plant>_top.png.proj.json`. O render do
+`runs/glassfix` batia byte-a-byte com o deliverable (sha), então o sidecar do glassfix era VÁLIDO
+e foi copiado sem rebuild. Com ele: `wall_presence PASS (0 flagged, calib=sidecar_exact)`.
+
+(2) **Gate runner enforce por EXIT CODE, não por print** (oráculo :8765, redteam, verdict B sobre
+meu leaning A). Skip silencioso virava exit 0 = CI verde. Um print "loud" continua exit 0 e CI
+faz gate no código, não no stdout — não teria barrado o incidente. Agora: `--render` dado mas
+sidecar ausente → `overall=INCOMPLETE`, **exit 3** (3, não 2 — argparse já usa 2 pra usage-error).
+Distinto de FAIL (exit 1): "não conseguiu rodar" (input faltando) ≠ "rodou e achou divergência".
+Preserva triagem ("regenera o sidecar" vs "geometria errada"). `--render` ausente de propósito
+(run consensus-only) segue PASS. Regra geral: **no silent caps** — cobertura que não rodou vira
+status não-verde, não um warning ignorável.
+
+## LL-036 (2026-06-02) — review externo julga o que você MANDA; mire a canônica de path fixo
+
+Mandei uma IA externa revisar fidelidade; ela apontou 3 itens "críticos/importantes".
+Verificação determinística contra a canônica ATUAL provou que **2 eram STALE**: ela revisou
+`visual_loop_current/final` (snapshot velho, render CORTADO nas laterais) em vez de
+`artifacts/planta_74/` (canônica de path fixo). #1 "render cortado" já resolvido pela câmera #29
+(margens 44/148 vs 0/29 do velho); #3 "portas 1,16/1,25m" já resolvido pelo regen #28 (todas
+≤0,89m). Só **#4 (8 soft barriers sb000-sb007 sem fonte)** era real.
+
+(1) **Verificar TODO achado de review contra a canônica atual, não contra o artefato revisado.**
+Render (bonito ou feio) não é prova; o que vale é o estado versionado atual.
+(2) **Review externo deve mirar o path fixo `artifacts/<plant>/`** (sempre o último correto),
+NUNCA dirs de review com timestamp/nome enganoso. `visual_loop_current` ("current" mentiroso) foi
+removido pra não enganar de novo.
+(3) Cada achado virou **gate de regressão determinístico**: `render_bbox_audit` (FAIL se conteúdo
+encosta na borda — pegaria o render velho; canônica PASS 44/148), `soft_barrier_source_audit`
+(WARN se barreira vira geometria física a 1,10m sem `barrier_type`/fonte PDF — Hard Rule #1).
+Achado stale vira guarda que prova a canônica limpa; achado real fica WARN pra classificação
+humana/PDF. Pendentes (precisam raster do PDF): swing de porta (#2), overlay PDF↔SKP registrado
+(#5), legibilidade de abertura no render (#6, core já validado).
+
+## LL-037 (2026-06-02) — soft barrier por barrier_type+fonte, não flag global (fim da gangorra)
+
+O builder renderizava TODOS os 9 soft_barriers iguais (slab cinza 1,10m, `PARAPET_RGB`), ligado
+por UM flag global `SOFT_BARRIERS_MODE`. Isso causou o efeito gangorra entre sessões: "tudo vira
+grade" ↔ "nada vira grade / tudo bloco". Os dois são global on/off = desligar a feature, não
+corrigir. Só `h_sb000` tinha fonte (barrier_type=peitoril, human_annotation); `sb000-sb007` eram
+polylines NUS virando bloco físico sem proveniência (viola Hard Rule #1).
+
+Fix (render POR SEGMENTO): `barrier_render_as(sb)` → railing/guardrail = grade; peitoril/mureta/
+parapet = muro baixo; **sem barrier_type/fonte = NÃO renderiza**. O loop grava `sb_records` e o
+`geometry_report.soft_barrier_groups.barriers` expõe por-barreira {id, sourced, rendered,
+render_as}. Build real: **8 unsourced skipped, só h_sb000 renderiza** (low_wall); o bloco cinza
+comprido sumiu. 6/6 gates verdes.
+
+Dois gates novos (deterministas, lêem consensus+report): `railing_exact_match_gate` (esperado vs
+actual: missing/extra/wrong-host/length-delta>10cm = FAIL) e `parapet_not_railing_fallback_gate`
+(unsourced→física = FAIL; remover grade não pode mintar bloco). Micro-fixture sintético prova que
+o builder-flag-global FALHA e o builder-por-tipo+fonte PASSA. Regra: **provenance decide se
+renderiza; o tipo decide como; nada global.** Falta só VISUAL_REVIEW do Felipe (aparência mudou).
