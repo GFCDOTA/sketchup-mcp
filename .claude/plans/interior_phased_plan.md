@@ -9,7 +9,14 @@
 
 ## Estado (atualizado por ciclo)
 
-- **Fase atual: 2 (Bedroom placement) — determinístico GREEN; GPT visual BLOCKED (infra).**
+- **Fase 3 (anatomia quartos) EM ANDAMENTO**: BedBuilder ✅ + WardrobeBuilder ✅ (commit 327a1c4:
+  corpo+portas/frestas+puxadores+rodapé, wardrobe_gate PASS, troca o bloco roxo no furnish).
+  validation_report phase3 = **5 gates GREEN**. FALTA: NightstandBuilder (criados ainda teal lisos)
+  + AnatomyGate consolidado + veredito GPT (fila). Apê 65/65, base intacta.
+- **FILA GPT-VISUAL (Modo B) acumulando** (clipboard infra travado): sofá-braço, cama, quarto
+  placement, guarda-roupa. Felipe pode destravar (sessão/tela) ou fazer consult manual; imagens
+  servidas em :8781. NÃO autojulgar; retry oportunístico cada ciclo.
+- **Fase 2 (Bedroom placement) — determinístico GREEN; GPT visual na fila.**
   - BedPlacementGate (`interior/validators/bed_placement_gate.py`, commit 523894c): valida
     cama (ancorada+cabeceira-parede-limpa+não-bloqueia-porta+orientação) + guarda-roupa
     (ancorado+frente-livre+não-bloqueia-porta) + criados (flanqueiam) + circulação. Fixtures
@@ -95,3 +102,9 @@
 - LL-FURN-003: cama precisa de cabeceira em parede limpa.
 - LL-FURN-005: Enscape = preview; V-Ray = final.
 - LL-FURN-006: ambiente estilizado → gerar referência GPT (Modo A) + DesignIntentSpec ANTES de construir.
+- LL-FURN-007: placement valida ANTES da beleza — BedPlacementGate (determinístico) cobre as dimensões
+  do schema GPT (ancorado/parede-limpa/circulação), então o determinístico não trava por falta de GPT.
+- LL-FURN-008: builder de móvel = espelhar sofa_builder (peças _p + place_sofa_boxes genérico +
+  parts_to_boxes + gate anatomia). Reuso barato: cama e guarda-roupa saíram rápido assim.
+- LL-FURN-009: anexo-de-imagem ao ChatGPT é o gargalo do GPT-visual (clipboard window-station
+  intermitente). Não bloquear o determinístico nele; acumular a fila e destravar em lote.
