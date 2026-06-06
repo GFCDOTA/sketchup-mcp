@@ -38,6 +38,8 @@ def _redact(s):
     return _SECRET_RE.sub("sk-ant-***REDACTED***", s) if isinstance(s, str) else s
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+# Estado NOC e' relativo ao tree onde se roda. Dispatcher e cockpit compartilham
+# quando rodam do MESMO tree (o normal pos-merge: ambos no main).
 NOC_DIR = REPO_ROOT / ".ai_bridge" / "noc"
 QUEUE = NOC_DIR / "queue.jsonl"
 LEDGER = NOC_DIR / "actions.jsonl"
@@ -297,6 +299,9 @@ def dispatch(task, dry_run=False) -> dict:
 def main():
     ap = argparse.ArgumentParser(description="NOC dispatcher — poe Claude pra trabalhar (1 atuador por vez)")
     ap.add_argument("--once", action="store_true", help="roda 1 ciclo e sai")
+    ap.add_argument("--loop", action="store_true", help="daemon: roda ciclos ate a fila esgotar (ou --max-cycles)")
+    ap.add_argument("--interval", type=int, default=20, help="segundos entre ciclos no --loop")
+    ap.add_argument("--max-cycles", type=int, default=50, help="teto de ciclos no --loop (anti-runaway)")
     ap.add_argument("--dry-run", action="store_true", help="NAO lanca Claude; prova o loop (lock/worktree/ledger)")
     ap.add_argument("--task-id", default=None, help="dispara uma task especifica da fila")
     ap.add_argument("--owner", default=f"dispatcher-{int(time.time())}")
@@ -309,13 +314,30 @@ def main():
         print(json.dumps({"status": "LOCKED", "held_by": h.get("owner"), "since": h.get("ts")}))
         return
     try:
-        queue = load_queue()
-        task = pick_task(queue, _terminal_ids(), task_id=args.task_id)
-        if not task:
-            print(json.dumps({"status": "NO_TASK", "queue_len": len(queue)}))
-            return
-        result = dispatch(task, dry_run=args.dry_run)
-        print(json.dumps(result, ensure_ascii=False, indent=2))
+        if args.loop:
+            n = 0
+            attempted = set()  # nao re-pegar a mesma task no mesmo run (status nao-terminal)
+            while n < args.max_cycles:
+                n += 1
+                lock.heartbeat()  # mantem a posse durante o loop
+                task = pick_task(load_queue(), _terminal_ids() | attempted)
+                if not task:
+                    print(json.dumps({"status": "NO_TASK", "cycle": n, "note": "fila esgotada -> parando"}))
+                    break
+                attempted.add(task.get("id"))
+                result = dispatch(task, dry_run=args.dry_run)
+                print(json.dumps({"cycle": n, "task_id": result.get("task_id"),
+                                  "status": result.get("status")}, ensure_ascii=False), flush=True)
+                time.sleep(max(0, args.interval))
+            else:
+                print(json.dumps({"status": "MAX_CYCLES", "cycles": n}))
+        else:
+            task = pick_task(load_queue(), _terminal_ids(), task_id=args.task_id)
+            if not task:
+                print(json.dumps({"status": "NO_TASK", "queue_len": len(load_queue())}))
+                return
+            result = dispatch(task, dry_run=args.dry_run)
+            print(json.dumps(result, ensure_ascii=False, indent=2))
     finally:
         lock.release()
 

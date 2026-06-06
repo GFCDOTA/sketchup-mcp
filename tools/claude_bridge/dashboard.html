@@ -335,6 +335,12 @@ details.audit .audit-body{padding:6px 16px 16px;}
 </div>
 <div class="muted" style="margin-top:8px">Oráculo :8765 (modo B, Opus 4.8) decide as bifurcações técnicas. Só o VISUAL_REVIEW sobe pro humano.</div></div>
 </div>
+
+<div class="grp">🤖 Atuador — o NOC AGINDO (não só vigiando)</div>
+<div class="wrap">
+<div class="card full" id="noc-actuator-card"><h2>Ações do NOC (dispatcher) — Claude posto pra trabalhar</h2>
+<div id="noc-actions" class="muted">carregando o atuador...</div></div>
+</div>
 </section>
 
 <section id="sessoes">
@@ -573,13 +579,41 @@ const TABS=['home','sessoes','gate','review-skp','repo','backlog','artifacts','l
 const TABMAP={home:['home'],sessoes:['sessoes'],gate:['gate'],'review-skp':['planta'],repo:['git','ecossistema'],backlog:['dificuldades','aprendizados'],artifacts:['lixao'],llms:['llms'],arquivos:['arquivos'],cerebro:['cerebro'],docs:['docs']};
 const HASHALIAS={planta:'review-skp',git:'repo',ecossistema:'repo',dificuldades:'backlog',aprendizados:'backlog',lixao:'artifacts'};
 const ALLSEC=['home','sessoes','gate','planta','git','ecossistema','dificuldades','aprendizados','lixao','llms','arquivos','cerebro','docs'];
+function nocBdg(s){
+  s=String(s||'?');
+  var c=({COMMITTED:'live',VISUAL_REVIEW_QUEUED:'stale',VERIFY_FAILED:'missing',NOOP:'draft',DRY_RUN:'draft',MAX_CYCLES:'aging',LOCKED:'aging'})[s]||'draft';
+  return '<span class="bdg '+c+'">'+esc(s)+'</span>';
+}
+async function loadNocActions(){
+  var el=$('noc-actions'); if(!el)return;
+  try{
+    const r=await fetch('/api/noc-actions',{cache:'no-store'});
+    if(r.status===404){el.innerHTML='<div class="alarm warn" style="margin:0">⏳ atuador visível após <b>reiniciar o cockpit</b> — endpoint <code>/api/noc-actions</code> é novo (server.py).</div>';return;}
+    const d=await r.json();
+    if(!d.exists){el.innerHTML='<span class="muted">o atuador ainda não rodou (sem ledger). Rode <code>noc_dispatcher.py --once</code> pra ele agir.</span>';return;}
+    var lock=d.lock||{};
+    var head='<div style="margin-bottom:10px">'+
+      (lock.held?'<span class="bdg live">dispatcher ATIVO</span> <span class="muted">'+esc(lock.owner||'')+' · há '+fmtAge(lock.age_sec)+'</span>'
+                :'<span class="bdg draft">dispatcher ocioso</span>')+
+      ' <span class="muted">· '+(d.total_actions||0)+' ações no ledger · '+((d.pending||[]).length)+' na fila</span></div>';
+    var vr=(d.visual_review_pending||[]);
+    if(vr.length){head+='<div class="alarm warn" style="margin:0 0 10px">🖼️ '+vr.length+' ação(ões) esperando o TEU VISUAL_REVIEW: '+vr.map(function(a){return '<code>'+esc(a.branch||a.task_id)+'</code>';}).join(', ')+'</div>';}
+    var rows=(d.actions||[]).slice(0,12).map(function(a){
+      return '<tr><td class="v">'+nocBdg(a.status)+'</td><td class="v"><b>'+esc(a.task_id||'')+'</b> '+esc((a.title||'').slice(0,60))+'</td><td class="v"><code>'+esc(a.branch||'')+'</code></td><td class="k" style="text-align:right">'+fmtAge(a.age_sec)+'</td></tr>';
+    }).join('');
+    var tbl=rows?'<table class="bstate"><tbody>'+rows+'</tbody></table>':'<span class="muted">sem ações no ledger ainda</span>';
+    var pend=(d.pending||[]);
+    var pendHtml=pend.length?'<div class="sub" style="margin-top:8px">fila pendente: '+pend.map(function(t){return '<code>'+esc(t.id)+'</code>'+(t.appearance?' <span class="bdg stale">aparência→VR</span>':'');}).join(' · ')+'</div>':'';
+    el.innerHTML=head+tbl+pendHtml+'<div class="muted" style="font-size:11px;margin-top:8px">'+esc(d.note||'')+'</div>';
+  }catch(e){el.innerHTML='<span class="muted">erro no atuador: '+esc(e)+'</span>';}
+}
 function route(){
   let raw=(location.hash||'#home').slice(1);
   let h=HASHALIAS[raw]||raw; if(!TABMAP[h])h='home';
   const show=TABMAP[h];
   ALLSEC.forEach(function(id){var s=$(id); if(s)s.className=(show.indexOf(id)>=0?'active':'');});
   document.querySelectorAll('nav a').forEach(function(a){a.className=(a.getAttribute('href')==='#'+h?'active':'');});
-  if(show.indexOf('home')>=0){loadStatus();loadActions();loadLocalAI();loadActivity();}
+  if(show.indexOf('home')>=0){loadStatus();loadActions();loadLocalAI();loadActivity();loadNocActions();}
   if(show.indexOf('sessoes')>=0)loadSessoes();
   if(show.indexOf('gate')>=0)loadGate();
   if(show.indexOf('git')>=0){loadGit();loadCommits();loadSysSummary();}
