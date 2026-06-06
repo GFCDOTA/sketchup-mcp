@@ -36,11 +36,36 @@ RB = ROOT / "tools/place_layout_skp.rb"
 def bedroom_designer_boxes(con, room_id):
     """Adapter: roda o bedroom_designer (cama por tamanho do quarto + cabeceira +
     criados + tapete + guarda-roupa + console; GPT-approved) e devolve os boxes no
-    formato place_layout. Substitui o place_bedroom_skp antigo nos quartos."""
+    formato place_layout. Troca o placeholder 'bed' (BLOCO UNICO azul) pela CAMA
+    GOLDEN composta (bed_builder: plinto+estrado+colchao+travesseiros+manta, material
+    por papel + bevel) no MESMO footprint/facing. Substitui o place_bedroom_skp antigo."""
+    from tools.bed_builder import build_bed, place_bed_boxes
+    from tools.furniture_anatomy_spec import bed_spec
     sm, out = bedroom_designer.run(con, room_id, minimalist=True)
     if out.get("result") != "OK":
         return None, out
-    return bedroom_designer._items_to_boxes(out["_winner_items"]), out
+    items = out["_winner_items"]
+    boxes = bedroom_designer._items_to_boxes(items)
+    bed_item = next((it for it in items if it.get("type") == "bed"), None)
+    if bed_item is not None:
+        pt_m = 0.19 / 5.4
+        pt_in = pt_m * 39.3700787402
+        bx0, by0, bx1, by1 = bed_item["box"].bounds
+        fx, fy = bed_item["facing"]
+        if abs(fy) >= abs(fx):                      # cama corre em Y (comprimento)
+            w_pdf, l_pdf = (bx1 - bx0), (by1 - by0)
+        else:                                       # cama corre em X
+            w_pdf, l_pdf = (by1 - by0), (bx1 - bx0)
+        cen = ((bx0 + bx1) / 2 * pt_in, (by0 + by1) / 2 * pt_in)
+        nm = str(bed_item.get("name", ""))
+        size = next((s for s in ("king", "queen", "casal", "solteiro") if s in nm), "king")
+        parts, _ = build_bed(bed_spec(size, width=round(w_pdf * pt_m, 3),
+                                      length=round(l_pdf * pt_m, 3)))
+        bed_parts = place_bed_boxes(parts, cen, (fx, fy))
+        boxes = [b for b in boxes if b.get("kind") != "bed"] + bed_parts
+        out["bed_parametric"] = {"size": size, "n_parts": len(bed_parts),
+                                 "W_m": round(w_pdf * pt_m, 2), "L_m": round(l_pdf * pt_m, 2)}
+    return boxes, out
 
 
 def _oriented_box(kind, center_in, facing, w_m, d_m, z0_m, h_m, rgb, label=None):

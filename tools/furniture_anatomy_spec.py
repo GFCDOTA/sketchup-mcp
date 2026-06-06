@@ -91,6 +91,63 @@ SOFA_SCHEMA = {
 }
 
 
+# ---------------------------------------------------------------- CAMA (bed)
+# pecas semanticas OBRIGATORIAS de uma cama (o gate exige presenca):
+BED_REQUIRED_PARTS = ("estrado", "colchao", "travesseiro", "manta")
+BED_SIZES = {"solteiro": (0.88, 1.88), "casal": (1.38, 1.88),
+             "queen": (1.58, 1.98), "king": (1.93, 2.03)}
+
+
+@dataclass
+class BedSpec:
+    """Anatomia parametrica de uma CAMA. Dims em metros. Convencao igual ao sofa:
+    X=largura (ao longo da cabeceira), Y=comprimento (PE em Y=0=frente=-Y; CABECA em
+    Y=L, encosta no painel/parede), Z=altura. Pecas SEPARADAS — NAO bloco unico:
+    estrado (madeira), colchao (linho), travesseiros (cabeceira), manta dobrada no pe."""
+    size: str = "king"               # solteiro | casal | queen | king
+    width: float = 1.93              # X (sobrescrito por size)
+    length: float = 2.03             # Y
+    base_z0: float = 0.10            # estrado comeca elevado (plinto recuado)
+    base_top: float = 0.38           # topo do estrado (onde deita o colchao)
+    mattress_top: float = 0.55       # superficie de dormir
+    mattress_inset: float = 0.03     # colchao levemente menor que o estrado? (na vdd transborda)
+    pillow_h: float = 0.10           # espessura do travesseiro
+    pillow_w: float = 0.50           # largura de cada travesseiro
+    pillow_depth: float = 0.34       # profundidade (Y) do travesseiro
+    n_pillows: int = 2
+    blanket_h: float = 0.06          # manta/edredom dobrado no pe
+    blanket_depth: float = 0.55      # quanto a manta cobre do pe (Y)
+    bevel: float = 0.04              # chanfro/inset nas pecas macias (colchao/travesseiro/manta)
+    estrado_rgb: tuple = (74, 56, 42)      # madeira escura
+    mattress_rgb: tuple = (205, 196, 178)  # linho/creme (roupa de cama)
+    pillow_rgb: tuple = (224, 218, 205)     # fronha clara
+    blanket_rgb: tuple = (168, 140, 112)    # manta caramelo (acento quente)
+
+    def validate(self):
+        assert self.base_top > self.base_z0
+        assert self.mattress_top > self.base_top
+        assert self.n_pillows >= 1
+        return self
+
+    def bbox_m(self):
+        return (round(self.width, 3), round(self.length, 3),
+                round(self.mattress_top + self.pillow_h, 3))
+
+    def to_dict(self):
+        d = asdict(self)
+        d["bbox_m"] = self.bbox_m()
+        d["required_parts"] = list(BED_REQUIRED_PARTS)
+        return d
+
+
+def bed_spec(size="king", **overrides):
+    w, l = BED_SIZES.get(size, BED_SIZES["king"])
+    s = BedSpec(size=size, width=w, length=l)
+    for k, v in overrides.items():
+        setattr(s, k, v)
+    return s.validate()
+
+
 if __name__ == "__main__":
     import json
     for v in VARIANTS:
@@ -98,3 +155,7 @@ if __name__ == "__main__":
         print(f"{v:14} bbox_m={s.bbox_m()} seats={s.seats}")
     print("\nschema keys:", list(SOFA_SCHEMA["properties"].keys()))
     print(json.dumps(sofa_spec("chaise_right").to_dict(), indent=2)[:400])
+    print("\n--- camas ---")
+    for sz in BED_SIZES:
+        s = bed_spec(sz)
+        print(f"{sz:10} bbox_m={s.bbox_m()} required={list(BED_REQUIRED_PARTS)}")

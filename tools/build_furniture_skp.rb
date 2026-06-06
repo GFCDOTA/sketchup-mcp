@@ -80,8 +80,8 @@ def fz_run
       z0 = (b['z0_in'] || 0).to_f
       g = parent.entities.add_group
       g.name = b['label'] || b['kind']
-      bevel = %w[seat_cushion back_cushion arm].include?(b['kind']) ? BEVEL_IN : 0.0
-      mode = b['kind'] == 'arm' ? 'frustum' : 'lid'   # braco = casca inclinada; almofada = inset
+      bevel = %w[seat_cushion back_cushion arm colchao travesseiro manta].include?(b['kind']) ? BEVEL_IN : 0.0
+      mode = b['kind'] == 'arm' ? 'frustum' : 'lid'   # braco = casca inclinada; almofada/cama = inset
       fz_solid(g.entities, b['corners'] || [], z0, h, bevel, mode)
       g.material = fz_material(model, "fz_#{b['label']}", b['rgb'] || [120, 120, 120])
       placed += 1
