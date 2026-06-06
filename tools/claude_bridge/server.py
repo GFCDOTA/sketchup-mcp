@@ -943,6 +943,10 @@ def status() -> dict:
                               for k, v in tl.get("canonical", {}).items()}}
 
 
+# Seed de oportunidades (ROI). CURADO contra a realidade — item concluido SAI daqui,
+# senao o NOC sugere trabalho ja feito. Ultima curadoria: 2026-06-05 (removidos
+# "Watchdog do gate" [feito: gate-watchdog-loop.ps1] e "Consolidar serving + remover
+# wt-dash" [feito: wt-dash removido, launchers repontados]).
 _NBA_SEED = [
     {"titulo": "Auto-extrator vetorial PDF->consensus (walls = filled paths)", "tipo": "produto",
      "impacto": 5, "esforco": 5, "proxima_acao": "só após 2a planta no loop manual; validar contra a planta_74 anotada"},
@@ -950,10 +954,6 @@ _NBA_SEED = [
      "impacto": 5, "esforco": 3, "proxima_acao": "Felipe fornece PDF + âncora física; anotar consensus juntos"},
     {"titulo": "Worktree-lock (fix-raiz da colisão multi-agent)", "tipo": "infra",
      "impacto": 3, "esforco": 2, "proxima_acao": "/lock keyed por session_id + ownership de branch"},
-    {"titulo": "Consolidar serving pro launcher canônico + remover wt-dash", "tipo": "infra",
-     "impacto": 3, "esforco": 2, "proxima_acao": "quando feat/banho2-glass sincronizar develop, repointar + remover wt-dash"},
-    {"titulo": "Watchdog do gate (auto-restart se /health cair)", "tipo": "infra",
-     "impacto": 2, "esforco": 2, "proxima_acao": "scheduled task (admin) ou loop de health-check"},
     {"titulo": "Tier do oráculo (Opus pesado / Sonnet rotina)", "tipo": "gate",
      "impacto": 2, "esforco": 3, "proxima_acao": "rotear por peso da decisão no multi-oracle"},
 ]
