@@ -1,5 +1,5 @@
 {
-  "phase": "phase1_brain_base",
+  "phase": "phase2_bedroom",
   "gates": [
     {
       "gate": "SofaPlacementGate",
@@ -79,6 +79,46 @@
           "result": "PASS",
           "n_parts": 6,
           "n_colors": 5
+        }
+      ]
+    },
+    {
+      "gate": "BedPlacementGate",
+      "pass": true,
+      "real_rooms": [
+        {
+          "room": "r000",
+          "real_room": "PASS"
+        },
+        {
+          "room": "r003",
+          "real_room": "PASS"
+        }
+      ],
+      "fixtures": [
+        {
+          "fixture": "quarto valido (designer)",
+          "expected": "PASS",
+          "got": "PASS",
+          "ok": true
+        },
+        {
+          "fixture": "cama rotacionada aleatoria",
+          "expected": "FAIL",
+          "got": "FAIL",
+          "ok": true
+        },
+        {
+          "fixture": "cama flutuando no centro",
+          "expected": "FAIL",
+          "got": "FAIL",
+          "ok": true
+        },
+        {
+          "fixture": "cama bloqueando porta",
+          "expected": "FAIL",
+          "got": "FAIL",
+          "ok": true
         }
       ]
     }

@@ -1,4 +1,4 @@
-# validation_report — phase1_brain_base
+# validation_report — phase2_bedroom
 
 **VERDICT: GREEN**
 
@@ -6,6 +6,7 @@
 - PASS — SofaPlacementGate
 - PASS — Sofa anatomy+visual
 - PASS — BedGate (anatomy+visual)
+- PASS — BedPlacementGate
 
 ## Artifacts canônicos
 - OK — planta_74_furnished.skp (269770b)

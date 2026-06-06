@@ -60,6 +60,26 @@ def _bed():
     return {"gate": "BedGate (anatomy+visual)", "pass": ok, "sizes": rows}
 
 
+def _bedroom_placement():
+    """Fase 2: gate de PLACEMENT do quarto — quartos reais r000/r003 PASS + fixtures
+    de erro FAIL como esperado."""
+    from interior.validators.bed_placement_gate import _fixtures, bed_placement_gate, real_layout
+    con = json.loads(CONS.read_text("utf-8"))
+    rows, ok = [], True
+    for rid in ("r000", "r003"):
+        lay = real_layout(con, rid)
+        v = bed_placement_gate(con, rid, lay)["verdict"] if lay else "NO_LAYOUT"
+        ok = ok and v == "PASS"
+        rows.append({"room": rid, "real_room": v})
+    fx, fok = [], True
+    for name, lay, expect in _fixtures(con, "r000"):
+        got = bed_placement_gate(con, "r000", lay)["verdict"]
+        hit = got == expect
+        fok = fok and hit
+        fx.append({"fixture": name, "expected": expect, "got": got, "ok": hit})
+    return {"gate": "BedPlacementGate", "pass": ok and fok, "real_rooms": rows, "fixtures": fx}
+
+
 def _artifacts():
     items = {
         "planta_74_furnished.skp": FURN / "planta_74_furnished.skp",
@@ -74,7 +94,7 @@ def _artifacts():
 
 
 def build_report(phase="phase0_baseline"):
-    gates = [_placement(), _sofa_anatomy_visual(), _bed()]
+    gates = [_placement(), _sofa_anatomy_visual(), _bed(), _bedroom_placement()]
     arts = _artifacts()
     all_pass = all(g["pass"] for g in gates)
     arts_ok = all(a["exists"] for a in arts.values())
