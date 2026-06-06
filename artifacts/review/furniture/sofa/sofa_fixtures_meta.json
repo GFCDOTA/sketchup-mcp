@@ -1,0 +1,269 @@
+[
+  {
+    "variant": "straight",
+    "seats": 3,
+    "n_parts": 13,
+    "bbox_m": [
+      2.2,
+      0.95,
+      0.85
+    ],
+    "front_axis": "-Y",
+    "kinds": [
+      "arm",
+      "back_cushion",
+      "base",
+      "foot",
+      "seat_cushion"
+    ],
+    "offset_x_m": 0.0,
+    "parts": [
+      {
+        "label": "foot_1",
+        "kind": "foot"
+      },
+      {
+        "label": "foot_2",
+        "kind": "foot"
+      },
+      {
+        "label": "foot_3",
+        "kind": "foot"
+      },
+      {
+        "label": "foot_4",
+        "kind": "foot"
+      },
+      {
+        "label": "arm_left",
+        "kind": "arm"
+      },
+      {
+        "label": "arm_right",
+        "kind": "arm"
+      },
+      {
+        "label": "base_main",
+        "kind": "base"
+      },
+      {
+        "label": "seat_1",
+        "kind": "seat_cushion"
+      },
+      {
+        "label": "seat_2",
+        "kind": "seat_cushion"
+      },
+      {
+        "label": "seat_3",
+        "kind": "seat_cushion"
+      },
+      {
+        "label": "back_1",
+        "kind": "back_cushion"
+      },
+      {
+        "label": "back_2",
+        "kind": "back_cushion"
+      },
+      {
+        "label": "back_3",
+        "kind": "back_cushion"
+      }
+    ]
+  },
+  {
+    "variant": "chaise_right",
+    "seats": 3,
+    "n_parts": 19,
+    "bbox_m": [
+      2.2,
+      1.6,
+      0.85
+    ],
+    "front_axis": "-Y",
+    "kinds": [
+      "arm",
+      "back_cushion",
+      "base",
+      "foot",
+      "seat_cushion"
+    ],
+    "offset_x_m": 3.4,
+    "parts": [
+      {
+        "label": "foot_1",
+        "kind": "foot"
+      },
+      {
+        "label": "foot_2",
+        "kind": "foot"
+      },
+      {
+        "label": "foot_3",
+        "kind": "foot"
+      },
+      {
+        "label": "foot_4",
+        "kind": "foot"
+      },
+      {
+        "label": "foot_5",
+        "kind": "foot"
+      },
+      {
+        "label": "foot_6",
+        "kind": "foot"
+      },
+      {
+        "label": "arm_left",
+        "kind": "arm"
+      },
+      {
+        "label": "arm_right",
+        "kind": "arm"
+      },
+      {
+        "label": "base_main",
+        "kind": "base"
+      },
+      {
+        "label": "base_chaise",
+        "kind": "base"
+      },
+      {
+        "label": "seat_1",
+        "kind": "seat_cushion"
+      },
+      {
+        "label": "seat_2",
+        "kind": "seat_cushion"
+      },
+      {
+        "label": "seat_3",
+        "kind": "seat_cushion"
+      },
+      {
+        "label": "seat_chaise_1",
+        "kind": "seat_cushion"
+      },
+      {
+        "label": "seat_chaise_2",
+        "kind": "seat_cushion"
+      },
+      {
+        "label": "back_1",
+        "kind": "back_cushion"
+      },
+      {
+        "label": "back_2",
+        "kind": "back_cushion"
+      },
+      {
+        "label": "back_3",
+        "kind": "back_cushion"
+      },
+      {
+        "label": "back_chaise",
+        "kind": "back_cushion"
+      }
+    ]
+  },
+  {
+    "variant": "chaise_left",
+    "seats": 3,
+    "n_parts": 19,
+    "bbox_m": [
+      2.2,
+      1.6,
+      0.85
+    ],
+    "front_axis": "-Y",
+    "kinds": [
+      "arm",
+      "back_cushion",
+      "base",
+      "foot",
+      "seat_cushion"
+    ],
+    "offset_x_m": 6.8,
+    "parts": [
+      {
+        "label": "foot_1",
+        "kind": "foot"
+      },
+      {
+        "label": "foot_2",
+        "kind": "foot"
+      },
+      {
+        "label": "foot_3",
+        "kind": "foot"
+      },
+      {
+        "label": "foot_4",
+        "kind": "foot"
+      },
+      {
+        "label": "foot_5",
+        "kind": "foot"
+      },
+      {
+        "label": "foot_6",
+        "kind": "foot"
+      },
+      {
+        "label": "arm_left",
+        "kind": "arm"
+      },
+      {
+        "label": "arm_right",
+        "kind": "arm"
+      },
+      {
+        "label": "base_main",
+        "kind": "base"
+      },
+      {
+        "label": "base_chaise",
+        "kind": "base"
+      },
+      {
+        "label": "seat_1",
+        "kind": "seat_cushion"
+      },
+      {
+        "label": "seat_2",
+        "kind": "seat_cushion"
+      },
+      {
+        "label": "seat_3",
+        "kind": "seat_cushion"
+      },
+      {
+        "label": "seat_chaise_1",
+        "kind": "seat_cushion"
+      },
+      {
+        "label": "seat_chaise_2",
+        "kind": "seat_cushion"
+      },
+      {
+        "label": "back_1",
+        "kind": "back_cushion"
+      },
+      {
+        "label": "back_2",
+        "kind": "back_cushion"
+      },
+      {
+        "label": "back_3",
+        "kind": "back_cushion"
+      },
+      {
+        "label": "back_chaise",
+        "kind": "back_cushion"
+      }
+    ]
+  }
+]
