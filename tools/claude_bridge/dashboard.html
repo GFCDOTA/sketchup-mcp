@@ -374,10 +374,15 @@ details.audit .audit-body{padding:6px 16px 16px;}
 <section id="dificuldades">
 <div id="alarm" class="alarm ok">checando patinagem...</div>
 <div class="wrap">
-<div class="card full"><h2>Backlog de dificuldades (vivo) — por que ainda não foi tratado</h2>
-<div id="diff-backlog" class="muted">carregando...</div>
-<div class="muted" style="margin-top:10px">Como o MCP usa o gate pra continuar: roteia decisões reais (9 triggers) pro <code>:8765</code> em modo B; se uma sessão fica <b>PARALYZED</b> (cycle congelado) ou há consult sem resposta, o alarme dispara — aí use o Q&A.</div></div>
-<div class="card full"><h2>Q&A — pergunta direto pro gate (Opus 4.8)</h2>
+<div class="card full"><h2>🎯 Próxima melhor ação — ranqueada por ROI</h2>
+<div class="muted" style="margin-bottom:10px">Impacto ÷ esforço (dificuldades OPEN + oportunidades semente). <b>Comece pelo topo</b> — é a fonte de verdade do "o que fazer agora".</div>
+<div id="nba-list"><span class="muted">rankeando...</span></div></div>
+<div class="card full"><h2>🔴 Dificuldades em aberto <span class="muted" style="font-weight:400;font-size:12px">— o que ainda trava (por severidade)</span></h2>
+<div id="diff-open" class="muted">carregando...</div>
+<div id="diff-resolved-head" style="margin-top:14px;display:none"><button onclick="toggleResolved()" style="font-size:11px">ver/ocultar resolvidas — FIXED/MITIGATED (<span id="diff-resolved-n">…</span>)</button></div>
+<div id="diff-resolved" style="display:none;margin-top:10px"></div></div>
+<div class="card full"><h2>💬 Travou numa decisão? Pergunta pro gate (Opus 4.8)</h2>
+<div class="muted" style="margin-bottom:8px">Roteia a decisão pro oráculo em modo B em vez de travar esperando humano. Se uma sessão fica <b>PARALYZED</b> ou há consult sem resposta, o alarme acima dispara.</div>
 <textarea id="qa-q" placeholder="Ex.: 'A sessão está patinando no opening_host da planta_74, opção A/B/C?'"></textarea>
 <label class="muted"><input type="checkbox" id="qa-rt"> red-team (o oráculo argumenta CONTRA antes de decidir)</label><br>
 <button onclick="askGate()">perguntar ao gate</button>
@@ -386,8 +391,10 @@ details.audit .audit-body{padding:6px 16px 16px;}
 </section>
 
 <section id="aprendizados">
-<div class="card full"><h2>Aprendizados / Failure Patterns — memória operacional anti-burrice</h2>
-<div id="learn-wrap" class="muted">carregando...</div></div>
+<div class="card full"><h2>📚 Aprendizados / Failure Patterns <span class="muted" style="font-weight:400;font-size:12px">— releia ANTES de repetir o erro (não é só histórico)</span></h2>
+<div id="learn-top" class="muted">carregando...</div>
+<div id="learn-more-head" style="margin-top:12px;display:none"><button onclick="toggleLearn()" style="font-size:11px">ver/ocultar anteriores (<span id="learn-more-n">…</span>)</button></div>
+<div id="learn-rest" style="display:none;margin-top:10px"></div></div>
 </section>
 
 <section id="lixao">
@@ -397,8 +404,9 @@ details.audit .audit-body{padding:6px 16px 16px;}
 </section>
 
 <section id="oportunidades">
-<div class="card full"><h2>Oportunidades & melhorias</h2>
-<ul class="opp">
+<div class="card full"><h2>💡 Oportunidades & melhorias <button onclick="toggleOpps()" style="font-size:11px;margin-left:8px">ver/ocultar</button></h2>
+<div class="muted" style="margin-bottom:6px">⚠️ Wishlist MANUAL e possivelmente desatualizada — alguns itens já podem estar feitos. A fonte de verdade do "o que fazer" é <b>Próxima melhor ação (ROI)</b> lá em cima.</div>
+<div id="opps-wrap" style="display:none"><ul class="opp">
 <li><b>Extrator vetorial PDF→consensus</b> (walls = filled paths) — destrava generalização; só DEPOIS de ≥2 plantas no loop manual. <span class="tag">produto</span></li>
 <li><b>2ª planta real como forcing function</b> — prova a generalização com planta nova, não com abstração. <span class="tag">produto</span></li>
 <li><b>Swap-in das constantes do builder</b> — executar o blueprint quando a árvore esfriar. <span class="tag">generalização</span></li>
@@ -407,7 +415,7 @@ details.audit .audit-body{padding:6px 16px 16px;}
 <li><b>Watchdog do gate</b> — auto-restart se /health cair (hoje: hook de login + LIGAR-BRIDGE). <span class="tag">infra</span></li>
 <li><b>Consolidar serving pro repo canônico</b> — sair do worktree wt-dash; aí o Lixão vê o runs/ scratch real. <span class="tag">infra</span></li>
 <li><b>RAG indexado</b> — o file-fetch §6.3 é "RAG-bebê"; indexar depois do pipeline generalizado. <span class="tag">enhancement</span></li>
-</ul></div>
+</ul></div></div>
 </section>
 
 <section id="llms">
@@ -592,7 +600,7 @@ function route(){
   if(show.indexOf('ecossistema')>=0)loadEco();
   if(show.indexOf('planta')>=0)loadPlant();
   if(show.indexOf('lixao')>=0)loadLixao();
-  if(show.indexOf('dificuldades')>=0)loadDiff();
+  if(show.indexOf('dificuldades')>=0){loadDiff();loadNbaList();}
   if(show.indexOf('aprendizados')>=0)loadLearnings();
   if(show.indexOf('llms')>=0)loadLLMs();
   if(show.indexOf('arquivos')>=0)loadFiles();
@@ -819,12 +827,29 @@ async function loadPlant(){
     }).join('')||'<span class="muted">sem ciclos em artifacts/review</span>';
   }catch(e){g.innerHTML='<span class="muted">erro: '+esc(e)+'</span>';}
 }
+function toggleResolved(){var e=$('diff-resolved');if(e)e.style.display=(e.style.display==='none'?'block':'none');}
+function toggleLearn(){var e=$('learn-rest');if(e)e.style.display=(e.style.display==='none'?'block':'none');}
+function toggleOpps(){var e=$('opps-wrap');if(e)e.style.display=(e.style.display==='none'?'block':'none');}
+async function loadNbaList(){
+  var w=$('nba-list'); if(!w)return;
+  try{const n=await (await fetch('/api/next-best-actions',{cache:'no-store'})).json();var A=(n.actions||[]);
+    if(!A.length){w.innerHTML='<div class="alarm ok" style="margin:0">✅ Sem ação rankeada — nenhuma dificuldade OPEN nem semente pendente.</div>';return;}
+    w.innerHTML=A.slice(0,6).map(function(a,i){return '<div style="display:flex;gap:12px;align-items:flex-start;padding:9px 0;border-top:'+(i?'1px solid #21262d':'none')+'"><span style="color:var(--accent);font-weight:800;white-space:nowrap;min-width:62px">ROI '+esc(String(a.roi))+'</span><div><b>'+esc(a.titulo)+'</b>'+(a.tipo?' <span class="flag" style="color:var(--dim)">'+esc(a.tipo)+'</span>':'')+'<div class="muted" style="margin-top:3px">→ '+esc(a.proxima_acao)+'</div></div></div>';}).join('');
+  }catch(e){w.innerHTML='<span class="muted">erro: '+esc(e)+'</span>';}
+}
 async function loadLearnings(){
-  var w=$('learn-wrap'); w.innerHTML='<span class="muted">carregando...</span>';
+  var top=$('learn-top'),rest=$('learn-rest'); if(!top)return;
+  top.innerHTML='<span class="muted">carregando...</span>';
   try{const d=await (await fetch('/api/learnings')).json();
     var SC={APPLIED:'var(--ok)',LEARNED:'var(--accent)'};
-    w.innerHTML='<div class="muted" style="margin-bottom:10px">'+d.total+' padrões · fonte: '+esc(d.source)+'</div>'+(d.learnings||[]).map(function(l){return '<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:10px"><b style="color:var(--accent)">'+esc(l.id)+' · '+esc(l.falha_observada)+'</b><span class="flag" style="color:'+(SC[l.status]||"var(--dim)")+';white-space:nowrap">'+esc(l.status)+'</span></div><div class="muted" style="margin:6px 0">causa: '+esc(l.causa_provavel)+' · detectado por: '+esc(l.como_detectamos)+'</div><div class="muted">correção: '+esc(l.como_corrigimos)+'</div><div style="background:rgba(63,185,80,.08);border:1px solid var(--ok);border-radius:6px;padding:8px;margin:8px 0"><b style="color:var(--ok)">prevenção de regressão:</b> '+esc(l.como_prevenir_regressao)+'</div><div class="muted">artefato: '+esc(l.artefato)+'</div></div>';}).join('');
-  }catch(e){w.innerHTML='<span class="muted">erro: '+esc(e)+'</span>';}
+    function lcard(l){return '<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:10px"><b style="color:var(--accent)">'+esc(l.id)+' · '+esc(l.falha_observada)+'</b><span class="flag" style="color:'+(SC[l.status]||"var(--dim)")+';white-space:nowrap">'+esc(l.status)+'</span></div><div class="muted" style="margin:6px 0">causa: '+esc(l.causa_provavel)+' · detectado por: '+esc(l.como_detectamos)+'</div><div class="muted">correção: '+esc(l.como_corrigimos)+'</div><div style="background:rgba(63,185,80,.08);border:1px solid var(--ok);border-radius:6px;padding:8px;margin:8px 0"><b style="color:var(--ok)">prevenção de regressão:</b> '+esc(l.como_prevenir_regressao)+'</div><div class="muted">artefato: '+esc(l.artefato)+'</div></div>';}
+    function lnum(l){var m=/(\d+)/.exec(l.id||'');return m?parseInt(m[1],10):0;}
+    var L=(d.learnings||[]).slice().sort(function(a,b){return lnum(b)-lnum(a);});
+    var head=L.slice(0,3),tail=L.slice(3);
+    top.innerHTML='<div class="muted" style="margin-bottom:10px"><b style="color:var(--txt)">'+d.total+'</b> padrões · fonte: '+esc(d.source)+' · mostrando os 3 mais recentes</div>'+(head.map(lcard).join('')||'<span class="muted">sem lições</span>');
+    var mh=$('learn-more-head'),mn=$('learn-more-n');
+    if(tail.length){if(mh)mh.style.display='block';if(mn)mn.textContent=tail.length;rest.innerHTML=tail.map(lcard).join('');}
+  }catch(e){top.innerHTML='<span class="muted">erro: '+esc(e)+'</span>';}
 }
 async function loadDiff(){
   try{const s=await (await fetch('/sessions')).json();
@@ -836,9 +861,15 @@ async function loadDiff(){
     else{a.className='alarm ok';a.textContent='✅ Tudo progredindo — nenhuma sessão PARALYZED/STALLED.';}
   }catch(e){var a=$('alarm');a.className='alarm bad';a.textContent='gate offline — não dá pra checar patinagem';}
   try{const dd=await (await fetch('/api/difficulties')).json();
-    var SEV={HIGH:'var(--bad)',MED:'var(--warn)',LOW:'var(--dim)'},ST={OPEN:'var(--bad)',MITIGATED:'var(--warn)',FIXED:'var(--ok)',REGRESSED:'var(--bad)',DEFERRED:'var(--accent)'};
-    $('diff-backlog').innerHTML='<div class="muted" style="margin-bottom:10px">'+dd.total+' dificuldades · fonte: '+esc(dd.source)+'</div>'+(dd.difficulties||[]).map(function(d){return '<div class="card" style="margin-bottom:12px;border-left:3px solid '+(SEV[d.severidade]||'var(--dim)')+'"><div style="display:flex;justify-content:space-between;gap:10px"><b style="color:var(--accent)">'+esc(d.id)+' · '+esc(d.titulo)+'</b><span class="flag" style="color:'+(ST[d.status]||'var(--dim)')+';white-space:nowrap">'+esc(d.status)+(d.review_by?' · revisar '+esc(d.review_by):'')+' · '+esc(d.severidade)+'</span></div><div class="muted" style="margin:6px 0">'+esc(d.sintoma)+'</div><div style="background:rgba(248,81,73,.08);border:1px solid var(--bad);border-radius:6px;padding:8px;margin:8px 0"><b style="color:var(--bad)">por que ainda não foi tratado:</b> '+esc(d.why_not_fixed_yet)+'</div><div class="muted">tentativas: '+((d.attempts||[]).map(esc).join(" · ")||"-")+'</div><div class="muted">gate ajudou: <b>'+esc(d.gate_helped)+'</b> · próxima hipótese: '+esc(d.next_hypothesis)+'</div><div class="muted">aceite: '+esc(d.acceptance_criteria)+'</div></div>';}).join('');
-  }catch(e){if($('diff-backlog'))$('diff-backlog').innerHTML='<span class="muted">erro: '+esc(e)+'</span>';}
+    var SEV={HIGH:'var(--bad)',MED:'var(--warn)',LOW:'var(--dim)'},ST={OPEN:'var(--bad)',MITIGATED:'var(--warn)',FIXED:'var(--ok)',REGRESSED:'var(--bad)',DEFERRED:'var(--accent)'},SEVRANK={HIGH:0,MED:1,LOW:2},RESOLVED={FIXED:1,MITIGATED:1};
+    function dcard(d){return '<div class="card" style="margin-bottom:12px;border-left:3px solid '+(SEV[d.severidade]||'var(--dim)')+'"><div style="display:flex;justify-content:space-between;gap:10px"><b style="color:var(--accent)">'+esc(d.id)+' · '+esc(d.titulo)+'</b><span class="flag" style="color:'+(ST[d.status]||'var(--dim)')+';white-space:nowrap">'+esc(d.status)+(d.review_by?' · revisar '+esc(d.review_by):'')+' · '+esc(d.severidade)+'</span></div><div class="muted" style="margin:6px 0">'+esc(d.sintoma)+'</div><div style="background:rgba(248,81,73,.08);border:1px solid var(--bad);border-radius:6px;padding:8px;margin:8px 0"><b style="color:var(--bad)">por que ainda não foi tratado:</b> '+esc(d.why_not_fixed_yet)+'</div><div class="muted">tentativas: '+((d.attempts||[]).map(esc).join(" · ")||"-")+'</div><div class="muted">gate ajudou: <b>'+esc(d.gate_helped)+'</b> · próxima hipótese: '+esc(d.next_hypothesis)+'</div><div class="muted">aceite: '+esc(d.acceptance_criteria)+'</div></div>';}
+    var all=(dd.difficulties||[]);
+    var open=all.filter(function(d){return !RESOLVED[d.status];}).sort(function(a,b){return (SEVRANK[a.severidade]==null?9:SEVRANK[a.severidade])-(SEVRANK[b.severidade]==null?9:SEVRANK[b.severidade]);});
+    var done=all.filter(function(d){return RESOLVED[d.status];});
+    if($('diff-open'))$('diff-open').innerHTML='<div class="muted" style="margin-bottom:10px"><b style="color:var(--txt)">'+open.length+'</b> em aberto de '+dd.total+' · fonte: '+esc(dd.source)+'</div>'+(open.map(dcard).join('')||'<div class="alarm ok" style="margin:0">✅ nenhuma dificuldade em aberto</div>');
+    var rh=$('diff-resolved-head'),rn=$('diff-resolved-n');
+    if(done.length){if(rh)rh.style.display='block';if(rn)rn.textContent=done.length;if($('diff-resolved'))$('diff-resolved').innerHTML=done.map(dcard).join('');}
+  }catch(e){if($('diff-open'))$('diff-open').innerHTML='<span class="muted">erro: '+esc(e)+'</span>';}
 }
 async function askGate(){
   var q=$('qa-q').value.trim(); if(!q)return; var r=$('qa-resp'); r.className='qa-resp';
