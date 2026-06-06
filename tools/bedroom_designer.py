@@ -25,6 +25,9 @@ from tools.spatial_model import PT_TO_M, build_spatial_model
 
 # --- móveis (m): (largura ao-longo da parede, profundidade perp, altura) ---
 KING = (1.93, 2.03, 0.55)
+QUEEN = (1.58, 2.03, 0.55)          # quarto secundário: king engole o guarda-roupa
+CASAL = (1.38, 1.88, 0.50)
+SOLTEIRO = (0.88, 1.88, 0.45)
 NIGHTSTAND = (0.45, 0.40, 0.55)     # GPT review: criado menor/compacto, leve
 RUG = (2.80, 3.40, 0.02)
 WARDROBE_DEPTH, WARDROBE_H = 0.60, 2.20
@@ -73,23 +76,27 @@ def _bbox_m(b):
 
 
 def _wardrobe_walls(sm, exclude_id):
-    """Paredes p/ guarda-roupa/dresser (!= cabeceira): limpa de porta; ranqueadas
-    por comprimento + bônus se limpa de janela. Devolve setups."""
+    """Paredes p/ guarda-roupa/dresser (!= cabeceira). Ranqueia por comprimento +
+    bônus se limpa de janela. INCLUI paredes com PORTA (o circ_u/door-zone mantém o
+    móvel longe do vão/giro, e o trecho limpo ao lado da porta serve) mas penaliza;
+    exclui só passagem/porta-balcão (vãos full-height que não dá pra bloquear) e
+    paredes curtas. (review suite02: só sobravam paredes de janela)."""
     by = {}
     for o in sm["openings"]:
         by.setdefault(o["wall_id"], []).append(o["kind"])
-    door_kinds = {"interior_door", "interior_passage", "glazed_balcony"}
+    block_kinds = {"interior_passage", "glazed_balcony"}   # vão full-height: nunca bloquear
     out = []
     for wr in sm["walls"]:
         if wr["id"] == exclude_id or wr["length_m"] < 1.0:
             continue
         kinds = by.get(wr["id"], [])
-        if any(k in door_kinds for k in kinds):
+        if any(k in block_kinds for k in kinds):
             continue
         ws = _wall_setup(sm, wr["id"])
         if ws is None:
             continue
-        s = wr["length_m"] * 5 + (15 if "window" not in kinds else 0)
+        has_door = "interior_door" in kinds
+        s = wr["length_m"] * 5 + (15 if "window" not in kinds else 0) - (20 if has_door else 0)
         out.append((s, ws, "window" in kinds))
     out.sort(key=lambda x: -x[0])
     return out
@@ -103,8 +110,21 @@ def _free_after(usable, solids):
     return free
 
 
-def build_layout(sm, hb, minimalist=True):
+def _bed_for_area(area_m2):
+    """Maior cama coerente com o tamanho do quarto. Designer ESCOLHE a cama: king
+    num quarto pequeno engole o guarda-roupa (review suite02). Não enfia king."""
+    if area_m2 >= 18:
+        return "king", KING
+    if area_m2 >= 13:
+        return "queen", QUEEN
+    if area_m2 >= 9:
+        return "casal", CASAL
+    return "solteiro", SOLTEIRO
+
+
+def build_layout(sm, hb, bed_dims=KING, bed_label="king", minimalist=True):
     """Monta um candidato com a cabeceira na parede hb (cama centralizada).
+    bed_dims/bed_label: tamanho da cama escolhido conforme o tamanho do quarto.
     minimalist (default, pos review GPT): P0 (cama+criados+tapete+guarda-roupa) +
     no MAXIMO o dresser. --full re-habilita banco/poltrona/mesa (vira showroom).
     Devolve (items, downgrades)."""
@@ -122,13 +142,13 @@ def build_layout(sm, hb, minimalist=True):
     o, face, sgn, ac = hb["orient"], hb["face"], hb["sgn"], hb["along_c"]
     items, downgrades = [], []
 
-    # --- P0: cama king CENTRALIZADA (desliza só se centralizada não couber) ---
-    bw, bl, _ = KING
+    # --- P0: cama CENTRALIZADA (tamanho conforme o quarto; desliza se não couber) ---
+    bw, bl, _ = bed_dims
     bed = None
     for off in (0.0, 0.3, -0.3, 0.6, -0.6):
         b = _fbox(o, face, sgn, ac + M(off), M(BED_PERP), M(bw), M(bl))
         if comodo.contains(b) and not _hit(b, circ_u) and not _hit(b, win_zone):
-            bed = {"name": "cama_king", "type": "bed", "box": b, "facing": _facing(o, sgn),
+            bed = {"name": f"cama_{bed_label}", "type": "bed", "box": b, "facing": _facing(o, sgn),
                    "anchor_wall": hb["id"], "reason": "âncora; cabeceira em parede limpa; centralizada",
                    "off": off}
             ac = ac + M(off)
@@ -420,15 +440,16 @@ def _piece_json(it):
 
 def run(con, room_id, minimalist=True):
     sm = build_spatial_model(con, room_id)
+    bed_label, bed_dims = _bed_for_area(sm["area_m2"])
     out = {"room_id": room_id, "room_name": sm.get("room_name"), "area_m2": sm["area_m2"],
-           "minimalist": minimalist, "candidates": []}
-    top, allhb = _headboard_candidates(sm, M(KING[0]), k=3)
+           "minimalist": minimalist, "bed_size": bed_label, "candidates": []}
+    top, allhb = _headboard_candidates(sm, M(bed_dims[0]), k=3)
     out["headboard_ranking"] = [{"wall": h["wall_id"], "score": h["score"], "clean": h["clean"],
                                  "has_window": h["has_window"], "has_door": h["has_door"]}
                                 for h in allhb]
     if not top:
         out["result"] = "NO_VALID_LAYOUT"
-        out["reason"] = "nenhuma parede comporta a cama king (1.93 m)"
+        out["reason"] = f"nenhuma parede comporta a cama {bed_label} ({bed_dims[0]:.2f} m)"
         return sm, out
     for rank, h in enumerate(top):
         hb = _wall_setup(sm, h["wall_id"])
@@ -436,7 +457,7 @@ def run(con, room_id, minimalist=True):
             continue
         hb["has_window"] = h["has_window"]
         hb["has_door"] = h["has_door"]
-        items, downs = build_layout(sm, hb, minimalist)
+        items, downs = build_layout(sm, hb, bed_dims, bed_label, minimalist)
         if items is None:
             out["candidates"].append({"headboard_wall": h["wall_id"], "rank": rank,
                                       "valid": False, "score": -999, "reason": downs})
@@ -507,7 +528,7 @@ def plot(sm, out, out_png, tag=""):
             ax.annotate("", xy=(b.centroid.x + fac[0] * L, b.centroid.y + fac[1] * L),
                         xytext=(b.centroid.x, b.centroid.y),
                         arrowprops=dict(arrowstyle="-|>", color="#ffd600", lw=2.3), zorder=7)
-    sub = f"Quarto KING designer {tag} ('{out.get('room_name')}') | {out['result']}"
+    sub = f"Quarto {out.get('bed_size', '').upper()} designer {tag} ('{out.get('room_name')}') | {out['result']}"
     if out["result"] == "OK":
         win = next(c for c in out["candidates"] if c["headboard_wall"] == out["chosen"])
         cl = win.get("clearances_m", {})
