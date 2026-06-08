@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import sys
 
 sys.path.insert(0, ".")
@@ -22,7 +23,7 @@ from shapely.geometry import box as shp_box  # noqa: E402
 from tools.furnish_apartment import BRAINS, CONSENSUS, classify_rooms  # noqa: E402
 from tools.spatial_model import build_spatial_model  # noqa: E402
 
-PT_TO_IN = (0.19 / 5.4) * 39.3700787402
+PT_TO_IN = float(os.environ.get("PT_TO_M") or (0.19 / 5.4)) * 39.3700787402  # env override (escala PDF 0.0259); cell e furniture na MESMA escala
 # movel-HEROI por tipo de comodo (o que a camera deve enquadrar)
 HERO = {"BEDROOM": ("estrado", "colchao", "headboard"), "LIVING": ("base", "seat_cushion", "arm"),
         "KITCHEN": ("bancada", "ilha"), "BATHROOM": ("bancada_banho", "box")}
