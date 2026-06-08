@@ -8,6 +8,38 @@ def vray_export_run
   out = []
   begin
     model = Sketchup.active_model
+
+    # TEXTURAS premium: aplica texturas procedurais nos materiais dos moveis (SU da UV;
+    # V-Ray traduz). So na exportacao V-Ray (line renders continuam chapados). VRAY_TEX_DIR.
+    tex_dir = ENV['VRAY_TEX_DIR']
+    if tex_dir && File.directory?(tex_dir)
+      wd = 'wood_dark.png'; wm = 'wood_medium.png'; fl = 'fabric_light.png'; fa = 'fabric_accent.png'
+      tex_map = {
+        'ph_estrado' => wd, 'ph_foot' => wd, 'ph_pe' => wd, 'ph_plinto' => wd, 'ph_rodape' => wd,
+        'ph_mesa_centro' => wd, 'ph_base' => wd,
+        'ph_corpo' => wm, 'ph_porta' => wm, 'ph_tampo' => wm, 'ph_gaveta' => wm, 'ph_rack_tv' => wm,
+        'ph_dresser' => wm, 'ph_bancada' => wm, 'ph_torre' => wm, 'ph_aereo' => wm,
+        'ph_seat_cushion' => fl, 'ph_back_cushion' => fl, 'ph_arm' => fl, 'ph_colchao' => fl,
+        'ph_travesseiro' => fl, 'ph_headboard' => fl,
+        'ph_manta' => fa, 'ph_tapete' => fa, 'ph_rug' => fa
+      }
+      n_tex = 0
+      tex_map.each do |matname, png|
+        m = model.materials[matname]
+        next unless m
+        path = File.join(tex_dir, png)
+        next unless File.exist?(path)
+        begin
+          m.texture = path
+          m.texture.size = [40, 40]   # ~1m de repeticao (inches)
+          n_tex += 1
+        rescue StandardError => e
+          out << "tex ERR #{matname}: #{e.message}"
+        end
+      end
+      out << "texturas aplicadas: #{n_tex}"
+    end
+
     view = model.active_view
     bb = model.bounds
     c = bb.center

@@ -83,10 +83,13 @@ class VRayFinalProvider(RenderProvider):
         t0 = time.time()
 
         # 1. SU exporta .vrscene (camera + RenderSessionExport)
+        tex_dir = ROOT / "assets/textures/procedural"
         env = dict(os.environ)
         env.update({"VRSCENE_OUT": str(vrscene).replace("\\", "/"),
                     "VRAY_LOG": str(log).replace("\\", "/"),
                     "VRAY_CAM": "top" if "top" in req.renders else "iso"})
+        if tex_dir.is_dir():
+            env["VRAY_TEX_DIR"] = str(tex_dir)   # materiais texturizados (madeira/tecido)
         ps = (f"Start-Process -FilePath '{self.su_exe}' "
               f"-ArgumentList '\"{copy}\"','-RubyStartup','\"{VRAY_EXPORT_RB}\"'")
         try:
@@ -111,7 +114,8 @@ class VRayFinalProvider(RenderProvider):
         # (f/8, 1/300, ISO100) -> interior subexposto. Tweak p/ um interior bem exposto.
         try:
             from tools.tweak_vrscene import tweak_file
-            tweak_file(vrscene, iso=req.iso, fnum=req.fnum, shutter=req.shutter, sky=req.sky)
+            tweak_file(vrscene, iso=req.iso, fnum=req.fnum, shutter=req.shutter, sky=req.sky,
+                       materials=True)
         except Exception:  # noqa: BLE001
             pass
 
