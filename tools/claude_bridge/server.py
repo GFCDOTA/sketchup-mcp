@@ -1392,6 +1392,73 @@ def brain_state() -> dict:
     }
 
 
+def noc_actions() -> dict:
+    """Estado do ATUADOR (NOC dispatcher) pra aba do dashboard: acoes recentes (ledger),
+    fila pendente e se ha um dispatcher segurando o lock AGORA. So LEITURA — o cockpit
+    nao atua; quem atua e o tools/claude_bridge/noc_dispatcher.py (processo a parte).
+    Nada fabricado: tudo vem de .ai_bridge/noc/{actions.jsonl,queue.jsonl,dispatcher.lock}."""
+    noc = REPO_ROOT / ".ai_bridge" / "noc"
+    _TERMINAL = {"COMMITTED", "VISUAL_REVIEW_QUEUED", "NOOP", "VERIFY_FAILED"}
+
+    def _jsonl(p):
+        rows = []
+        try:
+            for ln in p.read_text("utf-8", errors="replace").splitlines():
+                ln = ln.strip()
+                if ln:
+                    try:
+                        rows.append(json.loads(ln))
+                    except ValueError:
+                        pass
+        except OSError:
+            pass
+        return rows
+
+    actions = _jsonl(noc / "actions.jsonl")
+    for a in actions:
+        a["age_sec"] = round(time.time() - float(a.get("t", time.time())))
+    recent = list(reversed(actions))[:30]
+
+    counts = {}
+    for a in actions:
+        counts[a.get("status", "?")] = counts.get(a.get("status", "?"), 0) + 1
+
+    done = {a.get("task_id") for a in actions if a.get("status") in _TERMINAL}
+    pending = [{"id": t.get("id"), "title": t.get("title"), "appearance": bool(t.get("appearance"))}
+               for t in _jsonl(noc / "queue.jsonl")
+               if t.get("id") not in done and t.get("safe") is not False]
+
+    lock = {"held": False}
+    try:
+        d = json.loads((noc / "dispatcher.lock").read_text("utf-8"))
+        age = round(time.time() - float(d.get("ts", 0)))
+        lock = {"held": age <= 900, "owner": d.get("owner"), "pid": d.get("pid"), "age_sec": age}
+    except (OSError, ValueError):
+        pass
+
+    return {"exists": (noc / "actions.jsonl").exists() or (noc / "queue.jsonl").exists(),
+            "actions": recent, "counts": counts, "total_actions": len(actions),
+            "pending": pending, "lock": lock,
+            "visual_review_pending": [a for a in recent if a.get("status") == "VISUAL_REVIEW_QUEUED"],
+            "note": "atuador = noc_dispatcher.py (processo a parte); este card so observa o ledger"}
+
+
+def marcos() -> dict:
+    """Marcos / subidas de nivel do projeto (timeline curada, versionada em
+    tools/claude_bridge/marcos.json). Ordena por nivel desc (mais recente no topo).
+    So leitura — a curadoria vive no JSON, nada fabricado aqui."""
+    p = REPO_ROOT / "tools" / "claude_bridge" / "marcos.json"
+    try:
+        data = json.loads(p.read_text("utf-8"))
+    except (OSError, ValueError) as e:
+        return {"exists": False, "marcos": [], "note": f"marcos.json indisponivel: {type(e).__name__}"}
+    if not isinstance(data, list):
+        data = []
+    data = sorted(data, key=lambda m: m.get("nivel", 0), reverse=True)
+    return {"exists": True, "marcos": data, "count": len(data),
+            "current_level": max((m.get("nivel", 0) for m in data), default=0)}
+
+
 def _json_route(fn):
     """Adapt a zero-arg data function into a GET handler that sends it as JSON 200."""
     def handler(req, _url):
@@ -1625,6 +1692,8 @@ GET_ROUTES = {
     "/api/files": _json_route(recent_files),
     "/api/cognitive": _json_route(cognitive_doc),
     "/api/brain-state": _json_route(brain_state),
+    "/api/noc-actions": _json_route(noc_actions),
+    "/api/marcos": _json_route(marcos),
     "/api/skp-inventory-v2": _json_route(skp_inventory_v2),
     "/api/difficulties": _json_route(difficulties),
     "/api/skp-timeline": _json_route(skp_timeline),
