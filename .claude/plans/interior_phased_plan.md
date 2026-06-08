@@ -9,6 +9,18 @@
 
 ## Estado (atualizado por ciclo)
 
+- **Fase 4 (RenderProvider abstraction) FECHADA GREEN** (commit 4ffe7af): interior/renderers/
+  (render_provider.py interface + sketchup_basic_provider FUNCIONAL provado + enscape/vray stubs +
+  get_provider). Render via provider básico = idêntico ao inline, base intacta.
+- **Fase 5 (Spike Enscape/V-Ray/Trimble/MCP) FECHADA GREEN** (docs/spikes/render_and_asset_providers.md):
+  Enscape=GUI-only (manual, sem API) → Fase 6 fica manual/blocked, pular sem forçar. V-Ray=tem Ruby API
+  (`module VRay`, vray4sketchup2026.so) + vray.exe headless = MELHOR candidato, mas precisa LICENÇA +
+  registrar ext no SU 2026 (Fase 8, risco crack-SU). 3DW=Chrome MCP existente + manifest (Fase 7).
+  **MCP separado = NÃO** (adapters internos bastam). Sem inventar API.
+- **Próximo (não-bloqueado por render premium)**: WARN refinements premium (bevel sutil nas arestas:
+  criado > portas guarda-roupa > manta/travesseiros > braço sofá; + afastar criado da porta) OU Fase 7
+  (asset catalog — já tem v1 de commits antigos). Render premium real (V-Ray) = bloqueado em licença+setup.
+
 - **Fase 2 (Bedroom placement) — FECHADA GREEN (determinístico + GPT PASS).** GPT Modo B no
   suite01_top: VERDICT PASS (BED/WARDROBE/CIRCULATION/ORIENTATION PASS; NIGHTSTANDS WARN = criado
   superior perto da porta). Ver artifacts/review/interior/gpt_verdicts.md.
