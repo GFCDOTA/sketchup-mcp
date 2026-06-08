@@ -129,6 +129,16 @@ Geometria: `room_introspect.py <room_id>`. Cama centro (636,789), cabeceira lest
   planta_74_vray_sala_autocrop.png. Resíduo PREMIUM_REALISM (janela clara / parede esq / textura do piso) =
   polish de catálogo (backlog). Cômodos pequenos (suite02) seguem constrangidos pela geometria (auto dá shot
   válido, não ótimo — o herói foreshortened OU o dresser no quadro; caso-limite documentado).
+- **SKILL interior-architect-planner + geometry_sanity (Felipe 2026-06-08)**: design implícito virou regras
+  executáveis em `.claude/skills/interior-architect-planner/SKILL.md` (mental model 10 passos · regras gerais +
+  por ambiente · DesignIntentSpec obrigatório · candidate-layout · geometry_sanity · limites da auto-camera ·
+  quando chamar GPT). `tools/geometry_sanity.py` = gate determinístico BARATO (móvel dentro do cômodo / não
+  bloqueia porta / alto-sobre-janela / bbox sã) — calibrado: PASS nos cômodos, WARN real só na suite02 (dresser
+  perto da porta 10in²), ZERO falso-FAIL; teste `tools/test_geometry_sanity.py`. **1º slice = COZINHA r004**:
+  DesignIntentSpec (`artifacts/planta_74/design_intent/r004.json`) → geometry_sanity PASS → auto-camera → render.
+  VERDITO HONESTO: geometry **READY_FOR_SKP** · program **NEEDS_LAYOUT_FIX** (pia/cooktop/geladeira distintos
+  ausentes — bancada agregada) · câmera **LIMITED_BY_ROOM_GEOMETRY** (galley pequena → eye-level vira close-up da
+  bancada; cozinha pede modo top/iso/door-wide, não o eye-level-cluster). NÃO mascarado com crop.
 
 - Backlog WARN (não bloqueia): bevel premium nas arestas (criado>portas>manta>braço) + afastar criado da porta.
 

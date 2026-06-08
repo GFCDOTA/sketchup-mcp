@@ -1,0 +1,40 @@
+{
+  "room_id": "r004",
+  "room_type": "KITCHEN",
+  "dimensions_estimate": {"w_m": 2.5, "d_m": 4.0, "area_m2": 9.8,
+    "note": "cozinha ESTREITA/galley; bbox real (77,805)-(175,962) in ~ 98x157in"},
+  "fixed_constraints": {
+    "doors": [{"pos_in": [147, 804], "wall": "N", "note": "acesso — manter clearance, nao bloquear"}],
+    "windows": [],
+    "openings": [],
+    "clean_walls": ["W (x~77)", "S (y~962)", "E (x~172-175)"],
+    "no_place_zones": ["frente da porta N @(147,804) +-22in"]
+  },
+  "program_priority": {
+    "required": ["pia", "fogao/cooktop", "geladeira", "bancada"],
+    "desired": ["armario inferior", "armario superior (aereo)", "torre quente (forno/microondas)"],
+    "decorative": []
+  },
+  "layout_strategy": "Estreita (~2.5m) => bancada LINEAR/L nas paredes W+S; SEM ilha (nao cabe). Triangulo pia-fogao-geladeira COMPRIMIDO numa perna; aproveitamento VERTICAL (aereo + torre de canto).",
+  "furniture_plan": [
+    {"item": "bancada", "function": "preparo + pia + cooktop", "candidate_wall_or_zone": "parede W+S (L)",
+     "approximate_size": "~2.4m linear", "reason": "unica geometria viavel numa cozinha estreita",
+     "risk": "pia/cooktop/geladeira ainda IMPLICITOS na bancada agregada — sem placeholders distintos"},
+    {"item": "aereo", "function": "armazenamento superior", "candidate_wall_or_zone": "sobre a bancada (W+S)",
+     "approximate_size": "~2.4m linear, h~0.7m", "reason": "aproveitamento vertical (regra de marcenaria)", "risk": "nenhum"},
+    {"item": "torre", "function": "torre quente (forno/microondas) OU despensa", "candidate_wall_or_zone": "canto SW (78-102,937-962)",
+     "approximate_size": "~0.6x0.6m full-height", "reason": "aproveita o CANTO — marcenaria util", "risk": "conferir clearance"}
+  ],
+  "circulation_rules": ["corredor galley livre entre bancada e parede oposta", "porta N (147,804) clearance >= 60cm"],
+  "carpentry_opportunities": ["torre de canto (FEITO)", "aereo continuo (FEITO)", "gavetao inferior na bancada", "nicho no vao da torre"],
+  "must_not_violate": ["nao bloquear a porta N (147,804)", "NAO inventar ilha (nao cabe)", "bancada nao invade o corredor"],
+  "tradeoffs": ["cozinha estreita: pia+cooktop+geladeira comprimidos numa bancada linear; sem ilha; appliances ainda implicitos no placeholder agregado de bancada"],
+  "confidence": 0.6,
+  "needs_human_review": true,
+  "geometry_sanity": "PASS (r004: sem movel fora/bloqueando porta/atravessando parede)",
+  "status_geometry": "READY_FOR_SKP",
+  "status_program_fidelity": "NEEDS_LAYOUT_FIX (pia/cooktop/geladeira distintos ausentes — bancada agregada; refinar p/ fidelidade de cozinha)",
+  "status_camera": "LIMITED_BY_ROOM_GEOMETRY (galley ~2.5m: auto-camera eye-level com dist cap ~87in => close-up cramped da bancada, sem angulo de cozinha legivel — NAO mascarar com crop, declarado honesto)",
+  "camera_recommendation": "cozinha galley/pequena pede modo de camera DIFERENTE do eye-level-cluster (top/iso OU wide do vao da porta olhando a galeria); o auto-camera atual e tunado p/ comodo com heroi central + piso aberto",
+  "slice_verdict": "geometry READY_FOR_SKP · program NEEDS_LAYOUT_FIX (appliances) · camera LIMITED_BY_ROOM_GEOMETRY"
+}
