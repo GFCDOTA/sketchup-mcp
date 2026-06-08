@@ -9,10 +9,12 @@
 
 ## Estado (atualizado por ciclo)
 
-- **Fase 3 (anatomia quartos) EM ANDAMENTO**: BedBuilder ✅ + WardrobeBuilder ✅ (commit 327a1c4:
-  corpo+portas/frestas+puxadores+rodapé, wardrobe_gate PASS, troca o bloco roxo no furnish).
-  validation_report phase3 = **5 gates GREEN**. FALTA: NightstandBuilder (criados ainda teal lisos)
-  + AnatomyGate consolidado + veredito GPT (fila). Apê 65/65, base intacta.
+- **Fase 3 (anatomia quartos) DETERMINÍSTICO COMPLETO** (commits 327a1c4 wardrobe, 9cc09f0 nightstand):
+  BedBuilder ✅ + WardrobeBuilder ✅ (corpo+portas/frestas+puxadores+rodapé) + NightstandBuilder ✅
+  (pés+corpo+tampo+gaveta+knob). **validation_report = 6 gates GREEN** — esse report É o AnatomyGate
+  consolidado (roda sofa+bed+wardrobe+nightstand anatomy + bed placement). Apê 93/93, base intacta.
+  Anatomia do quarto: sofá+cama+guarda-roupa+criado todos golden (nenhum bloco único). FALTA só o
+  veredito GPT (fila, clipboard infra). → próxima fase determinística: **Fase 4 RenderProvider abstraction**.
 - **FILA GPT-VISUAL (Modo B) acumulando** (clipboard infra travado): sofá-braço, cama, quarto
   placement, guarda-roupa. Felipe pode destravar (sessão/tela) ou fazer consult manual; imagens
   servidas em :8781. NÃO autojulgar; retry oportunístico cada ciclo.
