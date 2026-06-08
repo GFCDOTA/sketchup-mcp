@@ -80,3 +80,13 @@ CAMERA (baixar p/ eye-level — esbarra na oclusão L-shape; tentar 1x). Render:
 - **Placement**: afastar o criado superior da porta (NIGHTSTANDS WARN).
 - **Premium**: bevel/chamfer sutil nas arestas (criado > portas do guarda-roupa > manta/travesseiros).
   Casa com o WARN do sofá-braço (silhueta externa) — bevel/fillet de acabamento é a etapa premium comum.
+
+### GPT_REVIEW [2026-06-08T01:25:25] id=sala_framing_v5 → GATE **WARN**
+- artifact: `planta_74_vray_sala_eyefill5.png`
+- VERDICT: **WARN** · PREMIUM_REALISM:WARN · MATERIALS:PASS · LIGHTING:PASS · CAMERA:WARN · FURNITURE_DETAIL:PASS
+- NEXT_ACTION: ajustar o crop/framebuffer da camera para remover a faixa cinza inferior sem aproximar mais, preservando sofa + mesa inteiros no quadro.
+
+### GPT_REVIEW [2026-06-08T01:28:50] id=sala_framing_crop → GATE **PASS**
+- artifact: `planta_74_vray_sala_eyefill_crop.png`
+- VERDICT: **PASS** · PREMIUM_REALISM:WARN · MATERIALS:PASS · LIGHTING:PASS · CAMERA:PASS · FURNITURE_DETAIL:PASS
+- NEXT_ACTION: aplicar mais suavidade visual no sofa, com tecido/bump mais evidente e bordas/almofadas menos rigidas.

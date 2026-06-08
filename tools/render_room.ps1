@@ -5,7 +5,8 @@ param(
   [string]$Out="planta_74_vray_sala_eye.png",
   [double]$Iso=100, [double]$Fnum=7, [double]$Shutter=160, [double]$Sky=0.3,
   [int]$Width=1500, [int]$Height=1000,
-  [string]$Fill=""
+  [string]$Fill="",
+  [string]$ReviewId="", [string]$ReviewCtx=""
 )
 $ErrorActionPreference="Stop"
 $su="C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
@@ -40,4 +41,12 @@ $img="$fdir\$Out"; Remove-Item $img -ErrorAction SilentlyContinue
 
 $baseHash2=(Get-FileHash $base -Algorithm SHA256).Hash
 if($baseHash -ne $baseHash2){ "!! BASE MUTATED !!"; exit 2 }
-if(Test-Path $img){ "OK $Out $((Get-Item $img).Length)b base_intact=True" } else { "RENDER FAIL"; exit 3 }
+if(-not (Test-Path $img)){ "RENDER FAIL"; exit 3 }
+"OK $Out $((Get-Item $img).Length)b base_intact=True"
+
+# STEP GPT_REVIEW gate: muda aparencia -> prepara o review (clipboard + prompt + PENDING no ledger)
+if($ReviewId -ne ""){
+  Push-Location E:\Claude\sketchup-mcp-mobiliar
+  & $py tools\gpt_review.py prepare --id $ReviewId --image $img --context $ReviewCtx
+  Pop-Location
+}
