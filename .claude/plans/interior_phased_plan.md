@@ -56,6 +56,28 @@
     - **PRÓXIMO ROI** (backlog, não-bloqueante): (a) enquadramento final da sala (faixa cinza inferior +
       parede lateral — PREMIUM_REALISM/CAMERA WARN); (b) **estender o pipeline premium aos QUARTOS**
       (suite01: textura+eye-level+fill, usando o template provado); (c) integrar câmera/fill no VRayFinalProvider.
+## GATE GPT_REVIEW (Felipe 2026-06-08) — validação visual formal
+
+`tools/gpt_review.py` (prepare/record/show) + skill `gpt-review-gate`. Toda mudança de aparência
+atravessa o gate; NUNCA autojulgar. PASS|WARN promove (WARN=backlog), **FAIL ou qualquer dimensão
+FAIL BLOQUEIA**. Ledger append-only `artifacts/review/interior/gpt_review_ledger.jsonl` (texto cru do
+GPT) + espelho `gpt_verdicts.md`. Hook no `render_room.ps1 -ReviewId`. Test verde `tools/test_gpt_review.py`.
+PROVADO: sala_framing_crop→PASS; quarto v1→FAIL (bloqueou).
+
+## QUARTO SUITE 01 (r000) premium — EM ANDAMENTO (template da sala + gate)
+
+Reusa o template provado: texturas + eye-level + luz interna + exposição, via `render_room.ps1`/`tune_render.ps1`.
+Geometria: `room_introspect.py <room_id>`. Cama centro (636,789), cabeceira leste, 2 janelas norte, área sul aberta.
+- **v1** fill 820 (= sala) → **GATE FAIL**: LIGHTING FAIL, cama "massa branca" (quarto menor superexpôs).
+- **v2** fill 260 + sky0.22 → LIGHTING WARN (cama recuperou, janela segurou), mas hotspot direto na cama.
+- **v3** fill DIFUSO (raio 42, z92, fora do eixo da cama) + sky0.18 + câmera recuada → LIGHTING WARN (difusa, sem
+  hotspot agressivo) mas **CAMERA FAIL** (cama não inteira + faixa cinza). Crop aplicado (`crop_render.py`).
+- **LIÇÃO LL-FURN**: fill premium é POR-CÔMODO (não reusar intensidade da sala); quarto menor/cama perto da luz
+  pede fill DIFUSO (raio grande, deslocado do eixo do móvel, z alto, intensidade baixa). Janela 2x pede sky menor.
+- **NEXT** (próxima iteração do loop): nailar o enquadramento da cama (inteira, sem faixa — crop+reframe leve,
+  "sem aproximar" per GPT) → re-gate até CAMERA/LIGHTING saírem de FAIL/WARN; depois materiais (roupa de cama
+  ainda lavada). Depois: SUITE 02 (r003) + cozinha. Renders WIP NÃO promovidos (gate não-PASS).
+
 - Backlog WARN (não bloqueia): bevel premium nas arestas (criado>portas>manta>braço) + afastar criado da porta.
 
 - **Fase 2 (Bedroom placement) — FECHADA GREEN (determinístico + GPT PASS).** GPT Modo B no

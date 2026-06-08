@@ -90,3 +90,18 @@ CAMERA (baixar p/ eye-level — esbarra na oclusão L-shape; tentar 1x). Render:
 - artifact: `planta_74_vray_sala_eyefill_crop.png`
 - VERDICT: **PASS** · PREMIUM_REALISM:WARN · MATERIALS:PASS · LIGHTING:PASS · CAMERA:PASS · FURNITURE_DETAIL:PASS
 - NEXT_ACTION: aplicar mais suavidade visual no sofa, com tecido/bump mais evidente e bordas/almofadas menos rigidas.
+
+### GPT_REVIEW [2026-06-08T01:37:37] id=quarto_suite01_v1 → GATE **FAIL**
+- artifact: `planta_74_vray_quarto.png`
+- VERDICT: **WARN** · PREMIUM_REALISM:WARN · MATERIALS:WARN · LIGHTING:FAIL · CAMERA:WARN · FURNITURE_DETAIL:WARN
+- NEXT_ACTION: reduzir a intensidade/exposure da luz interna quente para recuperar detalhe da cama e da janela antes de mexer em camera ou materiais.
+
+### GPT_REVIEW [2026-06-08T01:41:59] id=quarto_suite01_v2 → GATE **WARN**
+- artifact: `planta_74_vray_quarto.png`
+- VERDICT: **WARN** · PREMIUM_REALISM:WARN · MATERIALS:WARN · LIGHTING:WARN · CAMERA:WARN · FURNITURE_DETAIL:WARN
+- NEXT_ACTION: transformar a luz interna em fill indireto/difuso, reduzindo o hotspot direto na cama sem escurecer o quarto inteiro.
+
+### GPT_REVIEW [2026-06-08T01:46:25] id=quarto_suite01_v3 → GATE **FAIL**
+- artifact: `planta_74_vray_quarto.png`
+- VERDICT: **WARN** · PREMIUM_REALISM:WARN · MATERIALS:WARN · LIGHTING:WARN · CAMERA:FAIL · FURNITURE_DETAIL:WARN
+- NEXT_ACTION: corrigir o crop/framebuffer primeiro para remover a faixa cinza inferior e enquadrar a cama inteira sem aproximar mais.
