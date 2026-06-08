@@ -9,16 +9,18 @@
 
 ## Estado (atualizado por ciclo)
 
-- **Fase 3 (anatomia quartos) DETERMINÍSTICO COMPLETO** (commits 327a1c4 wardrobe, 9cc09f0 nightstand):
-  BedBuilder ✅ + WardrobeBuilder ✅ (corpo+portas/frestas+puxadores+rodapé) + NightstandBuilder ✅
-  (pés+corpo+tampo+gaveta+knob). **validation_report = 6 gates GREEN** — esse report É o AnatomyGate
-  consolidado (roda sofa+bed+wardrobe+nightstand anatomy + bed placement). Apê 93/93, base intacta.
-  Anatomia do quarto: sofá+cama+guarda-roupa+criado todos golden (nenhum bloco único). FALTA só o
-  veredito GPT (fila, clipboard infra). → próxima fase determinística: **Fase 4 RenderProvider abstraction**.
-- **FILA GPT-VISUAL (Modo B) acumulando** (clipboard infra travado): sofá-braço, cama, quarto
-  placement, guarda-roupa. Felipe pode destravar (sessão/tela) ou fazer consult manual; imagens
-  servidas em :8781. NÃO autojulgar; retry oportunístico cada ciclo.
-- **Fase 2 (Bedroom placement) — determinístico GREEN; GPT visual na fila.**
+- **Fase 2 (Bedroom placement) — FECHADA GREEN (determinístico + GPT PASS).** GPT Modo B no
+  suite01_top: VERDICT PASS (BED/WARDROBE/CIRCULATION/ORIENTATION PASS; NIGHTSTANDS WARN = criado
+  superior perto da porta). Ver artifacts/review/interior/gpt_verdicts.md.
+- **Fase 3 (anatomia quartos) — FECHADA GREEN (determinístico + GPT PASS)** (commits 327a1c4 wardrobe,
+  9cc09f0 nightstand): Bed+Wardrobe+Nightstand builders golden. validation_report = 6 gates GREEN
+  (= AnatomyGate consolidado). GPT Modo B no montage dos 3 móveis: VERDICT PASS (OBJECT_ANATOMY/
+  MATERIAL/PROPORTION PASS — "leem como móveis compostos, não caixas"; PREMIUM_REALISM WARN = falta
+  bevel/acabamento). Apê 93/93, base intacta. → próxima fase: **Fase 4 RenderProvider abstraction**.
+- **Clipboard DESTRAVADO** (Felipe destravou a sessão) — GPT Modo B operacional de novo (setclip.ps1 +
+  paste; receita: click composer + wait 1s + ctrl+v, depois type + Enter; montage via System.Drawing c/ casts [int]).
+- **BACKLOG de refinamento (WARN, não bloqueia)**: (a) afastar criado superior da porta; (b) bevel/chamfer
+  sutil nas arestas (criado > portas guarda-roupa > manta/travesseiros > braço do sofá) = etapa premium.
   - BedPlacementGate (`interior/validators/bed_placement_gate.py`, commit 523894c): valida
     cama (ancorada+cabeceira-parede-limpa+não-bloqueia-porta+orientação) + guarda-roupa
     (ancorado+frente-livre+não-bloqueia-porta) + criados (flanqueiam) + circulação. Fixtures
