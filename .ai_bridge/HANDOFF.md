@@ -26,7 +26,13 @@ Felipe escolheu "Produto + preparo candidato" (não pausar produto; preparar esc
   atual 0.0352 → 183 m² (1.359× grande). 7 arcos de porta FALSE_ALARM (scale-independent) confirmam só o anchor errado.
 - **Anchor recomendado 0.0259** (multi-cômodo) vs 0.0252 (1 cota, doc anterior). **NÃO aplicado** — default 0.0352 intacto.
 - **Build candidato:** será feito no anchor que o Felipe APROVAR (evita buildar 2× se ele preferir 0.0252).
-- **Produto NÃO pausado:** cozinha r004 PASS (eletro distintos, commit a2ecea7); layout é scale-robusto. Seguindo p/ anatomia do quarto.
+- **Produto NÃO pausado:** cozinha r004 PASS (eletro distintos, commit a2ecea7); layout é scale-robusto.
+
+### Sessão V-Ray/mobiliar 2026-06-08 — 3 entregas (branch feat/mobiliar-bedroom-layout)
+1. **Cozinha PRODUTO PASS** (a2ecea7): eletro distintos (geladeira/pia/cooktop) + fluxo, mata bancada agregada. GPT FURNITURE_DETAIL=PASS. Render LIMITED_BY_ROOM_GEOMETRY (galley).
+2. **Escala candidata STAGED** (7cdd801): `scale_candidate_20260608/` — overlay+cotas provam 0.0259 (1.359× menor). **Aguarda VISUAL_REVIEW do Felipe.**
+3. **Cama anatomia PASS** (f64bd21): cabeceira estofada + travesseiros fofos → "saiu do look de lajes" (GPT FURNITURE_DETAIL/CAMERA/LIGHTING=PASS). + hardening do builder (af3717d): guard anti-"Duplicate points" em peça fina.
+- **WARN recorrente** "arestas duras/chapado" (PREMIUM): é qualidade de RENDER (V-Ray round-edges/textura/GI), NÃO anatomia (FURNITURE_DETAIL já PASS). Trilha V-Ray gated na decisão de escala. Detalhe em `artifacts/review/furniture/LL-FURN.md`.
 
 ## 2026-06-03 (noite) — wt-dash PORTADO + consolidado (painel: dirty driver LIMPO)
 
