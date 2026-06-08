@@ -64,7 +64,13 @@ FAIL BLOQUEIA**. Ledger append-only `artifacts/review/interior/gpt_review_ledger
 GPT) + espelho `gpt_verdicts.md`. Hook no `render_room.ps1 -ReviewId`. Test verde `tools/test_gpt_review.py`.
 PROVADO: sala_framing_crop→PASS; quarto v1→FAIL (bloqueou).
 
-## QUARTO SUITE 01 (r000) premium — EM ANDAMENTO (template da sala + gate)
+## QUARTO SUITE 01 (r000) — WARN-promotable, lighting PASS, polish premium pendente
+
+> WORDING (correção Felipe 2026-06-08): NÃO chamar de "premium PASS". O gate passou só LIGHTING;
+> o cômodo inteiro ainda é **VERDICT WARN** (MATERIALS/CAMERA/FURNITURE_DETAIL/PREMIUM_REALISM WARN).
+> Status honesto = "WARN-promotable, lighting PASS, polish premium pendente". PASS premium = schema
+> sem FAIL E com PREMIUM_REALISM/FURNITURE_DETAIL melhores (deep verdict do GPT).
+
 
 Reusa o template provado: texturas + eye-level + luz interna + exposição, via `render_room.ps1`/`tune_render.ps1`.
 Geometria: `room_introspect.py <room_id>`. Cama centro (636,789), cabeceira leste, 2 janelas norte, área sul aberta.
@@ -83,8 +89,18 @@ Geometria: `room_introspect.py <room_id>`. Cama centro (636,789), cabeceira lest
 - **LIÇÃO LL-FURN**: fill premium POR-CÔMODO (quarto pediu fill DIFUSO raio~42, deslocado do eixo da cama, z alto,
   intensidade ~150 vs 820 da sala; sky menor p/ 2 janelas). Câmera: recuar p/ cama inteira + crop framebuffer
   da faixa de piso (NÃO aproximar). Sequência GPT: lighting→câmera/crop→materiais.
-- **NEXT** (próxima iteração): polish do quarto p/ PASS (cama centro ainda levemente lavada → textura fina da roupa
-  de cama; ou aceitar WARN e avançar). Depois SUITE 02 (r003) + COZINHA (r004) mesmo pipeline pelo gate.
+- **POLISH FINAL (2026-06-08, decisão Felipe "1 passada + congela se WARN")**: linho DEDICADO sutil p/ roupa de
+  cama (gen_textures.linen multiplicativo+slub; vray_export mapeia colchao/travesseiro/headboard→fabric_linen,
+  SOFA fica em fabric_light = sofa-safe) + crop com leitura de teto/shell aberto reduzida. Resultado GPT:
+  **MATERIALS PASS + FURNITURE_DETAIL PASS + LIGHTING PASS** (3/5); CAMERA+PREMIUM_REALISM WARN.
+- **CONGELADO WARN-promotable** (deliverable: planta_74_vray_quarto_WARN_promotable.png). Único bloqueio p/ PASS
+  = **faixa de piso inferior**: conflito Felipe(quer margem pequena) × GPT(quer remover) × Felipe(não quer pé colado);
+  com piso cinza não-mobiliado é incompatível sem tapete/material novo (fora do escopo small-polish). Per regra do
+  Felipe: NÃO entrar em looping de render — congela e avança. (LL-FURN: linho forte=grid/xadrez procedural → usar
+  weave multiplicativo de baixa amplitude + slub dominante; fill é por-cômodo.)
+- **NEXT**: SUITE 02 (r003) + COZINHA (r004), mesmo pipeline pelo GATE GPT_REVIEW (fill difuso por-cômodo,
+  exposição que segura janela, eye-level dentro do cômodo, crop). Resíduo do quarto (faixa/janela) = backlog visual,
+  revisitar só com tapete/floor material (geometria/escopo novo) se o Felipe quiser PASS premium do quarto.
 
 - Backlog WARN (não bloqueia): bevel premium nas arestas (criado>portas>manta>braço) + afastar criado da porta.
 

@@ -14,13 +14,16 @@ def vray_export_run
     tex_dir = ENV['VRAY_TEX_DIR']
     if tex_dir && File.directory?(tex_dir)
       wd = 'wood_dark.png'; wm = 'wood_medium.png'; fl = 'fabric_light.png'; fa = 'fabric_accent.png'
+      ln = 'fabric_linen.png'   # roupa de cama (BEDDING-ONLY) — trama de linho mais marcada; sofa NAO usa
       tex_map = {
         'ph_estrado' => wd, 'ph_foot' => wd, 'ph_pe' => wd, 'ph_plinto' => wd, 'ph_rodape' => wd,
         'ph_mesa_centro' => wd, 'ph_base' => wd,
         'ph_corpo' => wm, 'ph_porta' => wm, 'ph_tampo' => wm, 'ph_gaveta' => wm, 'ph_rack_tv' => wm,
         'ph_dresser' => wm, 'ph_bancada' => wm, 'ph_torre' => wm, 'ph_aereo' => wm,
-        'ph_seat_cushion' => fl, 'ph_back_cushion' => fl, 'ph_arm' => fl, 'ph_colchao' => fl,
-        'ph_travesseiro' => fl, 'ph_headboard' => fl,
+        # SOFA (sala = PASS, NAO regressar): mantem fabric_light
+        'ph_seat_cushion' => fl, 'ph_back_cushion' => fl, 'ph_arm' => fl,
+        # ROUPA DE CAMA: linho dedicado (textura mais marcada, menos lavada sob luz)
+        'ph_colchao' => ln, 'ph_travesseiro' => ln, 'ph_headboard' => ln,
         'ph_manta' => fa, 'ph_tapete' => fa, 'ph_rug' => fa
       }
       n_tex = 0

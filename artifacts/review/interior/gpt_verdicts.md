@@ -120,3 +120,18 @@ CAMERA (baixar p/ eye-level — esbarra na oclusão L-shape; tentar 1x). Render:
 - artifact: `planta_74_vray_quarto_crop.png`
 - VERDICT: **WARN** · PREMIUM_REALISM:WARN · MATERIALS:WARN · LIGHTING:PASS · CAMERA:WARN · FURNITURE_DETAIL:WARN
 - NEXT_ACTION: fazer crop final removendo totalmente a faixa cinza inferior sem cortar a cama.
+
+### GPT_REVIEW [2026-06-08T10:42:11] id=quarto_suite01_polish → GATE **WARN**
+- artifact: `planta_74_vray_quarto_crop.png`
+- VERDICT: **WARN** · PREMIUM_REALISM:WARN · MATERIALS:WARN · LIGHTING:PASS · CAMERA:WARN · FURNITURE_DETAIL:WARN
+- NEXT_ACTION: reduzir intensidade/escala da textura de linho da cama para ficar mais sutil e natural, mantendo a iluminacao atual.
+
+### GPT_REVIEW [2026-06-08T10:45:40] id=quarto_suite01_polish2 → GATE **WARN**
+- artifact: `planta_74_vray_quarto_crop.png`
+- VERDICT: **WARN** · PREMIUM_REALISM:WARN · MATERIALS:PASS · LIGHTING:PASS · CAMERA:WARN · FURNITURE_DETAIL:PASS
+- NEXT_ACTION: fazer o crop/frame final removendo a faixa cinza inferior e reduzindo a leitura de shell/teto aberto, mantendo materiais e iluminacao atuais.
+
+### GPT_REVIEW [2026-06-08T10:49:00] id=quarto_suite01_final → GATE **WARN**
+- artifact: `planta_74_vray_quarto_crop.png`
+- VERDICT: **WARN** · PREMIUM_REALISM:WARN · MATERIALS:PASS · LIGHTING:PASS · CAMERA:WARN · FURNITURE_DETAIL:PASS
+- NEXT_ACTION: fazer um crop final minimo removendo totalmente a faixa cinza inferior, sem mexer mais em luz/material/camera.

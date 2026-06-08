@@ -49,11 +49,27 @@ def fabric(c_base, seed):
     return Image.fromarray(out.astype("uint8"))
 
 
+def linen(c_base, seed, period=3.2, amp=46):
+    """Linho da ROUPA DE CAMA: trama FINA e SUTIL (GPT reprovou versao forte: 'grid/xadrez, procedural
+    demais'). Weave MULTIPLICATIVO (ponto de tecido, nao listras cruzadas=grid) de baixa amplitude +
+    slub dominante (irregularidade natural do fio) p/ quebrar a repeticao. Mais textura que o sofa,
+    porem natural. Base levemente menos branca p/ segurar tom sob luz."""
+    rng = np.random.default_rng(seed)
+    x = np.arange(SZ)[None, :].repeat(SZ, 0)
+    y = np.arange(SZ)[:, None].repeat(SZ, 1)
+    weave = np.sin(x * np.pi / period) * np.sin(y * np.pi / period)   # ponto multiplicativo (sem grid)
+    slub = _value_noise(SZ, SZ, 7, rng) - 0.5                         # fio irregular domina -> natural
+    t = weave * 0.20 + slub * 0.45
+    out = np.stack([np.clip(c_base[i] + t * amp, 0, 255) for i in range(3)], -1)
+    return Image.fromarray(out.astype("uint8"))
+
+
 TEXTURES = {
     "wood_medium.png": lambda: wood((150, 108, 70), (96, 66, 42), 11),
     "wood_dark.png": lambda: wood((92, 66, 46), (52, 36, 24), 22),
     "fabric_light.png": lambda: fabric((192, 182, 164), 33),
     "fabric_accent.png": lambda: fabric((174, 144, 114), 44),
+    "fabric_linen.png": lambda: linen((186, 178, 163), 55),   # roupa de cama (bedding-only)
 }
 
 
