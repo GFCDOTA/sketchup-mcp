@@ -16,13 +16,14 @@ Fix (commit 1d94494): ambos via env, mesmo padrão de `spatial_model`/`geometry_
 ## Prova @ PT_TO_M=0.0259 (determinística)
 - **Área Suíte 01**: 15.9 m² (shell correto).
 - **Colchão**: 1.99 × 1.54 m ≈ **queen** (1.58×2.03) — era 2.72×2.11 (1.36×). Cama escolhida: queen.
-- **geometry_sanity**: **WARN** (zero FAIL). Único warn: `tampo: perto da porta @(518,632) overlap 14in²`
-  — proximidade de criado×porta (placement nuance), NÃO escala; existiria em qualquer escala.
-  Por regra dura: FAIL bloqueia review; PASS/WARN → seguir.
-- **Default 0.0352 INTACTO** (sem env); 39 testes dos módulos passam; fixtures não mutados.
+- **geometry_sanity**: **PASS** (zero FAIL, zero WARN). O WARN criado×porta foi limpo: placement
+  agora é door-aware (clearance 22in = a do gate) e reduz/afasta só o criado da porta. 2 criados mantidos.
+- **Headboard dedup**: 1 cabeceira (era headboard+cabeceira duplicados) → 32 boxes.
+- **Default 0.0352 INTACTO** (provado before==after p/ r000+r003); 39 testes + 4 novos (test_suite01_scale_gate) passam; fixtures não mutados.
+- **Verificação adversarial** (workflow 9-agent): F1/F2/F4 CONFIRMED; F3 SUSPECT→resolvido (teste + default idêntico).
 
 ## Artefatos
-- `suite01_furnished_0259.skp` — **SHA256 `7e146caf3c942d69831cab2d446ced9ab9a1fd4fdedc042ffe65d82d48b8bbc4`**
+- `suite01_furnished_0259.skp` — **SHA256 `0f0c46c87015dad8cbf6fb8150581b736bea799cbac4c2365c51bee9600a997f`**
 - `suite01_furnished_top_0259.png` / `suite01_furnished_iso_0259.png` — placement (cama queen + cabeceira + 2 criados + guarda-roupa + tapete dentro do quarto)
 - `suite01_furnished_audit_0259.json` — geometry_sanity + medidas
 
