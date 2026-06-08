@@ -36,6 +36,33 @@ NEXT_ACTION: bevel/chamfer sutil nas arestas visíveis dos três móveis, começ
 ```
 → **Gate Fase 3 anatomia GREEN** (GPT não-FAIL em object anatomy: PASS; móveis não são blocos).
 
+## V-RAY render premium (Fase 8) — GPT Modo B iterado
+
+Render V-Ray real (export .vrscene + vray.exe headless). Iterações guiadas pelo GPT:
+- **Dollhouse distante**: CAMERA=FAIL ("não valoriza móveis").
+- **Câmera interior (zoom sala)**: melhorou; LIGHTING=FAIL (janela estourada).
+- **Exposição balanceada**: contraste recuperado.
+- **TEXTURAS procedurais (madeira grão + tecido trama)**: **MATERIALS=PASS** — *"a madeira com grão
+  e o tecido com trama já dão leitura muito melhor de material real; deixou de parecer plástico liso."*
+- **Lighting final (céu 0.3 + ISO100/f7/1-160)**: **GPT VERDICT=PASS** (planta_74_vray_sala_final.png):
+  ```
+  VERDICT: PASS
+  PREMIUM_REALISM: WARN — melhorou de forma clara vs versão anterior; sala ganhou contraste e leitura,
+    mas ainda não é "premium de revista"
+  MATERIALS: PASS — madeira e tecido leem melhor porque a luz não está mais lavando tudo
+  LIGHTING: PASS — a janela segurou bem melhor e recuperou detalhe/contraste interno vs antes
+    (resta uma área quente no piso junto à abertura)
+  CAMERA: WARN — continua alta e técnica, mais "overview" do que interior premium
+  FURNITURE_DETAIL: PASS — sofá, mesa e tapete mais legíveis agora que a exposição está controlada
+  TOP_3_ISSUES: 1) câmera ainda alta demais 2) highlight forte no piso junto à janela
+    3) materiais melhoraram, mas a vista ainda não valoriza textura fina
+  NEXT_ACTION: baixar a câmera (eye-level interior)
+  ```
+
+Estado: **VERDICT PASS** (milestone premium da sala atingido via V-Ray). LIGHTING resolvido FAIL→PASS
+(era o #1 recorrente). MATERIALS + FURNITURE_DETAIL + LIGHTING todos PASS. Único WARN acionável:
+CAMERA (baixar p/ eye-level — esbarra na oclusão L-shape; tentar 1x). Render: planta_74_vray_sala_final.png.
+
 ## Refinamentos WARN (não-bloqueantes, backlog)
 
 - **Placement**: afastar o criado superior da porta (NIGHTSTANDS WARN).
