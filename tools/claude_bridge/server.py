@@ -64,6 +64,18 @@ def resolve_tier(tier: str):
     """tier -> (model, effort). Desconhecido/vazio -> DEFAULT_TIER. Pura, testavel."""
     t = TIERS.get(str(tier or "").strip().lower()) or TIERS[DEFAULT_TIER]
     return t["model"], t["effort"]
+
+
+def consult_audit_fields(tier: str, mode: str = "") -> dict:
+    """Campos de tier/model/effort do evento de audit do /ask. Pura, testavel.
+    Garante que o audit registra tier + model + EFFORT de cada consulta."""
+    model, effort = resolve_tier(tier)
+    return {
+        "mode": mode or "default",
+        "tier": tier or DEFAULT_TIER,
+        "model": model,
+        "effort": effort,
+    }
 STARTED_AT = time.time()    # para o uptime no painel operacional
 
 SYSTEM = """You are the CLAUDE ORACLE for the sketchup-mcp fidelity project. The human (Felipe)
@@ -1552,8 +1564,8 @@ def _ask_route(req, _url):
         t0 = time.time()
         answer = ask_claude(question, tier=tier)
         _audit_append({"t": time.time(), "kind": "consult",
-                       "mode": mode or "default", "tier": tier or DEFAULT_TIER,
-                       "model": resolve_tier(tier)[0], "q_chars": len(prompt),
+                       **consult_audit_fields(tier, mode),
+                       "q_chars": len(prompt),
                        "a_chars": len(answer), "dur_sec": round(time.time() - t0, 1)})
         req._send(200, {"response": answer})
     except Exception as e:  # devolve erro honesto; nao fabrica resposta

@@ -1,7 +1,41 @@
 # Handoff — sketchup-mcp
 
-> Fio da meada entre sessões. Última atualização: **2026-06-03 (noite)** (wt-dash portado+consolidado, painel dirty-driver limpo; fidelidade planta_74 LANDADA em `d48798d` antes; gate :8765 LIVE).
+> Fio da meada entre sessões. Última atualização: **2026-06-08** (fast-tier no caminho pré-móvel / DesignIntentSpec; gate :8765 STALE por bloqueio de AV — ver abaixo).
 > Leia primeiro ao iniciar sessão.
+
+## 2026-06-08 — fast-tier wired no caminho pré-móvel (DesignIntentSpec) + AV bloqueando restart
+
+Branch `feat/design-intent-fast-tier` (off `origin/develop`). Slice pequena, determinística, **sem tocar SketchUp/V-Ray/assets** (mobiliar e wt-fidelity quentes, intocados).
+
+**O que entrou:**
+- `tools/consult_tier.py` (NOVO, puro) — `choose_gate_tier(purpose, *, explicit_tier, user_override)`:
+  fast = `design_intent` / `reference_to_checklist` / `layout_rule_draft` / `triage` / `prompt_prep` /
+  `exploration` (consultas baratas/repetitivas do ciclo de mobiliário, ANTES do `.skp`). deep =
+  `final_visual_verdict` (**PINADO**) / `merge_decision` / `artifact_approval` / `architectural_decision` /
+  `gate_conflict`. Desconhecido/vazio → **deep** (compat/segurança). Os 9 triggers canônicos caem em deep.
+- `tools/ask_gpt_gate.py` — `consult_design_intent(...)` (o caminho pré-móvel; reusa `run_gate`, trigger
+  `user_requested_consult`, purpose no context) + flag CLI `--purpose` (roteia o tier auto via
+  `choose_gate_tier`; `--tier` explícito vence = override do usuário).
+- `tools/claude_bridge/server.py` — `consult_audit_fields(tier, mode)` (puro) → o audit do `/ask` agora
+  grava **tier + model + effort** (antes só tier+model).
+- Testes: `tests/test_consult_tier.py` (16) + 4 em `tests/test_gate_tier.py` (audit). **pytest 500 ✓ / 5 skip** (zero regressão).
+
+**Hard rule preservada:** o veredito visual FINAL que aprova/reprova o `.skp` continua `deep` — `fast`
+nunca o pega por acidente; só um override EXPLÍCITO do usuário troca (negative-dogfood).
+
+**⚠️ Gate :8765 STALE (AV):** o `/health` vivo retorna `tiers=None` → o processo rodando é ANTERIOR ao
+merge do tier (687ddd7). O watchdog não relança com o `server.py` novo porque o **Windows Defender está
+matando os spawns de PowerShell** (ThreatID 2147941383, comportamental, no padrão `powershell.exe
+-ExecutionPolicy Bypass -Command …`; confirmado em `Get-MpThreatDetection`). Fix na mão do Felipe:
+`E:\Claude\add-defender-exclusions.ps1` (admin). Depois disso, restart do :8765 sobe o tier + o audit com
+effort LIVE. A prova de fast real (Sonnet ~8.5s vs Opus ~11.6s) já foi feita na sessão anterior (:8799).
+
+**PRÓXIMO PASSO DE PRODUTO (a linha mestra):** sair de infra e ir pro VISUAL —
+**GPT Reference Image / DesignIntentSpec (fast) → quarto / cama / guarda-roupa / criado-mudo →
+SKP + render → GPT deep verdict (veredito visual aprovado pelo olho do Felipe)**. O fast-tier agora
+destrava a metade "antes do .skp" desse ciclo (design intent, checklist, regras, triagem) barata e rápida;
+o deep continua sendo o juiz no fim. Padrão a replicar por cômodo/objeto: FAIL visual GPT → regra →
+fixture → gate → SKP melhor → GPT PASS (memória por objeto: LL-SOFA/BED/WARDROBE/NIGHTSTAND-NNN).
 
 ## 2026-06-03 (noite) — wt-dash PORTADO + consolidado (painel: dirty driver LIMPO)
 

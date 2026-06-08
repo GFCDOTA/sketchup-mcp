@@ -4,7 +4,8 @@ parse robusto do body /ask."""
 import json
 
 from tools.claude_bridge.server import (
-    DEFAULT_TIER, EFFORT, MODEL, TIERS, parse_ask_tier, resolve_tier,
+    DEFAULT_TIER, EFFORT, MODEL, TIERS, consult_audit_fields, parse_ask_tier,
+    resolve_tier,
 )
 
 
@@ -47,3 +48,30 @@ def test_tiers_shape():
     assert {"fast", "deep"} <= set(TIERS)
     for t in TIERS.values():
         assert "model" in t and "effort" in t
+
+
+# ---- audit grava tier/model/effort por consulta ----------------------
+
+def test_audit_fields_record_tier_model_effort_fast():
+    f = consult_audit_fields("fast")
+    assert f["tier"] == "fast"
+    assert f["model"] == "sonnet"
+    assert f["effort"] == "low"
+    assert f["mode"] == "default"
+
+
+def test_audit_fields_deep_when_empty():
+    f = consult_audit_fields("")        # sem tier -> deep (default)
+    assert f["tier"] == "deep"
+    assert (f["model"], f["effort"]) == (MODEL, EFFORT)
+
+
+def test_audit_fields_keep_mode():
+    f = consult_audit_fields("deep", mode="redteam")
+    assert f["mode"] == "redteam"
+    assert f["tier"] == "deep"
+
+
+def test_audit_fields_have_all_keys():
+    # o criterio da slice: audit registra tier/model/effort (+mode)
+    assert {"mode", "tier", "model", "effort"} <= set(consult_audit_fields("fast"))
