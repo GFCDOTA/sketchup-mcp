@@ -98,3 +98,19 @@ prova real `summarize_log` end-to-end em 2,3s.
 **Relação com o 1º slice `muscle.py gates`:** COMPLEMENTAR, não substitui. `muscle.py` = músculo INLINE SÍNCRONO
 determinístico (gates/build/render), ainda o maior token-saver e o **próximo** a implementar. `kind:local_llm` =
 músculo ASSÍNCRONO de decisão barata (fila). Ambos compartilham o princípio: o verboso fica no disco, o cérebro lê o veredito.
+
+## Slice implementado — fidelity loop (alvo do GPT + ciclo medível)
+
+(2026-06-08) Fase PRODUTO: "fiel à imagem do GPT" só tem sentido com (1) um ALVO e (2) o ciclo FAIL→PASS
+auditado. `tools/fidelity_loop.py` (determinístico, CLI + JSON compacto):
+- `register-ref <id> <imagem>` → guarda a imagem-ALVO do GPT como âncora (`.ai_bridge/fidelity/refs/<id>/`).
+- `package <id> <render.png>` → monta `alvo × render` + `ask_gpt.md` + schema em `runs/fidelity/` (scratch);
+  devolve `{status:READY_FOR_GPT, montage, package_dir}`. O verboso fica no pacote, não no contexto.
+- `record <id> PASS|WARN|FAIL` → audita o veredito do GPT no ledger `.ai_bridge/fidelity/ledger.jsonl`.
+- `kpi` → Learning-Cycle-Time por objeto (1º FAIL → 1º PASS) + agregado (pass_rate, avg_cycle_time).
+
+**Fronteira dura:** a máquina PREPARA e AUDITA; o **veredito visual é do GPT via Chrome** (gpt-review-gate;
+negative_dogfood). `record` recebe o que o GPT decidiu — nunca autojulga. Reframe honesto da auditoria 2026-06-08:
+a camada de validação já estava ~70% pronta; o gap real é o ALVO (este slice) + conteúdo (render real / móvel real).
+Próximo: (a) ligar `record` no fim do gate GPT existente (`run_skp_visual_review` / `gpt_review`), (b) `/api/fidelity`
+no cockpit (card KPI), (c) memória por objeto (LL-SOFA/BED-NNN) atada ao ledger.
