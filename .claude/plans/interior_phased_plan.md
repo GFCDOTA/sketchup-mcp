@@ -25,9 +25,18 @@
     `context = VRay::Context.active`; `tools/vray_export.rb` (camera iso/top + RenderSessionExport →
     .vrscene); `vray.exe -sceneFile=x.vrscene -imgFile=y.png -display=0 -autoClose=1` → PNG ~3s GPU.
     `VRayFinalProvider.render(in_skp)` funcional, available()=True. Render planta mobiliada gerado.
-    **REFINO premium pendente**: render escuro/pequeno (settings default 1 luz) → exposure/environment +
-    resolução (imgWidth/Height) + materiais V-Ray (fabric/madeira em vez de cor SU chapada) + câmeras
-    (human-eye/closeup). Esse é o caminho premium real (Enscape continua manual).
+    **REFINO premium EM ANDAMENTO** (commits 2e1c2a5 exposure, 01a5aa1 camera, eaf0999 exposure-balance):
+    - EXPOSURE: tools/tweak_vrscene.py pos-processa o .vrscene (export sai p/ exterior f/8-1/300-ISO100
+      = interior escuro). Tuning POR-SHOT: dollhouse overview pede mais luz; interior fechado pede menos
+      (ISO~100, f~5.6, shutter~1/125, sky~0.55) p/ não estourar a janela.
+    - CAMERA: vray_export.rb aceita VRAY_EYE/VRAY_TARGET/VRAY_FOV (inches). Interior eye-level OBSTRUI
+      pela L-shape (sofá entre 2 paredes m013/m014); o que funciona = high 3/4 zoom olhando por cima das
+      paredes (teto aberto). tools/compute_room_cam.py computa eye/target do grupo de móveis.
+    - GPT Modo B iterado: dollhouse CAMERA=FAIL → interior zoom WARN (sofá legível) → exposure-balance
+      (LIGHTING recuperado). Render atual = sala interior bem exposta, sofá golden visível.
+    - **PRÓXIMOS premium (divergentes, pedem direção)**: (a) MATERIAIS V-Ray textura (madeira/tecido em vez
+      de cor chapada — precisa material maps/BRDF edit; maior salto premium); (b) câmera EYE-LEVEL
+      cinematográfica (resolver oclusão da L-shape); (c) render dos QUARTOS (cama golden). vray.exe ~3-28s.
 - Backlog WARN (não bloqueia): bevel premium nas arestas (criado>portas>manta>braço) + afastar criado da porta.
 
 - **Fase 2 (Bedroom placement) — FECHADA GREEN (determinístico + GPT PASS).** GPT Modo B no
