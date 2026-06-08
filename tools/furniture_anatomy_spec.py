@@ -30,7 +30,7 @@ class SofaSpec:
     seat_height: float = 0.45        # topo do assento (onde senta) a partir do chao
     seat_depth: float = 0.58         # profundidade util do assento (Y)
     back_thickness: float = 0.18     # profundidade do encosto (Y)
-    arm_width: float = 0.22          # X do braco
+    arm_width: float = 0.18          # X do braco (GPT cycle2: 0.22 grosso demais -> afinar)
     arm_height: float = 0.62         # Z (topo do braco)
     foot_height: float = 0.10        # Z dos pes
     cushion_thickness: float = 0.15  # espessura da almofada do assento
