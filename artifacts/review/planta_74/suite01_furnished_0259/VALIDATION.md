@@ -48,6 +48,19 @@ print('colchao_m', round((c['x1']-c['x0'])*0.0254,2), round((c['y1']-c['y0'])*0.
 deles era 0.0352 hardcoded E havia +2 sites hardcoded (`furnish_apartment.pt_m` +
 `bedroom_designer._items_to_boxes`). O patch env conserta os três → furnished real @0.0259.
 
+## V-Ray premium — pipeline OK, hero-cam BLOQUEADO (fallback honesto, regra 10)
+Rodei `vray_export.rb` + `tweak_vrscene --materials` + `vray.exe` sobre o .skp @0.0259:
+**pipeline funciona** — 19 texturas premium aplicadas (madeira/tecido/linho/piso), GI + denoise
+RTX 5080, 0 erros, ~10s. PORÉM o **hero-cam interior** num quarto apertado (4.0×5.46m, móveis
+ocupam 2/3, só faixa leste de ~1.5m livre) + GI dim deu shots cramped/escuros em 2 tentativas.
+NÃO fiz 3ª (Felipe: "não quero mais tweak de fill/crop por cômodo"). **Follow-ups documentados:**
+- estratégia de câmera p/ quarto apertado (doorway/3-4 elevado) + iluminação interior;
+- `auto_camera.py` está scale-leaked (0.0352) → precisa do env fix p/ servir cam a 0.0259;
+- round-edges (WARN "arestas duras") precisa do plugin V-Ray `texRoundEdges` (não está no pipeline) —
+  `tweak_vrscene._set_block` só substitui params existentes, não injeta nó novo.
+**Reviewable desta entrega = o SU ISO/top** (mostra cama queen + cabeceira + criados + guarda-roupa
+no quarto, escala certa). O V-Ray premium hero é polish gated nos follow-ups acima.
+
 ## Próximo (humano)
 geometry_sanity sem FAIL → liberado pra **VISUAL_REVIEW do Felipe vs PDF** (gate humano).
 NÃO autojulgo IMPROVED/SAME/WORSE. Merge desta branch no PR coordenado via HANDOFF.
