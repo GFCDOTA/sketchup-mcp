@@ -62,6 +62,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
+from tools.consult_tier import choose_gate_tier
 from tools.gate_verdict import parse_verdict
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -354,6 +355,48 @@ def run_gate(
     )
 
 
+def consult_design_intent(
+    question: str,
+    context: dict | None = None,
+    *,
+    purpose: str = "design_intent",
+    questions_dir: Path | None = None,
+    responses_dir: Path | None = None,
+    url: str = BRIDGE_URL,
+    explicit_tier: str = "",
+    user_override: bool = False,
+) -> GateResult:
+    """Consulta PRE-MOVEL ao oraculo (ciclo de mobiliario, ANTES do `.skp`).
+
+    Este e o caminho do DesignIntentSpec / pre-movel: extrair design intent,
+    transformar referencia visual em checklist, rascunhar regra de layout,
+    triagem, preparar prompt. O tier sai de `choose_gate_tier(purpose)` —
+    tipicamente FAST (Sonnet+low, segundos), por serem consultas baratas e
+    repetitivas. Reusa `run_gate` (mesmo log/parse/audit).
+
+    O trigger e `user_requested_consult` (fluxo dirigido pelo usuario) e o
+    `purpose` viaja no `context` p/ rastreio no question file. O veredito visual
+    FINAL NAO passa por aqui — ele e `deep` (ver choose_gate_tier / Hard rule).
+    """
+    tier = choose_gate_tier(
+        purpose, explicit_tier=explicit_tier, user_override=user_override,
+    )
+    ctx = dict(context or {})
+    ctx.setdefault("purpose", purpose)
+    g = GateInput(
+        trigger="user_requested_consult",
+        question=question,
+        context=ctx,
+    )
+    return run_gate(
+        g,
+        questions_dir=questions_dir or (REPO_ROOT / ".ai_bridge" / "questions"),
+        responses_dir=responses_dir or (REPO_ROOT / ".ai_bridge" / "responses"),
+        url=url,
+        tier=tier,
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -390,9 +433,24 @@ def main() -> int:
     parser.add_argument(
         "--tier", choices=("fast", "deep"), default="",
         help="Tier do oraculo: 'fast' (Sonnet+effort baixo, segundos) p/ rotina/triagem; "
-             "vazio ou 'deep' = Opus xhigh (default do server, o JUIZ).",
+             "vazio ou 'deep' = Opus xhigh (default do server, o JUIZ). "
+             "Se dado, VENCE o --purpose (override explicito do usuario).",
+    )
+    parser.add_argument(
+        "--purpose", default="",
+        help="Proposito da consulta -> roteia o tier automaticamente via "
+             "choose_gate_tier. fast: design_intent, reference_to_checklist, "
+             "layout_rule_draft, triage, prompt_prep, exploration. deep: "
+             "final_visual_verdict (PINADO), merge_decision, artifact_approval, "
+             "architectural_decision, gate_conflict. Vazio/desconhecido -> deep.",
     )
     args = parser.parse_args()
+
+    # Roteamento de tier: --tier explicito vence; senao deriva do --purpose;
+    # senao deep (default seguro). --tier conta como override explicito do usuario.
+    tier = choose_gate_tier(
+        args.purpose, explicit_tier=args.tier, user_override=bool(args.tier),
+    )
 
     context: dict = {}
     if args.context_file and args.context_file.exists():
@@ -415,10 +473,13 @@ def main() -> int:
         responses_dir=args.responses_dir,
         require_consult=args.require_consult,
         url=args.bridge_url,
-        tier=args.tier,
+        tier=tier,
     )
 
     # Report
+    print(f"[gate] tier: {tier}"
+          + (f" (purpose={args.purpose})" if args.purpose else "")
+          + (" [user --tier override]" if args.tier else ""))
     if result.question_path:
         print(f"[gate] question: {result.question_path}")
     if result.response_path:
