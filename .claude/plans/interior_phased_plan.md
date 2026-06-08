@@ -42,6 +42,20 @@
       no renderer (place_layout_skp.rb) que o V-Ray traduz. Sourcing de textura = território Fase 7
       (asset catalog) ou geração procedural. Pede direção/assets do Felipe.
     - Outros premium: câmera eye-level cinematográfica (resolver oclusão L-shape); render dos quartos.
+  - **SALA PREMIUM = VERDICT PASS (2026-06-07/08; commits 6684876 texturas, ececc16 janela, a02f174 eye+luz):**
+    - TEXTURAS procedurais (madeira grão + tecido trama, numpy/PIL, `tools/gen_textures.py`, aplicadas no
+      vray_export.rb via material.texture): **GPT MATERIALS=PASS** ("deixou de parecer plástico liso").
+    - LIGHTING janela estourada (FAIL recorrente) → ISO100/f7/1-160/sky0.3 → **GPT LIGHTING=PASS** (segurou).
+    - CÂMERA eye-level (z 150→62, DENTRO da sala, costas p/ parede sul; oclusão resolvida pela geometria
+      real via `tools/room_introspect.py`): **GPT CAMERA=PASS** ("vende o sofá como ambiente real").
+    - LUZ INTERNA quente (LightSphere fill procedural injetada no .vrscene, `tweak_vrscene.add_fill_light`):
+      **GPT VERDICT=PASS / LIGHTING=PASS** ("sofá virou herói, paredes com preenchimento, janela controlada").
+    - Recipe reproduzível: `tools/render_room.ps1` (export+tweak+vray, hash base) + `tools/tune_render.ps1`
+      (tune fill/exposição sem re-export). Deliverable: planta_74_vray_sala_eyefill3.png. GOTCHA: fill
+      <55in da câmera = orb escuro visível.
+    - **PRÓXIMO ROI** (backlog, não-bloqueante): (a) enquadramento final da sala (faixa cinza inferior +
+      parede lateral — PREMIUM_REALISM/CAMERA WARN); (b) **estender o pipeline premium aos QUARTOS**
+      (suite01: textura+eye-level+fill, usando o template provado); (c) integrar câmera/fill no VRayFinalProvider.
 - Backlog WARN (não bloqueia): bevel premium nas arestas (criado>portas>manta>braço) + afastar criado da porta.
 
 - **Fase 2 (Bedroom placement) — FECHADA GREEN (determinístico + GPT PASS).** GPT Modo B no
