@@ -48,7 +48,11 @@ def bedroom_designer_boxes(con, room_id):
         return None, out
     items = out["_winner_items"]
     boxes = bedroom_designer._items_to_boxes(items)
-    pt_m = 0.19 / 5.4
+    # escala via ENV (default = wall-thickness 0.0352); casa com spatial_model/geometry_sanity.
+    # sem isso, footprint dimensionado no PT_TO_M novo (0.0259) era reconvertido a 0.0352 ->
+    # movel 1.36x grande + centro fora do comodo (geometry_sanity FAIL). sofa_builder.PT_TO_IN
+    # ja e m->in (39.37), entao a anatomia das parts nao muda; so o pt->m/in do placement.
+    pt_m = float(os.environ.get("PT_TO_M") or (0.19 / 5.4))
     pt_in = pt_m * 39.3700787402
 
     def _wd_facing(it, default=(0.0, 1.0)):

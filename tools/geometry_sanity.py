@@ -15,6 +15,7 @@ Saída: STATUS PASS|WARN|FAIL + itens. Exit 0 (PASS/WARN) / 1 (FAIL).
 from __future__ import annotations
 
 import json
+import os
 import sys
 
 sys.path.insert(0, ".")
@@ -24,7 +25,7 @@ from shapely.geometry import box as shp_box  # noqa: E402
 from tools.furnish_apartment import BRAINS, CONSENSUS, classify_rooms  # noqa: E402
 from tools.spatial_model import build_spatial_model  # noqa: E402
 
-PT_TO_IN = (0.19 / 5.4) * 39.3700787402
+PT_TO_IN = float(os.environ.get("PT_TO_M") or (0.19 / 5.4)) * 39.3700787402  # env override -> gate valida na escala do PDF (0.0259), nao na default
 FLOOR_KINDS = ("rug", "tapete")                      # ficam no chão: ok perto de porta/sob móvel
 TALL_KINDS = ("corpo", "torre", "aereo", "dresser", "estante", "guarda_roupa", "rack_tv", "bancada")
 DOOR_CLEARANCE_IN = 22.0

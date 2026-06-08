@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 from pathlib import Path
 
 from shapely.geometry import LineString, Point, Polygon, box
@@ -23,7 +24,7 @@ from shapely.ops import unary_union
 
 from tools.build_plan_shell_skp import compute_room_floors, wall_footprint
 
-PT_TO_M = 0.19 / 5.4
+PT_TO_M = float(os.environ.get("PT_TO_M") or (0.19 / 5.4))  # env override p/ escala do PDF (default = wall-thickness 0.0352); propaga p/ M()/areas/bedroom_layout/bedroom_designer
 CIRC_M = 0.85          # faixa de circulacao em frente a porta (m)
 MIN_USEFUL_M = 1.2     # comprimento minimo de parede util (m)
 SOFA_MIN_DEPTH_M = 2.2  # distancia minima sofa->TV pra a parede valer

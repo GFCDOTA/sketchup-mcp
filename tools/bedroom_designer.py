@@ -583,7 +583,9 @@ def to_markdown(out, tag):
 
 def _items_to_boxes(items):
     """Converte os items do designer pro formato place_layout (boxes SU inches)."""
-    pt_to_in = (0.19 / 5.4) * 39.3700787402
+    # usa o PT_TO_M do modulo (env-driven, igual linha 75 etc.) — antes era hardcoded
+    # (0.19/5.4) e posicionava headboard/rug a 0.0352 -> fora do comodo no shell 0.0259.
+    pt_to_in = PT_TO_M * 39.3700787402
     boxes = []
     for it in items:
         b = it["box"]
