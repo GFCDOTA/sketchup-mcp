@@ -112,6 +112,14 @@ Geometria: `room_introspect.py <room_id>`. Cama centro (636,789), cabeceira lest
   *"madeira clara lê bem e combina MELHOR com sofá/mesa/tapete do que o cinza chapado"*; MATERIALS+LIGHTING+
   FURNITURE_DETAIL PASS. Apê agora com piso coeso (sala+quarto). WARN residual: textura do piso levemente forte
   perto da janela (backlog — não loopar; piso já é PASS-quality nos dois cômodos).
+- **SUITE 02 (r003) premium** (2026-06-08, planta_74_vray_suite02_crop.png): pipeline GENERALIZOU — num 3º cômodo
+  (o menor) o piso de madeira + fill por-cômodo deram **MATERIALS PASS + LIGHTING PASS de primeira** (câmera 3/4
+  do canto SE; eye=448,800,74 target=368,710,36 fov66 fill 375,775,90,150,40 sky0.16). VERDICT WARN só por
+  ENQUADRAMENTO (guarda-roupa/dresser à direita domina o foreground + faixa inferior). Congelado WARN-promotable.
+- **LIÇÃO SISTÊMICA**: a família de WARN que sobra em TODOS os cômodos (sala/suite01/suite02) = **enquadramento**
+  (faixa inferior + oclusão), NUNCA materiais/luz/piso (esses são PASS). Próximo salto de maior ROI no render NÃO é
+  grindar câmera per-room — é resolver o enquadramento de forma SISTÊMICA (auto-câmera das bounds do cômodo +
+  crop-rule), que conserta os 3 cômodos de uma vez. (Análogo ao piso: fix root-cause apartment-wide.)
 
 - Backlog WARN (não bloqueia): bevel premium nas arestas (criado>portas>manta>braço) + afastar criado da porta.
 
