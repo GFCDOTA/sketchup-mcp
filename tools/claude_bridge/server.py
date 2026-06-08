@@ -1455,8 +1455,26 @@ def marcos() -> dict:
     if not isinstance(data, list):
         data = []
     data = sorted(data, key=lambda m: m.get("nivel", 0), reverse=True)
+
+    # metricas AUTO-COMPUTADAS do snapshot de PRs (peso/era + velocidade). Nada
+    # hardcoded: o calculo roda ao vivo sobre pr_history.json (gerado por pr_history.py).
+    metrics = {"available": False,
+               "note": "pr_history.json ausente — rode tools/claude_bridge/pr_history.py"}
+    snap = REPO_ROOT / "tools" / "claude_bridge" / "pr_history.json"
+    try:
+        s = json.loads(snap.read_text("utf-8"))
+        from tools.claude_bridge.marcos_metrics import compute_metrics
+        metrics = compute_metrics(s.get("prs", []), data)
+        metrics["generated_at"] = s.get("generated_at")
+        metrics["source"] = f"{s.get('source', 'gh pr list')} -> pr_history.json (snapshot)"
+    except (OSError, ValueError) as e:
+        metrics = {"available": False, "note": f"pr_history.json indisponivel: {type(e).__name__}"}
+    except Exception as e:  # calculo nunca derruba o endpoint
+        metrics = {"available": False, "note": f"erro no calculo: {type(e).__name__}: {e}"}
+
     return {"exists": True, "marcos": data, "count": len(data),
-            "current_level": max((m.get("nivel", 0) for m in data), default=0)}
+            "current_level": max((m.get("nivel", 0) for m in data), default=0),
+            "metrics": metrics}
 
 
 def _json_route(fn):

@@ -302,6 +302,15 @@ details.audit .audit-body{padding:6px 16px 16px;}
 .mhd{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:5px;font-size:13.5px;color:var(--txt);}
 .mre{color:var(--dim);font-size:12.5px;line-height:1.55;}
 .mpr{margin-top:6px;font-size:11px;color:var(--dim);} .mpr code{color:var(--accent);}
+/* aba Marcos: painel de peso+velocidade auto-computado */
+.vel-panel{display:flex;gap:18px;flex-wrap:wrap;align-items:center;background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line2);border-radius:11px;padding:13px 16px;margin:2px 0 4px;}
+.vel-stats{display:flex;gap:18px;flex-wrap:wrap;}
+.vs{text-align:center;min-width:62px;} .vsn{font-size:18px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;} .vsl{font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.6px;}
+.vel-spark{flex:1;min-width:170px;}
+.mw{display:flex;align-items:center;gap:9px;margin-top:7px;}
+.mwbar{flex:0 0 120px;height:7px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden;}
+.mwbar span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#9b6bff);border-radius:4px;}
+.mwn{font-size:10.5px;color:var(--dim);font-variant-numeric:tabular-nums;}
 </style></head><body>
 <header>
 <h1><span class="logo">◉</span> SketchUp Creator <span class="sub">NOC</span></h1>
@@ -634,18 +643,41 @@ async function loadMarcos(){
     if(r.status===404){el.innerHTML='<div class="alarm warn" style="margin:0">⏳ aba Marcos visível após reiniciar o cockpit — endpoint <code>/api/marcos</code> é novo.</div>';return;}
     const d=await r.json();
     if(!d.exists||!(d.marcos||[]).length){el.innerHTML='<span class="muted">sem marcos. '+esc(d.note||'')+'</span>';return;}
-    var hd=$('marcos-head'); if(hd)hd.innerHTML='nível atual: <span class="bdg live">N'+esc(d.current_level)+'</span> · '+d.count+' marcos · fonte: <code>marcos.json</code>';
+    var hd=$('marcos-head'); if(hd)hd.innerHTML='nível atual: <span class="bdg live">N'+esc(d.current_level)+'</span> · '+d.count+' marcos · fonte: <code>marcos.json</code> + métricas auto-computadas';
+    var mt=d.metrics||{available:false}, W=mt.weights||{}, maxprs=mt.max_prs_era||1;
+    // --- painel de velocidade (auto-computado) ---
+    var panel;
+    if(mt.available){
+      var spark=sparkline((mt.weekly||[]).map(function(w){return w.prs;}),'#2bd4ff');
+      var peak=(mt.weekly||[]).reduce(function(a,b){return b.prs>(a.prs||0)?b:a;},{});
+      var rng=mt.date_range||[];
+      panel='<div class="vel-panel"><div class="vel-stats">'+
+          velStat(mt.total_prs,'PRs merged')+velStat(mt.avg_per_day,'PRs/dia')+velStat(mt.avg_per_week,'PRs/sem')+
+          velStat(mt.learning?Math.round(mt.learning.ratio*100)+'%':'—','aprendizado')+
+          velStat(mt.loc_total!=null?Math.round(mt.loc_total/1000)+'k':'—','LOC*')+
+        '</div><div class="vel-spark"><span class="muted" style="font-size:10px">PRs/semana ('+esc(rng[0]||'?')+'→'+esc(rng[1]||'?')+') · pico '+esc(peak.week||'')+'='+esc(peak.prs||'')+'</span><br>'+spark+'</div></div>'+
+        '<div class="muted" style="font-size:10.5px;margin:5px 0 12px">⚙ auto-computado de <code>pr_history.json</code> (snapshot '+esc((mt.generated_at||'?').slice(0,10))+') por <code>marcos_metrics.py</code> · aprendizado = '+(mt.learning?mt.learning.count:0)+' PRs FP/LL/fix/pivot ('+(mt.learning?mt.learning.pivots.length:0)+' pivots) · *LOC ⚠ = inflado por assets/binários (>'+(mt.loc_noisy_ratio||5000)+' LOC/PR) · datas best-effort (clock-skew), ordem por PR#</div>';
+    } else {
+      panel='<div class="alarm warn" style="margin:0 0 10px">métricas indisponíveis: '+esc(mt.note||'')+'</div>';
+    }
+    // --- timeline com peso por marco ---
     var cls={infra:'proposto',produto:'live',fidelidade:'blueprint'};
-    el.innerHTML='<div class="mtl">'+d.marcos.map(function(m){
-      var c=cls[m.tipo]||'draft';
+    var tl='<div class="mtl">'+d.marcos.map(function(m){
+      var c=cls[m.tipo]||'draft', w=W[String(m.nivel)], peso;
+      if(w){
+        var pct=Math.max(3,Math.round(100*w.prs/maxprs));
+        peso='<div class="mw"><div class="mwbar"><span style="width:'+pct+'%"></span></div><span class="mwn">'+w.prs+' PRs · '+Math.round(w.loc/1000)+'k LOC'+(w.loc_noisy?' <span class="bdg stale" title="LOC inflado por assets/binarios">⚠ assets</span>':'')+'</span></div>';
+      } else { peso='<div class="mw"><span class="mwn">— sem PR (infra local)</span></div>'; }
       return '<div class="mnode"><div class="mlvl">N'+esc(m.nivel)+'</div><div class="mbody">'+
         '<div class="mhd"><b>'+esc(m.titulo)+'</b> <span class="bdg '+c+'">'+esc(m.tipo||'')+'</span> <span class="muted" style="font-size:11px">'+esc(m.data||'')+'</span></div>'+
-        '<div class="mre">'+esc(m.resumo||'')+'</div>'+
+        '<div class="mre">'+esc(m.resumo||'')+'</div>'+peso+
         (m.prova?'<div class="mpr">prova: <code>'+esc(m.prova)+'</code></div>':'')+
       '</div></div>';
     }).join('')+'</div>';
+    el.innerHTML=panel+tl;
   }catch(e){el.innerHTML='<span class="muted">erro nos marcos: '+esc(e)+'</span>';}
 }
+function velStat(v,l){return '<div class="vs"><div class="vsn">'+esc(v==null?'—':v)+'</div><div class="vsl">'+l+'</div></div>';}
 function route(){
   let raw=(location.hash||'#home').slice(1);
   let h=HASHALIAS[raw]||raw; if(!TABMAP[h])h='home';

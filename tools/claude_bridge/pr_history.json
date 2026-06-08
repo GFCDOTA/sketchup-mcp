@@ -1,0 +1,1816 @@
+{
+"generated_at": "2026-06-08T03:18:00Z",
+"repo": "GFCDOTA/sketchup-mcp",
+"source": "gh pr list",
+"count": 226,
+"prs": [
+{
+"number": 227,
+"title": "chore(docs): reconcilia docs de plano stale (FP-030 â†’ 2026-06-06)",
+"mergedAt": "2026-06-08T02:34:07Z",
+"state": "MERGED",
+"additions": 142,
+"deletions": 171
+},
+{
+"number": 226,
+"title": "fix(cockpit): resolve QUESTIONS_DIR/RESPONSES_DIR em call-time â€” conserta 4 testes de consult",
+"mergedAt": "2026-06-08T02:34:07Z",
+"state": "MERGED",
+"additions": 19,
+"deletions": 9
+},
+{
+"number": 225,
+"title": "fix(deps): declara matplotlib + numpy â€” pytest coletava quebrado num install limpo",
+"mergedAt": "2026-06-08T02:34:07Z",
+"state": "MERGED",
+"additions": 2,
+"deletions": 0
+},
+{
+"number": 224,
+"title": "chore(noc): cura _NBA_SEED â€” remove 2 aÃ§Ãµes jÃ¡ concluÃ­das do backlog ROI",
+"mergedAt": null,
+"state": "CLOSED",
+"additions": 4,
+"deletions": 4
+},
+{
+"number": 223,
+"title": "chore(noc-T1): documentar o NOC dispatcher (NOC_DISPATCHER.md)",
+"mergedAt": "2026-06-08T02:34:07Z",
+"state": "MERGED",
+"additions": 92,
+"deletions": 0
+},
+{
+"number": 222,
+"title": "feat(noc): dispatcher + worktree-lock â€” o NOC passa a AGIR, nÃ£o sÃ³ vigiar",
+"mergedAt": "2026-06-08T02:34:07Z",
+"state": "MERGED",
+"additions": 630,
+"deletions": 5
+},
+{
+"number": 221,
+"title": "Develop",
+"mergedAt": "2026-06-06T02:09:57Z",
+"state": "MERGED",
+"additions": 50375,
+"deletions": 1335
+},
+{
+"number": 220,
+"title": "chore(planta_74): restaura ground-truth humano apagado pela hygiene #134",
+"mergedAt": "2026-06-06T00:24:40Z",
+"state": "MERGED",
+"additions": 0,
+"deletions": 0
+},
+{
+"number": 219,
+"title": "Feature/noc dashboard redesign",
+"mergedAt": "2026-06-06T00:00:14Z",
+"state": "MERGED",
+"additions": 933,
+"deletions": 87
+},
+{
+"number": 218,
+"title": "docs(interiors): visao do auto-mobiliado + snapshot do estado rough",
+"mergedAt": "2026-06-05T23:59:49Z",
+"state": "MERGED",
+"additions": 1436,
+"deletions": 0
+},
+{
+"number": 217,
+"title": "Feat/mobiliar bedroom layout",
+"mergedAt": "2026-06-05T23:50:52Z",
+"state": "MERGED",
+"additions": 1433,
+"deletions": 0
+},
+{
+"number": 216,
+"title": "Feature/noc dashboard redesign",
+"mergedAt": "2026-06-05T19:06:49Z",
+"state": "MERGED",
+"additions": 312,
+"deletions": 41
+},
+{
+"number": 215,
+"title": "Feat/mobiliar bedroom layout",
+"mergedAt": "2026-06-05T19:06:24Z",
+"state": "MERGED",
+"additions": 3090,
+"deletions": 0
+},
+{
+"number": 214,
+"title": "Feat/fp 030 pdf overlay verify scale override",
+"mergedAt": "2026-05-31T03:37:09Z",
+"state": "MERGED",
+"additions": 11889,
+"deletions": 17
+},
+{
+"number": 213,
+"title": "docs(spec): gate framework v2 â€” multi-oracle + red-team + file-fetch â€¦",
+"mergedAt": "2026-05-31T03:36:48Z",
+"state": "MERGED",
+"additions": 42,
+"deletions": 0
+},
+{
+"number": 212,
+"title": "Chore/claude bridge persist (#210)",
+"mergedAt": "2026-05-31T03:09:48Z",
+"state": "MERGED",
+"additions": 402,
+"deletions": 0
+},
+{
+"number": 211,
+"title": "Feat/fp 030 pdf overlay verify scale override",
+"mergedAt": "2026-05-31T03:09:07Z",
+"state": "MERGED",
+"additions": 33066,
+"deletions": 204
+},
+{
+"number": 210,
+"title": "Chore/claude bridge persist",
+"mergedAt": "2026-05-31T03:07:14Z",
+"state": "MERGED",
+"additions": 402,
+"deletions": 0
+},
+{
+"number": 209,
+"title": "feat(fp-030): negative-dogfood â€” oracle misses real missing-wall",
+"mergedAt": "2026-05-29T20:28:45Z",
+"state": "MERGED",
+"additions": 988,
+"deletions": 7
+},
+{
+"number": 208,
+"title": "feat(ll-024): auto-trigger GPT consult from SKP visual review",
+"mergedAt": "2026-05-29T19:09:37Z",
+"state": "MERGED",
+"additions": 4957,
+"deletions": 4
+},
+{
+"number": 207,
+"title": "feat(ll-024): GPT Auto-Consult Gate + re-apply verdict separation",
+"mergedAt": "2026-05-29T18:57:10Z",
+"state": "MERGED",
+"additions": 3221,
+"deletions": 10
+},
+{
+"number": 206,
+"title": "feat(fp-030): OllamaVisionProvider â€” first WORKING image-capable visual oracle",
+"mergedAt": "2026-05-29T17:34:17Z",
+"state": "MERGED",
+"additions": 2429,
+"deletions": 3
+},
+{
+"number": 205,
+"title": "feat(fp-030): pluggable oracle providers + image-aware bridge + request package fallback",
+"mergedAt": "2026-05-29T17:04:56Z",
+"state": "MERGED",
+"additions": 2537,
+"deletions": 86
+},
+{
+"number": 204,
+"title": "evidence(planta_74): --require-oracle controlled cycle â†’ BLOCKED with 2 technical reasons",
+"mergedAt": "2026-05-29T16:29:33Z",
+"state": "MERGED",
+"additions": 201,
+"deletions": 0
+},
+{
+"number": 203,
+"title": "chore(ai_bridge): update HANDOFF.md post-PR #202 maturity jump merge",
+"mergedAt": "2026-05-29T06:05:50Z",
+"state": "MERGED",
+"additions": 27,
+"deletions": 9
+},
+{
+"number": 202,
+"title": "feat(fp-030): maturity jump ~35% â†’ ~60% â€” composer + 10 checks + negative fixtures + oracle bridge mode",
+"mergedAt": "2026-05-29T04:51:27Z",
+"state": "MERGED",
+"additions": 2950,
+"deletions": 278
+},
+{
+"number": 201,
+"title": "chore(ai_bridge): update HANDOFF.md post-PR #200 fresh validation",
+"mergedAt": "2026-05-29T04:29:00Z",
+"state": "MERGED",
+"additions": 38,
+"deletions": 3
+},
+{
+"number": 200,
+"title": "evidence(planta_74): manual validation 2026-05-29 â€” Visual Oracle Gate dogfooding #2",
+"mergedAt": "2026-05-29T04:26:43Z",
+"state": "MERGED",
+"additions": 1500,
+"deletions": 0
+},
+{
+"number": 199,
+"title": "chore(ai_bridge): adopt .ai_bridge/HANDOFF.md after #197 + #198",
+"mergedAt": "2026-05-29T02:16:09Z",
+"state": "MERGED",
+"additions": 165,
+"deletions": 0
+},
+{
+"number": 198,
+"title": "feat(claude): FP-030 Visual Oracle Gate â€” MVP + dogfooding on planta_74",
+"mergedAt": "2026-05-29T02:04:06Z",
+"state": "MERGED",
+"additions": 3612,
+"deletions": 95
+},
+{
+"number": 197,
+"title": "refine(claude): Constitution #8 friction-tax review â€” apply Q1 refinements",
+"mergedAt": "2026-05-29T02:02:38Z",
+"state": "MERGED",
+"additions": 312,
+"deletions": 78
+},
+{
+"number": 196,
+"title": "feat(claude): SKP Proof-of-Progress Gate â€” \"No SKP, no progress\"",
+"mergedAt": "2026-05-28T06:07:35Z",
+"state": "MERGED",
+"additions": 915,
+"deletions": 70
+},
+{
+"number": 195,
+"title": "test: pin opening routing invariants",
+"mergedAt": "2026-05-28T05:51:15Z",
+"state": "MERGED",
+"additions": 249,
+"deletions": 0
+},
+{
+"number": 194,
+"title": "chore: organize Claude project knowledge under .claude/",
+"mergedAt": "2026-05-27T17:05:09Z",
+"state": "MERGED",
+"additions": 3185,
+"deletions": 166
+},
+{
+"number": 193,
+"title": "feat(fp-026): residual wall stub elimination â€” spec + diagnostic + tests",
+"mergedAt": "2026-05-27T06:46:39Z",
+"state": "MERGED",
+"additions": 1395,
+"deletions": 0
+},
+{
+"number": 192,
+"title": "fix(walls): junction-aware endpoint extension â€” trim LL-017 stubs",
+"mergedAt": "2026-05-27T06:38:17Z",
+"state": "MERGED",
+"additions": 256,
+"deletions": 44
+},
+{
+"number": 191,
+"title": "feat(artifacts): refresh planta_74 build + document room fidelity baseline",
+"mergedAt": "2026-05-27T05:20:15Z",
+"state": "MERGED",
+"additions": 55,
+"deletions": 3
+},
+{
+"number": 190,
+"title": "Develop -> main sync (post-#189 conventions docs)",
+"mergedAt": "2026-05-27T03:04:35Z",
+"state": "MERGED",
+"additions": 108,
+"deletions": 405
+},
+{
+"number": 189,
+"title": "docs: document runs/ vs artifacts/ convention + rewrite quadrado spec",
+"mergedAt": "2026-05-27T02:46:08Z",
+"state": "MERGED",
+"additions": 108,
+"deletions": 405
+},
+{
+"number": 188,
+"title": "Develop",
+"mergedAt": "2026-05-27T02:36:32Z",
+"state": "MERGED",
+"additions": 12199,
+"deletions": 84593
+},
+{
+"number": 187,
+"title": "chore: drop 7 zero-ref fixture orphans + requirements.txt + clean.pdf",
+"mergedAt": "2026-05-27T01:34:34Z",
+"state": "MERGED",
+"additions": 5,
+"deletions": 661
+},
+{
+"number": 186,
+"title": "docs(claude): bake rule â€” never use --mode headless from a dev terminal",
+"mergedAt": "2026-05-26T06:10:25Z",
+"state": "MERGED",
+"additions": 20,
+"deletions": 2
+},
+{
+"number": 185,
+"title": "feat(artifacts): canonical planta_74 SKP + renders + report",
+"mergedAt": "2026-05-26T06:05:03Z",
+"state": "MERGED",
+"additions": 1329,
+"deletions": 0
+},
+{
+"number": 184,
+"title": "chore: prune repo to minimal SKP-generation pipeline",
+"mergedAt": "2026-05-26T04:55:51Z",
+"state": "MERGED",
+"additions": 164,
+"deletions": 119370
+},
+{
+"number": 183,
+"title": "chore: prune 5 more dead archive entries + 1 orphan script",
+"mergedAt": "2026-05-26T03:52:43Z",
+"state": "MERGED",
+"additions": 34,
+"deletions": 1335
+},
+{
+"number": 182,
+"title": "chore: drop orphan tool + FP-012 PNGs + cache archive docs",
+"mergedAt": "2026-05-26T03:46:08Z",
+"state": "MERGED",
+"additions": 15,
+"deletions": 935
+},
+{
+"number": 181,
+"title": "chore: prune 10 unreferenced F1-cycle archive docs + 1 dogfood SVG",
+"mergedAt": "2026-05-26T03:36:48Z",
+"state": "MERGED",
+"additions": 46,
+"deletions": 1709
+},
+{
+"number": 180,
+"title": "chore: archive 4 stale .md docs + drop PROMPT-FELIPE root prompt",
+"mergedAt": "2026-05-26T02:45:04Z",
+"state": "MERGED",
+"additions": 15,
+"deletions": 151
+},
+{
+"number": 179,
+"title": "feat(dashboard): Roadmap + SRE Radar tabs (cherry-pick of 3-week-orphan commits)",
+"mergedAt": "2026-05-25T15:22:29Z",
+"state": "MERGED",
+"additions": 2422,
+"deletions": 9
+},
+{
+"number": 178,
+"title": "chore(ai_bridge): refresh CURRENT_STATE + HANDOFF post #176/#177 merge",
+"mergedAt": "2026-05-25T15:06:30Z",
+"state": "MERGED",
+"additions": 192,
+"deletions": 65
+},
+{
+"number": 177,
+"title": "chore(tools): track orphan SU diagnostic tools (build_room_ring + dump_skp_groups)",
+"mergedAt": "2026-05-25T15:02:51Z",
+"state": "MERGED",
+"additions": 728,
+"deletions": 0
+},
+{
+"number": 176,
+"title": "feat(fixture): quadrado uniform 4-windows â€” fidelity reference (JSON + tests, SKP deferred)",
+"mergedAt": "2026-05-25T14:53:48Z",
+"state": "MERGED",
+"additions": 242,
+"deletions": 0
+},
+{
+"number": 175,
+"title": "feat(repo): artifact policy â€” promote quadrado canonical .skp + codify human_review/agent_inputs split",
+"mergedAt": "2026-05-25T02:14:12Z",
+"state": "MERGED",
+"additions": 470,
+"deletions": 1
+},
+{
+"number": 174,
+"title": "Develop",
+"mergedAt": "2026-05-25T01:47:32Z",
+"state": "MERGED",
+"additions": 52908,
+"deletions": 6746
+},
+{
+"number": 173,
+"title": "chore(handoff): record post-#172 baseline â€” Slice 6b merged, 6c not started",
+"mergedAt": "2026-05-25T01:37:23Z",
+"state": "MERGED",
+"additions": 75,
+"deletions": 0
+},
+{
+"number": 172,
+"title": "feat(cockpit): Slice 6b â€” room_polygon_override producer rule + chip handler + text-area UX",
+"mergedAt": "2026-05-25T01:28:55Z",
+"state": "MERGED",
+"additions": 1139,
+"deletions": 8
+},
+{
+"number": 171,
+"title": "feat(tools): restore soft-barrier and room polygon diagnostics (Part A of #143)",
+"mergedAt": "2026-05-24T23:46:08Z",
+"state": "MERGED",
+"additions": 1582,
+"deletions": 0
+},
+{
+"number": 170,
+"title": "fix(rooms): repair Floor_r001 soft-barrier split (supersedes #144)",
+"mergedAt": "2026-05-24T23:31:33Z",
+"state": "MERGED",
+"additions": 1611,
+"deletions": 23
+},
+{
+"number": 169,
+"title": "docs(adr): restore ADR-005 spec-driven development",
+"mergedAt": "2026-05-24T21:45:52Z",
+"state": "MERGED",
+"additions": 261,
+"deletions": 0
+},
+{
+"number": 168,
+"title": "chore: workflow concurrency + PyYAML pin + README doc map (supersedes #149)",
+"mergedAt": "2026-05-24T20:16:06Z",
+"state": "MERGED",
+"additions": 29,
+"deletions": 3
+},
+{
+"number": 167,
+"title": "chore(handoff): record post-#165 baseline + W001=0 / I003=10 / stop policy",
+"mergedAt": "2026-05-24T21:36:37Z",
+"state": "MERGED",
+"additions": 85,
+"deletions": 0
+},
+{
+"number": 166,
+"title": "feat(sdd): spec YAML linter + contract scaffolding (supersedes #148)",
+"mergedAt": "2026-05-24T20:09:18Z",
+"state": "MERGED",
+"additions": 926,
+"deletions": 0
+},
+{
+"number": 165,
+"title": "chore(repo): W001 Wave 2 â€” root-script allowlist (10 â†’ 0; zero file moves)",
+"mergedAt": "2026-05-24T20:01:38Z",
+"state": "MERGED",
+"additions": 379,
+"deletions": 138
+},
+{
+"number": 164,
+"title": "fix(openings+walls): wall-hosted window semantics + canonical shell + quadrado (supersedes #156)",
+"mergedAt": "2026-05-24T16:57:33Z",
+"state": "MERGED",
+"additions": 2752,
+"deletions": 16
+},
+{
+"number": 163,
+"title": "docs: clean docs foundations without stale SDD stack commits",
+"mergedAt": "2026-05-24T16:58:26Z",
+"state": "MERGED",
+"additions": 372,
+"deletions": 0
+},
+{
+"number": 162,
+"title": "docs(repo): codify multi-agent worktree-isolation policy",
+"mergedAt": "2026-05-24T16:47:27Z",
+"state": "MERGED",
+"additions": 381,
+"deletions": 215
+},
+{
+"number": 161,
+"title": "docs(protocol): LL-019 multi-agent coordination protocol",
+"mergedAt": "2026-05-24T15:59:08Z",
+"state": "MERGED",
+"additions": 389,
+"deletions": 0
+},
+{
+"number": 160,
+"title": "chore(repo): W001 Wave 1 â€” root prototype cleanup (16 â†’ 10)",
+"mergedAt": "2026-05-24T16:31:12Z",
+"state": "MERGED",
+"additions": 187,
+"deletions": 354
+},
+{
+"number": 159,
+"title": "chore(repo-health): allow `specs/` as canonical top-level dir",
+"mergedAt": "2026-05-24T15:47:34Z",
+"state": "MERGED",
+"additions": 31,
+"deletions": 2
+},
+{
+"number": 158,
+"title": "chore(repo): repository health gate + canonical hygiene governance",
+"mergedAt": "2026-05-24T15:29:40Z",
+"state": "MERGED",
+"additions": 4636,
+"deletions": 81
+},
+{
+"number": 157,
+"title": "chore(repo): document terminal-first GitHub PR workflow",
+"mergedAt": "2026-05-24T15:10:41Z",
+"state": "MERGED",
+"additions": 305,
+"deletions": 0
+},
+{
+"number": 156,
+"title": "fix(openings+walls): wall-hosted window semantics + canonical shell + success reference",
+"mergedAt": null,
+"state": "CLOSED",
+"additions": 2710,
+"deletions": 16
+},
+{
+"number": 155,
+"title": "fix(build_plan_shell): respect SU runner mode protocol (FP-023)",
+"mergedAt": "2026-05-24T15:10:45Z",
+"state": "MERGED",
+"additions": 178,
+"deletions": 11
+},
+{
+"number": 154,
+"title": "fix(skp_from_consensus): respect SU runner mode protocol (FP-023)",
+"mergedAt": "2026-05-24T15:22:55Z",
+"state": "MERGED",
+"additions": 242,
+"deletions": 11
+},
+{
+"number": 153,
+"title": "feat(safety): SU runner mode protocol â€” clean cherry-pick to develop",
+"mergedAt": "2026-05-23T15:13:59Z",
+"state": "MERGED",
+"additions": 504,
+"deletions": 0
+},
+{
+"number": 152,
+"title": "docs(specs): quadrado canonical micro-fixture spec",
+"mergedAt": "2026-05-23T15:13:09Z",
+"state": "MERGED",
+"additions": 393,
+"deletions": 0
+},
+{
+"number": 151,
+"title": "docs(diagnostics): stack integrity + FP-ID audit (2026-05-23)",
+"mergedAt": "2026-05-23T15:00:45Z",
+"state": "MERGED",
+"additions": 666,
+"deletions": 0
+},
+{
+"number": 150,
+"title": "docs(adr): ADR-005 â€” Spec-Driven Development formalisation",
+"mergedAt": "2026-05-23T05:23:02Z",
+"state": "MERGED",
+"additions": 1672,
+"deletions": 64
+},
+{
+"number": 149,
+"title": "chore: workflow concurrency + PyYAML pin + README doc map",
+"mergedAt": null,
+"state": "CLOSED",
+"additions": 1700,
+"deletions": 67
+},
+{
+"number": 148,
+"title": "feat(sdd): spec YAML linter + contract scaffolding",
+"mergedAt": null,
+"state": "CLOSED",
+"additions": 747,
+"deletions": 0
+},
+{
+"number": 147,
+"title": "docs: CONTRIBUTING.md + pipeline_overview.md (mermaid)",
+"mergedAt": null,
+"state": "CLOSED",
+"additions": 3164,
+"deletions": 0
+},
+{
+"number": 146,
+"title": "feat(sdd): Phase 2 â€” CI gate + coverage report + baseline failures audit",
+"mergedAt": null,
+"state": "CLOSED",
+"additions": 737,
+"deletions": 0
+},
+{
+"number": 145,
+"title": "feat(sdd): spec-driven development framework + harness (Phase 1)",
+"mergedAt": "2026-05-24T15:48:31Z",
+"state": "MERGED",
+"additions": 2059,
+"deletions": 0
+},
+{
+"number": 144,
+"title": "fix(rooms): Floor_r001 split via near-miss SB extension + Voronoi (FP-016)",
+"mergedAt": null,
+"state": "CLOSED",
+"additions": 3288,
+"deletions": 111
+},
+{
+"number": 143,
+"title": "feat(plan-shell): --layer-mode + room/SB diagnostic harness (Frente 2)",
+"mergedAt": null,
+"state": "CLOSED",
+"additions": 1683,
+"deletions": 88
+},
+{
+"number": 142,
+"title": "fix(plan-shell): door leaf hinge_world for vertical walls (FP-015)",
+"mergedAt": "2026-05-21T02:35:23Z",
+"state": "MERGED",
+"additions": 170,
+"deletions": 6
+},
+{
+"number": 141,
+"title": "feat(plan-shell): Phase 2 visual parity â€” doors / windows / glazed / passage",
+"mergedAt": "2026-05-21T02:12:54Z",
+"state": "MERGED",
+"additions": 783,
+"deletions": 44
+},
+{
+"number": 140,
+"title": "chore(plan-shell): geometry invariants hardening + provenance audit",
+"mergedAt": "2026-05-21T00:24:44Z",
+"state": "MERGED",
+"additions": 939,
+"deletions": 34
+},
+{
+"number": 139,
+"title": "test(plan-shell): mutation suite + mutant inputs + FP regression catalog (ADR-004)",
+"mergedAt": "2026-05-20T23:59:56Z",
+"state": "MERGED",
+"additions": 1051,
+"deletions": 0
+},
+{
+"number": 138,
+"title": "fix(plan-shell): soft_barriers as per-segment swept slabs + invariant suite",
+"mergedAt": "2026-05-20T23:46:09Z",
+"state": "MERGED",
+"additions": 689,
+"deletions": 39
+},
+{
+"number": 137,
+"title": "feat(plan-shell): wire as smoke gate F alternative + content-hash cache (Phase 3)",
+"mergedAt": "2026-05-20T23:15:56Z",
+"state": "MERGED",
+"additions": 306,
+"deletions": 37
+},
+{
+"number": 136,
+"title": "feat(plan-shell): experimental parallel exporter via shapely union",
+"mergedAt": "2026-05-20T23:01:05Z",
+"state": "MERGED",
+"additions": 1590,
+"deletions": 0
+},
+{
+"number": 135,
+"title": "chore: final planta_74 pass â€” 6 orphan version-iterations",
+"mergedAt": "2026-05-20T22:19:43Z",
+"state": "MERGED",
+"additions": 0,
+"deletions": 104
+},
+{
+"number": 134,
+"title": "chore: deep repo hygiene (-70 files, -25 MB clutter)",
+"mergedAt": "2026-05-20T22:14:44Z",
+"state": "MERGED",
+"additions": 25,
+"deletions": 6622
+},
+{
+"number": 133,
+"title": "chore: delete 36 obsolete runs/ subdirs (0 active refs)",
+"mergedAt": "2026-05-20T21:51:44Z",
+"state": "MERGED",
+"additions": 0,
+"deletions": 1843
+},
+{
+"number": 132,
+"title": "fix: disarm SketchUp autoruns on every launch (FP-014)",
+"mergedAt": "2026-05-20T19:40:14Z",
+"state": "MERGED",
+"additions": 327,
+"deletions": 48
+},
+{
+"number": 131,
+"title": "Paint guide: 3 pending soft_barrier zones for planta_74",
+"mergedAt": "2026-05-16T03:47:37Z",
+"state": "MERGED",
+"additions": 219,
+"deletions": 0
+},
+{
+"number": 130,
+"title": "Reclassify h_o005 host wall â€” drops planta_74 from FAIL to WARN",
+"mergedAt": "2026-05-16T03:42:21Z",
+"state": "MERGED",
+"additions": 253,
+"deletions": 67
+},
+{
+"number": 129,
+"title": "Visual fidelity gate hook + integration tests (PR B4) â€” closes the protocol",
+"mergedAt": "2026-05-14T03:29:59Z",
+"state": "MERGED",
+"additions": 663,
+"deletions": 37
+},
+{
+"number": 128,
+"title": "Visual fidelity gate â€” 8 algorithmic checks (PR B3)",
+"mergedAt": "2026-05-14T03:22:06Z",
+"state": "MERGED",
+"additions": 1405,
+"deletions": 51
+},
+{
+"number": 127,
+"title": "Visual fidelity gate reader (PR B2) â€” scaffolding + 8-check skeleton",
+"mergedAt": "2026-05-14T03:09:26Z",
+"state": "MERGED",
+"additions": 957,
+"deletions": 0
+},
+{
+"number": 126,
+"title": "Visual evidence producers (PR B1) â€” 7 artifacts for the fidelity gate",
+"mergedAt": "2026-05-14T03:03:32Z",
+"state": "MERGED",
+"additions": 918,
+"deletions": 0
+},
+{
+"number": 125,
+"title": "Block false visual PASS without required fidelity evidence",
+"mergedAt": "2026-05-14T02:52:10Z",
+"state": "MERGED",
+"additions": 995,
+"deletions": 40
+},
+{
+"number": 124,
+"title": "feat(overrides): Slice 6a â€” room_polygon_override schema + apply layer",
+"mergedAt": "2026-05-14T00:08:20Z",
+"state": "MERGED",
+"additions": 1545,
+"deletions": 3
+},
+{
+"number": 123,
+"title": "chore(ai_bridge): refresh handoff after PR #121 + issue #122",
+"mergedAt": "2026-05-13T23:53:23Z",
+"state": "MERGED",
+"additions": 282,
+"deletions": 127
+},
+{
+"number": 121,
+"title": "feat(human-walls): protocol + tools to fix global SKP visual fidelity",
+"mergedAt": "2026-05-13T23:48:58Z",
+"state": "MERGED",
+"additions": 11423,
+"deletions": 0
+},
+{
+"number": 120,
+"title": "fix(human-openings): host classifier (cut/gap/unhosted) + shift gate, no silent snap",
+"mergedAt": "2026-05-11T16:46:22Z",
+"state": "MERGED",
+"additions": 1681,
+"deletions": 41
+},
+{
+"number": 119,
+"title": "feat(human-openings): snap-to-wall + first SKP export from real annotation",
+"mergedAt": null,
+"state": "CLOSED",
+"additions": 285,
+"deletions": 3
+},
+{
+"number": 118,
+"title": "feat(human-openings): real planta_74 annotation run + auto-calibrate",
+"mergedAt": "2026-05-11T15:35:23Z",
+"state": "MERGED",
+"additions": 644,
+"deletions": 25
+},
+{
+"number": 117,
+"title": "docs(claude-md): record human-openings ground-truth protocol in Â§10",
+"mergedAt": "2026-05-11T15:34:34Z",
+"state": "MERGED",
+"additions": 44,
+"deletions": 0
+},
+{
+"number": 116,
+"title": "feat(human-openings): mandatory ground-truth pipeline (FP-014 P0 ship)",
+"mergedAt": "2026-05-11T15:21:10Z",
+"state": "MERGED",
+"additions": 1991,
+"deletions": 0
+},
+{
+"number": 115,
+"title": "docs(diagnostic): wall_candidates_audit â€” refute threshold hypothesis (FP-014 P0)",
+"mergedAt": "2026-05-11T14:52:37Z",
+"state": "MERGED",
+"additions": 1288,
+"deletions": 0
+},
+{
+"number": 114,
+"title": "feat(render_preflight): visual preflight gate before SKP export",
+"mergedAt": "2026-05-11T04:53:37Z",
+"state": "MERGED",
+"additions": 812,
+"deletions": 0
+},
+{
+"number": 113,
+"title": "feat(rooms_from_seeds): widen polygonize bridge default (50â†’150pt)",
+"mergedAt": "2026-05-11T04:52:41Z",
+"state": "MERGED",
+"additions": 24,
+"deletions": 2
+},
+{
+"number": 112,
+"title": "feat(rooms_from_seeds): add polygonize method (FP-014 P0, opt-in)",
+"mergedAt": "2026-05-11T04:37:58Z",
+"state": "MERGED",
+"additions": 448,
+"deletions": 13
+},
+{
+"number": 111,
+"title": "fix(consume_consensus): support human_annotation carve + read hinge_side",
+"mergedAt": "2026-05-11T01:59:48Z",
+"state": "MERGED",
+"additions": 22,
+"deletions": 2
+},
+{
+"number": 110,
+"title": "chore(repo): branch hygiene audit 2026-05-10",
+"mergedAt": "2026-05-10T16:58:45Z",
+"state": "MERGED",
+"additions": 160,
+"deletions": 0
+},
+{
+"number": 109,
+"title": "docs(ai_bridge): record Cycle 3 hygiene audit + hygiene loop paused",
+"mergedAt": "2026-05-10T16:49:50Z",
+"state": "MERGED",
+"additions": 32,
+"deletions": 0
+},
+{
+"number": 108,
+"title": "chore(repo): safe hygiene cleanup pass",
+"mergedAt": "2026-05-10T16:46:38Z",
+"state": "MERGED",
+"additions": 237,
+"deletions": 0
+},
+{
+"number": 107,
+"title": "feat(mission-control): cockpit aba Slice 1 â€” events log + project_status reader",
+"mergedAt": "2026-05-09T14:34:15Z",
+"state": "MERGED",
+"additions": 1447,
+"deletions": 2
+},
+{
+"number": 106,
+"title": "docs(fp014): MY_OPENINGS v2 (post-GPT) + extract_openings_vector spike",
+"mergedAt": "2026-05-09T14:28:10Z",
+"state": "MERGED",
+"additions": 199,
+"deletions": 9
+},
+{
+"number": 105,
+"title": "feat(fp014-gamma): structural_checks gate F0 â€” bloqueia SKP defeituoso",
+"mergedAt": "2026-05-09T05:40:26Z",
+"state": "MERGED",
+"additions": 1437,
+"deletions": 5
+},
+{
+"number": 104,
+"title": "docs(fp014): P0 spike findings â€” polygonize approach not viable, redirect to gate F0",
+"mergedAt": "2026-05-09T05:23:24Z",
+"state": "MERGED",
+"additions": 205,
+"deletions": 0
+},
+{
+"number": 103,
+"title": "docs(fp014): SKP visual failure â€” diagnostic + GPT-4o validation + repro script",
+"mergedAt": "2026-05-09T05:09:24Z",
+"state": "MERGED",
+"additions": 1832,
+"deletions": 0
+},
+{
+"number": 102,
+"title": "Rebase",
+"mergedAt": "2026-05-09T04:53:48Z",
+"state": "MERGED",
+"additions": 581,
+"deletions": 3
+},
+{
+"number": 101,
+"title": "docs(adr): ADR-002 â€” room_polygon_override (dogfood UX gap #2 contract)",
+"mergedAt": "2026-05-09T02:21:33Z",
+"state": "MERGED",
+"additions": 985,
+"deletions": 27
+},
+{
+"number": 100,
+"title": "chore(ai_bridge): post autonomous-loop wave handoff (10 PRs since #89; cockpit override-aware E2E live + dogfooded)",
+"mergedAt": "2026-05-09T01:46:42Z",
+"state": "MERGED",
+"additions": 302,
+"deletions": 100
+},
+{
+"number": 99,
+"title": "feat: Slice 5d â€” sub_scores_delta surfaced in pre_skp_review_v1 + cockpit (closes dogfood UX gap #3)",
+"mergedAt": "2026-05-09T01:38:54Z",
+"state": "MERGED",
+"additions": 316,
+"deletions": 6
+},
+{
+"number": 98,
+"title": "fix(smoke): sys.path bootstrap + dogfood report (override-aware flow end-to-end on real data)",
+"mergedAt": "2026-05-09T01:30:36Z",
+"state": "MERGED",
+"additions": 190,
+"deletions": 0
+},
+{
+"number": 97,
+"title": "feat(cockpit): Slice 4-extra â€” surface amended-fidelity (pre/post/delta) in Pre-SKP Review pane",
+"mergedAt": "2026-05-09T01:19:03Z",
+"state": "MERGED",
+"additions": 182,
+"deletions": 2
+},
+{
+"number": 96,
+"title": "feat(smoke): Slice 5c â€” gate F0 prefers fidelity_report_amended.json (override-aware verdict end-to-end)",
+"mergedAt": "2026-05-09T01:09:38Z",
+"state": "MERGED",
+"additions": 345,
+"deletions": 13
+},
+{
+"number": 95,
+"title": "feat(smoke): Slice 5b â€” gate E3 computes amended fidelity (apply_overrides=True)",
+"mergedAt": "2026-05-09T01:01:27Z",
+"state": "MERGED",
+"additions": 591,
+"deletions": 6
+},
+{
+"number": 94,
+"title": "feat(smoke): Slice 5a â€” gate E2 amends observed via apply_overrides when review_overrides.json exists",
+"mergedAt": "2026-05-09T00:51:41Z",
+"state": "MERGED",
+"additions": 463,
+"deletions": 4
+},
+{
+"number": 93,
+"title": "feat(smoke): Cycle 13b â€” gate F0pa emits proposed_actions.json (opt-in)",
+"mergedAt": "2026-05-09T00:42:07Z",
+"state": "MERGED",
+"additions": 380,
+"deletions": 4
+},
+{
+"number": 92,
+"title": "feat(cockpit): Slice 4 â€” Review tab consumes proposed_actions.json (chips + apply)",
+"mergedAt": "2026-05-09T00:33:32Z",
+"state": "MERGED",
+"additions": 911,
+"deletions": 5
+},
+{
+"number": 91,
+"title": "feat(tools): Cycle 13 â€” propose_skp_actions producer (proposed_actions_v1 per ADR-001 Â§2.6)",
+"mergedAt": "2026-05-09T00:22:17Z",
+"state": "MERGED",
+"additions": 968,
+"deletions": 0
+},
+{
+"number": 90,
+"title": "feat(smoke): gate G2 â€” port inspector v2 consumer from orphan branch (Stage 1.6 Cycle 5)",
+"mergedAt": "2026-05-09T00:12:13Z",
+"state": "MERGED",
+"additions": 329,
+"deletions": 4
+},
+{
+"number": 89,
+"title": "chore(ai_bridge): post-mutation-wave handoff â€” 8 PRs since ADR-001, mutation surface live end-to-end",
+"mergedAt": "2026-05-09T00:03:31Z",
+"state": "MERGED",
+"additions": 284,
+"deletions": 142
+},
+{
+"number": 88,
+"title": "feat(synth): multi-PDF synth corpus â€” 3 new topologies (T, +, long-hall) round-tripped",
+"mergedAt": "2026-05-08T23:56:25Z",
+"state": "MERGED",
+"additions": 968,
+"deletions": 3
+},
+{
+"number": 87,
+"title": "test(cockpit): cross-PR mutation integration tests â€” Slice 2 â†’ Slice 3 round-trip",
+"mergedAt": "2026-05-08T23:40:28Z",
+"state": "MERGED",
+"additions": 958,
+"deletions": 0
+},
+{
+"number": 86,
+"title": "docs(diagnostic): Stage 1.6 / orphan inspector branch investigation + follow-up brief",
+"mergedAt": "2026-05-08T23:36:47Z",
+"state": "MERGED",
+"additions": 753,
+"deletions": 0
+},
+{
+"number": 85,
+"title": "feat(cockpit): Cycle 12h â€” SVG source: manual annotation + inline override removal (closes Slice 2 deferrals)",
+"mergedAt": "2026-05-08T23:35:57Z",
+"state": "MERGED",
+"additions": 674,
+"deletions": 1
+},
+{
+"number": 84,
+"title": "feat(cockpit): Slice 3 â€” apply_overrides.py + gate_f0 + fidelity apply-mode + history_view F0 read (ADR-001 Â§4)",
+"mergedAt": "2026-05-08T23:15:19Z",
+"state": "MERGED",
+"additions": 2609,
+"deletions": 22
+},
+{
+"number": 83,
+"title": "feat(cockpit): Slice 2 â€” cockpit/overrides.py + Review tab (ADR-001 Â§3)",
+"mergedAt": "2026-05-08T23:13:00Z",
+"state": "MERGED",
+"additions": 1864,
+"deletions": 4
+},
+{
+"number": 82,
+"title": "feat(cockpit): Cycle 12g â€” on-demand thumbnail rendering for runs without preview files",
+"mergedAt": "2026-05-08T23:20:02Z",
+"state": "MERGED",
+"additions": 919,
+"deletions": 0
+},
+{
+"number": 81,
+"title": "docs(adr): ADR-001 â€” Validation Cockpit Mutation Surface",
+"mergedAt": "2026-05-08T22:33:41Z",
+"state": "MERGED",
+"additions": 779,
+"deletions": 57
+},
+{
+"number": 80,
+"title": "refactor(renderers): migrate render_*.py to renderers/ package + deprecation wrappers (architecture step 5)",
+"mergedAt": "2026-05-08T20:40:48Z",
+"state": "MERGED",
+"additions": 813,
+"deletions": 403
+},
+{
+"number": 79,
+"title": "feat(cockpit): Cycle 12f â€” History/Fidelity view + Pre-SKP Review status",
+"mergedAt": "2026-05-08T20:38:28Z",
+"state": "MERGED",
+"additions": 1704,
+"deletions": 3
+},
+{
+"number": 78,
+"title": "refactor(scripts): proto_*.py + render_sidebyside.py to argparse + un-block ruff",
+"mergedAt": "2026-05-08T20:34:46Z",
+"state": "MERGED",
+"additions": 510,
+"deletions": 126
+},
+{
+"number": 77,
+"title": "chore(ai_bridge): post-Cycle-12e â€” cockpit read-only slice feature-complete",
+"mergedAt": "2026-05-08T19:59:09Z",
+"state": "MERGED",
+"additions": 145,
+"deletions": 83
+},
+{
+"number": 76,
+"title": "feat(cockpit): Cycle 12e â€” diff view (run A vs run B with dashed-magenta overlay + Diff tab)",
+"mergedAt": "2026-05-08T19:55:37Z",
+"state": "MERGED",
+"additions": 309,
+"deletions": 10
+},
+{
+"number": 75,
+"title": "feat(cockpit): Cycle 12c â€” hover highlight via <title> tooltips + CSS",
+"mergedAt": "2026-05-08T19:49:41Z",
+"state": "MERGED",
+"additions": 159,
+"deletions": 15
+},
+{
+"number": 74,
+"title": "chore(ai_bridge): post-Cycle-12d session wrap â€” 6 PRs merged, queue refreshed",
+"mergedAt": "2026-05-08T19:43:59Z",
+"state": "MERGED",
+"additions": 229,
+"deletions": 88
+},
+{
+"number": 73,
+"title": "chore(hygiene): post-Cycle-12d audit ledger â€” no archives this cycle",
+"mergedAt": "2026-05-08T19:40:03Z",
+"state": "MERGED",
+"additions": 130,
+"deletions": 0
+},
+{
+"number": 72,
+"title": "chore(ai_bridge): post-Cycle-12b refresh + Cycle 12d promoted to P0",
+"mergedAt": "2026-05-08T19:32:00Z",
+"state": "MERGED",
+"additions": 134,
+"deletions": 96
+},
+{
+"number": 71,
+"title": "feat(cockpit): Cycle 12d â€” expected_model overlay (room outline status colors + Expected inspector tab)",
+"mergedAt": "2026-05-08T19:30:58Z",
+"state": "MERGED",
+"additions": 448,
+"deletions": 104
+},
+{
+"number": 70,
+"title": "feat(cockpit): Cycle 12b â€” PDF underlay (rasterised page behind the SVG overlay)",
+"mergedAt": "2026-05-08T19:23:47Z",
+"state": "MERGED",
+"additions": 462,
+"deletions": 42
+},
+{
+"number": 69,
+"title": "chore(ai_bridge): post-Cycle-12-merge handoff refresh + LL-012 (gh CLI tooling)",
+"mergedAt": "2026-05-08T19:10:02Z",
+"state": "MERGED",
+"additions": 247,
+"deletions": 152
+},
+{
+"number": 68,
+"title": "feat(cockpit): Cycle 12 â€” Validation Cockpit MVP (read-only Streamlit UI)",
+"mergedAt": "2026-05-08T19:03:44Z",
+"state": "MERGED",
+"additions": 1223,
+"deletions": 41
+},
+{
+"number": 67,
+"title": "feat(synth): Cycle 11d â€” widen synth wall-gap so opening + adjacency round-trip",
+"mergedAt": "2026-05-08T18:14:27Z",
+"state": "MERGED",
+"additions": 34,
+"deletions": 15
+},
+{
+"number": 66,
+"title": "feat(synth): Cycle 11c â€” synthetic vector PDF generator + real-pipeline round-trip test",
+"mergedAt": "2026-05-08T18:04:45Z",
+"state": "MERGED",
+"additions": 468,
+"deletions": 0
+},
+{
+"number": 65,
+"title": "docs(diagnostic): Cycle 11b â€” vector PDF inventory + multi-PDF foundation status",
+"mergedAt": "2026-05-08T17:58:23Z",
+"state": "MERGED",
+"additions": 112,
+"deletions": 0
+},
+{
+"number": 64,
+"title": "docs(diagnostic): adjacency_f1=0.67 plateau analysis (Cycle 6 alt) + FP-013",
+"mergedAt": "2026-05-08T16:20:03Z",
+"state": "MERGED",
+"additions": 320,
+"deletions": 1
+},
+{
+"number": 63,
+"title": "feat(rooms-from-seeds): Cycle 8b â€” promote concave-hull default + clear FP-012",
+"mergedAt": "2026-05-08T16:00:33Z",
+"state": "MERGED",
+"additions": 161,
+"deletions": 71
+},
+{
+"number": 62,
+"title": "docs(ops): post-wave snapshot + Cycle 8b LLM consult log",
+"mergedAt": "2026-05-08T14:21:43Z",
+"state": "MERGED",
+"additions": 257,
+"deletions": 0
+},
+{
+"number": 61,
+"title": "docs(ai_bridge): refresh state post-wave + autonomy protocol install",
+"mergedAt": "2026-05-08T14:12:15Z",
+"state": "MERGED",
+"additions": 201,
+"deletions": 288
+},
+{
+"number": 60,
+"title": "docs(ai-bridge): persistent agent communication via .ai_bridge/",
+"mergedAt": "2026-05-08T13:47:21Z",
+"state": "MERGED",
+"additions": 2110,
+"deletions": 0
+},
+{
+"number": 59,
+"title": "feat(ground-truth): Cycle 7 â€” expand planta_74_micro to 4 rooms",
+"mergedAt": "2026-05-08T13:45:50Z",
+"state": "MERGED",
+"additions": 56,
+"deletions": 3
+},
+{
+"number": 58,
+"title": "feat(ground-truth): v1 schema + planta_74 expected_model + fidelity engine + round-trip (Cycle 12)",
+"mergedAt": "2026-05-08T14:03:56Z",
+"state": "MERGED",
+"additions": 2108,
+"deletions": 6
+},
+{
+"number": 57,
+"title": "feat(rooms-from-seeds): FP-012 spike â€” opt-in concave-hull envelope clip (Cycle 8)",
+"mergedAt": "2026-05-08T13:43:32Z",
+"state": "MERGED",
+"additions": 355,
+"deletions": 14
+},
+{
+"number": 56,
+"title": "ci(quality-gates): Plan/Coherence/Micro/Fidelity strict CI (Cycle 10+13)",
+"mergedAt": "2026-05-08T13:41:58Z",
+"state": "MERGED",
+"additions": 112,
+"deletions": 0
+},
+{
+"number": 55,
+"title": "ci(rubocop): Ruby lint workflow for tools/*.rb (Cycle 9)",
+"mergedAt": "2026-05-08T14:01:06Z",
+"state": "MERGED",
+"additions": 159,
+"deletions": 13
+},
+{
+"number": 54,
+"title": "docs(readme,overview): Stage 1/1.5/1.6 tools + Fidelity Engine v1",
+"mergedAt": "2026-05-08T13:36:57Z",
+"state": "MERGED",
+"additions": 73,
+"deletions": 3
+},
+{
+"number": 53,
+"title": "docs(diagnostic): SUITE 01 polygon leakage on planta_74 (FP-012)",
+"mergedAt": "2026-05-08T13:36:52Z",
+"state": "MERGED",
+"additions": 210,
+"deletions": 0
+},
+{
+"number": 52,
+"title": "docs(claude): Â§17 Non-Stop Autonomy Rule â€” DONE IS NOT STOP",
+"mergedAt": "2026-05-08T13:36:31Z",
+"state": "MERGED",
+"additions": 83,
+"deletions": 0
+},
+{
+"number": 51,
+"title": "chore: hygiene cycle 2026-05-06 â€” drop local rar + merged branches",
+"mergedAt": "2026-05-07T03:15:29Z",
+"state": "MERGED",
+"additions": 71,
+"deletions": 0
+},
+{
+"number": 50,
+"title": "docs: strengthen autonomous agent operating rules",
+"mergedAt": "2026-05-07T03:13:52Z",
+"state": "MERGED",
+"additions": 150,
+"deletions": 1
+},
+{
+"number": 49,
+"title": "feat(inspector): Stage 1.6 v2 schema â€” sha256 + bounds_check + structâ€¦",
+"mergedAt": "2026-05-07T03:12:05Z",
+"state": "MERGED",
+"additions": 662,
+"deletions": 21
+},
+{
+"number": 48,
+"title": "Feature/micro truth gate planta 74",
+"mergedAt": "2026-05-07T01:06:05Z",
+"state": "MERGED",
+"additions": 2595,
+"deletions": 2
+},
+{
+"number": 47,
+"title": "Feature/plan truth gate planta 74",
+"mergedAt": "2026-05-07T01:04:21Z",
+"state": "MERGED",
+"additions": 1794,
+"deletions": 2
+},
+{
+"number": 46,
+"title": "feat(coherence): Stage 1 uncertainty-aware audit (assumptions + report)",
+"mergedAt": "2026-05-07T01:02:57Z",
+"state": "MERGED",
+"additions": 1409,
+"deletions": 2
+},
+{
+"number": 45,
+"title": "Feature/openings room context classifier",
+"mergedAt": "2026-05-07T00:49:01Z",
+"state": "MERGED",
+"additions": 1281,
+"deletions": 9
+},
+{
+"number": 44,
+"title": "feat(exporter): render door leaves + window panels for openings",
+"mergedAt": "2026-05-07T00:47:15Z",
+"state": "MERGED",
+"additions": 372,
+"deletions": 3
+},
+{
+"number": 43,
+"title": "Promote develop to main",
+"mergedAt": "2026-05-05T18:24:28Z",
+"state": "MERGED",
+"additions": 364,
+"deletions": 6
+},
+{
+"number": 42,
+"title": "feat(exporter): carve door_arc and svg_segments openings into walls",
+"mergedAt": "2026-05-05T18:21:38Z",
+"state": "MERGED",
+"additions": 364,
+"deletions": 6
+},
+{
+"number": 41,
+"title": "Promote develop to main",
+"mergedAt": "2026-05-05T15:04:31Z",
+"state": "MERGED",
+"additions": 230,
+"deletions": 0
+},
+{
+"number": 40,
+"title": "feat(exporter): emit wall_gap passage markers in dedicated SU layer",
+"mergedAt": "2026-05-05T15:00:58Z",
+"state": "MERGED",
+"additions": 230,
+"deletions": 0
+},
+{
+"number": 39,
+"title": "Promote develop to main",
+"mergedAt": "2026-05-05T14:44:33Z",
+"state": "MERGED",
+"additions": 665,
+"deletions": 0
+},
+{
+"number": 38,
+"title": "feat(openings): wall-gap detector for open_passage candidates",
+"mergedAt": "2026-05-05T14:41:44Z",
+"state": "MERGED",
+"additions": 665,
+"deletions": 0
+},
+{
+"number": 37,
+"title": "Promote develop to main",
+"mergedAt": "2026-05-05T13:56:27Z",
+"state": "MERGED",
+"additions": 368,
+"deletions": 0
+},
+{
+"number": 36,
+"title": "docs(ops): post-merge snapshot + E2E validation 2026-05-05",
+"mergedAt": "2026-05-05T13:53:55Z",
+"state": "MERGED",
+"additions": 368,
+"deletions": 0
+},
+{
+"number": 35,
+"title": "Promote develop to main",
+"mergedAt": "2026-05-05T13:39:07Z",
+"state": "MERGED",
+"additions": 3251,
+"deletions": 4
+},
+{
+"number": 34,
+"title": "Test/v1 v5 integration pipeline",
+"mergedAt": "2026-05-05T03:34:19Z",
+"state": "MERGED",
+"additions": 284,
+"deletions": 0
+},
+{
+"number": 33,
+"title": "ci(skp): add SKP Fidelity Gate paths-filtered workflow",
+"mergedAt": "2026-05-05T03:32:49Z",
+"state": "MERGED",
+"additions": 159,
+"deletions": 0
+},
+{
+"number": 32,
+"title": "feat(openings): V5 schema-additive kind_v5 classifier (opt-in)",
+"mergedAt": "2026-05-05T03:29:50Z",
+"state": "MERGED",
+"additions": 642,
+"deletions": 0
+},
+{
+"number": 31,
+"title": "vector: clarify rasterized PDF incompatibility",
+"mergedAt": "2026-05-05T03:28:05Z",
+"state": "MERGED",
+"additions": 531,
+"deletions": 1
+},
+{
+"number": 30,
+"title": "Skp/fix v1 living notch",
+"mergedAt": "2026-05-05T03:26:34Z",
+"state": "MERGED",
+"additions": 624,
+"deletions": 0
+},
+{
+"number": 29,
+"title": "refactor: clean rooms_from_seeds lint issues",
+"mergedAt": "2026-05-05T03:24:49Z",
+"state": "MERGED",
+"additions": 3,
+"deletions": 3
+},
+{
+"number": 28,
+"title": "Docs/matterport visual validation",
+"mergedAt": "2026-05-05T03:22:50Z",
+"state": "MERGED",
+"additions": 496,
+"deletions": 0
+},
+{
+"number": 27,
+"title": "ci(skp): add fidelity metric extractor for inspect_report.json",
+"mergedAt": "2026-05-05T03:21:16Z",
+"state": "MERGED",
+"additions": 305,
+"deletions": 0
+},
+{
+"number": 26,
+"title": "docs(validation): empirical SKP fidelity proof for consume_consensus â€¦",
+"mergedAt": "2026-05-05T03:19:28Z",
+"state": "MERGED",
+"additions": 108,
+"deletions": 0
+},
+{
+"number": 25,
+"title": "test(skp): pin consume_consensus.rb fidelity-fix invariants",
+"mergedAt": "2026-05-05T03:17:53Z",
+"state": "MERGED",
+"additions": 99,
+"deletions": 0
+},
+{
+"number": 24,
+"title": "Agents/prompt quality rubric",
+"mergedAt": "2026-05-04T20:38:06Z",
+"state": "MERGED",
+"additions": 1412,
+"deletions": 57
+},
+{
+"number": 23,
+"title": "docs: sync 2026-05-04 â€” banner roadmap, learning loop, F1 archive",
+"mergedAt": "2026-05-04T14:45:16Z",
+"state": "MERGED",
+"additions": 97,
+"deletions": 11
+},
+{
+"number": 22,
+"title": "fix(validator): remove planta_74 GT leak from vision LLM prompt",
+"mergedAt": "2026-05-04T14:57:37Z",
+"state": "MERGED",
+"additions": 55,
+"deletions": 2
+},
+{
+"number": 21,
+"title": "ci: add ruby -c syntax gate for tools/*.rb",
+"mergedAt": "2026-05-04T14:45:43Z",
+"state": "MERGED",
+"additions": 28,
+"deletions": 0
+},
+{
+"number": 20,
+"title": "feature: detect vector windows separately from doors",
+"mergedAt": "2026-05-04T14:45:32Z",
+"state": "MERGED",
+"additions": 650,
+"deletions": 42
+},
+{
+"number": 19,
+"title": "Promote develop to main",
+"mergedAt": "2026-05-04T04:19:37Z",
+"state": "MERGED",
+"additions": 43,
+"deletions": 1
+},
+{
+"number": 18,
+"title": "ci: run cheap SketchUp smoke gates without launching SketchUp",
+"mergedAt": "2026-05-04T04:15:19Z",
+"state": "MERGED",
+"additions": 43,
+"deletions": 1
+},
+{
+"number": 17,
+"title": "Promote develop to main",
+"mergedAt": "2026-05-04T03:26:34Z",
+"state": "MERGED",
+"additions": 599,
+"deletions": 15
+},
+{
+"number": 16,
+"title": "agents: repo-auditor v2 with NEW/RESOLVED/PERSISTING delta",
+"mergedAt": "2026-05-04T03:24:35Z",
+"state": "MERGED",
+"additions": 599,
+"deletions": 15
+},
+{
+"number": 15,
+"title": "Promote develop to main",
+"mergedAt": "2026-05-04T02:50:40Z",
+"state": "MERGED",
+"additions": 691,
+"deletions": 26
+},
+{
+"number": 14,
+"title": "perf: skip SketchUp export when consensus is unchanged",
+"mergedAt": "2026-05-04T02:42:02Z",
+"state": "MERGED",
+"additions": 691,
+"deletions": 26
+},
+{
+"number": 13,
+"title": "Promote develop to main",
+"mergedAt": "2026-05-04T02:00:07Z",
+"state": "MERGED",
+"additions": 275,
+"deletions": 35
+},
+{
+"number": 12,
+"title": "perf: capture real pipeline baseline (+ bench fixes)",
+"mergedAt": "2026-05-04T01:55:50Z",
+"state": "MERGED",
+"additions": 275,
+"deletions": 35
+},
+{
+"number": 11,
+"title": "Promote develop to main",
+"mergedAt": "2026-05-04T01:33:42Z",
+"state": "MERGED",
+"additions": 1295,
+"deletions": 46
+},
+{
+"number": 10,
+"title": "validate: SketchUp 2026 end-to-end smoke run",
+"mergedAt": "2026-05-04T01:18:14Z",
+"state": "MERGED",
+"additions": 274,
+"deletions": 19
+},
+{
+"number": 9,
+"title": "tooling: add SketchUp smoke gates harness",
+"mergedAt": "2026-05-04T00:48:00Z",
+"state": "MERGED",
+"additions": 1038,
+"deletions": 44
+},
+{
+"number": 8,
+"title": "Promote develop to main",
+"mergedAt": "2026-05-03T23:56:58Z",
+"state": "MERGED",
+"additions": 3317,
+"deletions": 190
+},
+{
+"number": 7,
+"title": "agents: add operational memory and guardrails",
+"mergedAt": "2026-05-03T23:03:54Z",
+"state": "MERGED",
+"additions": 3189,
+"deletions": 190
+},
+{
+"number": 6,
+"title": "docs: define content-addressed cache rollout plan",
+"mergedAt": "2026-05-03T15:03:03Z",
+"state": "MERGED",
+"additions": 728,
+"deletions": 6
+},
+{
+"number": 5,
+"title": "agents: add read-only repo auditor",
+"mergedAt": "2026-05-03T15:02:52Z",
+"state": "MERGED",
+"additions": 656,
+"deletions": 6
+},
+{
+"number": 4,
+"title": "perf: add pipeline benchmark baseline script",
+"mergedAt": "2026-05-03T15:02:39Z",
+"state": "MERGED",
+"additions": 662,
+"deletions": 6
+},
+{
+"number": 3,
+"title": "docs: define target architecture and specialist agents",
+"mergedAt": "2026-05-03T15:02:29Z",
+"state": "MERGED",
+"additions": 1486,
+"deletions": 6
+},
+{
+"number": 2,
+"title": "fix(ci): use actions/setup-python before setup-uv@v3",
+"mergedAt": "2026-05-03T15:02:10Z",
+"state": "MERGED",
+"additions": 21,
+"deletions": 6
+},
+{
+"number": 1,
+"title": "chore: add repo hardening baseline and CI",
+"mergedAt": "2026-05-03T14:45:52Z",
+"state": "MERGED",
+"additions": 457,
+"deletions": 1
+}
+]
+}
