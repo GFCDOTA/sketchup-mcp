@@ -1,0 +1,28 @@
+{
+  "room": "r000",
+  "name": "SUITE 01",
+  "pt_to_m": 0.0259,
+  "area_m2": 15.9,
+  "geometry_sanity": {
+    "room": "r000",
+    "type": "BEDROOM",
+    "status": "WARN",
+    "fails": [],
+    "warns": [
+      "tampo: perto da porta @(518,632) (overlap 14in2)"
+    ],
+    "n_items": 14
+  },
+  "colchao_m": [
+    1.99,
+    1.54
+  ],
+  "bed": {
+    "size": "queen",
+    "n_parts": 7,
+    "W_m": 1.58,
+    "L_m": 2.03
+  },
+  "skp_sha256": "7e146caf3c942d69831cab2d446ced9ab9a1fd4fdedc042ffe65d82d48b8bbc4",
+  "n_boxes": 33
+}
