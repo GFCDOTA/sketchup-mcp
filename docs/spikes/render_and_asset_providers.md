@@ -21,7 +21,7 @@
 |---|---|---|---|---|---|
 | **SketchUp básico** | top/iso/front/closeup (linha, sem luz) | ✅ Ruby (place_layout/build_furniture) + Start-Process (FEITO, Fase 4) | desktop interativo p/ write_image | **JÁ É O PROVIDER PADRÃO** | Não (adapter interno) |
 | **Enscape** | PREVIEW realtime (layout/escala/luz básica) | ❌ GUI-only: plugin .NET roda DENTRO do SU, render pela UI. Sem Ruby/CLI/headless achados | sem API de script; UI-bound; automação só por computer-use (frágil) | **PREVIEW MANUAL** — não automatizar agora (ROI baixo vs fragilidade). Reavaliar se a UI tiver atalho/handoff | Não (seria computer-use se um dia) |
-| **V-Ray** | FINAL/premium (tecido/madeira/luz indireta) | ⚠️ Ruby API real (`module VRay`, `vray4sketchup2026.so`) → aplicar materiais + export `.vrscene`; **`vray.exe` headless** renderiza o .vrscene | (a) extensão não carregada no nosso SU 2026; (b) **precisa LICENÇA** (entitlement); (c) compat crack-SU incerta; (d) API crypt (usar só superfície pública) | **MELHOR candidato a automação** → `VRayFinalProvider` interno (Ruby export + vray.exe). **Fase 8**, após: registrar a ext no SU 2026 + licença válida + spike de setup focada. Stub já existe | Não (adapter interno, igual ao básico) |
+| **V-Ray** | FINAL/premium (tecido/madeira/luz indireta) | ✅ **VIÁVEL — CONFIRMADO EMPIRICAMENTE** (probe_vray*.rb em SU 2026): extensão CARREGA (loaded=true), `module VRay` 100% alcançável de -RubyStartup, fluxo render→save MAPEADO (`RenderSessionProduction/Export.new(context:).start`, `VRayImage#save`, `ModelExporter#update_camera`, `vray.exe` headless do `.vrscene`) | (a) **precisa LICENÇA** ativa (entitlement — já instalada); (b) `context`/args de `start_render` no source CRYPT (mapear por tentativa, não inventar); (c) render lento (min) + possível VFB window | **MELHOR candidato → `VRayFinalProvider`** (adapter interno). Caminho: `RenderSessionExport`→`.vrscene`→`vray.exe` headless (desacopla do GUI). **Fase 8** focada. available()=True | Não (adapter interno) |
 | **Trimble / 3D Warehouse** | biblioteca de assets/referência | ❌ sem CLI de download; API web existe mas com auth; download é browser/UI | licença per-asset (maioria "combined work only"); ToS; bloat | **Chrome MCP (já existe)** + permissão do Felipe por asset + manifest de provenance + cache gitignored (`assets/third_party_cache/`); NUNCA redistribuir geometria (alinha com Fase 7) | Usa o **Chrome MCP existente** — sem MCP novo |
 
 ## MCP separado — avaliação
@@ -33,10 +33,16 @@
 
 ## Recomendação explícita (gate da Fase 5)
 
-1. **Enscape**: `manual-only` (preview manual; não automatizar).
-2. **V-Ray**: `adapter interno` futuro (Fase 8) — Ruby export `.vrscene` + `vray.exe` headless; pré-req: registrar ext no SU 2026 + licença. Risco real de compat com o SU crack.
+1. **Enscape**: `manual-only` (preview manual; não automatizar — GUI-only).
+2. **V-Ray**: `adapter interno` — **VIÁVEL (confirmado)**. Fase 8 nail o `context`/`start_render` (empírico,
+   tentativa cuidadosa) → `RenderSessionExport`→`.vrscene`→`vray.exe` headless. Pré-req: licença ativa (já há).
+   **NÃO é blocked** — é trabalho focado de orquestração. Felipe pode acelerar com um snippet do AppSDK.
 3. **3D Warehouse**: `Chrome MCP existente` + manifest + gitignore (Fase 7).
 4. **MCP separado**: `não` (adapters internos bastam).
+
+### Correção pós-probe (Felipe apontou: "tem todas extensões no SketchUp")
+A 1a leitura (ext ausente dos Plugins) estava ERRADA: as extensões registram fora da pasta Plugins
+(Enscape + V-Ray = `loaded=true` no SU). A `probe_vray*.rb` provou a API. V-Ray saiu de "blocked" → "VIÁVEL".
 
 → **Gate Fase 5 GREEN**: spike honesta concluída, sem inventar API, recomendação explícita por ferramenta.
 Próximo no plano: Fase 6 (Enscape preview) fica **manual/blocked** pela spike → pular sem forçar;
