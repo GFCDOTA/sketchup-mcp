@@ -21,10 +21,13 @@
   SU 2026 (loaded=true); `module VRay` 100% alcançável de -RubyStartup; fluxo render→save MAPEADO
   (RenderSessionProduction/Export.new(context:).start, VRayImage#save, ModelExporter#update_camera,
   vray.exe headless). vray_final_provider.available()=True. Probes: .claude/scratch/probe_vray*.rb.
-  - **FASE 8 (V-Ray render) = próximo foco**: nailar o `context` + 3-args de `start_render` (source crypt,
-    sem call-sites em texto → tentativa empírica cuidadosa, base copiada+timeout+kill). Caminho mais
-    determinístico: `RenderSessionExport`→`.vrscene`→`vray.exe -sceneFile=x.vrscene -imgFile=y.png` headless.
-    ACELERADOR: snippet de render/export Ruby do V-Ray (AppSDK) do Felipe colapsa o trial-and-error.
+  - **FASE 8 (V-Ray render) FUNCIONANDO** (commit ae85b8c): pipeline premium PROVADO end-to-end.
+    `context = VRay::Context.active`; `tools/vray_export.rb` (camera iso/top + RenderSessionExport →
+    .vrscene); `vray.exe -sceneFile=x.vrscene -imgFile=y.png -display=0 -autoClose=1` → PNG ~3s GPU.
+    `VRayFinalProvider.render(in_skp)` funcional, available()=True. Render planta mobiliada gerado.
+    **REFINO premium pendente**: render escuro/pequeno (settings default 1 luz) → exposure/environment +
+    resolução (imgWidth/Height) + materiais V-Ray (fabric/madeira em vez de cor SU chapada) + câmeras
+    (human-eye/closeup). Esse é o caminho premium real (Enscape continua manual).
 - Backlog WARN (não bloqueia): bevel premium nas arestas (criado>portas>manta>braço) + afastar criado da porta.
 
 - **Fase 2 (Bedroom placement) — FECHADA GREEN (determinístico + GPT PASS).** GPT Modo B no
