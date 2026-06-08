@@ -213,30 +213,44 @@ def real_layout(con, room_id):
     return lay
 
 
+def _clone(d):
+    return json.loads(json.dumps(d))
+
+
 def _fixtures(con, room_id="r000"):
-    """valido(real) + erros sinteticos. Devolve [(nome, layout, expect)]."""
-    from shapely.ops import unary_union
+    """valido(real) + erros sinteticos p/ CADA ramo do gate (cama/guarda-roupa/criado).
+    Devolve [(nome, layout, expect_verdict)]. expect = verdict GLOBAL:
+      - problema de cama (hard) -> FAIL; problema so de guarda-roupa/criado (soft) -> WARN."""
     brain = FurniturePlacementBrain(con, room_id)
     real = real_layout(con, room_id)
     out = []
-    if real:
-        out.append(("quarto valido (designer)", real, "PASS"))
-        bed = real["bed"]
-        # cama rotacionada aleatoria (facing 45 graus)
-        rot = json.loads(json.dumps(real)); rot["bed"]["facing"] = [0.7, 0.7]
-        out.append(("cama rotacionada aleatoria", rot, "FAIL"))
-        # cama atravessando circulacao / centro do comodo (flutuando)
-        cc = brain.cell.centroid
-        flo = json.loads(json.dumps(real))
-        flo["bed"]["center_in"] = [cc.x * PT_TO_IN, cc.y * PT_TO_IN]
-        out.append(("cama flutuando no centro", flo, "FAIL"))
-    # cama bloqueando porta (centro num giro de porta)
     dz = _door_zones(brain.sm)
-    if dz is not None and real:
+    cc = brain.cell.centroid
+    if not real:
+        return out
+    out.append(("quarto valido (designer)", real, "PASS"))
+    # --- CAMA (hard -> FAIL) ---
+    rot = _clone(real); rot["bed"]["facing"] = [0.7, 0.7]
+    out.append(("cama rotacionada aleatoria", rot, "FAIL"))
+    flo = _clone(real); flo["bed"]["center_in"] = [cc.x * PT_TO_IN, cc.y * PT_TO_IN]
+    out.append(("cama flutuando no centro", flo, "FAIL"))
+    if dz is not None:
         p = dz.representative_point()
-        bd = json.loads(json.dumps(real))
-        bd["bed"]["center_in"] = [p.x * PT_TO_IN, p.y * PT_TO_IN]
+        bd = _clone(real); bd["bed"]["center_in"] = [p.x * PT_TO_IN, p.y * PT_TO_IN]
         out.append(("cama bloqueando porta", bd, "FAIL"))
+    # --- GUARDA-ROUPA (soft -> WARN; bloquear porta tambem fere circulacao -> FAIL) ---
+    if real.get("wardrobe"):
+        if dz is not None:
+            p = dz.representative_point()
+            wb = _clone(real); wb["wardrobe"]["center_in"] = [p.x * PT_TO_IN, p.y * PT_TO_IN]
+            out.append(("guarda-roupa bloqueando porta", wb, "FAIL"))
+        wf = _clone(real)
+        wf["wardrobe"]["facing"] = [-real["wardrobe"]["facing"][0], -real["wardrobe"]["facing"][1]]
+        out.append(("guarda-roupa sem frente livre", wf, "WARN"))
+    # --- CRIADO solto (soft -> WARN) ---
+    if real.get("nightstands"):
+        nl = _clone(real); nl["nightstands"][0]["center_in"] = [cc.x * PT_TO_IN, cc.y * PT_TO_IN]
+        out.append(("criado solto (longe da cama)", nl, "WARN"))
     return out
 
 
