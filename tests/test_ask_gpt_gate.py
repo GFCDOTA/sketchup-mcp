@@ -190,7 +190,7 @@ def test_run_gate_online_parses_verdict(tmp_path: Path, monkeypatch):
     monkeypatch.setattr(
         gate, "probe_bridge", lambda url=gate.BRIDGE_URL: (True, "ok"))
     monkeypatch.setattr(
-        gate, "call_bridge", lambda prompt, url=gate.BRIDGE_URL, mode="": raw)
+        gate, "call_bridge", lambda prompt, url=gate.BRIDGE_URL, mode="", tier="": raw)
     g = GateInput(
         trigger="user_requested_consult", question="merge?", context={})
     result = run_gate(
@@ -212,8 +212,9 @@ def test_run_gate_sends_redteam_on_heavy_trigger(tmp_path: Path, monkeypatch):
     import tools.ask_gpt_gate as gate
     captured = {}
 
-    def fake_call(prompt, url=gate.BRIDGE_URL, mode=""):
+    def fake_call(prompt, url=gate.BRIDGE_URL, mode="", tier=""):
         captured["mode"] = mode
+        captured["tier"] = tier
         return "- Verdict: GO\n- Confidence: high\n"
 
     monkeypatch.setattr(gate, "probe_bridge", lambda url=gate.BRIDGE_URL: (True, "ok"))
