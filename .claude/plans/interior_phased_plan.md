@@ -108,6 +108,10 @@ Geometria: `room_introspect.py <room_id>`. Cama centro (636,789), cabeceira lest
   a janela; o claro reflete → NÃO atrapalha render nenhum. **Permanente no pipeline** (commitado): todo render futuro,
   qualquer cômodo, herda o piso de madeira automaticamente. Evidência: planta_74_vray_quarto_piso.png, _iso_floor.png.
   Resíduo: "faixa/crop inferior" = composição (não o piso) — backlog visual, mesma questão margem-Felipe×no-faixa-GPT.
+- **SALA re-renderizada com o piso de madeira = VERDICT PASS** (2026-06-08, planta_74_vray_sala_floor_crop.png):
+  *"madeira clara lê bem e combina MELHOR com sofá/mesa/tapete do que o cinza chapado"*; MATERIALS+LIGHTING+
+  FURNITURE_DETAIL PASS. Apê agora com piso coeso (sala+quarto). WARN residual: textura do piso levemente forte
+  perto da janela (backlog — não loopar; piso já é PASS-quality nos dois cômodos).
 
 - Backlog WARN (não bloqueia): bevel premium nas arestas (criado>portas>manta>braço) + afastar criado da porta.
 
