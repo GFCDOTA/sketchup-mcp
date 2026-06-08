@@ -74,6 +74,17 @@ def _wardrobe():
     return {"gate": "WardrobeGate (anatomy)", "pass": ok, "widths": rows}
 
 
+def _nightstand():
+    from interior.validators.nightstand_gate import nightstand_gate
+    from tools.furniture_anatomy_spec import nightstand_spec
+    from tools.nightstand_builder import build_nightstand
+    s = nightstand_spec()
+    parts, _ = build_nightstand(s)
+    r = nightstand_gate(s, parts)
+    return {"gate": "NightstandGate (anatomy)", "pass": r["result"] == "PASS",
+            "n_parts": r["n_parts"], "result": r["result"]}
+
+
 def _bedroom_placement():
     """Fase 2: gate de PLACEMENT do quarto — quartos reais r000/r003 PASS + fixtures
     de erro FAIL como esperado."""
@@ -108,7 +119,7 @@ def _artifacts():
 
 
 def build_report(phase="phase0_baseline"):
-    gates = [_placement(), _sofa_anatomy_visual(), _bed(), _wardrobe(), _bedroom_placement()]
+    gates = [_placement(), _sofa_anatomy_visual(), _bed(), _wardrobe(), _nightstand(), _bedroom_placement()]
     arts = _artifacts()
     all_pass = all(g["pass"] for g in gates)
     arts_ok = all(a["exists"] for a in arts.values())

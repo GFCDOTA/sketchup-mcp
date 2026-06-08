@@ -40,7 +40,8 @@ def bedroom_designer_boxes(con, room_id):
     GOLDEN composta (bed_builder: plinto+estrado+colchao+travesseiros+manta, material
     por papel + bevel) no MESMO footprint/facing. Substitui o place_bedroom_skp antigo."""
     from tools.bed_builder import build_bed, place_bed_boxes
-    from tools.furniture_anatomy_spec import bed_spec, wardrobe_spec
+    from tools.furniture_anatomy_spec import bed_spec, nightstand_spec, wardrobe_spec
+    from tools.nightstand_builder import build_nightstand, place_nightstand_boxes
     from tools.wardrobe_builder import build_wardrobe, place_wardrobe_boxes
     sm, out = bedroom_designer.run(con, room_id, minimalist=True)
     if out.get("result") != "OK":
@@ -61,9 +62,11 @@ def bedroom_designer_boxes(con, room_id):
             return (x1 - x0) * pt_m, (y1 - y0) * pt_m, ((x0 + x1) / 2 * pt_in, (y0 + y1) / 2 * pt_in)
         return (y1 - y0) * pt_m, (x1 - x0) * pt_m, ((x0 + x1) / 2 * pt_in, (y0 + y1) / 2 * pt_in)
 
+    bed_facing = (0.0, 1.0)
     bed_item = next((it for it in items if it.get("type") == "bed"), None)
     if bed_item is not None:
         fx, fy = _wd_facing(bed_item)
+        bed_facing = (fx, fy)
         w_m, l_m, cen = _wd_dims(bed_item["box"], (fx, fy))
         nm = str(bed_item.get("name", ""))
         size = next((s for s in ("king", "queen", "casal", "solteiro") if s in nm), "king")
@@ -72,6 +75,18 @@ def bedroom_designer_boxes(con, room_id):
         boxes = [b for b in boxes if b.get("kind") != "bed"] + bed_parts
         out["bed_parametric"] = {"size": size, "n_parts": len(bed_parts),
                                  "W_m": round(w_m, 2), "L_m": round(l_m, 2)}
+
+    # CRIADOS golden (pes+corpo+tampo+gaveta+knob), gaveta vira p/ fora (facing da cama).
+    ns_items = [it for it in items if it.get("type") == "nightstand"]
+    if ns_items:
+        ns_boxes, n_ns = [], 0
+        for it in ns_items:
+            nw, nd, ncen = _wd_dims(it["box"], bed_facing)
+            nparts, _ = build_nightstand(nightstand_spec(width=round(nw, 3), depth=round(max(nd, 0.30), 3)))
+            ns_boxes += place_nightstand_boxes(nparts, ncen, bed_facing)
+            n_ns += 1
+        boxes = [b for b in boxes if b.get("kind") != "nightstand"] + ns_boxes
+        out["nightstand_parametric"] = {"count": n_ns, "n_parts": len(ns_boxes)}
 
     # GUARDA-ROUPA golden (corpo+portas+puxadores+rodape) no mesmo footprint/facing (portas
     # viram p/ dentro do quarto). Troca o bloco roxo liso 'wardrobe'.

@@ -195,6 +195,49 @@ def wardrobe_spec(width=1.80, depth=0.58, height=2.20, **overrides):
     return s.validate()
 
 
+# ---------------------------------------------------------------- CRIADO-MUDO (nightstand)
+NIGHTSTAND_REQUIRED_PARTS = ("corpo", "tampo", "gaveta", "pe")
+
+
+@dataclass
+class NightstandSpec:
+    """Anatomia parametrica de um CRIADO-MUDO. Dims em m. Convencao: X=largura,
+    Y=profundidade (FRENTE=Y=0=-Y, gaveta vira p/ fora), Z=altura. Pecas SEPARADAS:
+    4 pes + corpo + tampo (transborda) + gaveta (frente) + knob."""
+    width: float = 0.45
+    depth: float = 0.40
+    height: float = 0.55
+    foot_h: float = 0.08
+    top_t: float = 0.03          # espessura do tampo
+    drawer_t: float = 0.02       # frente da gaveta (proud)
+    body_rgb: tuple = (120, 95, 68)     # corpo madeira
+    top_rgb: tuple = (82, 64, 48)       # tampo mais escuro (contraste)
+    drawer_rgb: tuple = (142, 116, 86)  # frente de gaveta mais clara
+    foot_rgb: tuple = (50, 42, 34)      # pes escuros
+    knob_rgb: tuple = (44, 44, 48)      # puxador metal escuro
+
+    def validate(self):
+        assert self.height > self.foot_h + self.top_t
+        assert self.width > 0 and self.depth > 0
+        return self
+
+    def bbox_m(self):
+        return (round(self.width, 3), round(self.depth, 3), round(self.height, 3))
+
+    def to_dict(self):
+        d = asdict(self)
+        d["bbox_m"] = self.bbox_m()
+        d["required_parts"] = list(NIGHTSTAND_REQUIRED_PARTS)
+        return d
+
+
+def nightstand_spec(width=0.45, depth=0.40, height=0.55, **overrides):
+    s = NightstandSpec(width=width, depth=depth, height=height)
+    for k, v in overrides.items():
+        setattr(s, k, v)
+    return s.validate()
+
+
 if __name__ == "__main__":
     import json
     for v in VARIANTS:

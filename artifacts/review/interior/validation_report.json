@@ -1,5 +1,5 @@
 {
-  "phase": "phase3_wardrobe",
+  "phase": "phase3_anatomy",
   "gates": [
     {
       "gate": "SofaPlacementGate",
@@ -107,6 +107,12 @@
       ]
     },
     {
+      "gate": "NightstandGate (anatomy)",
+      "pass": true,
+      "n_parts": 8,
+      "result": "PASS"
+    },
+    {
       "gate": "BedPlacementGate",
       "pass": true,
       "real_rooms": [
@@ -151,15 +157,15 @@
   "artifacts": {
     "planta_74_furnished.skp": {
       "exists": true,
-      "bytes": 277922
+      "bytes": 292280
     },
     "apartment_after_top.png": {
       "exists": true,
-      "bytes": 34398
+      "bytes": 34422
     },
     "apartment_after_iso.png": {
       "exists": true,
-      "bytes": 178317
+      "bytes": 180093
     },
     "sala_solver_top.png": {
       "exists": true,
