@@ -29,13 +29,14 @@ class SofaSpec:
     height: float = 0.85             # Z (topo do encosto)
     seat_height: float = 0.45        # topo do assento (onde senta) a partir do chao
     seat_depth: float = 0.58         # profundidade util do assento (Y)
-    back_thickness: float = 0.18     # profundidade do encosto (Y)
+    back_thickness: float = 0.20     # profundidade do encosto (Y) (GPT cycle4: +2cm mais cheio)
     arm_width: float = 0.18          # X do braco (GPT cycle2: 0.22 grosso demais -> afinar)
     arm_height: float = 0.62         # Z (topo do braco)
     foot_height: float = 0.10        # Z dos pes
-    cushion_thickness: float = 0.15  # espessura da almofada do assento
+    cushion_thickness: float = 0.18  # espessura da almofada do assento (GPT cycle4: +3cm, menos chapado)
     cushion_gap: float = 0.05        # VINCO/costura entre almofadas (GPT: fresta natural)
     cushion_bevel: float = 0.04      # chanfro/topo inset das almofadas (GPT: menos cubico)
+    backrest_rake: float = 10.0      # graus: inclinacao do encosto p/ tras (GPT cycle3: tira leitura de placa vertical)
     chaise_depth: float = 1.60       # Y total da perna-chaise (deita as pernas)
     chaise_width: float = 0.95       # X da chaise
     fabric_rgb: tuple = (182, 172, 153)  # tecido neutro linho/bege (GPT: nao cinza chapado)

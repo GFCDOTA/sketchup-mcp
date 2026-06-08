@@ -32,6 +32,14 @@ def _faces(p):
     }
 
 
+def _faces_from_verts8(v):
+    """6 faces de um box dado por 8 vertices [b0..b3 base, t0..t3 topo] — p/ pecas
+    NAO-axis-aligned (ex. encosto inclinado pelo backrest_rake)."""
+    return {"bottom": [v[0], v[1], v[2], v[3]], "top": [v[4], v[5], v[6], v[7]],
+            "front": [v[0], v[1], v[5], v[4]], "back": [v[3], v[2], v[6], v[7]],
+            "left": [v[0], v[3], v[7], v[4]], "right": [v[1], v[2], v[6], v[5]]}
+
+
 def render_parts(parts, out_png, *, title=None, elev=24, azim=-56, bg=(0.82, 0.82, 0.84)):
     fig = plt.figure(figsize=(7.2, 5.4), dpi=150)
     ax = fig.add_subplot(111, projection="3d")
@@ -40,7 +48,8 @@ def render_parts(parts, out_png, *, title=None, elev=24, azim=-56, bg=(0.82, 0.8
     polys, colors = [], []
     for p in parts:
         r, g, b = (c / 255.0 for c in p["rgb"])
-        for fname, quad in _faces(p).items():
+        faces = _faces_from_verts8(p["verts8"]) if p.get("verts8") else _faces(p)
+        for fname, quad in faces.items():
             s = _SHADE[fname]
             polys.append(quad)
             colors.append((min(1, r * s), min(1, g * s), min(1, b * s)))
