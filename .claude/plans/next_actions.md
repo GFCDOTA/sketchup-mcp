@@ -3,74 +3,59 @@
 Fila curta. Máximo 5 itens. Adicionar novo só se houver espaço E
 valor claro pro produto.
 
-> **Snapshot:** 2026-05-28 (sessão noturna autônoma). Decai rápido.
+> **Snapshot:** 2026-06-06. Decai rápido.
 
 ## Fila atual
 
-### 1. Mergear PR #197 (Constitution #8 friction-tax refinements)
+### 1. Mergear os PRs de unbreak/higiene (#225, #226)
 
-- **Objetivo:** Refinamentos da Constitution #8 em `develop` pra
-  evitar friction tax (escape hatch, path triggers, intermediários
-  não-commitados, anti-checklist-theater)
-- **Por quê:** Refinamentos baseados em Q1 review do user; PR #196
-  mergeou enquanto eu rodava o review, então virou PR follow-up
-- **Status:** PR aberta, aguardando review do user
-- **Critério de parada:** PR mergeada
+- **Objetivo:** landar o `fix(deps)` matplotlib+numpy (#225 — sem ele o
+  `pytest` nem coleta num install limpo) e o `fix(cockpit)` consult paths
+  em call-time (#226 — conserta 4 testes).
+- **Por quê:** o suite de testes precisa rodar verde num clone fresco;
+  hoje quebra na coleção. #226 depende de #225 pro verde total.
+- **Critério de parada:** ambos mergeados; `pytest tests/ -q` = 467 passed.
 
-### 2. Mergear PR #198 (FP-030 Visual Oracle Gate)
+### 2. Decidir o atuador do NOC (#222 + #223)
 
-- **Objetivo:** Spec + skill + tool + schema + manifest + 19 fixture
-  examples + 16 contract tests + dogfooding run em `develop`
-- **Por quê:** Visual Oracle Gate operacionaliza Constitution #8
-  ("No visual proof, no progress") com heurísticas determinísticas
-- **Status:** PR aberta, dogfooded com `planta_74` → verdict=WARN
-  documentado, artefatos em `artifacts/review/planta_74/visual_loop_current/final/`
-- **Critério de parada:** PR mergeada
+- **Objetivo:** revisar/mergear `feat/noc-dispatcher` (#222) e a doc
+  `NOC_DISPATCHER.md` (#223, depois do #222).
+- **Por quê:** o dispatcher fecha o loop de tasks seguras/auto-verificáveis.
+  Muda o `:8765` vivo — bem-railed (lock, worktree isolado, nunca
+  main/auto-merge, aparência→VISUAL_REVIEW), mas é decisão do Felipe.
+- **Critério de parada:** PRs mergeados ou veredito de ajuste.
 
 ### 3. (follow-up) `tools/check_skp_proof_of_progress.py` CI gate
 
-- **Objetivo:** Implementar o gate executável sugerido em
-  `specs/skp_proof_of_progress_gate.md` § "Testes / gates
-  automáticos"
-- **Por quê:** Hoje a regra depende de reviewer humano cobrar;
-  gate executável protege automaticamente
-- **NÃO INICIAR** sem ok explícito do user — categoria 5 pendente
+- **Objetivo:** implementar o gate executável de
+  `specs/skp_proof_of_progress_gate.md`.
+- **Por quê:** hoje a regra "No SKP, no progress" depende de reviewer humano.
+- **NÃO INICIAR** sem ok explícito do Felipe. Arquivo ainda não existe.
 
-### 4. (follow-up) FP-030 auto-fix loop entre attempts
+### 4. (infra) Workflow mínimo de pytest no GitHub Actions
 
-- **Objetivo:** Permitir que o `tools/run_skp_visual_review.py`
-  aplique fixes source-supported entre attempts
-- **Por quê:** Hoje o loop é documentário; auto-fix multiplica
-  o valor
-- **Requer:** taxonomy de fixes seguros + safe-edit policy
-- **NÃO INICIAR** sem mais clareza do user
+- **Objetivo:** `.github/workflows/` com `pip install -e ".[dev]" && pytest`.
+- **Por quê:** o repo **não tem CI**; as 2 quebras de hoje (#225, #226)
+  passaram batidas por meses. Um gate de coleção+pytest pega regressões.
+- **Critério de parada:** workflow verde num clone fresco.
 
-### 5. (follow-up) Side-by-side composite generator
+### 5. (produto) Overlay `semantic_zones` p/ room fidelity da planta_74
 
-- **Objetivo:** `tools/compose_side_by_side.py` que junta PDF
-  underlay + SKP top + SKP iso em 1 PNG
-- **Por quê:** Constitution #8 lista side-by-side como evidência
-  obrigatória; hoje só existe no baseline canonical
-- **Critério de parada:** tool integrado ao
-  `tools/run_skp_visual_review.py` na promoção pro `final/`
+- **Objetivo:** separar os 8 cells geométricos dos 11 ambientes semânticos
+  (open-plan funde r001/r002) sem inventar paredes.
+- **Por quê:** room fidelity = WARN honesto; o overlay resolve sem violar
+  Hard Rule #1. **Requer SketchUp** — não dá pra validar em sessão remota.
 
-## Backlog observado durante esta sessão
+## Backlog observado
 
-- Python install local: `AppData/Local/Programs/Python/Python312/`
-  está vazio (binário removido). Working via `uv`-managed Python.
-  Decidir se reinstalar ou aceitar uv-only (memory update pendente)
-- `matplotlib` faltando em `pyproject.toml` (PR #193 introduziu
-  uso em `tools/diagnose_wall_stubs.py`)
-- SU 2026 processos podem ficar pendurados após runs interactive —
-  documentar workflow de cleanup (kill antes de reuso)
-- `regression_summary_template.md` precisa ser atualizado pra
-  refletir o formato real usado neste PR (axes table sem "N/A"
-  columns redundantes)
+- `compose_side_by_side.py` **já existe** (item antigo concluído).
+- `chore/refresh-current-state`: conteúdo único (refresh de `current_state.md`)
+  foi folded em `chore/refresh-stale-docs`; fechar a branch após o merge.
+- SU 2026 pode deixar processos pendurados após runs interactive — kill antes de reuso.
 
 ## Regra de fila
 
-Concluir a fila → escolher próximo item **só se houver valor
-claro pro produto** (gerar/revisar `.skp` fiel). Não inventar
-trabalho cosmético. Ver `specs/product_goal.md` § "Critérios de
-avanço real" e `memory/operational_rules.md` § "Continuar
-automaticamente vs parar" (5 categorias).
+Concluir a fila → escolher próximo item **só se houver valor claro pro
+produto** (gerar/revisar `.skp` fiel). Não inventar trabalho cosmético.
+Ver `specs/product_goal.md` § "Critérios de avanço real" e
+`memory/operational_rules.md` § "Continuar automaticamente vs parar".
