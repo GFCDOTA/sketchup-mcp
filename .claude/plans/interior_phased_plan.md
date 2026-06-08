@@ -34,9 +34,14 @@
       paredes (teto aberto). tools/compute_room_cam.py computa eye/target do grupo de móveis.
     - GPT Modo B iterado: dollhouse CAMERA=FAIL → interior zoom WARN (sofá legível) → exposure-balance
       (LIGHTING recuperado). Render atual = sala interior bem exposta, sofá golden visível.
-    - **PRÓXIMOS premium (divergentes, pedem direção)**: (a) MATERIAIS V-Ray textura (madeira/tecido em vez
-      de cor chapada — precisa material maps/BRDF edit; maior salto premium); (b) câmera EYE-LEVEL
-      cinematográfica (resolver oclusão da L-shape); (c) render dos QUARTOS (cama golden). vray.exe ~3-28s.
+    - MATERIAIS: `tweak_vrscene.apply_materials` (commit 32e298a) edita BRDFs dos móveis por papel —
+      madeira satin / tecido matte / metal. SUTIL (reflexão discreta na luz difusa); propriedades só,
+      SEM texture maps de imagem.
+    - **PRÓXIMO salto premium = TEXTURE MAPS reais** (grão madeira, trama tecido): precisa de imagens de
+      textura aplicadas via TexBitmap (object/world mapping, móveis sem UV) OU materiais SU texturizados
+      no renderer (place_layout_skp.rb) que o V-Ray traduz. Sourcing de textura = território Fase 7
+      (asset catalog) ou geração procedural. Pede direção/assets do Felipe.
+    - Outros premium: câmera eye-level cinematográfica (resolver oclusão L-shape); render dos quartos.
 - Backlog WARN (não bloqueia): bevel premium nas arestas (criado>portas>manta>braço) + afastar criado da porta.
 
 - **Fase 2 (Bedroom placement) — FECHADA GREEN (determinístico + GPT PASS).** GPT Modo B no
