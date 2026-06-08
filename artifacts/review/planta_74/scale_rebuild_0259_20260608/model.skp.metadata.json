@@ -1,0 +1,9 @@
+{
+  "schema_version": "1.0.0",
+  "exporter": "build_plan_shell_skp",
+  "consensus_sha256": "1fa2e485b03ae239ee3ab456e719565ed872b663640f277343ebe3aff54a8fcd",
+  "skp_path": "E:\\Claude\\sketchup-mcp-mobiliar\\artifacts\\review\\planta_74\\scale_rebuild_0259_20260608\\model.skp",
+  "created_at": "2026-06-08T19:55:42Z",
+  "sketchup_path": "C:\\Program Files\\SketchUp\\SketchUp 2026\\SketchUp\\SketchUp.exe",
+  "command": "C:\\Program Files\\SketchUp\\SketchUp 2026\\SketchUp\\SketchUp.exe E:\\Claude\\sketchup-mcp-mobiliar\\artifacts\\review\\planta_74\\scale_rebuild_0259_20260608\\_bootstrap.skp"
+}

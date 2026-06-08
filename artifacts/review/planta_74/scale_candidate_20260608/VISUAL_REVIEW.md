@@ -1,5 +1,9 @@
 # VISUAL_REVIEW — escala planta_74 (candidato PT_TO_M=0.0259)
 
+> **✅ APROVADO pelo Felipe 2026-06-08** ("cota impressa não mente, render auto-fit engana").
+> Rebuild + validação em `../scale_rebuild_0259_20260608/` (Suíte 01 5.46×4.00 PASS, gates verdes).
+> Promoção ao canônico + PR aguardam coordenação com a sessão paralela.
+
 > **Gate do Felipe.** Mudar a escala muda a geometria absoluta vs PDF → só você aprova.
 > Preparado pela trilha V-Ray/mobiliar a pedido seu ("preparo candidato em paralelo").
 > **NÃO aplicado** — default segue 0.0352 até seu OK.
