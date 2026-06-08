@@ -63,6 +63,18 @@ Estado: **VERDICT PASS** (milestone premium da sala atingido via V-Ray). LIGHTIN
 (era o #1 recorrente). MATERIALS + FURNITURE_DETAIL + LIGHTING todos PASS. Único WARN acionável:
 CAMERA (baixar p/ eye-level — esbarra na oclusão L-shape; tentar 1x). Render: planta_74_vray_sala_final.png.
 
+### Câmera EYE-LEVEL + LUZ INTERNA (continuação)
+- **Eye-level** (eye z 150→62, dentro da sala, costas p/ parede sul): **GPT CAMERA=PASS** —
+  *"eye-level ficou melhor e mais premium que overview; vende o sofá como ambiente real, não planta técnica"*.
+  BEST_SHOT=eyelevel. Novo achado: paredes laterais escuras (sala fechada, só janela ilumina).
+- **Luz interna quente** (LightSphere fill procedural injetada no .vrscene, intensity 820, warm, invisible):
+  **GPT VERDICT=PASS / LIGHTING=PASS** (planta_74_vray_sala_eyefill3.png) —
+  *"resolveu: sofá virou herói, paredes ganharam preenchimento e a janela continua controlada"*.
+  MATERIALS+FURNITURE_DETAIL PASS. Remanescente: PREMIUM_REALISM WARN + CAMERA WARN =
+  **enquadramento** (faixa cinza inferior + parede lateral escura; sala deve ocupar o quadro inteiro).
+- Pipeline: `tweak_vrscene.add_fill_light` (LightSphere warm) + `render_room.ps1`/`tune_render.ps1` (scratch).
+  GOTCHA: 2ª fill perto da câmera (<55in) vira orb escuro visível — manter fills longe da câmera.
+
 ## Refinamentos WARN (não-bloqueantes, backlog)
 
 - **Placement**: afastar o criado superior da porta (NIGHTSTANDS WARN).
