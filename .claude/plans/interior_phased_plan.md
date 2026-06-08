@@ -17,9 +17,15 @@
   (`module VRay`, vray4sketchup2026.so) + vray.exe headless = MELHOR candidato, mas precisa LICENÇA +
   registrar ext no SU 2026 (Fase 8, risco crack-SU). 3DW=Chrome MCP existente + manifest (Fase 7).
   **MCP separado = NÃO** (adapters internos bastam). Sem inventar API.
-- **Próximo (não-bloqueado por render premium)**: WARN refinements premium (bevel sutil nas arestas:
-  criado > portas guarda-roupa > manta/travesseiros > braço sofá; + afastar criado da porta) OU Fase 7
-  (asset catalog — já tem v1 de commits antigos). Render premium real (V-Ray) = bloqueado em licença+setup.
+- **V-Ray VIÁVEL CONFIRMADO** (commit d9fa80c; Felipe apontou as extensões): Enscape+V-Ray carregam no
+  SU 2026 (loaded=true); `module VRay` 100% alcançável de -RubyStartup; fluxo render→save MAPEADO
+  (RenderSessionProduction/Export.new(context:).start, VRayImage#save, ModelExporter#update_camera,
+  vray.exe headless). vray_final_provider.available()=True. Probes: .claude/scratch/probe_vray*.rb.
+  - **FASE 8 (V-Ray render) = próximo foco**: nailar o `context` + 3-args de `start_render` (source crypt,
+    sem call-sites em texto → tentativa empírica cuidadosa, base copiada+timeout+kill). Caminho mais
+    determinístico: `RenderSessionExport`→`.vrscene`→`vray.exe -sceneFile=x.vrscene -imgFile=y.png` headless.
+    ACELERADOR: snippet de render/export Ruby do V-Ray (AppSDK) do Felipe colapsa o trial-and-error.
+- Backlog WARN (não bloqueia): bevel premium nas arestas (criado>portas>manta>braço) + afastar criado da porta.
 
 - **Fase 2 (Bedroom placement) — FECHADA GREEN (determinístico + GPT PASS).** GPT Modo B no
   suite01_top: VERDICT PASS (BED/WARDROBE/CIRCULATION/ORIENTATION PASS; NIGHTSTANDS WARN = criado
