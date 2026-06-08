@@ -76,8 +76,8 @@ def wood_floor(c_base, c_dark, seed, planks=5, rings=7):
     t = np.clip(grain * 0.8 + fine, 0, 1)
     out = np.stack([c_dark[i] + (c_base[i] - c_dark[i]) * t for i in range(3)], -1)
     seam = (SZ // planks)                                       # juntas entre tabuas
-    mask = (np.arange(SZ) % seam) < 2                           # 2px de junta escura
-    out[mask] *= 0.45
+    mask = (np.arange(SZ) % seam) < 2                           # 2px de junta (suave, nao preta)
+    out[mask] *= 0.62
     return Image.fromarray(np.clip(out, 0, 255).astype("uint8"))
 
 
@@ -87,7 +87,7 @@ TEXTURES = {
     "fabric_light.png": lambda: fabric((192, 182, 164), 33),
     "fabric_accent.png": lambda: fabric((174, 144, 114), 44),
     "fabric_linen.png": lambda: linen((186, 178, 163), 55),   # roupa de cama (bedding-only)
-    "wood_floor.png": lambda: wood_floor((158, 116, 78), (104, 72, 46), 77),   # piso (floor_* — todos os comodos)
+    "wood_floor.png": lambda: wood_floor((194, 166, 124), (154, 126, 88), 77),   # piso carvalho CLARO (floor_*): reflete luz, nao escurece o render
 }
 
 

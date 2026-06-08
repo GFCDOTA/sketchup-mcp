@@ -100,11 +100,14 @@ Geometria: `room_introspect.py <room_id>`. Cama centro (636,789), cabeceira lest
   weave multiplicativo de baixa amplitude + slub dominante; fill é por-cômodo.)
 - **NEXT**: SUITE 02 (r003) + COZINHA (r004), mesmo pipeline pelo GATE GPT_REVIEW (fill difuso por-cômodo,
   exposição que segura janela, eye-level dentro do cômodo, crop).
-- **ROOT-CAUSE da "faixa cinza" (decisão Felipe 2026-06-08, max-gain)**: a faixa NÃO é bug do quarto — é o PISO
-  cinza não-mobiliado, recorrente em TODO cômodo (sala, quarto, suite02, cozinha). Fix de maior ganho = **piso de
-  madeira como material do apê inteiro** (conserta a faixa de uma vez + foreground premium + todo render herda),
-  PORÉM implementar via o **pipeline B (DesignIntentSpec)** como material de intent — NÃO como render one-off no loop
-  V-Ray quente (mexeria na shell/sala e manteria o looping). Quarto fica CONGELADO WARN-promotable; piso entra no B.
+- **PISO — RESOLVIDO (Felipe 2026-06-08, fix root-cause apartment-wide)**: a "faixa cinza" era o PISO pastel chapado
+  (material `floor_<room_id>`), recorrente em TODO cômodo. Fix aplicado: textura `wood_floor.png` (carvalho CLARO)
+  em todos os `floor_*` via PREFIXO em `vray_export.rb` (robusto a id; tile [120,120]; sofá/parede intactos = distinct
+  materials). **GPT: MATERIALS PASS** ("madeira clara lê bem, não parece mais piso chapado") **+ LIGHTING PASS**
+  ("quarto bem exposto"). Carvalho CLARO de propósito: piso escuro reduzia o bounce → escurecia o quarto + estourava
+  a janela; o claro reflete → NÃO atrapalha render nenhum. **Permanente no pipeline** (commitado): todo render futuro,
+  qualquer cômodo, herda o piso de madeira automaticamente. Evidência: planta_74_vray_quarto_piso.png, _iso_floor.png.
+  Resíduo: "faixa/crop inferior" = composição (não o piso) — backlog visual, mesma questão margem-Felipe×no-faixa-GPT.
 
 - Backlog WARN (não bloqueia): bevel premium nas arestas (criado>portas>manta>braço) + afastar criado da porta.
 
