@@ -99,8 +99,12 @@ Geometria: `room_introspect.py <room_id>`. Cama centro (636,789), cabeceira lest
   Felipe: NÃO entrar em looping de render — congela e avança. (LL-FURN: linho forte=grid/xadrez procedural → usar
   weave multiplicativo de baixa amplitude + slub dominante; fill é por-cômodo.)
 - **NEXT**: SUITE 02 (r003) + COZINHA (r004), mesmo pipeline pelo GATE GPT_REVIEW (fill difuso por-cômodo,
-  exposição que segura janela, eye-level dentro do cômodo, crop). Resíduo do quarto (faixa/janela) = backlog visual,
-  revisitar só com tapete/floor material (geometria/escopo novo) se o Felipe quiser PASS premium do quarto.
+  exposição que segura janela, eye-level dentro do cômodo, crop).
+- **ROOT-CAUSE da "faixa cinza" (decisão Felipe 2026-06-08, max-gain)**: a faixa NÃO é bug do quarto — é o PISO
+  cinza não-mobiliado, recorrente em TODO cômodo (sala, quarto, suite02, cozinha). Fix de maior ganho = **piso de
+  madeira como material do apê inteiro** (conserta a faixa de uma vez + foreground premium + todo render herda),
+  PORÉM implementar via o **pipeline B (DesignIntentSpec)** como material de intent — NÃO como render one-off no loop
+  V-Ray quente (mexeria na shell/sala e manteria o looping). Quarto fica CONGELADO WARN-promotable; piso entra no B.
 
 - Backlog WARN (não bloqueia): bevel premium nas arestas (criado>portas>manta>braço) + afastar criado da porta.
 
