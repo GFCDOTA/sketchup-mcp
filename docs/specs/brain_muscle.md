@@ -73,3 +73,28 @@ SU/V-Ray/AV — risco a isolar).
 
 Resultado: o cérebro passa a ler ~8 linhas no lugar do log inteiro de gates. É a base do contrato p/ depois absorver
 build/render (onde o ganho de token é maior).
+
+## Slice implementado — roteamento `kind:local_llm` (músculo ASSÍNCRONO, Ollama)
+
+(2026-06-08) Primeiro **código** do split: o papel "LLM local = compute grátis" virou execução real.
+O NOC dispatcher agora roteia por `kind` (`dispatch_by_kind`):
+
+- **`kind:local_llm`** → `dispatch_local_llm()` roda um modelo LOCAL (Ollama, **token=0**) p/ um `purpose`
+  ALLOWLISTADO e devolve só o resultado compacto: texto → `runs/local_llm/<id>.md` (scratch), e o ledger
+  `.ai_bridge/noc/actions.jsonl` audita `backend/model/latency_ms/out_file`. **Nunca git, nunca `claude -p`,
+  nunca veredito visual.** Offline → `on_offline:"error"` (default, `LOCAL_LLM_OFFLINE`) ou `"claude"` (fallback explícito).
+- **`kind:tool`** → reservado pro `muscle.py` INLINE (este doc); dispatcher faz `SKIPPED_KIND_TOOL` (não rouba o caminho determinístico).
+- **`kind:claude`** (default) → caminho existente (worktree isolado + `claude -p`), **inalterado**.
+
+Arquivos: `tools/claude_bridge/ollama_client.py` (cliente-texto stdlib, irmão do `OllamaVisionProvider` que é visão) ·
+roteamento em `tools/claude_bridge/noc_dispatcher.py` · testes herméticos `tests/test_ollama_client.py` +
+`tests/test_noc_dispatcher_local_llm.py` (mock urllib / mock generate, sem Ollama real).
+
+Allowlist de `purpose`: `summarize_log · classify_test_failure · draft_design_intent · checklist_from_reference ·
+prompt_prepare · cheap_triage`. KEEP_CLAUDE (editar repo/branch/PR) e KEEP_DEEP (veredito visual final / merge /
+arquitetura) **não** entram no local. Latência medida nesta máquina: Ollama frio ~3–25s (load do modelo), quente <0,2s;
+prova real `summarize_log` end-to-end em 2,3s.
+
+**Relação com o 1º slice `muscle.py gates`:** COMPLEMENTAR, não substitui. `muscle.py` = músculo INLINE SÍNCRONO
+determinístico (gates/build/render), ainda o maior token-saver e o **próximo** a implementar. `kind:local_llm` =
+músculo ASSÍNCRONO de decisão barata (fila). Ambos compartilham o princípio: o verboso fica no disco, o cérebro lê o veredito.
