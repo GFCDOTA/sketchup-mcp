@@ -43,6 +43,15 @@ def _seat_row(kind, prefix, x0, x1, y0, y1, z0, z1, n, gap, rgb, bevel=0.0):
     return out
 
 
+def _shear_y(p, k, z0pivot):
+    """verts8 do box p cisalhado em Y: y += k*(z - z0pivot) (k=tan(rake)). Topo recua
+    -> encosto inclinado. Mantem 6 faces (renderer usa verts8)."""
+    x0, y0, z0, x1, y1, z1 = p["x0"], p["y0"], p["z0"], p["x1"], p["y1"], p["z1"]
+    sb, st = k * (z0 - z0pivot), k * (z1 - z0pivot)
+    return [(x0, y0 + sb, z0), (x1, y0 + sb, z0), (x1, y1 + sb, z0), (x0, y1 + sb, z0),
+            (x0, y0 + st, z1), (x1, y0 + st, z1), (x1, y1 + st, z1), (x0, y1 + st, z1)]
+
+
 def build_sofa(spec: SofaSpec):
     """Devolve (parts, meta). parts = pecas (caixas em m, com z0/z1)."""
     spec.validate()
@@ -98,7 +107,8 @@ def build_sofa(spec: SofaSpec):
     parts.append(_p("arm_right", "arm", W - aw, right_arm_y[0], W, right_arm_y[1], fh, ah, fab))
 
     # --- base/plataforma (corpo principal + chaise) ---
-    parts.append(_p("base_main", "base", main_seat_x[0], main_y0, main_seat_x[1], Dtot, fh, base_top, base_rgb))
+    rec = 0.06  # recuo do plinto frontal: base menos monolitica (GPT cycle3)
+    parts.append(_p("base_main", "base", main_seat_x[0], main_y0 + rec, main_seat_x[1], Dtot, fh, base_top, base_rgb))
     if chaise_x:
         parts.append(_p("base_chaise", "base", chaise_seat_x[0], 0.0, chaise_seat_x[1], Dtot, fh, base_top, base_rgb))
 
@@ -118,6 +128,19 @@ def build_sofa(spec: SofaSpec):
     if chaise_x:
         parts.append(_p("back_chaise", "back_cushion", chaise_seat_x[0], seat_back,
                         chaise_seat_x[1], Dtot, back_z0, bh, back_rgb))
+
+    # rake do encosto (GPT cycle3): cisalha back_cushion em +Y conforme sobe -> recline.
+    # verts8 p/ o renderer; x0..z1 viram AABB do cisalhado (gate/parts_to_boxes medem o real).
+    import math
+    rake = math.radians(spec.backrest_rake or 0.0)
+    if rake:
+        k = math.tan(rake)
+        for p in parts:
+            if p["kind"] == "back_cushion":
+                v = _shear_y(p, k, back_z0)
+                p["verts8"] = v
+                ys = [c[1] for c in v]
+                p["y0"], p["y1"] = round(min(ys), 4), round(max(ys), 4)
 
     meta = {"variant": spec.variant, "seats": spec.seats, "n_parts": len(parts),
             "bbox_m": spec.bbox_m(), "front_axis": "-Y",
