@@ -160,3 +160,8 @@ CAMERA (baixar p/ eye-level — esbarra na oclusão L-shape; tentar 1x). Render:
 - artifact: `?`
 - VERDICT: **PASS** · PREMIUM_REALISM:WARN · MATERIALS:WARN · LIGHTING:WARN · CAMERA:WARN · FURNITURE_DETAIL:PASS
 - NEXT_ACTION: adicionar/validar detalhes funcionais visiveis da cozinha — cuba+torneira, cooktop com bocas, forno com vidro/puxador e portas/gavetas nos modulos — sem mexer no layout.
+
+### GPT_REVIEW [2026-06-08T16:17:46] id=bedroom_anatomy_v2 → GATE **PASS**
+- artifact: `?`
+- VERDICT: **PASS** · PREMIUM_REALISM:WARN · MATERIALS:WARN · LIGHTING:PASS · CAMERA:PASS · FURNITURE_DETAIL:PASS
+- NEXT_ACTION: aplicar bevel/chamfer sutil e consistente nas arestas visiveis de cama, guarda-roupa e criado, comecando por criado e guarda-roupa.

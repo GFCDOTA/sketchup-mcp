@@ -26,6 +26,12 @@ def build_bed(spec: BedSpec):
     parts.append(_p("plinto", "estrado", 0.08, 0.08, W - 0.08, L - 0.08, 0.0, bz0, plinth))
     parts.append(_p("estrado", "estrado", 0.0, 0.0, W, L, bz0, btop, estr))
 
+    # --- cabeceira ESTOFADA na cabeca (Y alto), painel vertical da base ao topo
+    #     acima dos travesseiros; os travesseiros encostam NELA (nao no nada) ---
+    hbt = spec.headboard_t
+    parts.append(_p("cabeceira", "cabeceira", 0.0, L - hbt, W, L, 0.0, spec.headboard_h,
+                    tuple(spec.headboard_rgb)))
+
     # --- colchao (linho), transbordando levemente o estrado ---
     parts.append(_p("colchao", "colchao", 0.02, 0.02, W - 0.02, L - 0.02, btop, mtop, tuple(spec.mattress_rgb)))
 

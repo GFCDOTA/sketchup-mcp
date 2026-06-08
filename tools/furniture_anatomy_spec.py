@@ -93,7 +93,9 @@ SOFA_SCHEMA = {
 
 # ---------------------------------------------------------------- CAMA (bed)
 # pecas semanticas OBRIGATORIAS de uma cama (o gate exige presenca):
-BED_REQUIRED_PARTS = ("estrado", "colchao", "travesseiro", "manta")
+# cabeceira (headboard estofado) = peca de PRODUTO que faltava — sem ela os
+# travesseiros encostavam no nada e a cama lia como "lajes empilhadas".
+BED_REQUIRED_PARTS = ("estrado", "colchao", "cabeceira", "travesseiro", "manta")
 BED_SIZES = {"solteiro": (0.88, 1.88), "casal": (1.38, 1.88),
              "queen": (1.58, 1.98), "king": (1.93, 2.03)}
 
@@ -111,27 +113,31 @@ class BedSpec:
     base_top: float = 0.38           # topo do estrado (onde deita o colchao)
     mattress_top: float = 0.55       # superficie de dormir
     mattress_inset: float = 0.03     # colchao levemente menor que o estrado? (na vdd transborda)
-    pillow_h: float = 0.10           # espessura do travesseiro
+    headboard_h: float = 1.05        # topo da cabeceira a partir do chao (acima dos travesseiros)
+    headboard_t: float = 0.08        # espessura (Y) do painel da cabeceira
+    pillow_h: float = 0.16           # espessura do travesseiro (mais fofo: bevel le como almofada, nao laje)
     pillow_w: float = 0.50           # largura de cada travesseiro
-    pillow_depth: float = 0.34       # profundidade (Y) do travesseiro
+    pillow_depth: float = 0.36       # profundidade (Y) do travesseiro
     n_pillows: int = 2
-    blanket_h: float = 0.06          # manta/edredom dobrado no pe
+    blanket_h: float = 0.07          # manta/edredom dobrado no pe
     blanket_depth: float = 0.55      # quanto a manta cobre do pe (Y)
-    bevel: float = 0.04              # chanfro/inset nas pecas macias (colchao/travesseiro/manta)
+    bevel: float = 0.04              # chanfro/inset nas pecas macias (colchao/travesseiro/manta/cabeceira)
     estrado_rgb: tuple = (74, 56, 42)      # madeira escura
     mattress_rgb: tuple = (205, 196, 178)  # linho/creme (roupa de cama)
     pillow_rgb: tuple = (224, 218, 205)     # fronha clara
     blanket_rgb: tuple = (168, 140, 112)    # manta caramelo (acento quente)
+    headboard_rgb: tuple = (166, 152, 132)  # cabeceira ESTOFADA (linho quente, le premium)
 
     def validate(self):
         assert self.base_top > self.base_z0
         assert self.mattress_top > self.base_top
+        assert self.headboard_h > self.mattress_top + self.pillow_h   # cabeceira passa dos travesseiros
         assert self.n_pillows >= 1
         return self
 
     def bbox_m(self):
         return (round(self.width, 3), round(self.length, 3),
-                round(self.mattress_top + self.pillow_h, 3))
+                round(max(self.mattress_top + self.pillow_h, self.headboard_h), 3))
 
     def to_dict(self):
         d = asdict(self)
