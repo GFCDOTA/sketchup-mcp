@@ -206,6 +206,16 @@ SOURCE_STALE_MARGIN_SEC = 3600   # legacy .md mais velho que o audit por > 1h ->
 _AIB = REPO_ROOT / ".ai_bridge"
 QUESTIONS_DIR = _AIB / "questions"   # consults legacy (pergunta)
 RESPONSES_DIR = _AIB / "responses"   # consults legacy (resposta)
+
+
+def _questions_dir() -> Path:
+    """Resolve em call-time (nao no import) pra honrar um REPO_ROOT monkeypatchado
+    em teste; em producao REPO_ROOT nao muda, entao e' identico a QUESTIONS_DIR."""
+    return REPO_ROOT / ".ai_bridge" / "questions"
+
+
+def _responses_dir() -> Path:
+    return REPO_ROOT / ".ai_bridge" / "responses"
 _SESSIONS: dict = {}
 _SESSIONS_LOCK = threading.Lock()
 # Estado das ACOES corretivas em andamento (process-consults roda em background).
@@ -372,8 +382,8 @@ def _gate_source_info() -> dict:
     """Fonte real do gate + staleness + consults recentes do audit (pra aba Gate)."""
     now = time.time()
     aud = _audit_scan()
-    qd = QUESTIONS_DIR
-    rd = RESPONSES_DIR
+    qd = _questions_dir()
+    rd = _responses_dir()
     legacy_q = _newest_mtime(qd.glob("*.md")) if qd.is_dir() else None
     legacy_r = _newest_mtime(rd.glob("*.md")) if rd.is_dir() else None
     audit_c = aud["last_consult"]
@@ -720,8 +730,8 @@ def claude_sessions() -> dict:
                             "desc": _first_user_text(js), "reason": reason,
                             "idle_sec": round(age), "state": state})
     out.sort(key=lambda s: s["idle_sec"])
-    qd = QUESTIONS_DIR
-    rd = RESPONSES_DIR
+    qd = _questions_dir()
+    rd = _responses_dir()
     pending = []
     if qd.is_dir():
         answered = {p.stem for p in rd.glob("*.md")} if rd.is_dir() else set()
@@ -845,8 +855,8 @@ def gate_ledger() -> dict:
     """The gate Q&A history: question/response pairs, which are still pending
     (waiting on the gate), latency, and the verdict the gate gave. Answers 'o
     gate ajudou ou só virou teatro?'."""
-    qd = QUESTIONS_DIR
-    rd = RESPONSES_DIR
+    qd = _questions_dir()
+    rd = _responses_dir()
     rmap = {p.stem: p for p in rd.glob("*.md")} if rd.is_dir() else {}
     entries = []
     if qd.is_dir():
@@ -984,8 +994,8 @@ def next_best_actions() -> dict:
 
 def _orphan_consults() -> list:
     """Consults (perguntas) sem resposta — a fila que 'espera o gate'."""
-    qd = QUESTIONS_DIR
-    rd = RESPONSES_DIR
+    qd = _questions_dir()
+    rd = _responses_dir()
     if not qd.is_dir():
         return []
     answered = {p.stem for p in rd.glob("*.md")} if rd.is_dir() else set()
@@ -1005,7 +1015,7 @@ def _process_consults_worker(items: list) -> None:
     """Thread daemon: cada consult orfao -> gate -> grava resposta. Atualiza _ACTIONS
     pra a UI acompanhar ao vivo (3->2->1->0). Best-effort por item: um erro nao
     derruba a fila."""
-    rd = RESPONSES_DIR
+    rd = _responses_dir()
     try:
         rd.mkdir(parents=True, exist_ok=True)
     except OSError:
