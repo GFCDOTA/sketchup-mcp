@@ -37,7 +37,14 @@ BEVEL_IN = 0.04 * 39.3700787402   # ~4cm de chanfro/topo inset nas almofadas
 def fz_solid(ents, corners, z0, h, bevel, mode = 'lid')
   pts = corners.map { |c| Geom::Point3d.new(c[0].to_f, c[1].to_f, z0) }
   face = ents.add_face(pts)
-  if bevel <= 0 || h <= bevel * 1.6
+  fbb = face.bounds
+  fw = fbb.max.x - fbb.min.x
+  fd = fbb.max.y - fbb.min.y
+  # auto-protege: chanfro/inset SO se a peca for grossa o bastante nas DUAS dims do
+  # footprint (alem da altura). Peca fina (painel/porta/pe) -> caixa plana, sem inset.
+  # (sem isso, o inset zera a face -> ArgumentError "Duplicate points" — bug que dropou
+  #  a cabeceira; agora ela cai p/ caixa limpa em vez de quebrar.)
+  if bevel <= 0 || h <= bevel * 1.6 || fw < bevel * 2.4 || fd < bevel * 2.4
     face.pushpull(face.normal.z >= 0 ? h : -h)
     return
   end
@@ -80,7 +87,7 @@ def fz_run
       z0 = (b['z0_in'] || 0).to_f
       g = parent.entities.add_group
       g.name = b['label'] || b['kind']
-      bevel = %w[seat_cushion back_cushion arm colchao travesseiro manta].include?(b['kind']) ? BEVEL_IN : 0.0
+      bevel = %w[seat_cushion back_cushion arm colchao travesseiro manta cabeceira].include?(b['kind']) ? BEVEL_IN : 0.0
       mode = b['kind'] == 'arm' ? 'frustum' : 'lid'   # braco = casca inclinada; almofada/cama = inset
       fz_solid(g.entities, b['corners'] || [], z0, h, bevel, mode)
       g.material = fz_material(model, "fz_#{b['label']}", b['rgb'] || [120, 120, 120])
