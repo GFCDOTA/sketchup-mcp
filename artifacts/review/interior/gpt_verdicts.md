@@ -105,3 +105,18 @@ CAMERA (baixar p/ eye-level — esbarra na oclusão L-shape; tentar 1x). Render:
 - artifact: `planta_74_vray_quarto.png`
 - VERDICT: **WARN** · PREMIUM_REALISM:WARN · MATERIALS:WARN · LIGHTING:WARN · CAMERA:FAIL · FURNITURE_DETAIL:WARN
 - NEXT_ACTION: corrigir o crop/framebuffer primeiro para remover a faixa cinza inferior e enquadrar a cama inteira sem aproximar mais.
+
+### GPT_REVIEW [2026-06-08T02:01:46] id=quarto_suite01_crop → GATE **WARN**
+- artifact: `planta_74_vray_quarto_crop.png`
+- VERDICT: **WARN** · PREMIUM_REALISM:WARN · MATERIALS:WARN · LIGHTING:WARN · CAMERA:WARN · FURNITURE_DETAIL:WARN
+- NEXT_ACTION: reduzir ou afastar mais o fill quente da cama para recuperar textura da roupa de cama sem escurecer o quarto inteiro.
+
+### GPT_REVIEW [2026-06-08T02:04:06] id=quarto_suite01_v5 → GATE **WARN**
+- artifact: `planta_74_vray_quarto_crop.png`
+- VERDICT: **WARN** · PREMIUM_REALISM:WARN · MATERIALS:WARN · LIGHTING:PASS · CAMERA:WARN · FURNITURE_DETAIL:WARN
+- NEXT_ACTION: corrigir o crop/framebuffer para remover a faixa cinza inferior, mantendo essa iluminacao como base.
+
+### GPT_REVIEW [2026-06-08T02:06:26] id=quarto_suite01_v6 → GATE **WARN**
+- artifact: `planta_74_vray_quarto_crop.png`
+- VERDICT: **WARN** · PREMIUM_REALISM:WARN · MATERIALS:WARN · LIGHTING:PASS · CAMERA:WARN · FURNITURE_DETAIL:WARN
+- NEXT_ACTION: fazer crop final removendo totalmente a faixa cinza inferior sem cortar a cama.

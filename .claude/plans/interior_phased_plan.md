@@ -74,9 +74,17 @@ Geometria: `room_introspect.py <room_id>`. Cama centro (636,789), cabeceira lest
   hotspot agressivo) mas **CAMERA FAIL** (cama não inteira + faixa cinza). Crop aplicado (`crop_render.py`).
 - **LIÇÃO LL-FURN**: fill premium é POR-CÔMODO (não reusar intensidade da sala); quarto menor/cama perto da luz
   pede fill DIFUSO (raio grande, deslocado do eixo do móvel, z alto, intensidade baixa). Janela 2x pede sky menor.
-- **NEXT** (próxima iteração do loop): nailar o enquadramento da cama (inteira, sem faixa — crop+reframe leve,
-  "sem aproximar" per GPT) → re-gate até CAMERA/LIGHTING saírem de FAIL/WARN; depois materiais (roupa de cama
-  ainda lavada). Depois: SUITE 02 (r003) + cozinha. Renders WIP NÃO promovidos (gate não-PASS).
+- **v4** câmera recuada/subida (cama INTEIRA com margem) → **CAMERA FAIL→WARN** ("cama praticamente inteira").
+- **v5** fill 150 + sky0.14 (afastado/mais alto) → **LIGHTING PASS** ("fill menos agressivo, cama menos estourada,
+  janela mais controlada, quarto ainda iluminado"). Cama recuperou textura.
+- **v6** crop final (faixa de piso até o foot + trim do topo técnico) → **VERDICT WARN promotable** (LIGHTING PASS;
+  CAMERA/MATERIALS/FURNITURE_DETAIL/PREMIUM_REALISM WARN). **DELIVERABLE: planta_74_vray_quarto_premium.png**
+  (nível WARN honesto, sem FAIL — gate promove).
+- **LIÇÃO LL-FURN**: fill premium POR-CÔMODO (quarto pediu fill DIFUSO raio~42, deslocado do eixo da cama, z alto,
+  intensidade ~150 vs 820 da sala; sky menor p/ 2 janelas). Câmera: recuar p/ cama inteira + crop framebuffer
+  da faixa de piso (NÃO aproximar). Sequência GPT: lighting→câmera/crop→materiais.
+- **NEXT** (próxima iteração): polish do quarto p/ PASS (cama centro ainda levemente lavada → textura fina da roupa
+  de cama; ou aceitar WARN e avançar). Depois SUITE 02 (r003) + COZINHA (r004) mesmo pipeline pelo gate.
 
 - Backlog WARN (não bloqueia): bevel premium nas arestas (criado>portas>manta>braço) + afastar criado da porta.
 
