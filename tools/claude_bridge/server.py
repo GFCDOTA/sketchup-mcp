@@ -48,6 +48,22 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 CLAUDE_TIMEOUT = 240  # segundos por resposta; estoura -> erro 500, nunca trava infinito
 MODEL = "claude-opus-4-8"   # o JUIZ do modo B (Opus 4.8)
 EFFORT = "xhigh"            # effort maximo
+
+# Tiers do oraculo: 'fast' (rotina/triagem, segundos) vs 'deep' (A/B/C pesado, o JUIZ).
+# Modelo por ALIAS (claude resolve 'sonnet'/'opus' pro mais recente) + effort. deep =
+# comportamento atual (zero regressao). Sem isso, usar o gate em mais cenarios vira
+# pedagio de 60s por chamada (a latencia e' o effort xhigh, nao o I/O).
+TIERS = {
+    "fast": {"model": "sonnet", "effort": "low"},
+    "deep": {"model": MODEL, "effort": EFFORT},
+}
+DEFAULT_TIER = "deep"       # back-compat: sem 'tier' no /ask -> deep (nao muda quem ja chama)
+
+
+def resolve_tier(tier: str):
+    """tier -> (model, effort). Desconhecido/vazio -> DEFAULT_TIER. Pura, testavel."""
+    t = TIERS.get(str(tier or "").strip().lower()) or TIERS[DEFAULT_TIER]
+    return t["model"], t["effort"]
 STARTED_AT = time.time()    # para o uptime no painel operacional
 
 SYSTEM = """You are the CLAUDE ORACLE for the sketchup-mcp fidelity project. The human (Felipe)
@@ -88,23 +104,25 @@ def claude_bin() -> str:
     return shutil.which("claude") or shutil.which("claude.cmd") or "claude"
 
 
-def ask_claude(question: str) -> str:
-    """Roda `claude -p` headless com SYSTEM + a pergunta. Devolve o texto ou levanta."""
+def ask_claude(question: str, tier: str = DEFAULT_TIER) -> str:
+    """Roda `claude -p` headless com SYSTEM + a pergunta. `tier` escolhe model+effort:
+    'fast' (rotina/triagem, segundos) vs 'deep' (Opus xhigh, o JUIZ). Texto ou levanta."""
+    model, effort = resolve_tier(tier)
     prompt = SYSTEM + "\n\n=== QUESTION ===\n\n" + question
     # cwd NEUTRO (temp, FORA do repo): claude -p nao carrega o CLAUDE.md/hooks deste
     # projeto -> sem prompt de permissao e, critico, sem disparar o SessionStart hook
-    # que sobe ESTE bridge (recursao). Model+effort pinados: Opus 4.8 + xhigh (o JUIZ).
+    # que sobe ESTE bridge (recursao).
     workdir = tempfile.gettempdir()
     if sys.platform == "win32":
         # npm instala claude como .CMD -> precisa de shell; prompt vai por STDIN (sem quoting)
-        cmd = (f'"{claude_bin()}" -p --model {MODEL} --effort {EFFORT} '
+        cmd = (f'"{claude_bin()}" -p --model {model} --effort {effort} '
                f'--output-format text')
         proc = subprocess.run(cmd, input=prompt, capture_output=True, text=True,
                               encoding="utf-8", errors="replace",
                               timeout=CLAUDE_TIMEOUT, shell=True, cwd=workdir)
     else:
-        proc = subprocess.run([claude_bin(), "-p", "--model", MODEL,
-                               "--effort", EFFORT, "--output-format", "text"],
+        proc = subprocess.run([claude_bin(), "-p", "--model", model,
+                               "--effort", effort, "--output-format", "text"],
                               input=prompt, capture_output=True, text=True,
                               encoding="utf-8", errors="replace",
                               timeout=CLAUDE_TIMEOUT, cwd=workdir)
@@ -167,6 +185,19 @@ def parse_ask_mode(raw: bytes) -> str:
     return str(data.get("mode") or "").strip().lower()
 
 
+def parse_ask_tier(raw: bytes) -> str:
+    """Extract the optional `tier` (fast|deep) from an /ask body. '' if none."""
+    if not raw:
+        return ""
+    try:
+        data = json.loads(raw.decode("utf-8", errors="replace"))
+    except (ValueError, UnicodeError):
+        return ""
+    if not isinstance(data, dict):
+        return ""
+    return str(data.get("tier") or "").strip().lower()
+
+
 def apply_mode(prompt: str, mode: str) -> str:
     """Wrap the question per mode. `redteam` prepends a steelman-the-opposition
     instruction; any other / empty mode is a no-op."""
@@ -183,6 +214,8 @@ def health_payload() -> dict:
         "oracle": "claude",
         "model": MODEL,
         "effort": EFFORT,
+        "tiers": {k: dict(v) for k, v in TIERS.items()},
+        "default_tier": DEFAULT_TIER,
         "uptime_sec": round(time.time() - STARTED_AT, 1),
         "ask_field": list(ASK_FIELDS),
         "verdict_enum": list(VERDICT_ENUM),
@@ -1514,11 +1547,13 @@ def _ask_route(req, _url):
             req._send(400, {"error": "empty question (send 'prompt' or 'question')"})
             return
         mode = parse_ask_mode(body)
+        tier = parse_ask_tier(body)
         question = apply_mode(prompt, mode)
         t0 = time.time()
-        answer = ask_claude(question)
+        answer = ask_claude(question, tier=tier)
         _audit_append({"t": time.time(), "kind": "consult",
-                       "mode": mode or "default", "q_chars": len(prompt),
+                       "mode": mode or "default", "tier": tier or DEFAULT_TIER,
+                       "model": resolve_tier(tier)[0], "q_chars": len(prompt),
                        "a_chars": len(answer), "dur_sec": round(time.time() - t0, 1)})
         req._send(200, {"response": answer})
     except Exception as e:  # devolve erro honesto; nao fabrica resposta

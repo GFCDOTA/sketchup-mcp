@@ -252,11 +252,14 @@ def write_response_file(
     return path
 
 
-def call_bridge(prompt: str, url: str = BRIDGE_URL, mode: str = "") -> str:
-    """POST {prompt[, mode]} to /ask. Returns the response text or raises."""
+def call_bridge(prompt: str, url: str = BRIDGE_URL, mode: str = "", tier: str = "") -> str:
+    """POST {prompt[, mode][, tier]} to /ask. Returns the response text or raises.
+    tier='fast' usa Sonnet+effort baixo (segundos); '' deixa o server escolher (deep)."""
     payload = {"prompt": prompt}
     if mode:
         payload["mode"] = mode
+    if tier:
+        payload["tier"] = tier
     data = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(
         f"{url}/ask",
@@ -283,6 +286,7 @@ def run_gate(
     responses_dir: Path,
     require_consult: bool = False,
     url: str = BRIDGE_URL,
+    tier: str = "",
 ) -> GateResult:
     """Validate, probe, write, call. Returns GateResult.
 
@@ -318,12 +322,13 @@ def run_gate(
 
     # Bridge is up — record question first, then call
     mode = "redteam" if g.trigger in REDTEAM_TRIGGERS else ""
-    bridge_status = f"ONLINE — {detail}" + (f" | mode={mode}" if mode else "")
+    bridge_status = (f"ONLINE — {detail}" + (f" | mode={mode}" if mode else "")
+                     + (f" | tier={tier}" if tier else ""))
     question_path = write_question_file(
         questions_dir, g, prompt, bridge_status,
     )
     try:
-        raw = call_bridge(prompt, url=url, mode=mode)
+        raw = call_bridge(prompt, url=url, mode=mode, tier=tier)
     except (urllib.error.URLError, urllib.error.HTTPError,
             TimeoutError, OSError) as e:
         return GateResult(
@@ -382,6 +387,11 @@ def main() -> int:
              "writing SKIPPED_OFFLINE.",
     )
     parser.add_argument("--bridge-url", default=BRIDGE_URL)
+    parser.add_argument(
+        "--tier", choices=("fast", "deep"), default="",
+        help="Tier do oraculo: 'fast' (Sonnet+effort baixo, segundos) p/ rotina/triagem; "
+             "vazio ou 'deep' = Opus xhigh (default do server, o JUIZ).",
+    )
     args = parser.parse_args()
 
     context: dict = {}
@@ -405,6 +415,7 @@ def main() -> int:
         responses_dir=args.responses_dir,
         require_consult=args.require_consult,
         url=args.bridge_url,
+        tier=args.tier,
     )
 
     # Report
