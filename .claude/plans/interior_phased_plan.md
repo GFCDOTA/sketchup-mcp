@@ -120,6 +120,15 @@ Geometria: `room_introspect.py <room_id>`. Cama centro (636,789), cabeceira lest
   (faixa inferior + oclusão), NUNCA materiais/luz/piso (esses são PASS). Próximo salto de maior ROI no render NÃO é
   grindar câmera per-room — é resolver o enquadramento de forma SISTÊMICA (auto-câmera das bounds do cômodo +
   crop-rule), que conserta os 3 cômodos de uma vez. (Análogo ao piso: fix root-cause apartment-wide.)
+- **AUTO-CAMERA + AUTO-CROP — BUILT + VALIDADO (2026-06-08)**: `tools/auto_camera.py` deriva eye/target/fov das
+  bounds REAIS do cômodo — alvo no CENTRO DO CLUSTER de estar/dormir + sightline LIMPA pro herói + penalidade de
+  occluder grande no FOV + eye-level — **sem coords hardcoded (robusto a rebuild do `.skp`, nunca fica stale)**;
+  + auto-crop rule (top 11% / bottom 28%) remove o foreground morto. **GPT na SALA: VERDICT PASS + CAMERA PASS**
+  ("auto-camera + auto-crop resolveram a área morta, o conjunto ocupa o quadro"; MATERIALS/LIGHTING/FURNITURE PASS).
+  Regressão: `tools/test_auto_camera.py` (eye dentro do cômodo, eye-level, fov/dist sãos nos 3). Deliverable:
+  planta_74_vray_sala_autocrop.png. Resíduo PREMIUM_REALISM (janela clara / parede esq / textura do piso) =
+  polish de catálogo (backlog). Cômodos pequenos (suite02) seguem constrangidos pela geometria (auto dá shot
+  válido, não ótimo — o herói foreshortened OU o dresser no quadro; caso-limite documentado).
 
 - Backlog WARN (não bloqueia): bevel premium nas arestas (criado>portas>manta>braço) + afastar criado da porta.
 
