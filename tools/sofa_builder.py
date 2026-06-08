@@ -25,13 +25,21 @@ def _p(label, kind, x0, y0, x1, y1, z0, z1, rgb):
             "z0": round(z0, 4), "z1": round(z1, 4), "rgb": list(rgb)}
 
 
-def _seat_row(kind, prefix, x0, x1, y0, y1, z0, z1, n, gap, rgb):
-    """n almofadas SEPARADAS (com vinco) em X[x0,x1]."""
+def _seat_row(kind, prefix, x0, x1, y0, y1, z0, z1, n, gap, rgb, bevel=0.0):
+    """n almofadas SEPARADAS (com vinco) em X[x0,x1]. bevel>0: topo INSET (chanfro) ->
+    a almofada deixa de ser caixa reta (GPT cycle2: cushion_edge_radius, 'menos cubico').
+    Corpo (z0..z1-b) + tampo inset b em x/y (z1-b..z1), MESMO kind -> bbox e gate intactos."""
     out = []
     w = (x1 - x0 - gap * (n - 1)) / n
+    b = max(0.0, min(bevel, w / 2 - 0.01, (y1 - y0) / 2 - 0.01, (z1 - z0) / 2))
     for i in range(n):
         sx = x0 + i * (w + gap)
-        out.append(_p(f"{prefix}_{i + 1}", kind, sx, y0, sx + w, y1, z0, z1, rgb))
+        if b > 0:
+            zc = z1 - b
+            out.append(_p(f"{prefix}_{i + 1}", kind, sx, y0, sx + w, y1, z0, zc, rgb))
+            out.append(_p(f"{prefix}_{i + 1}_top", kind, sx + b, y0 + b, sx + w - b, y1 - b, zc, z1, rgb))
+        else:
+            out.append(_p(f"{prefix}_{i + 1}", kind, sx, y0, sx + w, y1, z0, z1, rgb))
     return out
 
 
@@ -96,7 +104,7 @@ def build_sofa(spec: SofaSpec):
 
     # --- assentos SEPARADOS (vinco) ---
     parts += _seat_row("seat_cushion", "seat", main_seat_x[0], main_seat_x[1],
-                       seat_front, seat_back, base_top, sh, n, gap, cush_rgb)
+                       seat_front, seat_back, base_top, sh, n, gap, cush_rgb, bevel=spec.cushion_bevel)
     if chaise_x:
         # chaise = assento FUNDO (deita as pernas): 2 almofadas ao longo de Y
         cyl = [(0.0, Dtot * 0.5), (Dtot * 0.5, seat_back)]
@@ -106,7 +114,7 @@ def build_sofa(spec: SofaSpec):
 
     # --- encostos SEPARADOS (corpo principal + sobre a chaise) ---
     parts += _seat_row("back_cushion", "back", main_seat_x[0], main_seat_x[1],
-                       seat_back, Dtot, back_z0, bh, n, gap, back_rgb)
+                       seat_back, Dtot, back_z0, bh, n, gap, back_rgb, bevel=spec.cushion_bevel)
     if chaise_x:
         parts.append(_p("back_chaise", "back_cushion", chaise_seat_x[0], seat_back,
                         chaise_seat_x[1], Dtot, back_z0, bh, back_rgb))
