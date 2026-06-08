@@ -30,7 +30,9 @@ Felipe escolheu "Produto + preparo candidato" (não pausar produto; preparar esc
 
 ### Sessão V-Ray/mobiliar 2026-06-08 — 3 entregas (branch feat/mobiliar-bedroom-layout)
 1. **Cozinha PRODUTO PASS** (a2ecea7): eletro distintos (geladeira/pia/cooktop) + fluxo, mata bancada agregada. GPT FURNITURE_DETAIL=PASS. Render LIMITED_BY_ROOM_GEOMETRY (galley).
-2. **Escala candidata STAGED** (7cdd801): `scale_candidate_20260608/` — overlay+cotas provam 0.0259 (1.359× menor). **Aguarda VISUAL_REVIEW do Felipe.**
+2. **Escala 0.0259 APROVADA + REBUILDADA + VALIDADA** (72c2e3e): Felipe aprovou ("cota não mente, render auto-fit engana"). Rebuild em `scale_rebuild_0259_20260608/model.skp` (SHA b7101037…), Suíte 01 5.46×4.00 vs PDF 5.45×4.00 = **PASS**, gates verdes, geometria íntegra. Default 0.0352 intacto, fixture não mutado, repro no VALIDATION.md.
+
+   **🔶 COORDENAÇÃO PEDIDA (sessão paralela):** a escala certa AINDA NÃO está no canônico `artifacts/planta_74/planta_74.skp` (segue 0.0352) nem no `furnished.skp`. Pra valer no apê: (1) rebuildar canônico c/ `ENV PT_TO_M=0.0259`, (2) re-mobiliar (layout é scale-robusto), (3) **re-renderizar V-Ray** (os renders sala/quarto atuais estão no apê 1.36× errado). Isso toca o deliverable compartilhado → **não faço unilateral**. PR `feat/mobiliar-bedroom-layout`→develop (13 commits) pronto, **sem merge cego** (passo 6 do Felipe). Compare: https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feat/mobiliar-bedroom-layout?expand=1
 3. **Cama anatomia PASS** (f64bd21): cabeceira estofada + travesseiros fofos → "saiu do look de lajes" (GPT FURNITURE_DETAIL/CAMERA/LIGHTING=PASS). + hardening do builder (af3717d): guard anti-"Duplicate points" em peça fina.
 - **WARN recorrente** "arestas duras/chapado" (PREMIUM): é qualidade de RENDER (V-Ray round-edges/textura/GI), NÃO anatomia (FURNITURE_DETAIL já PASS). Trilha V-Ray gated na decisão de escala. Detalhe em `artifacts/review/furniture/LL-FURN.md`.
 
