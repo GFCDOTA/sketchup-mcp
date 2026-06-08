@@ -76,7 +76,9 @@ def bedroom_designer_boxes(con, room_id):
         size = next((s for s in ("king", "queen", "casal", "solteiro") if s in nm), "king")
         parts, _ = build_bed(bed_spec(size, width=round(w_m, 3), length=round(l_m, 3)))
         bed_parts = place_bed_boxes(parts, cen, (fx, fy))
-        boxes = [b for b in boxes if b.get("kind") != "bed"] + bed_parts
+        # a anatomia do build_bed JA tem a 'cabeceira'; dropa tambem o 'headboard' do
+        # _items_to_boxes pra nao duplicar o painel (ruido visual no render). Felipe 2026-06-08.
+        boxes = [b for b in boxes if b.get("kind") not in ("bed", "headboard")] + bed_parts
         out["bed_parametric"] = {"size": size, "n_parts": len(bed_parts),
                                  "W_m": round(w_m, 2), "L_m": round(l_m, 2)}
 
