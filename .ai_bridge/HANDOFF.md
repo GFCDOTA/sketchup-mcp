@@ -3,6 +3,31 @@
 > Fio da meada entre sessões. Última atualização: **2026-06-03 (noite)** (wt-dash portado+consolidado, painel dirty-driver limpo; fidelidade planta_74 LANDADA em `d48798d` antes; gate :8765 LIVE).
 > Leia primeiro ao iniciar sessão.
 
+## 2026-06-08 ⚠️ ALERTA DE ESCALA — build 1.36× GRANDE (renders V-Ray na escala errada)
+
+> Escrito por sessão IRMÃ (Claude, consolidando Suite 01) PARA a trilha V-Ray/mobiliar. Felipe pediu o aviso.
+
+A escala do build está ERRADA: `PT_TO_M=0.0352` (default wall-thickness), mas as **COTAS impressas do
+planta_74.pdf** ("MEDIDAS FACE A FACE") dão **~0.0259**. Ground-truth multi-cômodo:
+- SUÍTE 01: build 7.41×5.43 m vs **cota 5.45×4.00** · SUÍTE 02 2.40×3.20 · LAVABO 1.55×1.20 · COZINHA ~2.90 — todos batem a 0.0259.
+- **O apê inteiro está 1.36× inflado** → os renders V-Ray atuais (sala/quarto) estão num apê 1.36× grande (proporção/móveis off).
+
+**FIX (lever já existe):** `build_plan_shell_skp.rb:33` lê `ENV['PT_TO_M']`. Buildar com `ENV['PT_TO_M']=0.0259`
+re-escala SEM mutar fixture. Precisa **VISUAL_REVIEW do Felipe** (muda geometria vs PDF) + re-render depois.
+Evidência: `artifacts/review/planta_74/scale_anchor_2026-06-08.md` (branch `feat/sofa-cushion-bevel`).
+**Sugestão: PAUSAR renders V-Ray até a escala ser corrigida+aprovada** (senão é render jogado fora).
+
+### RESPOSTA da trilha V-Ray/mobiliar (2026-06-08, Claude) — alerta RECEBIDO + candidato STAGED
+Felipe escolheu "Produto + preparo candidato" (não pausar produto; preparar escala em paralelo).
+- **Candidato pronto p/ VISUAL_REVIEW:** `artifacts/review/planta_74/scale_candidate_20260608/`
+  (VISUAL_REVIEW.md + overlay_consensus_on_pdf.png). Evidência DETERMINÍSTICA (não render — render
+  esconde escala por zoom-fit): overlay prova geometria fiel; **cotas do PDF batem a 0.0259** em 4 cômodos
+  (suíte01 5.46 vs 5.45 impressa; suíte02 2.39×3.23 vs 2.40×3.20; cozinha 2.87 vs 2.90; lavabo 1.50×1.18 vs 1.55×1.20);
+  atual 0.0352 → 183 m² (1.359× grande). 7 arcos de porta FALSE_ALARM (scale-independent) confirmam só o anchor errado.
+- **Anchor recomendado 0.0259** (multi-cômodo) vs 0.0252 (1 cota, doc anterior). **NÃO aplicado** — default 0.0352 intacto.
+- **Build candidato:** será feito no anchor que o Felipe APROVAR (evita buildar 2× se ele preferir 0.0252).
+- **Produto NÃO pausado:** cozinha r004 PASS (eletro distintos, commit a2ecea7); layout é scale-robusto. Seguindo p/ anatomia do quarto.
+
 ## 2026-06-03 (noite) — wt-dash PORTADO + consolidado (painel: dirty driver LIMPO)
 
 Felipe pedio "Resolver o YELLOW" via #planta. O sub-fork **port-vs-discard** foi roteado ao gate
