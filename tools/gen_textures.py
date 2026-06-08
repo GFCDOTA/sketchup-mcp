@@ -64,12 +64,30 @@ def linen(c_base, seed, period=3.2, amp=46):
     return Image.fromarray(out.astype("uint8"))
 
 
+def wood_floor(c_base, c_dark, seed, planks=5, rings=7):
+    """Piso de madeira: tabuas longas (veio vertical) + linhas de junta horizontais entre tabuas.
+    Tom quente medio, escala grande (tile grande no V-Ray). Conserta a 'faixa cinza' do piso pastel
+    chapado em TODO comodo (material floor_<room_id>). NAO afeta parede/movel (materiais distintos)."""
+    rng = np.random.default_rng(seed)
+    warp = _value_noise(SZ, SZ, 40, rng) * 5.0 + _value_noise(SZ, SZ, 12, rng) * 1.4
+    y = np.linspace(0, 1, SZ)[:, None].repeat(SZ, 1)            # veio corre na vertical
+    grain = (np.sin((y * rings + warp) * np.pi) * 0.5 + 0.5) ** 1.4
+    fine = _value_noise(SZ, SZ, 3, rng) * 0.16
+    t = np.clip(grain * 0.8 + fine, 0, 1)
+    out = np.stack([c_dark[i] + (c_base[i] - c_dark[i]) * t for i in range(3)], -1)
+    seam = (SZ // planks)                                       # juntas entre tabuas
+    mask = (np.arange(SZ) % seam) < 2                           # 2px de junta escura
+    out[mask] *= 0.45
+    return Image.fromarray(np.clip(out, 0, 255).astype("uint8"))
+
+
 TEXTURES = {
     "wood_medium.png": lambda: wood((150, 108, 70), (96, 66, 42), 11),
     "wood_dark.png": lambda: wood((92, 66, 46), (52, 36, 24), 22),
     "fabric_light.png": lambda: fabric((192, 182, 164), 33),
     "fabric_accent.png": lambda: fabric((174, 144, 114), 44),
     "fabric_linen.png": lambda: linen((186, 178, 163), 55),   # roupa de cama (bedding-only)
+    "wood_floor.png": lambda: wood_floor((158, 116, 78), (104, 72, 46), 77),   # piso (floor_* — todos os comodos)
 }
 
 

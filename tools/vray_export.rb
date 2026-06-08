@@ -40,6 +40,22 @@ def vray_export_run
           out << "tex ERR #{matname}: #{e.message}"
         end
       end
+      # PISO: textura de madeira em TODOS os materiais floor_* (prefixo = robusto a id; tile GRANDE = tabuas).
+      # Conserta a "faixa cinza" recorrente (piso pastel chapado). floor_* e distinto de parede(plan_wall)/
+      # movel(ph_*) => seguro, nao regride sofa/parede. Geometria intacta (so material.texture).
+      wf_path = File.join(tex_dir, 'wood_floor.png')
+      if File.exist?(wf_path)
+        model.materials.each do |m|
+          next unless m.name.to_s.start_with?('floor_')
+          begin
+            m.texture = wf_path
+            m.texture.size = [120, 120]   # ~3m de repeticao (tabuas grandes; piso != 40" do movel)
+            n_tex += 1
+          rescue StandardError => e
+            out << "tex ERR #{m.name}: #{e.message}"
+          end
+        end
+      end
       out << "texturas aplicadas: #{n_tex}"
     end
 
