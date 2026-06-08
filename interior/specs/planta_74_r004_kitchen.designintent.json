@@ -3,67 +3,71 @@
   "room_id": "r004",
   "room_type": "kitchen",
   "room_name": "COZINHA",
-  "source": "spatial_model(con,'r004') + consensus walls; SEM fabricacao",
+  "source": "spatial_model + consensus walls + r004 polygon (SEM fabricacao); placement validado por geometry_sanity",
   "dimensions_estimate": {
-    "area_m2_pipeline": 9.8,
-    "usable_m2_pipeline": 8.6,
-    "circulation_m2_pipeline": 1.2,
-    "scale_used": "PT_TO_M=0.0352 (consensus default; o geometry_report do SKP usa a MESMA)",
-    "area_m2_if_cota_scale": 5.0,
-    "scale_note": "HANDOFF sugere PT_TO_M~0.0252 pelas cotas (0.0352 ~1.4x grande). A 0.0252 a area cai p/ ~5m2 e as paredes encurtam ~0.72x. NAO resolvido -> needs_human_review."
+    "bbox_m_0352": [2.44, 3.9],
+    "bbox_m_0278": [1.95, 3.08],
+    "area_m2_0352": 9.4,
+    "scale_finding": "Apto inteiro a 0.0352 = 118.7 m2, mas o projeto e 74 m2 -> build ~1.27x GRANDE. Escala real ~0.0278 (ancora 74m2 total) / 0.0252 (cota) / 0.0318 (privativa). Consistencia: 0.0352 esta inflado.",
+    "scale_status": "needs_human_review: nailar exige cota do PDF (olho do Felipe / medicao). Afeta realismo ABSOLUTO; o LAYOUT (relativo) e robusto a escala."
   },
   "fixed_constraints": {
     "doors": [
-      {"wall_id": "m006", "note": "porta (2.83m de parede) — manter folga de giro + circulacao"},
-      {"wall_id": "m010", "note": "porta na parede longa compartilhada (15.08m) — circulacao p/ sala/jantar"}
+      {"wall_id": "m006", "pos": "parede TOPO (y~583)", "note": "manter livre + arco de giro + circulacao"},
+      {"wall_id": "m010", "pos": "canto inferior-direito (boundary p/ sala)", "note": "circulacao; manter livre"}
     ],
     "windows": [],
-    "openings": ["interior_door@m006", "interior_door@m010"],
-    "clean_walls": [
-      {"wall_id": "m013", "orient": "VERT", "len_m_0352": 3.49, "len_m_0252": 2.50, "role": "bancada PRINCIPAL"},
-      {"wall_id": "m011", "orient": "HORIZ", "len_m_0352": 2.85, "len_m_0252": 2.04, "role": "run secundario (geladeira+torre)"}
+    "clean_walls_in_room": [
+      {"wall_id": "m011", "orient": "HORIZ (fundo)", "in_room_len_m_0352": 2.46, "role": "PRINCIPAL: bancada pia+cooktop"},
+      {"wall_id": "m013", "orient": "VERT (direita)", "in_room_len_m_0352": 1.0, "role": "SECUNDARIO: geladeira + torre (a parede tem 3.49m mas ~2.4m ficam FORA da cozinha, no quarto)"}
     ],
-    "no_place_zones": ["arco/giro da porta m006", "faixa de circulacao 0.85m na frente das 2 portas (m006,m010)"]
+    "correcao": "spec v1 dizia m013=principal (3.49m). ERRADO: a m013 e quase toda fora do r004. A parede util real e a m011 (fundo). Corrigido olhando o poligono.",
+    "no_place_zones": ["arco/giro porta m006 (topo)", "canto inf-direito (porta m010)", "circulacao central"]
   },
   "program_priority": {
-    "obrigatorio": ["bancada com pia", "cooktop/fogao", "geladeira", "armario inferior (marcenaria)"],
-    "desejavel": ["armarios aereos sobre a bancada", "torre alta (forno/despensa)", "triangulo de trabalho plausivel"],
+    "obrigatorio": ["bancada com pia", "cooktop", "geladeira", "armario inferior (marcenaria)"],
+    "desejavel": ["aereos sobre a bancada", "torre forno/despensa"],
     "decorativo": []
   },
-  "layout_strategy": "Cozinha COMPACTA em 2 runs nas duas unicas paredes limpas: bancada principal em m013 (run mais longo, pia+cooktop) + run secundario em m011 (geladeira + torre alta). L se o canto m013-m011 fechar; senao galley/paralelo. SEM ilha (area pequena em qualquer escala). Aereos so sobre a bancada principal. Triangulo pia(m013)->cooktop(m013)->geladeira(m011) curto e funcional.",
+  "layout_strategy": "Cozinha COMPACTA em L: run PRINCIPAL no fundo (m011, ~2.46m: pia+cooktop) + coluna na direita (m013: geladeira + torre forno). Aereos so sobre o run do fundo. Centro/esquerda LIVRES p/ circulacao (porta no topo). SEM galley (a ~0.0278 a largura ~1.95m nao da corredor p/ 2 runs opostos) e SEM ilha. Triangulo pia/cooktop (fundo) -> geladeira (direita) curto.",
   "furniture_plan": [
-    {"item": "bancada_inferior_pia_cooktop", "funcao": "preparo + coccao + pia", "parede": "m013 (limpa, 3.49m)", "dim_aprox_m": "~3.0 x 0.60", "motivo": "parede limpa mais LONGA -> aproveita o maximo; concentra pia+cooktop no mesmo run = triangulo curto", "risco": "comprimento depende da escala; a 0.0252 cai p/ ~2.5m (ainda cabe pia+cooktop)"},
-    {"item": "geladeira", "funcao": "refrigeracao", "parede": "m011 (run secundario)", "dim_aprox_m": "~0.70 x 0.70", "motivo": "tira a geladeira do run de preparo (nao quebra a bancada continua); fica perto da entrada", "risco": "se m011 ~2.04m (escala cota), geladeira+torre apertam -> pode sobrar so 1"},
-    {"item": "torre_forno_despensa", "funcao": "forno alto + armazenamento vertical", "parede": "m011, ao lado da geladeira", "dim_aprox_m": "~0.60 x 0.60 x 2.10", "motivo": "verticaliza armazenamento numa cozinha pequena (marcenaria); nao rouba bancada", "risco": "altura nao pode bloquear porta/circulacao de m006/m010"},
-    {"item": "aereos", "funcao": "armazenamento superior", "parede": "sobre a bancada m013", "dim_aprox_m": "~3.0 x 0.35 @ z~1.5m", "motivo": "dobra o armazenamento sem ocupar piso; so sobre a bancada (nao sobre circulacao)", "risco": "nao avancar sobre a zona de porta"}
+    {"item": "bancada_pia_cooktop", "funcao": "preparo+coccao+pia", "parede": "m011 (fundo)", "dim_aprox_m": "~2.4 x 0.60 (ergonomico)", "motivo": "unica parede limpa LONGA dentro da cozinha -> maximo aproveitamento; pia+cooktop no mesmo run", "risco": "porta m010 no canto inf-dir: bancada para antes dela"},
+    {"item": "geladeira", "funcao": "refrigeracao", "parede": "m013 (direita, central)", "dim_aprox_m": "~0.70 x 0.70", "motivo": "tira a geladeira do run de preparo; longe da porta do topo", "risco": "profundidade 0.70 avanca no comodo estreito -> conferir corredor >=0.90m"},
+    {"item": "torre_forno_despensa", "funcao": "forno alto + despensa", "parede": "m013, abaixo da geladeira", "dim_aprox_m": "~0.60 x 0.60 x 2.10", "motivo": "verticaliza armazenamento (marcenaria) sem roubar bancada", "risco": "altura nao bloquear porta/circulacao"},
+    {"item": "aereos", "funcao": "armazenamento superior", "parede": "sobre a bancada do fundo (m011)", "dim_aprox_m": "~2.4 x 0.35 @ z~1.5m", "motivo": "dobra o armazenamento sem ocupar piso", "risco": "nao avancar sobre a porta do topo"}
   ],
   "circulation_rules": [
-    "manter >=0.85m livre na frente das portas m006 e m010 (zona de circulacao do spatial_model)",
-    "corredor de trabalho entre os 2 runs >= 0.90m (abrir geladeira/forno + 1 pessoa)",
-    "nenhum movel sobre o arco de giro da porta"
+    ">=0.85m livre na frente das portas m006 (topo) e m010 (canto inf-dir)",
+    "corredor de trabalho >= 0.90m entre a bancada do fundo e a coluna da direita",
+    "centro/esquerda do comodo = circulacao, sem movel"
   ],
   "carpentry_opportunities": [
-    "bancada inferior + aereos + torre = marcenaria sob medida (encostada na parede, RL-15: gap<=2cm)",
-    "aproveitar o canto (se m013-m011 fecharem) com gaveteiro/cantoneira em vez de vao morto",
-    "torre alta unifica forno+despensa: melhor uso vertical numa cozinha pequena"
+    "bancada + aereos + torre = marcenaria sob medida ENCOSTADA (RL-15, gap<=2cm)",
+    "torre unifica forno+despensa: melhor uso vertical numa cozinha pequena",
+    "se sobrar a esquerda util, gaveteiro raso encostado (a confirmar se ha parede limpa la)"
   ],
   "must_not_violate": [
     "geometry_sanity PASS (sem underground/degenerada/off-axis/escala/fora-do-comodo)",
-    "nao bloquear porta (m006/m010) nem arco de giro",
-    "nao atravessar parede (RL-09); planejado ENCOSTA (RL-15)",
-    "nao deixar corredor de trabalho < 0.90m",
-    "nao inventar dimensao sem evidencia (escala fica como risco, nao como numero cravado)"
+    "nao bloquear porta m006/m010 nem arco de giro",
+    "planejado ENCOSTA (RL-15); nao atravessa parede (RL-09)",
+    "corredor de trabalho >= 0.90m",
+    "nao cravar dimensao absoluta sem confirmar a escala"
   ],
   "tradeoffs": [
-    "Pia+cooktop no MESMO run (m013) = triangulo curto e bancada de apoio continua, mas concentra o uso num lado.",
-    "ALTERNATIVA DESCARTADA: ilha central — nao cabe (usable 8.6m2@0352 ou ~4.4m2@0252; ilha precisa ~1.0m de folga em volta).",
-    "ALTERNATIVA DESCARTADA: cozinha linear so em m013 — desperdicaria a parede limpa m011 e empilharia tudo num run so.",
-    "Geladeira em m011 separa do preparo (bom fluxo) mas, na escala-cota (paredes menores), pode forcar escolher geladeira OU torre."
+    "L (fundo+direita) aproveita as 2 paredes limpas reais; descartado galley (corredor < 0.9m na escala provavel) e ilha (nao cabe).",
+    "Geladeira na direita melhora o fluxo mas a 0.70 de profundidade aperta o corredor num comodo estreito -> risco a validar com o corredor real.",
+    "Run unico (so fundo) foi descartado: desperdicaria a parede direita e empilharia geladeira no preparo."
   ],
+  "validation": {
+    "geometry_sanity": "PASS (underground/degenerate/off_axis/absurd_bbox/outside_room) no placement gerado",
+    "plan_artifact": "artifacts/review/furniture/kitchen/r004_plan_top.png (top-view, render SU-free)",
+    "placement_source": ".claude/scratch/plan_kitchen_r004.py (determinismo: paredes reais + profundidades ergonomicas; r004-especifico, ainda nao generalizado em tool)"
+  },
   "confidence": "medium",
   "needs_human_review": [
-    "ESCALA: confirmar PT_TO_M 0.0352 vs 0.0252 — muda area (9.8 vs 5.0 m2) e se geladeira+torre cabem juntas em m011",
-    "CANTO m013-m011: confirmar se fecham (L com cantoneira) ou ficam offset (galley) — define o aproveitamento do canto",
-    "v1 nao tem placer de cozinha (so quarto) — gerar o placement do kitchen e trabalho novo (nao auto)"
+    "ESCALA: confirmar vs cota do PDF (build ~1.27x grande) — afeta se geladeira 0.70 deixa corredor >=0.90m",
+    "CORREDOR de trabalho real entre bancada-fundo e coluna-direita (medir no placement final)",
+    "PAREDE ESQUERDA: confirmar se ha trecho limpo util (hoje nao usado)",
+    "v1 nao tem placer de cozinha: este placement e r004-especifico; generalizar e trabalho novo"
   ]
 }
