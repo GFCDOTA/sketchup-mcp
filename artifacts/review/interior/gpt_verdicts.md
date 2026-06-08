@@ -135,3 +135,28 @@ CAMERA (baixar p/ eye-level — esbarra na oclusão L-shape; tentar 1x). Render:
 - artifact: `planta_74_vray_quarto_crop.png`
 - VERDICT: **WARN** · PREMIUM_REALISM:WARN · MATERIALS:PASS · LIGHTING:PASS · CAMERA:WARN · FURNITURE_DETAIL:PASS
 - NEXT_ACTION: fazer um crop final minimo removendo totalmente a faixa cinza inferior, sem mexer mais em luz/material/camera.
+
+### GPT_REVIEW [2026-06-08T12:50:58] id=quarto_piso_madeira → GATE **WARN**
+- artifact: `planta_74_vray_quarto_floor_crop.png`
+- VERDICT: **WARN** · PREMIUM_REALISM:WARN · MATERIALS:PASS · LIGHTING:PASS · CAMERA:WARN · FURNITURE_DETAIL:PASS
+- NEXT_ACTION: remover/cropar totalmente a faixa cinza inferior para deixar so o piso de madeira dentro do frame.
+
+### GPT_REVIEW [2026-06-08T13:06:08] id=sala_piso_madeira → GATE **PASS**
+- artifact: `planta_74_vray_sala_floor_crop.png`
+- VERDICT: **PASS** · PREMIUM_REALISM:WARN · MATERIALS:PASS · LIGHTING:PASS · CAMERA:WARN · FURNITURE_DETAIL:PASS
+- NEXT_ACTION: manter o piso de madeira, mas reduzir levemente a textura do piso perto da janela.
+
+### GPT_REVIEW [2026-06-08T13:14:15] id=suite02_premium → GATE **WARN**
+- artifact: `planta_74_vray_suite02_crop.png`
+- VERDICT: **WARN** · PREMIUM_REALISM:WARN · MATERIALS:PASS · LIGHTING:PASS · CAMERA:WARN · FURNITURE_DETAIL:WARN
+- NEXT_ACTION: ajustar camera/crop para remover a faixa cinza inferior e reduzir a oclusao do movel a direita, mantendo cama e janela no quadro.
+
+### GPT_REVIEW [2026-06-08T13:54:12] id=sala_autocam_full → GATE **PASS**
+- artifact: `planta_74_vray_sala_autocrop.png`
+- VERDICT: **PASS** · PREMIUM_REALISM:WARN · MATERIALS:PASS · LIGHTING:PASS · CAMERA:PASS · FURNITURE_DETAIL:PASS
+- NEXT_ACTION: reduzir a presenca da parede esquerda no auto-framing para concentrar mais o quadro em sofa+mesa+tapete.
+
+### GPT_REVIEW [2026-06-08T15:55:01] id=cozinha_product → GATE **PASS**
+- artifact: `?`
+- VERDICT: **PASS** · PREMIUM_REALISM:WARN · MATERIALS:WARN · LIGHTING:WARN · CAMERA:WARN · FURNITURE_DETAIL:PASS
+- NEXT_ACTION: adicionar/validar detalhes funcionais visiveis da cozinha — cuba+torneira, cooktop com bocas, forno com vidro/puxador e portas/gavetas nos modulos — sem mexer no layout.

@@ -22,6 +22,15 @@ AEREO_DEPTH, AEREO_Z0, AEREO_H = 0.35, 1.50, 0.70   # armário aéreo sobre a ba
 RGB_COUNTER = [176, 166, 150]
 RGB_TORRE = [69, 90, 100]                       # cinza-escuro eletrodoméstico
 RGB_AEREO = [150, 140, 124]                     # bege-escuro (madeira)
+RGB_GELADEIRA = [201, 203, 207]                 # inox claro
+RGB_PIA = [183, 187, 191]                       # cuba inox
+RGB_COOKTOP = [44, 44, 48]                      # vidro preto
+# ELETRODOMESTICOS distintos (programa de cozinha REAL): (kind, w_m, d_m, h_m, z0_m, rgb, frac_na_run).
+# Fluxo geladeira -> pia -> cooktop ao longo da run principal (triangulo linear de galley).
+# geladeira = full-height numa ponta; pia/cooktop = baixos SOBRE a bancada (z0 ~ altura da bancada).
+APPLIANCES = [("geladeira", 0.70, 0.66, 1.80, 0.00, RGB_GELADEIRA, 0.85),
+              ("pia",       0.55, 0.46, 0.12, 0.84, RGB_PIA, 0.62),
+              ("cooktop",   0.58, 0.50, 0.08, 0.90, RGB_COOKTOP, 0.40)]
 DOOR_KINDS = {"interior_door", "interior_passage", "glazed_balcony"}
 
 
@@ -119,6 +128,40 @@ def build_boxes(con, room_id):
             n_torre = 1
             break
 
+    # ELETRODOMESTICOS distintos (geladeira->pia->cooktop) na MAIOR run de bancada, LONGE da porta.
+    # Substitui o placeholder "bancada agregada" por pecas reconheciveis. Skip de slot perto da porta
+    # (geometry_sanity pegou o bug de por na parede curta junto da porta). NAO mascarar — corrigir o layout.
+    n_appl = 0
+    door_in = []
+    for o in con.get("openings", []):
+        if (o.get("kind") or o.get("type")) in DOOR_KINDS:
+            p = o.get("position") or o.get("center")
+            if p:
+                door_in.append((p[0] * PT_TO_IN, p[1] * PT_TO_IN))
+    bancadas = [it for it in items if it["kind"] == "bancada"]
+    main_idx = max(range(len(bancadas)), key=lambda i: (bancadas[i]["x1"] - bancadas[i]["x0"]) *
+                   (bancadas[i]["y1"] - bancadas[i]["y0"])) if bancadas else 0
+    main_wall = used[main_idx] if main_idx < len(used) else used[0]
+    ws_main = _wall_setup(sm, main_wall)
+    if ws_main is not None:
+        if ws_main["orient"] == "v":
+            a_lo, a_hi = max(ws_main["along_lo"], miny), min(ws_main["along_hi"], maxy)
+        else:
+            a_lo, a_hi = max(ws_main["along_lo"], minx), min(ws_main["along_hi"], maxx)
+        span = a_hi - a_lo
+        for kind, w_m, d_m, h_m, z0_m, rgb, frac in APPLIANCES:
+            bx = _fbox(ws_main["orient"], ws_main["face"], ws_main["sgn"], a_lo + span * frac,
+                       M(0.03), M(w_m), M(d_m)).intersection(cell)
+            if not bx.is_empty and bx.geom_type == "MultiPolygon":
+                bx = max(bx.geoms, key=lambda g: g.area)
+            if bx.is_empty or bx.geom_type != "Polygon" or bx.area < (0.05 / PT_TO_M ** 2):
+                continue
+            cx, cy = bx.centroid.x * PT_TO_IN, bx.centroid.y * PT_TO_IN
+            if any(((cx - dx) ** 2 + (cy - dy) ** 2) ** 0.5 < 26 for dx, dy in door_in):
+                continue                                  # nao colocar appliance perto da porta
+            items.append(_to_box(kind, bx, h_m, rgb, z0_m=z0_m))
+            n_appl += 1
+
     # ARMARIOS AEREOS sobre a bancada (GPT review P2: bancada embaixo + aereo em cima =
     # cozinha planejada real). Faixa rasa ELEVADA (z0=1.5m) na parede da bancada,
     # recortada ao comodo, FORA da janela (nao bloquear) e fora da circulacao.
@@ -145,7 +188,7 @@ def build_boxes(con, room_id):
         n_aereo += 1
     return items, {"result": "OK", "room_name": sm.get("room_name"),
                    "n_counters": len(used), "n_torre": n_torre, "n_aereo": n_aereo,
-                   "walls": used}
+                   "n_appliances": n_appl, "walls": used}
 
 
 if __name__ == "__main__":
