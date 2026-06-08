@@ -107,6 +107,14 @@ class VRayFinalProvider(RenderProvider):
                                 log=(log.read_text("utf-8", "ignore") if log.exists() else ""),
                                 error="export .vrscene falhou")
 
+        # 1b. corrige EXPOSICAO: o export sai com a CameraPhysical setada p/ exterior claro
+        # (f/8, 1/300, ISO100) -> interior subexposto. Tweak p/ um interior bem exposto.
+        try:
+            from tools.tweak_vrscene import tweak_file
+            tweak_file(vrscene, iso=req.iso, fnum=req.fnum, shutter=req.shutter, sky=req.sky)
+        except Exception:  # noqa: BLE001
+            pass
+
         # 2. vray.exe renderiza headless -> PNG
         try:
             r = subprocess.run([str(self.vray_exe), f"-sceneFile={vrscene}", f"-imgFile={out_png}",

@@ -31,6 +31,11 @@ class RenderRequest:
     base_skp: str | None = None        # shell a copiar (nunca mutado); default = planta_74 base
     in_skp: str | None = None          # .skp pronto (quando boxes=None) — futuro
     label: str = "render"
+    # exposicao V-Ray (corrige interior subexposto do export default exterior)
+    iso: int = 200
+    fnum: float = 4.0
+    shutter: int = 100
+    sky: float = 1.2
 
 
 @dataclass
