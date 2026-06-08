@@ -13,20 +13,28 @@ def vray_export_run
     c = bb.center
     d = bb.diagonal
     cam_mode = ENV['VRAY_CAM'] || 'iso'
-    if cam_mode == 'top'
+    up = Geom::Vector3d.new(0, 0, 1)
+    persp = true
+    if ENV['VRAY_EYE'] && ENV['VRAY_TARGET']
+      # camera INTERIOR custom: eye + target em inches (coords do modelo)
+      ex, ey, ez = ENV['VRAY_EYE'].split(',').map(&:to_f)
+      tx, ty, tz = ENV['VRAY_TARGET'].split(',').map(&:to_f)
+      eye = Geom::Point3d.new(ex, ey, ez)
+      c = Geom::Point3d.new(tx, ty, tz)
+      out << "camera CUSTOM eye=#{ENV['VRAY_EYE']} target=#{ENV['VRAY_TARGET']}"
+    elsif cam_mode == 'top'
       eye = Geom::Point3d.new(c.x, c.y, c.z + d * 1.6)
       up = Geom::Vector3d.new(0, 1, 0)
       persp = false
+      out << "camera top"
     else
       eye = Geom::Point3d.new(c.x + d * 0.55, c.y - d * 0.65, c.z + d * 0.7)
-      up = Geom::Vector3d.new(0, 0, 1)
-      persp = true
+      out << "camera iso; diag=#{d.round}"
     end
     cam = Sketchup::Camera.new(eye, c, up)
     cam.perspective = persp
-    cam.fov = 50 if persp
+    cam.fov = (ENV['VRAY_FOV'] || '55').to_f if persp
     view.camera = cam
-    out << "camera set (#{cam_mode}); model bounds diag=#{d.round}"
 
     ctx = (VRay::Context.active rescue nil)
     out << "VRay::Context.active -> #{ctx.class} nil?=#{ctx.nil?}"
