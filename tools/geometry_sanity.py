@@ -75,7 +75,9 @@ def audit(parts, *, rooms=None, to_m=1.0, cfg=None) -> dict:
         h = b.get("h_in")
         if h is not None and 0 < h < c["min_height_in"]:
             add("WARN", "degenerate_height", b, f"h_in={round(h, 3)}")
-        if not _axis_aligned(b):
+        if not b.get("decorative") and not _axis_aligned(b):
+            # decorativo (tapete/manta) pode ser recortado ao comodo (poligono nao-retangular,
+            # cantos arredondados) -> nao e "eixo torto" estrutural. So estrutural checa off_axis.
             add("FAIL", "off_axis", b, "corners nao axis-aligned (eixo torto)")
         for dim, nm in ((w, "w"), (d, "d")):
             if dim * to_m > c["max_dim_m"]:

@@ -62,3 +62,17 @@ def test_verdict_blocks_promotion_semantics():
     # FAIL -> exit !=0 (bloqueia); PASS -> 0
     assert audit([GOOD], to_m=0.0254)["overall"] == "PASS"
     assert audit([{**GOOD, "z0_in": -5}], to_m=0.0254)["overall"] == "FAIL"
+
+
+def test_decorative_clipped_polygon_not_off_axis():
+    # tapete decorativo recortado ao comodo (poligono axis-aligned em L, nao-retangular)
+    # NAO deve ser off_axis (era falso-positivo). Estrutural rotacionado AINDA e off_axis.
+    rug = {"kind": "rug", "label": "tapete", "decorative": True,
+           "x0": 10, "y0": 10, "x1": 40, "y1": 40,
+           "corners": [[10, 10], [40, 10], [40, 40], [25, 40], [25, 25], [10, 25]]}
+    r = audit([rug], to_m=0.0254)
+    assert not any(f["check"] == "off_axis" for f in r["findings"])
+    # mas um movel ESTRUTURAL torto continua FAIL
+    bed = {"kind": "bed", "label": "cama", "x0": 10, "y0": 10, "x1": 40, "y1": 40,
+           "corners": [[10, 10], [40, 12], [40, 40], [10, 38]]}
+    assert any(f["check"] == "off_axis" for f in audit([bed], to_m=0.0254)["findings"])
