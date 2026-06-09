@@ -14,7 +14,7 @@ from shapely.ops import unary_union   # noqa: E402
 from tools.bedroom_layout import M, _fbox, _wall_setup, _window_zones   # noqa: E402
 from tools.spatial_model import PT_TO_M, build_spatial_model   # noqa: E402
 
-PT_TO_IN = (0.19 / 5.4) * 39.3700787402
+from core.scale import PT_TO_IN  # noqa: E402  (fonte unica de escala; nao redefinir)
 COUNTER_DEPTH = 0.60
 COUNTER_H = 0.90
 TORRE_W, TORRE_D, TORRE_H = 0.60, 0.62, 2.10   # coluna forno+microondas (GPT review)

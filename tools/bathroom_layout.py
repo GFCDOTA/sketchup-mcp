@@ -17,7 +17,7 @@ from tools.bedroom_layout import (M, _door_zones, _fbox, _wall_setup,   # noqa: 
                                   _window_zones)
 from tools.spatial_model import PT_TO_M, build_spatial_model   # noqa: E402
 
-PT_TO_IN = (0.19 / 5.4) * 39.3700787402
+from core.scale import PT_TO_IN  # noqa: E402  (fonte unica de escala; nao redefinir)
 BOX_MIN_AREA_M2 = 4.0
 VASO = ("vaso", 0.40, 0.65)
 BOX = ("box", 0.90, 0.90)

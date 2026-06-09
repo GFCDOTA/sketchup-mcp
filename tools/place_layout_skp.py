@@ -23,7 +23,7 @@ from tools.layout_candidates import (EXTRA_TEMPLATES, M, TEMPLATES, _tv_setup,
 
 ROOT = Path(r"E:\Claude\sketchup-mcp")
 SKETCHUP_EXE = r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
-PT_TO_IN = (0.19 / 5.4) * 39.3700787402
+from core.scale import PT_TO_IN  # noqa: E402  (fonte unica de escala; nao redefinir)
 CONSENSUS = ROOT / "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json"
 BASE_SKP = ROOT / "artifacts/planta_74/planta_74.skp"
 OUT_DIR = ROOT / "runs/planta_74"

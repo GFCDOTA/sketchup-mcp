@@ -21,7 +21,7 @@ from shapely.ops import unary_union
 
 from tools.bedroom_layout import (M, _door_zones, _fbox, _headboard_candidates,
                                   _wall_setup, _window_zones, wall_footprint)
-from tools.spatial_model import PT_TO_M, build_spatial_model
+from tools.spatial_model import PT_TO_IN, PT_TO_M, build_spatial_model
 
 # --- móveis (m): (largura ao-longo da parede, profundidade perp, altura) ---
 KING = (1.93, 2.03, 0.55)
@@ -583,7 +583,7 @@ def to_markdown(out, tag):
 
 def _items_to_boxes(items):
     """Converte os items do designer pro formato place_layout (boxes SU inches)."""
-    pt_to_in = (0.19 / 5.4) * 39.3700787402
+    pt_to_in = PT_TO_IN  # core.scale (fonte unica)
     boxes = []
     for it in items:
         b = it["box"]
