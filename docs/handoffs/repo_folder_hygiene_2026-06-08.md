@@ -22,11 +22,11 @@ dúvida → manter/quarantine; worktrees fora do repo; runs/ = scratch gitignore
 - **D) worktree órfão já no origin:** `wt-sofa-bevel` + `wt-fidelity` → **REMOVIDOS** (turno anterior; branches pushadas). `wt-port` → deregistrado, branch `chore/suite01-scale-gate` no origin; **pasta presa** (FASE 4).
 - **E) arquivo solto a mover:** nenhum real. `CLAUDE_COGNITIVE_ARCHITECTURE.md` é **referenciado** por `tools/claude_bridge/server.py` → **mantido no root** (allowlistado no gate).
 - **F) candidato seguro a delete:** `E:\Claude\runs` (top-level) — pensei vazio, mas tem `planta_74/` → **mantido**. `wt-port` folder → bloqueada (não deletável agora).
-- **G) precisa DECISÃO HUMANA:**
-  1. `D:\` não existe — onde ficam os worktrees? (usei `E:\Claude\worktrees\`).
-  2. `_repo_wip_backups` (67K) + `_synthetic_untracked_backup` (181K) — backups de segurança; manter, arquivar ou consolidar em `_backups/`?
-  3. `E:\Claude\runs\planta_74` (top-level fora dos repos) — scratch órfão de qual sessão?
-  4. `wt-port` folder — deletar `rmdir /S /Q E:\Claude\wt-port` quando o handle soltar.
+- **G) RESOLVIDO (Felipe 2026-06-08):**
+  1. **Worktrees root** = `E:\Claude\worktrees\` (oficial neste ambiente; `D:\` não existe). Regra real = *fora do repo principal*; se `D:\Claude` existir em outro setup, usar `D:\Claude\worktrees\`.
+  2. **Backups** → consolidados em `E:\Claude\_backups\sketchup\{repo_wip_backups,synthetic_untracked_backup}\`. Regra: *backups vivem fora do repo e dos worktrees; nunca misturar com artifact/canonical/review*. Não deletados.
+  3. **`E:\Claude\runs\planta_74`** = scratch externo pendente de expiração (TTL). Regra: *se nenhum handoff/sessão referenciar e os artifacts importantes já estiverem promovidos p/ review/canonical, limpar; **TTL 7 dias**; antes de limpar, listar .skp/.png/.json e garantir que nada único ficou só ali*. **NÃO limpar no escuro.**
+  4. **`E:\Claude\wt-port`** = residue Windows não-operacional (handle aberto). NÃO forçar. Branch salva no origin + deregistrada do git = OK. Remover só após reboot / handle liberado: `rmdir /S /Q E:\Claude\wt-port`. **Não bloqueia merge.**
 
 ## FASE 3 — Estrutura alvo (criada nesta branch)
 ✅ `artifacts/canonical/planta_74/` · `docs/adr/` · `docs/handoffs/` (com `.gitkeep`).
@@ -60,5 +60,5 @@ Determinístico, exit 1 em violação, roda como pytest (`test_repo_health`). Ch
 ## Movido / Deletado (explícito)
 - **Deletado:** worktrees `wt-sofa-bevel`, `wt-fidelity` (folders; branches no origin); subpasta residual em `_ULTIMO_SKP` (turno anterior).
 - **Criado:** `artifacts/canonical/planta_74/.gitkeep`, `docs/adr/.gitkeep`, `docs/handoffs/.gitkeep`, 3× `README.md` (review legacy), `tools/repo_health_gate.py`, este report.
-- **Movido:** worktrees novos → `E:\Claude\worktrees\` (convenção). Nenhum arquivo do repo movido (root já limpo).
-- **NÃO deletado (proposital):** backups, scratch de sessão ativa, `wt-port` (bloqueada), `planta_74.pdf` + `CLAUDE_COGNITIVE_ARCHITECTURE.md` (referenciados).
+- **Movido:** worktrees novos → `E:\Claude\worktrees\` (convenção oficial). Backups `_repo_wip_backups` + `_synthetic_untracked_backup` → `E:\Claude\_backups\sketchup\` (grep confirmou 0 refs antes de mover). Nenhum arquivo do repo movido (root já limpo).
+- **NÃO deletado (proposital):** backups (só consolidados), scratch de sessão ativa, `E:\Claude\runs\planta_74` (scratch externo c/ TTL 7d), `wt-port` (residue Windows bloqueado), `planta_74.pdf` + `CLAUDE_COGNITIVE_ARCHITECTURE.md` (referenciados).
