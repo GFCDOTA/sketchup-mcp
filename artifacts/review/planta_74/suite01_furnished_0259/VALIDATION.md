@@ -1,0 +1,67 @@
+# Suíte 01 (r000) — furnished @ PT_TO_M=0.0259 (prova do fix de escala dos MÓVEIS)
+
+> Plano (b): portar SÓ o fix de escala necessário pro PR feat/mobiliar-bedroom-layout.
+> Branch `chore/suite01-scale-gate` (off feat/mobiliar-bedroom-layout). Escopo: Suíte 01 só.
+> **NÃO promovido ao canônico/furnished oficial.** Merge coordenado via HANDOFF.
+
+## O que estava errado (root cause — o gate room-aware pegou)
+Com `PT_TO_M=0.0259` o SHELL ficava certo (área 15.9 m²) mas os MÓVEIS saíam **1.36× grandes**
+(colchão 2.72×2.11 vs queen 1.58×2.03) e o geometry_sanity dava **FAIL** ("CENTRO fora do comodo").
+Causa: DOIS sites de escala hardcoded no path do quarto (NÃO o sofa_builder, que já é m→in 39.37):
+1. `furnish_apartment.py` `bedroom_designer_boxes`: `pt_m = 0.19/5.4` reconvertia o footprint
+   (dimensionado no PT_TO_M novo) de volta a 0.0352 → móvel 1.36× + centro fora do cômodo.
+2. `bedroom_designer._items_to_boxes`: `pt_to_in = (0.19/5.4)*39.37` → headboard/rug a 0.0352.
+Fix (commit 1d94494): ambos via env, mesmo padrão de `spatial_model`/`geometry_sanity`.
+
+## Prova @ PT_TO_M=0.0259 (determinística)
+- **Área Suíte 01**: 15.9 m² (shell correto).
+- **Colchão**: 1.99 × 1.54 m ≈ **queen** (1.58×2.03) — era 2.72×2.11 (1.36×). Cama escolhida: queen.
+- **geometry_sanity**: **PASS** (zero FAIL, zero WARN). O WARN criado×porta foi limpo: placement
+  agora é door-aware (clearance 22in = a do gate) e reduz/afasta só o criado da porta. 2 criados mantidos.
+- **Headboard dedup**: 1 cabeceira (era headboard+cabeceira duplicados) → 32 boxes.
+- **Default 0.0352 INTACTO** (provado before==after p/ r000+r003); 39 testes + 4 novos (test_suite01_scale_gate) passam; fixtures não mutados.
+- **Verificação adversarial** (workflow 9-agent): F1/F2/F4 CONFIRMED; F3 SUSPECT→resolvido (teste + default idêntico).
+
+## Artefatos
+- `suite01_furnished_0259.skp` — **SHA256 `0f0c46c87015dad8cbf6fb8150581b736bea799cbac4c2365c51bee9600a997f`**
+- `suite01_furnished_top_0259.png` / `suite01_furnished_iso_0259.png` — placement (cama queen + cabeceira + 2 criados + guarda-roupa + tapete dentro do quarto)
+- `suite01_furnished_audit_0259.json` — geometry_sanity + medidas
+
+## Reprodução
+```bash
+# 1) prova determinística (sem SU):
+PT_TO_M=0.0259 .venv/Scripts/python.exe -c "import os,json; \
+from tools.geometry_sanity import sanity_room; \
+from tools.furnish_apartment import CONSENSUS, bedroom_designer_boxes; \
+con=json.loads(CONSENSUS.read_text('utf-8')); \
+print(sanity_room(con,'r000')); \
+bx,_=bedroom_designer_boxes(con,'r000'); \
+c=[b for b in bx if b['kind']=='colchao'][0]; \
+print('colchao_m', round((c['x1']-c['x0'])*0.0254,2), round((c['y1']-c['y0'])*0.0254,2))"
+# 2) .skp: boxes (acima) -> place_layout_skp.rb sobre o shell 0.0259
+#    (artifacts/review/planta_74/scale_rebuild_0259_20260608/model.skp). shell_intact=True.
+```
+
+## Resposta à pergunta do Felipe (cobre da sessão paralela)
+"O furnished de vocês foi gerado com spatial_model.PT_TO_M=0.0259 ou só o shell foi rebuildado?"
+→ **Só o shell estava @0.0259; o furnished estava 1.36× grande.** O `spatial_model.PT_TO_M`
+deles era 0.0352 hardcoded E havia +2 sites hardcoded (`furnish_apartment.pt_m` +
+`bedroom_designer._items_to_boxes`). O patch env conserta os três → furnished real @0.0259.
+
+## V-Ray premium — PRODUZIDO (câmera sistemática via auto_camera env-fix)
+`vray_export.rb` + `tweak_vrscene --materials` + `vray.exe` sobre o .skp @0.0259: 19 texturas premium
+(madeira/linho/tecido/piso) + GI + denoise RTX, 0 erros. As 2 primeiras tentativas com câmera MANUAL
+deram shots cramped/escuros (quarto apertado 4.0×5.46m). **Root cause = `auto_camera.py` estava
+scale-leaked (0.0352)** — flagado pela varredura adversarial. **Fix:** `PT_TO_IN` via env (cell e
+móveis na MESMA escala). Com isso o `auto_camera` (mesma ferramenta sistemática que deu PASS na sala)
+gerou câmera 0.0259 correta (eye 354.5,663,60 → target 431.5,581.8,36, fov 66, sightline limpa) →
+**render premium reconhecível**: cama+cabeceira+travesseiros+manta+criado+janela com luz natural,
+texturas reais (não chapado). Artefatos: `suite01_vray_0259.png` + `suite01_vray_0259_crop.png` (auto-crop).
+**Pendentes (honesto):** (a) painel do guarda-roupa escuro na borda direita (enquadramento de quarto
+apertado); (b) round-edges p/ "arestas duras" precisa do plugin V-Ray `texRoundEdges` (não no pipeline);
+(c) **veredito GPT-via-Chrome BLOQUEADO** neste contexto autônomo (clipboard SetImage falha em powershell
+non-interactive; `upload_image` recusa path de repo) → veredito visual = VISUAL_REVIEW do Felipe (não autojulgo).
+
+## Próximo (humano)
+geometry_sanity sem FAIL → liberado pra **VISUAL_REVIEW do Felipe vs PDF** (gate humano).
+NÃO autojulgo IMPROVED/SAME/WORSE. Merge desta branch no PR coordenado via HANDOFF.

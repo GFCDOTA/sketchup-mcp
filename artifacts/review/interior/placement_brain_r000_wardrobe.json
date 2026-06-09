@@ -1,0 +1,171 @@
+{
+  "room_id": "r000",
+  "ftype": "wardrobe",
+  "best": {
+    "ftype": "wardrobe",
+    "wall_id": "m019",
+    "center_in": [
+      746.3,
+      899.3
+    ],
+    "facing": [
+      -1.0,
+      0.0
+    ],
+    "w_m": 1.8,
+    "d_m": 0.6,
+    "score": 91.2,
+    "breakdown": {
+      "wall_id": "m019",
+      "base_score": 91.2,
+      "hard_rejects": [],
+      "soft_penalties": [],
+      "final_score": 91.2
+    },
+    "reason": "wardrobe: score 91.2; ['limpa']"
+  },
+  "candidates": [
+    {
+      "ftype": "wardrobe",
+      "wall_id": "m019",
+      "center_in": [
+        746.3,
+        899.3
+      ],
+      "facing": [
+        -1.0,
+        0.0
+      ],
+      "w_m": 1.8,
+      "d_m": 0.6,
+      "score": 91.2,
+      "breakdown": {
+        "wall_id": "m019",
+        "base_score": 91.2,
+        "hard_rejects": [],
+        "soft_penalties": [],
+        "final_score": 91.2
+      },
+      "reason": "wardrobe: score 91.2; ['limpa']"
+    },
+    {
+      "ftype": "wardrobe",
+      "wall_id": "m017",
+      "center_in": [
+        551.2,
+        770.2
+      ],
+      "facing": [
+        1.0,
+        0.0
+      ],
+      "w_m": 1.8,
+      "d_m": 0.6,
+      "score": 64.6,
+      "breakdown": {
+        "wall_id": "m017",
+        "base_score": 64.6,
+        "hard_rejects": [],
+        "soft_penalties": [],
+        "final_score": 64.6
+      },
+      "reason": "wardrobe: score 64.6; ['limpa']"
+    },
+    {
+      "ftype": "wardrobe",
+      "wall_id": "m018",
+      "center_in": [
+        665.7,
+        786.1
+      ],
+      "facing": [
+        -1.0,
+        0.0
+      ],
+      "w_m": 1.8,
+      "d_m": 0.6,
+      "score": 63.7,
+      "breakdown": {
+        "wall_id": "m018",
+        "base_score": 63.7,
+        "hard_rejects": [],
+        "soft_penalties": [],
+        "final_score": 63.7
+      },
+      "reason": "wardrobe: score 63.7; ['limpa']"
+    },
+    {
+      "ftype": "wardrobe",
+      "wall_id": "m005",
+      "center_in": [
+        642.7,
+        736.0
+      ],
+      "facing": [
+        0.0,
+        1.0
+      ],
+      "w_m": 1.8,
+      "d_m": 0.6,
+      "score": 47.9,
+      "breakdown": {
+        "wall_id": "m005",
+        "base_score": 47.9,
+        "hard_rejects": [],
+        "soft_penalties": [],
+        "final_score": 47.9
+      },
+      "reason": "wardrobe: score 47.9; ['janela']"
+    }
+  ],
+  "rejected": [
+    {
+      "wall_id": "m010",
+      "base_score": -84.9,
+      "hard_rejects": [
+        "score wardrobe<=0 (inadequada: ['porta/passagem', \"limiar p/ ['r002', 'r004', 'r007']\"])"
+      ],
+      "soft_penalties": [],
+      "final_score": -84.9
+    },
+    {
+      "wall_id": "m016",
+      "base_score": -92.3,
+      "hard_rejects": [
+        "score wardrobe<=0 (inadequada: ['porta/passagem', \"limiar p/ ['r002', 'r003', 'r006']\"])"
+      ],
+      "soft_penalties": [],
+      "final_score": -92.3
+    },
+    {
+      "wall_id": "m007",
+      "base_score": -94.5,
+      "hard_rejects": [
+        "score wardrobe<=0 (inadequada: ['porta/passagem', \"limiar p/ ['r002', 'r003', 'r006']\"])",
+        "sem spot livre de circulacao"
+      ],
+      "soft_penalties": [],
+      "final_score": -94.5
+    },
+    {
+      "wall_id": "m009",
+      "base_score": -97.2,
+      "hard_rejects": [
+        "score wardrobe<=0 (inadequada: ['porta/passagem', \"limiar p/ ['r002', 'r007']\"])",
+        "sem spot livre de circulacao"
+      ],
+      "soft_penalties": [],
+      "final_score": -97.2
+    },
+    {
+      "wall_id": "m008",
+      "base_score": -97.8,
+      "hard_rejects": [
+        "score wardrobe<=0 (inadequada: ['porta/passagem', \"limiar p/ ['r005']\"])",
+        "sem spot livre de circulacao"
+      ],
+      "soft_penalties": [],
+      "final_score": -97.8
+    }
+  ]
+}

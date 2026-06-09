@@ -1,0 +1,181 @@
+{
+  "source": "Group_60_ref",
+  "unit": "in",
+  "object_hypothesis": "sofa",
+  "confidence": "alta",
+  "variant": "chaise",
+  "chaise_side": "left",
+  "footprint_fill_ratio": 0.73,
+  "is_single_block": false,
+  "n_definitions": 11,
+  "parts_detected": {
+    "seat_cushion": 2,
+    "arm": 4,
+    "back_cushion": 2,
+    "seat_base": 1,
+    "foot": 4,
+    "other": 2
+  },
+  "parts_detail": {
+    "seat_cushion": [
+      {
+        "name": "Группа#1",
+        "size_m": [
+          0.9,
+          0.7,
+          0.15
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Группа#24",
+        "size_m": [
+          0.9,
+          0.7,
+          0.15
+        ],
+        "instances": 1
+      }
+    ],
+    "arm": [
+      {
+        "name": "Компонент#3",
+        "size_m": [
+          0.95,
+          0.25,
+          0.55
+        ],
+        "instances": 2
+      },
+      {
+        "name": "Группа#23",
+        "size_m": [
+          0.9,
+          0.249,
+          0.403
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Group#58",
+        "size_m": [
+          0.25,
+          0.98,
+          0.581
+        ],
+        "instances": 1
+      }
+    ],
+    "back_cushion": [
+      {
+        "name": "Группа#2",
+        "size_m": [
+          0.15,
+          0.9,
+          0.825
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Группа#22",
+        "size_m": [
+          0.15,
+          0.9,
+          0.825
+        ],
+        "instances": 1
+      }
+    ],
+    "seat_base": [
+      {
+        "name": "Группа#25",
+        "size_m": [
+          0.9,
+          0.7,
+          0.25
+        ],
+        "instances": 1
+      }
+    ],
+    "foot": [
+      {
+        "name": "Компонент#4",
+        "size_m": [
+          0.05,
+          0.05,
+          0.03
+        ],
+        "instances": 4
+      }
+    ],
+    "other": [
+      {
+        "name": "Group#50",
+        "size_m": [
+          1.648,
+          0.983,
+          0.927
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Group#59",
+        "size_m": [
+          1.647,
+          0.93,
+          0.925
+        ],
+        "instances": 1
+      }
+    ]
+  },
+  "anatomy": {
+    "overall_m": {
+      "width": 2.839,
+      "depth": 1.656,
+      "height": 0.927
+    },
+    "seat_height_m": 0.28,
+    "seat_cushion_m": {
+      "w": 0.9,
+      "d": 0.7,
+      "t": 0.15
+    },
+    "back_cushion_m": {
+      "w": 0.15,
+      "d": 0.9,
+      "h": 0.825
+    },
+    "arm_m": {
+      "w": 0.7,
+      "d": 0.493,
+      "h": 0.511
+    },
+    "n_seat_cushions": 2,
+    "n_back_cushions": 2,
+    "n_arms": 4,
+    "n_feet": 4
+  },
+  "main_material": {
+    "name": "Material4",
+    "color": [
+      37,
+      38,
+      33
+    ],
+    "texture": "kivik-bezug-fur-hocker-mit-aufb__0152869_PE311149_S4.jpg"
+  },
+  "all_materials": [
+    "Dansbo Dark Gray",
+    "Carpet, Fabrics, Leathers, Textiles and Wallpaper-1",
+    "[Color_009]",
+    "Material25",
+    "Material4"
+  ],
+  "front_axis": "-Y (assumido: frente = lado dos assentos/encosto)",
+  "renders": [
+    "group_60_top.png",
+    "group_60_front.png",
+    "group_60_iso.png"
+  ]
+}

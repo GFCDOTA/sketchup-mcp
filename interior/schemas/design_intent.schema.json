@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DesignIntentSpec",
+  "description": "Contrato executavel extraido de uma intencao/imagem de referencia de interiores (ex: 'quarto industrial mobiliado'). Ponte entre a imagem bonita do GPT e o .skp: o que mobiliar, em que estilo, com que regras de posicao, o que NAO fazer, e como validar. O GPT Visual Design Oracle produz/valida isto (estruturado, nao comentario solto).",
+  "type": "object",
+  "required": ["room_type", "style", "anchor_furniture", "required_furniture",
+               "layout_rules", "negative_rules", "visual_validation_checklist"],
+  "properties": {
+    "room_type": {"enum": ["bedroom", "living_room", "integrated_living_kitchen",
+                           "kitchen", "dining", "home_office", "bathroom"]},
+    "style": {"type": "string", "description": "ex: industrial_modern, minimalist, warm_modern, scandinavian, japandi"},
+    "palette": {"type": "array", "items": {"type": "string"},
+                "description": "ex: ['concrete_gray','matte_black','dark_wood','warm_light']"},
+    "materials": {"type": "object", "description": "material por papel (wood/cabinet/countertop/sofa/metal/floor)"},
+    "anchor_furniture": {"type": "string", "description": "peca ancora do comodo (bed, sofa...)"},
+    "required_furniture": {"type": "array", "items": {"type": "string"}},
+    "complementary_furniture": {"type": "array", "items": {"type": "string"}},
+    "lighting": {"type": "array", "items": {"type": "string"}},
+    "layout_rules": {"type": "array", "items": {"type": "string"},
+      "description": "ex: bed_headboard_on_clean_wall, sofa_faces_tv, wardrobe_on_long_wall, keep_door_and_window_clear, maintain_human_circulation"},
+    "negative_rules": {"type": "array", "items": {"type": "string"},
+      "description": "ex: no_single_block_furniture, no_random_rotation, no_window_blocking, no_furniture_in_circulation"},
+    "visual_validation_checklist": {"type": "array", "items": {"type": "string"},
+      "description": "perguntas do Visual Oracle: 'parece industrial?', 'cama tem base/colchao/cabeceira?', 'circulacao livre?', 'paleta coerente?', 'intencional nao aleatorio?'"}
+  }
+}

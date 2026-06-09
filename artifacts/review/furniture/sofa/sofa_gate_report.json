@@ -1,0 +1,95 @@
+[
+  {
+    "variant": "straight",
+    "result": "PASS",
+    "bbox_got": [
+      2.2,
+      0.95,
+      0.85
+    ],
+    "bbox_exp": [
+      2.2,
+      0.95,
+      0.85
+    ],
+    "kinds": [
+      "arm",
+      "back_cushion",
+      "base",
+      "foot",
+      "seat_cushion"
+    ],
+    "n_parts": 13,
+    "checks": {
+      "nao_bloco_unico": true,
+      "pecas_obrigatorias": true,
+      "bbox_ok": true,
+      "orientacao_frontal": true,
+      "sem_peca_solta": true,
+      "materiais": true
+    },
+    "corrections": []
+  },
+  {
+    "variant": "chaise_right",
+    "result": "PASS",
+    "bbox_got": [
+      2.2,
+      1.6,
+      0.85
+    ],
+    "bbox_exp": [
+      2.2,
+      1.6,
+      0.85
+    ],
+    "kinds": [
+      "arm",
+      "back_cushion",
+      "base",
+      "foot",
+      "seat_cushion"
+    ],
+    "n_parts": 19,
+    "checks": {
+      "nao_bloco_unico": true,
+      "pecas_obrigatorias": true,
+      "bbox_ok": true,
+      "orientacao_frontal": true,
+      "sem_peca_solta": true,
+      "materiais": true
+    },
+    "corrections": []
+  },
+  {
+    "variant": "chaise_left",
+    "result": "PASS",
+    "bbox_got": [
+      2.2,
+      1.6,
+      0.85
+    ],
+    "bbox_exp": [
+      2.2,
+      1.6,
+      0.85
+    ],
+    "kinds": [
+      "arm",
+      "back_cushion",
+      "base",
+      "foot",
+      "seat_cushion"
+    ],
+    "n_parts": 19,
+    "checks": {
+      "nao_bloco_unico": true,
+      "pecas_obrigatorias": true,
+      "bbox_ok": true,
+      "orientacao_frontal": true,
+      "sem_peca_solta": true,
+      "materiais": true
+    },
+    "corrections": []
+  }
+]

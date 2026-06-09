@@ -1,0 +1,31 @@
+{
+  "room": "r000",
+  "name": "SUITE 01",
+  "pt_to_m": 0.0259,
+  "area_m2": 15.9,
+  "geometry_sanity": {
+    "room": "r000",
+    "type": "BEDROOM",
+    "status": "PASS",
+    "fails": [],
+    "warns": [],
+    "n_items": 13
+  },
+  "colchao_m": [
+    1.99,
+    1.54
+  ],
+  "bed": {
+    "size": "queen",
+    "n_parts": 7,
+    "W_m": 1.58,
+    "L_m": 2.03
+  },
+  "skp_sha256": "0f0c46c87015dad8cbf6fb8150581b736bea799cbac4c2365c51bee9600a997f",
+  "n_boxes": 32,
+  "fixes": [
+    "door-aware nightstand (WARN->PASS)",
+    "headboard dedup",
+    "scale env @0.0259"
+  ]
+}

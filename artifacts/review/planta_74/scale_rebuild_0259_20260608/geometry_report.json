@@ -1,0 +1,1201 @@
+{
+  "schema_version": "1.0.0",
+  "tool": "build_plan_shell_skp",
+  "consensus_path": "E:/Claude/sketchup-mcp-mobiliar/fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json",
+  "skp_path": "E:/Claude/sketchup-mcp-mobiliar/artifacts/review/planta_74/scale_rebuild_0259_20260608/model.skp",
+  "shell_json_path": "E:/Claude/sketchup-mcp-mobiliar/artifacts/review/planta_74/scale_rebuild_0259_20260608/_shell_polygon.json",
+  "soft_barriers_mode": "groups",
+  "plan_shell": {
+    "faces": 109,
+    "edges": 309,
+    "sub_groups": 3,
+    "faces_with_holes": 7,
+    "top_or_bottom_faces": 14,
+    "default_material_faces": 0,
+    "present": true
+  },
+  "floor_groups": {
+    "present": true,
+    "count": 8,
+    "failed_count": 0,
+    "failed_records": [
+
+    ],
+    "records": [
+      {
+        "name": "Floor_Group_r000",
+        "faces": 1,
+        "edges": 20,
+        "area_in2": 24646.99,
+        "area_m2": 15.9012
+      },
+      {
+        "name": "Floor_Group_r001",
+        "faces": 1,
+        "edges": 26,
+        "area_in2": 24119.66,
+        "area_m2": 15.561
+      },
+      {
+        "name": "Floor_Group_r002",
+        "faces": 1,
+        "edges": 35,
+        "area_in2": 22842.28,
+        "area_m2": 14.7369
+      },
+      {
+        "name": "Floor_Group_r003",
+        "faces": 1,
+        "edges": 18,
+        "area_in2": 12364.83,
+        "area_m2": 7.9773
+      },
+      {
+        "name": "Floor_Group_r004",
+        "faces": 1,
+        "edges": 8,
+        "area_in2": 8197.54,
+        "area_m2": 5.2887
+      },
+      {
+        "name": "Floor_Group_r005",
+        "faces": 1,
+        "edges": 10,
+        "area_in2": 4960.68,
+        "area_m2": 3.2004
+      },
+      {
+        "name": "Floor_Group_r006",
+        "faces": 1,
+        "edges": 10,
+        "area_in2": 4443.53,
+        "area_m2": 2.8668
+      },
+      {
+        "name": "Floor_Group_r007",
+        "faces": 1,
+        "edges": 8,
+        "area_in2": 2867.67,
+        "area_m2": 1.8501
+      }
+    ]
+  },
+  "soft_barrier_groups": {
+    "present": true,
+    "count": 1,
+    "skipped_count": 8,
+    "skip_reasons": [
+      "sb[0] sb000: unsourced_no_provenance (not rendered)",
+      "sb[1] sb001: unsourced_no_provenance (not rendered)",
+      "sb[2] sb002: unsourced_no_provenance (not rendered)",
+      "sb[3] sb003: unsourced_no_provenance (not rendered)",
+      "sb[4] sb004: unsourced_no_provenance (not rendered)",
+      "sb[5] sb005: unsourced_no_provenance (not rendered)",
+      "sb[6] sb006: unsourced_no_provenance (not rendered)",
+      "sb[7] sb007: unsourced_no_provenance (not rendered)"
+    ],
+    "barriers": [
+      {
+        "id": "sb000",
+        "barrier_type": null,
+        "sourced": false,
+        "rendered": false,
+        "render_as": null,
+        "skip_reason": "unsourced_no_provenance"
+      },
+      {
+        "id": "sb001",
+        "barrier_type": null,
+        "sourced": false,
+        "rendered": false,
+        "render_as": null,
+        "skip_reason": "unsourced_no_provenance"
+      },
+      {
+        "id": "sb002",
+        "barrier_type": null,
+        "sourced": false,
+        "rendered": false,
+        "render_as": null,
+        "skip_reason": "unsourced_no_provenance"
+      },
+      {
+        "id": "sb003",
+        "barrier_type": null,
+        "sourced": false,
+        "rendered": false,
+        "render_as": null,
+        "skip_reason": "unsourced_no_provenance"
+      },
+      {
+        "id": "sb004",
+        "barrier_type": null,
+        "sourced": false,
+        "rendered": false,
+        "render_as": null,
+        "skip_reason": "unsourced_no_provenance"
+      },
+      {
+        "id": "sb005",
+        "barrier_type": null,
+        "sourced": false,
+        "rendered": false,
+        "render_as": null,
+        "skip_reason": "unsourced_no_provenance"
+      },
+      {
+        "id": "sb006",
+        "barrier_type": null,
+        "sourced": false,
+        "rendered": false,
+        "render_as": null,
+        "skip_reason": "unsourced_no_provenance"
+      },
+      {
+        "id": "sb007",
+        "barrier_type": null,
+        "sourced": false,
+        "rendered": false,
+        "render_as": null,
+        "skip_reason": "unsourced_no_provenance"
+      },
+      {
+        "id": "h_sb000",
+        "barrier_type": "peitoril",
+        "sourced": true,
+        "rendered": true,
+        "render_as": "low_wall",
+        "host_wall_id": null,
+        "length_m": 5.571
+      }
+    ]
+  },
+  "totals": {
+    "top_level_groups": 24,
+    "faces": 50,
+    "edges": 219
+  },
+  "groups_diagnostic": [
+    {
+      "name": "PlanShell_Group",
+      "entity_count": 3,
+      "face_count": 109,
+      "edge_count": 309,
+      "sub_group_count": 3,
+      "lateral_face_count": 95,
+      "top_or_bottom_face_count": 14,
+      "top_face_count": 7,
+      "default_material_face_count": 0,
+      "primary_material": "plan_wall",
+      "bbox_in": {
+        "min": [
+          50.1721,
+          409.8339,
+          0.0
+        ],
+        "max": [
+          564.4116,
+          714.364,
+          106.2992
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          1.2744,
+          10.4098,
+          0.0
+        ],
+        "max": [
+          14.3361,
+          18.1448,
+          2.7
+        ]
+      },
+      "height_m": 2.7,
+      "footprint_bbox_m2": 101.033,
+      "footprint_top_face_m2": 8.563
+    },
+    {
+      "name": "Floor_Group_r000",
+      "entity_count": 21,
+      "face_count": 1,
+      "edge_count": 20,
+      "sub_group_count": 0,
+      "lateral_face_count": 0,
+      "top_or_bottom_face_count": 1,
+      "top_face_count": 1,
+      "default_material_face_count": 0,
+      "primary_material": "floor_r000",
+      "bbox_in": {
+        "min": [
+          340.5097,
+          529.9815,
+          0.0
+        ],
+        "max": [
+          558.11,
+          690.2,
+          0.0
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          8.6489,
+          13.4615,
+          0.0
+        ],
+        "max": [
+          14.176,
+          17.5311,
+          0.0
+        ]
+      },
+      "height_m": 0.0,
+      "footprint_bbox_m2": 22.4926,
+      "footprint_top_face_m2": 15.9012
+    },
+    {
+      "name": "Floor_Group_r001",
+      "entity_count": 27,
+      "face_count": 1,
+      "edge_count": 26,
+      "sub_group_count": 0,
+      "lateral_face_count": 0,
+      "top_or_bottom_face_count": 1,
+      "top_face_count": 1,
+      "default_material_face_count": 0,
+      "primary_material": "floor_r001",
+      "bbox_in": {
+        "min": [
+          56.9624,
+          411.4961,
+          0.0
+        ],
+        "max": [
+          268.1397,
+          591.1581,
+          0.0
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          1.4468,
+          10.452,
+          0.0
+        ],
+        "max": [
+          6.8107,
+          15.0154,
+          0.0
+        ]
+      },
+      "height_m": 0.0,
+      "footprint_bbox_m2": 24.4777,
+      "footprint_top_face_m2": 15.561
+    },
+    {
+      "name": "Floor_Group_r002",
+      "entity_count": 36,
+      "face_count": 1,
+      "edge_count": 35,
+      "sub_group_count": 0,
+      "lateral_face_count": 0,
+      "top_or_bottom_face_count": 1,
+      "top_face_count": 1,
+      "default_material_face_count": 0,
+      "primary_material": "floor_r002",
+      "bbox_in": {
+        "min": [
+          87.0607,
+          522.0292,
+          0.0
+        ],
+        "max": [
+          339.4093,
+          693.1976,
+          0.0
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          2.2113,
+          13.2595,
+          0.0
+        ],
+        "max": [
+          8.621,
+          17.6072,
+          0.0
+        ]
+      },
+      "height_m": 0.0,
+      "footprint_bbox_m2": 27.8671,
+      "footprint_top_face_m2": 14.7369
+    },
+    {
+      "name": "Floor_Group_r003",
+      "entity_count": 19,
+      "face_count": 1,
+      "edge_count": 18,
+      "sub_group_count": 0,
+      "lateral_face_count": 0,
+      "top_or_bottom_face_count": 1,
+      "top_face_count": 1,
+      "default_material_face_count": 0,
+      "primary_material": "floor_r003",
+      "bbox_in": {
+        "min": [
+          242.5683,
+          466.604,
+          0.0
+        ],
+        "max": [
+          339.4093,
+          598.1308,
+          0.0
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          6.1612,
+          11.8517,
+          0.0
+        ],
+        "max": [
+          8.621,
+          15.1925,
+          0.0
+        ]
+      },
+      "height_m": 0.0,
+      "footprint_bbox_m2": 8.2175,
+      "footprint_top_face_m2": 7.9773
+    },
+    {
+      "name": "Floor_Group_r004",
+      "entity_count": 9,
+      "face_count": 1,
+      "edge_count": 8,
+      "sub_group_count": 0,
+      "lateral_face_count": 0,
+      "top_or_bottom_face_count": 1,
+      "top_face_count": 1,
+      "default_material_face_count": 0,
+      "primary_material": "floor_r004",
+      "bbox_in": {
+        "min": [
+          56.84,
+          592.505,
+          0.0
+        ],
+        "max": [
+          128.546,
+          708.0637,
+          0.0
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          1.4437,
+          15.0496,
+          0.0
+        ],
+        "max": [
+          3.2651,
+          17.9848,
+          0.0
+        ]
+      },
+      "height_m": 0.0,
+      "footprint_bbox_m2": 5.346,
+      "footprint_top_face_m2": 5.2887
+    },
+    {
+      "name": "Floor_Group_r005",
+      "entity_count": 11,
+      "face_count": 1,
+      "edge_count": 10,
+      "sub_group_count": 0,
+      "lateral_face_count": 0,
+      "top_or_bottom_face_count": 1,
+      "top_face_count": 1,
+      "default_material_face_count": 0,
+      "primary_material": "floor_r005",
+      "bbox_in": {
+        "min": [
+          502.8698,
+          529.9815,
+          0.0
+        ],
+        "max": [
+          558.11,
+          631.7779,
+          0.0
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          12.7729,
+          13.4615,
+          0.0
+        ],
+        "max": [
+          14.176,
+          16.0472,
+          0.0
+        ]
+      },
+      "height_m": 0.0,
+      "footprint_bbox_m2": 3.6279,
+      "footprint_top_face_m2": 3.2004
+    },
+    {
+      "name": "Floor_Group_r006",
+      "entity_count": 11,
+      "face_count": 1,
+      "edge_count": 10,
+      "sub_group_count": 0,
+      "lateral_face_count": 0,
+      "top_or_bottom_face_count": 1,
+      "top_face_count": 1,
+      "default_material_face_count": 0,
+      "primary_material": "floor_r006",
+      "bbox_in": {
+        "min": [
+          340.5097,
+          494.379,
+          0.0
+        ],
+        "max": [
+          389.8791,
+          595.1343,
+          0.0
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          8.6489,
+          12.5572,
+          0.0
+        ],
+        "max": [
+          9.9029,
+          15.1164,
+          0.0
+        ]
+      },
+      "height_m": 0.0,
+      "footprint_bbox_m2": 3.2092,
+      "footprint_top_face_m2": 2.8668
+    },
+    {
+      "name": "Floor_Group_r007",
+      "entity_count": 9,
+      "face_count": 1,
+      "edge_count": 8,
+      "sub_group_count": 0,
+      "lateral_face_count": 0,
+      "top_or_bottom_face_count": 1,
+      "top_face_count": 1,
+      "default_material_face_count": 0,
+      "primary_material": "floor_r007",
+      "bbox_in": {
+        "min": [
+          266.3042,
+          640.8319,
+          0.0
+        ],
+        "max": [
+          326.5016,
+          690.2,
+          0.0
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          6.7641,
+          16.2771,
+          0.0
+        ],
+        "max": [
+          8.2931,
+          17.5311,
+          0.0
+        ]
+      },
+      "height_m": 0.0,
+      "footprint_bbox_m2": 1.9173,
+      "footprint_top_face_m2": 1.8501
+    },
+    {
+      "name": "SoftBarrier_Group_8",
+      "entity_count": 2,
+      "face_count": 78,
+      "edge_count": 156,
+      "sub_group_count": 13,
+      "lateral_face_count": 52,
+      "top_or_bottom_face_count": 26,
+      "top_face_count": 13,
+      "default_material_face_count": 0,
+      "primary_material": "plan_parapet",
+      "bbox_in": {
+        "min": [
+          104.0433,
+          409.9509,
+          0.0
+        ],
+        "max": [
+          270.1668,
+          467.0823,
+          43.3071
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          2.6427,
+          10.4128,
+          0.0
+        ],
+        "max": [
+          6.8622,
+          11.8639,
+          1.1
+        ]
+      },
+      "height_m": 1.1,
+      "footprint_bbox_m2": 6.1231,
+      "footprint_top_face_m2": 0.5194
+    },
+    {
+      "name": "DoorLeaf_Group_h_o000",
+      "entity_count": 18,
+      "face_count": 6,
+      "edge_count": 12,
+      "sub_group_count": 0,
+      "lateral_face_count": 4,
+      "top_or_bottom_face_count": 2,
+      "top_face_count": 1,
+      "default_material_face_count": 0,
+      "primary_material": "plan_door",
+      "bbox_in": {
+        "min": [
+          137.7256,
+          696.5016,
+          0.0
+        ],
+        "max": [
+          167.5997,
+          714.6586,
+          82.6772
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          3.4982,
+          17.6911,
+          0.0
+        ],
+        "max": [
+          4.257,
+          18.1523,
+          2.1
+        ]
+      },
+      "height_m": 2.1,
+      "footprint_bbox_m2": 0.35,
+      "footprint_top_face_m2": 0.0341
+    },
+    {
+      "name": "DoorLeaf_Group_h_o001",
+      "entity_count": 18,
+      "face_count": 6,
+      "edge_count": 12,
+      "sub_group_count": 0,
+      "lateral_face_count": 4,
+      "top_or_bottom_face_count": 2,
+      "top_face_count": 1,
+      "default_material_face_count": 0,
+      "primary_material": "plan_door",
+      "bbox_in": {
+        "min": [
+          268.4023,
+          643.0342,
+          0.0
+        ],
+        "max": [
+          291.6772,
+          657.3812,
+          82.6772
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          6.8174,
+          16.3331,
+          0.0
+        ],
+        "max": [
+          7.4086,
+          16.6975,
+          2.1
+        ]
+      },
+      "height_m": 2.1,
+      "footprint_bbox_m2": 0.2154,
+      "footprint_top_face_m2": 0.0264
+    },
+    {
+      "name": "DoorLeaf_Group_h_o002",
+      "entity_count": 18,
+      "face_count": 6,
+      "edge_count": 12,
+      "sub_group_count": 0,
+      "lateral_face_count": 4,
+      "top_or_bottom_face_count": 2,
+      "top_face_count": 1,
+      "default_material_face_count": 0,
+      "primary_material": "plan_door",
+      "bbox_in": {
+        "min": [
+          505.2007,
+          635.0819,
+          0.0
+        ],
+        "max": [
+          527.498,
+          648.8645,
+          82.6772
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          12.8321,
+          16.1311,
+          0.0
+        ],
+        "max": [
+          13.3984,
+          16.4812,
+          2.1
+        ]
+      },
+      "height_m": 2.1,
+      "footprint_bbox_m2": 0.1983,
+      "footprint_top_face_m2": 0.0252
+    },
+    {
+      "name": "DoorLeaf_Group_h_o003",
+      "entity_count": 18,
+      "face_count": 6,
+      "edge_count": 12,
+      "sub_group_count": 0,
+      "lateral_face_count": 4,
+      "top_or_bottom_face_count": 2,
+      "top_face_count": 1,
+      "default_material_face_count": 0,
+      "primary_material": "plan_door",
+      "bbox_in": {
+        "min": [
+          328.6899,
+          604.8165,
+          0.0
+        ],
+        "max": [
+          344.0759,
+          629.8911,
+          82.6772
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          8.3487,
+          15.3623,
+          0.0
+        ],
+        "max": [
+          8.7395,
+          15.9992,
+          2.1
+        ]
+      },
+      "height_m": 2.1,
+      "footprint_bbox_m2": 0.2489,
+      "footprint_top_face_m2": 0.0285
+    },
+    {
+      "name": "DoorLeaf_Group_h_o004",
+      "entity_count": 18,
+      "face_count": 6,
+      "edge_count": 12,
+      "sub_group_count": 0,
+      "lateral_face_count": 4,
+      "top_or_bottom_face_count": 2,
+      "top_face_count": 1,
+      "default_material_face_count": 0,
+      "primary_material": "plan_door",
+      "bbox_in": {
+        "min": [
+          304.5287,
+          601.4347,
+          0.0
+        ],
+        "max": [
+          329.5141,
+          616.7693,
+          82.6772
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          7.735,
+          15.2764,
+          0.0
+        ],
+        "max": [
+          8.3697,
+          15.6659,
+          2.1
+        ]
+      },
+      "height_m": 2.1,
+      "footprint_bbox_m2": 0.2472,
+      "footprint_top_face_m2": 0.0284
+    },
+    {
+      "name": "DoorLeaf_Group_h_o005",
+      "entity_count": 18,
+      "face_count": 6,
+      "edge_count": 12,
+      "sub_group_count": 0,
+      "lateral_face_count": 4,
+      "top_or_bottom_face_count": 2,
+      "top_face_count": 1,
+      "default_material_face_count": 0,
+      "primary_material": "plan_door",
+      "bbox_in": {
+        "min": [
+          89.1804,
+          594.4621,
+          0.0
+        ],
+        "max": [
+          121.2542,
+          613.8891,
+          82.6772
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          2.2652,
+          15.0993,
+          0.0
+        ],
+        "max": [
+          3.0799,
+          15.5928,
+          2.1
+        ]
+      },
+      "height_m": 2.1,
+      "footprint_bbox_m2": 0.402,
+      "footprint_top_face_m2": 0.0367
+    },
+    {
+      "name": "DoorLeaf_Group_h_o006",
+      "entity_count": 18,
+      "face_count": 6,
+      "edge_count": 12,
+      "sub_group_count": 0,
+      "lateral_face_count": 4,
+      "top_or_bottom_face_count": 2,
+      "top_face_count": 1,
+      "default_material_face_count": 0,
+      "primary_material": "plan_door",
+      "bbox_in": {
+        "min": [
+          331.004,
+          569.4197,
+          0.0
+        ],
+        "max": [
+          344.0759,
+          590.486,
+          82.6772
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          8.4075,
+          14.4633,
+          0.0
+        ],
+        "max": [
+          8.7395,
+          14.9983,
+          2.1
+        ]
+      },
+      "height_m": 2.1,
+      "footprint_bbox_m2": 0.1777,
+      "footprint_top_face_m2": 0.0238
+    },
+    {
+      "name": "WindowGlass_Group_h_o007",
+      "entity_count": 4,
+      "face_count": 24,
+      "edge_count": 48,
+      "sub_group_count": 4,
+      "lateral_face_count": 16,
+      "top_or_bottom_face_count": 8,
+      "top_face_count": 4,
+      "default_material_face_count": 0,
+      "primary_material": "plan_window_frame",
+      "bbox_in": {
+        "min": [
+          511.0687,
+          527.8565,
+          59.0551
+        ],
+        "max": [
+          532.2363,
+          531.0061,
+          82.6772
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          12.9811,
+          13.4076,
+          1.5
+        ],
+        "max": [
+          13.5188,
+          13.4876,
+          2.1
+        ]
+      },
+      "height_m": 0.6,
+      "footprint_bbox_m2": 0.043,
+      "footprint_top_face_m2": 0.094
+    },
+    {
+      "name": "WindowSash_Group_h_o007",
+      "entity_count": 5,
+      "face_count": 25,
+      "edge_count": 52,
+      "sub_group_count": 5,
+      "lateral_face_count": 17,
+      "top_or_bottom_face_count": 8,
+      "top_face_count": 4,
+      "default_material_face_count": 0,
+      "primary_material": "plan_window_frame",
+      "bbox_in": {
+        "min": [
+          513.0372,
+          523.4238,
+          61.4498
+        ],
+        "max": [
+          530.2678,
+          530.344,
+          80.9532
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          13.0311,
+          13.295,
+          1.5608
+        ],
+        "max": [
+          13.4688,
+          13.4707,
+          2.0562
+        ]
+      },
+      "height_m": 0.4954,
+      "footprint_bbox_m2": 0.0769,
+      "footprint_top_face_m2": 0.0449
+    },
+    {
+      "name": "WindowGlass_Group_h_o008",
+      "entity_count": 8,
+      "face_count": 38,
+      "edge_count": 80,
+      "sub_group_count": 8,
+      "lateral_face_count": 26,
+      "top_or_bottom_face_count": 12,
+      "top_face_count": 6,
+      "default_material_face_count": 0,
+      "primary_material": "plan_window_frame",
+      "bbox_in": {
+        "min": [
+          412.0022,
+          526.7541,
+          43.3071
+        ],
+        "max": [
+          471.8373,
+          532.1085,
+          90.5512
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          10.4649,
+          13.3796,
+          1.1
+        ],
+        "max": [
+          11.9847,
+          13.5156,
+          2.3
+        ]
+      },
+      "height_m": 1.2,
+      "footprint_bbox_m2": 0.2067,
+      "footprint_top_face_m2": 0.4619
+    },
+    {
+      "name": "WindowGlass_Group_h_o009",
+      "entity_count": 4,
+      "face_count": 24,
+      "edge_count": 48,
+      "sub_group_count": 4,
+      "lateral_face_count": 16,
+      "top_or_bottom_face_count": 8,
+      "top_face_count": 4,
+      "default_material_face_count": 0,
+      "primary_material": "plan_window_frame",
+      "bbox_in": {
+        "min": [
+          351.3213,
+          492.1922,
+          59.0551
+        ],
+        "max": [
+          372.4889,
+          495.3418,
+          82.6772
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          8.9236,
+          12.5017,
+          1.5
+        ],
+        "max": [
+          9.4612,
+          12.5817,
+          2.1
+        ]
+      },
+      "height_m": 0.6,
+      "footprint_bbox_m2": 0.043,
+      "footprint_top_face_m2": 0.094
+    },
+    {
+      "name": "WindowSash_Group_h_o009",
+      "entity_count": 5,
+      "face_count": 25,
+      "edge_count": 52,
+      "sub_group_count": 5,
+      "lateral_face_count": 17,
+      "top_or_bottom_face_count": 8,
+      "top_face_count": 4,
+      "default_material_face_count": 0,
+      "primary_material": "plan_window_frame",
+      "bbox_in": {
+        "min": [
+          353.2898,
+          487.7595,
+          61.4498
+        ],
+        "max": [
+          370.5204,
+          494.6797,
+          80.9532
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          8.9736,
+          12.3891,
+          1.5608
+        ],
+        "max": [
+          9.4112,
+          12.5649,
+          2.0562
+        ]
+      },
+      "height_m": 0.4954,
+      "footprint_bbox_m2": 0.0769,
+      "footprint_top_face_m2": 0.0449
+    },
+    {
+      "name": "WindowGlass_Group_h_o010",
+      "entity_count": 8,
+      "face_count": 38,
+      "edge_count": 80,
+      "sub_group_count": 8,
+      "lateral_face_count": 26,
+      "top_or_bottom_face_count": 12,
+      "top_face_count": 6,
+      "default_material_face_count": 0,
+      "primary_material": "plan_window_frame",
+      "bbox_in": {
+        "min": [
+          275.3991,
+          463.3766,
+          43.3071
+        ],
+        "max": [
+          327.6131,
+          468.731,
+          90.5512
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          6.9951,
+          11.7698,
+          1.1
+        ],
+        "max": [
+          8.3214,
+          11.9058,
+          2.3
+        ]
+      },
+      "height_m": 1.2,
+      "footprint_bbox_m2": 0.1804,
+      "footprint_top_face_m2": 0.4046
+    },
+    {
+      "name": "GlazedBalcony_Group_h_o011",
+      "entity_count": 1,
+      "face_count": 6,
+      "edge_count": 12,
+      "sub_group_count": 1,
+      "lateral_face_count": 4,
+      "top_or_bottom_face_count": 2,
+      "top_face_count": 1,
+      "default_material_face_count": 0,
+      "primary_material": "plan_window_glass",
+      "bbox_in": {
+        "min": [
+          138.513,
+          518.7261,
+          0.0
+        ],
+        "max": [
+          218.387,
+          524.2319,
+          106.2992
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          3.5182,
+          13.1756,
+          0.0
+        ],
+        "max": [
+          5.547,
+          13.3155,
+          2.7
+        ]
+      },
+      "height_m": 2.7,
+      "footprint_bbox_m2": 0.2837,
+      "footprint_top_face_m2": 0.2837
+    }
+  ],
+  "shell_stats_from_python": {
+    "input_walls": 20,
+    "input_openings": 12,
+    "openings_carved": 8,
+    "window_apertures_3d": 4,
+    "endpoints_free": 17,
+    "endpoints_junction": 23,
+    "openings_skipped_by_origin": [
+
+    ],
+    "openings_skipped_by_error": [
+
+    ],
+    "openings_skipped": [
+
+    ],
+    "shell_pieces_after_union": 3,
+    "shell_pieces_after_sliver_filter": 3,
+    "slivers_removed": 0,
+    "redundant_vertices_dropped": 31,
+    "snap_eps_pts": 0.1,
+    "min_sliver_area_pts2": 0.5,
+    "carving_origins": [
+      "human_annotation",
+      "svg_arc",
+      "svg_segments"
+    ],
+    "total_shell_area_pts2": 11945.2422,
+    "window_apertures": [
+      {
+        "id": "h_o007",
+        "wall_id": "m005",
+        "kind_v5": "window",
+        "center": [
+          511.582,
+          519.2106323242188
+        ],
+        "opening_width_pts": 20.759,
+        "host_wall_orientation": "h",
+        "host_wall_thickness_pts": 5.3988037109375
+      },
+      {
+        "id": "h_o008",
+        "wall_id": "m005",
+        "kind_v5": "window",
+        "center": [
+          433.3885,
+          519.2106323242188
+        ],
+        "opening_width_pts": 58.68,
+        "host_wall_orientation": "h",
+        "host_wall_thickness_pts": 5.3988037109375
+      },
+      {
+        "id": "h_o009",
+        "wall_id": "m003",
+        "kind_v5": "window",
+        "center": [
+          354.9185,
+          484.2348175048828
+        ],
+        "opening_width_pts": 20.759,
+        "host_wall_orientation": "h",
+        "host_wall_thickness_pts": 5.519989013671875
+      },
+      {
+        "id": "h_o010",
+        "wall_id": "m002",
+        "kind_v5": "window",
+        "center": [
+          295.6855,
+          457.05662536621094
+        ],
+        "opening_width_pts": 51.206,
+        "host_wall_orientation": "h",
+        "host_wall_thickness_pts": 5.398773193359375
+      }
+    ]
+  },
+  "gates_self_check": {
+    "plan_shell_group_exists": true,
+    "wall_shell_is_single_group": true,
+    "floors_separated_from_walls": true,
+    "default_material_faces_zero": true
+  }
+}
