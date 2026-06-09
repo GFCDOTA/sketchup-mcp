@@ -17,7 +17,7 @@ from tools.bedroom_layout import (M, _door_zones, _fbox, _wall_setup,   # noqa: 
                                   _window_zones)
 from tools.spatial_model import PT_TO_M, build_spatial_model   # noqa: E402
 
-PT_TO_IN = (0.19 / 5.4) * 39.3700787402
+PT_TO_IN = PT_TO_M * 39.3700787402   # env (escala PDF 0.0259); default 0.0352. cell+moveis mesma escala.
 BOX_MIN_AREA_M2 = 4.0
 VASO = ("vaso", 0.40, 0.65)
 BOX = ("box", 0.90, 0.90)

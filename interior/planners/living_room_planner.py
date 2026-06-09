@@ -21,7 +21,7 @@ from interior.semantics.wall_affordance import wall_affordance   # noqa: E402
 from tools.bedroom_layout import _door_zones, _fbox, _wall_setup, M  # noqa: E402
 from tools.spatial_model import PT_TO_M, build_spatial_model     # noqa: E402
 
-PT_TO_IN = (0.19 / 5.4) * 39.3700787402
+PT_TO_IN = PT_TO_M * 39.3700787402   # env (escala PDF 0.0259); default 0.0352. sofa/rack center_in mesma escala.
 SOFA_W, SOFA_D = 2.20, 0.95          # default; pode vir do catalogo
 TV_MIN_VIEW, TV_MAX_VIEW = 1.8, 5.0  # distancia sofa-TV plausivel (m)
 

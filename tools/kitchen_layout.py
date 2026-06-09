@@ -14,7 +14,7 @@ from shapely.ops import unary_union   # noqa: E402
 from tools.bedroom_layout import M, _fbox, _wall_setup, _window_zones   # noqa: E402
 from tools.spatial_model import PT_TO_M, build_spatial_model   # noqa: E402
 
-PT_TO_IN = (0.19 / 5.4) * 39.3700787402
+PT_TO_IN = PT_TO_M * 39.3700787402   # env (escala PDF 0.0259); default 0.0352. cell+moveis mesma escala.
 COUNTER_DEPTH = 0.60
 COUNTER_H = 0.90
 TORRE_W, TORRE_D, TORRE_H = 0.60, 0.62, 2.10   # coluna forno+microondas (GPT review)
