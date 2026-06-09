@@ -38,13 +38,17 @@ def _redact(s):
     return _SECRET_RE.sub("sk-ant-***REDACTED***", s) if isinstance(s, str) else s
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+try:  # raiz do workspace E:\Claude — fonte unica, robusta a apps/ (2026-06-09)
+    from tools.claude_bridge._paths import WORKSPACE_ROOT, WORKTREES_ROOT  # noqa: E402
+except ImportError:  # execucao standalone sem PYTHONPATH
+    from _paths import WORKSPACE_ROOT, WORKTREES_ROOT  # noqa: E402
 # Estado NOC e' relativo ao tree onde se roda. Dispatcher e cockpit compartilham
 # quando rodam do MESMO tree (o normal pos-merge: ambos no main).
 NOC_DIR = REPO_ROOT / ".ai_bridge" / "noc"
 QUEUE = NOC_DIR / "queue.jsonl"
 LEDGER = NOC_DIR / "actions.jsonl"
 LOCK_PATH = NOC_DIR / "dispatcher.lock"
-WT_PARENT = REPO_ROOT.parent  # E:/Claude — worktrees ficam FORA do glob sketchup-mcp*
+WT_PARENT = WORKTREES_ROOT  # E:/Claude/worktrees (raiz das worktrees temporarias)
 
 MODEL = "claude-opus-4-8"
 CLAUDE_TIMEOUT = 900  # 15 min por worker; estoura -> falha o ciclo, nao trava
@@ -57,7 +61,7 @@ def _claude_bin() -> str:
 # Token files candidatos (mesmos do start.ps1/watchdog). NUNCA logar o conteudo.
 _TOKEN_FILES = (
     REPO_ROOT / "tools" / "claude_bridge" / ".oauth_token",
-    Path(r"E:\Claude\claude-bridge\.oauth_token"),
+    Path(r"E:\Claude\ops\bridge\.oauth_token"),
 )
 
 

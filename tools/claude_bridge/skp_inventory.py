@@ -14,6 +14,10 @@ import subprocess
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+try:  # raiz do workspace E:\Claude — fonte unica, robusta a apps/ (2026-06-09)
+    from tools.claude_bridge._paths import WORKSPACE_ROOT, iter_workspace_repos  # noqa: E402
+except ImportError:  # execucao standalone sem PYTHONPATH
+    from _paths import WORKSPACE_ROOT, iter_workspace_repos  # noqa: E402
 
 
 def skp_inventory() -> dict:
@@ -120,14 +124,14 @@ def _dedup_and_classify(files: list) -> list:
 def skp_inventory_v2() -> dict:
     """Lixao v2: every .skp under E:\\Claude, sha256-deduped, with git status
     (tracked/untracked/ignored), classification + suggested action. Read-only."""
-    root = REPO_ROOT.parent
+    root = WORKSPACE_ROOT
+    repos = iter_workspace_repos(root)
     gitsets = {}
-    try:
-        for p in root.iterdir():
-            if p.is_dir() and (p / ".git").exists():
-                gitsets[p.name] = _git_skp_sets(p)
-    except OSError:
-        pass
+    for rp in repos:
+        try:
+            gitsets[rp] = _git_skp_sets(rp)
+        except OSError:
+            pass
     skps = []
     for dp, dns, fns in os.walk(root):
         dns[:] = [d for d in dns if d not in
@@ -144,13 +148,14 @@ def skp_inventory_v2() -> dict:
             size = sp.stat().st_size
         except OSError:
             continue
-        repo = rel.split("/", 1)[0]
-        inrepo = rel.split("/", 1)[1] if "/" in rel else ""
-        sets = gitsets.get(repo)
+        repo_path = next((rp for rp in repos if sp.is_relative_to(rp)), None)
         git = "no-git"
-        if sets and inrepo:
-            git = ("tracked" if inrepo in sets["tracked"] else
-                   "ignored" if inrepo in sets["ignored"] else "untracked")
+        if repo_path is not None:
+            sets = gitsets.get(repo_path)
+            inrepo = sp.relative_to(repo_path).as_posix()
+            if sets and inrepo:
+                git = ("tracked" if inrepo in sets["tracked"] else
+                       "ignored" if inrepo in sets["ignored"] else "untracked")
         files.append({"path": rel, "mb": round(size / 1e6, 2),
                       "sha": _sha256(sp)[:12], "git": git,
                       "has_meta": (sp.parent / "geometry_report.json").exists()
