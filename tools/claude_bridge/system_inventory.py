@@ -14,6 +14,10 @@ import time
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+try:  # raiz do workspace E:\Claude — fonte unica, robusta a apps/ (2026-06-09)
+    from tools.claude_bridge._paths import WORKSPACE_ROOT, iter_workspace_repos  # noqa: E402
+except ImportError:  # execucao standalone sem PYTHONPATH
+    from _paths import WORKSPACE_ROOT, iter_workspace_repos  # noqa: E402
 
 
 def _dir_size_mb(p: Path, cap: int = 8000):
@@ -39,8 +43,11 @@ def _classify_dir(p: Path) -> dict:
     """Human classification of a top-level E:\\Claude directory."""
     name = p.name
     known = {
-        "sketchup-mcp": ("CANONICAL_REPO", "repo principal canônico (pipeline PDF→SKP + gate + .claude/)", "baixo", "não"),
-        "claude-bridge": ("BRIDGE_SERVICE", "bridge standalone original (broker + server + .oauth_token + LIGAR-BRIDGE) — fallback/legado", "médio (contém o token)", "não — guarda o .oauth_token"),
+        "apps": ("APPS", "apps principais (sketchup-mcp = pipeline PDF→SKP + gate + .claude/)", "baixo", "não"),
+        "ops": ("OPS", "operacional do cockpit :8765 — bridge (.oauth_token) + launchers + latest + sync", "médio (contém o token)", "não — guarda o .oauth_token"),
+        "data": ("DATA", "scratch (runs) + backups de segurança", "baixo", "runs sim / backups não"),
+        "archive": ("ARCHIVE", "pending-merge (trabalho único a integrar) + old-repos (preservação)", "baixo", "não"),
+        "worktrees": ("WORKTREES", "raiz das git worktrees temporárias", "baixo", "não (os filhos sim)"),
         ".claude": ("CONFIG", "config/memória do projeto E:\\Claude (onde o chat roda)", "baixo", "não"),
     }
     if name in known:
@@ -62,7 +69,7 @@ def _classify_dir(p: Path) -> dict:
 
 def system_map() -> dict:
     """Scan E:\\Claude top-level and explain each dir (the Explorer page)."""
-    root = REPO_ROOT.parent
+    root = WORKSPACE_ROOT
     items = []
     try:
         entries = sorted(root.iterdir())
@@ -86,7 +93,7 @@ def system_map() -> dict:
 
 def git_inventory() -> dict:
     """Read-only git state for every repo/worktree under E:\\Claude. Mutates nothing."""
-    root = REPO_ROOT.parent
+    root = WORKSPACE_ROOT
 
     def g(p, *args):
         try:
@@ -97,16 +104,14 @@ def git_inventory() -> dict:
             return ""
 
     repos = []
-    try:
-        candidates = sorted(x for x in root.iterdir() if x.is_dir())
-    except OSError:
-        candidates = []
-    for p in candidates:
-        if not (p / ".git").exists():
-            continue
+    for p in iter_workspace_repos(root):
         lines = [ln for ln in g(p, "status", "--porcelain").splitlines() if ln.strip()]
         untracked = sum(1 for ln in lines if ln.startswith("??"))
-        repos.append({"path": p.name, "is_worktree": (p / ".git").is_file(),
+        try:
+            relpath = p.relative_to(root).as_posix()
+        except ValueError:
+            relpath = p.name
+        repos.append({"path": relpath, "is_worktree": (p / ".git").is_file(),
                       "branch": g(p, "rev-parse", "--abbrev-ref", "HEAD"),
                       "head": g(p, "rev-parse", "--short", "HEAD"),
                       "remote": g(p, "remote", "get-url", "origin"),

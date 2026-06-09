@@ -17,7 +17,7 @@ $repo      = (Resolve-Path (Join-Path $here "..\..")).Path
 $server    = Join-Path $here "server.py"
 $tokenFile = Join-Path $here ".oauth_token"
 # Fallback: o token canonico vive fora do repo (nao versionado). Usa se o local faltar.
-if (-not (Test-Path $tokenFile)) { $tokenFile = "E:\Claude\claude-bridge\.oauth_token" }
+if (-not (Test-Path $tokenFile)) { $tokenFile = "E:\Claude\ops\bridge\.oauth_token" }
 
 # Python: venv do repo, senao 'python' do PATH.
 $py = Join-Path $repo ".venv\Scripts\python.exe"

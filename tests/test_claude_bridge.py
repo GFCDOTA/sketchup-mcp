@@ -225,7 +225,8 @@ def test_system_map_shape():
 def test_classify_dir_known_and_unknown(tmp_path):
     import tools.claude_bridge.system_inventory as srv
     assert srv._classify_dir(tmp_path / "wt-foo")["type"] == "WORKTREE"
-    assert srv._classify_dir(tmp_path / "sketchup-mcp")["type"] == "CANONICAL_REPO"
+    assert srv._classify_dir(tmp_path / "apps")["type"] == "APPS"
+    assert srv._classify_dir(tmp_path / "ops")["type"] == "OPS"
     assert srv._classify_dir(tmp_path / "zxqv-random")["type"] == "UNKNOWN"
 
 
