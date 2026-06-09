@@ -23,7 +23,9 @@ from shapely.ops import unary_union
 
 from tools.build_plan_shell_skp import compute_room_floors, wall_footprint
 
-PT_TO_M = 0.19 / 5.4
+# escala vem da FONTE ÚNICA (core.scale); re-export p/ quem faz
+# `from tools.spatial_model import PT_TO_M`. NÃO redefinir escala aqui.
+from core.scale import M, M_TO_IN, PT_TO_IN, PT_TO_M  # noqa: F401
 CIRC_M = 0.85          # faixa de circulacao em frente a porta (m)
 MIN_USEFUL_M = 1.2     # comprimento minimo de parede util (m)
 SOFA_MIN_DEPTH_M = 2.2  # distancia minima sofa->TV pra a parede valer

@@ -31,8 +31,7 @@ from tools.spatial_model import (PT_TO_M, _tv_depth_m, _wall_mid,
                                  build_spatial_model, wall_footprint)
 
 
-def M(m):           # metros -> pdf-points
-    return m / PT_TO_M
+from core.scale import M  # noqa: E402,F401  (m->pt; fonte unica, re-export)
 
 
 # moveis placeholder: (largura ao-longo, profundidade perp) em metros
