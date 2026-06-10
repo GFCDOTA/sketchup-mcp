@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0.0",
   "tool": "build_plan_shell_skp",
-  "consensus_path": "E:/Claude/sketchup-mcp/fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json",
-  "skp_path": "E:/Claude/sketchup-mcp/runs/planta_74/model.skp",
-  "shell_json_path": "E:/Claude/sketchup-mcp/runs/planta_74/_shell_polygon.json",
+  "consensus_path": "E:/Claude/worktrees/scale-fix/fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json",
+  "skp_path": "E:/Claude/worktrees/scale-fix/runs/planta_74/model.skp",
+  "shell_json_path": "E:/Claude/worktrees/scale-fix/runs/planta_74/_shell_polygon.json",
   "soft_barriers_mode": "groups",
   "plan_shell": {
     "faces": 109,
@@ -26,57 +26,57 @@
         "name": "Floor_Group_r000",
         "faces": 1,
         "edges": 20,
-        "area_in2": 45486.65,
-        "area_m2": 29.3462
+        "area_in2": 24646.99,
+        "area_m2": 15.9012
       },
       {
         "name": "Floor_Group_r001",
         "faces": 1,
         "edges": 26,
-        "area_in2": 44513.46,
-        "area_m2": 28.7183
+        "area_in2": 24119.66,
+        "area_m2": 15.561
       },
       {
         "name": "Floor_Group_r002",
         "faces": 1,
         "edges": 35,
-        "area_in2": 42156.01,
-        "area_m2": 27.1974
+        "area_in2": 22842.28,
+        "area_m2": 14.7369
       },
       {
         "name": "Floor_Group_r003",
         "faces": 1,
         "edges": 18,
-        "area_in2": 22819.62,
-        "area_m2": 14.7223
+        "area_in2": 12364.83,
+        "area_m2": 7.9773
       },
       {
         "name": "Floor_Group_r004",
         "faces": 1,
         "edges": 8,
-        "area_in2": 15128.77,
-        "area_m2": 9.7605
+        "area_in2": 8197.54,
+        "area_m2": 5.2887
       },
       {
         "name": "Floor_Group_r005",
         "faces": 1,
         "edges": 10,
-        "area_in2": 9155.07,
-        "area_m2": 5.9065
+        "area_in2": 4960.68,
+        "area_m2": 3.2004
       },
       {
         "name": "Floor_Group_r006",
         "faces": 1,
         "edges": 10,
-        "area_in2": 8200.65,
-        "area_m2": 5.2907
+        "area_in2": 4443.53,
+        "area_m2": 2.8668
       },
       {
         "name": "Floor_Group_r007",
         "faces": 1,
         "edges": 8,
-        "area_in2": 5292.36,
-        "area_m2": 3.4144
+        "area_in2": 2867.67,
+        "area_m2": 1.8501
       }
     ]
   },
@@ -166,7 +166,7 @@
         "rendered": true,
         "render_as": "low_wall",
         "host_wall_id": null,
-        "length_m": 7.568
+        "length_m": 5.571
       }
     ]
   },
@@ -186,34 +186,34 @@
       "top_or_bottom_face_count": 14,
       "top_face_count": 7,
       "default_material_face_count": 0,
-      "primary_material": "plan_wall4",
+      "primary_material": "plan_wall",
       "bbox_in": {
         "min": [
-          68.1588,
-          556.7599,
+          50.1721,
+          409.8339,
           0.0
         ],
         "max": [
-          766.7539,
-          970.4645,
+          564.4116,
+          714.364,
           106.2992
         ]
       },
       "bbox_m": {
         "min": [
-          1.7312,
-          14.1417,
+          1.2744,
+          10.4098,
           0.0
         ],
         "max": [
-          19.4755,
-          24.6498,
+          14.3361,
+          18.1448,
           2.7
         ]
       },
       "height_m": 2.7,
-      "footprint_bbox_m2": 186.459,
-      "footprint_top_face_m2": 15.8032
+      "footprint_bbox_m2": 101.033,
+      "footprint_top_face_m2": 8.563
     },
     {
       "name": "Floor_Group_r000",
@@ -225,34 +225,34 @@
       "top_or_bottom_face_count": 1,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "floor_r25",
+      "primary_material": "floor_r000",
       "bbox_in": {
         "min": [
-          462.583,
-          719.9806,
+          340.5097,
+          529.9815,
           0.0
         ],
         "max": [
-          758.1932,
-          937.6376,
+          558.11,
+          690.2,
           0.0
         ]
       },
       "bbox_m": {
         "min": [
-          11.7496,
-          18.2875,
+          8.6489,
+          13.4615,
           0.0
         ],
         "max": [
-          19.2581,
-          23.816,
+          14.176,
+          17.5311,
           0.0
         ]
       },
       "height_m": 0.0,
-      "footprint_bbox_m2": 41.5106,
-      "footprint_top_face_m2": 29.3462
+      "footprint_bbox_m2": 22.4926,
+      "footprint_top_face_m2": 15.9012
     },
     {
       "name": "Floor_Group_r001",
@@ -264,34 +264,34 @@
       "top_or_bottom_face_count": 1,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "floor_r26",
+      "primary_material": "floor_r001",
       "bbox_in": {
         "min": [
-          77.3835,
-          559.018,
+          56.9624,
+          411.4961,
           0.0
         ],
         "max": [
-          364.2682,
-          803.0891,
+          268.1397,
+          591.1581,
           0.0
         ]
       },
       "bbox_m": {
         "min": [
-          1.9655,
-          14.1991,
+          1.4468,
+          10.452,
           0.0
         ],
         "max": [
-          9.2524,
-          20.3985,
+          6.8107,
+          15.0154,
           0.0
         ]
       },
       "height_m": 0.0,
-      "footprint_bbox_m2": 45.1743,
-      "footprint_top_face_m2": 28.7183
+      "footprint_bbox_m2": 24.4777,
+      "footprint_top_face_m2": 15.561
     },
     {
       "name": "Floor_Group_r002",
@@ -303,34 +303,34 @@
       "top_or_bottom_face_count": 1,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "floor_r27",
+      "primary_material": "floor_r002",
       "bbox_in": {
         "min": [
-          118.272,
-          709.1774,
+          87.0607,
+          522.0292,
           0.0
         ],
         "max": [
-          461.0881,
-          941.7099,
+          339.4093,
+          693.1976,
           0.0
         ]
       },
       "bbox_m": {
         "min": [
-          3.0041,
-          18.0131,
+          2.2113,
+          13.2595,
           0.0
         ],
         "max": [
-          11.7116,
-          23.9194,
+          8.621,
+          17.6072,
           0.0
         ]
       },
       "height_m": 0.0,
-      "footprint_bbox_m2": 51.4295,
-      "footprint_top_face_m2": 27.1974
+      "footprint_bbox_m2": 27.8671,
+      "footprint_top_face_m2": 14.7369
     },
     {
       "name": "Floor_Group_r003",
@@ -342,34 +342,34 @@
       "top_or_bottom_face_count": 1,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "floor_r28",
+      "primary_material": "floor_r003",
       "bbox_in": {
         "min": [
-          329.5294,
-          633.8822,
+          242.5683,
+          466.604,
           0.0
         ],
         "max": [
-          461.0881,
-          812.5615,
+          339.4093,
+          598.1308,
           0.0
         ]
       },
       "bbox_m": {
         "min": [
-          8.37,
-          16.1006,
+          6.1612,
+          11.8517,
           0.0
         ],
         "max": [
-          11.7116,
-          20.6391,
+          8.621,
+          15.1925,
           0.0
         ]
       },
       "height_m": 0.0,
-      "footprint_bbox_m2": 15.1657,
-      "footprint_top_face_m2": 14.7223
+      "footprint_bbox_m2": 8.2175,
+      "footprint_top_face_m2": 7.9773
     },
     {
       "name": "Floor_Group_r004",
@@ -381,34 +381,34 @@
       "top_or_bottom_face_count": 1,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "floor_r29",
+      "primary_material": "floor_r004",
       "bbox_in": {
         "min": [
-          77.2172,
-          804.9188,
+          56.84,
+          592.505,
           0.0
         ],
         "max": [
-          174.6299,
-          961.9055,
+          128.546,
+          708.0637,
           0.0
         ]
       },
       "bbox_m": {
         "min": [
-          1.9613,
-          20.4449,
+          1.4437,
+          15.0496,
           0.0
         ],
         "max": [
-          4.4356,
-          24.4324,
+          3.2651,
+          17.9848,
           0.0
         ]
       },
       "height_m": 0.0,
-      "footprint_bbox_m2": 9.8661,
-      "footprint_top_face_m2": 9.7605
+      "footprint_bbox_m2": 5.346,
+      "footprint_top_face_m2": 5.2887
     },
     {
       "name": "Floor_Group_r005",
@@ -420,34 +420,34 @@
       "top_or_bottom_face_count": 1,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "floor_r30",
+      "primary_material": "floor_r005",
       "bbox_in": {
         "min": [
-          683.1493,
-          719.9806,
+          502.8698,
+          529.9815,
           0.0
         ],
         "max": [
-          758.1932,
-          858.2712,
+          558.11,
+          631.7779,
           0.0
         ]
       },
       "bbox_m": {
         "min": [
-          17.352,
-          18.2875,
+          12.7729,
+          13.4615,
           0.0
         ],
         "max": [
-          19.2581,
-          21.8001,
+          14.176,
+          16.0472,
           0.0
         ]
       },
       "height_m": 0.0,
-      "footprint_bbox_m2": 6.6954,
-      "footprint_top_face_m2": 5.9065
+      "footprint_bbox_m2": 3.6279,
+      "footprint_top_face_m2": 3.2004
     },
     {
       "name": "Floor_Group_r006",
@@ -459,34 +459,34 @@
       "top_or_bottom_face_count": 1,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "floor_r31",
+      "primary_material": "floor_r006",
       "bbox_in": {
         "min": [
-          462.583,
-          671.6145,
+          340.5097,
+          494.379,
           0.0
         ],
         "max": [
-          529.6513,
-          808.4908,
+          389.8791,
+          595.1343,
           0.0
         ]
       },
       "bbox_m": {
         "min": [
-          11.7496,
-          17.059,
+          8.6489,
+          12.5572,
           0.0
         ],
         "max": [
-          13.4531,
-          20.5357,
+          9.9029,
+          15.1164,
           0.0
         ]
       },
       "height_m": 0.0,
-      "footprint_bbox_m2": 5.9226,
-      "footprint_top_face_m2": 5.2907
+      "footprint_bbox_m2": 3.2092,
+      "footprint_top_face_m2": 2.8668
     },
     {
       "name": "Floor_Group_r007",
@@ -498,73 +498,73 @@
       "top_or_bottom_face_count": 1,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "floor_r32",
+      "primary_material": "floor_r007",
       "bbox_in": {
         "min": [
-          361.7746,
-          870.571,
+          266.3042,
+          640.8319,
           0.0
         ],
         "max": [
-          443.5529,
-          937.6376,
+          326.5016,
+          690.2,
           0.0
         ]
       },
       "bbox_m": {
         "min": [
-          9.1891,
-          22.1125,
+          6.7641,
+          16.2771,
           0.0
         ],
         "max": [
-          11.2662,
-          23.816,
+          8.2931,
+          17.5311,
           0.0
         ]
       },
       "height_m": 0.0,
-      "footprint_bbox_m2": 3.5384,
-      "footprint_top_face_m2": 3.4144
+      "footprint_bbox_m2": 1.9173,
+      "footprint_top_face_m2": 1.8501
     },
     {
       "name": "SoftBarrier_Group_8",
       "entity_count": 2,
-      "face_count": 96,
-      "edge_count": 192,
-      "sub_group_count": 16,
-      "lateral_face_count": 64,
-      "top_or_bottom_face_count": 32,
-      "top_face_count": 16,
+      "face_count": 78,
+      "edge_count": 156,
+      "sub_group_count": 13,
+      "lateral_face_count": 52,
+      "top_or_bottom_face_count": 26,
+      "top_face_count": 13,
       "default_material_face_count": 0,
-      "primary_material": "plan_parapet4",
+      "primary_material": "plan_parapet",
       "bbox_in": {
         "min": [
-          141.6958,
-          557.2717,
+          104.0433,
+          409.9509,
           0.0
         ],
         "max": [
-          366.6691,
-          634.1791,
+          270.1668,
+          467.0823,
           43.3071
         ]
       },
       "bbox_m": {
         "min": [
-          3.5991,
-          14.1547,
+          2.6427,
+          10.4128,
           0.0
         ],
         "max": [
-          9.3134,
-          16.1081,
+          6.8622,
+          11.8639,
           1.1
         ]
       },
       "height_m": 1.1,
-      "footprint_bbox_m2": 11.1626,
-      "footprint_top_face_m2": 0.7069
+      "footprint_bbox_m2": 6.1231,
+      "footprint_top_face_m2": 0.5194
     },
     {
       "name": "DoorLeaf_Group_h_o000",
@@ -576,34 +576,34 @@
       "top_or_bottom_face_count": 2,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "plan_door4",
+      "primary_material": "plan_door",
       "bbox_in": {
         "min": [
-          187.3827,
-          946.1983,
+          137.7256,
+          696.5016,
           0.0
         ],
         "max": [
-          227.6844,
-          970.3757,
+          167.5997,
+          714.6586,
           82.6772
         ]
       },
       "bbox_m": {
         "min": [
-          4.7595,
-          24.0334,
+          3.4982,
+          17.6911,
           0.0
         ],
         "max": [
-          5.7832,
-          24.6475,
+          4.257,
+          18.1523,
           2.1
         ]
       },
       "height_m": 2.1,
-      "footprint_bbox_m2": 0.6286,
-      "footprint_top_face_m2": 0.0464
+      "footprint_bbox_m2": 0.35,
+      "footprint_top_face_m2": 0.0341
     },
     {
       "name": "DoorLeaf_Group_h_o001",
@@ -615,34 +615,34 @@
       "top_or_bottom_face_count": 2,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "plan_door4",
+      "primary_material": "plan_door",
       "bbox_in": {
         "min": [
-          364.9072,
-          873.5628,
+          268.4023,
+          643.0342,
           0.0
         ],
         "max": [
-          396.2438,
-          892.5643,
+          291.6772,
+          657.3812,
           82.6772
         ]
       },
       "bbox_m": {
         "min": [
-          9.2686,
-          22.1885,
+          6.8174,
+          16.3331,
           0.0
         ],
         "max": [
-          10.0646,
-          22.6711,
+          7.4086,
+          16.6975,
           2.1
         ]
       },
       "height_m": 2.1,
-      "footprint_bbox_m2": 0.3842,
-      "footprint_top_face_m2": 0.0358
+      "footprint_bbox_m2": 0.2154,
+      "footprint_top_face_m2": 0.0264
     },
     {
       "name": "DoorLeaf_Group_h_o002",
@@ -654,34 +654,34 @@
       "top_or_bottom_face_count": 2,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "plan_door4",
+      "primary_material": "plan_door",
       "bbox_in": {
         "min": [
-          686.5981,
-          862.7597,
+          505.2007,
+          635.0819,
           0.0
         ],
         "max": [
-          716.6068,
-          880.9944,
+          527.498,
+          648.8645,
           82.6772
         ]
       },
       "bbox_m": {
         "min": [
-          17.4396,
-          21.9141,
+          12.8321,
+          16.1311,
           0.0
         ],
         "max": [
-          18.2018,
-          22.3773,
+          13.3984,
+          16.4812,
           2.1
         ]
       },
       "height_m": 2.1,
-      "footprint_bbox_m2": 0.353,
-      "footprint_top_face_m2": 0.0343
+      "footprint_bbox_m2": 0.1983,
+      "footprint_top_face_m2": 0.0252
     },
     {
       "name": "DoorLeaf_Group_h_o003",
@@ -693,34 +693,34 @@
       "top_or_bottom_face_count": 2,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "plan_door4",
+      "primary_material": "plan_door",
       "bbox_in": {
         "min": [
-          446.5256,
-          821.644,
+          328.6899,
+          604.8165,
           0.0
         ],
         "max": [
-          466.9386,
-          855.4256,
+          344.0759,
+          629.8911,
           82.6772
         ]
       },
       "bbox_m": {
         "min": [
-          11.3418,
-          20.8698,
+          8.3487,
+          15.3623,
           0.0
         ],
         "max": [
-          11.8602,
-          21.7278,
+          8.7395,
+          15.9992,
           2.1
         ]
       },
       "height_m": 2.1,
-      "footprint_bbox_m2": 0.4449,
-      "footprint_top_face_m2": 0.0387
+      "footprint_bbox_m2": 0.2489,
+      "footprint_top_face_m2": 0.0285
     },
     {
       "name": "DoorLeaf_Group_h_o004",
@@ -732,34 +732,34 @@
       "top_or_bottom_face_count": 2,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "plan_door4",
+      "primary_material": "plan_door",
       "bbox_in": {
         "min": [
-          413.985,
-          817.0499,
+          304.5287,
+          601.4347,
           0.0
         ],
         "max": [
-          447.6454,
-          837.393,
+          329.5141,
+          616.7693,
           82.6772
         ]
       },
       "bbox_m": {
         "min": [
-          10.5152,
-          20.7531,
+          7.735,
+          15.2764,
           0.0
         ],
         "max": [
-          11.3702,
-          21.2698,
+          8.3697,
+          15.6659,
           2.1
         ]
       },
       "height_m": 2.1,
-      "footprint_bbox_m2": 0.4418,
-      "footprint_top_face_m2": 0.0386
+      "footprint_bbox_m2": 0.2472,
+      "footprint_top_face_m2": 0.0284
     },
     {
       "name": "DoorLeaf_Group_h_o005",
@@ -771,34 +771,34 @@
       "top_or_bottom_face_count": 2,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "plan_door4",
+      "primary_material": "plan_door",
       "bbox_in": {
         "min": [
-          121.434,
-          807.5776,
+          89.1804,
+          594.4621,
           0.0
         ],
         "max": [
-          164.724,
-          833.4803,
+          121.2542,
+          613.8891,
           82.6772
         ]
       },
       "bbox_m": {
         "min": [
-          3.0844,
-          20.5125,
+          2.2652,
+          15.0993,
           0.0
         ],
         "max": [
-          4.184,
-          21.1704,
+          3.0799,
+          15.5928,
           2.1
         ]
       },
       "height_m": 2.1,
-      "footprint_bbox_m2": 0.7234,
-      "footprint_top_face_m2": 0.0499
+      "footprint_bbox_m2": 0.402,
+      "footprint_top_face_m2": 0.0367
     },
     {
       "name": "DoorLeaf_Group_h_o006",
@@ -810,34 +810,34 @@
       "top_or_bottom_face_count": 2,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "plan_door4",
+      "primary_material": "plan_door",
       "bbox_in": {
         "min": [
-          449.6694,
-          773.5574,
+          331.004,
+          569.4197,
           0.0
         ],
         "max": [
-          466.9386,
-          801.8937,
+          344.0759,
+          590.486,
           82.6772
         ]
       },
       "bbox_m": {
         "min": [
-          11.4216,
-          19.6484,
+          8.4075,
+          14.4633,
           0.0
         ],
         "max": [
-          11.8602,
-          20.3681,
+          8.7395,
+          14.9983,
           2.1
         ]
       },
       "height_m": 2.1,
-      "footprint_bbox_m2": 0.3157,
-      "footprint_top_face_m2": 0.0323
+      "footprint_bbox_m2": 0.1777,
+      "footprint_top_face_m2": 0.0238
     },
     {
       "name": "WindowGlass_Group_h_o007",
@@ -852,31 +852,31 @@
       "primary_material": "plan_window_frame",
       "bbox_in": {
         "min": [
-          694.2875,
-          717.6584,
+          511.0687,
+          527.8565,
           59.0551
         ],
         "max": [
-          723.0438,
-          720.808,
+          532.2363,
+          531.0061,
           82.6772
         ]
       },
       "bbox_m": {
         "min": [
-          17.6349,
-          18.2285,
+          12.9811,
+          13.4076,
           1.5
         ],
         "max": [
-          18.3653,
-          18.3085,
+          13.5188,
+          13.4876,
           2.1
         ]
       },
       "height_m": 0.6,
-      "footprint_bbox_m2": 0.0584,
-      "footprint_top_face_m2": 0.1249
+      "footprint_bbox_m2": 0.043,
+      "footprint_top_face_m2": 0.094
     },
     {
       "name": "WindowSash_Group_h_o007",
@@ -891,31 +891,31 @@
       "primary_material": "plan_window_frame",
       "bbox_in": {
         "min": [
-          696.256,
-          713.2256,
+          513.0372,
+          523.4238,
           61.4498
         ],
         "max": [
-          721.0753,
-          720.1458,
+          530.2678,
+          530.344,
           80.9532
         ]
       },
       "bbox_m": {
         "min": [
-          17.6849,
-          18.1159,
+          13.0311,
+          13.295,
           1.5608
         ],
         "max": [
-          18.3153,
-          18.2917,
+          13.4688,
+          13.4707,
           2.0562
         ]
       },
       "height_m": 0.4954,
-      "footprint_bbox_m2": 0.1108,
-      "footprint_top_face_m2": 0.0634
+      "footprint_bbox_m2": 0.0769,
+      "footprint_top_face_m2": 0.0449
     },
     {
       "name": "WindowGlass_Group_h_o008",
@@ -930,31 +930,31 @@
       "primary_material": "plan_window_frame",
       "bbox_in": {
         "min": [
-          559.7056,
-          716.556,
+          412.0022,
+          526.7541,
           43.3071
         ],
         "max": [
-          640.9917,
-          721.9103,
+          471.8373,
+          532.1085,
           90.5512
         ]
       },
       "bbox_m": {
         "min": [
-          14.2165,
-          18.2005,
+          10.4649,
+          13.3796,
           1.1
         ],
         "max": [
-          16.2812,
-          18.3365,
+          11.9847,
+          13.5156,
           2.3
         ]
       },
       "height_m": 1.2,
-      "footprint_bbox_m2": 0.2808,
-      "footprint_top_face_m2": 0.6231
+      "footprint_bbox_m2": 0.2067,
+      "footprint_top_face_m2": 0.4619
     },
     {
       "name": "WindowGlass_Group_h_o009",
@@ -969,31 +969,31 @@
       "primary_material": "plan_window_frame",
       "bbox_in": {
         "min": [
-          477.2704,
-          669.2083,
+          351.3213,
+          492.1922,
           59.0551
         ],
         "max": [
-          506.0267,
-          672.3579,
+          372.4889,
+          495.3418,
           82.6772
         ]
       },
       "bbox_m": {
         "min": [
-          12.1227,
-          16.9979,
+          8.9236,
+          12.5017,
           1.5
         ],
         "max": [
-          12.8531,
-          17.0779,
+          9.4612,
+          12.5817,
           2.1
         ]
       },
       "height_m": 0.6,
-      "footprint_bbox_m2": 0.0584,
-      "footprint_top_face_m2": 0.1249
+      "footprint_bbox_m2": 0.043,
+      "footprint_top_face_m2": 0.094
     },
     {
       "name": "WindowSash_Group_h_o009",
@@ -1008,31 +1008,31 @@
       "primary_material": "plan_window_frame",
       "bbox_in": {
         "min": [
-          479.2389,
-          664.7756,
+          353.2898,
+          487.7595,
           61.4498
         ],
         "max": [
-          504.0582,
-          671.6958,
+          370.5204,
+          494.6797,
           80.9532
         ]
       },
       "bbox_m": {
         "min": [
-          12.1727,
-          16.8853,
+          8.9736,
+          12.3891,
           1.5608
         ],
         "max": [
-          12.8031,
-          17.0611,
+          9.4112,
+          12.5649,
           2.0562
         ]
       },
       "height_m": 0.4954,
-      "footprint_bbox_m2": 0.1108,
-      "footprint_top_face_m2": 0.0634
+      "footprint_bbox_m2": 0.0769,
+      "footprint_top_face_m2": 0.0449
     },
     {
       "name": "WindowGlass_Group_h_o010",
@@ -1047,31 +1047,31 @@
       "primary_material": "plan_window_frame",
       "bbox_in": {
         "min": [
-          374.13,
-          630.4576,
+          275.3991,
+          463.3766,
           43.3071
         ],
         "max": [
-          445.0628,
-          635.8119,
+          327.6131,
+          468.731,
           90.5512
         ]
       },
       "bbox_m": {
         "min": [
-          9.5029,
-          16.0136,
+          6.9951,
+          11.7698,
           1.1
         ],
         "max": [
-          11.3046,
-          16.1496,
+          8.3214,
+          11.9058,
           2.3
         ]
       },
       "height_m": 1.2,
-      "footprint_bbox_m2": 0.245,
-      "footprint_top_face_m2": 0.5453
+      "footprint_bbox_m2": 0.1804,
+      "footprint_top_face_m2": 0.4046
     },
     {
       "name": "GlazedBalcony_Group_h_o011",
@@ -1083,34 +1083,34 @@
       "top_or_bottom_face_count": 2,
       "top_face_count": 1,
       "default_material_face_count": 0,
-      "primary_material": "plan_window_glass4",
+      "primary_material": "plan_window_glass",
       "bbox_in": {
         "min": [
-          188.1701,
-          704.6901,
+          138.513,
+          518.7261,
           0.0
         ],
         "max": [
-          296.679,
-          712.1698,
+          218.387,
+          524.2319,
           106.2992
         ]
       },
       "bbox_m": {
         "min": [
-          4.7795,
-          17.8991,
+          3.5182,
+          13.1756,
           0.0
         ],
         "max": [
-          7.5356,
-          18.0891,
+          5.547,
+          13.3155,
           2.7
         ]
       },
       "height_m": 2.7,
-      "footprint_bbox_m2": 0.5236,
-      "footprint_top_face_m2": 0.5236
+      "footprint_bbox_m2": 0.2837,
+      "footprint_top_face_m2": 0.2837
     }
   ],
   "shell_stats_from_python": {
