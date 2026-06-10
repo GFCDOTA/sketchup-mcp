@@ -148,13 +148,16 @@ module SofaComponents
     z0 = lay[:leg_h]
     z1 = lay[:arm_h]
     nm = "arm_#{side}"
-    # GPT ciclo10 (TOP_FIX braco): profile=lounge -> braco com TOPO ROLADO CONTINUO
-    # (crowned_box, sem tampa plana / sem anel-chanfro). Traco de CLASSE; NAO troca
-    # arm_style do config, so a PRIMITIVA de render. slim/track/box (hoje rounded_box
-    # de topo plano) passam a rolar; wide/rolled_soft ja tem topo continuo -> ficam
-    # no case normal (zero regressao).
+    # GPT ciclo10->11 (TOP_FIX braco): profile=lounge -> braco = BLOCO LATERAL BAIXO
+    # e LIMPO (ref modern dark), NAO um tubo. Ciclo10 usou crowned_box e rolou DEMAIS:
+    # numa peca estreita(x)-e-longa(y) o domo vira meia-cana/poste na frente. Ciclo11
+    # corrige -> topo PLANO levemente amaciado (chanfro sutil, sem domo), frente
+    # VERTICAL continua (sem poste), arestas verticais com raio limpo. A altura baixa
+    # (arm_h=seat_h+0.06) + afinamento (arm_w*0.82) ja convergiram e ficam. Traco de
+    # CLASSE; NAO troca arm_style do config, so a primitiva. wide/rolled_soft ja sao
+    # macios -> seguem no case normal.
     if cfg['profile'] == 'lounge' && %w[slim track box].include?(style)
-      SP.rolled_arm_primitive(ent, x0, y0, x1, y1, z0, z1, softness: lay[:softness], mat_obj: mats[:fab], name: nm)
+      SP.rounded_box(ent, x0, y0, x1, y1, z0, z1, r: 0.05, top_round: 0.045, mat_obj: mats[:fab], name: nm)
       return
     end
     case style
