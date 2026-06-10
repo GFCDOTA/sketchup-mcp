@@ -77,6 +77,13 @@ module SofaGenerator
     arm_h = cfg['arm_height_m'].to_f
     leg_h = cfg['leg_height_m'].to_f
     seat_d = cfg['seat_depth_m'].to_f
+    rake = cfg['back_rake_deg'].to_f
+    # GPT ciclo1 (TOP_FIX perfil): lounge = silhueta mais baixa/profunda/reclinada.
+    # Traco de CLASSE (qualquer caso profile=lounge herda), nao ajuste de 1 exemplar.
+    if cfg['profile'] == 'lounge'
+      arm_h = [arm_h, seat_h + 0.13].min   # braco baixo (lê elegante, nao parede)
+      rake = [rake, 13.0].max              # mais recline
+    end
     base_top = seat_h - cush_t
     seat_back = d - back_t
     seat_front = [seat_back - seat_d, arm_w * 0.0 + 0.10].max
@@ -89,7 +96,7 @@ module SofaGenerator
       arm_w: arm_w, arm_h: arm_h,
       back_z0: seat_h - 0.03, back_top: h, back_front: seat_back, back_back: d,
       seat_x0: arm_w, seat_x1: w - arm_w,
-      rake_deg: cfg['back_rake_deg'].to_f,
+      rake_deg: rake,
       softness: cfg['softness_level']
     }
   end

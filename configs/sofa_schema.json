@@ -17,7 +17,8 @@
     "softness_level":    ["low", "medium", "high"],
     "edge_radius_level": ["low", "medium", "high"],
     "seam_style":    ["none", "simple", "piping_subtle"],
-    "material_style": ["light_linen", "mid_gray", "dark_charcoal"]
+    "material_style": ["light_linen", "mid_gray", "dark_charcoal"],
+    "profile": ["standard", "lounge"]
   },
 
   "integers": { "seat_count": [1, 6] },
@@ -48,6 +49,7 @@
     "edge_radius_level": "medium",
     "seam_style": "none",
     "material_style": "light_linen",
+    "profile": "standard",
     "seat_height_m": 0.43,
     "seat_depth_m": 0.58,
     "seat_cushion_thickness_m": 0.16,

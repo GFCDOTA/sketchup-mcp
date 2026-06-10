@@ -64,10 +64,10 @@
     "family": "straight", "seat_count": 3, "seat_style": "split", "back_style": "cushion",
     "arm_style": "track", "base_style": "recessed", "leg_style": "block",
     "softness_level": "high", "edge_radius_level": "high", "seam_style": "none",
-    "material_style": "dark_charcoal",
-    "overall_width_m": 2.40, "overall_depth_m": 0.95, "overall_height_m": 0.76,
-    "seat_height_m": 0.42, "seat_depth_m": 0.60, "seat_cushion_thickness_m": 0.18,
-    "arm_width_m": 0.22, "arm_height_m": 0.52, "back_height_m": 0.34, "back_thickness_m": 0.20,
-    "back_rake_deg": 10, "leg_height_m": 0.06, "leg_inset_m": 0.05
+    "material_style": "dark_charcoal", "profile": "lounge",
+    "overall_width_m": 2.40, "overall_depth_m": 1.05, "overall_height_m": 0.72,
+    "seat_height_m": 0.42, "seat_depth_m": 0.66, "seat_cushion_thickness_m": 0.18,
+    "arm_width_m": 0.22, "arm_height_m": 0.50, "back_height_m": 0.32, "back_thickness_m": 0.20,
+    "back_rake_deg": 13, "leg_height_m": 0.06, "leg_inset_m": 0.05
   }
 ]

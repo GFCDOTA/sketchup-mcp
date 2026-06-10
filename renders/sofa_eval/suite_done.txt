@@ -1,3 +1,3 @@
 SUITE casos=1
 primitives_board OK -> primitives_front.png, primitives_three_quarter.png
-eval_low_modern_dark_3seat OK bbox=[2.4, 1.011, 0.754] warns=0
+eval_low_modern_dark_3seat OK bbox=[2.4, 1.119, 0.712] warns=0
