@@ -1,0 +1,44 @@
+{
+  "_doc": "SofaVRayMaterialSpec — spec de CLASSE (por material_style) p/ o track de realismo V-Ray. Dados render-engine-agnosticos: um applier (interativo ou scriptado quando o V-Ray estiver carregado) cria o VRayBRDF consumindo isto. Valores de PARTIDA do GPT (diretor): roughness 0.75-0.9, reflection 0.15-0.25, bump 0.03-0.07, sheen/fuzz 0.25-0.45, fresnel ON, nunca preto puro. Reusa os MESMOS maps do albedo-preview (sofa_fabric_material.py). tile_m = UV world-scale (= preview).",
+  "version": "1.0.0",
+  "shared": {
+    "tile_m": 0.30,
+    "fresnel": true,
+    "reflection_glossy": true,
+    "note_specular": "specular bem espalhado, nada molhado (GPT)"
+  },
+  "styles": {
+    "dark_charcoal": {
+      "albedo_map": "textures/fabric_dark_charcoal_albedo.png",
+      "bump_map": "textures/fabric_dark_charcoal_bump.png",
+      "base_rgb": [33, 36, 38],
+      "_base_note": "V-Ray pode escurecer ao 32-38 do GPT (preview usa 40,43,45 p/ legibilidade flat)",
+      "roughness": 0.85,
+      "reflection": 0.20,
+      "bump_amount": 0.045,
+      "sheen": 0.35,
+      "fuzz": 0.25
+    },
+    "mid_gray": {
+      "albedo_map": "textures/fabric_mid_gray_albedo.png",
+      "bump_map": "textures/fabric_mid_gray_bump.png",
+      "base_rgb": [108, 110, 114],
+      "roughness": 0.82,
+      "reflection": 0.20,
+      "bump_amount": 0.045,
+      "sheen": 0.32,
+      "fuzz": 0.22
+    },
+    "light_linen": {
+      "albedo_map": "textures/fabric_light_linen_albedo.png",
+      "bump_map": "textures/fabric_light_linen_bump.png",
+      "base_rgb": [200, 191, 176],
+      "roughness": 0.80,
+      "reflection": 0.18,
+      "bump_amount": 0.050,
+      "sheen": 0.30,
+      "fuzz": 0.18
+    }
+  },
+  "_class_rule": "Mesmo idioma nos 3 estilos (roughness alto, reflexao baixa, bump fino, sheen/fuzz de tecido, fresnel on); nenhum valor de exemplar. Linen levemente menos fuzz (fibra), dark levemente mais sheen. Qualquer material_style novo herda o idioma."
+}
