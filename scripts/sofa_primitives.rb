@@ -368,22 +368,75 @@ module SofaPrimitives
                            seam: seam, seam_mat: seam_mat)
   end
 
-  # Almofada de ENCOSTO: espessura minima garantida, coroada, topo arredondado.
-  # O rake e aplicado pelo COMPONENTE (rotaciona o grupo) — aqui sai vertical.
+  # Almofada de ENCOSTO estofada (NAO placa): deforma a FACE FRONTAL (-Y, lado do
+  # sentado) -> bulge no meio (volume) + BASE comprimida contra o assento (tuck) +
+  # topo recuado/soft. y0=frente (encosta no assento), y1=fundo (plano, estrutural).
+  # O rake e aplicado pelo COMPONENTE (rotacao do grupo) — preservado.
+  # GPT (perfil/encosto): "menos placa, mais volume, base comprimida, topo soft".
   def back_cushion_primitive(ents, x0, y0, x1, y1, z0, z1,
                              softness: 'medium', mat_obj: nil, name: nil,
                              seam: false, seam_mat: nil)
     sp = soft_params(softness)
-    g = crowned_box(ents, x0, y0, x1, y1, z0, z1,
-                    r: sp[:r] * 1.2, crown: sp[:crown] * 0.9, seg: 8,
-                    mat_obj: mat_obj, name: name)
-    if seam
-      zsh = (z1 - sp[:crown] * 0.5) * M
-      perim = rounded_rect_pts(x0 * M, y0 * M, x1 * M, y1 * M, zsh, sp[:r] * 1.2 * M, 8)
-      # costura FILHA do grupo (acompanha o rake aplicado pelo componente — fix v1)
-      thin_seam_line(g.entities, perim, radius_m: 0.0045, mat_obj: seam_mat, name: "#{name}_seam")
+    bulge = sp[:crown] * 1.1        # protrusao max (meio) pro sentado
+    base_comp = sp[:crown] * 0.85   # base recua/comprime contra o assento (w~0)
+    top_back = sp[:crown] * 0.5     # topo recua um pouco (arredonda)
+    depth = (y1 - y0)
+    g = ents.add_group
+    g.name = name if name
+    nu = 6                          # mais segmentos -> perfil liso (nao facetado/pontudo)
+    nw = 6
+    yb = y1 * M                     # face de tras (plana, estrutural)
+    front = Array.new(nu + 1) { Array.new(nw + 1) }
+    (0..nu).each do |i|
+      u = i.to_f / nu
+      (0..nw).each do |k|
+        w = k.to_f / nw
+        x = x0 + (x1 - x0) * u
+        z = z0 + (z1 - z0) * w
+        du = 1.0 - (2.0 * u - 1.0)**2
+        dw = 1.0 - (2.0 * w - 1.0)**2
+        eu = (2.0 * u - 1.0)**2
+        yf = y0 - (bulge * du * dw) \
+                + (base_comp * ((1.0 - w)**2)) \
+                + (top_back * (w**2)) \
+                + (sp[:crown] * 0.3 * eu * dw)
+        yf = [yf, y0 - depth * 0.85].max
+        yf = [yf, y1 - 0.005].min
+        front[i][k] = Geom::Point3d.new(x * M, yf * M, z * M)
+      end
     end
-    g
+    (0...nu).each do |i|
+      (0...nw).each do |k|
+        a = front[i][k]; b = front[i + 1][k]; c = front[i + 1][k + 1]; d = front[i][k + 1]
+        begin; g.entities.add_face(a, b, c); rescue StandardError; end
+        begin; g.entities.add_face(a, c, d); rescue StandardError; end
+      end
+    end
+    perim = []
+    (0...nu).each { |i| perim << front[i][0] }
+    (0...nw).each { |k| perim << front[nu][k] }
+    nu.downto(1).each { |i| perim << front[i][nw] }
+    nw.downto(1).each { |k| perim << front[0][k] }
+    n = perim.size
+    (0...n).each do |idx|
+      a = perim[idx]; b = perim[(idx + 1) % n]
+      ab = Geom::Point3d.new(a.x, yb, a.z)
+      bb = Geom::Point3d.new(b.x, yb, b.z)
+      begin; g.entities.add_face(a, b, bb); rescue StandardError; end
+      begin; g.entities.add_face(a, bb, ab); rescue StandardError; end
+    end
+    begin; g.entities.add_face(perim.map { |p| Geom::Point3d.new(p.x, yb, p.z) }); rescue StandardError; end
+    g.material = mat_obj if mat_obj
+    g.entities.grep(Sketchup::Edge).each do |e|
+      next if (e.start.position.y - yb).abs < 0.05 && (e.end.position.y - yb).abs < 0.05
+      begin
+        e.soft = true
+        e.smooth = true
+      rescue StandardError
+        nil
+      end
+    end
+    _log(name, g)
   end
 
   # Pillow (pillow back / almofada solta): mais plump e mais arredondada.
