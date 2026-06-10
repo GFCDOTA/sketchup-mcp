@@ -383,8 +383,8 @@ module SofaPrimitives
     depth = (y1 - y0)
     g = ents.add_group
     g.name = name if name
-    nu = 6                          # mais segmentos -> perfil liso (nao facetado/pontudo)
-    nw = 6
+    nu = 6
+    nw = 10                         # silhueta lateral LISA (GPT: curva continua, nao facetada)
     yb = y1 * M                     # face de tras (plana, estrutural)
     front = Array.new(nu + 1) { Array.new(nw + 1) }
     (0..nu).each do |i|
@@ -394,12 +394,11 @@ module SofaPrimitives
         x = x0 + (x1 - x0) * u
         z = z0 + (z1 - z0) * w
         du = 1.0 - (2.0 * u - 1.0)**2
-        dw = 1.0 - (2.0 * w - 1.0)**2
-        eu = (2.0 * u - 1.0)**2
-        yf = y0 - (bulge * du * dw) \
+        hump = Math.sin(Math::PI * w)   # corcova SUAVE (0 nas pontas, pico no meio) -> silhueta continua
+        # frente: bulge suave (meio) ; base tuck (w~0) ; topo recua/arredonda (w~1)
+        yf = y0 - (bulge * du * hump) \
                 + (base_comp * ((1.0 - w)**2)) \
-                + (top_back * (w**2)) \
-                + (sp[:crown] * 0.3 * eu * dw)
+                + (top_back * (w**3))
         yf = [yf, y0 - depth * 0.85].max
         yf = [yf, y1 - 0.005].min
         front[i][k] = Geom::Point3d.new(x * M, yf * M, z * M)
