@@ -21,33 +21,66 @@ FileUtils.mkdir_p(DIR) rescue nil
 L = []
 def flush(arr, log); File.write(log, arr.join("\n") + "\n") rescue nil; end
 
-# camera deterministica (mesma linguagem do render_views SketchUp)
-def place_camera(model, kind)
-  bb = model.bounds; c = bb.center; dg = bb.diagonal
+# Chao neutro (GPT V-Ray passo1): bounce + contexto, ~6m, NEUTRO, no z minimo do sofa.
+# Adicionar ANTES de medir a camera (e usar bounds do SOFA, nao do chao, p/ enquadrar).
+def add_ground(model, sbb)
+  ents = model.active_entities
+  M = 39.3700787402
+  gm = model.materials['vray_ground'] || model.materials.add('vray_ground')
+  gm.color = Sketchup::Color.new(150, 150, 150)
+  sc = sbb.center; gz = sbb.min.z; half = 3.0 * M
+  pts = [[sc.x - half, sc.y - half, gz], [sc.x + half, sc.y - half, gz],
+         [sc.x + half, sc.y + half, gz], [sc.x - half, sc.y + half, gz]].map { |a| Geom::Point3d.new(*a) }
+  f = ents.add_face(pts); f.material = gm; f.back_material = gm
+  f.reverse! if f.normal.z < 0
+rescue StandardError
+  nil
+end
+
+# camera 3/4 ENQUADRADA NO SOFA (sbb = bounds do sofa, capturado antes do chao)
+def place_camera(model, sbb, kind)
+  sc = sbb.center; dg = sbb.diagonal
   up = Geom::Vector3d.new(0, 0, 1)
   eye = case kind
-        when 'front' then Geom::Point3d.new(c.x, bb.min.y - dg, c.z)
-        when 'side'  then Geom::Point3d.new(bb.max.x + dg, c.y, c.z)
-        else Geom::Point3d.new(bb.max.x + dg * 0.85, bb.min.y - dg * 0.95, c.z + dg * 0.65)
+        when 'front' then Geom::Point3d.new(sc.x, sbb.min.y - dg * 1.05, sc.z + dg * 0.1)
+        when 'side'  then Geom::Point3d.new(sbb.max.x + dg * 1.05, sc.y, sc.z + dg * 0.1)
+        else Geom::Point3d.new(sbb.max.x + dg * 0.55, sbb.min.y - dg * 0.75, sc.z + dg * 0.45)
         end
-  cam = Sketchup::Camera.new(eye, c, up); cam.perspective = true
-  model.active_view.camera = cam; model.active_view.zoom_extents
+  cam = Sketchup::Camera.new(eye, Geom::Point3d.new(sc.x, sc.y, sc.z + dg * 0.05), up)
+  cam.perspective = true; cam.fov = 35
+  model.active_view.camera = cam
 end
 
 begin
   ctx = VRay::Context.active
   scene = ctx.scene; renderer = ctx.renderer; model = ctx.model
   L << "ctx ok | model=#{model.title} | VRay #{VRay::SKETCHUP_VERSION rescue '?'}"; flush(L, LOG)
-  place_camera(model, ENV['VRAY_CAM'] || 'three_quarter')
 
+  sbb = model.bounds            # bounds do SOFA (antes do chao)
+  add_ground(model, sbb)        # GPT passo1: chao neutro
+  place_camera(model, sbb, ENV['VRAY_CAM'] || 'three_quarter')
+
+  # output + AUTO-EXPOSICAO + WB neutro (GPT passo2: charcoal le cinza-carvao, nao preto)
   scene.change {
     so = scene['/SettingsOutput']
     so[:img_width] = W; so[:img_height] = H; so[:lock_resolution] = true
+    scam = scene['/SettingsCamera']
+    if scam
+      scam[:auto_exposure] = 1 rescue nil
+      scam[:auto_white_balance] = 1 rescue nil
+    end
   }
 
   # PASSO OBRIGATORIO: exportar modelo+scene pro renderer
   exporter = VRay::ModelExporter.new(model: model, scene: scene, renderer: renderer)
   exporter.export_model(view: model.active_view)
+  # re-garante auto-exposicao apos export
+  begin
+    scam = scene['/SettingsCamera']
+    scene.change { scam[:auto_exposure] = 1; scam[:auto_white_balance] = 1 } if scam
+  rescue StandardError
+    nil
+  end
   L << "export_model OK"; flush(L, LOG)
 
   t0 = Time.now
