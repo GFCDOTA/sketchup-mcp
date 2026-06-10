@@ -73,5 +73,13 @@ não estiver boa**; toda correção é de classe.
 - `navigate` força https; abrir **nova aba por ciclo** (`tabs_create_mcp`) ou reusar a thread de
   review ("Análise de sofá procedural") pra manter contexto.
 - `get_page_text` às vezes atrasa a captura da última resposta → fallback `screenshot`.
+- **COLISÃO DE CLIPBOARD (bug real do loop, 2026-06-10):** se o agente põe a IMAGEM no
+  clipboard e depois o humano **copia o texto do prompt** (Ctrl+C), o texto SOBRESCREVE a
+  imagem → o Ctrl+V cola só texto e o GPT responde "anexar a imagem". **FIX:** o AGENTE
+  **digita o prompt** no composer via MCP (`type` funciona pra texto), e o humano faz
+  **só Ctrl+V (imagem) + Enter**, sem copiar nada. Nunca peça pro humano copiar o prompt.
+- O `ctrl+v` SINTÉTICO do MCP NÃO entrega imagem do clipboard (só um Ctrl+V real do teclado
+  entrega). Por isso: agente digita texto, humano cola a imagem. `set_clipboard_image.ps1`
+  usa `SetDataObject(img, $true)` (persist) pra a imagem sobreviver no clipboard.
 - Se o Chrome (extensão Claude) estiver **off** → marcar `BLOCKED_VISUAL_REVIEW_CHROME_OFF`,
   NÃO autoaprovar, salvar a folha e pedir o Chrome ao Felipe.

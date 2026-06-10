@@ -94,7 +94,7 @@ module SofaGenerator
       base_top: base_top, base_front: base_rec,
       seat_h: seat_h, seat_z0: base_top, seat_front: seat_front, seat_back: seat_back,
       arm_w: arm_w, arm_h: arm_h,
-      back_z0: seat_h - 0.03, back_top: h, back_front: seat_back, back_back: d,
+      back_z0: seat_h - 0.08, back_top: h, back_front: seat_back - 0.03, back_back: d,
       seat_x0: arm_w, seat_x1: w - arm_w,
       rake_deg: rake,
       softness: cfg['softness_level']
