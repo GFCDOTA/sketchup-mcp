@@ -73,6 +73,10 @@ module SofaComponents
   # ---- ASSENTO -------------------------------------------------------------
   def build_seat_module(ent, cfg, lay, mats, seam)
     soft = lay[:softness]
+    # GPT generalizacao: piso de volume p/ standard nao ler chapado em medium. Gated p/
+    # NAO tocar lounge (floor 0.0 = no-op byte-igual nele). 0.058 fica entre medium(0.050)
+    # e high(0.070): low/medium sobem, high fica igual (max vence).
+    seat_floor = (cfg['profile'] == 'lounge') ? 0.0 : 0.058
     yf = lay[:seat_front]
     yb = lay[:seat_back]
     z0 = lay[:seat_z0]
@@ -80,7 +84,7 @@ module SofaComponents
     breath = 0.006 # folga pequena (almofadas respiram)
     if cfg['seat_style'] == 'bench'
       SP.seat_cushion_primitive(ent, lay[:seat_x0] + breath, yf, lay[:seat_x1] - breath, yb,
-                                z0, z1, softness: soft, mat_obj: mats[:fab],
+                                z0, z1, softness: soft, mat_obj: mats[:fab], min_crown: seat_floor,
                                 name: 'seat_bench', seam: seam, seam_mat: mats[:seam])
     else # split
       n = [lay[:seats], 1].max
@@ -90,8 +94,35 @@ module SofaComponents
       n.times do |i|
         sx0 = lay[:seat_x0] + i * (cw + gap)
         SP.seat_cushion_primitive(ent, sx0 + breath, yf, sx0 + cw - breath, yb,
-                                  z0, z1, softness: soft, mat_obj: mats[:fab],
+                                  z0, z1, softness: soft, mat_obj: mats[:fab], min_crown: seat_floor,
                                   name: "seat_#{i + 1}", seam: seam, seam_mat: mats[:seam])
+      end
+    end
+
+    # --- CHAISE: fileira frontal de pad estofado (gated family=='chaise') ----
+    # GPT (generalizacao): a parte chaise lia como PLATAFORMA/SLAB. Cobre a faixa
+    # frontal (chaise_pad_front..seat_front-gap) com ESTOFADO na MESMA linguagem
+    # SoftCushion do assento (mesma divisao em X/breath/z0..z1). O tuck-gap em Y gera
+    # o sulco -> 2 PROFUNDIDADES de assento, nao 1 almofada gigante chapada. O slab de
+    # base recessed fica embaixo como frame (escondido). lounge/outras familias = no-op.
+    pf = lay[:chaise_pad_front]
+    if cfg['family'] == 'chaise' && pf && pf < yf
+      pyb = yf - lay[:gap]
+      if cfg['seat_style'] == 'bench'
+        SP.seat_cushion_primitive(ent, lay[:seat_x0] + breath, pf, lay[:seat_x1] - breath, pyb,
+                                  z0, z1, softness: soft, mat_obj: mats[:fab], min_crown: seat_floor,
+                                  name: 'seat_chaise_front', seam: seam, seam_mat: mats[:seam])
+      else
+        n = [lay[:seats], 1].max
+        gap = lay[:gap]
+        total = lay[:seat_x1] - lay[:seat_x0]
+        cw = (total - gap * (n - 1)) / n
+        n.times do |i|
+          sx0 = lay[:seat_x0] + i * (cw + gap)
+          SP.seat_cushion_primitive(ent, sx0 + breath, pf, sx0 + cw - breath, pyb,
+                                    z0, z1, softness: soft, mat_obj: mats[:fab], min_crown: seat_floor,
+                                    name: "seat_chaise_front_#{i + 1}", seam: seam, seam_mat: mats[:seam])
+        end
       end
     end
   end
@@ -107,6 +138,9 @@ module SofaComponents
 
   def build_back_module(ent, cfg, lay, mats, seam)
     soft = lay[:softness]
+    # GPT generalizacao: piso de VOLUME FRONTAL + tuck pro encosto standard (so quem opta).
+    # 0.0 no lounge (no-op). 0.050 sobe o tight (hardcoded 'low'=0.030) e low/medium; high igual.
+    back_floor = (cfg['profile'] == 'lounge') ? 0.0 : 0.050
     yf = lay[:back_front]
     yb = lay[:back_back]
     z0 = lay[:back_z0]
@@ -114,9 +148,9 @@ module SofaComponents
     style = cfg['back_style']
     breath = 0.006
     if style == 'tight'
-      # encosto firme e continuo (uma peca), crown menor
+      # encosto firme e continuo (uma peca), crown menor + floor de volume frontal (GPT)
       g = SP.back_cushion_primitive(ent, lay[:seat_x0] + breath, yf, lay[:seat_x1] - breath, yb,
-                                    z0, z1, softness: 'low', mat_obj: mats[:back],
+                                    z0, z1, softness: 'low', mat_obj: mats[:back], min_crown: back_floor,
                                     name: 'back_tight', seam: seam, seam_mat: mats[:seam])
       _rake!(g, lay)
     else
@@ -131,7 +165,7 @@ module SofaComponents
                                   z0, z1, softness: 'high', mat_obj: mats[:back], name: "back_pillow_#{i + 1}")
             else # cushion
               SP.back_cushion_primitive(ent, bx0 + breath, yf, bx0 + cw - breath, yb,
-                                        z0, z1, softness: soft, mat_obj: mats[:back],
+                                        z0, z1, softness: soft, mat_obj: mats[:back], min_crown: back_floor,
                                         name: "back_#{i + 1}", seam: seam, seam_mat: mats[:seam])
             end
         _rake!(g, lay)
@@ -166,13 +200,18 @@ module SofaComponents
       SP.rounded_box(ent, x0, y0, x1, y1, z0, z1, r: 0.05, top_round: 0.045, mat_obj: mats[:fab], name: nm)
       return
     end
+    # GPT generalizacao: braco STANDARD slim/track/box ganha topo/arestas mais MACIAS
+    # (melhor integracao braco<->corpo) SO via r/top_round -> NAO move/baixa/aterra o braco
+    # (x/y/z e arm_h intactos = sem postura lounge). lounge slim/track/box ja retornou acima;
+    # lounge so chega aqui via wide/rolled_soft, onde std=false -> valores atuais (no-op).
+    std = cfg['profile'] != 'lounge'
     case style
     when 'slim'
-      SP.rounded_box(ent, x0, y0, x1, y1, z0, z1, r: 0.03, top_round: 0.03, mat_obj: mats[:fab], name: nm)
+      SP.rounded_box(ent, x0, y0, x1, y1, z0, z1, r: (std ? 0.045 : 0.03), top_round: (std ? 0.05 : 0.03), mat_obj: mats[:fab], name: nm)
     when 'track'
-      SP.rounded_box(ent, x0, y0, x1, y1, z0, z1, r: 0.035, top_round: 0.05, mat_obj: mats[:fab], name: nm)
+      SP.rounded_box(ent, x0, y0, x1, y1, z0, z1, r: (std ? 0.05 : 0.035), top_round: (std ? 0.07 : 0.05), mat_obj: mats[:fab], name: nm)
     when 'box'
-      SP.rounded_box(ent, x0, y0, x1, y1, z0, z1, r: 0.02, top_round: 0.025, mat_obj: mats[:fab], name: nm)
+      SP.rounded_box(ent, x0, y0, x1, y1, z0, z1, r: (std ? 0.03 : 0.02), top_round: (std ? 0.04 : 0.025), mat_obj: mats[:fab], name: nm)
     when 'wide'
       SP.soft_rounded_box(ent, x0, y0, x1, y1, z0, z1, softness: lay[:softness], mat_obj: mats[:fab], name: nm)
     when 'rolled_soft'

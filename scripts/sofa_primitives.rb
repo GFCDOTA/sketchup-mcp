@@ -377,20 +377,23 @@ module SofaPrimitives
   # (KIVIK-ish) usa menos bulge / mais bloco; senao mais bulge/macio (lounge).
   def seat_cushion_primitive(ents, x0, y0, x1, y1, z0, z1,
                              softness: 'medium', mat_obj: nil, name: nil,
-                             seam: false, seam_mat: nil, family: nil)
+                             seam: false, seam_mat: nil, family: nil, min_crown: 0.0)
     sp = soft_params(softness)
     blk = (family == 'tight')
+    # GPT generalizacao: piso de volume (so quem opta passa min_crown>0; default 0 = no-op
+    # byte-igual). Standard usa floor p/ nao ler chapado em medium; lounge passa 0.
+    cr = [sp[:crown], min_crown].max
     # GPT ciclo4: menos "barriga" -> bulge MENOR + compressao mais UNIFORME (edge_comp
     # maior), frente mais reta (sag menor), tuck mais sutil (seam menor), topo menos arqueado.
     # GPT ciclo8: frente mais RETA/menos arqueada -> bulge e sag menores ainda +
     # compressao frontal mais controlada/uniforme (edge_comp maior).
     soft_cushion_primitive(ents, x0, y0, x1, y1, z0, z1,
                            softness: softness,
-                           bulge: sp[:crown] * (blk ? 0.34 : 0.45),
-                           sag_front: sp[:crown] * 0.14,
-                           seam_depth: sp[:crown] * (blk ? 0.14 : 0.20),
-                           edge_comp: sp[:crown] * 0.62,
-                           corner_pinch: sp[:crown] * 0.18,
+                           bulge: cr * (blk ? 0.34 : 0.45),
+                           sag_front: cr * 0.14,
+                           seam_depth: cr * (blk ? 0.14 : 0.20),
+                           edge_comp: cr * 0.62,
+                           corner_pinch: cr * 0.18,
                            nu: 6, nv: 4, mat_obj: mat_obj, name: name,
                            seam: seam, seam_mat: seam_mat)
   end
@@ -402,11 +405,12 @@ module SofaPrimitives
   # GPT (perfil/encosto): "menos placa, mais volume, base comprimida, topo soft".
   def back_cushion_primitive(ents, x0, y0, x1, y1, z0, z1,
                              softness: 'medium', mat_obj: nil, name: nil,
-                             seam: false, seam_mat: nil)
+                             seam: false, seam_mat: nil, min_crown: 0.0)
     sp = soft_params(softness)
+    cr = [sp[:crown], min_crown].max  # GPT generalizacao: piso de volume frontal (default 0 = no-op)
     depth = (y1 - y0)
-    bulge = sp[:crown] * 1.1        # protrusao max (meio) pro sentado
-    base_comp = sp[:crown] * 0.85   # base recua/comprime contra o assento (w~0)
+    bulge = cr * 1.1        # protrusao max (meio) pro sentado
+    base_comp = cr * 0.85   # base recua/comprime contra o assento (w~0)
     top_back = depth * 0.8          # topo: frente recua ate ~o fundo -> borda fina ARREDONDADA (GPT)
     g = ents.add_group
     g.name = name if name

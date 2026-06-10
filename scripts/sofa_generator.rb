@@ -102,6 +102,16 @@ module SofaGenerator
       base_top: base_top, base_front: base_front_eff,
       base_z0: ((cfg['profile'] == 'lounge' && cfg['base_style'] == 'recessed') ? [leg_h - 0.014, 0.006].max : leg_h),  # GPT ciclo12: lounge recessed -> base desce a ~o chao (SO recessed; plinth/exposed_legs intactos)
       seat_h: seat_h, seat_z0: base_top, seat_front: seat_front, seat_back: seat_back,
+      # family=='chaise' (GPT generalizacao): frente da fileira de pad estofado que cobre
+      # a plataforma de base chapada (y de chaise_pad_front ate seat_front). Fonte unica,
+      # relacional a base_front_eff/seat_front, clampada (nil se nao sobra profundidade
+      # util >=0.12m -> chaise raso degenerado nao gera fileira). nil p/ nao-chaise.
+      chaise_pad_front: (
+        if cfg['family'] == 'chaise'
+          _pf = [base_front_eff + 0.02, 0.08].max
+          (seat_front - _pf) >= 0.12 ? _pf : nil
+        end
+      ),
       arm_w: arm_w, arm_h: arm_h,
       back_z0: seat_h - 0.08, back_top: h, back_front: seat_back - 0.03, back_back: d,
       seat_x0: arm_w, seat_x1: w - arm_w,
