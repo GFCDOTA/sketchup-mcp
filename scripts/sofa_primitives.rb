@@ -261,22 +261,111 @@ module SofaPrimitives
 
   # ---- ESTOFADO (diferente de caixa arredondada) --------------------------
 
-  # Almofada de ASSENTO: corpo coroado (volume), frente macia, espessura plausivel.
-  # seam: se true, costura sutil no ombro superior externo.
-  def seat_cushion_primitive(ents, x0, y0, x1, y1, z0, z1,
-                             softness: 'medium', mat_obj: nil, name: nil,
+  # SoftCushionPrimitive — almofada DEFORMADA por costura+peso (nao rounded box).
+  # Topo = malha nu x nv (GPT: <=6x4) deformada: bulge central + edge_compression +
+  # sag frontal + corner_pinch + seam_tuck (a costura AFUNDA a malha na borda).
+  # Faces TRIANGULADAS (evita non-planar). soften so no estofado (topo/laterais),
+  # nunca nas arestas estruturais. Tudo em metros; converte p/ polegadas.
+  # Aprendido do gate GPT (ref 3DW): "parar de gerar caixa, gerar almofada comprimida".
+  def soft_cushion_primitive(ents, x0, y0, x1, y1, z0, z1,
+                             softness: 'medium', bulge: nil, sag_front: nil,
+                             seam_depth: nil, edge_comp: nil, corner_pinch: nil,
+                             nu: 6, nv: 4, mat_obj: nil, name: nil,
                              seam: false, seam_mat: nil)
     sp = soft_params(softness)
-    g = crowned_box(ents, x0, y0, x1, y1, z0, z1,
-                    r: sp[:r] * 1.3, crown: sp[:crown], seg: 8,
-                    mat_obj: mat_obj, name: name)
-    if seam
-      zsh = (z1 - sp[:crown] * 0.5) * M  # no ombro da coroa
-      perim = rounded_rect_pts(x0 * M, y0 * M, x1 * M, y1 * M, zsh, sp[:r] * 1.3 * M, 8)
-      # costura FILHA do grupo da almofada (acompanha rake/transform — fix v1)
-      thin_seam_line(g.entities, perim, radius_m: 0.0045, mat_obj: seam_mat, name: "#{name}_seam")
+    bulge      = (bulge      || sp[:crown] * 1.0)
+    sag_front  = (sag_front  || bulge * 0.45)
+    seam_depth = (seam_depth || bulge * 0.40)
+    edge_comp  = (edge_comp  || bulge * 0.45)
+    corner_pinch = (corner_pinch || bulge * 0.30)
+    g = ents.add_group
+    g.name = name if name
+    th = z1 - z0
+    maxdef = th * 0.5
+    top = Array.new(nu + 1) { Array.new(nv + 1) }
+    (0..nu).each do |i|
+      u = i.to_f / nu
+      (0..nv).each do |j|
+        v = j.to_f / nv
+        x = x0 + (x1 - x0) * u
+        y = y0 + (y1 - y0) * v
+        du = 1.0 - (2.0 * u - 1.0)**2     # dome (1 centro, 0 borda)
+        dv = 1.0 - (2.0 * v - 1.0)**2
+        eu = (2.0 * u - 1.0)**2           # borda (0 centro, 1 borda)
+        ev = (2.0 * v - 1.0)**2
+        ring = [u, 1.0 - u, v, 1.0 - v].min          # dist a borda mais proxima
+        seam_t = ring < 0.16 ? (1.0 - ring / 0.16) : 0.0  # tuck raso na borda
+        dz = bulge * du * dv \
+             - edge_comp * (eu + ev) * 0.5 \
+             - seam_depth * seam_t \
+             - corner_pinch * (eu * ev) \
+             - sag_front * ((1.0 - v)**2) * 0.6        # frente (v=0) cai
+        dz = [[dz, maxdef].min, -maxdef].max
+        top[i][j] = Geom::Point3d.new(x * M, y * M, (z1 + dz) * M)
+      end
     end
-    g
+    # topo triangulado
+    (0...nu).each do |i|
+      (0...nv).each do |j|
+        a = top[i][j]; b = top[i + 1][j]; c = top[i + 1][j + 1]; d = top[i][j + 1]
+        begin; g.entities.add_face(a, b, c); rescue StandardError; end
+        begin; g.entities.add_face(a, c, d); rescue StandardError; end
+      end
+    end
+    # perimetro -> laterais ate z0 + fundo
+    z0i = z0 * M
+    perim = []
+    (0...nu).each { |i| perim << top[i][0] }
+    (0...nv).each { |j| perim << top[nu][j] }
+    nu.downto(1).each { |i| perim << top[i][nv] }
+    nv.downto(1).each { |j| perim << top[0][j] }
+    n = perim.size
+    (0...n).each do |k|
+      a = perim[k]; b = perim[(k + 1) % n]
+      ab = Geom::Point3d.new(a.x, a.y, z0i)
+      bb = Geom::Point3d.new(b.x, b.y, z0i)
+      begin; g.entities.add_face(a, b, bb); rescue StandardError; end
+      begin; g.entities.add_face(a, bb, ab); rescue StandardError; end
+    end
+    begin; g.entities.add_face(perim.map { |p| Geom::Point3d.new(p.x, p.y, z0i) }); rescue StandardError; end
+    g.material = mat_obj if mat_obj
+    # soften/smooth TODO o estofado (topo+lados) como superficie continua; SO as arestas
+    # do fundo (z0) ficam vivas. Mata o serrilhado/facetado do mesh deformado.
+    # (GPT: "soften/smooth normals obrigatorio"; aqui = superficie macia, sem patamar.)
+    g.entities.grep(Sketchup::Edge).each do |e|
+      next if e.start.position.z <= z0i + 0.05 && e.end.position.z <= z0i + 0.05
+      begin
+        e.soft = true
+        e.smooth = true
+      rescue StandardError
+        nil
+      end
+    end
+    if seam
+      # piping fino SEPARADO no ombro (perimetro), guard-railed
+      zsh = (z1 - bulge * 0.5) * M
+      pr = rounded_rect_pts(x0 * M, y0 * M, x1 * M, y1 * M, zsh, 0.03 * M, 6)
+      thin_seam_line(g.entities, pr, radius_m: 0.004, mat_obj: seam_mat, name: "#{name}_seam")
+    end
+    _log(name, g)
+  end
+
+  # Almofada de ASSENTO: SoftCushion (deformada), nao rounded box. family='tight'
+  # (KIVIK-ish) usa menos bulge / mais bloco; senao mais bulge/macio (lounge).
+  def seat_cushion_primitive(ents, x0, y0, x1, y1, z0, z1,
+                             softness: 'medium', mat_obj: nil, name: nil,
+                             seam: false, seam_mat: nil, family: nil)
+    sp = soft_params(softness)
+    blk = (family == 'tight')
+    soft_cushion_primitive(ents, x0, y0, x1, y1, z0, z1,
+                           softness: softness,
+                           bulge: sp[:crown] * (blk ? 0.65 : 1.05),
+                           sag_front: sp[:crown] * 0.5,
+                           seam_depth: sp[:crown] * (blk ? 0.25 : 0.4),
+                           edge_comp: sp[:crown] * 0.45,
+                           corner_pinch: sp[:crown] * 0.26,
+                           nu: 6, nv: 4, mat_obj: mat_obj, name: name,
+                           seam: seam, seam_mat: seam_mat)
   end
 
   # Almofada de ENCOSTO: espessura minima garantida, coroada, topo arredondado.

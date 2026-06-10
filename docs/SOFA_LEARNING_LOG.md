@@ -241,3 +241,57 @@ Ainda NAO no nivel dos refs: TEXTURA de tecido (continuamos flat-shaded, so cor)
 Proximo gargalo: MATERIAL/TEXTURA (flat-shade vs trama real) — maior salto restante pro fotorrealismo
   (V-Ray ou material com imagem). Em geometria: suavizar mais o topo do dome.
 ```
+
+### Entrada 8 — Veredito GPT (gate visual): o gargalo e ESTOFADO (geometria), nao material
+
+```
+Data: 2026-06-10
+Caso: rodada v3 — consult GPT via Chrome com contact sheet REF 3DW x GERADO (gate visual = GPT, nao auto)
+Veredito GPT: WARN FORTE. Convergindo como sofa plausivel, mas ainda "caixa arredondada com costura
+  DESENHADA", nao "estofado comprimido por tecido".
+Diagnostico:
+  - Almofada = maior problema: separada/simetrica/lisa demais; falta bulge central, canto comprimido,
+    costura AFUNDANDO a geometria (nao linha por cima), sag frontal, pequena irregularidade.
+  - Encosto ainda le como placa vertical: + rake, compressao na base, volume no topo.
+  - Bracos no dark altos/grossos demais (ref = mais baixo/longo/elegante).
+  - Perfil ALTO demais -> baixar e dar mais profundidade (esp. modern_dark).
+  - Pes marrons genericos quebram realismo (dark = pe metalico pequeno/quase invisivel).
+  - Material escuro = direcao CERTA, mas evitar preto puro (charcoal + roughness + tecido visivel);
+    bege do KIVIK gerado e "errado como aprendizado" (ref e escuro pesado).
+MAIOR GARGALO (GPT): NAO e V-Ray nem so textura -> e GEOMETRIA DE ESTOFADO. A almofada ainda e
+  rounded box, nao almofada comprimida.
+PRIORIDADE (ordem do GPT):
+  1. SoftCushionPrimitive NOVA: topo subdividido + bulge central + edge compression + seam depression
+     (costura morde a malha) + corner pinch + sag frontal + soften normals.
+  2. Baixar altura geral + aumentar profundidade (modern_dark).
+  3. Bracos por familia (dark = baixo/elegante; KIVIK = bloco tecido pesado).
+  4. Base/pes discretos e coerentes.
+  5. SO DEPOIS material tecido (bump/normal + UV). 6. V-Ray por ultimo.
+Onde entra (proximo ciclo): [x] primitive (SoftCushionPrimitive) [x] component (arm por familia)
+  [x] generator (perfil baixo+profundo; pes discretos) [x] gate (SOFTNESS exige bulge+seam-bite).
+Confirma a Entrada 7 mas REORDENA: estofado-geometria ANTES de material/V-Ray.
+```
+
+**Confirmacao GPT (mesmo chat):** "CONCORDO. Almofada antes de material/V-Ray e a ordem certa."
+Refinamentos: malha 5x4/6x4 MAX; TRIANGULAR (evita non-planar); seam afunda a malha mas sulco RASO
+(exagero vira "colchao dividido"); bulge+edge_compression ANTES de noise (forma limpa primeiro);
+corner_pinch PEQUENO (senao vira cartoon); soften SELETIVO (estofado sim, arestas estruturais nao);
+piping SEPARADO (nao embute no mesh); winding consistente (normais); parametrizar por familia
+(softness/bulge/sag_front/seam_depth/edge_compression/corner_pinch — KIVIK menos bulge/mais bloco,
+dark lounge mais baixo/profundo). Consenso Claude+GPT+Felipe -> atacar.
+
+### Entrada 9 — SoftCushionPrimitive (malha deformada) no ASSENTO
+
+```
+Data: 2026-06-10
+Caso: rodada v4 — prioridade #1 (consenso Claude+GPT+Felipe), aplicada ao ASSENTO primeiro.
+Correcao: nova soft_cushion_primitive em sofa_primitives.rb — topo = malha 6x4 deformada
+  (bulge central + edge_compression + sag frontal + corner_pinch + seam_tuck raso na borda),
+  faces TRIANGULADAS (sem non-planar), soften seletivo, piping SEPARADO opcional; parametrico por
+  dimensao+softness; family='tight' => menos bulge / mais bloco. seat_cushion_primitive religado
+  pra ela (deixou de ser crowned_box). Encosto/braco vem no proximo passo (ordem do GPT).
+Onde entra: [x] primitive (soft_cushion_primitive) — TODOS os assentos herdam.
+Risco overfit: baixo (primitiva compartilhada + parametrica).
+Proximo: encosto (deformar a face -Y, nao o topo) -> bracos -> material tecido/UV -> V-Ray.
+Verificacao: render do primitives board + 2 sofas (claro + dark) — veredito visual = Felipe/GPT.
+```
