@@ -1,0 +1,116 @@
+{
+  "id": "straight_2seat_slim_arm_split_cushion_back",
+  "status": "OK",
+  "family": "straight",
+  "bbox_m": [
+    1.65,
+    0.986,
+    0.835
+  ],
+  "n_parts": 11,
+  "parts": [
+    "leg_1",
+    "leg_2",
+    "leg_3",
+    "leg_4",
+    "base_recessed",
+    "seat_1",
+    "seat_2",
+    "back_1",
+    "back_2",
+    "arm_left",
+    "arm_right"
+  ],
+  "warnings": [
+
+  ],
+  "errors": [
+
+  ],
+  "gates_objetivos": {
+    "PIPELINE_PASS": true,
+    "SCHEMA_PASS": true,
+    "COMPONENTS_PASS": true,
+    "PROPORTION_PASS": true,
+    "BLOCKOUT_PASS": "PENDING_VISUAL",
+    "ASSET_PASS": "PENDING_VISUAL",
+    "SOFTNESS_PASS": "PENDING_VISUAL",
+    "CAIXOTAO_FAIL": "PENDING_VISUAL",
+    "DETAIL_RESTRAINT_PASS": "PENDING_VISUAL"
+  },
+  "primitives_log": [
+    {
+      "name": "leg_1",
+      "w_m": 0.09,
+      "d_m": 0.09,
+      "h_m": 0.12
+    },
+    {
+      "name": "leg_2",
+      "w_m": 0.09,
+      "d_m": 0.09,
+      "h_m": 0.12
+    },
+    {
+      "name": "leg_3",
+      "w_m": 0.09,
+      "d_m": 0.09,
+      "h_m": 0.12
+    },
+    {
+      "name": "leg_4",
+      "w_m": 0.09,
+      "d_m": 0.09,
+      "h_m": 0.12
+    },
+    {
+      "name": "base_recessed",
+      "w_m": 1.39,
+      "d_m": 0.86,
+      "h_m": 0.16
+    },
+    {
+      "name": "seat_1",
+      "w_m": 0.674,
+      "d_m": 0.57,
+      "h_m": 0.15
+    },
+    {
+      "name": "seat_2",
+      "w_m": 0.674,
+      "d_m": 0.57,
+      "h_m": 0.15
+    },
+    {
+      "name": "back_1",
+      "w_m": 0.674,
+      "d_m": 0.2,
+      "h_m": 0.44
+    },
+    {
+      "name": "back_2",
+      "w_m": 0.674,
+      "d_m": 0.2,
+      "h_m": 0.44
+    },
+    {
+      "name": "arm_left",
+      "w_m": 0.13,
+      "d_m": 0.92,
+      "h_m": 0.46
+    },
+    {
+      "name": "arm_right",
+      "w_m": 0.13,
+      "d_m": 0.92,
+      "h_m": 0.46
+    }
+  ],
+  "renders": [
+    "front.png",
+    "side.png",
+    "top.png",
+    "three_quarter.png"
+  ],
+  "skp": "E:/Claude/worktrees/sofa-skill/renders/sofa_eval/straight_2seat_slim_arm_split_cushion_back/straight_2seat_slim_arm_split_cushion_back.skp"
+}

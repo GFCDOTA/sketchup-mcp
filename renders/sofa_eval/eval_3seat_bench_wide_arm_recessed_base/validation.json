@@ -1,0 +1,116 @@
+{
+  "id": "eval_3seat_bench_wide_arm_recessed_base",
+  "status": "OK",
+  "family": "straight",
+  "bbox_m": [
+    2.35,
+    1.053,
+    0.833
+  ],
+  "n_parts": 11,
+  "parts": [
+    "leg_1",
+    "leg_2",
+    "leg_3",
+    "leg_4",
+    "base_recessed",
+    "seat_bench",
+    "back_1",
+    "back_2",
+    "back_3",
+    "arm_left",
+    "arm_right"
+  ],
+  "warnings": [
+    "well braco-assento 0.17m>0.16 (assento pode ler fundo)"
+  ],
+  "errors": [
+
+  ],
+  "gates_objetivos": {
+    "PIPELINE_PASS": true,
+    "SCHEMA_PASS": true,
+    "COMPONENTS_PASS": true,
+    "PROPORTION_PASS": true,
+    "BLOCKOUT_PASS": "PENDING_VISUAL",
+    "ASSET_PASS": "PENDING_VISUAL",
+    "SOFTNESS_PASS": "PENDING_VISUAL",
+    "CAIXOTAO_FAIL": "PENDING_VISUAL",
+    "DETAIL_RESTRAINT_PASS": "PENDING_VISUAL"
+  },
+  "primitives_log": [
+    {
+      "name": "leg_1",
+      "w_m": 0.09,
+      "d_m": 0.09,
+      "h_m": 0.09
+    },
+    {
+      "name": "leg_2",
+      "w_m": 0.09,
+      "d_m": 0.09,
+      "h_m": 0.09
+    },
+    {
+      "name": "leg_3",
+      "w_m": 0.09,
+      "d_m": 0.09,
+      "h_m": 0.09
+    },
+    {
+      "name": "leg_4",
+      "w_m": 0.09,
+      "d_m": 0.09,
+      "h_m": 0.09
+    },
+    {
+      "name": "base_recessed",
+      "w_m": 1.75,
+      "d_m": 0.92,
+      "h_m": 0.16
+    },
+    {
+      "name": "seat_bench",
+      "w_m": 1.738,
+      "d_m": 0.6,
+      "h_m": 0.18
+    },
+    {
+      "name": "back_1",
+      "w_m": 0.559,
+      "d_m": 0.24,
+      "h_m": 0.44
+    },
+    {
+      "name": "back_2",
+      "w_m": 0.559,
+      "d_m": 0.24,
+      "h_m": 0.44
+    },
+    {
+      "name": "back_3",
+      "w_m": 0.559,
+      "d_m": 0.24,
+      "h_m": 0.44
+    },
+    {
+      "name": "arm_left",
+      "w_m": 0.3,
+      "d_m": 0.98,
+      "h_m": 0.51
+    },
+    {
+      "name": "arm_right",
+      "w_m": 0.3,
+      "d_m": 0.98,
+      "h_m": 0.51
+    }
+  ],
+  "renders": [
+    "front.png",
+    "side.png",
+    "top.png",
+    "three_quarter.png"
+  ],
+  "skp": "E:/Claude/worktrees/sofa-skill/renders/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/eval_3seat_bench_wide_arm_recessed_base.skp"
+}

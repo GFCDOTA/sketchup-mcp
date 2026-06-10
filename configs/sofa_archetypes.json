@@ -1,0 +1,82 @@
+[
+  {
+    "id": "straight_3seat_track_arm_split_cushion_back",
+    "family": "straight", "seat_count": 3, "seat_style": "split", "back_style": "cushion",
+    "arm_style": "track", "base_style": "recessed", "leg_style": "tapered_wood",
+    "softness_level": "medium", "edge_radius_level": "medium", "seam_style": "none",
+    "overall_width_m": 2.20, "overall_depth_m": 0.95, "overall_height_m": 0.85,
+    "seat_height_m": 0.43, "seat_depth_m": 0.58, "seat_cushion_thickness_m": 0.16,
+    "arm_width_m": 0.22, "arm_height_m": 0.60, "back_height_m": 0.45, "back_thickness_m": 0.22,
+    "back_rake_deg": 9, "leg_height_m": 0.12, "leg_inset_m": 0.06
+  },
+  {
+    "id": "straight_2seat_slim_arm_split_cushion_back",
+    "family": "straight", "seat_count": 2, "seat_style": "split", "back_style": "cushion",
+    "arm_style": "slim", "base_style": "recessed", "leg_style": "tapered_wood",
+    "softness_level": "medium", "edge_radius_level": "medium", "seam_style": "none",
+    "overall_width_m": 1.65, "overall_depth_m": 0.92, "overall_height_m": 0.84,
+    "seat_height_m": 0.43, "seat_depth_m": 0.57, "seat_cushion_thickness_m": 0.15,
+    "arm_width_m": 0.13, "arm_height_m": 0.58, "back_height_m": 0.45, "back_thickness_m": 0.20,
+    "back_rake_deg": 9, "leg_height_m": 0.12, "leg_inset_m": 0.06
+  },
+  {
+    "id": "loveseat_wide_arm_compact",
+    "family": "loveseat", "seat_count": 2, "seat_style": "split", "back_style": "cushion",
+    "arm_style": "wide", "base_style": "recessed", "leg_style": "block",
+    "softness_level": "high", "edge_radius_level": "high", "seam_style": "none",
+    "overall_width_m": 1.58, "overall_depth_m": 0.92, "overall_height_m": 0.82,
+    "seat_height_m": 0.42, "seat_depth_m": 0.56, "seat_cushion_thickness_m": 0.17,
+    "arm_width_m": 0.28, "arm_height_m": 0.58, "back_height_m": 0.44, "back_thickness_m": 0.24,
+    "back_rake_deg": 10, "leg_height_m": 0.08, "leg_inset_m": 0.05
+  },
+  {
+    "id": "bench_seat_tight_back_exposed_legs",
+    "family": "straight", "seat_count": 3, "seat_style": "bench", "back_style": "tight",
+    "arm_style": "track", "base_style": "exposed_legs", "leg_style": "tapered_wood",
+    "softness_level": "low", "edge_radius_level": "medium", "seam_style": "none",
+    "overall_width_m": 2.10, "overall_depth_m": 0.92, "overall_height_m": 0.80,
+    "seat_height_m": 0.44, "seat_depth_m": 0.58, "seat_cushion_thickness_m": 0.14,
+    "arm_width_m": 0.20, "arm_height_m": 0.60, "back_height_m": 0.40, "back_thickness_m": 0.18,
+    "back_rake_deg": 8, "leg_height_m": 0.16, "leg_inset_m": 0.07
+  },
+  {
+    "id": "pillow_back_soft_3seat",
+    "family": "straight", "seat_count": 3, "seat_style": "split", "back_style": "pillow",
+    "arm_style": "rolled_soft", "base_style": "recessed", "leg_style": "tapered_wood",
+    "softness_level": "high", "edge_radius_level": "high", "seam_style": "none",
+    "overall_width_m": 2.30, "overall_depth_m": 0.98, "overall_height_m": 0.86,
+    "seat_height_m": 0.43, "seat_depth_m": 0.60, "seat_cushion_thickness_m": 0.18,
+    "arm_width_m": 0.26, "arm_height_m": 0.60, "back_height_m": 0.46, "back_thickness_m": 0.26,
+    "back_rake_deg": 11, "leg_height_m": 0.10, "leg_inset_m": 0.06
+  },
+  {
+    "id": "chaise_basic_left",
+    "family": "chaise", "seat_count": 3, "seat_style": "split", "back_style": "cushion",
+    "arm_style": "track", "base_style": "recessed", "leg_style": "tapered_wood",
+    "softness_level": "medium", "edge_radius_level": "medium", "seam_style": "none",
+    "overall_width_m": 2.40, "overall_depth_m": 1.55, "overall_height_m": 0.85,
+    "seat_height_m": 0.43, "seat_depth_m": 0.58, "seat_cushion_thickness_m": 0.16,
+    "arm_width_m": 0.22, "arm_height_m": 0.60, "back_height_m": 0.45, "back_thickness_m": 0.22,
+    "back_rake_deg": 9, "leg_height_m": 0.12, "leg_inset_m": 0.06
+  },
+  {
+    "id": "modular_simple_3_units",
+    "family": "modular", "seat_count": 3, "seat_style": "split", "back_style": "cushion",
+    "arm_style": "box", "base_style": "plinth", "leg_style": "none",
+    "softness_level": "medium", "edge_radius_level": "low", "seam_style": "none",
+    "overall_width_m": 2.40, "overall_depth_m": 0.98, "overall_height_m": 0.82,
+    "seat_height_m": 0.43, "seat_depth_m": 0.60, "seat_cushion_thickness_m": 0.16,
+    "arm_width_m": 0.24, "arm_height_m": 0.62, "back_height_m": 0.42, "back_thickness_m": 0.22,
+    "back_rake_deg": 8, "leg_height_m": 0.0, "leg_inset_m": 0.05
+  },
+  {
+    "id": "armchair_derived_from_sofa_language",
+    "family": "armchair", "seat_count": 1, "seat_style": "split", "back_style": "cushion",
+    "arm_style": "track", "base_style": "recessed", "leg_style": "tapered_wood",
+    "softness_level": "medium", "edge_radius_level": "medium", "seam_style": "none",
+    "overall_width_m": 0.95, "overall_depth_m": 0.92, "overall_height_m": 0.85,
+    "seat_height_m": 0.43, "seat_depth_m": 0.57, "seat_cushion_thickness_m": 0.16,
+    "arm_width_m": 0.18, "arm_height_m": 0.60, "back_height_m": 0.45, "back_thickness_m": 0.22,
+    "back_rake_deg": 9, "leg_height_m": 0.12, "leg_inset_m": 0.06
+  }
+]

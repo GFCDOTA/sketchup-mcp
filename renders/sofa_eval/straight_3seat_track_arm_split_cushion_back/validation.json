@@ -1,0 +1,130 @@
+{
+  "id": "straight_3seat_track_arm_split_cushion_back",
+  "status": "OK",
+  "family": "straight",
+  "bbox_m": [
+    2.2,
+    1.018,
+    0.844
+  ],
+  "n_parts": 13,
+  "parts": [
+    "leg_1",
+    "leg_2",
+    "leg_3",
+    "leg_4",
+    "base_recessed",
+    "seat_1",
+    "seat_2",
+    "seat_3",
+    "back_1",
+    "back_2",
+    "back_3",
+    "arm_left",
+    "arm_right"
+  ],
+  "warnings": [
+    "well braco-assento 0.17m>0.16 (assento pode ler fundo)"
+  ],
+  "errors": [
+
+  ],
+  "gates_objetivos": {
+    "PIPELINE_PASS": true,
+    "SCHEMA_PASS": true,
+    "COMPONENTS_PASS": true,
+    "PROPORTION_PASS": true,
+    "BLOCKOUT_PASS": "PENDING_VISUAL",
+    "ASSET_PASS": "PENDING_VISUAL",
+    "SOFTNESS_PASS": "PENDING_VISUAL",
+    "CAIXOTAO_FAIL": "PENDING_VISUAL",
+    "DETAIL_RESTRAINT_PASS": "PENDING_VISUAL"
+  },
+  "primitives_log": [
+    {
+      "name": "leg_1",
+      "w_m": 0.09,
+      "d_m": 0.09,
+      "h_m": 0.12
+    },
+    {
+      "name": "leg_2",
+      "w_m": 0.09,
+      "d_m": 0.09,
+      "h_m": 0.12
+    },
+    {
+      "name": "leg_3",
+      "w_m": 0.09,
+      "d_m": 0.09,
+      "h_m": 0.12
+    },
+    {
+      "name": "leg_4",
+      "w_m": 0.09,
+      "d_m": 0.09,
+      "h_m": 0.12
+    },
+    {
+      "name": "base_recessed",
+      "w_m": 1.76,
+      "d_m": 0.89,
+      "h_m": 0.15
+    },
+    {
+      "name": "seat_1",
+      "w_m": 0.563,
+      "d_m": 0.58,
+      "h_m": 0.16
+    },
+    {
+      "name": "seat_2",
+      "w_m": 0.563,
+      "d_m": 0.58,
+      "h_m": 0.16
+    },
+    {
+      "name": "seat_3",
+      "w_m": 0.563,
+      "d_m": 0.58,
+      "h_m": 0.16
+    },
+    {
+      "name": "back_1",
+      "w_m": 0.563,
+      "d_m": 0.22,
+      "h_m": 0.45
+    },
+    {
+      "name": "back_2",
+      "w_m": 0.563,
+      "d_m": 0.22,
+      "h_m": 0.45
+    },
+    {
+      "name": "back_3",
+      "w_m": 0.563,
+      "d_m": 0.22,
+      "h_m": 0.45
+    },
+    {
+      "name": "arm_left",
+      "w_m": 0.22,
+      "d_m": 0.95,
+      "h_m": 0.48
+    },
+    {
+      "name": "arm_right",
+      "w_m": 0.22,
+      "d_m": 0.95,
+      "h_m": 0.48
+    }
+  ],
+  "renders": [
+    "front.png",
+    "side.png",
+    "top.png",
+    "three_quarter.png"
+  ],
+  "skp": "E:/Claude/worktrees/sofa-skill/renders/sofa_eval/straight_3seat_track_arm_split_cushion_back/straight_3seat_track_arm_split_cushion_back.skp"
+}

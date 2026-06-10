@@ -1,22 +1,29 @@
-# sofa_primitives.rb — primitivas reutilizaveis de estofado low/mid-poly p/ SketchUp.
+# sofa_primitives.rb — primitivas reutilizaveis da CLASSE sofa (low/mid-poly SketchUp).
 #
-# Implementa o contrato de docs/SOFA_SKILL.md. Anti-caixote por design:
-#   - cantos VERTICAIS arredondados (rounded-rect extrudado), nao 90deg vivo;
-#   - topo das almofadas COROADO (volume), nao chapado;
-#   - pes em frustum (afilados), nao perna de mesa;
-#   - piping/costura via followme (guard-railed);
-#   - suavizacao (soft+smooth) SO nas arestas curvas, nunca nos 90deg reais.
+# NAO sao hardcoded para um sofa especifico: cada primitiva toma dimensoes em
+# METROS, material, nome de grupo e softness, e registra bbox no LOG.
+# Anti-"rounded box": almofadas tem CROWN (cupula de 2 tiers) + bordas suaves,
+# nao so um chanfro. Suavizacao SO nas arestas curvas (90deg reais ficam vivos).
 #
-# Unidade da API publica: METROS. Converte p/ polegadas (unidade interna do SU).
+# Unidade interna do SU = POLEGADAS. M converte metros->polegadas.
 # Convencao: X=largura, Y=profundidade (frente=min Y), Z=altura.
-# Cada primitiva desenha num `ents` (normalmente grupo nomeado) e devolve o grupo.
 
 module SofaPrimitives
-  M = 39.3700787402  # metros -> polegadas (unidade interna do SketchUp)
+  M = 39.3700787402
+  LOG = []  # cada primitiva empurra {name, w_m, d_m, h_m} (gerador despeja no validation.json)
+
+  # softness_level -> raio de borda + crown (espelha softness_map do schema)
+  SOFT = {
+    'low'    => { r: 0.020, crown: 0.030 },
+    'medium' => { r: 0.035, crown: 0.050 },
+    'high'   => { r: 0.050, crown: 0.070 }
+  }.freeze
 
   module_function
 
-  # ---- helpers -------------------------------------------------------------
+  def soft_params(level)
+    SOFT[level.to_s] || SOFT['medium']
+  end
 
   def mat(model, name, rgb)
     m = model.materials[name]
@@ -27,19 +34,17 @@ module SofaPrimitives
     m
   end
 
-  # Perimetro de retangulo ARREDONDADO (em polegadas). Devolve Array<Point3d> no z dado.
-  # r = raio do canto; seg = segmentos por canto (low-poly: 4-6). CCW.
-  def rounded_rect_pts(x0, y0, x1, y1, z, r, seg = 5)
+  # ---- helpers de baixo nivel (em POLEGADAS) -------------------------------
+
+  # Perimetro de retangulo ARREDONDADO. r,seg controlam o canto. CCW.
+  def rounded_rect_pts(x0, y0, x1, y1, z, r, seg = 6)
     r = [r, (x1 - x0) / 2.0 - 0.001, (y1 - y0) / 2.0 - 0.001].min
     if r <= 0.001
       return [Geom::Point3d.new(x0, y0, z), Geom::Point3d.new(x1, y0, z),
               Geom::Point3d.new(x1, y1, z), Geom::Point3d.new(x0, y1, z)]
     end
-    # centro de cada canto + angulo inicial (graus), no sentido CCW
-    corners = [[x1 - r, y0 + r, 270.0],   # baixo-direita
-               [x1 - r, y1 - r,   0.0],   # cima-direita
-               [x0 + r, y1 - r,  90.0],   # cima-esquerda
-               [x0 + r, y0 + r, 180.0]]   # baixo-esquerda
+    corners = [[x1 - r, y0 + r, 270.0], [x1 - r, y1 - r, 0.0],
+               [x0 + r, y1 - r, 90.0], [x0 + r, y0 + r, 180.0]]
     pts = []
     corners.each do |cx, cy, a0|
       (0..seg).each do |i|
@@ -56,11 +61,11 @@ module SofaPrimitives
       fs = e.faces
       next unless fs.size == 2
       begin
-        ang = fs[0].normal.angle_between(fs[1].normal)  # radianos
+        ang = fs[0].normal.angle_between(fs[1].normal)
       rescue StandardError
         next
       end
-      if ang > 0.02 && ang < 1.0   # ~1deg..57deg = segmento de curva/coroa
+      if ang > 0.02 && ang < 1.05  # ~1deg..60deg = curva/crown
         e.soft = true
         e.smooth = true
       end
@@ -68,140 +73,225 @@ module SofaPrimitives
   end
 
   def _extrude_up(face, h_in)
-    # extruda p/ CIMA independente da orientacao da normal (idioma do place_layout)
     face.pushpull(face.normal.z >= 0 ? h_in : -h_in)
   end
 
   def _top_face(group, ztop_in)
     group.entities.grep(Sketchup::Face).find do |f|
-      f.normal.z.abs > 0.9 && (f.bounds.center.z - ztop_in).abs < 0.4
+      f.normal.z.abs > 0.9 && (f.bounds.center.z - ztop_in).abs < 0.5
     end
   end
 
-  # ---- primitivas ----------------------------------------------------------
+  def _log(name, group)
+    bb = group.bounds
+    LOG << { name: name || 'unnamed',
+             w_m: ((bb.max.x - bb.min.x) / M).round(3),
+             d_m: ((bb.max.y - bb.min.y) / M).round(3),
+             h_m: ((bb.max.z - bb.min.z) / M).round(3) }
+    group
+  end
 
-  # Caixa com cantos verticais arredondados + topo macio opcional (top_bevel = coroa/chanfro).
+  # ---- GEOMETRIA BASE ------------------------------------------------------
+
+  # Caixa com cantos verticais arredondados + (opcional) borda do topo arredondada.
   def rounded_box(ents, x0, y0, x1, y1, z0, z1,
-                  r: 0.04, top_bevel: 0.0, seg: 5, mat_obj: nil, name: nil)
-    x0i, y0i, x1i, y1i, z0i, z1i, ri, tbi =
-      [x0, y0, x1, y1, z0, z1, r, top_bevel].map { |v| v * M }
+                  r: 0.035, top_round: 0.0, seg: 6, mat_obj: nil, name: nil, soften: true)
+    x0i, y0i, x1i, y1i, z0i, z1i, ri, tr =
+      [x0, y0, x1, y1, z0, z1, r, top_round].map { |v| v * M }
     g = ents.add_group
     g.name = name if name
     h = z1i - z0i
-    tb = [tbi, h / 2.0 - 0.05].min
-    tb = 0.0 if tb < 0.0
-    base_h = h - tb
-
-    base_pts = rounded_rect_pts(x0i, y0i, x1i, y1i, z0i, ri, seg)
-    face = g.entities.add_face(base_pts)
-    return g if face.nil?
-    _extrude_up(face, base_h)
-
-    # coroa/chanfro: face do topo recebe um nucleo INSET levantado (rounded) -> macio
-    if tb > 0.05
-      ztop = z0i + base_h
-      tf = _top_face(g, ztop)
+    tr = [tr, h / 2.0 - 0.05].min
+    tr = 0.0 if tr < 0.0
+    base_h = h - tr
+    f = g.entities.add_face(rounded_rect_pts(x0i, y0i, x1i, y1i, z0i, ri, seg))
+    return _log(name, g) if f.nil?
+    _extrude_up(f, base_h)
+    if tr > 0.05  # borda do topo: anel inset levantado (chanfro arredondado)
+      zt = z0i + base_h
+      tf = _top_face(g, zt)
       if tf
-        ip = rounded_rect_pts(x0i + tb, y0i + tb, x1i - tb, y1i - tb, ztop,
-                              [ri, tb].max, seg)
+        ip = rounded_rect_pts(x0i + tr, y0i + tr, x1i - tr, y1i - tr, zt, [ri, tr].max, seg)
         inner = g.entities.add_face(ip)
-        _extrude_up(inner, tb) if inner
+        _extrude_up(inner, tr) if inner
       end
     end
-
     g.material = mat_obj if mat_obj
-    soften_curved_edges(g)
-    g
+    soften_curved_edges(g) if soften
+    _log(name, g)
   end
 
-  # Almofada de assento: rounded_box COROADO (volume) + piping opcional na borda do topo.
-  def seat_cushion(ents, x0, y0, x1, y1, z0, z1,
-                   r: 0.045, crown: 0.05, seg: 5, mat_obj: nil, piping_mat: nil, name: nil)
-    g = rounded_box(ents, x0, y0, x1, y1, z0, z1,
-                    r: r, top_bevel: crown, seg: seg, mat_obj: mat_obj, name: name)
-    if piping_mat
-      # vivo na borda superior externa (no nivel do ombro da coroa)
-      zsh = (z1 - crown) * M
-      perim = rounded_rect_pts(x0 * M, y0 * M, x1 * M, y1 * M, zsh, r * M, seg)
-      piping(ents, perim, 0.008, mat_obj: piping_mat)
-    end
-    g
-  end
-
-  # Almofada de encosto: mesma familia (o build aplica o rake via rotacao do grupo).
-  def back_cushion(ents, x0, y0, x1, y1, z0, z1,
-                   r: 0.045, crown: 0.045, seg: 5, mat_obj: nil, piping_mat: nil, name: nil)
-    g = rounded_box(ents, x0, y0, x1, y1, z0, z1,
-                    r: r, top_bevel: crown, seg: seg, mat_obj: mat_obj, name: name)
-    if piping_mat
-      zsh = (z1 - crown) * M
-      perim = rounded_rect_pts(x0 * M, y0 * M, x1 * M, y1 * M, zsh, r * M, seg)
-      piping(ents, perim, 0.008, mat_obj: piping_mat)
-    end
-    g
-  end
-
-  # Braco LARGO com topo bem arredondado (track/rolled arm).
-  def armrest(ents, x0, y0, x1, y1, z0, z1, r: 0.06, seg: 6, mat_obj: nil, name: nil)
-    # topo arredondado generoso: top_bevel ~ metade da largura do braco (limitado)
-    w = [(x1 - x0), (y1 - y0)].min
+  # rounded_box com borda do topo generosa (partes macias: bracos rolled, etc.)
+  def soft_rounded_box(ents, x0, y0, x1, y1, z0, z1,
+                       softness: 'medium', seg: 7, mat_obj: nil, name: nil)
+    sp = soft_params(softness)
     rounded_box(ents, x0, y0, x1, y1, z0, z1,
-                r: [r, w / 2.5].min, top_bevel: [w / 3.0, (z1 - z0) / 2.0].min,
-                seg: seg, mat_obj: mat_obj, name: name)
+                r: sp[:r] * 1.2, top_round: sp[:crown] * 0.9, seg: seg,
+                mat_obj: mat_obj, name: name)
   end
 
-  # Pe CURTO afilado (frustum): topo (junto a base) mais largo, ponta mais estreita.
-  def leg(ents, cx, cy, half, z0, z1, taper: 0.35, seg: 4, mat_obj: nil, name: nil)
-    cxi, cyi, hi, z0i, z1i = [cx, cy, half, z0, z1].map { |v| v * M }
-    tb = hi               # meia-largura no topo (encosta na base)
-    bb = hi * (1.0 - taper) # meia-largura na ponta (afilado)
+  # Caixa COROADA: corpo arredondado + cupula de 2 tiers no topo (volume de almofada).
+  def crowned_box(ents, x0, y0, x1, y1, z0, z1,
+                  r: 0.045, crown: 0.05, seg: 7, mat_obj: nil, name: nil)
+    x0i, y0i, x1i, y1i, z0i, z1i, ri, cr =
+      [x0, y0, x1, y1, z0, z1, r, crown].map { |v| v * M }
     g = ents.add_group
     g.name = name if name
-    top = [[cxi - tb, cyi - tb, z1i], [cxi + tb, cyi - tb, z1i],
-           [cxi + tb, cyi + tb, z1i], [cxi - tb, cyi + tb, z1i]].map { |p| Geom::Point3d.new(*p) }
-    bot = [[cxi - bb, cyi - bb, z0i], [cxi + bb, cyi - bb, z0i],
-           [cxi + bb, cyi + bb, z0i], [cxi - bb, cyi + bb, z0i]].map { |p| Geom::Point3d.new(*p) }
+    h = z1i - z0i
+    cr = [cr, h * 0.45, (x1i - x0i) * 0.22, (y1i - y0i) * 0.22].min
+    cr = 0.0 if cr < 0.0
+    body_h = h - cr
+    f = g.entities.add_face(rounded_rect_pts(x0i, y0i, x1i, y1i, z0i, ri, seg))
+    return _log(name, g) if f.nil?
+    _extrude_up(f, body_h)
+    if cr > 0.05  # cupula 2 tiers (inset, raise) -> puff macio com soften
+      zt = z0i + body_h
+      [[cr * 0.5, cr * 0.55], [cr * 0.9, cr * 0.45]].each do |inset, rise|
+        tf = _top_face(g, zt)
+        break unless tf
+        ip = rounded_rect_pts(x0i + inset, y0i + inset, x1i - inset, y1i - inset,
+                              zt, [ri * 0.8, inset].max, seg)
+        inf = g.entities.add_face(ip)
+        break unless inf
+        _extrude_up(inf, rise)
+        zt += rise
+      end
+    end
+    g.material = mat_obj if mat_obj
+    soften_curved_edges(g)
+    _log(name, g)
+  end
+
+  # Pe afilado (frustum): topo (junto a base) mais largo, ponta estreita.
+  def tapered_leg(ents, cx, cy, half, z0, z1, taper: 0.35, mat_obj: nil, name: nil)
+    cxi, cyi, hwi, z0i, z1i = [cx, cy, half, z0, z1].map { |v| v * M }
+    tw = hwi
+    bw = hwi * (1.0 - taper)
+    g = ents.add_group
+    g.name = name if name
+    top = [[cxi - tw, cyi - tw, z1i], [cxi + tw, cyi - tw, z1i],
+           [cxi + tw, cyi + tw, z1i], [cxi - tw, cyi + tw, z1i]].map { |p| Geom::Point3d.new(*p) }
+    bot = [[cxi - bw, cyi - bw, z0i], [cxi + bw, cyi - bw, z0i],
+           [cxi + bw, cyi + bw, z0i], [cxi - bw, cyi + bw, z0i]].map { |p| Geom::Point3d.new(*p) }
     begin
       g.entities.add_face(top)
-      4.times do |i|
-        j = (i + 1) % 4
-        g.entities.add_face(top[i], top[j], bot[j], bot[i])
-      end
+      4.times { |i| j = (i + 1) % 4; g.entities.add_face(top[i], top[j], bot[j], bot[i]) }
       g.entities.add_face(bot)
     rescue StandardError
       nil
     end
     g.material = mat_obj if mat_obj
-    g
+    _log(name, g)
   end
 
-  # Vivo/piping: followme de um circulo fino ao longo do perimetro (guard-railed).
-  # perimeter_pts em POLEGADAS. radius em METROS.
-  def piping(ents, perimeter_pts, radius_m, mat_obj: nil)
+  # Pe bloco (rounded box pequeno, quina levemente suave).
+  def block_leg(ents, cx, cy, half, z0, z1, mat_obj: nil, name: nil)
+    rounded_box(ents, cx - half, cy - half, cx + half, cy + half, z0, z1,
+                r: 0.006, top_round: 0.0, seg: 3, mat_obj: mat_obj, name: name)
+  end
+
+  # Pe/tubo cilindrico sutil (metal stub / pe redondo). seg baixo = low-poly.
+  def cylinder_or_tube_subtle(ents, cx, cy, radius, z0, z1, seg: 12, mat_obj: nil, name: nil)
+    cxi, cyi, rad, z0i, z1i = [cx, cy, radius, z0, z1].map { |v| v * M }
+    g = ents.add_group
+    g.name = name if name
+    begin
+      circ = g.entities.add_circle(Geom::Point3d.new(cxi, cyi, z0i),
+                                   Geom::Vector3d.new(0, 0, 1), rad, seg)
+      f = g.entities.add_face(circ)
+      _extrude_up(f, z1i - z0i) if f
+      g.entities.grep(Sketchup::Edge).each { |e| e.soft = true; e.smooth = true if e.line[1].z.abs < 0.01 || true }
+    rescue StandardError
+      nil
+    end
+    g.material = mat_obj if mat_obj
+    _log(name, g)
+  end
+
+  # Linha de costura SUTIL: tubo fino via followme ao longo de um perimetro.
+  # Subordinado a forma: raio pequeno, guard-railed (se falhar, degrada).
+  # perimeter_pts em POLEGADAS. radius_m em METROS (sutil: 0.004-0.006).
+  def thin_seam_line(ents, perimeter_pts, radius_m: 0.005, seg: 6, mat_obj: nil, name: nil)
     return nil if perimeter_pts.nil? || perimeter_pts.size < 4
     g = ents.add_group
+    g.name = name if name
     begin
       path = []
       n = perimeter_pts.size
       (0...n).each do |i|
         a = perimeter_pts[i]
         b = perimeter_pts[(i + 1) % n]
-        next if a.distance(b) < 0.01
+        next if a.distance(b) < 0.02
         e = g.entities.add_line(a, b)
         path << e if e
       end
-      return g if path.size < 3
-      p0 = perimeter_pts[0]
-      p1 = perimeter_pts[1]
-      dir = p1 - p0
+      return _log(name, g) if path.size < 3
+      dir = (perimeter_pts[1] - perimeter_pts[0])
       dir.normalize!
-      circ = g.entities.add_circle(p0, dir, radius_m * M, 8)
-      cface = g.entities.add_face(circ)
-      cface.followme(path) if cface
+      circ = g.entities.add_circle(perimeter_pts[0], dir, radius_m * M, seg)
+      cf = g.entities.add_face(circ)
+      cf.followme(path) if cf
       g.material = mat_obj if mat_obj
     rescue StandardError
-      # piping e prioridade 4: se falhar, degrada (sofa continua valido)
+      nil
+    end
+    _log(name, g)
+  end
+
+  # ---- ESTOFADO (diferente de caixa arredondada) --------------------------
+
+  # Almofada de ASSENTO: corpo coroado (volume), frente macia, espessura plausivel.
+  # seam: se true, costura sutil no ombro superior externo.
+  def seat_cushion_primitive(ents, x0, y0, x1, y1, z0, z1,
+                             softness: 'medium', mat_obj: nil, name: nil,
+                             seam: false, seam_mat: nil)
+    sp = soft_params(softness)
+    g = crowned_box(ents, x0, y0, x1, y1, z0, z1,
+                    r: sp[:r] * 1.3, crown: sp[:crown], seg: 8,
+                    mat_obj: mat_obj, name: name)
+    if seam
+      zsh = (z1 - sp[:crown] * 0.5) * M  # no ombro da coroa
+      perim = rounded_rect_pts(x0 * M, y0 * M, x1 * M, y1 * M, zsh, sp[:r] * 1.3 * M, 8)
+      # costura FILHA do grupo da almofada (acompanha rake/transform — fix v1)
+      thin_seam_line(g.entities, perim, radius_m: 0.0045, mat_obj: seam_mat, name: "#{name}_seam")
     end
     g
+  end
+
+  # Almofada de ENCOSTO: espessura minima garantida, coroada, topo arredondado.
+  # O rake e aplicado pelo COMPONENTE (rotaciona o grupo) — aqui sai vertical.
+  def back_cushion_primitive(ents, x0, y0, x1, y1, z0, z1,
+                             softness: 'medium', mat_obj: nil, name: nil,
+                             seam: false, seam_mat: nil)
+    sp = soft_params(softness)
+    g = crowned_box(ents, x0, y0, x1, y1, z0, z1,
+                    r: sp[:r] * 1.2, crown: sp[:crown] * 0.9, seg: 8,
+                    mat_obj: mat_obj, name: name)
+    if seam
+      zsh = (z1 - sp[:crown] * 0.5) * M
+      perim = rounded_rect_pts(x0 * M, y0 * M, x1 * M, y1 * M, zsh, sp[:r] * 1.2 * M, 8)
+      # costura FILHA do grupo (acompanha o rake aplicado pelo componente — fix v1)
+      thin_seam_line(g.entities, perim, radius_m: 0.0045, mat_obj: seam_mat, name: "#{name}_seam")
+    end
+    g
+  end
+
+  # Pillow (pillow back / almofada solta): mais plump e mais arredondada.
+  def pillow_primitive(ents, x0, y0, x1, y1, z0, z1,
+                       softness: 'high', mat_obj: nil, name: nil)
+    sp = soft_params(softness)
+    crowned_box(ents, x0, y0, x1, y1, z0, z1,
+                r: sp[:r] * 1.6, crown: sp[:crown] * 1.2, seg: 9,
+                mat_obj: mat_obj, name: name)
+  end
+
+  # Braco ROLLED/soft: corpo macio com topo bem arredondado (roll).
+  def rolled_arm_primitive(ents, x0, y0, x1, y1, z0, z1,
+                           softness: 'medium', mat_obj: nil, name: nil)
+    sp = soft_params(softness)
+    w = [(x1 - x0), (y1 - y0)].min
+    crowned_box(ents, x0, y0, x1, y1, z0, z1,
+                r: [sp[:r] * 1.4, w / 2.6].min, crown: [w / 2.4, (z1 - z0) * 0.4].min,
+                seg: 9, mat_obj: mat_obj, name: name)
   end
 end
