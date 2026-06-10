@@ -8,9 +8,9 @@ caller override. See tools/build_plan_shell_skp.PLANT_PT_TO_M.
 """
 from pathlib import Path
 
-from tools.build_plan_shell_skp import (
+from core.scale import (
     PLANT_PT_TO_M,
-    _plant_from_fixture_path,
+    plant_from_fixture_path,
     resolve_plant_pt_to_m,
 )
 
@@ -39,12 +39,12 @@ def test_quadrado_keeps_ruby_default():
 def test_non_fixture_path_never_injects():
     # _infer_plant() defaults to 'planta_74' for non-fixtures paths; the
     # injection path must NOT, or an arbitrary consensus would get the wrong
-    # scale. _plant_from_fixture_path returns None off fixtures/.
+    # scale. plant_from_fixture_path returns None off fixtures/.
     p = Path("runs/scratch/observed.json")
-    assert _plant_from_fixture_path(p) is None
+    assert plant_from_fixture_path(p) is None
     assert resolve_plant_pt_to_m(p, {}) is None
 
 
-def test_plant_from_fixture_path_extracts_plant():
-    assert _plant_from_fixture_path(PLANTA_74) == "planta_74"
-    assert _plant_from_fixture_path(QUADRADO) == "quadrado"
+def testplant_from_fixture_path_extracts_plant():
+    assert plant_from_fixture_path(PLANTA_74) == "planta_74"
+    assert plant_from_fixture_path(QUADRADO) == "quadrado"

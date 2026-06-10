@@ -64,6 +64,7 @@ from typing import Any
 from shapely.geometry import LineString, MultiPolygon, Point, Polygon, box
 from shapely.ops import unary_union
 
+from core.scale import plant_from_fixture_path, resolve_plant_pt_to_m
 from tools.disarm_sketchup_autoruns import disarm as disarm_autoruns
 from tools.su_runner_safety import log_mode, parse_mode, should_terminate
 
@@ -118,55 +119,6 @@ FULL_HEIGHT_CARVE_KINDS = frozenset({
     "glazed_balcony",
 })
 WINDOW_APERTURE_KINDS = frozenset({"window"})
-
-# ---- per-plant real-world scale (PDF points -> metres) ----------------
-# PT_TO_M converts PDF-point coordinates to metres in the Ruby exporter.
-# Its default there is the wall-thickness anchor (0.19 m / 5.4 pt = 0.0352),
-# which assumes every plan's structural wall is 0.19 m. For planta_74 that
-# assumption inflated the whole flat ~1.36x: the PDF's printed cota for
-# SUITE 01 is 5.45 x 4.00 m, but its consensus room polygon is
-# 210.70 x 154.43 pt, which only reads 5.45 x 4.00 m at PT_TO_M ~= 0.0259
-# (5.45/210.70 = 0.02587 and 4.00/154.43 = 0.02590 — two independent axes
-# of the same room agreeing to 0.14%). The wall-anchor 0.0352 made that
-# bedroom 7.41 x 5.43 m and the flat bbox 186 m^2 (impossible for a 74 m^2
-# unit). See artifacts/review/planta_74/scale_anchor_candidate_report.md.
-#
-# This registry is the verified per-plant scale. An explicit ENV['PT_TO_M']
-# (e.g. for experiments) always wins; plants absent here fall through to the
-# Ruby default, so quadrado and other fixtures are unaffected.
-PLANT_PT_TO_M: dict[str, float] = {
-    "planta_74": 0.0259,
-}
-
-
-def _plant_from_fixture_path(consensus_path: Path) -> str | None:
-    """Return the plant name iff the path lives under fixtures/<plant>/.
-
-    Stricter than ``_infer_plant`` (which defaults to ``"planta_74"`` for
-    any non-fixtures path) — we must NOT inject planta_74's scale for an
-    arbitrary consensus that merely happens to sit outside fixtures/.
-    """
-    parts = Path(consensus_path).resolve().parts
-    if "fixtures" in parts:
-        i = parts.index("fixtures")
-        if i + 1 < len(parts):
-            return parts[i + 1]
-    return None
-
-
-def resolve_plant_pt_to_m(consensus_path: Path, env: dict) -> str | None:
-    """PT_TO_M string to inject for this build, or None to keep the default.
-
-    An explicit ``env['PT_TO_M']`` is never overridden (caller intent wins).
-    Otherwise, if the plant inferred from the fixtures path has a verified
-    per-plant scale, return it as a string for the Ruby exporter's
-    ``ENV['PT_TO_M']`` hook to consume.
-    """
-    if env.get("PT_TO_M"):
-        return None
-    plant = _plant_from_fixture_path(consensus_path)
-    val = PLANT_PT_TO_M.get(plant) if plant else None
-    return None if val is None else str(val)
 
 
 def opening_kind_v5_normalised(op: dict) -> str:
@@ -1090,7 +1042,7 @@ def run(consensus_path: Path, out_skp: Path, *, sketchup_exe: Path,
     if _plant_scale is not None:
         env["PT_TO_M"] = _plant_scale
         print(
-            f"[scale] {_plant_from_fixture_path(consensus_path)}: "
+            f"[scale] {plant_from_fixture_path(consensus_path)}: "
             f"PT_TO_M={_plant_scale} (verified cota anchor)"
         )
     # Resolve runner mode (CLAUDE.md §18, LL-015, FP-023).
