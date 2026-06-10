@@ -81,7 +81,8 @@ module SofaGenerator
     # GPT ciclo1 (TOP_FIX perfil): lounge = silhueta mais baixa/profunda/reclinada.
     # Traco de CLASSE (qualquer caso profile=lounge herda), nao ajuste de 1 exemplar.
     if cfg['profile'] == 'lounge'
-      arm_h = [arm_h, seat_h + 0.13].min   # braco baixo (lê elegante, nao parede)
+      arm_h = [arm_h, seat_h + 0.06].min   # GPT ciclo10: braco lounge BAIXO -> topo ~6cm acima do assento (rente, nao parede)
+      arm_w = [arm_w * 0.82, 0.10].max if arm_w > 0.001  # GPT ciclo10: braco lounge mais FINO de frente (~18%, relacional); no-arm preservado
       rake = [rake, 13.0].max              # mais recline
       leg_h = [leg_h, 0.04].min            # GPT ciclo9: pes baixos -> rente ao chao, base menos exposta
     end
