@@ -70,6 +70,20 @@ não estiver boa**; toda correção é de classe.
 
 - `file_upload`/`upload_image` falham p/ paths do repo → usar **clipboard STA + Ctrl+V**
   (`set_clipboard_image.ps1`).
+- **UPLOAD AUTOMÁTICO NÃO FUNCIONA (testado 2026-06-10, ciclo 8):** tentativa de tirar o
+  humano do loop falhou nos dois caminhos: (a) `file_upload(<path do repo>)` → rejeitado
+  ("only files the user has shared with this session"; só aceita attachments/outputs/uploads
+  da sessão, não o repo nem Downloads); (b) servir a folha por `http.server` local → abrir em
+  aba → `computer screenshot` (vira `imageId`) → `upload_image(imageId, ref do input do ChatGPT)`
+  → erro "Unable to access message history to retrieve image" (o screenshot do Chrome-MCP não é
+  recuperável pelo `upload_image`, nem com `save_to_disk`; não cai em disco achável). **Conclusão:
+  o paste real do humano continua sendo o único caminho** até existir um input compartilhado com
+  a sessão. Mantido o método clipboard + Ctrl+V do humano.
+- **Falha "mensagem sem imagem" (ciclo 8):** o GPT respondeu `FAIL // anexar a imagem` porque a
+  msg foi enviada só com texto. **Recuperação:** o texto já fica na thread → basta **limpar o
+  composer, re-setar o clipboard fresco e o humano colar SÓ a imagem + Enter** (sem re-digitar).
+  Cuidado: `key ctrl+a` no MCP seleciona a PÁGINA inteira, não o composer → pra limpar use
+  `triple_click` no texto do composer + `Backspace`.
 - `navigate` força https; abrir **nova aba por ciclo** (`tabs_create_mcp`) ou reusar a thread de
   review ("Análise de sofá procedural") pra manter contexto.
 - `get_page_text` às vezes atrasa a captura da última resposta → fallback `screenshot`.
