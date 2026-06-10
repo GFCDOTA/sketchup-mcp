@@ -2,6 +2,33 @@
 
 Verdict: IMPROVED
 
+## Escala real ancorada na cota do PDF (2026-06-09) — PT_TO_M 0.0352 → 0.0259
+
+**Correção de escala determinística (não-visual).** O default do exporter
+(`PT_TO_M = 0.19/5.4 = 0.0352`) assume parede estrutural de 0,19 m e inflava o
+apê inteiro ~1,36×.
+
+### Prova (cota impressa do PDF como ground truth)
+- SUÍTE 01: cota impressa **5,45 × 4,00 m**; polígono do consensus
+  **210,70 × 154,43 pt** → 5,45/210,70 = 0,02587 e 4,00/154,43 = 0,02590
+  (dois eixos do mesmo quarto concordando a 0,14%) → **PT_TO_M ≈ 0,0259**.
+- Cross-check: SUÍTE 02 (92,27 pt) × 0,0259 = 2,39 m ≈ cota 2,40.
+- ANTES (0,0352): bbox **186,5 m²** / piso útil **124,4 m²** (impossível p/ 74 m²).
+- DEPOIS (0,0259): bbox **101,0 m²** / piso útil **67,4 m²** (~74 m² privativa);
+  parede 5,4 pt → **0,138 m** (parede interna real).
+- **Forma/layout idênticos** ao canônico IMPROVED anterior — só a dimensão
+  absoluta mudou (não é mudança de aparência; verificação é dimensional).
+
+### Fonte
+- `tools/build_plan_shell_skp.py` — `PLANT_PT_TO_M = {"planta_74": 0.0259}` +
+  `resolve_plant_pt_to_m()`; injeta `ENV['PT_TO_M']` no build (override
+  explícito sempre vence; quadrado/outras mantêm 0,0352). Consensus **intocado**.
+- `tests/test_plant_scale_override.py` — guarda injeção/override/quadrado.
+- Re-promovido: self-check + deterministic gates **green**; suite **506 passed**.
+- Evidência da medição: `scale_anchor_candidate_report.md` (mesma pasta).
+
+---
+
 ## SKP canônico atual (2026-06-04) — piso encosta na parede (células)
 
 **VISUAL_REVIEW = IMPROVED** (Felipe, 2026-06-04 — "melhorou bastante; o piso
