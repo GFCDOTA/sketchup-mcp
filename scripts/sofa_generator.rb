@@ -84,18 +84,23 @@ module SofaGenerator
       arm_h = [arm_h, seat_h + 0.06].min   # GPT ciclo10: braco lounge BAIXO -> topo ~6cm acima do assento (rente, nao parede)
       arm_w = [arm_w * 0.82, 0.10].max if arm_w > 0.001  # GPT ciclo10: braco lounge mais FINO de frente (~18%, relacional); no-arm preservado
       rake = [rake, 13.0].max              # mais recline
-      leg_h = [leg_h, 0.04].min            # GPT ciclo9: pes baixos -> rente ao chao, base menos exposta
+      leg_h = [leg_h, 0.02].min            # GPT ciclo9/12: pes baixos (reveal 4->2cm no side); .min preservado (cfg menor vence)
     end
     base_top = seat_h - cush_t
     seat_back = d - back_t
     seat_front = [seat_back - seat_d, arm_w * 0.0 + 0.10].max
     base_rec = cfg['base_style'] == 'plinth' ? 0.04 : 0.06
+    # GPT ciclo12: base lounge recua ~2cm ATRAS da frente do assento -> mata o degrau/ledge
+    # frontal e tuca a faixa sob o balanco da almofada (leitura monolitica). Relacional a
+    # seat_front (qualquer lounge herda); max(...,base_rec) protege sofa raso de inverter.
+    base_front_eff = cfg['profile'] == 'lounge' ? [seat_front - 0.02, base_rec].max : base_rec
     {
       w: w, d: d, h: h, seats: [cfg['seat_count'].to_i, 1].max, gap: 0.018,
       leg_h: leg_h,
       leg_inset: (cfg['profile'] == 'lounge' ? [cfg['leg_inset_m'].to_f, 0.085].max : cfg['leg_inset_m'].to_f),
       leg_half: (cfg['profile'] == 'lounge' ? 0.030 : 0.045),  # lounge: pes menores e recuados (GPT ciclo9)
-      base_top: base_top, base_front: base_rec,
+      base_top: base_top, base_front: base_front_eff,
+      base_z0: ((cfg['profile'] == 'lounge' && cfg['base_style'] == 'recessed') ? [leg_h - 0.014, 0.006].max : leg_h),  # GPT ciclo12: lounge recessed -> base desce a ~o chao (SO recessed; plinth/exposed_legs intactos)
       seat_h: seat_h, seat_z0: base_top, seat_front: seat_front, seat_back: seat_back,
       arm_w: arm_w, arm_h: arm_h,
       back_z0: seat_h - 0.08, back_top: h, back_front: seat_back - 0.03, back_back: d,

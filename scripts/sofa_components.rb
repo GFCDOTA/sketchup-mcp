@@ -63,7 +63,9 @@ module SofaComponents
       SP.rounded_box(ent, x0, lay[:base_front], x1, lay[:d], lay[:leg_h], bt,
                      r: 0.02, mat_obj: mats[:base], name: 'base_rail')
     else # recessed
-      SP.rounded_box(ent, x0, lay[:base_front], x1, lay[:d], lay[:leg_h], bt,
+      # GPT ciclo12: z0 = base_z0 (lounge desce a ~o chao); o braco segue em leg_h (desce
+      # APOIADO nos pes, "corpo desce" sem flutuar). Outros estilos: base_z0 == leg_h (no-op).
+      SP.rounded_box(ent, x0, lay[:base_front], x1, lay[:d], lay[:base_z0], bt,
                      r: 0.025, mat_obj: mats[:base], name: 'base_recessed')
     end
   end
