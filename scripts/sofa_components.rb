@@ -63,8 +63,8 @@ module SofaComponents
       SP.rounded_box(ent, x0, lay[:base_front], x1, lay[:d], lay[:leg_h], bt,
                      r: 0.02, mat_obj: mats[:base], name: 'base_rail')
     else # recessed
-      # GPT ciclo12: z0 = base_z0 (lounge desce a ~o chao); o braco segue em leg_h (desce
-      # APOIADO nos pes, "corpo desce" sem flutuar). Outros estilos: base_z0 == leg_h (no-op).
+      # GPT ciclo12/13: z0 = base_z0 (lounge desce a ~o chao). O braco TAMBEM segue base_z0
+      # (ciclo13) -> bottom continuo na frente. Outros estilos: base_z0 == leg_h (no-op).
       SP.rounded_box(ent, x0, lay[:base_front], x1, lay[:d], lay[:base_z0], bt,
                      r: 0.025, mat_obj: mats[:base], name: 'base_recessed')
     end
@@ -147,7 +147,11 @@ module SofaComponents
     x0, x1 = side == :left ? [0.0, aw] : [lay[:w] - aw, lay[:w]]
     y0 = 0.0
     y1 = lay[:d]
-    z0 = lay[:leg_h]
+    # GPT ciclo13: braco desce ate o MESMO fundo da base (base_z0), nao leg_h -> bottom
+    # CONTINUO na frente inteira (sem ressalto/poste nas extremidades; lateral = bloco
+    # baixo continuo rente ao chao). base_z0 == leg_h fora de lounge+recessed (no-op).
+    # Os pes ficam absorvidos dentro do volume do braco (invisiveis), sem flutuar.
+    z0 = lay[:base_z0]
     z1 = lay[:arm_h]
     nm = "arm_#{side}"
     # GPT ciclo10->11 (TOP_FIX braco): profile=lounge -> braco = BLOCO LATERAL BAIXO
