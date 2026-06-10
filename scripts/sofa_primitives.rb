@@ -34,6 +34,29 @@ module SofaPrimitives
     m
   end
 
+  # Material de TECIDO com textura procedural tileavel (track de material/GPT):
+  # aplica o albedo em UV de escala REAL (tile_m, ex 0.30m) -> mata o RGB chapado.
+  # rgb = cor base (fallback/tint se a textura faltar). tex_path = albedo PNG.
+  # Robusto: se a textura faltar/falhar, cai pra cor solida (nao quebra o build).
+  def mat_fabric(model, name, rgb, tex_path, tile_m)
+    m = model.materials[name]
+    return m if m
+    m = model.materials.add(name)
+    m.color = Sketchup::Color.new(rgb[0], rgb[1], rgb[2])
+    m.alpha = 1.0
+    if tex_path && File.exist?(tex_path)
+      begin
+        m.texture = tex_path
+        m.texture.size = tile_m * M  # UV world-scale: textura ocupa tile_m no modelo
+      rescue StandardError => e
+        LOG << "tex_fail #{name}: #{e.class}: #{e.message}"
+      end
+    else
+      LOG << "tex_missing #{name}: #{tex_path}"
+    end
+    m
+  end
+
   # ---- helpers de baixo nivel (em POLEGADAS) -------------------------------
 
   # Perimetro de retangulo ARREDONDADO. r,seg controlam o canto. CCW.

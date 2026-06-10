@@ -119,6 +119,16 @@ module SofaGenerator
     'dark_charcoal' => { fab: [58, 60, 64],    base: [38, 40, 42],    back: [70, 72, 76],    seam: [46, 48, 52] }
   }.freeze
 
+  # Track de material (GPT, geometria fechada): tecido = textura procedural tileavel
+  # (albedo) em UV de escala real, nao mais RGB chapado. Os mapas saem do
+  # sofa_fabric_material.py em textures/fabric_<style>_albedo.png. Uma unica fabric
+  # nas pecas estofadas (fab/base/back) = mais realista. seam/leg seguem solidos.
+  FABRIC_TILE_M = 0.30  # escala fisica do tile (GPT). CLASSE: igual p/ todo material_style.
+
+  def fabric_albedo_path(ms)
+    File.join(File.dirname(File.dirname(__FILE__)), 'textures', "fabric_#{ms}_albedo.png")
+  end
+
   def build_materials(model, cfg)
     ms = cfg['material_style'] || 'light_linen'
     pal = PALETTES[ms] || PALETTES['light_linen']
@@ -127,10 +137,12 @@ module SofaGenerator
               when 'metal_stub' then [120, 122, 128]
               else [96, 66, 44]
               end
+    alb = fabric_albedo_path(ms)
+    t = FABRIC_TILE_M
     {
-      fab:  SP.mat(model, "fab_#{ms}",  pal[:fab]),
-      base: SP.mat(model, "base_#{ms}", pal[:base]),
-      back: SP.mat(model, "back_#{ms}", pal[:back]),
+      fab:  SP.mat_fabric(model, "fab_#{ms}",  pal[:fab],  alb, t),
+      base: SP.mat_fabric(model, "base_#{ms}", pal[:base], alb, t),
+      back: SP.mat_fabric(model, "back_#{ms}", pal[:back], alb, t),
       seam: SP.mat(model, "seam_#{ms}", pal[:seam]),
       leg:  SP.mat(model, 'sofa_leg', leg_rgb)
     }
@@ -167,8 +179,18 @@ module SofaGenerator
                      antialias: true, transparent: false)
   end
 
+  # Garante que o render MOSTRE textura (track de material). O template Simple vem
+  # em modo "Shaded" (cor de face, sem textura) -> RenderMode=3 = Shaded WITH textures.
+  def enable_texture_render(model)
+    ro = model.rendering_options
+    ro['RenderMode'] = 3 rescue nil      # 3 = Shaded with textures
+    ro['Texture'] = true rescue nil
+    ro['DisplayColorByLayer'] = false rescue nil
+  end
+
   def render_views(model, dir)
     FileUtils.mkdir_p(dir)
+    enable_texture_render(model)
     view = model.active_view
     bb = model.bounds
     c = bb.center
@@ -181,6 +203,22 @@ module SofaGenerator
     _shoot(view, Geom::Point3d.new(bb.max.x + dg, c.y, c.z), c, up, false, ez, ey, dir, 'side.png')
     _shoot(view, Geom::Point3d.new(c.x, c.y, bb.max.z + dg * 2), c, Geom::Vector3d.new(0, 1, 0), false, ey, ex, dir, 'top.png')
     _shoot(view, Geom::Point3d.new(bb.max.x + dg * 0.85, bb.min.y - dg * 0.95, c.z + dg * 0.65), c, up, true, ez, ex, dir, 'three_quarter.png')
+    # MACRO do tecido (track material): camera perto do assento, FOV apertado ->
+    # o weave fino (2-3mm) fica legivel pro GPT julgar "chapado vs tecido".
+    sx = c.x - ex * 0.06
+    sy = bb.min.y + ey * 0.42
+    sz = bb.min.z + ez * 0.80
+    tgt = Geom::Point3d.new(sx, sy, sz)
+    eye = Geom::Point3d.new(sx + ex * 0.04, bb.min.y - dg * 0.20, sz + ez * 0.26)
+    _macro(view, eye, tgt, dir, 'macro.png')
+  end
+
+  def _macro(view, eye, target, dir, name)
+    cam = Sketchup::Camera.new(eye, target, Geom::Vector3d.new(0, 0, 1))
+    cam.perspective = true
+    cam.fov = 22
+    view.camera = cam
+    view.write_image(filename: File.join(dir, name), width: 1200, height: 1200, antialias: true)
   end
 
   # ---- gerar UM caso (limpa modelo, monta, renderiza, salva, valida) -------
