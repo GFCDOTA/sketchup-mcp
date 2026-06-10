@@ -379,10 +379,10 @@ module SofaPrimitives
                              softness: 'medium', mat_obj: nil, name: nil,
                              seam: false, seam_mat: nil)
     sp = soft_params(softness)
+    depth = (y1 - y0)
     bulge = sp[:crown] * 1.1        # protrusao max (meio) pro sentado
     base_comp = sp[:crown] * 0.85   # base recua/comprime contra o assento (w~0)
-    top_back = sp[:crown] * 0.5     # topo recua um pouco (arredonda)
-    depth = (y1 - y0)
+    top_back = depth * 0.8          # topo: frente recua ate ~o fundo -> borda fina ARREDONDADA (GPT)
     g = ents.add_group
     g.name = name if name
     nu = 6
@@ -400,7 +400,7 @@ module SofaPrimitives
         # frente: bulge suave (meio) ; base tuck (w~0) ; topo recua/arredonda (w~1)
         yf = y0 - (bulge * du * hump) \
                 + (base_comp * ((1.0 - w)**2)) \
-                + (top_back * (w**3))
+                + (top_back * (w**2.4))  # curva suave que fecha o topo (sem canto)
         yf = [yf, y0 - depth * 0.85].max
         yf = [yf, y1 - 0.005].min
         front[i][k] = Geom::Point3d.new(x * M, yf * M, z * M)
