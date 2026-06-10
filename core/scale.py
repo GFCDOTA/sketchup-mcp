@@ -39,6 +39,49 @@ PT_TO_M: float = float(os.environ.get("PT_TO_M") or _DEFAULT_PT_TO_M)
 PT_TO_IN: float = PT_TO_M * M_TO_IN
 
 
+# ---- verified per-plant scale (cota-anchored) ------------------------
+# Some plants have a real-world scale verified against the PDF's printed
+# cotas, which beats the wall-thickness default above. planta_74: SUITE 01's
+# cota is 5.45 x 4.00 m and its consensus room polygon is 210.70 x 154.43 pt
+# (5.45/210.70=0.02587, 4.00/154.43=0.02590 — two axes agreeing to 0.14%);
+# the wall-thickness default inflated the flat ~1.36x (bbox 186 m² for a
+# 74 m² unit). Builders call resolve_plant_pt_to_m() and set the PT_TO_M env
+# BEFORE the (sub)process that imports core.scale, so the value still flows
+# through the single PT_TO_M above — no second source of truth. Explicit env
+# always wins; plants absent here keep the default.
+PLANT_PT_TO_M: dict[str, float] = {
+    "planta_74": 0.0259,
+}
+
+
+def plant_from_fixture_path(consensus_path) -> str | None:
+    """Plant name iff the path lives under ``fixtures/<plant>/``, else None."""
+    from pathlib import Path
+    parts = Path(consensus_path).resolve().parts
+    if "fixtures" in parts:
+        i = parts.index("fixtures")
+        if i + 1 < len(parts):
+            return parts[i + 1]
+    return None
+
+
+def resolve_plant_pt_to_m(consensus_path, env: dict | None = None) -> str | None:
+    """PT_TO_M string to inject for a plant build, or None to keep the default.
+
+    An explicit ``env['PT_TO_M']`` is never overridden (caller intent wins).
+    Otherwise, if the plant inferred from the fixtures path has a verified
+    scale in ``PLANT_PT_TO_M``, return it as a string for the consumer (Ruby
+    exporter / furnish subprocess) to set as ``ENV['PT_TO_M']`` before it
+    imports core.scale.
+    """
+    env = os.environ if env is None else env
+    if env.get("PT_TO_M"):
+        return None
+    plant = plant_from_fixture_path(consensus_path)
+    val = PLANT_PT_TO_M.get(plant) if plant else None
+    return None if val is None else str(val)
+
+
 def to_pt(m: float) -> float:
     """metros → pdf-points."""
     return m / PT_TO_M

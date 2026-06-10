@@ -64,6 +64,7 @@ from typing import Any
 from shapely.geometry import LineString, MultiPolygon, Point, Polygon, box
 from shapely.ops import unary_union
 
+from core.scale import plant_from_fixture_path, resolve_plant_pt_to_m
 from tools.disarm_sketchup_autoruns import disarm as disarm_autoruns
 from tools.su_runner_safety import log_mode, parse_mode, should_terminate
 
@@ -1034,6 +1035,16 @@ def run(consensus_path: Path, out_skp: Path, *, sketchup_exe: Path,
     env["REPORT_OUT"] = str(out_report.resolve()).replace("\\", "/")
     env["SHELL_JSON_IN"] = str(out_shell_json.resolve()).replace("\\", "/")
     env["SOFT_BARRIERS_MODE"] = soft_barriers_mode
+    # Inject the verified per-plant real-world scale unless the caller set
+    # PT_TO_M explicitly. Plants without a verified anchor keep the Ruby
+    # default (0.0352). See PLANT_PT_TO_M for the planta_74 derivation.
+    _plant_scale = resolve_plant_pt_to_m(consensus_path, env)
+    if _plant_scale is not None:
+        env["PT_TO_M"] = _plant_scale
+        print(
+            f"[scale] {plant_from_fixture_path(consensus_path)}: "
+            f"PT_TO_M={_plant_scale} (verified cota anchor)"
+        )
     # Resolve runner mode (CLAUDE.md §18, LL-015, FP-023).
     # Safe default = `interactive` for local dev; `headless` on CI so
     # we preserve historical terminate-after-SKP behaviour. CLI flags

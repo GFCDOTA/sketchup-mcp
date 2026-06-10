@@ -1,0 +1,150 @@
+{
+  "room_id": "r002",
+  "room_name": "SALA DE JANTAR | SALA DE ESTAR",
+  "tv_wall": "m014",
+  "candidates_sofa": [
+    {
+      "wall_id": "m013",
+      "length_m": 3.49,
+      "clean": true,
+      "oppose": 1.0,
+      "view_dist_m": 3.21,
+      "face_angle_deg": 28.7,
+      "score": 71.2,
+      "rejects": []
+    }
+  ],
+  "rejected_sofa": [
+    {
+      "wall_id": "m015",
+      "length_m": 1.65,
+      "clean": true,
+      "oppose": -1.0,
+      "view_dist_m": 4.68,
+      "face_angle_deg": 83.1,
+      "score": -81.6,
+      "rejects": [
+        "nao fica de frente pra TV (oppose -1.00)",
+        "sofa nao acha spot livre de circulacao na parede",
+        "sofa nao olha pra TV (angulo 83>30)"
+      ]
+    },
+    {
+      "wall_id": "m010",
+      "length_m": 15.08,
+      "clean": false,
+      "oppose": 0.0,
+      "view_dist_m": 4.97,
+      "face_angle_deg": 0.5,
+      "score": 100.3,
+      "rejects": [
+        "parede nao-limpa (porta/janela)",
+        "nao fica de frente pra TV (oppose 0.00)"
+      ]
+    },
+    {
+      "wall_id": "m016",
+      "length_m": 7.67,
+      "clean": false,
+      "oppose": -1.0,
+      "view_dist_m": 3.62,
+      "face_angle_deg": 26.9,
+      "score": -40.2,
+      "rejects": [
+        "parede nao-limpa (porta/janela)",
+        "nao fica de frente pra TV (oppose -1.00)",
+        "sofa nao acha spot livre de circulacao na parede"
+      ]
+    },
+    {
+      "wall_id": "m007",
+      "length_m": 5.52,
+      "clean": false,
+      "oppose": -0.0,
+      "view_dist_m": 4.17,
+      "face_angle_deg": 133.8,
+      "score": -128.6,
+      "rejects": [
+        "parede nao-limpa (porta/janela)",
+        "nao fica de frente pra TV (oppose -0.00)",
+        "sofa nao acha spot livre de circulacao na parede",
+        "sofa nao olha pra TV (angulo 134>30)"
+      ]
+    },
+    {
+      "wall_id": "m004",
+      "length_m": 3.95,
+      "clean": false,
+      "oppose": -0.0,
+      "view_dist_m": 1.55,
+      "face_angle_deg": 98.3,
+      "score": -118.8,
+      "rejects": [
+        "parede nao-limpa (porta/janela)",
+        "nao fica de frente pra TV (oppose -0.00)",
+        "sofa nao acha spot livre de circulacao na parede",
+        "sofa nao olha pra TV (angulo 98>30)",
+        "distancia sofa-TV 1.6m fora de [1.8,5.0]"
+      ]
+    },
+    {
+      "wall_id": "m006",
+      "length_m": 2.83,
+      "clean": false,
+      "oppose": -0.0,
+      "view_dist_m": 5.36,
+      "face_angle_deg": 119.6,
+      "score": -141.3,
+      "rejects": [
+        "parede nao-limpa (porta/janela)",
+        "nao fica de frente pra TV (oppose -0.00)",
+        "sofa nao acha spot livre de circulacao na parede",
+        "sofa nao olha pra TV (angulo 120>30)",
+        "distancia sofa-TV 5.4m fora de [1.8,5.0]"
+      ]
+    },
+    {
+      "wall_id": "m009",
+      "length_m": 2.85,
+      "clean": false,
+      "oppose": 0.0,
+      "view_dist_m": 4.0,
+      "face_angle_deg": 38.6,
+      "score": -60.1,
+      "rejects": [
+        "parede nao-limpa (porta/janela)",
+        "nao fica de frente pra TV (oppose 0.00)",
+        "sofa nao acha spot livre de circulacao na parede",
+        "sofa nao olha pra TV (angulo 39>30)"
+      ]
+    }
+  ],
+  "result": "OK",
+  "plan": {
+    "tv_rack": {
+      "wall_id": "m014",
+      "center_in": [
+        311.1,
+        723.2
+      ],
+      "facing": [
+        -1.0,
+        0.0
+      ],
+      "rule": "parede limpa (WallAffordanceMap)"
+    },
+    "sofa": {
+      "wall_id": "m013",
+      "center_in": [
+        200.4,
+        783.9
+      ],
+      "facing": [
+        1.0,
+        0.0
+      ],
+      "width_m": 2.2,
+      "rule": "parede de frente p/ TV (oppose 1.0, ang 28.7, dist 3.21m)"
+    }
+  }
+}

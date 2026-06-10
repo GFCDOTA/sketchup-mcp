@@ -1,0 +1,143 @@
+{
+  "room_id": "r002",
+  "ftype": "sofa",
+  "best": {
+    "ftype": "sofa",
+    "wall_id": "m010",
+    "center_in": [
+      309.4,
+      918.8
+    ],
+    "facing": [
+      0.0,
+      -1.0
+    ],
+    "w_m": 2.2,
+    "d_m": 0.95,
+    "score": 100.8,
+    "breakdown": {
+      "wall_id": "m010",
+      "base_score": 100.8,
+      "hard_rejects": [],
+      "soft_penalties": [],
+      "final_score": 100.8
+    },
+    "reason": "sofa: score 100.8; ['porta/passagem', \"limiar p/ ['r000', 'r004', 'r007']\"]"
+  },
+  "candidates": [
+    {
+      "ftype": "sofa",
+      "wall_id": "m010",
+      "center_in": [
+        309.4,
+        918.8
+      ],
+      "facing": [
+        0.0,
+        -1.0
+      ],
+      "w_m": 2.2,
+      "d_m": 0.95,
+      "score": 100.8,
+      "breakdown": {
+        "wall_id": "m010",
+        "base_score": 100.8,
+        "hard_rejects": [],
+        "soft_penalties": [],
+        "final_score": 100.8
+      },
+      "reason": "sofa: score 100.8; ['porta/passagem', \"limiar p/ ['r000', 'r004', 'r007']\"]"
+    },
+    {
+      "ftype": "sofa",
+      "wall_id": "m013",
+      "center_in": [
+        200.4,
+        783.9
+      ],
+      "facing": [
+        1.0,
+        0.0
+      ],
+      "w_m": 2.2,
+      "d_m": 0.95,
+      "score": 59.9,
+      "breakdown": {
+        "wall_id": "m013",
+        "base_score": 59.9,
+        "hard_rejects": [],
+        "soft_penalties": [],
+        "final_score": 59.9
+      },
+      "reason": "sofa: score 59.9; ['limpa']"
+    }
+  ],
+  "rejected": [
+    {
+      "wall_id": "m014",
+      "base_score": 68.9,
+      "hard_rejects": [
+        "sem spot livre de circulacao"
+      ],
+      "soft_penalties": [],
+      "final_score": 68.9
+    },
+    {
+      "wall_id": "m015",
+      "base_score": 41.5,
+      "hard_rejects": [
+        "sem spot livre de circulacao"
+      ],
+      "soft_penalties": [],
+      "final_score": 41.5
+    },
+    {
+      "wall_id": "m016",
+      "base_score": 26.7,
+      "hard_rejects": [
+        "sem spot livre de circulacao"
+      ],
+      "soft_penalties": [],
+      "final_score": 26.7
+    },
+    {
+      "wall_id": "m007",
+      "base_score": 5.2,
+      "hard_rejects": [
+        "sem spot livre de circulacao"
+      ],
+      "soft_penalties": [],
+      "final_score": 5.2
+    },
+    {
+      "wall_id": "m004",
+      "base_score": -20.5,
+      "hard_rejects": [
+        "score sofa<=0 (inadequada: ['porta-balcao', \"limiar p/ ['r001', 'r003']\"])",
+        "sem spot livre de circulacao"
+      ],
+      "soft_penalties": [],
+      "final_score": -20.5
+    },
+    {
+      "wall_id": "m006",
+      "base_score": -21.7,
+      "hard_rejects": [
+        "score sofa<=0 (inadequada: ['porta/passagem', \"limiar p/ ['r001', 'r004']\"])",
+        "sem spot livre de circulacao"
+      ],
+      "soft_penalties": [],
+      "final_score": -21.7
+    },
+    {
+      "wall_id": "m009",
+      "base_score": -21.5,
+      "hard_rejects": [
+        "score sofa<=0 (inadequada: ['porta/passagem', \"limiar p/ ['r000', 'r007']\"])",
+        "sem spot livre de circulacao"
+      ],
+      "soft_penalties": [],
+      "final_score": -21.5
+    }
+  ]
+}
