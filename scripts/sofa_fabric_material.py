@@ -18,17 +18,18 @@ import numpy as np
 from PIL import Image
 
 # ---- SPECS por material_style (CLASSE; valores de partida do GPT) ------------
-# dark_charcoal: params exatos do GPT (tile 0.30, value_var 0.06, weave 0.08,
-#   large_noise 0.025, bump 0.045). base_rgb levemente acima do #222526 do GPT
-#   (40,43,45) p/ o weave continuar LEGIVEL na preview flat do SketchUp (sem
-#   sheen p/ levantar) — no V-Ray pode escurecer ao 32-38 do GPT.
+# GPT material ciclo1->2: inverter o balanco "variacao > weave" -> "weave > variacao"
+#   na preview (menos nuvem/mottling, mais trama). MESMO tile 0.30m. Valores do GPT p/
+#   dark: value_var 0.06->~0.045, large 0.025->~0.018, weave 0.085->~0.12. Mesmo idioma
+#   (weave > variacao) propagado p/ os 3 estilos = CLASSE. base_rgb dark um pouco acima
+#   do #222526 do GPT p/ o weave ler na preview flat (sem sheen); V-Ray pode escurecer.
 FABRIC_SPECS = {
-    'dark_charcoal': dict(base_rgb=(40, 43, 45),  tile_m=0.30, value_variation=0.06,
-                          weave_contrast=0.085, large_noise=0.025, bump_strength=0.045),
-    'mid_gray':      dict(base_rgb=(118, 120, 124), tile_m=0.30, value_variation=0.05,
-                          weave_contrast=0.075, large_noise=0.022, bump_strength=0.040),
-    'light_linen':   dict(base_rgb=(206, 197, 182), tile_m=0.30, value_variation=0.045,
-                          weave_contrast=0.10,  large_noise=0.020, bump_strength=0.050),
+    'dark_charcoal': dict(base_rgb=(40, 43, 45),  tile_m=0.30, value_variation=0.045,
+                          weave_contrast=0.12,  large_noise=0.018, bump_strength=0.045),
+    'mid_gray':      dict(base_rgb=(118, 120, 124), tile_m=0.30, value_variation=0.038,
+                          weave_contrast=0.105, large_noise=0.016, bump_strength=0.040),
+    'light_linen':   dict(base_rgb=(206, 197, 182), tile_m=0.30, value_variation=0.034,
+                          weave_contrast=0.13,  large_noise=0.015, bump_strength=0.050),
 }
 
 THREADS_PER_TILE = 128  # 1024/128 = 8 px/fio (~2.3mm no tile 0.30m) -> divide 1024 (tileavel)
