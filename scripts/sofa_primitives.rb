@@ -359,13 +359,15 @@ module SofaPrimitives
     blk = (family == 'tight')
     # GPT ciclo4: menos "barriga" -> bulge MENOR + compressao mais UNIFORME (edge_comp
     # maior), frente mais reta (sag menor), tuck mais sutil (seam menor), topo menos arqueado.
+    # GPT ciclo8: frente mais RETA/menos arqueada -> bulge e sag menores ainda +
+    # compressao frontal mais controlada/uniforme (edge_comp maior).
     soft_cushion_primitive(ents, x0, y0, x1, y1, z0, z1,
                            softness: softness,
-                           bulge: sp[:crown] * (blk ? 0.42 : 0.55),
-                           sag_front: sp[:crown] * 0.28,
-                           seam_depth: sp[:crown] * (blk ? 0.16 : 0.22),
-                           edge_comp: sp[:crown] * 0.55,
-                           corner_pinch: sp[:crown] * 0.20,
+                           bulge: sp[:crown] * (blk ? 0.34 : 0.45),
+                           sag_front: sp[:crown] * 0.14,
+                           seam_depth: sp[:crown] * (blk ? 0.14 : 0.20),
+                           edge_comp: sp[:crown] * 0.62,
+                           corner_pinch: sp[:crown] * 0.18,
                            nu: 6, nv: 4, mat_obj: mat_obj, name: name,
                            seam: seam, seam_mat: seam_mat)
   end
