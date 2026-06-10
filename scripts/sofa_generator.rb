@@ -83,6 +83,7 @@ module SofaGenerator
     if cfg['profile'] == 'lounge'
       arm_h = [arm_h, seat_h + 0.13].min   # braco baixo (lê elegante, nao parede)
       rake = [rake, 13.0].max              # mais recline
+      leg_h = [leg_h, 0.04].min            # GPT ciclo9: pes baixos -> rente ao chao, base menos exposta
     end
     base_top = seat_h - cush_t
     seat_back = d - back_t
@@ -90,7 +91,9 @@ module SofaGenerator
     base_rec = cfg['base_style'] == 'plinth' ? 0.04 : 0.06
     {
       w: w, d: d, h: h, seats: [cfg['seat_count'].to_i, 1].max, gap: 0.018,
-      leg_h: leg_h, leg_inset: cfg['leg_inset_m'].to_f, leg_half: 0.045,
+      leg_h: leg_h,
+      leg_inset: (cfg['profile'] == 'lounge' ? [cfg['leg_inset_m'].to_f, 0.085].max : cfg['leg_inset_m'].to_f),
+      leg_half: (cfg['profile'] == 'lounge' ? 0.030 : 0.045),  # lounge: pes menores e recuados (GPT ciclo9)
       base_top: base_top, base_front: base_rec,
       seat_h: seat_h, seat_z0: base_top, seat_front: seat_front, seat_back: seat_back,
       arm_w: arm_w, arm_h: arm_h,
