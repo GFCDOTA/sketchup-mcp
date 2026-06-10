@@ -95,18 +95,28 @@ module SofaGenerator
   end
 
   # ---- materiais -----------------------------------------------------------
+  # Paletas de tecido (aprendido dos refs 3DW: o ESCURO texturizado e metade do
+  # "parece real" — o linho claro chapado era um gap). material_style escolhe.
+  PALETTES = {
+    'light_linen'   => { fab: [210, 200, 185], base: [150, 142, 128], back: [196, 187, 172], seam: [150, 142, 128] },
+    'mid_gray'      => { fab: [120, 122, 126], base: [86, 88, 92],    back: [110, 112, 116], seam: [96, 98, 102] },
+    'dark_charcoal' => { fab: [58, 60, 64],    base: [38, 40, 42],    back: [70, 72, 76],    seam: [46, 48, 52] }
+  }.freeze
+
   def build_materials(model, cfg)
+    ms = cfg['material_style'] || 'light_linen'
+    pal = PALETTES[ms] || PALETTES['light_linen']
     leg_rgb = case cfg['leg_style']
               when 'block' then [70, 70, 72]
               when 'metal_stub' then [120, 122, 128]
               else [96, 66, 44]
               end
     {
-      fab:  SP.mat(model, 'sofa_fab',  [210, 200, 185]),
-      base: SP.mat(model, 'sofa_base', [126, 120, 111]),
-      back: SP.mat(model, 'sofa_back', [190, 181, 167]),
-      seam: SP.mat(model, 'sofa_seam', [150, 142, 128]),
-      leg:  SP.mat(model, 'sofa_leg',  leg_rgb)
+      fab:  SP.mat(model, "fab_#{ms}",  pal[:fab]),
+      base: SP.mat(model, "base_#{ms}", pal[:base]),
+      back: SP.mat(model, "back_#{ms}", pal[:back]),
+      seam: SP.mat(model, "seam_#{ms}", pal[:seam]),
+      leg:  SP.mat(model, 'sofa_leg', leg_rgb)
     }
   end
 

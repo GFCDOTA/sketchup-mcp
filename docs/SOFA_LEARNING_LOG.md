@@ -207,3 +207,37 @@ grosso+coroado (nao placa) · proporcao braco x assento (nao afunda) · camera d
 **Residual #1 (bloqueia ASSET_PASS / SOFTNESS_PASS):** topo das almofadas ainda em degrau →
 Entrada 6. Proximo ciclo ataca a primitiva de almofada (dome continuo). **Veredito visual final
 (ASSET/SOFTNESS/CAIXOTAO) é do Felipe/GPT — nao autoaprovado aqui.**
+
+### Entrada 7 — Aprendizado dos refs 3DW (group60 KIVIK + modern dark gray)
+
+```
+Data: 2026-06-10
+Caso: rodada v3 — auditoria de 2 SKPs reais do 3D Warehouse como BENCHMARK (nao clone)
+Padroes extraidos:
+  - Almofada real = topo ROLADO/macio (pillow), nao degrau; volume e frente arredondada.
+  - Material ESCURO texturizado e ~metade do "parece real" (linho claro chapado era gap).
+  - Perfil BAIXO (low back/low arm) e muito comum no modern; encosto pode ser fino (~0.15)
+    mas le encorpado pela maciez.
+  - Detalhe minimo: forma + material carregam; costura quase invisivel (confirma piping off).
+  - Escala: 3DW vem fora de escala (modern_dark_gray em ~1/2) -> nosso schema valida faixas
+    em metros (clamp), entao absorve sem virar sofa gigante/anao. Boa defesa ja existente.
+Correcao feita (no SISTEMA, anti-overfit):
+  - crowned_box: crown de 2 degraus -> TOPO ROLADO em quarto-de-circulo (dome continuo,
+    loft de aneis). Resolveu o "rounded box com tampa". TODAS as almofadas herdam.
+  - schema+generator: material_style (light_linen|mid_gray|dark_charcoal) + paletas -> tecido
+    escuro plausivel. eval_low_modern_dark_3seat criado pra benchmarkar vs o ref.
+Onde a correcao entrou:
+  [x] spec (regras: dome continuo, low profile, material escuro como familia valida)
+  [x] schema (material_style)
+  [x] primitive (crowned_box dome rolado)
+  [ ] component
+  [x] generator (paletas de material)
+  [x] eval gate (SOFTNESS so passa com dome continuo; material plausivel entra na leitura)
+Impacto esperado em outros sofas: TODOS — dome na primitiva compartilhada + material por config;
+  o straight_3seat (claro) e o eval_low_modern_dark (escuro) melhoraram por heranca, nao ajuste.
+Risco de overfit: baixo — nada e medida de 1 ref; sao regras de classe (dome, paleta, low profile).
+Ainda NAO no nivel dos refs: TEXTURA de tecido (continuamos flat-shaded, so cor); leve facetado
+  no topo do dome (segmentos do loft); bulge organico e tufting sutil dos refs.
+Proximo gargalo: MATERIAL/TEXTURA (flat-shade vs trama real) — maior salto restante pro fotorrealismo
+  (V-Ray ou material com imagem). Em geometria: suavizar mais o topo do dome.
+```

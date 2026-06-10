@@ -144,17 +144,38 @@ module SofaPrimitives
     f = g.entities.add_face(rounded_rect_pts(x0i, y0i, x1i, y1i, z0i, ri, seg))
     return _log(name, g) if f.nil?
     _extrude_up(f, body_h)
-    if cr > 0.05  # cupula 2 tiers (inset, raise) -> puff macio com soften
+    if cr > 0.04
+      # TOPO ROLADO (pillow) — aprendido dos refs 3DW (KIVIK/modern dark): a borda
+      # do topo "rola" pra dentro num quarto-de-circulo (dome CONTINUO), nunca
+      # degrau/tampa. Apaga a tampa plana e lofta aneis (triangulos = planares).
       zt = z0i + body_h
-      [[cr * 0.5, cr * 0.55], [cr * 0.9, cr * 0.45]].each do |inset, rise|
-        tf = _top_face(g, zt)
-        break unless tf
-        ip = rounded_rect_pts(x0i + inset, y0i + inset, x1i - inset, y1i - inset,
-                              zt, [ri * 0.8, inset].max, seg)
-        inf = g.entities.add_face(ip)
-        break unless inf
-        _extrude_up(inf, rise)
-        zt += rise
+      tf = _top_face(g, zt)
+      tf.erase! if tf
+      nseg = 4
+      rings = (0..nseg).map do |t|
+        a = (t.to_f / nseg) * (Math::PI / 2.0)
+        inset = cr * (1.0 - Math.cos(a))
+        z = zt + cr * Math.sin(a)
+        rounded_rect_pts(x0i + inset, y0i + inset, x1i - inset, y1i - inset, z, [ri * 0.85, 0.05].max, seg)
+      end
+      (0...nseg).each do |t|
+        aa = rings[t]
+        bb = rings[t + 1]
+        n = [aa.size, bb.size].min
+        (0...n).each do |i|
+          j = (i + 1) % n
+          begin
+            g.entities.add_face(aa[i], aa[j], bb[j])
+            g.entities.add_face(aa[i], bb[j], bb[i])
+          rescue StandardError
+            nil
+          end
+        end
+      end
+      begin
+        g.entities.add_face(rings[nseg])
+      rescue StandardError
+        nil
       end
     end
     g.material = mat_obj if mat_obj

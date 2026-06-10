@@ -1,0 +1,1 @@
+inspected 'ref_mdg' | bbox_m [1.336, 0.447, 0.394] | mats 6 | defs 17 | top_nodes 3

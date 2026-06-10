@@ -1,0 +1,1152 @@
+{
+  "title": "ref_mdg",
+  "path": "E:\\Claude\\worktrees\\sofa-skill\\.claude\\scratch\\ref_mdg.skp",
+  "length_unit_code": 2,
+  "bbox": {
+    "min_in": [
+      2.47,
+      33.82,
+      -1.1
+    ],
+    "size_in": [
+      52.62,
+      17.59,
+      15.5
+    ],
+    "size_m": [
+      1.336,
+      0.447,
+      0.394
+    ]
+  },
+  "materials": [
+    {
+      "name": "Blue & Gray",
+      "color": [
+        39,
+        45,
+        47
+      ],
+      "alpha": 1.0,
+      "texture": "Blue & Gray.jpg"
+    },
+    {
+      "name": "IMG_0197",
+      "color": [
+        8,
+        8,
+        3
+      ],
+      "alpha": 1.0,
+      "texture": "IMG_0197.jpg"
+    },
+    {
+      "name": "[0135_DarkGray]",
+      "color": [
+        81,
+        81,
+        81
+      ],
+      "alpha": 1.0,
+      "texture": null
+    },
+    {
+      "name": "myBlack",
+      "color": [
+        40,
+        40,
+        40
+      ],
+      "alpha": 1.0,
+      "texture": "Black Stained.jpg"
+    },
+    {
+      "name": "daisy-black-plain-colour-31000",
+      "color": [
+        30,
+        30,
+        30
+      ],
+      "alpha": 1.0,
+      "texture": "daisy-black-plain-colour-31000.jpg"
+    },
+    {
+      "name": "wallpaper-65713",
+      "color": [
+        77,
+        77,
+        77
+      ],
+      "alpha": 1.0,
+      "texture": "wallpaper-65713.jpg"
+    }
+  ],
+  "definitions": [
+    {
+      "name": "Group6#2",
+      "instances": 3,
+      "size_m": [
+        0.5,
+        0.5,
+        0.132
+      ]
+    },
+    {
+      "name": "Group#4",
+      "instances": 1,
+      "size_m": [
+        0.5,
+        0.5,
+        0.132
+      ]
+    },
+    {
+      "name": "Group5#1",
+      "instances": 1,
+      "size_m": [
+        0.5,
+        0.5,
+        0.165
+      ]
+    },
+    {
+      "name": "Component#2",
+      "instances": 6,
+      "size_m": [
+        0.112,
+        0.112,
+        0.099
+      ]
+    },
+    {
+      "name": "Group0#1",
+      "instances": 1,
+      "size_m": [
+        0.5,
+        0.5,
+        0.2
+      ]
+    },
+    {
+      "name": "Group#8",
+      "instances": 3,
+      "size_m": [
+        0.112,
+        1.112,
+        0.099
+      ]
+    },
+    {
+      "name": "Group6#1",
+      "instances": 1,
+      "size_m": [
+        0.5,
+        0.5,
+        0.132
+      ]
+    },
+    {
+      "name": "Component#6",
+      "instances": 10,
+      "size_m": [
+        0.5,
+        0.5,
+        0.165
+      ]
+    },
+    {
+      "name": "Group#2",
+      "instances": 1,
+      "size_m": [
+        0.5,
+        0.5,
+        0.132
+      ]
+    },
+    {
+      "name": "Component#1",
+      "instances": 6,
+      "size_m": [
+        0.5,
+        0.5,
+        0.2
+      ]
+    },
+    {
+      "name": "Group#3",
+      "instances": 1,
+      "size_m": [
+        0.112,
+        1.112,
+        0.099
+      ]
+    },
+    {
+      "name": "Group#6",
+      "instances": 1,
+      "size_m": [
+        2.501,
+        2.0,
+        0.2
+      ]
+    },
+    {
+      "name": "Group#5",
+      "instances": 1,
+      "size_m": [
+        2.739,
+        2.301,
+        0.541
+      ]
+    },
+    {
+      "name": "Component#3",
+      "instances": 4,
+      "size_m": [
+        0.034,
+        0.034,
+        0.028
+      ]
+    },
+    {
+      "name": "Group#1",
+      "instances": 1,
+      "size_m": [
+        1.502,
+        0.775,
+        0.319
+      ]
+    },
+    {
+      "name": "Group#7",
+      "instances": 1,
+      "size_m": [
+        1.336,
+        0.442,
+        0.347
+      ]
+    },
+    {
+      "name": "Tufted Cushion Base",
+      "instances": 2,
+      "size_m": [
+        2.739,
+        2.301,
+        0.689
+      ]
+    }
+  ],
+  "entity_counts": {
+    "ComponentInstance": 82,
+    "Group": 38,
+    "Edge": 27118,
+    "Face": 13912
+  },
+  "hierarchy": [
+    {
+      "type": "ComponentInstance",
+      "name": "Tufted Cushion Base",
+      "size_m": [
+        1.106,
+        0.29,
+        0.083
+      ],
+      "center_m": [
+        0.73,
+        1.004,
+        0.14
+      ],
+      "children": [
+        {
+          "type": "Group",
+          "name": "(group)",
+          "size_m": [
+            2.565,
+            2.122,
+            0.204
+          ],
+          "center_m": [
+            1.358,
+            1.148,
+            0.587
+          ],
+          "children": [
+            {
+              "type": "Group",
+              "name": "(group)",
+              "size_m": [
+                0.112,
+                1.112,
+                0.099
+              ],
+              "center_m": [
+                0.5,
+                1.0,
+                0.049
+              ],
+              "n_subgroups": 3
+            },
+            {
+              "type": "Group",
+              "name": "(group)",
+              "size_m": [
+                0.112,
+                1.112,
+                0.099
+              ],
+              "center_m": [
+                1.0,
+                1.0,
+                0.049
+              ],
+              "n_subgroups": 3
+            },
+            {
+              "type": "Group",
+              "name": "(group)",
+              "size_m": [
+                0.112,
+                1.112,
+                0.099
+              ],
+              "center_m": [
+                1.5,
+                1.0,
+                0.049
+              ],
+              "n_subgroups": 3
+            },
+            {
+              "type": "Group",
+              "name": "(group)",
+              "size_m": [
+                0.112,
+                1.112,
+                0.099
+              ],
+              "center_m": [
+                2.0,
+                1.0,
+                0.049
+              ],
+              "n_subgroups": 3
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#1",
+              "size_m": [
+                0.5,
+                0.5,
+                0.2
+              ],
+              "center_m": [
+                0.75,
+                1.25,
+                0.1
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#1",
+              "size_m": [
+                0.5,
+                0.5,
+                0.2
+              ],
+              "center_m": [
+                1.25,
+                1.25,
+                0.1
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#1",
+              "size_m": [
+                0.5,
+                0.5,
+                0.2
+              ],
+              "center_m": [
+                1.75,
+                1.25,
+                0.1
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#1",
+              "size_m": [
+                0.5,
+                0.5,
+                0.2
+              ],
+              "center_m": [
+                0.75,
+                0.75,
+                0.1
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#1",
+              "size_m": [
+                0.5,
+                0.5,
+                0.2
+              ],
+              "center_m": [
+                1.25,
+                0.75,
+                0.1
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "Group",
+              "name": "(group)",
+              "size_m": [
+                0.5,
+                0.5,
+                0.132
+              ],
+              "center_m": [
+                2.25,
+                1.75,
+                0.066
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#1",
+              "size_m": [
+                0.5,
+                0.5,
+                0.2
+              ],
+              "center_m": [
+                1.75,
+                0.75,
+                0.1
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#6",
+              "size_m": [
+                0.499,
+                0.5,
+                0.165
+              ],
+              "center_m": [
+                2.25,
+                0.748,
+                0.082
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#6",
+              "size_m": [
+                0.5,
+                0.5,
+                0.165
+              ],
+              "center_m": [
+                0.75,
+                1.75,
+                0.082
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#6",
+              "size_m": [
+                0.5,
+                0.5,
+                0.165
+              ],
+              "center_m": [
+                1.25,
+                1.75,
+                0.082
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#6",
+              "size_m": [
+                0.5,
+                0.5,
+                0.165
+              ],
+              "center_m": [
+                1.75,
+                1.75,
+                0.082
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#6",
+              "size_m": [
+                0.5,
+                0.5,
+                0.165
+              ],
+              "center_m": [
+                0.75,
+                0.25,
+                0.082
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#6",
+              "size_m": [
+                0.5,
+                0.5,
+                0.165
+              ],
+              "center_m": [
+                0.25,
+                0.75,
+                0.082
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#6",
+              "size_m": [
+                0.5,
+                0.5,
+                0.165
+              ],
+              "center_m": [
+                0.25,
+                1.25,
+                0.082
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "Group",
+              "name": "(group)",
+              "size_m": [
+                0.5,
+                0.5,
+                0.132
+              ],
+              "center_m": [
+                0.25,
+                1.75,
+                0.066
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "Group",
+              "name": "(group)",
+              "size_m": [
+                0.5,
+                0.5,
+                0.132
+              ],
+              "center_m": [
+                0.251,
+                0.25,
+                0.066
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#6",
+              "size_m": [
+                0.5,
+                0.5,
+                0.165
+              ],
+              "center_m": [
+                1.25,
+                0.25,
+                0.082
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#6",
+              "size_m": [
+                0.5,
+                0.5,
+                0.165
+              ],
+              "center_m": [
+                1.75,
+                0.25,
+                0.082
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#6",
+              "size_m": [
+                0.499,
+                0.5,
+                0.165
+              ],
+              "center_m": [
+                2.25,
+                1.248,
+                0.082
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "Group",
+              "name": "(group)",
+              "size_m": [
+                0.5,
+                0.5,
+                0.132
+              ],
+              "center_m": [
+                2.251,
+                0.251,
+                0.066
+              ],
+              "n_subgroups": 0
+            }
+          ]
+        },
+        {
+          "type": "Group",
+          "name": "(group)",
+          "size_m": [
+            2.739,
+            2.301,
+            0.541
+          ],
+          "center_m": [
+            1.369,
+            1.151,
+            0.27
+          ],
+          "n_subgroups": 0
+        }
+      ]
+    },
+    {
+      "type": "Group",
+      "name": "(group)",
+      "size_m": [
+        1.336,
+        0.442,
+        0.347
+      ],
+      "center_m": [
+        0.731,
+        1.085,
+        0.145
+      ],
+      "children": [
+        {
+          "type": "ComponentInstance",
+          "name": "Component#3",
+          "size_m": [
+            0.03,
+            0.034,
+            0.028
+          ],
+          "center_m": [
+            1.294,
+            0.06,
+            0.014
+          ],
+          "n_subgroups": 0
+        },
+        {
+          "type": "ComponentInstance",
+          "name": "Component#3",
+          "size_m": [
+            0.03,
+            0.034,
+            0.028
+          ],
+          "center_m": [
+            0.04,
+            0.411,
+            0.014
+          ],
+          "n_subgroups": 0
+        },
+        {
+          "type": "ComponentInstance",
+          "name": "Component#3",
+          "size_m": [
+            0.03,
+            0.034,
+            0.028
+          ],
+          "center_m": [
+            0.04,
+            0.073,
+            0.014
+          ],
+          "n_subgroups": 0
+        },
+        {
+          "type": "ComponentInstance",
+          "name": "Component#3",
+          "size_m": [
+            0.03,
+            0.034,
+            0.028
+          ],
+          "center_m": [
+            1.294,
+            0.407,
+            0.014
+          ],
+          "n_subgroups": 0
+        },
+        {
+          "type": "Group",
+          "name": "(group)",
+          "size_m": [
+            1.336,
+            0.442,
+            0.319
+          ],
+          "center_m": [
+            0.668,
+            0.221,
+            0.187
+          ],
+          "n_subgroups": 0
+        }
+      ]
+    },
+    {
+      "type": "ComponentInstance",
+      "name": "Tufted Cushion Base",
+      "size_m": [
+        1.106,
+        0.083,
+        0.216
+      ],
+      "center_m": [
+        0.735,
+        1.176,
+        0.258
+      ],
+      "children": [
+        {
+          "type": "Group",
+          "name": "(group)",
+          "size_m": [
+            2.565,
+            2.122,
+            0.204
+          ],
+          "center_m": [
+            1.358,
+            1.148,
+            0.587
+          ],
+          "children": [
+            {
+              "type": "Group",
+              "name": "(group)",
+              "size_m": [
+                0.112,
+                1.112,
+                0.099
+              ],
+              "center_m": [
+                0.5,
+                1.0,
+                0.049
+              ],
+              "n_subgroups": 3
+            },
+            {
+              "type": "Group",
+              "name": "(group)",
+              "size_m": [
+                0.112,
+                1.112,
+                0.099
+              ],
+              "center_m": [
+                1.0,
+                1.0,
+                0.049
+              ],
+              "n_subgroups": 3
+            },
+            {
+              "type": "Group",
+              "name": "(group)",
+              "size_m": [
+                0.112,
+                1.112,
+                0.099
+              ],
+              "center_m": [
+                1.5,
+                1.0,
+                0.049
+              ],
+              "n_subgroups": 3
+            },
+            {
+              "type": "Group",
+              "name": "(group)",
+              "size_m": [
+                0.112,
+                1.112,
+                0.099
+              ],
+              "center_m": [
+                2.0,
+                1.0,
+                0.049
+              ],
+              "n_subgroups": 3
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#1",
+              "size_m": [
+                0.5,
+                0.5,
+                0.2
+              ],
+              "center_m": [
+                0.75,
+                1.25,
+                0.1
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#1",
+              "size_m": [
+                0.5,
+                0.5,
+                0.2
+              ],
+              "center_m": [
+                1.25,
+                1.25,
+                0.1
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#1",
+              "size_m": [
+                0.5,
+                0.5,
+                0.2
+              ],
+              "center_m": [
+                1.75,
+                1.25,
+                0.1
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#1",
+              "size_m": [
+                0.5,
+                0.5,
+                0.2
+              ],
+              "center_m": [
+                0.75,
+                0.75,
+                0.1
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#1",
+              "size_m": [
+                0.5,
+                0.5,
+                0.2
+              ],
+              "center_m": [
+                1.25,
+                0.75,
+                0.1
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "Group",
+              "name": "(group)",
+              "size_m": [
+                0.5,
+                0.5,
+                0.132
+              ],
+              "center_m": [
+                2.25,
+                1.75,
+                0.066
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#1",
+              "size_m": [
+                0.5,
+                0.5,
+                0.2
+              ],
+              "center_m": [
+                1.75,
+                0.75,
+                0.1
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#6",
+              "size_m": [
+                0.499,
+                0.5,
+                0.165
+              ],
+              "center_m": [
+                2.25,
+                0.748,
+                0.082
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#6",
+              "size_m": [
+                0.5,
+                0.5,
+                0.165
+              ],
+              "center_m": [
+                0.75,
+                1.75,
+                0.082
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#6",
+              "size_m": [
+                0.5,
+                0.5,
+                0.165
+              ],
+              "center_m": [
+                1.25,
+                1.75,
+                0.082
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#6",
+              "size_m": [
+                0.5,
+                0.5,
+                0.165
+              ],
+              "center_m": [
+                1.75,
+                1.75,
+                0.082
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#6",
+              "size_m": [
+                0.5,
+                0.5,
+                0.165
+              ],
+              "center_m": [
+                0.75,
+                0.25,
+                0.082
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#6",
+              "size_m": [
+                0.5,
+                0.5,
+                0.165
+              ],
+              "center_m": [
+                0.25,
+                0.75,
+                0.082
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#6",
+              "size_m": [
+                0.5,
+                0.5,
+                0.165
+              ],
+              "center_m": [
+                0.25,
+                1.25,
+                0.082
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "Group",
+              "name": "(group)",
+              "size_m": [
+                0.5,
+                0.5,
+                0.132
+              ],
+              "center_m": [
+                0.25,
+                1.75,
+                0.066
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "Group",
+              "name": "(group)",
+              "size_m": [
+                0.5,
+                0.5,
+                0.132
+              ],
+              "center_m": [
+                0.251,
+                0.25,
+                0.066
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#6",
+              "size_m": [
+                0.5,
+                0.5,
+                0.165
+              ],
+              "center_m": [
+                1.25,
+                0.25,
+                0.082
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#6",
+              "size_m": [
+                0.5,
+                0.5,
+                0.165
+              ],
+              "center_m": [
+                1.75,
+                0.25,
+                0.082
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#6",
+              "size_m": [
+                0.499,
+                0.5,
+                0.165
+              ],
+              "center_m": [
+                2.25,
+                1.248,
+                0.082
+              ],
+              "n_subgroups": 1
+            },
+            {
+              "type": "Group",
+              "name": "(group)",
+              "size_m": [
+                0.5,
+                0.5,
+                0.132
+              ],
+              "center_m": [
+                2.251,
+                0.251,
+                0.066
+              ],
+              "n_subgroups": 0
+            }
+          ]
+        },
+        {
+          "type": "Group",
+          "name": "(group)",
+          "size_m": [
+            2.739,
+            2.301,
+            0.541
+          ],
+          "center_m": [
+            1.369,
+            1.151,
+            0.27
+          ],
+          "n_subgroups": 0
+        }
+      ]
+    }
+  ]
+}
