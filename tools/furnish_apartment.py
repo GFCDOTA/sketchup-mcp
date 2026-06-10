@@ -29,7 +29,7 @@ from tools.room_type import (BATHROOM, BEDROOM, KITCHEN, LIVING,   # noqa: E402
 ROOT = Path(__file__).resolve().parents[1]
 SKETCHUP_EXE = r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
 CONSENSUS = ROOT / "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json"
-BASE_SKP = ROOT / "artifacts/planta_74/planta_74.skp"
+BASE_SKP = Path(os.environ.get("FURNISH_BASE_SKP") or str(ROOT / "artifacts/planta_74/planta_74.skp"))  # shell override p/ escala: @0.0259 usa o shell rebuildado (base default 0.0352 intacta)
 OUT_DIR = ROOT / "artifacts/planta_74/furnished"   # pasta UNICA fixa
 RB = ROOT / "tools/place_layout_skp.rb"
 
