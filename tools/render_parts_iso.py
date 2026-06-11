@@ -45,16 +45,18 @@ def render_parts(parts, out_png, *, title=None, elev=24, azim=-56, bg=(0.82, 0.8
     ax = fig.add_subplot(111, projection="3d")
     ax.set_facecolor(bg)
     fig.patch.set_facecolor(bg)
-    polys, colors = [], []
+    polys, colors, edges = [], [], []
     for p in parts:
         r, g, b = (c / 255.0 for c in p["rgb"])
         faces = _faces_from_verts8(p["verts8"]) if p.get("verts8") else _faces(p)
+        ec = (0, 0, 0, 0.22) if p.get("edge", True) else (0, 0, 0, 0.0)
         for fname, quad in faces.items():
             s = _SHADE[fname]
             polys.append(quad)
             colors.append((min(1, r * s), min(1, g * s), min(1, b * s)))
+            edges.append(ec)
     ax.add_collection3d(Poly3DCollection(polys, facecolors=colors,
-                                         edgecolors=(0, 0, 0, 0.22), linewidths=0.3))
+                                         edgecolors=edges, linewidths=0.3))
     xs = [p["x0"] for p in parts] + [p["x1"] for p in parts]
     ys = [p["y0"] for p in parts] + [p["y1"] for p in parts]
     zs = [p["z0"] for p in parts] + [p["z1"] for p in parts]
