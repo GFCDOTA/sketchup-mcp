@@ -1,0 +1,249 @@
+"""decor_anatomy_spec.py — Intent-to-Scene slice 1: especificacao de ANATOMIA dos
+componentes procedurais de DECOR da sala (rug, coffee_table, side_table, floor_lamp,
+wall_art, curtain, plant_placeholder). Mesma convencao do furniture_anatomy_spec:
+dims em METROS, X=largura, Y=profundidade (frente=-Y), Z=altura, origem no canto
+(0,0,0). Pecas SEPARADAS com kind semantico — nao bloco unico. Os builders
+(tools/decor_builders.py) consomem estes specs; o SceneSpatialGate valida bbox
+plausivel via DECOR_PLAUSIBLE_BBOX_M.
+
+Regra da slice: componentes nao precisam ser perfeitos; precisam ser coerentes,
+proporcionais, leves e componentizados. Cores default = StylePack modern_warm_minimal
+(o composer sobrescreve via material_style).
+"""
+from __future__ import annotations
+
+from dataclasses import asdict, dataclass
+
+# pecas semanticas OBRIGATORIAS por tipo (gate exige presenca)
+DECOR_REQUIRED_PARTS = {
+    "rug": ("rug_field",),
+    "coffee_table": ("top", "leg"),
+    "side_table": ("top", "stem", "base"),
+    "floor_lamp": ("base", "stem", "shade"),
+    "wall_art": ("frame", "canvas"),
+    "curtain": ("panel_fold", "rod"),
+    "plant_placeholder": ("pot", "foliage"),
+}
+
+# bbox plausivel (W, D, H) em m por tipo — SpatialGate reprova movel fora da faixa.
+# Inclui o sofa (hero) pra o gate cobrir a cena inteira com uma tabela so.
+DECOR_PLAUSIBLE_BBOX_M = {
+    "sofa": ((1.4, 3.6), (0.8, 1.8), (0.60, 1.10)),
+    "rug": ((1.2, 4.5), (1.0, 3.5), (0.005, 0.03)),
+    "coffee_table": ((0.6, 1.6), (0.4, 1.0), (0.25, 0.50)),
+    "side_table": ((0.30, 0.70), (0.30, 0.70), (0.40, 0.75)),
+    "floor_lamp": ((0.20, 0.60), (0.20, 0.60), (1.20, 1.90)),
+    "wall_art": ((0.6, 2.2), (0.03, 0.12), (0.50, 1.60)),
+    "curtain": ((0.6, 4.0), (0.03, 0.25), (1.80, 2.80)),
+    "plant_placeholder": ((0.30, 0.90), (0.30, 0.90), (0.80, 2.00)),
+}
+
+
+def _base_dict(s, kind):
+    d = asdict(s)
+    d["bbox_m"] = s.bbox_m()
+    d["required_parts"] = list(DECOR_REQUIRED_PARTS[kind])
+    return d
+
+
+@dataclass
+class RugSpec:
+    """Tapete plano tecido: campo + borda em moldura (contraste sutil), fino."""
+    width: float = 3.0
+    depth: float = 2.0
+    thickness: float = 0.012
+    border_w: float = 0.12
+    field_rgb: tuple = (224, 214, 195)    # cream_woven
+    border_rgb: tuple = (205, 193, 172)   # tom mais escuro da trama
+
+    def validate(self):
+        assert self.width > 2 * self.border_w and self.depth > 2 * self.border_w
+        assert 0.004 <= self.thickness <= 0.03
+        return self
+
+    def bbox_m(self):
+        return (round(self.width, 3), round(self.depth, 3), round(self.thickness, 3))
+
+    def to_dict(self):
+        return _base_dict(self, "rug")
+
+
+@dataclass
+class CoffeeTableSpec:
+    """Mesa de centro baixa: tampo-laje pedra (travertino/concreto) + 2 pernas-laje
+    metal preto recuadas (le como peca de design, nao caixote)."""
+    width: float = 1.10
+    depth: float = 0.60
+    height: float = 0.36
+    top_t: float = 0.06
+    leg_t: float = 0.05          # espessura X de cada perna-laje
+    leg_inset_x: float = 0.12    # recuo da perna a partir da ponta
+    leg_inset_y: float = 0.06    # recuo da perna na profundidade
+    top_rgb: tuple = (206, 193, 171)   # travertine
+    leg_rgb: tuple = (38, 38, 40)      # black_metal
+
+    def validate(self):
+        assert self.height > self.top_t
+        assert self.width > 2 * (self.leg_inset_x + self.leg_t)
+        return self
+
+    def bbox_m(self):
+        return (round(self.width, 3), round(self.depth, 3), round(self.height, 3))
+
+    def to_dict(self):
+        return _base_dict(self, "coffee_table")
+
+
+@dataclass
+class SideTableSpec:
+    """Mesa lateral redonda slim: tampo disco + haste fina + base disco (metal)."""
+    diameter: float = 0.45
+    height: float = 0.55
+    top_t: float = 0.025
+    stem_t: float = 0.04
+    base_d: float = 0.30
+    base_t: float = 0.02
+    top_rgb: tuple = (38, 38, 40)
+    stem_rgb: tuple = (38, 38, 40)
+    base_rgb: tuple = (38, 38, 40)
+
+    def validate(self):
+        assert self.height > self.top_t + self.base_t
+        assert self.base_d < self.diameter * 0.9
+        return self
+
+    def bbox_m(self):
+        return (round(self.diameter, 3), round(self.diameter, 3), round(self.height, 3))
+
+    def to_dict(self):
+        return _base_dict(self, "side_table")
+
+
+@dataclass
+class FloorLampSpec:
+    """Luminaria de piso: base disco + haste fina metal + cupula tambor afunilada
+    (verts8) em tecido ivory."""
+    height: float = 1.65
+    base_d: float = 0.28
+    base_t: float = 0.025
+    stem_t: float = 0.035
+    shade_d: float = 0.42        # boca de baixo da cupula
+    shade_top_d: float = 0.32    # topo afunilado
+    shade_h: float = 0.24
+    stem_rgb: tuple = (38, 38, 40)
+    base_rgb: tuple = (38, 38, 40)
+    shade_rgb: tuple = (238, 228, 204)  # warm_ivory_shade
+
+    def validate(self):
+        assert self.height > self.base_t + self.shade_h
+        assert self.shade_top_d <= self.shade_d
+        return self
+
+    def bbox_m(self):
+        w = round(max(self.base_d, self.shade_d), 3)
+        return (w, w, round(self.height, 3))
+
+    def to_dict(self):
+        return _base_dict(self, "floor_lamp")
+
+
+@dataclass
+class WallArtSpec:
+    """Quadro grande abstrato neutro: moldura fina metal + tela + 2 blocos de
+    composicao (campo quente + faixa escura) levemente proud — le como arte
+    abstrata sem precisar de textura."""
+    width: float = 1.40
+    height: float = 0.95
+    depth: float = 0.06
+    frame_t: float = 0.03
+    canvas_rgb: tuple = (211, 199, 181)   # neutral_abstract
+    frame_rgb: tuple = (38, 38, 40)
+    accent_rgb: tuple = (128, 92, 64)     # burnt_umber
+    accent2_rgb: tuple = (84, 80, 76)     # cinza quente escuro
+
+    def validate(self):
+        assert self.width > 4 * self.frame_t and self.height > 4 * self.frame_t
+        assert 0.02 <= self.depth <= 0.12
+        return self
+
+    def bbox_m(self):
+        return (round(self.width, 3), round(self.depth, 3), round(self.height, 3))
+
+    def to_dict(self):
+        return _base_dict(self, "wall_art")
+
+
+@dataclass
+class CurtainSpec:
+    """Cortina painel ondulado low-poly: N dobras verticais alternando offset em
+    profundidade (fake wave) + varao metal. Largura = janela + transbordo."""
+    width: float = 2.2
+    height: float = 2.40
+    fold_w: float = 0.15
+    fold_amp: float = 0.05       # amplitude da onda (offset Y alternado)
+    thickness: float = 0.03
+    rod_d: float = 0.035
+    rod_overhang: float = 0.10   # varao passa da cortina nas pontas
+    panel_rgb: tuple = (237, 231, 218)   # light_linen
+    rod_rgb: tuple = (38, 38, 40)
+
+    def validate(self):
+        assert self.width >= 2 * self.fold_w
+        assert self.height >= 1.8
+        return self
+
+    def bbox_m(self):
+        return (round(self.width + 2 * self.rod_overhang, 3),
+                round(self.thickness + self.fold_amp + self.rod_d, 3),
+                round(self.height + self.rod_d, 3))
+
+    def to_dict(self):
+        return _base_dict(self, "curtain")
+
+
+@dataclass
+class PlantSpec:
+    """Planta placeholder: vaso + tronco + volume verde em 3 caixas sobrepostas
+    decrescentes (silhueta organica sem botanica real)."""
+    height: float = 1.50
+    pot_w: float = 0.32
+    pot_h: float = 0.30
+    trunk_t: float = 0.05
+    foliage_w: float = 0.55
+    foliage_rgb: tuple = (97, 117, 73)   # soft_olive_green
+    pot_rgb: tuple = (45, 43, 41)        # matte_black_pot
+    trunk_rgb: tuple = (74, 56, 42)      # dark_walnut
+
+    def validate(self):
+        assert self.height > self.pot_h + 0.4
+        assert self.foliage_w >= self.pot_w
+        return self
+
+    def bbox_m(self):
+        return (round(self.foliage_w, 3), round(self.foliage_w, 3), round(self.height, 3))
+
+    def to_dict(self):
+        return _base_dict(self, "plant_placeholder")
+
+
+_SPECS = {
+    "rug": RugSpec, "coffee_table": CoffeeTableSpec, "side_table": SideTableSpec,
+    "floor_lamp": FloorLampSpec, "wall_art": WallArtSpec, "curtain": CurtainSpec,
+    "plant_placeholder": PlantSpec,
+}
+
+
+def decor_spec(kind, **overrides):
+    """Factory padrao (igual sofa_spec): decor_spec('rug', width=3.2)."""
+    cls = _SPECS.get(kind)
+    assert cls is not None, f"tipo de decor desconhecido: {kind}"
+    s = cls()
+    for k, v in overrides.items():
+        setattr(s, k, v)
+    return s.validate()
+
+
+if __name__ == "__main__":
+    for kind in _SPECS:
+        s = decor_spec(kind)
+        print(f"{kind:18} bbox_m={s.bbox_m()} required={DECOR_REQUIRED_PARTS[kind]}")
