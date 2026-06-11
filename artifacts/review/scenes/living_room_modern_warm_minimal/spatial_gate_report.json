@@ -1,0 +1,54 @@
+{
+  "result": "PASS",
+  "checks": {
+    "dentro_da_sala": true,
+    "nao_flutua": true,
+    "sem_colisao": true,
+    "mesa_distancia": true,
+    "tapete_maior_que_hero": true,
+    "quadro_centralizado": true,
+    "cortina_na_janela": true,
+    "circulacao": true,
+    "bbox_plausivel": true,
+    "camera_enquadra": true,
+    "hero_ancorado": true,
+    "respiro_lateral": true,
+    "planta_perto_janela": true
+  },
+  "why": [],
+  "metrics": {
+    "coffee_table_gap_m": 0.4,
+    "rug_overhang_m": [
+      0.4,
+      0.4
+    ],
+    "art_offset_m": -0.0,
+    "art_gap_m": 0.25,
+    "curtain_offset_m": 0.0,
+    "hero_coverage": 0.109,
+    "hero_frame_pos": [
+      0.36,
+      0.4
+    ],
+    "hero_back_gap_m": 0.05,
+    "plant_wall_gap_m": 0.2,
+    "plant_window_along_gap_m": 0.15
+  },
+  "hard": [
+    "dentro_da_sala",
+    "nao_flutua",
+    "sem_colisao",
+    "mesa_distancia",
+    "tapete_maior_que_hero",
+    "quadro_centralizado",
+    "cortina_na_janela",
+    "circulacao",
+    "bbox_plausivel",
+    "camera_enquadra"
+  ],
+  "soft": [
+    "hero_ancorado",
+    "respiro_lateral",
+    "planta_perto_janela"
+  ]
+}

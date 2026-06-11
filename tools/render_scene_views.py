@@ -89,8 +89,13 @@ def scene_boxes(parts):
     for p in parts:
         x0, y0, x1, y1 = (p["x0"] * M_TO_IN, p["y0"] * M_TO_IN,
                           p["x1"] * M_TO_IN, p["y1"] * M_TO_IN)
+        # label namespaced pelo item: o .rb nomeia material fz_<label> — "top" da
+        # side_table colidia com "top" da coffee_table e herdava a cor errada
+        label = p.get("label", p["kind"])
+        if p.get("item"):
+            label = f"{p['item']}__{label}"
         boxes.append({
-            "kind": p["kind"], "label": p.get("label", p["kind"]),
+            "kind": p["kind"], "label": label,
             "x0": round(x0, 2), "y0": round(y0, 2), "x1": round(x1, 2), "y1": round(y1, 2),
             "corners": [[round(x0, 2), round(y0, 2)], [round(x1, 2), round(y0, 2)],
                         [round(x1, 2), round(y1, 2)], [round(x0, 2), round(y1, 2)]],
@@ -120,7 +125,9 @@ def _render_su(scene, parts, out_dir):
     prov = SketchUpBasicProvider()
     if not prov.available():
         return {"status": "skipped", "reason": "SU exe/base ausentes"}
-    vis = _visible_parts(parts, scene["camera"].get("hide_walls"))
+    # a camera iso do build_furniture_skp.rb e' FIXA de sudeste-elevado ->
+    # o dollhouse SU abre south+east (independente da camera mpl do composer)
+    vis = _visible_parts(parts, ["south", "east"])
     req = RenderRequest(
         boxes=scene_boxes(vis),
         out_skp=str(out_dir / "scene.skp"),

@@ -1,0 +1,40 @@
+{
+  "scene_id": "living_room_modern_warm_minimal",
+  "views": {
+    "top_view": "E:\\Claude\\apps\\sketchup-mcp\\runs\\scenes\\living_room_modern_warm_minimal\\top_view.png",
+    "three_quarter": "E:\\Claude\\apps\\sketchup-mcp\\runs\\scenes\\living_room_modern_warm_minimal\\three_quarter.png",
+    "contact_sheet": "E:\\Claude\\apps\\sketchup-mcp\\runs\\scenes\\living_room_modern_warm_minimal\\contact_sheet.png"
+  },
+  "renderer": "matplotlib_parts_iso (SU-free, deterministico)",
+  "camera": {
+    "kind": "three_quarter_human",
+    "eye": [
+      0.8,
+      0.4,
+      1.6
+    ],
+    "target": [
+      2.6,
+      2.784,
+      0.55
+    ],
+    "elev_deg": 19.4,
+    "azim_deg": -127.1,
+    "hide_walls": [
+      "south",
+      "west"
+    ],
+    "min_hero_coverage": 0.1
+  },
+  "sketchup": {
+    "status": "success",
+    "skp": "E:\\Claude\\apps\\sketchup-mcp\\runs\\scenes\\living_room_modern_warm_minimal\\scene.skp",
+    "renders": {
+      "top": "E:\\Claude\\apps\\sketchup-mcp\\runs\\scenes\\living_room_modern_warm_minimal\\sketchup_top.png",
+      "iso": "E:\\Claude\\apps\\sketchup-mcp\\runs\\scenes\\living_room_modern_warm_minimal\\sketchup_3_4.png"
+    },
+    "timing_s": 15.3,
+    "error": ""
+  },
+  "vray": "deferred — so depois do SpatialGate PASS"
+}
