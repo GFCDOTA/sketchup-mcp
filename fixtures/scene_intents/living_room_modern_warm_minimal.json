@@ -64,7 +64,7 @@
     "kind": "three_quarter_human",
     "eye_height_m": 1.6,
     "subject": "hero_seating_zone",
-    "min_hero_coverage": 0.12
+    "min_hero_coverage": 0.10
   },
   "render_goal": {
     "views": ["top", "three_quarter", "contact_sheet"],
