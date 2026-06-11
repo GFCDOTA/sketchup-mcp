@@ -19,15 +19,15 @@ H = (ENV['VRAY_H'] || '900').to_i
 require 'fileutils'
 FileUtils.mkdir_p(DIR) rescue nil
 L = []
+M = 39.3700787402  # metros->polegadas (top-level: constante dentro de metodo = SyntaxError)
 def flush(arr, log); File.write(log, arr.join("\n") + "\n") rescue nil; end
 
 # Chao neutro (GPT V-Ray passo1): bounce + contexto, ~6m, NEUTRO, no z minimo do sofa.
 # Adicionar ANTES de medir a camera (e usar bounds do SOFA, nao do chao, p/ enquadrar).
 def add_ground(model, sbb)
   ents = model.active_entities
-  M = 39.3700787402
   gm = model.materials['vray_ground'] || model.materials.add('vray_ground')
-  gm.color = Sketchup::Color.new(150, 150, 150)
+  gm.color = Sketchup::Color.new(120, 120, 121)  # GPT: cinza-claro neutro, nao branco
   sc = sbb.center; gz = sbb.min.z; half = 3.0 * M
   pts = [[sc.x - half, sc.y - half, gz], [sc.x + half, sc.y - half, gz],
          [sc.x + half, sc.y + half, gz], [sc.x - half, sc.y + half, gz]].map { |a| Geom::Point3d.new(*a) }
@@ -51,6 +51,33 @@ def place_camera(model, sbb, kind)
   model.active_view.camera = cam
 end
 
+# GPT V-Ray passo3-5: shader de TECIDO no BRDF exportado (a scene so tem stubs; o BRDF
+# real nasce no export). sheen 0.35 (fuzz leve) + bump 0.06 (trama, reusa uvwgen do
+# diffuse = escala 0.30m) + roughness 0.85 (fosco, mata plastico) + reflect baixo.
+# Aplica em qualquer material_style (deriva o bump png do nome /<fab|back|base>_<style>/).
+class FabricShaderSub
+  TEX_DIR = File.join(File.dirname(File.dirname(__FILE__)), 'textures')
+  def on_model_exported(exporter)
+    r = exporter.renderer
+    r.grep(:BRDFVRayMtl) { |b|
+      nm = (b.name rescue '')
+      m = nm.match(%r{/(?:fab|back|base)_([a-z_]+?)/BRDFVRayMtl})
+      next unless m
+      style = m[1]
+      begin; b[:sheen_amount] = 0.35; b[:sheen_glossiness] = 0.5; b[:sheen_color] = VRay::Color.new(0.82, 0.82, 0.82); rescue; end
+      begin; b[:roughness] = 0.85; b[:option_use_roughness] = true; b[:reflect] = VRay::Color.new(0.18, 0.18, 0.18); rescue; end
+      begin
+        png = File.join(TEX_DIR, "fabric_#{style}_bump.png")
+        if File.exist?(png)
+          uvw = (b[:diffuse][:uvwgen] rescue nil)
+          bt = r.create(:TexBitmap); bt[:file] = png; bt[:uvwgen] = uvw if uvw
+          b[:bump_map] = bt; b[:bump_amount] = 0.06; b[:bump_type] = 0
+        end
+      rescue; end
+    }
+  end
+end
+
 begin
   ctx = VRay::Context.active
   scene = ctx.scene; renderer = ctx.renderer; model = ctx.model
@@ -69,10 +96,13 @@ begin
       scam[:auto_exposure] = 1 rescue nil
       scam[:auto_white_balance] = 1 rescue nil
     end
+    sky = scene['/Environment Sky']        # GPT: reduz cast azul/cool da sombra
+    sky[:intensity_multiplier] = 0.7 rescue nil if sky
   }
 
-  # PASSO OBRIGATORIO: exportar modelo+scene pro renderer
+  # PASSO OBRIGATORIO: exportar modelo+scene pro renderer (+ shader de tecido no on_model_exported)
   exporter = VRay::ModelExporter.new(model: model, scene: scene, renderer: renderer)
+  exporter.subscribe(FabricShaderSub.new)
   exporter.export_model(view: model.active_view)
   # re-garante auto-exposicao apos export
   begin
