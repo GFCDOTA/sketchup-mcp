@@ -411,6 +411,103 @@ module SofaPrimitives
     _log(name, g)
   end
 
+  # Almofada TUFTED (capitone): grid de botoes/sulcos + PUFFS estofados entre eles, alem
+  # do bulge geral. Para sectional/tradicional (NAO o lounge liso). low/mid-poly.
+  # tuft_grid=[gx,gy] = numero de PUFFS (diamantes) em X,Y. tuft_bulge=altura do puff,
+  # tuft_depth=fundura do botao/sulco. O tufting e GEOMETRIA (depressoes reais), nao linha
+  # desenhada. Reaproveita jitter seeded (organic) + piping geometrico opcional (bead fino).
+  def tufted_cushion_primitive(ents, x0, y0, x1, y1, z0, z1,
+                               softness: 'medium', tuft_grid: [3, 2],
+                               tuft_bulge: 0.035, tuft_depth: 0.018, sag_front: nil,
+                               corner_pinch: nil, base_bulge: nil,
+                               piping: false, piping_radius: 0.012,
+                               jitter: 0.0, seed: 0, mat_obj: nil, seam_mat: nil, name: nil)
+    sp = soft_params(softness)
+    gx = [tuft_grid[0].to_i, 1].max
+    gy = [tuft_grid[1].to_i, 1].max
+    base_bulge   = (base_bulge   || sp[:crown] * 0.55)   # cupula geral suave (o tuft da o resto)
+    sag_front    = (sag_front    || base_bulge * 0.35)
+    corner_pinch = (corner_pinch || base_bulge * 0.30)
+    # organic/micro-irregularidade: jitter seeded por almofada (default 0 = no-op byte-igual)
+    jit = [[jitter.to_f, 0.0].max, 1.0].min
+    base_bulge *= _jfac(seed, 0, jit * 0.10)
+    tb = tuft_bulge * _jfac(seed, 1, jit * 0.10)
+    td = tuft_depth * _jfac(seed, 2, jit * 0.10)
+    tilt = _joff(seed, 3, jit * 0.06)
+    g = ents.add_group
+    g.name = name if name
+    th = z1 - z0
+    maxdef = th * 0.5
+    nu = [gx * 6, 14].max
+    nv = [gy * 6, 10].max
+    top = Array.new(nu + 1) { Array.new(nv + 1) }
+    (0..nu).each do |i|
+      u = i.to_f / nu
+      (0..nv).each do |j|
+        v = j.to_f / nv
+        x = x0 + (x1 - x0) * u
+        y = y0 + (y1 - y0) * v
+        du = (1.0 - (2.0 * u - 1.0)**2) * (1.0 + tilt * (2.0 * u - 1.0))
+        dv = 1.0 - (2.0 * v - 1.0)**2
+        eu = (2.0 * u - 1.0)**2
+        ev = (2.0 * v - 1.0)**2
+        # padrao tufted: puff (centro das celulas) sobe; sulcos (linhas do grid) descem;
+        # botoes (cantos do grid) descem MAIS. Falloff na borda (rim p/ piping, nao tufta ali).
+        pu = Math.sin(Math::PI * gx * u).abs
+        pv = Math.sin(Math::PI * gy * v).abs
+        puff = pu * pv
+        btn  = (1.0 - pu) * (1.0 - pv)
+        ring = [u, 1.0 - u, v, 1.0 - v].min
+        ef = [ring / 0.13, 1.0].min
+        tuft = (tb * puff - td * (1.0 - puff) - td * 0.7 * btn) * ef
+        dz = base_bulge * du * dv \
+             + tuft \
+             - corner_pinch * (eu * ev) \
+             - sag_front * ((1.0 - v)**2) * 0.6
+        dz = [[dz, maxdef].min, -maxdef].max
+        top[i][j] = Geom::Point3d.new(x * M, y * M, (z1 + dz) * M)
+      end
+    end
+    (0...nu).each do |i|
+      (0...nv).each do |j|
+        a = top[i][j]; b = top[i + 1][j]; c = top[i + 1][j + 1]; d = top[i][j + 1]
+        begin; g.entities.add_face(a, b, c); rescue StandardError; end
+        begin; g.entities.add_face(a, c, d); rescue StandardError; end
+      end
+    end
+    z0i = z0 * M
+    perim = []
+    (0...nu).each { |i| perim << top[i][0] }
+    (0...nv).each { |j| perim << top[nu][j] }
+    nu.downto(1).each { |i| perim << top[i][nv] }
+    nv.downto(1).each { |j| perim << top[0][j] }
+    np = perim.size
+    (0...np).each do |k|
+      a = perim[k]; b = perim[(k + 1) % np]
+      ab = Geom::Point3d.new(a.x, a.y, z0i)
+      bb = Geom::Point3d.new(b.x, b.y, z0i)
+      begin; g.entities.add_face(a, b, bb); rescue StandardError; end
+      begin; g.entities.add_face(a, bb, ab); rescue StandardError; end
+    end
+    begin; g.entities.add_face(perim.map { |p| Geom::Point3d.new(p.x, p.y, z0i) }); rescue StandardError; end
+    g.material = mat_obj if mat_obj
+    g.entities.grep(Sketchup::Edge).each do |e|
+      next if e.start.position.z <= z0i + 0.05 && e.end.position.z <= z0i + 0.05
+      begin
+        e.soft = true
+        e.smooth = true
+      rescue StandardError
+        nil
+      end
+    end
+    if piping
+      zsh = (z1 - base_bulge * 0.35) * M
+      pr = rounded_rect_pts(x0 * M, y0 * M, x1 * M, y1 * M, zsh, 0.025 * M, 6)
+      thin_seam_line(g.entities, pr, radius_m: piping_radius, mat_obj: seam_mat || mat_obj, name: "#{name}_piping")
+    end
+    _log(name, g)
+  end
+
   # Almofada de ASSENTO: SoftCushion (deformada), nao rounded box. family='tight'
   # (KIVIK-ish) usa menos bulge / mais bloco; senao mais bulge/macio (lounge).
   def seat_cushion_primitive(ents, x0, y0, x1, y1, z0, z1,
