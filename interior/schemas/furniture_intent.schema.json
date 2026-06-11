@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "FurnitureIntentSpec",
+  "description": "Intencao de UM movel dentro de um SceneIntentSpec. O SceneComposer resolve type+style_family num generator procedural (tools/sofa_builder.py, tools/decor_builders.py) e material_style numa cor/material do StylePack. NAO referencia asset externo — tudo parametrico. Schema documental (validacao executavel em scene_composer.validate_furniture_intent).",
+  "type": "object",
+  "required": ["type", "role", "priority"],
+  "properties": {
+    "type": {
+      "enum": ["sofa", "rug", "coffee_table", "side_table", "floor_lamp",
+               "wall_art", "curtain", "plant_placeholder"],
+      "description": "tipos suportados na slice 1 do Intent-to-Scene (living room vertical)"
+    },
+    "role": {
+      "enum": ["hero", "anchor", "companion", "textile", "light", "decor"],
+      "description": "papel na composicao: hero = peca principal (1 por cena); anchor = ancora a zona (rug); companion = serve o hero (coffee/side table); textile/light/decor = camadas"
+    },
+    "style_family": {
+      "type": "string",
+      "description": "familia do generator procedural, ex: dark_lounge (sofa), low_slab (coffee_table), slim_metal (floor_lamp/side_table), abstract_panel (wall_art), soft_panel (curtain), leafy_volume (plant)"
+    },
+    "dimensions_m": {
+      "type": "object",
+      "description": "dimensoes explicitas em metros (vence size_hint quando presente)",
+      "properties": {
+        "width": {"type": "number", "exclusiveMinimum": 0},
+        "depth": {"type": "number", "exclusiveMinimum": 0},
+        "height": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "size_hint": {
+      "enum": ["small", "medium", "large"],
+      "description": "tamanho relativo quando dimensions_m nao e' dado; o generator escolhe dims plausiveis"
+    },
+    "material_style": {
+      "type": "string",
+      "description": "role de material no StylePack (chave de style_pack.materials), ex: hero_fabric, rug, table_top, metal_accent, curtain"
+    },
+    "placement_hint": {
+      "type": "string",
+      "description": "dica de posicao resolvida pelo composer: main_wall | centered_under_hero | front_of_hero | beside_hero | near_window | on_window | above_hero | corner"
+    },
+    "priority": {
+      "type": "integer", "minimum": 1,
+      "description": "ordem de colocacao (1 = primeiro). Em conflito de espaco, prioridade menor vence"
+    },
+    "notes": {"type": "string", "description": "intencao livre do diretor de arte (nao executavel)"}
+  }
+}
