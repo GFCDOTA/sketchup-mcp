@@ -77,6 +77,10 @@ module SofaComponents
     # NAO tocar lounge (floor 0.0 = no-op byte-igual nele). 0.058 fica entre medium(0.050)
     # e high(0.070): low/medium sobem, high fica igual (max vence).
     seat_floor = (cfg['profile'] == 'lounge') ? 0.0 : 0.058
+    # GPT TOP_FIX (micro-irregularidade controlada): cada almofada herda um jitter seeded
+    # pelo PROPRIO indice -> quebra a uniformidade CAD sem des-convergir a forma. default
+    # 0.0 = no-op byte-igual (caller so opta via cfg['cushion_jitter']). Cap em 1.0.
+    cjit = [[(cfg['cushion_jitter'] || 0.0).to_f, 0.0].max, 1.0].min
     yf = lay[:seat_front]
     yb = lay[:seat_back]
     z0 = lay[:seat_z0]
@@ -85,7 +89,8 @@ module SofaComponents
     if cfg['seat_style'] == 'bench'
       SP.seat_cushion_primitive(ent, lay[:seat_x0] + breath, yf, lay[:seat_x1] - breath, yb,
                                 z0, z1, softness: soft, mat_obj: mats[:fab], min_crown: seat_floor,
-                                name: 'seat_bench', seam: seam, seam_mat: mats[:seam])
+                                name: 'seat_bench', seam: seam, seam_mat: mats[:seam],
+                                jitter: cjit, seed: 101)
     else # split
       n = [lay[:seats], 1].max
       gap = lay[:gap]
@@ -95,7 +100,8 @@ module SofaComponents
         sx0 = lay[:seat_x0] + i * (cw + gap)
         SP.seat_cushion_primitive(ent, sx0 + breath, yf, sx0 + cw - breath, yb,
                                   z0, z1, softness: soft, mat_obj: mats[:fab], min_crown: seat_floor,
-                                  name: "seat_#{i + 1}", seam: seam, seam_mat: mats[:seam])
+                                  name: "seat_#{i + 1}", seam: seam, seam_mat: mats[:seam],
+                                  jitter: cjit, seed: 101 + i)
       end
     end
 
@@ -108,10 +114,13 @@ module SofaComponents
     pf = lay[:chaise_pad_front]
     if cfg['family'] == 'chaise' && pf && pf < yf
       pyb = yf - lay[:gap]
+      # seed +200: a fileira chaise frontal NAO espelha a irregularidade do assento
+      # de tras (senao a uniformidade volta de outra forma). cjit=0 -> ainda no-op.
       if cfg['seat_style'] == 'bench'
         SP.seat_cushion_primitive(ent, lay[:seat_x0] + breath, pf, lay[:seat_x1] - breath, pyb,
                                   z0, z1, softness: soft, mat_obj: mats[:fab], min_crown: seat_floor,
-                                  name: 'seat_chaise_front', seam: seam, seam_mat: mats[:seam])
+                                  name: 'seat_chaise_front', seam: seam, seam_mat: mats[:seam],
+                                  jitter: cjit, seed: 201)
       else
         n = [lay[:seats], 1].max
         gap = lay[:gap]
@@ -121,7 +130,8 @@ module SofaComponents
           sx0 = lay[:seat_x0] + i * (cw + gap)
           SP.seat_cushion_primitive(ent, sx0 + breath, pf, sx0 + cw - breath, pyb,
                                     z0, z1, softness: soft, mat_obj: mats[:fab], min_crown: seat_floor,
-                                    name: "seat_chaise_front_#{i + 1}", seam: seam, seam_mat: mats[:seam])
+                                    name: "seat_chaise_front_#{i + 1}", seam: seam, seam_mat: mats[:seam],
+                                    jitter: cjit, seed: 201 + i)
         end
       end
     end
@@ -141,6 +151,9 @@ module SofaComponents
     # GPT generalizacao: piso de VOLUME FRONTAL + tuck pro encosto standard (so quem opta).
     # 0.0 no lounge (no-op). 0.050 sobe o tight (hardcoded 'low'=0.030) e low/medium; high igual.
     back_floor = (cfg['profile'] == 'lounge') ? 0.0 : 0.050
+    # GPT TOP_FIX (micro-irregularidade): encostos tambem variam por almofada (seed 301+,
+    # separado dos assentos 101+, p/ nao espelhar). default 0.0 = no-op byte-igual.
+    bjit = [[(cfg['cushion_jitter'] || 0.0).to_f, 0.0].max, 1.0].min
     yf = lay[:back_front]
     yb = lay[:back_back]
     z0 = lay[:back_z0]
@@ -151,7 +164,8 @@ module SofaComponents
       # encosto firme e continuo (uma peca), crown menor + floor de volume frontal (GPT)
       g = SP.back_cushion_primitive(ent, lay[:seat_x0] + breath, yf, lay[:seat_x1] - breath, yb,
                                     z0, z1, softness: 'low', mat_obj: mats[:back], min_crown: back_floor,
-                                    name: 'back_tight', seam: seam, seam_mat: mats[:seam])
+                                    name: 'back_tight', seam: seam, seam_mat: mats[:seam],
+                                    jitter: bjit, seed: 301)
       _rake!(g, lay)
     else
       n = [lay[:seats], 1].max
@@ -166,7 +180,8 @@ module SofaComponents
             else # cushion
               SP.back_cushion_primitive(ent, bx0 + breath, yf, bx0 + cw - breath, yb,
                                         z0, z1, softness: soft, mat_obj: mats[:back], min_crown: back_floor,
-                                        name: "back_#{i + 1}", seam: seam, seam_mat: mats[:seam])
+                                        name: "back_#{i + 1}", seam: seam, seam_mat: mats[:seam],
+                                        jitter: bjit, seed: 301 + i)
             end
         _rake!(g, lay)
       end

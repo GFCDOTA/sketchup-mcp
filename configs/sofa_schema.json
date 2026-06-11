@@ -1,44 +1,140 @@
 {
   "schema_version": "1.0.0",
   "doc": "Contrato parametrico da CLASSE sofa. O gerador (scripts/sofa_generator.rb) valida toda config contra este schema: rejeita enums invalidos, faz clamp+warning para dimensoes fora de range, e FALHA explicito para configs incoerentes. Nunca gerar silenciosamente um sofa implausivel.",
-
   "required": [
-    "id", "family", "seat_count", "seat_style", "back_style", "arm_style",
-    "base_style", "leg_style", "overall_width_m", "overall_depth_m", "overall_height_m"
+    "id",
+    "family",
+    "seat_count",
+    "seat_style",
+    "back_style",
+    "arm_style",
+    "base_style",
+    "leg_style",
+    "overall_width_m",
+    "overall_depth_m",
+    "overall_height_m"
   ],
-
   "enums": {
-    "family":        ["straight", "loveseat", "chaise", "modular", "armchair"],
-    "seat_style":    ["bench", "split"],
-    "back_style":    ["cushion", "tight", "pillow"],
-    "arm_style":     ["none", "slim", "track", "box", "wide", "rolled_soft"],
-    "base_style":    ["plinth", "recessed", "exposed_legs"],
-    "leg_style":     ["none", "tapered_wood", "block", "metal_stub"],
-    "softness_level":    ["low", "medium", "high"],
-    "edge_radius_level": ["low", "medium", "high"],
-    "seam_style":    ["none", "simple", "piping_subtle"],
-    "material_style": ["light_linen", "mid_gray", "dark_charcoal"],
-    "profile": ["standard", "lounge"]
+    "family": [
+      "straight",
+      "loveseat",
+      "chaise",
+      "modular",
+      "armchair"
+    ],
+    "seat_style": [
+      "bench",
+      "split"
+    ],
+    "back_style": [
+      "cushion",
+      "tight",
+      "pillow"
+    ],
+    "arm_style": [
+      "none",
+      "slim",
+      "track",
+      "box",
+      "wide",
+      "rolled_soft"
+    ],
+    "base_style": [
+      "plinth",
+      "recessed",
+      "exposed_legs"
+    ],
+    "leg_style": [
+      "none",
+      "tapered_wood",
+      "block",
+      "metal_stub"
+    ],
+    "softness_level": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "edge_radius_level": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "seam_style": [
+      "none",
+      "simple",
+      "piping_subtle"
+    ],
+    "material_style": [
+      "light_linen",
+      "mid_gray",
+      "dark_charcoal"
+    ],
+    "profile": [
+      "standard",
+      "lounge"
+    ]
   },
-
-  "integers": { "seat_count": [1, 6] },
-
+  "integers": {
+    "seat_count": [
+      1,
+      6
+    ]
+  },
   "ranges_m": {
-    "overall_width_m":          [1.10, 3.40],
-    "overall_depth_m":          [0.82, 1.70],
-    "overall_height_m":         [0.62, 1.05],
-    "seat_height_m":            [0.40, 0.47],
-    "seat_depth_m":             [0.52, 0.66],
-    "seat_cushion_thickness_m": [0.12, 0.20],
-    "arm_width_m":              [0.08, 0.34],
-    "arm_height_m":             [0.50, 0.70],
-    "back_height_m":            [0.32, 0.62],
-    "back_thickness_m":         [0.14, 0.30],
-    "back_rake_deg":            [4.0, 16.0],
-    "leg_height_m":             [0.0, 0.22],
-    "leg_inset_m":              [0.03, 0.12]
+    "overall_width_m": [
+      1.1,
+      3.4
+    ],
+    "overall_depth_m": [
+      0.82,
+      1.7
+    ],
+    "overall_height_m": [
+      0.62,
+      1.05
+    ],
+    "seat_height_m": [
+      0.4,
+      0.47
+    ],
+    "seat_depth_m": [
+      0.52,
+      0.66
+    ],
+    "seat_cushion_thickness_m": [
+      0.12,
+      0.2
+    ],
+    "arm_width_m": [
+      0.08,
+      0.34
+    ],
+    "arm_height_m": [
+      0.5,
+      0.7
+    ],
+    "back_height_m": [
+      0.32,
+      0.62
+    ],
+    "back_thickness_m": [
+      0.14,
+      0.3
+    ],
+    "back_rake_deg": [
+      4.0,
+      16.0
+    ],
+    "leg_height_m": [
+      0.0,
+      0.22
+    ],
+    "leg_inset_m": [
+      0.03,
+      0.12
+    ]
   },
-
   "defaults": {
     "seat_style": "split",
     "back_style": "cushion",
@@ -57,26 +153,38 @@
     "back_thickness_m": 0.22,
     "back_rake_deg": 9.0,
     "leg_height_m": 0.12,
-    "leg_inset_m": 0.06
+    "leg_inset_m": 0.06,
+    "cushion_jitter": 0.4
   },
-
   "arm_width_by_style_m": {
-    "none": 0.0, "slim": 0.13, "track": 0.22, "box": 0.24, "wide": 0.28, "rolled_soft": 0.26
+    "none": 0.0,
+    "slim": 0.13,
+    "track": 0.22,
+    "box": 0.24,
+    "wide": 0.28,
+    "rolled_soft": 0.26
   },
-
   "proportion_rules": {
     "arm_width_max_frac_of_width": 0.18,
-    "min_seat_clear_width_per_seat_m": 0.50,
+    "min_seat_clear_width_per_seat_m": 0.5,
     "seat_top_below_arm_top_max_m": 0.16,
     "back_thickness_min_m": 0.16,
     "seat_cushion_thickness_min_m": 0.12,
     "legs_must_be_inset": true,
     "note": "Regras checadas pelo gerador (PROPORTION_PASS). Violacao = warning + clamp ou FAIL explicito conforme severidade."
   },
-
   "softness_map": {
-    "low":    { "edge_radius_m": 0.020, "crown_m": 0.030 },
-    "medium": { "edge_radius_m": 0.035, "crown_m": 0.050 },
-    "high":   { "edge_radius_m": 0.050, "crown_m": 0.070 }
+    "low": {
+      "edge_radius_m": 0.02,
+      "crown_m": 0.03
+    },
+    "medium": {
+      "edge_radius_m": 0.035,
+      "crown_m": 0.05
+    },
+    "high": {
+      "edge_radius_m": 0.05,
+      "crown_m": 0.07
+    }
   }
 }

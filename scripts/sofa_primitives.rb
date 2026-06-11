@@ -25,6 +25,25 @@ module SofaPrimitives
     SOFT[level.to_s] || SOFT['medium']
   end
 
+  # Hash deterministico seed->float em [0,1). NAO usa rand global (reproduzivel:
+  # mesma planta = mesmo .skp). k = sub-canal (bulge/sag/... cada um independente).
+  # LCG simples (Numerical Recipes) — barato, sem estado, sem srand.
+  def _jrand(seed, k)
+    h = (seed.to_i * 2654435761 + (k.to_i + 1) * 40503) & 0xFFFFFFFF
+    h = (h * 1664525 + 1013904223) & 0xFFFFFFFF
+    h / 4294967296.0
+  end
+
+  # Fator de jitter SIMETRICO em [1-amp, 1+amp], seeded por (seed,k). amp<=1.
+  def _jfac(seed, k, amp)
+    1.0 + (_jrand(seed, k) * 2.0 - 1.0) * amp
+  end
+
+  # Offset de jitter SIMETRICO em [-amp, +amp] (p/ tilt/tuck que partem de 0).
+  def _joff(seed, k, amp)
+    (_jrand(seed, k) * 2.0 - 1.0) * amp
+  end
+
   def mat(model, name, rgb)
     m = model.materials[name]
     return m if m
@@ -294,13 +313,28 @@ module SofaPrimitives
                              softness: 'medium', bulge: nil, sag_front: nil,
                              seam_depth: nil, edge_comp: nil, corner_pinch: nil,
                              nu: 6, nv: 4, mat_obj: nil, name: nil,
-                             seam: false, seam_mat: nil)
+                             seam: false, seam_mat: nil,
+                             jitter: 0.0, seed: 0)
     sp = soft_params(softness)
     bulge      = (bulge      || sp[:crown] * 1.0)
     sag_front  = (sag_front  || bulge * 0.45)
     seam_depth = (seam_depth || bulge * 0.40)
     edge_comp  = (edge_comp  || bulge * 0.45)
     corner_pinch = (corner_pinch || bulge * 0.30)
+    # MICRO-IRREGULARIDADE CONTROLADA (GPT TOP_FIX): cada almofada herda um jitter
+    # seeded dos PROPRIOS params (sem ruido no loop). jitter=0.0 -> jf==1 / offsets==0
+    # -> byte-identico ao caller atual (no-op de CLASSE). Amplitudes pequenas (a forma
+    # convergida bulge/tuck/sag/silhueta fica; isto so quebra a uniformidade CAD).
+    jit = [[jitter.to_f, 0.0].max, 1.0].min
+    # +-amp por sub-canal (k distinto). ~+-9..12% nos volumes; tilt/tuck menores.
+    bulge        *= _jfac(seed, 0, jit * 0.10)   # +-10% do dome central
+    sag_front    *= _jfac(seed, 1, jit * 0.12)   # +-12% da queda frontal
+    seam_depth   *= _jfac(seed, 2, jit * 0.12)   # +-12% do tuck/divisoria
+    corner_pinch *= _jfac(seed, 3, jit * 0.12)   # +-12% do beliscao de canto
+    # edge_comp NAO jittered: e a "frente reta/uniforme" aprovada no ciclo8 -> intacta.
+    tilt = _joff(seed, 4, jit * 0.08)            # assimetria E<->D do dome: +-8%
+    tuck_lo = _jfac(seed, 5, jit * 0.10)         # tuck borda esquerda (u~0)  +-10%
+    tuck_hi = _jfac(seed, 6, jit * 0.10)         # tuck borda direita  (u~1)  +-10%
     g = ents.add_group
     g.name = name if name
     th = z1 - z0
@@ -312,15 +346,19 @@ module SofaPrimitives
         v = j.to_f / nv
         x = x0 + (x1 - x0) * u
         y = y0 + (y1 - y0) * v
-        du = 1.0 - (2.0 * u - 1.0)**2     # dome (1 centro, 0 borda)
+        # tilt: inclina LEVEMENTE o dome p/ um lado (assimetria E<->D), amplitude (2u-1).
+        du = (1.0 - (2.0 * u - 1.0)**2) * (1.0 + tilt * (2.0 * u - 1.0)) # dome (1 centro, 0 borda)
         dv = 1.0 - (2.0 * v - 1.0)**2
         eu = (2.0 * u - 1.0)**2           # borda (0 centro, 1 borda)
         ev = (2.0 * v - 1.0)**2
         ring = [u, 1.0 - u, v, 1.0 - v].min          # dist a borda mais proxima
         seam_t = ring < 0.16 ? (1.0 - ring / 0.16) : 0.0  # tuck raso na borda
+        # tuck por borda: esquerda (u<0.5) vs direita (u>=0.5) com fatores diferentes
+        # -> divisoes/encontros deixam de ser identicos. v=0.5 => fator 1 (continuo).
+        edge_fac = u < 0.5 ? tuck_lo : tuck_hi
         dz = bulge * du * dv \
              - edge_comp * (eu + ev) * 0.5 \
-             - seam_depth * seam_t \
+             - seam_depth * seam_t * edge_fac \
              - corner_pinch * (eu * ev) \
              - sag_front * ((1.0 - v)**2) * 0.6        # frente (v=0) cai
         dz = [[dz, maxdef].min, -maxdef].max
@@ -377,7 +415,8 @@ module SofaPrimitives
   # (KIVIK-ish) usa menos bulge / mais bloco; senao mais bulge/macio (lounge).
   def seat_cushion_primitive(ents, x0, y0, x1, y1, z0, z1,
                              softness: 'medium', mat_obj: nil, name: nil,
-                             seam: false, seam_mat: nil, family: nil, min_crown: 0.0)
+                             seam: false, seam_mat: nil, family: nil, min_crown: 0.0,
+                             jitter: 0.0, seed: 0)
     sp = soft_params(softness)
     blk = (family == 'tight')
     # GPT generalizacao: piso de volume (so quem opta passa min_crown>0; default 0 = no-op
@@ -395,7 +434,8 @@ module SofaPrimitives
                            edge_comp: cr * 0.62,
                            corner_pinch: cr * 0.18,
                            nu: 6, nv: 4, mat_obj: mat_obj, name: name,
-                           seam: seam, seam_mat: seam_mat)
+                           seam: seam, seam_mat: seam_mat,
+                           jitter: jitter, seed: seed)
   end
 
   # Almofada de ENCOSTO estofada (NAO placa): deforma a FACE FRONTAL (-Y, lado do
@@ -405,13 +445,20 @@ module SofaPrimitives
   # GPT (perfil/encosto): "menos placa, mais volume, base comprimida, topo soft".
   def back_cushion_primitive(ents, x0, y0, x1, y1, z0, z1,
                              softness: 'medium', mat_obj: nil, name: nil,
-                             seam: false, seam_mat: nil, min_crown: 0.0)
+                             seam: false, seam_mat: nil, min_crown: 0.0,
+                             jitter: 0.0, seed: 0)
     sp = soft_params(softness)
     cr = [sp[:crown], min_crown].max  # GPT generalizacao: piso de volume frontal (default 0 = no-op)
     depth = (y1 - y0)
     bulge = cr * 1.1        # protrusao max (meio) pro sentado
     base_comp = cr * 0.85   # base recua/comprime contra o assento (w~0)
     top_back = depth * 0.8          # topo: frente recua ate ~o fundo -> borda fina ARREDONDADA (GPT)
+    # MICRO-IRREGULARIDADE (GPT, back_variance<seat_variance): jitter seeded por almofada
+    # de ENCOSTO, amplitudes MENORES que o assento (encosto varia menos). jitter=0 -> no-op.
+    jit = [[jitter.to_f, 0.0].max, 1.0].min
+    bulge     *= _jfac(seed, 0, jit * 0.08)   # +-8% do volume frontal
+    base_comp *= _jfac(seed, 1, jit * 0.10)   # +-10% do tuck na base
+    btilt = _joff(seed, 2, jit * 0.06)        # assimetria E<->D do hump +-6%
     g = ents.add_group
     g.name = name if name
     nu = 6
@@ -424,7 +471,7 @@ module SofaPrimitives
         w = k.to_f / nw
         x = x0 + (x1 - x0) * u
         z = z0 + (z1 - z0) * w
-        du = 1.0 - (2.0 * u - 1.0)**2
+        du = (1.0 - (2.0 * u - 1.0)**2) * (1.0 + btilt * (2.0 * u - 1.0))  # tilt: assimetria E<->D
         hump = Math.sin(Math::PI * w)   # corcova SUAVE (0 nas pontas, pico no meio) -> silhueta continua
         # frente: bulge suave (meio) ; base tuck (w~0) ; topo recua/arredonda (w~1)
         yf = y0 - (bulge * du * hump) \
