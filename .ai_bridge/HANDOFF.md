@@ -1,7 +1,31 @@
 # Handoff — sketchup-mcp
 
-> Fio da meada entre sessões. Última atualização: **2026-06-08** (fast-tier no caminho pré-móvel / DesignIntentSpec; gate :8765 STALE por bloqueio de AV — ver abaixo).
+> Fio da meada entre sessões. Última atualização: **2026-06-11** (track Intent-to-Scene slice 1 ENTREGUE; GPT WARN com fixes — ver abaixo).
 > Leia primeiro ao iniciar sessão.
+
+## 2026-06-11 — Intent-to-Scene slice 1 ENTREGUE (sala procedural por intenção) + GPT WARN
+
+Branch **`feat/intent-to-scene`** (off origin/develop, pushed). PR por compare URL:
+<https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feat/intent-to-scene> — **PENDENTE MERGE** (nunca deixar aberta).
+
+**A camada nova:** SceneIntentSpec (GPT diretor de arte) → SceneComposer → generators → SpatialGate → RenderHarness.
+- Schemas: `interior/schemas/scene_intent.schema.json` + `furniture_intent.schema.json` (documentais; validação executável no composer).
+- StylePack: `interior/style_packs/modern_warm_minimal.json` (charcoal QUENTE [60,52,44] — spread 16 passa o `tecido_nao_cinza` do furniture_visual_gate; pés near-black pro `pes_contraste`).
+- Fixture: `fixtures/scene_intents/living_room_modern_warm_minimal.json` (sala 5.2×4.2, sofá hero, janela leste+cortina, tapete, mesa travertino, side, lamp, planta, quadro).
+- Generators decor: `tools/decor_anatomy_spec.py` + `tools/decor_builders.py` (rug, coffee_table, side_table, floor_lamp, wall_art, curtain, plant — mesmo contrato parts do sofa_builder; `DECOR_PLAUSIBLE_BBOX_M` alimenta o gate).
+- Composer: `interior/composer/scene_composer.py` (regras: hero na main wall, tapete centralizado tuck 0.15, mesa 0.40m, quadro acima respiro 0.25, cortina na janela, side/lamp fora do tapete, planta na janela; câmera 3/4 humana que NUNCA esconde a parede da janela; emite scene.json + scene_parts.json + scene_report.json).
+- Gate: `interior/validators/scene_spatial_gate.py` — 10 HARD + 3 SOFT; **PASS 13/13 na canônica, FAIL nas 6 sabotagens**.
+- Harness: `tools/render_scene_views.py` — SU-free top + 3/4 (tiles ≤0.45m sem edge + buraco do tapete no piso = fixes de painter-sort do mpl) + contact sheet; SU opcional NO-DISRUPT (pulou? não: rodou, SketchUp fechado) → `scene.skp` + sketchup_top/3_4. Materiais SU: label namespaced `item__label` (colisão fz_<label>). Câmera iso do `build_furniture_skp.rb` é FIXA de sudeste → dollhouse SU abre south+east.
+- Evidência: `artifacts/review/scenes/living_room_modern_warm_minimal/` (contact_sheet 3 painéis, scene.skp 136KB, reports). Testes: `tests/test_intent_to_scene.py` (24) — **suite 552 ✓ / 5 skip, zero regressão**.
+
+**GPT review (VISUAL real): WARN** — `.ai_bridge/fidelity/verdicts/SCENE-LIVINGROOM-MWM_cycle001.md`.
+"SpatialGate PASS ≠ composição PASS": (1) peso visual esmagado no norte/leste, metade sul vazia; (2) cortina protagonista errada (parede listrada domina a 3/4); (3) tapete/mesa não seguram o miolo. **TOP3 fixes** (cycle 002): accent_seat oposto ao hero + check de equilíbrio por quadrante; cortina em 2 painéis abertos como moldura + gate de peso visual; tapete ~3.4×2.3.
+
+**⚑ DESCOBERTA DE PROCESSO (supera parcialmente o clipboard-STA):** o paste de imagem na ChatGPT web via extensão FALHOU por todas as vias (Ctrl+V sintético não carrega clipboard do SO; CSP bloqueia fetch a localhost E raw.githubusercontent dentro da página; file_upload/upload_image recusam; relay base64 por LLM corrompe). **O que FUNCIONA: commitar/pushar o PNG e dar a URL raw.githubusercontent no prompt — o ChatGPT (Plus, thinking) ABRE a imagem via browsing e julga de verdade** (citou GitHub como fonte). Requisito: repo público + imagem na branch pushed.
+
+**Sofa-skill paralelo:** worktree `E:\Claude\worktrees\sofa-skill` ATIVO (commit 2026-06-10 21:58, dirty) com o sistema lounge V-Ray (33 commits à frente). NÃO tocado. O hero desta slice usa o `tools/sofa_builder.py` de develop (GPT PASS forma) com charcoal do StylePack; quando sofa-skill landar, plugá-lo é trocar o generator do type `sofa` (style_family `dark_lounge` já abstrai).
+
+**Próximo (cycle 002):** aplicar TOP3 fixes → re-render → re-gate → GPT de novo (loop FAIL→regra→fixture→gate→PASS, padrão do sofá). Depois: V-Ray só quando composição PASS.
 
 ## 2026-06-08 — fast-tier wired no caminho pré-móvel (DesignIntentSpec) + AV bloqueando restart
 
