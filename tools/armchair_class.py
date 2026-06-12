@@ -3,12 +3,13 @@ Cycle 001 do programa arquiteto-de-classe — 2a classe, replicando o template q
 levou o SOFA ao PASS (3 ciclos): ranges ergonomicos + relacoes + arquetipos +
 derive + gate + sabotagens + matriz.
 
-GEOMETRIA: REUSA tools/sofa_builder.build_sofa com seats=1 — a poltrona herda a
-gramatica congelada do sofa (sapata/cap/taper de braco, rake, bevel, overhang,
-base_recess). O que a distingue e' a TEORIA: braco proporcionalmente MUITO mais
-presente (arm_span_ratio 0.28-0.45 vs ~0.12-0.25 do sofa), footprint quase-
-QUADRADO (w/d 0.85-1.15 vs retangulo 2.5:1+ do sofa), encosto que sobe clara-
-mente acima do braco. Fonte: tabela ergonomica da classe (workflow 2026-06-12).
+GEOMETRIA (cycle 002, "emancipar do sofa"): tools/armchair_builder.build_armchair
+— gramatica SHELL-WRAPAROUND propria (concha em U: costas full-width + bracos
+encostando nela + OMBROS que sobem; almofadas INTERNAS mais claras = cavidade).
+TEORIA distintiva: braco presente (arm_span 0.22-0.50), footprint quase-quadrado,
+encosto acima do braco, e PRESENCA DO BRACO proporcional: braco fino COMPENSA
+com integracao (wrap), nunca engordando celula. Fonte: tabela ergonomica +
+veredito ARMCHAIR-CLASS_cycle001 ("objeto unitario, nao modulo de sofa cortado").
 
 Uso: python -m tools.armchair_class           (prova: arquetipos + sabotagens)
      python -m tools.armchair_class --matrix  (matriz visual pro juiz)
@@ -20,7 +21,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from tools.furniture_anatomy_spec import SofaSpec   # noqa: E402
+from tools.armchair_builder import ArmchairSpec, build_armchair   # noqa: E402
 
 # ----------------------------------------------------------------- faixas duras
 ARMCHAIR_RANGES = {
@@ -64,9 +65,14 @@ RELATIONS = {
     "braco_apoia_antebraco": (
         lambda s: s.arm_height - s.seat_height, 0.14, 0.30,
         "braco vs assento fora de [0.14,0.30]m — cotovelo alto/baixo demais"),
+    # cycle002 (juiz): presenca PERCEBIDA do braco — largura + integracao (wrap).
+    # Braco fino so existe com ombro/abraco; regra GERAL, nao engorda celula.
+    "presenca_do_braco": (
+        lambda s: s.arm_width + 0.06 * s.wrap_frac, 0.17, 0.40,
+        "braco sem presenca (largura+integracao < 0.17) — cadeira estofada"),
     "profundidade_coerente": (
-        lambda s: s.depth - (s.seat_depth + s.back_thickness), 0.0, 0.30,
-        "seat_depth+back_thickness nao cabe em depth (ou sobra demais)"),
+        lambda s: s.depth - (s.seat_depth + s.shell_t + s.back_cushion_t), -0.02, 0.30,
+        "seat_depth+shell+almofada nao cabe em depth (ou sobra demais)"),
     # lounge reclinada pede profundidade: depth_total cresce com o rake
     "recline_pede_profundidade": (
         lambda s: s.depth - 0.72 - max(0.0, (s.backrest_rake - 12.0)) * 0.010,
@@ -80,52 +86,57 @@ RELATIONS = {
 # ------------------------------------------------------- arquetipos (intencao)
 # eixo: club (bloco aconchegante controlado) <-> standard <-> lounge (recostar).
 ARCHETYPES = {
+    # cycle002: arquetipos com LINGUAGEM de silhueta propria via shell/wrap —
+    # club = abraco lateral alto (wrap 0.75, fechado, plinto); standard = limpo
+    # arquitetonico (braco classico + cap, wrap discreto); lounge = NESTING
+    # (concha BAIXA continua + encostao reclinado subindo acima do shell).
     "club": dict(seat_height=0.43, seat_depth=0.52, seat_width=0.52,
                  back_above_seat=0.46, backrest_rake=9.0, arm_above_seat=0.25,
-                 arm_width=0.26, depth=0.86, cushion_thickness=0.17,
+                 arm_width=0.26, depth=0.88, cushion_thickness=0.17,
                  cushion_bevel=0.04, base_style_default="plinth",
                  foot_legs=0.10, foot_plinth=0.04,
-                 arm_cap=False, arm_relief=0.05, arm_taper=0.0,
+                 wrap_frac=0.75, shell_low=False, arm_cap=False,
                  seat_overhang=0.0, base_recess=0.05),
     "standard": dict(seat_height=0.43, seat_depth=0.52, seat_width=0.54,
                      back_above_seat=0.53, backrest_rake=13.0, arm_above_seat=0.21,
-                     arm_width=0.18, depth=0.85, cushion_thickness=0.14,
+                     arm_width=0.18, depth=0.87, cushion_thickness=0.14,
                      cushion_bevel=0.04, base_style_default="legs",
                      foot_legs=0.14, foot_plinth=0.03,
-                     arm_cap=True, arm_relief=0.0, arm_taper=0.0,
+                     wrap_frac=0.30, shell_low=False, arm_cap=True,
                      seat_overhang=0.0, base_recess=0.06),
     "lounge": dict(seat_height=0.40, seat_depth=0.57, seat_width=0.55,
                    back_above_seat=0.66, backrest_rake=22.0, arm_above_seat=0.18,
-                   arm_width=0.13, depth=0.97, cushion_thickness=0.19,
+                   arm_width=0.13, depth=0.99, cushion_thickness=0.19,
                    cushion_bevel=0.05, base_style_default="legs",
                    foot_legs=0.16, foot_plinth=0.03,
-                   arm_cap=False, arm_relief=0.0, arm_taper=0.0,
+                   wrap_frac=1.0, shell_low=True, arm_cap=False,
                    seat_overhang=0.04, base_recess=0.09),
 }
 
 
-def derive_armchair_spec(archetype="standard", base_style=None, **overrides) -> SofaSpec:
-    """Deriva a poltrona PELA CLASSE como SofaSpec(seats=1) — reusa a gramatica
-    congelada do sofa; largura = seat_width + 2*arm_width (nunca chutada)."""
+def derive_armchair_spec(archetype="standard", base_style=None, **overrides) -> ArmchairSpec:
+    """Deriva a poltrona PELA CLASSE (geometria propria build_armchair);
+    largura = seat_width + 2*arm_width (nunca chutada). shell_low (lounge):
+    concha baixa (assento+0.26) com encostao subindo ate height (nesting)."""
     assert archetype in ARCHETYPES, f"arquetipo desconhecido: {archetype}"
     a = ARCHETYPES[archetype]
     base_style = base_style or a["base_style_default"]
     assert base_style in ("legs", "plinth")
     foot_h = a["foot_legs"] if base_style == "legs" else a["foot_plinth"]
-    spec = SofaSpec(
-        variant="straight", seats=1,
+    height = round(a["seat_height"] + a["back_above_seat"], 3)
+    spec = ArmchairSpec(
         width=round(a["seat_width"] + 2 * a["arm_width"], 3),
-        depth=a["depth"],
-        height=round(a["seat_height"] + a["back_above_seat"], 3),
+        depth=a["depth"], height=height,
         seat_height=a["seat_height"], seat_depth=a["seat_depth"],
-        back_thickness=0.20,
         arm_width=a["arm_width"],
         arm_height=round(a["seat_height"] + a["arm_above_seat"], 3),
         foot_height=foot_h,
         cushion_thickness=a["cushion_thickness"],
         cushion_bevel=a["cushion_bevel"],
         backrest_rake=a["backrest_rake"],
-        arm_cap=a["arm_cap"], arm_relief=a["arm_relief"], arm_taper=a["arm_taper"],
+        wrap_frac=a["wrap_frac"],
+        shell_back_h=(round(a["seat_height"] + 0.26, 3) if a["shell_low"] else 0.0),
+        arm_cap=a["arm_cap"],
         seat_overhang=a["seat_overhang"], base_recess=a["base_recess"],
     )
     for k, v in overrides.items():
@@ -133,7 +144,7 @@ def derive_armchair_spec(archetype="standard", base_style=None, **overrides) -> 
     return spec.validate()
 
 
-def armchair_class_gate(spec: SofaSpec, parts=None):
+def armchair_class_gate(spec: ArmchairSpec, parts=None):
     """Gate de PROPORCAO da classe poltrona. {result, errors, warnings, metrics}."""
     errors, warnings, metrics = [], [], {}
     seat_w = spec.width - 2 * spec.arm_width
@@ -149,9 +160,6 @@ def armchair_class_gate(spec: SofaSpec, parts=None):
         v = vals[k]
         if not (lo - 1e-9 <= v <= hi + 1e-9):
             errors.append(f"{k}={v:.3f} fora da faixa de classe [{lo},{hi}]")
-
-    if spec.seats != 1:
-        errors.append(f"poltrona tem 1 lugar (seats={spec.seats})")
 
     fh = spec.foot_height
     in_legs = FOOT_EXPOSED[0] - 1e-9 <= fh <= FOOT_EXPOSED[1] + 1e-9
@@ -184,9 +192,7 @@ def armchair_class_gate(spec: SofaSpec, parts=None):
 
 # ------------------------------------------------------------------ sabotagens
 def _raw(**kw):
-    s = SofaSpec(seats=1, width=0.90, depth=0.85, height=0.96,
-                 seat_height=0.43, seat_depth=0.52, arm_width=0.18,
-                 arm_height=0.64, foot_height=0.14, backrest_rake=13.0)
+    s = ArmchairSpec()
     for k, v in kw.items():
         setattr(s, k, v)
     return s
@@ -201,6 +207,8 @@ def _sabotages():
         ("lounge rasa reclinada (rake 26, depth 0.74)",
          lambda: _raw(backrest_rake=26.0, depth=0.74)),
         ("banqueta alta (assento 0.52)", lambda: _raw(seat_height=0.52, height=1.05)),
+        ("braco fino SEM integracao (0.13, wrap 0.2)",
+         lambda: _raw(arm_width=0.13, wrap_frac=0.2, width=0.80)),
     ]
 
 
@@ -213,7 +221,7 @@ MATRIX = [
     ("standard-legs", dict(archetype="standard")),
     ("standard-plinth", dict(archetype="standard", base_style="plinth")),
     ("standard-slim-arm", dict(archetype="standard", arm_width=0.14,
-                               width=0.54 + 2 * 0.14)),
+                               width=0.54 + 2 * 0.14, wrap_frac=0.60)),
     ("lounge-legs", dict(archetype="lounge")),
     ("lounge-deep", dict(archetype="lounge", seat_depth=0.60, depth=1.01)),
     ("lounge-highback", dict(archetype="lounge", height=1.14)),
@@ -222,7 +230,6 @@ MATRIX = [
 
 def build_matrix(out_dir):
     from tools.render_parts_iso import render_parts
-    from tools.sofa_builder import build_sofa
     from tools.sofa_class_matrix import _grid_sheet
     import json as _json
     out = Path(out_dir).resolve()
@@ -231,7 +238,7 @@ def build_matrix(out_dir):
     for name, kw in MATRIX:
         spec = derive_armchair_spec(**kw)
         cls = armchair_class_gate(spec)
-        parts, meta = build_sofa(spec)
+        parts, meta = build_armchair(spec)
         png = out / f"cell_{name}.png"
         render_parts(parts, png, elev=22, azim=-55,
                      title=f"{name}  W={spec.width:.2f}m")
@@ -241,7 +248,7 @@ def build_matrix(out_dir):
         cells.append((name, png, cls["result"], "-"))
     sheet = _grid_sheet(cells, out / "armchair_class_matrix.png",
                         "CLASSE POLTRONA — matriz de generalizacao (derivada por "
-                        "arquetipo, builder do sofa com seats=1)")
+                        "arquetipo, builder proprio shell-wraparound)")
     (out / "matrix_report.json").write_text(
         _json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
     return {"sheet": sheet, "report": report}

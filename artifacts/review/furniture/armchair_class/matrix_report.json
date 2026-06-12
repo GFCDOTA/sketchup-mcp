@@ -8,7 +8,7 @@
     "width_m": 1.04,
     "bbox_m": [
       1.04,
-      0.938,
+      0.958,
       0.89
     ],
     "class_gate": "PASS",
@@ -24,7 +24,7 @@
     "width_m": 1.04,
     "bbox_m": [
       1.04,
-      0.938,
+      0.958,
       0.89
     ],
     "class_gate": "PASS",
@@ -42,7 +42,7 @@
     "width_m": 1.05,
     "bbox_m": [
       1.05,
-      0.938,
+      0.958,
       0.89
     ],
     "class_gate": "PASS",
@@ -57,7 +57,7 @@
     "width_m": 0.9,
     "bbox_m": [
       0.9,
-      0.979,
+      0.999,
       0.96
     ],
     "class_gate": "PASS",
@@ -73,7 +73,7 @@
     "width_m": 0.9,
     "bbox_m": [
       0.9,
-      0.979,
+      0.999,
       0.96
     ],
     "class_gate": "PASS",
@@ -85,17 +85,18 @@
     "params": {
       "archetype": "standard",
       "arm_width": 0.14,
-      "width": 0.8200000000000001
+      "width": 0.8200000000000001,
+      "wrap_frac": 0.6
     },
     "width_m": 0.8200000000000001,
     "bbox_m": [
       0.82,
-      0.979,
+      0.999,
       0.96
     ],
     "class_gate": "PASS",
     "class_errors": [],
-    "n_parts": 13
+    "n_parts": 15
   },
   {
     "cell": "lounge-legs",
@@ -105,12 +106,12 @@
     "width_m": 0.81,
     "bbox_m": [
       0.81,
-      1.249,
+      1.269,
       1.06
     ],
     "class_gate": "PASS",
     "class_errors": [],
-    "n_parts": 11
+    "n_parts": 13
   },
   {
     "cell": "lounge-deep",
@@ -127,7 +128,7 @@
     ],
     "class_gate": "PASS",
     "class_errors": [],
-    "n_parts": 11
+    "n_parts": 13
   },
   {
     "cell": "lounge-highback",
@@ -138,11 +139,11 @@
     "width_m": 0.81,
     "bbox_m": [
       0.81,
-      1.281,
+      1.301,
       1.14
     ],
     "class_gate": "PASS",
     "class_errors": [],
-    "n_parts": 11
+    "n_parts": 13
   }
 ]
