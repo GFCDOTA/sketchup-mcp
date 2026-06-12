@@ -150,8 +150,14 @@ class BedSpec:
     # NEUTROS = exemplar atual byte-identico) ---
     base_style: str = "plinth"       # plinth (recuado) | legs (pes aparentes) | box (flush+saia)
     leg_height: float = 0.18         # so base_style=legs
+    leg_section: float = 0.07        # secao do pe: palito 0.06-0.08 | SAPATA 0.14-0.22
+                                     # (cycle002: pe sob massa box precisa SUSTENTAR a
+                                     # leitura box — sapata larga e baixa, nao palito)
     reveal: float = 0.08             # recuo do plinto (PROMOVIDO do hardcode 0.08)
     headboard_overhang: float = 0.0  # cabeceira passa do colchao por lado (wings/upholstered)
+    headboard_style: str = "plain"   # plain (painel unico, historico) | panel (fina
+                                     # arquitetonica + ledge) | upholstered (bolster
+                                     # proud emoldurado) | contained (flush, box)
     skirt: bool = False              # saia do box tradicional (esconde a base)
     estrado_rgb: tuple = (74, 56, 42)      # madeira escura
     mattress_rgb: tuple = (205, 196, 178)  # linho/creme (roupa de cama)

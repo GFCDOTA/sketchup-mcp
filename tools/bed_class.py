@@ -77,18 +77,23 @@ def _leveza_da_base(s: BedSpec):
 # ------------------------------------------------------- arquetipos (intencao)
 ARCHETYPES = {
     # eixo: plataforma horizontal (japandi) <-> estofada acolhedora <-> box massa
+    # cycle002: cada arquetipo carrega ASSINATURA (cabeceira por estilo) e
+    # COERENCIA de base (pe palito vs sapata conforme a massa que sustenta).
     "platform": dict(surface=0.38, base_top=0.18, base_z0=0.08, hb_above=0.24,
-                     hb_t=0.05, reveal=0.10, hb_overhang=0.0,
-                     base_style_default="plinth", leg_height=0.14, skirt=False,
-                     hb_rgb=(120, 96, 72)),     # madeira (painel fino, nao estofado)
+                     hb_t=0.05, reveal=0.10, hb_overhang=0.12,
+                     base_style_default="plinth", leg_height=0.12, leg_section=0.06,
+                     skirt=False, hb_style="panel",
+                     hb_rgb=(120, 96, 72)),     # madeira fina + ledge (arquitetonica)
     "upholstered": dict(surface=0.57, base_top=0.32, base_z0=0.10, hb_above=0.50,
                         hb_t=0.14, reveal=0.08, hb_overhang=0.10,
-                        base_style_default="legs", leg_height=0.18, skirt=False,
-                        hb_rgb=(166, 152, 132)),  # estofada linho (default historico)
+                        base_style_default="legs", leg_height=0.18, leg_section=0.07,
+                        skirt=False, hb_style="upholstered",
+                        hb_rgb=(166, 152, 132)),  # bolster proud (acolhedora)
     "box": dict(surface=0.62, base_top=0.34, base_z0=0.30, hb_above=0.38,
                 hb_t=0.10, reveal=0.0, hb_overhang=0.0,
-                base_style_default="box", leg_height=0.12, skirt=True,
-                hb_rgb=(150, 134, 114)),
+                base_style_default="box", leg_height=0.08, leg_section=0.18,
+                skirt=True, hb_style="contained",
+                hb_rgb=(150, 134, 114)),    # contida; pes = SAPATA (sustenta box)
 }
 HB_LEVELS = {"low": -0.14, "medium": 0.0, "high": +0.18}
 
@@ -114,6 +119,7 @@ def derive_bed_spec(size="queen", archetype="upholstered", base_style=None,
         headboard_t=a["hb_t"], headboard_rgb=a["hb_rgb"],
         headboard_overhang=a["hb_overhang"],
         base_style=base_style, leg_height=a["leg_height"],
+        leg_section=a["leg_section"], headboard_style=a["hb_style"],
         reveal=a["reveal"], skirt=(a["skirt"] and base_style == "box"),
         pillow_h=(0.12 if archetype == "platform" else 0.16),
         n_pillows=(1 if size == "solteiro" else 2),
@@ -157,6 +163,36 @@ def bed_class_gate(spec: BedSpec, parts=None):
     metrics["base_style"] = spec.base_style
     if not ok:
         errors.append(f"leveza_da_base: {msg}")
+
+    # cycle002 — COERENCIA pe<->massa: pe sob massa alta precisa SUSTENTAR a
+    # leitura (sapata larga e baixa); palito so sob base leve. Regra GERAL
+    # (vale box/uphol/platform com legs), nao patch da queen-box-legs.
+    if spec.base_style == "legs":
+        # proxy de massa = ALTURA DE DORMIR: cama alta (>=0.60) sobre pes so
+        # sustenta a leitura com SAPATA larga e baixa; cama baixa/media usa
+        # palito. (massa fisica do corpo nao distingue box de uphol — o que
+        # pesa visualmente e' o conjunto alto sobre apoio fino.)
+        metrics["surface_sobre_pes_m"] = round(spec.mattress_top, 3)
+        if spec.mattress_top >= 0.60 and not (spec.leg_section >= 0.14
+                                              and spec.leg_height <= 0.12):
+            errors.append(f"coerencia_pes_massa: cama alta ({spec.mattress_top:.2f}) "
+                          f"sobre pe palito ({spec.leg_section}x{spec.leg_height}) "
+                          f"— pe deve ser SAPATA (sec>=0.14, h<=0.12)")
+        if spec.mattress_top < 0.50 and spec.leg_section > 0.12:
+            errors.append("coerencia_pes_massa: sapata sob cama baixa — pe-bloco "
+                          "desproporcional")
+
+    # cycle002 — ASSINATURA da cabeceira coerente com a geometria
+    hs = spec.headboard_style
+    metrics["headboard_style"] = hs
+    if hs == "panel" and spec.headboard_t > 0.08:
+        errors.append("assinatura_cabeceira: panel arquitetonica exige painel "
+                      f"fino (t<=0.08; veio {spec.headboard_t})")
+    if hs == "upholstered" and spec.headboard_t < 0.10:
+        errors.append("assinatura_cabeceira: estofada exige espessura/volume "
+                      f"(t>=0.10; veio {spec.headboard_t})")
+    if hs == "contained" and spec.headboard_overhang > 0.02:
+        errors.append("assinatura_cabeceira: contained e' flush (sem wings)")
 
     if parts is not None:
         kinds = {p["kind"] for p in parts}
@@ -226,6 +262,11 @@ def _sabotages():
          lambda: _raw(mattress_top=0.78, base_top=0.50, headboard_h=1.25)),
         ("king curto (length 1.60)",
          lambda: _raw(width=1.93, length=1.60)),
+        ("box em pe-palito (esvazia a massa)",
+         lambda: derive_bed_spec("queen", "box", base_style="legs",
+                                 leg_section=0.07, leg_height=0.18)),
+        ("cabeceira 'estofada' fina (0.05)",
+         lambda: _raw(headboard_style="upholstered", headboard_t=0.05)),
     ]
 
 

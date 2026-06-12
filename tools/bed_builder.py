@@ -25,32 +25,54 @@ def build_bed(spec: BedSpec):
     # --- BASE por estilo de classe (cama cycle001): plinto recuado (reveal
     # parametrico) | pes aparentes (underbed aberto) | box flush + saia ---
     rv = spec.reveal
+    rail_rgb = _darker(estr, 0.82)   # cycle002: rail/shadow line — base DESENHADA
     if spec.base_style == "legs":
-        lh = spec.leg_height
-        foot = 0.07
-        for i, (fx, fy) in enumerate([(0.05, 0.05), (W - 0.12, 0.05),
-                                      (0.05, L - 0.12), (W - 0.12, L - 0.12),
-                                      (0.05, L / 2 - 0.035), (W - 0.12, L / 2 - 0.035)]):
-            parts.append(_p(f"pe_{i + 1}", "estrado", fx, fy, fx + foot, fy + foot,
+        lh, sec = spec.leg_height, spec.leg_section
+        for i, (fx, fy) in enumerate([(0.05, 0.05), (W - 0.05 - sec, 0.05),
+                                      (0.05, L - 0.05 - sec), (W - 0.05 - sec, L - 0.05 - sec),
+                                      (0.05, L / 2 - sec / 2), (W - 0.05 - sec, L / 2 - sec / 2)]):
+            parts.append(_p(f"pe_{i + 1}", "estrado", fx, fy, fx + sec, fy + sec,
                             0.0, lh, plinth))
-        parts.append(_p("estrado", "estrado", 0.0, 0.0, W, L, lh, btop, estr))
+        # rail estrutural (longarina escura) sob o deck = frame desenhado
+        rail_h = min(0.06, (btop - lh) * 0.45)
+        parts.append(_p("rail", "estrado", 0.0, 0.0, W, L, lh, lh + rail_h, rail_rgb))
+        parts.append(_p("estrado", "estrado", 0.0, 0.0, W, L, lh + rail_h, btop, estr))
     elif spec.base_style == "box":
-        parts.append(_p("box_base", "estrado", 0.0, 0.0, W, L, 0.0, bz0, plinth))
+        # box com SHADOW LINE: faixa inferior recuada (junta horizontal) — a
+        # massa continua inequivoca mas a base le como desenhada, nao caixote
+        sl = 0.06
+        parts.append(_p("box_shadow", "estrado", 0.02, 0.02, W - 0.02, L - 0.02,
+                        0.0, sl, _darker(estr, 0.55)))
+        parts.append(_p("box_base", "estrado", 0.0, 0.0, W, L, sl, bz0, plinth))
         parts.append(_p("estrado", "estrado", 0.0, 0.0, W, L, bz0, btop, estr))
         if spec.skirt:   # saia: paineis finos ate o chao (esconde a base)
             sk = _darker(tuple(spec.mattress_rgb), 0.92)
             parts.append(_p("saia_f", "manta", -0.01, -0.01, W + 0.01, 0.02, 0.0, btop, sk))
             parts.append(_p("saia_l", "manta", -0.01, -0.01, 0.02, L - 0.05, 0.0, btop, sk))
             parts.append(_p("saia_r", "manta", W - 0.02, -0.01, W + 0.01, L - 0.05, 0.0, btop, sk))
-    else:   # plinth (default historico)
+    else:   # plinth (default historico) + rail no estrado (shadow line dupla)
         parts.append(_p("plinto", "estrado", rv, rv, W - rv, L - rv, 0.0, bz0, plinth))
-        parts.append(_p("estrado", "estrado", 0.0, 0.0, W, L, bz0, btop, estr))
+        rail_h = min(0.05, (btop - bz0) * 0.4)
+        parts.append(_p("rail", "estrado", 0.0, 0.0, W, L, bz0, bz0 + rail_h, rail_rgb))
+        parts.append(_p("estrado", "estrado", 0.0, 0.0, W, L, bz0 + rail_h, btop, estr))
 
-    # --- cabeceira na cabeca (Y alto); overhang lateral opcional (wings) ---
+    # --- cabeceira: ASSINATURA por estilo (cycle002 — legivel a distancia) ---
     hbt = spec.headboard_t
     ov = spec.headboard_overhang
-    parts.append(_p("cabeceira", "cabeceira", -ov, L - hbt, W + ov, L, 0.0,
-                    spec.headboard_h, tuple(spec.headboard_rgb)))
+    hb_rgb = tuple(spec.headboard_rgb)
+    hh = spec.headboard_h
+    parts.append(_p("cabeceira", "cabeceira", -ov, L - hbt, W + ov, L, 0.0, hh, hb_rgb))
+    if spec.headboard_style == "panel":
+        # arquitetonica: LEDGE horizontal (prateleira fina proud) no topo
+        parts.append(_p("cabeceira_ledge", "cabeceira", -ov - 0.02, L - hbt - 0.10,
+                        W + ov + 0.02, L, hh, hh + 0.04, _darker(hb_rgb, 0.85)))
+    elif spec.headboard_style == "upholstered":
+        # acolhedora: BOLSTER central proud (volume macio emoldurado)
+        ins = 0.07
+        parts.append(_p("cabeceira_bolster", "cabeceira", ins, L - hbt - 0.05,
+                        W - ins, L - hbt, mtop + 0.04, hh - ins,
+                        tuple(min(255, int(c * 1.06)) for c in hb_rgb)))
+    # contained/plain: painel unico flush (sem gesto extra)
 
     # --- colchao (linho), transbordando levemente o estrado ---
     parts.append(_p("colchao", "colchao", 0.02, 0.02, W - 0.02, L - 0.02, btop, mtop, tuple(spec.mattress_rgb)))

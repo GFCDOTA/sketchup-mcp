@@ -15,7 +15,7 @@
     "class_gate": "PASS",
     "class_errors": [],
     "ns_target_h": 0.38,
-    "n_parts": 7
+    "n_parts": 9
   },
   {
     "cell": "queen-platform-legs-low",
@@ -33,7 +33,7 @@
     "class_gate": "PASS",
     "class_errors": [],
     "ns_target_h": 0.38,
-    "n_parts": 12
+    "n_parts": 14
   },
   {
     "cell": "king-platform-plinth-med",
@@ -51,7 +51,7 @@
     "class_gate": "PASS",
     "class_errors": [],
     "ns_target_h": 0.38,
-    "n_parts": 7
+    "n_parts": 9
   },
   {
     "cell": "casal-uphol-legs-med",
@@ -69,7 +69,7 @@
     "class_gate": "PASS",
     "class_errors": [],
     "ns_target_h": 0.57,
-    "n_parts": 12
+    "n_parts": 14
   },
   {
     "cell": "queen-uphol-legs-med",
@@ -87,7 +87,7 @@
     "class_gate": "PASS",
     "class_errors": [],
     "ns_target_h": 0.57,
-    "n_parts": 12
+    "n_parts": 14
   },
   {
     "cell": "king-uphol-plinth-high",
@@ -105,7 +105,7 @@
     "class_gate": "PASS",
     "class_errors": [],
     "ns_target_h": 0.57,
-    "n_parts": 7
+    "n_parts": 9
   },
   {
     "cell": "casal-box-skirt-med",
@@ -123,7 +123,7 @@
     "class_gate": "PASS",
     "class_errors": [],
     "ns_target_h": 0.62,
-    "n_parts": 10
+    "n_parts": 11
   },
   {
     "cell": "queen-box-legs-med",
@@ -141,7 +141,7 @@
     "class_gate": "PASS",
     "class_errors": [],
     "ns_target_h": 0.62,
-    "n_parts": 12
+    "n_parts": 13
   },
   {
     "cell": "king-box-skirt-high",
@@ -159,6 +159,6 @@
     "class_gate": "PASS",
     "class_errors": [],
     "ns_target_h": 0.62,
-    "n_parts": 10
+    "n_parts": 11
   }
 ]
