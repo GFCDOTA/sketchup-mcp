@@ -35,11 +35,16 @@ Branch `feat/scene-vray-interior` (4 commits, mergeada em develop). Estado do lo
 **baseline BROKEN → pass5 NEEDS_WORK → pass6 NEEDS_WORK-mas-reconhecido** ("patch mais suave,
 fills ajudaram") — ver `.ai_bridge/fidelity/verdicts/SCENE-LIVINGROOM-MWM_render_light_cycles.md`.
 
-**O PRÓXIMO PASSO É UM SÓ (palavras do juiz): a JANELA como fonte luminosa crível** — exterior/
-sky visível na abertura, sem "buraco com borda explodida". Caminho candidato: highlight
-compression (SettingsColorMapping burn via `set_block_param`, expor `--burn`) e/ou billboard
-exterior. SÓ DEPOIS: materiais (sofá charcoal quente c/ reflectance, tapete com textura —
-estender `apply_materials`/tex_map pros nomes `fz_*` da cena).
+**✅ LUZ APROVADA (madrugada): "APROVADA_SEGUIR_PARA_MATERIAIS"** (pass8 @124c3a7). A "janela
+morta" dos 3 ciclos era **alpha=0 do background** (o RGB do céu sempre esteve no arquivo;
+browser mostra transparente como branco) → `_flatten_alpha` no orquestrador. Receita CONGELADA:
+`--iso 200 --sky 1.1 --sun 0.38 --sun-size 8 --burn 0.3 --fill "4.7,2.4,1.7,8,0.4;
+1.6,3.4,2.0,6,0.35;2.6,2.0,2.2,4,0.4"`. **PRÓXIMO = MATERIAIS, na ordem do juiz: (1) SOFÁ**
+(quase-preto → charcoal/marrom quente, reflectance maior, roughness de tecido, microvariação;
+braço/assento/encosto legíveis), **(2) TAPETE** (textura/fibra), **(3) PISO** (veio, sem "plano
+laranja"). "Não mexeria mais no sol/fill antes desses três." Caminho técnico: estender
+`apply_materials`/tex_map pros nomes `fz_*` da cena (hoje só `ph_*` mobiliar) + `VRAY_TEX_DIR`
+(texturas procedurais já no repo em `assets/textures/procedural/`).
 
 O que entrou de infra: teto no shell (escondido em mpl/SU/gate); `scene_closed.skp` (modelo
 fechado pro V-Ray via provider); `tweak set_block_param` (TexSky ambiente ≠ SunLight sol — o
