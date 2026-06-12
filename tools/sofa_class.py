@@ -95,31 +95,47 @@ ANTI_REGRESSION = {
 
 # ------------------------------------------------------- arquetipos (intencao)
 # eixo formal <-> lounge; dimensoes ligadas ao corpo NAO escalam com lugares.
+# cycle002 (juiz: "arquetipos mudam dimensao mas nao LINGUAGEM"): cada arquetipo
+# agora carrega tambem linguagem fisica — formal = braco com tampo proud + pes
+# mais altos + chanfro crisp; lounge = almofada projetando sobre a base (sombra
+# horizontal) + plinto mais recuado + chanfro macio; standard = neutro.
 ARCHETYPES = {
     "formal": dict(seat_height=0.45, seat_depth=0.52, height=0.90, depth=0.88,
                    backrest_rake=10.0, arm_above_seat=0.24, cushion_thickness=0.13,
-                   per_seat=0.56, back_thickness=0.19),
+                   per_seat=0.56, back_thickness=0.19,
+                   arm_cap=True, cushion_bevel=0.03, seat_overhang=0.0,
+                   base_recess=0.05, foot_legs=0.14),
     "standard": dict(seat_height=0.43, seat_depth=0.56, height=0.84, depth=0.92,
                      backrest_rake=14.0, arm_above_seat=0.18, cushion_thickness=0.16,
-                     per_seat=0.60, back_thickness=0.20),
+                     per_seat=0.60, back_thickness=0.20,
+                     arm_cap=False, cushion_bevel=0.04, seat_overhang=0.0,
+                     base_recess=0.06, foot_legs=0.12),
     "lounge": dict(seat_height=0.40, seat_depth=0.62, height=0.74, depth=0.98,
                    backrest_rake=18.0, arm_above_seat=0.14, cushion_thickness=0.20,
-                   per_seat=0.66, back_thickness=0.22),
+                   per_seat=0.66, back_thickness=0.22,
+                   arm_cap=False, cushion_bevel=0.05, seat_overhang=0.04,
+                   base_recess=0.10, foot_legs=0.10),
 }
 ARM_STYLES = {"slim": 0.12, "medium": 0.18, "chunky": 0.28}   # m (FIXO entre lugares)
-BASE_STYLES = {"legs": 0.12, "plinth": 0.02}                  # foot_height por estilo
+BASE_STYLES = ("legs", "plinth")
+PLINTH_FOOT = 0.02
+# regra ANTI-BUNKER (cycle002): braco >= este limiar EXIGE compensacao de massa
+ARM_MASS_THRESHOLD = 0.22
+ARM_RELIEF_STD = 0.05
 
 
 def derive_spec(seats=3, archetype="standard", arm_style="medium",
                 base_style="legs", variant="straight", **overrides) -> SofaSpec:
     """Deriva um SofaSpec PELA CLASSE: largura calculada (nunca chutada),
-    alturas relativas resolvidas, arquetipo define o eixo formal<->lounge.
+    alturas relativas resolvidas, arquetipo define o eixo formal<->lounge E a
+    LINGUAGEM (arm_cap/overhang/recess/bevel — cycle002). Braco chunky ganha
+    compensacao de massa automatica (arm_relief, regra anti-bunker).
     overrides aplicam DEPOIS (e o gate pega se sairem da classe)."""
     assert archetype in ARCHETYPES, f"arquetipo desconhecido: {archetype}"
     assert arm_style in ARM_STYLES and base_style in BASE_STYLES
     a = ARCHETYPES[archetype]
     arm_w = ARM_STYLES[arm_style]
-    foot_h = BASE_STYLES[base_style]
+    foot_h = a["foot_legs"] if base_style == "legs" else PLINTH_FOOT
     width = round(seats * a["per_seat"] + 2 * arm_w, 3)
     spec = SofaSpec(
         variant=variant, seats=seats, width=width,
@@ -129,7 +145,11 @@ def derive_spec(seats=3, archetype="standard", arm_style="medium",
         arm_width=arm_w, arm_height=round(a["seat_height"] + a["arm_above_seat"], 3),
         foot_height=foot_h,
         cushion_thickness=a["cushion_thickness"],
+        cushion_bevel=a["cushion_bevel"],
         backrest_rake=a["backrest_rake"],
+        arm_cap=a["arm_cap"], seat_overhang=a["seat_overhang"],
+        base_recess=a["base_recess"],
+        arm_relief=(ARM_RELIEF_STD if arm_w >= ARM_MASS_THRESHOLD else 0.0),
     )
     for k, v in overrides.items():
         setattr(spec, k, v)
@@ -172,6 +192,12 @@ def sofa_class_gate(spec: SofaSpec, parts=None):
         if not (lo - 1e-9 <= v <= hi + 1e-9):
             errors.append(f"{name}={v:.3f}: {msg}")
 
+    # cycle002 — regra ANTI-BUNKER do juiz: braco com massa exige compensacao
+    # (sapata recuada). "Hoje chunky + plinth vira bunker."
+    if spec.arm_width >= ARM_MASS_THRESHOLD - 1e-9 and spec.arm_relief < 0.04:
+        errors.append(f"compensacao_de_massa: arm_width={spec.arm_width:.2f} >= "
+                      f"{ARM_MASS_THRESHOLD} sem arm_relief>=0.04 (bunker)")
+
     for name, (ok_fn, msg) in ANTI_REGRESSION.items():
         if not ok_fn(spec):
             warnings.append(f"{name}: {msg}")
@@ -202,6 +228,7 @@ def _sabotages():
         ("pe atarracado (0.05 no vale)", lambda: _raw(foot_height=0.05)),
         ("6 lugares em 1.5m", lambda: _raw(seats=6, width=1.5)),
         ("braco no topo do encosto (caixa)", lambda: _raw(arm_height=0.84)),
+        ("bunker (chunky 0.28 sem compensacao)", lambda: _raw(arm_width=0.28)),
     ]
 
 

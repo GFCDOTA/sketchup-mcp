@@ -41,6 +41,15 @@ class SofaSpec:
     chaise_width: float = 0.95       # X da chaise
     fabric_rgb: tuple = (182, 172, 153)  # tecido neutro linho/bege (GPT: nao cinza chapado)
     feet_rgb: tuple = (48, 40, 32)       # pes madeira escura
+    # --- LINGUAGEM de classe (cycle002 do programa arquiteto-de-classe; defaults
+    # NEUTROS = exemplar dos cycles 1-4 byte-identico, anti-regressao) ---
+    arm_relief: float = 0.0          # >0: braco "flutua" sobre sapata recuada (compensa
+                                     # massa de braco chunky — regra anti-bunker do juiz)
+    arm_cap: bool = False            # formal: tampo fino levemente proud no braco
+    seat_overhang: float = 0.0       # lounge: almofada projeta sobre a base frontal
+                                     # (sombra horizontal = base le como horizontal)
+    base_recess: float = 0.06        # recuo frontal do plinto (PROMOVIDO de hardcode
+                                     # rec=0.06 do builder — agora a classe controla)
 
     def validate(self):
         assert self.variant in VARIANTS, f"variant invalido: {self.variant}"

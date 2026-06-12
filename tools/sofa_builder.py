@@ -75,14 +75,18 @@ def build_sofa(spec: SofaSpec):
     parts = []
 
     # --- secoes em X: corpo principal + chaise opcional ---
+    # GRAMATICA de chaise integrada (cycle002, regra do juiz): o braco do lado da
+    # chaise acompanha SO o corpo principal (main_y0..Dtot) — a perna projetada da
+    # chaise fica ABERTA na frente ("extensao do seat deck, nao modulo colado";
+    # antes era muralha full-depth = "caixote anexado").
     if spec.variant == "chaise_right":
         chaise_x = (W - cw, W); main_x = (0.0, W - cw)
-        left_arm_y = (main_y0, Dtot); right_arm_y = (0.0, Dtot)   # braco dir = externo da chaise
+        left_arm_y = (main_y0, Dtot); right_arm_y = (main_y0, Dtot)
         main_seat_x = (main_x[0] + aw, main_x[1])
         chaise_seat_x = (chaise_x[0], chaise_x[1] - aw)
     elif spec.variant == "chaise_left":
         chaise_x = (0.0, cw); main_x = (cw, W)
-        left_arm_y = (0.0, Dtot); right_arm_y = (main_y0, Dtot)   # braco esq = externo da chaise
+        left_arm_y = (main_y0, Dtot); right_arm_y = (main_y0, Dtot)
         main_seat_x = (main_x[0], main_x[1] - aw)
         chaise_seat_x = (chaise_x[0] + aw, chaise_x[1])
     else:
@@ -96,30 +100,51 @@ def build_sofa(spec: SofaSpec):
     foot = 0.08
     corners = [(0.04, main_y0 + 0.04), (W - 0.04 - foot, main_y0 + 0.04),
                (0.04, Dtot - 0.04 - foot), (W - 0.04 - foot, Dtot - 0.04 - foot)]
-    if chaise_x:   # 2 pes extra na ponta funda da chaise
-        cxl, cxr = chaise_x
+    if chaise_x:   # 2 pes extra na ponta funda da chaise — SOB o deck projetado
+        # (chaise_seat_x, nao a borda externa: com a frente aberta o pe na faixa
+        # da antiga muralha ficava orfao no ar — gramatica cycle002)
+        cxl, cxr = chaise_seat_x
         corners += [(cxl + 0.04, 0.04), (cxr - 0.04 - foot, 0.04)]
     for i, (fx, fy) in enumerate(corners):
         parts.append(_p(f"foot_{i + 1}", "foot", fx, fy, fx + foot, fy + foot, fz[0], fz[1], feet))
 
     # --- bracos (bordas externas) ---
-    parts.append(_p("arm_left", "arm", 0.0, left_arm_y[0], aw, left_arm_y[1], fh, ah, fab))
-    parts.append(_p("arm_right", "arm", W - aw, right_arm_y[0], W, right_arm_y[1], fh, ah, fab))
+    # LINGUAGEM de classe (cycle002): arm_relief>0 = braco "flutua" sobre sapata
+    # recuada (compensa massa de braco chunky — anti-bunker); arm_cap = tampo fino
+    # levemente proud (linguagem formal). relief/cap = 0/False -> braco classico.
+    relief, cap = spec.arm_relief, spec.arm_cap
+    cap_t, cap_over, shoe_in = 0.04, 0.015, 0.03
+    for side, (x0a, x1a), (ya0, ya1) in (("left", (0.0, aw), left_arm_y),
+                                         ("right", (W - aw, W), right_arm_y)):
+        body_z0 = fh + relief
+        body_z1 = ah - (cap_t if cap else 0.0)
+        if relief > 0:
+            parts.append(_p(f"arm_{side}_shoe", "arm", x0a + shoe_in, ya0 + shoe_in,
+                            x1a - shoe_in, ya1 - shoe_in, fh, body_z0, fab))
+        parts.append(_p(f"arm_{side}", "arm", x0a, ya0, x1a, ya1, body_z0, body_z1, fab))
+        if cap:
+            parts.append(_p(f"arm_{side}_cap", "arm", x0a - cap_over, ya0 - cap_over,
+                            x1a + cap_over, ya1 + cap_over, body_z1, ah, fab))
 
     # --- base/plataforma (corpo principal + chaise) ---
-    rec = 0.06  # recuo do plinto frontal: base menos monolitica (GPT cycle3)
+    rec = spec.base_recess  # recuo do plinto frontal (hardcode 0.06 PROMOVIDO a classe)
     parts.append(_p("base_main", "base", main_seat_x[0], main_y0 + rec, main_seat_x[1], Dtot, fh, base_top, base_rgb))
     if chaise_x:
-        parts.append(_p("base_chaise", "base", chaise_seat_x[0], 0.0, chaise_seat_x[1], Dtot, fh, base_top, base_rgb))
+        # GRAMATICA de chaise integrada (cycle002): a base da chaise herda o MESMO
+        # recuo frontal do corpo (mesma linguagem de plinto, nao bloco ao chao)
+        parts.append(_p("base_chaise", "base", chaise_seat_x[0], rec, chaise_seat_x[1], Dtot, fh, base_top, base_rgb))
 
     # --- assentos SEPARADOS (vinco) ---
+    over = spec.seat_overhang   # lounge: almofada projeta sobre a base (sombra horizontal)
     parts += _seat_row("seat_cushion", "seat", main_seat_x[0], main_seat_x[1],
-                       seat_front, seat_back, base_top, sh, n, gap, cush_rgb, bevel=spec.cushion_bevel)
+                       seat_front - over, seat_back, base_top, sh, n, gap, cush_rgb, bevel=spec.cushion_bevel)
     if chaise_x:
-        # chaise = assento FUNDO (deita as pernas): 2 almofadas ao longo de Y
-        cyl = [(0.0, Dtot * 0.5), (Dtot * 0.5, seat_back)]
+        # GRAMATICA de chaise integrada (cycle002): o vinco da chaise ALINHA com a
+        # linha do assento do corpo (seat_front) — o deck le como UMA superficie
+        # continua em L, nao "2 almofadas com split arbitrario no meio"
+        cyl = [(0.0 - over, seat_front), (seat_front + 0.03, seat_back)]
         for j, (y0, y1) in enumerate(cyl):
-            parts.append(_p(f"seat_chaise_{j + 1}", "seat_cushion", chaise_seat_x[0], y0 + (0.03 if j else 0.0),
+            parts.append(_p(f"seat_chaise_{j + 1}", "seat_cushion", chaise_seat_x[0], y0,
                             chaise_seat_x[1], y1, base_top, sh, cush_rgb))
 
     # --- encostos SEPARADOS (corpo principal + sobre a chaise) ---

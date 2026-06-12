@@ -17,7 +17,7 @@
     "class_errors": [],
     "class_warnings": [],
     "anatomy_gate": "PASS",
-    "n_parts": 15
+    "n_parts": 17
   },
   {
     "cell": "formal-3l-med-plinth",
@@ -37,7 +37,7 @@
     "class_errors": [],
     "class_warnings": [],
     "anatomy_gate": "PASS",
-    "n_parts": 19
+    "n_parts": 21
   },
   {
     "cell": "formal-4l-chunky-legs",
@@ -57,7 +57,7 @@
     "class_errors": [],
     "class_warnings": [],
     "anatomy_gate": "PASS",
-    "n_parts": 23
+    "n_parts": 27
   },
   {
     "cell": "standard-2l-med-legs",
@@ -138,7 +138,7 @@
     "class_errors": [],
     "class_warnings": [],
     "anatomy_gate": "PASS",
-    "n_parts": 15
+    "n_parts": 17
   },
   {
     "cell": "lounge-3l-slim-legs",

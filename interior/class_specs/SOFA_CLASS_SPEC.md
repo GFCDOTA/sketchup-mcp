@@ -79,6 +79,20 @@ Profundidade/alturas NÃO escalam (erro clássico = inflar em cubo).
 `cushion_thickness ≥ 0.16 no standard` · `back_thickness ≥ 0.19` · partes
 obrigatórias {base, seat_cushion, back_cushion, arm, foot} · vinco visível.
 
+## Regras de linguagem (cycle 002 — veredito SOFA-CLASS_cycle001)
+
+1. **Compensação de massa do braço (anti-bunker):** `arm_width ≥ 0.22` EXIGE
+   `arm_relief ≥ 0.04` — o braço "flutua" sobre sapata recuada (luz por baixo).
+   Constraint executável no gate; o derive aplica automático no chunky.
+2. **Gramática de chaise integrada:** a chaise é EXTENSÃO do seat deck, nunca
+   módulo colado — (a) braço do lado da chaise acompanha SÓ o corpo (frente da
+   chaise aberta, sem muralha); (b) o vinco da chaise ALINHA com `seat_front`
+   do corpo (deck contínuo em L); (c) a base da chaise herda o `base_recess`.
+3. **Arquétipo muda LINGUAGEM, não só medida:** formal = `arm_cap` (tampo proud)
+   + pés mais altos (0.14) + chanfro crisp (0.03); lounge = `seat_overhang`
+   (almofada projeta sobre a base = sombra horizontal) + plinto mais recuado
+   (0.10) + chanfro macio (0.05) + pés baixos (0.10); standard = neutro.
+
 ## Heurísticas de boa forma
 
 - Pés visíveis (≥0.10) = leve/flutuante; plinto ao chão = ancorado. Escolher UM.
