@@ -1,0 +1,164 @@
+[
+  {
+    "cell": "casal-platform-plinth-low",
+    "params": {
+      "size": "casal",
+      "archetype": "platform",
+      "base_style": "plinth",
+      "headboard": "low"
+    },
+    "bbox_m": [
+      1.38,
+      1.88,
+      0.56
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "ns_target_h": 0.38,
+    "n_parts": 7
+  },
+  {
+    "cell": "queen-platform-legs-low",
+    "params": {
+      "size": "queen",
+      "archetype": "platform",
+      "base_style": "legs",
+      "headboard": "low"
+    },
+    "bbox_m": [
+      1.58,
+      1.98,
+      0.56
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "ns_target_h": 0.38,
+    "n_parts": 12
+  },
+  {
+    "cell": "king-platform-plinth-med",
+    "params": {
+      "size": "king",
+      "archetype": "platform",
+      "base_style": "plinth",
+      "headboard": "medium"
+    },
+    "bbox_m": [
+      1.93,
+      2.03,
+      0.62
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "ns_target_h": 0.38,
+    "n_parts": 7
+  },
+  {
+    "cell": "casal-uphol-legs-med",
+    "params": {
+      "size": "casal",
+      "archetype": "upholstered",
+      "base_style": "legs",
+      "headboard": "medium"
+    },
+    "bbox_m": [
+      1.38,
+      1.88,
+      1.07
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "ns_target_h": 0.57,
+    "n_parts": 12
+  },
+  {
+    "cell": "queen-uphol-legs-med",
+    "params": {
+      "size": "queen",
+      "archetype": "upholstered",
+      "base_style": "legs",
+      "headboard": "medium"
+    },
+    "bbox_m": [
+      1.58,
+      1.98,
+      1.07
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "ns_target_h": 0.57,
+    "n_parts": 12
+  },
+  {
+    "cell": "king-uphol-plinth-high",
+    "params": {
+      "size": "king",
+      "archetype": "upholstered",
+      "base_style": "plinth",
+      "headboard": "high"
+    },
+    "bbox_m": [
+      1.93,
+      2.03,
+      1.25
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "ns_target_h": 0.57,
+    "n_parts": 7
+  },
+  {
+    "cell": "casal-box-skirt-med",
+    "params": {
+      "size": "casal",
+      "archetype": "box",
+      "base_style": "box",
+      "headboard": "medium"
+    },
+    "bbox_m": [
+      1.38,
+      1.88,
+      1.0
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "ns_target_h": 0.62,
+    "n_parts": 10
+  },
+  {
+    "cell": "queen-box-legs-med",
+    "params": {
+      "size": "queen",
+      "archetype": "box",
+      "base_style": "legs",
+      "headboard": "medium"
+    },
+    "bbox_m": [
+      1.58,
+      1.98,
+      1.0
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "ns_target_h": 0.62,
+    "n_parts": 12
+  },
+  {
+    "cell": "king-box-skirt-high",
+    "params": {
+      "size": "king",
+      "archetype": "box",
+      "base_style": "box",
+      "headboard": "high"
+    },
+    "bbox_m": [
+      1.93,
+      2.03,
+      1.18
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "ns_target_h": 0.62,
+    "n_parts": 10
+  }
+]

@@ -146,6 +146,13 @@ class BedSpec:
     blanket_h: float = 0.07          # manta/edredom dobrado no pe
     blanket_depth: float = 0.55      # quanto a manta cobre do pe (Y)
     bevel: float = 0.04              # chanfro/inset nas pecas macias (colchao/travesseiro/manta/cabeceira)
+    # --- campos de CLASSE (programa arquiteto-de-classe, cama cycle001; defaults
+    # NEUTROS = exemplar atual byte-identico) ---
+    base_style: str = "plinth"       # plinth (recuado) | legs (pes aparentes) | box (flush+saia)
+    leg_height: float = 0.18         # so base_style=legs
+    reveal: float = 0.08             # recuo do plinto (PROMOVIDO do hardcode 0.08)
+    headboard_overhang: float = 0.0  # cabeceira passa do colchao por lado (wings/upholstered)
+    skirt: bool = False              # saia do box tradicional (esconde a base)
     estrado_rgb: tuple = (74, 56, 42)      # madeira escura
     mattress_rgb: tuple = (205, 196, 178)  # linho/creme (roupa de cama)
     pillow_rgb: tuple = (224, 218, 205)     # fronha clara

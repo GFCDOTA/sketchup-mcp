@@ -22,15 +22,35 @@ def build_bed(spec: BedSpec):
     plinth = _darker(estr, 0.7)
     parts = []
 
-    # --- plinto recuado (base no chao) + estrado (frame visivel) ---
-    parts.append(_p("plinto", "estrado", 0.08, 0.08, W - 0.08, L - 0.08, 0.0, bz0, plinth))
-    parts.append(_p("estrado", "estrado", 0.0, 0.0, W, L, bz0, btop, estr))
+    # --- BASE por estilo de classe (cama cycle001): plinto recuado (reveal
+    # parametrico) | pes aparentes (underbed aberto) | box flush + saia ---
+    rv = spec.reveal
+    if spec.base_style == "legs":
+        lh = spec.leg_height
+        foot = 0.07
+        for i, (fx, fy) in enumerate([(0.05, 0.05), (W - 0.12, 0.05),
+                                      (0.05, L - 0.12), (W - 0.12, L - 0.12),
+                                      (0.05, L / 2 - 0.035), (W - 0.12, L / 2 - 0.035)]):
+            parts.append(_p(f"pe_{i + 1}", "estrado", fx, fy, fx + foot, fy + foot,
+                            0.0, lh, plinth))
+        parts.append(_p("estrado", "estrado", 0.0, 0.0, W, L, lh, btop, estr))
+    elif spec.base_style == "box":
+        parts.append(_p("box_base", "estrado", 0.0, 0.0, W, L, 0.0, bz0, plinth))
+        parts.append(_p("estrado", "estrado", 0.0, 0.0, W, L, bz0, btop, estr))
+        if spec.skirt:   # saia: paineis finos ate o chao (esconde a base)
+            sk = _darker(tuple(spec.mattress_rgb), 0.92)
+            parts.append(_p("saia_f", "manta", -0.01, -0.01, W + 0.01, 0.02, 0.0, btop, sk))
+            parts.append(_p("saia_l", "manta", -0.01, -0.01, 0.02, L - 0.05, 0.0, btop, sk))
+            parts.append(_p("saia_r", "manta", W - 0.02, -0.01, W + 0.01, L - 0.05, 0.0, btop, sk))
+    else:   # plinth (default historico)
+        parts.append(_p("plinto", "estrado", rv, rv, W - rv, L - rv, 0.0, bz0, plinth))
+        parts.append(_p("estrado", "estrado", 0.0, 0.0, W, L, bz0, btop, estr))
 
-    # --- cabeceira ESTOFADA na cabeca (Y alto), painel vertical da base ao topo
-    #     acima dos travesseiros; os travesseiros encostam NELA (nao no nada) ---
+    # --- cabeceira na cabeca (Y alto); overhang lateral opcional (wings) ---
     hbt = spec.headboard_t
-    parts.append(_p("cabeceira", "cabeceira", 0.0, L - hbt, W, L, 0.0, spec.headboard_h,
-                    tuple(spec.headboard_rgb)))
+    ov = spec.headboard_overhang
+    parts.append(_p("cabeceira", "cabeceira", -ov, L - hbt, W + ov, L, 0.0,
+                    spec.headboard_h, tuple(spec.headboard_rgb)))
 
     # --- colchao (linho), transbordando levemente o estrado ---
     parts.append(_p("colchao", "colchao", 0.02, 0.02, W - 0.02, L - 0.02, btop, mtop, tuple(spec.mattress_rgb)))
