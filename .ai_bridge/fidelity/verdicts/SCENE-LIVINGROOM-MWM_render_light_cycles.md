@@ -32,3 +32,26 @@ via set_block_param (mesmo mecanismo de sun/sky), expor --burn no render_scene_v
   (penumbra), nao intensity.
 - O brilho na poltrona creme vem da LUZ DA JANELA sobre material claro — fix de material.
 - Fills em METROS no render_scene_vray --fill "x,y,z,int[,raio];...".
+
+## 2026-06-11 (madrugada) — LUZ APROVADA ✅
+
+| pass | receita | veredito |
+|---|---|---|
+| pass7 (@e170490) | + _flatten_alpha (RGBA->RGB) + burn 0.35 | NEEDS_WORK — "janela deixou de sabotar, ótimo; gargalo = contraste interno" |
+| pass8 (@124c3a7) | sun 0.38 size8 + fills 8/6/4 + burn 0.3 | **APROVADA_SEGUIR_PARA_MATERIAIS** |
+
+> "O patch ainda existe, mas deixou de ser o erro principal; a janela está crível, o
+> ambiente tem leitura, e o que ainda parece pesado vem mais de material escuro/chapado
+> do que de exposição."
+
+**DESCOBERTA RAIZ da "janela morta" (3 ciclos):** o V-Ray escreve o background com
+**alpha=0** — o RGB do céu SEMPRE esteve no arquivo; browser/visualizador mostra
+transparente como branco. Fix: `_flatten_alpha` no orquestrador.
+
+**RECEITA DE LUZ APROVADA (congelar):** `--iso 200 --sky 1.1 --sun 0.38 --sun-size 8
+--burn 0.3 --fill "4.7,2.4,1.7,8,0.4;1.6,3.4,2.0,6,0.35;2.6,2.0,2.2,4,0.4"`
+
+**ORDEM DOS MATERIAIS (juiz):** 1) SOFÁ (quase-preto -> charcoal/marrom quente,
+reflectance maior, roughness de tecido, microvariação; braço/assento/encosto legíveis);
+2) TAPETE (textura sutil, variação tonal, leitura de fibra); 3) PISO (madeira sem
+"plano laranja", veio + roughness natural). "Não mexeria mais no sol/fill antes desses três."
