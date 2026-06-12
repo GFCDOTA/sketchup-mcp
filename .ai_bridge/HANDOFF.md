@@ -29,6 +29,26 @@ volumes. Conecta com o sistema lounge V-Ray do worktree `sofa-skill` (33 commits
 tocado) — plugar = trocar o generator do type `sofa`. Máquina é render-ready (RTX 5080, V-Ray
 Swarm/Cosmos — ver memória de specs).
 
+### Fase V-Ray — caminho PROVADO (mesma noite)
+
+**`tools/render_scene_vray.py` (NOVO, em develop):** scene.skp + camera 3/4 do scene.json (m→inches)
+→ `vray_export.rb` (plugin vfs no SU 2026, `VRay::Context` OK) → `tweak_vrscene.py` → `vray.exe`
+headless → PNG. **Render da cycle003 saiu em 51,8s, base intacta, primeira tentativa.** O V-Ray
+standalone: `C:\Program Files\Chaos\V-Ray\V-Ray for SketchUp\extension\vray\bin\vray.exe`.
+
+**Achados pro próximo ciclo (o render saiu ESTOURADO — diagnóstico, não regressão):**
+1. **A cena não tem TETO** (`build_room_shell` = piso + 4 paredes) → luz de céu entra por cima e
+   lava o interior (defaults iso200/f4/sh100/sky1.0 viram exterior). Fix: part `ceiling` no shell,
+   escondida nos renders mpl/SU (mesmo mecanismo `hide_walls`) e mantida no V-Ray.
+2. **Câmera interior FOV 55 enquadra pouco** — accent_seat e cortina ficaram fora do frame; quadro
+   estourou branco. Fix: eye mais recuado pro canto + FOV ~65 OU câmera V-Ray própria.
+3. Depois do teto: exposição de interior (suite01 usava iso100/f7/sh160/sky0.3) + `add_fill_light`
+   (já existe no tweak) pra levantar sofá sem estourar a janela.
+4. Materiais premium: `apply_materials` do tweak mira blocos `_ph_*` (mobiliar) — **no-op nos
+   materiais `fz_<item>__<label>` da cena**. Estender o mapeamento pra `fz_*` = fatia dos "finos"
+   (tecido do sofá, tapete com textura — `VRAY_TEX_DIR` idem, tex_map é por nome `ph_*`).
+Cada mudança dessas muda APARÊNCIA → loop GPT de novo (régua do track).
+
 ## 2026-06-11 (tarde) — Intent-to-Scene cycle 002: GPT IMPROVED ("WARN melhorado")
 
 Branch **`feat/scene-cycle002`** (off origin/develop @39bb7f2). Loop FAIL→regra→fixture→gate→GPT

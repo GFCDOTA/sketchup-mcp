@@ -260,3 +260,15 @@ def test_render_harness_smoke(tmp_path, scene):
     assert m["sketchup"]["status"] == "off"
     boxes = scene_boxes(scene["parts"])
     assert all(b["h_in"] > 0 and len(b["corners"]) == 4 for b in boxes)
+
+
+# ------------------------------------------------------------------ vray (fase 2)
+def test_render_scene_vray_contract(tmp_path):
+    """Contrato SU-free do orquestrador V-Ray: falha explicita sem scene.skp;
+    camera m->inches correta. (Render real e' provado manualmente — depende de
+    SU+V-Ray instalados e SketchUp fechado.)"""
+    from tools.render_scene_vray import _fmt_in, render_scene_vray
+    assert _fmt_in(1.0) == "39.37"
+    (tmp_path / "scene.json").write_text("{}", encoding="utf-8")
+    r = render_scene_vray(tmp_path)
+    assert r["status"] == "fail" and "scene.skp" in r["error"]
