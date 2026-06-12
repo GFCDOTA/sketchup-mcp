@@ -74,10 +74,12 @@ RELATIONS = {
         "cushion_thickness nao cabe entre pes e topo do assento"),
     # hard so pega ABERRACAO (poltrona-quadrada / parede-de-aeroporto); o
     # refinamento estetico da silhueta (formal 2.0-2.5, lounge 2.6-3.2) e'
-    # julgamento VISUAL do juiz na matriz de variantes, nao hard gate.
+    # julgamento VISUAL do juiz na matriz. Teto 4.8: lounge-4l "low & long"
+    # e' intencao legitima (juiz cycle001 aceitou 4.05 como "esticado, ok";
+    # cycle003 alargou o lounge de proposito — extremo chunky da 4.56).
     "silhueta_largura_altura": (
-        lambda s: s.width / s.height, 1.4, 4.5,
-        "width/height fora de [1.4,4.5] — quadrado-poltrona ou parede"),
+        lambda s: s.width / s.height, 1.4, 4.8,
+        "width/height fora de [1.4,4.8] — quadrado-poltrona ou parede"),
 }
 
 # ------------------------------------------------- anti-regressao (cycles 1-4 GPT)
@@ -100,8 +102,11 @@ ANTI_REGRESSION = {
 # mais altos + chanfro crisp; lounge = almofada projetando sobre a base (sombra
 # horizontal) + plinto mais recuado + chanfro macio; standard = neutro.
 ARCHETYPES = {
-    "formal": dict(seat_height=0.45, seat_depth=0.52, height=0.90, depth=0.88,
-                   backrest_rake=10.0, arm_above_seat=0.24, cushion_thickness=0.13,
+    # cycle003 (juiz: "assinatura ainda timida"): silhuetas afastadas nos eixos —
+    # formal MAIS ereto/alto (rake 8, braco alto), lounge MAIS baixo/horizontal
+    # (rake 20, braco rente, assento largo). Relacoes conferidas contra RELATIONS.
+    "formal": dict(seat_height=0.45, seat_depth=0.52, height=0.92, depth=0.88,
+                   backrest_rake=8.0, arm_above_seat=0.26, cushion_thickness=0.13,
                    per_seat=0.56, back_thickness=0.19,
                    arm_cap=True, cushion_bevel=0.03, seat_overhang=0.0,
                    base_recess=0.05, foot_legs=0.14),
@@ -110,9 +115,9 @@ ARCHETYPES = {
                      per_seat=0.60, back_thickness=0.20,
                      arm_cap=False, cushion_bevel=0.04, seat_overhang=0.0,
                      base_recess=0.06, foot_legs=0.12),
-    "lounge": dict(seat_height=0.40, seat_depth=0.62, height=0.74, depth=0.98,
-                   backrest_rake=18.0, arm_above_seat=0.14, cushion_thickness=0.20,
-                   per_seat=0.66, back_thickness=0.22,
+    "lounge": dict(seat_height=0.40, seat_depth=0.62, height=0.72, depth=0.98,
+                   backrest_rake=20.0, arm_above_seat=0.12, cushion_thickness=0.20,
+                   per_seat=0.68, back_thickness=0.22,
                    arm_cap=False, cushion_bevel=0.05, seat_overhang=0.04,
                    base_recess=0.10, foot_legs=0.10),
 }
@@ -150,6 +155,8 @@ def derive_spec(seats=3, archetype="standard", arm_style="medium",
         arm_cap=a["arm_cap"], seat_overhang=a["seat_overhang"],
         base_recess=a["base_recess"],
         arm_relief=(ARM_RELIEF_STD if arm_w >= ARM_MASS_THRESHOLD else 0.0),
+        # cycle003: 2a compensacao do chunky — topo do braco afina (taper)
+        arm_taper=(0.04 if arm_w >= ARM_MASS_THRESHOLD else 0.0),
     )
     for k, v in overrides.items():
         setattr(spec, k, v)

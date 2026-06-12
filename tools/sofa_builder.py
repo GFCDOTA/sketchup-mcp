@@ -112,7 +112,7 @@ def build_sofa(spec: SofaSpec):
     # LINGUAGEM de classe (cycle002): arm_relief>0 = braco "flutua" sobre sapata
     # recuada (compensa massa de braco chunky — anti-bunker); arm_cap = tampo fino
     # levemente proud (linguagem formal). relief/cap = 0/False -> braco classico.
-    relief, cap = spec.arm_relief, spec.arm_cap
+    relief, cap, taper = spec.arm_relief, spec.arm_cap, spec.arm_taper
     cap_t, cap_over, shoe_in = 0.04, 0.015, 0.03
     for side, (x0a, x1a), (ya0, ya1) in (("left", (0.0, aw), left_arm_y),
                                          ("right", (W - aw, W), right_arm_y)):
@@ -121,7 +121,17 @@ def build_sofa(spec: SofaSpec):
         if relief > 0:
             parts.append(_p(f"arm_{side}_shoe", "arm", x0a + shoe_in, ya0 + shoe_in,
                             x1a - shoe_in, ya1 - shoe_in, fh, body_z0, fab))
-        parts.append(_p(f"arm_{side}", "arm", x0a, ya0, x1a, ya1, body_z0, body_z1, fab))
+        if taper > 0:
+            # cycle003 (juiz: "nao basta sapata"): topo do braco AFINA — terco
+            # superior inset na face EXTERNA + frente (braco deixa de ser parede)
+            zt = body_z0 + (body_z1 - body_z0) * 0.62
+            parts.append(_p(f"arm_{side}", "arm", x0a, ya0, x1a, ya1, body_z0, zt, fab))
+            tx0 = x0a + (taper if side == "left" else 0.0)
+            tx1 = x1a - (taper if side == "right" else 0.0)
+            parts.append(_p(f"arm_{side}_top", "arm", tx0, ya0 + taper, tx1, ya1,
+                            zt, body_z1, fab))
+        else:
+            parts.append(_p(f"arm_{side}", "arm", x0a, ya0, x1a, ya1, body_z0, body_z1, fab))
         if cap:
             parts.append(_p(f"arm_{side}_cap", "arm", x0a - cap_over, ya0 - cap_over,
                             x1a + cap_over, ya1 + cap_over, body_z1, ah, fab))
@@ -133,6 +143,14 @@ def build_sofa(spec: SofaSpec):
         # GRAMATICA de chaise integrada (cycle002): a base da chaise herda o MESMO
         # recuo frontal do corpo (mesma linguagem de plinto, nao bloco ao chao)
         parts.append(_p("base_chaise", "base", chaise_seat_x[0], rec, chaise_seat_x[1], Dtot, fh, base_top, base_rgb))
+        # TERMINACAO da chaise (cycle003, juiz: frente aberta lia como "buraco
+        # construtivo"): painel lateral ESTOFADO ate a altura do deck na faixa
+        # externa da perna projetada — sofa-chaise real tem lateral baixa
+        # estofada; o braco continua so sobre o corpo
+        if spec.chaise_termination == "panel":
+            px = (W - aw, W) if spec.variant == "chaise_right" else (0.0, aw)
+            parts.append(_p("chaise_side_panel", "base", px[0], rec, px[1],
+                            main_y0, fh, sh, cush_rgb))
 
     # --- assentos SEPARADOS (vinco) ---
     over = spec.seat_overhang   # lounge: almofada projeta sobre a base (sombra horizontal)

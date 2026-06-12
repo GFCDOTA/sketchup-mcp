@@ -46,10 +46,17 @@ class SofaSpec:
     arm_relief: float = 0.0          # >0: braco "flutua" sobre sapata recuada (compensa
                                      # massa de braco chunky — regra anti-bunker do juiz)
     arm_cap: bool = False            # formal: tampo fino levemente proud no braco
+    arm_taper: float = 0.0           # cycle003: >0 = topo do braco afina (inset nas faces
+                                     # externas) — 2a compensacao do chunky ("nao basta
+                                     # sapata; chanfro/taper pra nao virar parede lateral")
     seat_overhang: float = 0.0       # lounge: almofada projeta sobre a base frontal
                                      # (sombra horizontal = base le como horizontal)
     base_recess: float = 0.06        # recuo frontal do plinto (PROMOVIDO de hardcode
                                      # rec=0.06 do builder — agora a classe controla)
+    chaise_termination: str = "panel"  # cycle003: gramatica de TERMINACAO da chaise —
+                                     # 'panel' = lateral estofada ate a altura do deck
+                                     # (sofa-chaise real); 'open' = frente aberta (002,
+                                     # juiz: "le como buraco construtivo")
 
     def validate(self):
         assert self.variant in VARIANTS, f"variant invalido: {self.variant}"
