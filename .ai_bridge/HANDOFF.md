@@ -29,6 +29,25 @@ volumes. Conecta com o sistema lounge V-Ray do worktree `sofa-skill` (33 commits
 tocado) — plugar = trocar o generator do type `sofa`. Máquina é render-ready (RTX 5080, V-Ray
 Swarm/Cosmos — ver memória de specs).
 
+### Fase V-Ray — ciclos de LUZ rodados (mesma noite, mais tarde)
+
+Branch `feat/scene-vray-interior` (4 commits, mergeada em develop). Estado do loop de luz:
+**baseline BROKEN → pass5 NEEDS_WORK → pass6 NEEDS_WORK-mas-reconhecido** ("patch mais suave,
+fills ajudaram") — ver `.ai_bridge/fidelity/verdicts/SCENE-LIVINGROOM-MWM_render_light_cycles.md`.
+
+**O PRÓXIMO PASSO É UM SÓ (palavras do juiz): a JANELA como fonte luminosa crível** — exterior/
+sky visível na abertura, sem "buraco com borda explodida". Caminho candidato: highlight
+compression (SettingsColorMapping burn via `set_block_param`, expor `--burn`) e/ou billboard
+exterior. SÓ DEPOIS: materiais (sofá charcoal quente c/ reflectance, tapete com textura —
+estender `apply_materials`/tex_map pros nomes `fz_*` da cena).
+
+O que entrou de infra: teto no shell (escondido em mpl/SU/gate); `scene_closed.skp` (modelo
+fechado pro V-Ray via provider); `tweak set_block_param` (TexSky ambiente ≠ SunLight sol — o
+regex global antigo invertia a intenção); `--sun/--sun-size/--fill` (fills em METROS) no
+`render_scene_vray`. Aprendizados: sun≤0.2 mata o bounce; patch doma-se com sun_size (penumbra),
+não intensity; brilho na poltrona creme = luz de janela sobre material claro (fix de material).
+Receita atual: `--iso 200 --sky 0.9 --sun 0.55 --sun-size 6 --fill "4.7,2.4,1.7,5,0.4;1.6,3.4,2.0,3,0.35"`.
+
 ### Fase V-Ray — caminho PROVADO (mesma noite)
 
 **`tools/render_scene_vray.py` (NOVO, em develop):** scene.skp + camera 3/4 do scene.json (m→inches)
