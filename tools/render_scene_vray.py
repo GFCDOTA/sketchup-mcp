@@ -69,7 +69,7 @@ def _ensure_closed_skp(d, force=False):
 
 
 def render_scene_vray(scene_dir, out_png=None, iso=100, fnum=7.0, shutter=160,
-                      sky=0.3, fov=65, width=1500, height=1000, fills_m=None,
+                      sky=0.3, sun=None, fov=65, width=1500, height=1000, fills_m=None,
                       timeout_export=90, timeout_render=240):
     """Devolve dict de status. fail-explicito em cada etapa (sem sucesso fabricado).
     fills_m: lista de dicts {pos:(x,y,z) em METROS, intensity, radius_m opcional}."""
@@ -130,7 +130,7 @@ def render_scene_vray(scene_dir, out_png=None, iso=100, fnum=7.0, shutter=160,
                   "intensity": f["intensity"],
                   "radius": f.get("radius_m", 0.35) * M_TO_IN,
                   "color": f.get("color", (1.0, 0.8, 0.55))} for f in fills_m]
-    tweak_file(str(vrs), iso=iso, fnum=fnum, shutter=shutter, sky=sky,
+    tweak_file(str(vrs), iso=iso, fnum=fnum, shutter=shutter, sky=sky, sun=sun,
                width=width, height=height, materials=True, fill_lights=fills)
 
     out_png = Path(out_png) if out_png else d / "vray_three_quarter.png"
@@ -161,6 +161,7 @@ if __name__ == "__main__":
     ap.add_argument("--fnum", type=float, default=7.0)
     ap.add_argument("--shutter", type=float, default=160)
     ap.add_argument("--sky", type=float, default=0.3)
+    ap.add_argument("--sun", type=float, default=None)
     ap.add_argument("--fov", type=float, default=65)
     ap.add_argument("--width", type=int, default=1500)
     ap.add_argument("--height", type=int, default=1000)
@@ -175,7 +176,7 @@ if __name__ == "__main__":
             fills_m.append({"pos": (v[0], v[1], v[2]), "intensity": v[3],
                             **({"radius_m": v[4]} if len(v) > 4 else {})})
     res = render_scene_vray(ns.scene_dir, out_png=ns.out, iso=ns.iso, fnum=ns.fnum,
-                            shutter=ns.shutter, sky=ns.sky, fov=ns.fov,
+                            shutter=ns.shutter, sky=ns.sky, sun=ns.sun, fov=ns.fov,
                             width=ns.width, height=ns.height, fills_m=fills_m)
     print(json.dumps({k: v for k, v in res.items() if k != "log"},
                      indent=2, ensure_ascii=False))

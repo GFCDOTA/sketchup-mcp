@@ -93,13 +93,29 @@ def add_fill_light(text: str, lights) -> str:
     return text
 
 
+def set_block_param(text: str, header_pat: str, param: str, value) -> str:
+    """Seta param=value DENTRO do primeiro bloco cujo header casa header_pat.
+    Evita o bug do regex global: 'intensity_multiplier' existe no TexSky (ambiente)
+    E no SunLight (sol direto) — interior pede os dois em direcoes OPOSTAS
+    (TOP3 do juiz na fase render da cena: +ambiente, -sol duro)."""
+    m = re.search(header_pat, text)
+    if not m:
+        return text
+    start = m.end()
+    end = text.find("}", start)
+    seg = re.sub(rf"(\b{param}=)[\d.]+", rf"\g<1>{value}", text[start:end], count=1)
+    return text[:start] + seg + text[end:]
+
+
 def tweak(text: str, iso=200, fnum=4.0, shutter=100, sky=1.0, width=None, height=None,
-          materials=False, fill_lights=None) -> str:
+          materials=False, fill_lights=None, sun=None) -> str:
     text = re.sub(r"(\bISO=)[\d.]+", rf"\g<1>{iso}", text, count=1)
     text = re.sub(r"(\bf_number=)[\d.]+", rf"\g<1>{fnum}", text, count=1)
     text = re.sub(r"(\bshutter_speed=)[\d.]+", rf"\g<1>{shutter}", text, count=1)
     if sky is not None:
-        text = re.sub(r"(intensity_multiplier=)[\d.]+", rf"\g<1>{sky}", text, count=1)
+        text = set_block_param(text, r"TexSky\s+\S+\s*\{", "intensity_multiplier", sky)
+    if sun is not None:
+        text = set_block_param(text, r"SunLight\s+\S+\s*\{", "intensity_multiplier", sun)
     if width:
         text = re.sub(r"(\bimg_width=)\d+", rf"\g<1>{width}", text, count=1)
     if height:
