@@ -14,6 +14,8 @@
     "table_top_alt": {"name": "warm_concrete", "rgb": [174, 168, 159]},
     "metal_accent": {"name": "black_metal", "rgb": [38, 38, 40]},
     "curtain": {"name": "light_linen", "rgb": [237, 231, 218]},
+    "accent_fabric": {"name": "warm_taupe_boucle", "rgb": [196, 180, 158],
+                      "note": "contrapeso CLARO do hero charcoal (cycle 002): mais baixo e mais claro que o sofa, nao compete"},
     "art_canvas": {"name": "neutral_abstract", "rgb": [211, 199, 181]},
     "art_accent": {"name": "burnt_umber", "rgb": [128, 92, 64]},
     "lamp_shade": {"name": "warm_ivory_shade", "rgb": [238, 228, 204]},
@@ -29,14 +31,16 @@
     "floor_lamp": {"stem": "metal_accent", "shade": "lamp_shade"},
     "wall_art": {"canvas": "art_canvas", "frame": "metal_accent", "accent": "art_accent"},
     "curtain": "curtain",
-    "plant_placeholder": {"foliage": "plant_green", "pot": "plant_pot"}
+    "plant_placeholder": {"foliage": "plant_green", "pot": "plant_pot"},
+    "accent_seat": {"seat": "accent_fabric", "legs": "hero_feet"}
   },
   "decor_rules": [
     "large_art_above_hero",
     "plant_near_window",
-    "light_curtain_full_height_on_window",
+    "light_curtain_open_panels_framing_window",
     "floor_lamp_beside_hero",
     "rug_grounds_seating_zone_larger_than_hero",
+    "accent_seat_opposite_hero_balances_mass",
     "metal_accents_thin_and_black",
     "few_pieces_each_intentional"
   ],

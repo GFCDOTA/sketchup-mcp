@@ -29,11 +29,11 @@ from tools.sofa_builder import build_sofa                            # noqa: E40
 STYLE_DIR = ROOT / "interior" / "style_packs"
 
 FURNITURE_TYPES = ("sofa", "rug", "coffee_table", "side_table", "floor_lamp",
-                   "wall_art", "curtain", "plant_placeholder")
+                   "wall_art", "curtain", "plant_placeholder", "accent_seat")
 ROLES = ("hero", "anchor", "companion", "textile", "light", "decor")
 WALLS = ("north", "south", "east", "west")
 PLACEMENT_HINTS = ("main_wall", "centered_under_hero", "front_of_hero", "beside_hero",
-                   "near_window", "on_window", "above_hero", "corner")
+                   "near_window", "on_window", "above_hero", "corner", "opposite_hero")
 
 # rotacao (graus CCW) pra frente local (-Y) apontar pro INTERIOR a partir da parede
 WALL_THETA = {"north": 0, "south": 180, "east": 270, "west": 90}
@@ -48,6 +48,9 @@ TABLE_GAP = 0.40       # mesa de centro: alvo dentro de [0.35, 0.45]
 RUG_TUCK = 0.15        # tapete entra esse tanto sob a frente do hero
 ART_GAP = 0.25         # respiro entre topo do hero e base do quadro
 SIDE_GAP = 0.05        # folga minima entre pecas vizinhas
+OPPOSITE_GAP = 1.50    # frente do hero -> frente do accent_seat (conversa)
+ACCENT_LATERAL = 0.55  # accent_seat desloca pro lado OPOSTO 'a janela (equilibrio)
+CURTAIN_FRAME_OVER = 0.40   # paineis-moldura: transbordo da cortina por lado da janela
 
 # defaults de dims (W, D, H em m) quando o intent traz so size_hint
 SIZE_HINTS = {
@@ -58,6 +61,7 @@ SIZE_HINTS = {
     "wall_art": {"small": (0.9, 0.05, 0.7), "medium": (1.2, 0.06, 0.85), "large": (1.4, 0.06, 0.95)},
     "plant_placeholder": {"small": (0.4, 0.4, 1.0), "medium": (0.55, 0.55, 1.5), "large": (0.7, 0.7, 1.8)},
     "sofa": {"small": (1.8, 0.9, 0.8), "medium": (2.2, 0.95, 0.85), "large": (2.8, 1.0, 0.85)},
+    "accent_seat": {"small": (0.6, 0.65, 0.65), "medium": (0.75, 0.8, 0.72), "large": (0.9, 0.9, 0.78)},
 }
 
 
@@ -325,7 +329,15 @@ def _build_furniture(fi, style, scene_ctx):
     elif t == "curtain":
         win = scene_ctx.get("window")
         assert win is not None, "curtain pede uma janela em openings"
-        spec.width = (w or win["width_m"] + 0.4)
+        split = int(fi.get("panel_split", 1))
+        if split == 2:
+            # cortina-moldura: paineis recolhidos nas pontas, transbordando a janela
+            # (recuo lateral = painel cobre pouco vidro; o vao central fica aberto)
+            spec.width = (w or win["width_m"] + 2 * CURTAIN_FRAME_OVER)
+            spec.panel_split = 2
+            spec.panel_w = float(fi.get("panel_w", 0.55))
+        else:
+            spec.width = (w or win["width_m"] + 0.4)
         head = win.get("head_m", 2.1)
         spec.height = h or (head + 0.10)
         spec.panel_rgb = _rgb(style, fi.get("material_style", "curtain"))
@@ -337,6 +349,10 @@ def _build_furniture(fi, style, scene_ctx):
         spec.foliage_rgb = _rgb(style, fi.get("material_style", "plant_green"))
         spec.pot_rgb = _rgb(style, "plant_pot")
         spec.trunk_rgb = _rgb(style, "wood_accent", spec.trunk_rgb)
+    elif t == "accent_seat":
+        spec.width, spec.depth, spec.height = w or spec.width, d or spec.depth, h or spec.height
+        spec.seat_rgb = _rgb(style, fi.get("material_style", "accent_fabric"), spec.seat_rgb)
+        spec.leg_rgb = _rgb(style, "hero_feet", spec.leg_rgb)
     parts, _meta = fn(spec.validate())
     return parts, spec.to_dict()
 
@@ -476,6 +492,28 @@ def compose_scene(intent, style=None):
             _emit(fi, parts_local, spec_dict, WALL_THETA[wwall], c,
                   anchor=f"ao lado da janela {win['id']}, {abs(walong[0]) and 'x' or 'y'}={a:.2f}")
 
+        elif hint == "opposite_hero":
+            # contrapeso do hero (cycle 002): assento leve do lado oposto da zona de
+            # estar, ENCARANDO o hero, deslocado pro lado contrario ao da janela —
+            # quebra o vazio da metade oposta sem competir com o hero.
+            assert hero, "opposite_hero requer hero ja posicionado"
+            hx, hy = hero["center"]
+            hd = _depth_of(hero)
+            adv = hd / 2.0 + OPPOSITE_GAP + ld / 2.0
+            c = [hx + fwd[0] * adv, hy + fwd[1] * adv]
+            win = ctx["window"]
+            if win is not None:
+                wn = WALL_INWARD[win["wall"]]
+                s = wn[0] * along_axis[0] + wn[1] * along_axis[1]
+                if s != 0:           # janela num dos lados do eixo -> afasta dela
+                    side = 1.0 if s > 0 else -1.0
+                    c = [c[0] + along_axis[0] * ACCENT_LATERAL * side,
+                         c[1] + along_axis[1] * ACCENT_LATERAL * side]
+            th = (theta + 180) % 360
+            z = _rug_lift(rug_pl, c, lw, ld)
+            _emit(fi, parts_local, spec_dict, th, tuple(c), z_off=z,
+                  anchor=f"oposto ao hero, {OPPOSITE_GAP}m de conversa, encarando-o")
+
         elif hint == "corner":
             c = (room["width_m"] - lw / 2.0 - 0.15, room["depth_m"] - ld / 2.0 - 0.15)
             _emit(fi, parts_local, spec_dict, theta, c, anchor="canto NE")
@@ -558,6 +596,14 @@ def _distances(report, placements, room, ctx):
             gx = max(sx0 - hx1, hx0 - sx1, 0.0)
             gy = max(sy0 - hy1, hy0 - sy1, 0.0)
             d[f"{t}_gap_m"] = round(max(gx, gy) if (gx == 0 or gy == 0) else math.hypot(gx, gy), 3)
+    if hero and "accent_seat" in by:
+        a = by["accent_seat"]
+        fx, fy = hero["facing"]
+        gap = (abs((a["center"][0] - hero["center"][0]) * fx +
+                   (a["center"][1] - hero["center"][1]) * fy)
+               - _depth_of(hero) / 2.0 - _depth_of(a) / 2.0)
+        d["accent_seat_gap_m"] = round(gap, 3)
+        d["accent_faces_hero"] = (a["facing"][0] == -fx and a["facing"][1] == -fy)
 
 
 def _camera(goal, room, placements, hero_t, win_wall=None):

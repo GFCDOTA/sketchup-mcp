@@ -11,6 +11,12 @@ HARD (qualquer falha -> FAIL):
   tapete_maior_que_hero— tapete excede a largura do hero nos 2 lados
   quadro_centralizado  — quadro centrado no hero (+-5cm) e respiro [0.10, 0.45]
   cortina_na_janela    — cortina no eixo da janela (+-5cm), cobre a largura, na parede
+  cortina_moldura      — cortina nao-protagonista: paineis cobrem <=55% do proprio
+                         vao (abertos = moldura da janela, nao parede listrada).
+                         Regra do cycle 002 (GPT WARN: cortina dominava a 3/4)
+  equilibrio_quadrantes— massa de mobiliario (footprint, SEM tapete) presente nos 4
+                         quadrantes da sala: quadrante mais vazio >= 7% do total.
+                         Regra do cycle 002 (GPT WARN: metade sul vazia)
   circulacao           — porta livre + corredor >=0.7m da porta ate a zona de estar
   bbox_plausivel       — bbox de cada tipo dentro da faixa (DECOR_PLAUSIBLE_BBOX_M)
   camera_enquadra      — hero no frame da camera 3/4 (cobertura >= min, centrado)
@@ -39,12 +45,16 @@ TABLE_GAP_RANGE = (0.35, 0.45)
 ART_CENTER_TOL = 0.05
 ART_GAP_RANGE = (0.10, 0.45)
 CURTAIN_TOL = 0.05
+CURTAIN_MAX_COVER = 0.55       # paineis cobrem no maximo isso do vao da cortina
+QUADRANT_MIN_SHARE = 0.07      # quadrante mais vazio >= 7% do footprint (sem tapete)
+                               # (canonica cycle002: min=0.087 SE; sabotagem sem accent: ~0.0)
 ANCHOR_MAX_M = 0.45
 CORRIDOR_W = 0.70
 EPS = 1e-6
 
 # tipos que assentam no CHAO (z0 ~ 0 ou sobre o tapete)
-FLOOR_TYPES = ("sofa", "rug", "coffee_table", "side_table", "floor_lamp", "plant_placeholder")
+FLOOR_TYPES = ("sofa", "rug", "coffee_table", "side_table", "floor_lamp",
+               "plant_placeholder", "accent_seat")
 WALL_MOUNTED = {"wall_art": (0.3, 2.2), "curtain": (0.0, 0.12)}   # faixa valida de z0
 
 
@@ -225,6 +235,60 @@ def scene_spatial_gate(scene, parts=None):
     else:
         checks["cortina_na_janela"] = curt is None
 
+    # 7b. cortina_moldura — paineis cobrem <= CURTAIN_MAX_COVER do proprio vao
+    # (cortina aberta = moldura da janela; fechada = parede listrada protagonista).
+    # Mede pelas parts (folds) quando disponiveis; fallback: spec do placement.
+    if curt and wins:
+        win = wins[0]
+        spec = curt.get("spec") or {}
+        span = spec.get("width")
+        folds_w = None
+        if parts:
+            horiz = win["wall"] in ("north", "south")
+            folds = [p for p in parts
+                     if p.get("item") == "curtain" and p.get("kind") == "panel_fold"]
+            if folds:
+                ext = [(p["x0"], p["x1"]) if horiz else (p["y0"], p["y1"]) for p in folds]
+                folds_w = sum(b - a for a, b in ext)
+                span = span or (max(b for _, b in ext) - min(a for a, _ in ext))
+        if folds_w is None and span:
+            split = int(spec.get("panel_split", 1))
+            folds_w = 2 * float(spec.get("panel_w", span / 2)) if split == 2 else span
+        if folds_w is not None and span:
+            cover = folds_w / span
+            metrics["curtain_cover_frac"] = round(cover, 3)
+            checks["cortina_moldura"] = cover <= CURTAIN_MAX_COVER + EPS
+            if not checks["cortina_moldura"]:
+                why.append(f"cortina cobre {cover:.0%} do vao (max {CURTAIN_MAX_COVER:.0%}) "
+                           "— protagonista errada, abrir em paineis")
+        else:
+            checks["cortina_moldura"] = False
+            why.append("cortina sem spec/parts pra medir cobertura")
+    else:
+        checks["cortina_moldura"] = curt is None
+
+    # 7c. equilibrio_quadrantes — massa de mobiliario presente nos 4 quadrantes.
+    # Footprint SEM o tapete (underlay dilui; o que pesa visualmente e' o que esta
+    # de pe). Quadrante mais vazio >= QUADRANT_MIN_SHARE do total.
+    qx, qy = W / 2.0, D / 2.0
+    quads = ((0.0, 0.0, qx, qy), (qx, 0.0, W, qy), (0.0, qy, qx, D), (qx, qy, W, D))
+    areas = [0.0, 0.0, 0.0, 0.0]
+    for p in pls:
+        if p["type"] == "rug":
+            continue
+        x0, y0, x1, y1 = p["bbox"][:4]
+        for i, (a0, b0, a1, b1) in enumerate(quads):
+            areas[i] += _olap1d(x0, x1, a0, a1) * _olap1d(y0, y1, b0, b1)
+    tot = sum(areas)
+    shares = [a / tot for a in areas] if tot > EPS else [0.0] * 4
+    metrics["quadrant_shares"] = [round(s, 3) for s in shares]   # SW, SE, NW, NE
+    checks["equilibrio_quadrantes"] = tot > EPS and min(shares) >= QUADRANT_MIN_SHARE
+    if not checks["equilibrio_quadrantes"]:
+        names = ("SW", "SE", "NW", "NE")
+        worst = min(range(4), key=lambda i: shares[i])
+        why.append(f"massa esmagada: quadrante {names[worst]} com "
+                   f"{shares[worst]:.0%} do mobiliario (min {QUADRANT_MIN_SHARE:.0%})")
+
     # 8. circulacao — porta livre + corredor 0.7m ate a zona de estar
     blocked = []
     doors = [o for o in openings if o["type"] in ("door", "glass_door")]
@@ -354,6 +418,7 @@ def scene_spatial_gate(scene, parts=None):
 
     HARD = ("dentro_da_sala", "nao_flutua", "sem_colisao", "mesa_distancia",
             "tapete_maior_que_hero", "quadro_centralizado", "cortina_na_janela",
+            "cortina_moldura", "equilibrio_quadrantes",
             "circulacao", "bbox_plausivel", "camera_enquadra")
     SOFT = ("hero_ancorado", "respiro_lateral", "planta_perto_janela")
     if not all(checks[k] for k in HARD):
@@ -407,6 +472,15 @@ def _sabotages(scene):
         w, d = t["bbox"][2] - t["bbox"][0], t["bbox"][3] - t["bbox"][1]
         _mv(t, dx=door["center_along_m"] - (t["bbox"][0] + w / 2), dy=0.3 - (t["bbox"][1] + d / 2))
 
+    def curtain_closed(s):
+        c = next(p for p in s["placements"] if p["type"] == "curtain")
+        sp = dict(c.get("spec") or {})
+        sp["panel_split"] = 1
+        c["spec"] = sp
+
+    def accent_removed(s):
+        s["placements"] = [p for p in s["placements"] if p["type"] != "accent_seat"]
+
     return [
         mut("mesa longe (0.9m)", "FAIL", table_far),
         mut("sofa atravessa parede", "FAIL", sofa_through_wall),
@@ -414,6 +488,8 @@ def _sabotages(scene):
         mut("tapete menor que sofa", "FAIL", rug_small),
         mut("quadro descentralizado", "FAIL", art_off),
         mut("mesa na porta", "FAIL", table_in_door),
+        mut("cortina fechada (protagonista)", "FAIL", curtain_closed),
+        mut("sem accent_seat (sul vazio)", "FAIL", accent_removed),
     ]
 
 

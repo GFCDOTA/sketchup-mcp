@@ -104,16 +104,16 @@
       "rotation_deg": 0,
       "center": [
         2.6,
-        2.2812
+        2.1312
       ],
       "facing": [
         0,
         -1
       ],
       "bbox": [
-        1.1,
-        1.2812,
-        4.1,
+        0.9,
+        0.9812,
+        4.3,
         3.2812,
         0.0,
         0.012
@@ -122,8 +122,8 @@
       "n_parts": 5,
       "anchor": "centralizado com hero, tuck 0.15m sob a frente",
       "spec": {
-        "width": 3.0,
-        "depth": 2.0,
+        "width": 3.4,
+        "depth": 2.3,
         "thickness": 0.012,
         "border_w": 0.12,
         "field_rgb": [
@@ -137,8 +137,8 @@
           179
         ],
         "bbox_m": [
-          3.0,
-          2.0,
+          3.4,
+          2.3,
           0.012
         ],
         "required_parts": [
@@ -280,23 +280,25 @@
       ],
       "bbox": [
         5.1,
-        1.2,
+        1.0,
         5.18,
-        3.6,
+        3.8,
         0.05,
         2.485
       ],
       "z_off": 0.05,
-      "n_parts": 16,
+      "n_parts": 9,
       "anchor": "janela win01 (east)",
       "spec": {
-        "width": 2.2,
+        "width": 2.6,
         "height": 2.4,
         "fold_w": 0.15,
         "fold_amp": 0.05,
         "thickness": 0.03,
         "rod_d": 0.035,
         "rod_overhang": 0.1,
+        "panel_split": 2,
+        "panel_w": 0.55,
         "panel_rgb": [
           237,
           231,
@@ -308,7 +310,7 @@
           40
         ],
         "bbox_m": [
-          2.4,
+          2.8,
           0.115,
           2.435
         ],
@@ -326,7 +328,7 @@
       "material_style": "metal_accent",
       "rotation_deg": 0,
       "center": [
-        4.375,
+        4.575,
         3.6406
       ],
       "facing": [
@@ -334,9 +336,9 @@
         -1
       ],
       "bbox": [
-        4.15,
+        4.35,
         3.4156,
-        4.6,
+        4.8,
         3.8656,
         0.0,
         0.55
@@ -386,7 +388,7 @@
       "material_style": "metal_accent",
       "rotation_deg": 0,
       "center": [
-        0.84,
+        0.64,
         3.6406
       ],
       "facing": [
@@ -394,9 +396,9 @@
         -1
       ],
       "bbox": [
-        0.63,
+        0.43,
         3.4306,
-        1.05,
+        0.85,
         3.8506,
         0.0,
         1.65
@@ -496,6 +498,63 @@
           "foliage"
         ]
       }
+    },
+    {
+      "type": "accent_seat",
+      "role": "companion",
+      "label": "accent_seat",
+      "style_family": "light_boucle",
+      "material_style": "accent_fabric",
+      "rotation_deg": 180,
+      "center": [
+        2.05,
+        1.2312
+      ],
+      "facing": [
+        0,
+        1
+      ],
+      "bbox": [
+        1.675,
+        0.8312,
+        2.425,
+        1.6312,
+        0.0,
+        0.72
+      ],
+      "z_off": 0.0,
+      "n_parts": 6,
+      "anchor": "oposto ao hero, 1.5m de conversa, encarando-o",
+      "spec": {
+        "width": 0.75,
+        "depth": 0.8,
+        "height": 0.72,
+        "seat_h": 0.4,
+        "leg_h": 0.13,
+        "leg_t": 0.05,
+        "leg_inset": 0.06,
+        "back_t": 0.16,
+        "seat_rgb": [
+          196,
+          180,
+          158
+        ],
+        "leg_rgb": [
+          20,
+          18,
+          16
+        ],
+        "bbox_m": [
+          0.75,
+          0.8,
+          0.72
+        ],
+        "required_parts": [
+          "seat",
+          "back",
+          "leg"
+        ]
+      }
     }
   ],
   "camera": {
@@ -507,11 +566,11 @@
     ],
     "target": [
       2.6,
-      2.784,
+      2.734,
       0.55
     ],
-    "elev_deg": 19.4,
-    "azim_deg": -127.1,
+    "elev_deg": 19.6,
+    "azim_deg": -127.6,
     "hide_walls": [
       "south",
       "west"

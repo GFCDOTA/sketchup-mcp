@@ -23,6 +23,7 @@ DECOR_REQUIRED_PARTS = {
     "wall_art": ("frame", "canvas"),
     "curtain": ("panel_fold", "rod"),
     "plant_placeholder": ("pot", "foliage"),
+    "accent_seat": ("seat", "back", "leg"),
 }
 
 # bbox plausivel (W, D, H) em m por tipo — SpatialGate reprova movel fora da faixa.
@@ -36,6 +37,7 @@ DECOR_PLAUSIBLE_BBOX_M = {
     "wall_art": ((0.6, 2.2), (0.03, 0.12), (0.50, 1.60)),
     "curtain": ((0.6, 4.0), (0.03, 0.25), (1.80, 2.80)),
     "plant_placeholder": ((0.30, 0.90), (0.30, 0.90), (0.80, 2.00)),
+    "accent_seat": ((0.50, 1.20), (0.50, 1.10), (0.35, 0.95)),
 }
 
 
@@ -176,7 +178,10 @@ class WallArtSpec:
 @dataclass
 class CurtainSpec:
     """Cortina painel ondulado low-poly: N dobras verticais alternando offset em
-    profundidade (fake wave) + varao metal. Largura = janela + transbordo."""
+    profundidade (fake wave) + varao metal. Largura = janela + transbordo.
+    panel_split=2 abre a cortina em 2 paineis recolhidos nas pontas (cada um com
+    panel_w de largura) — a cortina vira MOLDURA da janela, nao parede listrada
+    (regra do cycle 002: cortina nao-protagonista)."""
     width: float = 2.2
     height: float = 2.40
     fold_w: float = 0.15
@@ -184,12 +189,18 @@ class CurtainSpec:
     thickness: float = 0.03
     rod_d: float = 0.035
     rod_overhang: float = 0.10   # varao passa da cortina nas pontas
+    panel_split: int = 1         # 1 = painel unico fechado; 2 = paineis abertos
+    panel_w: float = 0.55        # largura de CADA painel quando panel_split=2
     panel_rgb: tuple = (237, 231, 218)   # light_linen
     rod_rgb: tuple = (38, 38, 40)
 
     def validate(self):
         assert self.width >= 2 * self.fold_w
         assert self.height >= 1.8
+        assert self.panel_split in (1, 2)
+        if self.panel_split == 2:
+            assert 2 * self.panel_w < self.width, "paineis abertos pedem vao central"
+            assert self.panel_w >= self.fold_w
         return self
 
     def bbox_m(self):
@@ -226,10 +237,39 @@ class PlantSpec:
         return _base_dict(self, "plant_placeholder")
 
 
+@dataclass
+class AccentSeatSpec:
+    """Poltrona leve / assento de acento: 4 pes finos near-black + assento + encosto
+    BAIXO em tecido claro. Elemento de contrapeso do hero (cycle 002: quebra o vazio
+    da metade oposta ao sofa sem competir com ele — mais baixa e mais clara)."""
+    width: float = 0.75
+    depth: float = 0.80
+    height: float = 0.72
+    seat_h: float = 0.40
+    leg_h: float = 0.13
+    leg_t: float = 0.05
+    leg_inset: float = 0.06
+    back_t: float = 0.16
+    seat_rgb: tuple = (196, 180, 158)   # warm_taupe_boucle
+    leg_rgb: tuple = (20, 18, 16)       # near_black_wood
+
+    def validate(self):
+        assert self.height > self.seat_h > self.leg_h
+        assert self.depth > self.back_t + 0.3, "assento util na frente do encosto"
+        assert self.width > 2 * (self.leg_inset + self.leg_t)
+        return self
+
+    def bbox_m(self):
+        return (round(self.width, 3), round(self.depth, 3), round(self.height, 3))
+
+    def to_dict(self):
+        return _base_dict(self, "accent_seat")
+
+
 _SPECS = {
     "rug": RugSpec, "coffee_table": CoffeeTableSpec, "side_table": SideTableSpec,
     "floor_lamp": FloorLampSpec, "wall_art": WallArtSpec, "curtain": CurtainSpec,
-    "plant_placeholder": PlantSpec,
+    "plant_placeholder": PlantSpec, "accent_seat": AccentSeatSpec,
 }
 
 
