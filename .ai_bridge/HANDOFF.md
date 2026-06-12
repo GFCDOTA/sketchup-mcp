@@ -1,6 +1,6 @@
 # Handoff — sketchup-mcp
 
-> Fio da meada entre sessões. Última atualização: **2026-06-12** — **🏆×4 + RACK WARN c1 ("nasceu forte" — 1º builder 100% novo): floating precisa de contexto (parede/sombra), juiz pediu PROXY DA TV na matriz (satélite visível, não só numérico — vale pro programa). Cycle002 do rack = esses 3. Sentinelas: chaise-plinth/lounge-highback/queen-box-legs/organic@formal-2l/floating@tv75.**
+> Fio da meada entre sessões. Última atualização: **2026-06-12** — **🏆×5: SOFÁ·POLTRONA·CAMA·MESA·RACK — TODAS PASS ("a classe se explica visualmente"; TV-proxy = "padrão forte do programa, melhoria institucional"). Fila: mesa de jantar → cadeira → guarda-roupa → criado-mudo. Sentinelas: chaise-plinth/lounge-highback/queen-box-legs/organic@formal-2l/floating@tv75.**
 > Leia primeiro ao iniciar sessão.
 
 ## 2026-06-12 — Programa ARQUITETO DE CLASSE — sofá cycles 001-002 LANDADOS (WARN→WARN "melhora real")
@@ -84,6 +84,12 @@ TV alarga não sobe; satélites TV 55/65/75 + sofá distância/tilt; saturação
 pegas pelo gate. **Cycle 002:** (1) contexto do flutuante (parede proxy+sombra); (2) PROXY DA TV
 na matriz (contorno translúcido + linha de centro — padrão novo: satélite VISÍVEL); (3) fachada
 menos caixa-de-marcenaria. Pior célula: floating@tv75. Verdict RACK-CLASS_cycle001.md.
+
+**RACK cycle 002 → PASS:** wall_back+shadow gap+cleat (floating "virou arquétipo com lógica"),
+fachadas simétricas por arquétipo (fim do módulo-escuro-na-ponta), **TV proxy + linha de visão na
+matriz = PADRÃO INSTITUCIONAL** ("agora dá pra julgar a derivação TV↔rack↔visão de verdade").
+Sentinela: floating@tv75. Verdicts RACK-CLASS_cycle00{1,2}.md. Aplicar satélite-visível nas
+matrizes futuras (e retrofit nas existentes quando reabrirem).
 
 **PESQUISA PRONTA pras próximas classes** (workflow 2026-06-12, tabelas ergonômicas completas em
 `C:/Users/FELIP_~1/AppData/Local/Temp/claude/E--Claude/f4ec71f5-c33c-42b6-91c3-9d56331f5428/tasks/w2w46wjf6.output`
