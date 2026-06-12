@@ -14,7 +14,7 @@
       "frac_do_sofa": 0.58,
       "alvo_height_m": 0.42
     },
-    "n_parts": 2
+    "n_parts": 3
   },
   {
     "cell": "low_slab@sofa-std-3l",
@@ -31,7 +31,7 @@
       "frac_do_sofa": 0.58,
       "alvo_height_m": 0.4
     },
-    "n_parts": 2
+    "n_parts": 3
   },
   {
     "cell": "low_slab@sofa-lounge-4l",
@@ -48,7 +48,7 @@
       "frac_do_sofa": 0.467,
       "alvo_height_m": 0.37
     },
-    "n_parts": 2
+    "n_parts": 3
   },
   {
     "cell": "two_tier@sofa-formal-2l",

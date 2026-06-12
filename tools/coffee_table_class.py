@@ -91,7 +91,10 @@ class CoffeeTableClassSpec:
     leg_taper: float = 0.0         # organic: pernas conicas (fracao de afinamento)
     shelf: bool = False            # two_tier: prateleira inferior
     shelf_gap_floor: float = 0.12
-    round_corners: bool = False    # organic: cantos suavizados (racetrack low-poly)
+    round_corners: bool = False    # organic: cantos suavizados (octogono via verts8)
+    corner_ear_frac: float = 0.18  # organic: fracao do comprimento que vira chanfro
+    corner_soft_frac: float = 0.30 # organic: reducao de largura na ponta (raio percebido)
+    slab_reveal: float = 0.05      # low_slab: sombra/recuo no rodape do painel
     top_rgb: tuple = (206, 193, 171)
     leg_rgb: tuple = (38, 38, 40)
 
@@ -123,21 +126,33 @@ def build_coffee_table_v2(spec: CoffeeTableClassSpec):
     parts = []
     z_top0 = H - tt
 
-    # tampo: reto OU cantos suavizados (racetrack low-poly: central + alas)
+    # tampo: reto OU OCTOGONO real (cycle002: alas TRAPEZOIDAIS verts8 — chanfro
+    # amplo que le como raio, nao "retangulo com abas")
     if spec.round_corners:
-        ear = min(0.12, L * 0.10)
-        soft = min(0.05, W * 0.09)
+        ear = spec.corner_ear_frac * L
+        soft = spec.corner_soft_frac * W / 2.0
         parts.append(_p("top_center", "top", ear, 0.0, L - ear, W, z_top0, H, top))
-        parts.append(_p("top_l", "top", 0.0, soft, ear, W - soft, z_top0, H, top))
-        parts.append(_p("top_r", "top", L - ear, soft, L, W - soft, z_top0, H, top))
+        for tag, (xa, xb) in (("l", (ear, 0.0)), ("r", (L - ear, L))):
+            pa = _p(f"top_{tag}", "top", min(xa, xb), 0.0, max(xa, xb), W,
+                    z_top0, H, top)
+            pa["verts8"] = [
+                (xa, 0.0, z_top0), (xb, soft, z_top0),
+                (xb, W - soft, z_top0), (xa, W, z_top0),
+                (xa, 0.0, H), (xb, soft, H), (xb, W - soft, H), (xa, W, H)]
+            parts.append(pa)
     else:
         parts.append(_p("top", "top", 0.0, 0.0, L, W, z_top0, H, top))
 
     ins = spec.leg_inset
     if spec.style == "low_slab":
-        # base painel macico central recuado (monolitica, rente ao chao)
+        # base painel recuado COM REVEAL no rodape (cycle002: sombra inferior —
+        # "desenhada, nao bloco extrudado"; mesma familia da regra da cama)
+        rv = spec.slab_reveal
+        parts.append(_p("base_shadow", "leg", ins + 0.04, ins * 0.7 + 0.03,
+                        L - ins - 0.04, W - ins * 0.7 - 0.03, 0.0, rv,
+                        _darker(top, 0.5)))
         parts.append(_p("base_panel", "leg", ins, ins * 0.7, L - ins, W - ins * 0.7,
-                        0.0, z_top0, _darker(top, 0.8)))
+                        rv, z_top0, _darker(top, 0.8)))
     else:
         lt = spec.leg_t
         for tag, (x0, y0) in (("fl", (ins, ins)), ("fr", (L - ins - lt, ins)),
@@ -166,13 +181,16 @@ def build_coffee_table_v2(spec: CoffeeTableClassSpec):
 ARCHETYPES = {
     "low_slab": dict(aspect=1.85, top_t=0.08, leg_inset_ratio=0.22,
                      height_drop=0.07, leg_t=0.05, taper=0.0,
-                     shelf=False, round_corners=False),
+                     shelf=False, round_corners=False,
+                     leg_rgb=(38, 38, 40)),
     "two_tier": dict(aspect=1.80, top_t=0.04, leg_inset_ratio=0.12,
-                     height_drop=0.02, leg_t=0.05, taper=0.0,
-                     shelf=True, round_corners=False),
-    "organic": dict(aspect=1.55, top_t=0.03, leg_inset_ratio=0.14,
-                    height_drop=0.03, leg_t=0.05, taper=0.45,
-                    shelf=False, round_corners=True),
+                     height_drop=0.02, leg_t=0.045, taper=0.0,
+                     shelf=True, round_corners=False,
+                     leg_rgb=(110, 86, 64)),    # madeira clara (juiz: pretas pesavam)
+    "organic": dict(aspect=1.55, top_t=0.03, leg_inset_ratio=0.17,
+                    height_drop=0.03, leg_t=0.045, taper=0.55,
+                    shelf=False, round_corners=True,
+                    leg_rgb=(110, 86, 64)),
 }
 
 
@@ -191,7 +209,7 @@ def derive_coffee_spec(sofa_width=2.16, sofa_seat_height=0.43,
         top_t=a["top_t"], leg_t=a["leg_t"],
         leg_inset=round(a["leg_inset_ratio"] * width, 3),
         leg_taper=a["taper"], shelf=a["shelf"],
-        round_corners=a["round_corners"],
+        round_corners=a["round_corners"], leg_rgb=a["leg_rgb"],
     )
     spec.style = "low_slab" if archetype == "low_slab" else \
         "organic" if archetype == "organic" else "two_tier"
@@ -220,6 +238,12 @@ def coffee_table_class_gate(spec: CoffeeTableClassSpec, parts=None):
         errors.append("tampo grosso fora do slab — bloco sem intencao")
     if spec.style == "organic" and spec.leg_taper <= 0:
         errors.append("organic exige perna conica (taper>0)")
+    if spec.style == "organic":
+        if not spec.round_corners or spec.corner_ear_frac < 0.12                 or spec.corner_soft_frac < 0.20:
+            errors.append("silhueta organica imperceptivel (ear>=0.12L e "
+                          "soft>=0.20W — chanfro deve ler como raio)")
+    if spec.style == "low_slab" and spec.slab_reveal < 0.03:
+        errors.append("low_slab sem reveal no rodape — caixa com tampo")
     if parts is not None:
         kinds = {p["kind"] for p in parts}
         if not {"top", "leg"} <= kinds:
@@ -246,6 +270,12 @@ def _sabotages():
         ("prateleira colada no chao",
          lambda: (derive_coffee_spec(2.16, 0.43, "two_tier"), 2.16, 0.43,
                   dict(shelf_gap_floor=0.03))),
+        ("organic de mentira (chanfro imperceptivel)",
+         lambda: (derive_coffee_spec(2.16, 0.43, "organic"), 2.16, 0.43,
+                  dict(corner_ear_frac=0.06, corner_soft_frac=0.10))),
+        ("slab caixa-com-tampo (sem reveal)",
+         lambda: (derive_coffee_spec(2.16, 0.43, "low_slab"), 2.16, 0.43,
+                  dict(slab_reveal=0.0))),
     ]
 
 

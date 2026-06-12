@@ -24,7 +24,7 @@ def test_derive_never_fails(arch, sw, ssh):
     assert sofa_satellite_gate(spec, sw, ssh)["result"] == "PASS"
 
 
-@pytest.mark.parametrize("idx", range(6))
+@pytest.mark.parametrize("idx", range(8))
 def test_sabotages_fail(idx):
     name, mk = _sabotages()[idx]
     assert _apply_sab(mk), name
@@ -59,7 +59,10 @@ def test_archetype_grammar_in_geometry():
     assert any(p["label"] == "base_panel" for p in slab)
     assert any(p["label"] == "shelf" for p in tier)
     assert any(p.get("verts8") for p in org)            # pernas conicas
-    assert any(p["label"] == "top_l" for p in org)      # cantos suavizados
+    # cycle002: alas TRAPEZOIDAIS (octogono real) + reveal no slab
+    ala = next(p for p in org if p["label"] == "top_l")
+    assert ala.get("verts8"), "ala organica deve ser trapezoidal (verts8)"
+    assert any(p["label"] == "base_shadow" for p in slab)
 
 
 def test_matrix_builds(tmp_path):
