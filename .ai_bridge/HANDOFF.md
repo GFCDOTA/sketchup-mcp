@@ -1,6 +1,6 @@
 # Handoff — sketchup-mcp
 
-> Fio da meada entre sessões. Última atualização: **2026-06-12** — **🏆×4: SOFÁ · POLTRONA · CAMA · MESA DE CENTRO — todas PASS com forma congelada ("classe congelável"). Próxima: RACK (builder não existe — criar; satélites TV+sofá). Sentinelas: chaise-plinth/lounge-highback/queen-box-legs/organic@formal-2l.**
+> Fio da meada entre sessões. Última atualização: **2026-06-12** — **🏆×4 + RACK WARN c1 ("nasceu forte" — 1º builder 100% novo): floating precisa de contexto (parede/sombra), juiz pediu PROXY DA TV na matriz (satélite visível, não só numérico — vale pro programa). Cycle002 do rack = esses 3. Sentinelas: chaise-plinth/lounge-highback/queen-box-legs/organic@formal-2l/floating@tv75.**
 > Leia primeiro ao iniciar sessão.
 
 ## 2026-06-12 — Programa ARQUITETO DE CLASSE — sofá cycles 001-002 LANDADOS (WARN→WARN "melhora real")
@@ -77,6 +77,13 @@ trapezoidais, ear 0.18L/soft 0.30W, gate de perceptibilidade), pernas por arqué
 clara 0.045 no two_tier/organic), reveal no rodapé do slab. Juiz: organic "claramente
 não-retangular — que era o ponto", saturação "acerto forte do sistema". Sentinela:
 organic@formal-2l. Verdicts COFFEE-TABLE-CLASS_cycle00{1,2}.md.
+
+**RACK cycle 001: WARN "nasceu forte" (1º builder do zero)** — `tools/rack_class.py` completo
+(RackSpec+build_rack: fachada com ritmo nicho/gaveta, pés cônicos verts8/flutuante/toe-recess;
+TV alarga não sobe; satélites TV 55/65/75 + sofá distância/tilt; saturação 2.60m). 3 calibrações
+pegas pelo gate. **Cycle 002:** (1) contexto do flutuante (parede proxy+sombra); (2) PROXY DA TV
+na matriz (contorno translúcido + linha de centro — padrão novo: satélite VISÍVEL); (3) fachada
+menos caixa-de-marcenaria. Pior célula: floating@tv75. Verdict RACK-CLASS_cycle001.md.
 
 **PESQUISA PRONTA pras próximas classes** (workflow 2026-06-12, tabelas ergonômicas completas em
 `C:/Users/FELIP_~1/AppData/Local/Temp/claude/E--Claude/f4ec71f5-c33c-42b6-91c3-9d56331f5428/tasks/w2w46wjf6.output`
