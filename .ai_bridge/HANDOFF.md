@@ -1,6 +1,6 @@
 # Handoff — sketchup-mcp
 
-> Fio da meada entre sessões. Última atualização: **2026-06-12** — **SOFÁ PASS · POLTRONA PASS · CAMA PASS · MESA DE CENTRO WARN c1 ("nasceu bem como satélite; régua de escala FORTE; saturação = acerto de teoria"; fraco = gesto orgânico). Cycle002 da mesa: tampo octogonal/chanfro amplo (verts8 trapezoidal) + pernas por arquétipo.**
+> Fio da meada entre sessões. Última atualização: **2026-06-12** — **🏆×4: SOFÁ · POLTRONA · CAMA · MESA DE CENTRO — todas PASS com forma congelada ("classe congelável"). Próxima: RACK (builder não existe — criar; satélites TV+sofá). Sentinelas: chaise-plinth/lounge-highback/queen-box-legs/organic@formal-2l.**
 > Leia primeiro ao iniciar sessão.
 
 ## 2026-06-12 — Programa ARQUITETO DE CLASSE — sofá cycles 001-002 LANDADOS (WARN→WARN "melhora real")
@@ -71,6 +71,12 @@ importante de teoria"). Arquétipos: slab ✓, two_tier ✓, ORGANIC fraco ("ret
 **Cycle 002 da mesa:** (1) silhueta orgânica real — octógono/chanfro amplo via verts8 trapezoidal
 nas alas; (2) pernas por arquétipo (two_tier pesadas/escuras); pior célula organic@formal-2l.
 Classe autocontida em tools/coffee_table_class.py (NÃO toca decor_builders da cena PASS).
+
+**MESA DE CENTRO cycle 002 → PASS ("classe congelável"):** octógono real (alas verts8
+trapezoidais, ear 0.18L/soft 0.30W, gate de perceptibilidade), pernas por arquétipo (madeira
+clara 0.045 no two_tier/organic), reveal no rodapé do slab. Juiz: organic "claramente
+não-retangular — que era o ponto", saturação "acerto forte do sistema". Sentinela:
+organic@formal-2l. Verdicts COFFEE-TABLE-CLASS_cycle00{1,2}.md.
 
 **PESQUISA PRONTA pras próximas classes** (workflow 2026-06-12, tabelas ergonômicas completas em
 `C:/Users/FELIP_~1/AppData/Local/Temp/claude/E--Claude/f4ec71f5-c33c-42b6-91c3-9d56331f5428/tasks/w2w46wjf6.output`
