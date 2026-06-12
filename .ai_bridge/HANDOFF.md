@@ -1,7 +1,43 @@
 # Handoff — sketchup-mcp
 
-> Fio da meada entre sessões. Última atualização: **2026-06-11 (noite)** — **MARCO: composição da sala = PASS LIMPO do GPT em 3 ciclos; gate V-Ray DESTRAVADO**.
+> Fio da meada entre sessões. Última atualização: **2026-06-12** — **NOVA MISSÃO (direção do Felipe): programa "arquiteto de CLASSE procedural" de móveis; sofá cycle001 = WARN com TOP3 de classe**.
 > Leia primeiro ao iniciar sessão.
+
+## 2026-06-12 — Programa ARQUITETO DE CLASSE (móveis) — sofá cycle 001: teoria LANDADA, WARN do juiz
+
+Felipe pivotou a missão: sair de "mobiliar cômodo"/render e **aprender a CLASSE de cada móvel**
+proceduralmente (sofá → poltrona → cama → mesa → rack...), com prompt-programa formal: sem overfit,
+forma antes de detalhe, melhoria SEMPRE sobe pra spec/constraint/gerador/gate, prova por
+generalização, formato de saída por ciclo (FASE_ATUAL/DIAGNOSTICO/.../RISCO_DE_OVERFIT).
+**Se notar overfit, declarar "ESTOU ENTRANDO EM OVERFIT" e reorientar.**
+
+**Cycle 001 (FASES 0-4) — branch `feat/sofa-class-spec` (MERGEAR ao ler isto se ainda aberta):**
+- FASE 0 (workflow 5 agentes): a "classe" era um exemplar bom com knobs — validate() raso (4 asserts),
+  números mágicos no builder, gates cegos a proporção, escala não modelada. Worktree `sofa-skill`
+  NÃO tocou tools/*.py (idênticos) — divergência é documental/material; risco de colisão só em
+  furniture_anatomy_spec.py/sofa_builder.py.
+- FASE 1: `interior/class_specs/SOFA_CLASS_SPEC.md` (faixas ergonômicas reais, 9 relações,
+  arquétipos formal/standard/lounge, anti-regressão dos cycles 1-4 do exemplar, anti-patterns, escala).
+- FASE 2-3: `tools/sofa_class.py` (CLASS_RANGES/RELATIONS/ANTI_REGRESSION executáveis +
+  `derive_spec(seats, archetype, arm_style, base_style)` — width SEMPRE derivada = N·per_seat+2·arm;
+  6 sabotagens dimensionais provadas) + `tools/sofa_class_matrix.py` (9 células derivadas sem ajuste
+  manual, grid pro juiz). Furo de contrato corrigido: `bbox_m()` ignorava overhang do rake → WARN
+  falso sistêmico. 65 testes novos, suite 628 ✓.
+- FASE 4 (juiz GPT na matriz): **WARN** — `.ai_bridge/fidelity/verdicts/SOFA-CLASS_cycle001.md`.
+  Identidade de família ✓ ("até demais"), escala ✓ ("corpo humano preservado"), PIOR célula =
+  chaise-plinth ("caixote anexado").
+
+**CYCLE 002 (próxima fatia = FASE 5, refino da CLASSE no builder — aí sim tocar sofa_builder.py):**
+TOP3 do juiz, todos de classe: (1) **compensação de massa do braço** (chunky+plinth=bunker → se
+arm sobe, compensar com chanfro/recuo inferior/base mais leve); (2) **gramática de chaise integrada**
+(extensão do seat deck, não módulo colado: herdar alinhamento/continuidade de almofada/frente leve);
+(3) **arquétipos mudam LINGUAGEM, não só medidas** (formal=braços verticais/contido;
+lounge=base horizontal/relaxado). Validação: nova matriz → juiz; regras viram constraints/geometria
+da classe, NUNCA ajuste de célula (overfit-check explícito do juiz).
+
+**Estado paralelo:** fase materiais da CENA pausada pré-veredito em `feat/scene-materials` (pushed);
+luz V-Ray da cena APROVADA (receita congelada no handoff abaixo). Ordem das classes do Felipe:
+sofá → poltrona → cama → mesa de centro → rack → mesa de jantar → cadeira → guarda-roupa → criado-mudo.
 
 ## 2026-06-11 (noite) — Cycle 003: GPT "PASS limpo para composição" → fase V-Ray destravada
 
