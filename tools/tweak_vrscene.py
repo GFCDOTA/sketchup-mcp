@@ -25,6 +25,9 @@ MAT_PARAMS = {
              "fresnel_ior": "1.55", "metalness": "0"},                       # madeira satin
     "fabric": {"reflect": "AColor(0, 0, 0, 1)", "reflect_glossiness": "1", "roughness": "0.55",
                "metalness": "0"},                                            # tecido matte
+    "fabric_sheen": {"reflect": "AColor(0.07, 0.065, 0.06, 1)", "reflect_glossiness": "0.5",
+                     "roughness": "0.5", "metalness": "0"},   # tecido c/ sheen sutil (sofa da cena:
+                                                              # "reflectance maior" sem virar plastico
     "metal": {"reflect": "AColor(0.78, 0.78, 0.78, 1)", "reflect_glossiness": "0.82",
               "metalness": "1"},                                             # metal escovado
     "ceramic": {"reflect": "AColor(0.28, 0.28, 0.28, 1)", "reflect_glossiness": "0.9",
@@ -43,6 +46,27 @@ def _set_block(text: str, brdf: str, params: dict) -> str:
     for k, v in params.items():
         block = re.sub(rf"(?m)^(\s*{k}=)[^;\n]+;", rf"\g<1>{v};", block, count=1)
     return text[:s] + block + text[e:]
+
+
+# materiais da CENA Intent-to-Scene (nomes fz_<item>__<label>) -> classe BRDF.
+# Ordem do juiz na fase render: sofa (sheen sutil) -> tapete (fabric) -> piso (wood).
+SCENE_MAT_CLASSES = (
+    ("fz_sofa__", "fabric_sheen"),
+    ("fz_accent_seat__seat", "fabric_sheen"), ("fz_accent_seat__back", "fabric_sheen"),
+    ("fz_rug__", "fabric"), ("fz_curtain__fold", "fabric"),
+    ("fz_floor_BRDF", "wood"),   # _BRDF ancora o fim do nome: NAO pega fz_floor_lamp__*
+)
+
+
+def apply_scene_materials(text: str) -> str:
+    """BRDF por papel nos materiais fz_* da CENA: acha TODOS os blocos BRDFVRayMtl
+    cujo nome contem a substring (os nomes carregam item__label + sufixo numerico,
+    entao match exato nao serve)."""
+    for sub, cls in SCENE_MAT_CLASSES:
+        names = re.findall(rf"BRDFVRayMtl (\S*{re.escape(sub)}\S*) \{{", text)
+        for name in names:
+            text = _set_block(text, name, MAT_PARAMS[cls])
+    return text
 
 
 def apply_materials(text: str) -> str:
@@ -129,6 +153,7 @@ def tweak(text: str, iso=200, fnum=4.0, shutter=100, sky=1.0, width=None, height
         text = re.sub(r"(\bimg_height=)\d+", rf"\g<1>{height}", text, count=1)
     if materials:
         text = apply_materials(text)
+        text = apply_scene_materials(text)
     if fill_lights:
         text = add_fill_light(text, fill_lights)
     return text

@@ -88,6 +88,9 @@ TEXTURES = {
     "fabric_accent.png": lambda: fabric((174, 144, 114), 44),
     "fabric_linen.png": lambda: linen((186, 178, 163), 55),   # roupa de cama (bedding-only)
     "wood_floor.png": lambda: wood_floor((194, 166, 124), (154, 126, 88), 77),   # piso carvalho CLARO (floor_*): reflete luz, nao escurece o render
+    # sofa da CENA (fz_sofa__*): charcoal/marrom QUENTE com trama — juiz da fase
+    # render: "sair do quase-preto chapado", microvariacao p/ separar braco/assento
+    "fabric_charcoal.png": lambda: fabric((88, 72, 58), 66),
 }
 
 
