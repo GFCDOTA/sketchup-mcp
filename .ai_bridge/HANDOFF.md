@@ -1,7 +1,33 @@
 # Handoff — sketchup-mcp
 
-> Fio da meada entre sessões. Última atualização: **2026-06-11 (tarde)** (cycle 002 da sala = GPT **IMPROVED**; TOP3 do cycle 003 anotados — ver abaixo).
+> Fio da meada entre sessões. Última atualização: **2026-06-11 (noite)** — **MARCO: composição da sala = PASS LIMPO do GPT em 3 ciclos; gate V-Ray DESTRAVADO**.
 > Leia primeiro ao iniciar sessão.
+
+## 2026-06-11 (noite) — Cycle 003: GPT "PASS limpo para composição" → fase V-Ray destravada
+
+Branch `feat/scene-cycle003` (off develop @aafd33e). O loop convergiu: **WARN (001) → IMPROVED
+(002) → PASS LIMPO (003)** — "não precisa cycle 004 de composição; eu avançaria para
+materiais/V-Ray" (`.ai_bridge/fidelity/verdicts/SCENE-LIVINGROOM-MWM_cycle003.md`, mesma
+conversa do juiz, régua mantida).
+
+**Engenharia que entrou (a peça grande): ROTAÇÃO LIVRE no composer.**
+- `place_parts`/`_rot_pt` aceitam ângulo arbitrário: múltiplos de 90 continuam EXATOS (sem
+  drift); outros ângulos → toda part vira **verts8 girado** (footprint real no render mpl) com
+  bbox = **AABB conservador** (gate segue operando em AABB por design).
+- **Caminho SU**: `scene_boxes` exporta `corners` do quad INFERIOR do verts8 — o `fz_solid` do
+  `build_furniture_skp.rb` levanta polígono girado NATIVO (confirmado no .rb antes de implementar).
+  Limitação leve: extrusão reta (taper de cúpula vira prisma da boca).
+- accent_seat girado **12°** de volta pro eixo do hero (`ACCENT_TURN_DEG`; janela decide o lado) +
+  SOFT `accent_em_dialogo` (rotacionado + facing·dir_hero ≥ 0.9); `facing`/`faces_hero` por dot.
+- Cortina slim (fixture `panel_w` 0.40 + `CURTAIN_SLIM_T/AMP` 0.025/0.04; cover 0.423→0.308);
+  mesa 1.35×0.72×0.38. Gate canônica **PASS 16/16**, sabotagens 8/8, quadrantes [.181 .087 .353 .380].
+  Suite **561 ✓ / 5 skip**. Evidência promovida (SU success).
+
+**PRÓXIMA FASE (V-Ray/materiais) — os 3 "finos" do juiz já são de render:** (1) suavizar a massa
+preta do sofá via material; (2) textura/contraste no tapete; (3) iluminação/sombra pra separar
+volumes. Conecta com o sistema lounge V-Ray do worktree `sofa-skill` (33 commits à frente, NÃO
+tocado) — plugar = trocar o generator do type `sofa`. Máquina é render-ready (RTX 5080, V-Ray
+Swarm/Cosmos — ver memória de specs).
 
 ## 2026-06-11 (tarde) — Intent-to-Scene cycle 002: GPT IMPROVED ("WARN melhorado")
 
