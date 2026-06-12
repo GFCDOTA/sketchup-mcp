@@ -50,9 +50,16 @@ class SofaSpec:
         return self
 
     def bbox_m(self):
-        """bbox esperado (W, D, H) — D cresce se houver chaise."""
+        """bbox esperado (W, D, H) — D cresce se houver chaise E inclui o
+        overhang do rake do encosto (o cisalhamento do cycle 3 empurra o topo
+        do encosto alem de depth; o contrato nao tinha acompanhado e todo sofa
+        com rake dava WARN falso de bbox no gate — furo de classe, FASE 0)."""
+        import math
         d = self.depth if self.variant == "straight" else max(self.depth, self.chaise_depth)
-        return (round(self.width, 3), round(d, 3), round(self.height, 3))
+        back_z0 = self.seat_height - 0.03          # mesmo anchor do builder
+        rake_over = (self.height - back_z0) * math.tan(math.radians(self.backrest_rake))
+        return (round(self.width, 3), round(d + max(0.0, rake_over), 3),
+                round(self.height, 3))
 
     def to_dict(self):
         d = asdict(self)

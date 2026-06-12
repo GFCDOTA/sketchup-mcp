@@ -1,0 +1,183 @@
+[
+  {
+    "cell": "formal-2l-slim-legs",
+    "params": {
+      "seats": 2,
+      "archetype": "formal",
+      "arm_style": "slim",
+      "base_style": "legs"
+    },
+    "width_m": 1.36,
+    "bbox_m": [
+      1.36,
+      0.965,
+      0.9
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "class_warnings": [],
+    "anatomy_gate": "PASS",
+    "n_parts": 15
+  },
+  {
+    "cell": "formal-3l-med-plinth",
+    "params": {
+      "seats": 3,
+      "archetype": "formal",
+      "arm_style": "medium",
+      "base_style": "plinth"
+    },
+    "width_m": 2.04,
+    "bbox_m": [
+      2.04,
+      0.965,
+      0.9
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "class_warnings": [],
+    "anatomy_gate": "PASS",
+    "n_parts": 19
+  },
+  {
+    "cell": "formal-4l-chunky-legs",
+    "params": {
+      "seats": 4,
+      "archetype": "formal",
+      "arm_style": "chunky",
+      "base_style": "legs"
+    },
+    "width_m": 2.8,
+    "bbox_m": [
+      2.8,
+      0.965,
+      0.9
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "class_warnings": [],
+    "anatomy_gate": "PASS",
+    "n_parts": 23
+  },
+  {
+    "cell": "standard-2l-med-legs",
+    "params": {
+      "seats": 2,
+      "archetype": "standard",
+      "arm_style": "medium",
+      "base_style": "legs"
+    },
+    "width_m": 1.56,
+    "bbox_m": [
+      1.56,
+      1.03,
+      0.84
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "class_warnings": [],
+    "anatomy_gate": "PASS",
+    "n_parts": 15
+  },
+  {
+    "cell": "standard-3l-med-legs",
+    "params": {
+      "seats": 3,
+      "archetype": "standard",
+      "arm_style": "medium",
+      "base_style": "legs"
+    },
+    "width_m": 2.16,
+    "bbox_m": [
+      2.16,
+      1.03,
+      0.84
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "class_warnings": [],
+    "anatomy_gate": "PASS",
+    "n_parts": 19
+  },
+  {
+    "cell": "standard-3l-chaiseR-plinth",
+    "params": {
+      "seats": 3,
+      "archetype": "standard",
+      "arm_style": "medium",
+      "base_style": "plinth",
+      "variant": "chaise_right"
+    },
+    "width_m": 2.16,
+    "bbox_m": [
+      2.16,
+      1.71,
+      0.84
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "class_warnings": [],
+    "anatomy_gate": "PASS",
+    "n_parts": 25
+  },
+  {
+    "cell": "lounge-2l-chunky-plinth",
+    "params": {
+      "seats": 2,
+      "archetype": "lounge",
+      "arm_style": "chunky",
+      "base_style": "plinth"
+    },
+    "width_m": 1.88,
+    "bbox_m": [
+      1.88,
+      1.1,
+      0.74
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "class_warnings": [],
+    "anatomy_gate": "PASS",
+    "n_parts": 15
+  },
+  {
+    "cell": "lounge-3l-slim-legs",
+    "params": {
+      "seats": 3,
+      "archetype": "lounge",
+      "arm_style": "slim",
+      "base_style": "legs"
+    },
+    "width_m": 2.22,
+    "bbox_m": [
+      2.22,
+      1.1,
+      0.74
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "class_warnings": [],
+    "anatomy_gate": "PASS",
+    "n_parts": 19
+  },
+  {
+    "cell": "lounge-4l-med-plinth",
+    "params": {
+      "seats": 4,
+      "archetype": "lounge",
+      "arm_style": "medium",
+      "base_style": "plinth"
+    },
+    "width_m": 3.0,
+    "bbox_m": [
+      3.0,
+      1.1,
+      0.74
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "class_warnings": [],
+    "anatomy_gate": "PASS",
+    "n_parts": 23
+  }
+]
