@@ -1,0 +1,985 @@
+{
+  "summary": "Tabelas ergonomicas de referencia + diagnostico de builders existentes para as proximas 5 classes de moveis",
+  "agentCount": 6,
+  "logs": [
+    "6/6 frentes completas"
+  ],
+  "result": {
+    "armchair": {
+      "summary": "Tabela de referência da classe POLTRONA (armchair de estar, 1 lugar para sentar prolongado/leitura/conversa), pensada como constraints de spec procedural — mesmo molde da classe SOFA. Princípio central: poltrona NÃO é \"sofá de 1 lugar\". O sofá derruba largura por assento (~0,55-0,65 m de largura útil compartilhada e braços finos porque o custo de braço/lugar se dilui em 2-3 lugares); a poltrona é uma peça SOLO autocontida, então seus braços são proporcionalmente MUITO mais largos/presentes (são parte da silhueta e do conforto solo, não um divisor), a largura útil de assento é generosa (0,50-0,58 m para um corpo só, mas a peça toda fica \"gorda\" porque os braços pesam relativamente mais), e a profundidade/altura seguem a MESMA ergonomia do corpo humano do sofá (altura de assento, profundidade útil e altura de encosto são fixadas pelo corpo, não pela classe). Resultado: largura total de uma poltrona (0,75-0,95 m típico) é MENOR que um sofá de 1 lugar imaginário escalado, mas a RAZÃO braço/largura-total é bem maior (braços podem ser 30-45% da largura total numa club chair, vs ~15-25% num sofá). Três arquétipos no eixo de estilo: (1) FORMAL/CLUBINHA (club chair) — compacta, braços gordos e altos, encosto médio, pés baixos/escondidos, ar \"bloco aconchegante\" controlado; (2) STANDARD — proporção equilibrada de poltrona de sala, pernas visíveis, braços médios; (3) LOUNGE (baixa e funda) — assento mais baixo e mais profundo, encosto alto e reclinado (rake maior), para relaxar/recostar, ocupa mais profundidade total. O que é FIXO pelo corpo: altura do assento (~0,40-0,45 m), profundidade útil de assento (~0,48-0,55 m), altura do encosto acima do assento, altura do braço acima do assento (~0,18-0,25 m para apoiar o antebraço). O que ESCALA com estilo/conforto: espessura/volume dos braços, profundidade total (via almofadas e rake), altura total do encosto, altura/visibilidade dos pés. Os números abaixo são em metros e graus, com típico+min+max plausíveis para uma poltrona de estar residencial.",
+      "ranges": [
+        {
+          "param": "seat_height",
+          "min": 0.38,
+          "typ": 0.43,
+          "max": 0.46,
+          "unit": "m",
+          "note": "Altura do topo do assento ao chão (com almofada comprimida sob peso). FIXO pelo corpo humano — mesma faixa do sofá. Lounge tende ao piso inferior (0.38-0.41) para recostar; club/formal fica no meio (0.42-0.45). Abaixo de 0.36 vira puff/dificil de levantar; acima de 0.47 os pes nao tocam confortavelmente."
+        },
+        {
+          "param": "seat_depth_usable",
+          "min": 0.48,
+          "typ": 0.52,
+          "max": 0.58,
+          "unit": "m",
+          "note": "Profundidade UTIL do assento (frente do encosto ate borda do assento, onde a coxa apoia). FIXO pelo corpo. Standard/club ~0.50-0.53; lounge mais funda 0.55-0.60 (recosta com encosto reclinado). >0.62 sem encosto reclinado deixa o pe pendurado e forca escorregar."
+        },
+        {
+          "param": "seat_width_usable",
+          "min": 0.48,
+          "typ": 0.54,
+          "max": 0.6,
+          "unit": "m",
+          "note": "Largura UTIL do assento (vao livre entre os bracos internos) para UM corpo. Generosa porque e solo — NAO os ~0.55-0.62 compartilhados/divididos do sofa multi-lugar. <0.45 aperta o quadril; >0.65 ja parece poltrona-e-meia / love seat e perde a leitura de poltrona solo."
+        },
+        {
+          "param": "back_height_above_seat",
+          "min": 0.4,
+          "typ": 0.52,
+          "max": 0.75,
+          "unit": "m",
+          "note": "Altura do encosto MEDIDA a partir do topo do assento (parte que sustenta as costas). Semi-fixo pelo corpo + define arquetipo: club/formal medio-baixo 0.40-0.50 (apoia lombar/meio-costas); standard 0.48-0.58; lounge/high-back 0.62-0.78 (apoia ombros/cabeca, para recostar). Encosto < 0.38 nao apoia as costas (vira banqueta com encosto simbolico)."
+        },
+        {
+          "param": "back_rake",
+          "min": 5,
+          "typ": 12,
+          "max": 28,
+          "unit": "graus",
+          "note": "Inclinacao do encosto para tras a partir da vertical. Formal/club mais ereto 5-12 (sentar atento, postura social); standard 10-16; lounge bem reclinado 18-28 (relaxar/recostar). 0 grau (encosto vertical) parece duro/cadeira-de-jantar; >30 graus vira poltrona de descanso/quase chaise e exige profundidade total maior."
+        },
+        {
+          "param": "arm_height_above_seat",
+          "min": 0.16,
+          "typ": 0.21,
+          "max": 0.26,
+          "unit": "m",
+          "note": "Altura do topo do braco acima do topo do assento — onde o antebraco/cotovelo repousa. FIXO pela ergonomia do antebraco sentado. ~0.20-0.23 e o doce. <0.14 o braco fica inutil (cotovelo nao alcanca); >0.28 levanta o ombro (desconfortavel) — exceto club chair de braco-rolo alto que assume estetica de braco volumoso ate ~0.30."
+        },
+        {
+          "param": "arm_thickness",
+          "min": 0.1,
+          "typ": 0.2,
+          "max": 0.32,
+          "unit": "m",
+          "note": "ESPESSURA/largura horizontal de cada braco (a 'gordura' do braco visto de cima). DISTINTIVO DA POLTRONA — proporcionalmente MUITO mais largo que no sofa (sofa ~0.08-0.15). Standard 0.15-0.22; club/formal braco-gordo 0.22-0.32 (silhueta robusta); lounge pode ser fino e baixo. O par de bracos pode somar 0.30-0.55 m da largura total."
+        },
+        {
+          "param": "total_width",
+          "min": 0.7,
+          "typ": 0.85,
+          "max": 1,
+          "unit": "m",
+          "note": "Largura externa total (braco-a-braco). = largura_util + 2x espessura_braco. Club/formal compacta mas gorda 0.80-0.95; standard 0.78-0.90; lounge 0.85-1.00. MENOR que um sofa-de-1-lugar escalado, mas com fracao de braco bem maior. >1.05 le como poltrona-e-meia; <0.68 le como cadeira de bracos / acento estreito."
+        },
+        {
+          "param": "total_depth",
+          "min": 0.72,
+          "typ": 0.85,
+          "max": 1,
+          "unit": "m",
+          "note": "Profundidade externa total (frente do assento/almofada ate o ponto mais traseiro do encosto na base). = profundidade_util + espessura_encosto + recuo do rake. Club/standard 0.78-0.90; lounge mais funda 0.90-1.05 (encosto reclinado projeta para tras). <0.70 parece raso/instavel; deve crescer junto com o rake."
+        },
+        {
+          "param": "total_height",
+          "min": 0.72,
+          "typ": 0.88,
+          "max": 1.15,
+          "unit": "m",
+          "note": "Altura externa total (chao ao topo do encosto). = seat_height + back_height_above_seat (+ espessura da almofada de topo). Club/formal 0.78-0.95; standard 0.85-1.00; lounge/high-back/wingback 1.00-1.18. Coerencia: total_height deve bater com seat_height + back_height_above_seat dentro de ~0.03 m."
+        },
+        {
+          "param": "leg_height",
+          "min": 0,
+          "typ": 0.12,
+          "max": 0.22,
+          "unit": "m",
+          "note": "Altura visivel dos pes/pernas (chao ate a base do corpo estofado). Club/formal: baixo e quase escondido 0.0-0.08 (saia/base ate o chao = ar macico aconchegante). Standard: pernas visiveis 0.10-0.18 (le mais leve, mais facil limpar embaixo). Lounge/mid-century: 0.12-0.22 com pernas palito anguladas. 0 = base fechada ao chao (plinth/saia)."
+        },
+        {
+          "param": "seat_cushion_thickness",
+          "min": 0.1,
+          "typ": 0.15,
+          "max": 0.22,
+          "unit": "m",
+          "note": "Espessura da almofada de assento (afeta conforto e silhueta). Club/lounge mais gorda 0.16-0.22 (afunda, aconchego); standard 0.12-0.16; formal firme 0.10-0.14. Almofada muito fina (<0.08) le como dura/economica; muito gorda (>0.24) sobe o assento efetivo e parece inflada."
+        },
+        {
+          "param": "back_cushion_thickness",
+          "min": 0.08,
+          "typ": 0.14,
+          "max": 0.22,
+          "unit": "m",
+          "note": "Espessura da almofada/estofado do encosto. Consome profundidade total. Lounge gorda 0.16-0.22; standard 0.12-0.16; formal 0.08-0.13. Encosto-almofada muito fino le estrutural/duro; muito gordo empurra o corpo para frente e encurta a profundidade util efetiva."
+        }
+      ],
+      "relations": [
+        "arm_span_ratio (DISTINTIVO): (2 x arm_thickness) / total_width = 0.28-0.45 numa poltrona (club chair alto). No sofa essa razao cai para ~0.12-0.25 porque o braco se dilui entre 2-3 lugares. Se < 0.20, a peca le como 'sofa de 1 lugar' e nao como poltrona — bracos finos demais para a silhueta solo.",
+        "seat_to_total_width: seat_width_usable / total_width = 0.55-0.72. Abaixo de 0.52 os bracos engoliram o assento (parece bloco com fresta); acima de 0.78 quase nao ha braco (vira cadeira de acento estreita).",
+        "depth_drives_with_rake: total_depth cresce com back_rake. Regra: para cada ~5 graus de rake acima de 12, somar ~0.04-0.06 m em total_depth. Lounge reclinada SEM profundidade extra escorrega o usuario para fora.",
+        "height_consistency: total_height = seat_height + back_height_above_seat + top_cushion (~0.0-0.04 m). Devem fechar dentro de +/-0.03 m — incoerencia aqui denuncia geometria fabricada.",
+        "arm_vs_seat_height: arm_height_above_seat / seat_height ~ 0.40-0.58. O braco fica a ~0.20 m acima de um assento a ~0.43 m. Razao fora disso poe o cotovelo alto/baixo demais.",
+        "footprint_squareness: total_width / total_depth = 0.85-1.15. Poltrona de estar tende ao QUADRADO em planta (diferente do sofa, que e retangulo largo 2.5:1+). Razao > 1.4 ja le como mini-sofa, nao poltrona.",
+        "back_height_vs_total: back_height_above_seat / total_height = 0.45-0.68. Encosto alto (lounge/wing) puxa para 0.62-0.68; club medio-baixo fica em 0.45-0.52.",
+        "comfort_recline_pair: rake e seat_depth_usable andam juntos — encosto mais reclinado pede assento mais fundo (lounge: rake 20-28 graus + depth 0.55-0.60); ereto pede assento raso (formal: rake 6-12 + depth 0.48-0.52)."
+      ],
+      "archetypes": [
+        "FORMAL / CLUBINHA (club chair): compacta e robusta, leitura de 'bloco aconchegante controlado'. seat_height 0.42-0.45 m, seat_depth 0.50-0.53 m, seat_width_usable 0.50-0.55 m, back_height_above_seat 0.42-0.50 m, back_rake 6-12 graus (ereto/social), arm_thickness GORDO 0.22-0.30 m, arm_height_above_seat 0.22-0.28 m, total_width 0.80-0.92 m, total_depth 0.80-0.90 m, total_height 0.80-0.92 m, leg_height baixo/escondido 0.0-0.08 m (saia ou base ao chao). Razao braco/largura ~0.40. Couro/estofado pesado, pes discretos.",
+        "STANDARD (poltrona de sala equilibrada): a referencia neutra. seat_height 0.42-0.44 m, seat_depth 0.50-0.54 m, seat_width_usable 0.52-0.56 m, back_height_above_seat 0.48-0.58 m, back_rake 10-16 graus, arm_thickness medio 0.15-0.22 m, arm_height_above_seat 0.19-0.23 m, total_width 0.78-0.90 m, total_depth 0.80-0.90 m, total_height 0.88-1.00 m, leg_height visivel 0.10-0.18 m. Razao braco/largura ~0.30. Pernas aparentes, le leve e versatil.",
+        "LOUNGE (baixa e funda / recostar): para relaxar, encosto alto e reclinado. seat_height MAIS BAIXO 0.38-0.41 m, seat_depth MAIS FUNDO 0.55-0.60 m, seat_width_usable 0.52-0.58 m, back_height_above_seat ALTO 0.60-0.78 m (apoia ombros/cabeca), back_rake RECLINADO 18-28 graus, arm_thickness variavel (fino-baixo 0.10-0.16 mid-century OU gordo se wing), arm_height_above_seat 0.16-0.22 m, total_width 0.82-1.00 m, total_depth MAIOR 0.92-1.05 m, total_height 1.00-1.18 m, leg_height pernas palito anguladas 0.12-0.22 m (ou base giratoria). Almofadas gordas, afunda."
+      ],
+      "anti_patterns": [
+        "Bracos finos como de sofa (arm_thickness < 0.10 m ou razao braco/largura < 0.20): mata a leitura de poltrona — vira 'sofa de 1 lugar' magro. Poltrona solo PRECISA de braco presente.",
+        "Peca quadrada-perfeita inflada (total_width = total_depth = total_height, tudo ~0.85, com almofadas gordas): vira CUBO/BLOCO sem hierarquia, sem leitura de assento/encosto/braco. Falta de variacao = aparencia de caixa.",
+        "Encosto na altura do braco (back_height_above_seat ~= arm_height_above_seat): os tres planos colapsam num so volume — bloco sem costas reconheciveis. Encosto deve subir claramente acima dos bracos (back > arm por >=0.20 m).",
+        "Assento estreito engolido por bracos gordos (seat_width_usable / total_width < 0.50): parece poltrona com 'fresta' para sentar — desconfortavel e visualmente errado.",
+        "Lounge reclinada e rasa (back_rake > 20 graus com total_depth < 0.80 m e seat_depth < 0.52 m): geometria que joga o usuario para fora; encosto deitado sem profundidade nao fecha.",
+        "Pernas palito sob corpo macico de club chair (leg_height 0.20 m sob volume estofado pesado de saia-ao-chao): conflito de linguagem — base leve nao sustenta visualmente massa de bloco. Pe alto pede corpo mais enxuto.",
+        "Altura total incoerente (total_height != seat_height + back_height_above_seat dentro de +/-0.03 m): denuncia geometria fabricada/empilhamento errado das partes.",
+        "Assento alto demais (seat_height > 0.47 m): pes nao apoiam, parece banqueta alta; ou baixo demais (< 0.36 m) vira puff dificil de levantar.",
+        "Footprint de sofa (total_width / total_depth > 1.4): largura esticada faz a peca ler como mini-sofa retangular, perdendo o footprint quase-quadrado da poltrona.",
+        "Almofadas excessivas (seat_cushion > 0.24 m + back_cushion > 0.22 m juntas): poltrona 'marshmallow' inflada, sobe o assento efetivo e some a estrutura — parece brinquedo, nao movel de estar."
+      ],
+      "scaling": "FIXO PELO CORPO HUMANO (nao escala com estilo/variante — sao os mesmos do sofa porque o corpo e o mesmo): seat_height (~0.40-0.45 m), seat_depth_usable (~0.48-0.55 m), arm_height_above_seat (~0.18-0.25 m, altura do antebraco sentado), e o limite inferior util de back_height (encosto tem que de fato apoiar a lombar/costas). Esses NUNCA devem ser esticados para 'fazer caber' uma estetica — sao a ancora ergonomica. // ESCALA COM ESTILO/CONFORTO (e o que define o arquetipo): arm_thickness (0.10 fino mid-century -> 0.32 club gordo) — o principal eixo que distingue poltrona de sofa e formal de standard; total_depth e seat_depth crescem com back_rake (lounge reclinada e funda); back_height_above_seat e total_height crescem do club medio-baixo ao high-back/wing; leg_height/visibilidade dos pes (escondido no club, palito no mid-century); espessura das almofadas (firme-formal -> gordo-lounge). // RELACAO COM A CLASSE SOFA (o que NAO e so 'sofa de 1 lugar'): no sofa, largura por lugar e o que multiplica (peca cresce em X), bracos sao finos e se diluem entre 2-3 lugares, footprint e retangulo largo (>=2.5:1). Na poltrona, a peca e SOLO e quase-quadrada em planta (W/D ~0.85-1.15), os bracos sao proporcionalmente MUITO maiores (razao braco/largura 0.28-0.45 vs 0.12-0.25 do sofa) e fazem parte da silhueta e do conforto, e a largura util e generosa-para-um (nao a fatia compartilhada do sofa). Pegar um modulo de sofa e isolar 1 lugar PRODUZ ANTI-PATTERN (braco fino, peca magra, footprint errado) — por isso poltrona tem spec/proporcoes proprias."
+    },
+    "bed": {
+      "summary": "Tabela de referência da classe CAMA (residencial casal/solteiro) para virar constraints de spec procedural, mesmo molde do SOFA. Eixo principal de variação = arquétipo de estilo (plataforma baixa japandi / standard com cabeceira estofada / box tradicional). O que é FIXO pelo corpo humano: largura/comprimento do colchão (padrões BR de fábrica — solteiro 0,88×1,88; casal-padrão 1,38×1,88; queen 1,58×1,98; king 1,93×2,03) e a altura útil de assento/saída da cama (topo do colchão ~0,45-0,60 m do chão, ergonomia de sentar/levantar). O que ESCALA com estilo: altura da plataforma/estrado, presença e altura da cabeceira, espessura de estofado, recuo da saia/box, presença de pés. A cama é um objeto de SILHUETA HORIZONTAL — o erro procedural mais comum é fazê-la parecer um BLOCO maciço (box sem recuo + cabeceira da mesma largura externa + altura total alta). Anti-bloco = leveza visual: pé aparente OU plataforma com recuo de base (toe-kick), cabeceira proporcional, topo do colchão não muito alto. Razões-chave: colchão deve dominar o volume visual (espessura colchão 0,18-0,30 m sobre estrado fino); cabeceira acima do colchão = 0,30-0,75 m conforme estilo; comprimento total ≈ comprimento do colchão + cabeceira (0,05-0,15 m) + eventual frame nos pés.",
+      "ranges": [
+        {
+          "param": "mattress_width_single",
+          "min": 0.78,
+          "typ": 0.88,
+          "max": 0.96,
+          "unit": "m",
+          "note": "Solteiro BR. Padrao fabrica 0,88. Solteirao/king-single ate 0,96. Fixo pelo corpo (1 pessoa)."
+        },
+        {
+          "param": "mattress_width_double_std",
+          "min": 1.28,
+          "typ": 1.38,
+          "max": 1.4,
+          "unit": "m",
+          "note": "Casal padrao BR (1,38). Algumas fabricas 1,28 (mini-casal). NAO confundir com queen."
+        },
+        {
+          "param": "mattress_width_queen",
+          "min": 1.56,
+          "typ": 1.58,
+          "max": 1.6,
+          "unit": "m",
+          "note": "Queen BR = 1,58. O casal moderno mais comprado p/ quarto de casal de bom tamanho."
+        },
+        {
+          "param": "mattress_width_king",
+          "min": 1.86,
+          "typ": 1.93,
+          "max": 2.03,
+          "unit": "m",
+          "note": "King BR = 1,93. Super-king/california ate 2,03. Exige quarto largo (>3,2 m)."
+        },
+        {
+          "param": "mattress_length_single",
+          "min": 1.78,
+          "typ": 1.88,
+          "max": 2.03,
+          "unit": "m",
+          "note": "Solteiro 1,88 padrao; versao longa 2,03 p/ pessoa alta. Fixo pela altura humana."
+        },
+        {
+          "param": "mattress_length_double_queen",
+          "min": 1.88,
+          "typ": 1.98,
+          "max": 2.03,
+          "unit": "m",
+          "note": "Casal 1,88; queen 1,98; versoes longas 2,03. Comprimento escala pouco — corpo humano."
+        },
+        {
+          "param": "mattress_length_king",
+          "min": 1.98,
+          "typ": 2.03,
+          "max": 2.13,
+          "unit": "m",
+          "note": "King normalmente 2,03; california-king ate 2,13. Fixo pelo corpo."
+        },
+        {
+          "param": "mattress_thickness",
+          "min": 0.15,
+          "typ": 0.23,
+          "max": 0.35,
+          "unit": "m",
+          "note": "Colchao espuma fino 0,15; molas/box-top espesso 0,30-0,35. O colchao deve DOMINAR a silhueta visual."
+        },
+        {
+          "param": "sleep_surface_height",
+          "min": 0.45,
+          "typ": 0.55,
+          "max": 0.65,
+          "unit": "m",
+          "note": "Topo do colchao ao chao. ERGONOMIA-CHAVE: 0,50-0,60 ideal p/ sentar/levantar. Plataforma japandi baixa 0,30-0,40; box alto ate 0,70. Fixo-ish pelo corpo."
+        },
+        {
+          "param": "platform_deck_height",
+          "min": 0.1,
+          "typ": 0.25,
+          "max": 0.45,
+          "unit": "m",
+          "note": "Altura do estrado/plataforma onde apoia o colchao (sem o colchao). Japandi 0,10-0,20; standard 0,25-0,35; box vira o proprio volume."
+        },
+        {
+          "param": "platform_overhang_reveal",
+          "min": 0,
+          "typ": 0.06,
+          "max": 0.12,
+          "unit": "m",
+          "note": "Recuo da base sob a plataforma (toe-kick/float). >0 quebra o efeito bloco. Plataforma flutuante = base recuada 0,08-0,12."
+        },
+        {
+          "param": "headboard_height_above_mattress",
+          "min": 0.15,
+          "typ": 0.45,
+          "max": 0.8,
+          "unit": "m",
+          "note": "Altura da cabeceira ACIMA do topo do colchao. Japandi baixa 0,15-0,30; estofada media 0,40-0,55; statement alta 0,60-0,80. Eixo de estilo."
+        },
+        {
+          "param": "headboard_total_height_from_floor",
+          "min": 0.6,
+          "typ": 1.05,
+          "max": 1.4,
+          "unit": "m",
+          "note": "Topo da cabeceira ao chao = sleep_surface_height + altura acima. Acima de 1,40 vira parede/dossel."
+        },
+        {
+          "param": "headboard_thickness",
+          "min": 0.03,
+          "typ": 0.1,
+          "max": 0.2,
+          "unit": "m",
+          "note": "Madeira fina 0,03-0,06; estofada acolchoada 0,10-0,18; capitone profundo ate 0,20. Estofado = mais espesso e macio."
+        },
+        {
+          "param": "headboard_width",
+          "min": 0.88,
+          "typ": 1.6,
+          "max": 2.1,
+          "unit": "m",
+          "note": "Largura da cabeceira. = largura do colchao (flush) OU + 0,10-0,20 (overhang lateral/wings). Escala com colchao."
+        },
+        {
+          "param": "frame_side_rail_height",
+          "min": 0.05,
+          "typ": 0.18,
+          "max": 0.3,
+          "unit": "m",
+          "note": "Altura da longarina/lateral do frame visivel ao lado do colchao. Baixa 0,05 (colchao exposto); alta 0,30 (colchao embutido)."
+        },
+        {
+          "param": "frame_outer_width",
+          "min": 0.92,
+          "typ": 1.66,
+          "max": 2.2,
+          "unit": "m",
+          "note": "Largura externa do frame = colchao + 2x espessura lateral (0,02-0,06 cada). Escala direto com colchao."
+        },
+        {
+          "param": "frame_outer_length",
+          "min": 1.92,
+          "typ": 2.06,
+          "max": 2.25,
+          "unit": "m",
+          "note": "Comprimento externo = colchao + cabeceira (0,05-0,12) + footboard se houver (0,05-0,15)."
+        },
+        {
+          "param": "leg_height",
+          "min": 0.08,
+          "typ": 0.18,
+          "max": 0.28,
+          "unit": "m",
+          "note": "Pe aparente (madeira/metal). >0,12 da leveza visual e permite limpar embaixo. Box tradicional = sem pe (0)."
+        },
+        {
+          "param": "leg_inset_from_corner",
+          "min": 0,
+          "typ": 0.05,
+          "max": 0.1,
+          "unit": "m",
+          "note": "Recuo do pe em relacao ao canto. Pe no canto (0) classico; recuado 0,05-0,10 estilo mid-century."
+        },
+        {
+          "param": "box_base_height",
+          "min": 0.2,
+          "typ": 0.3,
+          "max": 0.4,
+          "unit": "m",
+          "note": "Altura da base box/sommier (so arquetipo box). E o volume macico que cria o efeito bloco — mitigar com saia ou pe-palito."
+        },
+        {
+          "param": "skirt_dust_ruffle_drop",
+          "min": 0,
+          "typ": 0.2,
+          "max": 0.55,
+          "unit": "m",
+          "note": "Saia/babado do chao ate a borda. Box tradicional usa pra esconder base; japandi/platform = 0 (sem saia)."
+        },
+        {
+          "param": "footboard_height_above_mattress",
+          "min": 0,
+          "typ": 0.1,
+          "max": 0.4,
+          "unit": "m",
+          "note": "Pe-da-cama (footboard) acima do colchao. Maioria moderna = 0 (sem). Classica/dossel ate 0,40."
+        },
+        {
+          "param": "underbed_clearance",
+          "min": 0,
+          "typ": 0.15,
+          "max": 0.3,
+          "unit": "m",
+          "note": "Vao livre sob o frame (limpeza/gavetas). Plataforma com gaveta/box = 0 (fechado); pe alto = 0,15-0,30 aberto."
+        }
+      ],
+      "relations": [
+        "sleep_surface_height = platform_deck_height + mattress_thickness (topo do colchao = altura do estrado + espessura). Ergonomia manda o RESULTADO (0,50-0,60), entao estrado e colchao se compensam: colchao grosso pede estrado baixo e vice-versa.",
+        "frame_outer_width = mattress_width + 2 * frame_side_rail_thickness; razao saudavel: folga lateral total 0,02-0,08 m (colchao deve encaixar justo, sem boiar). Folga >0,10 parece frame errado/grande.",
+        "frame_outer_length = mattress_length + headboard_thickness + footboard_thickness; recuo da cabeceira sobre o comprimento total 0,05-0,15 m.",
+        "headboard_width >= mattress_width SEMPRE (nunca menor que o colchao — parece cama errada). Overhang lateral tipico 0 a 0,20 m por lado.",
+        "RAZAO DE DOMINANCIA VISUAL: mattress_thickness / sleep_surface_height entre 0,35 e 0,55 — o colchao deve ocupar 35-55% da altura ate o topo. Se <0,25, a base parece pesada demais (efeito bloco/box macico).",
+        "RAZAO CABECEIRA: headboard_height_above_mattress / mattress_width entre 0,20 e 0,45 p/ proporcao agradavel. Cabeceira muito alta + cama estreita (>0,55) parece trono/desengonçada; muito baixa (<0,12) some.",
+        "RAZAO PLANTA (footprint): comprimento/largura do colchao ~ 1,3 (king) a 2,1 (solteiro). Casal/queen ~1,25-1,4. Fora disso nao e proporcao de cama humana.",
+        "LEVEZA: (leg_height + platform_overhang_reveal) deve ser > 0,06 m para a cama nao tocar o chao como bloco macico — EXCETO arquetipo box (que compensa com saia ou base recuada/pe-palito).",
+        "headboard_total_height_from_floor = sleep_surface_height + headboard_height_above_mattress; manter < 1,40 m p/ nao competir com altura de pe-direito/janela."
+      ],
+      "archetypes": [
+        "PLATAFORMA BAIXA (japandi / low-platform): sleep_surface_height 0,30-0,42 m; platform_deck_height 0,12-0,22; mattress_thickness 0,15-0,22 (fino, firme); platform_overhang_reveal 0,06-0,12 (base recuada/flutuante, as vezes com LED); headboard_height_above_mattress 0,0-0,30 (baixa ou ausente, integrada); headboard_thickness 0,03-0,06 (madeira clara); leg_height 0 (plataforma assenta no chao com toe-kick); skirt 0; footboard 0. Frame com PLATAFORMA LARGA (mesa/nightstand integrado nas laterais, overhang de 0,10-0,25 alem do colchao). Silhueta horizontal, baixa, leve. Madeira natural / linho.",
+        "STANDARD COM CABECEIRA ESTOFADA (upholstered): sleep_surface_height 0,52-0,62 m; platform_deck_height 0,28-0,38; mattress_thickness 0,22-0,30; headboard_height_above_mattress 0,40-0,60; headboard_thickness 0,10-0,18 (acolchoado, capitone opcional); headboard_width = colchao + 0,05-0,15 (leve overhang); frame_side_rail_height 0,12-0,22 (estofado tambem); leg_height 0,10-0,20 (pe aparente madeira/metal, mid-century) OU base estofada total; underbed_clearance 0,08-0,20; skirt 0; footboard 0. Equilibrio: cabeceira presente mas proporcional, pe da leveza. Tecido/veludo/boucle.",
+        "BOX TRADICIONAL (box/sommier classico): sleep_surface_height 0,55-0,70 m (alto); box_base_height 0,25-0,40 (base macica sommier); mattress_thickness 0,25-0,35 (molas/euro-top); platform_overhang_reveal 0,0 (base flush, efeito bloco) — MITIGAR com skirt_dust_ruffle_drop 0,20-0,55 OU pe-palito leg_height 0,12-0,20; headboard normalmente avulsa/parede ou alta 0,50-0,80; underbed_clearance 0 (fechado). Volume cheio, formal, hoteleiro. Risco maximo de virar BLOCO — exige saia ou pe pra quebrar o macico."
+      ],
+      "anti_patterns": [
+        "BLOCO MACICO: box flush no chao (overhang=0, leg=0, skirt=0) com altura total alta — parece um caixote/container, nao cama. Sempre quebrar a base com pe aparente, recuo (toe-kick) ou saia.",
+        "COLCHAO ESMAGADO: mattress_thickness < 0,12 ou razao colchao/altura < 0,25 — a base/estrado domina e o colchao some, parece banco ou tablado em vez de cama.",
+        "CABECEIRA-TRONO: headboard_height_above_mattress > 0,80 m, ou cabeceira mais alta que larga proporcionalmente — vira espaldar de trono, desengonca, compete com a parede.",
+        "CABECEIRA ESTREITA: headboard_width < mattress_width — cabeceira mais magra que o colchao deixa o colchao 'vazar' pros lados, leitura imediata de cama errada/barata.",
+        "FRAME FROUXO: folga lateral colchao-frame > 0,10 m (colchao boiando dentro do frame) — parece colchao de tamanho errado; ou frame mais curto que o colchao (colchao sobrando).",
+        "PROPORCAO DE PLANTA ERRADA: footprint quase quadrado p/ solteiro (deveria ser ~1,9-2,1 de razao) ou comprimento curto demais no king — quebra o reconhecimento de cama.",
+        "CAMA FLUTUANTE SEM ANCORA: pe altissimo (>0,30) deixando vao enorme e topo alto (>0,70) — parece beliche/cama de hospital, perde aconchego residencial.",
+        "PES GROSSOS DESPROPORCIONAIS: pe-bloco grosso (>0,12 de secao) numa cama leve, ou 4 pernas-palito finissimas sob box pesado — incompatibilidade de massa visual.",
+        "SAIA EM ESTILO ERRADO: skirt/babado num frame japandi ou de pe aparente mid-century — saia so pertence ao box tradicional; em outros estilos parece fantasia/errado.",
+        "FOOTBOARD ALTO MODERNO: pe-da-cama alto (>0,30) num quarto contemporaneo pequeno — fecha visualmente, encurta o quarto e data o movel (so cabe em classico/dossel)."
+      ],
+      "scaling": "\"FIXO PELO CORPO HUMANO (nao escala com estilo, so com o TAMANHO escolhido solteiro/casal/queen/king): largura e comprimento do colchao (padroes de fabrica BR discretos — nao interpolar livremente, escolher um SKU: 0,88/1,38/1,58/1,93 de largura), a razao de planta comprimento/largura (~1,9 solteiro a ~1,05 king), e a ALTURA DE SAIDA ergonomica (topo do colchao 0,45-0,65, alvo 0,50-0,60 p/ sentar/levantar confortavel — independe de estilo). ESCALA/MUDA COM O ARQUETIPO DE ESTILO (eixo de variacao da spec): altura da plataforma/estrado, presenca+altura+espessura da cabeceira, espessura do estofado lateral, presenca e altura de pe, recuo de base (toe-kick/overhang), saia/box, footboard. REGRA DE COMPENSACAO: como a altura de saida e ~fixa, estrado e colchao trocam entre si (japandi = colchao fino + estrado baixissimo; box = colchao grosso + base alta). REGRA DE LEVEZA INVARIANTE: qualquer que seja o tamanho, garantir UM mecanismo anti-bloco (pe aparente OU recuo de base OU saia coerente com o estilo); cabeceira sempre >= largura do colchao; colchao sempre visivelmente o componente dominante da silhueta. Componentes que NAO escalam em valor absoluto com o tamanho do colchao: espessuras de chapa/longarina, altura de pe, recuo de toe-kick (ergonomia/material constante) — so a largura/comprimento do frame acompanham o colchao.\""
+    },
+    "coffee_table": {
+      "summary": "Tabela de referência da classe MESA DE CENTRO (coffee table) para virar constraints de spec procedural, mesmo molde da classe SOFA. A relação CRÍTICA e fixa pelo corpo humano é a altura do tampo vs altura do assento do sofá: o tampo deve ficar nivelado ao assento ou no máximo ~5 cm abaixo (nunca acima), para alcance funcional do braço sentado. Tudo que é \"corpo\" (altura útil, distância de alcance/circulação ao sofá, espessura mínima estrutural do tampo) é FIXO pela ergonomia humana e NÃO escala com o tamanho da peça; já o footprint do tampo (comprimento/largura) ESCALA com o comprimento do sofá (regra dos ~2/3) e com a área livre da sala. Três arquétipos no eixo de estilo: (1) LOW SLAB — laje baixa, tampo grosso e maciço, perfil quase rente ao chão, base recuada/escondida, ar pesado/minimalista; (2) STANDARD 2-NÍVEIS — tampo + prateleira inferior, pernas visíveis com inset moderado, altura nivelada ao assento, o \"default seguro\"; (3) ORGÂNICA/OVAL — tampo oval ou redondo, bordas suaves, pernas afiladas/cônicas, footprint menor por unidade de área, suaviza circulação. Anti-patterns são basicamente desvios de proporção: tampo acima do assento, tampo grosso demais virando \"bloco\", pernas grossas/sem inset que viram caixote, peça muito alta/estreita, ou tampo curto demais (<1/2 do sofá) que vira \"ilha\" perdida. Valores em metros e graus, com típico+min+max plausíveis.",
+      "ranges": [
+        {
+          "param": "table_height",
+          "min": 0.3,
+          "typ": 0.42,
+          "max": 0.48,
+          "unit": "m",
+          "note": "Altura do tampo ao chao. FIXO pelo corpo. Regra critica: alinhar a altura do assento do sofa (seat_height) ou ficar ate ~5cm ABAIXO; nunca acima. Sofas residenciais tem assento 0.38-0.45m, dai a faixa. Low slab puxa pra baixo (0.30-0.38), standard fica 0.40-0.45."
+        },
+        {
+          "param": "height_vs_seat_delta",
+          "min": -0.1,
+          "typ": -0.03,
+          "max": 0,
+          "unit": "m",
+          "note": "RELACAO CRITICA. delta = table_height - seat_height. Saudavel: tampo nivelado (0) ou ate 10cm abaixo do assento. Otimo ~ -3cm. delta>0 (tampo acima do assento) e anti-pattern duro: incomoda braco/joelho e parece errado. Esta razao trava a altura, nao o estilo."
+        },
+        {
+          "param": "top_length",
+          "min": 0.7,
+          "typ": 1.1,
+          "max": 1.4,
+          "unit": "m",
+          "note": "Comprimento do tampo (eixo maior, retangular). ESCALA com o sofa: ~1/2 a 2/3 do comprimento do sofa (sofa 3-lugares ~2.0-2.2m => tampo ~1.0-1.3m). Nao deve passar de ~2/3 nem cair abaixo de ~1/2 do sofa."
+        },
+        {
+          "param": "top_width",
+          "min": 0.45,
+          "typ": 0.6,
+          "max": 0.75,
+          "unit": "m",
+          "note": "Largura/profundidade do tampo (eixo menor, retangular). Tipico ~0.55-0.65. Largura util pra apoiar coisas sem invadir a circulacao. Escala junto com o comprimento mantendo a razao do arquetipo."
+        },
+        {
+          "param": "top_aspect_ratio",
+          "min": 1.3,
+          "typ": 1.8,
+          "max": 2.2,
+          "unit": "ratio",
+          "note": "Razao comprimento/largura do tampo retangular. Saudavel 1.5-2.0 (acompanha a horizontalidade do sofa). >2.4 vira 'tabua' fina e estranha; <1.2 fica quadrado/atarracado pra sofa reto. Oval usa 1.4-1.8; redonda = 1.0 (caso a parte)."
+        },
+        {
+          "param": "round_diameter",
+          "min": 0.6,
+          "typ": 0.85,
+          "max": 1.1,
+          "unit": "m",
+          "note": "Diametro pra tampo redondo. Substitui length/width. Tipico 0.80-0.90 pra sala media. Footprint menor por suavizar cantos; bom em circulacao apertada."
+        },
+        {
+          "param": "top_thickness",
+          "min": 0.02,
+          "typ": 0.04,
+          "max": 0.09,
+          "unit": "m",
+          "note": "Espessura do tampo. FIXO um minimo estrutural (~2cm). Standard/organica: 0.025-0.05 (fino, leve). Low slab: 0.06-0.10 (laje grossa proposital). Acima de ~0.10 sem ser slab proposital vira 'bloco' pesado (anti-pattern)."
+        },
+        {
+          "param": "thickness_to_length_ratio",
+          "min": 0.02,
+          "typ": 0.04,
+          "max": 0.1,
+          "unit": "ratio",
+          "note": "Espessura do tampo / comprimento. Mantem o tampo 'fino' visualmente. Standard ~0.03-0.05. Low slab aceita ate ~0.10 de proposito. >0.12 = bloco desproporcional."
+        },
+        {
+          "param": "leg_inset",
+          "min": 0.04,
+          "typ": 0.08,
+          "max": 0.15,
+          "unit": "m",
+          "note": "Recuo das pernas pra dentro da borda do tampo (por lado). Tipico 0.06-0.10. Inset da leveza e evita bater o pe. inset~0 (perna rente a borda) deixa caixote/pesado. Low slab pode esconder/recuar muito a base (0.12-0.20)."
+        },
+        {
+          "param": "leg_inset_ratio",
+          "min": 0.05,
+          "typ": 0.1,
+          "max": 0.18,
+          "unit": "ratio",
+          "note": "leg_inset / top_width. Proporcional pra base nao 'estourar' nem encolher demais. ~0.08-0.12 saudavel. Razao guia o inset quando o tampo escala."
+        },
+        {
+          "param": "leg_thickness",
+          "min": 0.03,
+          "typ": 0.05,
+          "max": 0.09,
+          "unit": "m",
+          "note": "Secao da perna (lado, se quadrada/cilindrica). Tipico 0.04-0.06. Pernas finas afiladas = ar leve (organica). Grossas (>0.08) sem ser slab puxam pro 'caixote' pesado."
+        },
+        {
+          "param": "leg_taper_angle",
+          "min": 0,
+          "typ": 4,
+          "max": 12,
+          "unit": "deg",
+          "note": "Inclinacao/afilamento da perna (cone ou splay). 0 = perna reta (standard/slab). 3-8deg = afilada classica (organica/mid-century). >12deg fica instavel/datado. Splay lateral suaviza, comum no arquetipo organico."
+        },
+        {
+          "param": "lower_shelf_gap",
+          "min": 0.06,
+          "typ": 0.12,
+          "max": 0.2,
+          "unit": "m",
+          "note": "Vao livre entre prateleira inferior e o chao (so no arquetipo 2-niveis). Tipico 0.10-0.15. Vao da prateleira ao tampo precisa caber objetos (livros/cesto): ~0.18-0.28m. <0.06 do chao parece apertado/sujo."
+        },
+        {
+          "param": "distance_to_sofa",
+          "min": 0.3,
+          "typ": 0.4,
+          "max": 0.5,
+          "unit": "m",
+          "note": "Folga frontal entre borda do tampo e a frente do sofa. FIXO pelo corpo: alcanca sentado (~braco) e ainda passa a perna. <0.30 bate o joelho; >0.50 fica longe pra apoiar/pegar. Otimo ~0.35-0.45m. Nao escala com o tamanho da mesa."
+        },
+        {
+          "param": "clearance_circulation",
+          "min": 0.45,
+          "typ": 0.7,
+          "max": 0.9,
+          "unit": "m",
+          "note": "Folga de passagem nos demais lados (entre mesa e outros moveis/parede). FIXO pelo corpo: minimo ~0.45 pra passar de lado, ~0.70-0.90 confortavel de frente. Usado pra validar o footprint contra a sala, nao pela mesa em si."
+        },
+        {
+          "param": "ground_clearance",
+          "min": 0,
+          "typ": 0.1,
+          "max": 0.18,
+          "unit": "m",
+          "note": "Vao do tampo/corpo principal ate o chao no perimetro. Low slab ~0 (quase rente). Standard/organica 0.10-0.18 mostrando perna. Define 'peso' visual: rente=macico, alto=leve."
+        }
+      ],
+      "relations": [
+        "CRITICA: table_height <= seat_height (do sofa) e table_height >= seat_height - 0.10. Otimo: table_height = seat_height - 0.03. O tampo NUNCA fica acima do assento.",
+        "top_length ~= 0.5 a 0.66 * sofa_length (regra dos dois-tercos do sofa). Tampo entre metade e dois-tercos do comprimento do sofa.",
+        "top_aspect_ratio (length/width) ~= 1.5 a 2.0 pra acompanhar a horizontalidade do sofa; oval 1.4-1.8; redonda 1.0.",
+        "top_thickness / top_length <= ~0.05 no standard (tampo 'fino'); low slab pode ir ate ~0.10 de proposito.",
+        "leg_inset ~= 0.08 a 0.12 * top_width por lado; inset>0 sempre (perna recuada da borda da leveza).",
+        "distance_to_sofa entre 0.30 e 0.50m e e FIXO (corpo), independente do tamanho do tampo.",
+        "Vao prateleira->tampo (2-niveis) >= 0.18m pra caber objetos; lower_shelf_gap do chao >= 0.06m.",
+        "Footprint do tampo (length*width) deve deixar clearance_circulation >= 0.45m em todos os lados livres dentro da sala.",
+        "leg_thickness escala suavemente com top_length mas fica fina: leg_thickness ~= 0.04-0.06 mesmo em mesas maiores (nao engrossa proporcional)."
+      ],
+      "archetypes": [
+        "LOW SLAB (laje baixa): table_height 0.30-0.38m, ground_clearance ~0, top_thickness 0.06-0.10m (laje grossa proposital), base recuada/escondida (leg_inset 0.12-0.20 ou painel macico), leg_taper 0deg, aspecto pesado/minimalista/macico. Tampo retangular generoso. delta vs assento bem negativo (-0.05 a -0.10).",
+        "STANDARD 2-NIVEIS (default seguro): table_height 0.40-0.45m (nivelado ao assento, delta ~-0.03 a 0), tampo retangular top_length 1.0-1.3m, top_thickness 0.03-0.05m, pernas visiveis retas leg_taper 0-4deg, leg_inset 0.06-0.10m, prateleira inferior (vao tampo->prateleira ~0.20-0.28m, vao prateleira->chao 0.10-0.15m). Equilibrado, util, proporcao 'certa'.",
+        "ORGANICA/OVAL: tampo oval (aspect 1.4-1.8) ou redondo (diam 0.80-0.90m), bordas suaves, top_thickness fino 0.025-0.04m, pernas afiladas/conicas leg_taper 4-8deg com splay, ground_clearance 0.12-0.18m (ar leve), footprint menor por suavizar cantos => melhor em circulacao apertada. table_height 0.40-0.46m."
+      ],
+      "anti_patterns": [
+        "Tampo ACIMA da altura do assento do sofa (table_height > seat_height): incomoda braco/joelho e le como erro. Anti-pattern numero 1.",
+        "Tampo grosso demais (top_thickness > ~0.10m) sem ser slab proposital: vira 'bloco' pesado e desproporcional.",
+        "Pernas grossas (>0.08m) e/ou sem inset (leg_inset ~0): a base vira caixote macico, perde leveza.",
+        "Peca muito alta e estreita (table_height alto + top_width pequeno): aspecto de mesa-de-canto / instavel, foge da horizontalidade do sofa.",
+        "Tampo curto demais (top_length < 0.5*sofa_length): vira 'ilha' pequena perdida na frente do sofa, fora de escala.",
+        "Tampo comprido/fino demais (aspect_ratio > 2.4): le como 'tabua' estreita, sem area util.",
+        "Distancia ao sofa errada: <0.30m bate o joelho (apertado); >0.50m longe demais pra apoiar/alcancar sentado.",
+        "Tampo redondo grande (diam > ~1.1m) num sofa reto longo: footprint mal aproveitado, sobra circulacao quebrada nos cantos.",
+        "Prateleira inferior colada no chao (lower_shelf_gap < 0.06m) ou vao tampo->prateleira < 0.18m: parece entupido, sem funcao."
+      ],
+      "scaling": "\"FIXO pelo corpo humano (NAO escala com o tamanho da peca): table_height (travada pela altura do assento do sofa, delta -0.10..0), distance_to_sofa (0.30-0.50m), clearance_circulation (>=0.45m), top_thickness minimo estrutural (~0.02m), e a relacao critica table_height<=seat_height. ESCALA com o tamanho/contexto: top_length e top_width (regra dos dois-tercos do comprimento do sofa + area livre da sala), mantendo top_aspect_ratio do arquetipo; leg_inset escala proporcional ao top_width (~0.08-0.12x); o footprint do tampo cresce/encolhe pra preencher a sala sem violar as folgas fixas de circulacao. leg_thickness so escala MUITO suave (fica fina mesmo em mesas grandes). O ESTILO/ARQUETIPO controla espessura do tampo (slab grosso vs fino), ground_clearance (rente vs perna alta), leg_taper (reto vs afilado) e formato (retangular vs oval/redondo) — esses sao escolha de design, nao corpo nem escala.\""
+    },
+    "rack": {
+      "summary": "Tabela de referência dimensional para a classe RACK/PAINEL DE TV (mid-century a contemporâneo), no mesmo molde da classe SOFA, para virar constraints de uma spec procedural. Eixo ergonômico raiz: a linha de visão sentado é fixa pelo corpo humano — olho a ~1,12-1,22 m do chão num sofá/poltrona, e o CENTRO da TV deve cair perto desse nível (terço inferior da tela no máximo levemente acima da linha do olho). Isso ancora a altura do conjunto mais do que qualquer estilo. Daí derivam três arquétipos: (A) rack baixo com pés (mid-century / pernas palito) — superfície a 0,40-0,55 m, deixa a TV sentada na bancada com centro perto da linha do olho; (B) rack suspenso na parede (contemporâneo flutuante) — corpo fino a 0,35-0,45 m do chão, leve, sem pés; (C) rack + painel completo (parede de marcenaria) — base baixa + painel ripado/MDF subindo 1,2-2,4 m, TV pendurada no painel com centro a ~1,1 m. Comprimento escala com a diagonal da TV (regra prática: largura do móvel ≥ largura da TV + 0,30-0,60 m de folga de cada lado; TV 55\"≈1,23 m de largura, 65\"≈1,45 m, 75\"≈1,67 m de largura física do painel). Profundidade é quase fixa pelo corpo do móvel/eletrônicos (0,35-0,45 m), NÃO escala com a TV. Anti-patterns são sobretudo de proporção: móvel curto demais pra TV (TV \"transborda\"), alto demais (pescoço pra cima), profundo demais (bloco maciço), painel grosso, ausência de vão/respiro embaixo do suspenso. Valores em metros e graus, com típico+min+max plausíveis.",
+      "ranges": [
+        {
+          "param": "rack_height_top_surface",
+          "min": 0.3,
+          "typ": 0.45,
+          "max": 0.6,
+          "unit": "m",
+          "note": "Altura da superfície superior do rack baixo/bancada (do chão ao tampo). Típico 0,40-0,50 pra TV apoiada cair com centro perto da linha do olho sentado. Abaixo de 0,30 vira 'rente ao chão' (mid-century radical); acima de 0,60 a TV apoiada sobe demais."
+        },
+        {
+          "param": "rack_body_height",
+          "min": 0.3,
+          "typ": 0.4,
+          "max": 0.55,
+          "unit": "m",
+          "note": "Altura do CORPO/caixa do rack (sem contar pés). Define o volume de nichos/gavetas. Corpo alto demais (>0,55) com pés vira armário, perde o ar de rack horizontal."
+        },
+        {
+          "param": "leg_height",
+          "min": 0.08,
+          "typ": 0.15,
+          "max": 0.25,
+          "unit": "m",
+          "note": "Altura dos pés (rack baixo com pés / mid-century). Pé palito mid-century 0,12-0,20 m, levemente aberto. <0,08 quase encosta no chão (perde leveza); >0,25 vira aparador alto. Suspenso e painel completo NÃO têm pés."
+        },
+        {
+          "param": "wall_mount_gap_floor",
+          "min": 0.25,
+          "typ": 0.35,
+          "max": 0.5,
+          "unit": "m",
+          "note": "Vão livre do chão até a base do rack SUSPENSO. Esse respiro é o que faz o flutuante parecer leve; <0,20 parece colado/errado, >0,55 vira prateleira alta perdida. Crítico só pro arquétipo suspenso."
+        },
+        {
+          "param": "depth",
+          "min": 0.3,
+          "typ": 0.4,
+          "max": 0.5,
+          "unit": "m",
+          "note": "Profundidade do rack. QUASE FIXA pelo corpo do móvel/eletrônicos e pela base da TV moderna; não escala com a diagonal. <0,30 a TV de base larga não assenta; >0,50 vira bloco maciço que avança no ambiente."
+        },
+        {
+          "param": "tv_screen_center_height",
+          "min": 1,
+          "typ": 1.12,
+          "max": 1.25,
+          "unit": "m",
+          "note": "Altura do CENTRO da tela ao chão — a constraint ERGONÔMICA raiz. Linha do olho sentado ~1,12-1,22 m; centro da TV deve cair perto/levemente abaixo disso. >1,30 força pescoço pra cima (erro clássico de TV sobre lareira/painel alto)."
+        },
+        {
+          "param": "length_clearance_per_side",
+          "min": 0.15,
+          "typ": 0.3,
+          "max": 0.6,
+          "unit": "m",
+          "note": "Folga de comprimento do móvel além de CADA lado da largura física da TV. Move o comprimento do rack: rack_length ≈ tv_width + 2×folga. Folga 0 = TV transborda o móvel (anti-pattern); folga generosa 0,40-0,60 = visual equilibrado contemporâneo."
+        },
+        {
+          "param": "rack_length_55in",
+          "min": 1.4,
+          "typ": 1.8,
+          "max": 2.2,
+          "unit": "m",
+          "note": "Comprimento do rack para TV 55\" (largura física ~1,23 m). Mínimo ~1,40 (folga curta); típico 1,60-1,90. Escala com a TV."
+        },
+        {
+          "param": "rack_length_65in",
+          "min": 1.6,
+          "typ": 2,
+          "max": 2.6,
+          "unit": "m",
+          "note": "Comprimento do rack para TV 65\" (largura física ~1,45 m). Típico 1,90-2,20. Escala com a TV."
+        },
+        {
+          "param": "rack_length_75in",
+          "min": 1.8,
+          "typ": 2.3,
+          "max": 3,
+          "unit": "m",
+          "note": "Comprimento do rack para TV 75\" (largura física ~1,67 m). Típico 2,10-2,50; em painel completo pode ir a 3,0+. Escala com a TV."
+        },
+        {
+          "param": "tv_width_55in",
+          "min": 1.21,
+          "typ": 1.23,
+          "max": 1.25,
+          "unit": "m",
+          "note": "Largura física aproximada de uma TV 55\" 16:9 (sem moldura/com moldura fina). Quase fixa por geometria da diagonal, não por estilo."
+        },
+        {
+          "param": "tv_width_65in",
+          "min": 1.43,
+          "typ": 1.45,
+          "max": 1.47,
+          "unit": "m",
+          "note": "Largura física aproximada de uma TV 65\" 16:9. Fixa pela diagonal."
+        },
+        {
+          "param": "tv_width_75in",
+          "min": 1.65,
+          "typ": 1.67,
+          "max": 1.69,
+          "unit": "m",
+          "note": "Largura física aproximada de uma TV 75\" 16:9. Fixa pela diagonal."
+        },
+        {
+          "param": "niche_open_height",
+          "min": 0.16,
+          "typ": 0.22,
+          "max": 0.35,
+          "unit": "m",
+          "note": "Altura interna do nicho aberto (soundbar/console/receiver). Soundbar pede ~0,10-0,14; console/receiver ~0,15-0,30. <0,16 só cabe controle/objeto; nicho único alto >0,40 desequilibra o ritmo da fachada."
+        },
+        {
+          "param": "drawer_front_height",
+          "min": 0.12,
+          "typ": 0.2,
+          "max": 0.3,
+          "unit": "m",
+          "note": "Altura da frente de gaveta. Gaveta rasa 0,10-0,15 (controles/cabos), média 0,18-0,25 (mídia/objetos). >0,30 vira gavetão pesado que quebra a horizontalidade leve do rack."
+        },
+        {
+          "param": "drawer_count",
+          "min": 0,
+          "typ": 2,
+          "max": 4,
+          "unit": "un",
+          "note": "Número de gavetas no comprimento. 0 (puro nicho aberto, mid-century), 2 típico (ritmo simétrico), até 4 em racks longos de 75\". Ímpar central também válido. Acima de 4 fragmenta demais a fachada."
+        },
+        {
+          "param": "niche_count",
+          "min": 1,
+          "typ": 2,
+          "max": 4,
+          "unit": "un",
+          "note": "Número de nichos/módulos abertos. Geralmente espelha a divisão da fachada (1 vão central largo, ou 2-3 simétricos). Ritmo deve fechar com drawer_count num total par/harmônico."
+        },
+        {
+          "param": "panel_height",
+          "min": 1.2,
+          "typ": 1.8,
+          "max": 2.4,
+          "unit": "m",
+          "note": "Altura do PAINEL (ripado/MDF/marcenaria) atrás da TV — só arquétipo rack+painel. Painel cobre a TV com respiro: ≥ altura_TV + 2×margem. 1,80 enquadra bem 55-65\"; vai a 2,40 (quase teto) em pé-direito alto. <1,20 não 'segura' a TV visualmente."
+        },
+        {
+          "param": "panel_width",
+          "min": 1.4,
+          "typ": 2.2,
+          "max": 3.2,
+          "unit": "m",
+          "note": "Largura do painel atrás da TV. Mais largo que a TV (margem lateral ≥0,30 cada lado); frequentemente ≥ largura do rack. Painel mais estreito que a TV = erro grosseiro."
+        },
+        {
+          "param": "panel_thickness",
+          "min": 0.02,
+          "typ": 0.04,
+          "max": 0.08,
+          "unit": "m",
+          "note": "Espessura aparente do painel/ripado. Fino (0,03-0,05) parece marcenaria fina e contemporânea; >0,08 vira parede falsa pesada (anti-pattern de 'painel grosso')."
+        },
+        {
+          "param": "panel_margin_around_tv",
+          "min": 0.2,
+          "typ": 0.35,
+          "max": 0.6,
+          "unit": "m",
+          "note": "Margem de painel visível ao redor da TV (cada lado/topo). <0,20 a TV 'enche' o painel e parece apertada; ~0,35 dá respiro elegante; >0,60 a TV 'some' num painel gigante."
+        },
+        {
+          "param": "toe_recess_depth",
+          "min": 0,
+          "typ": 0.04,
+          "max": 0.08,
+          "unit": "m",
+          "note": "Recuo de rodapé/zócalo na base do rack apoiado no chão (alternativa aos pés). 0 = caixa rente ao piso; 0,04-0,06 dá leveza sem pés visíveis. Só faz sentido quando NÃO há pés nem suspensão."
+        },
+        {
+          "param": "cable_gap_back",
+          "min": 0.03,
+          "typ": 0.06,
+          "max": 0.1,
+          "unit": "m",
+          "note": "Vão de passagem de cabos atrás dos nichos/entre corpo e parede. Detalhe funcional fixo; não escala com a TV. Ausência total faz o nicho parecer maciço/irreal."
+        },
+        {
+          "param": "viewing_angle_tilt",
+          "min": 0,
+          "typ": 5,
+          "max": 15,
+          "unit": "graus",
+          "note": "Inclinação aceitável da linha de visão acima da horizontal do olho sentado. 0-10° confortável; >15° (TV alta/sobre lareira) força pescoço — anti-pattern ergonômico. Parâmetro de validação, não de geometria do móvel."
+        }
+      ],
+      "relations": [
+        "ANCORA ERGONÔMICA: tv_screen_center_height ≈ 1,10-1,20 m (fixo pelo olho sentado), INDEPENDENTE do estilo. No rack baixo: rack_height_top_surface + (altura_TV/2) ≈ centro → bancada ~0,45 m + meia-TV faz o centro cair na faixa. No painel/suspenso: a TV é pendurada direto na altura-alvo.",
+        "COMPRIMENTO ESCALA COM A TV: rack_length ≈ tv_width + 2×length_clearance_per_side. Mínimo absoluto: rack_length ≥ tv_width (senão a TV transborda). Saudável: folga 0,25-0,60 m por lado.",
+        "PROFUNDIDADE NÃO ESCALA: depth fica em 0,35-0,45 m para 55\", 65\" ou 75\" igual — é função do corpo do móvel e da base da TV, não da diagonal.",
+        "ALTURA TOTAL NÃO ESCALA COM A TV: rack_height (pés+corpo) governada pela linha do olho, não pelo tamanho da tela. TV maior NÃO sobe o móvel — alarga.",
+        "RAZÃO DE ESBELTEZ (rack baixo): comprimento/altura_total ≈ 3:1 a 5:1 (horizontal, leve). <2:1 parece bloco/cubo; >6:1 parece prateleira fina sem corpo.",
+        "RAZÃO PROFUNDIDADE/ALTURA ≈ 0,8:1 a 1,1:1 no corpo — mais profundo que alto vira gaveteiro pesado.",
+        "PAINEL ENQUADRA A TV: panel_height ≥ altura_TV + 2×panel_margin_around_tv E panel_width ≥ tv_width + 2×panel_margin_around_tv. O painel é sempre MAIOR que a TV em ambos os eixos.",
+        "RITMO DA FACHADA: drawer_count + niche_count devem somar uma divisão harmônica (simétrica ou ímpar-central) que cobre o comprimento; cada módulo ~0,40-0,90 m de largura.",
+        "PÉS vs SUSPENSO vs BASE: exatamente UM modo de apoio — leg_height>0 (com pés) XOR wall_mount_gap_floor>0 (suspenso) XOR toe_recess (caixa no chão). Misturar pés altos + suspensão é incoerente.",
+        "VÃO INFERIOR LEVE: no suspenso, wall_mount_gap_floor (0,30-0,45) é o que cria a leveza; no rack com pés, leg_height (0,12-0,20) cumpre o mesmo papel visual."
+      ],
+      "archetypes": [
+        "RACK BAIXO COM PÉS (mid-century / pernas palito): rack_height_top_surface 0,42-0,50 m, corpo 0,32-0,42 m, leg_height 0,12-0,20 m (pé palito levemente aberto/cônico), depth 0,38-0,45 m. Fachada com nichos abertos dominantes (niche_count 1-2 largos) + 0-2 gavetas; muito horizontal (esbeltez 4-5:1). TV apoiada na bancada → centro ~1,10-1,15 m. Madeira/freijó, leveza pela perna. Para 55-65\": comprimento 1,60-2,00 m.",
+        "RACK SUSPENSO NA PAREDE (contemporâneo flutuante): SEM pés, wall_mount_gap_floor 0,30-0,45 m, corpo fino 0,30-0,38 m de altura, depth 0,30-0,40 m (mais raso, leve). Fachada limpa, lacada, gavetas com puxador oculto (drawer_count 2-3) e poucos/nenhum nicho aberto. TV pode ficar apoiada (centro ~1,05-1,15) ou pendurada acima. Esbeltez alta 4-6:1. O respiro embaixo é a assinatura.",
+        "RACK + PAINEL COMPLETO (parede de marcenaria): base baixa (rack apoiado/suspenso, 0,30-0,40 m de altura) + PAINEL ripado/MDF subindo panel_height 1,80-2,40 m, panel_width 2,20-3,20 m, panel_thickness 0,03-0,05 m. TV PENDURADA no painel, centro a ~1,10-1,20 m, com panel_margin 0,30-0,50 m de respiro ao redor. Para 65-75\": base 2,20-2,60 m. Mais imponente/cheio; combina nichos na base + ripado vertical no painel."
+      ],
+      "anti_patterns": [
+        "TV TRANSBORDA O MÓVEL: rack_length < tv_width (ou folga ~0 por lado). A TV parece grande demais, 'pendurada' nas pontas — o erro de proporção mais comum. Regra: largura do móvel ≥ TV + 0,25-0,30 m por lado.",
+        "TV ALTA DEMAIS (pescoço pra cima): tv_screen_center_height > 1,30 m / viewing_angle_tilt > 15° — clássico da TV sobre lareira ou no topo do painel. Ergonomicamente errado mesmo que 'bonito'.",
+        "BLOCO MACIÇO / CUBO: profundidade ou altura grandes demais (depth >0,50, esbeltez <2:1). O rack perde a horizontalidade leve e vira um caixote pesado plantado no chão.",
+        "PÉS INVISÍVEIS / CAIXA COLADA NO CHÃO sem ser de propósito: leg_height < 0,08 e sem recuo de rodapé — parece que a perna sumiu/afundou, peso visual no piso.",
+        "SUSPENSO SEM RESPIRO: wall_mount_gap_floor < 0,20 m — o flutuante perde a razão de existir, parece colado/errado na parede.",
+        "PAINEL GROSSO / PAREDE FALSA: panel_thickness > 0,08 m — vira uma segunda parede maciça em vez de marcenaria fina; mata o contemporâneo.",
+        "PAINEL MENOR QUE A TV: panel_width < tv_width ou panel_height < altura_TV — a TV escapa das bordas do painel, leitura confusa e amadora.",
+        "FACHADA SEM RITMO: tudo gaveta fechada e nenhum nicho (parece armário/cômoda) OU divisões desiguais aleatórias que não fecham simetria — quebra a leitura de 'rack de TV'.",
+        "TV MINÚSCULA EM MÓVEL/PAINEL GIGANTE: panel_margin > 0,60 m por lado ou rack muito mais largo que a TV — a tela 'some', desproporção inversa.",
+        "MISTURA DE APOIOS INCOERENTE: pés altos + também suspenso, ou pés altíssimos (>0,25) num corpo baixo — linguagem estrutural confusa."
+      ],
+      "scaling": "FIXO PELO CORPO HUMANO (não escala com estilo nem com tamanho da TV): (1) altura do centro da tela ~1,10-1,20 m, travada pela linha do olho sentado num sofá/poltrona; (2) altura total do móvel (pés+corpo / bancada ~0,40-0,50 m) é derivada dessa linha do olho, NÃO do tamanho da TV — TV maior não sobe o rack; (3) profundidade 0,35-0,45 m, função do corpo do móvel e da base da TV/eletrônicos; (4) ângulo de visão confortável 0-10° acima da horizontal; (5) vãos funcionais fixos: passagem de cabos ~0,06 m, altura mínima de nicho de soundbar ~0,12 m. ESCALA COM O TAMANHO DA TV (diagonal 55→65→75\\\"): (a) COMPRIMENTO do rack = tv_width + 2×folga (folga 0,25-0,60 m/lado) → ~1,6 m / ~2,0 m / ~2,3 m; (b) largura e altura do PAINEL = dimensões da TV + margem de respiro 0,30-0,50 m em cada eixo; (c) número de módulos (gavetas+nichos) cresce com o comprimento mantendo cada módulo em 0,40-0,90 m. ESCALA COM O ESTILO/ARQUÉTIPO (não com o corpo): presença/ausência de pés vs suspensão vs painel; esbeltez (mid-century mais horizontal, painel mais imponente); proporção aberto/fechado da fachada; espessura aparente da marcenaria. REGRA-MÃE: altura é ditada pelo corpo, comprimento/painel pela TV, linguagem de apoio e ritmo pelo estilo."
+    },
+    "nightstand": {
+      "summary": "Tabela de referência da classe CRIADO-MUDO (nightstand) para virar constraints de spec procedural, mesmo molde da classe SOFA. A relação CRÍTICA é altura do topo vs altura do colchão: o topo do criado-mudo deve ficar entre -2 cm e +5 cm do plano do colchão (idealmente alinhado, ±0), pra que o objeto seja alcançável deitado e não vire \"torre\" ou \"caixote baixo\". Tudo o mais (largura, profundidade, gavetas, pés, folga da cama) escala em torno dessa âncora de altura. Três arquétipos no eixo de estilo: gaveteiro fechado (clássico/sólido, base no chão ou pés baixos), aberto com nicho (escandinavo/leve, pés altos visíveis + tampo + 1 gaveta + nicho aberto), suspenso (moderno/flutuante, fixo na parede sem pés). O corpo humano fixa a ALTURA (relação com colchão) e a PROFUNDIDADE útil de alcance; largura e detalhes de gaveta/pé escalam com o estilo e a folga disponível ao lado da cama.",
+      "ranges": [
+        {
+          "param": "altura_topo_total",
+          "min": 0.4,
+          "typ": 0.55,
+          "max": 0.7,
+          "unit": "m",
+          "note": "Altura do topo (superfície de apoio) ao chão. ANCORA da classe. Tipico 0.50-0.60 acompanha colchão moderno alto."
+        },
+        {
+          "param": "altura_topo_relativa_ao_colchao",
+          "min": -0.02,
+          "typ": 0,
+          "max": 0.05,
+          "unit": "m",
+          "note": "RELACAO CRITICA: topo do criado vs plano superior do colchao. Ideal nivelado (0). Abaixo de -5cm vira caixote; acima de +8cm vira torre/bloco. Tudo escala disso."
+        },
+        {
+          "param": "largura",
+          "min": 0.35,
+          "typ": 0.5,
+          "max": 0.65,
+          "unit": "m",
+          "note": "Frente do movel. <0.35 parece cubo/poste; >0.70 compete com a cama e vira comoda. 0.45-0.55 e o sweet spot."
+        },
+        {
+          "param": "profundidade",
+          "min": 0.3,
+          "typ": 0.4,
+          "max": 0.45,
+          "unit": "m",
+          "note": "Limitada pelo alcance do braco deitado e pela folga de circulacao. >0.45 invade passagem; <0.30 nao acomoda abajur+livro."
+        },
+        {
+          "param": "altura_util_gaveta",
+          "min": 0.08,
+          "typ": 0.14,
+          "max": 0.2,
+          "unit": "m",
+          "note": "Vao interno utilizavel de uma gaveta. <0.08 inutil; >0.22 parece desproporcional num movel pequeno (vira gaveteiro de comoda)."
+        },
+        {
+          "param": "numero_gavetas",
+          "min": 1,
+          "typ": 2,
+          "max": 3,
+          "unit": "un",
+          "note": "Tipico 1-2. 3 gavetas so se altura_total>=0.60. Mais que isso = comoda, nao criado-mudo."
+        },
+        {
+          "param": "altura_pes",
+          "min": 0,
+          "typ": 0.12,
+          "max": 0.22,
+          "unit": "m",
+          "note": "0 = base no chao (fechado/suspenso); 0.10-0.18 = pes visiveis (estilo escandinavo). >0.22 deixa o corpo curto/instavel visualmente."
+        },
+        {
+          "param": "espessura_tampo",
+          "min": 0.015,
+          "typ": 0.025,
+          "max": 0.04,
+          "unit": "m",
+          "note": "Tampo fino (1.5-2.5cm) = leve/moderno; grosso (3-4cm) = robusto/macico. Escala com o estilo, nao com o corpo."
+        },
+        {
+          "param": "espessura_painel_corpo",
+          "min": 0.015,
+          "typ": 0.018,
+          "max": 0.025,
+          "unit": "m",
+          "note": "Laterais/fundo do caixote. ~18mm e o padrao MDF. Engrossar demais incha o movel pequeno."
+        },
+        {
+          "param": "recuo_pes",
+          "min": 0,
+          "typ": 0.02,
+          "max": 0.05,
+          "unit": "m",
+          "note": "Quanto os pes recuam da face/aresta do corpo. Recuo leve da leveza (efeito flutuante); pe rente a aresta da base macica."
+        },
+        {
+          "param": "folga_lateral_cama",
+          "min": 0.02,
+          "typ": 0.05,
+          "max": 0.15,
+          "unit": "m",
+          "note": "Gap entre lateral do criado e a estrutura da cama. ~5cm = integrado/proximo. Folga grande deixa o criado orfao no espaco."
+        },
+        {
+          "param": "altura_suspenso_ao_chao",
+          "min": 0.2,
+          "typ": 0.3,
+          "max": 0.4,
+          "unit": "m",
+          "note": "So arquetipo suspenso: vao livre embaixo. Mantem topo nivelado com colchao mas sem tocar o chao. <0.20 nao parece flutuante."
+        },
+        {
+          "param": "raio_chanfro_arestas",
+          "min": 0,
+          "typ": 0.004,
+          "max": 0.015,
+          "unit": "m",
+          "note": "Quebra de aresta viva. 2-6mm = acabamento moderno; 0 = aresta dura industrial. Pequeno fillet evita o look de bloco bruto."
+        },
+        {
+          "param": "altura_nicho_aberto",
+          "min": 0.12,
+          "typ": 0.18,
+          "max": 0.28,
+          "unit": "m",
+          "note": "So arquetipo aberto-com-nicho: vao aberto entre tampo/gaveta para livros. Precisa ser >12cm pra acomodar objeto, senao parece fenda."
+        }
+      ],
+      "relations": [
+        "altura_topo_total ≈ altura_colchao_ao_chao + [-0.02 .. +0.05] (a ancora: o topo persegue o plano do colchao, NAO uma altura fixa de mesa)",
+        "profundidade ≈ 0.75 .. 0.95 × largura (criado quase quadrado em planta; profundidade sempre <= largura para nao parecer poste)",
+        "razao largura:profundidade entre 1.0:1 e 1.4:1 (saudavel ~1.2:1); fora disso (>1.6:1) vira comodinha/banqueta, (<0.9:1) vira torre",
+        "soma(altura_util_gavetas) + altura_pes + espessura_tampo + folgas internas ≈ altura_topo_total (a altura total e um orcamento repartido, nao livre)",
+        "altura_pes + altura_corpo_caixote = altura_topo_total - espessura_tampo (pes altos => caixote curto, e vice-versa; trade-off fixo)",
+        "altura_util_gaveta unitaria ≈ (altura_corpo_caixote - n×espessura_divisoria) / numero_gavetas (gavetas dividem o corpo igualmente; ultima pode ser maior)",
+        "footprint_topo (largura × profundidade) >= 0.16 m² para caber abajur + telefone + livro sem amontoar (~0.45×0.40)",
+        "espessura_tampo ≈ espessura_painel_corpo × [0.9 .. 2.0] (tampo igual ou um pouco mais grosso que as laterais; tampo mais fino que o corpo parece fragil)",
+        "altura_suspenso_ao_chao (suspenso) preserva a MESMA relacao topo↔colchao: topo nivelado, so o vao inferior muda"
+      ],
+      "archetypes": [
+        "GAVETEIRO FECHADO (classico/solido): largura 0.50, profundidade 0.42, altura_total 0.55, 2 gavetas de 0.16 util, base no chao OU pes baixos 0.06-0.10, tampo grosso 0.030, painel 0.018, recuo_pes 0, chanfro 0-2mm. Look macico, ancorado, peso visual no chao. Frente totalmente fechada (gaveta+gaveta).",
+        "ABERTO COM NICHO (escandinavo/leve): largura 0.45, profundidade 0.38, altura_total 0.52, 1 gaveta de 0.14 util em cima + nicho aberto 0.18 embaixo, pes altos visiveis 0.14-0.18 (tipo palito, levemente abertos), tampo fino 0.018, recuo_pes 0.02, chanfro 4-6mm. Look leve, arejado, o chao aparece sob o movel. Madeira clara.",
+        "SUSPENSO (moderno/flutuante): largura 0.55, profundidade 0.35, altura_corpo 0.16-0.22 (so caixote), SEM pes, fixado na parede com vao_ao_chao 0.28-0.35, topo ainda nivelado ao colchao, 1 gaveta de 0.12-0.16 util OU caixa+tampo, tampo embutido fino 0.018, faces lisas sem puxador aparente (push-to-open), chanfro 2-4mm. Look minimalista, parede-montado, leveza maxima."
+      ],
+      "anti_patterns": [
+        "TORRE/POSTE: largura < 0.35 com altura > 0.55 — proporcao vertical demais, parece coluna e nao mesa de apoio (footprint do topo fica menor que o objeto que vai em cima)",
+        "CAIXOTE/BLOCO BRUTO: cubo ~igual nos tres eixos (ex. 0.45×0.45×0.45) com aresta viva, sem pes, sem chanfro, painel grosso — le como caixa de papelao, nao como movel",
+        "DESALINHO COM O COLCHAO: topo > +8cm acima do colchao (inalcancavel deitado, vira mesa lateral) ou < -8cm abaixo (some ao lado da cama, vira banquinho) — quebra a relacao critica da classe",
+        "COMODA DISFARCADA: largura > 0.70 e/ou 3+ gavetas grandes — saiu da classe criado-mudo e virou comoda; perde a leitura de 'apoio de cabeceira'",
+        "PROFUNDIDADE INVASORA: profundidade > 0.45 — avanca sobre a circulacao lateral da cama e desequilibra a planta (parece grande demais para o vao)",
+        "PERNAS-PALITO INSTAVEIS: pes > 0.22 de altura e/ou finos demais sob corpo macico pesado — visual de movel que vai tombar, top-heavy",
+        "GAVETA ESMAGADA: altura_util_gaveta < 0.08 — fenda inutil que parece detalhe decorativo falso, nao gaveta real",
+        "TAMPO-LAMINA / TAMPO-LAJE: tampo < 1cm parece fragil e instavel; tampo > 5cm num movel de 50cm de largura parece pesado/desproporcional (overscale do detalhe)",
+        "FLUTUANTE FALSO: suspenso com vao_ao_chao < 0.18 — fica perto demais do chao e perde o efeito de leveza, parece so um movel baixo mal apoiado",
+        "FOLGA ORFA: gap lateral para a cama > 0.20 — o criado-mudo descola da cama e parece um movel solto/perdido no quarto, sem relacao com a cabeceira",
+        "PUXADOR FORA DE ESCALA: puxador/manopla grande herdado de movel maior — num criado pequeno o puxador domina a frente e estraga a proporcao"
+      ],
+      "scaling": "FIXO PELO CORPO HUMANO (nao escala com estilo/tamanho): (1) altura do topo SEMPRE perseguindo o plano do colchao [-2cm..+5cm] — esta e a unica medida verdadeiramente travada, porque o uso e alcancar objetos deitado; (2) profundidade util limitada pelo alcance do braco e pela circulacao (~0.30-0.45) — nao cresce indefinidamente; (3) altura util minima de gaveta (~0.08) e footprint minimo do topo (~0.16 m²) para funcao real. ESCALA COM ESTILO/VARIANTE: largura (0.35-0.65, mais larga = mais presenca/armazenamento), altura dos pes (0 no fechado/suspenso, 0.10-0.18 no escandinavo), espessura de tampo e painel (fino=moderno, grosso=robusto), numero e altura das gavetas, presenca de nicho aberto, recuo de pes e raio de chanfro (acabamento). REGRA DE ACOPLAMENTO: ao mudar a altura do colchao, a altura_total do criado se ajusta junto (relacao trava), e o orcamento de altura se redistribui entre pes + corpo/gavetas + tampo — esses tres absorvem a variacao mantendo o topo nivelado. Largura e profundidade NAO mudam com a altura do colchao (sao governadas por estilo + folga lateral disponivel). O arquetipo suspenso e o unico que substitui 'altura_pes' por 'vao_ao_chao' mantendo a mesma relacao topo↔colchao."
+    },
+    "builders": {
+      "summary": "\nDiagnóstico dos BUILDERS EXISTENTES para FASE 0 em E:/Claude/apps/sketchup-mcp (develop):\n\n**BUILDERS IMPLEMENTADOS:**\n1. **nightstand_builder.py** (CRIADO-MUDO): Completo com spec e contrato\n2. **bed_builder.py** (CAMA): Completo com spec e contrato\n3. **wardrobe_builder.py** (GUARDA-ROUPA): Completo com spec e contrato\n4. **sofa_builder.py** (SOFA): Completo com spec e contrato\n5. **decor_builders.py** (DECORAÇÃO): 8 builders procedurais (rug, coffee_table, side_table, floor_lamp, wall_art, curtain, plant, accent_seat)\n\n**NÃO ENCONTRADO:**\n- RackSpec / rack_builder.py: Builder de RACK (estante/móvel TV) NÃO EXISTE\n- ArmchairSpec / armchair_builder.py: Builder de POLTRONA standalone NÃO EXISTE (apenas AccentSeatSpec em decor_builders, que é \"assento de acento\" light)\n\n**PARAMETRIZAÇÃO:**\nTodos os builders reutilizam o padrão: partes semanticamente separadas (pecas distintas + materiais RGB), formato parts=(label,kind,x0,y0,x1,y1,z0,z1,rgb), conversão place_sofa_boxes (genérico), convenção X=largura, Y=profundidade (frente=-Y), Z=altura, origem (0,0,0).\n\n**EVAL_ARMCHAIR (worktree sofa-skill):**\nO eval_armchair_rolled_soft_arm não é builder parametrizado; é spec de teste (JSON config → sofa_builder com 1 seat, rolled_soft arm style). Os parâmetros usados: arm_style=rolled_soft, arm_width_m=0.26, arm_height_m=0.60, back_height_m=0.46, back_thickness_m=0.26. Este é o output da spec, não o input de um builder dedicado. A anatomia já sai do sofa_builder genérico com seat_count=1.\n",
+      "findings": [
+        {
+          "topic": "nightstand_builder.py (CRIADO-MUDO)",
+          "detail": "EXISTE e COMPLETO FASE 0. Parametros: width=0.45m, depth=0.40m, height=0.55m. Partes obrigatórias: corpo, tampo, gaveta, pe (4x). Contrato via NightstandSpec (furniture_anatomy_spec.py L228-268). Reutiliza _p() e place_sofa_boxes de sofa_builder. Gera parts em metros com RGB por papel (corpo/tampo/gaveta/pes com cores escaladas). Validação: assert height > foot_h + top_t.",
+          "file_refs": [
+            "E:/Claude/apps/sketchup-mcp/tools/nightstand_builder.py",
+            "E:/Claude/apps/sketchup-mcp/tools/furniture_anatomy_spec.py (L228-268)"
+          ]
+        },
+        {
+          "topic": "bed_builder.py (CAMA)",
+          "detail": "EXISTE e COMPLETO FASE 0. Parametros por tamanho (solteiro/casal/queen/king): largura 0.88-1.93m, comprimento 1.88-2.03m. Partes obrigatórias: estrado, colchao, cabeceira, travesseiro, manta (BED_REQUIRED_PARTS). Spec: BedSpec (L127-170). Gera: plinto recuado + estrado + cabeceira estofada (painel vertical Y=L-hbt) + colchao + N travesseiros separados na cabeceira + manta no pe. Validação: assert mattress_top > base_top, assert headboard_h > mattress_top+pillow_h. Contrato completo.",
+          "file_refs": [
+            "E:/Claude/apps/sketchup-mcp/tools/bed_builder.py",
+            "E:/Claude/apps/sketchup-mcp/tools/furniture_anatomy_spec.py (L118-179)"
+          ]
+        },
+        {
+          "topic": "wardrobe_builder.py (GUARDA-ROUPA)",
+          "detail": "EXISTE e COMPLETO FASE 0. Parametros: width=1.80m, depth=0.58m, height=2.20m. Partes obrigatórias: corpo, porta, puxador, rodape (WARDROBE_REQUIRED_PARTS). Spec: WardrobeSpec (L185-225). Gera: rodape recuado + corpo + N portas na frente (com frestas/divisoes verticais, gap=0.02m) + puxadores (1 por porta). N_doors() logic: 1 if W<0.9, 2 if W<1.8, else 3. Validacao: assert height > plinth_h. Contrato completo.",
+          "file_refs": [
+            "E:/Claude/apps/sketchup-mcp/tools/wardrobe_builder.py",
+            "E:/Claude/apps/sketchup-mcp/tools/furniture_anatomy_spec.py (L181-225)"
+          ]
+        },
+        {
+          "topic": "sofa_builder.py (SOFA)",
+          "detail": "EXISTE e COMPLETO FASE 0. Parametros: variant (straight/chaise_left/chaise_right), seats (int), width=2.20m, depth=0.95m, height=0.85m. Partes obrigatórias: base, seat_cushion, back_cushion, arm, foot (SOFA_REQUIRED_PARTS). Spec: SofaSpec (L21-92). Gera: pes 4x + bracos esq/dir (com arm_relief/arm_cap/arm_taper language cycle002-003) + base (main + chaise opconal com gramatica integrada) + assentos separados com vinco + encostos com rake (cisalhamento verts8). Contrato completo, validacoes de altura, bbox_m() com overshot do rake.",
+          "file_refs": [
+            "E:/Claude/apps/sketchup-mcp/tools/sofa_builder.py",
+            "E:/Claude/apps/sketchup-mcp/tools/furniture_anatomy_spec.py (L10-115)"
+          ]
+        },
+        {
+          "topic": "decor_builders.py + decor_anatomy_spec.py",
+          "detail": "EXISTE FASE 0 COMPLETA. 8 builders procedurais: build_rug, build_coffee_table, build_side_table, build_floor_lamp, build_wall_art, build_curtain, build_plant, build_accent_seat. Coffee_table parametros: width=1.10m, depth=0.60m, height=0.36m, top_t=0.06m, leg_t=0.05m (2 pernas-laje). Accent_seat (poltrona leve): width=0.75m, depth=0.80m, height=0.72m, 4 pes + assento + encosto baixo. Specs em decor_anatomy_spec.py (L51-267). Factory pattern decor_spec(kind, **overrides). Validacoes de bbox plausivel por tipo (DECOR_PLAUSIBLE_BBOX_M). Contrato completo.",
+          "file_refs": [
+            "E:/Claude/apps/sketchup-mcp/tools/decor_builders.py (L208-226)",
+            "E:/Claude/apps/sketchup-mcp/tools/decor_anatomy_spec.py (L269-283)"
+          ]
+        },
+        {
+          "topic": "RACK (Estante/Móvel TV) — NÃO EXISTE",
+          "detail": "RackSpec e rack_builder.py NÃO ENCONTRADOS no repo. Apenas referências em scratch/ (montage_*.py) mencionam 'rack=roxo' como placeholder placeholder na planta_74 sala. Será classe FALTANTE para FASE 1. Necessário: RackSpec com parametros (width, depth, height, n_shelves, shelf_depth, back_panel_h, leg_h, materials RGB). Builder: base recuada + lateral esquerdo/direito + N prateleiras separadas (kind=shelf) + pé horizontal frente.",
+          "file_refs": [
+            "E:/Claude/apps/sketchup-mcp/.claude/scratch/montage_evolucao.py",
+            "E:/Claude/apps/sketchup-mcp/.claude/scratch/montage_layout.py"
+          ]
+        },
+        {
+          "topic": "POLTRONA (Armchair) Standalone — NÃO EXISTE",
+          "detail": "ArmchairSpec e armchair_builder.py NÃO ENCONTRADOS. O repo tem AccentSeatSpec (decor_builders.py) que é 'assento de acento' leve (0.75x0.80x0.72m, encosto baixo 0.16m), MAS não é poltrona full. Worktree sofa-skill tem eval_armchair_rolled_soft_arm (JSON config em sofa_eval_cases.json L43-50) que é teste com: family=armchair, seat_count=1, arm_style=rolled_soft, bbox=1.02x0.94x0.86m. Mas é spec de TESTE consumida pelo sofa_builder genérico (N=1), não builder dedicado. Será classe FALTANTE para FASE 1. Necessário: ArmchairSpec (1 seat, arms rolled/square/tight, back pillow/tight, pernas tapered/block).",
+          "file_refs": [
+            "E:/Claude/worktrees/sofa-skill/configs/sofa_eval_cases.json (L43-50)",
+            "E:/Claude/worktrees/sofa-skill/renders/sofa_eval/eval_armchair_rolled_soft_arm/validation.json"
+          ]
+        },
+        {
+          "topic": "ESTRADO — Parte da CAMA, não builder separado",
+          "detail": "estrado (bed frame) é PECA gerada pelo bed_builder.py, não builder. Parametros dentro de BedSpec: base_z0=0.10m (plinto), base_top=0.38m (topo estrado). Parte kind=estrado gerada em 2 pecas: plinto recuado (Z=0..bz0) + estrado (Z=bz0..btop). Material: estrado_rgb=(74,56,42) madeira escura. Contrato BED_REQUIRED_PARTS menciona 'estrado' como obrigatorio.",
+          "file_refs": [
+            "E:/Claude/apps/sketchup-mcp/tools/bed_builder.py (L25-27)",
+            "E:/Claude/apps/sketchup-mcp/tools/furniture_anatomy_spec.py (L122)"
+          ]
+        },
+        {
+          "topic": "Contrato/Padrão genérico (reutilização)",
+          "detail": "Todos os builders seguem padrão: (1) Spec class em furniture_anatomy_spec.py ou decor_anatomy_spec.py com @dataclass + validate() + bbox_m() + to_dict(). (2) Builder function build_X(spec: XSpec) → (parts, meta). (3) parts = list[{label, kind, x0,y0,x1,y1,z0,z1, rgb}]. (4) Helper _p(label,kind,x0,y0,x1,y1,z0,z1,rgb) para criar part dict. (5) place_sofa_boxes(parts, center_in, facing) para posicionar na planta (rotacao+translacao). (6) Convenção X=largura, Y=profundidade (frente=-Y), Z=altura, origem (0,0,0). Material por RGB tuple, kind semantico. Sem asset externo, procedural leve.",
+          "file_refs": [
+            "E:/Claude/apps/sketchup-mcp/tools/sofa_builder.py (L194-227)",
+            "E:/Claude/apps/sketchup-mcp/tools/furniture_anatomy_spec.py (L61-92)",
+            "E:/Claude/apps/sketchup-mcp/tools/decor_builders.py (L18-32)"
+          ]
+        }
+      ]
+    }
+  }
+}

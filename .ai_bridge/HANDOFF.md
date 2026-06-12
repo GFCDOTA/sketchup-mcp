@@ -35,11 +35,21 @@ não abriria cycle 004 de forma; próximos ganhos são de OUTRO estágio (bevel/
 Verdicts SOFA-CLASS_cycle00{1,2,3}.md. **REGRA: mudança de FORMA do sofá a partir daqui = novo ciclo
 formal com juiz, nunca edição casual.**
 
-**PRÓXIMO: classe POLTRONA (armchair), cycle 001** — reusar o template provado (FASE 0 diagnóstico →
-spec/teoria executável → derive por arquétipo → matriz de generalização → juiz). A poltrona herda
-muito da teoria do sofá (1 lugar, braços/encosto/base; ranges próprios). Depois dela: cama → mesa de
-centro → rack → mesa de jantar → cadeira → guarda-roupa → criado-mudo (ordem do Felipe). O estágio
-de DETALHE do sofá (tufted do worktree sofa-skill, costura, material) fica pra quando a fase abrir.
+**POLTRONA cycle 001 FEITO (mesma data): WARN — "nasceu viável; precisa SE EMANCIPAR do sofá".**
+`tools/armchair_class.py` (teoria própria: arm_span [0.22,0.50], footprint quase-quadrado, encosto
+≥0.16 acima do braço, W≤1.05; arquétipos club/standard/lounge; 6 sabotagens) + geometria via
+`build_sofa(seats=1)`. Juiz: identidade de poltrona ✓; pior célula standard-slim-arm ("cadeira
+estofada"); **TOP3 cycle002: (1) CAVIDADE/integração braço+encosto (objeto unitário, não "módulo de
+sofá cortado") — provável geometria NOVA (braço wraparound que sobe e abraça o encosto); (2) regra
+geral de presença mínima do braço em escala compacta; (3) linguagem por arquétipo mais forte.**
+Vetado: engrossar só a slim-arm. Verdict: ARMCHAIR-CLASS_cycle001.md.
+
+**PESQUISA PRONTA pras próximas classes** (workflow 2026-06-12, tabelas ergonômicas completas em
+`C:/Users/FELIP_~1/AppData/Local/Temp/claude/E--Claude/f4ec71f5-c33c-42b6-91c3-9d56331f5428/tasks/w2w46wjf6.output`
+— SALVAR antes que o temp suma se for usar): CAMA, MESA DE CENTRO, RACK (builder NÃO existe — criar),
+CRIADO-MUDO. Builders existentes confirmados: bed_builder/wardrobe_builder/nightstand_builder/
+coffee_table (decor). Ordem do Felipe: cama → mesa de centro → rack → mesa de jantar → cadeira →
+guarda-roupa → criado-mudo. Detalhe do sofá (tufted do worktree sofa-skill) = estágio futuro.
 
 **Estado paralelo:** fase materiais da CENA pausada pré-veredito em `feat/scene-materials` (pushed);
 luz V-Ray da cena APROVADA (receita congelada no handoff abaixo). Ordem das classes do Felipe:
