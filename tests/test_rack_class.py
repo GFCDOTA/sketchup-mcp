@@ -23,7 +23,7 @@ def test_derive_never_fails(arch, tv):
     assert tv_satellite_gate(spec, tv)["result"] == "PASS"
 
 
-@pytest.mark.parametrize("idx", range(8))
+@pytest.mark.parametrize("idx", range(9))
 def test_sabotages_fail(idx):
     name, mk = _sabotages()[idx]
     assert _apply_sab(mk), name
@@ -53,6 +53,29 @@ def test_facade_rhythm_and_technical_void():
     parts, _ = build_rack(derive_rack_spec("65", "storage_media"))
     assert any(p["kind"] == "niche" for p in parts)    # vazio tecnico
     assert any(p["kind"] == "front" for p in parts)    # gaveta
+
+
+def test_cycle002_floating_context_and_facades():
+    """flutuacao REAL (wall_back + shadow gap + cleat) e fachadas simetricas."""
+    pf, _ = build_rack(derive_rack_spec("65", "floating_minimal"))
+    labels = {p["label"] for p in pf}
+    assert {"wall_back", "shadow_gap", "cleat"} <= labels
+    for arch in ("floating_minimal", "low_credenza", "storage_media"):
+        s = derive_rack_spec("65", arch)
+        assert s.facade_pattern == tuple(reversed(s.facade_pattern)), arch
+    # credenza: nicho CENTRAL (nao na ponta)
+    assert derive_rack_spec("65", "low_credenza").facade_pattern[1] == "niche"
+
+
+def test_tv_proxy_parts():
+    from tools.rack_class import _tv_proxy_parts
+    spec = derive_rack_spec("65", "low_credenza")
+    proxy = _tv_proxy_parts(spec, "65")
+    assert any(p["label"] == "eye_line" for p in proxy)
+    tw = 1.45
+    tl = next(p for p in proxy if p["label"] == "tv_l")
+    tr = next(p for p in proxy if p["label"] == "tv_r")
+    assert abs((tr["x1"] - tl["x0"]) - tw) < 0.01
 
 
 def test_floating_body_scales_with_length():

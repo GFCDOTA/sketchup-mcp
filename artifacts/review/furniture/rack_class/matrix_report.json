@@ -6,40 +6,40 @@
       0.34,
       0.68
     ],
-    "class_gate": "PASS",
+    "class_gate": "WARN",
     "class_errors": [],
     "tv_sat": "PASS",
     "sofa_sat": "PASS",
     "tv_center": 1.025,
-    "n_parts": 5
+    "n_parts": 8
   },
   {
     "cell": "floating_minimal@tv65",
     "bbox_m": [
       1.95,
       0.34,
-      0.685
+      0.68
     ],
-    "class_gate": "PASS",
+    "class_gate": "WARN",
     "class_errors": [],
     "tv_sat": "PASS",
     "sofa_sat": "PASS",
-    "tv_center": 1.09,
-    "n_parts": 5
+    "tv_center": 1.085,
+    "n_parts": 8
   },
   {
     "cell": "floating_minimal@tv75",
     "bbox_m": [
       2.17,
       0.34,
-      0.722
+      0.68
     ],
-    "class_gate": "PASS",
+    "class_gate": "WARN",
     "class_errors": [],
     "tv_sat": "PASS",
     "sofa_sat": "PASS",
-    "tv_center": 1.187,
-    "n_parts": 5
+    "tv_center": 1.145,
+    "n_parts": 8
   },
   {
     "cell": "low_credenza@tv55",

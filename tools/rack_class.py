@@ -42,10 +42,13 @@ CLEARANCE_SIDE = (0.12, 0.65)       # folga alem de cada lado da TV
 
 RELATIONS = {
     # esbeltez usa a altura VISUAL: no flutuante o vao e' vazio (so o corpo pesa)
+    # floating COM wall_back: a placa ancora a leitura — corpo fino ok (ate 7.2)
     "esbeltez_horizontal": (
-        lambda s: s.length / (s.body_h if s.support == "floating"
-                              else s.total_height()), 2.6, 6.2,
-        "comprimento/altura-visual fora de [2.6,6.2] — cubo/aparador ou prateleira"),
+        lambda s: (s.length / (s.body_h if s.support == "floating"
+                               else s.total_height()))
+        / (7.2 / 6.2 if (s.support == "floating" and s.wall_back) else 1.0),
+        2.6, 6.2,
+        "comprimento/altura-visual fora — cubo/aparador ou prateleira"),
     "corpo_nao_gaveteiro": (
         lambda s: s.depth / s.body_h, 0.70, 1.60,
         "profundidade/corpo fora de [0.7,1.6] — gaveteiro pesado ou lamina"),
@@ -65,6 +68,11 @@ class RackSpec:
     toe_recess: float = 0.05       # so base: recuo de rodape (sombra)
     n_niches: int = 2              # vazios tecnicos abertos
     n_drawers: int = 2
+    facade_pattern: tuple = ()     # cycle002: padrao SIMETRICO explicito por
+                                   # arquetipo (ex. ('drawer','niche','drawer'));
+                                   # vazio = deriva de n_niches/n_drawers
+    wall_back: bool = False        # cycle002 (floating): placa de fundo/parede
+                                   # proxy + shadow gap — flutuacao REAL
     top_proud: float = 0.02        # tampo levemente saliente (frente desenhada)
     body_rgb: tuple = (118, 92, 68)
     front_rgb: tuple = (134, 108, 82)
@@ -122,7 +130,16 @@ def build_rack(spec: RackSpec):
                         L - spec.toe_recess, D - spec.toe_recess,
                         0.0, 0.06, dark))
         z0 = 0.06
-    # floating: nada por baixo (o respiro E' o gesto)
+    # floating (cycle002): a flutuacao precisa de CONTEXTO — placa de fundo
+    # (parede proxy), SHADOW GAP forte sob o corpo e suporte recuado escuro
+    if spec.support == "floating":
+        if spec.wall_back:
+            parts.append(_p("wall_back", "base", -0.25, D + 0.02, L + 0.25,
+                            D + 0.04, 0.0, z0 + bh + 0.95, (228, 221, 208)))
+        parts.append(_p("shadow_gap", "base", 0.05, 0.04, L - 0.05, D - 0.02,
+                        z0 - 0.025, z0 - 0.005, _darker(body, 0.3)))
+        parts.append(_p("cleat", "base", L * 0.30, D - 0.10, L * 0.70, D,
+                        z0 - 0.10, z0, _darker(body, 0.35)))
 
     # corpo (casca) + tampo proud
     top_t = 0.03
@@ -132,13 +149,19 @@ def build_rack(spec: RackSpec):
 
     # fachada com RITMO: modulos alternando gaveta (frente proud) e nicho
     # (recesso escuro = vazio tecnico). Frente = -Y (y0).
-    n_mod = spec.n_niches + spec.n_drawers
+    # cycle002: padrao SIMETRICO explicito por arquetipo (juiz: nao repetir
+    # "modulo escuro na ponta"); fallback = alternancia legada
+    if spec.facade_pattern:
+        order = list(spec.facade_pattern)
+    else:
+        n_mod = spec.n_niches + spec.n_drawers
+        order = []
+        for i in range(n_mod):
+            order.append("drawer" if (i % 2 == 0 and order.count("drawer") < spec.n_drawers)
+                         or order.count("niche") >= spec.n_niches else "niche")
+    n_mod = len(order)
     mod_w = (L - 0.04) / n_mod
     fz0, fz1 = z0 + 0.03, z0 + bh - top_t - 0.03
-    order = []
-    for i in range(n_mod):       # alterna a partir de gaveta nas pontas
-        order.append("drawer" if (i % 2 == 0 and order.count("drawer") < spec.n_drawers)
-                     or order.count("niche") >= spec.n_niches else "niche")
     for i, kind in enumerate(order):
         mx0 = 0.02 + i * mod_w + 0.008
         mx1 = 0.02 + (i + 1) * mod_w - 0.008
@@ -192,15 +215,19 @@ def sofa_satellite_gate(spec: RackSpec, tv="65", sofa_dist=2.6, sofa_seat_h=0.43
 
 # ------------------------------------------------------- arquetipos + derive
 ARCHETYPES = {
+    # cycle002: fachada SIMETRICA propria por arquetipo (gramatica, nao sorteio)
     "floating_minimal": dict(support="floating", body_h=0.32, depth=0.34,
-                             gap_floor=0.36, n_niches=1, n_drawers=2,
-                             clearance=0.25),
+                             gap_floor=0.36, n_niches=0, n_drawers=3,
+                             facade=("drawer", "drawer", "drawer"),  # continua/limpa
+                             wall_back=True, clearance=0.25),
     "low_credenza": dict(support="legs", body_h=0.36, depth=0.42,
-                         leg_height=0.16, n_niches=2, n_drawers=1,
-                         clearance=0.30),
+                         leg_height=0.16, n_niches=1, n_drawers=2,
+                         facade=("drawer", "niche", "drawer"),       # nicho CENTRAL
+                         wall_back=False, clearance=0.30),
     "storage_media": dict(support="base", body_h=0.46, depth=0.45,
                           toe_recess=0.05, n_niches=2, n_drawers=2,
-                          clearance=0.35),
+                          facade=("niche", "drawer", "drawer", "niche"),  # distribuido
+                          wall_back=False, clearance=0.35),
 }
 
 
@@ -215,14 +242,15 @@ def derive_rack_spec(tv="65", archetype="low_credenza", **overrides) -> RackSpec
     # flutuante longo engrossa o corpo suavemente (esbeltez visual <=6 —
     # regra de classe: corpo acompanha o comprimento, nao vira prateleira)
     body_h = a["body_h"]
-    if a["support"] == "floating":
-        body_h = round(max(body_h, length / 6.0), 3)
+    if a["support"] == "floating" and not a.get("wall_back"):
+        body_h = round(max(body_h, length / 6.0), 3)   # sem contexto: engrossa
     spec = RackSpec(length=length, depth=a["depth"], body_h=body_h,
                     support=a["support"],
                     leg_height=a.get("leg_height", 0.16),
                     gap_floor=a.get("gap_floor", 0.35),
                     toe_recess=a.get("toe_recess", 0.05),
-                    n_niches=a["n_niches"], n_drawers=a["n_drawers"])
+                    n_niches=a["n_niches"], n_drawers=a["n_drawers"],
+                    facade_pattern=a["facade"], wall_back=a["wall_back"])
     for k, v in overrides.items():
         setattr(spec, k, v)
     return spec.validate()
@@ -246,6 +274,10 @@ def rack_class_gate(spec: RackSpec, parts=None):
         errors.append("pes invisiveis (<0.08) — perna sumiu/afundou")
     if spec.support == "floating" and spec.gap_floor < 0.25:
         errors.append("flutuante sem respiro (<0.25) — tabua baixa, nao floating")
+    if spec.support == "floating" and not spec.wall_back:
+        errors.append("flutuante sem placa de fundo/contexto — caixa solta no ar")
+    if spec.facade_pattern and spec.facade_pattern != tuple(reversed(spec.facade_pattern)):
+        warnings.append("fachada assimetrica — ritmo sem espelho")
     if spec.support == "base" and spec.toe_recess < 0.03:
         errors.append("base sem toe-recess — caixa colada no chao")
     if spec.n_niches < 1:
@@ -280,6 +312,8 @@ def _sabotages():
             derive_rack_spec("55", "low_credenza", length=1.23 + 1.8), "55", None)),
         ("sofa perto demais da TV 75", lambda: (
             derive_rack_spec("75", "low_credenza"), "75", 1.8)),
+        ("floating caixa-solta (sem wall_back)", lambda: (
+            derive_rack_spec("65", "floating_minimal", wall_back=False), "65", None)),
     ]
 
 
@@ -289,6 +323,29 @@ def _apply_sab(mk):
     t = tv_satellite_gate(spec, tv)
     s = sofa_satellite_gate(spec, tv, sofa_dist=dist) if dist else {"result": "PASS"}
     return g["result"] == "FAIL" or t["result"] == "FAIL" or s["result"] == "FAIL"
+
+
+def _tv_proxy_parts(spec: RackSpec, tv="65"):
+    """cycle002 (pedido do juiz): a TV nao pode ficar so no label — proxy de
+    MOLDURA (4 barras) sobre o rack + LINHA DE VISAO alvo (barra fina a 1.10m).
+    Satelite VISIVEL na matriz (padrao novo do programa)."""
+    tw, th = TVS[tv]
+    L = spec.length
+    x0 = (L - tw) / 2.0
+    zb = spec.total_height()
+    y0, y1 = spec.depth * 0.55, spec.depth * 0.55 + 0.03
+    g = (70, 72, 76)
+    t = 0.025
+    parts = [
+        _p("tv_b", "guide", x0, y0, x0 + tw, y1, zb, zb + t, g),
+        _p("tv_t", "guide", x0, y0, x0 + tw, y1, zb + th - t, zb + th, g),
+        _p("tv_l", "guide", x0, y0, x0 + t, y1, zb, zb + th, g),
+        _p("tv_r", "guide", x0 + tw - t, y0, x0 + tw, y1, zb, zb + th, g),
+        # linha de visao alvo (olho sentado ~1.10): atravessa alem do rack
+        _p("eye_line", "guide", -0.30, y0 + 0.005, L + 0.30, y1 - 0.005,
+           1.095, 1.115, (170, 60, 50)),
+    ]
+    return parts
 
 
 # ------------------------------------------------------------------ matriz
@@ -309,8 +366,9 @@ def build_matrix(out_dir):
         sat_tv = tv_satellite_gate(spec, tv)
         sat_sofa = sofa_satellite_gate(spec, tv, sofa_dist=TV_MIN_DIST[tv] + 0.4)
         parts, meta = build_rack(spec)
+        parts_vis = parts + _tv_proxy_parts(spec, tv)   # satelite VISIVEL
         png = out / f"cell_{name.replace('@', '_')}.png"
-        render_parts(parts, png, elev=18, azim=-62,
+        render_parts(parts_vis, png, elev=18, azim=-62,
                      title=f"{name}  {spec.length:.2f}m  tv_c={sat_tv['metrics']['tv_center_m']}")
         report.append({"cell": name, "bbox_m": meta["bbox_m"],
                        "class_gate": cls["result"], "class_errors": cls["errors"],
