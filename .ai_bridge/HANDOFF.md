@@ -1,6 +1,6 @@
 # Handoff — sketchup-mcp
 
-> Fio da meada entre sessões. Última atualização: **2026-06-12** — **🏆×3: SOFÁ PASS (3c) · POLTRONA PASS (2c) · CAMA PASS (2c, "classe com gramática clara"). Próxima: MESA DE CENTRO (satélite do assento do sofá). Sentinelas: chaise-plinth / lounge-highback / queen-box-legs.**
+> Fio da meada entre sessões. Última atualização: **2026-06-12** — **SOFÁ PASS · POLTRONA PASS · CAMA PASS · MESA DE CENTRO WARN c1 ("nasceu bem como satélite; régua de escala FORTE; saturação = acerto de teoria"; fraco = gesto orgânico). Cycle002 da mesa: tampo octogonal/chanfro amplo (verts8 trapezoidal) + pernas por arquétipo.**
 > Leia primeiro ao iniciar sessão.
 
 ## 2026-06-12 — Programa ARQUITETO DE CLASSE — sofá cycles 001-002 LANDADOS (WARN→WARN "melhora real")
@@ -62,6 +62,15 @@ da cabeceira (panel+ledge / upholstered+bolster / contained — "a diferença ap
 FIX3 base desenhada (rail escuro, shadow line no box, saia — "junta, recuo, apoio e intenção
 construtiva"). Sentinela: queen-box-legs. SATÉLITE re-aprovado como padrão. Verdicts
 BED-CLASS_cycle00{1,2}.md. **Mudança de forma da cama = ciclo formal com juiz.**
+
+**MESA DE CENTRO cycle 001: WARN "nasceu bem como classe satélite do sofá"** (verdict
+COFFEE-TABLE-CLASS_cycle001.md). Novidade institucional: SATÉLITE POR CONSTRUÇÃO — a mesa se
+DERIVA do sofá (comprimento 0.58·sofá, tampo = assento−drop; eixo da matriz = sofá servido) +
+SATURAÇÃO (sofá XL ≥2.6m: frac relaxa pra 0.44 — "alcance humano não escala junto", juiz: "acerto
+importante de teoria"). Arquétipos: slab ✓, two_tier ✓, ORGANIC fraco ("retangular com abas").
+**Cycle 002 da mesa:** (1) silhueta orgânica real — octógono/chanfro amplo via verts8 trapezoidal
+nas alas; (2) pernas por arquétipo (two_tier pesadas/escuras); pior célula organic@formal-2l.
+Classe autocontida em tools/coffee_table_class.py (NÃO toca decor_builders da cena PASS).
 
 **PESQUISA PRONTA pras próximas classes** (workflow 2026-06-12, tabelas ergonômicas completas em
 `C:/Users/FELIP_~1/AppData/Local/Temp/claude/E--Claude/f4ec71f5-c33c-42b6-91c3-9d56331f5428/tasks/w2w46wjf6.output`
