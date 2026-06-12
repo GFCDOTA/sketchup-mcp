@@ -1,6 +1,6 @@
 # Handoff — sketchup-mcp
 
-> Fio da meada entre sessões. Última atualização: **2026-06-12** — **🏆🏆 MÉTODO PROVADO: SOFÁ PASS (3 ciclos) + POLTRONA PASS (2 ciclos, geometria própria shell-wraparound). Próxima classe: CAMA (+ criado junto, sugestão do Felipe)**.
+> Fio da meada entre sessões. Última atualização: **2026-06-12** — **placar do programa: SOFÁ PASS (3c) · POLTRONA PASS (2c) · CAMA WARN cycle001 ("ótimo nascimento"); SATÉLITE = PADRÃO OFICIAL ("classe principal deriva a régua; satélite se adapta")**.
 > Leia primeiro ao iniciar sessão.
 
 ## 2026-06-12 — Programa ARQUITETO DE CLASSE — sofá cycles 001-002 LANDADOS (WARN→WARN "melhora real")
@@ -43,6 +43,17 @@ nesting) + `tools/armchair_class.py` (relação `presenca_do_braco = arm + 0.06�
 fino compensa com integração, nunca engorda). Juiz: "não abriria cycle 003 de forma; próximos =
 bevel/softness, almofadas/interior, material". **lounge-highback = STRESS CASE SENTINELA** (não
 patch local). Verdicts ARMCHAIR-CLASS_cycle00{1,2}.md.
+
+**CAMA cycle 001 FEITO: WARN "ótimo nascimento de classe"** (`feat/bed-class`, verdict
+BED-CLASS_cycle001.md). Teoria: SKUs BR discretos (não interpolar), dominância do colchão
+[0.28,0.60], cabeceira anti-trono (derive clampa 0.52·W), leveza da base (box flush = caixote).
+Builder estendido (base_style plinth/legs/box, reveal promovido, saia, wings) defaults neutros.
+**SATÉLITE do criado = PADRÃO OFICIAL do programa (juiz): "classe principal deriva a régua;
+classe satélite se adapta"** — `nightstand_satellite_gate` (alvo: platform 0.38/uphol 0.57/box
+0.62; criado 0.55 FALHA em platform). **CYCLE 002 da cama (TOP3):** (1) coerência BASE↔ARQUÉTIPO
+(box+legs esvazia a massa — pior célula queen-box-legs); (2) assinatura da CABECEIRA por
+arquétipo (legível à distância); (3) gramática frente/lateral da base ("desenhada, não só
+extrudada"). Vetado: arrumar só a queen-box-legs-med.
 
 **PESQUISA PRONTA pras próximas classes** (workflow 2026-06-12, tabelas ergonômicas completas em
 `C:/Users/FELIP_~1/AppData/Local/Temp/claude/E--Claude/f4ec71f5-c33c-42b6-91c3-9d56331f5428/tasks/w2w46wjf6.output`
