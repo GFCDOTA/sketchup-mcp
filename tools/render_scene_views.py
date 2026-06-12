@@ -83,12 +83,20 @@ def _tile_shell(parts, tile=0.45, cut_rects=()):
 
 def scene_boxes(parts):
     """parts world-space (m) -> boxes do build_furniture_skp.rb (inches, corners,
-    z0_in). Pecas verts8 (rake/cupula) viram o AABB — limitacao documentada do
-    caminho SU-boxes; o render mpl preserva o verts8."""
+    z0_in). Pecas com verts8 usam o QUAD INFERIOR como corners (footprint REAL —
+    inclusive girado em angulo livre; o fz_solid do .rb levanta qualquer poligono);
+    altura = extrusao reta, entao taper de cupula vira prisma da boca (limitacao
+    leve documentada). O render mpl preserva o verts8 completo."""
     boxes = []
     for p in parts:
         x0, y0, x1, y1 = (p["x0"] * M_TO_IN, p["y0"] * M_TO_IN,
                           p["x1"] * M_TO_IN, p["y1"] * M_TO_IN)
+        if p.get("verts8"):
+            corners = [[round(v[0] * M_TO_IN, 2), round(v[1] * M_TO_IN, 2)]
+                       for v in p["verts8"][:4]]
+        else:
+            corners = [[round(x0, 2), round(y0, 2)], [round(x1, 2), round(y0, 2)],
+                       [round(x1, 2), round(y1, 2)], [round(x0, 2), round(y1, 2)]]
         # label namespaced pelo item: o .rb nomeia material fz_<label> — "top" da
         # side_table colidia com "top" da coffee_table e herdava a cor errada
         label = p.get("label", p["kind"])
@@ -97,8 +105,7 @@ def scene_boxes(parts):
         boxes.append({
             "kind": p["kind"], "label": label,
             "x0": round(x0, 2), "y0": round(y0, 2), "x1": round(x1, 2), "y1": round(y1, 2),
-            "corners": [[round(x0, 2), round(y0, 2)], [round(x1, 2), round(y0, 2)],
-                        [round(x1, 2), round(y1, 2)], [round(x0, 2), round(y1, 2)]],
+            "corners": corners,
             "h_in": round((p["z1"] - p["z0"]) * M_TO_IN, 2),
             "z0_in": round(p["z0"] * M_TO_IN, 2),
             "rgb": p["rgb"], "ambiguous": False, "decorative": False,

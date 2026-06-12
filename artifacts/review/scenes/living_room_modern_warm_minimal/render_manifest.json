@@ -15,11 +15,11 @@
     ],
     "target": [
       2.6,
-      2.734,
+      2.714,
       0.55
     ],
-    "elev_deg": 19.6,
-    "azim_deg": -127.6,
+    "elev_deg": 19.7,
+    "azim_deg": -127.9,
     "hide_walls": [
       "south",
       "west"

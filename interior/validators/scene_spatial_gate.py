@@ -25,6 +25,9 @@ SOFT (falha -> WARN):
   hero_ancorado        — costas do hero a <=0.45m da parede
   respiro_lateral      — side_table/floor_lamp com folga >=0.05m do hero
   planta_perto_janela  — planta a <=0.35m da parede da janela e <=0.6m do vao
+  accent_em_dialogo    — accent_seat ROTACIONADO (nao paralelo aos eixos) e
+                         apontando pro hero (dot>=0.9). Regra do cycle 003
+                         (GPT: "objeto colocado" vs "conversa de estar")
 
 Uso: python -m interior.validators.scene_spatial_gate [runs/scenes/<id>]
      (sem arg: compoe a fixture canonica em memoria + roda 6 sabotagens que
@@ -397,6 +400,21 @@ def scene_spatial_gate(scene, parts=None):
                 why.append(f"{t} grudado/sobreposto ao hero")
     checks["respiro_lateral"] = gaps_ok
 
+    acc = next((p for p in pls if p["type"] == "accent_seat"), None)
+    if acc and hero:
+        ax, ay = acc["facing"]
+        rotated = min(abs(ax), abs(ay)) > 0.05      # nao paralelo aos eixos
+        dx = hero["center"][0] - acc["center"][0]
+        dy = hero["center"][1] - acc["center"][1]
+        n = math.hypot(dx, dy) or 1.0
+        dot = ax * dx / n + ay * dy / n
+        metrics["accent_facing_dot"] = round(dot, 3)
+        checks["accent_em_dialogo"] = rotated and dot >= 0.90
+        if not checks["accent_em_dialogo"]:
+            why.append(f"accent_seat sem dialogo: rotacionado={rotated} dot={dot:.2f}")
+    else:
+        checks["accent_em_dialogo"] = acc is None
+
     plant = next((p for p in pls if p["type"] == "plant_placeholder"), None)
     if plant and wins:
         win = wins[0]
@@ -420,7 +438,7 @@ def scene_spatial_gate(scene, parts=None):
             "tapete_maior_que_hero", "quadro_centralizado", "cortina_na_janela",
             "cortina_moldura", "equilibrio_quadrantes",
             "circulacao", "bbox_plausivel", "camera_enquadra")
-    SOFT = ("hero_ancorado", "respiro_lateral", "planta_perto_janela")
+    SOFT = ("hero_ancorado", "respiro_lateral", "planta_perto_janela", "accent_em_dialogo")
     if not all(checks[k] for k in HARD):
         result = "FAIL"
     elif all(checks[k] for k in SOFT):

@@ -50,7 +50,11 @@ ART_GAP = 0.25         # respiro entre topo do hero e base do quadro
 SIDE_GAP = 0.05        # folga minima entre pecas vizinhas
 OPPOSITE_GAP = 1.50    # frente do hero -> frente do accent_seat (conversa)
 ACCENT_LATERAL = 0.55  # accent_seat desloca pro lado OPOSTO 'a janela (equilibrio)
+ACCENT_TURN_DEG = 12   # cycle 003: poltrona gira de volta pro eixo do hero/mesa
+                       # ("conversa de estar", nao "objeto colocado" paralelo)
 CURTAIN_FRAME_OVER = 0.40   # paineis-moldura: transbordo da cortina por lado da janela
+CURTAIN_SLIM_T = 0.025      # cycle 003: paineis abertos mais magros na profundidade
+CURTAIN_SLIM_AMP = 0.04     # (na vista SU viravam barras fortes de primeiro plano)
 
 # defaults de dims (W, D, H em m) quando o intent traz so size_hint
 SIZE_HINTS = {
@@ -155,42 +159,71 @@ def _rgb(style, role, default=(150, 150, 150)):
 
 # ------------------------------------------------------------------ geometria
 def _rot_pt(x, y, theta):
-    """Rotacao EXATA em multiplos de 90 graus CCW."""
-    t = int(theta) % 360
-    if t == 0:
+    """Rotacao CCW em graus. Multiplos de 90 sao EXATOS (sem float drift);
+    qualquer outro angulo usa cos/sin (rotacao LIVRE — cycle 003)."""
+    t = float(theta) % 360.0
+    if t == 0.0:
         return x, y
-    if t == 90:
+    if t == 90.0:
         return -y, x
-    if t == 180:
+    if t == 180.0:
         return -x, -y
-    if t == 270:
+    if t == 270.0:
         return y, -x
-    raise ValueError(f"rotacao nao suportada: {theta}")
+    c, s = math.cos(math.radians(t)), math.sin(math.radians(t))
+    return x * c - y * s, x * s + y * c
+
+
+def _box_verts8(p):
+    """verts8 sintetico de uma part-caixa: 4 de baixo CCW + 4 de cima (mesma
+    convencao dos builders, ex. cupula da floor_lamp)."""
+    return [(p["x0"], p["y0"], p["z0"]), (p["x1"], p["y0"], p["z0"]),
+            (p["x1"], p["y1"], p["z0"]), (p["x0"], p["y1"], p["z0"]),
+            (p["x0"], p["y0"], p["z1"]), (p["x1"], p["y0"], p["z1"]),
+            (p["x1"], p["y1"], p["z1"]), (p["x0"], p["y1"], p["z1"])]
 
 
 def place_parts(parts, theta, world_center, z_off=0.0):
-    """Gira as parts (locais, m) em theta (0/90/180/270) em torno do centro do bbox
-    local e translada o centro pra world_center (x,y). Devolve parts world-space."""
+    """Gira as parts (locais, m) em theta em torno do centro do bbox local e
+    translada o centro pra world_center (x,y). Devolve parts world-space.
+    Multiplos de 90: caixas continuam caixas (axis-aligned exato). Outros
+    angulos (rotacao LIVRE): TODA part vira verts8 (footprint real girado pro
+    render mpl e pro caminho SU via corners); x0..y1 = AABB dos verts —
+    o gate opera nesse AABB (conservador por design)."""
     xs = [p["x0"] for p in parts] + [p["x1"] for p in parts]
     ys = [p["y0"] for p in parts] + [p["y1"] for p in parts]
     cx, cy = (min(xs) + max(xs)) / 2.0, (min(ys) + max(ys)) / 2.0
     wx, wy = world_center
+    exact = (float(theta) % 90.0) == 0.0
     out = []
     for p in parts:
         q = dict(p)
-        corners = [_rot_pt(x - cx, y - cy, theta)
-                   for x, y in ((p["x0"], p["y0"]), (p["x1"], p["y1"]))]
-        nx = [c[0] + wx for c in corners]
-        ny = [c[1] + wy for c in corners]
-        q["x0"], q["x1"] = round(min(nx), 4), round(max(nx), 4)
-        q["y0"], q["y1"] = round(min(ny), 4), round(max(ny), 4)
-        q["z0"], q["z1"] = round(p["z0"] + z_off, 4), round(p["z1"] + z_off, 4)
-        if p.get("verts8"):
+        if exact:
+            corners = [_rot_pt(x - cx, y - cy, theta)
+                       for x, y in ((p["x0"], p["y0"]), (p["x1"], p["y1"]))]
+            nx = [c[0] + wx for c in corners]
+            ny = [c[1] + wy for c in corners]
+            q["x0"], q["x1"] = round(min(nx), 4), round(max(nx), 4)
+            q["y0"], q["y1"] = round(min(ny), 4), round(max(ny), 4)
+            q["z0"], q["z1"] = round(p["z0"] + z_off, 4), round(p["z1"] + z_off, 4)
+            if p.get("verts8"):
+                v8 = []
+                for vx, vy, vz in p["verts8"]:
+                    rx, ry = _rot_pt(vx - cx, vy - cy, theta)
+                    v8.append((round(rx + wx, 4), round(ry + wy, 4), round(vz + z_off, 4)))
+                q["verts8"] = v8
+        else:
             v8 = []
-            for vx, vy, vz in p["verts8"]:
+            for vx, vy, vz in (p.get("verts8") or _box_verts8(p)):
                 rx, ry = _rot_pt(vx - cx, vy - cy, theta)
                 v8.append((round(rx + wx, 4), round(ry + wy, 4), round(vz + z_off, 4)))
             q["verts8"] = v8
+            q["x0"] = round(min(v[0] for v in v8), 4)
+            q["x1"] = round(max(v[0] for v in v8), 4)
+            q["y0"] = round(min(v[1] for v in v8), 4)
+            q["y1"] = round(max(v[1] for v in v8), 4)
+            q["z0"] = round(min(v[2] for v in v8), 4)
+            q["z1"] = round(max(v[2] for v in v8), 4)
         out.append(q)
     return out
 
@@ -332,10 +365,13 @@ def _build_furniture(fi, style, scene_ctx):
         split = int(fi.get("panel_split", 1))
         if split == 2:
             # cortina-moldura: paineis recolhidos nas pontas, transbordando a janela
-            # (recuo lateral = painel cobre pouco vidro; o vao central fica aberto)
+            # (recuo lateral = painel cobre pouco vidro; o vao central fica aberto);
+            # magros em profundidade pra nao virarem barras de primeiro plano na 3/4 SU
             spec.width = (w or win["width_m"] + 2 * CURTAIN_FRAME_OVER)
             spec.panel_split = 2
             spec.panel_w = float(fi.get("panel_w", 0.55))
+            spec.thickness = CURTAIN_SLIM_T
+            spec.fold_amp = CURTAIN_SLIM_AMP
         else:
             spec.width = (w or win["width_m"] + 0.4)
         head = win.get("head_m", 2.1)
@@ -391,7 +427,7 @@ def compose_scene(intent, style=None):
     def _emit(fi, parts_local, spec_dict, th, center, z_off=0.0, anchor=None):
         wp = place_parts(parts_local, th, center, z_off)
         bb = _bbox(wp)
-        fx, fy = _rot_pt(0, -1, th)
+        fx, fy = (round(v, 4) for v in _rot_pt(0, -1, th))
         pl = {"type": fi["type"], "role": fi["role"], "label": fi["type"],
               "style_family": fi.get("style_family"), "material_style": fi.get("material_style"),
               "rotation_deg": th, "center": [round(center[0], 4), round(center[1], 4)],
@@ -502,6 +538,7 @@ def compose_scene(intent, style=None):
             adv = hd / 2.0 + OPPOSITE_GAP + ld / 2.0
             c = [hx + fwd[0] * adv, hy + fwd[1] * adv]
             win = ctx["window"]
+            turn = 0.0
             if win is not None:
                 wn = WALL_INWARD[win["wall"]]
                 s = wn[0] * along_axis[0] + wn[1] * along_axis[1]
@@ -509,10 +546,13 @@ def compose_scene(intent, style=None):
                     side = 1.0 if s > 0 else -1.0
                     c = [c[0] + along_axis[0] * ACCENT_LATERAL * side,
                          c[1] + along_axis[1] * ACCENT_LATERAL * side]
-            th = (theta + 180) % 360
+                    # deslocou lateral -> gira de volta pro eixo do hero (conversa)
+                    turn = side * ACCENT_TURN_DEG
+            th = (theta + 180 + turn) % 360
             z = _rug_lift(rug_pl, c, lw, ld)
             _emit(fi, parts_local, spec_dict, th, tuple(c), z_off=z,
-                  anchor=f"oposto ao hero, {OPPOSITE_GAP}m de conversa, encarando-o")
+                  anchor=f"oposto ao hero, {OPPOSITE_GAP}m de conversa, "
+                         f"girado {abs(turn):g} graus pro eixo")
 
         elif hint == "corner":
             c = (room["width_m"] - lw / 2.0 - 0.15, room["depth_m"] - ld / 2.0 - 0.15)
@@ -603,7 +643,13 @@ def _distances(report, placements, room, ctx):
                    (a["center"][1] - hero["center"][1]) * fy)
                - _depth_of(hero) / 2.0 - _depth_of(a) / 2.0)
         d["accent_seat_gap_m"] = round(gap, 3)
-        d["accent_faces_hero"] = (a["facing"][0] == -fx and a["facing"][1] == -fy)
+        # encara o hero = facing do accent aponta pro hero (dot com a direcao
+        # accent->hero; tolera a rotacao de conversa do cycle 003)
+        dx, dy = hero["center"][0] - a["center"][0], hero["center"][1] - a["center"][1]
+        n = math.hypot(dx, dy) or 1.0
+        dot = a["facing"][0] * dx / n + a["facing"][1] * dy / n
+        d["accent_facing_dot"] = round(dot, 3)
+        d["accent_faces_hero"] = dot >= 0.90
 
 
 def _camera(goal, room, placements, hero_t, win_wall=None):

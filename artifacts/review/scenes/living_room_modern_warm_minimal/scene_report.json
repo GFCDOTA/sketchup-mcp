@@ -55,19 +55,19 @@
       "rotation_deg": 0,
       "center": [
         2.6,
-        2.4312
+        2.3712
       ],
       "facing": [
         0,
         -1
       ],
       "bbox": [
-        2.05,
-        2.1312,
-        3.15,
+        1.925,
+        2.0112,
+        3.275,
         2.7312,
         0.012,
-        0.372
+        0.392
       ],
       "z_off": 0.012,
       "anchor": "0.4m da frente do hero"
@@ -100,7 +100,7 @@
       "role": "textile",
       "rotation_deg": 270,
       "center": [
-        5.14,
+        5.1475,
         2.4
       ],
       "facing": [
@@ -108,7 +108,7 @@
         0
       ],
       "bbox": [
-        5.1,
+        5.115,
         1.0,
         5.18,
         3.8,
@@ -190,25 +190,25 @@
     {
       "type": "accent_seat",
       "role": "companion",
-      "rotation_deg": 180,
+      "rotation_deg": 168.0,
       "center": [
         2.05,
         1.2312
       ],
       "facing": [
-        0,
-        1
+        0.2079,
+        0.9781
       ],
       "bbox": [
-        1.675,
-        0.8312,
-        2.425,
-        1.6312,
+        1.6,
+        0.762,
+        2.5,
+        1.7004,
         0.0,
         0.72
       ],
       "z_off": 0.0,
-      "anchor": "oposto ao hero, 1.5m de conversa, encarando-o"
+      "anchor": "oposto ao hero, 1.5m de conversa, girado 12 graus pro eixo"
     }
   ],
   "distances": {
@@ -223,7 +223,8 @@
     "plant_to_window_m": 1.408,
     "side_table_gap_m": 0.65,
     "floor_lamp_gap_m": 0.65,
-    "accent_seat_gap_m": 1.5,
+    "accent_seat_gap_m": 1.431,
+    "accent_facing_dot": 1.0,
     "accent_faces_hero": true
   },
   "notes": []

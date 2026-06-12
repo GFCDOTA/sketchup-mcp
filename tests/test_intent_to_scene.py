@@ -105,8 +105,46 @@ def test_place_parts_rotation_exact():
     assert p["z0"] == 0.1 and p["z1"] == 0.6
     assert all(p["x0"] <= v[0] <= p["x1"] and p["y0"] <= v[1] <= p["y1"]
                for v in p["verts8"])
-    with pytest.raises(ValueError):
-        place_parts(parts, 45, (0, 0))
+
+
+def test_place_parts_free_rotation():
+    """Rotacao LIVRE (cycle 003): caixa sem verts8 ganha verts8 girado; bbox = AABB."""
+    import math
+    parts = [{"label": "a", "kind": "k", "x0": 0.0, "y0": 0.0, "x1": 2.0, "y1": 1.0,
+              "z0": 0.0, "z1": 0.5, "rgb": [1, 2, 3]}]
+    out = place_parts(parts, 30, (5.0, 5.0), z_off=0.1)
+    p = out[0]
+    c30, s30 = math.cos(math.radians(30)), math.sin(math.radians(30))
+    assert p["x1"] - p["x0"] == pytest.approx(2 * c30 + 1 * s30, abs=1e-3)
+    assert p["y1"] - p["y0"] == pytest.approx(2 * s30 + 1 * c30, abs=1e-3)
+    assert (p["x0"] + p["x1"]) / 2 == pytest.approx(5.0, abs=1e-3)
+    assert (p["y0"] + p["y1"]) / 2 == pytest.approx(5.0, abs=1e-3)
+    assert len(p["verts8"]) == 8 and p["z0"] == 0.1 and p["z1"] == 0.6
+    # quad inferior preserva as dimensoes REAIS da caixa (footprint girado)
+    (ax, ay, _), (bx, by, _), (cx2, cy2, _), _ = p["verts8"][:4]
+    assert math.hypot(bx - ax, by - ay) == pytest.approx(2.0, abs=1e-3)
+    assert math.hypot(cx2 - bx, cy2 - by) == pytest.approx(1.0, abs=1e-3)
+
+
+def test_scene_boxes_rotated_corners(scene):
+    """Caminho SU: part girada exporta corners do quad inferior (nao AABB)."""
+    from core.scale import M_TO_IN
+    from tools.render_scene_views import scene_boxes
+    acc_parts = [p for p in scene["parts"] if p.get("item") == "accent_seat"]
+    assert acc_parts and all(p.get("verts8") for p in acc_parts), "rotacao livre gera verts8"
+    boxes = scene_boxes(acc_parts)
+    seat = next(b for b in boxes if b["label"].endswith("__seat"))
+    xs = [c[0] for c in seat["corners"]]
+    ys = [c[1] for c in seat["corners"]]
+    # corners formam quad GIRADO: nao colapsam no retangulo AABB
+    aabb = [[seat["x0"], seat["y0"]], [seat["x1"], seat["y0"]],
+            [seat["x1"], seat["y1"]], [seat["x0"], seat["y1"]]]
+    assert seat["corners"] != aabb
+    assert min(xs) >= seat["x0"] - 0.01 and max(xs) <= seat["x1"] + 0.01
+    assert min(ys) >= seat["y0"] - 0.01 and max(ys) <= seat["y1"] + 0.01
+    import math
+    (ax, ay), (bx, by) = seat["corners"][0], seat["corners"][1]
+    assert math.hypot(bx - ax, by - ay) == pytest.approx(0.75 * M_TO_IN, abs=0.1)
 
 
 # ------------------------------------------------------------------ composer
@@ -164,6 +202,7 @@ def test_gate_fails_sabotages(scene, idx):
 def test_accent_seat_opposite_and_facing_hero(scene):
     d = scene["report"]["distances"]
     assert d["accent_faces_hero"] is True
+    assert d["accent_facing_dot"] >= 0.95
     assert 1.0 <= d["accent_seat_gap_m"] <= 2.2, "distancia de conversa"
     hero = next(p for p in scene["placements"] if p["role"] == "hero")
     acc = next(p for p in scene["placements"] if p["type"] == "accent_seat")
@@ -172,6 +211,9 @@ def test_accent_seat_opposite_and_facing_hero(scene):
     assert win["wall"] == "east" and acc["center"][0] < hero["center"][0]
     # mais baixo que o hero (contrapeso, nao concorrente)
     assert acc["bbox"][5] < hero["bbox"][5]
+    # cycle 003: girado pro eixo da conversa (nao paralelo aos eixos da sala)
+    assert acc["rotation_deg"] % 90 != 0
+    assert min(abs(acc["facing"][0]), abs(acc["facing"][1])) > 0.05
 
 
 def test_curtain_split_panels_frame_window(scene):
