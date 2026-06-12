@@ -1,12 +1,44 @@
 # Handoff — sketchup-mcp
 
-> Fio da meada entre sessões. Última atualização: **2026-06-11** (track Intent-to-Scene slice 1 ENTREGUE; GPT WARN com fixes — ver abaixo).
+> Fio da meada entre sessões. Última atualização: **2026-06-11 (tarde)** (cycle 002 da sala = GPT **IMPROVED**; TOP3 do cycle 003 anotados — ver abaixo).
 > Leia primeiro ao iniciar sessão.
+
+## 2026-06-11 (tarde) — Intent-to-Scene cycle 002: GPT IMPROVED ("WARN melhorado")
+
+Branch **`feat/scene-cycle002`** (off origin/develop @39bb7f2). Loop FAIL→regra→fixture→gate→GPT
+rodou inteiro na sessão: os TOP3 do WARN cycle001 viraram regra executável + fixture + 2 HARD checks.
+
+**O que entrou:**
+- **accent_seat NOVO** (AccentSeatSpec + build_accent_seat + hint `opposite_hero` no composer):
+  poltrona leve warm_taupe_boucle oposta ao hero, encarando-o (rot 180), deslocada 0.55m pro lado
+  CONTRÁRIO à janela; gap de conversa 1.5m. Material novo `accent_fabric` no StylePack.
+- **Cortina-moldura** (`CurtainSpec.panel_split=2` + `panel_w`): 2 painéis recolhidos nas pontas
+  (cover 42% do vão), transbordo 0.40/lado; varão varre o vão inteiro. Intent carrega `panel_split`.
+- **Tapete 3.4×2.3** na fixture (era 3.0×2.0) — pega sofá + mesa + frente do accent.
+- **SpatialGate +2 HARD**: `cortina_moldura` (cover ≤55% do vão; mede parts→fallback spec) e
+  `equilibrio_quadrantes` (footprint SEM tapete; quadrante mais vazio ≥7%; canônica min=0.087 SE).
+  +2 sabotagens (cortina fechada / sem accent) = **8/8 FAIL**. Canônica **PASS 15/15**, cov=0.109.
+- Suite **559 ✓ / 5 skip** (+7 testes cycle002), zero regressão.
+- **Gotcha NOVO (provider SU):** `render_scene_views`/provider com scene_dir RELATIVO → SketchUp
+  resolve `model.save`/`write_image` contra o CWD DELE → log diz "saved" mas .skp/PNG não aparecem
+  no run dir (`.skb` 0B é o sintoma). Fix: `Path(scene_dir).resolve()` no harness — SEMPRE absoluto.
+- Evidência re-promovida em `artifacts/review/scenes/living_room_modern_warm_minimal/`
+  (scene.skp 142KB, SU success, contact sheet 3 painéis).
+
+**GPT review (VISUAL real, browsing nas 2 URLs raw @SHA): IMPROVED** —
+`.ai_bridge/fidelity/verdicts/SCENE-LIVINGROOM-MWM_cycle002.md`.
+"O sul deixou de ser vazio morto, cortina perdeu protagonismo na 3/4 humana, miolo ancora.
+Ainda não é PASS limpo; é WARN melhorado." **TOP3 cycle 003:** (1) rotacionar poltrona 10–15°
+(⚠️ composer hoje só 0/90/180/270 — pede rotação livre em place_parts); (2) cortina mais magra
+na vista SU (painéis finos/recuados); (3) mesa de centro maior/oval ocupando o eixo sofá↔poltrona.
+NOVOS_PROBLEMAS: poltrona "caixote" ortogonal; blocos pretos demais no SE (ruído).
+
+**Próximo:** cycle 003 com os TOP3 acima (rotação livre é a peça de engenharia); V-Ray continua
+gated em composição PASS limpo.
 
 ## 2026-06-11 — Intent-to-Scene slice 1 ENTREGUE (sala procedural por intenção) + GPT WARN
 
-Branch **`feat/intent-to-scene`** (off origin/develop, pushed). PR por compare URL:
-<https://github.com/GFCDOTA/sketchup-mcp/compare/develop...feat/intent-to-scene> — **PENDENTE MERGE** (nunca deixar aberta).
+Branch **`feat/intent-to-scene`** — **MERGED em develop** (402b66e contido em origin/develop).
 
 **A camada nova:** SceneIntentSpec (GPT diretor de arte) → SceneComposer → generators → SpatialGate → RenderHarness.
 - Schemas: `interior/schemas/scene_intent.schema.json` + `furniture_intent.schema.json` (documentais; validação executável no composer).
