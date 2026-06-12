@@ -3,7 +3,7 @@
 > Fio da meada entre sessões. Última atualização: **2026-06-12** — **NOVA MISSÃO (direção do Felipe): programa "arquiteto de CLASSE procedural" de móveis; sofá cycle001 = WARN com TOP3 de classe**.
 > Leia primeiro ao iniciar sessão.
 
-## 2026-06-12 — Programa ARQUITETO DE CLASSE (móveis) — sofá cycle 001: teoria LANDADA, WARN do juiz
+## 2026-06-12 — Programa ARQUITETO DE CLASSE — sofá cycles 001-002 LANDADOS (WARN→WARN "melhora real")
 
 Felipe pivotou a missão: sair de "mobiliar cômodo"/render e **aprender a CLASSE de cada móvel**
 proceduralmente (sofá → poltrona → cama → mesa → rack...), com prompt-programa formal: sem overfit,
@@ -27,13 +27,19 @@ generalização, formato de saída por ciclo (FASE_ATUAL/DIAGNOSTICO/.../RISCO_D
   Identidade de família ✓ ("até demais"), escala ✓ ("corpo humano preservado"), PIOR célula =
   chaise-plinth ("caixote anexado").
 
-**CYCLE 002 (próxima fatia = FASE 5, refino da CLASSE no builder — aí sim tocar sofa_builder.py):**
-TOP3 do juiz, todos de classe: (1) **compensação de massa do braço** (chunky+plinth=bunker → se
-arm sobe, compensar com chanfro/recuo inferior/base mais leve); (2) **gramática de chaise integrada**
-(extensão do seat deck, não módulo colado: herdar alinhamento/continuidade de almofada/frente leve);
-(3) **arquétipos mudam LINGUAGEM, não só medidas** (formal=braços verticais/contido;
-lounge=base horizontal/relaxado). Validação: nova matriz → juiz; regras viram constraints/geometria
-da classe, NUNCA ajuste de célula (overfit-check explícito do juiz).
+**CYCLE 002 FEITO (mesma sessão): as 3 regras viraram classe** — `SofaSpec` ganhou
+`arm_relief`/`arm_cap`/`seat_overhang`/`base_recess` (defaults neutros = exemplar byte-idêntico);
+builder: sapata recuada (anti-bunker), chaise com frente aberta + vinco alinhado a seat_front +
+pés sob o deck, tampo proud formal, overhang lounge; gate: constraint `compensacao_de_massa` +
+sabotagem "bunker" (7/7). **Juiz: WARN — "melhora real, não cosmética"**
+(`.ai_bridge/fidelity/verdicts/SOFA-CLASS_cycle002.md`).
+
+**CYCLE 003 (próxima fatia) — TOP3_RESTANTES do juiz, todos de classe:**
+(1) **regra de TERMINAÇÃO da chaise** (frente/lateral com gramática própria: base baixa contínua
+OU perna/recuo OU painel reduzido — a frente aberta do 002 lê como "buraco construtivo");
+(2) **redução visual adicional do braço chunky** (chanfro/bevel/taper além da sapata);
+(3) **assinatura de SILHUETA por arquétipo mais forte** (formal ereto/crisp, lounge horizontal/fofo).
+Vetado: "arrumar só a célula chaise-plinth".
 
 **Estado paralelo:** fase materiais da CENA pausada pré-veredito em `feat/scene-materials` (pushed);
 luz V-Ray da cena APROVADA (receita congelada no handoff abaixo). Ordem das classes do Felipe:
