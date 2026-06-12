@@ -46,6 +46,16 @@ def _fmt_in(v_m):
     return f"{v_m * M_TO_IN:.2f}"
 
 
+def _flatten_alpha(png_path):
+    """O V-Ray escreve o background (ceu pela janela) com alpha=0 — o RGB do ceu
+    EXISTE mas browsers/visualizadores mostram transparente como branco puro
+    ('janela estourada/buraco' que o juiz viu era o canal alpha). Achata pra RGB."""
+    from PIL import Image
+    im = Image.open(png_path)
+    if im.mode == "RGBA":
+        im.convert("RGB").save(png_path)
+
+
 def _ensure_closed_skp(d, force=False):
     """Constroi scene_closed.skp: TODAS as parts (4 paredes + teto + moveis), nada
     escondido — o modelo que o V-Ray interior precisa. Reusa o provider SU."""
@@ -69,7 +79,7 @@ def _ensure_closed_skp(d, force=False):
 
 
 def render_scene_vray(scene_dir, out_png=None, iso=100, fnum=7.0, shutter=160,
-                      sky=0.3, sun=None, sun_size=None, fov=65, width=1500,
+                      sky=0.3, sun=None, sun_size=None, burn=None, fov=65, width=1500,
                       height=1000, fills_m=None,
                       timeout_export=90, timeout_render=240):
     """Devolve dict de status. fail-explicito em cada etapa (sem sucesso fabricado).
@@ -132,8 +142,8 @@ def render_scene_vray(scene_dir, out_png=None, iso=100, fnum=7.0, shutter=160,
                   "radius": f.get("radius_m", 0.35) * M_TO_IN,
                   "color": f.get("color", (1.0, 0.8, 0.55))} for f in fills_m]
     tweak_file(str(vrs), iso=iso, fnum=fnum, shutter=shutter, sky=sky, sun=sun,
-               sun_size=sun_size, width=width, height=height, materials=True,
-               fill_lights=fills)
+               sun_size=sun_size, burn=burn, width=width, height=height,
+               materials=True, fill_lights=fills)
 
     out_png = Path(out_png) if out_png else d / "vray_three_quarter.png"
     out_png = out_png.resolve()
@@ -148,6 +158,7 @@ def render_scene_vray(scene_dir, out_png=None, iso=100, fnum=7.0, shutter=160,
         return {"status": "fail", "error": "vray.exe nao produziu imagem",
                 "vray_tail": (r.stdout or "")[-400:], "timing_s": timing,
                 "base_intact": base_intact}
+    _flatten_alpha(out_png)
     return {"status": "success", "image": str(out_png),
             "vrscene_bytes": vrs.stat().st_size, "camera": {"eye": eye, "target": target},
             "timing_s": timing, "base_intact": base_intact, "log": log_txt[-300:]}
@@ -165,6 +176,7 @@ if __name__ == "__main__":
     ap.add_argument("--sky", type=float, default=0.3)
     ap.add_argument("--sun", type=float, default=None)
     ap.add_argument("--sun-size", type=float, default=None)
+    ap.add_argument("--burn", type=float, default=None)
     ap.add_argument("--fov", type=float, default=65)
     ap.add_argument("--width", type=int, default=1500)
     ap.add_argument("--height", type=int, default=1000)
@@ -180,7 +192,7 @@ if __name__ == "__main__":
                             **({"radius_m": v[4]} if len(v) > 4 else {})})
     res = render_scene_vray(ns.scene_dir, out_png=ns.out, iso=ns.iso, fnum=ns.fnum,
                             shutter=ns.shutter, sky=ns.sky, sun=ns.sun,
-                            sun_size=ns.sun_size, fov=ns.fov,
+                            sun_size=ns.sun_size, burn=ns.burn, fov=ns.fov,
                             width=ns.width, height=ns.height, fills_m=fills_m)
     print(json.dumps({k: v for k, v in res.items() if k != "log"},
                      indent=2, ensure_ascii=False))
