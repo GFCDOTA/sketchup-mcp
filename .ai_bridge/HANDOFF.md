@@ -1,6 +1,6 @@
 # Handoff — sketchup-mcp
 
-> Fio da meada entre sessões. Última atualização: **2026-06-12** — **🏆 MARCO: classe SOFÁ = PASS, FORMA CONGELADA em 3 ciclos ("gramática procedural de sofá, passou"); próximo móvel = POLTRONA**.
+> Fio da meada entre sessões. Última atualização: **2026-06-12** — **🏆🏆 MÉTODO PROVADO: SOFÁ PASS (3 ciclos) + POLTRONA PASS (2 ciclos, geometria própria shell-wraparound). Próxima classe: CAMA (+ criado junto, sugestão do Felipe)**.
 > Leia primeiro ao iniciar sessão.
 
 ## 2026-06-12 — Programa ARQUITETO DE CLASSE — sofá cycles 001-002 LANDADOS (WARN→WARN "melhora real")
@@ -35,14 +35,14 @@ não abriria cycle 004 de forma; próximos ganhos são de OUTRO estágio (bevel/
 Verdicts SOFA-CLASS_cycle00{1,2,3}.md. **REGRA: mudança de FORMA do sofá a partir daqui = novo ciclo
 formal com juiz, nunca edição casual.**
 
-**POLTRONA cycle 001 FEITO (mesma data): WARN — "nasceu viável; precisa SE EMANCIPAR do sofá".**
-`tools/armchair_class.py` (teoria própria: arm_span [0.22,0.50], footprint quase-quadrado, encosto
-≥0.16 acima do braço, W≤1.05; arquétipos club/standard/lounge; 6 sabotagens) + geometria via
-`build_sofa(seats=1)`. Juiz: identidade de poltrona ✓; pior célula standard-slim-arm ("cadeira
-estofada"); **TOP3 cycle002: (1) CAVIDADE/integração braço+encosto (objeto unitário, não "módulo de
-sofá cortado") — provável geometria NOVA (braço wraparound que sobe e abraça o encosto); (2) regra
-geral de presença mínima do braço em escala compacta; (3) linguagem por arquétipo mais forte.**
-Vetado: engrossar só a slim-arm. Verdict: ARMCHAIR-CLASS_cycle001.md.
+**POLTRONA = PASS em 2 ciclos (FORMA CONGELADA):** cycle001 WARN ("emancipar do sofá") → cycle002
+**PASS** ("o template do sofá foi replicado COM EMANCIPAÇÃO, que era exatamente o teste"). Nasceu
+`tools/armchair_builder.py` (gramática SHELL-WRAPAROUND: concha em U — costas full-width + braços
+encostando + OMBROS wrap_frac; almofadas internas mais claras = cavidade; shell_low p/ lounge
+nesting) + `tools/armchair_class.py` (relação `presenca_do_braco = arm + 0.06·wrap ≥ 0.17` — braço
+fino compensa com integração, nunca engorda). Juiz: "não abriria cycle 003 de forma; próximos =
+bevel/softness, almofadas/interior, material". **lounge-highback = STRESS CASE SENTINELA** (não
+patch local). Verdicts ARMCHAIR-CLASS_cycle00{1,2}.md.
 
 **PESQUISA PRONTA pras próximas classes** (workflow 2026-06-12, tabelas ergonômicas completas em
 `C:/Users/FELIP_~1/AppData/Local/Temp/claude/E--Claude/f4ec71f5-c33c-42b6-91c3-9d56331f5428/tasks/w2w46wjf6.output`
