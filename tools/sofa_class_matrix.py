@@ -99,8 +99,38 @@ def _grid_sheet(cells, out_png, title, cols=3):
     return str(out_png)
 
 
+def build_matrix_skp(out_skp, cols=3, pitch_x=4.0, pitch_y=3.2):
+    """SKP REAL da matriz: as 9 variantes derivadas, em grade no chao (showroom).
+    Reusa o provider SU (no-disrupt: pula se SketchUp aberto)."""
+    from interior.renderers.render_provider import RenderRequest
+    from interior.renderers.sketchup_basic_provider import SketchUpBasicProvider
+    from tools.sofa_builder import parts_to_boxes
+    boxes = []
+    for i, (name, kw) in enumerate(MATRIX):
+        spec = derive_spec(**kw)
+        parts, _ = build_sofa(spec)
+        r, c = divmod(i, cols)
+        for b in parts_to_boxes(parts, ox=c * pitch_x, oy=r * pitch_y):
+            b["label"] = f"{name}__{b['label']}"
+            boxes.append(b)
+    prov = SketchUpBasicProvider()
+    if not prov.available():
+        return {"status": "skipped", "reason": "SU indisponivel"}
+    out_skp = Path(out_skp).resolve()
+    req = RenderRequest(boxes=boxes, out_skp=str(out_skp), renderer="furniture",
+                        label="sofa_class_matrix",
+                        renders={"iso": str(out_skp.with_suffix("")) + "_iso.png"})
+    res = prov.render(req)
+    return {"status": res.status, "skp": res.skp, "renders": res.renders,
+            "error": res.error, "n_boxes": len(boxes)}
+
+
 if __name__ == "__main__":
     d = sys.argv[1] if len(sys.argv) > 1 else str(ROOT / "runs/sofa_class/matrix")
+    if "--skp" in sys.argv:
+        r = build_matrix_skp(Path(d) / "sofa_class_matrix.skp")
+        print(json.dumps(r, indent=2))
+        sys.exit(0 if r["status"] == "success" else 1)
     res = build_matrix(d)
     print(f"=== matriz da classe sofa: {len(res['report'])} celulas ===")
     for r in res["report"]:
