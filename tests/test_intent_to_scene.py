@@ -264,11 +264,22 @@ def test_render_harness_smoke(tmp_path, scene):
 
 # ------------------------------------------------------------------ vray (fase 2)
 def test_render_scene_vray_contract(tmp_path):
-    """Contrato SU-free do orquestrador V-Ray: falha explicita sem scene.skp;
+    """Contrato SU-free do orquestrador V-Ray: falha explicita sem a cena;
     camera m->inches correta. (Render real e' provado manualmente — depende de
     SU+V-Ray instalados e SketchUp fechado.)"""
     from tools.render_scene_vray import _fmt_in, render_scene_vray
     assert _fmt_in(1.0) == "39.37"
     (tmp_path / "scene.json").write_text("{}", encoding="utf-8")
     r = render_scene_vray(tmp_path)
-    assert r["status"] == "fail" and "scene.skp" in r["error"]
+    assert r["status"] == "fail" and "scene_parts.json" in r["error"]
+
+
+def test_shell_has_ceiling_hidden_from_views(scene):
+    """Teto existe no shell (V-Ray interior) mas NUNCA aparece no dollhouse."""
+    from tools.render_scene_views import _visible_parts
+    ceil = [p for p in scene["parts"] if p["label"] == "ceiling"]
+    assert len(ceil) == 1 and ceil[0]["kind"] == "ceiling"
+    H = scene["room"]["height_m"]
+    assert ceil[0]["z0"] == pytest.approx(H)
+    vis = _visible_parts(scene["parts"], [])
+    assert all(p["label"] != "ceiling" for p in vis)

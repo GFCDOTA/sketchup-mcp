@@ -350,7 +350,8 @@ def scene_spatial_gate(scene, parts=None):
     if hero and cam.get("eye"):
         eye, target = cam["eye"], cam["target"]
         if parts:
-            hidden = tuple(f"wall_{w}" for w in cam.get("hide_walls", []))
+            # mesmo dollhouse do render: paredes escondidas + teto fora do frame
+            hidden = tuple(f"wall_{w}" for w in cam.get("hide_walls", [])) + ("ceiling",)
             vis = [p for p in parts if not str(p.get("label", "")).startswith(hidden)]
             fx0 = min(p["x0"] for p in vis); fy0 = min(p["y0"] for p in vis)
             fx1 = max(p["x1"] for p in vis); fy1 = max(p["y1"] for p in vis)

@@ -36,7 +36,9 @@ def load_scene(scene_dir):
 
 
 def _visible_parts(parts, hide_walls):
-    hidden = tuple(f"wall_{w}" for w in (hide_walls or []))
+    """Dollhouse: esconde as paredes pedidas + SEMPRE o teto (o ceiling existe
+    so pro caminho V-Ray interior; top/3/4/SU ficam abertos)."""
+    hidden = tuple(f"wall_{w}" for w in (hide_walls or [])) + ("ceiling",)
     return [p for p in parts if not str(p.get("label", "")).startswith(hidden)]
 
 

@@ -250,18 +250,25 @@ def _wall_len(room, wall):
 
 # ------------------------------------------------------------------ room shell
 def _shell_box(label, x0, y0, x1, y1, z0, z1, rgb):
-    return {"label": label, "kind": "wall" if label.startswith("wall") else "floor",
+    kind = ("wall" if label.startswith("wall")
+            else "ceiling" if label == "ceiling" else "floor")
+    return {"label": label, "kind": kind,
             "x0": round(x0, 4), "y0": round(y0, 4), "x1": round(x1, 4), "y1": round(y1, 4),
             "z0": round(z0, 4), "z1": round(z1, 4), "rgb": list(rgb)}
 
 
 def build_room_shell(room, openings, style):
     """Piso + 4 paredes (espessura WALL_T pra FORA do interior) com vaos reais
-    (janela preserva peitoril+verga; porta vai ao chao — espelha a Hard Rule #2)."""
+    (janela preserva peitoril+verga; porta vai ao chao — espelha a Hard Rule #2)
+    + TETO (fase V-Ray: sem teto a luz de ceu lava o interior; os renders
+    mpl/SU/gate escondem o ceiling junto com as hide_walls)."""
     W, D, H = room["width_m"], room["depth_m"], room["height_m"]
     wall_rgb = _rgb(style, "wall")
     floor_rgb = _rgb(style, "floor")
-    parts = [_shell_box("floor", 0.0, 0.0, W, D, -FLOOR_T, 0.0, floor_rgb)]
+    ceil_rgb = _rgb(style, "ceiling", (242, 240, 234))
+    parts = [_shell_box("floor", 0.0, 0.0, W, D, -FLOOR_T, 0.0, floor_rgb),
+             _shell_box("ceiling", -WALL_T, -WALL_T, W + WALL_T, D + WALL_T,
+                        H, H + FLOOR_T, ceil_rgb)]
     spans = {"north": (0.0, W), "south": (0.0, W), "east": (0.0, D), "west": (0.0, D)}
     rects = {  # (x0,y0,x1,y1) da parede por nome
         "south": (0.0 - WALL_T, -WALL_T, W + WALL_T, 0.0),
