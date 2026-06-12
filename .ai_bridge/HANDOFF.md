@@ -1,6 +1,6 @@
 # Handoff — sketchup-mcp
 
-> Fio da meada entre sessões. Última atualização: **2026-06-12** — **placar do programa: SOFÁ PASS (3c) · POLTRONA PASS (2c) · CAMA WARN cycle001 ("ótimo nascimento"); SATÉLITE = PADRÃO OFICIAL ("classe principal deriva a régua; satélite se adapta")**.
+> Fio da meada entre sessões. Última atualização: **2026-06-12** — **🏆×3: SOFÁ PASS (3c) · POLTRONA PASS (2c) · CAMA PASS (2c, "classe com gramática clara"). Próxima: MESA DE CENTRO (satélite do assento do sofá). Sentinelas: chaise-plinth / lounge-highback / queen-box-legs.**
 > Leia primeiro ao iniciar sessão.
 
 ## 2026-06-12 — Programa ARQUITETO DE CLASSE — sofá cycles 001-002 LANDADOS (WARN→WARN "melhora real")
@@ -54,6 +54,14 @@ classe satélite se adapta"** — `nightstand_satellite_gate` (alvo: platform 0.
 (box+legs esvazia a massa — pior célula queen-box-legs); (2) assinatura da CABECEIRA por
 arquétipo (legível à distância); (3) gramática frente/lateral da base ("desenhada, não só
 extrudada"). Vetado: arrumar só a queen-box-legs-med.
+
+**CAMA cycle 002 → PASS ("congelaria FORMA; saiu de 'cama correta' pra 'classe com gramática
+clara'"):** FIX1 coerência pés↔massa (proxy = altura de dormir: ≥0.60 sobre pés exige SAPATA;
+queen-box-legs RE-DERIVADA pela regra — juiz confirmou zero remendo); FIX2 assinatura geométrica
+da cabeceira (panel+ledge / upholstered+bolster / contained — "a diferença aparece DE LONGE");
+FIX3 base desenhada (rail escuro, shadow line no box, saia — "junta, recuo, apoio e intenção
+construtiva"). Sentinela: queen-box-legs. SATÉLITE re-aprovado como padrão. Verdicts
+BED-CLASS_cycle00{1,2}.md. **Mudança de forma da cama = ciclo formal com juiz.**
 
 **PESQUISA PRONTA pras próximas classes** (workflow 2026-06-12, tabelas ergonômicas completas em
 `C:/Users/FELIP_~1/AppData/Local/Temp/claude/E--Claude/f4ec71f5-c33c-42b6-91c3-9d56331f5428/tasks/w2w46wjf6.output`
