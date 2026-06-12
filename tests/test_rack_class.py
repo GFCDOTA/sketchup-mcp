@@ -46,7 +46,8 @@ def test_one_support_mode_with_levity():
         if spec.support == "base":
             assert any(p["label"] == "toe_base" for p in parts)
         if spec.support == "floating":
-            assert min(p["z0"] for p in parts) >= 0.25   # respiro real
+            body = next(p for p in parts if p["label"] == "body")
+            assert body["z0"] >= 0.25                    # respiro real do corpo
 
 
 def test_facade_rhythm_and_technical_void():
@@ -79,8 +80,9 @@ def test_tv_proxy_parts():
 
 
 def test_floating_body_scales_with_length():
+    """com wall_back (ancora) o corpo fino e' ok ate 7.2; sem, engrossa."""
     s = derive_rack_spec("75", "floating_minimal")
-    assert s.length / s.body_h <= 6.2
+    assert s.length / s.body_h <= 7.2 and s.wall_back
 
 
 def test_sofa_satellite():
