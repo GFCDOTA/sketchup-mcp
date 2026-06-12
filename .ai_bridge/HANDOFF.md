@@ -1,6 +1,6 @@
 # Handoff — sketchup-mcp
 
-> Fio da meada entre sessões. Última atualização: **2026-06-12** — **NOVA MISSÃO (direção do Felipe): programa "arquiteto de CLASSE procedural" de móveis; sofá cycle001 = WARN com TOP3 de classe**.
+> Fio da meada entre sessões. Última atualização: **2026-06-12** — **🏆 MARCO: classe SOFÁ = PASS, FORMA CONGELADA em 3 ciclos ("gramática procedural de sofá, passou"); próximo móvel = POLTRONA**.
 > Leia primeiro ao iniciar sessão.
 
 ## 2026-06-12 — Programa ARQUITETO DE CLASSE — sofá cycles 001-002 LANDADOS (WARN→WARN "melhora real")
@@ -27,19 +27,19 @@ generalização, formato de saída por ciclo (FASE_ATUAL/DIAGNOSTICO/.../RISCO_D
   Identidade de família ✓ ("até demais"), escala ✓ ("corpo humano preservado"), PIOR célula =
   chaise-plinth ("caixote anexado").
 
-**CYCLE 002 FEITO (mesma sessão): as 3 regras viraram classe** — `SofaSpec` ganhou
-`arm_relief`/`arm_cap`/`seat_overhang`/`base_recess` (defaults neutros = exemplar byte-idêntico);
-builder: sapata recuada (anti-bunker), chaise com frente aberta + vinco alinhado a seat_front +
-pés sob o deck, tampo proud formal, overhang lounge; gate: constraint `compensacao_de_massa` +
-sabotagem "bunker" (7/7). **Juiz: WARN — "melhora real, não cosmética"**
-(`.ai_bridge/fidelity/verdicts/SOFA-CLASS_cycle002.md`).
+**CYCLES 002-003 FEITOS (mesma sessão) → PASS:** 002 = anti-bunker (sapata `arm_relief`) + chaise
+frente-aberta/deck em L + linguagem por arquétipo (WARN "melhora real"); 003 = TERMINAÇÃO da chaise
+(`chaise_termination='panel'`: lateral estofada até o deck) + `arm_taper` no chunky + silhuetas
+afastadas (formal rake 8/h 0.92 vs lounge rake 20/h 0.72/per_seat 0.68) → **PASS: "congelaria FORMA;
+não abriria cycle 004 de forma; próximos ganhos são de OUTRO estágio (bevel/costura/material/cena)"**.
+Verdicts SOFA-CLASS_cycle00{1,2,3}.md. **REGRA: mudança de FORMA do sofá a partir daqui = novo ciclo
+formal com juiz, nunca edição casual.**
 
-**CYCLE 003 (próxima fatia) — TOP3_RESTANTES do juiz, todos de classe:**
-(1) **regra de TERMINAÇÃO da chaise** (frente/lateral com gramática própria: base baixa contínua
-OU perna/recuo OU painel reduzido — a frente aberta do 002 lê como "buraco construtivo");
-(2) **redução visual adicional do braço chunky** (chanfro/bevel/taper além da sapata);
-(3) **assinatura de SILHUETA por arquétipo mais forte** (formal ereto/crisp, lounge horizontal/fofo).
-Vetado: "arrumar só a célula chaise-plinth".
+**PRÓXIMO: classe POLTRONA (armchair), cycle 001** — reusar o template provado (FASE 0 diagnóstico →
+spec/teoria executável → derive por arquétipo → matriz de generalização → juiz). A poltrona herda
+muito da teoria do sofá (1 lugar, braços/encosto/base; ranges próprios). Depois dela: cama → mesa de
+centro → rack → mesa de jantar → cadeira → guarda-roupa → criado-mudo (ordem do Felipe). O estágio
+de DETALHE do sofá (tufted do worktree sofa-skill, costura, material) fica pra quando a fase abrir.
 
 **Estado paralelo:** fase materiais da CENA pausada pré-veredito em `feat/scene-materials` (pushed);
 luz V-Ray da cena APROVADA (receita congelada no handoff abaixo). Ordem das classes do Felipe:
