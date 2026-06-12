@@ -9,9 +9,10 @@ render harness desenha via render_parts_iso / place_layout_skp.rb.
 """
 from __future__ import annotations
 
-from tools.decor_anatomy_spec import (CoffeeTableSpec, CurtainSpec,   # noqa: F401
-                                      FloorLampSpec, PlantSpec, RugSpec,
-                                      SideTableSpec, WallArtSpec, decor_spec)
+from tools.decor_anatomy_spec import (AccentSeatSpec, CoffeeTableSpec,   # noqa: F401
+                                      CurtainSpec, FloorLampSpec, PlantSpec,
+                                      RugSpec, SideTableSpec, WallArtSpec,
+                                      decor_spec)
 
 
 def _p(label, kind, x0, y0, x1, y1, z0, z1, rgb):
@@ -133,16 +134,27 @@ def build_wall_art(spec: WallArtSpec):
 
 def build_curtain(spec: CurtainSpec):
     """Painel ondulado low-poly: dobras verticais alternando offset em Y + varao.
-    Plano da cortina = XZ (corre ao longo de X); frente = -Y."""
+    Plano da cortina = XZ (corre ao longo de X); frente = -Y. panel_split=2 ->
+    dobras so nas 2 pontas (paineis recolhidos de panel_w cada, vao central
+    aberto = cortina-moldura); o varao continua varrendo a largura inteira."""
     spec.validate()
     W, H, fw, amp, t = spec.width, spec.height, spec.fold_w, spec.fold_amp, spec.thickness
-    n = max(2, round(W / fw))
-    fw = W / n                      # dobras exatas, sem sobra
+    if spec.panel_split == 2:
+        spans = [(0.0, spec.panel_w), (W - spec.panel_w, W)]
+    else:
+        spans = [(0.0, W)]
     parts = []
-    for i in range(n):
-        y0 = amp if i % 2 else 0.0
-        parts.append(_p(f"fold_{i + 1}", "panel_fold",
-                        i * fw, y0, (i + 1) * fw, y0 + t, 0.0, H, spec.panel_rgb))
+    i = 0
+    for x_start, x_end in spans:
+        pw = x_end - x_start
+        n = max(2, round(pw / fw))
+        pfw = pw / n                # dobras exatas, sem sobra
+        for j in range(n):
+            y0 = amp if j % 2 else 0.0
+            i += 1
+            parts.append(_p(f"fold_{i}", "panel_fold",
+                            x_start + j * pfw, y0, x_start + (j + 1) * pfw, y0 + t,
+                            0.0, H, spec.panel_rgb))
     rod = spec.rod_d
     parts.append(_p("rod", "rod", -spec.rod_overhang, amp / 2, W + spec.rod_overhang,
                     amp / 2 + rod, H, H + rod, spec.rod_rgb))
@@ -177,6 +189,22 @@ def build_plant(spec: PlantSpec):
     return parts, _meta("plant_placeholder", parts)
 
 
+def build_accent_seat(spec: AccentSeatSpec):
+    """4 pes finos recuados + assento + encosto baixo no fundo. Frente = -Y
+    (encosto fica em Y alto, igual ao sofa)."""
+    spec.validate()
+    W, D, H = spec.width, spec.depth, spec.height
+    sh, lh, lt, ins, bt = spec.seat_h, spec.leg_h, spec.leg_t, spec.leg_inset, spec.back_t
+    parts = []
+    for tag, (x0, y0) in (("fl", (ins, ins)), ("fr", (W - ins - lt, ins)),
+                          ("bl", (ins, D - ins - lt)), ("br", (W - ins - lt, D - ins - lt))):
+        parts.append(_p(f"leg_{tag}", "leg", x0, y0, x0 + lt, y0 + lt, 0.0, lh, spec.leg_rgb))
+    parts.append(_p("seat", "seat", 0.0, 0.0, W, D, lh, sh, spec.seat_rgb))
+    back_rgb = tuple(int(v * 0.94) for v in spec.seat_rgb)   # encosto um tom abaixo
+    parts.append(_p("back", "back", 0.0, D - bt, W, D, sh, H, back_rgb))
+    return parts, _meta("accent_seat", parts)
+
+
 BUILDERS = {
     "rug": (RugSpec, build_rug),
     "coffee_table": (CoffeeTableSpec, build_coffee_table),
@@ -185,6 +213,7 @@ BUILDERS = {
     "wall_art": (WallArtSpec, build_wall_art),
     "curtain": (CurtainSpec, build_curtain),
     "plant_placeholder": (PlantSpec, build_plant),
+    "accent_seat": (AccentSeatSpec, build_accent_seat),
 }
 
 

@@ -7,8 +7,8 @@
   "properties": {
     "type": {
       "enum": ["sofa", "rug", "coffee_table", "side_table", "floor_lamp",
-               "wall_art", "curtain", "plant_placeholder"],
-      "description": "tipos suportados na slice 1 do Intent-to-Scene (living room vertical)"
+               "wall_art", "curtain", "plant_placeholder", "accent_seat"],
+      "description": "tipos suportados no Intent-to-Scene (living room vertical); accent_seat entrou no cycle 002 (contrapeso do hero)"
     },
     "role": {
       "enum": ["hero", "anchor", "companion", "textile", "light", "decor"],
@@ -37,7 +37,15 @@
     },
     "placement_hint": {
       "type": "string",
-      "description": "dica de posicao resolvida pelo composer: main_wall | centered_under_hero | front_of_hero | beside_hero | near_window | on_window | above_hero | corner"
+      "description": "dica de posicao resolvida pelo composer: main_wall | centered_under_hero | front_of_hero | beside_hero | near_window | on_window | above_hero | corner | opposite_hero"
+    },
+    "panel_split": {
+      "type": "integer", "enum": [1, 2],
+      "description": "so curtain: 1 = painel unico fechado; 2 = paineis abertos nas pontas emoldurando a janela (cycle 002: cortina nao-protagonista)"
+    },
+    "panel_w": {
+      "type": "number", "exclusiveMinimum": 0,
+      "description": "so curtain com panel_split=2: largura de cada painel recolhido (default 0.55)"
     },
     "priority": {
       "type": "integer", "minimum": 1,

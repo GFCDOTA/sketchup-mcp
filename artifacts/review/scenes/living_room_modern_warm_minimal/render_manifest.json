@@ -15,11 +15,11 @@
     ],
     "target": [
       2.6,
-      2.784,
+      2.734,
       0.55
     ],
-    "elev_deg": 19.4,
-    "azim_deg": -127.1,
+    "elev_deg": 19.6,
+    "azim_deg": -127.6,
     "hide_walls": [
       "south",
       "west"
@@ -33,7 +33,7 @@
       "top": "E:\\Claude\\apps\\sketchup-mcp\\runs\\scenes\\living_room_modern_warm_minimal\\sketchup_top.png",
       "iso": "E:\\Claude\\apps\\sketchup-mcp\\runs\\scenes\\living_room_modern_warm_minimal\\sketchup_3_4.png"
     },
-    "timing_s": 15.3,
+    "timing_s": 13.7,
     "error": ""
   },
   "vray": "deferred — so depois do SpatialGate PASS"

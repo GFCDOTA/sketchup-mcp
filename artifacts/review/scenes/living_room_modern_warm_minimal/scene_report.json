@@ -32,16 +32,16 @@
       "rotation_deg": 0,
       "center": [
         2.6,
-        2.2812
+        2.1312
       ],
       "facing": [
         0,
         -1
       ],
       "bbox": [
-        1.1,
-        1.2812,
-        4.1,
+        0.9,
+        0.9812,
+        4.3,
         3.2812,
         0.0,
         0.012
@@ -109,9 +109,9 @@
       ],
       "bbox": [
         5.1,
-        1.2,
+        1.0,
         5.18,
-        3.6,
+        3.8,
         0.05,
         2.485
       ],
@@ -123,7 +123,7 @@
       "role": "companion",
       "rotation_deg": 0,
       "center": [
-        4.375,
+        4.575,
         3.6406
       ],
       "facing": [
@@ -131,9 +131,9 @@
         -1
       ],
       "bbox": [
-        4.15,
+        4.35,
         3.4156,
-        4.6,
+        4.8,
         3.8656,
         0.0,
         0.55
@@ -146,7 +146,7 @@
       "role": "light",
       "rotation_deg": 0,
       "center": [
-        0.84,
+        0.64,
         3.6406
       ],
       "facing": [
@@ -154,9 +154,9 @@
         -1
       ],
       "bbox": [
-        0.63,
+        0.43,
         3.4306,
-        1.05,
+        0.85,
         3.8506,
         0.0,
         1.65
@@ -186,20 +186,45 @@
       ],
       "z_off": 0.0,
       "anchor": "ao lado da janela win01, y=1.08"
+    },
+    {
+      "type": "accent_seat",
+      "role": "companion",
+      "rotation_deg": 180,
+      "center": [
+        2.05,
+        1.2312
+      ],
+      "facing": [
+        0,
+        1
+      ],
+      "bbox": [
+        1.675,
+        0.8312,
+        2.425,
+        1.6312,
+        0.0,
+        0.72
+      ],
+      "z_off": 0.0,
+      "anchor": "oposto ao hero, 1.5m de conversa, encarando-o"
     }
   ],
   "distances": {
     "coffee_table_gap_m": 0.4,
     "rug_overhang_m": [
-      0.4,
-      0.4
+      0.6,
+      0.6
     ],
     "art_offset_along_m": 0.0,
     "art_gap_above_hero_m": 0.25,
     "curtain_window_offset_m": 0.0,
     "plant_to_window_m": 1.408,
-    "side_table_gap_m": 0.45,
-    "floor_lamp_gap_m": 0.45
+    "side_table_gap_m": 0.65,
+    "floor_lamp_gap_m": 0.65,
+    "accent_seat_gap_m": 1.5,
+    "accent_faces_hero": true
   },
   "notes": []
 }

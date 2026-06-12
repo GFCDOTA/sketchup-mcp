@@ -167,7 +167,9 @@ def _contact_sheet(images, out_png, title):
 
 def render_views(scene_dir, su="auto"):
     scene, parts = load_scene(scene_dir)
-    out = Path(scene_dir)
+    # SEMPRE absoluto: o SketchUp resolve save/write_image contra o CWD DELE —
+    # path relativo aqui = .skp/PNG salvos fora do run dir com log de sucesso
+    out = Path(scene_dir).resolve()
     cam = scene["camera"]
     sid = scene["scene_id"]
 

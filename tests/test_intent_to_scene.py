@@ -151,11 +151,59 @@ def test_gate_passes_canonical_scene(scene):
     assert all(r["checks"].values())
 
 
-@pytest.mark.parametrize("idx", range(6))
+@pytest.mark.parametrize("idx", range(8))
 def test_gate_fails_sabotages(scene, idx):
     name, expect, s = _sabotages(scene)[idx]
     r = scene_spatial_gate(s, None)
     assert r["result"] == expect, f"{name}: esperado {expect}, veio {r['result']} {r['why']}"
+
+
+# ------------------------------------------------------------------ cycle 002
+# Regras aprendidas do GPT WARN cycle001 (verdict SCENE-LIVINGROOM-MWM_cycle001.md):
+# accent_seat oposto ao hero, cortina-moldura aberta, tapete maior, massa por quadrante.
+def test_accent_seat_opposite_and_facing_hero(scene):
+    d = scene["report"]["distances"]
+    assert d["accent_faces_hero"] is True
+    assert 1.0 <= d["accent_seat_gap_m"] <= 2.2, "distancia de conversa"
+    hero = next(p for p in scene["placements"] if p["role"] == "hero")
+    acc = next(p for p in scene["placements"] if p["type"] == "accent_seat")
+    win = next(o for o in scene["openings"] if o["type"] == "window")
+    # deslocado pro lado OPOSTO 'a janela (janela leste -> accent a oeste do hero)
+    assert win["wall"] == "east" and acc["center"][0] < hero["center"][0]
+    # mais baixo que o hero (contrapeso, nao concorrente)
+    assert acc["bbox"][5] < hero["bbox"][5]
+
+
+def test_curtain_split_panels_frame_window(scene):
+    r = scene_spatial_gate(scene, scene["parts"])
+    assert r["checks"]["cortina_moldura"], r["why"]
+    assert r["metrics"]["curtain_cover_frac"] <= 0.55
+    # 2 grupos de dobras com vao central aberto
+    folds = [p for p in scene["parts"]
+             if p.get("item") == "curtain" and p["kind"] == "panel_fold"]
+    ys = sorted((p["y0"], p["y1"]) for p in folds)
+    gaps = [b0 - a1 for (_, a1), (b0, _) in zip(ys, ys[1:]) if b0 - a1 > 0.01]
+    assert len(gaps) == 1 and gaps[0] > 0.8, f"esperava 1 vao central aberto, veio {gaps}"
+
+
+def test_quadrant_mass_balanced(scene):
+    r = scene_spatial_gate(scene, scene["parts"])
+    assert r["checks"]["equilibrio_quadrantes"], r["why"]
+    shares = r["metrics"]["quadrant_shares"]
+    assert len(shares) == 4 and abs(sum(shares) - 1.0) < 0.01
+    assert min(shares) >= 0.07
+
+
+def test_rug_anchors_seating_zone(scene):
+    """tapete cycle002 (3.4x2.3) pega sofa + mesa + accent (frente do accent no tapete)."""
+    rug = next(p for p in scene["placements"] if p["type"] == "rug")
+    table = next(p for p in scene["placements"] if p["type"] == "coffee_table")
+    acc = next(p for p in scene["placements"] if p["type"] == "accent_seat")
+    rx0, ry0, rx1, ry1 = rug["bbox"][:4]
+    assert (table["bbox"][0] >= rx0 and table["bbox"][2] <= rx1
+            and table["bbox"][1] >= ry0 and table["bbox"][3] <= ry1), "mesa toda no tapete"
+    # frente do accent (lado que encara o hero) alcanca o tapete
+    assert acc["bbox"][3] > ry0, "accent_seat fora da zona do tapete"
 
 
 # ------------------------------------------------------------------ harness

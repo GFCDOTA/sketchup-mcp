@@ -8,6 +8,8 @@
     "tapete_maior_que_hero": true,
     "quadro_centralizado": true,
     "cortina_na_janela": true,
+    "cortina_moldura": true,
+    "equilibrio_quadrantes": true,
     "circulacao": true,
     "bbox_plausivel": true,
     "camera_enquadra": true,
@@ -19,12 +21,19 @@
   "metrics": {
     "coffee_table_gap_m": 0.4,
     "rug_overhang_m": [
-      0.4,
-      0.4
+      0.6,
+      0.6
     ],
     "art_offset_m": -0.0,
     "art_gap_m": 0.25,
     "curtain_offset_m": 0.0,
+    "curtain_cover_frac": 0.423,
+    "quadrant_shares": [
+      0.134,
+      0.087,
+      0.372,
+      0.408
+    ],
     "hero_coverage": 0.109,
     "hero_frame_pos": [
       0.36,
@@ -42,6 +51,8 @@
     "tapete_maior_que_hero",
     "quadro_centralizado",
     "cortina_na_janela",
+    "cortina_moldura",
+    "equilibrio_quadrantes",
     "circulacao",
     "bbox_plausivel",
     "camera_enquadra"
