@@ -1,0 +1,128 @@
+[
+  {
+    "cell": "floating_minimal@tv55",
+    "bbox_m": [
+      1.73,
+      0.34,
+      0.68
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "tv_sat": "PASS",
+    "sofa_sat": "PASS",
+    "tv_center": 1.025,
+    "n_parts": 5
+  },
+  {
+    "cell": "floating_minimal@tv65",
+    "bbox_m": [
+      1.95,
+      0.34,
+      0.685
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "tv_sat": "PASS",
+    "sofa_sat": "PASS",
+    "tv_center": 1.09,
+    "n_parts": 5
+  },
+  {
+    "cell": "floating_minimal@tv75",
+    "bbox_m": [
+      2.17,
+      0.34,
+      0.722
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "tv_sat": "PASS",
+    "sofa_sat": "PASS",
+    "tv_center": 1.187,
+    "n_parts": 5
+  },
+  {
+    "cell": "low_credenza@tv55",
+    "bbox_m": [
+      1.83,
+      0.42,
+      0.52
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "tv_sat": "PASS",
+    "sofa_sat": "PASS",
+    "tv_center": 0.865,
+    "n_parts": 9
+  },
+  {
+    "cell": "low_credenza@tv65",
+    "bbox_m": [
+      2.05,
+      0.42,
+      0.52
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "tv_sat": "PASS",
+    "sofa_sat": "PASS",
+    "tv_center": 0.925,
+    "n_parts": 9
+  },
+  {
+    "cell": "low_credenza@tv75",
+    "bbox_m": [
+      2.27,
+      0.42,
+      0.52
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "tv_sat": "PASS",
+    "sofa_sat": "PASS",
+    "tv_center": 0.985,
+    "n_parts": 9
+  },
+  {
+    "cell": "storage_media@tv55",
+    "bbox_m": [
+      1.93,
+      0.45,
+      0.46
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "tv_sat": "PASS",
+    "sofa_sat": "PASS",
+    "tv_center": 0.805,
+    "n_parts": 7
+  },
+  {
+    "cell": "storage_media@tv65",
+    "bbox_m": [
+      2.15,
+      0.45,
+      0.46
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "tv_sat": "PASS",
+    "sofa_sat": "PASS",
+    "tv_center": 0.865,
+    "n_parts": 7
+  },
+  {
+    "cell": "storage_media@tv75",
+    "bbox_m": [
+      2.37,
+      0.45,
+      0.46
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "tv_sat": "PASS",
+    "sofa_sat": "PASS",
+    "tv_center": 0.925,
+    "n_parts": 7
+  }
+]
