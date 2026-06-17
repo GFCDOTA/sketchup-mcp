@@ -73,6 +73,7 @@ class DiningTableSpec:
     top_thickness: float = 0.04
     support: str = "legs"          # legs | pedestal
     apron_h: float = 0.10          # so legs: saia sob o tampo
+    apron_inset: float = 0.06      # rect: reveal do tampo sobre a saia (tampo+pernas, nao bloco)
     leg_section: float = 0.08
     leg_inset: float = 0.05        # recuo do canto (cadeira senta ENTRE pernas)
     leg_taper: bool = False        # oval_soft: perna conica verts8
@@ -186,10 +187,11 @@ def build_dining_table(spec: DiningTableSpec):
     if spec.shape == "rect":
         parts.append(_p("top", "top", 0.0, 0.0, L, W, z_top0, h, top))
         az0 = z_top0 - spec.apron_h
-        parts.append(_p("apron_f", "base", 0.04, 0.04, L - 0.04, 0.07, az0, z_top0, dark))
-        parts.append(_p("apron_b", "base", 0.04, W - 0.07, L - 0.04, W - 0.04, az0, z_top0, dark))
-        parts.append(_p("apron_l", "base", 0.04, 0.04, 0.07, W - 0.04, az0, z_top0, dark))
-        parts.append(_p("apron_r", "base", L - 0.07, 0.04, L - 0.04, W - 0.04, az0, z_top0, dark))
+        r = spec.apron_inset          # tampo sobressai => le tampo + estrutura, nao bloco
+        parts.append(_p("apron_f", "base", r, r, L - r, r + 0.03, az0, z_top0, dark))
+        parts.append(_p("apron_b", "base", r, W - r - 0.03, L - r, W - r, az0, z_top0, dark))
+        parts.append(_p("apron_l", "base", r, r, r + 0.03, W - r, az0, z_top0, dark))
+        parts.append(_p("apron_r", "base", L - r - 0.03, r, L - r, W - r, az0, z_top0, dark))
         sec, ins = spec.leg_section, spec.leg_inset
         for tag, (fx, fy) in (("fl", (ins, ins)), ("fr", (L - ins - sec, ins)),
                               ("bl", (ins, W - ins - sec)),
@@ -355,6 +357,9 @@ def dining_class_gate(spec: DiningTableSpec, parts=None):
                           "le retangulo chanfrado, nao curva continua")
         if spec.end_depth < 0.35 * spec.width:
             errors.append("ponta rasa (end<0.35*W) — oval lendo retangulo")
+    if spec.support == "legs" and spec.apron_h > 0.09:
+        errors.append(f"saia {spec.apron_h:.2f} > 0.09 — tampo+saia leem BLOCO "
+                      "pesado (afinar p/ ler tampo + pernas)")
     if spec.shape != "round" and spec.support == "legs":
         span = spec.length - 2 * (spec.leg_inset + spec.leg_section)
         need = spec.n_side() * PLACE_W_MIN
@@ -438,8 +443,8 @@ def circulation_gate(spec: DiningTableSpec, parts_vis=None):
 
 # ------------------------------------------------------- arquetipos + derive
 ARCHETYPES = {
-    "rect_family": dict(shape="rect", support="legs", top_thickness=0.04,
-                        apron_h=0.10, leg_section=0.08, leg_inset=0.05,
+    "rect_family": dict(shape="rect", support="legs", top_thickness=0.03,
+                        apron_h=0.06, leg_section=0.08, leg_inset=0.05,
                         base_w=0.90, seats_ok=(4, 6, 8),
                         top_rgb=(118, 92, 68), base_rgb=(96, 76, 58)),
     "round_compact": dict(shape="round", support="pedestal",
@@ -535,6 +540,8 @@ def _sabotages():
             derive_dining_spec(4, "round_compact", round_facets=8), None)),
         ("oval com ponta reta (oval_facets 1) le retangulo", lambda: (
             derive_dining_spec(6, "oval_soft", oval_facets=1), None)),
+        ("rect saia grossa (apron 0.12) le bloco", lambda: (
+            derive_dining_spec(6, "rect_family", apron_h=0.12), None)),
     ]
 
 

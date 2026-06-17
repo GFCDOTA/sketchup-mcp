@@ -28,7 +28,7 @@ def test_derive_never_fails(name, arch, seats):
     assert circulation_gate(spec, parts_vis=vis)["result"] == "PASS", name
 
 
-@pytest.mark.parametrize("idx", range(11))
+@pytest.mark.parametrize("idx", range(12))
 def test_sabotages_fail(idx):
     name, mk = _sabotages()[idx]
     assert _apply_sab(mk), name
