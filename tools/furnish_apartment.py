@@ -141,12 +141,12 @@ def living_room_boxes(con, room_id):
     from tools.sofa_builder import build_sofa, place_sofa_boxes, sofa_spec
     from interior.planners.living_room_planner import plan_living
     plan = plan_living(con, room_id)
-    if plan.get("result") != "OK":
-        boxes, out = living_boxes(con, room_id)            # fallback: brain antigo
-        if boxes:
-            boxes = [b for b in boxes if b.get("kind") != "poltrona"]
-        out = dict(out or {}); out["placement"] = f"fallback_brain ({plan.get('result')})"
-        return boxes, out
+    if not plan.get("plan"):
+        # sem parede util no comodo (raríssimo): NAO flutua moveis — sala vazia e
+        # honesto, sofa flutuando nao. O degrade do plan_living ja garante plano
+        # ANCORADO (WARN) p/ sala apertada; o brain antigo FLUTUANTE foi removido.
+        return [], {"result": plan.get("result"), "room_name": plan.get("room_name"),
+                    "placement": "no_plan_skip"}
     p = plan["plan"]
     sofa_c = tuple(p["sofa"]["center_in"]); sofa_f = tuple(p["sofa"]["facing"])
     rack_c = tuple(p["tv_rack"]["center_in"]); rack_f = tuple(p["tv_rack"]["facing"])
@@ -167,7 +167,14 @@ def living_room_boxes(con, room_id):
     # projeta o rack no eixo de facing do sofa (sofa->mesa->tapete->rack colineares).
     dist_fwd = (rack_c[0] - sofa_c[0]) * fnx + (rack_c[1] - sofa_c[1]) * fny
     rack_c = (sofa_c[0] + fnx * dist_fwd, sofa_c[1] + fny * dist_fwd)
-    boxes.append(_oriented_box("rack_tv", rack_c, rack_f, 1.80, 0.40, 0.0, 0.50, [120, 85, 55]))
+    # rack DIMENSIONADO A PAREDE-TV (Felipe: "rack muito grande"): cabe na parede
+    # com folga, teto 1.80m.
+    from interior.semantics.wall_affordance import wall_affordance
+    _aff = wall_affordance(con, room_id)
+    _rack_wall_len = next((w["length_m"] for w in _aff["walls"]
+                           if w["wall_id"] == p["tv_rack"]["wall_id"]), 1.80)
+    rack_w = round(min(1.80, max(1.00, _rack_wall_len - 0.40)), 2)
+    boxes.append(_oriented_box("rack_tv", rack_c, rack_f, rack_w, 0.40, 0.0, 0.50, [120, 85, 55]))
     boxes.append(_oriented_box("tapete", _ahead(0.95), sofa_f, 2.40, 1.60, 0.0, 0.02, [165, 156, 140]))
     boxes.append(_oriented_box("mesa_centro", _ahead(1.15), sofa_f, 1.00, 0.55, 0.0, 0.40, [92, 72, 56]))
     out = {"result": "OK", "room_name": plan.get("room_name"), "n_placed": len(boxes),
