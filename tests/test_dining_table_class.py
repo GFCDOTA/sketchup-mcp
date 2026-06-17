@@ -28,7 +28,7 @@ def test_derive_never_fails(name, arch, seats):
     assert circulation_gate(spec, parts_vis=vis)["result"] == "PASS", name
 
 
-@pytest.mark.parametrize("idx", range(9))
+@pytest.mark.parametrize("idx", range(10))
 def test_sabotages_fail(idx):
     name, mk = _sabotages()[idx]
     assert _apply_sab(mk), name
@@ -71,10 +71,13 @@ def test_archetype_grammar_in_geometry():
     # familia: 4 pernas + saia nos 4 lados
     assert sum(1 for p in rect if p["kind"] == "foot") == 4
     assert sum(1 for p in rect if p["label"].startswith("apron")) == 4
-    # redonda: pedestal (coluna + prato) + tampo octogono (alas verts8)
-    labels = {p["label"] for p in rnd}
-    assert {"column", "plate_a", "plate_b"} <= labels
-    assert any(p.get("verts8") for p in rnd if p["label"].startswith("top_"))
+    # redonda: tampo DISCO + pedestal redondos por BANDAS (le circulo, nao octogono)
+    rlabels = [p["label"] for p in rnd]
+    assert sum(1 for p in rnd if p["label"].startswith("top_")
+               and p.get("verts8")) >= 8          # disco curvo, nao 2 alas
+    assert any(l.startswith("column") for l in rlabels)  # coluna fina redonda
+    assert any(l.startswith("foot") for l in rlabels)    # prato baixo redondo
+    assert {"top", "foot"} <= {p["kind"] for p in rnd}
     # oval: pontas trapezoidais verts8 + pernas conicas verts8
     assert any(p.get("verts8") for p in oval if p["label"] in ("top_w", "top_e"))
     assert all(p.get("verts8") for p in oval if p["kind"] == "foot")

@@ -53,7 +53,7 @@
     "chair_sat": "PASS",
     "use_sat": "PASS",
     "frente_por_lugar": 1.257,
-    "n_parts": 7
+    "n_parts": 38
   },
   {
     "cell": "round_compact@4p",
@@ -67,7 +67,7 @@
     "chair_sat": "PASS",
     "use_sat": "PASS",
     "frente_por_lugar": 0.825,
-    "n_parts": 7
+    "n_parts": 38
   },
   {
     "cell": "round_compact@6p",
@@ -81,7 +81,7 @@
     "chair_sat": "PASS",
     "use_sat": "PASS",
     "frente_por_lugar": 0.707,
-    "n_parts": 7
+    "n_parts": 38
   },
   {
     "cell": "oval_soft@4p",

@@ -78,7 +78,7 @@ class DiningTableSpec:
     leg_taper: bool = False        # oval_soft: perna conica verts8
     place_w: float = PLACE_W
     heads: bool = True             # cabeceiras ocupadas (rect>=6; oval sempre)
-    corner_cut: float = 0.0        # round: chanfro do octogono (legibilidade)
+    round_facets: int = 24         # round: lados do disco do tampo (>=16 le circulo)
     end_depth: float = 0.0         # oval: profundidade de cada ponta curva
     tip_frac: float = 0.58         # oval: largura da ponta / W (percepcao)
     col_r: float = 0.075           # pedestal: raio da coluna
@@ -131,10 +131,30 @@ def _rot_box(label, kind, cx, cy, w, d, z0, z1, ang_rad, rgb):
     return p
 
 
+def _disc_bands(prefix, kind, cx, cy, R, z0, z1, rgb, nb=12):
+    """disco REDONDO como nb bandas trapezoidais (verts8): silhueta curva real
+    dentro da primitiva caixa (o renderer so desenha quad de topo/base). nb
+    bandas ~ poligono de 2*nb lados — >=12 le como circulo, nao octogono."""
+    parts = []
+    for i in range(nb):
+        ya = cy - R + (2 * R) * i / nb
+        yb = cy - R + (2 * R) * (i + 1) / nb
+        wa = math.sqrt(max(0.0, R * R - (ya - cy) ** 2))
+        wb = math.sqrt(max(0.0, R * R - (yb - cy) ** 2))
+        quad = [(cx - wa, ya), (cx + wa, ya), (cx + wb, yb), (cx - wb, yb)]
+        hw = max(wa, wb)
+        p = _p(f"{prefix}_{i}", kind, cx - hw, ya, cx + hw, yb, z0, z1, rgb)
+        p["verts8"] = ([(x, y, z0) for x, y in quad]
+                       + [(x, y, z1) for x, y in quad])
+        parts.append(p)
+    return parts
+
+
 def build_dining_table(spec: DiningTableSpec):
     """(parts, meta) no contrato padrao. rect = 4 pernas + saia; round =
-    pedestal central (coluna + prato baixo) e tampo OCTOGONO legivel; oval =
-    tampo racetrack (pontas trapezoidais verts8) + pernas conicas."""
+    tampo DISCO redondo (bandas verts8) + pedestal redondo (hub + coluna fina +
+    prato baixo); oval = tampo racetrack (pontas trapezoidais verts8) + pernas
+    conicas."""
     spec.validate()
     L, W, h, tt = spec.length, spec.width, spec.height, spec.top_thickness
     top, base = tuple(spec.top_rgb), tuple(spec.base_rgb)
@@ -157,29 +177,20 @@ def build_dining_table(spec: DiningTableSpec):
                             0.0, z_top0, base))
 
     elif spec.shape == "round":
-        D, c = L, spec.corner_cut
-        # tampo octogono: centro + 2 alas trapezoidais (cantos chanfrados 45)
-        parts.append(_p("top_c", "top", 0.0, c, D, D - c, z_top0, h, top))
-        for tag, (yi, yo) in (("n", (D - c, D)), ("s", (c, 0.0))):
-            p = _p(f"top_{tag}", "top", 0.0, min(yi, yo), D, max(yi, yo),
-                   z_top0, h, top)
-            p["verts8"] = ([(0.0, yi, z_top0), (D, yi, z_top0),
-                            (D - c, yo, z_top0), (c, yo, z_top0)]
-                           + [(0.0, yi, h), (D, yi, h),
-                              (D - c, yo, h), (c, yo, h)])
-            parts.append(p)
-        cx = cy = D / 2.0
-        parts.append(_p("skirt", "base", cx - 0.15 * D, cy - 0.15 * D,
-                        cx + 0.15 * D, cy + 0.15 * D, z_top0 - 0.04, z_top0, dark))
-        cr = spec.col_r
-        parts.append(_p("column", "foot", cx - cr, cy - cr, cx + cr, cy + cr,
-                        spec.plate_h, z_top0 - 0.04, base))
-        pr = spec.plate_r
-        parts.append(_p("plate_a", "foot", cx - pr, cy - pr, cx + pr, cy + pr,
-                        0.0, spec.plate_h * 0.5, base))
-        parts.append(_rot_box("plate_b", "foot", cx, cy, 2 * pr, 2 * pr,
-                              spec.plate_h * 0.5, spec.plate_h,
-                              math.pi / 4, _darker(base, 0.85)))
+        D = L
+        cx = cy = R = D / 2.0
+        nb = max(8, spec.round_facets // 2)
+        # tampo: DISCO redondo por bandas (le circulo, nao octogono facetado)
+        parts += _disc_bands("top", "top", cx, cy, R, z_top0, h, top, nb)
+        # hub fino e redondo sob o tampo (liga tampo -> coluna, sem bloco quadrado)
+        parts += _disc_bands("hub", "base", cx, cy, 0.12 * D,
+                             z_top0 - 0.035, z_top0, dark, 8)
+        # coluna do pedestal: FINA e redonda (libera a zona dos pes)
+        parts += _disc_bands("column", "foot", cx, cy, spec.col_r,
+                             spec.plate_h, z_top0 - 0.035, base, 8)
+        # prato da base: redondo, MENOR e BAIXO (canela/cadeira passam)
+        parts += _disc_bands("foot", "foot", cx, cy, spec.plate_r,
+                             0.0, spec.plate_h, _darker(base, 0.85), 10)
 
     else:  # oval (racetrack)
         ed, tip = spec.end_depth, spec.tip_frac * W
@@ -309,15 +320,19 @@ def dining_class_gate(spec: DiningTableSpec, parts=None):
         if not (lo - 1e-9 <= v <= hi + 1e-9):
             errors.append(f"{name}={v:.3f}: {msg}")
     if spec.shape == "round":
-        if spec.corner_cut < 0.18 * spec.length:
-            errors.append("octogono timido (<0.18*D) — redonda lendo quadrada")
-        if spec.plate_r > 0.40 * spec.length:
-            errors.append(f"prato da base {spec.plate_r:.2f} > 0.40*D — base "
-                          "central pesada: pe/canela nao entra")
-        if spec.plate_r < 0.27 * spec.length:
-            errors.append("prato < 0.27*D — pedestal instavel (tombamento)")
-        if spec.plate_h > 0.12:
-            errors.append("prato alto (>0.12) — canela bate na base")
+        if spec.round_facets < 16:
+            errors.append(f"redonda facetada ({spec.round_facets} lados <16) — "
+                          "le poligono, nao circulo")
+        if spec.plate_r > 0.36 * spec.length:
+            errors.append(f"prato da base {spec.plate_r:.2f} > 0.36*D — base "
+                          "central pesada: rouba a zona dos pes/cadeiras")
+        if spec.plate_r < 0.24 * spec.length:
+            errors.append("prato < 0.24*D — pedestal instavel (tombamento)")
+        if spec.col_r > 0.085 * spec.length:
+            errors.append(f"coluna {spec.col_r:.3f} > 0.085*D — pedestal grosso "
+                          "(rouba a zona dos pes)")
+        if spec.plate_h > 0.10:
+            errors.append("prato alto (>0.10) — canela bate na base")
     if spec.shape == "oval":
         if spec.end_depth < 0.35 * spec.width or spec.tip_frac > 0.70:
             errors.append("ponta timida (end<0.35*W ou tip>0.70*W) — oval "
@@ -450,8 +465,8 @@ def derive_dining_spec(seats=6, archetype="rect_family",
         D = max(seats * 0.68 / math.pi, ROUND_MIN_D[seats])
         D = round(min(D, DINING_RANGES["diameter_round"][1]), 3)
         kw.update(length=D, width=D, heads=False, place_w=round(pw, 3),
-                  corner_cut=round(0.22 * D, 3), col_r=max(0.06, 0.07 * D),
-                  plate_r=round(0.32 * D, 3), plate_h=0.10)
+                  round_facets=24, col_r=round(max(0.045, 0.05 * D), 3),
+                  plate_r=round(0.28 * D, 3), plate_h=0.06)
     else:  # oval
         n_side = max(1, (seats - 2) // 2)
         width = 0.95 + 0.035 * (n_side - 1)
@@ -488,8 +503,8 @@ def _sabotages():
         ("prancha infinita (3.20 x 0.90)", lambda: (
             derive_dining_spec(8, "rect_family", length=3.20, width=0.90), None)),
         ("redonda sem controle de alcance (D 1.75)", lambda: (
-            derive_dining_spec(6, "round_compact", length=1.75, width=1.75,
-                               corner_cut=0.40, plate_r=0.56), None)),
+            derive_dining_spec(6, "round_compact", length=1.75, width=1.75),
+            None)),
         ("base central pesada em mesa pequena (prato 0.34 em D 0.80)", lambda: (
             derive_dining_spec(2, "round_compact", plate_r=0.34), None)),
         ("altura incompativel com cadeira (0.84)", lambda: (
@@ -499,6 +514,8 @@ def _sabotages():
         ("oval que le como retangulo (ponta timida)", lambda: (
             derive_dining_spec(6, "oval_soft", end_depth=0.18, tip_frac=0.92),
             None)),
+        ("redonda facetada (round_facets 8) le poligono", lambda: (
+            derive_dining_spec(4, "round_compact", round_facets=8), None)),
     ]
 
 
