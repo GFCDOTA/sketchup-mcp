@@ -80,7 +80,7 @@ class DiningTableSpec:
     heads: bool = True             # cabeceiras ocupadas (rect>=6; oval sempre)
     round_facets: int = 24         # round: lados do disco do tampo (>=16 le circulo)
     end_depth: float = 0.0         # oval: profundidade de cada ponta curva
-    tip_frac: float = 0.58         # oval: largura da ponta / W (percepcao)
+    oval_facets: int = 8           # oval: bandas por ponta (semielipse; >=6 le curva)
     col_r: float = 0.075           # pedestal: raio da coluna
     plate_r: float = 0.0           # pedestal: raio do prato da base
     plate_h: float = 0.10          # pedestal: altura do prato (canela passa)
@@ -150,11 +150,32 @@ def _disc_bands(prefix, kind, cx, cy, R, z0, z1, rgb, nb=12):
     return parts
 
 
+def _oval_end_bands(prefix, x_full, x_tip, cy, W, z0, z1, rgb, nb=8):
+    """ponta de oval (racetrack) como SEMIELIPSE de nb bandas em x: meia-largura
+    em y = (W/2)*sqrt(1-t^2), do bordo cheio (t=0, largura W) ao bico (t=1).
+    Curva CONTINUA — nao o trapezio reto que lia 'retangulo chanfrado'."""
+    parts = []
+    depth = x_tip - x_full                       # com sinal (E: +, W: -)
+    for i in range(nb):
+        ta, tb = i / nb, (i + 1) / nb
+        xa, xb = x_full + depth * ta, x_full + depth * tb
+        ha = (W / 2.0) * math.sqrt(max(0.0, 1.0 - ta * ta))
+        hb = (W / 2.0) * math.sqrt(max(0.0, 1.0 - tb * tb))
+        quad = [(xa, cy - ha), (xa, cy + ha), (xb, cy + hb), (xb, cy - hb)]
+        hh = max(ha, hb)
+        p = _p(f"{prefix}_{i}", "top", min(xa, xb), cy - hh, max(xa, xb),
+               cy + hh, z0, z1, rgb)
+        p["verts8"] = ([(x, y, z0) for x, y in quad]
+                       + [(x, y, z1) for x, y in quad])
+        parts.append(p)
+    return parts
+
+
 def build_dining_table(spec: DiningTableSpec):
     """(parts, meta) no contrato padrao. rect = 4 pernas + saia; round =
     tampo DISCO redondo (bandas verts8) + pedestal redondo (hub + coluna fina +
-    prato baixo); oval = tampo racetrack (pontas trapezoidais verts8) + pernas
-    conicas."""
+    prato baixo); oval = tampo racetrack com pontas CURVAS semielipse (bandas
+    verts8) + pernas conicas."""
     spec.validate()
     L, W, h, tt = spec.length, spec.width, spec.height, spec.top_thickness
     top, base = tuple(spec.top_rgb), tuple(spec.base_rgb)
@@ -192,19 +213,14 @@ def build_dining_table(spec: DiningTableSpec):
         parts += _disc_bands("foot", "foot", cx, cy, spec.plate_r,
                              0.0, spec.plate_h, _darker(base, 0.85), 10)
 
-    else:  # oval (racetrack)
-        ed, tip = spec.end_depth, spec.tip_frac * W
+    else:  # oval (racetrack): centro reto + 2 pontas CURVAS (semielipse)
+        ed = spec.end_depth
         x0s, x1s = ed, L - ed
+        cy = W / 2.0
+        nb = max(6, spec.oval_facets)
         parts.append(_p("top_c", "top", x0s, 0.0, x1s, W, z_top0, h, top))
-        for tag, (xi, xo) in (("w", (x0s, 0.0)), ("e", (x1s, L))):
-            p = _p(f"top_{tag}", "top", min(xi, xo), 0.0, max(xi, xo), W,
-                   z_top0, h, top)
-            y0t, y1t = (W - tip) / 2.0, (W + tip) / 2.0
-            p["verts8"] = ([(xi, 0.0, z_top0), (xi, W, z_top0),
-                            (xo, y1t, z_top0), (xo, y0t, z_top0)]
-                           + [(xi, 0.0, h), (xi, W, h),
-                              (xo, y1t, h), (xo, y0t, h)])
-            parts.append(p)
+        parts += _oval_end_bands("top_w", x0s, 0.0, cy, W, z_top0, h, top, nb)
+        parts += _oval_end_bands("top_e", x1s, L, cy, W, z_top0, h, top, nb)
         az0 = z_top0 - spec.apron_h
         parts.append(_p("apron_f", "base", x0s + 0.02, 0.05, x1s - 0.02, 0.08,
                         az0, z_top0, dark))
@@ -217,7 +233,7 @@ def build_dining_table(spec: DiningTableSpec):
                               ("br", (x1s - 0.02 - sec, W - ins - sec))):
             p = _p(f"leg_{tag}", "foot", fx, fy, fx + sec, fy + sec,
                    0.0, z_top0, base)
-            sh = sec * 0.32  # conica: pe fino embaixo (elegancia da oval)
+            sh = sec * 0.18  # conica leve: pe presente (oval longa nao pode fragil)
             p["verts8"] = [
                 (fx + sh, fy + sh, 0.0), (fx + sec - sh, fy + sh, 0.0),
                 (fx + sec - sh, fy + sec - sh, 0.0), (fx + sh, fy + sec - sh, 0.0),
@@ -334,9 +350,11 @@ def dining_class_gate(spec: DiningTableSpec, parts=None):
         if spec.plate_h > 0.10:
             errors.append("prato alto (>0.10) — canela bate na base")
     if spec.shape == "oval":
-        if spec.end_depth < 0.35 * spec.width or spec.tip_frac > 0.70:
-            errors.append("ponta timida (end<0.35*W ou tip>0.70*W) — oval "
-                          "lendo retangulo com canto timido")
+        if spec.oval_facets < 6:
+            errors.append(f"oval com ponta reta ({spec.oval_facets} bandas <6) — "
+                          "le retangulo chanfrado, nao curva continua")
+        if spec.end_depth < 0.35 * spec.width:
+            errors.append("ponta rasa (end<0.35*W) — oval lendo retangulo")
     if spec.shape != "round" and spec.support == "legs":
         span = spec.length - 2 * (spec.leg_inset + spec.leg_section)
         need = spec.n_side() * PLACE_W_MIN
@@ -428,7 +446,7 @@ ARCHETYPES = {
                           top_thickness=0.035, seats_ok=(2, 4, 6),
                           top_rgb=(96, 80, 70), base_rgb=(70, 60, 54)),
     "oval_soft": dict(shape="oval", support="legs", top_thickness=0.03,
-                      apron_h=0.05, leg_section=0.055, leg_inset=0.08,
+                      apron_h=0.05, leg_section=0.06, leg_inset=0.08,
                       seats_ok=(4, 6, 8),
                       top_rgb=(142, 118, 92), base_rgb=(110, 92, 72)),
 }
@@ -482,7 +500,7 @@ def derive_dining_spec(seats=6, archetype="rect_family",
         kw.update(length=round(length, 3), width=round(width, 3), heads=True,
                   apron_h=a["apron_h"], leg_section=a["leg_section"],
                   leg_inset=a["leg_inset"], leg_taper=True,
-                  end_depth=round(end_depth, 3), tip_frac=0.58,
+                  end_depth=round(end_depth, 3), oval_facets=8,
                   place_w=round(pw, 3))
     spec = DiningTableSpec(**kw)
     for k, v in overrides.items():
@@ -511,11 +529,12 @@ def _sabotages():
             derive_dining_spec(6, "rect_family", height=0.84), None)),
         ("clearance/satelite invisivel na matriz", lambda: (
             derive_dining_spec(6, "rect_family"), "no_proxies")),
-        ("oval que le como retangulo (ponta timida)", lambda: (
-            derive_dining_spec(6, "oval_soft", end_depth=0.18, tip_frac=0.92),
-            None)),
+        ("oval que le como retangulo (ponta rasa end 0.18)", lambda: (
+            derive_dining_spec(6, "oval_soft", end_depth=0.18), None)),
         ("redonda facetada (round_facets 8) le poligono", lambda: (
             derive_dining_spec(4, "round_compact", round_facets=8), None)),
+        ("oval com ponta reta (oval_facets 1) le retangulo", lambda: (
+            derive_dining_spec(6, "oval_soft", oval_facets=1), None)),
     ]
 
 

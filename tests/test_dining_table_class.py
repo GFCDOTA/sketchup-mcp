@@ -28,7 +28,7 @@ def test_derive_never_fails(name, arch, seats):
     assert circulation_gate(spec, parts_vis=vis)["result"] == "PASS", name
 
 
-@pytest.mark.parametrize("idx", range(10))
+@pytest.mark.parametrize("idx", range(11))
 def test_sabotages_fail(idx):
     name, mk = _sabotages()[idx]
     assert _apply_sab(mk), name
@@ -78,8 +78,11 @@ def test_archetype_grammar_in_geometry():
     assert any(l.startswith("column") for l in rlabels)  # coluna fina redonda
     assert any(l.startswith("foot") for l in rlabels)    # prato baixo redondo
     assert {"top", "foot"} <= {p["kind"] for p in rnd}
-    # oval: pontas trapezoidais verts8 + pernas conicas verts8
-    assert any(p.get("verts8") for p in oval if p["label"] in ("top_w", "top_e"))
+    # oval: pontas CURVAS por bandas (semielipse) verts8 + pernas conicas verts8
+    assert sum(1 for p in oval if p["label"].startswith("top_w")
+               and p.get("verts8")) >= 4
+    assert sum(1 for p in oval if p["label"].startswith("top_e")
+               and p.get("verts8")) >= 4
     assert all(p.get("verts8") for p in oval if p["kind"] == "foot")
 
 
