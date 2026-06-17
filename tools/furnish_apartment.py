@@ -19,6 +19,13 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))   # roda standalone
+# Escala verificada da planta_74 (cota-anchored; core.scale.PLANT_PT_TO_M["planta_74"])
+# DEVE ser setada ANTES de core.scale ser importado pelos brains abaixo. Sem isso o
+# placement cai no default 0.0352 e a mobilia flutua ~1.36x FORA do shell 0.0259
+# (top render: comodos embaixo, moveis soltos em cima). core.scale congela PT_TO_M no
+# 1o import, entao nao da pra corrigir depois. Este pipeline e planta_74-only.
+if not os.environ.get("PT_TO_M"):
+    os.environ["PT_TO_M"] = "0.0259"
 from tools import bedroom_designer   # noqa: E402  (quartos: brain novo GPT-approved)
 from tools.bathroom_layout import build_boxes as bath_boxes   # noqa: E402
 from tools.kitchen_layout import build_boxes as kitchen_boxes   # noqa: E402
