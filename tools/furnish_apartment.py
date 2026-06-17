@@ -77,6 +77,8 @@ def bedroom_designer_boxes(con, room_id):
         size = next((s for s in ("king", "queen", "casal", "solteiro") if s in nm), "king")
         parts, _ = build_bed(bed_spec(size, width=round(w_m, 3), length=round(l_m, 3)))
         bed_parts = place_bed_boxes(parts, cen, (fx, fy))
+        for _b in bed_parts:
+            _b["module"] = "Cama"
         # a anatomia do build_bed JA tem a 'cabeceira'; dropa tambem o 'headboard' do
         # _items_to_boxes pra nao duplicar o painel (ruido visual no render). Felipe 2026-06-08.
         boxes = [b for b in boxes if b.get("kind") not in ("bed", "headboard")] + bed_parts
@@ -90,8 +92,11 @@ def bedroom_designer_boxes(con, room_id):
         for it in ns_items:
             nw, nd, ncen = _wd_dims(it["box"], bed_facing)
             nparts, _ = build_nightstand(nightstand_spec(width=round(nw, 3), depth=round(max(nd, 0.30), 3)))
-            ns_boxes += place_nightstand_boxes(nparts, ncen, bed_facing)
             n_ns += 1
+            _cb = place_nightstand_boxes(nparts, ncen, bed_facing)
+            for _b in _cb:                                  # cada criado = modulo separado
+                _b["module"] = f"Criado-mudo {n_ns}"
+            ns_boxes += _cb
         boxes = [b for b in boxes if b.get("kind") != "nightstand"] + ns_boxes
         out["nightstand_parametric"] = {"count": n_ns, "n_parts": len(ns_boxes)}
 
@@ -103,12 +108,14 @@ def bedroom_designer_boxes(con, room_id):
         ww_m, wd_m, wcen = _wd_dims(wd_item["box"], (wfx, wfy))
         wparts, _ = build_wardrobe(wardrobe_spec(width=round(ww_m, 3), depth=round(max(wd_m, 0.45), 3)))
         wboxes = place_wardrobe_boxes(wparts, wcen, (wfx, wfy))
+        for _b in wboxes:
+            _b["module"] = "Guarda-roupa"
         boxes = [b for b in boxes if b.get("kind") != "wardrobe"] + wboxes
         out["wardrobe_parametric"] = {"n_parts": len(wboxes), "W_m": round(ww_m, 2), "D_m": round(wd_m, 2)}
     return boxes, out
 
 
-def _oriented_box(kind, center_in, facing, w_m, d_m, z0_m, h_m, rgb, label=None):
+def _oriented_box(kind, center_in, facing, w_m, d_m, z0_m, h_m, rgb, label=None, module=None):
     """Caixa (rack/mesa/tapete) centrada em center_in (shell inches) com a FRENTE
     (-Y local) apontando 'facing'. Mesma rotacao do place_sofa_boxes -> qualquer
     angulo. w=largura (perp ao facing), d=profundidade (ao longo do facing)."""
@@ -129,7 +136,8 @@ def _oriented_box(kind, center_in, facing, w_m, d_m, z0_m, h_m, rgb, label=None)
     ys = [c[1] for c in corners]
     return {"kind": kind, "x0": min(xs), "y0": min(ys), "x1": max(xs), "y1": max(ys),
             "corners": corners, "h_in": round(h_m * M2IN, 2), "z0_in": round(z0_m * M2IN, 2),
-            "rgb": rgb, "label": label or kind, "ambiguous": False, "decorative": False}
+            "rgb": rgb, "label": label or kind, "module": module or kind,
+            "ambiguous": False, "decorative": False}
 
 
 def living_room_boxes(con, room_id):
@@ -155,6 +163,8 @@ def living_room_boxes(con, room_id):
     _seats = 3 if width_m >= 2.0 else 2
     parts, _ = build_sofa(sofa_spec("straight", seats=_seats, width=width_m, depth=0.95))
     boxes = place_sofa_boxes(parts, sofa_c, sofa_f)         # sofa de frente pra TV
+    for _b in boxes:                                        # cada movel = modulo editavel separado
+        _b["module"] = "Sofa"
     # mesa + tapete AGRUPADOS perto do sofa (nao esticados ate o rack); rack na parede-TV
     import math as _m
     fnx, fny = sofa_f
@@ -175,10 +185,10 @@ def living_room_boxes(con, room_id):
     _rack_wall_len = next((w["length_m"] for w in _aff["walls"]
                            if w["wall_id"] == p["tv_rack"]["wall_id"]), 1.80)
     rack_w = round(min(1.20, max(0.90, min(width_m, _rack_wall_len - 0.40))), 2)
-    boxes.append(_oriented_box("rack_tv", rack_c, rack_f, rack_w, 0.35, 0.0, 0.50, [120, 85, 55]))
+    boxes.append(_oriented_box("rack_tv", rack_c, rack_f, rack_w, 0.35, 0.0, 0.50, [120, 85, 55], module="Rack TV"))
     # tapete + mesa COMPACTOS, agrupados perto do sofa (nao transbordam o nicho).
-    boxes.append(_oriented_box("tapete", _ahead(0.70), sofa_f, 1.60, 1.10, 0.0, 0.02, [165, 156, 140]))
-    boxes.append(_oriented_box("mesa_centro", _ahead(0.80), sofa_f, 0.90, 0.50, 0.0, 0.40, [92, 72, 56]))
+    boxes.append(_oriented_box("tapete", _ahead(0.70), sofa_f, 1.60, 1.10, 0.0, 0.02, [165, 156, 140], module="Tapete"))
+    boxes.append(_oriented_box("mesa_centro", _ahead(0.80), sofa_f, 0.90, 0.50, 0.0, 0.40, [92, 72, 56], module="Mesa de centro"))
     out = {"result": "OK", "room_name": plan.get("room_name"), "n_placed": len(boxes),
            "placement": "common_sense_solver", "tv_wall": plan.get("tv_wall"),
            "sofa_wall": p["sofa"]["wall_id"], "view_dist_m": p["sofa"]["rule"]}
@@ -201,6 +211,9 @@ def collect_boxes(con):
             summary.append((r["id"], r["name"], r["room_type"], "skip(sem brain)", 0))
             continue
         boxes, out = brain(con, r["id"])
+        for b in (boxes or []):              # cada box leva COMODO + MODULO -> grupos editaveis no .skp
+            b["room"] = str(r.get("name") or r["id"])
+            b.setdefault("module", str(b.get("kind", "movel")))
         n = len(boxes) if boxes else 0
         all_boxes += boxes or []
         summary.append((r["id"], r["name"], r["room_type"], out.get("result"), n))

@@ -62,14 +62,24 @@ def pl_run
   end
 
   parent = model.active_entities.add_group
-  parent.name = 'Layout_placeholders'
+  parent.name = 'Mobilia'
   pents = parent.entities
+  # hierarquia EDITAVEL: Mobilia > <Comodo> > <Movel> > <peca>. Cada MOVEL e um grupo
+  # separado e nomeado (selecionar 'Sofa' pega so o sofa). Felipe 2026-06-17: nada de
+  # "quadradao gigantesco" com tudo junto.
+  room_groups = {}
+  mod_groups = {}
   placed = 0
   boxes.each do |b|
     begin
       h = b['h_in'].to_f
       z0 = (b['z0_in'] || 0).to_f      # base elevada (ex.: armario aereo flutua sobre a bancada)
-      g = pents.add_group
+      room = (b['room'] || 'Apto').to_s
+      mod  = (b['module'] || b['kind'] || 'Movel').to_s
+      rg = (room_groups[room] ||= (tmp = pents.add_group; tmp.name = room; tmp))
+      mkey = "#{room}|#{mod}"
+      mg = (mod_groups[mkey] ||= (tmp = rg.entities.add_group; tmp.name = mod; tmp))
+      g = mg.entities.add_group        # a peca, dentro do MOVEL, dentro do COMODO
       g.name = b['label'] || b['kind']
       # desenha o POLIGONO real (cantos) na cota z0; almofadas ganham chanfro no topo
       # (Visual Quality Layer: nao parecer cubo/game asset)
@@ -112,6 +122,7 @@ def pl_run
     end
   end
   log << "placed #{placed}/#{boxes.size} placeholders"
+  log << "MOVEIS (comodo > movel): #{mod_groups.keys.sort.join(' ; ')}"
 
   # AFTER: shell + moveis. LAYOUT_ZOOM_GROUP enquadra SO o comodo mobiliado
   # (bounds do grupo de moveis + folga p/ pegar as paredes), nao o apê inteiro.
