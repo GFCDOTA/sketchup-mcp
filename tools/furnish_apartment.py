@@ -151,7 +151,9 @@ def living_room_boxes(con, room_id):
     sofa_c = tuple(p["sofa"]["center_in"]); sofa_f = tuple(p["sofa"]["facing"])
     rack_c = tuple(p["tv_rack"]["center_in"]); rack_f = tuple(p["tv_rack"]["facing"])
     width_m = round(p["sofa"]["width_m"], 3)
-    parts, _ = build_sofa(sofa_spec("straight", seats=3, width=width_m, depth=0.95))
+    # seats adaptados a largura que cabe no nicho (3-lug so se a parede comporta).
+    _seats = 3 if width_m >= 2.0 else 2
+    parts, _ = build_sofa(sofa_spec("straight", seats=_seats, width=width_m, depth=0.95))
     boxes = place_sofa_boxes(parts, sofa_c, sofa_f)         # sofa de frente pra TV
     # mesa + tapete AGRUPADOS perto do sofa (nao esticados ate o rack); rack na parede-TV
     import math as _m
@@ -163,20 +165,20 @@ def living_room_boxes(con, room_id):
     def _ahead(dist_m):                                     # ponto 'dist_m' a frente do sofa
         return (sofa_c[0] + fnx * dist_m * M2IN, sofa_c[1] + fny * dist_m * M2IN)
 
-    # GPT (ajuste fino do placement PASS): CENTRALIZAR o rack/TV no eixo do sofa —
-    # projeta o rack no eixo de facing do sofa (sofa->mesa->tapete->rack colineares).
-    dist_fwd = (rack_c[0] - sofa_c[0]) * fnx + (rack_c[1] - sofa_c[1]) * fny
-    rack_c = (sofa_c[0] + fnx * dist_fwd, sofa_c[1] + fny * dist_fwd)
-    # rack DIMENSIONADO A PAREDE-TV (Felipe: "rack muito grande"): cabe na parede
-    # com folga, teto 1.80m.
+    # rack na parede-TV: o plan_living ja o posiciona FRENTE-A-FRENTE com o sofa,
+    # centrado no nicho (sem a projecao antiga que o empurrava pra boca/corredor).
+    # COMPACTO (Felipe: "diminuir o rack; tava tomando o corredor"): largura modesta
+    # (~ largura do sofa, teto 1.20m) e raso (0.35), flush na parede — apê pequeno
+    # pede movel compacto que nao rouba circulacao.
     from interior.semantics.wall_affordance import wall_affordance
     _aff = wall_affordance(con, room_id)
     _rack_wall_len = next((w["length_m"] for w in _aff["walls"]
                            if w["wall_id"] == p["tv_rack"]["wall_id"]), 1.80)
-    rack_w = round(min(1.80, max(1.00, _rack_wall_len - 0.40)), 2)
-    boxes.append(_oriented_box("rack_tv", rack_c, rack_f, rack_w, 0.40, 0.0, 0.50, [120, 85, 55]))
-    boxes.append(_oriented_box("tapete", _ahead(0.95), sofa_f, 2.40, 1.60, 0.0, 0.02, [165, 156, 140]))
-    boxes.append(_oriented_box("mesa_centro", _ahead(1.15), sofa_f, 1.00, 0.55, 0.0, 0.40, [92, 72, 56]))
+    rack_w = round(min(1.20, max(0.90, min(width_m, _rack_wall_len - 0.40))), 2)
+    boxes.append(_oriented_box("rack_tv", rack_c, rack_f, rack_w, 0.35, 0.0, 0.50, [120, 85, 55]))
+    # tapete + mesa COMPACTOS, agrupados perto do sofa (nao transbordam o nicho).
+    boxes.append(_oriented_box("tapete", _ahead(0.70), sofa_f, 1.60, 1.10, 0.0, 0.02, [165, 156, 140]))
+    boxes.append(_oriented_box("mesa_centro", _ahead(0.80), sofa_f, 0.90, 0.50, 0.0, 0.40, [92, 72, 56]))
     out = {"result": "OK", "room_name": plan.get("room_name"), "n_placed": len(boxes),
            "placement": "common_sense_solver", "tv_wall": plan.get("tv_wall"),
            "sofa_wall": p["sofa"]["wall_id"], "view_dist_m": p["sofa"]["rule"]}

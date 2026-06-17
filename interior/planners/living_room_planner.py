@@ -131,6 +131,24 @@ def plan_living(con, room_id, sofa_w=SOFA_W, sofa_d=SOFA_D):
     chosen = (report["candidates_sofa"] or report["rejected_sofa"] or [None])[0]
     if chosen is not None:
         sp, sn = chosen["_pt"], chosen["_n"]
+        sofa_w_fit = sofa_w
+        # CENTRAR o sofa OPOSTO a parede-TV (frente-a-frente, centrado no nicho — nao
+        # no canto/boca da abertura, que faz o rack "tomar o corredor") + DIMENSIONAR
+        # o sofa pra CABER no nicho (apê pequeno: movel compacto que cabe na parede;
+        # senao transborda. Felipe 2026-06-17). Usa o overlap das faixas 'along'.
+        sofa_ws = _wall_setup(sm, chosen["wall_id"])
+        if sofa_ws is not None and sofa_ws["orient"] == tv_ws["orient"]:
+            ov_lo = max(sofa_ws["along_lo"], tv_ws["along_lo"])
+            ov_hi = min(sofa_ws["along_hi"], tv_ws["along_hi"])
+            if ov_hi - ov_lo > M(0.8):                 # nicho com sobreposicao util
+                a_mid = (ov_lo + ov_hi) / 2.0
+                sofa_w_fit = min(sofa_w, (ov_hi - ov_lo) * PT_TO_M - 0.20)
+                perp_s = sofa_ws["face"] + sofa_ws["sgn"] * M(sofa_d / 2 + 0.03)
+                perp_t = tv_ws["face"] + tv_ws["sgn"] * M(0.25)
+                if sofa_ws["orient"] == "v":
+                    sp, tv_pt = (perp_s, a_mid), (perp_t, a_mid)
+                else:
+                    sp, tv_pt = (a_mid, perp_s), (a_mid, perp_t)
         degraded = not report["candidates_sofa"]
         report["result"] = "WARN" if (degraded or tv_degraded) else "OK"
         sofa_rule = (f"parede de frente p/ TV (oppose {chosen['oppose']}, "
@@ -146,7 +164,7 @@ def plan_living(con, room_id, sofa_w=SOFA_W, sofa_d=SOFA_D):
                                  else "parede limpa (WallAffordanceMap)")},
             "sofa": {"wall_id": chosen["wall_id"],
                      "center_in": [round(sp[0] * PT_TO_IN, 1), round(sp[1] * PT_TO_IN, 1)],
-                     "facing": list(sn), "width_m": sofa_w, "rule": sofa_rule},
+                     "facing": list(sn), "width_m": round(sofa_w_fit, 3), "rule": sofa_rule},
         }
     else:
         report["result"] = "NO_VALID_SOFA_WALL"   # comodo sem parede util (raríssimo)
