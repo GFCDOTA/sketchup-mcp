@@ -268,15 +268,15 @@ def living_room_boxes(con, room_id):
         wall_w = round(min(_rack_wall_len, 3.6), 2)
         boxes.append(_oriented_box("parede_concreto", wall_c, rack_f, wall_w, 0.04, 0.0, 2.40,
                                    [165, 162, 158], module="Parede concreto"))
-        # planta: ao LADO do sofá (canto, foreground), NÃO na frente do rack/TV (planta
-        # tapando a TV = bizarro). perp do facing do sofá, no lado que aponta pra área aberta.
-        perp_s = (-fny, fnx)
-        if (cen.x - sofa_c[0]) * perp_s[0] + (cen.y - sofa_c[1]) * perp_s[1] < 0:
-            perp_s = (-perp_s[0], -perp_s[1])
-        plant_anchor = (sofa_c[0] + perp_s[0] * 0.62 * M2IN, sofa_c[1] + perp_s[1] * 0.62 * M2IN)
-        plant_c = _toward_centroid(plant_anchor, 0.18)
-        if plant_c:
-            boxes += place_decor_boxes("plant_placeholder", plant_c, rack_f, height=1.45, module="Planta")
+        # planta PEQUENA sobre o RACK (acento de verde no móvel, como a referência) —
+        # no apê apertado não sobra piso livre p/ planta grande sem colidir. Vai numa
+        # ponta do rack (fora do centro da TV), apoiada no tampo (z_lift = altura do rack).
+        rperp = (-rfy, rfx)
+        plant_c = (rack_c[0] + rperp[0] * 0.50 * M2IN, rack_c[1] + rperp[1] * 0.50 * M2IN)
+        if _inside(plant_c, margin_in=2.0):
+            boxes += place_decor_boxes("plant_placeholder", plant_c, rack_f, z_lift=0.52,
+                                       height=0.55, pot_w=0.16, pot_h=0.10, foliage_w=0.30,
+                                       module="Planta")
         # quadro emoldurado na parede de concreto, acima do rack (z_lift = altura do olho)
         art_c = (wall_c[0] + rfx * 0.04 * M2IN, wall_c[1] + rfy * 0.04 * M2IN)
         boxes += place_decor_boxes("wall_art", art_c, rack_f, z_lift=1.15, module="Quadro",
