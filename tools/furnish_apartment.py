@@ -202,10 +202,36 @@ def living_room_boxes(con, room_id):
     _rack_wall_len = next((w["length_m"] for w in _aff["walls"]
                            if w["wall_id"] == p["tv_rack"]["wall_id"]), 1.80)
     rack_w = round(min(1.20, max(0.90, min(width_m, _rack_wall_len - 0.40))), 2)
-    boxes.append(_oriented_box("rack_tv", rack_c, rack_f, rack_w, 0.35, 0.0, 0.50, [120, 85, 55], module="Rack TV"))
+    if os.environ.get("FURNISH_STYLE") == "industrial":
+        # RACK = MÓVEL PLANEJADO real (rack_class PASS): pés/corpo/tampo/gavetas/nicho,
+        # derivado da TV + linha de visão. NÃO mais caixa. low_credenza preto+madeira.
+        # Gated industrial p/ não regredir o render default. place_sofa_boxes orienta (parts em m).
+        from tools.rack_class import build_rack, derive_rack_spec
+        _rlen = round(min(1.55, max(1.30, _rack_wall_len - 0.35)), 2)
+        _rspec = derive_rack_spec("55", "low_credenza", length=_rlen,
+                                  body_rgb=(60, 47, 36), front_rgb=(80, 62, 46), feet_rgb=(26, 26, 28))
+        _rparts, _ = build_rack(_rspec)
+        _rb = place_sofa_boxes(_rparts, rack_c, rack_f)
+        for _b in _rb:
+            _b["module"] = "Rack TV"
+        boxes += _rb
+    else:
+        boxes.append(_oriented_box("rack_tv", rack_c, rack_f, rack_w, 0.35, 0.0, 0.50, [120, 85, 55], module="Rack TV"))
     # tapete + mesa COMPACTOS, agrupados perto do sofa (nao transbordam o nicho).
     boxes.append(_oriented_box("tapete", _ahead(0.70), sofa_f, 1.60, 1.10, 0.0, 0.02, [165, 156, 140], module="Tapete"))
-    boxes.append(_oriented_box("mesa_centro", _ahead(0.80), sofa_f, 0.90, 0.50, 0.0, 0.40, [92, 72, 56], module="Mesa de centro"))
+    if os.environ.get("FURNISH_STYLE") == "industrial":
+        # MESA DE CENTRO = classe planejada (coffee_table_class PASS): tampo madeira +
+        # pernas metal preto + prateleira inferior. NÃO mais caixa.
+        from tools.coffee_table_class import CoffeeTableClassSpec, build_coffee_table_v2
+        _ct = CoffeeTableClassSpec(style="two_tier", length=0.95, width=0.50, height=0.38,
+                                   shelf=True, top_rgb=(80, 62, 46), leg_rgb=(30, 30, 33))
+        _ctp, _ = build_coffee_table_v2(_ct.validate())
+        _ctb = place_sofa_boxes(_ctp, _ahead(0.80), sofa_f)
+        for _b in _ctb:
+            _b["module"] = "Mesa de centro"
+        boxes += _ctb
+    else:
+        boxes.append(_oriented_box("mesa_centro", _ahead(0.80), sofa_f, 0.90, 0.50, 0.0, 0.40, [92, 72, 56], module="Mesa de centro"))
 
     # ---- camada de ESTILO (gated): parede de concreto na parede-TV + decor reusando
     # os builders que JA existem (planta, quadro). So adiciona; cor entra via apply_style.
@@ -242,9 +268,13 @@ def living_room_boxes(con, room_id):
         wall_w = round(min(_rack_wall_len, 3.6), 2)
         boxes.append(_oriented_box("parede_concreto", wall_c, rack_f, wall_w, 0.04, 0.0, 2.40,
                                    [165, 162, 158], module="Parede concreto"))
-        # planta: do canto do rack em direcao ao centroide, GARANTIDA dentro do comodo
-        rack_corner = (rack_c[0] - rfx * 0.30 * M2IN, rack_c[1] - rfy * 0.30 * M2IN)
-        plant_c = _toward_centroid(rack_corner, 0.32)
+        # planta: ao LADO do sofá (canto, foreground), NÃO na frente do rack/TV (planta
+        # tapando a TV = bizarro). perp do facing do sofá, no lado que aponta pra área aberta.
+        perp_s = (-fny, fnx)
+        if (cen.x - sofa_c[0]) * perp_s[0] + (cen.y - sofa_c[1]) * perp_s[1] < 0:
+            perp_s = (-perp_s[0], -perp_s[1])
+        plant_anchor = (sofa_c[0] + perp_s[0] * 0.62 * M2IN, sofa_c[1] + perp_s[1] * 0.62 * M2IN)
+        plant_c = _toward_centroid(plant_anchor, 0.18)
         if plant_c:
             boxes += place_decor_boxes("plant_placeholder", plant_c, rack_f, height=1.45, module="Planta")
         # quadro emoldurado na parede de concreto, acima do rack (z_lift = altura do olho)

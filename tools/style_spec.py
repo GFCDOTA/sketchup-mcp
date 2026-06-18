@@ -49,7 +49,7 @@ STYLE_TOKENS = {
     "industrial": StyleSpec(
         name="industrial", kind_rgb=_INDUSTRIAL_RGB, kind_texture=_INDUSTRIAL_TEX,
         light_kelvin=2700, fill_color=(1.0, 0.82, 0.6), floor="polished_concrete",
-        must_style=("seat_cushion", "back_cushion", "arm", "rack_tv", "mesa_centro", "tapete"),
+        must_style=("seat_cushion", "back_cushion", "arm", "tapete"),
     ),
 }
 
