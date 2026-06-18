@@ -173,13 +173,45 @@ TEXTURES = {
 }
 
 
+# ---- override por TEXTURA PBR REAL (CC0 Poly Haven) quando presente em assets/textures/pbr/ ----
+# (src jpg, png de saida, mult de cor|None). Mantém o procedural como fallback se o jpg sumir.
+PBR = ROOT / "assets/textures/pbr"
+PBR_MAP = [
+    ("pbr_concrete.jpg", "concrete.png", None),                         # concreto board-formed (parede TV)
+    ("pbr_wood_floor.jpg", "wood_floor.png", None),                     # piso madeira real
+    ("pbr_wood_floor.jpg", "wood_medium.png", None),
+    ("pbr_wood_floor.jpg", "wood_dark.png", (0.62, 0.58, 0.55)),        # madeira escura (rack/mesa)
+    ("pbr_fabric.jpg", "fabric_charcoal.png", (0.34, 0.37, 0.40)),      # trama real escurecida p/ charcoal
+    ("pbr_granite.jpg", "porcelain.png", None),                         # granito (piso area molhada)
+]
+
+
+def _apply_pbr_overrides():
+    if not PBR.is_dir():
+        return 0
+    n = 0
+    for src, dst, mult in PBR_MAP:
+        p = PBR / src
+        if not p.exists():
+            continue
+        im = Image.open(p).convert("RGB").resize((SZ, SZ))
+        if mult:
+            a = np.clip(np.asarray(im, dtype=float) * np.asarray(mult), 0, 255)
+            im = Image.fromarray(a.astype("uint8"))
+        im.save(OUT / dst)
+        n += 1
+        print(f"  PBR: {dst} <- {src}{' (escurecido)' if mult else ''}")
+    return n
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     for name, fn in TEXTURES.items():
         img = fn()
         img.save(OUT / name)
         print(f"  {name} {img.size}")
-    print(f"-> {OUT.relative_to(ROOT)}")
+    n = _apply_pbr_overrides()
+    print(f"-> {OUT.relative_to(ROOT)}  ({n} texturas PBR reais sobrepostas)")
 
 
 if __name__ == "__main__":
