@@ -110,6 +110,34 @@ def metal_matte(c_base, seed):
     return Image.fromarray(out.astype("uint8"))
 
 
+def porcelain(c_base, seed, tiles=2):
+    """Porcelanato grande-formato: base clara quase uniforme + veias MARMORIZADAS
+    suaves + junta de assentamento discreta (grade grande). Pratico p/ cozinha/banho
+    (facil de limpar). Tile grande no V-Ray."""
+    rng = np.random.default_rng(seed)
+    warp = _value_noise(SZ, SZ, 70, rng) * 3.0
+    veins = np.abs(np.sin((_value_noise(SZ, SZ, 28, rng) * 4 + warp) * np.pi)) ** 3
+    micro = _value_noise(SZ, SZ, 2, rng) - 0.5
+    t = -veins * 0.16 + micro * 0.05                      # veias levemente mais escuras
+    out = np.stack([np.clip(c_base[i] + t * 46, 0, 255) for i in range(3)], -1)
+    seam = SZ // tiles                                    # junta grande discreta
+    mask = (np.arange(SZ) % seam) < 2
+    out[mask] *= 0.93
+    out[:, mask] *= 0.93
+    return Image.fromarray(np.clip(out, 0, 255).astype("uint8"))
+
+
+def stone(c_base, seed):
+    """Pedra/quartzo de bancada: base cinza media + GRAO fino (sal-e-pimenta) +
+    veias suaves. Lisa, fosca-acetinada. Pratico (sem rejunte) p/ bancada de cozinha."""
+    rng = np.random.default_rng(seed)
+    speck = rng.random((SZ, SZ)) - 0.5                    # grao fino do quartzo
+    vein = _value_noise(SZ, SZ, 55, rng) - 0.5
+    t = speck * 0.10 + vein * 0.13
+    out = np.stack([np.clip(c_base[i] + t * 48, 0, 255) for i in range(3)], -1)
+    return Image.fromarray(np.clip(out, 0, 255).astype("uint8"))
+
+
 def wood_floor(c_base, c_dark, seed, planks=5, rings=7):
     """Piso de madeira: tabuas longas (veio vertical) + linhas de junta horizontais entre tabuas.
     Tom quente medio, escala grande (tile grande no V-Ray). Conserta a 'faixa cinza' do piso pastel
@@ -139,6 +167,9 @@ TEXTURES = {
     "brick.png": lambda: brick((150, 92, 70), (148, 144, 138), 102),
     "fabric_charcoal.png": lambda: fabric((60, 62, 66), 103),     # reusa fabric() parametrizada
     "metal_black_matte.png": lambda: metal_matte((30, 30, 32), 104),
+    # ---- praticos (cozinha/banho): porcelanato claro + pedra de bancada ----
+    "porcelain.png": lambda: porcelain((224, 222, 218), 105),
+    "stone_counter.png": lambda: stone((176, 174, 170), 106),
 }
 
 

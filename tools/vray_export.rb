@@ -43,6 +43,11 @@ def vray_export_run
           'ph_track_spot' => 'metal_black_matte.png'
         })
       end
+      # PEDRA na bancada (cozinha/banho pratico — lisa, sem rejunte), gated
+      if ENV['VRAY_STONE'] == '1'
+        tex_map = tex_map.merge({'ph_bancada' => 'stone_counter.png',
+                                 'ph_bancada_banho' => 'stone_counter.png'})
+      end
       n_tex = 0
       tex_map.each do |matname, png|
         m = model.materials[matname]
@@ -61,12 +66,16 @@ def vray_export_run
       # Conserta a "faixa cinza" recorrente (piso pastel chapado). floor_* e distinto de parede(plan_wall)/
       # movel(ph_*) => seguro, nao regride sofa/parede. Geometria intacta (so material.texture).
       wf_path = File.join(tex_dir, 'wood_floor.png')
+      pc_path = File.join(tex_dir, 'porcelain.png')
+      wet = (ENV['VRAY_PORCELAIN_FLOORS'] || '').split(',')   # materiais floor_* de area molhada
+      all_pc = ENV['VRAY_ALL_PORCELAIN'] == '1'                # render so de cozinha/banho
       if File.exist?(wf_path)
         model.materials.each do |m|
           next unless m.name.to_s.start_with?('floor_')
+          porc = (all_pc || wet.include?(m.name.to_s)) && File.exist?(pc_path)
           begin
-            m.texture = wf_path
-            m.texture.size = [120, 120]   # ~3m de repeticao (tabuas grandes; piso != 40" do movel)
+            m.texture = porc ? pc_path : wf_path   # porcelanato (facil limpar) na area molhada; madeira no resto
+            m.texture.size = porc ? [60, 60] : [120, 120]
             n_tex += 1
           rescue StandardError => e
             out << "tex ERR #{m.name}: #{e.message}"
