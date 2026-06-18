@@ -157,6 +157,20 @@ def place_decor_boxes(kind, center_in, facing, z_lift=0.0, module=None, **overri
     return bx
 
 
+def _chair_parts():
+    """Cadeira de jantar simples (Tolix-ish, metal preto): 4 pés + assento + encosto.
+    Metros, frente = -Y (encosto em +Y). Orientada por place_sofa_boxes."""
+    from tools.sofa_builder import _p
+    w, d, sh, bh, lt = 0.42, 0.44, 0.46, 0.86, 0.028
+    seat, frame = (52, 52, 56), (26, 26, 29)
+    parts = []
+    for x0, y0 in ((0.02, 0.02), (w - 0.02 - lt, 0.02), (0.02, d - 0.02 - lt), (w - 0.02 - lt, d - 0.02 - lt)):
+        parts.append(_p("leg", "foot", x0, y0, x0 + lt, y0 + lt, 0.0, sh, frame))
+    parts.append(_p("seat", "seat", 0.0, 0.0, w, d, sh, sh + 0.04, seat))
+    parts.append(_p("back", "back", 0.0, d - 0.05, w, d, sh, bh, frame))
+    return parts
+
+
 def living_room_boxes(con, room_id):
     """Sala via COMMON SENSE ENGINE (placement solver): o sofa GOLDEN deixa de
     flutuar no centro — fica ANCORADO numa parede de FRENTE pra TV (eixo sofa->rack),
@@ -293,6 +307,35 @@ def living_room_boxes(con, room_id):
         track_face = (-fny, fnx)                 # perp ao facing do sofa -> trilho ao longo do eixo
         boxes += place_decor_boxes("track_light", mid, track_face, z_lift=2.15, module="Trilho de luz",
                                    length=1.5, n_spots=3)
+        # MESA DE JANTAR (lado jantar): na maior zona LIVRE da sala, longe do cluster de estar.
+        from shapely.ops import unary_union as _uni
+        _occ = [Polygon([(c[0], c[1]) for c in _b["corners"]]) for _b in boxes if _b.get("corners")]
+        _free = cell_in.buffer(-M2IN * 0.12).difference(_uni([p.buffer(M2IN * 0.32) for p in _occ]))
+        if _free.geom_type == "MultiPolygon":
+            _free = max(_free.geoms, key=lambda g: g.area)
+        if (not _free.is_empty) and _free.area > (2.4 * M2IN * M2IN):
+            _dc = _free.centroid
+            from tools.dining_table_class import DiningTableSpec, build_dining_table
+            _dt = DiningTableSpec(shape="round", seats=4, length=0.92, width=0.92, height=0.75,
+                                  top_rgb=(92, 68, 46), base_rgb=(30, 30, 33))
+            _dtp, _ = build_dining_table(_dt.validate())
+            _dtb = place_sofa_boxes(_dtp, (_dc.x, _dc.y), (0.0, 1.0))
+            for _b in _dtb:
+                _b["module"] = "Mesa de jantar"
+            boxes += _dtb
+            _nch = 0
+            for _ang in range(0, 360, 45):                 # 8 direções; pega as que cabem
+                _ux, _uy = _m.cos(_m.radians(_ang)), _m.sin(_m.radians(_ang))
+                _chc = (_dc.x + _ux * 0.70 * M2IN, _dc.y + _uy * 0.70 * M2IN)
+                _pt = Point(_chc)
+                if cell_in.contains(_pt) and cell_in.exterior.distance(_pt) >= 4:
+                    _chb = place_sofa_boxes(_chair_parts(), _chc, (-_ux, -_uy))
+                    for _b in _chb:
+                        _b["module"] = "Cadeira jantar"
+                    boxes += _chb
+                    _nch += 1
+                    if _nch >= 4:
+                        break
 
     out = {"result": "OK", "room_name": plan.get("room_name"), "n_placed": len(boxes),
            "placement": "common_sense_solver", "tv_wall": plan.get("tv_wall"),
