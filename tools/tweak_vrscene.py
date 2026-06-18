@@ -20,6 +20,8 @@ MAT_FABRIC = ("headboard", "rug", "colchao", "travesseiro", "manta", "arm", "sea
               "back_cushion", "tapete")
 MAT_METAL = ("puxador",)
 MAT_CERAMIC = ("vaso",)
+MAT_CONCRETE = ("parede_concreto",)                                          # estilo industrial (no-op s/ o kind)
+MAT_BLACK_METAL = ("frame",)                                                 # moldura/estrutura preta fosca
 MAT_PARAMS = {
     "wood": {"reflect": "AColor(0.11, 0.11, 0.11, 1)", "reflect_glossiness": "0.72",
              "fresnel_ior": "1.55", "metalness": "0"},                       # madeira satin
@@ -29,6 +31,10 @@ MAT_PARAMS = {
               "metalness": "1"},                                             # metal escovado
     "ceramic": {"reflect": "AColor(0.28, 0.28, 0.28, 1)", "reflect_glossiness": "0.9",
                 "metalness": "0"},
+    "concrete": {"reflect": "AColor(0.04, 0.04, 0.04, 1)", "reflect_glossiness": "0.45",
+                 "fresnel_ior": "1.5", "metalness": "0"},                    # concreto fosco
+    "black_metal": {"reflect": "AColor(0.35, 0.35, 0.35, 1)", "reflect_glossiness": "0.35",
+                    "metalness": "1"},                                       # metal preto fosco
 }
 
 
@@ -48,7 +54,8 @@ def _set_block(text: str, brdf: str, params: dict) -> str:
 def apply_materials(text: str) -> str:
     """Aplica materiais V-Ray por papel nos materiais de movel (_ph_<kind>_BRDFVRayMtl)."""
     for kinds, cls in ((MAT_WOOD, "wood"), (MAT_FABRIC, "fabric"), (MAT_METAL, "metal"),
-                       (MAT_CERAMIC, "ceramic")):
+                       (MAT_CERAMIC, "ceramic"), (MAT_CONCRETE, "concrete"),
+                       (MAT_BLACK_METAL, "black_metal")):
         for kind in kinds:
             text = _set_block(text, f"_ph_{kind}_BRDFVRayMtl", MAT_PARAMS[cls])
     return text

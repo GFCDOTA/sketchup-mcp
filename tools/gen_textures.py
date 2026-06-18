@@ -64,6 +64,52 @@ def linen(c_base, seed, period=3.2, amp=46):
     return Image.fromarray(out.astype("uint8"))
 
 
+def concrete(c_base, seed):
+    """Concreto aparente: cinza FRIO com mottle multi-escala suave + manchas leves,
+    fosco e SEM grao direcional. Tile grande (parede ~2-2.5m). Industrial feature wall."""
+    rng = np.random.default_rng(seed)
+    mottle = ((_value_noise(SZ, SZ, 64, rng) - 0.5) * 0.7
+              + (_value_noise(SZ, SZ, 18, rng) - 0.5) * 0.4
+              + (_value_noise(SZ, SZ, 5, rng) - 0.5) * 0.15)
+    t = np.clip(mottle, -0.5, 0.5)
+    out = np.stack([np.clip(c_base[i] + t * 32, 0, 255) for i in range(3)], -1)
+    return Image.fromarray(out.astype("uint8"))
+
+
+def brick(c_base, c_mortar, seed, rows=9, cols=4):
+    """Tijolinho running-bond: tijolos + juntas de argamassa, leve variacao por tijolo
+    (alternativa de parede de acento). Tile grande (parede)."""
+    rng = np.random.default_rng(seed)
+    img = np.empty((SZ, SZ, 3), dtype=float)
+    img[:] = c_mortar
+    bh = SZ / rows
+    mortar = max(2, int(bh * 0.12))
+    bw = SZ / cols
+    for r in range(rows):
+        y0, y1 = int(r * bh) + mortar, int((r + 1) * bh) - mortar
+        offset = (bw / 2.0) if (r % 2) else 0.0
+        x = -offset
+        while x < SZ:
+            x0, x1 = int(x) + mortar, int(x + bw) - mortar
+            shade = 1.0 + (rng.random() - 0.5) * 0.18
+            col = [min(255.0, max(0.0, c_base[i] * shade)) for i in range(3)]
+            xa, xb, ya, yb = max(0, x0), min(SZ, x1), max(0, y0), min(SZ, y1)
+            if xb > xa and yb > ya:
+                img[ya:yb, xa:xb] = col
+            x += bw
+    n = (rng.random((SZ, SZ)) - 0.5)[..., None] * 10.0       # grao fino
+    return Image.fromarray(np.clip(img + n, 0, 255).astype("uint8"))
+
+
+def metal_matte(c_base, seed):
+    """Metal preto FOSCO: quase preto, micro-grao baixo, sem brilho direcional
+    (moldura/estrutura industrial; distinto do MAT_METAL escovado)."""
+    rng = np.random.default_rng(seed)
+    g = _value_noise(SZ, SZ, 4, rng) - 0.5
+    out = np.stack([np.clip(c_base[i] + g * 16, 0, 255) for i in range(3)], -1)
+    return Image.fromarray(out.astype("uint8"))
+
+
 def wood_floor(c_base, c_dark, seed, planks=5, rings=7):
     """Piso de madeira: tabuas longas (veio vertical) + linhas de junta horizontais entre tabuas.
     Tom quente medio, escala grande (tile grande no V-Ray). Conserta a 'faixa cinza' do piso pastel
@@ -88,6 +134,11 @@ TEXTURES = {
     "fabric_accent.png": lambda: fabric((174, 144, 114), 44),
     "fabric_linen.png": lambda: linen((186, 178, 163), 55),   # roupa de cama (bedding-only)
     "wood_floor.png": lambda: wood_floor((194, 166, 124), (154, 126, 88), 77),   # piso carvalho CLARO (floor_*): reflete luz, nao escurece o render
+    # ---- INDUSTRIAL (slice 1): concreto, tijolinho, tecido chumbo, metal preto fosco ----
+    "concrete.png": lambda: concrete((165, 162, 158), 101),
+    "brick.png": lambda: brick((150, 92, 70), (148, 144, 138), 102),
+    "fabric_charcoal.png": lambda: fabric((60, 62, 66), 103),     # reusa fabric() parametrizada
+    "metal_black_matte.png": lambda: metal_matte((30, 30, 32), 104),
 }
 
 

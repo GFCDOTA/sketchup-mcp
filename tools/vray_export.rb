@@ -26,6 +26,19 @@ def vray_export_run
         'ph_colchao' => ln, 'ph_travesseiro' => ln, 'ph_headboard' => ln,
         'ph_manta' => fa, 'ph_tapete' => fa, 'ph_rug' => fa
       }
+      # ESTILO industrial (gated): sobrescreve sofa/rack/tapete + parede/moldura. GATED por
+      # VRAY_STYLE p/ NAO regredir o render PASS do sofa-sala/quarto (default byte-estavel).
+      if ENV['VRAY_STYLE'] == 'industrial'
+        tex_map = tex_map.merge({
+          'ph_parede_concreto' => 'concrete.png',
+          'ph_rack_tv' => 'wood_dark.png',
+          'ph_seat_cushion' => 'fabric_charcoal.png',
+          'ph_back_cushion' => 'fabric_charcoal.png',
+          'ph_arm' => 'fabric_charcoal.png',
+          'ph_tapete' => 'fabric_charcoal.png',
+          'ph_frame' => 'metal_black_matte.png'
+        })
+      end
       n_tex = 0
       tex_map.each do |matname, png|
         m = model.materials[matname]
@@ -34,7 +47,7 @@ def vray_export_run
         next unless File.exist?(path)
         begin
           m.texture = path
-          m.texture.size = [40, 40]   # ~1m de repeticao (inches)
+          m.texture.size = (matname == 'ph_parede_concreto' ? [80, 80] : [40, 40])   # parede ~2m = tile maior
           n_tex += 1
         rescue StandardError => e
           out << "tex ERR #{matname}: #{e.message}"

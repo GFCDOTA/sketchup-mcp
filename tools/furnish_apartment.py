@@ -140,6 +140,23 @@ def _oriented_box(kind, center_in, facing, w_m, d_m, z0_m, h_m, rgb, label=None,
             "ambiguous": False, "decorative": False}
 
 
+def place_decor_boxes(kind, center_in, facing, z_lift=0.0, module=None, **overrides):
+    """Adapter de DECOR: build_decor(kind) (parts em metros, frente -Y) -> boxes
+    orientados pra 'facing' em center_in (inches), REUSANDO place_sofa_boxes (rotacao
+    provada). z_lift (m) sobe a peca (quadro na parede). module = grupo editavel no .skp."""
+    from tools.decor_builders import build_decor
+    from tools.sofa_builder import place_sofa_boxes
+    parts, _ = build_decor(kind, **overrides)
+    if z_lift:
+        for p in parts:
+            p["z0"] += z_lift
+            p["z1"] += z_lift
+    bx = place_sofa_boxes(parts, center_in, facing)
+    for b in bx:
+        b["module"] = module or kind
+    return bx
+
+
 def living_room_boxes(con, room_id):
     """Sala via COMMON SENSE ENGINE (placement solver): o sofa GOLDEN deixa de
     flutuar no centro — fica ANCORADO numa parede de FRENTE pra TV (eixo sofa->rack),
@@ -189,6 +206,52 @@ def living_room_boxes(con, room_id):
     # tapete + mesa COMPACTOS, agrupados perto do sofa (nao transbordam o nicho).
     boxes.append(_oriented_box("tapete", _ahead(0.70), sofa_f, 1.60, 1.10, 0.0, 0.02, [165, 156, 140], module="Tapete"))
     boxes.append(_oriented_box("mesa_centro", _ahead(0.80), sofa_f, 0.90, 0.50, 0.0, 0.40, [92, 72, 56], module="Mesa de centro"))
+
+    # ---- camada de ESTILO (gated): parede de concreto na parede-TV + decor reusando
+    # os builders que JA existem (planta, quadro). So adiciona; cor entra via apply_style.
+    style = os.environ.get("FURNISH_STYLE")
+    if style == "industrial":
+        from shapely.geometry import Point, Polygon
+
+        from core.scale import PT_TO_IN
+        from tools.spatial_model import build_spatial_model
+        cell_in = Polygon([(x * PT_TO_IN, y * PT_TO_IN)
+                           for x, y in build_spatial_model(con, room_id)["_geom"]["cell"].exterior.coords])
+        cen = cell_in.centroid
+
+        def _inside(pt, margin_in=9.0):
+            p = Point(pt)
+            return cell_in.contains(p) and cell_in.exterior.distance(p) >= margin_in
+
+        def _toward_centroid(start, frac0=0.35):
+            """Ponto entre start e o centroide, recuado ate ficar DENTRO com margem
+            (decor nunca atravessa parede / sai do comodo em L)."""
+            frac = frac0
+            for _ in range(9):
+                pt = (start[0] + (cen.x - start[0]) * frac, start[1] + (cen.y - start[1]) * frac)
+                if _inside(pt):
+                    return pt
+                frac += 0.08
+            return (cen.x, cen.y) if _inside((cen.x, cen.y)) else None
+
+        rfx, rfy = rack_f
+        _rn = _m.hypot(rfx, rfy) or 1.0
+        rfx, rfy = rfx / _rn, rfy / _rn
+        # parede de concreto ATRAS do rack (recuada ~0.19m contra o facing = na parede)
+        wall_c = (rack_c[0] - rfx * 0.19 * M2IN, rack_c[1] - rfy * 0.19 * M2IN)
+        wall_w = round(min(_rack_wall_len, 3.6), 2)
+        boxes.append(_oriented_box("parede_concreto", wall_c, rack_f, wall_w, 0.04, 0.0, 2.40,
+                                   [165, 162, 158], module="Parede concreto"))
+        # planta: do canto do rack em direcao ao centroide, GARANTIDA dentro do comodo
+        rack_corner = (rack_c[0] - rfx * 0.30 * M2IN, rack_c[1] - rfy * 0.30 * M2IN)
+        plant_c = _toward_centroid(rack_corner, 0.32)
+        if plant_c:
+            boxes += place_decor_boxes("plant_placeholder", plant_c, rack_f, height=1.45, module="Planta")
+        # quadro emoldurado na parede de concreto, acima do rack (z_lift = altura do olho)
+        art_c = (wall_c[0] + rfx * 0.04 * M2IN, wall_c[1] + rfy * 0.04 * M2IN)
+        boxes += place_decor_boxes("wall_art", art_c, rack_f, z_lift=1.15, module="Quadro",
+                                   width=0.90, height=0.62)
+
     out = {"result": "OK", "room_name": plan.get("room_name"), "n_placed": len(boxes),
            "placement": "common_sense_solver", "tv_wall": plan.get("tv_wall"),
            "sofa_wall": p["sofa"]["wall_id"], "view_dist_m": p["sofa"]["rule"]}
@@ -217,6 +280,13 @@ def collect_boxes(con):
         n = len(boxes) if boxes else 0
         all_boxes += boxes or []
         summary.append((r["id"], r["name"], r["room_type"], out.get("result"), n))
+    # camada de ESTILO (gated): recolore por kind = fonte unica do material SU ph_<kind>,
+    # ANTES de qualquer serializacao LAYOUT_BOXES. Kind fora do mapa fica intacto.
+    style = os.environ.get("FURNISH_STYLE")
+    if style:
+        from tools.style_spec import apply_style
+        nrec = apply_style(all_boxes, style)
+        print(f"[furnish-apt] estilo '{style}': {nrec} boxes recoloridos")
     return all_boxes, summary
 
 
