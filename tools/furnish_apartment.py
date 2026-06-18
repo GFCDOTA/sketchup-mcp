@@ -157,6 +157,19 @@ def place_decor_boxes(kind, center_in, facing, z_lift=0.0, module=None, **overri
     return bx
 
 
+def _dining_table_square(side=0.92, h=0.76, top_t=0.045, top_rgb=(96, 70, 48), leg_rgb=(30, 30, 33)):
+    """Mesa de jantar QUADRADA: tampo SÓLIDO (não fatias/palito) + 4 pernas grossas +
+    saia fina. Metros, origem no canto. (preferência do Felipe: quadrada/canto alemão)."""
+    from tools.sofa_builder import _p
+    lt, ins = 0.07, 0.05
+    parts = [_p("top", "top", 0.0, 0.0, side, side, h - top_t, h, top_rgb)]          # tampo sólido
+    sa = 0.07                                                                          # saia sob o tampo
+    parts.append(_p("apron", "saia", ins, ins, side - ins, side - ins, h - top_t - sa, h - top_t, leg_rgb))
+    for x0, y0 in ((ins, ins), (side - ins - lt, ins), (ins, side - ins - lt), (side - ins - lt, side - ins - lt)):
+        parts.append(_p("leg", "foot", x0, y0, x0 + lt, y0 + lt, 0.0, h - top_t, leg_rgb))
+    return parts
+
+
 def _chair_parts():
     """Cadeira de jantar simples (Tolix-ish, metal preto): 4 pés + assento + encosto.
     Metros, frente = -Y (encosto em +Y). Orientada por place_sofa_boxes."""
@@ -315,10 +328,7 @@ def living_room_boxes(con, room_id):
             _free = max(_free.geoms, key=lambda g: g.area)
         if (not _free.is_empty) and _free.area > (2.4 * M2IN * M2IN):
             _dc = _free.centroid
-            from tools.dining_table_class import DiningTableSpec, build_dining_table
-            _dt = DiningTableSpec(shape="round", seats=4, length=0.92, width=0.92, height=0.75,
-                                  top_rgb=(92, 68, 46), base_rgb=(30, 30, 33))
-            _dtp, _ = build_dining_table(_dt.validate())
+            _dtp = _dining_table_square(side=0.92, top_rgb=(96, 70, 48), leg_rgb=(30, 30, 33))
             _dtb = place_sofa_boxes(_dtp, (_dc.x, _dc.y), (0.0, 1.0))
             for _b in _dtb:
                 _b["module"] = "Mesa de jantar"
