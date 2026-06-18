@@ -251,6 +251,18 @@ def living_room_boxes(con, room_id):
         art_c = (wall_c[0] + rfx * 0.04 * M2IN, wall_c[1] + rfy * 0.04 * M2IN)
         boxes += place_decor_boxes("wall_art", art_c, rack_f, z_lift=1.15, module="Quadro",
                                    width=0.90, height=0.62)
+        # prateleira flutuante metal+madeira na parede de concreto (lado oposto ao quadro)
+        perp = (-rfy, rfx)
+        shelf_c = (wall_c[0] + perp[0] * 0.45 * M2IN + rfx * 0.14 * M2IN,
+                   wall_c[1] + perp[1] * 0.45 * M2IN + rfy * 0.14 * M2IN)
+        if _inside(shelf_c, margin_in=4.0):
+            boxes += place_decor_boxes("shelf", shelf_c, rack_f, z_lift=1.42, module="Prateleira",
+                                       width=0.85, n_planks=2)
+        # trilho de luz no TETO sobre o eixo sofa->rack (corre ao longo do eixo)
+        mid = ((sofa_c[0] + rack_c[0]) / 2.0, (sofa_c[1] + rack_c[1]) / 2.0)
+        track_face = (-fny, fnx)                 # perp ao facing do sofa -> trilho ao longo do eixo
+        boxes += place_decor_boxes("track_light", mid, track_face, z_lift=2.15, module="Trilho de luz",
+                                   length=1.5, n_spots=3)
 
     out = {"result": "OK", "room_name": plan.get("room_name"), "n_placed": len(boxes),
            "placement": "common_sense_solver", "tv_wall": plan.get("tv_wall"),

@@ -11,8 +11,8 @@ from __future__ import annotations
 
 from tools.decor_anatomy_spec import (AccentSeatSpec, CoffeeTableSpec,   # noqa: F401
                                       CurtainSpec, FloorLampSpec, PlantSpec,
-                                      RugSpec, SideTableSpec, WallArtSpec,
-                                      decor_spec)
+                                      RugSpec, ShelfSpec, SideTableSpec,
+                                      TrackLightSpec, WallArtSpec, decor_spec)
 
 
 def _p(label, kind, x0, y0, x1, y1, z0, z1, rgb):
@@ -161,31 +161,50 @@ def build_curtain(spec: CurtainSpec):
     return parts, _meta("curtain", parts)
 
 
+def _frustum8(cx, cy, z0, z1, w0, w1):
+    """8 verts: quad inferior (lado w0) + quad superior (lado w1) centrados em (cx,cy).
+    Tronco-de-piramide -> volume AFUNILADO (nao caixa reta)."""
+    h0, h1 = w0 / 2.0, w1 / 2.0
+    return [(cx - h0, cy - h0, z0), (cx + h0, cy - h0, z0), (cx + h0, cy + h0, z0), (cx - h0, cy + h0, z0),
+            (cx - h1, cy - h1, z1), (cx + h1, cy - h1, z1), (cx + h1, cy + h1, z1), (cx - h1, cy + h1, z1)]
+
+
 def build_plant(spec: PlantSpec):
-    """Vaso + tronco + 3 volumes verdes sobrepostos decrescentes (com offsets
-    laterais leves = silhueta organica, deterministica)."""
+    """Vaso AFUNILADO + tronco + copa em volumes TRONCO-DE-PIRAMIDE sobrepostos
+    (verts8): bojo no meio afinando p/ uma copa-ponta = silhueta organica (nao mais
+    caixotes empilhados 'Minecraft'). bbox AABB segue o volume real (gates intactos)."""
     spec.validate()
     H, pw, ph = spec.height, spec.pot_w, spec.pot_h
     fol = spec.foliage_w
     c = fol / 2.0
     tt = spec.trunk_t / 2.0
-    p0 = c - pw / 2.0
-    trunk_top = ph + (H - ph) * 0.30
+    fz = ph + (H - ph)            # topo da copa = H
+    trunk_top = ph + (H - ph) * 0.28
+
+    def _vol(label, kind, z0, z1, w0, w1, dx, dy, rgb):
+        cx, cy = c + dx, c + dy
+        hh = max(w0, w1) / 2.0
+        p = _p(label, kind, cx - hh, cy - hh, cx + hh, cy + hh, z0, z1, rgb)
+        p["verts8"] = _frustum8(cx, cy, z0, z1, w0, w1)
+        return p
+
+    # vaso = tronco-de-piramide invertido (base estreita, boca larga = vaso real)
     parts = [
-        _p("pot", "pot", p0, p0, p0 + pw, p0 + pw, 0.0, ph, spec.pot_rgb),
+        _vol("pot", "pot", 0.0, ph, pw * 0.74, pw, 0.0, 0.0, spec.pot_rgb),
         _p("trunk", "trunk", c - tt, c - tt, c + tt, c + tt, ph, trunk_top, spec.trunk_rgb),
     ]
-    layers = [   # (largura, z0, z1, dx, dy) — sobrepostos, decrescentes, offsets leves
-        (fol, trunk_top - 0.06, ph + (H - ph) * 0.62, 0.0, 0.0),
-        (fol * 0.78, ph + (H - ph) * 0.52, ph + (H - ph) * 0.85, -0.04, 0.03),
-        (fol * 0.55, ph + (H - ph) * 0.78, H, 0.03, -0.02),
-    ]
     g = spec.foliage_rgb
-    shades = [g, tuple(min(255, int(v * 1.12)) for v in g), tuple(int(v * 0.88) for v in g)]
-    for i, (w, z0, z1, dx, dy) in enumerate(layers):
-        h = w / 2.0
-        parts.append(_p(f"foliage_{i + 1}", "foliage",
-                        c - h + dx, c - h + dy, c + h + dx, c + h + dy, z0, z1, shades[i]))
+    shades = [tuple(int(v * 0.9) for v in g), g, tuple(min(255, int(v * 1.12)) for v in g),
+              tuple(int(v * 0.82) for v in g)]
+    # copa: bojo no meio (afina embaixo e no topo) -> teardrop organico, com offsets leves
+    layers = [   # (z0, z1, w0, w1, dx, dy)
+        (trunk_top - 0.05, ph + (H - ph) * 0.55, fol * 0.60, fol, 0.0, 0.0),
+        (ph + (H - ph) * 0.45, ph + (H - ph) * 0.74, fol, fol * 0.80, -0.04, 0.03),
+        (ph + (H - ph) * 0.66, ph + (H - ph) * 0.90, fol * 0.80, fol * 0.45, 0.04, -0.02),
+        (ph + (H - ph) * 0.84, fz, fol * 0.45, fol * 0.16, -0.02, 0.01),
+    ]
+    for i, (z0, z1, w0, w1, dx, dy) in enumerate(layers):
+        parts.append(_vol(f"foliage_{i + 1}", "foliage", z0, z1, w0, w1, dx, dy, shades[i]))
     return parts, _meta("plant_placeholder", parts)
 
 
@@ -205,6 +224,38 @@ def build_accent_seat(spec: AccentSeatSpec):
     return parts, _meta("accent_seat", parts)
 
 
+def build_shelf(spec: ShelfSpec):
+    """N tabuas de madeira FLUTUANTES em mãos-francesas de metal preto. Fundo (+Y) = parede.
+    bbox z>=0 (mão-francesa da tabua de baixo comeca em 0). Frente = -Y."""
+    spec.validate()
+    W, D, t = spec.width, spec.depth, spec.plank_t
+    bt, bd = spec.bracket_t, spec.bracket_drop
+    parts = []
+    for i in range(spec.n_planks):
+        z1 = bd + i * spec.gap + t
+        z0 = z1 - t
+        parts.append(_p(f"plank_{i + 1}", "shelf_plank", 0.0, 0.0, W, D, z0, z1, spec.plank_rgb))
+        for tag, bx in (("l", 0.06), ("r", W - 0.06 - bt)):
+            parts.append(_p(f"bracket_{i + 1}{tag}", "shelf_bracket",
+                            bx, D - 0.14, bx + bt, D, z0 - bd, z0, spec.bracket_rgb))
+    return parts, _meta("shelf", parts)
+
+
+def build_track_light(spec: TrackLightSpec):
+    """Rail preto fino (corre em X) + N spots pendurados embaixo. Monta no TETO
+    (placement levanta via z_lift). Frente = -Y."""
+    spec.validate()
+    L, rw, rh = spec.length, spec.rail_w, spec.rail_h
+    c = rw / 2.0
+    parts = [_p("rail", "track_rail", 0.0, 0.0, L, rw, spec.drop, spec.drop + rh, spec.rail_rgb)]
+    for i in range(spec.n_spots):
+        sx = (i + 0.5) * L / spec.n_spots
+        hd = spec.spot_d / 2.0
+        parts.append(_p(f"spot_{i + 1}", "track_spot",
+                        sx - hd, c - hd, sx + hd, c + hd, 0.0, spec.drop, spec.spot_rgb))
+    return parts, _meta("track_light", parts)
+
+
 BUILDERS = {
     "rug": (RugSpec, build_rug),
     "coffee_table": (CoffeeTableSpec, build_coffee_table),
@@ -214,6 +265,8 @@ BUILDERS = {
     "curtain": (CurtainSpec, build_curtain),
     "plant_placeholder": (PlantSpec, build_plant),
     "accent_seat": (AccentSeatSpec, build_accent_seat),
+    "shelf": (ShelfSpec, build_shelf),
+    "track_light": (TrackLightSpec, build_track_light),
 }
 
 

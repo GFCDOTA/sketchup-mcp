@@ -24,6 +24,8 @@ DECOR_REQUIRED_PARTS = {
     "curtain": ("panel_fold", "rod"),
     "plant_placeholder": ("pot", "foliage"),
     "accent_seat": ("seat", "back", "leg"),
+    "shelf": ("plank",),
+    "track_light": ("rail", "spot"),
 }
 
 # bbox plausivel (W, D, H) em m por tipo — SpatialGate reprova movel fora da faixa.
@@ -38,6 +40,8 @@ DECOR_PLAUSIBLE_BBOX_M = {
     "curtain": ((0.6, 4.0), (0.03, 0.25), (1.80, 2.80)),
     "plant_placeholder": ((0.30, 0.90), (0.30, 0.90), (0.80, 2.00)),
     "accent_seat": ((0.50, 1.20), (0.50, 1.10), (0.35, 0.95)),
+    "shelf": ((0.50, 1.80), (0.15, 0.36), (0.04, 1.00)),
+    "track_light": ((0.80, 2.40), (0.03, 0.14), (0.05, 0.30)),
 }
 
 
@@ -266,10 +270,62 @@ class AccentSeatSpec:
         return _base_dict(self, "accent_seat")
 
 
+@dataclass
+class ShelfSpec:
+    """Prateleira FLUTUANTE metal+madeira (industrial): N tabuas de madeira em mãos-
+    francesas finas de metal preto. Monta na parede (fundo +Y). Frente = -Y."""
+    width: float = 0.95
+    depth: float = 0.22
+    n_planks: int = 2
+    plank_t: float = 0.04
+    gap: float = 0.34            # vertical entre tabuas
+    bracket_t: float = 0.022     # espessura da mão-francesa
+    bracket_drop: float = 0.10   # quanto a mão-francesa desce abaixo da tabua
+    plank_rgb: tuple = (96, 70, 48)    # madeira escura
+    bracket_rgb: tuple = (30, 30, 33)  # metal preto fosco
+
+    def validate(self):
+        assert self.n_planks >= 1
+        assert self.width > 0.3 and 0.12 <= self.depth <= 0.36
+        return self
+
+    def bbox_m(self):
+        h = self.bracket_drop + (self.n_planks - 1) * self.gap + self.plank_t
+        return (round(self.width, 3), round(self.depth, 3), round(h, 3))
+
+    def to_dict(self):
+        return _base_dict(self, "shelf")
+
+
+@dataclass
+class TrackLightSpec:
+    """Trilho de luz de TETO (industrial): rail preto fino + N spots pendurados. Frente
+    = -Y. Monta no teto (placement levanta via z_lift). Dirige fills quentes no render."""
+    length: float = 1.60
+    rail_w: float = 0.04         # largura/profundidade do rail (corre em X)
+    rail_h: float = 0.04
+    n_spots: int = 3
+    spot_d: float = 0.07
+    drop: float = 0.07           # quanto os spots descem abaixo do rail
+    rail_rgb: tuple = (26, 26, 29)
+    spot_rgb: tuple = (34, 34, 38)
+
+    def validate(self):
+        assert self.length >= 0.6 and self.n_spots >= 1
+        return self
+
+    def bbox_m(self):
+        return (round(self.length, 3), round(self.rail_w, 3), round(self.drop + self.rail_h, 3))
+
+    def to_dict(self):
+        return _base_dict(self, "track_light")
+
+
 _SPECS = {
     "rug": RugSpec, "coffee_table": CoffeeTableSpec, "side_table": SideTableSpec,
     "floor_lamp": FloorLampSpec, "wall_art": WallArtSpec, "curtain": CurtainSpec,
     "plant_placeholder": PlantSpec, "accent_seat": AccentSeatSpec,
+    "shelf": ShelfSpec, "track_light": TrackLightSpec,
 }
 
 

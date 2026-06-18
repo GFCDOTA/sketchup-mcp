@@ -15,13 +15,14 @@ from pathlib import Path
 
 # --- materiais V-Ray por PAPEL (premium: troca cor chapada por madeira satin / tecido matte / metal) ---
 MAT_WOOD = ("estrado", "corpo", "tampo", "gaveta", "pe", "rodape", "porta", "foot", "base",
-            "rack_tv", "mesa_centro", "dresser", "bancada", "torre", "aereo", "bancada_banho", "box")
+            "rack_tv", "mesa_centro", "dresser", "bancada", "torre", "aereo", "bancada_banho",
+            "box", "shelf_plank")
 MAT_FABRIC = ("headboard", "rug", "colchao", "travesseiro", "manta", "arm", "seat_cushion",
               "back_cushion", "tapete")
 MAT_METAL = ("puxador",)
 MAT_CERAMIC = ("vaso",)
 MAT_CONCRETE = ("parede_concreto",)                                          # estilo industrial (no-op s/ o kind)
-MAT_BLACK_METAL = ("frame",)                                                 # moldura/estrutura preta fosca
+MAT_BLACK_METAL = ("frame", "shelf_bracket", "track_rail", "track_spot")      # estrutura preta fosca
 MAT_PARAMS = {
     "wood": {"reflect": "AColor(0.11, 0.11, 0.11, 1)", "reflect_glossiness": "0.72",
              "fresnel_ior": "1.55", "metalness": "0"},                       # madeira satin

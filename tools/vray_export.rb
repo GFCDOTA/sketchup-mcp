@@ -36,7 +36,11 @@ def vray_export_run
           'ph_back_cushion' => 'fabric_charcoal.png',
           'ph_arm' => 'fabric_charcoal.png',
           'ph_tapete' => 'fabric_charcoal.png',
-          'ph_frame' => 'metal_black_matte.png'
+          'ph_frame' => 'metal_black_matte.png',
+          'ph_shelf_plank' => 'wood_dark.png',
+          'ph_shelf_bracket' => 'metal_black_matte.png',
+          'ph_track_rail' => 'metal_black_matte.png',
+          'ph_track_spot' => 'metal_black_matte.png'
         })
       end
       n_tex = 0
