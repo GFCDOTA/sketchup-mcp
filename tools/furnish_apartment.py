@@ -77,6 +77,8 @@ def bedroom_designer_boxes(con, room_id):
         size = next((s for s in ("king", "queen", "casal", "solteiro") if s in nm), "king")
         parts, _ = build_bed(bed_spec(size, width=round(w_m, 3), length=round(l_m, 3)))
         bed_parts = place_bed_boxes(parts, cen, (fx, fy))
+        for _b in bed_parts:
+            _b["module"] = "Cama"
         # a anatomia do build_bed JA tem a 'cabeceira'; dropa tambem o 'headboard' do
         # _items_to_boxes pra nao duplicar o painel (ruido visual no render). Felipe 2026-06-08.
         boxes = [b for b in boxes if b.get("kind") not in ("bed", "headboard")] + bed_parts
@@ -90,8 +92,11 @@ def bedroom_designer_boxes(con, room_id):
         for it in ns_items:
             nw, nd, ncen = _wd_dims(it["box"], bed_facing)
             nparts, _ = build_nightstand(nightstand_spec(width=round(nw, 3), depth=round(max(nd, 0.30), 3)))
-            ns_boxes += place_nightstand_boxes(nparts, ncen, bed_facing)
             n_ns += 1
+            _cb = place_nightstand_boxes(nparts, ncen, bed_facing)
+            for _b in _cb:                                  # cada criado = modulo separado
+                _b["module"] = f"Criado-mudo {n_ns}"
+            ns_boxes += _cb
         boxes = [b for b in boxes if b.get("kind") != "nightstand"] + ns_boxes
         out["nightstand_parametric"] = {"count": n_ns, "n_parts": len(ns_boxes)}
 
@@ -103,12 +108,14 @@ def bedroom_designer_boxes(con, room_id):
         ww_m, wd_m, wcen = _wd_dims(wd_item["box"], (wfx, wfy))
         wparts, _ = build_wardrobe(wardrobe_spec(width=round(ww_m, 3), depth=round(max(wd_m, 0.45), 3)))
         wboxes = place_wardrobe_boxes(wparts, wcen, (wfx, wfy))
+        for _b in wboxes:
+            _b["module"] = "Guarda-roupa"
         boxes = [b for b in boxes if b.get("kind") != "wardrobe"] + wboxes
         out["wardrobe_parametric"] = {"n_parts": len(wboxes), "W_m": round(ww_m, 2), "D_m": round(wd_m, 2)}
     return boxes, out
 
 
-def _oriented_box(kind, center_in, facing, w_m, d_m, z0_m, h_m, rgb, label=None):
+def _oriented_box(kind, center_in, facing, w_m, d_m, z0_m, h_m, rgb, label=None, module=None):
     """Caixa (rack/mesa/tapete) centrada em center_in (shell inches) com a FRENTE
     (-Y local) apontando 'facing'. Mesma rotacao do place_sofa_boxes -> qualquer
     angulo. w=largura (perp ao facing), d=profundidade (ao longo do facing)."""
@@ -129,7 +136,25 @@ def _oriented_box(kind, center_in, facing, w_m, d_m, z0_m, h_m, rgb, label=None)
     ys = [c[1] for c in corners]
     return {"kind": kind, "x0": min(xs), "y0": min(ys), "x1": max(xs), "y1": max(ys),
             "corners": corners, "h_in": round(h_m * M2IN, 2), "z0_in": round(z0_m * M2IN, 2),
-            "rgb": rgb, "label": label or kind, "ambiguous": False, "decorative": False}
+            "rgb": rgb, "label": label or kind, "module": module or kind,
+            "ambiguous": False, "decorative": False}
+
+
+def place_decor_boxes(kind, center_in, facing, z_lift=0.0, module=None, **overrides):
+    """Adapter de DECOR: build_decor(kind) (parts em metros, frente -Y) -> boxes
+    orientados pra 'facing' em center_in (inches), REUSANDO place_sofa_boxes (rotacao
+    provada). z_lift (m) sobe a peca (quadro na parede). module = grupo editavel no .skp."""
+    from tools.decor_builders import build_decor
+    from tools.sofa_builder import place_sofa_boxes
+    parts, _ = build_decor(kind, **overrides)
+    if z_lift:
+        for p in parts:
+            p["z0"] += z_lift
+            p["z1"] += z_lift
+    bx = place_sofa_boxes(parts, center_in, facing)
+    for b in bx:
+        b["module"] = module or kind
+    return bx
 
 
 def living_room_boxes(con, room_id):
@@ -141,18 +166,22 @@ def living_room_boxes(con, room_id):
     from tools.sofa_builder import build_sofa, place_sofa_boxes, sofa_spec
     from interior.planners.living_room_planner import plan_living
     plan = plan_living(con, room_id)
-    if plan.get("result") != "OK":
-        boxes, out = living_boxes(con, room_id)            # fallback: brain antigo
-        if boxes:
-            boxes = [b for b in boxes if b.get("kind") != "poltrona"]
-        out = dict(out or {}); out["placement"] = f"fallback_brain ({plan.get('result')})"
-        return boxes, out
+    if not plan.get("plan"):
+        # sem parede util no comodo (raríssimo): NAO flutua moveis — sala vazia e
+        # honesto, sofa flutuando nao. O degrade do plan_living ja garante plano
+        # ANCORADO (WARN) p/ sala apertada; o brain antigo FLUTUANTE foi removido.
+        return [], {"result": plan.get("result"), "room_name": plan.get("room_name"),
+                    "placement": "no_plan_skip"}
     p = plan["plan"]
     sofa_c = tuple(p["sofa"]["center_in"]); sofa_f = tuple(p["sofa"]["facing"])
     rack_c = tuple(p["tv_rack"]["center_in"]); rack_f = tuple(p["tv_rack"]["facing"])
     width_m = round(p["sofa"]["width_m"], 3)
-    parts, _ = build_sofa(sofa_spec("straight", seats=3, width=width_m, depth=0.95))
+    # seats adaptados a largura que cabe no nicho (3-lug so se a parede comporta).
+    _seats = 3 if width_m >= 2.0 else 2
+    parts, _ = build_sofa(sofa_spec("straight", seats=_seats, width=width_m, depth=0.95))
     boxes = place_sofa_boxes(parts, sofa_c, sofa_f)         # sofa de frente pra TV
+    for _b in boxes:                                        # cada movel = modulo editavel separado
+        _b["module"] = "Sofa"
     # mesa + tapete AGRUPADOS perto do sofa (nao esticados ate o rack); rack na parede-TV
     import math as _m
     fnx, fny = sofa_f
@@ -163,13 +192,108 @@ def living_room_boxes(con, room_id):
     def _ahead(dist_m):                                     # ponto 'dist_m' a frente do sofa
         return (sofa_c[0] + fnx * dist_m * M2IN, sofa_c[1] + fny * dist_m * M2IN)
 
-    # GPT (ajuste fino do placement PASS): CENTRALIZAR o rack/TV no eixo do sofa —
-    # projeta o rack no eixo de facing do sofa (sofa->mesa->tapete->rack colineares).
-    dist_fwd = (rack_c[0] - sofa_c[0]) * fnx + (rack_c[1] - sofa_c[1]) * fny
-    rack_c = (sofa_c[0] + fnx * dist_fwd, sofa_c[1] + fny * dist_fwd)
-    boxes.append(_oriented_box("rack_tv", rack_c, rack_f, 1.80, 0.40, 0.0, 0.50, [120, 85, 55]))
-    boxes.append(_oriented_box("tapete", _ahead(0.95), sofa_f, 2.40, 1.60, 0.0, 0.02, [165, 156, 140]))
-    boxes.append(_oriented_box("mesa_centro", _ahead(1.15), sofa_f, 1.00, 0.55, 0.0, 0.40, [92, 72, 56]))
+    # rack na parede-TV: o plan_living ja o posiciona FRENTE-A-FRENTE com o sofa,
+    # centrado no nicho (sem a projecao antiga que o empurrava pra boca/corredor).
+    # COMPACTO (Felipe: "diminuir o rack; tava tomando o corredor"): largura modesta
+    # (~ largura do sofa, teto 1.20m) e raso (0.35), flush na parede — apê pequeno
+    # pede movel compacto que nao rouba circulacao.
+    from interior.semantics.wall_affordance import wall_affordance
+    _aff = wall_affordance(con, room_id)
+    _rack_wall_len = next((w["length_m"] for w in _aff["walls"]
+                           if w["wall_id"] == p["tv_rack"]["wall_id"]), 1.80)
+    rack_w = round(min(1.20, max(0.90, min(width_m, _rack_wall_len - 0.40))), 2)
+    if os.environ.get("FURNISH_STYLE") == "industrial":
+        # RACK = MÓVEL PLANEJADO real (rack_class PASS): pés/corpo/tampo/gavetas/nicho,
+        # derivado da TV + linha de visão. NÃO mais caixa. low_credenza preto+madeira.
+        # Gated industrial p/ não regredir o render default. place_sofa_boxes orienta (parts em m).
+        from tools.rack_class import build_rack, derive_rack_spec
+        _rlen = round(min(1.55, max(1.30, _rack_wall_len - 0.35)), 2)
+        _rspec = derive_rack_spec("55", "low_credenza", length=_rlen,
+                                  body_rgb=(60, 47, 36), front_rgb=(80, 62, 46), feet_rgb=(26, 26, 28))
+        _rparts, _ = build_rack(_rspec)
+        _rb = place_sofa_boxes(_rparts, rack_c, rack_f)
+        for _b in _rb:
+            _b["module"] = "Rack TV"
+        boxes += _rb
+    else:
+        boxes.append(_oriented_box("rack_tv", rack_c, rack_f, rack_w, 0.35, 0.0, 0.50, [120, 85, 55], module="Rack TV"))
+    # tapete + mesa COMPACTOS, agrupados perto do sofa (nao transbordam o nicho).
+    boxes.append(_oriented_box("tapete", _ahead(0.70), sofa_f, 1.60, 1.10, 0.0, 0.02, [165, 156, 140], module="Tapete"))
+    if os.environ.get("FURNISH_STYLE") == "industrial":
+        # MESA DE CENTRO = classe planejada (coffee_table_class PASS): tampo madeira +
+        # pernas metal preto + prateleira inferior. NÃO mais caixa.
+        from tools.coffee_table_class import CoffeeTableClassSpec, build_coffee_table_v2
+        _ct = CoffeeTableClassSpec(style="two_tier", length=0.95, width=0.50, height=0.38,
+                                   shelf=True, top_rgb=(80, 62, 46), leg_rgb=(30, 30, 33))
+        _ctp, _ = build_coffee_table_v2(_ct.validate())
+        _ctb = place_sofa_boxes(_ctp, _ahead(0.80), sofa_f)
+        for _b in _ctb:
+            _b["module"] = "Mesa de centro"
+        boxes += _ctb
+    else:
+        boxes.append(_oriented_box("mesa_centro", _ahead(0.80), sofa_f, 0.90, 0.50, 0.0, 0.40, [92, 72, 56], module="Mesa de centro"))
+
+    # ---- camada de ESTILO (gated): parede de concreto na parede-TV + decor reusando
+    # os builders que JA existem (planta, quadro). So adiciona; cor entra via apply_style.
+    style = os.environ.get("FURNISH_STYLE")
+    if style == "industrial":
+        from shapely.geometry import Point, Polygon
+
+        from core.scale import PT_TO_IN
+        from tools.spatial_model import build_spatial_model
+        cell_in = Polygon([(x * PT_TO_IN, y * PT_TO_IN)
+                           for x, y in build_spatial_model(con, room_id)["_geom"]["cell"].exterior.coords])
+        cen = cell_in.centroid
+
+        def _inside(pt, margin_in=9.0):
+            p = Point(pt)
+            return cell_in.contains(p) and cell_in.exterior.distance(p) >= margin_in
+
+        def _toward_centroid(start, frac0=0.35):
+            """Ponto entre start e o centroide, recuado ate ficar DENTRO com margem
+            (decor nunca atravessa parede / sai do comodo em L)."""
+            frac = frac0
+            for _ in range(9):
+                pt = (start[0] + (cen.x - start[0]) * frac, start[1] + (cen.y - start[1]) * frac)
+                if _inside(pt):
+                    return pt
+                frac += 0.08
+            return (cen.x, cen.y) if _inside((cen.x, cen.y)) else None
+
+        rfx, rfy = rack_f
+        _rn = _m.hypot(rfx, rfy) or 1.0
+        rfx, rfy = rfx / _rn, rfy / _rn
+        # parede de concreto ATRAS do rack (recuada ~0.19m contra o facing = na parede)
+        wall_c = (rack_c[0] - rfx * 0.19 * M2IN, rack_c[1] - rfy * 0.19 * M2IN)
+        wall_w = round(min(_rack_wall_len, 3.6), 2)
+        boxes.append(_oriented_box("parede_concreto", wall_c, rack_f, wall_w, 0.04, 0.0, 2.40,
+                                   [165, 162, 158], module="Parede concreto"))
+        # planta PEQUENA sobre o RACK (acento de verde no móvel, como a referência) —
+        # no apê apertado não sobra piso livre p/ planta grande sem colidir. Vai numa
+        # ponta do rack (fora do centro da TV), apoiada no tampo (z_lift = altura do rack).
+        rperp = (-rfy, rfx)
+        plant_c = (rack_c[0] + rperp[0] * 0.50 * M2IN, rack_c[1] + rperp[1] * 0.50 * M2IN)
+        if _inside(plant_c, margin_in=2.0):
+            boxes += place_decor_boxes("plant_placeholder", plant_c, rack_f, z_lift=0.52,
+                                       height=0.55, pot_w=0.16, pot_h=0.10, foliage_w=0.30,
+                                       module="Planta")
+        # quadro emoldurado na parede de concreto, acima do rack (z_lift = altura do olho)
+        art_c = (wall_c[0] + rfx * 0.04 * M2IN, wall_c[1] + rfy * 0.04 * M2IN)
+        boxes += place_decor_boxes("wall_art", art_c, rack_f, z_lift=1.15, module="Quadro",
+                                   width=0.90, height=0.62)
+        # prateleira flutuante metal+madeira na parede de concreto (lado oposto ao quadro)
+        perp = (-rfy, rfx)
+        shelf_c = (wall_c[0] + perp[0] * 0.45 * M2IN + rfx * 0.14 * M2IN,
+                   wall_c[1] + perp[1] * 0.45 * M2IN + rfy * 0.14 * M2IN)
+        if _inside(shelf_c, margin_in=4.0):
+            boxes += place_decor_boxes("shelf", shelf_c, rack_f, z_lift=1.42, module="Prateleira",
+                                       width=0.85, n_planks=2)
+        # trilho de luz no TETO sobre o eixo sofa->rack (corre ao longo do eixo)
+        mid = ((sofa_c[0] + rack_c[0]) / 2.0, (sofa_c[1] + rack_c[1]) / 2.0)
+        track_face = (-fny, fnx)                 # perp ao facing do sofa -> trilho ao longo do eixo
+        boxes += place_decor_boxes("track_light", mid, track_face, z_lift=2.15, module="Trilho de luz",
+                                   length=1.5, n_spots=3)
+
     out = {"result": "OK", "room_name": plan.get("room_name"), "n_placed": len(boxes),
            "placement": "common_sense_solver", "tv_wall": plan.get("tv_wall"),
            "sofa_wall": p["sofa"]["wall_id"], "view_dist_m": p["sofa"]["rule"]}
@@ -192,9 +316,19 @@ def collect_boxes(con):
             summary.append((r["id"], r["name"], r["room_type"], "skip(sem brain)", 0))
             continue
         boxes, out = brain(con, r["id"])
+        for b in (boxes or []):              # cada box leva COMODO + MODULO -> grupos editaveis no .skp
+            b["room"] = str(r.get("name") or r["id"])
+            b.setdefault("module", str(b.get("kind", "movel")))
         n = len(boxes) if boxes else 0
         all_boxes += boxes or []
         summary.append((r["id"], r["name"], r["room_type"], out.get("result"), n))
+    # camada de ESTILO (gated): recolore por kind = fonte unica do material SU ph_<kind>,
+    # ANTES de qualquer serializacao LAYOUT_BOXES. Kind fora do mapa fica intacto.
+    style = os.environ.get("FURNISH_STYLE")
+    if style:
+        from tools.style_spec import apply_style
+        nrec = apply_style(all_boxes, style)
+        print(f"[furnish-apt] estilo '{style}': {nrec} boxes recoloridos")
     return all_boxes, summary
 
 

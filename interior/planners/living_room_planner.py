@@ -62,11 +62,19 @@ def plan_living(con, room_id, sofa_w=SOFA_W, sofa_d=SOFA_D):
     sm = build_spatial_model(con, room_id)
     aff = wall_affordance(con, room_id)
     tv_id = aff["best_tv_wall"]
+    tv_degraded = False
+    if tv_id is None and aff["walls"]:
+        # DEGRADE: nenhuma parede 100% limpa pra TV -> usa a menos-ruim (maior
+        # tv_score; aff["walls"] ja vem ordenada por -tv_score) em vez de abortar
+        # com NO_TV_WALL (que derruba a sala pro brain que FLUTUA o sofa).
+        tv_id = aff["walls"][0]["wall_id"]
+        tv_degraded = True
     report = {"room_id": room_id, "room_name": sm.get("room_name"),
-              "tv_wall": tv_id, "candidates_sofa": [], "rejected_sofa": []}
+              "tv_wall": tv_id, "tv_degraded": tv_degraded,
+              "candidates_sofa": [], "rejected_sofa": []}
     if tv_id is None:
         report["result"] = "NO_TV_WALL"
-        report["reason"] = "nenhuma parede limpa serve de parede-TV"
+        report["reason"] = "comodo sem parede util (sem walls)"
         return report
     tv_ws = _wall_setup(sm, tv_id)
     tv_n = _inward_normal(tv_ws)
@@ -115,21 +123,51 @@ def plan_living(con, room_id, sofa_w=SOFA_W, sofa_d=SOFA_D):
         (report["rejected_sofa"] if rej else report["candidates_sofa"]).append(entry)
 
     report["candidates_sofa"].sort(key=lambda c: -c["score"])
-    if report["candidates_sofa"]:
-        best = report["candidates_sofa"][0]
-        sp, sn = best["_pt"], best["_n"]
-        report["result"] = "OK"
+    report["rejected_sofa"].sort(key=lambda c: -c["score"])
+    # DEGRADE HUMANIZADO: prefere candidato que passa todos os gates; se nenhum
+    # passa (sala apertada -> sofa sempre rejeitado por circulacao), ANCORA na
+    # parede menos-ruim (maior score = mais de frente pra TV + mais longa) com
+    # WARN, em vez de NO_VALID_SOFA_WALL (que faz o furnish cair no brain FLUTUANTE).
+    chosen = (report["candidates_sofa"] or report["rejected_sofa"] or [None])[0]
+    if chosen is not None:
+        sp, sn = chosen["_pt"], chosen["_n"]
+        sofa_w_fit = sofa_w
+        # CENTRAR o sofa OPOSTO a parede-TV (frente-a-frente, centrado no nicho — nao
+        # no canto/boca da abertura, que faz o rack "tomar o corredor") + DIMENSIONAR
+        # o sofa pra CABER no nicho (apê pequeno: movel compacto que cabe na parede;
+        # senao transborda. Felipe 2026-06-17). Usa o overlap das faixas 'along'.
+        sofa_ws = _wall_setup(sm, chosen["wall_id"])
+        if sofa_ws is not None and sofa_ws["orient"] == tv_ws["orient"]:
+            ov_lo = max(sofa_ws["along_lo"], tv_ws["along_lo"])
+            ov_hi = min(sofa_ws["along_hi"], tv_ws["along_hi"])
+            if ov_hi - ov_lo > M(0.8):                 # nicho com sobreposicao util
+                a_mid = (ov_lo + ov_hi) / 2.0
+                sofa_w_fit = min(sofa_w, (ov_hi - ov_lo) * PT_TO_M - 0.20)
+                perp_s = sofa_ws["face"] + sofa_ws["sgn"] * M(sofa_d / 2 + 0.03)
+                perp_t = tv_ws["face"] + tv_ws["sgn"] * M(0.25)
+                if sofa_ws["orient"] == "v":
+                    sp, tv_pt = (perp_s, a_mid), (perp_t, a_mid)
+                else:
+                    sp, tv_pt = (a_mid, perp_s), (a_mid, perp_t)
+        degraded = not report["candidates_sofa"]
+        report["result"] = "WARN" if (degraded or tv_degraded) else "OK"
+        sofa_rule = (f"parede de frente p/ TV (oppose {chosen['oppose']}, "
+                     f"ang {chosen['face_angle_deg']}, dist {chosen['view_dist_m']}m)")
+        if degraded:
+            report["degrade_sofa"] = chosen["rejects"]
+            sofa_rule = f"MELHOR ESFORCO ancorado (sala apertada): {chosen['rejects']}"
         report["plan"] = {
             "tv_rack": {"wall_id": tv_id,
                         "center_in": [round(tv_pt[0] * PT_TO_IN, 1), round(tv_pt[1] * PT_TO_IN, 1)],
-                        "facing": list(tv_n), "rule": "parede limpa (WallAffordanceMap)"},
-            "sofa": {"wall_id": best["wall_id"],
+                        "facing": list(tv_n),
+                        "rule": ("MELHOR ESFORCO (sem parede limpa pra TV)" if tv_degraded
+                                 else "parede limpa (WallAffordanceMap)")},
+            "sofa": {"wall_id": chosen["wall_id"],
                      "center_in": [round(sp[0] * PT_TO_IN, 1), round(sp[1] * PT_TO_IN, 1)],
-                     "facing": list(sn), "width_m": sofa_w,
-                     "rule": f"parede de frente p/ TV (oppose {best['oppose']}, ang {best['face_angle_deg']}, dist {best['view_dist_m']}m)"},
+                     "facing": list(sn), "width_m": round(sofa_w_fit, 3), "rule": sofa_rule},
         }
     else:
-        report["result"] = "NO_VALID_SOFA_WALL"
+        report["result"] = "NO_VALID_SOFA_WALL"   # comodo sem parede util (raríssimo)
     for c in report["candidates_sofa"] + report["rejected_sofa"]:
         c.pop("_pt", None)
         c.pop("_n", None)

@@ -1,8 +1,9 @@
-"""kitchen_layout.py — brain de COZINHA (rough v1): BANCADA (counter) ao longo
-das paredes LIMPAS (sem porta), ate 2 paredes (L). Placeholder boxes; plugga em
-furnish_apartment via build_boxes (mesmo formato do place_layout). v1 so bancada
-(0.60 m prof, 0.90 m alt); eletrodomesticos entram num refino. Felipe 2026-06-05.
-NAO usa 3D Warehouse.
+"""kitchen_layout.py — brain de COZINHA LINEAR (galley). A parede principal é
+SEGMENTADA sem sobreposicao: geladeira numa ponta -> bancada no meio (pia + cooktop
+EMBUTIDOS) -> torre/coluna na outra ponta; armario aereo SO sobre a bancada. 2a parede
+limpa (L) recebe bancada extra carved. Sem movel em cima de movel
+(tools/furniture_overlap_gate). Pratico: bancada continua, fluxo geladeira->pia->cooktop.
+Placeholder boxes; plugga em furnish_apartment via build_boxes. NAO usa 3D Warehouse.
 """
 from __future__ import annotations
 
@@ -17,21 +18,20 @@ from tools.spatial_model import PT_TO_M, build_spatial_model   # noqa: E402
 from core.scale import PT_TO_IN  # noqa: E402  (fonte unica de escala; nao redefinir)
 COUNTER_DEPTH = 0.60
 COUNTER_H = 0.90
-TORRE_W, TORRE_D, TORRE_H = 0.60, 0.62, 2.10   # coluna forno+microondas (GPT review)
-AEREO_DEPTH, AEREO_Z0, AEREO_H = 0.35, 1.50, 0.70   # armário aéreo sobre a bancada (GPT review)
+GEL_W, GEL_D, GEL_H = 0.70, 0.66, 1.80          # geladeira (ponta, full-height)
+TORRE_W, TORRE_D, TORRE_H = 0.60, 0.62, 2.10    # coluna forno+microondas (outra ponta)
+AEREO_DEPTH, AEREO_Z0, AEREO_H = 0.35, 1.50, 0.70   # armario aereo SOBRE a bancada
+PIA_W, PIA_D, PIA_Z0 = 0.50, 0.46, 0.84         # cuba embutida (compacta p/ caber c/ cooktop)
+COOK_W, COOK_D, COOK_Z0 = 0.46, 0.50, 0.90      # cooktop 4-bocas compacto embutido
+BANCADA_MIN_DEPTH = 0.35                         # abaixo disso = sliver inútil, descarta
 RGB_COUNTER = [176, 166, 150]
-RGB_TORRE = [69, 90, 100]                       # cinza-escuro eletrodoméstico
+RGB_TORRE = [69, 90, 100]                       # cinza-escuro eletrodomestico
 RGB_AEREO = [150, 140, 124]                     # bege-escuro (madeira)
 RGB_GELADEIRA = [201, 203, 207]                 # inox claro
 RGB_PIA = [183, 187, 191]                       # cuba inox
 RGB_COOKTOP = [44, 44, 48]                      # vidro preto
-# ELETRODOMESTICOS distintos (programa de cozinha REAL): (kind, w_m, d_m, h_m, z0_m, rgb, frac_na_run).
-# Fluxo geladeira -> pia -> cooktop ao longo da run principal (triangulo linear de galley).
-# geladeira = full-height numa ponta; pia/cooktop = baixos SOBRE a bancada (z0 ~ altura da bancada).
-APPLIANCES = [("geladeira", 0.70, 0.66, 1.80, 0.00, RGB_GELADEIRA, 0.85),
-              ("pia",       0.55, 0.46, 0.12, 0.84, RGB_PIA, 0.62),
-              ("cooktop",   0.58, 0.50, 0.08, 0.90, RGB_COOKTOP, 0.40)]
 DOOR_KINDS = {"interior_door", "interior_passage", "glazed_balcony"}
+AREA_MIN = 0.035 / (PT_TO_M ** 2)               # area minima de uma peca (m2 -> PT2)
 
 
 def _to_box(kind, shp, h_m, rgb, z0_m=0.0):
@@ -45,12 +45,14 @@ def _to_box(kind, shp, h_m, rgb, z0_m=0.0):
 
 
 def build_boxes(con, room_id):
-    """Bancada em L nas paredes limpas. Devolve (boxes, out) no formato do
+    """Cozinha LINEAR (galley) sem sobreposicao. Devolve (boxes, out) no formato do
     place_layout (compativel com furnish_apartment)."""
     sm = build_spatial_model(con, room_id)
     cell = sm["_geom"]["cell"]
     circ = sm["_geom"]["circ"]
     circ_u = unary_union(circ) if circ else None
+    win_zone = _window_zones(sm)
+    minx, miny, maxx, maxy = cell.bounds
     by = {}
     for o in sm["openings"]:
         by.setdefault(o["wall_id"], []).append(o["kind"])
@@ -61,134 +63,130 @@ def build_boxes(con, room_id):
     if not clean:
         return None, {"result": "NO_VALID_LAYOUT", "room_name": sm.get("room_name"),
                       "reason": "sem parede limpa p/ bancada"}
-    min_area = 0.30 / (PT_TO_M ** 2)             # bancada minima 0.30 m2
-    items, used, placed = [], [], None
-    for w in clean[:2]:                          # ate 2 paredes (L)
-        ws = _wall_setup(sm, w["id"])
-        if ws is None:
-            continue
-        # faixa de bancada ao longo da parede inteira, RECORTADA pelo comodo
-        # (segue a borda real), fora do arco de porta e sem overlap com a outra.
-        strip = _fbox(ws["orient"], ws["face"], ws["sgn"], ws["along_c"],
-                      M(0.03), M(w["length_m"] + 0.6), M(COUNTER_DEPTH))
-        inside = strip.intersection(cell)
-        if circ_u is not None:
-            inside = inside.difference(circ_u)
-        if placed is not None:
-            inside = inside.difference(placed)
-        if inside.is_empty:
-            continue
-        if inside.geom_type == "MultiPolygon":
-            inside = max(inside.geoms, key=lambda g: g.area)
-        if inside.geom_type != "Polygon" or inside.area < min_area:
-            continue
-        items.append(_to_box("bancada", inside, COUNTER_H, RGB_COUNTER))
-        used.append(w["id"])
-        placed = inside if placed is None else placed.union(inside)
-    if not items:
-        return None, {"result": "NO_VALID_LAYOUT", "room_name": sm.get("room_name"),
-                      "reason": "bancada nao coube dentro do comodo"}
 
-    # TORRE/coluna alta (forno+microondas) numa PONTA da bancada (GPT review: cozinha
-    # sem torre fica "blocos de bancada", incompleta). Desliza na parede-bancada com o
-    # range RECORTADO ao comodo (parede compartilhada nao joga a torre pra fora),
-    # ponta-cega primeiro, dentro do comodo e fora da circulacao.
-    n_torre = 0
-    minx, miny, maxx, maxy = cell.bounds
-    for wid in used:
-        ws0 = _wall_setup(sm, wid)
-        if ws0 is None:
-            continue
-        if ws0["orient"] == "v":
-            a_lo, a_hi = max(ws0["along_lo"], miny), min(ws0["along_hi"], maxy)
-        else:
-            a_lo, a_hi = max(ws0["along_lo"], minx), min(ws0["along_hi"], maxx)
-        lo, hi = a_lo + M(TORRE_W / 2 + 0.03), a_hi - M(TORRE_W / 2 + 0.03)
-        if hi <= lo:
-            continue
-        n = max(1, int((hi - lo) / M(0.12)))
-        mid = (lo + hi) / 2
-        spot = None
-        for i in sorted(range(n + 1), key=lambda j: -abs((lo + (hi - lo) * j / n) - mid)):
-            ac = lo + (hi - lo) * i / n
-            t = _fbox(ws0["orient"], ws0["face"], ws0["sgn"], ac, M(0.03),
-                      M(TORRE_W), M(TORRE_D)).intersection(cell)
-            if t.is_empty:
-                continue
-            if t.geom_type == "MultiPolygon":
-                t = max(t.geoms, key=lambda g: g.area)
-            if t.geom_type != "Polygon" or t.area < (0.20 / PT_TO_M ** 2):
-                continue
-            if circ_u is not None and not t.intersection(circ_u).is_empty:
-                continue
-            spot = t
-            break
-        if spot is not None:
-            items.append(_to_box("torre", spot, TORRE_H, RGB_TORRE))
-            n_torre = 1
-            break
-
-    # ELETRODOMESTICOS distintos (geladeira->pia->cooktop) na MAIOR run de bancada, LONGE da porta.
-    # Substitui o placeholder "bancada agregada" por pecas reconheciveis. Skip de slot perto da porta
-    # (geometry_sanity pegou o bug de por na parede curta junto da porta). NAO mascarar — corrigir o layout.
-    n_appl = 0
     door_in = []
     for o in con.get("openings", []):
         if (o.get("kind") or o.get("type")) in DOOR_KINDS:
             p = o.get("position") or o.get("center")
             if p:
                 door_in.append((p[0] * PT_TO_IN, p[1] * PT_TO_IN))
-    bancadas = [it for it in items if it["kind"] == "bancada"]
-    main_idx = max(range(len(bancadas)), key=lambda i: (bancadas[i]["x1"] - bancadas[i]["x0"]) *
-                   (bancadas[i]["y1"] - bancadas[i]["y0"])) if bancadas else 0
-    main_wall = used[main_idx] if main_idx < len(used) else used[0]
-    ws_main = _wall_setup(sm, main_wall)
-    if ws_main is not None:
-        if ws_main["orient"] == "v":
-            a_lo, a_hi = max(ws_main["along_lo"], miny), min(ws_main["along_hi"], maxy)
-        else:
-            a_lo, a_hi = max(ws_main["along_lo"], minx), min(ws_main["along_hi"], maxx)
-        span = a_hi - a_lo
-        for kind, w_m, d_m, h_m, z0_m, rgb, frac in APPLIANCES:
-            bx = _fbox(ws_main["orient"], ws_main["face"], ws_main["sgn"], a_lo + span * frac,
-                       M(0.03), M(w_m), M(d_m)).intersection(cell)
-            if not bx.is_empty and bx.geom_type == "MultiPolygon":
-                bx = max(bx.geoms, key=lambda g: g.area)
-            if bx.is_empty or bx.geom_type != "Polygon" or bx.area < (0.05 / PT_TO_M ** 2):
-                continue
-            cx, cy = bx.centroid.x * PT_TO_IN, bx.centroid.y * PT_TO_IN
-            if any(((cx - dx) ** 2 + (cy - dy) ** 2) ** 0.5 < 26 for dx, dy in door_in):
-                continue                                  # nao colocar appliance perto da porta
-            items.append(_to_box(kind, bx, h_m, rgb, z0_m=z0_m))
-            n_appl += 1
 
-    # ARMARIOS AEREOS sobre a bancada (GPT review P2: bancada embaixo + aereo em cima =
-    # cozinha planejada real). Faixa rasa ELEVADA (z0=1.5m) na parede da bancada,
-    # recortada ao comodo, FORA da janela (nao bloquear) e fora da circulacao.
-    win_zone = _window_zones(sm)
-    n_aereo = 0
-    for wid in used:
-        ws = _wall_setup(sm, wid)
-        w = next((x for x in sm["walls"] if x["id"] == wid), None)
-        if ws is None or w is None:
-            continue
-        strip = _fbox(ws["orient"], ws["face"], ws["sgn"], ws["along_c"], M(0.03),
-                      M(w["length_m"] + 0.6), M(AEREO_DEPTH)).intersection(cell)
+    def near_door(shp):
+        cx, cy = shp.centroid.x * PT_TO_IN, shp.centroid.y * PT_TO_IN
+        return any(((cx - dx) ** 2 + (cy - dy) ** 2) ** 0.5 < 22 for dx, dy in door_in)
+
+    items, placed = [], None
+
+    def _shp_run(shp, orient):
+        """along-interval (lo,hi) em PT do maior poligono util de shp; None se vazio."""
         if circ_u is not None:
-            strip = strip.difference(circ_u)
-        if win_zone is not None:
-            strip = strip.difference(win_zone)
-        if strip.is_empty:
+            shp = shp.difference(circ_u)
+        if placed is not None:
+            shp = shp.difference(placed)
+        if shp.is_empty:
+            return None
+        if shp.geom_type == "MultiPolygon":
+            shp = max(shp.geoms, key=lambda g: g.area)
+        if shp.geom_type != "Polygon" or shp.area < AREA_MIN:
+            return None
+        x0, y0, x1, y1 = shp.bounds
+        return (y0, y1) if orient == "v" else (x0, x1)
+
+    def clip(shp, carve=True):
+        if circ_u is not None:
+            shp = shp.difference(circ_u)
+        if carve and placed is not None:
+            shp = shp.difference(placed)
+        if shp.is_empty:
+            return None
+        if shp.geom_type == "MultiPolygon":
+            shp = max(shp.geoms, key=lambda g: g.area)
+        return shp if (shp.geom_type == "Polygon" and shp.area >= AREA_MIN) else None
+
+    def add(kind, shp, h_m, rgb, z0_m=0.0, mark=True):
+        nonlocal placed
+        items.append(_to_box(kind, shp, h_m, rgb, z0_m=z0_m))
+        if mark:
+            placed = shp if placed is None else placed.union(shp)
+
+    def fb(ws, center, length_m, depth_m):
+        return _fbox(ws["orient"], ws["face"], ws["sgn"], center, M(0.03),
+                     M(length_m), M(depth_m)).intersection(cell)
+
+    # escolhe paredes pelo RUN LIVRE real (parede ∩ cômodo − circulação), não pelo
+    # comprimento bruto (m013 tem 2.57m mas só 0.83m livre; m011 2.10m é a boa).
+    wruns = []
+    for w in clean:
+        ws = _wall_setup(sm, w["id"])
+        if ws is None:
             continue
-        if strip.geom_type == "MultiPolygon":
-            strip = max(strip.geoms, key=lambda g: g.area)
-        if strip.geom_type != "Polygon" or strip.area < (0.20 / PT_TO_M ** 2):
-            continue
-        items.append(_to_box("aereo", strip, AEREO_H, RGB_AEREO, z0_m=AEREO_Z0))
-        n_aereo += 1
-    return items, {"result": "OK", "room_name": sm.get("room_name"),
-                   "n_counters": len(used), "n_torre": n_torre, "n_aereo": n_aereo,
-                   "n_appliances": n_appl, "walls": used}
+        strip = fb(ws, ws["along_c"], w["length_m"] + 0.3, COUNTER_DEPTH)
+        run = _shp_run(strip, ws["orient"])
+        if run:
+            wruns.append((ws, run, (run[1] - run[0]) / M(1.0)))
+    wruns.sort(key=lambda t: -t[2])
+    if not wruns:
+        return None, {"result": "NO_VALID_LAYOUT", "room_name": sm.get("room_name"),
+                      "reason": "sem run livre p/ bancada"}
+
+    # ---------------- parede PRINCIPAL: galley linear dentro do run livre ----------------
+    ws, (f_lo, f_hi), run_m = wruns[0]
+    cur = f_lo
+    # geladeira numa ponta (só se o run comporta geladeira + bancada mínima)
+    if run_m >= GEL_W + 0.45:
+        gb = clip(fb(ws, cur + M(GEL_W / 2), GEL_W, GEL_D))
+        if gb is not None and not near_door(gb):
+            add("geladeira", gb, GEL_H, RGB_GELADEIRA)
+            cur = cur + M(GEL_W)
+    # torre na outra ponta só se sobra >=1.0m p/ bancada
+    f_hi_b = f_hi
+    if (f_hi - cur) >= M(1.0 + TORRE_W):
+        tb = clip(fb(ws, f_hi - M(TORRE_W / 2), TORRE_W, TORRE_D))
+        if tb is not None and not near_door(tb):
+            add("torre", tb, TORRE_H, RGB_TORRE)
+            f_hi_b = f_hi - M(TORRE_W)
+    # bancada no meio do run
+    b_len = (f_hi_b - cur) / M(1.0)
+    if b_len >= 0.5:
+        b_center = (cur + f_hi_b) / 2
+        bb = clip(fb(ws, b_center, b_len, COUNTER_DEPTH))
+        if bb is not None:
+            add("bancada", bb, COUNTER_H, RGB_COUNTER)
+            pb = clip(fb(ws, cur + M(0.30), PIA_W, PIA_D), carve=False)   # cuba numa ponta
+            if pb is not None:
+                add("pia", pb, 0.12, RGB_PIA, z0_m=PIA_Z0, mark=False)
+            if b_len >= 1.0:                        # cooktop na OUTRA ponta (sem encostar na cuba)
+                cb = clip(fb(ws, f_hi_b - M(0.28), COOK_W, COOK_D), carve=False)
+                if cb is not None:
+                    add("cooktop", cb, 0.08, RGB_COOKTOP, z0_m=COOK_Z0, mark=False)
+            ab = fb(ws, b_center, b_len, AEREO_DEPTH)
+            if win_zone is not None:
+                ab = ab.difference(win_zone)
+            if not ab.is_empty:
+                if ab.geom_type == "MultiPolygon":
+                    ab = max(ab.geoms, key=lambda g: g.area)
+                if ab.geom_type == "Polygon" and ab.area >= (0.12 / PT_TO_M ** 2):
+                    add("aereo", ab, AEREO_H, RGB_AEREO, z0_m=AEREO_Z0, mark=False)
+
+    # ---------------- 2a parede limpa (L): bancada/cooktop extra carved ----------------
+    for ws2, (g_lo, g_hi), run2 in wruns[1:2]:
+        g2 = clip(fb(ws2, (g_lo + g_hi) / 2, (g_hi - g_lo) / M(1.0), COUNTER_DEPTH))
+        if g2 is not None:
+            gx0, gy0, gx1, gy1 = g2.bounds
+            if min(gx1 - gx0, gy1 - gy0) / M(1.0) < BANCADA_MIN_DEPTH:
+                continue                            # sliver fino (16cm) = inútil, descarta
+            add("bancada", g2, COUNTER_H, RGB_COUNTER)
+            if "cooktop" not in [it["kind"] for it in items] and run2 >= 0.6:
+                cb2 = clip(fb(ws2, (g_lo + g_hi) / 2, COOK_W, COOK_D), carve=False)
+                if cb2 is not None:
+                    add("cooktop", cb2, 0.08, RGB_COOKTOP, z0_m=COOK_Z0, mark=False)
+
+    if not items:
+        return None, {"result": "NO_VALID_LAYOUT", "room_name": sm.get("room_name"),
+                      "reason": "nada coube dentro do comodo"}
+    kinds = [it["kind"] for it in items]
+    return items, {"result": "OK", "room_name": sm.get("room_name"), "n_items": len(items),
+                   "kinds": sorted(set(kinds)), "n_bancadas": kinds.count("bancada")}
 
 
 if __name__ == "__main__":
@@ -197,4 +195,4 @@ if __name__ == "__main__":
                      .read_text("utf-8"))
     boxes, out = build_boxes(con, "r004")
     print(f"COZINHA r004 ('{out.get('room_name')}') | {out['result']} | "
-          f"{len(boxes) if boxes else 0} bancada(s) nas paredes {out.get('walls')}")
+          f"{len(boxes) if boxes else 0} pecas | {out.get('kinds')}")
