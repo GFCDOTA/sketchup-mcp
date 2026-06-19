@@ -44,6 +44,104 @@ def _to_box(kind, shp, h_m, rgb, z0_m=0.0):
             "rgb": rgb, "label": kind, "ambiguous": False, "decorative": False}
 
 
+M2IN = 39.3700787402
+# cores (FORMA antes de material — tem que ler como cozinha mesmo chapado em cinza/branco)
+_KC = {"corpo": [224, 225, 229], "porta": [235, 236, 240], "puxador": [58, 60, 64],
+       "tampo": [122, 122, 128], "soculo": [66, 66, 70], "inox": [196, 199, 205],
+       "vidro": [28, 28, 32], "boca": [54, 54, 58], "cuba": [176, 180, 187],
+       "torneira": [150, 153, 160]}
+
+
+def _kp(kind, x0, y0, x1, y1, z0_m, z1_m, rgb):
+    """parte: x/y em POINTS (->inches), z em METROS. (frente detalhada)."""
+    x0, x1 = min(x0, x1), max(x0, x1)
+    y0, y1 = min(y0, y1), max(y0, y1)
+    return {"kind": kind, "x0": x0 * PT_TO_IN, "y0": y0 * PT_TO_IN, "x1": x1 * PT_TO_IN, "y1": y1 * PT_TO_IN,
+            "corners": [[round(x0 * PT_TO_IN, 2), round(y0 * PT_TO_IN, 2)], [round(x1 * PT_TO_IN, 2), round(y0 * PT_TO_IN, 2)],
+                        [round(x1 * PT_TO_IN, 2), round(y1 * PT_TO_IN, 2)], [round(x0 * PT_TO_IN, 2), round(y1 * PT_TO_IN, 2)]],
+            "h_in": round((z1_m - z0_m) * M2IN, 2), "z0_in": round(z0_m * M2IN, 2),
+            "rgb": rgb, "label": kind, "ambiguous": False, "decorative": False}
+
+
+def _kmod(kind, shp, h_m, rgb, z0_m, ws):
+    """Geometria DETALHADA de um elemento de cozinha (não cubo). Frente = lado do cômodo
+    (via ws). Cai pra caixa única se for um kind sem detalhe."""
+    x0, y0, x1, y1 = shp.bounds
+    vert = bool(ws and ws["orient"] == "v")
+    sgn = (ws["sgn"] if ws else 1)
+    s = 1 if sgn > 0 else -1
+    if vert:
+        front, back = (x1 if s > 0 else x0), (x0 if s > 0 else x1)
+        a0, a1 = y0, y1
+    else:
+        front, back = (y1 if s > 0 else y0), (y0 if s > 0 else y1)
+        a0, a1 = x0, x1
+    W = a1 - a0
+    t = M(0.018)
+
+    def body(za, zb, c, inset_front=0.0, inset_side=0.0):
+        f = front - s * M(inset_front)
+        sa0, sa1 = a0 + M(inset_side), a1 - M(inset_side)
+        return _kp(kind, min(f, back), sa0, max(f, back), sa1, za, zb, c) if vert \
+            else _kp(kind, sa0, min(f, back), sa1, max(f, back), za, zb, c)
+
+    def panel(sa0, sa1, za, zb, c, off=0.0, thick=None):
+        f1 = front - s * M(off)
+        f0 = f1 - s * (thick or t)
+        return _kp(kind, min(f0, f1), sa0, max(f0, f1), za, zb, c) if vert \
+            else _kp(kind, sa0, min(f0, f1), sa1, max(f0, f1), za, zb, c)
+
+    out = []
+    if kind == "geladeira":
+        out.append(body(z0_m, z0_m + h_m - 0.05, _KC["corpo"], inset_side=0.004))      # corpo + respiro topo
+        split = z0_m + h_m * 0.66
+        out.append(panel(a0 + M(0.02), a1 - M(0.02), split + 0.01, z0_m + h_m - 0.06, _KC["inox"]))  # porta sup
+        out.append(panel(a0 + M(0.02), a1 - M(0.02), z0_m + 0.04, split - 0.01, _KC["inox"]))        # porta inf
+        hp = a1 - M(0.07)
+        out.append(panel(hp, hp + M(0.03), split + 0.06, z0_m + h_m - 0.14, _KC["puxador"], off=0.02))  # puxador sup
+        out.append(panel(hp, hp + M(0.03), z0_m + 0.12, split - 0.06, _KC["puxador"], off=0.02))        # puxador inf
+    elif kind == "bancada":
+        tt, sk = 0.04, 0.10
+        out.append(body(z0_m, z0_m + sk, _KC["soculo"], inset_front=0.05))             # sóculo recuado (toe-kick)
+        out.append(body(z0_m + sk, z0_m + h_m - tt, _KC["corpo"]))                     # gabinete
+        nmod = max(1, int(round(W / M(0.50))))
+        mw = W / nmod
+        for i in range(nmod):                                                          # portas/gavetas + puxador
+            ma0, ma1 = a0 + i * mw + M(0.008), a0 + (i + 1) * mw - M(0.008)
+            out.append(panel(ma0, ma1, z0_m + sk + 0.02, z0_m + h_m - tt - 0.02, _KC["porta"]))
+            out.append(panel(ma1 - M(0.12), ma1 - M(0.03), z0_m + h_m - tt - 0.05, z0_m + h_m - tt - 0.015, _KC["puxador"], off=0.02))
+        out.append(body(z0_m + h_m - tt, z0_m + h_m, _KC["tampo"], inset_front=-0.025))  # tampo proud (overhang pedra)
+    elif kind == "cooktop":
+        out.append(body(z0_m, z0_m + 0.015, _KC["vidro"], inset_side=0.015))           # vidro preto fino
+        cax = [a0 + W * 0.3, a0 + W * 0.7]
+        dca = M(0.07)
+        dep0, dep1 = (front - s * M(0.10)), (front - s * M(0.34))                       # 2 fileiras de boca
+        for ca in cax:
+            for dd in (dep0, dep1):
+                if vert:   # profundidade=x, largura=y
+                    out.append(_kp("boca", dd - dca, ca - dca, dd + dca, ca + dca, z0_m + 0.014, z0_m + 0.022, _KC["boca"]))
+                else:      # profundidade=y, largura=x
+                    out.append(_kp("boca", ca - dca, dd - dca, ca + dca, dd + dca, z0_m + 0.014, z0_m + 0.022, _KC["boca"]))
+    elif kind == "pia":
+        out.append(body(z0_m, z0_m + 0.02, _KC["inox"], inset_side=0.01))              # borda da cuba
+        out.append(body(z0_m - 0.12, z0_m, _KC["cuba"], inset_front=0.06, inset_side=0.07))  # bojo recuado
+        ta = (a0 + a1) / 2
+        out.append(panel(ta - M(0.02), ta + M(0.02), z0_m + 0.02, z0_m + 0.22, _KC["torneira"], off=0.06, thick=M(0.035)))  # torneira
+    elif kind == "aereo":
+        out.append(body(z0_m, z0_m + h_m, _KC["corpo"]))
+        nmod = max(1, int(round(W / M(0.45))))
+        mw = W / nmod
+        for i in range(nmod):
+            ma0, ma1 = a0 + i * mw + M(0.008), a0 + (i + 1) * mw - M(0.008)
+            out.append(panel(ma0, ma1, z0_m + 0.02, z0_m + h_m - 0.02, _KC["porta"]))
+            out.append(panel(ma0 + M(0.03), ma0 + M(0.12), z0_m + 0.02, z0_m + 0.05, _KC["puxador"], off=0.02))  # puxador embaixo
+    else:
+        out.append(_kp(kind, x0, y0, x1, y1, z0_m, z0_m + h_m, rgb))                    # fallback caixa
+    for p in out:
+        p["module"] = kind   # todas as sub-peças pertencem ao MÓDULO pai (1 grupo no .skp + gate)
+    return out
+
+
 def build_boxes(con, room_id):
     """Cozinha LINEAR (galley) sem sobreposicao. Devolve (boxes, out) no formato do
     place_layout (compativel com furnish_apartment)."""
@@ -103,9 +201,9 @@ def build_boxes(con, room_id):
             shp = max(shp.geoms, key=lambda g: g.area)
         return shp if (shp.geom_type == "Polygon" and shp.area >= AREA_MIN) else None
 
-    def add(kind, shp, h_m, rgb, z0_m=0.0, mark=True):
+    def add(kind, shp, h_m, rgb, z0_m=0.0, mark=True, ws=None):
         nonlocal placed
-        items.append(_to_box(kind, shp, h_m, rgb, z0_m=z0_m))
+        items.extend(_kmod(kind, shp, h_m, rgb, z0_m, ws))   # geometria DETALHADA (não cubo)
         if mark:
             placed = shp if placed is None else placed.union(shp)
 
@@ -136,14 +234,14 @@ def build_boxes(con, room_id):
     if run_m >= GEL_W + 0.45:
         gb = clip(fb(ws, cur + M(GEL_W / 2), GEL_W, GEL_D))
         if gb is not None and not near_door(gb):
-            add("geladeira", gb, GEL_H, RGB_GELADEIRA)
+            add("geladeira", gb, GEL_H, RGB_GELADEIRA, ws=ws)
             cur = cur + M(GEL_W)
     # torre na outra ponta só se sobra >=1.0m p/ bancada
     f_hi_b = f_hi
     if (f_hi - cur) >= M(1.0 + TORRE_W):
         tb = clip(fb(ws, f_hi - M(TORRE_W / 2), TORRE_W, TORRE_D))
         if tb is not None and not near_door(tb):
-            add("torre", tb, TORRE_H, RGB_TORRE)
+            add("torre", tb, TORRE_H, RGB_TORRE, ws=ws)
             f_hi_b = f_hi - M(TORRE_W)
     # bancada no meio do run
     b_len = (f_hi_b - cur) / M(1.0)
@@ -151,14 +249,14 @@ def build_boxes(con, room_id):
         b_center = (cur + f_hi_b) / 2
         bb = clip(fb(ws, b_center, b_len, COUNTER_DEPTH))
         if bb is not None:
-            add("bancada", bb, COUNTER_H, RGB_COUNTER)
+            add("bancada", bb, COUNTER_H, RGB_COUNTER, ws=ws)
             pb = clip(fb(ws, cur + M(0.30), PIA_W, PIA_D), carve=False)   # cuba numa ponta
             if pb is not None:
-                add("pia", pb, 0.12, RGB_PIA, z0_m=PIA_Z0, mark=False)
+                add("pia", pb, 0.12, RGB_PIA, z0_m=PIA_Z0, mark=False, ws=ws)
             if b_len >= 1.0:                        # cooktop na OUTRA ponta (sem encostar na cuba)
                 cb = clip(fb(ws, f_hi_b - M(0.28), COOK_W, COOK_D), carve=False)
                 if cb is not None:
-                    add("cooktop", cb, 0.08, RGB_COOKTOP, z0_m=COOK_Z0, mark=False)
+                    add("cooktop", cb, 0.08, RGB_COOKTOP, z0_m=COOK_Z0, mark=False, ws=ws)
             ab = fb(ws, b_center, b_len, AEREO_DEPTH)
             if win_zone is not None:
                 ab = ab.difference(win_zone)
@@ -166,7 +264,7 @@ def build_boxes(con, room_id):
                 if ab.geom_type == "MultiPolygon":
                     ab = max(ab.geoms, key=lambda g: g.area)
                 if ab.geom_type == "Polygon" and ab.area >= (0.12 / PT_TO_M ** 2):
-                    add("aereo", ab, AEREO_H, RGB_AEREO, z0_m=AEREO_Z0, mark=False)
+                    add("aereo", ab, AEREO_H, RGB_AEREO, z0_m=AEREO_Z0, mark=False, ws=ws)
 
     # ---------------- 2a parede limpa (L): bancada/cooktop extra carved ----------------
     for ws2, (g_lo, g_hi), run2 in wruns[1:2]:
@@ -175,11 +273,11 @@ def build_boxes(con, room_id):
             gx0, gy0, gx1, gy1 = g2.bounds
             if min(gx1 - gx0, gy1 - gy0) / M(1.0) < BANCADA_MIN_DEPTH:
                 continue                            # sliver fino (16cm) = inútil, descarta
-            add("bancada", g2, COUNTER_H, RGB_COUNTER)
+            add("bancada", g2, COUNTER_H, RGB_COUNTER, ws=ws2)
             if "cooktop" not in [it["kind"] for it in items] and run2 >= 0.6:
                 cb2 = clip(fb(ws2, (g_lo + g_hi) / 2, COOK_W, COOK_D), carve=False)
                 if cb2 is not None:
-                    add("cooktop", cb2, 0.08, RGB_COOKTOP, z0_m=COOK_Z0, mark=False)
+                    add("cooktop", cb2, 0.08, RGB_COOKTOP, z0_m=COOK_Z0, mark=False, ws=ws2)
 
     if not items:
         return None, {"result": "NO_VALID_LAYOUT", "room_name": sm.get("room_name"),
