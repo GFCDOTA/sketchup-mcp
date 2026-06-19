@@ -189,8 +189,8 @@ def _kmod(kind, shp, h_m, rgb, z0_m, ws):
                 out.append(panel(ma0, ma1, z0_m + h_m * 0.5 - 0.012, z0_m + h_m * 0.5 + 0.012, _KC["niche_wood"], off=0.04, k="niche_wood"))  # prateleira madeira
             else:
                 out.append(panel(ma0, ma1, z0_m + 0.06, z0_m + h_m - 0.018, _KC["porta_sup"], k="porta_sup"))
-                # GOLA recuada no rodapé da porta (handle-less, ritmo elegante) — sem barra protuberante
-                out.append(panel(ma0 + M(0.02), ma1 - M(0.02), z0_m + 0.04, z0_m + 0.06, _KC["puxador"], off=-0.006, thick=M(0.014), k="puxador"))
+                # GOLA = sombra FINA recuada no rodapé da porta (handle-less, não domina)
+                out.append(panel(ma0 + M(0.02), ma1 - M(0.02), z0_m + 0.046, z0_m + 0.056, _KC["torneira"], off=0.0, thick=M(0.01), k="gola"))
     elif kind == "coifa":
         if h_m <= 0.20:                                                                # coifa SLIM integrada sob o aéreo
             out.append(body(z0_m, z0_m + h_m, _KC["corpo_sup"], inset_side=0.008, inset_front=0.012, k="corpo_sup"))  # caixa OFF-WHITE (integra ao aéreo, não bloco preto solto)
