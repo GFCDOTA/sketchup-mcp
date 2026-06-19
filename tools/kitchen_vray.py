@@ -22,7 +22,7 @@ SU = Path(r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe")
 VRAY = Path(r"C:\Program Files\Chaos\V-Ray\V-Ray for SketchUp\extension\vray\bin\vray.exe")
 RB = ROOT / "tools/vray_export.rb"
 TEX = ROOT / "assets/textures/procedural"
-BASE = ROOT / "artifacts/planta_74/furnished/planta_74_furnished.skp"
+BASE = Path(os.environ["BASE_SKP"]) if os.environ.get("BASE_SKP") else ROOT / "artifacts/planta_74/furnished/planta_74_furnished.skp"
 SCRATCH = ROOT / ".claude/scratch"
 FDIR = ROOT / "artifacts/planta_74/furnished/kitchen_angles"
 
