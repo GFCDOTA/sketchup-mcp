@@ -58,14 +58,15 @@ _KC = {
     "corpo": [156, 123, 86], "porta": [163, 130, 92], "gaveta": [163, 130, 92],   # base = madeira
     "corpo_sup": [231, 226, 214], "porta_sup": [236, 232, 221],                    # aéreo = off-white/fendi quente
     "filler": [203, 197, 185],                                                      # painel lateral da torre = fendi/taupe (não estoura branco no flat)
-    "tampo": [214, 216, 219], "backsplash": [223, 221, 215],                       # quartzo / rodabanca
+    "tampo": [214, 216, 219], "backsplash": [210, 213, 218],                       # tampo quartzo + backsplash PEDRA subindo da bancada
+    "niche_wood": [150, 118, 84],                                                  # fundo/prateleira do nicho de assinatura (madeira)
     "soculo": [40, 41, 45],                                                        # sóculo grafite
     "inox": [193, 198, 205],                                                       # borda cuba / metais
-    "geladeira": [207, 212, 219],                                                  # inox CLARO da geladeira (eletro, distinto da marcenaria)
+    "geladeira": [216, 220, 227],                                                  # inox MAIS CLARO/reflexivo (menos bloco cinza)
     "vidro": [22, 22, 26], "boca": [46, 46, 50],                                   # cooktop preto
     "cuba": [92, 96, 103], "torneira": [54, 56, 62],                               # bojo ESCURO (lê profundidade) / torneira grafite
     "puxador": [44, 45, 50],                                                       # puxador slim grafite
-    "led": [252, 247, 228],                                                        # fita LED quente sob o aéreo
+    "led": [255, 250, 232],                                                        # fita LED quente sob o aéreo (mais legível)
     "board": [165, 130, 92], "vaso_d": [96, 116, 86], "tempero": [188, 176, 150],  # decoração funcional
     "ralo": [60, 63, 69],                                                          # ralo/válvula da cuba
 }
@@ -176,14 +177,16 @@ def _kmod(kind, shp, h_m, rgb, z0_m, ws):
     elif kind in ("aereo", "aereo_fridge"):
         out.append(body(z0_m + 0.04, z0_m + h_m, _KC["corpo_sup"], k="corpo_sup"))     # carcaça OFF-WHITE
         out.append(body(z0_m + 0.018, z0_m + 0.04, _KC["soculo"], inset_front=0.04, k="soculo"))  # valance grafite recuada
-        out.append(panel(a0 + M(0.02), a1 - M(0.02), z0_m + 0.002, z0_m + 0.016, _KC["led"], off=0.004, thick=M(0.02), k="led"))  # FITA LED quente
+        out.append(panel(a0 + M(0.02), a1 - M(0.02), z0_m + 0.0, z0_m + 0.022, _KC["led"], off=0.006, thick=M(0.025), k="led"))  # FITA LED quente (mais legível)
         nmod = max(2, int(round(W / M(0.60))))                                         # portas MAIORES (premium, menos blocão)
         mw = W / nmod
-        niche = (nmod - 1) if (kind == "aereo" and nmod >= 3) else -1                  # 1 bay ABERTA = leveza + decor
+        niche = (nmod - 1) if (kind == "aereo" and nmod >= 3) else -1                  # 1 bay ABERTA = nicho de ASSINATURA
         for i in range(nmod):
             ma0, ma1 = a0 + i * mw + M(0.016), a0 + (i + 1) * mw - M(0.016)            # reveals finos entre portas grandes
             if i == niche:
-                out.append(panel(ma0, ma1, z0_m + h_m * 0.5 - 0.008, z0_m + h_m * 0.5 + 0.008, _KC["corpo_sup"], off=0.05, k="corpo_sup"))  # prateleira do nicho aberto
+                # NICHO DE ASSINATURA: fundo + prateleira em MADEIRA -> quebra o blocão off-white
+                out.append(panel(ma0, ma1, z0_m + 0.04, z0_m + h_m - 0.03, _KC["niche_wood"], off=AEREO_DEPTH - 0.025, thick=M(0.02), k="niche_wood"))  # fundo madeira
+                out.append(panel(ma0, ma1, z0_m + h_m * 0.5 - 0.012, z0_m + h_m * 0.5 + 0.012, _KC["niche_wood"], off=0.04, k="niche_wood"))  # prateleira madeira
             else:
                 out.append(panel(ma0, ma1, z0_m + 0.055, z0_m + h_m - 0.02, _KC["porta_sup"], k="porta_sup"))
                 out.append(panel(ma0 + M(0.06), ma1 - M(0.06), z0_m + 0.06, z0_m + 0.082, _KC["puxador"], off=0.025, k="puxador"))  # cava slim elegante
@@ -342,9 +345,9 @@ def build_boxes(con, room_id):
                     add("aereo", ab, AEREO_H, RGB_AEREO, z0_m=AEREO_Z0, mark=False, ws=ws)
             # COIFA SLIM integrada sob o aéreo, sobre o cooktop (depurador embutido)
             if cook_c is not None:
-                hb = clip(fb(ws, cook_c, COOK_W + 0.04, AEREO_DEPTH - 0.02), carve=False)   # slim, recuada, sem volume lateral
+                hb = clip(fb(ws, cook_c, COOK_W + 0.06, AEREO_DEPTH - 0.01), carve=False)   # slim mas LEGÍVEL (lê como depurador)
                 if hb is not None:
-                    add("coifa", hb, 0.05, RGB_TORRE, z0_m=AEREO_Z0 - 0.05, mark=False, ws=ws)
+                    add("coifa", hb, 0.07, RGB_TORRE, z0_m=AEREO_Z0 - 0.07, mark=False, ws=ws)
             # DECORAÇÃO funcional MÍNIMA na bancada (poucas coisas, sem bagunça) — sobre o tampo
             dec_c = (b_lo + b_hi) / 2
             db = clip(fb(ws, dec_c - M(0.12), 0.32, 0.22), carve=False)
