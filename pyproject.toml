@@ -31,6 +31,10 @@ dev = [
   "pytest>=8.3,<9.0",
   "ruff>=0.6,<1.0",
 ]
+# Servidor MCP (tools/mcp_server). Instale com: pip install -e .[mcp]
+mcp = [
+  "mcp>=1.2",
+]
 
 [project.urls]
 Repository = "https://github.com/GFCDOTA/sketchup-mcp"
