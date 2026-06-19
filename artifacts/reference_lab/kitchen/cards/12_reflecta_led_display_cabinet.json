@@ -1,0 +1,22 @@
+{
+  "card_id": "reflecta_led_display_cabinet",
+  "category": "material_token",
+  "problem": "armario 100% fechado perde charme (nada pra olhar); nicho 100% aberto junta po e bagunca. Felipe quer reflecta/champagne com LED como PONTO DE DESTAQUE, sem exagerar",
+  "design_move": "modulo de vitrine com porta de VIDRO REFLECTA/CHAMPAGNE + LED interno quente lavando o interior — guarda tacas/eletros/loucas SELECIONADAS por tras do vidro fume (esconde pequena bagunca, da brilho). UM ponto de destaque (1-2 modulos), nao a cozinha inteira de vidro",
+  "applies_to": ["upper_cabinet", "display_module", "tall_glass_column", "bar_niche"],
+  "implementation_tokens": {
+    "front_material": "glass_reflecta_champagne",
+    "glass_tint": "champagne_bronze_smoke",
+    "transparency": "semi (esconde bagunca, mostra silhueta)",
+    "internal_led": true,
+    "led_color_temperature_K": 2700,
+    "accent_scope": "1-2 modulos (ponto focal)",
+    "frame_finish": "bronze_or_graphite_slim",
+    "vray_brdf": {"reflect": 0.28, "reflect_glossiness": 0.85, "refract": 0.45, "fog_tint": "champagne"}
+  },
+  "joinery_token_ref": "references/tokens/under_cabinet_led.json",
+  "real_values": {"led_rgb": [255,250,232], "champagne_glass_rgb_hint": [196,168,130], "frame_bronze_rgb_hint": [150,120,78], "led_note": "fita LINEAR continua interna, recuada pra esconder a fonte (ver card 05)", "marca_dedo_note": "Felipe aceita reflecta marcar dedo SE for bonito — usar como destaque, nao porta de uso pesado"},
+  "forbidden": ["cozinha inteira de vidro reflecta (vira vitrine de loja, exagero)", "LED frio/azulado dentro do vidro (mata o champagne)", "vidro super transparente mostrando bagunca real", "neon saturado", "guardar tralha visivel atras do vidro (so itens selecionados)", "estourar a exposicao do interior"],
+  "gate": ["destaque pontual (max 1-2 modulos)", "LED 2700K quente continuo", "vidro esconde bagunca mas mostra silhueta", "moldura coordenada (bronze sutil ou grafite)", "nao competir com a pedra/madeira do conjunto"],
+  "evidence": "HIPOTESE A PROVAR — render do modulo vitrine + veredito GPT (champagne+LED le como destaque premium, nao vitrine de loja)"
+}

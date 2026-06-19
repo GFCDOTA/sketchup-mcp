@@ -70,6 +70,38 @@ autoral / seguro p/ manutenção / arriscado).
 - scraping em massa; copiar imagem literalmente;
 - mover âncora do PDF; cravar PASS sozinho (GPT checkpoint, Felipe juiz).
 
+## Perfil do Felipe (briefing nativo)
+
+Fonte de verdade estruturada: `artifacts/reference_lab/kitchen/specs/felipe_kitchen_preference_profile.json`
+(prosa-fonte em `FELIPE_KITCHEN_PREFERENCES.md`). Trate como **RESTRIÇÃO, não sugestão**.
+Apto ~74 m², Felipe + namorada, visitas eventuais, cozinha de uso **moderado** (ovo/frango/
+bife/hambúrguer/frituras leves), flexível pro futuro. Prévia forte pra arquiteto/marceneiro/
+empreiteira depois: **sonhar alto no conceito, mas durabilidade + manutenção viável na vida real.**
+
+**USO (obrigatórios e desejados):** lava-louças, cooktop (vidro preto), forno embutido —
+**obrigatórios**. Micro embutido em nicho escondido; airfryer em nicho com respiro; filtro/
+purificador previsto. **Torre quente** (forno+micro+airfryer em coluna) agrada — estudar.
+Muito armazenamento; **armário ATÉ O TETO** (anti-pó); **gavetões inferiores** pra panela.
+Geladeira integrada em torre. Robô aspirador (prever circulação/docking). **SEM puxador
+tradicional** — só cava/gola/perfil-J/embutido/push-amortecedor. Nichos só com propósito.
+
+**ESTÉTICA:** **NÃO** gosta de branco puro → prefere **ESCURA ou meio-termo**. Gosta de
+industrial preto+madeira, cimento queimado, madeira média/escura, moody/noturno, dourado/
+bronze (sutil a presente), pedra com veio mais FORTE (se manutenção viável), reflecta/champagne
+pontual com LED, luz quente 2700–3000K, hotel boutique / industrial premium. Direção aprovada
+(DECISION 003): **BLACK_WOOD_GOLD_INDUSTRIAL_BOUTIQUE** — impacta mas continua usável/limpável.
+
+**MANUTENÇÃO:** beleza **sem dor de cabeça**; manutenção viável **acima de** material delicado.
+Cuba preta a considerar (estética) vs inox (durabilidade/seguro); reflecta marca dedo (aceita
+se bonito = WARN, não free pass); piso mostra pouco pó/risco (default grafite médio acetinado).
+LED frio, mármore na zona de trabalho e madeira em área molhada = fora.
+
+**NUNCA:** mover pia/ponto hidráulico/parede/porta/shaft/área de serviço; inventar ilha;
+mudar a planta por causa de uma foto; transformar linear em U/L; aplicar na cozinha real sem
+spec antes; cravar PASS sozinho (veredito visual é do Felipe). Detalhe acionável por eixo:
+`kitchen/rules/{material_maintenance,appliance_niche_rules,lighting_rules}.md` + guia
+`HOW_TO_USE.md`.
+
 ## Estado
 v0 validado (DECISION 001): 3 golden samples (warm/dark/boutique) GPT PASS, mesma geometria.
 v1 acrescenta a camada de SISTEMA (medidas/ergonomia/manutenção/buildability) + os 4 gates.

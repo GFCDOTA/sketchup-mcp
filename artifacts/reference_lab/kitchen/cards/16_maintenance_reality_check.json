@@ -1,0 +1,30 @@
+{
+  "card_id": "maintenance_reality_check",
+  "category": "safety_gate",
+  "problem": "material bonito demais no conceito vira dor de cabeca na vida real (mancha, marca de dedo, risco, rejunte que junta gordura). Felipe quer beleza SEM dor de cabeca — durabilidade e manutencao viavel antes de promover qualquer material",
+  "design_move": "gate de realidade: para CADA material especificado, registrar durabilidade, risco de mancha/dedo/risco e facilidade de limpeza. Material delicado SO passa se Felipe aceitar o trade-off explicitamente (ex.: reflecta marca dedo = OK se for destaque bonito, nao porta de uso pesado). Manutencao viavel > material delicado",
+  "applies_to": ["countertop", "backsplash", "sink", "cabinet_fronts", "floor", "glass_reflecta", "hardware"],
+  "implementation_tokens": {
+    "check_per_material": ["durability", "stain_risk", "fingerprint_risk", "scratch_risk", "cleaning_ease", "grout_needed"],
+    "verdict": ["VIAVEL", "VIAVEL_COM_RESSALVA", "EVITAR"],
+    "requires_felipe_signoff_when": "material delicado em superficie de uso pesado",
+    "rule": "manutencao_viavel > material_delicado"
+  },
+  "joinery_token_ref": null,
+  "real_values": {
+    "examples": {
+      "inox_sink": {"verdict": "VIAVEL", "note": "seguro/duravel — base segura do Felipe"},
+      "black_sink": {"verdict": "VIAVEL_COM_RESSALVA", "note": "Felipe quer CONSIDERAR vs inox — pode marcar agua/calcario; checar durabilidade do acabamento antes"},
+      "reflecta_glass": {"verdict": "VIAVEL_COM_RESSALVA", "note": "marca dedo (Felipe aceita SE bonito) -> usar como DESTAQUE, nao porta de uso diario"},
+      "strong_veined_stone": {"verdict": "VIAVEL_COM_RESSALVA", "note": "Felipe quer veio FORTE se manutencao viavel -> preferir porcelanato/quartzo veiado (resistente) a marmore poroso"},
+      "burnished_cement": {"verdict": "VIAVEL_COM_RESSALVA", "note": "gosta do look; selar bem (poroso mancha) — checar selante/manutencao"},
+      "high_gloss_white": {"verdict": "EVITAR", "note": "fora do gosto (branco) + marca tudo + risca"},
+      "open_grout_tile": {"verdict": "EVITAR", "note": "rejunte junta gordura/data -> preferir pedra continua sem rejunte (card 04)"},
+      "floor": {"verdict": "criterio", "note": "Felipe quer piso que mostre POUCO po/risco -> tom medio fosco, nao preto liso nem claro brilhante"}
+    },
+    "robot_vacuum_note": "Felipe quer robo aspirador -> soculo/circulacao precisam dar passagem ao robo (sem degrau morto)"
+  },
+  "forbidden": ["promover material delicado em uso pesado sem signoff do Felipe", "ignorar rejunte/porosidade/selante", "piso preto liso ou claro brilhante (mostra po/risco)", "marmore poroso onde quartzo/porcelanato resolve", "PASS sozinho (sempre veredito Felipe pra trade-off de manutencao)"],
+  "gate": ["todo material tem verdict de manutencao (durabilidade+mancha+dedo+risco+limpeza)", "delicado em uso pesado = exige signoff Felipe", "piso mostra pouco po/risco", "manutencao viavel > beleza delicada", "soculo/circulacao compativeis com robo aspirador"],
+  "evidence": "gate de processo — preenchido por material antes de promover spec/render; veredito final do Felipe nos trade-offs"
+}

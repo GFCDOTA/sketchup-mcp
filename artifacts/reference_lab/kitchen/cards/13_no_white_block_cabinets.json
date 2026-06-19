@@ -1,0 +1,20 @@
+{
+  "card_id": "no_white_block_cabinets",
+  "category": "material_token",
+  "problem": "branco puro chapado = blocao plano sem profundidade, le MDF barato / catalogo de banco de imagem. Felipe NAO gosta de branco puro (prefere escura ou meio-termo)",
+  "design_move": "trocar branco puro por off-white QUENTE / fendi / taupe / grafite + quebrar o monocromatico com shadow gaps e abertura por cava/gola (handle-less). A sombra do reveal + a temperatura quente matam a leitura de bloco. Para o gosto Felipe, puxar pro meio-termo/escuro (taupe/grafite) antes do off-white",
+  "applies_to": ["upper_cabinet", "base_cabinet", "tower", "filler", "panels"],
+  "implementation_tokens": {
+    "palette": ["warm_offwhite_fendi", "taupe", "graphite"],
+    "finish": "satin (nunca ultra-gloss, nunca branco-papel)",
+    "color_temperature": "warm_neutral",
+    "break_block_with": ["shadow_gap_reveal", "cava_gola_handle_less", "material_contrast_base_vs_upper"],
+    "felipe_bias": "preferir meio-termo/escuro (taupe/grafite) a off-white claro",
+    "vray_brdf": {"reflect": 0.05, "reflect_glossiness": 0.58, "metalness": 0}
+  },
+  "joinery_token_ref": "references/tokens/warm_fendi_upper.json",
+  "real_values": {"fendi_rgb": [224,215,199], "taupe_rgb_hint": [168,158,143], "graphite_rgb": [40,41,45], "reveal_read_mm": [2,4], "white_ceiling": "NUNCA acima de [244,244,244] (branco-papel)"},
+  "forbidden": ["branco puro [255,255,255] chapado", "branco-papel >[244,244,244]", "ultra-gloss (marca digital, le plastico)", "frente lisa sem reveal/junta", "puxador bojudo cromado builder-grade", "monocromatico plano sem contraponto quente"],
+  "gate": ["nao ler como MDF chapado / bloco macico", "ter reveal/shadow-gap quebrando a massa", "abertura handle-less (cava/gola) ou puxador slim grafite", "tom dentro do gosto Felipe (meio-termo/escuro > branco)", "coordenar base x aereo (sem bicolor agressivo)"],
+  "evidence": "regra anti-padrao nº2 (anti_patterns.md) aplicada ao gosto Felipe; provar no hero que sumiu o 'brancao'"
+}
