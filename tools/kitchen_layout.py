@@ -55,11 +55,11 @@ M2IN = 39.3700787402
 # inferiores=madeira nogueira clara · superiores=off-white/fendi · tampo=quartzo claro ·
 # sóculo=grafite · geladeira/cuba=inox · cooktop=preto · puxador=grafite slim.
 _KC = {
-    "corpo": [171, 140, 100], "porta": [176, 145, 104], "gaveta": [176, 145, 104],   # base = carvalho/freijó natural médio (quente)
+    "corpo": [191, 167, 137], "porta": [195, 171, 141], "gaveta": [195, 171, 141],   # base = carvalho CLARO coordenado c/ o fendi (mata o bicolor builder-grade)
     "corpo_sup": [224, 215, 199], "porta_sup": [228, 220, 204],                    # aéreo = FENDI/off-white QUENTE (não branco puro)
     "filler": [224, 215, 199],                                                      # painel lateral da torre = MESMO fendi do aéreo (coluna coesa)
     "tampo": [222, 219, 212], "backsplash": [222, 219, 212],                       # PEDRA clara quente (veios = textura V-Ray); backsplash = tampo subindo
-    "niche_wood": [162, 130, 90],                                                  # fundo/prateleira do nicho de assinatura (madeira)
+    "niche_wood": [138, 104, 66],                                                  # nicho = madeira mais ESCURA (mantém contraste após clarear a base)
     "soculo": [40, 41, 45],                                                        # sóculo grafite
     "inox": [193, 198, 205],                                                       # borda cuba / metais
     "geladeira": [216, 220, 227],                                                  # inox MAIS CLARO/reflexivo (menos bloco cinza)
@@ -67,7 +67,7 @@ _KC = {
     "cuba": [92, 96, 103], "torneira": [54, 56, 62],                               # bojo ESCURO (lê profundidade) / torneira grafite
     "puxador": [44, 45, 50],                                                       # puxador slim grafite
     "led": [255, 250, 232],                                                        # fita LED quente sob o aéreo (mais legível)
-    "board": [176, 145, 104], "vaso_d": [96, 116, 86], "tempero": [188, 176, 150], # decoração funcional
+    "board": [150, 116, 78], "vaso_d": [96, 116, 86], "tempero": [188, 176, 150],  # decoração funcional (tábua + escura p/ destacar da base clara)
     "ralo": [60, 63, 69],                                                          # ralo/válvula da cuba
 }
 # nome de MÓDULO planejado (grupo selecionável sozinho no SKP); countertop é separado do base

@@ -20,6 +20,10 @@ def vray_export_run
         'ph_mesa_centro' => wd, 'ph_base' => wd,
         'ph_corpo' => wm, 'ph_porta' => wm, 'ph_tampo' => wm, 'ph_gaveta' => wm, 'ph_rack_tv' => wm,
         'ph_dresser' => wm, 'ph_bancada' => wm, 'ph_torre' => wm, 'ph_aereo' => wm,
+        # COZINHA planejada (kinds kc_* por PAPEL): madeira nos inferiores/nicho, pedra no tampo/backsplash.
+        # Fendi/inox/grafite ficam na cor solida + BRDF (sem textura). LED = emissivo (tweak).
+        'ph_kc_corpo' => wm, 'ph_kc_porta' => wm, 'ph_kc_gaveta' => wm, 'ph_kc_niche_wood' => wm, 'ph_kc_board' => wm,
+        'ph_kc_tampo' => 'stone_counter.png', 'ph_kc_backsplash' => 'stone_counter.png',
         # SOFA (sala = PASS, NAO regressar): mantem fabric_light
         'ph_seat_cushion' => fl, 'ph_back_cushion' => fl, 'ph_arm' => fl,
         # ROUPA DE CAMA: linho dedicado (textura mais marcada, menos lavada sob luz)
@@ -85,8 +89,21 @@ def vray_export_run
       out << "texturas aplicadas: #{n_tex}"
     end
 
+    # ISOLAR um cômodo (VRAY_ISOLATE=substring do nome do grupo) -> esconde o resto.
+    # Mata a oclusão do galley no V-Ray: sem paredes/móveis vizinhos a câmera frameia limpo.
+    iso = ENV['VRAY_ISOLATE']
     view = model.active_view
     bb = model.bounds
+    if iso && !iso.empty?
+      kbb = Geom::BoundingBox.new
+      model.entities.grep(Sketchup::Group).each do |g|
+        keep = g.name.to_s.include?(iso)
+        (g.hidden = !keep) rescue nil
+        kbb.add(g.bounds) if keep
+      end
+      bb = kbb if kbb.valid?
+      out << "isolado '#{iso}'"
+    end
     c = bb.center
     d = bb.diagonal
     cam_mode = ENV['VRAY_CAM'] || 'iso'
