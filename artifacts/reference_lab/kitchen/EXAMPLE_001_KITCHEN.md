@@ -15,12 +15,14 @@
 | Metal | bloco cinza fosco | **inox reflexivo** (eletro premium) |
 | Luz | flat, sem profundidade | **LED linear contínuo 2700K** + sóculo grafite |
 
-## Lição-raiz (3 camadas)
+## Lição-raiz (4 camadas)
 ```
 FORMA:   loose_object     → planned_niche_system
 PELE:    flat_material    → warm_layered_materiality
 LUZ:     spot_test_light  → continuous_architectural_light
+VOLUME:  white_block      → warm_fendi_satin_volume
 ```
+(o contraponto escuro vive em [EXAMPLE_002 — DARK_WALNUT](../kitchen_dark_walnut/EXAMPLE_002_KITCHEN_DARK_WALNUT.md))
 
 ## Separação FORMA × PELE (o que foi mexido em cada camada)
 - **FORMA** (só dentro do envelope do PDF, sem mover âncora): torre integrada · filler ·

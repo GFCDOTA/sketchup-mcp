@@ -1,0 +1,44 @@
+{
+  "spec": "DesignGrammarSpec",
+  "version": "1.0.0",
+  "reference_intent": "cozinha contemporânea escura premium (black + walnut moody)",
+  "room_type": "KITCHEN",
+  "source_example": "EXAMPLE_002_KITCHEN_DARK_WALNUT (referência curada do Felipe)",
+  "relation_to_001": "CONTRAPONTO do EXAMPLE_001 (claro/fendi). Mesmo método, paleta oposta.",
+  "status": { "extracted": true, "applied_to_planta_74": false, "gpt": "n/a", "felipe_final": "pendente (aplicar variante dark ou só bancar?)" },
+
+  "palette": {
+    "cabinets":     { "desc": "preto/grafite ultra-fosco (slab handle-less)", "rgb": [28, 28, 30], "category": "material" },
+    "tall_units":   { "desc": "dark grey-green floor-to-ceiling", "rgb": [55, 58, 56], "category": "material" },
+    "countertop":   { "desc": "nogueira maciça quente (veio dramático)", "rgb": [120, 72, 42], "category": "material" },
+    "backsplash":   { "desc": "MESMA nogueira do tampo, contínua, full-height", "rgb": [120, 72, 42], "category": "material" },
+    "floor":        { "desc": "nogueira mais clara", "rgb": [150, 95, 55], "category": "material" },
+    "fixtures":     { "desc": "preto fosco (torneira/cuba/cooktop)", "rgb": [20, 20, 22], "category": "material" },
+    "led":          { "desc": "LED linear quente 2700K (pop no escuro)", "rgb": [255, 240, 210], "category": "lighting" }
+  },
+
+  "tokens_by_category": {
+    "joinery_form_token": ["box_hood_wood_underside", "shadow_gap_reveal (reuso)", "integrated_fridge_tower (reuso)"],
+    "material_token": ["matte_black_joinery", "warm_walnut_surface", "matte_black_fixtures"],
+    "lighting_token": ["moody_low_key_warm_light", "under_cabinet_linear_led (reuso)"],
+    "camera_token": ["hero_camera_compact_kitchen (reuso)"],
+    "safety_gate": ["compact_dark_cave_gate", "wood_wetzone_gate"]
+  },
+  "cards_dir": "artifacts/reference_lab/kitchen_dark_walnut/cards/",
+
+  "forbidden_moves": [
+    "inventar ilha (planta_74 é linear)",
+    "virar L (posição é do PDF)",
+    "mover pia/parede/porta",
+    "madeira crua na zona molhada/quente (wood_wetzone_gate)",
+    "100% preto em cozinha compacta sem luz (compact_dark_cave_gate)"
+  ],
+
+  "gates": [
+    "compact_dark_cave_gate (não virar caverna)",
+    "wood_wetzone_gate (madeira selada/inserto na zona molhada)",
+    "tools/kitchen_validation.py (pia fixa)",
+    "tools/furniture_overlap_gate.py",
+    "veredito visual: GPT (checkpoint) -> Felipe (PASS)"
+  ]
+}

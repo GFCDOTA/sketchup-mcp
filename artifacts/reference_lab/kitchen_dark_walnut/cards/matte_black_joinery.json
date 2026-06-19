@@ -1,0 +1,17 @@
+{
+  "card_id": "matte_black_joinery",
+  "category": "material_token",
+  "problem": "marcenaria escura vira bloco preto chapado/plastico, ou pega poeira/marca e data quando cobre tudo",
+  "design_move": "preto/grafite ULTRA-FOSCO (matte), slab handle-less com gola/reveal; o contraste vem da madeira quente, nao do brilho",
+  "applies_to": ["upper_cabinet", "base_cabinet", "tall_unit"],
+  "implementation_tokens": {
+    "material_family": "matte_charcoal_black",
+    "finish": "ultra_matte",
+    "vray_brdf": {"reflect": 0.03, "reflect_glossiness": 0.32, "fresnel_ior": 1.45, "metalness": 0}
+  },
+  "joinery_token_ref": null,
+  "real_values": {"black_rgb": [28, 28, 30], "tall_unit_rgb": [55, 58, 56], "note": "kc_* novos kc_corpo_blk/kc_porta_blk se aplicar na planta"},
+  "forbidden": ["preto brilhante/plastico", "preto cobrindo 100% (sem madeira pra quebrar)", "puxador volumoso saliente"],
+  "gate": ["ultra-matte (gloss < ~0.35)", "sempre quebrar com madeira quente", "ver compact_dark_cave_gate em ambiente pequeno"],
+  "evidence": "referencia EXAMPLE_002 (black + walnut moody)"
+}

@@ -1,0 +1,18 @@
+{
+  "card_id": "warm_walnut_surface",
+  "category": "material_token",
+  "problem": "superficie sem calor / backsplash chapado; ou madeira muito clara some contra o preto",
+  "design_move": "nogueira quente de veio dramatico no TAMPO e no BACKSPLASH, mesmo material continuo (o tampo sobe a parede) — e a estrela contra o preto fosco",
+  "applies_to": ["countertop", "backsplash", "floor"],
+  "implementation_tokens": {
+    "material_family": "walnut_dramatic_grain",
+    "finish": "satin_oiled",
+    "continuity": "counter_wraps_up_as_backsplash",
+    "vray_brdf": {"reflect": 0.09, "reflect_glossiness": 0.62, "metalness": 0}
+  },
+  "joinery_token_ref": null,
+  "real_values": {"walnut_rgb": [120, 72, 42], "walnut_grain_rgb": [80, 45, 25], "floor_rgb": [150, 95, 55]},
+  "forbidden": ["madeira clara/fendi (some contra o preto — este estilo pede nogueira)", "verniz brilhante", "veio tileado obvio"],
+  "gate": ["ler como madeira nobre, nao laminado", "veio dramatico mas tileable (sem costura)", "ver wood_wetzone_gate no tampo molhado"],
+  "evidence": "referencia EXAMPLE_002; nogueira contínua backsplash+tampo"
+}
