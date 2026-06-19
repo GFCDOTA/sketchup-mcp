@@ -57,7 +57,7 @@ M2IN = 39.3700787402
 _KC = {
     "corpo": [156, 123, 86], "porta": [163, 130, 92], "gaveta": [163, 130, 92],   # base = madeira
     "corpo_sup": [231, 226, 214], "porta_sup": [236, 232, 221],                    # aéreo = off-white/fendi quente
-    "filler": [203, 197, 185],                                                      # painel lateral da torre = fendi/taupe (não estoura branco no flat)
+    "filler": [229, 224, 213],                                                      # painel lateral da torre = off-white (integra à coluna, não "remendo")
     "tampo": [214, 216, 219], "backsplash": [210, 213, 218],                       # tampo quartzo + backsplash PEDRA subindo da bancada
     "niche_wood": [150, 118, 84],                                                  # fundo/prateleira do nicho de assinatura (madeira)
     "soculo": [40, 41, 45],                                                        # sóculo grafite
@@ -188,12 +188,13 @@ def _kmod(kind, shp, h_m, rgb, z0_m, ws):
                 out.append(panel(ma0, ma1, z0_m + 0.04, z0_m + h_m - 0.03, _KC["niche_wood"], off=AEREO_DEPTH - 0.025, thick=M(0.02), k="niche_wood"))  # fundo madeira
                 out.append(panel(ma0, ma1, z0_m + h_m * 0.5 - 0.012, z0_m + h_m * 0.5 + 0.012, _KC["niche_wood"], off=0.04, k="niche_wood"))  # prateleira madeira
             else:
-                out.append(panel(ma0, ma1, z0_m + 0.055, z0_m + h_m - 0.02, _KC["porta_sup"], k="porta_sup"))
-                out.append(panel(ma0 + M(0.06), ma1 - M(0.06), z0_m + 0.06, z0_m + 0.082, _KC["puxador"], off=0.025, k="puxador"))  # cava slim elegante
+                out.append(panel(ma0, ma1, z0_m + 0.06, z0_m + h_m - 0.018, _KC["porta_sup"], k="porta_sup"))
+                # GOLA recuada no rodapé da porta (handle-less, ritmo elegante) — sem barra protuberante
+                out.append(panel(ma0 + M(0.02), ma1 - M(0.02), z0_m + 0.04, z0_m + 0.06, _KC["puxador"], off=-0.006, thick=M(0.014), k="puxador"))
     elif kind == "coifa":
         if h_m <= 0.20:                                                                # coifa SLIM integrada sob o aéreo
-            out.append(body(z0_m, z0_m + h_m, _KC["soculo"], inset_side=0.012, inset_front=0.02, k="soculo"))   # caixa fina GRAFITE recuada (slim)
-            out.append(body(z0_m, z0_m + h_m * 0.5, _KC["vidro"], inset_front=0.06, inset_side=0.06, k="vidro"))  # boca de sucção preta
+            out.append(body(z0_m, z0_m + h_m, _KC["corpo_sup"], inset_side=0.008, inset_front=0.012, k="corpo_sup"))  # caixa OFF-WHITE (integra ao aéreo, não bloco preto solto)
+            out.append(body(z0_m, z0_m + h_m * 0.45, _KC["vidro"], inset_front=0.05, inset_side=0.07, k="vidro"))     # grelha de sucção escura embaixo
         else:
             out.append(body(z0_m, z0_m + 0.16, _KC["inox"], k="inox"))                 # corpo de captura
             out.append(body(z0_m + 0.16, z0_m + h_m, _KC["inox"], inset_front=0.27, inset_side=0.13, k="inox"))  # chaminé
@@ -345,9 +346,9 @@ def build_boxes(con, room_id):
                     add("aereo", ab, AEREO_H, RGB_AEREO, z0_m=AEREO_Z0, mark=False, ws=ws)
             # COIFA SLIM integrada sob o aéreo, sobre o cooktop (depurador embutido)
             if cook_c is not None:
-                hb = clip(fb(ws, cook_c, COOK_W + 0.06, AEREO_DEPTH - 0.01), carve=False)   # slim mas LEGÍVEL (lê como depurador)
+                hb = clip(fb(ws, cook_c, COOK_W + 0.06, AEREO_DEPTH - 0.01), carve=False)   # depurador embutido off-white + grelha
                 if hb is not None:
-                    add("coifa", hb, 0.07, RGB_TORRE, z0_m=AEREO_Z0 - 0.07, mark=False, ws=ws)
+                    add("coifa", hb, 0.055, RGB_TORRE, z0_m=AEREO_Z0 - 0.055, mark=False, ws=ws)
             # DECORAÇÃO funcional MÍNIMA na bancada (poucas coisas, sem bagunça) — sobre o tampo
             dec_c = (b_lo + b_hi) / 2
             db = clip(fb(ws, dec_c - M(0.12), 0.32, 0.22), carve=False)
