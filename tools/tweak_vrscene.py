@@ -40,8 +40,8 @@ MAT_PARAMS = {
              "fresnel_ior": "8", "metalness": "1"},                          # inox geladeira (reflexo realista, roughness)
     "satin": {"reflect": "AColor(0.05, 0.05, 0.05, 1)", "reflect_glossiness": "0.58",
               "fresnel_ior": "1.4", "metalness": "0"},                       # laca acetinada fendi (nao plastico)
-    "stone": {"reflect": "AColor(0.13, 0.13, 0.13, 1)", "reflect_glossiness": "0.7",
-              "fresnel_ior": "1.55", "metalness": "0"},                      # pedra clara polida
+    "stone": {"reflect": "AColor(0.17, 0.17, 0.17, 1)", "reflect_glossiness": "0.8",
+              "fresnel_ior": "1.6", "metalness": "0"},                       # pedra clara polida (+reflexo/polish p/ assinatura)
     "black_gloss": {"reflect": "AColor(0.55, 0.55, 0.55, 1)", "reflect_glossiness": "0.93",
                     "fresnel_ior": "1.7", "metalness": "0"},                 # vidro preto cooktop
     "ceramic": {"reflect": "AColor(0.28, 0.28, 0.28, 1)", "reflect_glossiness": "0.9",
@@ -106,6 +106,49 @@ def _light_sphere(name, pos, intensity, color=(1.0, 0.8, 0.55), radius=14.0, uni
     )
 
 
+def _light_rectangle(name, center, u_dir, v_dir, normal, u_size, v_size, intensity,
+                     color=(1.0, 0.74, 0.45), units=0):
+    """Bloco LightRectangle V-Ray (area light retangular) — LED LINEAR sob aéreo.
+    Faixa fina e longa = wash quente CONTÍNUO no backsplash/bancada (em vez de
+    hotspots pontuais meia-lua de esfera, que dão cara de render/teste — feedback GPT).
+    u_size/v_size = MEIA-dimensão (a luz vai de -size a +size). Emite na direção `normal`."""
+    cx, cy, cz = center
+    ux, uy, uz = u_dir
+    vx, vy, vz = v_dir
+    nx, ny, nz = normal
+    r, g, b = color
+    return (
+        f"\nLightRectangle {name} {{\n"
+        f"  enabled=1;\n"
+        f"  transform=Transform(Matrix(Vector({ux}, {uy}, {uz}), Vector({vx}, {vy}, {vz}), "
+        f"Vector({nx}, {ny}, {nz})), Vector({cx}, {cy}, {cz}));\n"
+        f"  color=Color({r}, {g}, {b});\n"
+        f"  units={units};\n"
+        f"  intensity={intensity};\n"
+        f"  u_size={u_size};\n"
+        f"  v_size={v_size};\n"
+        f"  subdivs=16;\n"
+        f"  invisible=1;\n"
+        f"  affectDiffuse=1;\n"
+        f"  affectSpecular=1;\n"
+        f"  affectReflections=1;\n"
+        f"  shadows=1;\n"
+        f"  storeWithIrradianceMap=0;\n"
+        f"  noDecay=0;\n"
+        f"}}\n"
+    )
+
+
+def add_rect_lights(text: str, rects) -> str:
+    """Anexa 1+ LightRectangle. `rects` = lista de dicts {center,u_dir,v_dir,normal,
+    u_size,v_size,intensity,color}."""
+    for i, rt in enumerate(rects):
+        text += _light_rectangle(f"_led_strip_{i}", rt["center"], rt["u_dir"], rt["v_dir"],
+                                 rt["normal"], rt["u_size"], rt["v_size"], rt["intensity"],
+                                 rt.get("color", (1.0, 0.74, 0.45)), rt.get("units", 0))
+    return text
+
+
 def add_fill_light(text: str, lights) -> str:
     """Anexa 1+ LightSphere (fill interior quente) ao .vrscene. `lights` = lista de dicts
     {pos:(x,y,z), intensity:float, color:(r,g,b), radius:float}. Top-level plugin (igual SunLight),
@@ -132,7 +175,8 @@ def set_block_param(text: str, header_pat: str, param: str, value) -> str:
 
 
 def tweak(text: str, iso=200, fnum=4.0, shutter=100, sky=1.0, width=None, height=None,
-          materials=False, fill_lights=None, sun=None, sun_size=None, burn=None) -> str:
+          materials=False, fill_lights=None, sun=None, sun_size=None, burn=None,
+          rect_lights=None) -> str:
     text = re.sub(r"(\bISO=)[\d.]+", rf"\g<1>{iso}", text, count=1)
     text = re.sub(r"(\bf_number=)[\d.]+", rf"\g<1>{fnum}", text, count=1)
     text = re.sub(r"(\bshutter_speed=)[\d.]+", rf"\g<1>{shutter}", text, count=1)
@@ -155,6 +199,8 @@ def tweak(text: str, iso=200, fnum=4.0, shutter=100, sky=1.0, width=None, height
         text = apply_materials(text)
     if fill_lights:
         text = add_fill_light(text, fill_lights)
+    if rect_lights:
+        text = add_rect_lights(text, rect_lights)
     return text
 
 

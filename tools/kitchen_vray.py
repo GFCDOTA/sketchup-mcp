@@ -83,13 +83,17 @@ fills.append({"pos": (float(os.environ.get("KEY_X", 168)), float(os.environ.get(
 # FILL: suave do outro lado (lift das sombras -> madeira não some), neutro-quente
 fills.append({"pos": (176.0, 714.0, 64.0), "intensity": float(os.environ.get("FILL2_INT", 22)),
               "radius": 48.0, "color": (0.96, 0.93, 0.9)})
-# LED QUENTE 2700K sob o aéreo (acende bancada/backsplash)
-for ly in (615.0, 663.0):
-    fills.append({"pos": (64.0, ly, 57.0), "intensity": float(os.environ.get("LED_INT", 13)),
-                  "radius": 6.0, "color": (1.0, 0.72, 0.42)})
+# LED LINEAR sob o aéreo: LightRectangle fina e longa = wash CONTÍNUO (não hotspots) — feedback GPT.
+# u ao longo da bancada (y); normal aponta p/ wall+baixo (lava backsplash + bancada uniforme).
+led_rect = [{
+    "center": (62.0, 648.0, 56.5),
+    "u_dir": (0, 1, 0), "v_dir": (0.93, 0, -0.37), "normal": (-0.37, 0, -0.93),
+    "u_size": 50.0, "v_size": 2.5,
+    "intensity": float(os.environ.get("LED_INT", 8)), "color": (1.0, 0.74, 0.45),
+}]
 tweak_file(str(vrs), iso=ISO, fnum=FNUM, shutter=SHUTTER, sky=SKY, burn=BURN,
            sun=float(os.environ.get("SUN", 0.2)), sun_size=float(os.environ.get("SUN_SIZE", 3.0)),
-           materials=True, fill_lights=fills, width=1500, height=1100)
+           materials=True, fill_lights=fills, rect_lights=led_rect, width=1500, height=1100)
 
 img = (FDIR / out_name).resolve()
 if img.exists():
