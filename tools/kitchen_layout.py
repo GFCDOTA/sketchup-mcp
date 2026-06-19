@@ -20,7 +20,7 @@ COUNTER_DEPTH = 0.60
 COUNTER_H = 0.90
 GEL_W, GEL_D, GEL_H = 0.70, 0.66, 1.80          # geladeira (ponta, full-height)
 TORRE_W, TORRE_D, TORRE_H = 0.60, 0.62, 2.10    # coluna forno+microondas (outra ponta)
-AEREO_DEPTH, AEREO_Z0, AEREO_H = 0.35, 1.50, 0.70   # armario aereo SOBRE a bancada
+AEREO_DEPTH, AEREO_Z0, AEREO_H = 0.33, 1.52, 0.60   # aereo mais RASO/BAIXO + sobe 2cm = leveza
 PIA_W, PIA_D, PIA_Z0 = 0.50, 0.46, 0.90         # cuba: borda FLUSH com o tampo (0.90), bojo recua p/ baixo
 COOK_W, COOK_D, COOK_Z0 = 0.46, 0.50, 0.885     # cooktop: vidro fino quase flush no tampo (embutido)
 BANCADA_MIN_DEPTH = 0.35                         # abaixo disso = sliver inútil, descarta
@@ -169,10 +169,14 @@ def _kmod(kind, shp, h_m, rgb, z0_m, ws):
         out.append(body(z0_m, z0_m + 0.03, _KC["soculo"], inset_front=0.03, k="soculo"))  # rodabanca/valance grafite (reveal)
         nmod = max(2, int(round(W / M(0.45))))                                         # nunca bloco único: >=2 frentes
         mw = W / nmod
+        niche = (nmod - 1) if (kind == "aereo" and nmod >= 3) else -1                  # 1 bay ABERTA = leveza + decor
         for i in range(nmod):
             ma0, ma1 = a0 + i * mw + M(0.014), a0 + (i + 1) * mw - M(0.014)            # reveals largos entre portas
-            out.append(panel(ma0, ma1, z0_m + 0.05, z0_m + h_m - 0.02, _KC["porta_sup"], k="porta_sup"))
-            out.append(panel(ma0 + M(0.05), ma1 - M(0.05), z0_m + 0.055, z0_m + 0.085, _KC["puxador"], off=0.03, k="puxador"))  # cava/puxador slim
+            if i == niche:
+                out.append(panel(ma0, ma1, z0_m + h_m * 0.5 - 0.008, z0_m + h_m * 0.5 + 0.008, _KC["corpo_sup"], off=0.05, k="corpo_sup"))  # prateleira do nicho aberto
+            else:
+                out.append(panel(ma0, ma1, z0_m + 0.05, z0_m + h_m - 0.02, _KC["porta_sup"], k="porta_sup"))
+                out.append(panel(ma0 + M(0.05), ma1 - M(0.05), z0_m + 0.055, z0_m + 0.085, _KC["puxador"], off=0.03, k="puxador"))  # cava/puxador slim
     elif kind == "coifa":
         if h_m <= 0.20:                                                                # coifa SLIM integrada sob o aéreo
             out.append(body(z0_m, z0_m + h_m, _KC["inox"], inset_side=0.008, k="inox"))            # caixa fina inox
@@ -328,9 +332,9 @@ def build_boxes(con, room_id):
                     add("aereo", ab, AEREO_H, RGB_AEREO, z0_m=AEREO_Z0, mark=False, ws=ws)
             # COIFA SLIM integrada sob o aéreo, sobre o cooktop (depurador embutido)
             if cook_c is not None:
-                hb = clip(fb(ws, cook_c, COOK_W + 0.02, AEREO_DEPTH + 0.04), carve=False)
+                hb = clip(fb(ws, cook_c, COOK_W + 0.06, AEREO_DEPTH), carve=False)   # flush c/ o aéreo = embutida
                 if hb is not None:
-                    add("coifa", hb, 0.07, RGB_TORRE, z0_m=AEREO_Z0 - 0.07, mark=False, ws=ws)
+                    add("coifa", hb, 0.06, RGB_TORRE, z0_m=AEREO_Z0 - 0.06, mark=False, ws=ws)
 
     # ARMÁRIO sobre a geladeira -> alinha o TOPO com o aéreo (linha superior contínua)
     aereo_top = AEREO_Z0 + AEREO_H
@@ -338,12 +342,15 @@ def build_boxes(con, room_id):
         tcb = clip(fb(ws, gel_c, GEL_W, GEL_D), carve=False)   # full-depth -> coluna flush c/ a geladeira (sem poke diagonal)
         if tcb is not None:
             add("aereo_fridge", tcb, aereo_top - GEL_H, RGB_AEREO, z0_m=GEL_H, mark=False, ws=ws)
-    # FILLER vertical na junção bancada/coluna-geladeira -> fecha o gap diagonal
+    # FILLER vertical (painel-gable) na junção bancada/coluna-geladeira -> fecha o gap diagonal.
+    # Direto via fb (sem clip: footprint fino fica abaixo do AREA_MIN e era descartado).
     if gel_c is not None:
         junc = b_hi if g_end != "lo" else b_lo
-        fil = clip(fb(ws, junc, 0.04, GEL_D), carve=False)
-        if fil is not None:
-            add("filler", fil, aereo_top - 0.10, _KC["corpo_sup"], z0_m=0.10, mark=False, ws=ws)
+        fil = fb(ws, junc, 0.06, GEL_D).intersection(cell)
+        if not fil.is_empty:
+            if fil.geom_type == "MultiPolygon":
+                fil = max(fil.geoms, key=lambda g: g.area)
+            add("filler", fil, aereo_top - 0.06, _KC["corpo_sup"], z0_m=0.06, mark=False, ws=ws)
 
     if not items:
         return None, {"result": "NO_VALID_LAYOUT", "room_name": sm.get("room_name"),
