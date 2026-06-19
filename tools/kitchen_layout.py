@@ -20,9 +20,10 @@ COUNTER_DEPTH = 0.60
 COUNTER_H = 0.90
 GEL_W, GEL_D, GEL_H = 0.70, 0.66, 1.80          # geladeira (ponta, full-height)
 TORRE_W, TORRE_D, TORRE_H = 0.60, 0.62, 2.10    # coluna forno+microondas (outra ponta)
-AEREO_DEPTH, AEREO_Z0, AEREO_H = 0.33, 1.52, 0.60   # aereo mais RASO/BAIXO + sobe 2cm = leveza
+AEREO_DEPTH, AEREO_Z0, AEREO_H = 0.33, 1.50, 0.60   # clearance bancada->aéreo = 60cm (ergonomia 50-60)
 PIA_W, PIA_D, PIA_Z0 = 0.50, 0.46, 0.90         # cuba: borda FLUSH com o tampo (0.90), bojo recua p/ baixo
 COOK_W, COOK_D, COOK_Z0 = 0.46, 0.50, 0.885     # cooktop: vidro fino quase flush no tampo (embutido)
+TOE_KICK, TAMPO_THK = 0.12, 0.03                # sóculo recuado 12cm (10-15) / tampo fino 3cm
 BANCADA_MIN_DEPTH = 0.35                         # abaixo disso = sliver inútil, descarta
 RGB_COUNTER = [176, 166, 150]
 RGB_TORRE = [69, 90, 100]                       # cinza-escuro eletrodomestico
@@ -134,7 +135,7 @@ def _kmod(kind, shp, h_m, rgb, z0_m, ws):
         out.append(panel(hp, hp + M(0.04), split + 0.06, z0_m + h_m - 0.10, _KC["puxador"], off=0.03, k="puxador"))          # freezer
         out.append(panel(hp, hp + M(0.04), z0_m + 0.12, split - 0.06, _KC["puxador"], off=0.03, k="puxador"))                # geladeira (barra longa)
     elif kind == "bancada":
-        tt, sk = 0.03, 0.12                                                            # tampo BORDA FINA (3cm)
+        tt, sk = TAMPO_THK, TOE_KICK                                                   # tampo fino + sóculo (constantes ergonômicas)
         out.append(body(z0_m, z0_m + sk, _KC["soculo"], inset_front=0.08, k="soculo"))   # sóculo recuado 8cm (toe-kick lê)
         out.append(body(z0_m + sk, z0_m + h_m - tt, _KC["corpo"], k="corpo"))            # gabinete (carcaça)
         zd0, zd1 = z0_m + sk + 0.02, z0_m + h_m - tt - 0.02
