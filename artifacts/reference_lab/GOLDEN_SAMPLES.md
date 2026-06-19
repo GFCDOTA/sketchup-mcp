@@ -4,11 +4,15 @@
 > por gates, corrigidas por feedback, viram preset reutilizável. Isto é **sistema de escolha
 > de linguagem**, não render avulso. Congelado em [DECISIONS.md](DECISIONS.md) (DECISION 001).
 
+> 🏆 **ABENÇOADOS pelo Felipe (DECISION 002).** Regra: **a clara VENDE · a dark IMPRESSIONA ·
+> a boutique CONVENCE.** Ranking p/ o apê real: 1º boutique · 2º clara · 3º dark.
+
 | # | tema | papel | veredito | render |
 |---|---|---|---|---|
-| **001** | `warm_compact_premium` | **default seguro** — amplo, vendável, universal | GPT PASS de pele | `cozinha_vray_hero.png` |
-| **002** | `dark_walnut_moody_premium` | **variante autoral** — noturna, masculina, impacto visual | GPT PASS variante | `cozinha_vray_hero_dark.png` |
-| **003** | `hotel_boutique_warm_luxury` | **premium equilibrado** — taupe+champagne, refinado | GPT PASS | `cozinha_vray_hero_boutique.png` |
+| **001** | `warm_compact_premium` | **default seguro** — amplo, vendável, universal | ✅ APROVADO Felipe | `cozinha_vray_hero.png` |
+| **002** | `dark_walnut_moody_premium` | **variante autoral** — noturna, masculina, impacto visual | ✅ APROVADO Felipe | `cozinha_vray_hero_dark.png` |
+| **003** | `hotel_boutique_warm_luxury` | **premium equilibrado** — taupe+champagne, refinado | ✅ APROVADO Felipe | `cozinha_vray_hero_boutique.png` |
+| 004 | `black_wood_gold_industrial_boutique` | autoral premium — preto+madeira+ouro sutil | _em construção_ | `cozinha_vray_hero_blackgold.png` |
 
 ## GOLDEN_SAMPLE_001 — warm_compact_premium
 Fendi acetinado + carvalho coordenado + pedra clara veio sutil + inox reflexivo + LED 2700K +

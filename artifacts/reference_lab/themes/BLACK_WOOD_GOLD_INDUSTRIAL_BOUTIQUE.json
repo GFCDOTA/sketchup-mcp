@@ -1,0 +1,31 @@
+{
+  "theme_id": "BLACK_WOOD_GOLD_INDUSTRIAL_BOUTIQUE",
+  "aka": ["BLACK_WOOD_GOLD_PREMIUM"],
+  "token_type": "theme_preset (material_lighting_system)",
+  "style": "industrial boutique premium (NÃO industrial bruto) — 'casa de gente rica', não oficina",
+  "intent": "preto/grafite fosco + madeira natural quente (acento) + pedra escura com veio dourado SUTIL + cuba preta + torneira preta + bronze discreto + LED 2700K. Variante autoral/show, não default.",
+  "kitchen_theme_env": "black_wood_gold",
+
+  "implementation": {
+    "cabinets": {"color": "preto fosco ~[28,28,30]", "kinds": ["kc_corpo","kc_porta","kc_gaveta","kc_corpo_sup","kc_porta_sup","kc_filler"]},
+    "backsplash": {"material": "pedra escura veio dourado SUTIL (protagonista)", "texture": "stone_gold.png", "kinds": ["kc_backsplash"]},
+    "countertop": {"material": "pedra escura controlada (sem veio gritante)", "kinds": ["kc_tampo"]},
+    "wood_accent": {"material": "madeira natural quente (nicho/tábua, NUNCA área molhada)", "kinds": ["kc_niche_wood","kc_board"]},
+    "fridge": {"finish": "inox dark reflexivo (devolve luz - daylight_reflection)", "kinds": ["kc_geladeira"]},
+    "sink": {"color": "preta fosca", "kinds": ["kc_cuba"]},
+    "metals": {"faucet": "preta", "handles": "bronze DISCRETO", "kinds": ["kc_torneira","kc_puxador"]},
+    "lighting": {"temperature_K": 2700, "role": "LED forte lavando a pedra dourada (sai da caverna)"}
+  },
+
+  "gates": {
+    "cave_check": "borderline — exige LED forte + madeira/reflexo; é variante escura por natureza",
+    "fake_luxury_check": "PASS — veio dourado sutil/esparso (sem veião de mansão fake)",
+    "daylight_reflection_check": "geladeira inox dark + pedra polida devolvem luz",
+    "maintenance_check": "WARN — cuba/torneira preta marca água; pedra escura mostra poeira",
+    "compact_fit_check": "variante autoral; não é o default seguro do compacto",
+    "buildability_check": "executável (slab preto + pedra + bronze comum)"
+  },
+  "floor_variants_pendentes": ["A grafite médio (default seguro)", "B preto+veio dourado (show)", "C cimento queimado quente"],
+  "note_floor": "piso quase não aparece no hero isolado (crop nas bancadas) — variações de piso pedem câmera que mostre o chão (follow-up).",
+  "status": {"applied_to_planta_74": true, "render": "cozinha_vray_hero_blackgold.png", "gpt": "pendente", "felipe_final": "pendente"}
+}

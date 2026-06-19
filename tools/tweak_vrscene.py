@@ -118,6 +118,35 @@ def apply_theme_hotel_boutique(text: str) -> str:
     return text
 
 
+def apply_theme_black_wood_gold(text: str) -> str:
+    """THEME BLACK_WOOD_GOLD_INDUSTRIAL_BOUTIQUE — industrial boutique premium (não bruto).
+    Armarios preto fosco + madeira natural quente (acento) + pedra escura com veio dourado SUTIL
+    (backsplash protagonista via stone_gold.png; tampo controlado) + cuba preta + puxador bronze
+    discreto + torneira preta + geladeira inox dark. Skin-swap, geometria congelada.
+    Gates: cave/fake_luxury/maintenance/compact. Madeira NUNCA na area molhada (pref. Felipe)."""
+    blk = "AColor(0.012, 0.012, 0.013, 1)"
+    black = {"diffuse": blk, "reflect": "AColor(0.04, 0.04, 0.04, 1)",
+             "reflect_glossiness": "0.34", "fresnel_ior": "1.45", "metalness": "0"}
+    for k in ("kc_corpo", "kc_porta", "kc_gaveta", "kc_corpo_sup", "kc_porta_sup", "kc_filler", "kc_cuba"):
+        text = _set_block(text, f"_ph_{k}_BRDFVRayMtl", black)
+    dark_inox = {"diffuse": "AColor(0.022, 0.024, 0.028, 1)", "reflect": "AColor(0.46, 0.47, 0.52, 1)",
+                 "reflect_glossiness": "0.6", "fresnel_ior": "6", "metalness": "1"}
+    text = _set_block(text, "_ph_kc_geladeira_BRDFVRayMtl", dark_inox)
+    # tampo = pedra escura CONTROLADA (sem veio gritante); backsplash = pedra com veio dourado (textura)
+    dark_stone = {"diffuse": "AColor(0.035, 0.030, 0.027, 1)", "reflect": "AColor(0.16, 0.16, 0.16, 1)",
+                  "reflect_glossiness": "0.8", "fresnel_ior": "1.6", "metalness": "0"}
+    text = _set_block(text, "_ph_kc_tampo_BRDFVRayMtl", dark_stone)
+    text = _set_block(text, "_ph_kc_backsplash_BRDFVRayMtl",
+                      {"reflect": "AColor(0.18, 0.18, 0.18, 1)", "reflect_glossiness": "0.82", "metalness": "0"})
+    # puxador bronze DISCRETO; torneira preta (madeira natural quente fica no niche/board via apply_materials)
+    bronze = {"diffuse": "AColor(0.34, 0.24, 0.11, 1)", "reflect": "AColor(0.58, 0.44, 0.22, 1)",
+              "reflect_glossiness": "0.74", "fresnel_ior": "9", "metalness": "1"}
+    text = _set_block(text, "_ph_kc_puxador_BRDFVRayMtl", bronze)
+    text = _set_block(text, "_ph_kc_torneira_BRDFVRayMtl",
+                      {"diffuse": blk, "reflect": "AColor(0.3, 0.3, 0.3, 1)", "reflect_glossiness": "0.5", "metalness": "1"})
+    return text
+
+
 def _light_sphere(name, pos, intensity, color=(1.0, 0.8, 0.55), radius=14.0, units=0):
     """Bloco LightSphere V-Ray (area light esferica, quente, invisivel) — fill interior.
     pos/radius em INCHES (unidade do modelo exportado). units=0 (radiancia escalar,
@@ -241,6 +270,8 @@ def tweak(text: str, iso=200, fnum=4.0, shutter=100, sky=1.0, width=None, height
         text = apply_theme_dark_walnut(text)
     elif theme == "hotel_boutique":
         text = apply_theme_hotel_boutique(text)
+    elif theme == "black_wood_gold":
+        text = apply_theme_black_wood_gold(text)
     if fill_lights:
         text = add_fill_light(text, fill_lights)
     if rect_lights:

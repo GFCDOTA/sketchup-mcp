@@ -41,3 +41,31 @@ PDF + ergonomia + gate = VERDADE.
 ```
 Se a referência diz "aéreo 60cm / bancada 90 / armário até o teto", isso depende de pé-direito,
 eletros, coifa, pessoa, norma, marcenaria e espaço REAL — valida, não copia.
+
+---
+
+# Gates BLACK_WOOD_GOLD / temas escuros premium (DECISION 003)
+
+Obrigatórios pra temas escuros/premium na planta_74 compacta. Cada variação declara veredito.
+
+1. **cave_check** — ficou escura/pesada demais? Se sim → +LED, reflecta pontual, clarear piso,
+   ou trocar um volume pra grafite/champagne. (já validado no dark_walnut.)
+2. **daylight_reflection_check** — DE DIA, existe superfície que devolve luz? (geladeira satin/
+   reflexiva, vidro reflecta pontual, pedra satin/polida, champagne discreto, parede clara
+   controlada). Sem nenhuma → WARN (vira buraco escuro de dia).
+3. **maintenance_check** — piso/cuba/pedra/vidro/metais vão ser chatos de limpar/manter? WARN
+   quando muita superfície preta, vidro demais, ou pedra muito brilhante. (cuba/torneira preta
+   marca água; preto fosco marca dedo.)
+4. **appliance_workflow_check** — forno/micro/cooktop/pia/bancada fazem sentido no uso diário?
+   NÃO priorizar estética se o fluxo ficar burro (forno longe do preparo, micro inacessível).
+5. **reflecta_control_gate** — vidro reflecta/smoked SÓ como detalhe: 1–2 módulos no máx,
+   de preferência com LED interno ou módulo superior. Nunca fachada inteira.
+6. **black_floor_gate** — piso preto SÓ como teste; default = grafite médio / cimento queimado
+   quente / porcelanato escuro moderado. Preto com veio dourado = variante autoral, não default.
+7. **fake_luxury_check** — bronze/dourado e veios dourados SUTIS. Se parecer ostentação fake,
+   reduzir. (veião dourado gigante = "mansão fake Pinterest".)
+8. **buildability_check** — executável por marcenaria/pedreiro real? Material caro / execução
+   crítica / manutenção difícil → marcar risco. (cuba esculpida = cuidado com emenda/caimento.)
+
+**Critério de sucesso do tema escuro:** causar impacto MAS continuar usável, limpável, clara o
+suficiente de dia, e coerente com metragem compacta.

@@ -31,3 +31,38 @@ Theme must NOT change PDF anchors or approved geometry unless explicitly authori
 - ❄️ Reference translator pipeline **v0**.
 
 Ver [GOLDEN_SAMPLES.md](GOLDEN_SAMPLES.md).
+
+---
+
+## DECISION 002 — 3 golden samples ABENÇOADOS pelo Felipe (2026-06-19)
+
+```
+🏆 GOLDEN SAMPLES APROVADOS (veredito final Felipe)
+001 warm_compact_premium      PASS — default seguro / vendável / amplo
+002 dark_walnut_moody         PASS — autoral / noturno / impacto
+003 hotel_boutique_warm_luxury PASS — equilibrado / refinado / premium
+```
+
+**Regra de ouro dos papéis:**
+```
+A clara VENDE.
+A dark IMPRESSIONA.
+A boutique CONVENCE.
+```
+
+**Ranking do Felipe pro apê real (hoje):** 1º hotel_boutique · 2º warm_compact · 3º dark_walnut.
+(boutique = melhor equilíbrio bonita/não-cansa/parece-cara/funciona-em-compacto.)
+
+Marco de cozinha como prova de conceito do tradutor: **FECHADO e validado.** Próxima fase =
+ampliar a biblioteca com mais temas (BLACK_WOOD_GOLD) + evoluir o agente p/ inteligência de uso.
+
+---
+
+## DECISION 003 — preferências reais do Felipe viram RESTRIÇÃO do agente (2026-06-19)
+
+O que o Felipe gostou/não-gostou nesta rodada vira regra inteligente, não achismo. Registrado
+em [FELIPE_KITCHEN_PREFERENCES.md](FELIPE_KITCHEN_PREFERENCES.md). Direção alvo:
+**BLACK_WOOD_GOLD_INDUSTRIAL_BOUTIQUE** (preto fosco + madeira natural quente + pedra escura/
+quente com veios dourados SUTIS + cuba preta + torneira preta/bronze + bronze discreto + LED 2700K).
+**Regra:** não escolher material definitivo ainda — gerar variações, julgar A/B/C, e só depois
+descer pra pedra/cuba/manutenção/custo.

@@ -67,6 +67,12 @@ def vray_export_run
       if ENV['KITCHEN_THEME'] == 'hotel_boutique'
         ['ph_kc_corpo', 'ph_kc_porta', 'ph_kc_gaveta'].each { |k| tex_map.delete(k) }   # -> taupe
       end
+      # TEMA BLACK_WOOD_GOLD: armarios preto (sem textura), backsplash = pedra com veio dourado,
+      # tampo = pedra escura controlada (sem textura -> diffuse), niche/board = madeira quente (mantem).
+      if ENV['KITCHEN_THEME'] == 'black_wood_gold'
+        ['ph_kc_corpo', 'ph_kc_porta', 'ph_kc_gaveta', 'ph_kc_tampo'].each { |k| tex_map.delete(k) }
+        tex_map = tex_map.merge({ 'ph_kc_backsplash' => 'stone_gold.png' })
+      end
       n_tex = 0
       tex_map.each do |matname, png|
         m = model.materials[matname]
