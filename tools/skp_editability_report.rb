@@ -71,6 +71,11 @@ def kp_run
     if kbb.valid?
       (model.rendering_options['Texture'] = false) rescue nil
       (model.rendering_options['DisplayColorByLayer'] = false) rescue nil
+      # fundo escuro -> a janela não estoura em branco e o armário aéreo lê contra ela
+      (model.rendering_options['DrawHorizon'] = false) rescue nil
+      (model.rendering_options['BackgroundColor'] = Sketchup::Color.new(108, 114, 124)) rescue nil
+      (model.rendering_options['SkyColor'] = Sketchup::Color.new(108, 114, 124)) rescue nil
+      (model.rendering_options['DisplaySky'] = false) rescue nil
       si = model.shadow_info
       (si['DisplayShadows'] = true) rescue nil
       (si['Light'] = 70) rescue nil
@@ -81,13 +86,15 @@ def kp_run
       # Câmera CENTRADA em x (NÃO ofsetar -> não atravessa a parede lateral), à frente e
       # um pouco acima, olhando pras frentes. KP_FRONT_SGN=+1 inverte se a parede for -y.
       sgn = (ENV['KP_FRONT_SGN'] || '-1').to_f
-      front = [d * 2.6, 64.0].max
+      front = [d * (ENV['KP_FRONT'] ? ENV['KP_FRONT'].to_f : 2.8), 70.0].max
       ny = sgn < 0 ? kbb.min.y - front : kbb.max.y + front
-      eye = Geom::Point3d.new(c.x, ny, kbb.min.z + ht * 0.70)
+      ex = c.x + w * (ENV['KP_DX'] ? ENV['KP_DX'].to_f : 0.16)   # leve 3/4 (dentro da largura -> não atravessa parede)
+      ez = kbb.min.z + ht * (ENV['KP_EZ'] ? ENV['KP_EZ'].to_f : 0.78)
+      eye = Geom::Point3d.new(ex, ny, ez)
       tgt = Geom::Point3d.new(c.x, c.y, kbb.min.z + ht * 0.40)
       cam = Sketchup::Camera.new(eye, tgt, Geom::Vector3d.new(0, 0, 1))
       cam.perspective = true
-      cam.fov = 62
+      cam.fov = (ENV['KP_FOV'] ? ENV['KP_FOV'].to_f : 60.0)
       model.active_view.camera = cam
       model.active_view.write_image(filename: ENV['KP_PNG'], width: 1500, height: 1100, antialias: true)
       rep << "=== 5) render cinza -> #{File.basename(ENV['KP_PNG'])} (cozinha bbox #{w.round}x#{d.round}x#{ht.round} in) ==="

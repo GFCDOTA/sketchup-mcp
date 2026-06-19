@@ -21,8 +21,8 @@ COUNTER_H = 0.90
 GEL_W, GEL_D, GEL_H = 0.70, 0.66, 1.80          # geladeira (ponta, full-height)
 TORRE_W, TORRE_D, TORRE_H = 0.60, 0.62, 2.10    # coluna forno+microondas (outra ponta)
 AEREO_DEPTH, AEREO_Z0, AEREO_H = 0.35, 1.50, 0.70   # armario aereo SOBRE a bancada
-PIA_W, PIA_D, PIA_Z0 = 0.50, 0.46, 0.84         # cuba embutida (compacta p/ caber c/ cooktop)
-COOK_W, COOK_D, COOK_Z0 = 0.46, 0.50, 0.90      # cooktop 4-bocas compacto embutido
+PIA_W, PIA_D, PIA_Z0 = 0.50, 0.46, 0.90         # cuba: borda FLUSH com o tampo (0.90), bojo recua p/ baixo
+COOK_W, COOK_D, COOK_Z0 = 0.46, 0.50, 0.885     # cooktop: vidro fino quase flush no tampo (embutido)
 BANCADA_MIN_DEPTH = 0.35                         # abaixo disso = sliver inútil, descarta
 RGB_COUNTER = [176, 166, 150]
 RGB_TORRE = [69, 90, 100]                       # cinza-escuro eletrodomestico
@@ -48,8 +48,8 @@ M2IN = 39.3700787402
 # cores (FORMA antes de material — tem que ler como cozinha mesmo chapado em cinza/branco)
 _KC = {"corpo": [224, 225, 229], "porta": [235, 236, 240], "puxador": [58, 60, 64],
        "tampo": [122, 122, 128], "soculo": [66, 66, 70], "inox": [196, 199, 205],
-       "vidro": [28, 28, 32], "boca": [54, 54, 58], "cuba": [176, 180, 187],
-       "torneira": [150, 153, 160]}
+       "vidro": [28, 28, 32], "boca": [54, 54, 58], "cuba": [150, 154, 161],
+       "torneira": [150, 153, 160], "backsplash": [202, 205, 209], "gaveta": [231, 232, 236]}
 # nome de MÓDULO planejado (grupo selecionável sozinho no SKP); countertop é separado do base
 _MODNAME = {"geladeira": "fridge", "pia": "sink_module", "cooktop": "cooktop_module",
             "aereo": "upper_cabinet_01", "torre": "tall_cabinet", "bancada": "base_cabinet_01"}
@@ -97,27 +97,41 @@ def _kmod(kind, shp, h_m, rgb, z0_m, ws):
         return _kp(f"kc_{k}", min(f0, f1), sa0, max(f0, f1), za, zb, c) if vert \
             else _kp(f"kc_{k}", sa0, min(f0, f1), sa1, max(f0, f1), za, zb, c)
 
+    def backpanel(sa0, sa1, za, zb, c, thick=0.025):
+        """painel fino contra a PAREDE (backsplash/rodabanca)."""
+        f0, f1 = back, back + s * M(thick)
+        return _kp("kc_backsplash", min(f0, f1), sa0, max(f0, f1), za, zb, c) if vert \
+            else _kp("kc_backsplash", sa0, min(f0, f1), sa1, max(f0, f1), za, zb, c)
+
     out = []
     if kind == "geladeira":
-        out.append(body(z0_m, z0_m + h_m - 0.05, _KC["corpo"], inset_side=0.004, k="corpo"))   # corpo + respiro topo
+        out.append(body(z0_m + 0.04, z0_m + h_m - 0.05, _KC["corpo"], inset_side=0.01, k="corpo"))   # corpo + respiro topo/base
         split = z0_m + h_m * 0.66
-        out.append(panel(a0 + M(0.02), a1 - M(0.02), split + 0.01, z0_m + h_m - 0.06, _KC["inox"], k="inox"))  # porta sup
-        out.append(panel(a0 + M(0.02), a1 - M(0.02), z0_m + 0.04, split - 0.01, _KC["inox"], k="inox"))        # porta inf
-        hp = a1 - M(0.075)
-        out.append(panel(hp, hp + M(0.035), split + 0.06, z0_m + h_m - 0.14, _KC["puxador"], off=0.03, k="puxador"))  # puxador sup (barra vertical)
-        out.append(panel(hp, hp + M(0.035), z0_m + 0.12, split - 0.06, _KC["puxador"], off=0.03, k="puxador"))        # puxador inf
+        out.append(panel(a0 + M(0.022), a1 - M(0.022), split + 0.018, z0_m + h_m - 0.075, _KC["inox"], k="inox"))  # porta freezer (topo)
+        out.append(panel(a0 + M(0.022), a1 - M(0.022), z0_m + 0.07, split - 0.018, _KC["inox"], k="inox"))         # porta geladeira (baixo)
+        hp = a1 - M(0.095)                                                              # puxadores = barras verticais (>=1.5in p/ gate)
+        out.append(panel(hp, hp + M(0.045), split + 0.05, z0_m + h_m - 0.14, _KC["puxador"], off=0.032, k="puxador"))
+        out.append(panel(hp, hp + M(0.045), z0_m + 0.16, split - 0.05, _KC["puxador"], off=0.032, k="puxador"))
     elif kind == "bancada":
-        tt, sk = 0.04, 0.10
-        out.append(body(z0_m, z0_m + sk, _KC["soculo"], inset_front=0.06, k="soculo"))   # sóculo recuado 6cm (toe-kick lê)
-        out.append(body(z0_m + sk, z0_m + h_m - tt, _KC["corpo"], k="corpo"))            # gabinete
+        tt, sk = 0.04, 0.12
+        out.append(body(z0_m, z0_m + sk, _KC["soculo"], inset_front=0.08, k="soculo"))   # sóculo recuado 8cm (toe-kick lê)
+        out.append(body(z0_m + sk, z0_m + h_m - tt, _KC["corpo"], k="corpo"))            # gabinete (carcaça)
+        zd0, zd1 = z0_m + sk + 0.02, z0_m + h_m - tt - 0.02
         nmod = max(1, int(round(W / M(0.50))))
         mw = W / nmod
-        for i in range(nmod):                                                          # portas/gavetas + puxador BARRA
-            ma0, ma1 = a0 + i * mw + M(0.01), a0 + (i + 1) * mw - M(0.01)
-            out.append(panel(ma0, ma1, z0_m + sk + 0.02, z0_m + h_m - tt - 0.02, _KC["porta"], k="porta"))
-            out.append(panel(ma0 + M(0.05), ma1 - M(0.05), z0_m + h_m - tt - 0.07, z0_m + h_m - tt - 0.035,
-                             _KC["puxador"], off=0.028, k="puxador"))                    # barra horizontal saliente (lê)
-        out.append(body(z0_m + h_m - tt, z0_m + h_m, _KC["tampo"], inset_front=-0.025, k="tampo"))  # tampo proud (overhang pedra)
+        for i in range(nmod):
+            ma0, ma1 = a0 + i * mw + M(0.012), a0 + (i + 1) * mw - M(0.012)
+            if i == 0 and nmod >= 2:                # 1º módulo = GAVETEIRO (3 gavetas) -> lê marcenaria
+                for d in range(3):
+                    dz0 = zd0 + d * (zd1 - zd0) / 3 + 0.006
+                    dz1 = zd0 + (d + 1) * (zd1 - zd0) / 3 - 0.006
+                    out.append(panel(ma0, ma1, dz0, dz1, _KC["gaveta"], k="gaveta"))
+                    out.append(panel(ma0 + M(0.06), ma1 - M(0.06), dz1 - 0.034, dz1 - 0.012, _KC["puxador"], off=0.026, k="puxador"))
+            else:                                   # porta + barra de puxar no topo
+                out.append(panel(ma0, ma1, zd0, zd1, _KC["porta"], k="porta"))
+                out.append(panel(ma0 + M(0.05), ma1 - M(0.05), zd1 - 0.07, zd1 - 0.035, _KC["puxador"], off=0.028, k="puxador"))
+        out.append(body(z0_m + h_m - tt, z0_m + h_m, _KC["tampo"], inset_front=-0.03, k="tampo"))  # tampo CONTÍNUO proud (pedra)
+        out.append(backpanel(a0 + M(0.004), a1 - M(0.004), z0_m + h_m, z0_m + h_m + 0.55, _KC["backsplash"]))  # backsplash
     elif kind == "cooktop":
         out.append(body(z0_m, z0_m + 0.015, _KC["vidro"], inset_side=0.015, k="vidro"))  # vidro preto fino
         cax = [a0 + W * 0.3, a0 + W * 0.7]
@@ -135,20 +149,23 @@ def _kmod(kind, shp, h_m, rgb, z0_m, ws):
         ta = (a0 + a1) / 2
         out.append(panel(ta - M(0.02), ta + M(0.02), z0_m + 0.02, z0_m + 0.22, _KC["torneira"], off=0.06, thick=M(0.035), k="torneira"))  # torneira
     elif kind == "aereo":
-        out.append(body(z0_m, z0_m + h_m, _KC["corpo"], k="corpo"))
-        nmod = max(1, int(round(W / M(0.45))))
+        out.append(body(z0_m + 0.03, z0_m + h_m, _KC["corpo"], k="corpo"))             # carcaça (rodabanca abaixo)
+        out.append(body(z0_m, z0_m + 0.03, _KC["soculo"], inset_front=0.03, k="soculo"))  # rodabanca/valance inferior recuada
+        nmod = max(2, int(round(W / M(0.45))))                                         # nunca bloco único: >=2 frentes
         mw = W / nmod
         for i in range(nmod):
-            ma0, ma1 = a0 + i * mw + M(0.01), a0 + (i + 1) * mw - M(0.01)
-            out.append(panel(ma0, ma1, z0_m + 0.02, z0_m + h_m - 0.02, _KC["porta"], k="porta"))
-            out.append(panel(ma0 + M(0.05), ma1 - M(0.05), z0_m + 0.03, z0_m + 0.06, _KC["puxador"], off=0.028, k="puxador"))  # barra embaixo
+            ma0, ma1 = a0 + i * mw + M(0.014), a0 + (i + 1) * mw - M(0.014)            # reveals largos entre portas
+            out.append(panel(ma0, ma1, z0_m + 0.05, z0_m + h_m - 0.02, _KC["porta"], k="porta"))
+            out.append(panel(ma0 + M(0.05), ma1 - M(0.05), z0_m + 0.06, z0_m + 0.09, _KC["puxador"], off=0.028, k="puxador"))  # barra embaixo
     else:
         out.append(_kp(kind, x0, y0, x1, y1, z0_m, z0_m + h_m, rgb))                    # fallback caixa
     mname = _MODNAME.get(kind, kind)
     for p in out:
         p["module"] = mname   # sub-peças = 1 grupo top-level selecionável (nome planejado)
-    if kind == "bancada" and out:
-        out[-1]["module"] = "countertop"   # o tampo (último append) é módulo PRÓPRIO (separa do base)
+        if p["kind"] == "kc_tampo":
+            p["module"] = "countertop"     # tampo = módulo próprio (separa do base)
+        elif p["kind"] == "kc_backsplash":
+            p["module"] = "backsplash"     # backsplash = módulo próprio
     return out
 
 
