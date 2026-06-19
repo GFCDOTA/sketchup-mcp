@@ -367,7 +367,7 @@ def build_boxes(con, room_id):
     # até o TOPO. Direto via fb (footprint fino cai abaixo do AREA_MIN no clip).
     if gel_c is not None:
         junc = b_hi if g_end != "lo" else b_lo
-        fil = fb(ws, junc, 0.10, GEL_D).intersection(cell)
+        fil = fb(ws, junc, 0.16, GEL_D).intersection(cell)   # painel-gable 16cm (ergonomia filler 15-18)
         if not fil.is_empty:
             if fil.geom_type == "MultiPolygon":
                 fil = max(fil.geoms, key=lambda g: g.area)
