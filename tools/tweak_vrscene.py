@@ -78,6 +78,23 @@ def apply_materials(text: str) -> str:
     return text
 
 
+def apply_theme_dark_walnut(text: str) -> str:
+    """THEME DARK_WALNUT_MOODY_PREMIUM — troca a PELE da cozinha (preto fosco + nogueira)
+    sem rebuildar o .skp nem tocar geometria. Override do diffuse+BRDF por kind; o
+    vray_export remapeia as texturas (tampo/backsplash/niche -> walnut). Roda DEPOIS de
+    apply_materials (o tema vence). Referencia: reference_lab/kitchen_dark_walnut (EXAMPLE_002)."""
+    blk = "AColor(0.012, 0.012, 0.013, 1)"          # ~[28,28,30] sRGB -> linear (preto fosco)
+    black = {"diffuse": blk, "reflect": "AColor(0.04, 0.04, 0.04, 1)",
+             "reflect_glossiness": "0.34", "fresnel_ior": "1.45", "metalness": "0"}   # matte black slab
+    for k in ("kc_corpo", "kc_porta", "kc_gaveta", "kc_corpo_sup", "kc_porta_sup",
+              "kc_filler", "kc_geladeira", "kc_cuba"):
+        text = _set_block(text, f"_ph_{k}_BRDFVRayMtl", black)
+    wood = {"reflect": "AColor(0.09, 0.09, 0.09, 1)", "reflect_glossiness": "0.62", "metalness": "0"}  # walnut satin
+    for k in ("kc_tampo", "kc_backsplash", "kc_niche_wood", "kc_board"):
+        text = _set_block(text, f"_ph_{k}_BRDFVRayMtl", wood)
+    return text
+
+
 def _light_sphere(name, pos, intensity, color=(1.0, 0.8, 0.55), radius=14.0, units=0):
     """Bloco LightSphere V-Ray (area light esferica, quente, invisivel) — fill interior.
     pos/radius em INCHES (unidade do modelo exportado). units=0 (radiancia escalar,
@@ -176,7 +193,7 @@ def set_block_param(text: str, header_pat: str, param: str, value) -> str:
 
 def tweak(text: str, iso=200, fnum=4.0, shutter=100, sky=1.0, width=None, height=None,
           materials=False, fill_lights=None, sun=None, sun_size=None, burn=None,
-          rect_lights=None, noise_thresh=None, shade_rate=None) -> str:
+          rect_lights=None, noise_thresh=None, shade_rate=None, theme=None) -> str:
     text = re.sub(r"(\bISO=)[\d.]+", rf"\g<1>{iso}", text, count=1)
     text = re.sub(r"(\bf_number=)[\d.]+", rf"\g<1>{fnum}", text, count=1)
     text = re.sub(r"(\bshutter_speed=)[\d.]+", rf"\g<1>{shutter}", text, count=1)
@@ -197,6 +214,8 @@ def tweak(text: str, iso=200, fnum=4.0, shutter=100, sky=1.0, width=None, height
         text = re.sub(r"(\bimg_height=)\d+", rf"\g<1>{height}", text, count=1)
     if materials:
         text = apply_materials(text)
+    if theme == "dark_walnut":
+        text = apply_theme_dark_walnut(text)
     if fill_lights:
         text = add_fill_light(text, fill_lights)
     if rect_lights:

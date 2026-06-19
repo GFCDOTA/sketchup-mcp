@@ -52,6 +52,16 @@ def vray_export_run
         tex_map = tex_map.merge({'ph_bancada' => 'stone_counter.png',
                                  'ph_bancada_banho' => 'stone_counter.png'})
       end
+      # TEMA DARK_WALNUT_MOODY_PREMIUM (gated por KITCHEN_THEME) — troca SO a PELE da cozinha:
+      # nogueira no tampo/backsplash/nicho/tabua; armarios viram preto fosco (diffuse override no
+      # tweak_vrscene). NAO toca geometria/layout. Variante separada da cozinha clara (PASS).
+      if ENV['KITCHEN_THEME'] == 'dark_walnut'
+        ['ph_kc_corpo', 'ph_kc_porta', 'ph_kc_gaveta'].each { |k| tex_map.delete(k) }   # -> preto fosco
+        tex_map = tex_map.merge({
+          'ph_kc_tampo' => 'wood_dark.png', 'ph_kc_backsplash' => 'wood_dark.png',
+          'ph_kc_niche_wood' => 'wood_dark.png', 'ph_kc_board' => 'wood_dark.png'
+        })
+      end
       n_tex = 0
       tex_map.each do |matname, png|
         m = model.materials[matname]
