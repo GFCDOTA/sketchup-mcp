@@ -55,11 +55,11 @@ M2IN = 39.3700787402
 # inferiores=madeira nogueira clara · superiores=off-white/fendi · tampo=quartzo claro ·
 # sóculo=grafite · geladeira/cuba=inox · cooktop=preto · puxador=grafite slim.
 _KC = {
-    "corpo": [156, 123, 86], "porta": [163, 130, 92], "gaveta": [163, 130, 92],   # base = madeira
-    "corpo_sup": [231, 226, 214], "porta_sup": [236, 232, 221],                    # aéreo = off-white/fendi quente
-    "filler": [229, 224, 213],                                                      # painel lateral da torre = off-white (integra à coluna, não "remendo")
-    "tampo": [214, 216, 219], "backsplash": [210, 213, 218],                       # tampo quartzo + backsplash PEDRA subindo da bancada
-    "niche_wood": [150, 118, 84],                                                  # fundo/prateleira do nicho de assinatura (madeira)
+    "corpo": [171, 140, 100], "porta": [176, 145, 104], "gaveta": [176, 145, 104],   # base = carvalho/freijó natural médio (quente)
+    "corpo_sup": [224, 215, 199], "porta_sup": [228, 220, 204],                    # aéreo = FENDI/off-white QUENTE (não branco puro)
+    "filler": [224, 215, 199],                                                      # painel lateral da torre = MESMO fendi do aéreo (coluna coesa)
+    "tampo": [222, 219, 212], "backsplash": [222, 219, 212],                       # PEDRA clara quente (veios = textura V-Ray); backsplash = tampo subindo
+    "niche_wood": [162, 130, 90],                                                  # fundo/prateleira do nicho de assinatura (madeira)
     "soculo": [40, 41, 45],                                                        # sóculo grafite
     "inox": [193, 198, 205],                                                       # borda cuba / metais
     "geladeira": [216, 220, 227],                                                  # inox MAIS CLARO/reflexivo (menos bloco cinza)
@@ -67,7 +67,7 @@ _KC = {
     "cuba": [92, 96, 103], "torneira": [54, 56, 62],                               # bojo ESCURO (lê profundidade) / torneira grafite
     "puxador": [44, 45, 50],                                                       # puxador slim grafite
     "led": [255, 250, 232],                                                        # fita LED quente sob o aéreo (mais legível)
-    "board": [165, 130, 92], "vaso_d": [96, 116, 86], "tempero": [188, 176, 150],  # decoração funcional
+    "board": [176, 145, 104], "vaso_d": [96, 116, 86], "tempero": [188, 176, 150], # decoração funcional
     "ralo": [60, 63, 69],                                                          # ralo/válvula da cuba
 }
 # nome de MÓDULO planejado (grupo selecionável sozinho no SKP); countertop é separado do base
@@ -143,7 +143,7 @@ def _kmod(kind, shp, h_m, rgb, z0_m, ws):
         nmod = max(1, int(round(W / M(0.50))))
         mw = W / nmod
         for i in range(nmod):
-            ma0, ma1 = a0 + i * mw + M(0.012), a0 + (i + 1) * mw - M(0.012)
+            ma0, ma1 = a0 + i * mw + M(0.018), a0 + (i + 1) * mw - M(0.018)   # reveal de junta planejada (shadow gap)
             if i == 0 and nmod >= 2:                # 1º módulo = GAVETEIRO (3 gavetas) -> lê marcenaria
                 for d in range(3):
                     dz0 = zd0 + d * (zd1 - zd0) / 3 + 0.006
@@ -182,7 +182,7 @@ def _kmod(kind, shp, h_m, rgb, z0_m, ws):
         mw = W / nmod
         niche = (nmod - 1) if (kind == "aereo" and nmod >= 3) else -1                  # 1 bay ABERTA = nicho de ASSINATURA
         for i in range(nmod):
-            ma0, ma1 = a0 + i * mw + M(0.016), a0 + (i + 1) * mw - M(0.016)            # reveals finos entre portas grandes
+            ma0, ma1 = a0 + i * mw + M(0.022), a0 + (i + 1) * mw - M(0.022)            # reveal de junta planejada (shadow gap)
             if i == niche:
                 # NICHO DE ASSINATURA: fundo + prateleira em MADEIRA -> quebra o blocão off-white
                 out.append(panel(ma0, ma1, z0_m + 0.04, z0_m + h_m - 0.03, _KC["niche_wood"], off=AEREO_DEPTH - 0.025, thick=M(0.02), k="niche_wood"))  # fundo madeira
