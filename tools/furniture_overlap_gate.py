@@ -27,6 +27,17 @@ AREA_MIN_M2 = 0.04                   # cruzamento menor que isso = roçar, ignor
 FRAC_MIN = 0.12                      # E >=12% da área do menor módulo
 # módulos que legitimamente se sobrepõem a tudo (não são "móvel sobre móvel")
 EXCLUDE = ("tapete", "rug", "parede", "piso", "floor")
+# embutidos LEGÍTIMOS na cozinha: eletro/cuba (cooktop/pia/cuba) DENTRO da bancada
+# (base_cabinet + countertop). Counter sobre cabinet idem (mesma unidade física).
+_FIX = ("cooktop", "sink", "pia", "cuba")
+_HOST = ("bancada", "countertop", "base_cabinet")
+
+
+def _is_embedded(a, b):
+    a, b = a.lower(), b.lower()
+    fa, fb = any(f in a for f in _FIX), any(f in b for f in _FIX)
+    ha, hb = any(h in a for h in _HOST), any(h in b for h in _HOST)
+    return (fa and hb) or (fb and ha) or (ha and hb)
 
 
 def _module_geom(boxes):
@@ -64,12 +75,10 @@ def overlap_gate(con, room_id):
     geoms = {m: g for m, g in _module_geom(boxes or {}).items()
              if not any(e in m.lower() for e in EXCLUDE)}
     mods = sorted(geoms)
-    # embutidos LEGÍTIMOS: cooktop/pia DENTRO da bancada (eletro embutido, não colisão)
-    embedded = ({"cooktop", "bancada"}, {"pia", "bancada"}, {"cuba", "bancada"})
     fails, warns = [], []
     for i in range(len(mods)):
         for j in range(i + 1, len(mods)):
-            if {mods[i].lower(), mods[j].lower()} in embedded:
+            if _is_embedded(mods[i], mods[j]):   # eletro/cuba embutido na bancada+tampo: legítimo
                 continue
             pa, za0, za1 = geoms[mods[i]]
             pb, zb0, zb1 = geoms[mods[j]]

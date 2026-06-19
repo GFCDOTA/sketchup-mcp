@@ -1,0 +1,104 @@
+=== 1) ROOT (model.entities) ===
+  geometria SOLTA no root (faces+edges): 0   -> PASS (zero)
+  grupos top-level: 60  |  componentes top-level: 0
+
+=== 2) HIERARQUIA NOMEADA (Outliner) — 60 nós top-level ===
+  BANHO 01 · Bancada                locked=false  tag=BANHO 01    sub=3
+  BANHO 01 · Espelho                locked=false  tag=BANHO 01    sub=1
+  BANHO 01 · Vaso                   locked=false  tag=BANHO 01    sub=2
+  BANHO 02 · Bancada                locked=false  tag=BANHO 02    sub=3
+  BANHO 02 · Espelho                locked=false  tag=BANHO 02    sub=1
+  BANHO 02 · Vaso                   locked=false  tag=BANHO 02    sub=2
+  COZINHA · base_cabinet_01         locked=false  tag=COZINHA     sub=6
+  COZINHA · cooktop_module          locked=false  tag=COZINHA     sub=5
+  COZINHA · countertop              locked=false  tag=COZINHA     sub=1
+  COZINHA · fridge                  locked=false  tag=COZINHA     sub=5
+  COZINHA · sink_module             locked=false  tag=COZINHA     sub=3
+  COZINHA · upper_cabinet_01        locked=false  tag=COZINHA     sub=5
+  LAVABO · Bancada                  locked=false  tag=LAVABO      sub=3
+  LAVABO · Espelho                  locked=false  tag=LAVABO      sub=1
+  LAVABO · Vaso                     locked=false  tag=LAVABO      sub=2
+  DoorLeaf_Group_h_o000             locked=true   tag=Layer0      sub=6
+  DoorLeaf_Group_h_o001             locked=true   tag=Layer0      sub=6
+  DoorLeaf_Group_h_o002             locked=true   tag=Layer0      sub=6
+  DoorLeaf_Group_h_o003             locked=true   tag=Layer0      sub=6
+  DoorLeaf_Group_h_o004             locked=true   tag=Layer0      sub=6
+  DoorLeaf_Group_h_o005             locked=true   tag=Layer0      sub=6
+  DoorLeaf_Group_h_o006             locked=true   tag=Layer0      sub=6
+  Floor_Group_r000                  locked=true   tag=Layer0      sub=1
+  Floor_Group_r001                  locked=true   tag=Layer0      sub=1
+  Floor_Group_r002                  locked=true   tag=Layer0      sub=1
+  Floor_Group_r003                  locked=true   tag=Layer0      sub=1
+  Floor_Group_r004                  locked=true   tag=Layer0      sub=1
+  Floor_Group_r005                  locked=true   tag=Layer0      sub=1
+  Floor_Group_r006                  locked=true   tag=Layer0      sub=1
+  Floor_Group_r007                  locked=true   tag=Layer0      sub=1
+  GlazedBalcony_Group_h_o011        locked=true   tag=Layer0      sub=1
+  PlanShell_Group                   locked=true   tag=Layer0      sub=3
+  SoftBarrier_Group_8               locked=true   tag=Layer0      sub=2
+  WindowGlass_Group_h_o007          locked=true   tag=Layer0      sub=4
+  WindowGlass_Group_h_o008          locked=true   tag=Layer0      sub=8
+  WindowGlass_Group_h_o009          locked=true   tag=Layer0      sub=4
+  WindowGlass_Group_h_o010          locked=true   tag=Layer0      sub=8
+  WindowSash_Group_h_o007           locked=true   tag=Layer0      sub=5
+  WindowSash_Group_h_o009           locked=true   tag=Layer0      sub=5
+  SALA DE JANTAR | SALA DE ESTAR · Cadeira jantar  locked=false  tag=SALA DE JANTAR | SALA DE ESTAR  sub=24
+  SALA DE JANTAR | SALA DE ESTAR · Mesa de centro  locked=false  tag=SALA DE JANTAR | SALA DE ESTAR  sub=6
+  SALA DE JANTAR | SALA DE ESTAR · Mesa de jantar  locked=false  tag=SALA DE JANTAR | SALA DE ESTAR  sub=6
+  SALA DE JANTAR | SALA DE ESTAR · Parede concreto  locked=false  tag=SALA DE JANTAR | SALA DE ESTAR  sub=1
+  SALA DE JANTAR | SALA DE ESTAR · Planta  locked=false  tag=SALA DE JANTAR | SALA DE ESTAR  sub=6
+  SALA DE JANTAR | SALA DE ESTAR · Prateleira  locked=false  tag=SALA DE JANTAR | SALA DE ESTAR  sub=6
+  SALA DE JANTAR | SALA DE ESTAR · Quadro  locked=false  tag=SALA DE JANTAR | SALA DE ESTAR  sub=13
+  SALA DE JANTAR | SALA DE ESTAR · Rack TV  locked=false  tag=SALA DE JANTAR | SALA DE ESTAR  sub=9
+  SALA DE JANTAR | SALA DE ESTAR · Sofa  locked=false  tag=SALA DE JANTAR | SALA DE ESTAR  sub=15
+  SALA DE JANTAR | SALA DE ESTAR · Tapete  locked=false  tag=SALA DE JANTAR | SALA DE ESTAR  sub=1
+  SALA DE JANTAR | SALA DE ESTAR · Trilho de luz  locked=false  tag=SALA DE JANTAR | SALA DE ESTAR  sub=4
+  SUITE 01 · Cama                   locked=false  tag=SUITE 01    sub=8
+  SUITE 01 · Criado-mudo 1          locked=false  tag=SUITE 01    sub=8
+  SUITE 01 · Criado-mudo 2          locked=false  tag=SUITE 01    sub=8
+  SUITE 01 · Guarda-roupa           locked=false  tag=SUITE 01    sub=8
+  SUITE 01 · rug                    locked=false  tag=SUITE 01    sub=1
+  SUITE 02 · Cama                   locked=false  tag=SUITE 02    sub=8
+  SUITE 02 · Criado-mudo 1          locked=false  tag=SUITE 02    sub=8
+  SUITE 02 · Criado-mudo 2          locked=false  tag=SUITE 02    sub=8
+  SUITE 02 · Guarda-roupa           locked=false  tag=SUITE 02    sub=6
+  SUITE 02 · rug                    locked=false  tag=SUITE 02    sub=1
+
+=== 3) GATE — seleção isolada por módulo ===
+  [PASS] fridge: 1 grupo(s) 'COZINHA · fridge'  (5 sub-peças no total, 0 paredes)
+  [PASS] sink_module: 1 grupo(s) 'COZINHA · sink_module'  (3 sub-peças no total, 0 paredes)
+  [PASS] cooktop_module: 1 grupo(s) 'COZINHA · cooktop_module'  (5 sub-peças no total, 0 paredes)
+  [PASS] countertop: 1 grupo(s) 'COZINHA · countertop'  (1 sub-peças no total, 0 paredes)
+  [PASS] upper_cabinet_01: 1 grupo(s) 'COZINHA · upper_cabinet_01'  (5 sub-peças no total, 0 paredes)
+  [PASS] base_cabinet_01: 1 grupo(s) 'COZINHA · base_cabinet_01'  (6 sub-peças no total, 0 paredes)
+  [PASS] door_kitchen: 7 grupo(s) 'DoorLeaf_Group_h_o000', 'DoorLeaf_Group_h_o001', 'DoorLeaf_Group_h_o002', 'DoorLeaf_Group_h_o003', 'DoorLeaf_Group_h_o004', 'DoorLeaf_Group_h_o005', 'DoorLeaf_Group_h_o006'  (42 sub-peças no total, 0 paredes)
+  -> 7/7 módulos exigidos presentes e isolados
+
+=== 4) SHELL travado ===
+  PlanShell_Group: locked=true
+  Floor_Group_r000: locked=true
+  Floor_Group_r001: locked=true
+  Floor_Group_r002: locked=true
+  Floor_Group_r003: locked=true
+  Floor_Group_r004: locked=true
+  Floor_Group_r005: locked=true
+  Floor_Group_r006: locked=true
+  Floor_Group_r007: locked=true
+  SoftBarrier_Group_8: locked=true
+  DoorLeaf_Group_h_o000: locked=true
+  DoorLeaf_Group_h_o001: locked=true
+  DoorLeaf_Group_h_o002: locked=true
+  DoorLeaf_Group_h_o003: locked=true
+  DoorLeaf_Group_h_o004: locked=true
+  DoorLeaf_Group_h_o005: locked=true
+  DoorLeaf_Group_h_o006: locked=true
+  WindowGlass_Group_h_o007: locked=true
+  WindowSash_Group_h_o007: locked=true
+  WindowGlass_Group_h_o008: locked=true
+  WindowGlass_Group_h_o009: locked=true
+  WindowSash_Group_h_o009: locked=true
+  WindowGlass_Group_h_o010: locked=true
+  GlazedBalcony_Group_h_o011: locked=true
+  -> shell 24 grupos | travados 24  PASS
+
+=== 5) render cinza -> planta_74_cozinha_cinza.png (cozinha bbox 72x26x87 in) ===
