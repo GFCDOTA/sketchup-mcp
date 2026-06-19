@@ -108,11 +108,11 @@ def apply_theme_hotel_boutique(text: str) -> str:
              "reflect_glossiness": "0.58", "fresnel_ior": "1.4", "metalness": "0"}   # greige acetinado
     for k in ("kc_corpo", "kc_porta", "kc_gaveta", "kc_corpo_sup", "kc_porta_sup", "kc_filler"):
         text = _set_block(text, f"_ph_{k}_BRDFVRayMtl", taupe)
-    champagne = {"diffuse": "AColor(0.42, 0.32, 0.16, 1)", "reflect": "AColor(0.6, 0.55, 0.4, 1)",
-                 "reflect_glossiness": "0.72", "fresnel_ior": "6", "metalness": "1"}   # geladeira inox champagne
+    champagne = {"diffuse": "AColor(0.50, 0.37, 0.16, 1)", "reflect": "AColor(0.78, 0.64, 0.40, 1)",
+                 "reflect_glossiness": "0.8", "fresnel_ior": "8", "metalness": "1"}     # geladeira inox champagne (+metalico/inequivoco - GPT)
     text = _set_block(text, "_ph_kc_geladeira_BRDFVRayMtl", champagne)
-    bronze = {"diffuse": "AColor(0.34, 0.24, 0.11, 1)", "reflect": "AColor(0.55, 0.42, 0.22, 1)",
-              "reflect_glossiness": "0.7", "fresnel_ior": "8", "metalness": "1"}        # puxador/torneira/cuba bronze escovado
+    bronze = {"diffuse": "AColor(0.44, 0.29, 0.10, 1)", "reflect": "AColor(0.74, 0.54, 0.26, 1)",
+              "reflect_glossiness": "0.8", "fresnel_ior": "10", "metalness": "1"}       # puxador/torneira/cuba bronze escovado (+pop)
     for k in ("kc_puxador", "kc_torneira", "kc_cuba", "kc_soculo"):
         text = _set_block(text, f"_ph_{k}_BRDFVRayMtl", bronze)
     return text

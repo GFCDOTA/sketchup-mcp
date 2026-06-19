@@ -8,7 +8,7 @@
 |---|---|---|---|---|
 | **001** | `warm_compact_premium` | **default seguro** — amplo, vendável, universal | GPT PASS de pele | `cozinha_vray_hero.png` |
 | **002** | `dark_walnut_moody_premium` | **variante autoral** — noturna, masculina, impacto visual | GPT PASS variante | `cozinha_vray_hero_dark.png` |
-| 003 | `hotel_boutique_warm_luxury` | premium equilibrado (entre clara e dark) | _em teste_ | `cozinha_vray_hero_boutique.png` |
+| **003** | `hotel_boutique_warm_luxury` | **premium equilibrado** — taupe+champagne, refinado | GPT PASS | `cozinha_vray_hero_boutique.png` |
 
 ## GOLDEN_SAMPLE_001 — warm_compact_premium
 Fendi acetinado + carvalho coordenado + pedra clara veio sutil + inox reflexivo + LED 2700K +
