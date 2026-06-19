@@ -87,8 +87,13 @@ def apply_theme_dark_walnut(text: str) -> str:
     black = {"diffuse": blk, "reflect": "AColor(0.04, 0.04, 0.04, 1)",
              "reflect_glossiness": "0.34", "fresnel_ior": "1.45", "metalness": "0"}   # matte black slab
     for k in ("kc_corpo", "kc_porta", "kc_gaveta", "kc_corpo_sup", "kc_porta_sup",
-              "kc_filler", "kc_geladeira", "kc_cuba"):
+              "kc_filler", "kc_cuba"):
         text = _set_block(text, f"_ph_{k}_BRDFVRayMtl", black)
+    # geladeira: NAO matte-black absoluto (vira bloco morto pesado - feedback GPT) ->
+    # inox DARK/satin reflexivo (pega reflexo vertical, le como eletro premium, nao void)
+    dark_inox = {"diffuse": "AColor(0.022, 0.024, 0.028, 1)", "reflect": "AColor(0.46, 0.47, 0.52, 1)",
+                 "reflect_glossiness": "0.6", "fresnel_ior": "6", "metalness": "1"}
+    text = _set_block(text, "_ph_kc_geladeira_BRDFVRayMtl", dark_inox)
     wood = {"reflect": "AColor(0.09, 0.09, 0.09, 1)", "reflect_glossiness": "0.62", "metalness": "0"}  # walnut satin
     for k in ("kc_tampo", "kc_backsplash", "kc_niche_wood", "kc_board"):
         text = _set_block(text, f"_ph_{k}_BRDFVRayMtl", wood)
