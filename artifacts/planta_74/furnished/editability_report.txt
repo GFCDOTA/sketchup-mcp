@@ -10,12 +10,12 @@
   BANHO 02 · Espelho                locked=false  tag=BANHO 02    sub=1
   BANHO 02 · Vaso                   locked=false  tag=BANHO 02    sub=2
   COZINHA · backsplash              locked=false  tag=COZINHA     sub=1
-  COZINHA · base_cabinet_01         locked=false  tag=COZINHA     sub=10
+  COZINHA · base_cabinet_01         locked=false  tag=COZINHA     sub=14
   COZINHA · cooktop_module          locked=false  tag=COZINHA     sub=5
   COZINHA · countertop              locked=false  tag=COZINHA     sub=1
   COZINHA · fridge                  locked=false  tag=COZINHA     sub=5
   COZINHA · sink_module             locked=false  tag=COZINHA     sub=3
-  COZINHA · upper_cabinet_01        locked=false  tag=COZINHA     sub=6
+  COZINHA · upper_cabinet_01        locked=false  tag=COZINHA     sub=12
   LAVABO · Bancada                  locked=false  tag=LAVABO      sub=3
   LAVABO · Espelho                  locked=false  tag=LAVABO      sub=1
   LAVABO · Vaso                     locked=false  tag=LAVABO      sub=2
@@ -70,8 +70,8 @@
   [PASS] sink_module: 1 grupo(s) 'COZINHA · sink_module'  (3 sub-peças no total, 0 paredes)
   [PASS] cooktop_module: 1 grupo(s) 'COZINHA · cooktop_module'  (5 sub-peças no total, 0 paredes)
   [PASS] countertop: 1 grupo(s) 'COZINHA · countertop'  (1 sub-peças no total, 0 paredes)
-  [PASS] upper_cabinet_01: 1 grupo(s) 'COZINHA · upper_cabinet_01'  (6 sub-peças no total, 0 paredes)
-  [PASS] base_cabinet_01: 1 grupo(s) 'COZINHA · base_cabinet_01'  (10 sub-peças no total, 0 paredes)
+  [PASS] upper_cabinet_01: 1 grupo(s) 'COZINHA · upper_cabinet_01'  (12 sub-peças no total, 0 paredes)
+  [PASS] base_cabinet_01: 1 grupo(s) 'COZINHA · base_cabinet_01'  (14 sub-peças no total, 0 paredes)
   [PASS] door_kitchen: 7 grupo(s) 'DoorLeaf_Group_h_o000', 'DoorLeaf_Group_h_o001', 'DoorLeaf_Group_h_o002', 'DoorLeaf_Group_h_o003', 'DoorLeaf_Group_h_o004', 'DoorLeaf_Group_h_o005', 'DoorLeaf_Group_h_o006'  (42 sub-peças no total, 0 paredes)
   -> 7/7 módulos exigidos presentes e isolados
 
@@ -102,4 +102,5 @@
   GlazedBalcony_Group_h_o011: locked=true
   -> shell 24 grupos | travados 24  PASS
 
-=== 5) render cinza -> planta_74_cozinha_cinza.png (cozinha bbox 71x26x87 in) ===
+=== 5) render cinza -> planta_74_cozinha_cinza.png (cozinha bbox 26x113x87 in, face +x) ===
+    plano top -> planta_74_cozinha_plano.png

@@ -369,6 +369,15 @@ def collect_boxes(con):
             summary.append((r["id"], r["name"], r["room_type"], "skip(sem brain)", 0))
             continue
         boxes, out = brain(con, r["id"])
+        # GATE DE FIDELIDADE: a pia da cozinha é ponto hidráulico do PDF (parede oeste).
+        # Falha o build ANTES de render se a pia migrar (Felipe: KITCHEN_PDF_ANCHOR_FIX).
+        if r["room_type"] == KITCHEN:
+            from tools.kitchen_validation import validate as _kval
+            kv = _kval(con, r["id"])
+            print("\n".join(kv["lines"]))
+            print(f"kitchen_validation => {kv['result']}\n")
+            if kv["result"] != "PASS":
+                raise SystemExit(f"[furnish-apt] BUILD ABORTADO: cozinha reprovou o anchor da pia ({kv['checks'].get('sink_wall')})")
         for b in (boxes or []):              # cada box leva COMODO + MODULO -> grupos editaveis no .skp
             b["room"] = str(r.get("name") or r["id"])
             b.setdefault("module", str(b.get("kind", "movel")))

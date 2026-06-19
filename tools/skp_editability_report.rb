@@ -82,22 +82,36 @@ def kp_run
       (si['Dark'] = 50) rescue nil
       c = kbb.center
       w = kbb.max.x - kbb.min.x; d = kbb.max.y - kbb.min.y; ht = kbb.max.z - kbb.min.z
-      # As FRENTES da cozinha abrem pro lado livre (-y, onde está o cômodo, sem parede).
-      # Câmera CENTRADA em x (NÃO ofsetar -> não atravessa a parede lateral), à frente e
-      # um pouco acima, olhando pras frentes. KP_FRONT_SGN=+1 inverte se a parede for -y.
-      sgn = (ENV['KP_FRONT_SGN'] || '-1').to_f
-      front = [d * (ENV['KP_FRONT'] ? ENV['KP_FRONT'].to_f : 2.8), 70.0].max
-      ny = sgn < 0 ? kbb.min.y - front : kbb.max.y + front
-      ex = c.x + w * (ENV['KP_DX'] ? ENV['KP_DX'].to_f : 0.16)   # leve 3/4 (dentro da largura -> não atravessa parede)
+      # FRENTES abrem pro lado livre do cômodo. KP_FACE = eixo pra onde as frentes apontam
+      # (+x/-x/+y/-y). Câmera fica desse lado, à frente e um pouco acima, olhando pras frentes.
+      face = ENV['KP_FACE'] || '-y'
       ez = kbb.min.z + ht * (ENV['KP_EZ'] ? ENV['KP_EZ'].to_f : 0.78)
-      eye = Geom::Point3d.new(ex, ny, ez)
+      perp = (face == '+x' || face == '-x') ? d : w     # span perpendicular ao olhar (largura da cena)
+      far = [perp * (ENV['KP_FRONT'] ? ENV['KP_FRONT'].to_f : 1.4), 70.0].max
+      off3q = (ENV['KP_DX'] ? ENV['KP_DX'].to_f : 0.16)
+      case face
+      when '+x' then eye = Geom::Point3d.new(kbb.max.x + far, c.y + d * off3q, ez)
+      when '-x' then eye = Geom::Point3d.new(kbb.min.x - far, c.y + d * off3q, ez)
+      when '+y' then eye = Geom::Point3d.new(c.x + w * off3q, kbb.max.y + far, ez)
+      else           eye = Geom::Point3d.new(c.x + w * off3q, kbb.min.y - far, ez)  # -y
+      end
       tgt = Geom::Point3d.new(c.x, c.y, kbb.min.z + ht * 0.40)
       cam = Sketchup::Camera.new(eye, tgt, Geom::Vector3d.new(0, 0, 1))
       cam.perspective = true
       cam.fov = (ENV['KP_FOV'] ? ENV['KP_FOV'].to_f : 60.0)
       model.active_view.camera = cam
       model.active_view.write_image(filename: ENV['KP_PNG'], width: 1500, height: 1100, antialias: true)
-      rep << "=== 5) render cinza -> #{File.basename(ENV['KP_PNG'])} (cozinha bbox #{w.round}x#{d.round}x#{ht.round} in) ==="
+      rep << "=== 5) render cinza -> #{File.basename(ENV['KP_PNG'])} (cozinha bbox #{w.round}x#{d.round}x#{ht.round} in, face #{face}) ==="
+      # 5b) PLANO (top ortográfico) da cozinha p/ comparar com o PDF (pia na parede esquerda)
+      if ENV['KP_PNG_TOP']
+        tcam = Sketchup::Camera.new(Geom::Point3d.new(c.x, c.y, kbb.max.z + [w, d].max * 2.0),
+                                    Geom::Point3d.new(c.x, c.y, kbb.min.z), Geom::Vector3d.new(0, 1, 0))
+        tcam.perspective = false
+        tcam.height = [d, w].max * 1.25
+        model.active_view.camera = tcam
+        model.active_view.write_image(filename: ENV['KP_PNG_TOP'], width: 1100, height: 1300, antialias: true)
+        rep << "    plano top -> #{File.basename(ENV['KP_PNG_TOP'])}"
+      end
     else
       rep << "=== 5) render cinza PULADO — nenhum grupo 'COZINHA' ==="
     end

@@ -31,6 +31,10 @@ RGB_GELADEIRA = [201, 203, 207]                 # inox claro
 RGB_PIA = [183, 187, 191]                       # cuba inox
 RGB_COOKTOP = [44, 44, 48]                      # vidro preto
 DOOR_KINDS = {"interior_door", "interior_passage", "glazed_balcony"}
+# pia da cozinha = ponto HIDRÁULICO fixo do PDF (parede OESTE/esquerda). NÃO mover de
+# parede sem reforma hidráulica. Validado por tools/kitchen_validation.py.
+KITCHEN_SINK_ANCHOR = "KITCHEN_SINK_ANCHOR"
+KITCHEN_SINK_SIDE = "W"
 AREA_MIN = 0.035 / (PT_TO_M ** 2)               # area minima de uma peca (m2 -> PT2)
 
 
@@ -94,13 +98,13 @@ def _kmod(kind, shp, h_m, rgb, z0_m, ws):
     def panel(sa0, sa1, za, zb, c, off=0.0, thick=None, k="porta"):
         f1 = front - s * M(off)
         f0 = f1 - s * (thick or t)
-        return _kp(f"kc_{k}", min(f0, f1), sa0, max(f0, f1), za, zb, c) if vert \
+        return _kp(f"kc_{k}", min(f0, f1), sa0, max(f0, f1), sa1, za, zb, c) if vert \
             else _kp(f"kc_{k}", sa0, min(f0, f1), sa1, max(f0, f1), za, zb, c)
 
     def backpanel(sa0, sa1, za, zb, c, thick=0.025):
         """painel fino contra a PAREDE (backsplash/rodabanca)."""
         f0, f1 = back, back + s * M(thick)
-        return _kp("kc_backsplash", min(f0, f1), sa0, max(f0, f1), za, zb, c) if vert \
+        return _kp("kc_backsplash", min(f0, f1), sa0, max(f0, f1), sa1, za, zb, c) if vert \
             else _kp("kc_backsplash", sa0, min(f0, f1), sa1, max(f0, f1), za, zb, c)
 
     out = []
@@ -238,52 +242,60 @@ def build_boxes(con, room_id):
         return _fbox(ws["orient"], ws["face"], ws["sgn"], center, M(0.03),
                      M(length_m), M(depth_m)).intersection(cell)
 
-    # escolhe paredes pelo RUN LIVRE real (parede ∩ cômodo − circulação), não pelo
-    # comprimento bruto (m013 tem 2.57m mas só 0.83m livre; m011 2.10m é a boa).
-    wruns = []
-    for w in clean:
-        ws = _wall_setup(sm, w["id"])
-        if ws is None:
-            continue
-        strip = fb(ws, ws["along_c"], w["length_m"] + 0.3, COUNTER_DEPTH)
-        run = _shp_run(strip, ws["orient"])
-        if run:
-            wruns.append((ws, run, (run[1] - run[0]) / M(1.0)))
-    wruns.sort(key=lambda t: -t[2])
-    if not wruns:
+    # ============ ANCHOR HIDRÁULICO DA PIA (PDF) ============
+    # O PDF (planta de vendas) mostra a cuba na parede OESTE (esquerda) da cozinha,
+    # sobre a bancada vertical hidráulica. O consensus NÃO traz símbolo hidráulico NEM
+    # o segmento dessa parede (extração faltou o muro a x=minx), então ancoramos a
+    # cozinha na BORDA OESTE do polígono do cômodo (minx). A pia é PONTO FIXO: não muda
+    # de parede sem flag de reforma hidráulica. Geladeira/cooktop/armários giram em torno.
+    minx, miny, maxx, maxy = cell.bounds
+    wt = float(sm["_geom"]["con"]["wall_thickness_pts"])
+    ws = {"id": KITCHEN_SINK_ANCHOR, "orient": "v", "sgn": 1, "face": minx + wt / 2,
+          "along_c": (miny + maxy) / 2, "along_lo": miny, "along_hi": maxy,
+          "depth": maxx - minx}
+    strip = fb(ws, ws["along_c"], (maxy - miny) / M(1.0) + 0.3, COUNTER_DEPTH)
+    run = _shp_run(strip, "v")
+    if run is None:
         return None, {"result": "NO_VALID_LAYOUT", "room_name": sm.get("room_name"),
-                      "reason": "sem run livre p/ bancada"}
+                      "reason": "parede oeste (pia) sem run livre"}
+    f_lo, f_hi = run
+    run_m = (f_hi - f_lo) / M(1.0)
 
-    # ---------------- parede PRINCIPAL: galley linear dentro do run livre ----------------
-    ws, (f_lo, f_hi), run_m = wruns[0]
-    cur = f_lo
-    # geladeira numa ponta (só se o run comporta geladeira + bancada mínima)
-    if run_m >= GEL_W + 0.45:
-        gb = clip(fb(ws, cur + M(GEL_W / 2), GEL_W, GEL_D))
-        if gb is not None and not near_door(gb):
-            add("geladeira", gb, GEL_H, RGB_GELADEIRA, ws=ws)
-            cur = cur + M(GEL_W)
-    # torre na outra ponta só se sobra >=1.0m p/ bancada
-    f_hi_b = f_hi
-    if (f_hi - cur) >= M(1.0 + TORRE_W):
-        tb = clip(fb(ws, f_hi - M(TORRE_W / 2), TORRE_W, TORRE_D))
-        if tb is not None and not near_door(tb):
-            add("torre", tb, TORRE_H, RGB_TORRE, ws=ws)
-            f_hi_b = f_hi - M(TORRE_W)
-    # bancada no meio do run
-    b_len = (f_hi_b - cur) / M(1.0)
+    # Geladeira na ponta SUPERIOR (alto y) — a INFERIOR tem porta (giro entra na cozinha),
+    # geladeira funda (0.66) encostaria no giro. PIA logo abaixo dela = upper-middle do PDF.
+    g_end = None
+    for cand, tag in ((f_hi - M(GEL_W / 2), "hi"), (f_lo + M(GEL_W / 2), "lo")):
+        if run_m < GEL_W + 0.6:
+            break
+        gb_full = fb(ws, cand, GEL_W, GEL_D)                 # box CHEIO (geladeira não pode ser recortada pela porta)
+        if (not gb_full.is_empty and cell.buffer(2).contains(gb_full)
+                and (circ_u is None or gb_full.intersection(circ_u).area < AREA_MIN)
+                and not near_door(gb_full)):
+            add("geladeira", gb_full, GEL_H, RGB_GELADEIRA, ws=ws)
+            g_end = tag
+            break
+    b_lo = f_lo + (M(GEL_W) if g_end == "lo" else 0.0)
+    b_hi = f_hi - (M(GEL_W) if g_end == "hi" else 0.0)
+
+    # bancada CONTÍNUA na parede oeste (resto do run)
+    b_len = (b_hi - b_lo) / M(1.0)
     if b_len >= 0.5:
-        b_center = (cur + f_hi_b) / 2
+        b_center = (b_lo + b_hi) / 2
         bb = clip(fb(ws, b_center, b_len, COUNTER_DEPTH))
         if bb is not None:
             add("bancada", bb, COUNTER_H, RGB_COUNTER, ws=ws)
-            pb = clip(fb(ws, cur + M(0.30), PIA_W, PIA_D), carve=False)   # cuba numa ponta
+            # PIA no ANCHOR: upper-middle (logo abaixo da geladeira no topo), como no PDF
+            sink_c = (b_hi - M(0.35)) if g_end != "lo" else (b_lo + M(0.35))
+            pb = clip(fb(ws, sink_c, PIA_W, PIA_D), carve=False)
             if pb is not None:
                 add("pia", pb, 0.12, RGB_PIA, z0_m=PIA_Z0, mark=False, ws=ws)
-            if b_len >= 1.0:                        # cooktop na OUTRA ponta (sem encostar na cuba)
-                cb = clip(fb(ws, f_hi_b - M(0.28), COOK_W, COOK_D), carve=False)
+            # cooktop na bancada, na metade INFERIOR (não ocupa o ponto hidráulico da pia)
+            if b_len >= 1.0:
+                cook_c = (b_lo + M(0.32)) if g_end != "lo" else (b_hi - M(0.32))
+                cb = clip(fb(ws, cook_c, COOK_W, COOK_D), carve=False)
                 if cb is not None:
                     add("cooktop", cb, 0.08, RGB_COOKTOP, z0_m=COOK_Z0, mark=False, ws=ws)
+            # aéreo sobre a bancada (evita janela, se houver)
             ab = fb(ws, b_center, b_len, AEREO_DEPTH)
             if win_zone is not None:
                 ab = ab.difference(win_zone)
@@ -292,19 +304,6 @@ def build_boxes(con, room_id):
                     ab = max(ab.geoms, key=lambda g: g.area)
                 if ab.geom_type == "Polygon" and ab.area >= (0.12 / PT_TO_M ** 2):
                     add("aereo", ab, AEREO_H, RGB_AEREO, z0_m=AEREO_Z0, mark=False, ws=ws)
-
-    # ---------------- 2a parede limpa (L): bancada/cooktop extra carved ----------------
-    for ws2, (g_lo, g_hi), run2 in wruns[1:2]:
-        g2 = clip(fb(ws2, (g_lo + g_hi) / 2, (g_hi - g_lo) / M(1.0), COUNTER_DEPTH))
-        if g2 is not None:
-            gx0, gy0, gx1, gy1 = g2.bounds
-            if min(gx1 - gx0, gy1 - gy0) / M(1.0) < BANCADA_MIN_DEPTH:
-                continue                            # sliver fino (16cm) = inútil, descarta
-            add("bancada", g2, COUNTER_H, RGB_COUNTER, ws=ws2)
-            if "cooktop" not in [it["kind"] for it in items] and run2 >= 0.6:
-                cb2 = clip(fb(ws2, (g_lo + g_hi) / 2, COOK_W, COOK_D), carve=False)
-                if cb2 is not None:
-                    add("cooktop", cb2, 0.08, RGB_COOKTOP, z0_m=COOK_Z0, mark=False, ws=ws2)
 
     if not items:
         return None, {"result": "NO_VALID_LAYOUT", "room_name": sm.get("room_name"),
