@@ -2,6 +2,12 @@
 
 > Referência de **DIMENSÃO/ERGONOMIA** (não tema/estética): cozinha em L cotada. Caso-modelo
 > da regra de ouro: **medida de Pinterest = HIPÓTESE; PDF + ergonomia + gate validam.**
+>
+> ⚠️ **LEITURA CORRETA (Felipe):** estas cotas são **boas práticas de ergonomia pra QUALQUER
+> cozinha** (guia de melhorias) — **NÃO** são as dimensões da planta_74 e **NÃO** se importam.
+> As dimensões/posições da nossa cozinha vêm **SÓ do PDF**. Esta referência serve apenas como
+> **conjunto de REGRAS de conferência** (folgas/alturas padrão) — e elas confirmam o nosso
+> `kitchen_ergonomics.py`. Nada de medida desta foto vira medida nossa.
 
 ## Sidecar
 - **Fonte:** print cotado curado pelo Felipe (cozinha em L genérica, madeira clara + tampo escuro)
