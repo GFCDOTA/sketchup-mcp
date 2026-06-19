@@ -58,9 +58,10 @@ _KC = {
     "corpo_sup": [231, 226, 214], "porta_sup": [236, 232, 221],                    # aéreo = off-white/fendi quente
     "tampo": [214, 216, 219], "backsplash": [223, 221, 215],                       # quartzo / rodabanca
     "soculo": [40, 41, 45],                                                        # sóculo grafite
-    "inox": [193, 198, 205],                                                       # geladeira/coifa/borda cuba
+    "inox": [193, 198, 205],                                                       # borda cuba / metais
+    "geladeira": [207, 212, 219],                                                  # inox CLARO da geladeira (eletro, distinto da marcenaria)
     "vidro": [22, 22, 26], "boca": [46, 46, 50],                                   # cooktop preto
-    "cuba": [128, 133, 141], "torneira": [58, 60, 66],                             # cuba inox funda / torneira grafite
+    "cuba": [92, 96, 103], "torneira": [54, 56, 62],                               # bojo ESCURO (lê profundidade) / torneira grafite
     "puxador": [44, 45, 50],                                                       # puxador slim grafite
 }
 # nome de MÓDULO planejado (grupo selecionável sozinho no SKP); countertop é separado do base
@@ -119,13 +120,14 @@ def _kmod(kind, shp, h_m, rgb, z0_m, ws):
 
     out = []
     if kind == "geladeira":
-        out.append(body(z0_m + 0.04, z0_m + h_m - 0.05, _KC["inox"], inset_side=0.01, k="inox"))   # corpo INOX (não madeira) + respiro
-        split = z0_m + h_m * 0.66
-        out.append(panel(a0 + M(0.022), a1 - M(0.022), split + 0.018, z0_m + h_m - 0.075, _KC["inox"], k="inox"))  # porta freezer (topo)
-        out.append(panel(a0 + M(0.022), a1 - M(0.022), z0_m + 0.07, split - 0.018, _KC["inox"], k="inox"))         # porta geladeira (baixo)
-        hp = a1 - M(0.095)                                                              # puxadores = barras verticais (>=1.5in p/ gate)
-        out.append(panel(hp, hp + M(0.045), split + 0.05, z0_m + h_m - 0.14, _KC["puxador"], off=0.032, k="puxador"))
-        out.append(panel(hp, hp + M(0.045), z0_m + 0.16, split - 0.05, _KC["puxador"], off=0.032, k="puxador"))
+        out.append(body(z0_m + 0.03, z0_m + h_m - 0.04, _KC["geladeira"], inset_side=0.008, k="geladeira"))   # corpo INOX CLARO
+        split = z0_m + h_m * 0.62                                                       # freezer no topo (~38%)
+        out.append(panel(a0 + M(0.018), a1 - M(0.018), split + 0.022, z0_m + h_m - 0.055, _KC["geladeira"], k="geladeira"))  # porta freezer
+        out.append(panel(a0 + M(0.018), a1 - M(0.018), z0_m + 0.05, split - 0.022, _KC["geladeira"], k="geladeira"))         # porta geladeira
+        out.append(panel(a0 + M(0.018), a1 - M(0.018), split - 0.02, split + 0.02, _KC["soculo"], off=0.002, k="soculo"))    # REVEAL escuro da divisão freezer/fridge
+        hp = a1 - M(0.10)                                                               # puxadores = BARRAS VERTICAIS longas (cava)
+        out.append(panel(hp, hp + M(0.04), split + 0.06, z0_m + h_m - 0.10, _KC["puxador"], off=0.03, k="puxador"))          # freezer
+        out.append(panel(hp, hp + M(0.04), z0_m + 0.12, split - 0.06, _KC["puxador"], off=0.03, k="puxador"))                # geladeira (barra longa)
     elif kind == "bancada":
         tt, sk = 0.04, 0.12
         out.append(body(z0_m, z0_m + sk, _KC["soculo"], inset_front=0.08, k="soculo"))   # sóculo recuado 8cm (toe-kick lê)
@@ -179,8 +181,8 @@ def _kmod(kind, shp, h_m, rgb, z0_m, ws):
                 out.append(panel(ma0 + M(0.05), ma1 - M(0.05), z0_m + 0.055, z0_m + 0.085, _KC["puxador"], off=0.03, k="puxador"))  # cava/puxador slim
     elif kind == "coifa":
         if h_m <= 0.20:                                                                # coifa SLIM integrada sob o aéreo
-            out.append(body(z0_m, z0_m + h_m, _KC["inox"], inset_side=0.008, k="inox"))            # caixa fina inox
-            out.append(body(z0_m, z0_m + h_m * 0.55, _KC["boca"], inset_front=0.04, inset_side=0.05, k="boca"))  # boca de sucção escura
+            out.append(body(z0_m, z0_m + h_m, _KC["soculo"], inset_side=0.012, inset_front=0.02, k="soculo"))   # caixa fina GRAFITE recuada (slim)
+            out.append(body(z0_m, z0_m + h_m * 0.5, _KC["vidro"], inset_front=0.06, inset_side=0.06, k="vidro"))  # boca de sucção preta
         else:
             out.append(body(z0_m, z0_m + 0.16, _KC["inox"], k="inox"))                 # corpo de captura
             out.append(body(z0_m + 0.16, z0_m + h_m, _KC["inox"], inset_front=0.27, inset_side=0.13, k="inox"))  # chaminé
@@ -332,25 +334,26 @@ def build_boxes(con, room_id):
                     add("aereo", ab, AEREO_H, RGB_AEREO, z0_m=AEREO_Z0, mark=False, ws=ws)
             # COIFA SLIM integrada sob o aéreo, sobre o cooktop (depurador embutido)
             if cook_c is not None:
-                hb = clip(fb(ws, cook_c, COOK_W + 0.06, AEREO_DEPTH), carve=False)   # flush c/ o aéreo = embutida
+                hb = clip(fb(ws, cook_c, COOK_W + 0.04, AEREO_DEPTH - 0.02), carve=False)   # slim, recuada, sem volume lateral
                 if hb is not None:
-                    add("coifa", hb, 0.06, RGB_TORRE, z0_m=AEREO_Z0 - 0.06, mark=False, ws=ws)
+                    add("coifa", hb, 0.05, RGB_TORRE, z0_m=AEREO_Z0 - 0.05, mark=False, ws=ws)
 
     # ARMÁRIO sobre a geladeira -> alinha o TOPO com o aéreo (linha superior contínua)
     aereo_top = AEREO_Z0 + AEREO_H
     if gel_c is not None and (aereo_top - GEL_H) > 0.20:
-        tcb = clip(fb(ws, gel_c, GEL_W, GEL_D), carve=False)   # full-depth -> coluna flush c/ a geladeira (sem poke diagonal)
+        # começa no TOPO da geladeira (sem fenda) -> torre integrada, não caixinha solta
+        tcb = clip(fb(ws, gel_c, GEL_W, GEL_D), carve=False)
         if tcb is not None:
-            add("aereo_fridge", tcb, aereo_top - GEL_H, RGB_AEREO, z0_m=GEL_H, mark=False, ws=ws)
-    # FILLER vertical (painel-gable) na junção bancada/coluna-geladeira -> fecha o gap diagonal.
-    # Direto via fb (sem clip: footprint fino fica abaixo do AREA_MIN e era descartado).
+            add("aereo_fridge", tcb, aereo_top - (GEL_H - 0.05), RGB_AEREO, z0_m=GEL_H - 0.05, mark=False, ws=ws)
+    # FILLER vertical (painel-gable) na junção bancada/coluna-geladeira -> fecha o gap diagonal
+    # até o TOPO. Direto via fb (footprint fino cai abaixo do AREA_MIN no clip).
     if gel_c is not None:
         junc = b_hi if g_end != "lo" else b_lo
-        fil = fb(ws, junc, 0.06, GEL_D).intersection(cell)
+        fil = fb(ws, junc, 0.10, GEL_D).intersection(cell)
         if not fil.is_empty:
             if fil.geom_type == "MultiPolygon":
                 fil = max(fil.geoms, key=lambda g: g.area)
-            add("filler", fil, aereo_top - 0.06, _KC["corpo_sup"], z0_m=0.06, mark=False, ws=ws)
+            add("filler", fil, aereo_top - 0.08, _KC["corpo_sup"], z0_m=0.08, mark=False, ws=ws)
 
     if not items:
         return None, {"result": "NO_VALID_LAYOUT", "room_name": sm.get("room_name"),
