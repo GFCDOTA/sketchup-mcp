@@ -64,6 +64,9 @@ _KC = {
     "vidro": [22, 22, 26], "boca": [46, 46, 50],                                   # cooktop preto
     "cuba": [92, 96, 103], "torneira": [54, 56, 62],                               # bojo ESCURO (lê profundidade) / torneira grafite
     "puxador": [44, 45, 50],                                                       # puxador slim grafite
+    "led": [252, 247, 228],                                                        # fita LED quente sob o aéreo
+    "board": [165, 130, 92], "vaso_d": [96, 116, 86], "tempero": [188, 176, 150],  # decoração funcional
+    "ralo": [60, 63, 69],                                                          # ralo/válvula da cuba
 }
 # nome de MÓDULO planejado (grupo selecionável sozinho no SKP); countertop é separado do base
 _MODNAME = {"geladeira": "fridge", "pia": "sink_module", "cooktop": "cooktop_module",
@@ -121,7 +124,8 @@ def _kmod(kind, shp, h_m, rgb, z0_m, ws):
 
     out = []
     if kind == "geladeira":
-        out.append(body(z0_m + 0.03, z0_m + h_m - 0.04, _KC["geladeira"], inset_side=0.008, k="geladeira"))   # corpo INOX CLARO
+        out.append(body(z0_m + 0.03, z0_m + h_m - 0.06, _KC["geladeira"], inset_side=0.014, k="geladeira"))   # corpo INOX + respiro lateral/superior
+        out.append(panel(a0 + M(0.02), a1 - M(0.02), z0_m + h_m - 0.055, z0_m + h_m - 0.035, _KC["soculo"], off=0.0, k="soculo"))  # reveal de respiro no topo
         split = z0_m + h_m * 0.62                                                       # freezer no topo (~38%)
         out.append(panel(a0 + M(0.018), a1 - M(0.018), split + 0.022, z0_m + h_m - 0.055, _KC["geladeira"], k="geladeira"))  # porta freezer
         out.append(panel(a0 + M(0.018), a1 - M(0.018), z0_m + 0.05, split - 0.022, _KC["geladeira"], k="geladeira"))         # porta geladeira
@@ -130,7 +134,7 @@ def _kmod(kind, shp, h_m, rgb, z0_m, ws):
         out.append(panel(hp, hp + M(0.04), split + 0.06, z0_m + h_m - 0.10, _KC["puxador"], off=0.03, k="puxador"))          # freezer
         out.append(panel(hp, hp + M(0.04), z0_m + 0.12, split - 0.06, _KC["puxador"], off=0.03, k="puxador"))                # geladeira (barra longa)
     elif kind == "bancada":
-        tt, sk = 0.04, 0.12
+        tt, sk = 0.03, 0.12                                                            # tampo BORDA FINA (3cm)
         out.append(body(z0_m, z0_m + sk, _KC["soculo"], inset_front=0.08, k="soculo"))   # sóculo recuado 8cm (toe-kick lê)
         out.append(body(z0_m + sk, z0_m + h_m - tt, _KC["corpo"], k="corpo"))            # gabinete (carcaça)
         zd0, zd1 = z0_m + sk + 0.02, z0_m + h_m - tt - 0.02
@@ -164,22 +168,24 @@ def _kmod(kind, shp, h_m, rgb, z0_m, ws):
         out.append(body(z0_m, z0_m + 0.012, _KC["inox"], inset_side=0.008, k="inox"))   # borda fina flush na pedra
         out.append(body(z0_m - 0.20, z0_m, _KC["cuba"], inset_front=0.055, inset_side=0.06, k="cuba"))      # bojo FUNDO (20cm)
         out.append(body(z0_m - 0.205, z0_m - 0.19, _KC["cuba"], inset_front=0.05, inset_side=0.055, k="cuba"))  # fundo visível
+        out.append(body(z0_m - 0.205, z0_m - 0.193, _KC["ralo"], inset_front=0.19, inset_side=0.205, k="ralo"))  # RALO no fundo do bojo
         ta = (a0 + a1) / 2
-        out.append(panel(ta - M(0.028), ta + M(0.028), z0_m + 0.012, z0_m + 0.05, _KC["torneira"], off=0.05, thick=M(0.045), k="torneira"))  # base torneira (cilindro)
-        out.append(panel(ta - M(0.026), ta + M(0.026), z0_m + 0.05, z0_m + 0.27, _KC["torneira"], off=0.095, thick=M(0.04), k="torneira"))   # gooseneck (mais real)
+        out.append(panel(ta - M(0.024), ta + M(0.024), z0_m + 0.012, z0_m + 0.045, _KC["torneira"], off=0.05, thick=M(0.04), k="torneira"))  # base torneira
+        out.append(panel(ta - M(0.022), ta + M(0.022), z0_m + 0.045, z0_m + 0.28, _KC["torneira"], off=0.10, thick=M(0.035), k="torneira"))  # gooseneck slim elegante
     elif kind in ("aereo", "aereo_fridge"):
-        out.append(body(z0_m + 0.03, z0_m + h_m, _KC["corpo_sup"], k="corpo_sup"))     # carcaça OFF-WHITE
-        out.append(body(z0_m, z0_m + 0.03, _KC["soculo"], inset_front=0.03, k="soculo"))  # rodabanca/valance grafite (reveal)
-        nmod = max(2, int(round(W / M(0.45))))                                         # nunca bloco único: >=2 frentes
+        out.append(body(z0_m + 0.04, z0_m + h_m, _KC["corpo_sup"], k="corpo_sup"))     # carcaça OFF-WHITE
+        out.append(body(z0_m + 0.018, z0_m + 0.04, _KC["soculo"], inset_front=0.04, k="soculo"))  # valance grafite recuada
+        out.append(panel(a0 + M(0.02), a1 - M(0.02), z0_m + 0.002, z0_m + 0.016, _KC["led"], off=0.004, thick=M(0.02), k="led"))  # FITA LED quente
+        nmod = max(2, int(round(W / M(0.60))))                                         # portas MAIORES (premium, menos blocão)
         mw = W / nmod
         niche = (nmod - 1) if (kind == "aereo" and nmod >= 3) else -1                  # 1 bay ABERTA = leveza + decor
         for i in range(nmod):
-            ma0, ma1 = a0 + i * mw + M(0.014), a0 + (i + 1) * mw - M(0.014)            # reveals largos entre portas
+            ma0, ma1 = a0 + i * mw + M(0.016), a0 + (i + 1) * mw - M(0.016)            # reveals finos entre portas grandes
             if i == niche:
                 out.append(panel(ma0, ma1, z0_m + h_m * 0.5 - 0.008, z0_m + h_m * 0.5 + 0.008, _KC["corpo_sup"], off=0.05, k="corpo_sup"))  # prateleira do nicho aberto
             else:
-                out.append(panel(ma0, ma1, z0_m + 0.05, z0_m + h_m - 0.02, _KC["porta_sup"], k="porta_sup"))
-                out.append(panel(ma0 + M(0.05), ma1 - M(0.05), z0_m + 0.055, z0_m + 0.085, _KC["puxador"], off=0.03, k="puxador"))  # cava/puxador slim
+                out.append(panel(ma0, ma1, z0_m + 0.055, z0_m + h_m - 0.02, _KC["porta_sup"], k="porta_sup"))
+                out.append(panel(ma0 + M(0.06), ma1 - M(0.06), z0_m + 0.06, z0_m + 0.082, _KC["puxador"], off=0.025, k="puxador"))  # cava slim elegante
     elif kind == "coifa":
         if h_m <= 0.20:                                                                # coifa SLIM integrada sob o aéreo
             out.append(body(z0_m, z0_m + h_m, _KC["soculo"], inset_side=0.012, inset_front=0.02, k="soculo"))   # caixa fina GRAFITE recuada (slim)
@@ -338,6 +344,16 @@ def build_boxes(con, room_id):
                 hb = clip(fb(ws, cook_c, COOK_W + 0.04, AEREO_DEPTH - 0.02), carve=False)   # slim, recuada, sem volume lateral
                 if hb is not None:
                     add("coifa", hb, 0.05, RGB_TORRE, z0_m=AEREO_Z0 - 0.05, mark=False, ws=ws)
+            # DECORAÇÃO funcional MÍNIMA na bancada (poucas coisas, sem bagunça) — sobre o tampo
+            dec_c = (b_lo + b_hi) / 2
+            db = clip(fb(ws, dec_c - M(0.12), 0.32, 0.22), carve=False)
+            if db is not None:
+                add("decor_board", db, 0.02, _KC["board"], z0_m=COUNTER_H, mark=False, ws=ws)   # tábua de corte
+            vb = fb(ws, dec_c + M(0.20), 0.13, 0.13).intersection(cell)   # direto (footprint pequeno cai no AREA_MIN do clip)
+            if not vb.is_empty:
+                if vb.geom_type == "MultiPolygon":
+                    vb = max(vb.geoms, key=lambda g: g.area)
+                add("decor_vaso", vb, 0.17, _KC["vaso_d"], z0_m=COUNTER_H, mark=False, ws=ws)    # vasinho de tempero
 
     # ARMÁRIO sobre a geladeira -> alinha o TOPO com o aéreo (linha superior contínua)
     aereo_top = AEREO_Z0 + AEREO_H

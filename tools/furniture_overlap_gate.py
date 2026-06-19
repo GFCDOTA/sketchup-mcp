@@ -34,7 +34,7 @@ _HOST = ("bancada", "countertop", "base_cabinet")
 
 
 # trim de acabamento: filler/coifa-slim legitimamente encostam em módulos vizinhos
-_TRIM = ("filler", "hood", "coifa")
+_TRIM = ("filler", "hood", "coifa", "decor", "led", "ralo")
 
 
 def _is_embedded(a, b):
