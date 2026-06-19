@@ -34,5 +34,5 @@
     "premium_check: deve ler como dark premium, NÃO cozinha preta barata"
   ],
   "judging_question": "O tema dark walnut funcionou na metragem COMPACTA da planta_74? (NÃO 'ficou igual ao Pinterest?')",
-  "status": {"applied_to_planta_74": true, "render": "cozinha_vray_hero_dark.png", "gpt": "pendente", "felipe_final": "pendente"}
+  "status": {"applied_to_planta_74": true, "render": "cozinha_vray_hero_dark.png", "gpt": "PASS como variante dark_walnut (cave/premium/compacto OK; fix da geladeira inox-dark + LED reforcado)", "felipe_final": "pendente"}
 }
