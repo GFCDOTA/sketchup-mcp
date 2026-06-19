@@ -42,6 +42,10 @@ THEMES = [
      "role": "variante autoral / noturna / impacto",
      "env": {"ISO": "110", "SKY": "0.09", "SUN": "0.18", "BURN": "0.78", "KEY_INT": "86", "FILL2_INT": "18", "LED_INT": "30"},
      "gpt": "PASS variante", "gates": {"theme_fit": "PASS", "ergonomics": "PASS", "maintenance": "WARN (madeira na zona molhada)", "buildability": "PASS"}},
+    {"id": "04_black_wood_gold", "theme": "black_wood_gold", "out": "cozinha_vray_hero_blackgold.png",
+     "role": "autoral premium / show — preto+madeira+ouro sutil",
+     "env": {"ISO": "108", "SKY": "0.10", "SUN": "0.20", "BURN": "0.80", "KEY_INT": "88", "FILL2_INT": "19", "LED_INT": "36"},
+     "gpt": "PASS", "gates": {"theme_fit": "PASS", "ergonomics": "PASS", "maintenance": "WARN (cuba preta marca água + pedra escura)", "buildability": "PASS"}},
 ]
 
 # rankings (curado dos vereditos GPT + gates)

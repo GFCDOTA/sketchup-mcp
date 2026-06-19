@@ -124,9 +124,10 @@ def apply_theme_black_wood_gold(text: str) -> str:
     (backsplash protagonista via stone_gold.png; tampo controlado) + cuba preta + puxador bronze
     discreto + torneira preta + geladeira inox dark. Skin-swap, geometria congelada.
     Gates: cave/fake_luxury/maintenance/compact. Madeira NUNCA na area molhada (pref. Felipe)."""
-    blk = "AColor(0.012, 0.012, 0.013, 1)"
-    black = {"diffuse": blk, "reflect": "AColor(0.04, 0.04, 0.04, 1)",
-             "reflect_glossiness": "0.34", "fresnel_ior": "1.45", "metalness": "0"}
+    blk = "AColor(0.013, 0.013, 0.014, 1)"
+    # leve SATIN (não matte chapado) -> o preto lê como marcenaria premium, não massa preta (GPT #1)
+    black = {"diffuse": blk, "reflect": "AColor(0.08, 0.08, 0.08, 1)",
+             "reflect_glossiness": "0.47", "fresnel_ior": "1.5", "metalness": "0"}
     for k in ("kc_corpo", "kc_porta", "kc_gaveta", "kc_corpo_sup", "kc_porta_sup", "kc_filler", "kc_cuba"):
         text = _set_block(text, f"_ph_{k}_BRDFVRayMtl", black)
     dark_inox = {"diffuse": "AColor(0.022, 0.024, 0.028, 1)", "reflect": "AColor(0.46, 0.47, 0.52, 1)",
