@@ -20,10 +20,13 @@ end
 def ka_run
   model = Sketchup.active_model
   ents = model.entities
-  # 1) ISOLA: esconde tudo que não é módulo da COZINHA (mata oclusão da parede/sofá)
+  # 1) ISOLA: esconde tudo que não é módulo do cômodo-alvo (KA_KEEP) -> mata oclusão
+  keep = ENV['KA_KEEP'] || 'COZINHA'
+  hide = ENV['KA_HIDE']   # substring de módulo a esconder MESMO sendo do cômodo (ex. parede que oclui)
   kbb = Geom::BoundingBox.new
   ents.grep(Sketchup::Group).each do |g|
-    if g.name.to_s.include?('COZINHA')
+    nm = g.name.to_s
+    if nm.include?(keep) && !(hide && !hide.empty? && nm.include?(hide))
       g.hidden = false
       kbb.add(g.bounds)
     else

@@ -229,7 +229,7 @@ def living_room_boxes(con, room_id):
     _rack_wall_len = next((w["length_m"] for w in _aff["walls"]
                            if w["wall_id"] == p["tv_rack"]["wall_id"]), 1.80)
     rack_w = round(min(1.20, max(0.90, min(width_m, _rack_wall_len - 0.40))), 2)
-    if os.environ.get("FURNISH_STYLE") == "industrial":
+    if os.environ.get("FURNISH_STYLE") in ("industrial", "modern_warm"):
         # RACK = MÓVEL PLANEJADO real (rack_class PASS): pés/corpo/tampo/gavetas/nicho,
         # derivado da TV + linha de visão. NÃO mais caixa. low_credenza preto+madeira.
         # Gated industrial p/ não regredir o render default. place_sofa_boxes orienta (parts em m).
@@ -246,7 +246,7 @@ def living_room_boxes(con, room_id):
         boxes.append(_oriented_box("rack_tv", rack_c, rack_f, rack_w, 0.35, 0.0, 0.50, [120, 85, 55], module="Rack TV"))
     # tapete + mesa COMPACTOS, agrupados perto do sofa (nao transbordam o nicho).
     boxes.append(_oriented_box("tapete", _ahead(0.70), sofa_f, 1.60, 1.10, 0.0, 0.02, [165, 156, 140], module="Tapete"))
-    if os.environ.get("FURNISH_STYLE") == "industrial":
+    if os.environ.get("FURNISH_STYLE") in ("industrial", "modern_warm"):
         # MESA DE CENTRO = classe planejada (coffee_table_class PASS): tampo madeira +
         # pernas metal preto + prateleira inferior. NÃO mais caixa.
         from tools.coffee_table_class import CoffeeTableClassSpec, build_coffee_table_v2
@@ -263,7 +263,7 @@ def living_room_boxes(con, room_id):
     # ---- camada de ESTILO (gated): parede de concreto na parede-TV + decor reusando
     # os builders que JA existem (planta, quadro). So adiciona; cor entra via apply_style.
     style = os.environ.get("FURNISH_STYLE")
-    if style == "industrial":
+    if style in ("industrial", "modern_warm"):
         from shapely.geometry import Point, Polygon
 
         from core.scale import PT_TO_IN
