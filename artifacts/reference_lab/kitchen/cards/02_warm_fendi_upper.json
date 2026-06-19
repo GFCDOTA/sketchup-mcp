@@ -1,0 +1,18 @@
+{
+  "card_id": "warm_fendi_upper",
+  "category": "material_token",
+  "problem": "branco puro em flat/V-Ray parece MDF barato (o 'brancao'), some sob a luz sem temperatura",
+  "design_move": "flat_material -> warm_layered_materiality: off-white quente/fendi ACETINADO (satin), nunca branco puro nem ultra-gloss",
+  "applies_to": ["upper_cabinet", "tower", "upper_panel", "filler"],
+  "implementation_tokens": {
+    "material_family": "warm_offwhite_lacquer",
+    "finish": "satin",
+    "color_temperature": "warm_neutral",
+    "vray_brdf": {"reflect": 0.05, "reflect_glossiness": 0.58, "fresnel_ior": 1.4, "metalness": 0}
+  },
+  "joinery_token_ref": "references/tokens/warm_fendi_upper.json",
+  "real_values": {"fendi_rgb": [224,215,199], "kinds": ["kc_corpo_sup", "kc_porta_sup", "kc_filler"]},
+  "forbidden": ["branco puro >[244,244,244] (branco-papel)", "ultra-gloss (marca digital/plastico)", "fendi frio/acinzentado"],
+  "gate": ["nao ler como MDF chapado", "coordenar com a base madeira (sem bicolor builder-grade)", "deve aparecer no hero"],
+  "evidence": "GPT: 'o V-Ray resolveu o brancao; fendi mais quente/acetinado'"
+}

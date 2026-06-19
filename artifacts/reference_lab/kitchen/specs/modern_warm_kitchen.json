@@ -16,6 +16,13 @@
     "wood_accent":    { "desc": "nicho de madeira média", "rgb": [138, 104, 66], "kinds": ["kc_niche_wood"] }
   },
 
+  "cards_dir": "artifacts/reference_lab/kitchen/cards/ (10 Reference Cards implementáveis, formato card_schema.json)",
+  "tokens_by_category": {
+    "joinery_form_token": ["integrated_fridge_tower", "shadow_gap_reveal", "graphite_technical_toe_kick", "integrated_slim_hood"],
+    "material_token": ["warm_fendi_upper", "coordinated_oak_base", "subtle_veined_stone_backsplash", "inox_premium_appliance"],
+    "lighting_token": ["under_cabinet_linear_led"],
+    "camera_token": ["hero_camera_compact_kitchen"]
+  },
   "joinery_tokens": [
     "planned_fridge_tower",
     "warm_fendi_upper",

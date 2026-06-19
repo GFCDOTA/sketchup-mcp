@@ -1,0 +1,17 @@
+{
+  "card_id": "shadow_gap_reveal",
+  "category": "joinery_form_token",
+  "problem": "modulos colados sem junta = bloco macico sem ritmo; falta a sombra de marcenaria fina",
+  "design_move": "reveal/shadow gap entre modulos + gola/cava handle-less (puxador embutido)",
+  "applies_to": ["between_modules", "upper_top", "tower_meets_upper"],
+  "implementation_tokens": {
+    "reveal_read_mm": [2, 4],
+    "handle": "handle_less_gola",
+    "puxador_finish": "matte_graphite"
+  },
+  "joinery_token_ref": "references/tokens/premium_shadow_gap.json",
+  "real_values": {"puxador_kind": "kc_puxador", "puxador_rgb": [44,45,50]},
+  "forbidden": ["modulos colados sem junta", "puxador volumoso saliente", "reveal virar vao estrutural"],
+  "gate": ["reveal fino (2-4mm leitura)", "nao virar buraco", "consistente entre modulos"],
+  "evidence": "juntas/gola no cozinha_vray_hero.png fazem a marcenaria 'flutuar'"
+}

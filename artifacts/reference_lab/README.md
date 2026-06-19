@@ -1,48 +1,57 @@
-# Reference Lab — estúdio de tradução referência → marcenaria
+# Reference Lab — compilador de referência visual → regra procedural
 
-> Operado pelo especialista [`reference-to-joinery-translator`](../../.claude/skills/reference-to-joinery-translator/SKILL.md).
-> **Pinterest manda na linguagem. PDF manda na posição. Gates mandam na segurança. Felipe manda no PASS.**
+> Operado pelo especialista [`reference-to-joinery-translator`](../../.claude/skills/reference-to-joinery-translator/SKILL.md)
+> (aka REFERENCE_GRAMMAR_COMPILER).
+> **Referência bonita ≠ copiar imagem. Referência bonita → extrair decisões repetíveis.**
 
-## O que é
-O lugar dos **exemplos aplicados** (estudos de caso) que ensinam o pipeline a pensar
-como marceneiro/designer. Não é scraper, não baixa imagem em massa — o Felipe cura
-1–5 referências boas e o agente destila em regra.
+## Hierarquia absoluta
+PDF manda na **posição** · Gates mandam na **circulação/segurança** · Referência manda na
+**linguagem visual** · Felipe/GPT mandam no **PASS**.
 
-**10 cards bem feitos > 500 imagens.** O objetivo não é volume; é destilar referência
-boa em regra implementável e provada num render.
+## A separação que impede destruir o PDF: FORMA × PELE
+Todo card declara uma **categoria** — senão o agente mistura "botar pedra bonita" com
+"mudar layout" e destrói a planta:
+
+| Categoria | Camada | Pode mexer? |
+|---|---|---|
+| `joinery_form_token` | FORMA (torre, gola, coifa, filler, sóculo, proporção) | só dentro do envelope do PDF; **nunca move âncora** |
+| `material_token` | PELE (fendi, madeira, pedra, inox) | livre (acabamento) |
+| `lighting_token` | LUZ (LED linear, rig) | livre |
+| `camera_token` | CÂMERA (crop/FOV/hero) | livre (não toca geometria) |
+| `safety_gate` | TRAVA (pia fixa, circulação) | bloqueia |
 
 ## KB (`references/`) vs Lab (`artifacts/reference_lab/`)
-- **`references/`** = o livro-texto (conhecimento geral, reusável): materiais,
-  ergonomia, anti-padrões, paletas e **tokens** (fonte única dos tokens).
-- **`artifacts/reference_lab/`** = o caderno de estudos de caso (exemplos concretos,
-  com antes/depois e valores reais). Os tokens são **referenciados** de
-  `references/tokens/`, não copiados.
+- **`references/`** = livro-texto (conhecimento geral): materiais, ergonomia, anti-padrões,
+  paletas e **tokens** (fonte única).
+- **`artifacts/reference_lab/`** = estudos de caso (exemplos concretos com antes/depois e
+  cards JSON implementáveis). Tokens referenciados de `references/tokens/`, não copiados.
 
 ## Estrutura
 ```
 artifacts/reference_lab/
-  README.md                         (este arquivo)
+  README.md
   kitchen/
-    EXAMPLE_001_KITCHEN.md          ← a régua: cozinha planta_74 (antes/depois + lição)
-    examples/                       ← Reference Cards (problema→solução→gate)
-      integrated_fridge_tower.md
-      fendi_kill_flat_white.md
-      subtle_veined_backsplash.md
-      under_cabinet_linear_led.md
-      premium_shadow_gap.md
-    specs/
-      modern_warm_kitchen.json      ← DesignGrammarSpec do cômodo
+    EXAMPLE_001_KITCHEN.md          ← KITCHEN_WARM_COMPACT_PREMIUM (a régua / professor 001)
+    cards/
+      card_schema.json              ← contrato fixo do card
+      01..10_*.json                 ← 10 Reference Cards implementáveis (com categoria)
+    specs/modern_warm_kitchen.json  ← DesignGrammarSpec
 ```
 
-## Índice
-- **[EXAMPLE_001_KITCHEN](kitchen/EXAMPLE_001_KITCHEN.md)** — cozinha planejada
-  compacta premium. Lição-raiz: `loose_object → planned_niche_system`. Status: GPT
-  **PASS de pele**; veredito final do Felipe pendente.
-- Cards: torre de geladeira integrada · matar branco chapado (fendi) · pedra de veio
-  sutil · LED linear sob aéreo · shadow gap premium.
-- Spec: [`modern_warm_kitchen.json`](kitchen/specs/modern_warm_kitchen.json).
+## A saída do especialista é PATCH DE INTENÇÃO, não crítica
+```
+APPLY:  planned_fridge_tower, warm_fendi_upper, ...
+DO NOT: move sink / change wall / invent island / over-marble
+```
+
+## Lição-raiz (3 camadas)
+```
+loose_object    → planned_niche_system           (FORMA)
+flat_material   → warm_layered_materiality        (PELE)
+spot_test_light → continuous_architectural_light  (LUZ)
+```
 
 ## Como crescer o lab
-Felipe cola uma referência → o especialista lê → cria/atualiza um Card + atualiza o
-Spec → reusa/cria token em `references/tokens/` → aplica num componente → renderiza →
-GPT julga → Felipe dá o PASS. Cada referência boa vira um Card novo aqui.
+Felipe cola 1–5 referências boas → o especialista lê → separa FORMA/MATERIAL/LUZ/CÂMERA →
+cria/atualiza Cards JSON (formato fixo) → reusa/cria token em `references/tokens/` → aplica
+num componente → renderiza → GPT julga → Felipe dá o PASS. **10 cards bem feitos > 500 imagens.**

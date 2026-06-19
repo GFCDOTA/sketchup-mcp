@@ -1,0 +1,18 @@
+{
+  "card_id": "inox_premium_appliance",
+  "category": "material_token",
+  "problem": "eletro inox vira bloco cinza fosco sem vida (parece placeholder)",
+  "design_move": "inox REFLEXIVO (metalness) com roughness realista — le como eletro premium, reflete o ambiente",
+  "applies_to": ["fridge", "oven", "cooktop_trim", "sink"],
+  "implementation_tokens": {
+    "material_family": "brushed_inox",
+    "metalness": 1,
+    "roughness": "satin_brushed",
+    "vray_brdf": {"reflect": 0.72, "reflect_glossiness": 0.74, "fresnel_ior": 8, "metalness": 1}
+  },
+  "joinery_token_ref": null,
+  "real_values": {"inox_rgb": [216,220,227], "kinds": ["kc_geladeira", "kc_inox"], "tweak": "tools/tweak_vrscene.py MAT_INOX"},
+  "forbidden": ["inox chapado cinza fosco", "inox espelhado plastico", "mais de 2 acabamentos metalicos na cozinha"],
+  "gate": ["metalness=1 reflexivo", "roughness realista (nao espelho)", "max 2 metais"],
+  "evidence": "geladeira inox com reflexo no hero; BRDF MAT_INOX aplicado"
+}

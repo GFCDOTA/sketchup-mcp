@@ -1,0 +1,18 @@
+{
+  "card_id": "graphite_technical_toe_kick",
+  "category": "joinery_form_token",
+  "problem": "soculo na mesma cor/plano da frente = base pesada, bloco macico no chao",
+  "design_move": "soculo RECUADO em grafite fosco -> a base 'some' e a marcenaria parece flutuar",
+  "applies_to": ["base_toe_kick", "tower_base"],
+  "implementation_tokens": {
+    "toe_kick_height_cm": 12,
+    "recess": true,
+    "material": "matte_graphite",
+    "rgb": [40, 41, 45]
+  },
+  "joinery_token_ref": "references/tokens/premium_shadow_gap.json",
+  "real_values": {"soculo_kind": "kc_soculo", "soculo_rgb": [40,41,45], "TOE_KICK_m": 0.12},
+  "forbidden": ["soculo flush com a frente", "soculo na cor da marcenaria", "soculo brilhante"],
+  "gate": ["kitchen_ergonomics::toe_kick_height (10-15cm)", "recuado", "fosco (nao reflexivo)"],
+  "evidence": "grafite recuado no hero faz o fendi flutuar sobre a base"
+}
