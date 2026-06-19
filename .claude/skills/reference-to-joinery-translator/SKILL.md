@@ -1,84 +1,75 @@
 ---
 name: reference-to-joinery-translator
 description: >
-  Compilador de referência visual CURADA → regra procedural implementável no SketchUp.
-  (aka REFERENCE_GRAMMAR_COMPILER). Pega print/URL que o Felipe escolheu e produz:
-  leitura visual, separação FORMA/MATERIAL/LUZ/CÂMERA, Reference Cards JSON, DesignGrammarSpec,
-  tokens, gates, forbidden moves, e um PATCH DE INTENÇÃO (APPLY / DO NOT). NÃO é scraper, NÃO
-  baixa imagem em massa, NÃO copia pixel. Use quando o Felipe mandar referência pra virar regra,
-  ou ao criar/atualizar um card/exemplo no reference_lab.
+  v1 — REFERENCE_TO_KITCHEN_SYSTEM_TRANSLATOR. Compila referência visual CURADA em SISTEMA de
+  cozinha implementável: não só TEMA (cor/material/luz), mas INTELIGÊNCIA DE USO (medidas,
+  ergonomia, manutenção, buildability). Produz analysis (10 saídas) + theme preset + roda 4
+  gates. NÃO é scraper. Regra de ouro: Pinterest = intenção visual (hipótese), PDF/gates =
+  verdade espacial. Use quando o Felipe colar referência de cozinha/planejado, ou pra rodar
+  BATCH_THEME_RENDER de presets na planta_74.
 ---
 
-# REFERENCE_TO_JOINERY_TRANSLATOR
+# REFERENCE_TO_KITCHEN_SYSTEM_TRANSLATOR (v1)
 
-> Referência bonita ≠ copiar imagem. **Referência bonita → extrair decisões repetíveis.**
+> **Medida de Pinterest não é verdade. É hipótese.** PDF + ergonomia + gate validam.
+> Pinterest manda na **intenção visual**. PDF/gates mandam na **verdade espacial**.
+> Felipe manda no **PASS**.
 
-Você é o compilador que transforma gosto visual em **gramática procedural**. Não copia
-Pinterest, não faz scraping. O Felipe fornece prints/URLs/imagens curadas; você destila.
+Evolução do reference-to-joinery-translator v0 (que já separava FORMA×PELE e virou tema). Agora
+extrai também a **inteligência de uso** — porque o Pinterest tem muita mentira de foto: cozinha
+linda que na vida real é ruim de limpar, escura demais, coifa inútil, armário alto demais, vão
+pegando poeira, bancada sem apoio.
 
-## Hierarquia absoluta (nunca inverter)
-1. **PDF manda na POSIÇÃO** (pia, portas, paredes, janelas, layout).
-2. **Gates mandam na CIRCULAÇÃO/SEGURANÇA.**
-3. **Referência manda na LINGUAGEM VISUAL** (cor, material, proporção, detalhe, luz).
-4. **Felipe/GPT mandam no PASS final** (GPT = checkpoint; Felipe = juiz).
+## Duas camadas que o agente aprende (separadas)
+1. **TEMA** — preto/madeira/pedra/LED, industrial/japandi/hotel… (a PELE, a vibe).
+2. **INTELIGÊNCIA DE USO** — altura, vão, limpeza, poeira, ergonomia, coifa, rodapé, torre,
+   circulação, manutenção, buildability (o SISTEMA).
 
-## A separação que impede destruir o PDF: FORMA × PELE
-Toda decisão extraída de uma referência é classificada — senão o agente mistura "botar pedra
-bonita" com "mudar layout" e começa a destruir a planta.
-
-| Camada | Categoria do card | Exemplos | Pode mexer? |
-|---|---|---|---|
-| **FORMA** | `joinery_form_token` | torre integrada, gola recuada, coifa embutida, filler, proporção aéreo/base, sóculo | só dentro do envelope do PDF; **nunca move âncora** |
-| **PELE** | `material_token` | fendi acetinado, madeira quente, pedra veio sutil, inox reflexivo | livre (é acabamento) |
-| **LUZ** | `lighting_token` | LED linear quente, key/fill | livre |
-| **CÂMERA** | `camera_token` | crop/FOV/hero | livre (não toca geometria) |
-| **TRAVA** | `safety_gate` | não mover pia, circulação | bloqueia |
-
-## Sempre produza (8 saídas)
-1. **Leitura visual objetiva** da referência (o que de fato está lá).
-2. **Separação FORMA / MATERIAL / LUZ / CÂMERA.**
-3. **Reference Cards** no formato fixo (ver `cards/card_schema.json`).
-4. **DesignGrammarSpec** JSON (intent + palette + tokens + forbidden).
-5. **Tokens** aplicáveis (reusar/criar em `references/tokens/`).
-6. **Gates** de segurança e fidelidade.
-7. **Lista de forbidden moves.**
-8. **Exemplo antes/depois** quando houver base.
-
-## A saída final NÃO é crítica — é PATCH DE INTENÇÃO
-Errado: *"essa referência tem madeira e pedra"*. Certo:
+## Para cada referência, produza 10 saídas (analysis)
 ```
-APPLY:
-  - planned_fridge_tower
-  - warm_fendi_upper
-  - coordinated_oak_base
-  - subtle_veined_stone_backsplash
-  - under_cabinet_linear_led
-DO NOT:
-  - move sink / change wall / invent island
-  - over-marble the backsplash
+1.  Theme extraction        — cor/material/luz/sensação
+2.  Form/skin separation    — o que é FORMA (joinery) vs PELE (material/luz/câmera)
+3.  Dimension hints         — medidas aparentes/anotadas (HIPÓTESE, nunca verdade)
+4.  Ergonomics notes        — altura/alcance/uso diário/circulação/bancada
+5.  Maintenance notes       — poeira/limpeza/mancha/vão inútil
+6.  Buildability notes      — marcenaria executa ou é só foto?
+7.  What to copy            — tema/paleta/textura/iluminação/sensação
+8.  What to adapt           — medidas/proporções/materiais/intensidade de luz
+9.  What to reject          — layout de mansão/ilha impossível/coifa gigante/vão de poeira
+10. Theme preset            — JSON aplicável na planta_74 (KITCHEN_THEME)
 ```
+Template: `artifacts/reference_lab/templates/reference_analysis_template.md`.
 
-## Formato obrigatório do card (machine-implementable)
-Cada card é um JSON em `artifacts/reference_lab/<room>/cards/<id>.json` com:
-`card_id · category · problem · design_move · applies_to · implementation_tokens (params
-implementáveis, nunca vago tipo "deixar bonito") · joinery_token_ref · real_values ·
-forbidden · gate · evidence`. Contrato em `cards/card_schema.json`.
+## 4 gates novos (além dos gates de fidelidade)
+- **theme_fit_gate** — o tema combina com a planta COMPACTA linear da planta_74?
+- **ergonomics_gate** — altura/alcance/uso/circulação/bancada fazem sentido?
+  (`tools/kitchen_ergonomics.py` = as 12 medidas; falha = WARN/FAIL.)
+- **maintenance_gate** — vai juntar poeira / ruim de limpar / manchar / vão inútil?
+- **buildability_gate** — dá pra marcenaria executar, ou é só imagem de Pinterest?
 
-## Lição-raiz (3 camadas) — o que o golden sample ensina
+Definição: `artifacts/reference_lab/gates/reference_system_gates.md`.
+
+## Hierarquia absoluta
+PDF na **posição** · gates na **circulação/segurança/manutenção** · referência na **linguagem
+visual** · Felipe/GPT no **PASS**. Tema muda skin/material/luz/câmera; **NUNCA** âncora do PDF
+ou geometria aprovada sem autorização (DECISION 001).
+
+## Fluxo de lote (BATCH_THEME_RENDER)
 ```
-loose_object      → planned_niche_system          (FORMA)
-flat_material     → warm_layered_materiality       (PELE)
-spot_test_light   → continuous_architectural_light (LUZ)
+Felipe cola 5–10 refs curadas (inbox/)
+  → extrai temas (analyzed/*.analysis.md) → agrupa por linguagem → cria 3–N presets (themes/)
+  → aplica na MESMA geometria da planta_74 (skin-swap) → renderiza A/B/C/D (renders/)
+  → roda os 4 gates → GPT/Felipe julga → congela os melhores (GOLDEN_SAMPLES.md)
 ```
-
-## Golden sample
-**EXAMPLE_001_KITCHEN_WARM_COMPACT_PREMIUM** (`artifacts/reference_lab/kitchen/`) — a tua
-cozinha planta_74 v4, GPT PASS de pele. É a régua: toda referência nova é comparada com ela.
+Driver: `tools/batch_theme_render.py`. Saída: hero por tema + montagem + ranking (mais vendável /
+autoral / seguro p/ manutenção / arriscado).
 
 ## NUNCA
-- mover pia/portas/paredes/janelas sem autorização;
-- inventar ilha em planta compacta;
-- copiar imagem literalmente; depender de scraping em massa;
-- gerar token vago ("deixar bonito") — sempre parâmetro implementável;
-- misturar material com geometria sem **declarar a categoria**;
-- cravar PASS sozinho (GPT é checkpoint, Felipe é o juiz).
+- tratar Pinterest como verdade técnica (medida = hipótese, valida no PDF/ergonomia);
+- copiar layout/ilha/coifa-gigante/vão-de-poeira da referência;
+- scraping em massa; copiar imagem literalmente;
+- mover âncora do PDF; cravar PASS sozinho (GPT checkpoint, Felipe juiz).
+
+## Estado
+v0 validado (DECISION 001): 3 golden samples (warm/dark/boutique) GPT PASS, mesma geometria.
+v1 acrescenta a camada de SISTEMA (medidas/ergonomia/manutenção/buildability) + os 4 gates.
