@@ -73,9 +73,22 @@ if not vrs.exists():
     sys.exit(1)
 print("export OK:", log.read_text("utf-8", "ignore").replace("\n", " | ")[:300])
 
-c = [float(v) for v in (os.environ.get("VRAY_TARGET", "0,0,40").split(","))]
-fills = [{"pos": (c[0], c[1], 70.0), "intensity": FILL, "radius": 34.0, "color": (1.0, 0.84, 0.62)}] if FILL > 0 else None
+# RIG de luz dedicado (sphere area lights). Céu/sol baixos -> estes dominam = contraste/forma.
+fills = []
+# KEY: forte, frente-cima de um lado (define forma + sombra de profundidade), quente
+fills.append({"pos": (float(os.environ.get("KEY_X", 168)), float(os.environ.get("KEY_Y", 600)),
+                      float(os.environ.get("KEY_Z", 104))),
+              "intensity": float(os.environ.get("KEY_INT", 80)), "radius": float(os.environ.get("KEY_R", 26)),
+              "color": (1.0, 0.86, 0.62)})
+# FILL: suave do outro lado (lift das sombras -> madeira não some), neutro-quente
+fills.append({"pos": (176.0, 714.0, 64.0), "intensity": float(os.environ.get("FILL2_INT", 22)),
+              "radius": 48.0, "color": (0.96, 0.93, 0.9)})
+# LED QUENTE 2700K sob o aéreo (acende bancada/backsplash)
+for ly in (615.0, 663.0):
+    fills.append({"pos": (64.0, ly, 57.0), "intensity": float(os.environ.get("LED_INT", 13)),
+                  "radius": 6.0, "color": (1.0, 0.72, 0.42)})
 tweak_file(str(vrs), iso=ISO, fnum=FNUM, shutter=SHUTTER, sky=SKY, burn=BURN,
+           sun=float(os.environ.get("SUN", 0.2)), sun_size=float(os.environ.get("SUN_SIZE", 3.0)),
            materials=True, fill_lights=fills, width=1500, height=1100)
 
 img = (FDIR / out_name).resolve()
@@ -91,5 +104,10 @@ from PIL import Image  # noqa: E402
 im = Image.open(img)
 if im.mode == "RGBA":
     im = im.convert("RGB")
-    im.save(img)
+# crop hero: tira chão vazio + céu de sobra (mantém a cozinha). Tunável por env CROP_*.
+W, H = im.size
+cx0, cx1 = float(os.environ.get("CROP_X0", 0.10)), float(os.environ.get("CROP_X1", 0.93))
+cy0, cy1 = float(os.environ.get("CROP_Y0", 0.02)), float(os.environ.get("CROP_Y1", 0.60))
+im = im.crop((int(W * cx0), int(H * cy0), int(W * cx1), int(H * cy1)))
+im.save(img)
 print(f"OK base_intact={intact} -> {img}  ({im.size})")

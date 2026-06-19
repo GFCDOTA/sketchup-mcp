@@ -16,20 +16,34 @@ from pathlib import Path
 # --- materiais V-Ray por PAPEL (premium: troca cor chapada por madeira satin / tecido matte / metal) ---
 MAT_WOOD = ("estrado", "corpo", "tampo", "gaveta", "pe", "rodape", "porta", "foot", "base",
             "rack_tv", "mesa_centro", "dresser", "bancada", "torre", "aereo", "bancada_banho",
-            "box", "shelf_plank")
+            "box", "shelf_plank",
+            "kc_corpo", "kc_porta", "kc_gaveta", "kc_niche_wood", "kc_board")     # COZINHA: madeira
 MAT_FABRIC = ("headboard", "rug", "colchao", "travesseiro", "manta", "arm", "seat_cushion",
               "back_cushion", "tapete")
 MAT_METAL = ("puxador",)
-MAT_CERAMIC = ("vaso",)
+MAT_CERAMIC = ("vaso", "kc_cuba")                                            # cuba inox/ceramica
 MAT_CONCRETE = ("parede_concreto",)                                          # estilo industrial (no-op s/ o kind)
-MAT_BLACK_METAL = ("frame", "shelf_bracket", "track_rail", "track_spot")      # estrutura preta fosca
+MAT_BLACK_METAL = ("frame", "shelf_bracket", "track_rail", "track_spot",
+                   "kc_soculo", "kc_puxador", "kc_gola", "kc_torneira")       # COZINHA: grafite/preto fosco
+MAT_INOX = ("kc_geladeira", "kc_inox")                                       # COZINHA: inox reflexivo
+MAT_SATIN = ("kc_corpo_sup", "kc_porta_sup", "kc_filler")                    # COZINHA: fendi acetinado (nao plastico)
+MAT_STONE = ("kc_tampo", "kc_backsplash")                                    # COZINHA: pedra polida clara
+MAT_BLACK_GLOSS = ("kc_vidro", "kc_boca")                                    # COZINHA: cooktop vidro preto
 MAT_PARAMS = {
-    "wood": {"reflect": "AColor(0.11, 0.11, 0.11, 1)", "reflect_glossiness": "0.72",
-             "fresnel_ior": "1.55", "metalness": "0"},                       # madeira satin
+    "wood": {"reflect": "AColor(0.09, 0.09, 0.09, 1)", "reflect_glossiness": "0.7",
+             "fresnel_ior": "1.5", "metalness": "0"},                        # madeira satin (menos saturada via textura)
     "fabric": {"reflect": "AColor(0, 0, 0, 1)", "reflect_glossiness": "1", "roughness": "0.55",
                "metalness": "0"},                                            # tecido matte
     "metal": {"reflect": "AColor(0.78, 0.78, 0.78, 1)", "reflect_glossiness": "0.82",
               "metalness": "1"},                                             # metal escovado
+    "inox": {"reflect": "AColor(0.72, 0.74, 0.78, 1)", "reflect_glossiness": "0.74",
+             "fresnel_ior": "8", "metalness": "1"},                          # inox geladeira (reflexo realista, roughness)
+    "satin": {"reflect": "AColor(0.05, 0.05, 0.05, 1)", "reflect_glossiness": "0.58",
+              "fresnel_ior": "1.4", "metalness": "0"},                       # laca acetinada fendi (nao plastico)
+    "stone": {"reflect": "AColor(0.13, 0.13, 0.13, 1)", "reflect_glossiness": "0.7",
+              "fresnel_ior": "1.55", "metalness": "0"},                      # pedra clara polida
+    "black_gloss": {"reflect": "AColor(0.55, 0.55, 0.55, 1)", "reflect_glossiness": "0.93",
+                    "fresnel_ior": "1.7", "metalness": "0"},                 # vidro preto cooktop
     "ceramic": {"reflect": "AColor(0.28, 0.28, 0.28, 1)", "reflect_glossiness": "0.9",
                 "metalness": "0"},
     "concrete": {"reflect": "AColor(0.04, 0.04, 0.04, 1)", "reflect_glossiness": "0.45",
@@ -55,6 +69,8 @@ def _set_block(text: str, brdf: str, params: dict) -> str:
 def apply_materials(text: str) -> str:
     """Aplica materiais V-Ray por papel nos materiais de movel (_ph_<kind>_BRDFVRayMtl)."""
     for kinds, cls in ((MAT_WOOD, "wood"), (MAT_FABRIC, "fabric"), (MAT_METAL, "metal"),
+                       (MAT_INOX, "inox"), (MAT_SATIN, "satin"), (MAT_STONE, "stone"),
+                       (MAT_BLACK_GLOSS, "black_gloss"),
                        (MAT_CERAMIC, "ceramic"), (MAT_CONCRETE, "concrete"),
                        (MAT_BLACK_METAL, "black_metal")):
         for kind in kinds:
