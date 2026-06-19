@@ -56,6 +56,7 @@ M2IN = 39.3700787402
 _KC = {
     "corpo": [156, 123, 86], "porta": [163, 130, 92], "gaveta": [163, 130, 92],   # base = madeira
     "corpo_sup": [231, 226, 214], "porta_sup": [236, 232, 221],                    # aéreo = off-white/fendi quente
+    "filler": [203, 197, 185],                                                      # painel lateral da torre = fendi/taupe (não estoura branco no flat)
     "tampo": [214, 216, 219], "backsplash": [223, 221, 215],                       # quartzo / rodabanca
     "soculo": [40, 41, 45],                                                        # sóculo grafite
     "inox": [193, 198, 205],                                                       # borda cuba / metais
@@ -353,7 +354,7 @@ def build_boxes(con, room_id):
         if not fil.is_empty:
             if fil.geom_type == "MultiPolygon":
                 fil = max(fil.geoms, key=lambda g: g.area)
-            add("filler", fil, aereo_top - 0.08, _KC["corpo_sup"], z0_m=0.08, mark=False, ws=ws)
+            add("filler", fil, aereo_top - 0.08, _KC["filler"], z0_m=0.08, mark=False, ws=ws)
 
     if not items:
         return None, {"result": "NO_VALID_LAYOUT", "room_name": sm.get("room_name"),
