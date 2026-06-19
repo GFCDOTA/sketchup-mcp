@@ -176,7 +176,7 @@ def set_block_param(text: str, header_pat: str, param: str, value) -> str:
 
 def tweak(text: str, iso=200, fnum=4.0, shutter=100, sky=1.0, width=None, height=None,
           materials=False, fill_lights=None, sun=None, sun_size=None, burn=None,
-          rect_lights=None) -> str:
+          rect_lights=None, noise_thresh=None, shade_rate=None) -> str:
     text = re.sub(r"(\bISO=)[\d.]+", rf"\g<1>{iso}", text, count=1)
     text = re.sub(r"(\bf_number=)[\d.]+", rf"\g<1>{fnum}", text, count=1)
     text = re.sub(r"(\bshutter_speed=)[\d.]+", rf"\g<1>{shutter}", text, count=1)
@@ -201,6 +201,11 @@ def tweak(text: str, iso=200, fnum=4.0, shutter=100, sky=1.0, width=None, height
         text = add_fill_light(text, fill_lights)
     if rect_lights:
         text = add_rect_lights(text, rect_lights)
+    if noise_thresh is not None:
+        # threshold menor = menos grão (mais samples onde precisa). Limpa fendi/pedra (feedback GPT).
+        text = set_block_param(text, r"SettingsImageSampler\s+\S+\s*\{", "noise_threshold", noise_thresh)
+    if shade_rate is not None:
+        text = set_block_param(text, r"SettingsImageSampler\s+\S+\s*\{", "min_shade_rate", shade_rate)
     return text
 
 

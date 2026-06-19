@@ -93,7 +93,9 @@ led_rect = [{
 }]
 tweak_file(str(vrs), iso=ISO, fnum=FNUM, shutter=SHUTTER, sky=SKY, burn=BURN,
            sun=float(os.environ.get("SUN", 0.2)), sun_size=float(os.environ.get("SUN_SIZE", 3.0)),
-           materials=True, fill_lights=fills, rect_lights=led_rect, width=1500, height=1100)
+           materials=True, fill_lights=fills, rect_lights=led_rect,
+           noise_thresh=float(os.environ.get("NOISE", 0.015)), shade_rate=float(os.environ.get("SHADE", 12)),
+           width=1500, height=1100)
 
 img = (FDIR / out_name).resolve()
 if img.exists():
