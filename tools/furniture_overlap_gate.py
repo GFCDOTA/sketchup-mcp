@@ -33,8 +33,14 @@ _FIX = ("cooktop", "sink", "pia", "cuba")
 _HOST = ("bancada", "countertop", "base_cabinet")
 
 
+# trim de acabamento: filler/coifa-slim legitimamente encostam em módulos vizinhos
+_TRIM = ("filler", "hood", "coifa")
+
+
 def _is_embedded(a, b):
     a, b = a.lower(), b.lower()
+    if any(t in a for t in _TRIM) or any(t in b for t in _TRIM):
+        return True
     fa, fb = any(f in a for f in _FIX), any(f in b for f in _FIX)
     ha, hb = any(h in a for h in _HOST), any(h in b for h in _HOST)
     return (fa and hb) or (fb and ha) or (ha and hb)
