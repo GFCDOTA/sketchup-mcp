@@ -100,6 +100,24 @@ def apply_theme_dark_walnut(text: str) -> str:
     return text
 
 
+def apply_theme_hotel_boutique(text: str) -> str:
+    """THEME HOTEL_BOUTIQUE_WARM_LUXURY — premium equilibrado (entre a clara e a dark).
+    Taupe/greige nos armarios + bronze/champagne nos metais + pedra clara quente + LED refinado.
+    Skin-swap, geometria congelada. vray_export tira a textura de madeira dos armarios (-> taupe diffuse)."""
+    taupe = {"diffuse": "AColor(0.30, 0.25, 0.19, 1)", "reflect": "AColor(0.05, 0.05, 0.05, 1)",
+             "reflect_glossiness": "0.58", "fresnel_ior": "1.4", "metalness": "0"}   # greige acetinado
+    for k in ("kc_corpo", "kc_porta", "kc_gaveta", "kc_corpo_sup", "kc_porta_sup", "kc_filler"):
+        text = _set_block(text, f"_ph_{k}_BRDFVRayMtl", taupe)
+    champagne = {"diffuse": "AColor(0.42, 0.32, 0.16, 1)", "reflect": "AColor(0.6, 0.55, 0.4, 1)",
+                 "reflect_glossiness": "0.72", "fresnel_ior": "6", "metalness": "1"}   # geladeira inox champagne
+    text = _set_block(text, "_ph_kc_geladeira_BRDFVRayMtl", champagne)
+    bronze = {"diffuse": "AColor(0.34, 0.24, 0.11, 1)", "reflect": "AColor(0.55, 0.42, 0.22, 1)",
+              "reflect_glossiness": "0.7", "fresnel_ior": "8", "metalness": "1"}        # puxador/torneira/cuba bronze escovado
+    for k in ("kc_puxador", "kc_torneira", "kc_cuba", "kc_soculo"):
+        text = _set_block(text, f"_ph_{k}_BRDFVRayMtl", bronze)
+    return text
+
+
 def _light_sphere(name, pos, intensity, color=(1.0, 0.8, 0.55), radius=14.0, units=0):
     """Bloco LightSphere V-Ray (area light esferica, quente, invisivel) — fill interior.
     pos/radius em INCHES (unidade do modelo exportado). units=0 (radiancia escalar,
@@ -221,6 +239,8 @@ def tweak(text: str, iso=200, fnum=4.0, shutter=100, sky=1.0, width=None, height
         text = apply_materials(text)
     if theme == "dark_walnut":
         text = apply_theme_dark_walnut(text)
+    elif theme == "hotel_boutique":
+        text = apply_theme_hotel_boutique(text)
     if fill_lights:
         text = add_fill_light(text, fill_lights)
     if rect_lights:

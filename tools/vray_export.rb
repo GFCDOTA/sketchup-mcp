@@ -62,6 +62,11 @@ def vray_export_run
           'ph_kc_niche_wood' => 'wood_dark.png', 'ph_kc_board' => 'wood_dark.png'
         })
       end
+      # TEMA HOTEL_BOUTIQUE_WARM_LUXURY: armarios taupe/greige (tira textura de madeira ->
+      # diffuse no tweak); tampo/backsplash pedra clara quente (mantem stone); nicho/tabua = madeira.
+      if ENV['KITCHEN_THEME'] == 'hotel_boutique'
+        ['ph_kc_corpo', 'ph_kc_porta', 'ph_kc_gaveta'].each { |k| tex_map.delete(k) }   # -> taupe
+      end
       n_tex = 0
       tex_map.each do |matname, png|
         m = model.materials[matname]
