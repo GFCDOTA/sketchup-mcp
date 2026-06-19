@@ -1,0 +1,18 @@
+{
+  "name": "under_cabinet_led",
+  "title": "Fita LED quente 2700K sob o aéreo",
+  "rule": "Uma fita LED quente (2700K) corre sob a base do aéreo, lavando o backsplash e a bancada de pedra. A luz é QUENTE — casa com a temperatura da paleta (oak/fendi/stone), nunca branco-frio. Embutida no fundo do aéreo (não visível diretamente), só a lavagem aparece. É o que tira a cozinha do 'modelo CAD chapado' e dá realismo de planejado fotografado.",
+  "params": {
+    "led_rgb": [255, 250, 232],
+    "color_temp_k": 2700,
+    "mount": "embutida sob a base do aéreo (recuada ~2cm da frente, oculta)",
+    "throw": "lava backsplash (pedra) + bancada",
+    "intensity_note": "suave — realça, não estoura; em V-Ray = emissive quente baixo"
+  },
+  "applies_to_kinds": ["kc_led"],
+  "anti_pattern": "LED 6500K branco-frio quebra a paleta quente e deixa a cozinha 'hospitalar'; fita visível por baixo (não recuada) lê como gambiarra; intensidade alta estoura o branco da pedra.",
+  "cost_relative": "baixo (fita LED é barata; alto impacto visual por real gasto)",
+  "appearance": "Lavagem dourada suave descendo do aéreo sobre o backsplash de pedra e a bancada — assinatura de planejado fotografado.",
+  "gate_refs": ["tools/kitchen_ergonomics.py::upper_clearance", "VRAY_STYLE (veredito visual GPT)"],
+  "source": {"kind": "golden_sample", "title": "tools/kitchen_layout.py _KC led (LED quente 2700K)", "date": "2026-06-19"}
+}

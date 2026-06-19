@@ -1,0 +1,26 @@
+{
+  "name": "warm_fendi_upper",
+  "title": "Aéreo/torre em fendi off-white QUENTE (nunca branco puro)",
+  "rule": "Todos os módulos altos (aéreo, corpo superior, filler da torre) usam off-white QUENTE 'fendi', não branco puro nem cinza frio. A porta é levemente mais clara que o corpo. O aéreo só existe SOBRE a bancada (nunca solto na parede sem base embaixo), inicia a ~1.50 m do piso, profundidade 30-35cm, e a coluna da torre usa o MESMO fendi para ler coesa com o aéreo.",
+  "params": {
+    "corpo_sup_rgb": [224, 215, 199],
+    "porta_sup_rgb": [228, 220, 204],
+    "filler_rgb": [224, 215, 199],
+    "finish": "fosco quente (não brilho, não branco puro)",
+    "white_balance": "casa com LED 2700K",
+    "upper_start_height_m": 1.50,
+    "upper_depth_cm": 33,
+    "upper_depth_range_cm": [30, 35],
+    "upper_clearance_cm": 60,
+    "upper_clearance_range_cm": [50, 60],
+    "module_width_cm": 50,
+    "module_width_range_cm": [35, 65],
+    "joint_reveal": "shadow gap planejado entre módulos (ver premium_shadow_gap)"
+  },
+  "applies_to_kinds": ["kc_corpo_sup", "kc_porta_sup", "kc_filler"],
+  "anti_pattern": "Branco puro [255,255,255] esfria a cena e cria contraste duro com a base de madeira; cinza frio mata a quentura. Aéreo flutuando na parede sem bancada embaixo = layout não-planejado. Aéreo profundo demais (>35cm) bate na cabeça.",
+  "cost_relative": "médio (laqueado/melamina off-white é padrão de planejado)",
+  "appearance": "Massa superior cremosa quente, levemente off-white, que dialoga com o carvalho claro da base — família, não contraste.",
+  "gate_refs": ["tools/kitchen_ergonomics.py::upper_depth", "tools/kitchen_ergonomics.py::upper_clearance", "tools/kitchen_ergonomics.py::upper_module_width"],
+  "source": {"kind": "golden_sample", "title": "tools/kitchen_layout.py _KC corpo_sup/porta_sup/filler + AEREO_*", "date": "2026-06-19"}
+}
