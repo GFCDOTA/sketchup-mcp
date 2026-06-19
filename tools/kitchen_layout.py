@@ -56,7 +56,8 @@ _KC = {"corpo": [224, 225, 229], "porta": [235, 236, 240], "puxador": [58, 60, 6
        "torneira": [150, 153, 160], "backsplash": [202, 205, 209], "gaveta": [231, 232, 236]}
 # nome de MÓDULO planejado (grupo selecionável sozinho no SKP); countertop é separado do base
 _MODNAME = {"geladeira": "fridge", "pia": "sink_module", "cooktop": "cooktop_module",
-            "aereo": "upper_cabinet_01", "torre": "tall_cabinet", "bancada": "base_cabinet_01"}
+            "aereo": "upper_cabinet_01", "torre": "tall_cabinet", "bancada": "base_cabinet_01",
+            "coifa": "hood"}
 
 
 def _kp(kind, x0, y0, x1, y1, z0_m, z1_m, rgb):
@@ -135,7 +136,7 @@ def _kmod(kind, shp, h_m, rgb, z0_m, ws):
                 out.append(panel(ma0, ma1, zd0, zd1, _KC["porta"], k="porta"))
                 out.append(panel(ma0 + M(0.05), ma1 - M(0.05), zd1 - 0.07, zd1 - 0.035, _KC["puxador"], off=0.028, k="puxador"))
         out.append(body(z0_m + h_m - tt, z0_m + h_m, _KC["tampo"], inset_front=-0.03, k="tampo"))  # tampo CONTÍNUO proud (pedra)
-        out.append(backpanel(a0 + M(0.004), a1 - M(0.004), z0_m + h_m, z0_m + h_m + 0.55, _KC["backsplash"]))  # backsplash
+        out.append(backpanel(a0 + M(0.004), a1 - M(0.004), z0_m + h_m, z0_m + h_m + 0.50, _KC["backsplash"], thick=0.04))  # backsplash (até o aéreo)
     elif kind == "cooktop":
         out.append(body(z0_m, z0_m + 0.015, _KC["vidro"], inset_side=0.015, k="vidro"))  # vidro preto fino
         cax = [a0 + W * 0.3, a0 + W * 0.7]
@@ -160,7 +161,10 @@ def _kmod(kind, shp, h_m, rgb, z0_m, ws):
         for i in range(nmod):
             ma0, ma1 = a0 + i * mw + M(0.014), a0 + (i + 1) * mw - M(0.014)            # reveals largos entre portas
             out.append(panel(ma0, ma1, z0_m + 0.05, z0_m + h_m - 0.02, _KC["porta"], k="porta"))
-            out.append(panel(ma0 + M(0.05), ma1 - M(0.05), z0_m + 0.06, z0_m + 0.09, _KC["puxador"], off=0.028, k="puxador"))  # barra embaixo
+            out.append(panel(ma0 + M(0.05), ma1 - M(0.05), z0_m + 0.055, z0_m + 0.10, _KC["puxador"], off=0.034, k="puxador"))  # barra embaixo (saliente)
+    elif kind == "coifa":
+        out.append(body(z0_m, z0_m + 0.16, _KC["inox"], k="inox"))                     # corpo de captura (depurador)
+        out.append(body(z0_m + 0.16, z0_m + h_m, _KC["inox"], inset_front=0.27, inset_side=0.13, k="inox"))  # chaminé/duto estreito
     else:
         out.append(_kp(kind, x0, y0, x1, y1, z0_m, z0_m + h_m, rgb))                    # fallback caixa
     mname = _MODNAME.get(kind, kind)
@@ -290,16 +294,29 @@ def build_boxes(con, room_id):
             if pb is not None:
                 add("pia", pb, 0.12, RGB_PIA, z0_m=PIA_Z0, mark=False, ws=ws)
             # cooktop na bancada, na metade INFERIOR (não ocupa o ponto hidráulico da pia)
+            cook_c = None
             if b_len >= 1.0:
                 cook_c = (b_lo + M(0.32)) if g_end != "lo" else (b_hi - M(0.32))
                 cb = clip(fb(ws, cook_c, COOK_W, COOK_D), carve=False)
                 if cb is not None:
                     add("cooktop", cb, 0.08, RGB_COOKTOP, z0_m=COOK_Z0, mark=False, ws=ws)
-            # aéreo sobre a bancada (evita janela, se houver)
-            ab = fb(ws, b_center, b_len, AEREO_DEPTH)
-            if win_zone is not None:
-                ab = ab.difference(win_zone)
-            if not ab.is_empty:
+                    # COIFA/depurador sobre o cooktop (sobe até quase o teto); vão deixado no aéreo
+                    hb = clip(fb(ws, cook_c, COOK_W + 0.04, AEREO_DEPTH + 0.06), carve=False)
+                    if hb is not None:
+                        add("coifa", hb, 0.58, RGB_TORRE, z0_m=1.50, mark=False, ws=ws)
+            # aéreo FLANQUEANDO a coifa (deixa o vão do cooktop livre p/ a coifa); evita janela
+            segs = [(b_lo, b_hi)]
+            if cook_c is not None:
+                hw = M(COOK_W / 2 + 0.06)
+                segs = [(b_lo, cook_c - hw), (cook_c + hw, b_hi)]
+            for s_lo, s_hi in segs:
+                if (s_hi - s_lo) / M(1.0) < 0.30:        # vão curto = sem aéreo
+                    continue
+                ab = fb(ws, (s_lo + s_hi) / 2, (s_hi - s_lo) / M(1.0), AEREO_DEPTH)
+                if win_zone is not None:
+                    ab = ab.difference(win_zone)
+                if ab.is_empty:
+                    continue
                 if ab.geom_type == "MultiPolygon":
                     ab = max(ab.geoms, key=lambda g: g.area)
                 if ab.geom_type == "Polygon" and ab.area >= (0.12 / PT_TO_M ** 2):
