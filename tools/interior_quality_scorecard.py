@@ -167,7 +167,9 @@ def main():
     from tools.furnish_apartment import CONSENSUS
     from tools.room_type import classify_rooms
     con = json.loads(CONSENSUS.read_text("utf-8"))
-    rooms = [a.room] if a.room != "all" else [r["id"] for r in classify_rooms(con) if r.get("furnishable", True)]
+    from tools.furnish_apartment import BRAINS
+    rooms = ([a.room] if a.room != "all"
+             else [r["id"] for r in classify_rooms(con) if r.get("room_type") in BRAINS])
     results = []
     for rid in rooms:
         try:
