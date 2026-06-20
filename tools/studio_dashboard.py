@@ -207,7 +207,7 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 .chat{background:#0c0d10;border:1px solid var(--bd);border-radius:8px;padding:6px 8px;max-height:120px;overflow-y:auto;font-size:11.5px}
 .chat .ln{padding:2px 0;border-bottom:1px solid #16181d}.chat .to{color:var(--ok)}.chat .t{color:var(--mut);font-size:10px;float:right}
-.arrow{fill:none;stroke:var(--ok);stroke-width:2.2;stroke-dasharray:7 6;animation:flow 1s linear infinite;filter:drop-shadow(0 0 4px var(--ok))}
+.arrow{fill:none;stroke:var(--ok);stroke-width:1.7;stroke-dasharray:6 6;opacity:.8;animation:flow 1.1s linear infinite;filter:drop-shadow(0 0 2px var(--ok))}
 @keyframes flow{to{stroke-dashoffset:-13}}
 /* métricas */
 .metrics{margin-top:14px}.mrow{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:12px}
@@ -252,10 +252,12 @@ function drawArrows(ag){const svg=document.getElementById('arrows'),wrap=documen
  const amap=ag.agent_umbrella||{},recent=(ag.feed||[]).slice(-7).filter(f=>f.to)
  const errU=new Set((ag.umbrellas||[]).filter(u=>u.lead.status==='error').map(u=>u.id))
  const edges=new Set();recent.forEach(f=>{const su=amap[f.agent],tu=amap[f.to]||f.to;if(su&&tu&&su!==tu)edges.add(su+'>'+tu)})
- const ctr=(u)=>{const e=document.getElementById('lead-'+leadOf(u));if(!e)return null;const r=e.getBoundingClientRect();return{x:r.left-wr.left+r.width/2,y:r.top-wr.top}}
- let p='<defs><marker id=ah markerWidth=9 markerHeight=9 refX=7 refY=3 orient=auto><path d="M0,0 L7,3 L0,6 Z" fill="#7fd99a"/></marker><marker id=ahr markerWidth=9 markerHeight=9 refX=7 refY=3 orient=auto><path d="M0,0 L7,3 L0,6 Z" fill="#e67c7c"/></marker></defs>'
- edges.forEach(e=>{const[a,b]=e.split('>'),u=ctr(a),v=ctr(b);if(!u||!v)return;const my=Math.min(u.y,v.y)-20
-  const er=errU.has(b);p+=`<path class="arrow ${er?'err':''}" marker-end="url(#${er?'ahr':'ah'})" d="M${u.x},${u.y} Q${(u.x+v.x)/2},${my} ${v.x},${v.y}"/>`})
+ const box=(u)=>{const e=document.getElementById('lead-'+leadOf(u));if(!e)return null;const r=e.getBoundingClientRect()
+  return{l:r.left-wr.left,ri:r.right-wr.left,cx:r.left-wr.left+r.width/2,my:r.top-wr.top+r.height/2}}
+ let p='<defs><marker id=ah markerWidth=8 markerHeight=8 refX=6 refY=3 orient=auto><path d="M0,0 L6,3 L0,6 Z" fill="#7fd99a"/></marker><marker id=ahr markerWidth=8 markerHeight=8 refX=6 refY=3 orient=auto><path d="M0,0 L6,3 L0,6 Z" fill="#e67c7c"/></marker></defs>'
+ edges.forEach(e=>{const[a,b]=e.split('>'),A=box(a),B=box(b);if(!A||!B)return
+  const lr=B.cx>A.cx,x0=lr?A.ri:A.l,x1=lr?B.l:B.ri,cy=(A.my+B.my)/2-10,er=errU.has(b)
+  p+=`<path class="arrow ${er?'err':''}" marker-end="url(#${er?'ahr':'ah'})" d="M${x0},${A.my} Q${(x0+x1)/2},${cy} ${x1},${B.my}"/>`})
  svg.innerHTML=p}
 let LEADOF={};const leadOf=(u)=>LEADOF[u]
 async function curate(slug,action){await fetch('/api/curate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug,action})});tick()}
@@ -422,6 +424,7 @@ class H(BaseHTTPRequestHandler):
         self.send_response(code)
         self.send_header("Content-Type", ctype)
         self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-store, no-cache, must-revalidate")  # sempre versão fresca
         self.end_headers()
         self.wfile.write(body)
 
