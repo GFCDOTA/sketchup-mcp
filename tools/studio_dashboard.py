@@ -207,10 +207,10 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 .lead{display:flex;gap:10px;align-items:center;border-bottom:1px solid var(--bd);padding-bottom:9px;margin-bottom:9px}
 .lead .face{font-size:30px;line-height:1}.lead .nm{font-weight:700;font-size:15px}
 .lead .msg{color:var(--mut);font-size:11.5px;margin-top:2px;max-height:30px;overflow:hidden}
-.subs{display:flex;flex-direction:column;gap:7px;margin-bottom:9px}
-.sub{display:flex;gap:8px;align-items:center;background:#181a1f;border:1px solid var(--bd);border-radius:8px;padding:6px 9px}
-.sub .face{font-size:18px;opacity:.55}.sub.act .face,.lead.act .face{opacity:1}
-.sub .nm{font-size:12.5px}.sub .msg{color:var(--mut);font-size:11px;max-height:16px;overflow:hidden}
+.subs{display:flex;flex-direction:column;gap:5px;margin-bottom:9px}
+.sub{display:flex;gap:8px;align-items:center;background:#181a1f;border:1px solid var(--bd);border-radius:8px;padding:4px 9px}
+.sub .face{font-size:15px;opacity:.55}.sub.act .face,.lead.act .face{opacity:1}
+.sub .nm{font-size:12.5px;flex:1}
 .sdot{width:8px;height:8px;border-radius:50%;background:#5a606b;display:inline-block;margin-left:auto;flex:none}
 .s-working .sdot,.s-thinking .sdot{background:var(--ok);box-shadow:0 0 7px var(--ok);animation:pulse 1.1s infinite}
 .s-done .sdot{background:var(--blu)}.s-blocked .sdot,.s-error .sdot{background:var(--red)}.s-waiting .sdot{background:var(--warn)}
@@ -278,7 +278,7 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 <div id=chatmodal class=cmodal>
  <div class=cbox><div class=cbar><span id=cname></span><button class=mbtn onclick=closeChat()>✕ fechar</button></div>
   <div id=cbody class=cbody></div>
-  <div class=crow><input id=cinput placeholder="escreve aqui… (Enter envia)" onkeydown="if(event.key==='Enter')sendChat()"><button class=send onclick=sendChat()>➤ enviar</button></div>
+  <div class=crow><input id=cinput placeholder="escreve aqui… (Enter envia)" onkeydown="if(event.key==='Enter')sendChat()"><button class=send onclick=sendChat()>➤ enviar</button><button class=chatbtn onclick="sendChat(1)" title="consenso: pergunta pros 3 LLMs locais e sintetiza (mais lento, mais pensado)">🧠 consenso</button></div>
  </div></div>
 <script>
 const el=(h)=>{const d=document.createElement('div');d.innerHTML=h;return d.firstChild}
@@ -291,8 +291,7 @@ function leadCard(a){const act=(a.status==='working'||a.status==='thinking')?'ac
   <div class=msg>${esc(a.message)}</div></div></div>`}
 function subCard(a){const act=(a.status==='working'||a.status==='thinking'||a.online)?'act':''
  const on=a.online?'<span class=onl>online</span>':'<span class=off>offline</span>'
- return `<div class="sub s-${a.status} ${act}"><span class=face>${a.face}</span>
-  <div style=flex:1><div class=nm>${a.label} ${on}</div><div class=msg>${esc(a.message)}</div></div><span class="sdot ${a.online?'on':''}"></span></div>`}
+ return `<div class="sub s-${a.status} ${act}" title="${esc(a.message)}"><span class=face>${a.face}</span><span class=nm>${a.label}</span> ${on}<span class="sdot ${a.online?'on':''}"></span></div>`}
 function colChat(feed,ids){const f=(feed||[]).filter(x=>ids.includes(x.agent)||(x.agent==='felipe'&&ids.includes(x.to))).slice(-8)
  return f.map(x=>{const me=x.agent==='felipe'
   return `<div class="bub ${me?'me':'them'}"><div class=btxt>${esc(x.message)}</div><div class=bt>${me?'você':'🤖 agente'} · ${hhmm(x.ts)}</div></div>`}).join('')||'<span class=mut>sem conversa — pergunta abaixo ⬇</span>'}
@@ -337,8 +336,8 @@ async function loadChat(){const cm=document.getElementById('chatmodal');if(!cm.c
  const b=document.getElementById('cbody'),atBottom=b.scrollHeight-b.scrollTop-b.clientHeight<60
  b.innerHTML=feed.map(x=>{const me=x.agent==='felipe';return `<div class="bub ${me?'me':'them'}"><div class=btxt>${esc(x.message)}</div><div class=bt>${me?'você':'🤖 '+esc(x.agent)} · ${hhmm(x.ts)}</div></div>`}).join('')||'<span class=mut>sem mensagens — manda a primeira</span>'
  if(atBottom)b.scrollTop=b.scrollHeight}
-function sendChat(){const inp=document.getElementById('cinput'),q=(inp.value||'').trim();if(!q)return;inp.value=''
- fetch('/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:CHATAG,prompt:q})}).then(()=>loadChat());setTimeout(loadChat,500)}
+function sendChat(cons){const inp=document.getElementById('cinput'),q=(inp.value||'').trim();if(!q)return;inp.value=''
+ fetch(cons?'/api/consensus':'/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:CHATAG,prompt:q})}).then(()=>loadChat());setTimeout(loadChat,500)}
 setInterval(loadChat,3000)
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeChat()}})
 let LASTSTATE=''
@@ -514,6 +513,34 @@ def _ask(agent, prompt, image=None):
         return {"ok": False, "error": str(e)}
 
 
+def _consensus(agent, prompt):
+    """Fan-out: pergunta pros 3 LLMs locais (deepseek/qwen/llama), eles opinam, e um sintetiza
+    numa resposta concisa e mais 'pensada'. Mais lento, mas mais inteligente (ideia do Felipe)."""
+    import re as _re
+    agent = agent or "interior-designer"
+    prompt = prompt or ""
+
+    def _clean(r):
+        return _re.sub(r"<think>.*?</think>", "", r.get("response") or "", flags=_re.DOTALL).strip()
+    try:
+        from tools import ollama_bridge, studio_log
+        studio_log.post("felipe", "working", prompt, to=agent)
+        opinions = []
+        for role in ("deepseek", "qwen", "llama"):
+            studio_log.post(f"ollama-{role}", "thinking", f"opinando: {prompt[:40]}")
+            t = _clean(ollama_bridge.ask(role, prompt, timeout=90))
+            opinions.append((role, t))
+            studio_log.post(f"ollama-{role}", "done", t[:160] or "(vazio)")
+        synth_prompt = (f"Pergunta: '{prompt}'. Três modelos responderam:\n"
+                        + "\n".join(f"- {r}: {t[:350]}" for r, t in opinions)
+                        + "\nSintetize tudo numa resposta CONCISA e bem pensada (1 parágrafo), pegando os melhores pontos. Responda em PT-BR.")
+        synth = _clean(ollama_bridge.ask("deepseek", synth_prompt, timeout=120))[:700]
+        studio_log.post(agent, "done", "[consenso] " + synth)
+        return {"ok": True, "synthesis": synth, "opinions": [{"model": r, "text": t} for r, t in opinions]}
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": str(e)}
+
+
 def _clear(agent):
     """Felipe tira um agente do status de erro (volta pra idle)."""
     try:
@@ -579,6 +606,8 @@ class H(BaseHTTPRequestHandler):
             self._send(200, json.dumps(_upload(body.get("filename"), body.get("data"))))
         elif path == "/api/clear":
             self._send(200, json.dumps(_clear(body.get("agent"))))
+        elif path == "/api/consensus":
+            self._send(200, json.dumps(_consensus(body.get("agent"), body.get("prompt"))))
         else:
             self._send(404, b"not found", "text/plain")
 
