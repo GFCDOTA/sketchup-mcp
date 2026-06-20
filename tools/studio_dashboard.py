@@ -235,11 +235,22 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 .bub .bt{font-size:9px;color:var(--mut);margin-top:2px}
 .send{background:var(--ok)!important;color:#0c1410!important;border:none!important;font-weight:600}.send:hover{filter:brightness(1.1)}
 .critwrap{display:flex;gap:12px;align-items:flex-start;margin-bottom:8px}
-.critic{width:160px;border:1px solid var(--bd);border-radius:8px;flex:none}
+.critic{width:160px;border:1px solid var(--bd);border-radius:8px;flex:none;cursor:pointer}
+.thumb{cursor:pointer}.lnk{color:var(--blu);cursor:pointer;text-decoration:underline}
+.gallery{max-height:330px;overflow-y:auto;padding-right:4px}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.86);z-index:50;align-items:center;justify-content:center;padding:24px}
+.modal.show{display:flex}.mbox{max-width:92vw;max-height:92vh;display:flex;flex-direction:column;gap:8px}
+.mbar{display:flex;gap:10px;align-items:center}.mbar span{flex:1;font-size:13px;color:var(--mut)}
+.mbtn{background:#1f2227;border:1px solid var(--bd);color:var(--fg);border-radius:7px;padding:5px 11px;cursor:pointer;text-decoration:none;font-size:12.5px}
+.mbtn:hover{background:#2a2d34}.mbox img{max-width:92vw;max-height:82vh;object-fit:contain;border:1px solid var(--bd);border-radius:8px;background:#000}
 </style></head><body>
 <header><span class=hdot></span><h1>INTERIOR STUDIO</h1><span class=mut id=ts>carregando…</span>
 <span class=mut style=margin-left:auto>auto-refresh 5s · :8782 (separado do oráculo :8765)</span></header>
 <div class=wrap id=root></div>
+<div id=modal class=modal onclick="if(event.target===this)closeModal()">
+ <div class=mbox><div class=mbar><span id=mname></span>
+  <a id=mdl class=mbtn download>⬇ baixar</a><button class=mbtn onclick="copyImg(event)">copiar URL</button><button class=mbtn onclick=closeModal()>✕ fechar</button></div>
+  <img id=mimg></div></div>
 <script>
 const el=(h)=>{const d=document.createElement('div');d.innerHTML=h;return d.firstChild}
 const esc=(t)=>(t||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))
@@ -278,6 +289,13 @@ function uploadRef(){const f=document.getElementById('upfile').files[0];if(!f)re
  const msg=document.getElementById('upmsg');msg.textContent='subindo…'
  const r=new FileReader();r.onload=async()=>{const res=await (await fetch('/api/upload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filename:f.name,data:r.result})})).json()
   msg.textContent=res.ok?('✓ '+res.slug):('erro: '+res.error);tick()};r.readAsDataURL(f)}
+function openModal(src,name){const m=document.getElementById('modal');document.getElementById('mimg').src=src
+ document.getElementById('mname').textContent=name||'';const dl=document.getElementById('mdl');dl.href=src;dl.download=(name||'imagem')+(src.endsWith('.png')?'.png':'')
+ m.dataset.url=location.origin+src;m.classList.add('show')}
+function closeModal(){document.getElementById('modal').classList.remove('show')}
+function copyImg(ev){const u=document.getElementById('modal').dataset.url;if(navigator.clipboard)navigator.clipboard.writeText(u)
+ const b=ev.target;const t=b.textContent;b.textContent='copiado!';setTimeout(()=>b.textContent=t,1200)}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()})
 async function tick(){
  // NÃO atualizar enquanto o Felipe digita/seleciona — senão apaga o que ele tá escrevendo
  const ae=document.activeElement
@@ -311,7 +329,7 @@ async function tick(){
   <div class=charts>
    <div class=chartbox><h2>Chamadas por agente</h2><div class=pie><svg viewBox="0 0 120 120">${slices||'<circle cx=60 cy=60 r=46 fill=#20242b/>'}</svg><div class=legend>${leg||'<span class=mut>—</span>'}</div></div></div>
    <div class=chartbox><h2>Erros — o que TU não curtiu (vira lição)</h2>
-    <div class=critwrap>${critic?`<img class=critic src="/img/${encodeURIComponent(critic.name)}" title="${esc(critic.name)}">`:''}
+    <div class=critwrap>${critic?`<img class=critic onclick="openModal('/img/${encodeURIComponent(critic.name)}','${esc(critic.name)}')" src="/img/${encodeURIComponent(critic.name)}" title="${esc(critic.name)}">`:''}
      <div style=flex:1>${ebars}</div></div>
     <div class=flagrow><select id=flagag>${flagopts}</select>
      <input id=flagmsg onkeydown="if(event.key==='Enter')flagErr()" placeholder="ex.: parede muito escura… (Enter envia)"><button class=send onclick=flagErr()>marcar erro</button></div></div>
@@ -336,18 +354,21 @@ async function tick(){
   <div class=mut style=margin-bottom:8px>${Object.entries(bk).map(([k,n])=>`<span class=pill>${k}: ${n}</span>`).join(' ')||refs.error||''}</div>
   <table><tr><th>tema</th><th>refs</th></tr>${themes}</table></div>`))
  // INBOX
- const inb=(s.inbox||[]).map(i=>{const st=i.status||'pending';return `<tr><td>${esc(i.slug)}</td><td>${i.theme||'-'}</td><td>${st}</td>
-   <td>${(st==='pending'||st==='uploaded')?`<button onclick="curate('${esc(i.slug)}','approve')">✓</button> <button onclick="curate('${esc(i.slug)}','reject')">✕</button>`:''}</td></tr>`}).join('')
- const thumbs=(s.inbox||[]).filter(i=>i.local_path).map(i=>`<div class=thumb><img loading=lazy src="/inbox-img/${encodeURIComponent(i.local_path.split('/').pop())}"><div class=cap>${esc(i.slug)}<div class=t>${i.status||'pending'}</div></div></div>`).join('')
- root.appendChild(el(`<div class="card full"><h2>Curadoria — inbox de referência <span class=mut>(sobe imagem + aprova/rejeita — sem Claude)</span></h2>
+ const fn=(i)=>i.local_path?encodeURIComponent(i.local_path.split('/').pop()):''
+ const inb=(s.inbox||[]).map(i=>{const st=i.status||'pending'
+   const cell=i.local_path?`<td class=lnk onclick="openModal('/inbox-img/${fn(i)}','${esc(i.slug)}')">${esc(i.slug)}</td>`:`<td>${esc(i.slug)}</td>`
+   return `<tr>${cell}<td>${i.theme||'-'}</td><td>${st}</td>
+   <td>${(st==='pending'||st==='uploaded')?`<button onclick="curate('${esc(i.slug)}','approve')">✓ ok</button> <button onclick="curate('${esc(i.slug)}','reject')">✕ apagar</button>`:''}</td></tr>`}).join('')
+ const thumbs=(s.inbox||[]).filter(i=>i.local_path).map(i=>`<div class=thumb onclick="openModal('/inbox-img/${fn(i)}','${esc(i.slug)}')"><img loading=lazy src="/inbox-img/${fn(i)}"><div class=cap>${esc(i.slug)}<div class=t>${i.status||'pending'}</div></div></div>`).join('')
+ root.appendChild(el(`<div class="card full"><h2>Curadoria — inbox de referência <span class=mut>(clica na imagem/slug pra ampliar · aprova/apaga — sem Claude)</span></h2>
   <div class=uprow><input type=file id=upfile accept="image/*"><button onclick=uploadRef()>⬆ subir referência</button> <span class=mut id=upmsg></span></div>
   ${thumbs?`<div class=grid style="margin:10px 0">${thumbs}</div>`:''}
   <table><tr><th>slug</th><th>tema</th><th>status</th><th>ação</th></tr>${inb||'<tr><td colspan=4 class=mut>fila vazia — sobe uma referência acima</td></tr>'}</table></div>`))
  // RENDERS
- const rr=(s.renders||[]).slice(0,24).map(r=>`<div class=thumb><img loading=lazy src="/img/${encodeURIComponent(r.name)}">
+ const rr=(s.renders||[]).map(r=>`<div class=thumb onclick="openModal('/img/${encodeURIComponent(r.name)}','${esc(r.name)}')"><img loading=lazy src="/img/${encodeURIComponent(r.name)}">
    <div class=cap>${esc(r.name.replace('.png',''))}<div class=t>${r.theme} · ${r.sub} · ${r.kb}KB</div></div></div>`).join('')
- root.appendChild(el(`<div class="card full"><h2>Renders (${(s.renders||[]).length}) — mais novos primeiro</h2>
-  <div class=grid>${rr||'<span class=mut>sem renders</span>'}</div></div>`))
+ root.appendChild(el(`<div class="card full"><h2>Renders (${(s.renders||[]).length}) — clica pra ampliar/baixar · mais novos primeiro</h2>
+  <div class="grid gallery">${rr||'<span class=mut>sem renders</span>'}</div></div>`))
 }
 tick();setInterval(tick,5000);window.addEventListener('resize',()=>tick())
 </script></body></html>"""
