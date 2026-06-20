@@ -1,0 +1,1735 @@
+{
+  "title": "ref_closetsmart",
+  "path": "E:\\Claude\\apps\\sketchup-mcp\\.claude\\scratch\\ref_closetsmart.skp",
+  "length_unit_code": 4,
+  "bbox": {
+    "min_in": [
+      0.0,
+      27.06,
+      0.0
+    ],
+    "size_in": [
+      122.05,
+      90.55,
+      116.33
+    ],
+    "size_m": [
+      3.1,
+      2.3,
+      2.955
+    ]
+  },
+  "materials": [
+    {
+      "name": "<auto>",
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "alpha": 1.0,
+      "texture": null
+    },
+    {
+      "name": "<auto>1",
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "alpha": 1.0,
+      "texture": null
+    },
+    {
+      "name": "<auto>2",
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "alpha": 1.0,
+      "texture": null
+    },
+    {
+      "name": "<auto>3",
+      "color": [
+        0,
+        0,
+        0
+      ],
+      "alpha": 1.0,
+      "texture": null
+    },
+    {
+      "name": "[Translucent Glass Gray]",
+      "color": [
+        128,
+        128,
+        128
+      ],
+      "alpha": 0.5,
+      "texture": null
+    }
+  ],
+  "definitions": [
+    {
+      "name": "Component#255",
+      "instances": 1,
+      "size_m": [
+        0.06,
+        0.365,
+        0.06
+      ]
+    },
+    {
+      "name": "Component#256",
+      "instances": 1,
+      "size_m": [
+        0.06,
+        0.365,
+        0.035
+      ]
+    },
+    {
+      "name": "Component#257",
+      "instances": 1,
+      "size_m": [
+        0.71,
+        0.025,
+        1.93
+      ]
+    },
+    {
+      "name": "Component#258",
+      "instances": 1,
+      "size_m": [
+        0.71,
+        0.025,
+        0.025
+      ]
+    },
+    {
+      "name": "Component#259",
+      "instances": 1,
+      "size_m": [
+        0.706,
+        0.021,
+        0.14
+      ]
+    },
+    {
+      "name": "Component#260",
+      "instances": 1,
+      "size_m": [
+        0.215,
+        0.199,
+        0.011
+      ]
+    },
+    {
+      "name": "Component#261",
+      "instances": 1,
+      "size_m": [
+        0.215,
+        0.199,
+        0.011
+      ]
+    },
+    {
+      "name": "Component#262",
+      "instances": 1,
+      "size_m": [
+        0.659,
+        0.308,
+        0.105
+      ]
+    },
+    {
+      "name": "Component#263",
+      "instances": 1,
+      "size_m": [
+        0.659,
+        0.308,
+        0.105
+      ]
+    },
+    {
+      "name": "Component#264",
+      "instances": 1,
+      "size_m": [
+        0.659,
+        0.308,
+        0.105
+      ]
+    },
+    {
+      "name": "Component#265",
+      "instances": 1,
+      "size_m": [
+        0.659,
+        0.308,
+        0.105
+      ]
+    },
+    {
+      "name": "Component#266",
+      "instances": 1,
+      "size_m": [
+        0.008,
+        0.034,
+        0.238
+      ]
+    },
+    {
+      "name": "Component#267",
+      "instances": 1,
+      "size_m": [
+        0.008,
+        0.034,
+        0.238
+      ]
+    },
+    {
+      "name": "Component#268",
+      "instances": 1,
+      "size_m": [
+        0.659,
+        0.308,
+        0.105
+      ]
+    },
+    {
+      "name": "Component#269",
+      "instances": 1,
+      "size_m": [
+        0.659,
+        0.308,
+        0.105
+      ]
+    },
+    {
+      "name": "Component#270",
+      "instances": 1,
+      "size_m": [
+        0.659,
+        0.308,
+        0.105
+      ]
+    },
+    {
+      "name": "Component#271",
+      "instances": 1,
+      "size_m": [
+        0.659,
+        0.308,
+        0.105
+      ]
+    },
+    {
+      "name": "Component#272",
+      "instances": 1,
+      "size_m": [
+        0.659,
+        0.308,
+        0.105
+      ]
+    },
+    {
+      "name": "Component#273",
+      "instances": 1,
+      "size_m": [
+        0.659,
+        0.308,
+        0.105
+      ]
+    },
+    {
+      "name": "Component#274",
+      "instances": 1,
+      "size_m": [
+        0.659,
+        0.308,
+        0.105
+      ]
+    },
+    {
+      "name": "Component#275",
+      "instances": 1,
+      "size_m": [
+        0.659,
+        0.308,
+        0.105
+      ]
+    },
+    {
+      "name": "Component#276",
+      "instances": 1,
+      "size_m": [
+        2.866,
+        0.6,
+        0.04
+      ]
+    },
+    {
+      "name": "Component#277",
+      "instances": 1,
+      "size_m": [
+        2.0,
+        0.6,
+        0.04
+      ]
+    },
+    {
+      "name": "Component#278",
+      "instances": 1,
+      "size_m": [
+        2.0,
+        0.6,
+        0.04
+      ]
+    },
+    {
+      "name": "Component#279",
+      "instances": 1,
+      "size_m": [
+        2.0,
+        0.6,
+        0.04
+      ]
+    },
+    {
+      "name": "Component#280",
+      "instances": 1,
+      "size_m": [
+        0.04,
+        0.68,
+        2.35
+      ]
+    },
+    {
+      "name": "Component#281",
+      "instances": 1,
+      "size_m": [
+        0.04,
+        0.68,
+        2.35
+      ]
+    },
+    {
+      "name": "Component#282",
+      "instances": 1,
+      "size_m": [
+        0.04,
+        0.68,
+        2.35
+      ]
+    },
+    {
+      "name": "Component#283",
+      "instances": 1,
+      "size_m": [
+        0.04,
+        0.68,
+        2.35
+      ]
+    },
+    {
+      "name": "Component#284",
+      "instances": 1,
+      "size_m": [
+        1.99,
+        0.6,
+        0.035
+      ]
+    },
+    {
+      "name": "Component#285",
+      "instances": 1,
+      "size_m": [
+        0.74,
+        0.6,
+        0.07
+      ]
+    },
+    {
+      "name": "Component#286",
+      "instances": 1,
+      "size_m": [
+        0.74,
+        0.6,
+        0.07
+      ]
+    },
+    {
+      "name": "Component#287",
+      "instances": 1,
+      "size_m": [
+        0.74,
+        0.6,
+        0.07
+      ]
+    },
+    {
+      "name": "Component#288",
+      "instances": 1,
+      "size_m": [
+        0.74,
+        0.6,
+        0.07
+      ]
+    },
+    {
+      "name": "Component#289",
+      "instances": 1,
+      "size_m": [
+        0.36,
+        0.6,
+        0.07
+      ]
+    },
+    {
+      "name": "Component#290",
+      "instances": 1,
+      "size_m": [
+        0.83,
+        0.6,
+        2.27
+      ]
+    },
+    {
+      "name": "Component#291",
+      "instances": 1,
+      "size_m": [
+        0.75,
+        0.04,
+        2.27
+      ]
+    },
+    {
+      "name": "Component#292",
+      "instances": 1,
+      "size_m": [
+        0.04,
+        0.68,
+        2.35
+      ]
+    },
+    {
+      "name": "Component#293",
+      "instances": 1,
+      "size_m": [
+        0.75,
+        0.56,
+        0.08
+      ]
+    },
+    {
+      "name": "Component#294",
+      "instances": 1,
+      "size_m": [
+        0.631,
+        0.538,
+        2.31
+      ]
+    },
+    {
+      "name": "Component#295",
+      "instances": 1,
+      "size_m": [
+        1.0,
+        0.1,
+        2.6
+      ]
+    },
+    {
+      "name": "Component#296",
+      "instances": 1,
+      "size_m": [
+        0.9,
+        0.05,
+        1.7
+      ]
+    },
+    {
+      "name": "Component#297",
+      "instances": 1,
+      "size_m": [
+        0.8,
+        0.006,
+        1.6
+      ]
+    },
+    {
+      "name": "Component#298",
+      "instances": 1,
+      "size_m": [
+        0.9,
+        0.1,
+        0.05
+      ]
+    },
+    {
+      "name": "Component#299",
+      "instances": 1,
+      "size_m": [
+        0.9,
+        0.006,
+        0.75
+      ]
+    },
+    {
+      "name": "Component#300",
+      "instances": 1,
+      "size_m": [
+        0.265,
+        0.365,
+        0.245
+      ]
+    },
+    {
+      "name": "Component#301",
+      "instances": 1,
+      "size_m": [
+        0.285,
+        0.385,
+        0.017
+      ]
+    },
+    {
+      "name": "Component#302",
+      "instances": 1,
+      "size_m": [
+        0.269,
+        0.365,
+        0.085
+      ]
+    },
+    {
+      "name": "Component#303",
+      "instances": 1,
+      "size_m": [
+        0.285,
+        0.385,
+        0.017
+      ]
+    },
+    {
+      "name": "Component#251",
+      "instances": 1,
+      "size_m": [
+        3.1,
+        0.2,
+        2.65
+      ]
+    },
+    {
+      "name": "Component#252",
+      "instances": 1,
+      "size_m": [
+        3.1,
+        2.3,
+        0.305
+      ]
+    },
+    {
+      "name": "Component#253",
+      "instances": 1,
+      "size_m": [
+        2.9,
+        2.1,
+        0.05
+      ]
+    },
+    {
+      "name": "Component#254",
+      "instances": 1,
+      "size_m": [
+        0.2,
+        2.1,
+        2.65
+      ]
+    },
+    {
+      "name": "HAFELE Wardrobe Fitting Shoe Rack Pull-out rotates through 180_ - Pull-out-ShoeRack_807_95_023-1746531-present",
+      "instances": 1,
+      "size_m": [
+        0.71,
+        0.365,
+        2.19
+      ]
+    },
+    {
+      "name": "cabinet - cabinet-1747873-present",
+      "instances": 1,
+      "size_m": [
+        2.866,
+        1.178,
+        2.35
+      ]
+    },
+    {
+      "name": "window - window-1751844-present",
+      "instances": 1,
+      "size_m": [
+        1.0,
+        0.1,
+        2.6
+      ]
+    },
+    {
+      "name": "box - box-1696398-present",
+      "instances": 3,
+      "size_m": [
+        0.285,
+        0.385,
+        0.252
+      ]
+    },
+    {
+      "name": "box-01 - box-01-1698664-present",
+      "instances": 4,
+      "size_m": [
+        0.285,
+        0.385,
+        0.092
+      ]
+    },
+    {
+      "name": "room-09 - 3D View - present.dwg",
+      "instances": 1,
+      "size_m": [
+        3.1,
+        2.3,
+        2.955
+      ]
+    }
+  ],
+  "entity_counts": {
+    "ComponentInstance": 74,
+    "Edge": 8492,
+    "Face": 3839
+  },
+  "hierarchy": [
+    {
+      "type": "ComponentInstance",
+      "name": "room-09 - 3D View - present.dwg",
+      "size_m": [
+        3.1,
+        2.3,
+        2.955
+      ],
+      "center_m": [
+        1.55,
+        1.837,
+        1.477
+      ],
+      "children": [
+        {
+          "type": "ComponentInstance",
+          "name": "Component#251",
+          "size_m": [
+            3.1,
+            0.2,
+            2.65
+          ],
+          "center_m": [
+            1.55,
+            2.887,
+            1.63
+          ],
+          "n_subgroups": 0
+        },
+        {
+          "type": "ComponentInstance",
+          "name": "Component#252",
+          "size_m": [
+            3.1,
+            2.3,
+            0.305
+          ],
+          "center_m": [
+            1.55,
+            1.837,
+            0.152
+          ],
+          "n_subgroups": 0
+        },
+        {
+          "type": "ComponentInstance",
+          "name": "Component#253",
+          "size_m": [
+            2.9,
+            2.1,
+            0.05
+          ],
+          "center_m": [
+            1.45,
+            1.737,
+            0.33
+          ],
+          "n_subgroups": 0
+        },
+        {
+          "type": "ComponentInstance",
+          "name": "Component#254",
+          "size_m": [
+            0.2,
+            2.1,
+            2.65
+          ],
+          "center_m": [
+            3.0,
+            1.737,
+            1.63
+          ],
+          "n_subgroups": 0
+        },
+        {
+          "type": "ComponentInstance",
+          "name": "HAFELE Wardrobe Fitting Shoe Rack Pull-out rotates through 180_ - Pull-out-ShoeRack_807_95_023-1746531-present",
+          "size_m": [
+            0.71,
+            0.365,
+            2.19
+          ],
+          "center_m": [
+            2.475,
+            2.47,
+            1.53
+          ],
+          "children": [
+            {
+              "type": "ComponentInstance",
+              "name": "Component#255",
+              "size_m": [
+                0.06,
+                0.365,
+                0.06
+              ],
+              "center_m": [
+                0.001,
+                0.0,
+                -1.065
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#256",
+              "size_m": [
+                0.06,
+                0.365,
+                0.035
+              ],
+              "center_m": [
+                0.001,
+                0.0,
+                1.078
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#257",
+              "size_m": [
+                0.71,
+                0.025,
+                1.93
+              ],
+              "center_m": [
+                0.0,
+                -0.023,
+                -0.07
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#258",
+              "size_m": [
+                0.71,
+                0.025,
+                0.025
+              ],
+              "center_m": [
+                0.0,
+                -0.023,
+                1.047
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#259",
+              "size_m": [
+                0.706,
+                0.021,
+                0.14
+              ],
+              "center_m": [
+                0.0,
+                -0.023,
+                0.965
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#260",
+              "size_m": [
+                0.215,
+                0.199,
+                0.011
+              ],
+              "center_m": [
+                0.096,
+                0.066,
+                -1.039
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#261",
+              "size_m": [
+                0.215,
+                0.199,
+                0.011
+              ],
+              "center_m": [
+                0.096,
+                0.066,
+                1.064
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#262",
+              "size_m": [
+                0.659,
+                0.308,
+                0.105
+              ],
+              "center_m": [
+                0.0,
+                -0.023,
+                -0.934
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#263",
+              "size_m": [
+                0.659,
+                0.308,
+                0.105
+              ],
+              "center_m": [
+                0.0,
+                -0.023,
+                -0.774
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#264",
+              "size_m": [
+                0.659,
+                0.308,
+                0.105
+              ],
+              "center_m": [
+                0.0,
+                -0.023,
+                0.632
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#265",
+              "size_m": [
+                0.659,
+                0.308,
+                0.105
+              ],
+              "center_m": [
+                0.0,
+                -0.023,
+                0.792
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#266",
+              "size_m": [
+                0.008,
+                0.034,
+                0.238
+              ],
+              "center_m": [
+                -0.346,
+                0.007,
+                -0.07
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#267",
+              "size_m": [
+                0.008,
+                0.034,
+                0.238
+              ],
+              "center_m": [
+                -0.346,
+                -0.052,
+                -0.07
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#268",
+              "size_m": [
+                0.659,
+                0.308,
+                0.105
+              ],
+              "center_m": [
+                0.0,
+                -0.023,
+                -0.621
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#269",
+              "size_m": [
+                0.659,
+                0.308,
+                0.105
+              ],
+              "center_m": [
+                0.0,
+                -0.023,
+                -0.461
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#270",
+              "size_m": [
+                0.659,
+                0.308,
+                0.105
+              ],
+              "center_m": [
+                0.0,
+                -0.023,
+                -0.308
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#271",
+              "size_m": [
+                0.659,
+                0.308,
+                0.105
+              ],
+              "center_m": [
+                0.0,
+                -0.023,
+                -0.148
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#272",
+              "size_m": [
+                0.659,
+                0.308,
+                0.105
+              ],
+              "center_m": [
+                0.0,
+                -0.023,
+                0.006
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#273",
+              "size_m": [
+                0.659,
+                0.308,
+                0.105
+              ],
+              "center_m": [
+                0.0,
+                -0.023,
+                0.166
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#274",
+              "size_m": [
+                0.659,
+                0.308,
+                0.105
+              ],
+              "center_m": [
+                0.0,
+                -0.023,
+                0.319
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#275",
+              "size_m": [
+                0.659,
+                0.308,
+                0.105
+              ],
+              "center_m": [
+                0.0,
+                -0.023,
+                0.479
+              ],
+              "n_subgroups": 0
+            }
+          ]
+        },
+        {
+          "type": "ComponentInstance",
+          "name": "cabinet - cabinet-1747873-present",
+          "size_m": [
+            2.866,
+            1.178,
+            2.35
+          ],
+          "center_m": [
+            1.467,
+            2.198,
+            1.53
+          ],
+          "children": [
+            {
+              "type": "ComponentInstance",
+              "name": "Component#276",
+              "size_m": [
+                2.866,
+                0.6,
+                0.04
+              ],
+              "center_m": [
+                0.0,
+                0.249,
+                1.115
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#277",
+              "size_m": [
+                2.0,
+                0.6,
+                0.04
+              ],
+              "center_m": [
+                -0.397,
+                0.249,
+                0.745
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#278",
+              "size_m": [
+                2.0,
+                0.6,
+                0.04
+              ],
+              "center_m": [
+                -0.397,
+                0.249,
+                -0.535
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#279",
+              "size_m": [
+                2.0,
+                0.6,
+                0.04
+              ],
+              "center_m": [
+                -0.397,
+                0.249,
+                -1.035
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#280",
+              "size_m": [
+                0.04,
+                0.68,
+                2.35
+              ],
+              "center_m": [
+                -1.377,
+                0.249,
+                0.0
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#281",
+              "size_m": [
+                0.04,
+                0.68,
+                2.35
+              ],
+              "center_m": [
+                -0.977,
+                0.249,
+                0.0
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#282",
+              "size_m": [
+                0.04,
+                0.68,
+                2.35
+              ],
+              "center_m": [
+                -0.197,
+                0.249,
+                0.0
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#283",
+              "size_m": [
+                0.04,
+                0.68,
+                2.35
+              ],
+              "center_m": [
+                0.583,
+                0.249,
+                0.0
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#284",
+              "size_m": [
+                1.99,
+                0.6,
+                0.035
+              ],
+              "center_m": [
+                -0.397,
+                0.249,
+                0.643
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#285",
+              "size_m": [
+                0.74,
+                0.6,
+                0.07
+              ],
+              "center_m": [
+                0.193,
+                0.249,
+                -0.635
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#286",
+              "size_m": [
+                0.74,
+                0.6,
+                0.07
+              ],
+              "center_m": [
+                0.193,
+                0.249,
+                -0.75
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#287",
+              "size_m": [
+                0.74,
+                0.6,
+                0.07
+              ],
+              "center_m": [
+                0.193,
+                0.249,
+                -0.865
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#288",
+              "size_m": [
+                0.74,
+                0.6,
+                0.07
+              ],
+              "center_m": [
+                0.193,
+                0.249,
+                -0.98
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#289",
+              "size_m": [
+                0.36,
+                0.6,
+                0.07
+              ],
+              "center_m": [
+                -1.177,
+                0.249,
+                -0.635
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#290",
+              "size_m": [
+                0.83,
+                0.6,
+                2.27
+              ],
+              "center_m": [
+                1.018,
+                0.249,
+                -0.04
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#291",
+              "size_m": [
+                0.75,
+                0.04,
+                2.27
+              ],
+              "center_m": [
+                1.018,
+                0.529,
+                -0.04
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#292",
+              "size_m": [
+                0.04,
+                0.68,
+                2.35
+              ],
+              "center_m": [
+                1.413,
+                0.249,
+                0.0
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#293",
+              "size_m": [
+                0.75,
+                0.56,
+                0.08
+              ],
+              "center_m": [
+                1.018,
+                0.229,
+                -1.135
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#294",
+              "size_m": [
+                0.631,
+                0.538,
+                2.31
+              ],
+              "center_m": [
+                1.078,
+                -0.32,
+                -0.02
+              ],
+              "n_subgroups": 0
+            }
+          ]
+        },
+        {
+          "type": "ComponentInstance",
+          "name": "window - window-1751844-present",
+          "size_m": [
+            0.1,
+            1.0,
+            2.6
+          ],
+          "center_m": [
+            3.05,
+            1.387,
+            1.655
+          ],
+          "children": [
+            {
+              "type": "ComponentInstance",
+              "name": "Component#295",
+              "size_m": [
+                1.0,
+                0.1,
+                2.6
+              ],
+              "center_m": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#296",
+              "size_m": [
+                0.9,
+                0.05,
+                1.7
+              ],
+              "center_m": [
+                0.0,
+                -0.025,
+                0.4
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#297",
+              "size_m": [
+                0.8,
+                0.006,
+                1.6
+              ],
+              "center_m": [
+                0.0,
+                -0.025,
+                0.4
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#298",
+              "size_m": [
+                0.9,
+                0.1,
+                0.05
+              ],
+              "center_m": [
+                0.0,
+                0.0,
+                -0.475
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#299",
+              "size_m": [
+                0.9,
+                0.006,
+                0.75
+              ],
+              "center_m": [
+                0.0,
+                0.0,
+                -0.875
+              ],
+              "n_subgroups": 0
+            }
+          ]
+        },
+        {
+          "type": "ComponentInstance",
+          "name": "box - box-1696398-present",
+          "size_m": [
+            0.285,
+            0.385,
+            0.252
+          ],
+          "center_m": [
+            0.29,
+            2.449,
+            2.421
+          ],
+          "children": [
+            {
+              "type": "ComponentInstance",
+              "name": "Component#300",
+              "size_m": [
+                0.265,
+                0.365,
+                0.245
+              ],
+              "center_m": [
+                0.0,
+                0.0,
+                -0.003
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#301",
+              "size_m": [
+                0.285,
+                0.385,
+                0.017
+              ],
+              "center_m": [
+                0.0,
+                0.0,
+                0.117
+              ],
+              "n_subgroups": 0
+            }
+          ]
+        },
+        {
+          "type": "ComponentInstance",
+          "name": "box-01 - box-01-1698664-present",
+          "size_m": [
+            0.285,
+            0.385,
+            0.092
+          ],
+          "center_m": [
+            1.054,
+            2.465,
+            2.341
+          ],
+          "children": [
+            {
+              "type": "ComponentInstance",
+              "name": "Component#302",
+              "size_m": [
+                0.269,
+                0.365,
+                0.085
+              ],
+              "center_m": [
+                0.0,
+                0.0,
+                -0.003
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#303",
+              "size_m": [
+                0.285,
+                0.385,
+                0.017
+              ],
+              "center_m": [
+                0.0,
+                0.0,
+                0.037
+              ],
+              "n_subgroups": 0
+            }
+          ]
+        },
+        {
+          "type": "ComponentInstance",
+          "name": "box-01 - box-01-1698664-present",
+          "size_m": [
+            0.285,
+            0.385,
+            0.092
+          ],
+          "center_m": [
+            1.054,
+            2.465,
+            2.433
+          ],
+          "children": [
+            {
+              "type": "ComponentInstance",
+              "name": "Component#302",
+              "size_m": [
+                0.269,
+                0.365,
+                0.085
+              ],
+              "center_m": [
+                0.0,
+                0.0,
+                -0.003
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#303",
+              "size_m": [
+                0.285,
+                0.385,
+                0.017
+              ],
+              "center_m": [
+                0.0,
+                0.0,
+                0.037
+              ],
+              "n_subgroups": 0
+            }
+          ]
+        },
+        {
+          "type": "ComponentInstance",
+          "name": "box - box-1696398-present",
+          "size_m": [
+            0.285,
+            0.385,
+            0.252
+          ],
+          "center_m": [
+            0.71,
+            2.449,
+            2.421
+          ],
+          "children": [
+            {
+              "type": "ComponentInstance",
+              "name": "Component#300",
+              "size_m": [
+                0.265,
+                0.365,
+                0.245
+              ],
+              "center_m": [
+                0.0,
+                0.0,
+                -0.003
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#301",
+              "size_m": [
+                0.285,
+                0.385,
+                0.017
+              ],
+              "center_m": [
+                0.0,
+                0.0,
+                0.117
+              ],
+              "n_subgroups": 0
+            }
+          ]
+        },
+        {
+          "type": "ComponentInstance",
+          "name": "box-01 - box-01-1698664-present",
+          "size_m": [
+            0.285,
+            0.385,
+            0.092
+          ],
+          "center_m": [
+            1.054,
+            2.465,
+            0.561
+          ],
+          "children": [
+            {
+              "type": "ComponentInstance",
+              "name": "Component#302",
+              "size_m": [
+                0.269,
+                0.365,
+                0.085
+              ],
+              "center_m": [
+                0.0,
+                0.0,
+                -0.003
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#303",
+              "size_m": [
+                0.285,
+                0.385,
+                0.017
+              ],
+              "center_m": [
+                0.0,
+                0.0,
+                0.037
+              ],
+              "n_subgroups": 0
+            }
+          ]
+        },
+        {
+          "type": "ComponentInstance",
+          "name": "box-01 - box-01-1698664-present",
+          "size_m": [
+            0.285,
+            0.385,
+            0.092
+          ],
+          "center_m": [
+            1.054,
+            2.465,
+            0.653
+          ],
+          "children": [
+            {
+              "type": "ComponentInstance",
+              "name": "Component#302",
+              "size_m": [
+                0.269,
+                0.365,
+                0.085
+              ],
+              "center_m": [
+                0.0,
+                0.0,
+                -0.003
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#303",
+              "size_m": [
+                0.285,
+                0.385,
+                0.017
+              ],
+              "center_m": [
+                0.0,
+                0.0,
+                0.037
+              ],
+              "n_subgroups": 0
+            }
+          ]
+        },
+        {
+          "type": "ComponentInstance",
+          "name": "box - box-1696398-present",
+          "size_m": [
+            0.285,
+            0.385,
+            0.252
+          ],
+          "center_m": [
+            0.71,
+            2.449,
+            0.641
+          ],
+          "children": [
+            {
+              "type": "ComponentInstance",
+              "name": "Component#300",
+              "size_m": [
+                0.265,
+                0.365,
+                0.245
+              ],
+              "center_m": [
+                0.0,
+                0.0,
+                -0.003
+              ],
+              "n_subgroups": 0
+            },
+            {
+              "type": "ComponentInstance",
+              "name": "Component#301",
+              "size_m": [
+                0.285,
+                0.385,
+                0.017
+              ],
+              "center_m": [
+                0.0,
+                0.0,
+                0.117
+              ],
+              "n_subgroups": 0
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

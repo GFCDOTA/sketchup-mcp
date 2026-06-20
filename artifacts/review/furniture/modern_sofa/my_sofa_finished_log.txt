@@ -1,0 +1,1 @@
+rendered 15/15 boxes; wood=true; shadows=true

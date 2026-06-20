@@ -1,0 +1,1 @@
+inspected 'ref_closetsmart' | bbox_m [3.1, 2.3, 2.955] | mats 5 | defs 59 | top_nodes 1

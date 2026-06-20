@@ -1,0 +1,607 @@
+{
+  "source": "ref_closetsmart",
+  "unit": "m",
+  "object_hypothesis": "desconhecido",
+  "confidence": "baixa",
+  "variant": "straight",
+  "chaise_side": null,
+  "footprint_fill_ratio": null,
+  "is_single_block": false,
+  "n_definitions": 59,
+  "parts_detected": {
+    "other": 48,
+    "back_cushion": 14,
+    "seat_cushion": 1,
+    "seat_base": 1
+  },
+  "parts_detail": {
+    "other": [
+      {
+        "name": "Component#255",
+        "size_m": [
+          0.06,
+          0.365,
+          0.06
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#256",
+        "size_m": [
+          0.06,
+          0.365,
+          0.035
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#258",
+        "size_m": [
+          0.71,
+          0.025,
+          0.025
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#259",
+        "size_m": [
+          0.706,
+          0.021,
+          0.14
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#260",
+        "size_m": [
+          0.215,
+          0.199,
+          0.011
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#261",
+        "size_m": [
+          0.215,
+          0.199,
+          0.011
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#262",
+        "size_m": [
+          0.659,
+          0.308,
+          0.105
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#263",
+        "size_m": [
+          0.659,
+          0.308,
+          0.105
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#264",
+        "size_m": [
+          0.659,
+          0.308,
+          0.105
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#265",
+        "size_m": [
+          0.659,
+          0.308,
+          0.105
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#266",
+        "size_m": [
+          0.008,
+          0.034,
+          0.238
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#267",
+        "size_m": [
+          0.008,
+          0.034,
+          0.238
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#268",
+        "size_m": [
+          0.659,
+          0.308,
+          0.105
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#269",
+        "size_m": [
+          0.659,
+          0.308,
+          0.105
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#270",
+        "size_m": [
+          0.659,
+          0.308,
+          0.105
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#271",
+        "size_m": [
+          0.659,
+          0.308,
+          0.105
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#272",
+        "size_m": [
+          0.659,
+          0.308,
+          0.105
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#273",
+        "size_m": [
+          0.659,
+          0.308,
+          0.105
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#274",
+        "size_m": [
+          0.659,
+          0.308,
+          0.105
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#275",
+        "size_m": [
+          0.659,
+          0.308,
+          0.105
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#276",
+        "size_m": [
+          2.866,
+          0.6,
+          0.04
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#277",
+        "size_m": [
+          2.0,
+          0.6,
+          0.04
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#278",
+        "size_m": [
+          2.0,
+          0.6,
+          0.04
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#279",
+        "size_m": [
+          2.0,
+          0.6,
+          0.04
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#284",
+        "size_m": [
+          1.99,
+          0.6,
+          0.035
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#285",
+        "size_m": [
+          0.74,
+          0.6,
+          0.07
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#286",
+        "size_m": [
+          0.74,
+          0.6,
+          0.07
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#287",
+        "size_m": [
+          0.74,
+          0.6,
+          0.07
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#288",
+        "size_m": [
+          0.74,
+          0.6,
+          0.07
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#289",
+        "size_m": [
+          0.36,
+          0.6,
+          0.07
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#290",
+        "size_m": [
+          0.83,
+          0.6,
+          2.27
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#294",
+        "size_m": [
+          0.631,
+          0.538,
+          2.31
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#298",
+        "size_m": [
+          0.9,
+          0.1,
+          0.05
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#300",
+        "size_m": [
+          0.265,
+          0.365,
+          0.245
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#301",
+        "size_m": [
+          0.285,
+          0.385,
+          0.017
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#302",
+        "size_m": [
+          0.269,
+          0.365,
+          0.085
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#303",
+        "size_m": [
+          0.285,
+          0.385,
+          0.017
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#253",
+        "size_m": [
+          2.9,
+          2.1,
+          0.05
+        ],
+        "instances": 1
+      },
+      {
+        "name": "HAFELE Wardrobe Fitting Shoe Rack Pull-out rotates through 180_ - Pull-out-ShoeRack_807_95_023-1746531-present",
+        "size_m": [
+          0.71,
+          0.365,
+          2.19
+        ],
+        "instances": 1
+      },
+      {
+        "name": "cabinet - cabinet-1747873-present",
+        "size_m": [
+          2.866,
+          1.178,
+          2.35
+        ],
+        "instances": 1
+      },
+      {
+        "name": "box - box-1696398-present",
+        "size_m": [
+          0.285,
+          0.385,
+          0.252
+        ],
+        "instances": 3
+      },
+      {
+        "name": "box-01 - box-01-1698664-present",
+        "size_m": [
+          0.285,
+          0.385,
+          0.092
+        ],
+        "instances": 4
+      },
+      {
+        "name": "room-09 - 3D View - present.dwg",
+        "size_m": [
+          3.1,
+          2.3,
+          2.955
+        ],
+        "instances": 1
+      }
+    ],
+    "back_cushion": [
+      {
+        "name": "Component#257",
+        "size_m": [
+          0.71,
+          0.025,
+          1.93
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#280",
+        "size_m": [
+          0.04,
+          0.68,
+          2.35
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#281",
+        "size_m": [
+          0.04,
+          0.68,
+          2.35
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#282",
+        "size_m": [
+          0.04,
+          0.68,
+          2.35
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#283",
+        "size_m": [
+          0.04,
+          0.68,
+          2.35
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#291",
+        "size_m": [
+          0.75,
+          0.04,
+          2.27
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#292",
+        "size_m": [
+          0.04,
+          0.68,
+          2.35
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#295",
+        "size_m": [
+          1.0,
+          0.1,
+          2.6
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#296",
+        "size_m": [
+          0.9,
+          0.05,
+          1.7
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#297",
+        "size_m": [
+          0.8,
+          0.006,
+          1.6
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#299",
+        "size_m": [
+          0.9,
+          0.006,
+          0.75
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#251",
+        "size_m": [
+          3.1,
+          0.2,
+          2.65
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#254",
+        "size_m": [
+          0.2,
+          2.1,
+          2.65
+        ],
+        "instances": 1
+      },
+      {
+        "name": "window - window-1751844-present",
+        "size_m": [
+          1.0,
+          0.1,
+          2.6
+        ],
+        "instances": 1
+      }
+    ],
+    "seat_cushion": [
+      {
+        "name": "Component#293",
+        "size_m": [
+          0.75,
+          0.56,
+          0.08
+        ],
+        "instances": 1
+      }
+    ],
+    "seat_base": [
+      {
+        "name": "Component#252",
+        "size_m": [
+          3.1,
+          2.3,
+          0.305
+        ],
+        "instances": 1
+      }
+    ]
+  },
+  "anatomy": {
+    "overall_m": {
+      "width": 3.1,
+      "depth": 2.3,
+      "height": 2.955
+    },
+    "seat_height_m": 0.3,
+    "seat_cushion_m": {
+      "w": 0.75,
+      "d": 0.56,
+      "t": 0.08
+    },
+    "back_cushion_m": {
+      "w": 0.683,
+      "d": 0.43,
+      "h": 2.179
+    },
+    "arm_m": {
+      "w": null,
+      "d": null,
+      "h": null
+    },
+    "n_seat_cushions": 1,
+    "n_back_cushions": 14,
+    "n_arms": 0,
+    "n_feet": 0
+  },
+  "main_material": {
+    "name": "<auto>3",
+    "color": [
+      0,
+      0,
+      0
+    ],
+    "texture": null
+  },
+  "all_materials": [
+    "<auto>",
+    "<auto>1",
+    "<auto>2",
+    "<auto>3",
+    "[Translucent Glass Gray]"
+  ],
+  "front_axis": "-Y (assumido: frente = lado dos assentos/encosto)",
+  "renders": [
+    "closetsmart_top.png",
+    "closetsmart_front.png",
+    "closetsmart_iso.png"
+  ]
+}
