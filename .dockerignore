@@ -1,0 +1,4 @@
+# A imagem da dashboard não COPIA nada (o código vem do volume montado em runtime).
+# Então o contexto de build pode ser ~vazio — só o Dockerfile. Evita mandar .venv/artifacts (GBs).
+*
+!tools/Dockerfile.dashboard

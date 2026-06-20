@@ -1,0 +1,9 @@
+# INTERIOR STUDIO dashboard — roda o studio_dashboard.py num container persistente (:8782).
+# O repo inteiro (E:/Claude) é montado como volume em runtime; a imagem só carrega python + git.
+FROM python:3.12-slim
+RUN apt-get update && apt-get install -y --no-install-recommends git \
+    && rm -rf /var/lib/apt/lists/*
+WORKDIR /workspace/apps/sketchup-mcp
+EXPOSE 8782
+# stdlib only — sem requirements. O código vem do volume montado.
+CMD ["python", "tools/studio_dashboard.py", "--port", "8782"]

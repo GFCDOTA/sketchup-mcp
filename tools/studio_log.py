@@ -22,13 +22,21 @@ ACTIVITY = ROOT / "artifacts/reference_lab/studio_activity.jsonl"
 VALID_STATUS = {"idle", "working", "thinking", "done", "blocked", "error", "waiting"}
 
 
-def post(agent: str, status: str, message: str, ts: float | None = None) -> dict:
+def post(agent: str, status: str, message: str, to: str | None = None,
+         ts: float | None = None) -> dict:
     ACTIVITY.parent.mkdir(parents=True, exist_ok=True)
     rec = {"ts": ts if ts is not None else time.time(), "agent": agent,
            "status": status if status in VALID_STATUS else "working", "message": message}
+    if to:
+        rec["to"] = to   # destinatário -> a dashboard desenha a seta de conversa
     with ACTIVITY.open("a", encoding="utf-8") as f:
         f.write(json.dumps(rec, ensure_ascii=False) + "\n")
     return rec
+
+
+def talk(frm: str, to: str, message: str) -> dict:
+    """Atalho: um agente FALANDO com outro (status=working + campo `to`)."""
+    return post(frm, "working", message, to=to)
 
 
 def tail(n: int = 40) -> list[dict]:
@@ -60,6 +68,9 @@ def main(argv=None) -> int:
     if a[0] == "post" and len(a) >= 4:
         rec = post(a[1], a[2], " ".join(a[3:]))
         print("posted:", rec["agent"], rec["status"])
+    elif a[0] == "talk" and len(a) >= 4:
+        rec = talk(a[1], a[2], " ".join(a[3:]))
+        print("talk:", rec["agent"], "->", rec.get("to"))
     elif a[0] == "tail":
         n = int(a[1]) if len(a) > 1 else 40
         for r in tail(n):
