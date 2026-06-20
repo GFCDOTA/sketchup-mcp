@@ -130,8 +130,8 @@ def apply_theme_black_wood_gold(text: str) -> str:
              "reflect_glossiness": "0.47", "fresnel_ior": "1.5", "metalness": "0"}
     for k in ("kc_corpo", "kc_porta", "kc_gaveta", "kc_corpo_sup", "kc_porta_sup", "kc_filler", "kc_cuba"):
         text = _set_block(text, f"_ph_{k}_BRDFVRayMtl", black)
-    dark_inox = {"diffuse": "AColor(0.022, 0.024, 0.028, 1)", "reflect": "AColor(0.46, 0.47, 0.52, 1)",
-                 "reflect_glossiness": "0.6", "fresnel_ior": "6", "metalness": "1"}
+    dark_inox = {"diffuse": "AColor(0.020, 0.022, 0.026, 1)", "reflect": "AColor(0.62, 0.64, 0.70, 1)",
+                 "reflect_glossiness": "0.76", "fresnel_ior": "8", "metalness": "1"}   # +reflexo realista (GPT) sem virar espelho
     text = _set_block(text, "_ph_kc_geladeira_BRDFVRayMtl", dark_inox)
     # tampo = pedra escura CONTROLADA (sem veio gritante); backsplash = pedra com veio dourado (textura)
     dark_stone = {"diffuse": "AColor(0.035, 0.030, 0.027, 1)", "reflect": "AColor(0.16, 0.16, 0.16, 1)",
