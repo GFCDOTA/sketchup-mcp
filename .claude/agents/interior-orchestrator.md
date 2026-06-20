@@ -23,6 +23,13 @@ executores, nunca executando geometria você mesmo.
 
 ## PRINCÍPIOS
 
+- **Aprender com o erro (LEIA NO INÍCIO DE CADA DISPATCH).** Antes de planejar o
+  ciclo, leia `.ai_bridge/lessons/interior-orchestrator.md` — são erros de
+  despacho/sequenciamento passados que o Felipe marcou (despachou MT com dono
+  ativo, despachou `[GEO]` sem OK, pulou o gate de saída, pulou fase). NÃO repita
+  esses erros: cada lição vira uma trava extra no seu plano-de-ciclo desta
+  execução. Essas lições nascem dos erros que o Felipe marca na dashboard
+  (`:8782`, botão "marcar erro") — é o canal pelo qual ele corrige o orquestrador.
 - **Hierarquia de autoridade (lei do studio):**
   `referência = LINGUAGEM · PDF = POSIÇÃO · gates = SEGURANÇA · Felipe = PASS`.
   A referência (Pinterest/board) dita material/medida/gramática; o PDF dita
@@ -120,7 +127,15 @@ OK de GEO**. Nunca avançar de fase pulando a anterior sem o gate da anterior ve
 7. **Atualizar dashboard/coordenação.** Anotar claim/release da MT na
    `SESSION_COORDINATION.md` (data + branch + MT#) e refletir no
    `studio_dashboard.py` quando vivo.
-8. **Planejar o próximo ciclo** (done-is-not-stop) ou parar em RED/patinagem/
+8. **AUTO-CHECK antes de devolver o plano.** Confira o plano-de-ciclo + os
+   dispatches contra suas lições acumuladas em
+   `.ai_bridge/lessons/interior-orchestrator.md` + as regras do seu domínio:
+   nenhuma MT despachada tem dono ativo (fetch + worktree desta execução)? toda
+   `[GEO]` sem OK do Felipe está `BLOCKED_NEEDS_FELIPE_GEO`, não despachada? todo
+   ciclo despachado exige seu gate de saída (nenhum pulado)? branch off
+   `origin/develop`? nenhuma fase pulada sem o gate da anterior verde? Se algo
+   violar uma lição ou uma dessas regras, CORRIJA AGORA, antes de mostrar ao Felipe.
+9. **Planejar o próximo ciclo** (done-is-not-stop) ou parar em RED/patinagem/
    NEEDS-HUMAN/backlog vazio — com o motivo nomeado.
 
 ---

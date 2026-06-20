@@ -127,13 +127,25 @@ def _agents() -> dict:
         last, feed, allrecs = {}, [], []
     facemap = {a["id"]: a for a in ROSTER}
 
+    # status ONLINE dos LLMs locais (Ollama) — bolinha verde mesmo idle se o modelo está up
+    try:
+        from tools import ollama_bridge
+        avail = set(ollama_bridge.available())
+        rm = ollama_bridge.ROLE_MODEL
+    except Exception:  # noqa: BLE001
+        avail, rm = set(), {}
+    online_map = {"ollama-deepseek": rm.get("deepseek"), "ollama-qwen": rm.get("qwen"),
+                  "ollama-llama": rm.get("llama")}
+
     def card(aid):
         rec = last.get(aid)
         base = facemap.get(aid, {"face": "•", "label": aid})
+        mdl = online_map.get(aid)
         return {"id": aid, "face": base["face"], "label": base["label"],
                 "status": rec["status"] if rec else "idle",
                 "message": rec["message"] if rec else "—",
-                "ts": rec.get("ts") if rec else None}
+                "ts": rec.get("ts") if rec else None,
+                "online": bool(mdl and mdl in avail)}
 
     metrics = {}
     for r in allrecs:
@@ -209,6 +221,12 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 .flagrow{display:flex;gap:6px;margin-top:10px}.flagrow input{flex:1;background:#0c0d10;border:1px solid var(--bd);color:var(--fg);border-radius:6px;padding:4px 7px;font-size:12px}
 .flagrow select,.flagrow button,td button{background:#0c0d10;border:1px solid var(--bd);color:var(--fg);border-radius:6px;padding:3px 8px;font-size:12px;cursor:pointer}
 .flagrow button:hover,td button:hover{background:#1f2227}
+.onl{color:var(--ok);font-size:9.5px;border:1px solid #2a4030;border-radius:8px;padding:0 5px}
+.off{color:#6a6f78;font-size:9.5px;border:1px solid #2a2d34;border-radius:8px;padding:0 5px}
+.sdot.on{background:var(--ok);box-shadow:0 0 7px var(--ok)}
+.arrow.err{stroke:var(--red);filter:drop-shadow(0 0 4px var(--red))}
+.askrow{display:flex;gap:5px;margin-top:8px}.askrow input{flex:1;background:#0c0d10;border:1px solid var(--bd);color:var(--fg);border-radius:6px;padding:4px 7px;font-size:11.5px}
+.askrow button{background:#0c0d10;border:1px solid var(--bd);color:var(--ok);border-radius:6px;padding:4px 9px;cursor:pointer}.askrow button:hover{background:#1f2227}
 </style></head><body>
 <header><span class=hdot></span><h1>INTERIOR STUDIO</h1><span class=mut id=ts>carregando…</span>
 <span class=mut style=margin-left:auto>auto-refresh 5s · :8782 (separado do oráculo :8765)</span></header>
@@ -221,24 +239,29 @@ function leadCard(a){const act=(a.status==='working'||a.status==='thinking')?'ac
  return `<div class="lead s-${a.status} ${act}" id="lead-${a.id}"><div class=face>${a.face}</div>
   <div style=flex:1><div class=nm>${a.label}<span class=stag>${a.status}</span> <span class=sdot></span></div>
   <div class=msg>${esc(a.message)}</div></div></div>`}
-function subCard(a){const act=(a.status==='working'||a.status==='thinking')?'act':''
+function subCard(a){const act=(a.status==='working'||a.status==='thinking'||a.online)?'act':''
+ const on=a.online?'<span class=onl>online</span>':'<span class=off>offline</span>'
  return `<div class="sub s-${a.status} ${act}"><span class=face>${a.face}</span>
-  <div style=flex:1><div class=nm>${a.label}</div><div class=msg>${esc(a.message)}</div></div><span class=sdot></span></div>`}
+  <div style=flex:1><div class=nm>${a.label} ${on}</div><div class=msg>${esc(a.message)}</div></div><span class="sdot ${a.online?'on':''}"></span></div>`}
 function colChat(feed,ids){const f=(feed||[]).filter(x=>ids.includes(x.agent)).slice(-6)
  return f.map(x=>`<div class=ln><span class=t>${hhmm(x.ts)}</span>${esc(x.message)}${x.to?` <span class=to>→ ${esc(x.to)}</span>`:''}</div>`).join('')||'<span class=mut>—</span>'}
 function drawArrows(ag){const svg=document.getElementById('arrows'),wrap=document.getElementById('org');if(!svg||!wrap)return
  const wr=wrap.getBoundingClientRect();svg.setAttribute('width',wr.width);svg.setAttribute('height',wr.height)
  const amap=ag.agent_umbrella||{},recent=(ag.feed||[]).slice(-7).filter(f=>f.to)
+ const errU=new Set((ag.umbrellas||[]).filter(u=>u.lead.status==='error').map(u=>u.id))
  const edges=new Set();recent.forEach(f=>{const su=amap[f.agent],tu=amap[f.to]||f.to;if(su&&tu&&su!==tu)edges.add(su+'>'+tu)})
  const ctr=(u)=>{const e=document.getElementById('lead-'+leadOf(u));if(!e)return null;const r=e.getBoundingClientRect();return{x:r.left-wr.left+r.width/2,y:r.top-wr.top}}
- let p='<defs><marker id=ah markerWidth=9 markerHeight=9 refX=7 refY=3 orient=auto><path d="M0,0 L7,3 L0,6 Z" fill="#7fd99a"/></marker></defs>'
+ let p='<defs><marker id=ah markerWidth=9 markerHeight=9 refX=7 refY=3 orient=auto><path d="M0,0 L7,3 L0,6 Z" fill="#7fd99a"/></marker><marker id=ahr markerWidth=9 markerHeight=9 refX=7 refY=3 orient=auto><path d="M0,0 L7,3 L0,6 Z" fill="#e67c7c"/></marker></defs>'
  edges.forEach(e=>{const[a,b]=e.split('>'),u=ctr(a),v=ctr(b);if(!u||!v)return;const my=Math.min(u.y,v.y)-20
-  p+=`<path class=arrow marker-end="url(#ah)" d="M${u.x},${u.y} Q${(u.x+v.x)/2},${my} ${v.x},${v.y}"/>`})
+  const er=errU.has(b);p+=`<path class="arrow ${er?'err':''}" marker-end="url(#${er?'ahr':'ah'})" d="M${u.x},${u.y} Q${(u.x+v.x)/2},${my} ${v.x},${v.y}"/>`})
  svg.innerHTML=p}
 let LEADOF={};const leadOf=(u)=>LEADOF[u]
 async function curate(slug,action){await fetch('/api/curate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug,action})});tick()}
 function flagErr(){const a=document.getElementById('flagag').value,m=document.getElementById('flagmsg').value;if(!m)return
  fetch('/api/flag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:a,message:m})}).then(()=>{document.getElementById('flagmsg').value='';tick()})}
+async function askAgent(agent,umb){const inp=document.getElementById('ask-'+umb),q=(inp.value||'').trim();if(!q)return
+ inp.value='';inp.placeholder='perguntando ao LLM local…'
+ await fetch('/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent,prompt:q})});tick()}
 async function tick(){
  let s;try{s=await (await fetch('/api/state')).json()}catch(e){return}
  document.getElementById('ts').textContent='atualizado '+new Date().toLocaleTimeString('pt-BR')
@@ -248,7 +271,8 @@ async function tick(){
  // ORG (guarda-chuvas + setas + métricas)
  const cols=(ag.umbrellas||[]).map(u=>{const ids=[u.lead.id,...u.subs.map(x=>x.id)]
    return `<div class=col>${leadCard(u.lead)}<div class=subs>${u.subs.map(subCard).join('')}</div>
-    <div class=chat>${colChat(ag.feed,ids)}</div></div>`}).join('')
+    <div class=chat>${colChat(ag.feed,ids)}</div>
+    <div class=askrow><input id="ask-${u.id}" placeholder="perguntar pro ${esc(u.lead.label)} (LLM local)"><button onclick="askAgent('${u.lead.id}','${u.id}')">⌁</button></div></div>`}).join('')
  const ents=Object.entries(ag.metrics||{}).sort((a,b)=>b[1].calls-a[1].calls)
  const tot=ents.reduce((s,[,m])=>s+m.calls,0)||1, COL=['#6ca8ff','#7fd99a','#e6c069','#c08ae6','#5ad1c8','#e69a6c','#e67c7c']
  let acc=0
@@ -331,6 +355,26 @@ def _flag(agent, message):
         return {"ok": False, "error": str(e)}
 
 
+AGENT_ROLE = {"interior-designer": "designer", "interior-orchestrator": "coder",
+              "interior-pm": "llama", "ollama-deepseek": "deepseek",
+              "ollama-qwen": "qwen", "ollama-llama": "llama", "gpt-visual": "vision"}
+
+
+def _ask(agent, prompt, image=None):
+    """Felipe/studio pergunta a um agente -> roteia pro LLM LOCAL via Ollama, SEM Claude (peão local)."""
+    agent = agent or "interior-designer"
+    try:
+        from tools import ollama_bridge, studio_log
+        role = AGENT_ROLE.get(agent, "llama")
+        studio_log.post(agent, "thinking", f"(local) {(prompt or '')[:70]}")
+        r = ollama_bridge.ask(role, prompt or "", image=image)
+        resp = (r.get("response") or r.get("error") or "")[:400]
+        studio_log.post(agent, "done" if r.get("ok") else "error", f"(local) {resp[:120]}")
+        return {"ok": r.get("ok", False), "agent": agent, "model": r.get("model"), "response": resp}
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": str(e)}
+
+
 class H(BaseHTTPRequestHandler):
     def log_message(self, *a):
         pass
@@ -370,6 +414,8 @@ class H(BaseHTTPRequestHandler):
             self._send(200, json.dumps(_curate(body.get("slug"), body.get("action"))))
         elif path == "/api/flag":
             self._send(200, json.dumps(_flag(body.get("agent"), body.get("message"))))
+        elif path == "/api/ask":
+            self._send(200, json.dumps(_ask(body.get("agent"), body.get("prompt"), body.get("image"))))
         else:
             self._send(404, b"not found", "text/plain")
 

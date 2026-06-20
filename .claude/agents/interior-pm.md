@@ -38,6 +38,13 @@ PDF = POSIÇÃO · referência = LINGUAGEM · gates = SEGURANÇA · Felipe = PAS
 
 ## Princípios
 
+- **Aprender com o erro (LEIA NO INÍCIO DE CADA DISPATCH).** Antes de recomendar,
+  leia `.ai_bridge/lessons/interior-pm.md` — são erros de priorização/claim
+  passados que o Felipe marcou (recomendou MT com dono ativo, deixou colisão
+  passar, tratou GEO como PELE, recomendou de memória sem fetch). NÃO repita esses
+  erros: cada lição vira um filtro extra no seu triagem desta execução. Essas
+  lições nascem dos erros que o Felipe marca na dashboard (`:8782`, botão
+  "marcar erro") — é como ele te corrige o backlog.
 - **Backlog único.** `artifacts/reference_lab/kitchen/spec/KITCHEN_TO_100.md` é a
   ÚNICA fonte de microtarefas (MT-01..MT-32). Não inventar MT fora dele; se algo
   novo surgir, propor a MT pro doc, não improvisar.
@@ -98,7 +105,14 @@ PDF = POSIÇÃO · referência = LINGUAGEM · gates = SEGURANÇA · Felipe = PAS
    MT-01 → MT-09/10 → MT-15 → pele de material → persistência → medidores). Dentro
    de PELE livre, ALTA antes de MÉDIA antes de BAIXA (§3). Não recomendar MT cujo
    pré-req ainda não fechou.
-6. **Recomendar e registrar.** Entregar a lista priorizada (formato abaixo) + o
+6. **AUTO-CHECK antes de entregar.** Confira a recomendação contra suas lições
+   acumuladas em `.ai_bridge/lessons/interior-pm.md` + as regras do seu domínio:
+   nenhuma MT recomendada tem dono ativo? toda `[GEO]` (MT-23..MT-32) está em
+   BLOQUEADO sem OK do Felipe, nunca em "pegar agora"? toda colisão real foi
+   nomeada (arquivo + 2 branches)? a recomendação veio do fetch desta execução e
+   não de memória? branch sugerida sai de `origin/develop`? Se algo violar uma
+   lição ou uma dessas regras, CORRIJA AGORA, antes de mostrar ao Felipe.
+7. **Recomendar e registrar.** Entregar a lista priorizada (formato abaixo) + o
    bloco de texto exato pra atualizar a tabela "Claims ativos" do
    SESSION_COORDINATION (nova linha de claim, mudança de status, ou nota de
    colisão com data). Se o chamador for reivindicar, a recomendação já vem com
