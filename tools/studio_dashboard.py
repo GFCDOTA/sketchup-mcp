@@ -92,11 +92,19 @@ def _backlog() -> dict:
     done = set(re.findall(r"(MT-\d+)[^\n]*(?:DONE|✓|completed)", txt))
     tasks, seen = [], set()
     for ln in txt.splitlines():  # linhas de tabela: | **MT-NN** | descrição | ...
-        m = re.match(r"\|\s*\*{0,2}(MT-\d+)\*{0,2}\s*`?\[?GEO?\]?`?\s*\|\s*\*{0,2}([^|*]+?)\*{0,2}\s*\|", ln)
-        if m and m.group(1) not in seen:
-            seen.add(m.group(1))
-            tasks.append({"mt": m.group(1), "what": m.group(2).strip()[:90],
-                          "geo": m.group(1) in geo, "done": m.group(1) in done})
+        if not ln.strip().startswith("|") or "MT-" not in ln:
+            continue
+        cells = [c.strip() for c in ln.split("|")]
+        for i, c in enumerate(cells):
+            mm = re.search(r"(MT-\d+)", c)
+            if mm and i + 1 < len(cells):
+                mt = mm.group(1)
+                if mt in seen:
+                    break
+                seen.add(mt)
+                desc = re.sub(r"[*`\[\]]", "", cells[i + 1]).strip()
+                tasks.append({"mt": mt, "what": desc[:90], "geo": mt in geo, "done": mt in done})
+                break
     return {"total": len(mts), "geo": len(geo), "pele": len(mts) - len(geo),
             "done": len(done), "tasks": tasks}
 
