@@ -24,8 +24,8 @@ DECOR_REQUIRED_PARTS = {
     "curtain": ("panel_fold", "rod"),
     "plant_placeholder": ("pot", "foliage"),
     "accent_seat": ("seat", "back", "leg"),
-    "shelf": ("plank",),
-    "track_light": ("rail", "spot"),
+    "shelf": ("shelf_plank",),
+    "track_light": ("track_rail", "track_spot"),
 }
 
 # bbox plausivel (W, D, H) em m por tipo — SpatialGate reprova movel fora da faixa.
