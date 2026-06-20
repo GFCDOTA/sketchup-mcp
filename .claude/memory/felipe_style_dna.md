@@ -27,6 +27,10 @@ nunca auto.
 - **Eletros** inox dark / grafite / preto, **reflexivo** (devolve luz, ajuda a sair da caverna) — `~[82,84,84]`.
 - **Piso** (default seguro) grafite médio acetinado OU cimento queimado quente — **NÃO** preto como default.
 
+## Sensação desejada
+O ambiente deve parecer: **premium · compacto · urbano · elegante · aconchegante · dramático sem virar
+caverna · feito sob medida para apartamento brasileiro** (74m² real, não mansão de catálogo).
+
 ## Checks obrigatórios (o "juiz" do Felipe)
 - **cave_check** — escuro, mas **não caverna** (LED + madeira/reflexo compensam).
 - **fake_luxury_check** — dourado sutil, **nunca cafona/exagerado**.

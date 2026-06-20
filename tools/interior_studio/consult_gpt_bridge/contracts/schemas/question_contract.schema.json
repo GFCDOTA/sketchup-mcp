@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "architect_question_contract.v1",
+  "title": "ArchitectQuestionContract",
+  "description": "Pergunta estruturada do Arquiteto (via consult-liaison) ao Consult GPT. Geometria do PDF é congelada; só a linguagem visual é discutível.",
+  "type": "object",
+  "required": ["question_id", "created_at", "agent", "mode", "room", "phase", "theme", "priority",
+               "context", "decision_goal", "frozen_constraints", "mutable", "architect_hypothesis",
+               "questions", "answer_format"],
+  "additionalProperties": false,
+  "properties": {
+    "question_id": {"type": "string", "description": "<room>_<phase>_<NNN>"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "agent": {"type": "string", "const": "architect"},
+    "mode": {"type": "string", "enum": ["SPEC", "JUDGE", "REPAIR", "LEARN", "COMPARE"]},
+    "project": {"type": "string"},
+    "room": {"type": "string", "enum": ["kitchen", "living", "bedroom", "bathroom", "laundry", "full_apartment"]},
+    "phase": {"type": "string", "enum": ["layout", "form", "skin", "lighting", "render", "final_validation"]},
+    "theme": {"type": "string"},
+    "priority": {"type": "string", "enum": ["low", "medium", "high", "blocker"]},
+    "context": {"type": "string", "minLength": 1},
+    "decision_goal": {"type": "string", "minLength": 1},
+    "visual_inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "main": {"type": ["string", "null"], "description": "raw github url ou local path; null se mode SPEC"},
+        "aux": {"type": "array", "items": {"type": "string"}},
+        "compare": {
+          "type": "object",
+          "additionalProperties": {"type": "string"},
+          "description": "ex.: {\"A\": url, \"B\": url, \"C\": url} — obrigatório quando mode=COMPARE"
+        }
+      }
+    },
+    "frozen_constraints": {"type": "array", "items": {"type": "string"}, "description": "geometria que NÃO pode mudar"},
+    "mutable": {"type": "array", "items": {"type": "string"}, "description": "espaço de decisão (linguagem visual)"},
+    "architect_hypothesis": {"type": "string", "minLength": 1},
+    "questions": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "text"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"type": "string", "description": "ex.: cave_check, fake_luxury_check, ajuste_1"},
+          "text": {"type": "string"}
+        }
+      }
+    },
+    "answer_format": {"type": "string", "const": "ARCHITECT_ANSWER_CONTRACT v1"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"mode": {"const": "COMPARE"}}},
+      "then": {"required": ["visual_inputs"],
+               "properties": {"visual_inputs": {"required": ["compare"]}}}
+    }
+  ]
+}
