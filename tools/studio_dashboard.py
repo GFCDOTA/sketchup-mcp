@@ -252,6 +252,7 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 .thumb{cursor:pointer;position:relative}.lnk{color:var(--blu);cursor:pointer;text-decoration:underline}
 .trash{background:#2a1a1a;border:1px solid #4a2a2a;color:#e6a0a0;border-radius:6px;padding:2px 7px;cursor:pointer;font-size:12px}.trash:hover{background:#3a2222}
 .thumbtrash{position:absolute;top:5px;right:5px;padding:1px 6px;z-index:2}
+.minithumb{width:46px;height:34px;object-fit:cover;border-radius:5px;cursor:pointer;border:1px solid var(--bd)}
 .gallery{max-height:330px;overflow-y:auto;padding-right:4px}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.86);z-index:50;align-items:center;justify-content:center;padding:24px}
 .modal.show{display:flex}.mbox{max-width:92vw;max-height:92vh;display:flex;flex-direction:column;gap:8px}
@@ -312,6 +313,7 @@ async function curate(slug,action){await fetch('/api/curate',{method:'POST',head
 function flagErr(){const a=document.getElementById('flagag').value,m=document.getElementById('flagmsg').value;if(!m)return
  fetch('/api/flag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:a,message:m})}).then(()=>{document.getElementById('flagmsg').value='';tick(1)})}
 function clearErr(agent){fetch('/api/clear',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent})}).then(()=>tick(1))}
+function fetchPreview(slug){fetch('/api/preview',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug})}).then(()=>tick(1))}
 function askAgent(agent,umb){const inp=document.getElementById('ask-'+umb),q=(inp.value||'').trim();if(!q)return
  inp.value='';inp.blur()   // tira o foco -> o tick pode mostrar o balão
  fetch('/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent,prompt:q})}).then(()=>tick(1))
@@ -405,15 +407,16 @@ async function tick(force){
  // INBOX
  const fn=(i)=>i.local_path?encodeURIComponent(i.local_path.split('/').pop()):''
  const inb=(s.inbox||[]).map(i=>{const st=i.status||'pending',nm=esc(i.title||i.slug)
+   const thumb=i.local_path?`<img class=minithumb src="/inbox-img/${fn(i)}" onclick="openModal('/inbox-img/${fn(i)}','${esc(i.slug)}')">`:(i.source_url?`<button class=chatbtn onclick="fetchPreview('${esc(i.slug)}')" title="puxar imagem do site">🖼</button>`:'')
    const cell=i.local_path?`<td class=lnk onclick="openModal('/inbox-img/${fn(i)}','${esc(i.slug)}')">${nm}</td>`
      :(i.source_url?`<td><a class=lnk href="${esc(i.source_url)}" target=_blank>${nm} ↗</a></td>`:`<td>${nm}</td>`)
-   return `<tr>${cell}<td>${i.theme||'-'}</td><td>${st}</td>
-   <td>${st!=='approved'?`<button onclick="curate('${esc(i.slug)}','approve')">✓ ok</button> `:''}<button class=trash onclick="curate('${esc(i.slug)}','reject')" title=apagar>🗑</button></td></tr>`}).join('')
- const thumbs=(s.inbox||[]).filter(i=>i.local_path).map(i=>`<div class=thumb><img loading=lazy src="/inbox-img/${fn(i)}" onclick="openModal('/inbox-img/${fn(i)}','${esc(i.slug)}')"><button class="trash thumbtrash" onclick="curate('${esc(i.slug)}','reject')" title=apagar>🗑</button><div class=cap>${esc(i.slug)}<div class=t>${i.status||'pending'}</div></div></div>`).join('')
- root.appendChild(el(`<div class="card full" id=sec-cur><h2>Curadoria — inbox de referência <span class=mut>(clica na imagem/slug pra ampliar · aprova/apaga — sem Claude)</span></h2>
+   return `<tr><td>${thumb}</td>${cell}<td>${i.theme||'-'}</td><td>${st}</td>
+   <td>${st!=='approved'?`<button onclick="curate('${esc(i.slug)}','approve')" title=aprovar>✓</button> `:''}${st!=='rejected'?`<button onclick="curate('${esc(i.slug)}','reject')" title=reprovar>✕</button> `:''}<button class=trash onclick="curate('${esc(i.slug)}','delete')" title=apagar>🗑</button></td></tr>`}).join('')
+ const thumbs=(s.inbox||[]).filter(i=>i.local_path).map(i=>`<div class=thumb><img loading=lazy src="/inbox-img/${fn(i)}" onclick="openModal('/inbox-img/${fn(i)}','${esc(i.slug)}')"><button class="trash thumbtrash" onclick="curate('${esc(i.slug)}','delete')" title=apagar>🗑</button><div class=cap>${esc(i.slug)}<div class=t>${i.status||'pending'}</div></div></div>`).join('')
+ root.appendChild(el(`<div class="card full" id=sec-cur><h2>Curadoria — inbox de referência <span class=mut>(✓ aprova · ✕ reprova (fica) · 🗑 apaga · 🖼 puxa imagem do site)</span></h2>
   <div class=uprow><label class=upbtn>⬆ escolher imagem<input type=file id=upfile accept="image/*" onchange=uploadRef() hidden></label> <span class=mut id=upmsg>escolhe a imagem → sobe sozinho</span></div>
   ${thumbs?`<div class=grid style="margin:10px 0">${thumbs}</div>`:''}
-  <table><tr><th>slug</th><th>tema</th><th>status</th><th>ação</th></tr>${inb||'<tr><td colspan=4 class=mut>fila vazia — sobe uma referência acima</td></tr>'}</table></div>`))
+  <table><tr><th></th><th>referência</th><th>tema</th><th>status</th><th>ação</th></tr>${inb||'<tr><td colspan=5 class=mut>fila vazia — sobe uma referência acima</td></tr>'}</table></div>`))
  // RENDERS
  const rr=(s.renders||[]).map(r=>`<div class=thumb onclick="openModal('/img/${encodeURIComponent(r.name)}','${esc(r.name)}')"><img loading=lazy src="/img/${encodeURIComponent(r.name)}">
    <div class=cap>${esc(r.name.replace('.png',''))}<div class=t>${r.theme} · ${r.sub} · ${r.kb}KB</div></div></div>`).join('')
@@ -426,16 +429,13 @@ tick();setInterval(tick,10000);window.addEventListener('resize',()=>tick())
 
 
 def _curate(slug, action):
-    """Felipe aprova (mantém) ou apaga (SOME + deleta o arquivo) um candidato do inbox. Sem Claude."""
+    """3 ações: approve (aprovado) · reject (reprovado, FICA visível p/ saber o que não curtiu) ·
+    delete (SOME + deleta o arquivo). Tudo direto no INBOX.json, sem Claude."""
     if not INBOX.exists() or not slug:
         return {"ok": False}
     data = json.loads(INBOX.read_text("utf-8"))
     items = data.get("items", [])
-    if action == "approve":
-        for it in items:
-            if it.get("slug") == slug:
-                it["status"] = "approved"
-    else:  # apagar -> remove da lista + deleta o arquivo (Felipe não quer nem ver o rejeitado)
+    if action == "delete":
         for it in items:
             if it.get("slug") == slug and it.get("local_path"):
                 try:
@@ -443,8 +443,43 @@ def _curate(slug, action):
                 except Exception:  # noqa: BLE001
                     pass
         data["items"] = [it for it in items if it.get("slug") != slug]
+    else:  # approve / reject -> só muda o status (continua na lista)
+        for it in items:
+            if it.get("slug") == slug:
+                it["status"] = "approved" if action == "approve" else "rejected"
     INBOX.write_text(json.dumps(data, ensure_ascii=False, indent=2), "utf-8")
     return {"ok": True, "slug": slug, "action": action}
+
+
+def _fetch_preview(slug):
+    """Puxa a imagem de preview (og:image) do site de um candidato e salva como miniatura no inbox.
+    Acionado pelo Felipe (botão 🖼) — é a curadoria dele, não scraping em massa."""
+    import re as _re
+    import urllib.request
+    if not INBOX.exists():
+        return {"ok": False}
+    data = json.loads(INBOX.read_text("utf-8"))
+    item = next((it for it in data.get("items", []) if it.get("slug") == slug), None)
+    if not item or not item.get("source_url"):
+        return {"ok": False, "error": "sem url"}
+    hdr = {"User-Agent": "Mozilla/5.0"}
+    try:
+        html = urllib.request.urlopen(
+            urllib.request.Request(item["source_url"], headers=hdr), timeout=12).read().decode("utf-8", "ignore")
+        m = (_re.search(r'property=["\']og:image["\'][^>]*content=["\']([^"\']+)', html)
+             or _re.search(r'content=["\']([^"\']+)["\'][^>]*property=["\']og:image', html))
+        if not m:
+            return {"ok": False, "error": "site sem og:image"}
+        img_url = m.group(1)
+        raw = urllib.request.urlopen(urllib.request.Request(img_url, headers=hdr), timeout=12).read()
+        ext = ".png" if ".png" in img_url.lower() else (".webp" if ".webp" in img_url.lower() else ".jpg")
+        fname = slug + "_preview" + ext
+        (INBOX.parent / fname).write_bytes(raw)
+        item["local_path"] = f"inbox/{fname}"
+        INBOX.write_text(json.dumps(data, ensure_ascii=False, indent=2), "utf-8")
+        return {"ok": True, "path": item["local_path"]}
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": str(e)}
 
 
 def _upload(filename, data_b64):
@@ -608,6 +643,8 @@ class H(BaseHTTPRequestHandler):
             self._send(200, json.dumps(_clear(body.get("agent"))))
         elif path == "/api/consensus":
             self._send(200, json.dumps(_consensus(body.get("agent"), body.get("prompt"))))
+        elif path == "/api/preview":
+            self._send(200, json.dumps(_fetch_preview(body.get("slug"))))
         else:
             self._send(404, b"not found", "text/plain")
 
