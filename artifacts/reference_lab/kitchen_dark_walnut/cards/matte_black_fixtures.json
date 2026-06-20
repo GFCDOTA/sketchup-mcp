@@ -1,0 +1,16 @@
+{
+  "card_id": "matte_black_fixtures",
+  "category": "material_token",
+  "problem": "torneira/cuba inox brilhante quebra a paleta escura monocromatica e parece avulso",
+  "design_move": "fixtures monocromaticas PRETO FOSCO (torneira, cuba, cooktop, puxadores) — preto-no-preto coeso; o contraste vem da madeira, nao do metal",
+  "applies_to": ["faucet", "sink", "cooktop", "hardware"],
+  "implementation_tokens": {
+    "material_family": "matte_black_metal",
+    "vray_brdf": {"reflect": 0.35, "reflect_glossiness": 0.4, "metalness": 1}
+  },
+  "joinery_token_ref": null,
+  "real_values": {"black_fixture_rgb": [20, 20, 22], "note": "INVERSO do inox_premium_appliance do EXAMPLE_001 (estilo claro usa inox; estilo dark usa preto)"},
+  "forbidden": ["inox brilhante no meio do preto", "misturar preto + inox + dourado (max 2 metais)", "preto fosco que some sem nenhum reflexo (precisa de leve specular)"],
+  "gate": ["coeso com a marcenaria preta", "leve specular pra nao sumir", "max 2 acabamentos metalicos"],
+  "evidence": "referencia EXAMPLE_002; torneira/cuba/cooktop preto fosco"
+}

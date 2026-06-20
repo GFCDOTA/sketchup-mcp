@@ -20,6 +20,10 @@ def vray_export_run
         'ph_mesa_centro' => wd, 'ph_base' => wd,
         'ph_corpo' => wm, 'ph_porta' => wm, 'ph_tampo' => wm, 'ph_gaveta' => wm, 'ph_rack_tv' => wm,
         'ph_dresser' => wm, 'ph_bancada' => wm, 'ph_torre' => wm, 'ph_aereo' => wm,
+        # COZINHA planejada (kinds kc_* por PAPEL): madeira nos inferiores/nicho, pedra no tampo/backsplash.
+        # Fendi/inox/grafite ficam na cor solida + BRDF (sem textura). LED = emissivo (tweak).
+        'ph_kc_corpo' => wm, 'ph_kc_porta' => wm, 'ph_kc_gaveta' => wm, 'ph_kc_niche_wood' => wm, 'ph_kc_board' => wm,
+        'ph_kc_tampo' => 'stone_counter.png', 'ph_kc_backsplash' => 'stone_counter.png',
         # SOFA (sala = PASS, NAO regressar): mantem fabric_light
         'ph_seat_cushion' => fl, 'ph_back_cushion' => fl, 'ph_arm' => fl,
         # ROUPA DE CAMA: linho dedicado (textura mais marcada, menos lavada sob luz)
@@ -47,6 +51,27 @@ def vray_export_run
       if ENV['VRAY_STONE'] == '1'
         tex_map = tex_map.merge({'ph_bancada' => 'stone_counter.png',
                                  'ph_bancada_banho' => 'stone_counter.png'})
+      end
+      # TEMA DARK_WALNUT_MOODY_PREMIUM (gated por KITCHEN_THEME) — troca SO a PELE da cozinha:
+      # nogueira no tampo/backsplash/nicho/tabua; armarios viram preto fosco (diffuse override no
+      # tweak_vrscene). NAO toca geometria/layout. Variante separada da cozinha clara (PASS).
+      if ENV['KITCHEN_THEME'] == 'dark_walnut'
+        ['ph_kc_corpo', 'ph_kc_porta', 'ph_kc_gaveta'].each { |k| tex_map.delete(k) }   # -> preto fosco
+        tex_map = tex_map.merge({
+          'ph_kc_tampo' => 'wood_dark.png', 'ph_kc_backsplash' => 'wood_dark.png',
+          'ph_kc_niche_wood' => 'wood_dark.png', 'ph_kc_board' => 'wood_dark.png'
+        })
+      end
+      # TEMA HOTEL_BOUTIQUE_WARM_LUXURY: armarios taupe/greige (tira textura de madeira ->
+      # diffuse no tweak); tampo/backsplash pedra clara quente (mantem stone); nicho/tabua = madeira.
+      if ENV['KITCHEN_THEME'] == 'hotel_boutique'
+        ['ph_kc_corpo', 'ph_kc_porta', 'ph_kc_gaveta'].each { |k| tex_map.delete(k) }   # -> taupe
+      end
+      # TEMA BLACK_WOOD_GOLD: armarios preto (sem textura), backsplash = pedra com veio dourado,
+      # tampo = pedra escura controlada (sem textura -> diffuse), niche/board = madeira quente (mantem).
+      if ENV['KITCHEN_THEME'] == 'black_wood_gold'
+        ['ph_kc_corpo', 'ph_kc_porta', 'ph_kc_gaveta', 'ph_kc_tampo'].each { |k| tex_map.delete(k) }
+        tex_map = tex_map.merge({ 'ph_kc_backsplash' => 'stone_gold.png' })
       end
       n_tex = 0
       tex_map.each do |matname, png|
@@ -85,8 +110,21 @@ def vray_export_run
       out << "texturas aplicadas: #{n_tex}"
     end
 
+    # ISOLAR um cômodo (VRAY_ISOLATE=substring do nome do grupo) -> esconde o resto.
+    # Mata a oclusão do galley no V-Ray: sem paredes/móveis vizinhos a câmera frameia limpo.
+    iso = ENV['VRAY_ISOLATE']
     view = model.active_view
     bb = model.bounds
+    if iso && !iso.empty?
+      kbb = Geom::BoundingBox.new
+      model.entities.grep(Sketchup::Group).each do |g|
+        keep = g.name.to_s.include?(iso)
+        (g.hidden = !keep) rescue nil
+        kbb.add(g.bounds) if keep
+      end
+      bb = kbb if kbb.valid?
+      out << "isolado '#{iso}'"
+    end
     c = bb.center
     d = bb.diagonal
     cam_mode = ENV['VRAY_CAM'] || 'iso'

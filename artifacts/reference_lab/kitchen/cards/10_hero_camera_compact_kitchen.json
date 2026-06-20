@@ -1,0 +1,18 @@
+{
+  "card_id": "hero_camera_compact_kitchen",
+  "category": "camera_token",
+  "problem": "render com vazio lateral enorme / chao vazio mata a apresentacao (recorte perdido no canvas)",
+  "design_move": "camera de hero fechada e centralizada: FOV medio, cozinha enchendo o quadro, torre inteira + bancada visivel, crop tirando ceu/chao vazio",
+  "applies_to": ["kitchen_hero_render"],
+  "implementation_tokens": {
+    "fov": 47,
+    "framing": "centered_fill",
+    "crop": "tira vazio lateral + ceu/chao",
+    "must_show": ["full_fridge_tower", "counter"]
+  },
+  "joinery_token_ref": null,
+  "real_values": {"eye_in": [189,634,52], "target_in": [72,651,45], "fov": 47, "crop": {"x0": 0.09, "x1": 0.93, "y0": 0.12, "y1": 0.73}, "isolate": "VRAY_ISOLATE=COZINHA"},
+  "forbidden": ["faixa preta/vazio lateral grande", "chao vazio dominando", "cortar a torre da geladeira", "mover geometria pra 'caber'"],
+  "gate": ["cozinha enche o quadro", "torre inteira visivel", "SO camera/crop — NUNCA mexe geometria"],
+  "evidence": "GPT: 'le como hero de cozinha, nao recorte perdido no canvas'"
+}

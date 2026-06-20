@@ -1,0 +1,18 @@
+{
+  "card_id": "box_hood_wood_underside",
+  "category": "joinery_form_token",
+  "problem": "coifa generica/solta sem assinatura; ou caixa preta vira bloco morto",
+  "design_move": "coifa CAIXA proeminente (chamine) preto fosco com FUNDO/underside de madeira quente + tela perfurada decorativa — vira peca de assinatura, integrada ao teto/aereo",
+  "applies_to": ["over_cooktop"],
+  "implementation_tokens": {
+    "type": "box_chimney_statement",
+    "underside": "warm_wood_accent",
+    "screen": "perforated_black_panel_optional",
+    "finish_body": "matte_black"
+  },
+  "joinery_token_ref": null,
+  "real_values": {"body_rgb": [28, 28, 30], "underside_walnut_rgb": [120, 72, 42], "note": "alternativa de assinatura a coifa slim do EXAMPLE_001 (integrated_slim_hood)"},
+  "forbidden": ["coifa solta desalinhada do conjunto", "caixa preta sem o calor do fundo de madeira", "tela perfurada virar poluicao visual"],
+  "gate": ["kitchen_ergonomics::hood_clearance", "integrada ao teto/aereo (nao flutuando)", "fundo de madeira coordenado com tampo/backsplash", "nao bloquear circulacao"],
+  "evidence": "referencia EXAMPLE_002; coifa caixa preta c/ fundo madeira + tela"
+}

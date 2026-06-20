@@ -1,0 +1,32 @@
+{
+  "card_id": "warm_dark_industrial_palette",
+  "category": "material_token",
+  "problem": "branco parece MDF barato e NAO e o gosto do Felipe (ele nao gosta de branco puro). Falta uma paleta-mae que leia premium e case com o gosto: industrial preto+madeira, cimento queimado, moody/noturno",
+  "design_move": "paleta-mae meio-termo/escura premium: madeira media/escura + grafite/preto + pedra com veio (mais forte se manutencao viavel) + bronze/dourado SUTIL como joia pontual + LED quente. Mood noturno a noite, luz natural de dia. E a paleta guarda-chuva que os outros cards de material instanciam pro gosto Felipe (hotel boutique / industrial premium)",
+  "applies_to": ["whole_kitchen", "base_cabinet", "tower", "countertop", "backsplash", "hardware", "lighting"],
+  "implementation_tokens": {
+    "mood": ["industrial_black_wood", "burnished_cement", "moody_nocturnal", "hotel_boutique"],
+    "wood": "medium_to_dark_oak_walnut",
+    "dark_anchor": "graphite_black",
+    "stone": "veined (veio medio-forte se manutencao viavel -> porcelanato/quartzo veiado)",
+    "metal_accent": "bronze_gold_subtle (max 2 metais, joia pontual)",
+    "lighting": "warm_2700K",
+    "finish": "matte_satin (nunca ultra-gloss, nunca branco-papel)",
+    "day_night": "luz natural de dia + mood noturno a noite",
+    "vray_brdf_hint": {"wood": {"reflect": 0.08, "glossiness": 0.65}, "graphite": {"reflect": 0.05, "glossiness": 0.5}, "bronze": {"metalness": 1, "reflect": 0.6, "glossiness": 0.72}}
+  },
+  "joinery_token_ref": null,
+  "real_values": {
+    "medium_dark_wood_rgb_hint": [138,104,66],
+    "dark_walnut_rgb_hint": [92,68,46],
+    "graphite_rgb": [40,41,45],
+    "stone_rgb": [222,219,212],
+    "bronze_accent_rgb_hint": [150,120,78],
+    "led_rgb": [255,250,232],
+    "gpt_pass_themes": ["warm_compact_premium", "dark_walnut_moody", "hotel_boutique_warm_luxury", "black_wood_gold_industrial_boutique"],
+    "no_pure_white": "branco NUNCA acima de [244,244,244]; preferir grafite/taupe/madeira"
+  },
+  "forbidden": ["branco puro / brancao (fora do gosto)", "ultra-gloss plastico", "mais de 2 metais (bronze briga com cromo)", "dourado/bronze exagerado (vira espalhafatoso — Felipe pede SUTIL)", "cozinha tao escura que sufoca o apto compacto 74m2 (equilibrar com LED quente + pedra clara)", "veio dramatico em material poroso de uso pesado (ver card 16)"],
+  "gate": ["le como meio-termo/escuro premium (nao branco, nao builder-grade)", "max 2 metais, bronze como joia pontual", "LED 2700K quente", "mood noturno funciona E recebe luz natural de dia", "casa com um dos 4 temas GPT PASS", "passa o maintenance_reality_check (card 16)"],
+  "evidence": "4 temas GPT PASS ja existentes (themes/) confirmam a direcao; esta paleta-mae e a sintese — instanciar por cozinha e validar no hero + GPT"
+}

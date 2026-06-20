@@ -1,0 +1,17 @@
+{
+  "card_id": "compact_dark_cave_gate",
+  "category": "safety_gate",
+  "problem": "paleta escura (preto/nogueira) numa cozinha COMPACTA com pouca luz natural = caverna (anti-padrao da KB: nogueira + espaco pequeno + pouca luz)",
+  "design_move": "se aplicar dark em ambiente compacto: garantir bounce/luz suficiente, manter a madeira QUENTE (nao marrom morto), LED forte, e nao ir 100% preto — deixar a madeira e a luz abrirem o espaco",
+  "applies_to": ["compact_kitchen", "low_light_room"],
+  "implementation_tokens": {
+    "max_black_coverage": "~60% (resto madeira/luz)",
+    "require": ["warm_wood_balance", "strong_led", "enough_key_light"],
+    "check": "render nao pode ler como breu/caverna"
+  },
+  "joinery_token_ref": null,
+  "real_values": {"kb_ref": "references/materials/wood.md (nogueira+espaco pequeno+pouca luz = caverna)"},
+  "forbidden": ["100% preto em compacto", "madeira escura sem luz quente", "ambiente fechado sem fonte de luz visivel"],
+  "gate": ["render nao pode virar caverna", "madeira le quente", "leitura preservada (nao breu)", "veredito GPT/Felipe"],
+  "evidence": "regra de fidelidade derivada da KB + da referencia dark"
+}

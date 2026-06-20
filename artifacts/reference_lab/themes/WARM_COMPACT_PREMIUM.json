@@ -1,0 +1,16 @@
+{
+  "theme_id": "WARM_COMPACT_PREMIUM",
+  "token_type": "theme_preset (material_lighting_system)",
+  "style": "claro premium compacto — o DEFAULT seguro/vendável (GOLDEN_SAMPLE_001)",
+  "kitchen_theme_env": "(vazio — é o default da cozinha base)",
+  "implementation": {
+    "cabinets_upper": {"color": "fendi/off-white quente acetinado", "rgb": [224, 215, 199]},
+    "cabinets_base": {"color": "carvalho/freijó claro coordenado", "rgb": [191, 167, 137]},
+    "countertop_backsplash": {"material": "pedra clara veio sutil", "rgb": [222, 219, 212], "texture": "A_quartzo_fio"},
+    "appliance": {"finish": "inox reflexivo", "rgb": [216, 220, 227]},
+    "accents": {"toe_kick": "grafite [40,41,45]", "led": "2700K"}
+  },
+  "spec": "kitchen/specs/modern_warm_kitchen.json",
+  "example": "kitchen/EXAMPLE_001_KITCHEN.md",
+  "status": {"gpt": "PASS de pele", "felipe_final": "pendente"}
+}

@@ -1,0 +1,27 @@
+{
+  "name": "planned_fridge_tower",
+  "title": "Torre da geladeira integrada (loose_object -> planned_niche_system)",
+  "rule": "A geladeira NUNCA é um bloco solto encostado: ela mora num nicho planejado, flanqueada por painel lateral (filler) em FENDI igual ao aéreo, com respiro lateral/superior controlado, formando uma coluna coesa que sobe à mesma altura da marcenaria alta. O corpo inox fica inset dentro do nicho; o reveal escuro no topo lê como respiro planejado, não como gap acidental. A torre vai numa PONTA do layout linear, oposta à torre forno/microondas — nunca no meio da bancada.",
+  "params": {
+    "tower_width_cm": 70,
+    "tower_width_range_cm": [55, 75],
+    "tower_depth_cm": 66,
+    "tower_height_m": 1.80,
+    "fridge_body_inset_side_cm": 1.4,
+    "vent_gap_total_cm": 4,
+    "vent_gap_range_cm": [2, 6],
+    "freezer_split_fraction": 0.62,
+    "filler_rgb": [224, 215, 199],
+    "fridge_body_rgb": [216, 220, 227],
+    "reveal_rgb": [40, 41, 45],
+    "handle_rgb": [44, 45, 50],
+    "handle_style": "barra vertical longa (cava), uma por porta",
+    "position": "ponta do layout linear, oposta à torre forno; encostada na parede de fundo (PDF manda)"
+  },
+  "applies_to_kinds": ["kc_geladeira", "kc_filler", "kc_soculo", "kc_puxador"],
+  "anti_pattern": "Geladeira freestanding largada no canto, sem painel lateral, sem alinhamento de topo com o aéreo = leitura de 'objeto colocado', não de planejado. Também: respiro 0cm (geladeira esmagada) ou >6cm (gap feio).",
+  "cost_relative": "alto (painel lateral + nicho consomem 1 módulo de marcenaria além da geladeira), mas é o que separa planejado de avulso",
+  "appearance": "Coluna clara fendi com a geladeira inox claro centrada e recuada; sombra fina de respiro nas laterais e no topo; sobe alinhada ao aéreo.",
+  "gate_refs": ["tools/kitchen_ergonomics.py::fridge_tower_width", "tools/kitchen_ergonomics.py::fridge_vent_gap", "tools/furniture_overlap_gate.py"],
+  "source": {"kind": "golden_sample", "title": "tools/kitchen_layout.py (bloco geladeira + GEL_W/TORRE_W)", "date": "2026-06-19"}
+}

@@ -1,0 +1,17 @@
+{
+  "card_id": "integrated_slim_hood",
+  "category": "joinery_form_token",
+  "problem": "coifa preta volumosa aparece pesada e meio solta, briga com o conjunto",
+  "design_move": "coifa SLIM embutida/alinhada ao aereo (off-white coordenado ou inox discreto), under-cabinet",
+  "applies_to": ["over_cooktop"],
+  "implementation_tokens": {
+    "type": "slim_under_cabinet",
+    "align": "flush_with_upper",
+    "finish": "coordinated_offwhite_or_inox"
+  },
+  "joinery_token_ref": null,
+  "real_values": {"clearance_under_cabinet_cm": [45, 65], "note": "coifa de chamine seria 70-80; aqui slim under-cabinet"},
+  "forbidden": ["coifa volumosa solta", "coifa preta pesada destacada", "coifa desalinhada do aereo"],
+  "gate": ["kitchen_ergonomics::hood_clearance (45-65 under-cabinet)", "alinhada/embutida no conjunto"],
+  "evidence": "coifa slim no cozinha_vray_elev.png; GPT pedia 'alinhar/embutir melhor'"
+}

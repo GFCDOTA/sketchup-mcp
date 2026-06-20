@@ -1,0 +1,26 @@
+{
+  "theme_id": "HOTEL_BOUTIQUE_WARM_LUXURY",
+  "token_type": "theme_preset (material_lighting_system)",
+  "style": "premium equilibrado / hotel boutique — entre a clara (vendável) e a dark (autoral)",
+  "intent": "o tema do MEIO: taupe + bronze/champagne + pedra quente + LED refinado. Testou se o tradutor GENERALIZA (3a linguagem distinta na mesma geometria).",
+  "problem": "branco pode ser frio/genérico e preto pode ser pesado; falta o premium quente e equilibrado",
+  "design_move": "armários taupe/greige acetinado + metais bronze/champagne (a assinatura) + pedra clara quente + LED refinado; pouca cor, acabamento caro",
+
+  "skin_swap_only": "TROCA a pele, MANTÉM a forma. KITCHEN_THEME=hotel_boutique. Não rebuilda, não toca geometria.",
+
+  "implementation": {
+    "cabinets": {"color": "taupe/greige ~[150,138,122]", "finish": "satin", "kinds": ["kc_corpo","kc_porta","kc_gaveta","kc_corpo_sup","kc_porta_sup","kc_filler"]},
+    "fridge": {"finish": "inox champagne (metálico)", "kinds": ["kc_geladeira"]},
+    "metals": {"finish": "bronze escovado (puxador/torneira/cuba/sóculo)", "kinds": ["kc_puxador","kc_torneira","kc_cuba","kc_soculo"]},
+    "countertop_backsplash": {"material": "pedra clara quente (mantém stone)", "kinds": ["kc_tampo","kc_backsplash"]},
+    "wood_accent": {"material": "madeira no nicho/tábua", "kinds": ["kc_niche_wood","kc_board"]},
+    "lighting": {"temperature_K": "2700-3000", "mood": "refinado/equilibrado"}
+  },
+
+  "gates": [
+    "premium_check: NÃO pode cair em 'bege sem graça' — o bronze/champagne é a assinatura",
+    "balance_check: ocupa o meio-termo (não tão claro quanto 001, não tão escuro quanto 002)"
+  ],
+  "status": {"applied_to_planta_74": true, "render": "cozinha_vray_hero_boutique.png", "gpt": "PASS (taupe/champagne hotel premium; meio-termo OK; bronze reforçado p/ ficar inequívoco)", "felipe_final": "pendente"},
+  "gpt_quote": "boutique = premium equilibrada/refinada; o tradutor generalizou — 3 linguagens distintas na mesma geometria"
+}

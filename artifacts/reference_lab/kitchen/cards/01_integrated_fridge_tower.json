@@ -1,0 +1,19 @@
+{
+  "card_id": "integrated_fridge_tower",
+  "category": "joinery_form_token",
+  "problem": "geladeira solta parece eletro jogado no canto + deixa gap feio ao lado",
+  "design_move": "loose_object -> planned_niche_system: nicho com painel lateral + armario superior flush + filler + respiro tecnico; geladeira inox inset no nicho fendi",
+  "applies_to": ["kitchen", "laundry", "tall_appliance_column"],
+  "implementation_tokens": {
+    "system": "planned_niche",
+    "parts": ["gable_panel", "upper_cabinet_flush", "filler", "vent_gap", "inset_appliance"],
+    "filler_width_cm": 16,
+    "vent_gap_cm": 2.8,
+    "upper_flush_offset_cm": -5
+  },
+  "joinery_token_ref": "references/tokens/planned_fridge_tower.json",
+  "real_values": {"GEL_W_m": 0.70, "GEL_D_m": 0.66, "GEL_H_m": 1.80, "geladeira_rgb": [216,220,227], "nicho_fendi_rgb": [224,215,199]},
+  "forbidden": ["geladeira solta no canto", "bloquear porta/circulacao", "nicho de cor diferente da marcenaria"],
+  "gate": ["furniture_overlap_gate", "kitchen_ergonomics::fridge_vent_gap (2-6cm)", "nao bloquear porta"],
+  "evidence": "torre inteira no cozinha_vray_hero.png; GPT: deixou de parecer 'remendo'"
+}

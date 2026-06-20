@@ -1,0 +1,206 @@
+{
+  "schema": "joinery_tokens/1.0.0",
+  "produced_by": "PLANNED_JOINERY_SPECIALIST",
+  "produced_at": "2026-06-19",
+  "room_id": "r004",
+  "room_name": "COZINHA",
+  "layout": "linear_galley_west_wall",
+  "core_principle": "loose_object -> planned_niche_system",
+  "principle_explained": "Nenhum objeto e pousado solto. Cada eletrodomestico/elemento vira um SISTEMA: painel lateral + topo flush + filler de fechamento + respiro tecnico + material por papel + integracao com a linha de marcenaria (mesma cor/reveal das vizinhas).",
+  "scale_note": "Build roda com PT_TO_M=0.0259. cm aqui = world real; o builder converte via M()/PT_TO_IN. RGB = 0-255 sRGB, mesmo espaco do _KC em kitchen_layout.py.",
+  "fixed_anchors_pdf": {
+    "sink_wall": "W (oeste)",
+    "sink_is_hydraulic_fixed": true,
+    "layout_must_stay_linear": true,
+    "note": "A referencia NUNCA move pia/parede/porta nem vira U/L. Estes tokens so tocam LINGUAGEM e MATERIAL."
+  },
+  "tokens": [
+    {
+      "name": "fridge_tower",
+      "intent": "Geladeira inox vira COLUNA integrada full-height (loose_object -> planned_niche_system), nao bloco solto na ponta.",
+      "anatomy": ["nicho_full_height", "painel_lateral_filler", "armario_superior_flush_no_topo", "respiro_lateral_superior", "puxador_barra_vertical_cava", "reveal_freezer_fridge"],
+      "params": {
+        "niche_width_cm": 70,
+        "body_depth_cm": 66,
+        "body_height_cm": 180,
+        "vent_gap_total_cm": 2.8,
+        "freezer_split_ratio": 0.62,
+        "top_air_reveal_cm": 2,
+        "handle_style": "vertical_bar_recessed",
+        "rgb_body": [216, 220, 227],
+        "rgb_vent_reveal": [40, 41, 45],
+        "rgb_handle": [44, 45, 50]
+      },
+      "integration": "Topo recebe upper_cabinet flush (token: upper_cabinet_over_fridge) que alinha com a linha do aereo. filler vertical fecha a juncao com a bancada. Respiro lateral/superior = reveal grafite, nao fenda crua.",
+      "ergo_ref": ["fridge_tower_width 55-75", "fridge_vent_gap 2-6"],
+      "builder_kind": "geladeira + aereo_fridge + filler",
+      "status_in_build": "PRESENT"
+    },
+    {
+      "name": "upper_niche",
+      "intent": "1 bay ABERTA de MADEIRA dentro da linha de aereos off-white = nicho de assinatura; quebra o blocao e da hierarquia visual.",
+      "anatomy": ["fundo_madeira", "prateleira_madeira_meia_altura", "abertura_sem_porta", "reveal_de_junta_com_vizinhas"],
+      "params": {
+        "back_thickness_cm": 2,
+        "shelf_thickness_cm": 2.4,
+        "shelf_at_mid_height": true,
+        "open_bay_position": "last_bay_when_n_bays>=3",
+        "rgb_wood": [162, 130, 90]
+      },
+      "integration": "Vive no aereo continuo; uma das bays vira aberta (a ultima quando ha >=3 bays). Fundo e prateleira em madeira contra carcaca fendi.",
+      "ergo_ref": ["upper_module_width 35-65", "upper_depth 30-35"],
+      "builder_kind": "aereo (niche bay)",
+      "status_in_build": "PRESENT"
+    },
+    {
+      "name": "shadow_gap_reveal",
+      "intent": "Junta planejada (reveal/cava) entre modulos de porta e gaveta = leitura de marcenaria fina, sem puxador aparente dominando.",
+      "anatomy": ["gap_lateral_entre_modulos", "gola_inferior_na_porta_aerea"],
+      "params": {
+        "module_side_reveal_cm": 1.8,
+        "module_side_reveal_cm_upper": 2.2,
+        "gola_height_cm": 1.0,
+        "rgb_reveal_shadow": [54, 56, 62]
+      },
+      "integration": "Aplicado em TODA junta porta/porta e porta/gaveta (base e aereo). E o que separa visualmente os modulos sem precisar de puxador grande.",
+      "ergo_ref": ["base_module_width 35-65", "upper_module_width 35-65"],
+      "builder_kind": "panel inset (reveal) entre modulos",
+      "status_in_build": "PRESENT"
+    },
+    {
+      "name": "led_strip",
+      "intent": "Fita LED quente sob o aereo lava a pedra do backsplash e da o brilho que so aparece no V-Ray; em massa basica lê como linha clara quente.",
+      "anatomy": ["fita_sob_carcaca_do_aereo", "valance_grafite_recuada_que_esconde_a_fonte"],
+      "params": {
+        "strip_thickness_cm": 2.5,
+        "strip_inset_from_front_cm": 0.6,
+        "valance_recess_cm": 4,
+        "temperature": "warm_2700K",
+        "rgb_led": [255, 250, 232],
+        "rgb_valance": [40, 41, 45]
+      },
+      "integration": "Corre sob a carcaca do aereo, recuada atras da valance grafite (a fonte some, so a luz aparece). Em V-Ray vira emissivo.",
+      "ergo_ref": ["upper_clearance 50-60"],
+      "builder_kind": "aereo (led + valance)",
+      "status_in_build": "PRESENT"
+    },
+    {
+      "name": "stone_backsplash_veined",
+      "intent": "Tampo de pedra clara SOBE como backsplash continuo ate o aereo (rodabanca em pedra), mesmo material do tampo = leitura premium continua. Veios = textura V-Ray.",
+      "anatomy": ["tampo_fino_continuo_proud", "backsplash_subindo_mesmo_material", "veios_textura_vray"],
+      "params": {
+        "counter_thickness_cm": 3,
+        "counter_proud_overhang_cm": 3,
+        "backsplash_thickness_cm": 4,
+        "backsplash_height_cm": 50,
+        "rgb_stone": [222, 219, 212]
+      },
+      "integration": "Tampo proud (sobressai 3cm da face dos modulos) + backsplash da mesma pedra subindo 50cm ate a base do aereo. Veined = mapa de textura no V-Ray; no flat lê como superficie clara continua.",
+      "ergo_ref": ["countertop_height 85-92"],
+      "builder_kind": "bancada (tampo + backpanel)",
+      "status_in_build": "PRESENT"
+    },
+    {
+      "name": "gola_reveal",
+      "intent": "Sistema HANDLE-LESS por gola: sombra fina recuada no rodape da porta do aereo (puxada por baixo), em vez de puxador aplicado.",
+      "anatomy": ["recuo_de_gola_no_pe_da_porta", "sombra_grafite_fina"],
+      "params": {
+        "gola_height_cm": 1.0,
+        "gola_inset_cm": 0,
+        "gola_thickness_cm": 1.0,
+        "rgb_gola": [54, 56, 62]
+      },
+      "integration": "Nas portas de aereo (porta_sup): faixa fina grafite no rodape, simula a cava onde a mao puxa. Mantem a face limpa (slab), sem ferragem aparente.",
+      "ergo_ref": ["upper_module_width 35-65"],
+      "builder_kind": "aereo (gola panel)",
+      "status_in_build": "PRESENT"
+    },
+    {
+      "name": "slim_integrated_hood",
+      "intent": "Coifa/depurador SLIM embutido sob o aereo, caixa off-white (integra a marcenaria) + grelha de succao escura embaixo. NAO e bloco preto/chamine solto.",
+      "anatomy": ["caixa_off_white_flush_no_aereo", "grelha_succao_escura_inferior"],
+      "params": {
+        "hood_height_cm": 5.5,
+        "hood_over_cooktop": true,
+        "hood_width_cm": "cooktop_width + 6",
+        "grille_depth_ratio": 0.45,
+        "rgb_body": [224, 215, 199],
+        "rgb_grille": [22, 22, 26]
+      },
+      "integration": "Sob o aereo, centrada no cooktop. Mesma cor do aereo (fendi) -> some na linha; so a grelha escura marca a funcao. clearance ao cooktop dentro de 45-65.",
+      "ergo_ref": ["hood_clearance 45-65"],
+      "builder_kind": "coifa (slim)",
+      "status_in_build": "PRESENT"
+    },
+    {
+      "name": "plinth_graphite",
+      "intent": "Soculo/toe-kick recuado em grafite -> a marcenaria parece flutuar, sombra na base, leitura de planejado.",
+      "anatomy": ["soculo_recuado", "cor_grafite_escura_contraste_com_corpo"],
+      "params": {
+        "toe_kick_height_cm": 12,
+        "toe_kick_recess_cm": 8,
+        "rgb_plinth": [40, 41, 45]
+      },
+      "integration": "Base de TODOS os modulos inferiores (bancada/gaveteiro). Recuo 8cm + cor grafite = a base some na sombra e o corpo de madeira lê suspenso.",
+      "ergo_ref": ["toe_kick_height 10-15"],
+      "builder_kind": "bancada (soculo body)",
+      "status_in_build": "PRESENT"
+    },
+    {
+      "name": "warm_fendi_uppers",
+      "intent": "Aereos + torre-filler + coifa em FENDI/off-white QUENTE (nao branco puro) -> contraste suave dois-tons com a base de madeira; superior leve, inferior solido.",
+      "anatomy": ["carcaca_e_portas_fendi", "porta_slab_handle_less", "linha_superior_continua"],
+      "params": {
+        "rgb_carcass": [224, 215, 199],
+        "rgb_door": [228, 220, 204],
+        "door_style": "slab_handle_less",
+        "upper_depth_cm": 33,
+        "upper_z0_cm": 150,
+        "upper_height_cm": 60
+      },
+      "integration": "Define o TOM SUPERIOR da cozinha (dois-tons com oak_lowers). Filler da torre e coifa usam o mesmo fendi -> coluna e linha superior coesas. Janela respeitada (aereo recorta zona de janela).",
+      "ergo_ref": ["upper_depth 30-35", "upper_clearance 50-60"],
+      "builder_kind": "aereo / aereo_fridge / filler / coifa (corpo_sup)",
+      "status_in_build": "PRESENT"
+    },
+    {
+      "name": "oak_lowers",
+      "intent": "Modulos inferiores (bancada/gaveteiro/portas) em carvalho/freijo natural medio QUENTE -> ancora a cozinha, contraste com fendi dos superiores.",
+      "anatomy": ["corpo_madeira", "gaveteiro_3_gavetas_primeiro_modulo", "portas_slab", "puxador_slim_grafite_ou_gola"],
+      "params": {
+        "rgb_body": [171, 140, 100],
+        "rgb_door": [176, 145, 104],
+        "rgb_drawer": [176, 145, 104],
+        "base_depth_cm": 60,
+        "base_height_cm": 90,
+        "module_target_width_cm": 50,
+        "first_module_is_drawer_stack": true,
+        "drawer_count": 3
+      },
+      "integration": "Define o TOM INFERIOR (dois-tons com warm_fendi_uppers). 1o modulo = gaveteiro 3 gavetas (lê marcenaria), resto = portas slab. Puxador slim grafite na base; gola nos aereos.",
+      "ergo_ref": ["base_depth 55-60", "countertop_height 85-92", "base_module_width 35-65"],
+      "builder_kind": "bancada (corpo/porta/gaveta)",
+      "status_in_build": "PRESENT"
+    }
+  ],
+  "two_tone_signature": {
+    "lowers": "oak_lowers [171,140,100]",
+    "uppers": "warm_fendi_uppers [224,215,199]",
+    "counter_backsplash": "stone_backsplash_veined [222,219,212]",
+    "metals": "inox geladeira/cuba [216,220,227]/[193,198,205]",
+    "accents": "plinth_graphite [40,41,45] + niche_wood [162,130,90] + cooktop preto [22,22,26]",
+    "reads_as": "cozinha planejada moderna dois-tons (madeira quente embaixo, fendi quente em cima, pedra clara no tampo, inox integrado, grafite na base e nas juntas)."
+  },
+  "vray_only_effects": [
+    "veios da pedra (stone_backsplash_veined) — mapa de textura",
+    "reflexo do inox (fridge_tower / cuba) — refletividade",
+    "brilho da fita LED (led_strip) — emissivo quente 2700K"
+  ],
+  "gates_status": {
+    "kitchen_validation_sink_west": "PASS",
+    "geometry_sanity": "PASS",
+    "furniture_overlap_gate": "PASS",
+    "kitchen_ergonomics_12_metrics": "PASS",
+    "audited_at": "2026-06-19"
+  }
+}

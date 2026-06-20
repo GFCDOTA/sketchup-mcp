@@ -1,0 +1,38 @@
+{
+  "theme_id": "DARK_WALNUT_MOODY_PREMIUM",
+  "aka": ["BLACK_WALNUT_CONTEMPORARY", "dark_walnut_industrial_kitchen"],
+  "token_type": "theme_preset (material_lighting_system)",
+  "style": "contemporâneo dark + industrial luxury (não industrial puro)",
+  "source": "EXAMPLE_002 (referência curada do Felipe). Referência = TEMA, não estrutura.",
+  "problem": "cozinha escura pode parecer pesada, fria ou sem profundidade / caverna",
+  "design_move": "preto/grafite fosco + madeira escura de veio expressivo + LED quente lavando o backsplash; pouca cor, alto contraste, sensação noturna premium",
+
+  "skin_swap_only": "TROCA a pele, MANTÉM a forma. Não rebuilda, não toca geometria.",
+  "keep_100": ["PDF", "parede", "pia", "torre integrada", "coifa embutida", "módulos", "circulação", "layout linear", "câmera base"],
+
+  "implementation": {
+    "cabinets_upper_base": {"color": "matte_black ~[28,28,30]", "finish": "ultra_matte", "kinds": ["kc_corpo","kc_porta","kc_gaveta","kc_corpo_sup","kc_porta_sup","kc_filler"]},
+    "fridge": {"color": "matte_black (panel-ready)", "kinds": ["kc_geladeira"]},
+    "countertop_backsplash": {"material": "walnut/nogueira contínua", "texture": "wood_dark.png", "kinds": ["kc_tampo","kc_backsplash","kc_niche_wood","kc_board"]},
+    "sink_faucet_cooktop": {"color": "matte_black", "kinds": ["kc_cuba","kc_torneira","kc_boca","kc_vidro"]},
+    "toe_kick_handles": {"color": "graphite", "kinds": ["kc_soculo","kc_puxador"]},
+    "lighting": {"temperature_K": 2700, "role": "warm_wall_wash_on_wood (LED pop no escuro)", "mood": "low_key", "render": "ISO~110, SKY 0.09, LED forte"}
+  },
+
+  "how_to_render": "KITCHEN_THEME=dark_walnut .venv/Scripts/python.exe .claude/scratch/kitchen_vray.py cozinha_vray_hero_dark.png (vray_export remapeia texturas + tweak_vrscene.apply_theme_dark_walnut override do diffuse/BRDF). Mesma câmera/crop do hero claro.",
+
+  "forbidden": [
+    "preto chapado sem madeira (precisa da nogueira pra quebrar)",
+    "luz fria 4000K+",
+    "madeira sem veio / plástico molhado",
+    "100% preto em espaço compacto sem compensação de luz (caverna)",
+    "copiar ilha/L/layout/posição da referência"
+  ],
+  "gates": [
+    "cave_check: render não pode virar caverna preta (compact_dark_cave_gate)",
+    "wood_wet_check: madeira não pode parecer plástico molhado (wood_wetzone_gate)",
+    "premium_check: deve ler como dark premium, NÃO cozinha preta barata"
+  ],
+  "judging_question": "O tema dark walnut funcionou na metragem COMPACTA da planta_74? (NÃO 'ficou igual ao Pinterest?')",
+  "status": {"applied_to_planta_74": true, "render": "cozinha_vray_hero_dark.png", "gpt": "PASS como variante dark_walnut (cave/premium/compacto OK; fix da geladeira inox-dark + LED reforcado)", "felipe_final": "pendente"}
+}

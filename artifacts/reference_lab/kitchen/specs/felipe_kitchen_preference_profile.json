@@ -1,0 +1,129 @@
+{
+  "spec": "FelipeKitchenPreferenceProfile",
+  "version": "1.0.0",
+  "captured": "2026-06-19",
+  "role": "FONTE DE VERDADE estruturada do gosto/uso do Felipe para a cozinha. Versao machine-readable do FELIPE_KITCHEN_PREFERENCES.md (prosa) + DECISION 003. O agente trata isto como RESTRICAO, nao sugestao.",
+  "companion_docs": [
+    "artifacts/reference_lab/FELIPE_KITCHEN_PREFERENCES.md (prosa-fonte, GOSTOU/NAO-GOSTOU)",
+    "artifacts/reference_lab/DECISIONS.md (DECISION 002 golden samples, DECISION 003 restricao)",
+    "artifacts/reference_lab/kitchen/specs/modern_warm_kitchen.json (DesignGrammarSpec do golden)"
+  ],
+  "golden_rule": "referencia = LINGUAGEM | PDF = POSICAO | gates = SEGURANCA | Felipe = PASS",
+
+  "meta": {
+    "apto_m2": 74,
+    "moradores": "Felipe + namorada (2 fixos)",
+    "visitas": "eventuais (nao otimizar a cozinha para receber em massa)",
+    "uso": "cozinha moderada (ovo, frango, bife, hamburguer, frituras leves); flexivel para uso futuro mais intenso",
+    "downstream": "previa forte para arquiteto / marceneiro / empreiteira depois; sonhar alto no conceito MAS durabilidade + manutencao viavel na vida real",
+    "layout": "linear FIXO do PDF (room r004, planta_74) — nunca U/L/ilha por causa de uma referencia"
+  },
+
+  "must_have_appliances": {
+    "lava_loucas": { "required": true, "note": "obrigatorio; embutir sob bancada com frente coordenada (flush)" },
+    "cooktop": { "required": true, "note": "obrigatorio; vidro preto; perto da zona de preparo" },
+    "forno_embutido": { "required": true, "note": "obrigatorio; em torre ou coluna, NUNCA longe do cooktop/area de preparo" },
+    "micro_embutido": { "required": true, "note": "embutido em nicho escondido/planejado; funcional e perto da zona de uso" },
+    "airfryer_nicho": { "required": true, "note": "airfryer mora em nicho planejado (respiro), nao solta no balcao" },
+    "filtro_purificador": { "required": true, "note": "filtro/purificador de agua previsto" },
+    "torre_quente": { "required": false, "preference": "agrada — estudar", "note": "torre de forno+micro+airfryer concentrada agrada; avaliar viabilidade no envelope linear" },
+    "geladeira": { "required": true, "note": "torre integrada (loose_object -> planned_niche_system); satin/reflexiva devolve luz" },
+    "robo_aspirador": { "required": false, "preference": "agrada", "note": "prever vao/nicho de docking do robo no soculo/sob modulo" }
+  },
+
+  "storage": {
+    "muito_armazenamento": true,
+    "armario_ate_teto": { "required": true, "reason": "anti-po (evita vao de poeira no topo) + guarda item de pouco uso" },
+    "gavetoes_inferiores": { "preference": "quando couber", "reason": "panela/itens pesados em gaveta, nao em armario de porta" },
+    "nichos": { "preference": "com criterio", "note": "nicho so com proposito (acento de madeira/LED), nao decorativo vazio" }
+  },
+
+  "hardware": {
+    "sem_puxador_tradicional": true,
+    "allowed_systems": ["cava", "gola", "perfil_j", "puxador_embutido", "push_amortecedor"],
+    "forbidden_systems": ["puxador_alca_aparente", "puxador_dourado_ostentacao"],
+    "accent_metal": "grafite / preto fosco; bronze/champagne so em detalhe sutil",
+    "anti_pattern": "puxador dourado demais = ostentacao fake"
+  },
+
+  "glass": {
+    "reflecta_champagne_led": { "preference": "agrada", "where_yes": "1-2 modulos pontuais, de preferencia com LED interno; OU faixa vertical perto da torre", "where_no": "todos os aereos (reflexo demais, marca dedo, vira showroom)" },
+    "smoked_glass": "pontual, com LED interno"
+  },
+
+  "lighting": {
+    "led_quente": { "color_temperature_k": [2700, 3000], "required": true },
+    "linear_continuo": { "preference": "obrigatorio", "where": "sob aereo / nicho", "anti_pattern": "spot bolinha / 2 hotspots meia-lua" },
+    "mood_noturno": true,
+    "luz_natural_dia": true,
+    "discreto": "LED discreto, quente, funcional, premium — nao decorativo gritante",
+    "forbidden": "LED frio 4000K+"
+  },
+
+  "aesthetic": {
+    "evita_branco_puro": true,
+    "prefere": "ESCURA ou meio-termo (nunca branco chapado)",
+    "approved_direction": "BLACK_WOOD_GOLD_INDUSTRIAL_BOUTIQUE (DECISION 003) — impactante, escura, mas 'casa de gente rica', nao cozinha de oficina",
+    "gosta": [
+      "industrial preto + madeira",
+      "cimento queimado",
+      "madeira media/escura (nogueira / freijo / carvalho mais quente) como ACENTO",
+      "moody / noturno",
+      "dourado / bronze (sutil a presente)",
+      "pedra com veio mais FORTE / veio dourado quente SUTIL (se manutencao viavel)",
+      "reflecta / champagne com LED",
+      "hotel boutique / industrial premium",
+      "preto/grafite fosco ou satin nos volumes certos",
+      "coifa embutida",
+      "cuba e torneira pretas",
+      "backsplash de pedra protagonista atras da torneira"
+    ],
+    "evita": [
+      "branco puro / branco chapado (risco de MDF barato)",
+      "tudo preto sem compensacao de luz/reflexo (caverna)",
+      "veios dourados exagerados (mansao fake Pinterest)",
+      "reflecta em todos os aereos (showroom, marca dedo)",
+      "coifa industrial gigante fora de escala",
+      "LED frio"
+    ]
+  },
+
+  "maintenance": {
+    "principio": "beleza sem dor de cabeca; manutencao viavel ACIMA de material delicado",
+    "cuba_preta_vs_inox": "considerar cuba preta (fosca/satinada) pela estetica vs inox pela durabilidade; decisao final no maintenance gate com trade-off registrado",
+    "inox": "seguro / duravel (default seguro se cuba preta nao convencer)",
+    "reflecta_marca_dedo": "aceita se for bonito (trade-off consciente)",
+    "piso": {
+      "requisito": "mostrar pouco po e pouco risco",
+      "default_seguro": "grafite medio acetinado (escuro, nao suja visual, nao pesa como preto)",
+      "alternativa": "cimento queimado quente (mais leve, casa industrial)",
+      "variante_show": "preto com veio dourado (lindo, NAO default)",
+      "evitar": ["piso preto demais (pesa o compacto)", "piso claro demais (suja visualmente facil)"]
+    },
+    "robo_aspirador": "prever circulacao/docking",
+    "area_molhada": "sem textura de madeira na cuba/pia (parece fake); madeira so em backsplash parcial / nicho / detalhe / painel",
+    "pedra_a_pesquisar": "quartzo / porcelanato tecnico / granito escuro bem tratado — cada um com trade-off; 'nao mancha' e promessa perigosa, registrar no maintenance_gate"
+  },
+
+  "process_rule": "fechar preferencias -> atualizar agente -> gerar 3 variacoes reais -> Felipe julga A/B/C -> SO DEPOIS olhar Pinterest em lote + descer para material/cuba/manutencao/custo. NAO gerar 30 imagens no olhometro. NAO escolher material definitivo antes do A/B/C.",
+
+  "forbidden_moves": [
+    "mover a pia / ponto hidraulico (fixo do PDF)",
+    "mover parede / porta / janela / shaft / area de servico",
+    "inventar ilha",
+    "mudar a planta/layout por causa de uma foto",
+    "transformar o layout linear em U/L por causa de referencia",
+    "aplicar na cozinha real sem spec antes",
+    "dar PASS sozinho (veredito visual IMPROVED/SAME/WORSE e do Felipe, nunca auto)"
+  ],
+
+  "gates_que_validam": [
+    "tools/kitchen_validation.py (pia fixa do PDF)",
+    "tools/kitchen_ergonomics.py (medidas/clearances)",
+    "tools/furniture_overlap_gate.py (sem modulo sobre modulo)",
+    "tools/geometry_sanity.py",
+    "artifacts/reference_lab/gates/reference_system_gates.md",
+    "maintenance_gate (trade-off de cuba/pedra/piso) — a registrar",
+    "veredito visual: GPT (checkpoint) -> Felipe (PASS final)"
+  ]
+}

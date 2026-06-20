@@ -1,0 +1,17 @@
+{
+  "card_id": "wood_wetzone_gate",
+  "category": "safety_gate",
+  "problem": "tampo/backsplash de madeira maciça na zona molhada (pia) ou quente (cooktop) = mancha, incha, queima — bonito na foto, problema na vida real",
+  "design_move": "na zona molhada/quente: ou madeira BEM selada (oleo/verniz tecnico) ou inserir pedra/inox local sob pia e cooktop, mantendo a madeira nas areas secas",
+  "applies_to": ["wood_countertop", "wood_backsplash_behind_cooktop"],
+  "implementation_tokens": {
+    "wet_zone": "selar OU inserto de pedra sob a cuba",
+    "heat_zone": "inserto/protecao atras e ao lado do cooktop",
+    "dry_zone": "madeira livre"
+  },
+  "joinery_token_ref": null,
+  "real_values": {"kb_ref": "references/materials/wood.md / stone.md (onde-falha)"},
+  "forbidden": ["madeira crua sob a cuba", "madeira sem protecao atras do cooktop", "fingir que madeira na zona molhada nao e problema"],
+  "gate": ["zona molhada selada ou com inserto", "zona quente protegida", "declarar a escolha (selagem vs inserto)"],
+  "evidence": "regra pratica (a sabedoria 'comprei e me fodi') derivada da KB"
+}

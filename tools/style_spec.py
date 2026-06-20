@@ -45,11 +45,43 @@ _INDUSTRIAL_TEX = {
     "frame": "metal_black_matte.png",
 }
 
+# ---- MODERN_WARM: conecta a SALA à cozinha planejada (golden sample). Marcenaria em
+#      nogueira clara, painel/TV-wall off-white, pernas/detalhes grafite, sofá tecido
+#      bege claro. Espelha a paleta do _KC da cozinha. Felipe 2026-06-19. ----
+_WALNUT = (156, 123, 86)         # nogueira clara (= base da cozinha)
+_OFFWHITE = (228, 224, 214)      # off-white/fendi (= aéreo da cozinha)
+_GRAPHITE = (44, 45, 50)         # grafite (= sóculo/puxador da cozinha)
+_MODERN_WARM_RGB = {
+    # sofá: tecido bege claro + base/pés grafite
+    "seat_cushion": (184, 176, 162), "back_cushion": (178, 170, 156), "arm": (184, 176, 162),
+    "base": _GRAPHITE, "foot": _GRAPHITE, "leg": _GRAPHITE, "saia": _GRAPHITE,
+    "shelf_bracket": _GRAPHITE,
+    # marcenaria (rack/mesas/prateleira/topos) = nogueira clara
+    "rack_tv": _WALNUT, "mesa_centro": _WALNUT, "top": _WALNUT, "front": _WALNUT,
+    "shelf_plank": _WALNUT, "niche": (120, 95, 66),
+    # painel atrás da TV = off-white (ex-concreto)
+    "parede_concreto": _OFFWHITE,
+    # cadeiras grafite (detalhe preto) + moldura preta
+    "seat": (70, 72, 78), "back": _GRAPHITE, "frame": (38, 38, 40),
+    # tapete bege quente
+    "tapete": (180, 172, 158),
+}
+_MODERN_WARM_TEX = {
+    "rack_tv": "wood.png", "mesa_centro": "wood.png", "top": "wood.png",
+    "shelf_plank": "wood.png", "parede_concreto": "wood_floor.png",
+    "seat_cushion": "fabric.png", "back_cushion": "fabric.png", "arm": "fabric.png",
+}
+
 STYLE_TOKENS = {
     "industrial": StyleSpec(
         name="industrial", kind_rgb=_INDUSTRIAL_RGB, kind_texture=_INDUSTRIAL_TEX,
         light_kelvin=2700, fill_color=(1.0, 0.82, 0.6), floor="polished_concrete",
         must_style=("seat_cushion", "back_cushion", "arm", "tapete"),
+    ),
+    "modern_warm": StyleSpec(
+        name="modern_warm", kind_rgb=_MODERN_WARM_RGB, kind_texture=_MODERN_WARM_TEX,
+        light_kelvin=3000, fill_color=(1.0, 0.86, 0.68), floor="light_wood",
+        must_style=("seat_cushion", "back_cushion", "arm", "rack_tv", "mesa_centro", "tapete"),
     ),
 }
 

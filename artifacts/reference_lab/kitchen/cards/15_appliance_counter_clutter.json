@@ -1,0 +1,21 @@
+{
+  "card_id": "appliance_counter_clutter",
+  "category": "joinery_form_token",
+  "problem": "airfryer + micro + cafeteira + filtro/purificador soltos na bancada = superficie baguncada, eletro provisorio, quebra a linha limpa e come area de trabalho. Felipe quer bancada limpa e tudo em nicho/embutido",
+  "design_move": "loose_object -> nichos tecnicos: cada eletro de bancada ganha lugar planejado — micro no nicho da torre quente, airfryer em nicho tecnico (respiro+tomada), cafeteira/filtro numa 'estacao' (nicho aberto baixo com tomada interna) OU atras de porta reflecta-retratil (appliance garage) que esconde a tralha quando nao usa. Bancada volta a ser superficie de trabalho",
+  "applies_to": ["countertop", "appliance_garage", "coffee_station", "airfryer_niche", "micro_niche"],
+  "implementation_tokens": {
+    "strategy": ["tech_niche_per_appliance", "appliance_garage_retractable", "coordinate_with_hot_tower"],
+    "garage_door": "reflecta_retractable_or_tambour (porta que recolhe)",
+    "internal_socket": true,
+    "vent_for_heat_appliances": true,
+    "keep_counter_clear": true,
+    "airfryer_to": "card 11 hot_tower (nicho aberto pro vapor)",
+    "micro_to": "card 11 hot_tower (empilhado com forno)"
+  },
+  "joinery_token_ref": "references/tokens/planned_fridge_tower.json",
+  "real_values": {"socket_note": "tomada DENTRO do nicho (fio nao atravessa a frente)", "garage_note": "porta retratil/tambour esconde cafeteira+filtro+torradeira sem ocupar abertura de porta normal", "felipe_must": ["filtro/purificador previsto", "airfryer em nicho", "micro embutido"], "vent_note": "airfryer/cafeteira a vapor: nicho aberto ou com grelha"},
+  "forbidden": ["airfryer/micro/cafeteira/filtro soltos na bancada", "appliance garage selado em eletro quente (sem respiro)", "nicho sem tomada interna (gambiarra de fio)", "encher a bancada de eletro 'porque tem espaco'", "porta de garage que bloqueia circulacao ao abrir"],
+  "gate": ["furniture_overlap_gate", "bancada com area de trabalho LIVRE", "cada eletro tem nicho+tomada (nada solto)", "eletro quente com respiro", "coordenar com a torre quente (card 11)"],
+  "evidence": "HIPOTESE A PROVAR — render mostrando bancada limpa + eletros nos nichos/garage + veredito GPT"
+}

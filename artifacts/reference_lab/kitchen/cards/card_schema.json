@@ -1,0 +1,23 @@
+{
+  "$schema": "reference_lab/card_schema v1",
+  "description": "Contrato fixo de um Reference Card (referência visual -> regra procedural implementavel). Todo card em cards/<id>.json segue isto.",
+  "fields": {
+    "card_id": "string — slug unico, ex: subtle_veined_stone_backsplash",
+    "category": "enum — joinery_form_token | material_token | lighting_token | camera_token | safety_gate. SEPARA forma de pele: form so mexe dentro do envelope do PDF; material/lighting/camera sao acabamento livre.",
+    "problem": "string — o sintoma visual que faz parecer barato/blocado",
+    "design_move": "string — a manobra que resolve (decisao repetivel, nao 'deixar bonito')",
+    "applies_to": "string[] — pecas/comodos onde aplica",
+    "implementation_tokens": "object — PARAMETROS implementaveis (rgb, dims_cm, material_family, vein_intensity, roughness, color_temperature, etc.). Nunca vago.",
+    "joinery_token_ref": "string|null — caminho do token canonico em references/tokens/ quando existir",
+    "real_values": "object — valores provados do golden sample (RGB, dims, BRDF, posicoes)",
+    "forbidden": "string[] — anti-padroes / movimentos proibidos",
+    "gate": "string[] — regras de validacao que o resultado precisa passar",
+    "evidence": "string — render/veredito que prova"
+  },
+  "rules": [
+    "category e OBRIGATORIA — sem ela o pipeline mistura forma com pele.",
+    "joinery_form_token NUNCA move ancora do PDF (pia/porta/parede/janela/layout).",
+    "implementation_tokens sempre acionavel; proibido token vago.",
+    "todo card deve ter evidencia (render) ou estar marcado como hipotese a provar."
+  ]
+}

@@ -61,14 +61,12 @@ def pl_run
     log << "BEFORE render -> #{File.basename(ENV['LAYOUT_BEFORE'])}"
   end
 
-  parent = model.active_entities.add_group
-  parent.name = 'Mobilia'
-  pents = parent.entities
-  # hierarquia EDITAVEL: Mobilia > <Comodo> > <Movel> > <peca>. Cada MOVEL e um grupo
-  # separado e nomeado (selecionar 'Sofa' pega so o sofa). Felipe 2026-06-17: nada de
-  # "quadradao gigantesco" com tudo junto.
-  room_groups = {}
+  ents = model.active_entities
+  # EDITABILIDADE (Felipe 2026-06-18): cada MOVEL = um GRUPO TOP-LEVEL nomeado, pra
+  # clique UNICO selecionar SO aquele movel (nao o apê todo). Organizacao por COMODO
+  # via TAG/Layer (Outliner mostra; nao aninha a selecao). Nada de mega-grupo 'Mobilia'.
   mod_groups = {}
+  furn_bb = Geom::BoundingBox.new
   placed = 0
   boxes.each do |b|
     begin
@@ -76,10 +74,16 @@ def pl_run
       z0 = (b['z0_in'] || 0).to_f      # base elevada (ex.: armario aereo flutua sobre a bancada)
       room = (b['room'] || 'Apto').to_s
       mod  = (b['module'] || b['kind'] || 'Movel').to_s
-      rg = (room_groups[room] ||= (tmp = pents.add_group; tmp.name = room; tmp))
       mkey = "#{room}|#{mod}"
-      mg = (mod_groups[mkey] ||= (tmp = rg.entities.add_group; tmp.name = mod; tmp))
-      g = mg.entities.add_group        # a peca, dentro do MOVEL, dentro do COMODO
+      tag = (model.layers[room] || model.layers.add(room))
+      mg = mod_groups[mkey]
+      if mg.nil?
+        mg = ents.add_group            # MOVEL = grupo top-level (selecionavel sozinho)
+        mg.name = "#{room} · #{mod}"
+        mg.layer = tag
+        mod_groups[mkey] = mg
+      end
+      g = mg.entities.add_group        # a peca, DENTRO do movel
       g.name = b['label'] || b['kind']
       # desenha o POLIGONO real (cantos) na cota z0; almofadas ganham chanfro no topo
       # (Visual Quality Layer: nao parecer cubo/game asset)
@@ -122,13 +126,23 @@ def pl_run
     end
   end
   log << "placed #{placed}/#{boxes.size} placeholders"
-  log << "MOVEIS (comodo > movel): #{mod_groups.keys.sort.join(' ; ')}"
+  log << "MOVEIS (comodo | movel): #{mod_groups.keys.sort.join(' ; ')}"
+  mod_groups.each_value { |mg| (furn_bb.add(mg.bounds) rescue nil) }
+  # TRAVA o shell (paredes/piso/portas/janelas) — mover/editar movel NAO atrapalha a base
+  nlock = 0
+  ents.grep(Sketchup::Group).each do |gp|
+    nm = gp.name.to_s
+    if %w[PlanShell Floor_Group DoorLeaf Window GlazedBalcony SoftBarrier PassageMarker].any? { |p| nm.start_with?(p) }
+      (gp.locked = true; nlock += 1) rescue nil
+    end
+  end
+  log << "shell travado: #{nlock} grupos (paredes/piso/portas)"
 
   # AFTER: shell + moveis. LAYOUT_ZOOM_GROUP enquadra SO o comodo mobiliado
   # (bounds do grupo de moveis + folga p/ pegar as paredes), nao o apê inteiro.
   zoom_bb = nil
   if ENV['LAYOUT_ZOOM_GROUP'] && placed > 0
-    pb = parent.bounds
+    pb = furn_bb
     zoom_bb = Geom::BoundingBox.new
     pad = 48.0   # ~1.2 m de folga
     zoom_bb.add([pb.min.x - pad, pb.min.y - pad, pb.min.z])
