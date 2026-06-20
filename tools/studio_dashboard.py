@@ -227,6 +227,8 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 .arrow.err{stroke:var(--red);filter:drop-shadow(0 0 4px var(--red))}
 .askrow{display:flex;gap:5px;margin-top:8px}.askrow input{flex:1;background:#0c0d10;border:1px solid var(--bd);color:var(--fg);border-radius:6px;padding:4px 7px;font-size:11.5px}
 .askrow button{background:#0c0d10;border:1px solid var(--bd);color:var(--ok);border-radius:6px;padding:4px 9px;cursor:pointer}.askrow button:hover{background:#1f2227}
+.uprow{display:flex;gap:8px;align-items:center;margin-bottom:6px;font-size:12px}.uprow input[type=file]{color:var(--mut);font-size:11.5px}
+.uprow button{background:#0c0d10;border:1px solid var(--bd);color:var(--ok);border-radius:6px;padding:4px 9px;cursor:pointer}.uprow button:hover{background:#1f2227}
 </style></head><body>
 <header><span class=hdot></span><h1>INTERIOR STUDIO</h1><span class=mut id=ts>carregando…</span>
 <span class=mut style=margin-left:auto>auto-refresh 5s · :8782 (separado do oráculo :8765)</span></header>
@@ -262,7 +264,14 @@ function flagErr(){const a=document.getElementById('flagag').value,m=document.ge
 async function askAgent(agent,umb){const inp=document.getElementById('ask-'+umb),q=(inp.value||'').trim();if(!q)return
  inp.value='';inp.placeholder='perguntando ao LLM local…'
  await fetch('/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent,prompt:q})});tick()}
+function uploadRef(){const f=document.getElementById('upfile').files[0];if(!f)return
+ const msg=document.getElementById('upmsg');msg.textContent='subindo…'
+ const r=new FileReader();r.onload=async()=>{const res=await (await fetch('/api/upload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filename:f.name,data:r.result})})).json()
+  msg.textContent=res.ok?('✓ '+res.slug):('erro: '+res.error);tick()};r.readAsDataURL(f)}
 async function tick(){
+ // NÃO atualizar enquanto o Felipe digita/seleciona — senão apaga o que ele tá escrevendo
+ const ae=document.activeElement
+ if(ae&&/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)&&ae.type!=='file')return
  let s;try{s=await (await fetch('/api/state')).json()}catch(e){return}
  document.getElementById('ts').textContent='atualizado '+new Date().toLocaleTimeString('pt-BR')
  const b=s.backlog,refs=s.references||{},by=refs.by_theme||{},bk=refs.by_kind||{},ag=s.agents||{umbrellas:[],feed:[],metrics:{}}
@@ -313,9 +322,12 @@ async function tick(){
   <table><tr><th>tema</th><th>refs</th></tr>${themes}</table></div>`))
  // INBOX
  const inb=(s.inbox||[]).map(i=>{const st=i.status||'pending';return `<tr><td>${esc(i.slug)}</td><td>${i.theme||'-'}</td><td>${st}</td>
-   <td>${st==='pending'?`<button onclick="curate('${esc(i.slug)}','approve')">✓</button> <button onclick="curate('${esc(i.slug)}','reject')">✕</button>`:''}</td></tr>`}).join('')
- root.appendChild(el(`<div class=card><h2>Curadoria — inbox <span class=mut>(tu aprova/rejeita direto)</span></h2>
-  <table><tr><th>slug</th><th>tema</th><th>status</th><th>ação</th></tr>${inb||'<tr><td colspan=4 class=mut>fila vazia</td></tr>'}</table></div>`))
+   <td>${(st==='pending'||st==='uploaded')?`<button onclick="curate('${esc(i.slug)}','approve')">✓</button> <button onclick="curate('${esc(i.slug)}','reject')">✕</button>`:''}</td></tr>`}).join('')
+ const thumbs=(s.inbox||[]).filter(i=>i.local_path).map(i=>`<div class=thumb><img loading=lazy src="/inbox-img/${encodeURIComponent(i.local_path.split('/').pop())}"><div class=cap>${esc(i.slug)}<div class=t>${i.status||'pending'}</div></div></div>`).join('')
+ root.appendChild(el(`<div class="card full"><h2>Curadoria — inbox de referência <span class=mut>(sobe imagem + aprova/rejeita — sem Claude)</span></h2>
+  <div class=uprow><input type=file id=upfile accept="image/*"><button onclick=uploadRef()>⬆ subir referência</button> <span class=mut id=upmsg></span></div>
+  ${thumbs?`<div class=grid style="margin:10px 0">${thumbs}</div>`:''}
+  <table><tr><th>slug</th><th>tema</th><th>status</th><th>ação</th></tr>${inb||'<tr><td colspan=4 class=mut>fila vazia — sobe uma referência acima</td></tr>'}</table></div>`))
  // RENDERS
  const rr=(s.renders||[]).slice(0,24).map(r=>`<div class=thumb><img loading=lazy src="/img/${encodeURIComponent(r.name)}">
    <div class=cap>${esc(r.name.replace('.png',''))}<div class=t>${r.theme} · ${r.sub} · ${r.kb}KB</div></div></div>`).join('')
@@ -336,6 +348,31 @@ def _curate(slug, action):
             it["status"] = "approved" if action == "approve" else "rejected"
     INBOX.write_text(json.dumps(data, ensure_ascii=False, indent=2), "utf-8")
     return {"ok": True, "slug": slug, "action": action}
+
+
+def _upload(filename, data_b64):
+    """Felipe sobe uma imagem de referência -> inbox/ + entra no INBOX.json. Claude/LLM-visão lê depois."""
+    import base64 as _b64
+    import re as _re
+    if not filename or not data_b64:
+        return {"ok": False, "error": "sem arquivo"}
+    safe = _re.sub(r"[^A-Za-z0-9._-]", "_", filename)
+    if not safe.lower().endswith((".png", ".jpg", ".jpeg", ".webp")):
+        return {"ok": False, "error": "so imagem (png/jpg/jpeg/webp)"}
+    dest = INBOX.parent / safe
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        dest.write_bytes(_b64.b64decode(data_b64.split(",")[-1]))
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": str(e)}
+    data = json.loads(INBOX.read_text("utf-8")) if INBOX.exists() else {"items": []}
+    slug = safe.rsplit(".", 1)[0]
+    items = data.setdefault("items", [])
+    if not any(it.get("slug") == slug for it in items):
+        items.append({"slug": slug, "theme": None, "title": filename, "source_url": "",
+                      "status": "uploaded", "local_path": f"inbox/{safe}", "source": "felipe_upload"})
+    INBOX.write_text(json.dumps(data, ensure_ascii=False, indent=2), "utf-8")
+    return {"ok": True, "slug": slug, "path": f"inbox/{safe}"}
 
 
 def _flag(agent, message):
@@ -400,6 +437,15 @@ class H(BaseHTTPRequestHandler):
                 self._send(200, fp.read_bytes(), "image/png")
             else:
                 self._send(404, b"not found", "text/plain")
+        elif path.startswith("/inbox-img/"):
+            inbox_dir = INBOX.parent.resolve()
+            fp = (inbox_dir / path[len("/inbox-img/"):]).resolve()
+            ct = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
+                  ".webp": "image/webp"}.get(fp.suffix.lower())
+            if fp.is_file() and inbox_dir in fp.parents and ct:
+                self._send(200, fp.read_bytes(), ct)
+            else:
+                self._send(404, b"not found", "text/plain")
         else:
             self._send(404, b"not found", "text/plain")
 
@@ -416,6 +462,8 @@ class H(BaseHTTPRequestHandler):
             self._send(200, json.dumps(_flag(body.get("agent"), body.get("message"))))
         elif path == "/api/ask":
             self._send(200, json.dumps(_ask(body.get("agent"), body.get("prompt"), body.get("image"))))
+        elif path == "/api/upload":
+            self._send(200, json.dumps(_upload(body.get("filename"), body.get("data"))))
         else:
             self._send(404, b"not found", "text/plain")
 
