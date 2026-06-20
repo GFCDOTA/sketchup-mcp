@@ -693,7 +693,7 @@ def _cycle(goal=None):
         from tools import ollama_bridge, studio_log
         bk = _backlog()
         nxt = next((t for t in bk.get("tasks", [])
-                    if not t["done"] and not t["geo"] and t["status"] != "executado"), None)
+                    if not t["done"] and not t["geo"] and t["status"] in ("backlog", "refinamento")), None)
         if not nxt:
             studio_log.post("interior-pm", "idle", "sem tarefa PELE na fila — preciso de OK p/ GEO")
             return {"ok": True, "msg": "fila PELE vazia"}
@@ -703,9 +703,13 @@ def _cycle(goal=None):
         def clean(r):
             return _re.sub(r"<think>.*?</think>", "", r.get("response") or "", flags=_re.DOTALL).strip()
         pm = clean(ollama_bridge.ask("llama", f"Voce e o PM. Meta: {g}. Proxima tarefa: {mt}. Em 1 frase curta, por que puxar essa agora.", timeout=60))
-        studio_log.post("interior-pm", "working", pm[:200] or f"puxando {mt}", to="team_lead", via="llama3.1:8b")
+        studio_log.post("interior-pm", "done", pm[:200] or f"puxei {mt}", to="team_lead", via="llama3.1:8b")
+        # PM MOVE o card pra execução (ele é o dono do Kanban)
+        k = _kanban_load()
+        k[nxt["mt"]] = "execução"
+        KANBAN_FILE.write_text(json.dumps(k, ensure_ascii=False, indent=2), "utf-8")
         tl = clean(ollama_bridge.ask("coder", f"Voce e o Team Lead. O PM vai fazer: {mt}. Em 1 frase, o que o time precisa pra executar bem.", timeout=60))
-        studio_log.post("interior-orchestrator", "working", tl[:200] or "organizando o time", to="architect", via="qwen2.5-coder:14b")
+        studio_log.post("interior-orchestrator", "done", tl[:200] or "organizei o time", to="architect", via="qwen2.5-coder:14b")
         kb = _arch_knowledge()
         ar = clean(ollama_bridge.ask("deepseek", (f"[gosto do Felipe]: {kb}\n" if kb else "") + f"Voce e o Arquiteto. Tarefa: {mt}. Em 1 frase, a diretriz de design.", timeout=90))
         studio_log.post("interior-designer", "done", ar[:250] or "diretriz dada", via="deepseek-r1:14b")
