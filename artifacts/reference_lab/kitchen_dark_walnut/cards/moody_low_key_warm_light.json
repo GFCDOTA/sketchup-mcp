@@ -1,0 +1,19 @@
+{
+  "card_id": "moody_low_key_warm_light",
+  "category": "lighting_token",
+  "problem": "cozinha escura com luz neutra/forte fica morta e cinzenta; ou escura demais vira caverna sem leitura",
+  "design_move": "iluminacao LOW-KEY quente: key suave + LED linear que ESTOURA contra o armario escuro (alto contraste), madeira pegando o brilho quente — dramatico mas legivel",
+  "applies_to": ["dark_kitchen", "moody_ambiance"],
+  "implementation_tokens": {
+    "key": "warm_soft",
+    "ambient": "low (ceu/sky baixo)",
+    "led_pop": "alto (LED vale mais no escuro)",
+    "color_temperature_K": 2700,
+    "contrast": "high"
+  },
+  "joinery_token_ref": "references/tokens/under_cabinet_led.json",
+  "real_values": {"sky": 0.06, "sun": 0.18, "led_color": [1.0, 0.74, 0.45], "note": "rig do kitchen_vray.py, mais quente/baixo; LED relativamente mais forte"},
+  "forbidden": ["luz neutra/fria (mata o moody)", "escuro sem nenhuma fonte (caverna)", "estourar highlights na madeira"],
+  "gate": ["a madeira tem que ler quente (nao marrom morto)", "manter leitura (nao breu)", "LED contínuo, nunca hotspots"],
+  "evidence": "referencia EXAMPLE_002; ambiencia low-key quente com LED pop"
+}

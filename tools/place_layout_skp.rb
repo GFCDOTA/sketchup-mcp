@@ -61,22 +61,59 @@ def pl_run
     log << "BEFORE render -> #{File.basename(ENV['LAYOUT_BEFORE'])}"
   end
 
-  parent = model.active_entities.add_group
-  parent.name = 'Layout_placeholders'
-  pents = parent.entities
+  ents = model.active_entities
+  # EDITABILIDADE (Felipe 2026-06-18): cada MOVEL = um GRUPO TOP-LEVEL nomeado, pra
+  # clique UNICO selecionar SO aquele movel (nao o apê todo). Organizacao por COMODO
+  # via TAG/Layer (Outliner mostra; nao aninha a selecao). Nada de mega-grupo 'Mobilia'.
+  mod_groups = {}
+  furn_bb = Geom::BoundingBox.new
   placed = 0
   boxes.each do |b|
     begin
       h = b['h_in'].to_f
       z0 = (b['z0_in'] || 0).to_f      # base elevada (ex.: armario aereo flutua sobre a bancada)
-      g = pents.add_group
+      room = (b['room'] || 'Apto').to_s
+      mod  = (b['module'] || b['kind'] || 'Movel').to_s
+      mkey = "#{room}|#{mod}"
+      tag = (model.layers[room] || model.layers.add(room))
+      mg = mod_groups[mkey]
+      if mg.nil?
+        mg = ents.add_group            # MOVEL = grupo top-level (selecionavel sozinho)
+        mg.name = "#{room} · #{mod}"
+        mg.layer = tag
+        mod_groups[mkey] = mg
+      end
+      g = mg.entities.add_group        # a peca, DENTRO do movel
       g.name = b['label'] || b['kind']
-      # desenha o POLIGONO real (cantos) na cota z0, preservando rotacao
+      # desenha o POLIGONO real (cantos) na cota z0; almofadas ganham chanfro no topo
+      # (Visual Quality Layer: nao parecer cubo/game asset)
       pts = (b['corners'] || []).map { |c| Geom::Point3d.new(c[0].to_f, c[1].to_f, z0) }
+      bev = %w[seat_cushion back_cushion arm colchao travesseiro manta].include?(b['kind']) ? (0.04 * 39.3700787402) : 0.0
       face = g.entities.add_face(pts)
-      # extrudar SEMPRE pra cima (z0 -> z0+h)
-      dir = face.normal.z >= 0 ? h : -h
-      face.pushpull(dir)
+      if bev > 0 && h > bev * 1.6
+        face.pushpull(face.normal.z >= 0 ? (h - bev) : -(h - bev))
+        topz = z0 + h - bev
+        top = g.entities.grep(Sketchup::Face).find { |f| f.normal.z.abs > 0.9 && (f.bounds.center.z - topz).abs < 0.3 }
+        if top
+          bb = top.bounds
+          ix0, iy0, ix1, iy1 = bb.min.x + bev, bb.min.y + bev, bb.max.x - bev, bb.max.y - bev
+          if ix1 > ix0 && iy1 > iy0
+            th = z0 + h
+            if b['kind'] == 'arm'   # braco = casca INCLINADA (frustum), sem degrau (GPT)
+              bp = [[bb.min.x, bb.min.y, topz], [bb.max.x, bb.min.y, topz], [bb.max.x, bb.max.y, topz], [bb.min.x, bb.max.y, topz]].map { |p| Geom::Point3d.new(*p) }
+              tp = [[ix0, iy0, th], [ix1, iy0, th], [ix1, iy1, th], [ix0, iy1, th]].map { |p| Geom::Point3d.new(*p) }
+              top.erase!
+              4.times { |i| j = (i + 1) % 4; begin; g.entities.add_face(bp[i], bp[j], tp[j], tp[i]); rescue StandardError; end }
+              begin; g.entities.add_face(tp); rescue StandardError; end
+            else                    # almofada = topo inset levantado (degrau) — GPT aprovou
+              ip = [[ix0, iy0, topz], [ix1, iy0, topz], [ix1, iy1, topz], [ix0, iy1, topz]].map { |p| Geom::Point3d.new(*p) }
+              g.entities.add_face(ip).pushpull(bev)
+            end
+          end
+        end
+      else
+        face.pushpull(face.normal.z >= 0 ? h : -h)
+      end
       mat = pl_material(model, "ph_#{b['kind']}", b['rgb'] || [120, 120, 120])
       g.material = mat
       placed += 1
@@ -89,12 +126,23 @@ def pl_run
     end
   end
   log << "placed #{placed}/#{boxes.size} placeholders"
+  log << "MOVEIS (comodo | movel): #{mod_groups.keys.sort.join(' ; ')}"
+  mod_groups.each_value { |mg| (furn_bb.add(mg.bounds) rescue nil) }
+  # TRAVA o shell (paredes/piso/portas/janelas) — mover/editar movel NAO atrapalha a base
+  nlock = 0
+  ents.grep(Sketchup::Group).each do |gp|
+    nm = gp.name.to_s
+    if %w[PlanShell Floor_Group DoorLeaf Window GlazedBalcony SoftBarrier PassageMarker].any? { |p| nm.start_with?(p) }
+      (gp.locked = true; nlock += 1) rescue nil
+    end
+  end
+  log << "shell travado: #{nlock} grupos (paredes/piso/portas)"
 
   # AFTER: shell + moveis. LAYOUT_ZOOM_GROUP enquadra SO o comodo mobiliado
   # (bounds do grupo de moveis + folga p/ pegar as paredes), nao o apê inteiro.
   zoom_bb = nil
   if ENV['LAYOUT_ZOOM_GROUP'] && placed > 0
-    pb = parent.bounds
+    pb = furn_bb
     zoom_bb = Geom::BoundingBox.new
     pad = 48.0   # ~1.2 m de folga
     zoom_bb.add([pb.min.x - pad, pb.min.y - pad, pb.min.z])

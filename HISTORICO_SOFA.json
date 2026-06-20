@@ -1,0 +1,389 @@
+﻿{
+    "criticas_recorrentes_do_juiz":  [
+                                         {
+                                             "critica":  "Arestas duras/reta (APARECEU em Cycle 1, RESOLVIDA em Cycle 2)",
+                                             "status":  "RESOLVIDO",
+                                             "ciclos":  [
+                                                            1
+                                                        ],
+                                             "solucao":  "Bevel/chanfro nas almofadas (cushion_bevel = 0.04)",
+                                             "frequencia":  "1 vez (crítica estrutural)"
+                                         },
+                                         {
+                                             "ciclos":  [
+                                                            1,
+                                                            2,
+                                                            3,
+                                                            4
+                                                        ],
+                                             "comentario_c2":  "Almofadas de assento ainda um pouco finas/chapadas para o porte",
+                                             "solucao":  "Aumentar cushion_thickness 0.15→0.18 (Cycle 4)",
+                                             "frequencia":  "4 ciclos (crítica PERSISTENTE)",
+                                             "comentario_c1":  "Almofadas muito \u0027chapadas\u0027 e baixas",
+                                             "status":  "RESOLVIDO",
+                                             "critica":  "Almofadas muito chapadas/baixas (APARECEU em Cycle 1-2, MITIGADA em Cycle 4)",
+                                             "comentario_c4":  "Restava refino: almofadas ainda um pouco finas/chapadas — +2–3cm (APLICADO)"
+                                         },
+                                         {
+                                             "solucao":  "backrest_rake 10° (inclinação/cisalhamento em Y)",
+                                             "frequencia":  "3 ciclos (crítica ESTRUTURAL)",
+                                             "impacto":  "MUITO ALTO — transição de WARN para PASS",
+                                             "ciclos":  [
+                                                            1,
+                                                            2,
+                                                            3
+                                                        ],
+                                             "comentario_c2":  "Encostos continuam parecendo PLACAS VERTICAIS RÍGIDAS",
+                                             "comentario_c3":  "Rigidez geométrica nos encostos (levemente \u0027placa\u0027)",
+                                             "status":  "RESOLVIDO",
+                                             "comentario_c1":  "Encostos altos e retos demais, quase placas verticais",
+                                             "critica":  "Encostos verticais/rígidos (APARECEU em Cycle 1-2-3, RESOLVIDA em Cycle 3)"
+                                         },
+                                         {
+                                             "critica":  "Braços grossos/pesados (APARECEU em Cycle 1-2, RESOLVIDA em Cycle 2)",
+                                             "status":  "RESOLVIDO",
+                                             "ciclos":  [
+                                                            1,
+                                                            2
+                                                        ],
+                                             "solucao":  "arm_width 0.22→0.18 (redução 2cm por lado)",
+                                             "frequencia":  "2 ciclos"
+                                         },
+                                         {
+                                             "observacao":  "Não foi completamente resolvida; deixada em nível \u0027aceitável para o estilo industrial\u0027",
+                                             "ciclos":  [
+                                                            1,
+                                                            2,
+                                                            3
+                                                        ],
+                                             "frequencia":  "3 ciclos",
+                                             "solucao":  "Base recuada 6cm no frontal (rec=0.06)",
+                                             "critica":  "Base monolítica/pesada (APARECEU em Cycle 1-2-3, MITIGADA em Cycle 3)",
+                                             "status":  "MITIGADO (ainda visual pesada, mas aceitável no ciclo 3+)"
+                                         }
+                                     ],
+    "PASS_declarations":  [
+                              {
+                                  "data":  "2026-06-08",
+                                  "escopo":  "Forma/geometria/anatomia (o que o SofaBuilder controla)",
+                                  "anti_regressao":  "Qualquer redução de backrest_rake ou removal de cushion_bevel regride para WARN",
+                                  "parametros_bloqueados":  [
+                                                                "backrest_rake = 10° (essencial para saída de \u0027painel reto\u0027)",
+                                                                "cushion_bevel = 0.04 (essencial para saída de \u0027caixa rígida\u0027)",
+                                                                "arm_width = 0.18 (essencial para proporção visual)"
+                                                            ],
+                                  "declaracao":  "FORM PASS — Cycle 3",
+                                  "evidencia":  "Veredito GPT em SOFA-STRAIGHT-3SEAT_attempt003.md"
+                              },
+                              {
+                                  "data":  "2026-06-08",
+                                  "escopo":  "Forma/geometria sem ressalvas estruturais",
+                                  "anti_regressao":  "Qualquer redução nestes parâmetros quebra o PASS CLEAN",
+                                  "parametros_bloqueados":  [
+                                                                "backrest_rake = 10°",
+                                                                "cushion_bevel = 0.04",
+                                                                "arm_width = 0.18",
+                                                                "cushion_thickness = 0.18",
+                                                                "back_thickness = 0.20"
+                                                            ],
+                                  "declaracao":  "FORM PASS CLEAN — Cycle 4",
+                                  "evidencia":  "Veredito GPT em SOFA-STRAIGHT-3SEAT_attempt004.md"
+                              },
+                              {
+                                  "escopo":  "Hard checks: não-bloco-único, partes obrigatórias, orientação, materiais",
+                                  "benchmark":  "SofaGate (tools/sofa_gate.py) em todas as variantes (straight, chaise_left, chaise_right)",
+                                  "declaracao":  "GATE DETERMINÍSTICO — PASS (19 peças, múltiplos tipos)"
+                              }
+                          ],
+    "periodo":  "2026-06-08",
+    "contexto":  "Pipeline determinístico: SofaSpec → SofaBuilder → Python iso render (tools/render_parts_iso.py, sem SketchUp) → fidelity_loop (veredito GPT)",
+    "cycles":  [
+                   {
+                       "veredito":  "WARN",
+                       "numero":  1,
+                       "data":  "2026-06-08",
+                       "TOP3_problemas":  [
+                                              "Arestas 100% retas/quebradas: mata o realismo de tecido/estofado",
+                                              "Encostos muito verticais, altos e rígidos, parecendo blocos estruturais",
+                                              "Braços/base grossos demais em relação às almofadas → sofá pesado e pouco confortável"
+                                          ],
+                       "alvo_dimensional":  {
+                                                "largura_braco":  "16-22cm",
+                                                "altura_assento":  "0.42-0.45m",
+                                                "profundidade":  "0.85-0.95m",
+                                                "largura":  "2.10-2.30m",
+                                                "observacao":  "Encosto levemente inclinado/recuado, almofadas grossas com bordas arredondadas",
+                                                "altura_total":  "0.78-0.85m"
+                                            },
+                       "parametros_usados":  {
+                                                 "width":  2.2,
+                                                 "height":  0.85,
+                                                 "depth":  0.95,
+                                                 "variant":  "straight",
+                                                 "back_thickness":  0.18,
+                                                 "seats":  3,
+                                                 "cushion_bevel":  0,
+                                                 "cushion_thickness":  0.15,
+                                                 "backrest_rake":  0,
+                                                 "arm_width":  0.22
+                                             },
+                       "titulo_commit":  "chore(fidelity): 1o ciclo real — sofa straight 3seat -\u003e GPT WARN",
+                       "veredito_descricao":  "Reconhece como sofá 3 lugares, mas ainda está \u0027bloco CG parametrizado\u0027, não produto realista",
+                       "commit":  "848b38c",
+                       "acoes_recomendadas":  [
+                                                  "Aplicar raio/chanfro nas almofadas: cushion_bevel = 0.04-0.06m",
+                                                  "Refinar proporção dos braços",
+                                                  "Ajustar perfil dos encostos"
+                                              ],
+                       "criticas_estruturais":  [
+                                                    "Almofadas muito \u0027chapadas\u0027 e baixas",
+                                                    "Encostos altos e retos demais, quase placas verticais",
+                                                    "Braços grossos e altos, com cara de caixa",
+                                                    "Falta separação anatômica entre estrutura rígida e partes macias",
+                                                    "Arestas duras demais, sem chanfro/raio",
+                                                    "Base escura contínua e pesada, parecendo monolítica"
+                                                ],
+                       "kpi_tempo_estimado":  "43 min até PASS"
+                   },
+                   {
+                       "veredito":  "WARN (melhorou de verdade)",
+                       "data":  "2026-06-08",
+                       "parametros_aplicados":  {
+                                                    "backrest_rake":  0,
+                                                    "cushion_bevel":  0.04,
+                                                    "arm_width":  0.18,
+                                                    "cushion_thickness":  0.15,
+                                                    "back_thickness":  0.18
+                                                },
+                       "O_que_ainda_falta":  [
+                                                 "Encostos continuam parecendo PLACAS VERTICAIS RÍGIDAS, não almofadas",
+                                                 "Falta inclinação/recuo do encosto (~8–12°)",
+                                                 "Espessura visual menos acolchoada (~10–14cm, volume mais \u0027fofo\u0027)",
+                                                 "Base monolítica (bloco escuro da base segue alto e pesado)"
+                                             ],
+                       "proxima_acao":  "Inclinar os encostos para trás ~10° (criar parâmetro backrest_rake = 8–12°) — cycle 3",
+                       "gate_deterministico":  "PASS (19 peças, bbox exato)",
+                       "titulo_commit":  "feat(sofa): bevel nas almofadas + bracos afinados — GPT WARN melhorou (cycle 2)",
+                       "numero":  2,
+                       "ferramental_novo":  "tools/render_parts_iso.py: render iso DETERMINÍSTICO em matplotlib (sem SketchUp)",
+                       "commit":  "1a3b5b3",
+                       "mudancas_implementadas":  [
+                                                      "cushion_bevel ligado no builder: _seat_row passa a emitir corpo + tampo inset (~4cm)",
+                                                      "Corpo (z0..z1-b) + tampo inset b em x/y (z1-b..z1), MESMO kind → bbox intactos",
+                                                      "arm_width 0.22 → 0.18 (redução 2cm em cada lado)"
+                                                  ],
+                       "O_que_melhorou":  [
+                                              "Bevel nas almofadas quebrou bastante o efeito de \u0027caixa chapada\u0027",
+                                              "Assento e encosto têm leitura mais clara de peças separadas",
+                                              "Braços em 0.18m melhoraram a proporção lateral",
+                                              "Volume menos pesado",
+                                              "Sofá menos bruto e mais próximo de um produto"
+                                          ],
+                       "veredito_descricao":  "Bevel quebrou o efeito de \u0027caixa chapada\u0027; braços menos pesados; mais próximo de produto — mas encostos ainda parecendo placas verticais"
+                   },
+                   {
+                       "veredito":  "PASS (forma/geometria)",
+                       "data":  "2026-06-08",
+                       "parametros_aplicados":  {
+                                                    "arm_width":  0.18,
+                                                    "back_thickness":  0.18,
+                                                    "backrest_rake":  10,
+                                                    "cushion_bevel":  0.04,
+                                                    "cushion_thickness":  0.15,
+                                                    "base_recuo":  0.06
+                                                },
+                       "O_que_ainda_falta_REFINO":  [
+                                                        "Um pouco de rigidez geométrica nos encostos (levemente \u0027placa\u0027 para estofado)",
+                                                        "Engrossar ~2–4cm ou abaulamento discreto",
+                                                        "Almofadas de assento ainda um pouco finas/chapadas para o porte",
+                                                        "Adicionar ~2–3cm de espessura visual"
+                                                    ],
+                       "observacao":  "PASS é da FORMA/geometria (o que o builder controla). Aceitação fotorrealista (material/textura/iluminação) fica na trilha V-Ray (sessão paralela)",
+                       "gate_deterministico":  "WARN só no bbox (o rake adiciona ~7cm de profundidade real, esperado, não erro de escala)",
+                       "ferramental":  "render_parts_iso.py ganha suporte a verts8 (peças não axis-aligned)",
+                       "titulo_commit":  "feat(sofa): encosto inclinado + almofadas +espessura — GPT PASS LIMPO (cycles 3-4)",
+                       "numero":  3,
+                       "commit":  "f99dc7f",
+                       "mudancas_implementadas":  [
+                                                      "backrest_rake = 10°: encosto cisalhado em Y conforme sobe (função _shear_y)",
+                                                      "Verts8 para o renderer; x0..z1 viram AABB do cisalhado (gate/parts_to_boxes medem o real)",
+                                                      "Base recuada 6cm no frontal: plinto menos monolítico"
+                                                  ],
+                       "O_que_melhorou":  [
+                                              "Encosto inclinado ~10° corrigiu o principal erro do C2: saiu da leitura de \u0027painel reto\u0027",
+                                              "Passou a parecer encosto de sofá (inclinação natural de recline)",
+                                              "Base recuada aliviou o bloco inferior e deu silhueta mais crível",
+                                              "Proporção mais coerente entre braços, assento, encosto e base"
+                                          ],
+                       "veredito_descricao":  "Na leitura de FORMA/proporção/anatomia, ficou bom o suficiente para um sofá reto 3 lugares clean/industrial"
+                   },
+                   {
+                       "veredito":  "PASS LIMPO (sem ressalva de forma)",
+                       "numero":  4,
+                       "data":  "2026-06-08",
+                       "mudancas_implementadas":  [
+                                                      "cushion_thickness 0.15 → 0.18m (+3cm): assento menos chapado",
+                                                      "back_thickness 0.18 → 0.20m (+2cm): encosto mais acolchoado"
+                                                  ],
+                       "resultado_final":  {
+                                               "bbox_esperado":  {
+                                                                     "width":  2.2,
+                                                                     "depth":  0.95,
+                                                                     "height":  0.85
+                                                                 },
+                                               "n_partes":  19,
+                                               "gates":  [
+                                                             "nao_bloco_unico: PASS (várias peças e tipos)",
+                                                             "pecas_obrigatorias: PASS (base, seat_cushion, back_cushion, arm, foot)",
+                                                             "orientacao_frontal: PASS (encosto atrás dos assentos)",
+                                                             "materiais: PASS (todas as peças com RGB)",
+                                                             "bbox_ok: PASS (dentro da tolerância 5cm)",
+                                                             "sem_peca_solta: PASS (conexão de conjunto)"
+                                                         ],
+                                               "kinds":  [
+                                                             "base",
+                                                             "seat_cushion",
+                                                             "back_cushion",
+                                                             "arm",
+                                                             "foot"
+                                                         ]
+                                           },
+                       "impacto":  "Saiu do \u0027painel inclinado\u0027 para \u0027encosto acolchoado\u0027",
+                       "titulo_commit":  "(refino dentro do mesmo commit) — PASS LIMPO",
+                       "veredito_descricao":  "De forma/geometria, NÃO FALTA NADA CRÍTICO — forma está aprovada para um modelo paramétrico de sofá reto 3 lugares",
+                       "commit":  "f99dc7f",
+                       "proximo_track":  "Fora deste loop (trilha V-Ray): material/textura/iluminação realista — sessão paralela",
+                       "parametros_finais":  {
+                                                 "back_thickness":  0.2,
+                                                 "base_recuo":  0.06,
+                                                 "backrest_rake":  10,
+                                                 "cushion_thickness":  0.18,
+                                                 "cushion_bevel":  0.04,
+                                                 "arm_width":  0.18
+                                             },
+                       "encerramento":  "Fecho do loop (4 ciclos): attempt 1 WARN → attempt 2 WARN-melhorou → attempt 3 PASS (forma) → attempt 4 PASS LIMPO"
+                   }
+               ],
+    "resumo_timeline":  [
+                            "Cycle 1 (WARN): Bloco CG bruto — arestas duras, almofadas chapadas, encostos placas, braços grossos",
+                            "Cycle 2 (WARN→melhorou): Bevel 0.04m + arm_width 0.18 — quebrou o efeito caixa, mas encostos ainda verticais",
+                            "Cycle 3 (PASS forma): backrest_rake 10° + base recuada — encosto inclinado tira a leitura de painel",
+                            "Cycle 4 (PASS LIMPO): cushion_thickness 0.18 + back_thickness 0.20 — refino visual, menos chapado"
+                        ],
+    "juiz":  "GPT (ChatGPT Plus, via Chrome)",
+    "titulo":  "Histórico de Aprendizado — Classe SOFA (ciclos 1-4)",
+    "anti_regressao_rules":  [
+                                 {
+                                     "limite_maximo":  12,
+                                     "consequencia_perda":  "Regride de PASS para WARN (volta ao \u0027painel vertical\u0027)",
+                                     "gatilho_alerta":  "Se \u003c= 5°, imediatamente WARN visual",
+                                     "limite_minimo":  8,
+                                     "parametro":  "backrest_rake",
+                                     "default_ciclo4":  10
+                                 },
+                                 {
+                                     "consequencia_perda":  "Regride para WARN (volta ao \u0027bloco rígido\u0027)",
+                                     "parametro":  "cushion_bevel",
+                                     "default_ciclo2":  0.04,
+                                     "limite_minimo":  0.03,
+                                     "gatilho_alerta":  "Se 0 (desligado), imediatamente WARN"
+                                 },
+                                 {
+                                     "consequencia_perda":  "Regride para WARN visual (proporção pesada)",
+                                     "parametro":  "arm_width",
+                                     "default_ciclo2":  0.18,
+                                     "limite_maximo":  0.22,
+                                     "gatilho_alerta":  "Se \u003e= 0.22, WARN de proporção"
+                                 },
+                                 {
+                                     "consequencia_perda":  "Regride para WARN (volta a \u0027almofadas chapadas\u0027)",
+                                     "parametro":  "cushion_thickness",
+                                     "limite_minimo":  0.16,
+                                     "gatilho_alerta":  "Se \u003c= 0.15, WARN de proporção",
+                                     "default_ciclo4":  0.18
+                                 },
+                                 {
+                                     "consequencia_perda":  "Regride para WARN (encosto volta a parecer \u0027painel\u0027)",
+                                     "parametro":  "back_thickness",
+                                     "limite_minimo":  0.19,
+                                     "gatilho_alerta":  "Se \u003c= 0.18, WARN visual",
+                                     "default_ciclo4":  0.2
+                                 }
+                             ],
+    "metricas_finais":  {
+                            "taxa_resolucao_ciclo":  "Cycle 1→2: 2 fixes, WARN→WARN-melhorou; Cycle 2→3: 1 fix estrutural, WARN→PASS; Cycle 3→4: refinamentos, PASS→PASS-clean",
+                            "n_parametros_ajustados":  2,
+                            "n_parametros_adicionados":  5,
+                            "criticas_unicas_distintas":  6,
+                            "tentativas_ate_pass":  3,
+                            "criticas_persistentes_ciclos1a3":  3,
+                            "ciclos_para_pass_clean":  4,
+                            "kpi_learning_cycle_time":  "43 minutos (1º WARN → 1º PASS de forma)"
+                        },
+    "melhorias_que_SUBIRAM_para_classe":  [
+                                              {
+                                                  "valor":  0.04,
+                                                  "justificativa":  "Chanfro/topo inset nas almofadas reduz efeito de \u0027caixa rígida\u0027; crítico para realismo",
+                                                  "impacto":  "ALTO — muda leitura de toda a peça: passapor \u0027bloco\u0027 para \u0027estofado\u0027",
+                                                  "tipo_mudanca":  "SUBIDA: agora parte da SofaSpec (default 0.04)",
+                                                  "parametro":  "cushion_bevel",
+                                                  "origem":  "Cycle 2 (GPT WARN→melhorou)"
+                                              },
+                                              {
+                                                  "valor":  0.18,
+                                                  "justificativa":  "Redução de 0.22→0.18 proporciona braços mais refinados, menos pesados",
+                                                  "impacto":  "MÉDIO — muda proporção visual e conforto percebido",
+                                                  "tipo_mudanca":  "SUBIDA: novo default 0.18 (was 0.22)",
+                                                  "parametro":  "arm_width",
+                                                  "origem":  "Cycle 2 (GPT: braços grossos demais)"
+                                              },
+                                              {
+                                                  "valor":  10,
+                                                  "justificativa":  "Inclinação 10° tira a leitura de \u0027painel vertical\u0027 e adiciona recline natural",
+                                                  "impacto":  "MUITO ALTO — transição de WARN para PASS de forma",
+                                                  "tipo_mudanca":  "SUBIDA: novo parâmetro na SofaSpec (default 10.0 graus)",
+                                                  "parametro":  "backrest_rake",
+                                                  "implementacao":  "Cisalhamento em Y (verts8, função _shear_y) no SofaBuilder",
+                                                  "origem":  "Cycle 3 (GPT WARN→PASS: encosto inclinado)"
+                                              },
+                                              {
+                                                  "valor":  0.18,
+                                                  "justificativa":  "Aumento de 0.15→0.18m (+3cm) para assento menos achatado",
+                                                  "impacto":  "MÉDIO — refino de proporcionalidade do conforto visual",
+                                                  "tipo_mudanca":  "SUBIDA: novo default 0.18 (was 0.15)",
+                                                  "parametro":  "cushion_thickness",
+                                                  "origem":  "Cycle 4 (GPT refino: menos chapado)"
+                                              },
+                                              {
+                                                  "valor":  0.2,
+                                                  "justificativa":  "Aumento de 0.18→0.20m (+2cm) para encosto mais volumoso",
+                                                  "impacto":  "MÉDIO — transição de \u0027painel\u0027 para \u0027encosto acolchoado\u0027",
+                                                  "tipo_mudanca":  "SUBIDA: novo default 0.20 (was 0.18)",
+                                                  "parametro":  "back_thickness",
+                                                  "origem":  "Cycle 4 (GPT refino: encosto acolchoado)"
+                                              },
+                                              {
+                                                  "valor":  0.06,
+                                                  "justificativa":  "Recuo frontal de 6cm faz base parecer menos bloqueada",
+                                                  "impacto":  "BAIXO — refinement cosmético, não afeta funcionalidade",
+                                                  "tipo_mudanca":  "AJUSTE DE EXEMPLAR (hardcoded no builder, não parâmetro elevado)",
+                                                  "parametro":  "base_recuo (rec = 0.06)",
+                                                  "observacao":  "Deixado como constante no SofaBuilder, não elevado a SofaSpec",
+                                                  "origem":  "Cycle 3 (GPT: base monolítica)"
+                                              }
+                                          ],
+    "ajustes_de_exemplar_nao_elevados":  [
+                                             {
+                                                 "onde_ficou":  "SofaBuilder linha 110: hardcoded",
+                                                 "ajuste":  "Base recuo frontal (rec=0.06)",
+                                                 "por_que_nao_subiu":  "Aplica-se a TODOS os sofas retos (sem variação significativa); não é overridable em SofaSpec",
+                                                 "evidencia":  "Cycle 3 → PASS sem necessidade de parametrização"
+                                             },
+                                             {
+                                                 "onde_ficou":  "SofaBuilder, função _seat_row com parâmetro \u0027bevel\u0027",
+                                                 "ajuste":  "Topo inset (bevel aplicação em _seat_row)",
+                                                 "status":  "Parametrizável via SofaSpec.cushion_bevel",
+                                                 "observacao":  "Isto SUBIU — é overridable por exemplar via SofaSpec.cushion_bevel"
+                                             }
+                                         ]
+}

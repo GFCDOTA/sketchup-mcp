@@ -1,0 +1,558 @@
+{
+  "rooms": {
+    "r000": {
+      "name": "SUITE 01",
+      "type": "BEDROOM",
+      "area_m2": 29.3,
+      "walls": [
+        "m005",
+        "m007",
+        "m008",
+        "m009",
+        "m010",
+        "m016",
+        "m017",
+        "m018",
+        "m019"
+      ],
+      "openings": [
+        {
+          "wall_id": "m010",
+          "kind": "interior_door",
+          "center": [
+            152.3,
+            680.4
+          ]
+        },
+        {
+          "wall_id": "m009",
+          "kind": "interior_door",
+          "center": [
+            276.7,
+            627.9
+          ]
+        },
+        {
+          "wall_id": "m008",
+          "kind": "interior_door",
+          "center": [
+            508.4,
+            620.1
+          ]
+        },
+        {
+          "wall_id": "m016",
+          "kind": "interior_door",
+          "center": [
+            333.4,
+            606.9
+          ]
+        },
+        {
+          "wall_id": "m007",
+          "kind": "interior_door",
+          "center": [
+            313.1,
+            587.1
+          ]
+        },
+        {
+          "wall_id": "m016",
+          "kind": "interior_door",
+          "center": [
+            333.4,
+            569.9
+          ]
+        },
+        {
+          "wall_id": "m005",
+          "kind": "window",
+          "center": [
+            511.6,
+            519.2
+          ]
+        },
+        {
+          "wall_id": "m005",
+          "kind": "window",
+          "center": [
+            433.4,
+            519.2
+          ]
+        }
+      ]
+    },
+    "r001": {
+      "name": "A.S. | TERRACO SOCIAL | TERRACO TECNICO",
+      "type": "SERVICE",
+      "area_m2": 28.7,
+      "walls": [
+        "m001",
+        "m002",
+        "m004",
+        "m006",
+        "m013"
+      ],
+      "openings": [
+        {
+          "wall_id": "m006",
+          "kind": "interior_door",
+          "center": [
+            105.9,
+            580.2
+          ]
+        },
+        {
+          "wall_id": "m002",
+          "kind": "window",
+          "center": [
+            295.7,
+            457.1
+          ]
+        },
+        {
+          "wall_id": "m004",
+          "kind": "glazed_balcony",
+          "center": [
+            175.0,
+            511.4
+          ]
+        }
+      ]
+    },
+    "r002": {
+      "name": "SALA DE JANTAR | SALA DE ESTAR",
+      "type": "LIVING",
+      "area_m2": 27.2,
+      "walls": [
+        "m004",
+        "m006",
+        "m007",
+        "m009",
+        "m010",
+        "m013",
+        "m014",
+        "m015",
+        "m016"
+      ],
+      "openings": [
+        {
+          "wall_id": "m010",
+          "kind": "interior_door",
+          "center": [
+            152.3,
+            680.4
+          ]
+        },
+        {
+          "wall_id": "m009",
+          "kind": "interior_door",
+          "center": [
+            276.7,
+            627.9
+          ]
+        },
+        {
+          "wall_id": "m016",
+          "kind": "interior_door",
+          "center": [
+            333.4,
+            606.9
+          ]
+        },
+        {
+          "wall_id": "m007",
+          "kind": "interior_door",
+          "center": [
+            313.1,
+            587.1
+          ]
+        },
+        {
+          "wall_id": "m006",
+          "kind": "interior_door",
+          "center": [
+            105.9,
+            580.2
+          ]
+        },
+        {
+          "wall_id": "m016",
+          "kind": "interior_door",
+          "center": [
+            333.4,
+            569.9
+          ]
+        },
+        {
+          "wall_id": "m004",
+          "kind": "glazed_balcony",
+          "center": [
+            175.0,
+            511.4
+          ]
+        }
+      ]
+    },
+    "r003": {
+      "name": "SUITE 02",
+      "type": "BEDROOM",
+      "area_m2": 14.7,
+      "walls": [
+        "m002",
+        "m003",
+        "m004",
+        "m007",
+        "m014",
+        "m016"
+      ],
+      "openings": [
+        {
+          "wall_id": "m016",
+          "kind": "interior_door",
+          "center": [
+            333.4,
+            606.9
+          ]
+        },
+        {
+          "wall_id": "m007",
+          "kind": "interior_door",
+          "center": [
+            313.1,
+            587.1
+          ]
+        },
+        {
+          "wall_id": "m016",
+          "kind": "interior_door",
+          "center": [
+            333.4,
+            569.9
+          ]
+        },
+        {
+          "wall_id": "m003",
+          "kind": "window",
+          "center": [
+            354.9,
+            484.2
+          ]
+        },
+        {
+          "wall_id": "m002",
+          "kind": "window",
+          "center": [
+            295.7,
+            457.1
+          ]
+        },
+        {
+          "wall_id": "m004",
+          "kind": "glazed_balcony",
+          "center": [
+            175.0,
+            511.4
+          ]
+        }
+      ]
+    },
+    "r004": {
+      "name": "COZINHA",
+      "type": "KITCHEN",
+      "area_m2": 9.8,
+      "walls": [
+        "m006",
+        "m010",
+        "m011",
+        "m013",
+        "m020"
+      ],
+      "openings": [
+        {
+          "wall_id": "m010",
+          "kind": "interior_door",
+          "center": [
+            152.3,
+            680.4
+          ]
+        },
+        {
+          "wall_id": "m006",
+          "kind": "interior_door",
+          "center": [
+            105.9,
+            580.2
+          ]
+        }
+      ]
+    },
+    "r005": {
+      "name": "BANHO 01",
+      "type": "BATHROOM",
+      "area_m2": 5.9,
+      "walls": [
+        "m005",
+        "m008",
+        "m018",
+        "m019"
+      ],
+      "openings": [
+        {
+          "wall_id": "m008",
+          "kind": "interior_door",
+          "center": [
+            508.4,
+            620.1
+          ]
+        },
+        {
+          "wall_id": "m005",
+          "kind": "window",
+          "center": [
+            511.6,
+            519.2
+          ]
+        },
+        {
+          "wall_id": "m005",
+          "kind": "window",
+          "center": [
+            433.4,
+            519.2
+          ]
+        }
+      ]
+    },
+    "r006": {
+      "name": "BANHO 02",
+      "type": "BATHROOM",
+      "area_m2": 5.3,
+      "walls": [
+        "m003",
+        "m007",
+        "m016",
+        "m017"
+      ],
+      "openings": [
+        {
+          "wall_id": "m016",
+          "kind": "interior_door",
+          "center": [
+            333.4,
+            606.9
+          ]
+        },
+        {
+          "wall_id": "m007",
+          "kind": "interior_door",
+          "center": [
+            313.1,
+            587.1
+          ]
+        },
+        {
+          "wall_id": "m016",
+          "kind": "interior_door",
+          "center": [
+            333.4,
+            569.9
+          ]
+        },
+        {
+          "wall_id": "m003",
+          "kind": "window",
+          "center": [
+            354.9,
+            484.2
+          ]
+        }
+      ]
+    },
+    "r007": {
+      "name": "LAVABO",
+      "type": "BATHROOM",
+      "area_m2": 3.4,
+      "walls": [
+        "m009",
+        "m010",
+        "m015"
+      ],
+      "openings": [
+        {
+          "wall_id": "m010",
+          "kind": "interior_door",
+          "center": [
+            152.3,
+            680.4
+          ]
+        },
+        {
+          "wall_id": "m009",
+          "kind": "interior_door",
+          "center": [
+            276.7,
+            627.9
+          ]
+        }
+      ]
+    }
+  },
+  "adjacency": {
+    "r000": [
+      "r002",
+      "r003",
+      "r004",
+      "r005",
+      "r006",
+      "r007"
+    ],
+    "r001": [
+      "r002",
+      "r003",
+      "r004"
+    ],
+    "r002": [
+      "r000",
+      "r001",
+      "r003",
+      "r004",
+      "r006",
+      "r007"
+    ],
+    "r003": [
+      "r000",
+      "r001",
+      "r002",
+      "r006"
+    ],
+    "r004": [
+      "r000",
+      "r001",
+      "r002",
+      "r007"
+    ],
+    "r005": [
+      "r000"
+    ],
+    "r006": [
+      "r000",
+      "r002",
+      "r003"
+    ],
+    "r007": [
+      "r000",
+      "r002",
+      "r004"
+    ]
+  },
+  "connectors": [
+    {
+      "wall_id": "m010",
+      "kind": "interior_door",
+      "rooms": [
+        "r000",
+        "r002",
+        "r004",
+        "r007"
+      ],
+      "center": [
+        152.3,
+        680.4
+      ]
+    },
+    {
+      "wall_id": "m009",
+      "kind": "interior_door",
+      "rooms": [
+        "r000",
+        "r002",
+        "r007"
+      ],
+      "center": [
+        276.7,
+        627.9
+      ]
+    },
+    {
+      "wall_id": "m008",
+      "kind": "interior_door",
+      "rooms": [
+        "r000",
+        "r005"
+      ],
+      "center": [
+        508.4,
+        620.1
+      ]
+    },
+    {
+      "wall_id": "m016",
+      "kind": "interior_door",
+      "rooms": [
+        "r000",
+        "r002",
+        "r003",
+        "r006"
+      ],
+      "center": [
+        333.4,
+        606.9
+      ]
+    },
+    {
+      "wall_id": "m007",
+      "kind": "interior_door",
+      "rooms": [
+        "r000",
+        "r002",
+        "r003",
+        "r006"
+      ],
+      "center": [
+        313.1,
+        587.1
+      ]
+    },
+    {
+      "wall_id": "m016",
+      "kind": "interior_door",
+      "rooms": [
+        "r000",
+        "r002",
+        "r003",
+        "r006"
+      ],
+      "center": [
+        333.4,
+        569.9
+      ]
+    },
+    {
+      "wall_id": "m006",
+      "kind": "interior_door",
+      "rooms": [
+        "r001",
+        "r002",
+        "r004"
+      ],
+      "center": [
+        105.9,
+        580.2
+      ]
+    },
+    {
+      "wall_id": "m004",
+      "kind": "glazed_balcony",
+      "rooms": [
+        "r001",
+        "r002",
+        "r003"
+      ],
+      "center": [
+        175.0,
+        511.4
+      ]
+    }
+  ]
+}

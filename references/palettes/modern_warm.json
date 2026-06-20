@@ -1,0 +1,83 @@
+{
+  "id": "modern_warm",
+  "title": "Modern Warm — planejado quente (carvalho claro + fendi + pedra)",
+  "summary": "Paleta-mestra do golden sample da cozinha planta_74. Madeira clara coordenada embaixo, off-white QUENTE (fendi) em cima, pedra clara no tampo, grafite no rodapé/puxador, inox claro nos eletros. Quente, coeso, anti builder-grade. Princípio: nenhum branco puro, nenhum bicolor acidental.",
+  "temperature": "warm",
+  "white_balance": "2700K (LED quente)",
+  "anti_pattern": "Base mel-escuro + aéreo branco puro = bicolor builder-grade frio. Aqui a base é CLARA (carvalho) e o aéreo é off-white QUENTE (fendi), então leem como família, não contraste acidental.",
+  "roles": {
+    "base": {
+      "material": "carvalho/freijó claro (melamina ou laminado madeirado quente)",
+      "finish": "fosco/acetinado, veio madeira sutil",
+      "rgb": [191, 167, 137],
+      "rgb_door": [195, 171, 141],
+      "kinds": ["kc_corpo", "kc_porta", "kc_gaveta"],
+      "note": "Base CLARA coordenada com o fendi do aéreo — mata o bicolor builder-grade. Corpo e porta quase iguais (porta levemente mais clara)."
+    },
+    "upper": {
+      "material": "MDF laqueado/melamina off-white quente (FENDI)",
+      "finish": "fosco quente (NÃO branco puro, NÃO brilho)",
+      "rgb": [224, 215, 199],
+      "rgb_door": [228, 220, 204],
+      "kinds": ["kc_corpo_sup", "kc_porta_sup", "kc_filler"],
+      "note": "Fendi/off-white QUENTE. O filler (painel lateral da torre) usa o MESMO fendi do aéreo para a coluna ler coesa."
+    },
+    "tower": {
+      "material": "fendi (mesma família do aéreo) — coluna geladeira/forno integrada",
+      "finish": "fosco quente",
+      "rgb": [224, 215, 199],
+      "kinds": ["kc_filler", "kc_corpo_sup"],
+      "note": "A torre da geladeira NÃO é objeto solto: é nicho planejado, painel lateral em fendi igual ao aéreo (loose_object -> planned_niche_system)."
+    },
+    "stone": {
+      "material": "pedra clara quente (quartzo/granito claro veiado sutil)",
+      "finish": "polido suave, veio sutil (textura V-Ray)",
+      "rgb": [222, 219, 212],
+      "kinds": ["kc_tampo", "kc_backsplash"],
+      "note": "Tampo contínuo + backsplash = a pedra subindo até o aéreo. Veio sutil, nunca mármore dramático na cozinha econômica."
+    },
+    "toe_kick": {
+      "material": "grafite (rodapé recuado / sóculo)",
+      "finish": "fosco escuro",
+      "rgb": [40, 41, 45],
+      "kinds": ["kc_soculo"],
+      "note": "Sóculo recuado 10-15cm: sombra ancora a marcenaria no chão e some o pé. Grafite, não preto puro."
+    },
+    "appliance": {
+      "material": "inox claro reflexivo (geladeira) + cooktop preto + cuba/metais inox",
+      "finish": "inox escovado claro / vidro preto",
+      "rgb_fridge": [216, 220, 227],
+      "rgb_cooktop": [22, 22, 26],
+      "rgb_inox": [193, 198, 205],
+      "rgb_basin": [92, 96, 103],
+      "rgb_faucet": [54, 56, 62],
+      "kinds": ["kc_geladeira", "kc_vidro", "kc_boca", "kc_inox", "kc_cuba", "kc_torneira", "kc_ralo"],
+      "note": "Geladeira inox MAIS CLARO/reflexivo (menos bloco cinza-morto). Cooktop vidro preto. Cuba com bojo escuro p/ ler profundidade."
+    },
+    "hardware": {
+      "material": "puxador slim grafite (perfil/barra)",
+      "finish": "fosco grafite",
+      "rgb": [44, 45, 50],
+      "kinds": ["kc_puxador"],
+      "note": "Puxador slim grafite: barras verticais longas na geladeira, perfil cava nos módulos. Mesmo tom do sóculo (família escura)."
+    },
+    "led": {
+      "material": "fita LED quente sob o aéreo",
+      "finish": "luz 2700K",
+      "rgb": [255, 250, 232],
+      "kinds": ["kc_led"],
+      "note": "LED quente 2700K sob o aéreo lava o backsplash e a bancada. Quente, nunca branco-frio 6500K."
+    },
+    "wood_accent": {
+      "material": "madeira escura (nicho aberto / decoração funcional)",
+      "finish": "madeira mais ESCURA que a base (contraste após clarear a base)",
+      "rgb": [138, 104, 66],
+      "rgb_board": [150, 116, 78],
+      "kinds": ["kc_niche_wood", "kc_board"],
+      "note": "Nicho de madeira ESCURA dá ponto quente e profundidade. Mantém contraste já que a base ficou clara."
+    }
+  },
+  "applies_to_plant": "planta_74 room r004 (cozinha)",
+  "ergonomics_ref": "tools/kitchen_ergonomics.py (ERGO ranges)",
+  "source": {"kind": "golden_sample", "title": "Cozinha planta_74 — régua de qualidade construída (tools/kitchen_layout.py _KC)", "date": "2026-06-19"}
+}

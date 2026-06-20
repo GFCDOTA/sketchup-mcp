@@ -1,0 +1,185 @@
+{
+  "phase": "phase3_anatomy",
+  "gates": [
+    {
+      "gate": "SofaPlacementGate",
+      "pass": true,
+      "fixtures": [
+        {
+          "fixture": "correto (solver)",
+          "expected": "PASS",
+          "got": "PASS",
+          "ok": true
+        },
+        {
+          "fixture": "rotacionado errado",
+          "expected": "FAIL",
+          "got": "FAIL",
+          "ok": true
+        },
+        {
+          "fixture": "flutuando no centro",
+          "expected": "FAIL",
+          "got": "FAIL",
+          "ok": true
+        },
+        {
+          "fixture": "no corredor (circulacao)",
+          "expected": "FAIL",
+          "got": "FAIL",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "gate": "Sofa anatomy+visual",
+      "pass": true,
+      "variants": [
+        {
+          "variant": "straight",
+          "anatomy": "PASS",
+          "visual": "PASS"
+        },
+        {
+          "variant": "chaise_right",
+          "anatomy": "PASS",
+          "visual": "PASS"
+        },
+        {
+          "variant": "chaise_left",
+          "anatomy": "PASS",
+          "visual": "PASS"
+        }
+      ]
+    },
+    {
+      "gate": "BedGate (anatomy+visual)",
+      "pass": true,
+      "sizes": [
+        {
+          "size": "king",
+          "result": "PASS",
+          "n_parts": 6,
+          "n_colors": 5
+        },
+        {
+          "size": "queen",
+          "result": "PASS",
+          "n_parts": 6,
+          "n_colors": 5
+        },
+        {
+          "size": "casal",
+          "result": "PASS",
+          "n_parts": 6,
+          "n_colors": 5
+        },
+        {
+          "size": "solteiro",
+          "result": "PASS",
+          "n_parts": 6,
+          "n_colors": 5
+        }
+      ]
+    },
+    {
+      "gate": "WardrobeGate (anatomy)",
+      "pass": true,
+      "widths": [
+        {
+          "width": 1.2,
+          "result": "PASS",
+          "n_parts": 6,
+          "n_doors": 2
+        },
+        {
+          "width": 1.8,
+          "result": "PASS",
+          "n_parts": 8,
+          "n_doors": 3
+        },
+        {
+          "width": 2.4,
+          "result": "PASS",
+          "n_parts": 8,
+          "n_doors": 3
+        }
+      ]
+    },
+    {
+      "gate": "NightstandGate (anatomy)",
+      "pass": true,
+      "n_parts": 8,
+      "result": "PASS"
+    },
+    {
+      "gate": "BedPlacementGate",
+      "pass": true,
+      "real_rooms": [
+        {
+          "room": "r000",
+          "real_room": "PASS"
+        },
+        {
+          "room": "r003",
+          "real_room": "PASS"
+        }
+      ],
+      "fixtures": [
+        {
+          "fixture": "quarto valido (designer)",
+          "expected": "PASS",
+          "got": "PASS",
+          "ok": true
+        },
+        {
+          "fixture": "cama rotacionada aleatoria",
+          "expected": "FAIL",
+          "got": "FAIL",
+          "ok": true
+        },
+        {
+          "fixture": "cama flutuando no centro",
+          "expected": "FAIL",
+          "got": "FAIL",
+          "ok": true
+        },
+        {
+          "fixture": "cama bloqueando porta",
+          "expected": "FAIL",
+          "got": "FAIL",
+          "ok": true
+        }
+      ]
+    }
+  ],
+  "all_gates_pass": true,
+  "artifacts": {
+    "planta_74_furnished.skp": {
+      "exists": true,
+      "bytes": 292280
+    },
+    "apartment_after_top.png": {
+      "exists": true,
+      "bytes": 34422
+    },
+    "apartment_after_iso.png": {
+      "exists": true,
+      "bytes": 180093
+    },
+    "sala_solver_top.png": {
+      "exists": true,
+      "bytes": 20328
+    },
+    "sofa_arms_iso.png": {
+      "exists": true,
+      "bytes": 101173
+    },
+    "bed_iso.png": {
+      "exists": true,
+      "bytes": 95668
+    }
+  },
+  "artifacts_ok": true,
+  "verdict": "GREEN"
+}

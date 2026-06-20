@@ -1,0 +1,18 @@
+{
+  "card_id": "coordinated_oak_base",
+  "category": "material_token",
+  "problem": "madeira saturada/alaranjada = builder-grade; ou bicolor agressivo brigando com o aereo",
+  "design_move": "base carvalho/freijo CLARO coordenado, aquecido pra dialogar com o fendi (mata o bicolor)",
+  "applies_to": ["base_cabinet", "drawers", "lower_doors"],
+  "implementation_tokens": {
+    "material_family": "light_warm_oak",
+    "finish": "satin",
+    "saturation": "low-medium (nunca >[200,150,90])",
+    "vray_brdf": {"reflect": 0.09, "reflect_glossiness": 0.7, "metalness": 0}
+  },
+  "joinery_token_ref": "references/tokens/coordinated_oak_base.json",
+  "real_values": {"base_rgb": [191,167,137], "kinds": ["kc_corpo", "kc_porta", "kc_gaveta"], "nicho_accent_rgb": [138,104,66]},
+  "forbidden": ["madeira saturada/alaranjada builder-grade", "verniz brilhante (data)", "veio tileado obvio repetindo"],
+  "gate": ["coordenar com fendi (mesma familia quente)", "nao escurecer demais cozinha compacta"],
+  "evidence": "base no cozinha_vray_hero.png; coordena com o fendi sem bicolor"
+}

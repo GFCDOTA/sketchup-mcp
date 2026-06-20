@@ -1,0 +1,87 @@
+{
+  "id": "fendi_oak_stone",
+  "title": "Fendi · Oak · Stone — a tríade do planejado quente",
+  "summary": "Recorte canônico de 3 famílias do golden sample, nomeado pela tríade que define o estilo: FENDI (aéreo/torre off-white quente) + OAK (base carvalho claro) + STONE (tampo pedra clara). É o modern_warm reduzido aos 3 papéis estruturais que carregam 80% da leitura visual, mais os acentos escuros (grafite/inox) que dão o contraste.",
+  "temperature": "warm",
+  "white_balance": "2700K",
+  "design_thesis": "Três claros quentes empilhados (oak embaixo, fendi em cima, stone no meio horizontal) lidos como família + dois escuros (grafite no chão/puxador, inox nos eletros) como pontuação. Sem branco puro, sem frio.",
+  "roles": {
+    "oak_base": {
+      "family": "OAK",
+      "material": "carvalho/freijó claro madeirado",
+      "finish": "fosco acetinado, veio sutil",
+      "rgb": [191, 167, 137],
+      "rgb_door": [195, 171, 141],
+      "kinds": ["kc_corpo", "kc_porta", "kc_gaveta"],
+      "weight": "ancora visual inferior — base e gavetas",
+      "anti_pattern": "carvalho escuro/mel cria contraste frio com o fendi; manter CLARO."
+    },
+    "fendi_upper": {
+      "family": "FENDI",
+      "material": "MDF laqueado off-white quente",
+      "finish": "fosco quente",
+      "rgb": [224, 215, 199],
+      "rgb_door": [228, 220, 204],
+      "kinds": ["kc_corpo_sup", "kc_porta_sup", "kc_filler"],
+      "weight": "massa superior + coluna da torre",
+      "anti_pattern": "branco puro [255,255,255] esfria tudo; fendi é off-white QUENTE."
+    },
+    "stone_top": {
+      "family": "STONE",
+      "material": "pedra clara quente veiada sutil",
+      "finish": "polido suave",
+      "rgb": [222, 219, 212],
+      "kinds": ["kc_tampo", "kc_backsplash"],
+      "weight": "linha horizontal de luz entre oak e fendi",
+      "anti_pattern": "mármore dramático/escuro rouba a cena; veio SUTIL."
+    },
+    "graphite_accent": {
+      "family": "GRAPHITE",
+      "material": "grafite (sóculo + puxador slim)",
+      "finish": "fosco escuro",
+      "rgb_toe_kick": [40, 41, 45],
+      "rgb_handle": [44, 45, 50],
+      "kinds": ["kc_soculo", "kc_puxador"],
+      "weight": "pontuação escura: chão (sombra) e linhas de puxador",
+      "anti_pattern": "preto puro chapado; grafite tem matiz."
+    },
+    "steel_appliance": {
+      "family": "STEEL",
+      "material": "inox claro reflexivo + cooktop preto",
+      "finish": "inox escovado claro / vidro preto",
+      "rgb_fridge": [216, 220, 227],
+      "rgb_cooktop": [22, 22, 26],
+      "rgb_inox": [193, 198, 205],
+      "kinds": ["kc_geladeira", "kc_vidro", "kc_boca", "kc_inox", "kc_cuba", "kc_torneira"],
+      "weight": "eletros — inox claro p/ não virar bloco morto",
+      "anti_pattern": "inox cinza-escuro fosco = bloco morto; usar claro reflexivo."
+    },
+    "warm_wood_accent": {
+      "family": "WOOD_ACCENT",
+      "material": "madeira escura (nicho aberto / tábua)",
+      "finish": "madeira escura quente",
+      "rgb": [138, 104, 66],
+      "kinds": ["kc_niche_wood", "kc_board"],
+      "weight": "ponto quente de profundidade (nicho aberto)",
+      "anti_pattern": "se a base já é escura, este some; só vale com base CLARA."
+    },
+    "led_warm": {
+      "family": "LED",
+      "material": "fita LED 2700K sob aéreo",
+      "finish": "luz quente",
+      "rgb": [255, 250, 232],
+      "kinds": ["kc_led"],
+      "weight": "lavagem quente no backsplash/bancada",
+      "anti_pattern": "LED 6500K frio quebra a paleta quente."
+    }
+  },
+  "pairing_rules": [
+    "OAK e FENDI devem ler como família (ambos quentes, claros) — diferença é de valor/posição, não de temperatura.",
+    "STONE fica entre os dois e é o mais claro/neutro — é a linha de respiro.",
+    "GRAPHITE só nas bordas (chão + puxador) — nunca como massa grande.",
+    "STEEL claro p/ os eletros não virarem buraco cinza.",
+    "WOOD_ACCENT escuro é o único ponto frio-de-valor permitido, e só em nicho pequeno."
+  ],
+  "applies_to_plant": "planta_74 room r004 (cozinha)",
+  "source": {"kind": "golden_sample", "title": "Tríade extraída do golden sample (tools/kitchen_layout.py _KC)", "date": "2026-06-19"}
+}

@@ -1,0 +1,231 @@
+{
+  "scene_id": "living_room_modern_warm_minimal",
+  "style_id": "modern_warm_minimal",
+  "main_wall": "north",
+  "placements": [
+    {
+      "type": "sofa",
+      "role": "hero",
+      "rotation_deg": 0,
+      "center": [
+        2.6,
+        3.6406
+      ],
+      "facing": [
+        0,
+        -1
+      ],
+      "bbox": [
+        1.5,
+        3.1312,
+        3.7,
+        4.15,
+        0.0,
+        0.85
+      ],
+      "z_off": 0.0,
+      "anchor": "parede north"
+    },
+    {
+      "type": "rug",
+      "role": "anchor",
+      "rotation_deg": 0,
+      "center": [
+        2.6,
+        2.1312
+      ],
+      "facing": [
+        0,
+        -1
+      ],
+      "bbox": [
+        0.9,
+        0.9812,
+        4.3,
+        3.2812,
+        0.0,
+        0.012
+      ],
+      "z_off": 0.0,
+      "anchor": "centralizado com hero, tuck 0.15m sob a frente"
+    },
+    {
+      "type": "coffee_table",
+      "role": "companion",
+      "rotation_deg": 0,
+      "center": [
+        2.6,
+        2.3712
+      ],
+      "facing": [
+        0,
+        -1
+      ],
+      "bbox": [
+        1.925,
+        2.0112,
+        3.275,
+        2.7312,
+        0.012,
+        0.392
+      ],
+      "z_off": 0.012,
+      "anchor": "0.4m da frente do hero"
+    },
+    {
+      "type": "wall_art",
+      "role": "decor",
+      "rotation_deg": 0,
+      "center": [
+        2.6,
+        4.17
+      ],
+      "facing": [
+        0,
+        -1
+      ],
+      "bbox": [
+        1.9,
+        4.14,
+        3.3,
+        4.2,
+        1.1,
+        2.05
+      ],
+      "z_off": 1.1,
+      "anchor": "acima do hero, respiro 0.25m"
+    },
+    {
+      "type": "curtain",
+      "role": "textile",
+      "rotation_deg": 270,
+      "center": [
+        5.1475,
+        2.4
+      ],
+      "facing": [
+        -1,
+        0
+      ],
+      "bbox": [
+        5.115,
+        1.0,
+        5.18,
+        3.8,
+        0.05,
+        2.485
+      ],
+      "z_off": 0.05,
+      "anchor": "janela win01 (east)"
+    },
+    {
+      "type": "side_table",
+      "role": "companion",
+      "rotation_deg": 0,
+      "center": [
+        4.575,
+        3.6406
+      ],
+      "facing": [
+        0,
+        -1
+      ],
+      "bbox": [
+        4.35,
+        3.4156,
+        4.8,
+        3.8656,
+        0.0,
+        0.55
+      ],
+      "z_off": 0.0,
+      "anchor": "lado + do hero, fora do tapete"
+    },
+    {
+      "type": "floor_lamp",
+      "role": "light",
+      "rotation_deg": 0,
+      "center": [
+        0.64,
+        3.6406
+      ],
+      "facing": [
+        0,
+        -1
+      ],
+      "bbox": [
+        0.43,
+        3.4306,
+        0.85,
+        3.8506,
+        0.0,
+        1.65
+      ],
+      "z_off": 0.0,
+      "anchor": "lado - do hero, fora do tapete"
+    },
+    {
+      "type": "plant_placeholder",
+      "role": "decor",
+      "rotation_deg": 270,
+      "center": [
+        4.725,
+        1.075
+      ],
+      "facing": [
+        -1,
+        0
+      ],
+      "bbox": [
+        4.45,
+        0.8,
+        5.0,
+        1.35,
+        0.0,
+        1.5
+      ],
+      "z_off": 0.0,
+      "anchor": "ao lado da janela win01, y=1.08"
+    },
+    {
+      "type": "accent_seat",
+      "role": "companion",
+      "rotation_deg": 168.0,
+      "center": [
+        2.05,
+        1.2312
+      ],
+      "facing": [
+        0.2079,
+        0.9781
+      ],
+      "bbox": [
+        1.6,
+        0.762,
+        2.5,
+        1.7004,
+        0.0,
+        0.72
+      ],
+      "z_off": 0.0,
+      "anchor": "oposto ao hero, 1.5m de conversa, girado 12 graus pro eixo"
+    }
+  ],
+  "distances": {
+    "coffee_table_gap_m": 0.4,
+    "rug_overhang_m": [
+      0.6,
+      0.6
+    ],
+    "art_offset_along_m": 0.0,
+    "art_gap_above_hero_m": 0.25,
+    "curtain_window_offset_m": 0.0,
+    "plant_to_window_m": 1.408,
+    "side_table_gap_m": 0.65,
+    "floor_lamp_gap_m": 0.65,
+    "accent_seat_gap_m": 1.431,
+    "accent_facing_dot": 1.0,
+    "accent_faces_hero": true
+  },
+  "notes": []
+}

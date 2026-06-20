@@ -1,0 +1,581 @@
+{
+  "scene_id": "living_room_modern_warm_minimal",
+  "room": {
+    "width_m": 5.2,
+    "depth_m": 4.2,
+    "height_m": 2.7,
+    "main_wall": "north"
+  },
+  "openings": [
+    {
+      "id": "win01",
+      "wall": "east",
+      "type": "window",
+      "center_along_m": 2.4,
+      "width_m": 1.8,
+      "sill_m": 0.5,
+      "head_m": 2.3
+    },
+    {
+      "id": "door01",
+      "wall": "south",
+      "type": "door",
+      "center_along_m": 0.9,
+      "width_m": 0.9,
+      "sill_m": 0.0,
+      "head_m": 2.1
+    }
+  ],
+  "placements": [
+    {
+      "type": "sofa",
+      "role": "hero",
+      "label": "sofa",
+      "style_family": "dark_lounge",
+      "material_style": "hero_fabric",
+      "rotation_deg": 0,
+      "center": [
+        2.6,
+        3.6406
+      ],
+      "facing": [
+        0,
+        -1
+      ],
+      "bbox": [
+        1.5,
+        3.1312,
+        3.7,
+        4.15,
+        0.0,
+        0.85
+      ],
+      "z_off": 0.0,
+      "n_parts": 19,
+      "anchor": "parede north",
+      "spec": {
+        "variant": "straight",
+        "seats": 3,
+        "width": 2.2,
+        "depth": 0.95,
+        "height": 0.85,
+        "seat_height": 0.45,
+        "seat_depth": 0.58,
+        "back_thickness": 0.2,
+        "arm_width": 0.18,
+        "arm_height": 0.62,
+        "foot_height": 0.1,
+        "cushion_thickness": 0.18,
+        "cushion_gap": 0.05,
+        "cushion_bevel": 0.04,
+        "backrest_rake": 10.0,
+        "chaise_depth": 1.6,
+        "chaise_width": 0.95,
+        "fabric_rgb": [
+          60,
+          52,
+          44
+        ],
+        "feet_rgb": [
+          20,
+          18,
+          16
+        ],
+        "bbox_m": [
+          2.2,
+          0.95,
+          0.85
+        ],
+        "required_parts": [
+          "base",
+          "seat_cushion",
+          "back_cushion",
+          "arm",
+          "foot"
+        ]
+      }
+    },
+    {
+      "type": "rug",
+      "role": "anchor",
+      "label": "rug",
+      "style_family": "flat_woven",
+      "material_style": "rug",
+      "rotation_deg": 0,
+      "center": [
+        2.6,
+        2.1312
+      ],
+      "facing": [
+        0,
+        -1
+      ],
+      "bbox": [
+        0.9,
+        0.9812,
+        4.3,
+        3.2812,
+        0.0,
+        0.012
+      ],
+      "z_off": 0.0,
+      "n_parts": 5,
+      "anchor": "centralizado com hero, tuck 0.15m sob a frente",
+      "spec": {
+        "width": 3.4,
+        "depth": 2.3,
+        "thickness": 0.012,
+        "border_w": 0.12,
+        "field_rgb": [
+          224,
+          214,
+          195
+        ],
+        "border_rgb": [
+          206,
+          196,
+          179
+        ],
+        "bbox_m": [
+          3.4,
+          2.3,
+          0.012
+        ],
+        "required_parts": [
+          "rug_field"
+        ]
+      }
+    },
+    {
+      "type": "coffee_table",
+      "role": "companion",
+      "label": "coffee_table",
+      "style_family": "low_slab",
+      "material_style": "table_top",
+      "rotation_deg": 0,
+      "center": [
+        2.6,
+        2.3712
+      ],
+      "facing": [
+        0,
+        -1
+      ],
+      "bbox": [
+        1.925,
+        2.0112,
+        3.275,
+        2.7312,
+        0.012,
+        0.392
+      ],
+      "z_off": 0.012,
+      "n_parts": 3,
+      "anchor": "0.4m da frente do hero",
+      "spec": {
+        "width": 1.35,
+        "depth": 0.72,
+        "height": 0.38,
+        "top_t": 0.06,
+        "leg_t": 0.05,
+        "leg_inset_x": 0.12,
+        "leg_inset_y": 0.06,
+        "top_rgb": [
+          206,
+          193,
+          171
+        ],
+        "leg_rgb": [
+          38,
+          38,
+          40
+        ],
+        "bbox_m": [
+          1.35,
+          0.72,
+          0.38
+        ],
+        "required_parts": [
+          "top",
+          "leg"
+        ]
+      }
+    },
+    {
+      "type": "wall_art",
+      "role": "decor",
+      "label": "wall_art",
+      "style_family": "abstract_panel",
+      "material_style": "art_canvas",
+      "rotation_deg": 0,
+      "center": [
+        2.6,
+        4.17
+      ],
+      "facing": [
+        0,
+        -1
+      ],
+      "bbox": [
+        1.9,
+        4.14,
+        3.3,
+        4.2,
+        1.1,
+        2.05
+      ],
+      "z_off": 1.1,
+      "n_parts": 13,
+      "anchor": "acima do hero, respiro 0.25m",
+      "spec": {
+        "width": 1.4,
+        "height": 0.95,
+        "depth": 0.06,
+        "frame_t": 0.03,
+        "canvas_rgb": [
+          211,
+          199,
+          181
+        ],
+        "frame_rgb": [
+          38,
+          38,
+          40
+        ],
+        "accent_rgb": [
+          128,
+          92,
+          64
+        ],
+        "accent2_rgb": [
+          84,
+          80,
+          76
+        ],
+        "bbox_m": [
+          1.4,
+          0.06,
+          0.95
+        ],
+        "required_parts": [
+          "frame",
+          "canvas"
+        ]
+      }
+    },
+    {
+      "type": "curtain",
+      "role": "textile",
+      "label": "curtain",
+      "style_family": "soft_panel",
+      "material_style": "curtain",
+      "rotation_deg": 270,
+      "center": [
+        5.1475,
+        2.4
+      ],
+      "facing": [
+        -1,
+        0
+      ],
+      "bbox": [
+        5.115,
+        1.0,
+        5.18,
+        3.8,
+        0.05,
+        2.485
+      ],
+      "z_off": 0.05,
+      "n_parts": 7,
+      "anchor": "janela win01 (east)",
+      "spec": {
+        "width": 2.6,
+        "height": 2.4,
+        "fold_w": 0.15,
+        "fold_amp": 0.04,
+        "thickness": 0.025,
+        "rod_d": 0.035,
+        "rod_overhang": 0.1,
+        "panel_split": 2,
+        "panel_w": 0.4,
+        "panel_rgb": [
+          237,
+          231,
+          218
+        ],
+        "rod_rgb": [
+          38,
+          38,
+          40
+        ],
+        "bbox_m": [
+          2.8,
+          0.1,
+          2.435
+        ],
+        "required_parts": [
+          "panel_fold",
+          "rod"
+        ]
+      }
+    },
+    {
+      "type": "side_table",
+      "role": "companion",
+      "label": "side_table",
+      "style_family": "slim_metal_round",
+      "material_style": "metal_accent",
+      "rotation_deg": 0,
+      "center": [
+        4.575,
+        3.6406
+      ],
+      "facing": [
+        0,
+        -1
+      ],
+      "bbox": [
+        4.35,
+        3.4156,
+        4.8,
+        3.8656,
+        0.0,
+        0.55
+      ],
+      "z_off": 0.0,
+      "n_parts": 3,
+      "anchor": "lado + do hero, fora do tapete",
+      "spec": {
+        "diameter": 0.45,
+        "height": 0.55,
+        "top_t": 0.025,
+        "stem_t": 0.04,
+        "base_d": 0.3,
+        "base_t": 0.02,
+        "top_rgb": [
+          38,
+          38,
+          40
+        ],
+        "stem_rgb": [
+          38,
+          38,
+          40
+        ],
+        "base_rgb": [
+          38,
+          38,
+          40
+        ],
+        "bbox_m": [
+          0.45,
+          0.45,
+          0.55
+        ],
+        "required_parts": [
+          "top",
+          "stem",
+          "base"
+        ]
+      }
+    },
+    {
+      "type": "floor_lamp",
+      "role": "light",
+      "label": "floor_lamp",
+      "style_family": "slim_metal",
+      "material_style": "metal_accent",
+      "rotation_deg": 0,
+      "center": [
+        0.64,
+        3.6406
+      ],
+      "facing": [
+        0,
+        -1
+      ],
+      "bbox": [
+        0.43,
+        3.4306,
+        0.85,
+        3.8506,
+        0.0,
+        1.65
+      ],
+      "z_off": 0.0,
+      "n_parts": 3,
+      "anchor": "lado - do hero, fora do tapete",
+      "spec": {
+        "height": 1.65,
+        "base_d": 0.28,
+        "base_t": 0.025,
+        "stem_t": 0.035,
+        "shade_d": 0.42,
+        "shade_top_d": 0.32,
+        "shade_h": 0.24,
+        "stem_rgb": [
+          38,
+          38,
+          40
+        ],
+        "base_rgb": [
+          38,
+          38,
+          40
+        ],
+        "shade_rgb": [
+          238,
+          228,
+          204
+        ],
+        "bbox_m": [
+          0.42,
+          0.42,
+          1.65
+        ],
+        "required_parts": [
+          "base",
+          "stem",
+          "shade"
+        ]
+      }
+    },
+    {
+      "type": "plant_placeholder",
+      "role": "decor",
+      "label": "plant_placeholder",
+      "style_family": "leafy_volume",
+      "material_style": "plant_green",
+      "rotation_deg": 270,
+      "center": [
+        4.725,
+        1.075
+      ],
+      "facing": [
+        -1,
+        0
+      ],
+      "bbox": [
+        4.45,
+        0.8,
+        5.0,
+        1.35,
+        0.0,
+        1.5
+      ],
+      "z_off": 0.0,
+      "n_parts": 5,
+      "anchor": "ao lado da janela win01, y=1.08",
+      "spec": {
+        "height": 1.5,
+        "pot_w": 0.32,
+        "pot_h": 0.3,
+        "trunk_t": 0.05,
+        "foliage_w": 0.55,
+        "foliage_rgb": [
+          97,
+          117,
+          73
+        ],
+        "pot_rgb": [
+          45,
+          43,
+          41
+        ],
+        "trunk_rgb": [
+          74,
+          56,
+          42
+        ],
+        "bbox_m": [
+          0.55,
+          0.55,
+          1.5
+        ],
+        "required_parts": [
+          "pot",
+          "foliage"
+        ]
+      }
+    },
+    {
+      "type": "accent_seat",
+      "role": "companion",
+      "label": "accent_seat",
+      "style_family": "light_boucle",
+      "material_style": "accent_fabric",
+      "rotation_deg": 168.0,
+      "center": [
+        2.05,
+        1.2312
+      ],
+      "facing": [
+        0.2079,
+        0.9781
+      ],
+      "bbox": [
+        1.6,
+        0.762,
+        2.5,
+        1.7004,
+        0.0,
+        0.72
+      ],
+      "z_off": 0.0,
+      "n_parts": 6,
+      "anchor": "oposto ao hero, 1.5m de conversa, girado 12 graus pro eixo",
+      "spec": {
+        "width": 0.75,
+        "depth": 0.8,
+        "height": 0.72,
+        "seat_h": 0.4,
+        "leg_h": 0.13,
+        "leg_t": 0.05,
+        "leg_inset": 0.06,
+        "back_t": 0.16,
+        "seat_rgb": [
+          196,
+          180,
+          158
+        ],
+        "leg_rgb": [
+          20,
+          18,
+          16
+        ],
+        "bbox_m": [
+          0.75,
+          0.8,
+          0.72
+        ],
+        "required_parts": [
+          "seat",
+          "back",
+          "leg"
+        ]
+      }
+    }
+  ],
+  "camera": {
+    "kind": "three_quarter_human",
+    "eye": [
+      0.8,
+      0.4,
+      1.6
+    ],
+    "target": [
+      2.6,
+      2.714,
+      0.55
+    ],
+    "elev_deg": 19.7,
+    "azim_deg": -127.9,
+    "hide_walls": [
+      "south",
+      "west"
+    ],
+    "min_hero_coverage": 0.1
+  },
+  "style_id": "modern_warm_minimal"
+}

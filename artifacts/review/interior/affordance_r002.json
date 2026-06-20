@@ -1,0 +1,307 @@
+{
+  "room_id": "r002",
+  "room_name": "SALA DE JANTAR | SALA DE ESTAR",
+  "best_tv_wall": "m014",
+  "best_tv_walls": [
+    {
+      "wall_id": "m014",
+      "length_m": 4.39,
+      "openings": [],
+      "clean": true,
+      "neighbors": [],
+      "tv_score": 81.5,
+      "sofa_score": 68.9,
+      "notes": [
+        "limpa"
+      ]
+    },
+    {
+      "wall_id": "m013",
+      "length_m": 3.49,
+      "openings": [],
+      "clean": true,
+      "neighbors": [],
+      "tv_score": 68.9,
+      "sofa_score": 59.9,
+      "notes": [
+        "limpa"
+      ]
+    },
+    {
+      "wall_id": "m015",
+      "length_m": 1.65,
+      "openings": [],
+      "clean": true,
+      "neighbors": [],
+      "tv_score": 43.1,
+      "sofa_score": 41.5,
+      "notes": [
+        "limpa"
+      ]
+    }
+  ],
+  "rejected_tv_walls": [
+    {
+      "wall_id": "m010",
+      "length_m": 15.08,
+      "openings": [
+        "interior_door"
+      ],
+      "clean": false,
+      "neighbors": [
+        "r000",
+        "r004",
+        "r007"
+      ],
+      "tv_score": -84.9,
+      "sofa_score": 100.8,
+      "notes": [
+        "porta/passagem",
+        "limiar p/ ['r000', 'r004', 'r007']"
+      ]
+    },
+    {
+      "wall_id": "m016",
+      "length_m": 7.67,
+      "openings": [
+        "interior_door",
+        "interior_door"
+      ],
+      "clean": false,
+      "neighbors": [
+        "r000",
+        "r003",
+        "r006"
+      ],
+      "tv_score": -92.3,
+      "sofa_score": 26.7,
+      "notes": [
+        "porta/passagem",
+        "limiar p/ ['r000', 'r003', 'r006']"
+      ]
+    },
+    {
+      "wall_id": "m007",
+      "length_m": 5.52,
+      "openings": [
+        "interior_door"
+      ],
+      "clean": false,
+      "neighbors": [
+        "r000",
+        "r003",
+        "r006"
+      ],
+      "tv_score": -94.5,
+      "sofa_score": 5.2,
+      "notes": [
+        "porta/passagem",
+        "limiar p/ ['r000', 'r003', 'r006']"
+      ]
+    },
+    {
+      "wall_id": "m004",
+      "length_m": 3.95,
+      "openings": [
+        "glazed_balcony"
+      ],
+      "clean": false,
+      "neighbors": [
+        "r001",
+        "r003"
+      ],
+      "tv_score": -96.0,
+      "sofa_score": -20.5,
+      "notes": [
+        "porta-balcao",
+        "limiar p/ ['r001', 'r003']"
+      ]
+    },
+    {
+      "wall_id": "m006",
+      "length_m": 2.83,
+      "openings": [
+        "interior_door"
+      ],
+      "clean": false,
+      "neighbors": [
+        "r001",
+        "r004"
+      ],
+      "tv_score": -97.2,
+      "sofa_score": -21.7,
+      "notes": [
+        "porta/passagem",
+        "limiar p/ ['r001', 'r004']"
+      ]
+    },
+    {
+      "wall_id": "m009",
+      "length_m": 2.85,
+      "openings": [
+        "interior_door"
+      ],
+      "clean": false,
+      "neighbors": [
+        "r000",
+        "r007"
+      ],
+      "tv_score": -97.2,
+      "sofa_score": -21.5,
+      "notes": [
+        "porta/passagem",
+        "limiar p/ ['r000', 'r007']"
+      ]
+    }
+  ],
+  "walls": [
+    {
+      "wall_id": "m014",
+      "length_m": 4.39,
+      "openings": [],
+      "clean": true,
+      "neighbors": [],
+      "tv_score": 81.5,
+      "sofa_score": 68.9,
+      "notes": [
+        "limpa"
+      ]
+    },
+    {
+      "wall_id": "m013",
+      "length_m": 3.49,
+      "openings": [],
+      "clean": true,
+      "neighbors": [],
+      "tv_score": 68.9,
+      "sofa_score": 59.9,
+      "notes": [
+        "limpa"
+      ]
+    },
+    {
+      "wall_id": "m015",
+      "length_m": 1.65,
+      "openings": [],
+      "clean": true,
+      "neighbors": [],
+      "tv_score": 43.1,
+      "sofa_score": 41.5,
+      "notes": [
+        "limpa"
+      ]
+    },
+    {
+      "wall_id": "m010",
+      "length_m": 15.08,
+      "openings": [
+        "interior_door"
+      ],
+      "clean": false,
+      "neighbors": [
+        "r000",
+        "r004",
+        "r007"
+      ],
+      "tv_score": -84.9,
+      "sofa_score": 100.8,
+      "notes": [
+        "porta/passagem",
+        "limiar p/ ['r000', 'r004', 'r007']"
+      ]
+    },
+    {
+      "wall_id": "m016",
+      "length_m": 7.67,
+      "openings": [
+        "interior_door",
+        "interior_door"
+      ],
+      "clean": false,
+      "neighbors": [
+        "r000",
+        "r003",
+        "r006"
+      ],
+      "tv_score": -92.3,
+      "sofa_score": 26.7,
+      "notes": [
+        "porta/passagem",
+        "limiar p/ ['r000', 'r003', 'r006']"
+      ]
+    },
+    {
+      "wall_id": "m007",
+      "length_m": 5.52,
+      "openings": [
+        "interior_door"
+      ],
+      "clean": false,
+      "neighbors": [
+        "r000",
+        "r003",
+        "r006"
+      ],
+      "tv_score": -94.5,
+      "sofa_score": 5.2,
+      "notes": [
+        "porta/passagem",
+        "limiar p/ ['r000', 'r003', 'r006']"
+      ]
+    },
+    {
+      "wall_id": "m004",
+      "length_m": 3.95,
+      "openings": [
+        "glazed_balcony"
+      ],
+      "clean": false,
+      "neighbors": [
+        "r001",
+        "r003"
+      ],
+      "tv_score": -96.0,
+      "sofa_score": -20.5,
+      "notes": [
+        "porta-balcao",
+        "limiar p/ ['r001', 'r003']"
+      ]
+    },
+    {
+      "wall_id": "m006",
+      "length_m": 2.83,
+      "openings": [
+        "interior_door"
+      ],
+      "clean": false,
+      "neighbors": [
+        "r001",
+        "r004"
+      ],
+      "tv_score": -97.2,
+      "sofa_score": -21.7,
+      "notes": [
+        "porta/passagem",
+        "limiar p/ ['r001', 'r004']"
+      ]
+    },
+    {
+      "wall_id": "m009",
+      "length_m": 2.85,
+      "openings": [
+        "interior_door"
+      ],
+      "clean": false,
+      "neighbors": [
+        "r000",
+        "r007"
+      ],
+      "tv_score": -97.2,
+      "sofa_score": -21.5,
+      "notes": [
+        "porta/passagem",
+        "limiar p/ ['r000', 'r007']"
+      ]
+    }
+  ]
+}

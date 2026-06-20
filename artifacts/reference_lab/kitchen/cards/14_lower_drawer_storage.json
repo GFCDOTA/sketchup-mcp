@@ -1,0 +1,21 @@
+{
+  "card_id": "lower_drawer_storage",
+  "category": "joinery_form_token",
+  "problem": "portas baixas (modulo base com prateleira atras de porta) sao ruins pra panela: voce se abaixa, ajoelha e cava no fundo escuro. Felipe quer gavetoes inferiores pra panela e MUITO armazenamento",
+  "design_move": "modulo base com PORTA -> gavetoes inferiores: gavetao alto pra panela/tampa + gaveta media pra utensilio, todos com corredica de extracao total e amortecedor (soft-close). Tudo vem pra fora, nada fica no fundo morto",
+  "applies_to": ["base_cabinet", "under_counter", "pot_storage", "near_cooktop"],
+  "implementation_tokens": {
+    "system": "lower_drawer_bank",
+    "drawer_stack": ["deep_pot_drawer", "medium_utensil_drawer"],
+    "slide": "full_extension",
+    "soft_close": true,
+    "deep_drawer_height_cm": [25, 40],
+    "handle": "handle_less_gola (cava/gola, sem puxador tradicional)",
+    "internal_organizer": "divisor de panela/tampa opcional"
+  },
+  "joinery_token_ref": "references/tokens/premium_shadow_gap.json",
+  "real_values": {"module_width_cm": [40, 60], "gaveta_kind_hint": "kc_gaveta", "base_rgb": [191,167,137], "soft_close_note": "amortecedor obrigatorio (Felipe: SEM puxador tradicional -> abertura cava + soft-close)", "pot_drawer_note": "gavetao alto perto do cooktop pra panela/frigideira"},
+  "forbidden": ["porta baixa com prateleira fixa pra panela (fundo morto)", "gaveta sem extracao total (perde o fundo)", "gaveta sem amortecedor (Felipe pediu soft-close)", "puxador tradicional aplicado (usar cava/gola)", "gavetao raso onde precisa de panela alta"],
+  "gate": ["base de panela = gavetao (nao porta)", "extracao total + soft-close", "abertura handle-less coerente com o resto", "modulado 40-65cm (sem gaveta gigante que empena)"],
+  "evidence": "regra de armazenamento planejado; provar que a base de panela e gavetao no iso/elev + veredito GPT"
+}

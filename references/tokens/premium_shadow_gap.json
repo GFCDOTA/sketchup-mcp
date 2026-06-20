@@ -1,0 +1,21 @@
+{
+  "name": "premium_shadow_gap",
+  "title": "Reveal/shadow gap planejado entre módulos + sóculo recuado",
+  "rule": "Junta planejada: cada módulo (porta/gaveta) é separado do vizinho por um pequeno reveal (folga de sombra) em vez de encostar. O sóculo grafite é RECUADO 10-15cm da frente da base (toe-kick), criando uma sombra que ancora a marcenaria no chão e some o pé do armário. Reveals nos módulos + sóculo recuado = leitura premium de planejado, não bloco maciço builder-grade. O puxador slim grafite reforça as linhas verticais dos reveals.",
+  "params": {
+    "module_reveal_cm": 1.8,
+    "toe_kick_height_cm": 12,
+    "toe_kick_height_range_cm": [10, 15],
+    "toe_kick_recess_cm": 8,
+    "toe_kick_rgb": [40, 41, 45],
+    "handle_rgb": [44, 45, 50],
+    "handle_style": "slim grafite (perfil cava / barra), alinhado aos reveals verticais",
+    "drawer_reveal_cm": 0.6
+  },
+  "applies_to_kinds": ["kc_soculo", "kc_puxador"],
+  "anti_pattern": "Módulos encostados sem reveal = bloco maciço chapado; sóculo flush (não recuado) = armário 'pousado' sem sombra; sóculo claro = não ancora. Sem o shadow gap a marcenaria lê como caixa única de CAD.",
+  "cost_relative": "baixo (é geometria/posicionamento, não material) — alto retorno de realismo",
+  "appearance": "Linhas finas de sombra entre módulos e uma faixa escura recuada no rodapé; a marcenaria parece flutuar levemente e os módulos leem individualizados.",
+  "gate_refs": ["tools/kitchen_ergonomics.py::toe_kick_height", "tools/furniture_overlap_gate.py"],
+  "source": {"kind": "golden_sample", "title": "tools/kitchen_layout.py (reveal de junta + sóculo recuado TOE_KICK)", "date": "2026-06-19"}
+}

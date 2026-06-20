@@ -1,0 +1,82 @@
+{
+  "spec_version": "1.0.0",
+  "scene_id": "living_room_modern_warm_minimal",
+  "scene_type": "living_room",
+  "style_id": "modern_warm_minimal",
+  "mood": ["calmo", "acolhedor", "editorial", "intencional"],
+  "palette": ["warm_plaster", "warm_oak", "cream_woven", "dark_charcoal", "travertine", "black_metal"],
+  "room_dimensions": {
+    "width_m": 5.2,
+    "depth_m": 4.2,
+    "height_m": 2.7,
+    "main_wall": "north"
+  },
+  "openings": [
+    {"id": "win01", "wall": "east", "type": "window",
+     "center_along_m": 2.4, "width_m": 1.8, "sill_m": 0.5, "head_m": 2.3},
+    {"id": "door01", "wall": "south", "type": "door",
+     "center_along_m": 0.9, "width_m": 0.9, "sill_m": 0.0, "head_m": 2.1}
+  ],
+  "hero_piece": "sofa",
+  "furniture_intents": [
+    {"type": "sofa", "role": "hero", "style_family": "dark_lounge",
+     "dimensions_m": {"width": 2.2, "depth": 0.95, "height": 0.85},
+     "material_style": "hero_fabric", "placement_hint": "main_wall", "priority": 1,
+     "notes": "sofa dark lounge procedural existente (tools/sofa_builder.py) como hero piece"},
+    {"type": "rug", "role": "anchor", "style_family": "flat_woven",
+     "dimensions_m": {"width": 3.4, "depth": 2.3},
+     "material_style": "rug", "placement_hint": "centered_under_hero", "priority": 2,
+     "notes": "cycle 002: 3.4x2.3 (era 3.0x2.0, lia pequeno) — precisa pegar o conjunto sofa + mesa + accent"},
+    {"type": "coffee_table", "role": "companion", "style_family": "low_slab",
+     "dimensions_m": {"width": 1.35, "depth": 0.72, "height": 0.38},
+     "material_style": "table_top", "placement_hint": "front_of_hero", "priority": 3,
+     "notes": "cycle 003: 1.35x0.72 (era 1.1x0.6, lia acessorio) — presenca proporcional no eixo sofa<->poltrona"},
+    {"type": "wall_art", "role": "decor", "style_family": "abstract_panel",
+     "dimensions_m": {"width": 1.4, "depth": 0.06, "height": 0.95},
+     "material_style": "art_canvas", "placement_hint": "above_hero", "priority": 4,
+     "notes": "quadro grande abstrato neutro, centralizado no sofa"},
+    {"type": "curtain", "role": "textile", "style_family": "soft_panel",
+     "material_style": "curtain", "placement_hint": "on_window", "priority": 5,
+     "panel_split": 2, "panel_w": 0.40,
+     "notes": "cycle 002: 2 paineis ABERTOS emoldurando a janela; cycle 003: paineis 0.40 e mais magros (na vista SU viravam barras de primeiro plano)"},
+    {"type": "side_table", "role": "companion", "style_family": "slim_metal_round",
+     "dimensions_m": {"width": 0.45, "depth": 0.45, "height": 0.55},
+     "material_style": "metal_accent", "placement_hint": "beside_hero", "priority": 6},
+    {"type": "floor_lamp", "role": "light", "style_family": "slim_metal",
+     "dimensions_m": {"width": 0.42, "depth": 0.42, "height": 1.65},
+     "material_style": "metal_accent", "placement_hint": "beside_hero", "priority": 7,
+     "notes": "haste fina preta + cupula ivory, do lado oposto ao side_table"},
+    {"type": "plant_placeholder", "role": "decor", "style_family": "leafy_volume",
+     "dimensions_m": {"width": 0.55, "depth": 0.55, "height": 1.5},
+     "material_style": "plant_green", "placement_hint": "near_window", "priority": 8},
+    {"type": "accent_seat", "role": "companion", "style_family": "light_boucle",
+     "dimensions_m": {"width": 0.75, "depth": 0.8, "height": 0.72},
+     "material_style": "accent_fabric", "placement_hint": "opposite_hero", "priority": 9,
+     "notes": "cycle 002: poltrona leve clara oposta ao sofa; cycle 003: girada ~12 graus pro eixo do hero (conversa de estar, nao objeto paralelo)"}
+  ],
+  "composition_rules": [
+    "hero_on_main_wall",
+    "rug_centered_under_hero",
+    "coffee_table_0p35_0p45_from_hero",
+    "art_centered_above_hero",
+    "curtain_on_window",
+    "curtain_open_panels_framing_not_protagonist",
+    "accent_seat_opposite_hero",
+    "balanced_mass_per_quadrant",
+    "side_table_beside_hero",
+    "floor_lamp_beside_hero",
+    "plant_near_window",
+    "keep_circulation_0p7"
+  ],
+  "camera_goal": {
+    "kind": "three_quarter_human",
+    "eye_height_m": 1.6,
+    "subject": "hero_seating_zone",
+    "min_hero_coverage": 0.10
+  },
+  "render_goal": {
+    "views": ["top", "three_quarter", "contact_sheet"],
+    "mood_keywords": ["warm", "minimal", "soft_light", "lived_in_but_tidy"],
+    "notes": "vray_three_quarter so depois da composicao passar o SpatialGate (regra: nao otimizar V-Ray antes)"
+  }
+}

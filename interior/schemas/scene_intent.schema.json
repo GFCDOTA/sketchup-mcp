@@ -1,0 +1,80 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SceneIntentSpec",
+  "description": "Contrato do track Intent-to-Scene: o GPT (diretor de arte) emite esta intencao de CENA; o SceneComposer (interior/composer/scene_composer.py) compila em cena 3D procedural (parts -> boxes -> .skp/render). Distinto do DesignIntentSpec (que mobilia um comodo de PLANTA-PDF existente): aqui o ambiente e' sintetico, definido por room_dimensions — a intencao E' a fonte de verdade. Schema documental (validacao executavel em scene_composer.validate_scene_intent).",
+  "type": "object",
+  "required": ["scene_type", "style_id", "room_dimensions", "hero_piece",
+               "furniture_intents", "composition_rules", "camera_goal", "render_goal"],
+  "properties": {
+    "spec_version": {"type": "string", "description": "versao do contrato (ex: 1.0.0)"},
+    "scene_id": {"type": "string", "description": "id curto da cena (vira nome de pasta em runs/scenes/<scene_id>)"},
+    "scene_type": {"enum": ["living_room", "bedroom", "dining", "home_office", "reading_corner"]},
+    "style_id": {"type": "string",
+                 "description": "id de um StylePack em interior/style_packs/<style_id>.json (ex: modern_warm_minimal)"},
+    "mood": {"type": "array", "items": {"type": "string"},
+             "description": "adjetivos de direcao de arte, ex: ['calmo','acolhedor','editorial']"},
+    "palette": {"type": "array", "items": {"type": "string"},
+                "description": "nomes de cor da paleta (referenciam o StylePack), ex: ['warm_oak','dark_charcoal']"},
+    "room_dimensions": {
+      "type": "object",
+      "required": ["width_m", "depth_m", "height_m"],
+      "properties": {
+        "width_m": {"type": "number", "minimum": 2.0, "description": "X (parede sul/norte correm em X)"},
+        "depth_m": {"type": "number", "minimum": 2.0, "description": "Y"},
+        "height_m": {"type": "number", "minimum": 2.2, "description": "pe-direito"},
+        "main_wall": {"enum": ["north", "south", "east", "west"],
+                      "description": "parede principal (recebe o hero_piece). Convencao: origem (0,0) no canto SW; north = y=depth_m; east = x=width_m. Default: north"}
+      }
+    },
+    "openings": {
+      "type": "array",
+      "description": "janelas/portas da sala sintetica (a cortina alinha com a janela; gates checam bloqueio)",
+      "items": {
+        "type": "object",
+        "required": ["id", "wall", "type", "center_along_m", "width_m"],
+        "properties": {
+          "id": {"type": "string"},
+          "wall": {"enum": ["north", "south", "east", "west"]},
+          "type": {"enum": ["window", "door", "glass_door"]},
+          "center_along_m": {"type": "number",
+                             "description": "centro da abertura ao longo da parede, medido da ponta de MENOR coordenada"},
+          "width_m": {"type": "number", "exclusiveMinimum": 0},
+          "sill_m": {"type": "number", "description": "peitoril (windows; default 0.9; door = 0)"},
+          "head_m": {"type": "number", "description": "verga (default 2.1)"}
+        }
+      }
+    },
+    "hero_piece": {"type": "string",
+                   "description": "type do furniture_intent que e' o heroi visual da cena (ex: sofa). Deve existir em furniture_intents com role=hero"},
+    "furniture_intents": {
+      "type": "array", "minItems": 1,
+      "items": {"$ref": "furniture_intent.schema.json"},
+      "description": "intencoes de mobiliario (FurnitureIntentSpec). O composer resolve cada uma num generator procedural"
+    },
+    "composition_rules": {
+      "type": "array", "items": {"type": "string"},
+      "description": "regras de composicao executaveis pelo composer/gate, ex: hero_on_main_wall, rug_centered_under_hero, coffee_table_0p35_0p45_from_hero, art_centered_above_hero, plant_near_window, curtain_on_window, keep_circulation_0p7"
+    },
+    "camera_goal": {
+      "type": "object",
+      "required": ["kind"],
+      "properties": {
+        "kind": {"enum": ["three_quarter_human", "top", "front"]},
+        "eye_height_m": {"type": "number", "description": "altura do olho (default 1.60)"},
+        "subject": {"type": "string", "description": "o que enquadrar (default: hero + zona de estar)"},
+        "min_hero_coverage": {"type": "number", "minimum": 0, "maximum": 1,
+                              "description": "fracao minima do frame que o conjunto hero deve ocupar (gate de camera)"}
+      }
+    },
+    "render_goal": {
+      "type": "object",
+      "required": ["views"],
+      "properties": {
+        "views": {"type": "array",
+                  "items": {"enum": ["top", "three_quarter", "vray_three_quarter", "contact_sheet"]}},
+        "mood_keywords": {"type": "array", "items": {"type": "string"}},
+        "notes": {"type": "string"}
+      }
+    }
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "id": "modern_warm_minimal",
+  "name": "Modern Warm Minimal",
+  "description": "Sala moderna quente e minimal: madeira clara quente no piso, paredes em gesso quente, tecidos creme, hero em tecido charcoal escuro, pedra clara (travertino/concreto) na mesa, acentos finos em metal preto. Poucas pecas, cada uma intencional.",
+  "materials": {
+    "floor": {"name": "warm_oak", "rgb": [173, 134, 94]},
+    "wall": {"name": "warm_plaster", "rgb": [233, 226, 212]},
+    "ceiling": {"name": "soft_white", "rgb": [242, 240, 234]},
+    "rug": {"name": "cream_woven", "rgb": [224, 214, 195]},
+    "hero_fabric": {"name": "dark_charcoal_fabric", "rgb": [60, 52, 44],
+                    "note": "charcoal QUENTE (spread R-B 16): passa o furniture_visual_gate tecido_nao_cinza (HARD, exige max-min>=12) sem perder a leitura dark lounge"},
+    "hero_feet": {"name": "near_black_wood", "rgb": [20, 18, 16]},
+    "table_top": {"name": "travertine", "rgb": [206, 193, 171]},
+    "table_top_alt": {"name": "warm_concrete", "rgb": [174, 168, 159]},
+    "metal_accent": {"name": "black_metal", "rgb": [38, 38, 40]},
+    "curtain": {"name": "light_linen", "rgb": [237, 231, 218]},
+    "accent_fabric": {"name": "warm_taupe_boucle", "rgb": [196, 180, 158],
+                      "note": "contrapeso CLARO do hero charcoal (cycle 002): mais baixo e mais claro que o sofa, nao compete"},
+    "art_canvas": {"name": "neutral_abstract", "rgb": [211, 199, 181]},
+    "art_accent": {"name": "burnt_umber", "rgb": [128, 92, 64]},
+    "lamp_shade": {"name": "warm_ivory_shade", "rgb": [238, 228, 204]},
+    "plant_green": {"name": "soft_olive_green", "rgb": [97, 117, 73]},
+    "plant_pot": {"name": "matte_black_pot", "rgb": [45, 43, 41]},
+    "wood_accent": {"name": "dark_walnut", "rgb": [74, 56, 42]}
+  },
+  "material_defaults": {
+    "sofa": "hero_fabric",
+    "rug": "rug",
+    "coffee_table": {"top": "table_top", "base": "metal_accent"},
+    "side_table": {"top": "metal_accent", "base": "metal_accent"},
+    "floor_lamp": {"stem": "metal_accent", "shade": "lamp_shade"},
+    "wall_art": {"canvas": "art_canvas", "frame": "metal_accent", "accent": "art_accent"},
+    "curtain": "curtain",
+    "plant_placeholder": {"foliage": "plant_green", "pot": "plant_pot"},
+    "accent_seat": {"seat": "accent_fabric", "legs": "hero_feet"}
+  },
+  "decor_rules": [
+    "large_art_above_hero",
+    "plant_near_window",
+    "light_curtain_open_panels_framing_window",
+    "floor_lamp_beside_hero",
+    "rug_grounds_seating_zone_larger_than_hero",
+    "accent_seat_opposite_hero_balances_mass",
+    "metal_accents_thin_and_black",
+    "few_pieces_each_intentional"
+  ],
+  "palette": [
+    {"color": "warm_plaster", "rgb": [233, 226, 212], "weight": 0.32},
+    {"color": "warm_oak", "rgb": [173, 134, 94], "weight": 0.28},
+    {"color": "cream_woven", "rgb": [224, 214, 195], "weight": 0.14},
+    {"color": "dark_charcoal", "rgb": [60, 52, 44], "weight": 0.12},
+    {"color": "travertine", "rgb": [206, 193, 171], "weight": 0.07},
+    {"color": "soft_olive_green", "rgb": [97, 117, 73], "weight": 0.04},
+    {"color": "black_metal", "rgb": [38, 38, 40], "weight": 0.03}
+  ],
+  "vray_hints": {
+    "hero_fabric": "tecido charcoal com sheen baixo + bump de trama (reusar shader do track sofa quando landar)",
+    "floor": "madeira quente acetinada, reflexo suave",
+    "curtain": "linho translucido leve",
+    "table_top": "travertino fosco com poros sutis"
+  }
+}

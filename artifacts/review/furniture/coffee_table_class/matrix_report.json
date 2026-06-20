@@ -1,0 +1,155 @@
+[
+  {
+    "cell": "low_slab@sofa-formal-2l",
+    "bbox_m": [
+      0.858,
+      0.464,
+      0.38
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "satellite": "PASS",
+    "sat_metrics": {
+      "delta_vs_assento_m": -0.07,
+      "frac_do_sofa": 0.58,
+      "alvo_height_m": 0.42
+    },
+    "n_parts": 3
+  },
+  {
+    "cell": "low_slab@sofa-std-3l",
+    "bbox_m": [
+      1.253,
+      0.677,
+      0.36
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "satellite": "PASS",
+    "sat_metrics": {
+      "delta_vs_assento_m": -0.07,
+      "frac_do_sofa": 0.58,
+      "alvo_height_m": 0.4
+    },
+    "n_parts": 3
+  },
+  {
+    "cell": "low_slab@sofa-lounge-4l",
+    "bbox_m": [
+      1.4,
+      0.75,
+      0.33
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "satellite": "PASS",
+    "sat_metrics": {
+      "delta_vs_assento_m": -0.07,
+      "frac_do_sofa": 0.467,
+      "alvo_height_m": 0.37
+    },
+    "n_parts": 3
+  },
+  {
+    "cell": "two_tier@sofa-formal-2l",
+    "bbox_m": [
+      0.858,
+      0.477,
+      0.43
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "satellite": "PASS",
+    "sat_metrics": {
+      "delta_vs_assento_m": -0.02,
+      "frac_do_sofa": 0.58,
+      "alvo_height_m": 0.42
+    },
+    "n_parts": 6
+  },
+  {
+    "cell": "two_tier@sofa-std-3l",
+    "bbox_m": [
+      1.253,
+      0.696,
+      0.41
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "satellite": "PASS",
+    "sat_metrics": {
+      "delta_vs_assento_m": -0.02,
+      "frac_do_sofa": 0.58,
+      "alvo_height_m": 0.4
+    },
+    "n_parts": 6
+  },
+  {
+    "cell": "two_tier@sofa-lounge-4l",
+    "bbox_m": [
+      1.4,
+      0.75,
+      0.38
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "satellite": "PASS",
+    "sat_metrics": {
+      "delta_vs_assento_m": -0.02,
+      "frac_do_sofa": 0.467,
+      "alvo_height_m": 0.37
+    },
+    "n_parts": 6
+  },
+  {
+    "cell": "organic@sofa-formal-2l",
+    "bbox_m": [
+      0.858,
+      0.554,
+      0.42
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "satellite": "PASS",
+    "sat_metrics": {
+      "delta_vs_assento_m": -0.03,
+      "frac_do_sofa": 0.58,
+      "alvo_height_m": 0.42
+    },
+    "n_parts": 7
+  },
+  {
+    "cell": "organic@sofa-std-3l",
+    "bbox_m": [
+      1.253,
+      0.75,
+      0.4
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "satellite": "PASS",
+    "sat_metrics": {
+      "delta_vs_assento_m": -0.03,
+      "frac_do_sofa": 0.58,
+      "alvo_height_m": 0.4
+    },
+    "n_parts": 7
+  },
+  {
+    "cell": "organic@sofa-lounge-4l",
+    "bbox_m": [
+      1.4,
+      0.75,
+      0.37
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "satellite": "PASS",
+    "sat_metrics": {
+      "delta_vs_assento_m": -0.03,
+      "frac_do_sofa": 0.467,
+      "alvo_height_m": 0.37
+    },
+    "n_parts": 7
+  }
+]

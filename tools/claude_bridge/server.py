@@ -44,6 +44,10 @@ from tools.claude_bridge.skp_inventory import skp_inventory, skp_inventory_v2
 from tools.claude_bridge.system_inventory import git_inventory, live_processes, system_map
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+try:  # raiz do workspace E:\Claude — fonte unica, robusta a apps/ (2026-06-09)
+    from tools.claude_bridge._paths import WORKSPACE_ROOT  # noqa: E402
+except ImportError:  # execucao standalone sem PYTHONPATH
+    from _paths import WORKSPACE_ROOT  # noqa: E402
 
 CLAUDE_TIMEOUT = 240  # segundos por resposta; estoura -> erro 500, nunca trava infinito
 MODEL = "claude-opus-4-8"   # o JUIZ do modo B (Opus 4.8)
@@ -792,7 +796,7 @@ def claude_sessions() -> dict:
 
 def ecosystem() -> dict:
     """Top-level of E:\\Claude (the machine ecosystem) for the docs page."""
-    root = REPO_ROOT.parent
+    root = WORKSPACE_ROOT
     items = []
     try:
         for p in sorted(root.iterdir()):
@@ -1121,12 +1125,15 @@ def dirty_detail() -> dict:
     """DIAGNOSTICO read-only dos repos dirty: o que mudou + recomendacao honesta.
     NAO commita nada — em especial nao toca branch de outro agente (regra multi-agent)."""
     gi = git_inventory()
-    own = REPO_ROOT.name
+    try:
+        own = REPO_ROOT.relative_to(WORKSPACE_ROOT).as_posix()
+    except ValueError:
+        own = REPO_ROOT.name
     out = []
     for r in gi.get("repos", []):
         if not r.get("dirty"):
             continue
-        p = REPO_ROOT.parent / r["path"]
+        p = WORKSPACE_ROOT / r["path"]
         try:
             res = subprocess.run(["git", "-C", str(p), "status", "--porcelain"],
                                  capture_output=True, text=True, encoding="utf-8",

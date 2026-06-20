@@ -1,0 +1,84 @@
+{
+  "schema": "design_grammar_spec/1.0.0",
+  "produced_by": "PLANNED_JOINERY_SPECIALIST",
+  "produced_at": "2026-06-19",
+  "room": {
+    "room_id": "r004",
+    "room_name": "COZINHA",
+    "plant": "planta_74",
+    "layout_type": "linear_galley",
+    "primary_wall": "W (oeste)"
+  },
+  "max_rule": "Referencia manda na LINGUAGEM. PDF manda na POSICAO. Gates mandam na seguranca. Felipe da o PASS final.",
+  "fixed_anchors_pdf": [
+    {"anchor": "kitchen_sink", "wall": "W", "type": "hydraulic_fixed", "rule": "NAO mover de parede sem reforma hidraulica; validado por tools/kitchen_validation.py", "immutable": true},
+    {"anchor": "layout_linearity", "rule": "Permanece LINEAR (galley). NAO virar U/L por causa de referencia.", "immutable": true},
+    {"anchor": "door_passage", "rule": "Porta/passagem do PDF = circulacao livre; nada bloqueia (geometry_sanity).", "immutable": true},
+    {"anchor": "window_zone", "rule": "Aereo recorta a zona da janela (nao cobre vidro).", "immutable": true}
+  ],
+  "design_language": {
+    "style": "cozinha planejada moderna, dois-tons",
+    "palette": {
+      "oak_lowers": {"rgb": [171, 140, 100], "role": "modulos inferiores (carvalho/freijo quente)"},
+      "warm_fendi_uppers": {"rgb": [224, 215, 199], "role": "aereos/torre-filler/coifa (off-white quente)"},
+      "stone_counter_backsplash": {"rgb": [222, 219, 212], "role": "tampo + backsplash (pedra clara veined)"},
+      "graphite_plinth_reveal": {"rgb": [40, 41, 45], "role": "soculo + reveals/golas/respiros"},
+      "inox_appliance": {"rgb": [216, 220, 227], "role": "geladeira / metais reflexivos"},
+      "inox_sink_rim": {"rgb": [193, 198, 205], "role": "borda da cuba"},
+      "niche_wood": {"rgb": [162, 130, 90], "role": "fundo/prateleira do nicho de assinatura"},
+      "cooktop_black": {"rgb": [22, 22, 26], "role": "vidro do cooktop / grelha da coifa"},
+      "handle_graphite": {"rgb": [44, 45, 50], "role": "puxador slim / barra vertical"},
+      "led_warm": {"rgb": [255, 250, 232], "role": "fita LED 2700K sob o aereo"}
+    },
+    "composition": [
+      "linha inferior solida de madeira (ancora) + linha superior leve fendi (alivia)",
+      "topo continuo: aereo + armario-sobre-geladeira + filler alinhados na MESMA cota superior",
+      "geladeira integrada como COLUNA (nao bloco), com filler fechando a juncao",
+      "1 bay aberta de madeira no aereo = ponto focal / hierarquia",
+      "tampo fino proud + backsplash em pedra subindo = leitura premium continua"
+    ],
+    "joinery_detail": [
+      "soculo grafite recuado (movel flutua)",
+      "shadow_gap_reveal entre todos os modulos",
+      "gola handle-less nas portas de aereo + puxador slim grafite na base",
+      "coifa slim integrada (caixa fendi + grelha escura), nao chamine solta",
+      "respiro tecnico da geladeira = reveal grafite, nao fenda crua",
+      "tampo proud 3cm + rodabanca/backsplash mesma pedra"
+    ],
+    "signature": "torre de geladeira integrada + dois-tons madeira/fendi + tampo fino continuo + nicho de madeira aberto + gola handle-less. Isto e o que faz a cozinha LER como planejada de verdade, nao 'caixas no espaco'."
+  },
+  "tokens_ref": "joinery_tokens.json",
+  "loose_to_planned_map": [
+    {"loose": "geladeira solta na ponta", "planned": "fridge_tower: nicho + painel lateral + aereo flush no topo + filler + respiro + puxador-barra"},
+    {"loose": "cooktop pousado", "planned": "cooktop embutido no tampo + slim_integrated_hood alinhada"},
+    {"loose": "cuba apoiada", "planned": "cuba funda flush na pedra + gooseneck slim + ralo modelado"},
+    {"loose": "armario aereo bloco branco", "planned": "warm_fendi_uppers com upper_niche de madeira + led_strip + gola_reveal"},
+    {"loose": "base de armario cubo", "planned": "oak_lowers modulado (gaveteiro 3 gavetas + portas slab) sobre plinth_graphite recuado"}
+  ],
+  "vray_deferred": {
+    "note": "Render flat = massa/material basico. Estes efeitos so aparecem no V-Ray e NAO devem ser julgados ausentes no flat:",
+    "effects": ["veios da pedra (stone_backsplash_veined)", "reflexo do inox (fridge/cuba)", "brilho da fita LED (led_strip warm)"]
+  },
+  "gates": {
+    "kitchen_validation": "PASS (pia na parede OESTE do PDF = FIXA)",
+    "geometry_sanity": "PASS",
+    "furniture_overlap_gate": "PASS",
+    "kitchen_ergonomics": "PASS (12/12 metricas na faixa)",
+    "run_cmd": "cd /e/Claude/apps/sketchup-mcp && PT_TO_M=0.0259 .venv/Scripts/python.exe -m tools.<gate> r004"
+  },
+  "ergonomics_measured_cm": {
+    "countertop_height": {"value": 90.0, "range": [85, 92], "tag": "PASS"},
+    "toe_kick_height": {"value": 12.0, "range": [10, 15], "tag": "PASS"},
+    "base_depth": {"value": 60.0, "range": [55, 60], "tag": "PASS"},
+    "upper_depth": {"value": 33.0, "range": [30, 35], "tag": "PASS"},
+    "upper_clearance": {"value": 60.0, "range": [50, 60], "tag": "PASS"},
+    "hood_clearance": {"value": 55.0, "range": [45, 65], "tag": "PASS"},
+    "fridge_tower_width": {"value": 67.2, "range": [55, 75], "tag": "PASS"},
+    "fridge_vent_gap": {"value": 2.8, "range": [2, 6], "tag": "PASS"},
+    "base_module_width": {"value": 51.2, "range": [35, 65], "tag": "PASS"},
+    "upper_module_width": {"value": 50.4, "range": [35, 65], "tag": "PASS"},
+    "filler_width": {"value": 16.0, "range": [15, 18], "tag": "PASS"},
+    "sink_rim_height": {"value": 90.0, "range": [85, 92], "tag": "PASS"}
+  },
+  "human_final_pass": "PENDING (Felipe da o PASS visual final; veredito IMPROVED/PASS nunca e auto-julgado)"
+}

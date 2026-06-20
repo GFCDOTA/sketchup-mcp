@@ -322,7 +322,7 @@ details.audit .audit-body{padding:6px 16px 16px;}
 <span class="seg opt" id="hllm">🤖 —</span>
 </div>
 <nav>
-<a href="#home">Home</a><a href="#sessoes">Sessões</a><a href="#gate">Gate</a><a href="#review-skp">Review SKP</a><a href="#repo">Repo</a><a href="#backlog">Backlog</a><a href="#artifacts">Artifacts</a><a href="#llms">🤖 IAs locais</a><a href="#arquivos">📂 Arquivos</a><a href="#cerebro">🧠 Cérebro</a><a href="#marcos">🏆 Marcos</a><a href="#docs">Docs</a>
+<a href="#home">Home</a><a href="#sessoes">Sessões</a><a href="#gate">Gate</a><a href="#review-skp">Review SKP</a><a href="#repo">Repo</a><a href="#artifacts">Artifacts</a><a href="#llms">🤖 IAs locais</a><a href="#arquivos">📂 Arquivos</a><a href="#cerebro">🧠 Cérebro</a><a href="#marcos">🏆 Marcos</a><a href="#docs">Docs</a>
 </nav>
 </header>
 <main>
@@ -366,7 +366,7 @@ details.audit .audit-body{padding:6px 16px 16px;}
 
 <section id="sessoes">
 <div class="card full" id="sess-need-card"><h2>🛎️ Precisa de mim agora</h2>
-<div class="muted" style="margin-bottom:10px">Fila de atenção: consults sem resposta no gate + sessões <b>PARALYZED</b> (cycle congelado, exigem você). Ordenado por urgência — é só isto que pede ação.</div>
+<div class="muted" style="margin-bottom:10px">Consults sem resposta no gate — é só isto que pede a sua ação aqui. (sessões reais ativas/paradas vêm de <code>~/.claude/projects</code>, abaixo.)</div>
 <div id="sess-need"><span class="muted">checando...</span></div></div>
 <div class="card full"><h2>🟢 Trabalhando agora <span class="muted" style="font-weight:400;font-size:12px">— ativas &amp; ociosas (&lt;1h)</span></h2>
 <div id="sess-live"><span class="muted">lendo ~/.claude/projects...</span></div></div>
@@ -375,11 +375,14 @@ details.audit .audit-body{padding:6px 16px 16px;}
 </section>
 
 <section id="gate">
-<div id="gate-alarm" class="alarm ok">carregando ledger...</div>
-<div class="card full" id="gate-source-card"><h2>Fonte do Gate &amp; consultas REAIS recentes (audit.jsonl)</h2><div id="gate-source" class="muted">checando fonte...</div><div id="gate-recent" style="margin-top:10px"></div></div>
-<div class="card full"><h2>Ledger legacy (questions/responses .md) — histórico, pode estar stale</h2>
-<div id="gate-stats" class="muted" style="margin-bottom:12px"></div>
-<table><thead><tr><th>quando</th><th>trigger</th><th>respondido?</th><th>veredito</th><th>latência</th></tr></thead><tbody id="gate-rows"></tbody></table></div>
+<div id="gate-alarm" class="alarm ok">carregando consultas ao oráculo...</div>
+<div class="card full" id="gate-source-card"><h2>🔮 Consultas REAIS ao oráculo <span class="muted" style="font-weight:400;font-size:12px">— audit.jsonl, vivo (o ledger legacy morto foi removido)</span></h2><div id="gate-source" class="muted">checando fonte...</div><div id="gate-recent" style="margin-top:10px"></div></div>
+<div class="card full"><h2>💬 Travou numa decisão? Pergunta pro gate (Opus 4.8)</h2>
+<div class="muted" style="margin-bottom:8px">Roteia a decisão pro oráculo em modo B em vez de travar esperando humano.</div>
+<textarea id="qa-q" placeholder="Ex.: 'A sessão está patinando no opening_host da planta_74, opção A/B/C?'"></textarea>
+<label class="muted"><input type="checkbox" id="qa-rt"> red-team (o oráculo argumenta CONTRA antes de decidir)</label><br>
+<button onclick="askGate()">perguntar ao gate</button>
+<div id="qa-resp" class="qa-resp muted">a resposta do oráculo aparece aqui (pode levar até ~1min com Opus+xhigh)</div></div>
 </section>
 
 <section id="git">
@@ -398,31 +401,9 @@ details.audit .audit-body{padding:6px 16px 16px;}
 <div id="skp-timeline-wrap"></div></div>
 </section>
 
-<section id="dificuldades">
-<div id="alarm" class="alarm ok">checando patinagem...</div>
-<div class="wrap">
-<div class="card full"><h2>🎯 Próxima melhor ação — ranqueada por ROI</h2>
-<div class="muted" style="margin-bottom:10px">Impacto ÷ esforço (dificuldades OPEN + oportunidades semente). <b>Comece pelo topo</b> — é a fonte de verdade do "o que fazer agora".</div>
-<div id="nba-list"><span class="muted">rankeando...</span></div></div>
-<div class="card full"><h2>🔴 Dificuldades em aberto <span class="muted" style="font-weight:400;font-size:12px">— o que ainda trava (por severidade)</span></h2>
-<div id="diff-open" class="muted">carregando...</div>
-<div id="diff-resolved-head" style="margin-top:14px;display:none"><button onclick="toggleResolved()" style="font-size:11px">ver/ocultar resolvidas — FIXED/MITIGATED (<span id="diff-resolved-n">…</span>)</button></div>
-<div id="diff-resolved" style="display:none;margin-top:10px"></div></div>
-<div class="card full"><h2>💬 Travou numa decisão? Pergunta pro gate (Opus 4.8)</h2>
-<div class="muted" style="margin-bottom:8px">Roteia a decisão pro oráculo em modo B em vez de travar esperando humano. Se uma sessão fica <b>PARALYZED</b> ou há consult sem resposta, o alarme acima dispara.</div>
-<textarea id="qa-q" placeholder="Ex.: 'A sessão está patinando no opening_host da planta_74, opção A/B/C?'"></textarea>
-<label class="muted"><input type="checkbox" id="qa-rt"> red-team (o oráculo argumenta CONTRA antes de decidir)</label><br>
-<button onclick="askGate()">perguntar ao gate</button>
-<div id="qa-resp" class="qa-resp muted">a resposta do oráculo aparece aqui (pode levar até ~1min com Opus+xhigh)</div></div>
-</div>
-</section>
-
-<section id="aprendizados">
-<div class="card full"><h2>📚 Aprendizados / Failure Patterns <span class="muted" style="font-weight:400;font-size:12px">— releia ANTES de repetir o erro (não é só histórico)</span></h2>
-<div id="learn-top" class="muted">carregando...</div>
-<div id="learn-more-head" style="margin-top:12px;display:none"><button onclick="toggleLearn()" style="font-size:11px">ver/ocultar anteriores (<span id="learn-more-n">…</span>)</button></div>
-<div id="learn-rest" style="display:none;margin-top:10px"></div></div>
-</section>
+<!-- aba Backlog removida (2026-06-08): seções #dificuldades e #aprendizados eram 100% seed
+     hardcoded (nada as alimentava). O box "perguntar ao gate" foi movido pra aba #gate.
+     Hashes antigos (#backlog/#dificuldades/#aprendizados) redirecionam pra Home via HASHALIAS. -->
 
 <section id="lixao">
 <div class="card full"><h2>🗑️ Lixão — inventário de .skp (governança: usado vs lixo)</h2>
@@ -584,6 +565,7 @@ function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
 function fmtAge(s){if(s==null)return '-';if(s<90)return s+'s';if(s<5400)return Math.round(s/60)+'m';if(s<86400)return Math.round(s/3600)+'h';return Math.round(s/86400)+'d';}
 function fmtTime(t){try{return new Date(t*1000).toLocaleTimeString('pt-br');}catch(e){return '';}}
 function kv(k,v){return '<div class="kv"><span>'+k+'</span><span>'+esc(v)+'</span></div>';}
+function kvHTML(k,v){return '<div class="kv"><span>'+k+'</span><span>'+v+'</span></div>';}
 // ---- v3 NOC: estado compartilhado + sparklines (vanilla, sem lib) ----
 let _health=null,_llm=null,_sessFlags={paralyzed:[],stalled:[]};
 const SPARKMAX=40; // ~3min @ 5s
@@ -604,10 +586,10 @@ function renderSparks(){
 function tile(h,cls,val,label,sub){return '<div class="kpi link '+cls+'" data-hash="'+h+'"><div class="kpi-n">'+esc(val)+'</div><div class="kpi-l">'+label+'</div>'+(sub?'<div class="kpi-sub">'+esc(sub)+'</div>':'')+'</div>';}
 // 2A — consolidacao das 8 abas (nav). NAO move/apaga conteudo: cada aba nova mapeia
 // p/ as secoes existentes que ela mostra; hashes antigos continuam validos via HASHALIAS.
-const TABS=['home','sessoes','gate','review-skp','repo','backlog','artifacts','llms','arquivos','cerebro','marcos','docs'];
-const TABMAP={home:['home'],sessoes:['sessoes'],gate:['gate'],'review-skp':['planta'],repo:['git','ecossistema'],backlog:['dificuldades','aprendizados'],artifacts:['lixao'],llms:['llms'],arquivos:['arquivos'],cerebro:['cerebro'],marcos:['marcos'],docs:['docs']};
-const HASHALIAS={planta:'review-skp',git:'repo',ecossistema:'repo',dificuldades:'backlog',aprendizados:'backlog',lixao:'artifacts'};
-const ALLSEC=['home','sessoes','gate','planta','git','ecossistema','dificuldades','aprendizados','lixao','llms','arquivos','cerebro','marcos','docs'];
+const TABS=['home','sessoes','gate','review-skp','repo','artifacts','llms','arquivos','cerebro','marcos','docs'];
+const TABMAP={home:['home'],sessoes:['sessoes'],gate:['gate'],'review-skp':['planta'],repo:['git','ecossistema'],artifacts:['lixao'],llms:['llms'],arquivos:['arquivos'],cerebro:['cerebro'],marcos:['marcos'],docs:['docs']};
+const HASHALIAS={planta:'review-skp',git:'repo',ecossistema:'repo',lixao:'artifacts',backlog:'home',dificuldades:'home',aprendizados:'home'};
+const ALLSEC=['home','sessoes','gate','planta','git','ecossistema','lixao','llms','arquivos','cerebro','marcos','docs'];
 function nocBdg(s){
   s=String(s||'?');
   var c=({COMMITTED:'live',VISUAL_REVIEW_QUEUED:'stale',VERIFY_FAILED:'missing',NOOP:'draft',DRY_RUN:'draft',MAX_CYCLES:'aging',LOCKED:'aging'})[s]||'draft';
@@ -691,8 +673,6 @@ function route(){
   if(show.indexOf('ecossistema')>=0)loadEco();
   if(show.indexOf('planta')>=0)loadPlant();
   if(show.indexOf('lixao')>=0)loadLixao();
-  if(show.indexOf('dificuldades')>=0){loadDiff();loadNbaList();}
-  if(show.indexOf('aprendizados')>=0)loadLearnings();
   if(show.indexOf('llms')>=0)loadLLMs();
   if(show.indexOf('arquivos')>=0)loadFiles();
   if(show.indexOf('cerebro')>=0)loadCerebro();
@@ -728,9 +708,17 @@ async function loadStatus(){
   var canon=s.canonical_skp||{};
   var canonNoVerdict=Object.keys(canon).filter(function(k){return canon[k]&&canon[k].has_skp&&!canon[k].verdict;});
   var visBad=visEntries.length>0,visWarn=!visBad&&canonNoVerdict.length>0,visN=visEntries.length||canonNoVerdict.length;
+  // placar do projeto: SÓ sinais reais em tempo real (dirty repos, consults no gate, visual review).
+  // dificuldades estáticas (seed curado) NÃO entram mais no score — a aba pra agir nelas foi removida.
+  var rScore=pend>0?'RED':((dirty>0||visBad)?'YELLOW':'GREEN');
+  var rReasons=[];
+  if(pend)rReasons.push(pend+' consult(s) esperando o gate');
+  if(dirty)rReasons.push(dirty+' repo(s) dirty');
+  if(visN)rReasons.push(visN+' item(ns) de VISUAL_REVIEW');
+  var rReason=rReasons.length?rReasons.join('; '):'tudo limpo';
   var b=$('status-banner');
-  if(b){b.className='hero '+String(s.score).toLowerCase();
-    b.innerHTML='<div class="hero-score"><span class="hero-dot"></span>'+esc(s.score)+'</div><div class="hero-body"><div class="hero-reason">'+esc(s.reason)+'</div></div><div class="hero-aside"><div class="hero-upd">ATUALIZADO <b>'+new Date().toLocaleTimeString('pt-br')+'</b></div></div>';}
+  if(b){b.className='hero '+rScore.toLowerCase();
+    b.innerHTML='<div class="hero-score"><span class="hero-dot"></span>'+esc(rScore)+'</div><div class="hero-body"><div class="hero-reason">'+esc(rReason)+'</div></div><div class="hero-aside"><div class="hero-upd">ATUALIZADO <b>'+new Date().toLocaleTimeString('pt-br')+'</b></div></div>';}
   var k=$('kpi');
   if(k){
     var sessCls=_sessFlags.paralyzed.length?'bad':(stopped>0?'warn':'ok');
@@ -739,12 +727,11 @@ async function loadStatus(){
     var highCls=high===0?'ok':(high>=2?'bad':'warn');
     var llmCls=!_llm?'dim':(!_llm.up?'bad':((_llm.running||[]).length?'ok':'warn'));
     k.innerHTML=[
-      tile('#backlog',s.score==='GREEN'?'ok':(s.score==='YELLOW'?'warn':'bad'),s.score,'PROJETO',''),
+      tile('#home',rScore==='GREEN'?'ok':(rScore==='YELLOW'?'warn':'bad'),rScore,'PROJETO',''),
       tile('#sessoes',sessCls,s.sessions.total,'SESSÕES',stopped+' paradas'+(_sessFlags.paralyzed.length?' · '+_sessFlags.paralyzed.length+' travada(s)':'')),
       tile('#gate',gateCls,pend,'FILA GATE',pend?'sem resposta':'respondido'),
       tile('#review-skp',visCls,visN,'VISUAL REVIEW',visN?'precisa do seu olho':'nada pendente'),
       tile('#repo',dirty?'warn':'ok',dirty,'DIRTY REPOS',dirty?'sujo(s)':'limpos'),
-      tile('#backlog',highCls,high,'DIFIC. HIGH',(s.open_difficulties||0)+' OPEN'),
       tile('#docs',_health?'ok':'dim',_health?'UP':'DOWN','ORÁCULO',_health?(_health.model||''):'gate off'),
       tile('#llms',llmCls,_llm?((_llm.running||[]).length+'/'+(_llm.count||0)):'—','LLMs ON',(_llm&&!_llm.up)?'ollama off':'em memória')
     ].join('');
@@ -757,7 +744,6 @@ async function loadStatus(){
     if(pend>0)items.push(['bad','#gate',pend+' consult(s) ao gate sem resposta']);
     _sessFlags.paralyzed.forEach(function(v){items.push(['bad','#sessoes','sessão PARALYZED (travada): '+((v&&v.last_action)?esc(v.last_action):'cycle congelado')]);});
     if(_sessFlags.stalled.length)items.push(['warn','#sessoes',_sessFlags.stalled.length+' sessão(ões) STALLED (patinando)']);
-    if(high>0)items.push(['bad','#backlog',high+' dificuldade(s) HIGH aberta(s)']);
     if(items.length){
       if(attCard)attCard.className='card full';
       att.innerHTML='<ul class="attn">'+items.map(function(it){return '<li data-hash="'+it[1]+'"><span class="sev '+it[0]+'"></span><span>'+it[2]+'</span><span class="go">abrir ↗</span></li>';}).join('')+'</ul>';
@@ -773,14 +759,14 @@ async function loadActions(){
   var box=$('actions'); if(!box) return;
   try{
     const d=await (await fetch('/api/actions',{cache:'no-store'})).json();
-    box.innerHTML=(d.actions||[]).map(function(a){
+    box.innerHTML=(d.actions||[]).filter(function(a){return a.kind==='auto'||a.kind==='diagnose';}).map(function(a){
       var btn;
       if(a.kind==='auto'){
         btn=a.runnable?'<button class="act-btn go" onclick="runProcessConsults(this)">Corrigir agora</button>':'<button class="act-btn" disabled>nada pendente</button>';
       }else if(a.kind==='diagnose'){
         btn=a.runnable?'<button class="act-btn" onclick="runDirtyDetail(this)">Ver detalhe</button>':'<button class="act-btn" disabled>nada dirty</button>';
       }else{
-        btn='<button class="act-btn" onclick="location.hash=\'#dificuldades\'">Abrir trilha</button>';
+        btn='<button class="act-btn" onclick="location.hash=\'#home\'">abrir</button>';
       }
       return '<div class="act-row"><div style="min-width:0"><b>'+esc(a.label)+'</b><div class="muted">'+esc(a.detail)+'</div></div>'+btn+'</div><div class="act-out" id="out-'+esc(a.key)+'"></div>';
     }).join('')||'<span class="muted">sem ações</span>';
@@ -814,7 +800,7 @@ async function runDirtyDetail(btn){
   btn.disabled=false;btn.textContent='Ver detalhe';
 }
 async function loadCommits(){
-  try{const d=await (await fetch('/api/recent-commits')).json();
+  try{const d=await (await fetch('/api/recent-commits',{cache:'no-store'})).json();
     if($('commits'))$('commits').innerHTML=(d.commits||[]).map(function(c){return '<div class="ev"><span class="t">'+esc(c.slice(0,7))+'</span><span>'+esc(c.slice(8))+'</span></div>';}).join('')||'<div class="muted">sem commits</div>';
   }catch(e){}
 }
@@ -834,26 +820,19 @@ async function loadProcCost(){
 function toggleStopped(){var e=$('sess-stopped');if(e)e.style.display=(e.style.display==='none'?'block':'none');}
 async function loadSessoes(){
   var need=$('sess-need'),live=$('sess-live'),stop=$('sess-stopped');
-  var cs,orch;
+  var cs;
   try{cs=await (await fetch('/api/claude-sessions',{cache:'no-store'})).json();}catch(e){cs={sessions:[],total:0,pending_gate:[]};}
-  try{orch=await (await fetch('/sessions',{cache:'no-store'})).json();}catch(e){orch={};}
-  // ---- PRECISA DE MIM (herói; travadas vêm da PRÓPRIA fonte /sessions, não dependem de join) ----
-  var pend=cs.pending_gate||[],paralyzed=[],stalled=[];
-  Object.keys(orch||{}).forEach(function(sid){var v=orch[sid]||{},f=v.flags||[];
-    if(f.indexOf('PARALYZED')>=0)paralyzed.push([sid,v]);else if(f.indexOf('STALLED')>=0)stalled.push([sid,v]);});
+  // ---- PRECISA DE MIM (consults reais sem resposta no gate; heartbeats removidos — ninguém os envia) ----
+  var pend=cs.pending_gate||[];
   var ni=[];
   pend.forEach(function(p){ni.push('<div class="alarm bad" style="margin:0 0 8px">🚨 <b>Consult sem resposta no gate</b> — <code>'+esc(p.q)+'</code> <span class="muted">('+fmtAge(p.age_sec)+' esperando)</span></div>');});
-  paralyzed.forEach(function(x){ni.push('<div class="alarm bad" style="margin:0 0 8px">🧊 <b>Sessão PARALYZED</b> <code>'+esc(String(x[0]).slice(0,8))+'</code> — cycle congelado'+(x[1].last_action?' em: '+esc(x[1].last_action):'')+' <span class="muted">('+fmtAge(x[1].age_sec)+', '+(x[1].unchanged_beats||0)+' beats sem mudança)</span></div>');});
-  need.innerHTML=ni.length?ni.join(''):'<div class="alarm ok" style="margin:0">✅ Nada te esperando — 0 consult pendente, 0 sessão travada (PARALYZED).</div>';
-  if(stalled.length)need.innerHTML+='<div class="muted" style="margin-top:8px">↩️ '+stalled.length+' sessão(ões) STALLED (sem heartbeat) — o loop costuma retomar sozinho; só aja se persistir.</div>';
-  // ---- TRABALHANDO AGORA (ACTIVE+IDLE) ----
-  function orchFor(id){var ks=Object.keys(orch||{}).filter(function(sid){return String(sid).slice(0,8)===id;});return ks.length?orch[ks[0]]:null;}
+  need.innerHTML=ni.length?ni.join(''):'<div class="alarm ok" style="margin:0">✅ Nada te esperando — 0 consult pendente no gate.</div>';
+  // ---- TRABALHANDO AGORA (ACTIVE+IDLE) — fonte real ~/.claude/projects ----
   var liveS=(cs.sessions||[]).filter(function(s){return s.state!=='STOPPED';});
   if(liveS.length){
-    live.innerHTML='<table><thead><tr><th>estado</th><th>há</th><th>projeto</th><th>orquestrador</th><th>id</th><th>contexto (1ª msg)</th></tr></thead><tbody>'
-      +liveS.map(function(s){var o=orchFor(s.id);
-        var oc=o?('<span class="flag '+esc(o.flags[0])+'">'+esc(o.flags.join(' '))+'</span>'+(o.cycle!=null?' <span class="muted">cycle '+esc(String(o.cycle))+'</span>':'')):'<span class="muted">—</span>';
-        return '<tr><td><span class="flag '+s.state+'">'+s.state+'</span></td><td>'+fmtAge(s.idle_sec)+'</td><td>'+esc(s.project)+'</td><td>'+oc+'</td><td class="muted">'+esc(s.id)+'</td><td>'+esc(s.desc||'(sem descritor)')+'</td></tr>';}).join('')
+    live.innerHTML='<table><thead><tr><th>estado</th><th>há</th><th>projeto</th><th>id</th><th>contexto (1ª msg)</th></tr></thead><tbody>'
+      +liveS.map(function(s){
+        return '<tr><td><span class="flag '+s.state+'">'+s.state+'</span></td><td>'+fmtAge(s.idle_sec)+'</td><td>'+esc(s.project)+'</td><td class="muted">'+esc(s.id)+'</td><td>'+esc(s.desc||'(sem descritor)')+'</td></tr>';}).join('')
       +'</tbody></table>';
   }else{live.innerHTML='<span class="muted">nenhuma sessão ativa ou ociosa agora — tudo parado.</span>';}
   // ---- HISTÓRICO (STOPPED) colapsado ----
@@ -891,27 +870,32 @@ async function loadActivity(){
     +kv('Sessões agora',(d.active_sessions_now||0)+' ativas · '+(d.stalled_sessions_now||0)+' paradas/travadas');
 }
 async function loadGate(){
-  var al=$('gate-alarm'),st=$('gate-stats'),rb=$('gate-rows'),gs=$('gate-source'),gr=$('gate-recent');
-  try{const d=await (await fetch('/api/gate-ledger')).json();
-    if(gs){gs.innerHTML='fonte primária: <b style="color:var(--txt)">'+esc(d.source||'?')+'</b> '+(d.source_stale?'<span class="flag STOPPED">STALE</span>':'<span class="flag OK">ok</span>')+(d.stale_reason?('<div class="alarm bad" style="margin:10px 0 0">'+esc(d.stale_reason)+'</div>'):'');}
-    if(gr){var ac=d.audit_consults||[];gr.innerHTML='<div class="muted" style="margin-bottom:6px">consultas REAIS recentes (audit.jsonl) — '+ac.length+':</div>'+(ac.length?('<table><thead><tr><th>quando</th><th>modo</th><th>duração</th><th>q/a chars</th></tr></thead><tbody>'+ac.map(function(e){return '<tr><td>'+fmtAge(e.age_sec)+' atrás</td><td>'+esc(e.mode||'default')+'</td><td>'+(e.dur_sec==null?'-':e.dur_sec+'s')+'</td><td class="muted">'+(e.q_chars||'?')+' / '+(e.a_chars||'?')+'</td></tr>';}).join('')+'</tbody></table>'):'<span class="muted">nenhuma consulta no audit.jsonl</span>');}
-    if(d.pending>0){al.className='alarm bad';al.textContent='🚨 '+d.pending+' pergunta(s) SEM resposta (legacy). Respondidas: '+d.answered+'/'+d.total+'.';}
-    else{al.className='alarm ok';al.textContent='✅ Legacy: '+d.total+' perguntas, todas respondidas.';}
-    st.innerHTML='<b style="color:var(--txt)">'+d.total+'</b> registros legacy · '+d.answered+' respondidos · '+d.pending+' pendentes';
-    rb.innerHTML=(d.entries||[]).map(function(e){var v=e.verdict?('<span class="flag '+(e.verdict==='GO'?'OK':(e.verdict==='NO-GO'?'PARALYZED':'IDLE'))+'">'+e.verdict+'</span>'):'<span class="muted">-</span>';return '<tr><td>'+fmtAge(e.age_sec)+' atrás</td><td>'+esc(e.trigger)+'</td><td>'+(e.answered?'<span class="flag OK">sim</span>':'<span class="flag STOPPED">PENDENTE</span>')+'</td><td>'+v+'</td><td>'+(e.latency_sec==null?'-':fmtAge(e.latency_sec))+'</td></tr>';}).join('')||'<tr><td colspan=5 class="muted">nenhum consult ainda</td></tr>';
-  }catch(e){al.className='alarm bad';al.textContent='erro: '+e;}
+  var al=$('gate-alarm'),gs=$('gate-source'),gr=$('gate-recent');
+  try{const d=await (await fetch('/api/gate-ledger',{cache:'no-store'})).json();
+    var ac=d.audit_consults||[];
+    var freshest=ac.length?ac[0].age_sec:null;
+    if(al){
+      if(ac.length){al.className='alarm ok';al.textContent='✅ Oráculo ativo — '+ac.length+' consulta(s) real(is) registrada(s) · última há '+(freshest!=null?fmtAge(freshest):'?');}
+      else{al.className='alarm bad';al.textContent='⚠️ Nenhuma consulta ao oráculo no audit.jsonl. Use o box abaixo pra perguntar.';}
+    }
+    if(gs){gs.innerHTML='fonte viva: <b style="color:var(--txt)">audit.jsonl</b> '+(d.source_stale?'<span class="flag STOPPED">legacy stale ignorado</span>':'<span class="flag OK">ok</span>');}
+    if(gr){gr.innerHTML=(ac.length?('<table><thead><tr><th>quando</th><th>modo</th><th>duração</th><th>q/a chars</th></tr></thead><tbody>'+ac.map(function(e){return '<tr><td>'+fmtAge(e.age_sec)+' atrás</td><td>'+esc(e.mode||'default')+'</td><td>'+(e.dur_sec==null?'-':e.dur_sec+'s')+'</td><td class="muted">'+(e.q_chars||'?')+' / '+(e.a_chars||'?')+'</td></tr>';}).join('')+'</tbody></table>'):'<span class="muted">nenhuma consulta no audit.jsonl ainda — pergunte algo no box abaixo.</span>');}
+  }catch(e){if(al){al.className='alarm bad';al.textContent='erro: '+e;}}
 }
 async function loadPlant(){
   var g=$('plant-gallery'),tl=$('skp-timeline-wrap'),cv=$('skp-canonical-verdict');
   g.innerHTML='<span class="muted">carregando...</span>';
   var VF={IMPROVED:'OK',PASS:'OK',SAME:'IDLE',WARN:'IDLE',WORSE:'PARALYZED',FAIL:'PARALYZED'};
-  try{const d=await (await fetch('/api/skp-timeline')).json();
+  try{const d=await (await fetch('/api/skp-timeline',{cache:'no-store'})).json();
     var html='',verd='';
     Object.entries(d.canonical||{}).forEach(function(e){var name=e[0],c=e[1];
       verd+='<b style="color:var(--txt)">'+esc(name)+'</b> — veredito: '+(c.verdict?'<span class="flag '+(VF[c.verdict]||'IDLE')+'">'+c.verdict+'</span>':'<span class="muted">UNKNOWN (sem regression_summary)</span>')+' &nbsp; ';
       (c.pngs||[]).forEach(function(p){html+='<figure><img loading="lazy" src="/artifact?path='+encodeURIComponent(p)+'"><figcaption>'+esc(p.split("/").pop())+'</figcaption></figure>';});
     });
-    cv.innerHTML=verd||'<span class="muted">nenhum canônico em artifacts/&lt;plant&gt;/</span>';
+    var _ages=(d.timeline||[]).map(function(r){return r.age_sec;}).filter(function(x){return x!=null;});
+    var _fresh=_ages.length?Math.min.apply(null,_ages):null;
+    var _aging=(_fresh!=null&&_fresh>86400)?'<div class="alarm warn" style="margin:0 0 10px">⏳ Ciclo/render mais novo tem <b>'+fmtAge(_fresh)+'</b> — o pipeline (build + compare SKP) não roda desde então. A aba está honesta: sem ciclo novo, não há o que atualizar. Rode o NOC / generate-and-compare pra gerar dados frescos.</div>':'';
+    cv.innerHTML=_aging+(verd||'<span class="muted">nenhum canônico em artifacts/&lt;plant&gt;/</span>');
     g.innerHTML=html||'<span class="muted">sem renders canônicos</span>';
     tl.innerHTML=(d.timeline||[]).map(function(r){var fl=r.verdict?'<span class="flag '+(VF[r.verdict]||'IDLE')+'">'+r.verdict+'</span>':'<span class="muted">—</span>';
       var thumbs=(r.pngs||[]).map(function(p){return '<img loading="lazy" title="'+esc(p)+'" src="/artifact?path='+encodeURIComponent(p)+'" style="height:78px;border-radius:4px;background:#fff;margin:0 6px 6px 0">';}).join('');
@@ -972,32 +956,40 @@ async function askGate(){
 }
 const LIXCLR={CANONICAL_DELIVERABLE:'var(--ok)',REVIEW_ARTIFACT:'var(--accent)',GENERATED_SCRATCH:'var(--warn)',DUPLICATE:'var(--bad)',UNKNOWN:'var(--bad)'};
 const ACTCLR={KEEP:'var(--ok)',ARCHIVE:'var(--accent)',DELETE_CANDIDATE:'var(--bad)',INVESTIGATE:'var(--warn)'};
+function lixaoRows(arr){return arr.map(function(f){var lc=LIXCLR[f.category]||'var(--dim)';var ac=ACTCLR[f.action]||'var(--dim)';return '<tr><td style="color:'+lc+';font-weight:600;white-space:nowrap">'+f.category+'</td><td><span class="flag" style="color:'+ac+';background:rgba(248,81,73,.06)">'+f.action+'</span></td><td>'+esc(f.path)+(f.dup_of?'<br><span class="muted">↳ cópia de '+esc(f.dup_of)+'</span>':'')+'</td><td style="text-align:right">'+f.mb+' MB</td><td class="muted">'+f.git+'</td><td class="muted">'+esc(f.sha)+(f.has_meta?' 📄':'')+'</td></tr>';}).join('');}
+function lixaoTable(rows){return rows?('<table style="margin-top:14px"><thead><tr><th>categoria</th><th>ação sugerida</th><th>arquivo (dedup por hash)</th><th>tam</th><th>git</th><th>sha / meta</th></tr></thead><tbody>'+rows+'</tbody></table>'):'<span class="muted">nenhum</span>';}
+function toggleLixaoJunk(){var e=$('lixao-junk'),b=$('lixao-junk-btn');if(e){var open=e.style.display!=='none';e.style.display=open?'none':'block';if(b)b.textContent=(open?'▸ mostrar':'▾ ocultar')+' lixo / duplicatas / scratch ('+(b.getAttribute('data-n')||0)+')';}}
 async function loadLixao(){
   var sm=$('lixao-summary'),cc=$('lixao-cats'); sm.textContent='escaneando E:\\Claude + sha256 + git status (read-only)...';
-  try{const d=await (await fetch('/api/skp-inventory-v2')).json();
+  try{const d=await (await fetch('/api/skp-inventory-v2',{cache:'no-store'})).json();
+    var CLEAN={CANONICAL_DELIVERABLE:1,REVIEW_ARTIFACT:1};
+    var clean=(d.files||[]).filter(function(f){return CLEAN[f.category];});
+    var junk=(d.files||[]).filter(function(f){return !CLEAN[f.category];});
     var cats=Object.entries(d.by_category||{}).map(function(e){return e[0]+'='+e[1];}).join(' · ');
-    sm.innerHTML='<b style="color:var(--txt);font-size:14px">'+d.total+'</b> .skp em E:\\Claude · <b style="color:var(--txt)">'+d.total_mb+' MB</b> · <b style="color:var(--bad)">'+d.dup_groups+'</b> grupos duplicados (por hash) · '+cats;
-    var rows=(d.files||[]).map(function(f){var lc=LIXCLR[f.category]||'var(--dim)';var ac=ACTCLR[f.action]||'var(--dim)';return '<tr><td style="color:'+lc+';font-weight:600;white-space:nowrap">'+f.category+'</td><td><span class="flag" style="color:'+ac+';background:rgba(248,81,73,.06)">'+f.action+'</span></td><td>'+esc(f.path)+(f.dup_of?'<br><span class="muted">↳ cópia de '+esc(f.dup_of)+'</span>':'')+'</td><td style="text-align:right">'+f.mb+' MB</td><td class="muted">'+f.git+'</td><td class="muted">'+esc(f.sha)+(f.has_meta?' 📄':'')+'</td></tr>';}).join('');
-    cc.innerHTML='<table style="margin-top:14px"><thead><tr><th>categoria</th><th>ação sugerida</th><th>arquivo (dedup por hash)</th><th>tam</th><th>git</th><th>sha / meta</th></tr></thead><tbody>'+rows+'</tbody></table><div class="muted" style="margin-top:10px">100% read-only — nada é apagado. KEEP=manter · ARCHIVE=arquivar evidência antiga · DELETE_CANDIDATE=lixo/cópia segura · INVESTIGATE=UNKNOWN. 📄=tem metadata/geometry_report. ORPHAN/SUPERSEDED não são auto-detectados na v1 → caem em UNKNOWN→INVESTIGATE.</div>';
+    sm.innerHTML='<b style="color:var(--ok);font-size:14px">'+clean.length+'</b> úteis (canônico + evidência) · <b style="color:var(--bad)">'+junk.length+'</b> lixo/duplicata/scratch · '+d.total+' total · '+d.total_mb+' MB · '+d.dup_groups+' grupos dup · <span class="muted">'+cats+'</span>';
+    cc.innerHTML=lixaoTable(lixaoRows(clean))
+      +'<div style="margin:14px 0 0"><button id="lixao-junk-btn" data-n="'+junk.length+'" onclick="toggleLixaoJunk()">▸ mostrar lixo / duplicatas / scratch ('+junk.length+')</button></div>'
+      +'<div id="lixao-junk" style="display:none">'+lixaoTable(lixaoRows(junk))+'</div>'
+      +'<div class="muted" style="margin-top:10px">Por padrão só os <b>úteis</b> (CANONICAL_DELIVERABLE + REVIEW_ARTIFACT). O resto (DUPLICATE/GENERATED_SCRATCH/UNKNOWN) fica atrás do toggle. 100% read-only — nada é apagado. 📄=tem metadata/geometry_report.</div>';
   }catch(e){sm.textContent='erro: '+esc(e);}
 }
 const TYPECLR={CANONICAL_REPO:'var(--ok)',WORKTREE:'var(--accent)',BRIDGE_SERVICE:'var(--warn)',CONFIG:'var(--accent)',VENV:'var(--dim)',ARTIFACTS:'var(--ok)',RUNS_SCRATCH:'var(--warn)',GIT_INTERNAL:'var(--bad)',UNKNOWN:'var(--bad)'};
 async function loadSysSummary(){
-  try{const sm=await (await fetch('/api/system-map')).json(); const gi=await (await fetch('/api/git-inventory')).json();
+  try{const sm=await (await fetch('/api/system-map',{cache:'no-store'})).json(); const gi=await (await fetch('/api/git-inventory',{cache:'no-store'})).json();
     var wts=(gi.repos||[]).filter(function(r){return r.is_worktree;}).length;
-    if($('sys-summary'))$('sys-summary').innerHTML=kv('dirs em E:\\Claude',(sm.items||[]).length)+kv('repos/worktrees',(gi.repos||[]).length+' ('+wts+' worktrees)')+kv('dirty',((gi.dirty||[]).length?'<span style="color:var(--warn)">'+gi.dirty.join(', ')+'</span>':'0 (limpos)'))+kv('UNKNOWN',((sm.unknown||[]).length?'<span style="color:var(--bad)">'+sm.unknown.join(', ')+'</span>':'0'));
+    if($('sys-summary'))$('sys-summary').innerHTML=kv('dirs em E:\\Claude',(sm.items||[]).length)+kv('repos/worktrees',(gi.repos||[]).length+' ('+wts+' worktrees)')+kvHTML('dirty',((gi.dirty||[]).length?'<span style="color:var(--warn)">'+esc(gi.dirty.join(', '))+'</span>':'0 (limpos)'))+kvHTML('UNKNOWN',((sm.unknown||[]).length?'<span style="color:var(--bad)">'+esc(sm.unknown.join(', '))+'</span>':'0'));
   }catch(e){if($('sys-summary'))$('sys-summary').textContent='erro: '+e;}
 }
 async function loadGit(){
   var s=$('git-summary'),rb=$('git-rows');
-  try{const d=await (await fetch('/api/git-inventory')).json();
+  try{const d=await (await fetch('/api/git-inventory',{cache:'no-store'})).json();
     s.innerHTML='<b style="color:var(--txt)">'+(d.repos||[]).length+'</b> repos/worktrees · '+((d.dirty||[]).length?('<span style="color:var(--warn)">'+d.dirty.length+' dirty: '+d.dirty.join(', ')+'</span>'):'todos limpos');
     rb.innerHTML=(d.repos||[]).map(function(r){return '<tr><td><code>'+esc(r.path)+'</code></td><td>'+(r.is_worktree?'worktree':'repo')+'</td><td>'+esc(r.branch)+'</td><td class="muted">'+esc(r.head)+'</td><td>'+(r.dirty?'<span class="flag IDLE">dirty</span>':'<span class="flag OK">limpo</span>')+'</td><td>'+r.untracked+' ?? · '+r.changed+' chg</td><td class="muted">'+esc(r.last_commit)+'</td></tr>';}).join('')||'<tr><td colspan=7 class="muted">nenhum repo</td></tr>';
   }catch(e){s.textContent='erro: '+e;}
 }
 async function loadEco(){
   var w=$('eco-wrap'); w.innerHTML='<span class="muted">escaneando E:\\Claude...</span>';
-  try{const d=await (await fetch('/api/system-map')).json();
+  try{const d=await (await fetch('/api/system-map',{cache:'no-store'})).json();
     var unk=(d.unknown||[]).length?'<div class="alarm bad" style="margin-bottom:12px">❓ '+d.unknown.length+' dir(s) UNKNOWN — investigar: '+d.unknown.join(', ')+'</div>':'';
     var rows=(d.items||[]).map(function(it){var clr=TYPECLR[it.type]||'var(--dim)';return '<tr><td><code>'+esc(it.name)+'/</code></td><td><span class="flag" style="color:'+clr+';background:rgba(88,166,255,.08)">'+it.type+'</span></td><td>'+esc(it.expl)+'</td><td style="text-align:right">'+(it.mb_capped?'≥':'')+it.mb+' MB</td><td>'+fmtAge(it.modified_sec)+'</td><td>'+(it.has_git?(it.is_worktree?'worktree':'repo'):'-')+'</td><td>'+esc(it.risk)+'</td><td>'+esc(it.can_delete)+'</td></tr>';}).join('');
     w.innerHTML=unk+'<div class="muted" style="margin-bottom:8px">raiz: <code>'+esc(d.root)+'</code> · tamanho best-effort (≥ = passou do cap de scan)</div><table><thead><tr><th>pasta</th><th>tipo</th><th>o que é</th><th>tamanho</th><th>modif.</th><th>git</th><th>risco</th><th>apagar?</th></tr></thead><tbody>'+rows+'</tbody></table>';
@@ -1124,7 +1116,7 @@ async function loadBrainState(){
     if(nx){var act=d.next_action; nx.innerHTML = act ?
       '<div class="next-act"><div class="lbl">🎯 Próxima ação recomendada '+(act.roi!=null?'<span class="bdg proposto">ROI '+esc(act.roi)+'</span>':'')+'</div>'+
       '<div class="ttl">'+esc(act.titulo||'-')+'</div><div class="meta">→ '+esc(act.proxima_acao||'')+'</div>'+
-      '<div class="meta">tipo: '+esc(act.tipo||'-')+' · impacto '+esc(act.impacto)+' / esforço '+esc(act.esforco)+' · <a href="#backlog">backlog completo por ROI →</a></div></div>' : '';}
+      '<div class="meta">tipo: '+esc(act.tipo||'-')+' · impacto '+esc(act.impacto)+' / esforço '+esc(act.esforco)+'</div></div>' : '';}
     if(sk){var S=d.skills||[]; sk.innerHTML = S.length ?
       '<div class="skgrid">'+S.map(function(s){return '<div class="skcard'+(s.mandatory?' req':'')+'"><div class="skh"><span class="skn">'+esc(s.name)+'</span>'+(s.mandatory?'<span class="bdg stale">pós-mudança</span>':'')+'</div><div class="skd">'+esc(s.desc||'—')+'</div></div>';}).join('')+'</div>'
       : '<span class="muted">nenhuma skill encontrada</span>';}
@@ -1143,6 +1135,10 @@ async function loadCerebroDoc(){
 function tick(){var c=$('hclock');if(c)c.textContent=new Date().toLocaleTimeString('pt-br');}
 route(); pollHome(); tick(); setInterval(pollHome,5000); setInterval(tick,1000);
 setInterval(function(){var h=$('home');if(h&&h.classList.contains('active')){loadStatus();loadActivity();}},5000);
+// auto-refresh da aba ATIVA (corrige "nao atualiza" do Repo/Review SKP/etc — sem depender de cache do browser)
+setInterval(function(){var A=function(id){var s=$(id);return s&&s.classList.contains('active');};
+  if(A('git')){loadGit();loadCommits();loadSysSummary();} if(A('ecossistema'))loadEco();
+  if(A('planta'))loadPlant(); if(A('gate'))loadGate(); if(A('sessoes'))loadSessoes(); if(A('lixao'))loadLixao();},7000);
 loadLocalAI(); setInterval(loadLocalAI,10000);
 </script>
 <div class="lb" id="lightbox" onclick="this.classList.remove('open')"><img id="lb-img" alt="render em tela cheia"></div>

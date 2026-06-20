@@ -1,0 +1,22 @@
+{
+  "name": "subtle_veined_stone",
+  "title": "Tampo + backsplash em pedra clara de veio SUTIL (contínuo)",
+  "rule": "Tampo e backsplash são a MESMA pedra clara quente, contínuos: o backsplash é o tampo subindo pela parede até o aéreo. Veio sutil (textura V-Ray leve), nunca mármore dramático. Tampo fino (2-4cm) proud (levemente saliente sobre a frente das portas) para ler como laje de pedra. O backsplash sobe ~50cm da bancada até a base do aéreo, fechando o intervalo de clearance.",
+  "params": {
+    "tampo_rgb": [222, 219, 212],
+    "backsplash_rgb": [222, 219, 212],
+    "finish": "polido suave, veio sutil (textura V-Ray)",
+    "top_thickness_cm": 3,
+    "top_thickness_range_cm": [2, 4],
+    "top_overhang_front_cm": 3,
+    "backsplash_rise_cm": 50,
+    "backsplash_thickness_cm": 4,
+    "vein": "sutil — nunca mármore dramático/escuro"
+  },
+  "applies_to_kinds": ["kc_tampo", "kc_backsplash"],
+  "anti_pattern": "Mármore preto/dramático rouba a cena de uma cozinha econômica; tampo grosso demais (>4cm) parece falso; backsplash de cor diferente do tampo quebra a continuidade. Tampo flush com a frente (sem overhang) não lê como laje.",
+  "cost_relative": "médio-alto (quartzo/granito claro; o veio sutil é textura, não material caro)",
+  "appearance": "Linha horizontal de pedra clara quente entre a base oak e o aéreo fendi; backsplash contínuo lavado pelo LED quente.",
+  "gate_refs": ["tools/kitchen_ergonomics.py::countertop_height", "tools/kitchen_ergonomics.py::upper_clearance"],
+  "source": {"kind": "golden_sample", "title": "tools/kitchen_layout.py _KC tampo/backsplash + TAMPO_THK", "date": "2026-06-19"}
+}

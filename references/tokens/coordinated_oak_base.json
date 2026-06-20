@@ -1,0 +1,24 @@
+{
+  "name": "coordinated_oak_base",
+  "title": "Base carvalho claro COORDENADA com o fendi (mata o bicolor builder-grade)",
+  "rule": "Os módulos inferiores (corpo, portas, gavetas) usam carvalho/freijó CLARO coordenado com o fendi do aéreo — não madeira mel-escura. Base clara + aéreo fendi leem como família quente, eliminando o contraste bicolor frio típico de cozinha builder-grade. Corpo e porta quase idênticos (porta levemente mais clara). Profundidade 55-60cm, altura de bancada 85-92cm. Sóculo grafite recuado embaixo.",
+  "params": {
+    "corpo_rgb": [191, 167, 137],
+    "porta_rgb": [195, 171, 141],
+    "gaveta_rgb": [195, 171, 141],
+    "finish": "fosco acetinado, veio madeira sutil",
+    "base_depth_cm": 60,
+    "base_depth_range_cm": [55, 60],
+    "countertop_height_cm": 90,
+    "countertop_height_range_cm": [85, 92],
+    "module_width_cm": 50,
+    "module_width_range_cm": [35, 65],
+    "drawer_rows_per_drawer_module": 3
+  },
+  "applies_to_kinds": ["kc_corpo", "kc_porta", "kc_gaveta"],
+  "anti_pattern": "Carvalho mel/escuro embaixo + aéreo branco em cima = bicolor builder-grade frio (o defeito que este token corrige). Também: base e porta de tons muito diferentes = leitura remendada.",
+  "cost_relative": "médio (laminado/melamina madeirado claro é padrão)",
+  "appearance": "Base de madeira clara e calma, mesma temperatura do aéreo fendi; gavetas em pilha de 3 por módulo com puxador slim.",
+  "gate_refs": ["tools/kitchen_ergonomics.py::base_depth", "tools/kitchen_ergonomics.py::countertop_height", "tools/kitchen_ergonomics.py::base_module_width"],
+  "source": {"kind": "golden_sample", "title": "tools/kitchen_layout.py _KC corpo/porta/gaveta + COUNTER_*", "date": "2026-06-19"}
+}

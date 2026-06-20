@@ -17,7 +17,7 @@ from tools.bedroom_layout import (M, _door_zones, _fbox, _wall_setup,   # noqa: 
                                   _window_zones)
 from tools.spatial_model import PT_TO_M, build_spatial_model   # noqa: E402
 
-PT_TO_IN = (0.19 / 5.4) * 39.3700787402
+from core.scale import PT_TO_IN  # noqa: E402  (fonte unica de escala; nao redefinir)
 BOX_MIN_AREA_M2 = 4.0
 VASO = ("vaso", 0.40, 0.65)
 BOX = ("box", 0.90, 0.90)
@@ -33,6 +33,63 @@ def _to_box(kind, shp):
             "x1": x1 * PT_TO_IN, "y1": y1 * PT_TO_IN, "corners": corners,
             "h_in": H_M[kind] * 39.3700787402, "rgb": RGB[kind], "label": kind,
             "ambiguous": False, "decorative": False}
+
+
+# ---- fixtures MULTI-PEÇA (MVP banheiro de verdade, não caixa pelada) ----
+RGB2 = {"gabinete": [86, 64, 48], "tampo_banho": [196, 196, 202], "cuba": [236, 239, 243],
+        "espelho": [188, 206, 216], "vaso": [240, 242, 246], "box_vidro": [176, 208, 224]}
+
+
+def _pp(kind, x0, y0, x1, y1, z0_m, z1_m, rgb, module):
+    """parte: x/y em POINTS (->inches), z em METROS. module = grupo no .skp."""
+    x0, x1 = min(x0, x1), max(x0, x1)
+    y0, y1 = min(y0, y1), max(y0, y1)
+    return {"kind": kind, "x0": x0 * PT_TO_IN, "y0": y0 * PT_TO_IN,
+            "x1": x1 * PT_TO_IN, "y1": y1 * PT_TO_IN,
+            "corners": [[round(x0 * PT_TO_IN, 2), round(y0 * PT_TO_IN, 2)],
+                        [round(x1 * PT_TO_IN, 2), round(y0 * PT_TO_IN, 2)],
+                        [round(x1 * PT_TO_IN, 2), round(y1 * PT_TO_IN, 2)],
+                        [round(x0 * PT_TO_IN, 2), round(y1 * PT_TO_IN, 2)]],
+            "h_in": round((z1_m - z0_m) * 39.3700787402, 2), "z0_in": round(z0_m * 39.3700787402, 2),
+            "rgb": rgb, "label": kind, "module": module, "ambiguous": False, "decorative": False}
+
+
+def _emit(kind, b, ws):
+    """Geometria CRÍVEL por fixture (substitui a caixa única)."""
+    x0, y0, x1, y1 = b.bounds
+    w, d = x1 - x0, y1 - y0
+    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+    out = []
+    if kind == "vaso":
+        # vaso SUSPENSO (sem caixa acoplada): bacia afunilada off-floor + assento
+        ins = min(w, d) * 0.12
+        bowl = _pp("vaso", x0 + ins, y0 + ins, x1 - ins, y1 - ins, 0.28, 0.42, RGB2["vaso"], "Vaso")
+        bowl["verts8"] = [(x0 + ins * 1.7, y0 + ins * 1.7, 0.28), (x1 - ins * 1.7, y0 + ins * 1.7, 0.28),
+                          (x1 - ins * 1.7, y1 - ins * 1.7, 0.28), (x0 + ins * 1.7, y1 - ins * 1.7, 0.28),
+                          (x0 + ins, y0 + ins, 0.42), (x1 - ins, y0 + ins, 0.42),
+                          (x1 - ins, y1 - ins, 0.42), (x0 + ins, y1 - ins, 0.42)]
+        out.append(bowl)
+        out.append(_pp("vaso", x0 + ins, y0 + ins, x1 - ins, y1 - ins, 0.42, 0.45, RGB2["vaso"], "Vaso"))
+    elif kind == "bancada_banho":
+        out.append(_pp("gabinete", x0 + w * 0.04, y0 + d * 0.04, x1 - w * 0.04, y1 - d * 0.04,
+                       0.10, 0.78, RGB2["gabinete"], "Bancada"))               # gabinete madeira
+        out.append(_pp("bancada_banho", x0, y0, x1, y1, 0.78, 0.86, RGB2["tampo_banho"], "Bancada"))  # tampo pedra
+        cwid = min(w, d) * 0.46
+        out.append(_pp("cuba", cx - cwid / 2, cy - cwid / 2, cx + cwid / 2, cy + cwid / 2,
+                       0.86, 1.0, RGB2["cuba"], "Bancada"))                    # cuba de apoio
+        # espelho na PAREDE acima (usa ws p/ achar o lado da parede): thin, spanning o longo
+        t = M(0.015)
+        if ws is not None and ws["orient"] == "v":
+            wx = (ws["face"] + ws["sgn"] * M(0.04))
+            out.append(_pp("espelho", wx, y0 + d * 0.12, wx + t * ws["sgn"], y1 - d * 0.12,
+                           1.05, 1.75, RGB2["espelho"], "Espelho"))
+        elif ws is not None:
+            wy = (ws["face"] + ws["sgn"] * M(0.04))
+            out.append(_pp("espelho", x0 + w * 0.12, wy, x1 - w * 0.12, wy + t * ws["sgn"],
+                           1.05, 1.75, RGB2["espelho"], "Espelho"))
+    elif kind == "box":
+        out.append(_pp("box_vidro", x0, y0, x1, y1, 0.0, 2.0, RGB2["box_vidro"], "Box"))
+    return out
 
 
 def _room_span(ws, cell):
@@ -66,8 +123,8 @@ def _place_fixture(sm, walls, w_m, d_m, placed, circ_u, comodo, cell, win_zone, 
                 continue
             if any(b.intersection(p).area > 0 for p in placed):
                 continue
-            return b
-    return None
+            return b, ws
+    return None, None
 
 
 def build_boxes(con, room_id):
@@ -97,9 +154,9 @@ def build_boxes(con, room_id):
 
     items, placed = [], []
     for (kind, w_m, d_m), tall in fixtures:
-        b = _place_fixture(sm, walls, w_m, d_m, placed, circ_u, comodo, cell, win_zone, tall)
+        b, ws = _place_fixture(sm, walls, w_m, d_m, placed, circ_u, comodo, cell, win_zone, tall)
         if b is not None:
-            items.append(_to_box(kind, b))
+            items.extend(_emit(kind, b, ws))   # geometria CRÍVEL multi-peça
             placed.append(b)
     if not items:
         return None, {"result": "NO_VALID_LAYOUT", "room_name": sm.get("room_name"),

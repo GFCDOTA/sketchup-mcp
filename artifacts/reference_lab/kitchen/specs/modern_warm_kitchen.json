@@ -1,0 +1,58 @@
+{
+  "spec": "DesignGrammarSpec",
+  "version": "1.0.0",
+  "reference_intent": "cozinha planejada compacta premium",
+  "room_type": "KITCHEN",
+  "layout": "linear (FIXO do PDF, nunca U/L/ilha)",
+  "source_example": "EXAMPLE_001_KITCHEN (planta_74)",
+  "status": { "gpt_skin": "PASS", "felipe_final": "pendente" },
+
+  "palette": {
+    "upper_cabinets": { "desc": "fendi/off-white quente acetinado", "rgb": [224, 215, 199], "kinds": ["kc_corpo_sup", "kc_porta_sup", "kc_filler"] },
+    "base_cabinets":  { "desc": "carvalho/freijó claro coordenado", "rgb": [191, 167, 137], "kinds": ["kc_corpo", "kc_porta", "kc_gaveta"] },
+    "countertop":     { "desc": "pedra clara quente com veio sutil (tampo+backsplash contínuos)", "rgb": [222, 219, 212], "kinds": ["kc_tampo", "kc_backsplash"] },
+    "metal":          { "desc": "inox claro reflexivo (metalness)", "rgb": [216, 220, 227], "kinds": ["kc_geladeira", "kc_inox"] },
+    "accents":        { "desc": "grafite fosco + LED quente 2700K", "rgb_graphite": [40, 41, 45], "rgb_led": [255, 250, 232], "kinds": ["kc_soculo", "kc_puxador", "kc_led"] },
+    "wood_accent":    { "desc": "nicho de madeira média", "rgb": [138, 104, 66], "kinds": ["kc_niche_wood"] }
+  },
+
+  "cards_dir": "artifacts/reference_lab/kitchen/cards/ (10 Reference Cards implementáveis, formato card_schema.json)",
+  "tokens_by_category": {
+    "joinery_form_token": ["integrated_fridge_tower", "shadow_gap_reveal", "graphite_technical_toe_kick", "integrated_slim_hood"],
+    "material_token": ["warm_fendi_upper", "coordinated_oak_base", "subtle_veined_stone_backsplash", "inox_premium_appliance"],
+    "lighting_token": ["under_cabinet_linear_led"],
+    "camera_token": ["hero_camera_compact_kitchen"]
+  },
+  "joinery_tokens": [
+    "planned_fridge_tower",
+    "warm_fendi_upper",
+    "coordinated_oak_base",
+    "subtle_veined_stone",
+    "under_cabinet_led",
+    "premium_shadow_gap"
+  ],
+  "tokens_source": "references/tokens/ (fonte única — não duplicar aqui)",
+
+  "vray_skin_recipe": {
+    "note": "pele aprovada pelo GPT; receita no tools/kitchen_vray.py + tools/tweak_vrscene.py",
+    "materials": { "inox": "metalness=1, reflect~0.72, gloss 0.74", "fendi": "satin reflect 0.05/gloss 0.58", "stone": "reflect 0.17/gloss 0.8 + textura A_quartzo_fio", "wood": "satin" },
+    "light": { "rig": "key frente-lateral-alta + fill lift + LED LightRectangle 2700K", "sky": 0.07, "sun": 0.18 },
+    "quality": { "noise_threshold": 0.012, "min_shade_rate": 14 }
+  },
+
+  "forbidden_moves": [
+    "não mover pia (ponto hidráulico fixo do PDF)",
+    "não mover portas",
+    "não alterar parede",
+    "não inventar ilha",
+    "não mudar o layout linear do PDF"
+  ],
+
+  "gates": [
+    "tools/kitchen_validation.py (pia LEFT/fixa)",
+    "tools/furniture_overlap_gate.py",
+    "tools/kitchen_ergonomics.py (12 medidas)",
+    "tools/geometry_sanity.py",
+    "veredito visual: GPT (checkpoint) -> Felipe (PASS)"
+  ]
+}

@@ -1,7 +1,232 @@
 # Handoff — sketchup-mcp
 
-> Fio da meada entre sessões. Última atualização: **2026-06-08** (fast-tier no caminho pré-móvel / DesignIntentSpec; gate :8765 STALE por bloqueio de AV — ver abaixo).
+> Fio da meada entre sessões. Última atualização: **2026-06-12** — **🏆×5: SOFÁ·POLTRONA·CAMA·MESA·RACK — TODAS PASS ("a classe se explica visualmente"; TV-proxy = "padrão forte do programa, melhoria institucional"). Fila: mesa de jantar → cadeira → guarda-roupa → criado-mudo. Sentinelas: chaise-plinth/lounge-highback/queen-box-legs/organic@formal-2l/floating@tv75.**
 > Leia primeiro ao iniciar sessão.
+
+## 2026-06-12 — Programa ARQUITETO DE CLASSE — sofá cycles 001-002 LANDADOS (WARN→WARN "melhora real")
+
+Felipe pivotou a missão: sair de "mobiliar cômodo"/render e **aprender a CLASSE de cada móvel**
+proceduralmente (sofá → poltrona → cama → mesa → rack...), com prompt-programa formal: sem overfit,
+forma antes de detalhe, melhoria SEMPRE sobe pra spec/constraint/gerador/gate, prova por
+generalização, formato de saída por ciclo (FASE_ATUAL/DIAGNOSTICO/.../RISCO_DE_OVERFIT).
+**Se notar overfit, declarar "ESTOU ENTRANDO EM OVERFIT" e reorientar.**
+
+**Cycle 001 (FASES 0-4) — branch `feat/sofa-class-spec` (MERGEAR ao ler isto se ainda aberta):**
+- FASE 0 (workflow 5 agentes): a "classe" era um exemplar bom com knobs — validate() raso (4 asserts),
+  números mágicos no builder, gates cegos a proporção, escala não modelada. Worktree `sofa-skill`
+  NÃO tocou tools/*.py (idênticos) — divergência é documental/material; risco de colisão só em
+  furniture_anatomy_spec.py/sofa_builder.py.
+- FASE 1: `interior/class_specs/SOFA_CLASS_SPEC.md` (faixas ergonômicas reais, 9 relações,
+  arquétipos formal/standard/lounge, anti-regressão dos cycles 1-4 do exemplar, anti-patterns, escala).
+- FASE 2-3: `tools/sofa_class.py` (CLASS_RANGES/RELATIONS/ANTI_REGRESSION executáveis +
+  `derive_spec(seats, archetype, arm_style, base_style)` — width SEMPRE derivada = N·per_seat+2·arm;
+  6 sabotagens dimensionais provadas) + `tools/sofa_class_matrix.py` (9 células derivadas sem ajuste
+  manual, grid pro juiz). Furo de contrato corrigido: `bbox_m()` ignorava overhang do rake → WARN
+  falso sistêmico. 65 testes novos, suite 628 ✓.
+- FASE 4 (juiz GPT na matriz): **WARN** — `.ai_bridge/fidelity/verdicts/SOFA-CLASS_cycle001.md`.
+  Identidade de família ✓ ("até demais"), escala ✓ ("corpo humano preservado"), PIOR célula =
+  chaise-plinth ("caixote anexado").
+
+**CYCLES 002-003 FEITOS (mesma sessão) → PASS:** 002 = anti-bunker (sapata `arm_relief`) + chaise
+frente-aberta/deck em L + linguagem por arquétipo (WARN "melhora real"); 003 = TERMINAÇÃO da chaise
+(`chaise_termination='panel'`: lateral estofada até o deck) + `arm_taper` no chunky + silhuetas
+afastadas (formal rake 8/h 0.92 vs lounge rake 20/h 0.72/per_seat 0.68) → **PASS: "congelaria FORMA;
+não abriria cycle 004 de forma; próximos ganhos são de OUTRO estágio (bevel/costura/material/cena)"**.
+Verdicts SOFA-CLASS_cycle00{1,2,3}.md. **REGRA: mudança de FORMA do sofá a partir daqui = novo ciclo
+formal com juiz, nunca edição casual.**
+
+**POLTRONA = PASS em 2 ciclos (FORMA CONGELADA):** cycle001 WARN ("emancipar do sofá") → cycle002
+**PASS** ("o template do sofá foi replicado COM EMANCIPAÇÃO, que era exatamente o teste"). Nasceu
+`tools/armchair_builder.py` (gramática SHELL-WRAPAROUND: concha em U — costas full-width + braços
+encostando + OMBROS wrap_frac; almofadas internas mais claras = cavidade; shell_low p/ lounge
+nesting) + `tools/armchair_class.py` (relação `presenca_do_braco = arm + 0.06·wrap ≥ 0.17` — braço
+fino compensa com integração, nunca engorda). Juiz: "não abriria cycle 003 de forma; próximos =
+bevel/softness, almofadas/interior, material". **lounge-highback = STRESS CASE SENTINELA** (não
+patch local). Verdicts ARMCHAIR-CLASS_cycle00{1,2}.md.
+
+**CAMA cycle 001 FEITO: WARN "ótimo nascimento de classe"** (`feat/bed-class`, verdict
+BED-CLASS_cycle001.md). Teoria: SKUs BR discretos (não interpolar), dominância do colchão
+[0.28,0.60], cabeceira anti-trono (derive clampa 0.52·W), leveza da base (box flush = caixote).
+Builder estendido (base_style plinth/legs/box, reveal promovido, saia, wings) defaults neutros.
+**SATÉLITE do criado = PADRÃO OFICIAL do programa (juiz): "classe principal deriva a régua;
+classe satélite se adapta"** — `nightstand_satellite_gate` (alvo: platform 0.38/uphol 0.57/box
+0.62; criado 0.55 FALHA em platform). **CYCLE 002 da cama (TOP3):** (1) coerência BASE↔ARQUÉTIPO
+(box+legs esvazia a massa — pior célula queen-box-legs); (2) assinatura da CABECEIRA por
+arquétipo (legível à distância); (3) gramática frente/lateral da base ("desenhada, não só
+extrudada"). Vetado: arrumar só a queen-box-legs-med.
+
+**CAMA cycle 002 → PASS ("congelaria FORMA; saiu de 'cama correta' pra 'classe com gramática
+clara'"):** FIX1 coerência pés↔massa (proxy = altura de dormir: ≥0.60 sobre pés exige SAPATA;
+queen-box-legs RE-DERIVADA pela regra — juiz confirmou zero remendo); FIX2 assinatura geométrica
+da cabeceira (panel+ledge / upholstered+bolster / contained — "a diferença aparece DE LONGE");
+FIX3 base desenhada (rail escuro, shadow line no box, saia — "junta, recuo, apoio e intenção
+construtiva"). Sentinela: queen-box-legs. SATÉLITE re-aprovado como padrão. Verdicts
+BED-CLASS_cycle00{1,2}.md. **Mudança de forma da cama = ciclo formal com juiz.**
+
+**MESA DE CENTRO cycle 001: WARN "nasceu bem como classe satélite do sofá"** (verdict
+COFFEE-TABLE-CLASS_cycle001.md). Novidade institucional: SATÉLITE POR CONSTRUÇÃO — a mesa se
+DERIVA do sofá (comprimento 0.58·sofá, tampo = assento−drop; eixo da matriz = sofá servido) +
+SATURAÇÃO (sofá XL ≥2.6m: frac relaxa pra 0.44 — "alcance humano não escala junto", juiz: "acerto
+importante de teoria"). Arquétipos: slab ✓, two_tier ✓, ORGANIC fraco ("retangular com abas").
+**Cycle 002 da mesa:** (1) silhueta orgânica real — octógono/chanfro amplo via verts8 trapezoidal
+nas alas; (2) pernas por arquétipo (two_tier pesadas/escuras); pior célula organic@formal-2l.
+Classe autocontida em tools/coffee_table_class.py (NÃO toca decor_builders da cena PASS).
+
+**MESA DE CENTRO cycle 002 → PASS ("classe congelável"):** octógono real (alas verts8
+trapezoidais, ear 0.18L/soft 0.30W, gate de perceptibilidade), pernas por arquétipo (madeira
+clara 0.045 no two_tier/organic), reveal no rodapé do slab. Juiz: organic "claramente
+não-retangular — que era o ponto", saturação "acerto forte do sistema". Sentinela:
+organic@formal-2l. Verdicts COFFEE-TABLE-CLASS_cycle00{1,2}.md.
+
+**RACK cycle 001: WARN "nasceu forte" (1º builder do zero)** — `tools/rack_class.py` completo
+(RackSpec+build_rack: fachada com ritmo nicho/gaveta, pés cônicos verts8/flutuante/toe-recess;
+TV alarga não sobe; satélites TV 55/65/75 + sofá distância/tilt; saturação 2.60m). 3 calibrações
+pegas pelo gate. **Cycle 002:** (1) contexto do flutuante (parede proxy+sombra); (2) PROXY DA TV
+na matriz (contorno translúcido + linha de centro — padrão novo: satélite VISÍVEL); (3) fachada
+menos caixa-de-marcenaria. Pior célula: floating@tv75. Verdict RACK-CLASS_cycle001.md.
+
+**RACK cycle 002 → PASS:** wall_back+shadow gap+cleat (floating "virou arquétipo com lógica"),
+fachadas simétricas por arquétipo (fim do módulo-escuro-na-ponta), **TV proxy + linha de visão na
+matriz = PADRÃO INSTITUCIONAL** ("agora dá pra julgar a derivação TV↔rack↔visão de verdade").
+Sentinela: floating@tv75. Verdicts RACK-CLASS_cycle00{1,2}.md. Aplicar satélite-visível nas
+matrizes futuras (e retrofit nas existentes quando reabrirem).
+
+**PESQUISA PRONTA pras próximas classes** (workflow 2026-06-12, tabelas ergonômicas completas em
+`C:/Users/FELIP_~1/AppData/Local/Temp/claude/E--Claude/f4ec71f5-c33c-42b6-91c3-9d56331f5428/tasks/w2w46wjf6.output`
+— SALVAR antes que o temp suma se for usar): CAMA, MESA DE CENTRO, RACK (builder NÃO existe — criar),
+CRIADO-MUDO. Builders existentes confirmados: bed_builder/wardrobe_builder/nightstand_builder/
+coffee_table (decor). Ordem do Felipe: cama → mesa de centro → rack → mesa de jantar → cadeira →
+guarda-roupa → criado-mudo. Detalhe do sofá (tufted do worktree sofa-skill) = estágio futuro.
+
+**Estado paralelo:** fase materiais da CENA pausada pré-veredito em `feat/scene-materials` (pushed);
+luz V-Ray da cena APROVADA (receita congelada no handoff abaixo). Ordem das classes do Felipe:
+sofá → poltrona → cama → mesa de centro → rack → mesa de jantar → cadeira → guarda-roupa → criado-mudo.
+
+## 2026-06-11 (noite) — Cycle 003: GPT "PASS limpo para composição" → fase V-Ray destravada
+
+Branch `feat/scene-cycle003` (off develop @aafd33e). O loop convergiu: **WARN (001) → IMPROVED
+(002) → PASS LIMPO (003)** — "não precisa cycle 004 de composição; eu avançaria para
+materiais/V-Ray" (`.ai_bridge/fidelity/verdicts/SCENE-LIVINGROOM-MWM_cycle003.md`, mesma
+conversa do juiz, régua mantida).
+
+**Engenharia que entrou (a peça grande): ROTAÇÃO LIVRE no composer.**
+- `place_parts`/`_rot_pt` aceitam ângulo arbitrário: múltiplos de 90 continuam EXATOS (sem
+  drift); outros ângulos → toda part vira **verts8 girado** (footprint real no render mpl) com
+  bbox = **AABB conservador** (gate segue operando em AABB por design).
+- **Caminho SU**: `scene_boxes` exporta `corners` do quad INFERIOR do verts8 — o `fz_solid` do
+  `build_furniture_skp.rb` levanta polígono girado NATIVO (confirmado no .rb antes de implementar).
+  Limitação leve: extrusão reta (taper de cúpula vira prisma da boca).
+- accent_seat girado **12°** de volta pro eixo do hero (`ACCENT_TURN_DEG`; janela decide o lado) +
+  SOFT `accent_em_dialogo` (rotacionado + facing·dir_hero ≥ 0.9); `facing`/`faces_hero` por dot.
+- Cortina slim (fixture `panel_w` 0.40 + `CURTAIN_SLIM_T/AMP` 0.025/0.04; cover 0.423→0.308);
+  mesa 1.35×0.72×0.38. Gate canônica **PASS 16/16**, sabotagens 8/8, quadrantes [.181 .087 .353 .380].
+  Suite **561 ✓ / 5 skip**. Evidência promovida (SU success).
+
+**PRÓXIMA FASE (V-Ray/materiais) — os 3 "finos" do juiz já são de render:** (1) suavizar a massa
+preta do sofá via material; (2) textura/contraste no tapete; (3) iluminação/sombra pra separar
+volumes. Conecta com o sistema lounge V-Ray do worktree `sofa-skill` (33 commits à frente, NÃO
+tocado) — plugar = trocar o generator do type `sofa`. Máquina é render-ready (RTX 5080, V-Ray
+Swarm/Cosmos — ver memória de specs).
+
+### Fase V-Ray — ciclos de LUZ rodados (mesma noite, mais tarde)
+
+Branch `feat/scene-vray-interior` (4 commits, mergeada em develop). Estado do loop de luz:
+**baseline BROKEN → pass5 NEEDS_WORK → pass6 NEEDS_WORK-mas-reconhecido** ("patch mais suave,
+fills ajudaram") — ver `.ai_bridge/fidelity/verdicts/SCENE-LIVINGROOM-MWM_render_light_cycles.md`.
+
+**✅ LUZ APROVADA (madrugada): "APROVADA_SEGUIR_PARA_MATERIAIS"** (pass8 @124c3a7). A "janela
+morta" dos 3 ciclos era **alpha=0 do background** (o RGB do céu sempre esteve no arquivo;
+browser mostra transparente como branco) → `_flatten_alpha` no orquestrador. Receita CONGELADA:
+`--iso 200 --sky 1.1 --sun 0.38 --sun-size 8 --burn 0.3 --fill "4.7,2.4,1.7,8,0.4;
+1.6,3.4,2.0,6,0.35;2.6,2.0,2.2,4,0.4"`. **PRÓXIMO = MATERIAIS, na ordem do juiz: (1) SOFÁ**
+(quase-preto → charcoal/marrom quente, reflectance maior, roughness de tecido, microvariação;
+braço/assento/encosto legíveis), **(2) TAPETE** (textura/fibra), **(3) PISO** (veio, sem "plano
+laranja"). "Não mexeria mais no sol/fill antes desses três." Caminho técnico: estender
+`apply_materials`/tex_map pros nomes `fz_*` da cena (hoje só `ph_*` mobiliar) + `VRAY_TEX_DIR`
+(texturas procedurais já no repo em `assets/textures/procedural/`).
+
+O que entrou de infra: teto no shell (escondido em mpl/SU/gate); `scene_closed.skp` (modelo
+fechado pro V-Ray via provider); `tweak set_block_param` (TexSky ambiente ≠ SunLight sol — o
+regex global antigo invertia a intenção); `--sun/--sun-size/--fill` (fills em METROS) no
+`render_scene_vray`. Aprendizados: sun≤0.2 mata o bounce; patch doma-se com sun_size (penumbra),
+não intensity; brilho na poltrona creme = luz de janela sobre material claro (fix de material).
+Receita atual: `--iso 200 --sky 0.9 --sun 0.55 --sun-size 6 --fill "4.7,2.4,1.7,5,0.4;1.6,3.4,2.0,3,0.35"`.
+
+### Fase V-Ray — caminho PROVADO (mesma noite)
+
+**`tools/render_scene_vray.py` (NOVO, em develop):** scene.skp + camera 3/4 do scene.json (m→inches)
+→ `vray_export.rb` (plugin vfs no SU 2026, `VRay::Context` OK) → `tweak_vrscene.py` → `vray.exe`
+headless → PNG. **Render da cycle003 saiu em 51,8s, base intacta, primeira tentativa.** O V-Ray
+standalone: `C:\Program Files\Chaos\V-Ray\V-Ray for SketchUp\extension\vray\bin\vray.exe`.
+
+**Achados pro próximo ciclo (o render saiu ESTOURADO — diagnóstico, não regressão):**
+1. **A cena não tem TETO** (`build_room_shell` = piso + 4 paredes) → luz de céu entra por cima e
+   lava o interior (defaults iso200/f4/sh100/sky1.0 viram exterior). Fix: part `ceiling` no shell,
+   escondida nos renders mpl/SU (mesmo mecanismo `hide_walls`) e mantida no V-Ray.
+2. **Câmera interior FOV 55 enquadra pouco** — accent_seat e cortina ficaram fora do frame; quadro
+   estourou branco. Fix: eye mais recuado pro canto + FOV ~65 OU câmera V-Ray própria.
+3. Depois do teto: exposição de interior (suite01 usava iso100/f7/sh160/sky0.3) + `add_fill_light`
+   (já existe no tweak) pra levantar sofá sem estourar a janela.
+4. Materiais premium: `apply_materials` do tweak mira blocos `_ph_*` (mobiliar) — **no-op nos
+   materiais `fz_<item>__<label>` da cena**. Estender o mapeamento pra `fz_*` = fatia dos "finos"
+   (tecido do sofá, tapete com textura — `VRAY_TEX_DIR` idem, tex_map é por nome `ph_*`).
+Cada mudança dessas muda APARÊNCIA → loop GPT de novo (régua do track).
+
+## 2026-06-11 (tarde) — Intent-to-Scene cycle 002: GPT IMPROVED ("WARN melhorado")
+
+Branch **`feat/scene-cycle002`** (off origin/develop @39bb7f2). Loop FAIL→regra→fixture→gate→GPT
+rodou inteiro na sessão: os TOP3 do WARN cycle001 viraram regra executável + fixture + 2 HARD checks.
+
+**O que entrou:**
+- **accent_seat NOVO** (AccentSeatSpec + build_accent_seat + hint `opposite_hero` no composer):
+  poltrona leve warm_taupe_boucle oposta ao hero, encarando-o (rot 180), deslocada 0.55m pro lado
+  CONTRÁRIO à janela; gap de conversa 1.5m. Material novo `accent_fabric` no StylePack.
+- **Cortina-moldura** (`CurtainSpec.panel_split=2` + `panel_w`): 2 painéis recolhidos nas pontas
+  (cover 42% do vão), transbordo 0.40/lado; varão varre o vão inteiro. Intent carrega `panel_split`.
+- **Tapete 3.4×2.3** na fixture (era 3.0×2.0) — pega sofá + mesa + frente do accent.
+- **SpatialGate +2 HARD**: `cortina_moldura` (cover ≤55% do vão; mede parts→fallback spec) e
+  `equilibrio_quadrantes` (footprint SEM tapete; quadrante mais vazio ≥7%; canônica min=0.087 SE).
+  +2 sabotagens (cortina fechada / sem accent) = **8/8 FAIL**. Canônica **PASS 15/15**, cov=0.109.
+- Suite **559 ✓ / 5 skip** (+7 testes cycle002), zero regressão.
+- **Gotcha NOVO (provider SU):** `render_scene_views`/provider com scene_dir RELATIVO → SketchUp
+  resolve `model.save`/`write_image` contra o CWD DELE → log diz "saved" mas .skp/PNG não aparecem
+  no run dir (`.skb` 0B é o sintoma). Fix: `Path(scene_dir).resolve()` no harness — SEMPRE absoluto.
+- Evidência re-promovida em `artifacts/review/scenes/living_room_modern_warm_minimal/`
+  (scene.skp 142KB, SU success, contact sheet 3 painéis).
+
+**GPT review (VISUAL real, browsing nas 2 URLs raw @SHA): IMPROVED** —
+`.ai_bridge/fidelity/verdicts/SCENE-LIVINGROOM-MWM_cycle002.md`.
+"O sul deixou de ser vazio morto, cortina perdeu protagonismo na 3/4 humana, miolo ancora.
+Ainda não é PASS limpo; é WARN melhorado." **TOP3 cycle 003:** (1) rotacionar poltrona 10–15°
+(⚠️ composer hoje só 0/90/180/270 — pede rotação livre em place_parts); (2) cortina mais magra
+na vista SU (painéis finos/recuados); (3) mesa de centro maior/oval ocupando o eixo sofá↔poltrona.
+NOVOS_PROBLEMAS: poltrona "caixote" ortogonal; blocos pretos demais no SE (ruído).
+
+**Próximo:** cycle 003 com os TOP3 acima (rotação livre é a peça de engenharia); V-Ray continua
+gated em composição PASS limpo.
+
+## 2026-06-11 — Intent-to-Scene slice 1 ENTREGUE (sala procedural por intenção) + GPT WARN
+
+Branch **`feat/intent-to-scene`** — **MERGED em develop** (402b66e contido em origin/develop).
+
+**A camada nova:** SceneIntentSpec (GPT diretor de arte) → SceneComposer → generators → SpatialGate → RenderHarness.
+- Schemas: `interior/schemas/scene_intent.schema.json` + `furniture_intent.schema.json` (documentais; validação executável no composer).
+- StylePack: `interior/style_packs/modern_warm_minimal.json` (charcoal QUENTE [60,52,44] — spread 16 passa o `tecido_nao_cinza` do furniture_visual_gate; pés near-black pro `pes_contraste`).
+- Fixture: `fixtures/scene_intents/living_room_modern_warm_minimal.json` (sala 5.2×4.2, sofá hero, janela leste+cortina, tapete, mesa travertino, side, lamp, planta, quadro).
+- Generators decor: `tools/decor_anatomy_spec.py` + `tools/decor_builders.py` (rug, coffee_table, side_table, floor_lamp, wall_art, curtain, plant — mesmo contrato parts do sofa_builder; `DECOR_PLAUSIBLE_BBOX_M` alimenta o gate).
+- Composer: `interior/composer/scene_composer.py` (regras: hero na main wall, tapete centralizado tuck 0.15, mesa 0.40m, quadro acima respiro 0.25, cortina na janela, side/lamp fora do tapete, planta na janela; câmera 3/4 humana que NUNCA esconde a parede da janela; emite scene.json + scene_parts.json + scene_report.json).
+- Gate: `interior/validators/scene_spatial_gate.py` — 10 HARD + 3 SOFT; **PASS 13/13 na canônica, FAIL nas 6 sabotagens**.
+- Harness: `tools/render_scene_views.py` — SU-free top + 3/4 (tiles ≤0.45m sem edge + buraco do tapete no piso = fixes de painter-sort do mpl) + contact sheet; SU opcional NO-DISRUPT (pulou? não: rodou, SketchUp fechado) → `scene.skp` + sketchup_top/3_4. Materiais SU: label namespaced `item__label` (colisão fz_<label>). Câmera iso do `build_furniture_skp.rb` é FIXA de sudeste → dollhouse SU abre south+east.
+- Evidência: `artifacts/review/scenes/living_room_modern_warm_minimal/` (contact_sheet 3 painéis, scene.skp 136KB, reports). Testes: `tests/test_intent_to_scene.py` (24) — **suite 552 ✓ / 5 skip, zero regressão**.
+
+**GPT review (VISUAL real): WARN** — `.ai_bridge/fidelity/verdicts/SCENE-LIVINGROOM-MWM_cycle001.md`.
+"SpatialGate PASS ≠ composição PASS": (1) peso visual esmagado no norte/leste, metade sul vazia; (2) cortina protagonista errada (parede listrada domina a 3/4); (3) tapete/mesa não seguram o miolo. **TOP3 fixes** (cycle 002): accent_seat oposto ao hero + check de equilíbrio por quadrante; cortina em 2 painéis abertos como moldura + gate de peso visual; tapete ~3.4×2.3.
+
+**⚑ DESCOBERTA DE PROCESSO (supera parcialmente o clipboard-STA):** o paste de imagem na ChatGPT web via extensão FALHOU por todas as vias (Ctrl+V sintético não carrega clipboard do SO; CSP bloqueia fetch a localhost E raw.githubusercontent dentro da página; file_upload/upload_image recusam; relay base64 por LLM corrompe). **O que FUNCIONA: commitar/pushar o PNG e dar a URL raw.githubusercontent no prompt — o ChatGPT (Plus, thinking) ABRE a imagem via browsing e julga de verdade** (citou GitHub como fonte). Requisito: repo público + imagem na branch pushed.
+
+**Sofa-skill paralelo:** worktree `E:\Claude\worktrees\sofa-skill` ATIVO (commit 2026-06-10 21:58, dirty) com o sistema lounge V-Ray (33 commits à frente). NÃO tocado. O hero desta slice usa o `tools/sofa_builder.py` de develop (GPT PASS forma) com charcoal do StylePack; quando sofa-skill landar, plugá-lo é trocar o generator do type `sofa` (style_family `dark_lounge` já abstrai).
+
+**Próximo (cycle 002):** aplicar TOP3 fixes → re-render → re-gate → GPT de novo (loop FAIL→regra→fixture→gate→PASS, padrão do sofá). Depois: V-Ray só quando composição PASS.
 
 ## 2026-06-08 — fast-tier wired no caminho pré-móvel (DesignIntentSpec) + AV bloqueando restart
 

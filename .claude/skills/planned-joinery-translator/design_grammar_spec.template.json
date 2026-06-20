@@ -1,0 +1,58 @@
+{
+  "_doc": "DesignGrammarSpec — ponte referência_visual -> componentes SketchUp. Preenchido pelo PLANNED_JOINERY_TRANSLATOR. A referência alimenta 'style/palette/joinery_tokens/signature'; o PDF/consensus alimenta 'fixed_anchors' (IMUTÁVEL). Ver SKILL.md.",
+  "room": "kitchen",
+  "plant": "planta_74",
+  "room_id": "r004",
+  "style": "modern_compact_planned",
+  "reference": {
+    "source": "pinterest|print|foto|url",
+    "note": "1-2 refs bastam; descrever o que foi visto, sem copiar"
+  },
+  "palette": {
+    "base_cabinets": "warm_wood",
+    "upper_cabinets": "off_white",
+    "countertop": "light_stone",
+    "toe_kick": "graphite_black",
+    "appliances": "stainless_steel",
+    "cooktop": "black",
+    "accent": "fendi_taupe"
+  },
+  "joinery_tokens": [
+    "integrated_fridge_tower",
+    "flush_upper_cabinet",
+    "side_filler_panel",
+    "recessed_toe_kick",
+    "slab_doors",
+    "open_niche",
+    "slim_black_cooktop",
+    "deep_dark_sink",
+    "gooseneck_faucet",
+    "slim_integrated_hood",
+    "continuous_thin_countertop",
+    "backsplash"
+  ],
+  "loose_to_system": {
+    "_rule": "todo objeto solto vira sistema de nicho planejado (loose_object -> planned_niche_system)",
+    "fridge": ["side_filler_panel", "flush_upper_cabinet", "respiro", "vertical_handle", "stainless_material", "marcenaria_integration"]
+  },
+  "fixed_anchors": {
+    "_rule": "do PDF/consensus — IMUTÁVEL pela referência",
+    "sink": "pdf_hydraulic_anchor (parede oeste / minx)",
+    "doors": "pdf_doors",
+    "windows": "pdf_windows",
+    "walls": "pdf_walls",
+    "circulation": "pdf_free_runs"
+  },
+  "modules": [
+    {"name": "fridge", "type": "appliance_tower", "anchor": "wall_end", "selectable": true},
+    {"name": "base_cabinet_01", "type": "base", "composition": ["gaveteiro_3", "doors"], "selectable": true},
+    {"name": "countertop", "type": "surface", "thickness_m": 0.04, "selectable": true},
+    {"name": "upper_cabinet_01", "type": "upper", "flush": true, "open_niche": 1, "selectable": true},
+    {"name": "hood", "type": "slim_integrated", "selectable": true}
+  ],
+  "gates_required": [
+    "pdf_anchor", "circulation_free", "no_overlap", "editability",
+    "language_coherence", "realistic_proportion", "visual_verdict_human_or_gpt"
+  ],
+  "acceptance": "parece planejado real em material básico ANTES do V-Ray; se parece cubo/Minecraft, reprova"
+}

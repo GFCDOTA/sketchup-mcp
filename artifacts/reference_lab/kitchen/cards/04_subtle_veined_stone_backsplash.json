@@ -1,0 +1,20 @@
+{
+  "card_id": "subtle_veined_stone_backsplash",
+  "category": "material_token",
+  "problem": "backsplash liso parece parede pintada ou material barato",
+  "design_move": "pedra clara quente com veios finos e baixo contraste; tampo+backsplash MESMA pedra continuos",
+  "applies_to": ["countertop", "backsplash", "wet_niche"],
+  "implementation_tokens": {
+    "material_family": "warm_light_quartz",
+    "vein_intensity": "low",
+    "roughness": "polished_satin",
+    "color_temperature": "warm_neutral",
+    "texture": "FFT tileable, contraste stdL ~3-10",
+    "vray_brdf": {"reflect": 0.17, "reflect_glossiness": 0.8}
+  },
+  "joinery_token_ref": "references/tokens/subtle_veined_stone.json",
+  "real_values": {"stone_rgb": [222,219,212], "texture_file": "assets/textures/procedural/candidates/A_quartzo_fio.png", "top_thickness_cm": 3, "backsplash_rise_cm": 50},
+  "forbidden": ["marmore dramatico demais", "veio preto forte", "branco puro chapado", "textura sem escala"],
+  "gate": ["deve ler como pedra, nao parede", "nao pode competir com madeira/fendi", "deve aparecer no hero render"],
+  "evidence": "GPT: 'le como pedra clara com veio sutil... ficou no ponto, sem marmore dramatico'"
+}

@@ -1,0 +1,19 @@
+{
+  "card_id": "under_cabinet_linear_led",
+  "category": "lighting_token",
+  "problem": "cozinha chapada sem profundidade; tentativa de LED com pontos vira hotspots meia-lua (cara de render/teste)",
+  "design_move": "spot_test_light -> continuous_architectural_light: fita LINEAR quente 2700-3000K lavando o backsplash uniforme (LightRectangle, nao pontos)",
+  "applies_to": ["under_upper_cabinet", "under_niche", "inside_tower"],
+  "implementation_tokens": {
+    "light_type": "linear_strip",
+    "vray_plugin": "LightRectangle",
+    "color_temperature_K": 2700,
+    "rgb": [255,250,232],
+    "continuous": true
+  },
+  "joinery_token_ref": "references/tokens/under_cabinet_led.json",
+  "real_values": {"rect_center_in": [62,648,56.5], "normal": [-0.37,0,-0.93], "u_size": 50, "v_size": 2.5, "color": [1.0,0.74,0.45], "helper": "tools/tweak_vrscene.py::_light_rectangle"},
+  "forbidden": ["hotspots pontuais (meia-lua)", "parecer neon (cor saturada)", "estourar a exposicao"],
+  "gate": ["wash continuo, nunca pontos", "2700K quente", "nao estourar highlights"],
+  "evidence": "GPT: 'o LED virou faixa continua e sumiu a cara de dois spots de teste'"
+}

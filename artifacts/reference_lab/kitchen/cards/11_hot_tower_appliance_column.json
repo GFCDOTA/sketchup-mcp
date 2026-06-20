@@ -1,0 +1,23 @@
+{
+  "card_id": "hot_tower_appliance_column",
+  "category": "joinery_form_token",
+  "problem": "forno + micro + airfryer soltos (no tampo / em prateleira / pousados) = bancada baguncada, eletro provisorio, vao morto sobre o forno; Felipe pede forno e micro EMBUTIDOS e airfryer em NICHO",
+  "design_move": "loose_object -> torre quente: coluna unica piso-teto com forno + micro empilhados (frentes flush) + nicho tecnico do airfryer com respiro/tomada interna e abertura de calor; alturas ergonomicas (forno na faixa que nao se abaixa). Felipe gosta da torre quente -> estudar como 2a coluna ao lado da torre da geladeira",
+  "applies_to": ["kitchen", "tall_appliance_column", "oven_micro_stack", "airfryer_niche"],
+  "implementation_tokens": {
+    "system": "planned_hot_tower",
+    "parts": ["gable_panel", "oven_niche", "micro_niche_stacked", "airfryer_tech_niche", "vent_grille", "internal_socket", "upper_flush_closure"],
+    "column_width_cm": 60,
+    "column_depth_cm": 58,
+    "oven_door_floor_cm": [80, 100],
+    "micro_position": "stacked_above_oven_flush",
+    "airfryer_niche_open_for_steam": true,
+    "vent_gap_cm": 3,
+    "internal_socket": true
+  },
+  "joinery_token_ref": "references/tokens/planned_fridge_tower.json",
+  "real_values": {"oven_W_m": 0.60, "oven_niche_depth_m": 0.58, "vent_note": "respiro de fabricante: vao atras + grelha; NUNCA selar a caixa quente", "airfryer_note": "nicho aberto frontal pro vapor sair, tomada dedicada interna, frente sem porta cega que abafa", "tower_material": "marcenaria do conjunto (oven/micro inox aparente inset; nicho = madeira/fendi do conjunto)"},
+  "forbidden": ["forno/micro/airfryer soltos na bancada", "airfryer em caixa selada sem respiro (superaquece/derrete)", "vao morto aberto sobre o forno (junta po, le inacabado)", "torre que bloqueia porta/circulacao", "nicho sem tomada (fio atravessando a frente)", "mover ponto eletrico/gas pra 'caber' a torre"],
+  "gate": ["furniture_overlap_gate", "kitchen_ergonomics::column_width (55-65cm)", "kitchen_ergonomics::vent_gap (respiro de fabricante)", "forno na faixa ergonomica (porta 80-100cm do piso)", "airfryer_niche com respiro + tomada", "nao bloquear porta/circulacao"],
+  "evidence": "HIPOTESE A PROVAR (2a coluna quente) — render iso da torre + veredito GPT antes de promover; espelhar a torre da geladeira ja PASS"
+}

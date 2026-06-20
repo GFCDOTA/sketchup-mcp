@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "assets": [
+    {
+      "id": "sofa_parametric_straight_3seat",
+      "type": "sofa",
+      "tier": "C_parametric",
+      "variant": "straight",
+      "style_tags": [
+        "modern",
+        "neutral",
+        "dark_gray"
+      ],
+      "dimensions_m": {
+        "width": 2.2,
+        "depth": 0.95,
+        "height": 0.85
+      },
+      "thumbnail": "assets/furniture/sofa/thumbnails/sofa_parametric_straight_3seat_iso.png",
+      "quality": {
+        "scale_checked": true,
+        "orientation_checked": true,
+        "materials_checked": true,
+        "not_single_block": true,
+        "thumbnail_checked": true,
+        "gate": "PASS"
+      }
+    }
+  ]
+}

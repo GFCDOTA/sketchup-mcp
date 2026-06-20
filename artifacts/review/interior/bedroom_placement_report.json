@@ -1,0 +1,111 @@
+{
+  "phase": "phase2_bedroom_placement",
+  "rooms": {
+    "r000": {
+      "layout": {
+        "bed": {
+          "center_in": [
+            636.3382769180188,
+            789.1258980666945
+          ],
+          "facing": [
+            -1.0,
+            0.0
+          ],
+          "w_m": 1.93,
+          "l_m": 2.03
+        },
+        "nightstands": [
+          {
+            "center_in": [
+              668.4248910912818,
+              837.9447957045426
+            ]
+          },
+          {
+            "center_in": [
+              668.4248910912818,
+              740.3070004288465
+            ]
+          }
+        ],
+        "justification": "bedroom_designer minimalista",
+        "wardrobe": {
+          "center_in": [
+            526.6156121489856,
+            925.7262608172963
+          ],
+          "facing": [
+            0.0,
+            -1.0
+          ],
+          "w_m": 3.0,
+          "d_m": 0.6
+        }
+      },
+      "gate": {
+        "verdict": "PASS",
+        "BED_PLACEMENT": "PASS",
+        "ORIENTATION": "PASS",
+        "WARDROBE_PLACEMENT": "PASS",
+        "NIGHTSTANDS": "PASS",
+        "CIRCULATION": "PASS",
+        "issues": [],
+        "head_clean_wall": "m018"
+      }
+    },
+    "r003": {
+      "layout": {
+        "bed": {
+          "center_in": [
+            370.7715066750815,
+            723.2218431161863
+          ],
+          "facing": [
+            1.0,
+            0.0
+          ],
+          "w_m": 1.58,
+          "l_m": 2.03
+        },
+        "nightstands": [
+          {
+            "center_in": [
+              338.6848925018186,
+              765.1509769744993
+            ]
+          },
+          {
+            "center_in": [
+              338.6848925018186,
+              681.2927092578733
+            ]
+          }
+        ],
+        "justification": "bedroom_designer minimalista",
+        "wardrobe": {
+          "center_in": [
+            382.1281297301341,
+            796.5778370585218
+          ],
+          "facing": [
+            0.0,
+            -1.0
+          ],
+          "w_m": 1.5,
+          "d_m": 0.6
+        }
+      },
+      "gate": {
+        "verdict": "PASS",
+        "BED_PLACEMENT": "PASS",
+        "ORIENTATION": "PASS",
+        "WARDROBE_PLACEMENT": "PASS",
+        "NIGHTSTANDS": "PASS",
+        "CIRCULATION": "PASS",
+        "issues": [],
+        "head_clean_wall": "m014"
+      }
+    }
+  }
+}

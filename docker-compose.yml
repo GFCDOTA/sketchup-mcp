@@ -1,0 +1,21 @@
+# INTERIOR STUDIO — dashboard viva em container persistente (:8782).
+# `docker compose up -d --build` sobe e RESTARTA sozinho (não precisa o Claude subir).
+# Monta E:/Claude (read-only) -> /workspace; o dashboard lê os artefatos/backlog/atividade ao vivo.
+services:
+  studio-dashboard:
+    build:
+      context: .
+      dockerfile: tools/Dockerfile.dashboard
+    image: interior-studio-dashboard
+    container_name: interior-studio-dashboard
+    ports:
+      - "8782:8782"
+    volumes:
+      - E:/Claude:/workspace
+    working_dir: /workspace/apps/sketchup-mcp
+    environment:
+      # alcança o Ollama do HOST (:11434) de dentro do container
+      OLLAMA_HOST: "http://host.docker.internal:11434"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped

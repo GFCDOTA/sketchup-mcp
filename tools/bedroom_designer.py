@@ -21,7 +21,7 @@ from shapely.ops import unary_union
 
 from tools.bedroom_layout import (M, _door_zones, _fbox, _headboard_candidates,
                                   _wall_setup, _window_zones, wall_footprint)
-from tools.spatial_model import PT_TO_M, build_spatial_model
+from tools.spatial_model import PT_TO_IN, PT_TO_M, build_spatial_model
 
 # --- móveis (m): (largura ao-longo da parede, profundidade perp, altura) ---
 KING = (1.93, 2.03, 0.55)
@@ -178,16 +178,38 @@ def build_layout(sm, hb, bed_dims=KING, bed_label="king", minimalist=True):
 
     # --- P0: criados-mudos simétricos, alinhados à LINHA DA CABECEIRA, com folga
     # mínima da cama (GPT review: criados menores/leves, não colados no bloco) ---
+    # Door-aware: o _door_zones cobre só o VÃO; o geometry_sanity exige 22in de
+    # clearance ao redor do centro da porta. Quando o criado do lado da porta cai
+    # nessa faixa, encolhe/afasta SÓ esse criado (mantém simetria quando o default já
+    # passa) até zerar o overlap — sem reorganizar o quarto. (WARN criado×porta -> PASS.)
     nw, nd, _ = NIGHTSTAND
+    _dc = M(22 * 0.0254)   # 22in (= geometry_sanity DOOR_CLEARANCE_IN) em pts
+    _door_kinds = ("interior_door", "interior_passage", "glazed_balcony")
+    _door_clear = unary_union([
+        box(o2["center"][0] - _dc, o2["center"][1] - _dc, o2["center"][0] + _dc, o2["center"][1] + _dc)
+        for o2 in g["con"]["openings"]
+        if o2.get("wall_id") in set(g["room_walls"])
+        and (o2.get("kind_v5") or o2.get("kind")) in _door_kinds]) \
+        if any((o2.get("kind_v5") or o2.get("kind")) in _door_kinds
+               and o2.get("wall_id") in set(g["room_walls"]) for o2 in g["con"]["openings"]) else None
+    _tol_door = (M(0.036)) ** 2   # < ~2in2 -> geometry_sanity PASS (nao WARN)
     placed_n = 0
     for side in (1, -1):
         ns_ac = ac + side * (M(bw) / 2 + M(nw) / 2 + M(NS_GAP))
-        ns = _fbox(o, face, sgn, ns_ac, M(BED_PERP), M(nw), M(nd))
-        if comodo.contains(ns) and not _hit(ns, circ_u) and not _ov(ns, items):
+        # candidatos: default; encolhe (centrado, tira o canto do clearance); afasta da parede.
+        for cw, cdp, dperp in ((nw, nd, 0.0), (nw * 0.85, nd * 0.85, 0.0),
+                               (nw * 0.72, nd * 0.72, 0.0), (nw, nd, 0.06),
+                               (nw * 0.85, nd * 0.85, 0.06)):
+            ns = _fbox(o, face, sgn, ns_ac, M(BED_PERP + dperp), M(cw), M(cdp))
+            if not (comodo.contains(ns) and not _hit(ns, circ_u) and not _ov(ns, items)):
+                continue
+            if _door_clear is not None and ns.intersection(_door_clear).area > _tol_door:
+                continue
             items.append({"name": f"criado_mudo_{'dir' if side > 0 else 'esq'}", "type": "nightstand",
                           "box": ns, "anchor_wall": hb["id"],
-                          "reason": "flanqueando a cabeceira (simétrico, folga mínima)"})
+                          "reason": "flanqueando a cabeceira (clearance da porta respeitada)"})
             placed_n += 1
+            break
     if placed_n < 2:
         downgrades.append(f"criados-mudos: só {placed_n} coube(ram) (ideal 2)")
 
@@ -583,7 +605,7 @@ def to_markdown(out, tag):
 
 def _items_to_boxes(items):
     """Converte os items do designer pro formato place_layout (boxes SU inches)."""
-    pt_to_in = (0.19 / 5.4) * 39.3700787402
+    pt_to_in = PT_TO_IN  # core.scale (fonte unica)
     boxes = []
     for it in items:
         b = it["box"]

@@ -1,0 +1,149 @@
+[
+  {
+    "cell": "club-plinth",
+    "params": {
+      "archetype": "club",
+      "base_style": "plinth"
+    },
+    "width_m": 1.04,
+    "bbox_m": [
+      1.04,
+      0.958,
+      0.89
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "n_parts": 13
+  },
+  {
+    "cell": "club-legs",
+    "params": {
+      "archetype": "club",
+      "base_style": "legs"
+    },
+    "width_m": 1.04,
+    "bbox_m": [
+      1.04,
+      0.958,
+      0.89
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "n_parts": 13
+  },
+  {
+    "cell": "club-wide",
+    "params": {
+      "archetype": "club",
+      "base_style": "plinth",
+      "arm_width": 0.26,
+      "width": 1.05
+    },
+    "width_m": 1.05,
+    "bbox_m": [
+      1.05,
+      0.958,
+      0.89
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "n_parts": 13
+  },
+  {
+    "cell": "standard-legs",
+    "params": {
+      "archetype": "standard"
+    },
+    "width_m": 0.9,
+    "bbox_m": [
+      0.9,
+      0.999,
+      0.96
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "n_parts": 13
+  },
+  {
+    "cell": "standard-plinth",
+    "params": {
+      "archetype": "standard",
+      "base_style": "plinth"
+    },
+    "width_m": 0.9,
+    "bbox_m": [
+      0.9,
+      0.999,
+      0.96
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "n_parts": 13
+  },
+  {
+    "cell": "standard-slim-arm",
+    "params": {
+      "archetype": "standard",
+      "arm_width": 0.14,
+      "width": 0.8200000000000001,
+      "wrap_frac": 0.6
+    },
+    "width_m": 0.8200000000000001,
+    "bbox_m": [
+      0.82,
+      0.999,
+      0.96
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "n_parts": 15
+  },
+  {
+    "cell": "lounge-legs",
+    "params": {
+      "archetype": "lounge"
+    },
+    "width_m": 0.81,
+    "bbox_m": [
+      0.81,
+      1.269,
+      1.06
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "n_parts": 13
+  },
+  {
+    "cell": "lounge-deep",
+    "params": {
+      "archetype": "lounge",
+      "seat_depth": 0.6,
+      "depth": 1.01
+    },
+    "width_m": 0.81,
+    "bbox_m": [
+      0.81,
+      1.289,
+      1.06
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "n_parts": 13
+  },
+  {
+    "cell": "lounge-highback",
+    "params": {
+      "archetype": "lounge",
+      "height": 1.14
+    },
+    "width_m": 0.81,
+    "bbox_m": [
+      0.81,
+      1.301,
+      1.14
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "n_parts": 13
+  }
+]

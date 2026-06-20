@@ -1,0 +1,26 @@
+{
+  "name": "reflecta_champagne_led_cabinet",
+  "title": "Módulo(s) de vidro reflecta/champagne com LED interno (ponto de destaque, NÃO fachada)",
+  "rule": "1 a 2 módulos do conjunto (de preferência aéreos / cristaleira) ganham porta de VIDRO REFLECTA fumê champagne com LED interno quente — o ponto de brilho que Felipe gosta (reflecta/champagne com LED agrada). É DESTAQUE pontual, nunca a cozinha inteira: o reflecta_control_gate limita a 1-2 módulos. O vidro champagne reflete a luz de dia (devolve luz no tema escuro — daylight_reflection_check) e à noite o LED interno acende a prateleira como vitrine de hotel boutique. Caixilho slim grafite/bronze sutil. O vidro marca digital (Felipe aceita se for bonito) — manter na altura do aéreo, longe de respingo de cooktop/pia. LED interno quente 2700K, regulável, oculto na lateral/topo do módulo.",
+  "params": {
+    "glass_rgb": [120, 108, 92],
+    "glass_type": "reflecta fumê champagne (espelhado bronze suave, translúcido com LED ligado)",
+    "reflectivity": "satin/espelhado controlado — reflete de dia, vitrine de noite",
+    "frame_rgb": [69, 66, 60],
+    "frame_style": "caixilho slim grafite com toque bronze sutil",
+    "led_rgb": [255, 250, 232],
+    "led_color_temp_k": 2700,
+    "led_mount": "fita interna oculta (lateral ou topo do módulo), ilumina prateleiras",
+    "max_modules": 2,
+    "min_modules": 1,
+    "preferred_placement": "módulo aéreo / cristaleira (longe de respingo de cooktop e pia)",
+    "module_width_cm": 50,
+    "module_width_range_cm": [35, 65]
+  },
+  "applies_to_kinds": ["kc_porta_vidro", "kc_vidro", "kc_led", "kc_filler"],
+  "anti_pattern": "Fachada inteira de vidro reflecta = exagero (reflecta_control_gate FAIL). Vidro champagne sobre cooktop/pia (respingo de gordura/água marca demais — maintenance_gate). LED 6500K branco-frio dentro (quebra a paleta quente). Caixilho grosso/dourado berrante (vira ostentação fake — fake_luxury_check). Reflecta sem LED = só superfície que marca dedo sem o ganho de vitrine.",
+  "cost_relative": "médio-alto (vidro reflecta + ferragem de porta de vidro + fita LED + dimmer); por ser 1-2 módulos, impacto alto por real gasto",
+  "appearance": "Um ou dois módulos translúcidos cor champagne que de dia espelham suavemente a cozinha e de noite acendem como vitrine quente — o brilho premium pontual do tema escuro/boutique.",
+  "gate_refs": ["reference_system_gates.md::reflecta_control_gate (1-2 módulos, nunca fachada)", "reference_system_gates.md::daylight_reflection_check (devolve luz de dia)", "reference_system_gates.md::maintenance_check (longe de respingo; marca digital)", "reference_system_gates.md::fake_luxury_check (champagne/bronze sutil)", "tools/kitchen_ergonomics.py::upper_module_width"],
+  "source": {"kind": "felipe_profile", "title": "Perfil Felipe 2026-06-19: vidro reflecta/champagne com LED agrada; dourado/bronze sutil; reflecta marca dedo mas aceita se bonito", "date": "2026-06-19"}
+}

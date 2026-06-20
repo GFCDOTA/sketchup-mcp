@@ -38,16 +38,42 @@ def _redact(s):
     return _SECRET_RE.sub("sk-ant-***REDACTED***", s) if isinstance(s, str) else s
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+try:  # raiz do workspace E:\Claude — fonte unica, robusta a apps/ (2026-06-09)
+    from tools.claude_bridge._paths import WORKSPACE_ROOT, WORKTREES_ROOT  # noqa: E402
+except ImportError:  # execucao standalone sem PYTHONPATH
+    from _paths import WORKSPACE_ROOT, WORKTREES_ROOT  # noqa: E402
 # Estado NOC e' relativo ao tree onde se roda. Dispatcher e cockpit compartilham
 # quando rodam do MESMO tree (o normal pos-merge: ambos no main).
 NOC_DIR = REPO_ROOT / ".ai_bridge" / "noc"
 QUEUE = NOC_DIR / "queue.jsonl"
 LEDGER = NOC_DIR / "actions.jsonl"
 LOCK_PATH = NOC_DIR / "dispatcher.lock"
-WT_PARENT = REPO_ROOT.parent  # E:/Claude — worktrees ficam FORA do glob sketchup-mcp*
+WT_PARENT = WORKTREES_ROOT  # E:/Claude/worktrees (raiz das worktrees temporarias)
 
 MODEL = "claude-opus-4-8"
 CLAUDE_TIMEOUT = 900  # 15 min por worker; estoura -> falha o ciclo, nao trava
+
+# --- kind:local_llm (papel "Ollama = compute gratis" do brain_muscle.md) ----------
+# Purposes que PODEM rodar em modelo local (texto barato, sem editar repo nem julgar
+# visual). Fora desta lista -> SKIPPED_PURPOSE_NOT_ALLOWED (nada vaza pro local).
+LOCAL_LLM_OK = {
+    "summarize_log", "classify_test_failure", "draft_design_intent",
+    "checklist_from_reference", "prompt_prepare", "cheap_triage",
+}
+# Modelo default por purpose (override por task["model"]). Medido nesta maquina:
+# llama3.1:8b frio ~25s/quente <0.2s; qwen2.5-coder:14b ~3s. Token = 0 sempre.
+DEFAULT_MODEL_BY_PURPOSE = {
+    "summarize_log": "llama3.1:8b",
+    "classify_test_failure": "qwen2.5-coder:14b",
+    "draft_design_intent": "planta-assistant:latest",
+    "checklist_from_reference": "llama3.1:8b",
+    "prompt_prepare": "llama3.1:8b",
+    "cheap_triage": "llama3.1:8b",
+}
+# Texto gerado vai pro scratch gitignored (runs/); o ledger (.ai_bridge/noc) audita
+# so backend/model/latency/out_file — nunca o corpo verboso no contexto do cerebro.
+LOCAL_LLM_DIR = REPO_ROOT / "runs" / "local_llm"
+LOCAL_LLM_TERMINAL = {"LOCAL_LLM_DONE", "LOCAL_LLM_OFFLINE", "SKIPPED_PURPOSE_NOT_ALLOWED"}
 
 
 def _claude_bin() -> str:
@@ -57,7 +83,7 @@ def _claude_bin() -> str:
 # Token files candidatos (mesmos do start.ps1/watchdog). NUNCA logar o conteudo.
 _TOKEN_FILES = (
     REPO_ROOT / "tools" / "claude_bridge" / ".oauth_token",
-    Path(r"E:\Claude\claude-bridge\.oauth_token"),
+    Path(r"E:\Claude\ops\bridge\.oauth_token"),
 )
 
 
@@ -131,7 +157,7 @@ def ledger_append(entry: dict) -> None:
 
 def _terminal_ids() -> set:
     """Tasks ja em estado terminal (nao re-disparar)."""
-    term = {"COMMITTED", "VISUAL_REVIEW_QUEUED", "NOOP", "VERIFY_FAILED"}
+    term = {"COMMITTED", "VISUAL_REVIEW_QUEUED", "NOOP", "VERIFY_FAILED"} | LOCAL_LLM_TERMINAL
     return {r.get("task_id") for r in _ledger_rows() if r.get("status") in term}
 
 
@@ -296,6 +322,83 @@ def dispatch(task, dry_run=False) -> dict:
         ledger_append(entry)
 
 
+def dispatch_local_llm(task, dry_run=False) -> dict:
+    """kind:local_llm — roda um modelo LOCAL (Ollama) p/ um purpose ALLOWLISTADO e
+    devolve so o resultado compacto (texto -> runs/local_llm/<id>.md + ledger). Token = 0.
+    NUNCA toca git, NUNCA spawna claude, NUNCA da veredito visual. Offline ->
+    on_offline:'error' (default, status LOCAL_LLM_OFFLINE) ou 'claude' (fallback explicito).
+    Sem git = independente do caminho pesado do dispatch() -> testavel hermeticamente."""
+    from tools.claude_bridge import ollama_client  # lazy (mesmo padrao do noc_lock)
+
+    tid = task.get("id", "T?")
+    purpose = task.get("purpose", "")
+    entry = {"t": time.time(), "task_id": tid, "title": task.get("title", ""),
+             "kind": "local_llm", "purpose": purpose, "backend": "ollama"}
+    try:
+        if purpose not in LOCAL_LLM_OK:
+            entry["status"] = "SKIPPED_PURPOSE_NOT_ALLOWED"
+            entry["error"] = f"purpose {purpose!r} fora da allowlist {sorted(LOCAL_LLM_OK)}"
+            return entry
+        prompt = (task.get("prompt") or "").strip()
+        if not prompt:
+            entry["status"], entry["error"] = "NOOP", "prompt vazio"
+            return entry
+        model = task.get("model") or DEFAULT_MODEL_BY_PURPOSE.get(purpose, "llama3.1:8b")
+        entry["model"] = model
+        if dry_run:
+            entry["status"] = "DRY_RUN"
+            return entry
+        try:
+            res = ollama_client.generate(prompt, model=model, purpose=purpose,
+                                         options=task.get("options"))
+        except ollama_client.OllamaUnavailable as e:
+            if (task.get("on_offline") or "error") == "claude":
+                entry["status"], entry["error"] = "LOCAL_LLM_FALLBACK_CLAUDE", _redact(str(e))
+            else:
+                entry["status"], entry["error"] = "LOCAL_LLM_OFFLINE", _redact(str(e))
+            return entry
+        entry["latency_ms"] = res.get("latency_ms")
+        entry["eval_count"] = res.get("eval_count")
+        LOCAL_LLM_DIR.mkdir(parents=True, exist_ok=True)
+        out = LOCAL_LLM_DIR / f"{tid}.md"
+        out.write_text(
+            f"# {task.get('title', tid)}\n\n"
+            f"- purpose: `{purpose}`\n- model: `{model}`\n"
+            f"- latency: {res.get('latency_ms')}ms (load {res.get('load_ms')}ms)\n"
+            f"- backend: ollama (token=0)\n\n---\n\n{res.get('response', '')}\n",
+            encoding="utf-8")
+        try:
+            out_rel = str(out.relative_to(REPO_ROOT))
+        except ValueError:  # LOCAL_LLM_DIR fora do repo (ex.: tmp em teste)
+            out_rel = str(out)
+        entry["out_file"] = out_rel.replace("\\", "/")
+        entry["status"] = "LOCAL_LLM_DONE"
+        return entry
+    finally:
+        ledger_append(entry)
+
+
+def dispatch_by_kind(task, dry_run=False) -> dict:
+    """Roteia a task pelo `kind` (default 'claude' = comportamento existente):
+      - local_llm -> Ollama local (token=0); se LOCAL_LLM_FALLBACK_CLAUDE, cai pro claude.
+      - tool      -> reservado pro muscle.py INLINE (brain_muscle.md), nao o dispatcher.
+      - claude    -> caminho existente: worktree isolado + `claude -p` (INALTERADO)."""
+    kind = (task.get("kind") or "claude").lower()
+    if kind == "local_llm":
+        result = dispatch_local_llm(task, dry_run=dry_run)
+        if result.get("status") == "LOCAL_LLM_FALLBACK_CLAUDE":
+            return dispatch(task, dry_run=dry_run)
+        return result
+    if kind == "tool":
+        entry = {"t": time.time(), "task_id": task.get("id", "T?"),
+                 "title": task.get("title", ""), "kind": "tool",
+                 "status": "SKIPPED_KIND_TOOL",
+                 "note": "deterministico inline = tools/muscle.py (brain_muscle.md), nao o dispatcher"}
+        ledger_append(entry)
+        return entry
+    return dispatch(task, dry_run=dry_run)
+
+
 def main():
     ap = argparse.ArgumentParser(description="NOC dispatcher — poe Claude pra trabalhar (1 atuador por vez)")
     ap.add_argument("--once", action="store_true", help="roda 1 ciclo e sai")
@@ -325,7 +428,7 @@ def main():
                     print(json.dumps({"status": "NO_TASK", "cycle": n, "note": "fila esgotada -> parando"}))
                     break
                 attempted.add(task.get("id"))
-                result = dispatch(task, dry_run=args.dry_run)
+                result = dispatch_by_kind(task, dry_run=args.dry_run)
                 print(json.dumps({"cycle": n, "task_id": result.get("task_id"),
                                   "status": result.get("status")}, ensure_ascii=False), flush=True)
                 time.sleep(max(0, args.interval))
@@ -336,7 +439,7 @@ def main():
             if not task:
                 print(json.dumps({"status": "NO_TASK", "queue_len": len(load_queue())}))
                 return
-            result = dispatch(task, dry_run=args.dry_run)
+            result = dispatch_by_kind(task, dry_run=args.dry_run)
             print(json.dumps(result, ensure_ascii=False, indent=2))
     finally:
         lock.release()

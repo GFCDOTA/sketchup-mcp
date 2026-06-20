@@ -1,0 +1,28 @@
+{
+  "name": "coordinated_medium_dark_wood_base",
+  "title": "Base madeira MÉDIA/ESCURA quente coordenada (o gosto do Felipe vs carvalho claro)",
+  "rule": "Os módulos (corpo, portas, gavetas) usam madeira MÉDIA/ESCURA quente — nogueira/freijó/carvalho-fumê — não carvalho claro nem branco puro (Felipe não gosta de branco; prefere escura ou meio-termo). É a alternativa escura ao coordinated_oak_base: mesma disciplina de coordenação (corpo e porta quase idênticos, porta levemente mais clara) mas tom médio-escuro moody/industrial. Profundidade 55-60cm, bancada 85-92cm. Veio madeira visível (a madeira é a estrela, não a laca). Combina com aéreo escuro coordenado OU com aéreo claro em meio-termo controlado — nunca bicolor frio. SEM puxador tradicional: usar perfil cava/gola/push (ver premium_shadow_gap). Sóculo grafite recuado embaixo. Madeira FORA da zona molhada/quente (pia/cooktop), que ficam em pedra/inox (wood_wetzone_gate).",
+  "params": {
+    "corpo_rgb": [101, 74, 53],
+    "porta_rgb": [108, 80, 58],
+    "gaveta_rgb": [108, 80, 58],
+    "finish": "fosco acetinado, veio madeira visível (médio/escuro quente)",
+    "wood_tone": "nogueira / freijó / carvalho-fumê (médio a escuro, NUNCA claro nem branco)",
+    "base_depth_cm": 60,
+    "base_depth_range_cm": [55, 60],
+    "countertop_height_cm": 90,
+    "countertop_height_range_cm": [85, 92],
+    "module_width_cm": 50,
+    "module_width_range_cm": [35, 65],
+    "drawer_rows_per_drawer_module": 3,
+    "handleless": true,
+    "handle_strategy": "cava / gola / perfil J / push-amortecedor (ver premium_shadow_gap) — sem puxador de barra tradicional",
+    "wetzone_material": "pedra/inox na zona molhada e quente (madeira não toca pia/cooktop)"
+  },
+  "applies_to_kinds": ["kc_corpo", "kc_porta", "kc_gaveta"],
+  "anti_pattern": "Carvalho CLARO ou branco puro embaixo (não é o gosto do Felipe). Madeira escura + aéreo branco frio = bicolor builder-grade frio. Madeira na zona molhada/quente sem proteção (mancha/incha — maintenance_gate). Laca brilhante que esconde o veio (a graça da madeira média/escura é o veio). Puxador de barra tradicional (Felipe rejeita).",
+  "cost_relative": "médio (laminado/melamina madeirado médio-escuro é padrão); madeira natural folheada = médio-alto",
+  "appearance": "Base de madeira média/escura quente com veio visível, moody/industrial premium; gavetas em pilha de 3 por módulo abertas por cava (sem puxador). Lê família com paleta escura ou meio-termo, nunca contraste frio.",
+  "gate_refs": ["tools/kitchen_ergonomics.py::base_depth", "tools/kitchen_ergonomics.py::countertop_height", "tools/kitchen_ergonomics.py::base_module_width", "reference_system_gates.md::maintenance_gate (madeira fora da zona molhada/quente)", "reference_system_gates.md::cave_check (não escurecer demais o compacto)"],
+  "source": {"kind": "felipe_profile", "title": "Perfil Felipe 2026-06-19: madeira média/escura, industrial preto+madeira, moody, NÃO branco; alternativa escura ao coordinated_oak_base", "date": "2026-06-19"}
+}
