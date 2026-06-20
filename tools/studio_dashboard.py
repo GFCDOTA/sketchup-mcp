@@ -25,7 +25,31 @@ BACKLOG = ROOT / "artifacts/reference_lab/kitchen/spec/KITCHEN_TO_100.md"
 COORD = ROOT / ".ai_bridge/SESSION_COORDINATION.md"
 INBOX = ROOT / "artifacts/reference_lab/inbox/INBOX.json"
 ARCH_KB = ROOT / ".ai_bridge/knowledge/architect.md"   # conhecimento que o Felipe alimenta (orientações do GPT)
+KANBAN_FILE = ROOT / ".ai_bridge/kanban.json"          # status Trello de cada microtarefa (Felipe move)
+KANBAN_COLS = ["backlog", "refinamento", "execução", "teste", "executado"]
 SKIP = (".denoiser.png", ".effectsResult.png")
+
+
+def _kanban_load():
+    if KANBAN_FILE.exists():
+        try:
+            return json.loads(KANBAN_FILE.read_text("utf-8"))
+        except Exception:  # noqa: BLE001
+            return {}
+    return {}
+
+
+def _move_task(mt, direction):
+    """Move a microtarefa entre as colunas do Kanban (Felipe arrasta com ◀ ▶)."""
+    if not mt:
+        return {"ok": False}
+    k = _kanban_load()
+    cur = k.get(mt) if k.get(mt) in KANBAN_COLS else "backlog"
+    i = max(0, min(len(KANBAN_COLS) - 1, KANBAN_COLS.index(cur) + (1 if direction == "next" else -1)))
+    k[mt] = KANBAN_COLS[i]
+    KANBAN_FILE.parent.mkdir(parents=True, exist_ok=True)
+    KANBAN_FILE.write_text(json.dumps(k, ensure_ascii=False, indent=2), "utf-8")
+    return {"ok": True, "mt": mt, "status": k[mt]}
 
 ROSTER = [
     {"id": "interior-orchestrator", "face": "\U0001F3AC", "label": "Team Lead"},
@@ -90,6 +114,7 @@ def _backlog() -> dict:
     mts = set(re.findall(r"MT-\d+", txt))
     geo = set(re.findall(r"(MT-\d+)\s*`?\[GEO\]", txt))
     done = set(re.findall(r"(MT-\d+)[^\n]*(?:DONE|✓|completed)", txt))
+    kb = _kanban_load()
     tasks, seen = [], set()
     for ln in txt.splitlines():  # linhas de tabela: | **MT-NN** | descrição | ...
         if not ln.strip().startswith("|") or "MT-" not in ln:
@@ -103,7 +128,8 @@ def _backlog() -> dict:
                     break
                 seen.add(mt)
                 desc = re.sub(r"[*`\[\]]", "", cells[i + 1]).strip()
-                tasks.append({"mt": mt, "what": desc[:90], "geo": mt in geo, "done": mt in done})
+                status = kb.get(mt) if kb.get(mt) in KANBAN_COLS else ("executado" if mt in done else "backlog")
+                tasks.append({"mt": mt, "what": desc[:90], "geo": mt in geo, "done": mt in done, "status": status})
                 break
     return {"total": len(mts), "geo": len(geo), "pele": len(mts) - len(geo),
             "done": len(done), "tasks": tasks}
@@ -276,6 +302,14 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 .tklist{max-height:260px;overflow-y:auto;margin-top:10px}
 .tk{padding:4px 0;font-size:12.5px;border-bottom:1px solid #181a20}
 .tg{font-size:10px;padding:1px 6px;border-radius:8px}.tg.pele{background:#19281f;color:var(--ok)}.tg.geo{background:#2a2419;color:var(--warn)}
+.kboard{display:flex;gap:12px;overflow-x:auto;padding-bottom:6px;margin-top:10px}
+.kcol{flex:1;min-width:185px;background:#101116;border:1px solid var(--bd);border-radius:10px;padding:9px}
+.kcol-h{font-size:12px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;border-bottom:1px solid var(--bd);padding-bottom:6px}
+.kcol-b{display:flex;flex-direction:column;gap:7px;max-height:340px;overflow-y:auto}
+.kcard{background:#181a20;border:1px solid var(--bd);border-radius:8px;padding:7px 9px}
+.kc-top{font-size:12px;margin-bottom:3px}.kc-what{font-size:11.5px;color:var(--mut);line-height:1.35}
+.kc-mv{margin-top:5px;display:flex;gap:5px;justify-content:flex-end}
+.kc-mv button{background:#0c0d10;border:1px solid var(--bd);color:var(--gold);border-radius:5px;padding:1px 8px;cursor:pointer;font-size:11px}.kc-mv button:hover{background:#1f1b29}
 textarea{width:100%;min-height:90px;background:#0c0d10;border:1px solid var(--bd);color:var(--fg);border-radius:8px;padding:8px 11px;font:13px system-ui;resize:vertical}
 .mbar .e{max-width:90px}
 .gallery{max-height:330px;overflow-y:auto;padding-right:4px}
@@ -343,6 +377,7 @@ function fetchPreview(slug){fetch('/api/preview',{method:'POST',headers:{'Conten
 function feedArch(){const t=(document.getElementById('feedtext').value||'').trim(),ti=(document.getElementById('feedtitle').value||'').trim();if(!t)return
  const msg=document.getElementById('feedmsg');msg.textContent='alimentando…'
  fetch('/api/feed',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t,title:ti})}).then(r=>r.json()).then(r=>{document.getElementById('feedtext').value='';document.getElementById('feedtitle').value='';msg.textContent=r.ok?('✓ aprendido — '+r.chars+' chars na memória'):'erro';tick(1)})}
+function moveTask(mt,dir){fetch('/api/move',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mt,direction:dir})}).then(()=>tick(1))}
 function askAgent(agent,umb){const inp=document.getElementById('ask-'+umb),q=(inp.value||'').trim();if(!q)return
  inp.value='';inp.blur()   // tira o foco -> o tick pode mostrar o balão
  fetch('/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent,prompt:q})}).then(()=>tick(1))
@@ -416,14 +451,15 @@ async function tick(force){
  root.appendChild(el(`<div class="card full" id=sec-graf><h2>Gráficos</h2>
   <div class=chartbox style="max-width:380px"><h2>Chamadas por agente</h2><div class=pie><svg viewBox="0 0 120 120">${slices||'<circle cx=60 cy=60 r=46 fill=#20242b/>'}</svg><div class=legend>${leg||'<span class=mut>—</span>'}</div></div></div></div>`))
  // BACKLOG
- const pct=b.total?Math.round(100*b.done/b.total):0
- const tasks=(b.tasks||[]).map(t=>`<div class=tk><span class="tg ${t.geo?'geo':'pele'}">${t.geo?'GEO':'PELE'}</span> <b>${t.mt}</b> <span class=mut>${esc(t.what)}</span> ${t.done?'<span style=color:var(--ok)>✓</span>':''}</div>`).join('')
- root.appendChild(el(`<div class="card full"><h2>Backlog — o que falta na cozinha (${b.total} microtarefas)</h2>
-  <span class=k><b>${b.pele}</b> <span class=mut>PELE (posso já)</span></span>
-  <span class=k><b>${b.geo}</b> <span class=mut>GEO (precisa teu OK)</span></span>
-  <span class=k><b style=color:var(--ok)>${b.done}</b> <span class=mut>done</span></span>
-  <div class=bar><i style=width:${pct}%></i></div>
-  <div class=tklist>${tasks||'<span class=mut>—</span>'}</div></div>`))
+ const COLS=['backlog','refinamento','execução','teste','executado']
+ const COLLBL={backlog:'Backlog',refinamento:'Em refinamento','execução':'Em execução',teste:'Em teste',executado:'Executado'}
+ const board=COLS.map(col=>{const items=(b.tasks||[]).filter(t=>t.status===col)
+   const cards=items.map(t=>`<div class=kcard><div class=kc-top><span class="tg ${t.geo?'geo':'pele'}">${t.geo?'GEO':'PELE'}</span> <b>${t.mt}</b></div>
+     <div class=kc-what>${esc(t.what)}</div>
+     <div class=kc-mv><button onclick="moveTask('${t.mt}','prev')" title="voltar">◀</button><button onclick="moveTask('${t.mt}','next')" title="avançar">▶</button></div></div>`).join('')
+   return `<div class=kcol><div class=kcol-h>${COLLBL[col]} <span class=mut>${items.length}</span></div><div class=kcol-b>${cards||'<span class=mut style=font-size:11px>—</span>'}</div></div>`}).join('')
+ root.appendChild(el(`<div class="card full"><h2>Backlog — quadro Kanban <span class=mut>(${b.total} microtarefas · ${b.done} done · arrasta com ◀ ▶)</span></h2>
+  <div class=kboard>${board}</div></div>`))
  // ALIMENTAR O ARQUITETO
  const kb=(s.knowledge&&s.knowledge.chars)||0
  root.appendChild(el(`<div class="card full" id=sec-feed><h2>📚 Alimentar o Arquiteto <span class=mut>(cola orientações do GPT → ele aprende e USA nas respostas · ${kb} chars na memória)</span></h2>
@@ -709,6 +745,8 @@ class H(BaseHTTPRequestHandler):
             self._send(200, json.dumps(_fetch_preview(body.get("slug"))))
         elif path == "/api/feed":
             self._send(200, json.dumps(_feed(body.get("text"), body.get("title"))))
+        elif path == "/api/move":
+            self._send(200, json.dumps(_move_task(body.get("mt"), body.get("direction"))))
         else:
             self._send(404, b"not found", "text/plain")
 
