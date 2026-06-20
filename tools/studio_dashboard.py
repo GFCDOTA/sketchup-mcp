@@ -215,7 +215,7 @@ def _agents() -> dict:
 def _state() -> dict:
     return {"agents": _agents(), "renders": _renders(), "sessions": _sessions(),
             "backlog": _backlog(), "references": _references(), "inbox": _inbox(),
-            "knowledge": _knowledge_state()}
+            "knowledge": _knowledge_state(), "consult": _consult_state()}
 
 
 PAGE = r"""<!doctype html><html lang=pt-BR><head><meta charset=utf-8>
@@ -319,6 +319,11 @@ textarea{width:100%;min-height:90px;background:#0c0d10;border:1px solid var(--bd
 .kblist{max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;padding-right:4px}
 .kbi{display:flex;align-items:center;gap:8px;background:#0c0d10;border:1px solid var(--bd);border-radius:7px;padding:5px 9px}
 .kbi-t{flex:1;font-size:12.5px;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.consult-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1.4fr;gap:7px;margin-bottom:7px}
+.consult-grid select,.consult-grid input{background:#0c0d10;border:1px solid var(--bd);color:var(--fg);border-radius:7px;padding:6px 9px;font:12px system-ui}
+.consult-half{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:760px){.consult-grid{grid-template-columns:1fr 1fr}.consult-half{grid-template-columns:1fr}}
+.consult-res{margin-top:9px;background:#0c0d10;border:1px solid var(--bd);border-left:3px solid var(--gold);border-radius:7px;padding:8px 11px;font-size:12.5px}
 .mbar .e{max-width:90px}
 .gallery{max-height:330px;overflow-y:auto;padding-right:4px}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.86);z-index:50;align-items:center;justify-content:center;padding:24px}
@@ -394,6 +399,21 @@ function feedTxt(inp){const files=[...inp.files];if(!files.length)return;const m
    try{const r=await (await fetch('/api/feed',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,title})})).json();if(r.ok)done++}catch(e){}}
   inp.value='';msg.textContent='✓ '+done+'/'+files.length+' arquivo(s) aprendido(s)';tick(1)})()}
 function forgetKb(id){fetch('/api/forget',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})}).then(()=>tick(1))}
+let CONSULT_MD='',CONSULT_INGEST=null
+function cval(id){const e=document.getElementById(id);return e?e.value:''}
+function consultGen(){const m=document.getElementById('cqmsg');if(m)m.textContent='montando contrato…'
+ const payload={mode:cval('cq-mode'),room:cval('cq-room'),phase:cval('cq-phase'),theme:cval('cq-theme'),image:cval('cq-image'),context:cval('cq-context'),decision_goal:cval('cq-goal'),hypothesis:cval('cq-hyp')}
+ fetch('/api/consult/question',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).then(r=>r.json()).then(r=>{
+  if(r.ok){CONSULT_MD=r.md;if(m)m.textContent='✓ pergunta '+r.question_id+' gerada — copie pro ChatGPT'}else{if(m)m.textContent='erro: '+(r.error||'')}
+  tick(1)})}
+function consultCopy(ev){const t=CONSULT_MD||cval('cq-out');if(!t)return;if(navigator.clipboard)navigator.clipboard.writeText(t)
+ const b=ev.target,o=b.textContent;b.textContent='copiado!';setTimeout(()=>b.textContent=o,1200)}
+function consultSaveAns(){const a=cval('cq-answer');const m=document.getElementById('camsg');if(!a.trim()){if(m)m.textContent='cole a resposta primeiro';return}
+ if(m)m.textContent='salvando…'
+ fetch('/api/consult/answer',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({answer:a})}).then(r=>r.json()).then(r=>{if(m)m.textContent=r.ok?'✓ resposta salva — agora ingere':('erro: '+(r.error||''));tick(1)})}
+function consultIngest(){const m=document.getElementById('camsg');if(m)m.textContent='ingerindo…'
+ fetch('/api/consult/ingest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})}).then(r=>r.json()).then(r=>{
+  CONSULT_INGEST=r;if(m)m.textContent=r.ok?('✓ ingerido: '+r.verdict):('erro: '+(r.error||''));tick(1)})}
 function moveTask(mt,dir){fetch('/api/move',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mt,direction:dir})}).then(()=>tick(1))}
 function runCycle(){const m=document.getElementById('cyclemsg');if(m)m.textContent='rodando ciclo nos LLMs locais…'
  fetch('/api/cycle',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})}).then(r=>r.json()).then(r=>{if(m)m.textContent=r.ok?'✓ ciclo rodou':('erro: '+(r.error||''));tick(1)})}
@@ -496,6 +516,35 @@ async function tick(force){
    <span class=mut id=feedmsg></span></div>
   <div class=kblist-h>📖 o que o Arquiteto já aprendeu <span class=mut>(${kents.length})</span></div>
   <div class=kblist>${klist}</div></div>`))
+ // 🔌 CONSULT GPT BRIDGE (sidecar do Arquiteto — MVP manual)
+ const co=s.consult||{}
+ const opt=(arr,sel)=>arr.map(v=>`<option${v===sel?' selected':''}>${v}</option>`).join('')
+ let ingHtml=''
+ if(CONSULT_INGEST&&CONSULT_INGEST.ok){const r=CONSULT_INGEST
+  ingHtml=`<div class=consult-res><b>Último aprendizado ingerido</b> — veredito <b style="color:${r.verdict==='PASS'?'var(--ok)':r.verdict==='FAIL'?'var(--red)':'var(--warn)'}">${esc(r.verdict||'?')}</b> · correção nº1: ${esc(r.top_fix||'-')}<br>
+   🧬 ${(r.rules_added||[]).length} regra(s) no DNA · 🧑‍⚖️ ${(r.anti_patterns_added||[]).length} anti-pattern(s)${r.next_microtask&&r.next_microtask.title?(' · 🎯 próxima: <b>'+esc(r.next_microtask.id||'MT')+'</b> '+esc(r.next_microtask.title)):''}${(r.warnings||[]).length?(' · ⚠ '+esc((r.warnings||[]).join('; '))):''}</div>`}
+ const cqid=co.latest_question&&co.latest_question.question_id?co.latest_question.question_id:'—'
+ root.appendChild(el(`<div class="card full" id=sec-consult><h2>🔌 Consult GPT Bridge <span class=mut>(sidecar do Arquiteto · modo <b>${esc(co.bridge_mode||'manual')}</b> · OpenAI ${co.openai_enabled?'on':'off'} · ${co.ingested_count||0} ingerida(s) · ${(co.pending_questions||[]).length} pendente(s))</span></h2>
+  <div class=mut style="font-size:12px;margin-bottom:8px">Arquiteto gera a pergunta → você copia no ChatGPT (Consult GPT) → cola a resposta → o sistema vira regra/anti-pattern/DNA/próxima microtarefa. Geometria do PDF é congelada; só a linguagem visual muda. <i>(sidecar dentro da coluna do Arquiteto = MT-UI-004)</i></div>
+  <div class=consult-grid>
+   <select id=cq-mode title=modo>${opt(['JUDGE','SPEC','REPAIR','LEARN','COMPARE'],'JUDGE')}</select>
+   <select id=cq-room title=cômodo>${opt(['kitchen','living','bedroom','bathroom','laundry','full_apartment'],'kitchen')}</select>
+   <select id=cq-phase title=fase>${opt(['skin','layout','form','lighting','render','final_validation'],'skin')}</select>
+   <input id=cq-theme value="BLACK_WOOD_GOLD_INDUSTRIAL_BOUTIQUE" title=tema>
+  </div>
+  <input id=cq-image placeholder="imagem principal (raw github url ou caminho local) — opcional p/ SPEC" style="width:100%;margin-bottom:6px">
+  <textarea id=cq-context placeholder="Contexto (3-8 linhas: o que está acontecendo)" style="min-height:60px"></textarea>
+  <textarea id=cq-goal placeholder="Objetivo da decisão (que decisão o Consult GPT precisa tomar)" style="min-height:46px"></textarea>
+  <textarea id=cq-hyp placeholder="Hipótese do Arquiteto (o que você tentou fazer)" style="min-height:46px"></textarea>
+  <div style="margin:6px 0"><button class=send onclick=consultGen()>🧩 gerar pergunta</button> <span class=mut id=cqmsg></span></div>
+  <div class=consult-half>
+   <div><div class=kblist-h>Pergunta gerada <span class=mut>(${esc(cqid)})</span> <button class=chatbtn onclick=consultCopy(event)>copiar</button></div>
+    <textarea id=cq-out readonly placeholder="clique 'gerar pergunta' — o contrato aparece aqui pra copiar" style="min-height:150px;font:11px ui-monospace,monospace"></textarea></div>
+   <div><div class=kblist-h>Resposta do Consult GPT <button class=send onclick=consultSaveAns()>salvar</button> <button class=send onclick=consultIngest()>⚙ ingerir</button> <span class=mut id=camsg></span></div>
+    <textarea id=cq-answer placeholder="cole aqui a resposta (ARCHITECT_ANSWER_CONTRACT v1) que o ChatGPT devolveu" style="min-height:150px"></textarea></div>
+  </div>
+  ${ingHtml}</div>`))
+ const _co=document.getElementById('cq-out');if(_co)_co.value=CONSULT_MD
  // SESSÕES
  const cl=(s.sessions.claims||[]).map(c=>`<tr><td>${esc(c.desc)}</td><td>${esc(c.status)}</td></tr>`).join('')
  const nwt=(s.sessions.worktrees||[]).length
@@ -642,6 +691,97 @@ def _judge_append_flag(agent, message):
             JUDGE_RULES.write_text(json.dumps(data, ensure_ascii=False, indent=2), "utf-8")
     except Exception:  # noqa: BLE001
         pass   # a lição em prosa já foi gravada; não derruba o flag por causa do JSON
+
+
+# ---------------------------------------------------------------- Consult GPT Bridge (sidecar do Arquiteto)
+# Loop Arquiteto -> Consult GPT (manual): gera pergunta estruturada -> Felipe copia/cola no ChatGPT ->
+# cola a resposta -> ingere virando regra/anti-pattern/DNA/próxima-microtarefa. Lazy-import (resiliente).
+def _consult_state() -> dict:
+    try:
+        from tools.interior_studio.consult_gpt_bridge import openai_client, store
+        la = store.latest_answer()
+        c = store.counts()
+        return {"pending_questions": store.pending_questions(), "latest_question": store.latest_question(),
+                "latest_answer": la.get("raw") if la else None,
+                "latest_answer_path": la.get("path") if la else None,
+                "ingested_count": c["ingested"], "failed_count": c["failed"],
+                "bridge_mode": "manual", "openai_enabled": openai_client.is_enabled()}
+    except Exception as e:  # noqa: BLE001
+        return {"error": str(e), "pending_questions": [], "latest_question": None, "latest_answer": None,
+                "ingested_count": 0, "failed_count": 0, "bridge_mode": "manual", "openai_enabled": False}
+
+
+def _consult_latest(which: str) -> dict:
+    try:
+        from tools.interior_studio.consult_gpt_bridge import store
+        return {"ok": True, "data": store.latest_question() if which == "question" else store.latest_answer()}
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": str(e)}
+
+
+def _consult_question(body: dict) -> dict:
+    try:
+        from tools.interior_studio.consult_gpt_bridge import contracts, prompt_builder, store
+        q = prompt_builder.build_question(
+            mode=body.get("mode") or "JUDGE", room=body.get("room") or "kitchen",
+            phase=body.get("phase") or "skin",
+            theme=body.get("theme") or "BLACK_WOOD_GOLD_INDUSTRIAL_BOUTIQUE",
+            context=body.get("context") or "", decision_goal=body.get("decision_goal") or "",
+            architect_hypothesis=body.get("hypothesis") or "",
+            frozen_constraints=body.get("frozen"), mutable=body.get("mutable"),
+            visual_inputs={"main": body.get("image") or None, "aux": body.get("aux") or [],
+                           "compare": body.get("compare") or {}},
+            priority=body.get("priority") or "high", question_id=body.get("question_id") or None)
+        saved = store.save_question(q)
+        try:
+            from tools import studio_log
+            studio_log.post("consult-liaison", "working",
+                            f"pergunta {q['question_id']} pronta — copie pro Consult GPT", to="architect")
+        except Exception:  # noqa: BLE001
+            pass
+        return {"ok": True, "question_id": q["question_id"], "md": contracts.render_question_md(q), "paths": saved}
+    except ValueError as e:
+        return {"ok": False, "error": str(e)}
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": str(e)}
+
+
+def _consult_answer(body: dict) -> dict:
+    try:
+        from tools.interior_studio.consult_gpt_bridge import store
+        raw = body.get("answer") or body.get("answer_md") or ""
+        if not raw.strip():
+            return {"ok": False, "error": "resposta vazia"}
+        qid = body.get("question_id") or (store.latest_question() or {}).get("question_id") or "sem_id"
+        return {"ok": True, **store.save_answer(qid, raw)}
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": str(e)}
+
+
+def _consult_ingest(body: dict) -> dict:
+    try:
+        from tools.interior_studio.consult_gpt_bridge import ingest as ci
+        r = ci.ingest(body.get("question_id") or None)
+        try:
+            from tools import studio_log
+            if r.get("ok"):
+                studio_log.post("consult-liaison", "done",
+                                f"ingeri {r.get('question_id')}: {r.get('verdict')} · "
+                                f"+{len(r.get('rules_added', []))} regra(s), +{len(r.get('anti_patterns_added', []))} anti-pattern(s)",
+                                to="architect")
+        except Exception:  # noqa: BLE001
+            pass
+        return r
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": str(e)}
+
+
+def _consult_ask_openai(body: dict) -> dict:
+    try:
+        from tools.interior_studio.consult_gpt_bridge import openai_client
+        return openai_client.ask(body or {})
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": str(e), "fallback": "manual"}
 
 
 # Arquiteto CONVERSA (deepseek, responde de verdade); o spec-cuspidor é um ESPECIALISTA embaixo dele.
@@ -909,6 +1049,12 @@ class H(BaseHTTPRequestHandler):
             self._send(200, PAGE, "text/html; charset=utf-8")
         elif path == "/api/state":
             self._send(200, json.dumps(_state(), ensure_ascii=False))
+        elif path == "/api/consult/state":
+            self._send(200, json.dumps(_consult_state(), ensure_ascii=False))
+        elif path == "/api/consult/latest-question":
+            self._send(200, json.dumps(_consult_latest("question"), ensure_ascii=False))
+        elif path == "/api/consult/latest-answer":
+            self._send(200, json.dumps(_consult_latest("answer"), ensure_ascii=False))
         elif path.startswith("/img/"):
             fp = (ANGLES / path[len("/img/"):]).resolve()
             if fp.is_file() and ANGLES.resolve() in fp.parents and fp.suffix == ".png":
@@ -952,6 +1098,14 @@ class H(BaseHTTPRequestHandler):
             self._send(200, json.dumps(_feed(body.get("text"), body.get("title"))))
         elif path == "/api/forget":
             self._send(200, json.dumps(_forget(body.get("id"))))
+        elif path == "/api/consult/question":
+            self._send(200, json.dumps(_consult_question(body), ensure_ascii=False))
+        elif path == "/api/consult/answer":
+            self._send(200, json.dumps(_consult_answer(body), ensure_ascii=False))
+        elif path == "/api/consult/ingest":
+            self._send(200, json.dumps(_consult_ingest(body), ensure_ascii=False))
+        elif path == "/api/consult/ask-openai":
+            self._send(200, json.dumps(_consult_ask_openai(body), ensure_ascii=False))
         elif path == "/api/move":
             self._send(200, json.dumps(_move_task(body.get("mt"), body.get("direction"))))
         elif path == "/api/cycle":
