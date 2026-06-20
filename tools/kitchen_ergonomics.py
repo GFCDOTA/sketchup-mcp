@@ -24,7 +24,7 @@ ERGO = {
     "base_depth": (55, 60),
     "upper_depth": (30, 35),
     "upper_clearance": (50, 60),         # bancada -> base do aéreo
-    "hood_clearance": (45, 65),          # cooktop -> coifa under-cabinet (tipo aprovado); chaminé seria 70-80
+    "hood_clearance": (45, 65),          # cooktop -> coifa (slim integrada: 45-65; range-hood tradicional: 70-80)
     "fridge_tower_width": (55, 75),      # ~60 ref; geladeira freestanding 60-75
     "fridge_vent_gap": (6, 12),          # respiro lateral TOTAL: ≥6 = 2×≥3cm/lado (fridge.md §5-6); >12 = nicho desperdiçado
     "base_module_width": (35, 65),       # módulos comuns ~60 (40/50/60 ok)
@@ -52,18 +52,40 @@ def _center_m(parts, axis):
     return (lo + hi) / 2 * IN2CM / 100.0
 
 
-def work_triangle_fridge_cooktop_m(by_mod):
-    """Perna geladeira↔cooktop do triângulo de trabalho, em metros.
+def _top_z_m(parts, kind):
+    """topo (m) das parts de um kind = max(z0_in + h_in); None se kind ausente."""
+    zs = [p["z0_in"] + p["h_in"] for p in parts if p["kind"] == kind]
+    return max(zs) / 39.3700787402 if zs else None
 
-    A cozinha é LINEAR na parede OESTE (vertical), então os módulos correm no
-    eixo y (mesma convenção do resto do audit). Mede a distância centro-a-centro
-    no eixo da parede. None se geladeira ou cooktop ausente. Ergonomia: ≥1.2 m
+
+def _min_tag(v, lo):
+    """rótulo (str, tag) p/ uma medida com piso mínimo: WARN se < lo, n/a se None."""
+    if v is None:
+        return "n/a", "?"
+    return f"{v} m", ("PASS" if v >= lo else "WARN")
+
+
+def module_gap_m(by_mod, mod_a, mod_b):
+    """Distância centro-a-centro (m) entre dois módulos no eixo da parede oeste (y).
+
+    A cozinha é LINEAR na parede OESTE (vertical) -> módulos correm em y (mesma
+    convenção do resto do audit). None se faltar qualquer um dos módulos."""
+    a = _center_m(by_mod.get(mod_a, []), "y")
+    b = _center_m(by_mod.get(mod_b, []), "y")
+    return None if a is None or b is None else round(abs(a - b), 2)
+
+
+def work_triangle_fridge_cooktop_m(by_mod):
+    """Perna geladeira↔cooktop do triângulo de trabalho (m). Ergonomia: ≥1.2 m
     (door-clearance NÃO cobre isto — é o gap que faltava no relatório)."""
-    gel = _center_m(by_mod.get("fridge", []), "y")
-    cook = _center_m(by_mod.get("cooktop_module", []), "y")
-    if gel is None or cook is None:
-        return None
-    return round(abs(gel - cook), 2)
+    return module_gap_m(by_mod, "fridge", "cooktop_module")
+
+
+def faucet_to_upper_clearance_m(by_mod, aereo_z0):
+    """Folga topo-da-torneira → base do aéreo (m). Torneira gourmet alta pode bater
+    no aéreo baixo (spec §8). Ergonomia: ≥0.35 m. None se torneira ausente."""
+    top = _top_z_m(by_mod.get("sink_module", []), "kc_torneira")
+    return None if top is None else round(aereo_z0 - top, 2)
 
 
 def audit(room_id="r004"):
@@ -125,6 +147,7 @@ def main():
     import json
     con = json.loads((ROOT / "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json")
                      .read_text("utf-8"))
+    from tools import kitchen_layout as K
     from tools.geometry_sanity import sanity_room
     from tools.kitchen_validation import validate
     sink_pdf = validate(con, room)["result"]
@@ -132,12 +155,10 @@ def main():
         door_clear = sanity_room(con, room)["status"]   # door-clearance (NÃO é triângulo de trabalho)
     except Exception:  # noqa: BLE001
         door_clear = "?"
-    # triângulo de trabalho geladeira↔cooktop — métrica separada do door-clearance
-    tri_m = work_triangle_fridge_cooktop_m(by_mod)
-    if tri_m is None:
-        tri_str, tri_tag = "n/a", "?"
-    else:
-        tri_str, tri_tag = f"{tri_m} m", ("PASS" if tri_m >= 1.2 else "WARN")
+    # clearances de POSIÇÃO/uso — cada um separado do door-clearance (eixo da parede / alturas)
+    tri_str, tri_tag = _min_tag(work_triangle_fridge_cooktop_m(by_mod), 1.2)          # triângulo de trabalho
+    cook_sink_str, cook_sink_tag = _min_tag(module_gap_m(by_mod, "cooktop_module", "sink_module"), 0.5)  # térmico/respingo
+    faucet_str, faucet_tag = _min_tag(faucet_to_upper_clearance_m(by_mod, K.AEREO_Z0), 0.35)             # torneira gourmet x aéreo
 
     print("KITCHEN_DIMENSIONAL_AUDIT_RESULT:")
     for key, v, lo, hi, tag in rows:
@@ -145,6 +166,8 @@ def main():
     print(f"- sink_anchor_pdf = {sink_pdf}")
     print(f"- door_clearance = {door_clear}")
     print(f"- work_triangle_fridge_cooktop = {tri_str}  (>=1.2 m)  {tri_tag}")
+    print(f"- cooktop_sink_separation = {cook_sink_str}  (>=0.5 m)  {cook_sink_tag}")
+    print(f"- faucet_to_upper_clearance = {faucet_str}  (>=0.35 m)  {faucet_tag}")
     print(f"\nKITCHEN_DIMENSIONAL_AUDIT => {worst}")
     sys.exit(0)
 
