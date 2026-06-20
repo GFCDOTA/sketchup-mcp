@@ -2,7 +2,7 @@
 
 Esconde tudo menos a COZINHA (VRAY_ISOLATE) -> mata a oclusão do galley -> a câmera iso do
 vray_export.rb auto-enquadra. Aplica madeira/pedra (kc_* tex_map) + exposição quente. NÃO
-altera geometria. Uso: PT_TO_M=0.0259 .venv/Scripts/python.exe .claude/scratch/kitchen_vray.py [out.png]
+altera geometria. Uso: PT_TO_M=0.0259 .venv/Scripts/python.exe tools/kitchen_vray.py [out.png]
 """
 import hashlib
 import os
@@ -14,7 +14,7 @@ from pathlib import Path
 
 if not os.environ.get("PT_TO_M"):
     os.environ["PT_TO_M"] = "0.0259"
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[1]   # tools/ -> raiz do repo (sketchup-mcp). NAO parents[2] (=apps).
 sys.path.insert(0, str(ROOT))
 from tools.tweak_vrscene import tweak_file   # noqa: E402
 
@@ -83,6 +83,12 @@ fills.append({"pos": (float(os.environ.get("KEY_X", 168)), float(os.environ.get(
 # FILL: suave do outro lado (lift das sombras -> madeira não some), neutro-quente
 fills.append({"pos": (176.0, 714.0, 64.0), "intensity": float(os.environ.get("FILL2_INT", 22)),
               "radius": 48.0, "color": (0.96, 0.93, 0.9)})
+# FILL3 (MT-01): lado LESTE/direito — lava a coluna da geladeira que sumia no escuro em B.
+# Default ligado (int 16); FILL3_INT=0 desliga.
+fills.append({"pos": (float(os.environ.get("FILL3_X", 155)), float(os.environ.get("FILL3_Y", 698)),
+                      float(os.environ.get("FILL3_Z", 76))),
+              "intensity": float(os.environ.get("FILL3_INT", 16)), "radius": float(os.environ.get("FILL3_R", 30)),
+              "color": (0.98, 0.92, 0.84)})
 # LED LINEAR sob o aéreo: LightRectangle fina e longa = wash CONTÍNUO (não hotspots) — feedback GPT.
 # u ao longo da bancada (y); normal aponta p/ wall+baixo (lava backsplash + bancada uniforme).
 led_rect = [{

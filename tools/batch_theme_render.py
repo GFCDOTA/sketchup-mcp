@@ -19,7 +19,7 @@ from PIL import Image, ImageDraw
 ROOT = Path(__file__).resolve().parents[1]
 FDIR = ROOT / "artifacts/planta_74/furnished/kitchen_angles"
 RENDERS = ROOT / "artifacts/reference_lab/renders"
-DRIVER = ROOT / ".claude/scratch/kitchen_vray.py"
+DRIVER = ROOT / "tools/kitchen_vray.py"   # canonico (versionado); scratch/ era duplicata gitignored
 VENV = ROOT / ".venv/Scripts/python.exe"
 
 # câmera/crop/rig comuns (token hero_camera_compact_kitchen) — idênticos p/ todos os temas
