@@ -1,0 +1,28 @@
+{
+  "scope": "planta_74 / r004 cozinha / variante B (Felipe moody premium) — eye-level",
+  "direction": "BLACK_WOOD_GOLD moody premium",
+  "author": "interior-designer (Fase 1)",
+  "problem_fixed": "parede+teto [40,39,44] = CAVERNA; coluna da geladeira [36,36,38] some na parede (delta luminancia ~0)",
+  "tokens": {
+    "wall_rgb": [70, 67, 70],
+    "ceiling_rgb": [82, 80, 82],
+    "floor": {"rgb": [102, 100, 96], "texture": "porcelanato_cimento_grafite_medio_quente",
+              "finish": "acetinado_matte_R10", "reflect": 0.06, "rejunte_rgb": [70, 68, 66]},
+    "led_kelvin": 2700,
+    "lighting_fix": "FILL leste sobre a coluna da geladeira: area quente 2700K, +1 degrau sobre o ambiente, rasante na frente preta — separa a torre do fundo SEM clarear a parede inteira",
+    "stone": {
+      "tampo": {"base_rgb": [30, 29, 32], "vein_rgb": [150, 128, 86], "finish": "mate", "vein_level": "controlado_sutil"},
+      "backsplash": {"base_rgb": [30, 29, 32], "vein_rgb": [150, 128, 86], "finish": "mate", "vein_level": "1 degrau mais visivel que o tampo, continuo/casado"}
+    },
+    "reflectance": {"backsplash": 0.21, "tampo": 0.16, "armario": 0.05, "geladeira": 0.04, "parede": 0.06, "teto": 0.05, "piso": 0.06},
+    "gold_accent_point": "torneira preto-bronze PVD (UM ponto so — D4)",
+    "anti_cave_rule": "Nenhuma parede/teto GRANDE abaixo de luminancia ~0.22 (rgb medio ~60). Contraste coluna-geladeira x parede atras: delta luminancia >= 0.10 (resolver com FILL rasante, NAO clareando o ambiente). Teto 1 degrau mais claro que parede. Armario-heroi = superficie MAIS escura; parede/teto = fundo neutro (nunca parede mais escura que o movel).",
+    "mood": "moody premium aterrado: fundo grafite-quente real (nao void), profundidade por LUZ, heroi = marcenaria+backsplash, sem caverna, sem ouro gritante"
+  },
+  "requires_geo_change": false,
+  "note_geo": "100% PELE (cor/material/luz). Geometria/pia/modulos/coluna = GOLDEN_SAMPLE_004 CONGELADO. FILL e rig de luz.",
+  "gates_expected": {"cave_check": "PASS previsto", "fake_luxury_check": "PASS previsto",
+                     "maintenance_check": "WARN (cuba preta marca agua D5 + mitrar quina)", "continuity_check": "PASS previsto"},
+  "candidate_decision": "wall_rgb/ceiling_rgb NAO sao D1-D9 (parede nunca foi decidida) — diretriz derivada das regras anti-caverna; candidata a virar D10 se o Felipe cravar.",
+  "consumer": "tools/kitchen_vray.py + tools/tweak_vrscene.py (aplicar KITCHEN_WALLS=70,67,70 + FILL3 na coluna leste; resto ja no alvo)"
+}

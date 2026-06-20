@@ -106,3 +106,4 @@ assets/third_party_cache/
 
 # reference DB (índice reconstruível via reference_db.py rebuild)
 artifacts/reference_lab/reference.db
+artifacts/reference_lab/studio_activity.jsonl
