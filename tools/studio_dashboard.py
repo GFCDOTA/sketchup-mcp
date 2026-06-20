@@ -229,6 +229,13 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 .askrow button{background:#0c0d10;border:1px solid var(--bd);color:var(--ok);border-radius:6px;padding:4px 9px;cursor:pointer}.askrow button:hover{background:#1f2227}
 .uprow{display:flex;gap:8px;align-items:center;margin-bottom:6px;font-size:12px}.uprow input[type=file]{color:var(--mut);font-size:11.5px}
 .uprow button{background:#0c0d10;border:1px solid var(--bd);color:var(--ok);border-radius:6px;padding:4px 9px;cursor:pointer}.uprow button:hover{background:#1f2227}
+.bub{max-width:82%;padding:5px 9px;border-radius:11px;margin:4px 0;font-size:11.5px;word-break:break-word}
+.bub.me{background:#1f3a4d;margin-left:auto;border-bottom-right-radius:3px}
+.bub.them{background:#1d2026;border:1px solid var(--bd);margin-right:auto;border-bottom-left-radius:3px}
+.bub .bt{font-size:9px;color:var(--mut);margin-top:2px}
+.send{background:var(--ok)!important;color:#0c1410!important;border:none!important;font-weight:600}.send:hover{filter:brightness(1.1)}
+.critwrap{display:flex;gap:12px;align-items:flex-start;margin-bottom:8px}
+.critic{width:160px;border:1px solid var(--bd);border-radius:8px;flex:none}
 </style></head><body>
 <header><span class=hdot></span><h1>INTERIOR STUDIO</h1><span class=mut id=ts>carregando…</span>
 <span class=mut style=margin-left:auto>auto-refresh 5s · :8782 (separado do oráculo :8765)</span></header>
@@ -245,8 +252,9 @@ function subCard(a){const act=(a.status==='working'||a.status==='thinking'||a.on
  const on=a.online?'<span class=onl>online</span>':'<span class=off>offline</span>'
  return `<div class="sub s-${a.status} ${act}"><span class=face>${a.face}</span>
   <div style=flex:1><div class=nm>${a.label} ${on}</div><div class=msg>${esc(a.message)}</div></div><span class="sdot ${a.online?'on':''}"></span></div>`}
-function colChat(feed,ids){const f=(feed||[]).filter(x=>ids.includes(x.agent)).slice(-6)
- return f.map(x=>`<div class=ln><span class=t>${hhmm(x.ts)}</span>${esc(x.message)}${x.to?` <span class=to>→ ${esc(x.to)}</span>`:''}</div>`).join('')||'<span class=mut>—</span>'}
+function colChat(feed,ids){const f=(feed||[]).filter(x=>ids.includes(x.agent)||(x.agent==='felipe'&&ids.includes(x.to))).slice(-8)
+ return f.map(x=>{const me=x.agent==='felipe'
+  return `<div class="bub ${me?'me':'them'}"><div class=btxt>${esc(x.message)}</div><div class=bt>${me?'você':'🤖 agente'} · ${hhmm(x.ts)}</div></div>`}).join('')||'<span class=mut>sem conversa — pergunta abaixo ⬇</span>'}
 function drawArrows(ag){const svg=document.getElementById('arrows'),wrap=document.getElementById('org');if(!svg||!wrap)return
  const wr=wrap.getBoundingClientRect();svg.setAttribute('width',wr.width);svg.setAttribute('height',wr.height)
  const amap=ag.agent_umbrella||{},recent=(ag.feed||[]).slice(-7).filter(f=>f.to)
@@ -283,7 +291,7 @@ async function tick(){
  const cols=(ag.umbrellas||[]).map(u=>{const ids=[u.lead.id,...u.subs.map(x=>x.id)]
    return `<div class=col>${leadCard(u.lead)}<div class=subs>${u.subs.map(subCard).join('')}</div>
     <div class=chat>${colChat(ag.feed,ids)}</div>
-    <div class=askrow><input id="ask-${u.id}" placeholder="perguntar pro ${esc(u.lead.label)} (LLM local)"><button onclick="askAgent('${u.lead.id}','${u.id}')">⌁</button></div></div>`}).join('')
+    <div class=askrow><input id="ask-${u.id}" onkeydown="if(event.key==='Enter')askAgent('${u.lead.id}','${u.id}')" placeholder="perguntar pro ${esc(u.lead.label)}… (Enter envia)"><button class=send onclick="askAgent('${u.lead.id}','${u.id}')">➤ enviar</button></div></div>`}).join('')
  const ents=Object.entries(ag.metrics||{}).sort((a,b)=>b[1].calls-a[1].calls)
  const tot=ents.reduce((s,[,m])=>s+m.calls,0)||1, COL=['#6ca8ff','#7fd99a','#e6c069','#c08ae6','#5ad1c8','#e69a6c','#e67c7c']
  let acc=0
@@ -295,14 +303,19 @@ async function tick(){
  const ebars=errs.length?errs.map(([id,m])=>`<div class=mrow><span class=nm>${esc(id)}</span><span class=mbar><span class=e style=width:${Math.round(130*m.errors/emx)}px></span></span><span class=mnum>${m.errors} erro(s)</span></div>`).join(''):'<span class=mut>nenhum erro de design marcado ainda</span>'
  const flagopts=ents.map(([id])=>`<option>${esc(id)}</option>`).join('')||'<option>interior-designer</option>'
  root.appendChild(el(`<div class="card full"><h2>Agentes — guarda-chuvas (PM · Team Lead · Arquiteto)</h2>
-  <div class=org id=org><svg class=arrows id=arrows></svg><div class=cols>${cols}</div></div>
+  <div class=org id=org><svg class=arrows id=arrows></svg><div class=cols>${cols}</div></div></div>`))
+ drawArrows(ag)
+ // GRÁFICOS + marcar erro (com o render que tu critica do lado)
+ const critic=(s.renders||[])[0]
+ root.appendChild(el(`<div class="card full"><h2>Gráficos & erros de design</h2>
   <div class=charts>
    <div class=chartbox><h2>Chamadas por agente</h2><div class=pie><svg viewBox="0 0 120 120">${slices||'<circle cx=60 cy=60 r=46 fill=#20242b/>'}</svg><div class=legend>${leg||'<span class=mut>—</span>'}</div></div></div>
-   <div class=chartbox><h2>Erros de design (correções do Felipe)</h2>${ebars}
+   <div class=chartbox><h2>Erros — o que TU não curtiu (vira lição)</h2>
+    <div class=critwrap>${critic?`<img class=critic src="/img/${encodeURIComponent(critic.name)}" title="${esc(critic.name)}">`:''}
+     <div style=flex:1>${ebars}</div></div>
     <div class=flagrow><select id=flagag>${flagopts}</select>
-    <input id=flagmsg placeholder="ex.: parede muito escura, coifa não combina"><button onclick=flagErr()>marcar erro</button></div></div>
+     <input id=flagmsg onkeydown="if(event.key==='Enter')flagErr()" placeholder="ex.: parede muito escura… (Enter envia)"><button class=send onclick=flagErr()>marcar erro</button></div></div>
   </div></div>`))
- drawArrows(ag)
  // BACKLOG
  const pct=b.total?Math.round(100*b.done/b.total):0
  root.appendChild(el(`<div class=card><h2>Backlog — KITCHEN_TO_100</h2>
@@ -405,10 +418,10 @@ def _ask(agent, prompt, image=None):
     try:
         from tools import ollama_bridge, studio_log
         role = AGENT_ROLE.get(agent, "llama")
-        studio_log.post(agent, "thinking", f"(local) {(prompt or '')[:70]}")
+        studio_log.post("felipe", "working", prompt or "", to=agent)   # bolha do Felipe (direita)
         r = ollama_bridge.ask(role, prompt or "", image=image)
-        resp = (r.get("response") or r.get("error") or "")[:400]
-        studio_log.post(agent, "done" if r.get("ok") else "error", f"(local) {resp[:120]}")
+        resp = (r.get("response") or r.get("error") or "")[:600]
+        studio_log.post(agent, "done" if r.get("ok") else "error", resp)  # bolha do agente (esquerda)
         return {"ok": r.get("ok", False), "agent": agent, "model": r.get("model"), "response": resp}
     except Exception as e:  # noqa: BLE001
         return {"ok": False, "error": str(e)}
