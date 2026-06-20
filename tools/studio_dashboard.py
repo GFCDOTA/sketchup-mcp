@@ -200,7 +200,8 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 /* ORG / guarda-chuvas */
 .org{position:relative}
 .arrows{position:absolute;left:0;top:0;pointer-events:none;z-index:3;overflow:visible}
-.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;position:relative;z-index:1;padding-top:30px}
+.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;position:relative;z-index:1;padding-top:30px}
+.lead .msg,.sub .msg,.bub .btxt{overflow-wrap:anywhere;word-break:break-word}
 .col{background:#13151a;border:1px solid var(--bd);border-radius:12px;padding:12px}
 .lead{display:flex;gap:10px;align-items:center;border-bottom:1px solid var(--bd);padding-bottom:9px;margin-bottom:9px}
 .lead .face{font-size:30px;line-height:1}.lead .nm{font-weight:700;font-size:15px}
@@ -213,6 +214,7 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 .s-working .sdot,.s-thinking .sdot{background:var(--ok);box-shadow:0 0 7px var(--ok);animation:pulse 1.1s infinite}
 .s-done .sdot{background:var(--blu)}.s-blocked .sdot,.s-error .sdot{background:var(--red)}.s-waiting .sdot{background:var(--warn)}
 .stag{font-size:10px;color:var(--mut);margin-left:6px}
+.clearbtn{margin-left:8px;background:#2a1a1a;border:1px solid #4a2a2a;color:#e6a0a0;border-radius:6px;padding:1px 8px;cursor:pointer;font-size:10.5px}.clearbtn:hover{background:#3a2222}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 .chat{background:#0c0d10;border:1px solid var(--bd);border-radius:8px;padding:6px 8px;max-height:120px;overflow-y:auto;font-size:11.5px}
 .chat .ln{padding:2px 0;border-bottom:1px solid #16181d}.chat .to{color:var(--ok)}.chat .t{color:var(--mut);font-size:10px;float:right}
@@ -267,8 +269,9 @@ const el=(h)=>{const d=document.createElement('div');d.innerHTML=h;return d.firs
 const esc=(t)=>(t||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))
 const hhmm=(ts)=>ts?new Date(ts*1000).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):''
 function leadCard(a){const act=(a.status==='working'||a.status==='thinking')?'act':''
+ const clr=a.status==='error'?`<button class=clearbtn onclick="clearErr('${a.id}')">limpar</button>`:''
  return `<div class="lead s-${a.status} ${act}" id="lead-${a.id}"><div class=face>${a.face}</div>
-  <div style=flex:1><div class=nm>${a.label}<span class=stag>${a.status}</span> <span class=sdot></span></div>
+  <div style=flex:1><div class=nm>${a.label}<span class=stag>${a.status}</span> <span class=sdot></span>${clr}</div>
   <div class=msg>${esc(a.message)}</div></div></div>`}
 function subCard(a){const act=(a.status==='working'||a.status==='thinking'||a.online)?'act':''
  const on=a.online?'<span class=onl>online</span>':'<span class=off>offline</span>'
@@ -290,16 +293,18 @@ function drawArrows(ag){const svg=document.getElementById('arrows'),wrap=documen
   p+=`<path class="arrow ${er?'err':''}" marker-end="url(#${er?'ahr':'ah'})" d="M${x0},${A.my} Q${(x0+x1)/2},${cy} ${x1},${B.my}"/>`})
  svg.innerHTML=p}
 let LEADOF={};const leadOf=(u)=>LEADOF[u]
-async function curate(slug,action){await fetch('/api/curate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug,action})});tick()}
+async function curate(slug,action){await fetch('/api/curate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug,action})});tick(1)}
 function flagErr(){const a=document.getElementById('flagag').value,m=document.getElementById('flagmsg').value;if(!m)return
- fetch('/api/flag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:a,message:m})}).then(()=>{document.getElementById('flagmsg').value='';tick()})}
-async function askAgent(agent,umb){const inp=document.getElementById('ask-'+umb),q=(inp.value||'').trim();if(!q)return
- inp.value='';inp.placeholder='perguntando ao LLM local…'
- await fetch('/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent,prompt:q})});tick()}
+ fetch('/api/flag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:a,message:m})}).then(()=>{document.getElementById('flagmsg').value='';tick(1)})}
+function clearErr(agent){fetch('/api/clear',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent})}).then(()=>tick(1))}
+function askAgent(agent,umb){const inp=document.getElementById('ask-'+umb),q=(inp.value||'').trim();if(!q)return
+ inp.value='';inp.blur()   // tira o foco -> o tick pode mostrar o balão
+ fetch('/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent,prompt:q})}).then(()=>tick(1))
+ setTimeout(()=>tick(1),500)}   // mostra a TUA pergunta já (a resposta vem quando o LLM termina)
 function uploadRef(){const f=document.getElementById('upfile').files[0];if(!f)return
  const msg=document.getElementById('upmsg');msg.textContent='subindo…'
  const r=new FileReader();r.onload=async()=>{const res=await (await fetch('/api/upload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filename:f.name,data:r.result})})).json()
-  msg.textContent=res.ok?('✓ '+res.slug):('erro: '+res.error);tick()};r.readAsDataURL(f)}
+  msg.textContent=res.ok?('✓ '+res.slug):('erro: '+res.error);tick(1)};r.readAsDataURL(f)}
 function openModal(src,name){const m=document.getElementById('modal');document.getElementById('mimg').src=src
  document.getElementById('mname').textContent=name||'';const dl=document.getElementById('mdl');dl.href=src;dl.download=(name||'imagem')+(src.endsWith('.png')?'.png':'')
  m.dataset.url=location.origin+src;m.classList.add('show')}
@@ -307,13 +312,17 @@ function closeModal(){document.getElementById('modal').classList.remove('show')}
 function copyImg(ev){const u=document.getElementById('modal').dataset.url;if(navigator.clipboard)navigator.clipboard.writeText(u)
  const b=ev.target;const t=b.textContent;b.textContent='copiado!';setTimeout(()=>b.textContent=t,1200)}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()})
-async function tick(){
- // pausa o refresh com o modal aberto OU enquanto o Felipe digita/seleciona (senao apaga)
+let LASTSTATE=''
+async function tick(force){
+ // pausa com modal aberto OU enquanto digita/seleciona (senao apaga)
  const m=document.getElementById('modal');if(m&&m.classList.contains('show'))return
  const ae=document.activeElement
  if(ae&&/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName))return
- let s;try{s=await (await fetch('/api/state')).json()}catch(e){return}
+ let txt;try{txt=await (await fetch('/api/state')).text()}catch(e){return}
  document.getElementById('ts').textContent='atualizado '+new Date().toLocaleTimeString('pt-BR')
+ if(txt===LASTSTATE&&!force)return   // NADA mudou -> nao re-renderiza (preserva input/upload/foco)
+ LASTSTATE=txt
+ const s=JSON.parse(txt)
  const b=s.backlog,refs=s.references||{},by=refs.by_theme||{},bk=refs.by_kind||{},ag=s.agents||{umbrellas:[],feed:[],metrics:{}}
  LEADOF={};(ag.umbrellas||[]).forEach(u=>LEADOF[u.id]=u.lead.id)
  const root=document.getElementById('root');root.innerHTML=''
@@ -354,11 +363,11 @@ async function tick(){
   <span class=k><b style=color:var(--ok)>${b.done}</b> <span class=mut>done</span></span>
   <div class=bar><i style=width:${pct}%></i></div></div>`))
  // SESSÕES
- const cl=(s.sessions.claims||[]).map(c=>`<tr><td>${c.mt}</td><td>${esc(c.owner)}</td><td>${esc(c.status)}</td></tr>`).join('')
- const wt=(s.sessions.worktrees||[]).map(w=>`<div class=mut>${esc(w)}</div>`).join('')
- root.appendChild(el(`<div class=card><h2>Sessões / coordenação</h2>
-  <table><tr><th>MT</th><th>dono</th><th>status</th></tr>${cl||'<tr><td colspan=3 class=mut>sem claims</td></tr>'}</table>
-  <div style=margin-top:8px>${wt}</div></div>`))
+ const cl=(s.sessions.claims||[]).map(c=>`<tr><td>${esc(c.desc)}</td><td>${esc(c.status)}</td></tr>`).join('')
+ const nwt=(s.sessions.worktrees||[]).length
+ root.appendChild(el(`<div class=card><h2>O que cada sessão está fazendo</h2>
+  <table><tr><th>tarefa</th><th>status</th></tr>${cl||'<tr><td colspan=2 class=mut>nada em andamento</td></tr>'}</table>
+  <div class=mut style=margin-top:8px>${nwt} sessão(ões) de trabalho ativa(s)</div></div>`))
  // REFERÊNCIAS
  const themes=Object.entries(by).map(([t,n])=>`<tr><td>${esc(t)}</td><td>${n}</td></tr>`).join('')
  root.appendChild(el(`<div class=card><h2>Banco de referências (reference_db)</h2>
@@ -459,6 +468,16 @@ def _ask(agent, prompt, image=None):
         return {"ok": False, "error": str(e)}
 
 
+def _clear(agent):
+    """Felipe tira um agente do status de erro (volta pra idle)."""
+    try:
+        from tools import studio_log
+        studio_log.post(agent or "interior-orchestrator", "idle", "(status limpo pelo Felipe)")
+        return {"ok": True}
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": str(e)}
+
+
 class H(BaseHTTPRequestHandler):
     def log_message(self, *a):
         pass
@@ -512,6 +531,8 @@ class H(BaseHTTPRequestHandler):
             self._send(200, json.dumps(_ask(body.get("agent"), body.get("prompt"), body.get("image"))))
         elif path == "/api/upload":
             self._send(200, json.dumps(_upload(body.get("filename"), body.get("data"))))
+        elif path == "/api/clear":
+            self._send(200, json.dumps(_clear(body.get("agent"))))
         else:
             self._send(404, b"not found", "text/plain")
 
