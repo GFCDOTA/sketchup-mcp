@@ -136,7 +136,7 @@ def _agents() -> dict:
     except Exception:  # noqa: BLE001
         avail, rm = set(), {}
     online_map = {"ollama-deepseek": rm.get("deepseek"), "ollama-qwen": rm.get("qwen"),
-                  "ollama-llama": rm.get("llama")}
+                  "ollama-llama": rm.get("llama"), "ollama-spec": rm.get("designer")}
 
     def card(aid):
         rec = last.get(aid)
@@ -249,13 +249,23 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 .send{background:#192219!important;color:var(--ok)!important;border:1px solid #2c3a2c!important;font-weight:600;padding:3px 9px!important;font-size:11.5px}.send:hover{background:#21301f!important}
 .critwrap{display:flex;gap:12px;align-items:flex-start;margin-bottom:8px}
 .critic{width:230px;border:1px solid var(--bd);border-radius:8px;flex:none;cursor:pointer}.critic:hover{border-color:var(--gold)}
-.thumb{cursor:pointer}.lnk{color:var(--blu);cursor:pointer;text-decoration:underline}
+.thumb{cursor:pointer;position:relative}.lnk{color:var(--blu);cursor:pointer;text-decoration:underline}
+.trash{background:#2a1a1a;border:1px solid #4a2a2a;color:#e6a0a0;border-radius:6px;padding:2px 7px;cursor:pointer;font-size:12px}.trash:hover{background:#3a2222}
+.thumbtrash{position:absolute;top:5px;right:5px;padding:1px 6px;z-index:2}
 .gallery{max-height:330px;overflow-y:auto;padding-right:4px}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.86);z-index:50;align-items:center;justify-content:center;padding:24px}
 .modal.show{display:flex}.mbox{max-width:92vw;max-height:92vh;display:flex;flex-direction:column;gap:8px}
 .mbar{display:flex;gap:10px;align-items:center}.mbar span{flex:1;font-size:13px;color:var(--mut)}
 .mbtn{background:#1f2227;border:1px solid var(--bd);color:var(--fg);border-radius:7px;padding:5px 11px;cursor:pointer;text-decoration:none;font-size:12.5px}
 .mbtn:hover{background:#2a2d34}.mbox img{max-width:92vw;max-height:82vh;object-fit:contain;border:1px solid var(--bd);border-radius:8px;background:#000}
+.cmodal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:55;align-items:center;justify-content:center;padding:28px}
+.cmodal.show{display:flex}
+.cbox{width:min(740px,94vw);height:min(82vh,740px);background:var(--card);border:1px solid var(--bd);border-radius:14px;display:flex;flex-direction:column;overflow:hidden}
+.cbar{display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid var(--bd)}.cbar span{flex:1;font-weight:600;font-size:14px}
+.cbody{flex:1;overflow-y:auto;padding:14px 16px}
+.crow{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--bd)}
+.crow input{flex:1;background:#0c0d10;border:1px solid var(--bd);color:var(--fg);border-radius:8px;padding:8px 12px;font-size:13px}
+.chatbtn{background:#0c0d10;border:1px solid var(--bd);color:var(--gold);border-radius:6px;padding:3px 8px;cursor:pointer;font-size:12px}.chatbtn:hover{background:#1f1b29}
 </style></head><body>
 <header><span class=hdot></span><h1>INTERIOR STUDIO</h1>
 <nav><a href="#sec-agents">Agentes</a><a href="#sec-err">Erros</a><a href="#sec-graf">Gráficos</a><a href="#sec-cur">Curadoria</a><a href="#sec-ren">Renders</a></nav>
@@ -265,6 +275,11 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
  <div class=mbox><div class=mbar><span id=mname></span>
   <a id=mdl class=mbtn download>⬇ baixar</a><button class=mbtn onclick="copyImg(event)">copiar URL</button><button class=mbtn onclick=closeModal()>✕ fechar</button></div>
   <img id=mimg></div></div>
+<div id=chatmodal class=cmodal>
+ <div class=cbox><div class=cbar><span id=cname></span><button class=mbtn onclick=closeChat()>✕ fechar</button></div>
+  <div id=cbody class=cbody></div>
+  <div class=crow><input id=cinput placeholder="escreve aqui… (Enter envia)" onkeydown="if(event.key==='Enter')sendChat()"><button class=send onclick=sendChat()>➤ enviar</button></div>
+ </div></div>
 <script>
 const el=(h)=>{const d=document.createElement('div');d.innerHTML=h;return d.firstChild}
 const esc=(t)=>(t||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))
@@ -312,11 +327,25 @@ function openModal(src,name){const m=document.getElementById('modal');document.g
 function closeModal(){document.getElementById('modal').classList.remove('show')}
 function copyImg(ev){const u=document.getElementById('modal').dataset.url;if(navigator.clipboard)navigator.clipboard.writeText(u)
  const b=ev.target;const t=b.textContent;b.textContent='copiado!';setTimeout(()=>b.textContent=t,1200)}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()})
+let CHATAG='',CHATIDS=[]
+function openChat(agent,umb,idsStr){CHATAG=agent;CHATIDS=idsStr.split(',')
+ document.getElementById('cname').textContent='Chat — '+agent;document.getElementById('chatmodal').classList.add('show');loadChat();setTimeout(()=>document.getElementById('cinput').focus(),60)}
+function closeChat(){document.getElementById('chatmodal').classList.remove('show')}
+async function loadChat(){const cm=document.getElementById('chatmodal');if(!cm.classList.contains('show'))return
+ let s;try{s=await (await fetch('/api/state')).json()}catch(e){return}
+ const feed=(s.agents.feed||[]).filter(x=>CHATIDS.includes(x.agent)||(x.agent==='felipe'&&x.to&&CHATIDS.includes(x.to)))
+ const b=document.getElementById('cbody'),atBottom=b.scrollHeight-b.scrollTop-b.clientHeight<60
+ b.innerHTML=feed.map(x=>{const me=x.agent==='felipe';return `<div class="bub ${me?'me':'them'}"><div class=btxt>${esc(x.message)}</div><div class=bt>${me?'você':'🤖 '+esc(x.agent)} · ${hhmm(x.ts)}</div></div>`}).join('')||'<span class=mut>sem mensagens — manda a primeira</span>'
+ if(atBottom)b.scrollTop=b.scrollHeight}
+function sendChat(){const inp=document.getElementById('cinput'),q=(inp.value||'').trim();if(!q)return;inp.value=''
+ fetch('/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:CHATAG,prompt:q})}).then(()=>loadChat());setTimeout(loadChat,500)}
+setInterval(loadChat,3000)
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeChat()}})
 let LASTSTATE=''
 async function tick(force){
  // pausa com modal aberto OU enquanto digita/seleciona (senao apaga)
- const m=document.getElementById('modal');if(m&&m.classList.contains('show'))return
+ const m=document.getElementById('modal'),cm=document.getElementById('chatmodal')
+ if((m&&m.classList.contains('show'))||(cm&&cm.classList.contains('show')))return
  const ae=document.activeElement
  if(ae&&/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName))return
  let txt;try{txt=await (await fetch('/api/state')).text()}catch(e){return}
@@ -331,7 +360,7 @@ async function tick(force){
  const cols=(ag.umbrellas||[]).map(u=>{const ids=[u.lead.id,...u.subs.map(x=>x.id)]
    return `<div class=col>${leadCard(u.lead)}<div class=subs>${u.subs.map(subCard).join('')}</div>
     <div class=chat>${colChat(ag.feed,ids)}</div>
-    <div class=askrow><input id="ask-${u.id}" onkeydown="if(event.key==='Enter')askAgent('${u.lead.id}','${u.id}')" placeholder="perguntar pro ${esc(u.lead.label)}… (Enter envia)"><button class=send onclick="askAgent('${u.lead.id}','${u.id}')">➤ enviar</button></div></div>`}).join('')
+    <div class=askrow><input id="ask-${u.id}" onkeydown="if(event.key==='Enter')askAgent('${u.lead.id}','${u.id}')" placeholder="perguntar pro ${esc(u.lead.label)}…"><button class=send onclick="askAgent('${u.lead.id}','${u.id}')">➤</button><button class=chatbtn onclick="openChat('${u.lead.id}','${u.id}','${ids.join(',')}')" title="abrir chat grande">⛶</button></div></div>`}).join('')
  const ents=Object.entries(ag.metrics||{}).sort((a,b)=>b[1].calls-a[1].calls)
  const tot=ents.reduce((s,[,m])=>s+m.calls,0)||1, COL=['#6ca8ff','#7fd99a','#e6c069','#c08ae6','#5ad1c8','#e69a6c','#e67c7c']
  let acc=0
@@ -376,11 +405,12 @@ async function tick(force){
   <table><tr><th>tema</th><th>refs</th></tr>${themes}</table></div>`))
  // INBOX
  const fn=(i)=>i.local_path?encodeURIComponent(i.local_path.split('/').pop()):''
- const inb=(s.inbox||[]).map(i=>{const st=i.status||'pending'
-   const cell=i.local_path?`<td class=lnk onclick="openModal('/inbox-img/${fn(i)}','${esc(i.slug)}')">${esc(i.slug)}</td>`:`<td>${esc(i.slug)}</td>`
+ const inb=(s.inbox||[]).map(i=>{const st=i.status||'pending',nm=esc(i.title||i.slug)
+   const cell=i.local_path?`<td class=lnk onclick="openModal('/inbox-img/${fn(i)}','${esc(i.slug)}')">${nm}</td>`
+     :(i.source_url?`<td><a class=lnk href="${esc(i.source_url)}" target=_blank>${nm} ↗</a></td>`:`<td>${nm}</td>`)
    return `<tr>${cell}<td>${i.theme||'-'}</td><td>${st}</td>
-   <td>${(st==='pending'||st==='uploaded')?`<button onclick="curate('${esc(i.slug)}','approve')">✓ ok</button> <button onclick="curate('${esc(i.slug)}','reject')">✕ apagar</button>`:''}</td></tr>`}).join('')
- const thumbs=(s.inbox||[]).filter(i=>i.local_path).map(i=>`<div class=thumb onclick="openModal('/inbox-img/${fn(i)}','${esc(i.slug)}')"><img loading=lazy src="/inbox-img/${fn(i)}"><div class=cap>${esc(i.slug)}<div class=t>${i.status||'pending'}</div></div></div>`).join('')
+   <td>${st!=='approved'?`<button onclick="curate('${esc(i.slug)}','approve')">✓ ok</button> `:''}<button class=trash onclick="curate('${esc(i.slug)}','reject')" title=apagar>🗑</button></td></tr>`}).join('')
+ const thumbs=(s.inbox||[]).filter(i=>i.local_path).map(i=>`<div class=thumb><img loading=lazy src="/inbox-img/${fn(i)}" onclick="openModal('/inbox-img/${fn(i)}','${esc(i.slug)}')"><button class="trash thumbtrash" onclick="curate('${esc(i.slug)}','reject')" title=apagar>🗑</button><div class=cap>${esc(i.slug)}<div class=t>${i.status||'pending'}</div></div></div>`).join('')
  root.appendChild(el(`<div class="card full" id=sec-cur><h2>Curadoria — inbox de referência <span class=mut>(clica na imagem/slug pra ampliar · aprova/apaga — sem Claude)</span></h2>
   <div class=uprow><label class=upbtn>⬆ escolher imagem<input type=file id=upfile accept="image/*" onchange=uploadRef() hidden></label> <span class=mut id=upmsg>escolhe a imagem → sobe sozinho</span></div>
   ${thumbs?`<div class=grid style="margin:10px 0">${thumbs}</div>`:''}
@@ -397,13 +427,23 @@ tick();setInterval(tick,10000);window.addEventListener('resize',()=>tick())
 
 
 def _curate(slug, action):
-    """Felipe aprova/rejeita um candidato do inbox — grava direto no INBOX.json (sem Claude)."""
+    """Felipe aprova (mantém) ou apaga (SOME + deleta o arquivo) um candidato do inbox. Sem Claude."""
     if not INBOX.exists() or not slug:
         return {"ok": False}
     data = json.loads(INBOX.read_text("utf-8"))
-    for it in data.get("items", []):
-        if it.get("slug") == slug:
-            it["status"] = "approved" if action == "approve" else "rejected"
+    items = data.get("items", [])
+    if action == "approve":
+        for it in items:
+            if it.get("slug") == slug:
+                it["status"] = "approved"
+    else:  # apagar -> remove da lista + deleta o arquivo (Felipe não quer nem ver o rejeitado)
+        for it in items:
+            if it.get("slug") == slug and it.get("local_path"):
+                try:
+                    (ROOT / it["local_path"]).unlink()
+                except Exception:  # noqa: BLE001
+                    pass
+        data["items"] = [it for it in items if it.get("slug") != slug]
     INBOX.write_text(json.dumps(data, ensure_ascii=False, indent=2), "utf-8")
     return {"ok": True, "slug": slug, "action": action}
 
