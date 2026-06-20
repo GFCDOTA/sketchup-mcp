@@ -213,7 +213,7 @@ def _agents() -> dict:
 def _state() -> dict:
     return {"agents": _agents(), "renders": _renders(), "sessions": _sessions(),
             "backlog": _backlog(), "references": _references(), "inbox": _inbox(),
-            "knowledge": {"chars": len(ARCH_KB.read_text("utf-8")) if ARCH_KB.exists() else 0}}
+            "knowledge": _knowledge_state()}
 
 
 PAGE = r"""<!doctype html><html lang=pt-BR><head><meta charset=utf-8>
@@ -312,6 +312,11 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 .kc-mv{margin-top:5px;display:flex;gap:5px;justify-content:flex-end}
 .kc-mv button{background:#0c0d10;border:1px solid var(--bd);color:var(--gold);border-radius:5px;padding:1px 8px;cursor:pointer;font-size:11px}.kc-mv button:hover{background:#1f1b29}
 textarea{width:100%;min-height:90px;background:#0c0d10;border:1px solid var(--bd);color:var(--fg);border-radius:8px;padding:8px 11px;font:13px system-ui;resize:vertical}
+.upbtn{display:inline-block;background:#0c0d10;border:1px solid var(--bd);color:var(--blu);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:11.5px;font-weight:600}.upbtn:hover{background:#16202e}
+.kblist-h{margin:12px 0 6px;font-size:12px;color:var(--mut);font-weight:600}
+.kblist{max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;padding-right:4px}
+.kbi{display:flex;align-items:center;gap:8px;background:#0c0d10;border:1px solid var(--bd);border-radius:7px;padding:5px 9px}
+.kbi-t{flex:1;font-size:12.5px;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mbar .e{max-width:90px}
 .gallery{max-height:330px;overflow-y:auto;padding-right:4px}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.86);z-index:50;align-items:center;justify-content:center;padding:24px}
@@ -381,7 +386,12 @@ function clearErr(agent){fetch('/api/clear',{method:'POST',headers:{'Content-Typ
 function fetchPreview(slug){fetch('/api/preview',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug})}).then(()=>tick(1))}
 function feedArch(){const t=(document.getElementById('feedtext').value||'').trim(),ti=(document.getElementById('feedtitle').value||'').trim();if(!t)return
  const msg=document.getElementById('feedmsg');msg.textContent='alimentando…'
- fetch('/api/feed',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t,title:ti})}).then(r=>r.json()).then(r=>{document.getElementById('feedtext').value='';document.getElementById('feedtitle').value='';msg.textContent=r.ok?('✓ aprendido — '+r.chars+' chars na memória'):'erro';tick(1)})}
+ fetch('/api/feed',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t,title:ti})}).then(r=>r.json()).then(r=>{document.getElementById('feedtext').value='';document.getElementById('feedtitle').value='';msg.textContent=r.ok?('✓ aprendido — '+(r.count||'?')+' bloco(s), '+r.chars+' chars'):'erro';tick(1)})}
+function feedTxt(inp){const files=[...inp.files];if(!files.length)return;const msg=document.getElementById('feedmsg');msg.textContent='lendo '+files.length+' arquivo(s)…';let done=0
+ ;(async()=>{for(const f of files){let text='';try{text=await f.text()}catch(e){}if(!text.trim())continue;const title=f.name.replace(/\.(txt|md)$/i,'')
+   try{const r=await (await fetch('/api/feed',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,title})})).json();if(r.ok)done++}catch(e){}}
+  inp.value='';msg.textContent='✓ '+done+'/'+files.length+' arquivo(s) aprendido(s)';tick(1)})()}
+function forgetKb(id){fetch('/api/forget',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})}).then(()=>tick(1))}
 function moveTask(mt,dir){fetch('/api/move',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mt,direction:dir})}).then(()=>tick(1))}
 function runCycle(){const m=document.getElementById('cyclemsg');if(m)m.textContent='rodando ciclo nos LLMs locais…'
  fetch('/api/cycle',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})}).then(r=>r.json()).then(r=>{if(m)m.textContent=r.ok?'✓ ciclo rodou':('erro: '+(r.error||''));tick(1)})}
@@ -471,11 +481,17 @@ async function tick(force){
  root.appendChild(el(`<div class="card full"><h2>Backlog — quadro Kanban <span class=mut>(${b.total} microtarefas · ${b.done} done · arrasta com ◀ ▶)</span></h2>
   <div class=kboard>${board}</div></div>`))
  // ALIMENTAR O ARQUITETO
- const kb=(s.knowledge&&s.knowledge.chars)||0
- root.appendChild(el(`<div class="card full" id=sec-feed><h2>📚 Alimentar o Arquiteto <span class=mut>(cola orientações do GPT → ele aprende e USA nas respostas · ${kb} chars na memória)</span></h2>
+ const K=s.knowledge||{},kb=K.chars||0,kents=K.entries||[]
+ const klist=kents.length?kents.slice().reverse().map(e=>`<div class=kbi title="${esc(e.preview||'')}"><span class=kbi-t>${esc(e.title)}</span><span class=mut>${e.chars}c</span><button class=trash title=esquecer onclick="forgetKb(${e.id})">🗑</button></div>`).join(''):'<span class=mut style=font-size:12px>nada aprendido ainda — cola um texto ou sobe um .txt</span>'
+ root.appendChild(el(`<div class="card full" id=sec-feed><h2>📚 Alimentar o Arquiteto <span class=mut>(cola ou sobe orientações do GPT → ele aprende e USA nas respostas · ${kents.length} bloco(s) · ${kb} chars)</span></h2>
   <input id=feedtitle placeholder="título (ex.: paleta black wood gold)" style="width:100%;margin-bottom:7px">
   <textarea id=feedtext placeholder="cola aqui o texto/orientação do GPT sobre teu gosto, paleta, regras de design…"></textarea>
-  <div style=margin-top:7px><button class=send onclick=feedArch()>📚 alimentar</button> <span class=mut id=feedmsg></span></div></div>`))
+  <div style="margin-top:7px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+   <button class=send onclick=feedArch()>📚 alimentar (colado)</button>
+   <label class=upbtn>📄 subir .txt<input type=file accept=".txt,.md,text/plain" multiple style=display:none onchange=feedTxt(this)></label>
+   <span class=mut id=feedmsg></span></div>
+  <div class=kblist-h>📖 o que o Arquiteto já aprendeu <span class=mut>(${kents.length})</span></div>
+  <div class=kblist>${klist}</div></div>`))
  // SESSÕES
  const cl=(s.sessions.claims||[]).map(c=>`<tr><td>${esc(c.desc)}</td><td>${esc(c.status)}</td></tr>`).join('')
  const nwt=(s.sessions.worktrees||[]).length
@@ -609,24 +625,115 @@ def _flag(agent, message):
 
 
 # Arquiteto CONVERSA (deepseek, responde de verdade); o spec-cuspidor é um ESPECIALISTA embaixo dele.
+#
+# Conhecimento do Arquiteto = blocos ATÔMICOS no architect.md. Cada alimentação vira UM bloco com
+# header sentinela `<!--KB id=N | title=...-->` + corpo verbatim. O header NÃO colide com markdown
+# colado do GPT (que tem '##', '#', etc.), então um texto com várias seções continua sendo UMA entrada
+# — e o "esquecer" usa o ID ESTÁVEL, nunca a posição (posição muda quando a lista re-renderiza).
+_KB_HEAD_FMT = "<!--KB id={id} | title={title}-->"
+_KB_HEAD_RE = re.compile(r"^<!--KB id=(\d+) \| title=(.*?)-->\s*$")
+
+
+def _kb_read():
+    """Lê o architect.md como lista de blocos atômicos [{id,title,body}]. Arquivo sem header KB (legado)
+    vira UM único bloco id=0 — não adivinha fronteiras (markdown colado não é fronteira de entrada)."""
+    if not ARCH_KB.exists():
+        return []
+    text = ARCH_KB.read_text("utf-8")
+    if "<!--KB id=" not in text:
+        body = text.strip()
+        return [{"id": 0, "title": "(conhecimento legado)", "body": body}] if body else []
+    entries, cur = [], None
+    for line in text.splitlines():
+        m = _KB_HEAD_RE.match(line)
+        if m:
+            cur = {"id": int(m.group(1)), "title": m.group(2).strip() or "(sem título)", "body": []}
+            entries.append(cur)
+        elif cur is not None:
+            cur["body"].append(line)
+    for e in entries:
+        e["body"] = "\n".join(e["body"]).strip()
+    return entries
+
+
+def _kb_write(entries):
+    """Reescreve o architect.md a partir de [{id,title,body}] no formato atômico (idempotente)."""
+    if not entries:
+        ARCH_KB.write_text("", "utf-8")
+        return
+    parts = [f"{_KB_HEAD_FMT.format(id=e['id'], title=e['title'])}\n{e['body']}".rstrip() for e in entries]
+    ARCH_KB.write_text("\n" + "\n\n".join(parts) + "\n", "utf-8")
+
+
 def _feed(text, title=None):
-    """Felipe cola orientações de design (do GPT, que já sabe o gosto dele) -> o Arquiteto APRENDE
-    e usa isso nas respostas. É a alimentação do conhecimento do Arquiteto."""
+    """Felipe cola (ou sobe um .txt) orientações de design (do GPT, que já sabe o gosto dele) -> o
+    Arquiteto APRENDE e usa nas respostas. Cada alimentação = UM bloco atômico (id estável, corpo
+    verbatim) — o '##' do markdown do GPT NÃO fragmenta a entrada."""
     if not text or not text.strip():
         return {"ok": False, "error": "sem texto"}
+    entries = _kb_read()
+    new_id = max((e["id"] for e in entries), default=0) + 1
+    safe = (title or "orientação").replace("\n", " ").replace("-->", "→").strip()[:120] or "orientação"
     ARCH_KB.parent.mkdir(parents=True, exist_ok=True)
     with ARCH_KB.open("a", encoding="utf-8") as f:
-        f.write(f"\n## {title or 'orientação'}\n{text.strip()}\n")
+        f.write(f"\n{_KB_HEAD_FMT.format(id=new_id, title=safe)}\n{text.strip()}\n")
     try:
         from tools import studio_log
-        studio_log.post("interior-designer", "done", f"aprendi: {text.strip()[:80]}")
+        studio_log.post("interior-designer", "done", f"aprendi: {safe[:80]}")
     except Exception:  # noqa: BLE001
         pass
-    return {"ok": True, "chars": len(ARCH_KB.read_text("utf-8"))}
+    return {"ok": True, "id": new_id, "chars": len(ARCH_KB.read_text("utf-8")), "count": len(entries) + 1}
 
 
-def _arch_knowledge():
-    return ARCH_KB.read_text("utf-8")[-2500:] if ARCH_KB.exists() else ""
+def _kb_entries():
+    """Resumo p/ o painel: o que o Arquiteto já aprendeu (id estável, título, tamanho, preview).
+    Lista compacta -> Felipe manda VÁRIOS blocos sem encavalar/sair da tela."""
+    return [{"id": e["id"], "title": e["title"], "chars": len(e["body"]), "preview": e["body"][:160]}
+            for e in _kb_read()]
+
+
+def _knowledge_state():
+    return {"chars": len(ARCH_KB.read_text("utf-8")) if ARCH_KB.exists() else 0,
+            "entries": _kb_entries()}
+
+
+def _forget(entry_id):
+    """Felipe apaga UMA entrada pelo ID ESTÁVEL (não por posição — id não muda quando a lista
+    re-renderiza, então nunca apaga o bloco errado). Reescreve sem ela. Idempotente."""
+    try:
+        entry_id = int(entry_id)
+    except (TypeError, ValueError):
+        return {"ok": False, "error": "id inválido"}
+    entries = _kb_read()
+    keep = [e for e in entries if e["id"] != entry_id]
+    if len(keep) == len(entries):
+        return {"ok": False, "error": "id não encontrado"}
+    dropped = next(e for e in entries if e["id"] == entry_id)
+    _kb_write(keep)
+    try:
+        from tools import studio_log
+        studio_log.post("interior-designer", "done", f"esqueci: {dropped['title'][:60]}")
+    except Exception:  # noqa: BLE001
+        pass
+    return {"ok": True, "chars": len(ARCH_KB.read_text("utf-8")) if ARCH_KB.exists() else 0,
+            "count": len(keep)}
+
+
+def _arch_knowledge(budget=6000):
+    """Texto que PRIMA o Arquiteto antes de responder: entradas INTEIRAS (nunca cortadas no meio),
+    das mais recentes pra trás até o budget, em ordem cronológica. Antes era 'últimos 2500 chars'
+    (cortava bloco no meio e perdia tudo quando o Felipe alimenta MUITO)."""
+    entries = _kb_read()
+    if not entries:
+        return ""
+    blocks = [f"## {e['title']}\n{e['body']}".strip() for e in entries]
+    chosen, used = [], 0
+    for blk in reversed(blocks):
+        if chosen and used + len(blk) > budget:
+            break
+        chosen.append(blk)
+        used += len(blk)
+    return "\n\n".join(reversed(chosen))
 
 
 AGENT_ROLE = {"interior-designer": "deepseek", "interior-orchestrator": "coder",
@@ -789,6 +896,8 @@ class H(BaseHTTPRequestHandler):
             self._send(200, json.dumps(_fetch_preview(body.get("slug"))))
         elif path == "/api/feed":
             self._send(200, json.dumps(_feed(body.get("text"), body.get("title"))))
+        elif path == "/api/forget":
+            self._send(200, json.dumps(_forget(body.get("id"))))
         elif path == "/api/move":
             self._send(200, json.dumps(_move_task(body.get("mt"), body.get("direction"))))
         elif path == "/api/cycle":
