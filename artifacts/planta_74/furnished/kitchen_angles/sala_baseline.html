@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SALA r002 — BASELINE AUDIT</title>
+<style>
+ body{margin:0;background:#16181d;color:#e8e9ec;font:15px/1.5 system-ui,Segoe UI,Arial}
+ header{padding:18px 22px;border-bottom:1px solid #2a2d34;position:sticky;top:0;background:#16181d}
+ h1{margin:0;font-size:18px} .sub{color:#9aa0aa;font-size:13px;margin-top:4px}
+ .wrap{padding:18px 22px;display:grid;gap:22px;grid-template-columns:1fr 360px}
+ @media(max-width:900px){.wrap{grid-template-columns:1fr}}
+ figure{margin:0;background:#1d2026;border:1px solid #2a2d34;border-radius:10px;overflow:hidden}
+ figcaption{padding:9px 13px;font-size:13px;color:#cfd2d8;border-bottom:1px solid #2a2d34;background:#22252c}
+ img{display:block;width:100%;height:auto}
+ .diag{background:#1d2026;border:1px solid #2a2d34;border-radius:10px;padding:14px 16px;font-size:13.5px;align-self:start}
+ .diag h2{font-size:14px;margin:10px 0 4px} .ok{color:#9be3a8} .bad{color:#ff9b9b} .warn{color:#ffd58a}
+ ul{margin:4px 0 0;padding-left:18px} li{margin:3px 0}
+</style></head><body>
+<header><h1>SALA r002 (estar + jantar integrados) — BASELINE AUDIT <span style="color:#9aa0aa">sem V-Ray, sem material</span></h1>
+<div class="sub">Geometria VÁLIDA (gates PASS) — o problema é LAYOUT, não forma. Diagnóstico antes de aplicar black_wood_gold.</div></header>
+<div class="wrap">
+ <div>
+  <figure><figcaption>SALA r002 — crop do top: sofá+tapete (esq) · rack TV FLUTUANDO no meio · lado JANTAR vazio</figcaption>
+   <img src="sala_baseline_top_crop.png"></figure>
+  <figure style="margin-top:18px"><figcaption>Apê inteiro (sala = azul, no contexto) + iso 3D</figcaption>
+   <img src="sala_baseline_montagem.png"></figure>
+ </div>
+ <div class="diag">
+  <h2 class="ok">✅ Aproveitável</h2>
+  <ul><li>Sofá + tapete (cluster de estar)</li><li>Sala grande e bem integrada (estar/jantar/terraço/cozinha)</li><li>Geometria limpa — sem overlap/degenerado</li></ul>
+  <h2 class="bad">❌ Errado / lixo legado</h2>
+  <ul><li><b>Rack TV flutuando no meio</b> — sem parede atrás (#1)</li><li><b>Mesa de jantar AUSENTE</b> — lado jantar vazio</li><li>Sala sub-mobiliada, sem zonas</li><li>"Parede concreto gigante" = material de render, não estrutura</li></ul>
+  <h2 class="warn">🚧 Circulação</h2>
+  <ul><li>Nada bloqueia (gates PASS), mas o rack solto corta o fluxo</li><li>Eixos: sala↔terraço · sala↔cozinha · sala↔quartos</li></ul>
+  <h2>📐 Decisões p/ propagação</h2>
+  <ul><li><b>Parede-TV:</b> ancorar o rack numa parede real</li><li><b>Sofá:</b> encarando a parede-TV + tapete delimitando</li><li><b>Jantar:</b> zona vazia perto da cozinha</li><li><b>Rack → planned_niche:</b> painel de TV na parede (não móvel solto)</li></ul>
+ </div>
+</div></body></html>
