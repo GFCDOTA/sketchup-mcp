@@ -26,7 +26,7 @@ ERGO = {
     "upper_clearance": (50, 60),         # bancada -> base do aéreo
     "hood_clearance": (45, 65),          # cooktop -> coifa under-cabinet (tipo aprovado); chaminé seria 70-80
     "fridge_tower_width": (55, 75),      # ~60 ref; geladeira freestanding 60-75
-    "fridge_vent_gap": (2, 6),           # respiro lateral total
+    "fridge_vent_gap": (6, 12),          # respiro lateral TOTAL: ≥6 = 2×≥3cm/lado (fridge.md §5-6); >12 = nicho desperdiçado
     "base_module_width": (35, 65),       # módulos comuns ~60 (40/50/60 ok)
     "upper_module_width": (35, 65),
     "filler_width": (15, 18),            # quando necessário
@@ -41,6 +41,29 @@ def _ext_cm(parts, axis):
     lo = min(p[axis + "0"] for p in parts)
     hi = max(p[axis + "1"] for p in parts)
     return round((hi - lo) * IN2CM, 1)
+
+
+def _center_m(parts, axis):
+    """centro (m) de um módulo no eixo dado ('x'/'y'); None se vazio."""
+    if not parts:
+        return None
+    lo = min(p[axis + "0"] for p in parts)
+    hi = max(p[axis + "1"] for p in parts)
+    return (lo + hi) / 2 * IN2CM / 100.0
+
+
+def work_triangle_fridge_cooktop_m(by_mod):
+    """Perna geladeira↔cooktop do triângulo de trabalho, em metros.
+
+    A cozinha é LINEAR na parede OESTE (vertical), então os módulos correm no
+    eixo y (mesma convenção do resto do audit). Mede a distância centro-a-centro
+    no eixo da parede. None se geladeira ou cooktop ausente. Ergonomia: ≥1.2 m
+    (door-clearance NÃO cobre isto — é o gap que faltava no relatório)."""
+    gel = _center_m(by_mod.get("fridge", []), "y")
+    cook = _center_m(by_mod.get("cooktop_module", []), "y")
+    if gel is None or cook is None:
+        return None
+    return round(abs(gel - cook), 2)
 
 
 def audit(room_id="r004"):
@@ -71,7 +94,7 @@ def audit(room_id="r004"):
         "upper_clearance": round((K.AEREO_Z0 - K.COUNTER_H) * 100, 1),
         "hood_clearance": round(((K.AEREO_Z0 - 0.05) - (K.COOK_Z0 + 0.015)) * 100, 1),
         "fridge_tower_width": fridge_w,
-        "fridge_vent_gap": round(K.GEL_W * 100 - fridge_body_w, 1),   # nicho (GEL_W) vs corpo inset = respiro real
+        "fridge_vent_gap": round(K.GEL_W * 100 - fridge_body_w, 1),   # respiro TOTAL = nicho(GEL_W) − corpo inset (soma dos 2 lados; /2 = por-lado)
         "base_module_width": round(median(base_doors), 1) if base_doors else 0.0,
         "upper_module_width": round(median(upper_doors), 1) if upper_doors else 0.0,
         "filler_width": _ext_cm(by_mod.get("filler", []), "y"),
@@ -97,7 +120,7 @@ def audit(room_id="r004"):
 
 def main():
     room = sys.argv[1] if len(sys.argv) > 1 else "r004"
-    worst, rows, _ = audit(room)
+    worst, rows, by_mod = audit(room)
     # gates de POSIÇÃO (duros) — anexados ao relatório
     import json
     con = json.loads((ROOT / "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json")
@@ -106,15 +129,22 @@ def main():
     from tools.kitchen_validation import validate
     sink_pdf = validate(con, room)["result"]
     try:
-        circ = sanity_room(con, room)["status"]
+        door_clear = sanity_room(con, room)["status"]   # door-clearance (NÃO é triângulo de trabalho)
     except Exception:  # noqa: BLE001
-        circ = "?"
+        door_clear = "?"
+    # triângulo de trabalho geladeira↔cooktop — métrica separada do door-clearance
+    tri_m = work_triangle_fridge_cooktop_m(by_mod)
+    if tri_m is None:
+        tri_str, tri_tag = "n/a", "?"
+    else:
+        tri_str, tri_tag = f"{tri_m} m", ("PASS" if tri_m >= 1.2 else "WARN")
 
     print("KITCHEN_DIMENSIONAL_AUDIT_RESULT:")
     for key, v, lo, hi, tag in rows:
         print(f"- {key} = {v} cm  ({lo}-{hi})  {tag}")
     print(f"- sink_anchor_pdf = {sink_pdf}")
-    print(f"- circulation = {circ}")
+    print(f"- door_clearance = {door_clear}")
+    print(f"- work_triangle_fridge_cooktop = {tri_str}  (>=1.2 m)  {tri_tag}")
     print(f"\nKITCHEN_DIMENSIONAL_AUDIT => {worst}")
     sys.exit(0)
 
