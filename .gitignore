@@ -103,3 +103,6 @@ assets/third_party_cache/
 # V-Ray render-element byproducts (auto-gerados por render, nao evidencia)
 *.denoiser.png
 *.effectsResult.png
+
+# reference DB (índice reconstruível via reference_db.py rebuild)
+artifacts/reference_lab/reference.db
