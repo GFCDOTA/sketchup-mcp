@@ -155,6 +155,7 @@ def _agents() -> dict:
                 "status": rec["status"] if rec else "idle",
                 "message": rec["message"] if rec else "—",
                 "ts": rec.get("ts") if rec else None,
+                "to": rec.get("to") if rec else None,
                 "online": bool(mdl and mdl in avail)}
 
     metrics = {}
@@ -212,11 +213,12 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 .org{position:relative}
 .arrows{position:absolute;left:0;top:0;pointer-events:none;z-index:3;overflow:visible}
 .cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;position:relative;z-index:1;padding-top:30px}
-.lead .msg,.sub .msg,.bub .btxt{overflow-wrap:anywhere;word-break:break-word}
+.bub .btxt{overflow-wrap:anywhere;word-break:break-word}
 .col{background:#13151a;border:1px solid var(--bd);border-radius:12px;padding:12px}
 .lead{display:flex;gap:10px;align-items:center;border-bottom:1px solid var(--bd);padding-bottom:9px;margin-bottom:9px}
 .lead .face{font-size:30px;line-height:1}.lead .nm{font-weight:700;font-size:15px}
-.lead .msg{color:var(--mut);font-size:11.5px;margin-top:2px;max-height:30px;overflow:hidden}
+.lead .msg{color:var(--mut);font-size:11.5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.askto{font-size:10.5px;color:var(--gold);margin-left:6px}
 .subs{display:flex;flex-direction:column;gap:5px;margin-bottom:9px}
 .sub{display:flex;gap:8px;align-items:center;background:#181a1f;border:1px solid var(--bd);border-radius:8px;padding:4px 9px}
 .sub .face{font-size:15px;opacity:.55}.sub.act .face,.lead.act .face{opacity:1}
@@ -302,15 +304,16 @@ const esc=(t)=>(t||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[
 const hhmm=(ts)=>ts?new Date(ts*1000).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):''
 function leadCard(a){const act=(a.status==='working'||a.status==='thinking')?'act':''
  const clr=a.status==='error'?`<button class=clearbtn onclick="clearErr('${a.id}')">limpar</button>`:''
+ const to=(a.to&&a.to!=='felipe')?`<span class=askto>→ ${FACES[a.to]||''} ${esc(LABELS[a.to]||a.to)}</span>`:''
  return `<div class="lead s-${a.status} ${act}" id="lead-${a.id}"><div class=face>${a.face}</div>
-  <div style=flex:1><div class=nm>${a.label}<span class=stag>${a.status}</span> <span class=sdot></span>${clr}</div>
+  <div style=flex:1><div class=nm>${a.label}<span class=stag>${a.status}</span> <span class=sdot></span>${to}${clr}</div>
   <div class=msg>${esc(a.message)}</div></div></div>`}
 function subCard(a){const act=(a.status==='working'||a.status==='thinking'||a.online)?'act':''
  const on=a.online?'<span class=onl>online</span>':'<span class=off>offline</span>'
  return `<div class="sub s-${a.status} ${act}" title="${esc(a.message)}"><span class=face>${a.face}</span><span class=nm>${a.label}</span> ${on}<span class="sdot ${a.online?'on':''}"></span></div>`}
 function colChat(feed,ids){const f=(feed||[]).filter(x=>ids.includes(x.agent)||(x.agent==='felipe'&&ids.includes(x.to))).slice(-8)
  return f.map(x=>{const me=x.agent==='felipe'
-  return `<div class="bub ${me?'me':'them'}"><div class=btxt>${esc(x.message)}</div><div class=bt>${me?'você':'🤖 agente'} · ${hhmm(x.ts)}</div></div>`}).join('')||'<span class=mut>sem conversa — pergunta abaixo ⬇</span>'}
+  return `<div class="bub ${me?'me':'them'}"><div class=btxt>${esc(x.message)}</div><div class=bt>${FACES[x.agent]||'🤖'} ${esc(LABELS[x.agent]||x.agent)} · ${hhmm(x.ts)}</div></div>`}).join('')||'<span class=mut>sem conversa — pergunta abaixo ⬇</span>'}
 function drawArrows(ag){const svg=document.getElementById('arrows'),wrap=document.getElementById('org');if(!svg||!wrap)return
  const wr=wrap.getBoundingClientRect();svg.setAttribute('width',wr.width);svg.setAttribute('height',wr.height)
  const amap=ag.agent_umbrella||{},recent=(ag.feed||[]).slice(-7).filter(f=>f.to)
@@ -323,7 +326,7 @@ function drawArrows(ag){const svg=document.getElementById('arrows'),wrap=documen
   const lr=B.cx>A.cx,x0=lr?A.ri:A.l,x1=lr?B.l:B.ri,cy=(A.my+B.my)/2-10,er=errU.has(b)
   p+=`<path class="arrow ${er?'err':''}" marker-end="url(#${er?'ahr':'ah'})" d="M${x0},${A.my} Q${(x0+x1)/2},${cy} ${x1},${B.my}"/>`})
  svg.innerHTML=p}
-let LEADOF={};const leadOf=(u)=>LEADOF[u]
+let LEADOF={},FACES={},LABELS={};const leadOf=(u)=>LEADOF[u]
 async function curate(slug,action){await fetch('/api/curate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug,action})});tick(1)}
 function flagErr(){const a=document.getElementById('flagag').value,m=document.getElementById('flagmsg').value;if(!m)return
  fetch('/api/flag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:a,message:m})}).then(()=>{document.getElementById('flagmsg').value='';tick(1)})}
@@ -354,7 +357,7 @@ async function loadChat(){const cm=document.getElementById('chatmodal');if(!cm.c
  let s;try{s=await (await fetch('/api/state')).json()}catch(e){return}
  const feed=(s.agents.feed||[]).filter(x=>CHATIDS.includes(x.agent)||(x.agent==='felipe'&&x.to&&CHATIDS.includes(x.to)))
  const b=document.getElementById('cbody'),atBottom=b.scrollHeight-b.scrollTop-b.clientHeight<60
- b.innerHTML=feed.map(x=>{const me=x.agent==='felipe';return `<div class="bub ${me?'me':'them'}"><div class=btxt>${esc(x.message)}</div><div class=bt>${me?'você':'🤖 '+esc(x.agent)} · ${hhmm(x.ts)}</div></div>`}).join('')||'<span class=mut>sem mensagens — manda a primeira</span>'
+ b.innerHTML=feed.map(x=>{const me=x.agent==='felipe';return `<div class="bub ${me?'me':'them'}"><div class=btxt>${esc(x.message)}</div><div class=bt>${FACES[x.agent]||'🤖'} ${esc(LABELS[x.agent]||x.agent)} · ${hhmm(x.ts)}</div></div>`}).join('')||'<span class=mut>sem mensagens — manda a primeira</span>'
  if(atBottom)b.scrollTop=b.scrollHeight}
 function sendChat(cons){const inp=document.getElementById('cinput'),q=(inp.value||'').trim();if(!q)return;inp.value=''
  fetch(cons?'/api/consensus':'/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:CHATAG,prompt:q})}).then(()=>loadChat());setTimeout(loadChat,500)}
@@ -373,7 +376,8 @@ async function tick(force){
  LASTSTATE=txt
  const s=JSON.parse(txt)
  const b=s.backlog,refs=s.references||{},by=refs.by_theme||{},bk=refs.by_kind||{},ag=s.agents||{umbrellas:[],feed:[],metrics:{}}
- LEADOF={};(ag.umbrellas||[]).forEach(u=>LEADOF[u.id]=u.lead.id)
+ LEADOF={};FACES={};LABELS={};(ag.umbrellas||[]).forEach(u=>{LEADOF[u.id]=u.lead.id;FACES[u.id]=u.lead.face;LABELS[u.id]=u.label;[u.lead,...u.subs].forEach(c=>{FACES[c.id]=c.face;LABELS[c.id]=c.label})})
+ FACES['felipe']='🧑';LABELS['felipe']='você'
  const root=document.getElementById('root');const sy=window.scrollY;root.innerHTML=''
  // ORG (guarda-chuvas + setas + métricas)
  const cols=(ag.umbrellas||[]).map(u=>{const ids=[u.lead.id,...u.subs.map(x=>x.id)]
