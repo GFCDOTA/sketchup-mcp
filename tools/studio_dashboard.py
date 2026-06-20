@@ -173,10 +173,19 @@ def _state() -> dict:
 PAGE = r"""<!doctype html><html lang=pt-BR><head><meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1"><title>INTERIOR STUDIO — live</title>
 <style>
-:root{--bg:#0f1013;--card:#181a1f;--bd:#262a32;--fg:#e8e9ec;--mut:#9aa0aa;--ok:#7fd99a;--warn:#e6c069;--blu:#6ca8ff;--red:#e67c7c}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,Arial}
-header{padding:14px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:14px}
-h1{font-size:17px;margin:0}.hdot{width:9px;height:9px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok)}
+:root{--bg:#0e0f12;--card:#16171c;--bd:#262a32;--fg:#e8e9ec;--mut:#9aa0aa;--ok:#7fd99a;--warn:#e6c069;--blu:#6ca8ff;--red:#e67c7c;--gold:#c9a86a}
+*{box-sizing:border-box}
+body{margin:0;color:var(--fg);font:14px/1.5 system-ui,Arial;min-height:100vh;
+ background:radial-gradient(1100px 560px at 12% -8%, #1d1626 0%, #0e0f12 58%) fixed}
+*::-webkit-scrollbar{width:9px;height:9px}*::-webkit-scrollbar-track{background:transparent}
+*::-webkit-scrollbar-thumb{background:#2e2a3a;border-radius:6px;border:2px solid transparent;background-clip:padding-box}
+*::-webkit-scrollbar-thumb:hover{background:#473d5c;background-clip:padding-box}
+header{position:sticky;top:0;z-index:40;padding:12px 22px;display:flex;align-items:center;gap:16px;
+ background:linear-gradient(90deg,#15131c,#121318);border-bottom:1px solid #2c2636}
+h1{font-size:16px;margin:0;letter-spacing:.6px;font-weight:700;background:linear-gradient(90deg,#fff,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hdot{width:9px;height:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 9px var(--gold)}
+nav{display:flex;gap:3px}nav a{color:var(--mut);text-decoration:none;font-size:12.5px;padding:4px 10px;border-radius:7px}
+nav a:hover{color:var(--fg);background:#1f1b29}
 .mut{color:var(--mut);font-size:12.5px}.wrap{padding:16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px 16px}
 .card.full{grid-column:1/3}h2{font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin:0 0 10px}
@@ -229,13 +238,14 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 .askrow button{background:#0c0d10;border:1px solid var(--bd);color:var(--ok);border-radius:6px;padding:4px 9px;cursor:pointer}.askrow button:hover{background:#1f2227}
 .uprow{display:flex;gap:8px;align-items:center;margin-bottom:6px;font-size:12px}.uprow input[type=file]{color:var(--mut);font-size:11.5px}
 .uprow button{background:#0c0d10;border:1px solid var(--bd);color:var(--ok);border-radius:6px;padding:4px 9px;cursor:pointer}.uprow button:hover{background:#1f2227}
+.upbtn{background:#1a1622;border:1px solid #2c2636;color:var(--gold);border-radius:7px;padding:5px 12px;cursor:pointer;font-size:12px}.upbtn:hover{background:#221c2e}
 .bub{max-width:82%;padding:5px 9px;border-radius:11px;margin:4px 0;font-size:11.5px;word-break:break-word}
 .bub.me{background:#1f3a4d;margin-left:auto;border-bottom-right-radius:3px}
 .bub.them{background:#1d2026;border:1px solid var(--bd);margin-right:auto;border-bottom-left-radius:3px}
 .bub .bt{font-size:9px;color:var(--mut);margin-top:2px}
-.send{background:var(--ok)!important;color:#0c1410!important;border:none!important;font-weight:600}.send:hover{filter:brightness(1.1)}
+.send{background:#192219!important;color:var(--ok)!important;border:1px solid #2c3a2c!important;font-weight:600;padding:3px 9px!important;font-size:11.5px}.send:hover{background:#21301f!important}
 .critwrap{display:flex;gap:12px;align-items:flex-start;margin-bottom:8px}
-.critic{width:160px;border:1px solid var(--bd);border-radius:8px;flex:none;cursor:pointer}
+.critic{width:230px;border:1px solid var(--bd);border-radius:8px;flex:none;cursor:pointer}.critic:hover{border-color:var(--gold)}
 .thumb{cursor:pointer}.lnk{color:var(--blu);cursor:pointer;text-decoration:underline}
 .gallery{max-height:330px;overflow-y:auto;padding-right:4px}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.86);z-index:50;align-items:center;justify-content:center;padding:24px}
@@ -244,8 +254,9 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 .mbtn{background:#1f2227;border:1px solid var(--bd);color:var(--fg);border-radius:7px;padding:5px 11px;cursor:pointer;text-decoration:none;font-size:12.5px}
 .mbtn:hover{background:#2a2d34}.mbox img{max-width:92vw;max-height:82vh;object-fit:contain;border:1px solid var(--bd);border-radius:8px;background:#000}
 </style></head><body>
-<header><span class=hdot></span><h1>INTERIOR STUDIO</h1><span class=mut id=ts>carregando…</span>
-<span class=mut style=margin-left:auto>auto-refresh 5s · :8782 (separado do oráculo :8765)</span></header>
+<header><span class=hdot></span><h1>INTERIOR STUDIO</h1>
+<nav><a href="#sec-agents">Agentes</a><a href="#sec-err">Erros</a><a href="#sec-graf">Gráficos</a><a href="#sec-cur">Curadoria</a><a href="#sec-ren">Renders</a></nav>
+<span class=mut id=ts style=margin-left:auto>carregando…</span><span class=mut>· :8782</span></header>
 <div class=wrap id=root></div>
 <div id=modal class=modal onclick="if(event.target===this)closeModal()">
  <div class=mbox><div class=mbar><span id=mname></span>
@@ -297,9 +308,10 @@ function copyImg(ev){const u=document.getElementById('modal').dataset.url;if(nav
  const b=ev.target;const t=b.textContent;b.textContent='copiado!';setTimeout(()=>b.textContent=t,1200)}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()})
 async function tick(){
- // NÃO atualizar enquanto o Felipe digita/seleciona — senão apaga o que ele tá escrevendo
+ // pausa o refresh com o modal aberto OU enquanto o Felipe digita/seleciona (senao apaga)
+ const m=document.getElementById('modal');if(m&&m.classList.contains('show'))return
  const ae=document.activeElement
- if(ae&&/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)&&ae.type!=='file')return
+ if(ae&&/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName))return
  let s;try{s=await (await fetch('/api/state')).json()}catch(e){return}
  document.getElementById('ts').textContent='atualizado '+new Date().toLocaleTimeString('pt-BR')
  const b=s.backlog,refs=s.references||{},by=refs.by_theme||{},bk=refs.by_kind||{},ag=s.agents||{umbrellas:[],feed:[],metrics:{}}
@@ -320,20 +332,19 @@ async function tick(){
  const errs=ents.filter(([,m])=>m.errors>0),emx=Math.max(1,...errs.map(([,m])=>m.errors))
  const ebars=errs.length?errs.map(([id,m])=>`<div class=mrow><span class=nm>${esc(id)}</span><span class=mbar><span class=e style=width:${Math.round(130*m.errors/emx)}px></span></span><span class=mnum>${m.errors} erro(s)</span></div>`).join(''):'<span class=mut>nenhum erro de design marcado ainda</span>'
  const flagopts=ents.map(([id])=>`<option>${esc(id)}</option>`).join('')||'<option>interior-designer</option>'
- root.appendChild(el(`<div class="card full"><h2>Agentes — guarda-chuvas (PM · Team Lead · Arquiteto)</h2>
+ root.appendChild(el(`<div class="card full" id=sec-agents><h2>Agentes — guarda-chuvas (PM · Team Lead · Arquiteto)</h2>
   <div class=org id=org><svg class=arrows id=arrows></svg><div class=cols>${cols}</div></div></div>`))
  drawArrows(ag)
- // GRÁFICOS + marcar erro (com o render que tu critica do lado)
  const critic=(s.renders||[])[0]
- root.appendChild(el(`<div class="card full"><h2>Gráficos & erros de design</h2>
-  <div class=charts>
-   <div class=chartbox><h2>Chamadas por agente</h2><div class=pie><svg viewBox="0 0 120 120">${slices||'<circle cx=60 cy=60 r=46 fill=#20242b/>'}</svg><div class=legend>${leg||'<span class=mut>—</span>'}</div></div></div>
-   <div class=chartbox><h2>Erros — o que TU não curtiu (vira lição)</h2>
-    <div class=critwrap>${critic?`<img class=critic onclick="openModal('/img/${encodeURIComponent(critic.name)}','${esc(critic.name)}')" src="/img/${encodeURIComponent(critic.name)}" title="${esc(critic.name)}">`:''}
-     <div style=flex:1>${ebars}</div></div>
+ // ERROS — card próprio, grande, logo abaixo dos agentes
+ root.appendChild(el(`<div class="card full" id=sec-err><h2>Erros de design — o que TU não curtiu (vira lição)</h2>
+  <div class=critwrap>${critic?`<img class=critic onclick="openModal('/img/${encodeURIComponent(critic.name)}','${esc(critic.name)}')" src="/img/${encodeURIComponent(critic.name)}" title="clica pra ampliar">`:''}
+   <div style=flex:1>${ebars}
     <div class=flagrow><select id=flagag>${flagopts}</select>
-     <input id=flagmsg onkeydown="if(event.key==='Enter')flagErr()" placeholder="ex.: parede muito escura… (Enter envia)"><button class=send onclick=flagErr()>marcar erro</button></div></div>
-  </div></div>`))
+     <input id=flagmsg onkeydown="if(event.key==='Enter')flagErr()" placeholder="ex.: parede muito escura, coifa não combina… (Enter)"><button class=send onclick=flagErr()>marcar erro</button></div></div></div></div>`))
+ // GRÁFICOS (pizza)
+ root.appendChild(el(`<div class="card full" id=sec-graf><h2>Gráficos</h2>
+  <div class=chartbox style="max-width:380px"><h2>Chamadas por agente</h2><div class=pie><svg viewBox="0 0 120 120">${slices||'<circle cx=60 cy=60 r=46 fill=#20242b/>'}</svg><div class=legend>${leg||'<span class=mut>—</span>'}</div></div></div></div>`))
  // BACKLOG
  const pct=b.total?Math.round(100*b.done/b.total):0
  root.appendChild(el(`<div class=card><h2>Backlog — KITCHEN_TO_100</h2>
@@ -360,17 +371,17 @@ async function tick(){
    return `<tr>${cell}<td>${i.theme||'-'}</td><td>${st}</td>
    <td>${(st==='pending'||st==='uploaded')?`<button onclick="curate('${esc(i.slug)}','approve')">✓ ok</button> <button onclick="curate('${esc(i.slug)}','reject')">✕ apagar</button>`:''}</td></tr>`}).join('')
  const thumbs=(s.inbox||[]).filter(i=>i.local_path).map(i=>`<div class=thumb onclick="openModal('/inbox-img/${fn(i)}','${esc(i.slug)}')"><img loading=lazy src="/inbox-img/${fn(i)}"><div class=cap>${esc(i.slug)}<div class=t>${i.status||'pending'}</div></div></div>`).join('')
- root.appendChild(el(`<div class="card full"><h2>Curadoria — inbox de referência <span class=mut>(clica na imagem/slug pra ampliar · aprova/apaga — sem Claude)</span></h2>
-  <div class=uprow><input type=file id=upfile accept="image/*"><button onclick=uploadRef()>⬆ subir referência</button> <span class=mut id=upmsg></span></div>
+ root.appendChild(el(`<div class="card full" id=sec-cur><h2>Curadoria — inbox de referência <span class=mut>(clica na imagem/slug pra ampliar · aprova/apaga — sem Claude)</span></h2>
+  <div class=uprow><label class=upbtn>⬆ escolher imagem<input type=file id=upfile accept="image/*" onchange=uploadRef() hidden></label> <span class=mut id=upmsg>escolhe a imagem → sobe sozinho</span></div>
   ${thumbs?`<div class=grid style="margin:10px 0">${thumbs}</div>`:''}
   <table><tr><th>slug</th><th>tema</th><th>status</th><th>ação</th></tr>${inb||'<tr><td colspan=4 class=mut>fila vazia — sobe uma referência acima</td></tr>'}</table></div>`))
  // RENDERS
  const rr=(s.renders||[]).map(r=>`<div class=thumb onclick="openModal('/img/${encodeURIComponent(r.name)}','${esc(r.name)}')"><img loading=lazy src="/img/${encodeURIComponent(r.name)}">
    <div class=cap>${esc(r.name.replace('.png',''))}<div class=t>${r.theme} · ${r.sub} · ${r.kb}KB</div></div></div>`).join('')
- root.appendChild(el(`<div class="card full"><h2>Renders (${(s.renders||[]).length}) — clica pra ampliar/baixar · mais novos primeiro</h2>
+ root.appendChild(el(`<div class="card full" id=sec-ren><h2>Renders (${(s.renders||[]).length}) — clica pra ampliar/baixar · mais novos primeiro</h2>
   <div class="grid gallery">${rr||'<span class=mut>sem renders</span>'}</div></div>`))
 }
-tick();setInterval(tick,5000);window.addEventListener('resize',()=>tick())
+tick();setInterval(tick,10000);window.addEventListener('resize',()=>tick())
 </script></body></html>"""
 
 
