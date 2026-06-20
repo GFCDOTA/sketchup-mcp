@@ -383,6 +383,8 @@ function feedArch(){const t=(document.getElementById('feedtext').value||'').trim
  const msg=document.getElementById('feedmsg');msg.textContent='alimentando…'
  fetch('/api/feed',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t,title:ti})}).then(r=>r.json()).then(r=>{document.getElementById('feedtext').value='';document.getElementById('feedtitle').value='';msg.textContent=r.ok?('✓ aprendido — '+r.chars+' chars na memória'):'erro';tick(1)})}
 function moveTask(mt,dir){fetch('/api/move',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mt,direction:dir})}).then(()=>tick(1))}
+function runCycle(){const m=document.getElementById('cyclemsg');if(m)m.textContent='rodando ciclo nos LLMs locais…'
+ fetch('/api/cycle',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})}).then(r=>r.json()).then(r=>{if(m)m.textContent=r.ok?'✓ ciclo rodou':('erro: '+(r.error||''));tick(1)})}
 function askAgent(agent,umb){const inp=document.getElementById('ask-'+umb),q=(inp.value||'').trim();if(!q)return
  inp.value='';inp.blur()   // tira o foco -> o tick pode mostrar o balão
  fetch('/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent,prompt:q})}).then(()=>tick(1))
@@ -431,7 +433,7 @@ async function tick(force){
  const cols=(ag.umbrellas||[]).map(u=>{const ids=[u.lead.id,...u.subs.map(x=>x.id)]
    let extra=''
    if(u.id==='pm'){const bk=s.backlog||{},nx=(bk.tasks||[]).find(t=>!t.done&&!t.geo&&t.status!=='executado')
-     extra=`<div class=pmbox><b>🗂️ Dono do Kanban</b> · ${bk.total||0} tarefas · ${bk.done||0} feitas${nx?`<br>▶ próxima: <b>${nx.mt}</b> ${esc((nx.what||'').slice(0,42))}`:''}</div>`}
+     extra=`<div class=pmbox><b>🗂️ Dono do Kanban</b> · ${bk.total||0} tarefas · ${bk.done||0} feitas${nx?`<br>▶ próxima: <b>${nx.mt}</b> ${esc((nx.what||'').slice(0,42))}`:''}<br><button class=send style=margin-top:6px onclick=runCycle()>▶ rodar 1 ciclo (PM→Lead→Arquiteto)</button> <span class=mut id=cyclemsg></span></div>`}
    return `<div class=col>${leadCard(u.lead)}${extra}<div class=subs>${u.subs.map(subCard).join('')}</div>
     <div class=chat>${colChat(ag.feed,ids)}</div>
     <div class=askrow><input id="ask-${u.id}" onkeydown="if(event.key==='Enter')askAgent('${u.lead.id}','${u.id}')" placeholder="perguntar pro ${esc(u.lead.label)}…"><button class=send onclick="askAgent('${u.lead.id}','${u.id}')">➤</button><button class=chatbtn onclick="openChat('${u.lead.id}','${u.id}','${ids.join(',')}')" title="abrir chat grande">⛶</button></div></div>`}).join('')
@@ -683,6 +685,35 @@ def _consensus(agent, prompt):
         return {"ok": False, "error": str(e)}
 
 
+def _cycle(goal=None):
+    """UM ciclo do orquestrador rodando nos LLMs LOCAIS (sem Claude): PM escolhe a próxima tarefa
+    -> consulta o Team Lead -> que consulta o Arquiteto. Cada passo posta no feed = a cadeia viva."""
+    import re as _re
+    try:
+        from tools import ollama_bridge, studio_log
+        bk = _backlog()
+        nxt = next((t for t in bk.get("tasks", [])
+                    if not t["done"] and not t["geo"] and t["status"] != "executado"), None)
+        if not nxt:
+            studio_log.post("interior-pm", "idle", "sem tarefa PELE na fila — preciso de OK p/ GEO")
+            return {"ok": True, "msg": "fila PELE vazia"}
+        mt = f"{nxt['mt']} ({nxt['what'][:55]})"
+        g = goal or "deixar a cozinha 100%"
+
+        def clean(r):
+            return _re.sub(r"<think>.*?</think>", "", r.get("response") or "", flags=_re.DOTALL).strip()
+        pm = clean(ollama_bridge.ask("llama", f"Voce e o PM. Meta: {g}. Proxima tarefa: {mt}. Em 1 frase curta, por que puxar essa agora.", timeout=60))
+        studio_log.post("interior-pm", "working", pm[:200] or f"puxando {mt}", to="team_lead", via="llama3.1:8b")
+        tl = clean(ollama_bridge.ask("coder", f"Voce e o Team Lead. O PM vai fazer: {mt}. Em 1 frase, o que o time precisa pra executar bem.", timeout=60))
+        studio_log.post("interior-orchestrator", "working", tl[:200] or "organizando o time", to="architect", via="qwen2.5-coder:14b")
+        kb = _arch_knowledge()
+        ar = clean(ollama_bridge.ask("deepseek", (f"[gosto do Felipe]: {kb}\n" if kb else "") + f"Voce e o Arquiteto. Tarefa: {mt}. Em 1 frase, a diretriz de design.", timeout=90))
+        studio_log.post("interior-designer", "done", ar[:250] or "diretriz dada", via="deepseek-r1:14b")
+        return {"ok": True, "task": nxt["mt"]}
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": str(e)}
+
+
 def _clear(agent):
     """Felipe tira um agente do status de erro (volta pra idle)."""
     try:
@@ -756,6 +787,8 @@ class H(BaseHTTPRequestHandler):
             self._send(200, json.dumps(_feed(body.get("text"), body.get("title"))))
         elif path == "/api/move":
             self._send(200, json.dumps(_move_task(body.get("mt"), body.get("direction"))))
+        elif path == "/api/cycle":
+            self._send(200, json.dumps(_cycle(body.get("goal"))))
         else:
             self._send(404, b"not found", "text/plain")
 
