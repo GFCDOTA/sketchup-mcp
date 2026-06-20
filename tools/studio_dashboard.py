@@ -52,7 +52,7 @@ def _move_task(mt, direction):
     return {"ok": True, "mt": mt, "status": k[mt]}
 
 ROSTER = [
-    {"id": "interior-orchestrator", "face": "\U0001F3AC", "label": "Team Lead"},
+    {"id": "interior-orchestrator", "face": "\U0001F3AF", "label": "Team Lead"},
     {"id": "interior-pm",           "face": "\U0001F4CB", "label": "PM"},
     {"id": "interior-designer",     "face": "\U0001F3A8", "label": "Arquiteto"},
     {"id": "reference-scout",       "face": "\U0001F52D", "label": "Scout"},
@@ -253,6 +253,7 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 .lead .face{font-size:30px;line-height:1}.lead .nm{font-weight:700;font-size:15px}
 .lead .msg{color:var(--mut);font-size:11.5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .askto{font-size:10.5px;color:var(--gold);margin-left:6px}
+.pmbox{background:#15131c;border:1px solid #2c2636;border-left:3px solid var(--gold);border-radius:8px;padding:7px 11px;margin-bottom:9px;font-size:11.5px;color:#cdb98a}.pmbox b{color:var(--gold)}
 .subs{display:flex;flex-direction:column;gap:5px;margin-bottom:9px}
 .sub{display:flex;gap:8px;align-items:center;background:#181a1f;border:1px solid var(--bd);border-radius:8px;padding:4px 9px}
 .sub .face{font-size:15px;opacity:.55}.sub.act .face,.lead.act .face{opacity:1}
@@ -357,7 +358,7 @@ function subCard(a){const act=(a.status==='working'||a.status==='thinking'||a.on
  return `<div class="sub s-${a.status} ${act}" title="${esc(a.message)}"><span class=face>${a.face}</span><span class=nm>${a.label}</span> ${on}<span class="sdot ${a.online?'on':''}"></span></div>`}
 function colChat(feed,ids){const f=(feed||[]).filter(x=>ids.includes(x.agent)||(x.agent==='felipe'&&ids.includes(x.to))).slice(-8)
  return f.map(x=>{const me=x.agent==='felipe'
-  return `<div class="bub ${me?'me':'them'}"><div class=btxt>${esc(x.message)}</div><div class=bt>${FACES[x.agent]||'🤖'} ${esc(LABELS[x.agent]||x.agent)}${x.via?' · via '+esc(x.via):''} · ${hhmm(x.ts)}</div></div>`}).join('')||'<span class=mut>sem conversa — pergunta abaixo ⬇</span>'}
+  return `<div class="bub ${me?'me':'them'}"><div class=btxt>${esc(x.message)}</div><div class=bt>${FACES[x.agent]||'🤖'} ${esc(LABELS[x.agent]||x.agent)}${x.via&&x.via.indexOf('consenso')===0?' · 🧠 consenso':''} · ${hhmm(x.ts)}</div></div>`}).join('')||'<span class=mut>sem conversa — pergunta abaixo ⬇</span>'}
 function drawArrows(ag){const svg=document.getElementById('arrows'),wrap=document.getElementById('org');if(!svg||!wrap)return
  const wr=wrap.getBoundingClientRect();svg.setAttribute('width',wr.width);svg.setAttribute('height',wr.height)
  const amap=ag.agent_umbrella||{},recent=(ag.feed||[]).slice(-7).filter(f=>f.to)
@@ -402,7 +403,7 @@ async function loadChat(){const cm=document.getElementById('chatmodal');if(!cm.c
  let s;try{s=await (await fetch('/api/state')).json()}catch(e){return}
  const feed=(s.agents.feed||[]).filter(x=>CHATIDS.includes(x.agent)||(x.agent==='felipe'&&x.to&&CHATIDS.includes(x.to)))
  const b=document.getElementById('cbody'),atBottom=b.scrollHeight-b.scrollTop-b.clientHeight<60
- b.innerHTML=feed.map(x=>{const me=x.agent==='felipe';return `<div class="bub ${me?'me':'them'}"><div class=btxt>${esc(x.message)}</div><div class=bt>${FACES[x.agent]||'🤖'} ${esc(LABELS[x.agent]||x.agent)}${x.via?' · via '+esc(x.via):''} · ${hhmm(x.ts)}</div></div>`}).join('')||'<span class=mut>sem mensagens — manda a primeira</span>'
+ b.innerHTML=feed.map(x=>{const me=x.agent==='felipe';return `<div class="bub ${me?'me':'them'}"><div class=btxt>${esc(x.message)}</div><div class=bt>${FACES[x.agent]||'🤖'} ${esc(LABELS[x.agent]||x.agent)}${x.via&&x.via.indexOf('consenso')===0?' · 🧠 consenso':''} · ${hhmm(x.ts)}</div></div>`}).join('')||'<span class=mut>sem mensagens — manda a primeira</span>'
  if(atBottom)b.scrollTop=b.scrollHeight}
 function sendChat(cons){const inp=document.getElementById('cinput'),q=(inp.value||'').trim();if(!q)return;inp.value=''
  fetch(cons?'/api/consensus':'/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:CHATAG,prompt:q})}).then(()=>loadChat());setTimeout(loadChat,500)}
@@ -426,7 +427,10 @@ async function tick(force){
  const root=document.getElementById('root');const sy=window.scrollY;root.innerHTML=''
  // ORG (guarda-chuvas + setas + métricas)
  const cols=(ag.umbrellas||[]).map(u=>{const ids=[u.lead.id,...u.subs.map(x=>x.id)]
-   return `<div class=col>${leadCard(u.lead)}<div class=subs>${u.subs.map(subCard).join('')}</div>
+   let extra=''
+   if(u.id==='pm'){const bk=s.backlog||{},nx=(bk.tasks||[]).find(t=>!t.done&&!t.geo&&t.status!=='executado')
+     extra=`<div class=pmbox><b>🗂️ Dono do Kanban</b> · ${bk.total||0} tarefas · ${bk.done||0} feitas${nx?`<br>▶ próxima: <b>${nx.mt}</b> ${esc((nx.what||'').slice(0,42))}`:''}</div>`}
+   return `<div class=col>${leadCard(u.lead)}${extra}<div class=subs>${u.subs.map(subCard).join('')}</div>
     <div class=chat>${colChat(ag.feed,ids)}</div>
     <div class=askrow><input id="ask-${u.id}" onkeydown="if(event.key==='Enter')askAgent('${u.lead.id}','${u.id}')" placeholder="perguntar pro ${esc(u.lead.label)}…"><button class=send onclick="askAgent('${u.lead.id}','${u.id}')">➤</button><button class=chatbtn onclick="openChat('${u.lead.id}','${u.id}','${ids.join(',')}')" title="abrir chat grande">⛶</button></div></div>`}).join('')
  const ents=Object.entries(ag.metrics||{}).sort((a,b)=>b[1].calls-a[1].calls)
