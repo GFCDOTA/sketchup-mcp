@@ -1,0 +1,18 @@
+{
+  "name": "matte_black_cabinetry",
+  "title": "Marcenaria preto fosco / grafite como base (com matiz, não chapado)",
+  "rule": "Corpos, portas e gavetas em preto fosco a grafite são a BASE escura da cozinha black_wood_gold. O preto tem matiz (não é [0,0,0] chapado) e finish fosco/satin leve para devolver um mínimo de luz e não virar buraco morto. A massa preta SEMPRE compensada por madeira quente de acento + LED 2700K + pedra protagonista — preto puro sem compensação = caverna (FAIL). Sem puxador tradicional: abertura por cava/gola/perfil-J.",
+  "params": {
+    "matte_black_rgb": [24, 24, 24],
+    "graphite_rgb": [38, 39, 40],
+    "finish": "fosco a satin leve (não brilho espelhado, não morto)",
+    "handle_system": ["cava", "gola", "perfil_j", "push_amortecedor"],
+    "compensation_required": ["warm_wood_accent", "warm_2700k_led", "dark_gold_veined_stone"]
+  },
+  "applies_to_kinds": ["kc_corpo", "kc_porta", "kc_gaveta", "kc_corpo_sup", "kc_porta_sup", "kc_filler"],
+  "anti_pattern": "Preto puro [0,0,0] chapado e fosco-total sem reflexo = caverna / bloco morto. Massa preta sem madeira/LED/pedra de compensação reprova no cave_check. Puxador-alça aparente quebra a leitura handle-less.",
+  "cost_relative": "médio (MDF laqueado/melamínico preto fosco é comum; o custo está na coordenação dos acentos)",
+  "appearance": "Base e aéreos escuros e quietos que deixam a pedra dourada e a madeira de acento serem protagonistas; linhas de puxador embutidas, não aparentes.",
+  "gate_refs": ["artifacts/reference_lab/gates/reference_system_gates.md::cave_check", "tools/kitchen_validation.py"],
+  "source": {"kind": "golden_sample", "title": "theme BLACK_WOOD_GOLD_INDUSTRIAL_BOUTIQUE (GOLDEN_SAMPLE_004, DECISION 004) + FELIPE_KITCHEN_PREFERENCES", "date": "2026-06-20"}
+}

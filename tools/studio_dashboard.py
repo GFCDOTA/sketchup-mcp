@@ -25,6 +25,8 @@ BACKLOG = ROOT / "artifacts/reference_lab/kitchen/spec/KITCHEN_TO_100.md"
 COORD = ROOT / ".ai_bridge/SESSION_COORDINATION.md"
 INBOX = ROOT / "artifacts/reference_lab/inbox/INBOX.json"
 ARCH_KB = ROOT / ".ai_bridge/knowledge/architect.md"   # conhecimento que o Felipe alimenta (orientações do GPT)
+FELIPE_DNA = ROOT / ".claude/memory/felipe_style_dna.md"               # identidade de estilo CANÔNICA (room-agnostic)
+JUDGE_RULES = ROOT / "references/design_rules/felipe_visual_judge_rules.json"  # regras do juiz visual + erros marcados
 KANBAN_FILE = ROOT / ".ai_bridge/kanban.json"          # status Trello de cada microtarefa (Felipe move)
 KANBAN_COLS = ["backlog", "refinamento", "execução", "teste", "executado"]
 SKIP = (".denoiser.png", ".effectsResult.png")
@@ -483,7 +485,9 @@ async function tick(force){
  // ALIMENTAR O ARQUITETO
  const K=s.knowledge||{},kb=K.chars||0,kents=K.entries||[]
  const klist=kents.length?kents.slice().reverse().map(e=>`<div class=kbi title="${esc(e.preview||'')}"><span class=kbi-t>${esc(e.title)}</span><span class=mut>${e.chars}c</span><button class=trash title=esquecer onclick="forgetKb(${e.id})">🗑</button></div>`).join(''):'<span class=mut style=font-size:12px>nada aprendido ainda — cola um texto ou sobe um .txt</span>'
+ const Kj=(K.judge||{}),Kdna=K.dna
  root.appendChild(el(`<div class="card full" id=sec-feed><h2>📚 Alimentar o Arquiteto <span class=mut>(cola ou sobe orientações do GPT → ele aprende e USA nas respostas · ${kents.length} bloco(s) · ${kb} chars)</span></h2>
+  <div class=mut style="margin-bottom:8px;font-size:12px">O Arquiteto carrega 3 camadas antes de responder: <b style="color:${Kdna?'var(--ok)':'var(--red)'}">🧬 DNA ${Kdna?'✓':'ausente'}</b> · <b>🧑‍⚖️ ${Kj.anti_patterns||0} anti-patterns + ${Kj.flagged||0} erro(s) marcado(s)</b> · <b>📚 ${kents.length} orientação(ões)</b></div>
   <input id=feedtitle placeholder="título (ex.: paleta black wood gold)" style="width:100%;margin-bottom:7px">
   <textarea id=feedtext placeholder="cola aqui o texto/orientação do GPT sobre teu gosto, paleta, regras de design…"></textarea>
   <div style="margin-top:7px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
@@ -619,9 +623,25 @@ def _flag(agent, message):
         lessons.parent.mkdir(parents=True, exist_ok=True)
         with lessons.open("a", encoding="utf-8") as f:
             f.write(f"- [erro marcado pelo Felipe] {message}\n")
+        _judge_append_flag(agent, message)   # vira regra estruturada do juiz (o Arquiteto não repete)
         return {"ok": True}
     except Exception as e:  # noqa: BLE001
         return {"ok": False, "error": str(e)}
+
+
+def _judge_append_flag(agent, message):
+    """Acrescenta o erro marcado pelo Felipe em `flagged[]` das regras do juiz visual — camada estruturada
+    (distinta da lição em prosa) que o Arquiteto carrega no priming pra não repetir. Idempotente por (agent,msg)."""
+    try:
+        data = json.loads(JUDGE_RULES.read_text("utf-8")) if JUDGE_RULES.exists() else {
+            "spec": "FelipeVisualJudgeRules", "version": "1.0.0", "checks": [], "anti_patterns": [], "flagged": []}
+        flagged = data.setdefault("flagged", [])
+        if not any(f.get("agent") == agent and f.get("message") == message for f in flagged):
+            flagged.append({"agent": agent, "message": message})
+            JUDGE_RULES.parent.mkdir(parents=True, exist_ok=True)
+            JUDGE_RULES.write_text(json.dumps(data, ensure_ascii=False, indent=2), "utf-8")
+    except Exception:  # noqa: BLE001
+        pass   # a lição em prosa já foi gravada; não derruba o flag por causa do JSON
 
 
 # Arquiteto CONVERSA (deepseek, responde de verdade); o spec-cuspidor é um ESPECIALISTA embaixo dele.
@@ -693,8 +713,11 @@ def _kb_entries():
 
 
 def _knowledge_state():
+    jr = _judge_rules()
     return {"chars": len(ARCH_KB.read_text("utf-8")) if ARCH_KB.exists() else 0,
-            "entries": _kb_entries()}
+            "entries": _kb_entries(),
+            "dna": FELIPE_DNA.exists(),
+            "judge": {"anti_patterns": len(jr.get("anti_patterns", [])), "flagged": len(jr.get("flagged", []))}}
 
 
 def _forget(entry_id):
@@ -736,6 +759,37 @@ def _arch_knowledge(budget=6000):
     return "\n\n".join(reversed(chosen))
 
 
+def _judge_rules():
+    """Lê as regras do juiz visual do Felipe (anti-patterns + erros que ele marcou no painel)."""
+    if not JUDGE_RULES.exists():
+        return {}
+    try:
+        return json.loads(JUDGE_RULES.read_text("utf-8"))
+    except Exception:  # noqa: BLE001
+        return {}
+
+
+def _architect_priming(dna_budget=4000, feed_budget=4000):
+    """Contexto que o Arquiteto carrega ANTES de responder — as 3 CAMADAS do gosto do Felipe (modelo do
+    Felipe): (1) DNA de estilo canônico, (2) anti-patterns + erros marcados (não repetir), (3) orientações
+    coladas/subidas (architect.md). Camadas vazias são puladas."""
+    parts = []
+    if FELIPE_DNA.exists():
+        dna = FELIPE_DNA.read_text("utf-8").strip()
+        if dna:
+            parts.append("[FELIPE STYLE DNA — identidade canônica, é RESTRIÇÃO não sugestão]:\n" + dna[:dna_budget])
+    jr = _judge_rules()
+    aps = jr.get("anti_patterns", []) + [{"what": f.get("message", ""), "why": "erro marcado pelo Felipe"}
+                                         for f in jr.get("flagged", [])]
+    if aps:
+        lines = "\n".join(f"- NÃO: {a.get('what','')}" + (f" ({a['why']})" if a.get("why") else "") for a in aps if a.get("what"))
+        parts.append("[ANTI-PATTERNS — o que o Felipe NÃO curtiu, não repita]:\n" + lines)
+    feed = _arch_knowledge(budget=feed_budget)
+    if feed:
+        parts.append("[ORIENTAÇÕES alimentadas pelo Felipe — SIGA]:\n" + feed)
+    return "\n\n".join(parts)
+
+
 AGENT_ROLE = {"interior-designer": "deepseek", "interior-orchestrator": "coder",
               "interior-pm": "llama", "ollama-deepseek": "deepseek",
               "ollama-qwen": "qwen", "ollama-llama": "llama", "gpt-visual": "vision",
@@ -750,10 +804,10 @@ def _ask(agent, prompt, image=None):
         role = AGENT_ROLE.get(agent, "llama")
         studio_log.post("felipe", "working", prompt or "", to=agent)   # bolha do Felipe (direita)
         q = prompt or ""
-        if agent == "interior-designer":   # Arquiteto responde JÁ usando o que o Felipe alimentou
-            kb = _arch_knowledge()
-            if kb:
-                q = f"[Orientações de design e gosto do Felipe — SIGA isto]:\n{kb}\n\n[Pergunta]: {q}"
+        if agent == "interior-designer":   # Arquiteto responde JÁ usando as 3 camadas do gosto do Felipe
+            ctx = _architect_priming()
+            if ctx:
+                q = f"{ctx}\n\n[Pergunta]: {q}"
         r = ollama_bridge.ask(role, q, image=image)
         import re as _re
         raw = r.get("response") or r.get("error") or ""

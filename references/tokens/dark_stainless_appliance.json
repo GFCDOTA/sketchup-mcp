@@ -1,0 +1,18 @@
+{
+  "name": "dark_stainless_appliance",
+  "title": "Eletros inox dark / grafite REFLEXIVO — devolve luz, não vira bloco morto",
+  "rule": "Geladeira e eletros em inox dark / grafite / preto, mas SATIN/REFLEXIVO o bastante para devolver luz de dia (daylight_reflection): numa cozinha escura, uma superfície grande totalmente fosca vira buraco morto. A geladeira é torre integrada (loose_object -> planned_niche_system), não eletro solto. Cooktop em vidro preto. Forno/micro embutidos em torre/nicho, perto da zona de preparo.",
+  "params": {
+    "dark_stainless_rgb": [82, 84, 84],
+    "cooktop_glass_rgb": [22, 22, 26],
+    "finish": "inox dark satin reflexivo (NÃO fosco morto)",
+    "integration": "torre/coluna integrada; geladeira em nicho planejado",
+    "daylight_reflection": true
+  },
+  "applies_to_kinds": ["kc_geladeira", "kc_inox", "kc_vidro", "kc_boca"],
+  "anti_pattern": "Inox cinza-escuro FOSCO = bloco morto sem reflexo (reprova daylight_reflection). Geladeira solta sem nicho = loose_object. Forno longe do cooktop/preparo = fluxo burro (appliance_workflow_check).",
+  "cost_relative": "médio (linha inox dark / black steel é comum)",
+  "appearance": "Volumes escuros que captam e devolvem o LED quente e a luz do dia, integrados à marcenaria como torre, não como caixas avulsas.",
+  "gate_refs": ["artifacts/reference_lab/gates/reference_system_gates.md::daylight_reflection_check", "artifacts/reference_lab/gates/reference_system_gates.md::appliance_workflow_check"],
+  "source": {"kind": "golden_sample", "title": "theme BLACK_WOOD_GOLD.fridge (inox dark reflexivo) + felipe_kitchen_preference_profile.must_have_appliances", "date": "2026-06-20"}
+}
