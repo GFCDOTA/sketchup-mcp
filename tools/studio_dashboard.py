@@ -24,6 +24,7 @@ ANGLES = ROOT / "artifacts/planta_74/furnished/kitchen_angles"
 BACKLOG = ROOT / "artifacts/reference_lab/kitchen/spec/KITCHEN_TO_100.md"
 COORD = ROOT / ".ai_bridge/SESSION_COORDINATION.md"
 INBOX = ROOT / "artifacts/reference_lab/inbox/INBOX.json"
+ARCH_KB = ROOT / ".ai_bridge/knowledge/architect.md"   # conhecimento que o Felipe alimenta (orientações do GPT)
 SKIP = (".denoiser.png", ".effectsResult.png")
 
 ROSTER = [
@@ -84,12 +85,20 @@ def _sessions() -> dict:
 
 def _backlog() -> dict:
     if not BACKLOG.exists():
-        return {"total": 0, "pele": 0, "geo": 0, "done": 0}
+        return {"total": 0, "pele": 0, "geo": 0, "done": 0, "tasks": []}
     txt = BACKLOG.read_text("utf-8", "ignore")
     mts = set(re.findall(r"MT-\d+", txt))
     geo = set(re.findall(r"(MT-\d+)\s*`?\[GEO\]", txt))
     done = set(re.findall(r"(MT-\d+)[^\n]*(?:DONE|✓|completed)", txt))
-    return {"total": len(mts), "geo": len(geo), "pele": len(mts) - len(geo), "done": len(done)}
+    tasks, seen = [], set()
+    for ln in txt.splitlines():  # linhas de tabela: | **MT-NN** | descrição | ...
+        m = re.match(r"\|\s*\*{0,2}(MT-\d+)\*{0,2}\s*`?\[?GEO?\]?`?\s*\|\s*\*{0,2}([^|*]+?)\*{0,2}\s*\|", ln)
+        if m and m.group(1) not in seen:
+            seen.add(m.group(1))
+            tasks.append({"mt": m.group(1), "what": m.group(2).strip()[:90],
+                          "geo": m.group(1) in geo, "done": m.group(1) in done})
+    return {"total": len(mts), "geo": len(geo), "pele": len(mts) - len(geo),
+            "done": len(done), "tasks": tasks}
 
 
 def _references() -> dict:
@@ -168,7 +177,8 @@ def _agents() -> dict:
 
 def _state() -> dict:
     return {"agents": _agents(), "renders": _renders(), "sessions": _sessions(),
-            "backlog": _backlog(), "references": _references(), "inbox": _inbox()}
+            "backlog": _backlog(), "references": _references(), "inbox": _inbox(),
+            "knowledge": {"chars": len(ARCH_KB.read_text("utf-8")) if ARCH_KB.exists() else 0}}
 
 
 PAGE = r"""<!doctype html><html lang=pt-BR><head><meta charset=utf-8>
@@ -253,6 +263,11 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 .trash{background:#2a1a1a;border:1px solid #4a2a2a;color:#e6a0a0;border-radius:6px;padding:2px 7px;cursor:pointer;font-size:12px}.trash:hover{background:#3a2222}
 .thumbtrash{position:absolute;top:5px;right:5px;padding:1px 6px;z-index:2}
 .minithumb{width:46px;height:34px;object-fit:cover;border-radius:5px;cursor:pointer;border:1px solid var(--bd)}
+.tklist{max-height:260px;overflow-y:auto;margin-top:10px}
+.tk{padding:4px 0;font-size:12.5px;border-bottom:1px solid #181a20}
+.tg{font-size:10px;padding:1px 6px;border-radius:8px}.tg.pele{background:#19281f;color:var(--ok)}.tg.geo{background:#2a2419;color:var(--warn)}
+textarea{width:100%;min-height:90px;background:#0c0d10;border:1px solid var(--bd);color:var(--fg);border-radius:8px;padding:8px 11px;font:13px system-ui;resize:vertical}
+.mbar .e{max-width:90px}
 .gallery{max-height:330px;overflow-y:auto;padding-right:4px}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.86);z-index:50;align-items:center;justify-content:center;padding:24px}
 .modal.show{display:flex}.mbox{max-width:92vw;max-height:92vh;display:flex;flex-direction:column;gap:8px}
@@ -314,6 +329,9 @@ function flagErr(){const a=document.getElementById('flagag').value,m=document.ge
  fetch('/api/flag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:a,message:m})}).then(()=>{document.getElementById('flagmsg').value='';tick(1)})}
 function clearErr(agent){fetch('/api/clear',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent})}).then(()=>tick(1))}
 function fetchPreview(slug){fetch('/api/preview',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug})}).then(()=>tick(1))}
+function feedArch(){const t=(document.getElementById('feedtext').value||'').trim(),ti=(document.getElementById('feedtitle').value||'').trim();if(!t)return
+ const msg=document.getElementById('feedmsg');msg.textContent='alimentando…'
+ fetch('/api/feed',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t,title:ti})}).then(r=>r.json()).then(r=>{document.getElementById('feedtext').value='';document.getElementById('feedtitle').value='';msg.textContent=r.ok?('✓ aprendido — '+r.chars+' chars na memória'):'erro';tick(1)})}
 function askAgent(agent,umb){const inp=document.getElementById('ask-'+umb),q=(inp.value||'').trim();if(!q)return
  inp.value='';inp.blur()   // tira o foco -> o tick pode mostrar o balão
  fetch('/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent,prompt:q})}).then(()=>tick(1))
@@ -387,12 +405,19 @@ async function tick(force){
   <div class=chartbox style="max-width:380px"><h2>Chamadas por agente</h2><div class=pie><svg viewBox="0 0 120 120">${slices||'<circle cx=60 cy=60 r=46 fill=#20242b/>'}</svg><div class=legend>${leg||'<span class=mut>—</span>'}</div></div></div></div>`))
  // BACKLOG
  const pct=b.total?Math.round(100*b.done/b.total):0
- root.appendChild(el(`<div class=card><h2>Backlog — KITCHEN_TO_100</h2>
-  <span class=k><b>${b.total}</b> <span class=mut>microtarefas</span></span>
-  <span class=k><b>${b.pele}</b> <span class=mut>PELE</span></span>
-  <span class=k><b>${b.geo}</b> <span class=mut>GEO (espera Felipe)</span></span>
+ const tasks=(b.tasks||[]).map(t=>`<div class=tk><span class="tg ${t.geo?'geo':'pele'}">${t.geo?'GEO':'PELE'}</span> <b>${t.mt}</b> <span class=mut>${esc(t.what)}</span> ${t.done?'<span style=color:var(--ok)>✓</span>':''}</div>`).join('')
+ root.appendChild(el(`<div class="card full"><h2>Backlog — o que falta na cozinha (${b.total} microtarefas)</h2>
+  <span class=k><b>${b.pele}</b> <span class=mut>PELE (posso já)</span></span>
+  <span class=k><b>${b.geo}</b> <span class=mut>GEO (precisa teu OK)</span></span>
   <span class=k><b style=color:var(--ok)>${b.done}</b> <span class=mut>done</span></span>
-  <div class=bar><i style=width:${pct}%></i></div></div>`))
+  <div class=bar><i style=width:${pct}%></i></div>
+  <div class=tklist>${tasks||'<span class=mut>—</span>'}</div></div>`))
+ // ALIMENTAR O ARQUITETO
+ const kb=(s.knowledge&&s.knowledge.chars)||0
+ root.appendChild(el(`<div class="card full" id=sec-feed><h2>📚 Alimentar o Arquiteto <span class=mut>(cola orientações do GPT → ele aprende e USA nas respostas · ${kb} chars na memória)</span></h2>
+  <input id=feedtitle placeholder="título (ex.: paleta black wood gold)" style="width:100%;margin-bottom:7px">
+  <textarea id=feedtext placeholder="cola aqui o texto/orientação do GPT sobre teu gosto, paleta, regras de design…"></textarea>
+  <div style=margin-top:7px><button class=send onclick=feedArch()>📚 alimentar</button> <span class=mut id=feedmsg></span></div></div>`))
  // SESSÕES
  const cl=(s.sessions.claims||[]).map(c=>`<tr><td>${esc(c.desc)}</td><td>${esc(c.status)}</td></tr>`).join('')
  const nwt=(s.sessions.worktrees||[]).length
@@ -525,6 +550,26 @@ def _flag(agent, message):
 
 
 # Arquiteto CONVERSA (deepseek, responde de verdade); o spec-cuspidor é um ESPECIALISTA embaixo dele.
+def _feed(text, title=None):
+    """Felipe cola orientações de design (do GPT, que já sabe o gosto dele) -> o Arquiteto APRENDE
+    e usa isso nas respostas. É a alimentação do conhecimento do Arquiteto."""
+    if not text or not text.strip():
+        return {"ok": False, "error": "sem texto"}
+    ARCH_KB.parent.mkdir(parents=True, exist_ok=True)
+    with ARCH_KB.open("a", encoding="utf-8") as f:
+        f.write(f"\n## {title or 'orientação'}\n{text.strip()}\n")
+    try:
+        from tools import studio_log
+        studio_log.post("interior-designer", "done", f"aprendi: {text.strip()[:80]}")
+    except Exception:  # noqa: BLE001
+        pass
+    return {"ok": True, "chars": len(ARCH_KB.read_text("utf-8"))}
+
+
+def _arch_knowledge():
+    return ARCH_KB.read_text("utf-8")[-2500:] if ARCH_KB.exists() else ""
+
+
 AGENT_ROLE = {"interior-designer": "deepseek", "interior-orchestrator": "coder",
               "interior-pm": "llama", "ollama-deepseek": "deepseek",
               "ollama-qwen": "qwen", "ollama-llama": "llama", "gpt-visual": "vision",
@@ -538,7 +583,12 @@ def _ask(agent, prompt, image=None):
         from tools import ollama_bridge, studio_log
         role = AGENT_ROLE.get(agent, "llama")
         studio_log.post("felipe", "working", prompt or "", to=agent)   # bolha do Felipe (direita)
-        r = ollama_bridge.ask(role, prompt or "", image=image)
+        q = prompt or ""
+        if agent == "interior-designer":   # Arquiteto responde JÁ usando o que o Felipe alimentou
+            kb = _arch_knowledge()
+            if kb:
+                q = f"[Orientações de design e gosto do Felipe — SIGA isto]:\n{kb}\n\n[Pergunta]: {q}"
+        r = ollama_bridge.ask(role, q, image=image)
         import re as _re
         raw = r.get("response") or r.get("error") or ""
         resp = _re.sub(r"<think>.*?</think>", "", raw, flags=_re.DOTALL).strip()[:600]  # tira o raciocínio do deepseek
@@ -645,6 +695,8 @@ class H(BaseHTTPRequestHandler):
             self._send(200, json.dumps(_consensus(body.get("agent"), body.get("prompt"))))
         elif path == "/api/preview":
             self._send(200, json.dumps(_fetch_preview(body.get("slug"))))
+        elif path == "/api/feed":
+            self._send(200, json.dumps(_feed(body.get("text"), body.get("title"))))
         else:
             self._send(404, b"not found", "text/plain")
 
