@@ -347,15 +347,17 @@ const hhmm=(ts)=>ts?new Date(ts*1000).toLocaleTimeString('pt-BR',{hour:'2-digit'
 function leadCard(a){const act=(a.status==='working'||a.status==='thinking')?'act':''
  const clr=a.status==='error'?`<button class=clearbtn onclick="clearErr('${a.id}')">limpar</button>`:''
  const to=(a.to&&a.to!=='felipe')?`<span class=askto>→ ${FACES[a.to]||''} ${esc(LABELS[a.to]||a.to)}</span>`:''
+ let ic={working:'⚙️ trabalhando…',thinking:'💭 pensando…',done:'✓ respondeu',error:'⚠️ deu erro',idle:'• ocioso',waiting:'⏳ aguardando'}[a.status]||a.status
+ if(a.message&&a.message.indexOf('aprendi')===0)ic='📚 aprendeu algo'
  return `<div class="lead s-${a.status} ${act}" id="lead-${a.id}"><div class=face>${a.face}</div>
   <div style=flex:1><div class=nm>${a.label}<span class=stag>${a.status}</span> <span class=sdot></span>${to}${clr}</div>
-  <div class=msg>${esc(a.message)}</div></div></div>`}
+  <div class=msg>${ic}</div></div></div>`}
 function subCard(a){const act=(a.status==='working'||a.status==='thinking'||a.online)?'act':''
  const on=a.online?'<span class=onl>online</span>':'<span class=off>offline</span>'
  return `<div class="sub s-${a.status} ${act}" title="${esc(a.message)}"><span class=face>${a.face}</span><span class=nm>${a.label}</span> ${on}<span class="sdot ${a.online?'on':''}"></span></div>`}
 function colChat(feed,ids){const f=(feed||[]).filter(x=>ids.includes(x.agent)||(x.agent==='felipe'&&ids.includes(x.to))).slice(-8)
  return f.map(x=>{const me=x.agent==='felipe'
-  return `<div class="bub ${me?'me':'them'}"><div class=btxt>${esc(x.message)}</div><div class=bt>${FACES[x.agent]||'🤖'} ${esc(LABELS[x.agent]||x.agent)} · ${hhmm(x.ts)}</div></div>`}).join('')||'<span class=mut>sem conversa — pergunta abaixo ⬇</span>'}
+  return `<div class="bub ${me?'me':'them'}"><div class=btxt>${esc(x.message)}</div><div class=bt>${FACES[x.agent]||'🤖'} ${esc(LABELS[x.agent]||x.agent)}${x.via?' · via '+esc(x.via):''} · ${hhmm(x.ts)}</div></div>`}).join('')||'<span class=mut>sem conversa — pergunta abaixo ⬇</span>'}
 function drawArrows(ag){const svg=document.getElementById('arrows'),wrap=document.getElementById('org');if(!svg||!wrap)return
  const wr=wrap.getBoundingClientRect();svg.setAttribute('width',wr.width);svg.setAttribute('height',wr.height)
  const amap=ag.agent_umbrella||{},recent=(ag.feed||[]).slice(-7).filter(f=>f.to)
@@ -400,7 +402,7 @@ async function loadChat(){const cm=document.getElementById('chatmodal');if(!cm.c
  let s;try{s=await (await fetch('/api/state')).json()}catch(e){return}
  const feed=(s.agents.feed||[]).filter(x=>CHATIDS.includes(x.agent)||(x.agent==='felipe'&&x.to&&CHATIDS.includes(x.to)))
  const b=document.getElementById('cbody'),atBottom=b.scrollHeight-b.scrollTop-b.clientHeight<60
- b.innerHTML=feed.map(x=>{const me=x.agent==='felipe';return `<div class="bub ${me?'me':'them'}"><div class=btxt>${esc(x.message)}</div><div class=bt>${FACES[x.agent]||'🤖'} ${esc(LABELS[x.agent]||x.agent)} · ${hhmm(x.ts)}</div></div>`}).join('')||'<span class=mut>sem mensagens — manda a primeira</span>'
+ b.innerHTML=feed.map(x=>{const me=x.agent==='felipe';return `<div class="bub ${me?'me':'them'}"><div class=btxt>${esc(x.message)}</div><div class=bt>${FACES[x.agent]||'🤖'} ${esc(LABELS[x.agent]||x.agent)}${x.via?' · via '+esc(x.via):''} · ${hhmm(x.ts)}</div></div>`}).join('')||'<span class=mut>sem mensagens — manda a primeira</span>'
  if(atBottom)b.scrollTop=b.scrollHeight}
 function sendChat(cons){const inp=document.getElementById('cinput'),q=(inp.value||'').trim();if(!q)return;inp.value=''
  fetch(cons?'/api/consensus':'/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:CHATAG,prompt:q})}).then(()=>loadChat());setTimeout(loadChat,500)}
@@ -495,6 +497,7 @@ async function tick(force){
    <div class=cap>${esc(r.name.replace('.png',''))}<div class=t>${r.theme} · ${r.sub} · ${r.kb}KB</div></div></div>`).join('')
  root.appendChild(el(`<div class="card full" id=sec-ren><h2>Renders (${(s.renders||[]).length}) — clica pra ampliar/baixar · mais novos primeiro</h2>
   <div class="grid gallery">${rr||'<span class=mut>sem renders</span>'}</div></div>`))
+ document.querySelectorAll('.chat').forEach(c=>{c.scrollTop=c.scrollHeight})   // chat sempre na última msg
  window.scrollTo(0,sy)   // mantém a rolagem onde estava (não sobe ao mandar mensagem)
 }
 tick();setInterval(tick,10000);window.addEventListener('resize',()=>tick())
@@ -640,7 +643,7 @@ def _ask(agent, prompt, image=None):
         import re as _re
         raw = r.get("response") or r.get("error") or ""
         resp = _re.sub(r"<think>.*?</think>", "", raw, flags=_re.DOTALL).strip()[:600]  # tira o raciocínio do deepseek
-        studio_log.post(agent, "done" if r.get("ok") else "error", resp)  # bolha do agente (esquerda)
+        studio_log.post(agent, "done" if r.get("ok") else "error", resp, via=r.get("model"))  # bolha do agente
         return {"ok": r.get("ok", False), "agent": agent, "model": r.get("model"), "response": resp}
     except Exception as e:  # noqa: BLE001
         return {"ok": False, "error": str(e)}
@@ -668,7 +671,7 @@ def _consensus(agent, prompt):
                         + "\n".join(f"- {r}: {t[:350]}" for r, t in opinions)
                         + "\nSintetize tudo numa resposta CONCISA e bem pensada (1 parágrafo), pegando os melhores pontos. Responda em PT-BR.")
         synth = _clean(ollama_bridge.ask("deepseek", synth_prompt, timeout=120))[:700]
-        studio_log.post(agent, "done", "[consenso] " + synth)
+        studio_log.post(agent, "done", "[consenso] " + synth, via="consenso (deepseek+qwen+llama)")
         return {"ok": True, "synthesis": synth, "opinions": [{"model": r, "text": t} for r, t in opinions]}
     except Exception as e:  # noqa: BLE001
         return {"ok": False, "error": str(e)}

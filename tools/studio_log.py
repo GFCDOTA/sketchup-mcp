@@ -23,12 +23,14 @@ VALID_STATUS = {"idle", "working", "thinking", "done", "blocked", "error", "wait
 
 
 def post(agent: str, status: str, message: str, to: str | None = None,
-         ts: float | None = None) -> dict:
+         via: str | None = None, ts: float | None = None) -> dict:
     ACTIVITY.parent.mkdir(parents=True, exist_ok=True)
     rec = {"ts": ts if ts is not None else time.time(), "agent": agent,
            "status": status if status in VALID_STATUS else "working", "message": message}
     if to:
         rec["to"] = to   # destinatário -> a dashboard desenha a seta de conversa
+    if via:
+        rec["via"] = via  # qual IA respondeu (modelo) ou "consenso (...)"
     with ACTIVITY.open("a", encoding="utf-8") as f:
         f.write(json.dumps(rec, ensure_ascii=False) + "\n")
     return rec
