@@ -228,53 +228,82 @@ def living_room_boxes(con, room_id):
     _aff = wall_affordance(con, room_id)
     _rack_wall_len = next((w["length_m"] for w in _aff["walls"]
                            if w["wall_id"] == p["tv_rack"]["wall_id"]), 1.80)
-    rack_w = round(min(1.20, max(0.90, min(width_m, _rack_wall_len - 0.40))), 2)
-    if os.environ.get("FURNISH_STYLE") in ("industrial", "modern_warm"):
-        # RACK = MÓVEL PLANEJADO real (rack_class PASS): pés/corpo/tampo/gavetas/nicho,
-        # derivado da TV + linha de visão. NÃO mais caixa. low_credenza preto+madeira.
-        # Gated industrial p/ não regredir o render default. place_sofa_boxes orienta (parts em m).
-        from tools.rack_class import build_rack, derive_rack_spec
-        _rlen = round(min(1.55, max(1.30, _rack_wall_len - 0.35)), 2)
-        _rspec = derive_rack_spec("55", "low_credenza", length=_rlen,
-                                  body_rgb=(60, 47, 36), front_rgb=(80, 62, 46), feet_rgb=(26, 26, 28))
-        _rparts, _ = build_rack(_rspec)
-        _rb = place_sofa_boxes(_rparts, rack_c, rack_f)
-        for _b in _rb:
-            _b["module"] = "Rack TV"
-        boxes += _rb
-    else:
-        boxes.append(_oriented_box("rack_tv", rack_c, rack_f, rack_w, 0.35, 0.0, 0.50, [120, 85, 55], module="Rack TV"))
+    # RACK = painel/credenza PLANEJADO ancorado na parede-TV (planned_niche_system, NUNCA cubo proxy).
+    # LIVING_ROOM_LAYOUT_FIX_OPTION_A: a FORMA entra SEMPRE (sai do proxy); a cor é neutra no baseline
+    # e escura só sob FURNISH_STYLE (a estética black_wood_gold entra numa fase posterior).
+    from tools.rack_class import build_rack, derive_rack_spec
+    _styled = os.environ.get("FURNISH_STYLE") in ("industrial", "modern_warm")
+    _rlen = round(min(1.55, max(1.30, _rack_wall_len - 0.35)), 2)
+    _rspec = derive_rack_spec("55", "low_credenza", length=_rlen,
+                              body_rgb=(60, 47, 36) if _styled else (122, 98, 70),
+                              front_rgb=(80, 62, 46) if _styled else (138, 112, 82),
+                              feet_rgb=(26, 26, 28) if _styled else (64, 64, 68))
+    _rparts, _ = build_rack(_rspec)
+    _rb = place_sofa_boxes(_rparts, rack_c, rack_f)
+    for _b in _rb:
+        _b["module"] = "Rack TV"
+    boxes += _rb
     # tapete + mesa COMPACTOS, agrupados perto do sofa (nao transbordam o nicho).
     boxes.append(_oriented_box("tapete", _ahead(0.70), sofa_f, 1.60, 1.10, 0.0, 0.02, [165, 156, 140], module="Tapete"))
-    if os.environ.get("FURNISH_STYLE") in ("industrial", "modern_warm"):
-        # MESA DE CENTRO = classe planejada (coffee_table_class PASS): tampo madeira +
-        # pernas metal preto + prateleira inferior. NÃO mais caixa.
-        from tools.coffee_table_class import CoffeeTableClassSpec, build_coffee_table_v2
-        _ct = CoffeeTableClassSpec(style="two_tier", length=0.95, width=0.50, height=0.38,
-                                   shelf=True, top_rgb=(80, 62, 46), leg_rgb=(30, 30, 33))
-        _ctp, _ = build_coffee_table_v2(_ct.validate())
-        _ctb = place_sofa_boxes(_ctp, _ahead(0.80), sofa_f)
-        for _b in _ctb:
-            _b["module"] = "Mesa de centro"
-        boxes += _ctb
-    else:
-        boxes.append(_oriented_box("mesa_centro", _ahead(0.80), sofa_f, 0.90, 0.50, 0.0, 0.40, [92, 72, 56], module="Mesa de centro"))
+    # MESA DE CENTRO = classe planejada COMPACTA (NUNCA cubo). Forma sempre; cor neutra no baseline.
+    from tools.coffee_table_class import CoffeeTableClassSpec, build_coffee_table_v2
+    _ct = CoffeeTableClassSpec(style="two_tier", length=0.95, width=0.50, height=0.38, shelf=True,
+                               top_rgb=(80, 62, 46) if _styled else (120, 96, 70),
+                               leg_rgb=(30, 30, 33) if _styled else (64, 64, 68))
+    _ctp, _ = build_coffee_table_v2(_ct.validate())
+    _ctb = place_sofa_boxes(_ctp, _ahead(0.80), sofa_f)
+    for _b in _ctb:
+        _b["module"] = "Mesa de centro"
+    boxes += _ctb
 
-    # ---- camada de ESTILO (gated): parede de concreto na parede-TV + decor reusando
-    # os builders que JA existem (planta, quadro). So adiciona; cor entra via apply_style.
+    # cell + helper (SEMPRE — jantar e decor usam o polígono do cômodo)
+    from shapely.geometry import Point, Polygon
+
+    from core.scale import PT_TO_IN
+    from tools.spatial_model import build_spatial_model
+    cell_in = Polygon([(x * PT_TO_IN, y * PT_TO_IN)
+                       for x, y in build_spatial_model(con, room_id)["_geom"]["cell"].exterior.coords])
+    cen = cell_in.centroid
+
+    def _inside(pt, margin_in=9.0):
+        p = Point(pt)
+        return cell_in.contains(p) and cell_in.exterior.distance(p) >= margin_in
+
+    # ---- ZONA DE JANTAR (SEMPRE — forma/zona, NÃO estética). Mesa COMPACTA p/ 4 (apê 74m²,
+    # nada de trambolho); na maior zona LIVRE longe do estar; NÃO bloqueia porta/passagem
+    # (geometry_sanity + overlap conferem). LIVING_ROOM_LAYOUT_FIX_OPTION_A.
+    from shapely.ops import unary_union as _uni
+    _occ = [Polygon([(c[0], c[1]) for c in _b["corners"]]) for _b in boxes if _b.get("corners")]
+    _free = cell_in.buffer(-M2IN * 0.12).difference(_uni([p.buffer(M2IN * 0.32) for p in _occ]))
+    if _free.geom_type == "MultiPolygon":
+        _free = max(_free.geoms, key=lambda g: g.area)
+    if (not _free.is_empty) and _free.area > (2.4 * M2IN * M2IN):
+        _dc = _free.centroid
+        _dtp = _dining_table_square(side=0.92,
+                                    top_rgb=(96, 70, 48) if _styled else (120, 96, 70),
+                                    leg_rgb=(30, 30, 33) if _styled else (64, 64, 68))
+        _dtb = place_sofa_boxes(_dtp, (_dc.x, _dc.y), (0.0, 1.0))
+        for _b in _dtb:
+            _b["module"] = "Mesa de jantar"
+        boxes += _dtb
+        _nch = 0
+        for _ang in range(0, 360, 45):                 # 8 direções; pega as que cabem
+            _ux, _uy = _m.cos(_m.radians(_ang)), _m.sin(_m.radians(_ang))
+            _chc = (_dc.x + _ux * 0.70 * M2IN, _dc.y + _uy * 0.70 * M2IN)
+            _pt = Point(_chc)
+            if cell_in.contains(_pt) and cell_in.exterior.distance(_pt) >= 4:
+                _chb = place_sofa_boxes(_chair_parts(), _chc, (-_ux, -_uy))
+                for _b in _chb:
+                    _b["module"] = "Cadeira jantar"
+                boxes += _chb
+                _nch += 1
+                if _nch >= 4:
+                    break
+
+    # ---- camada de ESTILO (gated, AESTHETIC — NÃO entra no layout-fix): parede de concreto na
+    # parede-TV + decor (planta/quadro/prateleira/trilho). Só sob FURNISH_STYLE.
     style = os.environ.get("FURNISH_STYLE")
     if style in ("industrial", "modern_warm"):
-        from shapely.geometry import Point, Polygon
-
-        from core.scale import PT_TO_IN
-        from tools.spatial_model import build_spatial_model
-        cell_in = Polygon([(x * PT_TO_IN, y * PT_TO_IN)
-                           for x, y in build_spatial_model(con, room_id)["_geom"]["cell"].exterior.coords])
-        cen = cell_in.centroid
-
-        def _inside(pt, margin_in=9.0):
-            p = Point(pt)
-            return cell_in.contains(p) and cell_in.exterior.distance(p) >= margin_in
 
         def _toward_centroid(start, frac0=0.35):
             """Ponto entre start e o centroide, recuado ate ficar DENTRO com margem
@@ -295,57 +324,25 @@ def living_room_boxes(con, room_id):
         wall_w = round(min(_rack_wall_len, 3.6), 2)
         boxes.append(_oriented_box("parede_concreto", wall_c, rack_f, wall_w, 0.04, 0.0, 2.40,
                                    [165, 162, 158], module="Parede concreto"))
-        # planta PEQUENA sobre o RACK (acento de verde no móvel, como a referência) —
-        # no apê apertado não sobra piso livre p/ planta grande sem colidir. Vai numa
-        # ponta do rack (fora do centro da TV), apoiada no tampo (z_lift = altura do rack).
         rperp = (-rfy, rfx)
         plant_c = (rack_c[0] + rperp[0] * 0.50 * M2IN, rack_c[1] + rperp[1] * 0.50 * M2IN)
         if _inside(plant_c, margin_in=2.0):
             boxes += place_decor_boxes("plant_placeholder", plant_c, rack_f, z_lift=0.52,
                                        height=0.55, pot_w=0.16, pot_h=0.10, foliage_w=0.30,
                                        module="Planta")
-        # quadro emoldurado na parede de concreto, acima do rack (z_lift = altura do olho)
         art_c = (wall_c[0] + rfx * 0.04 * M2IN, wall_c[1] + rfy * 0.04 * M2IN)
         boxes += place_decor_boxes("wall_art", art_c, rack_f, z_lift=1.15, module="Quadro",
                                    width=0.90, height=0.62)
-        # prateleira flutuante metal+madeira na parede de concreto (lado oposto ao quadro)
         perp = (-rfy, rfx)
         shelf_c = (wall_c[0] + perp[0] * 0.45 * M2IN + rfx * 0.14 * M2IN,
                    wall_c[1] + perp[1] * 0.45 * M2IN + rfy * 0.14 * M2IN)
         if _inside(shelf_c, margin_in=4.0):
             boxes += place_decor_boxes("shelf", shelf_c, rack_f, z_lift=1.42, module="Prateleira",
                                        width=0.85, n_planks=2)
-        # trilho de luz no TETO sobre o eixo sofa->rack (corre ao longo do eixo)
         mid = ((sofa_c[0] + rack_c[0]) / 2.0, (sofa_c[1] + rack_c[1]) / 2.0)
         track_face = (-fny, fnx)                 # perp ao facing do sofa -> trilho ao longo do eixo
         boxes += place_decor_boxes("track_light", mid, track_face, z_lift=2.15, module="Trilho de luz",
                                    length=1.5, n_spots=3)
-        # MESA DE JANTAR (lado jantar): na maior zona LIVRE da sala, longe do cluster de estar.
-        from shapely.ops import unary_union as _uni
-        _occ = [Polygon([(c[0], c[1]) for c in _b["corners"]]) for _b in boxes if _b.get("corners")]
-        _free = cell_in.buffer(-M2IN * 0.12).difference(_uni([p.buffer(M2IN * 0.32) for p in _occ]))
-        if _free.geom_type == "MultiPolygon":
-            _free = max(_free.geoms, key=lambda g: g.area)
-        if (not _free.is_empty) and _free.area > (2.4 * M2IN * M2IN):
-            _dc = _free.centroid
-            _dtp = _dining_table_square(side=0.92, top_rgb=(96, 70, 48), leg_rgb=(30, 30, 33))
-            _dtb = place_sofa_boxes(_dtp, (_dc.x, _dc.y), (0.0, 1.0))
-            for _b in _dtb:
-                _b["module"] = "Mesa de jantar"
-            boxes += _dtb
-            _nch = 0
-            for _ang in range(0, 360, 45):                 # 8 direções; pega as que cabem
-                _ux, _uy = _m.cos(_m.radians(_ang)), _m.sin(_m.radians(_ang))
-                _chc = (_dc.x + _ux * 0.70 * M2IN, _dc.y + _uy * 0.70 * M2IN)
-                _pt = Point(_chc)
-                if cell_in.contains(_pt) and cell_in.exterior.distance(_pt) >= 4:
-                    _chb = place_sofa_boxes(_chair_parts(), _chc, (-_ux, -_uy))
-                    for _b in _chb:
-                        _b["module"] = "Cadeira jantar"
-                    boxes += _chb
-                    _nch += 1
-                    if _nch >= 4:
-                        break
 
     out = {"result": "OK", "room_name": plan.get("room_name"), "n_placed": len(boxes),
            "placement": "common_sense_solver", "tv_wall": plan.get("tv_wall"),
