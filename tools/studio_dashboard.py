@@ -35,12 +35,13 @@ ROSTER = [
     {"id": "ollama-qwen",           "face": "\U0001F916", "label": "Qwen-coder"},
     {"id": "ollama-llama",          "face": "\U0001F999", "label": "Llama"},
     {"id": "gpt-visual",            "face": "\U0001F9E0", "label": "GPT (visão)"},
+    {"id": "ollama-spec",           "face": "\U0001F4D0", "label": "Especialista-Spec"},
 ]
 # Topologia: PM coordena (sem LLM); Team Lead consulta os LOCAIS (código); Arquiteto consulta GPT (visão).
 UMBRELLAS = [
     {"id": "pm",        "label": "PM",        "lead": "interior-pm",           "subs": ["reference-scout"]},
     {"id": "team_lead", "label": "Team Lead", "lead": "interior-orchestrator", "subs": ["ollama-deepseek", "ollama-qwen", "ollama-llama"]},
-    {"id": "architect", "label": "Arquiteto", "lead": "interior-designer",     "subs": ["gpt-visual"]},
+    {"id": "architect", "label": "Arquiteto", "lead": "interior-designer",     "subs": ["gpt-visual", "ollama-spec"]},
 ]
 
 
@@ -325,7 +326,7 @@ async function tick(force){
  const s=JSON.parse(txt)
  const b=s.backlog,refs=s.references||{},by=refs.by_theme||{},bk=refs.by_kind||{},ag=s.agents||{umbrellas:[],feed:[],metrics:{}}
  LEADOF={};(ag.umbrellas||[]).forEach(u=>LEADOF[u.id]=u.lead.id)
- const root=document.getElementById('root');root.innerHTML=''
+ const root=document.getElementById('root');const sy=window.scrollY;root.innerHTML=''
  // ORG (guarda-chuvas + setas + métricas)
  const cols=(ag.umbrellas||[]).map(u=>{const ids=[u.lead.id,...u.subs.map(x=>x.id)]
    return `<div class=col>${leadCard(u.lead)}<div class=subs>${u.subs.map(subCard).join('')}</div>
@@ -389,6 +390,7 @@ async function tick(force){
    <div class=cap>${esc(r.name.replace('.png',''))}<div class=t>${r.theme} · ${r.sub} · ${r.kb}KB</div></div></div>`).join('')
  root.appendChild(el(`<div class="card full" id=sec-ren><h2>Renders (${(s.renders||[]).length}) — clica pra ampliar/baixar · mais novos primeiro</h2>
   <div class="grid gallery">${rr||'<span class=mut>sem renders</span>'}</div></div>`))
+ window.scrollTo(0,sy)   // mantém a rolagem onde estava (não sobe ao mandar mensagem)
 }
 tick();setInterval(tick,10000);window.addEventListener('resize',()=>tick())
 </script></body></html>"""
@@ -448,9 +450,11 @@ def _flag(agent, message):
         return {"ok": False, "error": str(e)}
 
 
-AGENT_ROLE = {"interior-designer": "designer", "interior-orchestrator": "coder",
+# Arquiteto CONVERSA (deepseek, responde de verdade); o spec-cuspidor é um ESPECIALISTA embaixo dele.
+AGENT_ROLE = {"interior-designer": "deepseek", "interior-orchestrator": "coder",
               "interior-pm": "llama", "ollama-deepseek": "deepseek",
-              "ollama-qwen": "qwen", "ollama-llama": "llama", "gpt-visual": "vision"}
+              "ollama-qwen": "qwen", "ollama-llama": "llama", "gpt-visual": "vision",
+              "ollama-spec": "designer"}
 
 
 def _ask(agent, prompt, image=None):
@@ -461,7 +465,9 @@ def _ask(agent, prompt, image=None):
         role = AGENT_ROLE.get(agent, "llama")
         studio_log.post("felipe", "working", prompt or "", to=agent)   # bolha do Felipe (direita)
         r = ollama_bridge.ask(role, prompt or "", image=image)
-        resp = (r.get("response") or r.get("error") or "")[:600]
+        import re as _re
+        raw = r.get("response") or r.get("error") or ""
+        resp = _re.sub(r"<think>.*?</think>", "", raw, flags=_re.DOTALL).strip()[:600]  # tira o raciocínio do deepseek
         studio_log.post(agent, "done" if r.get("ok") else "error", resp)  # bolha do agente (esquerda)
         return {"ok": r.get("ok", False), "agent": agent, "model": r.get("model"), "response": resp}
     except Exception as e:  # noqa: BLE001
