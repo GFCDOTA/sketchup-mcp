@@ -12,7 +12,7 @@
 | **001** | `warm_compact_premium` | **default seguro** — amplo, vendável, universal | ✅ APROVADO Felipe | `cozinha_vray_hero.png` |
 | **002** | `dark_walnut_moody_premium` | **variante autoral** — noturna, masculina, impacto visual | ✅ APROVADO Felipe | `cozinha_vray_hero_dark.png` |
 | **003** | `hotel_boutique_warm_luxury` | **premium equilibrado** — taupe+champagne, refinado | ✅ APROVADO Felipe | `cozinha_vray_hero_boutique.png` |
-| 004 | `black_wood_gold_industrial_boutique` | autoral premium / show — preto+madeira+ouro sutil | GPT PASS | `cozinha_vray_hero_blackgold.png` |
+| **004** | `black_wood_gold_industrial_boutique` | ⭐ **DIREÇÃO ESCOLHIDA do Felipe** — preto+madeira+ouro, hero validado | ✅ **APROVADO Felipe** (.skp) | `cozinha_skp_blackgold_hero_final.png` |
 
 ## GOLDEN_SAMPLE_001 — warm_compact_premium
 Fendi acetinado + carvalho coordenado + pedra clara veio sutil + inox reflexivo + LED 2700K +

@@ -66,3 +66,30 @@ em [FELIPE_KITCHEN_PREFERENCES.md](FELIPE_KITCHEN_PREFERENCES.md). Direção alv
 quente com veios dourados SUTIS + cuba preta + torneira preta/bronze + bronze discreto + LED 2700K).
 **Regra:** não escolher material definitivo ainda — gerar variações, julgar A/B/C, e só depois
 descer pra pedra/cuba/manutenção/custo.
+
+---
+
+## DECISION 004 — black_wood_gold CONGELADO como GOLDEN_SAMPLE_004 (2026-06-20, Felipe)
+
+```
+VEREDITO FINAL (Felipe): CONGELAR como GOLDEN_SAMPLE_004 (black_wood_gold).
+
+A cozinha está aprovada como referência oficial de:
+- linguagem · materialidade · paleta · marcenaria · integração de eletros · qualidade visual
+
+NÃO alterar mais: geometria · layout · pia · módulos · paleta · conceito.
+```
+
+**Caminho percorrido (tudo validado):** forma validada · pia no ponto do PDF · ergonomia/
+modulação validadas (ref de cotas confirmou `kitchen_ergonomics`) · linguagem definida (17 refs
+do Felipe unânimes em dark+wood) · paleta/material aprovados · V-Ray hero em nível de
+apresentação (loop GPT: PASS de design/material) · `.skp` bakeado e aberto. **O resto agora é
+microacabamento, não projeto** — parar antes de "polir até estragar".
+
+**Artefatos:** `.skp` = `artifacts/planta_74/furnished/planta_74_furnished_black_wood_gold.skp`;
+hero = `kitchen_angles/cozinha_skp_blackgold_hero_final.png`; theme =
+`themes/BLACK_WOOD_GOLD_INDUSTRIAL_BOUTIQUE.json`; exemplo =
+`kitchen/EXAMPLE_BLACK_WOOD_GOLD.md`.
+
+**Próximo:** (1) cozinha = exemplo-base do agent; (2) documentar tokens/regras; (3) propagar o
+método pro próximo ambiente (sala).
