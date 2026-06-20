@@ -33,11 +33,13 @@ ROSTER = [
     {"id": "reference-scout",       "face": "\U0001F52D", "label": "Scout"},
     {"id": "ollama-deepseek",       "face": "\U0001F433", "label": "DeepSeek"},
     {"id": "ollama-qwen",           "face": "\U0001F916", "label": "Qwen-coder"},
+    {"id": "ollama-llama",          "face": "\U0001F999", "label": "Llama"},
     {"id": "gpt-visual",            "face": "\U0001F9E0", "label": "GPT (visão)"},
 ]
+# Topologia: PM coordena (sem LLM); Team Lead consulta os LOCAIS (código); Arquiteto consulta GPT (visão).
 UMBRELLAS = [
     {"id": "pm",        "label": "PM",        "lead": "interior-pm",           "subs": ["reference-scout"]},
-    {"id": "team_lead", "label": "Team Lead", "lead": "interior-orchestrator", "subs": ["ollama-deepseek", "ollama-qwen"]},
+    {"id": "team_lead", "label": "Team Lead", "lead": "interior-orchestrator", "subs": ["ollama-deepseek", "ollama-qwen", "ollama-llama"]},
     {"id": "architect", "label": "Arquiteto", "lead": "interior-designer",     "subs": ["gpt-visual"]},
 ]
 
@@ -200,6 +202,13 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 .mrow .nm{width:130px;color:var(--mut)}.mbar{flex:1;display:flex;gap:3px;align-items:center}
 .mbar .c{height:11px;background:var(--blu);border-radius:3px;min-width:2px}.mbar .e{height:11px;background:var(--red);border-radius:3px}
 .mnum{font-size:11px;color:var(--mut);width:92px}
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+.chartbox{background:#13151a;border:1px solid var(--bd);border-radius:10px;padding:12px}
+.pie{display:flex;gap:14px;align-items:center}.pie svg{width:118px;height:118px;flex:none}
+.legend{font-size:12px}.lg{display:flex;align-items:center;gap:6px;margin:2px 0}.sw{width:11px;height:11px;border-radius:3px;display:inline-block}
+.flagrow{display:flex;gap:6px;margin-top:10px}.flagrow input{flex:1;background:#0c0d10;border:1px solid var(--bd);color:var(--fg);border-radius:6px;padding:4px 7px;font-size:12px}
+.flagrow select,.flagrow button,td button{background:#0c0d10;border:1px solid var(--bd);color:var(--fg);border-radius:6px;padding:3px 8px;font-size:12px;cursor:pointer}
+.flagrow button:hover,td button:hover{background:#1f2227}
 </style></head><body>
 <header><span class=hdot></span><h1>INTERIOR STUDIO</h1><span class=mut id=ts>carregando…</span>
 <span class=mut style=margin-left:auto>auto-refresh 5s · :8782 (separado do oráculo :8765)</span></header>
@@ -227,6 +236,9 @@ function drawArrows(ag){const svg=document.getElementById('arrows'),wrap=documen
   p+=`<path class=arrow marker-end="url(#ah)" d="M${u.x},${u.y} Q${(u.x+v.x)/2},${my} ${v.x},${v.y}"/>`})
  svg.innerHTML=p}
 let LEADOF={};const leadOf=(u)=>LEADOF[u]
+async function curate(slug,action){await fetch('/api/curate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug,action})});tick()}
+function flagErr(){const a=document.getElementById('flagag').value,m=document.getElementById('flagmsg').value;if(!m)return
+ fetch('/api/flag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:a,message:m})}).then(()=>{document.getElementById('flagmsg').value='';tick()})}
 async function tick(){
  let s;try{s=await (await fetch('/api/state')).json()}catch(e){return}
  document.getElementById('ts').textContent='atualizado '+new Date().toLocaleTimeString('pt-BR')
@@ -237,15 +249,24 @@ async function tick(){
  const cols=(ag.umbrellas||[]).map(u=>{const ids=[u.lead.id,...u.subs.map(x=>x.id)]
    return `<div class=col>${leadCard(u.lead)}<div class=subs>${u.subs.map(subCard).join('')}</div>
     <div class=chat>${colChat(ag.feed,ids)}</div></div>`}).join('')
- const mx=Math.max(1,...Object.values(ag.metrics||{}).map(m=>m.calls))
- const met=Object.entries(ag.metrics||{}).sort((a,b)=>b[1].calls-a[1].calls).map(([id,m])=>{
-   const lbl=(LEADOF&&id)||id;return `<div class=mrow><span class=nm>${esc(id)}</span>
-    <span class=mbar><span class=c style=width:${Math.round(120*m.calls/mx)}px></span>
-    ${m.errors?`<span class=e style=width:${Math.round(120*m.errors/mx)}px></span>`:''}</span>
-    <span class=mnum>${m.calls} chamadas${m.errors?` · ${m.errors} erro`:''}</span></div>`}).join('')
+ const ents=Object.entries(ag.metrics||{}).sort((a,b)=>b[1].calls-a[1].calls)
+ const tot=ents.reduce((s,[,m])=>s+m.calls,0)||1, COL=['#6ca8ff','#7fd99a','#e6c069','#c08ae6','#5ad1c8','#e69a6c','#e67c7c']
+ let acc=0
+ const slices=ents.map(([id,m],i)=>{const fr=m.calls/tot,a0=acc*6.2832,a1=(acc+fr)*6.2832;acc+=fr
+   const x0=(60+46*Math.sin(a0)).toFixed(1),y0=(60-46*Math.cos(a0)).toFixed(1),x1=(60+46*Math.sin(a1)).toFixed(1),y1=(60-46*Math.cos(a1)).toFixed(1)
+   return `<path d="M60,60 L${x0},${y0} A46,46 0 ${fr>.5?1:0} 1 ${x1},${y1} Z" fill="${COL[i%COL.length]}"/>`}).join('')
+ const leg=ents.map(([id,m],i)=>`<div class=lg><span class=sw style=background:${COL[i%COL.length]}></span>${esc(id)} <span class=mut>${m.calls}</span></div>`).join('')
+ const errs=ents.filter(([,m])=>m.errors>0),emx=Math.max(1,...errs.map(([,m])=>m.errors))
+ const ebars=errs.length?errs.map(([id,m])=>`<div class=mrow><span class=nm>${esc(id)}</span><span class=mbar><span class=e style=width:${Math.round(130*m.errors/emx)}px></span></span><span class=mnum>${m.errors} erro(s)</span></div>`).join(''):'<span class=mut>nenhum erro de design marcado ainda</span>'
+ const flagopts=ents.map(([id])=>`<option>${esc(id)}</option>`).join('')||'<option>interior-designer</option>'
  root.appendChild(el(`<div class="card full"><h2>Agentes — guarda-chuvas (PM · Team Lead · Arquiteto)</h2>
   <div class=org id=org><svg class=arrows id=arrows></svg><div class=cols>${cols}</div></div>
-  <div class=metrics><h2 style=margin:14px_0_6px>Chamadas / erros por agente</h2>${met||'<span class=mut>sem dados ainda</span>'}</div></div>`))
+  <div class=charts>
+   <div class=chartbox><h2>Chamadas por agente</h2><div class=pie><svg viewBox="0 0 120 120">${slices||'<circle cx=60 cy=60 r=46 fill=#20242b/>'}</svg><div class=legend>${leg||'<span class=mut>—</span>'}</div></div></div>
+   <div class=chartbox><h2>Erros de design (correções do Felipe)</h2>${ebars}
+    <div class=flagrow><select id=flagag>${flagopts}</select>
+    <input id=flagmsg placeholder="ex.: parede muito escura, coifa não combina"><button onclick=flagErr()>marcar erro</button></div></div>
+  </div></div>`))
  drawArrows(ag)
  // BACKLOG
  const pct=b.total?Math.round(100*b.done/b.total):0
@@ -267,9 +288,10 @@ async function tick(){
   <div class=mut style=margin-bottom:8px>${Object.entries(bk).map(([k,n])=>`<span class=pill>${k}: ${n}</span>`).join(' ')||refs.error||''}</div>
   <table><tr><th>tema</th><th>refs</th></tr>${themes}</table></div>`))
  // INBOX
- const inb=(s.inbox||[]).map(i=>`<tr><td>${esc(i.slug)}</td><td>${i.theme||'-'}</td><td>${i.status||'pending'}</td></tr>`).join('')
- root.appendChild(el(`<div class=card><h2>Curadoria — inbox de referência</h2>
-  <table><tr><th>slug</th><th>tema</th><th>status</th></tr>${inb||'<tr><td colspan=3 class=mut>fila vazia</td></tr>'}</table></div>`))
+ const inb=(s.inbox||[]).map(i=>{const st=i.status||'pending';return `<tr><td>${esc(i.slug)}</td><td>${i.theme||'-'}</td><td>${st}</td>
+   <td>${st==='pending'?`<button onclick="curate('${esc(i.slug)}','approve')">✓</button> <button onclick="curate('${esc(i.slug)}','reject')">✕</button>`:''}</td></tr>`}).join('')
+ root.appendChild(el(`<div class=card><h2>Curadoria — inbox <span class=mut>(tu aprova/rejeita direto)</span></h2>
+  <table><tr><th>slug</th><th>tema</th><th>status</th><th>ação</th></tr>${inb||'<tr><td colspan=4 class=mut>fila vazia</td></tr>'}</table></div>`))
  // RENDERS
  const rr=(s.renders||[]).slice(0,24).map(r=>`<div class=thumb><img loading=lazy src="/img/${encodeURIComponent(r.name)}">
    <div class=cap>${esc(r.name.replace('.png',''))}<div class=t>${r.theme} · ${r.sub} · ${r.kb}KB</div></div></div>`).join('')
@@ -278,6 +300,35 @@ async function tick(){
 }
 tick();setInterval(tick,5000);window.addEventListener('resize',()=>tick())
 </script></body></html>"""
+
+
+def _curate(slug, action):
+    """Felipe aprova/rejeita um candidato do inbox — grava direto no INBOX.json (sem Claude)."""
+    if not INBOX.exists() or not slug:
+        return {"ok": False}
+    data = json.loads(INBOX.read_text("utf-8"))
+    for it in data.get("items", []):
+        if it.get("slug") == slug:
+            it["status"] = "approved" if action == "approve" else "rejected"
+    INBOX.write_text(json.dumps(data, ensure_ascii=False, indent=2), "utf-8")
+    return {"ok": True, "slug": slug, "action": action}
+
+
+def _flag(agent, message):
+    """Felipe marca um ERRO de design (ex.: 'parede muito escura') — vira erro no log E lição do agente.
+    A lição é o que torna o erro APRENDIZADO: o agente LÊ esse arquivo no próximo dispatch e não repete."""
+    agent = agent or "interior-designer"
+    message = message or "correção do Felipe"
+    try:
+        from tools import studio_log
+        studio_log.post(agent, "error", message)
+        lessons = ROOT / f".ai_bridge/lessons/{agent}.md"
+        lessons.parent.mkdir(parents=True, exist_ok=True)
+        with lessons.open("a", encoding="utf-8") as f:
+            f.write(f"- [erro marcado pelo Felipe] {message}\n")
+        return {"ok": True}
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": str(e)}
 
 
 class H(BaseHTTPRequestHandler):
@@ -305,6 +356,20 @@ class H(BaseHTTPRequestHandler):
                 self._send(200, fp.read_bytes(), "image/png")
             else:
                 self._send(404, b"not found", "text/plain")
+        else:
+            self._send(404, b"not found", "text/plain")
+
+    def do_POST(self):
+        path = urlparse(self.path).path
+        try:
+            length = int(self.headers.get("Content-Length", 0))
+            body = json.loads(self.rfile.read(length) or b"{}")
+        except Exception:  # noqa: BLE001
+            body = {}
+        if path == "/api/curate":
+            self._send(200, json.dumps(_curate(body.get("slug"), body.get("action"))))
+        elif path == "/api/flag":
+            self._send(200, json.dumps(_flag(body.get("agent"), body.get("message"))))
         else:
             self._send(404, b"not found", "text/plain")
 
