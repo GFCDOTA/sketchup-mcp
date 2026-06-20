@@ -34,15 +34,19 @@ rastreável e versionável, funcionando **sem internet e sem OpenAI** (MVP manua
    faz sentido se for propagar pra sala; a cozinha já está no theme congelado. **Não duplicar** o DNA da cozinha lá.
 
 ## Fases
-- **Fase 0 — descoberta** ✅ (acima)
-- **Fase 1 — contratos** ✅ (templates + schemas, esta execução)
-- **Fase 2 — storage** (`store.py` + árvore `.ai_bridge/interior_consult/`)
-- **Fase 3 — endpoints** (`/api/consult/*` no studio_dashboard.py)
-- **Fase 4 — dashboard manual bridge** (gerar/copiar pergunta; sidecar consult-liaison)
-- **Fase 5 — ingestão de resposta** (`answer_parser.py`)
-- **Fase 6 — aprendizado persistente** (`ingest.py` → DNA / judge-rules / tokens / próxima MT / interior_feedback)
-- **Fase 7 — OpenAI API backend OPCIONAL** (`openai_client.py`, chave só em env)
-- **Fase 8 — Chrome helper EXPERIMENTAL**
+- **Fase 0 — descoberta** ✅
+- **Fase 1 — contratos** ✅ (templates + schemas — commit 31f94bc)
+- **Fase 2 — storage** ✅ `store.py` + árvore `.ai_bridge/interior_consult/` (commit 8eb9f82)
+- **Fase 3 — endpoints** ✅ `/api/consult/*` no studio_dashboard.py
+- **Fase 4 — dashboard manual bridge** ✅ card `🔌 Consult GPT Bridge` (gerar/copiar pergunta, colar/ingerir)
+- **Fase 5 — ingestão de resposta** ✅ `answer_parser.py` (tolerante)
+- **Fase 6 — aprendizado persistente** ✅ `ingest.py` → DNA / judge-rules / próxima MT / interior_feedback (idempotente)
+- **Fase 7 — OpenAI API backend OPCIONAL** — só o STUB seguro existe; backend real = MT-012/013 (TODO)
+- **Fase 8 — Chrome helper EXPERIMENTAL** — TODO (MT-014)
+
+> **MVP manual FECHADO (commit 8eb9f82):** roda offline ponta-a-ponta (gerar→copiar→colar→ingerir→aprende).
+> MT-003/004/005/006/007/008/010/011 ✅. Falta: sidecar dentro da coluna do Arquiteto + entidade cycle
+> (track MT-UI-001..006), backend OpenAI real (MT-012/013), Chrome (MT-014), e MT-009 (style pack da SALA, condicional).
 
 ---
 
@@ -156,5 +160,6 @@ rastreável e versionável, funcionando **sem internet e sem OpenAI** (MVP manua
 8. Contratos legíveis. 9. Aprendizado versionável. 10. Toda decisão gera rastreabilidade.
 
 ## Próximo passo
-Fase 2 (MT-003: `store.py` + árvore de storage). Só depois Fase 3 (endpoints). OpenAI (Fase 7) e Chrome
-(Fase 8) por último. O track UI (MT-UI-*) pode começar em paralelo a partir de MT-UI-001.
+MVP manual pronto. Próximos (com ok do Felipe): track UI (MT-UI-001 entidade `cycle` → MT-UI-004 mover o
+sidecar pra dentro da coluna do Arquiteto), backend OpenAI real (MT-012/013), Chrome (MT-014). Usar o MVP:
+gerar pergunta no card `🔌 Consult GPT Bridge` (:8782) → copiar no ChatGPT → colar a resposta → ingerir.
