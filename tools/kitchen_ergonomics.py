@@ -26,7 +26,8 @@ ERGO = {
     "upper_clearance": (50, 60),         # bancada -> base do aéreo
     "hood_clearance": (45, 65),          # cooktop -> coifa under-cabinet (tipo aprovado); chaminé seria 70-80
     "fridge_tower_width": (55, 75),      # ~60 ref; geladeira freestanding 60-75
-    "fridge_vent_gap": (2, 6),           # respiro lateral total
+    "fridge_vent_gap": (6, 12),          # respiro lateral TOTAL >=6cm (>=3cm/LADO, fridge.md §5). NAO afrouxar.
+    "cooktop_fridge_sep": (60, 400),     # frio longe do calor (spec §0.3): cooktop<->geladeira >=60cm
     "base_module_width": (35, 65),       # módulos comuns ~60 (40/50/60 ok)
     "upper_module_width": (35, 65),
     "filler_width": (15, 18),            # quando necessário
@@ -63,6 +64,15 @@ def audit(room_id="r004"):
     fridge_w = _ext_cm(by_mod.get("fridge", []), "y")
     fridge_body_w = _ext_cm(fridge_body, "y") if fridge_body else fridge_w
 
+    # separação térmica cooktop<->geladeira (frio longe do calor) — centros no eixo y (parede oeste vertical)
+    def _cy(parts):
+        if not parts:
+            return None
+        return (min(p["y0"] for p in parts) + max(p["y1"] for p in parts)) / 2
+    cook_parts = [b for bs in by_mod.values() for b in bs if b["kind"] in {"kc_boca", "kc_vidro"}]
+    cook_cy, fridge_cy = _cy(cook_parts), _cy(by_mod.get("fridge", []))
+    cooktop_fridge_sep = round(abs(cook_cy - fridge_cy) * IN2CM, 1) if (cook_cy is not None and fridge_cy is not None) else 0.0
+
     measured = {
         "countertop_height": round(K.COUNTER_H * 100, 1),
         "toe_kick_height": round(K.TOE_KICK * 100, 1),
@@ -72,6 +82,7 @@ def audit(room_id="r004"):
         "hood_clearance": round(((K.AEREO_Z0 - 0.05) - (K.COOK_Z0 + 0.015)) * 100, 1),
         "fridge_tower_width": fridge_w,
         "fridge_vent_gap": round(K.GEL_W * 100 - fridge_body_w, 1),   # nicho (GEL_W) vs corpo inset = respiro real
+        "cooktop_fridge_sep": cooktop_fridge_sep,
         "base_module_width": round(median(base_doors), 1) if base_doors else 0.0,
         "upper_module_width": round(median(upper_doors), 1) if upper_doors else 0.0,
         "filler_width": _ext_cm(by_mod.get("filler", []), "y"),
@@ -106,15 +117,15 @@ def main():
     from tools.kitchen_validation import validate
     sink_pdf = validate(con, room)["result"]
     try:
-        circ = sanity_room(con, room)["status"]
+        door_clear = sanity_room(con, room)["status"]   # door-clearance da peça (NAO é circulação de corredor da cozinha)
     except Exception:  # noqa: BLE001
-        circ = "?"
+        door_clear = "?"
 
     print("KITCHEN_DIMENSIONAL_AUDIT_RESULT:")
     for key, v, lo, hi, tag in rows:
         print(f"- {key} = {v} cm  ({lo}-{hi})  {tag}")
     print(f"- sink_anchor_pdf = {sink_pdf}")
-    print(f"- circulation = {circ}")
+    print(f"- door_clearance = {door_clear}   # circulação de corredor real precisa da parede oposta (não modelada na cozinha isolada)")
     print(f"\nKITCHEN_DIMENSIONAL_AUDIT => {worst}")
     sys.exit(0)
 
