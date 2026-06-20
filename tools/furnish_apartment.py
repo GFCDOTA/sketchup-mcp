@@ -184,6 +184,44 @@ def _chair_parts():
     return parts
 
 
+def _bwg_recolor(boxes):
+    """Linguagem black_wood_gold (GOLDEN_SAMPLE_004) na SALA: madeira escura coordenada +
+    preto/grafite controlado + tecido escuro + tapete neutro quente + LED quente. SO cor (rgb),
+    NUNCA geometria/posicao -> o layout JA validado fica intacto. Coerente com a cozinha."""
+    WOOD = [110, 84, 58]
+    BLACK = [44, 44, 48]
+    FABRIC = [74, 72, 78]
+    RUG = [140, 128, 112]
+    LED = [255, 240, 212]
+    bk = ("foot", "leg", "perna", "pe", "frame", "base", "soculo", "bracket", "vidro", "boca", "door")
+    fk = ("cushion", "seat", "back", "arm")
+    wk = ("top", "corpo", "porta", "front", "body", "plank", "panel", "shelf", "tampo", "gaveta", "board", "stem")
+    for b in boxes:
+        mod = str(b.get("module", "")).lower()
+        kind = str(b.get("kind", "")).lower()
+        if "spot" in kind:
+            b["rgb"] = LED                                  # spot quente
+        elif "rail" in kind or "trilho" in mod:
+            b["rgb"] = BLACK                                # trilho preto
+        elif "tapete" in mod:
+            b["rgb"] = RUG
+        elif "parede" in mod or "concreto" in mod:
+            b["rgb"] = BLACK                                # painel de midia DARK (nao concreto claro)
+        elif "planta" in mod or "foliage" in kind or "quadro" in mod:
+            continue                                        # acento (verde/arte) — mantem
+        elif "sofa" in mod:
+            b["rgb"] = BLACK if any(k in kind for k in bk) else FABRIC
+        elif "cadeira" in mod:
+            b["rgb"] = BLACK                                # cadeiras escuras elegantes
+        elif any(k in kind for k in bk):
+            b["rgb"] = BLACK
+        elif any(k in kind for k in wk):
+            b["rgb"] = WOOD
+        elif any(k in kind for k in fk):
+            b["rgb"] = FABRIC
+    return boxes
+
+
 def living_room_boxes(con, room_id):
     """Sala via COMMON SENSE ENGINE (placement solver): o sofa GOLDEN deixa de
     flutuar no centro — fica ANCORADO numa parede de FRENTE pra TV (eixo sofa->rack),
@@ -343,6 +381,10 @@ def living_room_boxes(con, room_id):
         track_face = (-fny, fnx)                 # perp ao facing do sofa -> trilho ao longo do eixo
         boxes += place_decor_boxes("track_light", mid, track_face, z_lift=2.15, module="Trilho de luz",
                                    length=1.5, n_spots=3)
+
+    # LINGUAGEM black_wood_gold (fase de propagacao) — so cor, gated. Layout intacto.
+    if os.environ.get("FURNISH_STYLE") in ("industrial", "modern_warm"):
+        _bwg_recolor(boxes)
 
     out = {"result": "OK", "room_name": plan.get("room_name"), "n_placed": len(boxes),
            "placement": "common_sense_solver", "tv_wall": plan.get("tv_wall"),
