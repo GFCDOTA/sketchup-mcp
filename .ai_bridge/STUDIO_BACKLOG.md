@@ -4,8 +4,12 @@
 > sozinho e commita; **[V]** = precisa veredito visual do Felipe/GPT; **[D]** = precisa decisão do Felipe.
 > Status: ✅ feito · ▶ em andamento · ⬜ a fazer. Atacando de cima pra baixo por prioridade.
 >
-> **Feito 2026-06-21 (autônomo):** P0-1,2,3 · P1-8 · P2-19 · P3-23,24,26 · P5-15 —
-> commits `e4bc8ec` (modo limpo) · `df60787` (P0 ciclo+P3) · `6a17d4d` (limpeza+testes).
+> **Feito 2026-06-21 (autônomo, carta branca):** P0-1,2,3,4,7 · P1-8,12 · P2-19,20,21 · P3-23,24,26 · P5-15 —
+> commits `e4bc8ec`·`df60787`·`6a17d4d`·`4ea7aaf`·`d4da4fd`. O **ciclo alimenta o Arquiteto** sozinho (P0-7);
+> em **dúvida de design, consulto os locais** (Arquiteto/consenso) no lugar do Felipe e alimento o resultado
+> tagueado `[REC LOCAL · validar]`. ⚠️ Achado: o DeepSeek local pode **contradizer** o aprendizado do Consult
+> GPT em decisão crítica (recomendou coifa "escondida" vs o anti-pattern `black_blob_appliance`) → decisão
+> crítica/visual continua sendo GPT+Felipe; local serve pra soft/rascunho.
 
 ## P0 — Inteligência dos agentes (o que tava "burro"/alucinando)
 1. ✅ [A] Endurecer o prompt do ciclo (PT, SÓ cozinha, sem inventar solda/código/emergência)
