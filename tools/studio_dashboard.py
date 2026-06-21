@@ -279,6 +279,8 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 .askbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .askbar select,.askbar input{background:#0c0d10;border:1px solid var(--bd);color:var(--fg);border-radius:8px;padding:8px 11px;font:13px system-ui}
 .askbar input{flex:1;min-width:220px}
+.qhist{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.qchip{cursor:pointer;background:#0c0d10;border:1px solid var(--bd);border-radius:12px;padding:3px 10px;font-size:11.5px;color:#cdb98a}.qchip:hover{border-color:var(--gold);color:#fff}
 .cycsec{margin-top:16px;border-top:1px solid var(--bd);padding-top:13px}
 .cycsec-h{font-size:13px;color:var(--gold);font-weight:600;margin-bottom:9px}
 .mtlink{cursor:pointer;border-bottom:1px dotted var(--gold)}.mtlink:hover{color:#fff}
@@ -592,10 +594,14 @@ async function tick(force){
    <div class=cydir onclick="this.classList.toggle('exp')" title="clica pra expandir/recolher">🎯 ${esc(c.directive||'(sem diretriz)')}</div>
    <div class=cymeta><span class=mut>🦙 llama → 🤖 qwen → 🐳 deepseek</span> <button class=chatbtn onclick="cycleToConsult(${i})" title="virar pergunta pro Consult GPT validar">→ validar no Consult GPT</button>${c.consulted?' <span class=mut>✓ consultado</span>':''}</div></div>`).join(''):'<span class=mut>nenhum ciclo rodado ainda — clica "▶ Rodar próximo ciclo" acima. A diretriz que sair vira o item aqui.</span>'
  // 🗣️ PERGUNTE AO TIME — o ó de tudo (topo): traduz a pergunta plana num bom prompt pro local
- root.appendChild(el(`<div class="card full" id=sec-ask><h2>🗣️ Pergunte ao time <span class=mut>(em português normal — eu enquadro o prompt pra o local não alucinar)</span></h2>
+ const myq=(ag.feed||[]).filter(x=>x.agent==='felipe'&&(x.message||'').trim()).slice(-10).reverse()
+ const qseen=new Set(),myqU=myq.filter(x=>{const k=(x.message||'').slice(0,60);if(qseen.has(k))return false;qseen.add(k);return true}).slice(0,6)
+ const qhist=myqU.length?`<div class=qhist><span class=mut>tuas últimas:</span>${myqU.map(x=>`<span class=qchip title="reusar esta pergunta" data-q="${esc(x.message)}" onclick="const e=document.getElementById('ask-q');if(e){e.value=this.dataset.q;e.focus()}">${esc((x.message||'').slice(0,42))}${(x.message||'').length>42?'…':''}</span>`).join('')}</div>`:''
+ root.appendChild(el(`<div class="card full" id=sec-ask><h2>🗣️ Pergunte ao time <span class=mut>(em português normal — eu enquadro o prompt com teu DNA pra o local não alucinar nem fugir do teu gosto)</span></h2>
   <div class=askbar><select id=ask-agent title="pra quem"><option value=interior-designer>🐳 Arquiteto</option><option value=interior-pm>🦙 PM</option><option value=interior-orchestrator>🤖 Team Lead</option><option value=consenso>🧠 consenso (3)</option></select>
-   <input id=ask-q placeholder="pergunte qualquer coisa (ex.: a coifa preta tá sumindo no fundo?)" onkeydown="if(event.key==='Enter')teamAsk()">
-   <button class=send onclick=teamAsk()>➤ perguntar</button> <span class=mut id=askmsg></span></div></div>`))
+   <input id=ask-q placeholder="pergunte qualquer coisa (ex.: qual piso pra não aparecer sujeira?)" onkeydown="if(event.key==='Enter')teamAsk()">
+   <button class=send onclick=teamAsk()>➤ perguntar</button> <span class=mut id=askmsg></span></div>
+  ${qhist}</div>`))
  // AGENTES + CICLO numa seção só
  root.appendChild(el(`<div class="card full" id=sec-agents><h2>Agentes — PM · Team Lead · Arquiteto <span class=mut>(+ o ciclo, abaixo dos chats)</span></h2>
   <div class=org id=org><svg class=arrows id=arrows></svg><div class=cols>${cols}</div></div>
@@ -912,12 +918,15 @@ def _team_ask(agent, question):
         return {"ok": False, "error": "escreve a pergunta"}
     labels = {"interior-pm": "PM", "interior-orchestrator": "Team Lead", "interior-designer": "Arquiteto"}
     role = agent if agent in labels else "interior-designer"
-    framed = (f"Você é o {labels.get(role, 'Arquiteto')} de um estúdio de design de INTERIORES (cozinha "
-              f"planta_74, apê 74m2, estilo dark premium BLACK_WOOD_GOLD). Responda em português, foco em "
-              f"design/execução de COZINHA, sem inventar nem sair do tema.\n\nPergunta do Felipe: {q}")
+    base = (f"Você é o {labels.get(role, 'Arquiteto')} de um estúdio de design de INTERIORES (cozinha "
+            f"planta_74, apê 74m2, estilo dark premium BLACK_WOOD_GOLD). Responda em português, foco em "
+            f"design/execução de COZINHA, RESPEITANDO o gosto do Felipe abaixo. Sem inventar nem sair do tema.")
+    # injeta o DNA pra QUALQUER agente responder no gosto do Felipe (o Arquiteto já recebe via _ask)
+    prime = "" if agent == "interior-designer" else _architect_priming(dna_budget=2500, feed_budget=900)
+    framed = ((prime + "\n\n") if prime else "") + f"{base}\n\nPergunta do Felipe: {q}"
     if agent == "consenso":
-        return _consensus("interior-designer", framed)
-    return _ask(role, framed)
+        return _consensus("interior-designer", framed, display=q)
+    return _ask(role, framed, display=q)
 
 
 def _consult_learn(body: dict) -> dict:
@@ -1115,13 +1124,14 @@ AGENT_ROLE = {"interior-designer": "deepseek", "interior-orchestrator": "coder",
               "ollama-spec": "designer"}
 
 
-def _ask(agent, prompt, image=None):
-    """Felipe/studio pergunta a um agente -> roteia pro LLM LOCAL via Ollama, SEM Claude (peão local)."""
+def _ask(agent, prompt, image=None, display=None):
+    """Felipe/studio pergunta a um agente -> roteia pro LLM LOCAL via Ollama, SEM Claude (peão local).
+    `display` = o que aparece na bolha do Felipe (pergunta PLANA); `prompt` = o que vai pro LLM (enquadrado)."""
     agent = agent or "interior-designer"
     try:
         from tools import ollama_bridge, studio_log
         role = AGENT_ROLE.get(agent, "llama")
-        studio_log.post("felipe", "working", prompt or "", to=agent)   # bolha do Felipe (direita)
+        studio_log.post("felipe", "working", (display or prompt or "").strip(), to=agent)   # bolha do Felipe (pergunta plana)
         q = prompt or ""
         if agent == "interior-designer":   # Arquiteto responde JÁ usando as 3 camadas do gosto do Felipe
             ctx = _architect_priming()
@@ -1137,9 +1147,10 @@ def _ask(agent, prompt, image=None):
         return {"ok": False, "error": str(e)}
 
 
-def _consensus(agent, prompt):
+def _consensus(agent, prompt, display=None):
     """Fan-out: pergunta pros 3 LLMs locais (deepseek/qwen/llama), eles opinam, e um sintetiza
-    numa resposta concisa e mais 'pensada'. Mais lento, mas mais inteligente (ideia do Felipe)."""
+    numa resposta concisa e mais 'pensada'. Mais lento, mas mais inteligente (ideia do Felipe).
+    `display` = pergunta PLANA pra bolha do Felipe (vs `prompt` enquadrado)."""
     import re as _re
     agent = agent or "interior-designer"
     prompt = prompt or ""
@@ -1148,7 +1159,7 @@ def _consensus(agent, prompt):
         return _re.sub(r"<think>.*?</think>", "", r.get("response") or "", flags=_re.DOTALL).strip()
     try:
         from tools import ollama_bridge, studio_log
-        studio_log.post("felipe", "working", prompt, to=agent)
+        studio_log.post("felipe", "working", (display or prompt or "").strip(), to=agent)
         opinions = []
         for role in ("deepseek", "qwen", "llama"):
             studio_log.post(f"ollama-{role}", "thinking", f"opinando: {prompt[:40]}")
