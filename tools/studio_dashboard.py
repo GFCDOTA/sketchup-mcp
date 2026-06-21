@@ -283,6 +283,8 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 .qchip{cursor:pointer;background:#0c0d10;border:1px solid var(--bd);border-radius:12px;padding:3px 10px;font-size:11.5px;color:#cdb98a}.qchip:hover{border-color:var(--gold);color:#fff}
 .cycsec{margin-top:16px;border-top:1px solid var(--bd);padding-top:13px}
 .cycsec-h{font-size:13px;color:var(--gold);font-weight:600;margin-bottom:9px}
+.convbox{max-height:430px;overflow-y:auto;padding:8px 12px;background:#0c0d10;border:1px solid var(--bd);border-radius:8px;display:flex;flex-direction:column}
+.bub.cons{border:1px solid var(--gold)}
 .mtlink{cursor:pointer;border-bottom:1px dotted var(--gold)}.mtlink:hover{color:#fff}
 .kc-hl{outline:2px solid var(--gold);outline-offset:1px;box-shadow:0 0 0 4px rgba(201,168,106,.18)}
 .cylist{display:flex;flex-direction:column;gap:9px}
@@ -462,6 +464,10 @@ function goToMT(mt){const sec=document.getElementById('sec-backlog');if(sec)sec.
  const c=document.getElementById('kc-'+mt);if(c){c.classList.add('kc-hl');c.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>c.classList.remove('kc-hl'),2400)}}
 function goToCycle(){const c=document.getElementById('sec-agents');if(!c)return
  c.scrollIntoView({behavior:'smooth',block:'start'})}
+function micAsk(btn){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){const m=document.getElementById('askmsg');if(m)m.textContent='teu navegador não suporta voz (usa Chrome)';return}
+ const r=new SR();r.lang='pt-BR';r.interimResults=false;r.maxAlternatives=1;const o=btn.textContent;btn.textContent='🔴'
+ r.onresult=e=>{const t=e.results[0][0].transcript;const q=document.getElementById('ask-q');if(q){q.value=t;q.focus()}}
+ r.onerror=()=>{btn.textContent=o};r.onend=()=>{btn.textContent=o};r.start()}
 function teamAsk(){const ag=cval('ask-agent')||'interior-designer',q=(cval('ask-q')||'').trim();const m=document.getElementById('askmsg');if(!q){if(m)m.textContent='escreve a pergunta';return}
  if(m)m.textContent='enquadrando e perguntando… (pode levar alguns segundos)'
  const e=document.getElementById('ask-q');if(e)e.value=''
@@ -521,7 +527,7 @@ function applyOrder(){const root=document.getElementById('root');if(!root)return
  const full=[...saved.filter(id=>present.includes(id)),...present.filter(id=>!saved.includes(id))]
  full.forEach(id=>{const e=document.getElementById(id);if(e)root.appendChild(e)})}
 // RECOLHER cards — só Agentes/Loop/Consult/Backlog abertos por padrão; o resto recolhido (menos poluição)
-const DEFAULT_OPEN=['sec-ask','sec-agents','sec-consult','sec-backlog']
+const DEFAULT_OPEN=['sec-ask','sec-agents','sec-conversa','sec-consult','sec-backlog']
 function collapsedSet(){try{const v=JSON.parse(localStorage.getItem('studio_collapsed')||'null');return v===null?null:new Set(v)}catch(e){return null}}
 function saveCollapsed(s){localStorage.setItem('studio_collapsed',JSON.stringify([...s]))}
 function applyCollapsed(){const root=document.getElementById('root');if(!root)return
@@ -600,6 +606,7 @@ async function tick(force){
  root.appendChild(el(`<div class="card full" id=sec-ask><h2>🗣️ Pergunte ao time <span class=mut>(em português normal — eu enquadro o prompt com teu DNA pra o local não alucinar nem fugir do teu gosto)</span></h2>
   <div class=askbar><select id=ask-agent title="pra quem"><option value=interior-designer>🐳 Arquiteto</option><option value=interior-pm>🦙 PM</option><option value=interior-orchestrator>🤖 Team Lead</option><option value=consenso>🧠 consenso (3)</option></select>
    <input id=ask-q placeholder="pergunte qualquer coisa (ex.: qual piso pra não aparecer sujeira?)" onkeydown="if(event.key==='Enter')teamAsk()">
+   <button class=chatbtn onclick="micAsk(this)" title="perguntar por voz (pt-BR) — o navegador transcreve">🎤</button>
    <button class=send onclick=teamAsk()>➤ perguntar</button> <span class=mut id=askmsg></span></div>
   ${qhist}</div>`))
  // AGENTES + CICLO numa seção só
@@ -607,6 +614,12 @@ async function tick(force){
   <div class=org id=org><svg class=arrows id=arrows></svg><div class=cols>${cols}</div></div>
   <div class=cycsec><div class=cycsec-h>🔄 Ciclo — o PM roda aqui</div>${cyctrl}<div class=kblist-h>Ciclos recentes</div><div class=cylist>${cyhtml}</div></div></div>`))
  drawArrows(ag)
+ // 💬 CONVERSA DO TIME — thread única (em ordem), pra saber quem fala com quem + a resposta oficial
+ const conv=(ag.feed||[]).slice(-30)
+ const convHtml=conv.map(x=>{const me=x.agent==='felipe',isC=x.via&&(''+x.via).indexOf('consenso')>=0
+   return `<div class="bub ${me?'me':'them'}${isC?' cons':''}"><div class=btxt>${esc(x.message)}</div><div class=bt>${FACES[x.agent]||'🤖'} ${esc(LABELS[x.agent]||x.agent)}${x.to&&x.to!=='felipe'?(' → '+esc(LABELS[x.to]||x.to)):''}${viaTag(x.via)} · ${hhmm(x.ts)}</div></div>`}).join('')
+ root.appendChild(el(`<div class="card full" id=sec-conversa><h2>💬 Conversa do time <span class=mut>(tudo numa thread, em ordem — quem fala com quem; resposta do 🐳 Arquiteto ou 🧠 consenso = a oficial)</span></h2>
+  <div class=convbox>${convHtml||'<span class=mut>sem conversa ainda — pergunta lá em cima</span>'}</div></div>`))
  const critic=(s.renders||[])[0]
  // ERROS — card próprio, grande, logo abaixo dos agentes
  root.appendChild(el(`<div class="card full" id=sec-err><h2>Erros de design — o que TU não curtiu (vira lição)</h2>
@@ -707,7 +720,7 @@ async function tick(force){
  root.appendChild(el(`<div class="card full" id=sec-ren><h2>Renders (${(s.renders||[]).length}) — clica pra ampliar/baixar · mais novos primeiro</h2>
   <div class="grid gallery">${rr||'<span class=mut>sem renders</span>'}</div></div>`))
  applyOrder();applyCollapsed();makeDraggable()   // layout livre: ordem salva + recolher + punho ⠿
- document.querySelectorAll('.chat').forEach(c=>{c.scrollTop=c.scrollHeight})   // chat sempre na última msg
+ document.querySelectorAll('.chat,.convbox').forEach(c=>{c.scrollTop=c.scrollHeight})   // chat/conversa sempre na última msg
  window.scrollTo(0,sy)   // mantém a rolagem onde estava (não sobe ao mandar mensagem)
 }
 tick(true);setInterval(tick,10000);window.addEventListener('resize',()=>tick(1))
