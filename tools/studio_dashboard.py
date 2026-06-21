@@ -272,10 +272,10 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 .cyhd{font-size:12.5px;margin-bottom:4px}
 .cydir{font-size:13px;color:#e8e9ec;line-height:1.5;margin:3px 0 6px}
 .cymeta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:11px}
-.subs{display:flex;flex-direction:column;gap:7px;margin-bottom:9px;min-height:120px}
-.sub{display:flex;gap:8px;align-items:center;background:#181a1f;border:1px solid var(--bd);border-radius:8px;padding:4px 9px}
+.subs{display:flex;flex-direction:row;flex-wrap:wrap;gap:6px;margin-bottom:9px}
+.sub{display:flex;gap:8px;align-items:center;background:#181a1f;border:1px solid var(--bd);border-radius:8px;padding:4px 9px;flex:1 1 auto;min-width:128px}
 .sub .face{font-size:15px;opacity:.55}.sub.act .face,.lead.act .face{opacity:1}
-.sub .nm{font-size:12.5px;flex:1}
+.sub .nm{font-size:12.5px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sdot{width:8px;height:8px;border-radius:50%;background:#5a606b;display:inline-block;margin-left:auto;flex:none}
 .s-working .sdot,.s-thinking .sdot{background:var(--ok);box-shadow:0 0 7px var(--ok);animation:pulse 1.1s infinite}
 .s-done .sdot{background:var(--blu)}.s-blocked .sdot,.s-error .sdot{background:var(--red)}.s-waiting .sdot{background:var(--warn)}
