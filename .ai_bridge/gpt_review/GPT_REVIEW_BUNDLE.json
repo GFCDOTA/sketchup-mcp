@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-06-21T19:06:04",
+  "generated_at": "2026-06-21T19:17:05",
   "repo": {
     "branch": "feat/sofa-class-from-reference",
-    "sha": "0eaaf63f0c95a2e067f34f060a9d4f22e3e97497",
+    "sha": "33cee88fcf8d8ab69a498325abc2b7d0811b4f7f",
     "remote_url": "https://github.com/GFCDOTA/sketchup-mcp.git",
     "owner": "GFCDOTA",
     "repo": "sketchup-mcp"
@@ -61,7 +61,7 @@
     "mode": "REFERENCE_PACK",
     "status": "waiting_felipe_curation",
     "next_action": "Felipe escolher 1-2 referências principais (⭐) na Curadoria",
-    "architect_blocked": true,
+    "architect_blocked": false,
     "references": {
       "pack_id": "sofa_reference_pack_001",
       "approved": [
@@ -69,7 +69,9 @@
         "sofa-ref-02-venezia-slate"
       ],
       "rejected": [],
-      "main": [],
+      "main": [
+        "sofa-ref-02-venezia-slate"
+      ],
       "anti": [
         "sofa-ref-06-anti-povison"
       ]
@@ -82,7 +84,9 @@
         "icon": "✓",
         "summary": "Sofá escolhido como laboratório controlado (erro caixa é óbvio, reutilizável).",
         "model": "llama3.1:8b",
-        "files": []
+        "files": [],
+        "needs": null,
+        "jump": null
       },
       {
         "agent": "Team Lead",
@@ -91,7 +95,9 @@
         "icon": "✓",
         "summary": "Quebrou em: reference_pack -> curadoria -> build_spec -> build -> gates -> judge.",
         "model": "qwen2.5-coder:14b",
-        "files": []
+        "files": [],
+        "needs": null,
+        "jump": null
       },
       {
         "agent": "Reference Scout",
@@ -103,52 +109,64 @@
         "files": [
           "artifacts/reference_lab/sofa/SOFA_REFERENCE_PACK.md",
           ".ai_bridge/reference_packs/sofa_reference_pack_001.json"
-        ]
+        ],
+        "needs": null,
+        "jump": null
       },
       {
         "agent": "Felipe",
         "face": "🧑",
-        "status": "waiting",
-        "icon": "⏳",
-        "summary": "Aguardando curadoria: aprovar/rejeitar/⭐principal/🚫anti-pattern.",
+        "status": "done",
+        "icon": "✓",
+        "summary": "✓ principal escolhido (1)",
         "model": "",
-        "files": []
+        "files": [],
+        "needs": null,
+        "jump": null
       },
       {
         "agent": "Architect",
         "face": "🐳",
-        "status": "blocked",
-        "icon": "⛔",
-        "summary": "BLOQUEADO até existir referência ⭐ principal (regra-trava).",
+        "status": "pending",
+        "icon": "—",
+        "summary": "destravado ✓ — pronto pra virar SOFA_BUILD_SPEC (após Consult GPT)",
         "model": "",
-        "files": []
+        "files": [],
+        "needs": null,
+        "jump": null
       },
       {
         "agent": "Gates",
         "face": "✅",
         "status": "na",
         "icon": "·",
-        "summary": "Ainda não aplicável (sem sofá construído).",
+        "summary": "ainda não aplicável (sem sofá construído)",
         "model": "",
-        "files": []
+        "files": [],
+        "needs": null,
+        "jump": null
       },
       {
         "agent": "Consult Liaison",
         "face": "🔌",
         "status": "pending",
         "icon": "—",
-        "summary": "Pronto pra gerar pergunta ao Consult GPT pós-curadoria.",
+        "summary": "pronto pra gerar pergunta pós-curadoria",
         "model": "",
-        "files": []
+        "files": [],
+        "needs": "gerar pergunta GPT",
+        "jump": "sec-consult"
       },
       {
         "agent": "Learning",
         "face": "📚",
         "status": "pending",
         "icon": "—",
-        "summary": "Pendente: regra/anti-pattern só após resposta do GPT.",
+        "summary": "pendente: regra/anti-pattern após resposta do GPT",
         "model": "",
-        "files": []
+        "files": [],
+        "needs": null,
+        "jump": null
       }
     ],
     "consult": {
@@ -162,9 +180,9 @@
       "golden_samples": []
     },
     "next_step": {
-      "kind": "curate",
-      "label": "⭐ Você: escolher 1–2 referências PRINCIPAIS no Reference Pack",
-      "actionable": false
+      "kind": "consult",
+      "label": "🔌 Gerar pergunta pro Consult GPT → SOFA_BUILD_SPEC",
+      "actionable": true
     },
     "cycles": [
       {
@@ -205,7 +223,8 @@
         "dna_adherence": "alta — couro quente + ferro discreto casa com BLACK_WOOD_GOLD.",
         "status": "approved",
         "comment": "",
-        "og_image": "https://craftersandweavers.com/cdn/shop/files/unnamed_9db0b94d-3f12-4d57-80a4-a5edb4c09cab_1200x1112.jpg?v=1767817527"
+        "og_image": "https://craftersandweavers.com/cdn/shop/files/unnamed_9db0b94d-3f12-4d57-80a4-a5edb4c09cab_1200x1112.jpg?v=1767817527",
+        "link_status": "ok"
       },
       {
         "id": "sofa-ref-02-venezia-slate",
@@ -226,9 +245,10 @@
         "copy": "A COR slate/grafite · pés de ferro finos · linha limpa modern-industrial.",
         "avoid": "Braço reto pode virar caixa se for largo — manter fino.",
         "dna_adherence": "muito alta — cor grafite é o centro do dark premium.",
-        "status": "approved",
+        "status": "main",
         "comment": "",
-        "og_image": "https://craftersandweavers.com/cdn/shop/files/6_00dad817-9c7f-4cb0-9b97-0ec8a6567736_1200x1500.png?v=1776293708"
+        "og_image": "https://craftersandweavers.com/cdn/shop/files/6_00dad817-9c7f-4cb0-9b97-0ec8a6567736_1200x1500.png?v=1776293708",
+        "link_status": "ok"
       },
       {
         "id": "sofa-ref-03-chiavari",
@@ -251,7 +271,8 @@
         "dna_adherence": "alta — couro quente; cuidar pra não ficar rústico.",
         "status": "pending",
         "comment": "",
-        "og_image": "https://worldinteriors.com/cdn/shop/products/gpf-isof-gei_3q1_1_1200x1200.jpg?v=1740007422"
+        "og_image": "https://worldinteriors.com/cdn/shop/products/gpf-isof-gei_3q1_1_1200x1200.jpg?v=1740007422",
+        "link_status": "ok"
       },
       {
         "id": "sofa-ref-04-compact-at",
@@ -273,7 +294,8 @@
         "avoid": "Sven mid-century foge do industrial — pegar PROPORÇÃO/conforto, não o retrô.",
         "dna_adherence": "média — referência de PROPORÇÃO compacta, não de estilo.",
         "status": "pending",
-        "comment": ""
+        "comment": "",
+        "link_status": "ok"
       },
       {
         "id": "sofa-ref-05-industrywest-radia",
@@ -295,7 +317,8 @@
         "avoid": "Assento/encosto raso demais → menos aconchego; garantir profundidade.",
         "dna_adherence": "alta — detalhe industrial refinado (braço track + sled).",
         "status": "pending",
-        "comment": ""
+        "comment": "",
+        "link_status": "broken"
       },
       {
         "id": "sofa-ref-06-anti-povison",
@@ -317,14 +340,15 @@
         "avoid": "Braço largo reto · sem pé que erga · módulos cúbicos · encosto tábua reta · zero raio/chanfro nas quinas.",
         "dna_adherence": "zero — viola dark premium e conforto.",
         "status": "anti",
-        "comment": ""
+        "comment": "",
+        "link_status": "ok"
       }
     ],
     "counts": {
       "total": 6,
-      "approved": 2,
+      "approved": 1,
       "rejected": 0,
-      "main": 0,
+      "main": 1,
       "anti": 1,
       "pending": 3
     }
@@ -437,9 +461,9 @@
     "done": 0
   },
   "changes_since_last": {
-    "last_sha": "6e9c4c23910311fc48a5a98e03b5a12f15c2cc97",
-    "current_sha": "0eaaf63f0c95a2e067f34f060a9d4f22e3e97497",
-    "diffstat": ".ai_bridge/interior_cycles/CYCLE-003.json          |   9 +-\n .../reference_packs/sofa_reference_pack_001.json   |  15 +-\n .../anti_patterns/sofa-ref-06-anti-povison.json    |  12 ++\n references/felipe/approved/sofa-ref-01-henry.json  |  12 ++\n .../felipe/approved/sofa-ref-02-venezia-slate.json |  12 ++\n tests/test_interior_cycles.py                      |  12 ++\n tools/interior_studio/cycles.py                    |  18 +-\n tools/interior_studio/gpt_review_bundle.py         | 199 +++++++++++++++++++++\n tools/interior_studio/reference_packs.py           |   7 +-\n tools/studio_dashboard.py                          |  75 +++++++-\n 10 files changed, 357 insertions(+), 14 deletions(-)"
+    "last_sha": "0eaaf63f0c95a2e067f34f060a9d4f22e3e97497",
+    "current_sha": "33cee88fcf8d8ab69a498325abc2b7d0811b4f7f",
+    "diffstat": ".ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.json       | 445 +++++++++++++++++++++\n .ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md         |  93 +++++\n .ai_bridge/interior_cycles/CYCLE-003.json          |   4 +-\n .../reference_packs/sofa_reference_pack_001.json   |  20 +-\n references/felipe/approved/sofa-ref-01-henry.json  |   2 +-\n .../felipe/approved/sofa-ref-02-venezia-slate.json |   6 +-\n tests/test_interior_cycles.py                      |  13 +\n tools/interior_studio/cycles.py                    |  63 ++-\n tools/studio_dashboard.py                          |  65 ++-\n 9 files changed, 660 insertions(+), 51 deletions(-)"
   },
   "question": "Revise o estado atual do Interior Studio (:8782) pelos arquivos raw linkados. (1) O dashboard está CLARO pra operar o ciclo CYCLE-003 / SOFA_REFERENCE_PACK? (2) O que ainda compete por atenção / está confuso? (3) O que priorizar ANTES de construir o sofá? (4) A curadoria VISUAL e a regra-trava (Arquiteto bloqueado sem ⭐ principal) estão bem resolvidas? Responda objetivo, com prioridades."
 }
