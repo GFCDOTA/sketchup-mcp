@@ -250,9 +250,9 @@ h1{font-size:16px;margin:0;letter-spacing:.6px;font-weight:700;background:linear
 .hdot{width:9px;height:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 9px var(--gold)}
 nav{display:flex;gap:3px}nav a{color:var(--mut);text-decoration:none;font-size:12.5px;padding:4px 10px;border-radius:7px}
 nav a:hover{color:var(--fg);background:#1f1b29}
-.mut{color:var(--mut);font-size:12.5px}.wrap{padding:16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px 16px;overflow:auto;resize:vertical;min-height:84px}
-.card.full{grid-column:1/3}.card.half{grid-column:auto}h2{font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin:0 0 10px}
+.mut{color:var(--mut);font-size:12.5px}.wrap{padding:16px 20px;display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px 16px;overflow:auto;resize:both;min-height:84px;min-width:300px;width:100%;max-width:100%;box-sizing:border-box;flex:0 0 auto}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin:0 0 10px}
 .card.collapsed{height:auto!important;resize:none}
 .wbtn{cursor:pointer;color:#7a8696;font-size:12px;margin-right:5px;user-select:none}.wbtn:hover{color:var(--gold)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
@@ -535,7 +535,7 @@ function applyOrder(){const root=document.getElementById('root');if(!root)return
  const full=[...saved.filter(id=>present.includes(id)),...present.filter(id=>!saved.includes(id))]
  full.forEach(id=>{const e=document.getElementById(id);if(e)root.appendChild(e)})}
 // RECOLHER cards — só Agentes/Loop/Consult/Backlog abertos por padrão; o resto recolhido (menos poluição)
-const DEFAULT_OPEN=['sec-ask','sec-agents','sec-conversa','sec-consult','sec-backlog']
+const DEFAULT_OPEN=['sec-ask','sec-cycles','sec-agents','sec-conversa','sec-consult','sec-backlog']
 function collapsedSet(){try{const v=JSON.parse(localStorage.getItem('studio_collapsed')||'null');return v===null?null:new Set(v)}catch(e){return null}}
 function saveCollapsed(s){localStorage.setItem('studio_collapsed',JSON.stringify([...s]))}
 function applyCollapsed(){const root=document.getElementById('root');if(!root)return
@@ -547,14 +547,14 @@ function toggleCollapse(id){const set=collapsedSet()||new Set();if(set.has(id))s
 // REDIMENSIONAR — altura livre (puxa a borda de baixo, salva no mouseup) + largura ½/inteira
 function cardSizes(){try{return JSON.parse(localStorage.getItem('studio_sizes')||'{}')}catch(e){return{}}}
 function saveSizes(){const root=document.getElementById('root');if(!root)return;const sz=cardSizes()
- ;[...root.children].forEach(c=>{if(c.id&&c.classList.contains('card')&&c.style.height){(sz[c.id]=sz[c.id]||{}).h=c.style.height}})
+ ;[...root.children].forEach(c=>{if(!c.id||!c.classList.contains('card'))return;const o=sz[c.id]=sz[c.id]||{}
+   if(c.style.height)o.h=c.style.height;if(c.style.width)o.w=c.style.width})
  localStorage.setItem('studio_sizes',JSON.stringify(sz))}
 function applySizes(){const sz=cardSizes();Object.keys(sz).forEach(id=>{const c=document.getElementById(id);if(!c)return
- if(sz[id].h&&!c.classList.contains('collapsed'))c.style.height=sz[id].h
- if(sz[id].half){c.classList.remove('full');c.classList.add('half')}})}
+ if(sz[id].w)c.style.width=sz[id].w
+ if(sz[id].h&&!c.classList.contains('collapsed'))c.style.height=sz[id].h})}
 function toggleWidth(id){const sz=cardSizes(),c=document.getElementById(id);if(!c)return
- const half=!c.classList.contains('half');c.classList.toggle('half',half);c.classList.toggle('full',!half)
- ;(sz[id]=sz[id]||{}).half=half;localStorage.setItem('studio_sizes',JSON.stringify(sz))}
+ const w=c.style.width==='49%'?'100%':'49%';c.style.width=w;(sz[id]=sz[id]||{}).w=w;localStorage.setItem('studio_sizes',JSON.stringify(sz))}
 document.addEventListener('mouseup',()=>saveSizes())
 function makeDraggable(){const root=document.getElementById('root');if(!root)return
  ;[...root.children].forEach(card=>{if(!card.id||!card.classList.contains('card'))return
@@ -568,8 +568,8 @@ function makeDraggable(){const root=document.getElementById('root');if(!root)ret
   if(!card.querySelector('.collapse-btn')){const cb=document.createElement('span');cb.className='collapse-btn';cb.title='recolher/expandir';cb.textContent=card.classList.contains('collapsed')?'▸':'▾'
    cb.onclick=()=>{toggleCollapse(card.id);cb.textContent=card.classList.contains('collapsed')?'▸':'▾'}
    const hd=card.querySelector('h2');if(hd)hd.insertBefore(cb,hd.firstChild)}
-  if(!card.querySelector('.wbtn')){const wb=document.createElement('span');wb.className='wbtn';wb.title='largura: ½ / inteira';wb.textContent=card.classList.contains('half')?'◫':'▭'
-   wb.onclick=()=>{toggleWidth(card.id);wb.textContent=card.classList.contains('half')?'◫':'▭'}
+  if(!card.querySelector('.wbtn')){const wb=document.createElement('span');wb.className='wbtn';wb.title='largura ½ / inteira (ou puxa o canto pra qualquer tamanho)';wb.textContent=card.style.width==='49%'?'◫':'▭'
+   wb.onclick=()=>{toggleWidth(card.id);wb.textContent=card.style.width==='49%'?'◫':'▭'}
    const hd=card.querySelector('h2');if(hd)hd.insertBefore(wb,hd.firstChild)}})}
 function cardDrop(e,targetId){e.preventDefault();if(!DRAGID||DRAGID===targetId)return
  const root=document.getElementById('root'),drag=document.getElementById(DRAGID),tgt=document.getElementById(targetId)
@@ -632,10 +632,12 @@ async function tick(force){
    <button class=chatbtn onclick="micAsk(this)" title="perguntar por voz (pt-BR) — o navegador transcreve">🎤</button>
    <button class=send onclick=teamAsk()>➤ perguntar</button> <span class=mut id=askmsg></span></div>
   ${qhist}</div>`))
- // AGENTES + CICLO numa seção só
- root.appendChild(el(`<div class="card full" id=sec-agents><h2>Agentes — PM · Team Lead · Arquiteto <span class=mut>(+ o ciclo, abaixo dos chats)</span></h2>
-  <div class=org id=org><svg class=arrows id=arrows></svg><div class=cols>${cols}</div></div>
-  <div class=cycsec><div class=cycsec-h>🔄 Ciclo — o PM roda aqui</div>${cyctrl}<div class=kblist-h>Ciclos recentes</div><div class=cylist>${cyhtml}</div></div></div>`))
+ // 🔄 CICLO — card SOLTO, logo após "Pergunte ao time" (você move/redimensiona à vontade)
+ root.appendChild(el(`<div class="card full" id=sec-cycles><h2>🔄 Ciclo <span class=mut>(o PM roda aqui · a saída vira diretriz no banco → "validar no Consult GPT")</span></h2>
+  ${cyctrl}<div class=kblist-h>Ciclos recentes</div><div class=cylist>${cyhtml}</div></div>`))
+ // AGENTES — só os 3 + chats
+ root.appendChild(el(`<div class="card full" id=sec-agents><h2>Agentes — PM · Team Lead · Arquiteto</h2>
+  <div class=org id=org><svg class=arrows id=arrows></svg><div class=cols>${cols}</div></div></div>`))
  drawArrows(ag)
  // 💬 CONVERSA DO TIME — thread única (em ordem), pra saber quem fala com quem + a resposta oficial
  const conv=(ag.feed||[]).slice(-30)
