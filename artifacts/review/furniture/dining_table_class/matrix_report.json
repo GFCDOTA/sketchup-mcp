@@ -1,0 +1,128 @@
+[
+  {
+    "cell": "rect_family@4p",
+    "bbox_m": [
+      1.4,
+      0.9,
+      0.75
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "chair_sat": "PASS",
+    "use_sat": "PASS",
+    "frente_por_lugar": 0.62,
+    "n_parts": 9
+  },
+  {
+    "cell": "rect_family@6p",
+    "bbox_m": [
+      1.84,
+      0.95,
+      0.75
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "chair_sat": "PASS",
+    "use_sat": "PASS",
+    "frente_por_lugar": 0.62,
+    "n_parts": 9
+  },
+  {
+    "cell": "rect_family@8p",
+    "bbox_m": [
+      2.46,
+      1.0,
+      0.75
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "chair_sat": "PASS",
+    "use_sat": "PASS",
+    "frente_por_lugar": 0.62,
+    "n_parts": 9
+  },
+  {
+    "cell": "round_compact@2p",
+    "bbox_m": [
+      0.8,
+      0.8,
+      0.75
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "chair_sat": "PASS",
+    "use_sat": "PASS",
+    "frente_por_lugar": 1.257,
+    "n_parts": 38
+  },
+  {
+    "cell": "round_compact@4p",
+    "bbox_m": [
+      1.05,
+      1.05,
+      0.75
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "chair_sat": "PASS",
+    "use_sat": "PASS",
+    "frente_por_lugar": 0.825,
+    "n_parts": 38
+  },
+  {
+    "cell": "round_compact@6p",
+    "bbox_m": [
+      1.35,
+      1.35,
+      0.75
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "chair_sat": "PASS",
+    "use_sat": "PASS",
+    "frente_por_lugar": 0.707,
+    "n_parts": 38
+  },
+  {
+    "cell": "oval_soft@4p",
+    "bbox_m": [
+      1.635,
+      0.95,
+      0.75
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "chair_sat": "PASS",
+    "use_sat": "PASS",
+    "frente_por_lugar": 0.62,
+    "n_parts": 23
+  },
+  {
+    "cell": "oval_soft@6p",
+    "bbox_m": [
+      1.88,
+      0.985,
+      0.75
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "chair_sat": "PASS",
+    "use_sat": "PASS",
+    "frente_por_lugar": 0.62,
+    "n_parts": 23
+  },
+  {
+    "cell": "oval_soft@8p",
+    "bbox_m": [
+      2.523,
+      1.02,
+      0.75
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "chair_sat": "PASS",
+    "use_sat": "PASS",
+    "frente_por_lugar": 0.62,
+    "n_parts": 23
+  }
+]
