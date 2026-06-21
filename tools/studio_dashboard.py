@@ -343,6 +343,9 @@ textarea{width:100%;min-height:90px;background:#0c0d10;border:1px solid var(--bd
 .mbar .e{max-width:90px}
 .drag{cursor:grab;color:#5a6472;font-size:15px;margin-right:9px;user-select:none;vertical-align:middle}.drag:hover{color:var(--gold)}.drag:active{cursor:grabbing}
 .card.dragover{outline:2px dashed var(--gold);outline-offset:2px}
+.collapse-btn{cursor:pointer;color:#7a8696;font-size:13px;margin-right:5px;user-select:none}.collapse-btn:hover{color:var(--gold)}
+.card.collapsed>*:not(h2){display:none}
+.card.collapsed{padding-bottom:13px}.card.collapsed h2{margin-bottom:0}
 .gallery{max-height:330px;overflow-y:auto;padding-right:4px}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.86);z-index:50;align-items:center;justify-content:center;padding:24px}
 .modal.show{display:flex}.mbox{max-width:92vw;max-height:92vh;display:flex;flex-direction:column;gap:8px}
@@ -432,6 +435,15 @@ function consultSaveAns(){const a=cval('cq-answer');const m=document.getElementB
 function consultIngest(){const m=document.getElementById('camsg');if(m)m.textContent='ingerindo…'
  fetch('/api/consult/ingest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})}).then(r=>r.json()).then(r=>{
   CONSULT_INGEST=r;if(m)m.textContent=r.ok?('✓ ingerido: '+r.verdict):('erro: '+(r.error||''));tick(1)})}
+function consultLearn(){const a=cval('cq-answer');const m=document.getElementById('camsg');if(!a.trim()){if(m)m.textContent='cole algo primeiro';return}
+ if(m)m.textContent='aprendendo… (resposta estruturada pode levar alguns segundos)'
+ fetch('/api/consult/learn',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:a})}).then(r=>r.json()).then(r=>{
+  if(r.ok){CONSULT_INGEST=(r.mode==='ingest')?r:null
+   if(r.mode==='ingest'){if(m)m.textContent='✓ aprendido: '+(r.verdict||'')+' · +'+((r.rules_added||[]).length)+' regra(s), +'+((r.anti_patterns_added||[]).length)+' anti-pattern(s)'}
+   else{if(m)m.textContent='✓ orientação aprendida ('+(r.count||'?')+' bloco(s) na memória)'}
+   const ta=document.getElementById('cq-answer');if(ta)ta.value=''}
+  else{if(m)m.textContent='erro: '+(r.error||'')}
+  tick(1)})}
 function moveTask(mt,dir){fetch('/api/move',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mt,direction:dir})}).then(()=>tick(1))}
 function goToMT(mt){const sec=document.getElementById('sec-backlog');if(sec)sec.scrollIntoView({behavior:'smooth',block:'center'})
  const c=document.getElementById('kc-'+mt);if(c){c.classList.add('kc-hl');c.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>c.classList.remove('kc-hl'),2400)}}
@@ -489,6 +501,16 @@ function applyOrder(){const root=document.getElementById('root');if(!root)return
  const present=[...root.children].filter(c=>c.id&&c.classList.contains('card')).map(c=>c.id)
  const full=[...saved.filter(id=>present.includes(id)),...present.filter(id=>!saved.includes(id))]
  full.forEach(id=>{const e=document.getElementById(id);if(e)root.appendChild(e)})}
+// RECOLHER cards — só Agentes/Loop/Consult/Backlog abertos por padrão; o resto recolhido (menos poluição)
+const DEFAULT_OPEN=['sec-agents','sec-cycles','sec-consult','sec-backlog']
+function collapsedSet(){try{const v=JSON.parse(localStorage.getItem('studio_collapsed')||'null');return v===null?null:new Set(v)}catch(e){return null}}
+function saveCollapsed(s){localStorage.setItem('studio_collapsed',JSON.stringify([...s]))}
+function applyCollapsed(){const root=document.getElementById('root');if(!root)return
+ let set=collapsedSet()
+ if(set===null){set=new Set([...root.children].filter(c=>c.id&&c.classList.contains('card')&&!DEFAULT_OPEN.includes(c.id)).map(c=>c.id));saveCollapsed(set)}
+ ;[...root.children].forEach(c=>{if(c.id&&c.classList.contains('card'))c.classList.toggle('collapsed',set.has(c.id))})}
+function toggleCollapse(id){const set=collapsedSet()||new Set();if(set.has(id))set.delete(id);else set.add(id);saveCollapsed(set)
+ const c=document.getElementById(id);if(c)c.classList.toggle('collapsed',set.has(id))}
 function makeDraggable(){const root=document.getElementById('root');if(!root)return
  ;[...root.children].forEach(card=>{if(!card.id||!card.classList.contains('card'))return
   card.ondragover=e=>{e.preventDefault();e.dataTransfer.dropEffect='move';if(DRAGID&&DRAGID!==card.id)card.classList.add('dragover')}
@@ -497,13 +519,16 @@ function makeDraggable(){const root=document.getElementById('root');if(!root)ret
   if(!card.querySelector('.drag')){const h=document.createElement('span');h.className='drag';h.textContent='⠿';h.title='arraste pra mover este card';h.draggable=true
    h.ondragstart=e=>{DRAGID=card.id;if(e.dataTransfer.setDragImage)e.dataTransfer.setDragImage(card,18,18);e.dataTransfer.effectAllowed='move'}
    h.ondragend=()=>{DRAGID=null;document.querySelectorAll('.card.dragover').forEach(c=>c.classList.remove('dragover'))}
-   const hd=card.querySelector('h2');if(hd)hd.insertBefore(h,hd.firstChild);else card.insertBefore(h,card.firstChild)}})}
+   const hd=card.querySelector('h2');if(hd)hd.insertBefore(h,hd.firstChild);else card.insertBefore(h,card.firstChild)}
+  if(!card.querySelector('.collapse-btn')){const cb=document.createElement('span');cb.className='collapse-btn';cb.title='recolher/expandir';cb.textContent=card.classList.contains('collapsed')?'▸':'▾'
+   cb.onclick=()=>{toggleCollapse(card.id);cb.textContent=card.classList.contains('collapsed')?'▸':'▾'}
+   const hd=card.querySelector('h2');if(hd)hd.insertBefore(cb,hd.firstChild)}})}
 function cardDrop(e,targetId){e.preventDefault();if(!DRAGID||DRAGID===targetId)return
  const root=document.getElementById('root'),drag=document.getElementById(DRAGID),tgt=document.getElementById(targetId)
  if(!root||!drag||!tgt)return
  const r=tgt.getBoundingClientRect(),after=e.clientY>r.top+r.height/2
  root.insertBefore(drag,after?tgt.nextSibling:tgt);DRAGID=null;saveOrder()}
-function resetLayout(){localStorage.removeItem('studio_order');tick(1)}
+function resetLayout(){localStorage.removeItem('studio_order');localStorage.removeItem('studio_collapsed');tick(1)}
 let LASTSTATE=''
 async function tick(force){
  // pausa com modal aberto OU enquanto digita/seleciona (senao apaga)
@@ -620,8 +645,8 @@ async function tick(force){
   <div class=consult-half>
    <div><div class=kblist-h>Pergunta gerada <span class=mut>(${esc(cqid)})</span> <button class=chatbtn onclick=consultCopy(event)>copiar</button></div>
     <textarea id=cq-out readonly placeholder="clique 'gerar pergunta' — o contrato aparece aqui pra copiar" style="min-height:150px;font:11px ui-monospace,monospace"></textarea></div>
-   <div><div class=kblist-h>Resposta do Consult GPT <button class=send onclick=consultSaveAns()>salvar</button> <button class=send onclick=consultIngest()>⚙ ingerir</button> <span class=mut id=camsg></span></div>
-    <textarea id=cq-answer placeholder="cole aqui a resposta (ARCHITECT_ANSWER_CONTRACT v1) que o ChatGPT devolveu" style="min-height:150px"></textarea></div>
+   <div><div class=kblist-h>Resposta do GPT (ou orientação solta) <button class=send onclick=consultLearn()>✓ aprender</button> <span class=mut id=camsg></span></div>
+    <textarea id=cq-answer placeholder="cole a resposta do GPT (ARCHITECT_ANSWER_CONTRACT) OU qualquer orientação de design — o sistema detecta sozinho e aprende (vira regra/anti-pattern/microtarefa, ou conhecimento do Arquiteto)" style="min-height:150px"></textarea></div>
   </div>
   ${ingHtml}</div>`))
  const _co=document.getElementById('cq-out');if(_co)_co.value=CONSULT_MD
@@ -654,7 +679,7 @@ async function tick(force){
    <div class=cap>${esc(r.name.replace('.png',''))}<div class=t>${r.theme} · ${r.sub} · ${r.kb}KB</div></div></div>`).join('')
  root.appendChild(el(`<div class="card full" id=sec-ren><h2>Renders (${(s.renders||[]).length}) — clica pra ampliar/baixar · mais novos primeiro</h2>
   <div class="grid gallery">${rr||'<span class=mut>sem renders</span>'}</div></div>`))
- applyOrder();makeDraggable()   // layout livre: aplica a ordem salva + injeta o punho ⠿ de arrastar
+ applyOrder();applyCollapsed();makeDraggable()   // layout livre: ordem salva + recolher + punho ⠿
  document.querySelectorAll('.chat').forEach(c=>{c.scrollTop=c.scrollHeight})   // chat sempre na última msg
  window.scrollTo(0,sy)   // mantém a rolagem onde estava (não sobe ao mandar mensagem)
 }
@@ -852,6 +877,41 @@ def _consult_ingest(body: dict) -> dict:
                                 to="architect")
         except Exception:  # noqa: BLE001
             pass
+        return r
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": str(e)}
+
+
+def _consult_learn(body: dict) -> dict:
+    """UM botão pra aprender. Cola a resposta do Consult GPT OU qualquer orientação solta — auto-detecta:
+    se é um ARCHITECT_ANSWER_CONTRACT (tem veredito/respostas) salva+ingere (vira regra/anti-pattern/MT no DNA);
+    senão alimenta direto o conhecimento do Arquiteto (architect.md). Mata o 'salvar/ingerir' separado."""
+    text = (body.get("text") or body.get("answer") or "").strip()
+    if not text:
+        return {"ok": False, "error": "cole a resposta do GPT ou uma orientação primeiro"}
+    low = text.lower()
+    is_answer = ("architect_answer_contract" in low or "## veredito" in low or "## respostas" in low
+                 or bool(re.search(r"(?im)^\s*-?\s*verdict\s*:", text)))
+    try:
+        if is_answer:
+            from tools.interior_studio.consult_gpt_bridge import answer_parser, ingest as ci, store
+            parsed = answer_parser.parse_answer(text)
+            qid = (body.get("question_id") or parsed.get("question_id")
+                   or (store.latest_question() or {}).get("question_id") or "colado")
+            store.save_answer(qid, text)
+            r = ci.ingest(qid)
+            r["mode"] = "ingest"
+            try:
+                from tools import studio_log
+                if r.get("ok"):
+                    studio_log.post("consult-liaison", "done",
+                                    f"aprendi {qid}: {r.get('verdict')} · +{len(r.get('rules_added', []))} regra(s)",
+                                    to="architect")
+            except Exception:  # noqa: BLE001
+                pass
+            return r
+        r = _feed(text, body.get("title"))
+        r["mode"] = "feed"
         return r
     except Exception as e:  # noqa: BLE001
         return {"ok": False, "error": str(e)}
@@ -1219,6 +1279,8 @@ class H(BaseHTTPRequestHandler):
             self._send(200, json.dumps(_consult_answer(body), ensure_ascii=False))
         elif path == "/api/consult/ingest":
             self._send(200, json.dumps(_consult_ingest(body), ensure_ascii=False))
+        elif path == "/api/consult/learn":
+            self._send(200, json.dumps(_consult_learn(body), ensure_ascii=False))
         elif path == "/api/consult/ask-openai":
             self._send(200, json.dumps(_consult_ask_openai(body), ensure_ascii=False))
         elif path == "/api/move":
