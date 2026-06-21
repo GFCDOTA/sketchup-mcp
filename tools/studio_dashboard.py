@@ -195,11 +195,15 @@ def _agents() -> dict:
                 "online": bool(mdl and mdl in avail)}
 
     metrics = {}
+    model_usage = {}   # chamadas REAIS aos LLMs (campo `via`), distinto de "mensagens no feed"
     for r in allrecs:
         m = metrics.setdefault(r["agent"], {"calls": 0, "errors": 0})
         m["calls"] += 1
         if r.get("status") == "error":
             m["errors"] += 1
+        via = r.get("via")
+        if via:
+            model_usage[via] = model_usage.get(via, 0) + 1
 
     umbrellas = [{"id": u["id"], "label": u["label"], "lead": card(u["lead"]),
                   "subs": [card(s) for s in u["subs"]]} for u in UMBRELLAS]
@@ -209,7 +213,7 @@ def _agents() -> dict:
         for s in u["subs"]:
             agent_umbrella[s] = u["id"]
     return {"umbrellas": umbrellas, "feed": feed, "metrics": metrics,
-            "agent_umbrella": agent_umbrella}
+            "agent_umbrella": agent_umbrella, "model_usage": model_usage}
 
 
 def _state() -> dict:
@@ -256,6 +260,10 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 .lead .msg{color:var(--mut);font-size:11.5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .askto{font-size:10.5px;color:var(--gold);margin-left:6px}
 .pmbox{background:#15131c;border:1px solid #2c2636;border-left:3px solid var(--gold);border-radius:8px;padding:7px 11px;margin-bottom:9px;font-size:11.5px;color:#cdb98a}.pmbox b{color:var(--gold)}
+.cyc-help{margin:5px 0;padding:6px 8px;background:#0e0d14;border-radius:6px;color:#9aa0aa;font-size:11px;line-height:1.45}.cyc-help b{color:#cdb98a}
+.cyc-next{margin:5px 0;font-size:12px;color:#e8e9ec}
+.mtlink{cursor:pointer;border-bottom:1px dotted var(--gold)}.mtlink:hover{color:#fff}
+.kc-hl{outline:2px solid var(--gold);outline-offset:1px;box-shadow:0 0 0 4px rgba(201,168,106,.18)}
 .subs{display:flex;flex-direction:column;gap:5px;margin-bottom:9px}
 .sub{display:flex;gap:8px;align-items:center;background:#181a1f;border:1px solid var(--bd);border-radius:8px;padding:4px 9px}
 .sub .face{font-size:15px;opacity:.55}.sub.act .face,.lead.act .face{opacity:1}
@@ -415,6 +423,8 @@ function consultIngest(){const m=document.getElementById('camsg');if(m)m.textCon
  fetch('/api/consult/ingest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})}).then(r=>r.json()).then(r=>{
   CONSULT_INGEST=r;if(m)m.textContent=r.ok?('✓ ingerido: '+r.verdict):('erro: '+(r.error||''));tick(1)})}
 function moveTask(mt,dir){fetch('/api/move',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mt,direction:dir})}).then(()=>tick(1))}
+function goToMT(mt){const sec=document.getElementById('sec-backlog');if(sec)sec.scrollIntoView({behavior:'smooth',block:'center'})
+ const c=document.getElementById('kc-'+mt);if(c){c.classList.add('kc-hl');c.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>c.classList.remove('kc-hl'),2400)}}
 function runCycle(){const m=document.getElementById('cyclemsg');if(m)m.textContent='rodando ciclo nos LLMs locais…'
  fetch('/api/cycle',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})}).then(r=>r.json()).then(r=>{if(m)m.textContent=r.ok?'✓ ciclo rodou':('erro: '+(r.error||''));tick(1)})}
 function askAgent(agent,umb){const inp=document.getElementById('ask-'+umb),q=(inp.value||'').trim();if(!q)return
@@ -464,8 +474,13 @@ async function tick(force){
  // ORG (guarda-chuvas + setas + métricas)
  const cols=(ag.umbrellas||[]).map(u=>{const ids=[u.lead.id,...u.subs.map(x=>x.id)]
    let extra=''
-   if(u.id==='pm'){const bk=s.backlog||{},nx=(bk.tasks||[]).find(t=>!t.done&&!t.geo&&t.status!=='executado')
-     extra=`<div class=pmbox><b>🗂️ Dono do Kanban</b> · ${bk.total||0} tarefas · ${bk.done||0} feitas${nx?`<br>▶ próxima: <b>${nx.mt}</b> ${esc((nx.what||'').slice(0,42))}`:''}<br><button class=send style=margin-top:6px onclick=runCycle()>▶ rodar 1 ciclo (PM→Lead→Arquiteto)</button> <span class=mut id=cyclemsg></span></div>`}
+   if(u.id==='pm'){const bk=s.backlog||{}
+     // MESMO filtro do _cycle (backend): tarefa PELE em backlog/refinamento — assim o preview = o que VAI rodar
+     const nx=(bk.tasks||[]).find(t=>!t.done&&!t.geo&&(t.status==='backlog'||t.status==='refinamento'))
+     extra=`<div class=pmbox><b>🗂️ Dono do Kanban</b> · ${bk.total||0} tarefas · ${bk.done||0} feitas
+      <div class=cyc-help>Um <b>ciclo</b> roda nos LLMs locais (sem Claude): <b>PM</b>(llama) escolhe a próxima tarefa PELE → <b>Team Lead</b>(qwen) valida → <b>Arquiteto</b>(deepseek) dá a diretriz. O card vai pra <b>execução</b>. É decisão/texto — <b>não</b> mexe no .skp.</div>
+      ${nx?`<div class=cyc-next>▶ próximo ciclo vai rodar: <b class=mtlink onclick="goToMT('${nx.mt}')" title="ver no Kanban">${nx.mt}</b> — ${esc((nx.what||'').slice(0,52))}</div>`:`<div class=cyc-next><span class=mut>sem tarefa PELE na fila — as GEO esperam teu OK</span></div>`}
+      <button class=send style=margin-top:6px onclick=runCycle() ${nx?'':'disabled'}>▶ Rodar próximo ciclo</button> <span class=mut id=cyclemsg></span></div>`}
    return `<div class=col>${leadCard(u.lead)}${extra}<div class=subs>${u.subs.map(subCard).join('')}</div>
     <div class=chat>${colChat(ag.feed,ids)}</div>
     <div class=askrow><input id="ask-${u.id}" onkeydown="if(event.key==='Enter')askAgent('${u.lead.id}','${u.id}')" placeholder="perguntar pro ${esc(u.lead.label)}…"><button class=send onclick="askAgent('${u.lead.id}','${u.id}')">➤</button><button class=chatbtn onclick="openChat('${u.lead.id}','${u.id}','${ids.join(',')}')" title="abrir chat grande">⛶</button></div></div>`}).join('')
@@ -489,18 +504,25 @@ async function tick(force){
    <div style=flex:1>${ebars}
     <div class=flagrow><select id=flagag>${flagopts}</select>
      <input id=flagmsg onkeydown="if(event.key==='Enter')flagErr()" placeholder="ex.: parede muito escura, coifa não combina… (Enter)"><button class=send onclick=flagErr()>marcar erro</button></div></div></div></div>`))
- // GRÁFICOS (pizza)
+ // GRÁFICOS (pizza = mensagens no feed · barras = chamadas reais de modelo)
+ const mu=Object.entries(ag.model_usage||{}).sort((a,b)=>b[1]-a[1])
+ const muTot=mu.reduce((s,[,n])=>s+n,0)||1
+ const muRows=mu.length?mu.map(([mdl,n])=>`<div class=mrow><span class=nm>${esc(mdl)}</span><span class=mbar><span style="display:inline-block;height:9px;border-radius:5px;background:var(--blu);width:${Math.round(130*n/muTot)}px"></span></span><span class=mnum>${n} (${Math.round(100*n/muTot)}%)</span></div>`).join(''):'<span class=mut>nenhuma chamada de modelo registrada ainda</span>'
  root.appendChild(el(`<div class="card full" id=sec-graf><h2>Gráficos</h2>
-  <div class=chartbox style="max-width:380px"><h2>Chamadas por agente</h2><div class=pie><svg viewBox="0 0 120 120">${slices||'<circle cx=60 cy=60 r=46 fill=#20242b/>'}</svg><div class=legend>${leg||'<span class=mut>—</span>'}</div></div></div></div>`))
+  <div style="display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start">
+   <div class=chartbox style="max-width:340px"><h2>Mensagens no feed por agente <span class=mut style=font-weight:400>(quem mais falou — NÃO é chamada de LLM)</span></h2><div class=pie><svg viewBox="0 0 120 120">${slices||'<circle cx=60 cy=60 r=46 fill=#20242b/>'}</svg><div class=legend>${leg||'<span class=mut>—</span>'}</div></div></div>
+   <div class=chartbox style="flex:1;min-width:270px"><h2>Modelos usados <span class=mut style=font-weight:400>(chamadas REAIS aos LLMs)</span></h2>${muRows}
+    <div class=mut style="font-size:11px;margin-top:7px;line-height:1.45">Por que <b>DeepSeek</b> aparece mais: o papel do <b>Arquiteto</b> mapeia pra <code>deepseek-r1</code> (raciocínio), então toda pergunta de design vai nele. Só o <b>🧠 consenso</b> usa os 3 (deepseek+qwen+llama). PM=llama, Team Lead=qwen.</div></div>
+  </div></div>`))
  // BACKLOG
  const COLS=['backlog','refinamento','execução','teste','executado']
  const COLLBL={backlog:'Backlog',refinamento:'Em refinamento','execução':'Em execução',teste:'Em teste',executado:'Executado'}
  const board=COLS.map(col=>{const items=(b.tasks||[]).filter(t=>t.status===col)
-   const cards=items.map(t=>`<div class=kcard><div class=kc-top><span class="tg ${t.geo?'geo':'pele'}">${t.geo?'GEO':'PELE'}</span> <b>${t.mt}</b></div>
+   const cards=items.map(t=>`<div class=kcard id="kc-${esc(t.mt)}" data-mt="${esc(t.mt)}"><div class=kc-top><span class="tg ${t.geo?'geo':'pele'}">${t.geo?'GEO':'PELE'}</span> <b>${t.mt}</b></div>
      <div class=kc-what>${esc(t.what)}</div>
      <div class=kc-mv><button onclick="moveTask('${t.mt}','prev')" title="voltar">◀</button><button onclick="moveTask('${t.mt}','next')" title="avançar">▶</button></div></div>`).join('')
    return `<div class=kcol><div class=kcol-h>${COLLBL[col]} <span class=mut>${items.length}</span></div><div class=kcol-b>${cards||'<span class=mut style=font-size:11px>—</span>'}</div></div>`}).join('')
- root.appendChild(el(`<div class="card full"><h2>Backlog — quadro Kanban <span class=mut>(${b.total} microtarefas · ${b.done} done · arrasta com ◀ ▶)</span></h2>
+ root.appendChild(el(`<div class="card full" id=sec-backlog><h2>Backlog — quadro Kanban <span class=mut>(${b.total} microtarefas · ${b.done} done · arrasta com ◀ ▶)</span></h2>
   <div class=kboard>${board}</div></div>`))
  // ALIMENTAR O ARQUITETO
  const K=s.knowledge||{},kb=K.chars||0,kents=K.entries||[]
