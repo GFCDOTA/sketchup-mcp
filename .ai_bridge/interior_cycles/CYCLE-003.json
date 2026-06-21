@@ -1,0 +1,87 @@
+{
+  "cycle_id": "CYCLE-003",
+  "project": "planta_74",
+  "room": "living",
+  "asset": "sofa",
+  "microtask": "MT-SOFA-001",
+  "title": "Gerar SOFA_REFERENCE_PACK",
+  "mode": "REFERENCE_PACK",
+  "status": "waiting_felipe_curation",
+  "next_action": "Felipe escolher 1-2 referências principais (⭐) na Curadoria",
+  "created_at": 1782078380.3031933,
+  "steps": [
+    {
+      "agent": "PM",
+      "status": "done",
+      "summary": "Sofá escolhido como laboratório controlado (erro caixa é óbvio, reutilizável).",
+      "ts": 1782078380.319132,
+      "model": "llama3.1:8b"
+    },
+    {
+      "agent": "Team Lead",
+      "status": "done",
+      "summary": "Quebrou em: reference_pack -> curadoria -> build_spec -> build -> gates -> judge.",
+      "ts": 1782078380.3266814,
+      "model": "qwen2.5-coder:14b"
+    },
+    {
+      "agent": "Reference Scout",
+      "status": "done",
+      "summary": "6 referências reais coletadas (3 boutique premium, 2 compactos, 1 anti-caixa).",
+      "ts": 1782078380.3317006,
+      "model": "WebSearch",
+      "files": [
+        "artifacts/reference_lab/sofa/SOFA_REFERENCE_PACK.md",
+        ".ai_bridge/reference_packs/sofa_reference_pack_001.json"
+      ]
+    },
+    {
+      "agent": "Felipe",
+      "status": "waiting",
+      "summary": "Aguardando curadoria: aprovar/rejeitar/⭐principal/🚫anti-pattern.",
+      "ts": 1782078380.3378286
+    },
+    {
+      "agent": "Architect",
+      "status": "blocked",
+      "summary": "BLOQUEADO até existir referência ⭐ principal (regra-trava).",
+      "ts": 1782078380.3418472
+    },
+    {
+      "agent": "Gates",
+      "status": "na",
+      "summary": "Ainda não aplicável (sem sofá construído).",
+      "ts": 1782078380.34538
+    },
+    {
+      "agent": "Consult Liaison",
+      "status": "pending",
+      "summary": "Pronto pra gerar pergunta ao Consult GPT pós-curadoria.",
+      "ts": 1782078380.3506866
+    },
+    {
+      "agent": "Learning",
+      "status": "pending",
+      "summary": "Pendente: regra/anti-pattern só após resposta do GPT.",
+      "ts": 1782078380.355201
+    }
+  ],
+  "references": {
+    "pack_id": "sofa_reference_pack_001",
+    "approved": [],
+    "rejected": [],
+    "main": [],
+    "anti": []
+  },
+  "gates": {},
+  "consult": {
+    "question_id": null,
+    "answer_id": null,
+    "ingested": false
+  },
+  "learning": {
+    "new_rules": [],
+    "anti_patterns": [],
+    "golden_samples": []
+  }
+}

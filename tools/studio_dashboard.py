@@ -32,6 +32,10 @@ KANBAN_FILE = ROOT / ".ai_bridge/kanban.json"          # status Trello de cada m
 CYCLES_FILE = ROOT / ".ai_bridge/interior_consult/cycles.jsonl"  # cada ciclo persistido (o "banco" do loop)
 KANBAN_COLS = ["backlog", "refinamento", "execução", "teste", "executado"]
 SKIP = (".denoiser.png", ".effectsResult.png")
+DEFAULT_PACK = "sofa_reference_pack_001"   # pack ativo da esteira (sofá = primeiro laboratório)
+
+from tools.interior_studio import cycles as ic_cycles            # noqa: E402  entidade CYCLE (esteira)
+from tools.interior_studio import reference_packs as ic_refpacks  # noqa: E402  Reference Pack + curadoria Felipe
 
 
 def _kanban_load():
@@ -228,10 +232,53 @@ def _agents() -> dict:
             "agent_umbrella": agent_umbrella, "model_usage": model_usage}
 
 
+def _learning_log() -> dict:
+    """Agrega o aprendizado PERSISTENTE pra esteira: regras novas (Consult GPT → DNA), anti-patterns
+    (juiz visual), golden samples congelados. Só LÊ — não fabrica nada."""
+    new_rules: list = []
+    anti_patterns: list = []
+    golden: list = []
+    ing_dir = ROOT / ".ai_bridge/interior_consult/ingested"
+    if ing_dir.is_dir():
+        for p in sorted(ing_dir.glob("*.json"))[-12:]:
+            try:
+                rec = json.loads(p.read_text("utf-8"))
+            except (json.JSONDecodeError, OSError):
+                continue
+            new_rules += rec.get("rules_added") or []
+            anti_patterns += rec.get("anti_patterns_added") or []
+    if JUDGE_RULES.exists():
+        try:
+            jd = json.loads(JUDGE_RULES.read_text("utf-8"))
+            for a in jd.get("anti_patterns") or []:
+                w = a.get("what") or a.get("id")
+                if w:
+                    anti_patterns.append(w)
+        except (json.JSONDecodeError, OSError):
+            pass
+    gs_dir = ROOT / "references/felipe/golden_samples"
+    if gs_dir.is_dir():
+        golden = [p.stem for p in sorted(gs_dir.glob("*")) if p.is_file()]
+
+    def _dd(xs):
+        seen, out = set(), []
+        for x in xs:
+            k = (x or "").strip().lower() if isinstance(x, str) else str(x)
+            if k and k not in seen:
+                seen.add(k)
+                out.append(x.strip() if isinstance(x, str) else x)
+        return out
+    return {"new_rules": _dd(new_rules)[-15:], "anti_patterns": _dd(anti_patterns)[-15:],
+            "golden_samples": golden}
+
+
 def _state() -> dict:
+    fac = ic_cycles.factory_state()
+    pack_id = (fac.get("references") or {}).get("pack_id") or DEFAULT_PACK
     return {"agents": _agents(), "renders": _renders(), "sessions": _sessions(),
             "backlog": _backlog(), "references": _references(), "inbox": _inbox(),
-            "knowledge": _knowledge_state(), "consult": _consult_state(), "cycles": _cycles_recent(8)}
+            "knowledge": _knowledge_state(), "consult": _consult_state(), "cycles": _cycles_recent(8),
+            "factory": fac, "refpack": ic_refpacks.pack_state(pack_id), "learning": _learning_log()}
 
 
 PAGE = r"""<!doctype html><html lang=pt-BR><head><meta charset=utf-8>
@@ -385,6 +432,37 @@ textarea{width:100%;min-height:90px;background:#0c0d10;border:1px solid var(--bd
 .crow{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--bd)}
 .crow input{flex:1;background:#0c0d10;border:1px solid var(--bd);color:var(--fg);border-radius:8px;padding:8px 12px;font-size:13px}
 .chatbtn{background:#0c0d10;border:1px solid var(--bd);color:var(--gold);border-radius:6px;padding:3px 8px;cursor:pointer;font-size:12px}.chatbtn:hover{background:#1f1b29}
+/* 🏭 FÁBRICA — barra de estado atual */
+#sec-factory{border-left:3px solid var(--gold)}
+.facbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+.facpill{background:#15131c;border:1px solid #2c2636;border-radius:9px;padding:3px 10px;font-size:12px;color:#cdb98a}
+.facpill.cid{border-color:var(--gold);color:var(--gold);font-weight:700}
+.facpill.st{background:#19281f;border-color:#2c3a2c;color:var(--ok)}
+.facnext{font-size:13px;color:#e8e9ec;margin:4px 0}
+.facblock{margin-top:7px;background:#2a1717;border:1px solid #4a2a2a;border-radius:8px;padding:7px 11px;color:#e6a0a0;font-size:12.5px}
+/* 🔧 TIMELINE do ciclo */
+.tllist{display:flex;flex-direction:column;gap:6px}
+.tlstep{background:#0c0d10;border:1px solid var(--bd);border-left:3px solid #3a3f49;border-radius:8px;padding:7px 11px}
+.tlstep.tl-done{border-left-color:var(--ok)}.tlstep.tl-doing{border-left-color:var(--blu)}
+.tlstep.tl-wait{border-left-color:var(--warn)}.tlstep.tl-block{border-left-color:var(--red)}
+.tlstep.tl-na,.tlstep.tl-pend{opacity:.62}
+.tlhead{font-size:12.5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}.tlface{font-size:15px}
+.tlicon{font-weight:700}.tlstep.tl-done .tlicon{color:var(--ok)}.tlstep.tl-block .tlicon{color:var(--red)}.tlstep.tl-wait .tlicon{color:var(--warn)}
+.tlsum{font-size:12px;color:var(--mut);margin-top:3px;line-height:1.4}
+/* 🖼️ REFERENCE PACK + curadoria */
+.refgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:11px}
+.refcard{background:#0c0d10;border:1px solid var(--bd);border-radius:10px;padding:11px 13px;border-top:3px solid #3a3f49}
+.refcard.rs-main{border-top-color:var(--gold);box-shadow:0 0 0 1px rgba(201,168,106,.35)}
+.refcard.rs-approved{border-top-color:var(--ok)}.refcard.rs-rejected{border-top-color:var(--red);opacity:.7}
+.refcard.rs-anti{border-top-color:#a05a5a;background:#160f0f}
+.refhd{font-size:13px;margin-bottom:5px}.reftags{margin-bottom:6px;display:flex;gap:5px;flex-wrap:wrap}
+.rb-main{background:#2a2417;color:var(--gold)}.rb-approved{background:#19281f;color:var(--ok)}.rb-rejected{background:#281717;color:var(--red)}.rb-anti{background:#2a1717;color:#e6a0a0}.rb-pending{color:var(--mut)}
+.refbody{font-size:12px;color:#cfd2d8;line-height:1.5;margin-bottom:8px}.refbody b{color:var(--fg)}
+.refact{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.cbtn{background:#15131c;border:1px solid #2c2636;border-radius:7px;padding:3px 10px;cursor:pointer;font-size:14px}.cbtn:hover{background:#221c2e;border-color:var(--gold)}
+/* 📚 LEARNING LOG */
+.llgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.lllist{margin:4px 0;padding-left:18px;font-size:12.5px;line-height:1.5;max-height:240px;overflow-y:auto}.lllist li{margin:2px 0}
 </style></head><body>
 <header><span class=hdot></span><h1>INTERIOR STUDIO</h1>
 <nav><a href="#sec-agents">Agentes</a><a href="#sec-err">Erros</a><a href="#sec-graf">Gráficos</a><a href="#sec-cur">Curadoria</a><a href="#sec-ren">Renders</a></nav>
@@ -433,6 +511,8 @@ function drawArrows(ag){const svg=document.getElementById('arrows'),wrap=documen
  svg.innerHTML=p}
 let LEADOF={},FACES={},LABELS={};const leadOf=(u)=>LEADOF[u]
 async function curate(slug,action){await fetch('/api/curate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug,action})});tick(1)}
+let FACTORY={}
+function curateRef(packId,refId,action){fetch('/api/curate-ref',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pack_id:packId,ref_id:refId,action,cycle_id:FACTORY.cycle_id||null})}).then(()=>tick(1))}
 function flagErr(){const a=document.getElementById('flagag').value,m=document.getElementById('flagmsg').value;if(!m)return
  fetch('/api/flag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:a,message:m})}).then(()=>{document.getElementById('flagmsg').value='';tick(1)})}
 function clearErr(agent){fetch('/api/clear',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent})}).then(()=>tick(1))}
@@ -535,7 +615,7 @@ function applyOrder(){const root=document.getElementById('root');if(!root)return
  const full=[...saved.filter(id=>present.includes(id)),...present.filter(id=>!saved.includes(id))]
  full.forEach(id=>{const e=document.getElementById(id);if(e)root.appendChild(e)})}
 // RECOLHER cards — só Agentes/Loop/Consult/Backlog abertos por padrão; o resto recolhido (menos poluição)
-const DEFAULT_OPEN=['sec-ask','sec-cycles','sec-agents','sec-conversa','sec-consult','sec-backlog']
+const DEFAULT_OPEN=['sec-factory','sec-ciclo','sec-refpack','sec-ask','sec-agents','sec-conversa','sec-consult','sec-learning','sec-backlog']
 function collapsedSet(){try{const v=JSON.parse(localStorage.getItem('studio_collapsed')||'null');return v===null?null:new Set(v)}catch(e){return null}}
 function saveCollapsed(s){localStorage.setItem('studio_collapsed',JSON.stringify([...s]))}
 function applyCollapsed(){const root=document.getElementById('root');if(!root)return
@@ -594,6 +674,38 @@ async function tick(force){
  LEADOF={};FACES={};LABELS={};(ag.umbrellas||[]).forEach(u=>{LEADOF[u.id]=u.lead.id;FACES[u.id]=u.lead.face;LABELS[u.id]=u.label;[u.lead,...u.subs].forEach(c=>{FACES[c.id]=c.face;LABELS[c.id]=c.label})})
  FACES['felipe']='🧑';LABELS['felipe']='você'
  const root=document.getElementById('root');const sy=window.scrollY;root.innerHTML=''
+ // 🏭 FÁBRICA + 🔧 CICLO ATUAL + 🖼️ REFERENCE PACK — a esteira por ciclo (topo, unidade principal)
+ FACTORY=s.factory||{}
+ const fac=FACTORY
+ if(fac.has_cycle){
+  root.appendChild(el(`<div class="card full" id=sec-factory><h2>🏭 Fábrica de interiores — estado atual</h2>
+   <div class=facbar><span class=facpill>📐 ${esc(fac.project||'')}</span><span class=facpill>🛋️ ${esc(fac.room||'')} · ${esc(fac.asset||'')}</span><span class=facpill>⚙ ${esc(fac.mode||'')}</span><span class="facpill cid">${esc(fac.cycle_id||'')}</span><span class=facpill>${esc(fac.microtask||'')} — ${esc(fac.title||'')}</span><span class="facpill st">${esc(fac.status||'')}</span></div>
+   <div class=facnext>▶ próxima ação: <b>${esc(fac.next_action||'—')}</b></div>
+   ${fac.architect_blocked?`<div class=facblock>⛔ Arquiteto BLOQUEADO — sem referência ⭐ principal curada. NÃO constrói o ${esc(fac.asset||'móvel')} até você escolher (regra-trava).</div>`:''}</div>`))
+  const tl=(fac.timeline||[]).map(st=>{const cl={done:'tl-done',doing:'tl-doing',waiting:'tl-wait',blocked:'tl-block',na:'tl-na',pending:'tl-pend'}[st.status]||'tl-pend'
+   return `<div class="tlstep ${cl}"><div class=tlhead><span class=tlface>${st.face}</span> <b>${esc(st.agent)}</b> <span class=tlicon>${st.icon}</span> <span class=mut>${esc(st.status)}</span>${st.model?`<span class=stag>${esc(st.model)}</span>`:''}</div>${st.summary?`<div class=tlsum>${esc(st.summary)}</div>`:''}</div>`}).join('')
+  root.appendChild(el(`<div class="card full" id=sec-ciclo><h2>🔧 Ciclo atual — ${esc(fac.cycle_id||'')} · ${esc(fac.microtask||'')} <span class=mut>(esteira: PM→Lead→Scout→Felipe→Arquiteto→Gates→Consult→Learning)</span></h2>
+   <div class=tllist>${tl}</div></div>`))
+ }
+ const rp=s.refpack||{}
+ if(rp.ok&&(rp.references||[]).length){const cc=rp.counts||{}
+  const tlbl={boutique_premium:'boutique premium',compact_premium:'compacto premium',anti_example:'anti-exemplo'}
+  const blbl={approved:'👍 aprovada',rejected:'👎 rejeitada',main:'⭐ PRINCIPAL',anti:'🚫 anti-pattern',pending:'• pendente'}
+  const cards=rp.references.map(r=>{const st=r.status||'pending'
+   return `<div class="refcard rs-${st}">
+    <div class=refhd><b>${esc(r.title)}</b> <span class=mut>· ${esc(r.source||'')}</span></div>
+    <div class=reftags><span class=pill>${esc(tlbl[r.type]||r.type||'')}</span> <span class="pill rb-${st}">${blbl[st]||st}</span></div>
+    <div class=refbody><b>por que:</b> ${esc(r.why_good||'')}<br><b>copiar:</b> ${esc(r.copy||'')}<br><b>evitar:</b> ${esc(r.avoid||'')}<br><span class=mut>DNA: ${esc(r.dna_adherence||'')}</span></div>
+    <div class=refact><a class=mbtn href="${esc(r.link||'#')}" target=_blank rel=noopener>🖼 ver ↗</a>
+     <button class=cbtn title=aprovar onclick="curateRef('${rp.pack_id}','${r.id}','approve')">👍</button>
+     <button class=cbtn title="marcar PRINCIPAL (desbloqueia o Arquiteto)" onclick="curateRef('${rp.pack_id}','${r.id}','main')">⭐</button>
+     <button class=cbtn title=rejeitar onclick="curateRef('${rp.pack_id}','${r.id}','reject')">👎</button>
+     <button class=cbtn title="marcar anti-pattern" onclick="curateRef('${rp.pack_id}','${r.id}','anti')">🚫</button>
+     <button class=cbtn title="limpar curadoria" onclick="curateRef('${rp.pack_id}','${r.id}','clear')">↺</button></div></div>`}).join('')
+  root.appendChild(el(`<div class="card full" id=sec-refpack><h2>🖼️ Reference Pack — ${esc(rp.asset||'')} <span class=mut>(cura a REFERÊNCIA VISUAL, não texto · ⭐${cc.main||0} · 👍${cc.approved||0} · 👎${cc.rejected||0} · 🚫${cc.anti||0} · ${cc.pending||0} pendente)</span></h2>
+   <div class=mut style="font-size:12px;margin-bottom:8px">⚠️ ${esc(rp.honesty||'')}</div>
+   <div class=refgrid>${cards}</div></div>`))
+ }
  // ORG (guarda-chuvas + setas + métricas)
  const cols=(ag.umbrellas||[]).map(u=>{const ids=[u.lead.id,...u.subs.map(x=>x.id)]
    return `<div class=col>${leadCard(u.lead)}<div class=subs>${u.subs.map(subCard).join('')}</div>
@@ -715,6 +827,15 @@ async function tick(force){
   </div>
   ${ingHtml}</div>`))
  const _co=document.getElementById('cq-out');if(_co)_co.value=CONSULT_MD
+ // 📚 LEARNING LOG — o que a fábrica aprendeu (regras/anti-patterns/golden) = repertório
+ const ll=s.learning||{}
+ const lcol=(arr,empty)=>arr&&arr.length?arr.map(x=>`<li>${esc(typeof x==='string'?x:JSON.stringify(x))}</li>`).join(''):`<li class=mut>${empty}</li>`
+ root.appendChild(el(`<div class="card full" id=sec-learning><h2>📚 Learning Log <span class=mut>(o que a fábrica aprendeu — vira repertório reutilizável)</span></h2>
+  <div class=llgrid>
+   <div><div class=kblist-h>🧬 Regras novas <span class=mut>(Consult GPT → DNA)</span></div><ul class=lllist>${lcol(ll.new_rules,'nenhuma regra nova ainda')}</ul></div>
+   <div><div class=kblist-h>🚫 Anti-patterns <span class=mut>(juiz visual)</span></div><ul class=lllist>${lcol(ll.anti_patterns,'nenhum anti-pattern ainda')}</ul></div>
+   <div><div class=kblist-h>⭐ Golden samples <span class=mut>(forma congelada)</span></div><ul class=lllist>${lcol(ll.golden_samples,'nenhum golden sample ainda')}</ul></div>
+  </div></div>`))
  // SESSÕES
  const cl=(s.sessions.claims||[]).map(c=>`<tr><td>${esc(c.desc)}</td><td>${esc(c.status)}</td></tr>`).join('')
  const nwt=(s.sessions.worktrees||[]).length
@@ -1326,6 +1447,16 @@ def _cycle(goal=None):
         return {"ok": False, "error": str(e)}
 
 
+def _curate_ref(body: dict) -> dict:
+    """Curadoria visual do Felipe numa referência do Reference Pack (👍/👎/⭐/🚫 + comentário)."""
+    try:
+        return ic_refpacks.curate(body.get("pack_id") or DEFAULT_PACK, body.get("ref_id"),
+                                  body.get("action"), body.get("comment"), body.get("cycle_id"),
+                                  ts=time.time())
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": str(e)}
+
+
 def _clear(agent):
     """Felipe tira um agente do status de erro (volta pra idle)."""
     try:
@@ -1423,6 +1554,8 @@ class H(BaseHTTPRequestHandler):
             self._send(200, json.dumps(_move_task(body.get("mt"), body.get("direction"))))
         elif path == "/api/cycle":
             self._send(200, json.dumps(_cycle(body.get("goal"))))
+        elif path == "/api/curate-ref":
+            self._send(200, json.dumps(_curate_ref(body), ensure_ascii=False))
         else:
             self._send(404, b"not found", "text/plain")
 
