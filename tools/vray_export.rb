@@ -112,6 +112,33 @@ def vray_export_run
           end
         end
       end
+      # CENA Intent-to-Scene (materiais fz_<item>__<label>): textura por PREFIXO.
+      # Ordem do juiz (fase render): sofa charcoal quente c/ trama, tapete c/ fibra,
+      # piso c/ veio. Formato: prefixo -> [png, tile_inches].
+      fz_tex = {
+        'fz_sofa__' => ['fabric_charcoal.png', 40],
+        'fz_accent_seat__seat' => ['fabric_light.png', 40],
+        'fz_accent_seat__back' => ['fabric_light.png', 40],
+        'fz_rug__' => ['fabric_linen.png', 60],
+        'fz_floor' => ['wood_floor.png', 120]
+      }
+      model.materials.each do |m|
+        name = m.name.to_s
+        # 'fz_floor' e' match EXATO: start_with pegaria fz_floor_lamp__* (haste de
+        # luminaria virou madeira de piso no pass9 — bug real)
+        pref = fz_tex.keys.find { |k| k == 'fz_floor' ? name == k : name.start_with?(k) }
+        next unless pref
+        png, tile = fz_tex[pref]
+        path = File.join(tex_dir, png)
+        next unless File.exist?(path)
+        begin
+          m.texture = path
+          m.texture.size = [tile, tile]
+          n_tex += 1
+        rescue StandardError => e
+          out << "tex ERR #{name}: #{e.message}"
+        end
+      end
       out << "texturas aplicadas: #{n_tex}"
     end
 

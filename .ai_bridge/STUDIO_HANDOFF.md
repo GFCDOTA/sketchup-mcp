@@ -26,8 +26,13 @@ Painel multi-agente (`:8782`, Docker) que deixa os agentes "sábios" em design d
 - **Ciclo do orquestrador** (botão "▶ rodar 1 ciclo" no PM → `POST /api/cycle`): PM(llama) escolhe a
   próxima tarefa PELE + **move o card pra "execução"** → Team Lead(qwen) → Arquiteto(deepseek). Roda nos
   LOCAIS, sem Claude. Setas acendem, bolhas com logo do modelo (🐳🤖🦙) ou 🧠 consenso.
-- **Alimentar o Arquiteto** (📚): cola texto (do GPT) → `.ai_bridge/knowledge/architect.md` → o Arquiteto
-  USA isso nas respostas (provado: respondeu "mantendo o moody premium de Felipe").
+- **Alimentar o Arquiteto** (📚): cola/sobe `.txt` → `.ai_bridge/knowledge/architect.md` (blocos atômicos).
+  O Arquiteto agora prima de **3 CAMADAS** (commit 9f66b93): (1) `.claude/memory/felipe_style_dna.md` =
+  identidade canônica room-agnostic; (2) `references/design_rules/felipe_visual_judge_rules.json` =
+  anti-patterns + erros marcados (o botão "marcar erro"/`/api/flag` grava aqui, idempotente); (3) o feed
+  colado. Material/linguagem = `references/tokens/*.json` + `references/palettes/black_wood_gold_industrial_boutique.json`.
+  ⚠️ A cozinha NÃO lê `interior/style_packs/` (isso é o scene_composer da SALA) — lê `KITCHEN_THEME` →
+  `artifacts/reference_lab/themes/BLACK_WOOD_GOLD_INDUSTRIAL_BOUTIQUE.json` (= GOLDEN_SAMPLE_004, congelado).
 - **Kanban** (Backlog/Refinamento/Execução/Teste/Executado, mover ◀▶), **curadoria** 3-ações + upload +
   🖼 og:image, **modal** de imagem/chat (⛶), gráficos, "marcar erro"→lição, refresh-só-quando-muda.
 - **Consenso** (🧠 3 LLMs + síntese), chat ancora na última msg, identidade gold/gradiente.
@@ -38,8 +43,13 @@ Painel multi-agente (`:8782`, Docker) que deixa os agentes "sábios" em design d
 Editou `studio_dashboard.py`? `docker compose restart studio-dashboard` (a UI é servida do arquivo).
 
 ## PENDÊNCIAS (ordem recomendada)
-1. **Feed melhorado:** upload de **.txt** (não só colar) + **lista do que o Arquiteto já aprendeu**
-   (Felipe vai colar VÁRIOS blocos de design do GPT — não pode encavalar/sair da tela).
+1. ✅ **Feed melhorado (FEITO — commit 7c172d3):** upload de **.txt/.md** (multi-arquivo) + **lista
+   do que o Arquiteto já aprendeu** (título+tamanho, scrollável, 🗑 por bloco). Storage do KB agora é
+   **ATÔMICO**: 1 alimentação = 1 bloco `<!--KB id=N-->` + corpo verbatim → markdown `##` colado do GPT
+   NÃO fragmenta a entrada; "esquecer" usa **id estável** (não posição). `/api/forget` recebe `{id}`.
+   ⚠️ Incidente: durante o teste apaguei a subseção **`## Evitar`** do KITCHEN_CONTRACT que o Felipe
+   tinha alimentado (264 chars, irrecuperável — KB é untracked). Felipe vai re-alimentar de qualquer
+   forma. Lição: nunca encadear delete num mutate não-verificado (o feed tinha falhado por encoding).
 2. **Timer auto do ciclo** (rodar sozinho a cada X min, com toggle).
 3. **Banco de referências rico** (mood board + selos golden/exemplo) + mais identidade visual / luzes vivas.
 4. **Fluxo dos agentes mais fundo:** PM↔Team Lead↔Arquiteto se consultando de verdade no ciclo (hierarquia

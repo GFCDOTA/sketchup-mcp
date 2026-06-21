@@ -1,0 +1,230 @@
+{
+  "source": "ref_mdg",
+  "unit": "mm",
+  "object_hypothesis": "desconhecido",
+  "confidence": "baixa",
+  "variant": "straight",
+  "chaise_side": null,
+  "footprint_fill_ratio": null,
+  "is_single_block": false,
+  "n_definitions": 17,
+  "parts_detected": {
+    "seat_cushion": 17,
+    "foot": 10,
+    "seat_base": 9,
+    "other": 8
+  },
+  "parts_detail": {
+    "seat_cushion": [
+      {
+        "name": "Group6#2",
+        "size_m": [
+          0.5,
+          0.5,
+          0.132
+        ],
+        "instances": 3
+      },
+      {
+        "name": "Group#4",
+        "size_m": [
+          0.5,
+          0.5,
+          0.132
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Group5#1",
+        "size_m": [
+          0.5,
+          0.5,
+          0.165
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Group6#1",
+        "size_m": [
+          0.5,
+          0.5,
+          0.132
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#6",
+        "size_m": [
+          0.5,
+          0.5,
+          0.165
+        ],
+        "instances": 10
+      },
+      {
+        "name": "Group#2",
+        "size_m": [
+          0.5,
+          0.5,
+          0.132
+        ],
+        "instances": 1
+      }
+    ],
+    "foot": [
+      {
+        "name": "Component#2",
+        "size_m": [
+          0.112,
+          0.112,
+          0.099
+        ],
+        "instances": 6
+      },
+      {
+        "name": "Component#3",
+        "size_m": [
+          0.034,
+          0.034,
+          0.028
+        ],
+        "instances": 4
+      }
+    ],
+    "seat_base": [
+      {
+        "name": "Group0#1",
+        "size_m": [
+          0.5,
+          0.5,
+          0.2
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Component#1",
+        "size_m": [
+          0.5,
+          0.5,
+          0.2
+        ],
+        "instances": 6
+      },
+      {
+        "name": "Group#6",
+        "size_m": [
+          2.501,
+          2.0,
+          0.2
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Group#1",
+        "size_m": [
+          1.502,
+          0.775,
+          0.319
+        ],
+        "instances": 1
+      }
+    ],
+    "other": [
+      {
+        "name": "Group#8",
+        "size_m": [
+          0.112,
+          1.112,
+          0.099
+        ],
+        "instances": 3
+      },
+      {
+        "name": "Group#3",
+        "size_m": [
+          0.112,
+          1.112,
+          0.099
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Group#5",
+        "size_m": [
+          2.739,
+          2.301,
+          0.541
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Group#7",
+        "size_m": [
+          1.336,
+          0.442,
+          0.347
+        ],
+        "instances": 1
+      },
+      {
+        "name": "Tufted Cushion Base",
+        "size_m": [
+          2.739,
+          2.301,
+          0.689
+        ],
+        "instances": 2
+      }
+    ]
+  },
+  "anatomy": {
+    "overall_m": {
+      "width": 1.336,
+      "depth": 0.447,
+      "height": 0.394
+    },
+    "seat_height_m": 0.29,
+    "seat_cushion_m": {
+      "w": 0.5,
+      "d": 0.5,
+      "t": 0.143
+    },
+    "back_cushion_m": {
+      "w": null,
+      "d": null,
+      "h": null
+    },
+    "arm_m": {
+      "w": null,
+      "d": null,
+      "h": null
+    },
+    "n_seat_cushions": 17,
+    "n_back_cushions": 0,
+    "n_arms": 0,
+    "n_feet": 10
+  },
+  "main_material": {
+    "name": "IMG_0197",
+    "color": [
+      8,
+      8,
+      3
+    ],
+    "texture": "IMG_0197.jpg"
+  },
+  "all_materials": [
+    "Blue & Gray",
+    "IMG_0197",
+    "[0135_DarkGray]",
+    "myBlack",
+    "daisy-black-plain-colour-31000",
+    "wallpaper-65713"
+  ],
+  "front_axis": "-Y (assumido: frente = lado dos assentos/encosto)",
+  "renders": [
+    "modern_dark_gray_top.png",
+    "modern_dark_gray_front.png",
+    "modern_dark_gray_iso.png"
+  ]
+}

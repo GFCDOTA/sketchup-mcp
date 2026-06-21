@@ -1,0 +1,95 @@
+{
+  "id": "black_wood_gold_industrial_boutique",
+  "title": "Black · Wood · Gold — industrial boutique premium (dark)",
+  "summary": "A paleta da assinatura escura do Felipe (GOLDEN_SAMPLE_004): preto/grafite fosco como BASE, madeira natural quente como ACENTO de equilíbrio, pedra escura com veio dourado SUTIL como PROTAGONISTA, metais bronze discretos e eletros inox dark reflexivos como pontuação, tudo lavado por LED quente 2700K. Dramático sem virar caverna; sofisticado sem luxo fake. Contraponto dark do fendi_oak_stone (paleta clara).",
+  "temperature": "warm-dark",
+  "white_balance": "2700K",
+  "design_thesis": "Uma base escura quieta (preto/grafite) que existe para fazer 3 coisas brilharem: a pedra de veio dourado atrás da torneira, o acento de madeira quente, e o LED 2700K. O perigo é a caverna — então sempre há reflexo (inox dark, pedra polida) e calor (madeira, luz) compensando o preto. Bronze é só o tempero.",
+  "roles": {
+    "matte_black_base": {
+      "family": "BLACK",
+      "material": "preto fosco / grafite laqueado",
+      "finish": "fosco a satin leve",
+      "rgb": [24, 24, 24],
+      "rgb_graphite": [38, 39, 40],
+      "kinds": ["kc_corpo", "kc_porta", "kc_gaveta", "kc_corpo_sup", "kc_porta_sup", "kc_filler"],
+      "weight": "BASE — a massa escura quieta",
+      "anti_pattern": "preto puro [0,0,0] chapado sem reflexo = caverna/bloco morto; precisa de matiz + compensação."
+    },
+    "dark_gold_veined_stone": {
+      "family": "STONE",
+      "material": "pedra escura com veio dourado sutil",
+      "finish": "polido suave, veio sutil (textura V-Ray)",
+      "rgb": [34, 31, 29],
+      "kinds": ["kc_backsplash"],
+      "weight": "PROTAGONISTA — backsplash atrás da torneira",
+      "anti_pattern": "veião dourado gritante = mansão fake / fake luxury; veio SUTIL e esparso."
+    },
+    "controlled_dark_countertop": {
+      "family": "STONE",
+      "material": "pedra escura controlada",
+      "finish": "polido controlado, sem veio gritante",
+      "rgb": [45, 43, 40],
+      "kinds": ["kc_tampo"],
+      "weight": "tampo que NÃO compete com o backsplash protagonista",
+      "anti_pattern": "tampo com veio forte brigando com o backsplash."
+    },
+    "warm_wood_accent": {
+      "family": "WOOD_ACCENT",
+      "material": "madeira natural quente (nogueira/freijó/carvalho)",
+      "finish": "fosco acetinado quente",
+      "rgb": [126, 82, 48],
+      "kinds": ["kc_niche_wood", "kc_board"],
+      "weight": "ACENTO — quebra o peso do preto (nicho/tábua, NUNCA área molhada)",
+      "anti_pattern": "madeira na cuba/pia = parece fake; madeira só em nicho/backsplash parcial/detalhe."
+    },
+    "bronze_hardware": {
+      "family": "METAL",
+      "material": "bronze/champagne escovado discreto",
+      "finish": "escovado fosco, detalhe",
+      "rgb": [171, 119, 63],
+      "kinds": ["kc_puxador"],
+      "weight": "pontuação quente sutil; cuba/torneira são PRETAS",
+      "anti_pattern": "dourado demais/aparente = ostentação fake."
+    },
+    "dark_steel_appliance": {
+      "family": "STEEL",
+      "material": "inox dark / grafite reflexivo + cooktop vidro preto",
+      "finish": "inox dark satin reflexivo / vidro preto",
+      "rgb": [82, 84, 84],
+      "rgb_cooktop": [22, 22, 26],
+      "kinds": ["kc_geladeira", "kc_inox", "kc_vidro", "kc_boca"],
+      "weight": "eletros que DEVOLVEM luz (daylight_reflection), não buraco morto",
+      "anti_pattern": "inox fosco morto = bloco sem reflexo; usar satin reflexivo."
+    },
+    "warm_led_2700k": {
+      "family": "LED",
+      "material": "fita LED 2700K linear sob aéreo/nicho",
+      "finish": "luz quente contínua",
+      "rgb": [255, 221, 165],
+      "kinds": ["kc_led"],
+      "weight": "lava a pedra dourada e a bancada — o que tira a cena da caverna",
+      "anti_pattern": "spot bolinha / 2 hotspots meia-lua; LED frio 4000K+ quebra a paleta."
+    },
+    "warm_concrete_floor": {
+      "family": "FLOOR",
+      "material": "grafite médio acetinado / cimento queimado quente",
+      "finish": "acetinado quente",
+      "rgb": [128, 121, 110],
+      "kinds": ["kc_piso"],
+      "weight": "chão escuro-médio (NÃO preto default; mostra pouco pó/risco)",
+      "anti_pattern": "piso preto demais pesa o compacto; claro demais suja visualmente."
+    }
+  },
+  "pairing_rules": [
+    "BLACK é base quieta — sempre compensada por madeira + LED + pedra, nunca sozinha (anti-caverna).",
+    "STONE dourada é a protagonista (backsplash); o tampo é escuro CONTROLADO pra não competir.",
+    "WOOD_ACCENT quente é o equilíbrio térmico — só em nicho/tábua/painel, NUNCA na área molhada.",
+    "BRONZE só como detalhe (<5% da leitura); cuba e torneira pretas.",
+    "STEEL dark precisa ser reflexivo (devolve luz); inox fosco morto é proibido.",
+    "LED 2700K linear é obrigatório pra sair da caverna; nada de frio nem spot bolinha."
+  ],
+  "applies_to_plant": "planta_74 room r004 (cozinha) — propagável a outros cômodos via felipe_style_dna",
+  "judge_checks": ["cave_check", "fake_luxury_check", "compact_premium_check", "warmth_check", "material_hierarchy_check", "felipe_taste_match"],
+  "source": {"kind": "golden_sample", "title": "theme BLACK_WOOD_GOLD_INDUSTRIAL_BOUTIQUE (GOLDEN_SAMPLE_004, DECISION 004) + felipe_kitchen_preference_profile + valores fornecidos pelo Felipe", "date": "2026-06-20"}
+}

@@ -19,6 +19,7 @@ MIN_DOOR_CLEAR_M = 0.6      # m — folga minima sofa<->porta (alem da circulaca
 PASSAGE_MIN_M = 0.80        # m — corredor livre minimo
 FILL_IDEAL = (0.25, 0.45)   # area de moveis / area util
 RESPIRO_IDEAL = 0.60        # fracao de area livre alvo
+MAX_PLANNED_WALL_GAP_M = 0.02  # m — planejado/embutido tem que ENCOSTAR (vao perpendicular acima disso = mal planejado)
 
 # ---- catalogo de regras (id, kind, statement, anti_pattern, enforced_by) ----
 RULES = [
@@ -79,6 +80,13 @@ RULES = [
      "statement": "Movel fica dentro do comodo (nao vaza pra fora/comodo vizinho).",
      "anti_pattern": "AP-14: bounding box fora da celula da sala.",
      "enforced_by": "hard_gates.dentro_do_comodo"},
+    {"id": "RL-15", "kind": "soft", "name": "planejado_encosta_na_parede",
+     "statement": f"Movel PLANEJADO/embutido (guarda-roupa, bancada, aereo, torre, painel) ENCOSTA "
+                  f"na parede: vao perpendicular <= {MAX_PLANNED_WALL_GAP_M} m. Marcenaria sob medida "
+                  f"nao tem folga atras nem fica centralizada com vao dos lados.",
+     "anti_pattern": "AP-15: guarda-roupa/bancada a MARGIN_M da parede OU centralizado com lacuna "
+                     "(planejado mal planejado).",
+     "enforced_by": "soft.planejado_encosta (tools/furniture_wall_gap.audit); fix: margin 0 p/ planejado em _place_against"},
 ]
 
 RULE_BY_ID = {r["id"]: r for r in RULES}
@@ -123,4 +131,7 @@ def flag_anti_patterns(candidate: dict) -> list[dict]:
     f = m.get("fill_ratio")
     if f is not None and not (FILL_IDEAL[0] <= f <= FILL_IDEAL[1]):
         add("RL-13", "soft", f"proporcao moveis/sala {f} fora de {FILL_IDEAL}")
+    pg = m.get("planned_wall_gap_m")
+    if pg is not None and pg > MAX_PLANNED_WALL_GAP_M:
+        add("RL-15", "soft", f"planejado a {pg} m da parede (> {MAX_PLANNED_WALL_GAP_M} m) — encostar/preencher")
     return flags

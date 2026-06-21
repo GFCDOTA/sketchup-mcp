@@ -1,0 +1,9 @@
+# Runtime data do Consult GPT Bridge — NÃO versionar (a estrutura fica pelos .gitkeep já commitados).
+cycles.jsonl
+next_microtasks.md
+outbox/
+inbox/
+answered/
+ingested/
+failed/
+logs/

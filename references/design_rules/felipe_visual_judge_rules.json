@@ -1,0 +1,137 @@
+{
+  "spec": "FelipeVisualJudgeRules",
+  "version": "1.0.0",
+  "role": "Regras de JULGAMENTO VISUAL do Felipe — o que aprovar e o que reprovar num render/SKP de interior. O Arquiteto carrega isto antes de gerar/julgar pra NÃO repetir erro já marcado. Alimentado pelo painel :8782 (botão 'marcar erro' -> append em `flagged`). Veredito visual final é do Felipe; estas regras são o filtro automático que antecede.",
+  "golden_rule": "referência = LINGUAGEM | PDF = POSIÇÃO | gates = SEGURANÇA | Felipe = PASS final",
+  "checks": [
+    {
+      "id": "cave_check",
+      "ask": "Está escuro mas NÃO virou caverna? (LED + madeira/reflexo compensam o preto?)",
+      "fail_if": "massa preta grande sem luz/reflexo/madeira de compensação",
+      "severity": "HARD"
+    },
+    {
+      "id": "fake_luxury_check",
+      "ask": "O dourado/bronze é SUTIL, não cafona?",
+      "fail_if": "veio dourado exagerado ou puxador dourado ostentação",
+      "severity": "HARD"
+    },
+    {
+      "id": "compact_premium_check",
+      "ask": "Tem impacto sem matar a circulação do apê compacto (74m²)?",
+      "fail_if": "volume bonito que bloqueia passagem/uso",
+      "severity": "SOFT"
+    },
+    {
+      "id": "warmth_check",
+      "ask": "Tem madeira/luz quente suficiente? Não caiu no frio?",
+      "fail_if": "LED frio 4000K+ ou ausência de acento quente",
+      "severity": "SOFT"
+    },
+    {
+      "id": "material_hierarchy_check",
+      "ask": "Pedra protagonista, preto base, bronze/madeira pontuação — a hierarquia se lê?",
+      "fail_if": "tampo competindo com backsplash, ou acento virando massa",
+      "severity": "SOFT"
+    },
+    {
+      "id": "maintenance_check",
+      "ask": "É bonito MAS morável? Manutenção viável?",
+      "fail_if": "material delicado/impraticável priorizado sobre durabilidade",
+      "severity": "SOFT"
+    },
+    {
+      "id": "felipe_taste_match",
+      "ask": "Parece o apê boutique dark premium do Felipe?",
+      "fail_if": "genérico/showroom/oficina/branco chapado",
+      "severity": "HARD"
+    }
+  ],
+  "anti_patterns": [
+    {
+      "id": "ap_white_slab",
+      "what": "branco puro / chapado",
+      "why": "cheira MDF barato",
+      "from": "FELIPE_KITCHEN_PREFERENCES"
+    },
+    {
+      "id": "ap_cave",
+      "what": "tudo preto sem compensação de luz/reflexo",
+      "why": "vira caverna",
+      "from": "FELIPE_KITCHEN_PREFERENCES"
+    },
+    {
+      "id": "ap_gold_excess",
+      "what": "veios dourados exagerados",
+      "why": "mansão fake / fake luxury",
+      "from": "FELIPE_KITCHEN_PREFERENCES"
+    },
+    {
+      "id": "ap_gold_handle",
+      "what": "puxador dourado demais / alça aparente",
+      "why": "ostentação fake",
+      "from": "FELIPE_KITCHEN_PREFERENCES"
+    },
+    {
+      "id": "ap_reflecta_all",
+      "what": "reflecta em todos os aéreos",
+      "why": "showroom, marca dedo",
+      "from": "FELIPE_KITCHEN_PREFERENCES"
+    },
+    {
+      "id": "ap_wood_wetzone",
+      "what": "madeira na cuba/pia (área molhada)",
+      "why": "parece fake",
+      "from": "FELIPE_KITCHEN_PREFERENCES"
+    },
+    {
+      "id": "ap_cold_led",
+      "what": "LED frio 4000K+",
+      "why": "quebra a paleta quente",
+      "from": "FELIPE_KITCHEN_PREFERENCES"
+    },
+    {
+      "id": "ap_giant_hood",
+      "what": "coifa industrial gigante fora de escala",
+      "why": "desproporção",
+      "from": "FELIPE_KITCHEN_PREFERENCES"
+    },
+    {
+      "id": "ap_black_floor_default",
+      "what": "piso preto como default (ou claro demais)",
+      "why": "pesa o compacto / suja visualmente",
+      "from": "FELIPE_KITCHEN_PREFERENCES"
+    },
+    {
+      "id": "ap_move_pdf",
+      "what": "mover posição fixa do PDF por causa de referência",
+      "why": "PDF manda na posição",
+      "from": "felipe_kitchen_preference_profile.forbidden_moves"
+    },
+    {
+      "id": "ap_consult_11",
+      "what": "black_blob_appliance`: eletro escuro demais que some no fundo e vira mancha sem leitura.",
+      "why": "Consult GPT",
+      "from": "kitchen_skin_045756"
+    },
+    {
+      "id": "ap_consult_12",
+      "what": "chrome_hood_noise`: coifa inox clara/cromada chamando mais atenção que a pedra.",
+      "why": "Consult GPT",
+      "from": "kitchen_skin_045756"
+    },
+    {
+      "id": "ap_consult_13",
+      "what": "flat_black_wall`: armário, coifa e fundo com mesmo valor tonal, sem profundidade.",
+      "why": "Consult GPT",
+      "from": "kitchen_skin_045756"
+    },
+    {
+      "id": "ap_consult_14",
+      "what": "fake_premium_gold_hood`: tentar resolver luxo colocando dourado na coifa.",
+      "why": "Consult GPT",
+      "from": "kitchen_skin_045756"
+    }
+  ],
+  "flagged": []
+}

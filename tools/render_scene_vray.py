@@ -116,7 +116,9 @@ def render_scene_vray(scene_dir, out_png=None, iso=100, fnum=7.0, shutter=160,
     env.update({"VRSCENE_OUT": str(vrs).replace("\\", "/"),
                 "VRAY_LOG": str(log).replace("\\", "/"),
                 "VRAY_EYE": eye, "VRAY_TARGET": target,
-                "VRAY_FOV": str(fov)})
+                "VRAY_FOV": str(fov),
+                # texturas procedurais (fz_* da cena: sofa charcoal/tapete fibra/piso veio)
+                "VRAY_TEX_DIR": str(ROOT / "assets/textures/procedural").replace("\\", "/")})
     ps = (f"Start-Process -FilePath '{SU_EXE}' "
           f"-ArgumentList '\"{copy}\"','-RubyStartup','\"{EXPORT_RB}\"'")
     t0 = time.time()
@@ -135,6 +137,8 @@ def render_scene_vray(scene_dir, out_png=None, iso=100, fnum=7.0, shutter=160,
         return {"status": "fail", "error": "export .vrscene falhou",
                 "log": log_txt[-500:], "timing_s": round(time.time() - t0, 1)}
 
+    import shutil as _sh
+    _sh.copy2(vrs, SCRATCH / "scene_raw.vrscene")   # raw pristine p/ A/B de tweak sem SU
     fills = None
     if fills_m:
         fills = [{"pos": tuple(v * M_TO_IN for v in f["pos"]),

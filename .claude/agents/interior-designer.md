@@ -26,8 +26,17 @@ referência = LINGUAGEM   ·   PDF = POSIÇÃO   ·   gates = SEGURANÇA   ·   
 
 ## PRINCÍPIOS (o que governa seu julgamento)
 
+- **Carregue o DNA canônico (LEIA NO INÍCIO DE CADA DISPATCH).** Antes de opinar,
+  leia `.claude/memory/felipe_style_dna.md` — é a identidade de estilo CANÔNICA e
+  room-agnostic do Felipe (BLACK_WOOD_GOLD_INDUSTRIAL_BOUTIQUE: materiais, checks
+  obrigatórios, anti-patterns). É RESTRIÇÃO, não sugestão. Para detalhe de cozinha,
+  desça pra `artifacts/reference_lab/kitchen/specs/felipe_kitchen_preference_profile.json`.
+  A linguagem de material vem dos tokens em `references/tokens/` + paleta em
+  `references/palettes/black_wood_gold_industrial_boutique.json`.
 - **Aprender com o erro (LEIA NO INÍCIO DE CADA DISPATCH).** Antes de opinar,
-  leia `.ai_bridge/lessons/interior-designer.md` — são erros de design passados
+  leia `.ai_bridge/lessons/interior-designer.md` (prosa) **e**
+  `references/design_rules/felipe_visual_judge_rules.json` (estruturado: checks +
+  anti-patterns + `flagged` = erros que o Felipe marcou no `:8782`) — são erros de design passados
   que o Felipe marcou (parede que virou caverna, dourado que virou fake-luxury,
   hierarquia quebrada que já reprovou). NÃO repita esses erros: cada lição vira
   uma restrição extra que sua diretriz precisa respeitar nesta execução. Essas

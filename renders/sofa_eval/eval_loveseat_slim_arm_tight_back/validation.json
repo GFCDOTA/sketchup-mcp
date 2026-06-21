@@ -1,0 +1,109 @@
+{
+  "id": "eval_loveseat_slim_arm_tight_back",
+  "status": "OK",
+  "family": "loveseat",
+  "bbox_m": [
+    1.52,
+    0.957,
+    0.816
+  ],
+  "n_parts": 10,
+  "parts": [
+    "leg_1",
+    "leg_2",
+    "leg_3",
+    "leg_4",
+    "base_recessed",
+    "seat_1",
+    "seat_2",
+    "back_tight",
+    "arm_left",
+    "arm_right"
+  ],
+  "warnings": [
+
+  ],
+  "errors": [
+
+  ],
+  "gates_objetivos": {
+    "PIPELINE_PASS": true,
+    "SCHEMA_PASS": true,
+    "COMPONENTS_PASS": true,
+    "PROPORTION_PASS": true,
+    "BLOCKOUT_PASS": "PENDING_VISUAL",
+    "ASSET_PASS": "PENDING_VISUAL",
+    "SOFTNESS_PASS": "PENDING_VISUAL",
+    "CAIXOTAO_FAIL": "PENDING_VISUAL",
+    "DETAIL_RESTRAINT_PASS": "PENDING_VISUAL"
+  },
+  "primitives_log": [
+    {
+      "name": "leg_1",
+      "w_m": 0.09,
+      "d_m": 0.09,
+      "h_m": 0.12
+    },
+    {
+      "name": "leg_2",
+      "w_m": 0.09,
+      "d_m": 0.09,
+      "h_m": 0.12
+    },
+    {
+      "name": "leg_3",
+      "w_m": 0.09,
+      "d_m": 0.09,
+      "h_m": 0.12
+    },
+    {
+      "name": "leg_4",
+      "w_m": 0.09,
+      "d_m": 0.09,
+      "h_m": 0.12
+    },
+    {
+      "name": "base_recessed",
+      "w_m": 1.28,
+      "d_m": 0.84,
+      "h_m": 0.16
+    },
+    {
+      "name": "seat_1",
+      "w_m": 0.619,
+      "d_m": 0.56,
+      "h_m": 0.15
+    },
+    {
+      "name": "seat_2",
+      "w_m": 0.619,
+      "d_m": 0.56,
+      "h_m": 0.15
+    },
+    {
+      "name": "back_tight",
+      "w_m": 1.268,
+      "d_m": 0.18,
+      "h_m": 0.42
+    },
+    {
+      "name": "arm_left",
+      "w_m": 0.12,
+      "d_m": 0.9,
+      "h_m": 0.46
+    },
+    {
+      "name": "arm_right",
+      "w_m": 0.12,
+      "d_m": 0.9,
+      "h_m": 0.46
+    }
+  ],
+  "renders": [
+    "front.png",
+    "side.png",
+    "top.png",
+    "three_quarter.png"
+  ],
+  "skp": "E:/Claude/worktrees/sofa-skill/renders/sofa_eval/eval_loveseat_slim_arm_tight_back/eval_loveseat_slim_arm_tight_back.skp"
+}
