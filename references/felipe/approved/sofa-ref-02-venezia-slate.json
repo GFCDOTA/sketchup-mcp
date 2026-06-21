@@ -3,10 +3,10 @@
   "title": "Venezia Industrial Leather Sofa — Slate",
   "link": "https://craftersandweavers.com/products/preorder-venezia-industrial-modern-leather-sofa-slate-leather",
   "type": "boutique_premium",
-  "status": "approved",
-  "is_main": false,
+  "status": "main",
+  "is_main": true,
   "comment": "",
-  "curated_at": 1782078868.6198559,
+  "curated_at": 1782080017.5817246,
   "copy": "A COR slate/grafite · pés de ferro finos · linha limpa modern-industrial.",
   "avoid": "Braço reto pode virar caixa se for largo — manter fino."
 }

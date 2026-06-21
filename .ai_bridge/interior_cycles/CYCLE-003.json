@@ -73,7 +73,9 @@
       "sofa-ref-02-venezia-slate"
     ],
     "rejected": [],
-    "main": [],
+    "main": [
+      "sofa-ref-02-venezia-slate"
+    ],
     "anti": [
       "sofa-ref-06-anti-povison"
     ]

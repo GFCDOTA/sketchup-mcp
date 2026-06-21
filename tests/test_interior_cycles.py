@@ -100,6 +100,19 @@ def test_acao_invalida_nao_quebra(sandbox):
     assert r["ok"] is False and "inválida" in r["error"]
 
 
+def test_timeline_deriva_arquiteto_ignora_status_congelado(sandbox):
+    """Regressão: mesmo com 'blocked' GRAVADO na semente do ciclo, marcar ⭐ principal DESTRAVA
+    (timeline deriva o status do estado atual, não lê o congelado — bug que travava o Felipe)."""
+    _seed_pack(sandbox / "packs")
+    cid = _cycle_linked()
+    cycles.set_step(cid, "Architect", "blocked", "status congelado na semente")
+    cycles.set_step(cid, "Felipe", "waiting", "congelado")
+    reference_packs.curate("p1", "r1", "main", cycle_id=cid)
+    tl = {s["agent"]: s["status"] for s in cycles.timeline(cycles.get_cycle(cid))}
+    assert tl["Architect"] == "pending"   # derivou — NÃO leu o 'blocked' gravado
+    assert tl["Felipe"] == "done"
+
+
 def test_anti_exemplo_nao_vira_principal(sandbox):
     """Clicar ⭐ principal num anti-exemplo é misclick → roteia pra anti (não se constrói do que evitar)."""
     _seed_pack(sandbox / "packs")

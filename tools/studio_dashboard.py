@@ -465,6 +465,12 @@ textarea{width:100%;min-height:90px;background:#0c0d10;border:1px solid var(--bd
 .refbody{font-size:12px;color:#cfd2d8;line-height:1.5;margin-bottom:8px}.refbody b{color:var(--fg)}
 .refact{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
 .cbtn{background:#15131c;border:1px solid #2c2636;border-radius:7px;padding:3px 10px;cursor:pointer;font-size:14px}.cbtn:hover{background:#221c2e;border-color:var(--gold)}
+.cbtn-star{font-size:12.5px;color:var(--gold);border-color:#4a3f22;font-weight:600}.cbtn-star:hover{background:#2a2417}
+.cbtn-star.pulse{box-shadow:0 0 0 0 rgba(201,168,106,.5);animation:starpulse 1.6s infinite}
+@keyframes starpulse{0%{box-shadow:0 0 0 0 rgba(201,168,106,.45)}70%{box-shadow:0 0 0 7px rgba(201,168,106,0)}100%{box-shadow:0 0 0 0 rgba(201,168,106,0)}}
+.tlneed{margin-top:5px;font-size:12px;color:var(--warn);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.refhint{background:#1a1622;border:1px solid #4a3f22;border-left:3px solid var(--gold);border-radius:8px;padding:8px 12px;font-size:12.5px;color:#e8d9b8;margin-bottom:8px}
+.refhint.ok{border-color:#2c3a2c;border-left-color:var(--ok);background:#13191420;color:var(--ok)}
 /* 📚 LEARNING LOG */
 .llgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
 .lllist{margin:4px 0;padding-left:18px;font-size:12.5px;line-height:1.5;max-height:240px;overflow-y:auto}.lllist li{margin:2px 0}
@@ -527,8 +533,8 @@ function genBundle(){const m=document.getElementById('bundlemsg');if(m)m.textCon
 function copyBundle(ev){cpTxt(BUNDLE&&BUNDLE.md,ev)}
 function copyBundleLink(ev){cpTxt(BUNDLE&&BUNDLE.raw_link,ev)}
 function copyShortQ(ev){cpTxt(BUNDLE&&BUNDLE.question,ev)}
-function nextStepGo(kind){const id={scout:'sec-scout',consult:'sec-consult',curate:'sec-refpack',build:'sec-ciclo'}[kind]||'sec-ciclo'
- const sec=document.getElementById(id);if(sec)sec.scrollIntoView({behavior:'smooth',block:'center'})}
+function nextStepGo(kind){jumpTo({scout:'sec-scout',consult:'sec-consult',curate:'sec-refpack',build:'sec-ciclo'}[kind]||'sec-ciclo')}
+function jumpTo(id){const sec=document.getElementById(id);if(sec){sec.scrollIntoView({behavior:'smooth',block:'center'});sec.classList.add('kc-hl');setTimeout(()=>sec.classList.remove('kc-hl'),2000)}}
 function flagErr(){const a=document.getElementById('flagag').value,m=document.getElementById('flagmsg').value;if(!m)return
  fetch('/api/flag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:a,message:m})}).then(()=>{document.getElementById('flagmsg').value='';tick(1)})}
 function clearErr(agent){fetch('/api/clear',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent})}).then(()=>tick(1))}
@@ -702,29 +708,33 @@ async function tick(force){
    <div class=facbundle><span class=mut>pacote p/ GPT:</span> <button class=chatbtn onclick="copyBundle(event)">📋 copiar bundle</button> <button class=chatbtn onclick="copyBundleLink(event)">🔗 copiar link raw</button> <button class=chatbtn onclick="copyShortQ(event)">🧾 copiar pergunta</button> <span class=mut id=bundlemsg></span></div>
    ${fac.architect_blocked?`<div class=facblock>⛔ Arquiteto BLOQUEADO — sem referência ⭐ principal curada. NÃO constrói o ${esc(fac.asset||'móvel')} até você escolher (regra-trava).</div>`:''}</div>`))
   const tl=(fac.timeline||[]).map(st=>{const cl={done:'tl-done',doing:'tl-doing',waiting:'tl-wait',blocked:'tl-block',na:'tl-na',pending:'tl-pend'}[st.status]||'tl-pend'
-   return `<div class="tlstep ${cl}"><div class=tlhead><span class=tlface>${st.face}</span> <b>${esc(st.agent)}</b> <span class=tlicon>${st.icon}</span> <span class=mut>${esc(st.status)}</span>${st.model?`<span class=stag>${esc(st.model)}</span>`:''}</div>${st.summary?`<div class=tlsum>${esc(st.summary)}</div>`:''}</div>`}).join('')
+   const need=st.needs?`<div class=tlneed>⚠ falta: <b>${esc(st.needs)}</b> <button class=cbtn onclick="jumpTo('${st.jump||'sec-refpack'}')">→ resolver</button></div>`:''
+   return `<div class="tlstep ${cl}"><div class=tlhead><span class=tlface>${st.face}</span> <b>${esc(st.agent)}</b> <span class=tlicon>${st.icon}</span> <span class=mut>${esc(st.status)}</span>${st.model?`<span class=stag>${esc(st.model)}</span>`:''}</div>${st.summary?`<div class=tlsum>${esc(st.summary)}</div>`:''}${need}</div>`}).join('')
   root.appendChild(el(`<div class="card full" id=sec-ciclo><h2>🔧 Ciclo atual — ${esc(fac.cycle_id||'')} · ${esc(fac.microtask||'')} <span class=mut>(esteira: PM→Lead→Scout→Felipe→Arquiteto→Gates→Consult→Learning)</span></h2>
    <div class=tllist>${tl}</div></div>`))
  }
  const rp=s.refpack||{}
- if(rp.ok&&(rp.references||[]).length){const cc=rp.counts||{}
+ if(rp.ok&&(rp.references||[]).length){const cc=rp.counts||{},needMain=(cc.main||0)===0
   const tlbl={boutique_premium:'boutique premium',compact_premium:'compacto premium',anti_example:'anti-exemplo'}
   const blbl={approved:'👍 aprovada',rejected:'👎 rejeitada',main:'⭐ PRINCIPAL',anti:'🚫 anti-pattern',pending:'• pendente'}
-  const cards=rp.references.map(r=>{const st=r.status||'pending'
-   const img=r.og_image?`<img class=refimg loading=lazy src="${esc(r.og_image)}" onclick="openModal('${esc(r.og_image)}','${esc(r.title)}')" onerror="this.replaceWith(el('<a class=refimg-ph href=\\'${esc(r.link||'#')}\\' target=_blank>🖼 abrir no site ↗</a>'))">`:`<a class=refimg-ph href="${esc(r.link||'#')}" target=_blank rel=noopener>🖼 ver no site ↗<br><span class=mut style=font-size:10.5px>clica "puxar imagens" no topo</span></a>`
+  const cards=rp.references.map(r=>{const st=r.status||'pending',anti=r.type==='anti_example',broke=r.link_status==='broken'
+   const img=broke?`<div class=refimg-ph style="border-color:var(--red);color:var(--red)">⚠ link quebrado<br><span class=mut style=font-size:10.5px>${esc(r.source||'')}</span></div>`:(r.og_image?`<img class=refimg loading=lazy src="${esc(r.og_image)}" onclick="openModal('${esc(r.og_image)}','${esc(r.title)}')" onerror="this.replaceWith(el('<a class=refimg-ph href=\\'${esc(r.link||'#')}\\' target=_blank>🖼 abrir no site ↗</a>'))">`:`<a class=refimg-ph href="${esc(r.link||'#')}" target=_blank rel=noopener>🖼 ver no site ↗<br><span class=mut style=font-size:10.5px>clica "🖼 puxar imagens" no topo</span></a>`)
+   const star=anti?'':`<button class="cbtn cbtn-star ${needMain?'pulse':''}" title="marcar ⭐ PRINCIPAL — É ISTO que desbloqueia o Arquiteto" onclick="curateRef('${rp.pack_id}','${r.id}','main')">⭐ principal</button>`
    return `<div class="refcard rs-${st}">
     ${img}
     <div class=refhd><b>${esc(r.title)}</b> <span class=mut>· ${esc(r.source||'')}</span></div>
-    <div class=reftags><span class=pill>${esc(tlbl[r.type]||r.type||'')}</span> <span class="pill rb-${st}">${blbl[st]||st}</span></div>
+    <div class=reftags><span class=pill>${esc(tlbl[r.type]||r.type||'')}</span> <span class="pill rb-${st}">${blbl[st]||st}</span>${broke?' <span class="pill rb-rejected">⚠ link quebrado</span>':''}</div>
     <div class=refbody><b>por que:</b> ${esc(r.why_good||'')}<br><b>copiar:</b> ${esc(r.copy||'')}<br><b>evitar:</b> ${esc(r.avoid||'')}<br><span class=mut>DNA: ${esc(r.dna_adherence||'')}</span></div>
     <div class=refact><a class=mbtn href="${esc(r.link||'#')}" target=_blank rel=noopener>🖼 ver ↗</a>
-     <button class=cbtn title=aprovar onclick="curateRef('${rp.pack_id}','${r.id}','approve')">👍</button>
-     <button class=cbtn title="marcar PRINCIPAL (desbloqueia o Arquiteto)" onclick="curateRef('${rp.pack_id}','${r.id}','main')">⭐</button>
+     <button class=cbtn title=aprovar onclick="curateRef('${rp.pack_id}','${r.id}','approve')">👍 aprovar</button>
+     ${star}
      <button class=cbtn title=rejeitar onclick="curateRef('${rp.pack_id}','${r.id}','reject')">👎</button>
      <button class=cbtn title="marcar anti-pattern" onclick="curateRef('${rp.pack_id}','${r.id}','anti')">🚫</button>
      <button class=cbtn title="limpar curadoria" onclick="curateRef('${rp.pack_id}','${r.id}','clear')">↺</button></div></div>`}).join('')
-  root.appendChild(el(`<div class="card full" id=sec-refpack><h2>🖼️ Reference Pack — ${esc(rp.asset||'')} <span class=mut>(cura a REFERÊNCIA VISUAL, não texto · ⭐${cc.main||0} · 👍${cc.approved||0} · 👎${cc.rejected||0} · 🚫${cc.anti||0} · ${cc.pending||0} pendente)</span> <button class=chatbtn onclick="refpackImages('${rp.pack_id}')" title="puxa a imagem (og:image) de cada referência pra você curar pelo VISUAL, não pelo texto">🖼 puxar imagens</button> <span class=mut id=rpimgmsg></span></h2>
-   <div class=mut style="font-size:12px;margin-bottom:8px">⚠️ ${esc(rp.honesty||'')}</div>
+  const hint=needMain?`<div class=refhint>👉 marque <b>UMA</b> referência como <b style="color:var(--gold)">⭐ principal</b> pra <b>destravar o Arquiteto</b>. Aprovar (👍) sozinho <b>NÃO</b> destrava — quem conta é o ⭐.</div>`:`<div class="refhint ok">✓ principal escolhido — Arquiteto destravado. Pode seguir pro Consult GPT → SOFA_BUILD_SPEC.</div>`
+  root.appendChild(el(`<div class="card full" id=sec-refpack><h2>🖼️ Reference Pack — ${esc(rp.asset||'')} <span class=mut>(cura pela IMAGEM · ⭐${cc.main||0} · 👍${cc.approved||0} · 👎${cc.rejected||0} · 🚫${cc.anti||0} · ${cc.pending||0} pendente)</span> <button class=chatbtn onclick="refpackImages('${rp.pack_id}')" title="puxa a imagem (og:image) de cada referência + checa links quebrados">🖼 puxar imagens + checar links</button> <span class=mut id=rpimgmsg></span></h2>
+   ${hint}
+   <div class=mut style="font-size:12px;margin:6px 0 8px">⚠️ ${esc(rp.honesty||'')}</div>
    <div class=refgrid>${cards}</div></div>`))
  }
  // ORG (guarda-chuvas + setas + métricas)
@@ -1480,34 +1490,53 @@ def _refpack_images(body: dict) -> dict:
     """Resolve o og:image de cada referência do pack (só a URL — o navegador carrega da CDN, sem baixar
     arquivo). Persiste `og_image` no pack pra virar curadoria VISUAL (não tabela de texto)."""
     import re as _re
+    import urllib.error
     import urllib.request
     pack_id = body.get("pack_id") or DEFAULT_PACK
     pack = ic_refpacks.load_pack(pack_id)
     if not pack:
         return {"ok": False, "error": f"pack {pack_id} não encontrado"}
     hdr = {"User-Agent": "Mozilla/5.0"}
-    out, changed = {}, False
+    out, broken, changed = {}, [], False
+
+    def _set(ref, key, val):
+        nonlocal changed
+        if ref.get(key) != val:
+            ref[key] = val
+            changed = True
+
     for ref in pack.get("references", []):
-        if ref.get("og_image"):
-            out[ref["id"]] = ref["og_image"]
-            continue
         url = ref.get("link")
+        if ref.get("og_image"):   # já resolvido antes → link estava ok
+            out[ref["id"]] = ref["og_image"]
+            _set(ref, "link_status", "ok")
+            continue
         if not url:
             continue
         try:
             html = urllib.request.urlopen(urllib.request.Request(url, headers=hdr), timeout=12).read().decode("utf-8", "ignore")
+            _set(ref, "link_status", "ok")
             m = (_re.search(r'property=["\']og:image["\'][^>]*content=["\']([^"\']+)', html)
                  or _re.search(r'content=["\']([^"\']+)["\'][^>]*property=["\']og:image', html)
                  or _re.search(r'name=["\']twitter:image["\'][^>]*content=["\']([^"\']+)', html))
             if m:
-                ref["og_image"] = m.group(1)
+                _set(ref, "og_image", m.group(1))
                 out[ref["id"]] = m.group(1)
-                changed = True
-        except Exception:  # noqa: BLE001
+        except urllib.error.HTTPError as e:
+            if e.code in (404, 410):      # página morta (gone) = link quebrado
+                _set(ref, "link_status", "broken")
+                broken.append(ref["id"])
+            else:                         # 403/500/etc: respondeu, página existe
+                _set(ref, "link_status", "ok")
+        except urllib.error.URLError:     # DNS / conexão recusada = quebrado
+            _set(ref, "link_status", "broken")
+            broken.append(ref["id"])
+        except Exception:  # noqa: BLE001  (timeout etc: não marca, pode ser transitório)
             continue
     if changed:
         ic_refpacks.save_pack(pack)
-    return {"ok": True, "images": out, "resolved": len(out), "total": len(pack.get("references", []))}
+    return {"ok": True, "images": out, "resolved": len(out), "broken": broken,
+            "total": len(pack.get("references", []))}
 
 
 def _curate_ref(body: dict) -> dict:

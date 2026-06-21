@@ -132,35 +132,56 @@ def architect_blocked(c: dict) -> bool:
     return not (refs.get("main") or [])
 
 
+# etapas DERIVADAS do estado atual (curadoria/consult/learning) — sempre recalculadas, NUNCA lidas do
+# status congelado na semente (senão o Arquiteto fica "blocked" pra sempre mesmo após marcar a ⭐).
+DERIVED_STEPS = {"Felipe", "Architect", "Gates", "Consult Liaison", "Learning"}
+
+
+def _derived_step(agent: str, c: dict, blocked: bool) -> tuple:
+    """(status, summary, needs, jump) calculados AO VIVO. `needs`=o que falta · `jump`=seção pra resolver."""
+    refs = c.get("references") or {}
+    if agent == "Felipe":
+        if refs.get("main"):
+            return "done", f"✓ principal escolhido ({len(refs['main'])})", None, None
+        curated = (refs.get("approved") or []) + (refs.get("anti") or []) + (refs.get("rejected") or [])
+        if curated:
+            return "doing", "curando — falta marcar ⭐ PRINCIPAL (👍 aprovar NÃO basta)", "marcar ⭐ principal", "sec-refpack"
+        return "waiting", "aguardando você curar (👍 aprovar · ⭐ principal · 👎 · 🚫)", "curar referências", "sec-refpack"
+    if agent == "Architect":
+        if blocked:
+            return "blocked", "BLOQUEADO — precisa de 1 referência ⭐ PRINCIPAL (não só 👍 aprovada)", "marcar ⭐ principal", "sec-refpack"
+        return "pending", "destravado ✓ — pronto pra virar SOFA_BUILD_SPEC (após Consult GPT)", None, None
+    if agent == "Gates":
+        return "na", "ainda não aplicável (sem sofá construído)", None, None
+    if agent == "Consult Liaison":
+        if (c.get("consult") or {}).get("ingested"):
+            return "done", "resposta do GPT ingerida", None, None
+        return "pending", "pronto pra gerar pergunta pós-curadoria", "gerar pergunta GPT", "sec-consult"
+    if agent == "Learning":
+        lr = c.get("learning") or {}
+        if lr.get("new_rules") or lr.get("anti_patterns") or lr.get("golden_samples"):
+            return "done", "aprendizado registrado", None, None
+        return "pending", "pendente: regra/anti-pattern após resposta do GPT", None, None
+    return "pending", "", None, None
+
+
 def timeline(c: dict) -> list[dict]:
-    """As 8 etapas canônicas com o status real do ciclo (merge do que foi registrado + regras)."""
+    """As 8 etapas canônicas. PM/Lead/Scout = status REGISTRADO (eventos). Felipe/Arquiteto/Gates/
+    Consult/Learning = DERIVADOS do estado atual (recalculados todo render → destravam sozinhos)."""
     recorded = {s.get("agent"): s for s in c.get("steps", [])}
     blocked = architect_blocked(c)
     out = []
     for agent in STEP_ORDER:
         s = dict(recorded.get(agent, {}))
-        st = s.get("status")
-        if not st:
-            # default por etapa quando ainda não registrada
-            if agent == "Felipe":
-                refs = c.get("references") or {}
-                curated = (refs.get("approved") or []) + (refs.get("main") or []) + (refs.get("anti") or [])
-                st = "done" if refs.get("main") else ("doing" if curated else "waiting")
-            elif agent == "Architect":
-                st = "blocked" if blocked else "pending"
-            elif agent == "Gates":
-                st = "na"
-            elif agent == "Consult Liaison":
-                st = "done" if (c.get("consult") or {}).get("ingested") else "pending"
-            elif agent == "Learning":
-                lr = c.get("learning") or {}
-                st = "done" if (lr.get("new_rules") or lr.get("anti_patterns") or lr.get("golden_samples")) else "pending"
-            else:
-                st = "pending"
+        needs = jump = None
+        if agent in DERIVED_STEPS:
+            st, summ, needs, jump = _derived_step(agent, c, blocked)
+        else:
+            st, summ = (s.get("status") or "pending"), s.get("summary", "")
         out.append({"agent": agent, "face": STEP_FACE.get(agent, "•"),
                     "status": st, "icon": STATUS_ICON.get(st, "•"),
-                    "summary": s.get("summary", ""), "model": s.get("model", ""),
-                    "files": s.get("files", [])})
+                    "summary": summ, "model": s.get("model", ""), "files": s.get("files", []),
+                    "needs": needs, "jump": jump})
     return out
 
 

@@ -29,7 +29,8 @@
       "dna_adherence": "alta — couro quente + ferro discreto casa com BLACK_WOOD_GOLD.",
       "status": "approved",
       "comment": "",
-      "og_image": "https://craftersandweavers.com/cdn/shop/files/unnamed_9db0b94d-3f12-4d57-80a4-a5edb4c09cab_1200x1112.jpg?v=1767817527"
+      "og_image": "https://craftersandweavers.com/cdn/shop/files/unnamed_9db0b94d-3f12-4d57-80a4-a5edb4c09cab_1200x1112.jpg?v=1767817527",
+      "link_status": "ok"
     },
     {
       "id": "sofa-ref-02-venezia-slate",
@@ -50,9 +51,10 @@
       "copy": "A COR slate/grafite · pés de ferro finos · linha limpa modern-industrial.",
       "avoid": "Braço reto pode virar caixa se for largo — manter fino.",
       "dna_adherence": "muito alta — cor grafite é o centro do dark premium.",
-      "status": "approved",
+      "status": "main",
       "comment": "",
-      "og_image": "https://craftersandweavers.com/cdn/shop/files/6_00dad817-9c7f-4cb0-9b97-0ec8a6567736_1200x1500.png?v=1776293708"
+      "og_image": "https://craftersandweavers.com/cdn/shop/files/6_00dad817-9c7f-4cb0-9b97-0ec8a6567736_1200x1500.png?v=1776293708",
+      "link_status": "ok"
     },
     {
       "id": "sofa-ref-03-chiavari",
@@ -75,7 +77,8 @@
       "dna_adherence": "alta — couro quente; cuidar pra não ficar rústico.",
       "status": "pending",
       "comment": "",
-      "og_image": "https://worldinteriors.com/cdn/shop/products/gpf-isof-gei_3q1_1_1200x1200.jpg?v=1740007422"
+      "og_image": "https://worldinteriors.com/cdn/shop/products/gpf-isof-gei_3q1_1_1200x1200.jpg?v=1740007422",
+      "link_status": "ok"
     },
     {
       "id": "sofa-ref-04-compact-at",
@@ -97,7 +100,8 @@
       "avoid": "Sven mid-century foge do industrial — pegar PROPORÇÃO/conforto, não o retrô.",
       "dna_adherence": "média — referência de PROPORÇÃO compacta, não de estilo.",
       "status": "pending",
-      "comment": ""
+      "comment": "",
+      "link_status": "ok"
     },
     {
       "id": "sofa-ref-05-industrywest-radia",
@@ -119,7 +123,8 @@
       "avoid": "Assento/encosto raso demais → menos aconchego; garantir profundidade.",
       "dna_adherence": "alta — detalhe industrial refinado (braço track + sled).",
       "status": "pending",
-      "comment": ""
+      "comment": "",
+      "link_status": "broken"
     },
     {
       "id": "sofa-ref-06-anti-povison",
@@ -141,7 +146,8 @@
       "avoid": "Braço largo reto · sem pé que erga · módulos cúbicos · encosto tábua reta · zero raio/chanfro nas quinas.",
       "dna_adherence": "zero — viola dark premium e conforto.",
       "status": "anti",
-      "comment": ""
+      "comment": "",
+      "link_status": "ok"
     }
   ]
 }
