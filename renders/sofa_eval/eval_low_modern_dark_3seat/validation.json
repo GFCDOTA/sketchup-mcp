@@ -1,0 +1,130 @@
+{
+  "id": "eval_low_modern_dark_3seat",
+  "status": "OK",
+  "family": "straight",
+  "bbox_m": [
+    2.4,
+    1.13,
+    0.717
+  ],
+  "n_parts": 13,
+  "parts": [
+    "leg_1",
+    "leg_2",
+    "leg_3",
+    "leg_4",
+    "base_recessed",
+    "seat_1",
+    "seat_2",
+    "seat_3",
+    "back_1",
+    "back_2",
+    "back_3",
+    "arm_left",
+    "arm_right"
+  ],
+  "warnings": [
+
+  ],
+  "errors": [
+
+  ],
+  "gates_objetivos": {
+    "PIPELINE_PASS": true,
+    "SCHEMA_PASS": true,
+    "COMPONENTS_PASS": true,
+    "PROPORTION_PASS": true,
+    "BLOCKOUT_PASS": "PENDING_VISUAL",
+    "ASSET_PASS": "PENDING_VISUAL",
+    "SOFTNESS_PASS": "PENDING_VISUAL",
+    "CAIXOTAO_FAIL": "PENDING_VISUAL",
+    "DETAIL_RESTRAINT_PASS": "PENDING_VISUAL"
+  },
+  "primitives_log": [
+    {
+      "name": "leg_1",
+      "w_m": 0.09,
+      "d_m": 0.09,
+      "h_m": 0.06
+    },
+    {
+      "name": "leg_2",
+      "w_m": 0.09,
+      "d_m": 0.09,
+      "h_m": 0.06
+    },
+    {
+      "name": "leg_3",
+      "w_m": 0.09,
+      "d_m": 0.09,
+      "h_m": 0.06
+    },
+    {
+      "name": "leg_4",
+      "w_m": 0.09,
+      "d_m": 0.09,
+      "h_m": 0.06
+    },
+    {
+      "name": "base_recessed",
+      "w_m": 1.96,
+      "d_m": 0.99,
+      "h_m": 0.18
+    },
+    {
+      "name": "seat_1",
+      "w_m": 0.629,
+      "d_m": 0.66,
+      "h_m": 0.21
+    },
+    {
+      "name": "seat_2",
+      "w_m": 0.629,
+      "d_m": 0.66,
+      "h_m": 0.21
+    },
+    {
+      "name": "seat_3",
+      "w_m": 0.629,
+      "d_m": 0.66,
+      "h_m": 0.21
+    },
+    {
+      "name": "back_1",
+      "w_m": 0.629,
+      "d_m": 0.261,
+      "h_m": 0.38
+    },
+    {
+      "name": "back_2",
+      "w_m": 0.629,
+      "d_m": 0.261,
+      "h_m": 0.38
+    },
+    {
+      "name": "back_3",
+      "w_m": 0.629,
+      "d_m": 0.261,
+      "h_m": 0.38
+    },
+    {
+      "name": "arm_left",
+      "w_m": 0.22,
+      "d_m": 1.05,
+      "h_m": 0.44
+    },
+    {
+      "name": "arm_right",
+      "w_m": 0.22,
+      "d_m": 1.05,
+      "h_m": 0.44
+    }
+  ],
+  "renders": [
+    "front.png",
+    "side.png",
+    "top.png",
+    "three_quarter.png"
+  ],
+  "skp": "E:/Claude/worktrees/sofa-skill/renders/sofa_eval/eval_low_modern_dark_3seat/eval_low_modern_dark_3seat.skp"
+}
