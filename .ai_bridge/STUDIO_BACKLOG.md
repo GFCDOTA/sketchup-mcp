@@ -3,6 +3,9 @@
 > Backlog REAL (sem enchimento) do INTERIOR STUDIO + cozinha planta_74. O Claude ataca as **[A]**
 > sozinho e commita; **[V]** = precisa veredito visual do Felipe/GPT; **[D]** = precisa decisão do Felipe.
 > Status: ✅ feito · ▶ em andamento · ⬜ a fazer. Atacando de cima pra baixo por prioridade.
+>
+> **Feito 2026-06-21 (autônomo):** P0-1,2,3 · P1-8 · P2-19 · P3-23,24,26 · P5-15 —
+> commits `e4bc8ec` (modo limpo) · `df60787` (P0 ciclo+P3) · `6a17d4d` (limpeza+testes).
 
 ## P0 — Inteligência dos agentes (o que tava "burro"/alucinando)
 1. ✅ [A] Endurecer o prompt do ciclo (PT, SÓ cozinha, sem inventar solda/código/emergência)
