@@ -277,7 +277,8 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 .cylist{display:flex;flex-direction:column;gap:9px}
 .cyrow{background:#0c0d10;border:1px solid var(--bd);border-left:3px solid var(--blu);border-radius:8px;padding:9px 12px}
 .cyhd{font-size:12.5px;margin-bottom:4px}
-.cydir{font-size:13px;color:#e8e9ec;line-height:1.5;margin:3px 0 6px}
+.cydir{font-size:13px;color:#e8e9ec;line-height:1.5;margin:3px 0 6px;cursor:pointer;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.cydir.exp{-webkit-line-clamp:unset;overflow:visible}
 .cymeta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:11px}
 .subs{display:flex;flex-direction:row;flex-wrap:wrap;gap:6px;margin-bottom:9px}
 .sub{display:flex;gap:8px;align-items:center;background:#181a1f;border:1px solid var(--bd);border-radius:8px;padding:4px 9px;flex:1 1 auto;min-width:128px}
@@ -576,7 +577,7 @@ async function tick(force){
    <span class=mut id=cyclemsg></span></div>`
  const cyhtml=CYCLES.length?CYCLES.map((c,i)=>`<div class=cyrow>
    <div class=cyhd><b class=mtlink onclick="goToMT('${esc(c.mt||'')}')">${esc(c.cycle_id||'CYCLE')}</b> · <b>${esc(c.mt||'')}</b> ${esc((c.what||'').slice(0,46))} <span class=mut>· ${hhmm(c.ts)}</span></div>
-   <div class=cydir>🎯 ${esc(c.directive||'(sem diretriz)')}</div>
+   <div class=cydir onclick="this.classList.toggle('exp')" title="clica pra expandir/recolher">🎯 ${esc(c.directive||'(sem diretriz)')}</div>
    <div class=cymeta><span class=mut>🦙 llama → 🤖 qwen → 🐳 deepseek</span> <button class=chatbtn onclick="cycleToConsult(${i})" title="virar pergunta pro Consult GPT validar">→ validar no Consult GPT</button>${c.consulted?' <span class=mut>✓ consultado</span>':''}</div></div>`).join(''):'<span class=mut>nenhum ciclo rodado ainda — clique "▶ Rodar próximo ciclo" aqui em cima. A diretriz que sair vira o item aqui.</span>'
  root.appendChild(el(`<div class="card full" id=sec-cycles><h2>🔄 Ciclo <span class=mut>(roda aqui · a saída vira diretriz no banco → "validar no Consult GPT")</span></h2>
   ${cyctrl}
