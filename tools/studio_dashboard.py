@@ -14,6 +14,7 @@ import json
 import re
 import subprocess
 import sys
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse
@@ -28,6 +29,7 @@ ARCH_KB = ROOT / ".ai_bridge/knowledge/architect.md"   # conhecimento que o Feli
 FELIPE_DNA = ROOT / ".claude/memory/felipe_style_dna.md"               # identidade de estilo CANÔNICA (room-agnostic)
 JUDGE_RULES = ROOT / "references/design_rules/felipe_visual_judge_rules.json"  # regras do juiz visual + erros marcados
 KANBAN_FILE = ROOT / ".ai_bridge/kanban.json"          # status Trello de cada microtarefa (Felipe move)
+CYCLES_FILE = ROOT / ".ai_bridge/interior_consult/cycles.jsonl"  # cada ciclo persistido (o "banco" do loop)
 KANBAN_COLS = ["backlog", "refinamento", "execução", "teste", "executado"]
 SKIP = (".denoiser.png", ".effectsResult.png")
 
@@ -219,7 +221,7 @@ def _agents() -> dict:
 def _state() -> dict:
     return {"agents": _agents(), "renders": _renders(), "sessions": _sessions(),
             "backlog": _backlog(), "references": _references(), "inbox": _inbox(),
-            "knowledge": _knowledge_state(), "consult": _consult_state()}
+            "knowledge": _knowledge_state(), "consult": _consult_state(), "cycles": _cycles_recent(8)}
 
 
 PAGE = r"""<!doctype html><html lang=pt-BR><head><meta charset=utf-8>
@@ -252,9 +254,10 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 /* ORG / guarda-chuvas */
 .org{position:relative}
 .arrows{position:absolute;left:0;top:0;pointer-events:none;z-index:3;overflow:visible}
-.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;position:relative;z-index:1;padding-top:30px}
+.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px;position:relative;z-index:1;padding-top:30px}
+@media(max-width:980px){.cols{grid-template-columns:1fr;gap:16px}}
 .bub .btxt{overflow-wrap:anywhere;word-break:break-word}
-.col{background:#13151a;border:1px solid var(--bd);border-radius:12px;padding:12px}
+.col{background:#13151a;border:1px solid var(--bd);border-radius:12px;padding:15px}
 .lead{display:flex;gap:10px;align-items:center;border-bottom:1px solid var(--bd);padding-bottom:9px;margin-bottom:9px}
 .lead .face{font-size:30px;line-height:1}.lead .nm{font-weight:700;font-size:15px}
 .lead .msg{color:var(--mut);font-size:11.5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -264,6 +267,11 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 .cyc-next{margin:5px 0;font-size:12px;color:#e8e9ec}
 .mtlink{cursor:pointer;border-bottom:1px dotted var(--gold)}.mtlink:hover{color:#fff}
 .kc-hl{outline:2px solid var(--gold);outline-offset:1px;box-shadow:0 0 0 4px rgba(201,168,106,.18)}
+.cylist{display:flex;flex-direction:column;gap:9px}
+.cyrow{background:#0c0d10;border:1px solid var(--bd);border-left:3px solid var(--blu);border-radius:8px;padding:9px 12px}
+.cyhd{font-size:12.5px;margin-bottom:4px}
+.cydir{font-size:13px;color:#e8e9ec;line-height:1.5;margin:3px 0 6px}
+.cymeta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:11px}
 .subs{display:flex;flex-direction:column;gap:5px;margin-bottom:9px}
 .sub{display:flex;gap:8px;align-items:center;background:#181a1f;border:1px solid var(--bd);border-radius:8px;padding:4px 9px}
 .sub .face{font-size:15px;opacity:.55}.sub.act .face,.lead.act .face{opacity:1}
@@ -274,7 +282,7 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 .stag{font-size:10px;color:var(--mut);margin-left:6px}
 .clearbtn{margin-left:8px;background:#2a1a1a;border:1px solid #4a2a2a;color:#e6a0a0;border-radius:6px;padding:1px 8px;cursor:pointer;font-size:10.5px}.clearbtn:hover{background:#3a2222}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.chat{background:#0c0d10;border:1px solid var(--bd);border-radius:8px;padding:6px 8px;max-height:120px;overflow-y:auto;font-size:11.5px}
+.chat{background:#0c0d10;border:1px solid var(--bd);border-radius:8px;padding:10px 12px;max-height:340px;min-height:150px;overflow-y:auto;font-size:12.5px}
 .chat .ln{padding:2px 0;border-bottom:1px solid #16181d}.chat .to{color:var(--ok)}.chat .t{color:var(--mut);font-size:10px;float:right}
 .arrow{fill:none;stroke:var(--ok);stroke-width:1.7;stroke-dasharray:6 6;opacity:.8;animation:flow 1.1s linear infinite;filter:drop-shadow(0 0 2px var(--ok))}
 @keyframes flow{to{stroke-dashoffset:-13}}
@@ -299,7 +307,7 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 .uprow{display:flex;gap:8px;align-items:center;margin-bottom:6px;font-size:12px}.uprow input[type=file]{color:var(--mut);font-size:11.5px}
 .uprow button{background:#0c0d10;border:1px solid var(--bd);color:var(--ok);border-radius:6px;padding:4px 9px;cursor:pointer}.uprow button:hover{background:#1f2227}
 .upbtn{background:#1a1622;border:1px solid #2c2636;color:var(--gold);border-radius:7px;padding:5px 12px;cursor:pointer;font-size:12px}.upbtn:hover{background:#221c2e}
-.bub{max-width:82%;padding:5px 9px;border-radius:11px;margin:4px 0;font-size:11.5px;word-break:break-word}
+.bub{max-width:84%;padding:7px 11px;border-radius:11px;margin:6px 0;font-size:12.5px;line-height:1.45;word-break:break-word}
 .bub.me{background:#1f3a4d;margin-left:auto;border-bottom-right-radius:3px}
 .bub.them{background:#1d2026;border:1px solid var(--bd);margin-right:auto;border-bottom-left-radius:3px}
 .bub .bt{font-size:9px;color:var(--mut);margin-top:2px}
@@ -378,7 +386,7 @@ function leadCard(a){const act=(a.status==='working'||a.status==='thinking')?'ac
 function subCard(a){const act=(a.status==='working'||a.status==='thinking'||a.online)?'act':''
  const on=a.online?'<span class=onl>online</span>':'<span class=off>offline</span>'
  return `<div class="sub s-${a.status} ${act}" title="${esc(a.message)}"><span class=face>${a.face}</span><span class=nm>${a.label}</span> ${on}<span class="sdot ${a.online?'on':''}"></span></div>`}
-function colChat(feed,ids){const f=(feed||[]).filter(x=>ids.includes(x.agent)||(x.agent==='felipe'&&ids.includes(x.to))).slice(-8)
+function colChat(feed,ids){const f=(feed||[]).filter(x=>ids.includes(x.agent)||(x.agent==='felipe'&&ids.includes(x.to))).slice(-16)
  return f.map(x=>{const me=x.agent==='felipe'
   return `<div class="bub ${me?'me':'them'}"><div class=btxt>${esc(x.message)}</div><div class=bt>${FACES[x.agent]||'🤖'} ${esc(LABELS[x.agent]||x.agent)}${viaTag(x.via)} · ${hhmm(x.ts)}</div></div>`}).join('')||'<span class=mut>sem conversa — pergunta abaixo ⬇</span>'}
 function drawArrows(ag){const svg=document.getElementById('arrows'),wrap=document.getElementById('org');if(!svg||!wrap)return
@@ -425,8 +433,22 @@ function consultIngest(){const m=document.getElementById('camsg');if(m)m.textCon
 function moveTask(mt,dir){fetch('/api/move',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mt,direction:dir})}).then(()=>tick(1))}
 function goToMT(mt){const sec=document.getElementById('sec-backlog');if(sec)sec.scrollIntoView({behavior:'smooth',block:'center'})
  const c=document.getElementById('kc-'+mt);if(c){c.classList.add('kc-hl');c.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>c.classList.remove('kc-hl'),2400)}}
-function runCycle(){const m=document.getElementById('cyclemsg');if(m)m.textContent='rodando ciclo nos LLMs locais…'
- fetch('/api/cycle',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})}).then(r=>r.json()).then(r=>{if(m)m.textContent=r.ok?'✓ ciclo rodou':('erro: '+(r.error||''));tick(1)})}
+let AUTOCYCLE=null,CYCLES=[]
+function runCycle(){const m=document.getElementById('cyclemsg');if(m)m.textContent='rodando ciclo nos LLMs locais… (pode levar ~1-2 min)'
+ fetch('/api/cycle',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})}).then(r=>r.json()).then(r=>{
+  const empty=r.msg&&r.msg.indexOf('vazia')>=0
+  if(m)m.textContent=r.ok?(empty?'⏸ fila PELE vazia':('✓ '+(r.cycle_id||'ciclo')+' rodou')):('erro: '+(r.error||''))
+  if(empty&&AUTOCYCLE){clearInterval(AUTOCYCLE);AUTOCYCLE=null;if(m)m.textContent='⏸ fila PELE vazia — auto parado'}
+  tick(1)})}
+function toggleAuto(el){if(AUTOCYCLE){clearInterval(AUTOCYCLE);AUTOCYCLE=null}
+ if(el.checked){const min=parseInt((document.getElementById('auto-min')||{}).value||'3');AUTOCYCLE=setInterval(runCycle,min*60000);runCycle()}}
+function cycleToConsult(i){const c=CYCLES[i];if(!c)return;const set=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v}
+ set('cq-mode','SPEC');set('cq-room','kitchen');set('cq-phase','skin')
+ set('cq-context','Validar a diretriz do ciclo '+c.cycle_id+' para '+c.mt+' ('+(c.what||'')+'). Geometria congelada (PDF/golden); só a linguagem visual muda.')
+ set('cq-goal','A diretriz do Arquiteto está alinhada ao gosto dark premium do Felipe? Precisa ajuste antes de virar render?')
+ set('cq-hyp',c.directive||'')
+ const sec=document.getElementById('sec-consult');if(sec)sec.scrollIntoView({behavior:'smooth',block:'start'})
+ const m=document.getElementById('cqmsg');if(m)m.textContent='✏️ pré-preenchido do '+c.cycle_id+' — clique "🧩 gerar pergunta"'}
 function askAgent(agent,umb){const inp=document.getElementById('ask-'+umb),q=(inp.value||'').trim();if(!q)return
  inp.value='';inp.blur()   // tira o foco -> o tick pode mostrar o balão
  fetch('/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent,prompt:q})}).then(()=>tick(1))
@@ -480,7 +502,9 @@ async function tick(force){
      extra=`<div class=pmbox><b>🗂️ Dono do Kanban</b> · ${bk.total||0} tarefas · ${bk.done||0} feitas
       <div class=cyc-help>Um <b>ciclo</b> roda nos LLMs locais (sem Claude): <b>PM</b>(llama) escolhe a próxima tarefa PELE → <b>Team Lead</b>(qwen) valida → <b>Arquiteto</b>(deepseek) dá a diretriz. O card vai pra <b>execução</b>. É decisão/texto — <b>não</b> mexe no .skp.</div>
       ${nx?`<div class=cyc-next>▶ próximo ciclo vai rodar: <b class=mtlink onclick="goToMT('${nx.mt}')" title="ver no Kanban">${nx.mt}</b> — ${esc((nx.what||'').slice(0,52))}</div>`:`<div class=cyc-next><span class=mut>sem tarefa PELE na fila — as GEO esperam teu OK</span></div>`}
-      <button class=send style=margin-top:6px onclick=runCycle() ${nx?'':'disabled'}>▶ Rodar próximo ciclo</button> <span class=mut id=cyclemsg></span></div>`}
+      <button class=send style=margin-top:6px onclick=runCycle() ${nx?'':'disabled'}>▶ Rodar próximo ciclo</button>
+      <label class=mut style="font-size:11px;display:inline-flex;align-items:center;gap:4px;margin-left:6px"><input type=checkbox onchange=toggleAuto(this) ${AUTOCYCLE?'checked':''}>auto a cada <select id=auto-min style="background:#0c0d10;border:1px solid var(--bd);color:var(--fg);border-radius:4px;padding:1px 3px"><option>2</option><option selected>3</option><option>5</option><option>10</option></select> min</label>
+      <span class=mut id=cyclemsg></span></div>`}
    return `<div class=col>${leadCard(u.lead)}${extra}<div class=subs>${u.subs.map(subCard).join('')}</div>
     <div class=chat>${colChat(ag.feed,ids)}</div>
     <div class=askrow><input id="ask-${u.id}" onkeydown="if(event.key==='Enter')askAgent('${u.lead.id}','${u.id}')" placeholder="perguntar pro ${esc(u.lead.label)}…"><button class=send onclick="askAgent('${u.lead.id}','${u.id}')">➤</button><button class=chatbtn onclick="openChat('${u.lead.id}','${u.id}','${ids.join(',')}')" title="abrir chat grande">⛶</button></div></div>`}).join('')
@@ -497,6 +521,14 @@ async function tick(force){
  root.appendChild(el(`<div class="card full" id=sec-agents><h2>Agentes — guarda-chuvas (PM · Team Lead · Arquiteto)</h2>
   <div class=org id=org><svg class=arrows id=arrows></svg><div class=cols>${cols}</div></div></div>`))
  drawArrows(ag)
+ // 🔄 CICLOS RECENTES — fecha o loop: a diretriz do Arquiteto vira pergunta ao Consult GPT
+ CYCLES=s.cycles||[]
+ const cyhtml=CYCLES.length?CYCLES.map((c,i)=>`<div class=cyrow>
+   <div class=cyhd><b class=mtlink onclick="goToMT('${esc(c.mt||'')}')">${esc(c.cycle_id||'CYCLE')}</b> · <b>${esc(c.mt||'')}</b> ${esc((c.what||'').slice(0,46))} <span class=mut>· ${hhmm(c.ts)}</span></div>
+   <div class=cydir>🎯 ${esc(c.directive||'(sem diretriz)')}</div>
+   <div class=cymeta><span class=mut>🦙 llama → 🤖 qwen → 🐳 deepseek</span> <button class=chatbtn onclick="cycleToConsult(${i})" title="virar pergunta pro Consult GPT validar">→ validar no Consult GPT</button>${c.consulted?' <span class=mut>✓ consultado</span>':''}</div></div>`).join(''):'<span class=mut>nenhum ciclo rodado ainda — clique "▶ Rodar próximo ciclo" no card do PM. A diretriz que sair vira o item aqui.</span>'
+ root.appendChild(el(`<div class="card full" id=sec-cycles><h2>🔄 Ciclos recentes <span class=mut>(a SAÍDA de cada ciclo = a diretriz do Arquiteto, salva no banco. O botão "→ validar" manda ela pro Consult GPT → vira regra/próxima microtarefa)</span></h2>
+  <div class=cylist>${cyhtml}</div></div>`))
  const critic=(s.renders||[])[0]
  // ERROS — card próprio, grande, logo abaixo dos agentes
  root.appendChild(el(`<div class="card full" id=sec-err><h2>Erros de design — o que TU não curtiu (vira lição)</h2>
@@ -1008,9 +1040,37 @@ def _consensus(agent, prompt):
         return {"ok": False, "error": str(e)}
 
 
+def _cycle_save(rec: dict) -> None:
+    CYCLES_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with CYCLES_FILE.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+
+
+def _cycles_count() -> int:
+    if not CYCLES_FILE.exists():
+        return 0
+    return sum(1 for ln in CYCLES_FILE.read_text("utf-8", "ignore").splitlines() if ln.strip())
+
+
+def _cycles_recent(n: int = 8) -> list[dict]:
+    """Últimos ciclos persistidos (mais recente primeiro) — é o 'banco' que fecha o loop: cada ciclo
+    guarda a diretriz do Arquiteto pra virar pergunta ao Consult GPT / próxima ação no .skp."""
+    if not CYCLES_FILE.exists():
+        return []
+    out = []
+    for ln in CYCLES_FILE.read_text("utf-8", "ignore").splitlines()[-n:]:
+        try:
+            out.append(json.loads(ln))
+        except json.JSONDecodeError:
+            continue
+    out.reverse()
+    return out
+
+
 def _cycle(goal=None):
     """UM ciclo do orquestrador rodando nos LLMs LOCAIS (sem Claude): PM escolhe a próxima tarefa
-    -> consulta o Team Lead -> que consulta o Arquiteto. Cada passo posta no feed = a cadeia viva."""
+    -> consulta o Team Lead -> que consulta o Arquiteto. Cada passo posta no feed = a cadeia viva.
+    O resultado é PERSISTIDO (cycles.jsonl) com a diretriz do Arquiteto = saída útil do ciclo."""
     import re as _re
     try:
         from tools import ollama_bridge, studio_log
@@ -1036,7 +1096,13 @@ def _cycle(goal=None):
         kb = _arch_knowledge()
         ar = clean(ollama_bridge.ask("deepseek", (f"[gosto do Felipe]: {kb}\n" if kb else "") + f"Voce e o Arquiteto. Tarefa: {mt}. Em 1 frase, a diretriz de design.", timeout=90))
         studio_log.post("interior-designer", "done", ar[:250] or "diretriz dada", via="deepseek-r1:14b")
-        return {"ok": True, "task": nxt["mt"]}
+        cid = f"CYCLE-{_cycles_count() + 1:03d}"
+        directive = (ar or "").strip()[:600] or "(sem diretriz)"
+        _cycle_save({"cycle_id": cid, "ts": time.time(), "mt": nxt["mt"], "what": nxt.get("what", ""),
+                     "goal": g, "pm": (pm or "").strip()[:300], "lead": (tl or "").strip()[:300],
+                     "directive": directive, "models": ["llama3.1:8b", "qwen2.5-coder:14b", "deepseek-r1:14b"],
+                     "consulted": False})
+        return {"ok": True, "task": nxt["mt"], "cycle_id": cid, "directive": directive}
     except Exception as e:  # noqa: BLE001
         return {"ok": False, "error": str(e)}
 
