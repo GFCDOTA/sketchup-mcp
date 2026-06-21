@@ -71,7 +71,12 @@ def vray_export_run
       # tampo = pedra escura controlada (sem textura -> diffuse), niche/board = madeira quente (mantem).
       if ENV['KITCHEN_THEME'] == 'black_wood_gold'
         ['ph_kc_corpo', 'ph_kc_porta', 'ph_kc_gaveta', 'ph_kc_tampo'].each { |k| tex_map.delete(k) }
-        tex_map = tex_map.merge({ 'ph_kc_backsplash' => 'stone_gold.png' })
+        # KITCHEN_STONE_TEX p/ variantes (A=stone_gold atual, B=dark_gold controlado, C=nero-gold).
+        # niche/board = MADEIRA ESCURA quente (acento Felipe) -> mata o painel claro/cremoso (wm claro).
+        tex_map = tex_map.merge({
+          'ph_kc_backsplash' => (ENV['KITCHEN_STONE_TEX'] || 'stone_gold.png'),
+          'ph_kc_niche_wood' => 'wood_dark.png', 'ph_kc_board' => 'wood_dark.png'
+        })
       end
       n_tex = 0
       tex_map.each do |matname, png|
@@ -124,6 +129,44 @@ def vray_export_run
       end
       bb = kbb if kbb.valid?
       out << "isolado '#{iso}'"
+    end
+    # PISO de render (gated KITCHEN_FLOOR=textura): plano grande no z do piso, adicionado DEPOIS
+    # do isolate (nao some). Mata a cozinha "flutuando". So no .skp COPIA -> base intacta.
+    if ENV['KITCHEN_FLOOR'] && tex_dir
+      fp = File.join(tex_dir, ENV['KITCHEN_FLOOR'])
+      if File.exist?(fp)
+        fmat = model.materials.add('kitchen_floor_render')
+        fmat.texture = fp
+        fmat.texture.size = [70, 70]
+        z0 = bb.min.z
+        grp = model.entities.add_group
+        pts = [[20, 540, z0], [250, 540, z0], [250, 770, z0], [20, 770, z0]].map { |p| Geom::Point3d.new(*p) }
+        ff = grp.entities.add_face(pts)
+        ff.material = fmat
+        ff.back_material = fmat
+        out << 'piso add'
+      end
+    end
+    # PAREDES+TETO de render (gated KITCHEN_WALLS=r,g,b): caixa escura ao redor da cozinha
+    # (mata o "ceu azul" -> interior fechado moody). Planos DEPOIS do isolate. So no .skp COPIA.
+    if ENV['KITCHEN_WALLS']
+      wr, wg, wb = (ENV['KITCHEN_WALLS'].split(',').map(&:to_f) + [40, 40, 44])[0, 3]
+      wmat = model.materials.add('kitchen_wall_render')
+      wmat.color = Sketchup::Color.new(wr.to_i, wg.to_i, wb.to_i)
+      z0 = bb.min.z
+      zc = z0 + 128
+      wgrp = model.entities.add_group
+      quads = [
+        [[53, 515, z0], [53, 795, z0], [53, 795, zc], [53, 515, zc]],   # fundo (oeste, atras dos armarios)
+        [[5, 713, z0], [90, 713, z0], [90, 713, zc], [5, 713, zc]],     # ponta norte do galley
+        [[5, 515, zc], [205, 515, zc], [205, 795, zc], [5, 795, zc]],   # teto
+      ]
+      quads.each do |q|
+        f = wgrp.entities.add_face(q.map { |p| Geom::Point3d.new(*p) })
+        f.material = wmat
+        f.back_material = wmat
+      end
+      out << 'paredes add'
     end
     c = bb.center
     d = bb.diagonal

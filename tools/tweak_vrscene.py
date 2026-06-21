@@ -130,9 +130,22 @@ def apply_theme_black_wood_gold(text: str) -> str:
              "reflect_glossiness": "0.47", "fresnel_ior": "1.5", "metalness": "0"}
     for k in ("kc_corpo", "kc_porta", "kc_gaveta", "kc_corpo_sup", "kc_porta_sup", "kc_filler", "kc_cuba"):
         text = _set_block(text, f"_ph_{k}_BRDFVRayMtl", black)
-    dark_inox = {"diffuse": "AColor(0.020, 0.022, 0.026, 1)", "reflect": "AColor(0.67, 0.69, 0.74, 1)",
-                 "reflect_glossiness": "0.83", "fresnel_ior": "10", "metalness": "1"}  # reflexo + highlight controlado (GPT hero polish)
-    text = _set_block(text, "_ph_kc_geladeira_BRDFVRayMtl", dark_inox)
+    # ph_filler GENERICO (sem kc_): lateral cream da torre da geladeira -> preto (coluna coesa).
+    # Era o "painel branco" que o Felipe via (cream [190,173,146], fora da lista kc).
+    text = _set_block(text, "_ph_filler_BRDFVRayMtl", black)
+    # inox (chaminé/coifa + borda) = grafite metálico escuro (era [193,198,205] claro -> destoava do moody)
+    text = _set_block(text, "_ph_kc_inox_BRDFVRayMtl",
+                      {"diffuse": "AColor(0.05, 0.05, 0.055, 1)", "reflect": "AColor(0.28, 0.28, 0.30, 1)",
+                       "reflect_glossiness": "0.6", "fresnel_ior": "6", "metalness": "1"})
+    import os as _os
+    if _os.environ.get("KITCHEN_GELADEIRA") == "black":   # variantes B/C: PRETO FOSCO antidigital (Felipe D8)
+        # metalness=0 (pintura fosca, NAO espelho) -> diffuse preto domina; nao reflete o key como painel cremoso
+        gel = {"diffuse": "AColor(0.016, 0.016, 0.018, 1)", "reflect": "AColor(0.05, 0.05, 0.05, 1)",
+               "reflect_glossiness": "0.5", "fresnel_ior": "1.45", "metalness": "0"}
+    else:                                                  # variante A: inox dark reflexivo (golden atual)
+        gel = {"diffuse": "AColor(0.020, 0.022, 0.026, 1)", "reflect": "AColor(0.67, 0.69, 0.74, 1)",
+               "reflect_glossiness": "0.83", "fresnel_ior": "10", "metalness": "1"}
+    text = _set_block(text, "_ph_kc_geladeira_BRDFVRayMtl", gel)
     # tampo = pedra escura CONTROLADA (sem veio gritante); backsplash = pedra com veio dourado (textura)
     dark_stone = {"diffuse": "AColor(0.035, 0.030, 0.027, 1)", "reflect": "AColor(0.16, 0.16, 0.16, 1)",
                   "reflect_glossiness": "0.8", "fresnel_ior": "1.6", "metalness": "0"}

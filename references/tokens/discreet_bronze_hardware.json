@@ -1,0 +1,18 @@
+{
+  "name": "discreet_bronze_hardware",
+  "title": "Metais bronze/champagne DISCRETOS — detalhe, nunca ostentação",
+  "rule": "Bronze/champagne entra só como pontuação sutil (perfil de puxador embutido, aro de nicho, faixa fina), NUNCA como superfície grande nem cor dominante. Cuba e torneira são PRETAS; o bronze é o brilho quente de detalhe que dá o ar 'boutique' sem virar fake luxury. Coerente com o sistema handle-less (cava/gola): o bronze aparece na sombra/recorte, não numa alça aplicada.",
+  "params": {
+    "bronze_rgb": [171, 119, 63],
+    "finish": "escovado fosco discreto (não polido espelhado dourado)",
+    "where_yes": ["perfil de gola/cava", "aro de nicho", "faixa fina vertical perto da torre"],
+    "where_no": ["puxador-alça aparente", "superfície grande", "todos os módulos"],
+    "coverage_max": "detalhe (<5% da leitura visual)"
+  },
+  "applies_to_kinds": ["kc_puxador"],
+  "anti_pattern": "Puxador dourado demais / alça dourada aparente = ostentação fake. Dourado espalhado em muitos módulos = mansão fake Pinterest. Bronze brilhante espelhado quebra o moody premium.",
+  "cost_relative": "baixo-médio (perfil/acabamento, não ferragem de luxo)",
+  "appearance": "Brilho quente discreto que pontua os recortes da marcenaria preta — lido de perto, invisível de longe.",
+  "gate_refs": ["artifacts/reference_lab/gates/reference_system_gates.md::fake_luxury_check"],
+  "source": {"kind": "golden_sample", "title": "FELIPE_KITCHEN_PREFERENCES (NÃO GOSTOU: puxador dourado) + felipe_kitchen_preference_profile.hardware", "date": "2026-06-20"}
+}
