@@ -251,8 +251,10 @@ h1{font-size:16px;margin:0;letter-spacing:.6px;font-weight:700;background:linear
 nav{display:flex;gap:3px}nav a{color:var(--mut);text-decoration:none;font-size:12.5px;padding:4px 10px;border-radius:7px}
 nav a:hover{color:var(--fg);background:#1f1b29}
 .mut{color:var(--mut);font-size:12.5px}.wrap{padding:16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px 16px}
-.card.full{grid-column:1/3}h2{font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin:0 0 10px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px 16px;overflow:auto;resize:vertical;min-height:84px}
+.card.full{grid-column:1/3}.card.half{grid-column:auto}h2{font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin:0 0 10px}
+.card.collapsed{height:auto!important;resize:none}
+.wbtn{cursor:pointer;color:#7a8696;font-size:12px;margin-right:5px;user-select:none}.wbtn:hover{color:var(--gold)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
 .thumb{border:1px solid var(--bd);border-radius:8px;overflow:hidden;background:#000}
 .thumb img{width:100%;display:block;aspect-ratio:4/3;object-fit:cover}
@@ -386,7 +388,7 @@ textarea{width:100%;min-height:90px;background:#0c0d10;border:1px solid var(--bd
 </style></head><body>
 <header><span class=hdot></span><h1>INTERIOR STUDIO</h1>
 <nav><a href="#sec-agents">Agentes</a><a href="#sec-err">Erros</a><a href="#sec-graf">Gráficos</a><a href="#sec-cur">Curadoria</a><a href="#sec-ren">Renders</a></nav>
-<span class=mut style="margin-left:auto;font-size:11px">🔓 arraste o ⠿ dos cards</span><button onclick=resetLayout() title="voltar ao layout padrão" style="background:#0c0d10;border:1px solid var(--bd);color:var(--mut);border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11px;margin:0 12px">↺ layout</button><span class=mut id=ts>carregando…</span><span class=mut>· :8782</span></header>
+<span class=mut style="margin-left:auto;font-size:11px">🔓 ⠿ mover · ▭ largura · puxa a borda ↕ pra altura</span><button onclick=resetLayout() title="voltar ao layout padrão" style="background:#0c0d10;border:1px solid var(--bd);color:var(--mut);border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11px;margin:0 12px">↺ layout</button><span class=mut id=ts>carregando…</span><span class=mut>· :8782</span></header>
 <div class=wrap id=root></div>
 <div id=modal class=modal onclick="if(event.target===this)closeModal()">
  <div class=mbox><div class=mbar><span id=mname></span>
@@ -542,6 +544,18 @@ function applyCollapsed(){const root=document.getElementById('root');if(!root)re
  ;[...root.children].forEach(c=>{if(c.id&&c.classList.contains('card'))c.classList.toggle('collapsed',set.has(c.id))})}
 function toggleCollapse(id){const set=collapsedSet()||new Set();if(set.has(id))set.delete(id);else set.add(id);saveCollapsed(set)
  const c=document.getElementById(id);if(c)c.classList.toggle('collapsed',set.has(id))}
+// REDIMENSIONAR — altura livre (puxa a borda de baixo, salva no mouseup) + largura ½/inteira
+function cardSizes(){try{return JSON.parse(localStorage.getItem('studio_sizes')||'{}')}catch(e){return{}}}
+function saveSizes(){const root=document.getElementById('root');if(!root)return;const sz=cardSizes()
+ ;[...root.children].forEach(c=>{if(c.id&&c.classList.contains('card')&&c.style.height){(sz[c.id]=sz[c.id]||{}).h=c.style.height}})
+ localStorage.setItem('studio_sizes',JSON.stringify(sz))}
+function applySizes(){const sz=cardSizes();Object.keys(sz).forEach(id=>{const c=document.getElementById(id);if(!c)return
+ if(sz[id].h&&!c.classList.contains('collapsed'))c.style.height=sz[id].h
+ if(sz[id].half){c.classList.remove('full');c.classList.add('half')}})}
+function toggleWidth(id){const sz=cardSizes(),c=document.getElementById(id);if(!c)return
+ const half=!c.classList.contains('half');c.classList.toggle('half',half);c.classList.toggle('full',!half)
+ ;(sz[id]=sz[id]||{}).half=half;localStorage.setItem('studio_sizes',JSON.stringify(sz))}
+document.addEventListener('mouseup',()=>saveSizes())
 function makeDraggable(){const root=document.getElementById('root');if(!root)return
  ;[...root.children].forEach(card=>{if(!card.id||!card.classList.contains('card'))return
   card.ondragover=e=>{e.preventDefault();e.dataTransfer.dropEffect='move';if(DRAGID&&DRAGID!==card.id)card.classList.add('dragover')}
@@ -553,13 +567,16 @@ function makeDraggable(){const root=document.getElementById('root');if(!root)ret
    const hd=card.querySelector('h2');if(hd)hd.insertBefore(h,hd.firstChild);else card.insertBefore(h,card.firstChild)}
   if(!card.querySelector('.collapse-btn')){const cb=document.createElement('span');cb.className='collapse-btn';cb.title='recolher/expandir';cb.textContent=card.classList.contains('collapsed')?'▸':'▾'
    cb.onclick=()=>{toggleCollapse(card.id);cb.textContent=card.classList.contains('collapsed')?'▸':'▾'}
-   const hd=card.querySelector('h2');if(hd)hd.insertBefore(cb,hd.firstChild)}})}
+   const hd=card.querySelector('h2');if(hd)hd.insertBefore(cb,hd.firstChild)}
+  if(!card.querySelector('.wbtn')){const wb=document.createElement('span');wb.className='wbtn';wb.title='largura: ½ / inteira';wb.textContent=card.classList.contains('half')?'◫':'▭'
+   wb.onclick=()=>{toggleWidth(card.id);wb.textContent=card.classList.contains('half')?'◫':'▭'}
+   const hd=card.querySelector('h2');if(hd)hd.insertBefore(wb,hd.firstChild)}})}
 function cardDrop(e,targetId){e.preventDefault();if(!DRAGID||DRAGID===targetId)return
  const root=document.getElementById('root'),drag=document.getElementById(DRAGID),tgt=document.getElementById(targetId)
  if(!root||!drag||!tgt)return
  const r=tgt.getBoundingClientRect(),after=e.clientY>r.top+r.height/2
  root.insertBefore(drag,after?tgt.nextSibling:tgt);DRAGID=null;saveOrder()}
-function resetLayout(){localStorage.removeItem('studio_order');localStorage.removeItem('studio_collapsed');tick(1)}
+function resetLayout(){localStorage.removeItem('studio_order');localStorage.removeItem('studio_collapsed');localStorage.removeItem('studio_sizes');tick(1)}
 let LASTSTATE=''
 async function tick(force){
  if(document.hidden&&!force)return   // aba em background -> não trabalha (perf)
@@ -730,7 +747,7 @@ async function tick(force){
    <div class=cap>${esc(r.name.replace('.png',''))}<div class=t>${r.theme} · ${r.sub} · ${r.kb}KB</div></div></div>`).join('')
  root.appendChild(el(`<div class="card full" id=sec-ren><h2>Renders (${(s.renders||[]).length}) — clica pra ampliar/baixar · mais novos primeiro</h2>
   <div class="grid gallery">${rr||'<span class=mut>sem renders</span>'}</div></div>`))
- applyOrder();applyCollapsed();makeDraggable()   // layout livre: ordem salva + recolher + punho ⠿
+ applyOrder();applyCollapsed();applySizes();makeDraggable()   // layout livre: ordem + recolher + tamanho + punho ⠿
  document.querySelectorAll('.chat,.convbox').forEach(c=>{c.scrollTop=c.scrollHeight})   // chat/conversa sempre na última msg
  window.scrollTo(0,sy)   // mantém a rolagem onde estava (não sobe ao mandar mensagem)
 }
