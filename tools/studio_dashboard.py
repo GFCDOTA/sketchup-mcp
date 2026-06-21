@@ -139,7 +139,12 @@ def _backlog() -> dict:
             "done": len(done), "tasks": tasks}
 
 
+_REF_CACHE = {"t": 0.0, "v": None}   # cache 30s do reference_db (não reabrir SQLite a cada poll)
+
+
 def _references() -> dict:
+    if _REF_CACHE["v"] is not None and time.time() - _REF_CACHE["t"] < 30:
+        return _REF_CACHE["v"]
     try:
         from tools import reference_db as rdb
         con = rdb.connect()
@@ -151,9 +156,11 @@ def _references() -> dict:
             "SELECT COALESCE(theme,'(sem tema)'), COUNT(*) FROM reference "
             "WHERE kind IN ('render','theme_preset') GROUP BY theme").fetchall())
         con.close()
-        return {"by_kind": by_kind, "by_theme": by_theme}
+        out = {"by_kind": by_kind, "by_theme": by_theme}
     except Exception as e:  # noqa: BLE001
-        return {"error": str(e)}
+        out = {"error": str(e)}
+    _REF_CACHE.update(t=time.time(), v=out)
+    return out
 
 
 def _inbox() -> list[dict]:
@@ -525,6 +532,7 @@ function cardDrop(e,targetId){e.preventDefault();if(!DRAGID||DRAGID===targetId)r
 function resetLayout(){localStorage.removeItem('studio_order');localStorage.removeItem('studio_collapsed');tick(1)}
 let LASTSTATE=''
 async function tick(force){
+ if(document.hidden&&!force)return   // aba em background -> não trabalha (perf)
  // pausa com modal aberto OU enquanto digita/seleciona (senao apaga)
  const m=document.getElementById('modal'),cm=document.getElementById('chatmodal')
  if((m&&m.classList.contains('show'))||(cm&&cm.classList.contains('show')))return
@@ -543,7 +551,7 @@ async function tick(force){
  const cols=(ag.umbrellas||[]).map(u=>{const ids=[u.lead.id,...u.subs.map(x=>x.id)]
    return `<div class=col>${leadCard(u.lead)}<div class=subs>${u.subs.map(subCard).join('')}</div>
     <div class=chat>${colChat(ag.feed,ids)}</div>
-    <div class=askrow><input id="ask-${u.id}" onkeydown="if(event.key==='Enter')askAgent('${u.lead.id}','${u.id}')" placeholder="perguntar pro ${esc(u.lead.label)}…"><button class=send onclick="askAgent('${u.lead.id}','${u.id}')">➤</button><button class=chatbtn onclick="openChat('${u.lead.id}','${u.id}','${ids.join(',')}')" title="abrir chat grande">⛶</button></div></div>`}).join('')
+    <div class=askrow><input id="ask-${u.id}" onkeydown="if(event.key==='Enter')askAgent('${u.lead.id}','${u.id}')" placeholder="${u.id==='pm'?'tarefa/prioridade (design? → pergunta pro Arquiteto)':('perguntar pro '+esc(u.lead.label)+'…')}"><button class=send onclick="askAgent('${u.lead.id}','${u.id}')">➤</button><button class=chatbtn onclick="openChat('${u.lead.id}','${u.id}','${ids.join(',')}')" title="abrir chat grande">⛶</button></div></div>`}).join('')
  const ents=Object.entries(ag.metrics||{}).sort((a,b)=>b[1].calls-a[1].calls)
  const tot=ents.reduce((s,[,m])=>s+m.calls,0)||1, COL=['#6ca8ff','#7fd99a','#e6c069','#c08ae6','#5ad1c8','#e69a6c','#e67c7c']
  let acc=0
@@ -1187,6 +1195,8 @@ def _cycle(goal=None):
                      "goal": g, "pm": (pm or "").strip()[:300], "lead": (tl or "").strip()[:300],
                      "directive": directive, "models": ["llama3.1:8b", "qwen2.5-coder:14b", "deepseek-r1:14b"],
                      "consulted": False})
+        if len(directive) > 40 and directive != "(sem diretriz)":
+            _feed(directive, f"diretriz de ciclo {nxt['mt']}")   # alimenta o Arquiteto com a própria diretriz
         return {"ok": True, "task": nxt["mt"], "cycle_id": cid, "directive": directive}
     except Exception as e:  # noqa: BLE001
         return {"ok": False, "error": str(e)}
