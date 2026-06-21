@@ -68,10 +68,15 @@
   ],
   "references": {
     "pack_id": "sofa_reference_pack_001",
-    "approved": [],
+    "approved": [
+      "sofa-ref-01-henry",
+      "sofa-ref-02-venezia-slate"
+    ],
     "rejected": [],
     "main": [],
-    "anti": []
+    "anti": [
+      "sofa-ref-06-anti-povison"
+    ]
   },
   "gates": {},
   "consult": {

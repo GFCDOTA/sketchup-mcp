@@ -27,8 +27,9 @@
       "copy": "Pé/estrutura de ferro discreto que ergue · almofada de couro com volume · braço médio.",
       "avoid": "Tubo de ferro grosso demais → vira loft tosco.",
       "dna_adherence": "alta — couro quente + ferro discreto casa com BLACK_WOOD_GOLD.",
-      "status": "pending",
-      "comment": ""
+      "status": "approved",
+      "comment": "",
+      "og_image": "https://craftersandweavers.com/cdn/shop/files/unnamed_9db0b94d-3f12-4d57-80a4-a5edb4c09cab_1200x1112.jpg?v=1767817527"
     },
     {
       "id": "sofa-ref-02-venezia-slate",
@@ -49,8 +50,9 @@
       "copy": "A COR slate/grafite · pés de ferro finos · linha limpa modern-industrial.",
       "avoid": "Braço reto pode virar caixa se for largo — manter fino.",
       "dna_adherence": "muito alta — cor grafite é o centro do dark premium.",
-      "status": "pending",
-      "comment": ""
+      "status": "approved",
+      "comment": "",
+      "og_image": "https://craftersandweavers.com/cdn/shop/files/6_00dad817-9c7f-4cb0-9b97-0ec8a6567736_1200x1500.png?v=1776293708"
     },
     {
       "id": "sofa-ref-03-chiavari",
@@ -72,7 +74,8 @@
       "avoid": "Pátina rústica demais → puxa pra loft, não boutique. Dosar.",
       "dna_adherence": "alta — couro quente; cuidar pra não ficar rústico.",
       "status": "pending",
-      "comment": ""
+      "comment": "",
+      "og_image": "https://worldinteriors.com/cdn/shop/products/gpf-isof-gei_3q1_1_1200x1200.jpg?v=1740007422"
     },
     {
       "id": "sofa-ref-04-compact-at",
@@ -137,7 +140,7 @@
       "copy": "NADA — é o que evitar.",
       "avoid": "Braço largo reto · sem pé que erga · módulos cúbicos · encosto tábua reta · zero raio/chanfro nas quinas.",
       "dna_adherence": "zero — viola dark premium e conforto.",
-      "status": "pending",
+      "status": "anti",
       "comment": ""
     }
   ]

@@ -164,6 +164,22 @@ def timeline(c: dict) -> list[dict]:
     return out
 
 
+def next_step(c: dict) -> dict:
+    """A PRÓXIMA ETAPA CORRETA do ciclo (não um 'rodar ciclo' genérico). `actionable`=tem botão;
+    senão é ação do Felipe (curar)."""
+    refs = c.get("references") or {}
+    consult = c.get("consult") or {}
+    if not refs.get("pack_id"):
+        return {"kind": "scout", "label": "🔭 Rodar Scout (buscar referências)", "actionable": True}
+    if not refs.get("main"):
+        return {"kind": "curate", "label": "⭐ Você: escolher 1–2 referências PRINCIPAIS no Reference Pack",
+                "actionable": False}
+    if not consult.get("ingested"):
+        return {"kind": "consult", "label": "🔌 Gerar pergunta pro Consult GPT → SOFA_BUILD_SPEC",
+                "actionable": True}
+    return {"kind": "build", "label": "▶ Gerar Build Spec / construir (pós-curadoria)", "actionable": True}
+
+
 def factory_state() -> dict:
     """Resumo pro topo do dashboard (barra de fábrica) + timeline do ciclo atual."""
     c = current_cycle()
@@ -180,5 +196,5 @@ def factory_state() -> dict:
         "architect_blocked": architect_blocked(c),
         "references": c.get("references") or {}, "timeline": timeline(c),
         "consult": c.get("consult") or {}, "learning": c.get("learning") or {},
-        "cycles": cards,
+        "next_step": next_step(c), "cycles": cards,
     }

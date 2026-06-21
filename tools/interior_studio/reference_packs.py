@@ -127,6 +127,11 @@ def curate(pack_id: str, ref_id: str, action: str, comment: str | None = None,
     ref = next((r for r in pack.get("references", []) if r.get("id") == ref_id), None)
     if not ref:
         return {"ok": False, "error": f"referência não encontrada: {ref_id}"}
+    # GUARD: anti-exemplo NÃO pode ser ⭐ principal (não se constrói a partir do que se quer EVITAR).
+    # Um clique de "principal" num anti-exemplo é misclick → roteia pro bucket correto (anti).
+    rerouted = False
+    if status == "main" and ref.get("type") == "anti_example":
+        status, rerouted = "anti", True
     # ⭐ principal é exclusivo: zera o main anterior
     if status == "main":
         for r in pack["references"]:
@@ -140,7 +145,7 @@ def curate(pack_id: str, ref_id: str, action: str, comment: str | None = None,
     save_pack(pack)
     _sync_cycle(pack_id, pack, cycle_id)
     return {"ok": True, "pack_id": pack_id, "ref_id": ref_id, "status": status,
-            "verdict_path": verdict_path, "counts": _counts(pack)}
+            "rerouted_anti": rerouted, "verdict_path": verdict_path, "counts": _counts(pack)}
 
 
 def ensure_felipe_dirs() -> None:

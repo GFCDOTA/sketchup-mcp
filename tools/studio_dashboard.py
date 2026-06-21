@@ -36,6 +36,7 @@ DEFAULT_PACK = "sofa_reference_pack_001"   # pack ativo da esteira (sofá = prim
 
 from tools.interior_studio import cycles as ic_cycles            # noqa: E402  entidade CYCLE (esteira)
 from tools.interior_studio import reference_packs as ic_refpacks  # noqa: E402  Reference Pack + curadoria Felipe
+from tools.interior_studio import gpt_review_bundle as ic_bundle  # noqa: E402  pacote de revisão pro Consult GPT
 
 
 def _kanban_load():
@@ -439,7 +440,11 @@ textarea{width:100%;min-height:90px;background:#0c0d10;border:1px solid var(--bd
 .facpill.cid{border-color:var(--gold);color:var(--gold);font-weight:700}
 .facpill.st{background:#19281f;border-color:#2c3a2c;color:var(--ok)}
 .facnext{font-size:13px;color:#e8e9ec;margin:4px 0}
+.facacts{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin:7px 0 4px}
+.facbundle{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:12px;border-top:1px dashed #2c2636;padding-top:7px;margin-top:4px}
 .facblock{margin-top:7px;background:#2a1717;border:1px solid #4a2a2a;border-radius:8px;padding:7px 11px;color:#e6a0a0;font-size:12.5px}
+.refimg{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;margin-bottom:8px;background:#000;cursor:pointer;border:1px solid var(--bd)}
+.refimg-ph{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;width:100%;aspect-ratio:4/3;border-radius:8px;margin-bottom:8px;background:#101116;border:1px dashed var(--bd);color:var(--blu);text-decoration:none;font-size:12.5px}.refimg-ph:hover{border-color:var(--gold)}
 /* 🔧 TIMELINE do ciclo */
 .tllist{display:flex;flex-direction:column;gap:6px}
 .tlstep{background:#0c0d10;border:1px solid var(--bd);border-left:3px solid #3a3f49;border-radius:8px;padding:7px 11px}
@@ -511,8 +516,19 @@ function drawArrows(ag){const svg=document.getElementById('arrows'),wrap=documen
  svg.innerHTML=p}
 let LEADOF={},FACES={},LABELS={};const leadOf=(u)=>LEADOF[u]
 async function curate(slug,action){await fetch('/api/curate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug,action})});tick(1)}
-let FACTORY={}
+let FACTORY={},BUNDLE=null
 function curateRef(packId,refId,action){fetch('/api/curate-ref',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pack_id:packId,ref_id:refId,action,cycle_id:FACTORY.cycle_id||null})}).then(()=>tick(1))}
+function cpTxt(t,ev){if(t&&navigator.clipboard)navigator.clipboard.writeText(t);if(ev){const b=ev.target,o=b.textContent;b.textContent=t?'copiado!':'gera o pacote 1º';setTimeout(()=>b.textContent=o,1300)}}
+function refpackImages(packId){const m=document.getElementById('rpimgmsg');if(m)m.textContent='🖼 puxando imagens (og:image)…'
+ fetch('/api/refpack-images',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pack_id:packId})}).then(r=>r.json()).then(r=>{if(m)m.textContent=r.ok?('✓ '+r.resolved+'/'+r.total+' imagens'):('erro: '+(r.error||''));tick(1)})}
+function genBundle(){const m=document.getElementById('bundlemsg');if(m)m.textContent='📦 gerando pacote pro GPT…'
+ fetch('/api/gpt-bundle',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})}).then(r=>r.json()).then(r=>{BUNDLE=r
+  if(m)m.textContent=r.ok?('✓ '+(r.md_path||'')+' · branch '+(r.branch||'?')+(r.raw_link?' · link raw pronto (pós-push)':' · sem remote')):('erro: '+(r.error||''));tick(1)})}
+function copyBundle(ev){cpTxt(BUNDLE&&BUNDLE.md,ev)}
+function copyBundleLink(ev){cpTxt(BUNDLE&&BUNDLE.raw_link,ev)}
+function copyShortQ(ev){cpTxt(BUNDLE&&BUNDLE.question,ev)}
+function nextStepGo(kind){const id={scout:'sec-scout',consult:'sec-consult',curate:'sec-refpack',build:'sec-ciclo'}[kind]||'sec-ciclo'
+ const sec=document.getElementById(id);if(sec)sec.scrollIntoView({behavior:'smooth',block:'center'})}
 function flagErr(){const a=document.getElementById('flagag').value,m=document.getElementById('flagmsg').value;if(!m)return
  fetch('/api/flag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:a,message:m})}).then(()=>{document.getElementById('flagmsg').value='';tick(1)})}
 function clearErr(agent){fetch('/api/clear',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent})}).then(()=>tick(1))}
@@ -677,10 +693,13 @@ async function tick(force){
  // 🏭 FÁBRICA + 🔧 CICLO ATUAL + 🖼️ REFERENCE PACK — a esteira por ciclo (topo, unidade principal)
  FACTORY=s.factory||{}
  const fac=FACTORY
- if(fac.has_cycle){
-  root.appendChild(el(`<div class="card full" id=sec-factory><h2>🏭 Fábrica de interiores — estado atual</h2>
+ if(fac.has_cycle){const ns=fac.next_step||{}
+  const nsBtn=ns.actionable?`<button class=send onclick="nextStepGo('${ns.kind}')">${esc(ns.label||'▶ próxima etapa')}</button>`:`<span class="facpill st" style="background:#2a2417;color:var(--gold);border-color:var(--gold)">${esc(ns.label||fac.next_action||'—')}</span>`
+  root.appendChild(el(`<div class="card full" id=sec-factory><h2>🏭 Fábrica de interiores — o que decidir AGORA</h2>
    <div class=facbar><span class=facpill>📐 ${esc(fac.project||'')}</span><span class=facpill>🛋️ ${esc(fac.room||'')} · ${esc(fac.asset||'')}</span><span class=facpill>⚙ ${esc(fac.mode||'')}</span><span class="facpill cid">${esc(fac.cycle_id||'')}</span><span class=facpill>${esc(fac.microtask||'')} — ${esc(fac.title||'')}</span><span class="facpill st">${esc(fac.status||'')}</span></div>
    <div class=facnext>▶ próxima ação: <b>${esc(fac.next_action||'—')}</b></div>
+   <div class=facacts>${nsBtn} <button class=chatbtn onclick="nextStepGo('scout')">🔭 Scout</button> <button class=chatbtn onclick="nextStepGo('consult')">🔌 Consult GPT</button> <button class=chatbtn onclick="genBundle()" title="gera GPT_REVIEW_BUNDLE.md — fonte única pro GPT revisar o dash sem localhost">📦 Pacote GPT</button></div>
+   <div class=facbundle><span class=mut>pacote p/ GPT:</span> <button class=chatbtn onclick="copyBundle(event)">📋 copiar bundle</button> <button class=chatbtn onclick="copyBundleLink(event)">🔗 copiar link raw</button> <button class=chatbtn onclick="copyShortQ(event)">🧾 copiar pergunta</button> <span class=mut id=bundlemsg></span></div>
    ${fac.architect_blocked?`<div class=facblock>⛔ Arquiteto BLOQUEADO — sem referência ⭐ principal curada. NÃO constrói o ${esc(fac.asset||'móvel')} até você escolher (regra-trava).</div>`:''}</div>`))
   const tl=(fac.timeline||[]).map(st=>{const cl={done:'tl-done',doing:'tl-doing',waiting:'tl-wait',blocked:'tl-block',na:'tl-na',pending:'tl-pend'}[st.status]||'tl-pend'
    return `<div class="tlstep ${cl}"><div class=tlhead><span class=tlface>${st.face}</span> <b>${esc(st.agent)}</b> <span class=tlicon>${st.icon}</span> <span class=mut>${esc(st.status)}</span>${st.model?`<span class=stag>${esc(st.model)}</span>`:''}</div>${st.summary?`<div class=tlsum>${esc(st.summary)}</div>`:''}</div>`}).join('')
@@ -692,7 +711,9 @@ async function tick(force){
   const tlbl={boutique_premium:'boutique premium',compact_premium:'compacto premium',anti_example:'anti-exemplo'}
   const blbl={approved:'👍 aprovada',rejected:'👎 rejeitada',main:'⭐ PRINCIPAL',anti:'🚫 anti-pattern',pending:'• pendente'}
   const cards=rp.references.map(r=>{const st=r.status||'pending'
+   const img=r.og_image?`<img class=refimg loading=lazy src="${esc(r.og_image)}" onclick="openModal('${esc(r.og_image)}','${esc(r.title)}')" onerror="this.replaceWith(el('<a class=refimg-ph href=\\'${esc(r.link||'#')}\\' target=_blank>🖼 abrir no site ↗</a>'))">`:`<a class=refimg-ph href="${esc(r.link||'#')}" target=_blank rel=noopener>🖼 ver no site ↗<br><span class=mut style=font-size:10.5px>clica "puxar imagens" no topo</span></a>`
    return `<div class="refcard rs-${st}">
+    ${img}
     <div class=refhd><b>${esc(r.title)}</b> <span class=mut>· ${esc(r.source||'')}</span></div>
     <div class=reftags><span class=pill>${esc(tlbl[r.type]||r.type||'')}</span> <span class="pill rb-${st}">${blbl[st]||st}</span></div>
     <div class=refbody><b>por que:</b> ${esc(r.why_good||'')}<br><b>copiar:</b> ${esc(r.copy||'')}<br><b>evitar:</b> ${esc(r.avoid||'')}<br><span class=mut>DNA: ${esc(r.dna_adherence||'')}</span></div>
@@ -702,7 +723,7 @@ async function tick(force){
      <button class=cbtn title=rejeitar onclick="curateRef('${rp.pack_id}','${r.id}','reject')">👎</button>
      <button class=cbtn title="marcar anti-pattern" onclick="curateRef('${rp.pack_id}','${r.id}','anti')">🚫</button>
      <button class=cbtn title="limpar curadoria" onclick="curateRef('${rp.pack_id}','${r.id}','clear')">↺</button></div></div>`}).join('')
-  root.appendChild(el(`<div class="card full" id=sec-refpack><h2>🖼️ Reference Pack — ${esc(rp.asset||'')} <span class=mut>(cura a REFERÊNCIA VISUAL, não texto · ⭐${cc.main||0} · 👍${cc.approved||0} · 👎${cc.rejected||0} · 🚫${cc.anti||0} · ${cc.pending||0} pendente)</span></h2>
+  root.appendChild(el(`<div class="card full" id=sec-refpack><h2>🖼️ Reference Pack — ${esc(rp.asset||'')} <span class=mut>(cura a REFERÊNCIA VISUAL, não texto · ⭐${cc.main||0} · 👍${cc.approved||0} · 👎${cc.rejected||0} · 🚫${cc.anti||0} · ${cc.pending||0} pendente)</span> <button class=chatbtn onclick="refpackImages('${rp.pack_id}')" title="puxa a imagem (og:image) de cada referência pra você curar pelo VISUAL, não pelo texto">🖼 puxar imagens</button> <span class=mut id=rpimgmsg></span></h2>
    <div class=mut style="font-size:12px;margin-bottom:8px">⚠️ ${esc(rp.honesty||'')}</div>
    <div class=refgrid>${cards}</div></div>`))
  }
@@ -1447,6 +1468,48 @@ def _cycle(goal=None):
         return {"ok": False, "error": str(e)}
 
 
+def _gpt_bundle(body: dict) -> dict:
+    """Gera o GPT_REVIEW_BUNDLE.{md,json} a partir do estado atual (fonte única pro Consult GPT)."""
+    try:
+        return ic_bundle.build(_state(), now=time.strftime("%Y-%m-%dT%H:%M:%S"))
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": str(e)}
+
+
+def _refpack_images(body: dict) -> dict:
+    """Resolve o og:image de cada referência do pack (só a URL — o navegador carrega da CDN, sem baixar
+    arquivo). Persiste `og_image` no pack pra virar curadoria VISUAL (não tabela de texto)."""
+    import re as _re
+    import urllib.request
+    pack_id = body.get("pack_id") or DEFAULT_PACK
+    pack = ic_refpacks.load_pack(pack_id)
+    if not pack:
+        return {"ok": False, "error": f"pack {pack_id} não encontrado"}
+    hdr = {"User-Agent": "Mozilla/5.0"}
+    out, changed = {}, False
+    for ref in pack.get("references", []):
+        if ref.get("og_image"):
+            out[ref["id"]] = ref["og_image"]
+            continue
+        url = ref.get("link")
+        if not url:
+            continue
+        try:
+            html = urllib.request.urlopen(urllib.request.Request(url, headers=hdr), timeout=12).read().decode("utf-8", "ignore")
+            m = (_re.search(r'property=["\']og:image["\'][^>]*content=["\']([^"\']+)', html)
+                 or _re.search(r'content=["\']([^"\']+)["\'][^>]*property=["\']og:image', html)
+                 or _re.search(r'name=["\']twitter:image["\'][^>]*content=["\']([^"\']+)', html))
+            if m:
+                ref["og_image"] = m.group(1)
+                out[ref["id"]] = m.group(1)
+                changed = True
+        except Exception:  # noqa: BLE001
+            continue
+    if changed:
+        ic_refpacks.save_pack(pack)
+    return {"ok": True, "images": out, "resolved": len(out), "total": len(pack.get("references", []))}
+
+
 def _curate_ref(body: dict) -> dict:
     """Curadoria visual do Felipe numa referência do Reference Pack (👍/👎/⭐/🚫 + comentário)."""
     try:
@@ -1556,6 +1619,10 @@ class H(BaseHTTPRequestHandler):
             self._send(200, json.dumps(_cycle(body.get("goal"))))
         elif path == "/api/curate-ref":
             self._send(200, json.dumps(_curate_ref(body), ensure_ascii=False))
+        elif path == "/api/gpt-bundle":
+            self._send(200, json.dumps(_gpt_bundle(body), ensure_ascii=False))
+        elif path == "/api/refpack-images":
+            self._send(200, json.dumps(_refpack_images(body), ensure_ascii=False))
         else:
             self._send(404, b"not found", "text/plain")
 

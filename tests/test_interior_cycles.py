@@ -98,3 +98,15 @@ def test_acao_invalida_nao_quebra(sandbox):
     _seed_pack(sandbox / "packs")
     r = reference_packs.curate("p1", "r1", "explode")
     assert r["ok"] is False and "inválida" in r["error"]
+
+
+def test_anti_exemplo_nao_vira_principal(sandbox):
+    """Clicar ⭐ principal num anti-exemplo é misclick → roteia pra anti (não se constrói do que evitar)."""
+    _seed_pack(sandbox / "packs")
+    cid = _cycle_linked()
+    r = reference_packs.curate("p1", "r3", "main", cycle_id=cid)   # r3 = anti_example
+    assert r["ok"] and r["rerouted_anti"] is True and r["status"] == "anti"
+    c = cycles.get_cycle(cid)
+    assert c["references"]["main"] == []          # anti-exemplo NÃO entra em main
+    assert c["references"]["anti"] == ["r3"]
+    assert cycles.architect_blocked(c) is True    # segue bloqueado (sem principal válido)
