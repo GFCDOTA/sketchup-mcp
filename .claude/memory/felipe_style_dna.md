@@ -59,3 +59,9 @@ Pinterest em lote e desce pra material/cuba/manutenção/custo. **Não** gerar 3
 - **Cozinha** (piloto, GOLDEN_SAMPLE_004 congelado): ver `felipe_kitchen_preference_profile.json` —
   eletros must-have, torre quente, layout linear FIXO do PDF (r004), nichos, vidro reflecta pontual.
 - **Sala / lavabo / quarto**: ainda sem profile próprio — herdam esta DNA até o Felipe fechar o gosto do cômodo.
+
+## Aprendido via Consult GPT
+- Eletros e coifa devem ser `dark stainless`, `graphite` ou `matte black metal`, nunca inox claro dominante. _(Consult GPT · kitchen_skin_045756)_
+- Em cozinha dark premium, eletro pode ser integrado visualmente, mas precisa manter leitura sutil de volume. _(Consult GPT · kitchen_skin_045756)_
+- Coifa é elemento coadjuvante; backsplash dark-gold é o protagonista. _(Consult GPT · kitchen_skin_045756)_
+- Preto sobre preto precisa de separação por luz, sombra, roughness ou borda, não por cor forte. _(Consult GPT · kitchen_skin_045756)_

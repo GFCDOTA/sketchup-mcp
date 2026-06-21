@@ -186,10 +186,20 @@ def _parse_microtask(text: str | None) -> dict:
 
 
 def _kv(text: str, *keys: str) -> str | None:
+    """Valor de um rótulo 'k:'. Aceita inline ('Título: X') E rótulo sozinho com o valor na linha
+    seguinte ('Título:\\n`X`') — formato que o ChatGPT usa bastante."""
+    lines = text.splitlines()
     for k in keys:
-        m = re.search(rf"(?im)^[-*\s]*{re.escape(k)}\s*:?\s*`?([^`\n]+?)`?\s*$", text)
-        if m and m.group(1).strip():
-            return m.group(1).strip()
+        kp = re.escape(k)
+        for i, ln in enumerate(lines):
+            m = re.match(rf"(?i)^[-*\s]*{kp}\s*:\s*`?([^`\n]+?)`?\s*$", ln)
+            if m and m.group(1).strip():
+                return m.group(1).strip()
+            if re.match(rf"(?i)^[-*\s]*{kp}\s*:?\s*$", ln):   # rótulo sozinho -> próxima linha não-vazia
+                for nxt in lines[i + 1:]:
+                    if nxt.strip():
+                        return nxt.strip().strip("`* ")
+                    continue
     return None
 
 
