@@ -1,26 +1,20 @@
 # GPT REVIEW BUNDLE — Interior Studio (:8782)
-> Gerado 2026-06-21T19:17:05 · fonte única pro Consult GPT revisar o dashboard sem localhost.
+> Gerado 2026-06-21T19:26:27 · fonte única pro Consult GPT revisar o dashboard sem localhost.
 
 ## 1. Repo
 - branch: `feat/sofa-class-from-reference`
-- commit: `33cee88fcf8d8ab69a498325abc2b7d0811b4f7f`
+- commit: `950b4dc006a9ab34f45aa1bc1ffd27994d0a33cc`
 - remote: `https://github.com/GFCDOTA/sketchup-mcp.git`
-- gerado_em: 2026-06-21T19:17:05
+- gerado_em: 2026-06-21T19:26:27
 - tree: https://github.com/GFCDOTA/sketchup-mcp/tree/feat/sofa-class-from-reference
 
 <details><summary>git diff --stat desde a última revisão</summary>
 
 ```
-.ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.json       | 445 +++++++++++++++++++++
- .ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md         |  93 +++++
- .ai_bridge/interior_cycles/CYCLE-003.json          |   4 +-
- .../reference_packs/sofa_reference_pack_001.json   |  20 +-
- references/felipe/approved/sofa-ref-01-henry.json  |   2 +-
- .../felipe/approved/sofa-ref-02-venezia-slate.json |   6 +-
- tests/test_interior_cycles.py                      |  13 +
- tools/interior_studio/cycles.py                    |  63 ++-
- tools/studio_dashboard.py                          |  65 ++-
- 9 files changed, 660 insertions(+), 51 deletions(-)
+tests/test_interior_cycles.py            | 13 +++++++++
+ tools/interior_studio/reference_packs.py | 21 ++++++++++++++
+ tools/studio_dashboard.py                | 48 +++++++++++++++++---------------
+ 3 files changed, 59 insertions(+), 23 deletions(-)
 ```
 </details>
 
@@ -72,19 +66,13 @@ _Análise = hipótese de pesquisa (não vi as imagens renderizadas). Quem julga 
 - última pergunta: kitchen_skin_045756 · pendentes: 1 · ingeridas: 1
 
 ## 7. Mudanças desde a última revisão
-- último SHA revisado: `0eaaf63f0c95a2e067f34f060a9d4f22e3e97497`
-- SHA atual: `33cee88fcf8d8ab69a498325abc2b7d0811b4f7f`
+- último SHA revisado: `182e2628b560ea26f1feeeb9c9a35a3e4559cc38`
+- SHA atual: `950b4dc006a9ab34f45aa1bc1ffd27994d0a33cc`
 ```
-.ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.json       | 445 +++++++++++++++++++++
- .ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md         |  93 +++++
- .ai_bridge/interior_cycles/CYCLE-003.json          |   4 +-
- .../reference_packs/sofa_reference_pack_001.json   |  20 +-
- references/felipe/approved/sofa-ref-01-henry.json  |   2 +-
- .../felipe/approved/sofa-ref-02-venezia-slate.json |   6 +-
- tests/test_interior_cycles.py                      |  13 +
- tools/interior_studio/cycles.py                    |  63 ++-
- tools/studio_dashboard.py                          |  65 ++-
- 9 files changed, 660 insertions(+), 51 deletions(-)
+tests/test_interior_cycles.py            | 13 +++++++++
+ tools/interior_studio/reference_packs.py | 21 ++++++++++++++
+ tools/studio_dashboard.py                | 48 +++++++++++++++++---------------
+ 3 files changed, 59 insertions(+), 23 deletions(-)
 ```
 
 ## Pergunta para o GPT

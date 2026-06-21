@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-06-21T19:17:05",
+  "generated_at": "2026-06-21T19:26:27",
   "repo": {
     "branch": "feat/sofa-class-from-reference",
-    "sha": "33cee88fcf8d8ab69a498325abc2b7d0811b4f7f",
+    "sha": "950b4dc006a9ab34f45aa1bc1ffd27994d0a33cc",
     "remote_url": "https://github.com/GFCDOTA/sketchup-mcp.git",
     "owner": "GFCDOTA",
     "repo": "sketchup-mcp"
@@ -461,9 +461,9 @@
     "done": 0
   },
   "changes_since_last": {
-    "last_sha": "0eaaf63f0c95a2e067f34f060a9d4f22e3e97497",
-    "current_sha": "33cee88fcf8d8ab69a498325abc2b7d0811b4f7f",
-    "diffstat": ".ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.json       | 445 +++++++++++++++++++++\n .ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md         |  93 +++++\n .ai_bridge/interior_cycles/CYCLE-003.json          |   4 +-\n .../reference_packs/sofa_reference_pack_001.json   |  20 +-\n references/felipe/approved/sofa-ref-01-henry.json  |   2 +-\n .../felipe/approved/sofa-ref-02-venezia-slate.json |   6 +-\n tests/test_interior_cycles.py                      |  13 +\n tools/interior_studio/cycles.py                    |  63 ++-\n tools/studio_dashboard.py                          |  65 ++-\n 9 files changed, 660 insertions(+), 51 deletions(-)"
+    "last_sha": "182e2628b560ea26f1feeeb9c9a35a3e4559cc38",
+    "current_sha": "950b4dc006a9ab34f45aa1bc1ffd27994d0a33cc",
+    "diffstat": "tests/test_interior_cycles.py            | 13 +++++++++\n tools/interior_studio/reference_packs.py | 21 ++++++++++++++\n tools/studio_dashboard.py                | 48 +++++++++++++++++---------------\n 3 files changed, 59 insertions(+), 23 deletions(-)"
   },
   "question": "Revise o estado atual do Interior Studio (:8782) pelos arquivos raw linkados. (1) O dashboard está CLARO pra operar o ciclo CYCLE-003 / SOFA_REFERENCE_PACK? (2) O que ainda compete por atenção / está confuso? (3) O que priorizar ANTES de construir o sofá? (4) A curadoria VISUAL e a regra-trava (Arquiteto bloqueado sem ⭐ principal) estão bem resolvidas? Responda objetivo, com prioridades."
 }
