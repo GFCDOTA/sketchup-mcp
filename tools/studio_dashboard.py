@@ -257,7 +257,7 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 .cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px;position:relative;z-index:1;padding-top:30px}
 @media(max-width:980px){.cols{grid-template-columns:1fr;gap:16px}}
 .bub .btxt{overflow-wrap:anywhere;word-break:break-word}
-.col{background:#13151a;border:1px solid var(--bd);border-radius:12px;padding:15px}
+.col{background:#13151a;border:1px solid var(--bd);border-radius:12px;padding:15px;display:flex;flex-direction:column}
 .lead{display:flex;gap:10px;align-items:center;border-bottom:1px solid var(--bd);padding-bottom:9px;margin-bottom:9px}
 .lead .face{font-size:30px;line-height:1}.lead .nm{font-weight:700;font-size:15px}
 .lead .msg{color:var(--mut);font-size:11.5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -272,7 +272,7 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 .cyhd{font-size:12.5px;margin-bottom:4px}
 .cydir{font-size:13px;color:#e8e9ec;line-height:1.5;margin:3px 0 6px}
 .cymeta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:11px}
-.subs{display:flex;flex-direction:column;gap:5px;margin-bottom:9px}
+.subs{display:flex;flex-direction:column;gap:7px;margin-bottom:9px;min-height:120px}
 .sub{display:flex;gap:8px;align-items:center;background:#181a1f;border:1px solid var(--bd);border-radius:8px;padding:4px 9px}
 .sub .face{font-size:15px;opacity:.55}.sub.act .face,.lead.act .face{opacity:1}
 .sub .nm{font-size:12.5px;flex:1}
@@ -282,7 +282,7 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 .stag{font-size:10px;color:var(--mut);margin-left:6px}
 .clearbtn{margin-left:8px;background:#2a1a1a;border:1px solid #4a2a2a;color:#e6a0a0;border-radius:6px;padding:1px 8px;cursor:pointer;font-size:10.5px}.clearbtn:hover{background:#3a2222}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.chat{background:#0c0d10;border:1px solid var(--bd);border-radius:8px;padding:10px 12px;max-height:340px;min-height:150px;overflow-y:auto;font-size:12.5px}
+.chat{background:#0c0d10;border:1px solid var(--bd);border-radius:8px;padding:10px 12px;flex:1;min-height:200px;max-height:460px;overflow-y:auto;font-size:12.5px}
 .chat .ln{padding:2px 0;border-bottom:1px solid #16181d}.chat .to{color:var(--ok)}.chat .t{color:var(--mut);font-size:10px;float:right}
 .arrow{fill:none;stroke:var(--ok);stroke-width:1.7;stroke-dasharray:6 6;opacity:.8;animation:flow 1.1s linear infinite;filter:drop-shadow(0 0 2px var(--ok))}
 @keyframes flow{to{stroke-dashoffset:-13}}
@@ -495,17 +495,7 @@ async function tick(force){
  const root=document.getElementById('root');const sy=window.scrollY;root.innerHTML=''
  // ORG (guarda-chuvas + setas + métricas)
  const cols=(ag.umbrellas||[]).map(u=>{const ids=[u.lead.id,...u.subs.map(x=>x.id)]
-   let extra=''
-   if(u.id==='pm'){const bk=s.backlog||{}
-     // MESMO filtro do _cycle (backend): tarefa PELE em backlog/refinamento — assim o preview = o que VAI rodar
-     const nx=(bk.tasks||[]).find(t=>!t.done&&!t.geo&&(t.status==='backlog'||t.status==='refinamento'))
-     extra=`<div class=pmbox><b>🗂️ Dono do Kanban</b> · ${bk.total||0} tarefas · ${bk.done||0} feitas
-      <div class=cyc-help>Um <b>ciclo</b> roda nos LLMs locais (sem Claude): <b>PM</b>(llama) escolhe a próxima tarefa PELE → <b>Team Lead</b>(qwen) valida → <b>Arquiteto</b>(deepseek) dá a diretriz. O card vai pra <b>execução</b>. É decisão/texto — <b>não</b> mexe no .skp.</div>
-      ${nx?`<div class=cyc-next>▶ próximo ciclo vai rodar: <b class=mtlink onclick="goToMT('${nx.mt}')" title="ver no Kanban">${nx.mt}</b> — ${esc((nx.what||'').slice(0,52))}</div>`:`<div class=cyc-next><span class=mut>sem tarefa PELE na fila — as GEO esperam teu OK</span></div>`}
-      <button class=send style=margin-top:6px onclick=runCycle() ${nx?'':'disabled'}>▶ Rodar próximo ciclo</button>
-      <label class=mut style="font-size:11px;display:inline-flex;align-items:center;gap:4px;margin-left:6px"><input type=checkbox onchange=toggleAuto(this) ${AUTOCYCLE?'checked':''}>auto a cada <select id=auto-min style="background:#0c0d10;border:1px solid var(--bd);color:var(--fg);border-radius:4px;padding:1px 3px"><option>2</option><option selected>3</option><option>5</option><option>10</option></select> min</label>
-      <span class=mut id=cyclemsg></span></div>`}
-   return `<div class=col>${leadCard(u.lead)}${extra}<div class=subs>${u.subs.map(subCard).join('')}</div>
+   return `<div class=col>${leadCard(u.lead)}<div class=subs>${u.subs.map(subCard).join('')}</div>
     <div class=chat>${colChat(ag.feed,ids)}</div>
     <div class=askrow><input id="ask-${u.id}" onkeydown="if(event.key==='Enter')askAgent('${u.lead.id}','${u.id}')" placeholder="perguntar pro ${esc(u.lead.label)}…"><button class=send onclick="askAgent('${u.lead.id}','${u.id}')">➤</button><button class=chatbtn onclick="openChat('${u.lead.id}','${u.id}','${ids.join(',')}')" title="abrir chat grande">⛶</button></div></div>`}).join('')
  const ents=Object.entries(ag.metrics||{}).sort((a,b)=>b[1].calls-a[1].calls)
@@ -523,11 +513,20 @@ async function tick(force){
  drawArrows(ag)
  // 🔄 CICLOS RECENTES — fecha o loop: a diretriz do Arquiteto vira pergunta ao Consult GPT
  CYCLES=s.cycles||[]
+ const cbk=s.backlog||{}, cnx=(cbk.tasks||[]).find(t=>!t.done&&!t.geo&&(t.status==='backlog'||t.status==='refinamento'))
+ const cyctrl=`<div class=pmbox>
+   <div class=cyc-help>Um <b>ciclo</b> roda nos LLMs locais (sem Claude): <b>PM</b>(llama) escolhe a próxima tarefa PELE → <b>Team Lead</b>(qwen) valida → <b>Arquiteto</b>(deepseek) dá a diretriz. O card vai pra <b>execução</b>. É decisão/texto — <b>não</b> mexe no .skp.</div>
+   ${cnx?`<div class=cyc-next>▶ próximo ciclo vai rodar: <b class=mtlink onclick="goToMT('${cnx.mt}')" title="ver no Kanban">${cnx.mt}</b> — ${esc((cnx.what||'').slice(0,60))}</div>`:`<div class=cyc-next><span class=mut>sem tarefa PELE na fila — as GEO esperam teu OK</span></div>`}
+   <button class=send style=margin-top:6px onclick=runCycle() ${cnx?'':'disabled'}>▶ Rodar próximo ciclo</button>
+   <label class=mut style="font-size:11px;display:inline-flex;align-items:center;gap:4px;margin-left:6px"><input type=checkbox onchange=toggleAuto(this) ${AUTOCYCLE?'checked':''}>auto a cada <select id=auto-min style="background:#0c0d10;border:1px solid var(--bd);color:var(--fg);border-radius:4px;padding:1px 3px"><option>2</option><option selected>3</option><option>5</option><option>10</option></select> min</label>
+   <span class=mut id=cyclemsg></span></div>`
  const cyhtml=CYCLES.length?CYCLES.map((c,i)=>`<div class=cyrow>
    <div class=cyhd><b class=mtlink onclick="goToMT('${esc(c.mt||'')}')">${esc(c.cycle_id||'CYCLE')}</b> · <b>${esc(c.mt||'')}</b> ${esc((c.what||'').slice(0,46))} <span class=mut>· ${hhmm(c.ts)}</span></div>
    <div class=cydir>🎯 ${esc(c.directive||'(sem diretriz)')}</div>
-   <div class=cymeta><span class=mut>🦙 llama → 🤖 qwen → 🐳 deepseek</span> <button class=chatbtn onclick="cycleToConsult(${i})" title="virar pergunta pro Consult GPT validar">→ validar no Consult GPT</button>${c.consulted?' <span class=mut>✓ consultado</span>':''}</div></div>`).join(''):'<span class=mut>nenhum ciclo rodado ainda — clique "▶ Rodar próximo ciclo" no card do PM. A diretriz que sair vira o item aqui.</span>'
- root.appendChild(el(`<div class="card full" id=sec-cycles><h2>🔄 Ciclos recentes <span class=mut>(a SAÍDA de cada ciclo = a diretriz do Arquiteto, salva no banco. O botão "→ validar" manda ela pro Consult GPT → vira regra/próxima microtarefa)</span></h2>
+   <div class=cymeta><span class=mut>🦙 llama → 🤖 qwen → 🐳 deepseek</span> <button class=chatbtn onclick="cycleToConsult(${i})" title="virar pergunta pro Consult GPT validar">→ validar no Consult GPT</button>${c.consulted?' <span class=mut>✓ consultado</span>':''}</div></div>`).join(''):'<span class=mut>nenhum ciclo rodado ainda — clique "▶ Rodar próximo ciclo" aqui em cima. A diretriz que sair vira o item aqui.</span>'
+ root.appendChild(el(`<div class="card full" id=sec-cycles><h2>🔄 Ciclo <span class=mut>(roda aqui · a saída vira diretriz no banco → "validar no Consult GPT")</span></h2>
+  ${cyctrl}
+  <div class=kblist-h>Ciclos recentes</div>
   <div class=cylist>${cyhtml}</div></div>`))
  const critic=(s.renders||[])[0]
  // ERROS — card próprio, grande, logo abaixo dos agentes
