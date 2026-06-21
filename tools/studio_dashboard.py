@@ -1092,7 +1092,7 @@ def _ask(agent, prompt, image=None):
         r = ollama_bridge.ask(role, q, image=image)
         import re as _re
         raw = r.get("response") or r.get("error") or ""
-        resp = _re.sub(r"<think>.*?</think>", "", raw, flags=_re.DOTALL).strip()[:600]  # tira o raciocínio do deepseek
+        resp = _re.sub(r"<think>.*?</think>", "", raw, flags=_re.DOTALL).strip()[:1500]  # tira o raciocínio do deepseek; cap 1500 (era 600, cortava)
         studio_log.post(agent, "done" if r.get("ok") else "error", resp, via=r.get("model"))  # bolha do agente
         return {"ok": r.get("ok", False), "agent": agent, "model": r.get("model"), "response": resp}
     except Exception as e:  # noqa: BLE001
@@ -1172,16 +1172,20 @@ def _cycle(goal=None):
 
         def clean(r):
             return _re.sub(r"<think>.*?</think>", "", r.get("response") or "", flags=_re.DOTALL).strip()
-        pm = clean(ollama_bridge.ask("llama", f"Voce e o PM. Meta: {g}. Proxima tarefa: {mt}. Em 1 frase curta, por que puxar essa agora.", timeout=60))
+        dom = ("Voce e o {role} de um estudio de design de INTERIORES, cozinha da planta_74 (apto 74m2, "
+               "estilo dark premium BLACK_WOOD_GOLD). Responda SO em portugues, 1 frase curta, "
+               "estritamente sobre design/execucao de COZINHA. NAO invente tarefa nova; NAO fale de "
+               "solda, codigo, software, emergencia nem nada fora de cozinha.")
+        pm = clean(ollama_bridge.ask("llama", f"{dom.format(role='PM')} Meta: {g}. Tarefa atual: {mt}. Em 1 frase: por que puxar essa tarefa agora?", timeout=60))
         studio_log.post("interior-pm", "done", pm[:200] or f"puxei {mt}", to="team_lead", via="llama3.1:8b")
         # PM MOVE o card pra execução (ele é o dono do Kanban)
         k = _kanban_load()
         k[nxt["mt"]] = "execução"
         KANBAN_FILE.write_text(json.dumps(k, ensure_ascii=False, indent=2), "utf-8")
-        tl = clean(ollama_bridge.ask("coder", f"Voce e o Team Lead. O PM vai fazer: {mt}. Em 1 frase, o que o time precisa pra executar bem.", timeout=60))
+        tl = clean(ollama_bridge.ask("coder", f"{dom.format(role='Team Lead')} Tarefa: {mt}. Em 1 frase: o que o time precisa pra executar bem?", timeout=60))
         studio_log.post("interior-orchestrator", "done", tl[:200] or "organizei o time", to="architect", via="qwen2.5-coder:14b")
-        kb = _arch_knowledge()
-        ar = clean(ollama_bridge.ask("deepseek", (f"[gosto do Felipe]: {kb}\n" if kb else "") + f"Voce e o Arquiteto. Tarefa: {mt}. Em 1 frase, a diretriz de design.", timeout=90))
+        prime = _architect_priming()   # DNA + anti-patterns + orientações (não só architect.md)
+        ar = clean(ollama_bridge.ask("deepseek", (f"{prime}\n\n" if prime else "") + f"{dom.format(role='Arquiteto')} Tarefa: {mt}. Em 1 frase: a diretriz de design.", timeout=90))
         studio_log.post("interior-designer", "done", ar[:250] or "diretriz dada", via="deepseek-r1:14b")
         cid = f"CYCLE-{_cycles_count() + 1:03d}"
         directive = (ar or "").strip()[:600] or "(sem diretriz)"

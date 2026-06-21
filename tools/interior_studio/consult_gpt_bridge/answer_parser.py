@@ -53,7 +53,8 @@ def parse_answer(raw: str) -> dict:
     out["change"] = _bullets(_find(sections, "alterar"))
     out["dont_do"] = _bullets(_find(sections, "não fazer", "nao fazer"))
     out["dna_updates"] = _bullets(_find(sections, "felipe style dna", "atualização", "atualizacao"))
-    out["anti_patterns"] = _bullets(_find(sections, "anti-pattern", "anti pattern", "antipattern"))
+    out["anti_patterns"] = [a.replace("`", "").strip() for a in
+                            _bullets(_find(sections, "anti-pattern", "anti pattern", "antipattern"))]
     out["next_microtask"] = _parse_microtask(_find(sections, "próxima microtarefa", "proxima microtarefa", "microtarefa"))
     out["next_render_prompt"] = _first_code_or_text(_find(sections, "prompt curto", "próximo render", "proximo render"))
 
