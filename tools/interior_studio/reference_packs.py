@@ -21,6 +21,7 @@ FELIPE_DIR = ROOT / "references" / "felipe"
 
 # ação de curadoria -> status no pack
 ACTIONS = {"approve": "approved", "reject": "rejected", "main": "main", "anti": "anti", "clear": "pending"}
+REMOVE = "remove"   # tira a referência do pack de vez (link quebrado / inútil)
 # status -> pasta durável em references/felipe/
 BUCKET = {"approved": "approved", "main": "approved", "rejected": "rejected", "anti": "anti_patterns"}
 
@@ -115,9 +116,29 @@ def _sync_cycle(pack_id: str, pack: dict, cycle_id: str | None) -> None:
     cycles.save_cycle(c)
 
 
+def remove_ref(pack_id: str, ref_id: str, cycle_id: str | None = None) -> dict:
+    """Tira a referência do pack de vez (link quebrado / inútil) + limpa verditos + sincroniza ciclo."""
+    pack = load_pack(pack_id)
+    if not pack:
+        return {"ok": False, "error": f"pack não encontrado: {pack_id}"}
+    before = len(pack.get("references", []))
+    pack["references"] = [r for r in pack.get("references", []) if r.get("id") != ref_id]
+    if len(pack["references"]) == before:
+        return {"ok": False, "error": f"referência não encontrada: {ref_id}"}
+    for b in set(BUCKET.values()):
+        old = FELIPE_DIR / b / f"{ref_id}.json"
+        if old.exists():
+            old.unlink()
+    save_pack(pack)
+    _sync_cycle(pack_id, pack, cycle_id)
+    return {"ok": True, "removed": ref_id, "counts": _counts(pack)}
+
+
 def curate(pack_id: str, ref_id: str, action: str, comment: str | None = None,
            cycle_id: str | None = None, ts: float | None = None) -> dict:
     """Aplica uma ação de curadoria do Felipe a uma referência."""
+    if action == REMOVE:
+        return remove_ref(pack_id, ref_id, cycle_id)
     status = ACTIONS.get(action)
     if status is None:
         return {"ok": False, "error": f"ação inválida: {action}"}

@@ -471,12 +471,15 @@ textarea{width:100%;min-height:90px;background:#0c0d10;border:1px solid var(--bd
 .tlneed{margin-top:5px;font-size:12px;color:var(--warn);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .refhint{background:#1a1622;border:1px solid #4a3f22;border-left:3px solid var(--gold);border-radius:8px;padding:8px 12px;font-size:12.5px;color:#e8d9b8;margin-bottom:8px}
 .refhint.ok{border-color:#2c3a2c;border-left-color:var(--ok);background:#13191420;color:var(--ok)}
+.reftray{margin-top:12px;border-top:1px dashed #2c2636;padding-top:8px}
+.reftrayrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#0c0d10;border:1px solid var(--bd);border-radius:7px;padding:5px 10px;margin-bottom:5px;font-size:12.5px}
+.reftrayt{flex:1;min-width:200px;color:var(--mut)}
 /* 📚 LEARNING LOG */
 .llgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
 .lllist{margin:4px 0;padding-left:18px;font-size:12.5px;line-height:1.5;max-height:240px;overflow-y:auto}.lllist li{margin:2px 0}
 </style></head><body>
 <header><span class=hdot></span><h1>INTERIOR STUDIO</h1>
-<nav><a href="#sec-agents">Agentes</a><a href="#sec-err">Erros</a><a href="#sec-graf">Gráficos</a><a href="#sec-cur">Curadoria</a><a href="#sec-ren">Renders</a></nav>
+<nav><a href="http://localhost:8783/fluxo" target=_blank style="color:var(--gold);font-weight:700">⛓ Fluxo</a><a href="http://localhost:8783/grafo" target=_blank style="color:var(--gold);font-weight:700">🕸 Mapa</a><a href="#sec-agents">Agentes</a><a href="#sec-err">Erros</a><a href="#sec-graf">Gráficos</a><a href="#sec-cur">Curadoria</a><a href="#sec-ren">Renders</a></nav>
 <span class=mut style="margin-left:auto;font-size:11px">🔓 ⠿ mover · ▭ largura · puxa a borda ↕ pra altura</span><button onclick=resetLayout() title="voltar ao layout padrão" style="background:#0c0d10;border:1px solid var(--bd);color:var(--mut);border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11px;margin:0 12px">↺ layout</button><span class=mut id=ts>carregando…</span><span class=mut>· :8782</span></header>
 <div class=wrap id=root></div>
 <div id=modal class=modal onclick="if(event.target===this)closeModal()">
@@ -717,25 +720,28 @@ async function tick(force){
  if(rp.ok&&(rp.references||[]).length){const cc=rp.counts||{},needMain=(cc.main||0)===0
   const tlbl={boutique_premium:'boutique premium',compact_premium:'compacto premium',anti_example:'anti-exemplo'}
   const blbl={approved:'👍 aprovada',rejected:'👎 rejeitada',main:'⭐ PRINCIPAL',anti:'🚫 anti-pattern',pending:'• pendente'}
-  const cards=rp.references.map(r=>{const st=r.status||'pending',anti=r.type==='anti_example',broke=r.link_status==='broken'
-   const img=broke?`<div class=refimg-ph style="border-color:var(--red);color:var(--red)">⚠ link quebrado<br><span class=mut style=font-size:10.5px>${esc(r.source||'')}</span></div>`:(r.og_image?`<img class=refimg loading=lazy src="${esc(r.og_image)}" onclick="openModal('${esc(r.og_image)}','${esc(r.title)}')" onerror="this.replaceWith(el('<a class=refimg-ph href=\\'${esc(r.link||'#')}\\' target=_blank>🖼 abrir no site ↗</a>'))">`:`<a class=refimg-ph href="${esc(r.link||'#')}" target=_blank rel=noopener>🖼 ver no site ↗<br><span class=mut style=font-size:10.5px>clica "🖼 puxar imagens" no topo</span></a>`)
-   const star=anti?'':`<button class="cbtn cbtn-star ${needMain?'pulse':''}" title="marcar ⭐ PRINCIPAL — É ISTO que desbloqueia o Arquiteto" onclick="curateRef('${rp.pack_id}','${r.id}','main')">⭐ principal</button>`
+  const allr=rp.references||[],withImg=allr.filter(r=>r.og_image),noImg=allr.filter(r=>!r.og_image)
+  const acts=(r)=>{const star=r.type==='anti_example'?'':`<button class="cbtn cbtn-star ${needMain?'pulse':''}" title="marcar ⭐ PRINCIPAL — desbloqueia o Arquiteto" onclick="curateRef('${rp.pack_id}','${r.id}','main')">⭐ principal</button>`
+   return `<button class=cbtn title=aprovar onclick="curateRef('${rp.pack_id}','${r.id}','approve')">👍 aprovar</button> ${star} <button class=cbtn title=rejeitar onclick="curateRef('${rp.pack_id}','${r.id}','reject')">👎</button> <button class=cbtn title="anti-pattern" onclick="curateRef('${rp.pack_id}','${r.id}','anti')">🚫</button> <button class=cbtn title="remover do pack" onclick="curateRef('${rp.pack_id}','${r.id}','remove')">🗑</button>`}
+  const cards=withImg.map(r=>{const st=r.status||'pending'
    return `<div class="refcard rs-${st}">
-    ${img}
+    <img class=refimg loading=lazy src="${esc(r.og_image)}" onclick="openModal('${esc(r.og_image)}','${esc(r.title)}')" onerror="this.replaceWith(el('<a class=refimg-ph href=\\'${esc(r.link||'#')}\\' target=_blank>🖼 abrir no site ↗</a>'))">
     <div class=refhd><b>${esc(r.title)}</b> <span class=mut>· ${esc(r.source||'')}</span></div>
-    <div class=reftags><span class=pill>${esc(tlbl[r.type]||r.type||'')}</span> <span class="pill rb-${st}">${blbl[st]||st}</span>${broke?' <span class="pill rb-rejected">⚠ link quebrado</span>':''}</div>
-    <div class=refbody><b>por que:</b> ${esc(r.why_good||'')}<br><b>copiar:</b> ${esc(r.copy||'')}<br><b>evitar:</b> ${esc(r.avoid||'')}<br><span class=mut>DNA: ${esc(r.dna_adherence||'')}</span></div>
-    <div class=refact><a class=mbtn href="${esc(r.link||'#')}" target=_blank rel=noopener>🖼 ver ↗</a>
-     <button class=cbtn title=aprovar onclick="curateRef('${rp.pack_id}','${r.id}','approve')">👍 aprovar</button>
-     ${star}
-     <button class=cbtn title=rejeitar onclick="curateRef('${rp.pack_id}','${r.id}','reject')">👎</button>
-     <button class=cbtn title="marcar anti-pattern" onclick="curateRef('${rp.pack_id}','${r.id}','anti')">🚫</button>
-     <button class=cbtn title="limpar curadoria" onclick="curateRef('${rp.pack_id}','${r.id}','clear')">↺</button></div></div>`}).join('')
-  const hint=needMain?`<div class=refhint>👉 marque <b>UMA</b> referência como <b style="color:var(--gold)">⭐ principal</b> pra <b>destravar o Arquiteto</b>. Aprovar (👍) sozinho <b>NÃO</b> destrava — quem conta é o ⭐.</div>`:`<div class="refhint ok">✓ principal escolhido — Arquiteto destravado. Pode seguir pro Consult GPT → SOFA_BUILD_SPEC.</div>`
-  root.appendChild(el(`<div class="card full" id=sec-refpack><h2>🖼️ Reference Pack — ${esc(rp.asset||'')} <span class=mut>(cura pela IMAGEM · ⭐${cc.main||0} · 👍${cc.approved||0} · 👎${cc.rejected||0} · 🚫${cc.anti||0} · ${cc.pending||0} pendente)</span> <button class=chatbtn onclick="refpackImages('${rp.pack_id}')" title="puxa a imagem (og:image) de cada referência + checa links quebrados">🖼 puxar imagens + checar links</button> <span class=mut id=rpimgmsg></span></h2>
+    <div class=reftags><span class=pill>${esc(tlbl[r.type]||r.type||'')}</span> <span class="pill rb-${st}">${blbl[st]||st}</span></div>
+    <div class=refbody><b>por que:</b> ${esc(r.why_good||'')}<br><b>copiar:</b> ${esc(r.copy||'')}<br><b>evitar:</b> ${esc(r.avoid||'')}</div>
+    <div class=refact><a class=mbtn href="${esc(r.link||'#')}" target=_blank rel=noopener>🖼 ver ↗</a> ${acts(r)}</div></div>`}).join('')
+  const tray=noImg.length?`<div class=reftray><div class=kblist-h>🚫 Sem imagem / link quebrado (${noImg.length}) <span class=mut>— não dá pra curar pelo visual: puxa imagem, substitui ou remove</span></div>${noImg.map(r=>{const broke=r.link_status==='broken'
+   return `<div class=reftrayrow><span class=reftrayt>${broke?'⚠ ':''}${esc(r.title)} <span class=mut>· ${esc(r.source||'')}</span>${broke?' <span class="pill rb-rejected">link quebrado</span>':' <span class=mut>(sem preview)</span>'}</span> <a class=mbtn href="${esc(r.link||'#')}" target=_blank rel=noopener>ver ↗</a> <button class=cbtn title="remover do pack de vez" onclick="curateRef('${rp.pack_id}','${r.id}','remove')">🗑 remover</button></div>`}).join('')}</div>`:''
+  const hint=needMain?`<div class=refhint>👉 marque <b>UMA</b> com imagem como <b style="color:var(--gold)">⭐ principal</b> pra <b>destravar o Arquiteto</b>. Aprovar (👍) sozinho <b>NÃO</b> destrava.</div>`:`<div class="refhint ok">✓ principal escolhido — Arquiteto destravado. Segue pro Consult GPT → SOFA_BUILD_SPEC.</div>`
+  const scoutHtml=SCOUT_RESULTS&&SCOUT_RESULTS.ok?((SCOUT_RESULTS.results||[]).map(r=>`<div class=scoutrow><a class=lnk href="${esc(r.url)}" target=_blank rel=noopener>${esc(r.title)} ↗</a></div>`).join('')||'<span class=mut>nada encontrado</span>'):(SCOUT_RESULTS?`<span class=mut>erro: ${esc(SCOUT_RESULTS.error||'')}</span>`:'<span class=mut>busca referências na web — os links abrem no teu navegador</span>')
+  root.appendChild(el(`<div class="card full" id=sec-refpack><h2>🖼️ Reference Pack — ${esc(rp.asset||'')} <span class=mut>(${withImg.length} com imagem · ⭐${cc.main||0} · 👍${cc.approved||0} · 👎${cc.rejected||0} · 🚫${cc.anti||0})</span> <button class=chatbtn onclick="refpackImages('${rp.pack_id}')" title="puxa og:image + checa links quebrados">🖼 puxar imagens + checar links</button> <span class=mut id=rpimgmsg></span></h2>
    ${hint}
-   <div class=mut style="font-size:12px;margin:6px 0 8px">⚠️ ${esc(rp.honesty||'')}</div>
-   <div class=refgrid>${cards}</div></div>`))
+   <div class=refgrid>${cards||'<span class=mut>nenhuma referência com imagem — clica "🖼 puxar imagens" ou busca novas abaixo</span>'}</div>
+   ${tray}
+   <div class=cycsec><div class=cycsec-h>🔭 Buscar mais referências na web</div>
+    <div class=mut style="font-size:11.5px;margin-bottom:6px">Quem busca: <b>o Claude</b> (eu, via WebSearch — foi assim que montei estas 6) ou <b>esta busca</b> (servidor, via DuckDuckGo). Os <b>LLMs locais (DeepSeek/Qwen/Llama) NÃO navegam</b> — eles só organizam/comparam o que já foi trazido.</div>
+    <div class=askbar><input id=scout-q placeholder="ex.: sofá couro caramelo industrial boutique braço baixo" onkeydown="if(event.key==='Enter')scoutSearch()"><button class=send onclick=scoutSearch()>🔎 buscar</button> <span class=mut id=scoutmsg></span></div>
+    <div class=scoutlist>${scoutHtml}</div></div></div>`))
  }
  // ORG (guarda-chuvas + setas + métricas)
  const cols=(ag.umbrellas||[]).map(u=>{const ids=[u.lead.id,...u.subs.map(x=>x.id)]
@@ -776,7 +782,7 @@ async function tick(force){
    <button class=send onclick=teamAsk()>➤ perguntar</button> <span class=mut id=askmsg></span></div>
   ${qhist}</div>`))
  // 🔄 CICLO — card SOLTO, logo após "Pergunte ao time" (você move/redimensiona à vontade)
- root.appendChild(el(`<div class="card full" id=sec-cycles><h2>🔄 Ciclo <span class=mut>(o PM roda aqui · a saída vira diretriz no banco → "validar no Consult GPT")</span></h2>
+ root.appendChild(el(`<div class="card full" id=sec-cycles><h2>🔁 Rascunho de diretriz (LLMs locais) <span class=mut>(secundário — NÃO é o "Ciclo atual" lá em cima; aqui o PM/llama gera um texto-diretriz pra você levar ao Consult GPT)</span></h2>
   ${cyctrl}<div class=kblist-h>Ciclos recentes</div><div class=cylist>${cyhtml}</div></div>`))
  // AGENTES — só os 3 + chats
  root.appendChild(el(`<div class="card full" id=sec-agents><h2>Agentes — PM · Team Lead · Arquiteto</h2>
@@ -887,11 +893,7 @@ async function tick(force){
    return `<tr><td>${thumb}</td>${cell}<td>${i.theme||'-'}</td><td>${st}</td>
    <td>${st!=='approved'?`<button onclick="curate('${esc(i.slug)}','approve')" title=aprovar>✓</button> `:''}${st!=='rejected'?`<button onclick="curate('${esc(i.slug)}','reject')" title=reprovar>✕</button> `:''}<button class=trash onclick="curate('${esc(i.slug)}','delete')" title=apagar>🗑</button></td></tr>`}).join('')
  const thumbs=(s.inbox||[]).filter(i=>i.local_path).map(i=>`<div class=thumb><img loading=lazy src="/inbox-img/${fn(i)}" onclick="openModal('/inbox-img/${fn(i)}','${esc(i.slug)}')"><button class="trash thumbtrash" onclick="curate('${esc(i.slug)}','delete')" title=apagar>🗑</button><div class=cap>${esc(i.slug)}<div class=t>${i.status||'pending'}</div></div></div>`).join('')
- // 🔭 SCOUT — busca web pelo servidor (DuckDuckGo); alimenta a curadoria
- const scoutHtml=SCOUT_RESULTS&&SCOUT_RESULTS.ok?((SCOUT_RESULTS.results||[]).map(r=>`<div class=scoutrow><a class=lnk href="${esc(r.url)}" target=_blank rel=noopener>${esc(r.title)} ↗</a></div>`).join('')||'<span class=mut>nada encontrado</span>'):(SCOUT_RESULTS?`<span class=mut>erro: ${esc(SCOUT_RESULTS.error||'')}</span>`:'<span class=mut>busca referências/preços — os links abrem no teu navegador</span>')
- root.appendChild(el(`<div class="card full" id=sec-scout><h2>🔭 Scout — buscar referência / preço na web <span class=mut>(busca pelo servidor via DuckDuckGo — os locais não navegam)</span></h2>
-  <div class=askbar><input id=scout-q placeholder="ex.: porcelanato cimento queimado grafite preço m2" onkeydown="if(event.key==='Enter')scoutSearch()"><button class=send onclick=scoutSearch()>🔎 buscar</button> <span class=mut id=scoutmsg></span></div>
-  <div class=scoutlist>${scoutHtml}</div></div>`))
+ // (🔭 Scout foi consolidado DENTRO do Reference Pack — não é mais card solto)
  root.appendChild(el(`<div class="card full" id=sec-cur><h2>Curadoria — inbox de referência <span class=mut>(✓ aprova · ✕ reprova (fica) · 🗑 apaga · 🖼 puxa imagem do site)</span></h2>
   <div class=uprow><label class=upbtn>⬆ escolher imagem<input type=file id=upfile accept="image/*" onchange=uploadRef() hidden></label> <span class=mut id=upmsg>escolhe a imagem → sobe sozinho</span></div>
   ${thumbs?`<div class=grid style="margin:10px 0">${thumbs}</div>`:''}

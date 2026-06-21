@@ -94,6 +94,19 @@ def test_curadoria_idempotente(sandbox):
     assert r["counts"]["approved"] == 1   # não duplica
 
 
+def test_remover_referencia_tira_do_pack_e_do_ciclo(sandbox):
+    """Link quebrado / inútil → remove de vez (some do pack + dos arrays do ciclo + verditos)."""
+    _seed_pack(sandbox / "packs")
+    cid = _cycle_linked()
+    reference_packs.curate("p1", "r2", "approve", cycle_id=cid)
+    r = reference_packs.curate("p1", "r2", "remove", cycle_id=cid)
+    assert r["ok"] and r["removed"] == "r2"
+    pack = reference_packs.load_pack("p1")
+    assert all(x["id"] != "r2" for x in pack["references"])   # sumiu do pack
+    assert "r2" not in cycles.get_cycle(cid)["references"]["approved"]
+    assert not (sandbox / "felipe" / "approved" / "r2.json").exists()
+
+
 def test_acao_invalida_nao_quebra(sandbox):
     _seed_pack(sandbox / "packs")
     r = reference_packs.curate("p1", "r1", "explode")
