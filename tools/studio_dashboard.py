@@ -285,6 +285,8 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 .cycsec-h{font-size:13px;color:var(--gold);font-weight:600;margin-bottom:9px}
 .convbox{max-height:430px;overflow-y:auto;padding:8px 12px;background:#0c0d10;border:1px solid var(--bd);border-radius:8px;display:flex;flex-direction:column}
 .bub.cons{border:1px solid var(--gold)}
+.scoutlist{display:flex;flex-direction:column;gap:6px;margin-top:10px;max-height:340px;overflow-y:auto}
+.scoutrow{background:#0c0d10;border:1px solid var(--bd);border-radius:7px;padding:8px 11px;font-size:12.5px}
 .mtlink{cursor:pointer;border-bottom:1px dotted var(--gold)}.mtlink:hover{color:#fff}
 .kc-hl{outline:2px solid var(--gold);outline-offset:1px;box-shadow:0 0 0 4px rgba(201,168,106,.18)}
 .cylist{display:flex;flex-direction:column;gap:9px}
@@ -472,6 +474,10 @@ function teamAsk(){const ag=cval('ask-agent')||'interior-designer',q=(cval('ask-
  if(m)m.textContent='enquadrando e perguntando… (pode levar alguns segundos)'
  const e=document.getElementById('ask-q');if(e)e.value=''
  fetch('/api/team-ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:ag,question:q})}).then(r=>r.json()).then(r=>{if(m)m.textContent=r.ok?('✓ respondeu — olha no chat (rola até Agentes)'):('erro: '+(r.error||''));tick(1)})}
+let SCOUT_RESULTS=null
+function scoutSearch(){const q=(cval('scout-q')||'').trim();const m=document.getElementById('scoutmsg');if(!q){if(m)m.textContent='escreve o que buscar';return}
+ if(m)m.textContent='🔭 buscando na web…'
+ fetch('/api/scout-search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q})}).then(r=>r.json()).then(r=>{SCOUT_RESULTS=r;if(m)m.textContent=r.ok?('✓ '+((r.results||[]).length)+' resultados'):('erro: '+(r.error||''));tick(1)})}
 let AUTOCYCLE=null,CYCLES=[]
 function runCycle(){const m=document.getElementById('cyclemsg');if(m)m.textContent='rodando ciclo nos LLMs locais… (pode levar ~1-2 min)'
  fetch('/api/cycle',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})}).then(r=>r.json()).then(r=>{
@@ -710,6 +716,11 @@ async function tick(force){
    return `<tr><td>${thumb}</td>${cell}<td>${i.theme||'-'}</td><td>${st}</td>
    <td>${st!=='approved'?`<button onclick="curate('${esc(i.slug)}','approve')" title=aprovar>✓</button> `:''}${st!=='rejected'?`<button onclick="curate('${esc(i.slug)}','reject')" title=reprovar>✕</button> `:''}<button class=trash onclick="curate('${esc(i.slug)}','delete')" title=apagar>🗑</button></td></tr>`}).join('')
  const thumbs=(s.inbox||[]).filter(i=>i.local_path).map(i=>`<div class=thumb><img loading=lazy src="/inbox-img/${fn(i)}" onclick="openModal('/inbox-img/${fn(i)}','${esc(i.slug)}')"><button class="trash thumbtrash" onclick="curate('${esc(i.slug)}','delete')" title=apagar>🗑</button><div class=cap>${esc(i.slug)}<div class=t>${i.status||'pending'}</div></div></div>`).join('')
+ // 🔭 SCOUT — busca web pelo servidor (DuckDuckGo); alimenta a curadoria
+ const scoutHtml=SCOUT_RESULTS&&SCOUT_RESULTS.ok?((SCOUT_RESULTS.results||[]).map(r=>`<div class=scoutrow><a class=lnk href="${esc(r.url)}" target=_blank rel=noopener>${esc(r.title)} ↗</a></div>`).join('')||'<span class=mut>nada encontrado</span>'):(SCOUT_RESULTS?`<span class=mut>erro: ${esc(SCOUT_RESULTS.error||'')}</span>`:'<span class=mut>busca referências/preços — os links abrem no teu navegador</span>')
+ root.appendChild(el(`<div class="card full" id=sec-scout><h2>🔭 Scout — buscar referência / preço na web <span class=mut>(busca pelo servidor via DuckDuckGo — os locais não navegam)</span></h2>
+  <div class=askbar><input id=scout-q placeholder="ex.: porcelanato cimento queimado grafite preço m2" onkeydown="if(event.key==='Enter')scoutSearch()"><button class=send onclick=scoutSearch()>🔎 buscar</button> <span class=mut id=scoutmsg></span></div>
+  <div class=scoutlist>${scoutHtml}</div></div>`))
  root.appendChild(el(`<div class="card full" id=sec-cur><h2>Curadoria — inbox de referência <span class=mut>(✓ aprova · ✕ reprova (fica) · 🗑 apaga · 🖼 puxa imagem do site)</span></h2>
   <div class=uprow><label class=upbtn>⬆ escolher imagem<input type=file id=upfile accept="image/*" onchange=uploadRef() hidden></label> <span class=mut id=upmsg>escolhe a imagem → sobe sozinho</span></div>
   ${thumbs?`<div class=grid style="margin:10px 0">${thumbs}</div>`:''}
@@ -921,6 +932,40 @@ def _consult_ingest(body: dict) -> dict:
         return r
     except Exception as e:  # noqa: BLE001
         return {"ok": False, "error": str(e)}
+
+
+def _scout_search(query, n=8):
+    """🔭 Scout: busca referência/preço na web pelo SERVIDOR (DuckDuckGo HTML, sem chave nem LLM — os
+    locais não navegam). Devolve [{title,url}]. É o que vai alimentar a curadoria de referências/preços."""
+    import html as _html
+    import re as _re
+    import urllib.parse
+    import urllib.request
+    q = (query or "").strip()
+    if not q:
+        return {"ok": False, "error": "escreve o que buscar"}
+    try:
+        data = urllib.parse.urlencode({"q": q}).encode()   # DDG html exige POST (GET devolve página vazia)
+        req = urllib.request.Request(
+            "https://html.duckduckgo.com/html/", data=data,
+            headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+                     "Content-Type": "application/x-www-form-urlencoded"})
+        html = urllib.request.urlopen(req, timeout=14).read().decode("utf-8", "ignore")
+        out = []
+        for m in _re.finditer(r'<a\s+([^>]*?class="result__a"[^>]*?)>(.*?)</a>', html, _re.DOTALL):
+            hm = _re.search(r'href="([^"]+)"', m.group(1))
+            if not hm:
+                continue
+            title = _html.unescape(_re.sub(r"<[^>]+>", "", m.group(2))).strip()
+            mm = _re.search(r"uddg=([^&]+)", hm.group(1))   # caso venha redirect
+            real = urllib.parse.unquote(mm.group(1)) if mm else hm.group(1)
+            if title and real.startswith("http"):
+                out.append({"title": title[:130], "url": real})
+            if len(out) >= n:
+                break
+        return {"ok": True, "query": q, "results": out}
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": str(e), "hint": "o container precisa de internet"}
 
 
 def _team_ask(agent, question):
@@ -1351,6 +1396,8 @@ class H(BaseHTTPRequestHandler):
             self._send(200, json.dumps(_consult_learn(body), ensure_ascii=False))
         elif path == "/api/team-ask":
             self._send(200, json.dumps(_team_ask(body.get("agent"), body.get("question")), ensure_ascii=False))
+        elif path == "/api/scout-search":
+            self._send(200, json.dumps(_scout_search(body.get("query")), ensure_ascii=False))
         elif path == "/api/consult/ask-openai":
             self._send(200, json.dumps(_consult_ask_openai(body), ensure_ascii=False))
         elif path == "/api/move":
