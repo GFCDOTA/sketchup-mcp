@@ -429,12 +429,6 @@ function consultGen(){const m=document.getElementById('cqmsg');if(m)m.textConten
   tick(1)})}
 function consultCopy(ev){const t=CONSULT_MD||cval('cq-out');if(!t)return;if(navigator.clipboard)navigator.clipboard.writeText(t)
  const b=ev.target,o=b.textContent;b.textContent='copiado!';setTimeout(()=>b.textContent=o,1200)}
-function consultSaveAns(){const a=cval('cq-answer');const m=document.getElementById('camsg');if(!a.trim()){if(m)m.textContent='cole a resposta primeiro';return}
- if(m)m.textContent='salvando…'
- fetch('/api/consult/answer',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({answer:a})}).then(r=>r.json()).then(r=>{if(m)m.textContent=r.ok?'✓ resposta salva — agora ingere':('erro: '+(r.error||''));tick(1)})}
-function consultIngest(){const m=document.getElementById('camsg');if(m)m.textContent='ingerindo…'
- fetch('/api/consult/ingest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})}).then(r=>r.json()).then(r=>{
-  CONSULT_INGEST=r;if(m)m.textContent=r.ok?('✓ ingerido: '+r.verdict):('erro: '+(r.error||''));tick(1)})}
 function consultLearn(){const a=cval('cq-answer');const m=document.getElementById('camsg');if(!a.trim()){if(m)m.textContent='cole algo primeiro';return}
  if(m)m.textContent='aprendendo… (resposta estruturada pode levar alguns segundos)'
  fetch('/api/consult/learn',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:a})}).then(r=>r.json()).then(r=>{
@@ -583,7 +577,7 @@ async function tick(force){
  const critic=(s.renders||[])[0]
  // ERROS — card próprio, grande, logo abaixo dos agentes
  root.appendChild(el(`<div class="card full" id=sec-err><h2>Erros de design — o que TU não curtiu (vira lição)</h2>
-  <div class=critwrap>${critic?`<img class=critic onclick="openModal('/img/${encodeURIComponent(critic.name)}','${esc(critic.name)}')" src="/img/${encodeURIComponent(critic.name)}" title="clica pra ampliar">`:''}
+  <div class=critwrap>${critic?`<img class=critic loading=lazy onclick="openModal('/img/${encodeURIComponent(critic.name)}','${esc(critic.name)}')" src="/img/${encodeURIComponent(critic.name)}" title="clica pra ampliar">`:''}
    <div style=flex:1>${ebars}
     <div class=flagrow><select id=flagag>${flagopts}</select>
      <input id=flagmsg onkeydown="if(event.key==='Enter')flagErr()" placeholder="ex.: parede muito escura, coifa não combina… (Enter)"><button class=send onclick=flagErr()>marcar erro</button></div></div></div></div>`))
@@ -664,7 +658,7 @@ async function tick(force){
  // INBOX
  const fn=(i)=>i.local_path?encodeURIComponent(i.local_path.split('/').pop()):''
  const inb=(s.inbox||[]).map(i=>{const st=i.status||'pending',nm=esc(i.title||i.slug)
-   const thumb=i.local_path?`<img class=minithumb src="/inbox-img/${fn(i)}" onclick="openModal('/inbox-img/${fn(i)}','${esc(i.slug)}')">`:(i.source_url?`<button class=chatbtn onclick="fetchPreview('${esc(i.slug)}')" title="puxar imagem do site">🖼</button>`:'')
+   const thumb=i.local_path?`<img class=minithumb loading=lazy src="/inbox-img/${fn(i)}" onclick="openModal('/inbox-img/${fn(i)}','${esc(i.slug)}')">`:(i.source_url?`<button class=chatbtn onclick="fetchPreview('${esc(i.slug)}')" title="puxar imagem do site">🖼</button>`:'')
    const cell=i.local_path?`<td class=lnk onclick="openModal('/inbox-img/${fn(i)}','${esc(i.slug)}')">${nm}</td>`
      :(i.source_url?`<td><a class=lnk href="${esc(i.source_url)}" target=_blank>${nm} ↗</a></td>`:`<td>${nm}</td>`)
    return `<tr><td>${thumb}</td>${cell}<td>${i.theme||'-'}</td><td>${st}</td>
