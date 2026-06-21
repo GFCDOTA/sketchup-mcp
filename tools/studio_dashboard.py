@@ -276,6 +276,11 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 .cyc-help{margin:5px 0;padding:6px 8px;background:#0e0d14;border-radius:6px;color:#9aa0aa;font-size:11px;line-height:1.45}.cyc-help b{color:#cdb98a}
 .cyc-next{margin:5px 0;font-size:12px;color:#e8e9ec}
 .cycnav{cursor:pointer;background:#15131c;border:1px solid #2c2636;border-left:3px solid var(--gold);border-radius:7px;padding:6px 9px;margin-bottom:9px;font-size:11.5px;color:#cdb98a}.cycnav:hover{background:#1d1826}.cycnav b{color:var(--gold)}
+.askbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.askbar select,.askbar input{background:#0c0d10;border:1px solid var(--bd);color:var(--fg);border-radius:8px;padding:8px 11px;font:13px system-ui}
+.askbar input{flex:1;min-width:220px}
+.cycsec{margin-top:16px;border-top:1px solid var(--bd);padding-top:13px}
+.cycsec-h{font-size:13px;color:var(--gold);font-weight:600;margin-bottom:9px}
 .mtlink{cursor:pointer;border-bottom:1px dotted var(--gold)}.mtlink:hover{color:#fff}
 .kc-hl{outline:2px solid var(--gold);outline-offset:1px;box-shadow:0 0 0 4px rgba(201,168,106,.18)}
 .cylist{display:flex;flex-direction:column;gap:9px}
@@ -453,9 +458,12 @@ function consultLearn(){const a=cval('cq-answer');const m=document.getElementByI
 function moveTask(mt,dir){fetch('/api/move',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mt,direction:dir})}).then(()=>tick(1))}
 function goToMT(mt){const sec=document.getElementById('sec-backlog');if(sec)sec.scrollIntoView({behavior:'smooth',block:'center'})
  const c=document.getElementById('kc-'+mt);if(c){c.classList.add('kc-hl');c.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>c.classList.remove('kc-hl'),2400)}}
-function goToCycle(){const c=document.getElementById('sec-cycles');if(!c)return
- if(c.classList.contains('collapsed'))toggleCollapse('sec-cycles')
- c.scrollIntoView({behavior:'smooth',block:'start'});c.classList.add('kc-hl');setTimeout(()=>c.classList.remove('kc-hl'),2200)}
+function goToCycle(){const c=document.getElementById('sec-agents');if(!c)return
+ c.scrollIntoView({behavior:'smooth',block:'start'})}
+function teamAsk(){const ag=cval('ask-agent')||'interior-designer',q=(cval('ask-q')||'').trim();const m=document.getElementById('askmsg');if(!q){if(m)m.textContent='escreve a pergunta';return}
+ if(m)m.textContent='enquadrando e perguntando… (pode levar alguns segundos)'
+ const e=document.getElementById('ask-q');if(e)e.value=''
+ fetch('/api/team-ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:ag,question:q})}).then(r=>r.json()).then(r=>{if(m)m.textContent=r.ok?('✓ respondeu — olha no chat (rola até Agentes)'):('erro: '+(r.error||''));tick(1)})}
 let AUTOCYCLE=null,CYCLES=[]
 function runCycle(){const m=document.getElementById('cyclemsg');if(m)m.textContent='rodando ciclo nos LLMs locais… (pode levar ~1-2 min)'
  fetch('/api/cycle',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})}).then(r=>r.json()).then(r=>{
@@ -511,7 +519,7 @@ function applyOrder(){const root=document.getElementById('root');if(!root)return
  const full=[...saved.filter(id=>present.includes(id)),...present.filter(id=>!saved.includes(id))]
  full.forEach(id=>{const e=document.getElementById(id);if(e)root.appendChild(e)})}
 // RECOLHER cards — só Agentes/Loop/Consult/Backlog abertos por padrão; o resto recolhido (menos poluição)
-const DEFAULT_OPEN=['sec-agents','sec-cycles','sec-consult','sec-backlog']
+const DEFAULT_OPEN=['sec-ask','sec-agents','sec-consult','sec-backlog']
 function collapsedSet(){try{const v=JSON.parse(localStorage.getItem('studio_collapsed')||'null');return v===null?null:new Set(v)}catch(e){return null}}
 function saveCollapsed(s){localStorage.setItem('studio_collapsed',JSON.stringify([...s]))}
 function applyCollapsed(){const root=document.getElementById('root');if(!root)return
@@ -557,8 +565,7 @@ async function tick(force){
  const root=document.getElementById('root');const sy=window.scrollY;root.innerHTML=''
  // ORG (guarda-chuvas + setas + métricas)
  const cols=(ag.umbrellas||[]).map(u=>{const ids=[u.lead.id,...u.subs.map(x=>x.id)]
-   const cycNav=u.id==='pm'?`<div class=cycnav onclick="goToCycle()" title="ir pro ciclo que o PM roda">🔄 o PM roda o <b>ciclo</b> — ver / rodar →</div>`:''
-   return `<div class=col>${leadCard(u.lead)}<div class=subs>${u.subs.map(subCard).join('')}</div>${cycNav}
+   return `<div class=col>${leadCard(u.lead)}<div class=subs>${u.subs.map(subCard).join('')}</div>
     <div class=chat>${colChat(ag.feed,ids)}</div>
     <div class=askrow><input id="ask-${u.id}" onkeydown="if(event.key==='Enter')askAgent('${u.lead.id}','${u.id}')" placeholder="${u.id==='pm'?'tarefa/prioridade (design? → pergunta pro Arquiteto)':('perguntar pro '+esc(u.lead.label)+'…')}"><button class=send onclick="askAgent('${u.lead.id}','${u.id}')">➤</button><button class=chatbtn onclick="openChat('${u.lead.id}','${u.id}','${ids.join(',')}')" title="abrir chat grande">⛶</button></div></div>`}).join('')
  const ents=Object.entries(ag.metrics||{}).sort((a,b)=>b[1].calls-a[1].calls)
@@ -571,10 +578,7 @@ async function tick(force){
  const errs=ents.filter(([,m])=>m.errors>0),emx=Math.max(1,...errs.map(([,m])=>m.errors))
  const ebars=errs.length?errs.map(([id,m])=>`<div class=mrow><span class=nm>${esc(id)}</span><span class=mbar><span class=e style=width:${Math.round(130*m.errors/emx)}px></span></span><span class=mnum>${m.errors} erro(s)</span></div>`).join(''):'<span class=mut>nenhum erro de design marcado ainda</span>'
  const flagopts=ents.map(([id])=>`<option>${esc(id)}</option>`).join('')||'<option>interior-designer</option>'
- root.appendChild(el(`<div class="card full" id=sec-agents><h2>Agentes — guarda-chuvas (PM · Team Lead · Arquiteto)</h2>
-  <div class=org id=org><svg class=arrows id=arrows></svg><div class=cols>${cols}</div></div></div>`))
- drawArrows(ag)
- // 🔄 CICLOS RECENTES — fecha o loop: a diretriz do Arquiteto vira pergunta ao Consult GPT
+ // CICLO — computa antes pra injetar DENTRO da seção de agentes (abaixo dos chats)
  CYCLES=s.cycles||[]
  const cbk=s.backlog||{}, cnx=(cbk.tasks||[]).find(t=>!t.done&&!t.geo&&(t.status==='backlog'||t.status==='refinamento'))
  const cyctrl=`<div class=pmbox>
@@ -586,11 +590,17 @@ async function tick(force){
  const cyhtml=CYCLES.length?CYCLES.map((c,i)=>`<div class=cyrow>
    <div class=cyhd><b class=mtlink onclick="goToMT('${esc(c.mt||'')}')">${esc(c.cycle_id||'CYCLE')}</b> · <b>${esc(c.mt||'')}</b> ${esc((c.what||'').slice(0,46))} <span class=mut>· ${hhmm(c.ts)}</span></div>
    <div class=cydir onclick="this.classList.toggle('exp')" title="clica pra expandir/recolher">🎯 ${esc(c.directive||'(sem diretriz)')}</div>
-   <div class=cymeta><span class=mut>🦙 llama → 🤖 qwen → 🐳 deepseek</span> <button class=chatbtn onclick="cycleToConsult(${i})" title="virar pergunta pro Consult GPT validar">→ validar no Consult GPT</button>${c.consulted?' <span class=mut>✓ consultado</span>':''}</div></div>`).join(''):'<span class=mut>nenhum ciclo rodado ainda — clique "▶ Rodar próximo ciclo" aqui em cima. A diretriz que sair vira o item aqui.</span>'
- root.appendChild(el(`<div class="card full" id=sec-cycles><h2>🔄 Ciclo <span class=mut>(roda aqui · a saída vira diretriz no banco → "validar no Consult GPT")</span></h2>
-  ${cyctrl}
-  <div class=kblist-h>Ciclos recentes</div>
-  <div class=cylist>${cyhtml}</div></div>`))
+   <div class=cymeta><span class=mut>🦙 llama → 🤖 qwen → 🐳 deepseek</span> <button class=chatbtn onclick="cycleToConsult(${i})" title="virar pergunta pro Consult GPT validar">→ validar no Consult GPT</button>${c.consulted?' <span class=mut>✓ consultado</span>':''}</div></div>`).join(''):'<span class=mut>nenhum ciclo rodado ainda — clica "▶ Rodar próximo ciclo" acima. A diretriz que sair vira o item aqui.</span>'
+ // 🗣️ PERGUNTE AO TIME — o ó de tudo (topo): traduz a pergunta plana num bom prompt pro local
+ root.appendChild(el(`<div class="card full" id=sec-ask><h2>🗣️ Pergunte ao time <span class=mut>(em português normal — eu enquadro o prompt pra o local não alucinar)</span></h2>
+  <div class=askbar><select id=ask-agent title="pra quem"><option value=interior-designer>🐳 Arquiteto</option><option value=interior-pm>🦙 PM</option><option value=interior-orchestrator>🤖 Team Lead</option><option value=consenso>🧠 consenso (3)</option></select>
+   <input id=ask-q placeholder="pergunte qualquer coisa (ex.: a coifa preta tá sumindo no fundo?)" onkeydown="if(event.key==='Enter')teamAsk()">
+   <button class=send onclick=teamAsk()>➤ perguntar</button> <span class=mut id=askmsg></span></div></div>`))
+ // AGENTES + CICLO numa seção só
+ root.appendChild(el(`<div class="card full" id=sec-agents><h2>Agentes — PM · Team Lead · Arquiteto <span class=mut>(+ o ciclo, abaixo dos chats)</span></h2>
+  <div class=org id=org><svg class=arrows id=arrows></svg><div class=cols>${cols}</div></div>
+  <div class=cycsec><div class=cycsec-h>🔄 Ciclo — o PM roda aqui</div>${cyctrl}<div class=kblist-h>Ciclos recentes</div><div class=cylist>${cyhtml}</div></div></div>`))
+ drawArrows(ag)
  const critic=(s.renders||[])[0]
  // ERROS — card próprio, grande, logo abaixo dos agentes
  root.appendChild(el(`<div class="card full" id=sec-err><h2>Erros de design — o que TU não curtiu (vira lição)</h2>
@@ -892,6 +902,22 @@ def _consult_ingest(body: dict) -> dict:
         return r
     except Exception as e:  # noqa: BLE001
         return {"ok": False, "error": str(e)}
+
+
+def _team_ask(agent, question):
+    """Pergunta PLANA do Felipe -> ENQUADRA num bom prompt (domínio cozinha, PT, sem inventar) -> manda
+    pro agente/consenso local. É o tradutor: o local não alucina com pergunta casual."""
+    q = (question or "").strip()
+    if not q:
+        return {"ok": False, "error": "escreve a pergunta"}
+    labels = {"interior-pm": "PM", "interior-orchestrator": "Team Lead", "interior-designer": "Arquiteto"}
+    role = agent if agent in labels else "interior-designer"
+    framed = (f"Você é o {labels.get(role, 'Arquiteto')} de um estúdio de design de INTERIORES (cozinha "
+              f"planta_74, apê 74m2, estilo dark premium BLACK_WOOD_GOLD). Responda em português, foco em "
+              f"design/execução de COZINHA, sem inventar nem sair do tema.\n\nPergunta do Felipe: {q}")
+    if agent == "consenso":
+        return _consensus("interior-designer", framed)
+    return _ask(role, framed)
 
 
 def _consult_learn(body: dict) -> dict:
@@ -1299,6 +1325,8 @@ class H(BaseHTTPRequestHandler):
             self._send(200, json.dumps(_consult_ingest(body), ensure_ascii=False))
         elif path == "/api/consult/learn":
             self._send(200, json.dumps(_consult_learn(body), ensure_ascii=False))
+        elif path == "/api/team-ask":
+            self._send(200, json.dumps(_team_ask(body.get("agent"), body.get("question")), ensure_ascii=False))
         elif path == "/api/consult/ask-openai":
             self._send(200, json.dumps(_consult_ask_openai(body), ensure_ascii=False))
         elif path == "/api/move":
