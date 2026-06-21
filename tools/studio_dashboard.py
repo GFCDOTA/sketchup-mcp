@@ -341,6 +341,8 @@ textarea{width:100%;min-height:90px;background:#0c0d10;border:1px solid var(--bd
 @media(max-width:760px){.consult-grid{grid-template-columns:1fr 1fr}.consult-half{grid-template-columns:1fr}}
 .consult-res{margin-top:9px;background:#0c0d10;border:1px solid var(--bd);border-left:3px solid var(--gold);border-radius:7px;padding:8px 11px;font-size:12.5px}
 .mbar .e{max-width:90px}
+.drag{cursor:grab;color:#5a6472;font-size:15px;margin-right:9px;user-select:none;vertical-align:middle}.drag:hover{color:var(--gold)}.drag:active{cursor:grabbing}
+.card.dragover{outline:2px dashed var(--gold);outline-offset:2px}
 .gallery{max-height:330px;overflow-y:auto;padding-right:4px}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.86);z-index:50;align-items:center;justify-content:center;padding:24px}
 .modal.show{display:flex}.mbox{max-width:92vw;max-height:92vh;display:flex;flex-direction:column;gap:8px}
@@ -358,7 +360,7 @@ textarea{width:100%;min-height:90px;background:#0c0d10;border:1px solid var(--bd
 </style></head><body>
 <header><span class=hdot></span><h1>INTERIOR STUDIO</h1>
 <nav><a href="#sec-agents">Agentes</a><a href="#sec-err">Erros</a><a href="#sec-graf">Gráficos</a><a href="#sec-cur">Curadoria</a><a href="#sec-ren">Renders</a></nav>
-<span class=mut id=ts style=margin-left:auto>carregando…</span><span class=mut>· :8782</span></header>
+<span class=mut style="margin-left:auto;font-size:11px">🔓 arraste o ⠿ dos cards</span><button onclick=resetLayout() title="voltar ao layout padrão" style="background:#0c0d10;border:1px solid var(--bd);color:var(--mut);border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11px;margin:0 12px">↺ layout</button><span class=mut id=ts>carregando…</span><span class=mut>· :8782</span></header>
 <div class=wrap id=root></div>
 <div id=modal class=modal onclick="if(event.target===this)closeModal()">
  <div class=mbox><div class=mbar><span id=mname></span>
@@ -477,6 +479,31 @@ function sendChat(cons){const inp=document.getElementById('cinput'),q=(inp.value
  fetch(cons?'/api/consensus':'/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:CHATAG,prompt:q})}).then(()=>loadChat());setTimeout(loadChat,500)}
 setInterval(loadChat,3000)
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeChat()}})
+// LAYOUT LIVRE — arraste cada card pelo punho ⠿; a ordem fica salva no navegador (localStorage)
+let DRAGID=null
+function cardOrder(){try{return JSON.parse(localStorage.getItem('studio_order')||'[]')}catch(e){return[]}}
+function saveOrder(){const root=document.getElementById('root');if(!root)return
+ localStorage.setItem('studio_order',JSON.stringify([...root.children].filter(c=>c.id&&c.classList.contains('card')).map(c=>c.id)))}
+function applyOrder(){const root=document.getElementById('root');if(!root)return
+ const saved=cardOrder();if(!saved.length)return
+ const present=[...root.children].filter(c=>c.id&&c.classList.contains('card')).map(c=>c.id)
+ const full=[...saved.filter(id=>present.includes(id)),...present.filter(id=>!saved.includes(id))]
+ full.forEach(id=>{const e=document.getElementById(id);if(e)root.appendChild(e)})}
+function makeDraggable(){const root=document.getElementById('root');if(!root)return
+ ;[...root.children].forEach(card=>{if(!card.id||!card.classList.contains('card'))return
+  card.ondragover=e=>{e.preventDefault();e.dataTransfer.dropEffect='move';if(DRAGID&&DRAGID!==card.id)card.classList.add('dragover')}
+  card.ondragleave=()=>card.classList.remove('dragover')
+  card.ondrop=e=>{card.classList.remove('dragover');cardDrop(e,card.id)}
+  if(!card.querySelector('.drag')){const h=document.createElement('span');h.className='drag';h.textContent='⠿';h.title='arraste pra mover este card';h.draggable=true
+   h.ondragstart=e=>{DRAGID=card.id;if(e.dataTransfer.setDragImage)e.dataTransfer.setDragImage(card,18,18);e.dataTransfer.effectAllowed='move'}
+   h.ondragend=()=>{DRAGID=null;document.querySelectorAll('.card.dragover').forEach(c=>c.classList.remove('dragover'))}
+   const hd=card.querySelector('h2');if(hd)hd.insertBefore(h,hd.firstChild);else card.insertBefore(h,card.firstChild)}})}
+function cardDrop(e,targetId){e.preventDefault();if(!DRAGID||DRAGID===targetId)return
+ const root=document.getElementById('root'),drag=document.getElementById(DRAGID),tgt=document.getElementById(targetId)
+ if(!root||!drag||!tgt)return
+ const r=tgt.getBoundingClientRect(),after=e.clientY>r.top+r.height/2
+ root.insertBefore(drag,after?tgt.nextSibling:tgt);DRAGID=null;saveOrder()}
+function resetLayout(){localStorage.removeItem('studio_order');tick(1)}
 let LASTSTATE=''
 async function tick(force){
  // pausa com modal aberto OU enquanto digita/seleciona (senao apaga)
@@ -601,12 +628,12 @@ async function tick(force){
  // SESSÕES
  const cl=(s.sessions.claims||[]).map(c=>`<tr><td>${esc(c.desc)}</td><td>${esc(c.status)}</td></tr>`).join('')
  const nwt=(s.sessions.worktrees||[]).length
- root.appendChild(el(`<div class=card><h2>O que cada sessão está fazendo</h2>
+ root.appendChild(el(`<div class=card id=sec-sessions><h2>O que cada sessão está fazendo</h2>
   <table><tr><th>tarefa</th><th>status</th></tr>${cl||'<tr><td colspan=2 class=mut>nada em andamento</td></tr>'}</table>
   <div class=mut style=margin-top:8px>${nwt} sessão(ões) de trabalho ativa(s)</div></div>`))
  // REFERÊNCIAS
  const themes=Object.entries(by).map(([t,n])=>`<tr><td>${esc(t)}</td><td>${n}</td></tr>`).join('')
- root.appendChild(el(`<div class=card><h2>Banco de referências (reference_db)</h2>
+ root.appendChild(el(`<div class=card id=sec-refs><h2>Banco de referências (reference_db)</h2>
   <div class=mut style=margin-bottom:8px>${Object.entries(bk).map(([k,n])=>`<span class=pill>${k}: ${n}</span>`).join(' ')||refs.error||''}</div>
   <table><tr><th>tema</th><th>refs</th></tr>${themes}</table></div>`))
  // INBOX
@@ -627,6 +654,7 @@ async function tick(force){
    <div class=cap>${esc(r.name.replace('.png',''))}<div class=t>${r.theme} · ${r.sub} · ${r.kb}KB</div></div></div>`).join('')
  root.appendChild(el(`<div class="card full" id=sec-ren><h2>Renders (${(s.renders||[]).length}) — clica pra ampliar/baixar · mais novos primeiro</h2>
   <div class="grid gallery">${rr||'<span class=mut>sem renders</span>'}</div></div>`))
+ applyOrder();makeDraggable()   // layout livre: aplica a ordem salva + injeta o punho ⠿ de arrastar
  document.querySelectorAll('.chat').forEach(c=>{c.scrollTop=c.scrollHeight})   // chat sempre na última msg
  window.scrollTo(0,sy)   // mantém a rolagem onde estava (não sobe ao mandar mensagem)
 }
