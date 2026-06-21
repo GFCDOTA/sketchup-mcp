@@ -68,9 +68,9 @@ ROSTER = [
 ]
 # Topologia: PM coordena (sem LLM); Team Lead consulta os LOCAIS (código); Arquiteto consulta GPT (visão).
 UMBRELLAS = [
-    {"id": "pm",        "label": "PM",        "lead": "interior-pm",           "subs": ["reference-scout"]},
-    {"id": "team_lead", "label": "Team Lead", "lead": "interior-orchestrator", "subs": ["ollama-deepseek", "ollama-qwen", "ollama-llama"]},
-    {"id": "architect", "label": "Arquiteto", "lead": "interior-designer",     "subs": ["gpt-visual", "ollama-spec"]},
+    {"id": "pm",        "label": "PM",        "lead": "interior-pm",           "subs": ["ollama-llama"]},
+    {"id": "team_lead", "label": "Team Lead", "lead": "interior-orchestrator", "subs": ["ollama-qwen"]},
+    {"id": "architect", "label": "Arquiteto", "lead": "interior-designer",     "subs": ["ollama-deepseek", "gpt-visual"]},
 ]
 
 
@@ -190,7 +190,10 @@ def _agents() -> dict:
     except Exception:  # noqa: BLE001
         avail, rm = set(), {}
     online_map = {"ollama-deepseek": rm.get("deepseek"), "ollama-qwen": rm.get("qwen"),
-                  "ollama-llama": rm.get("llama"), "ollama-spec": rm.get("designer")}
+                  "ollama-llama": rm.get("llama"), "ollama-spec": rm.get("designer"),
+                  # o LÍDER mostra o status do modelo que ELE usa (PM=llama, Lead=qwen, Arq=deepseek)
+                  "interior-pm": rm.get("llama"), "interior-orchestrator": rm.get("qwen"),
+                  "interior-designer": rm.get("deepseek")}
 
     def card(aid):
         rec = last.get(aid)
@@ -272,6 +275,7 @@ th{color:var(--mut);font-weight:600}.pill{display:inline-block;padding:1px 8px;b
 .pmbox{background:#15131c;border:1px solid #2c2636;border-left:3px solid var(--gold);border-radius:8px;padding:7px 11px;margin-bottom:9px;font-size:11.5px;color:#cdb98a}.pmbox b{color:var(--gold)}
 .cyc-help{margin:5px 0;padding:6px 8px;background:#0e0d14;border-radius:6px;color:#9aa0aa;font-size:11px;line-height:1.45}.cyc-help b{color:#cdb98a}
 .cyc-next{margin:5px 0;font-size:12px;color:#e8e9ec}
+.cycnav{cursor:pointer;background:#15131c;border:1px solid #2c2636;border-left:3px solid var(--gold);border-radius:7px;padding:6px 9px;margin-bottom:9px;font-size:11.5px;color:#cdb98a}.cycnav:hover{background:#1d1826}.cycnav b{color:var(--gold)}
 .mtlink{cursor:pointer;border-bottom:1px dotted var(--gold)}.mtlink:hover{color:#fff}
 .kc-hl{outline:2px solid var(--gold);outline-offset:1px;box-shadow:0 0 0 4px rgba(201,168,106,.18)}
 .cylist{display:flex;flex-direction:column;gap:9px}
@@ -449,6 +453,9 @@ function consultLearn(){const a=cval('cq-answer');const m=document.getElementByI
 function moveTask(mt,dir){fetch('/api/move',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mt,direction:dir})}).then(()=>tick(1))}
 function goToMT(mt){const sec=document.getElementById('sec-backlog');if(sec)sec.scrollIntoView({behavior:'smooth',block:'center'})
  const c=document.getElementById('kc-'+mt);if(c){c.classList.add('kc-hl');c.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>c.classList.remove('kc-hl'),2400)}}
+function goToCycle(){const c=document.getElementById('sec-cycles');if(!c)return
+ if(c.classList.contains('collapsed'))toggleCollapse('sec-cycles')
+ c.scrollIntoView({behavior:'smooth',block:'start'});c.classList.add('kc-hl');setTimeout(()=>c.classList.remove('kc-hl'),2200)}
 let AUTOCYCLE=null,CYCLES=[]
 function runCycle(){const m=document.getElementById('cyclemsg');if(m)m.textContent='rodando ciclo nos LLMs locais… (pode levar ~1-2 min)'
  fetch('/api/cycle',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})}).then(r=>r.json()).then(r=>{
@@ -550,7 +557,8 @@ async function tick(force){
  const root=document.getElementById('root');const sy=window.scrollY;root.innerHTML=''
  // ORG (guarda-chuvas + setas + métricas)
  const cols=(ag.umbrellas||[]).map(u=>{const ids=[u.lead.id,...u.subs.map(x=>x.id)]
-   return `<div class=col>${leadCard(u.lead)}<div class=subs>${u.subs.map(subCard).join('')}</div>
+   const cycNav=u.id==='pm'?`<div class=cycnav onclick="goToCycle()" title="ir pro ciclo que o PM roda">🔄 o PM roda o <b>ciclo</b> — ver / rodar →</div>`:''
+   return `<div class=col>${leadCard(u.lead)}<div class=subs>${u.subs.map(subCard).join('')}</div>${cycNav}
     <div class=chat>${colChat(ag.feed,ids)}</div>
     <div class=askrow><input id="ask-${u.id}" onkeydown="if(event.key==='Enter')askAgent('${u.lead.id}','${u.id}')" placeholder="${u.id==='pm'?'tarefa/prioridade (design? → pergunta pro Arquiteto)':('perguntar pro '+esc(u.lead.label)+'…')}"><button class=send onclick="askAgent('${u.lead.id}','${u.id}')">➤</button><button class=chatbtn onclick="openChat('${u.lead.id}','${u.id}','${ids.join(',')}')" title="abrir chat grande">⛶</button></div></div>`}).join('')
  const ents=Object.entries(ag.metrics||{}).sort((a,b)=>b[1].calls-a[1].calls)
@@ -686,7 +694,8 @@ async function tick(force){
  document.querySelectorAll('.chat').forEach(c=>{c.scrollTop=c.scrollHeight})   // chat sempre na última msg
  window.scrollTo(0,sy)   // mantém a rolagem onde estava (não sobe ao mandar mensagem)
 }
-tick();setInterval(tick,10000);window.addEventListener('resize',()=>tick())
+tick(true);setInterval(tick,10000);window.addEventListener('resize',()=>tick(1))
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick(1)})   // aba voltou -> re-renderiza
 </script></body></html>"""
 
 
