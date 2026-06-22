@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-06-22T02:26:38",
+  "generated_at": "2026-06-22T12:47:27",
   "repo": {
     "branch": "feat/sofa-class-from-reference",
-    "sha": "da44393e43fdb37f1a6c7ad0b076fd52bee6f010",
+    "sha": "a38fd3b40398a79a063b42bd573c70b589c6755f",
     "remote_url": "https://github.com/GFCDOTA/sketchup-mcp.git",
     "owner": "GFCDOTA",
     "repo": "sketchup-mcp"
@@ -59,7 +59,7 @@
     "microtask": "MT-SOFA-001",
     "title": "Gerar SOFA_REFERENCE_PACK",
     "mode": "REFERENCE_PACK",
-    "status": "ready_for_sofa_build_spec_after_gpt_patch",
+    "status": "ready_for_build_spec",
     "next_action": "Felipe escolher 1-2 referências principais (⭐) na Curadoria",
     "architect_blocked": false,
     "references": {
@@ -161,9 +161,9 @@
       {
         "agent": "Learning",
         "face": "📚",
-        "status": "pending",
-        "icon": "—",
-        "summary": "pendente: regra/anti-pattern após resposta do GPT",
+        "status": "done",
+        "icon": "✓",
+        "summary": "aprendizado registrado",
         "model": "",
         "files": [],
         "needs": null,
@@ -177,13 +177,32 @@
       "status": "waiting_gpt_answer"
     },
     "learning": {
-      "new_rules": [],
-      "anti_patterns": [],
-      "golden_samples": []
+      "new_rules": [
+        "Sofá industrial premium para Felipe deve ser derivado de referência real, com assento profundo, braços contidos, encosto baixo levemente inclinado e pés finos em metal escuro.",
+        "Evitar sofá-caixa: todo sofá precisa ter leitura clara de assento volumoso, braço suavizado, encosto confortável e base leve.",
+        "Couro grafite/slate funciona bem no BLACK_WOOD_GOLD quando tem roughness controlado e não parece plástico brilhante.",
+        "Em sala compacta, preservar profundidade útil do assento e reduzir largura antes de sacrificar conforto visual.",
+        "Não copiar dimensão de sofá de referência: a referência define linguagem/formalidade/material; o footprint final vem da planta + gates de circulação (sala compacta)."
+      ],
+      "anti_patterns": [
+        "sofa_box_block: Sofá não pode parecer cubo com braços e encosto verticais.",
+        "armrest_too_chunky: Braço não pode dominar o volume visual nem parecer bloco estrutural.",
+        "flat_cushion: Almofada não pode ser plano chapado; precisa crown, espessura e borda suavizada.",
+        "wall_backrest: Encosto não pode ser parede vertical; precisa inclinação e almofada.",
+        "floor_block_base: Nesta variante, sofá não pode encostar no chão como bloco; precisa pés e vão inferior.",
+        "plastic_black_leather: Couro preto/grafite não pode parecer plástico brilhante.",
+        "fake_industrial_brutal: Industrial não pode virar bruto, pesado ou tosco; precisa boutique premium.",
+        "reference_scale_copy: copiar proporção/dimensão de sofá real sem recalcular pra sala compacta; a referência manda na linguagem, não no footprint.",
+        "toy_sofa_from_over_shrink: reduzir tudo proporcionalmente até virar miniatura dura; compacto premium mantém almofada, profundidade visual e presença."
+      ],
+      "golden_samples": [],
+      "patches": [
+        "LP-SOFA-001"
+      ]
     },
     "next_step": {
-      "kind": "consult",
-      "label": "📥 Cole a resposta do GPT no painel → vira Learning Patch (você aprova)",
+      "kind": "build",
+      "label": "▶ MT-SOFA-004: construir o sofá da referência (patch aprovado)",
       "actionable": true
     },
     "cycles": [
@@ -469,22 +488,29 @@
     "openai_enabled": true
   },
   "learning": {
-    "new_rules": [],
+    "new_rules": [
+      "Sofá industrial premium para Felipe deve ser derivado de referência real, com assento profundo, braços contidos, encosto baixo levemente inclinado e pés finos em metal escuro.",
+      "Evitar sofá-caixa: todo sofá precisa ter leitura clara de assento volumoso, braço suavizado, encosto confortável e base leve.",
+      "Couro grafite/slate funciona bem no BLACK_WOOD_GOLD quando tem roughness controlado e não parece plástico brilhante.",
+      "Em sala compacta, preservar profundidade útil do assento e reduzir largura antes de sacrificar conforto visual.",
+      "Não copiar dimensão de sofá de referência: a referência define linguagem/formalidade/material; o footprint final vem da planta + gates de circulação (sala compacta)."
+    ],
     "anti_patterns": [
-      "branco puro / chapado",
-      "tudo preto sem compensação de luz/reflexo",
-      "veios dourados exagerados",
-      "puxador dourado demais / alça aparente",
-      "reflecta em todos os aéreos",
-      "madeira na cuba/pia (área molhada)",
-      "LED frio 4000K+",
-      "coifa industrial gigante fora de escala",
       "piso preto como default (ou claro demais)",
       "mover posição fixa do PDF por causa de referência",
       "black_blob_appliance`: eletro escuro demais que some no fundo e vira mancha sem leitura.",
       "chrome_hood_noise`: coifa inox clara/cromada chamando mais atenção que a pedra.",
       "flat_black_wall`: armário, coifa e fundo com mesmo valor tonal, sem profundidade.",
-      "fake_premium_gold_hood`: tentar resolver luxo colocando dourado na coifa."
+      "fake_premium_gold_hood`: tentar resolver luxo colocando dourado na coifa.",
+      "sofa_box_block: Sofá não pode parecer cubo com braços e encosto verticais.",
+      "armrest_too_chunky: Braço não pode dominar o volume visual nem parecer bloco estrutural.",
+      "flat_cushion: Almofada não pode ser plano chapado; precisa crown, espessura e borda suavizada.",
+      "wall_backrest: Encosto não pode ser parede vertical; precisa inclinação e almofada.",
+      "floor_block_base: Nesta variante, sofá não pode encostar no chão como bloco; precisa pés e vão inferior.",
+      "plastic_black_leather: Couro preto/grafite não pode parecer plástico brilhante.",
+      "fake_industrial_brutal: Industrial não pode virar bruto, pesado ou tosco; precisa boutique premium.",
+      "reference_scale_copy: copiar proporção/dimensão de sofá real sem recalcular pra sala compacta; a referência manda na linguagem, não no footprint.",
+      "toy_sofa_from_over_shrink: reduzir tudo proporcionalmente até virar miniatura dura; compacto premium mantém almofada, profundidade visual e presença."
     ],
     "golden_samples": []
   },
@@ -493,9 +519,9 @@
     "done": 0
   },
   "changes_since_last": {
-    "last_sha": "b1df53e366e0b5b5c94b12c75e32c64ee453d223",
-    "current_sha": "da44393e43fdb37f1a6c7ad0b076fd52bee6f010",
-    "diffstat": ".ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.json | 16 +++++++++----\n .ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md   | 34 +++++++++++-----------------\n 2 files changed, 24 insertions(+), 26 deletions(-)"
+    "last_sha": "da44393e43fdb37f1a6c7ad0b076fd52bee6f010",
+    "current_sha": "a38fd3b40398a79a063b42bd573c70b589c6755f",
+    "diffstat": ".ai_bridge/gpt_review/.gitignore                   |   1 +\n .ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.json       |  10 +-\n .ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md         |  24 ++--\n .ai_bridge/interior_cycles/CYCLE-003.json          |  25 +++-\n .ai_bridge/learning_patches/LP-SOFA-001.json       |  43 ++++--\n .claude/memory/felipe_style_dna.md                 |   5 +\n .../furniture/sofa/venezia/NEW_venezia_2l.png      | Bin 0 -> 51030 bytes\n .../furniture/sofa/venezia/NEW_venezia_3l.png      | Bin 0 -> 51949 bytes\n .../review/furniture/sofa/venezia/OLD_caixa_3l.png | Bin 0 -> 44259 bytes\n .../furniture/sofa/venezia/compare_report.json     |  45 ++++++\n .../review/furniture/sofa/venezia/gpt_verdict.md   |  41 ++++++\n .../review/furniture/sofa/venezia/room_NEW.png     | Bin 0 -> 46956 bytes\n .../review/furniture/sofa/venezia/room_OLD.png     | Bin 0 -> 44496 bytes\n .../sofa/venezia/sofa_venezia_compare.png          | Bin 0 -> 136809 bytes\n .../furniture/sofa/venezia/sofa_venezia_room.png   | Bin 0 -> 67309 bytes\n .../design_rules/felipe_visual_judge_rules.json    |  54 ++++++++\n tools/interior_studio/learning_patch.py            |   3 +-\n tools/sofa_class.py                                |  13 +-\n tools/sofa_venezia_compare.py                      |  67 +++++++++\n tools/sofa_venezia_room.py                         |  96 +++++++++++++\n tools/studio_dashboard.py                          | 154 +++++++++++++++++++--\n 21 files changed, 539 insertions(+), 42 deletions(-)"
   },
   "question": "Revise o estado atual do Interior Studio (:8782) pelos arquivos raw linkados. (1) O dashboard está CLARO pra operar o ciclo CYCLE-003 / SOFA_REFERENCE_PACK? (2) O que ainda compete por atenção / está confuso? (3) O que priorizar ANTES de construir o sofá? (4) A curadoria VISUAL e a regra-trava (Arquiteto bloqueado sem ⭐ principal) estão bem resolvidas? Responda objetivo, com prioridades."
 }
