@@ -28,6 +28,14 @@ Ajuste fino — **não bloqueia**.
 
 **Conclusão:** PASS. A forma sustenta o próximo passo: teste contextual **dentro da sala** + render V-Ray.
 
+## Gate 2 — CONTEXTO (sofá na sala, `sofa_venezia_room.png`) · GPT via ponte
+**VEREDITO: PASS — pode seguir pro V-Ray fotorrealista.**
+- (a) Cabe na sala com circulação ok? Sim — cabe melhor que a caixa, circulação folgada, não entope a sala.
+- (b) Escala/footprint? Sim — nem grande demais nem miniatura; coerente com rack+TV+profundidade da sala.
+- Leitura contextual: o novo deixa a sala mais leve/crível; pés elevados + forma menos blocada melhoram presença sem inflar volume.
+- WARN leve (V-Ray): conferir eye-level + uma vista com circulação mais explícita; garantir que couro grafite + 2700K não "pesem" demais na sala compacta.
+
 ## Decisão
-Forma APROVADA pelo GPT. Próximo: render V-Ray do sofá venezia DENTRO da sala (rack/corredor/TV, circulação),
-com o ajuste fino de maciez de almofada na pele/material. Veredito final de aparência = Felipe.
+**Forma PASS + Contexto PASS (GPT pela ponte).** MT-SOFA-004 geometria/contexto = APROVADO.
+Próximo (polimento final): render V-Ray fotorrealista do venezia na sala (couro grafite, luz 2700K, eye-level),
+com a maciez de almofada na pele. **Veredito final de aparência = Felipe (olho dele no desktop).**
