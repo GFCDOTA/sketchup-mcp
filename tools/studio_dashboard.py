@@ -299,6 +299,7 @@ def _asset_pipeline(asset: str) -> list:
     lr = c.get("learning") or {}
     pack = ic_refpacks.load_pack(f"{asset}_reference_pack_001") or {}
     npack = len(pack.get("references", []))
+    nimg = sum(1 for r in pack.get("references", []) if r.get("og_image"))
     vdir = ROOT / "artifacts/review/furniture" / asset
 
     def has(glb):
@@ -316,7 +317,8 @@ def _asset_pipeline(asset: str) -> list:
     def s(done):
         return "done" if done else "pending"
     return [
-        {"icon": "📚", "label": "Referências", "status": s(npack > 0), "jump": "sec-refpack", "detail": f"{npack} refs"},
+        {"icon": "📚", "label": "Referências", "status": s(npack > 0), "jump": "sec-refpack",
+         "detail": f"{nimg} com img · {npack} no pack"},
         {"icon": "🎨", "label": "Curadoria", "status": s(bool(refs.get("main"))), "jump": "sec-refpack",
          "detail": "⭐ escolhida" if refs.get("main") else "falta ⭐"},
         {"icon": "📐", "label": "Build Spec", "status": s(spec_done), "jump": "sec-patch",
@@ -343,8 +345,10 @@ def _overview() -> dict:
             continue
         icon, label = FURNITURE_META[asset]
         pack = ic_refpacks.load_pack(f"{asset}_reference_pack_001")
-        refs = len(pack.get("references", [])) if pack else 0
-        main = sum(1 for r in (pack or {}).get("references", []) if r.get("status") == "main")
+        prefs = (pack or {}).get("references", [])
+        refs = len(prefs)
+        refs_img = sum(1 for r in prefs if r.get("og_image"))   # só estes viram card (têm imagem)
+        main = sum(1 for r in prefs if r.get("status") == "main")
         vdir = ROOT / "artifacts/review/furniture" / asset
         vtxt = ""
         vf = list(vdir.glob("**/gpt_verdict.md")) if vdir.exists() else []
@@ -353,8 +357,8 @@ def _overview() -> dict:
         verdict = ("GPT PASS (forma+contexto)" if ("Contexto" in vtxt and "PASS" in vtxt)
                    else "GPT PASS (forma)" if "PASS" in vtxt else "—")
         badge = "active" if asset == cur else ("new" if pack else "classic")
-        inv.append({"asset": asset, "icon": icon, "label": label, "refs": refs, "main": main,
-                    "method": "reference-driven" if pack else "clássico (programa antigo)",
+        inv.append({"asset": asset, "icon": icon, "label": label, "refs": refs, "refs_img": refs_img,
+                    "main": main, "method": "reference-driven" if pack else "clássico (programa antigo)",
                     "verdict": verdict, "badge": badge, "current": asset == cur})
     pipe = _asset_pipeline(cur) if cur else []
     nxt = next((p for p in pipe if p["status"] != "done"), None)
@@ -831,7 +835,7 @@ async function tick(force){
   const pipe=(ov.pipeline||[]).map((p,i)=>`${i?'<span class=ovarrow>→</span>':''}<div class="ovstep ${SC[p.status]||'ov-pend'}"${p.jump?` onclick="jumpTo('${p.jump}')" style="cursor:pointer"`:''} title="${esc(p.detail||'')}"><div class=ovic>${p.icon}</div><div class=ovlbl>${esc(p.label)}</div><div class=ovdet>${esc(p.detail||'')}</div></div>`).join('')
   const BADGE={active:['▶ ATIVO','#f0a868'],new:['✓ método novo','var(--ok)'],classic:['clássico (sem ref)','var(--mut)']}
   const inv=(ov.inventory||[]).map(it=>{const b=BADGE[it.badge]||['','var(--mut)']
-   return `<div class="ovcard ${it.current?'ovcard-on':''}"><div class=ovcic>${it.icon}</div><div class=ovcnm>${esc(it.label)}</div><div class=ovcb style="color:${b[1]}">${b[0]}</div><div class=ovcd>${it.refs} refs${it.verdict&&it.verdict!=='—'?('<br>'+esc(it.verdict)):''}</div></div>`}).join('')
+   return `<div class="ovcard ${it.current?'ovcard-on':''}"><div class=ovcic>${it.icon}</div><div class=ovcnm>${esc(it.label)}</div><div class=ovcb style="color:${b[1]}">${b[0]}</div><div class=ovcd>${it.refs?((it.refs_img||0)+' com img · '+it.refs+' no pack'):'sem reference pack'}${it.verdict&&it.verdict!=='—'?('<br>'+esc(it.verdict)):''}</div></div>`}).join('')
   root.appendChild(el(`<div class="card full" id=sec-overview><h2>🛰️ Visão geral — o que tá rolando AGORA</h2>
    <div class=ovhead>📐 <b>${esc(ov.project||'')}</b> · móvel atual: <b style="color:#f0a868">${esc(ov.current_label||'—')}</b> · próximo passo: <b>${esc(ov.next_action||'—')}</b></div>
    <div class=ovpipe>${pipe||'<span class=mut>sem ciclo ativo</span>'}</div>
