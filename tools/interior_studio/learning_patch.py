@@ -117,7 +117,8 @@ def compute_diff(patch: dict) -> dict:
     ap = pc.get("anti_patterns") or []
     anti_add = [a for a in ap if ci._norm(a) and ci._norm(a) not in have_ap]
     anti_dup = [a for a in ap if a not in anti_add]
-    return {"rules_add": rules_add, "rules_dup": rules_dup, "anti_add": anti_add, "anti_dup": anti_dup}
+    return {"rules_add": rules_add, "rules_dup": rules_dup, "anti_add": anti_add, "anti_dup": anti_dup,
+            "build_spec": pc.get("build_spec_constraints") or None}   # GPT: mostrar os constraints no diff
 
 
 def approve(patch_id: str, *, now: str | None = None) -> dict:

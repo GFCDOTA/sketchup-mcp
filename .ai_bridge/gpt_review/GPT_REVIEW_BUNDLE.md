@@ -1,20 +1,19 @@
 # GPT REVIEW BUNDLE — Interior Studio (:8782)
-> Gerado 2026-06-22T02:21:56 · fonte única pro Consult GPT revisar o dashboard sem localhost.
+> Gerado 2026-06-22T02:26:38 · fonte única pro Consult GPT revisar o dashboard sem localhost.
 
 ## 1. Repo
 - branch: `feat/sofa-class-from-reference`
-- commit: `b1df53e366e0b5b5c94b12c75e32c64ee453d223`
+- commit: `da44393e43fdb37f1a6c7ad0b076fd52bee6f010`
 - remote: `https://github.com/GFCDOTA/sketchup-mcp.git`
-- gerado_em: 2026-06-22T02:21:56
+- gerado_em: 2026-06-22T02:26:38
 - tree: https://github.com/GFCDOTA/sketchup-mcp/tree/feat/sofa-class-from-reference
 
 <details><summary>git diff --stat desde a última revisão</summary>
 
 ```
-.ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.json | 23 +++++++-------
- .ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md   | 42 +++++++++++++------------
- tools/studio_dashboard.py                    | 46 ++++++++++++++++++++++++++--
- 3 files changed, 79 insertions(+), 32 deletions(-)
+.ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.json | 16 +++++++++----
+ .ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md   | 34 +++++++++++-----------------
+ 2 files changed, 24 insertions(+), 26 deletions(-)
 ```
 </details>
 
@@ -66,13 +65,12 @@ _Análise = hipótese de pesquisa (não vi as imagens renderizadas). Quem julga 
 - última pergunta: sofa_spec_001 · pendentes: 2 · ingeridas: 1
 
 ## 7. Mudanças desde a última revisão
-- último SHA revisado: `243ed216e936a03f754799cfe2f24ed1ce9e4e14`
-- SHA atual: `b1df53e366e0b5b5c94b12c75e32c64ee453d223`
+- último SHA revisado: `b1df53e366e0b5b5c94b12c75e32c64ee453d223`
+- SHA atual: `da44393e43fdb37f1a6c7ad0b076fd52bee6f010`
 ```
-.ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.json | 23 +++++++-------
- .ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md   | 42 +++++++++++++------------
- tools/studio_dashboard.py                    | 46 ++++++++++++++++++++++++++--
- 3 files changed, 79 insertions(+), 32 deletions(-)
+.ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.json | 16 +++++++++----
+ .ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md   | 34 +++++++++++-----------------
+ 2 files changed, 24 insertions(+), 26 deletions(-)
 ```
 
 ## Pergunta para o GPT

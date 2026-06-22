@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-06-22T02:21:56",
+  "generated_at": "2026-06-22T02:26:38",
   "repo": {
     "branch": "feat/sofa-class-from-reference",
-    "sha": "b1df53e366e0b5b5c94b12c75e32c64ee453d223",
+    "sha": "da44393e43fdb37f1a6c7ad0b076fd52bee6f010",
     "remote_url": "https://github.com/GFCDOTA/sketchup-mcp.git",
     "owner": "GFCDOTA",
     "repo": "sketchup-mcp"
@@ -493,9 +493,9 @@
     "done": 0
   },
   "changes_since_last": {
-    "last_sha": "243ed216e936a03f754799cfe2f24ed1ce9e4e14",
-    "current_sha": "b1df53e366e0b5b5c94b12c75e32c64ee453d223",
-    "diffstat": ".ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.json | 23 +++++++-------\n .ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md   | 42 +++++++++++++------------\n tools/studio_dashboard.py                    | 46 ++++++++++++++++++++++++++--\n 3 files changed, 79 insertions(+), 32 deletions(-)"
+    "last_sha": "b1df53e366e0b5b5c94b12c75e32c64ee453d223",
+    "current_sha": "da44393e43fdb37f1a6c7ad0b076fd52bee6f010",
+    "diffstat": ".ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.json | 16 +++++++++----\n .ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md   | 34 +++++++++++-----------------\n 2 files changed, 24 insertions(+), 26 deletions(-)"
   },
   "question": "Revise o estado atual do Interior Studio (:8782) pelos arquivos raw linkados. (1) O dashboard está CLARO pra operar o ciclo CYCLE-003 / SOFA_REFERENCE_PACK? (2) O que ainda compete por atenção / está confuso? (3) O que priorizar ANTES de construir o sofá? (4) A curadoria VISUAL e a regra-trava (Arquiteto bloqueado sem ⭐ principal) estão bem resolvidas? Responda objetivo, com prioridades."
 }

@@ -899,6 +899,9 @@ async function tick(force){
     <div><div class=kblist-h>🧬 Regras novas <span class=mut>→ felipe_style_dna.md</span></div><ul class=difflist>${dl(pdiff.rules_add,'add')||'<li class=mut>nada novo</li>'}${dl(pdiff.rules_dup,'dup')}</ul></div>
     <div><div class=kblist-h>🚫 Anti-patterns <span class=mut>→ juiz visual</span></div><ul class=difflist>${dl(pdiff.anti_add,'add')||'<li class=mut>nada novo</li>'}${dl(pdiff.anti_dup,'dup')}</ul></div>
    </div>
+   ${pdiff.build_spec?`<div class=kblist-h style="margin-top:8px">🔧 build_spec_constraints <span class=mut>(guiam a CONSTRUÇÃO do sofá, não só o DNA)</span></div>
+    <div class=patchdiff><div><b style="color:var(--ok);font-size:12px">must_have</b><ul class=difflist>${dl(pdiff.build_spec.must_have,'add')}</ul></div>
+     <div><b style="color:var(--red);font-size:12px">must_not_have</b><ul class=difflist>${dl(pdiff.build_spec.must_not_have,'dup')}</ul></div></div>`:''}
    ${nm.title?`<div class=mut style="font-size:12px;margin-top:2px">🎯 próxima microtarefa sugerida: <b>${esc(nm.id||'MT')}</b> ${esc(nm.title)}</div>`:''}
    <div class=patchacts><button class=send onclick="patchAction('${draft.patch_id}','approve')">✅ aprovar e aplicar no DNA</button> <button class=cbtn onclick="patchAction('${draft.patch_id}','reject')">⛔ rejeitar</button></div>`
  }else{patchBody=`<span class=mut>nenhum patch pendente. Cole uma resposta ESTRUTURADA do Consult GPT (ARCHITECT_ANSWER) no sidecar 🔌 acima → ela vira um patch <b>draft</b> aqui, com diff, pra você aprovar antes de virar memória.</span>`}
