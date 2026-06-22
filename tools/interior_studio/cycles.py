@@ -185,6 +185,19 @@ def timeline(c: dict) -> list[dict]:
     return out
 
 
+def derive_status(c: dict) -> str:
+    """Status DERIVADO do estado real (não o congelado na semente — GPT pegou a inconsistência:
+    se já há ⭐ principal, não pode dizer 'waiting_felipe_curation')."""
+    refs = c.get("references") or {}
+    lr = c.get("learning") or {}
+    applied = bool(lr.get("new_rules") or lr.get("anti_patterns") or lr.get("golden_samples") or lr.get("patches"))
+    if not refs.get("main"):
+        return "waiting_felipe_curation"
+    if not applied:
+        return "ready_for_sofa_build_spec_after_gpt_patch"
+    return "ready_for_build_spec"
+
+
 def next_step(c: dict) -> dict:
     """A PRÓXIMA ETAPA CORRETA do ciclo (não um 'rodar ciclo' genérico). `actionable`=tem botão;
     senão é ação do Felipe (curar)."""
@@ -195,10 +208,11 @@ def next_step(c: dict) -> dict:
     if not refs.get("main"):
         return {"kind": "curate", "label": "⭐ Você: escolher 1–2 referências PRINCIPAIS no Reference Pack",
                 "actionable": False}
-    if not consult.get("ingested"):
-        return {"kind": "consult", "label": "🔌 Gerar pergunta pro Consult GPT → SOFA_BUILD_SPEC",
+    lr = c.get("learning") or {}
+    if not (lr.get("new_rules") or lr.get("patches")):
+        return {"kind": "consult", "label": "🔌 Consult GPT → resposta vira Learning Patch (você aprova) → SOFA_BUILD_SPEC",
                 "actionable": True}
-    return {"kind": "build", "label": "▶ Gerar Build Spec / construir (pós-curadoria)", "actionable": True}
+    return {"kind": "build", "label": "▶ Gerar SOFA_BUILD_SPEC (curadoria + patch aprovado)", "actionable": True}
 
 
 def factory_state() -> dict:
@@ -213,7 +227,7 @@ def factory_state() -> dict:
         "has_cycle": True,
         "cycle_id": c.get("cycle_id"), "project": c.get("project"), "room": c.get("room"),
         "asset": c.get("asset"), "microtask": c.get("microtask"), "title": c.get("title"),
-        "mode": c.get("mode"), "status": c.get("status"), "next_action": c.get("next_action"),
+        "mode": c.get("mode"), "status": derive_status(c), "next_action": c.get("next_action"),
         "architect_blocked": architect_blocked(c),
         "references": c.get("references") or {}, "timeline": timeline(c),
         "consult": c.get("consult") or {}, "learning": c.get("learning") or {},

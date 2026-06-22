@@ -37,6 +37,7 @@ DEFAULT_PACK = "sofa_reference_pack_001"   # pack ativo da esteira (sofá = prim
 from tools.interior_studio import cycles as ic_cycles            # noqa: E402  entidade CYCLE (esteira)
 from tools.interior_studio import reference_packs as ic_refpacks  # noqa: E402  Reference Pack + curadoria Felipe
 from tools.interior_studio import gpt_review_bundle as ic_bundle  # noqa: E402  pacote de revisão pro Consult GPT
+from tools.interior_studio import learning_patch as ic_patch      # noqa: E402  LEARNING_PATCH (resposta→patch→diff→aprova)
 
 
 def _kanban_load():
@@ -257,6 +258,10 @@ def _learning_log() -> dict:
                     anti_patterns.append(w)
         except (json.JSONDecodeError, OSError):
             pass
+    try:
+        new_rules += ic_patch.applied_rules()   # regras já aplicadas via LEARNING_PATCH aprovado
+    except Exception:  # noqa: BLE001
+        pass
     gs_dir = ROOT / "references/felipe/golden_samples"
     if gs_dir.is_dir():
         golden = [p.stem for p in sorted(gs_dir.glob("*")) if p.is_file()]
@@ -279,7 +284,8 @@ def _state() -> dict:
     return {"agents": _agents(), "renders": _renders(), "sessions": _sessions(),
             "backlog": _backlog(), "references": _references(), "inbox": _inbox(),
             "knowledge": _knowledge_state(), "consult": _consult_state(), "cycles": _cycles_recent(8),
-            "factory": fac, "refpack": ic_refpacks.pack_state(pack_id), "learning": _learning_log()}
+            "factory": fac, "refpack": ic_refpacks.pack_state(pack_id), "learning": _learning_log(),
+            "patches": ic_patch.patches_state()}
 
 
 PAGE = r"""<!doctype html><html lang=pt-BR><head><meta charset=utf-8>
@@ -477,6 +483,16 @@ textarea{width:100%;min-height:90px;background:#0c0d10;border:1px solid var(--bd
 /* 📚 LEARNING LOG */
 .llgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
 .lllist{margin:4px 0;padding-left:18px;font-size:12.5px;line-height:1.5;max-height:240px;overflow-y:auto}.lllist li{margin:2px 0}
+/* 🧠 LEARNING PATCH (diff) */
+#sec-patch{border-left:3px solid var(--gold)}
+.patchhd{font-size:13.5px;margin-bottom:3px}
+.patchdiff{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:6px 0}
+@media(max-width:760px){.patchdiff{grid-template-columns:1fr}}
+.difflist{margin:4px 0;padding-left:6px;list-style:none;font-size:12.5px;line-height:1.55}
+.difflist li{padding:2px 8px;border-radius:5px;margin:3px 0}
+.difflist li.add{background:#14241a;border-left:3px solid var(--ok);color:#bfe8cb}.difflist li.add::before{content:'+ ';color:var(--ok);font-weight:700}
+.difflist li.dup{background:#181a20;color:#7a8696;text-decoration:line-through;opacity:.7}.difflist li.dup::before{content:'≡ '}
+.patchacts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;border-top:1px dashed #2c2636;padding-top:8px}
 </style></head><body>
 <header><span class=hdot></span><h1>INTERIOR STUDIO</h1>
 <nav><a href="http://localhost:8783/fluxo" target=_blank style="color:var(--gold);font-weight:700">⛓ Fluxo</a><a href="http://localhost:8783/grafo" target=_blank style="color:var(--gold);font-weight:700">🕸 Mapa</a><a href="#sec-agents">Agentes</a><a href="#sec-err">Erros</a><a href="#sec-graf">Gráficos</a><a href="#sec-cur">Curadoria</a><a href="#sec-ren">Renders</a></nav>
@@ -562,12 +578,15 @@ function consultCopy(ev){const t=CONSULT_MD||cval('cq-out');if(!t)return;if(navi
 function consultLearn(){const a=cval('cq-answer');const m=document.getElementById('camsg');if(!a.trim()){if(m)m.textContent='cole algo primeiro';return}
  if(m)m.textContent='aprendendo… (resposta estruturada pode levar alguns segundos)'
  fetch('/api/consult/learn',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:a})}).then(r=>r.json()).then(r=>{
-  if(r.ok){CONSULT_INGEST=(r.mode==='ingest')?r:null
-   if(r.mode==='ingest'){if(m)m.textContent='✓ aprendido: '+(r.verdict||'')+' · +'+((r.rules_added||[]).length)+' regra(s), +'+((r.anti_patterns_added||[]).length)+' anti-pattern(s)'}
-   else{if(m)m.textContent='✓ orientação aprendida ('+(r.count||'?')+' bloco(s) na memória)'}
+  if(r.ok){CONSULT_INGEST=null
+   if(r.mode==='patch_draft'){const d=r.diff||{};if(m)m.textContent='✓ '+r.patch_id+' (draft) gerado — revisa o DIFF no 🧠 Learning Patch (+'+((d.rules_add||[]).length)+' regra, +'+((d.anti_add||[]).length)+' anti) e aprova/rejeita'
+    const sec=document.getElementById('sec-patch');if(sec)setTimeout(()=>sec.scrollIntoView({behavior:'smooth',block:'center'}),300)}
+   else{if(m)m.textContent='✓ orientação aprendida ('+(r.count||'?')+' bloco(s) na memória do Arquiteto)'}
    const ta=document.getElementById('cq-answer');if(ta)ta.value=''}
   else{if(m)m.textContent='erro: '+(r.error||'')}
   tick(1)})}
+function patchAction(pid,action){const reason=action==='reject'?(prompt('motivo da rejeição (opcional):')||''):''
+ fetch('/api/patch',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({patch_id:pid,action,reason})}).then(()=>tick(1))}
 function moveTask(mt,dir){fetch('/api/move',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mt,direction:dir})}).then(()=>tick(1))}
 function goToMT(mt){const sec=document.getElementById('sec-backlog');if(sec)sec.scrollIntoView({behavior:'smooth',block:'center'})
  const c=document.getElementById('kc-'+mt);if(c){c.classList.add('kc-hl');c.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>c.classList.remove('kc-hl'),2400)}}
@@ -640,7 +659,7 @@ function applyOrder(){const root=document.getElementById('root');if(!root)return
  const full=[...saved.filter(id=>present.includes(id)),...present.filter(id=>!saved.includes(id))]
  full.forEach(id=>{const e=document.getElementById(id);if(e)root.appendChild(e)})}
 // RECOLHER cards — só Agentes/Loop/Consult/Backlog abertos por padrão; o resto recolhido (menos poluição)
-const DEFAULT_OPEN=['sec-factory','sec-ciclo','sec-refpack','sec-ask','sec-agents','sec-conversa','sec-consult','sec-learning','sec-backlog']
+const DEFAULT_OPEN=['sec-factory','sec-ciclo','sec-refpack','sec-ask','sec-agents','sec-consult','sec-patch','sec-learning','sec-backlog']
 function collapsedSet(){try{const v=JSON.parse(localStorage.getItem('studio_collapsed')||'null');return v===null?null:new Set(v)}catch(e){return null}}
 function saveCollapsed(s){localStorage.setItem('studio_collapsed',JSON.stringify([...s]))}
 function applyCollapsed(){const root=document.getElementById('root');if(!root)return
@@ -864,6 +883,22 @@ async function tick(force){
   </div>
   ${ingHtml}</div>`))
  const _co=document.getElementById('cq-out');if(_co)_co.value=CONSULT_MD
+ // 🧠 LEARNING PATCH — resposta GPT vira patch (draft) → DIFF → Felipe aprova/rejeita → só então DNA
+ const pt=s.patches||{},draft=pt.draft,pdiff=pt.diff||{},pcc=pt.counts||{}
+ const dl=(arr,cls)=>(arr||[]).map(x=>`<li class=${cls}>${esc(typeof x==='string'?x:JSON.stringify(x))}</li>`).join('')
+ let patchBody
+ if(draft){const nm=draft.next_microtask||{}
+  patchBody=`<div class=patchhd><b>${esc(draft.patch_id)}</b> <span class="pill rb-${(draft.verdict||'').toLowerCase()==='pass'?'approved':(draft.verdict||'').toLowerCase()==='fail'?'rejected':'pending'}">${esc(draft.verdict||'?')}</span> <span class=mut>de ${esc(draft.source_question_id||'?')} · ${esc(draft.cycle_id||'')} · confiança ${esc(draft.confidence||'?')} · sha ${esc((draft.commit_sha||'').slice(0,8))}</span></div>
+   <div class=mut style="font-size:11.5px;margin:4px 0">Aplicação <b>MANUAL</b> — nada vai pro DNA até você aprovar. O diff mostra só o que <b>MUDA</b> (＋ novo · ≡ já existe, ignorado).</div>
+   <div class=patchdiff>
+    <div><div class=kblist-h>🧬 Regras novas <span class=mut>→ felipe_style_dna.md</span></div><ul class=difflist>${dl(pdiff.rules_add,'add')||'<li class=mut>nada novo</li>'}${dl(pdiff.rules_dup,'dup')}</ul></div>
+    <div><div class=kblist-h>🚫 Anti-patterns <span class=mut>→ juiz visual</span></div><ul class=difflist>${dl(pdiff.anti_add,'add')||'<li class=mut>nada novo</li>'}${dl(pdiff.anti_dup,'dup')}</ul></div>
+   </div>
+   ${nm.title?`<div class=mut style="font-size:12px;margin-top:2px">🎯 próxima microtarefa sugerida: <b>${esc(nm.id||'MT')}</b> ${esc(nm.title)}</div>`:''}
+   <div class=patchacts><button class=send onclick="patchAction('${draft.patch_id}','approve')">✅ aprovar e aplicar no DNA</button> <button class=cbtn onclick="patchAction('${draft.patch_id}','reject')">⛔ rejeitar</button></div>`
+ }else{patchBody=`<span class=mut>nenhum patch pendente. Cole uma resposta ESTRUTURADA do Consult GPT (ARCHITECT_ANSWER) no sidecar 🔌 acima → ela vira um patch <b>draft</b> aqui, com diff, pra você aprovar antes de virar memória.</span>`}
+ root.appendChild(el(`<div class="card full" id=sec-patch><h2>🧠 Learning Patch <span class=mut>(resposta GPT → patch → diff → você aprova → DNA · ${pcc.draft||0} draft · ${pcc.applied||0} aplicado · ${pcc.rejected||0} rejeitado)</span></h2>
+  ${patchBody}</div>`))
  // 📚 LEARNING LOG — o que a fábrica aprendeu (regras/anti-patterns/golden) = repertório
  const ll=s.learning||{}
  const lcol=(arr,empty)=>arr&&arr.length?arr.map(x=>`<li>${esc(typeof x==='string'?x:JSON.stringify(x))}</li>`).join(''):`<li class=mut>${empty}</li>`
@@ -1172,22 +1207,26 @@ def _consult_learn(body: dict) -> dict:
                  or bool(re.search(r"(?im)^\s*-?\s*verdict\s*:", text)))
     try:
         if is_answer:
-            from tools.interior_studio.consult_gpt_bridge import answer_parser, ingest as ci, store
+            # GPT decision: resposta estruturada NÃO aplica direto. Vira LEARNING_PATCH draft → diff → Felipe aprova.
+            from tools.interior_studio import learning_patch as lp
+            from tools.interior_studio.consult_gpt_bridge import answer_parser, store
             parsed = answer_parser.parse_answer(text)
             qid = (body.get("question_id") or parsed.get("question_id")
                    or (store.latest_question() or {}).get("question_id") or "colado")
-            store.save_answer(qid, text)
-            r = ci.ingest(qid)
-            r["mode"] = "ingest"
+            saved = store.save_answer(qid, text)
+            parsed["question_id"] = qid
+            patch = lp.from_answer(parsed, answer_path=saved.get("path", ""))
+            diff = lp.compute_diff(patch)
             try:
                 from tools import studio_log
-                if r.get("ok"):
-                    studio_log.post("consult-liaison", "done",
-                                    f"aprendi {qid}: {r.get('verdict')} · +{len(r.get('rules_added', []))} regra(s)",
-                                    to="architect")
+                studio_log.post("consult-liaison", "done",
+                                f"gerei {patch['patch_id']} (draft) de {qid}: "
+                                f"+{len(diff['rules_add'])} regra(s), +{len(diff['anti_add'])} anti — aguarda Felipe",
+                                to="architect")
             except Exception:  # noqa: BLE001
                 pass
-            return r
+            return {"ok": True, "mode": "patch_draft", "patch_id": patch["patch_id"],
+                    "verdict": patch.get("verdict"), "diff": diff}
         r = _feed(text, body.get("title"))
         r["mode"] = "feed"
         return r
@@ -1541,6 +1580,29 @@ def _refpack_images(body: dict) -> dict:
             "total": len(pack.get("references", []))}
 
 
+def _patch_action(body: dict) -> dict:
+    """Felipe aprova/rejeita um LEARNING_PATCH draft (só após aprovação ele altera DNA/juiz)."""
+    pid = body.get("patch_id")
+    act = body.get("action")
+    try:
+        if act == "approve":
+            r = ic_patch.approve(pid, now=time.strftime("%Y-%m-%dT%H:%M:%S"))
+            try:
+                from tools import studio_log
+                if r.get("ok"):
+                    studio_log.post("consult-liaison", "done",
+                                    f"Felipe APROVOU {pid}: +{len(r.get('rules_added', []))} regra(s) no DNA",
+                                    to="architect")
+            except Exception:  # noqa: BLE001
+                pass
+            return r
+        if act == "reject":
+            return ic_patch.reject(pid, body.get("reason"), now=time.strftime("%Y-%m-%dT%H:%M:%S"))
+        return {"ok": False, "error": f"ação inválida: {act}"}
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": str(e)}
+
+
 def _curate_ref(body: dict) -> dict:
     """Curadoria visual do Felipe numa referência do Reference Pack (👍/👎/⭐/🚫 + comentário)."""
     try:
@@ -1654,6 +1716,8 @@ class H(BaseHTTPRequestHandler):
             self._send(200, json.dumps(_gpt_bundle(body), ensure_ascii=False))
         elif path == "/api/refpack-images":
             self._send(200, json.dumps(_refpack_images(body), ensure_ascii=False))
+        elif path == "/api/patch":
+            self._send(200, json.dumps(_patch_action(body), ensure_ascii=False))
         else:
             self._send(404, b"not found", "text/plain")
 
