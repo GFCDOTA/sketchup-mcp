@@ -1,0 +1,54 @@
+{
+  "id": "furniture_program_r002",
+  "type": "furniture_program",
+  "source_worker": "Arquiteto · deepseek-r1:14b",
+  "environment": "sala",
+  "room_id": "r002",
+  "room_name": "SALA DE JANTAR | SALA DE ESTAR",
+  "area_m2": 13.8,
+  "items": [
+    {
+      "asset": "sofa",
+      "priority": "core",
+      "reason": "móvel central para o ambiente de estar"
+    },
+    {
+      "asset": "coffee_table",
+      "priority": "core",
+      "reason": "para complementar o sofá e servir bebidas"
+    },
+    {
+      "asset": "dining_table",
+      "priority": "core",
+      "reason": "mesa de jantar compacta que serve também como workspace opcional"
+    },
+    {
+      "asset": "armchair",
+      "priority": "core",
+      "reason": "complementa o ambiente com conforto"
+    },
+    {
+      "asset": "storage_bench",
+      "priority": "core",
+      "reason": "móvel multifuncional para armazenamento e assento"
+    },
+    {
+      "asset": "tv_console",
+      "priority": "secundario",
+      "reason": "para organizar eletrônicos e decorar com elementos de estilo"
+    },
+    {
+      "asset": "accent_lamp",
+      "priority": "opcional",
+      "reason": "iluminação focal complementar"
+    }
+  ],
+  "existing": [
+    "🛋️ Sofá (pronto p/ V-Ray)",
+    "🪑 Poltrona (falta referências)",
+    "☕ Mesa de centro (falta referências)",
+    "🍽️ Mesa de jantar (falta referências)",
+    "📺 Rack (falta referências)"
+  ],
+  "requires_approval": true
+}

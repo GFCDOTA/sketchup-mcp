@@ -45,6 +45,8 @@ from tools.interior_studio import reference_packs as ic_refpacks  # noqa: E402  
 from tools.interior_studio import gpt_review_bundle as ic_bundle  # noqa: E402  pacote de revisão pro Consult GPT
 from tools.interior_studio import learning_patch as ic_patch      # noqa: E402  LEARNING_PATCH (resposta→patch→diff→aprova)
 from tools.interior_studio import project_state as ic_pstate      # noqa: E402  state machine + inventário por cômodo
+from tools.interior_studio import proposals as ic_proposals       # noqa: E402  fila de propostas dos workers locais
+from tools.interior_studio import architect_program as ic_archprog  # noqa: E402  Arquiteto propõe furniture_program
 
 
 def _kanban_load():
@@ -302,7 +304,21 @@ def _state() -> dict:
             "backlog": _backlog(), "references": _references(), "inbox": _inbox(),
             "knowledge": _knowledge_state(), "consult": _consult_state(), "cycles": _cycles_recent(8),
             "factory": fac, "refpack": ic_refpacks.pack_state(pack_id), "learning": _learning_log(),
-            "patches": ic_patch.patches_state(), "overview": _overview()}
+            "patches": ic_patch.patches_state(), "proposals": ic_proposals.state(), "overview": _overview()}
+
+
+def _proposal_action(body: dict) -> dict:
+    """Aprovar/rejeitar uma proposta, ou pedir o Arquiteto propor o programa de um cômodo."""
+    act = body.get("action")
+    if act == "approve":
+        p = ic_proposals.approve(body.get("id", ""))
+        return {"ok": bool(p), "proposal": p}
+    if act == "reject":
+        p = ic_proposals.reject(body.get("id", ""))
+        return {"ok": bool(p), "proposal": p}
+    if act == "propose":   # roda o Arquiteto (LLM local) pro cômodo — pode demorar (deepseek)
+        return ic_archprog.propose_and_save(body.get("room_id", ""), body.get("model", "deepseek"))
+    return {"ok": False, "error": f"ação desconhecida: {act}"}
 
 
 PAGE = r"""<!doctype html><html lang=pt-BR><head><meta charset=utf-8>
@@ -545,11 +561,17 @@ textarea{width:100%;min-height:90px;background:#0c0d10;border:1px solid var(--bd
 .ovcyc{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:12px;margin:11px 0 2px}.ovinvfull{margin-top:2px}
 .ovfoco{font-size:8.5px;font-weight:700;background:#f0a868;color:#1a1206;border-radius:4px;padding:1px 5px;vertical-align:middle}
 .ovpulse{display:flex;flex-direction:column;gap:5px}.ovpline{font-size:12px;line-height:1.4}.ovpface{font-size:14px}.ovon{color:var(--ok);font-size:9px;vertical-align:middle}
+#sec-program{border-left:3px solid #9c6fd4}
+.apcard{border:1px solid var(--bd);border-radius:9px;background:#0b0c0f;padding:10px 12px;margin-bottom:9px}
+.aphd{font-size:13px;margin-bottom:7px}.appass{color:var(--ok);font-size:11px;font-weight:600}
+.apitems{display:flex;flex-direction:column;gap:3px;margin-bottom:8px}
+.apitem{font-size:12px;display:flex;align-items:center;gap:7px}.apdot{width:7px;height:7px;border-radius:50%;flex:none}
+.apwhy{color:var(--mut)}.apacts{display:flex;gap:7px;flex-wrap:wrap}
 .ovinvtoggle{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;font-size:12px;border-top:1px dashed #2c2636;padding-top:9px}
 .ovcard[onclick]{cursor:pointer}.ovcard[onclick]:hover{border-color:#f0a868;background:#15131c}
 </style></head><body>
 <header><span class=hdot></span><h1>🎛 INTERIOR STUDIO</h1>
-<nav><a href="#sec-overview">Missão</a><a href="#sec-ciclo">Ciclo</a><a href="#sec-refpack">Reference Pack</a><a href="#sec-consult">Consult GPT</a><a href="#sec-patch">Learning Patch</a><a href="#sec-agents">Agentes</a><a href="#sec-backlog">Backlog</a><a href="#sec-ren">Renders</a><a href="/explica" target=_blank style="color:var(--gold);font-weight:600;margin-left:8px" title="como o sistema funciona — o Fluxo e o Mapa estão aqui dentro">📖 Explica</a></nav></header>
+<nav><a href="#sec-overview">Missão</a><a href="#sec-program">Programa</a><a href="#sec-ciclo">Ciclo</a><a href="#sec-refpack">Reference Pack</a><a href="#sec-consult">Consult GPT</a><a href="#sec-patch">Learning Patch</a><a href="#sec-agents">Agentes</a><a href="#sec-backlog">Backlog</a><a href="#sec-ren">Renders</a><a href="/explica" target=_blank style="color:var(--gold);font-weight:600;margin-left:8px" title="como o sistema funciona — o Fluxo e o Mapa estão aqui dentro">📖 Explica</a></nav></header>
 <div class=wrap id=root></div>
 <div id=modal class=modal onclick="if(event.target===this)closeModal()">
  <div class=mbox><div class=mbar><span id=mname></span>
@@ -615,6 +637,9 @@ function consultRelay(){const m=document.getElementById('cqmsg');if(m)m.textCont
 function jumpTo(id){const sec=document.getElementById(id);if(sec){sec.scrollIntoView({behavior:'smooth',block:'center'});sec.classList.add('kc-hl');setTimeout(()=>sec.classList.remove('kc-hl'),2000)}}
 let ROOMOPEN=new Set()   // quais cômodos do inventário estão expandidos (persiste entre re-renders; default fechado = enxuto)
 function invToggle(k,open){open?ROOMOPEN.add(k):ROOMOPEN.delete(k)}
+function propAct(id,action){fetch('/api/proposal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,action})}).then(r=>r.json()).then(_=>tick(1))}
+function propGen(rid,btn){if(btn){btn.disabled=true;btn.textContent='🧠 Arquiteto pensando…'}
+ fetch('/api/proposal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'propose',room_id:rid})}).then(r=>r.json()).then(_=>{if(btn){btn.disabled=false;btn.textContent='🔄 re-propor'}tick(1)}).catch(_=>{if(btn){btn.disabled=false;btn.textContent='🔄 re-propor'}})}
 function flagErr(){const a=document.getElementById('flagag').value,m=document.getElementById('flagmsg').value;if(!m)return
  fetch('/api/flag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:a,message:m})}).then(()=>{document.getElementById('flagmsg').value='';tick(1)})}
 function clearErr(agent){fetch('/api/clear',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent})}).then(()=>tick(1))}
@@ -826,6 +851,17 @@ async function tick(force){
    <div class=ovinvfull>${rooms}</div>
    <div class=ovsec>📡 PULSO <span class=mut>última fala do time + sessões ativas</span></div>
    <div class=ovpulse>${pulso}${sess}</div></div>`))
+ }
+ // 🧠 PROGRAMA DO ARQUITETO — furniture_program proposto pelo LLM local (Felipe aprova; nada entra direto)
+ {const pend=((s.proposals||{}).pending||[]).filter(p=>p.type==='furniture_program')
+  const appr=((s.proposals||{}).approved||[]).filter(p=>p.type==='furniture_program')
+  if(pend.length||appr.length){const PRI={core:'#f0a868',secundario:'var(--blu)',opcional:'var(--mut)'}
+   const card=p=>{const items=(p.items||[]).map(it=>`<div class=apitem><span class=apdot style="background:${PRI[it.priority]||'var(--mut)'}"></span><b>${esc(it.asset)}</b> <span class=mut>${esc(it.priority||'')}</span> <span class=apwhy>— ${esc(it.reason||'')}</span></div>`).join('')
+    const isPend=p.status!=='approved'
+    return `<div class=apcard><div class=aphd><b>${esc(p.room_name||p.environment||'')}</b> <span class=mut>${p.area_m2?p.area_m2+' m² · ':''}${esc(p.source_worker||'')}</span>${isPend?'':' <span class=appass>✓ aprovado</span>'}</div><div class=apitems>${items}</div>${isPend?`<div class=apacts><button class=send onclick="propAct('${p.id}','approve')">✅ aprovar programa</button> <button class=chatbtn onclick="propAct('${p.id}','reject')">👎 rejeitar</button> <button class=chatbtn onclick="propGen('${esc(p.room_id||'')}',this)">🔄 re-propor</button></div>`:''}</div>`}
+   root.appendChild(el(`<div class="card full" id=sec-program><h2>🧠 Programa do Arquiteto <span class=mut>(o LLM local propõe a mobília do cômodo a partir das dimensões reais + estilo — você aprova; nada entra direto)</span></h2>
+    ${pend.map(card).join('')||''}
+    ${appr.length?`<div class=ovsec>✓ aprovados</div>${appr.map(card).join('')}`:''}</div>`))}
  }
  // 🏭 FÁBRICA + 🔧 CICLO ATUAL + 🖼️ REFERENCE PACK — a esteira por ciclo (topo, unidade principal)
  FACTORY=s.factory||{}
@@ -1915,6 +1951,8 @@ class H(BaseHTTPRequestHandler):
             self._send(200, json.dumps(_refpack_images(body), ensure_ascii=False))
         elif path == "/api/patch":
             self._send(200, json.dumps(_patch_action(body), ensure_ascii=False))
+        elif path == "/api/proposal":
+            self._send(200, json.dumps(_proposal_action(body), ensure_ascii=False))
         else:
             self._send(404, b"not found", "text/plain")
 
