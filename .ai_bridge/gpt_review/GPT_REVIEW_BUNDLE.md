@@ -1,24 +1,22 @@
 # GPT REVIEW BUNDLE — Interior Studio (:8782)
-> Gerado 2026-06-22T01:04:44 · fonte única pro Consult GPT revisar o dashboard sem localhost.
+> Gerado 2026-06-22T01:35:58 · fonte única pro Consult GPT revisar o dashboard sem localhost.
 
 ## 1. Repo
 - branch: `feat/sofa-class-from-reference`
-- commit: `e7750cb5c0f296573be47cbee58b3635307da38e`
+- commit: `d73f1305b29e649b970525a3bc1954c49c5b37b1`
 - remote: `https://github.com/GFCDOTA/sketchup-mcp.git`
-- gerado_em: 2026-06-22T01:04:44
+- gerado_em: 2026-06-22T01:35:58
 - tree: https://github.com/GFCDOTA/sketchup-mcp/tree/feat/sofa-class-from-reference
 
 <details><summary>git diff --stat desde a última revisão</summary>
 
 ```
-.ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.json       |  10 +-
- .ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md         |  38 ++--
- tests/test_learning_patch.py                       |  97 ++++++++++
- .../interior_studio/contracts/learning_patch.v1.md |  49 +++++
- tools/interior_studio/cycles.py                    |  22 ++-
- tools/interior_studio/learning_patch.py            | 201 +++++++++++++++++++++
- tools/studio_dashboard.py                          |  92 ++++++++--
- 7 files changed, 461 insertions(+), 48 deletions(-)
+.ai_bridge/interior_cycles/CYCLE-003.json          |  5 +-
+ .../consult_gpt_bridge/contracts.py                |  6 +++
+ .../consult_gpt_bridge/prompt_builder.py           |  3 +-
+ tools/interior_studio/cycles.py                    |  7 ++-
+ tools/studio_dashboard.py                          | 57 +++++++++++++++++++---
+ 5 files changed, 65 insertions(+), 13 deletions(-)
 ```
 </details>
 
@@ -67,20 +65,18 @@ _Análise = hipótese de pesquisa (não vi as imagens renderizadas). Quem julga 
 
 ## 6. Consult GPT Bridge
 - modo: manual · OpenAI: on
-- última pergunta: kitchen_skin_045756 · pendentes: 1 · ingeridas: 1
+- última pergunta: sofa_spec_001 · pendentes: 2 · ingeridas: 1
 
 ## 7. Mudanças desde a última revisão
-- último SHA revisado: `950b4dc006a9ab34f45aa1bc1ffd27994d0a33cc`
-- SHA atual: `e7750cb5c0f296573be47cbee58b3635307da38e`
+- último SHA revisado: `986e9452f33dc904b213a7584da7af1c8bf9db23`
+- SHA atual: `d73f1305b29e649b970525a3bc1954c49c5b37b1`
 ```
-.ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.json       |  10 +-
- .ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md         |  38 ++--
- tests/test_learning_patch.py                       |  97 ++++++++++
- .../interior_studio/contracts/learning_patch.v1.md |  49 +++++
- tools/interior_studio/cycles.py                    |  22 ++-
- tools/interior_studio/learning_patch.py            | 201 +++++++++++++++++++++
- tools/studio_dashboard.py                          |  92 ++++++++--
- 7 files changed, 461 insertions(+), 48 deletions(-)
+.ai_bridge/interior_cycles/CYCLE-003.json          |  5 +-
+ .../consult_gpt_bridge/contracts.py                |  6 +++
+ .../consult_gpt_bridge/prompt_builder.py           |  3 +-
+ tools/interior_studio/cycles.py                    |  7 ++-
+ tools/studio_dashboard.py                          | 57 +++++++++++++++++++---
+ 5 files changed, 65 insertions(+), 13 deletions(-)
 ```
 
 ## Pergunta para o GPT
