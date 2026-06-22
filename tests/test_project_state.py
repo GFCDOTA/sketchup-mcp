@@ -29,6 +29,22 @@ def _pack(sb, asset, refs):
         json.dumps({"pack_id": f"{asset}_reference_pack_001", "references": refs}), "utf-8")
 
 
+def _verdict(sb, asset, text):
+    d = sb / "artifacts/review/furniture" / asset
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "gpt_verdict.md").write_text(text, "utf-8")
+    (d / "x_compare.png").write_bytes(b"x")   # build_done
+
+
+def test_sinais_case_idioma_insensiveis_nao_travam_estado(sandbox):
+    """Regressão: verdict do GPT em minúsculas / idioma variante não pode deixar o asset travado
+    em form_review/context_review quando na verdade foi aprovado."""
+    _class(sandbox, "sofa")
+    _pack(sandbox, "sofa", [{"id": "r1", "status": "main"}])
+    _verdict(sandbox, "sofa", "Veredito: forma PASS. contexto: pass (parou de parecer caixa).")
+    assert ps.asset_state("sofa")["state"] == "vray_ready"
+
+
 def test_not_started_sem_classe_sem_pack(sandbox):
     assert ps.asset_state("nightstand")["state"] == "not_started"
 

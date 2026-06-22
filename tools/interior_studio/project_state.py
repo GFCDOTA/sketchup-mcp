@@ -77,9 +77,10 @@ def asset_state(asset: str) -> dict:
     vf = list(vdir.glob("**/gpt_verdict.md")) if vdir.exists() else []
     if vf:
         vtxt = vf[0].read_text("utf-8", "ignore")
+    vlow = vtxt.lower()   # casamento de sinais case/idioma-insensível (verdict do GPT varia "Contexto"/"context"/caixa)
     build_done = has("**/*compare*.png")
-    form_pass = ("parou de parecer caixa" in vtxt) or ("Forma" in vtxt and "PASS" in vtxt)
-    ctx_pass = ("Contexto" in vtxt and "PASS" in vtxt) or ("CONTEXTO" in vtxt and "PASS" in vtxt)
+    form_pass = ("parou de parecer caixa" in vlow) or ("forma" in vlow and "pass" in vlow)
+    ctx_pass = ("contexto" in vlow and "pass" in vlow) or ("context" in vlow and "pass" in vlow)
     vray_done = has("**/*vray*.png") or has("**/*_final*.png")
 
     if vray_done:
