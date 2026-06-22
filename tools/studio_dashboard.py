@@ -495,8 +495,8 @@ textarea{width:100%;min-height:90px;background:#0c0d10;border:1px solid var(--bd
 .difflist li.dup{background:#181a20;color:#7a8696;text-decoration:line-through;opacity:.7}.difflist li.dup::before{content:'≡ '}
 .patchacts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;border-top:1px dashed #2c2636;padding-top:8px}
 </style></head><body>
-<header><span class=hdot></span><h1>INTERIOR STUDIO</h1>
-<nav><a href="http://localhost:8783/fluxo" target=_blank style="color:var(--gold);font-weight:700">⛓ Fluxo</a><a href="http://localhost:8783/grafo" target=_blank style="color:var(--gold);font-weight:700">🕸 Mapa</a><a href="#sec-agents">Agentes</a><a href="#sec-err">Erros</a><a href="#sec-graf">Gráficos</a><a href="#sec-cur">Curadoria</a><a href="#sec-ren">Renders</a></nav>
+<header><span class=hdot></span><h1>INTERIOR STUDIO <span style="font-size:11px;color:var(--mut);font-weight:400">· o dash · :8782</span></h1>
+<nav><a href="http://localhost:8783/" target=_blank style="color:#f0a868;font-weight:700" title="vitrine / porta de entrada (Mapa, Fluxo, Agentes, Como funciona)">🏠 Vitrine :8783</a><a href="http://localhost:8783/grafo" target=_blank style="color:var(--gold);font-weight:700">🕸 Mapa</a><a href="http://localhost:8783/fluxo" target=_blank style="color:var(--gold);font-weight:700">⛓ Fluxo</a><a href="#sec-factory">Ciclo</a><a href="#sec-agents">Agentes</a><a href="#sec-cur">Curadoria</a><a href="#sec-ren">Renders</a></nav>
 <span class=mut style="margin-left:auto;font-size:11px">🔓 ⠿ mover · ▭ largura · puxa a borda ↕ pra altura</span><button onclick=resetLayout() title="voltar ao layout padrão" style="background:#0c0d10;border:1px solid var(--bd);color:var(--mut);border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11px;margin:0 12px">↺ layout</button><span class=mut id=ts>carregando…</span><span class=mut>· :8782</span></header>
 <div class=wrap id=root></div>
 <div id=modal class=modal onclick="if(event.target===this)closeModal()">
