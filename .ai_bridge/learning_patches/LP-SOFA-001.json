@@ -1,7 +1,7 @@
 {
   "patch_id": "LP-SOFA-001",
   "created_at": "2026-06-22T01:56:28",
-  "status": "draft",
+  "status": "applied",
   "source": "Consult GPT (via ponte Chrome) + revisão",
   "source_question_id": "sofa_spec_001",
   "source_answer_id": null,
@@ -83,12 +83,33 @@
     "description": "Reconstruir a classe sofá usando a SOFA_BUILD_SPEC acima, gerando variações 2 e 3 lugares, com comparação lado a lado contra o sofá antigo quadrado."
   },
   "review": {
-    "approved_by": null,
-    "approved_at": null,
+    "approved_by": "Felipe",
+    "approved_at": "2026-06-22T05:29:39",
     "rejected_reason": null
   },
   "applied": {
-    "applied_at": null,
-    "files_changed": []
+    "applied_at": "2026-06-22T05:29:39",
+    "files_changed": [
+      ".claude/memory/felipe_style_dna.md",
+      "references/design_rules/felipe_visual_judge_rules.json"
+    ],
+    "rules_added": [
+      "Sofá industrial premium para Felipe deve ser derivado de referência real, com assento profundo, braços contidos, encosto baixo levemente inclinado e pés finos em metal escuro.",
+      "Evitar sofá-caixa: todo sofá precisa ter leitura clara de assento volumoso, braço suavizado, encosto confortável e base leve.",
+      "Couro grafite/slate funciona bem no BLACK_WOOD_GOLD quando tem roughness controlado e não parece plástico brilhante.",
+      "Em sala compacta, preservar profundidade útil do assento e reduzir largura antes de sacrificar conforto visual.",
+      "Não copiar dimensão de sofá de referência: a referência define linguagem/formalidade/material; o footprint final vem da planta + gates de circulação (sala compacta)."
+    ],
+    "anti_patterns_added": [
+      "sofa_box_block: Sofá não pode parecer cubo com braços e encosto verticais.",
+      "armrest_too_chunky: Braço não pode dominar o volume visual nem parecer bloco estrutural.",
+      "flat_cushion: Almofada não pode ser plano chapado; precisa crown, espessura e borda suavizada.",
+      "wall_backrest: Encosto não pode ser parede vertical; precisa inclinação e almofada.",
+      "floor_block_base: Nesta variante, sofá não pode encostar no chão como bloco; precisa pés e vão inferior.",
+      "plastic_black_leather: Couro preto/grafite não pode parecer plástico brilhante.",
+      "fake_industrial_brutal: Industrial não pode virar bruto, pesado ou tosco; precisa boutique premium.",
+      "reference_scale_copy: copiar proporção/dimensão de sofá real sem recalcular pra sala compacta; a referência manda na linguagem, não no footprint.",
+      "toy_sofa_from_over_shrink: reduzir tudo proporcionalmente até virar miniatura dura; compacto premium mantém almofada, profundidade visual e presença."
+    ]
   }
 }
