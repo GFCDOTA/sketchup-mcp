@@ -285,69 +285,14 @@ def _learning_log() -> dict:
             "golden_samples": golden}
 
 
-FURNITURE_META = {   # classe de móvel -> (ícone, rótulo PT) pro inventário da Visão Geral
-    "sofa": ("🛋️", "Sofá"), "armchair": ("🪑", "Poltrona"), "bed": ("🛏️", "Cama"),
-    "coffee_table": ("☕", "Mesa de centro"), "dining_table": ("🍽️", "Mesa de jantar"),
-    "rack": ("📺", "Rack"), "wardrobe": ("🚪", "Guarda-roupa"), "nightstand": ("🗄️", "Criado-mudo"),
-}
-
-
-def _asset_pipeline(asset: str) -> list:
-    """As 8 etapas da esteira ROOM_CYCLE pro asset atual, com status DERIVADO de sinais reais
-    (reference pack · curadoria · learning patch · artefatos de render/veredito). GitHub-Actions-style."""
-    c = ic_cycles.current_cycle() or {}
-    refs = c.get("references") or {}
-    lr = c.get("learning") or {}
-    pack = ic_refpacks.load_pack(f"{asset}_reference_pack_001") or {}
-    npack = len(pack.get("references", []))
-    nimg = sum(1 for r in pack.get("references", []) if r.get("og_image"))
-    vdir = ROOT / "artifacts/review/furniture" / asset
-
-    def has(glb):
-        return bool(list(vdir.glob(glb))) if vdir.exists() else False
-    vtxt = ""
-    vf = list(vdir.glob("**/gpt_verdict.md")) if vdir.exists() else []
-    if vf:
-        vtxt = vf[0].read_text("utf-8", "ignore")
-    build_done = has("**/*compare*.png")
-    form_pass = ("parou de parecer caixa" in vtxt) or ("Forma" in vtxt and "PASS" in vtxt)
-    ctx_pass = ("Contexto" in vtxt and "PASS" in vtxt) or ("CONTEXTO" in vtxt and "PASS" in vtxt)
-    vray_done = has("**/*vray*.png") or has("**/*_final*.png")
-    spec_done = bool(lr.get("new_rules") or lr.get("patches"))
-
-    def s(done):
-        return "done" if done else "pending"
-    return [
-        {"icon": "📚", "label": "Referências", "status": s(npack > 0), "jump": "sec-refpack",
-         "detail": f"{nimg} com img · {npack} no pack"},
-        {"icon": "🎨", "label": "Curadoria", "status": s(bool(refs.get("main"))), "jump": "sec-refpack",
-         "detail": "⭐ escolhida" if refs.get("main") else "falta ⭐"},
-        {"icon": "📐", "label": "Build Spec", "status": s(spec_done), "jump": "sec-patch",
-         "detail": "patch aprovado" if spec_done else "falta"},
-        {"icon": "🔨", "label": "Construção", "status": s(build_done), "jump": "sec-ren",
-         "detail": "classe construída" if build_done else "falta"},
-        {"icon": "🤖", "label": "GPT Forma", "status": s(form_pass), "detail": "PASS" if form_pass else "—"},
-        {"icon": "🏠", "label": "GPT Contexto", "status": s(ctx_pass), "detail": "PASS" if ctx_pass else "—"},
-        {"icon": "🎞️", "label": "V-Ray", "status": s(vray_done), "detail": "render pronto" if vray_done else "falta (teu olho)"},
-        {"icon": "🧠", "label": "Aprendido", "status": s(bool(lr.get("new_rules"))), "jump": "sec-learning",
-         "detail": f"{len(lr.get('new_rules', []))} regras" if lr.get("new_rules") else "—"},
-    ]
-
-
 def _overview() -> dict:
-    """VISÃO GERAL (mission control): headline + pipeline do asset atual + inventário DINÂMICO por cômodo
-    (state machine canônica, GAP 1 do GPT — cada cômodo lista SÓ os assets que fazem sentido pra ele)."""
-    fac = ic_cycles.factory_state()
-    cur = fac.get("asset") if fac.get("has_cycle") else None
-    pipe = _asset_pipeline(cur) if cur else []
-    nxt = next((p for p in pipe if p["status"] != "done"), None)
-    next_action = (f"{nxt['icon']} {nxt['label']} — {nxt['detail']}" if nxt
-                   else ("ciclo completo ✓" if pipe else fac.get("next_action")))
-    rooms = ic_pstate.project_state()["rooms"]
-    return {"project": fac.get("project") or "planta_74", "current_asset": cur,
-            "current_label": FURNITURE_META.get(cur, ("", None))[1] if cur else None,
-            "next_action": next_action, "has_cycle": fac.get("has_cycle", False),
-            "pipeline": pipe, "rooms": rooms}
+    """VISÃO GERAL = domínio por ambiente (consenso Claude×GPT): os FOCOS ATIVOS (fluxos VIVOS derivados do
+    estado, suporta MÚLTIPLOS — 'mostra os fluxos conforme o que está sendo trabalhado') + inventário por
+    cômodo (escondido). Pipeline = política do domínio (pipeline_for, por kind do asset)."""
+    st = ic_pstate.project_state()
+    focuses = ic_pstate.active_focuses()
+    return {"project": st["project"], "active_focuses": focuses, "n_focus": len(focuses),
+            "rooms": st["rooms"]}
 
 
 def _state() -> dict:
@@ -582,6 +527,8 @@ textarea{width:100%;min-height:90px;background:#0c0d10;border:1px solid var(--bd
 .ovcic{font-size:24px;line-height:1}.ovcnm{font-weight:700;font-size:13px}
 .ovcb{font-size:10.5px;font-weight:600;margin-top:2px}.ovcd{font-size:11px;color:var(--mut);margin-top:3px;line-height:1.3}
 .ovroom{margin-bottom:10px}.ovroomh{font-size:12.5px;margin:8px 0 6px;color:#cdb98a;border-bottom:1px solid var(--bd);padding-bottom:4px}
+.ovfocus{background:#0c0d10;border:1px solid var(--bd);border-left:3px solid #f0a868;border-radius:10px;padding:11px 12px;margin-bottom:12px}
+.ovfocush{font-size:13.5px;margin-bottom:10px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}.ovnext{color:#f0a868;font-size:12px}
 .ovinvtoggle{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;font-size:12px;border-top:1px dashed #2c2636;padding-top:9px}
 .ovcard[onclick]{cursor:pointer}.ovcard[onclick]:hover{border-color:#f0a868;background:#15131c}
 </style></head><body>
@@ -814,20 +761,23 @@ async function tick(force){
  LEADOF={};FACES={};LABELS={};(ag.umbrellas||[]).forEach(u=>{LEADOF[u.id]=u.lead.id;FACES[u.id]=u.lead.face;LABELS[u.id]=u.label;[u.lead,...u.subs].forEach(c=>{FACES[c.id]=c.face;LABELS[c.id]=c.label})})
  FACES['felipe']='🧑';LABELS['felipe']='você'
  const root=document.getElementById('root');const sy=window.scrollY;root.innerHTML=''
- // 🛰️ VISÃO GERAL (mission control) — a primeira coisa: onde estamos, pipeline, inventário
+ // 🛰️ VISÃO GERAL — domínio por ambiente: os FOCOS ATIVOS (fluxos vivos, N) + inventário (escondido)
  const ov=s.overview||{}
- if(ov.has_cycle||(ov.rooms||[]).length){const SC={done:'ov-done',pending:'ov-pend',doing:'ov-doing'}
-  const pipe=(ov.pipeline||[]).map((p,i)=>`${i?'<span class=ovarrow>→</span>':''}<div class="ovstep ${SC[p.status]||'ov-pend'}"${p.jump?` onclick="jumpTo('${p.jump}')" style="cursor:pointer"`:''} title="${esc(p.detail||'')}"><div class=ovic>${p.icon}</div><div class=ovlbl>${esc(p.label)}</div><div class=ovdet>${esc(p.detail||'')}</div></div>`).join('')
+ if((ov.active_focuses||[]).length||(ov.rooms||[]).length){const SC={done:'ov-done',pending:'ov-pend',doing:'ov-doing'}
   const STC={approved:'var(--ok)',learned:'var(--ok)',frozen:'var(--blu)',vray_ready:'var(--gold)',context_review_needed:'var(--gold)',form_review_needed:'var(--gold)',building:'var(--blu)',build_spec_ready:'var(--warn)',curation_needed:'var(--warn)',references_needed:'var(--mut)',not_started:'#5a606b'}
-  const rooms=(ov.rooms||[]).map(rm=>{const cards=(rm.assets||[]).map(a=>{const col=STC[a.state]||'var(--mut)',on=a.asset===ov.current_asset
-    return `<div class="ovcard ${on?'ovcard-on':''}"${a.jump?` onclick="jumpTo('${a.jump}')" style="cursor:pointer"`:''}><div class=ovcnm>${esc(a.label)}</div><div class=ovcb style="color:${col}">${esc(a.state_label)}</div><div class=ovcd>▶ ${esc(a.next||'')}${a.refs?(' · '+(a.refs_img||0)+'/'+a.refs+' img'):''}</div></div>`}).join('')
+  const focusBlocks=(ov.active_focuses||[]).map(f=>{
+   const pipe=(f.pipeline||[]).map((p,i)=>`${i?'<span class=ovarrow>→</span>':''}<div class="ovstep ${SC[p.status]||'ov-pend'}"><div class=ovic>${p.icon}</div><div class=ovlbl>${esc(p.label)}</div></div>`).join('')
+   const col=STC[f.state]||'var(--gold)'
+   const act=f.jump?`<button class=chatbtn onclick="jumpTo('${f.jump}')">▶ ${esc(f.next||'')}</button>`:`<span class=ovnext>▶ ${esc(f.next||'')}</span>`
+   return `<div class=ovfocus><div class=ovfocush>${f.env_icon} <span class=mut>${esc(f.env_label)}</span> › <b>${esc(f.label)}</b> <span style="color:${col}">— ${esc(f.state_label)}</span>${f.reason?(' <span class=mut>('+esc(f.reason)+')</span>'):''} ${act}</div><div class=ovpipe>${pipe}</div></div>`}).join('')
+  const noFocus='<div class=mut style="padding:8px 2px">Nenhum fluxo ativo agora — escolhe um asset no inventário pra começar um ciclo.</div>'
+  const rooms=(ov.rooms||[]).map(rm=>{const cards=(rm.assets||[]).map(a=>{const col=STC[a.state]||'var(--mut)'
+    return `<div class="ovcard"${a.jump?` onclick="jumpTo('${a.jump}')" style="cursor:pointer"`:''}><div class=ovcnm>${esc(a.label)}</div><div class=ovcb style="color:${col}">${esc(a.state_label)}</div><div class=ovcd>▶ ${esc(a.next||'')}${a.refs?(' · '+(a.refs_img||0)+'/'+a.refs+' img'):''}</div></div>`}).join('')
    return `<div class=ovroom><div class=ovroomh>${rm.icon} <b>${esc(rm.label)}</b> <span class=mut>${rm.done}/${rm.total} prontos</span></div><div class=ovinv>${cards}</div></div>`}).join('')
-  // resumo do RESTO (não-foco) — não polui; só conta
   let nprog=0,ntodo=0,ndone=0;(ov.rooms||[]).forEach(rm=>(rm.assets||[]).forEach(a=>{if(['approved','learned','frozen'].includes(a.state))ndone++;else if(['not_started','references_needed'].includes(a.state))ntodo++;else nprog++}))
-  root.appendChild(el(`<div class="card full" id=sec-overview><h2>🛰️ Visão geral — foco no que tá rolando AGORA</h2>
-   <div class=ovhead>🎯 foco: <b style="color:#f0a868">${esc(ov.current_label||'nenhum ciclo ativo')}</b> · próximo passo: <b>${esc(ov.next_action||'—')}</b></div>
-   <div class=ovpipe>${pipe||'<span class=mut>sem ciclo ativo — escolhe um asset no inventário</span>'}</div>
-   <div class=ovinvtoggle><span class=mut>resto do apê: ${nprog} em andamento · ${ntodo} a fazer · ${ndone} pronto(s)</span> <button class=chatbtn onclick="toggleInv(this)">${INVOPEN?'▲ ocultar ambientes':'📋 ver todos os ambientes'}</button></div>
+  root.appendChild(el(`<div class="card full" id=sec-overview><h2>🛰️ Visão geral — focos ativos${ov.n_focus?(' ('+ov.n_focus+')'):''}</h2>
+   ${focusBlocks||noFocus}
+   <div class=ovinvtoggle><span class=mut>apê inteiro: ${nprog} em andamento · ${ntodo} a fazer · ${ndone} pronto(s)</span> <button class=chatbtn onclick="toggleInv(this)">${INVOPEN?'▲ ocultar ambientes':'📋 ver todos os ambientes'}</button></div>
    <div id=ovinvfull style="display:${INVOPEN?'block':'none'};margin-top:10px"><div class=kblist-h>Inventário por cômodo <span class=mut>(pra quando for replicar pra outros ambientes)</span></div>${rooms}</div></div>`))
  }
  // 🏭 FÁBRICA + 🔧 CICLO ATUAL + 🖼️ REFERENCE PACK — a esteira por ciclo (topo, unidade principal)

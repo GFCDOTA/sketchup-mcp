@@ -61,6 +61,29 @@ def test_next_action_sempre_resolvido(sandbox):
         assert a["next"], f"{asset} sem próxima ação"
 
 
+def test_pipeline_furniture_segue_o_estado(sandbox):
+    _class(sandbox, "sofa")
+    _pack(sandbox, "sofa", [{"id": "r1", "status": "main"}])   # build_spec_ready
+    pipe = ps.pipeline_for("sofa")
+    assert [p["status"] for p in pipe][:3] == ["done", "done", "doing"]   # refs+curadoria done, build_spec doing
+
+
+def test_pipeline_kitchen_frozen_tudo_done(sandbox):
+    pipe = ps.pipeline_for("kitchen")
+    assert pipe and all(p["status"] == "done" for p in pipe)   # cozinha congelada = pipeline da cozinha 100%
+
+
+def test_active_focuses_so_o_que_esta_em_andamento(sandbox):
+    _class(sandbox, "sofa")
+    _pack(sandbox, "sofa", [{"id": "r1", "status": "main"}])   # in progress
+    _class(sandbox, "rack")                                     # references_needed = NÃO é foco
+    foc = ps.active_focuses()
+    assets = [f["asset"] for f in foc]
+    assert "sofa" in assets and "rack" not in assets and "kitchen" not in assets
+    sofa = next(f for f in foc if f["asset"] == "sofa")
+    assert sofa["environment"] == "sala" and sofa["pipeline"] and sofa["next"]
+
+
 def test_inventario_por_comodo_so_tem_seus_assets(sandbox):
     m = ps.project_state()
     keys = [r["key"] for r in m["rooms"]]

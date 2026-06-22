@@ -105,6 +105,78 @@ def asset_state(asset: str) -> dict:
             "refs": nrefs, "refs_img": nimg, "main": main, "has_class": has_class}
 
 
+# ---- asset → KIND: define a POLÍTICA de pipeline do domínio (GPT: "pipeline é política do domínio, não enum global") ----
+ASSET_KIND = {a: "furniture" for a in ("sofa", "armchair", "coffee_table", "dining_table",
+                                       "rack", "bed", "wardrobe", "nightstand")}
+ASSET_KIND.update({"kitchen": "kitchen", "vanity": "bathroom"})
+PIPELINES = {   # cada KIND tem o SEU pipeline
+    "furniture": ["references", "curation", "build_spec", "build", "form_review", "context_review", "vray", "learned"],
+    "kitchen": ["geometry", "appliances", "skin", "golden", "learned"],
+    "bathroom": ["geometry", "fixtures", "counter", "tiling", "lighting", "render", "learned"],
+}
+STAGE_META = {
+    "references": ("📚", "Referências"), "curation": ("🎨", "Curadoria"), "build_spec": ("📐", "Build Spec"),
+    "build": ("🔨", "Construção"), "form_review": ("🤖", "GPT Forma"), "context_review": ("🏠", "GPT Contexto"),
+    "vray": ("🎞️", "V-Ray"), "learned": ("🧠", "Aprendido"), "geometry": ("📐", "Geometria"),
+    "appliances": ("🧊", "Eletros"), "skin": ("🎨", "Pele"), "golden": ("✨", "Golden"),
+    "fixtures": ("🚿", "Louças"), "counter": ("🪨", "Bancada"), "tiling": ("🧱", "Revestimento"),
+    "lighting": ("💡", "Luz"), "render": ("🎞️", "Render"),
+}
+# quantas etapas do pipeline FURNITURE já estão DONE, por estado
+_FURNITURE_DONE = {"not_started": 0, "references_needed": 0, "curation_needed": 1, "build_spec_ready": 2,
+                   "building": 3, "form_review_needed": 4, "context_review_needed": 5, "vray_ready": 6,
+                   "approved": 7, "learned": 8, "frozen": 8}
+# estados "EM ANDAMENTO" → viram FOCO ATIVO no dash (o que estamos tratando agora)
+IN_PROGRESS = {"curation_needed", "build_spec_ready", "building", "form_review_needed",
+               "context_review_needed", "vray_ready"}
+
+
+def env_of(asset: str) -> dict | None:
+    """Ambiente (cômodo) ao qual o asset pertence — AssetRegistry."""
+    return next((r for r in ROOMS if asset in r["assets"]), None)
+
+
+def pipeline_for(asset: str) -> list:
+    """PipelineResolver: o pipeline (política do domínio) do asset, com status derivado do estado."""
+    kind = ASSET_KIND.get(asset, "furniture")
+    stages = PIPELINES.get(kind, PIPELINES["furniture"])
+    st = asset_state(asset)["state"]
+    if kind == "furniture":
+        done = _FURNITURE_DONE.get(st, 0)
+    elif st == "frozen":
+        done = len(stages)
+    else:
+        done = 0
+    closed = st in ("frozen", "approved", "learned")
+    out = []
+    for i, sg in enumerate(stages):
+        ic, lbl = STAGE_META.get(sg, ("•", sg))
+        status = "done" if i < done else ("doing" if (i == done and not closed) else "pending")
+        out.append({"icon": ic, "label": lbl, "status": status})
+    return out
+
+
+def active_focuses() -> list:
+    """Os fluxos VIVOS (assets em andamento) = o que estamos tratando AGORA. Suporta MÚLTIPLOS focos
+    (resolve 'tenho 2-3 sessões abertas'). Derivado do estado — o sistema mostra os fluxos vivos."""
+    reason = {"curation_needed": "referências baixadas, falta escolher a principal ⭐",
+              "build_spec_ready": "principal escolhida, pronto p/ build spec",
+              "building": "spec aprovada, construindo a classe",
+              "form_review_needed": "classe construída, aguardando veredito de forma",
+              "context_review_needed": "forma OK, aguardando veredito de contexto",
+              "vray_ready": "forma + contexto aprovados pelo GPT"}
+    out = []
+    for r in ROOMS:
+        for a in r["assets"]:
+            stt = asset_state(a)
+            if stt["state"] in IN_PROGRESS:
+                out.append({"environment": r["key"], "env_label": r["label"], "env_icon": r["icon"],
+                            "asset": a, "label": ASSET_META.get(a, a), "state": stt["state"],
+                            "state_label": stt["state_label"], "next": stt["next"], "jump": stt["jump"],
+                            "reason": reason.get(stt["state"], ""), "pipeline": pipeline_for(a)})
+    return out
+
+
 def project_state() -> dict:
     """O modelo inteiro: projeto → cômodos → assets (com estado + próxima ação). É a fonte do inventário."""
     rooms = []
