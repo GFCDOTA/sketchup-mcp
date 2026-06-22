@@ -1,38 +1,24 @@
 # GPT REVIEW BUNDLE — Interior Studio (:8782)
-> Gerado 2026-06-22T12:47:27 · fonte única pro Consult GPT revisar o dashboard sem localhost.
+> Gerado 2026-06-22T17:19:54 · fonte única pro Consult GPT revisar o dashboard sem localhost.
 
 ## 1. Repo
 - branch: `feat/sofa-class-from-reference`
-- commit: `a38fd3b40398a79a063b42bd573c70b589c6755f`
+- commit: `f7fb2c46336a4a95d75c5bc6a9fcb5f047c72376`
 - remote: `https://github.com/GFCDOTA/sketchup-mcp.git`
-- gerado_em: 2026-06-22T12:47:27
+- gerado_em: 2026-06-22T17:19:54
 - tree: https://github.com/GFCDOTA/sketchup-mcp/tree/feat/sofa-class-from-reference
 
 <details><summary>git diff --stat desde a última revisão</summary>
 
 ```
-.ai_bridge/gpt_review/.gitignore                   |   1 +
- .ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.json       |  10 +-
- .ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md         |  24 ++--
- .ai_bridge/interior_cycles/CYCLE-003.json          |  25 +++-
- .ai_bridge/learning_patches/LP-SOFA-001.json       |  43 ++++--
- .claude/memory/felipe_style_dna.md                 |   5 +
- .../furniture/sofa/venezia/NEW_venezia_2l.png      | Bin 0 -> 51030 bytes
- .../furniture/sofa/venezia/NEW_venezia_3l.png      | Bin 0 -> 51949 bytes
- .../review/furniture/sofa/venezia/OLD_caixa_3l.png | Bin 0 -> 44259 bytes
- .../furniture/sofa/venezia/compare_report.json     |  45 ++++++
- .../review/furniture/sofa/venezia/gpt_verdict.md   |  41 ++++++
- .../review/furniture/sofa/venezia/room_NEW.png     | Bin 0 -> 46956 bytes
- .../review/furniture/sofa/venezia/room_OLD.png     | Bin 0 -> 44496 bytes
- .../sofa/venezia/sofa_venezia_compare.png          | Bin 0 -> 136809 bytes
- .../furniture/sofa/venezia/sofa_venezia_room.png   | Bin 0 -> 67309 bytes
- .../design_rules/felipe_visual_judge_rules.json    |  54 ++++++++
- tools/interior_studio/learning_patch.py            |   3 +-
- tools/sofa_class.py                                |  13 +-
- tools/sofa_venezia_compare.py                      |  67 +++++++++
- tools/sofa_venezia_room.py                         |  96 +++++++++++++
- tools/studio_dashboard.py                          | 154 +++++++++++++++++++--
- 21 files changed, 539 insertions(+), 42 deletions(-)
+.ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.json       |  74 +++++---
+ .ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md         |  66 +++++--
+ .../interior_studio/ARCHITECTURE_DOMAINS_GPT.md    |  61 +++++++
+ .ai_bridge/interior_studio/UX_DISCUSSION_GPT.md    |  51 ++++++
+ tests/test_project_state.py                        | 111 ++++++++++++
+ tools/interior_studio/project_state.py             | 193 +++++++++++++++++++++
+ tools/studio_dashboard.py                          | 130 ++++----------
+ 7 files changed, 552 insertions(+), 134 deletions(-)
 ```
 </details>
 
@@ -80,35 +66,21 @@ _Análise = hipótese de pesquisa (não vi as imagens renderizadas). Quem julga 
 - **❌ ANTI: Povison Boxy Modular (square track arms)** [🚫 anti-pattern] (anti_example) — https://www.povison.com/modern-modular-sofa-boxy-chaise-sectional-sofa-with-new-cat-scratch-fabric-wide-armrest-pillows-pine-wood-frame.html
 
 ## 6. Consult GPT Bridge
-- modo: manual · OpenAI: on
+- modo: manual · OpenAI: off
 - última pergunta: sofa_spec_001 · pendentes: 2 · ingeridas: 1
 
 ## 7. Mudanças desde a última revisão
-- último SHA revisado: `da44393e43fdb37f1a6c7ad0b076fd52bee6f010`
-- SHA atual: `a38fd3b40398a79a063b42bd573c70b589c6755f`
+- último SHA revisado: `a38fd3b40398a79a063b42bd573c70b589c6755f`
+- SHA atual: `f7fb2c46336a4a95d75c5bc6a9fcb5f047c72376`
 ```
-.ai_bridge/gpt_review/.gitignore                   |   1 +
- .ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.json       |  10 +-
- .ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md         |  24 ++--
- .ai_bridge/interior_cycles/CYCLE-003.json          |  25 +++-
- .ai_bridge/learning_patches/LP-SOFA-001.json       |  43 ++++--
- .claude/memory/felipe_style_dna.md                 |   5 +
- .../furniture/sofa/venezia/NEW_venezia_2l.png      | Bin 0 -> 51030 bytes
- .../furniture/sofa/venezia/NEW_venezia_3l.png      | Bin 0 -> 51949 bytes
- .../review/furniture/sofa/venezia/OLD_caixa_3l.png | Bin 0 -> 44259 bytes
- .../furniture/sofa/venezia/compare_report.json     |  45 ++++++
- .../review/furniture/sofa/venezia/gpt_verdict.md   |  41 ++++++
- .../review/furniture/sofa/venezia/room_NEW.png     | Bin 0 -> 46956 bytes
- .../review/furniture/sofa/venezia/room_OLD.png     | Bin 0 -> 44496 bytes
- .../sofa/venezia/sofa_venezia_compare.png          | Bin 0 -> 136809 bytes
- .../furniture/sofa/venezia/sofa_venezia_room.png   | Bin 0 -> 67309 bytes
- .../design_rules/felipe_visual_judge_rules.json    |  54 ++++++++
- tools/interior_studio/learning_patch.py            |   3 +-
- tools/sofa_class.py                                |  13 +-
- tools/sofa_venezia_compare.py                      |  67 +++++++++
- tools/sofa_venezia_room.py                         |  96 +++++++++++++
- tools/studio_dashboard.py                          | 154 +++++++++++++++++++--
- 21 files changed, 539 insertions(+), 42 deletions(-)
+.ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.json       |  74 +++++---
+ .ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md         |  66 +++++--
+ .../interior_studio/ARCHITECTURE_DOMAINS_GPT.md    |  61 +++++++
+ .ai_bridge/interior_studio/UX_DISCUSSION_GPT.md    |  51 ++++++
+ tests/test_project_state.py                        | 111 ++++++++++++
+ tools/interior_studio/project_state.py             | 193 +++++++++++++++++++++
+ tools/studio_dashboard.py                          | 130 ++++----------
+ 7 files changed, 552 insertions(+), 134 deletions(-)
 ```
 
 ## Pergunta para o GPT
