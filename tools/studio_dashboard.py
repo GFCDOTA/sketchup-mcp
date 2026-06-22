@@ -526,7 +526,15 @@ textarea{width:100%;min-height:90px;background:#0c0d10;border:1px solid var(--bd
 .ovcard-on{border-color:#f0a868;box-shadow:0 0 0 1px rgba(240,168,104,.3)}
 .ovcic{font-size:24px;line-height:1}.ovcnm{font-weight:700;font-size:13px}
 .ovcb{font-size:10.5px;font-weight:600;margin-top:2px}.ovcd{font-size:11px;color:var(--mut);margin-top:3px;line-height:1.3}
-.ovroom{margin-bottom:10px}.ovroomh{font-size:12.5px;margin:8px 0 6px;color:#cdb98a;border-bottom:1px solid var(--bd);padding-bottom:4px}
+.ovroom{margin-bottom:5px;border:1px solid var(--bd);border-radius:8px;background:#0b0c0f;overflow:hidden}
+.ovroomh{display:flex;align-items:center;gap:10px;padding:8px 11px;cursor:pointer;font-size:12.5px;list-style:none;user-select:none}
+.ovroomh::-webkit-details-marker{display:none}.ovroomh::marker{content:''}
+.ovroom[open] .ovroomh{border-bottom:1px solid var(--bd);background:#101116}.ovroomh:hover{background:#101116}
+.ovrmn{flex:1}.ovrmn b{font-weight:600}.ovwip{font-size:11px;color:#f0a868}.ovcts{display:flex;gap:7px}.ovct{font-size:11px;color:var(--mut)}
+.ovrows{padding:5px 6px}
+.ovrow{display:flex;align-items:center;gap:9px;padding:5px 8px;font-size:12px;border-radius:6px}
+.ovrow:hover{background:#15131c}.ovrow-f{background:#15130d}
+.ovrn{flex:1;font-weight:600}.ovrst{font-size:11px;white-space:nowrap}.ovrnext{font-size:11px;color:var(--mut);white-space:nowrap}
 .ovfocus{background:#0c0d10;border:1px solid var(--bd);border-left:3px solid #f0a868;border-radius:10px;padding:11px 12px;margin-bottom:12px}
 .ovfocush{font-size:13.5px;margin-bottom:10px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}.ovnext{color:#f0a868;font-size:12px}
 .ovhero{margin-bottom:11px}.ovheroline{font-size:14px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:3px 0}
@@ -605,8 +613,8 @@ function nextStepGo(kind){jumpTo({scout:'sec-scout',consult:'sec-consult',curate
 function consultRelay(){const m=document.getElementById('cqmsg');if(m)m.textContent='🤖 pedindo relay…'
  fetch('/api/consult/relay-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})}).then(r=>r.json()).then(r=>{if(m)m.textContent=r.ok?('🤖 relay pedido pra '+r.question_id+' — me fala "relaya" no chat que eu dirijo o ChatGPT'):('erro: '+(r.error||''));tick(1)})}
 function jumpTo(id){const sec=document.getElementById(id);if(sec){sec.scrollIntoView({behavior:'smooth',block:'center'});sec.classList.add('kc-hl');setTimeout(()=>sec.classList.remove('kc-hl'),2000)}}
-let INVOPEN=false   // inventário de TODOS os ambientes fica escondido — foco é só o que tá em andamento
-function toggleInv(b){INVOPEN=!INVOPEN;const e=document.getElementById('ovinvfull');if(e)e.style.display=INVOPEN?'block':'none';if(b)b.textContent=INVOPEN?'▲ ocultar ambientes':'📋 ver todos os ambientes'}
+let ROOMOPEN=new Set()   // quais cômodos do inventário estão expandidos (persiste entre re-renders; default fechado = enxuto)
+function invToggle(k,open){open?ROOMOPEN.add(k):ROOMOPEN.delete(k)}
 function flagErr(){const a=document.getElementById('flagag').value,m=document.getElementById('flagmsg').value;if(!m)return
  fetch('/api/flag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:a,message:m})}).then(()=>{document.getElementById('flagmsg').value='';tick(1)})}
 function clearErr(agent){fetch('/api/clear',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent})}).then(()=>tick(1))}
@@ -798,9 +806,15 @@ async function tick(force){
   const doneA=allA.filter(a=>['approved','learned','frozen'].includes(a.state))
   const todoN=allA.filter(a=>['not_started','references_needed'].includes(a.state)).length
   const nominal=`⚙️ ${inprog.map(nm).join(', ')||'—'} · ✅ ${doneA.map(nm).join(', ')||'—'} · ⬜ ${todoN} a fazer`
-  const rooms=(ov.rooms||[]).map(rm=>{const cards=(rm.assets||[]).map(a=>{const col=STC[a.state]||'var(--mut)',isF=prin&&a.asset===prin.asset
-    return `<div class="ovcard${isF?' ovcard-on':''}"${a.jump?` onclick="jumpTo('${a.jump}')" style="cursor:pointer"`:''}><div class=ovcnm>${SICO(a.state)} ${esc(a.label)}${isF?' <span class=ovfoco>FOCO</span>':''}</div><div class=ovcb style="color:${col}">${esc(a.state_label)}</div><div class=ovcd>▶ ${esc(a.next||'')}${a.refs?(' · '+(a.refs_img||0)+'/'+a.refs+' img'):''}</div></div>`}).join('')
-   return `<div class=ovroom><div class=ovroomh>${rm.icon} <b>${esc(rm.label)}</b> <span class=mut>${rm.done}/${rm.total} prontos</span></div><div class=ovinv>${cards}</div></div>`}).join('')
+  // cômodo = bloco DOBRÁVEL (default fechado = enxuto, escala p/ biblioteca): resumo + contadores; expande pra ver itens
+  const ISDONE=st=>['approved','learned','frozen'].includes(st),ISTODO=st=>['not_started','references_needed'].includes(st),ISWIP=st=>!ISDONE(st)&&!ISTODO(st)
+  const rooms=(ov.rooms||[]).map(rm=>{const as=rm.assets||[]
+    const wip=as.find(a=>ISWIP(a.state))
+    const ct=(ic,f)=>{const n=as.filter(f).length;return n?`<span class=ovct>${ic}${n}</span>`:''}
+    const counts=ct('⚙️',a=>ISWIP(a.state))+ct('✅',a=>ISDONE(a.state))+ct('⬜',a=>ISTODO(a.state))
+    const rows=as.map(a=>{const isF=prin&&a.asset===prin.asset
+     return `<div class="ovrow${isF?' ovrow-f':''}"${a.jump?` onclick="jumpTo('${a.jump}')" style=cursor:pointer`:''}><span class=ovrn>${SICO(a.state)} ${esc(a.label)}${isF?' <span class=ovfoco>FOCO</span>':''}</span><span class=ovrst style="color:${STC[a.state]||'var(--mut)'}">${esc(a.state_label)}</span><span class=ovrnext>▶ ${esc(a.next||'')}</span></div>`}).join('')
+    return `<details class=ovroom${ROOMOPEN.has(rm.key)?' open':''} ontoggle="invToggle('${rm.key}',this.open)"><summary class=ovroomh><span class=ovrmn>${rm.icon} <b>${esc(rm.label)}</b></span>${wip?`<span class=ovwip>⚙️ ${esc((wip.label||'').replace(/^\S+\s/,''))}</span>`:''}<span class=ovcts>${counts}</span></summary><div class=ovrows>${rows}</div></details>`}).join('')
   // ── 3) PULSO: última fala de cada agente (estilo status WhatsApp) + sessões ativas ──
   const leads=((s.agents||{}).umbrellas||[]).map(u=>u.lead).filter(Boolean)
   const pulso=leads.map(l=>`<div class=ovpline><span class=ovpface>${l.face}</span> <b>${esc(l.label)}</b>${l.online?' <span class=ovon title=online>●</span>':''} <span class=mut>${esc((l.message||'—').slice(0,110))}</span></div>`).join('')||'<div class=mut style=font-size:11px>time quieto</div>'
