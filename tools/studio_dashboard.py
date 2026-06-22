@@ -284,6 +284,88 @@ def _learning_log() -> dict:
             "golden_samples": golden}
 
 
+FURNITURE_META = {   # classe de móvel -> (ícone, rótulo PT) pro inventário da Visão Geral
+    "sofa": ("🛋️", "Sofá"), "armchair": ("🪑", "Poltrona"), "bed": ("🛏️", "Cama"),
+    "coffee_table": ("☕", "Mesa de centro"), "dining_table": ("🍽️", "Mesa de jantar"),
+    "rack": ("📺", "Rack"), "wardrobe": ("🚪", "Guarda-roupa"), "nightstand": ("🗄️", "Criado-mudo"),
+}
+
+
+def _asset_pipeline(asset: str) -> list:
+    """As 8 etapas da esteira ROOM_CYCLE pro asset atual, com status DERIVADO de sinais reais
+    (reference pack · curadoria · learning patch · artefatos de render/veredito). GitHub-Actions-style."""
+    c = ic_cycles.current_cycle() or {}
+    refs = c.get("references") or {}
+    lr = c.get("learning") or {}
+    pack = ic_refpacks.load_pack(f"{asset}_reference_pack_001") or {}
+    npack = len(pack.get("references", []))
+    vdir = ROOT / "artifacts/review/furniture" / asset
+
+    def has(glb):
+        return bool(list(vdir.glob(glb))) if vdir.exists() else False
+    vtxt = ""
+    vf = list(vdir.glob("**/gpt_verdict.md")) if vdir.exists() else []
+    if vf:
+        vtxt = vf[0].read_text("utf-8", "ignore")
+    build_done = has("**/*compare*.png")
+    form_pass = ("parou de parecer caixa" in vtxt) or ("Forma" in vtxt and "PASS" in vtxt)
+    ctx_pass = ("Contexto" in vtxt and "PASS" in vtxt) or ("CONTEXTO" in vtxt and "PASS" in vtxt)
+    vray_done = has("**/*vray*.png") or has("**/*_final*.png")
+    spec_done = bool(lr.get("new_rules") or lr.get("patches"))
+
+    def s(done):
+        return "done" if done else "pending"
+    return [
+        {"icon": "📚", "label": "Referências", "status": s(npack > 0), "jump": "sec-refpack", "detail": f"{npack} refs"},
+        {"icon": "🎨", "label": "Curadoria", "status": s(bool(refs.get("main"))), "jump": "sec-refpack",
+         "detail": "⭐ escolhida" if refs.get("main") else "falta ⭐"},
+        {"icon": "📐", "label": "Build Spec", "status": s(spec_done), "jump": "sec-patch",
+         "detail": "patch aprovado" if spec_done else "falta"},
+        {"icon": "🔨", "label": "Construção", "status": s(build_done), "jump": "sec-ren",
+         "detail": "classe construída" if build_done else "falta"},
+        {"icon": "🤖", "label": "GPT Forma", "status": s(form_pass), "detail": "PASS" if form_pass else "—"},
+        {"icon": "🏠", "label": "GPT Contexto", "status": s(ctx_pass), "detail": "PASS" if ctx_pass else "—"},
+        {"icon": "🎞️", "label": "V-Ray", "status": s(vray_done), "detail": "render pronto" if vray_done else "falta (teu olho)"},
+        {"icon": "🧠", "label": "Aprendido", "status": s(bool(lr.get("new_rules"))), "jump": "sec-learning",
+         "detail": f"{len(lr.get('new_rules', []))} regras" if lr.get("new_rules") else "—"},
+    ]
+
+
+def _overview() -> dict:
+    """A VISÃO GERAL (mission control) pro topo: headline + pipeline do asset atual + inventário de móveis."""
+    import glob
+    fac = ic_cycles.factory_state()
+    cur = fac.get("asset") if fac.get("has_cycle") else None
+    inv = []
+    for f in sorted(glob.glob(str(ROOT / "tools" / "*_class.py"))):
+        asset = Path(f).stem[:-6]   # tira "_class"
+        if asset not in FURNITURE_META:
+            continue
+        icon, label = FURNITURE_META[asset]
+        pack = ic_refpacks.load_pack(f"{asset}_reference_pack_001")
+        refs = len(pack.get("references", [])) if pack else 0
+        main = sum(1 for r in (pack or {}).get("references", []) if r.get("status") == "main")
+        vdir = ROOT / "artifacts/review/furniture" / asset
+        vtxt = ""
+        vf = list(vdir.glob("**/gpt_verdict.md")) if vdir.exists() else []
+        if vf:
+            vtxt = vf[0].read_text("utf-8", "ignore")
+        verdict = ("GPT PASS (forma+contexto)" if ("Contexto" in vtxt and "PASS" in vtxt)
+                   else "GPT PASS (forma)" if "PASS" in vtxt else "—")
+        badge = "active" if asset == cur else ("new" if pack else "classic")
+        inv.append({"asset": asset, "icon": icon, "label": label, "refs": refs, "main": main,
+                    "method": "reference-driven" if pack else "clássico (programa antigo)",
+                    "verdict": verdict, "badge": badge, "current": asset == cur})
+    pipe = _asset_pipeline(cur) if cur else []
+    nxt = next((p for p in pipe if p["status"] != "done"), None)
+    next_action = (f"{nxt['icon']} {nxt['label']} — {nxt['detail']}" if nxt
+                   else ("ciclo completo ✓" if pipe else fac.get("next_action")))
+    return {"project": fac.get("project") or "planta_74", "current_asset": cur,
+            "current_label": FURNITURE_META.get(cur, ("", None))[1] if cur else None,
+            "next_action": next_action, "has_cycle": fac.get("has_cycle", False),
+            "pipeline": pipe, "inventory": inv}
+
+
 def _state() -> dict:
     fac = ic_cycles.factory_state()
     pack_id = (fac.get("references") or {}).get("pack_id") or DEFAULT_PACK
@@ -291,7 +373,7 @@ def _state() -> dict:
             "backlog": _backlog(), "references": _references(), "inbox": _inbox(),
             "knowledge": _knowledge_state(), "consult": _consult_state(), "cycles": _cycles_recent(8),
             "factory": fac, "refpack": ic_refpacks.pack_state(pack_id), "learning": _learning_log(),
-            "patches": ic_patch.patches_state()}
+            "patches": ic_patch.patches_state(), "overview": _overview()}
 
 
 PAGE = r"""<!doctype html><html lang=pt-BR><head><meta charset=utf-8>
@@ -499,6 +581,22 @@ textarea{width:100%;min-height:90px;background:#0c0d10;border:1px solid var(--bd
 .difflist li.add{background:#14241a;border-left:3px solid var(--ok);color:#bfe8cb}.difflist li.add::before{content:'+ ';color:var(--ok);font-weight:700}
 .difflist li.dup{background:#181a20;color:#7a8696;text-decoration:line-through;opacity:.7}.difflist li.dup::before{content:'≡ '}
 .patchacts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;border-top:1px dashed #2c2636;padding-top:8px}
+/* 🛰️ VISÃO GERAL (mission control) */
+#sec-overview{border-left:3px solid #f0a868}
+.ovhead{font-size:13.5px;margin-bottom:12px;color:#e8e9ec}
+.ovpipe{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;row-gap:10px}
+.ovstep{flex:1 1 110px;min-width:104px;background:#0c0d10;border:1px solid var(--bd);border-top:3px solid #3a3f49;border-radius:10px;padding:10px 8px;text-align:center}
+.ovstep.ov-done{border-top-color:var(--ok)}.ovstep.ov-doing{border-top-color:var(--blu)}.ovstep.ov-pend{opacity:.6}
+.ovstep:hover{background:#15131c}
+.ovic{font-size:26px;line-height:1}.ovlbl{font-size:11.5px;font-weight:600;margin-top:5px;color:var(--fg)}
+.ovdet{font-size:10.5px;color:var(--mut);margin-top:2px;line-height:1.25}
+.ovstep.ov-done .ovdet{color:var(--ok)}
+.ovarrow{align-self:center;color:#4a5260;font-size:16px;padding:0 3px;flex:0 0 auto}
+.ovinv{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.ovcard{background:#0c0d10;border:1px solid var(--bd);border-radius:10px;padding:11px 12px}
+.ovcard-on{border-color:#f0a868;box-shadow:0 0 0 1px rgba(240,168,104,.3)}
+.ovcic{font-size:24px;line-height:1}.ovcnm{font-weight:700;font-size:13px;margin-top:4px}
+.ovcb{font-size:10.5px;font-weight:600;margin-top:2px}.ovcd{font-size:11px;color:var(--mut);margin-top:3px;line-height:1.3}
 </style></head><body>
 <header><span class=hdot></span><h1>🎛 INTERIOR STUDIO</h1>
 <nav><a href="#sec-factory">Ciclo</a><a href="#sec-refpack">Reference Pack</a><a href="#sec-consult">Consult GPT</a><a href="#sec-patch">Learning Patch</a><a href="#sec-agents">Agentes</a><a href="#sec-backlog">Backlog</a><a href="#sec-ren">Renders</a><a href="/explica" target=_blank style="color:var(--gold);font-weight:600;margin-left:8px" title="como o sistema funciona — o Fluxo e o Mapa estão aqui dentro">📖 Explica</a></nav></header>
@@ -660,13 +758,15 @@ let DRAGID=null
 function cardOrder(){try{return JSON.parse(localStorage.getItem('studio_order')||'[]')}catch(e){return[]}}
 function saveOrder(){const root=document.getElementById('root');if(!root)return
  localStorage.setItem('studio_order',JSON.stringify([...root.children].filter(c=>c.id&&c.classList.contains('card')).map(c=>c.id)))}
+const PINNED_TOP=['sec-overview']   // Visão Geral SEMPRE no topo, ignora o layout salvo
 function applyOrder(){const root=document.getElementById('root');if(!root)return
- const saved=cardOrder();if(!saved.length)return
  const present=[...root.children].filter(c=>c.id&&c.classList.contains('card')).map(c=>c.id)
- const full=[...saved.filter(id=>present.includes(id)),...present.filter(id=>!saved.includes(id))]
- full.forEach(id=>{const e=document.getElementById(id);if(e)root.appendChild(e)})}
+ const saved=cardOrder()
+ let order=saved.length?[...saved.filter(id=>present.includes(id)),...present.filter(id=>!saved.includes(id))]:present
+ order=[...PINNED_TOP.filter(id=>present.includes(id)),...order.filter(id=>!PINNED_TOP.includes(id))]
+ order.forEach(id=>{const e=document.getElementById(id);if(e)root.appendChild(e)})}
 // RECOLHER cards — só Agentes/Loop/Consult/Backlog abertos por padrão; o resto recolhido (menos poluição)
-const DEFAULT_OPEN=['sec-factory','sec-ciclo','sec-refpack','sec-ask','sec-agents','sec-consult','sec-patch','sec-learning','sec-backlog']
+const DEFAULT_OPEN=['sec-overview','sec-factory','sec-ciclo','sec-refpack','sec-ask','sec-agents','sec-consult','sec-patch','sec-learning','sec-backlog']
 function collapsedSet(){try{const v=JSON.parse(localStorage.getItem('studio_collapsed')||'null');return v===null?null:new Set(v)}catch(e){return null}}
 function saveCollapsed(s){localStorage.setItem('studio_collapsed',JSON.stringify([...s]))}
 function applyCollapsed(){const root=document.getElementById('root');if(!root)return
@@ -725,6 +825,19 @@ async function tick(force){
  LEADOF={};FACES={};LABELS={};(ag.umbrellas||[]).forEach(u=>{LEADOF[u.id]=u.lead.id;FACES[u.id]=u.lead.face;LABELS[u.id]=u.label;[u.lead,...u.subs].forEach(c=>{FACES[c.id]=c.face;LABELS[c.id]=c.label})})
  FACES['felipe']='🧑';LABELS['felipe']='você'
  const root=document.getElementById('root');const sy=window.scrollY;root.innerHTML=''
+ // 🛰️ VISÃO GERAL (mission control) — a primeira coisa: onde estamos, pipeline, inventário
+ const ov=s.overview||{}
+ if(ov.has_cycle||(ov.inventory||[]).length){const SC={done:'ov-done',pending:'ov-pend',doing:'ov-doing'}
+  const pipe=(ov.pipeline||[]).map((p,i)=>`${i?'<span class=ovarrow>→</span>':''}<div class="ovstep ${SC[p.status]||'ov-pend'}"${p.jump?` onclick="jumpTo('${p.jump}')" style="cursor:pointer"`:''} title="${esc(p.detail||'')}"><div class=ovic>${p.icon}</div><div class=ovlbl>${esc(p.label)}</div><div class=ovdet>${esc(p.detail||'')}</div></div>`).join('')
+  const BADGE={active:['▶ ATIVO','#f0a868'],new:['✓ método novo','var(--ok)'],classic:['clássico (sem ref)','var(--mut)']}
+  const inv=(ov.inventory||[]).map(it=>{const b=BADGE[it.badge]||['','var(--mut)']
+   return `<div class="ovcard ${it.current?'ovcard-on':''}"><div class=ovcic>${it.icon}</div><div class=ovcnm>${esc(it.label)}</div><div class=ovcb style="color:${b[1]}">${b[0]}</div><div class=ovcd>${it.refs} refs${it.verdict&&it.verdict!=='—'?('<br>'+esc(it.verdict)):''}</div></div>`}).join('')
+  root.appendChild(el(`<div class="card full" id=sec-overview><h2>🛰️ Visão geral — o que tá rolando AGORA</h2>
+   <div class=ovhead>📐 <b>${esc(ov.project||'')}</b> · móvel atual: <b style="color:#f0a868">${esc(ov.current_label||'—')}</b> · próximo passo: <b>${esc(ov.next_action||'—')}</b></div>
+   <div class=ovpipe>${pipe||'<span class=mut>sem ciclo ativo</span>'}</div>
+   <div class=kblist-h style="margin-top:12px">Inventário de móveis <span class=mut>(tudo que existe e em que método — clica pra focar)</span></div>
+   <div class=ovinv>${inv}</div></div>`))
+ }
  // 🏭 FÁBRICA + 🔧 CICLO ATUAL + 🖼️ REFERENCE PACK — a esteira por ciclo (topo, unidade principal)
  FACTORY=s.factory||{}
  const fac=FACTORY
