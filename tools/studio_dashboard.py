@@ -500,8 +500,8 @@ textarea{width:100%;min-height:90px;background:#0c0d10;border:1px solid var(--bd
 .difflist li.dup{background:#181a20;color:#7a8696;text-decoration:line-through;opacity:.7}.difflist li.dup::before{content:'≡ '}
 .patchacts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;border-top:1px dashed #2c2636;padding-top:8px}
 </style></head><body>
-<header><span class=hdot></span><h1>INTERIOR STUDIO <span style="font-size:11px;color:var(--mut);font-weight:400">· :8782</span></h1>
-<nav><a href="#sec-factory" style="color:#f0a868;font-weight:700">🎛 Dash</a><a href="/grafo" target=_blank style="color:var(--gold);font-weight:700" title="Mapa de Conhecimento (mesma porta)">🕸 Mapa</a><a href="/fluxo" target=_blank style="color:var(--gold);font-weight:700" title="Fluxo do pipeline (mesma porta)">⛓ Fluxo</a><a href="/explica" target=_blank style="color:var(--gold);font-weight:700" title="Como funciona">📖 Explica</a><a href="#sec-refpack">Curadoria</a><a href="#sec-ren">Renders</a></nav>
+<header><span class=hdot></span><h1>🎛 INTERIOR STUDIO <span style="font-size:11px;color:var(--mut);font-weight:400">:8782</span></h1>
+<nav><span class=mut style="font-size:10.5px;margin-right:1px">outras telas →</span><a href="/grafo" target=_blank style="color:var(--gold);font-weight:600" title="Mapa de Conhecimento">🕸 Mapa</a><a href="/fluxo" target=_blank style="color:var(--gold);font-weight:600" title="Fluxo do pipeline">⛓ Fluxo</a><a href="/explica" target=_blank style="color:var(--gold);font-weight:600" title="Como funciona o sistema">📖 Explica</a></nav>
 <span class=mut style="margin-left:auto;font-size:11px">🔓 ⠿ mover · ▭ largura · puxa a borda ↕ pra altura</span><button onclick=resetLayout() title="voltar ao layout padrão" style="background:#0c0d10;border:1px solid var(--bd);color:var(--mut);border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11px;margin:0 12px">↺ layout</button><span class=mut id=ts>carregando…</span><span class=mut>· :8782</span></header>
 <div class=wrap id=root></div>
 <div id=modal class=modal onclick="if(event.target===this)closeModal()">
