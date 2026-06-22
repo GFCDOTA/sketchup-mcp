@@ -1,22 +1,24 @@
 # GPT REVIEW BUNDLE — Interior Studio (:8782)
-> Gerado 2026-06-22T01:35:58 · fonte única pro Consult GPT revisar o dashboard sem localhost.
+> Gerado 2026-06-22T01:57:25 · fonte única pro Consult GPT revisar o dashboard sem localhost.
 
 ## 1. Repo
 - branch: `feat/sofa-class-from-reference`
-- commit: `d73f1305b29e649b970525a3bc1954c49c5b37b1`
+- commit: `243ed216e936a03f754799cfe2f24ed1ce9e4e14`
 - remote: `https://github.com/GFCDOTA/sketchup-mcp.git`
-- gerado_em: 2026-06-22T01:35:58
+- gerado_em: 2026-06-22T01:57:25
 - tree: https://github.com/GFCDOTA/sketchup-mcp/tree/feat/sofa-class-from-reference
 
 <details><summary>git diff --stat desde a última revisão</summary>
 
 ```
-.ai_bridge/interior_cycles/CYCLE-003.json          |  5 +-
- .../consult_gpt_bridge/contracts.py                |  6 +++
- .../consult_gpt_bridge/prompt_builder.py           |  3 +-
- tools/interior_studio/cycles.py                    |  7 ++-
- tools/studio_dashboard.py                          | 57 +++++++++++++++++++---
- 5 files changed, 65 insertions(+), 13 deletions(-)
+.ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.json       | 107 ++++++++++-------
+ .ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md         |  40 +++----
+ .ai_bridge/interior_cycles/CYCLE-003.json          |   3 +-
+ .ai_bridge/learning_patches/LP-SOFA-001.json       |  92 +++++++++++++++
+ artifacts/reference_lab/sofa/SOFA_BUILD_SPEC.md    | 129 +++++++++++++++++++++
+ .../consult_gpt_bridge/answer_parser.py            |  54 ++++++++-
+ tools/interior_studio/learning_patch.py            |   3 +-
+ 7 files changed, 362 insertions(+), 66 deletions(-)
 ```
 </details>
 
@@ -37,7 +39,7 @@
 - ciclo: **CYCLE-003** · microtarefa: **MT-SOFA-001** · modo: **REFERENCE_PACK**
 - status: **ready_for_sofa_build_spec_after_gpt_patch** · próxima ação: **Felipe escolher 1-2 referências principais (⭐) na Curadoria**
 - arquiteto_bloqueado: **False**
-- reference pack: {'total': 6, 'approved': 1, 'rejected': 0, 'main': 1, 'anti': 1, 'pending': 3}
+- reference pack: {'total': 6, 'approved': 2, 'rejected': 0, 'main': 1, 'anti': 1, 'pending': 2}
 - backlog: 32 microtarefas, 0 done
 - learning: 0 regra(s), 14 anti-pattern(s), 0 golden
 
@@ -58,7 +60,7 @@ _Análise = hipótese de pesquisa (não vi as imagens renderizadas). Quem julga 
 
 - **Henry Industrial Modern Leather Sofa** [👍 aprovada] (boutique_premium) — https://craftersandweavers.com/products/henry-industrial-modern-leather-sofa-2-colors-available
 - **Venezia Industrial Leather Sofa — Slate** [⭐ PRINCIPAL] (boutique_premium) — https://craftersandweavers.com/products/preorder-venezia-industrial-modern-leather-sofa-slate-leather
-- **Chiavari Industrial Vintage Dark Brown Leather** [• pendente] (boutique_premium) — https://worldinteriors.com/products/chiavari-industrial-vintage-dark-brown-leather-sofa
+- **Chiavari Industrial Vintage Dark Brown Leather** [👍 aprovada] (boutique_premium) — https://worldinteriors.com/products/chiavari-industrial-vintage-dark-brown-leather-sofa
 - **Compactos premium (Article Sven / Albany Park Kova)** [• pendente] (compact_premium) — https://www.apartmenttherapy.com/best-small-space-sofas-37520392
 - **Industry West — Radia (channel-tuft, track arm, sled)** [• pendente] (compact_premium) — https://www.industrywest.com/collections/sofas
 - **❌ ANTI: Povison Boxy Modular (square track arms)** [🚫 anti-pattern] (anti_example) — https://www.povison.com/modern-modular-sofa-boxy-chaise-sectional-sofa-with-new-cat-scratch-fabric-wide-armrest-pillows-pine-wood-frame.html
@@ -68,15 +70,17 @@ _Análise = hipótese de pesquisa (não vi as imagens renderizadas). Quem julga 
 - última pergunta: sofa_spec_001 · pendentes: 2 · ingeridas: 1
 
 ## 7. Mudanças desde a última revisão
-- último SHA revisado: `986e9452f33dc904b213a7584da7af1c8bf9db23`
-- SHA atual: `d73f1305b29e649b970525a3bc1954c49c5b37b1`
+- último SHA revisado: `d73f1305b29e649b970525a3bc1954c49c5b37b1`
+- SHA atual: `243ed216e936a03f754799cfe2f24ed1ce9e4e14`
 ```
-.ai_bridge/interior_cycles/CYCLE-003.json          |  5 +-
- .../consult_gpt_bridge/contracts.py                |  6 +++
- .../consult_gpt_bridge/prompt_builder.py           |  3 +-
- tools/interior_studio/cycles.py                    |  7 ++-
- tools/studio_dashboard.py                          | 57 +++++++++++++++++++---
- 5 files changed, 65 insertions(+), 13 deletions(-)
+.ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.json       | 107 ++++++++++-------
+ .ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md         |  40 +++----
+ .ai_bridge/interior_cycles/CYCLE-003.json          |   3 +-
+ .ai_bridge/learning_patches/LP-SOFA-001.json       |  92 +++++++++++++++
+ artifacts/reference_lab/sofa/SOFA_BUILD_SPEC.md    | 129 +++++++++++++++++++++
+ .../consult_gpt_bridge/answer_parser.py            |  54 ++++++++-
+ tools/interior_studio/learning_patch.py            |   3 +-
+ 7 files changed, 362 insertions(+), 66 deletions(-)
 ```
 
 ## Pergunta para o GPT
