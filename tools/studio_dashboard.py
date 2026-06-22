@@ -31,6 +31,11 @@ JUDGE_RULES = ROOT / "references/design_rules/felipe_visual_judge_rules.json"  #
 KANBAN_FILE = ROOT / ".ai_bridge/kanban.json"          # status Trello de cada microtarefa (Felipe move)
 CYCLES_FILE = ROOT / ".ai_bridge/interior_consult/cycles.jsonl"  # cada ciclo persistido (o "banco" do loop)
 RELAY_FILE = ROOT / ".ai_bridge/interior_consult/relay.json"     # fila do relay Claude↔ChatGPT (Chrome)
+TOOLSDIR = ROOT / "tools"                                        # pra servir Mapa/Fluxo/etc. na MESMA porta
+# Mapa de Conhecimento / Fluxo / etc. integrados no :8782 (mesmos arquivos do :8783, servidos aqui também).
+PAGE_FILES = {"/grafo": "grafo.html", "/fluxo": "flow.html", "/explica": "explica.html",
+              "/como-funciona": "explica.html", "/agents": "agents.html",
+              "/single-agent": "agents.html", "/multi-agent": "agents.html", "/vitrine": "home.html"}
 KANBAN_COLS = ["backlog", "refinamento", "execução", "teste", "executado"]
 SKIP = (".denoiser.png", ".effectsResult.png")
 DEFAULT_PACK = "sofa_reference_pack_001"   # pack ativo da esteira (sofá = primeiro laboratório)
@@ -495,8 +500,8 @@ textarea{width:100%;min-height:90px;background:#0c0d10;border:1px solid var(--bd
 .difflist li.dup{background:#181a20;color:#7a8696;text-decoration:line-through;opacity:.7}.difflist li.dup::before{content:'≡ '}
 .patchacts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;border-top:1px dashed #2c2636;padding-top:8px}
 </style></head><body>
-<header><span class=hdot></span><h1>INTERIOR STUDIO <span style="font-size:11px;color:var(--mut);font-weight:400">· o dash · :8782</span></h1>
-<nav><a href="http://localhost:8783/" target=_blank style="color:#f0a868;font-weight:700" title="vitrine / porta de entrada (Mapa, Fluxo, Agentes, Como funciona)">🏠 Vitrine :8783</a><a href="http://localhost:8783/grafo" target=_blank style="color:var(--gold);font-weight:700">🕸 Mapa</a><a href="http://localhost:8783/fluxo" target=_blank style="color:var(--gold);font-weight:700">⛓ Fluxo</a><a href="#sec-factory">Ciclo</a><a href="#sec-agents">Agentes</a><a href="#sec-cur">Curadoria</a><a href="#sec-ren">Renders</a></nav>
+<header><span class=hdot></span><h1>INTERIOR STUDIO <span style="font-size:11px;color:var(--mut);font-weight:400">· :8782</span></h1>
+<nav><a href="#sec-factory" style="color:#f0a868;font-weight:700">🎛 Dash</a><a href="/grafo" target=_blank style="color:var(--gold);font-weight:700" title="Mapa de Conhecimento (mesma porta)">🕸 Mapa</a><a href="/fluxo" target=_blank style="color:var(--gold);font-weight:700" title="Fluxo do pipeline (mesma porta)">⛓ Fluxo</a><a href="/explica" target=_blank style="color:var(--gold);font-weight:700" title="Como funciona">📖 Explica</a><a href="#sec-refpack">Curadoria</a><a href="#sec-ren">Renders</a></nav>
 <span class=mut style="margin-left:auto;font-size:11px">🔓 ⠿ mover · ▭ largura · puxa a borda ↕ pra altura</span><button onclick=resetLayout() title="voltar ao layout padrão" style="background:#0c0d10;border:1px solid var(--bd);color:var(--mut);border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11px;margin:0 12px">↺ layout</button><span class=mut id=ts>carregando…</span><span class=mut>· :8782</span></header>
 <div class=wrap id=root></div>
 <div id=modal class=modal onclick="if(event.target===this)closeModal()">
@@ -1733,6 +1738,18 @@ class H(BaseHTTPRequestHandler):
             self._send(200, json.dumps(_consult_latest("question"), ensure_ascii=False))
         elif path == "/api/consult/latest-answer":
             self._send(200, json.dumps(_consult_latest("answer"), ensure_ascii=False))
+        elif path in PAGE_FILES:   # Mapa/Fluxo/Como-funciona integrados na MESMA porta (:8782)
+            fp = TOOLSDIR / PAGE_FILES[path]
+            try:
+                self._send(200, fp.read_text("utf-8"), "text/html; charset=utf-8")
+            except OSError as e:
+                self._send(500, f"{fp.name}: {e}", "text/plain; charset=utf-8")
+        elif path == "/api/kgraph":
+            fp = TOOLSDIR / "kgraph.json"
+            try:
+                self._send(200, fp.read_text("utf-8"), "application/json; charset=utf-8")
+            except OSError as e:
+                self._send(500, json.dumps({"error": str(e)}), "application/json")
         elif path.startswith("/img/"):
             fp = (ANGLES / path[len("/img/"):]).resolve()
             if fp.is_file() and ANGLES.resolve() in fp.parents and fp.suffix == ".png":
