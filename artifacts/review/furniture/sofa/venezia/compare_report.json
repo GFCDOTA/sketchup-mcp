@@ -1,0 +1,45 @@
+[
+  {
+    "name": "OLD_caixa_3l",
+    "width_m": 2.05,
+    "bbox_m": [
+      2.05,
+      0.98,
+      0.85
+    ],
+    "class_gate": "FAIL",
+    "class_errors": [
+      "backrest_rake=4.000 fora da faixa de classe [8.0,22.0]",
+      "per_seat=0.483 fora da faixa de classe [0.52,0.75]",
+      "braco_na_silhueta=1.000: braco vs encosto fora de [0.30,0.60] — braco no topo do encosto = caixa"
+    ],
+    "anatomy_gate": "PASS",
+    "n_parts": 19
+  },
+  {
+    "name": "NEW_venezia_3l",
+    "width_m": 2.049,
+    "bbox_m": [
+      2.049,
+      0.943,
+      0.76
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "anatomy_gate": "PASS",
+    "n_parts": 19
+  },
+  {
+    "name": "NEW_venezia_2l",
+    "width_m": 1.466,
+    "bbox_m": [
+      1.466,
+      0.943,
+      0.76
+    ],
+    "class_gate": "PASS",
+    "class_errors": [],
+    "anatomy_gate": "PASS",
+    "n_parts": 15
+  }
+]
