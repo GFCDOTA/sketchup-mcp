@@ -1427,12 +1427,34 @@ class H(BaseHTTPRequestHandler):
             self._send(404, b"not found", "text/plain")
 
 
+def _lan_ip() -> str | None:
+    """IP da máquina na rede local (pra abrir o dashboard pelo celular).
+
+    Truque do socket UDP: não envia nada, só faz o SO escolher a interface
+    de saída — devolve o IP da LAN (192.168.x / 10.x) sem depender de DNS.
+    """
+    import socket
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        return ip if not ip.startswith("127.") else None
+    except Exception:  # noqa: BLE001
+        return None
+    finally:
+        s.close()
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--port", type=int, default=8782)
     a = ap.parse_args(argv)
     srv = ThreadingHTTPServer(("0.0.0.0", a.port), H)
     print(f"INTERIOR STUDIO dashboard -> http://127.0.0.1:{a.port}/  (Ctrl+C p/ parar)")
+    lan = _lan_ip()
+    if lan:
+        print(f"  na rede (celular/tablet, mesmo Wi-Fi) -> http://{lan}:{a.port}/")
+        print(f"  (Windows: se nao abrir, libere a porta {a.port} no Firewall)")
     try:
         srv.serve_forever()
     except KeyboardInterrupt:
