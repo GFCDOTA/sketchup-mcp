@@ -533,11 +533,15 @@ textarea{width:100%;min-height:90px;background:#0c0d10;border:1px solid var(--bd
 .ovherok{font-size:9.5px;font-weight:700;letter-spacing:.07em;color:#7a8290;background:#15161c;border:1px solid var(--bd);border-radius:5px;padding:2px 6px;min-width:58px;text-align:center}
 .ovchips{margin-top:9px;font-size:11.5px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 .ovchip{background:#14131a;border:1px solid var(--bd);border-radius:20px;padding:3px 10px;cursor:pointer}.ovchip:hover{border-color:#f0a868}
+.ovsec{font-size:12px;font-weight:700;letter-spacing:.04em;color:#cdb98a;margin:14px 0 7px;border-top:1px solid var(--bd);padding-top:10px}.ovsec .mut{font-weight:400}
+.ovcyc{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:12px;margin:11px 0 2px}.ovinvfull{margin-top:2px}
+.ovfoco{font-size:8.5px;font-weight:700;background:#f0a868;color:#1a1206;border-radius:4px;padding:1px 5px;vertical-align:middle}
+.ovpulse{display:flex;flex-direction:column;gap:5px}.ovpline{font-size:12px;line-height:1.4}.ovpface{font-size:14px}.ovon{color:var(--ok);font-size:9px;vertical-align:middle}
 .ovinvtoggle{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;font-size:12px;border-top:1px dashed #2c2636;padding-top:9px}
 .ovcard[onclick]{cursor:pointer}.ovcard[onclick]:hover{border-color:#f0a868;background:#15131c}
 </style></head><body>
 <header><span class=hdot></span><h1>🎛 INTERIOR STUDIO</h1>
-<nav><a href="#sec-factory">Ciclo</a><a href="#sec-refpack">Reference Pack</a><a href="#sec-consult">Consult GPT</a><a href="#sec-patch">Learning Patch</a><a href="#sec-agents">Agentes</a><a href="#sec-backlog">Backlog</a><a href="#sec-ren">Renders</a><a href="/explica" target=_blank style="color:var(--gold);font-weight:600;margin-left:8px" title="como o sistema funciona — o Fluxo e o Mapa estão aqui dentro">📖 Explica</a></nav></header>
+<nav><a href="#sec-overview">Missão</a><a href="#sec-ciclo">Ciclo</a><a href="#sec-refpack">Reference Pack</a><a href="#sec-consult">Consult GPT</a><a href="#sec-patch">Learning Patch</a><a href="#sec-agents">Agentes</a><a href="#sec-backlog">Backlog</a><a href="#sec-ren">Renders</a><a href="/explica" target=_blank style="color:var(--gold);font-weight:600;margin-left:8px" title="como o sistema funciona — o Fluxo e o Mapa estão aqui dentro">📖 Explica</a></nav></header>
 <div class=wrap id=root></div>
 <div id=modal class=modal onclick="if(event.target===this)closeModal()">
  <div class=mbox><div class=mbar><span id=mname></span>
@@ -775,35 +779,44 @@ async function tick(force){
  // 🛰️ VISÃO GERAL — domínio por ambiente: os FOCOS ATIVOS (fluxos vivos, N) + inventário (escondido)
  const ov=s.overview||{}
  if((ov.active_focuses||[]).length||(ov.rooms||[]).length){const SC={done:'ov-done',pending:'ov-pend',doing:'ov-doing'}
+  const fac=s.factory||{}
   const STC={approved:'var(--ok)',learned:'var(--ok)',frozen:'var(--blu)',vray_ready:'var(--gold)',context_review_needed:'var(--gold)',form_review_needed:'var(--gold)',building:'var(--blu)',build_spec_ready:'var(--warn)',curation_needed:'var(--warn)',references_needed:'var(--mut)',not_started:'#5a606b'}
-  // FOCO PRINCIPAL = hero NOMINAL (GPT prioridade #1: "Felipe quer saber TÔ MEXENDO EM QUÊ, não um contador")
+  const SICO=st=>['approved','learned','frozen'].includes(st)?'✅':['not_started','references_needed'].includes(st)?'⬜':'⚙️'   // GPT: 3 emojis de status
+  // ── 1) OPERAÇÃO: hero NOMINAL + pipeline + linha do ciclo (absorve a Fábrica) ──
   const mkPipe=f=>(f.pipeline||[]).map((p,i)=>`${i?'<span class=ovarrow>→</span>':''}<div class="ovstep ${SC[p.status]||'ov-pend'}"><div class=ovic>${p.icon}</div><div class=ovlbl>${esc(p.label)}</div></div>`).join('')
   const prin=(ov.active_focuses||[])[0],others=(ov.active_focuses||[]).slice(1)
-  const heroTitle=prin?`🎯 AGORA: <b style="color:#f0a868">${esc(prin.env_label)} · ${esc(prin.label)}</b>`:'🛰️ Visão geral — nenhum fluxo ativo'
+  const heroTitle=prin?`🎯 AGORA: <b style="color:#f0a868">${esc(prin.env_label)} · ${esc(prin.label)}</b>`:'🛰️ MISSÃO — nenhum fluxo ativo'
   const heroBlock=prin?(()=>{const col=STC[prin.state]||'var(--gold)'
    const act=prin.jump?`<button class=chatbtn onclick="jumpTo('${prin.jump}')">▶ ${esc(prin.next||'')}</button>`:`<span class=ovnext>▶ ${esc(prin.next||'')}</span>`
    const chips=others.length?`<div class=ovchips><span class=mut>também ativo:</span> ${others.map(o=>`<span class=ovchip onclick="jumpTo('${o.jump||'sec-overview'}')">${o.env_icon} ${esc(o.label)} <span style="color:${STC[o.state]||'var(--mut)'}">— ${esc(o.state_label)}</span></span>`).join(' ')}</div>`:''
    return `<div class=ovfocus><div class=ovhero><div class=ovheroline><span class=ovherok>AGORA</span> <b>${esc(prin.env_label)} · ${esc(prin.label)}</b> <span style="color:${col}">— ${esc(prin.state_label)}</span></div>${prin.reason?`<div class=ovheroline><span class=ovherok>POR QUÊ</span> <span class=mut>${esc(prin.reason)}</span></div>`:''}<div class=ovheroline><span class=ovherok>PRÓXIMO</span> ${act}</div></div><div class=ovpipe>${mkPipe(prin)}</div>${chips}</div>`})():'<div class=mut style="padding:8px 2px">Nenhum fluxo ativo agora — escolhe um asset no inventário pra começar um ciclo.</div>'
-  const rooms=(ov.rooms||[]).map(rm=>{const cards=(rm.assets||[]).map(a=>{const col=STC[a.state]||'var(--mut)'
-    return `<div class="ovcard"${a.jump?` onclick="jumpTo('${a.jump}')" style="cursor:pointer"`:''}><div class=ovcnm>${esc(a.label)}</div><div class=ovcb style="color:${col}">${esc(a.state_label)}</div><div class=ovcd>▶ ${esc(a.next||'')}${a.refs?(' · '+(a.refs_img||0)+'/'+a.refs+' img'):''}</div></div>`}).join('')
+  const cycLine=fac.has_cycle?`<div class=ovcyc><span class=ovherok>CICLO</span> <span class=mut>${esc(fac.cycle_id||'')} · ${esc(fac.microtask||'')} — ${esc(fac.title||'')}</span> <button class=chatbtn onclick="nextStepGo('scout')">🔭 Scout</button> <button class=chatbtn onclick="nextStepGo('consult')">🔌 Consult GPT</button> <button class=chatbtn onclick="genBundle()" title="gera GPT_REVIEW_BUNDLE.md">📦 Pacote GPT</button></div>${fac.architect_blocked?`<div class=facblock>⛔ Arquiteto BLOQUEADO — sem referência ⭐ principal curada. Não constrói o ${esc(fac.asset||'móvel')} até você escolher.</div>`:''}`:''
+  // ── 2) INVENTÁRIO: resumo NOMINAL (GPT: "1 pronto não informa; ✅ Cozinha informa") + ícone por asset ──
+  const nm=a=>esc((a.label||'').replace(/^\S+\s/,''))
+  const allA=(ov.rooms||[]).flatMap(rm=>rm.assets||[])
+  const inprog=allA.filter(a=>!['approved','learned','frozen','not_started','references_needed'].includes(a.state))
+  const doneA=allA.filter(a=>['approved','learned','frozen'].includes(a.state))
+  const todoN=allA.filter(a=>['not_started','references_needed'].includes(a.state)).length
+  const nominal=`⚙️ ${inprog.map(nm).join(', ')||'—'} · ✅ ${doneA.map(nm).join(', ')||'—'} · ⬜ ${todoN} a fazer`
+  const rooms=(ov.rooms||[]).map(rm=>{const cards=(rm.assets||[]).map(a=>{const col=STC[a.state]||'var(--mut)',isF=prin&&a.asset===prin.asset
+    return `<div class="ovcard${isF?' ovcard-on':''}"${a.jump?` onclick="jumpTo('${a.jump}')" style="cursor:pointer"`:''}><div class=ovcnm>${SICO(a.state)} ${esc(a.label)}${isF?' <span class=ovfoco>FOCO</span>':''}</div><div class=ovcb style="color:${col}">${esc(a.state_label)}</div><div class=ovcd>▶ ${esc(a.next||'')}${a.refs?(' · '+(a.refs_img||0)+'/'+a.refs+' img'):''}</div></div>`}).join('')
    return `<div class=ovroom><div class=ovroomh>${rm.icon} <b>${esc(rm.label)}</b> <span class=mut>${rm.done}/${rm.total} prontos</span></div><div class=ovinv>${cards}</div></div>`}).join('')
-  let nprog=0,ntodo=0,ndone=0;(ov.rooms||[]).forEach(rm=>(rm.assets||[]).forEach(a=>{if(['approved','learned','frozen'].includes(a.state))ndone++;else if(['not_started','references_needed'].includes(a.state))ntodo++;else nprog++}))
+  // ── 3) PULSO: última fala de cada agente (estilo status WhatsApp) + sessões ativas ──
+  const leads=((s.agents||{}).umbrellas||[]).map(u=>u.lead).filter(Boolean)
+  const pulso=leads.map(l=>`<div class=ovpline><span class=ovpface>${l.face}</span> <b>${esc(l.label)}</b>${l.online?' <span class=ovon title=online>●</span>':''} <span class=mut>${esc((l.message||'—').slice(0,110))}</span></div>`).join('')||'<div class=mut style=font-size:11px>time quieto</div>'
+  const sess=((s.sessions||{}).claims||[]).map(c=>`<div class=ovpline><span class=mut>🖥️ <b>${esc(c.owner)}</b> · ${esc(c.mt)} ${esc(c.desc)} <i>(${esc(c.status)})</i></span></div>`).join('')||'<div class=mut style=font-size:11px>nenhuma sessão reivindicando MT</div>'
   root.appendChild(el(`<div class="card full" id=sec-overview><h2>${heroTitle}</h2>
    ${heroBlock}
-   <div class=ovinvtoggle><span class=mut>apê inteiro: ${nprog} em andamento · ${ntodo} a fazer · ${ndone} pronto(s)</span> <button class=chatbtn onclick="toggleInv(this)">${INVOPEN?'▲ ocultar ambientes':'📋 ver todos os ambientes'}</button></div>
-   <div id=ovinvfull style="display:${INVOPEN?'block':'none'};margin-top:10px"><div class=kblist-h>Inventário por cômodo <span class=mut>(pra quando for replicar pra outros ambientes)</span></div>${rooms}</div></div>`))
+   ${cycLine}
+   <div class=ovsec>📦 INVENTÁRIO <span class=mut>${nominal}</span></div>
+   <div class=ovinvfull>${rooms}</div>
+   <div class=ovsec>📡 PULSO <span class=mut>última fala do time + sessões ativas</span></div>
+   <div class=ovpulse>${pulso}${sess}</div></div>`))
  }
  // 🏭 FÁBRICA + 🔧 CICLO ATUAL + 🖼️ REFERENCE PACK — a esteira por ciclo (topo, unidade principal)
  FACTORY=s.factory||{}
  const fac=FACTORY
- if(fac.has_cycle){const ns=fac.next_step||{}
-  const nsBtn=ns.actionable?`<button class=send onclick="nextStepGo('${ns.kind}')">${esc(ns.label||'▶ próxima etapa')}</button>`:`<span class="facpill st" style="background:#2a2417;color:var(--gold);border-color:var(--gold)">${esc(ns.label||fac.next_action||'—')}</span>`
-  root.appendChild(el(`<div class="card full" id=sec-factory><h2>🏭 Fábrica de interiores — o que decidir AGORA</h2>
-   <div class=facbar><span class=facpill>📐 ${esc(fac.project||'')}</span><span class=facpill>🛋️ ${esc(fac.room||'')} · ${esc(fac.asset||'')}</span><span class=facpill>⚙ ${esc(fac.mode||'')}</span><span class="facpill cid">${esc(fac.cycle_id||'')}</span><span class=facpill>${esc(fac.microtask||'')} — ${esc(fac.title||'')}</span><span class="facpill st">${esc(fac.status||'')}</span></div>
-   <div class=facnext>▶ próxima ação: <b>${esc(fac.next_action||'—')}</b></div>
-   <div class=facacts>${nsBtn} <button class=chatbtn onclick="nextStepGo('scout')">🔭 Scout</button> <button class=chatbtn onclick="nextStepGo('consult')">🔌 Consult GPT</button> <button class=chatbtn onclick="genBundle()" title="gera GPT_REVIEW_BUNDLE.md — fonte única pro GPT revisar o dash sem localhost">📦 Pacote GPT</button></div>
-   <div class=facbundle><span class=mut>pacote p/ GPT:</span> <button class=chatbtn onclick="copyBundle(event)">📋 copiar bundle</button> <button class=chatbtn onclick="copyBundleLink(event)">🔗 copiar link raw</button> <button class=chatbtn onclick="copyShortQ(event)">🧾 copiar pergunta</button> <span class=mut id=bundlemsg></span></div>
-   ${fac.architect_blocked?`<div class=facblock>⛔ Arquiteto BLOQUEADO — sem referência ⭐ principal curada. NÃO constrói o ${esc(fac.asset||'móvel')} até você escolher (regra-trava).</div>`:''}</div>`))
+ if(fac.has_cycle){   // o card 🏭 Fábrica foi ABSORVIDO pela MISSÃO (linha CICLO); aqui fica só a timeline detalhada
   const tl=(fac.timeline||[]).map(st=>{const cl={done:'tl-done',doing:'tl-doing',waiting:'tl-wait',blocked:'tl-block',na:'tl-na',pending:'tl-pend'}[st.status]||'tl-pend'
    const need=st.needs?`<div class=tlneed>⚠ falta: <b>${esc(st.needs)}</b> <button class=cbtn onclick="jumpTo('${st.jump||'sec-refpack'}')">→ resolver</button></div>`:''
    return `<div class="tlstep ${cl}"><div class=tlhead><span class=tlface>${st.face}</span> <b>${esc(st.agent)}</b> <span class=tlicon>${st.icon}</span> <span class=mut>${esc(st.status)}</span>${st.model?`<span class=stag>${esc(st.model)}</span>`:''}</div>${st.summary?`<div class=tlsum>${esc(st.summary)}</div>`:''}${need}</div>`}).join('')
