@@ -1,24 +1,20 @@
 # GPT REVIEW BUNDLE — Interior Studio (:8782)
-> Gerado 2026-06-22T01:57:25 · fonte única pro Consult GPT revisar o dashboard sem localhost.
+> Gerado 2026-06-22T02:21:56 · fonte única pro Consult GPT revisar o dashboard sem localhost.
 
 ## 1. Repo
 - branch: `feat/sofa-class-from-reference`
-- commit: `243ed216e936a03f754799cfe2f24ed1ce9e4e14`
+- commit: `b1df53e366e0b5b5c94b12c75e32c64ee453d223`
 - remote: `https://github.com/GFCDOTA/sketchup-mcp.git`
-- gerado_em: 2026-06-22T01:57:25
+- gerado_em: 2026-06-22T02:21:56
 - tree: https://github.com/GFCDOTA/sketchup-mcp/tree/feat/sofa-class-from-reference
 
 <details><summary>git diff --stat desde a última revisão</summary>
 
 ```
-.ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.json       | 107 ++++++++++-------
- .ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md         |  40 +++----
- .ai_bridge/interior_cycles/CYCLE-003.json          |   3 +-
- .ai_bridge/learning_patches/LP-SOFA-001.json       |  92 +++++++++++++++
- artifacts/reference_lab/sofa/SOFA_BUILD_SPEC.md    | 129 +++++++++++++++++++++
- .../consult_gpt_bridge/answer_parser.py            |  54 ++++++++-
- tools/interior_studio/learning_patch.py            |   3 +-
- 7 files changed, 362 insertions(+), 66 deletions(-)
+.ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.json | 23 +++++++-------
+ .ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md   | 42 +++++++++++++------------
+ tools/studio_dashboard.py                    | 46 ++++++++++++++++++++++++++--
+ 3 files changed, 79 insertions(+), 32 deletions(-)
 ```
 </details>
 
@@ -70,17 +66,13 @@ _Análise = hipótese de pesquisa (não vi as imagens renderizadas). Quem julga 
 - última pergunta: sofa_spec_001 · pendentes: 2 · ingeridas: 1
 
 ## 7. Mudanças desde a última revisão
-- último SHA revisado: `d73f1305b29e649b970525a3bc1954c49c5b37b1`
-- SHA atual: `243ed216e936a03f754799cfe2f24ed1ce9e4e14`
+- último SHA revisado: `243ed216e936a03f754799cfe2f24ed1ce9e4e14`
+- SHA atual: `b1df53e366e0b5b5c94b12c75e32c64ee453d223`
 ```
-.ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.json       | 107 ++++++++++-------
- .ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md         |  40 +++----
- .ai_bridge/interior_cycles/CYCLE-003.json          |   3 +-
- .ai_bridge/learning_patches/LP-SOFA-001.json       |  92 +++++++++++++++
- artifacts/reference_lab/sofa/SOFA_BUILD_SPEC.md    | 129 +++++++++++++++++++++
- .../consult_gpt_bridge/answer_parser.py            |  54 ++++++++-
- tools/interior_studio/learning_patch.py            |   3 +-
- 7 files changed, 362 insertions(+), 66 deletions(-)
+.ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.json | 23 +++++++-------
+ .ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md   | 42 +++++++++++++------------
+ tools/studio_dashboard.py                    | 46 ++++++++++++++++++++++++++--
+ 3 files changed, 79 insertions(+), 32 deletions(-)
 ```
 
 ## Pergunta para o GPT
