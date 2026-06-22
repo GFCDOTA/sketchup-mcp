@@ -320,25 +320,42 @@ def _load_matrix(con: sqlite3.Connection):
     return rows, mat / norms
 
 
-def cmd_search(args: argparse.Namespace) -> int:
-    con = connect(Path(args.db).resolve())
+def search(query: str, k: int = 6, db_path: Path | str = DEFAULT_DB) -> list[dict]:
+    """Busca semântica reutilizável (CLI + endpoint :8765). Lista vazia se índice vazio."""
+    con = connect(Path(db_path))
     rows, mat = _load_matrix(con)
     if not rows:
-        print("índice vazio — rode `index` primeiro", file=sys.stderr)
-        return 1
-    q = embed(args.query)
+        return []
+    q = embed(query)
     q = q / (np.linalg.norm(q) or 1.0)
     sims = mat @ q
-    top = np.argsort(-sims)[: args.k]
-    print(f'busca: "{args.query}"   ({len(rows)} chunks no índice)\n')
-    for rank, i in enumerate(top, 1):
+    order = np.argsort(-sims)[:k]
+    out: list[dict] = []
+    for rank, i in enumerate(order, 1):
         _id, src, stype, title, text, _ = rows[i]
-        snippet = " ".join(text.split())[:240]
-        head = f"#{rank}  score={sims[i]:.3f}  [{stype}]  {src}"
-        print(head)
-        if title:
-            print(f"      title: {title}")
-        print(f"      {snippet}\n")
+        out.append({
+            "rank": rank,
+            "score": round(float(sims[i]), 4),
+            "source_type": stype,
+            "source_path": src,
+            "title": title,
+            "snippet": " ".join(text.split())[:240],
+            "text": text,
+        })
+    return out
+
+
+def cmd_search(args: argparse.Namespace) -> int:
+    results = search(args.query, args.k, args.db)
+    if not results:
+        print("índice vazio — rode `index` primeiro", file=sys.stderr)
+        return 1
+    print(f'busca: "{args.query}"   (k={args.k})\n')
+    for r in results:
+        print(f"#{r['rank']}  score={r['score']:.3f}  [{r['source_type']}]  {r['source_path']}")
+        if r["title"]:
+            print(f"      title: {r['title']}")
+        print(f"      {r['snippet']}\n")
     return 0
 
 

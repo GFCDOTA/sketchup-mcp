@@ -33,6 +33,20 @@ $PY tools/project_memory_db.py stats
 O `.db` é índice **DERIVADO e reconstruível** (gitignored). Idempotente: só
 reembeda arquivo que mudou (dedup por hash de conteúdo).
 
+### Endpoint HTTP (`:8765`)
+
+Os agentes consultam por HTTP — rota read-only e aditiva, NÃO toca o `/ask`:
+
+```bash
+curl -s -G http://127.0.0.1:8765/api/memory/search \
+  --data-urlencode "q=como julgamos a proporção do sofá?" --data-urlencode "k=6"
+# -> {"query":..., "count":N, "results":[{score,source_type,source_path,title,snippet,text}]}
+```
+
+Auto-anunciada em `/health` (`endpoints`). Erro honesto: 400 se `q` vazio, 500 se
+índice ausente / Ollama offline (nunca fabrica). Requer o índice já construído
+(`index`) no checkout onde o `:8765` roda.
+
 ## O que é indexado / o que NÃO é
 
 **Indexa** (alto valor semântico): `HANDOFF*.md`, `fidelity/verdicts/*.md`,
@@ -48,12 +62,14 @@ reembeda arquivo que mudou (dedup por hash de conteúdo).
 RAG é **CONSULTIVO**. Os gates determinísticos continuam sendo a verdade. Esta
 base responde *"o que já aconteceu?"*, nunca *"está certo?"*.
 
-## Roadmap (próximos passos — não nesta fatia)
+## Roadmap
 
+- ✅ **Endpoint `:8765`** — `GET /api/memory/search` (read-only) servido pelo
+  `server.py`; agentes consultam por HTTP. (feito)
 - **STEP 4 — write-back curado**: veredito PASS do `:8765` → memória, com gate
   `PENDING → Felipe aprova → APPLIED` (anti lixo-entra-lixo-sai). Detector de
   contradição antes de servir.
-- **Endpoint `:8765`**: expor `/api/memory/search` (read-only) no `server.py`
-  pra os agentes consultarem por HTTP. Hoje a busca é via CLI.
+- **Wiring dos agentes**: arquiteto/PM/lead chamam `/api/memory/search` antes de
+  opinar (1 linha no spec de cada agente).
 - **Busca híbrida**: somar BM25 (SQLite FTS5) ao cosseno se a recuperação por
   keyword exata fizer falta.

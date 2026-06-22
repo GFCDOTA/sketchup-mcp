@@ -1556,6 +1556,28 @@ def _artifact_route(req, url):
     req._send_bytes(f.read_bytes(), ctype)
 
 
+def _memory_search_route(req, url):
+    """GET /api/memory/search?q=...&k=6 — RAG #2 (memória do projeto), read-only.
+    Busca semântica na project_memory.db pra os agentes consultarem 'o que já
+    fizemos e aprendemos'. Honesto em 400/500; nunca fabrica. NÃO toca o /ask."""
+    try:
+        params = parse_qs(url.query)
+        query = (params.get("q") or params.get("query") or [""])[0].strip()
+        if not query:
+            req._send(400, {"error": "empty query (send ?q=...)"})
+            return
+        try:
+            k = int((params.get("k") or ["6"])[0])
+        except ValueError:
+            k = 6
+        k = max(1, min(k, 20))
+        from tools.project_memory_db import search as _memory_search
+        results = _memory_search(query, k)
+        req._send(200, {"query": query, "count": len(results), "results": results})
+    except Exception as e:  # índice ausente / Ollama offline -> erro honesto
+        req._send(500, {"error": f"{type(e).__name__}: {e}"})
+
+
 def _ask_route(req, _url):
     """POST /ask — the oracle consult. Honest 500 on failure; never fabricates."""
     try:
@@ -1776,6 +1798,7 @@ GET_ROUTES = {
     "/api/actions/process-consults": _json_route(process_consults_state),
     "/api/actions/dirty-detail": _json_route(dirty_detail),
     "/artifact": _artifact_route,
+    "/api/memory/search": _memory_search_route,
 }
 
 POST_ROUTES = {
