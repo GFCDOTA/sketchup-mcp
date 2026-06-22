@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-06-21T19:26:27",
+  "generated_at": "2026-06-22T01:04:44",
   "repo": {
     "branch": "feat/sofa-class-from-reference",
-    "sha": "950b4dc006a9ab34f45aa1bc1ffd27994d0a33cc",
+    "sha": "e7750cb5c0f296573be47cbee58b3635307da38e",
     "remote_url": "https://github.com/GFCDOTA/sketchup-mcp.git",
     "owner": "GFCDOTA",
     "repo": "sketchup-mcp"
@@ -59,7 +59,7 @@
     "microtask": "MT-SOFA-001",
     "title": "Gerar SOFA_REFERENCE_PACK",
     "mode": "REFERENCE_PACK",
-    "status": "waiting_felipe_curation",
+    "status": "ready_for_sofa_build_spec_after_gpt_patch",
     "next_action": "Felipe escolher 1-2 referências principais (⭐) na Curadoria",
     "architect_blocked": false,
     "references": {
@@ -181,7 +181,7 @@
     },
     "next_step": {
       "kind": "consult",
-      "label": "🔌 Gerar pergunta pro Consult GPT → SOFA_BUILD_SPEC",
+      "label": "🔌 Consult GPT → resposta vira Learning Patch (você aprova) → SOFA_BUILD_SPEC",
       "actionable": true
     },
     "cycles": [
@@ -461,9 +461,9 @@
     "done": 0
   },
   "changes_since_last": {
-    "last_sha": "182e2628b560ea26f1feeeb9c9a35a3e4559cc38",
-    "current_sha": "950b4dc006a9ab34f45aa1bc1ffd27994d0a33cc",
-    "diffstat": "tests/test_interior_cycles.py            | 13 +++++++++\n tools/interior_studio/reference_packs.py | 21 ++++++++++++++\n tools/studio_dashboard.py                | 48 +++++++++++++++++---------------\n 3 files changed, 59 insertions(+), 23 deletions(-)"
+    "last_sha": "950b4dc006a9ab34f45aa1bc1ffd27994d0a33cc",
+    "current_sha": "e7750cb5c0f296573be47cbee58b3635307da38e",
+    "diffstat": ".ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.json       |  10 +-\n .ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md         |  38 ++--\n tests/test_learning_patch.py                       |  97 ++++++++++\n .../interior_studio/contracts/learning_patch.v1.md |  49 +++++\n tools/interior_studio/cycles.py                    |  22 ++-\n tools/interior_studio/learning_patch.py            | 201 +++++++++++++++++++++\n tools/studio_dashboard.py                          |  92 ++++++++--\n 7 files changed, 461 insertions(+), 48 deletions(-)"
   },
   "question": "Revise o estado atual do Interior Studio (:8782) pelos arquivos raw linkados. (1) O dashboard está CLARO pra operar o ciclo CYCLE-003 / SOFA_REFERENCE_PACK? (2) O que ainda compete por atenção / está confuso? (3) O que priorizar ANTES de construir o sofá? (4) A curadoria VISUAL e a regra-trava (Arquiteto bloqueado sem ⭐ principal) estão bem resolvidas? Responda objetivo, com prioridades."
 }

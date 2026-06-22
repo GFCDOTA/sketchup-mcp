@@ -1,20 +1,24 @@
 # GPT REVIEW BUNDLE — Interior Studio (:8782)
-> Gerado 2026-06-21T19:26:27 · fonte única pro Consult GPT revisar o dashboard sem localhost.
+> Gerado 2026-06-22T01:04:44 · fonte única pro Consult GPT revisar o dashboard sem localhost.
 
 ## 1. Repo
 - branch: `feat/sofa-class-from-reference`
-- commit: `950b4dc006a9ab34f45aa1bc1ffd27994d0a33cc`
+- commit: `e7750cb5c0f296573be47cbee58b3635307da38e`
 - remote: `https://github.com/GFCDOTA/sketchup-mcp.git`
-- gerado_em: 2026-06-21T19:26:27
+- gerado_em: 2026-06-22T01:04:44
 - tree: https://github.com/GFCDOTA/sketchup-mcp/tree/feat/sofa-class-from-reference
 
 <details><summary>git diff --stat desde a última revisão</summary>
 
 ```
-tests/test_interior_cycles.py            | 13 +++++++++
- tools/interior_studio/reference_packs.py | 21 ++++++++++++++
- tools/studio_dashboard.py                | 48 +++++++++++++++++---------------
- 3 files changed, 59 insertions(+), 23 deletions(-)
+.ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.json       |  10 +-
+ .ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md         |  38 ++--
+ tests/test_learning_patch.py                       |  97 ++++++++++
+ .../interior_studio/contracts/learning_patch.v1.md |  49 +++++
+ tools/interior_studio/cycles.py                    |  22 ++-
+ tools/interior_studio/learning_patch.py            | 201 +++++++++++++++++++++
+ tools/studio_dashboard.py                          |  92 ++++++++--
+ 7 files changed, 461 insertions(+), 48 deletions(-)
 ```
 </details>
 
@@ -33,7 +37,7 @@ tests/test_interior_cycles.py            | 13 +++++++++
 ## 3. Estado atual (resumo do /api/state)
 - projeto: **planta_74** · cômodo: **living** · asset: **sofa**
 - ciclo: **CYCLE-003** · microtarefa: **MT-SOFA-001** · modo: **REFERENCE_PACK**
-- status: **waiting_felipe_curation** · próxima ação: **Felipe escolher 1-2 referências principais (⭐) na Curadoria**
+- status: **ready_for_sofa_build_spec_after_gpt_patch** · próxima ação: **Felipe escolher 1-2 referências principais (⭐) na Curadoria**
 - arquiteto_bloqueado: **False**
 - reference pack: {'total': 6, 'approved': 1, 'rejected': 0, 'main': 1, 'anti': 1, 'pending': 3}
 - backlog: 32 microtarefas, 0 done
@@ -66,13 +70,17 @@ _Análise = hipótese de pesquisa (não vi as imagens renderizadas). Quem julga 
 - última pergunta: kitchen_skin_045756 · pendentes: 1 · ingeridas: 1
 
 ## 7. Mudanças desde a última revisão
-- último SHA revisado: `182e2628b560ea26f1feeeb9c9a35a3e4559cc38`
-- SHA atual: `950b4dc006a9ab34f45aa1bc1ffd27994d0a33cc`
+- último SHA revisado: `950b4dc006a9ab34f45aa1bc1ffd27994d0a33cc`
+- SHA atual: `e7750cb5c0f296573be47cbee58b3635307da38e`
 ```
-tests/test_interior_cycles.py            | 13 +++++++++
- tools/interior_studio/reference_packs.py | 21 ++++++++++++++
- tools/studio_dashboard.py                | 48 +++++++++++++++++---------------
- 3 files changed, 59 insertions(+), 23 deletions(-)
+.ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.json       |  10 +-
+ .ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md         |  38 ++--
+ tests/test_learning_patch.py                       |  97 ++++++++++
+ .../interior_studio/contracts/learning_patch.v1.md |  49 +++++
+ tools/interior_studio/cycles.py                    |  22 ++-
+ tools/interior_studio/learning_patch.py            | 201 +++++++++++++++++++++
+ tools/studio_dashboard.py                          |  92 ++++++++--
+ 7 files changed, 461 insertions(+), 48 deletions(-)
 ```
 
 ## Pergunta para o GPT
