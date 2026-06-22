@@ -30,6 +30,7 @@ FELIPE_DNA = ROOT / ".claude/memory/felipe_style_dna.md"               # identid
 JUDGE_RULES = ROOT / "references/design_rules/felipe_visual_judge_rules.json"  # regras do juiz visual + erros marcados
 KANBAN_FILE = ROOT / ".ai_bridge/kanban.json"          # status Trello de cada microtarefa (Felipe move)
 CYCLES_FILE = ROOT / ".ai_bridge/interior_consult/cycles.jsonl"  # cada ciclo persistido (o "banco" do loop)
+RELAY_FILE = ROOT / ".ai_bridge/interior_consult/relay.json"     # fila do relay Claude↔ChatGPT (Chrome)
 KANBAN_COLS = ["backlog", "refinamento", "execução", "teste", "executado"]
 SKIP = (".denoiser.png", ".effectsResult.png")
 DEFAULT_PACK = "sofa_reference_pack_001"   # pack ativo da esteira (sofá = primeiro laboratório)
@@ -553,6 +554,8 @@ function copyBundle(ev){cpTxt(BUNDLE&&BUNDLE.md,ev)}
 function copyBundleLink(ev){cpTxt(BUNDLE&&BUNDLE.raw_link,ev)}
 function copyShortQ(ev){cpTxt(BUNDLE&&BUNDLE.question,ev)}
 function nextStepGo(kind){jumpTo({scout:'sec-scout',consult:'sec-consult',curate:'sec-refpack',build:'sec-ciclo'}[kind]||'sec-ciclo')}
+function consultRelay(){const m=document.getElementById('cqmsg');if(m)m.textContent='🤖 pedindo relay…'
+ fetch('/api/consult/relay-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})}).then(r=>r.json()).then(r=>{if(m)m.textContent=r.ok?('🤖 relay pedido pra '+r.question_id+' — me fala "relaya" no chat que eu dirijo o ChatGPT'):('erro: '+(r.error||''));tick(1)})}
 function jumpTo(id){const sec=document.getElementById(id);if(sec){sec.scrollIntoView({behavior:'smooth',block:'center'});sec.classList.add('kc-hl');setTimeout(()=>sec.classList.remove('kc-hl'),2000)}}
 function flagErr(){const a=document.getElementById('flagag').value,m=document.getElementById('flagmsg').value;if(!m)return
  fetch('/api/flag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:a,message:m})}).then(()=>{document.getElementById('flagmsg').value='';tick(1)})}
@@ -876,7 +879,7 @@ async function tick(force){
   <textarea id=cq-context placeholder="Contexto (3-8 linhas: o que está acontecendo)" style="min-height:60px"></textarea>
   <textarea id=cq-goal placeholder="Objetivo da decisão (que decisão o Consult GPT precisa tomar)" style="min-height:46px"></textarea>
   <textarea id=cq-hyp placeholder="Hipótese do Arquiteto (o que você tentou fazer)" style="min-height:46px"></textarea>
-  <div style="margin:6px 0"><button class=send onclick=consultGen()>🧩 gerar pergunta</button> <span class=mut id=cqmsg></span></div>
+  <div style="margin:6px 0"><button class=send onclick=consultGen()>🧩 gerar pergunta</button> <button class=chatbtn onclick=consultRelay() title="o Claude pega esta pergunta, dirige o TEU ChatGPT Plus pela extensão do Chrome, lê a resposta e devolve aqui → vira Learning Patch">🤖 relay via Claude (Chrome)</button> <span class=mut id=cqmsg></span> ${co.relay?`<span class=mut>· último relay: <b>${esc(co.relay.question_id||'')}</b> ${esc(co.relay.status||'')}${co.relay.patch_id?(' → '+esc(co.relay.patch_id)):''}</span>`:''}</div>
   <div class=consult-half>
    <div><div class=kblist-h>Pergunta gerada <span class=mut>(${esc(cqid)})</span> <button class=chatbtn onclick=consultCopy(event)>copiar</button></div>
     <textarea id=cq-out readonly placeholder="clique 'gerar pergunta' — o contrato aparece aqui pra copiar" style="min-height:150px;font:11px ui-monospace,monospace"></textarea></div>
@@ -1077,7 +1080,8 @@ def _consult_state() -> dict:
                 "latest_question_md": contracts.render_question_md(lq) if lq else None,
                 "latest_answer": la.get("raw") if la else None,
                 "latest_answer_path": la.get("path") if la else None,
-                "status": cstat, "ingested_count": c["ingested"], "failed_count": c["failed"],
+                "status": cstat, "relay": _relay_state(),
+                "ingested_count": c["ingested"], "failed_count": c["failed"],
                 "bridge_mode": "manual", "openai_enabled": openai_client.is_enabled()}
     except Exception as e:  # noqa: BLE001
         return {"error": str(e), "pending_questions": [], "latest_question": None, "latest_answer": None,
@@ -1149,6 +1153,39 @@ def _consult_question(body: dict) -> dict:
                 "status": "waiting_gpt_answer", "paths": saved}
     except ValueError as e:
         return {"ok": False, "error": str(e)}
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": str(e)}
+
+
+def _relay_state() -> dict | None:
+    try:
+        return json.loads(RELAY_FILE.read_text("utf-8")) if RELAY_FILE.exists() else None
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
+def _relay_mark(qid: str, status: str, **extra) -> None:
+    RELAY_FILE.parent.mkdir(parents=True, exist_ok=True)
+    rec = {"question_id": qid, "status": status, "ts": time.strftime("%Y-%m-%dT%H:%M:%S"), **extra}
+    RELAY_FILE.write_text(json.dumps(rec, ensure_ascii=False, indent=2), "utf-8")
+
+
+def _consult_relay_request(body: dict) -> dict:
+    """Felipe pede o RELAY: o Claude vai pegar a pergunta pendente, dirigir o ChatGPT Plus dele pela
+    extensão do Chrome, ler a resposta e devolver pro dash. (Semi-auto: roda quando o Claude está na sessão.)"""
+    try:
+        from tools.interior_studio.consult_gpt_bridge import store
+        qid = body.get("question_id") or (store.latest_question() or {}).get("question_id")
+        if not qid:
+            return {"ok": False, "error": "sem pergunta pendente pra relayar — gere uma primeiro"}
+        _relay_mark(qid, "requested")
+        try:
+            from tools import studio_log
+            studio_log.post("consult-liaison", "working",
+                            f"relay PEDIDO: {qid} → Claude vai dirigir o ChatGPT (Chrome)", to="architect")
+        except Exception:  # noqa: BLE001
+            pass
+        return {"ok": True, "question_id": qid, "status": "requested"}
     except Exception as e:  # noqa: BLE001
         return {"ok": False, "error": str(e)}
 
@@ -1258,6 +1295,9 @@ def _consult_learn(body: dict) -> dict:
             parsed["question_id"] = qid
             patch = lp.from_answer(parsed, answer_path=saved.get("path", ""))
             diff = lp.compute_diff(patch)
+            rs = _relay_state()   # se havia relay pendente desse qid, fecha o loop
+            if rs and rs.get("question_id") == qid:
+                _relay_mark(qid, "answered", patch_id=patch["patch_id"])
             try:
                 from tools import studio_log
                 studio_log.post("consult-liaison", "done",
@@ -1741,6 +1781,8 @@ class H(BaseHTTPRequestHandler):
             self._send(200, json.dumps(_consult_ingest(body), ensure_ascii=False))
         elif path == "/api/consult/learn":
             self._send(200, json.dumps(_consult_learn(body), ensure_ascii=False))
+        elif path == "/api/consult/relay-request":
+            self._send(200, json.dumps(_consult_relay_request(body), ensure_ascii=False))
         elif path == "/api/team-ask":
             self._send(200, json.dumps(_team_ask(body.get("agent"), body.get("question")), ensure_ascii=False))
         elif path == "/api/scout-search":
