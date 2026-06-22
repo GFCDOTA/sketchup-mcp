@@ -59,3 +59,32 @@ suggested_action, **requires_approval: true**}. **Nada entra direto.**
 5. **ReferencePackHealth** + Scout auto-refill (mata o beco sem saída).
 
 ⚠️ Bridge gotcha confirmado: setas `→`/acentos corrompem msg longa pelo digitador do Chrome — mandar com "->".
+
+---
+
+## VEREDITO BRUTAL do GPT sobre o CORE construído (2026-06-22, GPT LEU o project_state.py raw)
+**"isso AJUDA, não é firula. O domínio novo é bom. O risco agora é estragarem ele colocando IA opinativa e UI
+bonitinha demais em cima ANTES de transformar o estado em dado confiável."**
+
+**4 cortes/ajustes GRADUAIS (não agora — primeiro faz o dash usar bem o domínio):**
+1. **UI dentro do domínio** (STATE_LABEL/ASSET_META/emoji/label/texto-de-botão no core) = acoplamento. Depois:
+   criar `project_state_view.py`/`dashboard_presenter.py`; domínio fala `state="vray_ready"`, a UI traduz.
+2. **Estado por substring de markdown é frágil "pra caralho"** (form_pass/ctx_pass procuram frase no .md) =
+   **MAIOR RISCO REAL do core.** Fix: no próximo GPT gate salvar `gpt_verdict.json` sidecar {gate,verdict,asset,env};
+   a state machine lê JSON, não frase. (mitigado parcial: já fiz case-insensitive, mas o certo é o sidecar JSON.)
+3. **`asset_state()` recalcula 2-3×/render** (active_focuses chama asset_state; pipeline_for chama de novo; +carrega
+   pack/cycles/glob). "Ok com 5 assets, molenga com 80." Fix: snapshot único — `state=project_state();
+   active_focuses(state); pipeline_for(asset, asset_state)`. Sem banco, só não recalcula em cascata.
+4. **`FIXED_STATE={"kitchen":"frozen"}` é gambiarra perigosa** — só a GEOMETRIA tá frozen; pele/pedra/eletros
+   ainda vivos. Se o dash diz "cozinha congelada" Felipe perde confiança. Fix: kitchen_geometry=frozen,
+   kitchen_skin=in_progress, kitchen_appliances=pending (sub-assets da cozinha).
+
+**Locais (CONFIRMA minha posição):** "têm função decente, mas UMA só por enquanto: **Consistency/Gap Auditor**.
+O resto é firula até o core estar sólido." Lê project_state+packs+DNA+anti+patches+verdicts+artifacts+cycles →
+gera `proposal` (requires_approval, nunca muta). "propor próxima tarefa" = CORTAR (2 fontes de verdade vs o resolver).
+
+**UX (prioridade #1 do GPT, FEITO):** hero mostra o foco NOMINAL "AGORA: Sala/Jantar · Sofá — pronto p/ V-Ray"
++ POR QUÊ + PRÓXIMO, não "focos ativos (1)". Múltiplos focos = principal expandido + outros como chips.
+
+**Ordem recomendada pelo GPT:** (1) hero AGORA nominal ✅FEITO · (2) verdict estruturado (sidecar JSON) ·
+(3) Auditor local único (gaps/contradições → proposals) · (4) snapshot/cache · (5) separar UI presenter do domínio.

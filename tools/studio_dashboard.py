@@ -529,6 +529,10 @@ textarea{width:100%;min-height:90px;background:#0c0d10;border:1px solid var(--bd
 .ovroom{margin-bottom:10px}.ovroomh{font-size:12.5px;margin:8px 0 6px;color:#cdb98a;border-bottom:1px solid var(--bd);padding-bottom:4px}
 .ovfocus{background:#0c0d10;border:1px solid var(--bd);border-left:3px solid #f0a868;border-radius:10px;padding:11px 12px;margin-bottom:12px}
 .ovfocush{font-size:13.5px;margin-bottom:10px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}.ovnext{color:#f0a868;font-size:12px}
+.ovhero{margin-bottom:11px}.ovheroline{font-size:14px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:3px 0}
+.ovherok{font-size:9.5px;font-weight:700;letter-spacing:.07em;color:#7a8290;background:#15161c;border:1px solid var(--bd);border-radius:5px;padding:2px 6px;min-width:58px;text-align:center}
+.ovchips{margin-top:9px;font-size:11.5px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.ovchip{background:#14131a;border:1px solid var(--bd);border-radius:20px;padding:3px 10px;cursor:pointer}.ovchip:hover{border-color:#f0a868}
 .ovinvtoggle{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;font-size:12px;border-top:1px dashed #2c2636;padding-top:9px}
 .ovcard[onclick]{cursor:pointer}.ovcard[onclick]:hover{border-color:#f0a868;background:#15131c}
 </style></head><body>
@@ -547,6 +551,10 @@ textarea{width:100%;min-height:90px;background:#0c0d10;border:1px solid var(--bd
 <script>
 const el=(h)=>{const d=document.createElement('div');d.innerHTML=h;return d.firstChild}
 const esc=(t)=>(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
+// esc() é pra CONTEÚDO/atributo HTML. Dentro de um on*="…(' … ')" o argumento é uma STRING JS:
+// a entidade HTML (&#39;) é DECODIFICADA pelo browser ANTES do parser JS → um apóstrofo (Henry's) quebra
+// o argumento. jsq() hex-escapa pra \xHH (sobrevive ao parse de atributo HTML E ao parse de string JS).
+const jsq=(t)=>(t==null?'':''+t).replace(/[\\'"<>&\n\r]/g,c=>'\\x'+c.charCodeAt(0).toString(16).padStart(2,'0'))
 const hhmm=(ts)=>ts?new Date(ts*1000).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):''
 const MODELFACE={'deepseek-r1:14b':'🐳','qwen2.5-coder:14b':'🤖','llama3.1:8b':'🦙','interior-designer:latest':'🎨','coder-assistant:latest':'🛠️','qwen2.5vl:7b':'👁️','moondream:latest':'👁️'}
 const viaTag=(v)=>!v?'':(v.indexOf('consenso')===0?' · 🧠 consenso (3 IAs)':' · via '+(MODELFACE[v]||'🤖'))
@@ -669,6 +677,9 @@ function uploadRef(){const f=document.getElementById('upfile').files[0];if(!f)re
  const msg=document.getElementById('upmsg');msg.textContent='subindo…'
  const r=new FileReader();r.onload=async()=>{const res=await (await fetch('/api/upload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filename:f.name,data:r.result})})).json()
   msg.textContent=res.ok?('✓ '+res.slug):('erro: '+res.error);tick(1)};r.readAsDataURL(f)}
+// fallback de <img> que falhou: troca pelo link "abrir no site" SEM concatenar a URL em HTML/JS
+// (lê data-link já decodificado e seta href como PROPRIEDADE → imune a aspas/<> na URL dinâmica)
+function imgFallback(img){const a=el('<a class=refimg-ph target=_blank rel=noopener>🖼 abrir no site ↗</a>');a.href=img.dataset.link||'#';img.replaceWith(a)}
 function openModal(src,name){const m=document.getElementById('modal');document.getElementById('mimg').src=src
  document.getElementById('mname').textContent=name||'';const dl=document.getElementById('mdl');dl.href=src;dl.download=(name||'imagem')+(src.endsWith('.png')?'.png':'')
  m.dataset.url=location.origin+src;m.classList.add('show')}
@@ -765,18 +776,20 @@ async function tick(force){
  const ov=s.overview||{}
  if((ov.active_focuses||[]).length||(ov.rooms||[]).length){const SC={done:'ov-done',pending:'ov-pend',doing:'ov-doing'}
   const STC={approved:'var(--ok)',learned:'var(--ok)',frozen:'var(--blu)',vray_ready:'var(--gold)',context_review_needed:'var(--gold)',form_review_needed:'var(--gold)',building:'var(--blu)',build_spec_ready:'var(--warn)',curation_needed:'var(--warn)',references_needed:'var(--mut)',not_started:'#5a606b'}
-  const focusBlocks=(ov.active_focuses||[]).map(f=>{
-   const pipe=(f.pipeline||[]).map((p,i)=>`${i?'<span class=ovarrow>→</span>':''}<div class="ovstep ${SC[p.status]||'ov-pend'}"><div class=ovic>${p.icon}</div><div class=ovlbl>${esc(p.label)}</div></div>`).join('')
-   const col=STC[f.state]||'var(--gold)'
-   const act=f.jump?`<button class=chatbtn onclick="jumpTo('${f.jump}')">▶ ${esc(f.next||'')}</button>`:`<span class=ovnext>▶ ${esc(f.next||'')}</span>`
-   return `<div class=ovfocus><div class=ovfocush>${f.env_icon} <span class=mut>${esc(f.env_label)}</span> › <b>${esc(f.label)}</b> <span style="color:${col}">— ${esc(f.state_label)}</span>${f.reason?(' <span class=mut>('+esc(f.reason)+')</span>'):''} ${act}</div><div class=ovpipe>${pipe}</div></div>`}).join('')
-  const noFocus='<div class=mut style="padding:8px 2px">Nenhum fluxo ativo agora — escolhe um asset no inventário pra começar um ciclo.</div>'
+  // FOCO PRINCIPAL = hero NOMINAL (GPT prioridade #1: "Felipe quer saber TÔ MEXENDO EM QUÊ, não um contador")
+  const mkPipe=f=>(f.pipeline||[]).map((p,i)=>`${i?'<span class=ovarrow>→</span>':''}<div class="ovstep ${SC[p.status]||'ov-pend'}"><div class=ovic>${p.icon}</div><div class=ovlbl>${esc(p.label)}</div></div>`).join('')
+  const prin=(ov.active_focuses||[])[0],others=(ov.active_focuses||[]).slice(1)
+  const heroTitle=prin?`🎯 AGORA: <b style="color:#f0a868">${esc(prin.env_label)} · ${esc(prin.label)}</b>`:'🛰️ Visão geral — nenhum fluxo ativo'
+  const heroBlock=prin?(()=>{const col=STC[prin.state]||'var(--gold)'
+   const act=prin.jump?`<button class=chatbtn onclick="jumpTo('${prin.jump}')">▶ ${esc(prin.next||'')}</button>`:`<span class=ovnext>▶ ${esc(prin.next||'')}</span>`
+   const chips=others.length?`<div class=ovchips><span class=mut>também ativo:</span> ${others.map(o=>`<span class=ovchip onclick="jumpTo('${o.jump||'sec-overview'}')">${o.env_icon} ${esc(o.label)} <span style="color:${STC[o.state]||'var(--mut)'}">— ${esc(o.state_label)}</span></span>`).join(' ')}</div>`:''
+   return `<div class=ovfocus><div class=ovhero><div class=ovheroline><span class=ovherok>AGORA</span> <b>${esc(prin.env_label)} · ${esc(prin.label)}</b> <span style="color:${col}">— ${esc(prin.state_label)}</span></div>${prin.reason?`<div class=ovheroline><span class=ovherok>POR QUÊ</span> <span class=mut>${esc(prin.reason)}</span></div>`:''}<div class=ovheroline><span class=ovherok>PRÓXIMO</span> ${act}</div></div><div class=ovpipe>${mkPipe(prin)}</div>${chips}</div>`})():'<div class=mut style="padding:8px 2px">Nenhum fluxo ativo agora — escolhe um asset no inventário pra começar um ciclo.</div>'
   const rooms=(ov.rooms||[]).map(rm=>{const cards=(rm.assets||[]).map(a=>{const col=STC[a.state]||'var(--mut)'
     return `<div class="ovcard"${a.jump?` onclick="jumpTo('${a.jump}')" style="cursor:pointer"`:''}><div class=ovcnm>${esc(a.label)}</div><div class=ovcb style="color:${col}">${esc(a.state_label)}</div><div class=ovcd>▶ ${esc(a.next||'')}${a.refs?(' · '+(a.refs_img||0)+'/'+a.refs+' img'):''}</div></div>`}).join('')
    return `<div class=ovroom><div class=ovroomh>${rm.icon} <b>${esc(rm.label)}</b> <span class=mut>${rm.done}/${rm.total} prontos</span></div><div class=ovinv>${cards}</div></div>`}).join('')
   let nprog=0,ntodo=0,ndone=0;(ov.rooms||[]).forEach(rm=>(rm.assets||[]).forEach(a=>{if(['approved','learned','frozen'].includes(a.state))ndone++;else if(['not_started','references_needed'].includes(a.state))ntodo++;else nprog++}))
-  root.appendChild(el(`<div class="card full" id=sec-overview><h2>🛰️ Visão geral — focos ativos${ov.n_focus?(' ('+ov.n_focus+')'):''}</h2>
-   ${focusBlocks||noFocus}
+  root.appendChild(el(`<div class="card full" id=sec-overview><h2>${heroTitle}</h2>
+   ${heroBlock}
    <div class=ovinvtoggle><span class=mut>apê inteiro: ${nprog} em andamento · ${ntodo} a fazer · ${ndone} pronto(s)</span> <button class=chatbtn onclick="toggleInv(this)">${INVOPEN?'▲ ocultar ambientes':'📋 ver todos os ambientes'}</button></div>
    <div id=ovinvfull style="display:${INVOPEN?'block':'none'};margin-top:10px"><div class=kblist-h>Inventário por cômodo <span class=mut>(pra quando for replicar pra outros ambientes)</span></div>${rooms}</div></div>`))
  }
@@ -806,7 +819,7 @@ async function tick(force){
    return `<button class=cbtn title=aprovar onclick="curateRef('${rp.pack_id}','${r.id}','approve')">👍 aprovar</button> ${star} <button class=cbtn title=rejeitar onclick="curateRef('${rp.pack_id}','${r.id}','reject')">👎</button> <button class=cbtn title="anti-pattern" onclick="curateRef('${rp.pack_id}','${r.id}','anti')">🚫</button> <button class=cbtn title="remover do pack" onclick="curateRef('${rp.pack_id}','${r.id}','remove')">🗑</button>`}
   const cards=withImg.map(r=>{const st=r.status||'pending'
    return `<div class="refcard rs-${st}">
-    <img class=refimg loading=lazy src="${esc(r.og_image)}" onclick="openModal('${esc(r.og_image)}','${esc(r.title)}')" onerror="this.replaceWith(el('<a class=refimg-ph href=\\'${esc(r.link||'#')}\\' target=_blank>🖼 abrir no site ↗</a>'))">
+    <img class=refimg loading=lazy src="${esc(r.og_image)}" data-link="${esc(r.link||'#')}" onclick="openModal('${jsq(r.og_image)}','${jsq(r.title)}')" onerror="imgFallback(this)">
     <div class=refhd><b>${esc(r.title)}</b> <span class=mut>· ${esc(r.source||'')}</span></div>
     <div class=reftags><span class=pill>${esc(tlbl[r.type]||r.type||'')}</span> <span class="pill rb-${st}">${blbl[st]||st}</span></div>
     <div class=refbody><b>por que:</b> ${esc(r.why_good||'')}<br><b>copiar:</b> ${esc(r.copy||'')}<br><b>evitar:</b> ${esc(r.avoid||'')}</div>
@@ -849,7 +862,7 @@ async function tick(force){
    <label class=mut style="font-size:11px;display:inline-flex;align-items:center;gap:4px;margin-left:6px"><input type=checkbox onchange=toggleAuto(this) ${AUTOCYCLE?'checked':''}>auto a cada <select id=auto-min style="background:#0c0d10;border:1px solid var(--bd);color:var(--fg);border-radius:4px;padding:1px 3px"><option>2</option><option selected>3</option><option>5</option><option>10</option></select> min</label>
    <span class=mut id=cyclemsg></span></div>`
  const cyhtml=CYCLES.length?CYCLES.map((c,i)=>`<div class=cyrow>
-   <div class=cyhd><b class=mtlink onclick="goToMT('${esc(c.mt||'')}')">${esc(c.cycle_id||'CYCLE')}</b> · <b>${esc(c.mt||'')}</b> ${esc((c.what||'').slice(0,46))} <span class=mut>· ${hhmm(c.ts)}</span></div>
+   <div class=cyhd><b class=mtlink onclick="goToMT('${jsq(c.mt||'')}')">${esc(c.cycle_id||'CYCLE')}</b> · <b>${esc(c.mt||'')}</b> ${esc((c.what||'').slice(0,46))} <span class=mut>· ${hhmm(c.ts)}</span></div>
    <div class=cydir onclick="this.classList.toggle('exp')" title="clica pra expandir/recolher">🎯 ${esc(c.directive||'(sem diretriz)')}</div>
    <div class=cymeta><span class=mut>🦙 llama → 🤖 qwen → 🐳 deepseek</span> <button class=chatbtn onclick="cycleToConsult(${i})" title="virar pergunta pro Consult GPT validar">→ validar no Consult GPT</button>${c.consulted?' <span class=mut>✓ consultado</span>':''}</div></div>`).join(''):'<span class=mut>nenhum ciclo rodado ainda — clica "▶ Rodar próximo ciclo" acima. A diretriz que sair vira o item aqui.</span>'
  // 🗣️ PERGUNTE AO TIME — o ó de tudo (topo): traduz a pergunta plana num bom prompt pro local
@@ -878,7 +891,7 @@ async function tick(force){
  const critic=(s.renders||[])[0]
  // ERROS — card próprio, grande, logo abaixo dos agentes
  root.appendChild(el(`<div class="card full" id=sec-err><h2>Erros de design — o que TU não curtiu (vira lição)</h2>
-  <div class=critwrap>${critic?`<img class=critic loading=lazy onclick="openModal('/img/${encodeURIComponent(critic.name)}','${esc(critic.name)}')" src="/img/${encodeURIComponent(critic.name)}" title="clica pra ampliar">`:''}
+  <div class=critwrap>${critic?`<img class=critic loading=lazy onclick="openModal('/img/${encodeURIComponent(critic.name)}','${jsq(critic.name)}')" src="/img/${encodeURIComponent(critic.name)}" title="clica pra ampliar">`:''}
    <div style=flex:1>${ebars}
     <div class=flagrow><select id=flagag>${flagopts}</select>
      <input id=flagmsg onkeydown="if(event.key==='Enter')flagErr()" placeholder="ex.: parede muito escura, coifa não combina… (Enter)"><button class=send onclick=flagErr()>marcar erro</button></div></div></div></div>`))
@@ -989,19 +1002,19 @@ async function tick(force){
  // INBOX
  const fn=(i)=>i.local_path?encodeURIComponent(i.local_path.split('/').pop()):''
  const inb=(s.inbox||[]).map(i=>{const st=i.status||'pending',nm=esc(i.title||i.slug)
-   const thumb=i.local_path?`<img class=minithumb loading=lazy src="/inbox-img/${fn(i)}" onclick="openModal('/inbox-img/${fn(i)}','${esc(i.slug)}')">`:(i.source_url?`<button class=chatbtn onclick="fetchPreview('${esc(i.slug)}')" title="puxar imagem do site">🖼</button>`:'')
-   const cell=i.local_path?`<td class=lnk onclick="openModal('/inbox-img/${fn(i)}','${esc(i.slug)}')">${nm}</td>`
+   const thumb=i.local_path?`<img class=minithumb loading=lazy src="/inbox-img/${fn(i)}" onclick="openModal('/inbox-img/${fn(i)}','${jsq(i.slug)}')">`:(i.source_url?`<button class=chatbtn onclick="fetchPreview('${jsq(i.slug)}')" title="puxar imagem do site">🖼</button>`:'')
+   const cell=i.local_path?`<td class=lnk onclick="openModal('/inbox-img/${fn(i)}','${jsq(i.slug)}')">${nm}</td>`
      :(i.source_url?`<td><a class=lnk href="${esc(i.source_url)}" target=_blank>${nm} ↗</a></td>`:`<td>${nm}</td>`)
    return `<tr><td>${thumb}</td>${cell}<td>${i.theme||'-'}</td><td>${st}</td>
-   <td>${st!=='approved'?`<button onclick="curate('${esc(i.slug)}','approve')" title=aprovar>✓</button> `:''}${st!=='rejected'?`<button onclick="curate('${esc(i.slug)}','reject')" title=reprovar>✕</button> `:''}<button class=trash onclick="curate('${esc(i.slug)}','delete')" title=apagar>🗑</button></td></tr>`}).join('')
- const thumbs=(s.inbox||[]).filter(i=>i.local_path).map(i=>`<div class=thumb><img loading=lazy src="/inbox-img/${fn(i)}" onclick="openModal('/inbox-img/${fn(i)}','${esc(i.slug)}')"><button class="trash thumbtrash" onclick="curate('${esc(i.slug)}','delete')" title=apagar>🗑</button><div class=cap>${esc(i.slug)}<div class=t>${i.status||'pending'}</div></div></div>`).join('')
+   <td>${st!=='approved'?`<button onclick="curate('${jsq(i.slug)}','approve')" title=aprovar>✓</button> `:''}${st!=='rejected'?`<button onclick="curate('${jsq(i.slug)}','reject')" title=reprovar>✕</button> `:''}<button class=trash onclick="curate('${jsq(i.slug)}','delete')" title=apagar>🗑</button></td></tr>`}).join('')
+ const thumbs=(s.inbox||[]).filter(i=>i.local_path).map(i=>`<div class=thumb><img loading=lazy src="/inbox-img/${fn(i)}" onclick="openModal('/inbox-img/${fn(i)}','${jsq(i.slug)}')"><button class="trash thumbtrash" onclick="curate('${jsq(i.slug)}','delete')" title=apagar>🗑</button><div class=cap>${esc(i.slug)}<div class=t>${i.status||'pending'}</div></div></div>`).join('')
  // (🔭 Scout foi consolidado DENTRO do Reference Pack — não é mais card solto)
  root.appendChild(el(`<div class="card full" id=sec-cur><h2>Curadoria — inbox de referência <span class=mut>(✓ aprova · ✕ reprova (fica) · 🗑 apaga · 🖼 puxa imagem do site)</span></h2>
   <div class=uprow><label class=upbtn>⬆ escolher imagem<input type=file id=upfile accept="image/*" onchange=uploadRef() hidden></label> <span class=mut id=upmsg>escolhe a imagem → sobe sozinho</span></div>
   ${thumbs?`<div class=grid style="margin:10px 0">${thumbs}</div>`:''}
   <table><tr><th></th><th>referência</th><th>tema</th><th>status</th><th>ação</th></tr>${inb||'<tr><td colspan=5 class=mut>fila vazia — sobe uma referência acima</td></tr>'}</table></div>`))
  // RENDERS
- const rr=(s.renders||[]).map(r=>`<div class=thumb onclick="openModal('/img/${encodeURIComponent(r.name)}','${esc(r.name)}')"><img loading=lazy src="/img/${encodeURIComponent(r.name)}">
+ const rr=(s.renders||[]).map(r=>`<div class=thumb onclick="openModal('/img/${encodeURIComponent(r.name)}','${jsq(r.name)}')"><img loading=lazy src="/img/${encodeURIComponent(r.name)}">
    <div class=cap>${esc(r.name.replace('.png',''))}<div class=t>${r.theme} · ${r.sub} · ${r.kb}KB</div></div></div>`).join('')
  root.appendChild(el(`<div class="card full" id=sec-ren><h2>Renders (${(s.renders||[]).length}) — clica pra ampliar/baixar · mais novos primeiro</h2>
   <div class="grid gallery">${rr||'<span class=mut>sem renders</span>'}</div></div>`))
