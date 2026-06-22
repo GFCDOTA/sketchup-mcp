@@ -582,6 +582,7 @@ textarea{width:100%;min-height:90px;background:#0c0d10;border:1px solid var(--bd
 .ovcic{font-size:24px;line-height:1}.ovcnm{font-weight:700;font-size:13px}
 .ovcb{font-size:10.5px;font-weight:600;margin-top:2px}.ovcd{font-size:11px;color:var(--mut);margin-top:3px;line-height:1.3}
 .ovroom{margin-bottom:10px}.ovroomh{font-size:12.5px;margin:8px 0 6px;color:#cdb98a;border-bottom:1px solid var(--bd);padding-bottom:4px}
+.ovinvtoggle{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;font-size:12px;border-top:1px dashed #2c2636;padding-top:9px}
 .ovcard[onclick]{cursor:pointer}.ovcard[onclick]:hover{border-color:#f0a868;background:#15131c}
 </style></head><body>
 <header><span class=hdot></span><h1>🎛 INTERIOR STUDIO</h1>
@@ -645,6 +646,8 @@ function nextStepGo(kind){jumpTo({scout:'sec-scout',consult:'sec-consult',curate
 function consultRelay(){const m=document.getElementById('cqmsg');if(m)m.textContent='🤖 pedindo relay…'
  fetch('/api/consult/relay-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})}).then(r=>r.json()).then(r=>{if(m)m.textContent=r.ok?('🤖 relay pedido pra '+r.question_id+' — me fala "relaya" no chat que eu dirijo o ChatGPT'):('erro: '+(r.error||''));tick(1)})}
 function jumpTo(id){const sec=document.getElementById(id);if(sec){sec.scrollIntoView({behavior:'smooth',block:'center'});sec.classList.add('kc-hl');setTimeout(()=>sec.classList.remove('kc-hl'),2000)}}
+let INVOPEN=false   // inventário de TODOS os ambientes fica escondido — foco é só o que tá em andamento
+function toggleInv(b){INVOPEN=!INVOPEN;const e=document.getElementById('ovinvfull');if(e)e.style.display=INVOPEN?'block':'none';if(b)b.textContent=INVOPEN?'▲ ocultar ambientes':'📋 ver todos os ambientes'}
 function flagErr(){const a=document.getElementById('flagag').value,m=document.getElementById('flagmsg').value;if(!m)return
  fetch('/api/flag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:a,message:m})}).then(()=>{document.getElementById('flagmsg').value='';tick(1)})}
 function clearErr(agent){fetch('/api/clear',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent})}).then(()=>tick(1))}
@@ -819,11 +822,13 @@ async function tick(force){
   const rooms=(ov.rooms||[]).map(rm=>{const cards=(rm.assets||[]).map(a=>{const col=STC[a.state]||'var(--mut)',on=a.asset===ov.current_asset
     return `<div class="ovcard ${on?'ovcard-on':''}"${a.jump?` onclick="jumpTo('${a.jump}')" style="cursor:pointer"`:''}><div class=ovcnm>${esc(a.label)}</div><div class=ovcb style="color:${col}">${esc(a.state_label)}</div><div class=ovcd>▶ ${esc(a.next||'')}${a.refs?(' · '+(a.refs_img||0)+'/'+a.refs+' img'):''}</div></div>`}).join('')
    return `<div class=ovroom><div class=ovroomh>${rm.icon} <b>${esc(rm.label)}</b> <span class=mut>${rm.done}/${rm.total} prontos</span></div><div class=ovinv>${cards}</div></div>`}).join('')
-  root.appendChild(el(`<div class="card full" id=sec-overview><h2>🛰️ Visão geral — o que tá rolando AGORA</h2>
-   <div class=ovhead>📐 <b>${esc(ov.project||'')}</b> · móvel atual: <b style="color:#f0a868">${esc(ov.current_label||'—')}</b> · próximo passo: <b>${esc(ov.next_action||'—')}</b></div>
-   <div class=ovpipe>${pipe||'<span class=mut>sem ciclo ativo</span>'}</div>
-   <div class=kblist-h style="margin-top:12px">Inventário por cômodo <span class=mut>(cada ambiente × seus assets × estado · clica pra ir)</span></div>
-   ${rooms}</div>`))
+  // resumo do RESTO (não-foco) — não polui; só conta
+  let nprog=0,ntodo=0,ndone=0;(ov.rooms||[]).forEach(rm=>(rm.assets||[]).forEach(a=>{if(['approved','learned','frozen'].includes(a.state))ndone++;else if(['not_started','references_needed'].includes(a.state))ntodo++;else nprog++}))
+  root.appendChild(el(`<div class="card full" id=sec-overview><h2>🛰️ Visão geral — foco no que tá rolando AGORA</h2>
+   <div class=ovhead>🎯 foco: <b style="color:#f0a868">${esc(ov.current_label||'nenhum ciclo ativo')}</b> · próximo passo: <b>${esc(ov.next_action||'—')}</b></div>
+   <div class=ovpipe>${pipe||'<span class=mut>sem ciclo ativo — escolhe um asset no inventário</span>'}</div>
+   <div class=ovinvtoggle><span class=mut>resto do apê: ${nprog} em andamento · ${ntodo} a fazer · ${ndone} pronto(s)</span> <button class=chatbtn onclick="toggleInv(this)">${INVOPEN?'▲ ocultar ambientes':'📋 ver todos os ambientes'}</button></div>
+   <div id=ovinvfull style="display:${INVOPEN?'block':'none'};margin-top:10px"><div class=kblist-h>Inventário por cômodo <span class=mut>(pra quando for replicar pra outros ambientes)</span></div>${rooms}</div></div>`))
  }
  // 🏭 FÁBRICA + 🔧 CICLO ATUAL + 🖼️ REFERENCE PACK — a esteira por ciclo (topo, unidade principal)
  FACTORY=s.factory||{}
