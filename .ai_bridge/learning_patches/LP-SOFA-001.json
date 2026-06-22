@@ -1,0 +1,92 @@
+{
+  "patch_id": "LP-SOFA-001",
+  "created_at": "2026-06-22T01:56:28",
+  "status": "draft",
+  "source": "Consult GPT",
+  "source_question_id": "sofa_spec_001",
+  "source_answer_id": null,
+  "cycle_id": "CYCLE-003",
+  "project": "planta_74",
+  "room": "living",
+  "asset": "sofa",
+  "theme": "BLACK_WOOD_GOLD_INDUSTRIAL_BOUTIQUE",
+  "branch": "feat/sofa-class-from-reference",
+  "commit_sha": "ec47576dc11a4cc107d990ffed9b825b5d39fa58",
+  "applies_to": [
+    "felipe_style_dna",
+    "anti_patterns",
+    "learning_log"
+  ],
+  "confidence": "medium",
+  "requires_felipe_confirmation": true,
+  "verdict": "PASS",
+  "summary": "PASS_WITH_CONSTRAINTS A referência Venezia é uma boa base para reconstruir a classe sofá porque resolve o problema central do sofá-caixa: tem perfil baixo, couro grafite/slate, pernas finas de ferro preto, costura aparente, almofadas com volume e linguagem modern-industrial. Para o apê compacto de 74m², a classe deve usar a Venezia como referência formal, mas não copiar a dimensão integral sem checar circulação.",
+  "evidence": {
+    "reference_ids": [
+      "sofa-ref-02-venezia-slate",
+      "sofa-ref-01-henry",
+      "sofa-ref-02-venezia-slate",
+      "sofa-ref-03-chiavari"
+    ],
+    "render_paths": [],
+    "source_urls": [],
+    "raw_question_path": "",
+    "raw_answer_path": ".ai_bridge\\interior_consult\\inbox\\20260622T015628_sofa_spec_001_answer.md"
+  },
+  "proposed_changes": {
+    "new_rules": [
+      "Sofá industrial premium para Felipe deve ser derivado de referência real, com assento profundo, braços contidos, encosto baixo levemente inclinado e pés finos em metal escuro.",
+      "Evitar sofá-caixa: todo sofá precisa ter leitura clara de assento volumoso, braço suavizado, encosto confortável e base leve.",
+      "Couro grafite/slate funciona bem no BLACK_WOOD_GOLD quando tem roughness controlado e não parece plástico brilhante.",
+      "Em sala compacta, preservar profundidade útil do assento e reduzir largura antes de sacrificar conforto visual."
+    ],
+    "anti_patterns": [
+      "sofa_box_block: Sofá não pode parecer cubo com braços e encosto verticais.",
+      "armrest_too_chunky: Braço não pode dominar o volume visual nem parecer bloco estrutural.",
+      "flat_cushion: Almofada não pode ser plano chapado; precisa crown, espessura e borda suavizada.",
+      "wall_backrest: Encosto não pode ser parede vertical; precisa inclinação e almofada.",
+      "floor_block_base: Nesta variante, sofá não pode encostar no chão como bloco; precisa pés e vão inferior.",
+      "plastic_black_leather: Couro preto/grafite não pode parecer plástico brilhante.",
+      "fake_industrial_brutal: Industrial não pode virar bruto, pesado ou tosco; precisa boutique premium."
+    ],
+    "visual_tokens": [],
+    "material_lessons": [],
+    "maintenance_lessons": [],
+    "forbidden_patterns": [],
+    "build_spec_constraints": {
+      "must_have": [
+        "visible_thin_black_iron_legs",
+        "slate_graphite_leather",
+        "real_cushion_volume",
+        "low_or_medium_arms",
+        "slightly_reclined_back",
+        "subtle_top_stitch",
+        "rounded_or_chamfered_edges"
+      ],
+      "must_not_have": [
+        "boxy_block_body",
+        "oversized_armrests",
+        "flat_seat_planes",
+        "vertical_wall_back",
+        "heavy_floor_plinth",
+        "chrome_legs",
+        "glossy_plastic_black"
+      ]
+    },
+    "golden_sample_candidates": []
+  },
+  "next_microtask": {
+    "title": "MT-SOFA-004 — Construir sofá industrial boutique baseado na referência Venezia",
+    "id": "MT-SOFA-004",
+    "description": "Reconstruir a classe sofá usando a SOFA_BUILD_SPEC acima, gerando variações 2 e 3 lugares, com comparação lado a lado contra o sofá antigo quadrado."
+  },
+  "review": {
+    "approved_by": null,
+    "approved_at": null,
+    "rejected_reason": null
+  },
+  "applied": {
+    "applied_at": null,
+    "files_changed": []
+  }
+}
