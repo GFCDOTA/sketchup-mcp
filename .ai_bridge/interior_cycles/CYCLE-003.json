@@ -82,9 +82,10 @@
   },
   "gates": {},
   "consult": {
-    "question_id": null,
+    "question_id": "sofa_spec_001",
     "answer_id": null,
-    "ingested": false
+    "ingested": false,
+    "status": "waiting_gpt_answer"
   },
   "learning": {
     "new_rules": [],

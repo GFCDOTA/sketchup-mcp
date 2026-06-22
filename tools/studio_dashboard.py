@@ -862,8 +862,10 @@ async function tick(force){
   ingHtml=`<div class=consult-res><b>Último aprendizado ingerido</b> — veredito <b style="color:${r.verdict==='PASS'?'var(--ok)':r.verdict==='FAIL'?'var(--red)':'var(--warn)'}">${esc(r.verdict||'?')}</b> · correção nº1: ${esc(r.top_fix||'-')}<br>
    🧬 ${(r.rules_added||[]).length} regra(s) no DNA · 🧑‍⚖️ ${(r.anti_patterns_added||[]).length} anti-pattern(s)${r.next_microtask&&r.next_microtask.title?(' · 🎯 próxima: <b>'+esc(r.next_microtask.id||'MT')+'</b> '+esc(r.next_microtask.title)):''}${(r.warnings||[]).length?(' · ⚠ '+esc((r.warnings||[]).join('; '))):''}</div>`}
  const cqid=co.latest_question&&co.latest_question.question_id?co.latest_question.question_id:'—'
- root.appendChild(el(`<div class="card full" id=sec-consult><h2>🔌 Consult GPT Bridge <span class=mut>(sidecar do Arquiteto · modo <b>${esc(co.bridge_mode||'manual')}</b> · OpenAI ${co.openai_enabled?'on':'off'} · ${co.ingested_count||0} ingerida(s) · ${(co.pending_questions||[]).length} pendente(s))</span></h2>
-  <div class=mut style="font-size:12px;margin-bottom:8px">Arquiteto gera a pergunta → você copia no ChatGPT (Consult GPT) → cola a resposta → o sistema vira regra/anti-pattern/DNA/próxima microtarefa. Geometria do PDF é congelada; só a linguagem visual muda. <i>(sidecar dentro da coluna do Arquiteto = MT-UI-004)</i></div>
+ const cwait=co.status==='waiting_gpt_answer'
+ root.appendChild(el(`<div class="card full" id=sec-consult><h2>🔌 Consult GPT Bridge <span class=mut>(contrato oficial — rastreável · modo <b>${esc(co.bridge_mode||'manual')}</b> · ${co.ingested_count||0} ingerida(s))</span> ${cwait?`<span class="facpill st" style="background:#2a2417;color:var(--gold);border-color:var(--gold)">⏳ waiting_gpt_answer · ${esc(cqid)}</span>`:''}</h2>
+  <div class=mut style="font-size:12px;margin-bottom:8px">Fluxo OFICIAL (rastreável): gera a pergunta aqui → 📋 copia pro ChatGPT → cola a resposta → vira <b>Learning Patch draft</b> (não aplica direto) → você aprova o diff → só então altera o DNA. <i>Pergunta solta no chat = só conversa; aqui = contrato.</i></div>
+  ${cwait?`<div class=refhint>⏳ Pergunta <b>${esc(cqid)}</b> gerada e salva (status <b>waiting_gpt_answer</b>). Copia abaixo (📋), manda no Consult GPT, e cola a resposta no campo da direita → vira Learning Patch.</div>`:''}
   <div class=consult-grid>
    <select id=cq-mode title=modo>${opt(['JUDGE','SPEC','REPAIR','LEARN','COMPARE'],'JUDGE')}</select>
    <select id=cq-room title=cômodo>${opt(['kitchen','living','bedroom','bathroom','laundry','full_apartment'],'kitchen')}</select>
@@ -882,7 +884,7 @@ async function tick(force){
     <textarea id=cq-answer placeholder="cole a resposta do GPT (ARCHITECT_ANSWER_CONTRACT) OU qualquer orientação de design — o sistema detecta sozinho e aprende (vira regra/anti-pattern/microtarefa, ou conhecimento do Arquiteto)" style="min-height:150px"></textarea></div>
   </div>
   ${ingHtml}</div>`))
- const _co=document.getElementById('cq-out');if(_co)_co.value=CONSULT_MD
+ const _co=document.getElementById('cq-out');if(_co)_co.value=CONSULT_MD||(co.latest_question_md||'')
  // 🧠 LEARNING PATCH — resposta GPT vira patch (draft) → DIFF → Felipe aprova/rejeita → só então DNA
  const pt=s.patches||{},draft=pt.draft,pdiff=pt.diff||{},pcc=pt.counts||{}
  const dl=(arr,cls)=>(arr||[]).map(x=>`<li class=${cls}>${esc(typeof x==='string'?x:JSON.stringify(x))}</li>`).join('')
@@ -1064,13 +1066,18 @@ def _judge_append_flag(agent, message):
 # cola a resposta -> ingere virando regra/anti-pattern/DNA/próxima-microtarefa. Lazy-import (resiliente).
 def _consult_state() -> dict:
     try:
-        from tools.interior_studio.consult_gpt_bridge import openai_client, store
+        from tools.interior_studio.consult_gpt_bridge import contracts, openai_client, store
         la = store.latest_answer()
+        lq = store.latest_question()
         c = store.counts()
-        return {"pending_questions": store.pending_questions(), "latest_question": store.latest_question(),
+        # pergunta gerada no painel = contrato oficial → status waiting_gpt_answer até a resposta chegar
+        cc = ic_cycles.current_cycle() or {}
+        cstat = (cc.get("consult") or {}).get("status")
+        return {"pending_questions": store.pending_questions(), "latest_question": lq,
+                "latest_question_md": contracts.render_question_md(lq) if lq else None,
                 "latest_answer": la.get("raw") if la else None,
                 "latest_answer_path": la.get("path") if la else None,
-                "ingested_count": c["ingested"], "failed_count": c["failed"],
+                "status": cstat, "ingested_count": c["ingested"], "failed_count": c["failed"],
                 "bridge_mode": "manual", "openai_enabled": openai_client.is_enabled()}
     except Exception as e:  # noqa: BLE001
         return {"error": str(e), "pending_questions": [], "latest_question": None, "latest_answer": None,
@@ -1085,27 +1092,61 @@ def _consult_latest(which: str) -> dict:
         return {"ok": False, "error": str(e)}
 
 
+def _cycle_references() -> list[dict]:
+    """As referências CURADAS do ciclo atual (⭐ principal · 👍 aprovadas · 🚫 anti) com título+link —
+    pra entrar no ARCHITECT_QUESTION_CONTRACT (rastreabilidade do gosto)."""
+    c = ic_cycles.current_cycle()
+    if not c:
+        return []
+    refs = c.get("references") or {}
+    pack = ic_refpacks.load_pack(refs.get("pack_id") or DEFAULT_PACK) or {}
+    by_id = {r.get("id"): r for r in pack.get("references", [])}
+    out, seen = [], set()
+    for role, ids in (("main", refs.get("main")), ("approved", refs.get("approved")), ("anti", refs.get("anti"))):
+        for rid in ids or []:
+            if rid in seen:
+                continue
+            r = by_id.get(rid)
+            if r:
+                seen.add(rid)
+                out.append({"title": r.get("title"), "link": r.get("link"), "role": role})
+    return out
+
+
 def _consult_question(body: dict) -> dict:
     try:
         from tools.interior_studio.consult_gpt_bridge import contracts, prompt_builder, store
+        refs = body.get("references")
+        if refs is None:
+            refs = _cycle_references()   # auto: puxa as referências curadas do ciclo
         q = prompt_builder.build_question(
             mode=body.get("mode") or "JUDGE", room=body.get("room") or "kitchen",
             phase=body.get("phase") or "skin",
             theme=body.get("theme") or "BLACK_WOOD_GOLD_INDUSTRIAL_BOUTIQUE",
             context=body.get("context") or "", decision_goal=body.get("decision_goal") or "",
-            architect_hypothesis=body.get("hypothesis") or "",
+            architect_hypothesis=body.get("hypothesis") or "", references=refs,
+            questions=body.get("questions") or None,
             frozen_constraints=body.get("frozen"), mutable=body.get("mutable"),
             visual_inputs={"main": body.get("image") or None, "aux": body.get("aux") or [],
                            "compare": body.get("compare") or {}},
             priority=body.get("priority") or "high", question_id=body.get("question_id") or None)
         saved = store.save_question(q)
+        try:   # amarra a pergunta ao ciclo (rastreabilidade) + status waiting_gpt_answer
+            c = ic_cycles.current_cycle()
+            if c:
+                c.setdefault("consult", {})["question_id"] = q["question_id"]
+                c["consult"]["status"] = "waiting_gpt_answer"
+                ic_cycles.save_cycle(c)
+        except Exception:  # noqa: BLE001
+            pass
         try:
             from tools import studio_log
             studio_log.post("consult-liaison", "working",
                             f"pergunta {q['question_id']} pronta — copie pro Consult GPT", to="architect")
         except Exception:  # noqa: BLE001
             pass
-        return {"ok": True, "question_id": q["question_id"], "md": contracts.render_question_md(q), "paths": saved}
+        return {"ok": True, "question_id": q["question_id"], "md": contracts.render_question_md(q),
+                "status": "waiting_gpt_answer", "paths": saved}
     except ValueError as e:
         return {"ok": False, "error": str(e)}
     except Exception as e:  # noqa: BLE001

@@ -210,9 +210,12 @@ def next_step(c: dict) -> dict:
                 "actionable": False}
     lr = c.get("learning") or {}
     if not (lr.get("new_rules") or lr.get("patches")):
-        return {"kind": "consult", "label": "🔌 Consult GPT → resposta vira Learning Patch (você aprova) → SOFA_BUILD_SPEC",
+        if consult.get("question_id"):
+            return {"kind": "consult", "label": "📥 Cole a resposta do GPT no painel → vira Learning Patch (você aprova)",
+                    "actionable": True}
+        return {"kind": "consult", "label": "🔌 Gerar pergunta pro Consult GPT (SPEC) — já pré-preenchida",
                 "actionable": True}
-    return {"kind": "build", "label": "▶ Gerar SOFA_BUILD_SPEC (curadoria + patch aprovado)", "actionable": True}
+    return {"kind": "build", "label": "▶ MT-SOFA-004: construir o sofá da referência (patch aprovado)", "actionable": True}
 
 
 def factory_state() -> dict:
