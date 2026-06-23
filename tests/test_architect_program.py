@@ -43,3 +43,38 @@ def test_extract_json_tira_o_think_do_deepseek():
 
 def test_extract_json_sem_json_retorna_none():
     assert ap._extract_json("o arquiteto divagou e nao deu json") is None
+
+
+# --- SPEC-C: gate deterministico do programa (LLM propoe, gate garante o invariante) ---
+
+def test_normalize_injeta_cama_quando_suite_esquece():
+    items, gate = ap.normalize_program(
+        [{"asset": "guarda_roupa"}, {"asset": "criado_mudo"}], "suite")
+    assert any("cama" in i["asset"] for i in items)          # cama injetada
+    assert "cama" in gate["injected"]
+
+
+def test_normalize_remove_item_de_outro_comodo_da_cozinha():
+    items, gate = ap.normalize_program(
+        [{"asset": "cama"}, {"asset": "bancada"}, {"asset": "cooktop"}, {"asset": "geladeira"}],
+        "cozinha")
+    names = [i["asset"] for i in items]
+    assert "cama" not in names                               # cross-comodo removido
+    assert any(r["asset"] == "cama" for r in gate["removed"])
+    assert {"bancada", "cooktop", "geladeira"} <= set(names)  # CORE da cozinha preservado
+
+
+def test_normalize_salva_asset_bom_tirando_prefixo_de_outro_comodo():
+    # bug real: Arquiteto prefixou itens da cozinha com 'banheiro_'
+    items, _ = ap.normalize_program(
+        [{"asset": "banheiro_cooktop"}, {"asset": "banheiro_bancada"}, {"asset": "banheiro_geladeira"}],
+        "cozinha")
+    names = [i["asset"] for i in items]
+    assert "cooktop" in names and "bancada" in names and "geladeira" in names
+    assert not any(n.startswith("banheiro_") for n in names)
+
+
+def test_normalize_e_idempotente():
+    once, _ = ap.normalize_program([{"asset": "sofa"}], "sala")
+    twice, _ = ap.normalize_program(once, "sala")
+    assert [i["asset"] for i in once] == [i["asset"] for i in twice]

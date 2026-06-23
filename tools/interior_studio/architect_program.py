@@ -25,6 +25,67 @@ MODELS = {"deepseek": "deepseek-r1:14b", "qwen": "qwen2.5-coder:14b"}
 ROOM_KEY = {"SALA DE JANTAR | SALA DE ESTAR": "sala", "SUITE 01": "suite", "SUITE 02": "suite",
             "COZINHA": "cozinha", "BANHO 01": "banheiro", "BANHO 02": "banheiro", "LAVABO": "banheiro"}
 
+# --- SPEC-C: gate deterministico do programa (o LLM local erra: suite sem cama, cozinha
+#     com item de banheiro). O LLM PROPOE; este gate GARANTE o invariante (CORE presente,
+#     0 cross-comodo). Espelha a filosofia do projeto: gate deterministico = verdade, LLM = consultivo. ---
+# CORE obrigatorio por tipo de comodo: (asset_canonico, [keywords p/ detectar no nome], label injetado)
+CORE_BY_ROOM = {
+    "sala":     [("sofa", ["sofa", "sofá"], "sofa")],
+    "suite":    [("bed", ["cama", "bed"], "cama")],
+    "cozinha":  [("counter", ["bancada", "counter"], "bancada"),
+                 ("cooktop", ["cooktop", "fogão", "fogao", "stove", "cooktop"], "cooktop"),
+                 ("fridge", ["geladeira", "fridge", "refrigerador"], "geladeira")],
+    "banheiro": [("toilet", ["vaso", "privada", "sanitário", "sanitario", "toilet"], "vaso"),
+                 ("sink", ["cuba", "pia", "lavatório", "lavatorio", "sink"], "cuba")],
+}
+# tokens que pertencem EXCLUSIVAMENTE a OUTRO tipo de comodo (presenca => remover por cross-comodo).
+# NUNCA conter um token que seja legitimo no proprio comodo (ex.: cozinha nao proibe 'bancada').
+ROOM_EXCLUSIVE = {
+    "sala":     ["cama", "bed", "cooktop", "fogão", "fogao", "geladeira", "fridge", "vaso",
+                 "privada", "chuveiro", "shower", "guarda-roupa", "wardrobe", "criado-mudo"],
+    "suite":    ["sofa", "sofá", "cooktop", "fogão", "fogao", "geladeira", "fridge", "vaso",
+                 "privada", "chuveiro", "shower", "cuba", "cooktop", "rack"],
+    "cozinha":  ["cama", "bed", "sofa", "sofá", "vaso", "privada", "chuveiro", "shower",
+                 "guarda-roupa", "wardrobe", "criado-mudo", "criado"],
+    "banheiro": ["cama", "bed", "sofa", "sofá", "cooktop", "fogão", "fogao", "geladeira",
+                 "fridge", "guarda-roupa", "wardrobe", "rack"],
+}
+ROOM_TOKENS = ["banheiro", "banho", "cozinha", "sala", "suite", "quarto", "lavabo"]
+
+
+def _strip_room_prefix(name: str, room_key: str) -> str:
+    """Tira um prefixo '<comodo>_' do nome (bug real: Arquiteto prefixou itens da cozinha com
+    'banheiro_'). Salva o asset bom ('banheiro_cooktop' -> 'cooktop'); o gate de exclusao decide depois."""
+    for tok in ROOM_TOKENS:
+        for sep in ("_", "-", " "):
+            if name.startswith(tok + sep):
+                return name[len(tok) + 1:]
+    return name
+
+
+def normalize_program(items: list[dict], room_key: str) -> tuple[list[dict], dict]:
+    """LLM propoe, gate garante: remove item exclusivo de outro comodo, injeta CORE faltante.
+    Deterministico, idempotente. Devolve (items_normalizados, report{removed,injected})."""
+    core = CORE_BY_ROOM.get(room_key, [])
+    excl = ROOM_EXCLUSIVE.get(room_key, [])
+    kept, removed, seen = [], [], set()
+    for it in items or []:
+        raw = str(it.get("asset", "")).strip().lower()
+        if not raw:
+            continue
+        name = _strip_room_prefix(raw, room_key)
+        if any(tok in name for tok in excl):                     # exclusivo de outro comodo
+            removed.append({"asset": raw, "why": "cross-cômodo"})
+            continue
+        kept.append({**it, "asset": name})
+        for canon, kws, _ in core:                               # marca CORE ja satisfeito
+            if any(k in name for k in kws):
+                seen.add(canon)
+    injected = [{"asset": label, "priority": "core",
+                 "reason": "CORE obrigatório do cômodo (injetado pelo gate determinístico)"}
+                for canon, _, label in core if canon not in seen]
+    return injected + kept, {"removed": removed, "injected": [i["asset"] for i in injected]}
+
 
 def rooms() -> list[dict]:
     """Cômodos da planta_74 com área e dims em metros (derivadas do polígono × PT_TO_M)."""
@@ -87,7 +148,8 @@ COMODO: {name}
 AREA: {area} m2  (aprox {w} x {d} m)
 ESTILO (DNA do Felipe, e RESTRICAO nao sugestao): {dna}
 JA EXISTE no comodo: {existing}
-REGRAS: ape compacto, nao bloquear circulacao; so o que CABE e faz sentido nessa area; gosto do Felipe = industrial boutique premium, black/wood/gold. No maximo 6 itens.
+{core_hint}
+REGRAS: ape compacto, nao bloquear circulacao; so o que CABE e faz sentido nessa area; gosto do Felipe = industrial boutique premium, black/wood/gold. No maximo 6 itens. NAO inclua movel de OUTRO comodo (ex.: nada de cama/sofa na cozinha; nada de cooktop/geladeira no quarto; nada de vaso/cuba fora do banheiro). Use o nome do PROPRIO comodo, SEM prefixo de outro comodo (errado: "banheiro_cooktop"; certo: "cooktop").
 
 Responda APENAS um JSON valido, nada fora dele:
 {{"environment":"{key}","items":[{{"asset":"nome_curto_minusculo","priority":"core","reason":"por que, 1 linha curta"}}]}}
@@ -100,10 +162,14 @@ def propose_program(room_id: str, model: str = "deepseek") -> dict:
         return {"ok": False, "error": f"comodo {room_id} nao encontrado"}
     rm = ctx["room"]
     mdl = MODELS.get(model, model)
+    rkey = rm["key"] or rm["id"]
+    core = CORE_BY_ROOM.get(rkey, [])
+    core_hint = ("ITENS CORE OBRIGATORIOS deste comodo (TEM que aparecer): "
+                 + ", ".join(label for _, _, label in core) + ".") if core else ""
     prompt = PROMPT.format(name=rm["name"], area=rm["area_m2"], w=rm["w_m"], d=rm["d_m"],
                            dna=(ctx["dna"][:900] or "(sem DNA)"),
                            existing=", ".join(ctx["existing"]) or "(nada ainda)",
-                           key=rm["key"] or rm["id"])
+                           key=rkey, core_hint=core_hint)
     raw = _ollama(mdl, prompt)
     prog = _extract_json(raw)
     used = mdl
@@ -118,7 +184,12 @@ def propose_program(room_id: str, model: str = "deepseek") -> dict:
         used = f'{mdl} + qwen(format)'
     if not prog or "items" not in prog:
         return {"ok": False, "error": "Arquiteto nao devolveu JSON valido", "raw": raw[:500], "model": mdl}
-    return {"ok": True, "model": used, "room": rm, "program": prog, "existing": ctx["existing"]}
+    # SPEC-C: gate deterministico — garante CORE presente + 0 cross-comodo (o LLM erra)
+    items, gate = normalize_program(prog.get("items", []), rkey)
+    prog["items"] = items
+    prog["environment"] = rkey
+    return {"ok": True, "model": used, "room": rm, "program": prog,
+            "existing": ctx["existing"], "gate": gate}
 
 
 def propose_and_save(room_id: str, model: str = "deepseek") -> dict:
@@ -131,7 +202,8 @@ def propose_and_save(room_id: str, model: str = "deepseek") -> dict:
     prop = {"id": f"furniture_program_{rm['id']}", "type": "furniture_program",
             "source_worker": f"Arquiteto · {r['model']}", "environment": rm["key"] or rm["id"],
             "room_id": rm["id"], "room_name": rm["name"], "area_m2": rm["area_m2"],
-            "items": r["program"].get("items", []), "existing": r["existing"]}
+            "items": r["program"].get("items", []), "existing": r["existing"],
+            "gate": r.get("gate", {})}   # SPEC-C: o que o gate determinístico corrigiu (transparência)
     proposals.save(prop)
     return {"ok": True, "proposal": prop}
 
