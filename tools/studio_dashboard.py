@@ -746,14 +746,21 @@ function cardOrder(){try{return JSON.parse(localStorage.getItem('studio_order')|
 function saveOrder(){const root=document.getElementById('root');if(!root)return
  localStorage.setItem('studio_order',JSON.stringify([...root.children].filter(c=>c.id&&c.classList.contains('card')).map(c=>c.id)))}
 const PINNED_TOP=['sec-overview']   // Visão Geral SEMPRE no topo, ignora o layout salvo
+// ordem-padrão AGRUPADA por assunto: núcleo de trabalho → referências → GPT/aprendizado → time local → coordenação/saída
+const DEFAULT_ORDER=['sec-overview','sec-program','sec-auditor','sec-ciclo','sec-backlog',
+ 'sec-refpack','sec-cur',
+ 'sec-consult','sec-patch','sec-learning','sec-feed','sec-err',
+ 'sec-ask','sec-cycles','sec-agents','sec-conversa',
+ 'sec-sessions','sec-ren']
 function applyOrder(){const root=document.getElementById('root');if(!root)return
  const present=[...root.children].filter(c=>c.id&&c.classList.contains('card')).map(c=>c.id)
+ const base=[...DEFAULT_ORDER.filter(id=>present.includes(id)),...present.filter(id=>!DEFAULT_ORDER.includes(id))]
  const saved=cardOrder()
- let order=saved.length?[...saved.filter(id=>present.includes(id)),...present.filter(id=>!saved.includes(id))]:present
+ let order=saved.length?[...saved.filter(id=>present.includes(id)),...present.filter(id=>!saved.includes(id))]:base
  order=[...PINNED_TOP.filter(id=>present.includes(id)),...order.filter(id=>!PINNED_TOP.includes(id))]
  order.forEach(id=>{const e=document.getElementById(id);if(e)root.appendChild(e)})}
-// RECOLHER cards — só Agentes/Loop/Consult/Backlog abertos por padrão; o resto recolhido (menos poluição)
-const DEFAULT_OPEN=['sec-overview','sec-factory','sec-ciclo','sec-refpack','sec-ask','sec-agents','sec-consult','sec-patch','sec-learning','sec-backlog']
+// RECOLHER cards — só o LÍDER de cada grupo aberto por padrão; o resto recolhido 1-clique (menos poluição)
+const DEFAULT_OPEN=['sec-overview','sec-program','sec-auditor','sec-ciclo','sec-backlog','sec-refpack','sec-consult','sec-ask','sec-ren']
 function collapsedSet(){try{const v=JSON.parse(localStorage.getItem('studio_collapsed')||'null');return v===null?null:new Set(v)}catch(e){return null}}
 function saveCollapsed(s){localStorage.setItem('studio_collapsed',JSON.stringify([...s]))}
 function applyCollapsed(){const root=document.getElementById('root');if(!root)return
@@ -975,16 +982,7 @@ async function tick(force){
    <div style=flex:1>${ebars}
     <div class=flagrow><select id=flagag>${flagopts}</select>
      <input id=flagmsg onkeydown="if(event.key==='Enter')flagErr()" placeholder="ex.: parede muito escura, coifa não combina… (Enter)"><button class=send onclick=flagErr()>marcar erro</button></div></div></div></div>`))
- // GRÁFICOS (pizza = mensagens no feed · barras = chamadas reais de modelo)
- const mu=Object.entries(ag.model_usage||{}).sort((a,b)=>b[1]-a[1])
- const muTot=mu.reduce((s,[,n])=>s+n,0)||1
- const muRows=mu.length?mu.map(([mdl,n])=>`<div class=mrow><span class=nm>${esc(mdl)}</span><span class=mbar><span style="display:inline-block;height:9px;border-radius:5px;background:var(--blu);width:${Math.round(130*n/muTot)}px"></span></span><span class=mnum>${n} (${Math.round(100*n/muTot)}%)</span></div>`).join(''):'<span class=mut>nenhuma chamada de modelo registrada ainda</span>'
- root.appendChild(el(`<div class="card full" id=sec-graf><h2>Gráficos</h2>
-  <div style="display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start">
-   <div class=chartbox style="max-width:340px"><h2>Mensagens no feed por agente <span class=mut style=font-weight:400>(quem mais falou — NÃO é chamada de LLM)</span></h2><div class=pie><svg viewBox="0 0 120 120">${slices||'<circle cx=60 cy=60 r=46 fill=#20242b/>'}</svg><div class=legend>${leg||'<span class=mut>—</span>'}</div></div></div>
-   <div class=chartbox style="flex:1;min-width:270px"><h2>Modelos usados <span class=mut style=font-weight:400>(chamadas REAIS aos LLMs)</span></h2>${muRows}
-    <div class=mut style="font-size:11px;margin-top:7px;line-height:1.45">Por que <b>DeepSeek</b> aparece mais: o papel do <b>Arquiteto</b> mapeia pra <code>deepseek-r1</code> (raciocínio), então toda pergunta de design vai nele. Só o <b>🧠 consenso</b> usa os 3 (deepseek+qwen+llama). PM=llama, Team Lead=qwen.</div></div>
-  </div></div>`))
+ // (Gráficos removido no declutter 2026-06-23 — pizza de "quem falou mais" era vaidade, sem ação)
  // BACKLOG
  const COLS=['backlog','refinamento','execução','teste','executado']
  const COLLBL={backlog:'Backlog',refinamento:'Em refinamento','execução':'Em execução',teste:'Em teste',executado:'Executado'}
@@ -1074,11 +1072,7 @@ async function tick(force){
  root.appendChild(el(`<div class=card id=sec-sessions><h2>O que cada sessão está fazendo</h2>
   <table><tr><th>tarefa</th><th>status</th></tr>${cl||'<tr><td colspan=2 class=mut>nada em andamento</td></tr>'}</table>
   <div class=mut style=margin-top:8px>${nwt} sessão(ões) de trabalho ativa(s)</div></div>`))
- // REFERÊNCIAS
- const themes=Object.entries(by).map(([t,n])=>`<tr><td>${esc(t)}</td><td>${n}</td></tr>`).join('')
- root.appendChild(el(`<div class=card id=sec-refs><h2>Banco de referências (reference_db)</h2>
-  <div class=mut style=margin-bottom:8px>${Object.entries(bk).map(([k,n])=>`<span class=pill>${k}: ${n}</span>`).join(' ')||refs.error||''}</div>
-  <table><tr><th>tema</th><th>refs</th></tr>${themes}</table></div>`))
+ // (Banco de referências / reference_db removido no declutter 2026-06-23 — stats read-only de baixo valor nesta fase)
  // INBOX
  const fn=(i)=>i.local_path?encodeURIComponent(i.local_path.split('/').pop()):''
  const inb=(s.inbox||[]).map(i=>{const st=i.status||'pending',nm=esc(i.title||i.slug)
@@ -1102,6 +1096,9 @@ async function tick(force){
  document.querySelectorAll('.chat,.convbox').forEach(c=>{c.scrollTop=c.scrollHeight})   // chat/conversa sempre na última msg
  window.scrollTo(0,sy)   // mantém a rolagem onde estava (não sobe ao mandar mensagem)
 }
+// reset 1× do layout salvo quando a estrutura de cards muda (senão o localStorage do navegador esconde o novo default)
+const LAYOUT_VER='2026-06-23-declutter-1'
+if(localStorage.getItem('studio_layout_ver')!==LAYOUT_VER){['studio_order','studio_collapsed','studio_sizes'].forEach(k=>localStorage.removeItem(k));localStorage.setItem('studio_layout_ver',LAYOUT_VER)}
 tick(true);setInterval(tick,10000);window.addEventListener('resize',()=>tick(1))
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick(1)})   // aba voltou -> re-renderiza
 </script></body></html>"""
