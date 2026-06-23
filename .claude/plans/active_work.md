@@ -6,7 +6,33 @@ Branch em curso, objetivo, escopo, validação.
 > arquivo estiver stale, qualquer agente deve reconciliar antes
 > de operar.
 
-> **Snapshot:** 2026-06-06.
+> **Snapshot:** 2026-06-23.
+
+## Contexto da sessão (2026-06-23) — INTERIOR STUDIO
+
+Trabalho no app vivo do studio (dashboard :8782 + workers LLM locais). Ver
+`HANDOFF.md` (raiz do repo) para o fio completo + prompt de continuação.
+
+**Branches (off `develop` @70e1726, ambas pushadas):**
+- `feat/architect-interns` @`872db43` — 6 **Estagiários do Arquiteto**
+  (`tools/interior_studio/interns.py`): validadores temáticos do
+  `furniture_program` (pertencimento/completude/nomenclatura/capacidade/
+  redundância determinísticos + estilo via LLM-leve qwen). Wired em `auditor.py`
+  (substituem C4/C5) e `studio_dashboard.py` (seção agrupada). ruff limpo,
+  idempotente, 6 gaps nas 4 propostas reais.
+- `chore/studio-dashboard-declutter` @`3ab4736` (HEAD, **stacked** sobre a de
+  cima) — 1º passe do declutter: 20→18 painéis, removidos Gráficos + Banco-de-
+  referências, agrupados por assunto (`DEFAULT_ORDER`/`DEFAULT_OPEN`) +
+  `LAYOUT_VER` reset 1×.
+
+**Aguardando Felipe:** (a) manter/reverter as 2 remoções; (b) fundir qual
+cluster em card único (Time local / GPT&Aprendizado / Referências); (c) reiniciar
+a :8782 pra ver. PRs por URL (gh sem escopo) — ver HANDOFF §9.
+
+**Hands-off:** untracked vitrine/kgraph (`tools/*.html`, `grafo_server.py`…) =
+outra linha; worktrees `sofa-skill` / `wt-architect-rag`.
+
+---
 
 ## Contexto da sessão (2026-06-06)
 
