@@ -167,6 +167,61 @@ def env_of(asset: str) -> dict | None:
     return next((r for r in ROOMS if asset in r["assets"]), None)
 
 
+# ---- SPEC-B: inventário DINÂMICO a partir do furniture_program aprovado pelo Arquiteto ----
+# O Arquiteto fala uma linguagem mais rica ("mesa_centro", "tv_console", "sofa_2_places"); o
+# modelo canônico tem 10 assets. Este mapa reconcilia asset→canônico (canonical → keywords).
+ASSET_SYNONYMS = {
+    "sofa": ["sofa", "sofá"],
+    "armchair": ["poltrona", "armchair", "accent_chair", "cadeira_de_leitura", "leitura"],
+    "coffee_table": ["mesa_centro", "mesa_de_centro", "coffee", "centro"],
+    "dining_table": ["mesa_jantar", "mesa_de_jantar", "dining", "jantar"],
+    "rack": ["rack", "tv_console", "console", "tv", "estante_tv", "painel_tv", "home_theater"],
+    "bed": ["cama", "bed"],
+    "wardrobe": ["guarda_roupa", "wardrobe", "closet", "armario_roupa", "roupeiro"],
+    "nightstand": ["criado", "nightstand", "cabeceira"],
+}
+# cômodos monolíticos no modelo canônico: QUALQUER item do programa colapsa no asset único
+SINGLE_ASSET_ROOM = {"cozinha": "kitchen", "banheiro": "vanity"}
+
+
+def canonical_asset(name: str, room_key: str | None = None) -> str | None:
+    """asset (linguagem do Arquiteto) → asset canônico do modelo, ou None se não houver classe.
+    Cozinha/banheiro colapsam no asset único do cômodo (kitchen/vanity)."""
+    if room_key in SINGLE_ASSET_ROOM:
+        return SINGLE_ASSET_ROOM[room_key]
+    n = name.strip().lower().replace(" ", "_").replace("-", "_")
+    if n in ASSET_META:
+        return n
+    for canon, kws in ASSET_SYNONYMS.items():
+        if any(k in n for k in kws):
+            return canon
+    return None
+
+
+def room_asset_keys(room_key: str, default_assets: list) -> tuple[list, str]:
+    """Os assets do cômodo: o furniture_program APROVADO (mapeado p/ canônico, deduped, na ordem
+    do programa) se existir; senão o ROOMS hardcoded. Devolve (keys, source). Item sem canônico
+    entra 'loose' (estado not_started) — o inventário reflete a escolha do Arquiteto."""
+    try:
+        from tools.interior_studio import proposals
+        prog = proposals.approved_program(room_key)
+    except Exception:  # noqa: BLE001
+        prog = None
+    if not prog:
+        return list(default_assets), "default"
+    seen, out = set(), []
+    for it in prog.get("items", []):
+        nm = str(it.get("asset", "")).strip().lower()
+        if not nm:
+            continue
+        key = canonical_asset(nm, room_key) or nm
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(key)
+    return (out, "program") if out else (list(default_assets), "default")
+
+
 def pipeline_for(asset: str) -> list:
     """PipelineResolver: o pipeline (política do domínio) do asset, com status derivado do estado."""
     kind = ASSET_KIND.get(asset, "furniture")
@@ -212,12 +267,13 @@ def project_state() -> dict:
     """O modelo inteiro: projeto → cômodos → assets (com estado + próxima ação). É a fonte do inventário."""
     rooms = []
     for r in ROOMS:
+        keys, source = room_asset_keys(r["key"], r["assets"])   # SPEC-B: programa aprovado sobrepõe ROOMS
         assets = []
-        for a in r["assets"]:
+        for a in keys:
             stt = asset_state(a)
             stt["label"] = ASSET_META.get(a, a)
             assets.append(stt)
         done = sum(1 for a in assets if a["state"] in ("approved", "learned", "frozen"))
         rooms.append({"key": r["key"], "label": r["label"], "icon": r["icon"],
-                      "assets": assets, "done": done, "total": len(assets)})
+                      "assets": assets, "done": done, "total": len(assets), "assets_source": source})
     return {"project": "planta_74", "rooms": rooms}

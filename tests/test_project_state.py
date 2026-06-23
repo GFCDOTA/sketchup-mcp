@@ -17,6 +17,8 @@ def sandbox(tmp_path, monkeypatch):
     monkeypatch.setattr(ps, "ROOT", tmp_path)
     monkeypatch.setattr(cycles, "CYCLES_DIR", tmp_path / "cycles")
     monkeypatch.setattr(rp, "PACKS_DIR", tmp_path / "packs")
+    from tools.interior_studio import proposals
+    monkeypatch.setattr(proposals, "PDIR", tmp_path / "proposals")   # inventário dinâmico isolado
     return tmp_path
 
 
@@ -137,6 +139,32 @@ def test_active_focuses_so_o_que_esta_em_andamento(sandbox):
     assert "sofa" in assets and "rack" not in assets and "kitchen" not in assets
     sofa = next(f for f in foc if f["asset"] == "sofa")
     assert sofa["environment"] == "sala" and sofa["pipeline"] and sofa["next"]
+
+
+def test_canonical_asset_mapeia_a_linguagem_do_arquiteto():
+    assert ps.canonical_asset("tv_console", "sala") == "rack"
+    assert ps.canonical_asset("mesa_centro", "sala") == "coffee_table"
+    assert ps.canonical_asset("poltrona", "sala") == "armchair"
+    assert ps.canonical_asset("sofa_2_places", "sala") == "sofa"
+    assert ps.canonical_asset("bancada", "cozinha") == "kitchen"     # cozinha colapsa
+    assert ps.canonical_asset("cuba", "banheiro") == "vanity"        # banheiro colapsa
+    assert ps.canonical_asset("escrivaninha_xpto", "sala") is None   # sem canônico
+
+
+def test_inventario_dinamico_usa_programa_aprovado(sandbox):
+    from tools.interior_studio import proposals
+    proposals.save({"id": "furniture_program_r002", "type": "furniture_program", "environment": "sala",
+                    "items": [{"asset": "sofa"}, {"asset": "mesa_centro"}, {"asset": "tv_console"}]})
+    proposals.approve("furniture_program_r002")
+    sala = next(r for r in ps.project_state()["rooms"] if r["key"] == "sala")
+    assert [a["asset"] for a in sala["assets"]] == ["sofa", "coffee_table", "rack"]   # mapeado+deduped
+    assert sala["assets_source"] == "program"
+
+
+def test_inventario_sem_programa_aprovado_usa_default(sandbox):
+    sala = next(r for r in ps.project_state()["rooms"] if r["key"] == "sala")
+    assert sala["assets_source"] == "default"
+    assert [a["asset"] for a in sala["assets"]] == ["sofa", "armchair", "coffee_table", "dining_table", "rack"]
 
 
 def test_inventario_por_comodo_so_tem_seus_assets(sandbox):
