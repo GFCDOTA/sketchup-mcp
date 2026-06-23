@@ -20,16 +20,16 @@ ROOT = Path(__file__).resolve().parents[2]
 THEMES_DIR = ROOT / "artifacts/reference_lab/themes"
 DNA_FILE = ROOT / ".claude/memory/felipe_style_dna.md"
 
-# ---- estagiário (perfil) por tema: persona + modelo local de síntese ----
-INTERNS = {
-    "black_wood_gold": {"id": "intern-nero", "persona": "Nero — especialista no escuro premium "
+# ---- JUIZ DE RENDER (perfil) por tema: persona + modelo local de síntese ----
+JUDGES = {
+    "black_wood_gold": {"id": "judge-nero", "persona": "Nero — especialista no escuro premium "
                         "(black/wood/gold industrial boutique). Caça caverna e fake-gold.",
                         "model": "deepseek-r1:14b"},
-    "dark_walnut": {"id": "intern-walnut", "persona": "Walnut — moody nogueira premium.",
+    "dark_walnut": {"id": "judge-walnut", "persona": "Walnut — moody nogueira premium.",
                     "model": "deepseek-r1:14b"},
-    "hotel_boutique": {"id": "intern-lobby", "persona": "Lobby — boutique quente equilibrado.",
+    "hotel_boutique": {"id": "judge-lobby", "persona": "Lobby — boutique quente equilibrado.",
                        "model": "deepseek-r1:14b"},
-    "warm_compact": {"id": "intern-fendi", "persona": "Fendi — claro/quente compacto.",
+    "warm_compact": {"id": "judge-fendi", "persona": "Fendi — claro/quente compacto.",
                      "model": "deepseek-r1:14b"},
 }
 
@@ -102,7 +102,7 @@ _THEME_CHECKS = {"black_wood_gold": _CHECKS_BWG}
 def themes() -> list[str]:
     """Ids de tema conhecidos (presets em disco + os com schema embutido)."""
     disk = {p.stem.lower() for p in THEMES_DIR.glob("*.json")} if THEMES_DIR.exists() else set()
-    known = set(INTERNS) | set(_THEME_CHECKS)
+    known = set(JUDGES) | set(_THEME_CHECKS)
     # normaliza nomes de preset (BLACK_WOOD_GOLD_INDUSTRIAL_BOUTIQUE -> black_wood_gold via match)
     return sorted(known | {d for d in disk})
 
@@ -110,19 +110,19 @@ def themes() -> list[str]:
 def resolve(theme_id: str) -> str:
     """Aceita aliases/nomes de preset → id canônico do registry."""
     t = (theme_id or "").lower()
-    for canon in INTERNS:
+    for canon in JUDGES:
         if canon in t or t in canon:
             return canon
     return t
 
 
 def load_theme(theme_id: str) -> dict:
-    """O tema como tópico: id, estagiário-dono, DNA, anti-patterns, checks (schema)."""
+    """O tema como tópico: id, juiz-de-render-dono, DNA, anti-patterns, checks (schema)."""
     tid = resolve(theme_id)
     return {
         "id": tid,
-        "intern": INTERNS.get(tid, {"id": f"intern-{tid}", "persona": f"estagiário de {tid}",
-                                    "model": "deepseek-r1:14b"}),
+        "judge": JUDGES.get(tid, {"id": f"judge-{tid}", "persona": f"juiz de render de {tid}",
+                                  "model": "deepseek-r1:14b"}),
         "dna": _DNA.get(tid, f"tema {tid} (DNA ainda não destilado — usar default)"),
         "anti_patterns": _ANTI.get(tid, []),
         "checks": _THEME_CHECKS.get(tid, _CHECKS_DEFAULT),

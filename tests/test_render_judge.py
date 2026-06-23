@@ -5,7 +5,7 @@ import pytest
 from PIL import Image
 
 from tools.interior_studio import theme_registry as reg
-from tools.interior_studio import theme_intern as ti
+from tools.interior_studio import render_judge as rj
 from tools.interior_studio.render_fingerprint import fingerprint
 
 
@@ -77,23 +77,23 @@ def test_crushed_shadows_pega_o_que_a_mean_mascara():
 
 
 def test_overall_status_pega_o_pior():
-    assert ti.overall_status([{"status": "PASS"}, {"status": "WARN"}, {"status": "FAIL"}]) == "FAIL"
-    assert ti.overall_status([{"status": "PASS"}, {"status": "WARN"}]) == "WARN"
-    assert ti.overall_status([{"status": "PASS"}, {"status": "UNKNOWN"}]) == "PASS"
+    assert rj.overall_status([{"status": "PASS"}, {"status": "WARN"}, {"status": "FAIL"}]) == "FAIL"
+    assert rj.overall_status([{"status": "PASS"}, {"status": "WARN"}]) == "WARN"
+    assert rj.overall_status([{"status": "PASS"}, {"status": "UNKNOWN"}]) == "PASS"
 
 
-def test_registry_tema_carrega_com_estagiario_e_schema():
+def test_registry_tema_carrega_com_juiz_e_schema():
     t = reg.load_theme("BLACK_WOOD_GOLD_INDUSTRIAL_BOUTIQUE")   # alias/preset name resolve
     assert t["id"] == "black_wood_gold"
-    assert t["intern"]["id"] == "intern-nero"
+    assert t["judge"]["id"] == "judge-nero"
     assert any(c["id"] == "no_fake_gold" for c in t["checks"])
     assert len(reg.vision_questions(t)) >= 5
 
 
 def test_validate_so_deterministico_sem_rede(tmp_path):
-    # run_vision=False, run_intern=False -> nenhum LLM; checks de visão ficam UNKNOWN/sem sinal
+    # run_vision=False, run_judge=False -> nenhum LLM; checks de visão ficam UNKNOWN/sem sinal
     p = _png(tmp_path, "dark.png", [12, 11, 10])
-    v = ti.validate(p, "black_wood_gold", run_intern=False, run_vision=False)
-    assert v["theme"] == "black_wood_gold" and v["intern"] == "intern-nero"
+    v = rj.validate(p, "black_wood_gold", run_judge=False, run_vision=False)
+    assert v["theme"] == "black_wood_gold" and v["judge"] == "judge-nero"
     nc = next(c for c in v["checks"] if c["id"] == "not_cave")
     assert nc["status"] == "FAIL"        # mean_lum ~11 -> caverna determinística
