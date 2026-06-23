@@ -1,0 +1,45 @@
+{
+  "id": "furniture_program_r004",
+  "type": "furniture_program",
+  "source_worker": "Arquiteto · deepseek-r1:14b",
+  "environment": "cozinha",
+  "room_id": "r004",
+  "room_name": "COZINHA",
+  "area_m2": 5.1,
+  "items": [
+    {
+      "asset": "ilha_compacta",
+      "priority": "core",
+      "reason": "móvel central que combina funcionalidade e estilo industrial boutique"
+    },
+    {
+      "asset": "banheiro_armario_sobreposta",
+      "priority": "core",
+      "reason": "armário com cooktop e lava-louças, em madeira escura e metais dourados"
+    },
+    {
+      "asset": "gabinete_gourmet",
+      "priority": "core",
+      "reason": "para armazenamento de alimentos e utensílios, integrando o estilo industrial"
+    },
+    {
+      "asset": "banheiro_luminaria_sobre_cabacete",
+      "priority": "secundario",
+      "reason": "iluminação moderna que complementa o ambiente"
+    },
+    {
+      "asset": "banheiro_cadeira_bar",
+      "priority": "opcional",
+      "reason": "móvel que adiciona conforto e estilo"
+    },
+    {
+      "asset": "banheiro_armario_pantry",
+      "priority": "core",
+      "reason": "para armazenamento organizado de alimentos secos"
+    }
+  ],
+  "existing": [
+    "🍳 Cozinha (marcenaria) (congelado)"
+  ],
+  "requires_approval": true
+}

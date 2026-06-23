@@ -131,6 +131,60 @@
       "what": "fake_premium_gold_hood`: tentar resolver luxo colocando dourado na coifa.",
       "why": "Consult GPT",
       "from": "kitchen_skin_045756"
+    },
+    {
+      "id": "ap_consult_15",
+      "what": "sofa_box_block: Sofá não pode parecer cubo com braços e encosto verticais.",
+      "why": "Consult GPT",
+      "from": "LP-SOFA-001"
+    },
+    {
+      "id": "ap_consult_16",
+      "what": "armrest_too_chunky: Braço não pode dominar o volume visual nem parecer bloco estrutural.",
+      "why": "Consult GPT",
+      "from": "LP-SOFA-001"
+    },
+    {
+      "id": "ap_consult_17",
+      "what": "flat_cushion: Almofada não pode ser plano chapado; precisa crown, espessura e borda suavizada.",
+      "why": "Consult GPT",
+      "from": "LP-SOFA-001"
+    },
+    {
+      "id": "ap_consult_18",
+      "what": "wall_backrest: Encosto não pode ser parede vertical; precisa inclinação e almofada.",
+      "why": "Consult GPT",
+      "from": "LP-SOFA-001"
+    },
+    {
+      "id": "ap_consult_19",
+      "what": "floor_block_base: Nesta variante, sofá não pode encostar no chão como bloco; precisa pés e vão inferior.",
+      "why": "Consult GPT",
+      "from": "LP-SOFA-001"
+    },
+    {
+      "id": "ap_consult_20",
+      "what": "plastic_black_leather: Couro preto/grafite não pode parecer plástico brilhante.",
+      "why": "Consult GPT",
+      "from": "LP-SOFA-001"
+    },
+    {
+      "id": "ap_consult_21",
+      "what": "fake_industrial_brutal: Industrial não pode virar bruto, pesado ou tosco; precisa boutique premium.",
+      "why": "Consult GPT",
+      "from": "LP-SOFA-001"
+    },
+    {
+      "id": "ap_consult_22",
+      "what": "reference_scale_copy: copiar proporção/dimensão de sofá real sem recalcular pra sala compacta; a referência manda na linguagem, não no footprint.",
+      "why": "Consult GPT",
+      "from": "LP-SOFA-001"
+    },
+    {
+      "id": "ap_consult_23",
+      "what": "toy_sofa_from_over_shrink: reduzir tudo proporcionalmente até virar miniatura dura; compacto premium mantém almofada, profundidade visual e presença.",
+      "why": "Consult GPT",
+      "from": "LP-SOFA-001"
     }
   ],
   "flagged": []

@@ -30,8 +30,23 @@ FELIPE_DNA = ROOT / ".claude/memory/felipe_style_dna.md"               # identid
 JUDGE_RULES = ROOT / "references/design_rules/felipe_visual_judge_rules.json"  # regras do juiz visual + erros marcados
 KANBAN_FILE = ROOT / ".ai_bridge/kanban.json"          # status Trello de cada microtarefa (Felipe move)
 CYCLES_FILE = ROOT / ".ai_bridge/interior_consult/cycles.jsonl"  # cada ciclo persistido (o "banco" do loop)
+RELAY_FILE = ROOT / ".ai_bridge/interior_consult/relay.json"     # fila do relay Claude↔ChatGPT (Chrome)
+TOOLSDIR = ROOT / "tools"                                        # pra servir Mapa/Fluxo/etc. na MESMA porta
+# Mapa de Conhecimento / Fluxo / etc. integrados no :8782 (mesmos arquivos do :8783, servidos aqui também).
+PAGE_FILES = {"/grafo": "grafo.html", "/fluxo": "flow.html", "/explica": "explica.html",
+              "/como-funciona": "explica.html", "/agents": "agents.html",
+              "/single-agent": "agents.html", "/multi-agent": "agents.html", "/vitrine": "home.html"}
 KANBAN_COLS = ["backlog", "refinamento", "execução", "teste", "executado"]
 SKIP = (".denoiser.png", ".effectsResult.png")
+DEFAULT_PACK = "sofa_reference_pack_001"   # pack ativo da esteira (sofá = primeiro laboratório)
+
+from tools.interior_studio import cycles as ic_cycles            # noqa: E402  entidade CYCLE (esteira)
+from tools.interior_studio import reference_packs as ic_refpacks  # noqa: E402  Reference Pack + curadoria Felipe
+from tools.interior_studio import gpt_review_bundle as ic_bundle  # noqa: E402  pacote de revisão pro Consult GPT
+from tools.interior_studio import learning_patch as ic_patch      # noqa: E402  LEARNING_PATCH (resposta→patch→diff→aprova)
+from tools.interior_studio import project_state as ic_pstate      # noqa: E402  state machine + inventário por cômodo
+from tools.interior_studio import proposals as ic_proposals       # noqa: E402  fila de propostas dos workers locais
+from tools.interior_studio import architect_program as ic_archprog  # noqa: E402  Arquiteto propõe furniture_program
 
 
 def _kanban_load():
@@ -228,10 +243,85 @@ def _agents() -> dict:
             "agent_umbrella": agent_umbrella, "model_usage": model_usage}
 
 
+def _learning_log() -> dict:
+    """Agrega o aprendizado PERSISTENTE pra esteira: regras novas (Consult GPT → DNA), anti-patterns
+    (juiz visual), golden samples congelados. Só LÊ — não fabrica nada."""
+    new_rules: list = []
+    anti_patterns: list = []
+    golden: list = []
+    ing_dir = ROOT / ".ai_bridge/interior_consult/ingested"
+    if ing_dir.is_dir():
+        for p in sorted(ing_dir.glob("*.json"))[-12:]:
+            try:
+                rec = json.loads(p.read_text("utf-8"))
+            except (json.JSONDecodeError, OSError):
+                continue
+            new_rules += rec.get("rules_added") or []
+            anti_patterns += rec.get("anti_patterns_added") or []
+    if JUDGE_RULES.exists():
+        try:
+            jd = json.loads(JUDGE_RULES.read_text("utf-8"))
+            for a in jd.get("anti_patterns") or []:
+                w = a.get("what") or a.get("id")
+                if w:
+                    anti_patterns.append(w)
+        except (json.JSONDecodeError, OSError):
+            pass
+    try:
+        new_rules += ic_patch.applied_rules()   # regras já aplicadas via LEARNING_PATCH aprovado
+    except Exception:  # noqa: BLE001
+        pass
+    gs_dir = ROOT / "references/felipe/golden_samples"
+    if gs_dir.is_dir():
+        golden = [p.stem for p in sorted(gs_dir.glob("*")) if p.is_file()]
+
+    def _dd(xs):
+        seen, out = set(), []
+        for x in xs:
+            k = (x or "").strip().lower() if isinstance(x, str) else str(x)
+            if k and k not in seen:
+                seen.add(k)
+                out.append(x.strip() if isinstance(x, str) else x)
+        return out
+    return {"new_rules": _dd(new_rules)[-15:], "anti_patterns": _dd(anti_patterns)[-15:],
+            "golden_samples": golden}
+
+
+def _overview() -> dict:
+    """VISÃO GERAL = domínio por ambiente (consenso Claude×GPT): os FOCOS ATIVOS (fluxos VIVOS derivados do
+    estado, suporta MÚLTIPLOS — 'mostra os fluxos conforme o que está sendo trabalhado') + inventário por
+    cômodo (escondido). Pipeline = política do domínio (pipeline_for, por kind do asset)."""
+    st = ic_pstate.project_state()
+    focuses = ic_pstate.active_focuses()
+    return {"project": st["project"], "active_focuses": focuses, "n_focus": len(focuses),
+            "rooms": st["rooms"]}
+
+
 def _state() -> dict:
+    fac = ic_cycles.factory_state()
+    pack_id = (fac.get("references") or {}).get("pack_id") or DEFAULT_PACK
     return {"agents": _agents(), "renders": _renders(), "sessions": _sessions(),
             "backlog": _backlog(), "references": _references(), "inbox": _inbox(),
-            "knowledge": _knowledge_state(), "consult": _consult_state(), "cycles": _cycles_recent(8)}
+            "knowledge": _knowledge_state(), "consult": _consult_state(), "cycles": _cycles_recent(8),
+            "factory": fac, "refpack": ic_refpacks.pack_state(pack_id), "learning": _learning_log(),
+            "patches": ic_patch.patches_state(), "proposals": ic_proposals.state(), "overview": _overview()}
+
+
+def _proposal_action(body: dict) -> dict:
+    """Aprovar/rejeitar uma proposta, ou pedir o Arquiteto propor o programa de um cômodo."""
+    act = body.get("action")
+    if act == "approve":
+        p = ic_proposals.approve(body.get("id", ""))
+        return {"ok": bool(p), "proposal": p}
+    if act == "reject":
+        p = ic_proposals.reject(body.get("id", ""))
+        return {"ok": bool(p), "proposal": p}
+    if act == "propose":   # roda o Arquiteto (LLM local) pro cômodo — pode demorar (deepseek)
+        return ic_archprog.propose_and_save(body.get("room_id", ""), body.get("model", "deepseek"))
+    if act == "audit":     # roda o Auditor de Consistência (determinístico) → salva gaps pending
+        from tools.interior_studio import auditor as ic_auditor
+        return {"ok": True, **ic_auditor.audit_and_save()}
+    return {"ok": False, "error": f"ação desconhecida: {act}"}
 
 
 PAGE = r"""<!doctype html><html lang=pt-BR><head><meta charset=utf-8>
@@ -385,10 +475,106 @@ textarea{width:100%;min-height:90px;background:#0c0d10;border:1px solid var(--bd
 .crow{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--bd)}
 .crow input{flex:1;background:#0c0d10;border:1px solid var(--bd);color:var(--fg);border-radius:8px;padding:8px 12px;font-size:13px}
 .chatbtn{background:#0c0d10;border:1px solid var(--bd);color:var(--gold);border-radius:6px;padding:3px 8px;cursor:pointer;font-size:12px}.chatbtn:hover{background:#1f1b29}
+/* 🏭 FÁBRICA — barra de estado atual */
+#sec-factory{border-left:3px solid var(--gold)}
+.facbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+.facpill{background:#15131c;border:1px solid #2c2636;border-radius:9px;padding:3px 10px;font-size:12px;color:#cdb98a}
+.facpill.cid{border-color:var(--gold);color:var(--gold);font-weight:700}
+.facpill.st{background:#19281f;border-color:#2c3a2c;color:var(--ok)}
+.facnext{font-size:13px;color:#e8e9ec;margin:4px 0}
+.facacts{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin:7px 0 4px}
+.facbundle{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:12px;border-top:1px dashed #2c2636;padding-top:7px;margin-top:4px}
+.facblock{margin-top:7px;background:#2a1717;border:1px solid #4a2a2a;border-radius:8px;padding:7px 11px;color:#e6a0a0;font-size:12.5px}
+.refimg{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;margin-bottom:8px;background:#000;cursor:pointer;border:1px solid var(--bd)}
+.refimg-ph{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;width:100%;aspect-ratio:4/3;border-radius:8px;margin-bottom:8px;background:#101116;border:1px dashed var(--bd);color:var(--blu);text-decoration:none;font-size:12.5px}.refimg-ph:hover{border-color:var(--gold)}
+/* 🔧 TIMELINE do ciclo */
+.tllist{display:flex;flex-direction:column;gap:6px}
+.tlstep{background:#0c0d10;border:1px solid var(--bd);border-left:3px solid #3a3f49;border-radius:8px;padding:7px 11px}
+.tlstep.tl-done{border-left-color:var(--ok)}.tlstep.tl-doing{border-left-color:var(--blu)}
+.tlstep.tl-wait{border-left-color:var(--warn)}.tlstep.tl-block{border-left-color:var(--red)}
+.tlstep.tl-na,.tlstep.tl-pend{opacity:.62}
+.tlhead{font-size:12.5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}.tlface{font-size:15px}
+.tlicon{font-weight:700}.tlstep.tl-done .tlicon{color:var(--ok)}.tlstep.tl-block .tlicon{color:var(--red)}.tlstep.tl-wait .tlicon{color:var(--warn)}
+.tlsum{font-size:12px;color:var(--mut);margin-top:3px;line-height:1.4}
+/* 🖼️ REFERENCE PACK + curadoria */
+.refgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:11px}
+.refcard{background:#0c0d10;border:1px solid var(--bd);border-radius:10px;padding:11px 13px;border-top:3px solid #3a3f49}
+.refcard.rs-main{border-top-color:var(--gold);box-shadow:0 0 0 1px rgba(201,168,106,.35)}
+.refcard.rs-approved{border-top-color:var(--ok)}.refcard.rs-rejected{border-top-color:var(--red);opacity:.7}
+.refcard.rs-anti{border-top-color:#a05a5a;background:#160f0f}
+.refhd{font-size:13px;margin-bottom:5px}.reftags{margin-bottom:6px;display:flex;gap:5px;flex-wrap:wrap}
+.rb-main{background:#2a2417;color:var(--gold)}.rb-approved{background:#19281f;color:var(--ok)}.rb-rejected{background:#281717;color:var(--red)}.rb-anti{background:#2a1717;color:#e6a0a0}.rb-pending{color:var(--mut)}
+.refbody{font-size:12px;color:#cfd2d8;line-height:1.5;margin-bottom:8px}.refbody b{color:var(--fg)}
+.refact{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.cbtn{background:#15131c;border:1px solid #2c2636;border-radius:7px;padding:3px 10px;cursor:pointer;font-size:14px}.cbtn:hover{background:#221c2e;border-color:var(--gold)}
+.cbtn-star{font-size:12.5px;color:var(--gold);border-color:#4a3f22;font-weight:600}.cbtn-star:hover{background:#2a2417}
+.cbtn-star.pulse{box-shadow:0 0 0 0 rgba(201,168,106,.5);animation:starpulse 1.6s infinite}
+@keyframes starpulse{0%{box-shadow:0 0 0 0 rgba(201,168,106,.45)}70%{box-shadow:0 0 0 7px rgba(201,168,106,0)}100%{box-shadow:0 0 0 0 rgba(201,168,106,0)}}
+.tlneed{margin-top:5px;font-size:12px;color:var(--warn);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.refhint{background:#1a1622;border:1px solid #4a3f22;border-left:3px solid var(--gold);border-radius:8px;padding:8px 12px;font-size:12.5px;color:#e8d9b8;margin-bottom:8px}
+.refhint.ok{border-color:#2c3a2c;border-left-color:var(--ok);background:#13191420;color:var(--ok)}
+.reftray{margin-top:12px;border-top:1px dashed #2c2636;padding-top:8px}
+.reftrayrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#0c0d10;border:1px solid var(--bd);border-radius:7px;padding:5px 10px;margin-bottom:5px;font-size:12.5px}
+.reftrayt{flex:1;min-width:200px;color:var(--mut)}
+/* 📚 LEARNING LOG */
+.llgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.lllist{margin:4px 0;padding-left:18px;font-size:12.5px;line-height:1.5;max-height:240px;overflow-y:auto}.lllist li{margin:2px 0}
+/* 🧠 LEARNING PATCH (diff) */
+#sec-patch{border-left:3px solid var(--gold)}
+.patchhd{font-size:13.5px;margin-bottom:3px}
+.patchdiff{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:6px 0}
+@media(max-width:760px){.patchdiff{grid-template-columns:1fr}}
+.difflist{margin:4px 0;padding-left:6px;list-style:none;font-size:12.5px;line-height:1.55}
+.difflist li{padding:2px 8px;border-radius:5px;margin:3px 0}
+.difflist li.add{background:#14241a;border-left:3px solid var(--ok);color:#bfe8cb}.difflist li.add::before{content:'+ ';color:var(--ok);font-weight:700}
+.difflist li.dup{background:#181a20;color:#7a8696;text-decoration:line-through;opacity:.7}.difflist li.dup::before{content:'≡ '}
+.patchacts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;border-top:1px dashed #2c2636;padding-top:8px}
+/* 🛰️ VISÃO GERAL (mission control) */
+#sec-overview{border-left:3px solid #f0a868}
+.ovhead{font-size:13.5px;margin-bottom:12px;color:#e8e9ec}
+.ovpipe{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;row-gap:10px}
+.ovstep{flex:1 1 110px;min-width:104px;background:#0c0d10;border:1px solid var(--bd);border-top:3px solid #3a3f49;border-radius:10px;padding:10px 8px;text-align:center}
+.ovstep.ov-done{border-top-color:var(--ok)}.ovstep.ov-doing{border-top-color:var(--blu)}.ovstep.ov-pend{opacity:.6}
+.ovstep:hover{background:#15131c}
+.ovic{font-size:26px;line-height:1}.ovlbl{font-size:11.5px;font-weight:600;margin-top:5px;color:var(--fg)}
+.ovdet{font-size:10.5px;color:var(--mut);margin-top:2px;line-height:1.25}
+.ovstep.ov-done .ovdet{color:var(--ok)}
+.ovarrow{align-self:center;color:#4a5260;font-size:16px;padding:0 3px;flex:0 0 auto}
+.ovinv{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.ovcard{background:#0c0d10;border:1px solid var(--bd);border-radius:10px;padding:11px 12px}
+.ovcard-on{border-color:#f0a868;box-shadow:0 0 0 1px rgba(240,168,104,.3)}
+.ovcic{font-size:24px;line-height:1}.ovcnm{font-weight:700;font-size:13px}
+.ovcb{font-size:10.5px;font-weight:600;margin-top:2px}.ovcd{font-size:11px;color:var(--mut);margin-top:3px;line-height:1.3}
+.ovroom{margin-bottom:5px;border:1px solid var(--bd);border-radius:8px;background:#0b0c0f;overflow:hidden}
+.ovroomh{display:flex;align-items:center;gap:10px;padding:8px 11px;cursor:pointer;font-size:12.5px;list-style:none;user-select:none}
+.ovroomh::-webkit-details-marker{display:none}.ovroomh::marker{content:''}
+.ovroom[open] .ovroomh{border-bottom:1px solid var(--bd);background:#101116}.ovroomh:hover{background:#101116}
+.ovrmn{flex:1}.ovrmn b{font-weight:600}.ovwip{font-size:11px;color:#f0a868}.ovcts{display:flex;gap:7px}.ovct{font-size:11px;color:var(--mut)}
+.ovrows{padding:5px 6px}
+.ovrow{display:flex;align-items:center;gap:9px;padding:5px 8px;font-size:12px;border-radius:6px}
+.ovrow:hover{background:#15131c}.ovrow-f{background:#15130d}
+.ovrn{flex:1;font-weight:600}.ovrst{font-size:11px;white-space:nowrap}.ovrnext{font-size:11px;color:var(--mut);white-space:nowrap}
+.ovfocus{background:#0c0d10;border:1px solid var(--bd);border-left:3px solid #f0a868;border-radius:10px;padding:11px 12px;margin-bottom:12px}
+.ovfocush{font-size:13.5px;margin-bottom:10px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}.ovnext{color:#f0a868;font-size:12px}
+.ovhero{margin-bottom:11px}.ovheroline{font-size:14px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:3px 0}
+.ovherok{font-size:9.5px;font-weight:700;letter-spacing:.07em;color:#7a8290;background:#15161c;border:1px solid var(--bd);border-radius:5px;padding:2px 6px;min-width:58px;text-align:center}
+.ovchips{margin-top:9px;font-size:11.5px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.ovchip{background:#14131a;border:1px solid var(--bd);border-radius:20px;padding:3px 10px;cursor:pointer}.ovchip:hover{border-color:#f0a868}
+.ovsec{font-size:12px;font-weight:700;letter-spacing:.04em;color:#cdb98a;margin:14px 0 7px;border-top:1px solid var(--bd);padding-top:10px}.ovsec .mut{font-weight:400}
+.ovcyc{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:12px;margin:11px 0 2px}.ovinvfull{margin-top:2px}
+.ovfoco{font-size:8.5px;font-weight:700;background:#f0a868;color:#1a1206;border-radius:4px;padding:1px 5px;vertical-align:middle}
+.ovpulse{display:flex;flex-direction:column;gap:5px}.ovpline{font-size:12px;line-height:1.4}.ovpface{font-size:14px}.ovon{color:var(--ok);font-size:9px;vertical-align:middle}
+#sec-program{border-left:3px solid #9c6fd4}
+.apcard{border:1px solid var(--bd);border-radius:9px;background:#0b0c0f;padding:10px 12px;margin-bottom:9px}
+.aphd{font-size:13px;margin-bottom:7px}.appass{color:var(--ok);font-size:11px;font-weight:600}
+.apitems{display:flex;flex-direction:column;gap:3px;margin-bottom:8px}
+.apitem{font-size:12px;display:flex;align-items:center;gap:7px}.apdot{width:7px;height:7px;border-radius:50%;flex:none}
+.apwhy{color:var(--mut)}.apacts{display:flex;gap:7px;flex-wrap:wrap}
+.ovinvtoggle{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;font-size:12px;border-top:1px dashed #2c2636;padding-top:9px}
+.ovcard[onclick]{cursor:pointer}.ovcard[onclick]:hover{border-color:#f0a868;background:#15131c}
 </style></head><body>
-<header><span class=hdot></span><h1>INTERIOR STUDIO</h1>
-<nav><a href="#sec-agents">Agentes</a><a href="#sec-err">Erros</a><a href="#sec-graf">Gráficos</a><a href="#sec-cur">Curadoria</a><a href="#sec-ren">Renders</a></nav>
-<span class=mut style="margin-left:auto;font-size:11px">🔓 ⠿ mover · ▭ largura · puxa a borda ↕ pra altura</span><button onclick=resetLayout() title="voltar ao layout padrão" style="background:#0c0d10;border:1px solid var(--bd);color:var(--mut);border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11px;margin:0 12px">↺ layout</button><span class=mut id=ts>carregando…</span><span class=mut>· :8782</span></header>
+<header><span class=hdot></span><h1>🎛 INTERIOR STUDIO</h1>
+<nav><a href="#sec-overview">Missão</a><a href="#sec-program">Programa</a><a href="#sec-ciclo">Ciclo</a><a href="#sec-refpack">Reference Pack</a><a href="#sec-consult">Consult GPT</a><a href="#sec-patch">Learning Patch</a><a href="#sec-agents">Agentes</a><a href="#sec-backlog">Backlog</a><a href="#sec-ren">Renders</a><a href="/explica" target=_blank style="color:var(--gold);font-weight:600;margin-left:8px" title="como o sistema funciona — o Fluxo e o Mapa estão aqui dentro">📖 Explica</a></nav></header>
 <div class=wrap id=root></div>
 <div id=modal class=modal onclick="if(event.target===this)closeModal()">
  <div class=mbox><div class=mbar><span id=mname></span>
@@ -401,7 +587,11 @@ textarea{width:100%;min-height:90px;background:#0c0d10;border:1px solid var(--bd
  </div></div>
 <script>
 const el=(h)=>{const d=document.createElement('div');d.innerHTML=h;return d.firstChild}
-const esc=(t)=>(t||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))
+const esc=(t)=>(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
+// esc() é pra CONTEÚDO/atributo HTML. Dentro de um on*="…(' … ')" o argumento é uma STRING JS:
+// a entidade HTML (&#39;) é DECODIFICADA pelo browser ANTES do parser JS → um apóstrofo (Henry's) quebra
+// o argumento. jsq() hex-escapa pra \xHH (sobrevive ao parse de atributo HTML E ao parse de string JS).
+const jsq=(t)=>(t==null?'':''+t).replace(/[\\'"<>&\n\r]/g,c=>'\\x'+c.charCodeAt(0).toString(16).padStart(2,'0'))
 const hhmm=(ts)=>ts?new Date(ts*1000).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):''
 const MODELFACE={'deepseek-r1:14b':'🐳','qwen2.5-coder:14b':'🤖','llama3.1:8b':'🦙','interior-designer:latest':'🎨','coder-assistant:latest':'🛠️','qwen2.5vl:7b':'👁️','moondream:latest':'👁️'}
 const viaTag=(v)=>!v?'':(v.indexOf('consenso')===0?' · 🧠 consenso (3 IAs)':' · via '+(MODELFACE[v]||'🤖'))
@@ -433,6 +623,26 @@ function drawArrows(ag){const svg=document.getElementById('arrows'),wrap=documen
  svg.innerHTML=p}
 let LEADOF={},FACES={},LABELS={};const leadOf=(u)=>LEADOF[u]
 async function curate(slug,action){await fetch('/api/curate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug,action})});tick(1)}
+let FACTORY={},BUNDLE=null
+function curateRef(packId,refId,action){fetch('/api/curate-ref',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pack_id:packId,ref_id:refId,action,cycle_id:FACTORY.cycle_id||null})}).then(()=>tick(1))}
+function cpTxt(t,ev){if(t&&navigator.clipboard)navigator.clipboard.writeText(t);if(ev){const b=ev.target,o=b.textContent;b.textContent=t?'copiado!':'gera o pacote 1º';setTimeout(()=>b.textContent=o,1300)}}
+function refpackImages(packId){const m=document.getElementById('rpimgmsg');if(m)m.textContent='🖼 puxando imagens (og:image)…'
+ fetch('/api/refpack-images',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pack_id:packId})}).then(r=>r.json()).then(r=>{if(m)m.textContent=r.ok?('✓ '+r.resolved+'/'+r.total+' imagens'):('erro: '+(r.error||''));tick(1)})}
+function genBundle(){const m=document.getElementById('bundlemsg');if(m)m.textContent='📦 gerando pacote pro GPT…'
+ fetch('/api/gpt-bundle',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})}).then(r=>r.json()).then(r=>{BUNDLE=r
+  if(m)m.textContent=r.ok?('✓ '+(r.md_path||'')+' · branch '+(r.branch||'?')+(r.raw_link?' · link raw pronto (pós-push)':' · sem remote')):('erro: '+(r.error||''));tick(1)})}
+function copyBundle(ev){cpTxt(BUNDLE&&BUNDLE.md,ev)}
+function copyBundleLink(ev){cpTxt(BUNDLE&&BUNDLE.raw_link,ev)}
+function copyShortQ(ev){cpTxt(BUNDLE&&BUNDLE.question,ev)}
+function nextStepGo(kind){jumpTo({scout:'sec-scout',consult:'sec-consult',curate:'sec-refpack',build:'sec-ciclo'}[kind]||'sec-ciclo')}
+function consultRelay(){const m=document.getElementById('cqmsg');if(m)m.textContent='🤖 pedindo relay…'
+ fetch('/api/consult/relay-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})}).then(r=>r.json()).then(r=>{if(m)m.textContent=r.ok?('🤖 relay pedido pra '+r.question_id+' — me fala "relaya" no chat que eu dirijo o ChatGPT'):('erro: '+(r.error||''));tick(1)})}
+function jumpTo(id){const sec=document.getElementById(id);if(sec){sec.scrollIntoView({behavior:'smooth',block:'center'});sec.classList.add('kc-hl');setTimeout(()=>sec.classList.remove('kc-hl'),2000)}}
+let ROOMOPEN=new Set()   // quais cômodos do inventário estão expandidos (persiste entre re-renders; default fechado = enxuto)
+function invToggle(k,open){open?ROOMOPEN.add(k):ROOMOPEN.delete(k)}
+function propAct(id,action){fetch('/api/proposal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,action})}).then(r=>r.json()).then(_=>tick(1))}
+function propGen(rid,btn){if(btn){btn.disabled=true;btn.textContent='🧠 Arquiteto pensando…'}
+ fetch('/api/proposal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'propose',room_id:rid})}).then(r=>r.json()).then(_=>{if(btn){btn.disabled=false;btn.textContent='🔄 re-propor'}tick(1)}).catch(_=>{if(btn){btn.disabled=false;btn.textContent='🔄 re-propor'}})}
 function flagErr(){const a=document.getElementById('flagag').value,m=document.getElementById('flagmsg').value;if(!m)return
  fetch('/api/flag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:a,message:m})}).then(()=>{document.getElementById('flagmsg').value='';tick(1)})}
 function clearErr(agent){fetch('/api/clear',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent})}).then(()=>tick(1))}
@@ -457,12 +667,15 @@ function consultCopy(ev){const t=CONSULT_MD||cval('cq-out');if(!t)return;if(navi
 function consultLearn(){const a=cval('cq-answer');const m=document.getElementById('camsg');if(!a.trim()){if(m)m.textContent='cole algo primeiro';return}
  if(m)m.textContent='aprendendo… (resposta estruturada pode levar alguns segundos)'
  fetch('/api/consult/learn',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:a})}).then(r=>r.json()).then(r=>{
-  if(r.ok){CONSULT_INGEST=(r.mode==='ingest')?r:null
-   if(r.mode==='ingest'){if(m)m.textContent='✓ aprendido: '+(r.verdict||'')+' · +'+((r.rules_added||[]).length)+' regra(s), +'+((r.anti_patterns_added||[]).length)+' anti-pattern(s)'}
-   else{if(m)m.textContent='✓ orientação aprendida ('+(r.count||'?')+' bloco(s) na memória)'}
+  if(r.ok){CONSULT_INGEST=null
+   if(r.mode==='patch_draft'){const d=r.diff||{};if(m)m.textContent='✓ '+r.patch_id+' (draft) gerado — revisa o DIFF no 🧠 Learning Patch (+'+((d.rules_add||[]).length)+' regra, +'+((d.anti_add||[]).length)+' anti) e aprova/rejeita'
+    const sec=document.getElementById('sec-patch');if(sec)setTimeout(()=>sec.scrollIntoView({behavior:'smooth',block:'center'}),300)}
+   else{if(m)m.textContent='✓ orientação aprendida ('+(r.count||'?')+' bloco(s) na memória do Arquiteto)'}
    const ta=document.getElementById('cq-answer');if(ta)ta.value=''}
   else{if(m)m.textContent='erro: '+(r.error||'')}
   tick(1)})}
+function patchAction(pid,action){const reason=action==='reject'?(prompt('motivo da rejeição (opcional):')||''):''
+ fetch('/api/patch',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({patch_id:pid,action,reason})}).then(()=>tick(1))}
 function moveTask(mt,dir){fetch('/api/move',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mt,direction:dir})}).then(()=>tick(1))}
 function goToMT(mt){const sec=document.getElementById('sec-backlog');if(sec)sec.scrollIntoView({behavior:'smooth',block:'center'})
  const c=document.getElementById('kc-'+mt);if(c){c.classList.add('kc-hl');c.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>c.classList.remove('kc-hl'),2400)}}
@@ -504,6 +717,9 @@ function uploadRef(){const f=document.getElementById('upfile').files[0];if(!f)re
  const msg=document.getElementById('upmsg');msg.textContent='subindo…'
  const r=new FileReader();r.onload=async()=>{const res=await (await fetch('/api/upload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filename:f.name,data:r.result})})).json()
   msg.textContent=res.ok?('✓ '+res.slug):('erro: '+res.error);tick(1)};r.readAsDataURL(f)}
+// fallback de <img> que falhou: troca pelo link "abrir no site" SEM concatenar a URL em HTML/JS
+// (lê data-link já decodificado e seta href como PROPRIEDADE → imune a aspas/<> na URL dinâmica)
+function imgFallback(img){const a=el('<a class=refimg-ph target=_blank rel=noopener>🖼 abrir no site ↗</a>');a.href=img.dataset.link||'#';img.replaceWith(a)}
 function openModal(src,name){const m=document.getElementById('modal');document.getElementById('mimg').src=src
  document.getElementById('mname').textContent=name||'';const dl=document.getElementById('mdl');dl.href=src;dl.download=(name||'imagem')+(src.endsWith('.png')?'.png':'')
  m.dataset.url=location.origin+src;m.classList.add('show')}
@@ -529,13 +745,15 @@ let DRAGID=null
 function cardOrder(){try{return JSON.parse(localStorage.getItem('studio_order')||'[]')}catch(e){return[]}}
 function saveOrder(){const root=document.getElementById('root');if(!root)return
  localStorage.setItem('studio_order',JSON.stringify([...root.children].filter(c=>c.id&&c.classList.contains('card')).map(c=>c.id)))}
+const PINNED_TOP=['sec-overview']   // Visão Geral SEMPRE no topo, ignora o layout salvo
 function applyOrder(){const root=document.getElementById('root');if(!root)return
- const saved=cardOrder();if(!saved.length)return
  const present=[...root.children].filter(c=>c.id&&c.classList.contains('card')).map(c=>c.id)
- const full=[...saved.filter(id=>present.includes(id)),...present.filter(id=>!saved.includes(id))]
- full.forEach(id=>{const e=document.getElementById(id);if(e)root.appendChild(e)})}
+ const saved=cardOrder()
+ let order=saved.length?[...saved.filter(id=>present.includes(id)),...present.filter(id=>!saved.includes(id))]:present
+ order=[...PINNED_TOP.filter(id=>present.includes(id)),...order.filter(id=>!PINNED_TOP.includes(id))]
+ order.forEach(id=>{const e=document.getElementById(id);if(e)root.appendChild(e)})}
 // RECOLHER cards — só Agentes/Loop/Consult/Backlog abertos por padrão; o resto recolhido (menos poluição)
-const DEFAULT_OPEN=['sec-ask','sec-cycles','sec-agents','sec-conversa','sec-consult','sec-backlog']
+const DEFAULT_OPEN=['sec-overview','sec-factory','sec-ciclo','sec-refpack','sec-ask','sec-agents','sec-consult','sec-patch','sec-learning','sec-backlog']
 function collapsedSet(){try{const v=JSON.parse(localStorage.getItem('studio_collapsed')||'null');return v===null?null:new Set(v)}catch(e){return null}}
 function saveCollapsed(s){localStorage.setItem('studio_collapsed',JSON.stringify([...s]))}
 function applyCollapsed(){const root=document.getElementById('root');if(!root)return
@@ -586,7 +804,7 @@ async function tick(force){
  const ae=document.activeElement
  if(ae&&/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName))return
  let txt;try{txt=await (await fetch('/api/state')).text()}catch(e){return}
- document.getElementById('ts').textContent='atualizado '+new Date().toLocaleTimeString('pt-BR')
+ const _ts=document.getElementById('ts');if(_ts)_ts.textContent='atualizado '+new Date().toLocaleTimeString('pt-BR')
  if(txt===LASTSTATE&&!force)return   // NADA mudou -> nao re-renderiza (preserva input/upload/foco)
  LASTSTATE=txt
  const s=JSON.parse(txt)
@@ -594,6 +812,103 @@ async function tick(force){
  LEADOF={};FACES={};LABELS={};(ag.umbrellas||[]).forEach(u=>{LEADOF[u.id]=u.lead.id;FACES[u.id]=u.lead.face;LABELS[u.id]=u.label;[u.lead,...u.subs].forEach(c=>{FACES[c.id]=c.face;LABELS[c.id]=c.label})})
  FACES['felipe']='🧑';LABELS['felipe']='você'
  const root=document.getElementById('root');const sy=window.scrollY;root.innerHTML=''
+ // 🛰️ VISÃO GERAL — domínio por ambiente: os FOCOS ATIVOS (fluxos vivos, N) + inventário (escondido)
+ const ov=s.overview||{}
+ if((ov.active_focuses||[]).length||(ov.rooms||[]).length){const SC={done:'ov-done',pending:'ov-pend',doing:'ov-doing'}
+  const fac=s.factory||{}
+  const STC={approved:'var(--ok)',learned:'var(--ok)',frozen:'var(--blu)',vray_ready:'var(--gold)',context_review_needed:'var(--gold)',form_review_needed:'var(--gold)',building:'var(--blu)',build_spec_ready:'var(--warn)',curation_needed:'var(--warn)',references_needed:'var(--mut)',not_started:'#5a606b'}
+  const SICO=st=>['approved','learned','frozen'].includes(st)?'✅':['not_started','references_needed'].includes(st)?'⬜':'⚙️'   // GPT: 3 emojis de status
+  // ── 1) OPERAÇÃO: hero NOMINAL + pipeline + linha do ciclo (absorve a Fábrica) ──
+  const mkPipe=f=>(f.pipeline||[]).map((p,i)=>`${i?'<span class=ovarrow>→</span>':''}<div class="ovstep ${SC[p.status]||'ov-pend'}"><div class=ovic>${p.icon}</div><div class=ovlbl>${esc(p.label)}</div></div>`).join('')
+  const prin=(ov.active_focuses||[])[0],others=(ov.active_focuses||[]).slice(1)
+  const heroTitle=prin?`🎯 AGORA: <b style="color:#f0a868">${esc(prin.env_label)} · ${esc(prin.label)}</b>`:'🛰️ MISSÃO — nenhum fluxo ativo'
+  const heroBlock=prin?(()=>{const col=STC[prin.state]||'var(--gold)'
+   const act=prin.jump?`<button class=chatbtn onclick="jumpTo('${prin.jump}')">▶ ${esc(prin.next||'')}</button>`:`<span class=ovnext>▶ ${esc(prin.next||'')}</span>`
+   const chips=others.length?`<div class=ovchips><span class=mut>também ativo:</span> ${others.map(o=>`<span class=ovchip onclick="jumpTo('${o.jump||'sec-overview'}')">${o.env_icon} ${esc(o.label)} <span style="color:${STC[o.state]||'var(--mut)'}">— ${esc(o.state_label)}</span></span>`).join(' ')}</div>`:''
+   return `<div class=ovfocus><div class=ovhero><div class=ovheroline><span class=ovherok>AGORA</span> <b>${esc(prin.env_label)} · ${esc(prin.label)}</b> <span style="color:${col}">— ${esc(prin.state_label)}</span></div>${prin.reason?`<div class=ovheroline><span class=ovherok>POR QUÊ</span> <span class=mut>${esc(prin.reason)}</span></div>`:''}<div class=ovheroline><span class=ovherok>PRÓXIMO</span> ${act}</div></div><div class=ovpipe>${mkPipe(prin)}</div>${chips}</div>`})():'<div class=mut style="padding:8px 2px">Nenhum fluxo ativo agora — escolhe um asset no inventário pra começar um ciclo.</div>'
+  const cycLine=fac.has_cycle?`<div class=ovcyc><span class=ovherok>CICLO</span> <span class=mut>${esc(fac.cycle_id||'')} · ${esc(fac.microtask||'')} — ${esc(fac.title||'')}</span> <button class=chatbtn onclick="nextStepGo('scout')">🔭 Scout</button> <button class=chatbtn onclick="nextStepGo('consult')">🔌 Consult GPT</button> <button class=chatbtn onclick="genBundle()" title="gera GPT_REVIEW_BUNDLE.md">📦 Pacote GPT</button></div>${fac.architect_blocked?`<div class=facblock>⛔ Arquiteto BLOQUEADO — sem referência ⭐ principal curada. Não constrói o ${esc(fac.asset||'móvel')} até você escolher.</div>`:''}`:''
+  // ── 2) INVENTÁRIO: resumo NOMINAL (GPT: "1 pronto não informa; ✅ Cozinha informa") + ícone por asset ──
+  const nm=a=>esc((a.label||'').replace(/^\S+\s/,''))
+  const allA=(ov.rooms||[]).flatMap(rm=>rm.assets||[])
+  const inprog=allA.filter(a=>!['approved','learned','frozen','not_started','references_needed'].includes(a.state))
+  const doneA=allA.filter(a=>['approved','learned','frozen'].includes(a.state))
+  const todoN=allA.filter(a=>['not_started','references_needed'].includes(a.state)).length
+  const nominal=`⚙️ ${inprog.map(nm).join(', ')||'—'} · ✅ ${doneA.map(nm).join(', ')||'—'} · ⬜ ${todoN} a fazer`
+  // cômodo = bloco DOBRÁVEL (default fechado = enxuto, escala p/ biblioteca): resumo + contadores; expande pra ver itens
+  const ISDONE=st=>['approved','learned','frozen'].includes(st),ISTODO=st=>['not_started','references_needed'].includes(st),ISWIP=st=>!ISDONE(st)&&!ISTODO(st)
+  const rooms=(ov.rooms||[]).map(rm=>{const as=rm.assets||[]
+    const wip=as.find(a=>ISWIP(a.state))
+    const ct=(ic,f)=>{const n=as.filter(f).length;return n?`<span class=ovct>${ic}${n}</span>`:''}
+    const counts=ct('⚙️',a=>ISWIP(a.state))+ct('✅',a=>ISDONE(a.state))+ct('⬜',a=>ISTODO(a.state))
+    const rows=as.map(a=>{const isF=prin&&a.asset===prin.asset
+     return `<div class="ovrow${isF?' ovrow-f':''}"${a.jump?` onclick="jumpTo('${a.jump}')" style=cursor:pointer`:''}><span class=ovrn>${SICO(a.state)} ${esc(a.label)}${isF?' <span class=ovfoco>FOCO</span>':''}</span><span class=ovrst style="color:${STC[a.state]||'var(--mut)'}">${esc(a.state_label)}</span><span class=ovrnext>▶ ${esc(a.next||'')}</span></div>`}).join('')
+    return `<details class=ovroom${ROOMOPEN.has(rm.key)?' open':''} ontoggle="invToggle('${rm.key}',this.open)"><summary class=ovroomh><span class=ovrmn>${rm.icon} <b>${esc(rm.label)}</b></span>${wip?`<span class=ovwip>⚙️ ${esc((wip.label||'').replace(/^\S+\s/,''))}</span>`:''}<span class=ovcts>${counts}</span></summary><div class=ovrows>${rows}</div></details>`}).join('')
+  // ── 3) PULSO: última fala de cada agente (estilo status WhatsApp) + sessões ativas ──
+  const leads=((s.agents||{}).umbrellas||[]).map(u=>u.lead).filter(Boolean)
+  const pulso=leads.map(l=>`<div class=ovpline><span class=ovpface>${l.face}</span> <b>${esc(l.label)}</b>${l.online?' <span class=ovon title=online>●</span>':''} <span class=mut>${esc((l.message||'—').slice(0,110))}</span></div>`).join('')||'<div class=mut style=font-size:11px>time quieto</div>'
+  const sess=((s.sessions||{}).claims||[]).map(c=>`<div class=ovpline><span class=mut>🖥️ <b>${esc(c.owner)}</b> · ${esc(c.mt)} ${esc(c.desc)} <i>(${esc(c.status)})</i></span></div>`).join('')||'<div class=mut style=font-size:11px>nenhuma sessão reivindicando MT</div>'
+  root.appendChild(el(`<div class="card full" id=sec-overview><h2>${heroTitle}</h2>
+   ${heroBlock}
+   ${cycLine}
+   <div class=ovsec>📦 INVENTÁRIO <span class=mut>${nominal}</span></div>
+   <div class=ovinvfull>${rooms}</div>
+   <div class=ovsec>📡 PULSO <span class=mut>última fala do time + sessões ativas</span></div>
+   <div class=ovpulse>${pulso}${sess}</div></div>`))
+ }
+ // 🧠 PROGRAMA DO ARQUITETO — furniture_program proposto pelo LLM local (Felipe aprova; nada entra direto)
+ {const pend=((s.proposals||{}).pending||[]).filter(p=>p.type==='furniture_program')
+  const appr=((s.proposals||{}).approved||[]).filter(p=>p.type==='furniture_program')
+  if(pend.length||appr.length){const PRI={core:'#f0a868',secundario:'var(--blu)',opcional:'var(--mut)'}
+   const card=p=>{const items=(p.items||[]).map(it=>`<div class=apitem><span class=apdot style="background:${PRI[it.priority]||'var(--mut)'}"></span><b>${esc(it.asset)}</b> <span class=mut>${esc(it.priority||'')}</span> <span class=apwhy>— ${esc(it.reason||'')}</span></div>`).join('')
+    const isPend=p.status!=='approved'
+    return `<div class=apcard><div class=aphd><b>${esc(p.room_name||p.environment||'')}</b> <span class=mut>${p.area_m2?p.area_m2+' m² · ':''}${esc(p.source_worker||'')}</span>${isPend?'':' <span class=appass>✓ aprovado</span>'}</div><div class=apitems>${items}</div>${isPend?`<div class=apacts><button class=send onclick="propAct('${p.id}','approve')">✅ aprovar programa</button> <button class=chatbtn onclick="propAct('${p.id}','reject')">👎 rejeitar</button> <button class=chatbtn onclick="propGen('${esc(p.room_id||'')}',this)">🔄 re-propor</button></div>`:''}</div>`}
+   root.appendChild(el(`<div class="card full" id=sec-program><h2>🧠 Programa do Arquiteto <span class=mut>(o LLM local propõe a mobília do cômodo a partir das dimensões reais + estilo — você aprova; nada entra direto)</span></h2>
+    ${pend.map(card).join('')||''}
+    ${appr.length?`<div class=ovsec>✓ aprovados</div>${appr.map(card).join('')}`:''}</div>`))}
+ }
+ // 🔍 AUDITOR DE CONSISTÊNCIA — gaps determinísticos (worker local que PROPÕE, nunca muta; Felipe aprova/rejeita)
+ {const gaps=((s.proposals||{}).pending||[]).filter(p=>p.type==='consistency_gap')
+  const SEV={high:'var(--red)',med:'var(--warn)',low:'var(--mut)'}
+  const grow=g=>`<div class=apcard><div class=aphd><span class=apdot style="background:${SEV[g.severity]||'var(--mut)'}"></span><b>${esc(g.title||g.kind)}</b> <span class=mut>${esc(g.environment||g.asset||'')}</span></div><div class="apwhy" style="margin:4px 0 8px">— ${esc(g.detail||'')}</div><div class=apacts><button class=send onclick="propAct('${g.id}','approve')">✅ aceitar gap</button> <button class=chatbtn onclick="propAct('${g.id}','reject')">👎 ignorar</button></div></div>`
+  root.appendChild(el(`<div class="card full" id=sec-auditor><h2>🔍 Auditor de Consistência <span class=mut>(worker determinístico: lê os sinais reais e PROPÕE gaps — nunca muta; você decide)</span> <button class=chatbtn style="float:right" onclick="propAct('','audit')">🔍 rodar auditoria</button></h2>
+   ${gaps.length?gaps.map(grow).join(''):'<div class=mut>✓ sem gaps de consistência pendentes — rode a auditoria pra reescanear.</div>'}</div>`))}
+ // 🏭 FÁBRICA + 🔧 CICLO ATUAL + 🖼️ REFERENCE PACK — a esteira por ciclo (topo, unidade principal)
+ FACTORY=s.factory||{}
+ const fac=FACTORY
+ if(fac.has_cycle){   // o card 🏭 Fábrica foi ABSORVIDO pela MISSÃO (linha CICLO); aqui fica só a timeline detalhada
+  const tl=(fac.timeline||[]).map(st=>{const cl={done:'tl-done',doing:'tl-doing',waiting:'tl-wait',blocked:'tl-block',na:'tl-na',pending:'tl-pend'}[st.status]||'tl-pend'
+   const need=st.needs?`<div class=tlneed>⚠ falta: <b>${esc(st.needs)}</b> <button class=cbtn onclick="jumpTo('${st.jump||'sec-refpack'}')">→ resolver</button></div>`:''
+   return `<div class="tlstep ${cl}"><div class=tlhead><span class=tlface>${st.face}</span> <b>${esc(st.agent)}</b> <span class=tlicon>${st.icon}</span> <span class=mut>${esc(st.status)}</span>${st.model?`<span class=stag>${esc(st.model)}</span>`:''}</div>${st.summary?`<div class=tlsum>${esc(st.summary)}</div>`:''}${need}</div>`}).join('')
+  root.appendChild(el(`<div class="card full" id=sec-ciclo><h2>🔧 Ciclo atual — ${esc(fac.cycle_id||'')} · ${esc(fac.microtask||'')} <span class=mut>(esteira: PM→Lead→Scout→Felipe→Arquiteto→Gates→Consult→Learning)</span></h2>
+   <div class=tllist>${tl}</div></div>`))
+ }
+ const rp=s.refpack||{}
+ if(rp.ok&&(rp.references||[]).length){const cc=rp.counts||{},needMain=(cc.main||0)===0
+  const tlbl={boutique_premium:'boutique premium',compact_premium:'compacto premium',anti_example:'anti-exemplo'}
+  const blbl={approved:'👍 aprovada',rejected:'👎 rejeitada',main:'⭐ PRINCIPAL',anti:'🚫 anti-pattern',pending:'• pendente'}
+  const allr=rp.references||[],withImg=allr.filter(r=>r.og_image),noImg=allr.filter(r=>!r.og_image)
+  const acts=(r)=>{const star=r.type==='anti_example'?'':`<button class="cbtn cbtn-star ${needMain?'pulse':''}" title="marcar ⭐ PRINCIPAL — desbloqueia o Arquiteto" onclick="curateRef('${rp.pack_id}','${r.id}','main')">⭐ principal</button>`
+   return `<button class=cbtn title=aprovar onclick="curateRef('${rp.pack_id}','${r.id}','approve')">👍 aprovar</button> ${star} <button class=cbtn title=rejeitar onclick="curateRef('${rp.pack_id}','${r.id}','reject')">👎</button> <button class=cbtn title="anti-pattern" onclick="curateRef('${rp.pack_id}','${r.id}','anti')">🚫</button> <button class=cbtn title="remover do pack" onclick="curateRef('${rp.pack_id}','${r.id}','remove')">🗑</button>`}
+  const cards=withImg.map(r=>{const st=r.status||'pending'
+   return `<div class="refcard rs-${st}">
+    <img class=refimg loading=lazy src="${esc(r.og_image)}" data-link="${esc(r.link||'#')}" onclick="openModal('${jsq(r.og_image)}','${jsq(r.title)}')" onerror="imgFallback(this)">
+    <div class=refhd><b>${esc(r.title)}</b> <span class=mut>· ${esc(r.source||'')}</span></div>
+    <div class=reftags><span class=pill>${esc(tlbl[r.type]||r.type||'')}</span> <span class="pill rb-${st}">${blbl[st]||st}</span></div>
+    <div class=refbody><b>por que:</b> ${esc(r.why_good||'')}<br><b>copiar:</b> ${esc(r.copy||'')}<br><b>evitar:</b> ${esc(r.avoid||'')}</div>
+    <div class=refact><a class=mbtn href="${esc(r.link||'#')}" target=_blank rel=noopener>🖼 ver ↗</a> ${acts(r)}</div></div>`}).join('')
+  const tray=noImg.length?`<div class=reftray><div class=kblist-h>🚫 Sem imagem / link quebrado (${noImg.length}) <span class=mut>— não dá pra curar pelo visual: puxa imagem, substitui ou remove</span></div>${noImg.map(r=>{const broke=r.link_status==='broken'
+   return `<div class=reftrayrow><span class=reftrayt>${broke?'⚠ ':''}${esc(r.title)} <span class=mut>· ${esc(r.source||'')}</span>${broke?' <span class="pill rb-rejected">link quebrado</span>':' <span class=mut>(sem preview)</span>'}</span> <a class=mbtn href="${esc(r.link||'#')}" target=_blank rel=noopener>ver ↗</a> <button class=cbtn title="remover do pack de vez" onclick="curateRef('${rp.pack_id}','${r.id}','remove')">🗑 remover</button></div>`}).join('')}</div>`:''
+  const hint=needMain?`<div class=refhint>👉 marque <b>UMA</b> com imagem como <b style="color:var(--gold)">⭐ principal</b> pra <b>destravar o Arquiteto</b>. Aprovar (👍) sozinho <b>NÃO</b> destrava.</div>`:`<div class="refhint ok">✓ principal escolhido — Arquiteto destravado. Segue pro Consult GPT → SOFA_BUILD_SPEC.</div>`
+  const scoutHtml=SCOUT_RESULTS&&SCOUT_RESULTS.ok?((SCOUT_RESULTS.results||[]).map(r=>`<div class=scoutrow><a class=lnk href="${esc(r.url)}" target=_blank rel=noopener>${esc(r.title)} ↗</a></div>`).join('')||'<span class=mut>nada encontrado</span>'):(SCOUT_RESULTS?`<span class=mut>erro: ${esc(SCOUT_RESULTS.error||'')}</span>`:'<span class=mut>busca referências na web — os links abrem no teu navegador</span>')
+  root.appendChild(el(`<div class="card full" id=sec-refpack><h2>🖼️ Reference Pack — ${esc(rp.asset||'')} <span class=mut>(${withImg.length} com imagem · ⭐${cc.main||0} · 👍${cc.approved||0} · 👎${cc.rejected||0} · 🚫${cc.anti||0})</span> <button class=chatbtn onclick="refpackImages('${rp.pack_id}')" title="puxa og:image + checa links quebrados">🖼 puxar imagens + checar links</button> <span class=mut id=rpimgmsg></span></h2>
+   ${hint}
+   <div class=refgrid>${cards||'<span class=mut>nenhuma referência com imagem — clica "🖼 puxar imagens" ou busca novas abaixo</span>'}</div>
+   ${tray}
+   <div class=cycsec><div class=cycsec-h>🔭 Buscar mais referências na web</div>
+    <div class=mut style="font-size:11.5px;margin-bottom:6px">Quem busca: <b>o Claude</b> (eu, via WebSearch — foi assim que montei estas 6) ou <b>esta busca</b> (servidor, via DuckDuckGo). Os <b>LLMs locais (DeepSeek/Qwen/Llama) NÃO navegam</b> — eles só organizam/comparam o que já foi trazido.</div>
+    <div class=askbar><input id=scout-q placeholder="ex.: sofá couro caramelo industrial boutique braço baixo" onkeydown="if(event.key==='Enter')scoutSearch()"><button class=send onclick=scoutSearch()>🔎 buscar</button> <span class=mut id=scoutmsg></span></div>
+    <div class=scoutlist>${scoutHtml}</div></div></div>`))
+ }
  // ORG (guarda-chuvas + setas + métricas)
  const cols=(ag.umbrellas||[]).map(u=>{const ids=[u.lead.id,...u.subs.map(x=>x.id)]
    return `<div class=col>${leadCard(u.lead)}<div class=subs>${u.subs.map(subCard).join('')}</div>
@@ -619,7 +934,7 @@ async function tick(force){
    <label class=mut style="font-size:11px;display:inline-flex;align-items:center;gap:4px;margin-left:6px"><input type=checkbox onchange=toggleAuto(this) ${AUTOCYCLE?'checked':''}>auto a cada <select id=auto-min style="background:#0c0d10;border:1px solid var(--bd);color:var(--fg);border-radius:4px;padding:1px 3px"><option>2</option><option selected>3</option><option>5</option><option>10</option></select> min</label>
    <span class=mut id=cyclemsg></span></div>`
  const cyhtml=CYCLES.length?CYCLES.map((c,i)=>`<div class=cyrow>
-   <div class=cyhd><b class=mtlink onclick="goToMT('${esc(c.mt||'')}')">${esc(c.cycle_id||'CYCLE')}</b> · <b>${esc(c.mt||'')}</b> ${esc((c.what||'').slice(0,46))} <span class=mut>· ${hhmm(c.ts)}</span></div>
+   <div class=cyhd><b class=mtlink onclick="goToMT('${jsq(c.mt||'')}')">${esc(c.cycle_id||'CYCLE')}</b> · <b>${esc(c.mt||'')}</b> ${esc((c.what||'').slice(0,46))} <span class=mut>· ${hhmm(c.ts)}</span></div>
    <div class=cydir onclick="this.classList.toggle('exp')" title="clica pra expandir/recolher">🎯 ${esc(c.directive||'(sem diretriz)')}</div>
    <div class=cymeta><span class=mut>🦙 llama → 🤖 qwen → 🐳 deepseek</span> <button class=chatbtn onclick="cycleToConsult(${i})" title="virar pergunta pro Consult GPT validar">→ validar no Consult GPT</button>${c.consulted?' <span class=mut>✓ consultado</span>':''}</div></div>`).join(''):'<span class=mut>nenhum ciclo rodado ainda — clica "▶ Rodar próximo ciclo" acima. A diretriz que sair vira o item aqui.</span>'
  // 🗣️ PERGUNTE AO TIME — o ó de tudo (topo): traduz a pergunta plana num bom prompt pro local
@@ -633,7 +948,7 @@ async function tick(force){
    <button class=send onclick=teamAsk()>➤ perguntar</button> <span class=mut id=askmsg></span></div>
   ${qhist}</div>`))
  // 🔄 CICLO — card SOLTO, logo após "Pergunte ao time" (você move/redimensiona à vontade)
- root.appendChild(el(`<div class="card full" id=sec-cycles><h2>🔄 Ciclo <span class=mut>(o PM roda aqui · a saída vira diretriz no banco → "validar no Consult GPT")</span></h2>
+ root.appendChild(el(`<div class="card full" id=sec-cycles><h2>🔁 Rascunho de diretriz (LLMs locais) <span class=mut>(secundário — NÃO é o "Ciclo atual" lá em cima; aqui o PM/llama gera um texto-diretriz pra você levar ao Consult GPT)</span></h2>
   ${cyctrl}<div class=kblist-h>Ciclos recentes</div><div class=cylist>${cyhtml}</div></div>`))
  // AGENTES — só os 3 + chats
  root.appendChild(el(`<div class="card full" id=sec-agents><h2>Agentes — PM · Team Lead · Arquiteto</h2>
@@ -648,7 +963,7 @@ async function tick(force){
  const critic=(s.renders||[])[0]
  // ERROS — card próprio, grande, logo abaixo dos agentes
  root.appendChild(el(`<div class="card full" id=sec-err><h2>Erros de design — o que TU não curtiu (vira lição)</h2>
-  <div class=critwrap>${critic?`<img class=critic loading=lazy onclick="openModal('/img/${encodeURIComponent(critic.name)}','${esc(critic.name)}')" src="/img/${encodeURIComponent(critic.name)}" title="clica pra ampliar">`:''}
+  <div class=critwrap>${critic?`<img class=critic loading=lazy onclick="openModal('/img/${encodeURIComponent(critic.name)}','${jsq(critic.name)}')" src="/img/${encodeURIComponent(critic.name)}" title="clica pra ampliar">`:''}
    <div style=flex:1>${ebars}
     <div class=flagrow><select id=flagag>${flagopts}</select>
      <input id=flagmsg onkeydown="if(event.key==='Enter')flagErr()" placeholder="ex.: parede muito escura, coifa não combina… (Enter)"><button class=send onclick=flagErr()>marcar erro</button></div></div></div></div>`))
@@ -694,8 +1009,10 @@ async function tick(force){
   ingHtml=`<div class=consult-res><b>Último aprendizado ingerido</b> — veredito <b style="color:${r.verdict==='PASS'?'var(--ok)':r.verdict==='FAIL'?'var(--red)':'var(--warn)'}">${esc(r.verdict||'?')}</b> · correção nº1: ${esc(r.top_fix||'-')}<br>
    🧬 ${(r.rules_added||[]).length} regra(s) no DNA · 🧑‍⚖️ ${(r.anti_patterns_added||[]).length} anti-pattern(s)${r.next_microtask&&r.next_microtask.title?(' · 🎯 próxima: <b>'+esc(r.next_microtask.id||'MT')+'</b> '+esc(r.next_microtask.title)):''}${(r.warnings||[]).length?(' · ⚠ '+esc((r.warnings||[]).join('; '))):''}</div>`}
  const cqid=co.latest_question&&co.latest_question.question_id?co.latest_question.question_id:'—'
- root.appendChild(el(`<div class="card full" id=sec-consult><h2>🔌 Consult GPT Bridge <span class=mut>(sidecar do Arquiteto · modo <b>${esc(co.bridge_mode||'manual')}</b> · OpenAI ${co.openai_enabled?'on':'off'} · ${co.ingested_count||0} ingerida(s) · ${(co.pending_questions||[]).length} pendente(s))</span></h2>
-  <div class=mut style="font-size:12px;margin-bottom:8px">Arquiteto gera a pergunta → você copia no ChatGPT (Consult GPT) → cola a resposta → o sistema vira regra/anti-pattern/DNA/próxima microtarefa. Geometria do PDF é congelada; só a linguagem visual muda. <i>(sidecar dentro da coluna do Arquiteto = MT-UI-004)</i></div>
+ const cwait=co.status==='waiting_gpt_answer'
+ root.appendChild(el(`<div class="card full" id=sec-consult><h2>🔌 Consult GPT Bridge <span class=mut>(contrato oficial — rastreável · modo <b>${esc(co.bridge_mode||'manual')}</b> · ${co.ingested_count||0} ingerida(s))</span> ${cwait?`<span class="facpill st" style="background:#2a2417;color:var(--gold);border-color:var(--gold)">⏳ waiting_gpt_answer · ${esc(cqid)}</span>`:''}</h2>
+  <div class=mut style="font-size:12px;margin-bottom:8px">Fluxo OFICIAL (rastreável): gera a pergunta aqui → 📋 copia pro ChatGPT → cola a resposta → vira <b>Learning Patch draft</b> (não aplica direto) → você aprova o diff → só então altera o DNA. <i>Pergunta solta no chat = só conversa; aqui = contrato.</i></div>
+  ${cwait?`<div class=refhint>⏳ Pergunta <b>${esc(cqid)}</b> gerada e salva (status <b>waiting_gpt_answer</b>). Copia abaixo (📋), manda no Consult GPT, e cola a resposta no campo da direita → vira Learning Patch.</div>`:''}
   <div class=consult-grid>
    <select id=cq-mode title=modo>${opt(['JUDGE','SPEC','REPAIR','LEARN','COMPARE'],'JUDGE')}</select>
    <select id=cq-room title=cômodo>${opt(['kitchen','living','bedroom','bathroom','laundry','full_apartment'],'kitchen')}</select>
@@ -706,7 +1023,7 @@ async function tick(force){
   <textarea id=cq-context placeholder="Contexto (3-8 linhas: o que está acontecendo)" style="min-height:60px"></textarea>
   <textarea id=cq-goal placeholder="Objetivo da decisão (que decisão o Consult GPT precisa tomar)" style="min-height:46px"></textarea>
   <textarea id=cq-hyp placeholder="Hipótese do Arquiteto (o que você tentou fazer)" style="min-height:46px"></textarea>
-  <div style="margin:6px 0"><button class=send onclick=consultGen()>🧩 gerar pergunta</button> <span class=mut id=cqmsg></span></div>
+  <div style="margin:6px 0"><button class=send onclick=consultGen()>🧩 gerar pergunta</button> <button class=chatbtn onclick=consultRelay() title="o Claude pega esta pergunta, dirige o TEU ChatGPT Plus pela extensão do Chrome, lê a resposta e devolve aqui → vira Learning Patch">🤖 relay via Claude (Chrome)</button> <span class=mut id=cqmsg></span> ${co.relay?`<span class=mut>· último relay: <b>${esc(co.relay.question_id||'')}</b> ${esc(co.relay.status||'')}${co.relay.patch_id?(' → '+esc(co.relay.patch_id)):''}</span>`:''}</div>
   <div class=consult-half>
    <div><div class=kblist-h>Pergunta gerada <span class=mut>(${esc(cqid)})</span> <button class=chatbtn onclick=consultCopy(event)>copiar</button></div>
     <textarea id=cq-out readonly placeholder="clique 'gerar pergunta' — o contrato aparece aqui pra copiar" style="min-height:150px;font:11px ui-monospace,monospace"></textarea></div>
@@ -714,7 +1031,35 @@ async function tick(force){
     <textarea id=cq-answer placeholder="cole a resposta do GPT (ARCHITECT_ANSWER_CONTRACT) OU qualquer orientação de design — o sistema detecta sozinho e aprende (vira regra/anti-pattern/microtarefa, ou conhecimento do Arquiteto)" style="min-height:150px"></textarea></div>
   </div>
   ${ingHtml}</div>`))
- const _co=document.getElementById('cq-out');if(_co)_co.value=CONSULT_MD
+ const _co=document.getElementById('cq-out');if(_co)_co.value=CONSULT_MD||(co.latest_question_md||'')
+ // 🧠 LEARNING PATCH — resposta GPT vira patch (draft) → DIFF → Felipe aprova/rejeita → só então DNA
+ const pt=s.patches||{},draft=pt.draft,pdiff=pt.diff||{},pcc=pt.counts||{}
+ const dl=(arr,cls)=>(arr||[]).map(x=>`<li class=${cls}>${esc(typeof x==='string'?x:JSON.stringify(x))}</li>`).join('')
+ let patchBody
+ if(draft){const nm=draft.next_microtask||{}
+  patchBody=`<div class=patchhd><b>${esc(draft.patch_id)}</b> <span class="pill rb-${(draft.verdict||'').toLowerCase()==='pass'?'approved':(draft.verdict||'').toLowerCase()==='fail'?'rejected':'pending'}">${esc(draft.verdict||'?')}</span> <span class=mut>de ${esc(draft.source_question_id||'?')} · ${esc(draft.cycle_id||'')} · confiança ${esc(draft.confidence||'?')} · sha ${esc((draft.commit_sha||'').slice(0,8))}</span></div>
+   <div class=mut style="font-size:11.5px;margin:4px 0">Aplicação <b>MANUAL</b> — nada vai pro DNA até você aprovar. O diff mostra só o que <b>MUDA</b> (＋ novo · ≡ já existe, ignorado).</div>
+   <div class=patchdiff>
+    <div><div class=kblist-h>🧬 Regras novas <span class=mut>→ felipe_style_dna.md</span></div><ul class=difflist>${dl(pdiff.rules_add,'add')||'<li class=mut>nada novo</li>'}${dl(pdiff.rules_dup,'dup')}</ul></div>
+    <div><div class=kblist-h>🚫 Anti-patterns <span class=mut>→ juiz visual</span></div><ul class=difflist>${dl(pdiff.anti_add,'add')||'<li class=mut>nada novo</li>'}${dl(pdiff.anti_dup,'dup')}</ul></div>
+   </div>
+   ${pdiff.build_spec?`<div class=kblist-h style="margin-top:8px">🔧 build_spec_constraints <span class=mut>(guiam a CONSTRUÇÃO do sofá, não só o DNA)</span></div>
+    <div class=patchdiff><div><b style="color:var(--ok);font-size:12px">must_have</b><ul class=difflist>${dl(pdiff.build_spec.must_have,'add')}</ul></div>
+     <div><b style="color:var(--red);font-size:12px">must_not_have</b><ul class=difflist>${dl(pdiff.build_spec.must_not_have,'dup')}</ul></div></div>`:''}
+   ${nm.title?`<div class=mut style="font-size:12px;margin-top:2px">🎯 próxima microtarefa sugerida: <b>${esc(nm.id||'MT')}</b> ${esc(nm.title)}</div>`:''}
+   <div class=patchacts><button class=send onclick="patchAction('${draft.patch_id}','approve')">✅ aprovar e aplicar no DNA</button> <button class=cbtn onclick="patchAction('${draft.patch_id}','reject')">⛔ rejeitar</button></div>`
+ }else{patchBody=`<span class=mut>nenhum patch pendente. Cole uma resposta ESTRUTURADA do Consult GPT (ARCHITECT_ANSWER) no sidecar 🔌 acima → ela vira um patch <b>draft</b> aqui, com diff, pra você aprovar antes de virar memória.</span>`}
+ root.appendChild(el(`<div class="card full" id=sec-patch><h2>🧠 Learning Patch <span class=mut>(resposta GPT → patch → diff → você aprova → DNA · ${pcc.draft||0} draft · ${pcc.applied||0} aplicado · ${pcc.rejected||0} rejeitado)</span></h2>
+  ${patchBody}</div>`))
+ // 📚 LEARNING LOG — o que a fábrica aprendeu (regras/anti-patterns/golden) = repertório
+ const ll=s.learning||{}
+ const lcol=(arr,empty)=>arr&&arr.length?arr.map(x=>`<li>${esc(typeof x==='string'?x:JSON.stringify(x))}</li>`).join(''):`<li class=mut>${empty}</li>`
+ root.appendChild(el(`<div class="card full" id=sec-learning><h2>📚 Learning Log <span class=mut>(o que a fábrica aprendeu — vira repertório reutilizável)</span></h2>
+  <div class=llgrid>
+   <div><div class=kblist-h>🧬 Regras novas <span class=mut>(Consult GPT → DNA)</span></div><ul class=lllist>${lcol(ll.new_rules,'nenhuma regra nova ainda')}</ul></div>
+   <div><div class=kblist-h>🚫 Anti-patterns <span class=mut>(juiz visual)</span></div><ul class=lllist>${lcol(ll.anti_patterns,'nenhum anti-pattern ainda')}</ul></div>
+   <div><div class=kblist-h>⭐ Golden samples <span class=mut>(forma congelada)</span></div><ul class=lllist>${lcol(ll.golden_samples,'nenhum golden sample ainda')}</ul></div>
+  </div></div>`))
  // SESSÕES
  const cl=(s.sessions.claims||[]).map(c=>`<tr><td>${esc(c.desc)}</td><td>${esc(c.status)}</td></tr>`).join('')
  const nwt=(s.sessions.worktrees||[]).length
@@ -729,23 +1074,19 @@ async function tick(force){
  // INBOX
  const fn=(i)=>i.local_path?encodeURIComponent(i.local_path.split('/').pop()):''
  const inb=(s.inbox||[]).map(i=>{const st=i.status||'pending',nm=esc(i.title||i.slug)
-   const thumb=i.local_path?`<img class=minithumb loading=lazy src="/inbox-img/${fn(i)}" onclick="openModal('/inbox-img/${fn(i)}','${esc(i.slug)}')">`:(i.source_url?`<button class=chatbtn onclick="fetchPreview('${esc(i.slug)}')" title="puxar imagem do site">🖼</button>`:'')
-   const cell=i.local_path?`<td class=lnk onclick="openModal('/inbox-img/${fn(i)}','${esc(i.slug)}')">${nm}</td>`
+   const thumb=i.local_path?`<img class=minithumb loading=lazy src="/inbox-img/${fn(i)}" onclick="openModal('/inbox-img/${fn(i)}','${jsq(i.slug)}')">`:(i.source_url?`<button class=chatbtn onclick="fetchPreview('${jsq(i.slug)}')" title="puxar imagem do site">🖼</button>`:'')
+   const cell=i.local_path?`<td class=lnk onclick="openModal('/inbox-img/${fn(i)}','${jsq(i.slug)}')">${nm}</td>`
      :(i.source_url?`<td><a class=lnk href="${esc(i.source_url)}" target=_blank>${nm} ↗</a></td>`:`<td>${nm}</td>`)
    return `<tr><td>${thumb}</td>${cell}<td>${i.theme||'-'}</td><td>${st}</td>
-   <td>${st!=='approved'?`<button onclick="curate('${esc(i.slug)}','approve')" title=aprovar>✓</button> `:''}${st!=='rejected'?`<button onclick="curate('${esc(i.slug)}','reject')" title=reprovar>✕</button> `:''}<button class=trash onclick="curate('${esc(i.slug)}','delete')" title=apagar>🗑</button></td></tr>`}).join('')
- const thumbs=(s.inbox||[]).filter(i=>i.local_path).map(i=>`<div class=thumb><img loading=lazy src="/inbox-img/${fn(i)}" onclick="openModal('/inbox-img/${fn(i)}','${esc(i.slug)}')"><button class="trash thumbtrash" onclick="curate('${esc(i.slug)}','delete')" title=apagar>🗑</button><div class=cap>${esc(i.slug)}<div class=t>${i.status||'pending'}</div></div></div>`).join('')
- // 🔭 SCOUT — busca web pelo servidor (DuckDuckGo); alimenta a curadoria
- const scoutHtml=SCOUT_RESULTS&&SCOUT_RESULTS.ok?((SCOUT_RESULTS.results||[]).map(r=>`<div class=scoutrow><a class=lnk href="${esc(r.url)}" target=_blank rel=noopener>${esc(r.title)} ↗</a></div>`).join('')||'<span class=mut>nada encontrado</span>'):(SCOUT_RESULTS?`<span class=mut>erro: ${esc(SCOUT_RESULTS.error||'')}</span>`:'<span class=mut>busca referências/preços — os links abrem no teu navegador</span>')
- root.appendChild(el(`<div class="card full" id=sec-scout><h2>🔭 Scout — buscar referência / preço na web <span class=mut>(busca pelo servidor via DuckDuckGo — os locais não navegam)</span></h2>
-  <div class=askbar><input id=scout-q placeholder="ex.: porcelanato cimento queimado grafite preço m2" onkeydown="if(event.key==='Enter')scoutSearch()"><button class=send onclick=scoutSearch()>🔎 buscar</button> <span class=mut id=scoutmsg></span></div>
-  <div class=scoutlist>${scoutHtml}</div></div>`))
+   <td>${st!=='approved'?`<button onclick="curate('${jsq(i.slug)}','approve')" title=aprovar>✓</button> `:''}${st!=='rejected'?`<button onclick="curate('${jsq(i.slug)}','reject')" title=reprovar>✕</button> `:''}<button class=trash onclick="curate('${jsq(i.slug)}','delete')" title=apagar>🗑</button></td></tr>`}).join('')
+ const thumbs=(s.inbox||[]).filter(i=>i.local_path).map(i=>`<div class=thumb><img loading=lazy src="/inbox-img/${fn(i)}" onclick="openModal('/inbox-img/${fn(i)}','${jsq(i.slug)}')"><button class="trash thumbtrash" onclick="curate('${jsq(i.slug)}','delete')" title=apagar>🗑</button><div class=cap>${esc(i.slug)}<div class=t>${i.status||'pending'}</div></div></div>`).join('')
+ // (🔭 Scout foi consolidado DENTRO do Reference Pack — não é mais card solto)
  root.appendChild(el(`<div class="card full" id=sec-cur><h2>Curadoria — inbox de referência <span class=mut>(✓ aprova · ✕ reprova (fica) · 🗑 apaga · 🖼 puxa imagem do site)</span></h2>
   <div class=uprow><label class=upbtn>⬆ escolher imagem<input type=file id=upfile accept="image/*" onchange=uploadRef() hidden></label> <span class=mut id=upmsg>escolhe a imagem → sobe sozinho</span></div>
   ${thumbs?`<div class=grid style="margin:10px 0">${thumbs}</div>`:''}
   <table><tr><th></th><th>referência</th><th>tema</th><th>status</th><th>ação</th></tr>${inb||'<tr><td colspan=5 class=mut>fila vazia — sobe uma referência acima</td></tr>'}</table></div>`))
  // RENDERS
- const rr=(s.renders||[]).map(r=>`<div class=thumb onclick="openModal('/img/${encodeURIComponent(r.name)}','${esc(r.name)}')"><img loading=lazy src="/img/${encodeURIComponent(r.name)}">
+ const rr=(s.renders||[]).map(r=>`<div class=thumb onclick="openModal('/img/${encodeURIComponent(r.name)}','${jsq(r.name)}')"><img loading=lazy src="/img/${encodeURIComponent(r.name)}">
    <div class=cap>${esc(r.name.replace('.png',''))}<div class=t>${r.theme} · ${r.sub} · ${r.kb}KB</div></div></div>`).join('')
  root.appendChild(el(`<div class="card full" id=sec-ren><h2>Renders (${(s.renders||[]).length}) — clica pra ampliar/baixar · mais novos primeiro</h2>
   <div class="grid gallery">${rr||'<span class=mut>sem renders</span>'}</div></div>`))
@@ -875,12 +1216,18 @@ def _judge_append_flag(agent, message):
 # cola a resposta -> ingere virando regra/anti-pattern/DNA/próxima-microtarefa. Lazy-import (resiliente).
 def _consult_state() -> dict:
     try:
-        from tools.interior_studio.consult_gpt_bridge import openai_client, store
+        from tools.interior_studio.consult_gpt_bridge import contracts, openai_client, store
         la = store.latest_answer()
+        lq = store.latest_question()
         c = store.counts()
-        return {"pending_questions": store.pending_questions(), "latest_question": store.latest_question(),
+        # pergunta gerada no painel = contrato oficial → status waiting_gpt_answer até a resposta chegar
+        cc = ic_cycles.current_cycle() or {}
+        cstat = (cc.get("consult") or {}).get("status")
+        return {"pending_questions": store.pending_questions(), "latest_question": lq,
+                "latest_question_md": contracts.render_question_md(lq) if lq else None,
                 "latest_answer": la.get("raw") if la else None,
                 "latest_answer_path": la.get("path") if la else None,
+                "status": cstat, "relay": _relay_state(),
                 "ingested_count": c["ingested"], "failed_count": c["failed"],
                 "bridge_mode": "manual", "openai_enabled": openai_client.is_enabled()}
     except Exception as e:  # noqa: BLE001
@@ -896,29 +1243,96 @@ def _consult_latest(which: str) -> dict:
         return {"ok": False, "error": str(e)}
 
 
+def _cycle_references() -> list[dict]:
+    """As referências CURADAS do ciclo atual (⭐ principal · 👍 aprovadas · 🚫 anti) com título+link —
+    pra entrar no ARCHITECT_QUESTION_CONTRACT (rastreabilidade do gosto)."""
+    c = ic_cycles.current_cycle()
+    if not c:
+        return []
+    refs = c.get("references") or {}
+    pack = ic_refpacks.load_pack(refs.get("pack_id") or DEFAULT_PACK) or {}
+    by_id = {r.get("id"): r for r in pack.get("references", [])}
+    out, seen = [], set()
+    for role, ids in (("main", refs.get("main")), ("approved", refs.get("approved")), ("anti", refs.get("anti"))):
+        for rid in ids or []:
+            if rid in seen:
+                continue
+            r = by_id.get(rid)
+            if r:
+                seen.add(rid)
+                out.append({"title": r.get("title"), "link": r.get("link"), "role": role})
+    return out
+
+
 def _consult_question(body: dict) -> dict:
     try:
         from tools.interior_studio.consult_gpt_bridge import contracts, prompt_builder, store
+        refs = body.get("references")
+        if refs is None:
+            refs = _cycle_references()   # auto: puxa as referências curadas do ciclo
         q = prompt_builder.build_question(
             mode=body.get("mode") or "JUDGE", room=body.get("room") or "kitchen",
             phase=body.get("phase") or "skin",
             theme=body.get("theme") or "BLACK_WOOD_GOLD_INDUSTRIAL_BOUTIQUE",
             context=body.get("context") or "", decision_goal=body.get("decision_goal") or "",
-            architect_hypothesis=body.get("hypothesis") or "",
+            architect_hypothesis=body.get("hypothesis") or "", references=refs,
+            questions=body.get("questions") or None,
             frozen_constraints=body.get("frozen"), mutable=body.get("mutable"),
             visual_inputs={"main": body.get("image") or None, "aux": body.get("aux") or [],
                            "compare": body.get("compare") or {}},
             priority=body.get("priority") or "high", question_id=body.get("question_id") or None)
         saved = store.save_question(q)
+        try:   # amarra a pergunta ao ciclo (rastreabilidade) + status waiting_gpt_answer
+            c = ic_cycles.current_cycle()
+            if c:
+                c.setdefault("consult", {})["question_id"] = q["question_id"]
+                c["consult"]["status"] = "waiting_gpt_answer"
+                ic_cycles.save_cycle(c)
+        except Exception:  # noqa: BLE001
+            pass
         try:
             from tools import studio_log
             studio_log.post("consult-liaison", "working",
                             f"pergunta {q['question_id']} pronta — copie pro Consult GPT", to="architect")
         except Exception:  # noqa: BLE001
             pass
-        return {"ok": True, "question_id": q["question_id"], "md": contracts.render_question_md(q), "paths": saved}
+        return {"ok": True, "question_id": q["question_id"], "md": contracts.render_question_md(q),
+                "status": "waiting_gpt_answer", "paths": saved}
     except ValueError as e:
         return {"ok": False, "error": str(e)}
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": str(e)}
+
+
+def _relay_state() -> dict | None:
+    try:
+        return json.loads(RELAY_FILE.read_text("utf-8")) if RELAY_FILE.exists() else None
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
+def _relay_mark(qid: str, status: str, **extra) -> None:
+    RELAY_FILE.parent.mkdir(parents=True, exist_ok=True)
+    rec = {"question_id": qid, "status": status, "ts": time.strftime("%Y-%m-%dT%H:%M:%S"), **extra}
+    RELAY_FILE.write_text(json.dumps(rec, ensure_ascii=False, indent=2), "utf-8")
+
+
+def _consult_relay_request(body: dict) -> dict:
+    """Felipe pede o RELAY: o Claude vai pegar a pergunta pendente, dirigir o ChatGPT Plus dele pela
+    extensão do Chrome, ler a resposta e devolver pro dash. (Semi-auto: roda quando o Claude está na sessão.)"""
+    try:
+        from tools.interior_studio.consult_gpt_bridge import store
+        qid = body.get("question_id") or (store.latest_question() or {}).get("question_id")
+        if not qid:
+            return {"ok": False, "error": "sem pergunta pendente pra relayar — gere uma primeiro"}
+        _relay_mark(qid, "requested")
+        try:
+            from tools import studio_log
+            studio_log.post("consult-liaison", "working",
+                            f"relay PEDIDO: {qid} → Claude vai dirigir o ChatGPT (Chrome)", to="architect")
+        except Exception:  # noqa: BLE001
+            pass
+        return {"ok": True, "question_id": qid, "status": "requested"}
     except Exception as e:  # noqa: BLE001
         return {"ok": False, "error": str(e)}
 
@@ -1018,22 +1432,29 @@ def _consult_learn(body: dict) -> dict:
                  or bool(re.search(r"(?im)^\s*-?\s*verdict\s*:", text)))
     try:
         if is_answer:
-            from tools.interior_studio.consult_gpt_bridge import answer_parser, ingest as ci, store
+            # GPT decision: resposta estruturada NÃO aplica direto. Vira LEARNING_PATCH draft → diff → Felipe aprova.
+            from tools.interior_studio import learning_patch as lp
+            from tools.interior_studio.consult_gpt_bridge import answer_parser, store
             parsed = answer_parser.parse_answer(text)
             qid = (body.get("question_id") or parsed.get("question_id")
                    or (store.latest_question() or {}).get("question_id") or "colado")
-            store.save_answer(qid, text)
-            r = ci.ingest(qid)
-            r["mode"] = "ingest"
+            saved = store.save_answer(qid, text)
+            parsed["question_id"] = qid
+            patch = lp.from_answer(parsed, answer_path=saved.get("path", ""))
+            diff = lp.compute_diff(patch)
+            rs = _relay_state()   # se havia relay pendente desse qid, fecha o loop
+            if rs and rs.get("question_id") == qid:
+                _relay_mark(qid, "answered", patch_id=patch["patch_id"])
             try:
                 from tools import studio_log
-                if r.get("ok"):
-                    studio_log.post("consult-liaison", "done",
-                                    f"aprendi {qid}: {r.get('verdict')} · +{len(r.get('rules_added', []))} regra(s)",
-                                    to="architect")
+                studio_log.post("consult-liaison", "done",
+                                f"gerei {patch['patch_id']} (draft) de {qid}: "
+                                f"+{len(diff['rules_add'])} regra(s), +{len(diff['anti_add'])} anti — aguarda Felipe",
+                                to="architect")
             except Exception:  # noqa: BLE001
                 pass
-            return r
+            return {"ok": True, "mode": "patch_draft", "patch_id": patch["patch_id"],
+                    "verdict": patch.get("verdict"), "diff": diff}
         r = _feed(text, body.get("title"))
         r["mode"] = "feed"
         return r
@@ -1326,6 +1747,100 @@ def _cycle(goal=None):
         return {"ok": False, "error": str(e)}
 
 
+def _gpt_bundle(body: dict) -> dict:
+    """Gera o GPT_REVIEW_BUNDLE.{md,json} a partir do estado atual (fonte única pro Consult GPT)."""
+    try:
+        return ic_bundle.build(_state(), now=time.strftime("%Y-%m-%dT%H:%M:%S"))
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": str(e)}
+
+
+def _refpack_images(body: dict) -> dict:
+    """Resolve o og:image de cada referência do pack (só a URL — o navegador carrega da CDN, sem baixar
+    arquivo). Persiste `og_image` no pack pra virar curadoria VISUAL (não tabela de texto)."""
+    import re as _re
+    import urllib.error
+    import urllib.request
+    pack_id = body.get("pack_id") or DEFAULT_PACK
+    pack = ic_refpacks.load_pack(pack_id)
+    if not pack:
+        return {"ok": False, "error": f"pack {pack_id} não encontrado"}
+    hdr = {"User-Agent": "Mozilla/5.0"}
+    out, broken, changed = {}, [], False
+
+    def _set(ref, key, val):
+        nonlocal changed
+        if ref.get(key) != val:
+            ref[key] = val
+            changed = True
+
+    for ref in pack.get("references", []):
+        url = ref.get("link")
+        if ref.get("og_image"):   # já resolvido antes → link estava ok
+            out[ref["id"]] = ref["og_image"]
+            _set(ref, "link_status", "ok")
+            continue
+        if not url:
+            continue
+        try:
+            html = urllib.request.urlopen(urllib.request.Request(url, headers=hdr), timeout=12).read().decode("utf-8", "ignore")
+            _set(ref, "link_status", "ok")
+            m = (_re.search(r'property=["\']og:image["\'][^>]*content=["\']([^"\']+)', html)
+                 or _re.search(r'content=["\']([^"\']+)["\'][^>]*property=["\']og:image', html)
+                 or _re.search(r'name=["\']twitter:image["\'][^>]*content=["\']([^"\']+)', html))
+            if m:
+                _set(ref, "og_image", m.group(1))
+                out[ref["id"]] = m.group(1)
+        except urllib.error.HTTPError as e:
+            if e.code in (404, 410):      # página morta (gone) = link quebrado
+                _set(ref, "link_status", "broken")
+                broken.append(ref["id"])
+            else:                         # 403/500/etc: respondeu, página existe
+                _set(ref, "link_status", "ok")
+        except urllib.error.URLError:     # DNS / conexão recusada = quebrado
+            _set(ref, "link_status", "broken")
+            broken.append(ref["id"])
+        except Exception:  # noqa: BLE001  (timeout etc: não marca, pode ser transitório)
+            continue
+    if changed:
+        ic_refpacks.save_pack(pack)
+    return {"ok": True, "images": out, "resolved": len(out), "broken": broken,
+            "total": len(pack.get("references", []))}
+
+
+def _patch_action(body: dict) -> dict:
+    """Felipe aprova/rejeita um LEARNING_PATCH draft (só após aprovação ele altera DNA/juiz)."""
+    pid = body.get("patch_id")
+    act = body.get("action")
+    try:
+        if act == "approve":
+            r = ic_patch.approve(pid, now=time.strftime("%Y-%m-%dT%H:%M:%S"))
+            try:
+                from tools import studio_log
+                if r.get("ok"):
+                    studio_log.post("consult-liaison", "done",
+                                    f"Felipe APROVOU {pid}: +{len(r.get('rules_added', []))} regra(s) no DNA",
+                                    to="architect")
+            except Exception:  # noqa: BLE001
+                pass
+            return r
+        if act == "reject":
+            return ic_patch.reject(pid, body.get("reason"), now=time.strftime("%Y-%m-%dT%H:%M:%S"))
+        return {"ok": False, "error": f"ação inválida: {act}"}
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": str(e)}
+
+
+def _curate_ref(body: dict) -> dict:
+    """Curadoria visual do Felipe numa referência do Reference Pack (👍/👎/⭐/🚫 + comentário)."""
+    try:
+        return ic_refpacks.curate(body.get("pack_id") or DEFAULT_PACK, body.get("ref_id"),
+                                  body.get("action"), body.get("comment"), body.get("cycle_id"),
+                                  ts=time.time())
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": str(e)}
+
+
 def _clear(agent):
     """Felipe tira um agente do status de erro (volta pra idle)."""
     try:
@@ -1362,6 +1877,18 @@ class H(BaseHTTPRequestHandler):
             self._send(200, json.dumps(_consult_latest("question"), ensure_ascii=False))
         elif path == "/api/consult/latest-answer":
             self._send(200, json.dumps(_consult_latest("answer"), ensure_ascii=False))
+        elif path in PAGE_FILES:   # Mapa/Fluxo/Como-funciona integrados na MESMA porta (:8782)
+            fp = TOOLSDIR / PAGE_FILES[path]
+            try:
+                self._send(200, fp.read_text("utf-8"), "text/html; charset=utf-8")
+            except OSError as e:
+                self._send(500, f"{fp.name}: {e}", "text/plain; charset=utf-8")
+        elif path == "/api/kgraph":
+            fp = TOOLSDIR / "kgraph.json"
+            try:
+                self._send(200, fp.read_text("utf-8"), "application/json; charset=utf-8")
+            except OSError as e:
+                self._send(500, json.dumps({"error": str(e)}), "application/json")
         elif path.startswith("/img/"):
             fp = (ANGLES / path[len("/img/"):]).resolve()
             if fp.is_file() and ANGLES.resolve() in fp.parents and fp.suffix == ".png":
@@ -1413,6 +1940,8 @@ class H(BaseHTTPRequestHandler):
             self._send(200, json.dumps(_consult_ingest(body), ensure_ascii=False))
         elif path == "/api/consult/learn":
             self._send(200, json.dumps(_consult_learn(body), ensure_ascii=False))
+        elif path == "/api/consult/relay-request":
+            self._send(200, json.dumps(_consult_relay_request(body), ensure_ascii=False))
         elif path == "/api/team-ask":
             self._send(200, json.dumps(_team_ask(body.get("agent"), body.get("question")), ensure_ascii=False))
         elif path == "/api/scout-search":
@@ -1423,6 +1952,16 @@ class H(BaseHTTPRequestHandler):
             self._send(200, json.dumps(_move_task(body.get("mt"), body.get("direction"))))
         elif path == "/api/cycle":
             self._send(200, json.dumps(_cycle(body.get("goal"))))
+        elif path == "/api/curate-ref":
+            self._send(200, json.dumps(_curate_ref(body), ensure_ascii=False))
+        elif path == "/api/gpt-bundle":
+            self._send(200, json.dumps(_gpt_bundle(body), ensure_ascii=False))
+        elif path == "/api/refpack-images":
+            self._send(200, json.dumps(_refpack_images(body), ensure_ascii=False))
+        elif path == "/api/patch":
+            self._send(200, json.dumps(_patch_action(body), ensure_ascii=False))
+        elif path == "/api/proposal":
+            self._send(200, json.dumps(_proposal_action(body), ensure_ascii=False))
         else:
             self._send(404, b"not found", "text/plain")
 

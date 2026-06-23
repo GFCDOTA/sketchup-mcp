@@ -1,0 +1,527 @@
+{
+  "generated_at": "2026-06-22T17:19:54",
+  "repo": {
+    "branch": "feat/sofa-class-from-reference",
+    "sha": "f7fb2c46336a4a95d75c5bc6a9fcb5f047c72376",
+    "remote_url": "https://github.com/GFCDOTA/sketchup-mcp.git",
+    "owner": "GFCDOTA",
+    "repo": "sketchup-mcp"
+  },
+  "tree_url": "https://github.com/GFCDOTA/sketchup-mcp/tree/feat/sofa-class-from-reference",
+  "links": [
+    {
+      "path": "tools/studio_dashboard.py",
+      "raw": "https://raw.githubusercontent.com/GFCDOTA/sketchup-mcp/feat/sofa-class-from-reference/tools/studio_dashboard.py"
+    },
+    {
+      "path": "tools/interior_studio/cycles.py",
+      "raw": "https://raw.githubusercontent.com/GFCDOTA/sketchup-mcp/feat/sofa-class-from-reference/tools/interior_studio/cycles.py"
+    },
+    {
+      "path": "tools/interior_studio/reference_packs.py",
+      "raw": "https://raw.githubusercontent.com/GFCDOTA/sketchup-mcp/feat/sofa-class-from-reference/tools/interior_studio/reference_packs.py"
+    },
+    {
+      "path": ".ai_bridge/interior_studio/HANDOFF.md",
+      "raw": "https://raw.githubusercontent.com/GFCDOTA/sketchup-mcp/feat/sofa-class-from-reference/.ai_bridge/interior_studio/HANDOFF.md"
+    },
+    {
+      "path": ".ai_bridge/ROOM_CYCLE_PLAN.md",
+      "raw": "https://raw.githubusercontent.com/GFCDOTA/sketchup-mcp/feat/sofa-class-from-reference/.ai_bridge/ROOM_CYCLE_PLAN.md"
+    },
+    {
+      "path": ".claude/memory/felipe_style_dna.md",
+      "raw": "https://raw.githubusercontent.com/GFCDOTA/sketchup-mcp/feat/sofa-class-from-reference/.claude/memory/felipe_style_dna.md"
+    },
+    {
+      "path": "artifacts/reference_lab/sofa/SOFA_REFERENCE_PACK.md",
+      "raw": "https://raw.githubusercontent.com/GFCDOTA/sketchup-mcp/feat/sofa-class-from-reference/artifacts/reference_lab/sofa/SOFA_REFERENCE_PACK.md"
+    },
+    {
+      "path": ".ai_bridge/reference_packs/sofa_reference_pack_001.json",
+      "raw": "https://raw.githubusercontent.com/GFCDOTA/sketchup-mcp/feat/sofa-class-from-reference/.ai_bridge/reference_packs/sofa_reference_pack_001.json"
+    },
+    {
+      "path": ".ai_bridge/interior_cycles/CYCLE-003.json",
+      "raw": "https://raw.githubusercontent.com/GFCDOTA/sketchup-mcp/feat/sofa-class-from-reference/.ai_bridge/interior_cycles/CYCLE-003.json"
+    },
+    {
+      "path": ".ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md",
+      "raw": "https://raw.githubusercontent.com/GFCDOTA/sketchup-mcp/feat/sofa-class-from-reference/.ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md"
+    }
+  ],
+  "factory": {
+    "has_cycle": true,
+    "cycle_id": "CYCLE-003",
+    "project": "planta_74",
+    "room": "living",
+    "asset": "sofa",
+    "microtask": "MT-SOFA-001",
+    "title": "Gerar SOFA_REFERENCE_PACK",
+    "mode": "REFERENCE_PACK",
+    "status": "ready_for_build_spec",
+    "next_action": "Felipe escolher 1-2 referências principais (⭐) na Curadoria",
+    "architect_blocked": false,
+    "references": {
+      "pack_id": "sofa_reference_pack_001",
+      "approved": [
+        "sofa-ref-01-henry",
+        "sofa-ref-02-venezia-slate",
+        "sofa-ref-03-chiavari"
+      ],
+      "rejected": [],
+      "main": [
+        "sofa-ref-02-venezia-slate"
+      ],
+      "anti": [
+        "sofa-ref-06-anti-povison"
+      ]
+    },
+    "timeline": [
+      {
+        "agent": "PM",
+        "face": "🦙",
+        "status": "done",
+        "icon": "✓",
+        "summary": "Sofá escolhido como laboratório controlado (erro caixa é óbvio, reutilizável).",
+        "model": "llama3.1:8b",
+        "files": [],
+        "needs": null,
+        "jump": null
+      },
+      {
+        "agent": "Team Lead",
+        "face": "🤖",
+        "status": "done",
+        "icon": "✓",
+        "summary": "Quebrou em: reference_pack -> curadoria -> build_spec -> build -> gates -> judge.",
+        "model": "qwen2.5-coder:14b",
+        "files": [],
+        "needs": null,
+        "jump": null
+      },
+      {
+        "agent": "Reference Scout",
+        "face": "🔭",
+        "status": "done",
+        "icon": "✓",
+        "summary": "6 referências reais coletadas (3 boutique premium, 2 compactos, 1 anti-caixa).",
+        "model": "WebSearch",
+        "files": [
+          "artifacts/reference_lab/sofa/SOFA_REFERENCE_PACK.md",
+          ".ai_bridge/reference_packs/sofa_reference_pack_001.json"
+        ],
+        "needs": null,
+        "jump": null
+      },
+      {
+        "agent": "Felipe",
+        "face": "🧑",
+        "status": "done",
+        "icon": "✓",
+        "summary": "✓ principal escolhido (1)",
+        "model": "",
+        "files": [],
+        "needs": null,
+        "jump": null
+      },
+      {
+        "agent": "Architect",
+        "face": "🐳",
+        "status": "pending",
+        "icon": "—",
+        "summary": "destravado ✓ — pronto pra virar SOFA_BUILD_SPEC (após Consult GPT)",
+        "model": "",
+        "files": [],
+        "needs": null,
+        "jump": null
+      },
+      {
+        "agent": "Gates",
+        "face": "✅",
+        "status": "na",
+        "icon": "·",
+        "summary": "ainda não aplicável (sem sofá construído)",
+        "model": "",
+        "files": [],
+        "needs": null,
+        "jump": null
+      },
+      {
+        "agent": "Consult Liaison",
+        "face": "🔌",
+        "status": "pending",
+        "icon": "—",
+        "summary": "pronto pra gerar pergunta pós-curadoria",
+        "model": "",
+        "files": [],
+        "needs": "gerar pergunta GPT",
+        "jump": "sec-consult"
+      },
+      {
+        "agent": "Learning",
+        "face": "📚",
+        "status": "done",
+        "icon": "✓",
+        "summary": "aprendizado registrado",
+        "model": "",
+        "files": [],
+        "needs": null,
+        "jump": null
+      }
+    ],
+    "consult": {
+      "question_id": "sofa_spec_001",
+      "answer_id": null,
+      "ingested": false,
+      "status": "waiting_gpt_answer"
+    },
+    "learning": {
+      "new_rules": [
+        "Sofá industrial premium para Felipe deve ser derivado de referência real, com assento profundo, braços contidos, encosto baixo levemente inclinado e pés finos em metal escuro.",
+        "Evitar sofá-caixa: todo sofá precisa ter leitura clara de assento volumoso, braço suavizado, encosto confortável e base leve.",
+        "Couro grafite/slate funciona bem no BLACK_WOOD_GOLD quando tem roughness controlado e não parece plástico brilhante.",
+        "Em sala compacta, preservar profundidade útil do assento e reduzir largura antes de sacrificar conforto visual.",
+        "Não copiar dimensão de sofá de referência: a referência define linguagem/formalidade/material; o footprint final vem da planta + gates de circulação (sala compacta)."
+      ],
+      "anti_patterns": [
+        "sofa_box_block: Sofá não pode parecer cubo com braços e encosto verticais.",
+        "armrest_too_chunky: Braço não pode dominar o volume visual nem parecer bloco estrutural.",
+        "flat_cushion: Almofada não pode ser plano chapado; precisa crown, espessura e borda suavizada.",
+        "wall_backrest: Encosto não pode ser parede vertical; precisa inclinação e almofada.",
+        "floor_block_base: Nesta variante, sofá não pode encostar no chão como bloco; precisa pés e vão inferior.",
+        "plastic_black_leather: Couro preto/grafite não pode parecer plástico brilhante.",
+        "fake_industrial_brutal: Industrial não pode virar bruto, pesado ou tosco; precisa boutique premium.",
+        "reference_scale_copy: copiar proporção/dimensão de sofá real sem recalcular pra sala compacta; a referência manda na linguagem, não no footprint.",
+        "toy_sofa_from_over_shrink: reduzir tudo proporcionalmente até virar miniatura dura; compacto premium mantém almofada, profundidade visual e presença."
+      ],
+      "golden_samples": [],
+      "patches": [
+        "LP-SOFA-001"
+      ]
+    },
+    "next_step": {
+      "kind": "build",
+      "label": "▶ MT-SOFA-004: construir o sofá da referência (patch aprovado)",
+      "actionable": true
+    },
+    "cycles": [
+      {
+        "cycle_id": "CYCLE-003",
+        "asset": "sofa",
+        "microtask": "MT-SOFA-001",
+        "title": "Gerar SOFA_REFERENCE_PACK",
+        "status": "waiting_felipe_curation"
+      }
+    ]
+  },
+  "refpack": {
+    "ok": true,
+    "pack_id": "sofa_reference_pack_001",
+    "asset": "sofa",
+    "theme": "BLACK_WOOD_GOLD_INDUSTRIAL_BOUTIQUE",
+    "honesty": "Análise = hipótese de pesquisa (não vi as imagens renderizadas). Quem julga gosto = Felipe + Consult GPT.",
+    "direction": "industrial boutique premium · dark premium · couro/grafite/madeira quente · assento profundo · braço baixo/médio · base leve/pés discretos. ANTI: sofá-caixa, bruto de bar/loft.",
+    "references": [
+      {
+        "id": "sofa-ref-01-henry",
+        "title": "Henry Industrial Modern Leather Sofa",
+        "source": "Crafters & Weavers",
+        "type": "boutique_premium",
+        "link": "https://craftersandweavers.com/products/henry-industrial-modern-leather-sofa-2-colors-available",
+        "why_good": "Couro top-grain italiano + estrutura de cano de ferro vintage — industrial boutique sem virar bruto.",
+        "form": "Retangular horizontal com leve aconchego; tubo aparente discreto.",
+        "proportion": "Média-baixa, horizontal.",
+        "arm": "Médio, couro sobre estrutura — não bloco gigante.",
+        "back": "Almofadas de couro com costura, leitura clara.",
+        "seat": "Profundo, almofada cheia.",
+        "base": "Ferro aparente — leve, ergue o volume do chão.",
+        "material": "Couro top-grain (caramelo escuro/preto) + ferro.",
+        "comfort": "Alto (almofada cheia + couro quente).",
+        "maintenance": "Couro fácil de limpar; escuro esconde marca.",
+        "copy": "Pé/estrutura de ferro discreto que ergue · almofada de couro com volume · braço médio.",
+        "avoid": "Tubo de ferro grosso demais → vira loft tosco.",
+        "dna_adherence": "alta — couro quente + ferro discreto casa com BLACK_WOOD_GOLD.",
+        "status": "approved",
+        "comment": "",
+        "og_image": "https://craftersandweavers.com/cdn/shop/files/unnamed_9db0b94d-3f12-4d57-80a4-a5edb4c09cab_1200x1112.jpg?v=1767817527",
+        "link_status": "ok"
+      },
+      {
+        "id": "sofa-ref-02-venezia-slate",
+        "title": "Venezia Industrial Leather Sofa — Slate",
+        "source": "Crafters & Weavers",
+        "type": "boutique_premium",
+        "link": "https://craftersandweavers.com/products/preorder-venezia-industrial-modern-leather-sofa-slate-leather",
+        "why_good": "Couro slate (grafite) = paleta dark premium exata; pernas de ferro finas; modern+industrial.",
+        "form": "Linhas limpas modern com toque industrial nas pernas.",
+        "proportion": "Equilibrada, horizontal.",
+        "arm": "Reto mas fino, não bloco.",
+        "back": "Almofada definida.",
+        "seat": "Profundo.",
+        "base": "Ferro fino → base leve.",
+        "material": "Couro slate (grafite).",
+        "comfort": "Médio-alto.",
+        "maintenance": "Couro slate esconde sujeira/marca bem.",
+        "copy": "A COR slate/grafite · pés de ferro finos · linha limpa modern-industrial.",
+        "avoid": "Braço reto pode virar caixa se for largo — manter fino.",
+        "dna_adherence": "muito alta — cor grafite é o centro do dark premium.",
+        "status": "main",
+        "comment": "",
+        "og_image": "https://craftersandweavers.com/cdn/shop/files/6_00dad817-9c7f-4cb0-9b97-0ec8a6567736_1200x1500.png?v=1776293708",
+        "link_status": "ok"
+      },
+      {
+        "id": "sofa-ref-03-chiavari",
+        "title": "Chiavari Industrial Vintage Dark Brown Leather",
+        "source": "World Interiors",
+        "type": "boutique_premium",
+        "link": "https://worldinteriors.com/products/chiavari-industrial-vintage-dark-brown-leather-sofa",
+        "why_good": "Couro marrom-escuro vintage = couro quente envelhecido premium.",
+        "form": "Clássico-industrial com pátina; volume aconchegante.",
+        "proportion": "Média.",
+        "arm": "Rolô/médio (couro) — convidativo.",
+        "back": "Almofadado, leitura quente.",
+        "seat": "Profundo, macio.",
+        "base": "Discretos.",
+        "material": "Couro vintage marrom-escuro.",
+        "comfort": "Alto (pátina + volume).",
+        "maintenance": "Couro envelhecido → marca vira charme, baixa manutenção.",
+        "copy": "Couro quente envelhecido · volume convidativo · braço rolô médio.",
+        "avoid": "Pátina rústica demais → puxa pra loft, não boutique. Dosar.",
+        "dna_adherence": "alta — couro quente; cuidar pra não ficar rústico.",
+        "status": "approved",
+        "comment": "",
+        "og_image": "https://worldinteriors.com/cdn/shop/products/gpf-isof-gei_3q1_1_1200x1200.jpg?v=1740007422",
+        "link_status": "ok"
+      },
+      {
+        "id": "sofa-ref-04-compact-at",
+        "title": "Compactos premium (Article Sven / Albany Park Kova)",
+        "source": "Apartment Therapy",
+        "type": "compact_premium",
+        "link": "https://www.apartmenttherapy.com/best-small-space-sofas-37520392",
+        "why_good": "Lista curada de compactos premium com foto real — assento profundo num footprint pequeno.",
+        "form": "Silhueta limpa, baixa, horizontal (Sven) / modular (Kova).",
+        "proportion": "Compacta (~1,80m) com assento profundo.",
+        "arm": "Fino/médio (Sven tem braço slim icônico).",
+        "back": "Baixo-médio, confortável.",
+        "seat": "Profundo apesar do tamanho compacto.",
+        "base": "Pés palito de madeira (Sven) → leve.",
+        "material": "Couro caramelo (Sven) ou tecido grafite.",
+        "comfort": "Alto pro tamanho.",
+        "maintenance": "Kova capa removível/lavável; couro fácil.",
+        "copy": "Assento profundo em footprint compacto (chave do apê) · pé palito leve · braço slim.",
+        "avoid": "Sven mid-century foge do industrial — pegar PROPORÇÃO/conforto, não o retrô.",
+        "dna_adherence": "média — referência de PROPORÇÃO compacta, não de estilo.",
+        "status": "pending",
+        "comment": "",
+        "link_status": "ok"
+      },
+      {
+        "id": "sofa-ref-05-industrywest-radia",
+        "title": "Industry West — Radia (channel-tuft, track arm, sled)",
+        "source": "Industry West",
+        "type": "compact_premium",
+        "link": "https://www.industrywest.com/collections/sofas",
+        "why_good": "Designer/boutique acessível; braço track fino (anti-caixa) + base sled metal — industrial refinado.",
+        "form": "Horizontal, baixa, tufting horizontal dá textura.",
+        "proportion": "Compacta-média.",
+        "arm": "Track (fino, reto, baixo) — referência de braço bem resolvido.",
+        "back": "Baixo com gomos horizontais.",
+        "seat": "Raso-médio (atenção: pode ser raso demais).",
+        "base": "Sled de metal → base leve industrial.",
+        "material": "Tecido grafite ou couro; metal.",
+        "comfort": "Médio (channel-tuft premium, encosto baixo).",
+        "maintenance": "Depende do tecido; metal fácil.",
+        "copy": "Braço track fino (anti-caixa) · base sled metal · channel-tuft horizontal.",
+        "avoid": "Assento/encosto raso demais → menos aconchego; garantir profundidade.",
+        "dna_adherence": "alta — detalhe industrial refinado (braço track + sled).",
+        "status": "pending",
+        "comment": "",
+        "link_status": "broken"
+      },
+      {
+        "id": "sofa-ref-06-anti-povison",
+        "title": "❌ ANTI: Povison Boxy Modular (square track arms)",
+        "source": "Povison",
+        "type": "anti_example",
+        "link": "https://www.povison.com/modern-modular-sofa-boxy-chaise-sectional-sofa-with-new-cat-scratch-fabric-wide-armrest-pillows-pine-wood-frame.html",
+        "why_good": "ANTI-exemplo: o sofá-caixa literal — é o que o Claude tende a gerar sozinho.",
+        "form": "CUBO. Blocos retos empilhados.",
+        "proportion": "Pesada, vertical-bloco, sem aconchego.",
+        "arm": "Square track LARGO = parede lateral; rouba assento, vira caixa.",
+        "back": "Reto, almofada quadrada.",
+        "seat": "Profundidade ok mas leitura de bloco.",
+        "base": "Sem pé / pé escondido → volume plantado pesado.",
+        "material": "Tecido budget, pinho.",
+        "comfort": "Baixo (parece duro/showroom barato).",
+        "maintenance": "Tecido claro marca; pinho barato.",
+        "copy": "NADA — é o que evitar.",
+        "avoid": "Braço largo reto · sem pé que erga · módulos cúbicos · encosto tábua reta · zero raio/chanfro nas quinas.",
+        "dna_adherence": "zero — viola dark premium e conforto.",
+        "status": "anti",
+        "comment": "",
+        "link_status": "ok"
+      }
+    ],
+    "counts": {
+      "total": 6,
+      "approved": 2,
+      "rejected": 0,
+      "main": 1,
+      "anti": 1,
+      "pending": 2
+    }
+  },
+  "consult": {
+    "pending_questions": [
+      {
+        "question_id": "kitchen_skin_042632",
+        "mode": "SPEC",
+        "room": "kitchen",
+        "phase": "skin",
+        "created_at": "2026-06-21T04:26:32"
+      },
+      {
+        "question_id": "sofa_spec_001",
+        "mode": "SPEC",
+        "room": "living",
+        "phase": "form",
+        "created_at": "2026-06-22T01:33:04"
+      }
+    ],
+    "latest_question": {
+      "question_id": "sofa_spec_001",
+      "created_at": "2026-06-22T01:33:04",
+      "agent": "architect",
+      "mode": "SPEC",
+      "project": "planta_74",
+      "room": "living",
+      "phase": "form",
+      "theme": "BLACK_WOOD_GOLD_INDUSTRIAL_BOUTIQUE",
+      "priority": "high",
+      "context": "Sofá da sala do apê 74m² compacto (sala-L). O sofá atual gerado pelo Claude é uma 'caixa'. Quero reconstruir a CLASSE procedural do sofá a partir da referência principal curada (Venezia, couro grafite, pernas de ferro finas). Geometria do apê é fixa; muda forma/proporção/material do sofá.",
+      "decision_goal": "Produzir um SOFA_BUILD_SPEC buildável (dimensões + proporções + base + tokens de material + anti-patterns proibidos) a partir da ⭐ Venezia, pra o sofá parar de parecer caixa, parecer confortável/profundo e caber em sala compacta.",
+      "visual_inputs": {
+        "main": null,
+        "aux": [],
+        "compare": {}
+      },
+      "frozen_constraints": [
+        "Footprint do sofá limitado pela sala-L compacta",
+        "Não alterar paredes/portas/janelas do apê"
+      ],
+      "mutable": [
+        "Largura por nº de lugares",
+        "Profundidade/altura do assento",
+        "Altura do braço",
+        "Volume/inclinação do encosto",
+        "Espessura da almofada",
+        "Raio/chanfro das quinas",
+        "Base/pés",
+        "Tokens de material"
+      ],
+      "architect_hypothesis": "Couro grafite; pernas de ferro finas que erguem o volume; assento profundo com almofada de volume real; braço médio mais leve que o encosto; quinas com leve chanfro. Evitar braço largo reto e módulo cúbico.",
+      "references": [
+        {
+          "title": "Venezia Industrial Leather Sofa — Slate",
+          "link": "https://craftersandweavers.com/products/preorder-venezia-industrial-modern-leather-sofa-slate-leather",
+          "role": "main"
+        },
+        {
+          "title": "Henry Industrial Modern Leather Sofa",
+          "link": "https://craftersandweavers.com/products/henry-industrial-modern-leather-sofa-2-colors-available",
+          "role": "approved"
+        },
+        {
+          "title": "❌ ANTI: Povison Boxy Modular (square track arms)",
+          "link": "https://www.povison.com/modern-modular-sofa-boxy-chaise-sectional-sofa-with-new-cat-scratch-fabric-wide-armrest-pillows-pine-wood-frame.html",
+          "role": "anti"
+        }
+      ],
+      "questions": [
+        {
+          "id": "dimensions",
+          "text": "Dimensões 2 e 3 lugares (cm): largura · prof. total · prof. ÚTIL do assento · altura do assento · altura do braço · altura/encosto · inclinação?"
+        },
+        {
+          "id": "proportion_no_box",
+          "text": "Proporção braço↔assento↔encosto pra NÃO parecer caixa e parecer confortável + profundo?"
+        },
+        {
+          "id": "cushion_volume",
+          "text": "Espessura/volume da almofada (assento e encosto) pra leitura cheia, não simbólica?"
+        },
+        {
+          "id": "base_and_radius",
+          "text": "Base/pés (ferro fino que ergue) + plinto + raio/chanfro nas quinas?"
+        },
+        {
+          "id": "material_tokens",
+          "text": "Tokens de material (couro grafite, metal escuro) coerentes com BLACK_WOOD_GOLD?"
+        },
+        {
+          "id": "forbidden_anti_patterns",
+          "text": "Anti-patterns proibidos explícitos (ex.: sofa_box_block, armrest_too_chunky, flat_cushion)?"
+        },
+        {
+          "id": "compact_fit",
+          "text": "Ajustes pra caber em sala compacta mantendo o assento profundo?"
+        }
+      ],
+      "answer_format": "ARCHITECT_ANSWER_CONTRACT v1"
+    },
+    "latest_question_md": "# ARCHITECT_QUESTION_CONTRACT v1\n\n## Metadata\n- question_id: `sofa_spec_001`\n- created_at: `2026-06-22T01:33:04`\n- agent: `architect`\n- mode: `SPEC`\n- project: `planta_74`\n- room: `living`\n- phase: `form`\n- theme: `BLACK_WOOD_GOLD_INDUSTRIAL_BOUTIQUE`\n- priority: `high`\n\n## Contexto\nSofá da sala do apê 74m² compacto (sala-L). O sofá atual gerado pelo Claude é uma 'caixa'. Quero reconstruir a CLASSE procedural do sofá a partir da referência principal curada (Venezia, couro grafite, pernas de ferro finas). Geometria do apê é fixa; muda forma/proporção/material do sofá.\n\n## Objetivo da decisão\nProduzir um SOFA_BUILD_SPEC buildável (dimensões + proporções + base + tokens de material + anti-patterns proibidos) a partir da ⭐ Venezia, pra o sofá parar de parecer caixa, parecer confortável/profundo e caber em sala compacta.\n\n## Inputs visuais\n- Imagem principal: `(sem imagem — decisão de direção)`\n\n## Referências curadas pelo Felipe (gosto)\n- [⭐ PRINCIPAL] Venezia Industrial Leather Sofa — Slate — https://craftersandweavers.com/products/preorder-venezia-industrial-modern-leather-sofa-slate-leather\n- [👍 aprovada] Henry Industrial Modern Leather Sofa — https://craftersandweavers.com/products/henry-industrial-modern-leather-sofa-2-colors-available\n- [🚫 anti-pattern] ❌ ANTI: Povison Boxy Modular (square track arms) — https://www.povison.com/modern-modular-sofa-boxy-chaise-sectional-sofa-with-new-cat-scratch-fabric-wide-armrest-pillows-pine-wood-frame.html\n\n## Restrições congeladas (NÃO pode mudar)\n- Footprint do sofá limitado pela sala-L compacta\n- Não alterar paredes/portas/janelas do apê\n\n## O que pode mudar\n- Largura por nº de lugares\n- Profundidade/altura do assento\n- Altura do braço\n- Volume/inclinação do encosto\n- Espessura da almofada\n- Raio/chanfro das quinas\n- Base/pés\n- Tokens de material\n\n## Hipótese do Arquiteto\nCouro grafite; pernas de ferro finas que erguem o volume; assento profundo com almofada de volume real; braço médio mais leve que o encosto; quinas com leve chanfro. Evitar braço largo reto e módulo cúbico.\n\n## Dúvidas específicas\n1. dimensions: Dimensões 2 e 3 lugares (cm): largura · prof. total · prof. ÚTIL do assento · altura do assento · altura do braço · altura/encosto · inclinação?\n2. proportion_no_box: Proporção braço↔assento↔encosto pra NÃO parecer caixa e parecer confortável + profundo?\n3. cushion_volume: Espessura/volume da almofada (assento e encosto) pra leitura cheia, não simbólica?\n4. base_and_radius: Base/pés (ferro fino que ergue) + plinto + raio/chanfro nas quinas?\n5. material_tokens: Tokens de material (couro grafite, metal escuro) coerentes com BLACK_WOOD_GOLD?\n6. forbidden_anti_patterns: Anti-patterns proibidos explícitos (ex.: sofa_box_block, armrest_too_chunky, flat_cushion)?\n7. compact_fit: Ajustes pra caber em sala compacta mantendo o assento profundo?\n\n## Formato obrigatório da resposta\nResponder usando **`ARCHITECT_ANSWER_CONTRACT v1`**. Obrigatório: VEREDITO PASS/WARN/FAIL · resposta para cada dúvida · correção prioritária nº1 · regras novas pro Felipe Style DNA · anti-patterns · próxima microtarefa executável.\n",
+    "latest_answer": "# ARCHITECT_ANSWER_CONTRACT v1\n\n## Metadata\nquestion_id: `sofa_spec_001` · consultant: `Consult GPT` · mode: `SPEC` · asset: `sofa` ·\ncycle: `CYCLE-003 / MT-SOFA-003` · theme: `BLACK_WOOD_GOLD_INDUSTRIAL_BOUTIQUE` · verdict: `PASS_WITH_CONSTRAINTS`\n\n## Veredito\n`PASS_WITH_CONSTRAINTS`\nA referência Venezia é uma boa base para reconstruir a classe sofá porque resolve o problema central do\nsofá-caixa: tem perfil baixo, couro grafite/slate, pernas finas de ferro preto, costura aparente, almofadas\ncom volume e linguagem modern-industrial. Para o apê compacto de 74m², a classe deve usar a Venezia como\nreferência formal, mas não copiar a dimensão integral sem checar circulação.\n\n## SOFA_BUILD_SPEC\n\nArquétipo principal: `industrial_boutique_slim_leather_sofa`\nSofá industrial boutique premium, couro grafite/slate, assento profundo, almofadas volumosas, braços\nmédios/baixos suavizados, encosto baixo levemente inclinado, pernas finas de ferro preto. Confortável,\npremium e leve, nunca bloco quadrado.\n\n### Dimensões — 3 lugares compacto premium\n```json\n{\"type\":\"3_seat_compact\",\"width_cm\":205,\"depth_total_cm\":88,\"seat_depth_usable_cm\":58,\"seat_height_cm\":43,\n \"back_height_total_cm\":76,\"backrest_visible_height_from_seat_cm\":33,\"backrest_angle_deg\":10,\"arm_height_cm\":58,\n \"arm_width_cm\":15,\"seat_cushion_thickness_cm\":16,\"back_cushion_thickness_cm\":12,\"leg_height_cm\":14,\"leg_thickness_cm\":3}\n```\nFaixas: `{\"width_cm\":[198,213],\"depth_total_cm\":[84,90],\"seat_depth_usable_cm\":[56,61],\"seat_height_cm\":[42,45],\"back_height_total_cm\":[74,78],\"arm_height_cm\":[56,61],\"arm_width_cm\":[14,17]}`\n\n### Dimensões — 2 lugares compacto\n```json\n{\"type\":\"2_seat_compact\",\"width_cm\":165,\"depth_total_cm\":86,\"seat_depth_usable_cm\":57,\"seat_height_cm\":43,\n \"back_height_total_cm\":76,\"backrest_visible_height_from_seat_cm\":33,\"backrest_angle_deg\":10,\"arm_height_cm\":58,\n \"arm_width_cm\":14,\"seat_cushion_thickness_cm\":16,\"back_cushion_thickness_cm\":12,\"leg_height_cm\":14,\"leg_thickness_cm\":3}\n```\nFaixas: `{\"width_cm\":[155,175],\"depth_total_cm\":[82,88],\"seat_depth_usable_cm\":[55,60],\"seat_height_cm\":[42,45],\"back_height_total_cm\":[74,78],\"arm_height_cm\":[56,61],\"arm_width_cm\":[13,16]}`\n\n### Proporção braço ↔ assento ↔ encosto\nLer como 4 sistemas separados: pés/base leve + assento volumoso + encosto macio + braços contidos.\n```json\n{\"arm_width_ratio\":\"0.07-0.09\",\"seat_visual_mass_ratio\":\"0.45-0.55\",\"back_visual_mass_ratio\":\"0.22-0.30\",\n \"leg_void_height_ratio\":\"0.15-0.18\",\"arm_height_vs_back\":\"arm <= back_top\"}\n```\nBraço não domina; assento > braço; encosto com volume/inclinação (não parede reta); pernas criam vão/sombra;\npreservar profundidade útil antes de reduzir conforto.\n\n### Assento\n```json\n{\"seat_cushions\":2,\"cushion_top_crown_cm\":2.5,\"front_edge_radius_cm\":4,\"seam_gap_cm\":1.2,\"piping_radius_cm\":0.8,\"seat_surface\":\"slightly_crowned_not_flat\"}\n```\n2 almofadas grandes (3 lugares); separação sutil; borda frontal arredondada; topo com leve abaulamento; nunca plano chapado.\n\n### Encosto\n```json\n{\"backrest_angle_deg\":10,\"back_cushion_thickness_cm\":12,\"back_top_radius_cm\":3,\"back_panel_offset_from_seat_cm\":4,\"back_style\":\"low_slightly_reclined_cushioned\"}\n```\nNão vertical tipo parede; inclinação 8°–12°; topo suavizado; altura baixa/moderna; almofada traseira com espessura.\n\n### Braços\n```json\n{\"arm_height_cm\":58,\"arm_width_cm_3seat\":15,\"arm_width_cm_2seat\":14,\"arm_outer_radius_cm\":3,\"arm_top_radius_cm\":3.5,\"arm_front_chamfer_cm\":2,\"top_stitch_offset_cm\":2}\n```\nMédio/baixo, não bloco; bordas suavizadas; top stitch quebra a massa; estofado, não caixa estrutural; não mais alto que o topo do encosto.\n\n### Base e pés\n```json\n{\"base_type\":\"thin_black_iron_legs\",\"leg_height_cm\":14,\"leg_profile\":\"round_or_square_slim\",\"leg_thickness_cm\":3,\"front_leg_inset_cm\":10,\"side_leg_inset_cm\":12,\"rear_leg_inset_cm\":8,\"plinth\":\"forbidden_in_this_variant\"}\n```\nPernas finas de ferro preto; vão inferior visível; pernas recuadas; plinto proibido nesta variante; não encostar no chão como bloco.\n\n### Raios, chanfros e softness\n```json\n{\"global_soft_edge_cm\":2,\"seat_front_radius_cm\":4,\"arm_radius_cm\":3,\"back_top_radius_cm\":3,\"cushion_crown_cm\":2.5,\"forbid_perfect_90_degree_blocks\":true}\n```\n\n### Tokens de material\n```json\n{\"upholstery\":{\"token\":\"slate_graphite_top_grain_leather\",\"color_rgb\":[48,50,50],\"roughness\":0.42,\"sheen\":0.18,\"notes\":\"couro grafite/slate premium, sem brilho plástico\"},\n \"legs\":{\"token\":\"matte_black_iron\",\"color_rgb\":[18,18,18],\"roughness\":0.55,\"metallic\":0.7},\n \"stitching\":{\"token\":\"subtle_top_stitch\",\"color_rgb\":[68,68,66],\"contrast\":\"low\"},\n \"pillows_optional\":{\"token\":\"dark_warm_bolster_or_lumbar\",\"allowed\":true,\"max_count\":2}}\n```\nCompatibilidade BLACK_WOOD_GOLD: peça escura premium; SEM dourado no sofá; metal preto/grafite (não bronze);\ncouro não-plástico; coadjuvante premium da sala, não peça chamativa.\n\n### Ajuste para sala compacta\n```json\n{\"compact_priority\":[\"preserve_seat_depth\",\"reduce_width_if_needed\",\"keep_legs_visible\",\"avoid_chaise_initially\",\"never_block_circulation\"]}\n```\nPriorizar 2 lugares se circulação apertar; 3 lugares só se parede/nicho permitir; prof. total ideal < 90 cm;\nreduzir largura antes de profundidade útil; nunca prof. útil < 54 cm; evitar chaise nesta 1ª versão.\n\n## dna_updates\n```json\n[\n  {\"scope\":\"sofa\",\"rule\":\"Sofá industrial premium para Felipe deve ser derivado de referência real, com assento profundo, braços contidos, encosto baixo levemente inclinado e pés finos em metal escuro.\"},\n  {\"scope\":\"sofa\",\"rule\":\"Evitar sofá-caixa: todo sofá precisa ter leitura clara de assento volumoso, braço suavizado, encosto confortável e base leve.\"},\n  {\"scope\":\"material\",\"rule\":\"Couro grafite/slate funciona bem no BLACK_WOOD_GOLD quando tem roughness controlado e não parece plástico brilhante.\"},\n  {\"scope\":\"compact_living\",\"rule\":\"Em sala compacta, preservar profundidade útil do assento e reduzir largura antes de sacrificar conforto visual.\"}\n]\n```\n\n## anti_patterns\n```json\n[\n  {\"id\":\"sofa_box_block\",\"rule\":\"Sofá não pode parecer cubo com braços e encosto verticais.\"},\n  {\"id\":\"armrest_too_chunky\",\"rule\":\"Braço não pode dominar o volume visual nem parecer bloco estrutural.\"},\n  {\"id\":\"flat_cushion\",\"rule\":\"Almofada não pode ser plano chapado; precisa crown, espessura e borda suavizada.\"},\n  {\"id\":\"wall_backrest\",\"rule\":\"Encosto não pode ser parede vertical; precisa inclinação e almofada.\"},\n  {\"id\":\"floor_block_base\",\"rule\":\"Nesta variante, sofá não pode encostar no chão como bloco; precisa pés e vão inferior.\"},\n  {\"id\":\"plastic_black_leather\",\"rule\":\"Couro preto/grafite não pode parecer plástico brilhante.\"},\n  {\"id\":\"fake_industrial_brutal\",\"rule\":\"Industrial não pode virar bruto, pesado ou tosco; precisa boutique premium.\"}\n]\n```\n\n## build_spec_constraints\n```json\n{\"must_have\":[\"visible_thin_black_iron_legs\",\"slate_graphite_leather\",\"real_cushion_volume\",\"low_or_medium_arms\",\"slightly_reclined_back\",\"subtle_top_stitch\",\"rounded_or_chamfered_edges\"],\n \"must_not_have\":[\"boxy_block_body\",\"oversized_armrests\",\"flat_seat_planes\",\"vertical_wall_back\",\"heavy_floor_plinth\",\"chrome_legs\",\"glossy_plastic_black\"]}\n```\n\n## Próxima microtarefa\nTítulo: `MT-SOFA-004 — Construir sofá industrial boutique baseado na referência Venezia`\nDescrição: Reconstruir a classe sofá usando a SOFA_BUILD_SPEC acima, gerando variações 2 e 3 lugares, com comparação lado a lado contra o sofá antigo quadrado.\n\n## Prompt curto para próximo render\nGerar sofá industrial boutique premium baseado na referência Venezia: couro grafite/slate, braços médios/baixos\nsuavizados, assento profundo com volume real, encosto baixo levemente inclinado, costura/top stitch sutil e\npernas finas de ferro preto com vão inferior. Evitar sofá-caixa, braços gigantes, almofada plana, plinto pesado\ne couro preto brilhante. Comparar lado a lado com o sofá antigo quadrado.",
+    "latest_answer_path": ".ai_bridge/interior_consult/inbox/20260622T015628_sofa_spec_001_answer.md",
+    "status": "waiting_gpt_answer",
+    "relay": {
+      "question_id": "sofa_spec_001",
+      "status": "answered",
+      "ts": "2026-06-22T02:06:36",
+      "patch_id": "LP-SOFA-001"
+    },
+    "ingested_count": 1,
+    "failed_count": 0,
+    "bridge_mode": "manual",
+    "openai_enabled": false
+  },
+  "learning": {
+    "new_rules": [
+      "Sofá industrial premium para Felipe deve ser derivado de referência real, com assento profundo, braços contidos, encosto baixo levemente inclinado e pés finos em metal escuro.",
+      "Evitar sofá-caixa: todo sofá precisa ter leitura clara de assento volumoso, braço suavizado, encosto confortável e base leve.",
+      "Couro grafite/slate funciona bem no BLACK_WOOD_GOLD quando tem roughness controlado e não parece plástico brilhante.",
+      "Em sala compacta, preservar profundidade útil do assento e reduzir largura antes de sacrificar conforto visual.",
+      "Não copiar dimensão de sofá de referência: a referência define linguagem/formalidade/material; o footprint final vem da planta + gates de circulação (sala compacta)."
+    ],
+    "anti_patterns": [
+      "piso preto como default (ou claro demais)",
+      "mover posição fixa do PDF por causa de referência",
+      "black_blob_appliance`: eletro escuro demais que some no fundo e vira mancha sem leitura.",
+      "chrome_hood_noise`: coifa inox clara/cromada chamando mais atenção que a pedra.",
+      "flat_black_wall`: armário, coifa e fundo com mesmo valor tonal, sem profundidade.",
+      "fake_premium_gold_hood`: tentar resolver luxo colocando dourado na coifa.",
+      "sofa_box_block: Sofá não pode parecer cubo com braços e encosto verticais.",
+      "armrest_too_chunky: Braço não pode dominar o volume visual nem parecer bloco estrutural.",
+      "flat_cushion: Almofada não pode ser plano chapado; precisa crown, espessura e borda suavizada.",
+      "wall_backrest: Encosto não pode ser parede vertical; precisa inclinação e almofada.",
+      "floor_block_base: Nesta variante, sofá não pode encostar no chão como bloco; precisa pés e vão inferior.",
+      "plastic_black_leather: Couro preto/grafite não pode parecer plástico brilhante.",
+      "fake_industrial_brutal: Industrial não pode virar bruto, pesado ou tosco; precisa boutique premium.",
+      "reference_scale_copy: copiar proporção/dimensão de sofá real sem recalcular pra sala compacta; a referência manda na linguagem, não no footprint.",
+      "toy_sofa_from_over_shrink: reduzir tudo proporcionalmente até virar miniatura dura; compacto premium mantém almofada, profundidade visual e presença."
+    ],
+    "golden_samples": []
+  },
+  "backlog": {
+    "total": 32,
+    "done": 0
+  },
+  "changes_since_last": {
+    "last_sha": "a38fd3b40398a79a063b42bd573c70b589c6755f",
+    "current_sha": "f7fb2c46336a4a95d75c5bc6a9fcb5f047c72376",
+    "diffstat": ".ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.json       |  74 +++++---\n .ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md         |  66 +++++--\n .../interior_studio/ARCHITECTURE_DOMAINS_GPT.md    |  61 +++++++\n .ai_bridge/interior_studio/UX_DISCUSSION_GPT.md    |  51 ++++++\n tests/test_project_state.py                        | 111 ++++++++++++\n tools/interior_studio/project_state.py             | 193 +++++++++++++++++++++\n tools/studio_dashboard.py                          | 130 ++++----------\n 7 files changed, 552 insertions(+), 134 deletions(-)"
+  },
+  "question": "Revise o estado atual do Interior Studio (:8782) pelos arquivos raw linkados. (1) O dashboard está CLARO pra operar o ciclo CYCLE-003 / SOFA_REFERENCE_PACK? (2) O que ainda compete por atenção / está confuso? (3) O que priorizar ANTES de construir o sofá? (4) A curadoria VISUAL e a regra-trava (Arquiteto bloqueado sem ⭐ principal) estão bem resolvidas? Responda objetivo, com prioridades."
+}

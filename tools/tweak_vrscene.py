@@ -185,6 +185,63 @@ def apply_theme_black_wood_gold(text: str) -> str:
     return text
 
 
+def _set_blocks_matching(text: str, substr: str, params: dict) -> str:
+    """Aplica `params` a TODOS os blocos BRDFVRayMtl cujo nome contem `substr`
+    (os nomes _fz_* carregam sufixo numerico: seat_1/seat_2/border_n... — match
+    exato nao serve). Mesmo mecanismo de apply_scene_materials."""
+    for name in re.findall(rf"BRDFVRayMtl (\S*{re.escape(substr)}\S*) \{{", text):
+        text = _set_block(text, name, params)
+    return text
+
+
+def apply_scene_theme_black_wood_gold(text: str) -> str:
+    """THEME BLACK_WOOD_GOLD da SALA (cena Intent-to-Scene, materiais _fz_*).
+    Skin-swap no .vrscene, geometria CONGELADA — espelha apply_theme_black_wood_gold
+    (cozinha) mas nos nomes da cena. Reusa o vocabulario de cor/BRDF JA validado pelo
+    GPT no DNA da cozinha (nao re-litigar paleta). Premium boutique: sofa preto,
+    madeira quente, bronze DISCRETO (o 'gold'), parede greige (NAO caverna), sem veio
+    dourado espalhado (NAO fake-luxury). Substitui o apply_scene_materials (morto)."""
+    walnut = {"diffuse": "AColor(0.11, 0.05, 0.022, 1)", "reflect": "AColor(0.09, 0.09, 0.09, 1)",
+              "reflect_glossiness": "0.7", "fresnel_ior": "1.5", "metalness": "0"}      # madeira quente matte
+    black_metal = {"diffuse": "AColor(0.012, 0.012, 0.013, 1)", "reflect": "AColor(0.35, 0.35, 0.35, 1)",
+                   "reflect_glossiness": "0.4", "fresnel_ior": "1.5", "metalness": "1"}  # metal preto fosco
+    fabric_sheen = {"reflect": "AColor(0.07, 0.065, 0.06, 1)", "reflect_glossiness": "0.5",
+                    "roughness": "0.5", "metalness": "0"}                                # tecido sheen sutil (textura mantida)
+    charcoal_fab = {"diffuse": "AColor(0.05, 0.048, 0.045, 1)", "reflect": "AColor(0, 0, 0, 1)",
+                    "reflect_glossiness": "1", "metalness": "0"}                         # tapete charcoal matte (ancora o 'black')
+    bronze = {"diffuse": "AColor(0.34, 0.24, 0.11, 1)", "reflect": "AColor(0.58, 0.44, 0.22, 1)",
+              "reflect_glossiness": "0.74", "fresnel_ior": "9", "metalness": "1"}        # bronze escovado DISCRETO (o 'gold')
+    dark_stone = {"diffuse": "AColor(0.035, 0.030, 0.027, 1)", "reflect": "AColor(0.16, 0.16, 0.16, 1)",
+                  "reflect_glossiness": "0.8", "fresnel_ior": "1.6", "metalness": "0"}   # pedra escura polida
+    taupe_drape = {"diffuse": "AColor(0.10, 0.09, 0.078, 1)", "reflect": "AColor(0, 0, 0, 1)",
+                   "reflect_glossiness": "1", "metalness": "0"}                          # cortina taupe (doma a janela)
+    wall_greige = {"diffuse": "AColor(0.36, 0.33, 0.29, 1)"}                             # parede greige quente (mid, nao cave)
+    wood_satin = {"reflect": "AColor(0.09, 0.09, 0.09, 1)", "reflect_glossiness": "0.7", "metalness": "0"}  # piso satin (textura mantida)
+
+    for sub in ("sofa__seat", "sofa__back", "sofa__arm"):       # sofa: charcoal (textura) + sheen
+        text = _set_blocks_matching(text, sub, fabric_sheen)
+    text = _set_blocks_matching(text, "coffee_table__top", walnut)        # <-- MATA o estouro + madeira
+    text = _set_blocks_matching(text, "coffee_table__leg", black_metal)
+    text = _set_blocks_matching(text, "rug__", charcoal_fab)
+    text = _set_blocks_matching(text, "curtain__fold", taupe_drape)
+    text = _set_blocks_matching(text, "curtain__rod", bronze)
+    text = _set_block(text, "_fz_floor_BRDFVRayMtl", wood_satin)          # exato: nao pega floor_lamp
+    for sub in ("floor_lamp__stem", "floor_lamp__base",                  # metais = bronze (o 'gold')
+                "side_table__stem", "side_table__base"):
+        text = _set_blocks_matching(text, sub, bronze)
+    text = _set_blocks_matching(text, "side_table__top", dark_stone)
+    text = _set_blocks_matching(text, "wall_art__frame", black_metal)
+    for d in ("wall_east", "wall_north", "wall_south", "wall_west"):      # paredes greige (nao wall_art)
+        text = _set_blocks_matching(text, d, wall_greige)
+    # luminaria ACESA: o abajur emite quente (>1). Anchor no canto escuro (a luminaria
+    # encosta na parede esq.), justifica a peca, le como cena de fim de tarde — premium,
+    # tira da caverna SEM clarear tudo. A luz cast vem do fill co-locado (render_scene_vray).
+    text = _set_blocks_matching(text, "floor_lamp__shade",
+        {"diffuse": "AColor(0.55, 0.42, 0.22, 1)",
+         "self_illumination": "AColor(2.2, 1.45, 0.7, 1)", "self_illumination_gi": "1"})
+    return text
+
+
 def _light_sphere(name, pos, intensity, color=(1.0, 0.8, 0.55), radius=14.0, units=0):
     """Bloco LightSphere V-Ray (area light esferica, quente, invisivel) — fill interior.
     pos/radius em INCHES (unidade do modelo exportado). units=0 (radiancia escalar,
@@ -283,7 +340,8 @@ def set_block_param(text: str, header_pat: str, param: str, value) -> str:
 
 def tweak(text: str, iso=200, fnum=4.0, shutter=100, sky=1.0, width=None, height=None,
           materials=False, fill_lights=None, sun=None, sun_size=None, burn=None,
-          rect_lights=None, noise_thresh=None, shade_rate=None, theme=None) -> str:
+          rect_lights=None, noise_thresh=None, shade_rate=None, theme=None,
+          scene_theme=None) -> str:
     text = re.sub(r"(\bISO=)[\d.]+", rf"\g<1>{iso}", text, count=1)
     text = re.sub(r"(\bf_number=)[\d.]+", rf"\g<1>{fnum}", text, count=1)
     text = re.sub(r"(\bshutter_speed=)[\d.]+", rf"\g<1>{shutter}", text, count=1)
@@ -310,6 +368,8 @@ def tweak(text: str, iso=200, fnum=4.0, shutter=100, sky=1.0, width=None, height
         text = apply_theme_hotel_boutique(text)
     elif theme == "black_wood_gold":
         text = apply_theme_black_wood_gold(text)
+    if scene_theme == "black_wood_gold":     # tema da CENA (materiais _fz_*), distinto do _ph_kc_ da cozinha
+        text = apply_scene_theme_black_wood_gold(text)
     if fill_lights:
         text = add_fill_light(text, fill_lights)
     if rect_lights:

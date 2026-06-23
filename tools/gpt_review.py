@@ -144,6 +144,13 @@ def cmd_record(a):
              "raw": text.strip()}
     _append_ledger(entry)
     _mirror_md(entry)
+    # SPEC-E: se for veredito de um ASSET num STAGE (form/context/vray), emite o sidecar
+    # ESTRUTURADO gpt_verdict.json p/ o project_state derivar estado sem substring de markdown.
+    if a.asset and a.stage:
+        from tools.interior_studio.project_state import save_asset_verdict
+        sc = save_asset_verdict(a.asset, a.stage, parsed["verdict"],
+                                environment=(a.environment or None), md=text)
+        print(f"sidecar estruturado: {sc}")
     print(f"\n=== GPT_REVIEW :: GATE = {gate['gate']} (promote={gate['promote']}) ===")
     print(f"id={a.id}  VERDICT={parsed['verdict']}")
     for d, x in parsed["dims"].items():
@@ -195,6 +202,9 @@ def main():
     r.add_argument("--id", required=True)
     r.add_argument("--verdict-file"); r.add_argument("--text"); r.add_argument("--image", default="")
     r.add_argument("--dims", default="")
+    r.add_argument("--asset", default="", help="SPEC-E: asset (ex. sofa) p/ emitir o sidecar gpt_verdict.json")
+    r.add_argument("--stage", default="", help="SPEC-E: gate do veredito (form|context|vray) — vai no sidecar")
+    r.add_argument("--environment", default="", help="SPEC-E: cômodo (ex. sala) — vai no sidecar")
     r.set_defaults(fn=cmd_record)
     s = sub.add_parser("show", help="lista o ledger")
     s.add_argument("--id", default=""); s.set_defaults(fn=cmd_show)

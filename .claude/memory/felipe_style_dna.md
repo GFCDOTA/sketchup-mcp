@@ -61,6 +61,11 @@ Pinterest em lote e desce pra material/cuba/manutenção/custo. **Não** gerar 3
 - **Sala / lavabo / quarto**: ainda sem profile próprio — herdam esta DNA até o Felipe fechar o gosto do cômodo.
 
 ## Aprendido via Consult GPT
+- Sofá industrial premium para Felipe deve ser derivado de referência real, com assento profundo, braços contidos, encosto baixo levemente inclinado e pés finos em metal escuro. _(Consult GPT · LP-SOFA-001)_
+- Evitar sofá-caixa: todo sofá precisa ter leitura clara de assento volumoso, braço suavizado, encosto confortável e base leve. _(Consult GPT · LP-SOFA-001)_
+- Couro grafite/slate funciona bem no BLACK_WOOD_GOLD quando tem roughness controlado e não parece plástico brilhante. _(Consult GPT · LP-SOFA-001)_
+- Em sala compacta, preservar profundidade útil do assento e reduzir largura antes de sacrificar conforto visual. _(Consult GPT · LP-SOFA-001)_
+- Não copiar dimensão de sofá de referência: a referência define linguagem/formalidade/material; o footprint final vem da planta + gates de circulação (sala compacta). _(Consult GPT · LP-SOFA-001)_
 - Eletros e coifa devem ser `dark stainless`, `graphite` ou `matte black metal`, nunca inox claro dominante. _(Consult GPT · kitchen_skin_045756)_
 - Em cozinha dark premium, eletro pode ser integrado visualmente, mas precisa manter leitura sutil de volume. _(Consult GPT · kitchen_skin_045756)_
 - Coifa é elemento coadjuvante; backsplash dark-gold é o protagonista. _(Consult GPT · kitchen_skin_045756)_
