@@ -55,17 +55,23 @@ def test_sidecar_json_resolve_o_gap(sb):
 
 def test_programa_aprovado_que_viola_o_gate_vira_gap(sb):
     proposals.save({"id": "furniture_program_r004", "type": "furniture_program", "environment": "cozinha",
+                    "room_name": "COZINHA",
                     "items": [{"asset": "cama"}, {"asset": "bancada"}]})   # cama na cozinha = cross-cômodo
     proposals.approve("furniture_program_r004")
-    g = [x for x in auditor.audit() if x["kind"] == "stale_program"]
-    assert g and g[0]["environment"] == "cozinha"
+    # ex-C4 stale_program: agora o estagiário de PERTENCIMENTO pega a 'cama' na cozinha
+    g = [x for x in auditor.audit(with_style=False)
+         if x["kind"] == "intern_pertencimento" and x.get("environment") == "cozinha"]
+    assert g and "cama" in g[0]["detail"]
 
 
 def test_proposta_pendente_que_viola_o_gate_vira_gap(sb):
     proposals.save({"id": "furniture_program_r000", "type": "furniture_program", "environment": "suite",
+                    "room_name": "SUITE 01",
                     "items": [{"asset": "wardrobe"}, {"asset": "mirror"}]})   # suíte SEM cama
-    g = [x for x in auditor.audit() if x["kind"] == "buggy_pending_program"]
-    assert g and g[0]["environment"] == "suite" and "cama" in g[0]["detail"]
+    # ex-C5 buggy_pending_program: agora o estagiário de COMPLETUDE pega a falta da 'cama'
+    g = [x for x in auditor.audit(with_style=False)
+         if x["kind"] == "intern_completude" and x.get("environment") == "suite"]
+    assert g and "cama" in g[0]["detail"]
 
 
 def test_audit_and_save_salva_e_limpa_stale(sb):
