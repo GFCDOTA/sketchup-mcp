@@ -10,6 +10,7 @@ artefatos em artifacts/review/furniture/<asset>/ (render compare / gpt_verdict /
 """
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from tools.interior_studio import cycles as ic_cycles
@@ -73,15 +74,28 @@ def asset_state(asset: str) -> dict:
 
     def has(glb):
         return bool(list(vdir.glob(glb))) if vdir.exists() else False
-    vtxt = ""
-    vf = list(vdir.glob("**/gpt_verdict.md")) if vdir.exists() else []
-    if vf:
-        vtxt = vf[0].read_text("utf-8", "ignore")
-    vlow = vtxt.lower()   # casamento de sinais case/idioma-insensível (verdict do GPT varia "Contexto"/"context"/caixa)
     build_done = has("**/*compare*.png")
-    form_pass = ("parou de parecer caixa" in vlow) or ("forma" in vlow and "pass" in vlow)
-    ctx_pass = ("contexto" in vlow and "pass" in vlow) or ("context" in vlow and "pass" in vlow)
     vray_done = has("**/*vray*.png") or has("**/*_final*.png")
+    # SPEC-E: estado deriva do gpt_verdict.json ESTRUTURADO {gate,verdict} — não de substring de
+    # markdown (frágil: o GPT varia "Contexto"/"context"/caixa/idioma). Fallback p/ o .md enquanto
+    # o asset ainda não tiver sidecar (compat retro).
+    verdicts = []
+    for vj in (vdir.glob("**/gpt_verdict.json") if vdir.exists() else []):
+        try:
+            verdicts.append(json.loads(vj.read_text("utf-8", "ignore")))
+        except Exception:  # noqa: BLE001  (sidecar corrompido não derruba o estado)
+            pass
+    if verdicts:
+        def _passed(gate_pref):
+            return any(str(v.get("gate", "")).lower().startswith(gate_pref)
+                       and str(v.get("verdict", "")).upper() == "PASS" for v in verdicts)
+        form_pass = _passed("form")
+        ctx_pass = _passed("context") or _passed("contexto")
+    else:
+        vf = list(vdir.glob("**/gpt_verdict.md")) if vdir.exists() else []
+        vlow = (vf[0].read_text("utf-8", "ignore").lower() if vf else "")
+        form_pass = ("parou de parecer caixa" in vlow) or ("forma" in vlow and "pass" in vlow)
+        ctx_pass = ("contexto" in vlow and "pass" in vlow) or ("context" in vlow and "pass" in vlow)
 
     if vray_done:
         st = "approved"
@@ -104,6 +118,22 @@ def asset_state(asset: str) -> dict:
     lbl, jump = NEXT_ACTION.get(st, ("—", None))
     return {"asset": asset, "state": st, "state_label": STATE_LABEL[st], "next": lbl, "jump": jump,
             "refs": nrefs, "refs_img": nimg, "main": main, "has_class": has_class}
+
+
+def save_asset_verdict(asset: str, gate: str, verdict: str, environment: str | None = None,
+                       md: str | None = None, subdir: str | None = None) -> Path:
+    """SPEC-E: grava o veredito GPT de um asset como JSON ESTRUTURADO (sidecar) p/ o asset_state
+    derivar estado SEM caçar substring em markdown. `gate` ∈ {form, context, vray, …}; `verdict`
+    ∈ {PASS, WARN, FAIL}. Um JSON por gate (em subdir nomeado pelo gate por default). Opcionalmente
+    grava também o gpt_verdict.md (espelho humano). Idempotente por (asset, gate). Devolve o path do JSON."""
+    d = ROOT / "artifacts/review/furniture" / asset / (subdir or gate)
+    d.mkdir(parents=True, exist_ok=True)
+    payload = {"asset": asset, "gate": gate, "verdict": str(verdict).upper(), "environment": environment}
+    jpath = d / "gpt_verdict.json"
+    jpath.write_text(json.dumps(payload, ensure_ascii=False, indent=2), "utf-8")
+    if md is not None:
+        (d / "gpt_verdict.md").write_text(md, "utf-8")
+    return jpath
 
 
 # ---- asset → KIND: define a POLÍTICA de pipeline do domínio (GPT: "pipeline é política do domínio, não enum global") ----

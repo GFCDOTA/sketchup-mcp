@@ -45,6 +45,45 @@ def test_sinais_case_idioma_insensiveis_nao_travam_estado(sandbox):
     assert ps.asset_state("sofa")["state"] == "vray_ready"
 
 
+def _verdict_json(sb, asset, gate, verdict, subdir=None):
+    d = sb / "artifacts/review/furniture" / asset / (subdir or gate)
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "gpt_verdict.json").write_text(json.dumps(
+        {"asset": asset, "gate": gate, "verdict": verdict, "environment": "sala"}), "utf-8")
+
+
+def test_estado_deriva_do_json_sidecar_nao_de_substring(sandbox):
+    """SPEC-E: forma+contexto PASS via JSON estruturado → vray_ready (sem caçar substring no .md)."""
+    _class(sandbox, "sofa")
+    _pack(sandbox, "sofa", [{"id": "r1", "status": "main"}])
+    _verdict_json(sandbox, "sofa", "form", "PASS", subdir="venezia/form")
+    _verdict_json(sandbox, "sofa", "context", "PASS", subdir="venezia/context")
+    assert ps.asset_state("sofa")["state"] == "vray_ready"
+
+
+def test_json_sidecar_fail_nao_avanca(sandbox):
+    _class(sandbox, "sofa")
+    _pack(sandbox, "sofa", [{"id": "r1", "status": "main"}])
+    _verdict_json(sandbox, "sofa", "form", "FAIL")
+    assert ps.asset_state("sofa")["state"] == "build_spec_ready"   # FAIL não avança
+
+
+def test_json_tem_prioridade_sobre_o_markdown(sandbox):
+    """JSON estruturado (FAIL) vence o markdown que diz 'contexto pass' — fim do estado por substring."""
+    _class(sandbox, "sofa")
+    _pack(sandbox, "sofa", [{"id": "r1", "status": "main"}])
+    _verdict(sandbox, "sofa", "contexto: pass (parou de parecer caixa)")   # md PASS + compare.png
+    _verdict_json(sandbox, "sofa", "form", "FAIL")
+    assert ps.asset_state("sofa")["state"] != "vray_ready"   # o JSON manda
+
+
+def test_save_asset_verdict_roundtrip(sandbox):
+    _class(sandbox, "sofa")
+    _pack(sandbox, "sofa", [{"id": "r1", "status": "main"}])
+    ps.save_asset_verdict("sofa", "context", "PASS", environment="sala")
+    assert ps.asset_state("sofa")["state"] == "vray_ready"
+
+
 def test_not_started_sem_classe_sem_pack(sandbox):
     assert ps.asset_state("nightstand")["state"] == "not_started"
 
