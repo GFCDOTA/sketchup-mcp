@@ -318,6 +318,9 @@ def _proposal_action(body: dict) -> dict:
         return {"ok": bool(p), "proposal": p}
     if act == "propose":   # roda o Arquiteto (LLM local) pro cômodo — pode demorar (deepseek)
         return ic_archprog.propose_and_save(body.get("room_id", ""), body.get("model", "deepseek"))
+    if act == "audit":     # roda o Auditor de Consistência (determinístico) → salva gaps pending
+        from tools.interior_studio import auditor as ic_auditor
+        return {"ok": True, **ic_auditor.audit_and_save()}
     return {"ok": False, "error": f"ação desconhecida: {act}"}
 
 
@@ -863,6 +866,12 @@ async function tick(force){
     ${pend.map(card).join('')||''}
     ${appr.length?`<div class=ovsec>✓ aprovados</div>${appr.map(card).join('')}`:''}</div>`))}
  }
+ // 🔍 AUDITOR DE CONSISTÊNCIA — gaps determinísticos (worker local que PROPÕE, nunca muta; Felipe aprova/rejeita)
+ {const gaps=((s.proposals||{}).pending||[]).filter(p=>p.type==='consistency_gap')
+  const SEV={high:'var(--red)',med:'var(--warn)',low:'var(--mut)'}
+  const grow=g=>`<div class=apcard><div class=aphd><span class=apdot style="background:${SEV[g.severity]||'var(--mut)'}"></span><b>${esc(g.title||g.kind)}</b> <span class=mut>${esc(g.environment||g.asset||'')}</span></div><div class="apwhy" style="margin:4px 0 8px">— ${esc(g.detail||'')}</div><div class=apacts><button class=send onclick="propAct('${g.id}','approve')">✅ aceitar gap</button> <button class=chatbtn onclick="propAct('${g.id}','reject')">👎 ignorar</button></div></div>`
+  root.appendChild(el(`<div class="card full" id=sec-auditor><h2>🔍 Auditor de Consistência <span class=mut>(worker determinístico: lê os sinais reais e PROPÕE gaps — nunca muta; você decide)</span> <button class=chatbtn style="float:right" onclick="propAct('','audit')">🔍 rodar auditoria</button></h2>
+   ${gaps.length?gaps.map(grow).join(''):'<div class=mut>✓ sem gaps de consistência pendentes — rode a auditoria pra reescanear.</div>'}</div>`))}
  // 🏭 FÁBRICA + 🔧 CICLO ATUAL + 🖼️ REFERENCE PACK — a esteira por ciclo (topo, unidade principal)
  FACTORY=s.factory||{}
  const fac=FACTORY

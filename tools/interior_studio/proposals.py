@@ -64,6 +64,18 @@ def reject(pid: str) -> dict | None:
     return _move(pid, "pending", "rejected")
 
 
+def delete(pid: str) -> bool:
+    """Remove a proposta de QUALQUER status (idempotente). Usado pelo Auditor p/ limpar
+    gaps pending que não existem mais. Devolve True se removeu algo."""
+    hit = False
+    for s in STATUSES:
+        f = PDIR / s / f"{pid}.json"
+        if f.exists():
+            f.unlink()
+            hit = True
+    return hit
+
+
 def approved_program(environment: str) -> dict | None:
     """O furniture_program APROVADO de um cômodo (pro inventário dinâmico ler)."""
     for p in _load("approved"):
