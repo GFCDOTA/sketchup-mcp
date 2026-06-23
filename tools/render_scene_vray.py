@@ -80,7 +80,7 @@ def _ensure_closed_skp(d, force=False):
 
 def render_scene_vray(scene_dir, out_png=None, iso=100, fnum=7.0, shutter=160,
                       sky=0.3, sun=None, sun_size=None, burn=None, fov=65, width=1500,
-                      height=1000, fills_m=None,
+                      height=1000, fills_m=None, scene_theme=None,
                       timeout_export=90, timeout_render=240):
     """Devolve dict de status. fail-explicito em cada etapa (sem sucesso fabricado).
     fills_m: lista de dicts {pos:(x,y,z) em METROS, intensity, radius_m opcional}."""
@@ -147,7 +147,7 @@ def render_scene_vray(scene_dir, out_png=None, iso=100, fnum=7.0, shutter=160,
                   "color": f.get("color", (1.0, 0.8, 0.55))} for f in fills_m]
     tweak_file(str(vrs), iso=iso, fnum=fnum, shutter=shutter, sky=sky, sun=sun,
                sun_size=sun_size, burn=burn, width=width, height=height,
-               materials=True, fill_lights=fills)
+               materials=True, fill_lights=fills, scene_theme=scene_theme)
 
     out_png = Path(out_png) if out_png else d / "vray_three_quarter.png"
     out_png = out_png.resolve()
@@ -186,6 +186,8 @@ if __name__ == "__main__":
     ap.add_argument("--height", type=int, default=1000)
     ap.add_argument("--fill", default="",
                     help="fills em METROS: 'x,y,z,int[,raio_m]' separados por ';'")
+    ap.add_argument("--scene-theme", default=None,
+                    help="tema de PELE da cena (materiais _fz_*): 'black_wood_gold'")
     ns = ap.parse_args()
     fills_m = None
     if ns.fill:
@@ -197,7 +199,8 @@ if __name__ == "__main__":
     res = render_scene_vray(ns.scene_dir, out_png=ns.out, iso=ns.iso, fnum=ns.fnum,
                             shutter=ns.shutter, sky=ns.sky, sun=ns.sun,
                             sun_size=ns.sun_size, burn=ns.burn, fov=ns.fov,
-                            width=ns.width, height=ns.height, fills_m=fills_m)
+                            width=ns.width, height=ns.height, fills_m=fills_m,
+                            scene_theme=ns.scene_theme)
     print(json.dumps({k: v for k, v in res.items() if k != "log"},
                      indent=2, ensure_ascii=False))
     if res.get("log"):
