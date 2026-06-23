@@ -68,6 +68,14 @@ def test_warm_metals_frio_vira_warn():
     assert reg.eval_check(check, {}, {"warm_metals": "bronze quente"})["status"] == "PASS"
 
 
+def test_crushed_shadows_pega_o_que_a_mean_mascara():
+    # achado da verificação: a mean_lum é enganada por janela clara; near_black_pct revela a sala escura
+    check = next(c for c in reg.load_theme("black_wood_gold")["checks"] if c["id"] == "crushed_shadows")
+    assert reg.eval_check(check, {"near_black_pct": 58}, {})["status"] == "FAIL"
+    assert reg.eval_check(check, {"near_black_pct": 47}, {})["status"] == "WARN"
+    assert reg.eval_check(check, {"near_black_pct": 30}, {})["status"] == "PASS"
+
+
 def test_overall_status_pega_o_pior():
     assert ti.overall_status([{"status": "PASS"}, {"status": "WARN"}, {"status": "FAIL"}]) == "FAIL"
     assert ti.overall_status([{"status": "PASS"}, {"status": "WARN"}]) == "WARN"

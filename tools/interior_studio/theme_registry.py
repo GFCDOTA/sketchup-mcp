@@ -65,6 +65,10 @@ _CHECKS_BWG = [
     {"id": "not_cave", "label": "escuro mas NÃO caverna", "kind": "hybrid", "type": "bool",
      "q": "Parece CAVERNA — escuro demais, o ambiente some no preto?",
      "bad_answer": True, "det_field": "exposure.mean_lum", "fail_below": 30, "warn_below": 42},
+    # crushed_shadows: a mean_lum é enganada por uma janela clara (split-exposure); o near_black_pct
+    # revela que metade da sala some no preto. Achado UNÂNIME dos juízes (verificação 2026-06-23).
+    {"id": "crushed_shadows", "label": "sombras não esmagadas", "kind": "deterministic",
+     "det_field": "near_black_pct", "fail_above": 55, "warn_above": 45},
     {"id": "warmth", "label": "luz quente 2700K", "kind": "hybrid", "type": "str",
      "q": "A luz é QUENTE (âmbar/2700K) ou FRIA (azulada/branca)?", "good_contains": "quent",
      "det_field": "warmth", "fail_below": -0.01, "warn_below": 0.04},
