@@ -751,7 +751,7 @@ function saveOrder(){const root=document.getElementById('root');if(!root)return
  localStorage.setItem('studio_order',JSON.stringify([...root.children].filter(c=>c.id&&c.classList.contains('card')).map(c=>c.id)))}
 const PINNED_TOP=['sec-overview']   // Visão Geral SEMPRE no topo, ignora o layout salvo
 // ordem-padrão AGRUPADA por assunto: núcleo de trabalho → referências → GPT/aprendizado → time local → coordenação/saída
-const DEFAULT_ORDER=['sec-overview','sec-program','sec-auditor','sec-ciclo','sec-backlog',
+const DEFAULT_ORDER=['sec-overview','sec-program','sec-auditor','sec-ciclo','sec-conversa','sec-backlog',
  'grp-refs','grp-gpt','grp-local',
  'sec-sessions','sec-ren']
 function applyOrder(){const root=document.getElementById('root');if(!root)return
@@ -766,7 +766,7 @@ function applyOrder(){const root=document.getElementById('root');if(!root)return
 const GROUPS=[
  {id:'grp-refs', title:'🗂️ Referências', members:['sec-refpack','sec-cur']},
  {id:'grp-gpt',  title:'🔌 GPT & Aprendizado', members:['sec-consult','sec-patch','sec-learning','sec-feed','sec-err']},
- {id:'grp-local',title:'🤖 Time local', members:['sec-ask','sec-cycles','sec-agents','sec-conversa']},
+ {id:'grp-local',title:'🤖 Time local', members:['sec-ask','sec-cycles','sec-agents']},
 ]
 function applyGroups(){const root=document.getElementById('root');if(!root)return
  GROUPS.forEach(g=>{
@@ -778,7 +778,7 @@ function applyGroups(){const root=document.getElementById('root');if(!root)retur
   present.forEach(c=>{c.classList.remove('card','full');c.classList.add('grpsec');body.appendChild(c)})
  })}
 // RECOLHER cards — só o LÍDER de cada grupo aberto por padrão; o resto recolhido 1-clique (menos poluição)
-const DEFAULT_OPEN=['sec-overview','sec-program','sec-auditor','sec-ciclo','sec-backlog','grp-refs','sec-ren']
+const DEFAULT_OPEN=['sec-overview','sec-program','sec-auditor','sec-ciclo','sec-conversa','sec-backlog','grp-refs','grp-local','sec-ren']
 function collapsedSet(){try{const v=JSON.parse(localStorage.getItem('studio_collapsed')||'null');return v===null?null:new Set(v)}catch(e){return null}}
 function saveCollapsed(s){localStorage.setItem('studio_collapsed',JSON.stringify([...s]))}
 function applyCollapsed(){const root=document.getElementById('root');if(!root)return
@@ -1115,7 +1115,7 @@ async function tick(force){
  window.scrollTo(0,sy)   // mantém a rolagem onde estava (não sobe ao mandar mensagem)
 }
 // reset 1× do layout salvo quando a estrutura de cards muda (senão o localStorage do navegador esconde o novo default)
-const LAYOUT_VER='2026-06-23-declutter-2-groups'
+const LAYOUT_VER='2026-06-23-declutter-3-chat-prominente'
 if(localStorage.getItem('studio_layout_ver')!==LAYOUT_VER){['studio_order','studio_collapsed','studio_sizes'].forEach(k=>localStorage.removeItem(k));localStorage.setItem('studio_layout_ver',LAYOUT_VER)}
 tick(true);setInterval(tick,10000);window.addEventListener('resize',()=>tick(1))
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick(1)})   // aba voltou -> re-renderiza
