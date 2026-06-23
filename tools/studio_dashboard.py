@@ -318,9 +318,9 @@ def _proposal_action(body: dict) -> dict:
         return {"ok": bool(p), "proposal": p}
     if act == "propose":   # roda o Arquiteto (LLM local) pro cômodo — pode demorar (deepseek)
         return ic_archprog.propose_and_save(body.get("room_id", ""), body.get("model", "deepseek"))
-    if act == "audit":     # roda o Auditor de Consistência (determinístico) → salva gaps pending
+    if act == "audit":     # roda os Estagiários (5 determinísticos + estilo LLM-leve) → salva gaps pending
         from tools.interior_studio import auditor as ic_auditor
-        return {"ok": True, **ic_auditor.audit_and_save()}
+        return {"ok": True, **ic_auditor.audit_and_save(with_style=body.get("style", True))}
     return {"ok": False, "error": f"ação desconhecida: {act}"}
 
 
@@ -866,12 +866,20 @@ async function tick(force){
     ${pend.map(card).join('')||''}
     ${appr.length?`<div class=ovsec>✓ aprovados</div>${appr.map(card).join('')}`:''}</div>`))}
  }
- // 🔍 AUDITOR DE CONSISTÊNCIA — gaps determinísticos (worker local que PROPÕE, nunca muta; Felipe aprova/rejeita)
+ // 🎓 ESTAGIÁRIOS DO ARQUITETO — 6 validadores temáticos (5 determinísticos + estilo LLM-leve); PROPÕEM, nunca mutam
  {const gaps=((s.proposals||{}).pending||[]).filter(p=>p.type==='consistency_gap')
   const SEV={high:'var(--red)',med:'var(--warn)',low:'var(--mut)'}
-  const grow=g=>`<div class=apcard><div class=aphd><span class=apdot style="background:${SEV[g.severity]||'var(--mut)'}"></span><b>${esc(g.title||g.kind)}</b> <span class=mut>${esc(g.environment||g.asset||'')}</span></div><div class="apwhy" style="margin:4px 0 8px">— ${esc(g.detail||'')}</div><div class=apacts><button class=send onclick="propAct('${g.id}','approve')">✅ aceitar gap</button> <button class=chatbtn onclick="propAct('${g.id}','reject')">👎 ignorar</button></div></div>`
-  root.appendChild(el(`<div class="card full" id=sec-auditor><h2>🔍 Auditor de Consistência <span class=mut>(worker determinístico: lê os sinais reais e PROPÕE gaps — nunca muta; você decide)</span> <button class=chatbtn style="float:right" onclick="propAct('','audit')">🔍 rodar auditoria</button></h2>
-   ${gaps.length?gaps.map(grow).join(''):'<div class=mut>✓ sem gaps de consistência pendentes — rode a auditoria pra reescanear.</div>'}</div>`))}
+  const grow=g=>`<div class=apcard><div class=aphd><span class=apdot style="background:${SEV[g.severity]||'var(--mut)'}"></span><b>${esc(g.title||g.kind)}</b> <span class=mut>${esc(g.room_name||g.environment||g.asset||'')}</span></div><div class="apwhy" style="margin:4px 0 8px">— ${esc(g.detail||'')}</div><div class=apacts><button class=send onclick="propAct('${g.id}','approve')">✅ aceitar gap</button> <button class=chatbtn onclick="propAct('${g.id}','reject')">👎 ignorar</button></div></div>`
+  const ROSTER=['pertencimento','completude','nomenclatura','capacidade','redundancia','estilo']
+  const interns=gaps.filter(g=>g.intern), general=gaps.filter(g=>!g.intern)
+  const byI={}; interns.forEach(g=>{(byI[g.intern]=byI[g.intern]||[]).push(g)})
+  const hd=lbl=>`<div style="margin:12px 0 5px;font-weight:600;color:var(--gold);font-size:12px;border-bottom:1px solid var(--bd);padding-bottom:3px">`+lbl+`</div>`
+  const blocks=ROSTER.filter(k=>byI[k]).map(k=>{const gs=byI[k]
+    return hd(`${esc(gs[0].intern_label||k)} <span class=mut style="font-weight:400">· ${gs.length}</span>`)+gs.map(grow).join('')}).join('')
+  const genBlock=general.length?hd(`🔍 Consistência geral <span class=mut style="font-weight:400">· ${general.length}</span>`)+general.map(grow).join(''):''
+  const body=blocks+genBlock
+  root.appendChild(el(`<div class="card full" id=sec-auditor><h2>🎓 Estagiários do Arquiteto <span class=mut>(6 lentes: pertencimento · completude · nomenclatura · capacidade · redundância · estilo — cada uma PROPÕE, nunca muta; você decide)</span> <button class=chatbtn style="float:right" onclick="propAct('','audit')">🔍 rodar auditoria</button></h2>
+   ${body||'<div class=mut>✓ nenhum estagiário levantou gap pendente — rode a auditoria pra reescanear os programas.</div>'}</div>`))}
  // 🏭 FÁBRICA + 🔧 CICLO ATUAL + 🖼️ REFERENCE PACK — a esteira por ciclo (topo, unidade principal)
  FACTORY=s.factory||{}
  const fac=FACTORY

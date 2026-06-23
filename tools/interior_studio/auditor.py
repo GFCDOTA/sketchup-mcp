@@ -9,8 +9,11 @@ Checks:
 - C1 duplicate_main — pack com >1 referência ⭐ principal.
 - C2 no_json_verdict — asset em estado avançado derivado de markdown frágil (sem gpt_verdict.json) [tie SPEC-E].
 - C3 competing_program — cômodo com programa aprovado E proposta pendente.
-- C4 stale_program — programa APROVADO que o gate do Arquiteto (SPEC-C) corrigiria (cross-cômodo / sem CORE).
-- C5 buggy_pending_program — proposta PENDENTE que o gate corrigiria (gerada antes do SPEC-C; não aprovar como está).
+- ESTAGIÁRIOS (interns.py) — cada furniture_program (pendente E aprovado) é validado por 6 lentes
+  temáticas (pertencimento/completude/nomenclatura/capacidade/redundância/estilo). Substituiu os
+  antigos C4 stale_program / C5 buggy_pending_program (achado monolítico do gate) por gaps legíveis
+  por tema. O gate determinístico do Arquiteto segue garantindo o invariante na PROPOSTA; estes
+  estagiários AUDITAM o que foi proposto/aprovado e PROPÕEM correções.
 """
 from __future__ import annotations
 
@@ -18,7 +21,7 @@ import json
 import sys
 from pathlib import Path
 
-from tools.interior_studio import architect_program as ic_arch
+from tools.interior_studio import interns as ic_interns
 from tools.interior_studio import project_state as ps
 from tools.interior_studio import proposals as ic_proposals
 from tools.interior_studio import reference_packs as ic_refpacks
@@ -35,8 +38,9 @@ def _gap(kind: str, subject: str, severity: str, title: str, detail: str, **extr
     return g
 
 
-def audit() -> list[dict]:
-    """Devolve a lista de gaps reais (determinístico, sem efeito colateral)."""
+def audit(with_style: bool = True) -> list[dict]:
+    """Devolve a lista de gaps reais (determinístico, sem efeito colateral). `with_style` liga o
+    estagiário de estilo (LLM-leve via Ollama; degrada p/ no-op se o serviço estiver fora)."""
     findings = []
     # C1 — pack com principal (⭐) duplicado
     for asset in ps.ASSET_META:
@@ -61,7 +65,7 @@ def audit() -> list[dict]:
                     f"{asset} está em '{st}' sem gpt_verdict.json estruturado",
                     "Estado avançado derivado de markdown frágil — emitir o sidecar (save_asset_verdict).",
                     asset=asset))
-    # proposals: concorrência e obsolescência de programa
+    # proposals: concorrência + estagiários temáticos por programa
     state = ic_proposals.state()
     approved_envs = {p.get("environment") for p in state["approved"]
                      if p.get("type") == "furniture_program"}
@@ -76,34 +80,19 @@ def audit() -> list[dict]:
                 f"cômodo '{env}' tem programa aprovado E proposta pendente",
                 "Reconciliar: rejeitar a pendente ou substituir a aprovada.",
                 environment=env))
-        # C5 — pending que o gate do Arquiteto (SPEC-C) corrigiria (gerada antes do gate)
-        _, rep = ic_arch.normalize_program(p.get("items", []), env)
-        if rep["removed"] or rep["injected"]:
-            findings.append(_gap(
-                "buggy_pending_program", env, "med",
-                f"proposta pendente de '{env}' viola o gate (cross-cômodo / sem CORE) — não aprovar como está",
-                f"removeria={[r['asset'] for r in rep['removed']]} injetaria={rep['injected']} "
-                f"— re-propor com o Arquiteto endurecido.",
-                environment=env))
-    # C4 — programa APROVADO que o gate determinístico (SPEC-C) corrigiria (aprovado antes do gate)
+        # ESTAGIÁRIOS — 6 lentes temáticas sobre a proposta PENDENTE (ex-C5)
+        findings += ic_interns.gaps_for_program(p, with_style=with_style)
+    # ESTAGIÁRIOS — também auditam programas APROVADOS (ex-C4 stale_program)
     for p in state["approved"]:
         if p.get("type") == "furniture_program":
-            _, rep = ic_arch.normalize_program(p.get("items", []), p.get("environment"))
-            if rep["removed"] or rep["injected"]:
-                env = p.get("environment", "?")
-                findings.append(_gap(
-                    "stale_program", env, "high",
-                    f"programa aprovado de '{env}' viola o gate (cross-cômodo / sem CORE)",
-                    f"removeria={[r['asset'] for r in rep['removed']]} injetaria={rep['injected']} "
-                    f"— re-propor e re-aprovar.",
-                    environment=env))
+            findings += ic_interns.gaps_for_program(p, with_style=with_style)
     return findings
 
 
-def audit_and_save() -> dict:
+def audit_and_save(with_style: bool = True) -> dict:
     """Salva os gaps NÃO resolvidos como proposals pending; remove pending obsoletos (gaps que
     sumiram). NUNCA toca approved/rejected (decisão humana). Idempotente."""
-    findings = audit()
+    findings = audit(with_style=with_style)
     fids = {f["id"] for f in findings}
     st = ic_proposals.state()
     handled = {p["id"] for s in ("approved", "rejected") for p in st[s]
@@ -125,7 +114,8 @@ def audit_and_save() -> dict:
 
 if __name__ == "__main__":
     sys.stdout.reconfigure(encoding="utf-8")
+    style = "--style" in sys.argv          # estilo (LLM) é opt-in no CLI p/ rodar rápido/determinístico
     if "--save" in sys.argv:
-        print(json.dumps(audit_and_save(), ensure_ascii=False, indent=2))
+        print(json.dumps(audit_and_save(with_style=style), ensure_ascii=False, indent=2))
     else:
-        print(json.dumps(audit(), ensure_ascii=False, indent=2))
+        print(json.dumps(audit(with_style=style), ensure_ascii=False, indent=2))
