@@ -461,6 +461,10 @@ textarea{width:100%;min-height:90px;background:#0c0d10;border:1px solid var(--bd
 .collapse-btn{cursor:pointer;color:#7a8696;font-size:13px;margin-right:5px;user-select:none}.collapse-btn:hover{color:var(--gold)}
 .card.collapsed>*:not(h2){display:none}
 .card.collapsed{padding-bottom:13px}.card.collapsed h2{margin-bottom:0}
+.cardgroup .grpbody{display:flex;flex-direction:column;gap:2px}
+.grpsec{padding:11px 0 3px;border-top:1px solid var(--bd)}
+.grpsec:first-child{border-top:0;padding-top:2px}
+.grpsec>h2{font-size:13.5px;color:var(--mut);font-weight:600;margin:0 0 7px;letter-spacing:.2px}
 .gallery{max-height:330px;overflow-y:auto;padding-right:4px}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.86);z-index:50;align-items:center;justify-content:center;padding:24px}
 .modal.show{display:flex}.mbox{max-width:92vw;max-height:92vh;display:flex;flex-direction:column;gap:8px}
@@ -748,9 +752,7 @@ function saveOrder(){const root=document.getElementById('root');if(!root)return
 const PINNED_TOP=['sec-overview']   // Visão Geral SEMPRE no topo, ignora o layout salvo
 // ordem-padrão AGRUPADA por assunto: núcleo de trabalho → referências → GPT/aprendizado → time local → coordenação/saída
 const DEFAULT_ORDER=['sec-overview','sec-program','sec-auditor','sec-ciclo','sec-backlog',
- 'sec-refpack','sec-cur',
- 'sec-consult','sec-patch','sec-learning','sec-feed','sec-err',
- 'sec-ask','sec-cycles','sec-agents','sec-conversa',
+ 'grp-refs','grp-gpt','grp-local',
  'sec-sessions','sec-ren']
 function applyOrder(){const root=document.getElementById('root');if(!root)return
  const present=[...root.children].filter(c=>c.id&&c.classList.contains('card')).map(c=>c.id)
@@ -759,8 +761,24 @@ function applyOrder(){const root=document.getElementById('root');if(!root)return
  let order=saved.length?[...saved.filter(id=>present.includes(id)),...present.filter(id=>!saved.includes(id))]:base
  order=[...PINNED_TOP.filter(id=>present.includes(id)),...order.filter(id=>!PINNED_TOP.includes(id))]
  order.forEach(id=>{const e=document.getElementById(id);if(e)root.appendChild(e)})}
+// CLUSTERS fundidos em UM card cada (passe 2 do declutter): agrupa no DOM PÓS-build (não toca os
+// templates -> zero risco de TDZ). Membros viram seções internas MANTENDO o id (jumpTo segue achando).
+const GROUPS=[
+ {id:'grp-refs', title:'🗂️ Referências', members:['sec-refpack','sec-cur']},
+ {id:'grp-gpt',  title:'🔌 GPT & Aprendizado', members:['sec-consult','sec-patch','sec-learning','sec-feed','sec-err']},
+ {id:'grp-local',title:'🤖 Time local', members:['sec-ask','sec-cycles','sec-agents','sec-conversa']},
+]
+function applyGroups(){const root=document.getElementById('root');if(!root)return
+ GROUPS.forEach(g=>{
+  const present=g.members.map(id=>document.getElementById(id)).filter(c=>c&&c.parentNode===root)
+  if(!present.length)return
+  const grp=el(`<div class="card full cardgroup" id="${g.id}"><h2>${g.title} <span class=mut>(${present.length} painéis)</span></h2><div class=grpbody></div></div>`)
+  root.insertBefore(grp,present[0])
+  const body=grp.querySelector('.grpbody')
+  present.forEach(c=>{c.classList.remove('card','full');c.classList.add('grpsec');body.appendChild(c)})
+ })}
 // RECOLHER cards — só o LÍDER de cada grupo aberto por padrão; o resto recolhido 1-clique (menos poluição)
-const DEFAULT_OPEN=['sec-overview','sec-program','sec-auditor','sec-ciclo','sec-backlog','sec-refpack','sec-consult','sec-ask','sec-ren']
+const DEFAULT_OPEN=['sec-overview','sec-program','sec-auditor','sec-ciclo','sec-backlog','grp-refs','sec-ren']
 function collapsedSet(){try{const v=JSON.parse(localStorage.getItem('studio_collapsed')||'null');return v===null?null:new Set(v)}catch(e){return null}}
 function saveCollapsed(s){localStorage.setItem('studio_collapsed',JSON.stringify([...s]))}
 function applyCollapsed(){const root=document.getElementById('root');if(!root)return
@@ -1092,12 +1110,12 @@ async function tick(force){
    <div class=cap>${esc(r.name.replace('.png',''))}<div class=t>${r.theme} · ${r.sub} · ${r.kb}KB</div></div></div>`).join('')
  root.appendChild(el(`<div class="card full" id=sec-ren><h2>Renders (${(s.renders||[]).length}) — clica pra ampliar/baixar · mais novos primeiro</h2>
   <div class="grid gallery">${rr||'<span class=mut>sem renders</span>'}</div></div>`))
- applyOrder();applyCollapsed();applySizes();makeDraggable()   // layout livre: ordem + recolher + tamanho + punho ⠿
+ applyGroups();applyOrder();applyCollapsed();applySizes();makeDraggable()   // funde clusters + layout livre: ordem + recolher + tamanho + punho ⠿
  document.querySelectorAll('.chat,.convbox').forEach(c=>{c.scrollTop=c.scrollHeight})   // chat/conversa sempre na última msg
  window.scrollTo(0,sy)   // mantém a rolagem onde estava (não sobe ao mandar mensagem)
 }
 // reset 1× do layout salvo quando a estrutura de cards muda (senão o localStorage do navegador esconde o novo default)
-const LAYOUT_VER='2026-06-23-declutter-1'
+const LAYOUT_VER='2026-06-23-declutter-2-groups'
 if(localStorage.getItem('studio_layout_ver')!==LAYOUT_VER){['studio_order','studio_collapsed','studio_sizes'].forEach(k=>localStorage.removeItem(k));localStorage.setItem('studio_layout_ver',LAYOUT_VER)}
 tick(true);setInterval(tick,10000);window.addEventListener('resize',()=>tick(1))
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick(1)})   // aba voltou -> re-renderiza
