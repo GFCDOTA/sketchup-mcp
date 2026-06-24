@@ -32,6 +32,7 @@ KANBAN_FILE = ROOT / ".ai_bridge/kanban.json"          # status Trello de cada m
 CYCLES_FILE = ROOT / ".ai_bridge/interior_consult/cycles.jsonl"  # cada ciclo persistido (o "banco" do loop)
 RELAY_FILE = ROOT / ".ai_bridge/interior_consult/relay.json"     # fila do relay Claude↔ChatGPT (Chrome)
 TOOLSDIR = ROOT / "tools"                                        # pra servir Mapa/Fluxo/etc. na MESMA porta
+VITRINEDIR = TOOLSDIR / "vitrine"                                # a "vitrine" web (home/grafo/fluxo/agents/explica + kgraph)
 # Mapa de Conhecimento / Fluxo / etc. integrados no :8782 (mesmos arquivos do :8783, servidos aqui também).
 PAGE_FILES = {"/grafo": "grafo.html", "/fluxo": "flow.html", "/explica": "explica.html",
               "/como-funciona": "explica.html", "/agents": "agents.html",
@@ -1901,13 +1902,13 @@ class H(BaseHTTPRequestHandler):
         elif path == "/api/consult/latest-answer":
             self._send(200, json.dumps(_consult_latest("answer"), ensure_ascii=False))
         elif path in PAGE_FILES:   # Mapa/Fluxo/Como-funciona integrados na MESMA porta (:8782)
-            fp = TOOLSDIR / PAGE_FILES[path]
+            fp = VITRINEDIR / PAGE_FILES[path]
             try:
                 self._send(200, fp.read_text("utf-8"), "text/html; charset=utf-8")
             except OSError as e:
                 self._send(500, f"{fp.name}: {e}", "text/plain; charset=utf-8")
         elif path == "/api/kgraph":
-            fp = TOOLSDIR / "kgraph.json"
+            fp = VITRINEDIR / "kgraph.json"
             try:
                 self._send(200, fp.read_text("utf-8"), "application/json; charset=utf-8")
             except OSError as e:

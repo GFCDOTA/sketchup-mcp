@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang=pt-BR><head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>sketchup-mcp · vitrine</title>
+<style>
+:root{--bg:#0f1014;--ink:#e7eaf2;--mut:#98a2b3;--gold:#c9a86a;--mint:#6ee7b7;--peri:#a5b4fc;--code:#93b4d6}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%}
+body{font:14px/1.5 system-ui,Arial;color:var(--ink);background:radial-gradient(1300px 820px at 50% -12%,#1b1726 0%,#0c0d11 64%) fixed;min-height:100vh;display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:10px;padding:11px 18px;background:linear-gradient(90deg,#16131e,#101218);border-bottom:1px solid #241f30}
+header h1{font-size:15px;margin:0;font-weight:700;color:#fff}.dot{width:9px;height:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 9px var(--gold)}.spacer{margin-left:auto}
+a.nav{color:var(--mut);text-decoration:none;font-size:12.5px;border:1px solid #2c3340;border-radius:8px;padding:6px 11px}a.nav:hover{color:#fff;background:#1f1b29}
+.hero{text-align:center;padding:46px 18px 8px}
+.hero h2{font-size:38px;margin:0;font-weight:800;background:linear-gradient(90deg,#fff,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:var(--mut);font-size:15.5px;margin:12px auto 0;max-width:620px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px;max-width:920px;margin:34px auto;padding:0 20px;width:100%}
+.card{display:block;text-decoration:none;background:#16191f;border:1px solid #262b36;border-top:3px solid var(--c);border-radius:16px;padding:20px 20px 18px;transition:transform .2s,box-shadow .2s,border-color .2s}
+.card:hover{transform:translateY(-4px);box-shadow:0 0 0 2px var(--c),0 0 26px color-mix(in srgb,var(--c) 45%,transparent)}
+.card .ic{font-size:34px;line-height:1}
+.card .nm{font-weight:800;font-size:18px;margin-top:8px;color:var(--c)}
+.card .ds{color:var(--mut);font-size:13px;margin-top:6px;line-height:1.45}
+.card .go{margin-top:12px;font-size:12.5px;color:var(--ink);opacity:.7}
+.c-explica{--c:var(--gold)}.c-grafo{--c:var(--mint)}.c-fluxo{--c:var(--peri)}.c-agents{--c:var(--code)}.c-dash{--c:#f0a868}
+footer{margin-top:auto;text-align:center;color:var(--mut);font-size:12px;padding:24px 0 30px}
+</style></head><body>
+<header><span class=dot></span><h1>sketchup-mcp · vitrine</h1>
+ <span class=spacer></span><a class=nav href="http://localhost:8782/" style="border-color:#5a4a2a;color:#f0a868">🎛 Dash :8782</a></header>
+<div class=hero>
+ <h2>sketchup-mcp</h2>
+ <p>Da <b>planta em PDF</b> ao apartamento <b>3D fiel, mobiliado e renderizado</b>. Escolha por onde explorar o sistema:</p>
+</div>
+<div class=cards>
+ <a class="card c-dash" href="http://localhost:8782/"><div class=ic>🎛</div><div class=nm>Interior Studio (dash)</div><div class=ds>O painel VIVO onde o trabalho acontece: ciclo atual, reference pack, curadoria, learning patch, ponte GPT e os agentes locais. <b>É aqui que se opera o estúdio.</b></div><div class=go>Abrir o dash — :8782 →</div></a>
+ <a class="card c-explica" href="/explica"><div class=ic>📖</div><div class=nm>Como funciona</div><div class=ds>O sistema inteiro explicado pra quem não conhece — e quando ele usa cada "motor" (código · IA local · GPT · Claude · você).</div><div class=go>Começa por aqui →</div></a>
+ <a class="card c-fluxo" href="/fluxo"><div class=ic>⛓</div><div class=nm>Fluxo</div><div class=ds>O pipeline passo a passo, do PDF ao render — animado. Clica num passo e ele te leva pro grafo.</div><div class=go>Ver o fluxo →</div></a>
+ <a class="card c-grafo" href="/grafo"><div class=ic>🕸</div><div class=nm>Mapa de Conhecimento</div><div class=ds>Todo o projeto como um grafo interativo. Clica num nó pra isolar e ler suas conexões.</div><div class=go>Abrir o mapa →</div></a>
+ <a class="card c-agents" href="/agents"><div class=ic>🤖</div><div class=nm>Agentes</div><div class=ds>Single vs Multi Agent com o conteúdo real: o pipeline num agente × o Interior Studio orquestrado.</div><div class=go>Ver os agentes →</div></a>
+</div>
+<footer>sketchup-mcp · PDF da planta → 3D fiel → mobiliado → render realista · :8783</footer>
+</body></html>
