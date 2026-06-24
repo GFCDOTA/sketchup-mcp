@@ -91,6 +91,9 @@ tools/claude_bridge/*.log
 # NOC dispatcher: ledger + lock sao runtime (queue.jsonl e' seed, versiona)
 .ai_bridge/noc/actions.jsonl
 .ai_bridge/noc/dispatcher.lock
+# interior_studio: gaps do Auditor + ledgers dos Juizes de Render = runtime regenerado
+.ai_bridge/proposals/pending/gap_*.json
+.ai_bridge/interior_studio/*.jsonl
 
 # pdf_knowledge: indice e PDFs licenciados NAO commitar
 tools/pdf_knowledge/output/
