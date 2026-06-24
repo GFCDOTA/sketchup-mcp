@@ -40,7 +40,7 @@ mcp = [
 Repository = "https://github.com/GFCDOTA/sketchup-mcp"
 
 [tool.setuptools.packages.find]
-include = ["tools*"]
+include = ["tools*", "core*", "interior*"]
 exclude = ["tests*", "runs*", "docs*"]
 
 [tool.pytest.ini_options]
