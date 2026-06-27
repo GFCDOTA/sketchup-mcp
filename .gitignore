@@ -94,6 +94,9 @@ tools/claude_bridge/*.log
 # interior_studio: gaps do Auditor + ledgers dos Juizes de Render = runtime regenerado
 .ai_bridge/proposals/pending/gap_*.json
 .ai_bridge/interior_studio/*.jsonl
+# kanban do cockpit + relay de consulta inter-agente = estado de runtime, nao fonte
+.ai_bridge/kanban.json
+.ai_bridge/interior_consult/
 
 # pdf_knowledge: indice e PDFs licenciados NAO commitar
 tools/pdf_knowledge/output/
@@ -110,6 +113,10 @@ assets/third_party_cache/
 # reference DB (índice reconstruível via reference_db.py rebuild)
 artifacts/reference_lab/reference.db
 artifacts/reference_lab/studio_activity.jsonl
+# inbox do reference-scout = staging pre-curadoria (so INBOX.json/README.md sao versionados)
+artifacts/reference_lab/inbox/*.png
+artifacts/reference_lab/inbox/*.jpg
+artifacts/reference_lab/inbox/*.jpeg
 
 # project-memory RAG #2 (índice reconstruível via project_memory_db.py index)
 .ai_bridge/project_memory.db
