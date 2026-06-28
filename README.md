@@ -1,5 +1,7 @@
 # sketchup-mcp
 
+[![ci](https://github.com/GFCDOTA/sketchup-mcp/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/GFCDOTA/sketchup-mcp/actions/workflows/ci.yml)
+
 **PDF architectural floor plan → a faithful SketchUp `.skp` model.**
 
 Given a `consensus.json` describing the walls, openings and rooms of an
