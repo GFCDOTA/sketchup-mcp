@@ -1,0 +1,79 @@
+name: ci
+
+# A esteira que se valida sozinha: todo PR/push pra develop|main roda os testes
+# de contrato, os gates de fidelidade determinísticos e o smoke do servidor MCP.
+# Tudo SEM SketchUp (os passos que exigem SU degradam via skipif / só rodam local).
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+  workflow_dispatch:
+
+# Cancela runs superados no mesmo ref (não enfileira commits velhos).
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Runner é headless (sem DISPLAY) — força o backend não-interativo do matplotlib.
+  MPLBACKEND: Agg
+
+jobs:
+  tests:
+    name: pytest (py${{ matrix.python }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - name: Install (core + dev)
+        run: pip install -e ".[dev]"
+      - name: Contract + gate test suite
+        run: python -m pytest tests/ -q
+
+  fidelity-gates:
+    name: deterministic fidelity gates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - name: Install (core)
+        run: pip install -e .
+      # Consensus-only detectors (opening<->host, wall overlap). Puros, sem SU/rede.
+      # exit 0=PASS, 1=FAIL, 3=INCOMPLETE — o exit code É o gate.
+      - name: Gate — planta_74
+        run: python -m tools.run_deterministic_gates --fixture planta_74
+      - name: Gate — quadrado (micro-fixture canônico)
+        run: python -m tools.run_deterministic_gates --fixture quadrado
+
+  mcp-server:
+    name: mcp server (smoke + stdio handshake)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - name: Install (core + mcp)
+        run: pip install -e ".[mcp]"
+      # Exercita as 9 tools SU-free in-process.
+      - name: In-process smoke (9 tools)
+        run: python -m tools.mcp_server.smoke
+      # Sobe o server por stdio (como o Claude Code faz) e fala MCP de verdade.
+      - name: Real stdio handshake (initialize / tools-list / call_tool)
+        run: python -m tools.mcp_server.stdio_check
