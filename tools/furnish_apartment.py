@@ -250,7 +250,17 @@ def living_room_boxes(con, room_id):
     width_m = round(p["sofa"]["width_m"], 3)
     # seats adaptados a largura que cabe no nicho (3-lug so se a parede comporta).
     _seats = 3 if width_m >= 2.0 else 2
-    parts, _ = build_sofa(sofa_spec("straight", seats=_seats, width=width_m, depth=0.95))
+    _sofa_spec = sofa_spec("straight", seats=_seats, width=width_m, depth=0.95)
+    parts, _ = build_sofa(_sofa_spec)
+    # FASE 0 do laco classe->.skp: o gate de classe (tools/sofa_class.py, ja testado
+    # isolado) valida PROPORCAO/ANATOMIA do sofa GERADO — nao so colisao/sanidade. Aqui
+    # ele entra no caminho REAL de geracao pela 1a vez, em WARN-log: nao aborta o build
+    # (Felipe: provar PASS do exemplar default por 1 ciclo antes de promover a FAIL).
+    from tools.sofa_class import sofa_class_gate
+    _sgate = sofa_class_gate(_sofa_spec, parts)
+    if _sgate["result"] != "PASS":
+        _why = "; ".join(_sgate["errors"] or _sgate["warnings"]) or "(sem detalhe)"
+        print(f"[furnish-apt] sofa_class_gate => {_sgate['result']} (WARN-log, nao aborta): {_why}")
     boxes = place_sofa_boxes(parts, sofa_c, sofa_f)         # sofa de frente pra TV
     for _b in boxes:                                        # cada movel = modulo editavel separado
         _b["module"] = "Sofa"
