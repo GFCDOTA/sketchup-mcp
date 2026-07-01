@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "correction_finding.v1",
+  "description": "FP-033 unified finding shape. Normalizes the deterministic detectors (run_deterministic_gates, geometry_sanity.audit, furniture_overlap_gate) AND visual_findings.v1 (FP-032) into ONE shape the correction loop routes on. `route` is filled by tools/finding_router.classify. No additionalProperties:false — detectors may carry extra provenance.",
+  "type": "object",
+  "required": [
+    "type",
+    "severity",
+    "source",
+    "evidence"
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "description": "canonical finding type — the router's key (e.g. furniture_overlap, opening_host_mismatch, floating_door, global_visual)"
+    },
+    "severity": {
+      "enum": [
+        "WARN",
+        "FAIL"
+      ]
+    },
+    "source": {
+      "description": "which kind of detector produced it",
+      "enum": [
+        "deterministic",
+        "ollama_vision",
+        "claude_bridge",
+        "oracle_bridge",
+        "human"
+      ]
+    },
+    "source_check": {
+      "type": "string",
+      "description": "the concrete detector/gate that emitted it (geometry_sanity, furniture_overlap_gate, opening_host, visual_oracle, ...)"
+    },
+    "suspected_owner": {
+      "type": "string",
+      "description": "what likely owns the fix (builder, opening_routing, consensus, furniture_brain, soft_barrier_routing)"
+    },
+    "route": {
+      "description": "filled by finding_router.classify",
+      "enum": [
+        "DETERMINISTIC_AUTOFIX",
+        "NEEDS_VISION",
+        "NEEDS_FELIPE"
+      ]
+    },
+    "evidence": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "axis": {
+      "type": "string"
+    },
+    "room": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    }
+  }
+}
