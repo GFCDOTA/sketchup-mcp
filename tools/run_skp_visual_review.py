@@ -85,6 +85,60 @@ def worst_verdict(*verdicts: str) -> str:
     return max(valid, key=lambda v: _VERDICT_RANK.get(v, 0))
 
 
+# ---- FP-032 promotion gate (only PROVEN eyes cast a hard FAIL) ------
+
+
+def load_latest_discrimination(fixture: str, backend: str) -> dict | None:
+    """Return the most recent `discrimination_report.json` (from
+    `tools/negative_dogfood.py`) for (fixture, backend), or None if no dogfood
+    evidence exists for that backend.
+
+    Legacy reports (pre-multi-backend) omit the `backend` key; those were all
+    `ollama_vision`, so a missing key is treated as `ollama_vision`. Absence of
+    any matching report -> None -> the runner treats the backend as NOT-yet-
+    proven (honest: no evidence is not proof).
+    """
+    base = REPO_ROOT / "artifacts" / "review" / fixture
+    if not base.exists():
+        return None
+    best: dict | None = None
+    best_mtime = -1.0
+    for rp in base.glob("**/discrimination_report.json"):
+        try:
+            data = json.loads(rp.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if data.get("backend", "ollama_vision") != backend:
+            continue
+        m = rp.stat().st_mtime
+        if m > best_mtime:
+            best_mtime = m
+            best = data
+    return best
+
+
+def promote_oracle_verdict(
+    oracle_verdict: str, discriminated: bool
+) -> tuple[str, str]:
+    """FP-032 promotion rule.
+
+    An oracle **FAIL** only stands as a HARD FAIL if the backend was PROVEN
+    discriminative for this fixture (negative_dogfood == DISCRIMINATED). Absent
+    that proof, an oracle FAIL is a *weak* signal — degrade it to WARN so it is
+    recorded but does not block. PASS / WARN pass through unchanged (never
+    escalated).
+
+    Returns (effective_verdict, note). `note` is empty when nothing changed.
+    """
+    if oracle_verdict == "FAIL" and not discriminated:
+        return "WARN", (
+            "oracle FAIL degraded to WARN (FP-032): backend not proven "
+            "discriminative for this fixture - no DISCRIMINATED negative_dogfood "
+            "report. Weak signal recorded, does not harden the gate."
+        )
+    return oracle_verdict, ""
+
+
 # ---- GPT auto-consult trigger detection ----------------------------
 
 
@@ -1497,6 +1551,16 @@ def main() -> int:
             if oracle_resp.status == "ok":
                 normalized = oracle_resp.normalized_findings
                 oracle_verdict = normalized.get("top_level_verdict", "PASS")
+                # FP-032 promotion gate: an oracle FAIL only HARDENS the gate
+                # if THIS backend proved it discriminates on this fixture
+                # (negative_dogfood == DISCRIMINATED). No proof -> weak signal.
+                disc_report = load_latest_discrimination(fixture, args.oracle)
+                oracle_discriminated = bool(
+                    disc_report and disc_report.get("result") == "DISCRIMINATED"
+                )
+                effective_oracle_verdict, promotion_note = promote_oracle_verdict(
+                    oracle_verdict, oracle_discriminated
+                )
                 # deterministic_verdict from actual findings (ignoring
                 # qualitative-auto-WARN fallback)
                 det_findings_for_agg = attempts[-1].get("findings", [])
@@ -1517,9 +1581,11 @@ def main() -> int:
                     "WARN_documented" if known else "PASS"
                 )
 
-                # worst(oracle, deterministic, carried_known_warnings)
+                # worst(effective_oracle, deterministic, carried_known_warnings).
+                # The oracle verdict feeds in only AFTER the promotion gate, so a
+                # non-proven backend can never harden the gate to FAIL on its own.
                 final_v = worst_verdict(
-                    oracle_verdict,
+                    effective_oracle_verdict,
                     deterministic_verdict,
                     carried_warnings_verdict,
                 )
@@ -1538,21 +1604,43 @@ def main() -> int:
                         )
                         axes_out[ax_name] = a
 
+                # FP-032: a non-proven backend's per-axis FAIL is also degraded
+                # to WARN, so axes stay consistent with the gated top level.
+                if not oracle_discriminated:
+                    for ax_name, a in list(axes_out.items()):
+                        if isinstance(a, dict) and a.get("verdict") == "FAIL":
+                            a["verdict"] = "WARN"
+                            a["evidence"] = (
+                                (a.get("evidence", "") + " | ").lstrip(" |")
+                                + "FP-032: oracle FAIL degraded to WARN "
+                                  "(backend not proven discriminative)."
+                            )
+                            axes_out[ax_name] = a
+
                 merged = dict(normalized)
                 merged["fixture"] = fixture
                 merged["attempt"] = "final"
                 merged["axes"] = axes_out
+                merged["source"] = normalized.get("source", "oracle")
                 merged["oracle_verdict"] = oracle_verdict
+                merged["oracle_verdict_effective"] = effective_oracle_verdict
+                merged["oracle_discriminated"] = oracle_discriminated
+                merged["discrimination_result"] = (
+                    disc_report.get("result") if disc_report else "NO_DOGFOOD_EVIDENCE"
+                )
+                if promotion_note:
+                    merged["promotion_note"] = promotion_note
                 merged["deterministic_verdict"] = deterministic_verdict
                 merged["carried_known_warnings_verdict"] = carried_warnings_verdict
                 merged["known_warnings_carried"] = known_descriptions
                 merged["final_verdict"] = final_v
                 merged["top_level_verdict"] = final_v
                 merged["aggregation_note"] = (
-                    "final_verdict = worst(oracle_verdict, "
-                    "deterministic_verdict, carried_known_warnings_verdict). "
-                    "The visual oracle provider is working, but its PASS does "
-                    "not override known architectural WARNs."
+                    "final_verdict = worst(effective_oracle_verdict, "
+                    "deterministic_verdict, carried_known_warnings_verdict), where "
+                    "effective_oracle_verdict applies the FP-032 promotion gate "
+                    "(oracle FAIL only hardens if the backend proved DISCRIMINATED). "
+                    "The oracle's PASS does not override known architectural WARNs."
                 )
                 det_findings = attempts[-1].get("findings", [])
                 if det_findings:
@@ -1560,6 +1648,8 @@ def main() -> int:
                 _write_json(final_dir / "visual_findings.json", merged)
                 print(
                     f"[oracle] verdicts: oracle={oracle_verdict} "
+                    f"(effective={effective_oracle_verdict}, "
+                    f"discriminated={oracle_discriminated}) "
                     f"deterministic={deterministic_verdict} "
                     f"carried_known={carried_warnings_verdict} "
                     f"-> final={final_v}"

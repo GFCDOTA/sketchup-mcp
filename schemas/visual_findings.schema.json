@@ -1,7 +1,33 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "visual_findings.v1",
-  "type": "object",
+  "description": "visual_findings.v1 — FP-030 base + FP-032 honesty fields (source, confidence, discriminated). All FP-032 fields are OPTIONAL so findings written before the hardening still validate. No additionalProperties:false anywhere: the runner enriches the top level with aggregation keys (oracle_verdict, final_verdict, known_warnings_carried, ...).",
+  "$defs": {
+    "source": {
+      "description": "Where this judgment came from. oracle_bridge is the legacy/normalizer default kept for back-compat with findings written before the source enum split.",
+      "enum": [
+        "deterministic",
+        "ollama_vision",
+        "claude_bridge",
+        "human",
+        "oracle_bridge"
+      ]
+    },
+    "confidence": {
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ]
+    },
+    "discriminated": {
+      "description": "Did the emitting backend prove it discriminates this defect-type in the last negative_dogfood? null = not measured.",
+      "type": [
+        "boolean",
+        "null"
+      ]
+    }
+  },
   "required": [
     "schema_version",
     "fixture",
@@ -29,6 +55,15 @@
     },
     "axes": {
       "type": "object"
+    },
+    "source": {
+      "$ref": "#/$defs/source"
+    },
+    "confidence": {
+      "$ref": "#/$defs/confidence"
+    },
+    "discriminated": {
+      "$ref": "#/$defs/discriminated"
     },
     "findings": {
       "type": "array",
@@ -83,6 +118,15 @@
           },
           "proposed_fix": {
             "type": "string"
+          },
+          "source": {
+            "$ref": "#/$defs/source"
+          },
+          "confidence": {
+            "$ref": "#/$defs/confidence"
+          },
+          "discriminated": {
+            "$ref": "#/$defs/discriminated"
           }
         }
       }
