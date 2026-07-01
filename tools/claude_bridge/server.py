@@ -29,6 +29,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import os
 import shutil
 import subprocess
 import sys
@@ -149,6 +150,46 @@ def ask_claude(question: str, tier: str = DEFAULT_TIER) -> str:
     if "not logged in" in low or "please run /login" in low:
         raise RuntimeError("claude headless NAO autenticado — rode `claude setup-token` "
                            "e exporte CLAUDE_CODE_OAUTH_TOKEN")
+    return out
+
+
+def ask_claude_vision(question: str, image_paths, tier: str = DEFAULT_TIER) -> str:
+    """Como ask_claude, mas concede LEITURA dos diretorios das imagens (--add-dir) pro
+    claude -p ABRIR os renders com a ferramenta Read — a VISAO vem dai. E o unico olho
+    confiavel do sistema: os modelos locais de visao (qwen2.5vl/moondream) NAO discriminam
+    defeito (negative_dogfood provou). O prompt do chamador instrui a leitura + o formato
+    de saida (visual_findings). Sem --add-dir, o claude -p (cwd neutro) e' bloqueado por
+    permissao ao ler paths fora do cwd e HONESTAMENTE se recusa a chutar."""
+    model, effort = resolve_tier(tier)
+    prompt = SYSTEM + "\n\n=== QUESTION ===\n\n" + question
+    workdir = tempfile.gettempdir()
+    dirs = []
+    for p in (image_paths or []):
+        d = os.path.dirname(os.path.abspath(str(p)))
+        if d and d not in dirs:
+            dirs.append(d)
+    if sys.platform == "win32":
+        adg = " ".join(f'--add-dir "{d}"' for d in dirs)
+        cmd = (f'"{claude_bin()}" -p --model {model} --effort {effort} '
+               f'--output-format text {adg}')
+        proc = subprocess.run(cmd, input=prompt, capture_output=True, text=True,
+                              encoding="utf-8", errors="replace",
+                              timeout=CLAUDE_TIMEOUT, shell=True, cwd=workdir)
+    else:
+        add_args = []
+        for d in dirs:
+            add_args += ["--add-dir", d]
+        proc = subprocess.run([claude_bin(), "-p", "--model", model, "--effort", effort,
+                               "--output-format", "text", *add_args],
+                              input=prompt, capture_output=True, text=True,
+                              encoding="utf-8", errors="replace",
+                              timeout=CLAUDE_TIMEOUT, cwd=workdir)
+    out = (proc.stdout or "").strip()
+    if not out:
+        raise RuntimeError(f"resposta vazia (stderr: {(proc.stderr or '')[:300]})")
+    low = out.lower()
+    if "not logged in" in low or "please run /login" in low:
+        raise RuntimeError("claude headless NAO autenticado")
     return out
 
 
@@ -1601,6 +1642,32 @@ def _ask_route(req, _url):
         req._send(500, {"error": f"{type(e).__name__}: {e}"})
 
 
+def _ask_vision_route(req, _url):
+    """POST /ask-vision — como /ask, mas com 'images': [paths abs] que o claude -p pode
+    LER (--add-dir). Emite o que o prompt pedir (ex.: visual_findings). Honest 500."""
+    try:
+        n = int(req.headers.get("Content-Length") or 0)
+        body = req.rfile.read(n) if n else b""
+        data = json.loads(body.decode("utf-8", errors="replace")) if body else {}
+        prompt = (data.get("prompt") or data.get("question") or "").strip()
+        images = data.get("images") or []
+        if not prompt:
+            req._send(400, {"error": "empty prompt"})
+            return
+        if not images:
+            req._send(400, {"error": "no images (send 'images': [abs paths])"})
+            return
+        tier = data.get("tier") or DEFAULT_TIER
+        t0 = time.time()
+        answer = ask_claude_vision(prompt, images, tier=tier)
+        _audit_append({"t": time.time(), "kind": "consult_vision",
+                       "n_images": len(images), "a_chars": len(answer),
+                       "dur_sec": round(time.time() - t0, 1)})
+        req._send(200, {"response": answer})
+    except Exception as e:
+        req._send(500, {"error": f"{type(e).__name__}: {e}"})
+
+
 def _heartbeat_route(req, _url):
     req._heartbeat()
 
@@ -1803,6 +1870,7 @@ GET_ROUTES = {
 
 POST_ROUTES = {
     "/ask": _ask_route,
+    "/ask-vision": _ask_vision_route,
     "/heartbeat": _heartbeat_route,
     "/api/actions/process-consults": _process_consults_start_route,
 }
