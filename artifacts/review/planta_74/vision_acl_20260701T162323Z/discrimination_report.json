@@ -1,0 +1,157 @@
+{
+  "schema_version": "negative_dogfood.v2",
+  "fixture": "planta_74",
+  "backend": "claude_bridge_vision",
+  "backend_model": null,
+  "timestamp": "2026-07-01T16:29:03Z",
+  "method": "production-parity (top+iso+side_by_side+context); corrupt top only",
+  "recipe": {
+    "op": "erase_top_exterior_wall_segment",
+    "defect_class": "missing_wall_continuation",
+    "source_render": "planta_74_top.png",
+    "rect": [
+      500,
+      200,
+      900,
+      224
+    ],
+    "ref_point": [
+      1300,
+      30
+    ]
+  },
+  "corruption": {
+    "rect": [
+      500,
+      200,
+      900,
+      224
+    ],
+    "ref_point": [
+      1300,
+      30
+    ],
+    "fill_rgb": [
+      191,
+      191,
+      198
+    ],
+    "image_size": [
+      1600,
+      1200
+    ],
+    "src_sha256": "3fa806c800c8c327beb90fc17774c00508b12375145a26c1ac3a211c14e000f0",
+    "out_sha256": "6871a68c2a8a2cf6ab76fdd201eea47b8fe2ce39bb31365a96fdf2535901f55f"
+  },
+  "clean_oracle": {
+    "status": "ok",
+    "detail": "claude bridge /ask-vision returned valid visual_findings.v1",
+    "verdict": "PASS",
+    "images": [
+      "clean_top.png",
+      "clean_iso.png",
+      "clean_side_by_side.png"
+    ],
+    "normalized": {
+      "schema_version": "visual_findings.v1",
+      "top_level_verdict": "PASS",
+      "axes": {
+        "window_fidelity": {
+          "verdict": "PASS",
+          "evidence": "clean_iso: four glazed windows on exterior walls (two framed front-facade windows + two small awning windows) plus the terrace sliding glass; count matches windows3d=4. All seated within exterior walls, none floating or full-height voids."
+        },
+        "door_fidelity": {
+          "verdict": "PASS",
+          "evidence": "Six door swings visible in clean_top, each hinged on a wall (hosted, none floating). The central pier near image center carries two swings and clean_iso shows a tight cluster of brown door leaves there — dense but seated on walls, no leaf detached in space. Positions correspond to PDF suite/bath/entry doors."
+        },
+        "room_fidelity": {
+          "verdict": "PASS",
+          "evidence": "Every room carries a distinct pastel floor fill fully contained within its walls in clean_top — no color bleeding into the gray exterior (no floor leak). Room set and placement (kitchen, dining, living, suites, bath, terrace) correspond to the PDF layout in clean_side_by_side."
+        },
+        "wall_fidelity": {
+          "verdict": "PASS",
+          "evidence": "clean_top: outer perimeter reads as continuous dark wall volumes with a stepped facade/terrace profile that matches the PDF; no erased segments, no open perimeter. Interior partitions are present and fully enclose every colored room; the stepped notches at bottom-left/bottom-right are wall-thickness/column steps, not gaps."
+        },
+        "scale_rotation": {
+          "verdict": "PASS",
+          "evidence": "clean_side_by_side: the SKP top view matches the PDF footprint proportions and orientation (long horizontal body with left terrace step and right rooms); no mirroring, rotation, or scale mismatch."
+        },
+        "global_visual": {
+          "verdict": "PASS",
+          "evidence": "Clean render on uniform gray background; no floating geometry, orphan glass panels, or artifacts. Model reads as one coherent, fully enclosed floor plan consistent with the PDF."
+        }
+      },
+      "findings": [],
+      "source": "claude_bridge",
+      "raw_confidence": "medium"
+    }
+  },
+  "corrupted_oracle": {
+    "status": "ok",
+    "detail": "claude bridge /ask-vision returned valid visual_findings.v1",
+    "verdict": "FAIL",
+    "images": [
+      "corrupted_top.png",
+      "clean_iso.png",
+      "corrupted_side_by_side.png"
+    ],
+    "normalized": {
+      "schema_version": "visual_findings.v1",
+      "top_level_verdict": "FAIL",
+      "axes": {
+        "window_fidelity": {
+          "verdict": "PASS",
+          "evidence": "clean_iso shows ~4 glazed openings in the facade walls (two 2-pane sliders plus small awning units, distinct from the balcony railing glass), consistent with windows3d=4 and the PDF window positions."
+        },
+        "door_fidelity": {
+          "verdict": "PASS",
+          "evidence": "Multiple brown door swings are each seated in a wall opening; the small central pier hosts two adjacent bathroom doors, consistent with the PDF's BANHEIRO/LAVABO cluster. No clearly hostless/floating leaf observed."
+        },
+        "room_fidelity": {
+          "verdict": "PASS",
+          "evidence": "Each room carries a distinct floor fill (yellow, cyan, green, pink, lilac) and reads as an enclosed zone matching the PDF room partition; no floor color bleeds past its bounding walls."
+        },
+        "wall_fidelity": {
+          "verdict": "FAIL",
+          "evidence": "In corrupted_top the upper (facade) wall of the central cyan living room is not continuous: a short dark wall segment floats near the top-center (approx between the entry door and the small central room) with open gaps on either side, so the room's top perimeter does not close cleanly. Reads as an erased/broken wall run rather than a windowed wall."
+        },
+        "scale_rotation": {
+          "verdict": "PASS",
+          "evidence": "In corrupted_side_by_side the SKP top and iso align with the PDF's proportions and orientation (L-shaped mass, terrace bottom-left, suites right); no visible rotation or scale drift."
+        },
+        "global_visual": {
+          "verdict": "WARN",
+          "evidence": "Overall massing, room layout and openings track the PDF closely; the single broken top-wall segment is the only structural deviation from an otherwise faithful model."
+        }
+      },
+      "findings": [
+        {
+          "id": "vf_001",
+          "severity": "FAIL",
+          "axis": "wall_fidelity",
+          "type": "missing_wall_continuation",
+          "location": "top/facade wall of the central cyan living room, upper-center (between the entry door swing and the small central room)",
+          "evidence_image": "corrupted_top.png",
+          "evidence": "The top perimeter wall of the central living room is discontinuous: a short isolated wall segment floats near the top with open gaps on both sides, leaving the room's upper edge non-enclosed. Appears as an erased/gapped wall run, not a thin-rendered window."
+        }
+      ],
+      "source": "claude_bridge",
+      "raw_confidence": "medium"
+    }
+  },
+  "conclusive": true,
+  "criteria": {
+    "primary_top_level": {
+      "clean_verdict": "PASS",
+      "corrupted_verdict": "FAIL",
+      "discriminated": true
+    },
+    "primary_pass": true,
+    "secondary_finding_level": {
+      "clean_gap_findings": 0,
+      "corrupted_gap_findings": 1,
+      "new_localized_gap": true
+    }
+  },
+  "result": "DISCRIMINATED"
+}

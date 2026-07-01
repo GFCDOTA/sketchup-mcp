@@ -47,10 +47,11 @@ def _make_request(tmp_path: Path) -> OracleRequest:
 # ---- registry --------------------------------------------------------
 
 
-def test_registry_exposes_four_providers():
+def test_registry_exposes_all_providers():
     names = available_provider_names()
     assert names == [
         "chatgpt_bridge_image",
+        "claude_bridge_vision",
         "future_vision_api",
         "none",
         "ollama_vision",
