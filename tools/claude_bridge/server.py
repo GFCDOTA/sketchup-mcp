@@ -40,6 +40,15 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
+# Run-as-script bootstrap: `python server.py` (the docstring's own example, and
+# how start.ps1 / .claude/launch.json launch it) puts only THIS file's dir on
+# sys.path, so `from tools.claude_bridge...` -> ModuleNotFoundError. The watchdog
+# works around it by exporting PYTHONPATH; do it here too so every launch path
+# (script, module, PYTHONPATH-less preview) resolves the package.
+_repo_root = str(Path(__file__).resolve().parents[2])
+if _repo_root not in sys.path:
+    sys.path.insert(0, _repo_root)
+
 from tools.claude_bridge.knowledge_log import difficulties, learnings
 from tools.claude_bridge.skp_inventory import skp_inventory, skp_inventory_v2
 from tools.claude_bridge.system_inventory import git_inventory, live_processes, system_map
