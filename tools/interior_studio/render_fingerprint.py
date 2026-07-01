@@ -62,6 +62,30 @@ def zone_colors(arr: np.ndarray) -> dict:
     return out
 
 
+def near_white_frac(arr: np.ndarray, thr: int = 235) -> float:
+    """Fração de pixels quase-brancos (menor canal >= thr): o proxy de 'chapado de BRANCO /
+    lavado'. Mais amplo que clipped_white (>=250) — pega o off-white sem cor, não só o estouro."""
+    return round(float((arr.min(2) >= thr).mean()), 4)
+
+
+def texture_frac(arr: np.ndarray, win: int = 8, lo: float = 1.0, hi: float = 20.0) -> float:
+    """ADVISORY (não-veredito) de 'quanta variação de textura há?': fração de tiles win×win cujo
+    desvio-padrão local cai na banda [lo,hi]. Textura de veio/concreto/pedra (amplitude média) cai
+    na banda; a cor chapada fica abaixo. CAVEAT (revisão adversarial): NÃO é um veredito confiável de
+    'tem textura?' num render de LINHA do SketchUp — (a) as texturas de TECIDO do pipeline são
+    sutis (std de tile ~0.7-1.3, quase no piso de ruído) e podem ler como chapadas; (b) as arestas
+    ANTIALIASED do SU caem na banda média (~5-11) e inflam o número sem material. Por isso o
+    flat_white_gate reporta este número mas NÃO decide veredito com ele; a prova de textura aplicada
+    é o log per-kind do place_layout_skp.rb + o olho do Felipe. Determinístico/idempotente."""
+    lum = arr @ _W
+    h, w = lum.shape
+    hh, ww = h - h % win, w - w % win
+    if hh < win or ww < win:
+        return 0.0
+    tstd = lum[:hh, :ww].reshape(hh // win, win, ww // win, win).std(axis=(1, 3))
+    return round(float(((tstd >= lo) & (tstd <= hi)).mean()), 4)
+
+
 def fingerprint(png_path: str | Path, k: int = 8) -> dict:
     """Fingerprint determinístico de um render. Devolve dict serializável."""
     p = Path(png_path)
@@ -85,6 +109,8 @@ def fingerprint(png_path: str | Path, k: int = 8) -> dict:
         "clipped_pct": round(100 * clipped / npix, 3),
         "near_black_pct": round(100 * dark / npix, 1),
         "warmth": _warmth(arr.reshape(-1, 3).mean(0)),   # calor global médio
+        "near_white_pct": round(100 * near_white_frac(arr), 2),   # 'chapado de branco' (flat_white_gate)
+        "texture_frac": texture_frac(arr),                        # 'tem textura?' (flat_white_gate)
         "palette": dominant_palette(img, k),
         "zones": zone_colors(arr),
     }
