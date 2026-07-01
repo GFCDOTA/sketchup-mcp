@@ -434,9 +434,13 @@ def collect_boxes(con):
     # ANTES de qualquer serializacao LAYOUT_BOXES. Kind fora do mapa fica intacto.
     style = os.environ.get("FURNISH_STYLE")
     if style:
-        from tools.style_spec import apply_style
+        from tools.style_spec import apply_style, attach_materials
         nrec = apply_style(all_boxes, style)
         print(f"[furnish-apt] estilo '{style}': {nrec} boxes recoloridos")
+        # FP-037: resolve material por (familia_de_modulo, kind) e anexa por box. Destrava madeira
+        # no rack/mesa (kinds base/top/front) SEM contaminar o sofa (sofa.base = flat/grafite).
+        ntex = attach_materials(all_boxes, style)
+        print(f"[furnish-apt] material por modulo: {ntex} boxes com textura resolvida")
     return all_boxes, summary
 
 

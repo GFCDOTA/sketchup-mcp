@@ -18,6 +18,12 @@ def vray_export_run
       tex_map = {
         'ph_estrado' => wd, 'ph_foot' => wd, 'ph_pe' => wd, 'ph_plinto' => wd, 'ph_rodape' => wd,
         'ph_mesa_centro' => wd, 'ph_base' => wd,
+        # FP-037: os kinds do rack/mesa viraram ph_{familia}_{kind} no path interativo (material por
+        # modulo). Espelha aqui p/ o V-Ray NAO regredir: o corpo do rack era 'ph_base'=>wd (madeira);
+        # com ph_rack_base ele nao casava mais o tex_map -> ficava flat. Chaves NOVAS = renders PASS
+        # antigos (sem esses materiais) ficam byte-estaveis; so a cozinha/rack novos ganham a madeira.
+        'ph_rack_base' => wd, 'ph_rack_top' => wd, 'ph_rack_front' => wd, 'ph_rack_niche' => wd,
+        'ph_coffee_table_top' => wd, 'ph_dining_table_top' => wd,
         'ph_corpo' => wm, 'ph_porta' => wm, 'ph_tampo' => wm, 'ph_gaveta' => wm, 'ph_rack_tv' => wm,
         'ph_dresser' => wm, 'ph_bancada' => wm, 'ph_torre' => wm, 'ph_aereo' => wm,
         # COZINHA planejada (kinds kc_* por PAPEL): madeira nos inferiores/nicho, pedra no tampo/backsplash.
