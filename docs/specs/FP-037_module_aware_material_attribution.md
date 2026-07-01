@@ -159,11 +159,16 @@ com a mesma disciplina de citação do FP-036 (madeira = `wood_dark.png`/`wood_m
 
 ## 9. Riscos
 
-- **Colisão de nome de material com o V-Ray.** O V-Ray casa `tex_map` por `ph_#{kind}`. Materiais
-  novos `ph_#{família}_#{kind}` **não** batem com as entradas do V-Ray → o V-Ray não os texturiza
-  (ficam como estão: flat, = hoje). Isso **não é regressão** (o rack decomposto já era flat no V-Ray),
-  mas é uma **divergência** interativo×V-Ray. Mitigação: documentar; follow-on adiciona entradas
-  `ph_rack_*` no `tex_map` do V-Ray (fora deste FP).
+- **Colisão de nome de material com o V-Ray — ERA REGRESSÃO (corrigido na implementação).** ⚠️ A
+  premissa "o rack já era flat no V-Ray" estava ERRADA (pega pela review adversarial): o corpo do
+  rack (kind `base`) virava material `ph_base`, e o `tex_map` do V-Ray tem `'ph_base' => wood_dark` →
+  o rack **era madeira no V-Ray**. Renomear pra `ph_rack_base` (sem entrada no `tex_map`) deixava o
+  rack **flat no V-Ray = REGRESSÃO real**. **Correção aplicada:** adicionar `ph_rack_base`/`ph_rack_top`/
+  `ph_rack_front`/`ph_rack_niche`/`ph_coffee_table_top`/`ph_dining_table_top` como aliases no `tex_map`
+  do `vray_export.rb` (chaves NOVAS → renders PASS antigos byte-estáveis; só o `.skp` FP-037 ganha/
+  mantém a madeira no V-Ray). Teste-contrato pina os aliases. Então V-Ray **não regride** — mas foi
+  necessário tocar o `vray_export.rb` (o não-goal "não mexer no V-Ray se não for necessário" cedeu ao
+  "é necessário p/ não regredir").
 - **Normalização de módulo frágil.** Rótulos humanos (`"Mesa de centro"`) podem mudar. Mitigação:
   `module_family` tolerante + teste que cobre TODOS os rótulos reais emitidos pelos brains (varrer
   `furnish_apartment` por `module=`), e fallback seguro (desconhecido→"" → resolve por kind).
