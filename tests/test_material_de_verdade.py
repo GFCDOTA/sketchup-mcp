@@ -176,10 +176,11 @@ def test_flat_white_does_not_false_fail_fabric_sofa(tmp_path):
 
 
 def test_flat_white_warns_on_blank_render(tmp_path):
-    """Render quase-VAZIO/uniforme (SU nao desenhou / uma cor so) -> WARN (contraste minusculo)."""
+    """Render quase-VAZIO/uniforme (SU nao desenhou / uma cor so) -> WARN (contraste minusculo).
+    (FP-039: veredito por flag de vocabulario fixo 'quase_vazio'.)"""
     r = flat_white_check(_blank_png(tmp_path / "blank.png"), "industrial")
     assert r["result"] == "WARN", r
-    assert "quase-vazio" in " ".join(r["warns"])
+    assert "quase_vazio" in r["flags"]
 
 
 def test_gate_verdict_is_texture_frac_independent(tmp_path):
