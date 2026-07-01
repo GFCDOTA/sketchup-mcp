@@ -1621,7 +1621,7 @@ def main() -> int:
                 merged["fixture"] = fixture
                 merged["attempt"] = "final"
                 merged["axes"] = axes_out
-                merged["source"] = normalized.get("source", "oracle")
+                merged["source"] = normalized.get("source", "oracle_bridge")
                 merged["oracle_verdict"] = oracle_verdict
                 merged["oracle_verdict_effective"] = effective_oracle_verdict
                 merged["oracle_discriminated"] = oracle_discriminated
