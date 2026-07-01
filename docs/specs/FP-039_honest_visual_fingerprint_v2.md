@@ -45,12 +45,15 @@ tier confiável:
 
 1. **Métricas CONFIÁVEIS (decision-grade)** — o gate PODE decidir com elas:
    - `near_white_frac` — excesso de branco/washed (já existe, FP-036).
-   - `large_flat_area_frac` — fração da imagem em **grandes áreas chapadas** (regiões amplas de cor
-     quase-uniforme). NOVA.
    - `neutral_dominance` — fração em **cinza/bege dessaturado uniforme** (render "morto"/monótono). NOVA.
    - `contrast_std` — contraste global (já existe); baixo ⇒ render quase-vazio/liso.
 2. **Métricas ADVISORY** — reportadas, **nunca** decidem:
    - `texture_frac` (já existe; motivo documentado no FP-036).
+   - ⚠️ `large_flat_area_frac` — **era p/ ser confiável, mas a IMPLEMENTAÇÃO (calibração) DEMOVEU pra
+     advisory**: mede "área de cor sólida ampla", mas parede/piso e blocos coloridos LEGÍTIMOS também
+     são sólidos (fixture colorida=0.87, deliverable texturizado=0.59) → não distingue "chapado ruim"
+     de "sólido ok", então não pode decidir. Fica reportada. (O próprio fingerprint honesto se
+     auto-corrigindo — é o espírito do FP-039.)
    - `edge_frac` — fração de tiles de alto gradiente (arestas do SU); NOVA, advisory (confunde textura).
    - `palette_entropy` — entropia de Shannon da paleta dominante; NOVA, advisory (diversidade de cor).
 3. **Julgamentos PROIBIDOS pra decisão automática** — o gate **NÃO** pode emitir:
