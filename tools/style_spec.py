@@ -29,6 +29,11 @@ class StyleSpec:
     # LAYOUT_TILE_MAP) e documenta o reflexo p/ o V-Ray consumir sem numeros hardcoded no futuro
     # (refactor gated FORA desta FP p/ nao regredir o render PASS).
     kind_finish: dict = field(default_factory=dict)
+    # (familia_de_modulo, kind) -> png / finish. FP-037: resolve material por MODULO quando o kind
+    # e generico/sobrecarregado (base/top/front aparecem em rack E sofa). Chave-tupla so vive no
+    # Python (nunca vai pro JSON); a resolucao anexa mat_name/tex_png/tile_in por box.
+    module_kind_texture: dict = field(default_factory=dict)
+    module_kind_finish: dict = field(default_factory=dict)
 
 
 # ---- INDUSTRIAL compacto: sofa chumbo, rack baixo madeira escura, parede de concreto,
@@ -109,20 +114,107 @@ _MODERN_WARM_FIN = {
     "parede_concreto": _FIN_LACQUER_MATTE,                        # painel off-white = laca fosca
 }
 
+# ---- FP-037: material por (FAMILIA_DE_MODULO, kind). Destrava MADEIRA no rack/mesa-de-centro/mesa-
+# de-jantar, cujos kinds (base/top/front/niche/leg) sao GENERICOS e compartilhados com o sofa. A
+# regra de ouro: (sofa, base) e (sofa, foot) NAO tem entrada aqui -> resolvem por kind/flat (grafite),
+# entao a madeira do rack NUNCA vaza pro sofa. Wood = mesmo png do kind-level do estilo (sem inventar).
+# rack emite foot/base/top/front/niche (rack_class.build_rack); coffee_table emite top/leg;
+# dining_table emite top/saia/foot (_dining_table_square). Pes/saia ficam grafite (nao entram).
+_WOOD_IND = "wood_dark.png"
+_INDUSTRIAL_MOD_TEX = {
+    ("rack", "base"): _WOOD_IND, ("rack", "top"): _WOOD_IND,
+    ("rack", "front"): _WOOD_IND, ("rack", "niche"): _WOOD_IND,
+    ("coffee_table", "top"): _WOOD_IND,
+    ("dining_table", "top"): _WOOD_IND,
+}
+_WOOD_MW = "wood_medium.png"
+_MODERN_WARM_MOD_TEX = {
+    ("rack", "base"): _WOOD_MW, ("rack", "top"): _WOOD_MW,
+    ("rack", "front"): _WOOD_MW, ("rack", "niche"): _WOOD_MW,
+    ("coffee_table", "top"): _WOOD_MW,
+    ("dining_table", "top"): _WOOD_MW,
+}
+_INDUSTRIAL_MOD_FIN = {k: _FIN_WOOD_MATTE for k in _INDUSTRIAL_MOD_TEX}
+_MODERN_WARM_MOD_FIN = {k: _FIN_WOOD_MATTE for k in _MODERN_WARM_MOD_TEX}
+
 STYLE_TOKENS = {
     "industrial": StyleSpec(
         name="industrial", kind_rgb=_INDUSTRIAL_RGB, kind_texture=_INDUSTRIAL_TEX,
         kind_finish=_INDUSTRIAL_FIN,
+        module_kind_texture=_INDUSTRIAL_MOD_TEX, module_kind_finish=_INDUSTRIAL_MOD_FIN,
         light_kelvin=2700, fill_color=(1.0, 0.82, 0.6), floor="polished_concrete",
         must_style=("seat_cushion", "back_cushion", "arm", "tapete"),
     ),
     "modern_warm": StyleSpec(
         name="modern_warm", kind_rgb=_MODERN_WARM_RGB, kind_texture=_MODERN_WARM_TEX,
         kind_finish=_MODERN_WARM_FIN,
+        module_kind_texture=_MODERN_WARM_MOD_TEX, module_kind_finish=_MODERN_WARM_MOD_FIN,
         light_kelvin=3000, fill_color=(1.0, 0.86, 0.68), floor="light_wood",
         must_style=("seat_cushion", "back_cushion", "arm", "rack_tv", "mesa_centro", "tapete"),
     ),
 }
+
+# ---- FP-037: familia de modulo (normaliza o rotulo humano de b["module"]) + resolucao de material.
+# ORDEM importa (checar 'cadeira' antes de 'jantar'; 'criado' antes de 'cama'). Primeiro match vence.
+_FAMILY_RULES = (
+    ("cadeira", "dining_chair"), ("mesa de jantar", "dining_table"),
+    ("mesa de centro", "coffee_table"), ("rack", "rack"), ("sofa", "sofa"),
+    ("criado", "nightstand"), ("guarda", "wardrobe"), ("cama", "bed"),
+    ("tapete", "rug"), ("rug", "rug"),
+    ("parede", "wall_panel"), ("concreto", "wall_panel"),
+    ("bancada", "bathroom_vanity"), ("espelho", "bathroom_vanity"),
+    ("vaso", "bathroom_vanity"), ("gabinete", "bathroom_vanity"),
+    ("cabinet", "kitchen_cabinet"), ("cooktop", "kitchen_cabinet"),
+    ("countertop", "kitchen_cabinet"), ("backsplash", "kitchen_cabinet"),
+    ("sink", "kitchen_cabinet"), ("fridge", "kitchen_cabinet"),
+    ("hood", "kitchen_cabinet"), ("filler", "kitchen_cabinet"),
+    ("planta", "decor"), ("quadro", "decor"), ("prateleira", "decor"), ("trilho", "decor"),
+)
+
+
+def module_family(module_str) -> str:
+    """Rotulo humano de b["module"] -> familia canonica (rack/coffee_table/sofa/...). Desconhecido
+    -> "" (cai no fallback por kind). Determinístico, case-insensitive."""
+    m = str(module_str or "").lower()
+    for kw, fam in _FAMILY_RULES:
+        if kw in m:
+            return fam
+    return ""
+
+
+def resolve_material(style_name, family, kind) -> dict:
+    """Resolve o material de UMA peca por HIERARQUIA: (familia,kind) -> kind -> flat.
+    Devolve {mat_name, tex_png, tile_in}. mat_name = ph_{familia}_{kind} SO quando o override de
+    modulo casa (senao ph_{kind}, compat com o V-Ray). Sem estilo/entrada -> cor chapada (FP-036)."""
+    st = STYLE_TOKENS.get(style_name)
+    if not st:
+        return {"mat_name": f"ph_{kind}", "tex_png": None, "tile_in": 40}
+    key = (family, kind)
+    if key in st.module_kind_texture:                       # NIVEL 1: override por modulo
+        fin = st.module_kind_finish.get(key, {})
+        return {"mat_name": f"ph_{family}_{kind}", "tex_png": st.module_kind_texture[key],
+                "tile_in": fin.get("tile_in", 40)}
+    if kind in st.kind_texture:                             # NIVEL 2: mapa por kind (FP-036)
+        return {"mat_name": f"ph_{kind}", "tex_png": st.kind_texture[kind],
+                "tile_in": st.kind_finish.get(kind, {}).get("tile_in", 40)}
+    return {"mat_name": f"ph_{kind}", "tex_png": None, "tile_in": 40}   # NIVEL 3: flat
+
+
+def attach_materials(boxes, style_name):
+    """Anexa mat_name/tex_png/tile_in a cada box (IN-PLACE), resolvendo por (familia,kind). Roda
+    DEPOIS do apply_style, ANTES do dump LAYOUT_BOXES. O place_layout_skp.rb prefere esses campos
+    (senao cai no fallback FP-036 por kind). Sem estilo -> no-op. Devolve nº com textura resolvida."""
+    st = STYLE_TOKENS.get(style_name)
+    if not st:
+        return 0
+    n = 0
+    for b in boxes:
+        fam = module_family(b.get("module"))
+        r = resolve_material(style_name, fam, b.get("kind"))
+        b["mat_name"], b["tex_png"], b["tile_in"] = r["mat_name"], r["tex_png"], r["tile_in"]
+        if r["tex_png"]:
+            n += 1
+    return n
 
 
 def get_style(name):

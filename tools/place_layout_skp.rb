@@ -133,19 +133,23 @@ def pl_run
         face.pushpull(face.normal.z >= 0 ? h : -h)
       end
       kind = b['kind']
-      png = tex_map[kind]                                        # nil se o kind nao tem textura
+      # FP-037: prefere o material JA RESOLVIDO por (familia,kind) no Python (mat_name/tex_png/
+      # tile_in) — assim rack.base=madeira e sofa.base=grafite viram materiais SEPARADOS. Sem os
+      # campos (ex. slice sem attach) cai no fallback FP-036 por kind (tex_map[kind]).
+      mat_name = b['mat_name'] || "ph_#{kind}"
+      png = b.key?('tex_png') ? b['tex_png'] : tex_map[kind]
+      tile = (b['tile_in'] || tile_map[kind] || 40).to_f
       tex_path = (png && tex_dir) ? File.join(tex_dir, png) : nil
-      tile = (tile_map[kind] || 40).to_f
-      if png && tex_dir && !tex_logged[kind]                     # log por kind (invariante auditavel)
-        tex_logged[kind] = true
+      if png && tex_dir && !tex_logged[mat_name]                 # log por material (invariante auditavel)
+        tex_logged[mat_name] = true
         if File.exist?(tex_path)
-          tex_applied[kind] = true                               # so conta o que de fato texturizou
-          log << "  tex ph_#{kind} <- #{png} (tile #{tile.round})"
+          tex_applied[mat_name] = true                           # so conta o que de fato texturizou
+          log << "  tex #{mat_name} <- #{png} (tile #{tile.round})"
         else
-          log << "  tex MISS ph_#{kind}: #{png} ausente -> cor chapada"
+          log << "  tex MISS #{mat_name}: #{png} ausente -> cor chapada"
         end
       end
-      mat = pl_material(model, "ph_#{kind}", b['rgb'] || [120, 120, 120], tex_path, tile)
+      mat = pl_material(model, mat_name, b['rgb'] || [120, 120, 120], tex_path, tile)
       g.material = mat
       placed += 1
       bw = (b['x1'].to_f - b['x0'].to_f).round
