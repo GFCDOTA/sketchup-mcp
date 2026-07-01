@@ -11,7 +11,7 @@ por VRAY_STYLE). `texture_map_for` documenta o mapa que o .rb usa (mantido em si
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -23,6 +23,12 @@ class StyleSpec:
     fill_color: tuple = (1.0, 0.82, 0.6)   # fill quente (~2700K)
     floor: str = "polished_concrete"
     must_style: tuple = ()  # kinds que TEM que ser recoloridos (checado no gate)
+    # kind -> {finish,roughness,metalness,tile_in,cite}: leitura de REFLEXO por papel,
+    # destilada de references/materials/*.md (cada entrada CITA a faixa da .md, sem inventar).
+    # Contrato unico do BRDF: hoje alimenta o TILE do path interativo (place_layout_skp.rb via
+    # LAYOUT_TILE_MAP) e documenta o reflexo p/ o V-Ray consumir sem numeros hardcoded no futuro
+    # (refactor gated FORA desta FP p/ nao regredir o render PASS).
+    kind_finish: dict = field(default_factory=dict)
 
 
 # ---- INDUSTRIAL compacto: sofa chumbo, rack baixo madeira escura, parede de concreto,
@@ -67,19 +73,52 @@ _MODERN_WARM_RGB = {
     "tapete": (180, 172, 158),
 }
 _MODERN_WARM_TEX = {
-    "rack_tv": "wood.png", "mesa_centro": "wood.png", "top": "wood.png",
-    "shelf_plank": "wood.png", "parede_concreto": "wood_floor.png",
-    "seat_cushion": "fabric.png", "back_cushion": "fabric.png", "arm": "fabric.png",
+    # nogueira clara -> wood_medium (wood.png/fabric.png NAO existem em assets/textures/procedural;
+    # referencia-los deixava o path interativo cair no fallback chapado). painel off-white = LACA
+    # LISA -> SEM textura (so cor+finish fosco); nao herda o wood_floor antigo (era incoerente).
+    "rack_tv": "wood_medium.png", "mesa_centro": "wood_medium.png", "top": "wood_medium.png",
+    "shelf_plank": "wood_medium.png",
+    "seat_cushion": "fabric_light.png", "back_cushion": "fabric_light.png", "arm": "fabric_light.png",
+}
+
+# ---- FINISH / BRDF por PAPEL (destilado de references/materials/*.md; cada token CITA a .md).
+# tile_in = tamanho fisico do tile (in) p/ o path interativo; parede ~2m pede tile grande (80).
+# fabric NAO ganha token: e o mais fosco/difuso da lista, cor+trama bastam (sem reflexo p/ ler).
+_FIN_WOOD_MATTE = {"finish": "matte", "roughness": 0.60, "metalness": 0.0, "tile_in": 40,
+                   "cite": "wood.md: manter fosco/acetinado; verniz brilhante data (sem gloss)"}
+_FIN_GRAPHITE = {"finish": "matte", "roughness": 0.70, "metalness": 0.40, "tile_in": 40,
+                 "cite": "metal.md: grafite fosco roughness 0.6-0.8, metalness medio"}
+_FIN_BLACK_MATTE = {"finish": "matte", "roughness": 0.80, "metalness": 0.30, "tile_in": 40,
+                    "cite": "metal.md: preto fosco roughness alta, reflexo minimo"}
+_FIN_CONCRETE = {"finish": "matte", "roughness": 0.85, "metalness": 0.0, "tile_in": 80,
+                 "cite": "stone.md: mineral fosco, roughness alta, reflexo baixo (parede ~2m)"}
+_FIN_LACQUER_MATTE = {"finish": "matte", "roughness": 0.60, "metalness": 0.0, "tile_in": 80,
+                      "cite": "lacquer.md: laca fosca ZERO brilho, absorve luz"}
+
+_INDUSTRIAL_FIN = {
+    "rack_tv": _FIN_WOOD_MATTE, "mesa_centro": _FIN_WOOD_MATTE,   # madeira escura fosca
+    "base": _FIN_GRAPHITE, "foot": _FIN_GRAPHITE,                 # base/pes = grafite fosco
+    "frame": _FIN_BLACK_MATTE,                                    # moldura = metal preto fosco
+    "parede_concreto": _FIN_CONCRETE,                             # concreto aparente (tile 80)
+}
+_MODERN_WARM_FIN = {
+    "rack_tv": _FIN_WOOD_MATTE, "mesa_centro": _FIN_WOOD_MATTE, "top": _FIN_WOOD_MATTE,
+    "shelf_plank": _FIN_WOOD_MATTE, "niche": _FIN_WOOD_MATTE,
+    "base": _FIN_GRAPHITE, "foot": _FIN_GRAPHITE, "leg": _FIN_GRAPHITE, "saia": _FIN_GRAPHITE,
+    "shelf_bracket": _FIN_GRAPHITE, "back": _FIN_GRAPHITE, "frame": _FIN_BLACK_MATTE,
+    "parede_concreto": _FIN_LACQUER_MATTE,                        # painel off-white = laca fosca
 }
 
 STYLE_TOKENS = {
     "industrial": StyleSpec(
         name="industrial", kind_rgb=_INDUSTRIAL_RGB, kind_texture=_INDUSTRIAL_TEX,
+        kind_finish=_INDUSTRIAL_FIN,
         light_kelvin=2700, fill_color=(1.0, 0.82, 0.6), floor="polished_concrete",
         must_style=("seat_cushion", "back_cushion", "arm", "tapete"),
     ),
     "modern_warm": StyleSpec(
         name="modern_warm", kind_rgb=_MODERN_WARM_RGB, kind_texture=_MODERN_WARM_TEX,
+        kind_finish=_MODERN_WARM_FIN,
         light_kelvin=3000, fill_color=(1.0, 0.86, 0.68), floor="light_wood",
         must_style=("seat_cushion", "back_cushion", "arm", "rack_tv", "mesa_centro", "tapete"),
     ),
@@ -107,12 +146,43 @@ def apply_style(boxes, style_name):
 
 
 def texture_map_for(style_name):
-    """kind -> textura png (espelha o tex_map gated do vray_export.rb)."""
+    """kind -> textura png (espelha o tex_map gated do vray_export.rb). Fonte consumida
+    tanto pelo V-Ray quanto AGORA pelo path interativo (place_layout_skp.rb via LAYOUT_TEX_MAP)."""
     st = STYLE_TOKENS.get(style_name)
     return dict(st.kind_texture) if st else {}
+
+
+def finish_map_for(style_name):
+    """kind -> {finish,roughness,metalness,tile_in,cite}. Reflexo por papel, .md-citado."""
+    st = STYLE_TOKENS.get(style_name)
+    return dict(st.kind_finish) if st else {}
+
+
+def tile_map_for(style_name):
+    """kind -> tile_in (destilado do finish token). O path interativo dimensiona o tile da
+    textura SU por kind; sem entrada o .rb cai no default (40 in). Parede pede tile grande."""
+    st = STYLE_TOKENS.get(style_name)
+    if not st:
+        return {}
+    return {k: fin.get("tile_in", 40) for k, fin in st.kind_finish.items()}
+
+
+def texture_env(style_name, tex_dir):
+    """Vars de ENV que o place_layout_skp.rb le p/ texturizar o path interativo por kind.
+    Fonte UNICA (texture_map_for/tile_map_for) -> serializada UMA vez aqui p/ furnish + slice r002.
+    Estilo desconhecido -> {} (o .rb cai no default '{}' = cor chapada, comportamento anterior)."""
+    import json
+    tm = texture_map_for(style_name)
+    if not tm:
+        return {}
+    return {
+        "LAYOUT_TEX_MAP": json.dumps(tm),
+        "LAYOUT_TILE_MAP": json.dumps(tile_map_for(style_name)),
+        "LAYOUT_TEX_DIR": str(tex_dir),
+    }
 
 
 if __name__ == "__main__":
     for name, st in STYLE_TOKENS.items():
         print(f"STYLE {name}: {len(st.kind_rgb)} kinds, must_style={st.must_style}, "
-              f"kelvin={st.light_kelvin}")
+              f"kelvin={st.light_kelvin}, tex={len(st.kind_texture)}, finish={len(st.kind_finish)}")
