@@ -87,7 +87,9 @@ def test_verdict_is_pure_function_of_reliable():
     base = {"near_white_frac": 0.0, "neutral_dominance": 0.5, "contrast_std": 40.0}
     assert verdict_from_reliable(base)["result"] == "PASS"
     assert verdict_from_reliable({**base, "near_white_frac": 0.6})["result"] == "FAIL"
-    assert verdict_from_reliable({**base, "neutral_dominance": 0.95})["result"] == "WARN"
+    # neutro_monotono exige neutro ALTO E contraste baixo (senao e greyscale detalhado, ok):
+    assert verdict_from_reliable({**base, "neutral_dominance": 0.95, "contrast_std": 10.0})["result"] == "WARN"
+    assert verdict_from_reliable({**base, "neutral_dominance": 0.95})["result"] == "PASS"  # contraste 40 = detalhado
 
 
 def test_gate_result_equals_verdict_of_reliable(tmp_path):
@@ -97,17 +99,35 @@ def test_gate_result_equals_verdict_of_reliable(tmp_path):
         assert flat_white_check(p)["result"] == verdict_from_reliable(fp["reliable"])["result"]
 
 
-def test_verdict_ignores_advisory_even_when_extreme(tmp_path):
-    # dois vereditos com MESMO reliable mas 'advisory' fabricado diferente -> identicos (a func nem le)
+def test_verdict_ignores_advisory_even_when_extreme():
+    # INJETA advisory EXTREMO num input -> veredito TEM que ser identico (verdict_from_reliable so le
+    # as chaves reliable). Se algum dia a func ler uma chave advisory, este teste FALHA (trava a pureza).
     rel = {"near_white_frac": 0.1, "neutral_dominance": 0.4, "contrast_std": 30.0}
-    assert verdict_from_reliable(rel) == verdict_from_reliable(dict(rel))
+    poisoned = {**rel, "texture_frac": 1.0, "edge_frac": 1.0, "palette_entropy": 9.9,
+                "large_flat_area_frac": 1.0}
+    assert verdict_from_reliable(rel) == verdict_from_reliable(poisoned)
+
+
+def _all_strings(obj):
+    """Todas as strings (chaves + valores, recursivo) de um dict/list — pra varrer o output inteiro."""
+    out = []
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            out.append(str(k))
+            out += _all_strings(v)
+    elif isinstance(obj, (list, tuple)):
+        for v in obj:
+            out += _all_strings(v)
+    elif isinstance(obj, str):
+        out.append(obj)
+    return out
 
 
 # ---------------------------------------------------------------- PROIBIDO: nada de estetica
 def test_gate_never_emits_aesthetic_judgment(tmp_path):
     for b in (_white, _monotone, _textured, _varied):
         r = flat_white_check(b(tmp_path / f"{b.__name__}.png"))
-        blob = " ".join(list(r["flags"]) + r["fails"] + r["warns"] + list(r.keys())).lower()
+        blob = " ".join(_all_strings(r)).lower()   # varre TODO o output (chaves + valores, recursivo)
         for term in FORBIDDEN_JUDGMENT_TERMS:
             assert term not in blob, f"gate emitiu julgamento estetico proibido: {term!r}"
 

@@ -29,9 +29,12 @@ sys.path.insert(0, str(ROOT))
 # fracao de pixel quase-branco: render lavado/off-white (sinal CONFIAVEL)
 WHITE_FRAC_FAIL = 0.55
 WHITE_FRAC_WARN = 0.30
-# dominancia neutra: render monotono/'morto' (uma cor cinza/bege uniforme). Conservador: 0.90 pega
-# so o caso extremo (calib: monotono=0.97; render industrial LEGITIMO dessaturado <=0.80 nao dispara).
+# neutro_monotono: MUITO neutro (cinza/bege dessaturado) E de BAIXA variacao = render apagado/'morto'.
+# As DUAS condicoes (revisao adversarial): so 'muito neutro' pegaria um greyscale DETALHADO (que
+# desenhou algo, nao e morto); exigir tambem contraste baixo garante que e de fato apagado. Calib:
+# monotono neutral=0.97/contraste=2; industrial legitimo dessaturado <=0.80 (nao dispara de qualquer forma).
 NEUTRAL_DOM_WARN = 0.90
+NEUTRAL_CONTRAST_MAX = 15.0
 # contraste global minusculo: quase-vazio / nao desenhou (calib: washed=3, monotono=2)
 BLANK_STD_WARN = 3.0
 
@@ -51,9 +54,9 @@ def verdict_from_reliable(reliable: dict) -> dict:
     elif nw >= WHITE_FRAC_WARN:
         flags.append("quase_branco")
         warns.append(f"quase_branco: {nw:.0%} quase-branco (limite {WHITE_FRAC_WARN:.0%})")
-    if nd >= NEUTRAL_DOM_WARN:
+    if nd >= NEUTRAL_DOM_WARN and cs < NEUTRAL_CONTRAST_MAX:
         flags.append("neutro_monotono")
-        warns.append(f"neutro_monotono: {nd:.0%} cinza/bege dessaturado uniforme")
+        warns.append(f"neutro_monotono: {nd:.0%} cinza/bege dessaturado + contraste {cs} baixo (apagado)")
     if cs < BLANK_STD_WARN:
         flags.append("quase_vazio")
         warns.append(f"quase_vazio: contraste global {cs} (<{BLANK_STD_WARN}) - desenhou pouco?")
