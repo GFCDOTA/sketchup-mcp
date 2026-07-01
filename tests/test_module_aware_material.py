@@ -135,3 +135,13 @@ def test_pl_run_prefers_resolved_material():
 def test_furnish_calls_attach_materials():
     src = (ROOT / "tools/furnish_apartment.py").read_text("utf-8")
     assert "attach_materials" in src, "furnish deve resolver material por modulo antes do dump"
+
+
+def test_vray_tex_map_has_module_aware_aliases():
+    """Anti-regressao (review adversarial): FP-037 renomeou o corpo do rack de ph_base p/ ph_rack_base.
+    O V-Ray casa material por NOME EXATO; sem os aliases o rack (que era 'ph_base'=>wd = madeira no
+    FP-036) ficaria FLAT no V-Ray. Chaves novas => renders PASS antigos byte-estaveis."""
+    vr = (ROOT / "tools/vray_export.rb").read_text("utf-8")
+    for alias in ("ph_rack_base", "ph_rack_top", "ph_rack_front", "ph_rack_niche",
+                  "ph_coffee_table_top", "ph_dining_table_top"):
+        assert f"'{alias}'" in vr, f"V-Ray tex_map sem alias {alias} (rack regride pra flat no V-Ray)"
