@@ -66,6 +66,7 @@ Uma task por linha (JSONL). Campos:
 | `id`          | identificador único da task (casado com `--task-id` e com o ledger). |
 | `title`       | descrição curta, legível.                                            |
 | `safe`        | `true` = elegível pra atuação autônoma; `false` = só humano.         |
+| `kind`        | `claude` (default), `local_llm`, `tool`, `correction_cycle`.         |
 | `appearance`  | `true` = muda APARÊNCIA de planta/`.skp` → força rota `VISUAL_REVIEW`.|
 | `verify_file` | caminho do artefato que o verify deve produzir/checar.               |
 | `verify`      | comando determinístico de verificação (exit 0 = passou).             |
@@ -74,6 +75,45 @@ Uma task por linha (JSONL). Campos:
 A combinação `safe` + `appearance` decide a rota: `safe:false` nunca atua;
 `appearance:true` nunca auto-aprova (vai pra VISUAL_REVIEW mesmo que o verify
 determinístico passe).
+
+> ⚠️ Drift doc/código honesto: hoje `appearance` é consumido só pelo dashboard
+> (`server.py`) — o `dispatch()` decide a rota de aparência pela heurística de
+> arquivo tocado `_appearance_changed` (`.skp`/`.png`/`consensus`/`renderer`/…),
+> não pelo campo. Não prometa que `appearance:true` sozinho força o review.
+> ⚠️ `kind` desconhecido (typo) cai no caminho `claude` caro (fallthrough sem
+> validação) — conferir o kind antes de enfileirar.
+
+## kind: `correction_cycle` (FP-033 slice 3)
+
+Roda **UM ciclo** do `tools/correction_loop.py` (detect→classify→fix→re-check)
+escopado num worktree isolado, reusando `dispatch()` inteiro via o seam
+`run_worker` (guardas, verify, commit/push de branch, ledger — nada duplicado).
+
+Campos da task: `id`, `title`, `safe`, `kind:"correction_cycle"`, `fixture`
+(default `planta_74`), `out?` (default `E:/Claude/data/runs/noc_correction/
+<fixture>` — **fora do worktree**, que é efêmero; a fila de visão
+`vision_requests.jsonl` precisa sobreviver entre tasks; `data/runs` é scratch
+com TTL), `max_cycles?` (default 1), `verify_file` (default injetado:
+`artifacts/correction_loop/<fixture>/loop_result.json`).
+
+O worker: (1) se há fila de visão pendente, drena via
+`tools/vision_queue_consumer` (POST `/ask-vision` no `:8765`; exit 3 =
+`BLOCKED_NEEDS_FP032`/`BLOCKED_NEEDS_RENDER` honesto, o pedido FICA na fila —
+tolerado); (2) roda o loop com `--max-cycles`; (3) copia a evidência
+(`loop_result.json`, `consensus_candidate.json`, `findings.json`) pro worktree.
+
+Mapa de resultado:
+
+| saída do loop | status no ledger |
+|---|---|
+| `consensus_candidate.json` presente (fix mudou consensus) | `VISUAL_REVIEW_QUEUED` — o filename casa com a heurística `_appearance_changed`; commit `wip` + push, nunca auto-aprova |
+| só `loop_result.json`/`findings.json` (evidência) | `COMMITTED` (determinístico) |
+| loop `PENDING_VISION`/`NEEDS_FELIPE` (exit 3) | **sucesso enfileirado**, não falha — worker rc 0 |
+| loop `STALL`/`RED` (exit 1) | worker rc 1 no ledger (investigar, não re-tentar em loop) |
+
+Semântica: **1 task = 1 ciclo**. Os statuses terminais existentes
+(`COMMITTED`/`VISUAL_REVIEW_QUEUED`/`NOOP`/`VERIFY_FAILED`) impedem re-run do
+mesmo `id` — ciclo seguinte = task nova na fila.
 
 ## O ledger — `.ai_bridge/noc/actions.jsonl`
 

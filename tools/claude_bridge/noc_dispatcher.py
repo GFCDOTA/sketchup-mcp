@@ -75,6 +75,14 @@ DEFAULT_MODEL_BY_PURPOSE = {
 LOCAL_LLM_DIR = REPO_ROOT / "runs" / "local_llm"
 LOCAL_LLM_TERMINAL = {"LOCAL_LLM_DONE", "LOCAL_LLM_OFFLINE", "SKIPPED_PURPOSE_NOT_ALLOWED"}
 
+# --- kind:correction_cycle (FP-033 slice 3) --------------------------------------
+# Out dir do correction_loop PERSISTENTE e FORA do worktree (o wt e' efemero,
+# removido no finally; a fila de visao vision_requests.jsonl precisa sobreviver
+# entre tasks). data/runs = scratch com TTL por convencao do workspace.
+CORRECTION_OUT_ROOT = WORKSPACE_ROOT / "data" / "runs" / "noc_correction"
+CORRECTION_CONSUMER_TIMEOUT = 600
+CORRECTION_LOOP_TIMEOUT = 900
+
 
 def _claude_bin() -> str:
     return shutil.which("claude") or shutil.which("claude.cmd") or "claude"
@@ -232,12 +240,13 @@ def _branch_has_work(branch: str) -> bool:
         return False
 
 
-def dispatch(task, dry_run=False) -> dict:
+def dispatch(task, dry_run=False, run_worker=_run_worker) -> dict:
     tid = task.get("id", "T?")
     branch = f"chore/noc-{tid.lower()}"
     wt = WT_PARENT / f"wt-noc-{tid.lower()}"
     now = time.time()
     entry = {"t": now, "task_id": tid, "title": task.get("title", ""),
+             "kind": task.get("kind", "claude"),
              "branch": branch, "worktree": str(wt), "dry_run": dry_run}
 
     wt_created = False
@@ -261,7 +270,7 @@ def dispatch(task, dry_run=False) -> dict:
 
         worker = {"rc": None, "note": "dry-run: worker NAO lancado"}
         if not dry_run:
-            rc, out, err = _run_worker(task, wt)
+            rc, out, err = run_worker(task, wt)
             worker = {"rc": rc, "out_tail": out, "err_tail": err}
         entry["worker"] = worker
 
@@ -378,12 +387,67 @@ def dispatch_local_llm(task, dry_run=False) -> dict:
         ledger_append(entry)
 
 
+def dispatch_correction_cycle(task, dry_run=False) -> dict:
+    """kind:correction_cycle — roda UM ciclo do correction_loop (FP-033) num
+    worktree isolado, REUSANDO dispatch() via o seam run_worker: worktree off
+    origin/develop, guardas SKIPPED_*, verify_file, commit/push da branch
+    (NUNCA main) e ledger vem TODOS de la, zero duplicacao.
+
+    Worker: (1) drena a fila de visao pendente via tools.vision_queue_consumer
+    (exit 3 = BLOCKED honesto, pedido FICA na fila — tolerado); (2) roda
+    tools.correction_loop --max-cycles N (default 1; exit 3 = PENDING_VISION/
+    NEEDS_FELIPE = enfileirado, NAO e' falha); (3) copia a evidencia pro wt em
+    artifacts/correction_loop/<fixture>/ — o filename consensus_candidate.json
+    casa com _appearance_changed -> commit wip + VISUAL_REVIEW_QUEUED (aparencia
+    nunca auto-aprovada); so loop_result/findings -> COMMITTED deterministico.
+
+    Semantica: 1 task = 1 ciclo; ciclo seguinte = task NOVA na fila (os statuses
+    terminais existentes impedem re-run do mesmo id)."""
+    fixture = task.get("fixture", "planta_74")
+    out = Path(task.get("out") or (CORRECTION_OUT_ROOT / fixture)).resolve()
+
+    def _worker(task_, wt: Path):
+        out.mkdir(parents=True, exist_ok=True)
+        vq = out / "vision_requests.jsonl"
+        if vq.is_file() and vq.read_text("utf-8", errors="replace").strip():
+            rc, o, e = _run([sys.executable, "-m", "tools.vision_queue_consumer",
+                             "--out", str(out), "--fixture", fixture],
+                            cwd=wt, timeout=CORRECTION_CONSUMER_TIMEOUT)
+            if rc not in (0, 3):
+                return rc, o[-800:], e[-400:]
+        rc, o, e = _run([sys.executable, "-m", "tools.correction_loop",
+                         "--fixture", fixture, "--out", str(out),
+                         "--max-cycles", str(task_.get("max_cycles", 1))],
+                        cwd=wt, timeout=CORRECTION_LOOP_TIMEOUT)
+        if rc not in (0, 3):  # 1 = STALL/RED; 3 = enfileirado (visao/Felipe), sucesso
+            return rc, o[-800:], e[-400:]
+        dest = wt / "artifacts" / "correction_loop" / fixture
+        dest.mkdir(parents=True, exist_ok=True)
+        for name in ("loop_result.json", "consensus_candidate.json"):
+            src = out / name
+            if src.is_file():
+                shutil.copy2(src, dest / name)
+        cycles = sorted(out.glob("cycle_*/findings.json"))
+        if cycles:
+            shutil.copy2(cycles[-1], dest / "findings.json")
+        return 0, o[-800:], e[-400:]
+
+    task.setdefault("verify_file",
+                    f"artifacts/correction_loop/{fixture}/loop_result.json")
+    return dispatch(task, dry_run=dry_run, run_worker=_worker)
+
+
 def dispatch_by_kind(task, dry_run=False) -> dict:
     """Roteia a task pelo `kind` (default 'claude' = comportamento existente):
-      - local_llm -> Ollama local (token=0); se LOCAL_LLM_FALLBACK_CLAUDE, cai pro claude.
-      - tool      -> reservado pro muscle.py INLINE (brain_muscle.md), nao o dispatcher.
-      - claude    -> caminho existente: worktree isolado + `claude -p` (INALTERADO)."""
+      - local_llm        -> Ollama local (token=0); LOCAL_LLM_FALLBACK_CLAUDE cai pro claude.
+      - tool             -> reservado pro muscle.py INLINE (brain_muscle.md), nao o dispatcher.
+      - correction_cycle -> 1 ciclo do correction_loop (FP-033) via dispatch() + seam.
+      - claude           -> caminho existente: worktree isolado + `claude -p` (INALTERADO).
+    Kind DESCONHECIDO cai no caminho claude (fallthrough caro — validacao fica pra
+    outro slice; anotado no NOC_DISPATCHER.md)."""
     kind = (task.get("kind") or "claude").lower()
+    if kind == "correction_cycle":
+        return dispatch_correction_cycle(task, dry_run=dry_run)
     if kind == "local_llm":
         result = dispatch_local_llm(task, dry_run=dry_run)
         if result.get("status") == "LOCAL_LLM_FALLBACK_CLAUDE":
