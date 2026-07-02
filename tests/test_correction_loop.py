@@ -183,6 +183,75 @@ def test_confirmed_vision_finding_reinjected_routes_needs_felipe(tmp_path):
     assert json.loads(rows[0])["type"] == "floating_door"
 
 
+def test_confirmed_vision_type_never_requeues_to_the_eye(tmp_path):
+    # anti-ping-pong: um wall_stub JÁ confirmado pelo olho (source_check
+    # visual_oracle) não volta pra vision_requests.jsonl — o resíduo
+    # qualitativo é do Felipe, senão request<->confirm nunca termina
+    confirmed = {"type": "wall_stub", "severity": "WARN",
+                 "source": "claude_bridge", "source_check": "visual_oracle",
+                 "evidence": "texto livre do olho, não-determinístico",
+                 "consumed_at": "2026-07-01T12:00:00"}
+    (tmp_path / "vision_confirmed.jsonl").write_text(
+        json.dumps(confirmed) + "\n", encoding="utf-8")
+    detect = lambda ctx: loop.pending_vision_findings(tmp_path)  # noqa: E731
+    res = loop.run_loop(
+        fixture="synthetic", detect=detect, out_dir=tmp_path,
+        heartbeat=None, log=lambda m: None)
+    assert res.state == loop.NEEDS_FELIPE            # não PENDING_VISION
+    assert not (tmp_path / "vision_requests.jsonl").exists()
+    rows = (tmp_path / "visual_review_queue.jsonl").read_text(
+        "utf-8").splitlines()
+    assert len(rows) == 1
+
+
+def test_ack_makes_confirmed_rows_single_shot(tmp_path):
+    # uma confirmação alimenta EXATAMENTE um run: depois do ack, o próximo run
+    # não re-injeta e CLEAN volta a ser alcançável no out dir persistente
+    confirmed = {"type": "floating_door", "severity": "FAIL",
+                 "source": "claude_bridge", "source_check": "visual_oracle",
+                 "evidence": "door floats"}
+    (tmp_path / "vision_confirmed.jsonl").write_text(
+        json.dumps(confirmed) + "\n", encoding="utf-8")
+    injected = loop.pending_vision_findings(tmp_path)
+    assert len(injected) == 1
+    loop.ack_confirmed_findings(tmp_path, injected)
+    assert loop.pending_vision_findings(tmp_path) == []   # acked -> não volta
+    res = loop.run_loop(
+        fixture="synthetic",
+        detect=lambda ctx: loop.pending_vision_findings(tmp_path),
+        out_dir=tmp_path, heartbeat=None, log=lambda m: None)
+    assert res.state == loop.CLEAN                    # alcançável de novo
+
+
+def test_pending_vision_findings_dedups_duplicate_confirmations(tmp_path):
+    row = {"type": "wall_stub", "severity": "WARN", "source": "claude_bridge",
+           "source_check": "visual_oracle", "evidence": "e"}
+    (tmp_path / "vision_confirmed.jsonl").write_text(
+        json.dumps(row) + "\n" + json.dumps(row) + "\n", encoding="utf-8")
+    assert len(loop.pending_vision_findings(tmp_path)) == 1
+
+
+def test_run_loop_purges_stale_outputs_from_previous_run(tmp_path):
+    # out dir persistente entre tasks: cycle_*/ e consensus_candidate.json de um
+    # run anterior seriam commitados como evidência do run atual — purgados no
+    # início; as filas *.jsonl sobrevivem
+    stale_cycle = tmp_path / "cycle_03"
+    stale_cycle.mkdir(parents=True)
+    (stale_cycle / "findings.json").write_text("[]\n", encoding="utf-8")
+    (tmp_path / "consensus_candidate.json").write_text(
+        '{"stale": true}\n', encoding="utf-8")
+    (tmp_path / "vision_requests.jsonl").write_text(
+        '{"type": "wall_stub"}\n', encoding="utf-8")
+    res = loop.run_loop(
+        fixture="synthetic", detect=lambda ctx: [], out_dir=tmp_path,
+        heartbeat=None, log=lambda m: None)
+    assert res.state == loop.CLEAN
+    assert not stale_cycle.exists()                       # stale cycle purgado
+    assert not (tmp_path / "consensus_candidate.json").exists()  # sem fix = sem candidata
+    assert (tmp_path / "cycle_01" / "findings.json").exists()    # run atual
+    assert (tmp_path / "vision_requests.jsonl").exists()         # fila intacta
+
+
 def test_unfixable_autofix_escalates_to_felipe(tmp_path):
     # routed AUTOFIX but no handler -> honest escalation to the human queue
     detect = lambda ctx: [_finding("opening_host_mismatch", evidence="x")]  # noqa: E731

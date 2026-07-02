@@ -93,14 +93,31 @@ Campos da task: `id`, `title`, `safe`, `kind:"correction_cycle"`, `fixture`
 (default `planta_74`), `out?` (default `E:/Claude/data/runs/noc_correction/
 <fixture>` — **fora do worktree**, que é efêmero; a fila de visão
 `vision_requests.jsonl` precisa sobreviver entre tasks; `data/runs` é scratch
-com TTL), `max_cycles?` (default 1), `verify_file` (default injetado:
-`artifacts/correction_loop/<fixture>/loop_result.json`).
+com TTL), `render?` (path(s) de render do estado ATUAL do modelo, repassados
+como `--render` pro consumer — **sem render explícito o drain bloqueia
+`BLOCKED_NEEDS_RENDER`**: não existe fallback de "PNG mais novo do repo",
+que num worktree fresco é arbitrário e pode entregar dogfood corrompido
+commitado ao olho), `max_cycles?` (default 1), `verify_file` (default
+injetado: `artifacts/correction_loop/<fixture>/loop_result.json`).
 
 O worker: (1) se há fila de visão pendente, drena via
 `tools/vision_queue_consumer` (POST `/ask-vision` no `:8765`; exit 3 =
 `BLOCKED_NEEDS_FP032`/`BLOCKED_NEEDS_RENDER` honesto, o pedido FICA na fila —
-tolerado); (2) roda o loop com `--max-cycles`; (3) copia a evidência
+tolerado); (2) roda o loop com `--max-cycles` (o `run_loop` **purga no início**
+os outputs de runs anteriores no out persistente — `cycle_*/`,
+`consensus_candidate.json`, `loop_result.json` — então a evidência copiada é
+sempre DESTE run; as filas `*.jsonl` sobrevivem); (3) copia a evidência
 (`loop_result.json`, `consensus_candidate.json`, `findings.json`) pro worktree.
+Timeout/erro de subprocess vira `rc=1` no ledger (nunca exceção — senão a task
+ficaria sem status terminal e re-dispararia pra sempre).
+
+Ciclo de vida da fila de visão (anti-ping-pong): o consumer grava
+`vision_consumed.jsonl` **antes** de `vision_confirmed.jsonl` (crash entre os
+dois não re-drena nem duplica); cada confirmação alimenta **um** run do loop e
+é ackada em `vision_confirmed_consumed.jsonl`; finding já confirmado pelo olho
+(`source_check: visual_oracle`) nunca re-roteia `NEEDS_VISION` — o resíduo
+qualitativo sobe pro Felipe. Defeito que persiste re-entra por pedido NOVO do
+detector, não pela confirmação velha.
 
 Mapa de resultado:
 

@@ -81,7 +81,9 @@ def test_normalizes_visual_findings_v1(validator):
     assert out[0]["type"] == "missing_wall_continuation"
     assert out[0]["source"] == "claude_bridge"
     assert out[0]["route"] == fr.NEEDS_FELIPE          # oracle-seen wall gap -> human
-    assert out[1]["route"] == fr.NEEDS_VISION          # global_visual axis -> vision
+    # anti-ping-pong: o output do OLHO (source_check=visual_oracle) nunca
+    # re-roteia pro próprio olho — o resíduo qualitativo é do Felipe
+    assert out[1]["route"] == fr.NEEDS_FELIPE
 
 
 def test_visual_findings_empty_is_empty():

@@ -131,11 +131,69 @@ def test_worker_loop_exit1_is_failure(monkeypatch, sandbox, tmp_path):
 
 def test_consensus_candidate_filename_matches_appearance_heuristic(monkeypatch,
                                                                    tmp_path):
-    # garante a rota VISUAL_REVIEW_QUEUED sem lógica nova: o path copiado pelo
-    # worker casa com o padrão de substring de _appearance_changed
+    # garante a rota VISUAL_REVIEW_QUEUED sem lógica nova: no worktree fresco a
+    # candidata chega UNTRACKED num dir novo; sem -uall o git colapsa pra
+    # `?? artifacts/correction_loop/` e o filename some — o check exige -uall e
+    # a linha untracked REAL (`?? <path completo>`) tem que casar
     def fake_git(args, cwd=None, timeout=120):
-        assert args[:2] == ["status", "--porcelain"]
-        return 0, " M artifacts/correction_loop/planta_74/consensus_candidate.json\n", ""
+        assert args[:3] == ["status", "--porcelain", "-uall"]
+        return 0, "?? artifacts/correction_loop/planta_74/consensus_candidate.json\n", ""
 
     monkeypatch.setattr(nd, "_git", fake_git)
     assert nd._appearance_changed(tmp_path) is True
+
+
+def test_appearance_check_would_miss_collapsed_untracked_dir(monkeypatch,
+                                                             tmp_path):
+    # regressão do bug: a saída COLAPSADA (sem -uall) não casa com padrão nenhum;
+    # se alguém remover o -uall, o teste acima quebra e este documenta o porquê
+    def fake_git(args, cwd=None, timeout=120):
+        assert "-uall" in args
+        return 0, "?? artifacts/correction_loop/\n", ""
+
+    monkeypatch.setattr(nd, "_git", fake_git)
+    assert nd._appearance_changed(tmp_path) is False
+
+
+def test_worker_forwards_task_render_to_consumer(monkeypatch, sandbox, tmp_path):
+    out = nd.CORRECTION_OUT_ROOT / "planta_74"
+    out.mkdir(parents=True)
+    (out / "vision_requests.jsonl").write_text('{"type": "wall_stub"}\n',
+                                               encoding="utf-8")
+    cmds: list = []
+
+    def fake_run(cmd, cwd=None, timeout=120):
+        cmds.append(list(cmd))
+        return 0, "", ""
+
+    monkeypatch.setattr(nd, "_run", fake_run)
+    task = {"id": "C5", "kind": "correction_cycle", "fixture": "planta_74",
+            "render": ["runs/render_top.png", "runs/render_iso.png"]}
+    worker = _capture_worker(monkeypatch, task)
+    wt = tmp_path / "wt-noc-c5"
+    wt.mkdir()
+    worker(task, wt)
+    consumer_cmd = cmds[0]
+    assert "tools.vision_queue_consumer" in consumer_cmd
+    renders = [consumer_cmd[i + 1] for i, tok in enumerate(consumer_cmd)
+               if tok == "--render"]
+    assert renders == ["runs/render_top.png", "runs/render_iso.png"]
+
+
+def test_worker_timeout_becomes_rc1_not_exception(monkeypatch, sandbox,
+                                                  tmp_path):
+    # TimeoutExpired NÃO pode propagar: viraria linha de ledger sem status e a
+    # task re-dispararia pra sempre (paridade com _run_worker)
+    import subprocess
+
+    def hanging_run(cmd, cwd=None, timeout=120):
+        raise subprocess.TimeoutExpired(cmd=cmd, timeout=timeout)
+
+    monkeypatch.setattr(nd, "_run", hanging_run)
+    task = {"id": "C6", "kind": "correction_cycle", "fixture": "planta_74"}
+    worker = _capture_worker(monkeypatch, task)
+    wt = tmp_path / "wt-noc-c6"
+    wt.mkdir()
+    rc, _, err = worker(task, wt)
+    assert rc == 1
+    assert "TimeoutExpired" in err

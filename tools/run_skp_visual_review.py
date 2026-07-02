@@ -50,14 +50,16 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from tools.oracle_providers import (
-    OracleRequest, available_provider_names, get_provider,
-    write_oracle_request_package,
+from tools.ask_gpt_gate import (
+    GateInput as GPTGateInput,
 )
 from tools.ask_gpt_gate import (
-    CANONICAL_TRIGGERS as GPT_CANONICAL_TRIGGERS,
-    GateInput as GPTGateInput,
     run_gate as run_gpt_gate,
+)
+from tools.oracle_providers import (
+    OracleRequest,
+    available_provider_names,
+    get_provider,
 )
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -137,6 +139,25 @@ def promote_oracle_verdict(
             "report. Weak signal recorded, does not harden the gate."
         )
     return oracle_verdict, ""
+
+
+def degrade_unproven_fail(entry: dict, *, key: str = "verdict") -> dict:
+    """Per-entry half of the FP-032 promotion rule: an unproven backend cannot
+    cast a hard FAIL — degrade the entry's FAIL to WARN, appending the audit
+    note to its ``evidence``. Mutates and returns ``entry``.
+
+    Shared by this runner (per-axis, ``key="verdict"``) and by
+    ``tools/vision_queue_consumer`` (per-finding, ``key="severity"``) so the
+    rule and its message cannot diverge between the two callers.
+    """
+    if entry.get(key) == "FAIL":
+        entry[key] = "WARN"
+        entry["evidence"] = (
+            (entry.get("evidence", "") + " | ").lstrip(" |")
+            + "FP-032: oracle FAIL degraded to WARN "
+              "(backend not proven discriminative)."
+        )
+    return entry
 
 
 # ---- GPT auto-consult trigger detection ----------------------------
@@ -1134,7 +1155,7 @@ def write_regression_summary(
         f"- model_iso.png: {'OK' if has_iso else 'MISSING'}",
         f"- side_by_side_pdf_vs_skp.png: {'OK' if has_sxs else 'MISSING'}",
         f"- visual_findings.json: {'OK' if (final_dir / 'visual_findings.json').exists() else 'MISSING'}",
-        f"- regression_summary.md: OK (this file)",
+        "- regression_summary.md: OK (this file)",
     ])
     (final_dir / "regression_summary.md").write_text(
         "\n".join(lines) + "\n", encoding="utf-8"
@@ -1608,14 +1629,8 @@ def main() -> int:
                 # to WARN, so axes stay consistent with the gated top level.
                 if not oracle_discriminated:
                     for ax_name, a in list(axes_out.items()):
-                        if isinstance(a, dict) and a.get("verdict") == "FAIL":
-                            a["verdict"] = "WARN"
-                            a["evidence"] = (
-                                (a.get("evidence", "") + " | ").lstrip(" |")
-                                + "FP-032: oracle FAIL degraded to WARN "
-                                  "(backend not proven discriminative)."
-                            )
-                            axes_out[ax_name] = a
+                        if isinstance(a, dict):
+                            axes_out[ax_name] = degrade_unproven_fail(a)
 
                 merged = dict(normalized)
                 merged["fixture"] = fixture

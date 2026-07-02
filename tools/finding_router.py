@@ -82,16 +82,25 @@ def classify(finding: dict) -> str:
     Precedence: hard-guard (never-auto) > deterministic whitelist > vision >
     explicit Felipe > safe default (NEEDS_FELIPE). An unknown type is never
     auto-fixed — it escalates to the human.
+
+    Termination rule: a finding the eye itself already confirmed
+    (``source_check == "visual_oracle"``, set by
+    ``correction_finding.from_visual_findings_v1``) NEVER routes back to
+    NEEDS_VISION — re-asking the eye about its own answer would ping-pong
+    request<->confirm forever (each confirmation carries fresh evidence text,
+    so the request signature is always "new"). Once seen, the residual
+    qualitative call is the human's.
     """
     ftype = _norm((finding or {}).get("type"))
     axis = _norm((finding or {}).get("axis"))
+    eye_confirmed = _norm((finding or {}).get("source_check")) == "visual_oracle"
 
     if ftype in _NEVER_AUTO:
         return NEEDS_FELIPE
     if ftype in AUTOFIX_TYPES:
         return DETERMINISTIC_AUTOFIX
     if ftype in NEEDS_VISION_TYPES or axis in _VISION_AXES:
-        return NEEDS_VISION
+        return NEEDS_FELIPE if eye_confirmed else NEEDS_VISION
     if ftype in NEEDS_FELIPE_TYPES:
         return NEEDS_FELIPE
     return NEEDS_FELIPE  # safe default: unknown/ambiguous -> human, never auto-fix

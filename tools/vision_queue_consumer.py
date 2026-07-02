@@ -10,18 +10,24 @@ a request and finishes PENDING_VISION. This consumer closes that gap:
 which `correction_loop.pending_vision_findings()` re-injects into DETECT.
 
 Honesty contract (FP-032 parity by REUSE, not copy):
-- no render on disk           -> BLOCKED_NEEDS_RENDER (no HTTP call at all)
+- renders must be EXPLICIT (`--render` / `image_paths`) -> otherwise
+  BLOCKED_NEEDS_RENDER (no HTTP call at all). There is deliberately NO
+  "newest PNG in artifacts/review" fallback: in a fresh NOC worktree every
+  committed PNG has the same checkout mtime, so that pick is arbitrary and can
+  hand the eye a stale before/after montage or a COMMITTED corrupted
+  negative-dogfood render — findings fabricated by evidence selection.
 - bridge offline/incompatible -> BLOCKED_NEEDS_FP032 (queue intact, ZERO
   fabricated findings — the provider's honest negatives pass straight through)
 - an oracle FAIL only stands if the backend has a DISCRIMINATED
-  negative_dogfood report (`run_skp_visual_review.promote_oracle_verdict`);
-  otherwise it is degraded to WARN — the same promotion rule as the runner
+  negative_dogfood report (`run_skp_visual_review.promote_oracle_verdict` +
+  `degrade_unproven_fail`); otherwise it is degraded to WARN — the same
+  promotion rule as the runner
 - the queue file is append-only: consumption is recorded in
   `vision_consumed.jsonl` (signatures), never by rewriting the queue
 
 CLI:
     python -m tools.vision_queue_consumer --out runs/loop_x --fixture planta_74 \\
-        [--render <png>]... [--tier deep] [--bridge-url URL]
+        --render <png> [--render <png>]... [--tier deep] [--bridge-url URL]
 
 Exit codes: 0 = EMPTY/DRAINED, 3 = BLOCKED_*, 1 = unexpected error.
 """
@@ -32,39 +38,9 @@ import json
 from pathlib import Path
 from typing import Callable
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-# where the pipeline promotes review renders; monkeypatchable in tests
-ARTIFACTS_REVIEW_ROOT = REPO_ROOT / "artifacts" / "review"
+from tools.jsonl_io import append_jsonl, queue_key, read_jsonl
+
 BACKEND = "claude_bridge_vision"
-
-
-def _read_jsonl(path: Path) -> list[dict]:
-    if not path.is_file():
-        return []
-    out: list[dict] = []
-    for line in path.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if not line:
-            continue
-        try:
-            row = json.loads(line)
-        except ValueError:
-            continue
-        if isinstance(row, dict):
-            out.append(row)
-    return out
-
-
-def _append_jsonl(path: Path, rows: list[dict]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("a", encoding="utf-8") as fh:
-        for r in rows:
-            fh.write(json.dumps(r, ensure_ascii=False) + "\n")
-
-
-def _signature(f: dict) -> tuple:
-    """Same dedup key as correction_loop._queue: (type, room, evidence[:80])."""
-    return (f.get("type"), f.get("room") or "", (f.get("evidence") or "")[:80])
 
 
 def _pending_requests(out_dir: Path) -> list[dict]:
@@ -72,11 +48,11 @@ def _pending_requests(out_dir: Path) -> list[dict]:
     the loop append duplicate rows, so dedup by signature AND subtract what
     `vision_consumed.jsonl` already recorded."""
     consumed = {tuple(r.get("signature") or ()) for r in
-                _read_jsonl(out_dir / "vision_consumed.jsonl")}
+                read_jsonl(out_dir / "vision_consumed.jsonl")}
     pending: list[dict] = []
     seen: set = set()
-    for row in _read_jsonl(out_dir / "vision_requests.jsonl"):
-        sig = _signature(row)
+    for row in read_jsonl(out_dir / "vision_requests.jsonl"):
+        sig = queue_key(row)
         if sig in consumed or sig in seen:
             continue
         seen.add(sig)
@@ -84,20 +60,11 @@ def _pending_requests(out_dir: Path) -> list[dict]:
     return pending
 
 
-def _locate_renders(fixture: str) -> list[Path]:
-    """Newest promoted review PNG for the fixture (the eye needs pixels)."""
-    base = ARTIFACTS_REVIEW_ROOT / fixture
-    if not base.exists():
-        return []
-    pngs = [p for p in base.glob("**/*.png") if p.is_file()]
-    if not pngs:
-        return []
-    return [max(pngs, key=lambda p: p.stat().st_mtime)]
-
-
 def _confirm_prompt(fixture: str, pending: list[dict]) -> str:
-    """Context for the request (and the manual-review package on failure): the
-    provider still sends its own strict v1 extraction prompt over HTTP."""
+    """Context for the request (and the manual-review package on failure). The
+    provider builds its own strict v1 extraction prompt over HTTP, but renders
+    the same pending list into it via ``context["pending"]`` — the eye always
+    sees WHICH findings it was asked to confirm/localize."""
     return (
         f"Confirm-or-localize task for fixture {fixture!r}: the deterministic "
         "correction loop queued the findings below as NEEDS_VISION (no "
@@ -110,9 +77,9 @@ def _confirm_prompt(fixture: str, pending: list[dict]) -> str:
 
 
 def _degrade_unproven(vf: dict, discriminated: bool) -> dict:
-    """FP-032 promotion parity (imported rule, not a copy): an unproven backend
+    """FP-032 promotion parity (imported rules, not copies): an unproven backend
     cannot cast a hard FAIL — top level AND per-finding severities degrade."""
-    from tools.run_skp_visual_review import promote_oracle_verdict
+    from tools.run_skp_visual_review import degrade_unproven_fail, promote_oracle_verdict
     effective, note = promote_oracle_verdict(
         vf.get("top_level_verdict", "PASS"), discriminated)
     vf["top_level_verdict"] = effective
@@ -120,13 +87,8 @@ def _degrade_unproven(vf: dict, discriminated: bool) -> dict:
         vf["promotion_note"] = note
     if not discriminated:
         for f in vf.get("findings", []) or []:
-            if isinstance(f, dict) and f.get("severity") == "FAIL":
-                f["severity"] = "WARN"
-                f["evidence"] = (
-                    (f.get("evidence", "") + " | ").lstrip(" |")
-                    + "FP-032: oracle FAIL degraded to WARN "
-                      "(backend not proven discriminative)."
-                )
+            if isinstance(f, dict):
+                degrade_unproven_fail(f, key="severity")
     return vf
 
 
@@ -144,7 +106,7 @@ def drain(
 
     One provider call per drain (all pending findings ride together). Every
     exit path writes `consumer_result.json`; only DRAINED touches
-    `vision_confirmed.jsonl` / `vision_consumed.jsonl`.
+    `vision_consumed.jsonl` / `vision_confirmed.jsonl`.
     """
     out_dir = Path(out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -166,14 +128,15 @@ def drain(
     if not pending:
         return _result("EMPTY", consumed=0, pending_left=0)
 
-    # renders BEFORE any HTTP: no pixels -> nothing to show the eye
+    # renders BEFORE any HTTP: no pixels -> nothing to show the eye. Explicit
+    # only — an implicit repo-wide pick is not traceable to the current model
+    # state (see module docstring), so its absence BLOCKS instead of guessing.
     images = [Path(p) for p in (image_paths or []) if Path(p).is_file()]
-    if not images and image_paths is None:
-        images = _locate_renders(fixture)
     if not images:
         return _result(
             "BLOCKED_NEEDS_RENDER",
-            detail="no existing render to show the eye — no HTTP attempted",
+            detail="no explicit render traceable to the current model state "
+                   "(--render) — no HTTP attempted",
             pending_left=len(pending))
 
     if provider is None:
@@ -214,12 +177,18 @@ def drain(
         f["consumed_at"] = now
         f["fixture"] = fixture
         f["discriminated"] = discriminated
-    if confirmed:
-        _append_jsonl(out_dir / "vision_confirmed.jsonl", confirmed)
-    _append_jsonl(out_dir / "vision_consumed.jsonl", [
-        {"signature": list(_signature(p)), "consumed_at": now}
+    # consumed BEFORE confirmed: the two appends are separate opens, and a
+    # crash/timeout between them must not leave confirmed findings without a
+    # consumption record — that would re-drain the same pending set (a second
+    # call against the live :8765 + duplicated confirmed rows). Losing one
+    # confirmation batch on crash is the cheaper failure: the request is
+    # simply gone from the queue, nothing is duplicated or fabricated.
+    append_jsonl(out_dir / "vision_consumed.jsonl", [
+        {"signature": list(queue_key(p)), "consumed_at": now}
         for p in pending
     ])
+    if confirmed:
+        append_jsonl(out_dir / "vision_confirmed.jsonl", confirmed)
     return _result("DRAINED", consumed=len(pending), confirmed=len(confirmed),
                    pending_left=0, provider_status="ok",
                    discriminated=discriminated)
@@ -230,8 +199,9 @@ def main() -> int:
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--fixture", default="planta_74")
     ap.add_argument("--render", action="append", type=Path, default=None,
-                    help="render(s) explícitos; ausente = PNG mais novo em "
-                         "artifacts/review/<fixture>/")
+                    help="render(s) explícitos do estado ATUAL do modelo; "
+                         "obrigatório pra drenar (sem render rastreável = "
+                         "BLOCKED_NEEDS_RENDER, nunca um PNG arbitrário do repo)")
     ap.add_argument("--tier", default=None)
     ap.add_argument("--bridge-url", default=None)
     a = ap.parse_args()

@@ -90,6 +90,8 @@ def _bridge_provider(monkeypatch, response_text: str, calls: dict | None = None)
         if url.endswith("/ask-vision"):
             if calls is not None:
                 calls["ask"] = calls.get("ask", 0) + 1
+                calls["prompt"] = json.loads(
+                    req.data.decode("utf-8"))["prompt"]
             return _FakeResp(json.dumps(
                 {"response": response_text}).encode("utf-8"))
         raise AssertionError(f"unexpected url {url}")
@@ -149,12 +151,28 @@ def test_incompatible_bridge_blocks(monkeypatch, tmp_path):
 
 
 def test_no_render_blocks_before_http(monkeypatch, tmp_path):
+    # renders são EXPLÍCITOS: sem --render/image_paths NÃO existe fallback pra
+    # "PNG mais novo do repo" (mtime de checkout é arbitrário e inclui dogfood
+    # corrompido commitado) — bloqueia honesto antes de qualquer HTTP
     _seed_queue(tmp_path, [_pending()])
     _no_http(monkeypatch)             # not even probe() may fire
-    monkeypatch.setattr(vqc, "ARTIFACTS_REVIEW_ROOT", tmp_path / "no_reviews")
     res = vqc.drain(tmp_path, fixture="planta_74", now=NOW, log=lambda m: None)
     assert res["status"] == "BLOCKED_NEEDS_RENDER"
     assert not (tmp_path / "vision_confirmed.jsonl").exists()
+    # e a lista explícita vazia (paths inexistentes) bloqueia igual
+    res2 = vqc.drain(tmp_path, fixture="planta_74",
+                     image_paths=[tmp_path / "missing.png"],
+                     now=NOW, log=lambda m: None)
+    assert res2["status"] == "BLOCKED_NEEDS_RENDER"
+
+
+def test_no_implicit_repo_png_fallback_exists():
+    # regressão dos achados de seleção de evidência: o consumidor não pode ter
+    # um picker implícito de PNG do repo (mtime/glob) — render é sempre injetado
+    import inspect
+    src = inspect.getsource(vqc)
+    assert "ARTIFACTS_REVIEW_ROOT" not in src
+    assert "st_mtime" not in src
 
 
 # --- drained path: contract + promotion parity ---------------------------------
@@ -214,6 +232,59 @@ def test_fail_degraded_to_warn_without_discrimination(monkeypatch, tmp_path):
         (out / "vision_confirmed.jsonl").read_text("utf-8").splitlines()[0])
     assert row["severity"] == "WARN"                 # FP-032 promotion parity
     assert "degraded to WARN" in row["evidence"]
+
+
+def test_eye_prompt_carries_the_pending_findings(monkeypatch, tmp_path):
+    # o contrato confirm/re-localize/drop só existe se o olho VÊ o que foi
+    # pedido: o prompt POSTado no /ask-vision tem que carregar a fila pendente
+    # (context["pending"] renderizado por _build_vision_prompt), não só a
+    # extração genérica
+    _seed_queue(tmp_path, [_pending(evidence="stub na parede norte")])
+    img = _png(tmp_path)
+    calls: dict = {}
+    p = _bridge_provider(monkeypatch, _v1_text([], verdict="PASS"), calls=calls)
+    res = vqc.drain(tmp_path, fixture="planta_74", provider=p,
+                    image_paths=[img], now=NOW, log=lambda m: None)
+    assert res["status"] == "DRAINED"
+    assert "stub na parede norte" in calls["prompt"]
+    assert "confirm" in calls["prompt"].lower()
+
+
+def test_consumed_recorded_even_when_confirm_write_would_be_lost(monkeypatch,
+                                                                 tmp_path):
+    # atomicidade: consumed é gravado ANTES de confirmed — crash entre os dois
+    # não pode re-drenar o mesmo pending (2ª chamada ao :8765 + rows duplicadas);
+    # perder 1 confirmação é o modo de falha barato
+    _seed_queue(tmp_path, [_pending()])
+    img = _png(tmp_path)
+    findings = [{"id": "vf_001", "severity": "WARN", "axis": "global_visual",
+                 "type": "wall_stub", "location": "top",
+                 "evidence_image": "render.png", "evidence": "stub"}]
+    p = _bridge_provider(monkeypatch, _v1_text(findings, verdict="WARN"))
+
+    real_append = vqc.append_jsonl
+    order: list = []
+
+    def tracking_append(path, rows):
+        order.append(path.name)
+        if path.name == "vision_confirmed.jsonl":
+            raise OSError("disk died between the two appends")
+        real_append(path, rows)
+
+    monkeypatch.setattr(vqc, "append_jsonl", tracking_append)
+    with pytest.raises(OSError):
+        vqc.drain(tmp_path, fixture="planta_74", provider=p,
+                  image_paths=[img], now=NOW, log=lambda m: None)
+    assert order[0] == "vision_consumed.jsonl"     # consumed gravado primeiro
+    # próximo drain NÃO re-chama o olho: pending já consumido
+    monkeypatch.setattr(vqc, "append_jsonl", real_append)
+    calls: dict = {}
+    p2 = _bridge_provider(monkeypatch, _v1_text([], verdict="PASS"),
+                          calls=calls)
+    res = vqc.drain(tmp_path, fixture="planta_74", provider=p2,
+                    image_paths=[img], now=NOW, log=lambda m: None)
+    assert res["status"] == "EMPTY"
+    assert "ask" not in calls
 
 
 def test_duplicate_rows_consumed_once_and_not_redrained(monkeypatch, tmp_path):

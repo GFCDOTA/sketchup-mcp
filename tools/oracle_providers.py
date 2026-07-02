@@ -35,7 +35,7 @@ import json
 import shutil
 import urllib.error
 import urllib.request
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -464,6 +464,7 @@ class OllamaVisionProvider(OracleProvider):
         """Read + resize + base64. Resize protects the context window."""
         import base64
         import io
+
         from PIL import Image
 
         with Image.open(path) as img:
@@ -647,10 +648,25 @@ class ClaudeBridgeVisionProvider(OracleProvider):
     def _build_vision_prompt(self, req: OracleRequest) -> str:
         """Prompt that OVERRIDES the bridge's GO/NO-GO SYSTEM format and asks
         for a strict `visual_findings.v1` JSON, driven by actually reading the
-        renders (whose absolute paths are listed so `claude -p` can Read them)."""
+        renders (whose absolute paths are listed so `claude -p` can Read them).
+
+        When the caller queued specific findings for confirmation
+        (``context["pending"]``, set by `tools/vision_queue_consumer`), they are
+        rendered into the prompt so the eye actually SEES what it was asked to
+        confirm/re-localize/drop — otherwise the confirm-or-drop contract would
+        be decided by omission, not by the eye."""
         ctx = req.context if isinstance(req.context, dict) else {}
         gates = ctx.get("gates_self_check", {}) or {}
         stats = ctx.get("shell_stats_from_python", {}) or {}
+        pending = ctx.get("pending") or []
+        pending_block = ""
+        if pending:
+            pending_block = (
+                "Pending findings queued for confirmation — for EACH one, "
+                "confirm, re-localize or drop it based on what you SEE in the "
+                "renders (never invent a defect that is not visible):\n"
+                + json.dumps(pending, indent=2, ensure_ascii=False) + "\n\n"
+            )
         ctx_one_line = (
             f"gates_ok={sum(1 for v in gates.values() if v is True)}/{len(gates) or '?'} "
             f"walls={stats.get('input_walls', '?')} "
@@ -693,6 +709,7 @@ class ClaudeBridgeVisionProvider(OracleProvider):
             "shows a wall gap / erased segment / non-enclosed perimeter, emit a "
             "missing_wall_continuation finding (severity FAIL) with its location. "
             "Report ONLY what you SEE.\n\n"
+            f"{pending_block}"
             f"Geometry context (secondary — never overrides the pixels): "
             f"{ctx_one_line}.\n"
         )

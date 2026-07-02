@@ -32,6 +32,7 @@ from __future__ import annotations
 import argparse
 import copy
 import json
+import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
@@ -39,6 +40,7 @@ from typing import Callable
 from tools import correction_finding as cfind
 from tools import correction_fixes as cfix
 from tools import finding_router as frouter
+from tools.jsonl_io import append_jsonl, queue_key, read_jsonl
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -90,13 +92,6 @@ def _default_heartbeat(session_id: str, cycle: int, stage: str) -> None:
         pass
 
 
-def _append_jsonl(path: Path, rows: list[dict]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("a", encoding="utf-8") as fh:
-        for r in rows:
-            fh.write(json.dumps(r, ensure_ascii=False) + "\n")
-
-
 def run_loop(
     *,
     fixture: str,
@@ -116,6 +111,16 @@ def run_loop(
     correction_findings (see tools/correction_finding)."""
     out_dir = Path(out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
+    # Run outputs describe THIS run only. The out dir is persistent across NOC
+    # tasks (by design: the *.jsonl queues must survive), and cycle numbering
+    # restarts at cycle_01 every run — so leftovers from a previous run
+    # (cycle_NN/ dirs, consensus_candidate.json, loop_result.json) would be
+    # picked up as stale evidence of the current run. Purge them; queues stay.
+    for stale in sorted(out_dir.glob("cycle_*")):
+        if stale.is_dir():
+            shutil.rmtree(stale)
+    for name in ("consensus_candidate.json", "loop_result.json"):
+        (out_dir / name).unlink(missing_ok=True)
     sid = f"correction-loop:{fixture}"
     ctx = cfix.FixContext(
         consensus=copy.deepcopy(consensus) if consensus is not None else None,
@@ -138,13 +143,13 @@ def run_loop(
     def _queue(kind: str, findings: list[dict], seen: set) -> int:
         fresh = []
         for f in findings:
-            key = (f.get("type"), f.get("room", ""), f.get("evidence", "")[:80])
+            key = queue_key(f)   # same identity the consumer dedups by
             if key in seen:
                 continue
             seen.add(key)
             fresh.append({**f, "queued_as": kind})
         if fresh:
-            _append_jsonl(out_dir / f"{kind}.jsonl", fresh)
+            append_jsonl(out_dir / f"{kind}.jsonl", fresh)
         return len(fresh)
 
     def _persist_cycle(cycle: int, findings: list[dict]) -> None:
@@ -287,22 +292,38 @@ def pending_vision_findings(out_dir: Path) -> list[dict]:
     """Confirmed visual findings from the FP-032 eye (`vision_confirmed.jsonl`,
     written by tools/vision_queue_consumer) — re-injected into the next DETECT.
     Keyed by out_dir, not fixture (spec:106 said fixture; every loop queue is
-    already relative to --out, so the code wins). Missing file -> []."""
-    p = Path(out_dir) / "vision_confirmed.jsonl"
-    if not p.is_file():
-        return []
+    already relative to --out, so the code wins). Missing file -> [].
+
+    A confirmed row feeds exactly ONE loop run: rows whose signature was acked
+    by `ack_confirmed_findings` (`vision_confirmed_consumed.jsonl`) are skipped,
+    otherwise a single confirmation would re-enter every future run in the
+    persistent out dir and CLEAN would become unreachable forever. Duplicate
+    rows (crash between the consumer's two appends) are deduped by the same
+    signature."""
+    out_dir = Path(out_dir)
+    acked = {tuple(r.get("signature") or ()) for r in
+             read_jsonl(out_dir / "vision_confirmed_consumed.jsonl")}
     out: list[dict] = []
-    for line in p.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if not line:
+    seen: set = set()
+    for row in read_jsonl(out_dir / "vision_confirmed.jsonl"):
+        key = queue_key(row)
+        if key in acked or key in seen:
             continue
-        try:
-            row = json.loads(line)
-        except ValueError:
-            continue  # tolerant, same stance as the dispatcher's load_queue
-        if isinstance(row, dict):
-            out.append(row)
+        seen.add(key)
+        out.append(row)
     return out
+
+
+def ack_confirmed_findings(out_dir: Path, rows: list[dict]) -> None:
+    """Record that these confirmed rows were consumed by a completed loop run
+    (routed to the Felipe queue / autofixed / reported as final findings), so
+    `pending_vision_findings` never re-injects them. Append-only, mirroring the
+    consumer's `vision_consumed.jsonl` pattern. A defect that persists after a
+    fix re-enters via a NEW eye request, not via the stale confirmation."""
+    if not rows:
+        return
+    append_jsonl(Path(out_dir) / "vision_confirmed_consumed.jsonl",
+                 [{"signature": list(queue_key(r))} for r in rows])
 
 
 def _load_fixture_consensus(fixture: str) -> dict:
@@ -324,14 +345,19 @@ def main() -> int:
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
 
+    # snapshot ONCE per run (deterministic within the run) and ack after a
+    # completed run: one confirmation feeds one run, never every future run
+    injected = pending_vision_findings(a.out)
     res = run_loop(
         fixture=a.fixture,
-        detect=lambda ctx: _consensus_detector(ctx) + pending_vision_findings(a.out),
+        detect=lambda ctx: _consensus_detector(ctx) + injected,
         consensus=_load_fixture_consensus(a.fixture),
         out_dir=a.out,
         max_cycles=a.max_cycles,
         dry_run=a.dry_run,
     )
+    if injected and res.state != RED and not a.dry_run:
+        ack_confirmed_findings(a.out, injected)
     print(f"[loop] state={res.state} cycles={res.cycles} "
           f"fixes={len(res.fixes_applied)} felipe_q={res.felipe_queued} "
           f"vision_q={res.vision_queued}")

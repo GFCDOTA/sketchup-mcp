@@ -219,8 +219,13 @@ def _run_worker(task, wt: Path):
 
 
 def _appearance_changed(wt: Path) -> bool:
-    """Mudou .skp / render / builder / consensus? -> aparencia -> gate humano."""
-    rc, out, _ = _git(["status", "--porcelain"], cwd=wt)
+    """Mudou .skp / render / builder / consensus? -> aparencia -> gate humano.
+
+    `-uall` e' load-bearing: sem ele o git COLAPSA um diretorio untracked numa
+    linha unica (`?? artifacts/correction_loop/`) e o FILENAME some — exatamente
+    o cenario real do kind:correction_cycle, onde consensus_candidate.json chega
+    num dir novo do worktree fresco e escaparia da rota VISUAL_REVIEW_QUEUED."""
+    rc, out, _ = _git(["status", "--porcelain", "-uall"], cwd=wt)
     touched = [ln[3:] for ln in out.splitlines() if ln.strip()]
     pat = (".skp", ".png", "build_plan_shell", "consensus", "renderer", "/renders/")
     return any(any(p in f for p in pat) for f in touched)
@@ -393,32 +398,49 @@ def dispatch_correction_cycle(task, dry_run=False) -> dict:
     origin/develop, guardas SKIPPED_*, verify_file, commit/push da branch
     (NUNCA main) e ledger vem TODOS de la, zero duplicacao.
 
-    Worker: (1) drena a fila de visao pendente via tools.vision_queue_consumer
-    (exit 3 = BLOCKED honesto, pedido FICA na fila — tolerado); (2) roda
+    Worker: (1) drena a fila de visao pendente via tools.vision_queue_consumer,
+    repassando task["render"] como --render (o consumer EXIGE render explicito
+    rastreavel ao estado atual — sem ele, BLOCKED_NEEDS_RENDER honesto e o
+    pedido FICA na fila; exit 3 = BLOCKED tolerado); (2) roda
     tools.correction_loop --max-cycles N (default 1; exit 3 = PENDING_VISION/
     NEEDS_FELIPE = enfileirado, NAO e' falha); (3) copia a evidencia pro wt em
-    artifacts/correction_loop/<fixture>/ — o filename consensus_candidate.json
+    artifacts/correction_loop/<fixture>/ — o run_loop purga outputs de runs
+    anteriores no comeco (cycle_*/, consensus_candidate.json), entao tudo que
+    existe no out apos o loop e' DESTE run; o filename consensus_candidate.json
     casa com _appearance_changed -> commit wip + VISUAL_REVIEW_QUEUED (aparencia
     nunca auto-aprovada); so loop_result/findings -> COMMITTED deterministico.
+
+    Timeout/erro de subprocess vira rc=1 no ledger (paridade com _run_worker),
+    nunca excecao — senao a task fica sem status terminal e re-dispara pra
+    sempre, derrubando o proprio dispatcher em --loop.
 
     Semantica: 1 task = 1 ciclo; ciclo seguinte = task NOVA na fila (os statuses
     terminais existentes impedem re-run do mesmo id)."""
     fixture = task.get("fixture", "planta_74")
     out = Path(task.get("out") or (CORRECTION_OUT_ROOT / fixture)).resolve()
 
+    def _run_step(cmd, wt, timeout):
+        try:
+            return _run(cmd, cwd=wt, timeout=timeout)
+        except subprocess.SubprocessError as e:  # TimeoutExpired incluso
+            return 1, "", f"{type(e).__name__}: {e}"
+
     def _worker(task_, wt: Path):
         out.mkdir(parents=True, exist_ok=True)
         vq = out / "vision_requests.jsonl"
         if vq.is_file() and vq.read_text("utf-8", errors="replace").strip():
-            rc, o, e = _run([sys.executable, "-m", "tools.vision_queue_consumer",
-                             "--out", str(out), "--fixture", fixture],
-                            cwd=wt, timeout=CORRECTION_CONSUMER_TIMEOUT)
+            cmd = [sys.executable, "-m", "tools.vision_queue_consumer",
+                   "--out", str(out), "--fixture", fixture]
+            renders = task_.get("render")
+            for r in ([renders] if isinstance(renders, str) else (renders or [])):
+                cmd += ["--render", str(r)]
+            rc, o, e = _run_step(cmd, wt, CORRECTION_CONSUMER_TIMEOUT)
             if rc not in (0, 3):
                 return rc, o[-800:], e[-400:]
-        rc, o, e = _run([sys.executable, "-m", "tools.correction_loop",
-                         "--fixture", fixture, "--out", str(out),
-                         "--max-cycles", str(task_.get("max_cycles", 1))],
-                        cwd=wt, timeout=CORRECTION_LOOP_TIMEOUT)
+        rc, o, e = _run_step([sys.executable, "-m", "tools.correction_loop",
+                              "--fixture", fixture, "--out", str(out),
+                              "--max-cycles", str(task_.get("max_cycles", 1))],
+                             wt, CORRECTION_LOOP_TIMEOUT)
         if rc not in (0, 3):  # 1 = STALL/RED; 3 = enfileirado (visao/Felipe), sucesso
             return rc, o[-800:], e[-400:]
         dest = wt / "artifacts" / "correction_loop" / fixture

@@ -55,6 +55,19 @@ def test_visual_axis_routes_to_vision_even_with_unknown_type():
     assert fr.classify(_f("something_new", axis="scale_rotation")) == fr.NEEDS_VISION
 
 
+@pytest.mark.parametrize("t,axis", [
+    ("wall_stub", None), ("global_visual", None), ("scale_rotation", None),
+    ("something_new", "global_visual"),
+])
+def test_eye_confirmed_finding_never_routes_back_to_vision(t, axis):
+    # anti-ping-pong: o que o próprio olho confirmou (source_check
+    # visual_oracle) não volta pra fila do olho — vai pro humano
+    f = _f(t, source="claude_bridge", source_check="visual_oracle")
+    if axis:
+        f["axis"] = axis
+    assert fr.classify(f) == fr.NEEDS_FELIPE
+
+
 # --- safe default ----------------------------------------------------------
 
 
