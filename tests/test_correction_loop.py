@@ -152,6 +152,37 @@ def test_vision_finding_queues_request_without_fabricating(tmp_path):
     assert not (tmp_path / "visual_findings.json").exists()
 
 
+def test_pending_vision_findings_reads_confirmed_and_tolerates_garbage(tmp_path):
+    assert loop.pending_vision_findings(tmp_path) == []   # missing file -> []
+    (tmp_path / "vision_confirmed.jsonl").write_text(
+        json.dumps({"type": "wall_stub", "severity": "WARN",
+                    "source": "deterministic", "evidence": "e"}) + "\n"
+        + "not json\n", encoding="utf-8")
+    out = loop.pending_vision_findings(tmp_path)
+    assert len(out) == 1
+    assert out[0]["type"] == "wall_stub"
+
+
+def test_confirmed_vision_finding_reinjected_routes_needs_felipe(tmp_path):
+    # the FP-032 eye confirmed an appearance defect (vision_queue_consumer wrote
+    # vision_confirmed.jsonl) -> re-injected via detect -> Felipe, NEVER autofix
+    confirmed = {"type": "floating_door", "severity": "FAIL",
+                 "source": "claude_bridge", "source_check": "visual_oracle",
+                 "evidence": "door floats at hall",
+                 "consumed_at": "2026-07-01T12:00:00"}
+    (tmp_path / "vision_confirmed.jsonl").write_text(
+        json.dumps(confirmed) + "\n", encoding="utf-8")
+    detect = lambda ctx: loop.pending_vision_findings(tmp_path)  # noqa: E731
+    res = loop.run_loop(
+        fixture="synthetic", detect=detect, out_dir=tmp_path,
+        heartbeat=None, log=lambda m: None)
+    assert res.state == loop.NEEDS_FELIPE
+    assert res.fixes_applied == []                # appearance never auto-fixed
+    rows = (tmp_path / "visual_review_queue.jsonl").read_text("utf-8").splitlines()
+    assert len(rows) == 1
+    assert json.loads(rows[0])["type"] == "floating_door"
+
+
 def test_unfixable_autofix_escalates_to_felipe(tmp_path):
     # routed AUTOFIX but no handler -> honest escalation to the human queue
     detect = lambda ctx: [_finding("opening_host_mismatch", evidence="x")]  # noqa: E731
@@ -209,6 +240,7 @@ def test_no_machine_appearance_verdict_in_loop_modules():
     import re
     from pathlib import Path
     pattern = re.compile(r"""['"](IMPROVED|SAME|WORSE)['"]""")
-    for mod in ("correction_loop.py", "correction_fixes.py"):
+    for mod in ("correction_loop.py", "correction_fixes.py",
+                "vision_queue_consumer.py"):
         text = (Path(loop.__file__).parent / mod).read_text(encoding="utf-8")
         assert not pattern.search(text), f"{mod} must never emit appearance verdicts"

@@ -9,8 +9,10 @@ findings, routes them (`tools/finding_router`), applies deterministic fixes
     STALL            same finding signature twice / fix worsened (reverted)
     NEEDS_FELIPE     only appearance-routed findings remain (queued, never auto)
     PENDING_VISION   only vision-routed findings remain (request queued for the
-                     FP-032 eye; wiring render->/ask-vision is the next slice —
-                     the loop NEVER fabricates a visual finding)
+                     FP-032 eye; `tools/vision_queue_consumer` drains it via
+                     POST /ask-vision and `pending_vision_findings` re-injects
+                     the confirmed result — the loop itself NEVER fabricates a
+                     visual finding)
     MAX_CYCLES       anti-runaway ceiling
     RED              unexpected error (surfaced, not swallowed)
 
@@ -281,6 +283,28 @@ def _consensus_detector(_ctx: cfix.FixContext) -> list[dict]:
     })
 
 
+def pending_vision_findings(out_dir: Path) -> list[dict]:
+    """Confirmed visual findings from the FP-032 eye (`vision_confirmed.jsonl`,
+    written by tools/vision_queue_consumer) — re-injected into the next DETECT.
+    Keyed by out_dir, not fixture (spec:106 said fixture; every loop queue is
+    already relative to --out, so the code wins). Missing file -> []."""
+    p = Path(out_dir) / "vision_confirmed.jsonl"
+    if not p.is_file():
+        return []
+    out: list[dict] = []
+    for line in p.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            row = json.loads(line)
+        except ValueError:
+            continue  # tolerant, same stance as the dispatcher's load_queue
+        if isinstance(row, dict):
+            out.append(row)
+    return out
+
+
 def _load_fixture_consensus(fixture: str) -> dict:
     base = REPO_ROOT / "fixtures" / fixture
     p = base / "consensus_with_human_walls_and_soft_barriers.json"
@@ -302,7 +326,7 @@ def main() -> int:
 
     res = run_loop(
         fixture=a.fixture,
-        detect=_consensus_detector,
+        detect=lambda ctx: _consensus_detector(ctx) + pending_vision_findings(a.out),
         consensus=_load_fixture_consensus(a.fixture),
         out_dir=a.out,
         max_cycles=a.max_cycles,
