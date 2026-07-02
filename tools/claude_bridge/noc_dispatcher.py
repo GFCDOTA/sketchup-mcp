@@ -83,6 +83,12 @@ CORRECTION_OUT_ROOT = WORKSPACE_ROOT / "data" / "runs" / "noc_correction"
 CORRECTION_CONSUMER_TIMEOUT = 600
 CORRECTION_LOOP_TIMEOUT = 900
 
+# --- kind:variant-sweep (FP-034) --------------------------------------------------
+# Mesmo racional do CORRECTION_OUT_ROOT: o corpus.jsonl/renders do sweep sao
+# persistentes e vivem FORA do worktree efemero; a evidencia e' COPIADA pro wt.
+VARIANT_OUT_ROOT = WORKSPACE_ROOT / "data" / "runs" / "noc_variant_sweep"
+VARIANT_SWEEP_TIMEOUT = 900
+
 
 def _claude_bin() -> str:
     return shutil.which("claude") or shutil.which("claude.cmd") or "claude"
@@ -459,17 +465,71 @@ def dispatch_correction_cycle(task, dry_run=False) -> dict:
     return dispatch(task, dry_run=dry_run, run_worker=_worker)
 
 
+def dispatch_variant_sweep(task, dry_run=False) -> dict:
+    """kind:variant-sweep — roda UM sweep de variantes julgadas (FP-034) via o
+    seam run_worker do dispatch(): guardas SKIPPED_*, verify_file, commit/push
+    da branch (NUNCA main) e ledger vem todos de la, zero duplicacao.
+
+    DESVIO deliberado do precedente correction_cycle: o worker roda com
+    cwd=REPO_ROOT (a arvore DESTE dispatcher), nao cwd=wt — o wt vem de
+    origin/develop, que pre-merge NAO tem tools/variant_sweep.py; e o sweep so
+    PRODUZ evidencia (corpus/renders), nunca edita o wt. A evidencia e' copiada
+    pro wt em artifacts/variant_sweep/<plant>/ — a copia de >=1 .png dispara
+    _appearance_changed -> VISUAL_REVIEW_QUEUED (o `appearance:true` da task e'
+    decorativo pro dispatch; a rota vem da heuristica de filename, drift
+    documentado no NOC_DISPATCHER.md). PT_TO_M=0.0259 e' responsabilidade do
+    proprio tools/variant_sweep.py (setdefault no topo do modulo).
+
+    Timeout/erro de subprocess vira rc=1 (paridade com _run_step do
+    correction_cycle) — excecao propagada deixaria a task sem status terminal.
+    Semantica: 1 task = 1 sweep; sweep seguinte = task NOVA na fila."""
+    plant = task.get("plant", "planta_74")
+    out = Path(task.get("out") or (VARIANT_OUT_ROOT / plant)).resolve()
+
+    def _run_step(cmd, cwd, timeout):
+        try:
+            return _run(cmd, cwd=cwd, timeout=timeout)
+        except subprocess.SubprocessError as e:  # TimeoutExpired incluso
+            return 1, "", f"{type(e).__name__}: {e}"
+
+    def _worker(task_, wt: Path):
+        out.mkdir(parents=True, exist_ok=True)
+        cmd = [sys.executable, "-m", "tools.variant_sweep",
+               "--out", str(out), "--n", str(task_.get("n", 6)),
+               "--plant", plant, "--dry-run"]
+        rc, o, e = _run_step(cmd, REPO_ROOT, VARIANT_SWEEP_TIMEOUT)
+        if rc != 0:
+            return rc, o[-800:], e[-400:]
+        dest = wt / "artifacts" / "variant_sweep" / plant
+        dest.mkdir(parents=True, exist_ok=True)
+        for name in ("corpus.jsonl", "contact_sheet.png"):
+            src = out / name
+            if src.is_file():
+                shutil.copy2(src, dest / name)
+        for png in sorted(out.glob("*/iso.png")):
+            d = dest / png.parent.name
+            d.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(png, d / png.name)
+        return 0, o[-800:], e[-400:]
+
+    task.setdefault("verify_file", f"artifacts/variant_sweep/{plant}/corpus.jsonl")
+    return dispatch(task, dry_run=dry_run, run_worker=_worker)
+
+
 def dispatch_by_kind(task, dry_run=False) -> dict:
     """Roteia a task pelo `kind` (default 'claude' = comportamento existente):
       - local_llm        -> Ollama local (token=0); LOCAL_LLM_FALLBACK_CLAUDE cai pro claude.
       - tool             -> reservado pro muscle.py INLINE (brain_muscle.md), nao o dispatcher.
       - correction_cycle -> 1 ciclo do correction_loop (FP-033) via dispatch() + seam.
+      - variant-sweep    -> 1 sweep de variantes julgadas (FP-034) via dispatch() + seam.
       - claude           -> caminho existente: worktree isolado + `claude -p` (INALTERADO).
     Kind DESCONHECIDO cai no caminho claude (fallthrough caro — validacao fica pra
     outro slice; anotado no NOC_DISPATCHER.md)."""
     kind = (task.get("kind") or "claude").lower()
     if kind == "correction_cycle":
         return dispatch_correction_cycle(task, dry_run=dry_run)
+    if kind == "variant-sweep":  # HIFEN byte-exato (spec FP-034); .lower() nao normaliza
+        return dispatch_variant_sweep(task, dry_run=dry_run)
     if kind == "local_llm":
         result = dispatch_local_llm(task, dry_run=dry_run)
         if result.get("status") == "LOCAL_LLM_FALLBACK_CLAUDE":
