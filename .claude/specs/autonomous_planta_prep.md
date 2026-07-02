@@ -26,10 +26,17 @@
 - **Cockpit runner (:8782) = STUB TOTAL.** `cockpit_api.py` `_runner()` só faz `time.sleep` +
   logs FAKE + falha pseudo-aleatória no step `verify`; auto-marcado `stub=True`. NÃO chama build,
   NÃO dispara gate, NÃO gera render. `/api/.../run` é vidro com teatro atrás.
-- **Oráculo :8765 = CRASH-LOOP AGORA.** Causa-raiz CONFIRMADA: `ops/bridge/.oauth_token` tem
-  **BOM UTF-8** (`ef bb bf`) e o `gate-watchdog-loop.ps1` faz só `.Trim()` (não tira BOM) → Bearer
-  corrompido → `claude -p` não autentica → `/health` nunca passa → relança a cada ~49s
-  (`watchdog.log` escrito hoje). Gate degrada honesto pra `SKIPPED_OFFLINE`, mas decisões não fluem.
+- **Oráculo :8765 — UPDATE 2026-07-01: VIVO, com `/ask-vision` LIGADO (FP-032 deploy).** O
+  crash-loop por BOM descrito abaixo foi CONSERTADO (job 0 ✅). Instabilidade RESIDUAL: episódios
+  de kill-loop por **Windows Defender** (ThreatID 2147941383) matando spawns
+  `powershell -ExecutionPolicy Bypass` do watchdog — 16.753 DOWNs / 10.743 relaunches em 27 dias
+  (diagnóstico no watchdog.log; agravante: 2 watchdogs em paralelo, sem singleton). Exclusões
+  Tier A/B aplicadas 2026-07-01; Tier C (powershell.exe) pendente de decisão do Felipe; hardening
+  formal (singleton, observabilidade de spawn, backoff, task legada) = spec FP-040 a escrever.
+  [Diagnóstico original de 2026-06-29, mantido como histórico:] Causa-raiz CONFIRMADA:
+  `ops/bridge/.oauth_token` tinha **BOM UTF-8** (`ef bb bf`) e o `gate-watchdog-loop.ps1` fazia só
+  `.Trim()` (não tira BOM) → Bearer corrompido → `claude -p` não autenticava → `/health` nunca
+  passava → relançava a cada ~49s.
 - **`noc-watchdog` (keepalive do atuador) = PARADO** (última sweep 2026-06-09). Sem ele a fila
   NOC não é drenada — o atuador real fica inerte.
 - **`broker.py` (auto-respondedor) = nunca rodou em produção** (só 1 selftest 2026-05-30).
@@ -47,7 +54,7 @@ head -c 3 ops/bridge/.oauth_token | xxd   # ef bb bf  → BOM presente
 
 | # | Job | Sem SU? | Pré-estagia | Trigger | Esforço |
 |---|---|---|---|---|---|
-| 0 | **Reparar o oráculo :8765** (strip BOM do `.oauth_token` + trocar `.Trim()` por strip-BOM no watchdog + matar zumbi + relançar) | ✓ | destrava TODO o eixo autônomo (gate/NOC/broker) | boot / botão "Reparar bridge" | baixo |
+| 0 | ✅ **FEITO 2026-07-01** — oráculo :8765 reparado E estendido (`/ask-vision` vivo, FP-032; discriminação provada em produção) | ✓ | destravou o eixo autônomo (gate/NOC/broker + OLHO) | — | — |
 | 1 | **Pre-flight de planta**: roda a suite determinística por fixture → `runs/preflight/<plant>.json` com PASS/FAIL itemizado | ✓ | Claude já sabe SE passa e ONDE falha, sem gastar ciclo; verde = pré-req do VISUAL_REVIEW | watcher no `consensus_*.json` / cron | baixo |
 | 2 | **Indexador de referência**: watchdog em `artifacts/reference_lab/` → `reference_db ingest` (idempotente por sha256) | ✓ | referência já indexada por cômodo/tema; tira o "architect_blocked por falta de ref" | FileSystemWatcher / cron leve | baixo |
 | 3 | **Watcher de consensus**: ao detectar parede fragmentada, roda `regenerate_consensus.py` → candidato em `runs/` + gates nele + diff (X→Y paredes). NUNCA promove | ✓ | consensus reparado-candidato + relatório esperando; Claude só decide promover (após visual) | watcher mtime / NOC `kind=consensus-repair` | médio |
@@ -68,11 +75,14 @@ revisar. **Nenhuma decisão visual foi tomada pela máquina.**
    visual é não-confiável. Job só prepara evidência.
 3. **Worker NOC: proibido `main`/`merge`**, worktree isolado, lock TTL, verify antes de manter,
    só kinds comprovadamente seguros.
-4. **Sem o :8765 vivo, não wirar a fila** — qualquer job com `claude -p` falha por auth (o BOM).
+4. **Sem o :8765 vivo, não wirar a fila** — qualquer job com `claude -p` falha por auth.
+   (2026-07-01: :8765 vivo ✅; pré-condição satisfeita ENQUANTO o hardening FP-040 não regride.)
 
 ## Recommended first
-**Job 0 — reparar o oráculo :8765** (BOM + watchdog). Baixo esforço, zero risco de planta (só toca
-auth), gargalo-raiz: com ele vivo, atuador NOC + broker + auto-consulta voltam a fluir sem reescrever nada.
+~~Job 0~~ ✅ feito (2026-07-01). **Próximos: Job 1 (pre-flight determinístico) + Job 4 (wirar a
+fila NOC)** — e o motor pros kinds seguros JÁ EXISTE: `tools/correction_loop.py` (FP-033, landado
+2026-07-01) roda DETECT→CLASSIFY→FIX→RE-CHECK sem sessão, com candidata no `--out` e aparência
+sempre em `VISUAL_REVIEW_QUEUED`. Job 4 = enfileirar `kind=correction_cycle` + religar noc-watchdog.
 
 ## Reference
 - NOC dispatcher / bridge: memória `reference_noc_dispatcher`, `reference_sketchup_cockpit_gate`
