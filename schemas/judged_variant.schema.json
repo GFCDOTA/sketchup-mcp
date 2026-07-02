@@ -1,0 +1,178 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "judged_variant/1.0.0",
+  "title": "judged_variant.v1",
+  "description": "FP-034 — um registro julgado por variante do sweep (corpus.jsonl, 1/linha). Verdicts da MAQUINA: CANDIDATE|FAIL|PENDING_VISION (nunca IMPROVED/SAME/WORSE — aparencia final e' exclusiva do human_verdict, preenchido SO pelo Felipe). machine_score e' sempre rotulado machine_provisional. visual_findings delega ao visual_findings.schema.json (FP-032) — aqui so o envelope minimo, sem duplicar o contrato. Sem additionalProperties:false: consumidores (FP-035) podem enriquecer.",
+  "type": "object",
+  "required": [
+    "schema",
+    "run_id",
+    "variant_id",
+    "created_at",
+    "plant",
+    "params",
+    "geometry",
+    "render_refs",
+    "visual_findings",
+    "machine_score",
+    "verdict",
+    "human_verdict"
+  ],
+  "properties": {
+    "schema": {
+      "const": "judged_variant/1.0.0"
+    },
+    "run_id": {
+      "type": "string"
+    },
+    "variant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "description": "derivado do mtime do artefato (deterministico), nunca clock atual"
+    },
+    "plant": {
+      "type": "string"
+    },
+    "params": {
+      "type": "object",
+      "required": [
+        "style",
+        "theme",
+        "layout_seed"
+      ],
+      "properties": {
+        "style": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "theme": {
+          "type": "string"
+        },
+        "layout_seed": {
+          "type": "integer"
+        },
+        "layout_source": {
+          "type": "string"
+        },
+        "pt_to_m": {
+          "type": "string"
+        },
+        "kitchen_theme_env_only_affects_vray": {
+          "type": "boolean",
+          "description": "honestidade: no sweep SU-free o eixo tema NAO muda a geometria/iso — e' flag do path V-Ray"
+        }
+      }
+    },
+    "geometry": {
+      "type": "object",
+      "required": [
+        "n_boxes",
+        "deterministic_gates"
+      ],
+      "properties": {
+        "n_boxes": {
+          "type": "integer"
+        },
+        "rooms": {
+          "type": "array"
+        },
+        "deterministic_gates": {
+          "type": "object",
+          "additionalProperties": {
+            "enum": [
+              "PASS",
+              "WARN",
+              "FAIL"
+            ]
+          }
+        },
+        "gate_detail": {
+          "type": "object"
+        }
+      }
+    },
+    "render_refs": {
+      "type": "object",
+      "required": [
+        "iso",
+        "sha256",
+        "renderer"
+      ],
+      "properties": {
+        "iso": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "null so quando o build abortou antes do render (ex. gate da cozinha)"
+        },
+        "sha256": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "renderer": {
+          "type": "string"
+        }
+      }
+    },
+    "visual_findings": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "schema_version"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": "visual_findings.v1"
+            }
+          }
+        }
+      ],
+      "description": "null = sem achados (PENDING_VISION, nunca fabricado); objeto = visual_findings.v1 (contrato completo em schemas/visual_findings.schema.json)"
+    },
+    "machine_score": {
+      "type": "object",
+      "required": [
+        "value",
+        "label"
+      ],
+      "properties": {
+        "value": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "label": {
+          "const": "machine_provisional"
+        }
+      }
+    },
+    "verdict": {
+      "enum": [
+        "CANDIDATE",
+        "FAIL",
+        "PENDING_VISION"
+      ]
+    },
+    "human_verdict": {
+      "type": [
+        "null",
+        "object",
+        "string"
+      ],
+      "description": "SO o Felipe preenche (shape livre); a maquina grava sempre null"
+    }
+  }
+}
