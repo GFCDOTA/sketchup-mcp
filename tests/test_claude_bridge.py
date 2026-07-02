@@ -61,6 +61,16 @@ def test_health_exposes_contract():
     assert "VISUAL_REVIEW" in h["verdict_enum"]
 
 
+def test_health_exposes_build_identity():
+    """FP-040: /health carrega a identidade do BUILD servido (sha12 + mtime do
+    server.py) — sem isso um deploy não-aplicado é invisível (o watchdog serve
+    o server.py do working tree, e 'vivo' não implica 'código novo')."""
+    h = health_payload()
+    assert len(h["server_sha12"]) == 12
+    assert h["server_sha12"] != "unknown"
+    assert h["server_mtime"] and h["server_mtime"] != "unknown"
+
+
 # ---- §6.2 red-team mode ----
 def test_parse_ask_mode_redteam():
     assert parse_ask_mode(_body({"prompt": "q", "mode": "redteam"})) == "redteam"

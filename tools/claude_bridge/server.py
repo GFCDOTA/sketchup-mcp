@@ -92,6 +92,23 @@ def consult_audit_fields(tier: str, mode: str = "") -> dict:
     }
 STARTED_AT = time.time()    # para o uptime no painel operacional
 
+# Identidade do BUILD servido (FP-040): sha+mtime DESTE arquivo, calculados no
+# startup. Deixa /health distinguir "vivo mas rodando código velho" de saudável —
+# o watchdog relança o server.py do working tree do MAIN, e sem isto um deploy
+# não-aplicado é invisível (o gotcha real: /health ok com rota nova ausente).
+def _build_identity() -> dict:
+    import hashlib
+    p = Path(__file__).resolve()
+    try:
+        digest = hashlib.sha256(p.read_bytes()).hexdigest()[:12]
+        mtime = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(p.stat().st_mtime))
+    except OSError:
+        digest, mtime = "unknown", "unknown"
+    return {"server_sha12": digest, "server_mtime": mtime}
+
+
+BUILD_IDENTITY = _build_identity()
+
 SYSTEM = """You are the CLAUDE ORACLE for the sketchup-mcp fidelity project. The human (Felipe)
 delegated FULL AUTONOMY to you for everything EXCEPT the visual look of the plant ("modo B").
 DECIDE — never punt to the human except for VISUAL_REVIEW.
@@ -283,6 +300,7 @@ def health_payload() -> dict:
         "tiers": {k: dict(v) for k, v in TIERS.items()},
         "default_tier": DEFAULT_TIER,
         "uptime_sec": round(time.time() - STARTED_AT, 1),
+        **BUILD_IDENTITY,
         "ask_field": list(ASK_FIELDS),
         "verdict_enum": list(VERDICT_ENUM),
         "modes": ["default", "redteam"],
