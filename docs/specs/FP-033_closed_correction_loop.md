@@ -1,5 +1,17 @@
 # FP-033: Closed Correction Loop — detector → typed finding → fix → re-render → re-check
 
+> **Status slice 3 (2026-07-01) — drifts resolvidos a favor do CÓDIGO:**
+> `BLOCKED_NEEDS_FP032` (spec) virou status do **CONSUMIDOR**
+> (`tools/vision_queue_consumer.py`), não estado do loop — o loop usa
+> `PENDING_VISION`. `pending_vision_findings()` existe agora, keyed por
+> **out_dir** (não fixture — todas as filas do loop já são relativas ao
+> `--out`). O `--once` da spec é `--max-cycles 1` na task NOC
+> (`kind:"correction_cycle"`, que reusa `dispatch()` via o seam `run_worker` —
+> os helpers de pseudocódigo `enqueue_render_then_vision`/`FP032_available`/
+> `noc_commit_cycle` não existem e não foram criados). Promoção FAIL só com
+> dogfood `DISCRIMINATED` (paridade FP-032 por import de
+> `run_skp_visual_review.promote_oracle_verdict`, não cópia).
+
 > **Honestidade de partida (lido no código):** quase todas as PEÇAS já existem isoladas.
 > O que NÃO existe é a **máquina de estados que costura o laço** e decide, por finding, se
 > conserta sozinha (determinístico), delega pra VISÃO (FP-032) ou sobe pro FELIPE. A
