@@ -147,3 +147,35 @@ task (`id` casa com a fila). O campo `status` é um destes:
 
 O ledger é a fonte de verdade auditável: dá pra reconstruir tudo que o atuador
 tocou, por que manteve ou descartou, e o que ficou pendente de olho humano.
+
+## Apêndice: night_feeder — quem enche a fila quando o gate dorme
+
+`tools/night_feeder.py` é o **alimentador**: um job read-only-exceto-a-fila que
+detecta ociosidade do gate (idade do último registro de
+`.ai_bridge/audit/audit.jsonl`) e faz **append** de trabalho seguro e capado em
+`queue.jsonl` — quem age continua sendo o dispatcher; o veredito visual continua
+sendo do Felipe.
+
+**Caps default (por dia, ids `NF-<YYYYMMDD>-<slug>` = idempotência):**
+
+- 1 `correction_cycle` por planta (default `planta_74`, `max_cycles: 1`);
+- 1 `variant-sweep` (real SU-free, `n: 8` — o dispatcher passa `--dry-run` pro
+  `tools.variant_sweep`, que nesse modo gera registros REAIS com
+  `PENDING_VISION` honesto, sem visão e sem SketchUp);
+- dedup duro: nunca enfileira kind+fixture que já está **pendente** na fila
+  (pendente = sem status terminal no ledger, mesma régua do `pick_task`).
+
+**Sinais reportados mas SEM ação automática (limitações honestas):**
+
+- variante `PENDING_VISION` no corpus não tem caminho de drain via fila —
+  `dispatch_variant_sweep` não expõe `--ask-vision`; upgrade manual:
+  `python -m tools.variant_sweep --ask-vision --only <variant_id> --out <run>`;
+- o drain de `vision_requests.jsonl` via fila (kind `correction_cycle`) exige
+  `render` explícito na task; o feeder **não fabrica render** (sem ele o
+  consumer bloqueia `BLOCKED_NEEDS_RENDER` e o pedido permanece).
+
+**Como rodar / desligar:** `--dry-run` imprime o plano (default sem flags);
+`--once` aplica; `--today`/`--now` injetam o clock (teste); `--no-sweep` /
+`--no-correction` desligam cada perna; desligar de vez = simplesmente não
+agendar o feeder (ele não tem daemon próprio — cada execução é one-shot,
+exit 0 sempre).
