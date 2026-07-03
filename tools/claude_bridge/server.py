@@ -579,194 +579,14 @@ def activity_summary() -> dict:
     }
 
 
-# Operational dashboard served by the gate itself (no external stack): polls
-# /health + /sessions + /events every 5s. If this page won't load, the gate is down.
-DASHBOARD_HTML = """<!doctype html>
-<html lang="pt-br"><head><meta charset="utf-8">
-<title>Claude Gate - Operacional</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-:root{--bg:#0d1117;--card:#161b22;--line:#30363d;--txt:#e6edf3;--dim:#8b949e;
---ok:#3fb950;--bad:#f85149;--warn:#d29922;--accent:#58a6ff;}
-*{box-sizing:border-box;}
-body{margin:0;background:var(--bg);color:var(--txt);
-font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
-header{display:flex;align-items:center;gap:16px;padding:16px 24px;border-bottom:1px solid var(--line);flex-wrap:wrap;}
-h1{font-size:18px;margin:0;font-weight:600;}
-.badge{padding:6px 14px;border-radius:20px;font-weight:700;letter-spacing:.5px;}
-.badge.on{background:rgba(63,185,80,.15);color:var(--ok);border:1px solid var(--ok);}
-.badge.off{background:rgba(248,81,73,.15);color:var(--bad);border:1px solid var(--bad);}
-.wrap{padding:24px;display:grid;gap:20px;grid-template-columns:1fr 1fr;max-width:1100px;}
-.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;}
-.card h2{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin:0 0 12px;}
-.kv{display:flex;justify-content:space-between;padding:3px 0;gap:12px;}
-.kv span:first-child{color:var(--dim);}
-table{width:100%;border-collapse:collapse;font-size:13px;}
-th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);}
-th{color:var(--dim);font-weight:500;}
-.flag{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;}
-.flag.OK{background:rgba(63,185,80,.15);color:var(--ok);}
-.flag.STALLED{background:rgba(210,153,34,.15);color:var(--warn);}
-.flag.PARALYZED{background:rgba(248,81,73,.15);color:var(--bad);}
-.feed{max-height:280px;overflow:auto;}
-.ev{display:flex;gap:10px;padding:4px 0;border-bottom:1px solid #21262d;font-size:12px;}
-.ev .t{color:var(--dim);white-space:nowrap;}
-.ev .k{font-weight:700;}
-.ev .k.consult{color:var(--accent);}
-.ev .k.heartbeat{color:var(--dim);}
-.timeline{display:flex;gap:3px;flex-wrap:wrap;}
-.dot{width:12px;height:12px;border-radius:3px;background:var(--line);}
-.dot.up{background:var(--ok);}
-.dot.down{background:var(--bad);}
-.full{grid-column:1 / -1;}
-.pipe{display:flex;align-items:stretch;gap:6px;flex-wrap:wrap;}
-.stg{flex:1;min-width:84px;background:#0d1117;border:1px solid var(--line);border-radius:8px;padding:10px 6px;text-align:center;font-size:12px;font-weight:600;display:flex;flex-direction:column;justify-content:center;}
-.stg small{display:block;color:var(--dim);font-weight:400;margin-top:4px;font-size:10px;}
-.stg.pdf{border-color:#6e7681;}
-.stg.human{border-color:var(--warn);background:rgba(210,153,34,.08);}
-.stg.auto{border-color:var(--accent);background:rgba(88,166,255,.07);}
-.stg.gate{border-color:var(--ok);background:rgba(63,185,80,.07);}
-.stg.ok{border-color:var(--ok);background:rgba(63,185,80,.15);}
-.arr{display:flex;align-items:center;color:var(--dim);font-size:18px;}
-.legend{margin-top:12px;display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--dim);align-items:center;}
-.lg{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:middle;}
-.lg.auto{background:rgba(88,166,255,.6);}
-.lg.human{background:rgba(210,153,34,.7);}
-.lg.gate{background:rgba(63,185,80,.6);}
-.lg.ok{background:var(--ok);}
-.docs details{border:1px solid var(--line);border-radius:6px;margin-bottom:6px;background:#0d1117;}
-.docs summary{cursor:pointer;padding:8px 12px;font-weight:600;font-size:12px;color:var(--accent);}
-.docs .d{padding:3px 14px 3px 26px;font-size:12px;border-top:1px solid #21262d;}
-.docs .d code{color:var(--warn);background:rgba(210,153,34,.08);padding:1px 6px;border-radius:4px;margin-right:7px;}
-footer{padding:0 24px 24px;color:var(--dim);font-size:12px;}
-</style></head><body>
-<header><h1>&#127899; Claude Gate - Operacional</h1>
-<span id="status" class="badge off">CHECANDO...</span>
-<span id="updated" style="color:var(--dim);font-size:12px;"></span></header>
-<div class="wrap">
-<div class="card full"><h2>Pipeline PDF -&gt; SKP (como o sketchup-mcp processa)</h2>
-<div class="pipe">
-<div class="stg pdf">PDF<small>planta</small></div><div class="arr">&#8594;</div>
-<div class="stg human">anotacao<small>HUMANO</small></div><div class="arr">&#8594;</div>
-<div class="stg auto">consensus.json<small>walls/openings/rooms</small></div><div class="arr">&#8594;</div>
-<div class="stg auto">build_shell<small>.py shapely</small></div><div class="arr">&#8594;</div>
-<div class="stg auto">.skp + renders<small>.rb SketchUp</small></div><div class="arr">&#8594;</div>
-<div class="stg gate">gates det.<small>opening_host/overlay</small></div><div class="arr">&#8594;</div>
-<div class="stg human">VISUAL_REVIEW<small>HUMANO vs PDF</small></div><div class="arr">&#8594;</div>
-<div class="stg ok">artifacts/<small>deliverable</small></div>
-</div>
-<div class="legend"><span><span class="lg auto"></span>automatico</span><span><span class="lg human"></span>gate humano</span><span><span class="lg gate"></span>deterministico (ground truth)</span><span><span class="lg ok"></span>entrega</span></div>
-<div style="margin-top:10px;color:var(--dim);font-size:12px;">O oraculo :8765 (modo B, Opus 4.8) decide as bifurcacoes tecnicas ao longo do fluxo. So o VISUAL_REVIEW sobe pro humano.</div></div>
-<div class="card"><h2>Health</h2><div id="health"></div></div>
-<div class="card"><h2>Health timeline</h2><div id="timeline" class="timeline"></div>
-<div style="margin-top:10px;color:var(--dim);font-size:12px;">verde=online | vermelho=offline | refresh 5s</div></div>
-<div class="card full"><h2>Sessoes (orquestrador)</h2>
-<table><thead><tr><th>session</th><th>cycle</th><th>idade</th><th>beats iguais</th><th>ultima acao</th><th>flags</th></tr></thead>
-<tbody id="sessions"></tbody></table></div>
-<div class="card full"><h2>Atividade (consults + heartbeats)</h2><div id="feed" class="feed"></div></div>
-<div class="card full"><h2>Diretorio .claude/ — o cerebro do projeto (clique pra expandir)</h2>
-<div class="docs">
-<details><summary>raiz</summary>
-<div class="d"><code>CLAUDE.md</code>bootloader: missao, Hard Rules, ordem de carregamento</div>
-<div class="d"><code>constitution.md</code>principios nao-negociaveis (#1 o .skp e o artefato; #8 no-skp-no-progress)</div>
-<div class="d"><code>README.md</code>orientacao/indice do diretorio</div>
-</details>
-<details><summary>memory/ — memoria persistente (estado + regras vivas)</summary>
-<div class="d"><code>project_context.md</code>o que e o projeto e onde esta</div>
-<div class="d"><code>current_state.md</code>estado atual (feito / em andamento)</div>
-<div class="d"><code>operational_rules.md</code>loop GREEN/YELLOW/RED e quando parar</div>
-<div class="d"><code>git_workflow.md</code>develop-first; disciplina de branch/commit/PR</div>
-<div class="d"><code>multi_agent_coordination.md</code>coordenacao entre sessoes/worktrees (nao clobberar)</div>
-<div class="d"><code>artifact_policy.md</code>hierarquia runs/ vs artifacts/ vs fixtures/ + promotion</div>
-<div class="d"><code>lessons_learned.md</code>licoes LL-NNN acumuladas (releia antes de repetir)</div>
-<div class="d"><code>deprecated_context.md</code>o que ficou obsoleto (nao seguir)</div>
-</details>
-<details><summary>specs/ — especificacoes (o "como deve ser")</summary>
-<div class="d"><code>product_goal.md</code>o objetivo: .skp fiel ao PDF</div>
-<div class="d"><code>fidelity_gate.md</code>o que conta como fiel (campos do geometry_report)</div>
-<div class="d"><code>skp_artifact_layout.md</code>paths/naming/metadata do .skp canonico</div>
-<div class="d"><code>skp_proof_of_progress_gate.md</code>Constitution #8: sem SKP+evidencia, nao e progresso</div>
-<div class="d"><code>gate_framework_and_audit.md</code>o gate de decisao §6 (oraculo/redteam/file-fetch/confidence/audit)</div>
-<div class="d"><code>generalize_builder_constants.md</code>blueprint pra generalizar as constantes do builder</div>
-<div class="d"><code>perfect_reference_strategy.md</code>PDF como ground truth</div>
-<div class="d"><code>sdd_and_harness_engineering.md</code>spec-driven dev + engenharia do harness</div>
-<div class="d"><code>repository_hygiene.md</code>higiene do repo (arquivar obsoletos)</div>
-<div class="d"><code>templates/</code>4 templates: artifact_contract, feature_spec, fidelity_spec, regression_summary</div>
-</details>
-<details><summary>skills/ — 10 capacidades auto-descobertas (cada uma um SKILL.md)</summary>
-<div class="d"><code>pdf-to-skp-pipeline</code>build do .skp a partir do consensus</div>
-<div class="d"><code>fidelity-review</code>checklist SKP vs PDF (humano)</div>
-<div class="d"><code>generate-and-compare-skp-after-change</code>gera SKP + compara before/after</div>
-<div class="d"><code>skp-visual-self-correction</code>Visual Oracle Gate: floating door / orphan glass / etc</div>
-<div class="d"><code>skp-artifact-management</code>promocao runs/ -&gt; artifacts/</div>
-<div class="d"><code>gpt-auto-consult-gate</code>consulta o oraculo :8765 nas decisoes reais (9 triggers)</div>
-<div class="d"><code>gh-autopilot</code>commit -&gt; PR -&gt; merge -&gt; cleanup via gh</div>
-<div class="d"><code>repo-governance</code>PR/branch/merge/hygiene</div>
-<div class="d"><code>multi-agent-handoff</code>coordenacao multi-agent/worktrees</div>
-<div class="d"><code>autonomous-fidelity-loop</code>loop continuo de fidelidade (log por ciclo + heartbeat)</div>
-</details>
-<details><summary>evals/ — avaliacao</summary>
-<div class="d"><code>eval_strategy.md</code>estrategia de avaliacao</div>
-<div class="d"><code>fidelity_rubric.md</code>rubrica de fidelidade (eixos)</div>
-<div class="d"><code>regression_matrix.md</code>matriz de regressao</div>
-</details>
-<details><summary>plans/ — planejamento</summary>
-<div class="d"><code>active_work.md</code>trabalho ativo</div>
-<div class="d"><code>next_actions.md</code>proximas acoes</div>
-<div class="d"><code>roadmap.md</code>roadmap</div>
-<div class="d"><code>stopped_work.md</code>trabalho pausado</div>
-</details>
-<details><summary>docs/ — documentacao + historico</summary>
-<div class="d"><code>index.md</code>indice dos docs</div>
-<div class="d"><code>2026-05-31_agentic_system_retro_roadmap.md</code>retro do sistema agentico + roadmap</div>
-<div class="d"><code>adr/0001-...</code>ADR da arquitetura (gate + pipeline) — este sistema</div>
-<div class="d"><code>audits/</code>3 auditorias (estrutura .claude, friction review, proof-of-progress)</div>
-</details>
-<details><summary>scratch/ — local-only (gitignored)</summary>
-<div class="d">rascunhos descartaveis; nada importante vive aqui</div>
-</details>
-</div></div>
-</div>
-<footer>Servido pelo proprio gate em :8765 - sem stack externa</footer>
-<script>
-const hist=[];
-function fmtAge(s){if(s==null)return '-';if(s<90)return s+'s';if(s<5400)return Math.round(s/60)+'m';return Math.round(s/3600)+'h';}
-function fmtTime(t){try{return new Date(t*1000).toLocaleTimeString('pt-br');}catch(e){return '';}}
-function kv(k,v){return '<div class="kv"><span>'+k+'</span><span>'+v+'</span></div>';}
-async function tick(){
-let online=false,health=null;
-try{const r=await fetch('/health',{cache:'no-store'});health=await r.json();online=r.ok;}catch(e){online=false;}
-const b=document.getElementById('status');
-b.className='badge '+(online?'on':'off');b.textContent=online?'ONLINE':'OFFLINE';
-document.getElementById('updated').textContent='atualizado '+new Date().toLocaleTimeString('pt-br');
-hist.push(online);if(hist.length>60)hist.shift();
-document.getElementById('timeline').innerHTML=hist.map(u=>'<div class="dot '+(u?'up':'down')+'"></div>').join('');
-if(health){document.getElementById('health').innerHTML=
-kv('oracle',health.oracle)+kv('model',health.model||'-')+kv('effort',health.effort||'-')+
-kv('uptime',fmtAge(health.uptime_sec))+kv('modes',(health.modes||[]).join(', '))+
-kv('endpoints',(health.endpoints||[]).join(' '));}
-else{document.getElementById('health').innerHTML='<div style="color:var(--bad)">sem resposta do /health</div>';}
-if(!online)return;
-try{const s=await (await fetch('/sessions',{cache:'no-store'})).json();
-const rows=Object.entries(s).map(function(e){var id=e[0],v=e[1];
-return '<tr><td>'+id+'</td><td>'+(v.cycle==null?'-':v.cycle)+'</td><td>'+fmtAge(v.age_sec)+'</td><td>'+(v.unchanged_beats||0)+'</td><td>'+(v.last_action||'')+'</td><td>'+(v.flags||[]).map(f=>'<span class="flag '+f+'">'+f+'</span>').join(' ')+'</td></tr>';}).join('');
-document.getElementById('sessions').innerHTML=rows||'<tr><td colspan=6 style="color:var(--dim)">nenhuma sessao batendo ponto ainda</td></tr>';}catch(e){}
-try{const ev=await (await fetch('/events',{cache:'no-store'})).json();
-document.getElementById('feed').innerHTML=ev.slice().reverse().map(function(e){
-var extra=e.kind==='consult'?('mode='+(e.mode||'default')+' | '+(e.dur_sec==null?'?':e.dur_sec)+'s | q'+(e.q_chars==null?'?':e.q_chars)):('cycle='+(e.cycle==null?'?':e.cycle)+' | '+(e.session_id||'')+' '+(e.last_action||''));
-return '<div class="ev"><span class="t">'+fmtTime(e.t)+'</span><span class="k '+e.kind+'">'+e.kind+'</span><span>'+extra+'</span></div>';}).join('')||'<div style="color:var(--dim)">sem atividade ainda</div>';}catch(e){}
-}
-tick();setInterval(tick,5000);
-</script></body></html>"""
-
-
-def dashboard_html() -> str:
-    """Serve the multi-page SPA from dashboard.html (sibling file). Falls back to
-    the inline single-page DASHBOARD_HTML if the file is missing."""
-    try:
-        return (Path(__file__).parent / "dashboard.html").read_text("utf-8")
-    except OSError:
-        return DASHBOARD_HTML
+# Operational dashboard RETIRED 2026-07-03 (unified-cockpit landed) — the page now lives
+# at :8782 (sketchup-mcp-bff), reading this gate by FILE via bridge_mirror.py. This gate
+# stays headless: root/`/dashboard` just redirect a lost bookmark to the real page.
+def _redirect_to_cockpit(req, _url):
+    req.send_response(302)
+    req.send_header("Location", "http://localhost:8782/")
+    req.send_header("Content-Length", "0")
+    req.end_headers()
 
 
 def plant_info() -> dict:
@@ -1860,8 +1680,8 @@ def llm_usage() -> dict:
 # path (rstrip'd of trailing "/") -> command. "" is the form "/" and "/dashboard"
 # reduce to. GET strips the query (urlparse); POST matches the raw path, as before.
 GET_ROUTES = {
-    "": _html_route(dashboard_html),
-    "/dashboard": _html_route(dashboard_html),
+    "": _redirect_to_cockpit,
+    "/dashboard": _redirect_to_cockpit,
     "/health": _json_route(health_payload),
     "/sessions": _json_route(sessions_view),
     "/events": _json_route(recent_events),

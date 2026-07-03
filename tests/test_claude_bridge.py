@@ -139,11 +139,12 @@ def test_health_has_model_effort_uptime():
     assert "/" in h["endpoints"] and "/events" in h["endpoints"]
 
 
-def test_dashboard_html_is_a_page():
+def test_root_and_dashboard_redirect_to_the_unified_cockpit():
+    """The gate is headless since the unified-cockpit landed (:8782 reads it by file
+    via bridge_mirror.py) — a lost bookmark to "/" or "/dashboard" should not 404."""
     import tools.claude_bridge.server as srv
-    assert srv.DASHBOARD_HTML.lstrip().startswith("<!doctype html>")
-    assert "Claude Gate" in srv.DASHBOARD_HTML
-    assert "/sessions" in srv.DASHBOARD_HTML and "/events" in srv.DASHBOARD_HTML
+    assert srv.GET_ROUTES[""] is srv._redirect_to_cockpit
+    assert srv.GET_ROUTES["/dashboard"] is srv._redirect_to_cockpit
 
 
 def test_recent_events_parses_tail_skips_garbage(tmp_path, monkeypatch):
@@ -169,17 +170,6 @@ def test_skp_inventory_shape():
             "other"} == set(inv["categories"])
 
 
-def test_dashboard_html_serves_the_spa():
-    import tools.claude_bridge.server as srv
-    html = srv.dashboard_html()
-    assert "<!doctype html>" in html.lower()
-    assert "SketchUp Creator" in html
-    # SPA tabs present (the inline fallback DASHBOARD_HTML has none of these).
-    # 8-tab nav consolidated in cockpit Fase 2A (commit 6a4b846); update this
-    # list if the nav changes again.
-    for tab in ("#home", "#sessoes", "#gate", "#review-skp",
-                "#repo", "#backlog", "#artifacts", "#docs"):
-        assert tab in html, f"missing SPA tab {tab}"
 
 
 def test_safe_artifact_blocks_escape_and_nonimage():
