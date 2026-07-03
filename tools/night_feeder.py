@@ -52,12 +52,12 @@ from tools.jsonl_io import append_jsonl, read_jsonl
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
-# Statuses terminais IMPORTADOS do dispatcher (lockstep, nao copia): task com
-# status fora deste set continua PENDENTE na fila (pick_task re-pega).
+# Statuses terminais IMPORTADOS do dispatcher (lockstep REAL, fonte unica —
+# a mesma constante que _terminal_ids() consome): task com status fora deste
+# set continua PENDENTE na fila (pick_task re-pega).
 from tools.claude_bridge import noc_dispatcher as _nd  # noqa: E402
 
-TERMINAL = {"COMMITTED", "VISUAL_REVIEW_QUEUED", "NOOP", "VERIFY_FAILED"} \
-    | _nd.LOCAL_LLM_TERMINAL
+TERMINAL = _nd.TERMINAL_STATUSES
 
 DEFAULT_IDLE_MIN = 30
 DEFAULT_SWEEP_N = 8
@@ -85,16 +85,14 @@ def latest_corpus(variant_root: Path) -> Path | None:
 
 
 def pending_vision_variants(corpus: Path | None) -> list[str]:
-    """variant_ids cujo registro LAST-WINS esta PENDING_VISION (mesma leitura
-    do variant_sweep.sweep: o corpus e append-only, a ultima linha por id vale)."""
+    """variant_ids cujo registro LAST-WINS esta PENDING_VISION. REUSA
+    corpus_to_rag._last_wins (identidade unica do last-wins por variant_id;
+    o corpus e append-only, a ultima linha por id vale)."""
     if corpus is None:
         return []
-    by_id: dict = {}
-    for r in read_jsonl(corpus):
-        vid = r.get("variant_id")
-        if vid:
-            by_id[vid] = r
-    return sorted(v for v, r in by_id.items() if r.get("verdict") == "PENDING_VISION")
+    from tools.corpus_to_rag import _last_wins
+    return sorted(r["variant_id"] for r in _last_wins(corpus)
+                  if r.get("verdict") == "PENDING_VISION")
 
 
 def pending_vision_requests(correction_root: Path) -> dict:
@@ -113,11 +111,19 @@ def pending_vision_requests(correction_root: Path) -> dict:
 
 
 def queue_state(queue_path: Path, ledger_path: Path) -> dict:
-    """Fila + ledger -> ids conhecidos, tasks PENDENTES (sem status terminal)."""
+    """Fila + ledger -> ids conhecidos, tasks PENDENTES.
+
+    Pendente = o que o pick_task do dispatcher AINDA PEGARIA (elegibilidade
+    real, nao aproximacao): safe:false NUNCA roda (pick_task pula) e nunca
+    ganha status terminal — contar como pendente starvaria o cap diario pra
+    sempre; task SEM id RODA no pick_task (None nunca entra em done) — tem
+    que contar pro dedup kind+fixture, senao o feeder duplica o kind no dia."""
     tasks = read_jsonl(queue_path)
     ledger = read_jsonl(ledger_path)
-    terminal_ids = {r.get("task_id") for r in ledger if r.get("status") in TERMINAL}
-    pending = [t for t in tasks if t.get("id") and t["id"] not in terminal_ids]
+    terminal_ids = {r.get("task_id") for r in ledger
+                    if r.get("status") in TERMINAL} - {None}
+    pending = [t for t in tasks
+               if t.get("safe") is not False and t.get("id") not in terminal_ids]
     return {
         "queue_ids": [t.get("id") for t in tasks if t.get("id")],
         "ledger_ids": sorted({r.get("task_id") for r in ledger if r.get("task_id")}),
@@ -227,7 +233,8 @@ def build_plan(*, today: str, now: float, queue_path: Path, ledger_path: Path,
                                        "count": len(var_pending)},
             "correction_pending_vision": corr_pending,
             "queue": {"total": len(qs["queue_ids"]),
-                      "pending_ids": sorted(t["id"] for t in qs["pending"]),
+                      "pending_ids": sorted(t["id"] for t in qs["pending"]
+                                            if t.get("id")),
                       "feeder_today": feeder_today},
         },
         "plan": plan,

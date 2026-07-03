@@ -159,7 +159,35 @@ def test_default_without_flags_is_dry_run(env, capsys):
 
 
 def test_terminal_statuses_stay_lockstep_with_dispatcher():
-    # se o dispatcher ganhar/perder status terminal, o feeder tem que seguir
+    # Lockstep ESTRUTURAL: feeder consome a MESMA constante que _terminal_ids()
+    # do dispatcher (fonte unica — drift impossivel por construcao)…
     from tools.claude_bridge import noc_dispatcher as nd
-    assert nf.TERMINAL == ({"COMMITTED", "VISUAL_REVIEW_QUEUED", "NOOP",
-                            "VERIFY_FAILED"} | nd.LOCAL_LLM_TERMINAL)
+    assert nf.TERMINAL is nd.TERMINAL_STATUSES
+    # …e o PIN abaixo e' independente da definicao: se o dispatcher ganhar/
+    # perder status terminal, ele FALHA e forca atualizacao consciente aqui.
+    assert nd.TERMINAL_STATUSES == {
+        "COMMITTED", "VISUAL_REVIEW_QUEUED", "NOOP", "VERIFY_FAILED",
+        "LOCAL_LLM_DONE", "LOCAL_LLM_OFFLINE", "SKIPPED_PURPOSE_NOT_ALLOWED",
+    }
+
+
+def test_unsafe_parked_task_does_not_starve_daily_corr(env, capsys):
+    # safe:false NUNCA e executada pelo pick_task e nunca ganha status terminal:
+    # se contasse como pendente, starvaria o correction_cycle diario PRA SEMPRE
+    # (fila e append-only). Pendente = elegibilidade real do dispatcher.
+    _audit(env, age_sec=7200)
+    append_jsonl(env["queue"], [{"id": "M9", "kind": "correction_cycle",
+                                 "fixture": "planta_74", "safe": False}])
+    rep = _run(env, capsys, "--dry-run")
+    assert f"NF-{TODAY}-corr-planta_74" in [t["id"] for t in rep["plan"]]
+
+
+def test_idless_task_still_counts_for_dedup(env, capsys):
+    # task SEM id RODA no pick_task (None nunca entra em done) -> e' pendente
+    # de verdade; o dedup kind+fixture tem que ve-la ou o feeder duplica o dia
+    _audit(env, age_sec=7200)
+    append_jsonl(env["queue"], [{"kind": "correction_cycle",
+                                 "fixture": "planta_74", "safe": True}])
+    rep = _run(env, capsys, "--dry-run")
+    assert [t["kind"] for t in rep["plan"]] == ["variant-sweep"]
+    assert any("dedup" in s["reason"] for s in rep["skipped"])

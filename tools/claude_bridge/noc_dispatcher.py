@@ -74,6 +74,11 @@ DEFAULT_MODEL_BY_PURPOSE = {
 # so backend/model/latency/out_file — nunca o corpo verboso no contexto do cerebro.
 LOCAL_LLM_DIR = REPO_ROOT / "runs" / "local_llm"
 LOCAL_LLM_TERMINAL = {"LOCAL_LLM_DONE", "LOCAL_LLM_OFFLINE", "SKIPPED_PURPOSE_NOT_ALLOWED"}
+# Statuses TERMINAIS (task com um destes no ledger nao re-dispara). FONTE UNICA:
+# consumida por _terminal_ids() aqui e por tools.night_feeder.TERMINAL (lockstep
+# real — mudar aqui propaga pros dois; o teste do feeder pina o conteudo).
+TERMINAL_STATUSES = {"COMMITTED", "VISUAL_REVIEW_QUEUED", "NOOP",
+                     "VERIFY_FAILED"} | LOCAL_LLM_TERMINAL
 
 # --- kind:correction_cycle (FP-033 slice 3) --------------------------------------
 # Out dir do correction_loop PERSISTENTE e FORA do worktree (o wt e' efemero,
@@ -182,8 +187,8 @@ def ledger_append(entry: dict) -> None:
 
 def _terminal_ids() -> set:
     """Tasks ja em estado terminal (nao re-disparar)."""
-    term = {"COMMITTED", "VISUAL_REVIEW_QUEUED", "NOOP", "VERIFY_FAILED"} | LOCAL_LLM_TERMINAL
-    return {r.get("task_id") for r in _ledger_rows() if r.get("status") in term}
+    return {r.get("task_id") for r in _ledger_rows()
+            if r.get("status") in TERMINAL_STATUSES}
 
 
 def pick_task(queue, done, task_id=None):
