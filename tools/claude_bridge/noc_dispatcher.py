@@ -130,6 +130,17 @@ def _run(cmd, cwd=None, timeout=120):
     return p.returncode, (p.stdout or ""), (p.stderr or "")
 
 
+def _run_step_tolerant(cmd, cwd, timeout):
+    """_run que NUNCA propaga erro de subprocess: timeout/falha vira rc=1 —
+    contrato compartilhado dos workers por-kind (correction_cycle,
+    variant-sweep): excecao propagada deixaria a task sem status terminal e
+    ela re-dispararia pra sempre, derrubando o dispatcher em --loop."""
+    try:
+        return _run(cmd, cwd=cwd, timeout=timeout)
+    except subprocess.SubprocessError as e:  # TimeoutExpired incluso
+        return 1, "", f"{type(e).__name__}: {e}"
+
+
 def _git(args, cwd=REPO_ROOT, timeout=120):
     return _run(["git", *args], cwd=cwd, timeout=timeout)
 
@@ -425,12 +436,6 @@ def dispatch_correction_cycle(task, dry_run=False) -> dict:
     fixture = task.get("fixture", "planta_74")
     out = Path(task.get("out") or (CORRECTION_OUT_ROOT / fixture)).resolve()
 
-    def _run_step(cmd, wt, timeout):
-        try:
-            return _run(cmd, cwd=wt, timeout=timeout)
-        except subprocess.SubprocessError as e:  # TimeoutExpired incluso
-            return 1, "", f"{type(e).__name__}: {e}"
-
     def _worker(task_, wt: Path):
         out.mkdir(parents=True, exist_ok=True)
         vq = out / "vision_requests.jsonl"
@@ -440,13 +445,13 @@ def dispatch_correction_cycle(task, dry_run=False) -> dict:
             renders = task_.get("render")
             for r in ([renders] if isinstance(renders, str) else (renders or [])):
                 cmd += ["--render", str(r)]
-            rc, o, e = _run_step(cmd, wt, CORRECTION_CONSUMER_TIMEOUT)
+            rc, o, e = _run_step_tolerant(cmd, wt, CORRECTION_CONSUMER_TIMEOUT)
             if rc not in (0, 3):
                 return rc, o[-800:], e[-400:]
-        rc, o, e = _run_step([sys.executable, "-m", "tools.correction_loop",
-                              "--fixture", fixture, "--out", str(out),
-                              "--max-cycles", str(task_.get("max_cycles", 1))],
-                             wt, CORRECTION_LOOP_TIMEOUT)
+        rc, o, e = _run_step_tolerant([sys.executable, "-m", "tools.correction_loop",
+                                       "--fixture", fixture, "--out", str(out),
+                                       "--max-cycles", str(task_.get("max_cycles", 1))],
+                                      wt, CORRECTION_LOOP_TIMEOUT)
         if rc not in (0, 3):  # 1 = STALL/RED; 3 = enfileirado (visao/Felipe), sucesso
             return rc, o[-800:], e[-400:]
         dest = wt / "artifacts" / "correction_loop" / fixture
@@ -480,24 +485,18 @@ def dispatch_variant_sweep(task, dry_run=False) -> dict:
     documentado no NOC_DISPATCHER.md). PT_TO_M=0.0259 e' responsabilidade do
     proprio tools/variant_sweep.py (setdefault no topo do modulo).
 
-    Timeout/erro de subprocess vira rc=1 (paridade com _run_step do
-    correction_cycle) — excecao propagada deixaria a task sem status terminal.
+    Timeout/erro de subprocess vira rc=1 (_run_step_tolerant, compartilhado com
+    o correction_cycle) — excecao propagada deixaria a task sem status terminal.
     Semantica: 1 task = 1 sweep; sweep seguinte = task NOVA na fila."""
     plant = task.get("plant", "planta_74")
     out = Path(task.get("out") or (VARIANT_OUT_ROOT / plant)).resolve()
-
-    def _run_step(cmd, cwd, timeout):
-        try:
-            return _run(cmd, cwd=cwd, timeout=timeout)
-        except subprocess.SubprocessError as e:  # TimeoutExpired incluso
-            return 1, "", f"{type(e).__name__}: {e}"
 
     def _worker(task_, wt: Path):
         out.mkdir(parents=True, exist_ok=True)
         cmd = [sys.executable, "-m", "tools.variant_sweep",
                "--out", str(out), "--n", str(task_.get("n", 6)),
                "--plant", plant, "--dry-run"]
-        rc, o, e = _run_step(cmd, REPO_ROOT, VARIANT_SWEEP_TIMEOUT)
+        rc, o, e = _run_step_tolerant(cmd, REPO_ROOT, VARIANT_SWEEP_TIMEOUT)
         if rc != 0:
             return rc, o[-800:], e[-400:]
         dest = wt / "artifacts" / "variant_sweep" / plant

@@ -107,7 +107,9 @@ def export_memory_json(corpus_path: Path, out_json: Path) -> int:
             "params": params,
             "gates": (rec.get("geometry") or {}).get("deterministic_gates") or {},
             "render": (rec.get("render_refs") or {}).get("iso"),
-            "machine_score": (rec.get("machine_score") or {}).get("value"),
+            # objeto {value,label} INTEIRO: o rotulo machine_provisional e' o
+            # marcador de honestidade e viaja junto com a nota (spec FP-034)
+            "machine_score": rec.get("machine_score"),
             "created_at": rec.get("created_at"),
         })
     out_json = Path(out_json)

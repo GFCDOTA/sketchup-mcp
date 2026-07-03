@@ -29,6 +29,9 @@ from core.scale import PT_TO_IN  # noqa: E402  (fonte unica de escala; env PT_TO
 FLOOR_KINDS = ("rug", "tapete")                      # ficam no chão: ok perto de porta/sob móvel
 TALL_KINDS = ("corpo", "torre", "aereo", "dresser", "estante", "guarda_roupa", "rack_tv", "bancada")
 DOOR_CLEARANCE_IN = 22.0
+# tolerância p/ "centro fora do cômodo": painel encostado na parede tem centro ~dentro.
+# Fonte ÚNICA do valor — sanity_room e o variant_sweep (_outside_room) leem daqui.
+OUTSIDE_BUFFER_IN = 8.0
 
 
 # ── API HERMÉTICA (boxes sintéticos em POLEGADAS) ────────────────────────────
@@ -151,8 +154,8 @@ def sanity_room(con, room_id):
             fails.append(f"{k}: bbox DEGENERADA ({w:.1f}x{h:.1f}in)"); continue
         if max(w, h) > diag:
             fails.append(f"{k}: bbox ABSURDA ({w:.0f}x{h:.0f}in > diag {diag:.0f})"); continue
-        # FORA = CENTRO fora do comodo (8in de tolerancia: painel encostado na parede tem centro ~dentro).
-        if not poly.buffer(8).contains(bb.centroid):
+        # FORA = CENTRO fora do comodo (OUTSIDE_BUFFER_IN de tolerancia).
+        if not poly.buffer(OUTSIDE_BUFFER_IN).contains(bb.centroid):
             fails.append(f"{k}: CENTRO fora do comodo (atravessa parede / fora do comodo)")
         elif (bb.difference(poly).area / bb.area if bb.area else 0) > 0.5:
             warns.append(f"{k}: >50% transborda a parede")

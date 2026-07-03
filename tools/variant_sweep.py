@@ -32,6 +32,7 @@ import itertools
 import json
 import os
 import sys
+from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -52,16 +53,24 @@ from tools.variant_axes import Variant, default_axes  # noqa: E402
 SCHEMA_ID = "judged_variant/1.0.0"
 MACHINE_LABEL = "machine_provisional"
 BACKEND = "claude_bridge_vision"  # nome de provider/backend (source = claude_bridge)
-OUTSIDE_BUFFER_IN = 8.0  # paridade com geometry_sanity.sanity_room (painel na parede)
 
 
 def expand_axes(axes: dict | None = None, n: int | None = None,
                 plant: str = "planta_74") -> list[Variant]:
-    """Grid deterministico e ordenado (style, theme, layout). n = prefixo."""
+    """Grid deterministico e ordenado (style, theme, layout). n = prefixo
+    (n=0 => 0 celulas; None => grid inteiro). Guarda de unicidade: variant_id
+    usa 'baseline'/'warm_compact' como default legivel — um token literal igual
+    ao default colidiria e o sweep pularia a celula em silencio (dedup por id)."""
     ax = axes or default_axes()
     cells = [Variant(plant=plant, style=s, theme=t, layout_seed=ls)
              for s, t, ls in itertools.product(ax["style"], ax["theme"], ax["layout"])]
-    return cells[:n] if n else cells
+    counts = Counter(c.variant_id for c in cells)
+    dupes = sorted(vid for vid, k in counts.items() if k > 1)
+    if dupes:
+        raise ValueError(
+            "variant_id colidiu — token literal igual ao default do id (ex. theme "
+            f"'warm_compact' vs '' ou style 'baseline' vs None): {dupes}")
+    return cells[:n] if n is not None else cells
 
 
 def _require_plant_scale(plant: str) -> None:
@@ -78,10 +87,10 @@ def _require_plant_scale(plant: str) -> None:
 # ── gates deterministicos HERMETICOS (sobre os boxes REAIS da variante) ─────
 # overlap_gate/sanity_room RE-RODAM os brains a partir do consensus — variante
 # com boxes mutados seria invisivel pra eles (validariam o baseline, prova
-# falsa). Aqui: geometry_sanity.audit (box-accepting) + pairwise de colisao
-# reusando _module_geom/thresholds do furniture_overlap_gate + outside_room com
-# buffer de 8in (paridade sanity_room; o check cru do audit tem tolerancia zero
-# e reprova pe' de cama encostado na parede do proprio baseline golden).
+# falsa). Aqui: geometry_sanity.audit (box-accepting) + pairwise_overlap
+# canonico do furniture_overlap_gate + outside_room via audit(rooms=) com os
+# poligonos PRE-bufferizados em OUTSIDE_BUFFER_IN (o check cru tem tolerancia
+# zero e reprova pe' de cama encostado na parede do proprio baseline golden).
 
 
 def _audit_boxes(boxes: list[dict]) -> dict:
@@ -99,60 +108,41 @@ def _audit_boxes(boxes: list[dict]) -> dict:
 
 
 def _outside_room(boxes: list[dict], con: dict) -> dict:
-    """Centro do box fora de TODOS os comodos (buffer 8in) -> FAIL."""
-    from shapely.geometry import Point, Polygon
-    polys = [Polygon([(x * scale.PT_TO_IN, y * scale.PT_TO_IN)
-                      for x, y in r["polygon_pts"]]).buffer(OUTSIDE_BUFFER_IN)
+    """Centro do box fora de TODOS os comodos (buffer OUTSIDE_BUFFER_IN) -> FAIL.
+    Reusa o check canonico outside_room do geometry_sanity.audit (rooms= aceita
+    os poligonos JA bufferizados) em vez de uma 3a implementacao ponto-em-
+    poligono; o buffer vem da fonte unica (paridade sanity_room)."""
+    from shapely.geometry import Polygon
+
+    from tools.geometry_sanity import OUTSIDE_BUFFER_IN, audit
+    polys = [list(Polygon([(x * scale.PT_TO_IN, y * scale.PT_TO_IN)
+                           for x, y in r["polygon_pts"]])
+                  .buffer(OUTSIDE_BUFFER_IN).exterior.coords)
              for r in con.get("rooms", []) if r.get("polygon_pts")]
-    fails = []
-    for b in boxes:
-        cx, cy = (b["x0"] + b["x1"]) / 2, (b["y0"] + b["y1"]) / 2
-        if polys and not any(p.contains(Point(cx, cy)) for p in polys):
-            fails.append(f"{b.get('label') or b.get('kind')}: centro "
-                         f"({round(cx)},{round(cy)}) fora de todos os comodos")
+    if not polys:
+        return {"result": "PASS", "fails": []}
+    g = audit(boxes, rooms=polys, to_m=0.0254)
+    fails = [f"{f.get('label') or f.get('kind')}: {f['detail']}"
+             for f in g["findings"] if f["check"] == "outside_room"]
     return {"result": "FAIL" if fails else "PASS", "fails": fails}
 
 
 def _overlap_pairwise(boxes: list[dict]) -> dict:
-    """Colisao movel-sobre-movel por comodo, direto nos boxes da variante.
-    Reusa _module_geom/_is_embedded/thresholds do furniture_overlap_gate
-    (duplicacao consciente do loop pairwise: o gate original nao aceita boxes)."""
-    from tools.furniture_overlap_gate import (
-        AREA_MIN_M2,
-        EXCLUDE,
-        FRAC_MIN,
-        M2IN,
-        Z_EPS_IN,
-        _is_embedded,
-        _module_geom,
-    )
+    """Colisao movel-sobre-movel por comodo, direto nos boxes da variante, via
+    o loop pairwise CANONICO do gate (furniture_overlap_gate.pairwise_overlap —
+    o overlap_gate original re-roda brains e nao aceita boxes; o veredito de
+    colisao, thresholds inclusos, tem fonte unica la')."""
+    from tools.furniture_overlap_gate import _module_geom, pairwise_overlap
     per_room: dict[str, list[dict]] = {}
     for b in boxes:
         per_room.setdefault(str(b.get("room", "")), []).append(b)
     fails, warns = [], []
     n_modules = 0
     for room, rboxes in sorted(per_room.items()):
-        geoms = {m: g for m, g in _module_geom(rboxes).items()
-                 if not any(e in m.lower() for e in EXCLUDE)}
-        mods = sorted(geoms)
-        n_modules += len(mods)
-        for i in range(len(mods)):
-            for j in range(i + 1, len(mods)):
-                if _is_embedded(mods[i], mods[j]):
-                    continue
-                pa, za0, za1 = geoms[mods[i]]
-                pb, zb0, zb1 = geoms[mods[j]]
-                if min(za1, zb1) - max(za0, zb0) <= Z_EPS_IN:
-                    continue
-                inter = pa.intersection(pb).area / (M2IN * M2IN)
-                if inter < AREA_MIN_M2:
-                    continue
-                amin = min(pa.area, pb.area) / (M2IN * M2IN)
-                frac = inter / amin if amin else 0.0
-                if frac >= FRAC_MIN:
-                    msg = (f"{room}: {mods[i]} x {mods[j]}: "
-                           f"{inter * 10000:.0f} cm2 ({frac:.0%} do menor)")
-                    (fails if frac >= 0.30 else warns).append(msg)
+        f, w, n = pairwise_overlap(_module_geom(rboxes))
+        n_modules += n
+        fails += [f"{room}: {m}" for m in f]
+        warns += [f"{room}: {m}" for m in w]
     result = "FAIL" if fails else ("WARN" if warns else "PASS")
     return {"result": result, "n_modules": n_modules, "fails": fails, "warns": warns}
 
@@ -233,22 +223,26 @@ def _boxes_to_parts(boxes: list[dict]) -> list[dict]:
 
 def _collect_findings(png: Path, *, plant: str, provider=None,
                       discrimination=None) -> dict | None:
-    """Modo 1: sidecar visual_findings.json ao lado do render (FP-032 externo).
+    """Modo 1: sidecar visual_findings.json ao lado do render (FP-032 externo);
+    so vale se for visual_findings.v1 — sidecar ilegivel/nao-conforme conta como
+    AUSENTE (logado) e NAO sombreia o provider.
     Modo 2: provider claude_bridge_vision injetado (opt-in --ask-vision), com a
     regra FAIL-so-se-DISCRIMINATED (degradacao REUSADA do vision_queue_consumer).
     Sem nenhum dos dois / bridge fora -> None (PENDING_VISION honesto)."""
     png = Path(png)
     sidecar = png.with_name("visual_findings.json")
     if sidecar.is_file():
+        vf = None
         try:
             vf = json.loads(sidecar.read_text("utf-8"))
         except (OSError, json.JSONDecodeError):
-            return None
-        if not isinstance(vf, dict):
-            return None
-        vf.setdefault("fixture", plant)   # required no schema v1; o detector
-        vf.setdefault("attempt", "variant")  # externo nem sempre preenche
-        return vf
+            pass
+        if isinstance(vf, dict) and vf.get("schema_version") == "visual_findings.v1":
+            vf.setdefault("fixture", plant)   # required no schema v1; o detector
+            vf.setdefault("attempt", "variant")  # externo nem sempre preenche
+            return vf
+        print(f"[variant-sweep] sidecar ilegivel/nao-conforme IGNORADO "
+              f"(cai pro provider, se houver): {sidecar}", file=sys.stderr)
     if provider is None:
         return None
     ok, _reason = provider.probe()
@@ -288,11 +282,15 @@ def _collect_findings(png: Path, *, plant: str, provider=None,
 
 def _machine_score(gates: dict, findings: dict | None) -> float | None:
     """Score provisional SO quando ha achados visuais (senao null — so gates
-    nao viram nota). Deterministico, rotulado machine_provisional sempre."""
+    nao viram nota). top_level_verdict desconhecido/ausente = achado nao-
+    conforme -> None (nunca fabrica nota de um verdict que nao existe).
+    Deterministico, rotulado machine_provisional sempre."""
     if findings is None:
         return None
     score = {"PASS": 1.0, "WARN": 0.6, "FAIL": 0.0}.get(
-        findings.get("top_level_verdict"), 0.6)
+        findings.get("top_level_verdict"))
+    if score is None:
+        return None
     for v in gates.values():
         if v == "WARN":
             score -= 0.1
@@ -402,7 +400,9 @@ def sweep(n: int | None, out_root: Path, *, plant: str = "planta_74",
     corpus.jsonl e' append-only e idempotente por variant_id: celula ja vista e'
     pulada; excecao unica = registro PENDING_VISION com provider disponivel
     (upgrade de visao), que APPENDA um registro superseding (last-wins por
-    variant_id na leitura — o arquivo nunca e' reescrito)."""
+    variant_id na leitura — o arquivo nunca e' reescrito). Upgrade que volta
+    PENDING_VISION (bridge fora / probe FAIL) NAO appenda — nao supersede nada;
+    rerun com --ask-vision offline fica idempotente."""
     out_root = Path(out_root).resolve()
     out_root.mkdir(parents=True, exist_ok=True)
     corpus = out_root / "corpus.jsonl"
@@ -425,6 +425,13 @@ def sweep(n: int | None, out_root: Path, *, plant: str = "planta_74",
         rec = runner(v, out_root / v.variant_id, con_path=con_path,
                      provider=provider, discrimination=discrimination,
                      render=render, run_id=out_root.name, out_root=out_root)
+        if upgrade and rec.get("verdict") == "PENDING_VISION":
+            # upgrade que NAO trouxe visao: o rec e' semanticamente o prev —
+            # appendar duplicaria uma linha que nao supersede nada
+            records.append(prev)
+            log(f"[variant-sweep] {v.variant_id}: upgrade sem visao "
+                "(PENDING_VISION mantido; corpus intacto)")
+            continue
         append_jsonl(corpus, [rec])
         by_id[v.variant_id] = rec
         records.append(rec)

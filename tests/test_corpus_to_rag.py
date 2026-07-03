@@ -81,6 +81,10 @@ def test_corpus_to_rag_output_is_ingestible_project_memory_db(monkeypatch,
     assert n == 2
     items = json.loads(out_json.read_text("utf-8"))
     assert isinstance(items, list) and items[0]["id"].startswith("planta_74__")
+    # o rotulo machine_provisional viaja com a nota (marcador de honestidade):
+    # consumidor FP-035 nunca ve um score sem o carimbo de nao-autoritativo
+    assert items[0]["machine_score"] == {"value": None,
+                                         "label": "machine_provisional"}
     # embed MOCKADO por NOME (cmd_index/search chamam pmd.embed): Ollama-off ok
     monkeypatch.setattr(pmd, "embed",
                         lambda t, **kw: np.zeros(8, dtype=np.float32))

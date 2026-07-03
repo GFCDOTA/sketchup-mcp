@@ -3,6 +3,8 @@ Hermetico: le so dados TRACKED read-only (style_spec, themes/*.json); zero
 escrita fora de tmp, zero rede, zero SketchUp."""
 from __future__ import annotations
 
+import pytest
+
 from tools.style_spec import STYLE_TOKENS
 from tools.variant_axes import Variant, default_axes, layout_axis, style_axis, theme_axis
 from tools.variant_sweep import expand_axes
@@ -24,6 +26,24 @@ def test_expand_axes_n_limits_cells():
     four = expand_axes(n=4)
     assert len(four) == 4
     assert four == full[:4]  # prefixo do grid, nao amostra aleatoria
+
+
+def test_expand_axes_n_zero_is_empty_not_full_grid():
+    # n=0 = prefixo vazio (contrato do docstring) — 0 e' falsy, mas NAO pode
+    # cair no ramo "grid inteiro" (task NOC {"n": 0} viraria 36 celulas/timeout)
+    assert expand_axes(n=0) == []
+
+
+def test_expand_axes_raises_on_variant_id_collision():
+    # theme "" e um token literal 'warm_compact' gerariam o MESMO variant_id
+    # (default legivel do id); colisao silenciosa = celula pulada + fusao no RAG
+    axes = {"style": [None], "theme": ["", "warm_compact"], "layout": [0]}
+    with pytest.raises(ValueError, match="variant_id colidiu"):
+        expand_axes(axes)
+    # style None vs token literal 'baseline' idem
+    axes2 = {"style": [None, "baseline"], "theme": [""], "layout": [0]}
+    with pytest.raises(ValueError, match="variant_id colidiu"):
+        expand_axes(axes2)
 
 
 def test_variant_id_is_stable_for_same_params():

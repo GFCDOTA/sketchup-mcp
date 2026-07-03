@@ -228,6 +228,32 @@ def test_vision_adapter_unavailable_yields_none_not_fabrication(tmp_path,
                                 discrimination=lambda: None) is None
 
 
+def test_bad_sidecar_counts_as_absent_and_does_not_shadow_provider(tmp_path,
+                                                                   monkeypatch):
+    # sidecar torn (JSON invalido) e sidecar sem schema_version v1: AUSENTE —
+    # nunca fabrica achado dele, e o provider vivo E' consultado (nao sombreado)
+    _no_http(monkeypatch)
+    for bad in ('{"torn": ', json.dumps({"foo": 1}), json.dumps([1, 2])):
+        d = tmp_path / f"v{hash(bad) & 0xffff}"
+        png = _png(d)
+        png.with_name("visual_findings.json").write_text(bad, encoding="utf-8")
+        # sem provider -> None (PENDING_VISION honesto, nunca CANDIDATE de lixo)
+        assert vs._collect_findings(png, plant="planta_74", provider=None) is None
+        p = _FakeProvider(findings=_v1_findings("PASS"))
+        got = vs._collect_findings(png, plant="planta_74", provider=p,
+                                   discrimination=lambda: None)
+        assert p.calls == 1  # provider consultado apesar do sidecar quebrado
+        assert got is not None and got["top_level_verdict"] == "PASS"
+
+
+def test_machine_score_never_fabricated_from_unknown_verdict():
+    # findings nao-conformes (sem top_level_verdict valido) -> nota None,
+    # nunca o default 0.6 fabricado de um verdict que nao existe
+    assert vs._machine_score({}, {"foo": 1}) is None
+    assert vs._machine_score({}, {"top_level_verdict": "MAYBE"}) is None
+    assert vs._machine_score({}, _v1_findings("WARN")) == 0.6
+
+
 # --- corpus append-only idempotente + contact sheet -------------------------------
 
 
@@ -280,6 +306,24 @@ def test_vision_upgrade_appends_superseding_record_never_rewrites(tmp_path):
     rows = ctr.export_reference_rows(corpus)
     assert len(rows) == 1
     assert rows[0][0]["notes"] == "CANDIDATE"
+
+
+def test_failed_vision_upgrade_is_idempotent_no_duplicate_append(tmp_path):
+    # rerun com --ask-vision e bridge FORA: o upgrade re-roda a celula mas o
+    # registro volta PENDING_VISION — appendar duplicaria sem superseder nada.
+    # N passadas = corpus continua com 1 linha (idempotente)
+    out = tmp_path / "run1"
+    vs.sweep(1, out, run_one=_fake_run_one(out), log=lambda m: None)  # PENDING
+    corpus = out / "corpus.jsonl"
+    assert len(corpus.read_text("utf-8").splitlines()) == 1
+    still_pending = _fake_run_one(out)  # findings=None -> PENDING_VISION de novo
+    for _ in range(3):
+        recs = vs.sweep(1, out, run_one=still_pending,
+                        provider=_FakeProvider(probe_ok=False),
+                        log=lambda m: None)
+        assert recs[0]["verdict"] == "PENDING_VISION"
+    lines = corpus.read_text("utf-8").splitlines()
+    assert len(lines) == 1  # nada appendado: o corpus nao cresce por rerun offline
 
 
 # --- integracao: sweep real SU-free em subprocess ---------------------------------
