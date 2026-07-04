@@ -66,7 +66,7 @@ Uma task por linha (JSONL). Campos:
 | `id`          | identificador único da task (casado com `--task-id` e com o ledger). |
 | `title`       | descrição curta, legível.                                            |
 | `safe`        | `true` = elegível pra atuação autônoma; `false` = só humano.         |
-| `kind`        | `claude` (default), `local_llm`, `tool`, `correction_cycle`.         |
+| `kind`        | `claude` (default), `local_llm`, `tool`, `correction_cycle`, `variant-sweep`, `variant-vision-drain`. |
 | `appearance`  | `true` = muda APARÊNCIA de planta/`.skp` → força rota `VISUAL_REVIEW`.|
 | `verify_file` | caminho do artefato que o verify deve produzir/checar.               |
 | `verify`      | comando determinístico de verificação (exit 0 = passou).             |
@@ -132,6 +132,65 @@ Semântica: **1 task = 1 ciclo**. Os statuses terminais existentes
 (`COMMITTED`/`VISUAL_REVIEW_QUEUED`/`NOOP`/`VERIFY_FAILED`) impedem re-run do
 mesmo `id` — ciclo seguinte = task nova na fila.
 
+## kind: `variant-vision-drain` (fecha o loop do night_feeder)
+
+Drena **UMA** variante `PENDING_VISION` do corpus via o **painel colaborativo
+de 3 juízes** (ver seção seguinte), reusando `dispatch()` pelo mesmo seam
+`run_worker` de `correction_cycle`/`variant-sweep` — guardas, `verify_file`,
+commit/push de branch, ledger, zero duplicação.
+
+Campos da task: `id`, `title`, `safe`, `kind:"variant-vision-drain"`, `plant`
+(default `planta_74`), `variant_id` (**obrigatório** — sem ele o worker falha
+`rc=1` sem gastar subprocess), `out?` (default `E:/Claude/data/runs/
+noc_variant_sweep/<plant>` — mesmo out-root do `variant-sweep`, fora do
+worktree efêmero).
+
+O worker roda `python -m tools.variant_sweep --out <out> --plant <plant>
+--ask-vision --only <variant_id>` com `cwd=REPO_ROOT` (mesmo DESVIO
+deliberado do `variant-sweep`: o worktree vem de `origin/develop`, que
+pré-merge pode não ter `tools/variant_sweep.py`; o sweep só produz evidência,
+nunca edita o worktree). Isso chama o provider `claude_bridge_vision`, que
+POSTa em `/ask-vision` — o painel de 3 juízes roda lá, sem mudança de
+contrato HTTP. `design_patterns_observed` que o painel produzir chega ao
+`corpus.jsonl` pelo **mesmo** caminho que `visual_findings` já usava
+(`build_record` grava o dict inteiro) — não há arquivo paralelo. A evidência
+(corpus atualizado + `.png` da variante) é copiada pro worktree em
+`artifacts/variant_sweep/<plant>/`, igual ao `variant-sweep`.
+
+Timeout/erro de subprocess vira `rc=1` (mesmo `_run_step_tolerant`
+compartilhado) — exceção propagada deixaria a task sem status terminal.
+Semântica: **1 task = 1 variante drenada**; drain seguinte = task nova na
+fila (id determinístico por dia+variante, ver `night_feeder` abaixo).
+
+## O painel colaborativo de 3 juízes (`/ask-vision`)
+
+Desde esta fatia, `POST /ask-vision` deixou de ser **1 chamada** `claude -p`
+e virou um **painel de 3**, todos escopados dentro do mesmo `ask_claude_vision`
+(`--add-dir` nos renders):
+
+1. **Estrutura** — só os 5 eixos geométricos (`wall_fidelity`, `door_fidelity`,
+   `window_fidelity`, `room_fidelity`, `scale_rotation`); ignora material/luz.
+2. **Material & Luz** — eixo NOVO `material_light` (textura/cor/reflectância/
+   sombra/exposição — o que os 6 eixos antigos não cobriam).
+3. **Síntese** — roda DEPOIS, recebe os 2 relatórios acima como **texto** (não
+   relê imagem — custo) e produz (a) o `top_level_verdict` FINAL (resolve
+   conflito honesto; nunca inventa o que um juiz não viu) e (b)
+   `design_patterns_observed: [{pattern, verdict, why}]` — conhecimento de
+   design reusável (paleta/material/luz/proporção/layout), acumulado pra
+   alimentar o FP-035 (RAG, ainda não implementado — só o dado fica pronto).
+
+Juízes 1 e 2 rodam em **paralelo** (`ThreadPoolExecutor`, 2 workers — cada
+chamada é 1 subprocess `claude -p` bloqueante de ~50-110s medido em produção).
+Degradação honesta: falha/timeout de qualquer juiz não fabrica veredito nem
+padrão daquele juiz — a síntese marca os eixos do juiz ausente como `WARN`
+("judge unavailable — not evaluated"), nunca `PASS` por omissão, e cai a
+`confidence`. Contrato HTTP inalterado: `{"response": "<json/texto>"}` — o
+cliente (`oracle_providers.ClaudeBridgeVisionProvider`) parseia igual; os
+campos novos (`material_light`, `design_patterns_observed`) são **aditivos**
+no schema `visual_findings.v1` (schema antigo continua válido sem eles). A
+regra **"FAIL só se DISCRIMINATED"** de promoção continua em
+`run_skp_visual_review.py` — o painel não mexe nisso.
+
 ## O ledger — `.ai_bridge/noc/actions.jsonl`
 
 Append-only, uma ação por linha. Registra o que o dispatcher **fez** com cada
@@ -162,20 +221,26 @@ sendo do Felipe.
 - 1 `variant-sweep` (real SU-free, `n: 8` — o dispatcher passa `--dry-run` pro
   `tools.variant_sweep`, que nesse modo gera registros REAIS com
   `PENDING_VISION` honesto, sem visão e sem SketchUp);
-- dedup duro: nunca enfileira kind+fixture que já está **pendente** na fila
-  (pendente = sem status terminal no ledger, mesma régua do `pick_task`).
+- até `drain_cap` (default **3**) `variant-vision-drain`/ciclo — **loop
+  fechado**: quando o corpus tem variantes `PENDING_VISION` (do sweep acima ou
+  de um ciclo anterior), o feeder enfileira 1 task por variante (id
+  `NF-<dia>-visdrain-<variant_id>`), até o teto; o dispatcher roda cada uma via
+  `dispatch_variant_vision_drain` (painel de 3 juízes). Excedente (>`drain_cap`
+  pendentes no mesmo ciclo) fica documentado em `limitations[]` e drena nos
+  ciclos seguintes — nunca enfileira todas de uma vez;
+- dedup duro: nunca enfileira kind+fixture (ou kind+`variant_id`, no caso do
+  drain — variantes do mesmo plant não colidem entre si) que já está
+  **pendente** na fila (pendente = sem status terminal no ledger, mesma régua
+  do `pick_task`).
 
-**Sinais reportados mas SEM ação automática (limitações honestas):**
+**Sinal reportado mas SEM ação automática (limitação honesta que permanece):**
 
-- variante `PENDING_VISION` no corpus não tem caminho de drain via fila —
-  `dispatch_variant_sweep` não expõe `--ask-vision`; upgrade manual:
-  `python -m tools.variant_sweep --ask-vision --only <variant_id> --out <run>`;
 - o drain de `vision_requests.jsonl` via fila (kind `correction_cycle`) exige
   `render` explícito na task; o feeder **não fabrica render** (sem ele o
   consumer bloqueia `BLOCKED_NEEDS_RENDER` e o pedido permanece).
 
 **Como rodar / desligar:** `--dry-run` imprime o plano (default sem flags);
 `--once` aplica; `--today`/`--now` injetam o clock (teste); `--no-sweep` /
-`--no-correction` desligam cada perna; desligar de vez = simplesmente não
-agendar o feeder (ele não tem daemon próprio — cada execução é one-shot,
-exit 0 sempre).
+`--no-correction` / `--no-drain` desligam cada perna; `--drain-cap N` ajusta o
+teto por ciclo; desligar de vez = simplesmente não agendar o feeder (ele não
+tem daemon próprio — cada execução é one-shot, exit 0 sempre).

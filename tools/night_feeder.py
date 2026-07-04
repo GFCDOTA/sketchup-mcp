@@ -18,19 +18,27 @@ Plano -> enfileira com caps DEFAULT:
   - 1 variant-sweep/dia (REAL su-free: o dispatcher passa --dry-run pro
     tools.variant_sweep, que nesse modo gera registros REAIS com
     PENDING_VISION honesto — barato, sem SketchUp, sem visao);
-  - dedup duro: NUNCA enfileira kind+fixture que ja esta pendente na fila.
+  - ate `drain_cap` (default 3) variant-vision-drain/ciclo — LOOP FECHADO:
+    quando o sweep acima (ou um ciclo anterior) deixa variantes PENDING_VISION
+    no corpus, o feeder enfileira 1 task por variante (id NF-<dia>-visdrain-
+    <variant_id>) que o dispatcher roda via dispatch_variant_vision_drain
+    (`tools.variant_sweep --ask-vision --only <variant_id>`, painel
+    colaborativo de 3 juizes) — nunca mais que `drain_cap` por ciclo;
+  - dedup duro: NUNCA enfileira kind+fixture (ou kind+variant_id, no caso do
+    drain) que ja esta pendente na fila.
 
 Limitacoes HONESTAS (declaradas no plano, nunca kind inventado):
-  - variante PENDING_VISION nao tem caminho de drain via fila hoje:
-    dispatch_variant_sweep nao expoe --ask-vision (upgrade manual =
-    `python -m tools.variant_sweep --ask-vision --only <variant_id> --out <run>`);
+  - excesso de PENDING_VISION alem do drain_cap fica pra ciclos seguintes
+    (nao enfileira as 50 variantes de uma vez so);
   - o drain de vision_requests via fila (kind correction_cycle) exige
     task["render"] explicito do estado ATUAL do modelo; o feeder NAO fabrica
     render (sem ele o consumer bloqueia BLOCKED_NEEDS_RENDER e o pedido fica).
 
 Rails: o feeder so PREPARA (append na fila, append-only, mesmo idioma
 jsonl_io); quem age e o dispatcher; veredito visual continua exclusivo do
-Felipe. Deterministico e idempotente: --today/--now injetados, ids
+Felipe (human_verdict sempre null; design_patterns_observed e' conhecimento
+observacional acumulado do painel de 3 juizes, NUNCA um veredito estetico).
+Deterministico e idempotente: --today/--now injetados, ids
 NF-<YYYYMMDD>-<slug> — rodar 2x no mesmo dia = zero task nova. Exit 0 sempre
 (feeder sem sinal nao e erro).
 
@@ -38,6 +46,7 @@ Uso:
     python -m tools.night_feeder --dry-run                 # imprime o plano
     python -m tools.night_feeder --once                    # aplica (append na fila)
     python -m tools.night_feeder --once --no-sweep         # so correction_cycle
+    python -m tools.night_feeder --once --no-drain         # sem drain de PENDING_VISION
     python -m tools.night_feeder --today 20260703 --now 1783118000  # teste
 """
 from __future__ import annotations
@@ -159,13 +168,32 @@ def sweep_task(today: str, plant: str, n: int) -> dict:
     }
 
 
+def drain_task(today: str, plant: str, variant_id: str) -> dict:
+    """kind:variant-vision-drain (fecha o loop): 1 variante PENDING_VISION do
+    corpus drenada via o painel colaborativo de 3 juizes (dispatch_variant_-
+    vision_drain -> tools.variant_sweep --ask-vision --only <variant_id>). Id
+    determinístico por dia+variante (nunca a mesma variante 2x no mesmo dia)."""
+    return {
+        "id": f"{ID_PREFIX}-{today}-visdrain-{variant_id}",
+        "title": f"night-feeder: drain PENDING_VISION {variant_id} (painel 3 juizes)",
+        "safe": True,
+        "kind": "variant-vision-drain",  # HIFEN byte-exato (paridade com variant-sweep)
+        "plant": plant,
+        "variant_id": variant_id,
+        "enqueued_by": "night_feeder",
+    }
+
+
 # ── plano ────────────────────────────────────────────────────────────────────
+
+DEFAULT_DRAIN_CAP = 3  # teto de variantes PENDING_VISION drenadas por ciclo (nao 50 de uma vez)
 
 
 def build_plan(*, today: str, now: float, queue_path: Path, ledger_path: Path,
                audit_path: Path, variant_root: Path, correction_root: Path,
                plants: list[str], sweep_n: int, idle_min: float,
-               no_correction: bool = False, no_sweep: bool = False) -> dict:
+               no_correction: bool = False, no_sweep: bool = False,
+               no_drain: bool = False, drain_cap: int = DEFAULT_DRAIN_CAP) -> dict:
     gate = probe_gate_idle(audit_path, now)
     idle = gate["idle_sec"] is None or gate["idle_sec"] >= idle_min * 60
     gate["idle"] = idle
@@ -179,9 +207,17 @@ def build_plan(*, today: str, now: float, queue_path: Path, ledger_path: Path,
     known_ids = set(qs["queue_ids"]) | set(qs["ledger_ids"])
     feeder_today = sorted(i for i in known_ids
                           if isinstance(i, str) and i.startswith(f"{ID_PREFIX}-{today}-"))
-    pending_kinds = {((t.get("kind") or "claude").lower(),
-                      t.get("fixture") or t.get("plant") or "")
-                     for t in qs["pending"]}
+    # chave de dedup por kind: correction_cycle/variant-sweep dedupam por
+    # (kind, fixture-ou-plant) — variant-vision-drain dedupa por (kind,
+    # variant_id), pois varias variantes do MESMO plant podem estar pendentes
+    # ao mesmo tempo (fixture/plant sozinho colidiria todas numa so chave).
+    pending_kinds = set()
+    for t in qs["pending"]:
+        k = (t.get("kind") or "claude").lower()
+        if k == "variant-vision-drain":
+            pending_kinds.add((k, t.get("variant_id") or ""))
+        else:
+            pending_kinds.add((k, t.get("fixture") or t.get("plant") or ""))
 
     plan: list[dict] = []
     skipped: list[dict] = []
@@ -208,14 +244,23 @@ def build_plan(*, today: str, now: float, queue_path: Path, ledger_path: Path,
     consider(sweep_task(today, plants[0], sweep_n), ("variant-sweep", plants[0]),
              no_sweep, f"variant-sweep {plants[0]}")
 
+    # Loop fechado: PENDING_VISION detectado -> enfileira drain via o painel de
+    # 3 juizes (dispatch_variant_vision_drain), capado (nao enfileira 50 de
+    # uma vez). plants[0] e' o mesmo plant do corpus mais recente lido acima
+    # (latest_corpus/pending_vision_variants nao distinguem por plant hoje —
+    # mesma limitacao ja existente do sweep_task, nao nova desta fatia).
+    drain_plant = plants[0] if plants else "planta_74"
+    for vid in var_pending[:drain_cap]:
+        consider(drain_task(today, drain_plant, vid),
+                 ("variant-vision-drain", vid),
+                 no_drain, f"variant-vision-drain {vid}")
+
     limitations: list[str] = []
-    if var_pending:
+    if len(var_pending) > drain_cap:
         limitations.append(
-            f"{len(var_pending)} variante(s) PENDING_VISION no corpus "
-            f"{corpus} SEM caminho de drain via fila: dispatch_variant_sweep "
-            "nao expoe --ask-vision (passa sempre --dry-run ao tools.variant_sweep). "
-            "Upgrade manual: python -m tools.variant_sweep --ask-vision "
-            "--only <variant_id> --out <run_dir>.")
+            f"{len(var_pending)} variante(s) PENDING_VISION no corpus {corpus}; "
+            f"so as primeiras {drain_cap} entraram no plano deste ciclo (cap "
+            "drain_cap) — as restantes drenam em ciclos seguintes.")
     if corr_pending:
         limitations.append(
             f"vision_requests pendentes {corr_pending}: o drain via fila (kind "
@@ -284,6 +329,10 @@ def main(argv=None) -> int:
     ap.add_argument("--no-correction", action="store_true")
     ap.add_argument("--no-sweep", action="store_true",
                     help="nao enfileira variant-sweep (ex.: prova ao vivo)")
+    ap.add_argument("--no-drain", action="store_true",
+                    help="nao enfileira variant-vision-drain (loop fechado desligado)")
+    ap.add_argument("--drain-cap", type=int, default=DEFAULT_DRAIN_CAP,
+                    help=f"teto de variant-vision-drain/ciclo (default {DEFAULT_DRAIN_CAP})")
     a = ap.parse_args(argv)
 
     now = a.now if a.now is not None else time.time()
@@ -299,7 +348,8 @@ def main(argv=None) -> int:
         audit_path=audit, variant_root=Path(runs) / "noc_variant_sweep",
         correction_root=Path(runs) / "noc_correction",
         plants=list(a.plants), sweep_n=a.n, idle_min=a.idle_min,
-        no_correction=a.no_correction, no_sweep=a.no_sweep)
+        no_correction=a.no_correction, no_sweep=a.no_sweep,
+        no_drain=a.no_drain, drain_cap=a.drain_cap)
 
     if a.once and not a.dry_run:
         report["applied"] = apply_plan(report, queue)

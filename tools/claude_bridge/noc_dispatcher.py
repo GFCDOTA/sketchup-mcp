@@ -520,13 +520,78 @@ def dispatch_variant_sweep(task, dry_run=False) -> dict:
     return dispatch(task, dry_run=dry_run, run_worker=_worker)
 
 
+def dispatch_variant_vision_drain(task, dry_run=False) -> dict:
+    """kind:variant-vision-drain — fecha o loop do night_feeder: drena UMA
+    variante PENDING_VISION do corpus via o painel colaborativo de 3 juizes
+    (FP-032 panel), usando o MESMO seam run_worker do dispatch() que
+    dispatch_correction_cycle/dispatch_variant_sweep ja usam — guardas
+    SKIPPED_*, verify_file, commit/push da branch (NUNCA main) e ledger vem
+    todos de la, zero duplicacao.
+
+    Mesmo DESVIO deliberado do precedente variant-sweep: o worker roda com
+    cwd=REPO_ROOT (a arvore DESTE dispatcher), nao cwd=wt — o wt vem de
+    origin/develop, que pre-merge pode nao ter tools/variant_sweep.py; e o
+    drain so ATUALIZA o corpus.jsonl existente (append last-wins), nunca edita
+    o wt. `--ask-vision --only <variant_id> --out <out>` e' o contrato REAL
+    de tools/variant_sweep.py (ja existente, nao inventado aqui) — ele chama
+    o provider claude_bridge_vision, que por sua vez POSTa em /ask-vision (o
+    painel de 3 juizes agora vive la, sem mudanca de contrato HTTP). O
+    design_patterns_observed que o painel produzir chega ao corpus pelo MESMO
+    caminho que visual_findings ja usa hoje (build_record grava o dict
+    inteiro) — nao ha arquivo paralelo.
+
+    A evidencia (corpus.jsonl atualizado) e' copiada pro wt em
+    artifacts/variant_sweep/<plant>/ — igual ao variant-sweep; a copia do
+    corpus.jsonl (sem extensao .png/.skp) NAO dispara _appearance_changed por
+    si so, mas o proprio corpus pode conter um verdict novo (CANDIDATE/FAIL)
+    que ainda depende do humano pra virar canonico (regra de promocao fica em
+    run_skp_visual_review.py / vision_queue_consumer.py, nao aqui).
+
+    Timeout/erro de subprocess vira rc=1 (_run_step_tolerant, compartilhado
+    com correction_cycle/variant-sweep) — excecao propagada deixaria a task
+    sem status terminal e ela re-dispararia pra sempre.
+    Semantica: 1 task = 1 variante drenada; drain seguinte = task NOVA na
+    fila (id determinístico por dia+variante, ver night_feeder)."""
+    plant = task.get("plant", "planta_74")
+    out = Path(task.get("out") or (VARIANT_OUT_ROOT / plant)).resolve()
+
+    def _worker(task_, wt: Path):
+        vid = task_.get("variant_id", "")
+        if not vid:
+            return 1, "", "variant_id ausente na task — nada pra drenar"
+        cmd = [sys.executable, "-m", "tools.variant_sweep",
+               "--out", str(out), "--plant", plant,
+               "--ask-vision", "--only", vid]
+        rc, o, e = _run_step_tolerant(cmd, REPO_ROOT, VARIANT_SWEEP_TIMEOUT)
+        if rc != 0:
+            return rc, o[-800:], e[-400:]
+        dest = wt / "artifacts" / "variant_sweep" / plant
+        dest.mkdir(parents=True, exist_ok=True)
+        for name in ("corpus.jsonl", "contact_sheet.png"):
+            src = out / name
+            if src.is_file():
+                shutil.copy2(src, dest / name)
+        vdir = out / vid
+        if vdir.is_dir():
+            d = dest / vid
+            d.mkdir(parents=True, exist_ok=True)
+            for png in sorted(vdir.glob("*.png")):
+                shutil.copy2(png, d / png.name)
+        return 0, o[-800:], e[-400:]
+
+    task.setdefault("verify_file", f"artifacts/variant_sweep/{plant}/corpus.jsonl")
+    return dispatch(task, dry_run=dry_run, run_worker=_worker)
+
+
 def dispatch_by_kind(task, dry_run=False) -> dict:
     """Roteia a task pelo `kind` (default 'claude' = comportamento existente):
-      - local_llm        -> Ollama local (token=0); LOCAL_LLM_FALLBACK_CLAUDE cai pro claude.
-      - tool             -> reservado pro muscle.py INLINE (brain_muscle.md), nao o dispatcher.
-      - correction_cycle -> 1 ciclo do correction_loop (FP-033) via dispatch() + seam.
-      - variant-sweep    -> 1 sweep de variantes julgadas (FP-034) via dispatch() + seam.
-      - claude           -> caminho existente: worktree isolado + `claude -p` (INALTERADO).
+      - local_llm            -> Ollama local (token=0); LOCAL_LLM_FALLBACK_CLAUDE cai pro claude.
+      - tool                 -> reservado pro muscle.py INLINE (brain_muscle.md), nao o dispatcher.
+      - correction_cycle     -> 1 ciclo do correction_loop (FP-033) via dispatch() + seam.
+      - variant-sweep        -> 1 sweep de variantes julgadas (FP-034) via dispatch() + seam.
+      - variant-vision-drain -> drena 1 variante PENDING_VISION via painel de 3 juizes
+                                (fecha o loop do night_feeder) via dispatch() + seam.
+      - claude               -> caminho existente: worktree isolado + `claude -p` (INALTERADO).
     Kind DESCONHECIDO cai no caminho claude (fallthrough caro — validacao fica pra
     outro slice; anotado no NOC_DISPATCHER.md)."""
     kind = (task.get("kind") or "claude").lower()
@@ -534,6 +599,8 @@ def dispatch_by_kind(task, dry_run=False) -> dict:
         return dispatch_correction_cycle(task, dry_run=dry_run)
     if kind == "variant-sweep":  # HIFEN byte-exato (spec FP-034); .lower() nao normaliza
         return dispatch_variant_sweep(task, dry_run=dry_run)
+    if kind == "variant-vision-drain":  # HIFEN byte-exato (paridade com variant-sweep)
+        return dispatch_variant_vision_drain(task, dry_run=dry_run)
     if kind == "local_llm":
         result = dispatch_local_llm(task, dry_run=dry_run)
         if result.get("status") == "LOCAL_LLM_FALLBACK_CLAUDE":

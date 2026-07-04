@@ -137,9 +137,75 @@ def test_vision_signals_lastwins_and_honest_limitations(env, capsys):
     rep = _run(env, capsys, "--dry-run")
     assert rep["signals"]["variant_pending_vision"]["variants"] == ["v2"]
     assert rep["signals"]["correction_pending_vision"] == {"planta_74": 1}
+    # loop fechado: v2 PENDING_VISION agora ENFILEIRA um drain (nao fica so
+    # em limitations) — a limitation que sobra e' a do correction_cycle, que
+    # esta fatia nao mexeu
+    ids = [t["id"] for t in rep["plan"]]
+    assert f"NF-{TODAY}-visdrain-v2" in ids
     lims = " ".join(rep["limitations"])
-    assert "--ask-vision" in lims                    # sem drain de variante via fila
     assert "BLOCKED_NEEDS_RENDER" in lims            # feeder nao fabrica render
+
+
+def test_pending_vision_variant_enqueues_drain_task(env, capsys):
+    _audit(env, age_sec=7200)
+    run_dir = env["runs"] / "noc_variant_sweep" / "s1"
+    run_dir.mkdir()
+    append_jsonl(run_dir / "corpus.jsonl", [
+        {"variant_id": "planta_74__v1", "verdict": "PENDING_VISION"},
+    ])
+    rep = _run(env, capsys, "--once")
+    rows = read_jsonl(env["queue"])
+    drain = next(r for r in rows if r["kind"] == "variant-vision-drain")
+    assert drain["id"] == f"NF-{TODAY}-visdrain-planta_74__v1"
+    assert drain["variant_id"] == "planta_74__v1"
+    assert drain["plant"] == "planta_74" and drain["safe"] is True
+    assert rep["applied"] == 3  # corr + sweep + 1 drain
+
+
+def test_drain_cap_limits_tasks_per_cycle(env, capsys):
+    _audit(env, age_sec=7200)
+    run_dir = env["runs"] / "noc_variant_sweep" / "s1"
+    run_dir.mkdir()
+    append_jsonl(run_dir / "corpus.jsonl", [
+        {"variant_id": f"v{i}", "verdict": "PENDING_VISION"} for i in range(5)
+    ])
+    rep = _run(env, capsys, "--dry-run", "--drain-cap", "2")
+    drain_ids = [t["id"] for t in rep["plan"] if t["kind"] == "variant-vision-drain"]
+    assert len(drain_ids) == 2                       # nunca as 5 de uma vez
+    assert "so as primeiras 2" in " ".join(rep["limitations"])
+
+
+def test_no_drain_flag_disables_vision_drain(env, capsys):
+    _audit(env, age_sec=7200)
+    run_dir = env["runs"] / "noc_variant_sweep" / "s1"
+    run_dir.mkdir()
+    append_jsonl(run_dir / "corpus.jsonl", [
+        {"variant_id": "v1", "verdict": "PENDING_VISION"},
+    ])
+    rep = _run(env, capsys, "--dry-run", "--no-drain")
+    assert [t["kind"] for t in rep["plan"]] == ["correction_cycle", "variant-sweep"]
+    assert any("desligado por flag" in s["reason"] for s in rep["skipped"]
+               if "visdrain" in s["what"] or "drain" in s["what"])
+
+
+def test_drain_dedup_by_variant_id_not_plant(env, capsys):
+    # 2 variantes PENDING_VISION do MESMO plant: uma ja pendente na fila (kind
+    # variant-vision-drain, variant_id=v1) NAO pode bloquear v2 — dedup por
+    # (kind, variant_id), nao por (kind, plant), senao v2 nunca entraria
+    _audit(env, age_sec=7200)
+    run_dir = env["runs"] / "noc_variant_sweep" / "s1"
+    run_dir.mkdir()
+    append_jsonl(run_dir / "corpus.jsonl", [
+        {"variant_id": "v1", "verdict": "PENDING_VISION"},
+        {"variant_id": "v2", "verdict": "PENDING_VISION"},
+    ])
+    append_jsonl(env["queue"], [{"id": "M9", "kind": "variant-vision-drain",
+                                 "plant": "planta_74", "variant_id": "v1",
+                                 "safe": True}])
+    rep = _run(env, capsys, "--dry-run")
+    drain_ids = {t["variant_id"] for t in rep["plan"]
+                if t["kind"] == "variant-vision-drain"}
+    assert drain_ids == {"v2"}                        # v1 dedupado, v2 entra
 
 
 def test_no_sweep_flag_for_live_prova(env, capsys):
