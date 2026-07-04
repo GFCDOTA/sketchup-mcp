@@ -219,6 +219,204 @@ def ask_claude_vision(question: str, image_paths, tier: str = DEFAULT_TIER) -> s
     return out
 
 
+# ---- painel colaborativo de 3 juizes (vision panel) ------------------------
+# Decisao do Felipe: o /ask-vision deixa de ser 1 chamada `claude -p` e vira um
+# PAINEL de 3: "estrutura" (5 eixos geometricos existentes) + "material_luz"
+# (eixo NOVO, textura/cor/reflectancia/sombra/exposicao — o que os 6 eixos
+# antigos NAO cobrem) RODAM EM PARALELO (ThreadPoolExecutor — stdlib, cada
+# chamada e' um subprocess bloqueante `claude -p`, threads bastam pra IO-bound);
+# o 3o ("sintese") roda DEPOIS, recebe os DOIS relatorios como TEXTO (nao
+# rele imagens — custo) e produz (a) o top_level_verdict FINAL (resolve
+# conflito honesto, nunca inventa o que um juiz nao viu) e (b)
+# design_patterns_observed — a colaboracao dos 3 vira conhecimento de design
+# REUSAVEL (FP-035-prep), nao so um PASS/FAIL isolado.
+#
+# Degradacao honesta: falha/timeout de QUALQUER uma das 3 chamadas NAO fabrica
+# veredito nem padroes daquele juiz — confidence cai, o 3o decide com o que tem
+# (nunca inventa o que falta). "FAIL so se DISCRIMINATED" continua regra de
+# PROMOCAO no run_skp_visual_review.py — o painel nao mexe nisso.
+VISION_PANEL_TIMEOUT_SEC = CLAUDE_TIMEOUT + 60  # cada juiz roda dentro do CLAUDE_TIMEOUT do ask_claude_vision; folga pro ThreadPoolExecutor.result()
+
+_STRUCTURE_JUDGE_PROMPT = """You are judge 1/3 of a collaborative visual-fidelity panel — ESTRUTURA.
+Focus ONLY on these 5 geometric fidelity axes (PDF-vs-SKP correctness, NOT aesthetics):
+wall_fidelity, door_fidelity, window_fidelity, room_fidelity, scale_rotation.
+Ignore material/color/light/texture entirely — that is judge 2's job, not yours.
+
+OPEN each render below with the Read tool and LOOK at it: your judgment MUST come from the
+pixels, not from geometry numbers alone.
+
+Renders (absolute paths, readable via --add-dir):
+{img_lines}
+
+Return ONLY a JSON object (no prose, no code fences):
+{{
+  "top_level_verdict": "PASS|WARN|FAIL",
+  "confidence": "low|medium|high",
+  "axes": {{
+    "wall_fidelity":  {{"verdict":"PASS|WARN|FAIL","evidence":"..."}},
+    "door_fidelity":  {{"verdict":"PASS|WARN|FAIL","evidence":"..."}},
+    "window_fidelity":{{"verdict":"PASS|WARN|FAIL","evidence":"..."}},
+    "room_fidelity":  {{"verdict":"PASS|WARN|FAIL","evidence":"..."}},
+    "scale_rotation": {{"verdict":"PASS|WARN|FAIL","evidence":"..."}}
+  }},
+  "findings": [ {{"id":"vf_001","severity":"FAIL|WARN","axis":"<one of the 5 axes above>",
+  "type":"<type>","location":"...","evidence_image":"<render file name>","evidence":"..."}} ]
+}}
+
+Finding types: floating_door, wall_stub, missing_wall_continuation, misplaced_window,
+full_height_window_void, floor_leak, misplaced_soft_barrier. Report ONLY what you SEE.
+
+{extra_context}
+"""
+
+_MATERIAL_LIGHT_JUDGE_PROMPT = """You are judge 2/3 of a collaborative visual-fidelity panel — MATERIAL & LUZ.
+Focus ONLY on this axis: material_light — texture, color, reflectance, shadow, exposure. This is
+what differentiates a real V-Ray render from a wireframe/flat-shaded placeholder; it is NOT
+covered by the 5 geometric axes (wall/door/window/room/scale_rotation), which judge 1 already owns.
+Ignore wall/door/window/room placement and scale entirely — that is judge 1's job, not yours.
+
+OPEN each render below with the Read tool and LOOK at it: your judgment MUST come from the
+pixels.
+
+Renders (absolute paths, readable via --add-dir):
+{img_lines}
+
+Return ONLY a JSON object (no prose, no code fences):
+{{
+  "top_level_verdict": "PASS|WARN|FAIL",
+  "confidence": "low|medium|high",
+  "axes": {{
+    "material_light": {{"verdict":"PASS|WARN|FAIL","evidence":"..."}}
+  }},
+  "findings": [ {{"id":"vf_001","severity":"FAIL|WARN","axis":"material_light",
+  "type":"<type>","location":"...","evidence_image":"<render file name>","evidence":"..."}} ],
+  "design_patterns_observed": [
+    {{"pattern":"<short label, e.g. paleta/material/luz/proporcao/layout choice>",
+      "verdict":"works|fails|neutral","why":"<what you SAW that supports this>"}}
+  ]
+}}
+
+Finding types: orphan_glass_panel, flat_shading_no_texture, blown_out_exposure,
+missing_shadow, wrong_material_hue, global_visual_fail. design_patterns_observed is OPTIONAL —
+leave it [] if you did not see enough to name a reusable pattern; NEVER invent one. Report ONLY
+what you SEE.
+
+{extra_context}
+"""
+
+_SYNTHESIS_JUDGE_PROMPT = """You are judge 3/3 of a collaborative visual-fidelity panel — SINTESE.
+You do NOT re-read the renders (that is expensive and already done). You receive the two reports
+below, written by judge 1 (ESTRUTURA — the 5 geometric fidelity axes) and judge 2 (MATERIAL & LUZ
+— texture/color/light). Either report may be MISSING (judge failed/timed out) — if so, decide with
+what you have and say so honestly; NEVER invent what a missing judge would have said.
+
+Your job has two parts:
+1. Resolve the FINAL top_level_verdict for this render, combining both reports honestly (FAIL if
+   either report FAILs; WARN if either WARNs and neither FAILs; PASS only if both PASS). If a
+   report is missing, do not silently default to PASS — say so in a finding and reflect it in
+   confidence.
+2. Produce design_patterns_observed: a list of REUSABLE design-pattern observations (palette,
+   material, lighting, proportion, layout) that this variant demonstrates working well OR badly —
+   this is accumulated design knowledge, not a fidelity verdict. Merge/dedupe patterns already
+   named by judge 2 with anything you can additionally infer from BOTH reports together (e.g. a
+   geometric proportion issue from judge 1 combined with a material choice from judge 2). Leave
+   the list EMPTY if there is not enough signal — never fabricate a pattern.
+
+=== JUDGE 1 REPORT (ESTRUTURA) ===
+{structure_report}
+
+=== JUDGE 2 REPORT (MATERIAL & LUZ) ===
+{material_light_report}
+
+Return ONLY a JSON object (no prose, no code fences) matching visual_findings.v1:
+{{
+  "schema_version": "visual_findings.v1",
+  "top_level_verdict": "PASS|WARN|FAIL",
+  "confidence": "low|medium|high",
+  "axes": {{
+    "wall_fidelity":   {{"verdict":"PASS|WARN|FAIL","evidence":"..."}},
+    "door_fidelity":   {{"verdict":"PASS|WARN|FAIL","evidence":"..."}},
+    "window_fidelity": {{"verdict":"PASS|WARN|FAIL","evidence":"..."}},
+    "room_fidelity":   {{"verdict":"PASS|WARN|FAIL","evidence":"..."}},
+    "scale_rotation":  {{"verdict":"PASS|WARN|FAIL","evidence":"..."}},
+    "material_light":  {{"verdict":"PASS|WARN|FAIL","evidence":"..."}},
+    "global_visual":   {{"verdict":"PASS|WARN|FAIL","evidence":"..."}}
+  }},
+  "findings": [ {{"id":"vf_001","severity":"FAIL|WARN","axis":"<one of the 7 axes above>",
+  "type":"<type>","location":"...","evidence_image":"<render file name>","evidence":"..."}} ],
+  "design_patterns_observed": [
+    {{"pattern":"...","verdict":"works|fails|neutral","why":"..."}}
+  ]
+}}
+
+If a report above is literally the text "MISSING (judge failed/timed out)", copy through the
+axes/findings you DO have from the other report, mark the missing axes' verdict as "WARN" with
+evidence "judge unavailable — not evaluated", cap confidence at "low", and add a finding
+{{"severity":"WARN","axis":"global_visual","type":"panel_degraded", ...}} documenting which judge
+was missing. Never claim PASS for an axis nobody evaluated.
+"""
+
+
+def _vision_panel_img_lines(image_paths) -> str:
+    return "\n".join(f"  - {Path(p).resolve()}" for p in (image_paths or []))
+
+
+def _run_vision_judge(prompt_template: str, image_paths, extra_context: str,
+                      tier: str) -> tuple[str | None, str | None]:
+    """Roda 1 juiz do painel (`ask_claude_vision`). Retorna (texto, None) em
+    sucesso ou (None, motivo) em falha — NUNCA fabrica texto de juiz que falhou
+    (o chamador precisa distinguir 'juiz respondeu' de 'juiz caiu')."""
+    prompt = prompt_template.format(
+        img_lines=_vision_panel_img_lines(image_paths),
+        extra_context=extra_context or "")
+    try:
+        return ask_claude_vision(prompt, image_paths, tier=tier), None
+    except Exception as e:  # noqa: BLE001 — degradacao honesta, nunca propaga
+        return None, f"{type(e).__name__}: {e}"
+
+
+def ask_claude_vision_panel(question: str, image_paths, tier: str = DEFAULT_TIER) -> str:
+    """Painel COLABORATIVO de 3 juizes (substitui a chamada unica ao
+    ask_claude_vision pro /ask-vision). `question` e' o contexto extra que o
+    chamador passaria (ex.: pending findings do vision_queue_consumer) —
+    repassado aos juizes 1 e 2 como contexto secundario.
+
+    1. "estrutura" + "material_luz" RODAM EM PARALELO (ThreadPoolExecutor,
+       2 workers — cada chamada e' 1 subprocess `claude -p` bloqueante de
+       ~50-110s medido em producao; paralelizar os 2 primeiros corta a
+       latencia total de ~3x para ~2x uma chamada).
+    2. "sintese" roda DEPOIS, recebendo os 2 relatorios como TEXTO (nunca
+       relê as imagens — custo). Produz o veredito FINAL + design_patterns.
+
+    Retorna o TEXTO do juiz de sintese (mesmo formato de string que
+    ask_claude_vision devolvia) — o chamador (_ask_vision_route) empacota em
+    {"response": "<texto>"} EXATAMENTE como antes; nenhuma mudanca de contrato
+    HTTP. Nunca fabrica: se um juiz falha, o prompt de sintese INSTRUI o 3o a
+    marcar os eixos daquele juiz como WARN honesto (nunca PASS por omissao)."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    with ThreadPoolExecutor(max_workers=2) as ex:
+        fut_structure = ex.submit(_run_vision_judge, _STRUCTURE_JUDGE_PROMPT,
+                                  image_paths, question, tier)
+        fut_material = ex.submit(_run_vision_judge, _MATERIAL_LIGHT_JUDGE_PROMPT,
+                                 image_paths, question, tier)
+        structure_text, structure_err = fut_structure.result(timeout=VISION_PANEL_TIMEOUT_SEC)
+        material_text, material_err = fut_material.result(timeout=VISION_PANEL_TIMEOUT_SEC)
+
+    structure_report = structure_text or "MISSING (judge failed/timed out)"
+    material_report = material_text or "MISSING (judge failed/timed out)"
+    if structure_err:
+        structure_report += f"\n[judge 1 error, honestly surfaced: {structure_err}]"
+    if material_err:
+        material_report += f"\n[judge 2 error, honestly surfaced: {material_err}]"
+
+    synthesis_prompt = _SYNTHESIS_JUDGE_PROMPT.format(
+        structure_report=structure_report, material_light_report=material_report)
+    # sintese NAO le imagem (custo) -> ask_claude (texto), nao ask_claude_vision;
+    # sem imagens no bridge, --add-dir fica vazio e o dir do cwd neutro basta.
+    return ask_claude(synthesis_prompt, tier=tier)
+
+
 # ---- /ask + /health contract (spec gate_framework §6.5) ------------
 ASK_FIELDS = ("prompt", "question")
 VERDICT_ENUM = ("GO", "NO-GO", "MORE-INFO", "VISUAL_REVIEW")
@@ -1490,8 +1688,12 @@ def _ask_route(req, _url):
 
 
 def _ask_vision_route(req, _url):
-    """POST /ask-vision — como /ask, mas com 'images': [paths abs] que o claude -p pode
-    LER (--add-dir). Emite o que o prompt pedir (ex.: visual_findings). Honest 500."""
+    """POST /ask-vision — painel COLABORATIVO de 3 juizes (estrutura + material_luz
+    em paralelo -> sintese). Mesmo contrato HTTP de sempre: 'images' [paths abs]
+    que o claude -p pode LER (--add-dir); devolve {"response": "<json/texto>"} —
+    o cliente (oracle_providers.ClaudeBridgeVisionProvider) parseia igual, campos
+    novos sao aditivos. Honest 500; painel nunca fabrica veredito/padrao de juiz
+    que falhou (ver ask_claude_vision_panel)."""
     try:
         n = int(req.headers.get("Content-Length") or 0)
         body = req.rfile.read(n) if n else b""
@@ -1506,8 +1708,8 @@ def _ask_vision_route(req, _url):
             return
         tier = data.get("tier") or DEFAULT_TIER
         t0 = time.time()
-        answer = ask_claude_vision(prompt, images, tier=tier)
-        _audit_append({"t": time.time(), "kind": "consult_vision",
+        answer = ask_claude_vision_panel(prompt, images, tier=tier)
+        _audit_append({"t": time.time(), "kind": "consult_vision_panel",
                        "n_images": len(images), "a_chars": len(answer),
                        "dur_sec": round(time.time() - t0, 1)})
         req._send(200, {"response": answer})

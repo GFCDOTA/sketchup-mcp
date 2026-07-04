@@ -899,13 +899,38 @@ _AXIS_KEYS = {
     "wall_fidelity", "door_fidelity", "window_fidelity",
     "room_fidelity", "scale_rotation", "global_visual",
 }
+# Eixos ADITIVOS: opcionais, nunca exigidos por _AXIS_KEYS.issubset (retrocompat
+# com qualquer resposta escrita antes do painel de 3 juizes). Hoje so
+# material_light (juiz 2 do painel colaborativo, FP-035-prep); propagado se
+# presente, ignorado silenciosamente se ausente.
+_OPTIONAL_AXIS_KEYS = {"material_light"}
+
+
+def _normalize_design_patterns(raw_list) -> list[dict]:
+    """Normaliza design_patterns_observed (FP-035-prep) tolerantemente: entradas
+    sem os 3 campos minimos sao DESCARTADAS (nunca fabrica pattern/verdict/why
+    a partir de lixo parcial) — a lista pode legitimamente ficar vazia."""
+    out: list[dict] = []
+    if not isinstance(raw_list, list):
+        return out
+    for p in raw_list:
+        if not isinstance(p, dict):
+            continue
+        pattern, verdict, why = p.get("pattern"), p.get("verdict"), p.get("why")
+        if not pattern or verdict not in {"works", "fails", "neutral"} or not why:
+            continue
+        out.append({"pattern": str(pattern), "verdict": verdict, "why": str(why)})
+    return out
 
 
 def _normalize_to_visual_findings(raw: dict) -> dict | None:
     """Coerce an oracle response into a visual_findings.v1 shape.
 
     Returns None if the payload lacks the minimum required structure
-    (top_level_verdict + axes object with the 6 keys).
+    (top_level_verdict + axes object with the 6 keys). Optional axes (ex.:
+    material_light, from the 3-judge panel's judge 2) and
+    design_patterns_observed (the panel's synthesis output) are propagated
+    ADDITIVELY when present — never required, never fabricated when absent.
     """
     if not isinstance(raw, dict):
         return None
@@ -934,6 +959,17 @@ def _normalize_to_visual_findings(raw: dict) -> dict | None:
         if v not in {"PASS", "WARN", "FAIL"}:
             return None
         out["axes"][k] = {"verdict": v, "evidence": str(a.get("evidence", ""))}
+    for k in _OPTIONAL_AXIS_KEYS:
+        a = axes.get(k)
+        if not isinstance(a, dict):
+            continue
+        v = a.get("verdict")
+        if v not in {"PASS", "WARN", "FAIL"}:
+            continue
+        out["axes"][k] = {"verdict": v, "evidence": str(a.get("evidence", ""))}
+    patterns = _normalize_design_patterns(raw.get("design_patterns_observed"))
+    if patterns:
+        out["design_patterns_observed"] = patterns
     findings = raw.get("findings") or []
     if isinstance(findings, list):
         for f in findings:

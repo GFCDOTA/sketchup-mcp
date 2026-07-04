@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "visual_findings.v1",
-  "description": "visual_findings.v1 — FP-030 base + FP-032 honesty fields (source, confidence, discriminated). All FP-032 fields are OPTIONAL so findings written before the hardening still validate. No additionalProperties:false anywhere: the runner enriches the top level with aggregation keys (oracle_verdict, final_verdict, known_warnings_carried, ...).",
+  "description": "visual_findings.v1 — FP-030 base + FP-032 honesty fields (source, confidence, discriminated) + FP-035-prep collaborative-panel fields (material_light axis, design_patterns_observed). All FP-032/panel fields are OPTIONAL so findings written before the hardening still validate. No additionalProperties:false anywhere: the runner enriches the top level with aggregation keys (oracle_verdict, final_verdict, known_warnings_carried, ...).",
   "$defs": {
     "source": {
       "description": "Where this judgment came from. oracle_bridge is the legacy/normalizer default kept for back-compat with findings written before the source enum split.",
@@ -26,6 +26,31 @@
         "boolean",
         "null"
       ]
+    },
+    "design_pattern": {
+      "description": "One observed reusable design pattern from the collaborative 3-judge panel's synthesis stage (FP-035-prep — accumulates knowledge for a future RAG; never a fidelity verdict). Empty design_patterns_observed[] is honest when there is not enough signal; never fabricate an entry.",
+      "type": "object",
+      "required": [
+        "pattern",
+        "verdict",
+        "why"
+      ],
+      "properties": {
+        "pattern": {
+          "type": "string",
+          "description": "Short label of the design choice observed, e.g. 'paleta black_wood_gold em cozinha compacta'."
+        },
+        "verdict": {
+          "enum": [
+            "works",
+            "fails",
+            "neutral"
+          ]
+        },
+        "why": {
+          "type": "string"
+        }
+      }
     }
   },
   "required": [
@@ -65,6 +90,13 @@
     "discriminated": {
       "$ref": "#/$defs/discriminated"
     },
+    "design_patterns_observed": {
+      "description": "FP-035-prep: structured, reusable design knowledge synthesized by the 3rd (synthesis) judge from the panel's two reports. Absent or [] is honest when there is insufficient data — never fabricated. This is observational knowledge, NOT a fidelity or aesthetic verdict (human_verdict/IMPROVED-SAME-WORSE stay exclusive to Felipe).",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/design_pattern"
+      }
+    },
     "findings": {
       "type": "array",
       "items": {
@@ -95,7 +127,8 @@
               "window_fidelity",
               "room_fidelity",
               "scale_rotation",
-              "global_visual"
+              "global_visual",
+              "material_light"
             ]
           },
           "type": {
