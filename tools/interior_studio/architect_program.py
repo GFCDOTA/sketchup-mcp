@@ -125,6 +125,59 @@ def _retrieve_bundle(room_key: str | None) -> dict | None:
         return None
 
 
+def guard_bundle_freshness(bundle: dict | None) -> dict | None:
+    """FP-037: freshness guard ANTES do arquiteto consumir o contexto RAG.
+
+    Se o bundle traz retrieved_chunks (backend embed), passa-os pelo
+    rag_freshness.freshness_guard: chunk inativo / de corpus_version antigo é
+    REJEITADO; chunk cuja fonte ficou mais nova que o índice é marcado STALE e
+    NÃO é usado silenciosamente (registra em bundle['freshness']). Contexto stale
+    degrada — nunca entra calado no prompt.
+
+    RETROCOMPAT: sem bundle, ou sem retrieved_chunks (faceted puro), é NO-OP —
+    devolve o bundle intacto. Qualquer erro/infra ausente -> devolve o bundle como
+    veio (o guard nunca derruba o gerador).
+    """
+    if not bundle:
+        return bundle
+    chunks = bundle.get("retrieved_chunks") or []
+    if not chunks:
+        return bundle
+    try:
+        from tools import rag_freshness as rf
+        con = rf.connect()
+        try:
+            candidates = [{"chunk_id": c.get("chunk_id"),
+                           "document_id": _doc_id_of_chunk(con, c.get("chunk_id"))}
+                          for c in chunks]
+            res = rf.freshness_guard(con, candidates)
+        finally:
+            con.close()
+        fresh_ids = {c["chunk_id"] for c in res.fresh_chunks}
+        kept = [c for c in chunks if c.get("chunk_id") in fresh_ids]
+        bundle = {**bundle, "retrieved_chunks": kept, "freshness": {
+            "kept": len(kept), "rejected": res.rejected, "stale": res.stale,
+            "corpus_version": res.corpus_version,
+        }}
+        if res.rejected or res.stale:
+            # degradação honesta: avisa o consumidor que contexto foi descartado
+            note = (f"freshness guard: {len(res.rejected)} chunk(s) rejeitado(s), "
+                    f"{len(res.stale)} stale (fonte mais nova que o índice — "
+                    f"reindex pendente). Contexto stale NÃO usado.")
+            bundle["notes"] = list(bundle.get("notes") or []) + [note]
+        return bundle
+    except Exception:  # noqa: BLE001 — guard nunca quebra o gerador
+        return bundle
+
+
+def _doc_id_of_chunk(con, chunk_id: str | None) -> str | None:
+    if not chunk_id:
+        return None
+    row = con.execute("SELECT document_id FROM chunk WHERE chunk_id=?",
+                      (chunk_id,)).fetchone()
+    return row["document_id"] if row else None
+
+
 def render_bundle_for_prompt(bundle: dict | None, max_tokens: int = 6) -> str:
     """Bloco estruturado (não texto cru truncado) do bundle recuperado pro prompt:
     tokens canônicos + anti-patterns + layout_hints. Vazio se sem bundle."""
@@ -158,7 +211,10 @@ def room_context(room_id: str) -> dict | None:
                 existing.append(f'{ps.ASSET_META.get(a, a)} ({st["state_label"]})')
     # FP-035: injeta o bundle estruturado recuperado (laço curadoria→furnish→.skp).
     # RETROCOMPAT: sem bundle -> design_spec vazio; o prompt cai no dna cru.
-    bundle = _retrieve_bundle(rm["key"])
+    # FP-037: passa o bundle pelo freshness guard ANTES de virar contexto do prompt
+    # (rejeita chunk inativo/stale; contexto stale não entra calado). No-op no
+    # faceted puro (sem retrieved_chunks).
+    bundle = guard_bundle_freshness(_retrieve_bundle(rm["key"]))
     return {"room": rm, "dna": dna, "existing": existing,
             "design_bundle": bundle,
             "design_spec": render_bundle_for_prompt(bundle)}
