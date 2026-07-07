@@ -13,8 +13,11 @@ STYLE/taste never enters) and acted on CONSERVATIVELY:
 
 Every processed item writes an append-only ``decision_audit_record`` (idempotent:
 a re-run does not re-decide — approved/rejected proposals have left the pending
-folder, and left_pending/refused records are deduped by (decision_id, action)).
-``created_at`` is DERIVED from the pending file mtime, never the wall clock.
+folder, and left_pending/refused records are deduped by (decision_id, action,
+dry_run)). A ``dry_run`` drain also writes these records (marked ``dry_run=true``)
+so the dashboard can review the history of what the carteiro WOULD do — without
+moving a single proposal or writing a DLQ row. ``created_at`` is DERIVED from the
+pending file mtime, never the wall clock.
 
 The RAIL: this module never imports the human-verdict vocabulary nor the literals
 IMPROVED/SAME/WORSE; ``decided_by`` is always ``auto_decider`` (``gate_mode_b`` in
@@ -182,8 +185,11 @@ def drain(*, caps: dict | None = None, proposals=ic_proposals, gates_fn=None,
 
     ``dry_run`` (SAFETY): when True the drain still classifies each proposal and
     determines the action it WOULD take — the returned summary shows what would
-    happen — but it NEVER moves a proposal (no ``approve``/``reject``) and NEVER
-    writes the audit/DLQ. Threaded through every apply/write point.
+    happen. It NEVER moves a proposal (no ``approve``/``reject``) and NEVER writes
+    the DLQ. It DOES write the ``decision_audit_record`` (marked ``dry_run=true``)
+    so the dashboard sees the trail of what the carteiro would do — a pure,
+    side-effect-free-on-the-proposals history. Threaded through every apply/write
+    point; audit idempotency is keyed by (decision_id, action, dry_run).
     """
     eff_caps = _effective_caps(caps)
     max_dec = eff_caps["max_auto_decisions_per_drain"]
@@ -200,8 +206,10 @@ def drain(*, caps: dict | None = None, proposals=ic_proposals, gates_fn=None,
     if not use_gate:
         gate_fn = None
 
-    # append-only + idempotent: never re-append a record for a (decision_id, action)
-    seen = {(r.get("decision_id"), r.get("action")) for r in read_jsonl(audit_path)}
+    # append-only + idempotent: never re-append a record for a
+    # (decision_id, action, dry_run). A legacy row without dry_run reads as False.
+    seen = {(r.get("decision_id"), r.get("action"), bool(r.get("dry_run")))
+            for r in read_jsonl(audit_path)}
 
     pending = sorted(proposals.state().get("pending", []),
                      key=lambda p: str(p.get("id", "")))     # FROZEN, deterministic
@@ -215,13 +223,15 @@ def drain(*, caps: dict | None = None, proposals=ic_proposals, gates_fn=None,
     n_gate_calls = 0
 
     def _emit(rec: dict) -> None:
-        # append-only + idempotent: a (decision_id, action) already recorded is not
-        # re-appended, and does NOT count as a fresh record for this drain. In
-        # dry_run the would-be record is surfaced in the summary but never written.
-        if (rec["decision_id"], rec["action"]) not in seen:
-            if not dry_run:
-                append_jsonl(audit_path, [rec])
-            seen.add((rec["decision_id"], rec["action"]))
+        # append-only + idempotent: a (decision_id, action, dry_run) already recorded
+        # is not re-appended, and does NOT count as a fresh record for this drain.
+        # The audit IS written in dry_run too (marked) — only the proposal move and
+        # the DLQ are suppressed — so the dashboard gets the would-do history.
+        rec["dry_run"] = dry_run
+        key = (rec["decision_id"], rec["action"], dry_run)
+        if key not in seen:
+            append_jsonl(audit_path, [rec])
+            seen.add(key)
             new_records.append(rec)
 
     def _write_dlq(row: dict) -> None:
@@ -338,6 +348,23 @@ def drain(*, caps: dict | None = None, proposals=ic_proposals, gates_fn=None,
 
     return {"decided": decided, "escalated": escalated, "refused": refused,
             "left_pending": left_pending, "audit_records": new_records}
+
+
+def read_audit(limit: int = 100, *, out_dir: Path | None = None) -> list[dict]:
+    """Read the carteiro's ``decision_audit_record`` trail, MOST RECENT FIRST, up
+    to ``limit`` rows. The audit is append-only, so recency == append order: the
+    last line written is the newest (``created_at`` is a derived mtime and may tie,
+    so it is NOT used to order). Pure, no network — the BFF/dashboard reads the
+    decision history through this (dry_run==true rows are the would-do simulations).
+
+    ``out_dir`` overrides the default (engine ``data/runs``) — e.g. the BFF passes
+    ``BFF_ENGINE_ROOT / "data" / "runs"``. Missing file -> [] (tolerant read)."""
+    out = Path(out_dir) if out_dir else DEFAULT_OUT
+    rows = read_jsonl(out / AUDIT_NAME)
+    rows.reverse()                      # append-only => last appended == most recent
+    if limit is not None and limit >= 0:
+        rows = rows[:limit]
+    return rows
 
 
 def _main(argv=None) -> int:

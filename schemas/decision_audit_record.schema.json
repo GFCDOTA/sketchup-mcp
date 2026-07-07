@@ -17,7 +17,8 @@
     "decided_by",
     "caps_snapshot",
     "corpus_version",
-    "created_at"
+    "created_at",
+    "dry_run"
   ],
   "properties": {
     "schema": {
@@ -97,6 +98,10 @@
     "created_at": {
       "type": "string",
       "description": "ISO-8601 UTC, DERIVED from the proposal artifact mtime — never the wall-clock of the decision, never random."
+    },
+    "dry_run": {
+      "type": "boolean",
+      "description": "true = the carteiro only SIMULATED this decision (drain dry_run): the record is written for the dashboard history but NO proposal was moved and NO DLQ row was written — it is what the carteiro WOULD do. false = an --apply drain that actually moved the proposal (or wrote the DLQ). Dedup identity is (decision_id, action, dry_run), so a simulated and an applied record of the same decision coexist."
     }
   }
 }

@@ -212,36 +212,66 @@ def test_no_audit_record_is_ever_decided_by_a_human(tmp_path):
 # ---- dry-run (SAFETY) ----------------------------------------------------
 
 
-def test_dry_run_shows_actions_but_moves_nothing_and_writes_nothing(tmp_path):
+def test_dry_run_writes_audit_but_moves_nothing_and_writes_no_dlq(tmp_path, validator):
     props = FakeProposals([_clean(), _broken(), _taste_gap()])
     res = _drain(props, tmp_path, dry_run=True)
-    # the summary still shows WHAT WOULD HAPPEN…
+    # the summary shows WHAT WOULD HAPPEN…
     assert res["decided"] == [
         {"decision_id": "furniture_program_r002", "action": "auto_approve"},
         {"decision_id": "furniture_program_r003", "action": "auto_reject"}]
     assert res["refused"] == ["gap_estilo_r004"]
-    assert len(res["audit_records"]) == 3          # would-be records surfaced
-    # …but NOTHING was mutated: proposals untouched, no audit/DLQ files written
+    assert len(res["audit_records"]) == 3
+    # …the audit IS written — every record valid, marked dry_run=true …
+    assert (tmp_path / ad.AUDIT_NAME).exists()
+    lines = (tmp_path / ad.AUDIT_NAME).read_text("utf-8").splitlines()
+    assert len(lines) == 3
+    for ln in lines:
+        rec = json.loads(ln)
+        validator.validate(rec)
+        assert rec["dry_run"] is True
+        assert rec["decided_by"] == "auto_decider"       # RAIL holds in dry_run
+    # …but NO proposal moved and NO DLQ was written (side-effect-free on proposals)
     assert set(props.pending) == {"furniture_program_r002",
                                   "furniture_program_r003", "gap_estilo_r004"}
     assert props.approved == {} and props.rejected == {}
-    assert not (tmp_path / ad.AUDIT_NAME).exists()
     assert not (tmp_path / ad.DLQ_NAME).exists()
 
 
-def test_dry_run_is_repeatable_and_apply_then_mutates(tmp_path):
+def test_dry_run_is_idempotent_and_apply_then_mutates_and_marks_false(tmp_path):
     props = FakeProposals([_clean()])
-    # two dry passes are identical and never mutate
+    # two dry passes: the second re-sees the same (id, action, dry_run) -> no re-append
     first = _drain(props, tmp_path, dry_run=True)
+    lines_1 = (tmp_path / ad.AUDIT_NAME).read_text("utf-8").splitlines()
     second = _drain(props, tmp_path, dry_run=True)
     assert first["decided"] == second["decided"]
-    assert "furniture_program_r002" in props.pending
-    assert not (tmp_path / ad.AUDIT_NAME).exists()
-    # apply (dry_run=False) actually moves the proposal and writes the audit
+    assert second["audit_records"] == []                 # deduped, nothing appended
+    assert (tmp_path / ad.AUDIT_NAME).read_text("utf-8").splitlines() == lines_1
+    assert "furniture_program_r002" in props.pending     # still not moved
+    # apply (dry_run=False): DISTINCT key -> a new dry_run=false record + the move
     applied = _drain(props, tmp_path, dry_run=False)
     assert applied["decided"][0]["action"] == "auto_approve"
+    assert applied["audit_records"][0]["dry_run"] is False
     assert "furniture_program_r002" in props.approved
-    assert (tmp_path / ad.AUDIT_NAME).exists()
+    lines_2 = (tmp_path / ad.AUDIT_NAME).read_text("utf-8").splitlines()
+    assert len(lines_2) == 2                              # dry-run row + apply row
+    assert {json.loads(x)["dry_run"] for x in lines_2} == {True, False}
+
+
+# ---- read_audit accessor (BFF-facing) ------------------------------------
+
+
+def test_read_audit_returns_most_recent_first_and_respects_limit(tmp_path):
+    props = FakeProposals([_clean(f"furniture_program_r00{i}") for i in range(2, 6)])
+    res = _drain(props, tmp_path)                         # 4 records, append order
+    written = [r["decision_id"] for r in res["audit_records"]]
+    rows = ad.read_audit(out_dir=tmp_path)
+    assert [r["decision_id"] for r in rows] == list(reversed(written))  # newest first
+    assert ad.read_audit(limit=2, out_dir=tmp_path) == rows[:2]
+    assert ad.read_audit(limit=0, out_dir=tmp_path) == []
+
+
+def test_read_audit_missing_file_is_empty(tmp_path):
+    assert ad.read_audit(out_dir=tmp_path) == []
 
 
 def test_main_defaults_to_dry_run(monkeypatch, capsys):

@@ -55,6 +55,7 @@ def _record(**over) -> dict:
                           "max_gate_calls_per_drain": 5},
         "corpus_version": "unknown",
         "created_at": "2026-01-01T00:00:00Z",
+        "dry_run": False,
     }
     base.update(over)
     return base
@@ -104,6 +105,18 @@ def test_schema_rejects_missing_required(dar):
     rec = _record()
     del rec["decided_by"]
     assert list(dar.iter_errors(rec))
+
+
+def test_dry_run_is_required_and_boolean(dar):
+    # dry_run distinguishes a SIMULATED record from an APPLIED one — both are valid
+    assert not list(dar.iter_errors(_record(dry_run=True)))
+    assert not list(dar.iter_errors(_record(dry_run=False)))
+    # required: a record missing it is rejected
+    rec = _record()
+    del rec["dry_run"]
+    assert list(dar.iter_errors(rec))
+    # boolean only: a string must not pass
+    assert list(dar.iter_errors(_record(dry_run="true")))
 
 
 # ---- THE RAIL: decided_by is never human --------------------------------
