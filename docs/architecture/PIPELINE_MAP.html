@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>sketchup-mcp — mapa da pipeline</title>
+<style>
+  :root{
+    --bg:#eef0fb; --ink:#0f1420; --muted:#6b7280; --line:#e3e6f3;
+    --navy:#121a2e; --navy2:#1b2540; --white:#f7f8ff;
+    --purple:#7c3aed; --teal:#10b981; --orange:#f59e0b; --pink:#ec4899;
+    --blue:#3b82f6; --slate:#64748b;
+    --card:#ffffff;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  .poster{font-family:var(--sans);color:var(--ink);background:var(--bg);
+    max-width:1180px;margin:0 auto;padding:26px;border-radius:18px;line-height:1.45}
+  .poster h1,.poster h2,.poster h3,.poster p{margin:0}
+  .sec-label{font-size:12px;font-weight:800;letter-spacing:.12em;color:var(--slate);text-transform:uppercase;margin:30px 0 12px}
+  /* hero */
+  .hero{background:linear-gradient(135deg,var(--navy),var(--navy2));color:var(--white);
+    border-radius:16px;padding:30px 32px;position:relative;overflow:hidden}
+  .hero h1{font-size:40px;font-weight:850;letter-spacing:-.5px}
+  .hero .sub{font-size:16px;color:#aeb7d6;margin-top:8px;max-width:760px}
+  .hero .cmd{font-family:var(--mono);font-size:13px;color:#7dd3fc;margin-top:14px}
+  .pill{position:absolute;top:26px;right:30px;background:var(--teal);color:#04231a;
+    font-weight:800;font-size:12px;letter-spacing:.08em;padding:7px 13px;border-radius:999px}
+  .pill.ci{top:64px;background:#1f2937;color:#9ca3af;border:1px solid #374151;font-family:var(--mono)}
+  /* pipeline stages */
+  .stages{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;align-items:stretch}
+  .stage{border-radius:12px;padding:16px 15px;color:#fff;position:relative}
+  .stage h3{font-size:16px;font-weight:800}
+  .stage .k{font-size:12px;opacity:.9;margin-top:3px}
+  .stage .d{font-size:12.5px;margin-top:9px;opacity:.96;line-height:1.4}
+  .s1{background:var(--purple)} .s2{background:var(--teal)} .s3{background:var(--orange)} .s4{background:var(--pink)}
+  .flowline{font-family:var(--mono);font-size:12px;color:var(--muted);background:#fff;border:1px solid var(--line);
+    border-radius:10px;padding:11px 14px;margin-top:10px;overflow-x:auto;white-space:nowrap}
+  .flowline b{color:var(--teal)} .flowline i{color:var(--orange);font-style:normal}
+  /* tree */
+  .grid2{display:grid;grid-template-columns:1.05fr .95fr;gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+  .tree{font-family:var(--mono);font-size:13px;line-height:1.85}
+  .tree .fld{font-weight:700}
+  .tree .c{color:var(--muted);font-weight:400}
+  .tree .dot{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:7px;vertical-align:middle}
+  .new{background:var(--teal);color:#04231a;font-size:10px;font-weight:800;padding:1px 6px;border-radius:6px;margin-left:6px;font-family:var(--sans)}
+  /* roles */
+  .roles{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+  .role{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 15px}
+  .role .rh{display:flex;align-items:center;gap:8px;font-weight:800;font-size:13.5px}
+  .role .imp{margin-left:auto;font-size:10px;font-weight:800;letter-spacing:.05em;padding:2px 8px;border-radius:999px}
+  .imp-core{background:#fee2e2;color:#b91c1c} .imp-key{background:#fef3c7;color:#92400e} .imp-sup{background:#e5e7eb;color:#374151}
+  .role p{font-size:12px;color:var(--muted);margin:6px 0 9px}
+  .chips{display:flex;flex-wrap:wrap;gap:5px}
+  .chip{font-family:var(--mono);font-size:11px;background:#f3f4ff;border:1px solid var(--line);color:#374151;padding:2px 7px;border-radius:6px}
+  .rd{width:11px;height:11px;border-radius:4px;flex:0 0 auto}
+  /* why cards */
+  .why{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  .whyc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:17px 19px}
+  .whyc .t{display:flex;align-items:center;gap:9px;font-weight:800;font-size:15px}
+  .whyc .bd{font-size:13px;color:#4b5563;margin-top:8px;line-height:1.5}
+  .whyc .bd code{font-family:var(--mono);font-size:12px;background:#f3f4ff;padding:1px 5px;border-radius:5px}
+  .cdot{width:13px;height:13px;border-radius:50%}
+  /* footer */
+  .foot{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#cbd5e1;border-radius:14px;padding:20px 24px;margin-top:26px;font-size:13px;line-height:1.6}
+  .foot b{color:#fff}
+  .foot .tpl{font-family:var(--mono);font-size:12px;color:#7dd3fc;margin-top:8px}
+  @media(max-width:760px){.stages,.grid2,.roles,.why{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="poster">
+
+  <div class="hero">
+    <div class="pill">PIPELINE PROVADA</div>
+    <div class="pill ci">ci: 3 jobs verdes</div>
+    <h1>sketchup-mcp</h1>
+    <div class="sub">PDF de planta arquitetônica &rarr; um <b>.skp do SketchUp fiel</b>. Tudo — gates, testes, renders, o oráculo de decisão — existe pra provar que o modelo bate com o PDF.</div>
+    <div class="cmd">consensus.json → build_plan_shell_skp → model.skp + renders + report → gates</div>
+  </div>
+
+  <div class="sec-label">Do PDF ao .skp, em 4 estágios</div>
+  <div class="stages">
+    <div class="stage s1"><h3>1 · Extrair</h3><div class="k">PDF → dados</div><div class="d">Vetor do PDF vira <code>consensus.json</code>: paredes, aberturas, cômodos em pontos. <b>Nada se inventa.</b></div></div>
+    <div class="stage s2"><h3>2 · Construir</h3><div class="k">dados → .skp</div><div class="d">Python calcula a casca 2D; Ruby/SketchUp extruda e recorta janela (peitoril+verga).</div></div>
+    <div class="stage s3"><h3>3 · Validar</h3><div class="k">prova de fidelidade</div><div class="d">Gates determinísticos (dados) + gate visual (olho/GPT) vs o PDF.</div></div>
+    <div class="stage s4"><h3>4 · Promover</h3><div class="k">runs → artifacts</div><div class="d">Só o .skp aprovado vira o <b>entregável</b> versionado em <code>artifacts/</code>.</div></div>
+  </div>
+  <div class="flowline">consensus.json ──▶ <b>[Python] casca 2D</b> ──▶ _shell_polygon.json ──▶ <b>[Ruby/SketchUp] extruda+recorta</b> ──▶ model.skp + report ──▶ <i>[gates] determinístico + visual</i> &nbsp;&nbsp;│&nbsp;&nbsp; a CI valida o lado Python ◀──┤──▶ SketchUp/olho valida o lado direito</div>
+
+  <div class="sec-label">Estrutura do projeto — onde mora cada coisa</div>
+  <div class="grid2">
+    <div class="card">
+      <div class="tree">
+<span class="dot" style="background:var(--blue)"></span><span class="fld">.claude/</span> <span class="c"># o cérebro do agente</span><br>
+&nbsp;&nbsp;├─ skills/ <span class="c">· 18 skills (pipeline, gates, furnish, governança)</span><br>
+&nbsp;&nbsp;├─ agents/ <span class="c">· 4 agentes nomeados + oráculo</span><br>
+&nbsp;&nbsp;├─ specs/ · evals/ <span class="c">· contrato + rubrica de fidelidade</span><br>
+&nbsp;&nbsp;└─ memory/ · plans/ <span class="c">· estado entre sessões</span><br>
+<span class="dot" style="background:var(--teal)"></span><span class="fld">tools/</span> <span class="c"># o motor — 124 arquivos</span><br>
+&nbsp;&nbsp;├─ mcp_server/ <span class="c">· servidor MCP (9 tools)</span><br>
+&nbsp;&nbsp;├─ claude_bridge/ <span class="c">· cockpit + oráculo :8765</span><br>
+&nbsp;&nbsp;├─ interior_studio/ <span class="c">· time de agentes + :8782</span><br>
+&nbsp;&nbsp;├─ pdf_knowledge/ <span class="c">· índice de PDFs de referência</span><br>
+&nbsp;&nbsp;└─ vitrine/ <span class="c">· app unificado (grafo/fluxo)</span><br>
+<span class="dot" style="background:var(--orange)"></span><span class="fld">interior/</span> <span class="c"># mobiliário & estilo · 37</span><br>
+<span class="dot" style="background:var(--purple)"></span><span class="fld">fixtures/</span> <span class="c"># entradas canônicas (quadrado + planta_74)</span><br>
+<span class="dot" style="background:var(--pink)"></span><span class="fld">artifacts/</span> <span class="c"># ★ O ENTREGÁVEL (.skp + renders + report)</span><br>
+<span class="dot" style="background:var(--slate)"></span><span class="fld">tests/</span> <span class="c"># 901 contract/gate suites · 70 arq</span><br>
+<span class="dot" style="background:var(--teal)"></span><span class="fld">.github/</span> <span class="c"># a esteira (CI)</span><span class="new">NOVO</span><br>
+<span class="dot" style="background:var(--slate)"></span>schemas/ · references/ · docs/ · scripts/ · .ai_bridge/<br>
+<span class="dot" style="background:var(--ink)"></span><span class="fld">CLAUDE.md</span> <span class="c"># regras do agente (always-apply)</span>
+      </div>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;justify-content:center">
+      <div class="sec-label" style="margin:0 0 10px">Legenda de importância</div>
+      <div style="display:flex;align-items:center;gap:9px;margin:6px 0"><span class="rd" style="background:#ef4444"></span><b style="font-size:13px">Load-bearing</b><span style="font-size:12px;color:var(--muted)">— remover/inverter = bug ou .skp infiel</span></div>
+      <div style="display:flex;align-items:center;gap:9px;margin:6px 0"><span class="rd" style="background:#f59e0b"></span><b style="font-size:13px">Chave</b><span style="font-size:12px;color:var(--muted)">— estrutura a qualidade, não a correção crua</span></div>
+      <div style="display:flex;align-items:center;gap:9px;margin:6px 0"><span class="rd" style="background:#9ca3af"></span><b style="font-size:13px">Apoio</b><span style="font-size:12px;color:var(--muted)">— utilitário, render, scratch, métrica</span></div>
+      <p style="font-size:12px;color:var(--muted);margin-top:14px;line-height:1.55">A CI roda <b>sem SketchUp</b> (Linux). Ela fiscaliza o lado <b>load-bearing</b> que decide a geometria — não a aparência final, que fica pro olho + (em breve) a VM.</p>
+    </div>
+  </div>
+
+  <div class="sec-label">Os arquivos, por função na pipeline</div>
+  <div class="roles">
+
+    <div class="role"><div class="rh"><span class="rd" style="background:#ef4444"></span>Casca & geometria <span class="imp imp-core">LOAD-BEARING</span></div>
+      <p>O coração: consensus → polígono de parede → .skp extrudado.</p>
+      <div class="chips"><span class="chip">build_plan_shell_skp.py</span><span class="chip">build_plan_shell_skp.rb</span><span class="chip">spatial_model.py</span><span class="chip">regenerate_consensus.py</span><span class="chip">su_runner_safety.py</span><span class="chip">disarm_sketchup_autoruns.py</span><span class="chip">inspect_skp.rb</span></div></div>
+
+    <div class="role"><div class="rh"><span class="rd" style="background:#ef4444"></span>Gates determinísticos <span class="imp imp-core">LOAD-BEARING</span></div>
+      <p>Provam fidelidade sobre os <b>dados</b> — é o que a CI roda.</p>
+      <div class="chips"><span class="chip">run_deterministic_gates.py</span><span class="chip">opening_host_audit.py</span><span class="chip">opening_aperture_audit.py</span><span class="chip">opening_audit.py</span><span class="chip">wall_overlap_audit.py</span><span class="chip">wall_exact_match_gate.py</span><span class="chip">position_fidelity_gate.py</span><span class="chip">railing_exact_match_gate.py</span><span class="chip">parapet_not_railing_fallback_gate.py</span><span class="chip">kitchen_wall_regression_gate.py</span><span class="chip">soft_barrier_source_audit.py</span><span class="chip">render_bbox_audit.py</span><span class="chip">diagnose_wall_stubs.py</span><span class="chip">geometry_sanity.py</span><span class="chip">repo_health_gate.py</span></div></div>
+
+    <div class="role"><div class="rh"><span class="rd" style="background:#ef4444"></span>Gate visual (olho/GPT) <span class="imp imp-core">LOAD-BEARING</span></div>
+      <p>O juiz da aparência vs o PDF — o único gate humano.</p>
+      <div class="chips"><span class="chip">run_skp_visual_review.py</span><span class="chip">visual_regression_gate.py</span><span class="chip">overlay_diff.py</span><span class="chip">pdf_overlay_verify.py</span><span class="chip">compose_side_by_side.py</span><span class="chip">negative_dogfood.py</span><span class="chip">crop_render.py</span><span class="chip">gpt_review.py</span></div></div>
+
+    <div class="role"><div class="rh"><span class="rd" style="background:#ef4444"></span>Promoção & artefato <span class="imp imp-core">LOAD-BEARING</span></div>
+      <p>Decide o que vira o entregável versionado.</p>
+      <div class="chips"><span class="chip">promote_artifact.py</span><span class="chip">promote_canonical.py</span></div></div>
+
+    <div class="role"><div class="rh"><span class="rd" style="background:#3b82f6"></span>Servidor MCP <span class="imp imp-key">CHAVE</span></div>
+      <p>Expõe 9 tools SU-free (gates, classes, gramática) por stdio.</p>
+      <div class="chips"><span class="chip">mcp_server/server.py</span><span class="chip">mcp_server/smoke.py</span><span class="chip">mcp_server/stdio_check.py</span></div></div>
+
+    <div class="role"><div class="rh"><span class="rd" style="background:#3b82f6"></span>Oráculo & cockpit :8765 <span class="imp imp-key">CHAVE</span></div>
+      <p>Decisões reais vão pro gate HTTP, não pro humano no chat.</p>
+      <div class="chips"><span class="chip">claude_bridge/server.py</span><span class="chip">ask_gpt_gate.py</span><span class="chip">oracle_providers.py</span><span class="chip">consult_tier.py</span><span class="chip">gate_verdict.py</span><span class="chip">gate_util.py</span><span class="chip">gate_filefetch.py</span><span class="chip">ollama_bridge.py</span><span class="chip">noc_dispatcher.py</span><span class="chip">noc_lock.py</span></div></div>
+
+    <div class="role"><div class="rh"><span class="rd" style="background:#f59e0b"></span>Auto-mobiliar <span class="imp imp-key">CHAVE</span></div>
+      <p>Mobília paramétrica + layout por cômodo no .skp.</p>
+      <div class="chips"><span class="chip">furnish_apartment.py</span><span class="chip">furnish_plan.py</span><span class="chip">furnish_plan.rb</span><span class="chip">bedroom_designer.py</span><span class="chip">bedroom_layout.py</span><span class="chip">kitchen_layout.py</span><span class="chip">bathroom_layout.py</span><span class="chip">room_type.py</span><span class="chip">layout_candidates.py</span><span class="chip">layout_rules.py</span><span class="chip">place_bedroom_skp.py</span><span class="chip">place_layout_skp.py</span><span class="chip">furniture_overlap_gate.py</span><span class="chip">furniture_wall_gap.py</span></div></div>
+
+    <div class="role"><div class="rh"><span class="rd" style="background:#f59e0b"></span>Classes de móvel <span class="imp imp-key">CHAVE</span></div>
+      <p>Aprende a CLASSE de cada móvel (forma antes do detalhe).</p>
+      <div class="chips"><span class="chip">sofa_class.py</span><span class="chip">sofa_builder.py</span><span class="chip">armchair_class.py</span><span class="chip">bed_class.py</span><span class="chip">coffee_table_class.py</span><span class="chip">dining_table_class.py</span><span class="chip">rack_class.py</span><span class="chip">wardrobe_builder.py</span><span class="chip">nightstand_builder.py</span><span class="chip">furniture_anatomy_spec.py</span><span class="chip">furniture_normalizer.py</span><span class="chip">render_parts_iso.py</span></div></div>
+
+    <div class="role"><div class="rh"><span class="rd" style="background:#f59e0b"></span>Estilo, render & V-Ray <span class="imp imp-key">CHAVE</span></div>
+      <p>Gramática de estilo + câmera + render fotográfico.</p>
+      <div class="chips"><span class="chip">style_spec.py</span><span class="chip">style_coherence_gate.py</span><span class="chip">reference_grammar.py</span><span class="chip">reference_db.py</span><span class="chip">auto_camera.py</span><span class="chip">render_scene_vray.py</span><span class="chip">render_scene_views.py</span><span class="chip">kitchen_vray.py</span><span class="chip">vray_export.rb</span><span class="chip">tweak_vrscene.py</span><span class="chip">gen_textures.py</span><span class="chip">batch_theme_render.py</span></div></div>
+
+    <div class="role"><div class="rh"><span class="rd" style="background:#9ca3af"></span>Studio, vitrine & memória <span class="imp imp-sup">APOIO</span></div>
+      <p>Dashboards (:8782), grafo, loop de fidelidade, métricas.</p>
+      <div class="chips"><span class="chip">studio_dashboard.py</span><span class="chip">interior_studio/*</span><span class="chip">vitrine/grafo_server.py</span><span class="chip">fidelity_loop.py</span><span class="chip">project_memory_db.py</span><span class="chip">pdf_knowledge/*</span><span class="chip">interior_quality_scorecard.py</span></div></div>
+
+  </div>
+
+  <div class="sec-label">Por que é organizado assim</div>
+  <div class="why">
+    <div class="whyc"><div class="t"><span class="cdot" style="background:var(--blue)"></span>A consensus é a fonte de verdade</div><div class="bd">Se uma parede/cômodo/abertura não está no <code>consensus.json</code>, ela <b>não entra no .skp</b>. Nada de geometria inventada pra "fechar" o número.</div></div>
+    <div class="whyc"><div class="t"><span class="cdot" style="background:var(--purple)"></span>Cérebro (Python) ≠ músculo (SketchUp)</div><div class="bd">Python decide <b>o quê</b> construir; SketchUp <b>constrói</b>. A <b>CI valida o cérebro</b> (sem SketchUp); o olho + a <b>VM</b> validam o músculo.</div></div>
+    <div class="whyc"><div class="t"><span class="cdot" style="background:var(--orange)"></span>O .skp é o entregável</div><div class="bd">Gates, testes e oráculo só contam se destravam <b>um .skp provadamente fiel ao PDF</b>. <code>runs/</code> é scratch; só <code>artifacts/</code> manda.</div></div>
+    <div class="whyc"><div class="t"><span class="cdot" style="background:var(--teal)"></span>Decisão pelo oráculo, não pelo chat</div><div class="bd">Decisão técnica/merge vai pro gate <code>:8765</code> e é respondida sozinha. Só o veredito <b>visual</b> é humano.</div></div>
+  </div>
+
+  <div class="foot">
+    <b>Replicável como template.</b> A mesma espinha serve pra qualquer pipeline "entrada → artefato provado":
+    <div class="tpl">.claude/ (cérebro) · tools/ (motor) · fixtures/ → artifacts/ (entrada → entregável) · gates (prova) · .github/ (esteira) · CLAUDE.md (regras)</div>
+    Troca o domínio (PDF→.skp) pelo teu, mantém a regra de ouro: <b>uma fonte de verdade, o artefato como entregável, e a prova rodando sozinha.</b>
+  </div>
+
+</div>
+</body>
+</html>
