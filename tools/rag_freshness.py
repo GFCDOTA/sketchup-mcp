@@ -61,6 +61,9 @@ SOURCES: list[tuple[str, str, str]] = [
     ("references/design_rules/felipe_visual_judge_rules.json",       "design_rule",   "json"),
     ("references/design_rules/furniture_rule_cards.json",            "design_rule",   "json"),
     ("references/felipe/anti_patterns/*.json",                       "anti_pattern",  "json"),
+    # write-back do GOSTO do Felipe (taste_writeback): sem este glob o veredito
+    # curado nunca muda o corpus_version nem entra no Qdrant (o "buraco central").
+    ("references/felipe/verdicts/*.json",                            "human_verdict", "json"),
     ("fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json",
                                                                      "consensus",     "consensus"),
     ("fixtures/planta_74/semantic_zones.json",                       "semantic_zones", "json"),
