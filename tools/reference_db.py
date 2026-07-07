@@ -380,6 +380,62 @@ def _load_felipe_anti(room: str, style: str | None) -> list[str]:
     return out
 
 
+def _embed_recall_chunks(room: str, style_norm: str | None) -> tuple[list[dict], str | None, list[str]]:
+    """FP-037 Camada 2 — recall semântico OPCIONAL via Qdrant+Ollama.
+
+    Devolve (retrieved_chunks, corpus_version, notes). retrieved_chunks =
+    [{source, chunk_id, confidence}] pros consumidores auditarem. DEGRADA HONESTO:
+    Qdrant/Ollama off -> ([], corpus_version_ou_None, [nota_de_degradação]). NUNCA
+    infla confidence; o vetor só melhora RECALL, os facets decidem o resto.
+
+    Import LAZY do adapter (urllib puro) — o CI que só tem [dev] não toca infra.
+    """
+    notes: list[str] = []
+    try:
+        from tools import rag_embed_backend as reb
+        from tools import rag_freshness as rf
+    except Exception as e:  # noqa: BLE001 — módulo ausente não derruba retrieve
+        notes.append(f"backend=embed indisponível (import): {e!r} -> faceted.")
+        return [], None, notes
+
+    con_fresh = None
+    try:
+        con_fresh = rf.connect()
+        corpus_version = rf.current_corpus_version(con_fresh)
+        if corpus_version is None:
+            notes.append("backend=embed: índice de freshness vazio "
+                         "(rode `reference_db reindex`) -> faceted.")
+            return [], None, notes
+        query_text = f"{room} {style_norm or ''} marcenaria planejada".strip()
+        hits = reb.semantic_recall(query_text, corpus_version=corpus_version,
+                                   top_k=12)
+        retrieved = [{
+            "source": h["payload"].get("source_path"),
+            "chunk_id": h["chunk_id"],
+            "confidence": round(h["score"], 4),
+        } for h in hits]
+        if not retrieved:
+            notes.append("backend=embed: Qdrant vazio p/ o corpus atual "
+                         "(reindex do Qdrant pendente) -> faceted mantém a decisão.")
+        return retrieved, corpus_version, notes
+    except reb.InfraUnavailable as e:  # Qdrant/Ollama off
+        notes.append(f"backend=embed degradou p/ faceted: infra off ({e}). "
+                     "confidence NÃO inflada.")
+        cv = None
+        if con_fresh is not None:
+            try:
+                cv = rf.current_corpus_version(con_fresh)
+            except Exception:  # noqa: BLE001
+                cv = None
+        return [], cv, notes
+    except Exception as e:  # noqa: BLE001 — qualquer erro -> faceted, honesto
+        notes.append(f"backend=embed erro inesperado -> faceted: {e!r}")
+        return [], None, notes
+    finally:
+        if con_fresh is not None:
+            con_fresh.close()
+
+
 def retrieve(room, style=None, budget=None, *, con=None, top_n=6,
              backend="faceted") -> dict:
     """room/style/budget -> DesignSpecBundle.v1 (faceted+ranked).
@@ -391,15 +447,24 @@ def retrieve(room, style=None, budget=None, *, con=None, top_n=6,
     por nome. DEGRADA HONESTO: sem corpus julgado do FP-034 -> confidence LOW.
 
     NÃO fabrica ranking sem dado; o bundle é PROPOSTA (Felipe aprova); nunca
-    emite veredito visual. backend='embed' é stub (fatia opcional, default off).
+    emite veredito visual.
+
+    FP-037: backend='embed' liga o recall semântico REAL (Qdrant+Ollama) por cima
+    do faceted — o vetor melhora RECALL (retrieved_chunks auditáveis), os
+    facets/gates continuam decidindo confidence. Infra off -> degrada pro faceted,
+    loga, e a confidence NÃO infla. backend='faceted' (default) NUNCA toca infra.
+    O bundle carrega SEMPRE rag_corpus_version + retrieved_chunks (aditivo/retrocompat).
     """
     room = (room or "").strip().lower()
     style_norm = normalize_theme(style)
     notes: list[str] = []
+    rag_corpus_version: str | None = None
+    retrieved_chunks: list[dict] = []
     if backend == "embed":
-        notes.append("backend=embed é STUB (fatia opcional FP-035 fatia 5); "
-                     "usando faceted. Nenhum caso real provou que facet falha.")
-        backend = "faceted"
+        retrieved_chunks, rag_corpus_version, embed_notes = _embed_recall_chunks(
+            room, style_norm)
+        notes.extend(embed_notes)
+        backend = "embed"  # registra a INTENÇÃO; o ranking segue faceted (honesto)
 
     disk_tokens = _load_disk_tokens(room)
     db_signal = _load_db_signal(con, room, style_norm)
@@ -512,6 +577,11 @@ def retrieve(room, style=None, budget=None, *, con=None, top_n=6,
         "confidence": confidence,
         "backend": backend,
         "notes": notes,
+        # FP-037 (aditivo/retrocompat): resposta auditável — de qual geração do
+        # corpus veio, e quais chunks o recall semântico trouxe (vazio no faceted
+        # puro ou quando a infra está off; nunca infla confidence).
+        "rag_corpus_version": rag_corpus_version,
+        "retrieved_chunks": retrieved_chunks,
     }
 
 
@@ -544,6 +614,51 @@ def _print_rows(rows, as_json=False, paths_only=False) -> None:
     print(f"\n{len(rows)} referência(s).")
 
 
+def _cmd_reindex(a) -> int:
+    """FP-037 `reindex`: source registry -> chunks (camada pura, sempre) e depois,
+    se a infra estiver up e --no-embed não for passado, popula o Qdrant incremental.
+    O clock real entra SÓ aqui (borda CLI) via now_iso; a lógica de biblioteca é
+    determinística (recebe now_iso injetado)."""
+    import datetime as _dt
+
+    from tools import rag_freshness as rf
+
+    now_iso = _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    con = rf.connect()
+    report = rf.reindex(con, now_iso=now_iso, rebuild=a.rebuild)
+
+    qdrant_report = None
+    if not a.no_embed:
+        try:
+            from tools import rag_embed_backend as reb
+            if reb.infra_up():
+                qdrant_report = reb.reindex_qdrant(
+                    con, corpus_version=report["corpus_version"], now_iso=now_iso)
+            else:
+                report["note"] = ("Qdrant/Ollama off -> só a camada pura de "
+                                  "freshness foi reindexada (embed pulado, honesto).")
+        except reb.InfraUnavailable as e:  # noqa: F821 — reb pode não ter importado
+            report["note"] = f"embed pulado (infra off): {e}"
+        except Exception as e:  # noqa: BLE001
+            report["note"] = f"embed pulado (erro): {e!r}"
+    con.close()
+
+    out = {"freshness": report, "qdrant": qdrant_report}
+    if getattr(a, "json", False):
+        print(json.dumps(out, ensure_ascii=False, indent=2))
+    else:
+        print(f"reindex freshness: corpus_version={report['corpus_version'][:12]} "
+              f"docs={report['docs_active']} reused={report['chunks_reused']} "
+              f"reindexed={report['chunks_reindexed']} "
+              f"deactivated={report['chunks_deactivated']}")
+        if qdrant_report:
+            print(f"reindex qdrant: embedded={qdrant_report['embedded']} "
+                  f"deleted={qdrant_report['deleted']}")
+        if report.get("note"):
+            print(f"  note: {report['note']}")
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Índice SQLite das referências (reference_lab).")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -563,7 +678,15 @@ def main(argv=None) -> int:
     rt.add_argument("--top-n", type=int, default=6)
     rt.add_argument("--backend", default="faceted", choices=("faceted", "embed"))
     rt.add_argument("--json", action="store_true")
+    rx = sub.add_parser("reindex", help="FP-037: source registry -> chunks + (opcional) Qdrant")
+    rx.add_argument("--rebuild", action="store_true", help="dropa e reconstrói o índice de freshness")
+    rx.add_argument("--no-embed", action="store_true",
+                    help="só a camada pura (freshness); pula o embed no Qdrant")
+    rx.add_argument("--json", action="store_true")
     a = ap.parse_args(argv)
+
+    if a.cmd == "reindex":
+        return _cmd_reindex(a)
 
     LAB.mkdir(parents=True, exist_ok=True)
     if a.cmd == "rebuild" and DB_PATH.exists():

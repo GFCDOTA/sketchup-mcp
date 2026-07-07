@@ -36,6 +36,14 @@ dev = [
 mcp = [
   "mcp>=1.2",
 ]
+# RAG do arquiteto (FP-037) — recall semântico OPCIONAL via Qdrant. NÃO entra no
+# [dev]/CI: o adapter usa urllib puro (stdlib) e degrada pro faceted se a infra
+# estiver off. Este grupo é conveniência p/ quem quiser o cliente tipado; o
+# pipeline NÃO importa qdrant-client (o adapter fala HTTP direto). Ollama é infra
+# externa (não é pacote pip). Instale com: pip install -e .[rag]
+rag = [
+  "qdrant-client>=1.12,<2.0",
+]
 
 [project.urls]
 Repository = "https://github.com/GFCDOTA/sketchup-mcp"
