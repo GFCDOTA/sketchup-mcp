@@ -1,0 +1,26 @@
+Você é o ARQUITETO de interiores de um apê compacto premium. Proponha o PROGRAMA DE MOBILIÁRIO do cômodo: QUE móveis devem existir nele, respeitando o estilo e o espaço REAL.
+
+COMODO: COZINHA
+AREA: 5.1 m2  (aprox 1.8 x 2.9 m)
+ESTILO (DNA do Felipe, e RESTRICAO nao sugestao): # Felipe Style DNA
+
+> **Identidade de estilo CANÔNICA e room-agnostic** do Felipe (cozinha · sala · lavabo · quarto · área).
+> Consolidação (não duplicação) das fontes que já existiam, todas específicas de cozinha:
+> [FELIPE_KITCHEN_PREFERENCES.md](../../artifacts/reference_lab/FELIPE_KITCHEN_PREFERENCES.md) (prosa GOSTOU/NÃO-GOSTOU) +
+> [felipe_kitchen_preference_profile.json](../../artifacts/ref
+TOKENS DE MARCENARIA RECUPERADOS (curadoria do Felipe, confidence=LOW):
+- coordinated_medium_dark_wood_base (builder: kc_corpo, kc_porta, kc_gaveta)
+- coordinated_oak_base (builder: kc_corpo, kc_porta, kc_gaveta)
+- dark_stainless_appliance (builder: kc_geladeira, kc_inox, kc_vidro, kc_boca)
+- discreet_bronze_hardware (builder: kc_puxador)
+- hot_tower_niche (builder: kc_niche_wood, kc_filler, kc_porta_vidro, kc_inox, kc_soculo, kc_puxador)
+- matte_black_cabinetry (builder: kc_corpo, kc_porta, kc_gaveta, kc_corpo_sup, kc_porta_sup, kc_filler)
+ANTI-PADRÕES (NÃO fazer): Carvalho CLARO ou branco puro embaixo (não é o gosto do Felipe). Madeira escura + aéreo branco frio = bicolor builder-gr | Carvalho mel/escuro embaixo + aéreo branco em cima = bicolor builder-grade frio (o defeito que este token corrige). Tamb | Inox cinza-escuro FOSCO = bloco morto sem reflexo (reprova daylight_reflection). Geladeira solta sem nicho = loose_objec | Puxador dourado demais / alça dourada aparente = ostentação fake. Dourado espalhado em muitos módulos = mansão fake Pint
+LAYOUT: hot_tower_niche: ponta do layout linear OPOSTA à torre da geladeira; encostada na parede de fundo (PDF manda — não mover pia/ponto/parede)
+JA EXISTE no comodo: 🍳 Cozinha (marcenaria) (congelado)
+ITENS CORE OBRIGATORIOS deste comodo (TEM que aparecer): bancada, cooktop, geladeira.
+REGRAS: ape compacto, nao bloquear circulacao; so o que CABE e faz sentido nessa area; gosto do Felipe = industrial boutique premium, black/wood/gold. No maximo 6 itens. NAO inclua movel de OUTRO comodo (ex.: nada de cama/sofa na cozinha; nada de cooktop/geladeira no quarto; nada de vaso/cuba fora do banheiro). Use o nome do PROPRIO comodo, SEM prefixo de outro comodo (errado: "banheiro_cooktop"; certo: "cooktop").
+
+Responda APENAS um JSON valido, nada fora dele:
+{"environment":"cozinha","items":[{"asset":"nome_curto_minusculo","priority":"core","reason":"por que, 1 linha curta"}]}
+priority deve ser core, secundario ou opcional.

@@ -1,0 +1,54 @@
+{
+  "ok": true,
+  "model": "deepseek-r1:14b",
+  "room": {
+    "id": "r004",
+    "name": "COZINHA",
+    "area_m2": 5.1,
+    "w_m": 1.8,
+    "d_m": 2.9,
+    "key": "cozinha"
+  },
+  "program": {
+    "environment": "cozinha",
+    "items": [
+      {
+        "asset": "cooktop",
+        "priority": "core",
+        "reason": "móvel essencial para cozimento"
+      },
+      {
+        "asset": "geladeira",
+        "priority": "core",
+        "reason": "armazenamento de alimentos"
+      },
+      {
+        "asset": "bancada",
+        "priority": "core",
+        "reason": "área de trabalho com pia e torneiras"
+      },
+      {
+        "asset": "pia",
+        "priority": "core",
+        "reason": "móvel para lavagem de alimentos"
+      },
+      {
+        "asset": "gavetas",
+        "priority": "core",
+        "reason": "armazenamento de utensílios"
+      },
+      {
+        "asset": "armário_de_geladeira",
+        "priority": "core",
+        "reason": "móvel para armazenamento adicional"
+      }
+    ]
+  },
+  "existing": [
+    "🍳 Cozinha (marcenaria) (congelado)"
+  ],
+  "gate": {
+    "removed": [],
+    "injected": []
+  }
+}
