@@ -25,6 +25,12 @@ MODELS = {"deepseek": "deepseek-r1:14b", "qwen": "qwen2.5-coder:14b"}
 ROOM_KEY = {"SALA DE JANTAR | SALA DE ESTAR": "sala", "SUITE 01": "suite", "SUITE 02": "suite",
             "COZINHA": "cozinha", "BANHO 01": "banheiro", "BANHO 02": "banheiro", "LAVABO": "banheiro"}
 
+# chave pt do project_state → room_type EN do reference_db.retrieve()/references/tokens.
+ROOM_TYPE_EN = {"cozinha": "kitchen", "sala": "living", "suite": "bedroom",
+                "banheiro": "bathroom"}
+# estilo default do DNA do Felipe (industrial boutique preto+madeira+dourado) para o retrieve.
+FELIPE_STYLE = "black_wood_gold"
+
 # --- SPEC-C: gate deterministico do programa (o LLM local erra: suite sem cama, cozinha
 #     com item de banheiro). O LLM PROPOE; este gate GARANTE o invariante (CORE presente,
 #     0 cross-comodo). Espelha a filosofia do projeto: gate deterministico = verdade, LLM = consultivo. ---
@@ -105,6 +111,39 @@ def rooms() -> list[dict]:
     return out
 
 
+def _retrieve_bundle(room_key: str | None) -> dict | None:
+    """FP-035: recupera o DesignSpecBundle do cômodo/estilo do Felipe. RETROCOMPAT:
+    qualquer erro/import ausente devolve None -> o gerador cai no DNA cru."""
+    room_type = ROOM_TYPE_EN.get(room_key or "")
+    if not room_type:
+        return None
+    try:
+        from tools import reference_db as rdb
+        bundle = rdb.retrieve(room_type, FELIPE_STYLE)
+        return bundle if bundle.get("tokens") else None
+    except Exception:  # noqa: BLE001 — retrieve nunca deve quebrar o gerador
+        return None
+
+
+def render_bundle_for_prompt(bundle: dict | None, max_tokens: int = 6) -> str:
+    """Bloco estruturado (não texto cru truncado) do bundle recuperado pro prompt:
+    tokens canônicos + anti-patterns + layout_hints. Vazio se sem bundle."""
+    if not bundle or not bundle.get("tokens"):
+        return ""
+    lines = [f"TOKENS DE MARCENARIA RECUPERADOS (curadoria do Felipe, "
+             f"confidence={bundle.get('confidence')}):"]
+    for t in bundle["tokens"][:max_tokens]:
+        kinds = ", ".join(t.get("builder_kinds", []))
+        lines.append(f"- {t['name']}" + (f" (builder: {kinds})" if kinds else ""))
+    antis = bundle.get("anti_patterns") or []
+    if antis:
+        lines.append("ANTI-PADRÕES (NÃO fazer): " + " | ".join(a[:120] for a in antis[:4]))
+    hints = bundle.get("layout_hints") or []
+    if hints:
+        lines.append("LAYOUT: " + " | ".join(h[:140] for h in hints[:3]))
+    return "\n".join(lines)
+
+
 def room_context(room_id: str) -> dict | None:
     rm = next((r for r in rooms() if r["id"] == room_id or r["name"] == room_id), None)
     if not rm:
@@ -117,7 +156,12 @@ def room_context(room_id: str) -> dict | None:
             st = ps.asset_state(a)
             if st["state"] != "not_started":
                 existing.append(f'{ps.ASSET_META.get(a, a)} ({st["state_label"]})')
-    return {"room": rm, "dna": dna, "existing": existing}
+    # FP-035: injeta o bundle estruturado recuperado (laço curadoria→furnish→.skp).
+    # RETROCOMPAT: sem bundle -> design_spec vazio; o prompt cai no dna cru.
+    bundle = _retrieve_bundle(rm["key"])
+    return {"room": rm, "dna": dna, "existing": existing,
+            "design_bundle": bundle,
+            "design_spec": render_bundle_for_prompt(bundle)}
 
 
 def _ollama(model: str, prompt: str, timeout: int = 240) -> str:
@@ -147,6 +191,7 @@ PROMPT = """Você é o ARQUITETO de interiores de um apê compacto premium. Prop
 COMODO: {name}
 AREA: {area} m2  (aprox {w} x {d} m)
 ESTILO (DNA do Felipe, e RESTRICAO nao sugestao): {dna}
+{design_spec}
 JA EXISTE no comodo: {existing}
 {core_hint}
 REGRAS: ape compacto, nao bloquear circulacao; so o que CABE e faz sentido nessa area; gosto do Felipe = industrial boutique premium, black/wood/gold. No maximo 6 itens. NAO inclua movel de OUTRO comodo (ex.: nada de cama/sofa na cozinha; nada de cooktop/geladeira no quarto; nada de vaso/cuba fora do banheiro). Use o nome do PROPRIO comodo, SEM prefixo de outro comodo (errado: "banheiro_cooktop"; certo: "cooktop").
@@ -166,8 +211,13 @@ def propose_program(room_id: str, model: str = "deepseek") -> dict:
     core = CORE_BY_ROOM.get(rkey, [])
     core_hint = ("ITENS CORE OBRIGATORIOS deste comodo (TEM que aparecer): "
                  + ", ".join(label for _, _, label in core) + ".") if core else ""
+    # FP-035: bundle estruturado recuperado > DNA cru truncado. Se veio bundle,
+    # o dna cru encolhe (só contexto de fundo); o design_spec vira a autoridade.
+    design_spec = ctx.get("design_spec") or ""
+    dna_len = 400 if design_spec else 900
     prompt = PROMPT.format(name=rm["name"], area=rm["area_m2"], w=rm["w_m"], d=rm["d_m"],
-                           dna=(ctx["dna"][:900] or "(sem DNA)"),
+                           dna=(ctx["dna"][:dna_len] or "(sem DNA)"),
+                           design_spec=design_spec,
                            existing=", ".join(ctx["existing"]) or "(nada ainda)",
                            key=rkey, core_hint=core_hint)
     raw = _ollama(mdl, prompt)

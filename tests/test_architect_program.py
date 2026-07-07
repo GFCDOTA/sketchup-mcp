@@ -2,7 +2,8 @@
 do deepseek-r1 (que cospe <think>…</think> antes do JSON). NÃO chama o LLM (isso é integração)."""
 import pytest
 
-from tools.interior_studio import architect_program as ap, proposals
+from tools.interior_studio import architect_program as ap
+from tools.interior_studio import proposals
 
 
 @pytest.fixture
@@ -78,3 +79,61 @@ def test_normalize_e_idempotente():
     once, _ = ap.normalize_program([{"asset": "sofa"}], "sala")
     twice, _ = ap.normalize_program(once, "sala")
     assert [i["asset"] for i in once] == [i["asset"] for i in twice]
+
+
+# --- FP-035: injeção do DesignSpecBundle recuperado no prompt do Arquiteto ---
+
+def test_render_bundle_for_prompt_e_estruturado_nao_dna_cru():
+    bundle = {
+        "confidence": "LOW",
+        "tokens": [{"name": "hot_tower_niche", "builder_kinds": ["kc_niche_wood"]},
+                   {"name": "coordinated_medium_dark_wood_base", "builder_kinds": ["kc_corpo"]}],
+        "anti_patterns": ["Micro na bancada come área de trabalho."],
+        "layout_hints": ["hot_tower_niche: ponta oposta à geladeira"],
+    }
+    block = ap.render_bundle_for_prompt(bundle)
+    assert "hot_tower_niche" in block
+    assert "coordinated_medium_dark_wood_base" in block
+    assert "ANTI-PADRÕES" in block and "Micro na bancada" in block
+    assert "LAYOUT" in block
+
+
+def test_render_bundle_vazio_quando_sem_tokens():
+    assert ap.render_bundle_for_prompt(None) == ""
+    assert ap.render_bundle_for_prompt({"tokens": []}) == ""
+
+
+def test_architect_prompt_injects_bundle(monkeypatch):
+    # room_context da cozinha injeta o bloco estruturado do bundle recuperado
+    # (tokens canônicos), não só o dna cru truncado.
+    fake_bundle = {
+        "confidence": "LOW",
+        "tokens": [{"name": "hot_tower_niche", "builder_kinds": ["kc_niche_wood"]}],
+        "anti_patterns": ["forno embaixo do cooktop perde ergonomia"],
+        "layout_hints": [],
+    }
+    monkeypatch.setattr(ap, "_retrieve_bundle", lambda room_key: fake_bundle)
+    # rooms() pode não achar consensus real no worktree; testa o wiring direto.
+    monkeypatch.setattr(ap, "rooms", lambda: [
+        {"id": "r004", "name": "COZINHA", "area_m2": 8.0, "w_m": 3.0, "d_m": 2.5,
+         "key": "cozinha"}])
+    ctx = ap.room_context("r004")
+    assert ctx is not None
+    assert ctx["design_bundle"] is fake_bundle
+    assert "hot_tower_niche" in ctx["design_spec"]
+
+
+def test_retrieve_bundle_degrada_para_none_em_erro(monkeypatch):
+    # RETROCOMPAT: se retrieve estoura, _retrieve_bundle devolve None (cai no dna cru)
+    import tools.reference_db as rdb
+
+    def _boom(*a, **k):
+        raise RuntimeError("db off")
+
+    monkeypatch.setattr(rdb, "retrieve", _boom)
+    assert ap._retrieve_bundle("cozinha") is None
+
+
+def test_retrieve_bundle_none_para_comodo_sem_mapa():
+    assert ap._retrieve_bundle(None) is None
+    assert ap._retrieve_bundle("") is None
