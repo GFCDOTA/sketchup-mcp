@@ -124,14 +124,19 @@ def test_taste_gap_is_refused_and_never_touched(tmp_path, validator):
     assert rec["decided_by"] == "auto_decider"
 
 
-def test_borderline_program_is_left_pending(tmp_path, validator):
-    # clean interns but the injected overlap gate WARNs -> borderline -> pending
+def test_borderline_program_left_pending_when_gate_disabled(tmp_path, validator):
+    # clean interns but the injected overlap gate WARNs -> borderline; with the
+    # gate disabled it simply stays pending (gated behaviour is commit-4 tests)
     props = FakeProposals([_clean("furniture_program_r002")])
-    res = _drain(props, tmp_path, gates_fn=lambda p: ("PASS", "WARN"))
+    res = _drain(props, tmp_path, gates_fn=lambda p: ("PASS", "WARN"),
+                 use_gate=False)
     assert res["left_pending"] == ["furniture_program_r002"]
     assert "furniture_program_r002" in props.pending
-    assert res["audit_records"][0]["classification"] == dj.BORDERLINE
-    assert res["audit_records"][0]["action"] == "left_pending"
+    rec = res["audit_records"][0]
+    validator.validate(rec)
+    assert rec["classification"] == dj.BORDERLINE
+    assert rec["action"] == "left_pending"
+    assert any("gate desabilitado" in e for e in rec["evidence"])
 
 
 # ---- caps ----------------------------------------------------------------

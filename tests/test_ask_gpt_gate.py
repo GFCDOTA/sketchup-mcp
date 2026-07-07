@@ -19,8 +19,13 @@ from pathlib import Path
 import pytest
 
 from tools.ask_gpt_gate import (
-    BRIDGE_URL, CANONICAL_TRIGGERS, GateInput, GateResult,
-    build_prompt, probe_bridge, run_gate,
+    BRIDGE_URL,
+    CANONICAL_TRIGGERS,
+    GateInput,
+    GateResult,
+    build_prompt,
+    probe_bridge,
+    run_gate,
 )
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -30,7 +35,11 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
 def test_canonical_triggers_count():
-    assert len(CANONICAL_TRIGGERS) == 9
+    assert len(CANONICAL_TRIGGERS) == 10
+
+
+def test_canonical_triggers_include_objective_gate_borderline():
+    assert "objective_gate_borderline" in CANONICAL_TRIGGERS
 
 
 def test_canonical_triggers_include_pr206_case():

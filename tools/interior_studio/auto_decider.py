@@ -24,9 +24,11 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 
+from tools import ask_gpt_gate as agg
 from tools.interior_studio import decision_judge as dj
 from tools.interior_studio import proposals as ic_proposals
 from tools.jsonl_io import append_jsonl, read_jsonl
@@ -38,12 +40,20 @@ DLQ_NAME = "auto_decider_dlq.jsonl"
 
 AUDIT_SCHEMA = "decision_audit_record/1.0.0"
 DEFAULT_CAPS = {"max_auto_decisions_per_drain": 20, "max_gate_calls_per_drain": 5}
+GATE_TRIGGER = agg.OBJECTIVE_GATE_BORDERLINE
 
-# classification -> (action, whether it mutates the proposal, counts vs the cap)
+# actions
 _APPROVE = "auto_approve"
 _REJECT = "auto_reject"
 _REFUSE = "refused_taste"
 _PENDING = "left_pending"
+_ESCALATED = "escalated_gate"
+
+# a decisive gate verdict must be GO/NO-GO at non-low confidence; anything else
+# (MORE-INFO, VISUAL_REVIEW, low confidence, offline) is inconclusive -> stays human.
+_GATE_APPLY = {"GO": _APPROVE, "NO-GO": _REJECT}
+_GATE_OK_CONF = ("high", "medium")
+_FILL_RE = re.compile(r"~?(\d+)\s*%\s*do piso")
 
 
 def _effective_caps(caps: dict | None) -> dict:
@@ -117,9 +127,53 @@ def _record(judged: dict, action: str, created_at: str, caps: dict,
     }
 
 
+def _gate_context(prop: dict, judged: dict) -> dict:
+    """Deterministic evidence for the gate — gates, fill%, overlap verdict, the
+    intern findings. The oracle rules on measured facts, never on taste."""
+    evidence = list(judged.get("evidence", []))
+    ctx = {
+        "decision_id": judged["decision_id"],
+        "decision_type": judged["decision_type"],
+        "environment": prop.get("environment"),
+        "room_id": prop.get("room_id"),
+        "room_name": prop.get("room_name"),
+        "judge_verdicts": judged["judge_verdicts"],   # geometry_sanity / furniture_overlap
+        "objective_confidence": judged["confidence"],
+        "deterministic_evidence": evidence,
+    }
+    for line in evidence:                              # surface fill% as a number
+        m = _FILL_RE.search(line)
+        if m:
+            ctx["fill_pct"] = int(m.group(1))
+            break
+    return ctx
+
+
+def _default_gate_fn(questions_dir: Path, responses_dir: Path, url: str | None):
+    """Wraps ask_gpt_gate.run_gate with the 10th trigger. Offline degrades honest
+    (SKIPPED_OFFLINE) — never fabricates a verdict."""
+    def _call(prop: dict, judged: dict):
+        ctx = _gate_context(prop, judged)
+        question = (
+            f"Objective BORDERLINE decision {judged['decision_id']} "
+            f"({judged['decision_type']}): the deterministic gates carry a WARN "
+            f"(no FAIL). From the deterministic evidence ONLY, should this be "
+            f"approved (GO) or rejected (NO-GO)? This is a technical/objective call "
+            f"— do NOT rule on taste/aesthetics; if it needs a human visual look, "
+            f"answer VISUAL_REVIEW.")
+        g = agg.GateInput(trigger=GATE_TRIGGER, question=question, context=ctx)
+        kw = {"questions_dir": questions_dir, "responses_dir": responses_dir}
+        if url:
+            kw["url"] = url
+        return agg.run_gate(g, **kw)
+    return _call
+
+
 def drain(*, caps: dict | None = None, proposals=ic_proposals, gates_fn=None,
           now_fn=None, out_dir: Path | None = None,
-          corpus_version: str = "unknown") -> dict:
+          corpus_version: str = "unknown", use_gate: bool = True, gate_fn=None,
+          questions_dir: Path | None = None, responses_dir: Path | None = None,
+          bridge_url: str | None = None) -> dict:
     """Single-pass objective drain. Returns
     {decided, escalated, refused, left_pending, audit_records}.
 
@@ -128,11 +182,18 @@ def drain(*, caps: dict | None = None, proposals=ic_proposals, gates_fn=None,
     """
     eff_caps = _effective_caps(caps)
     max_dec = eff_caps["max_auto_decisions_per_drain"]
+    max_gate = eff_caps["max_gate_calls_per_drain"]
     out = Path(out_dir) if out_dir else DEFAULT_OUT
     audit_path = out / AUDIT_NAME
     dlq_path = out / DLQ_NAME
     gates_fn = gates_fn or _default_gates
     now_fn = now_fn or _default_created_at(proposals)
+    if use_gate and gate_fn is None:
+        gate_fn = _default_gate_fn(
+            questions_dir or (ROOT / ".ai_bridge" / "questions"),
+            responses_dir or (ROOT / ".ai_bridge" / "responses"), bridge_url)
+    if not use_gate:
+        gate_fn = None
 
     # append-only + idempotent: never re-append a record for a (decision_id, action)
     seen = {(r.get("decision_id"), r.get("action")) for r in read_jsonl(audit_path)}
@@ -141,10 +202,12 @@ def drain(*, caps: dict | None = None, proposals=ic_proposals, gates_fn=None,
                      key=lambda p: str(p.get("id", "")))     # FROZEN, deterministic
 
     decided: list[dict] = []
+    escalated: list[dict] = []
     refused: list[str] = []
     left_pending: list[str] = []
     new_records: list[dict] = []
     n_decisions = 0
+    n_gate_calls = 0
 
     def _emit(rec: dict) -> None:
         # append-only + idempotent: a (decision_id, action) already recorded is not
@@ -195,11 +258,72 @@ def drain(*, caps: dict | None = None, proposals=ic_proposals, gates_fn=None,
             n_decisions += 1
             continue
 
-        # INVALID or BORDERLINE -> left pending (BORDERLINE reaches the gate in commit 4)
-        _emit(_record(judged, _PENDING, created_at, eff_caps, corpus_version))
+        if klass == dj.INVALID:
+            _emit(_record(judged, _PENDING, created_at, eff_caps, corpus_version))
+            left_pending.append(pid)
+            continue
+
+        # ---- BORDERLINE -> gate mode B --------------------------------------
+        if gate_fn is None or n_gate_calls >= max_gate:
+            rec = _record(judged, _PENDING, created_at, eff_caps, corpus_version)
+            note = ("gate desabilitado" if gate_fn is None
+                    else f"gate cap atingido (max_gate_calls_per_drain={max_gate})")
+            rec["evidence"] = list(rec["evidence"]) + [note]
+            _emit(rec)
+            left_pending.append(pid)
+            continue
+        n_gate_calls += 1
+        try:
+            gr = gate_fn(prop, judged)
+        except Exception as e:  # noqa: BLE001 — a gate crash is inconclusive, never fatal
+            append_jsonl(dlq_path, [{"decision_id": pid, "stage": "gate",
+                                     "error": repr(e), "created_at": created_at}])
+            gate_meta = {"trigger": GATE_TRIGGER, "status": "error", "verdict": None,
+                         "confidence": None, "applied": None}
+            _emit(_record(judged, _ESCALATED, created_at, eff_caps, corpus_version,
+                          decided_by="gate_mode_b", gate=gate_meta))
+            escalated.append({"decision_id": pid, "status": "error", "applied": None})
+            left_pending.append(pid)
+            continue
+
+        status = getattr(gr, "status", None)
+        verdict = getattr(gr, "verdict", None)
+        confidence = getattr(gr, "confidence", None)
+        gate_meta = {"trigger": GATE_TRIGGER, "status": status, "verdict": verdict,
+                     "confidence": confidence, "applied": None}
+        decisive = (status == "ok" and verdict in _GATE_APPLY
+                    and confidence in _GATE_OK_CONF)
+        if decisive and n_decisions < max_dec:
+            action = _GATE_APPLY[verdict]
+            gate_meta["applied"] = "approve" if action == _APPROVE else "reject"
+            try:
+                (proposals.approve if action == _APPROVE else proposals.reject)(pid)
+            except Exception as e:  # noqa: BLE001
+                append_jsonl(dlq_path, [{"decision_id": pid, "stage": "gate_apply",
+                                         "action": action, "error": repr(e),
+                                         "created_at": created_at}])
+                left_pending.append(pid)
+                continue
+            _emit(_record(judged, action, created_at, eff_caps, corpus_version,
+                          decided_by="gate_mode_b", gate=gate_meta))
+            decided.append({"decision_id": pid, "action": action})
+            escalated.append({"decision_id": pid, "verdict": verdict,
+                              "applied": gate_meta["applied"]})
+            n_decisions += 1
+            continue
+
+        # inconclusive (MORE-INFO / VISUAL_REVIEW / low conf / offline) OR
+        # decision-cap-limited -> stays human, DLQ, 0 retry, NEVER fabricate a verdict
+        append_jsonl(dlq_path, [{"decision_id": pid, "stage": "gate",
+                                 "status": status, "verdict": verdict,
+                                 "confidence": confidence, "created_at": created_at}])
+        _emit(_record(judged, _ESCALATED, created_at, eff_caps, corpus_version,
+                      decided_by="gate_mode_b", gate=gate_meta))
+        escalated.append({"decision_id": pid, "status": status,
+                          "verdict": verdict, "applied": None})
         left_pending.append(pid)
 
-    return {"decided": decided, "escalated": [], "refused": refused,
+    return {"decided": decided, "escalated": escalated, "refused": refused,
             "left_pending": left_pending, "audit_records": new_records}
 
 
