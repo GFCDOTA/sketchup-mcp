@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "decision_audit_record/1.0.0",
+  "title": "decision_audit_record.v1",
+  "description": "Semi-autonomous pipeline — append-only audit of ONE objective decision the carteiro (auto_decider) drained, OR of a borderline it escalated to the gate (mode B). The RAIL: `decided_by` is NEVER a human. Objective and taste never cross — a taste/aesthetic item is classified TASTE_REFUSED and the machine never touches it (no approve/reject). Deterministic: created_at is derived (artifact mtime), never wall-clock/random. No additionalProperties:false — consumers (FP curadoria/RAG) may enrich.",
+  "type": "object",
+  "required": [
+    "schema",
+    "decision_id",
+    "decision_type",
+    "classification",
+    "action",
+    "confidence",
+    "evidence",
+    "judge_verdicts",
+    "gate",
+    "decided_by",
+    "caps_snapshot",
+    "corpus_version",
+    "created_at"
+  ],
+  "properties": {
+    "schema": {
+      "const": "decision_audit_record/1.0.0"
+    },
+    "decision_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "identity of the proposal decided (= proposals.state() id, e.g. furniture_program_r004, gap_capacidade_r004)"
+    },
+    "decision_type": {
+      "description": "RAW proposal type — distinguishes the two decision surfaces",
+      "enum": [
+        "furniture_program",
+        "consistency_gap"
+      ]
+    },
+    "classification": {
+      "description": "the objective judge's verdict class. TASTE_REFUSED = gosto/estético; the machine abstains. INVALID = malformed/irrecoverable.",
+      "enum": [
+        "OBJECTIVE_STRONG_PASS",
+        "OBJECTIVE_STRONG_FAIL",
+        "BORDERLINE",
+        "INVALID",
+        "TASTE_REFUSED"
+      ]
+    },
+    "action": {
+      "description": "what actually happened to the proposal",
+      "enum": [
+        "auto_approve",
+        "auto_reject",
+        "escalated_gate",
+        "left_pending",
+        "refused_taste"
+      ]
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "scalar objective confidence in the classification (derived from the PASS/WARN/FAIL counts of the checks that RAN, scaled by coverage). SKIPPED checks are excluded, never fabricated."
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "human-readable deterministic evidence lines (intern findings, gate fails/warns, gap title/detail)"
+    },
+    "judge_verdicts": {
+      "type": "object",
+      "description": "per-checker verdicts fused into the classification (e.g. {interns: PASS, geometry_sanity: PASS|SKIPPED, furniture_overlap: WARN})"
+    },
+    "gate": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "null unless the item was escalated to ask_gpt_gate (mode B). When present: {trigger, status, verdict, confidence, applied}."
+    },
+    "decided_by": {
+      "description": "WHO made the call — the RAIL: never a human. auto_decider = the objective carteiro; gate_mode_b = the delegated oracle gate.",
+      "enum": [
+        "auto_decider",
+        "gate_mode_b"
+      ]
+    },
+    "caps_snapshot": {
+      "type": "object",
+      "description": "the job caps in force for this drain (max_auto_decisions_per_drain, max_gate_calls_per_drain, ...) — provenance for why an item may have been left_pending (capped)."
+    },
+    "corpus_version": {
+      "type": "string",
+      "description": "RAG corpus version in force (provenance); 'unknown' when the RAG index is not wired/reachable."
+    },
+    "created_at": {
+      "type": "string",
+      "description": "ISO-8601 UTC, DERIVED from the proposal artifact mtime — never the wall-clock of the decision, never random."
+    }
+  }
+}

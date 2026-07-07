@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rag_writeback_record/1.0.0",
+  "title": "rag_writeback_record.v1",
+  "description": "Registro que escreve de volta no corpus RAG o aprendizado de UMA variante curada (imagem + .skp + veredito do Felipe + padrões observados). human_verdict/liked/felipe_comment são do Felipe — a máquina só TRANSPORTA (nunca fabrica). Consumido nos commits 5-9; o schema entra agora. Sem additionalProperties:false.",
+  "type": "object",
+  "required": [
+    "asset_id",
+    "run_id",
+    "cycle_id",
+    "room_id",
+    "room_type",
+    "human_verdict",
+    "image_path",
+    "skp_path",
+    "corpus_version",
+    "created_at"
+  ],
+  "properties": {
+    "asset_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "run_id": {
+      "type": "string"
+    },
+    "cycle_id": {
+      "type": "string"
+    },
+    "room_id": {
+      "type": "string"
+    },
+    "room_type": {
+      "type": "string"
+    },
+    "style_profile": {
+      "type": "string"
+    },
+    "image_path": {
+      "type": "string"
+    },
+    "skp_path": {
+      "type": "string"
+    },
+    "human_verdict": {
+      "description": "veredito do Felipe (SÓ ele emite)",
+      "enum": [
+        "IMPROVED",
+        "SAME",
+        "WORSE"
+      ]
+    },
+    "liked": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "felipe_comment": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "positive_patterns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "negative_patterns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "corpus_version": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string",
+      "description": "ISO-8601 UTC, derivado (mtime do artefato), não wall-clock"
+    }
+  }
+}

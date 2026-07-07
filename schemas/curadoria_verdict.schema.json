@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "curadoria_verdict/1.0.0",
+  "title": "curadoria_verdict.v1",
+  "description": "Um veredito de CURADORIA humana sobre uma variante (tela de curadoria do :8782). human_verdict é o gate EXCLUSIVO do Felipe (IMPROVED|SAME|WORSE) — a máquina JAMAIS o emite (test_machine_never_writes_human_verdict). Consumido nos commits 5-8 do pipeline; o schema entra agora. Sem additionalProperties:false.",
+  "type": "object",
+  "required": [
+    "variant_id",
+    "human_verdict",
+    "batch_id",
+    "t"
+  ],
+  "properties": {
+    "variant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "human_verdict": {
+      "description": "veredito humano — SÓ o Felipe emite, via clique na curadoria",
+      "enum": [
+        "IMPROVED",
+        "SAME",
+        "WORSE"
+      ]
+    },
+    "liked": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "description": "gosto do Felipe (thumbs); null = não sinalizado"
+    },
+    "note": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "batch_id": {
+      "type": "string",
+      "description": "lote de curadoria a que este veredito pertence"
+    },
+    "t": {
+      "type": "string",
+      "description": "timestamp do clique (ISO-8601)"
+    }
+  }
+}
