@@ -174,6 +174,26 @@ def derive_spec(seats=3, archetype="standard", arm_style="medium",
     return spec.validate()
 
 
+def derive_living_sofa(width_m, archetype="venezia", arm_style="thin",
+                       base_style="legs") -> SofaSpec:
+    """Deriva o sofa da SALA pra um nicho de largura `width_m`: a CLASSE escolhe o
+    numero de LUGARES (pra per_seat cair na faixa, ~ideal do arquetipo) e a largura
+    e' fixada ao nicho. Default = arquetipo VENEZIA curado pelo Felipe (sofa-ref-02
+    venezia-slate ⭐main: bracos finos `thin` + pes de ferro `legs`). Substitui a
+    heuristica grosseira `3 se w>=2.0 senao 2` que esticava per_seat fora da classe."""
+    arm = ARM_STYLES[arm_style]
+    ideal = ARCHETYPES[archetype]["per_seat"]
+    s_lo, s_hi = CLASS_RANGES["seats"]
+    ps_hi = CLASS_RANGES["per_seat"][1]
+    seats = max(int(s_lo), min(int(s_hi), round((width_m - 2 * arm) / ideal)))
+    # largura preenche o nicho, mas encolhe se isso esticaria per_seat acima do teto
+    # da classe (sofa um tico mais estreito que o nicho >> sofa fora da classe).
+    max_w = seats * ps_hi + 2 * arm
+    width = round(min(width_m, max_w), 3)
+    return derive_spec(seats, archetype=archetype, arm_style=arm_style,
+                       base_style=base_style, width=width)
+
+
 def sofa_class_gate(spec: SofaSpec, parts=None):
     """Valida um SofaSpec contra a CLASSE. Devolve {result, errors, warnings,
     metrics}. ERRO = fora das faixas/relacoes (FAIL); WARNING = anti-regressao

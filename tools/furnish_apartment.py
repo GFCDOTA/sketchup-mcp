@@ -235,7 +235,7 @@ def living_room_boxes(con, room_id):
     fora da circulacao; rack de MADEIRA na parede-TV (limpa), mesa de centro + tapete
     no eixo entre os dois. Corrige o veredito do GPT (objeto PASS, placement FAIL):
     o solver rejeita sofa em circulacao / sem eixo pra TV. Fallback: brain antigo."""
-    from tools.sofa_builder import build_sofa, place_sofa_boxes, sofa_spec
+    from tools.sofa_builder import build_sofa, place_sofa_boxes
     from interior.planners.living_room_planner import plan_living
     plan = plan_living(con, room_id)
     if not plan.get("plan"):
@@ -249,8 +249,20 @@ def living_room_boxes(con, room_id):
     rack_c = tuple(p["tv_rack"]["center_in"]); rack_f = tuple(p["tv_rack"]["facing"])
     width_m = round(p["sofa"]["width_m"], 3)
     # seats adaptados a largura que cabe no nicho (3-lug so se a parede comporta).
-    _seats = 3 if width_m >= 2.0 else 2
-    parts, _ = build_sofa(sofa_spec("straight", seats=_seats, width=width_m, depth=0.95))
+    # FASE 1 do laco classe->.skp: a CLASSE escolhe os LUGARES (per_seat na faixa) e o
+    # sofa nasce do arquetipo VENEZIA curado pelo Felipe (sofa-ref-02 venezia-slate main:
+    # bracos finos + pes de ferro). Substitui a heuristica `3 se w>=2.0 senao 2` que
+    # esticava per_seat fora da classe (defeito que a Fase 0 revelou). So a largura e'
+    # fixada ao nicho; o resto e' in-class por construcao.
+    from tools.sofa_class import derive_living_sofa, sofa_class_gate
+    _sofa_spec = derive_living_sofa(width_m)
+    parts, _ = build_sofa(_sofa_spec)
+    # gate de classe no caminho REAL (Fase 0): agora o sofa nasce in-class, entao isto e'
+    # guarda-corpo contra REGRESSAO futura (ex.: mexer no arquetipo). WARN-log, nao aborta.
+    _sgate = sofa_class_gate(_sofa_spec, parts)
+    if _sgate["result"] != "PASS":
+        _why = "; ".join(_sgate["errors"] or _sgate["warnings"]) or "(sem detalhe)"
+        print(f"[furnish-apt] sofa_class_gate => {_sgate['result']} (WARN-log, nao aborta): {_why}")
     boxes = place_sofa_boxes(parts, sofa_c, sofa_f)         # sofa de frente pra TV
     for _b in boxes:                                        # cada movel = modulo editavel separado
         _b["module"] = "Sofa"
