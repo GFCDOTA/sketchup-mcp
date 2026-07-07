@@ -27,7 +27,21 @@ import json
 import sys
 from pathlib import Path
 
+from tools.human_verdict import HUMAN_VERDICTS as _HUMAN_VERDICTS
 from tools.jsonl_io import read_jsonl
+
+
+def _human_overlay(corpus_path: Path) -> dict[str, dict]:
+    """human_verdicts.jsonl (mesmo dir do corpus) -> {variant_id: registro},
+    last-wins por ordem de arquivo. O arquivo e' escrito SO pelo clique do
+    Felipe na tela de curadoria do :8782 (KICKOFF_CURADORIA) — a maquina
+    nunca fala IMPROVED/SAME/WORSE; registro fora desse vocabulario e' ignorado."""
+    out: dict[str, dict] = {}
+    for rec in read_jsonl(Path(corpus_path).parent / "human_verdicts.jsonl"):
+        vid = rec.get("variant_id")
+        if vid and rec.get("human_verdict") in _HUMAN_VERDICTS:
+            out[vid] = rec
+    return out
 
 
 def _last_wins(corpus_path: Path) -> list[dict]:
@@ -36,6 +50,11 @@ def _last_wins(corpus_path: Path) -> list[dict]:
         vid = rec.get("variant_id")
         if vid:
             by_id[vid] = rec
+    for vid, h in _human_overlay(corpus_path).items():
+        if vid in by_id:   # o corpus nunca e' reescrito — overlay so' em memoria
+            by_id[vid]["human_verdict"] = {"verdict": h["human_verdict"],
+                                           "note": h.get("note") or "",
+                                           "t": h.get("t")}
     return list(by_id.values())
 
 
@@ -47,6 +66,11 @@ def export_reference_rows(corpus_path: Path) -> list[tuple[dict, list[str]]]:
         params = rec.get("params") or {}
         gates = (rec.get("geometry") or {}).get("deterministic_gates") or {}
         render = rec.get("render_refs") or {}
+        hv = rec.get("human_verdict") if isinstance(rec.get("human_verdict"), dict) else {}
+        notes = rec.get("verdict")
+        if hv.get("verdict"):
+            notes = (f"{notes} | human:{hv['verdict']}"
+                     + (f" ({hv['note']})" if hv.get("note") else ""))
         row = {
             "slug": f"variant/{vid}",
             "kind": "judged_variant",
@@ -66,12 +90,14 @@ def export_reference_rows(corpus_path: Path) -> list[tuple[dict, list[str]]]:
             "gate_verdicts": json.dumps(gates, ensure_ascii=False) if gates else None,
             "linked_skp": None,
             "sidecar": Path(corpus_path).as_posix(),
-            "notes": rec.get("verdict"),
+            "notes": notes,
             "created_at": rec.get("created_at"),
         }
         tags = [t for t in (rec.get("plant"),
                             (rec.get("verdict") or "").lower(),
-                            f"seed{params.get('layout_seed')}") if t]
+                            f"seed{params.get('layout_seed')}",
+                            f"human_{hv['verdict'].lower()}" if hv.get("verdict") else None)
+                if t]
         rows.append((row, tags))
     return rows
 
@@ -110,6 +136,8 @@ def export_memory_json(corpus_path: Path, out_json: Path) -> int:
             # objeto {value,label} INTEIRO: o rotulo machine_provisional e' o
             # marcador de honestidade e viaja junto com a nota (spec FP-034)
             "machine_score": rec.get("machine_score"),
+            # veredito do Felipe (overlay de human_verdicts.jsonl) — None ate' ele clicar
+            "human_verdict": rec.get("human_verdict"),
             "created_at": rec.get("created_at"),
         })
     out_json = Path(out_json)
