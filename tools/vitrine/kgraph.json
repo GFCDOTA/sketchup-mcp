@@ -1,0 +1,2186 @@
+{
+ "nodes": [
+  {
+   "id": "00-fluxo",
+   "stem": "00-Fluxo",
+   "title": "00 · Fluxo do projeto (PDF → render)",
+   "type": "index",
+   "domain": "",
+   "folder": "",
+   "area": "Núcleo / Mapas",
+   "deg": 54
+  },
+  {
+   "id": "cockpit-ops-map",
+   "stem": "cockpit-ops-map",
+   "title": "Cockpit & Ops Map",
+   "type": "index",
+   "domain": "cockpit-ops",
+   "folder": "",
+   "area": "Cockpit & Ops",
+   "deg": 11
+  },
+  {
+   "id": "ai bridge and handoff protocol",
+   "stem": "AI Bridge and Handoff Protocol",
+   "title": "AI Bridge and Handoff Protocol",
+   "type": "concept",
+   "domain": "process-meta",
+   "folder": "concepts",
+   "area": "Processo & Meta",
+   "deg": 7
+  },
+  {
+   "id": "autonomy protocol",
+   "stem": "Autonomy Protocol",
+   "title": "Autonomy Protocol",
+   "type": "concept",
+   "domain": "process-meta",
+   "folder": "concepts",
+   "area": "Processo & Meta",
+   "deg": 11
+  },
+  {
+   "id": "canonical artifact rule",
+   "stem": "Canonical Artifact Rule",
+   "title": "Canonical Artifact Rule",
+   "type": "concept",
+   "domain": "process-meta",
+   "folder": "concepts",
+   "area": "Processo & Meta",
+   "deg": 6
+  },
+  {
+   "id": "chatgpt consult path",
+   "stem": "ChatGPT Consult Path",
+   "title": "ChatGPT Consult Path",
+   "type": "concept",
+   "domain": "cockpit-ops",
+   "folder": "concepts",
+   "area": "Cockpit & Ops",
+   "deg": 8
+  },
+  {
+   "id": "class-architect-method",
+   "stem": "Class-Architect-Method",
+   "title": "Class Architect Method",
+   "type": "concept",
+   "domain": "sketchup-mcp",
+   "folder": "concepts",
+   "area": "Núcleo / Mapas",
+   "deg": 9
+  },
+  {
+   "id": "clean and hexagonal architecture",
+   "stem": "Clean and Hexagonal Architecture",
+   "title": "Clean and Hexagonal Architecture",
+   "type": "concept",
+   "domain": "process-meta",
+   "folder": "concepts",
+   "area": "Processo & Meta",
+   "deg": 11
+  },
+  {
+   "id": "code review and security",
+   "stem": "Code Review and Security",
+   "title": "Code Review and Security",
+   "type": "concept",
+   "domain": "process-meta",
+   "folder": "concepts",
+   "area": "Processo & Meta",
+   "deg": 7
+  },
+  {
+   "id": "consensus model schema",
+   "stem": "Consensus Model Schema",
+   "title": "Consensus Model Schema",
+   "type": "concept",
+   "domain": "pipeline",
+   "folder": "concepts",
+   "area": "Pipeline (PDF→.skp)",
+   "deg": 14
+  },
+  {
+   "id": "consulting llms at forks",
+   "stem": "Consulting LLMs at Forks",
+   "title": "Consulting LLMs at Forks",
+   "type": "concept",
+   "domain": "process-meta",
+   "folder": "concepts",
+   "area": "Processo & Meta",
+   "deg": 8
+  },
+  {
+   "id": "defender powershell flag",
+   "stem": "Defender PowerShell Flag",
+   "title": "Defender PowerShell Flag",
+   "type": "concept",
+   "domain": "cockpit-ops",
+   "folder": "concepts",
+   "area": "Cockpit & Ops",
+   "deg": 8
+  },
+  {
+   "id": "deterministic detectors first",
+   "stem": "Deterministic Detectors First",
+   "title": "Deterministic Detectors First",
+   "type": "concept",
+   "domain": "pipeline",
+   "folder": "concepts",
+   "area": "Pipeline (PDF→.skp)",
+   "deg": 10
+  },
+  {
+   "id": "disc-and-curve-by-bands",
+   "stem": "Disc-and-Curve-by-Bands",
+   "title": "Disc and Curve by Bands",
+   "type": "concept",
+   "domain": "furniture",
+   "folder": "concepts",
+   "area": "Móveis",
+   "deg": 8
+  },
+  {
+   "id": "done is not stop",
+   "stem": "Done Is Not Stop",
+   "title": "Done Is Not Stop",
+   "type": "concept",
+   "domain": "process-meta",
+   "folder": "concepts",
+   "area": "Processo & Meta",
+   "deg": 10
+  },
+  {
+   "id": "fidelity-gate",
+   "stem": "Fidelity-Gate",
+   "title": "Fidelity Gate",
+   "type": "concept",
+   "domain": "sketchup-mcp",
+   "folder": "concepts",
+   "area": "Núcleo / Mapas",
+   "deg": 16
+  },
+  {
+   "id": "furnished-plant product direction",
+   "stem": "Furnished-Plant Product Direction",
+   "title": "Furnished-Plant Product Direction",
+   "type": "concept",
+   "domain": "interior-render",
+   "folder": "concepts",
+   "area": "Interiores & Render",
+   "deg": 8
+  },
+  {
+   "id": "furnishing-the-apartment",
+   "stem": "Furnishing-the-Apartment",
+   "title": "Furnishing the Apartment",
+   "type": "concept",
+   "domain": "furniture",
+   "folder": "concepts",
+   "area": "Móveis",
+   "deg": 10
+  },
+  {
+   "id": "furniture-class-program",
+   "stem": "Furniture-Class-Program",
+   "title": "Furniture Class Program",
+   "type": "concept",
+   "domain": "sketchup-mcp",
+   "folder": "concepts",
+   "area": "Núcleo / Mapas",
+   "deg": 14
+  },
+  {
+   "id": "furniture-class-scorecard",
+   "stem": "Furniture-Class-Scorecard",
+   "title": "Furniture Class Scorecard",
+   "type": "concept",
+   "domain": "furniture",
+   "folder": "concepts",
+   "area": "Móveis",
+   "deg": 13
+  },
+  {
+   "id": "git and pr workflow",
+   "stem": "Git and PR Workflow",
+   "title": "Git and PR Workflow",
+   "type": "concept",
+   "domain": "process-meta",
+   "folder": "concepts",
+   "area": "Processo & Meta",
+   "deg": 10
+  },
+  {
+   "id": "grep refs before removing",
+   "stem": "Grep Refs Before Removing",
+   "title": "Grep Refs Before Removing",
+   "type": "concept",
+   "domain": "cockpit-ops",
+   "folder": "concepts",
+   "area": "Cockpit & Ops",
+   "deg": 7
+  },
+  {
+   "id": "interior architect method",
+   "stem": "Interior Architect Method",
+   "title": "Interior Architect Method",
+   "type": "concept",
+   "domain": "interior-render",
+   "folder": "concepts",
+   "area": "Interiores & Render",
+   "deg": 8
+  },
+  {
+   "id": "interior style grammar",
+   "stem": "Interior Style Grammar",
+   "title": "Interior Style Grammar",
+   "type": "concept",
+   "domain": "interior-render",
+   "folder": "concepts",
+   "area": "Interiores & Render",
+   "deg": 11
+  },
+  {
+   "id": "joinery-designer",
+   "stem": "Joinery-Designer",
+   "title": "Joinery Designer",
+   "type": "concept",
+   "domain": "furniture",
+   "folder": "concepts",
+   "area": "Móveis",
+   "deg": 8
+  },
+  {
+   "id": "look before you tweak",
+   "stem": "Look Before You Tweak",
+   "title": "Look Before You Tweak",
+   "type": "concept",
+   "domain": "pipeline",
+   "folder": "concepts",
+   "area": "Pipeline (PDF→.skp)",
+   "deg": 10
+  },
+  {
+   "id": "model and effort right-sizing",
+   "stem": "Model and Effort Right-Sizing",
+   "title": "Model and Effort Right-Sizing",
+   "type": "concept",
+   "domain": "process-meta",
+   "folder": "concepts",
+   "area": "Processo & Meta",
+   "deg": 4
+  },
+  {
+   "id": "no-fabrication rule",
+   "stem": "No-Fabrication Rule",
+   "title": "No-Fabrication Rule",
+   "type": "concept",
+   "domain": "pipeline",
+   "folder": "concepts",
+   "area": "Pipeline (PDF→.skp)",
+   "deg": 15
+  },
+  {
+   "id": "parametric openings",
+   "stem": "Parametric Openings",
+   "title": "Parametric Openings",
+   "type": "concept",
+   "domain": "pipeline",
+   "folder": "concepts",
+   "area": "Pipeline (PDF→.skp)",
+   "deg": 12
+  },
+  {
+   "id": "pdf plan semantics",
+   "stem": "PDF Plan Semantics",
+   "title": "PDF Plan Semantics",
+   "type": "concept",
+   "domain": "pipeline",
+   "folder": "concepts",
+   "area": "Pipeline (PDF→.skp)",
+   "deg": 10
+  },
+  {
+   "id": "pdf-to-skp-pipeline",
+   "stem": "PDF-to-SKP-Pipeline",
+   "title": "PDF-to-SKP Pipeline",
+   "type": "concept",
+   "domain": "sketchup-mcp",
+   "folder": "concepts",
+   "area": "Núcleo / Mapas",
+   "deg": 15
+  },
+  {
+   "id": "product-learning phase",
+   "stem": "Product-Learning Phase",
+   "title": "Product-Learning Phase",
+   "type": "concept",
+   "domain": "interior-render",
+   "folder": "concepts",
+   "area": "Interiores & Render",
+   "deg": 9
+  },
+  {
+   "id": "pt-to-m-scale-lock",
+   "stem": "PT-to-M-Scale-Lock",
+   "title": "PT-to-M Scale Lock",
+   "type": "concept",
+   "domain": "sketchup-mcp",
+   "folder": "concepts",
+   "area": "Núcleo / Mapas",
+   "deg": 13
+  },
+  {
+   "id": "reference-to-joinery translator",
+   "stem": "Reference-to-Joinery Translator",
+   "title": "Reference-to-Joinery Translator",
+   "type": "concept",
+   "domain": "interior-render",
+   "folder": "concepts",
+   "area": "Interiores & Render",
+   "deg": 8
+  },
+  {
+   "id": "satellite-pattern",
+   "stem": "Satellite-Pattern",
+   "title": "Satellite Pattern",
+   "type": "concept",
+   "domain": "furniture",
+   "folder": "concepts",
+   "area": "Móveis",
+   "deg": 7
+  },
+  {
+   "id": "shell build and in-place edit",
+   "stem": "Shell Build and In-Place Edit",
+   "title": "Shell Build and In-Place Edit",
+   "type": "concept",
+   "domain": "pipeline",
+   "folder": "concepts",
+   "area": "Pipeline (PDF→.skp)",
+   "deg": 9
+  },
+  {
+   "id": "su-free-furniture-loop",
+   "stem": "SU-Free-Furniture-Loop",
+   "title": "SU-Free Furniture Loop",
+   "type": "concept",
+   "domain": "furniture",
+   "folder": "concepts",
+   "area": "Móveis",
+   "deg": 8
+  },
+  {
+   "id": "testing strategy",
+   "stem": "Testing Strategy",
+   "title": "Testing Strategy",
+   "type": "concept",
+   "domain": "process-meta",
+   "folder": "concepts",
+   "area": "Processo & Meta",
+   "deg": 12
+  },
+  {
+   "id": "v-ray render pipeline",
+   "stem": "V-Ray Render Pipeline",
+   "title": "V-Ray Render Pipeline",
+   "type": "concept",
+   "domain": "interior-render",
+   "folder": "concepts",
+   "area": "Interiores & Render",
+   "deg": 9
+  },
+  {
+   "id": "vector-first extraction",
+   "stem": "Vector-First Extraction",
+   "title": "Vector-First Extraction",
+   "type": "concept",
+   "domain": "pipeline",
+   "folder": "concepts",
+   "area": "Pipeline (PDF→.skp)",
+   "deg": 12
+  },
+  {
+   "id": "visual gates and gpt review",
+   "stem": "Visual Gates and GPT Review",
+   "title": "Visual Gates and GPT Review",
+   "type": "concept",
+   "domain": "interior-render",
+   "folder": "concepts",
+   "area": "Interiores & Render",
+   "deg": 9
+  },
+  {
+   "id": "visual-review-gate",
+   "stem": "Visual-Review-Gate",
+   "title": "Visual Review Gate",
+   "type": "concept",
+   "domain": "sketchup-mcp",
+   "folder": "concepts",
+   "area": "Núcleo / Mapas",
+   "deg": 31
+  },
+  {
+   "id": "cockpit & gate server.py",
+   "stem": "Cockpit & Gate server.py",
+   "title": "Cockpit & Gate server.py",
+   "type": "entity",
+   "domain": "cockpit-ops",
+   "folder": "entities",
+   "area": "Cockpit & Ops",
+   "deg": 14
+  },
+  {
+   "id": "cockpit-8765",
+   "stem": "Cockpit-8765",
+   "title": "Cockpit-8765",
+   "type": "entity",
+   "domain": "sketchup-mcp",
+   "folder": "entities",
+   "area": "Núcleo / Mapas",
+   "deg": 12
+  },
+  {
+   "id": "felipe's machine",
+   "stem": "Felipe's Machine",
+   "title": "Felipe's Machine",
+   "type": "entity",
+   "domain": "cockpit-ops",
+   "folder": "entities",
+   "area": "Cockpit & Ops",
+   "deg": 10
+  },
+  {
+   "id": "interior_studio",
+   "stem": "INTERIOR_STUDIO",
+   "title": "INTERIOR_STUDIO",
+   "type": "entity",
+   "domain": "interior-render",
+   "folder": "entities",
+   "area": "Interiores & Render",
+   "deg": 8
+  },
+  {
+   "id": "loglife",
+   "stem": "loglife",
+   "title": "loglife",
+   "type": "entity",
+   "domain": "process-meta",
+   "folder": "entities",
+   "area": "Processo & Meta",
+   "deg": 8
+  },
+  {
+   "id": "noc desktop launchers",
+   "stem": "NOC Desktop Launchers",
+   "title": "NOC Desktop Launchers",
+   "type": "entity",
+   "domain": "cockpit-ops",
+   "folder": "entities",
+   "area": "Cockpit & Ops",
+   "deg": 11
+  },
+  {
+   "id": "noc dispatcher",
+   "stem": "NOC Dispatcher",
+   "title": "NOC Dispatcher",
+   "type": "entity",
+   "domain": "cockpit-ops",
+   "folder": "entities",
+   "area": "Cockpit & Ops",
+   "deg": 10
+  },
+  {
+   "id": "planta_74",
+   "stem": "planta_74",
+   "title": "planta_74",
+   "type": "entity",
+   "domain": "sketchup-mcp",
+   "folder": "entities",
+   "area": "Núcleo / Mapas",
+   "deg": 18
+  },
+  {
+   "id": "sketchup-mcp",
+   "stem": "sketchup-mcp",
+   "title": "sketchup-mcp",
+   "type": "entity",
+   "domain": "sketchup-mcp",
+   "folder": "entities",
+   "area": "Núcleo / Mapas",
+   "deg": 59
+  },
+  {
+   "id": "smartcatalog",
+   "stem": "SmartCatalog",
+   "title": "SmartCatalog",
+   "type": "entity",
+   "domain": "process-meta",
+   "folder": "entities",
+   "area": "Processo & Meta",
+   "deg": 6
+  },
+  {
+   "id": "system-design-specialist-lab",
+   "stem": "system-design-specialist-lab",
+   "title": "system-design-specialist-lab",
+   "type": "entity",
+   "domain": "process-meta",
+   "folder": "entities",
+   "area": "Processo & Meta",
+   "deg": 6
+  },
+  {
+   "id": "workspace layout",
+   "stem": "Workspace Layout",
+   "title": "Workspace Layout",
+   "type": "entity",
+   "domain": "cockpit-ops",
+   "folder": "entities",
+   "area": "Cockpit & Ops",
+   "deg": 8
+  },
+  {
+   "id": "furniture-map",
+   "stem": "furniture-map",
+   "title": "Furniture Map",
+   "type": "index",
+   "domain": "furniture",
+   "folder": "",
+   "area": "Móveis",
+   "deg": 17
+  },
+  {
+   "id": "hot",
+   "stem": "hot",
+   "title": "Contexto recente",
+   "type": "hot",
+   "domain": "",
+   "folder": "",
+   "area": "Núcleo / Mapas",
+   "deg": 2
+  },
+  {
+   "id": "index",
+   "stem": "index",
+   "title": "Mapa do projeto sketchup-mcp",
+   "type": "index",
+   "domain": "",
+   "folder": "",
+   "area": "Núcleo / Mapas",
+   "deg": 14
+  },
+  {
+   "id": "interior-render-map",
+   "stem": "interior-render-map",
+   "title": "Interior & Render Map",
+   "type": "index",
+   "domain": "interior-render",
+   "folder": "",
+   "area": "Interiores & Render",
+   "deg": 13
+  },
+  {
+   "id": "pipeline map",
+   "stem": "Pipeline Map",
+   "title": "Pipeline Map",
+   "type": "index",
+   "domain": "pipeline",
+   "folder": "",
+   "area": "Pipeline (PDF→.skp)",
+   "deg": 24
+  },
+  {
+   "id": "process-meta-map",
+   "stem": "process-meta-map",
+   "title": "Process & Workflow Map",
+   "type": "index",
+   "domain": "process-meta",
+   "folder": "",
+   "area": "Processo & Meta",
+   "deg": 16
+  },
+  {
+   "id": "sketchup-mcp-bootloader",
+   "stem": "sketchup-mcp-bootloader",
+   "title": "sketchup-mcp bootloader (CLAUDE.md)",
+   "type": "source",
+   "domain": "",
+   "folder": "sources",
+   "area": "Núcleo / Mapas",
+   "deg": 34
+  }
+ ],
+ "links": [
+  {
+   "source": "00-fluxo",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "index"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "planta_74"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "pdf plan semantics"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "vector-first extraction"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "no-fabrication rule"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "look before you tweak"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "consensus model schema"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "pt-to-m-scale-lock"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "pdf-to-skp-pipeline"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "shell build and in-place edit"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "parametric openings"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "fidelity-gate"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "deterministic detectors first"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "visual-review-gate"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "furniture-class-program"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "furniture-class-scorecard"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "class-architect-method"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "satellite-pattern"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "disc-and-curve-by-bands"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "furnishing-the-apartment"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "su-free-furniture-loop"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "joinery-designer"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "interior architect method"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "interior style grammar"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "reference-to-joinery translator"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "interior_studio"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "product-learning phase"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "furnished-plant product direction"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "v-ray render pipeline"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "visual gates and gpt review"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "cockpit-8765"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "cockpit & gate server.py"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "noc dispatcher"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "noc desktop launchers"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "chatgpt consult path"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "felipe's machine"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "workspace layout"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "grep refs before removing"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "defender powershell flag"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "autonomy protocol"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "done is not stop"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "git and pr workflow"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "canonical artifact rule"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "consulting llms at forks"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "ai bridge and handoff protocol"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "model and effort right-sizing"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "clean and hexagonal architecture"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "testing strategy"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "code review and security"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "loglife"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "system-design-specialist-lab"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "smartcatalog"
+  },
+  {
+   "source": "00-fluxo",
+   "target": "sketchup-mcp-bootloader"
+  },
+  {
+   "source": "cockpit-ops-map",
+   "target": "cockpit-8765"
+  },
+  {
+   "source": "cockpit-ops-map",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "cockpit-ops-map",
+   "target": "cockpit & gate server.py"
+  },
+  {
+   "source": "cockpit-ops-map",
+   "target": "noc desktop launchers"
+  },
+  {
+   "source": "cockpit-ops-map",
+   "target": "noc dispatcher"
+  },
+  {
+   "source": "cockpit-ops-map",
+   "target": "chatgpt consult path"
+  },
+  {
+   "source": "cockpit-ops-map",
+   "target": "felipe's machine"
+  },
+  {
+   "source": "cockpit-ops-map",
+   "target": "workspace layout"
+  },
+  {
+   "source": "cockpit-ops-map",
+   "target": "grep refs before removing"
+  },
+  {
+   "source": "cockpit-ops-map",
+   "target": "defender powershell flag"
+  },
+  {
+   "source": "ai bridge and handoff protocol",
+   "target": "git and pr workflow"
+  },
+  {
+   "source": "ai bridge and handoff protocol",
+   "target": "done is not stop"
+  },
+  {
+   "source": "ai bridge and handoff protocol",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "autonomy protocol",
+   "target": "consulting llms at forks"
+  },
+  {
+   "source": "autonomy protocol",
+   "target": "git and pr workflow"
+  },
+  {
+   "source": "autonomy protocol",
+   "target": "visual-review-gate"
+  },
+  {
+   "source": "autonomy protocol",
+   "target": "done is not stop"
+  },
+  {
+   "source": "autonomy protocol",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "canonical artifact rule",
+   "target": "testing strategy"
+  },
+  {
+   "source": "canonical artifact rule",
+   "target": "visual-review-gate"
+  },
+  {
+   "source": "canonical artifact rule",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "chatgpt consult path",
+   "target": "visual-review-gate"
+  },
+  {
+   "source": "chatgpt consult path",
+   "target": "noc dispatcher"
+  },
+  {
+   "source": "chatgpt consult path",
+   "target": "cockpit & gate server.py"
+  },
+  {
+   "source": "chatgpt consult path",
+   "target": "cockpit-8765"
+  },
+  {
+   "source": "chatgpt consult path",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "class-architect-method",
+   "target": "visual-review-gate"
+  },
+  {
+   "source": "class-architect-method",
+   "target": "furniture-class-program"
+  },
+  {
+   "source": "class-architect-method",
+   "target": "sketchup-mcp-bootloader"
+  },
+  {
+   "source": "clean and hexagonal architecture",
+   "target": "loglife"
+  },
+  {
+   "source": "clean and hexagonal architecture",
+   "target": "smartcatalog"
+  },
+  {
+   "source": "clean and hexagonal architecture",
+   "target": "testing strategy"
+  },
+  {
+   "source": "clean and hexagonal architecture",
+   "target": "code review and security"
+  },
+  {
+   "source": "clean and hexagonal architecture",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "code review and security",
+   "target": "visual-review-gate"
+  },
+  {
+   "source": "code review and security",
+   "target": "testing strategy"
+  },
+  {
+   "source": "code review and security",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "consensus model schema",
+   "target": "pt-to-m-scale-lock"
+  },
+  {
+   "source": "consensus model schema",
+   "target": "parametric openings"
+  },
+  {
+   "source": "consensus model schema",
+   "target": "no-fabrication rule"
+  },
+  {
+   "source": "consensus model schema",
+   "target": "vector-first extraction"
+  },
+  {
+   "source": "consensus model schema",
+   "target": "pdf-to-skp-pipeline"
+  },
+  {
+   "source": "consensus model schema",
+   "target": "pipeline map"
+  },
+  {
+   "source": "consensus model schema",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "consensus model schema",
+   "target": "sketchup-mcp-bootloader"
+  },
+  {
+   "source": "consulting llms at forks",
+   "target": "autonomy protocol"
+  },
+  {
+   "source": "consulting llms at forks",
+   "target": "visual-review-gate"
+  },
+  {
+   "source": "consulting llms at forks",
+   "target": "done is not stop"
+  },
+  {
+   "source": "consulting llms at forks",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "defender powershell flag",
+   "target": "felipe's machine"
+  },
+  {
+   "source": "defender powershell flag",
+   "target": "cockpit & gate server.py"
+  },
+  {
+   "source": "defender powershell flag",
+   "target": "noc desktop launchers"
+  },
+  {
+   "source": "defender powershell flag",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "deterministic detectors first",
+   "target": "fidelity-gate"
+  },
+  {
+   "source": "deterministic detectors first",
+   "target": "visual-review-gate"
+  },
+  {
+   "source": "deterministic detectors first",
+   "target": "planta_74"
+  },
+  {
+   "source": "deterministic detectors first",
+   "target": "no-fabrication rule"
+  },
+  {
+   "source": "deterministic detectors first",
+   "target": "pipeline map"
+  },
+  {
+   "source": "deterministic detectors first",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "deterministic detectors first",
+   "target": "sketchup-mcp-bootloader"
+  },
+  {
+   "source": "disc-and-curve-by-bands",
+   "target": "su-free-furniture-loop"
+  },
+  {
+   "source": "disc-and-curve-by-bands",
+   "target": "furniture-class-scorecard"
+  },
+  {
+   "source": "disc-and-curve-by-bands",
+   "target": "furniture-map"
+  },
+  {
+   "source": "disc-and-curve-by-bands",
+   "target": "sketchup-mcp-bootloader"
+  },
+  {
+   "source": "done is not stop",
+   "target": "ai bridge and handoff protocol"
+  },
+  {
+   "source": "done is not stop",
+   "target": "autonomy protocol"
+  },
+  {
+   "source": "done is not stop",
+   "target": "consulting llms at forks"
+  },
+  {
+   "source": "done is not stop",
+   "target": "git and pr workflow"
+  },
+  {
+   "source": "done is not stop",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "fidelity-gate",
+   "target": "visual-review-gate"
+  },
+  {
+   "source": "fidelity-gate",
+   "target": "pdf-to-skp-pipeline"
+  },
+  {
+   "source": "fidelity-gate",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "fidelity-gate",
+   "target": "sketchup-mcp-bootloader"
+  },
+  {
+   "source": "furnished-plant product direction",
+   "target": "furniture-class-program"
+  },
+  {
+   "source": "furnished-plant product direction",
+   "target": "product-learning phase"
+  },
+  {
+   "source": "furnished-plant product direction",
+   "target": "interior architect method"
+  },
+  {
+   "source": "furnished-plant product direction",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "furnishing-the-apartment",
+   "target": "planta_74"
+  },
+  {
+   "source": "furnishing-the-apartment",
+   "target": "furniture-class-scorecard"
+  },
+  {
+   "source": "furnishing-the-apartment",
+   "target": "pt-to-m-scale-lock"
+  },
+  {
+   "source": "furnishing-the-apartment",
+   "target": "joinery-designer"
+  },
+  {
+   "source": "furnishing-the-apartment",
+   "target": "furniture-map"
+  },
+  {
+   "source": "furnishing-the-apartment",
+   "target": "sketchup-mcp-bootloader"
+  },
+  {
+   "source": "furniture-class-program",
+   "target": "class-architect-method"
+  },
+  {
+   "source": "furniture-class-program",
+   "target": "visual-review-gate"
+  },
+  {
+   "source": "furniture-class-program",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "furniture-class-program",
+   "target": "sketchup-mcp-bootloader"
+  },
+  {
+   "source": "furniture-class-scorecard",
+   "target": "class-architect-method"
+  },
+  {
+   "source": "furniture-class-scorecard",
+   "target": "furniture-class-program"
+  },
+  {
+   "source": "furniture-class-scorecard",
+   "target": "satellite-pattern"
+  },
+  {
+   "source": "furniture-class-scorecard",
+   "target": "disc-and-curve-by-bands"
+  },
+  {
+   "source": "furniture-class-scorecard",
+   "target": "furnishing-the-apartment"
+  },
+  {
+   "source": "furniture-class-scorecard",
+   "target": "visual-review-gate"
+  },
+  {
+   "source": "furniture-class-scorecard",
+   "target": "sketchup-mcp-bootloader"
+  },
+  {
+   "source": "git and pr workflow",
+   "target": "autonomy protocol"
+  },
+  {
+   "source": "git and pr workflow",
+   "target": "ai bridge and handoff protocol"
+  },
+  {
+   "source": "git and pr workflow",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "grep refs before removing",
+   "target": "cockpit & gate server.py"
+  },
+  {
+   "source": "grep refs before removing",
+   "target": "workspace layout"
+  },
+  {
+   "source": "grep refs before removing",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "interior architect method",
+   "target": "furnished-plant product direction"
+  },
+  {
+   "source": "interior architect method",
+   "target": "interior style grammar"
+  },
+  {
+   "source": "interior architect method",
+   "target": "visual gates and gpt review"
+  },
+  {
+   "source": "interior architect method",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "interior style grammar",
+   "target": "furniture-class-program"
+  },
+  {
+   "source": "interior style grammar",
+   "target": "product-learning phase"
+  },
+  {
+   "source": "interior style grammar",
+   "target": "visual-review-gate"
+  },
+  {
+   "source": "interior style grammar",
+   "target": "reference-to-joinery translator"
+  },
+  {
+   "source": "interior style grammar",
+   "target": "v-ray render pipeline"
+  },
+  {
+   "source": "interior style grammar",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "joinery-designer",
+   "target": "visual-review-gate"
+  },
+  {
+   "source": "joinery-designer",
+   "target": "furnishing-the-apartment"
+  },
+  {
+   "source": "joinery-designer",
+   "target": "planta_74"
+  },
+  {
+   "source": "joinery-designer",
+   "target": "furniture-map"
+  },
+  {
+   "source": "joinery-designer",
+   "target": "sketchup-mcp-bootloader"
+  },
+  {
+   "source": "look before you tweak",
+   "target": "vector-first extraction"
+  },
+  {
+   "source": "look before you tweak",
+   "target": "deterministic detectors first"
+  },
+  {
+   "source": "look before you tweak",
+   "target": "no-fabrication rule"
+  },
+  {
+   "source": "look before you tweak",
+   "target": "pipeline map"
+  },
+  {
+   "source": "look before you tweak",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "look before you tweak",
+   "target": "sketchup-mcp-bootloader"
+  },
+  {
+   "source": "model and effort right-sizing",
+   "target": "autonomy protocol"
+  },
+  {
+   "source": "model and effort right-sizing",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "no-fabrication rule",
+   "target": "consensus model schema"
+  },
+  {
+   "source": "no-fabrication rule",
+   "target": "pt-to-m-scale-lock"
+  },
+  {
+   "source": "no-fabrication rule",
+   "target": "pdf plan semantics"
+  },
+  {
+   "source": "no-fabrication rule",
+   "target": "look before you tweak"
+  },
+  {
+   "source": "no-fabrication rule",
+   "target": "fidelity-gate"
+  },
+  {
+   "source": "no-fabrication rule",
+   "target": "pipeline map"
+  },
+  {
+   "source": "no-fabrication rule",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "no-fabrication rule",
+   "target": "sketchup-mcp-bootloader"
+  },
+  {
+   "source": "parametric openings",
+   "target": "fidelity-gate"
+  },
+  {
+   "source": "parametric openings",
+   "target": "planta_74"
+  },
+  {
+   "source": "parametric openings",
+   "target": "consensus model schema"
+  },
+  {
+   "source": "parametric openings",
+   "target": "pdf plan semantics"
+  },
+  {
+   "source": "parametric openings",
+   "target": "pipeline map"
+  },
+  {
+   "source": "parametric openings",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "parametric openings",
+   "target": "sketchup-mcp-bootloader"
+  },
+  {
+   "source": "pdf plan semantics",
+   "target": "parametric openings"
+  },
+  {
+   "source": "pdf plan semantics",
+   "target": "no-fabrication rule"
+  },
+  {
+   "source": "pdf plan semantics",
+   "target": "vector-first extraction"
+  },
+  {
+   "source": "pdf plan semantics",
+   "target": "pipeline map"
+  },
+  {
+   "source": "pdf plan semantics",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "pdf plan semantics",
+   "target": "sketchup-mcp-bootloader"
+  },
+  {
+   "source": "pdf-to-skp-pipeline",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "pdf-to-skp-pipeline",
+   "target": "pt-to-m-scale-lock"
+  },
+  {
+   "source": "pdf-to-skp-pipeline",
+   "target": "fidelity-gate"
+  },
+  {
+   "source": "pdf-to-skp-pipeline",
+   "target": "visual-review-gate"
+  },
+  {
+   "source": "pdf-to-skp-pipeline",
+   "target": "sketchup-mcp-bootloader"
+  },
+  {
+   "source": "product-learning phase",
+   "target": "furnished-plant product direction"
+  },
+  {
+   "source": "product-learning phase",
+   "target": "interior architect method"
+  },
+  {
+   "source": "product-learning phase",
+   "target": "visual gates and gpt review"
+  },
+  {
+   "source": "product-learning phase",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "pt-to-m-scale-lock",
+   "target": "planta_74"
+  },
+  {
+   "source": "pt-to-m-scale-lock",
+   "target": "pdf-to-skp-pipeline"
+  },
+  {
+   "source": "pt-to-m-scale-lock",
+   "target": "fidelity-gate"
+  },
+  {
+   "source": "pt-to-m-scale-lock",
+   "target": "sketchup-mcp-bootloader"
+  },
+  {
+   "source": "reference-to-joinery translator",
+   "target": "interior_studio"
+  },
+  {
+   "source": "reference-to-joinery translator",
+   "target": "interior style grammar"
+  },
+  {
+   "source": "reference-to-joinery translator",
+   "target": "planta_74"
+  },
+  {
+   "source": "reference-to-joinery translator",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "satellite-pattern",
+   "target": "furniture-class-scorecard"
+  },
+  {
+   "source": "satellite-pattern",
+   "target": "class-architect-method"
+  },
+  {
+   "source": "satellite-pattern",
+   "target": "furniture-map"
+  },
+  {
+   "source": "satellite-pattern",
+   "target": "sketchup-mcp-bootloader"
+  },
+  {
+   "source": "shell build and in-place edit",
+   "target": "consensus model schema"
+  },
+  {
+   "source": "shell build and in-place edit",
+   "target": "parametric openings"
+  },
+  {
+   "source": "shell build and in-place edit",
+   "target": "fidelity-gate"
+  },
+  {
+   "source": "shell build and in-place edit",
+   "target": "pdf-to-skp-pipeline"
+  },
+  {
+   "source": "shell build and in-place edit",
+   "target": "pipeline map"
+  },
+  {
+   "source": "shell build and in-place edit",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "shell build and in-place edit",
+   "target": "sketchup-mcp-bootloader"
+  },
+  {
+   "source": "su-free-furniture-loop",
+   "target": "visual-review-gate"
+  },
+  {
+   "source": "su-free-furniture-loop",
+   "target": "furniture-class-scorecard"
+  },
+  {
+   "source": "su-free-furniture-loop",
+   "target": "disc-and-curve-by-bands"
+  },
+  {
+   "source": "su-free-furniture-loop",
+   "target": "furniture-map"
+  },
+  {
+   "source": "su-free-furniture-loop",
+   "target": "sketchup-mcp-bootloader"
+  },
+  {
+   "source": "testing strategy",
+   "target": "canonical artifact rule"
+  },
+  {
+   "source": "testing strategy",
+   "target": "code review and security"
+  },
+  {
+   "source": "testing strategy",
+   "target": "visual-review-gate"
+  },
+  {
+   "source": "testing strategy",
+   "target": "clean and hexagonal architecture"
+  },
+  {
+   "source": "testing strategy",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "v-ray render pipeline",
+   "target": "visual gates and gpt review"
+  },
+  {
+   "source": "v-ray render pipeline",
+   "target": "visual-review-gate"
+  },
+  {
+   "source": "v-ray render pipeline",
+   "target": "interior style grammar"
+  },
+  {
+   "source": "v-ray render pipeline",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "vector-first extraction",
+   "target": "look before you tweak"
+  },
+  {
+   "source": "vector-first extraction",
+   "target": "consensus model schema"
+  },
+  {
+   "source": "vector-first extraction",
+   "target": "no-fabrication rule"
+  },
+  {
+   "source": "vector-first extraction",
+   "target": "pdf-to-skp-pipeline"
+  },
+  {
+   "source": "vector-first extraction",
+   "target": "pipeline map"
+  },
+  {
+   "source": "vector-first extraction",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "vector-first extraction",
+   "target": "sketchup-mcp-bootloader"
+  },
+  {
+   "source": "visual gates and gpt review",
+   "target": "visual-review-gate"
+  },
+  {
+   "source": "visual gates and gpt review",
+   "target": "v-ray render pipeline"
+  },
+  {
+   "source": "visual gates and gpt review",
+   "target": "product-learning phase"
+  },
+  {
+   "source": "visual gates and gpt review",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "visual-review-gate",
+   "target": "fidelity-gate"
+  },
+  {
+   "source": "visual-review-gate",
+   "target": "cockpit-8765"
+  },
+  {
+   "source": "visual-review-gate",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "visual-review-gate",
+   "target": "sketchup-mcp-bootloader"
+  },
+  {
+   "source": "cockpit & gate server.py",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "cockpit & gate server.py",
+   "target": "cockpit-8765"
+  },
+  {
+   "source": "cockpit & gate server.py",
+   "target": "grep refs before removing"
+  },
+  {
+   "source": "cockpit & gate server.py",
+   "target": "noc dispatcher"
+  },
+  {
+   "source": "cockpit & gate server.py",
+   "target": "noc desktop launchers"
+  },
+  {
+   "source": "cockpit-8765",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "cockpit-8765",
+   "target": "visual-review-gate"
+  },
+  {
+   "source": "cockpit-8765",
+   "target": "sketchup-mcp-bootloader"
+  },
+  {
+   "source": "felipe's machine",
+   "target": "cockpit & gate server.py"
+  },
+  {
+   "source": "felipe's machine",
+   "target": "noc desktop launchers"
+  },
+  {
+   "source": "felipe's machine",
+   "target": "defender powershell flag"
+  },
+  {
+   "source": "felipe's machine",
+   "target": "workspace layout"
+  },
+  {
+   "source": "felipe's machine",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "interior_studio",
+   "target": "planta_74"
+  },
+  {
+   "source": "interior_studio",
+   "target": "cockpit-8765"
+  },
+  {
+   "source": "interior_studio",
+   "target": "reference-to-joinery translator"
+  },
+  {
+   "source": "interior_studio",
+   "target": "v-ray render pipeline"
+  },
+  {
+   "source": "interior_studio",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "loglife",
+   "target": "clean and hexagonal architecture"
+  },
+  {
+   "source": "loglife",
+   "target": "testing strategy"
+  },
+  {
+   "source": "loglife",
+   "target": "git and pr workflow"
+  },
+  {
+   "source": "loglife",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "noc desktop launchers",
+   "target": "cockpit & gate server.py"
+  },
+  {
+   "source": "noc desktop launchers",
+   "target": "noc dispatcher"
+  },
+  {
+   "source": "noc desktop launchers",
+   "target": "felipe's machine"
+  },
+  {
+   "source": "noc desktop launchers",
+   "target": "defender powershell flag"
+  },
+  {
+   "source": "noc desktop launchers",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "noc dispatcher",
+   "target": "visual-review-gate"
+  },
+  {
+   "source": "noc dispatcher",
+   "target": "chatgpt consult path"
+  },
+  {
+   "source": "noc dispatcher",
+   "target": "cockpit & gate server.py"
+  },
+  {
+   "source": "noc dispatcher",
+   "target": "noc desktop launchers"
+  },
+  {
+   "source": "noc dispatcher",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "planta_74",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "planta_74",
+   "target": "pt-to-m-scale-lock"
+  },
+  {
+   "source": "planta_74",
+   "target": "pdf-to-skp-pipeline"
+  },
+  {
+   "source": "planta_74",
+   "target": "sketchup-mcp-bootloader"
+  },
+  {
+   "source": "sketchup-mcp",
+   "target": "pdf-to-skp-pipeline"
+  },
+  {
+   "source": "sketchup-mcp",
+   "target": "planta_74"
+  },
+  {
+   "source": "sketchup-mcp",
+   "target": "fidelity-gate"
+  },
+  {
+   "source": "sketchup-mcp",
+   "target": "visual-review-gate"
+  },
+  {
+   "source": "sketchup-mcp",
+   "target": "furniture-class-program"
+  },
+  {
+   "source": "sketchup-mcp",
+   "target": "cockpit-8765"
+  },
+  {
+   "source": "sketchup-mcp",
+   "target": "sketchup-mcp-bootloader"
+  },
+  {
+   "source": "smartcatalog",
+   "target": "clean and hexagonal architecture"
+  },
+  {
+   "source": "smartcatalog",
+   "target": "testing strategy"
+  },
+  {
+   "source": "smartcatalog",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "system-design-specialist-lab",
+   "target": "git and pr workflow"
+  },
+  {
+   "source": "system-design-specialist-lab",
+   "target": "loglife"
+  },
+  {
+   "source": "system-design-specialist-lab",
+   "target": "clean and hexagonal architecture"
+  },
+  {
+   "source": "system-design-specialist-lab",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "workspace layout",
+   "target": "grep refs before removing"
+  },
+  {
+   "source": "workspace layout",
+   "target": "cockpit & gate server.py"
+  },
+  {
+   "source": "workspace layout",
+   "target": "felipe's machine"
+  },
+  {
+   "source": "workspace layout",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "furniture-map",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "furniture-map",
+   "target": "furniture-class-scorecard"
+  },
+  {
+   "source": "furniture-map",
+   "target": "satellite-pattern"
+  },
+  {
+   "source": "furniture-map",
+   "target": "disc-and-curve-by-bands"
+  },
+  {
+   "source": "furniture-map",
+   "target": "su-free-furniture-loop"
+  },
+  {
+   "source": "furniture-map",
+   "target": "furnishing-the-apartment"
+  },
+  {
+   "source": "furniture-map",
+   "target": "joinery-designer"
+  },
+  {
+   "source": "furniture-map",
+   "target": "furniture-class-program"
+  },
+  {
+   "source": "furniture-map",
+   "target": "class-architect-method"
+  },
+  {
+   "source": "furniture-map",
+   "target": "visual-review-gate"
+  },
+  {
+   "source": "furniture-map",
+   "target": "planta_74"
+  },
+  {
+   "source": "hot",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "hot",
+   "target": "index"
+  },
+  {
+   "source": "index",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "index",
+   "target": "pipeline map"
+  },
+  {
+   "source": "index",
+   "target": "furniture-map"
+  },
+  {
+   "source": "index",
+   "target": "interior-render-map"
+  },
+  {
+   "source": "index",
+   "target": "cockpit-ops-map"
+  },
+  {
+   "source": "index",
+   "target": "process-meta-map"
+  },
+  {
+   "source": "index",
+   "target": "planta_74"
+  },
+  {
+   "source": "index",
+   "target": "pt-to-m-scale-lock"
+  },
+  {
+   "source": "index",
+   "target": "fidelity-gate"
+  },
+  {
+   "source": "index",
+   "target": "visual-review-gate"
+  },
+  {
+   "source": "index",
+   "target": "furniture-class-program"
+  },
+  {
+   "source": "index",
+   "target": "cockpit-8765"
+  },
+  {
+   "source": "interior-render-map",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "interior-render-map",
+   "target": "product-learning phase"
+  },
+  {
+   "source": "interior-render-map",
+   "target": "furnished-plant product direction"
+  },
+  {
+   "source": "interior-render-map",
+   "target": "interior architect method"
+  },
+  {
+   "source": "interior-render-map",
+   "target": "interior style grammar"
+  },
+  {
+   "source": "interior-render-map",
+   "target": "reference-to-joinery translator"
+  },
+  {
+   "source": "interior-render-map",
+   "target": "interior_studio"
+  },
+  {
+   "source": "interior-render-map",
+   "target": "v-ray render pipeline"
+  },
+  {
+   "source": "interior-render-map",
+   "target": "visual gates and gpt review"
+  },
+  {
+   "source": "interior-render-map",
+   "target": "visual-review-gate"
+  },
+  {
+   "source": "interior-render-map",
+   "target": "planta_74"
+  },
+  {
+   "source": "interior-render-map",
+   "target": "furniture-class-program"
+  },
+  {
+   "source": "pipeline map",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "pipeline map",
+   "target": "pdf-to-skp-pipeline"
+  },
+  {
+   "source": "pipeline map",
+   "target": "vector-first extraction"
+  },
+  {
+   "source": "pipeline map",
+   "target": "pdf plan semantics"
+  },
+  {
+   "source": "pipeline map",
+   "target": "no-fabrication rule"
+  },
+  {
+   "source": "pipeline map",
+   "target": "consensus model schema"
+  },
+  {
+   "source": "pipeline map",
+   "target": "pt-to-m-scale-lock"
+  },
+  {
+   "source": "pipeline map",
+   "target": "parametric openings"
+  },
+  {
+   "source": "pipeline map",
+   "target": "shell build and in-place edit"
+  },
+  {
+   "source": "pipeline map",
+   "target": "fidelity-gate"
+  },
+  {
+   "source": "pipeline map",
+   "target": "deterministic detectors first"
+  },
+  {
+   "source": "pipeline map",
+   "target": "visual-review-gate"
+  },
+  {
+   "source": "pipeline map",
+   "target": "look before you tweak"
+  },
+  {
+   "source": "pipeline map",
+   "target": "planta_74"
+  },
+  {
+   "source": "pipeline map",
+   "target": "sketchup-mcp-bootloader"
+  },
+  {
+   "source": "process-meta-map",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "process-meta-map",
+   "target": "autonomy protocol"
+  },
+  {
+   "source": "process-meta-map",
+   "target": "done is not stop"
+  },
+  {
+   "source": "process-meta-map",
+   "target": "consulting llms at forks"
+  },
+  {
+   "source": "process-meta-map",
+   "target": "model and effort right-sizing"
+  },
+  {
+   "source": "process-meta-map",
+   "target": "git and pr workflow"
+  },
+  {
+   "source": "process-meta-map",
+   "target": "canonical artifact rule"
+  },
+  {
+   "source": "process-meta-map",
+   "target": "ai bridge and handoff protocol"
+  },
+  {
+   "source": "process-meta-map",
+   "target": "clean and hexagonal architecture"
+  },
+  {
+   "source": "process-meta-map",
+   "target": "testing strategy"
+  },
+  {
+   "source": "process-meta-map",
+   "target": "code review and security"
+  },
+  {
+   "source": "process-meta-map",
+   "target": "loglife"
+  },
+  {
+   "source": "process-meta-map",
+   "target": "system-design-specialist-lab"
+  },
+  {
+   "source": "process-meta-map",
+   "target": "smartcatalog"
+  },
+  {
+   "source": "process-meta-map",
+   "target": "visual-review-gate"
+  },
+  {
+   "source": "sketchup-mcp-bootloader",
+   "target": "sketchup-mcp"
+  },
+  {
+   "source": "sketchup-mcp-bootloader",
+   "target": "cockpit-8765"
+  },
+  {
+   "source": "sketchup-mcp-bootloader",
+   "target": "planta_74"
+  },
+  {
+   "source": "sketchup-mcp-bootloader",
+   "target": "pdf-to-skp-pipeline"
+  },
+  {
+   "source": "sketchup-mcp-bootloader",
+   "target": "pt-to-m-scale-lock"
+  },
+  {
+   "source": "sketchup-mcp-bootloader",
+   "target": "fidelity-gate"
+  },
+  {
+   "source": "sketchup-mcp-bootloader",
+   "target": "visual-review-gate"
+  },
+  {
+   "source": "sketchup-mcp-bootloader",
+   "target": "furniture-class-program"
+  },
+  {
+   "source": "sketchup-mcp-bootloader",
+   "target": "class-architect-method"
+  }
+ ],
+ "areas": [
+  {
+   "name": "Processo & Meta",
+   "count": 14
+  },
+  {
+   "name": "Núcleo / Mapas",
+   "count": 13
+  },
+  {
+   "name": "Cockpit & Ops",
+   "count": 9
+  },
+  {
+   "name": "Pipeline (PDF→.skp)",
+   "count": 9
+  },
+  {
+   "name": "Interiores & Render",
+   "count": 9
+  },
+  {
+   "name": "Móveis",
+   "count": 7
+  }
+ ],
+ "stats": {
+  "nodes": 61,
+  "links": 385
+ }
+}

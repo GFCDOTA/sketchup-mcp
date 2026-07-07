@@ -28,7 +28,7 @@ def _now_iso(now: str | None) -> str:
 def build_question(*, mode: str, room: str, phase: str, theme: str, context: str, decision_goal: str,
                    architect_hypothesis: str, frozen_constraints=None, mutable=None, questions=None,
                    visual_inputs=None, priority: str = "medium", project: str = "planta_74",
-                   question_id: str | None = None, now: str | None = None) -> dict:
+                   references=None, question_id: str | None = None, now: str | None = None) -> dict:
     """Constrói + valida um question_contract. Levanta ValueError se inválido."""
     created = _now_iso(now)
     qid = question_id or f"{room}_{phase}_{created.replace(':', '').replace('-', '')[-6:]}"
@@ -50,6 +50,7 @@ def build_question(*, mode: str, room: str, phase: str, theme: str, context: str
         "mutable": list(mutable) if mutable is not None
         else (_MUTABLE_KITCHEN if room == "kitchen" else []),
         "architect_hypothesis": (architect_hypothesis or "").strip(),
+        "references": list(references) if references else [],
         "questions": questions or [dict(q) for q in C.DEFAULT_QUESTIONS],
         "answer_format": C.ANSWER_FORMAT,
     }

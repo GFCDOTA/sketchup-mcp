@@ -7,7 +7,7 @@ from __future__ import annotations
 import json
 import re
 
-_VERDICT_RE = re.compile(r"\b(PASS|WARN|FAIL)\b")
+_VERDICT_RE = re.compile(r"\b(PASS|WARN|FAIL)(?:_[A-Z_]+)?\b")   # casa PASS_WITH_CONSTRAINTS → PASS
 _NUM_ITEM_RE = re.compile(r"^\s*\d+\.\s*(.+)$")
 _BULLET_RE = re.compile(r"^\s*[-*]\s+(.+)$")
 
@@ -57,6 +57,28 @@ def parse_answer(raw: str) -> dict:
                             _bullets(_find(sections, "anti-pattern", "anti pattern", "antipattern"))]
     out["next_microtask"] = _parse_microtask(_find(sections, "próxima microtarefa", "proxima microtarefa", "microtarefa"))
     out["next_render_prompt"] = _first_code_or_text(_find(sections, "prompt curto", "próximo render", "proximo render"))
+
+    # FALLBACK ESTRUTURADO: o GPT manda dna_updates/anti_patterns/build_spec_constraints como blocos JSON
+    # (sob labels em texto puro, sem '##'). Extrai disso quando o parse markdown não pegou.
+    if not out["dna_updates"]:
+        arr = _json_after(s, "dna_updates")
+        if isinstance(arr, list):
+            out["dna_updates"] = [r for r in (_rule_text(x) for x in arr) if r]
+    if not out["anti_patterns"]:
+        arr = _json_after(s, "anti_patterns")
+        if isinstance(arr, list):
+            out["anti_patterns"] = [a for a in (_anti_text(x) for x in arr) if a]
+    bsc = _json_after(s, "build_spec_constraints")
+    if bsc:
+        out["build_spec_constraints"] = bsc
+    if not out["next_microtask"].get("title"):
+        mm = re.search(r"(MT-[\w-]+\s*[—–-]\s*[^\n`]+)", s)
+        if mm:
+            title = mm.group(1).strip()
+            out["next_microtask"] = {"title": title}
+            idm = re.search(r"(MT-[\w-]+)", title)
+            if idm:
+                out["next_microtask"]["id"] = idm.group(1)
 
     # top_fix = "ajuste número 1" das dúvidas, senão a 1ª linha de change
     for qa in out["question_answers"]:
@@ -225,6 +247,36 @@ def _sub_bullets(text: str, *keys: str) -> list[str]:
         elif ln.strip() and not ln.startswith((" ", "\t")):
             break
     return out
+
+
+def _json_after(s: str, label: str):
+    """Acha uma linha-label (texto puro, sem precisar de '##') e parseia o próximo bloco ```json ...```."""
+    m = re.search(rf"(?im)^[#>*\s]*{re.escape(label)}\s*:?\s*$", s)
+    if not m:
+        return None
+    cm = re.search(r"```(?:json)?\s*(.+?)```", s[m.end():], re.DOTALL)
+    if not cm:
+        return None
+    try:
+        return json.loads(cm.group(1))
+    except (json.JSONDecodeError, ValueError):
+        return None
+
+
+def _rule_text(x) -> str:
+    """Extrai a regra de um item de dna_updates (str, ou {'rule'|'text': ...})."""
+    if isinstance(x, dict):
+        return (x.get("rule") or x.get("text") or x.get("what") or "").strip()
+    return str(x).strip()
+
+
+def _anti_text(x) -> str:
+    """Extrai o anti-pattern de um item (str, ou {'id', 'rule'|'what'}) -> 'id: regra' (rastreável)."""
+    if isinstance(x, dict):
+        idv = (x.get("id") or "").strip()
+        rule = (x.get("rule") or x.get("what") or x.get("why") or "").strip()
+        return f"{idv}: {rule}" if idv and rule else (idv or rule)
+    return str(x).strip()
 
 
 def _first_code_or_text(text: str | None) -> str:

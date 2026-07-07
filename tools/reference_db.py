@@ -10,7 +10,13 @@ Uso:
     python tools/reference_db.py rebuild           # drop + init + ingest
     python tools/reference_db.py query --room kitchen --theme black_wood_gold [--kind render]
     python tools/reference_db.py query --sub-element hero_render --json
+    python tools/reference_db.py retrieve --room kitchen --style black_wood_gold [--budget medio] [--json]
     python tools/reference_db.py stats
+
+FP-035: retrieve(room, style, budget) devolve um DesignSpecBundle.v1 ranqueado
+(tokens curados de references/tokens/ + sinal de curadoria/gates do índice),
+degradando honesto pra confidence LOW quando o corpus julgado do FP-034 está
+ausente. Ver schemas/design_spec_bundle.schema.json.
 """
 from __future__ import annotations
 
@@ -25,6 +31,8 @@ ROOT = Path(__file__).resolve().parents[1]
 LAB = ROOT / "artifacts/reference_lab"
 DB_PATH = LAB / "reference.db"
 ANGLES = ROOT / "artifacts/planta_74/furnished/kitchen_angles"
+TOKENS_DIR = ROOT / "references/tokens"     # tokens builder-consumíveis curados (FP-035)
+FELIPE_ANTI = ROOT / "references/felipe/anti_patterns"  # refs anti do Felipe (por bucket)
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS reference (
@@ -168,11 +176,13 @@ def _ingest_theme(con, p: Path) -> int:
     return 1
 
 
-def _ingest_token(con, p: Path) -> int:
+def _ingest_token(con, p: Path, default_room: str | None = None) -> int:
     d = json.loads(p.read_text("utf-8"))
     _upsert(con, {
-        "slug": p.stem, "kind": "token", "path": _rel(p), "room": d.get("room"),
-        "intent": d.get("intent") or d.get("description") or p.stem,
+        "slug": p.stem, "kind": "token", "path": _rel(p),
+        "room": d.get("room") or default_room,
+        "intent": d.get("intent") or d.get("rule") or d.get("title")
+        or d.get("description") or p.stem,
         "category": d.get("category"), "source": "token", "sha256": _sha(p),
         "curation_status": "approved", "created_at": _mtime_iso(p),
     })
@@ -198,6 +208,9 @@ def ingest(con: sqlite3.Connection) -> dict:
         counts["theme_preset"] += _ingest_theme(con, p)
     for p in sorted(LAB.glob("**/tokens/*.json")):
         counts["token"] += _ingest_token(con, p)
+    if TOKENS_DIR.is_dir():  # FP-035: tokens builder-consumíveis curados (cozinha)
+        for p in sorted(TOKENS_DIR.glob("*.json")):
+            counts["token"] += _ingest_token(con, p, default_room="kitchen")
     if ANGLES.is_dir():  # M3: mata a pasta solta
         for p in sorted(ANGLES.glob("*.png")):
             if p.name.endswith(SKIP_SUFFIX):
@@ -228,6 +241,287 @@ def query(con, *, room=None, theme=None, kind=None, sub_element=None, tag=None,
         sql += " WHERE " + " AND ".join(where)
     sql += " ORDER BY r.kind, r.slug"
     return con.execute(sql, params).fetchall()
+
+
+# ---------------------------------------------------------------------------
+# FP-035 — retrieve(): room/style/budget -> DesignSpecBundle.v1 (faceted+ranked).
+#
+# LÊ o disco (references/tokens/*.json) + o índice SQLite (cards/theme_presets/
+# judged_variants) e devolve um bundle RANQUEADO. Colapsa sinônimos via
+# reference_grammar (não duplica vocabulário). DEGRADA HONESTO: sem corpus julgado
+# do FP-034 -> confidence LOW baseado só em facets+gates, nunca ranking fabricado.
+# Determinístico (sem clock/random; ordena por chave estável). query() fica intacta.
+# ---------------------------------------------------------------------------
+
+BUNDLE_SCHEMA_VERSION = "design_spec_bundle.v1"
+
+# palavra de custo (1ª token do cost_relative em prosa) -> nível ordinal.
+_COST_LEVEL = {"baixo": 1, "baixo-médio": 2, "médio": 3, "médio-alto": 4, "alto": 5}
+# alvo de budget (arg) -> nível ordinal (aceita pt e en).
+_BUDGET_LEVEL = {
+    "baixo": 1, "low": 1, "econ": 1, "economico": 1,
+    "medio": 3, "médio": 3, "mid": 3, "medium": 3,
+    "alto": 5, "high": 5, "premium": 5,
+}
+# papéis de paleta reconhecidos nos params dos tokens (chave *_rgb -> papel).
+_PALETTE_RGB_SUFFIX = "_rgb"
+
+
+def _cost_level(cost_relative: str | None) -> int | None:
+    """Nível ordinal do custo a partir da 1ª palavra da prosa cost_relative."""
+    if not cost_relative:
+        return None
+    head = str(cost_relative).strip().lower().split()[0].strip(",.;:()")
+    return _COST_LEVEL.get(head)
+
+
+def _budget_fit(cost_level: int | None, budget: str | None) -> int:
+    """+1 se o custo do token cabe no budget alvo; -1 se estoura; 0 sem info."""
+    if budget is None or cost_level is None:
+        return 0
+    target = _BUDGET_LEVEL.get(str(budget).strip().lower())
+    if target is None:
+        return 0
+    return 1 if cost_level <= target else -1
+
+
+def _canon_token_name(name: str):
+    """Colapsa sinônimo -> nome canônico via reference_grammar (reuso, sem duplicar)."""
+    try:
+        from tools import reference_grammar as rg
+        return rg._canon(name)
+    except Exception:  # noqa: BLE001 — grammar ausente não deve derrubar retrieve
+        return name
+
+
+def _load_disk_tokens(room: str) -> list[dict]:
+    """Lê references/tokens/*.json (builder-consumíveis). Room é implícito
+    (cozinha) — estes tokens não têm campo 'room'. Filtra por room quando o
+    token declara um; senão trata como do cômodo-alvo (kitchen)."""
+    out: list[dict] = []
+    if not TOKENS_DIR.is_dir():
+        return out
+    for p in sorted(TOKENS_DIR.glob("*.json")):
+        try:
+            d = json.loads(p.read_text("utf-8"))
+        except Exception:  # noqa: BLE001
+            continue
+        tok_room = (d.get("room") or "kitchen").strip().lower()
+        if room and tok_room != room:
+            continue
+        out.append({
+            "raw_name": d.get("name") or p.stem,
+            "params": d.get("params") or {},
+            "applies_to_kinds": d.get("applies_to_kinds") or [],
+            "anti_pattern": d.get("anti_pattern"),
+            "cost_relative": d.get("cost_relative"),
+            "gate_refs": d.get("gate_refs") or [],
+            "source_path": _rel(p),
+            "curation_status": "approved",   # curado pelo Felipe (references/tokens)
+            "gate_verdicts": None,
+            "kind": "token",
+        })
+    return out
+
+
+def _load_db_signal(con, room: str, theme: str | None) -> list[dict]:
+    """Sinal de curadoria/gates do índice (cards/theme_presets/judged_variants).
+    Só pra RANKING — NÃO vira token do bundle. Ausência = degradação honesta."""
+    if con is None:
+        return []
+    out: list[dict] = []
+    try:
+        rows = query(con, room=room) if room else con.execute(
+            "SELECT * FROM reference").fetchall()
+    except sqlite3.Error:
+        return []
+    for r in rows:
+        if r["kind"] == "token":
+            continue  # tokens vêm do disco (fonte curada), não do índice
+        gv = None
+        if r["gate_verdicts"]:
+            try:
+                gv = json.loads(r["gate_verdicts"])
+            except Exception:  # noqa: BLE001
+                gv = None
+        out.append({
+            "slug": r["slug"], "kind": r["kind"],
+            "theme": r["theme"], "curation_status": r["curation_status"],
+            "gate_verdicts": gv, "source_path": r["path"],
+        })
+    return out
+
+
+def _curation_weight(status: str | None) -> int:
+    return {"main": 3, "golden": 3, "approved": 2, "candidate": 1, "anti": -5}.get(
+        (status or "").strip().lower(), 0)
+
+
+def _gate_pass_count(gv: dict | None) -> int:
+    if not isinstance(gv, dict):
+        return 0
+    return sum(1 for v in gv.values() if str(v).upper() == "PASS")
+
+
+def _load_felipe_anti(room: str, style: str | None) -> list[str]:
+    """Refs anti do Felipe (references/felipe/anti_patterns/*.json). Bucket é por
+    cômodo hoje só p/ sofá (sala); cozinha degrada honesto (lista vazia)."""
+    out: list[str] = []
+    if not FELIPE_ANTI.is_dir():
+        return out
+    for p in sorted(FELIPE_ANTI.glob("*.json")):
+        try:
+            d = json.loads(p.read_text("utf-8"))
+        except Exception:  # noqa: BLE001
+            continue
+        avoid = d.get("avoid") or d.get("comment")
+        if avoid:
+            out.append(str(avoid).strip())
+    return out
+
+
+def retrieve(room, style=None, budget=None, *, con=None, top_n=6,
+             backend="faceted") -> dict:
+    """room/style/budget -> DesignSpecBundle.v1 (faceted+ranked).
+
+    Lê os tokens curados de references/tokens/ (fonte builder-consumível) e usa o
+    índice SQLite (se existir) só como SINAL de curadoria/gates pro ranking.
+    Colapsa sinônimos via reference_grammar. Ranking determinístico por
+    (facet_match, curation_status, gate_pass, budget_fit) — desempate estável
+    por nome. DEGRADA HONESTO: sem corpus julgado do FP-034 -> confidence LOW.
+
+    NÃO fabrica ranking sem dado; o bundle é PROPOSTA (Felipe aprova); nunca
+    emite veredito visual. backend='embed' é stub (fatia opcional, default off).
+    """
+    room = (room or "").strip().lower()
+    style_norm = normalize_theme(style)
+    notes: list[str] = []
+    if backend == "embed":
+        notes.append("backend=embed é STUB (fatia opcional FP-035 fatia 5); "
+                     "usando faceted. Nenhum caso real provou que facet falha.")
+        backend = "faceted"
+
+    disk_tokens = _load_disk_tokens(room)
+    db_signal = _load_db_signal(con, room, style_norm)
+
+    # corpus julgado do FP-034 presente? (kind=judged_variant no índice)
+    fp034_present = any(s["kind"] == "judged_variant" for s in db_signal)
+
+    # ranking dos tokens (determinístico). facet_match: room casou (disk tokens já
+    # filtrados por room) => 1; style casa se algum params/nome bate o tema — mas
+    # os tokens curados não carregam theme, então facet de style não penaliza.
+    def _score(tok: dict) -> tuple:
+        cost_lvl = _cost_level(tok.get("cost_relative"))
+        s = 3 * 1                                   # facet room match (já filtrado)
+        s += 2 * _curation_weight(tok["curation_status"])
+        s += 1 * 0                                  # tokens de disco não têm gate_verdicts
+        s += _budget_fit(cost_lvl, budget)
+        # desempate estável e determinístico: score desc, depois nome canônico asc
+        return (s, )
+
+    # colapsa sinônimo -> canônico e dedup por nome canônico (last-wins irrelevante:
+    # tokens de disco têm nomes distintos; sinônimo só colapsa duplicata real).
+    by_canon: dict[str, dict] = {}
+    for tok in disk_tokens:
+        canon = _canon_token_name(tok["raw_name"])
+        tok = {**tok, "name": canon}
+        if canon not in by_canon:
+            by_canon[canon] = tok
+    collapsed = list(by_canon.values())
+
+    ranked = sorted(collapsed, key=lambda t: (-_score(t)[0], t["name"]))
+
+    tokens_out: list[dict] = []
+    anti: list[str] = []
+    hints: list[str] = []
+    gate_refs: list[str] = []
+    palette: dict = {}
+    provenance: list[dict] = []
+    seen_anti: set[str] = set()
+    seen_gate: set[str] = set()
+
+    for tok in ranked[:top_n]:
+        tokens_out.append({
+            "name": tok["name"],
+            "builder_kinds": list(tok["applies_to_kinds"]),
+            "params": tok["params"],
+            "source_path": tok["source_path"],
+            "cost_relative": tok.get("cost_relative"),
+        })
+        # anti-patterns (union, dedup, ordem de ranking preservada)
+        ap = tok.get("anti_pattern")
+        if ap and ap not in seen_anti:
+            seen_anti.add(ap)
+            anti.append(str(ap))
+        # gate_refs (union dedup)
+        for g in tok.get("gate_refs") or []:
+            if g not in seen_gate:
+                seen_gate.add(g)
+                gate_refs.append(g)
+        # layout_hints: campo 'position' dos params (LINGUAGEM, não coordenada)
+        pos = tok["params"].get("position") if isinstance(tok["params"], dict) else None
+        if pos:
+            hints.append(f'{tok["name"]}: {pos}')
+        # palette: chaves *_rgb dos params (papel = chave sem sufixo _rgb)
+        if isinstance(tok["params"], dict):
+            for k, v in tok["params"].items():
+                if k.endswith(_PALETTE_RGB_SUFFIX):
+                    palette.setdefault(k[: -len(_PALETTE_RGB_SUFFIX)], v)
+        provenance.append({
+            "source_path": tok["source_path"], "kind": "token",
+            "curation_status": tok["curation_status"],
+            "gate_verdicts": tok.get("gate_verdicts"),
+        })
+
+    # refs anti do Felipe (bucket por cômodo; cozinha degrada honesto)
+    for a in _load_felipe_anti(room, style_norm):
+        if a not in seen_anti:
+            seen_anti.add(a)
+            anti.append(a)
+
+    # provenance dos sinais de DB considerados (honestidade de origem do ranking)
+    for s in db_signal:
+        provenance.append({
+            "source_path": s["source_path"], "kind": s["kind"],
+            "curation_status": s["curation_status"] or "candidate",
+            "gate_verdicts": s["gate_verdicts"],
+        })
+
+    # confidence — honesto: sem corpus julgado FP-034 -> LOW (só facets+gates).
+    if not tokens_out:
+        confidence = "LOW"
+        notes.append("nenhum token recuperado para o cômodo/estilo -> confidence LOW.")
+    elif not fp034_present:
+        confidence = "LOW"
+        notes.append("corpus julgado FP-034 ausente -> ranking sem sinal de "
+                     "curadoria julgada; confidence LOW (degradação honesta).")
+    else:
+        # FP-034 presente: HIGH se há gate PASS no sinal, senão MEDIUM.
+        any_pass = any(_gate_pass_count(s["gate_verdicts"]) for s in db_signal)
+        confidence = "HIGH" if any_pass else "MEDIUM"
+
+    return {
+        "schema_version": BUNDLE_SCHEMA_VERSION,
+        "query": {"room": room, "style": style_norm, "budget": budget},
+        "tokens": tokens_out,
+        "palette": palette,
+        "anti_patterns": anti,
+        "layout_hints": hints,
+        "gate_refs": gate_refs,
+        "provenance": provenance,
+        "confidence": confidence,
+        "backend": backend,
+        "notes": notes,
+    }
+
+
+def normalize_theme(style: str | None) -> str | None:
+    """Colapsa um 'style' solto pro tema canônico do índice (THEME_WORDS)."""
+    if not style:
+        return None
+    low = str(style).strip().lower()
+    return THEME_WORDS.get(low) or next(
+        (v for k, v in THEME_WORDS.items() if k in low), low)
 
 
 def _print_rows(rows, as_json=False, paths_only=False) -> None:
@@ -262,6 +556,13 @@ def main(argv=None) -> int:
         q.add_argument(f"--{opt}")
     q.add_argument("--json", action="store_true")
     q.add_argument("--paths", action="store_true")
+    rt = sub.add_parser("retrieve", help="room/style/budget -> DesignSpecBundle.v1 (FP-035)")
+    rt.add_argument("--room", required=True)
+    rt.add_argument("--style")
+    rt.add_argument("--budget")
+    rt.add_argument("--top-n", type=int, default=6)
+    rt.add_argument("--backend", default="faceted", choices=("faceted", "embed"))
+    rt.add_argument("--json", action="store_true")
     a = ap.parse_args(argv)
 
     LAB.mkdir(parents=True, exist_ok=True)
@@ -284,6 +585,21 @@ def main(argv=None) -> int:
         rows = query(con, room=a.room, theme=a.theme, kind=a.kind, sub_element=getattr(a, "sub_element"),
                      tag=a.tag, curation=a.curation, gate_pass=getattr(a, "gate_pass"))
         _print_rows(rows, as_json=a.json, paths_only=a.paths)
+    elif a.cmd == "retrieve":
+        bundle = retrieve(a.room, a.style, a.budget, con=con,
+                          top_n=a.top_n, backend=a.backend)
+        if a.json:
+            print(json.dumps(bundle, ensure_ascii=False, indent=2))
+        else:
+            print(f"room={bundle['query']['room']} style={bundle['query']['style']} "
+                  f"budget={bundle['query']['budget']} confidence={bundle['confidence']}")
+            print(f"  tokens ({len(bundle['tokens'])}): "
+                  + ", ".join(t["name"] for t in bundle["tokens"]))
+            print(f"  anti_patterns: {len(bundle['anti_patterns'])} | "
+                  f"layout_hints: {len(bundle['layout_hints'])} | "
+                  f"gate_refs: {len(bundle['gate_refs'])}")
+            for n in bundle["notes"]:
+                print(f"  note: {n}")
     con.close()
     return 0
 

@@ -1,0 +1,157 @@
+{
+  "schema_version": "negative_dogfood.v2",
+  "fixture": "planta_74",
+  "backend": "claude_bridge_vision",
+  "backend_model": null,
+  "timestamp": "2026-07-01T17:18:55Z",
+  "method": "production-parity (top+iso+side_by_side+context); corrupt top only",
+  "recipe": {
+    "op": "erase_top_exterior_wall_segment",
+    "defect_class": "missing_wall_continuation",
+    "source_render": "planta_74_top.png",
+    "rect": [
+      500,
+      200,
+      900,
+      224
+    ],
+    "ref_point": [
+      1300,
+      30
+    ]
+  },
+  "corruption": {
+    "rect": [
+      500,
+      200,
+      900,
+      224
+    ],
+    "ref_point": [
+      1300,
+      30
+    ],
+    "fill_rgb": [
+      191,
+      191,
+      198
+    ],
+    "image_size": [
+      1600,
+      1200
+    ],
+    "src_sha256": "3fa806c800c8c327beb90fc17774c00508b12375145a26c1ac3a211c14e000f0",
+    "out_sha256": "6871a68c2a8a2cf6ab76fdd201eea47b8fe2ce39bb31365a96fdf2535901f55f"
+  },
+  "clean_oracle": {
+    "status": "ok",
+    "detail": "claude bridge /ask-vision returned valid visual_findings.v1",
+    "verdict": "PASS",
+    "images": [
+      "clean_top.png",
+      "clean_iso.png",
+      "clean_side_by_side.png"
+    ],
+    "normalized": {
+      "schema_version": "visual_findings.v1",
+      "top_level_verdict": "PASS",
+      "axes": {
+        "window_fidelity": {
+          "verdict": "PASS",
+          "evidence": "clean_iso: glazed windows hosted in wall faces on the two center rooms, the right suite (sliding), plus small awning windows and the terrace glass railing — consistent with windows3d=4. Top view shows matching sill marks; no orphan glass panels."
+        },
+        "scale_rotation": {
+          "verdict": "PASS",
+          "evidence": "clean_side_by_side: SKP top aligns to PDF orientation and proportions — kitchen top-left, living center, terraço bottom-left, suites right, bath core center; no flip, rotation, or aspect mismatch."
+        },
+        "door_fidelity": {
+          "verdict": "PASS",
+          "evidence": "clean_top shows ~6 door leaves with swing arcs (kitchen top, cyan closet, central bath junction, right suite→far-right room), each hinged on a wall/jamb. The central '+' pillar cluster is busy but every leaf is hosted; clean_iso confirms brown leaves standing inside real openings, none floating."
+        },
+        "room_fidelity": {
+          "verdict": "PASS",
+          "evidence": "clean_top: each room carries a distinct closed floor fill (kitchen, living/sala, terraço, two baths, right suites) with no color bleeding past walls; count and placement mirror the PDF rooms."
+        },
+        "global_visual": {
+          "verdict": "PASS",
+          "evidence": "Overall SKP top/iso is a faithful, enclosed reproduction of the PDF layout; no leaks, no missing walls, no misplaced fixtures visible at render resolution."
+        },
+        "wall_fidelity": {
+          "verdict": "PASS",
+          "evidence": "clean_top: exterior perimeter traces continuously with no erased segments; interior partitions and the stepped terrace/suite jogs match the PDF footprint. clean_iso: all rooms read as fully bounded solids, no open-ended stubs."
+        }
+      },
+      "findings": [],
+      "source": "claude_bridge",
+      "raw_confidence": "medium"
+    }
+  },
+  "corrupted_oracle": {
+    "status": "ok",
+    "detail": "claude bridge /ask-vision returned valid visual_findings.v1",
+    "verdict": "WARN",
+    "images": [
+      "corrupted_top.png",
+      "clean_iso.png",
+      "corrupted_side_by_side.png"
+    ],
+    "normalized": {
+      "schema_version": "visual_findings.v1",
+      "top_level_verdict": "WARN",
+      "axes": {
+        "window_fidelity": {
+          "verdict": "PASS",
+          "evidence": "Four glazed openings visible: bottom of lavender bathroom, bottom of far-right small suite, the living/terrace sliding glass at bottom-center, plus the terrace glass band lower-left; in clean_iso these appear as punched, sill-mounted windows plus a 4-panel terrace railing. Count and placement consistent with windows3d=4; no full-height void or misplaced pane seen."
+        },
+        "scale_rotation": {
+          "verdict": "PASS",
+          "evidence": "SKP top orientation, aspect ratio and room arrangement align with the PDF panel in the side-by-side (kitchen top-left, terrace bottom-left, suites right); no mirroring or rotation offset detected."
+        },
+        "door_fidelity": {
+          "verdict": "PASS",
+          "evidence": "Doors render as brown swing leaves in expected openings (top kitchen/living doorway, LAVABO, terrace side, right suite top, bathroom). Swing directions and positions are consistent with the PDF; no leaf floating detached from a wall host."
+        },
+        "room_fidelity": {
+          "verdict": "PASS",
+          "evidence": "Each room carries a distinct floor fill (cream kitchen, cyan living, green terrace, pink suite, lavender bath, yellow suites) with no color bleeding across walls; room count and adjacency match the PDF panel in corrupted_side_by_side."
+        },
+        "global_visual": {
+          "verdict": "PASS",
+          "evidence": "Overall the top view is a faithful reproduction of the PDF floor plan; clean_iso shows coherent extruded walls with floors and glazing and no floating/orphan geometry."
+        },
+        "wall_fidelity": {
+          "verdict": "WARN",
+          "evidence": "Perimeter reads as fully enclosed on all four sides and interior partitions match the PDF layout, BUT the central junction where the LAVABO/SUITE/BANHEIRO cluster meets the living and right-suite (approx center of corrupted_top, between the cyan, pink, lavender and yellow rooms) shows a small isolated wall block with door leaves converging on it and short gaps around it. The wall line through that node reads as fragmented rather than a single continuous partition. It plausibly corresponds to a legitimate doorframe pier in the PDF, so this is flagged for deterministic opening_host_audit re-check rather than called a hard break."
+        }
+      },
+      "findings": [
+        {
+          "id": "vf_001",
+          "severity": "WARN",
+          "axis": "wall_fidelity",
+          "type": "wall_stub",
+          "location": "central room junction between LAVABO (cyan), SUITE (pink), BANHEIRO (lavender) and right SUITE (yellow), roughly center of frame",
+          "evidence_image": "corrupted_top.png",
+          "evidence": "A small isolated wall block sits at the four-room junction with door leaves on either side and short gaps separating it from the adjoining partitions, so the central wall line reads as fragmented rather than continuous. May be a legitimate doorframe pier matching the PDF; recommend opening_host_audit to confirm the wall host is intact and not a true stub/gap. No non-enclosed perimeter or erased exterior segment was observed elsewhere."
+        }
+      ],
+      "source": "claude_bridge",
+      "raw_confidence": "medium"
+    }
+  },
+  "conclusive": true,
+  "criteria": {
+    "primary_top_level": {
+      "clean_verdict": "PASS",
+      "corrupted_verdict": "WARN",
+      "discriminated": true
+    },
+    "primary_pass": true,
+    "secondary_finding_level": {
+      "clean_gap_findings": 0,
+      "corrupted_gap_findings": 1,
+      "new_localized_gap": true
+    }
+  },
+  "result": "DISCRIMINATED"
+}

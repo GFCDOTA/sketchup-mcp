@@ -35,7 +35,7 @@ import json
 import shutil
 import urllib.error
 import urllib.request
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -44,6 +44,10 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 ORACLE_BRIDGE_URL = "http://localhost:8765"
 ORACLE_BRIDGE_HEALTH_TIMEOUT_SEC = 5
 ORACLE_BRIDGE_CALL_TIMEOUT_SEC = 120
+# `claude -p` at Opus/xhigh reading 2-3 renders can approach the bridge's own
+# CLAUDE_TIMEOUT (240s, server.py); give the HTTP client headroom to receive the
+# bridge's honest 500 instead of a client-side timeout that looks like a crash.
+ORACLE_BRIDGE_VISION_TIMEOUT_SEC = 300
 
 OLLAMA_URL = "http://localhost:11434"
 OLLAMA_HEALTH_TIMEOUT_SEC = 5
@@ -460,6 +464,7 @@ class OllamaVisionProvider(OracleProvider):
         """Read + resize + base64. Resize protects the context window."""
         import base64
         import io
+
         from PIL import Image
 
         with Image.open(path) as img:
@@ -475,41 +480,9 @@ class OllamaVisionProvider(OracleProvider):
         return base64.b64encode(path.read_bytes()).decode("ascii")
 
     def _extract_first_json_object(self, text: str) -> dict | None:
-        """Find the first balanced {...} in `text` and json.loads it.
-
-        Vision models often wrap JSON in markdown fences or prose. This
-        extractor scans for the first `{` and walks the brace depth to
-        find the matching `}`."""
-        i = text.find("{")
-        if i < 0:
-            return None
-        depth = 0
-        in_str = False
-        esc = False
-        for j in range(i, len(text)):
-            c = text[j]
-            if esc:
-                esc = False
-                continue
-            if c == "\\":
-                esc = True
-                continue
-            if c == '"':
-                in_str = not in_str
-                continue
-            if in_str:
-                continue
-            if c == "{":
-                depth += 1
-            elif c == "}":
-                depth -= 1
-                if depth == 0:
-                    blob = text[i:j + 1]
-                    try:
-                        return json.loads(blob)
-                    except json.JSONDecodeError:
-                        return None
-        return None
+        """Thin instance wrapper over the shared module-level extractor
+        (kept for back-compat with callers/tests that use the method form)."""
+        return _extract_first_json_object(text)
 
     def call(self, req: OracleRequest, *, out_dir: Path) -> OracleResponse:
         try:
@@ -618,6 +591,225 @@ class OllamaVisionProvider(OracleProvider):
         )
 
 
+class ClaudeBridgeVisionProvider(OracleProvider):
+    """Claude via the :8765 bridge `/ask-vision` route — the system's ONLY
+    discriminative eye (FP-032).
+
+    `OllamaVisionProvider` (local qwen2.5vl:7b / moondream) is proven NON-
+    discriminative by `negative_dogfood` (it FAILs the clean render as readily
+    as the corrupted one). This provider instead POSTs to
+    `tools/claude_bridge/server.py` `POST /ask-vision`, which runs `claude -p`
+    with `--add-dir` on the render directories so Claude actually OPENS the PNGs
+    with its Read tool and judges the pixels. The bridge replies
+    `{"response": "<text>"}`; the text is expected to carry a
+    `visual_findings.v1` JSON object, which we extract + normalize.
+
+    Honesty contract (same three negative statuses as the siblings):
+    - bridge unreachable              -> `unavailable`     + request package
+    - bridge up but no `/ask-vision`  -> `incompatible`    + request package
+      (text-only build — the live :8765 until the FP-032 server.py is deployed)
+    - claude answered but not v1      -> `invalid_response`+ request package
+      (NEVER fabricates a verdict)
+    """
+    name = "claude_bridge_vision"
+
+    def __init__(self, url: str = ORACLE_BRIDGE_URL, tier: str = "deep"):
+        self.url = url
+        self.tier = tier
+
+    def _health(self) -> dict | None:
+        """Return the parsed /health payload, or None if unreachable."""
+        try:
+            req = urllib.request.Request(f"{self.url}/health", method="GET")
+            with urllib.request.urlopen(
+                req, timeout=ORACLE_BRIDGE_HEALTH_TIMEOUT_SEC,
+            ) as resp:
+                if resp.status != 200:
+                    return None
+                return json.loads(resp.read().decode("utf-8"))
+        except (urllib.error.URLError, urllib.error.HTTPError,
+                TimeoutError, OSError, json.JSONDecodeError):
+            return None
+
+    def probe(self) -> tuple[bool, str]:
+        health = self._health()
+        if health is None:
+            return False, f"claude bridge unreachable at {self.url}"
+        if "/ask-vision" not in (health.get("endpoints") or []):
+            return False, (
+                "claude bridge up but does not advertise /ask-vision "
+                "(text-only build — deploy the FP-032 server.py)"
+            )
+        return True, (
+            f"claude bridge healthy; /ask-vision available "
+            f"(model={health.get('model')})"
+        )
+
+    def _build_vision_prompt(self, req: OracleRequest) -> str:
+        """Prompt that OVERRIDES the bridge's GO/NO-GO SYSTEM format and asks
+        for a strict `visual_findings.v1` JSON, driven by actually reading the
+        renders (whose absolute paths are listed so `claude -p` can Read them).
+
+        When the caller queued specific findings for confirmation
+        (``context["pending"]``, set by `tools/vision_queue_consumer`), they are
+        rendered into the prompt so the eye actually SEES what it was asked to
+        confirm/re-localize/drop — otherwise the confirm-or-drop contract would
+        be decided by omission, not by the eye."""
+        ctx = req.context if isinstance(req.context, dict) else {}
+        gates = ctx.get("gates_self_check", {}) or {}
+        stats = ctx.get("shell_stats_from_python", {}) or {}
+        pending = ctx.get("pending") or []
+        pending_block = ""
+        if pending:
+            pending_block = (
+                "Pending findings queued for confirmation — for EACH one, "
+                "confirm, re-localize or drop it based on what you SEE in the "
+                "renders (never invent a defect that is not visible):\n"
+                + json.dumps(pending, indent=2, ensure_ascii=False) + "\n\n"
+            )
+        ctx_one_line = (
+            f"gates_ok={sum(1 for v in gates.values() if v is True)}/{len(gates) or '?'} "
+            f"walls={stats.get('input_walls', '?')} "
+            f"windows3d={stats.get('window_apertures_3d', '?')}"
+        )
+        img_lines = "\n".join(
+            f"  - {Path(p).resolve()}" for p in req.image_paths
+        )
+        return (
+            "This is a visual_findings EXTRACTION task, NOT a GO/NO-GO consult — "
+            "ignore the oracle answer format from the system prompt and follow "
+            "the JSON contract below.\n\n"
+            "You are an architectural visual fidelity reviewer for a SketchUp "
+            "floor-plan pipeline. OPEN each render below with the Read tool and "
+            "LOOK at it: your judgment MUST come from the pixels, not from the "
+            "geometry numbers.\n\n"
+            "Renders (absolute paths, readable via --add-dir):\n"
+            f"{img_lines}\n\n"
+            "After reading them, return ONLY a JSON object (no prose, no code "
+            "fences) matching visual_findings.v1:\n"
+            "{\n"
+            '  "schema_version": "visual_findings.v1",\n'
+            '  "top_level_verdict": "PASS|WARN|FAIL",\n'
+            '  "confidence": "low|medium|high",\n'
+            '  "axes": {\n'
+            '    "wall_fidelity":   {"verdict":"PASS|WARN|FAIL","evidence":"..."},\n'
+            '    "door_fidelity":   {"verdict":"PASS|WARN|FAIL","evidence":"..."},\n'
+            '    "window_fidelity": {"verdict":"PASS|WARN|FAIL","evidence":"..."},\n'
+            '    "room_fidelity":   {"verdict":"PASS|WARN|FAIL","evidence":"..."},\n'
+            '    "scale_rotation":  {"verdict":"PASS|WARN|FAIL","evidence":"..."},\n'
+            '    "global_visual":   {"verdict":"PASS|WARN|FAIL","evidence":"..."}\n'
+            "  },\n"
+            '  "findings": [ {"id":"vf_001","severity":"FAIL|WARN",'
+            '"axis":"<one of the 6 axes>","type":"<type>","location":"...",'
+            '"evidence_image":"<render file name>","evidence":"..."} ]\n'
+            "}\n\n"
+            "Finding types: floating_door, orphan_glass_panel, wall_stub, "
+            "missing_wall_continuation, misplaced_window, full_height_window_void, "
+            "floor_leak, misplaced_soft_barrier, global_visual_fail. If a render "
+            "shows a wall gap / erased segment / non-enclosed perimeter, emit a "
+            "missing_wall_continuation finding (severity FAIL) with its location. "
+            "Report ONLY what you SEE.\n\n"
+            f"{pending_block}"
+            f"Geometry context (secondary — never overrides the pixels): "
+            f"{ctx_one_line}.\n"
+        )
+
+    def _package(self, out_dir: Path, req: OracleRequest, status: str,
+                 reason: str, detail: str, raw: dict | None = None) -> OracleResponse:
+        pkg = write_oracle_request_package(out_dir, req, status=status, reason=reason)
+        return OracleResponse(
+            provider=self.name, status=status, detail=detail,
+            raw=raw, package_dir=pkg,
+        )
+
+    def call(self, req: OracleRequest, *, out_dir: Path) -> OracleResponse:
+        try:
+            req.validate()
+        except (ValueError, FileNotFoundError) as e:
+            return OracleResponse(
+                provider=self.name, status="invalid_response",
+                detail=f"request validation failed: {e}",
+            )
+
+        health = self._health()
+        if health is None:
+            return self._package(
+                out_dir, req, status="unavailable",
+                reason=f"claude bridge unreachable at {self.url}",
+                detail=f"bridge unreachable at {self.url}",
+            )
+        if "/ask-vision" not in (health.get("endpoints") or []):
+            return self._package(
+                out_dir, req, status="incompatible",
+                reason=(
+                    "claude bridge is up but does not advertise /ask-vision "
+                    "(text-only build); deploy the FP-032 server.py to enable "
+                    "the vision route"
+                ),
+                detail="bridge lacks /ask-vision route; package written",
+            )
+
+        payload = json.dumps({
+            "prompt": self._build_vision_prompt(req),
+            "images": [str(Path(p).resolve()) for p in req.image_paths],
+            "tier": self.tier,
+        }).encode("utf-8")
+        http_req = urllib.request.Request(
+            f"{self.url}/ask-vision", data=payload, method="POST",
+            headers={"Content-Type": "application/json"},
+        )
+        try:
+            with urllib.request.urlopen(
+                http_req, timeout=ORACLE_BRIDGE_VISION_TIMEOUT_SEC,
+            ) as resp:
+                outer = json.loads(resp.read().decode("utf-8"))
+        except urllib.error.HTTPError as e:
+            body = ""
+            try:
+                body = e.read().decode("utf-8", errors="replace")[:300]
+            except OSError:
+                pass
+            return self._package(
+                out_dir, req, status="unavailable",
+                reason=f"/ask-vision returned HTTP {e.code}: {body}",
+                detail=f"/ask-vision HTTP {e.code}: {body}",
+            )
+        except (urllib.error.URLError, TimeoutError, OSError,
+                json.JSONDecodeError) as e:
+            return self._package(
+                out_dir, req, status="unavailable",
+                reason=f"/ask-vision call failed: {e!r}",
+                detail=f"network/parse error: {e!r}",
+            )
+
+        raw_text = outer.get("response", "") if isinstance(outer, dict) else ""
+        parsed = _extract_first_json_object(raw_text)
+        if parsed is None:
+            return self._package(
+                out_dir, req, status="invalid_response",
+                reason="claude bridge returned text with no parseable JSON object",
+                detail="claude vision output not parseable as JSON",
+                raw={"response": raw_text[:2000]},
+            )
+
+        normalized = _normalize_to_visual_findings(parsed)
+        if normalized is None:
+            return self._package(
+                out_dir, req, status="invalid_response",
+                reason="claude bridge returned JSON but not visual_findings.v1",
+                detail="claude vision response did not normalize to v1",
+                raw={"parsed": parsed},
+            )
+        # Honest provenance: this finding came from the Claude bridge eye.
+        normalized["source"] = "claude_bridge"
+        return OracleResponse(
+            provider=self.name, status="ok",
+            detail="claude bridge /ask-vision returned valid visual_findings.v1",
+            raw={"outer": outer, "parsed": parsed},
+            normalized_findings=normalized,
+        )
+
+
 class FutureVisionAPIProvider(OracleProvider):
     """Stub for a future Anthropic/OpenAI Vision API integration.
 
@@ -657,6 +849,49 @@ class FutureVisionAPIProvider(OracleProvider):
             )
 
 
+# ---- shared parsing helpers -----------------------------------------
+
+
+def _extract_first_json_object(text: str) -> dict | None:
+    """Find the first balanced ``{...}`` in ``text`` and ``json.loads`` it.
+
+    Vision models AND `claude -p` often wrap the JSON in markdown fences or
+    prose. This scans for the first ``{`` and walks the brace depth (string-
+    aware) to find the matching ``}``. Shared by ``OllamaVisionProvider`` and
+    ``ClaudeBridgeVisionProvider`` so both extract identically.
+    """
+    i = text.find("{")
+    if i < 0:
+        return None
+    depth = 0
+    in_str = False
+    esc = False
+    for j in range(i, len(text)):
+        c = text[j]
+        if esc:
+            esc = False
+            continue
+        if c == "\\":
+            esc = True
+            continue
+        if c == '"':
+            in_str = not in_str
+            continue
+        if in_str:
+            continue
+        if c == "{":
+            depth += 1
+        elif c == "}":
+            depth -= 1
+            if depth == 0:
+                blob = text[i:j + 1]
+                try:
+                    return json.loads(blob)
+                except json.JSONDecodeError:
+                    return None
+    return None
+
+
 # ---- normalization ---------------------------------------------------
 
 
@@ -664,13 +899,38 @@ _AXIS_KEYS = {
     "wall_fidelity", "door_fidelity", "window_fidelity",
     "room_fidelity", "scale_rotation", "global_visual",
 }
+# Eixos ADITIVOS: opcionais, nunca exigidos por _AXIS_KEYS.issubset (retrocompat
+# com qualquer resposta escrita antes do painel de 3 juizes). Hoje so
+# material_light (juiz 2 do painel colaborativo, FP-035-prep); propagado se
+# presente, ignorado silenciosamente se ausente.
+_OPTIONAL_AXIS_KEYS = {"material_light"}
+
+
+def _normalize_design_patterns(raw_list) -> list[dict]:
+    """Normaliza design_patterns_observed (FP-035-prep) tolerantemente: entradas
+    sem os 3 campos minimos sao DESCARTADAS (nunca fabrica pattern/verdict/why
+    a partir de lixo parcial) — a lista pode legitimamente ficar vazia."""
+    out: list[dict] = []
+    if not isinstance(raw_list, list):
+        return out
+    for p in raw_list:
+        if not isinstance(p, dict):
+            continue
+        pattern, verdict, why = p.get("pattern"), p.get("verdict"), p.get("why")
+        if not pattern or verdict not in {"works", "fails", "neutral"} or not why:
+            continue
+        out.append({"pattern": str(pattern), "verdict": verdict, "why": str(why)})
+    return out
 
 
 def _normalize_to_visual_findings(raw: dict) -> dict | None:
     """Coerce an oracle response into a visual_findings.v1 shape.
 
     Returns None if the payload lacks the minimum required structure
-    (top_level_verdict + axes object with the 6 keys).
+    (top_level_verdict + axes object with the 6 keys). Optional axes (ex.:
+    material_light, from the 3-judge panel's judge 2) and
+    design_patterns_observed (the panel's synthesis output) are propagated
+    ADDITIVELY when present — never required, never fabricated when absent.
     """
     if not isinstance(raw, dict):
         return None
@@ -699,6 +959,17 @@ def _normalize_to_visual_findings(raw: dict) -> dict | None:
         if v not in {"PASS", "WARN", "FAIL"}:
             return None
         out["axes"][k] = {"verdict": v, "evidence": str(a.get("evidence", ""))}
+    for k in _OPTIONAL_AXIS_KEYS:
+        a = axes.get(k)
+        if not isinstance(a, dict):
+            continue
+        v = a.get("verdict")
+        if v not in {"PASS", "WARN", "FAIL"}:
+            continue
+        out["axes"][k] = {"verdict": v, "evidence": str(a.get("evidence", ""))}
+    patterns = _normalize_design_patterns(raw.get("design_patterns_observed"))
+    if patterns:
+        out["design_patterns_observed"] = patterns
     findings = raw.get("findings") or []
     if isinstance(findings, list):
         for f in findings:
@@ -723,6 +994,7 @@ _REGISTRY: dict[str, type[OracleProvider]] = {
     "none": NoneProvider,
     "chatgpt_bridge_image": ChatGPTBridgeImageProvider,
     "ollama_vision": OllamaVisionProvider,
+    "claude_bridge_vision": ClaudeBridgeVisionProvider,
     "future_vision_api": FutureVisionAPIProvider,
 }
 

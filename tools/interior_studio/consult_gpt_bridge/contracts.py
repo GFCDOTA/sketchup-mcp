@@ -108,6 +108,12 @@ def render_question_md(c: dict) -> str:
     if vi.get("compare"):
         for k in sorted(vi["compare"]):
             lines.append(f"- Versão {k}: `{vi['compare'][k]}`")
+    refs = c.get("references") or []
+    if refs:
+        role_lbl = {"main": "⭐ PRINCIPAL", "approved": "👍 aprovada", "anti": "🚫 anti-pattern"}
+        lines += ["", "## Referências curadas pelo Felipe (gosto)"]
+        for r in refs:
+            lines.append(f"- [{role_lbl.get(r.get('role'), r.get('role', ''))}] {r.get('title', '')} — {r.get('link', '')}")
     lines += ["", "## Restrições congeladas (NÃO pode mudar)"]
     lines += [f"- {x}" for x in (c.get("frozen_constraints") or [])] or ["- (declarar a geometria congelada)"]
     lines += ["", "## O que pode mudar"]

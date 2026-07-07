@@ -1,0 +1,206 @@
+{
+  "schema_version": "semantic_zones.v1",
+  "fixture": "planta_74",
+  "consensus_source": "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json",
+  "purpose": "Semantic-zone ANNOTATION overlay. Maps each geometric cell (a closed room polygon in the consensus) to one or more named semantic ambients. Resolves the room_fidelity WARN (8 geometric cells vs 11 semantic ambients) WITHOUT inventing any wall/opening geometry: cells that the PDF draws open-plan (no physical wall between ambients) stay ONE cell in the shell but are annotated as multiple named zones here. Hard Rule #1 preserved: this file adds NO geometry, only labels already authored in the consensus rooms.",
+  "provenance": "Every zone name is copied verbatim from consensus rooms[].name (pipe-separated for merged cells). Multi-zone cells additionally carry label_ids and merged_seeds straight from the consensus room. No name is invented here.",
+  "cells": [
+    {
+      "cell_id": "r000",
+      "cell_name": "SUITE 01",
+      "centroid_pts": [
+        435.328,
+        612.741
+      ],
+      "open_plan_merge": false,
+      "zones": [
+        {
+          "name": "SUITE 01",
+          "label_id": "l009",
+          "seed_pt": [
+            434.23321533203125,
+            609.9827270507812
+          ],
+          "source": "consensus.rooms[].name|label_id"
+        }
+      ]
+    },
+    {
+      "cell_id": "r001",
+      "cell_name": "A.S. | TERRACO SOCIAL | TERRACO TECNICO",
+      "centroid_pts": [
+        145.147,
+        470.44
+      ],
+      "open_plan_merge": true,
+      "merge_reason": "seeds_share_cell",
+      "merge_note": "PDF draws no physical wall between these ambients; polygonize closes one cell. Split is semantic-only.",
+      "zones": [
+        {
+          "name": "A.S.",
+          "label_id": "l007",
+          "seed_pt": [
+            91.1695556640625,
+            523.3749389648438
+          ],
+          "source": "consensus.rooms[].name|label_ids|merged_seeds"
+        },
+        {
+          "name": "TERRACO SOCIAL",
+          "label_id": "l008",
+          "seed_pt": [
+            154.44516372680664,
+            462.88114166259766
+          ],
+          "source": "consensus.rooms[].name|label_ids|merged_seeds"
+        },
+        {
+          "name": "TERRACO TECNICO",
+          "label_id": "l015",
+          "seed_pt": [
+            247.55320358276367,
+            432.83577728271484
+          ],
+          "source": "consensus.rooms[].name|label_ids|merged_seeds"
+        }
+      ]
+    },
+    {
+      "cell_id": "r002",
+      "cell_name": "SALA DE JANTAR | SALA DE ESTAR",
+      "centroid_pts": [
+        200.735,
+        600.866
+      ],
+      "open_plan_merge": true,
+      "merge_reason": "seeds_share_cell",
+      "merge_note": "PDF draws no physical wall between these ambients; polygonize closes one cell. Split is semantic-only.",
+      "zones": [
+        {
+          "name": "SALA DE JANTAR",
+          "label_id": "l013",
+          "seed_pt": [
+            189.7418098449707,
+            630.5092620849609
+          ],
+          "source": "consensus.rooms[].name|label_ids|merged_seeds"
+        },
+        {
+          "name": "SALA DE ESTAR",
+          "label_id": "l014",
+          "seed_pt": [
+            182.5546417236328,
+            563.4514465332031
+          ],
+          "source": "consensus.rooms[].name|label_ids|merged_seeds"
+        }
+      ]
+    },
+    {
+      "cell_id": "r003",
+      "cell_name": "SUITE 02",
+      "centroid_pts": [
+        284.944,
+        522.261
+      ],
+      "open_plan_merge": false,
+      "zones": [
+        {
+          "name": "SUITE 02",
+          "label_id": "l005",
+          "seed_pt": [
+            286.6405487060547,
+            526.230712890625
+          ],
+          "source": "consensus.rooms[].name|label_id"
+        }
+      ]
+    },
+    {
+      "cell_id": "r004",
+      "cell_name": "COZINHA",
+      "centroid_pts": [
+        90.645,
+        638.289
+      ],
+      "open_plan_merge": false,
+      "zones": [
+        {
+          "name": "COZINHA",
+          "label_id": "l011",
+          "seed_pt": [
+            96.46437072753906,
+            640.9668884277344
+          ],
+          "source": "consensus.rooms[].name|label_id"
+        }
+      ]
+    },
+    {
+      "cell_id": "r005",
+      "cell_name": "BANHO 01",
+      "centroid_pts": [
+        518.727,
+        572.991
+      ],
+      "open_plan_merge": false,
+      "zones": [
+        {
+          "name": "BANHO 01",
+          "label_id": "l010",
+          "seed_pt": [
+            512.759033203125,
+            580.3725280761719
+          ],
+          "source": "consensus.rooms[].name|label_id"
+        }
+      ]
+    },
+    {
+      "cell_id": "r006",
+      "cell_name": "BANHO 02",
+      "centroid_pts": [
+        356.961,
+        538.57
+      ],
+      "open_plan_merge": false,
+      "zones": [
+        {
+          "name": "BANHO 02",
+          "label_id": "l006",
+          "seed_pt": [
+            353.16725158691406,
+            548.4557800292969
+          ],
+          "source": "consensus.rooms[].name|label_id"
+        }
+      ]
+    },
+    {
+      "cell_id": "r007",
+      "cell_name": "LAVABO",
+      "centroid_pts": [
+        290.502,
+        653.857
+      ],
+      "open_plan_merge": false,
+      "zones": [
+        {
+          "name": "LAVABO",
+          "label_id": "l012",
+          "seed_pt": [
+            296.1532745361328,
+            647.2068786621094
+          ],
+          "source": "consensus.rooms[].name|label_id"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "geometric_cells": 8,
+    "semantic_zones": 11,
+    "open_plan_cells": 2,
+    "resolves_warning": "room_fidelity_open_plan"
+  }
+}

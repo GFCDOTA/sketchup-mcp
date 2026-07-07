@@ -1,0 +1,1 @@
+"""validators — gates/validadores deterministicos."""

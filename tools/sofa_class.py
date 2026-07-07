@@ -120,8 +120,19 @@ ARCHETYPES = {
                    per_seat=0.68, back_thickness=0.22,
                    arm_cap=False, cushion_bevel=0.05, seat_overhang=0.04,
                    base_recess=0.10, foot_legs=0.10),
+    # MT-SOFA-004: industrial_boutique_slim_leather (derivado da referência Venezia,
+    # SOFA_BUILD_SPEC aprovado / LP-SOFA-001). Couro grafite, pés finos de ferro, assento
+    # profundo, encosto baixo levemente inclinado, braço médio/baixo. As travas do GPT
+    # (reference_scale_copy / toy_sofa_from_over_shrink) vivem no juiz visual; aqui a CLASSE
+    # garante a proporção. Dimensões: seat_h 43 · seat_d 58 · total_d 88 · alt 76 · braço 58/15 ·
+    # almofada 16 · pés 14 · rake 10. (3 lugares → 2.05m; 2 lugares fica compacto premium.)
+    "venezia": dict(seat_height=0.43, seat_depth=0.58, height=0.76, depth=0.88,
+                    backrest_rake=10.0, arm_above_seat=0.15, cushion_thickness=0.16,
+                    per_seat=0.583, back_thickness=0.20,
+                    arm_cap=False, cushion_bevel=0.04, seat_overhang=0.025,
+                    base_recess=0.10, foot_legs=0.14),
 }
-ARM_STYLES = {"slim": 0.12, "medium": 0.18, "chunky": 0.28}   # m (FIXO entre lugares)
+ARM_STYLES = {"slim": 0.12, "thin": 0.15, "medium": 0.18, "chunky": 0.28}   # m (FIXO entre lugares)
 BASE_STYLES = ("legs", "plinth")
 PLINTH_FOOT = 0.02
 # regra ANTI-BUNKER (cycle002): braco >= este limiar EXIGE compensacao de massa

@@ -5,54 +5,65 @@ description: Use quando o Felipe quer a sessão trabalhando a fidelidade de uma 
 
 # Autonomous Fidelity Loop
 
-Faz a sessão tocar a fidelidade da planta **sem parar à toa**, com **log por ciclo** e
-**auto-correção do que é determinístico**. O motor é o `/loop` (self-paced) — esta skill
-é o protocolo canônico que ele segue.
+**O motor agora é código, não prosa** (FP-033): `tools/correction_loop.py` é a
+máquina de estados que detecta → classifica → conserta → re-checa sozinha. Esta
+skill virou o **protocolo humano de supervisão** — como acionar o motor, ler o
+que ele produziu e decidir o próximo passo. Não re-executar o ciclo à mão.
 
-## Como entrar
-Entre em `/loop` dinâmico (sem intervalo, self-paced) com o protocolo abaixo. Cada wakeup
-do loop = um ciclo. Não pasteie prompt solto — invoque esta skill (ou diga "não pare").
+## As 3 peças do motor
 
-## Log por ciclo (OBRIGATÓRIO — imprima 1 linha por ciclo)
+1. **`tools/correction_loop.py`** — o laço. Estados: `CLEAN` / `STALL` /
+   `NEEDS_FELIPE` / `PENDING_VISION` / `MAX_CYCLES` / `RED`; exit 0 = limpo,
+   1 = STALL/RED, 3 = enfileirado (visão/humano — **não é falha**).
+   ```
+   python -m tools.correction_loop --fixture planta_74 --out runs/loop_x [--max-cycles N] [--dry-run]
+   ```
+2. **`tools/vision_queue_consumer.py`** — drena `<out>/vision_requests.jsonl`
+   pelo olho FP-032 (`POST /ask-vision` no `:8765`) e escreve
+   `vision_confirmed.jsonl`, que o loop re-injeta no próximo ciclo. Degrada
+   honesto: sem render → `BLOCKED_NEEDS_RENDER`; bridge offline/incompatível →
+   `BLOCKED_NEEDS_FP032` (fila intacta, ZERO achado fabricado). FAIL do oráculo
+   só permanece FAIL com dogfood `DISCRIMINATED` do backend (paridade FP-032).
+3. **NOC `kind:"correction_cycle"`** — 1 task = 1 ciclo em worktree isolado off
+   `origin/develop` via `noc_dispatcher` (ver `NOC_DISPATCHER.md`). Mudança de
+   consensus → `VISUAL_REVIEW_QUEUED`; só evidência → `COMMITTED`. Nunca main.
 
-```
-[ciclo N | HH:MM] fiz: <slice> | gate(:8765): <GO/NO-GO/—> | dets: overlay_diff=<PASS/FAIL> opening_host=<x/12> | tests: <n✓> | ESTADO: PROGREDINDO | PATINANDO | BLOCKED | aprendi: <1 frase ou —>
-```
+## Protocolo de supervisão (o que VOCÊ faz)
 
-## Heartbeat por ciclo (orquestrador de liveness em `:8765`)
-Todo ciclo, **bata ponto** no gate pra outra sessão / o Felipe saber se você progride ou travou:
-```
-POST http://localhost:8765/heartbeat  {"session_id":"<id estavel>","cycle":<N>,"last_action":"<frase curta>"}
-```
-`cycle` é o **token de progresso monotônico** (incrementa a cada ciclo REAL) — é o sinal que
-distingue *progredindo* de *vivo-mas-travado*. Quem observa: `GET :8765/sessions` → flags
-`STALLED` (sem ponto há >10min) / `PARALYZED` (mesmo `cycle` por 3+ pontos) / `OK`.
-Best-effort: se o POST falhar, **siga o ciclo** (heartbeat nunca trava o trabalho).
+Por rodada, leia — nesta ordem — e aja pela tabela:
 
-## Regras do ciclo
+- `<out>/loop_result.json` (estado, ciclos, fixes, filas)
+- `<out>/consumer_result.json` (o que o olho consumiu/bloqueou)
+- `.ai_bridge/noc/actions.jsonl` (ledger — status por task)
 
-1. **PERCEBER erro (determinístico):** rode `tools/overlay_diff` + `tools/opening_host_audit`
-   + `pytest`. Conserte o que eles acusarem; **commit por slice**.
-2. **NÃO autojulgar visual:** render / representação / fixture NÃO se autojulga — o oracle de
-   visão dá falso PASS (ver `negative_dogfood`). Isso é **NEEDS-HUMAN** → flag pro Felipe e segue.
-3. **APRENDER (memória escrita, não ML):** ao errar/descobrir, escreva 1 linha em
-   `.claude/memory/lessons_learned.md` + HANDOFF e **releia antes de repetir**.
-4. **Consultar o oracle:** decisões A/B/C reais → `gpt-auto-consult-gate` (POST `:8765`).
-5. **Detectar PATINAGEM:** 2 ciclos sem progresso novo (mesmo FAIL / nada commitado /
-   repetindo a mesma tentativa) → **PARE** e reporte `PATINANDO: <motivo>`. Não insista no escuro.
-6. **PARAR (certo, não desperdício):** pare só em **RED real**, **PATINANDO**,
-   **NEEDS-HUMAN bloqueante**, ou **backlog determinístico esgotado** (reporte
-   "backlog limpo, parando — sem inventar ciclo"). Fora isso → próximo ciclo.
+| estado | ação |
+|---|---|
+| `CLEAN` | backlog fechado — **parar é o certo**, não inventar ciclo. |
+| `PENDING_VISION` | rodar `vision_queue_consumer` (ou aguardar bridge subir) e enfileirar task nova de ciclo. |
+| `NEEDS_FELIPE` | revisar `<out>/visual_review_queue.jsonl` com o Felipe (Chrome, vs PDF). Nunca autojulgar. |
+| `STALL` / `RED` | investigar a causa raiz; **não** re-tentar em loop (patinagem detectada é feature). |
+| `MAX_CYCLES` | avaliar se vale nova task com teto maior — decisão explícita, não default. |
+| `BLOCKED_NEEDS_FP032` (consumer) | bridge `:8765` fora/sem `/ask-vision` — pedido fica na fila; não fabricar achado. |
 
-## Modo B — autonomia delegada (não furar)
-- Fixture/consensus: regenerar/corrigir é **AUTÔNOMO** (decide e faz). Mas **PROMOVER pra
-  canônica** dispara `VISUAL_REVIEW` (olho do Felipe vs PDF) antes de virar ground-truth.
-- Veredito visual IMPROVED/SAME/WORSE: **nunca** auto (não-confiável) → `VISUAL_REVIEW`.
+Log por rodada (mantido do protocolo original): 1 linha
+`[ciclo N] estado=<X> fixes=<n> felipe_q=<n> vision_q=<n> | PROGREDINDO/PATINANDO/BLOCKED | aprendi: <1 frase ou —>`.
+
+## Invariantes (não furar — RED)
+
+- **Aparência NUNCA auto**: findings de aparência roteiam `NEEDS_FELIPE` /
+  `VISUAL_REVIEW_QUEUED` por construção (router + `_appearance_changed`). O
+  veredito visual final é exclusivo do Felipe (Chrome-only).
+- **Zero achado fabricado**: sem FP-032 disponível o pedido FICA na fila; o
+  loop nunca inventa finding visual.
+- **Fixtures pinadas intocáveis**: o loop trabalha em CÓPIA; promover
+  `consensus_candidate.json` pra `fixtures/` é gate humano (Hard Rule #3).
+- **Heartbeat best-effort**: `:8765` offline nunca trava um ciclo.
 - Develop-first; commit por slice; `--mode headless` proibido em dev local.
 
 ## Limites honestos (dizer ao Felipe, não fingir)
-- **"Aprender"** = acumular lição em arquivo + reler — **não** é rede neural aprendendo.
-- **"Perceber a planta errada"** = só o que os detectores **determinísticos** medem; o
-  julgamento **visual** sobe pro humano.
-- **"Não parar"** = não parar **à toa**; quando o trabalho real acaba, **parar é o certo**
-  (continuar sem ROI = patinar = tempo/dinheiro jogado fora).
+
+- "Aprender" = lição em arquivo + reler — não é rede neural aprendendo.
+- "Perceber a planta errada" = o que os detectores determinísticos medem + o
+  que o olho FP-032 **confirma discriminado**; o julgamento final é humano.
+- "Não parar" = não parar à toa; `CLEAN`/`STALL` são paradas corretas —
+  continuar sem ROI é patinar.

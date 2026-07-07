@@ -29,6 +29,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import os
 import shutil
 import subprocess
 import sys
@@ -38,6 +39,15 @@ import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
+
+# Run-as-script bootstrap: `python server.py` (the docstring's own example, and
+# how start.ps1 / .claude/launch.json launch it) puts only THIS file's dir on
+# sys.path, so `from tools.claude_bridge...` -> ModuleNotFoundError. The watchdog
+# works around it by exporting PYTHONPATH; do it here too so every launch path
+# (script, module, PYTHONPATH-less preview) resolves the package.
+_repo_root = str(Path(__file__).resolve().parents[2])
+if _repo_root not in sys.path:
+    sys.path.insert(0, _repo_root)
 
 from tools.claude_bridge.knowledge_log import difficulties, learnings
 from tools.claude_bridge.skp_inventory import skp_inventory, skp_inventory_v2
@@ -81,6 +91,23 @@ def consult_audit_fields(tier: str, mode: str = "") -> dict:
         "effort": effort,
     }
 STARTED_AT = time.time()    # para o uptime no painel operacional
+
+# Identidade do BUILD servido (FP-040): sha+mtime DESTE arquivo, calculados no
+# startup. Deixa /health distinguir "vivo mas rodando código velho" de saudável —
+# o watchdog relança o server.py do working tree do MAIN, e sem isto um deploy
+# não-aplicado é invisível (o gotcha real: /health ok com rota nova ausente).
+def _build_identity() -> dict:
+    import hashlib
+    p = Path(__file__).resolve()
+    try:
+        digest = hashlib.sha256(p.read_bytes()).hexdigest()[:12]
+        mtime = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(p.stat().st_mtime))
+    except OSError:
+        digest, mtime = "unknown", "unknown"
+    return {"server_sha12": digest, "server_mtime": mtime}
+
+
+BUILD_IDENTITY = _build_identity()
 
 SYSTEM = """You are the CLAUDE ORACLE for the sketchup-mcp fidelity project. The human (Felipe)
 delegated FULL AUTONOMY to you for everything EXCEPT the visual look of the plant ("modo B").
@@ -150,6 +177,244 @@ def ask_claude(question: str, tier: str = DEFAULT_TIER) -> str:
         raise RuntimeError("claude headless NAO autenticado — rode `claude setup-token` "
                            "e exporte CLAUDE_CODE_OAUTH_TOKEN")
     return out
+
+
+def ask_claude_vision(question: str, image_paths, tier: str = DEFAULT_TIER) -> str:
+    """Como ask_claude, mas concede LEITURA dos diretorios das imagens (--add-dir) pro
+    claude -p ABRIR os renders com a ferramenta Read — a VISAO vem dai. E o unico olho
+    confiavel do sistema: os modelos locais de visao (qwen2.5vl/moondream) NAO discriminam
+    defeito (negative_dogfood provou). O prompt do chamador instrui a leitura + o formato
+    de saida (visual_findings). Sem --add-dir, o claude -p (cwd neutro) e' bloqueado por
+    permissao ao ler paths fora do cwd e HONESTAMENTE se recusa a chutar."""
+    model, effort = resolve_tier(tier)
+    prompt = SYSTEM + "\n\n=== QUESTION ===\n\n" + question
+    workdir = tempfile.gettempdir()
+    dirs = []
+    for p in (image_paths or []):
+        d = os.path.dirname(os.path.abspath(str(p)))
+        if d and d not in dirs:
+            dirs.append(d)
+    if sys.platform == "win32":
+        adg = " ".join(f'--add-dir "{d}"' for d in dirs)
+        cmd = (f'"{claude_bin()}" -p --model {model} --effort {effort} '
+               f'--output-format text {adg}')
+        proc = subprocess.run(cmd, input=prompt, capture_output=True, text=True,
+                              encoding="utf-8", errors="replace",
+                              timeout=CLAUDE_TIMEOUT, shell=True, cwd=workdir)
+    else:
+        add_args = []
+        for d in dirs:
+            add_args += ["--add-dir", d]
+        proc = subprocess.run([claude_bin(), "-p", "--model", model, "--effort", effort,
+                               "--output-format", "text", *add_args],
+                              input=prompt, capture_output=True, text=True,
+                              encoding="utf-8", errors="replace",
+                              timeout=CLAUDE_TIMEOUT, cwd=workdir)
+    out = (proc.stdout or "").strip()
+    if not out:
+        raise RuntimeError(f"resposta vazia (stderr: {(proc.stderr or '')[:300]})")
+    low = out.lower()
+    if "not logged in" in low or "please run /login" in low:
+        raise RuntimeError("claude headless NAO autenticado")
+    return out
+
+
+# ---- painel colaborativo de 3 juizes (vision panel) ------------------------
+# Decisao do Felipe: o /ask-vision deixa de ser 1 chamada `claude -p` e vira um
+# PAINEL de 3: "estrutura" (5 eixos geometricos existentes) + "material_luz"
+# (eixo NOVO, textura/cor/reflectancia/sombra/exposicao — o que os 6 eixos
+# antigos NAO cobrem) RODAM EM PARALELO (ThreadPoolExecutor — stdlib, cada
+# chamada e' um subprocess bloqueante `claude -p`, threads bastam pra IO-bound);
+# o 3o ("sintese") roda DEPOIS, recebe os DOIS relatorios como TEXTO (nao
+# rele imagens — custo) e produz (a) o top_level_verdict FINAL (resolve
+# conflito honesto, nunca inventa o que um juiz nao viu) e (b)
+# design_patterns_observed — a colaboracao dos 3 vira conhecimento de design
+# REUSAVEL (FP-035-prep), nao so um PASS/FAIL isolado.
+#
+# Degradacao honesta: falha/timeout de QUALQUER uma das 3 chamadas NAO fabrica
+# veredito nem padroes daquele juiz — confidence cai, o 3o decide com o que tem
+# (nunca inventa o que falta). "FAIL so se DISCRIMINATED" continua regra de
+# PROMOCAO no run_skp_visual_review.py — o painel nao mexe nisso.
+VISION_PANEL_TIMEOUT_SEC = CLAUDE_TIMEOUT + 60  # cada juiz roda dentro do CLAUDE_TIMEOUT do ask_claude_vision; folga pro ThreadPoolExecutor.result()
+
+_STRUCTURE_JUDGE_PROMPT = """You are judge 1/3 of a collaborative visual-fidelity panel — ESTRUTURA.
+Focus ONLY on these 5 geometric fidelity axes (PDF-vs-SKP correctness, NOT aesthetics):
+wall_fidelity, door_fidelity, window_fidelity, room_fidelity, scale_rotation.
+Ignore material/color/light/texture entirely — that is judge 2's job, not yours.
+
+OPEN each render below with the Read tool and LOOK at it: your judgment MUST come from the
+pixels, not from geometry numbers alone.
+
+Renders (absolute paths, readable via --add-dir):
+{img_lines}
+
+Return ONLY a JSON object (no prose, no code fences):
+{{
+  "top_level_verdict": "PASS|WARN|FAIL",
+  "confidence": "low|medium|high",
+  "axes": {{
+    "wall_fidelity":  {{"verdict":"PASS|WARN|FAIL","evidence":"..."}},
+    "door_fidelity":  {{"verdict":"PASS|WARN|FAIL","evidence":"..."}},
+    "window_fidelity":{{"verdict":"PASS|WARN|FAIL","evidence":"..."}},
+    "room_fidelity":  {{"verdict":"PASS|WARN|FAIL","evidence":"..."}},
+    "scale_rotation": {{"verdict":"PASS|WARN|FAIL","evidence":"..."}}
+  }},
+  "findings": [ {{"id":"vf_001","severity":"FAIL|WARN","axis":"<one of the 5 axes above>",
+  "type":"<type>","location":"...","evidence_image":"<render file name>","evidence":"..."}} ]
+}}
+
+Finding types: floating_door, wall_stub, missing_wall_continuation, misplaced_window,
+full_height_window_void, floor_leak, misplaced_soft_barrier. Report ONLY what you SEE.
+
+{extra_context}
+"""
+
+_MATERIAL_LIGHT_JUDGE_PROMPT = """You are judge 2/3 of a collaborative visual-fidelity panel — MATERIAL & LUZ.
+Focus ONLY on this axis: material_light — texture, color, reflectance, shadow, exposure. This is
+what differentiates a real V-Ray render from a wireframe/flat-shaded placeholder; it is NOT
+covered by the 5 geometric axes (wall/door/window/room/scale_rotation), which judge 1 already owns.
+Ignore wall/door/window/room placement and scale entirely — that is judge 1's job, not yours.
+
+OPEN each render below with the Read tool and LOOK at it: your judgment MUST come from the
+pixels.
+
+Renders (absolute paths, readable via --add-dir):
+{img_lines}
+
+Return ONLY a JSON object (no prose, no code fences):
+{{
+  "top_level_verdict": "PASS|WARN|FAIL",
+  "confidence": "low|medium|high",
+  "axes": {{
+    "material_light": {{"verdict":"PASS|WARN|FAIL","evidence":"..."}}
+  }},
+  "findings": [ {{"id":"vf_001","severity":"FAIL|WARN","axis":"material_light",
+  "type":"<type>","location":"...","evidence_image":"<render file name>","evidence":"..."}} ],
+  "design_patterns_observed": [
+    {{"pattern":"<short label, e.g. paleta/material/luz/proporcao/layout choice>",
+      "verdict":"works|fails|neutral","why":"<what you SAW that supports this>"}}
+  ]
+}}
+
+Finding types: orphan_glass_panel, flat_shading_no_texture, blown_out_exposure,
+missing_shadow, wrong_material_hue, global_visual_fail. design_patterns_observed is OPTIONAL —
+leave it [] if you did not see enough to name a reusable pattern; NEVER invent one. Report ONLY
+what you SEE.
+
+{extra_context}
+"""
+
+_SYNTHESIS_JUDGE_PROMPT = """You are judge 3/3 of a collaborative visual-fidelity panel — SINTESE.
+You do NOT re-read the renders (that is expensive and already done). You receive the two reports
+below, written by judge 1 (ESTRUTURA — the 5 geometric fidelity axes) and judge 2 (MATERIAL & LUZ
+— texture/color/light). Either report may be MISSING (judge failed/timed out) — if so, decide with
+what you have and say so honestly; NEVER invent what a missing judge would have said.
+
+Your job has two parts:
+1. Resolve the FINAL top_level_verdict for this render, combining both reports honestly (FAIL if
+   either report FAILs; WARN if either WARNs and neither FAILs; PASS only if both PASS). If a
+   report is missing, do not silently default to PASS — say so in a finding and reflect it in
+   confidence.
+2. Produce design_patterns_observed: a list of REUSABLE design-pattern observations (palette,
+   material, lighting, proportion, layout) that this variant demonstrates working well OR badly —
+   this is accumulated design knowledge, not a fidelity verdict. Merge/dedupe patterns already
+   named by judge 2 with anything you can additionally infer from BOTH reports together (e.g. a
+   geometric proportion issue from judge 1 combined with a material choice from judge 2). Leave
+   the list EMPTY if there is not enough signal — never fabricate a pattern.
+
+=== JUDGE 1 REPORT (ESTRUTURA) ===
+{structure_report}
+
+=== JUDGE 2 REPORT (MATERIAL & LUZ) ===
+{material_light_report}
+
+Return ONLY a JSON object (no prose, no code fences) matching visual_findings.v1:
+{{
+  "schema_version": "visual_findings.v1",
+  "top_level_verdict": "PASS|WARN|FAIL",
+  "confidence": "low|medium|high",
+  "axes": {{
+    "wall_fidelity":   {{"verdict":"PASS|WARN|FAIL","evidence":"..."}},
+    "door_fidelity":   {{"verdict":"PASS|WARN|FAIL","evidence":"..."}},
+    "window_fidelity": {{"verdict":"PASS|WARN|FAIL","evidence":"..."}},
+    "room_fidelity":   {{"verdict":"PASS|WARN|FAIL","evidence":"..."}},
+    "scale_rotation":  {{"verdict":"PASS|WARN|FAIL","evidence":"..."}},
+    "material_light":  {{"verdict":"PASS|WARN|FAIL","evidence":"..."}},
+    "global_visual":   {{"verdict":"PASS|WARN|FAIL","evidence":"..."}}
+  }},
+  "findings": [ {{"id":"vf_001","severity":"FAIL|WARN","axis":"<one of the 7 axes above>",
+  "type":"<type>","location":"...","evidence_image":"<render file name>","evidence":"..."}} ],
+  "design_patterns_observed": [
+    {{"pattern":"...","verdict":"works|fails|neutral","why":"..."}}
+  ]
+}}
+
+If a report above is literally the text "MISSING (judge failed/timed out)", copy through the
+axes/findings you DO have from the other report, mark the missing axes' verdict as "WARN" with
+evidence "judge unavailable — not evaluated", cap confidence at "low", and add a finding
+{{"severity":"WARN","axis":"global_visual","type":"panel_degraded", ...}} documenting which judge
+was missing. Never claim PASS for an axis nobody evaluated.
+"""
+
+
+def _vision_panel_img_lines(image_paths) -> str:
+    return "\n".join(f"  - {Path(p).resolve()}" for p in (image_paths or []))
+
+
+def _run_vision_judge(prompt_template: str, image_paths, extra_context: str,
+                      tier: str) -> tuple[str | None, str | None]:
+    """Roda 1 juiz do painel (`ask_claude_vision`). Retorna (texto, None) em
+    sucesso ou (None, motivo) em falha — NUNCA fabrica texto de juiz que falhou
+    (o chamador precisa distinguir 'juiz respondeu' de 'juiz caiu')."""
+    prompt = prompt_template.format(
+        img_lines=_vision_panel_img_lines(image_paths),
+        extra_context=extra_context or "")
+    try:
+        return ask_claude_vision(prompt, image_paths, tier=tier), None
+    except Exception as e:  # noqa: BLE001 — degradacao honesta, nunca propaga
+        return None, f"{type(e).__name__}: {e}"
+
+
+def ask_claude_vision_panel(question: str, image_paths, tier: str = DEFAULT_TIER) -> str:
+    """Painel COLABORATIVO de 3 juizes (substitui a chamada unica ao
+    ask_claude_vision pro /ask-vision). `question` e' o contexto extra que o
+    chamador passaria (ex.: pending findings do vision_queue_consumer) —
+    repassado aos juizes 1 e 2 como contexto secundario.
+
+    1. "estrutura" + "material_luz" RODAM EM PARALELO (ThreadPoolExecutor,
+       2 workers — cada chamada e' 1 subprocess `claude -p` bloqueante de
+       ~50-110s medido em producao; paralelizar os 2 primeiros corta a
+       latencia total de ~3x para ~2x uma chamada).
+    2. "sintese" roda DEPOIS, recebendo os 2 relatorios como TEXTO (nunca
+       relê as imagens — custo). Produz o veredito FINAL + design_patterns.
+
+    Retorna o TEXTO do juiz de sintese (mesmo formato de string que
+    ask_claude_vision devolvia) — o chamador (_ask_vision_route) empacota em
+    {"response": "<texto>"} EXATAMENTE como antes; nenhuma mudanca de contrato
+    HTTP. Nunca fabrica: se um juiz falha, o prompt de sintese INSTRUI o 3o a
+    marcar os eixos daquele juiz como WARN honesto (nunca PASS por omissao)."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    with ThreadPoolExecutor(max_workers=2) as ex:
+        fut_structure = ex.submit(_run_vision_judge, _STRUCTURE_JUDGE_PROMPT,
+                                  image_paths, question, tier)
+        fut_material = ex.submit(_run_vision_judge, _MATERIAL_LIGHT_JUDGE_PROMPT,
+                                 image_paths, question, tier)
+        structure_text, structure_err = fut_structure.result(timeout=VISION_PANEL_TIMEOUT_SEC)
+        material_text, material_err = fut_material.result(timeout=VISION_PANEL_TIMEOUT_SEC)
+
+    structure_report = structure_text or "MISSING (judge failed/timed out)"
+    material_report = material_text or "MISSING (judge failed/timed out)"
+    if structure_err:
+        structure_report += f"\n[judge 1 error, honestly surfaced: {structure_err}]"
+    if material_err:
+        material_report += f"\n[judge 2 error, honestly surfaced: {material_err}]"
+
+    synthesis_prompt = _SYNTHESIS_JUDGE_PROMPT.format(
+        structure_report=structure_report, material_light_report=material_report)
+    # sintese NAO le imagem (custo) -> ask_claude (texto), nao ask_claude_vision;
+    # sem imagens no bridge, --add-dir fica vazio e o dir do cwd neutro basta.
+    return ask_claude(synthesis_prompt, tier=tier)
 
 
 # ---- /ask + /health contract (spec gate_framework §6.5) ------------
@@ -233,6 +498,7 @@ def health_payload() -> dict:
         "tiers": {k: dict(v) for k, v in TIERS.items()},
         "default_tier": DEFAULT_TIER,
         "uptime_sec": round(time.time() - STARTED_AT, 1),
+        **BUILD_IDENTITY,
         "ask_field": list(ASK_FIELDS),
         "verdict_enum": list(VERDICT_ENUM),
         "modes": ["default", "redteam"],
@@ -511,194 +777,14 @@ def activity_summary() -> dict:
     }
 
 
-# Operational dashboard served by the gate itself (no external stack): polls
-# /health + /sessions + /events every 5s. If this page won't load, the gate is down.
-DASHBOARD_HTML = """<!doctype html>
-<html lang="pt-br"><head><meta charset="utf-8">
-<title>Claude Gate - Operacional</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-:root{--bg:#0d1117;--card:#161b22;--line:#30363d;--txt:#e6edf3;--dim:#8b949e;
---ok:#3fb950;--bad:#f85149;--warn:#d29922;--accent:#58a6ff;}
-*{box-sizing:border-box;}
-body{margin:0;background:var(--bg);color:var(--txt);
-font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
-header{display:flex;align-items:center;gap:16px;padding:16px 24px;border-bottom:1px solid var(--line);flex-wrap:wrap;}
-h1{font-size:18px;margin:0;font-weight:600;}
-.badge{padding:6px 14px;border-radius:20px;font-weight:700;letter-spacing:.5px;}
-.badge.on{background:rgba(63,185,80,.15);color:var(--ok);border:1px solid var(--ok);}
-.badge.off{background:rgba(248,81,73,.15);color:var(--bad);border:1px solid var(--bad);}
-.wrap{padding:24px;display:grid;gap:20px;grid-template-columns:1fr 1fr;max-width:1100px;}
-.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;}
-.card h2{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin:0 0 12px;}
-.kv{display:flex;justify-content:space-between;padding:3px 0;gap:12px;}
-.kv span:first-child{color:var(--dim);}
-table{width:100%;border-collapse:collapse;font-size:13px;}
-th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);}
-th{color:var(--dim);font-weight:500;}
-.flag{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;}
-.flag.OK{background:rgba(63,185,80,.15);color:var(--ok);}
-.flag.STALLED{background:rgba(210,153,34,.15);color:var(--warn);}
-.flag.PARALYZED{background:rgba(248,81,73,.15);color:var(--bad);}
-.feed{max-height:280px;overflow:auto;}
-.ev{display:flex;gap:10px;padding:4px 0;border-bottom:1px solid #21262d;font-size:12px;}
-.ev .t{color:var(--dim);white-space:nowrap;}
-.ev .k{font-weight:700;}
-.ev .k.consult{color:var(--accent);}
-.ev .k.heartbeat{color:var(--dim);}
-.timeline{display:flex;gap:3px;flex-wrap:wrap;}
-.dot{width:12px;height:12px;border-radius:3px;background:var(--line);}
-.dot.up{background:var(--ok);}
-.dot.down{background:var(--bad);}
-.full{grid-column:1 / -1;}
-.pipe{display:flex;align-items:stretch;gap:6px;flex-wrap:wrap;}
-.stg{flex:1;min-width:84px;background:#0d1117;border:1px solid var(--line);border-radius:8px;padding:10px 6px;text-align:center;font-size:12px;font-weight:600;display:flex;flex-direction:column;justify-content:center;}
-.stg small{display:block;color:var(--dim);font-weight:400;margin-top:4px;font-size:10px;}
-.stg.pdf{border-color:#6e7681;}
-.stg.human{border-color:var(--warn);background:rgba(210,153,34,.08);}
-.stg.auto{border-color:var(--accent);background:rgba(88,166,255,.07);}
-.stg.gate{border-color:var(--ok);background:rgba(63,185,80,.07);}
-.stg.ok{border-color:var(--ok);background:rgba(63,185,80,.15);}
-.arr{display:flex;align-items:center;color:var(--dim);font-size:18px;}
-.legend{margin-top:12px;display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--dim);align-items:center;}
-.lg{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:middle;}
-.lg.auto{background:rgba(88,166,255,.6);}
-.lg.human{background:rgba(210,153,34,.7);}
-.lg.gate{background:rgba(63,185,80,.6);}
-.lg.ok{background:var(--ok);}
-.docs details{border:1px solid var(--line);border-radius:6px;margin-bottom:6px;background:#0d1117;}
-.docs summary{cursor:pointer;padding:8px 12px;font-weight:600;font-size:12px;color:var(--accent);}
-.docs .d{padding:3px 14px 3px 26px;font-size:12px;border-top:1px solid #21262d;}
-.docs .d code{color:var(--warn);background:rgba(210,153,34,.08);padding:1px 6px;border-radius:4px;margin-right:7px;}
-footer{padding:0 24px 24px;color:var(--dim);font-size:12px;}
-</style></head><body>
-<header><h1>&#127899; Claude Gate - Operacional</h1>
-<span id="status" class="badge off">CHECANDO...</span>
-<span id="updated" style="color:var(--dim);font-size:12px;"></span></header>
-<div class="wrap">
-<div class="card full"><h2>Pipeline PDF -&gt; SKP (como o sketchup-mcp processa)</h2>
-<div class="pipe">
-<div class="stg pdf">PDF<small>planta</small></div><div class="arr">&#8594;</div>
-<div class="stg human">anotacao<small>HUMANO</small></div><div class="arr">&#8594;</div>
-<div class="stg auto">consensus.json<small>walls/openings/rooms</small></div><div class="arr">&#8594;</div>
-<div class="stg auto">build_shell<small>.py shapely</small></div><div class="arr">&#8594;</div>
-<div class="stg auto">.skp + renders<small>.rb SketchUp</small></div><div class="arr">&#8594;</div>
-<div class="stg gate">gates det.<small>opening_host/overlay</small></div><div class="arr">&#8594;</div>
-<div class="stg human">VISUAL_REVIEW<small>HUMANO vs PDF</small></div><div class="arr">&#8594;</div>
-<div class="stg ok">artifacts/<small>deliverable</small></div>
-</div>
-<div class="legend"><span><span class="lg auto"></span>automatico</span><span><span class="lg human"></span>gate humano</span><span><span class="lg gate"></span>deterministico (ground truth)</span><span><span class="lg ok"></span>entrega</span></div>
-<div style="margin-top:10px;color:var(--dim);font-size:12px;">O oraculo :8765 (modo B, Opus 4.8) decide as bifurcacoes tecnicas ao longo do fluxo. So o VISUAL_REVIEW sobe pro humano.</div></div>
-<div class="card"><h2>Health</h2><div id="health"></div></div>
-<div class="card"><h2>Health timeline</h2><div id="timeline" class="timeline"></div>
-<div style="margin-top:10px;color:var(--dim);font-size:12px;">verde=online | vermelho=offline | refresh 5s</div></div>
-<div class="card full"><h2>Sessoes (orquestrador)</h2>
-<table><thead><tr><th>session</th><th>cycle</th><th>idade</th><th>beats iguais</th><th>ultima acao</th><th>flags</th></tr></thead>
-<tbody id="sessions"></tbody></table></div>
-<div class="card full"><h2>Atividade (consults + heartbeats)</h2><div id="feed" class="feed"></div></div>
-<div class="card full"><h2>Diretorio .claude/ — o cerebro do projeto (clique pra expandir)</h2>
-<div class="docs">
-<details><summary>raiz</summary>
-<div class="d"><code>CLAUDE.md</code>bootloader: missao, Hard Rules, ordem de carregamento</div>
-<div class="d"><code>constitution.md</code>principios nao-negociaveis (#1 o .skp e o artefato; #8 no-skp-no-progress)</div>
-<div class="d"><code>README.md</code>orientacao/indice do diretorio</div>
-</details>
-<details><summary>memory/ — memoria persistente (estado + regras vivas)</summary>
-<div class="d"><code>project_context.md</code>o que e o projeto e onde esta</div>
-<div class="d"><code>current_state.md</code>estado atual (feito / em andamento)</div>
-<div class="d"><code>operational_rules.md</code>loop GREEN/YELLOW/RED e quando parar</div>
-<div class="d"><code>git_workflow.md</code>develop-first; disciplina de branch/commit/PR</div>
-<div class="d"><code>multi_agent_coordination.md</code>coordenacao entre sessoes/worktrees (nao clobberar)</div>
-<div class="d"><code>artifact_policy.md</code>hierarquia runs/ vs artifacts/ vs fixtures/ + promotion</div>
-<div class="d"><code>lessons_learned.md</code>licoes LL-NNN acumuladas (releia antes de repetir)</div>
-<div class="d"><code>deprecated_context.md</code>o que ficou obsoleto (nao seguir)</div>
-</details>
-<details><summary>specs/ — especificacoes (o "como deve ser")</summary>
-<div class="d"><code>product_goal.md</code>o objetivo: .skp fiel ao PDF</div>
-<div class="d"><code>fidelity_gate.md</code>o que conta como fiel (campos do geometry_report)</div>
-<div class="d"><code>skp_artifact_layout.md</code>paths/naming/metadata do .skp canonico</div>
-<div class="d"><code>skp_proof_of_progress_gate.md</code>Constitution #8: sem SKP+evidencia, nao e progresso</div>
-<div class="d"><code>gate_framework_and_audit.md</code>o gate de decisao §6 (oraculo/redteam/file-fetch/confidence/audit)</div>
-<div class="d"><code>generalize_builder_constants.md</code>blueprint pra generalizar as constantes do builder</div>
-<div class="d"><code>perfect_reference_strategy.md</code>PDF como ground truth</div>
-<div class="d"><code>sdd_and_harness_engineering.md</code>spec-driven dev + engenharia do harness</div>
-<div class="d"><code>repository_hygiene.md</code>higiene do repo (arquivar obsoletos)</div>
-<div class="d"><code>templates/</code>4 templates: artifact_contract, feature_spec, fidelity_spec, regression_summary</div>
-</details>
-<details><summary>skills/ — 10 capacidades auto-descobertas (cada uma um SKILL.md)</summary>
-<div class="d"><code>pdf-to-skp-pipeline</code>build do .skp a partir do consensus</div>
-<div class="d"><code>fidelity-review</code>checklist SKP vs PDF (humano)</div>
-<div class="d"><code>generate-and-compare-skp-after-change</code>gera SKP + compara before/after</div>
-<div class="d"><code>skp-visual-self-correction</code>Visual Oracle Gate: floating door / orphan glass / etc</div>
-<div class="d"><code>skp-artifact-management</code>promocao runs/ -&gt; artifacts/</div>
-<div class="d"><code>gpt-auto-consult-gate</code>consulta o oraculo :8765 nas decisoes reais (9 triggers)</div>
-<div class="d"><code>gh-autopilot</code>commit -&gt; PR -&gt; merge -&gt; cleanup via gh</div>
-<div class="d"><code>repo-governance</code>PR/branch/merge/hygiene</div>
-<div class="d"><code>multi-agent-handoff</code>coordenacao multi-agent/worktrees</div>
-<div class="d"><code>autonomous-fidelity-loop</code>loop continuo de fidelidade (log por ciclo + heartbeat)</div>
-</details>
-<details><summary>evals/ — avaliacao</summary>
-<div class="d"><code>eval_strategy.md</code>estrategia de avaliacao</div>
-<div class="d"><code>fidelity_rubric.md</code>rubrica de fidelidade (eixos)</div>
-<div class="d"><code>regression_matrix.md</code>matriz de regressao</div>
-</details>
-<details><summary>plans/ — planejamento</summary>
-<div class="d"><code>active_work.md</code>trabalho ativo</div>
-<div class="d"><code>next_actions.md</code>proximas acoes</div>
-<div class="d"><code>roadmap.md</code>roadmap</div>
-<div class="d"><code>stopped_work.md</code>trabalho pausado</div>
-</details>
-<details><summary>docs/ — documentacao + historico</summary>
-<div class="d"><code>index.md</code>indice dos docs</div>
-<div class="d"><code>2026-05-31_agentic_system_retro_roadmap.md</code>retro do sistema agentico + roadmap</div>
-<div class="d"><code>adr/0001-...</code>ADR da arquitetura (gate + pipeline) — este sistema</div>
-<div class="d"><code>audits/</code>3 auditorias (estrutura .claude, friction review, proof-of-progress)</div>
-</details>
-<details><summary>scratch/ — local-only (gitignored)</summary>
-<div class="d">rascunhos descartaveis; nada importante vive aqui</div>
-</details>
-</div></div>
-</div>
-<footer>Servido pelo proprio gate em :8765 - sem stack externa</footer>
-<script>
-const hist=[];
-function fmtAge(s){if(s==null)return '-';if(s<90)return s+'s';if(s<5400)return Math.round(s/60)+'m';return Math.round(s/3600)+'h';}
-function fmtTime(t){try{return new Date(t*1000).toLocaleTimeString('pt-br');}catch(e){return '';}}
-function kv(k,v){return '<div class="kv"><span>'+k+'</span><span>'+v+'</span></div>';}
-async function tick(){
-let online=false,health=null;
-try{const r=await fetch('/health',{cache:'no-store'});health=await r.json();online=r.ok;}catch(e){online=false;}
-const b=document.getElementById('status');
-b.className='badge '+(online?'on':'off');b.textContent=online?'ONLINE':'OFFLINE';
-document.getElementById('updated').textContent='atualizado '+new Date().toLocaleTimeString('pt-br');
-hist.push(online);if(hist.length>60)hist.shift();
-document.getElementById('timeline').innerHTML=hist.map(u=>'<div class="dot '+(u?'up':'down')+'"></div>').join('');
-if(health){document.getElementById('health').innerHTML=
-kv('oracle',health.oracle)+kv('model',health.model||'-')+kv('effort',health.effort||'-')+
-kv('uptime',fmtAge(health.uptime_sec))+kv('modes',(health.modes||[]).join(', '))+
-kv('endpoints',(health.endpoints||[]).join(' '));}
-else{document.getElementById('health').innerHTML='<div style="color:var(--bad)">sem resposta do /health</div>';}
-if(!online)return;
-try{const s=await (await fetch('/sessions',{cache:'no-store'})).json();
-const rows=Object.entries(s).map(function(e){var id=e[0],v=e[1];
-return '<tr><td>'+id+'</td><td>'+(v.cycle==null?'-':v.cycle)+'</td><td>'+fmtAge(v.age_sec)+'</td><td>'+(v.unchanged_beats||0)+'</td><td>'+(v.last_action||'')+'</td><td>'+(v.flags||[]).map(f=>'<span class="flag '+f+'">'+f+'</span>').join(' ')+'</td></tr>';}).join('');
-document.getElementById('sessions').innerHTML=rows||'<tr><td colspan=6 style="color:var(--dim)">nenhuma sessao batendo ponto ainda</td></tr>';}catch(e){}
-try{const ev=await (await fetch('/events',{cache:'no-store'})).json();
-document.getElementById('feed').innerHTML=ev.slice().reverse().map(function(e){
-var extra=e.kind==='consult'?('mode='+(e.mode||'default')+' | '+(e.dur_sec==null?'?':e.dur_sec)+'s | q'+(e.q_chars==null?'?':e.q_chars)):('cycle='+(e.cycle==null?'?':e.cycle)+' | '+(e.session_id||'')+' '+(e.last_action||''));
-return '<div class="ev"><span class="t">'+fmtTime(e.t)+'</span><span class="k '+e.kind+'">'+e.kind+'</span><span>'+extra+'</span></div>';}).join('')||'<div style="color:var(--dim)">sem atividade ainda</div>';}catch(e){}
-}
-tick();setInterval(tick,5000);
-</script></body></html>"""
-
-
-def dashboard_html() -> str:
-    """Serve the multi-page SPA from dashboard.html (sibling file). Falls back to
-    the inline single-page DASHBOARD_HTML if the file is missing."""
-    try:
-        return (Path(__file__).parent / "dashboard.html").read_text("utf-8")
-    except OSError:
-        return DASHBOARD_HTML
+# Operational dashboard RETIRED 2026-07-03 (unified-cockpit landed) — the page now lives
+# at :8782 (sketchup-mcp-bff), reading this gate by FILE via bridge_mirror.py. This gate
+# stays headless: root/`/dashboard` just redirect a lost bookmark to the real page.
+def _redirect_to_cockpit(req, _url):
+    req.send_response(302)
+    req.send_header("Location", "http://localhost:8782/")
+    req.send_header("Content-Length", "0")
+    req.end_headers()
 
 
 def plant_info() -> dict:
@@ -1556,6 +1642,28 @@ def _artifact_route(req, url):
     req._send_bytes(f.read_bytes(), ctype)
 
 
+def _memory_search_route(req, url):
+    """GET /api/memory/search?q=...&k=6 — RAG #2 (memória do projeto), read-only.
+    Busca semântica na project_memory.db pra os agentes consultarem 'o que já
+    fizemos e aprendemos'. Honesto em 400/500; nunca fabrica. NÃO toca o /ask."""
+    try:
+        params = parse_qs(url.query)
+        query = (params.get("q") or params.get("query") or [""])[0].strip()
+        if not query:
+            req._send(400, {"error": "empty query (send ?q=...)"})
+            return
+        try:
+            k = int((params.get("k") or ["6"])[0])
+        except ValueError:
+            k = 6
+        k = max(1, min(k, 20))
+        from tools.project_memory_db import search as _memory_search
+        results = _memory_search(query, k)
+        req._send(200, {"query": query, "count": len(results), "results": results})
+    except Exception as e:  # índice ausente / Ollama offline -> erro honesto
+        req._send(500, {"error": f"{type(e).__name__}: {e}"})
+
+
 def _ask_route(req, _url):
     """POST /ask — the oracle consult. Honest 500 on failure; never fabricates."""
     try:
@@ -1576,6 +1684,36 @@ def _ask_route(req, _url):
                        "a_chars": len(answer), "dur_sec": round(time.time() - t0, 1)})
         req._send(200, {"response": answer})
     except Exception as e:  # devolve erro honesto; nao fabrica resposta
+        req._send(500, {"error": f"{type(e).__name__}: {e}"})
+
+
+def _ask_vision_route(req, _url):
+    """POST /ask-vision — painel COLABORATIVO de 3 juizes (estrutura + material_luz
+    em paralelo -> sintese). Mesmo contrato HTTP de sempre: 'images' [paths abs]
+    que o claude -p pode LER (--add-dir); devolve {"response": "<json/texto>"} —
+    o cliente (oracle_providers.ClaudeBridgeVisionProvider) parseia igual, campos
+    novos sao aditivos. Honest 500; painel nunca fabrica veredito/padrao de juiz
+    que falhou (ver ask_claude_vision_panel)."""
+    try:
+        n = int(req.headers.get("Content-Length") or 0)
+        body = req.rfile.read(n) if n else b""
+        data = json.loads(body.decode("utf-8", errors="replace")) if body else {}
+        prompt = (data.get("prompt") or data.get("question") or "").strip()
+        images = data.get("images") or []
+        if not prompt:
+            req._send(400, {"error": "empty prompt"})
+            return
+        if not images:
+            req._send(400, {"error": "no images (send 'images': [abs paths])"})
+            return
+        tier = data.get("tier") or DEFAULT_TIER
+        t0 = time.time()
+        answer = ask_claude_vision_panel(prompt, images, tier=tier)
+        _audit_append({"t": time.time(), "kind": "consult_vision_panel",
+                       "n_images": len(images), "a_chars": len(answer),
+                       "dur_sec": round(time.time() - t0, 1)})
+        req._send(200, {"response": answer})
+    except Exception as e:
         req._send(500, {"error": f"{type(e).__name__}: {e}"})
 
 
@@ -1744,8 +1882,8 @@ def llm_usage() -> dict:
 # path (rstrip'd of trailing "/") -> command. "" is the form "/" and "/dashboard"
 # reduce to. GET strips the query (urlparse); POST matches the raw path, as before.
 GET_ROUTES = {
-    "": _html_route(dashboard_html),
-    "/dashboard": _html_route(dashboard_html),
+    "": _redirect_to_cockpit,
+    "/dashboard": _redirect_to_cockpit,
     "/health": _json_route(health_payload),
     "/sessions": _json_route(sessions_view),
     "/events": _json_route(recent_events),
@@ -1776,10 +1914,12 @@ GET_ROUTES = {
     "/api/actions/process-consults": _json_route(process_consults_state),
     "/api/actions/dirty-detail": _json_route(dirty_detail),
     "/artifact": _artifact_route,
+    "/api/memory/search": _memory_search_route,
 }
 
 POST_ROUTES = {
     "/ask": _ask_route,
+    "/ask-vision": _ask_vision_route,
     "/heartbeat": _heartbeat_route,
     "/api/actions/process-consults": _process_consults_start_route,
 }

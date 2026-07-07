@@ -29,6 +29,91 @@ from core.scale import PT_TO_IN  # noqa: E402  (fonte unica de escala; env PT_TO
 FLOOR_KINDS = ("rug", "tapete")                      # ficam no chão: ok perto de porta/sob móvel
 TALL_KINDS = ("corpo", "torre", "aereo", "dresser", "estante", "guarda_roupa", "rack_tv", "bancada")
 DOOR_CLEARANCE_IN = 22.0
+# tolerância p/ "centro fora do cômodo": painel encostado na parede tem centro ~dentro.
+# Fonte ÚNICA do valor — sanity_room e o variant_sweep (_outside_room) leem daqui.
+OUTSIDE_BUFFER_IN = 8.0
+
+
+# ── API HERMÉTICA (boxes sintéticos em POLEGADAS) ────────────────────────────
+# audit() é o gate determinístico stdlib-puro pinado por tests/test_geometry_sanity.py
+# (boxes x0,y0,x1,y1 + z0_in/h_in/corners). Complementa sanity_room() (consensus-based,
+# abaixo). Restaurado de 4def965 ("Frente A"); foi perdido no merge -X ours 15a15b2
+# (que manteve a versão consensus-only mas dropou audit, orfanando o teste).
+DEFAULTS = {
+    "z_under_tol_in": -0.5,      # z0_in abaixo disso = underground (embaixo da terra)
+    "min_footprint_in2": 1.0,    # footprint menor = degenerada (área ~0)
+    "min_height_in": 0.2,        # altura menor = sliver 2D (WARN)
+    "max_dim_m": 6.0,            # UMA dimensão de um móvel > isso = escala explodida
+    "outside_margin": 1.0,       # margem p/ "fora do cômodo" (mesma unidade das caixas)
+}
+
+
+def _wh(b):
+    return (b["x1"] - b["x0"], b["y1"] - b["y0"])
+
+
+def _axis_aligned(b) -> bool:
+    cs = b.get("corners")
+    if not cs:
+        return True  # sem corners -> assume AABB (x0..y1)
+    xs = {round(c[0], 1) for c in cs}
+    ys = {round(c[1], 1) for c in cs}
+    return len(xs) <= 2 and len(ys) <= 2
+
+
+def _pt_in_poly(x, y, poly) -> bool:
+    inside, n, j = False, len(poly), len(poly) - 1
+    for i in range(n):
+        xi, yi = poly[i]
+        xj, yj = poly[j]
+        if ((yi > y) != (yj > y)) and (x < (xj - xi) * (y - yi) / ((yj - yi) or 1e-9) + xi):
+            inside = not inside
+        j = i
+    return inside
+
+
+def audit(parts, *, rooms=None, to_m=1.0, cfg=None) -> dict:
+    """parts: lista de boxes. rooms: lista de polígonos [[x,y],...] NA MESMA UNIDADE das
+    caixas (opcional — só então roda fora-do-cômodo). to_m converte dimensões p/ metros
+    (apt_boxes em polegadas -> to_m=0.0254). Devolve dict com overall/findings."""
+    c = {**DEFAULTS, **(cfg or {})}
+    findings = []
+
+    def add(sev, check, b, detail):
+        findings.append({"severity": sev, "check": check, "label": b.get("label"),
+                         "kind": b.get("kind"), "detail": detail})
+
+    for b in parts:
+        w, d = _wh(b)
+        z0 = b.get("z0_in")
+        if z0 is not None and z0 < c["z_under_tol_in"]:
+            add("FAIL", "underground", b, f"z0_in={round(z0, 2)} < {c['z_under_tol_in']}")
+        if w * d < c["min_footprint_in2"]:
+            add("FAIL", "degenerate_footprint", b, f"footprint={round(w * d, 3)} (w={round(w,2)} d={round(d,2)})")
+        h = b.get("h_in")
+        if h is not None and 0 < h < c["min_height_in"]:
+            add("WARN", "degenerate_height", b, f"h_in={round(h, 3)}")
+        if not b.get("decorative") and not _axis_aligned(b):
+            # decorativo (tapete/manta) pode ser recortado ao comodo (poligono nao-retangular,
+            # cantos arredondados) -> nao e "eixo torto" estrutural. So estrutural checa off_axis.
+            add("FAIL", "off_axis", b, "corners nao axis-aligned (eixo torto)")
+        for dim, nm in ((w, "w"), (d, "d")):
+            if dim * to_m > c["max_dim_m"]:
+                add("FAIL", "absurd_bbox", b, f"{nm}={round(dim * to_m, 2)}m > {c['max_dim_m']}m (escala explodida)")
+        if rooms:
+            cx, cy = (b["x0"] + b["x1"]) / 2, (b["y0"] + b["y1"]) / 2
+            if not any(_pt_in_poly(cx, cy, poly) for poly in rooms):
+                add("FAIL", "outside_room", b, f"centro ({round(cx)},{round(cy)}) fora de todos os comodos")
+
+    n_fail = sum(1 for f in findings if f["severity"] == "FAIL")
+    n_warn = sum(1 for f in findings if f["severity"] == "WARN")
+    checks = ["underground", "degenerate_footprint", "degenerate_height", "off_axis", "absurd_bbox"]
+    if rooms:
+        checks.append("outside_room")
+    return {"overall": "FAIL" if n_fail else ("WARN" if n_warn else "PASS"),
+            "n_parts": len(parts), "n_fail": n_fail, "n_warn": n_warn,
+            "findings": findings, "checks_run": checks,
+            "note": "PASS = sem regressao geometrica obvia; NAO julga estetica/premium (isso e o visual review)."}
 
 
 def _fbox(b):
@@ -69,8 +154,8 @@ def sanity_room(con, room_id):
             fails.append(f"{k}: bbox DEGENERADA ({w:.1f}x{h:.1f}in)"); continue
         if max(w, h) > diag:
             fails.append(f"{k}: bbox ABSURDA ({w:.0f}x{h:.0f}in > diag {diag:.0f})"); continue
-        # FORA = CENTRO fora do comodo (8in de tolerancia: painel encostado na parede tem centro ~dentro).
-        if not poly.buffer(8).contains(bb.centroid):
+        # FORA = CENTRO fora do comodo (OUTSIDE_BUFFER_IN de tolerancia).
+        if not poly.buffer(OUTSIDE_BUFFER_IN).contains(bb.centroid):
             fails.append(f"{k}: CENTRO fora do comodo (atravessa parede / fora do comodo)")
         elif (bb.difference(poly).area / bb.area if bb.area else 0) > 0.5:
             warns.append(f"{k}: >50% transborda a parede")

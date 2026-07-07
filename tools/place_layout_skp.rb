@@ -40,12 +40,22 @@ def pl_png(model, path)
     filename: path, width: 1600, height: 1200, antialias: true, transparent: false)
 end
 
-def pl_material(model, name, rgb)
+def pl_material(model, name, rgb, tex_path = nil, tile = 40)
   m = model.materials[name]
   return m if m
   m = model.materials.add(name)
   m.color = Sketchup::Color.new(rgb[0], rgb[1], rgb[2])
   m.alpha = 1.0
+  # A CORRECAO DO BUG (FP-036): o path HUMANO/interativo tambem aplica textura por kind, nao so
+  # o V-Ray. Sem png (ou arquivo ausente) -> cor chapada = comportamento anterior (fallback seguro).
+  if tex_path && File.exist?(tex_path)
+    begin
+      m.texture = tex_path
+      m.texture.size = [tile, tile] if m.texture   # tamanho fisico do tile em polegadas
+    rescue StandardError
+      # textura falhou -> fica so na cor solida (nao aborta a peca)
+    end
+  end
   m
 end
 
@@ -53,6 +63,14 @@ def pl_run
   boxes = JSON.parse(ENV['LAYOUT_BOXES'] || '[]')
   model = Sketchup.active_model
   log = []
+
+  # FP-036: mapa de textura por KIND (de style_spec.texture_map_for), injetado pelo Python.
+  # kind = FONTE UNICA -> cada ph_<kind> recebe SO a textura do seu kind (nunca a 1a peca em tudo).
+  tex_map = (JSON.parse(ENV['LAYOUT_TEX_MAP'] || '{}') rescue {})    # kind -> png
+  tile_map = (JSON.parse(ENV['LAYOUT_TILE_MAP'] || '{}') rescue {})  # kind -> tile_in (de tile_map_for)
+  tex_dir = ENV['LAYOUT_TEX_DIR']
+  tex_logged = {}    # dedup do log por kind (inclui MISS)
+  tex_applied = {}   # so os kinds que REALMENTE receberam textura (File.exist? true)
 
   # BEFORE: shell puro (sem moveis)
   if ENV['LAYOUT_BEFORE']
@@ -114,7 +132,24 @@ def pl_run
       else
         face.pushpull(face.normal.z >= 0 ? h : -h)
       end
-      mat = pl_material(model, "ph_#{b['kind']}", b['rgb'] || [120, 120, 120])
+      kind = b['kind']
+      # FP-037: prefere o material JA RESOLVIDO por (familia,kind) no Python (mat_name/tex_png/
+      # tile_in) — assim rack.base=madeira e sofa.base=grafite viram materiais SEPARADOS. Sem os
+      # campos (ex. slice sem attach) cai no fallback FP-036 por kind (tex_map[kind]).
+      mat_name = b['mat_name'] || "ph_#{kind}"
+      png = b.key?('tex_png') ? b['tex_png'] : tex_map[kind]
+      tile = (b['tile_in'] || tile_map[kind] || 40).to_f
+      tex_path = (png && tex_dir) ? File.join(tex_dir, png) : nil
+      if png && tex_dir && !tex_logged[mat_name]                 # log por material (invariante auditavel)
+        tex_logged[mat_name] = true
+        if File.exist?(tex_path)
+          tex_applied[mat_name] = true                           # so conta o que de fato texturizou
+          log << "  tex #{mat_name} <- #{png} (tile #{tile.round})"
+        else
+          log << "  tex MISS #{mat_name}: #{png} ausente -> cor chapada"
+        end
+      end
+      mat = pl_material(model, mat_name, b['rgb'] || [120, 120, 120], tex_path, tile)
       g.material = mat
       placed += 1
       bw = (b['x1'].to_f - b['x0'].to_f).round
@@ -126,6 +161,7 @@ def pl_run
     end
   end
   log << "placed #{placed}/#{boxes.size} placeholders"
+  log << "texturas aplicadas: #{tex_applied.size} kind(s) via LAYOUT_TEX_MAP"
   log << "MOVEIS (comodo | movel): #{mod_groups.keys.sort.join(' ; ')}"
   mod_groups.each_value { |mg| (furn_bb.add(mg.bounds) rescue nil) }
   # TRAVA o shell (paredes/piso/portas/janelas) — mover/editar movel NAO atrapalha a base

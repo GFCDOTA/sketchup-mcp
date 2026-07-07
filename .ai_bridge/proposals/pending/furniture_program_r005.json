@@ -1,0 +1,43 @@
+{
+  "id": "furniture_program_r005",
+  "type": "furniture_program",
+  "source_worker": "Arquiteto · deepseek-r1:14b",
+  "environment": "banheiro",
+  "room_id": "r005",
+  "room_name": "BANHO 01",
+  "area_m2": 2.9,
+  "items": [
+    {
+      "asset": "chuveiro_compacto",
+      "priority": "core",
+      "reason": "para banho em espaços pequenos"
+    },
+    {
+      "asset": "pia_vessel_black_wood",
+      "priority": "core",
+      "reason": "design industrial com madeira preta eouro"
+    },
+    {
+      "asset": "espelho_com_gaveta",
+      "priority": "core",
+      "reason": "armazenamento builtin e estilo"
+    },
+    {
+      "asset": "bidet_moderno",
+      "priority": "core",
+      "reason": "prático e funcional"
+    },
+    {
+      "asset": "luminária_sconce_gold",
+      "priority": "core",
+      "reason": "iluminação suave e design"
+    },
+    {
+      "asset": "cabide_towel_heated",
+      "priority": "opcional",
+      "reason": "conveniência adicional"
+    }
+  ],
+  "existing": [],
+  "requires_approval": true
+}

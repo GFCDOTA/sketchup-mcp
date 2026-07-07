@@ -1,0 +1,6 @@
+# Vitrine sketchup-mcp (home/grafo/fluxo/agentes/explica) em container persistente (:8783).
+# stdlib only — sem requirements. O código vem do volume E:/Claude:/workspace montado em runtime.
+FROM python:3.12-slim
+WORKDIR /workspace/apps/sketchup-mcp
+EXPOSE 8783
+CMD ["python", "tools/vitrine/grafo_server.py", "--port", "8783"]

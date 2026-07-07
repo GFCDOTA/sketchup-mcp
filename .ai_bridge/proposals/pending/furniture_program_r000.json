@@ -1,0 +1,40 @@
+{
+  "id": "furniture_program_r000",
+  "type": "furniture_program",
+  "source_worker": "Arquiteto · deepseek-r1:14b",
+  "environment": "suite",
+  "room_id": "r000",
+  "room_name": "SUITE 01",
+  "area_m2": 15.3,
+  "items": [
+    {
+      "asset": "wardrobe",
+      "priority": "core",
+      "reason": "armazenamento essencial em estilo industrial"
+    },
+    {
+      "asset": "desk",
+      "priority": "core",
+      "reason": "trabalho e estudo com design moderno"
+    },
+    {
+      "asset": "pendant_light",
+      "priority": "core",
+      "reason": "iluminação industrial e funcional"
+    },
+    {
+      "asset": "mirror",
+      "priority": "secundario",
+      "reason": "decoracao utilitaria com estilo"
+    },
+    {
+      "asset": "artwork",
+      "priority": "opcional",
+      "reason": "toque de sofisticação no ambiente"
+    }
+  ],
+  "existing": [
+    "🛏️ Cama (falta referências)"
+  ],
+  "requires_approval": true
+}

@@ -434,9 +434,13 @@ def collect_boxes(con):
     # ANTES de qualquer serializacao LAYOUT_BOXES. Kind fora do mapa fica intacto.
     style = os.environ.get("FURNISH_STYLE")
     if style:
-        from tools.style_spec import apply_style
+        from tools.style_spec import apply_style, attach_materials
         nrec = apply_style(all_boxes, style)
         print(f"[furnish-apt] estilo '{style}': {nrec} boxes recoloridos")
+        # FP-037: resolve material por (familia_de_modulo, kind) e anexa por box. Destrava madeira
+        # no rack/mesa (kinds base/top/front) SEM contaminar o sofa (sofa.base = flat/grafite).
+        ntex = attach_materials(all_boxes, style)
+        print(f"[furnish-apt] material por modulo: {ntex} boxes com textura resolvida")
     return all_boxes, summary
 
 
@@ -477,6 +481,17 @@ def main():
     env["LAYOUT_AFTER_ISO"] = str(after_iso).replace("\\", "/")
     env["LAYOUT_LOG"] = str(log_path).replace("\\", "/")
 
+    # FP-036: textura por kind no path INTERATIVO — o .skp que o Felipe abre deixa de sair com
+    # cor chapada. So sob FURNISH_STYLE; fonte unica = style_spec.texture_env (nunca a 1a peca em tudo).
+    style = os.environ.get("FURNISH_STYLE")
+    if style:
+        from tools.style_spec import texture_env
+        tex_env = texture_env(style, (ROOT / "assets/textures/procedural").resolve())
+        env.update(tex_env)
+        if tex_env:
+            print(f"[furnish-apt] textura interativa: "
+                  f"{len(json.loads(tex_env['LAYOUT_TEX_MAP']))} kind(s) mapeados (estilo {style})")
+
     subprocess.run(["taskkill", "/F", "/IM", "SketchUp.exe"], capture_output=True)
     time.sleep(1)
     cmd = [SKETCHUP_EXE, str(BASE_SKP), "-RubyStartup", str(RB)]
@@ -496,6 +511,21 @@ def main():
     else:
         print("[furnish-apt] TIMEOUT — SU nao produziu log")
         sys.exit(1)
+
+    # FP-036: gate DETERMINISTICO anti-chapado (nao julga estetica; so 'os moveis tem textura?').
+    # Roda no render gerado ANTES de entregar pro veredito do Felipe. FAIL = provavel sem textura.
+    if after_iso.exists():
+        try:
+            from tools.flat_white_gate import flat_white_check
+            fw = flat_white_check(after_iso, os.environ.get("FURNISH_STYLE"))
+            print(f"\n[furnish-apt] flat_white_check({after_iso.name}) => {fw['result']}")
+            for line in fw.get("fails", []) + fw.get("warns", []):
+                print(f"    {line}")
+            if fw["result"] == "FAIL":
+                print("[furnish-apt] /!\\ render CHAPADO (provavel sem textura) — inspecionar antes do veredito")
+        except Exception as e:  # noqa: BLE001
+            print(f"[furnish-apt] flat_white_check pulado: {e}")
+
     print(f"\n[furnish-apt] -> {OUT_DIR}/")
     print(f"  SKP:   {skp_out.name}")
     print(f"  AFTER: {after_top.name} / {after_iso.name}")

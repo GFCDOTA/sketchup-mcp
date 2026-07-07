@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang=pt-BR><head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>Fluxo do Projeto — PDF → Render</title>
+<style>
+:root{--bg:#0e0f12;--card:#16171c;--bd:#262a32;--fg:#e8e9ec;--mut:#9aa0aa;--gold:#c9a86a;--a:#6ca8ff;--b:#7fd99a}
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{color:var(--fg);font:14px/1.5 system-ui,Arial;background:radial-gradient(1200px 700px at 50% 0%,#15131d,#0c0d10 70%) fixed;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+header{display:flex;align-items:center;gap:12px;padding:11px 18px;border-bottom:1px solid #2c2636;background:linear-gradient(90deg,#15131c,#121318);flex:none}
+h1{font-size:15px;margin:0;font-weight:700;letter-spacing:.4px;background:linear-gradient(90deg,#fff,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 9px var(--gold)}.spacer{margin-left:auto}
+a.nav{color:var(--mut);text-decoration:none;font-size:12.5px;border:1px solid var(--bd);border-radius:8px;padding:6px 11px}
+a.nav:hover{color:var(--fg);background:#1f1b29}a.nav.on{color:var(--gold);border-color:var(--gold)}
+#app{flex:1;display:flex;min-height:0}
+main{flex:1;overflow-y:auto;padding:22px 18px 60px;display:flex;flex-direction:column;align-items:center}
+.phase{font-size:12px;text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin:10px 0 12px;width:470px;max-width:88vw}
+.pa{color:var(--a)}.pb{color:var(--b)}
+.step{width:470px;max-width:88vw;background:var(--card);border:1px solid var(--bd);border-left:4px solid var(--a);border-radius:11px;padding:12px 15px;display:flex;gap:13px;align-items:center;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.step:hover{border-color:var(--gold)}.step.sel{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,106,.16)}
+.step.b{border-left-color:var(--b)}
+.num{width:30px;height:30px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#0c0d10;background:var(--a)}
+.step.b .num{background:var(--b)}
+.st{font-weight:600;font-size:13.5px}.sd{color:var(--mut);font-size:11.5px}
+.cnt{margin-left:auto;color:var(--mut);font-size:11px;white-space:nowrap}
+.arr{color:#525a6b;font-size:17px;line-height:1;margin:4px 0}
+.railwrap{width:470px;max-width:88vw;margin-top:20px;border-top:1px solid var(--bd);padding-top:15px}
+.railh{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--mut);font-weight:700;margin-bottom:10px}
+.rail{background:#13151a;border:1px solid var(--bd);border-left:4px solid var(--gold);border-radius:10px;padding:11px 14px;margin-bottom:9px;cursor:pointer;transition:border-color .15s}.rail:hover{border-color:var(--gold)}.rail.sel{box-shadow:0 0 0 3px rgba(201,168,106,.16)}
+.rt{font-weight:600;font-size:13px}.rd{color:var(--mut);font-size:11.5px}
+aside{width:308px;flex:none;border-left:1px solid var(--bd);background:#101116cc;overflow-y:auto;padding:16px}
+aside h2{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin:0 0 4px}
+.dt{font-size:15px;font-weight:700;margin-bottom:2px;line-height:1.25}.dd{color:var(--mut);font-size:12px;margin:4px 0 12px}
+.pg{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--fg);padding:7px 10px;border:1px solid var(--bd);border-radius:7px;margin:5px 0;background:#0c0d10;text-decoration:none}
+.pg:hover{border-color:var(--gold);color:#fff}.pg .a{margin-left:auto;color:var(--mut);font-size:11px}
+.hint{color:var(--mut);font-size:11.5px;line-height:1.55}
+.play{background:#0c0d10;border:1px solid var(--bd);color:var(--b);border-radius:8px;padding:6px 12px;font:12.5px system-ui;cursor:pointer}.play:hover{border-color:var(--b)}
+.step.on{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,106,.22),0 0 26px rgba(201,168,106,.5);transform:scale(1.05)}
+.arr.on{color:var(--gold);transform:scale(1.7)}
+</style></head><body>
+<header><span class=dot></span><h1>Fluxo do Projeto — PDF → Render</h1>
+ <span class=spacer></span>
+ <a class=nav href="/">🏠</a><a class=nav href="/grafo">🕸 Grafo</a><a class="nav on" href="/fluxo">⛓ Fluxo</a><a class=nav href="/agents">🤖 Agentes</a>
+ <button class=play id=play onclick=toggleAnim()>▶ animar fluxo</button>
+ <a class=nav href="/explica">📖 Como funciona</a></header>
+<div id=app>
+ <main id=flow></main>
+ <aside id=detail><span class=hint>Clica num passo pra ver as páginas dele. Cada página abre no <b>grafo</b>, já isolada.<br><br>Fase A = geometria fiel · Fase B = deixar bonito · trilhos = sustentam tudo.</span></aside>
+</div>
+<script>
+const PHASES=[
+ {name:'Fase A · geometria fiel',cls:'pa',b:false,steps:[
+  {n:1,t:'PDF da planta',d:'a entrada, a verdade',pages:['planta_74','PDF Plan Semantics']},
+  {n:2,t:'Consensus (humano lê o PDF)',d:'descreve paredes/portas à mão — sem IA',pages:['No-Fabrication Rule','PDF Plan Semantics','Vector-First Extraction']},
+  {n:3,t:'Consensus congelado',d:'a verdade vira dados (JSON)',pages:['Consensus Model Schema','Look Before You Tweak']},
+  {n:4,t:'Travar a escala (0.0259)',d:'PDF points → metros',pages:['PT-to-M-Scale-Lock']},
+  {n:5,t:'Build do shell .skp',d:'paredes · portas · janelas',pages:['PDF-to-SKP-Pipeline','Shell Build and In-Place Edit','Parametric Openings']},
+  {n:6,t:'Provar fidelidade (gate)',d:'determinístico + olho',pages:['Fidelity-Gate','Deterministic Detectors First','Visual-Review-Gate']},
+ ]},
+ {name:'Fase B · deixar bonito',cls:'pb',b:true,steps:[
+  {n:7,t:'Mobiliar',d:'6 classes de móvel',pages:['Furniture-Class-Program','Furniture-Class-Scorecard','Class-Architect-Method','Satellite-Pattern','Disc-and-Curve-by-Bands','Furnishing-the-Apartment','SU-Free-Furniture-Loop','Joinery-Designer']},
+  {n:8,t:'Dar o estilo (interiores)',d:'paleta · materiais · luz',pages:['Interior Architect Method','Interior Style Grammar','Reference-to-Joinery Translator','INTERIOR_STUDIO','Product-Learning Phase','Furnished-Plant Product Direction']},
+  {n:9,t:'Render V-Ray',d:'imagem realista',pages:['V-Ray Render Pipeline']},
+  {n:10,t:'Veredito visual',d:'olho do Felipe / GPT',pages:['Visual Gates and GPT Review','Visual-Review-Gate']},
+ ]},
+];
+const RAILS=[
+ {t:'Operação',d:':8765 · NOC · máquina · workspace',pages:['Cockpit-8765','Cockpit & Gate server.py','NOC Dispatcher','NOC Desktop Launchers','ChatGPT Consult Path',"Felipe's Machine",'Workspace Layout','Grep Refs Before Removing','Defender PowerShell Flag']},
+ {t:'Processo / como trabalhar',d:'git · autonomia · regras de engenharia',pages:['Git and PR Workflow','Autonomy Protocol','Done Is Not Stop','Consulting LLMs at Forks','Canonical Artifact Rule','AI Bridge and Handoff Protocol','Model and Effort Right-Sizing','Clean and Hexagonal Architecture','Testing Strategy','Code Review and Security']},
+];
+const esc=t=>(t||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const STEP={},RAIL={};
+function render(){const f=document.getElementById('flow');let h='';
+ PHASES.forEach((ph)=>{h+=`<div class="phase ${ph.cls}">${esc(ph.name)}</div>`;
+  ph.steps.forEach((s,i)=>{STEP[s.n]=s;if(i)h+='<div class=arr>▼</div>';
+   h+=`<div class="step ${ph.b?'b':''}" data-k="${s.n}"><div class=num>${s.n}</div><div><div class=st>${esc(s.t)}</div><div class=sd>${esc(s.d)}</div></div><div class=cnt>${s.pages.length} pág.</div></div>`});});
+ h+=`<div class=railwrap><div class=railh>Trilhos de apoio — atravessam o fluxo inteiro</div>`;
+ RAILS.forEach((r,i)=>{RAIL[i]=r;h+=`<div class=rail data-r="${i}"><div class=rt>${esc(r.t)}</div><div class=rd>${esc(r.d)} · ${r.pages.length} pág.</div></div>`});
+ h+='</div>';
+ f.innerHTML=h;
+ f.querySelectorAll('.step').forEach(e=>e.onclick=()=>pick('step',e.dataset.k,e));
+ f.querySelectorAll('.rail').forEach(e=>e.onclick=()=>pick('rail',e.dataset.r,e));
+}
+function pick(kind,key,el){
+ document.querySelectorAll('.step.sel,.rail.sel').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');
+ const o=kind==='step'?STEP[key]:RAIL[key];const title=kind==='step'?(o.n+'. '+o.t):o.t;
+ const d=document.getElementById('detail');
+ d.innerHTML=`<div class=dt>${esc(title)}</div><div class=dd>${esc(o.d)}</div>
+  <h2>Páginas (${o.pages.length}) — abre no grafo</h2>
+  ${o.pages.map(p=>`<a class=pg href="/grafo?node=${encodeURIComponent(p)}" target=_blank title="abrir no grafo, isolada">${esc(p)} <span class=a>↗</span></a>`).join('')}`;
+}
+render();
+let ANIM=null,ai=0;
+function animEls(){return [...document.querySelectorAll('.step')]}
+function animStep(){const els=animEls();if(!els.length)return;
+ document.querySelectorAll('.step.on,.arr.on').forEach(x=>x.classList.remove('on'));
+ const el=els[ai%els.length];el.classList.add('on');
+ const p=el.previousElementSibling;if(p&&p.classList.contains('arr'))p.classList.add('on');
+ el.scrollIntoView({behavior:'smooth',block:'center'});pick('step',el.dataset.k,el);ai++}
+function toggleAnim(){const b=document.getElementById('play');
+ if(ANIM){clearInterval(ANIM);ANIM=null;b.textContent='▶ animar fluxo';document.querySelectorAll('.step.on,.arr.on').forEach(x=>x.classList.remove('on'))}
+ else{b.textContent='⏸ parar';ai=0;animStep();ANIM=setInterval(animStep,1700)}}
+setTimeout(toggleAnim,500);
+</script>
+</body></html>
