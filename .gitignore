@@ -120,3 +120,6 @@ artifacts/reference_lab/inbox/*.jpeg
 
 # project-memory RAG #2 (índice reconstruível via project_memory_db.py index)
 .ai_bridge/project_memory.db
+# freshness/cache do RAG do arquiteto (FP-037) — índice DERIVADO e reconstruível
+# via `reference_db.py reindex`; a verdade vive nas fontes registradas.
+.ai_bridge/rag_freshness.db

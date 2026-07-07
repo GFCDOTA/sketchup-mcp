@@ -118,6 +118,23 @@
       "type": "array",
       "items": {"type": "string"},
       "description": "avisos honestos (ex. 'corpus FP-034 ausente -> confidence LOW')"
+    },
+    "rag_corpus_version": {
+      "type": ["string", "null"],
+      "description": "FP-037 (aditivo) — sha256 da geração do corpus RAG de onde a resposta veio (documentos ATIVOS registrados no source registry). null quando o backend embed nao foi usado ou o indice de freshness esta vazio. Torna a decisao AUDITAVEL: a mesma query em corpus diferente carrega version diferente."
+    },
+    "retrieved_chunks": {
+      "type": "array",
+      "description": "FP-037 (aditivo) — chunks trazidos pelo recall semantico (backend embed). Vazio no faceted puro ou quando Qdrant/Ollama off (degradacao honesta). NUNCA infla confidence — so audita o que o vetor recuperou.",
+      "items": {
+        "type": "object",
+        "required": ["source", "chunk_id", "confidence"],
+        "properties": {
+          "source": {"type": ["string", "null"], "description": "source_path do chunk"},
+          "chunk_id": {"type": ["string", "null"]},
+          "confidence": {"type": "number", "description": "score de similaridade cosine [0..1]"}
+        }
+      }
     }
   }
 }
