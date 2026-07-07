@@ -25,7 +25,7 @@ the source PDF**.
 | Language | Python 3.11+ · Ruby (SketchUp) |
 | Platform | Windows + SketchUp 2026 (the `.skp` build step) |
 | Core deps | `shapely`, `pypdfium2`, `Pillow` |
-| Tests | 41 Python-only contract/gate suites (no SketchUp needed) |
+| Tests | 85 Python-only contract/gate suites (no SketchUp needed) |
 | License | Proprietary |
 
 ---
@@ -183,7 +183,7 @@ artifacts/                       # tracked canonical deliverables
   planta_74/geometry_report.json
   review/                                        # promoted before/after evidence
 
-tests/                           # 41 Python-only contract / gate suites
+tests/                           # 85 Python-only contract / gate suites
 docs/                            # specs + assets
 references/design_rules/         # furniture rule cards + schema
 schemas/visual_findings.schema.json
