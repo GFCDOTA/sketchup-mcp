@@ -293,3 +293,63 @@ def test_main_apply_flag_mutates(monkeypatch, capsys):
     assert ad._main(["--apply"]) == 0
     assert seen["dry_run"] is False
     assert json.loads(capsys.readouterr().out)["dry_run"] is False
+
+
+# ---- run-log (activation history, BFF-facing) ----------------------------
+
+FIXED_T = "2026-01-01T00:00:00Z"
+
+
+def _runs(tmp_path):
+    return (tmp_path / ad.RUNS_NAME).read_text("utf-8").splitlines()
+
+
+def test_drain_writes_one_run_log_line_with_derived_counts(tmp_path):
+    props = FakeProposals([_clean(), _broken(), _taste_gap()])
+    _drain(props, tmp_path, now_iso=FIXED_T)
+    lines = _runs(tmp_path)
+    assert len(lines) == 1                               # exactly one line per drain
+    row = json.loads(lines[0])
+    assert row == {"t": FIXED_T, "trigger": "auto", "decided": 2,
+                   "auto_approve": 1, "auto_reject": 1, "escalated": 0,
+                   "left_pending": 0, "refused": 1, "dry_run": False}
+
+
+def test_run_log_trigger_marks_the_line(tmp_path):
+    props = FakeProposals([_clean()])
+    _drain(props, tmp_path, trigger="manual", now_iso=FIXED_T)
+    row = json.loads(_runs(tmp_path)[0])
+    assert row["trigger"] == "manual"
+    assert row["decided"] == 1 and row["auto_approve"] == 1
+
+
+def test_run_log_records_the_acionamento_in_dry_run_too(tmp_path):
+    props = FakeProposals([_clean(), _broken()])
+    _drain(props, tmp_path, dry_run=True, now_iso=FIXED_T)
+    lines = _runs(tmp_path)
+    assert len(lines) == 1                               # simulation still logged
+    row = json.loads(lines[0])
+    assert row["dry_run"] is True                        # marked as a simulation
+    assert row["decided"] == 2                           # WOULD-do counts recorded
+    assert row["auto_approve"] == 1 and row["auto_reject"] == 1
+    assert set(props.pending) == {"furniture_program_r002",
+                                  "furniture_program_r003"}  # but nothing moved
+
+
+def test_read_runs_is_most_recent_first_with_limit_and_missing_file(tmp_path):
+    assert ad.read_runs(out_dir=tmp_path) == []          # missing file -> []
+    # three drains, all with the SAME t -> recency MUST come from append order
+    for label in ("first", "second", "third"):
+        _drain(FakeProposals([_clean()]), tmp_path, trigger=label, now_iso=FIXED_T)
+    rows = ad.read_runs(out_dir=tmp_path)
+    assert [r["trigger"] for r in rows] == ["third", "second", "first"]  # newest first
+    assert ad.read_runs(limit=2, out_dir=tmp_path) == rows[:2]
+    assert ad.read_runs(limit=0, out_dir=tmp_path) == []
+
+
+def test_consume_trigger_deletes_and_returns_true_then_false(tmp_path):
+    p = tmp_path / "manual_trigger"
+    p.write_text("go", encoding="utf-8")
+    assert ad.consume_trigger(p) is True                 # existed -> consumed
+    assert not p.exists()                                # …and deleted
+    assert ad.consume_trigger(p) is False                # gone -> False, no raise

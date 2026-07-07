@@ -40,6 +40,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_OUT = ROOT / "data" / "runs"
 AUDIT_NAME = "auto_decider_audit.jsonl"
 DLQ_NAME = "auto_decider_dlq.jsonl"
+RUNS_NAME = "auto_decider_runs.jsonl"     # one line PER drain — the activation log
 
 AUDIT_SCHEMA = "decision_audit_record/1.0.0"
 DEFAULT_CAPS = {"max_auto_decisions_per_drain": 20, "max_gate_calls_per_drain": 5}
@@ -57,6 +58,31 @@ _ESCALATED = "escalated_gate"
 _GATE_APPLY = {"GO": _APPROVE, "NO-GO": _REJECT}
 _GATE_OK_CONF = ("high", "medium")
 _FILL_RE = re.compile(r"~?(\d+)\s*%\s*do piso")
+
+
+def _utc_now_iso() -> str:
+    """ISO UTC stamp — used ONLY as the run-log default at the drain boundary
+    (injected in tests via ``now_iso``, never in testable logic). The run-log ``t``
+    is the ACTIVATION time (wall clock is honest here); the derived-mtime rule is
+    about a proposal's ``created_at``, not about when the carteiro ran."""
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _run_log_row(summary: dict, *, trigger: str, dry_run: bool, t: str) -> dict:
+    """One activation-log line — counts DERIVED from the drain summary. Written on
+    every drain (dry-run too) so the dashboard has the history of acionamentos."""
+    decided = summary["decided"]
+    return {
+        "t": t,
+        "trigger": trigger,
+        "decided": len(decided),
+        "auto_approve": sum(1 for d in decided if d.get("action") == _APPROVE),
+        "auto_reject": sum(1 for d in decided if d.get("action") == _REJECT),
+        "escalated": len(summary["escalated"]),
+        "left_pending": len(summary["left_pending"]),
+        "refused": len(summary["refused"]),
+        "dry_run": dry_run,
+    }
 
 
 def _effective_caps(caps: dict | None) -> dict:
@@ -176,9 +202,16 @@ def drain(*, caps: dict | None = None, proposals=ic_proposals, gates_fn=None,
           now_fn=None, out_dir: Path | None = None,
           corpus_version: str = "unknown", use_gate: bool = True, gate_fn=None,
           questions_dir: Path | None = None, responses_dir: Path | None = None,
-          bridge_url: str | None = None, dry_run: bool = False) -> dict:
+          bridge_url: str | None = None, dry_run: bool = False,
+          trigger: str = "auto", now_iso: str | None = None) -> dict:
     """Single-pass objective drain. Returns
     {decided, escalated, refused, left_pending, audit_records}.
+
+    Every drain appends ONE line to ``auto_decider_runs.jsonl`` (the activation
+    log) — counts derived from the summary, labelled with ``trigger`` ("auto" by
+    default; "manual" for the dashboard button). A ``dry_run`` drain records the
+    acionamento too (``dry_run=true``) so the history includes simulations. ``t`` is
+    the run time (``now_iso`` injected in tests; wall clock at the boundary).
 
     Injectables (defaults are the live wiring): ``proposals`` (state/approve/reject),
     ``gates_fn(proposal)->(geo,overlap)``, ``now_fn(pid)->iso``, ``out_dir``.
@@ -346,8 +379,12 @@ def drain(*, caps: dict | None = None, proposals=ic_proposals, gates_fn=None,
                           "verdict": verdict, "applied": None})
         left_pending.append(pid)
 
-    return {"decided": decided, "escalated": escalated, "refused": refused,
-            "left_pending": left_pending, "audit_records": new_records}
+    summary = {"decided": decided, "escalated": escalated, "refused": refused,
+               "left_pending": left_pending, "audit_records": new_records}
+    # activation log: ALWAYS one line per drain (dry-run too) — never deduped.
+    append_jsonl(out / RUNS_NAME, [_run_log_row(
+        summary, trigger=trigger, dry_run=dry_run, t=now_iso or _utc_now_iso())])
+    return summary
 
 
 def read_audit(limit: int = 100, *, out_dir: Path | None = None) -> list[dict]:
@@ -367,6 +404,32 @@ def read_audit(limit: int = 100, *, out_dir: Path | None = None) -> list[dict]:
     return rows
 
 
+def read_runs(limit: int = 50, *, out_dir: Path | None = None) -> list[dict]:
+    """Read the carteiro's ACTIVATION log (``auto_decider_runs.jsonl``), MOST RECENT
+    FIRST, up to ``limit`` rows. Like the audit, the log is append-only, so recency
+    == append order — ``t`` may tie between runs and is NOT used to order. Pure, no
+    network — the BFF/dashboard reads the history of acionamentos through this
+    (``dry_run==true`` rows are simulations). Missing file -> [] (tolerant read)."""
+    out = Path(out_dir) if out_dir else DEFAULT_OUT
+    rows = read_jsonl(out / RUNS_NAME)
+    rows.reverse()                      # append-only => last appended == most recent
+    if limit is not None and limit >= 0:
+        rows = rows[:limit]
+    return rows
+
+
+def consume_trigger(trigger_path: Path) -> bool:
+    """Edge-trigger consumer for the dashboard button: if ``trigger_path`` exists,
+    DELETE it and return True (a manual run was requested); otherwise return False.
+    Pure and atomic (unlink races resolve to one winner). The actuator calls:
+    ``if consume_trigger(p): drain(trigger="manual")``."""
+    try:
+        Path(trigger_path).unlink()
+        return True
+    except FileNotFoundError:
+        return False
+
+
 def _main(argv=None) -> int:
     import argparse
     import sys
@@ -378,10 +441,12 @@ def _main(argv=None) -> int:
                      help="simula: classifica e mostra o que faria, NAO muta (default)")
     grp.add_argument("--apply", action="store_true",
                      help="aplica de verdade (move proposals, escreve audit/DLQ)")
+    ap.add_argument("--trigger", choices=("auto", "manual"), default="auto",
+                    help="rotulo do acionamento no run-log (default auto; manual = botao)")
     a = ap.parse_args(argv)
     # DEFAULT = seguro: sem --apply nunca muta (nem --dry-run nem sem flag mutam).
     dry_run = not a.apply
-    summary = drain(dry_run=dry_run)
+    summary = drain(dry_run=dry_run, trigger=a.trigger)
     out = {k: v for k, v in summary.items() if k != "audit_records"}
     out["dry_run"] = dry_run
     out["audit_records"] = len(summary["audit_records"])
