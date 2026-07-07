@@ -1,4 +1,4 @@
-"""night_feeder — alimentador da fila NOC. Hermetico: paths TODOS injetados
+"""feeder — alimentador da fila NOC. Hermetico: paths TODOS injetados
 (tmp), clock injetado (--now/--today); NAO toca a fila NOC de producao, o
 git nem o :8765."""
 from __future__ import annotations
@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from tools import night_feeder as nf
+from tools import feeder as nf
 from tools.jsonl_io import append_jsonl, read_jsonl
 
 NOW = 1_783_118_000.0

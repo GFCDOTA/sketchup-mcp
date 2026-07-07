@@ -1,5 +1,5 @@
-"""night_feeder.py — alimentador noturno da fila NOC: enche a fila com trabalho
-SEGURO e CAPADO quando o gate esta ocioso, pra o atuador nunca dormir sem lenha.
+"""feeder.py — alimentador da fila NOC: enche a fila com trabalho SEGURO e
+CAPADO quando o gate esta ocioso, pra o atuador nunca dormir sem lenha.
 
 Sinais (probes READ-ONLY na arvore do motor + data/runs do workspace):
   (a) ociosidade do gate  = idade do ultimo registro de .ai_bridge/audit/audit.jsonl
@@ -43,11 +43,11 @@ NF-<YYYYMMDD>-<slug> — rodar 2x no mesmo dia = zero task nova. Exit 0 sempre
 (feeder sem sinal nao e erro).
 
 Uso:
-    python -m tools.night_feeder --dry-run                 # imprime o plano
-    python -m tools.night_feeder --once                    # aplica (append na fila)
-    python -m tools.night_feeder --once --no-sweep         # so correction_cycle
-    python -m tools.night_feeder --once --no-drain         # sem drain de PENDING_VISION
-    python -m tools.night_feeder --today 20260703 --now 1783118000  # teste
+    python -m tools.feeder --dry-run                 # imprime o plano
+    python -m tools.feeder --once                    # aplica (append na fila)
+    python -m tools.feeder --once --no-sweep         # so correction_cycle
+    python -m tools.feeder --once --no-drain         # sem drain de PENDING_VISION
+    python -m tools.feeder --today 20260703 --now 1783118000  # teste
 """
 from __future__ import annotations
 
@@ -146,25 +146,25 @@ def queue_state(queue_path: Path, ledger_path: Path) -> dict:
 def corr_task(today: str, fixture: str) -> dict:
     return {
         "id": f"{ID_PREFIX}-{today}-corr-{fixture}",
-        "title": f"night-feeder: 1 ciclo correction_loop {fixture}",
+        "title": f"feeder: 1 ciclo correction_loop {fixture}",
         "safe": True,
         "kind": "correction_cycle",
         "fixture": fixture,
         "max_cycles": 1,
-        "enqueued_by": "night_feeder",
+        "enqueued_by": "feeder",
     }
 
 
 def sweep_task(today: str, plant: str, n: int) -> dict:
     return {
         "id": f"{ID_PREFIX}-{today}-sweep-{plant}",
-        "title": f"night-feeder: variant sweep su-free {plant} (n={n})",
+        "title": f"feeder: variant sweep su-free {plant} (n={n})",
         "safe": True,
         "kind": "variant-sweep",  # HIFEN byte-exato (spec FP-034)
         "plant": plant,
         "n": n,
         "appearance": True,  # sweep copia .png -> rota VISUAL_REVIEW; campo e
-        "enqueued_by": "night_feeder",  # informativo pro dashboard (drift documentado)
+        "enqueued_by": "feeder",  # informativo pro dashboard (drift documentado)
     }
 
 
@@ -175,12 +175,12 @@ def drain_task(today: str, plant: str, variant_id: str) -> dict:
     determinístico por dia+variante (nunca a mesma variante 2x no mesmo dia)."""
     return {
         "id": f"{ID_PREFIX}-{today}-visdrain-{variant_id}",
-        "title": f"night-feeder: drain PENDING_VISION {variant_id} (painel 3 juizes)",
+        "title": f"feeder: drain PENDING_VISION {variant_id} (painel 3 juizes)",
         "safe": True,
         "kind": "variant-vision-drain",  # HIFEN byte-exato (paridade com variant-sweep)
         "plant": plant,
         "variant_id": variant_id,
-        "enqueued_by": "night_feeder",
+        "enqueued_by": "feeder",
     }
 
 
@@ -269,7 +269,7 @@ def build_plan(*, today: str, now: float, queue_path: Path, ledger_path: Path,
             "BLOCKED_NEEDS_RENDER (honesto) e o pedido permanece na fila de visao.")
 
     return {
-        "feeder": "night_feeder/1.0.0",
+        "feeder": "feeder/1.1.0",
         "today": today,
         "signals": {
             "gate": gate,
@@ -306,7 +306,7 @@ def _default_runs_root() -> Path:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(
-        description="night feeder — enche a fila NOC com trabalho seguro e capado")
+        description="feeder — enche a fila NOC com trabalho seguro e capado")
     ap.add_argument("--dry-run", action="store_true",
                     help="imprime o plano, NAO escreve (default se --once ausente)")
     ap.add_argument("--once", action="store_true", help="aplica: append na fila")

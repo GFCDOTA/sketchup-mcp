@@ -47,7 +47,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 
 def _default_gallery_corpus(fixture: str) -> Path:
     """Corpus da UNICA galeria (data/runs/noc_variant_sweep sob a raiz do
-    workspace — a mesma do sweep/night_feeder/curadoria). Fallback repo-relativo
+    workspace — a mesma do sweep/feeder/curadoria). Fallback repo-relativo
     se a raiz do workspace nao resolver."""
     try:
         from tools.claude_bridge._paths import WORKSPACE_ROOT

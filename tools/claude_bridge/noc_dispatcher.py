@@ -75,7 +75,7 @@ DEFAULT_MODEL_BY_PURPOSE = {
 LOCAL_LLM_DIR = REPO_ROOT / "runs" / "local_llm"
 LOCAL_LLM_TERMINAL = {"LOCAL_LLM_DONE", "LOCAL_LLM_OFFLINE", "SKIPPED_PURPOSE_NOT_ALLOWED"}
 # Statuses TERMINAIS (task com um destes no ledger nao re-dispara). FONTE UNICA:
-# consumida por _terminal_ids() aqui e por tools.night_feeder.TERMINAL (lockstep
+# consumida por _terminal_ids() aqui e por tools.feeder.TERMINAL (lockstep
 # real — mudar aqui propaga pros dois; o teste do feeder pina o conteudo).
 TERMINAL_STATUSES = {"COMMITTED", "VISUAL_REVIEW_QUEUED", "NOOP",
                      "VERIFY_FAILED"} | LOCAL_LLM_TERMINAL
@@ -577,7 +577,7 @@ def dispatch_variant_sweep(task, dry_run=False) -> dict:
 
 
 def dispatch_variant_vision_drain(task, dry_run=False) -> dict:
-    """kind:variant-vision-drain — fecha o loop do night_feeder: drena UMA
+    """kind:variant-vision-drain — fecha o loop do feeder: drena UMA
     variante PENDING_VISION do corpus via o painel colaborativo de 3 juizes
     (FP-032 panel), usando o MESMO seam run_worker do dispatch() que
     dispatch_correction_cycle/dispatch_variant_sweep ja usam — guardas
@@ -607,7 +607,7 @@ def dispatch_variant_vision_drain(task, dry_run=False) -> dict:
     com correction_cycle/variant-sweep) — excecao propagada deixaria a task
     sem status terminal e ela re-dispararia pra sempre.
     Semantica: 1 task = 1 variante drenada; drain seguinte = task NOVA na
-    fila (id determinístico por dia+variante, ver night_feeder)."""
+    fila (id determinístico por dia+variante, ver feeder)."""
     plant = task.get("plant", "planta_74")
     out = Path(task.get("out") or (VARIANT_OUT_ROOT / plant)).resolve()
 
@@ -646,7 +646,7 @@ def dispatch_by_kind(task, dry_run=False) -> dict:
       - correction_cycle     -> 1 ciclo do correction_loop (FP-033) via dispatch() + seam.
       - variant-sweep        -> 1 sweep de variantes julgadas (FP-034) via dispatch() + seam.
       - variant-vision-drain -> drena 1 variante PENDING_VISION via painel de 3 juizes
-                                (fecha o loop do night_feeder) via dispatch() + seam.
+                                (fecha o loop do feeder) via dispatch() + seam.
       - claude               -> caminho existente: worktree isolado + `claude -p` (INALTERADO).
     Kind DESCONHECIDO cai no caminho claude (fallthrough caro — validacao fica pra
     outro slice; anotado no NOC_DISPATCHER.md)."""

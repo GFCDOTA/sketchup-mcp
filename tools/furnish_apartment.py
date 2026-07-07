@@ -43,7 +43,7 @@ PLANT = "planta_74"   # pipeline planta_74-only (mesmo escopo do resto do modulo
 
 
 def _gallery_corpus_root() -> Path:
-    """Raiz do corpus de galeria = a MESMA do variant_sweep/night_feeder
+    """Raiz do corpus de galeria = a MESMA do variant_sweep/feeder
     (data/runs/noc_variant_sweep sob a raiz do WORKSPACE), pra o apê mobiliado
     virar mais um item da UNICA galeria que a curadoria/RAG ja leem — nao um
     silo paralelo. Fallback repo-relativo se a raiz do workspace nao resolver."""

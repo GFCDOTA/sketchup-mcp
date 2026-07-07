@@ -132,7 +132,7 @@ Semântica: **1 task = 1 ciclo**. Os statuses terminais existentes
 (`COMMITTED`/`VISUAL_REVIEW_QUEUED`/`NOOP`/`VERIFY_FAILED`) impedem re-run do
 mesmo `id` — ciclo seguinte = task nova na fila.
 
-## kind: `variant-vision-drain` (fecha o loop do night_feeder)
+## kind: `variant-vision-drain` (fecha o loop do feeder)
 
 Drena **UMA** variante `PENDING_VISION` do corpus via o **painel colaborativo
 de 3 juízes** (ver seção seguinte), reusando `dispatch()` pelo mesmo seam
@@ -160,7 +160,7 @@ contrato HTTP. `design_patterns_observed` que o painel produzir chega ao
 Timeout/erro de subprocess vira `rc=1` (mesmo `_run_step_tolerant`
 compartilhado) — exceção propagada deixaria a task sem status terminal.
 Semântica: **1 task = 1 variante drenada**; drain seguinte = task nova na
-fila (id determinístico por dia+variante, ver `night_feeder` abaixo).
+fila (id determinístico por dia+variante, ver `feeder` abaixo).
 
 ## O painel colaborativo de 3 juízes (`/ask-vision`)
 
@@ -207,9 +207,9 @@ task (`id` casa com a fila). O campo `status` é um destes:
 O ledger é a fonte de verdade auditável: dá pra reconstruir tudo que o atuador
 tocou, por que manteve ou descartou, e o que ficou pendente de olho humano.
 
-## Apêndice: night_feeder — quem enche a fila quando o gate dorme
+## Apêndice: feeder — quem enche a fila quando o gate dorme
 
-`tools/night_feeder.py` é o **alimentador**: um job read-only-exceto-a-fila que
+`tools/feeder.py` é o **alimentador**: um job read-only-exceto-a-fila que
 detecta ociosidade do gate (idade do último registro de
 `.ai_bridge/audit/audit.jsonl`) e faz **append** de trabalho seguro e capado em
 `queue.jsonl` — quem age continua sendo o dispatcher; o veredito visual continua

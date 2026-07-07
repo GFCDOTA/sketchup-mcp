@@ -1,5 +1,5 @@
 """Roteamento kind:variant-vision-drain no NOC dispatcher (fecha o loop do
-night_feeder). Hermetico: mocka ledger (lista em memoria), _run (subprocess) e
+feeder). Hermetico: mocka ledger (lista em memoria), _run (subprocess) e
 WT_PARENT/VARIANT_OUT_ROOT; NAO toca git real, worktree real, o :8765 nem a
 fila NOC de producao."""
 from __future__ import annotations
