@@ -74,6 +74,25 @@ DEFAULT_MODEL_BY_PURPOSE = {
 # so backend/model/latency/out_file — nunca o corpo verboso no contexto do cerebro.
 LOCAL_LLM_DIR = REPO_ROOT / "runs" / "local_llm"
 LOCAL_LLM_TERMINAL = {"LOCAL_LLM_DONE", "LOCAL_LLM_OFFLINE", "SKIPPED_PURPOSE_NOT_ALLOWED"}
+# Statuses TERMINAIS (task com um destes no ledger nao re-dispara). FONTE UNICA:
+# consumida por _terminal_ids() aqui e por tools.night_feeder.TERMINAL (lockstep
+# real — mudar aqui propaga pros dois; o teste do feeder pina o conteudo).
+TERMINAL_STATUSES = {"COMMITTED", "VISUAL_REVIEW_QUEUED", "NOOP",
+                     "VERIFY_FAILED"} | LOCAL_LLM_TERMINAL
+
+# --- kind:correction_cycle (FP-033 slice 3) --------------------------------------
+# Out dir do correction_loop PERSISTENTE e FORA do worktree (o wt e' efemero,
+# removido no finally; a fila de visao vision_requests.jsonl precisa sobreviver
+# entre tasks). data/runs = scratch com TTL por convencao do workspace.
+CORRECTION_OUT_ROOT = WORKSPACE_ROOT / "data" / "runs" / "noc_correction"
+CORRECTION_CONSUMER_TIMEOUT = 600
+CORRECTION_LOOP_TIMEOUT = 900
+
+# --- kind:variant-sweep (FP-034) --------------------------------------------------
+# Mesmo racional do CORRECTION_OUT_ROOT: o corpus.jsonl/renders do sweep sao
+# persistentes e vivem FORA do worktree efemero; a evidencia e' COPIADA pro wt.
+VARIANT_OUT_ROOT = WORKSPACE_ROOT / "data" / "runs" / "noc_variant_sweep"
+VARIANT_SWEEP_TIMEOUT = 900
 
 
 def _claude_bin() -> str:
@@ -114,6 +133,17 @@ def _bash():
 def _run(cmd, cwd=None, timeout=120):
     p = subprocess.run(cmd, cwd=cwd and str(cwd), capture_output=True, text=True, timeout=timeout)
     return p.returncode, (p.stdout or ""), (p.stderr or "")
+
+
+def _run_step_tolerant(cmd, cwd, timeout):
+    """_run que NUNCA propaga erro de subprocess: timeout/falha vira rc=1 —
+    contrato compartilhado dos workers por-kind (correction_cycle,
+    variant-sweep): excecao propagada deixaria a task sem status terminal e
+    ela re-dispararia pra sempre, derrubando o dispatcher em --loop."""
+    try:
+        return _run(cmd, cwd=cwd, timeout=timeout)
+    except subprocess.SubprocessError as e:  # TimeoutExpired incluso
+        return 1, "", f"{type(e).__name__}: {e}"
 
 
 def _git(args, cwd=REPO_ROOT, timeout=120):
@@ -157,8 +187,8 @@ def ledger_append(entry: dict) -> None:
 
 def _terminal_ids() -> set:
     """Tasks ja em estado terminal (nao re-disparar)."""
-    term = {"COMMITTED", "VISUAL_REVIEW_QUEUED", "NOOP", "VERIFY_FAILED"} | LOCAL_LLM_TERMINAL
-    return {r.get("task_id") for r in _ledger_rows() if r.get("status") in term}
+    return {r.get("task_id") for r in _ledger_rows()
+            if r.get("status") in TERMINAL_STATUSES}
 
 
 def pick_task(queue, done, task_id=None):
@@ -211,8 +241,13 @@ def _run_worker(task, wt: Path):
 
 
 def _appearance_changed(wt: Path) -> bool:
-    """Mudou .skp / render / builder / consensus? -> aparencia -> gate humano."""
-    rc, out, _ = _git(["status", "--porcelain"], cwd=wt)
+    """Mudou .skp / render / builder / consensus? -> aparencia -> gate humano.
+
+    `-uall` e' load-bearing: sem ele o git COLAPSA um diretorio untracked numa
+    linha unica (`?? artifacts/correction_loop/`) e o FILENAME some — exatamente
+    o cenario real do kind:correction_cycle, onde consensus_candidate.json chega
+    num dir novo do worktree fresco e escaparia da rota VISUAL_REVIEW_QUEUED."""
+    rc, out, _ = _git(["status", "--porcelain", "-uall"], cwd=wt)
     touched = [ln[3:] for ln in out.splitlines() if ln.strip()]
     pat = (".skp", ".png", "build_plan_shell", "consensus", "renderer", "/renders/")
     return any(any(p in f for p in pat) for f in touched)
@@ -232,12 +267,13 @@ def _branch_has_work(branch: str) -> bool:
         return False
 
 
-def dispatch(task, dry_run=False) -> dict:
+def dispatch(task, dry_run=False, run_worker=_run_worker) -> dict:
     tid = task.get("id", "T?")
     branch = f"chore/noc-{tid.lower()}"
     wt = WT_PARENT / f"wt-noc-{tid.lower()}"
     now = time.time()
     entry = {"t": now, "task_id": tid, "title": task.get("title", ""),
+             "kind": task.get("kind", "claude"),
              "branch": branch, "worktree": str(wt), "dry_run": dry_run}
 
     wt_created = False
@@ -261,7 +297,7 @@ def dispatch(task, dry_run=False) -> dict:
 
         worker = {"rc": None, "note": "dry-run: worker NAO lancado"}
         if not dry_run:
-            rc, out, err = _run_worker(task, wt)
+            rc, out, err = run_worker(task, wt)
             worker = {"rc": rc, "out_tail": out, "err_tail": err}
         entry["worker"] = worker
 
@@ -378,12 +414,193 @@ def dispatch_local_llm(task, dry_run=False) -> dict:
         ledger_append(entry)
 
 
+def dispatch_correction_cycle(task, dry_run=False) -> dict:
+    """kind:correction_cycle — roda UM ciclo do correction_loop (FP-033) num
+    worktree isolado, REUSANDO dispatch() via o seam run_worker: worktree off
+    origin/develop, guardas SKIPPED_*, verify_file, commit/push da branch
+    (NUNCA main) e ledger vem TODOS de la, zero duplicacao.
+
+    Worker: (1) drena a fila de visao pendente via tools.vision_queue_consumer,
+    repassando task["render"] como --render (o consumer EXIGE render explicito
+    rastreavel ao estado atual — sem ele, BLOCKED_NEEDS_RENDER honesto e o
+    pedido FICA na fila; exit 3 = BLOCKED tolerado); (2) roda
+    tools.correction_loop --max-cycles N (default 1; exit 3 = PENDING_VISION/
+    NEEDS_FELIPE = enfileirado, NAO e' falha); (3) copia a evidencia pro wt em
+    artifacts/correction_loop/<fixture>/ — o run_loop purga outputs de runs
+    anteriores no comeco (cycle_*/, consensus_candidate.json), entao tudo que
+    existe no out apos o loop e' DESTE run; o filename consensus_candidate.json
+    casa com _appearance_changed -> commit wip + VISUAL_REVIEW_QUEUED (aparencia
+    nunca auto-aprovada); so loop_result/findings -> COMMITTED deterministico.
+
+    Timeout/erro de subprocess vira rc=1 no ledger (paridade com _run_worker),
+    nunca excecao — senao a task fica sem status terminal e re-dispara pra
+    sempre, derrubando o proprio dispatcher em --loop.
+
+    Semantica: 1 task = 1 ciclo; ciclo seguinte = task NOVA na fila (os statuses
+    terminais existentes impedem re-run do mesmo id)."""
+    fixture = task.get("fixture", "planta_74")
+    out = Path(task.get("out") or (CORRECTION_OUT_ROOT / fixture)).resolve()
+
+    def _worker(task_, wt: Path):
+        out.mkdir(parents=True, exist_ok=True)
+        vq = out / "vision_requests.jsonl"
+        if vq.is_file() and vq.read_text("utf-8", errors="replace").strip():
+            cmd = [sys.executable, "-m", "tools.vision_queue_consumer",
+                   "--out", str(out), "--fixture", fixture]
+            renders = task_.get("render")
+            for r in ([renders] if isinstance(renders, str) else (renders or [])):
+                cmd += ["--render", str(r)]
+            rc, o, e = _run_step_tolerant(cmd, wt, CORRECTION_CONSUMER_TIMEOUT)
+            if rc not in (0, 3):
+                return rc, o[-800:], e[-400:]
+        rc, o, e = _run_step_tolerant([sys.executable, "-m", "tools.correction_loop",
+                                       "--fixture", fixture, "--out", str(out),
+                                       "--max-cycles", str(task_.get("max_cycles", 1))],
+                                      wt, CORRECTION_LOOP_TIMEOUT)
+        if rc not in (0, 3):  # 1 = STALL/RED; 3 = enfileirado (visao/Felipe), sucesso
+            return rc, o[-800:], e[-400:]
+        dest = wt / "artifacts" / "correction_loop" / fixture
+        dest.mkdir(parents=True, exist_ok=True)
+        for name in ("loop_result.json", "consensus_candidate.json"):
+            src = out / name
+            if src.is_file():
+                shutil.copy2(src, dest / name)
+        cycles = sorted(out.glob("cycle_*/findings.json"))
+        if cycles:
+            shutil.copy2(cycles[-1], dest / "findings.json")
+        return 0, o[-800:], e[-400:]
+
+    task.setdefault("verify_file",
+                    f"artifacts/correction_loop/{fixture}/loop_result.json")
+    return dispatch(task, dry_run=dry_run, run_worker=_worker)
+
+
+def dispatch_variant_sweep(task, dry_run=False) -> dict:
+    """kind:variant-sweep — roda UM sweep de variantes julgadas (FP-034) via o
+    seam run_worker do dispatch(): guardas SKIPPED_*, verify_file, commit/push
+    da branch (NUNCA main) e ledger vem todos de la, zero duplicacao.
+
+    DESVIO deliberado do precedente correction_cycle: o worker roda com
+    cwd=REPO_ROOT (a arvore DESTE dispatcher), nao cwd=wt — o wt vem de
+    origin/develop, que pre-merge NAO tem tools/variant_sweep.py; e o sweep so
+    PRODUZ evidencia (corpus/renders), nunca edita o wt. A evidencia e' copiada
+    pro wt em artifacts/variant_sweep/<plant>/ — a copia de >=1 .png dispara
+    _appearance_changed -> VISUAL_REVIEW_QUEUED (o `appearance:true` da task e'
+    decorativo pro dispatch; a rota vem da heuristica de filename, drift
+    documentado no NOC_DISPATCHER.md). PT_TO_M=0.0259 e' responsabilidade do
+    proprio tools/variant_sweep.py (setdefault no topo do modulo).
+
+    Timeout/erro de subprocess vira rc=1 (_run_step_tolerant, compartilhado com
+    o correction_cycle) — excecao propagada deixaria a task sem status terminal.
+    Semantica: 1 task = 1 sweep; sweep seguinte = task NOVA na fila."""
+    plant = task.get("plant", "planta_74")
+    out = Path(task.get("out") or (VARIANT_OUT_ROOT / plant)).resolve()
+
+    def _worker(task_, wt: Path):
+        out.mkdir(parents=True, exist_ok=True)
+        cmd = [sys.executable, "-m", "tools.variant_sweep",
+               "--out", str(out), "--n", str(task_.get("n", 6)),
+               "--plant", plant, "--dry-run"]
+        rc, o, e = _run_step_tolerant(cmd, REPO_ROOT, VARIANT_SWEEP_TIMEOUT)
+        if rc != 0:
+            return rc, o[-800:], e[-400:]
+        dest = wt / "artifacts" / "variant_sweep" / plant
+        dest.mkdir(parents=True, exist_ok=True)
+        for name in ("corpus.jsonl", "contact_sheet.png"):
+            src = out / name
+            if src.is_file():
+                shutil.copy2(src, dest / name)
+        for png in sorted(out.glob("*/iso.png")):
+            d = dest / png.parent.name
+            d.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(png, d / png.name)
+        return 0, o[-800:], e[-400:]
+
+    task.setdefault("verify_file", f"artifacts/variant_sweep/{plant}/corpus.jsonl")
+    return dispatch(task, dry_run=dry_run, run_worker=_worker)
+
+
+def dispatch_variant_vision_drain(task, dry_run=False) -> dict:
+    """kind:variant-vision-drain — fecha o loop do night_feeder: drena UMA
+    variante PENDING_VISION do corpus via o painel colaborativo de 3 juizes
+    (FP-032 panel), usando o MESMO seam run_worker do dispatch() que
+    dispatch_correction_cycle/dispatch_variant_sweep ja usam — guardas
+    SKIPPED_*, verify_file, commit/push da branch (NUNCA main) e ledger vem
+    todos de la, zero duplicacao.
+
+    Mesmo DESVIO deliberado do precedente variant-sweep: o worker roda com
+    cwd=REPO_ROOT (a arvore DESTE dispatcher), nao cwd=wt — o wt vem de
+    origin/develop, que pre-merge pode nao ter tools/variant_sweep.py; e o
+    drain so ATUALIZA o corpus.jsonl existente (append last-wins), nunca edita
+    o wt. `--ask-vision --only <variant_id> --out <out>` e' o contrato REAL
+    de tools/variant_sweep.py (ja existente, nao inventado aqui) — ele chama
+    o provider claude_bridge_vision, que por sua vez POSTa em /ask-vision (o
+    painel de 3 juizes agora vive la, sem mudanca de contrato HTTP). O
+    design_patterns_observed que o painel produzir chega ao corpus pelo MESMO
+    caminho que visual_findings ja usa hoje (build_record grava o dict
+    inteiro) — nao ha arquivo paralelo.
+
+    A evidencia (corpus.jsonl atualizado) e' copiada pro wt em
+    artifacts/variant_sweep/<plant>/ — igual ao variant-sweep; a copia do
+    corpus.jsonl (sem extensao .png/.skp) NAO dispara _appearance_changed por
+    si so, mas o proprio corpus pode conter um verdict novo (CANDIDATE/FAIL)
+    que ainda depende do humano pra virar canonico (regra de promocao fica em
+    run_skp_visual_review.py / vision_queue_consumer.py, nao aqui).
+
+    Timeout/erro de subprocess vira rc=1 (_run_step_tolerant, compartilhado
+    com correction_cycle/variant-sweep) — excecao propagada deixaria a task
+    sem status terminal e ela re-dispararia pra sempre.
+    Semantica: 1 task = 1 variante drenada; drain seguinte = task NOVA na
+    fila (id determinístico por dia+variante, ver night_feeder)."""
+    plant = task.get("plant", "planta_74")
+    out = Path(task.get("out") or (VARIANT_OUT_ROOT / plant)).resolve()
+
+    def _worker(task_, wt: Path):
+        vid = task_.get("variant_id", "")
+        if not vid:
+            return 1, "", "variant_id ausente na task — nada pra drenar"
+        cmd = [sys.executable, "-m", "tools.variant_sweep",
+               "--out", str(out), "--plant", plant,
+               "--ask-vision", "--only", vid]
+        rc, o, e = _run_step_tolerant(cmd, REPO_ROOT, VARIANT_SWEEP_TIMEOUT)
+        if rc != 0:
+            return rc, o[-800:], e[-400:]
+        dest = wt / "artifacts" / "variant_sweep" / plant
+        dest.mkdir(parents=True, exist_ok=True)
+        for name in ("corpus.jsonl", "contact_sheet.png"):
+            src = out / name
+            if src.is_file():
+                shutil.copy2(src, dest / name)
+        vdir = out / vid
+        if vdir.is_dir():
+            d = dest / vid
+            d.mkdir(parents=True, exist_ok=True)
+            for png in sorted(vdir.glob("*.png")):
+                shutil.copy2(png, d / png.name)
+        return 0, o[-800:], e[-400:]
+
+    task.setdefault("verify_file", f"artifacts/variant_sweep/{plant}/corpus.jsonl")
+    return dispatch(task, dry_run=dry_run, run_worker=_worker)
+
+
 def dispatch_by_kind(task, dry_run=False) -> dict:
     """Roteia a task pelo `kind` (default 'claude' = comportamento existente):
-      - local_llm -> Ollama local (token=0); se LOCAL_LLM_FALLBACK_CLAUDE, cai pro claude.
-      - tool      -> reservado pro muscle.py INLINE (brain_muscle.md), nao o dispatcher.
-      - claude    -> caminho existente: worktree isolado + `claude -p` (INALTERADO)."""
+      - local_llm            -> Ollama local (token=0); LOCAL_LLM_FALLBACK_CLAUDE cai pro claude.
+      - tool                 -> reservado pro muscle.py INLINE (brain_muscle.md), nao o dispatcher.
+      - correction_cycle     -> 1 ciclo do correction_loop (FP-033) via dispatch() + seam.
+      - variant-sweep        -> 1 sweep de variantes julgadas (FP-034) via dispatch() + seam.
+      - variant-vision-drain -> drena 1 variante PENDING_VISION via painel de 3 juizes
+                                (fecha o loop do night_feeder) via dispatch() + seam.
+      - claude               -> caminho existente: worktree isolado + `claude -p` (INALTERADO).
+    Kind DESCONHECIDO cai no caminho claude (fallthrough caro — validacao fica pra
+    outro slice; anotado no NOC_DISPATCHER.md)."""
     kind = (task.get("kind") or "claude").lower()
+    if kind == "correction_cycle":
+        return dispatch_correction_cycle(task, dry_run=dry_run)
+    if kind == "variant-sweep":  # HIFEN byte-exato (spec FP-034); .lower() nao normaliza
+        return dispatch_variant_sweep(task, dry_run=dry_run)
+    if kind == "variant-vision-drain":  # HIFEN byte-exato (paridade com variant-sweep)
+        return dispatch_variant_vision_drain(task, dry_run=dry_run)
     if kind == "local_llm":
         result = dispatch_local_llm(task, dry_run=dry_run)
         if result.get("status") == "LOCAL_LLM_FALLBACK_CLAUDE":

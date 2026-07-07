@@ -37,8 +37,11 @@ def describe(png_path: str | Path, questions: list[dict], model: str = VISION_MO
     if not p.exists():
         return {"ok": False, "error": f"imagem ausente: {p}", "answers": {}}
     b64 = base64.b64encode(p.read_bytes()).decode()
+    # placeholder de string fora da f-string: backslash dentro da expressão é
+    # SyntaxError no py3.11 (só virou legal no 3.12/PEP 701).
+    _str_ph = '"..."'
     schema = ", ".join(
-        f'"{x["key"]}": {"true/false" if x.get("type") == "bool" else ("0-10" if x.get("type") == "scale" else "\"...\"")}'
+        f'"{x["key"]}": {"true/false" if x.get("type") == "bool" else "0-10" if x.get("type") == "scale" else _str_ph}'
         for x in questions)
     qlist = "\n".join(f'- {x["key"]}: {x["q"]}' for x in questions)
     prompt = ("Você é um AUDITOR DE RENDER de interiores. Olhe a imagem e responda com OBJETIVIDADE, "

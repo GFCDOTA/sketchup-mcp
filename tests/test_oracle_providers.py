@@ -47,10 +47,11 @@ def _make_request(tmp_path: Path) -> OracleRequest:
 # ---- registry --------------------------------------------------------
 
 
-def test_registry_exposes_four_providers():
+def test_registry_exposes_all_providers():
     names = available_provider_names()
     assert names == [
         "chatgpt_bridge_image",
+        "claude_bridge_vision",
         "future_vision_api",
         "none",
         "ollama_vision",
@@ -319,3 +320,78 @@ def test_normalize_carries_findings_through():
     assert out is not None
     assert len(out["findings"]) == 1
     assert out["findings"][0]["type"] == "orphan_glass_panel"
+
+
+# ---- painel de 3 juizes: eixo material_light + design_patterns_observed ----
+# (extensoes ADITIVAS do FP-035-prep; retrocompat = os testes acima continuam
+# passando sem tocar nenhum deles)
+
+
+def test_normalize_without_material_light_still_works_backcompat():
+    # payload de ANTES do painel (sem material_light nem design_patterns) tem
+    # que continuar validando identico — extensao e' aditiva, nunca exigida
+    out = _normalize_to_visual_findings(_valid_oracle_payload())
+    assert out is not None
+    assert "material_light" not in out["axes"]
+    assert "design_patterns_observed" not in out
+
+
+def test_normalize_propagates_material_light_axis_when_present():
+    payload = _valid_oracle_payload()
+    payload["axes"]["material_light"] = {"verdict": "WARN", "evidence": "flat shading"}
+    out = _normalize_to_visual_findings(payload)
+    assert out is not None
+    assert out["axes"]["material_light"] == {"verdict": "WARN", "evidence": "flat shading"}
+    # os 6 eixos base continuam intactos (aditivo, nao substitutivo)
+    assert set(out["axes"].keys()) == {
+        "wall_fidelity", "door_fidelity", "window_fidelity",
+        "room_fidelity", "scale_rotation", "global_visual", "material_light",
+    }
+
+
+def test_normalize_ignores_material_light_with_bad_verdict_silently():
+    # eixo opcional malformado NAO derruba o payload inteiro (so ele e' descartado)
+    payload = _valid_oracle_payload()
+    payload["axes"]["material_light"] = {"verdict": "MAYBE", "evidence": "?"}
+    out = _normalize_to_visual_findings(payload)
+    assert out is not None
+    assert "material_light" not in out["axes"]
+
+
+def test_normalize_propagates_design_patterns_observed():
+    payload = _valid_oracle_payload()
+    payload["design_patterns_observed"] = [
+        {"pattern": "paleta black_wood_gold em cozinha compacta",
+         "verdict": "works", "why": "contraste dourado/preto le bem"},
+    ]
+    out = _normalize_to_visual_findings(payload)
+    assert out is not None
+    assert out["design_patterns_observed"] == [
+        {"pattern": "paleta black_wood_gold em cozinha compacta",
+         "verdict": "works", "why": "contraste dourado/preto le bem"},
+    ]
+
+
+def test_normalize_drops_malformed_pattern_entries_never_fabricates():
+    payload = _valid_oracle_payload()
+    payload["design_patterns_observed"] = [
+        {"pattern": "", "verdict": "works", "why": "sem nome"},         # pattern vazio
+        {"pattern": "x", "verdict": "maybe", "why": "verdict invalido"},  # verdict fora do enum
+        {"pattern": "y", "verdict": "fails"},                            # sem why
+        {"pattern": "z", "verdict": "neutral", "why": "ok"},             # valido
+    ]
+    out = _normalize_to_visual_findings(payload)
+    assert out is not None
+    assert out["design_patterns_observed"] == [
+        {"pattern": "z", "verdict": "neutral", "why": "ok"},
+    ]
+
+
+def test_normalize_empty_design_patterns_list_is_honest_not_populated():
+    # lista vazia (juiz nao teve dado suficiente) fica de fora do dict de saida
+    # -- nunca fabrica uma entrada so pra "preencher"
+    payload = _valid_oracle_payload()
+    payload["design_patterns_observed"] = []
+    out = _normalize_to_visual_findings(payload)
+    assert out is not None
+    assert "design_patterns_observed" not in out

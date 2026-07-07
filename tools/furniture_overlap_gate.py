@@ -25,6 +25,7 @@ M2IN = 39.3700787402
 Z_EPS_IN = 2.0 / 2.54 * 1.0          # ~2cm de folga vertical p/ considerar "mesmo nível"
 AREA_MIN_M2 = 0.04                   # cruzamento menor que isso = roçar, ignora
 FRAC_MIN = 0.12                      # E >=12% da área do menor módulo
+FRAC_FAIL = 0.30                     # >=30% do menor módulo = FAIL (abaixo, WARN)
 # módulos que legitimamente se sobrepõem a tudo (não são "móvel sobre móvel")
 EXCLUDE = ("tapete", "rug", "parede", "piso", "floor")
 # embutidos LEGÍTIMOS na cozinha: eletro/cuba (cooktop/pia/cuba) DENTRO da bancada
@@ -69,16 +70,13 @@ def _module_geom(boxes):
     return out
 
 
-def overlap_gate(con, room_id):
-    os.environ.setdefault("PT_TO_M", "0.0259")
-    from tools.furnish_apartment import BRAINS
-    from tools.room_type import classify_rooms
-    r = {x["id"]: x for x in classify_rooms(con)}.get(room_id)
-    if not r:
-        return {"result": "FAIL", "room": room_id, "fails": ["cômodo inexistente"], "warns": []}
-    brain = BRAINS.get(r["room_type"])
-    boxes, _ = brain(con, room_id) if brain else ([], {})
-    geoms = {m: g for m, g in _module_geom(boxes or {}).items()
+def pairwise_overlap(geoms):
+    """Loop pairwise CANÔNICO de colisão sobre module -> (footprint, z0_in, z1_in)
+    (saída de _module_geom). Aplica EXCLUDE, _is_embedded e os thresholds
+    Z_EPS_IN/AREA_MIN_M2/FRAC_MIN/FRAC_FAIL — fonte ÚNICA do veredito de colisão
+    (o variant_sweep reusa direto nos boxes da variante; mudar aqui muda os dois).
+    Devolve (fails, warns, n_modules)."""
+    geoms = {m: g for m, g in geoms.items()
              if not any(e in m.lower() for e in EXCLUDE)}
     mods = sorted(geoms)
     fails, warns = [], []
@@ -98,10 +96,23 @@ def overlap_gate(con, room_id):
             frac = inter / amin if amin else 0.0
             if frac >= FRAC_MIN:
                 msg = f"{mods[i]} × {mods[j]}: {inter*10000:.0f} cm² sobrepostos ({frac:.0%} do menor)"
-                (fails if frac >= 0.30 else warns).append(msg)
+                (fails if frac >= FRAC_FAIL else warns).append(msg)
+    return fails, warns, len(mods)
+
+
+def overlap_gate(con, room_id):
+    os.environ.setdefault("PT_TO_M", "0.0259")
+    from tools.furnish_apartment import BRAINS
+    from tools.room_type import classify_rooms
+    r = {x["id"]: x for x in classify_rooms(con)}.get(room_id)
+    if not r:
+        return {"result": "FAIL", "room": room_id, "fails": ["cômodo inexistente"], "warns": []}
+    brain = BRAINS.get(r["room_type"])
+    boxes, _ = brain(con, room_id) if brain else ([], {})
+    fails, warns, n_modules = pairwise_overlap(_module_geom(boxes or {}))
     result = "FAIL" if fails else ("WARN" if warns else "PASS")
     return {"result": result, "room": room_id, "room_name": r["name"],
-            "n_modules": len(mods), "fails": fails, "warns": warns}
+            "n_modules": n_modules, "fails": fails, "warns": warns}
 
 
 def main():

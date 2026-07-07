@@ -176,10 +176,13 @@ def _compose_sxs(pdf: Path, top: Path, iso: Path, out: Path) -> Path | None:
 
 
 def _run_oracle(images: list[Path], context: dict, out_dir: Path,
-                model: str | None) -> dict:
-    provider = get_provider("ollama_vision")
-    if model:
+                model: str | None, backend: str = "ollama_vision",
+                bridge_url: str | None = None) -> dict:
+    provider = get_provider(backend)
+    if model and hasattr(provider, "model"):
         provider.model = model  # type: ignore[attr-defined]
+    if bridge_url and hasattr(provider, "url"):
+        provider.url = bridge_url  # type: ignore[attr-defined]
     req = OracleRequest(
         prompt="Review these architectural floor-plan renders for fidelity defects.",
         image_paths=images,
@@ -199,7 +202,8 @@ def _run_oracle(images: list[Path], context: dict, out_dir: Path,
     }
 
 
-def run(fixture: str, out_dir: Path, model: str | None = None) -> dict:
+def run(fixture: str, out_dir: Path, model: str | None = None,
+        backend: str = "ollama_vision", bridge_url: str | None = None) -> dict:
     if fixture not in CORRUPTION_RECIPES:
         raise ValueError(
             f"no corruption recipe for fixture {fixture!r}; "
@@ -246,8 +250,12 @@ def run(fixture: str, out_dir: Path, model: str | None = None) -> dict:
         p for p in (corrupted_top, clean_iso if iso_ok else None, corrupted_sxs) if p
     ]
 
-    clean_res = _run_oracle(clean_imgs, context, out_dir / "clean", model)
-    corrupted_res = _run_oracle(corrupted_imgs, context, out_dir / "corrupted", model)
+    clean_res = _run_oracle(
+        clean_imgs, context, out_dir / "clean", model, backend, bridge_url,
+    )
+    corrupted_res = _run_oracle(
+        corrupted_imgs, context, out_dir / "corrupted", model, backend, bridge_url,
+    )
 
     # ---- A+B criteria ----
     conclusive = clean_res["status"] == "ok" and corrupted_res["status"] == "ok"
@@ -277,6 +285,8 @@ def run(fixture: str, out_dir: Path, model: str | None = None) -> dict:
     report = {
         "schema_version": "negative_dogfood.v2",
         "fixture": fixture,
+        "backend": backend,
+        "backend_model": model,
         "timestamp": _now_utc_iso(),
         "method": "production-parity (top+iso+side_by_side+context); corrupt top only",
         "recipe": recipe,
@@ -331,7 +341,7 @@ def run(fixture: str, out_dir: Path, model: str | None = None) -> dict:
         f"side-by-side built from it) is corrupted; iso + PDF + geometry "
         f"context are identical between runs.",
         "",
-        "## Oracle verdicts (ollama_vision, full input set)",
+        f"## Oracle verdicts (`{backend}`{f' / {model}' if model else ''}, full input set)",
         "",
         "| Render set | status | top_level | localized gap findings |",
         "|---|---|---|---|",
@@ -360,9 +370,21 @@ def main() -> int:
     ap.add_argument("--fixture", default="planta_74")
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--model", default=None, help="override ollama vision model")
+    ap.add_argument(
+        "--backend", default="ollama_vision",
+        help="oracle backend: ollama_vision | claude_bridge_vision | ...",
+    )
+    ap.add_argument(
+        "--bridge-url", default=None,
+        help="override the bridge URL for claude_bridge_vision "
+             "(e.g. http://localhost:8799 to test a non-live server)",
+    )
     args = ap.parse_args()
 
-    report = run(args.fixture, Path(args.out), model=args.model)
+    report = run(
+        args.fixture, Path(args.out), model=args.model,
+        backend=args.backend, bridge_url=args.bridge_url,
+    )
     c, k = report["clean_oracle"], report["corrupted_oracle"]
     print(f"[negative-dogfood] fixture={report['fixture']} result={report['result']}")
     print(

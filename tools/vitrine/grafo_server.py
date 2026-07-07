@@ -21,6 +21,7 @@ GRAFO = HERE / "grafo.html"
 FLUXO = HERE / "flow.html"
 AGENTS = HERE / "agents.html"
 EXPLICA = HERE / "explica.html"
+PIPELINE = HERE / "pipeline.html"
 HOME = HERE / "home.html"
 KGRAPH = HERE / "kgraph.json"
 
@@ -66,6 +67,11 @@ class H(BaseHTTPRequestHandler):
                 self._send(200, EXPLICA.read_text("utf-8"), "text/html; charset=utf-8")
             except Exception as e:  # noqa: BLE001
                 self._send(500, f"explica.html: {e}", "text/plain; charset=utf-8")
+        elif p in ("/pipeline", "/mapa-pipeline", "/arquitetura"):
+            try:
+                self._send(200, PIPELINE.read_text("utf-8"), "text/html; charset=utf-8")
+            except Exception as e:  # noqa: BLE001
+                self._send(500, f"pipeline.html: {e}", "text/plain; charset=utf-8")
         elif p == "/api/kgraph":
             try:
                 self._send(200, KGRAPH.read_text("utf-8"), "application/json; charset=utf-8")

@@ -61,6 +61,16 @@ def test_health_exposes_contract():
     assert "VISUAL_REVIEW" in h["verdict_enum"]
 
 
+def test_health_exposes_build_identity():
+    """FP-040: /health carrega a identidade do BUILD servido (sha12 + mtime do
+    server.py) — sem isso um deploy não-aplicado é invisível (o watchdog serve
+    o server.py do working tree, e 'vivo' não implica 'código novo')."""
+    h = health_payload()
+    assert len(h["server_sha12"]) == 12
+    assert h["server_sha12"] != "unknown"
+    assert h["server_mtime"] and h["server_mtime"] != "unknown"
+
+
 # ---- §6.2 red-team mode ----
 def test_parse_ask_mode_redteam():
     assert parse_ask_mode(_body({"prompt": "q", "mode": "redteam"})) == "redteam"
@@ -91,8 +101,9 @@ def test_health_advertises_redteam_mode():
 # ---- session liveness orchestrator (heartbeat) ----------------------
 
 
-def test_heartbeat_progressing_is_ok():
+def test_heartbeat_progressing_is_ok(tmp_path, monkeypatch):
     import tools.claude_bridge.server as srv
+    monkeypatch.setattr(srv, "AUDIT_PATH", tmp_path / "audit.jsonl")
     srv._SESSIONS.clear()
     srv.record_heartbeat("sess-A", 1)
     srv.record_heartbeat("sess-A", 2)  # cycle advanced -> progressing
@@ -101,16 +112,18 @@ def test_heartbeat_progressing_is_ok():
     assert v["flags"] == ["OK"]
 
 
-def test_heartbeat_frozen_cycle_is_paralyzed():
+def test_heartbeat_frozen_cycle_is_paralyzed(tmp_path, monkeypatch):
     import tools.claude_bridge.server as srv
+    monkeypatch.setattr(srv, "AUDIT_PATH", tmp_path / "audit.jsonl")
     srv._SESSIONS.clear()
     for _ in range(srv.PARALYZED_M + 1):
         srv.record_heartbeat("sess-B", 7)  # same cycle every beat -> stuck
     assert "PARALYZED" in srv.sessions_view()["sess-B"]["flags"]
 
 
-def test_heartbeat_stalled_when_silent(monkeypatch):
+def test_heartbeat_stalled_when_silent(tmp_path, monkeypatch):
     import tools.claude_bridge.server as srv
+    monkeypatch.setattr(srv, "AUDIT_PATH", tmp_path / "audit.jsonl")
     srv._SESSIONS.clear()
     srv.record_heartbeat("sess-C", 1)
     monkeypatch.setattr(srv, "STALL_SECONDS", -1)  # make any age count as "too old"
@@ -129,11 +142,12 @@ def test_health_has_model_effort_uptime():
     assert "/" in h["endpoints"] and "/events" in h["endpoints"]
 
 
-def test_dashboard_html_is_a_page():
+def test_root_and_dashboard_redirect_to_the_unified_cockpit():
+    """The gate is headless since the unified-cockpit landed (:8782 reads it by file
+    via bridge_mirror.py) — a lost bookmark to "/" or "/dashboard" should not 404."""
     import tools.claude_bridge.server as srv
-    assert srv.DASHBOARD_HTML.lstrip().startswith("<!doctype html>")
-    assert "Claude Gate" in srv.DASHBOARD_HTML
-    assert "/sessions" in srv.DASHBOARD_HTML and "/events" in srv.DASHBOARD_HTML
+    assert srv.GET_ROUTES[""] is srv._redirect_to_cockpit
+    assert srv.GET_ROUTES["/dashboard"] is srv._redirect_to_cockpit
 
 
 def test_recent_events_parses_tail_skips_garbage(tmp_path, monkeypatch):
@@ -159,17 +173,6 @@ def test_skp_inventory_shape():
             "other"} == set(inv["categories"])
 
 
-def test_dashboard_html_serves_the_spa():
-    import tools.claude_bridge.server as srv
-    html = srv.dashboard_html()
-    assert "<!doctype html>" in html.lower()
-    assert "SketchUp Creator" in html
-    # SPA tabs present (the inline fallback DASHBOARD_HTML has none of these).
-    # 8-tab nav consolidated in cockpit Fase 2A (commit 6a4b846); update this
-    # list if the nav changes again.
-    for tab in ("#home", "#sessoes", "#gate", "#review-skp",
-                "#repo", "#backlog", "#artifacts", "#docs"):
-        assert tab in html, f"missing SPA tab {tab}"
 
 
 def test_safe_artifact_blocks_escape_and_nonimage():

@@ -21,7 +21,7 @@ from pathlib import Path
 from tools.layout_candidates import (EXTRA_TEMPLATES, M, TEMPLATES, _tv_setup,
                                      run, score)
 
-ROOT = Path(r"E:\Claude\sketchup-mcp")
+ROOT = Path(__file__).resolve().parents[1]   # repo root (era E:\Claude\sketchup-mcp, morto pos-consolidacao 2026-06-09)
 SKETCHUP_EXE = r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
 from core.scale import PT_TO_IN  # noqa: E402  (fonte unica de escala; nao redefinir)
 CONSENSUS = ROOT / "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json"
@@ -164,6 +164,17 @@ def main():
     env["LAYOUT_AFTER_TOP"] = str(after_top).replace("\\", "/")
     env["LAYOUT_AFTER_ISO"] = str(after_iso).replace("\\", "/")
     env["LAYOUT_LOG"] = str(log_path).replace("\\", "/")
+
+    # FP-036: slice de PROVA r002 — texturiza o path interativo por kind (rack_tv/mesa_centro/tapete
+    # tem entrada no mapa industrial). So sob FURNISH_STYLE; fonte unica = style_spec.texture_env.
+    style = os.environ.get("FURNISH_STYLE")
+    if style:
+        from tools.style_spec import texture_env
+        tex_env = texture_env(style, (ROOT / "assets/textures/procedural").resolve())
+        env.update(tex_env)
+        if tex_env:
+            print(f"[place] textura interativa: "
+                  f"{len(json.loads(tex_env['LAYOUT_TEX_MAP']))} kind(s) mapeados (estilo {style})")
 
     subprocess.run(["taskkill", "/F", "/IM", "SketchUp.exe"], capture_output=True)
     time.sleep(1)
