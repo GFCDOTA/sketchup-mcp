@@ -253,6 +253,18 @@ def _appearance_changed(wt: Path) -> bool:
     return any(any(p in f for p in pat) for f in touched)
 
 
+def _touched_render(wt: Path):
+    """Primeiro .png tocado no diff do worktree (evidencia de aparencia p/ a
+    galeria), ou None. Usa o mesmo `-uall` do _appearance_changed pra nao perder
+    render num dir untracked novo."""
+    rc, out, _ = _git(["status", "--porcelain", "-uall"], cwd=wt)
+    for ln in out.splitlines():
+        f = ln[3:].strip()
+        if f.endswith(".png") and (wt / f).is_file():
+            return wt / f
+    return None
+
+
 def _branch_exists(branch: str) -> bool:
     rc, _, _ = _git(["rev-parse", "--verify", "--quiet", f"refs/heads/{branch}"])
     return rc == 0
@@ -265,6 +277,42 @@ def _branch_has_work(branch: str) -> bool:
         return int(out.strip()) > 0
     except ValueError:
         return False
+
+
+def _emit_appearance_gallery_item(task, wt: Path):
+    """APARENCIA NAO-BLOQUEIA: alem de comitar a evidencia na branch wip, materializa
+    um item de galeria PENDENTE (build_record reusado do variant_sweep) no corpus
+    PERSISTENTE do sweep (fora do wt efemero) — pra mudanca de aparencia virar
+    RECUPERAVEL na galeria em vez de morrer travada numa branch. human_verdict=None,
+    verdict=PENDING_VISION. O render do wt (que some no finally) e' COPIADO pro dir
+    persistente da variante pro registro apontar pra path estavel. Best-effort: falha
+    aqui NUNCA derruba o dispatch (a branch ja carrega a evidencia). Import lazy: o
+    emitter resolve contra a arvore DESTE dispatcher (nao o wt off origin/develop)."""
+    try:
+        from tools.variant_axes import Variant
+        from tools.variant_sweep import emit_gallery_item
+        plant = task.get("plant", "planta_74")
+        tid = str(task.get("id", "T?"))
+        corpus = VARIANT_OUT_ROOT / plant / "corpus.jsonl"
+        v = Variant(plant=plant, style=f"noc-{tid.lower()}", theme="", layout_seed=0)
+        png = _touched_render(wt)
+        stable = None
+        if png is not None:
+            vdir = corpus.parent / v.variant_id
+            vdir.mkdir(parents=True, exist_ok=True)
+            stable = vdir / "iso.png"
+            shutil.copy2(png, stable)
+        return emit_gallery_item(
+            corpus, v, png=stable, renderer="noc-evidence", findings=None,
+            gate_detail={"source": "noc_dispatcher", "task_id": tid,
+                         "branch": f"chore/noc-{tid.lower()}",
+                         "title": task.get("title", "")},
+            log=lambda *_a, **_k: None)
+    except Exception as e:  # noqa: BLE001 — galeria e' best-effort; branch ja tem a evidencia
+        ledger_append({"t": time.time(), "task_id": task.get("id"),
+                       "kind": task.get("kind", "claude"),
+                       "status": "GALLERY_EMIT_SKIPPED", "error": _redact(str(e))})
+        return None
 
 
 def dispatch(task, dry_run=False, run_worker=_run_worker) -> dict:
@@ -332,11 +380,19 @@ def dispatch(task, dry_run=False, run_worker=_run_worker) -> dict:
             entry["status"] = "DRY_RUN" if dry_run else "NOOP"
             return entry
 
-        # mudou aparencia -> NAO auto-aprova: enfileira visual review
+        # mudou aparencia -> NAO auto-aprova E NAO trava: comita a evidencia na
+        # branch (segue) E emite um item de galeria PENDENTE, pra o achado virar
+        # recuperavel na galeria em vez de parquear so numa branch wip esperando
+        # o olho do Felipe. O veredito de aparencia continua exclusivo dele (nunca
+        # auto); o dispatcher NAO espera por ele.
         if _appearance_changed(wt):
             _git(["add", "-A"], cwd=wt)
             _git(["commit", "-m", f"wip(noc-{tid}): {task.get('title','')} [needs VISUAL_REVIEW]"], cwd=wt)
             _git(["push", "-u", "origin", branch], cwd=wt, timeout=120)
+            gi = _emit_appearance_gallery_item(task, wt)
+            if gi:
+                entry["gallery_item"] = gi.get("variant_id")
+                entry["gallery_verdict"] = gi.get("verdict")
             entry["status"] = "VISUAL_REVIEW_QUEUED"
             return entry
 

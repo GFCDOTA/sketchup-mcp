@@ -350,6 +350,35 @@ def build_record(v: Variant, *, run_id: str, gates: dict, gate_detail: dict | No
     }
 
 
+def emit_gallery_item(corpus: Path, v: Variant, *, png: Path | None = None,
+                      gates: dict | None = None, gate_detail: dict | None = None,
+                      findings: dict | None = None, renderer: str = "su-free",
+                      run_id: str | None = None, log=print) -> dict:
+    """APARENCIA NAO-BLOQUEIA: materializa UM item de galeria PENDENTE
+    (build_record, human_verdict=None) e faz append IDEMPOTENTE por variant_id no
+    corpus append-only — pra uma saida mobiliada / mudanca de aparencia virar um
+    item RECUPERAVEL na galeria em vez de morrer travada numa fila-arquivo ou numa
+    branch wip. NUNCA espera veredito humano (esse e' do Felipe, offline).
+
+    Fabrica canonica REUSADA = build_record (mesmo shape do sweep). O CHAMADOR
+    controla `gates`: pra nao BLOQUEAR aparencia, nunca passe um gate FAIL aqui —
+    sem FAIL e sem findings o verdict nasce PENDING_VISION (findings PASS -> CANDIDATE).
+
+    Idempotente: variant_id ja no corpus -> NAO re-appenda (retorna o registro
+    existente). Deterministico, safe pra rodar 2x (o corpus nunca e' reescrito)."""
+    corpus = Path(corpus)
+    existing = {r.get("variant_id"): r for r in read_jsonl(corpus)}
+    if v.variant_id in existing:
+        log(f"[gallery] {v.variant_id}: ja no corpus (skip idempotente)")
+        return existing[v.variant_id]
+    rec = build_record(v, run_id=run_id or corpus.parent.name, gates=gates or {},
+                       gate_detail=gate_detail, png=png, renderer=renderer,
+                       findings=findings, out_root=corpus.parent)
+    append_jsonl(corpus, [rec])
+    log(f"[gallery] {v.variant_id}: {rec['verdict']} (human_verdict=None) -> {corpus}")
+    return rec
+
+
 def run_variant(v: Variant, out_dir: Path, *, con_path: Path | None = None,
                 provider=None, discrimination=None, render: str = "su-free",
                 find_adapter=None, run_id: str | None = None,

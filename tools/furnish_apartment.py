@@ -39,6 +39,22 @@ CONSENSUS = ROOT / "fixtures/planta_74/consensus_with_human_walls_and_soft_barri
 BASE_SKP = Path(os.environ.get("FURNISH_BASE_SKP") or str(ROOT / "artifacts/planta_74/planta_74.skp"))  # shell override p/ escala: @0.0259 usa o shell rebuildado (base default 0.0352 intacta)
 OUT_DIR = ROOT / "artifacts/planta_74/furnished"   # pasta UNICA fixa
 RB = ROOT / "tools/place_layout_skp.rb"
+PLANT = "planta_74"   # pipeline planta_74-only (mesmo escopo do resto do modulo)
+
+
+def _gallery_corpus_root() -> Path:
+    """Raiz do corpus de galeria = a MESMA do variant_sweep/night_feeder
+    (data/runs/noc_variant_sweep sob a raiz do WORKSPACE), pra o apê mobiliado
+    virar mais um item da UNICA galeria que a curadoria/RAG ja leem — nao um
+    silo paralelo. Fallback repo-relativo se a raiz do workspace nao resolver."""
+    try:
+        from tools.claude_bridge._paths import WORKSPACE_ROOT
+        return WORKSPACE_ROOT / "data" / "runs" / "noc_variant_sweep"
+    except Exception:  # noqa: BLE001 — checkout solto / sem apps+ops: repo-relativo
+        return ROOT / "data" / "runs" / "noc_variant_sweep"
+
+
+GALLERY_CORPUS_ROOT = _gallery_corpus_root()
 
 def bedroom_designer_boxes(con, room_id):
     """Adapter: roda o bedroom_designer (cama por tamanho do quarto + cabeceira +
@@ -456,6 +472,35 @@ def collect_boxes(con):
     return all_boxes, summary
 
 
+def _emit_furnished_gallery_item(iso_png, *, skp, style, plant=PLANT,
+                                 flat_white=None, corpus=None):
+    """APARENCIA NAO-BLOQUEIA (Bloco 2): DEPOIS que o .skp canonico + renders +
+    flat_white_gate ja rodaram (geracao INTACTA, isto e' additivo puro), emite um
+    item de galeria PENDENTE do apê mobiliado canonico e SEGUE. human_verdict fica
+    None; verdict = PENDING_VISION (o furnish nao coleta visao). O flat_white e'
+    um sinal de APARENCIA — vai pro gate_detail (recuperavel pelo olho do Felipe),
+    NUNCA como gate FAIL que travaria o item. Reusa variant_sweep.build_record via
+    emit_gallery_item (fabrica canonica + append idempotente por variant_id).
+    NUNCA espera veredito nem aborta o furnish."""
+    from tools.variant_axes import Variant
+    from tools.variant_sweep import emit_gallery_item
+    corpus = Path(corpus) if corpus else (GALLERY_CORPUS_ROOT / plant / "corpus.jsonl")
+    corpus.parent.mkdir(parents=True, exist_ok=True)
+    v = Variant(plant=plant, style=style or None, theme="", layout_seed=0)
+    gate_detail = {"source": "furnish_apartment", "skp": Path(skp).name if skp else None}
+    if isinstance(flat_white, dict):  # sinal de aparencia, NAO-bloqueante
+        gate_detail["flat_white"] = {"result": flat_white.get("result"),
+                                     "flags": flat_white.get("flags", []),
+                                     "fails": flat_white.get("fails", []),
+                                     "warns": flat_white.get("warns", [])}
+    # kitchen_validation PASSOU (o build abortaria em collect_boxes se nao); e' o
+    # unico gate deterministico que conhecemos aqui, e nao e' FAIL -> PENDING_VISION.
+    return emit_gallery_item(corpus, v, png=iso_png,
+                             gates={"kitchen_validation": "PASS"},
+                             gate_detail=gate_detail, findings=None,
+                             renderer="sketchup")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true")
@@ -526,6 +571,7 @@ def main():
 
     # FP-036: gate DETERMINISTICO anti-chapado (nao julga estetica; so 'os moveis tem textura?').
     # Roda no render gerado ANTES de entregar pro veredito do Felipe. FAIL = provavel sem textura.
+    fw = None
     if after_iso.exists():
         try:
             from tools.flat_white_gate import flat_white_check
@@ -537,6 +583,19 @@ def main():
                 print("[furnish-apt] /!\\ render CHAPADO (provavel sem textura) — inspecionar antes do veredito")
         except Exception as e:  # noqa: BLE001
             print(f"[furnish-apt] flat_white_check pulado: {e}")
+
+    # APARENCIA NAO-BLOQUEIA: o .skp canonico + renders JA existem (geracao acima
+    # INTACTA). Emite um item de galeria PENDENTE (human_verdict=None) na MESMA
+    # galeria do sweep e SEGUE — o veredito de aparencia e' do Felipe, offline, e
+    # NUNCA trava o pipeline. Best-effort: falhar aqui nunca derruba o furnish.
+    try:
+        rec = _emit_furnished_gallery_item(
+            after_iso if after_iso.exists() else None,
+            skp=skp_out, style=os.environ.get("FURNISH_STYLE"), flat_white=fw)
+        print(f"[furnish-apt] item de galeria: {rec['variant_id']} "
+              f"=> {rec['verdict']} (human_verdict={rec['human_verdict']})")
+    except Exception as e:  # noqa: BLE001 — galeria nunca bloqueia a cozinha/apê
+        print(f"[furnish-apt] item de galeria pulado (nao-fatal): {e}")
 
     print(f"\n[furnish-apt] -> {OUT_DIR}/")
     print(f"  SKP:   {skp_out.name}")

@@ -44,6 +44,46 @@ from tools.jsonl_io import append_jsonl, queue_key, read_jsonl
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
+
+def _default_gallery_corpus(fixture: str) -> Path:
+    """Corpus da UNICA galeria (data/runs/noc_variant_sweep sob a raiz do
+    workspace — a mesma do sweep/night_feeder/curadoria). Fallback repo-relativo
+    se a raiz do workspace nao resolver."""
+    try:
+        from tools.claude_bridge._paths import WORKSPACE_ROOT
+        root = WORKSPACE_ROOT / "data" / "runs" / "noc_variant_sweep"
+    except Exception:  # noqa: BLE001
+        root = REPO_ROOT / "data" / "runs" / "noc_variant_sweep"
+    return root / fixture / "corpus.jsonl"
+
+
+def _emit_appearance_gallery(fixture: str, gallery_corpus: Path,
+                             felipe: list[dict], log) -> str | None:
+    """APARENCIA NAO-BLOQUEIA: alem da fila-arquivo visual_review_queue, materializa
+    um item de galeria PENDENTE (build_record reusado do variant_sweep) pro achado
+    de aparencia virar RECUPERAVEL na galeria em vez de morrer num .jsonl. Sem
+    render (correction_loop nao gera pixel) -> png=None; o resumo dos findings vai
+    pro gate_detail. human_verdict=None, verdict=PENDING_VISION. Best-effort e
+    idempotente (variant_id estavel por fixture): NUNCA derruba o loop nem espera
+    veredito. Retorna o variant_id emitido, ou None se pulado/best-effort falhou."""
+    try:
+        from tools.variant_axes import Variant
+        from tools.variant_sweep import emit_gallery_item
+        corpus = Path(gallery_corpus)
+        corpus.parent.mkdir(parents=True, exist_ok=True)
+        v = Variant(plant=fixture, style="correction", theme="", layout_seed=0)
+        detail = {"source": "correction_loop", "fixture": fixture,
+                  "findings": [{"type": f.get("type"), "severity": f.get("severity"),
+                                "room": f.get("room")} for f in felipe][:12]}
+        rec = emit_gallery_item(corpus, v, png=None, findings=None,
+                                renderer="correction-loop", gate_detail=detail,
+                                log=lambda *_a, **_k: None)
+        return rec.get("variant_id")
+    except Exception as e:  # noqa: BLE001 — galeria e' best-effort; a fila-arquivo ja guardou o achado
+        log(f"[loop] item de galeria pulado (nao-fatal): {e}")
+        return None
+
+
 CLEAN = "CLEAN"
 STALL = "STALL"
 NEEDS_FELIPE = "NEEDS_FELIPE"
@@ -104,6 +144,7 @@ def run_loop(
     dry_run: bool = False,
     apply_fix: Callable[[cfix.FixContext, dict], cfix.FixResult] = cfix.apply,
     heartbeat: Callable[[str, int, str], None] | None = _default_heartbeat,
+    gallery_corpus: Path | None = None,
     log: Callable[[str], None] = print,
 ) -> LoopResult:
     """Run the loop on WORKING COPIES of consensus/boxes. `detect` is injected
@@ -209,6 +250,11 @@ def run_loop(
                 if n:
                     log(f"[loop] cycle {cycle}: {n} finding(s) de aparência -> "
                         f"VISUAL_REVIEW_QUEUED (nunca auto)")
+                # aparencia NAO-BLOQUEIA: alem da fila-arquivo, emite um item de
+                # galeria PENDENTE (idempotente por fixture) pro achado virar
+                # recuperavel — o loop NAO espera veredito, so registra e segue.
+                if gallery_corpus is not None:
+                    _emit_appearance_gallery(fixture, gallery_corpus, felipe, log)
             if vision:
                 n = _queue("vision_requests", vision, queued_vision)
                 if n:
@@ -355,6 +401,7 @@ def main() -> int:
         out_dir=a.out,
         max_cycles=a.max_cycles,
         dry_run=a.dry_run,
+        gallery_corpus=_default_gallery_corpus(a.fixture),
     )
     if injected and res.state != RED and not a.dry_run:
         ack_confirmed_findings(a.out, injected)
