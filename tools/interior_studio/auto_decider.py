@@ -173,12 +173,17 @@ def drain(*, caps: dict | None = None, proposals=ic_proposals, gates_fn=None,
           now_fn=None, out_dir: Path | None = None,
           corpus_version: str = "unknown", use_gate: bool = True, gate_fn=None,
           questions_dir: Path | None = None, responses_dir: Path | None = None,
-          bridge_url: str | None = None) -> dict:
+          bridge_url: str | None = None, dry_run: bool = False) -> dict:
     """Single-pass objective drain. Returns
     {decided, escalated, refused, left_pending, audit_records}.
 
     Injectables (defaults are the live wiring): ``proposals`` (state/approve/reject),
     ``gates_fn(proposal)->(geo,overlap)``, ``now_fn(pid)->iso``, ``out_dir``.
+
+    ``dry_run`` (SAFETY): when True the drain still classifies each proposal and
+    determines the action it WOULD take — the returned summary shows what would
+    happen — but it NEVER moves a proposal (no ``approve``/``reject``) and NEVER
+    writes the audit/DLQ. Threaded through every apply/write point.
     """
     eff_caps = _effective_caps(caps)
     max_dec = eff_caps["max_auto_decisions_per_drain"]
@@ -211,11 +216,17 @@ def drain(*, caps: dict | None = None, proposals=ic_proposals, gates_fn=None,
 
     def _emit(rec: dict) -> None:
         # append-only + idempotent: a (decision_id, action) already recorded is not
-        # re-appended, and does NOT count as a fresh record for this drain.
+        # re-appended, and does NOT count as a fresh record for this drain. In
+        # dry_run the would-be record is surfaced in the summary but never written.
         if (rec["decision_id"], rec["action"]) not in seen:
-            append_jsonl(audit_path, [rec])
+            if not dry_run:
+                append_jsonl(audit_path, [rec])
             seen.add((rec["decision_id"], rec["action"]))
             new_records.append(rec)
+
+    def _write_dlq(row: dict) -> None:
+        if not dry_run:                     # dry_run classifies but never mutates
+            append_jsonl(dlq_path, [row])
 
     for prop in pending:
         pid = str(prop.get("id", ""))
@@ -224,8 +235,8 @@ def drain(*, caps: dict | None = None, proposals=ic_proposals, gates_fn=None,
             geo, ovl = gates_fn(prop)
             judged = dj.classify(prop, geometry=geo, overlap=ovl)
         except Exception as e:  # noqa: BLE001 — never crash the drain; DLQ + leave pending
-            append_jsonl(dlq_path, [{"decision_id": pid, "stage": "classify",
-                                     "error": repr(e), "created_at": created_at}])
+            _write_dlq({"decision_id": pid, "stage": "classify",
+                        "error": repr(e), "created_at": created_at})
             left_pending.append(pid)
             continue
 
@@ -245,14 +256,15 @@ def drain(*, caps: dict | None = None, proposals=ic_proposals, gates_fn=None,
                 left_pending.append(pid)
                 continue
             action = _APPROVE if klass == dj.STRONG_PASS else _REJECT
-            try:
-                (proposals.approve if action == _APPROVE else proposals.reject)(pid)
-            except Exception as e:  # noqa: BLE001
-                append_jsonl(dlq_path, [{"decision_id": pid, "stage": "apply",
-                                         "action": action, "error": repr(e),
-                                         "created_at": created_at}])
-                left_pending.append(pid)
-                continue
+            if not dry_run:
+                try:
+                    (proposals.approve if action == _APPROVE else proposals.reject)(pid)
+                except Exception as e:  # noqa: BLE001
+                    _write_dlq({"decision_id": pid, "stage": "apply",
+                                "action": action, "error": repr(e),
+                                "created_at": created_at})
+                    left_pending.append(pid)
+                    continue
             _emit(_record(judged, action, created_at, eff_caps, corpus_version))
             decided.append({"decision_id": pid, "action": action})
             n_decisions += 1
@@ -276,8 +288,8 @@ def drain(*, caps: dict | None = None, proposals=ic_proposals, gates_fn=None,
         try:
             gr = gate_fn(prop, judged)
         except Exception as e:  # noqa: BLE001 — a gate crash is inconclusive, never fatal
-            append_jsonl(dlq_path, [{"decision_id": pid, "stage": "gate",
-                                     "error": repr(e), "created_at": created_at}])
+            _write_dlq({"decision_id": pid, "stage": "gate",
+                        "error": repr(e), "created_at": created_at})
             gate_meta = {"trigger": GATE_TRIGGER, "status": "error", "verdict": None,
                          "confidence": None, "applied": None}
             _emit(_record(judged, _ESCALATED, created_at, eff_caps, corpus_version,
@@ -296,14 +308,15 @@ def drain(*, caps: dict | None = None, proposals=ic_proposals, gates_fn=None,
         if decisive and n_decisions < max_dec:
             action = _GATE_APPLY[verdict]
             gate_meta["applied"] = "approve" if action == _APPROVE else "reject"
-            try:
-                (proposals.approve if action == _APPROVE else proposals.reject)(pid)
-            except Exception as e:  # noqa: BLE001
-                append_jsonl(dlq_path, [{"decision_id": pid, "stage": "gate_apply",
-                                         "action": action, "error": repr(e),
-                                         "created_at": created_at}])
-                left_pending.append(pid)
-                continue
+            if not dry_run:
+                try:
+                    (proposals.approve if action == _APPROVE else proposals.reject)(pid)
+                except Exception as e:  # noqa: BLE001
+                    _write_dlq({"decision_id": pid, "stage": "gate_apply",
+                                "action": action, "error": repr(e),
+                                "created_at": created_at})
+                    left_pending.append(pid)
+                    continue
             _emit(_record(judged, action, created_at, eff_caps, corpus_version,
                           decided_by="gate_mode_b", gate=gate_meta))
             decided.append({"decision_id": pid, "action": action})
@@ -314,9 +327,9 @@ def drain(*, caps: dict | None = None, proposals=ic_proposals, gates_fn=None,
 
         # inconclusive (MORE-INFO / VISUAL_REVIEW / low conf / offline) OR
         # decision-cap-limited -> stays human, DLQ, 0 retry, NEVER fabricate a verdict
-        append_jsonl(dlq_path, [{"decision_id": pid, "stage": "gate",
-                                 "status": status, "verdict": verdict,
-                                 "confidence": confidence, "created_at": created_at}])
+        _write_dlq({"decision_id": pid, "stage": "gate",
+                    "status": status, "verdict": verdict,
+                    "confidence": confidence, "created_at": created_at})
         _emit(_record(judged, _ESCALATED, created_at, eff_caps, corpus_version,
                       decided_by="gate_mode_b", gate=gate_meta))
         escalated.append({"decision_id": pid, "status": status,
@@ -327,14 +340,25 @@ def drain(*, caps: dict | None = None, proposals=ic_proposals, gates_fn=None,
             "left_pending": left_pending, "audit_records": new_records}
 
 
-def _main() -> int:
+def _main(argv=None) -> int:
+    import argparse
     import sys
     sys.stdout.reconfigure(encoding="utf-8")
-    summary = drain()
-    print(json.dumps({k: (v if k == "audit_records" else v)
-                      for k, v in summary.items()
-                      if k != "audit_records"}, ensure_ascii=False, indent=2))
-    print(f"audit_records={len(summary['audit_records'])}")
+    ap = argparse.ArgumentParser(
+        description="auto_decider — o CARTEIRO: decide os objetivos e aplica (ou simula)")
+    grp = ap.add_mutually_exclusive_group()
+    grp.add_argument("--dry-run", action="store_true",
+                     help="simula: classifica e mostra o que faria, NAO muta (default)")
+    grp.add_argument("--apply", action="store_true",
+                     help="aplica de verdade (move proposals, escreve audit/DLQ)")
+    a = ap.parse_args(argv)
+    # DEFAULT = seguro: sem --apply nunca muta (nem --dry-run nem sem flag mutam).
+    dry_run = not a.apply
+    summary = drain(dry_run=dry_run)
+    out = {k: v for k, v in summary.items() if k != "audit_records"}
+    out["dry_run"] = dry_run
+    out["audit_records"] = len(summary["audit_records"])
+    print(json.dumps(out, ensure_ascii=False, indent=2))
     return 0
 
 

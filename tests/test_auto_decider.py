@@ -207,3 +207,59 @@ def test_no_audit_record_is_ever_decided_by_a_human(tmp_path):
     for rec in res["audit_records"]:
         assert rec["decided_by"] != "Felipe"
         assert rec["decided_by"] in ("auto_decider", "gate_mode_b")
+
+
+# ---- dry-run (SAFETY) ----------------------------------------------------
+
+
+def test_dry_run_shows_actions_but_moves_nothing_and_writes_nothing(tmp_path):
+    props = FakeProposals([_clean(), _broken(), _taste_gap()])
+    res = _drain(props, tmp_path, dry_run=True)
+    # the summary still shows WHAT WOULD HAPPEN…
+    assert res["decided"] == [
+        {"decision_id": "furniture_program_r002", "action": "auto_approve"},
+        {"decision_id": "furniture_program_r003", "action": "auto_reject"}]
+    assert res["refused"] == ["gap_estilo_r004"]
+    assert len(res["audit_records"]) == 3          # would-be records surfaced
+    # …but NOTHING was mutated: proposals untouched, no audit/DLQ files written
+    assert set(props.pending) == {"furniture_program_r002",
+                                  "furniture_program_r003", "gap_estilo_r004"}
+    assert props.approved == {} and props.rejected == {}
+    assert not (tmp_path / ad.AUDIT_NAME).exists()
+    assert not (tmp_path / ad.DLQ_NAME).exists()
+
+
+def test_dry_run_is_repeatable_and_apply_then_mutates(tmp_path):
+    props = FakeProposals([_clean()])
+    # two dry passes are identical and never mutate
+    first = _drain(props, tmp_path, dry_run=True)
+    second = _drain(props, tmp_path, dry_run=True)
+    assert first["decided"] == second["decided"]
+    assert "furniture_program_r002" in props.pending
+    assert not (tmp_path / ad.AUDIT_NAME).exists()
+    # apply (dry_run=False) actually moves the proposal and writes the audit
+    applied = _drain(props, tmp_path, dry_run=False)
+    assert applied["decided"][0]["action"] == "auto_approve"
+    assert "furniture_program_r002" in props.approved
+    assert (tmp_path / ad.AUDIT_NAME).exists()
+
+
+def test_main_defaults_to_dry_run(monkeypatch, capsys):
+    seen: dict = {}
+    monkeypatch.setattr(ad, "drain", lambda **kw: seen.update(kw) or {
+        "decided": [], "escalated": [], "refused": [],
+        "left_pending": [], "audit_records": []})
+    assert ad._main([]) == 0                        # no flag
+    assert seen["dry_run"] is True
+    out = json.loads(capsys.readouterr().out)
+    assert out["dry_run"] is True and out["audit_records"] == 0
+
+
+def test_main_apply_flag_mutates(monkeypatch, capsys):
+    seen: dict = {}
+    monkeypatch.setattr(ad, "drain", lambda **kw: seen.update(kw) or {
+        "decided": [], "escalated": [], "refused": [],
+        "left_pending": [], "audit_records": []})
+    assert ad._main(["--apply"]) == 0
+    assert seen["dry_run"] is False
+    assert json.loads(capsys.readouterr().out)["dry_run"] is False
