@@ -1,0 +1,282 @@
+KITCHEN_VALIDATION:
+- sink_wall = LEFT
+- sink_anchor_source = PDF_WEST_WALL
+- sink_distance_to_left_wall = 1.2 in (~0/encostado)
+- sink_inside_kitchen = true
+- sink_not_inside_AS = true
+- fridge_inside_kitchen = true
+- cooktop_inside_kitchen = true
+- kitchen_door_clearance_ok = true
+- modules_grouped_individually = true
+kitchen_validation => PASS
+
+[furnish-apt] estilo 'industrial': 46 boxes recoloridos
+[furnish-apt] material por modulo: 24 boxes com textura resolvida
+[furnish-apt] 230 placeholders em 7 comodo(s):
+  r000  SUITE 01                     BEDROOM   OK               33 boxes
+  r001  A.S. | TERRACO SOCIAL | TERR SERVICE   skip(sem brain)  0 boxes
+  r002  SALA DE JANTAR | SALA DE EST LIVING    OK               91 boxes
+  r003  SUITE 02                     BEDROOM   OK               31 boxes
+  r004  COZINHA                      KITCHEN   OK               57 boxes
+  r005  BANHO 01                     BATHROOM  OK               6 boxes
+  r006  BANHO 02                     BATHROOM  OK               6 boxes
+  r007  LAVABO                       BATHROOM  OK               6 boxes
+[furnish-apt] textura interativa: 8 kind(s) mapeados (estilo industrial)
+[furnish-apt] launching SU...
+[furnish-apt] LOG:
+BEFORE render -> planta_74_furnished_before_top.png
+  rug bbox 134x108x1 in
+  estrado bbox 74x56x4 in
+  estrado bbox 80x62x2 in
+  estrado bbox 80x62x9 in
+  cabeceira bbox 3x62x41 in
+  colchao bbox 78x61x7 in
+  travesseiro bbox 14x20x6 in
+  travesseiro bbox 14x20x6 in
+  manta bbox 22x59x3 in
+  pe bbox 2x2x3 in
+  pe bbox 2x2x3 in
+  pe bbox 2x2x3 in
+  pe bbox 2x2x3 in
+  corpo bbox 14x16x17 in
+  tampo bbox 16x18x1 in
+  gaveta bbox 1x14x15 in
+  puxador bbox 2x2x1 in
+  pe bbox 2x2x3 in
+  pe bbox 2x2x3 in
+  pe bbox 2x2x3 in
+  pe bbox 2x2x3 in
+  corpo bbox 14x16x17 in
+  tampo bbox 16x18x1 in
+  gaveta bbox 1x14x15 in
+  puxador bbox 2x2x1 in
+  rodape bbox 91x20x3 in
+  corpo bbox 94x22x83 in
+  porta bbox 30x1x82 in
+  puxador bbox 1x3x16 in
+  porta bbox 30x1x82 in
+  puxador bbox 1x3x16 in
+  porta bbox 30x1x82 in
+  puxador bbox 1x3x16 in
+  foot bbox 3x3x4 in
+  foot bbox 3x3x4 in
+  foot bbox 3x3x4 in
+  foot bbox 3x3x4 in
+  tex ph_arm <- fabric_charcoal.png (tile 40)
+  arm bbox 37x7x20 in
+  arm bbox 37x7x20 in
+  base bbox 35x50x7 in
+  tex ph_seat_cushion <- fabric_charcoal.png (tile 40)
+  seat_cushion bbox 23x24x6 in
+  seat_cushion bbox 20x21x2 in
+  seat_cushion bbox 23x24x6 in
+  seat_cushion bbox 20x21x2 in
+  tex ph_back_cushion <- fabric_charcoal.png (tile 40)
+  back_cushion bbox 11x24x15 in
+  back_cushion bbox 5x21x2 in
+  back_cushion bbox 11x24x15 in
+  back_cushion bbox 5x21x2 in
+  foot bbox 2x2x6 in
+  foot bbox 2x2x6 in
+  foot bbox 2x2x6 in
+  foot bbox 2x2x6 in
+  tex ph_rack_base <- wood_dark.png (tile 40)
+  base bbox 17x61x13 in
+  tex ph_rack_top <- wood_dark.png (tile 40)
+  top bbox 17x63x1 in
+  tex ph_rack_front <- wood_dark.png (tile 40)
+  front bbox 0x19x11 in
+  tex ph_rack_niche <- wood_dark.png (tile 40)
+  niche bbox 2x19x10 in
+  front bbox 0x19x11 in
+  tex ph_tapete <- fabric_charcoal.png (tile 40)
+  tapete bbox 43x63x1 in
+  tex ph_coffee_table_top <- wood_dark.png (tile 40)
+  top bbox 20x37x2 in
+  leg bbox 2x2x13 in
+  leg bbox 2x2x13 in
+  leg bbox 2x2x13 in
+  leg bbox 2x2x13 in
+  top bbox 15x30x1 in
+  tex ph_dining_table_top <- wood_dark.png (tile 40)
+  top bbox 36x36x2 in
+  saia bbox 32x32x3 in
+  foot bbox 3x3x28 in
+  foot bbox 3x3x28 in
+  foot bbox 3x3x28 in
+  foot bbox 3x3x28 in
+  foot bbox 1x1x18 in
+  foot bbox 1x1x18 in
+  foot bbox 1x1x18 in
+  foot bbox 1x1x18 in
+  seat bbox 17x17x2 in
+  back bbox 2x17x16 in
+  foot bbox 2x2x18 in
+  foot bbox 2x2x18 in
+  foot bbox 2x2x18 in
+  foot bbox 2x2x18 in
+  seat bbox 24x24x2 in
+  back bbox 13x13x16 in
+  foot bbox 1x1x18 in
+  foot bbox 1x1x18 in
+  foot bbox 1x1x18 in
+  foot bbox 1x1x18 in
+  seat bbox 17x17x2 in
+  back bbox 17x2x16 in
+  foot bbox 2x2x18 in
+  foot bbox 2x2x18 in
+  foot bbox 2x2x18 in
+  foot bbox 2x2x18 in
+  seat bbox 24x24x2 in
+  back bbox 13x13x16 in
+  tex ph_parede_concreto <- concrete.png (tile 80)
+  parede_concreto bbox 2x127x94 in
+  pot bbox 6x6x4 in
+  trunk bbox 2x2x5 in
+  foliage bbox 12x12x7 in
+  foliage bbox 12x12x5 in
+  foliage bbox 9x9x4 in
+  foliage bbox 5x5x3 in
+  tex ph_frame <- metal_black_matte.png (tile 40)
+  frame bbox 2x1x24 in
+  frame bbox 2x1x24 in
+  frame bbox 2x33x1 in
+  frame bbox 2x33x1 in
+  canvas bbox 1x3x22 in
+  canvas bbox 1x15x3 in
+  art_accent bbox 1x15x11 in
+  canvas bbox 1x15x8 in
+  canvas bbox 1x2x22 in
+  canvas bbox 1x3x2 in
+  art_accent bbox 1x3x19 in
+  canvas bbox 1x3x2 in
+  canvas bbox 1x9x22 in
+  shelf_plank bbox 9x33x2 in
+  shelf_bracket bbox 6x1x4 in
+  shelf_bracket bbox 6x1x4 in
+  shelf_plank bbox 9x33x2 in
+  shelf_bracket bbox 6x1x4 in
+  shelf_bracket bbox 6x1x4 in
+  track_rail bbox 59x2x2 in
+  track_spot bbox 3x3x3 in
+  track_spot bbox 3x3x3 in
+  track_spot bbox 3x3x3 in
+  rug bbox 99x110x1 in
+  estrado bbox 68x28x4 in
+  estrado bbox 74x35x2 in
+  estrado bbox 74x35x9 in
+  cabeceira bbox 3x35x41 in
+  colchao bbox 72x33x7 in
+  travesseiro bbox 14x20x6 in
+  travesseiro bbox 14x20x6 in
+  manta bbox 22x32x3 in
+  pe bbox 2x2x3 in
+  pe bbox 2x2x3 in
+  pe bbox 2x2x3 in
+  pe bbox 2x2x3 in
+  corpo bbox 14x16x17 in
+  tampo bbox 16x18x1 in
+  gaveta bbox 1x14x15 in
+  puxador bbox 2x2x1 in
+  pe bbox 2x2x3 in
+  pe bbox 2x2x3 in
+  pe bbox 2x2x3 in
+  pe bbox 2x2x3 in
+  corpo bbox 14x16x17 in
+  tampo bbox 16x18x1 in
+  gaveta bbox 1x14x15 in
+  puxador bbox 2x2x1 in
+  rodape bbox 20x36x3 in
+  corpo bbox 22x39x83 in
+  porta bbox 1x18x82 in
+  puxador bbox 3x1x16 in
+  porta bbox 1x18x82 in
+  puxador bbox 3x1x16 in
+  kc_geladeira bbox 26x26x67 in
+  kc_soculo bbox 1x26x1 in
+  kc_geladeira bbox 1x26x24 in
+  kc_geladeira bbox 1x26x41 in
+  kc_soculo bbox 1x26x2 in
+  kc_puxador bbox 1x2x21 in
+  kc_puxador bbox 1x2x37 in
+  kc_soculo bbox 20x86x5 in
+  kc_corpo bbox 24x86x30 in
+  kc_gaveta bbox 1x20x9 in
+  kc_puxador bbox 1x15x1 in
+  kc_gaveta bbox 1x20x9 in
+  kc_puxador bbox 1x15x1 in
+  kc_gaveta bbox 1x20x9 in
+  kc_puxador bbox 1x15x1 in
+  kc_porta bbox 1x20x28 in
+  kc_puxador bbox 1x16x1 in
+  kc_porta bbox 1x20x28 in
+  kc_puxador bbox 1x16x1 in
+  kc_porta bbox 1x20x28 in
+  kc_puxador bbox 1x16x1 in
+  kc_tampo bbox 25x86x1 in
+  kc_backsplash bbox 2x86x20 in
+  kc_inox bbox 18x19x0 in
+  kc_cuba bbox 16x15x8 in
+  kc_cuba bbox 16x15x1 in
+  kc_ralo bbox 11x4x0 in
+  kc_torneira bbox 2x2x1 in
+  kc_torneira bbox 1x2x9 in
+  kc_vidro bbox 20x17x1 in
+  kc_boca bbox 6x6x0 in
+  kc_boca bbox 6x6x0 in
+  kc_boca bbox 6x6x0 in
+  kc_boca bbox 6x6x0 in
+  kc_corpo_sup bbox 13x86x22 in
+  kc_soculo bbox 11x86x1 in
+  kc_led bbox 1x85x1 in
+  kc_porta_sup bbox 1x20x21 in
+  kc_gola bbox 0x18x0 in
+  kc_porta_sup bbox 1x20x21 in
+  kc_gola bbox 0x18x0 in
+  kc_porta_sup bbox 1x20x21 in
+  kc_gola bbox 0x18x0 in
+  kc_niche_wood bbox 1x20x21 in
+  kc_niche_wood bbox 1x20x1 in
+  kc_corpo_sup bbox 12x20x2 in
+  kc_vidro bbox 11x15x1 in
+  decor_board bbox 9x13x1 in
+  decor_vaso bbox 5x5x7 in
+  kc_corpo_sup bbox 26x28x12 in
+  kc_soculo bbox 24x28x1 in
+  kc_led bbox 1x26x1 in
+  kc_porta_sup bbox 1x12x11 in
+  kc_gola bbox 0x10x0 in
+  kc_porta_sup bbox 1x12x11 in
+  kc_gola bbox 0x10x0 in
+  filler bbox 26x6x80 in
+  gabinete bbox 14x18x27 in
+  bancada_banho bbox 16x20x3 in
+  cuba bbox 7x7x6 in
+  espelho bbox 1x15x28 in
+  vaso bbox 22x12x6 in
+  vaso bbox 22x12x1 in
+  gabinete bbox 14x18x27 in
+  bancada_banho bbox 16x20x3 in
+  cuba bbox 7x7x6 in
+  espelho bbox 1x15x28 in
+  vaso bbox 22x12x6 in
+  vaso bbox 22x12x1 in
+  gabinete bbox 18x14x27 in
+  bancada_banho bbox 20x16x3 in
+  cuba bbox 7x7x6 in
+  espelho bbox 15x1x28 in
+  vaso bbox 12x22x6 in
+  vaso bbox 12x22x1 in
+placed 230/230 placeholders
+texturas aplicadas: 12 kind(s) via LAYOUT_TEX_MAP
+MOVEIS (comodo | movel): BANHO 01|Bancada ; BANHO 01|Espelho ; BANHO 01|Vaso ; BANHO 02|Bancada ; BANHO 02|Espelho ; BANHO 02|Vaso ; COZINHA|backsplash ; COZINHA|base_cabinet_01 ; COZINHA|cooktop_module ; COZINHA|countertop ; COZINHA|decor_board ; COZINHA|decor_vaso ; COZINHA|filler ; COZINHA|fridge ; COZINHA|hood ; COZINHA|sink_module ; COZINHA|upper_cabinet_01 ; COZINHA|upper_cabinet_02 ; LAVABO|Bancada ; LAVABO|Espelho ; LAVABO|Vaso ; SALA DE JANTAR | SALA DE ESTAR|Cadeira jantar ; SALA DE JANTAR | SALA DE ESTAR|Mesa de centro ; SALA DE JANTAR | SALA DE ESTAR|Mesa de jantar ; SALA DE JANTAR | SALA DE ESTAR|Parede concreto ; SALA DE JANTAR | SALA DE ESTAR|Planta ; SALA DE JANTAR | SALA DE ESTAR|Prateleira ; SALA DE JANTAR | SALA DE ESTAR|Quadro ; SALA DE JANTAR | SALA DE ESTAR|Rack TV ; SALA DE JANTAR | SALA DE ESTAR|Sofa ; SALA DE JANTAR | SALA DE ESTAR|Tapete ; SALA DE JANTAR | SALA DE ESTAR|Trilho de luz ; SUITE 01|Cama ; SUITE 01|Criado-mudo 1 ; SUITE 01|Criado-mudo 2 ; SUITE 01|Guarda-roupa ; SUITE 01|rug ; SUITE 02|Cama ; SUITE 02|Criado-mudo 1 ; SUITE 02|Criado-mudo 2 ; SUITE 02|Guarda-roupa ; SUITE 02|rug
+shell travado: 24 grupos (paredes/piso/portas)
+AFTER top -> planta_74_furnished_after_top.png
+AFTER iso -> planta_74_furnished_after_iso.png
+saved -> planta_74_furnished.skp
+
+[furnish-apt] flat_white_check(planta_74_furnished_after_iso.png) => PASS
+
+[furnish-apt] -> E:\Claude\worktrees\fp035-kitchen\artifacts\planta_74\furnished/
+  SKP:   planta_74_furnished.skp
+  AFTER: planta_74_furnished_after_top.png / planta_74_furnished_after_iso.png

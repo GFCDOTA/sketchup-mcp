@@ -1,0 +1,718 @@
+{
+  "schema_version": "design_spec_bundle.v1",
+  "query": {
+    "room": "kitchen",
+    "style": "black_wood_gold",
+    "budget": null
+  },
+  "tokens": [
+    {
+      "name": "coordinated_medium_dark_wood_base",
+      "builder_kinds": [
+        "kc_corpo",
+        "kc_porta",
+        "kc_gaveta"
+      ],
+      "params": {
+        "corpo_rgb": [
+          101,
+          74,
+          53
+        ],
+        "porta_rgb": [
+          108,
+          80,
+          58
+        ],
+        "gaveta_rgb": [
+          108,
+          80,
+          58
+        ],
+        "finish": "fosco acetinado, veio madeira visível (médio/escuro quente)",
+        "wood_tone": "nogueira / freijó / carvalho-fumê (médio a escuro, NUNCA claro nem branco)",
+        "base_depth_cm": 60,
+        "base_depth_range_cm": [
+          55,
+          60
+        ],
+        "countertop_height_cm": 90,
+        "countertop_height_range_cm": [
+          85,
+          92
+        ],
+        "module_width_cm": 50,
+        "module_width_range_cm": [
+          35,
+          65
+        ],
+        "drawer_rows_per_drawer_module": 3,
+        "handleless": true,
+        "handle_strategy": "cava / gola / perfil J / push-amortecedor (ver premium_shadow_gap) — sem puxador de barra tradicional",
+        "wetzone_material": "pedra/inox na zona molhada e quente (madeira não toca pia/cooktop)"
+      },
+      "source_path": "references/tokens/coordinated_medium_dark_wood_base.json",
+      "cost_relative": "médio (laminado/melamina madeirado médio-escuro é padrão); madeira natural folheada = médio-alto"
+    },
+    {
+      "name": "coordinated_oak_base",
+      "builder_kinds": [
+        "kc_corpo",
+        "kc_porta",
+        "kc_gaveta"
+      ],
+      "params": {
+        "corpo_rgb": [
+          191,
+          167,
+          137
+        ],
+        "porta_rgb": [
+          195,
+          171,
+          141
+        ],
+        "gaveta_rgb": [
+          195,
+          171,
+          141
+        ],
+        "finish": "fosco acetinado, veio madeira sutil",
+        "base_depth_cm": 60,
+        "base_depth_range_cm": [
+          55,
+          60
+        ],
+        "countertop_height_cm": 90,
+        "countertop_height_range_cm": [
+          85,
+          92
+        ],
+        "module_width_cm": 50,
+        "module_width_range_cm": [
+          35,
+          65
+        ],
+        "drawer_rows_per_drawer_module": 3
+      },
+      "source_path": "references/tokens/coordinated_oak_base.json",
+      "cost_relative": "médio (laminado/melamina madeirado claro é padrão)"
+    },
+    {
+      "name": "dark_stainless_appliance",
+      "builder_kinds": [
+        "kc_geladeira",
+        "kc_inox",
+        "kc_vidro",
+        "kc_boca"
+      ],
+      "params": {
+        "dark_stainless_rgb": [
+          82,
+          84,
+          84
+        ],
+        "cooktop_glass_rgb": [
+          22,
+          22,
+          26
+        ],
+        "finish": "inox dark satin reflexivo (NÃO fosco morto)",
+        "integration": "torre/coluna integrada; geladeira em nicho planejado",
+        "daylight_reflection": true
+      },
+      "source_path": "references/tokens/dark_stainless_appliance.json",
+      "cost_relative": "médio (linha inox dark / black steel é comum)"
+    },
+    {
+      "name": "discreet_bronze_hardware",
+      "builder_kinds": [
+        "kc_puxador"
+      ],
+      "params": {
+        "bronze_rgb": [
+          171,
+          119,
+          63
+        ],
+        "finish": "escovado fosco discreto (não polido espelhado dourado)",
+        "where_yes": [
+          "perfil de gola/cava",
+          "aro de nicho",
+          "faixa fina vertical perto da torre"
+        ],
+        "where_no": [
+          "puxador-alça aparente",
+          "superfície grande",
+          "todos os módulos"
+        ],
+        "coverage_max": "detalhe (<5% da leitura visual)"
+      },
+      "source_path": "references/tokens/discreet_bronze_hardware.json",
+      "cost_relative": "baixo-médio (perfil/acabamento, não ferragem de luxo)"
+    },
+    {
+      "name": "hot_tower_niche",
+      "builder_kinds": [
+        "kc_niche_wood",
+        "kc_filler",
+        "kc_porta_vidro",
+        "kc_inox",
+        "kc_soculo",
+        "kc_puxador"
+      ],
+      "params": {
+        "tower_width_cm": 62,
+        "tower_width_range_cm": [
+          60,
+          65
+        ],
+        "tower_depth_cm": 60,
+        "tower_depth_range_cm": [
+          55,
+          60
+        ],
+        "tower_height_m": 2.1,
+        "oven_niche_width_cm": 60,
+        "oven_door_center_height_cm": 90,
+        "oven_door_height_range_cm": [
+          80,
+          100
+        ],
+        "oven_vent_gap_rear_cm": 4,
+        "micro_niche_above_oven": true,
+        "micro_center_height_cm": 150,
+        "micro_center_height_range_cm": [
+          140,
+          160
+        ],
+        "micro_vent_gap_cm": 3,
+        "airfryer_niche": "nicho ventilado com prateleira/apoio puxável; respiro lateral+traseiro",
+        "airfryer_pullout_shelf": true,
+        "outlet_per_niche": true,
+        "outlet_note": "1 tomada interna oculta por nicho, na voltagem do aparelho (forno/cooktop podem exigir 220V)",
+        "front_flush": true,
+        "filler_width_cm": 16,
+        "filler_width_range_cm": [
+          15,
+          18
+        ],
+        "filler_rgb": [
+          108,
+          80,
+          58
+        ],
+        "appliance_face_rgb": [
+          44,
+          44,
+          48
+        ],
+        "position": "ponta do layout linear OPOSTA à torre da geladeira; encostada na parede de fundo (PDF manda — não mover pia/ponto/parede)",
+        "handleless": true
+      },
+      "source_path": "references/tokens/hot_tower_niche.json",
+      "cost_relative": "alto (coluna dedicada + 2-3 nichos com respiro/tomada + eletros embutidos consomem 1 módulo cheio de marcenaria), mas é requisito OBRIGATÓRIO do Felipe e o que separa planejado de avulso"
+    },
+    {
+      "name": "matte_black_cabinetry",
+      "builder_kinds": [
+        "kc_corpo",
+        "kc_porta",
+        "kc_gaveta",
+        "kc_corpo_sup",
+        "kc_porta_sup",
+        "kc_filler"
+      ],
+      "params": {
+        "matte_black_rgb": [
+          24,
+          24,
+          24
+        ],
+        "graphite_rgb": [
+          38,
+          39,
+          40
+        ],
+        "finish": "fosco a satin leve (não brilho espelhado, não morto)",
+        "handle_system": [
+          "cava",
+          "gola",
+          "perfil_j",
+          "push_amortecedor"
+        ],
+        "compensation_required": [
+          "warm_wood_accent",
+          "warm_2700k_led",
+          "dark_gold_veined_stone"
+        ]
+      },
+      "source_path": "references/tokens/matte_black_cabinetry.json",
+      "cost_relative": "médio (MDF laqueado/melamínico preto fosco é comum; o custo está na coordenação dos acentos)"
+    }
+  ],
+  "palette": {
+    "corpo": [
+      101,
+      74,
+      53
+    ],
+    "porta": [
+      108,
+      80,
+      58
+    ],
+    "gaveta": [
+      108,
+      80,
+      58
+    ],
+    "dark_stainless": [
+      82,
+      84,
+      84
+    ],
+    "cooktop_glass": [
+      22,
+      22,
+      26
+    ],
+    "bronze": [
+      171,
+      119,
+      63
+    ],
+    "filler": [
+      108,
+      80,
+      58
+    ],
+    "appliance_face": [
+      44,
+      44,
+      48
+    ],
+    "matte_black": [
+      24,
+      24,
+      24
+    ],
+    "graphite": [
+      38,
+      39,
+      40
+    ]
+  },
+  "anti_patterns": [
+    "Carvalho CLARO ou branco puro embaixo (não é o gosto do Felipe). Madeira escura + aéreo branco frio = bicolor builder-grade frio. Madeira na zona molhada/quente sem proteção (mancha/incha — maintenance_gate). Laca brilhante que esconde o veio (a graça da madeira média/escura é o veio). Puxador de barra tradicional (Felipe rejeita).",
+    "Carvalho mel/escuro embaixo + aéreo branco em cima = bicolor builder-grade frio (o defeito que este token corrige). Também: base e porta de tons muito diferentes = leitura remendada.",
+    "Inox cinza-escuro FOSCO = bloco morto sem reflexo (reprova daylight_reflection). Geladeira solta sem nicho = loose_object. Forno longe do cooktop/preparo = fluxo burro (appliance_workflow_check).",
+    "Puxador dourado demais / alça dourada aparente = ostentação fake. Dourado espalhado em muitos módulos = mansão fake Pinterest. Bronze brilhante espelhado quebra o moody premium.",
+    "Forno embaixo do cooktop 'porque sempre foi' quando o projeto pede coluna (perde a ergonomia de não abaixar). Micro na bancada (loose_object que come área de trabalho) ou alto demais (prato quente acima da cabeça = perigo). Airfryer largado no tampo. Nicho selado sem respiro (superaquece, queima). Nicho sem tomada (gambiarra de extensão). Torre quente colada na torre da geladeira (calor + frio juntos = ineficiência; appliance_workflow_check). Vão morto aberto no topo (pega pó). Puxador de barra tradicional (Felipe rejeita).",
+    "Preto puro [0,0,0] chapado e fosco-total sem reflexo = caverna / bloco morto. Massa preta sem madeira/LED/pedra de compensação reprova no cave_check. Puxador-alça aparente quebra a leitura handle-less.",
+    "Braço largo reto · sem pé que erga · módulos cúbicos · encosto tábua reta · zero raio/chanfro nas quinas."
+  ],
+  "layout_hints": [
+    "hot_tower_niche: ponta do layout linear OPOSTA à torre da geladeira; encostada na parede de fundo (PDF manda — não mover pia/ponto/parede)"
+  ],
+  "gate_refs": [
+    "tools/kitchen_ergonomics.py::base_depth",
+    "tools/kitchen_ergonomics.py::countertop_height",
+    "tools/kitchen_ergonomics.py::base_module_width",
+    "reference_system_gates.md::maintenance_gate (madeira fora da zona molhada/quente)",
+    "reference_system_gates.md::cave_check (não escurecer demais o compacto)",
+    "artifacts/reference_lab/gates/reference_system_gates.md::daylight_reflection_check",
+    "artifacts/reference_lab/gates/reference_system_gates.md::appliance_workflow_check",
+    "artifacts/reference_lab/gates/reference_system_gates.md::fake_luxury_check",
+    "reference_system_gates.md::appliance_workflow_check (forno/micro/airfryer acessíveis, fluxo de uso)",
+    "reference_system_gates.md::ergonomics_gate (altura do forno/micro)",
+    "reference_system_gates.md::buildability_check (eletro cabe no nicho, respiro de fabricante)",
+    "tools/kitchen_ergonomics.py::filler_width",
+    "tools/furniture_overlap_gate.py",
+    "references/joinery_rules/appliance_niches.md (forno/micro/anatomia de nicho)",
+    "artifacts/reference_lab/gates/reference_system_gates.md::cave_check",
+    "tools/kitchen_validation.py"
+  ],
+  "provenance": [
+    {
+      "source_path": "references/tokens/coordinated_medium_dark_wood_base.json",
+      "kind": "token",
+      "curation_status": "approved",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "references/tokens/coordinated_oak_base.json",
+      "kind": "token",
+      "curation_status": "approved",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "references/tokens/dark_stainless_appliance.json",
+      "kind": "token",
+      "curation_status": "approved",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "references/tokens/discreet_bronze_hardware.json",
+      "kind": "token",
+      "curation_status": "approved",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "references/tokens/hot_tower_niche.json",
+      "kind": "token",
+      "curation_status": "approved",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "references/tokens/matte_black_cabinetry.json",
+      "kind": "token",
+      "curation_status": "approved",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/reference_lab/kitchen/cards/11_hot_tower_appliance_column.json",
+      "kind": "card",
+      "curation_status": "approved",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/reference_lab/kitchen/cards/01_integrated_fridge_tower.json",
+      "kind": "card",
+      "curation_status": "approved",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/A_golden_atual.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/B_moody_premium.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/C_stress_nero.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_AB_clara_dark.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_B_antes_depois.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_ang_01_hero_3q.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_ang_02_elevacao.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_ang_03_3q_alt.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_ang_04_dollhouse.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_ang_05_detalhe.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_antes_depois.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_biblioteca_temas.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_montagem.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_montagem_v2.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_skp_blackgold_3q.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_skp_blackgold_elev.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_skp_blackgold_hero_final.png",
+      "kind": "render",
+      "curation_status": "golden",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_skp_blackgold_hero_polish.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_skp_blackgold_montagem.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_skp_blackgold_proof.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_skp_blackgold_vray_claro.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_variante_B.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_variante_B_v2.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_vray_3q.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_vray_elev.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_vray_hero.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_vray_hero_blackgold.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_vray_hero_boutique.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_vray_hero_dark.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_vray_iso.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_vray_montagem.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/kitchen_materials_candidates.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/matriz_ABC.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/sala_baseline_montagem.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/sala_baseline_top_crop.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/sala_bwg_flat_montagem.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/sala_bwg_top_crop.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/sala_eye_01_sofa_to_tv.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/sala_eye_02_tv_to_sofa.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/sala_eye_03_jantar.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/sala_eye_04_dollhouse.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/sala_eye_04_overview.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/sala_eyelevel_montagem.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/sala_fixed_top_crop.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/planta_74/furnished/kitchen_angles/sala_layout_fix_antes_depois.png",
+      "kind": "render",
+      "curation_status": "candidate",
+      "gate_verdicts": null
+    },
+    {
+      "source_path": "artifacts/reference_lab/themes/BLACK_WOOD_GOLD_INDUSTRIAL_BOUTIQUE.json",
+      "kind": "theme_preset",
+      "curation_status": "{\"applied_to_planta_74\": true, \"render\": \"cozinha_vray_hero_blackgold.png\", \"gpt\": \"PASS (cave se segura, fake_luxury OK/sutil, compact premium usavel; satin leve no preto aplicado)\", \"felipe_final\": \"APROVADO — GOLDEN_SAMPLE_004 (DECISION 004, 2026-06-20). Congelado: geometria/layout/pia/modulos/paleta/conceito.\"}",
+      "gate_verdicts": {
+        "cave_check": "borderline — exige LED forte + madeira/reflexo; é variante escura por natureza",
+        "fake_luxury_check": "PASS — veio dourado sutil/esparso (sem veião de mansão fake)",
+        "daylight_reflection_check": "geladeira inox dark + pedra polida devolvem luz",
+        "maintenance_check": "WARN — cuba/torneira preta marca água; pedra escura mostra poeira",
+        "compact_fit_check": "variante autoral; não é o default seguro do compacto",
+        "buildability_check": "executável (slab preto + pedra + bronze comum)"
+      }
+    },
+    {
+      "source_path": "artifacts/reference_lab/themes/DARK_WALNUT_MOODY_PREMIUM.json",
+      "kind": "theme_preset",
+      "curation_status": "{\"applied_to_planta_74\": true, \"render\": \"cozinha_vray_hero_dark.png\", \"gpt\": \"PASS como variante dark_walnut (cave/premium/compacto OK; fix da geladeira inox-dark + LED reforcado)\", \"felipe_final\": \"pendente\"}",
+      "gate_verdicts": [
+        "cave_check: render não pode virar caverna preta (compact_dark_cave_gate)",
+        "wood_wet_check: madeira não pode parecer plástico molhado (wood_wetzone_gate)",
+        "premium_check: deve ler como dark premium, NÃO cozinha preta barata"
+      ]
+    },
+    {
+      "source_path": "artifacts/reference_lab/themes/HOTEL_BOUTIQUE_WARM_LUXURY.json",
+      "kind": "theme_preset",
+      "curation_status": "{\"applied_to_planta_74\": true, \"render\": \"cozinha_vray_hero_boutique.png\", \"gpt\": \"PASS (taupe/champagne hotel premium; meio-termo OK; bronze reforçado p/ ficar inequívoco)\", \"felipe_final\": \"pendente\"}",
+      "gate_verdicts": [
+        "premium_check: NÃO pode cair em 'bege sem graça' — o bronze/champagne é a assinatura",
+        "balance_check: ocupa o meio-termo (não tão claro quanto 001, não tão escuro quanto 002)"
+      ]
+    },
+    {
+      "source_path": "artifacts/reference_lab/kitchen_dark_walnut/THEME_DARK_WALNUT_MOODY_PREMIUM.json",
+      "kind": "theme_preset",
+      "curation_status": "{\"applied_to_planta_74\": true, \"render\": \"cozinha_vray_hero_dark.png\", \"gpt\": \"PASS como variante dark_walnut (cave/premium/compacto OK; fix da geladeira inox-dark + LED reforcado)\", \"felipe_final\": \"pendente\"}",
+      "gate_verdicts": [
+        "cave_check: render não pode virar caverna preta (compact_dark_cave_gate)",
+        "wood_wet_check: madeira não pode parecer plástico molhado (wood_wetzone_gate)",
+        "premium_check: deve ler como dark premium, NÃO cozinha preta barata"
+      ]
+    },
+    {
+      "source_path": "artifacts/reference_lab/kitchen_hotel_boutique/THEME_HOTEL_BOUTIQUE_WARM_LUXURY.json",
+      "kind": "theme_preset",
+      "curation_status": "{\"applied_to_planta_74\": true, \"render\": \"cozinha_vray_hero_boutique.png\", \"gpt\": \"PASS (taupe/champagne hotel premium; meio-termo OK; bronze reforçado p/ ficar inequívoco)\", \"felipe_final\": \"pendente\"}",
+      "gate_verdicts": [
+        "premium_check: NÃO pode cair em 'bege sem graça' — o bronze/champagne é a assinatura",
+        "balance_check: ocupa o meio-termo (não tão claro quanto 001, não tão escuro quanto 002)"
+      ]
+    },
+    {
+      "source_path": "artifacts/reference_lab/themes/WARM_COMPACT_PREMIUM.json",
+      "kind": "theme_preset",
+      "curation_status": "{\"gpt\": \"PASS de pele\", \"felipe_final\": \"pendente\"}",
+      "gate_verdicts": null
+    }
+  ],
+  "confidence": "LOW",
+  "backend": "faceted",
+  "notes": [
+    "corpus julgado FP-034 ausente -> ranking sem sinal de curadoria julgada; confidence LOW (degradação honesta)."
+  ]
+}
