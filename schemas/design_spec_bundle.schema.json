@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "design_spec_bundle/1.0.0",
+  "title": "design_spec_bundle.v1",
+  "description": "FP-035 — o contrato tipado que retrieve(room, style, budget) devolve. E' o resultado de uma consulta faceted+ranked sobre o reference_db (cards/theme_presets/judged_variants) + os tokens curados de references/tokens/*.json, colapsando sinonimos via reference_grammar. Manda na LINGUAGEM (token/material/medida/anti-padrao); NUNCA na POSICAO (o PDF/consensus manda na posicao). candidato != canonico: o bundle e' PROPOSTA (Felipe aprova); o veredito visual IMPROVED/SAME/WORSE nunca vem daqui. confidence=LOW quando o corpus julgado (FP-034) esta ausente/esparso — degradacao honesta, nunca ranking fabricado.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "query",
+    "tokens",
+    "palette",
+    "anti_patterns",
+    "layout_hints",
+    "gate_refs",
+    "provenance",
+    "confidence"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "design_spec_bundle.v1"
+    },
+    "query": {
+      "type": "object",
+      "required": ["room", "style", "budget"],
+      "properties": {
+        "room": {
+          "type": "string",
+          "minLength": 1
+        },
+        "style": {
+          "type": ["string", "null"]
+        },
+        "budget": {
+          "type": ["string", "null"],
+          "description": "alvo de custo relativo (ex. baixo|medio|alto) ou null (sem filtro de orcamento)"
+        }
+      }
+    },
+    "tokens": {
+      "type": "array",
+      "description": "tokens builder-consumiveis RANQUEADOS (nome canonico, sinonimo ja colapsado). Vazio e' valido (degradacao honesta), mas com confidence rebaixada.",
+      "items": {
+        "type": "object",
+        "required": ["name", "builder_kinds", "source_path"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "builder_kinds": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "applies_to_kinds do token (kc_corpo, kc_porta, ...)"
+          },
+          "params": {
+            "type": "object"
+          },
+          "source_path": {
+            "type": "string",
+            "description": "de onde o token foi lido (references/tokens/<name>.json), pra rastreabilidade"
+          },
+          "cost_relative": {
+            "type": ["string", "null"],
+            "description": "prosa do token; a primeira palavra (alto/medio/baixo) alimenta o budget_fit"
+          }
+        }
+      }
+    },
+    "palette": {
+      "type": "object",
+      "description": "papel -> cor/material recuperado dos params dos tokens vencedores. {} valido quando nenhum token traz cor.",
+      "additionalProperties": true
+    },
+    "anti_patterns": {
+      "type": "array",
+      "description": "union dos anti_pattern dos tokens + refs anti do Felipe (references/felipe/anti_patterns/). Nunca vazio quando algum token tem anti_pattern.",
+      "items": {"type": "string"}
+    },
+    "layout_hints": {
+      "type": "array",
+      "description": "dicas de posicao/ergonomia extraidas dos params 'position' dos tokens (LINGUAGEM, nao coordenada — o PDF manda na posicao real).",
+      "items": {"type": "string"}
+    },
+    "gate_refs": {
+      "type": "array",
+      "description": "union dos gate_refs dos tokens vencedores — gates que o builder deve rodar.",
+      "items": {"type": "string"}
+    },
+    "provenance": {
+      "type": "array",
+      "description": "honestidade: de onde veio cada peca do bundle, com seu curation_status e gate_verdicts. Uma entrada por candidato considerado.",
+      "items": {
+        "type": "object",
+        "required": ["source_path", "curation_status"],
+        "properties": {
+          "source_path": {"type": "string"},
+          "kind": {"type": ["string", "null"]},
+          "curation_status": {
+            "type": "string",
+            "description": "main|approved|candidate|anti|... conforme a fonte"
+          },
+          "gate_verdicts": {
+            "type": ["object", "array", "null"],
+            "description": "objeto {gate: PASS|WARN|FAIL} (FP-034) OU lista de notas legadas (theme_presets antigos) OU null"
+          }
+        }
+      }
+    },
+    "confidence": {
+      "enum": ["HIGH", "MEDIUM", "LOW"],
+      "description": "HIGH: facet forte + corpus julgado FP-034 presente. MEDIUM: facet forte, julgamento parcial. LOW: sem corpus julgado (FP-034 ausente) — so facets+gates, ranking sem sinal de curadoria. NUNCA finge HIGH sem julgamento."
+    },
+    "backend": {
+      "type": "string",
+      "description": "faceted (default) | embed (fatia opcional, atras de flag)"
+    },
+    "notes": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "avisos honestos (ex. 'corpus FP-034 ausente -> confidence LOW')"
+    }
+  }
+}
