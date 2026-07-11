@@ -6,8 +6,8 @@
   "shell_json_path": "E:/Claude/apps/sketchup-mcp/runs/planta_74/_shell_polygon.json",
   "soft_barriers_mode": "groups",
   "plan_shell": {
-    "faces": 109,
-    "edges": 309,
+    "faces": 114,
+    "edges": 324,
     "sub_groups": 3,
     "faces_with_holes": 7,
     "top_or_bottom_faces": 14,
@@ -164,7 +164,7 @@
         "barrier_type": "peitoril",
         "sourced": true,
         "rendered": true,
-        "render_as": "low_wall",
+        "render_as": "railing",
         "host_wall_id": null,
         "length_m": 5.571
       }
@@ -179,17 +179,17 @@
     {
       "name": "PlanShell_Group",
       "entity_count": 3,
-      "face_count": 109,
-      "edge_count": 309,
+      "face_count": 114,
+      "edge_count": 324,
       "sub_group_count": 3,
-      "lateral_face_count": 95,
+      "lateral_face_count": 100,
       "top_or_bottom_face_count": 14,
       "top_face_count": 7,
       "default_material_face_count": 0,
       "primary_material": "plan_wall",
       "bbox_in": {
         "min": [
-          50.1721,
+          50.1723,
           409.8339,
           0.0
         ],
@@ -212,8 +212,8 @@
         ]
       },
       "height_m": 2.7,
-      "footprint_bbox_m2": 101.033,
-      "footprint_top_face_m2": 8.563
+      "footprint_bbox_m2": 101.0329,
+      "footprint_top_face_m2": 8.5751
     },
     {
       "name": "Floor_Group_r000",
@@ -537,7 +537,7 @@
       "top_or_bottom_face_count": 26,
       "top_face_count": 13,
       "default_material_face_count": 0,
-      "primary_material": "plan_parapet",
+      "primary_material": "plan_railing",
       "bbox_in": {
         "min": [
           104.0433,
@@ -1118,8 +1118,8 @@
     "input_openings": 12,
     "openings_carved": 8,
     "window_apertures_3d": 4,
-    "endpoints_free": 17,
-    "endpoints_junction": 23,
+    "endpoints_free": 22,
+    "endpoints_junction": 18,
     "openings_skipped_by_origin": [
 
     ],
@@ -1132,7 +1132,7 @@
     "shell_pieces_after_union": 3,
     "shell_pieces_after_sliver_filter": 3,
     "slivers_removed": 0,
-    "redundant_vertices_dropped": 31,
+    "redundant_vertices_dropped": 3,
     "snap_eps_pts": 0.1,
     "min_sliver_area_pts2": 0.5,
     "carving_origins": [
@@ -1140,7 +1140,7 @@
       "svg_arc",
       "svg_segments"
     ],
-    "total_shell_area_pts2": 11945.2422,
+    "total_shell_area_pts2": 11963.2201,
     "window_apertures": [
       {
         "id": "h_o007",

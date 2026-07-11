@@ -321,7 +321,9 @@ def test_classify_endpoint_junctions_quadrado_all_junctions():
     cons = _quadrado_consensus()
     j = _classify_endpoint_junctions(cons["walls"])
     for wid, (a, b) in j.items():
-        assert a is True and b is True, (
+        # contrato 2026-07-11: floats (extensao em pts, capada na face
+        # externa do vizinho); truthy = junction, 0.0 = free.
+        assert a and b, (
             f"wall {wid} should have both endpoints as junctions; got {(a, b)}"
         )
 
@@ -337,7 +339,7 @@ def test_classify_endpoint_junctions_isolated_wall_both_free():
         "rooms": [], "openings": [], "soft_barriers": [],
     }
     j = _classify_endpoint_junctions(cons["walls"])
-    assert j["lonely"] == (False, False)
+    assert j["lonely"] == (0.0, 0.0)
 
 
 def test_classify_endpoint_junctions_t_junction():
@@ -353,8 +355,8 @@ def test_classify_endpoint_junctions_t_junction():
     j = _classify_endpoint_junctions(walls)
     # Stub's TOP endpoint is at (100, 100) which is inside spine's box.
     # Stub's bottom endpoint (100, 50) is free.
-    assert j["stub"][1] is True, "stub end should be junction (hits spine)"
-    assert j["stub"][0] is False, "stub start should be FREE"
+    assert j["stub"][1], "stub end should be junction (hits spine)"
+    assert j["stub"][0] == 0.0, "stub start should be FREE"
 
 
 @pytest.mark.skipif(
@@ -379,8 +381,13 @@ def test_planta_74_free_endpoints_have_no_stub_extension():
     # junction count rose 21->23 (the new wall meets the spine at both
     # ends); free stays 17. (Felipe VISUAL_REVIEW IMPROVED 2026-06-03,
     # rebuilt with unique IDs after the m019 duplicate-ID fix.)
-    assert stats["endpoints_junction"] == 23
-    assert stats["endpoints_free"] == 17
+    # 2026-07-11 (review clinico): a extensao de juncao passou a ser
+    # CAPADA na face externa do vizinho perpendicular. 5 endpoints que
+    # terminavam exatamente NA face externa (m003.start, m004.end,
+    # m005.start, m008.end, m009.end) deixaram de ganhar stub fantasma
+    # de half-t e viraram free: junction 23->18, free 17->22.
+    assert stats["endpoints_junction"] == 18
+    assert stats["endpoints_free"] == 22
     assert stats["endpoints_junction"] + stats["endpoints_free"] == 2 * len(walls)
 
     # For each FREE side, the wall's OWN footprint must terminate at

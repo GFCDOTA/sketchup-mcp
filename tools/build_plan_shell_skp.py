@@ -176,19 +176,32 @@ def wall_footprint(wall: dict, extend_endpoints: bool = True,
     half = t / 2.0
     es = extend_endpoints if extend_start is None else extend_start
     ee = extend_endpoints if extend_end is None else extend_end
+
+    # Extension amount per end: bool True = half-thickness (legado);
+    # bool False/None = 0; float = quantidade explícita em pts, capada em
+    # half (o clamp de junção de _classify_endpoint_junctions passa floats
+    # pra nunca ultrapassar a face externa do vizinho perpendicular).
+    def _amt(v) -> float:
+        if v is True:
+            return half
+        if not v:
+            return 0.0
+        return min(float(v), half)
+
+    es_amt, ee_amt = _amt(es), _amt(ee)
     # Resolve per-axis: 'start' is the lower coord side, 'end' is the upper.
     ori = wall.get("orientation")
     if ori == "h":
-        s_low, s_high = (es, ee) if s[0] <= e[0] else (ee, es)
-        x0 = min(s[0], e[0]) - (half if s_low else 0.0)
-        x1 = max(s[0], e[0]) + (half if s_high else 0.0)
+        low_amt, high_amt = (es_amt, ee_amt) if s[0] <= e[0] else (ee_amt, es_amt)
+        x0 = min(s[0], e[0]) - low_amt
+        x1 = max(s[0], e[0]) + high_amt
         cy = s[1]
         return box(x0, cy - half, x1, cy + half)
     if ori == "v":
-        s_low, s_high = (es, ee) if s[1] <= e[1] else (ee, es)
+        low_amt, high_amt = (es_amt, ee_amt) if s[1] <= e[1] else (ee_amt, es_amt)
         cx = s[0]
-        y0 = min(s[1], e[1]) - (half if s_low else 0.0)
-        y1 = max(s[1], e[1]) + (half if s_high else 0.0)
+        y0 = min(s[1], e[1]) - low_amt
+        y1 = max(s[1], e[1]) + high_amt
         return box(cx - half, y0, cx + half, y1)
     raise ValueError(
         f"wall {wall.get('id')} has unsupported orientation={ori!r}; "
@@ -205,13 +218,22 @@ JUNCTION_TOL_PTS = 0.5
 
 def _classify_endpoint_junctions(
     walls: list[dict],
-) -> dict[str, tuple[bool, bool]]:
-    """Return ``{wall_id: (start_is_junction, end_is_junction)}``.
+) -> dict[str, tuple[float, float]]:
+    """Return ``{wall_id: (start_ext_pts, end_ext_pts)}``.
 
     A wall endpoint is a **junction** iff a buffered version of any
     **perpendicular** wall's raw (un-extended) footprint contains it.
     Buffered by ``JUNCTION_TOL_PTS`` so endpoints exactly on a wall
-    edge count.
+    edge count. Free endpoints get extension 0.0.
+
+    A extensão devolvida é **capada na face EXTERNA do vizinho** (nunca
+    passa dela): min(half-thickness, distância do endpoint até a face
+    oposta do vizinho perpendicular na direção da extensão). Sem o clamp,
+    um endpoint desenhado NA face externa do vizinho ganhava half-t de
+    stub pra fora — a planta_74 gerava 5 stubs fantasmas (~2.7×5.4 pt)
+    que só ficavam invisíveis porque _remove_small_teeth os amputava por
+    coincidência de constante (2.7 < tol 3.0), levando junto geometria
+    REAL do consensus (bug par do vf_004).
 
     The perpendicularity requirement is critical for the LL-017 stub
     trim: extending into a PERPENDICULAR neighbour closes a T/L
@@ -234,13 +256,20 @@ def _classify_endpoint_junctions(
         w["id"]: wall_footprint(w, extend_endpoints=False) for w in walls
     }
     orients = {w["id"]: w.get("orientation") for w in walls}
-    out: dict[str, tuple[bool, bool]] = {}
+    out: dict[str, tuple[float, float]] = {}
     for w in walls:
         wid = w["id"]
         own_orient = orients[wid]
+        half = float(w["thickness"]) / 2.0
+        s, e = w["start"], w["end"]
+        # eixo da parede (índice da coordenada que varia) e direção
+        # "pra fora" em cada ponta
+        axis = 0 if own_orient == "h" else 1
 
-        def is_junction(p: list[float]) -> bool:
+        def _ext(p: list[float], outward: float) -> float:
+            """Extensão capada pra este endpoint (0.0 = free)."""
             pt = Point(p)
+            best = 0.0
             for other_id, fp in raw_fps.items():
                 if other_id == wid:
                     continue
@@ -248,11 +277,21 @@ def _classify_endpoint_junctions(
                 # NOT represent a corner to close (LL-017 stub trim).
                 if orients[other_id] == own_orient:
                     continue
-                if fp.buffer(JUNCTION_TOL_PTS).contains(pt):
-                    return True
-            return False
+                if not fp.buffer(JUNCTION_TOL_PTS).contains(pt):
+                    continue
+                # distância do endpoint até a face EXTERNA do vizinho na
+                # direção da extensão — nunca estender além dela
+                minx, miny, maxx, maxy = fp.bounds
+                lo, hi = (minx, maxx) if axis == 0 else (miny, maxy)
+                needed = (hi - p[axis]) if outward > 0 else (p[axis] - lo)
+                best = max(best, max(0.0, min(half, needed)))
+            return best
 
-        out[wid] = (is_junction(w["start"]), is_junction(w["end"]))
+        if abs(e[axis] - s[axis]) < 1e-9:
+            out[wid] = (0.0, 0.0)
+            continue
+        out_s = -1.0 if s[axis] < e[axis] else 1.0
+        out[wid] = (_ext(s, out_s), _ext(e, -out_s))
     return out
 
 
@@ -299,11 +338,17 @@ def _canonicalise_axis_aligned_ring(coords: list[tuple[float, float]],
 
 def _remove_small_teeth(ring: list, tol: float = 3.0) -> list:
     """Remove corner-notch 'teeth' — small SYMMETRIC rectangular protrusions/recesses
-    of depth < tol that shapely.union leaves at wall junctions (half-thickness step =
-    the 'toquinhos' Felipe flagged 2026-06-03, ~2.7pt). Only collapses a tooth whose two
-    side edges are equal length, so the reconnected base stays axis-aligned — NEVER
-    creates a diagonal. Legit steps (depth >= tol) and real corners are preserved.
-    (Micro-test verified: dente removed, degrau 20pt kept, quadrado untouched.)"""
+    of depth < tol AND width < tol that shapely.union leaves at wall junctions
+    (half-thickness step = the 'toquinhos' Felipe flagged 2026-06-03, ~2.7pt).
+    Only collapses a tooth whose two side edges are equal length, so the
+    reconnected base stays axis-aligned — NEVER creates a diagonal.
+
+    O dente precisa ser pequeno nas DUAS dimensões: exigir só profundidade
+    < tol fazia o filtro comer geometria REAL do consensus de qualquer
+    largura (medido na planta_74: remanescente de 1.26pt junto ao carve da
+    h_o005 e overhang de 2.08pt da m006, ambos com largura 5.4 = espessura
+    de parede). Feature real rasa-mas-larga agora sobrevive; artefato de
+    canto (raso E estreito) continua removido."""
     import math as _m
     pts = [tuple(p) for p in ring]
     if len(pts) >= 2 and pts[0] == pts[-1]:
@@ -315,9 +360,11 @@ def _remove_small_teeth(ring: list, tol: float = 3.0) -> list:
             P, Q, R, S = pts[i], pts[(i+1) % n], pts[(i+2) % n], pts[(i+3) % n]
             pq = (Q[0]-P[0], Q[1]-P[1]); qr = (R[0]-Q[0], R[1]-Q[1]); rs = (S[0]-R[0], S[1]-R[1])
             lpq, lrs = _m.hypot(*pq), _m.hypot(*rs)
+            lqr = _m.hypot(*qr)
             if (abs(pq[0]*qr[0]+pq[1]*qr[1]) < 1e-6 and abs(rs[0]*qr[0]+rs[1]*qr[1]) < 1e-6
                     and (pq[0]*rs[0]+pq[1]*rs[1]) < 0 and abs(lpq-lrs) < 1e-6
-                    and 1e-9 < lpq < tol and 1e-9 < lrs < tol):
+                    and 1e-9 < lpq < tol and 1e-9 < lrs < tol
+                    and 1e-9 < lqr < tol):
                 for k in sorted([(i+1) % n, (i+2) % n], reverse=True):
                     pts.pop(k)
                 changed = True
@@ -479,10 +526,21 @@ def build_shell_polygon(consensus: dict) -> tuple[list[Polygon], dict]:
                 ),
             })
             continue
+        # Hard Rule #2: full-height carve SÓ pra kinds da whitelist.
+        # Kind desconhecido (extractor futuro, typo) NUNCA vira buraco
+        # chão-teto silencioso — vai pro bucket de erro.
+        kind = opening_kind_v5_normalised(op)
+        if kind not in FULL_HEIGHT_CARVE_KINDS:
+            openings_skipped_by_error.append(
+                f"{op.get('id')}: kind_v5 {kind!r} not in "
+                f"FULL_HEIGHT_CARVE_KINDS nor window aperture — refusing "
+                f"full-height carve (Hard Rule #2)"
+            )
+            continue
         try:
             carve_rects.append(opening_carve_rect(op, host, default_thickness))
-        except ValueError as e:
-            openings_skipped_by_error.append(f"{op.get('id')}: {e}")
+        except (ValueError, KeyError, TypeError) as e:
+            openings_skipped_by_error.append(f"{op.get('id')}: {e!r}")
 
     if carve_rects:
         carve_union = unary_union(carve_rects)

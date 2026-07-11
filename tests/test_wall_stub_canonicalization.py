@@ -94,10 +94,10 @@ def test_l_junction_no_residual_cap():
     """L: corner endpoints extend, free ends do not → no stubs."""
     cons = _l_junction_consensus()
     j = _classify_endpoint_junctions(cons["walls"])
-    assert j["h"][1] is True, "h.end at corner should be junction"
-    assert j["v"][0] is True, "v.start at corner should be junction"
-    assert j["h"][0] is False
-    assert j["v"][1] is False
+    assert j["h"][1], "h.end at corner should be junction"
+    assert j["v"][0], "v.start at corner should be junction"
+    assert j["h"][0] == 0.0
+    assert j["v"][1] == 0.0
 
     polys, stats = build_shell_polygon(cons)
     assert stats["shell_pieces_after_sliver_filter"] == 1
@@ -112,8 +112,8 @@ def test_t_junction_no_dangling_cap():
     """T-junction: stem's inner endpoint is a perpendicular junction."""
     cons = _t_junction_consensus()
     j = _classify_endpoint_junctions(cons["walls"])
-    assert j["stem"][1] is True, "stem top should be junction"
-    assert j["stem"][0] is False, "stem bottom should be FREE"
+    assert j["stem"][1], "stem top should be junction"
+    assert j["stem"][0] == 0.0, "stem bottom should be FREE"
     assert j["spine"] == (False, False)
 
     candidates, _ = detect_candidates(cons)
@@ -129,8 +129,8 @@ def test_straight_collinear_merge():
     j = _classify_endpoint_junctions(cons["walls"])
     # Per LL-017 perpendicular requirement, parallel collinear walls
     # do NOT classify as junctions — both endpoints stay FREE.
-    assert j["left"][1] is False
-    assert j["right"][0] is False
+    assert j["left"][1] == 0.0
+    assert j["right"][0] == 0.0
 
 
 def test_door_carve_no_jamb_fragment():
