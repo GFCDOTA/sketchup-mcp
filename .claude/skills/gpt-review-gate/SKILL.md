@@ -42,7 +42,7 @@ Prompt sempre força: SÓ TEXTO, SEM IMAGEM, SEM REDESENHAR.
 
 ## Artefatos
 
-- `tools/gpt_review.py` — prepare / record / show (parser + gate + ledger). Testado: `tools/test_gpt_review.py`.
+- `tools/gpt_review.py` — prepare / record / show (parser + gate + ledger). Testado: `tests/test_gpt_review.py`.
 - Ledger append-only: `artifacts/review/interior/gpt_review_ledger.jsonl`.
 - Espelho humano: `artifacts/review/interior/gpt_verdicts.md`.
 
