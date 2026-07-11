@@ -38,6 +38,10 @@ REPO = Path(__file__).resolve().parent.parent
 # Labels ficam ADJACENTES ao elemento (fora dele); 40pt ≈ 1m na planta_74.
 LABEL_MATCH_MAX_PT = 40.0
 HEIGHT_TOL_M = 0.05
+# sourced vence uma órfã quase-empatada: linework órfão frequentemente
+# DUPLICA a borda que uma barreira sourced já cobre (ex. sb004 vs
+# h_sb000 na borda leste do terraço técnico, diferença de 0.5pt).
+SOURCED_TIEBREAK_PT = 3.0
 
 LABEL_RE = re.compile(r"(PEITORIL|MURETA|GUARDA[- ]?CORPO)?\s*H\s*=\s*([\d]+[.,]\d+)\s*M")
 
@@ -102,11 +106,12 @@ def audit(fix: str = "planta_74") -> list[dict]:
             ((sb, d) for sb, d in near if sb.get("barrier_type")), None)
         orphan_near = next(
             ((sb, d) for sb, d in near if not sb.get("barrier_type")), None)
-        # sourced vence se for o mais próximo OU se estiver praticamente
-        # colada no label; órfã mais próxima que a sourced = elemento
-        # não-renderizado distinto.
+        # sourced vence se for o mais próximo ou quase-empatado (órfã
+        # costuma duplicar a mesma borda); órfã CLARAMENTE mais próxima
+        # = elemento não-renderizado distinto.
         if sourced_near and (orphan_near is None
-                             or sourced_near[1] <= orphan_near[1]):
+                             or sourced_near[1] <= orphan_near[1]
+                             + SOURCED_TIEBREAK_PT):
             sb, d = sourced_near
             row["barrier_id"] = sb["id"]
             row["consensus_height_m"] = sb.get("height_m")
