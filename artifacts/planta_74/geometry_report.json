@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0.0",
   "tool": "build_plan_shell_skp",
-  "consensus_path": "E:/Claude/worktrees/scale-fix/fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json",
-  "skp_path": "E:/Claude/worktrees/scale-fix/runs/planta_74/model.skp",
-  "shell_json_path": "E:/Claude/worktrees/scale-fix/runs/planta_74/_shell_polygon.json",
+  "consensus_path": "E:/Claude/apps/sketchup-mcp/fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json",
+  "skp_path": "E:/Claude/apps/sketchup-mcp/runs/planta_74/model.skp",
+  "shell_json_path": "E:/Claude/apps/sketchup-mcp/runs/planta_74/_shell_polygon.json",
   "soft_barriers_mode": "groups",
   "plan_shell": {
     "faces": 109,
@@ -580,24 +580,24 @@
       "bbox_in": {
         "min": [
           137.7256,
-          696.5016,
+          672.8383,
           0.0
         ],
         "max": [
           167.5997,
-          714.6586,
+          690.9953,
           82.6772
         ]
       },
       "bbox_m": {
         "min": [
           3.4982,
-          17.6911,
+          17.0901,
           0.0
         ],
         "max": [
           4.257,
-          18.1523,
+          17.5513,
           2.1
         ]
       },
@@ -658,24 +658,24 @@
       "bbox_in": {
         "min": [
           505.2007,
-          635.0819,
+          615.793,
           0.0
         ],
         "max": [
           527.498,
-          648.8645,
+          629.5756,
           82.6772
         ]
       },
       "bbox_m": {
         "min": [
           12.8321,
-          16.1311,
+          15.6411,
           0.0
         ],
         "max": [
           13.3984,
-          16.4812,
+          15.9912,
           2.1
         ]
       },
@@ -696,25 +696,25 @@
       "primary_material": "plan_door",
       "bbox_in": {
         "min": [
-          328.6899,
-          604.8165,
+          342.7121,
+          604.0291,
           0.0
         ],
         "max": [
-          344.0759,
-          629.8911,
+          358.0981,
+          629.1037,
           82.6772
         ]
       },
       "bbox_m": {
         "min": [
-          8.3487,
-          15.3623,
+          8.7049,
+          15.3423,
           0.0
         ],
         "max": [
-          8.7395,
-          15.9992,
+          9.0957,
+          15.9792,
           2.1
         ]
       },
@@ -735,25 +735,25 @@
       "primary_material": "plan_door",
       "bbox_in": {
         "min": [
-          304.5287,
-          601.4347,
+          309.0596,
+          580.594,
           0.0
         ],
         "max": [
-          329.5141,
-          616.7693,
+          334.0449,
+          595.9285,
           82.6772
         ]
       },
       "bbox_m": {
         "min": [
-          7.735,
-          15.2764,
+          7.8501,
+          14.7471,
           0.0
         ],
         "max": [
-          8.3697,
-          15.6659,
+          8.4847,
+          15.1366,
           2.1
         ]
       },
@@ -774,25 +774,25 @@
       "primary_material": "plan_door",
       "bbox_in": {
         "min": [
-          89.1804,
-          594.4621,
+          94.8079,
+          569.5288,
           0.0
         ],
         "max": [
-          121.2542,
-          613.8891,
+          126.8817,
+          588.9558,
           82.6772
         ]
       },
       "bbox_m": {
         "min": [
-          2.2652,
-          15.0993,
+          2.4081,
+          14.466,
           0.0
         ],
         "max": [
-          3.0799,
-          15.5928,
+          3.2228,
+          14.9595,
           2.1
         ]
       },
@@ -813,25 +813,25 @@
       "primary_material": "plan_door",
       "bbox_in": {
         "min": [
-          331.004,
-          569.4197,
+          342.7121,
+          572.5568,
           0.0
         ],
         "max": [
-          344.0759,
-          590.486,
+          355.7839,
+          593.6231,
           82.6772
         ]
       },
       "bbox_m": {
         "min": [
-          8.4075,
-          14.4633,
+          8.7049,
+          14.5429,
           0.0
         ],
         "max": [
-          8.7395,
-          14.9983,
+          9.0369,
+          15.078,
           2.1
         ]
       },
