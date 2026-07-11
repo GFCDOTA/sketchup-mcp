@@ -57,6 +57,32 @@ class SofaSpec:
                                      # 'panel' = lateral estofada ate a altura do deck
                                      # (sofa-chaise real); 'open' = frente aberta (002,
                                      # juiz: "le como buraco construtivo")
+    # --- FP-SOFA-PREMIUM alt_001 (defaults NEUTROS = legado byte-identico) ---
+    arm_profile: str = "box"         # 'rounded' = braco vira PERFIL extrudado com
+                                     # roundover REAL no topo (spec 6.2 — nao soften)
+    arm_front_recess: float = 0.0    # >0: braco comeca N m ATRAS da frente do sofa
+    arm_edge_radius: float = 0.0     # raio (m) do roundover superior (12-40mm/spec)
+    # --- FP-SOFA-PREMIUM alt_002 (REVISE_CHANGE do GPT: plinto 80mm visivel +
+    # riser central OCULTO ate a cota de apoio — pes somem, cota intacta) ---
+    base_style: str = "feet"         # 'plinth' = plinto continuo recuado no lugar
+                                     # dos 4 pes de canto
+    plinth_inset: float = 0.06       # recuo do plinto vs footprint (shadow gap)
+    plinth_visible_h: float = 0.08   # altura VISIVEL do plinto (z=0..h); acima
+                                     # dele o riser oculto (inset 2x) sobe ate fh
+    # --- FP-SOFA-PREMIUM alt_003 (encosto = almofada UNICA com coroamento) ---
+    back_style: str = "stacked"      # 'single_crowned' = 1 perfil por modulo com
+                                     # topo arredondado (sem bloco superior separado)
+    back_edge_radius: float = 0.025  # raio (m) do coroamento do encosto
+    # --- FP-SOFA-PREMIUM alt_004 (assento = almofada UNICA abaulada) ---
+    seat_style: str = "stacked_bevel"  # 'single_crowned' = 1 perfil por assento,
+                                     # topo abaulado + raio na aresta frontal
+    seat_crown: float = 0.015        # abaulamento do topo (pico no centro, m)
+    seat_edge_radius: float = 0.025  # raio (m) da aresta frontal-superior
+    # --- FP-SOFA-PREMIUM alt_005 (travessa frontal recuada e arredondada) ---
+    base_rail: str = "box"           # 'recessed_rounded' = face frontal da travessa
+                                     # recuada vs a frente das almofadas + raio no topo
+    rail_recess_from_cushion: float = 0.055  # recuo (m) da face frontal (REVISE GPT)
+    rail_edge_radius: float = 0.02   # raio (m) da aresta superior-frontal
 
     def validate(self):
         assert self.variant in VARIANTS, f"variant invalido: {self.variant}"

@@ -40,6 +40,53 @@ def _faces_from_verts8(v):
             "left": [v[0], v[3], v[7], v[4]], "right": [v[1], v[2], v[6], v[5]]}
 
 
+# luz fixa p/ pecas de PERFIL (roundover real, FP-SOFA-PREMIUM): determinismo
+# igual ao _SHADE nominal — topo claro, frente quase-clara, base escura.
+_LIGHT = (-0.28, -0.42, 0.86)
+
+
+def _shade_from_normal(n):
+    """Brilho [0.45..1.0] pelo cosseno normal·luz — perfis curvos ganham o
+    gradiente que denuncia o raio no clay (a razao de existir do roundover)."""
+    import math
+    nx, ny, nz = n
+    ln = math.sqrt(nx * nx + ny * ny + nz * nz) or 1.0
+    d = (nx * _LIGHT[0] + ny * _LIGHT[1] + nz * _LIGHT[2]) / ln
+    return 0.45 + 0.55 * max(0.0, d)
+
+
+def _faces_from_profile_xz(p):
+    """[(quad_ou_ngon, shade)] de um PERFIL 2D em (x,z) extrudado em Y
+    (p['profile_xz'] = poligono CCW; y0..y1 = extrusao). Tampas nas duas
+    pontas + um quad por aresta do perfil, sombreado pela normal real."""
+    pts = p["profile_xz"]
+    y0, y1 = p["y0"], p["y1"]
+    out = [([(x, y0, z) for (x, z) in pts], _shade_from_normal((0, -1, 0))),
+           ([(x, y1, z) for (x, z) in pts], _shade_from_normal((0, 1, 0)))]
+    n = len(pts)
+    for i in range(n):
+        (xa, za), (xb, zb) = pts[i], pts[(i + 1) % n]
+        quad = [(xa, y0, za), (xb, y0, zb), (xb, y1, zb), (xa, y1, za)]
+        # normal 2D da aresta no plano (x,z), CCW -> normal externa = (dz, -dx)
+        out.append((quad, _shade_from_normal((zb - za, 0.0, -(xb - xa)))))
+    return out
+
+
+def _faces_from_profile_yz(p):
+    """[(face, shade)] de um PERFIL 2D em (y,z) extrudado em X — encostos com
+    coroamento real (FP-SOFA-PREMIUM alt_003); rake ja vem baked nos pontos."""
+    pts = p["profile_yz"]
+    x0, x1 = p["x0"], p["x1"]
+    out = [([(x0, y, z) for (y, z) in pts], _shade_from_normal((-1, 0, 0))),
+           ([(x1, y, z) for (y, z) in pts], _shade_from_normal((1, 0, 0)))]
+    n = len(pts)
+    for i in range(n):
+        (ya, za), (yb, zb) = pts[i], pts[(i + 1) % n]
+        quad = [(x0, ya, za), (x0, yb, zb), (x1, yb, zb), (x1, ya, za)]
+        out.append((quad, _shade_from_normal((0.0, zb - za, -(yb - ya)))))
+    return out
+
+
 def render_parts(parts, out_png, *, title=None, elev=24, azim=-56, bg=(0.82, 0.82, 0.84)):
     fig = plt.figure(figsize=(7.2, 5.4), dpi=150)
     ax = fig.add_subplot(111, projection="3d")
@@ -48,10 +95,16 @@ def render_parts(parts, out_png, *, title=None, elev=24, azim=-56, bg=(0.82, 0.8
     polys, colors, edges = [], [], []
     for p in parts:
         r, g, b = (c / 255.0 for c in p["rgb"])
-        faces = _faces_from_verts8(p["verts8"]) if p.get("verts8") else _faces(p)
         ec = (0, 0, 0, 0.22) if p.get("edge", True) else (0, 0, 0, 0.0)
-        for fname, quad in faces.items():
-            s = _SHADE[fname]
+        if p.get("profile_xz"):
+            shaded = _faces_from_profile_xz(p)
+        elif p.get("profile_yz"):
+            shaded = _faces_from_profile_yz(p)
+        elif p.get("verts8"):
+            shaded = [(q, _SHADE[n]) for n, q in _faces_from_verts8(p["verts8"]).items()]
+        else:
+            shaded = [(q, _SHADE[n]) for n, q in _faces(p).items()]
+        for quad, s in shaded:
             polys.append(quad)
             colors.append((min(1, r * s), min(1, g * s), min(1, b * s)))
             edges.append(ec)
