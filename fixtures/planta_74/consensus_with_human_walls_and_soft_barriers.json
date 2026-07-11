@@ -320,7 +320,9 @@
         "gap_id": "gap_w003_w002",
         "carved_predicted": false,
         "drawn_predicted": true
-      }
+      },
+      "swing_side": "neg",
+      "swing_provenance": "pdf_arc_audit(tools/door_swing_audit.py)@2026-07-11; aprovacao: task vf_004 despachada pelo Felipe"
     },
     {
       "id": "h_o001",
@@ -366,7 +368,9 @@
         "gap_id": "gap_w007_w006",
         "carved_predicted": false,
         "drawn_predicted": true
-      }
+      },
+      "swing_side": "pos",
+      "swing_provenance": "pdf_arc_audit(tools/door_swing_audit.py)@2026-07-11; aprovacao: task vf_004 despachada pelo Felipe"
     },
     {
       "id": "h_o002",
@@ -412,7 +416,9 @@
         "gap_id": "gap_w010_w009",
         "carved_predicted": false,
         "drawn_predicted": true
-      }
+      },
+      "swing_side": "neg",
+      "swing_provenance": "pdf_arc_audit(tools/door_swing_audit.py)@2026-07-11; aprovacao: task vf_004 despachada pelo Felipe"
     },
     {
       "id": "h_o003",
@@ -458,7 +464,9 @@
         "gap_id": "gap_w024_w004",
         "carved_predicted": false,
         "drawn_predicted": true
-      }
+      },
+      "swing_side": "pos",
+      "swing_provenance": "pdf_arc_audit(tools/door_swing_audit.py)@2026-07-11; aprovacao: task vf_004 despachada pelo Felipe"
     },
     {
       "id": "h_o004",
@@ -475,7 +483,7 @@
         587.1240539550781
       ],
       "opening_width_pts": 27.402,
-      "hinge_side": "left",
+      "hinge_side": "right",
       "host_mode": "existing_gap",
       "human_annotation": {
         "source_image": "fixtures/planta_74/human_openings_annotation.png",
@@ -504,7 +512,9 @@
         "gap_id": "gap_w012_w011",
         "carved_predicted": false,
         "drawn_predicted": true
-      }
+      },
+      "swing_side": "neg",
+      "swing_provenance": "pdf_arc_audit(tools/door_swing_audit.py)@2026-07-11; aprovacao: task vf_004 despachada pelo Felipe"
     },
     {
       "id": "h_o005",
@@ -521,7 +531,7 @@
         580.1895
       ],
       "opening_width_pts": 35.429,
-      "hinge_side": "left",
+      "hinge_side": "right",
       "host_mode": "cut_into_wall",
       "human_annotation": {
         "source_image": "fixtures/planta_74/human_openings_annotation.png",
@@ -556,7 +566,9 @@
         "wall_id": "w022",
         "host_mode": "unhosted"
       },
-      "_host_reclassified_at": "2026-05-16T03:26:36Z"
+      "_host_reclassified_at": "2026-05-16T03:26:36Z",
+      "swing_side": "neg",
+      "swing_provenance": "pdf_arc_audit(tools/door_swing_audit.py)@2026-07-11; aprovacao: task vf_004 despachada pelo Felipe"
     },
     {
       "id": "h_o006",
@@ -573,7 +585,7 @@
         569.909
       ],
       "opening_width_pts": 22.964,
-      "hinge_side": "left",
+      "hinge_side": "right",
       "host_mode": "existing_gap",
       "human_annotation": {
         "source_image": "fixtures/planta_74/human_openings_annotation.png",
@@ -602,7 +614,9 @@
         "gap_id": "gap_w024_w004",
         "carved_predicted": false,
         "drawn_predicted": true
-      }
+      },
+      "swing_side": "pos",
+      "swing_provenance": "pdf_arc_audit(tools/door_swing_audit.py)@2026-07-11; aprovacao: task vf_004 despachada pelo Felipe"
     },
     {
       "id": "h_o007",
