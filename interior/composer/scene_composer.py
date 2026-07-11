@@ -417,7 +417,8 @@ def compose_scene(intent, style=None):
     along_axis = (_rot_pt(1, 0, theta))               # eixo da largura do hero no mundo
 
     windows = [o for o in openings if o["type"] == "window"]
-    ctx = {"window": windows[0] if windows else None}
+    ctx = {"window": windows[0] if windows else None,
+           "openings": openings}
 
     shell = build_room_shell(room, openings, style)
     scene_parts = list(shell)
@@ -528,7 +529,13 @@ def compose_scene(intent, style=None):
             wwall = win["wall"]
             wfwd = WALL_INWARD[wwall]
             walong = _rot_pt(1, 0, WALL_THETA[wwall])
-            a = win["center_along_m"] - win["width_m"] / 2.0 - 0.15 - lw / 2.0
+            # window_side opcional no intent: 'plus' poe a peca do outro lado
+            # do vao (util pra equilibrar massa por quadrante); default 'minus'
+            # preserva o comportamento legado.
+            if fi.get("window_side") == "plus":
+                a = win["center_along_m"] + win["width_m"] / 2.0 + 0.15 + lw / 2.0
+            else:
+                a = win["center_along_m"] - win["width_m"] / 2.0 - 0.15 - lw / 2.0
             face = _wall_face_point(room, wwall, a)
             inset = 0.20 + ld / 2.0          # na frente da cortina, encostado na parede
             c = (face[0] + wfwd[0] * inset, face[1] + wfwd[1] * inset)
@@ -546,15 +553,30 @@ def compose_scene(intent, style=None):
             c = [hx + fwd[0] * adv, hy + fwd[1] * adv]
             win = ctx["window"]
             turn = 0.0
+            side = 0.0
             if win is not None:
                 wn = WALL_INWARD[win["wall"]]
                 s = wn[0] * along_axis[0] + wn[1] * along_axis[1]
                 if s != 0:           # janela num dos lados do eixo -> afasta dela
                     side = 1.0 if s > 0 else -1.0
-                    c = [c[0] + along_axis[0] * ACCENT_LATERAL * side,
-                         c[1] + along_axis[1] * ACCENT_LATERAL * side]
-                    # deslocou lateral -> gira de volta pro eixo do hero (conversa)
-                    turn = side * ACCENT_TURN_DEG
+            if side == 0.0:
+                # Janela na parede que o accent ENCARA (ou sem janela): sem
+                # lateral a evitar, mas conversa de estar continua exigindo o
+                # giro (gate accent_em_dialogo reprova poltrona paralela —
+                # "objeto paralelo", cycle 003). Desloca pro lado oposto 'a
+                # porta no eixo (se houver) e gira de volta pro hero.
+                door = next((o for o in (ctx.get("openings") or [])
+                             if o.get("type") == "door"), None)
+                side = 1.0
+                if door is not None and door.get("wall") in WALL_INWARD:
+                    dn = WALL_INWARD[door["wall"]]
+                    sd = dn[0] * along_axis[0] + dn[1] * along_axis[1]
+                    if sd != 0:
+                        side = 1.0 if sd > 0 else -1.0
+            c = [c[0] + along_axis[0] * ACCENT_LATERAL * side,
+                 c[1] + along_axis[1] * ACCENT_LATERAL * side]
+            # deslocou lateral -> gira de volta pro eixo do hero (conversa)
+            turn = side * ACCENT_TURN_DEG
             th = (theta + 180 + turn) % 360
             z = _rug_lift(rug_pl, c, lw, ld)
             _emit(fi, parts_local, spec_dict, th, tuple(c), z_off=z,
