@@ -125,3 +125,5 @@ artifacts/reference_lab/inbox/*.jpeg
 .ai_bridge/rag_freshness.db
 /data/
 # runtime do auto-decider (trilha jsonl) — TTL, nao commitar
+artifacts/_archive/**/attempt_0/
+docs/archive/**/scratch_preserved/*.skp

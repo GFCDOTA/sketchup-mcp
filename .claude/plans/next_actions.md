@@ -3,59 +3,45 @@
 Fila curta. Máximo 5 itens. Adicionar novo só se houver espaço E
 valor claro pro produto.
 
-> **Snapshot:** 2026-06-06. Decai rápido.
+> **Snapshot:** 2026-07-11. Decai rápido.
 
 ## Fila atual
 
-### 1. Mergear os PRs de unbreak/higiene (#225, #226)
+### 1. Mover os 4 `test_*.py` órfãos de `tools/` pra `tests/`
 
-- **Objetivo:** landar o `fix(deps)` matplotlib+numpy (#225 — sem ele o
-  `pytest` nem coleta num install limpo) e o `fix(cockpit)` consult paths
-  em call-time (#226 — conserta 4 testes).
-- **Por quê:** o suite de testes precisa rodar verde num clone fresco;
-  hoje quebra na coleção. #226 depende de #225 pro verde total.
-- **Critério de parada:** ambos mergeados; `pytest tests/ -q` = 467 passed.
+- **Objetivo:** `tools/test_auto_camera.py`, `tools/test_geometry_sanity.py`
+  (renomear — colide com o de tests/), `tools/test_gpt_review.py` e
+  `tools/test_suite01_scale_gate.py` nunca rodam (pytest `testpaths=tests`,
+  CI idem) — são regressão silenciosa, incluindo o guardião da trava
+  de escala PT_TO_M=0.0259.
+- **Cuidado:** atualizar `.claude/skills/gpt-review-gate/SKILL.md:45`
+  (referencia `tools/test_gpt_review.py`) no mesmo commit; verificar
+  que rodam sem SketchUp antes de entrar no CI.
 
-### 2. Decidir o atuador do NOC (#222 + #223)
+### 2. Ressincronizar `uv.lock` com o `pyproject.toml`
 
-- **Objetivo:** revisar/mergear `feat/noc-dispatcher` (#222) e a doc
-  `NOC_DISPATCHER.md` (#223, depois do #222).
-- **Por quê:** o dispatcher fecha o loop de tasks seguras/auto-verificáveis.
-  Muda o `:8765` vivo — bem-railed (lock, worktree isolado, nunca
-  main/auto-merge, aparência→VISUAL_REVIEW), mas é decisão do Felipe.
-- **Critério de parada:** PRs mergeados ou veredito de ajuste.
+- **Objetivo:** lock congelado em 2026-06-03 sem numpy/matplotlib/
+  jsonschema nem extras mcp/rag. `uv lock` + commit chore.
 
 ### 3. (follow-up) `tools/check_skp_proof_of_progress.py` CI gate
 
-- **Objetivo:** implementar o gate executável de
-  `specs/skp_proof_of_progress_gate.md`.
-- **Por quê:** hoje a regra "No SKP, no progress" depende de reviewer humano.
-- **NÃO INICIAR** sem ok explícito do Felipe. Arquivo ainda não existe.
+- Gate executável de `specs/skp_proof_of_progress_gate.md`.
+  **NÃO INICIAR** sem ok explícito do Felipe. Arquivo ainda não existe.
 
-### 4. (infra) Workflow mínimo de pytest no GitHub Actions
+### 4. Fixes menores de docs apontados na auditoria 2026-07-11
 
-- **Objetivo:** `.github/workflows/` com `pip install -e ".[dev]" && pytest`.
-- **Por quê:** o repo **não tem CI**; as 2 quebras de hoje (#225, #226)
-  passaram batidas por meses. Um gate de coleção+pytest pega regressões.
-- **Critério de parada:** workflow verde num clone fresco.
+- `roadmap.md` (M3 semantic_zones entregue; FP-032..040 ausentes),
+  `.claude/docs/index.md` e `.claude/README.md` (contagens/árvore
+  desatualizadas), `interior_phased_plan.md` (estampar HISTÓRICO),
+  `current_state.md` (5 pontos decaídos listados na auditoria).
 
-### 5. (produto) Overlay `semantic_zones` p/ room fidelity da planta_74
+### 5. (produto) Crescer o corpus do RAG (FP-035 core fechado)
 
-- **Objetivo:** separar os 8 cells geométricos dos 11 ambientes semânticos
-  (open-plan funde r001/r002) sem inventar paredes.
-- **Por quê:** room fidelity = WARN honesto; o overlay resolve sem violar
-  Hard Rule #1. **Requer SketchUp** — não dá pra validar em sessão remota.
-
-## Backlog observado
-
-- `compose_side_by_side.py` **já existe** (item antigo concluído).
-- `chore/refresh-current-state`: conteúdo único (refresh de `current_state.md`)
-  foi folded em `chore/refresh-stale-docs`; fechar a branch após o merge.
-- SU 2026 pode deixar processos pendurados após runs interactive — kill antes de reuso.
+- O write-back está vivo; cada curadoria sua alimenta o retrieve.
+  Rodar drains/curadoria em lote pra engordar o corpus.
 
 ## Regra de fila
 
 Concluir a fila → escolher próximo item **só se houver valor claro pro
 produto** (gerar/revisar `.skp` fiel). Não inventar trabalho cosmético.
-Ver `specs/product_goal.md` § "Critérios de avanço real" e
-`memory/operational_rules.md` § "Continuar automaticamente vs parar".
+Ver `specs/product_goal.md` § "Critérios de avanço real".
