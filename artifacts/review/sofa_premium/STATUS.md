@@ -41,3 +41,21 @@ back_style=single_crowned seat_style=single_crowned base_rail=recessed_rounded
    (DINING_PREMIUM_FAMILY: 1 cadeira + 1 mesa canonicas, regras
    extraidas das alt_001-005, max 2 ciclos de gate pra familia toda);
    depois camas/criados com os mesmos construtores.
+
+## FECHAMENTO DO PROGRAMA (2026-07-11, sessao harness)
+
+| etapa | verdict | evidencia |
+|---|---|---|
+| harness SU (porta fiel alt_001-005) | baseline OK | su_baseline_contact_sheet.png |
+| alt_006 nativa (intersect + soften seletivo) | PRE=APPROVE, POST=IMPROVED | alt006_before_after.png |
+| GATE FINAL DE SILHUETA | PASS — blockiness=1 (<=1 OK) | idem |
+| INTEGRACAO na planta (slot 1.62m, LP-SOFA-001) | APPROVED, issues=[] | integration_evidence.png |
+
+Deliverables: sofa_premium_harness.skp (artifacts/review/sofa_premium/) +
+planta_74_furnished_with_sofa_premium.skp (artifacts/planta_74/furnished/).
+Criterios de parada do CLAUDE_EXECUTION_PROMPT: todos atendidos exceto
+"blockiness_score <= 1" TER SIDO 0 (atingiu exatamente 1 = criterio OK).
+
+PROXIMO PROGRAMA (single_instruction do veredito final): FP-DINING-PREMIUM —
+familia canonica mesa+cadeira reutilizando roundovers reais, volumes unicos,
+suportes recuados e shadow gaps (max 2 ciclos de gate pra familia toda).
