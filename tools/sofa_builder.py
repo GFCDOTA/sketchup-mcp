@@ -114,18 +114,36 @@ def build_sofa(spec: SofaSpec):
         main_seat_x = (aw, W - aw)
         chaise_seat_x = None
 
-    # --- pes (4 cantos do footprint em L) ---
-    fz = (0.0, fh)
-    foot = 0.08
-    corners = [(0.04, main_y0 + 0.04), (W - 0.04 - foot, main_y0 + 0.04),
-               (0.04, Dtot - 0.04 - foot), (W - 0.04 - foot, Dtot - 0.04 - foot)]
-    if chaise_x:   # 2 pes extra na ponta funda da chaise — SOB o deck projetado
-        # (chaise_seat_x, nao a borda externa: com a frente aberta o pe na faixa
-        # da antiga muralha ficava orfao no ar — gramatica cycle002)
-        cxl, cxr = chaise_seat_x
-        corners += [(cxl + 0.04, 0.04), (cxr - 0.04 - foot, 0.04)]
-    for i, (fx, fy) in enumerate(corners):
-        parts.append(_p(f"foot_{i + 1}", "foot", fx, fy, fx + foot, fy + foot, fz[0], fz[1], feet))
+    # --- suporte: pes de canto (legado) OU plinto recuado (FP-SOFA-PREMIUM) ---
+    if getattr(spec, "base_style", "feet") == "plinth":
+        # alt_002 (REVISE_CHANGE do GPT): plinto continuo escuro recuado
+        # plinth_inset nas 4 faces, altura VISIVEL plinth_visible_h; acima
+        # dele um RISER central oculto (inset 2x) sobe ate fh — a cota de
+        # apoio de bracos/base fica intacta e o vao vira shadow gap real.
+        ins = spec.plinth_inset
+        vh = min(spec.plinth_visible_h, fh)
+        parts.append(_p("plinth", "foot", ins, main_y0 + ins, W - ins,
+                        Dtot - ins, 0.0, vh, feet))
+        if fh - vh > 1e-4:
+            ins2 = max(ins * 2, 0.12)
+            parts.append(_p("plinth_riser", "foot", ins2, main_y0 + ins2,
+                            W - ins2, Dtot - ins2, vh, fh, _darker(feet, 0.6)))
+        if chaise_x:
+            cxl, cxr = chaise_seat_x
+            parts.append(_p("plinth_chaise", "foot", cxl + ins, ins, cxr - ins,
+                            main_y0 + ins, 0.0, vh, feet))
+    else:
+        fz = (0.0, fh)
+        foot = 0.08
+        corners = [(0.04, main_y0 + 0.04), (W - 0.04 - foot, main_y0 + 0.04),
+                   (0.04, Dtot - 0.04 - foot), (W - 0.04 - foot, Dtot - 0.04 - foot)]
+        if chaise_x:   # 2 pes extra na ponta funda da chaise — SOB o deck projetado
+            # (chaise_seat_x, nao a borda externa: com a frente aberta o pe na faixa
+            # da antiga muralha ficava orfao no ar — gramatica cycle002)
+            cxl, cxr = chaise_seat_x
+            corners += [(cxl + 0.04, 0.04), (cxr - 0.04 - foot, 0.04)]
+        for i, (fx, fy) in enumerate(corners):
+            parts.append(_p(f"foot_{i + 1}", "foot", fx, fy, fx + foot, fy + foot, fz[0], fz[1], feet))
 
     # --- bracos (bordas externas) ---
     # LINGUAGEM de classe (cycle002): arm_relief>0 = braco "flutua" sobre sapata

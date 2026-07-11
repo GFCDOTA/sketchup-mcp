@@ -62,6 +62,13 @@ class SofaSpec:
                                      # roundover REAL no topo (spec 6.2 — nao soften)
     arm_front_recess: float = 0.0    # >0: braco comeca N m ATRAS da frente do sofa
     arm_edge_radius: float = 0.0     # raio (m) do roundover superior (12-40mm/spec)
+    # --- FP-SOFA-PREMIUM alt_002 (REVISE_CHANGE do GPT: plinto 80mm visivel +
+    # riser central OCULTO ate a cota de apoio — pes somem, cota intacta) ---
+    base_style: str = "feet"         # 'plinth' = plinto continuo recuado no lugar
+                                     # dos 4 pes de canto
+    plinth_inset: float = 0.06       # recuo do plinto vs footprint (shadow gap)
+    plinth_visible_h: float = 0.08   # altura VISIVEL do plinto (z=0..h); acima
+                                     # dele o riser oculto (inset 2x) sobe ate fh
 
     def validate(self):
         assert self.variant in VARIANTS, f"variant invalido: {self.variant}"

@@ -1,0 +1,12 @@
+{
+  "alteration_id": "alt_002",
+  "phase": "BEFORE_CHANGE",
+  "current_version": "alt_001 KEPT (bracos roundover aprovados)",
+  "dominant_defect": "4 pes quadrados aparentes nos cantos + base com leitura de laje — 'base_quality=1' do baseline; single_instruction do seu POST da alt_001",
+  "single_change": "Substituir os 4 pes quadrados por PLINTO unico continuo escuro: laje z=0..0.14m com RECUO de 60mm nas 4 faces do footprint (o recuo em sombra = shadow gap uniforme). Topo do plinto mantido em z=0.14 (mesma cota onde bracos e base ja apoiam — bracos congelados intocados). Cor = feet_rgb escuro atual.",
+  "values_before": {"suporte": "4 pes 80x80mm expostos nos cantos", "plinth": null},
+  "values_after": {"suporte": "plinto continuo", "plinth_inset_mm": 60, "plinth_top_z_m": 0.14, "cor": "feet_rgb escuro"},
+  "frozen_elements": ["bracos alt_001 (espessura/raio/recuo/altura)", "largura 2.1m/3 lugares", "profundidade assento", "3 modulos", "rake 10deg", "assentos/encostos", "cores do tecido", "cameras"],
+  "validation_cameras": [{"elev": 20, "azim": -35}, {"elev": 8, "azim": -90}, {"elev": 8, "azim": 0}, {"elev": 35, "azim": -55}],
+  "current_evidence": "https://raw.githubusercontent.com/GFCDOTA/sketchup-mcp/feat/sofa-premium-alt001/artifacts/review/sofa_premium/alt_001_before_after.png"
+}
