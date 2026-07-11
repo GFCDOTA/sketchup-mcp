@@ -1,0 +1,13 @@
+{
+  "alteration_id": "alt_001",
+  "phase": "BEFORE_CHANGE",
+  "current_version": "run_000_baseline (FAIL, blockiness=5)",
+  "dominant_defect": "bracos = placas verticais retas de profundidade total, quina viva, sem recuo — 'moldura rigida em caixa' (verdict do baseline)",
+  "single_change": "Reconstruir APENAS os 2 bracos como prisma de PERFIL com roundover real: secao transversal (x,z) com cantos superiores arredondados raio 30mm (5 segmentos de arco, geometria real, nao soften), extrudada em Y com RECUO FRONTAL de 70mm (braco comeca 70mm atras da frente do sofa), 20mm mais baixo (topo 0.56m -> 130mm acima do assento) e 10mm mais fino (0.14m).",
+  "values_before": {"arm_width_m": 0.15, "arm_top_z_m": 0.58, "front_recess_m": 0.0, "edge_radius_mm": 0, "shape": "caixa reta full-depth"},
+  "values_after": {"arm_width_m": 0.14, "arm_top_z_m": 0.56, "front_recess_m": 0.07, "edge_radius_mm": 30, "arc_segments": 5, "shape": "perfil extrudado com roundover superior real"},
+  "frozen_elements": ["largura geral 2.1m/3 lugares", "profundidade assento 0.58m", "divisao 3 modulos", "backrest_rake 10deg", "base/plinto (alteracao futura)", "almofadas (alteracao futura)", "pes (alteracao futura)", "material/cores", "cameras de validacao"],
+  "validation_cameras": [{"elev": 20, "azim": -35}, {"elev": 8, "azim": -90}, {"elev": 8, "azim": 0}, {"elev": 35, "azim": -55}],
+  "current_evidence": "https://raw.githubusercontent.com/GFCDOTA/sketchup-mcp/develop/artifacts/review/planta_74/sala_boutique_20260711/sofa_baseline_contact_sheet.png",
+  "implementation_note": "exige extender render_parts_iso com part type profile_xz (poligono extrudado, sombreamento por normal) — infra da alteracao, sem efeito visual em pecas legadas (box/verts8 intocados)"
+}
