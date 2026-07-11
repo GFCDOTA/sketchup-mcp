@@ -375,7 +375,15 @@ def barrier_source(sb)
 end
 
 # Returns 'railing', 'low_wall', or nil (unsourced -> do not render).
+# FONTE ÚNICA da decisão de render: o `render_as` explícito do consensus
+# (curadoria humana, ex. h_sb000 'grade') VENCE o mapeamento por tipo.
+# build_soft_barrier recebe o valor resolvido — não re-deriva (a
+# re-derivação divergia: grade construída com material de parapeito e
+# report gravando 'low_wall').
 def barrier_render_as(sb)
+  explicit = (sb['render_as'] || '').to_s.strip.downcase
+  return 'railing'  if %w[grade railing guardrail].include?(explicit)
+  return 'low_wall' if %w[low_wall mureta peitoril parapet].include?(explicit)
   bt = (sb['barrier_type'] || '').to_s.strip.downcase
   return 'railing'  if RAILING_BARRIER_TYPES.include?(bt)
   return 'low_wall' if LOW_WALL_BARRIER_TYPES.include?(bt)
@@ -468,7 +476,7 @@ def add_grade_box(ents, quad_xy, z0, z1, material)
 end
 
 def build_soft_barrier(parent_ents, barrier, material, index,
-                       wall_footprints: nil)
+                       wall_footprints: nil, render_as: nil)
   # Per-segment swept slab. For each consecutive pair (a, b) on the
   # polyline, build a thin rectangle perpendicular to the segment
   # direction with half-width SOFT_BARRIER_THICKNESS_IN/2. The slab is
@@ -491,7 +499,10 @@ def build_soft_barrier(parent_ents, barrier, material, index,
             'reason' => "skip(no_source): barrier_type=#{bt.inspect} human_annotation=#{has_source}"}
   end
   # GRADE so com autorizacao explicita; peitoril/mureta = elemento baixo opaco.
-  render_grade = (barrier['render_as'] == 'grade' || bt == 'guardrail' || bt == 'railing')
+  # Decisao vem RESOLVIDA do call site (barrier_render_as) — fonte unica;
+  # fallback local so pra chamadas legadas sem o kwarg.
+  resolved = render_as || barrier_render_as(barrier)
+  render_grade = (resolved == 'railing')
 
   group = parent_ents.add_group
   group.name = "SoftBarrier_Group_#{index}"
@@ -1556,7 +1567,8 @@ if sb_mode == 'groups'
     end
     mat = render_as == 'railing' ? railing_mat : parapet_mat
     res = build_soft_barrier(
-      model.active_entities, sb, mat, i, wall_footprints: wall_footprints,
+      model.active_entities, sb, mat, i,
+      wall_footprints: wall_footprints, render_as: render_as,
     )
     if res['ok']
       sb_built += 1
@@ -1621,7 +1633,11 @@ openings.each_with_index do |op, i|
   end
   kind = opening_kind_v5(op)
   origin = op['geometry_origin'] || ''
-  carved = CARVING_ORIGINS.include?(origin)
+  # Paridade com o driver Python (build_plan_shell_skp.py): origin
+  # VAZIO/ausente também carva (lá: `if origin and origin not in
+  # CARVING_ORIGINS -> skip`). Sem isto, consensus futuro sem
+  # geometry_origin ganharia gap carvado + marker + porta SEM folha.
+  carved = origin.empty? || CARVING_ORIGINS.include?(origin)
 
   case kind
   when 'interior_door'
