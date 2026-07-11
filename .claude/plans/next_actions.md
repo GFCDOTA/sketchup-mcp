@@ -5,40 +5,45 @@ valor claro pro produto.
 
 > **Snapshot:** 2026-07-11. Decai rápido.
 
-## Fila atual
+## Fila atual (backlog do review clínico 2026-07-11 — 3 revisores, 32 findings; vf_004 + integridade do shell JÁ corrigidos)
 
-### 1. Mover os 4 `test_*.py` órfãos de `tools/` pra `tests/`
+### 1. Janelas: peitoril/verga MEDIDOS do PDF + eixo Z nos gates
 
-- **Objetivo:** `tools/test_auto_camera.py`, `tools/test_geometry_sanity.py`
-  (renomear — colide com o de tests/), `tools/test_gpt_review.py` e
-  `tools/test_suite01_scale_gate.py` nunca rodam (pytest `testpaths=tests`,
-  CI idem) — são regressão silenciosa, incluindo o guardião da trava
-  de escala PT_TO_M=0.0259.
-- **Cuidado:** atualizar `.claude/skills/gpt-review-gate/SKILL.md:45`
-  (referencia `tools/test_gpt_review.py`) no mesmo commit; verificar
-  que rodam sem SketchUp antes de entrar no CI.
+- **Por quê:** hoje o builder decide "basculante" por LARGURA e usa sills
+  hardcoded (1.10/1.50m) — o PDF carrega o dado como texto ("PEITORIL
+  H=1,10M"); e NENHUM gate olha Z (o geometry_report já emite bbox 3D,
+  o position_fidelity só usa x/y). É a dupla que esconde a próxima
+  classe de bug invisível (irmã do swing). Template: door_swing_audit.
 
-### 2. Ressincronizar `uv.lock` com o `pyproject.toml`
+### 2. Gate reverso PDF→consensus (opening faltante)
 
-- **Objetivo:** lock congelado em 2026-06-03 sem numpy/matplotlib/
-  jsonschema nem extras mcp/rag. `uv lock` + commit chore.
+- **Por quê:** arco de porta no PDF SEM opening no consensus é invisível
+  hoje — a classe mais grave de infidelidade sem detector. O matcher
+  arco↔porta e o filtro de louças JÁ existem em door_swing_audit; falta
+  só o loop reverso + FAIL em arco órfão.
 
-### 3. (follow-up) `tools/check_skp_proof_of_progress.py` CI gate
+### 3. Cache do build: chave incompleta (mordeu ao vivo em 2026-07-11)
 
-- Gate executável de `specs/skp_proof_of_progress_gate.md`.
-  **NÃO INICIAR** sem ok explícito do Felipe. Arquivo ainda não existe.
+- **Por quê:** `should_skip` só olha o sha do consensus — mudou builder
+  (.py/.rb), PT_TO_M ou soft_barriers_mode, devolve .skp velho com
+  "[skip] unchanged". Incluir hash dos builders + config na chave.
 
-### 4. Fixes menores de docs apontados na auditoria 2026-07-11
+### 4. Contrato pra plantas novas: campos obrigatórios + openings no report
 
-- `roadmap.md` (M3 semantic_zones entregue; FP-032..040 ausentes),
-  `.claude/docs/index.md` e `.claude/README.md` (contagens/árvore
-  desatualizadas), `interior_phased_plan.md` (estampar HISTÓRICO),
-  `current_state.md` (5 pontos decaídos listados na auditoria).
+- **Por quê:** os defaults silenciosos continuam (`hinge_side||'left'`,
+  `swing_side||'pos'`) — planta nova regride a chute sem sinal; e o
+  geometry_report não registra o resultado por opening (janela pode
+  sumir em silêncio). Gate de campos + bloco `openings` no report.
 
-### 5. (produto) Crescer o corpus do RAG (FP-035 core fechado)
+### 5. (follow-up menor) MÉDIAs do review + docs
 
-- O write-back está vivo; cada curadoria sua alimenta o retrieve.
-  Rodar drains/curadoria em lote pra engordar o corpus.
+- rb: face_tol 3.4× maior que o necessário (:1076), is_basc/esquadria
+  só wall H, rollback do carve 3D, espessura global nos paths 2D.
+  py: floor snap sem limite de spread (~35cm), floors com massa
+  diferente do shell, modo attach lança SU, sliver inválido sem reparo.
+  contrato: metadata mentiroso do consensus, triagem das 8 sb órfãs,
+  louças extraíveis, rooms merged (r001/r002). docs: roadmap/index/
+  README/current_state (auditoria 2026-07-11).
 
 ## Regra de fila
 
