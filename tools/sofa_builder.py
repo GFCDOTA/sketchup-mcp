@@ -201,8 +201,32 @@ def build_sofa(spec: SofaSpec):
 
     # --- assentos SEPARADOS (vinco) ---
     over = spec.seat_overhang   # lounge: almofada projeta sobre a base (sombra horizontal)
-    parts += _seat_row("seat_cushion", "seat", main_seat_x[0], main_seat_x[1],
-                       seat_front - over, seat_back, base_top, sh, n, gap, cush_rgb, bevel=spec.cushion_bevel)
+    if getattr(spec, "seat_style", "stacked_bevel") == "single_crowned":
+        # FP-SOFA-PREMIUM alt_004: cada assento = UMA almofada (perfil (y,z)
+        # extrudado em X) com coroamento de 15mm (pico no centro) e raio real
+        # na aresta FRONTAL-superior — elimina o tampo inset separado.
+        crown = getattr(spec, "seat_crown", 0.015)
+        r = getattr(spec, "seat_edge_radius", 0.025)
+        yF, yB, z1 = seat_front - over, seat_back, sh
+        prof = [(yF, base_top), (yB, base_top), (yB, z1)]
+        span = yB - (yF + r)
+        for j in range(1, 6):                    # coroamento: parabola yB -> yF+r
+            t = j / 6.0
+            prof.append((yB - span * t, z1 + crown * 4.0 * t * (1.0 - t)))
+        import math as _math
+        for j in range(0, 6):                    # aresta frontal: arco 90->180
+            a = _math.radians(90.0 + 90.0 * j / 5.0)
+            prof.append((yF + r + r * _math.cos(a), z1 - r + r * _math.sin(a)))
+        wmod = (main_seat_x[1] - main_seat_x[0] - gap * (n - 1)) / n
+        for i in range(n):
+            sx = main_seat_x[0] + i * (wmod + gap)
+            p = _p(f"seat_{i + 1}", "seat_cushion", sx, yF, sx + wmod, yB,
+                   base_top, z1 + crown, cush_rgb)
+            p["profile_yz"] = prof
+            parts.append(p)
+    else:
+        parts += _seat_row("seat_cushion", "seat", main_seat_x[0], main_seat_x[1],
+                           seat_front - over, seat_back, base_top, sh, n, gap, cush_rgb, bevel=spec.cushion_bevel)
     if chaise_x:
         # GRAMATICA de chaise integrada (cycle002): o vinco da chaise ALINHA com a
         # linha do assento do corpo (seat_front) — o deck le como UMA superficie

@@ -1,0 +1,12 @@
+{
+  "alteration_id": "alt_004",
+  "phase": "BEFORE_CHANGE",
+  "current_version": "alt_003 KEPT (bracos + plinto + encostos unicos)",
+  "dominant_defect": "assentos = placas retangulares rigidas e planas (single_instruction do seu POST da alt_003)",
+  "single_change": "Reconstruir APENAS os 3 assentos: cada um vira UMA almofada (perfil em (y,z) extrudado em X por modulo) com COROAMENTO superior de 15mm (topo levemente abaulado, pico no centro) e raio real de 25mm (5 segmentos) na aresta FRONTAL-superior exposta. Footprint, altura nominal, posicao e gaps preservados; overhang frontal existente preservado.",
+  "values_before": {"pecas_por_assento": 2, "forma": "caixa + tampo inset", "crown_mm": 0, "edge_radius_mm": 0},
+  "values_after": {"pecas_por_assento": 1, "forma": "perfil unico abaulado", "crown_mm": 15, "edge_radius_mm": 25, "arc_segments": 5},
+  "frozen_elements": ["encostos alt_003", "bracos alt_001", "plinto+riser alt_002", "largura/3 lugares", "gaps", "rake", "cores", "cameras"],
+  "validation_cameras": [{"elev": 20, "azim": -35}, {"elev": 8, "azim": -90}, {"elev": 8, "azim": 0}, {"elev": 35, "azim": -55}],
+  "current_evidence": "https://raw.githubusercontent.com/GFCDOTA/sketchup-mcp/feat/sofa-premium-alt001/artifacts/review/sofa_premium/alt_003_before_after.png"
+}

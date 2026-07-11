@@ -73,6 +73,11 @@ class SofaSpec:
     back_style: str = "stacked"      # 'single_crowned' = 1 perfil por modulo com
                                      # topo arredondado (sem bloco superior separado)
     back_edge_radius: float = 0.025  # raio (m) do coroamento do encosto
+    # --- FP-SOFA-PREMIUM alt_004 (assento = almofada UNICA abaulada) ---
+    seat_style: str = "stacked_bevel"  # 'single_crowned' = 1 perfil por assento,
+                                     # topo abaulado + raio na aresta frontal
+    seat_crown: float = 0.015        # abaulamento do topo (pico no centro, m)
+    seat_edge_radius: float = 0.025  # raio (m) da aresta frontal-superior
 
     def validate(self):
         assert self.variant in VARIANTS, f"variant invalido: {self.variant}"
