@@ -1,0 +1,18 @@
+{
+  "run_id": "run_000_baseline",
+  "date": "2026-07-11",
+  "phase": "BASELINE",
+  "source": "GPT via gpt-chrome-bridge :8899 (contact sheet 4 angulos, raw URL)",
+  "verdict": "FAIL",
+  "blockiness_score": 5,
+  "silhouette_coherence": 2,
+  "upholstery_readability": 1,
+  "arm_quality": 1,
+  "cushion_quality": 1,
+  "base_quality": 1,
+  "main_silhouette_defect": "bracos sao placas verticais de altura quase total, avancam ate a frente, terminam sobre pes quadrados expostos — moldura rigida em caixa",
+  "main_upholstery_defect": "assentos/encostos/apoios = placas rigidas empilhadas, espessura uniforme, quinas vivas, zero compressao/costura",
+  "highest_impact_change": "alt_001: substituir os bracos-placa por bracos baixos, finos, recuados na frente, raio visivel ~25mm",
+  "do_not_change": ["largura geral 3 lugares", "profundidade do assento", "divisao em 3 modulos largos", "inclinacao dos encostos"],
+  "nota_tecnica": "build_sofa gera APENAS caixas (render_parts_iso e' box-based) — alt_001 exige extender o builder com prisma chanfrado/roundover REAL (spec 6.2), nao soften cosmetico."
+}
