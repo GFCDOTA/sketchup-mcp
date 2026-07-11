@@ -5212,6 +5212,38 @@
         ]
       },
       "render_as": "grade"
+    },
+    {
+      "id": "h_sb001",
+      "barrier_type": "mureta",
+      "polyline_pts": [
+        [
+          227.0,
+          408.0
+        ],
+        [
+          227.0,
+          500.2
+        ]
+      ],
+      "height_m": 0.7,
+      "orientation": "v",
+      "geometry_origin": "pdf_vector",
+      "render_as": "low_wall",
+      "pdf_provenance": {
+        "band_bbox_pts": [
+          223.1,
+          408.0,
+          230.9,
+          500.2
+        ],
+        "label": "MURETA H=0,70M",
+        "label_center_pts": [
+          234.8,
+          431.1
+        ],
+        "curated": "pdf_height_labels_audit + overlay visual; task despachada pelo Felipe 2026-07-11 (chip task_820ccf6e)"
+      }
     }
   ],
   "metadata": {

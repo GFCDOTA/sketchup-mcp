@@ -489,14 +489,18 @@ def build_soft_barrier(parent_ents, barrier, material, index,
   return {'ok' => false, 'reason' => 'no polyline_pts'} if pts_pdf.length < 2
 
   # SOURCE GATE (Felipe 2026-06-02): so renderiza com FONTE EXPLICITA.
-  # sem barrier_type + sem human_annotation => SKIP TOTAL (caso sb000-sb007).
+  # sem barrier_type + sem origem whitelisted => SKIP TOTAL (caso sb000-sb007).
   # NADA de fallback fisico — nem grade, nem mureta, nem bloco cinza. Fica
   # ausente do SKP; aparece so como WARN no soft_barrier_source_audit.
+  # Origens aceitas: human_annotation (curadoria por imagem) e pdf_vector /
+  # pdf_text_label (extracao honesta de vetor+texto do PDF; ex. h_sb001
+  # MURETA H=0,70M, audit pdf_height_labels 2026-07-11).
   bt = barrier['barrier_type']
-  has_source = (barrier['geometry_origin'] == 'human_annotation')
+  has_source = %w[human_annotation pdf_vector pdf_text_label]
+               .include?(barrier['geometry_origin'].to_s)
   unless bt && has_source
     return {'ok' => false,
-            'reason' => "skip(no_source): barrier_type=#{bt.inspect} human_annotation=#{has_source}"}
+            'reason' => "skip(no_source): barrier_type=#{bt.inspect} sourced=#{has_source}"}
   end
   # GRADE so com autorizacao explicita; peitoril/mureta = elemento baixo opaco.
   # Decisao vem RESOLVIDA do call site (barrier_render_as) — fonte unica;
@@ -606,7 +610,11 @@ def build_soft_barrier(parent_ents, barrier, material, index,
       end
       ok_seg = boxes > 0
     else
-      # MURETA OPACA (default): laje fina extrudada ate 1,10m.
+      # MURETA OPACA (default): laje fina extrudada ate height_m do
+      # consensus (medida do PDF, ex. h_sb001 = 0,70m); fallback 1,10m
+      # (PARAPET_HEIGHT_M) pra barreira legada sem o campo.
+      mureta_h_in = (barrier['height_m'] ? barrier['height_m'].to_f
+                                         : PARAPET_HEIGHT_M) * M_TO_IN
       half_t = SOFT_BARRIER_THICKNESS_IN / 2.0
       nx = -uy * half_t
       ny =  ux * half_t
@@ -619,7 +627,7 @@ def build_soft_barrier(parent_ents, barrier, material, index,
       face = (se.add_face(quad) rescue nil)
       if face
         face.reverse! if face.normal.z < 0
-        face.pushpull(PARAPET_HEIGHT_IN)
+        face.pushpull(mureta_h_in)
         se.grep(Sketchup::Face).each { |f| f.material = material; f.back_material = material }
         ok_seg = true
       else

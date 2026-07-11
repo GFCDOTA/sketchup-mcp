@@ -32,9 +32,9 @@
       {
         "name": "Floor_Group_r001",
         "faces": 1,
-        "edges": 26,
-        "area_in2": 24119.66,
-        "area_m2": 15.561
+        "edges": 28,
+        "area_in2": 23883.98,
+        "area_m2": 15.409
       },
       {
         "name": "Floor_Group_r002",
@@ -82,7 +82,7 @@
   },
   "soft_barrier_groups": {
     "present": true,
-    "count": 1,
+    "count": 2,
     "skipped_count": 8,
     "skip_reasons": [
       "sb[0] sb000: unsourced_no_provenance (not rendered)",
@@ -167,13 +167,22 @@
         "render_as": "railing",
         "host_wall_id": null,
         "length_m": 5.571
+      },
+      {
+        "id": "h_sb001",
+        "barrier_type": "mureta",
+        "sourced": true,
+        "rendered": true,
+        "render_as": "low_wall",
+        "host_wall_id": null,
+        "length_m": 2.388
       }
     ]
   },
   "totals": {
-    "top_level_groups": 24,
+    "top_level_groups": 25,
     "faces": 50,
-    "edges": 219
+    "edges": 221
   },
   "groups_diagnostic": [
     {
@@ -256,9 +265,9 @@
     },
     {
       "name": "Floor_Group_r001",
-      "entity_count": 27,
+      "entity_count": 29,
       "face_count": 1,
-      "edge_count": 26,
+      "edge_count": 28,
       "sub_group_count": 0,
       "lateral_face_count": 0,
       "top_or_bottom_face_count": 1,
@@ -291,7 +300,7 @@
       },
       "height_m": 0.0,
       "footprint_bbox_m2": 24.4777,
-      "footprint_top_face_m2": 15.561
+      "footprint_top_face_m2": 15.409
     },
     {
       "name": "Floor_Group_r002",
@@ -565,6 +574,45 @@
       "height_m": 1.1,
       "footprint_bbox_m2": 6.1231,
       "footprint_top_face_m2": 0.5194
+    },
+    {
+      "name": "SoftBarrier_Group_9",
+      "entity_count": 1,
+      "face_count": 6,
+      "edge_count": 12,
+      "sub_group_count": 1,
+      "lateral_face_count": 4,
+      "top_or_bottom_face_count": 2,
+      "top_face_count": 1,
+      "default_material_face_count": 0,
+      "primary_material": "plan_parapet",
+      "bbox_in": {
+        "min": [
+          230.7185,
+          416.0315,
+          0.0
+        ],
+        "max": [
+          232.2185,
+          510.0465,
+          27.5591
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          5.8603,
+          10.5672,
+          0.0
+        ],
+        "max": [
+          5.8983,
+          12.9552,
+          0.7
+        ]
+      },
+      "height_m": 0.7,
+      "footprint_bbox_m2": 0.091,
+      "footprint_top_face_m2": 0.091
     },
     {
       "name": "DoorLeaf_Group_h_o000",
