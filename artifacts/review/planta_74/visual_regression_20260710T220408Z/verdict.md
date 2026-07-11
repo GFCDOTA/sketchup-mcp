@@ -36,3 +36,21 @@ ACTION: promote
 - 7 design_patterns_observed extraídos pelo painel (6 works / 1 neutral)
   alimentam o corpus do RAG automaticamente.
 - Carimbo humano final (VISUAL_REVIEW) segue sendo do Felipe.
+
+## Check estrito porta/janela (follow-up, 2026-07-10)
+
+Re-despacho do painel com PDF 300dpi + renders em resolução nativa
+(o path-guard do bridge bloqueia o scratchpad do Claude — usar path do repo):
+
+- Paredes / cômodos (9/9) / escala / orientação: **PASS**.
+- Posições de TODAS as portas e janelas resolvíveis: **MATCH** com o PDF.
+- **FINDING REAL — porta de ENTRADA com swing INVERTIDO** (vf_004,
+  confirmado por crop manual PDF vs SKP): no PDF a folha abre PRA DENTRO
+  da SALA DE JANTAR (dobradiça à esquerda, arco interno); no SKP a folha
+  renderiza PRA FORA da unidade. Investigar: lado do arc no
+  consensus_model vs offset do leaf no build_plan_shell_skp.
+- FAIL de material_light do painel = categoria (cobrou V-Ray de render
+  interativo flat) — não se aplica a este artefato; a própria síntese
+  reconhece que seria WARN.
+- Janelas de COZINHA/BANHOS/A.S.: UNRESOLVABLE por oclusão de mobília
+  no top view (não é defeito; conferir com render sem mobília se preciso).
