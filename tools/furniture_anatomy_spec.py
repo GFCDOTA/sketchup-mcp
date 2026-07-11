@@ -57,6 +57,11 @@ class SofaSpec:
                                      # 'panel' = lateral estofada ate a altura do deck
                                      # (sofa-chaise real); 'open' = frente aberta (002,
                                      # juiz: "le como buraco construtivo")
+    # --- FP-SOFA-PREMIUM alt_001 (defaults NEUTROS = legado byte-identico) ---
+    arm_profile: str = "box"         # 'rounded' = braco vira PERFIL extrudado com
+                                     # roundover REAL no topo (spec 6.2 — nao soften)
+    arm_front_recess: float = 0.0    # >0: braco comeca N m ATRAS da frente do sofa
+    arm_edge_radius: float = 0.0     # raio (m) do roundover superior (12-40mm/spec)
 
     def validate(self):
         assert self.variant in VARIANTS, f"variant invalido: {self.variant}"

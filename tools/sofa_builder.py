@@ -43,6 +43,25 @@ def _seat_row(kind, prefix, x0, x1, y0, y1, z0, z1, n, gap, rgb, bevel=0.0):
     return out
 
 
+def _rounded_arm_profile(x0, x1, z0, z1, r, nseg=5):
+    """Secao (x,z) CCW de um braco com roundover REAL nos 2 cantos superiores:
+    retangulo com arcos de raio r (nseg segmentos cada) — FP-SOFA-PREMIUM
+    alt_001 (spec 6.2: bevel de geometria, nao soften cosmetico)."""
+    import math
+    r = max(0.0, min(r, (x1 - x0) / 2 - 1e-4, (z1 - z0) / 2 - 1e-4))
+    if r <= 0:
+        return [(x0, z0), (x1, z0), (x1, z1), (x0, z1)]
+    cz = z1 - r
+    pts = [(x0, z0), (x1, z0), (x1, cz)]
+    for i in range(1, nseg + 1):        # canto sup DIREITO: centro (x1-r, cz), 0->90
+        a = math.radians(90.0 * i / nseg)
+        pts.append((x1 - r + r * math.cos(a), cz + r * math.sin(a)))
+    for i in range(1, nseg + 1):        # canto sup ESQUERDO: centro (x0+r, cz), 90->180
+        a = math.radians(90.0 + 90.0 * i / nseg)
+        pts.append((x0 + r + r * math.cos(a), cz + r * math.sin(a)))
+    return pts
+
+
 def _shear_y(p, k, z0pivot):
     """verts8 do box p cisalhado em Y: y += k*(z - z0pivot) (k=tan(rake)). Topo recua
     -> encosto inclinado. Mantem 6 faces (renderer usa verts8)."""
@@ -116,6 +135,16 @@ def build_sofa(spec: SofaSpec):
     cap_t, cap_over, shoe_in = 0.04, 0.015, 0.03
     for side, (x0a, x1a), (ya0, ya1) in (("left", (0.0, aw), left_arm_y),
                                          ("right", (W - aw, W), right_arm_y)):
+        if getattr(spec, "arm_profile", "box") == "rounded":
+            # FP-SOFA-PREMIUM alt_001: braco = PERFIL extrudado com roundover
+            # real no topo + recuo frontal (frente do sofa = -Y -> ya0+recess).
+            ya0r = ya0 + max(0.0, getattr(spec, "arm_front_recess", 0.0))
+            prof = _rounded_arm_profile(x0a, x1a, fh, ah,
+                                        getattr(spec, "arm_edge_radius", 0.0))
+            p = _p(f"arm_{side}", "arm", x0a, ya0r, x1a, ya1, fh, ah, fab)
+            p["profile_xz"] = prof
+            parts.append(p)
+            continue
         body_z0 = fh + relief
         body_z1 = ah - (cap_t if cap else 0.0)
         if relief > 0:
