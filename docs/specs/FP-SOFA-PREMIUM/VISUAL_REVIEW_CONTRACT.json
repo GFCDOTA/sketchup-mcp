@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SofaPremiumVisualReview",
+  "type": "object",
+  "required": [
+    "verdict",
+    "blockiness_score",
+    "silhouette_coherence",
+    "upholstery_readability",
+    "arm_quality",
+    "cushion_quality",
+    "base_quality",
+    "main_silhouette_defect",
+    "main_upholstery_defect",
+    "highest_impact_change"
+  ],
+  "properties": {
+    "verdict": {
+      "type": "string",
+      "enum": ["PASS", "WARN", "FAIL"]
+    },
+    "blockiness_score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 5,
+      "description": "0 = premium/orgânico, 5 = Minecraft/caixas empilhadas"
+    },
+    "silhouette_coherence": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 5
+    },
+    "upholstery_readability": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 5
+    },
+    "arm_quality": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 5
+    },
+    "cushion_quality": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 5
+    },
+    "base_quality": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 5
+    },
+    "main_silhouette_defect": {
+      "type": "string"
+    },
+    "main_upholstery_defect": {
+      "type": "string"
+    },
+    "highest_impact_change": {
+      "type": "string"
+    },
+    "do_not_change": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
