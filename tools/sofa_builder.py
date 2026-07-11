@@ -213,8 +213,26 @@ def build_sofa(spec: SofaSpec):
                             chaise_seat_x[1], y1, base_top, sh, cush_rgb))
 
     # --- encostos SEPARADOS (corpo principal + sobre a chaise) ---
-    parts += _seat_row("back_cushion", "back", main_seat_x[0], main_seat_x[1],
-                       seat_back, Dtot, back_z0, bh, n, gap, back_rgb, bevel=spec.cushion_bevel)
+    if getattr(spec, "back_style", "stacked") == "single_crowned":
+        # FP-SOFA-PREMIUM alt_003: cada encosto = UMA almofada (perfil em (y,z)
+        # extrudado em X) com coroamento arredondado real no topo; o rake de
+        # 10deg vem BAKED nos pontos do perfil (nada de bloco superior separado).
+        import math as _math
+        kr = _math.tan(_math.radians(spec.backrest_rake or 0.0))
+        r = getattr(spec, "back_edge_radius", 0.025)
+        wmod = (main_seat_x[1] - main_seat_x[0] - gap * (n - 1)) / n
+        prof0 = _rounded_arm_profile(seat_back, Dtot, back_z0, bh, r)  # (y,z)
+        prof = [(y + kr * (z - back_z0), z) for (y, z) in prof0]
+        ys = [y for (y, _z) in prof]
+        for i in range(n):
+            sx = main_seat_x[0] + i * (wmod + gap)
+            p = _p(f"back_{i + 1}", "back_cushion", sx, min(ys), sx + wmod,
+                   max(ys), back_z0, bh, back_rgb)
+            p["profile_yz"] = prof
+            parts.append(p)
+    else:
+        parts += _seat_row("back_cushion", "back", main_seat_x[0], main_seat_x[1],
+                           seat_back, Dtot, back_z0, bh, n, gap, back_rgb, bevel=spec.cushion_bevel)
     if chaise_x:
         parts.append(_p("back_chaise", "back_cushion", chaise_seat_x[0], seat_back,
                         chaise_seat_x[1], Dtot, back_z0, bh, back_rgb))
@@ -226,7 +244,8 @@ def build_sofa(spec: SofaSpec):
     if rake:
         k = math.tan(rake)
         for p in parts:
-            if p["kind"] == "back_cushion":
+            if p["kind"] == "back_cushion" and not p.get("profile_yz"):
+                # perfis (alt_003) ja vem com o rake baked nos pontos
                 v = _shear_y(p, k, back_z0)
                 p["verts8"] = v
                 ys = [c[1] for c in v]

@@ -1,0 +1,12 @@
+{
+  "alteration_id": "alt_003",
+  "phase": "BEFORE_CHANGE",
+  "current_version": "alt_002 KEPT (bracos roundover + plinto/riser)",
+  "dominant_defect": "encostos = placas empilhadas com blocos superiores separados lendo como pecas rigidas adicionais (upholstery_readability=1 no baseline; single_instruction do seu POST da alt_002)",
+  "single_change": "Reconstruir APENAS os 3 encostos: cada um vira UMA almofada unica (perfil extrudado em X por modulo) — sem bloco superior separado — com COROAMENTO suave no topo: cantos superiores arredondados com raio real de 25mm (5 segmentos), rake de 10deg PRESERVADO (baked nos pontos do perfil). Gap entre modulos preservado.",
+  "values_before": {"pecas_por_encosto": 2, "forma": "caixa + tampo inset (le como bloco empilhado)", "edge_radius_mm": 0},
+  "values_after": {"pecas_por_encosto": 1, "forma": "perfil unico com coroamento arredondado", "edge_radius_mm": 25, "arc_segments": 5, "rake_deg": 10},
+  "frozen_elements": ["bracos alt_001", "plinto+riser alt_002", "cota apoio z=0.14", "largura 2.1m/3 lugares", "profundidade assento", "3 modulos e gaps", "rake 10deg", "ASSENTOS (alteracao futura)", "cores", "cameras"],
+  "validation_cameras": [{"elev": 20, "azim": -35}, {"elev": 8, "azim": -90}, {"elev": 8, "azim": 0}, {"elev": 35, "azim": -55}],
+  "current_evidence": "https://raw.githubusercontent.com/GFCDOTA/sketchup-mcp/feat/sofa-premium-alt001/artifacts/review/sofa_premium/alt_002_before_after.png"
+}

@@ -72,6 +72,21 @@ def _faces_from_profile_xz(p):
     return out
 
 
+def _faces_from_profile_yz(p):
+    """[(face, shade)] de um PERFIL 2D em (y,z) extrudado em X — encostos com
+    coroamento real (FP-SOFA-PREMIUM alt_003); rake ja vem baked nos pontos."""
+    pts = p["profile_yz"]
+    x0, x1 = p["x0"], p["x1"]
+    out = [([(x0, y, z) for (y, z) in pts], _shade_from_normal((-1, 0, 0))),
+           ([(x1, y, z) for (y, z) in pts], _shade_from_normal((1, 0, 0)))]
+    n = len(pts)
+    for i in range(n):
+        (ya, za), (yb, zb) = pts[i], pts[(i + 1) % n]
+        quad = [(x0, ya, za), (x0, yb, zb), (x1, yb, zb), (x1, ya, za)]
+        out.append((quad, _shade_from_normal((0.0, zb - za, -(yb - ya)))))
+    return out
+
+
 def render_parts(parts, out_png, *, title=None, elev=24, azim=-56, bg=(0.82, 0.82, 0.84)):
     fig = plt.figure(figsize=(7.2, 5.4), dpi=150)
     ax = fig.add_subplot(111, projection="3d")
@@ -83,6 +98,8 @@ def render_parts(parts, out_png, *, title=None, elev=24, azim=-56, bg=(0.82, 0.8
         ec = (0, 0, 0, 0.22) if p.get("edge", True) else (0, 0, 0, 0.0)
         if p.get("profile_xz"):
             shaded = _faces_from_profile_xz(p)
+        elif p.get("profile_yz"):
+            shaded = _faces_from_profile_yz(p)
         elif p.get("verts8"):
             shaded = [(q, _SHADE[n]) for n, q in _faces_from_verts8(p["verts8"]).items()]
         else:

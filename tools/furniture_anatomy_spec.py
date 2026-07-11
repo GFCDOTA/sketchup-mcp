@@ -69,6 +69,10 @@ class SofaSpec:
     plinth_inset: float = 0.06       # recuo do plinto vs footprint (shadow gap)
     plinth_visible_h: float = 0.08   # altura VISIVEL do plinto (z=0..h); acima
                                      # dele o riser oculto (inset 2x) sobe ate fh
+    # --- FP-SOFA-PREMIUM alt_003 (encosto = almofada UNICA com coroamento) ---
+    back_style: str = "stacked"      # 'single_crowned' = 1 perfil por modulo com
+                                     # topo arredondado (sem bloco superior separado)
+    back_edge_radius: float = 0.025  # raio (m) do coroamento do encosto
 
     def validate(self):
         assert self.variant in VARIANTS, f"variant invalido: {self.variant}"
