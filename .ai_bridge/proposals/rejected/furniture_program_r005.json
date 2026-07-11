@@ -39,5 +39,6 @@
     }
   ],
   "existing": [],
-  "requires_approval": true
+  "requires_approval": true,
+  "status": "rejected"
 }

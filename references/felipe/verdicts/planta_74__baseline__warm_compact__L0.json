@@ -1,0 +1,22 @@
+{
+  "asset_id": "planta_74__baseline__warm_compact__L0",
+  "corpus_version": "",
+  "created_at": "2026-07-04T16:32:09+00:00",
+  "cycle_id": "",
+  "evidence": [
+    "planta_74__baseline__warm_compact__L0/iso.png"
+  ],
+  "felipe_comment": "teste",
+  "human_verdict": "IMPROVED",
+  "image_path": "planta_74__baseline__warm_compact__L0/iso.png",
+  "liked": null,
+  "negative_patterns": [],
+  "positive_patterns": [],
+  "room_id": "planta_74",
+  "room_type": "",
+  "run_id": "planta_74",
+  "schema": "rag_writeback_record/1.0.0",
+  "skp_path": "",
+  "style_profile": "",
+  "tags": []
+}

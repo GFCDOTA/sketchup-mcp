@@ -41,5 +41,6 @@
   "existing": [
     "🍳 Cozinha (marcenaria) (congelado)"
   ],
-  "requires_approval": true
+  "requires_approval": true,
+  "status": "rejected"
 }
