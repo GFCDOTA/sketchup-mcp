@@ -29,3 +29,29 @@ Inventario que EU vejo:
 Impressao geral: composicao de sala organizada e legivel, paleta escura-quente
 (grafite + caramelo + greige), mas geometria de PLACEHOLDER — tudo caixa, sem
 bevel, sem tecido, planta e cortinas denunciando o low-poly.
+
+---
+
+# RESULTADO do teste cego (GPT descreveu sem contexto nenhum)
+
+12/12 itens BATERAM com a descricao registrada acima antes da consulta:
+tipo de imagem (viewport SketchUp 3/4 dollhouse, paredes omitidas, fundo cinza),
+sofa (grafite, 3 modulos, bracos caixa, parede direita, sobre o tapete),
+tapete (taupe claro com borda escura, plano), mesa de centro (preta, laje),
+poltrona (caramelo, blocada, VOLTADA pro sofa, parte no tapete), mesa lateral
+(tampo quadrado madeira, pedestal, junto ao braco), abajur (haste preta,
+cupula CUBO bege), planta (blocos verdes empilhados, vaso cubo preto),
+cortinas (faixas planas recolhidas + varao preto), quadro/painel (moldura
+preta, marrom + retangulo escuro — MESMA ambiguidade de posicao que eu
+percebi), passagem sem porta, paleta escura-quente identica.
+
+GPT viu 3 detalhes ALEM da minha descricao (todos reais na imagem):
+apoios de cabeca nos modulos do sofa, ~3 pes visiveis na poltrona,
+tons de verde discretamente variados na copa da planta.
+
+ZERO alucinacao: recusou afirmar o que nao via ("funcao do painel nao
+pode ser confirmada", "nao ha TV inequivoca", "grande janela ou porta —
+nao pode ser confirmado pela geometria").
+
+Conclusao: o canal texto+URL raw transmite a imagem com fidelidade total;
+os vereditos visuais do GPT via :8899 sao confiaveis como segunda opiniao.
