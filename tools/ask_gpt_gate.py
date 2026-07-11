@@ -280,7 +280,8 @@ def call_bridge(prompt: str, url: str = BRIDGE_URL, mode: str = "", tier: str = 
         body = resp.read().decode("utf-8")
     try:
         parsed = json.loads(body)
-        return str(parsed.get("response", body))
+        # backend-agnóstico: :8765 devolve "response"; o GPT-no-Docker (:8899) "answer".
+        return str(parsed.get("response") or parsed.get("answer") or body)
     except json.JSONDecodeError:
         return body
 

@@ -57,6 +57,13 @@ Quem atende o `:8765` é configurável:
   (após `claude setup-token` → `.oauth_token`). Ver
   `tools/claude_bridge/README.md`.
 - **ChatGPT** bridge (`E:\chatgpt-bridge\`) — alternativa.
+- **GPT-no-Docker** (`ops/gpt-docker/`, `localhost:8899`) — ChatGPT logado num
+  Chrome dentro de um container, mesmo contrato `/health`+`/ask`. O gate consulta
+  apontando o backend: `python -m tools.ask_gpt_gate --bridge-url http://localhost:8899 …`.
+  É **ASSISTÊNCIA / segunda-opinião** do gate — degrada `SKIPPED_OFFLINE` se o
+  container estiver fora/deslogado, **nunca bloqueia** (é browser-automation da
+  assinatura, fallback de laboratório, fora dos Termos da OpenAI em escala; um
+  bug/rate-limit não pode travar o pipeline). Ver skill `gpt-docker-consult`.
 
 O bridge roda em **modo B (autonomia delegada pelo Felipe)**: decide sozinho
 o técnico / fixture / merges com base em evidência determinística. O **único gate
