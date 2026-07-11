@@ -78,6 +78,11 @@ class SofaSpec:
                                      # topo abaulado + raio na aresta frontal
     seat_crown: float = 0.015        # abaulamento do topo (pico no centro, m)
     seat_edge_radius: float = 0.025  # raio (m) da aresta frontal-superior
+    # --- FP-SOFA-PREMIUM alt_005 (travessa frontal recuada e arredondada) ---
+    base_rail: str = "box"           # 'recessed_rounded' = face frontal da travessa
+                                     # recuada vs a frente das almofadas + raio no topo
+    rail_recess_from_cushion: float = 0.055  # recuo (m) da face frontal (REVISE GPT)
+    rail_edge_radius: float = 0.02   # raio (m) da aresta superior-frontal
 
     def validate(self):
         assert self.variant in VARIANTS, f"variant invalido: {self.variant}"

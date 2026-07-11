@@ -185,7 +185,23 @@ def build_sofa(spec: SofaSpec):
 
     # --- base/plataforma (corpo principal + chaise) ---
     rec = spec.base_recess  # recuo do plinto frontal (hardcode 0.06 PROMOVIDO a classe)
-    parts.append(_p("base_main", "base", main_seat_x[0], main_y0 + rec, main_seat_x[1], Dtot, fh, base_top, base_rgb))
+    if getattr(spec, "base_rail", "box") == "recessed_rounded":
+        # FP-SOFA-PREMIUM alt_005 (REVISE do GPT: 55mm, nao 35): travessa
+        # frontal recuada vs a FRENTE DAS ALMOFADAS + raio real no topo-frontal.
+        import math as _math
+        rr = getattr(spec, "rail_edge_radius", 0.02)
+        cush_front = (Dtot - bt) - sd - spec.seat_overhang
+        ry0 = cush_front + getattr(spec, "rail_recess_from_cushion", 0.055)
+        prof = [(ry0, fh), (Dtot, fh), (Dtot, base_top), (ry0 + rr, base_top)]
+        for j in range(1, 6):                    # canto topo-frontal: 90->180
+            a = _math.radians(90.0 + 90.0 * j / 5.0)
+            prof.append((ry0 + rr + rr * _math.cos(a), base_top - rr + rr * _math.sin(a)))
+        p = _p("base_main", "base", main_seat_x[0], ry0, main_seat_x[1], Dtot,
+               fh, base_top, base_rgb)
+        p["profile_yz"] = prof
+        parts.append(p)
+    else:
+        parts.append(_p("base_main", "base", main_seat_x[0], main_y0 + rec, main_seat_x[1], Dtot, fh, base_top, base_rgb))
     if chaise_x:
         # GRAMATICA de chaise integrada (cycle002): a base da chaise herda o MESMO
         # recuo frontal do corpo (mesma linguagem de plinto, nao bloco ao chao)
