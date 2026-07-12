@@ -433,14 +433,18 @@ def run_variant(v: Variant, out_dir: Path, *, con_path: Path | None = None,
 def sweep(n: int | None, out_root: Path, *, plant: str = "planta_74",
           axes: dict | None = None, render: str = "su-free", provider=None,
           discrimination=None, con_path: Path | None = None, run_one=None,
-          only: str | None = None, log=print) -> list[dict]:
+          only: str | None = None, force_rerender: bool = False,
+          log=print) -> list[dict]:
     """Roda as celulas do grid em serie (NUNCA paraleliza contra o :8765).
     corpus.jsonl e' append-only e idempotente por variant_id: celula ja vista e'
     pulada; excecao unica = registro PENDING_VISION com provider disponivel
     (upgrade de visao), que APPENDA um registro superseding (last-wins por
     variant_id na leitura — o arquivo nunca e' reescrito). Upgrade que volta
     PENDING_VISION (bridge fora / probe FAIL) NAO appenda — nao supersede nada;
-    rerun com --ask-vision offline fica idempotente."""
+    rerun com --ask-vision offline fica idempotente.
+    force_rerender=True re-roda celula JA vista e appenda supersede — o caso
+    'o RENDERER evoluiu' (ex.: shell arquitetonico novo): a idempotencia por
+    presenca esconderia o render novo do corpus. Explicito, nunca default."""
     out_root = Path(out_root).resolve()
     out_root.mkdir(parents=True, exist_ok=True)
     corpus = out_root / "corpus.jsonl"
@@ -456,16 +460,17 @@ def sweep(n: int | None, out_root: Path, *, plant: str = "planta_74",
         prev = by_id.get(v.variant_id)
         upgrade = (prev is not None and prev.get("verdict") == "PENDING_VISION"
                    and provider is not None)
-        if prev is not None and not upgrade:
+        if prev is not None and not upgrade and not force_rerender:
             records.append(prev)
             log(f"[variant-sweep] {v.variant_id}: ja no corpus (skip)")
             continue
         rec = runner(v, out_root / v.variant_id, con_path=con_path,
                      provider=provider, discrimination=discrimination,
                      render=render, run_id=out_root.name, out_root=out_root)
-        if upgrade and rec.get("verdict") == "PENDING_VISION":
+        if upgrade and rec.get("verdict") == "PENDING_VISION" and not force_rerender:
             # upgrade que NAO trouxe visao: o rec e' semanticamente o prev —
-            # appendar duplicaria uma linha que nao supersede nada
+            # appendar duplicaria uma linha que nao supersede nada (com
+            # force_rerender o render NOVO supersede mesmo sem visao)
             records.append(prev)
             log(f"[variant-sweep] {v.variant_id}: upgrade sem visao "
                 "(PENDING_VISION mantido; corpus intacto)")
@@ -509,6 +514,8 @@ def main(argv=None) -> int:
     ap.add_argument("--bridge-url", default=None)
     ap.add_argument("--tier", default=None)
     ap.add_argument("--only", default=None, help="roda so este variant_id (grid inteiro)")
+    ap.add_argument("--force-rerender", action="store_true",
+                    help="re-roda celulas JA no corpus e appenda supersede (renderer evoluiu)")
     a = ap.parse_args(argv)
     provider = None
     if a.ask_vision and not a.dry_run:
@@ -520,7 +527,7 @@ def main(argv=None) -> int:
             provider.tier = a.tier
     try:
         recs = sweep(a.n, a.out, plant=a.plant, render=a.render,
-                     provider=provider, only=a.only)
+                     provider=provider, only=a.only, force_rerender=a.force_rerender)
     except Exception as e:  # noqa: BLE001 — CLI: erro vira exit 1, nao traceback cru
         print(f"[variant-sweep] ERRO: {type(e).__name__}: {e}", file=sys.stderr)
         return 1

@@ -354,3 +354,33 @@ def test_su_free_sweep_smoke_4_variants(tmp_path, validator):
         assert row["render_refs"]["renderer"] == "su-free"
         assert (out / row["render_refs"]["iso"]).is_file()
     assert (out / "contact_sheet.png").is_file()
+
+
+def test_force_rerender_supersedes_existing(tmp_path, monkeypatch):
+    """Idempotência por presença pula célula já vista; --force-rerender re-roda e
+    APPENDA supersede (caso real: o renderer ganhou o shell arquitetônico e o
+    corpus precisa do render novo sob os MESMOS variant_ids)."""
+    import tools.variant_sweep as vs
+
+    calls = []
+
+    def fake_run(v, out_dir, **kw):
+        calls.append(v.variant_id)
+        return {"schema": "judged_variant/1.0.0", "variant_id": v.variant_id,
+                "verdict": "PENDING_VISION", "run_id": "t", "plant": v.plant,
+                "created_at": "2026-07-12T00:00:00Z", "human_verdict": None,
+                "render_refs": {"iso": "x/iso.png", "sha256": f"sha-{len(calls)}",
+                                "renderer": "su-free"}}
+
+    out = tmp_path / "sweep"
+    vs.sweep(1, out, plant="planta_74", run_one=fake_run, log=lambda *a: None)
+    assert len(calls) == 1
+    vs.sweep(1, out, plant="planta_74", run_one=fake_run, log=lambda *a: None)
+    assert len(calls) == 1                                    # idempotente: skip
+    vs.sweep(1, out, plant="planta_74", run_one=fake_run,
+             force_rerender=True, log=lambda *a: None)
+    assert len(calls) == 2                                    # force re-rodou
+    from tools.jsonl_io import read_jsonl
+    recs = read_jsonl(out / "corpus.jsonl")
+    assert len(recs) == 2                                     # supersede appendado
+    assert recs[-1]["render_refs"]["sha256"] == "sha-2"       # last-wins = render novo
