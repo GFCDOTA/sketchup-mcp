@@ -219,3 +219,20 @@ def test_idempotent_second_pass_skips_reviewed(env):
     _run(env, lambda it: _score(8), apply=True)
     rep2 = _run(env, lambda it: _score(8), apply=True)                  # 2ª passada
     assert rep2["n_selected"] == 0                                      # mesmo render → nada
+
+
+def test_run_log_written_per_apply_pass(env):
+    """Visibilidade: cada passada aplicada grava 1 linha em curation_runs.jsonl
+    (t/trigger/n_reviewed/reviewed[]) — inclusive a passada VAZIA (rodou às HH:MM
+    é o ponto). Dry-run NÃO loga."""
+    append_jsonl(env["corpus"], [_rec(REAL_IDS[0], sha="sha-1")])
+    _run(env, lambda it: _score(4, caminho="x"), apply=False)           # dry-run
+    assert not (env["out"] / cr.RUNS_FILE).exists()
+    _run(env, lambda it: _score(4, caminho="x"), apply=True)            # revisa 1
+    _run(env, lambda it: _score(4, caminho="x"), apply=True)            # vazia
+    runs = read_jsonl(env["out"] / cr.RUNS_FILE)
+    assert len(runs) == 2
+    assert runs[0]["n_reviewed"] == 1 and runs[0]["trigger"] == "auto"
+    assert runs[0]["reviewed"][0]["variant_id"] == REAL_IDS[0]
+    assert runs[0]["reviewed"][0]["nota"] == 4
+    assert runs[1]["n_reviewed"] == 0 and runs[1]["n_selected"] == 0    # vazia também loga

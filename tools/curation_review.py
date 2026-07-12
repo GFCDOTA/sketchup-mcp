@@ -66,6 +66,7 @@ ID_PREFIX = "CR"
 
 STATUS_FILE = "curation_status.jsonl"
 REVIEW_FILE = "gpt_reviews.jsonl"
+RUNS_FILE = "curation_runs.jsonl"   # run-log por passada (visibilidade no cockpit)
 
 
 # ── predicados puros sobre um registro do corpus (last-wins) ─────────────────
@@ -196,12 +197,14 @@ def _card_status_for_route(route: str, *, enqueue_fix: bool) -> str:
 
 def run_batch(*, corpus_path: Path, out_dir: Path, scorer, now: float, today: str,
               cap: int = DEFAULT_CAP, apply: bool = False, enqueue_fix: bool = False,
-              queue_path: Path | None = None, known_ids: frozenset = frozenset()) -> dict:
+              queue_path: Path | None = None, known_ids: frozenset = frozenset(),
+              trigger: str = "auto") -> dict:
     """UMA passada do laço. `scorer(item) -> VisualScore|None` é injetável.
 
     Dry-run (apply=False): calcula o que revisaria, NÃO chama o scorer nem escreve.
-    --apply: roda o laço (status → GPT → review → decisão), grava os sidecars, e
-    (se enqueue_fix) enfileira as correções deduplicadas.
+    --apply: roda o laço (status → GPT → review → decisão), grava os sidecars +
+    UMA linha de run-log (curation_runs.jsonl — o cockpit mostra "o que o sistema
+    fez neste tick"), e (se enqueue_fix) enfileira as correções deduplicadas.
     """
     corpus_path = Path(corpus_path)
     out_dir = Path(out_dir)
@@ -252,7 +255,7 @@ def run_batch(*, corpus_path: Path, out_dir: Path, scorer, now: float, today: st
     if enqueue_fix and fixes and queue_path is not None:
         append_jsonl(Path(queue_path), fixes)
 
-    return {
+    report = {
         "curation_review": "curation_review/1.0.0",
         "today": today, "corpus": str(corpus_path),
         "n_records": len(records), "n_selected": len(selected),
@@ -261,6 +264,19 @@ def run_batch(*, corpus_path: Path, out_dir: Path, scorer, now: float, today: st
         "enqueued_fixes": [t["id"] for t in fixes],
         "applied": True,
     }
+    # run-log: UMA linha por passada aplicada (mesmo padrão do auto_decider_runs) —
+    # é o que o cockpit mostra em "o que a revisão autônoma fez a cada tick".
+    # Passada vazia TAMBÉM loga (n_reviewed=0 = "rodou e não havia nada") — a
+    # visibilidade de "rodou às HH:MM" é o ponto, não só quando há trabalho.
+    append_jsonl(out_dir / RUNS_FILE, [{
+        "t": now, "today": today, "trigger": trigger,
+        "n_selected": len(selected), "n_reviewed": report["n_reviewed"],
+        "remaining": max(0, len(selected) - len(batch)),
+        "reviewed": [{"variant_id": r["variant_id"], "nota": r.get("nota"),
+                      "route": r.get("route")} for r in results],
+        "enqueued_fixes": report["enqueued_fixes"],
+    }])
+    return report
 
 
 # ── scorer real (não exercido em dry-run; injetado nos testes) ───────────────
@@ -327,6 +343,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--timeout", type=int, default=200)
     ap.add_argument("--today", default=None, help="YYYYMMDD (teste/idempotência)")
     ap.add_argument("--now", type=float, default=None, help="epoch injetado (teste)")
+    ap.add_argument("--trigger", default="auto", choices=("auto", "manual"),
+                    help="proveniência no run-log (tick=auto, botão=manual)")
     ap.add_argument("--queue", type=Path, default=None,
                     help="default: <repo>/.ai_bridge/noc/queue.jsonl")
     ap.add_argument("--ledger", type=Path, default=None,
@@ -346,7 +364,7 @@ def main(argv: list[str] | None = None) -> int:
     report = run_batch(
         corpus_path=corpus, out_dir=out_dir, scorer=scorer, now=now, today=today,
         cap=a.cap, apply=a.apply, enqueue_fix=a.enqueue_fix, queue_path=queue,
-        known_ids=_known_ids(queue, ledger))
+        known_ids=_known_ids(queue, ledger), trigger=a.trigger)
 
     print(json.dumps(report, ensure_ascii=False, indent=2))
     return 0
