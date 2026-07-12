@@ -407,8 +407,17 @@ def run_variant(v: Variant, out_dir: Path, *, con_path: Path | None = None,
     boxes, layout_source = _apply_layout_seed(con, boxes, v.layout_seed)
     gates, gate_detail = run_deterministic_gates(boxes, con)
     from tools.render_parts_iso import render_parts
-    png = Path(render_parts(_boxes_to_parts(boxes), out_dir / "iso.png",
-                            elev=24, azim=-56, title=v.variant_id))
+    # ENVELOPE-FIRST (nota 2/10 unânime do painel/GPT era "furniture-only, sem
+    # envelope"): paredes/portas/janelas do consensus entram ANTES da mobília,
+    # em corte dollhouse. SWEEP_SHELL=0 desliga (comparação/depuração).
+    parts = _boxes_to_parts(boxes)
+    if os.environ.get("SWEEP_SHELL", "1") != "0":
+        from tools.shell_parts import shell_parts
+        parts = shell_parts(con) + parts
+    # elev 24→38 pós-shell (GPT: câmera baixa escondia os ambientes atrás da
+    # massa cortada; mais zenital revela o interior sem virar top-down)
+    png = Path(render_parts(parts, out_dir / "iso.png",
+                            elev=38, azim=-56, title=v.variant_id))
     if find_adapter is not None:
         findings = find_adapter(png)
     else:
