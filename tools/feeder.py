@@ -94,14 +94,20 @@ def latest_corpus(variant_root: Path) -> Path | None:
 
 
 def pending_vision_variants(corpus: Path | None) -> list[str]:
-    """variant_ids cujo registro LAST-WINS esta PENDING_VISION. REUSA
-    corpus_to_rag._last_wins (identidade unica do last-wins por variant_id;
-    o corpus e append-only, a ultima linha por id vale)."""
+    """variant_ids cujo registro LAST-WINS esta PENDING_VISION E que sao variantes
+    de sweep DRENAVEIS. REUSA corpus_to_rag._last_wins (identidade unica do
+    last-wins por variant_id; o corpus e append-only, a ultima linha por id vale).
+
+    EXCLUI a evidencia sintetica de APARENCIA (noc-<tid> / noc-evidence): esses ja
+    foram pra VISUAL_REVIEW do Felipe e nao sao drenaveis — re-enfileira-los faz o
+    dispatcher re-emitir com variant_id ainda mais aninhado (o bug do id recursivo
+    que crescia todo dia). Fonte unica do marcador em noc_dispatcher."""
     if corpus is None:
         return []
     from tools.corpus_to_rag import _last_wins
     return sorted(r["variant_id"] for r in _last_wins(corpus)
-                  if r.get("verdict") == "PENDING_VISION")
+                  if r.get("verdict") == "PENDING_VISION"
+                  and not _nd.is_appearance_evidence_variant(r))
 
 
 def pending_vision_requests(correction_root: Path) -> dict:

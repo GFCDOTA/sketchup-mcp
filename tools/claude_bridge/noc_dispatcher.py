@@ -279,6 +279,18 @@ def _branch_has_work(branch: str) -> bool:
         return False
 
 
+def is_appearance_evidence_variant(rec: dict) -> bool:
+    """True se o registro de galeria veio de _emit_appearance_gallery_item
+    (APARENCIA nao-bloqueia): style=noc-<tid> -> variant_id com '__noc-', renderer
+    'noc-evidence'. Esses itens JA foram pra VISUAL_REVIEW do Felipe e NAO sao
+    variantes de sweep drenaveis — re-drena-los re-emite com id ainda mais aninhado
+    (o bug do variant_id que cresce todo dia). Fonte UNICA da convencao de emissao,
+    consumida pelo feeder (nao re-enfileira) e pelo curation_review (quarentena)."""
+    vid = rec.get("variant_id") or ""
+    renderer = (rec.get("render_refs") or {}).get("renderer") or ""
+    return "__noc-" in vid or renderer == "noc-evidence"
+
+
 def _emit_appearance_gallery_item(task, wt: Path):
     """APARENCIA NAO-BLOQUEIA: alem de comitar a evidencia na branch wip, materializa
     um item de galeria PENDENTE (build_record reusado do variant_sweep) no corpus
