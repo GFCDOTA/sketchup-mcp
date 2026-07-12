@@ -115,6 +115,14 @@ def pl_run
           d = pvec.dot(pface.normal)
           pface.pushpull(d.abs < 1e-6 ? pvec.length : d)
         end
+        # suaviza as arestas do perfil: sem isto as facetas do coroamento viram
+        # 'ranhuras' e o sofa parece faceteado/rugoso, nao curvo liso (regra do harness).
+        g.entities.grep(Sketchup::Edge).each do |e|
+          if e.faces.length == 2 && e.faces[0].normal.angle_between(e.faces[1].normal) < 0.45
+            e.soft = true
+            e.smooth = true
+          end
+        end
       else
       # desenha o POLIGONO real (cantos) na cota z0; almofadas ganham chanfro no topo
       # (Visual Quality Layer: nao parecer cubo/game asset)
