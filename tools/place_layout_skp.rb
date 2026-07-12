@@ -103,6 +103,19 @@ def pl_run
       end
       g = mg.entities.add_group        # a peca, DENTRO do movel
       g.name = b['label'] || b['kind']
+      # PERFIL: peca com face 3D no mundo + vetor de extrusao (place_sofa_boxes) ->
+      # desenha as CURVAS reais (coroamento/arredondado) em vez de caixa. Padrao p/
+      # QUALQUER peca com profile (sofa hoje; qualquer movel refinado no futuro).
+      if (pw_face = b['profile_world'])
+        ppts = pw_face.map { |c| Geom::Point3d.new(c[0].to_f, c[1].to_f, c[2].to_f) }
+        pface = g.entities.add_face(ppts)
+        if pface
+          ev = b['extrude_vec'] || [0, 0, 0]
+          pvec = Geom::Vector3d.new(ev[0].to_f, ev[1].to_f, ev[2].to_f)
+          d = pvec.dot(pface.normal)
+          pface.pushpull(d.abs < 1e-6 ? pvec.length : d)
+        end
+      else
       # desenha o POLIGONO real (cantos) na cota z0; almofadas ganham chanfro no topo
       # (Visual Quality Layer: nao parecer cubo/game asset)
       pts = (b['corners'] || []).map { |c| Geom::Point3d.new(c[0].to_f, c[1].to_f, z0) }
@@ -132,6 +145,7 @@ def pl_run
       else
         face.pushpull(face.normal.z >= 0 ? h : -h)
       end
+      end   # fecha o if (pw_face = b['profile_world'])
       kind = b['kind']
       # FP-037: prefere o material JA RESOLVIDO por (familia,kind) no Python (mat_name/tex_png/
       # tile_in) — assim rack.base=madeira e sofa.base=grafite viram materiais SEPARADOS. Sem os

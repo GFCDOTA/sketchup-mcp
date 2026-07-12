@@ -322,13 +322,33 @@ def place_sofa_boxes(parts, center_in, facing):
             corners.append([round(cx_in + wx * PT_TO_IN, 2), round(cy_in + wy * PT_TO_IN, 2)])
         xs = [c[0] for c in corners]
         ys = [c[1] for c in corners]
-        boxes.append({
+        box = {
             "kind": p["kind"], "x0": min(xs), "y0": min(ys), "x1": max(xs), "y1": max(ys),
             "corners": corners,
             "h_in": round((p["z1"] - p["z0"]) * PT_TO_IN, 2),
             "z0_in": round(p["z0"] * PT_TO_IN, 2),
             "rgb": p["rgb"], "label": p["label"], "ambiguous": False, "decorative": False,
-        })
+        }
+        # PERFIL (coroamento/arredondado): carrega a face 3D JÁ no mundo (mesma
+        # rotacao theta + translacao dos corners) + o vetor de extrusao, pro
+        # place_layout_skp desenhar as CURVAS em vez de caixa. Padrao p/ qualquer
+        # peca com profile (nao so sofa). z do perfil e ABSOLUTO (em m -> inches).
+        _pxz, _pyz = p.get("profile_xz"), p.get("profile_yz")
+        if _pxz or _pyz:
+            def _w(lx, ly, lz):
+                rx, ry = lx - cxl, ly - cyl
+                wx, wy = rx * ct - ry * st, rx * st + ry * ct
+                return [round(cx_in + wx * PT_TO_IN, 3),
+                        round(cy_in + wy * PT_TO_IN, 3), round(lz * PT_TO_IN, 3)]
+            if _pxz:   # face no plano y=y0 local (pts x,z); extruda local +y por (y1-y0)
+                dep = (p["y1"] - p["y0"]) * PT_TO_IN
+                box["profile_world"] = [_w(px, p["y0"], pz) for (px, pz) in _pxz]
+                box["extrude_vec"] = [round(-st * dep, 3), round(ct * dep, 3), 0.0]
+            else:      # face no plano x=x0 local (pts y,z); extruda local +x por (x1-x0)
+                dep = (p["x1"] - p["x0"]) * PT_TO_IN
+                box["profile_world"] = [_w(p["x0"], py, pz) for (py, pz) in _pyz]
+                box["extrude_vec"] = [round(ct * dep, 3), round(st * dep, 3), 0.0]
+        boxes.append(box)
     return boxes
 
 
