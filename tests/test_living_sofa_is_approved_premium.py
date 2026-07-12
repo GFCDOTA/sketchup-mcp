@@ -45,6 +45,25 @@ def test_seat_cushions_are_single_crowned_not_stacked_blocks() -> None:
         )
 
 
+def test_place_sofa_boxes_carries_profiles_for_curved_render() -> None:
+    """O furnish (place_sofa_boxes) TEM que carregar o PERFIL (profile_world +
+    extrude_vec, já no mundo) das peças curvas — senão o place_layout_skp.rb desenha
+    CAIXA e o sofá vira 'quadrado zoado' na planta (bug 2026-07-12). Padrão p/ qualquer
+    peça com profile, não só sofá."""
+    from tools.sofa_builder import place_sofa_boxes
+
+    parts, _ = build_sofa(derive_living_sofa(2.1))
+    boxes = place_sofa_boxes(parts, (100.0, 100.0), (-1, 0))
+    curved = [b for b in boxes if b.get("profile_world")]
+    assert len(curved) >= 8, (
+        f"só {len(curved)} peças carregam profile_world; o furnish vai achatar o sofá "
+        "em caixa (as curvas — braços/base/almofadas — precisam do perfil no mundo)"
+    )
+    for b in curved:
+        assert b.get("extrude_vec"), f"{b['label']} sem extrude_vec (não extruda)"
+        assert len(b["profile_world"]) >= 3, f"{b['label']} face de perfil degenerada"
+
+
 def test_composed_living_scene_sofa_is_premium() -> None:
     """OUTRO caminho de produção: o SceneComposer (intent → sofa_spec → build_sofa) —
     NÃO passa por derive_living_sofa. Bug 2026-07-12: o composer embarcava o sofá velho
