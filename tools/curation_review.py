@@ -113,8 +113,11 @@ def select_items(records: list[dict], *, reviews: dict[str, dict]) -> list[dict]
             continue
         sha = _render_sha(rec)
         prev = reviews.get(vid)
-        if _human_decided(rec) and (prev is None or not sha
-                                    or prev.get("render_sha") == sha):
+        # humano-julgado SEM review anterior: NÃO pular — sem sha de referência
+        # não há como saber se ele viu ESTE render; a nota entra (era o gap que
+        # deixava variante julgada eternamente sem nota pro render novo)
+        if _human_decided(rec) and prev is not None and (
+                not sha or prev.get("render_sha") == sha):
             continue
         if prev and sha and prev.get("render_sha") == sha:
             continue

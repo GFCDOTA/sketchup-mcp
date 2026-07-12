@@ -88,10 +88,12 @@ def test_select_skips_synthetic_no_render_human_decided():
         _rec(GARBAGE_IDS[0], iso="", renderer="noc-evidence"),  # ✗ sintético
         _rec("planta_74__baseline__dark_walnut__L1", iso=""),   # ✗ sem render
         _rec("planta_74__baseline__dark_walnut__L2",
-             human={"verdict": "IMPROVED"}),                 # ✗ Felipe já falou
+             human={"verdict": "IMPROVED"}),                 # ✓ julgado mas SEM review
     ]
     got = [r["variant_id"] for r in cr.select_items(records, reviews={})]
-    assert got == [REAL_IDS[0]]
+    # política 2026-07-12: humano-julgado sem review anterior TAMBÉM é notado
+    # (sem sha de referência não há como saber que ele viu ESTE render)
+    assert got == [REAL_IDS[0], "planta_74__baseline__dark_walnut__L2"]
 
 
 def test_select_skips_already_reviewed_same_render_sha():
@@ -252,3 +254,17 @@ def test_human_decided_rereviews_when_render_changed(env):
     append_jsonl(env["corpus"], [_rec(REAL_IDS[0], sha="sha-NEW")])  # render mudou (shell)
     rep2 = _run(env, lambda it: _score(5), apply=False)
     assert rep2["n_selected"] == 1                                  # nota re-acompanha
+
+
+def test_human_decided_without_prior_review_still_gets_scored(env):
+    """Gap real: variante julgada pelo humano SEM review anterior nunca ganhava
+    nota (prev is None pulava). Sem sha de referência não dá pra saber que o
+    humano viu ESTE render — a nota entra; na passada seguinte (mesmo sha) pula."""
+    append_jsonl(env["corpus"], [_rec(REAL_IDS[0], sha="sha-1")])
+    append_jsonl(env["out"] / "human_verdicts.jsonl",
+                 [{"variant_id": REAL_IDS[0], "human_verdict": "WORSE",
+                   "t": "2026-07-12T18:00:00Z"}])
+    rep = _run(env, lambda it: _score(3), apply=True)
+    assert rep["n_reviewed"] == 1                            # notou mesmo com WORSE
+    rep2 = _run(env, lambda it: _score(3), apply=False)
+    assert rep2["n_selected"] == 0                           # mesmo render → pula
