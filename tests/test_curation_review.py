@@ -236,3 +236,19 @@ def test_run_log_written_per_apply_pass(env):
     assert runs[0]["reviewed"][0]["variant_id"] == REAL_IDS[0]
     assert runs[0]["reviewed"][0]["nota"] == 4
     assert runs[1]["n_reviewed"] == 0 and runs[1]["n_selected"] == 0    # vazia também loga
+
+
+def test_human_decided_rereviews_when_render_changed(env):
+    """Gosto do Felipe é respeitado (nunca re-pedimos), mas a NOTA acompanha o
+    RENDER: variante julgada por ele + render novo (sha mudou) → re-seleciona;
+    mesmo render → pula."""
+    append_jsonl(env["corpus"], [_rec(REAL_IDS[0], sha="sha-old")])
+    _run(env, lambda it: _score(2), apply=True)                     # nota no render velho
+    append_jsonl(env["out"] / "human_verdicts.jsonl",
+                 [{"variant_id": REAL_IDS[0],
+                   "human_verdict": "WORSE", "t": "2026-07-12T18:00:00Z"}])
+    rep = _run(env, lambda it: _score(2), apply=False)              # mesmo render
+    assert rep["n_selected"] == 0                                   # humano falou → pula
+    append_jsonl(env["corpus"], [_rec(REAL_IDS[0], sha="sha-NEW")])  # render mudou (shell)
+    rep2 = _run(env, lambda it: _score(5), apply=False)
+    assert rep2["n_selected"] == 1                                  # nota re-acompanha

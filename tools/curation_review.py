@@ -95,7 +95,10 @@ def select_items(records: list[dict], *, reviews: dict[str, dict]) -> list[dict]
       - tem render (o GPT precisa da imagem);
       - NÃO é evidência sintética de aparência (noc-<tid> / noc-evidence) — esses
         já foram pra VISUAL_REVIEW do Felipe e são a raiz do variant_id recursivo;
-      - sem veredito humano terminal (Felipe já falou → respeita);
+      - veredito humano = GOSTO respeitado (nunca re-pedimos), mas ele valeu pro
+        render DA ÉPOCA: se o render mudou (sha≠ da última nota), a NOTA da
+        máquina re-acompanha — senão o card mostra render novo com crítica velha
+        (caso real: o sweep ganhou o shell e o grid re-emite os MESMOS ids);
       - ainda não revisado NESTE render (re-revisa só quando o render muda —
         chave = render_refs.sha256; sem sha → sempre revisa, honesto).
     """
@@ -108,10 +111,11 @@ def select_items(records: list[dict], *, reviews: dict[str, dict]) -> list[dict]
             continue
         if not _has_render(rec):
             continue
-        if _human_decided(rec):
-            continue
         sha = _render_sha(rec)
         prev = reviews.get(vid)
+        if _human_decided(rec) and (prev is None or not sha
+                                    or prev.get("render_sha") == sha):
+            continue
         if prev and sha and prev.get("render_sha") == sha:
             continue
         out.append(rec)
