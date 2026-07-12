@@ -10,7 +10,7 @@ import pytest
 
 from tools.furniture_anatomy_spec import sofa_spec
 from tools.sofa_builder import build_sofa
-from tools.sofa_class import ARM_STYLES, derive_living_sofa, sofa_class_gate
+from tools.sofa_class import derive_living_sofa, sofa_class_gate
 
 
 # larguras reais de nicho num ape compacto (2-lug ate 4-lug)
@@ -27,14 +27,20 @@ def test_living_sofa_is_in_class(width_m):
     assert 0.52 <= per_seat <= 0.75, f"per_seat={per_seat:.3f} fora da classe"
 
 
-def test_living_sofa_carries_venezia_curation():
-    """O sofa da sala usa o arquetipo VENEZIA curado pelo Felipe: bracos FINOS (thin)
-    + pes de ferro (base 'legs', nao plinto rente)."""
+def test_living_sofa_carries_venezia_premium_curation():
+    """O sofa da sala nasce do arquetipo VENEZIA curado E embarca a estofaria PREMIUM
+    aprovada (FP-SOFA-PREMIUM alt_001-005): braco FINO ARREDONDADO (0.14) sobre PLINTO,
+    almofada UNICA coroada. O plinto SUPERSEDE os pes de ferro do venezia-slate original
+    — decisao explicita do Felipe (2026-07-12): 'o sofa que ficou bom' e o premium. O
+    invariante estrutural completo mora em test_living_sofa_is_approved_premium.py; aqui
+    garantimos que derive_living_sofa (o caminho do furnish) carrega o premium por padrao,
+    nao um box generico."""
     spec = derive_living_sofa(2.40)
-    parts, _ = build_sofa(spec)
-    verdict = sofa_class_gate(spec, parts)
-    assert spec.arm_width == ARM_STYLES["thin"]              # bracos finos
-    assert verdict["metrics"]["base_style"] == "legs"        # pes de ferro expostos
+    build_sofa(spec)  # nao pode levantar
+    assert spec.arm_width == 0.14                  # braco fino premium (refina o thin 0.15)
+    assert spec.arm_profile == "rounded"           # alt_001
+    assert spec.base_style == "plinth"             # alt_002 (supersede os pes de ferro)
+    assert spec.seat_style == "single_crowned"     # alt_004
 
 
 def test_fase1_fixes_the_old_heuristic_defect():

@@ -26,18 +26,12 @@ TEMPLATE = ROOT / "artifacts/planta_74/planta_74.skp"  # so pra abrir o SU; o rb
 
 
 def premium_spec():
+    # FONTE ÚNICA: a estofaria premium agora vive em derive_living_sofa
+    # (PREMIUM_LIVING_UPHOLSTERY em sofa_class) — o builder de produção e este harness
+    # não podem divergir. Antes, os overrides estavam duplicados AQUI e a produção
+    # ficava com o sofá velho (bug 2026-07-12).
     from tools.sofa_class import derive_living_sofa
-    s = derive_living_sofa(2.1)
-    s.arm_width = 0.14
-    s.arm_height = 0.56
-    s.arm_profile = "rounded"
-    s.arm_front_recess = 0.07
-    s.arm_edge_radius = 0.03
-    s.base_style = "plinth"
-    s.back_style = "single_crowned"
-    s.seat_style = "single_crowned"
-    s.base_rail = "recessed_rounded"
-    return s
+    return derive_living_sofa(2.1)
 
 
 def main() -> int:
