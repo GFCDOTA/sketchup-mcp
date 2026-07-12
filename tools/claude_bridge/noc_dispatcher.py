@@ -94,6 +94,16 @@ CORRECTION_LOOP_TIMEOUT = 900
 VARIANT_OUT_ROOT = WORKSPACE_ROOT / "data" / "runs" / "noc_variant_sweep"
 VARIANT_SWEEP_TIMEOUT = 900
 
+# --- kind:curation_fix (laco autonomo de curadoria) -------------------------------
+# Diferente de TODOS os outros kinds: worktree PERSISTENTE (nunca removido). O
+# --resume da sessao Claude e' escopado ao DIRETORIO (confirmado nos docs do CLI:
+# "No conversation found" se rodar de outro cwd) -> pra manter UMA sessao acumulando
+# contexto entre correcoes, o cwd tem que ser o mesmo. session_id persiste em
+# CURATION_FIX_SESSION (capturado do --output-format json, reusado no --resume).
+CURATION_FIX_WT = WT_PARENT / "wt-curation-fix"      # PERSISTENTE (session-resume)
+CURATION_FIX_BRANCH = "chore/curation-fix"
+CURATION_FIX_SESSION = NOC_DIR / "curation_fix.session"
+
 
 def _claude_bin() -> str:
     return shutil.which("claude") or shutil.which("claude.cmd") or "claude"
@@ -651,6 +661,163 @@ def dispatch_variant_vision_drain(task, dry_run=False) -> dict:
     return dispatch(task, dry_run=dry_run, run_worker=_worker)
 
 
+def _read_fix_session() -> str | None:
+    try:
+        s = CURATION_FIX_SESSION.read_text("utf-8").strip()
+        return s or None
+    except OSError:
+        return None
+
+
+def _write_fix_session(sid: str) -> None:
+    if sid:
+        NOC_DIR.mkdir(parents=True, exist_ok=True)
+        CURATION_FIX_SESSION.write_text(sid, "utf-8")
+
+
+def _parse_session_id(stdout: str) -> str | None:
+    """session_id do JSON do `claude -p --output-format json` (tolerante — stdout
+    lixo/vazio -> None, nunca explode)."""
+    try:
+        d = json.loads((stdout or "").strip())
+    except (ValueError, TypeError):
+        return None
+    sid = d.get("session_id") if isinstance(d, dict) else None
+    return sid if isinstance(sid, str) and sid else None
+
+
+def _curation_fix_prompt(task, wt: Path) -> str:
+    vid = task.get("variant_id", "?")
+    nota = task.get("gpt_nota")
+    porque = (task.get("gpt_porque") or "").strip()
+    caminho = (task.get("gpt_caminho") or "").strip()
+    return (
+        f"Voce e o WORKER de CORRECAO DE CURADORIA do NOC. Esta e uma SESSAO UNICA que\n"
+        f"acumula contexto entre correcoes (--resume) — use o que aprendeu antes.\n"
+        f"Trabalhe SOMENTE dentro deste worktree:\n  {wt}\n\n"
+        f"REGRAS DURAS: NAO invente parede/comodo/movel (Hard Rule #1); NAO toque main/\n"
+        f"outros worktrees; NAO de git push/commit/merge (o dispatcher cuida); siga o\n"
+        f"CLAUDE.md do repo.\n\n"
+        f"Um critico visual (GPT-no-Docker) revisou a variante '{vid}' e deu nota "
+        f"{nota}/10.\n"
+        f"CRITICA (porque):\n{porque}\n\n"
+        f"CAMINHO PRO 10 (prioridade):\n{caminho}\n\n"
+        f"O QUE FAZER:\n"
+        f"- Ache no gerador (tools/) a CAUSA do item #1 da critica e faca a MENOR mudanca\n"
+        f"  honesta que o ataca. Mudanca de APARENCIA (render/.skp/builder) e' esperada —\n"
+        f"  o dispatcher enfileira VISUAL_REVIEW pro Felipe (o veredito visual e' dele).\n"
+        f"- Se a causa for uma LIMITACAO SISTEMICA (ex.: o iso su-free nao tem shell\n"
+        f"  arquitetonico), NAO finja consertar: escreva NEEDS_FELIPE.md explicando e PARE.\n"
+        f"- Rode os testes que tocam o que voce mudou.\n\n"
+        f"Ao terminar, pare."
+    )
+
+
+def _run_curation_fix_worker(task, wt: Path):
+    """Claude com SESSAO UNICA: captura session_id do --output-format json e o
+    REUSA no --resume da proxima task (contexto acumula). Resume invalido
+    ('No conversation found') -> retry com sessao fresca. Prompt via STDIN."""
+    prompt = _curation_fix_prompt(task, wt)
+    bin_ = _claude_bin()
+    sid = _read_fix_session()
+
+    def _invoke(resume):
+        base = ["-p", "--model", MODEL, "--permission-mode", "acceptEdits",
+                "--output-format", "json"]
+        if resume:
+            base += ["--resume", resume]
+        env = _worker_env()
+        if sys.platform == "win32":
+            cmd = '"' + bin_ + '" ' + " ".join(base)
+            return subprocess.run(cmd, input=prompt, cwd=str(wt), capture_output=True,
+                                  text=True, shell=True, timeout=CLAUDE_TIMEOUT, env=env)
+        return subprocess.run([bin_, *base], input=prompt, cwd=str(wt),
+                              capture_output=True, text=True, timeout=CLAUDE_TIMEOUT, env=env)
+
+    try:
+        p = _invoke(sid)
+        if sid and p.returncode != 0 and "No conversation found" in ((p.stdout or "") + (p.stderr or "")):
+            p = _invoke(None)  # sessao antiga sumiu -> comeca uma nova
+    except subprocess.SubprocessError as e:
+        return 1, "", f"{type(e).__name__}: {e}"
+    new_sid = _parse_session_id(p.stdout)
+    if new_sid:
+        _write_fix_session(new_sid)
+    return p.returncode, _redact((p.stdout or "")[-800:]), _redact((p.stderr or "")[-400:])
+
+
+def dispatch_curation_fix(task, dry_run=False, run_worker=_run_curation_fix_worker) -> dict:
+    """kind:curation_fix — o laco autonomo de curadoria (curation_review) aciona UMA
+    sessao Claude (persistente via --resume) pra melhorar o gerador guiado pela
+    critica do GPT.
+
+    Worktree PERSISTENTE (wt-curation-fix, off origin/develop na branch
+    chore/curation-fix): NUNCA removido — o --resume e' escopado ao dir, entao a
+    continuidade da sessao exige o MESMO worktree entre tasks. Rails iguais ao
+    dispatch(): aparencia muda -> VISUAL_REVIEW_QUEUED (gate do Felipe), determinist.
+    -> COMMITTED, NUNCA main/merge. Nunca deixa a task sem status terminal (senao
+    re-dispara pra sempre no --loop)."""
+    tid = task.get("id", "T?")
+    wt, branch = CURATION_FIX_WT, CURATION_FIX_BRANCH
+    entry = {"t": time.time(), "task_id": tid, "title": task.get("title", ""),
+             "kind": "curation_fix", "branch": branch, "worktree": str(wt),
+             "dry_run": dry_run}
+    try:
+        if not wt.exists():   # 1a vez: cria o worktree persistente off develop
+            _git(["fetch", "origin"], timeout=60)
+            if _branch_exists(branch):
+                rc, _, err = _git(["worktree", "add", str(wt), branch])
+            else:
+                rc, _, err = _git(["worktree", "add", str(wt), "-b", branch, "origin/develop"])
+            if rc != 0:
+                entry["status"], entry["error"] = "WT_ADD_FAILED", err[-300:]
+                return entry
+        # limpa restos do run anterior (o commit ja levou o que interessava); o
+        # reset e' pro tip da propria branch chore/curation-fix (nao perde fixes).
+        _git(["reset", "--hard"], cwd=wt)
+        _git(["clean", "-fd"], cwd=wt)
+
+        if dry_run:
+            entry["status"] = "DRY_RUN"
+            return entry
+
+        rc, out, err = run_worker(task, wt)
+        entry["worker"] = {"rc": rc, "out_tail": out, "err_tail": err}
+        entry["session"] = bool(_read_fix_session())
+
+        _, st, _ = _git(["status", "--porcelain"], cwd=wt)
+        if not st.strip():
+            entry["status"] = "NOOP"
+            return entry
+
+        if _appearance_changed(wt):
+            _git(["add", "-A"], cwd=wt)
+            _git(["commit", "-m",
+                  f"wip(curation-fix {tid}): {task.get('title','')} [needs VISUAL_REVIEW]"], cwd=wt)
+            prc, _, perr = _git(["push", "-u", "origin", branch], cwd=wt, timeout=120)
+            gi = _emit_appearance_gallery_item(task, wt)
+            if gi:
+                entry["gallery_item"] = gi.get("variant_id")
+            entry["status"] = "VISUAL_REVIEW_QUEUED" if prc == 0 else "PUSH_FAILED"
+            if prc != 0:
+                entry["error"] = perr[-300:]
+            return entry
+
+        _git(["add", "-A"], cwd=wt)
+        _git(["commit", "-m", f"chore(curation-fix {tid}): {task.get('title','')}"], cwd=wt)
+        prc, _, perr = _git(["push", "-u", "origin", branch], cwd=wt, timeout=120)
+        entry["status"] = "COMMITTED" if prc == 0 else "PUSH_FAILED"
+        if prc != 0:
+            entry["error"] = perr[-300:]
+        return entry
+    except Exception as e:  # noqa: BLE001 — task SEM status terminal re-dispara pra sempre
+        entry["status"] = "VERIFY_FAILED"
+        entry["error"] = _redact(str(e))[-300:]
+        return entry
+    finally:
+        ledger_append(entry)  # worktree NAO e' removido (persistente): sem finally de remove
+
+
 def dispatch_by_kind(task, dry_run=False) -> dict:
     """Roteia a task pelo `kind` (default 'claude' = comportamento existente):
       - local_llm            -> Ollama local (token=0); LOCAL_LLM_FALLBACK_CLAUDE cai pro claude.
@@ -659,6 +826,9 @@ def dispatch_by_kind(task, dry_run=False) -> dict:
       - variant-sweep        -> 1 sweep de variantes julgadas (FP-034) via dispatch() + seam.
       - variant-vision-drain -> drena 1 variante PENDING_VISION via painel de 3 juizes
                                 (fecha o loop do feeder) via dispatch() + seam.
+      - curation_fix         -> laco autonomo de curadoria: UMA sessao Claude (--resume)
+                                num worktree PERSISTENTE corrige o gerador guiada pela
+                                critica do GPT; aparencia -> VISUAL_REVIEW.
       - claude               -> caminho existente: worktree isolado + `claude -p` (INALTERADO).
     Kind DESCONHECIDO cai no caminho claude (fallthrough caro — validacao fica pra
     outro slice; anotado no NOC_DISPATCHER.md)."""
@@ -669,6 +839,8 @@ def dispatch_by_kind(task, dry_run=False) -> dict:
         return dispatch_variant_sweep(task, dry_run=dry_run)
     if kind == "variant-vision-drain":  # HIFEN byte-exato (paridade com variant-sweep)
         return dispatch_variant_vision_drain(task, dry_run=dry_run)
+    if kind == "curation_fix":  # laco autonomo de curadoria: sessao Claude UNICA
+        return dispatch_curation_fix(task, dry_run=dry_run)
     if kind == "local_llm":
         result = dispatch_local_llm(task, dry_run=dry_run)
         if result.get("status") == "LOCAL_LLM_FALLBACK_CLAUDE":
