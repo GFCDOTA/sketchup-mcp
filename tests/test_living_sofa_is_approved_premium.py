@@ -45,6 +45,27 @@ def test_seat_cushions_are_single_crowned_not_stacked_blocks() -> None:
         )
 
 
+def test_composed_living_scene_sofa_is_premium() -> None:
+    """OUTRO caminho de produção: o SceneComposer (intent → sofa_spec → build_sofa) —
+    NÃO passa por derive_living_sofa. Bug 2026-07-12: o composer embarcava o sofá velho
+    mesmo com o furnish já corrigido. A lição é que CADA caminho precisa da trava: aqui
+    compomos a cena boutique real e exigimos o sofá premium (plinto, almofada única)."""
+    import json
+
+    from interior.composer.scene_composer import ROOT, compose_scene
+
+    intent = json.loads(
+        (ROOT / "fixtures/scene_intents/living_room_black_wood_gold_boutique.json")
+        .read_text("utf-8")
+    )
+    sofa = [p for p in compose_scene(intent)["parts"] if p.get("item") == "sofa"]
+    assert sofa, "cena composta sem sofá?"
+    loose = [p["label"] for p in sofa if re.fullmatch(r"foot_\d+", str(p.get("label", "")))]
+    tops = [p["label"] for p in sofa if str(p.get("label", "")).endswith("_top")]
+    assert not loose, f"SceneComposer ainda emite pés de canto ({loose}); premium=plinto"
+    assert not tops, f"SceneComposer ainda empilha almofadas ({tops}); premium=coroada"
+
+
 def test_base_is_plinth_no_loose_feet() -> None:
     """alt_002 (APROVADO): base = plinto recuado, PÉS ELIMINADOS. O builder antigo
     emite foot_1..foot_4. Nota: o plinto também tem kind=='foot' (label 'plinth'),

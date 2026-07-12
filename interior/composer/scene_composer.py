@@ -25,6 +25,7 @@ sys.path.insert(0, str(ROOT))
 from tools.decor_builders import BUILDERS as DECOR_BUILDERS          # noqa: E402
 from tools.furniture_anatomy_spec import sofa_spec                   # noqa: E402
 from tools.sofa_builder import build_sofa                            # noqa: E402
+from tools.sofa_class import PREMIUM_LIVING_UPHOLSTERY               # noqa: E402
 
 STYLE_DIR = ROOT / "interior" / "style_packs"
 
@@ -336,6 +337,11 @@ def _build_furniture(fi, style, scene_ctx):
         ov["fabric_rgb"] = _rgb(style, fi.get("material_style", "hero_fabric"))
         ov["feet_rgb"] = _rgb(style, "hero_feet", (20, 18, 16))
         spec = sofa_spec(fi.get("style_family_variant", "straight"), 3, **ov)
+        # estofaria premium aprovada (fonte única PREMIUM_LIVING_UPHOLSTERY) — o sofá
+        # de sala é premium em QUALQUER caminho de produção, o composer inclusive.
+        # Sem isto a cena embarca o sofá velho (pés + almofada empilhada), bug 2026-07-12.
+        for k, v in PREMIUM_LIVING_UPHOLSTERY.items():
+            setattr(spec, k, v)
         parts, _meta = build_sofa(spec)
         return parts, spec.to_dict()
 
