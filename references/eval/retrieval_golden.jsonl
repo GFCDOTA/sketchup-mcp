@@ -1,0 +1,24 @@
+# retrieval_golden.jsonl — gabarito de relevância p/ tools/retrieval_eval.py (FP-035)
+# ⚠ DRAFT: os `relevant` (conjunto + ORDEM) são um rascunho inferido da palette/
+#   finish de cada token em references/tokens/. A relevância final é julgamento do
+#   Felipe — reordene/edite à vontade; a régua (recall@k/MRR/nDCG) é objetiva.
+# Formato por linha: {"room","style","budget"(ou null),"relevant":[nomes ORDENADOS],"note"}
+# Linhas `#` e em branco são ignoradas. Ordem do arquivo é irrelevante (o eval ordena).
+#
+# Os 12 tokens curados são TODOS de cozinha e NÃO carregam style -> retrieve()
+# devolve os mesmos 12 em qualquer estilo (empate alfabético). Logo: recall@k
+# satura; o sinal real é MRR/nDCG (ordem) + os hard-negatives (precisão).
+#
+# --- cozinha por estilo (mesmo room, style distinto = expõe o style ignorado) ---
+{"room":"kitchen","style":"black_wood_gold","budget":null,"relevant":["matte_black_cabinetry","coordinated_medium_dark_wood_base","discreet_bronze_hardware","reflecta_champagne_led_cabinet","hot_tower_niche","planned_fridge_tower","dark_stainless_appliance","subtle_veined_stone","premium_shadow_gap","under_cabinet_led"],"note":"preto fosco + madeira escura + bronze/champagne; exclui fendi off-white e carvalho claro"}
+{"room":"kitchen","style":"warm_compact","budget":null,"relevant":["warm_fendi_upper","coordinated_oak_base","under_cabinet_led","premium_shadow_gap","planned_fridge_tower","hot_tower_niche","discreet_bronze_hardware","subtle_veined_stone"],"note":"fendi quente + carvalho claro + LED 2700K; exclui preto/madeira escura/inox dark/champagne bling"}
+{"room":"kitchen","style":"dark_walnut","budget":null,"relevant":["coordinated_medium_dark_wood_base","matte_black_cabinetry","dark_stainless_appliance","hot_tower_niche","planned_fridge_tower","subtle_veined_stone","premium_shadow_gap","under_cabinet_led"],"note":"nogueira escura + preto + inox dark; menos ouro; exclui fendi/carvalho/champagne/bronze"}
+{"room":"kitchen","style":"industrial","budget":null,"relevant":["matte_black_cabinetry","coordinated_medium_dark_wood_base","dark_stainless_appliance","hot_tower_niche","planned_fridge_tower","subtle_veined_stone","premium_shadow_gap"],"note":"preto/madeira/metal cru; exclui fendi/carvalho/bronze/champagne (sem brilho)"}
+#
+# --- budget: baixo rebaixa os tokens de custo 'alto' (torre quente/geladeira) ---
+{"room":"kitchen","style":"black_wood_gold","budget":"baixo","relevant":["premium_shadow_gap","under_cabinet_led","discreet_bronze_hardware","matte_black_cabinetry","coordinated_medium_dark_wood_base","dark_stainless_appliance"],"note":"orçamento baixo: barato-primeiro; torre quente/geladeira (custo alto) NÃO no topo"}
+#
+# --- hard-negatives: cômodo != cozinha NÃO pode vazar token de cozinha ---
+{"room":"bedroom","style":"black_wood_gold","budget":null,"relevant":[],"note":"quarto: nenhum token de cozinha deve aparecer"}
+{"room":"bathroom","style":"warm_compact","budget":null,"relevant":[],"note":"banheiro: idem"}
+{"room":"living_room","style":"industrial","budget":null,"relevant":[],"note":"sala: idem"}
