@@ -35,9 +35,12 @@
    do gate, PAT sem Pull-requests:write).
 5. Com folga: pedir ao GPT a **crítica apontada dos 9 WORSE** (piso? luz?
    móveis-caixa?) e converter em itens da fila `next_actions.md`.
-6. Com folga: **flip `RAG_BACKEND=embed` no gerador** — muda o .skp, então:
-   gerar variante com embed on → veredito visual GPT → só liga se ≠ WORSE.
-   Antes disso, Felipe revisar os rótulos DRAFT de
+6. ~~Flip `RAG_BACKEND=embed`~~ **FEITO 2026-07-24** (gate :8765: GO opção A,
+   confiança alta) — `setx RAG_BACKEND embed` (user-level; processo novo herda;
+   dashboard vivo precisa restart). Racional: o flip só muda o BUNDLE do
+   Arquiteto; todo .skp segue gated pela esteira (geometry_sanity + veredito
+   visual POR CICLO) by construction. Provado: `_retrieve_bundle` devolve
+   backend=embed com 18 chunks. Pendente do Felipe: revisar os rótulos DRAFT de
    `references/eval/retrieval_golden.jsonl`.
 
 ## Definition of done
