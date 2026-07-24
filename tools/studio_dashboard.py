@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -298,6 +299,123 @@ def _overview() -> dict:
             "rooms": st["rooms"]}
 
 
+# ---------------------------------------------------------------------------
+# 🧠 Memória vetorial (RAG) — status + consulta pro Felipe ACOMPANHAR o aprendizado
+# (FP-035/FP-037). Leitura leve com cache; busca semântica sob demanda via POST.
+# Honestidade: infra off -> erro claro / flags off, NUNCA resultado fabricado.
+# ---------------------------------------------------------------------------
+_RAG_CACHE = {"t": 0.0, "v": None}
+
+
+def _rag_status() -> dict:
+    """O que o banco vetorial TEM (corpus, chunks por fonte, verdicts do Felipe
+    materializados pelo taste write-back) + infra Qdrant/Ollama de pé ou não.
+    Cache 20s — roda a cada tick do /api/state sem pesar."""
+    if _RAG_CACHE["v"] is not None and time.time() - _RAG_CACHE["t"] < 20:
+        return _RAG_CACHE["v"]
+    out: dict = {"ok": True}
+    try:
+        from tools import rag_freshness as rf
+        con = rf.connect()
+        out["corpus_version"] = rf.current_corpus_version(con)
+        rows = con.execute(
+            "SELECT source_type, COUNT(*), COALESCE(SUM(embedded),0) FROM chunk "
+            "WHERE is_active=1 GROUP BY source_type ORDER BY source_type").fetchall()
+        out["by_source_type"] = {r[0]: {"chunks": r[1], "embedded": r[2]} for r in rows}
+        out["chunks_active"] = sum(r[1] for r in rows)
+        out["chunks_embedded"] = sum(r[2] for r in rows)
+        con.close()
+    except Exception as e:  # noqa: BLE001 — status nunca derruba o /api/state
+        out = {"ok": False, "error": f"freshness: {e!r}"}
+    try:
+        from tools import rag_embed_backend as reb
+        out["qdrant_up"] = reb.qdrant_up(timeout=1)
+        out["ollama_up"] = reb.ollama_up(timeout=1)
+        if out.get("qdrant_up"):
+            info = reb._http("GET", f"{reb.QDRANT_URL}/collections/{reb.COLLECTION}",
+                             timeout=3)
+            out["qdrant_points"] = (info.get("result") or {}).get("points_count")
+    except Exception:  # noqa: BLE001
+        out.setdefault("qdrant_up", False)
+        out.setdefault("ollama_up", False)
+    # gosto do Felipe já materializado (rag_writeback_record) — com ou SEM sinal:
+    # verdict sem comentário/tag só diz "piorou", não ENSINA (honestidade do write-back).
+    try:
+        by_v: dict[str, int] = {}
+        sem_sinal = 0
+        latest: list[dict] = []
+        for fp in sorted((ROOT / "references/felipe/verdicts").glob("*.json")):
+            d = json.loads(fp.read_text("utf-8"))
+            v = str(d.get("human_verdict") or "?")
+            by_v[v] = by_v.get(v, 0) + 1
+            has_signal = bool((d.get("felipe_comment") or "").strip()
+                              or d.get("positive_patterns") or d.get("negative_patterns"))
+            sem_sinal += 0 if has_signal else 1
+            latest.append({"asset_id": d.get("asset_id") or fp.stem, "verdict": v,
+                           "created_at": d.get("created_at") or "", "has_signal": has_signal})
+        latest.sort(key=lambda x: x["created_at"], reverse=True)
+        out["verdicts"] = {"total": sum(by_v.values()), "by_verdict": by_v,
+                           "sem_sinal": sem_sinal, "latest": latest[:6]}
+    except Exception as e:  # noqa: BLE001
+        out["verdicts"] = {"error": str(e)}
+    out["generator_backend"] = os.environ.get("RAG_BACKEND", "faceted")
+    _RAG_CACHE.update(t=time.time(), v=out)
+    return out
+
+
+def _rag_search(body: dict) -> dict:
+    """Busca semântica LIVRE no banco vetorial ("o que tem sobre X?"). Cosine via
+    Qdrant+Ollama; infra off -> erro claro, sem degradar pra resultado falso."""
+    q = (body.get("q") or "").strip()
+    if not q:
+        return {"ok": False, "error": "consulta vazia"}
+    try:
+        k = max(1, min(30, int(body.get("k") or 8)))
+    except (TypeError, ValueError):
+        k = 8
+    st = (body.get("source_type") or "").strip() or None
+    try:
+        from tools import rag_embed_backend as reb
+        from tools import rag_freshness as rf
+        con = rf.connect()
+        cv = rf.current_corpus_version(con)
+        con.close()
+        if cv is None:
+            return {"ok": False,
+                    "error": "índice de freshness vazio — rode `reference_db reindex`"}
+        hits = reb.semantic_recall(q, corpus_version=cv, top_k=k, source_type=st)
+        return {"ok": True, "corpus_version": cv, "query": q, "hits": [{
+            "score": round(h["score"], 4),
+            "title": h["payload"].get("title") or "",
+            "source_path": h["payload"].get("source_path") or "",
+            "source_type": h["payload"].get("source_type") or "",
+            "text": (h["payload"].get("text") or "")[:300],
+        } for h in hits]}
+    except Exception as e:  # noqa: BLE001 — inclui InfraUnavailable
+        return {"ok": False, "error": f"{e}"}
+
+
+def _rag_compare(body: dict) -> dict:
+    """faceted × embed pro MESMO room/style — mostra a fusão RRF agindo (ou
+    degradando honesto). É o termômetro visível de 'o vetor está sendo usado?'."""
+    room = (body.get("room") or "kitchen").strip().lower()
+    style = (body.get("style") or "").strip() or None
+    try:
+        from tools import reference_db as rdb
+        fac = rdb.retrieve(room, style, top_n=8)
+        emb = rdb.retrieve(room, style, top_n=8, backend="embed")
+        f_names = [t["name"] for t in fac.get("tokens") or []]
+        e_names = [t["name"] for t in emb.get("tokens") or []]
+        return {"ok": True, "room": room, "style": style,
+                "faceted": f_names, "embed": e_names,
+                "moved": f_names != e_names,
+                "chunks": emb.get("retrieved_chunks") or [],
+                "notes": emb.get("notes") or [],
+                "corpus_version": emb.get("rag_corpus_version")}
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": f"{e}"}
+
+
 def _state() -> dict:
     fac = ic_cycles.factory_state()
     pack_id = (fac.get("references") or {}).get("pack_id") or DEFAULT_PACK
@@ -305,7 +423,8 @@ def _state() -> dict:
             "backlog": _backlog(), "references": _references(), "inbox": _inbox(),
             "knowledge": _knowledge_state(), "consult": _consult_state(), "cycles": _cycles_recent(8),
             "factory": fac, "refpack": ic_refpacks.pack_state(pack_id), "learning": _learning_log(),
-            "patches": ic_patch.patches_state(), "proposals": ic_proposals.state(), "overview": _overview()}
+            "patches": ic_patch.patches_state(), "proposals": ic_proposals.state(),
+            "rag": _rag_status(), "overview": _overview()}
 
 
 def _proposal_action(body: dict) -> dict:
@@ -698,6 +817,14 @@ let SCOUT_RESULTS=null
 function scoutSearch(){const q=(cval('scout-q')||'').trim();const m=document.getElementById('scoutmsg');if(!q){if(m)m.textContent='escreve o que buscar';return}
  if(m)m.textContent='🔭 buscando na web…'
  fetch('/api/scout-search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q})}).then(r=>r.json()).then(r=>{SCOUT_RESULTS=r;if(m)m.textContent=r.ok?('✓ '+((r.results||[]).length)+' resultados'):('erro: '+(r.error||''));tick(1)})}
+// 🧠 Memória vetorial — busca semântica + comparador faceted×embed (resultados vivem em globals, o tick re-renderiza)
+let RAG_RESULTS=null,RAG_CMP=null
+function ragSearch(){const q=((document.getElementById('rag-q')||{}).value||'').trim();if(!q)return
+ const st=(document.getElementById('rag-st')||{}).value||'';const m=document.getElementById('ragmsg');if(m)m.textContent='buscando por significado…'
+ fetch('/api/rag/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({q,source_type:st})}).then(r=>r.json()).then(r=>{RAG_RESULTS=r;if(m)m.textContent=r.ok?('✓ '+((r.hits||[]).length)+' chunk(s)'):('erro: '+(r.error||''));tick(1)})}
+function ragCompare(){const room=(document.getElementById('rag-room')||{}).value||'kitchen',style=(document.getElementById('rag-style')||{}).value||''
+ const m=document.getElementById('ragcmpmsg');if(m)m.textContent='comparando…'
+ fetch('/api/rag/compare',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({room,style})}).then(r=>r.json()).then(r=>{RAG_CMP=r;if(m)m.textContent=r.ok?(r.moved?'✓ a fusão REORDENOU o ranking':'= mesma ordem (sem sinal semântico novo)'):('erro: '+(r.error||''));tick(1)})}
 let AUTOCYCLE=null,CYCLES=[]
 function runCycle(){const m=document.getElementById('cyclemsg');if(m)m.textContent='rodando ciclo nos LLMs locais… (pode levar ~1-2 min)'
  fetch('/api/cycle',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})}).then(r=>r.json()).then(r=>{
@@ -753,7 +880,7 @@ function saveOrder(){const root=document.getElementById('root');if(!root)return
 const PINNED_TOP=['sec-overview']   // Visão Geral SEMPRE no topo, ignora o layout salvo
 // ordem-padrão AGRUPADA por assunto: núcleo de trabalho → referências → GPT/aprendizado → time local → coordenação/saída
 const DEFAULT_ORDER=['sec-overview','sec-program','sec-auditor','sec-ciclo','sec-conversa','sec-backlog',
- 'grp-refs','grp-gpt','grp-local',
+ 'grp-refs','sec-rag','grp-gpt','grp-local',
  'sec-sessions','sec-ren']
 function applyOrder(){const root=document.getElementById('root');if(!root)return
  const present=[...root.children].filter(c=>c.id&&c.classList.contains('card')).map(c=>c.id)
@@ -779,7 +906,7 @@ function applyGroups(){const root=document.getElementById('root');if(!root)retur
   present.forEach(c=>{c.classList.remove('card','full');c.classList.add('grpsec');body.appendChild(c)})
  })}
 // RECOLHER cards — só o LÍDER de cada grupo aberto por padrão; o resto recolhido 1-clique (menos poluição)
-const DEFAULT_OPEN=['sec-overview','sec-program','sec-auditor','sec-ciclo','sec-conversa','sec-backlog','grp-refs','grp-local','sec-ren']
+const DEFAULT_OPEN=['sec-overview','sec-program','sec-auditor','sec-ciclo','sec-conversa','sec-backlog','grp-refs','sec-rag','grp-local','sec-ren']
 function collapsedSet(){try{const v=JSON.parse(localStorage.getItem('studio_collapsed')||'null');return v===null?null:new Set(v)}catch(e){return null}}
 function saveCollapsed(s){localStorage.setItem('studio_collapsed',JSON.stringify([...s]))}
 function applyCollapsed(){const root=document.getElementById('root');if(!root)return
@@ -1012,6 +1139,33 @@ async function tick(force){
    return `<div class=kcol><div class=kcol-h>${COLLBL[col]} <span class=mut>${items.length}</span></div><div class=kcol-b>${cards||'<span class=mut style=font-size:11px>—</span>'}</div></div>`}).join('')
  root.appendChild(el(`<div class="card full" id=sec-backlog><h2>Backlog — quadro Kanban <span class=mut>(${b.total} microtarefas · ${b.done} done · arrasta com ◀ ▶)</span></h2>
   <div class=kboard>${board}</div></div>`))
+ // 🧠 MEMÓRIA VETORIAL (RAG) — o que o banco sabe, o gosto já materializado, consulta viva (FP-035/FP-037)
+ const rag=s.rag||{},rgv=rag.verdicts||{},rby=rgv.by_verdict||{}
+ const rup=b=>b?'<span style="color:var(--ok)">✓ on</span>':'<span style="color:var(--red)">✗ off</span>'
+ const rsrc=Object.entries(rag.by_source_type||{}).map(([k,v])=>`<span class=pill>${esc(k)}: ${v.chunks} chunk(s) · ${v.embedded} embedado(s)</span>`).join(' ')||'<span class=mut>índice vazio — rode <code>reference_db reindex</code></span>'
+ const rverd=Object.entries(rby).map(([k,n])=>`<span class=pill>${k==='WORSE'?'👎':k==='IMPROVED'?'👍':'•'} ${esc(k)}: ${n}</span>`).join(' ')||'<span class=mut>nenhum verdict materializado ainda — teus cliques na curadoria viram memória aqui</span>'
+ const rwarn=(rgv.sem_sinal||0)>0?`<div class=refhint>⚠ <b>${rgv.sem_sinal}</b> verdict(s) SEM comentário/tag — só dizem "piorou", não ENSINAM o porquê. 1 frase ou 2 tags no clique viram aprendizado recuperável.</div>`:''
+ const rlatest=(rgv.latest||[]).map(v=>`<div class=scoutrow><span class=mut>${esc((v.created_at||'').slice(0,10))}</span> ${v.verdict==='WORSE'?'👎':v.verdict==='IMPROVED'?'👍':'•'} ${esc(v.asset_id)} ${v.has_signal?'<span class=pill style="color:var(--ok)">com sinal</span>':'<span class=pill>sem sinal</span>'}</div>`).join('')
+ const rstOpts='<option value="">todas as fontes</option>'+Object.keys(rag.by_source_type||{}).map(k=>`<option>${esc(k)}</option>`).join('')
+ const rhits=RAG_RESULTS&&RAG_RESULTS.ok?((RAG_RESULTS.hits||[]).map(h=>`<div class=scoutrow><b>${(h.score||0).toFixed(3)}</b> <span class=pill>${esc(h.source_type)}</span> <b>${esc(h.title||h.source_path)}</b><div class=mut style="font-size:11.5px">${esc(h.text||'')}</div></div>`).join('')||'<span class=mut>nada encontrado no corpus atual — isso também é resposta ("o que NÃO tem")</span>'):(RAG_RESULTS?`<span class=mut>erro: ${esc(RAG_RESULTS.error||'')}</span>`:'<span class=mut>pergunta "o que o banco sabe sobre X" — busca por SIGNIFICADO (cosine), não por palavra exata</span>')
+ let rcmp='<span class=mut>compara o ranking SEM × COM o sinal semântico do mesmo cômodo/estilo — se a ordem mudou, o vetor está agindo de verdade</span>'
+ if(RAG_CMP&&RAG_CMP.ok){
+  const li=(ns,other)=>ns.map((n,i)=>{const j=other.length?other.indexOf(n):-1
+   const d=other.length?(j<0?' <span style="color:var(--gold)">novo</span>':(j===i?' <span class=mut>=</span>':(j>i?` <span style="color:var(--ok)">▲${j-i}</span>`:` <span style="color:var(--red)">▼${i-j}</span>`))):''
+   return `<div class=scoutrow>${i+1}. ${esc(n)}${d}</div>`}).join('')||'<span class=mut>—</span>'
+  rcmp=`<div style="display:flex;gap:14px;flex-wrap:wrap"><div style="flex:1;min-width:200px"><div class=kblist-h>faceted (sem vetor)</div>${li(RAG_CMP.faceted||[],[])}</div>
+   <div style="flex:1;min-width:200px"><div class=kblist-h>embed / fusão RRF ${RAG_CMP.moved?'<span style="color:var(--ok)">— reordenou ✓</span>':'<span class=mut>— igual</span>'}</div>${li(RAG_CMP.embed||[],RAG_CMP.faceted||[])}</div></div>
+   ${(RAG_CMP.notes||[]).map(n=>`<div class=mut style="font-size:11px">ℹ ${esc(n)}</div>`).join('')}`}
+ root.appendChild(el(`<div class="card full" id=sec-rag><h2>🧠 Memória vetorial (RAG) <span class=mut>(corpus ${esc((rag.corpus_version||'—').slice(0,12))} · ${rag.chunks_active||0} chunks ativos · ${rag.chunks_embedded||0} embedados${rag.qdrant_points!=null?` · ${rag.qdrant_points} pontos no Qdrant`:''} · Qdrant ${rup(rag.qdrant_up)} · Ollama ${rup(rag.ollama_up)} · gerador: <b>${esc(rag.generator_backend||'faceted')}</b>)</span> <a class=mbtn style="float:right" href="http://localhost:6333/dashboard#/collections/rag_chunks" target=_blank rel=noopener title="explorar os pontos crus direto no Qdrant">🗄 Qdrant ↗</a></h2>
+  <div class=kblist-h>O que TEM no banco</div><div>${rsrc}</div>
+  <div class=kblist-h style="margin-top:8px">Gosto do Felipe já materializado (taste write-back)</div><div>${rverd}</div>${rwarn}
+  <div class=cylist style="margin-top:4px">${rlatest}</div>
+  <div class=cycsec><div class=cycsec-h>🔎 Consultar o banco (busca semântica)</div>
+   <div class=askbar><input id=rag-q placeholder="ex.: bancada madeira escura com dourado discreto" onkeydown="if(event.key==='Enter')ragSearch()"><select id=rag-st title="filtrar por fonte">${rstOpts}</select><button class=send onclick=ragSearch()>🔎 buscar</button> <span class=mut id=ragmsg></span></div>
+   <div class=scoutlist>${rhits}</div></div>
+  <div class=cycsec><div class=cycsec-h>⚖️ A fusão está agindo? (faceted × embed)</div>
+   <div class=askbar><select id=rag-room><option>kitchen</option><option>bedroom</option><option>bathroom</option><option>living_room</option></select><select id=rag-style><option>warm_compact</option><option>dark_walnut</option><option>black_wood_gold</option><option>industrial</option></select><button class=send onclick=ragCompare()>⚖️ comparar</button> <span class=mut id=ragcmpmsg></span></div>
+   <div>${rcmp}</div></div></div>`))
  // ALIMENTAR O ARQUITETO
  const K=s.knowledge||{},kb=K.chars||0,kents=K.entries||[]
  const klist=kents.length?kents.slice().reverse().map(e=>`<div class=kbi title="${esc(e.preview||'')}"><span class=kbi-t>${esc(e.title)}</span><span class=mut>${e.chars}c</span><button class=trash title=esquecer onclick="forgetKb(${e.id})">🗑</button></div>`).join(''):'<span class=mut style=font-size:12px>nada aprendido ainda — cola um texto ou sobe um .txt</span>'
@@ -1907,6 +2061,8 @@ class H(BaseHTTPRequestHandler):
                 self._send(200, fp.read_text("utf-8"), "text/html; charset=utf-8")
             except OSError as e:
                 self._send(500, f"{fp.name}: {e}", "text/plain; charset=utf-8")
+        elif path == "/api/rag":
+            self._send(200, json.dumps(_rag_status(), ensure_ascii=False))
         elif path == "/api/kgraph":
             fp = VITRINEDIR / "kgraph.json"
             try:
@@ -1986,6 +2142,10 @@ class H(BaseHTTPRequestHandler):
             self._send(200, json.dumps(_patch_action(body), ensure_ascii=False))
         elif path == "/api/proposal":
             self._send(200, json.dumps(_proposal_action(body), ensure_ascii=False))
+        elif path == "/api/rag/search":
+            self._send(200, json.dumps(_rag_search(body), ensure_ascii=False))
+        elif path == "/api/rag/compare":
+            self._send(200, json.dumps(_rag_compare(body), ensure_ascii=False))
         else:
             self._send(404, b"not found", "text/plain")
 

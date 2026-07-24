@@ -80,6 +80,40 @@ def test_point_id_is_deterministic():
     assert a == b and isinstance(a, int)
 
 
+def test_embed_applies_query_prefix(monkeypatch):
+    # nomic-embed-text é instruction-tuned p/ retrieval assimétrico: query leva
+    # 'search_query: '. Sem infra: intercepta _http e checa o prompt enviado.
+    captured = {}
+
+    def _fake_http(method, url, payload=None, *, timeout=30):
+        captured["payload"] = payload
+        return {"embedding": [0.0] * reb.EMBED_DIM}
+
+    monkeypatch.setattr(reb, "_http", _fake_http)
+    reb.embed("onde vai o forno", prefix=reb.EMBED_QUERY_PREFIX)
+    assert captured["payload"]["prompt"].startswith("search_query: ")
+    assert "onde vai o forno" in captured["payload"]["prompt"]
+
+
+def test_search_adds_source_type_filter(monkeypatch):
+    # recall token-scoped: search(source_type='token') filtra nativo no Qdrant,
+    # senão os chunks-de-token ficam esparsos no top_k do corpus inteiro.
+    captured = {}
+
+    def _fake_http(method, url, payload=None, *, timeout=30):
+        captured["payload"] = payload
+        return {"result": []}
+
+    monkeypatch.setattr(reb, "_http", _fake_http)
+    reb.search([0.0] * reb.EMBED_DIM, corpus_version="cv", source_type="token")
+    musts = captured["payload"]["filter"]["must"]
+    assert {"key": "source_type", "match": {"value": "token"}} in musts
+    # sem source_type: só is_active + corpus_version (retrocompat)
+    reb.search([0.0] * reb.EMBED_DIM, corpus_version="cv")
+    keys = {m["key"] for m in captured["payload"]["filter"]["must"]}
+    assert keys == {"is_active", "corpus_version"}
+
+
 # =========================================================================== INTEGRAÇÃO (skip)
 @pytest.fixture
 def integ_corpus(tmp_path):

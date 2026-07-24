@@ -380,6 +380,53 @@ def _load_felipe_anti(room: str, style: str | None) -> list[str]:
     return out
 
 
+# style -> termos semânticos curados p/ a query de recall (determinístico, sem LLM).
+# Chaveado pelo tema canônico (normalize_theme) p/ casar sinônimos de estilo.
+_STYLE_QUERY_TERMS = {
+    "black_wood_gold": "preto fosco madeira escura bronze champagne metal escuro",
+    "dark_walnut": "nogueira madeira escura quente preto fosco inox grafite",
+    "warm_compact": "off-white quente fendi carvalho claro compacto aconchegante led 2700k",
+    "industrial_boutique": "concreto metal preto cru industrial madeira",
+    "hotel_boutique": "luxo hoteleiro pedra madeira iluminação âmbar",
+}
+
+
+def build_retrieval_query(room: str, style: str | None, budget: str | None = None) -> str:
+    """room/style -> texto de query semântica curado e DETERMINÍSTICO (sem LLM).
+    Substitui o f-string fixo antigo; injeta a LINGUAGEM do estilo p/ o recall
+    discriminar (o facet não carrega tema). budget NÃO entra (é sinal de ranking,
+    não de semântica)."""
+    room = (room or "").strip().lower()
+    style_norm = normalize_theme(style)
+    parts = [room, "marcenaria planejada"]
+    terms = _STYLE_QUERY_TERMS.get(style_norm or "")
+    if terms:
+        parts.append(terms)
+    elif style_norm:
+        parts.append(str(style_norm).replace("_", " "))
+    return " ".join(p for p in parts if p).strip()
+
+
+def _rrf_fuse(faceted_ranked: list[dict], semantic_sources: list[str],
+              k: int = 60) -> list[dict]:
+    """Reciprocal Rank Fusion DETERMINÍSTICA de duas rank-lists. faceted_ranked =
+    tokens na ordem faceted (posição = rank); semantic_sources = source_paths na
+    ordem de cosine desc. Junta por source_path; termo ausente não contribui.
+    Desempate estável por nome. semantic vazio -> ordem faceted preservada."""
+    sem_rank = {src: i for i, src in enumerate(semantic_sources)}
+
+    def _rrf(i: int, tok: dict) -> float:
+        s = 1.0 / (k + i + 1)                       # rank faceted (1-indexed)
+        sp = tok.get("source_path")
+        if sp in sem_rank:
+            s += 1.0 / (k + sem_rank[sp] + 1)       # rank semântico (1-indexed)
+        return s
+
+    return [tok for _, tok in sorted(
+        enumerate(faceted_ranked),
+        key=lambda it: (-_rrf(it[0], it[1]), it[1]["name"]))]
+
+
 def _embed_recall_chunks(room: str, style_norm: str | None) -> tuple[list[dict], str | None, list[str]]:
     """FP-037 Camada 2 — recall semântico OPCIONAL via Qdrant+Ollama.
 
@@ -406,14 +453,30 @@ def _embed_recall_chunks(room: str, style_norm: str | None) -> tuple[list[dict],
             notes.append("backend=embed: índice de freshness vazio "
                          "(rode `reference_db reindex`) -> faceted.")
             return [], None, notes
-        query_text = f"{room} {style_norm or ''} marcenaria planejada".strip()
-        hits = reb.semantic_recall(query_text, corpus_version=corpus_version,
-                                   top_k=12)
-        retrieved = [{
-            "source": h["payload"].get("source_path"),
-            "chunk_id": h["chunk_id"],
-            "confidence": round(h["score"], 4),
-        } for h in hits]
+        query_text = build_retrieval_query(room, style_norm)
+        # UM embed, DUAS buscas (regressão pega por test_taste_writeback_recall):
+        #   - token-scoped -> alimenta a fusão RRF (sem o filtro nativo os chunks
+        #     de token ficam esparsos no top_k e a fusão colapsa);
+        #   - geral (sem filtro) -> o write-back do gosto (verdicts do Felipe)
+        #     segue RECUPERÁVEL nos retrieved_chunks. O filtro 'token' SOZINHO
+        #     escondia o aprendizado humano do retrieve — dois consumidores, dois
+        #     recalls; tokens primeiro (é a ordem que a fusão usa).
+        vec = reb.embed(query_text, prefix=reb.EMBED_QUERY_PREFIX)
+        hits_tok = reb.search(vec, corpus_version=corpus_version, top_k=12,
+                              source_type="token")
+        hits_all = reb.search(vec, corpus_version=corpus_version, top_k=12)
+        seen_ids: set = set()
+        retrieved = []
+        for h in hits_tok + hits_all:
+            if h["chunk_id"] in seen_ids:
+                continue
+            seen_ids.add(h["chunk_id"])
+            retrieved.append({
+                "source": h["payload"].get("source_path"),
+                "chunk_id": h["chunk_id"],
+                "source_type": h["payload"].get("source_type"),
+                "confidence": round(h["score"], 4),
+            })
         if not retrieved:
             notes.append("backend=embed: Qdrant vazio p/ o corpus atual "
                          "(reindex do Qdrant pendente) -> faceted mantém a decisão.")
@@ -495,6 +558,17 @@ def retrieve(room, style=None, budget=None, *, con=None, top_n=6,
     collapsed = list(by_canon.values())
 
     ranked = sorted(collapsed, key=lambda t: (-_score(t)[0], t["name"]))
+
+    # FP-035 epic "ligar o embed": funde o recall semântico (antes DESCARTADO em
+    # :467) no ranking via RRF. SÓ no caminho embed COM chunks reais -> o caminho
+    # faceted / infra-off fica byte-idêntico (a fusão nem roda). Confidence segue
+    # decidida por facets/gates — o cosine nunca a infla.
+    if backend == "embed" and retrieved_chunks:
+        # a fusão SÓ usa chunks de TOKEN (join por source_path contra o faceted);
+        # os demais (verdicts/estilo) ficam auditáveis nos retrieved_chunks.
+        sem_sources = [c["source"] for c in retrieved_chunks
+                       if c.get("source") and c.get("source_type") == "token"]
+        ranked = _rrf_fuse(ranked, sem_sources)
 
     tokens_out: list[dict] = []
     anti: list[str] = []
