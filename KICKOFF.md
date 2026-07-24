@@ -29,10 +29,16 @@
    iterar/reverter. **Não autojulgar.**
 3. **PR → develop** (URL de compare; PAT sem `Pull requests:write`):
    `.../compare/develop...fix/planta74-furnished-fidelity` — landar, não deixar aberta.
-4. **Landar `feat/fp035-retrieval-eval`** do mesmo jeito:
-   `.../compare/develop...feat/fp035-retrieval-eval`.
+4. ~~Landar `feat/fp035-retrieval-eval`~~ **FEITO 2026-07-23** — develop tem a
+   fusão RRF + fix do write-back recall + card 🧠 Memória vetorial no :8782
+   (merges `4d4df7f`/`6317500`/`58cf40f`; mecânica: merge local `--no-ff` com GO
+   do gate, PAT sem Pull-requests:write).
 5. Com folga: pedir ao GPT a **crítica apontada dos 9 WORSE** (piso? luz?
    móveis-caixa?) e converter em itens da fila `next_actions.md`.
+6. Com folga: **flip `RAG_BACKEND=embed` no gerador** — muda o .skp, então:
+   gerar variante com embed on → veredito visual GPT → só liga se ≠ WORSE.
+   Antes disso, Felipe revisar os rótulos DRAFT de
+   `references/eval/retrieval_golden.jsonl`.
 
 ## Definition of done
 - [ ] 2 PRs mergeadas em `develop`; zero branch órfã pushada.
@@ -53,9 +59,13 @@ Evidência do handoff é de 2026-07-23; re-verifique ANTES do passo 1 da missão
 **Não prossiga sem tudo verde:**
 ```bash
 cd E:/Claude/apps/sketchup-mcp && git status -sb && curl -s http://localhost:8765/health | head -c 200
-.venv/Scripts/python.exe -m pytest tests/ -q            # esperado: 1381 passed, 9 skipped (exit 0)
+.venv/Scripts/python.exe -m pytest tests/ -q            # ~1404 passed c/ Qdrant+Ollama vivos (5 skipped); infra off = +4 skips
 .venv/Scripts/python.exe -m tools.door_swing_audit      # esperado: PASS 7/7 (exit 0)
 ```
+⚠ Qdrant/RAG: reindex SÓ do tree canônico (`apps\sketchup-mcp`) — reindexar de
+worktree clobbera o corpus da produção no Qdrant compartilhado (memória
+`reference_qdrant_shared_collection_worktree_clobber`); recuperação:
+`reference_db reindex --rebuild` aqui.
 Se a working tree divergir do `HANDOFF.md` §3 (loop autônomo escreve em
 `.ai_bridge/`), reconciliar primeiro; se a suíte quebrar, consertar antes de
 commitar qualquer fix.

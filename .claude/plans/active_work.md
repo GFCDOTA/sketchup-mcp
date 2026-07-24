@@ -41,7 +41,10 @@ Branch em curso, objetivo, escopo, validação.
 
 - `fix/planta74-furnished-fidelity` — 3 fixes de furnish prontos na working
   tree, falta commit → veredito visual → PR (ver `KICKOFF.md`).
-- `feat/fp035-retrieval-eval` — pushada, falta PR → develop (landar, não deixar órfã).
+- ✅ 2026-07-23: **FP-035 LANDADO em develop** (fusão RRF + fix write-back recall
+  + card 🧠 Memória vetorial no :8782); tree principal atualizado (`dd9112e`),
+  suíte 1410/0/5 c/ infra viva, Qdrant rebuild (218 chunks). Resta o flip
+  `RAG_BACKEND=embed` do gerador (visual-gated) + Felipe revisar golden-set DRAFT.
 - Fila seguinte em `next_actions.md`.
 
 ## Validação (comandos atuais)

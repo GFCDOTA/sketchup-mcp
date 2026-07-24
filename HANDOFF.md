@@ -11,6 +11,19 @@
   (b) `feat/fp035-retrieval-eval` **pushada com 2 commits e sem PR** (viola "nunca
   deixar branch órfã"). Campanha de baseline voltou **9× WORSE** sem comentário.
 
+> **ADENDO 2026-07-23 (mesma sessão, mais tarde) — RAG LIGADO NO RECALL:**
+> a pendência (b) foi RESOLVIDA e foi além: develop recebeu `4d4df7f` (fusão RRF
+> + retrieval_eval; eval real: MRR 0.90→1.00, nDCG@6 0.808→0.839), `6317500`
+> (fix: o filtro token da fusão escondia os verdicts do Felipe do recall —
+> regressão pega pelo teste infra-gated, red→green no dia) e `58cf40f` (card
+> **🧠 Memória vetorial** no :8782 — status do banco, busca semântica,
+> comparador faceted×embed, alerta de verdict sem sinal). Tree principal já tem
+> tudo via merge `dd9112e`; suíte AQUI: **1410 passed, 5 skipped** (infra viva);
+> Qdrant reindexado `--rebuild` (corpus `006ff80f9a96`, 218 chunks). Falta SÓ o
+> flip `RAG_BACKEND=embed` do gerador (visual-gated) — ver KICKOFF §6. Gotcha
+> novo: reindex NUNCA de worktree (clobbera o Qdrant compartilhado). As seções
+> abaixo (§2/§5/§6) descrevem o estado da MANHÃ; este adendo prevalece.
+
 ## 1. Objetivo atual
 Subir a **nota visual da planta_74 mobiliada** (a nota do GPT/Felipe é o
 termômetro do projeto). A campanha de baselines de 2026-07-12 voltou **9× WORSE**
