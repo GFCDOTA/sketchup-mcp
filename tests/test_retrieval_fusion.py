@@ -23,7 +23,27 @@ GOLDEN = rev.DEFAULT_GOLDEN
 def _chunks(names: list[str]) -> list[dict]:
     """Fabrica retrieved_chunks (source=source_path do token) em ordem de cosine."""
     return [{"source": f"references/tokens/{n}.json", "chunk_id": n,
+             "source_type": "token",
              "confidence": round(1.0 - i * 0.01, 4)} for i, n in enumerate(names)]
+
+
+def test_writeback_chunks_stay_auditable_but_dont_fuse(monkeypatch):
+    # verdict do Felipe no recall: fica AUDITÁVEL nos retrieved_chunks, mas a
+    # fusão só usa source_type='token' (join por source_path contra o faceted) —
+    # regressão do filtro nativo que escondia o write-back (taste recall).
+    import tools.reference_db as _rdb
+
+    def _stub(room, style_norm):
+        ch = _chunks(["coordinated_oak_base"])
+        ch.insert(0, {"source": "references/felipe/verdicts/v1.json",
+                      "chunk_id": "v1", "source_type": "curation",
+                      "confidence": 0.99})
+        return ch, "cv-test", []
+    monkeypatch.setattr(_rdb, "_embed_recall_chunks", _stub)
+    bundle = _rdb.retrieve("kitchen", "warm_compact", top_n=12, backend="embed")
+    assert any(c.get("source_type") == "curation"
+               for c in bundle["retrieved_chunks"])
+    assert bundle["tokens"][0]["name"] == "coordinated_oak_base"
 
 
 # --- fusão reordena pelo sinal semântico -----------------------------------

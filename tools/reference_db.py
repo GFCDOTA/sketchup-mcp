@@ -454,15 +454,29 @@ def _embed_recall_chunks(room: str, style_norm: str | None) -> tuple[list[dict],
                          "(rode `reference_db reindex`) -> faceted.")
             return [], None, notes
         query_text = build_retrieval_query(room, style_norm)
-        # source_type='token' -> recall token-scoped (senão os chunks-de-token
-        # ficam esparsos no top_k do corpus inteiro e a fusão RRF colapsa).
-        hits = reb.semantic_recall(query_text, corpus_version=corpus_version,
-                                   top_k=12, source_type="token")
-        retrieved = [{
-            "source": h["payload"].get("source_path"),
-            "chunk_id": h["chunk_id"],
-            "confidence": round(h["score"], 4),
-        } for h in hits]
+        # UM embed, DUAS buscas (regressão pega por test_taste_writeback_recall):
+        #   - token-scoped -> alimenta a fusão RRF (sem o filtro nativo os chunks
+        #     de token ficam esparsos no top_k e a fusão colapsa);
+        #   - geral (sem filtro) -> o write-back do gosto (verdicts do Felipe)
+        #     segue RECUPERÁVEL nos retrieved_chunks. O filtro 'token' SOZINHO
+        #     escondia o aprendizado humano do retrieve — dois consumidores, dois
+        #     recalls; tokens primeiro (é a ordem que a fusão usa).
+        vec = reb.embed(query_text, prefix=reb.EMBED_QUERY_PREFIX)
+        hits_tok = reb.search(vec, corpus_version=corpus_version, top_k=12,
+                              source_type="token")
+        hits_all = reb.search(vec, corpus_version=corpus_version, top_k=12)
+        seen_ids: set = set()
+        retrieved = []
+        for h in hits_tok + hits_all:
+            if h["chunk_id"] in seen_ids:
+                continue
+            seen_ids.add(h["chunk_id"])
+            retrieved.append({
+                "source": h["payload"].get("source_path"),
+                "chunk_id": h["chunk_id"],
+                "source_type": h["payload"].get("source_type"),
+                "confidence": round(h["score"], 4),
+            })
         if not retrieved:
             notes.append("backend=embed: Qdrant vazio p/ o corpus atual "
                          "(reindex do Qdrant pendente) -> faceted mantém a decisão.")
@@ -550,7 +564,10 @@ def retrieve(room, style=None, budget=None, *, con=None, top_n=6,
     # faceted / infra-off fica byte-idêntico (a fusão nem roda). Confidence segue
     # decidida por facets/gates — o cosine nunca a infla.
     if backend == "embed" and retrieved_chunks:
-        sem_sources = [c["source"] for c in retrieved_chunks if c.get("source")]
+        # a fusão SÓ usa chunks de TOKEN (join por source_path contra o faceted);
+        # os demais (verdicts/estilo) ficam auditáveis nos retrieved_chunks.
+        sem_sources = [c["source"] for c in retrieved_chunks
+                       if c.get("source") and c.get("source_type") == "token"]
         ranked = _rrf_fuse(ranked, sem_sources)
 
     tokens_out: list[dict] = []
