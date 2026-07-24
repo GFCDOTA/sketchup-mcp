@@ -8,6 +8,7 @@ entra direto no estado canônico). stdlib only; LÊ sinais reais; não muta nada
 from __future__ import annotations
 
 import json
+import os
 import re
 import urllib.request
 from pathlib import Path
@@ -30,6 +31,11 @@ ROOM_TYPE_EN = {"cozinha": "kitchen", "sala": "living", "suite": "bedroom",
                 "banheiro": "bathroom"}
 # estilo default do DNA do Felipe (industrial boutique preto+madeira+dourado) para o retrieve.
 FELIPE_STYLE = "black_wood_gold"
+# Backend do RAG na geração. DEFAULT 'faceted' (comportamento de hoje, seguro).
+# 'embed' liga a fusão RRF do recall semântico -> muda os tokens injetados ->
+# muda o .skp: só o Felipe aprova (veredito visual GPT) e exige `reference_db
+# reindex --rebuild` (re-embeda com os prefixos nomic). Gate = env RAG_BACKEND.
+_RAG_BACKEND = os.environ.get("RAG_BACKEND", "faceted")
 
 # --- SPEC-C: gate deterministico do programa (o LLM local erra: suite sem cama, cozinha
 #     com item de banheiro). O LLM PROPOE; este gate GARANTE o invariante (CORE presente,
@@ -119,7 +125,7 @@ def _retrieve_bundle(room_key: str | None) -> dict | None:
         return None
     try:
         from tools import reference_db as rdb
-        bundle = rdb.retrieve(room_type, FELIPE_STYLE)
+        bundle = rdb.retrieve(room_type, FELIPE_STYLE, backend=_RAG_BACKEND)
         return bundle if bundle.get("tokens") else None
     except Exception:  # noqa: BLE001 — retrieve nunca deve quebrar o gerador
         return None

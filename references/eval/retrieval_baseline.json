@@ -1,0 +1,246 @@
+{
+  "k": 6,
+  "backend": "faceted",
+  "aggregate": {
+    "n": 8,
+    "n_with_relevant": 5,
+    "recall_at_k": 0.7225,
+    "mrr": 0.9,
+    "ndcg_at_k": 0.8083
+  },
+  "style_discrimination": [
+    {
+      "room": "kitchen",
+      "styles": [
+        "black_wood_gold",
+        "dark_walnut",
+        "industrial",
+        "warm_compact"
+      ],
+      "identical_ranking": true
+    }
+  ],
+  "rows": [
+    {
+      "query": {
+        "room": "bathroom",
+        "style": "warm_compact",
+        "budget": null
+      },
+      "relevant": [],
+      "predicted": [],
+      "recall_at_k": 1.0,
+      "mrr": 0.0,
+      "ndcg_at_k": 1.0,
+      "confidence": "LOW",
+      "note": "banheiro: idem"
+    },
+    {
+      "query": {
+        "room": "bedroom",
+        "style": "black_wood_gold",
+        "budget": null
+      },
+      "relevant": [],
+      "predicted": [],
+      "recall_at_k": 1.0,
+      "mrr": 0.0,
+      "ndcg_at_k": 1.0,
+      "confidence": "LOW",
+      "note": "quarto: nenhum token de cozinha deve aparecer"
+    },
+    {
+      "query": {
+        "room": "kitchen",
+        "style": "black_wood_gold",
+        "budget": null
+      },
+      "relevant": [
+        "matte_black_cabinetry",
+        "coordinated_medium_dark_wood_base",
+        "discreet_bronze_hardware",
+        "reflecta_champagne_led_cabinet",
+        "hot_tower_niche",
+        "planned_fridge_tower",
+        "dark_stainless_appliance",
+        "subtle_veined_stone",
+        "premium_shadow_gap",
+        "under_cabinet_led"
+      ],
+      "predicted": [
+        "coordinated_medium_dark_wood_base",
+        "coordinated_oak_base",
+        "dark_stainless_appliance",
+        "discreet_bronze_hardware",
+        "hot_tower_niche",
+        "matte_black_cabinetry",
+        "planned_fridge_tower",
+        "premium_shadow_gap",
+        "reflecta_champagne_led_cabinet",
+        "subtle_veined_stone",
+        "under_cabinet_led",
+        "warm_fendi_upper"
+      ],
+      "recall_at_k": 0.5,
+      "mrr": 1.0,
+      "ndcg_at_k": 0.7587,
+      "confidence": "LOW",
+      "note": "preto fosco + madeira escura + bronze/champagne; exclui fendi off-white e carvalho claro"
+    },
+    {
+      "query": {
+        "room": "kitchen",
+        "style": "black_wood_gold",
+        "budget": "baixo"
+      },
+      "relevant": [
+        "premium_shadow_gap",
+        "under_cabinet_led",
+        "discreet_bronze_hardware",
+        "matte_black_cabinetry",
+        "coordinated_medium_dark_wood_base",
+        "dark_stainless_appliance"
+      ],
+      "predicted": [
+        "premium_shadow_gap",
+        "under_cabinet_led",
+        "coordinated_medium_dark_wood_base",
+        "coordinated_oak_base",
+        "dark_stainless_appliance",
+        "discreet_bronze_hardware",
+        "hot_tower_niche",
+        "matte_black_cabinetry",
+        "planned_fridge_tower",
+        "reflecta_champagne_led_cabinet",
+        "subtle_veined_stone",
+        "warm_fendi_upper"
+      ],
+      "recall_at_k": 0.8333,
+      "mrr": 1.0,
+      "ndcg_at_k": 0.8814,
+      "confidence": "LOW",
+      "note": "orçamento baixo: barato-primeiro; torre quente/geladeira (custo alto) NÃO no topo"
+    },
+    {
+      "query": {
+        "room": "kitchen",
+        "style": "dark_walnut",
+        "budget": null
+      },
+      "relevant": [
+        "coordinated_medium_dark_wood_base",
+        "matte_black_cabinetry",
+        "dark_stainless_appliance",
+        "hot_tower_niche",
+        "planned_fridge_tower",
+        "subtle_veined_stone",
+        "premium_shadow_gap",
+        "under_cabinet_led"
+      ],
+      "predicted": [
+        "coordinated_medium_dark_wood_base",
+        "coordinated_oak_base",
+        "dark_stainless_appliance",
+        "discreet_bronze_hardware",
+        "hot_tower_niche",
+        "matte_black_cabinetry",
+        "planned_fridge_tower",
+        "premium_shadow_gap",
+        "reflecta_champagne_led_cabinet",
+        "subtle_veined_stone",
+        "under_cabinet_led",
+        "warm_fendi_upper"
+      ],
+      "recall_at_k": 0.5,
+      "mrr": 1.0,
+      "ndcg_at_k": 0.7643,
+      "confidence": "LOW",
+      "note": "nogueira escura + preto + inox dark; menos ouro; exclui fendi/carvalho/champagne/bronze"
+    },
+    {
+      "query": {
+        "room": "kitchen",
+        "style": "industrial",
+        "budget": null
+      },
+      "relevant": [
+        "matte_black_cabinetry",
+        "coordinated_medium_dark_wood_base",
+        "dark_stainless_appliance",
+        "hot_tower_niche",
+        "planned_fridge_tower",
+        "subtle_veined_stone",
+        "premium_shadow_gap"
+      ],
+      "predicted": [
+        "coordinated_medium_dark_wood_base",
+        "coordinated_oak_base",
+        "dark_stainless_appliance",
+        "discreet_bronze_hardware",
+        "hot_tower_niche",
+        "matte_black_cabinetry",
+        "planned_fridge_tower",
+        "premium_shadow_gap",
+        "reflecta_champagne_led_cabinet",
+        "subtle_veined_stone",
+        "under_cabinet_led",
+        "warm_fendi_upper"
+      ],
+      "recall_at_k": 0.5714,
+      "mrr": 1.0,
+      "ndcg_at_k": 0.7429,
+      "confidence": "LOW",
+      "note": "preto/madeira/metal cru; exclui fendi/carvalho/bronze/champagne (sem brilho)"
+    },
+    {
+      "query": {
+        "room": "kitchen",
+        "style": "warm_compact",
+        "budget": null
+      },
+      "relevant": [
+        "warm_fendi_upper",
+        "coordinated_oak_base",
+        "under_cabinet_led",
+        "premium_shadow_gap",
+        "planned_fridge_tower",
+        "hot_tower_niche",
+        "discreet_bronze_hardware",
+        "subtle_veined_stone"
+      ],
+      "predicted": [
+        "coordinated_medium_dark_wood_base",
+        "coordinated_oak_base",
+        "dark_stainless_appliance",
+        "discreet_bronze_hardware",
+        "hot_tower_niche",
+        "matte_black_cabinetry",
+        "planned_fridge_tower",
+        "premium_shadow_gap",
+        "reflecta_champagne_led_cabinet",
+        "subtle_veined_stone",
+        "under_cabinet_led",
+        "warm_fendi_upper"
+      ],
+      "recall_at_k": 0.375,
+      "mrr": 0.5,
+      "ndcg_at_k": 0.319,
+      "confidence": "LOW",
+      "note": "fendi quente + carvalho claro + LED 2700K; exclui preto/madeira escura/inox dark/champagne bling"
+    },
+    {
+      "query": {
+        "room": "living_room",
+        "style": "industrial",
+        "budget": null
+      },
+      "relevant": [],
+      "predicted": [],
+      "recall_at_k": 1.0,
+      "mrr": 0.0,
+      "ndcg_at_k": 1.0,
+      "confidence": "LOW",
+      "note": "sala: idem"
+    }
+  ]
+}
