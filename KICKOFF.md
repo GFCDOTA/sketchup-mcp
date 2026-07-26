@@ -61,10 +61,14 @@
 Evidência do handoff é de 2026-07-23; re-verifique ANTES do passo 1 da missão.
 **Não prossiga sem tudo verde:**
 ```bash
-cd E:/Claude/apps/sketchup-mcp && git status -sb && curl -s http://localhost:8765/health | head -c 200
-.venv/Scripts/python.exe -m pytest tests/ -q            # ~1404 passed c/ Qdrant+Ollama vivos (5 skipped); infra off = +4 skips
+cd E:/Claude/apps/sketchup-mcp && git status -sb && curl -s http://127.0.0.1:8899/health
+.venv/Scripts/python.exe -m pytest tests/ -q            # ~1217 passed c/ Qdrant+Ollama vivos (5 skipped); infra off = +4 skips
 .venv/Scripts/python.exe -m tools.door_swing_audit      # esperado: PASS 7/7 (exit 0)
 ```
+> **NOC :8765 + dashboards REMOVIDOS 2026-07-24** (pedido do Felipe) —
+> aprendizados em `E:\Claude\LESSONS-NOC.md`; oráculo (decisão E visual) agora
+> é só o GPT-Docker `:8899`. Consulta ao RAG: CLI (`tools.reference_db`) ou
+> Qdrant dashboard `:6333`.
 ⚠ Qdrant/RAG: reindex SÓ do tree canônico (`apps\sketchup-mcp`) — reindexar de
 worktree clobbera o corpus da produção no Qdrant compartilhado (memória
 `reference_qdrant_shared_collection_worktree_clobber`); recuperação:

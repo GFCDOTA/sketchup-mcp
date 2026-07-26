@@ -11,6 +11,14 @@
   (b) `feat/fp035-retrieval-eval` **pushada com 2 commits e sem PR** (viola "nunca
   deixar branch órfã"). Campanha de baseline voltou **9× WORSE** sem comentário.
 
+> **ADENDO 2 (2026-07-24) — NOC + DASHBOARDS REMOVIDOS a pedido do Felipe:**
+> `:8765`/watchdogs/atuador/feeder/curation_review/studio_dashboard/vitrine/BFF
+> apagados (develop `f31f071`, -16k linhas; suíte pós-remoção **1217/0/5**).
+> Aprendizados consolidados em `E:\Claude\LESSONS-NOC.md`. Oráculo (decisão E
+> visual) = GPT-Docker `:8899` (`ask_gpt_gate` re-apontado). RAG/write-back
+> INTACTOS (embed segue default do gerador); consulta via CLI ou Qdrant `:6333`.
+> Referências a `:8765`/card :8782 nos adendos ABAIXO estão superadas.
+
 > **ADENDO 2026-07-23 (mesma sessão, mais tarde) — RAG LIGADO NO RECALL:**
 > a pendência (b) foi RESOLVIDA e foi além: develop recebeu `4d4df7f` (fusão RRF
 > + retrieval_eval; eval real: MRR 0.90→1.00, nDCG@6 0.808→0.839), `6317500`
