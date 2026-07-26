@@ -67,7 +67,9 @@ from tools.gate_verdict import parse_verdict
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
-BRIDGE_URL = "http://localhost:8765"
+# NOC :8765 removido 2026-07-24 — o backend default do gate é o GPT-Docker
+# (ops/gpt-docker, mesmo contrato /health+/ask; degrada SKIPPED_OFFLINE).
+BRIDGE_URL = "http://localhost:8899"
 BRIDGE_HEALTH_TIMEOUT_SEC = 5
 BRIDGE_CALL_TIMEOUT_SEC = 260   # > server CLAUDE_TIMEOUT(240); Opus+xhigh is slow
 

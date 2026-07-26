@@ -45,32 +45,24 @@ Quebrar uma dessas é RED. Ver `@.claude/memory/operational_rules.md`
 - **Multi-agent**: nunca assumir exclusividade do repo. Ver
   `@.claude/memory/multi_agent_coordination.md`.
 
-## Oracle de decisão (GPT Auto-Consult Gate → :8765)
+## Oracle de decisão (GPT-Docker → :8899)
 
-Decisões reais (os 9 triggers de `gpt-auto-consult-gate`) são consultadas
-por HTTP em `localhost:8765` (via `tools/ask_gpt_gate.py`). **Roteie a
-decisão pelo gate, não pergunte ao humano no chat** — pelo gate ela é
-respondida automaticamente; no chat ela trava até alguém ver.
+> O NOC/cockpit `:8765` (claude_bridge server + dispatcher + dashboards) foi
+> **REMOVIDO em 2026-07-24** a pedido do Felipe. Aprendizados consolidados em
+> `E:\Claude\LESSONS-NOC.md`.
 
-Quem atende o `:8765` é configurável:
-- **CLAUDE** (assinatura, sem API key): `tools/claude_bridge/start.ps1`
-  (após `claude setup-token` → `.oauth_token`). Ver
-  `tools/claude_bridge/README.md`.
-- **ChatGPT** bridge (`E:\chatgpt-bridge\`) — alternativa.
-- **GPT-no-Docker** (`ops/gpt-docker/`, `localhost:8899`) — ChatGPT logado num
-  Chrome dentro de um container, mesmo contrato `/health`+`/ask`. O gate consulta
-  apontando o backend: `python -m tools.ask_gpt_gate --bridge-url http://localhost:8899 …`.
-  É **ASSISTÊNCIA / segunda-opinião** do gate — degrada `SKIPPED_OFFLINE` se o
-  container estiver fora/deslogado, **nunca bloqueia** (é browser-automation da
-  assinatura, fallback de laboratório, fora dos Termos da OpenAI em escala; um
-  bug/rate-limit não pode travar o pipeline). Ver skill `gpt-docker-consult`.
+Decisões reais em bifurcação são consultadas no **GPT-Docker**
+(`ops/gpt-docker/`, `localhost:8899`, ChatGPT logado num Chrome em container,
+contrato `/health`+`/ask`): `python -m tools.ask_gpt_gate --bridge-url
+http://localhost:8899 …`. Degrada `SKIPPED_OFFLINE` se o container estiver
+fora/deslogado — **nunca bloqueia e nunca fabrica resposta**. Ver skill
+`gpt-docker-consult`.
 
-O bridge roda em **modo B (autonomia delegada pelo Felipe)**: decide sozinho
-o técnico / fixture / merges com base em evidência determinística. O **único gate
-humano é `VISUAL_REVIEW`** — quando a APARÊNCIA da planta muda e só o olho do Felipe
-valida vs o PDF (aí ele entra). Veredito visual IMPROVED/SAME/WORSE **nunca** é auto
-(comprovadamente não-confiável — negative_dogfood). Se o `:8765` cair, o gate degrada
-pra `SKIPPED_OFFLINE` (não fabrica resposta).
+Segue valendo o **modo B (autonomia delegada pelo Felipe)**: técnico / fixture /
+merge decidido por evidência determinística. O **único gate humano é
+`VISUAL_REVIEW`** — quando a APARÊNCIA da planta muda e só o olho do Felipe
+valida vs o PDF. Veredito visual IMPROVED/SAME/WORSE **nunca** é auto
+(comprovadamente não-confiável — negative_dogfood).
 
 ## Load order
 
@@ -122,8 +114,6 @@ Auto-discovered em `.claude/skills/*/SKILL.md`:
 - `skp-visual-self-correction` — Visual Oracle Gate (FP-030);
   detecta floating door / orphan glass / window count mismatch /
   bad aperture / floor leak; loop até 3 attempts
-- `gpt-auto-consult-gate` — LL-024; consulta ChatGPT bridge text-only
-  automaticamente em decisão real (9 triggers canônicos)
 - `repo-governance` — PR / branch / merge / hygiene
 - `multi-agent-handoff` — coordenação multi-agent / worktrees
 - `autonomous-fidelity-loop` — loop contínuo auto-ritmado de fidelidade com
