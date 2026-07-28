@@ -455,6 +455,13 @@ def collect_boxes(con):
         for b in (boxes or []):              # cada box leva COMODO + MODULO -> grupos editaveis no .skp
             b["room"] = str(r.get("name") or r["id"])
             b.setdefault("module", str(b.get("kind", "movel")))
+        # GUARD anti-regressao (wet room): banheiro so aceita kinds de LOUCA. Se um movel de
+        # quarto/sala vazar pra ca, LOGA (nao aborta) -> pega regressao futura de roteamento.
+        if r["room_type"] == BATHROOM:
+            _WET = {"gabinete", "bancada_banho", "cuba", "espelho", "vaso", "box_vidro", "box"}
+            estranhos = sorted({str(b.get("kind")) for b in (boxes or []) if str(b.get("kind")) not in _WET})
+            if estranhos:
+                print(f"[furnish-apt] WARN wet-room {r['name']!r}: kind(s) fora da louca -> {estranhos}")
         n = len(boxes) if boxes else 0
         all_boxes += boxes or []
         summary.append((r["id"], r["name"], r["room_type"], out.get("result"), n))
