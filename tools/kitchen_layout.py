@@ -7,6 +7,7 @@ Placeholder boxes; plugga em furnish_apartment via build_boxes. NAO usa 3D Wareh
 """
 from __future__ import annotations
 
+import math
 import sys
 from pathlib import Path
 
@@ -21,16 +22,16 @@ COUNTER_H = 0.90
 GEL_W, GEL_D, GEL_H = 0.70, 0.66, 1.80          # geladeira (ponta, full-height)
 TORRE_W, TORRE_D, TORRE_H = 0.60, 0.62, 2.10    # coluna forno+microondas (outra ponta)
 AEREO_DEPTH, AEREO_Z0, AEREO_H = 0.33, 1.50, 0.60   # clearance bancada->aéreo = 60cm (ergonomia 50-60)
-PIA_W, PIA_D, PIA_Z0 = 0.50, 0.46, 0.90         # cuba: borda FLUSH com o tampo (0.90), bojo recua p/ baixo
-COOK_W, COOK_D, COOK_Z0 = 0.46, 0.50, 0.885     # cooktop: vidro fino quase flush no tampo (embutido)
+PIA_W, PIA_D, PIA_Z0 = 0.50, 0.46, 0.90         # cuba UNDERMOUNT: abertura escura lê de cima; bojo recua p/ baixo
+COOK_W, COOK_D, COOK_Z0 = 0.46, 0.50, 0.898     # cooktop: vidro FINO proud <=8mm acima do plano do tampo (0.90)
 TOE_KICK, TAMPO_THK = 0.12, 0.03                # sóculo recuado 12cm (10-15) / tampo fino 3cm
 BANCADA_MIN_DEPTH = 0.35                         # abaixo disso = sliver inútil, descarta
-RGB_COUNTER = [176, 166, 150]
-RGB_TORRE = [69, 90, 100]                       # cinza-escuro eletrodomestico
-RGB_AEREO = [150, 140, 124]                     # bege-escuro (madeira)
-RGB_GELADEIRA = [201, 203, 207]                 # inox claro
-RGB_PIA = [183, 187, 191]                       # cuba inox
-RGB_COOKTOP = [44, 44, 48]                      # vidro preto
+RGB_COUNTER = [30, 29, 32]                      # porcelanato preto-dourado MATE (DesignDirective BLACK_WOOD_GOLD)
+RGB_TORRE = [38, 39, 40]                        # torre grafite fosco (matte_black_cabinetry)
+RGB_AEREO = [108, 80, 58]                       # nogueira quente (acento anti-caverna)
+RGB_GELADEIRA = [36, 36, 38]                    # preto fosco antidigital (D8 — NUNCA inox claro)
+RGB_PIA = [33, 32, 34]                          # cuba composto preto satin (D5)
+RGB_COOKTOP = [22, 22, 26]                      # vitrocerâmico preto (D1)
 DOOR_KINDS = {"interior_door", "interior_passage", "glazed_balcony"}
 # pia da cozinha = ponto HIDRÁULICO fixo do PDF (parede OESTE/esquerda). NÃO mover de
 # parede sem reforma hidráulica. Validado por tools/kitchen_validation.py.
@@ -50,25 +51,29 @@ def _to_box(kind, shp, h_m, rgb, z0_m=0.0):
 
 
 M2IN = 39.3700787402
-# cores (FORMA antes de material — tem que ler como cozinha mesmo chapado em cinza/branco)
-# PALETA de cozinha planejada moderna (Felipe KITCHEN_MODERN_PLANNED_KITCHEN_FORM):
-# inferiores=madeira nogueira clara · superiores=off-white/fendi · tampo=quartzo claro ·
-# sóculo=grafite · geladeira/cuba=inox · cooktop=preto · puxador=grafite slim.
+# cores (FORMA antes de material — tem que ler como cozinha mesmo chapado)
+# PALETA BLACK_WOOD_GOLD moody premium (DesignDirectiveSpec 2026-07-27, ancorada em
+# references/tokens/{matte_black_cabinetry,coordinated_medium_dark_wood_base,
+# dark_stainless_appliance,discreet_bronze_hardware} + KITCHEN_DECISIONS D1-D9):
+# base=grafite fosco · aéreos=nogueira (acento anti-caverna) · tampo/backsplash=
+# porcelanato preto-dourado mate · eletros=preto fosco · bronze SÓ na torneira (D4).
 _KC = {
-    "corpo": [191, 167, 137], "porta": [195, 171, 141], "gaveta": [195, 171, 141],   # base = carvalho CLARO coordenado c/ o fendi (mata o bicolor builder-grade)
-    "corpo_sup": [224, 215, 199], "porta_sup": [228, 220, 204],                    # aéreo = FENDI/off-white QUENTE (não branco puro)
-    "filler": [224, 215, 199],                                                      # painel lateral da torre = MESMO fendi do aéreo (coluna coesa)
-    "tampo": [222, 219, 212], "backsplash": [222, 219, 212],                       # PEDRA clara quente (veios = textura V-Ray); backsplash = tampo subindo
-    "niche_wood": [138, 104, 66],                                                  # nicho = madeira mais ESCURA (mantém contraste após clarear a base)
-    "soculo": [40, 41, 45],                                                        # sóculo grafite
-    "inox": [193, 198, 205],                                                       # borda cuba / metais
-    "geladeira": [216, 220, 227],                                                  # inox MAIS CLARO/reflexivo (menos bloco cinza)
-    "vidro": [22, 22, 26], "boca": [46, 46, 50],                                   # cooktop preto
-    "cuba": [92, 96, 103], "torneira": [54, 56, 62],                               # bojo ESCURO (lê profundidade) / torneira grafite
-    "puxador": [44, 45, 50],                                                       # puxador slim grafite
-    "led": [255, 250, 232],                                                        # fita LED quente sob o aéreo (mais legível)
-    "board": [150, 116, 78], "vaso_d": [96, 116, 86], "tempero": [188, 176, 150],  # decoração funcional (tábua + escura p/ destacar da base clara)
-    "ralo": [60, 63, 69],                                                          # ralo/válvula da cuba
+    "corpo": [38, 39, 40], "porta": [38, 39, 40], "gaveta": [41, 42, 43],          # base GRAFITE fosco (nunca [0,0,0] chapado = caverna)
+    "corpo_sup": [108, 80, 58], "porta_sup": [112, 84, 61],                        # aéreo NOGUEIRA quente até o teto — o anti-caverna do conjunto
+    "filler": [38, 39, 40],                                                         # painel lateral da torre = mesmo grafite (coluna coesa)
+    "tampo": [30, 29, 32], "backsplash": [32, 30, 33],                             # porcelanato preto-dourado MATE (veio sutil = textura V-Ray)
+    "niche_wood": [126, 82, 48],                                                   # nicho quente (hot_tower_niche)
+    "soculo": [24, 24, 24],                                                        # sóculo preto profundo (shadow line)
+    "inox": [82, 84, 84],                                                          # dark stainless satin (não inox claro)
+    "geladeira": [36, 36, 38],                                                     # preto fosco antidigital, pega embutida (D8)
+    "vidro": [22, 22, 26], "boca": [55, 55, 58], "anel": [120, 120, 124],          # vitro preto + disco + anel serigrafado
+    "cuba": [33, 32, 34], "torneira": [28, 28, 30],                                # cuba composto preta / torneira preto fosco PVD
+    "bronze": [171, 119, 63],                                                      # o ÚNICO ponto de ouro do ambiente (D4)
+    "puxador": [24, 24, 24],                                                       # gola/cava preta — sem barra, sem bronze no hardware
+    "led": [255, 250, 232],                                                        # fita LED 2700K sob o aéreo (highlight pontual permitido)
+    "board": [126, 82, 48], "vaso_d": [70, 68, 66], "tempero": [96, 94, 90],       # tábua quente + cerâmica grafite (zero objeto branco)
+    "ralo": [50, 50, 53],                                                          # ralo/válvula da cuba
+    "coifa": [38, 39, 40],                                                         # coifa slim preta — coadjuvante (D3)
 }
 # nome de MÓDULO planejado (grupo selecionável sozinho no SKP); countertop é separado do base
 _MODNAME = {"geladeira": "fridge", "pia": "sink_module", "cooktop": "cooktop_module",
@@ -83,6 +88,19 @@ def _kp(kind, x0, y0, x1, y1, z0_m, z1_m, rgb):
     return {"kind": kind, "x0": x0 * PT_TO_IN, "y0": y0 * PT_TO_IN, "x1": x1 * PT_TO_IN, "y1": y1 * PT_TO_IN,
             "corners": [[round(x0 * PT_TO_IN, 2), round(y0 * PT_TO_IN, 2)], [round(x1 * PT_TO_IN, 2), round(y0 * PT_TO_IN, 2)],
                         [round(x1 * PT_TO_IN, 2), round(y1 * PT_TO_IN, 2)], [round(x0 * PT_TO_IN, 2), round(y1 * PT_TO_IN, 2)]],
+            "h_in": round((z1_m - z0_m) * M2IN, 2), "z0_in": round(z0_m * M2IN, 2),
+            "rgb": rgb, "label": kind, "ambiguous": False, "decorative": False}
+
+
+def _koct(kind, cx, cy, r, z0_m, z1_m, rgb):
+    """Disco OCTOGONAL flat (x/y em POINTS): leitura circular low-poly sem custo de
+    malha — boca/anel de cooktop (diretriz: 'discos, não caixotes')."""
+    pts = [(cx + r * math.cos(a), cy + r * math.sin(a))
+           for a in (math.pi / 8 + i * math.pi / 4 for i in range(8))]
+    xs, ys = [p[0] for p in pts], [p[1] for p in pts]
+    return {"kind": kind, "x0": min(xs) * PT_TO_IN, "y0": min(ys) * PT_TO_IN,
+            "x1": max(xs) * PT_TO_IN, "y1": max(ys) * PT_TO_IN,
+            "corners": [[round(px * PT_TO_IN, 2), round(py * PT_TO_IN, 2)] for px, py in pts],
             "h_in": round((z1_m - z0_m) * M2IN, 2), "z0_in": round(z0_m * M2IN, 2),
             "rgb": rgb, "label": kind, "ambiguous": False, "decorative": False}
 
@@ -156,24 +174,42 @@ def _kmod(kind, shp, h_m, rgb, z0_m, ws):
         out.append(body(z0_m + h_m - tt, z0_m + h_m, _KC["tampo"], inset_front=-0.03, k="tampo"))  # tampo CONTÍNUO proud (pedra)
         out.append(backpanel(a0 + M(0.004), a1 - M(0.004), z0_m + h_m, z0_m + h_m + 0.50, _KC["backsplash"], thick=0.04))  # backsplash (até o aéreo)
     elif kind == "cooktop":
-        out.append(body(z0_m, z0_m + 0.015, _KC["vidro"], inset_side=0.015, k="vidro"))  # vidro preto fino
-        cax = [a0 + W * 0.3, a0 + W * 0.7]
-        dca = M(0.07)
-        dep0, dep1 = (front - s * M(0.10)), (front - s * M(0.34))                       # 2 fileiras de boca
+        # VITROCERÂMICO (D1): vidro FINO (7mm) proud <=8mm do plano do tampo; o
+        # inset maior que o rasgo faz o shadow gap perimetral (vidro != pedra).
+        out.append(body(z0_m, z0_m + 0.007, _KC["vidro"], inset_front=0.012, inset_side=0.012, k="vidro"))
+        cax = [a0 + W * 0.30, a0 + W * 0.70]
+        rr = M(0.095)                                                               # zonas r~9.5cm (diretriz 9-11)
+        dep0, dep1 = (front - s * M(0.14)), (front - s * M(0.36))                   # grid 2x2
+        zt = z0_m + 0.007
         for ca in cax:
             for dd in (dep0, dep1):
-                if vert:   # profundidade=x, largura=y
-                    out.append(_kp("kc_boca", dd - dca, ca - dca, dd + dca, ca + dca, z0_m + 0.014, z0_m + 0.022, _KC["boca"]))
-                else:      # profundidade=y, largura=x
-                    out.append(_kp("kc_boca", ca - dca, dd - dca, ca + dca, dd + dca, z0_m + 0.014, z0_m + 0.022, _KC["boca"]))
+                cx, cy = (dd, ca) if vert else (ca, dd)
+                out.append(_koct("kc_anel", cx, cy, rr + M(0.009), zt, zt + 0.0006, _KC["anel"]))   # anel serigrafado fino
+                out.append(_koct("kc_boca", cx, cy, rr, zt + 0.0004, zt + 0.0015, _KC["boca"]))     # disco flat (sem volume)
+        fb0, fb1 = front - s * M(0.045), front - s * M(0.075)                       # faixa de controle na borda frontal
+        cm0, cm1 = (a0 + a1) / 2 - M(0.10), (a0 + a1) / 2 + M(0.10)
+        if vert:
+            out.append(_kp("kc_anel", min(fb0, fb1), cm0, max(fb0, fb1), cm1, zt, zt + 0.0008, _KC["anel"]))
+        else:
+            out.append(_kp("kc_anel", cm0, min(fb0, fb1), cm1, max(fb0, fb1), zt, zt + 0.0008, _KC["anel"]))
     elif kind == "pia":
-        out.append(body(z0_m, z0_m + 0.012, _KC["inox"], inset_side=0.008, k="inox"))   # borda fina flush na pedra
-        out.append(body(z0_m - 0.20, z0_m, _KC["cuba"], inset_front=0.055, inset_side=0.06, k="cuba"))      # bojo FUNDO (20cm)
-        out.append(body(z0_m - 0.205, z0_m - 0.19, _KC["cuba"], inset_front=0.05, inset_side=0.055, k="cuba"))  # fundo visível
+        # UNDERMOUNT sem aro (D5): a leitura de cima é a ABERTURA ESCURA na pedra —
+        # placa da cuba 2mm acima do plano do tampo; a pedra faz a borda, não inox.
+        out.append(body(z0_m - 0.004, z0_m + 0.002, _KC["cuba"], inset_front=0.055, inset_side=0.06, k="cuba"))
+        out.append(body(z0_m - 0.20, z0_m - 0.004, _KC["cuba"], inset_front=0.06, inset_side=0.065, k="cuba"))   # bojo FUNDO (20cm, sombra interna)
+        out.append(body(z0_m - 0.205, z0_m - 0.19, _KC["cuba"], inset_front=0.05, inset_side=0.055, k="cuba"))   # fundo visível
         out.append(body(z0_m - 0.205, z0_m - 0.193, _KC["ralo"], inset_front=0.19, inset_side=0.205, k="ralo"))  # RALO no fundo do bojo
+        # torneira em L preto fosco PVD, ATRÁS da cuba; aro bronze = o ÚNICO ouro (D4)
         ta = (a0 + a1) / 2
-        out.append(panel(ta - M(0.024), ta + M(0.024), z0_m + 0.012, z0_m + 0.045, _KC["torneira"], off=0.05, thick=M(0.04), k="torneira"))  # base torneira
-        out.append(panel(ta - M(0.022), ta + M(0.022), z0_m + 0.045, z0_m + 0.28, _KC["torneira"], off=0.10, thick=M(0.035), k="torneira"))  # gooseneck slim elegante
+        post_off = PIA_D - 0.075                                                    # montante ~7.5cm da parede
+        out.append(panel(ta - M(0.015), ta + M(0.015), z0_m + 0.002, z0_m + 0.30, _KC["torneira"], off=post_off, thick=M(0.03), k="torneira"))  # montante vertical 30cm
+        sp1 = front - s * M(post_off)
+        sp0 = front - s * M(post_off - 0.20)                                        # bica horizontal 20cm sobre a cuba
+        if vert:
+            out.append(_kp("kc_torneira", min(sp0, sp1), ta - M(0.013), max(sp0, sp1), ta + M(0.013), z0_m + 0.27, z0_m + 0.30, _KC["torneira"]))
+        else:
+            out.append(_kp("kc_torneira", ta - M(0.013), min(sp0, sp1), ta + M(0.013), max(sp0, sp1), z0_m + 0.27, z0_m + 0.30, _KC["torneira"]))
+        out.append(panel(ta - M(0.018), ta + M(0.018), z0_m + 0.135, z0_m + 0.165, _KC["bronze"], off=post_off - 0.002, thick=M(0.034), k="bronze"))  # aro bronze no montante
     elif kind in ("aereo", "aereo_fridge"):
         out.append(body(z0_m + 0.04, z0_m + h_m, _KC["corpo_sup"], k="corpo_sup"))     # carcaça OFF-WHITE
         out.append(body(z0_m + 0.018, z0_m + 0.04, _KC["soculo"], inset_front=0.04, k="soculo"))  # valance grafite recuada
@@ -192,12 +228,12 @@ def _kmod(kind, shp, h_m, rgb, z0_m, ws):
                 # GOLA = sombra FINA recuada no rodapé da porta (handle-less, não domina)
                 out.append(panel(ma0 + M(0.02), ma1 - M(0.02), z0_m + 0.046, z0_m + 0.056, _KC["torneira"], off=0.0, thick=M(0.01), k="gola"))
     elif kind == "coifa":
-        if h_m <= 0.20:                                                                # coifa SLIM integrada sob o aéreo
-            out.append(body(z0_m, z0_m + h_m, _KC["corpo_sup"], inset_side=0.008, inset_front=0.012, k="corpo_sup"))  # caixa OFF-WHITE (integra ao aéreo, não bloco preto solto)
+        if h_m <= 0.20:                                                                # coifa SLIM under-cabinet preta (D3) — coadjuvante
+            out.append(body(z0_m, z0_m + h_m, _KC["coifa"], inset_side=0.008, inset_front=0.012, k="coifa"))
             out.append(body(z0_m, z0_m + h_m * 0.45, _KC["vidro"], inset_front=0.05, inset_side=0.07, k="vidro"))     # grelha de sucção escura embaixo
         else:
-            out.append(body(z0_m, z0_m + 0.16, _KC["inox"], k="inox"))                 # corpo de captura
-            out.append(body(z0_m + 0.16, z0_m + h_m, _KC["inox"], inset_front=0.27, inset_side=0.13, k="inox"))  # chaminé
+            out.append(body(z0_m, z0_m + 0.16, _KC["coifa"], k="coifa"))               # corpo de captura preto fosco
+            out.append(body(z0_m + 0.16, z0_m + h_m, _KC["coifa"], inset_front=0.27, inset_side=0.13, k="coifa"))  # chaminé
     else:
         out.append(_kp(kind, x0, y0, x1, y1, z0_m, z0_m + h_m, rgb))                    # fallback caixa
     mname = _MODNAME.get(kind, kind)
