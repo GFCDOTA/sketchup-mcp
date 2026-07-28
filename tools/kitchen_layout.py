@@ -67,8 +67,8 @@ _KC = {
     "soculo": [18, 18, 20],                                                        # sóculo preto profundo (shadow line)
     "inox": [82, 84, 84],                                                          # dark stainless satin (não inox claro)
     "geladeira": [36, 36, 38],                                                     # preto fosco antidigital, pega embutida (D8)
-    "vidro": [22, 22, 26], "boca": [96, 96, 100], "anel": [120, 120, 124],         # vitro preto (agora contrasta c/ tampo claro) + discos cinza legíveis
-    "cuba": [70, 68, 72], "cuba_rim": [138, 136, 132], "torneira": [28, 28, 30],   # interior da cuba mais claro + aro de recorte claro no tampo (pia LÊ de cima)
+    "vidro": [22, 22, 26], "boca": [118, 118, 122], "anel": [150, 150, 154],       # GPT v2: discos/anéis MAIS claros — cooktop com presença de produto
+    "cuba": [46, 44, 48], "cuba_rim": [150, 148, 144], "torneira": [28, 28, 30],   # GPT v2: aro AINDA mais claro × interior fundo escuro = recorte salta (pia lê)
     "bronze": [171, 119, 63],                                                      # o ÚNICO ponto de ouro do ambiente (D4)
     "puxador": [24, 24, 24],                                                       # gola/cava preta — sem barra, sem bronze no hardware
     "led": [255, 250, 232],                                                        # fita LED 2700K sob o aéreo (highlight pontual permitido)
@@ -174,18 +174,21 @@ def _kmod(kind, shp, h_m, rgb, z0_m, ws):
                 out.append(panel(ma0 + M(0.05), ma1 - M(0.05), zd1 - 0.07, zd1 - 0.035, _KC["puxador"], off=0.028, k="puxador"))
         out.append(body(z0_m + h_m - tt, z0_m + h_m, _KC["tampo"], inset_front=-0.03, k="tampo"))  # tampo CONTÍNUO proud (pedra)
         out.append(backpanel(a0 + M(0.004), a1 - M(0.004), z0_m + h_m, z0_m + h_m + 0.50, _KC["backsplash"], thick=0.04))  # backsplash (até o aéreo)
+        # rodabanca CLARA no encontro tampo×backsplash (GPT v2: hierarquia entre
+        # parede técnica e bancada sem clarear o mood)
+        out.append(backpanel(a0 + M(0.004), a1 - M(0.004), z0_m + h_m, z0_m + h_m + 0.014, [104, 98, 92], thick=0.046))
     elif kind == "cooktop":
         # VITROCERÂMICO (D1): vidro FINO (7mm) proud <=8mm do plano do tampo; o
         # inset maior que o rasgo faz o shadow gap perimetral (vidro != pedra).
         out.append(body(z0_m, z0_m + 0.007, _KC["vidro"], inset_front=0.012, inset_side=0.012, k="vidro"))
         cax = [a0 + W * 0.30, a0 + W * 0.70]
-        rr = M(0.095)                                                               # zonas r~9.5cm (diretriz 9-11)
+        rr = M(0.105)                                                               # zonas r~10.5cm (GPT v2: presença de produto)
         dep0, dep1 = (front - s * M(0.14)), (front - s * M(0.36))                   # grid 2x2
         zt = z0_m + 0.007
         for ca in cax:
             for dd in (dep0, dep1):
                 cx, cy = (dd, ca) if vert else (ca, dd)
-                out.append(_koct("kc_anel", cx, cy, rr + M(0.009), zt, zt + 0.0006, _KC["anel"]))   # anel serigrafado fino
+                out.append(_koct("kc_anel", cx, cy, rr + M(0.012), zt, zt + 0.0006, _KC["anel"]))   # anel serigrafado (mais nítido)
                 out.append(_koct("kc_boca", cx, cy, rr, zt + 0.0004, zt + 0.0015, _KC["boca"]))     # disco flat (sem volume)
         fb0, fb1 = front - s * M(0.045), front - s * M(0.075)                       # faixa de controle na borda frontal
         cm0, cm1 = (a0 + a1) / 2 - M(0.10), (a0 + a1) / 2 + M(0.10)
@@ -197,7 +200,7 @@ def _kmod(kind, shp, h_m, rgb, z0_m, ws):
         # UNDERMOUNT sem aro (D5): a leitura de cima é a ABERTURA ESCURA na pedra.
         # GPT v1: a pia sumia no preto → aro CLARO de recorte no tampo (maior, por
         # baixo) + abertura escura (menor, por cima) = borda polida visível.
-        out.append(body(z0_m - 0.001, z0_m + 0.001, _KC["cuba_rim"], inset_front=0.047, inset_side=0.052, k="cuba_rim"))
+        out.append(body(z0_m - 0.001, z0_m + 0.001, _KC["cuba_rim"], inset_front=0.041, inset_side=0.046, k="cuba_rim"))
         out.append(body(z0_m + 0.001, z0_m + 0.0025, _KC["cuba"], inset_front=0.055, inset_side=0.06, k="cuba"))
         out.append(body(z0_m - 0.20, z0_m - 0.004, _KC["cuba"], inset_front=0.06, inset_side=0.065, k="cuba"))   # bojo FUNDO (20cm, sombra interna)
         out.append(body(z0_m - 0.205, z0_m - 0.19, _KC["cuba"], inset_front=0.05, inset_side=0.055, k="cuba"))   # fundo visível
@@ -216,22 +219,42 @@ def _kmod(kind, shp, h_m, rgb, z0_m, ws):
     elif kind == "aereo":
         # GPT v1: faixa inferior tinha valance+trilho+LED sobrepostos ("peças
         # acumuladas") → simplificado pra carcaça + UMA linha de LED recuada.
-        out.append(body(z0_m + 0.028, z0_m + h_m, _KC["corpo_sup"], k="corpo_sup"))    # carcaça nogueira (mais escura que as portas)
-        out.append(panel(a0 + M(0.02), a1 - M(0.02), z0_m + 0.004, z0_m + 0.026, _KC["led"], off=0.012, thick=M(0.025), k="led"))  # ÚNICA fita LED quente recuada
         nmod = max(2, int(round(W / M(0.60))))                                         # portas MAIORES (premium, menos blocão)
         mw = W / nmod
         niche = (nmod - 1) if nmod >= 3 else -1                                        # 1 bay ABERTA = nicho de ASSINATURA
+
+        def bseg(sa0, sa1, za, zb, c, k="corpo_sup"):
+            """caixa full-depth num trecho [sa0,sa1] do along — carcaça segmentada."""
+            return _kp(f"kc_{k}", min(front, back), sa0, max(front, back), sa1, za, zb, c) if vert \
+                else _kp(f"kc_{k}", sa0, min(front, back), sa1, max(front, back), za, zb, c)
+
+        if niche < 0:
+            out.append(body(z0_m + 0.028, z0_m + h_m, _KC["corpo_sup"], k="corpo_sup"))
+        else:
+            # GPT v2: nicho lia como "pano morto" porque a carcaça era um SÓLIDO e a
+            # bay aberta mostrava a face dele. Agora o vão é REAL: carcaça em 2
+            # segmentos + teto/base do nicho + fundo em sombra + prateleiras e
+            # divisória de profundidade inteira (bordas de madeira lêem na frente).
+            na0, na1 = a0 + niche * mw, a0 + (niche + 1) * mw
+            out.append(bseg(a0, na0, z0_m + 0.028, z0_m + h_m, _KC["corpo_sup"]))       # carcaça antes do nicho
+            if na1 < a1 - M(0.005):
+                out.append(bseg(na1, a1, z0_m + 0.028, z0_m + h_m, _KC["corpo_sup"]))   # carcaça depois do nicho
+            out.append(bseg(na0, na1, z0_m + h_m - 0.022, z0_m + h_m, _KC["corpo_sup"]))  # teto do nicho
+            out.append(bseg(na0, na1, z0_m + 0.028, z0_m + 0.05, _KC["corpo_sup"]))       # base do nicho
+            out.append(panel(na0, na1, z0_m + 0.05, z0_m + h_m - 0.022, _KC["niche_back"], off=AEREO_DEPTH - 0.025, thick=M(0.02), k="niche_back"))  # fundo sombreado
+            for fz in (1 / 3, 2 / 3):
+                sz = z0_m + 0.05 + fz * (h_m - 0.072)
+                out.append(bseg(na0 + M(0.012), na1 - M(0.012), sz - 0.011, sz + 0.011, _KC["niche_wood"], k="niche_wood"))  # prateleiras
+            nm = (na0 + na1) / 2
+            out.append(bseg(nm - M(0.009), nm + M(0.009), z0_m + 0.05, z0_m + h_m - 0.022, _KC["niche_wood"], k="niche_wood"))  # divisória vertical
+        out.append(panel(a0 + M(0.02), a1 - M(0.02), z0_m + 0.004, z0_m + 0.026, _KC["led"], off=0.012, thick=M(0.025), k="led"))  # ÚNICA fita LED quente recuada
         for i in range(nmod):
-            ma0, ma1 = a0 + i * mw + M(0.022), a0 + (i + 1) * mw - M(0.022)            # reveal de junta planejada (shadow gap)
             if i == niche:
-                # NICHO DE ASSINATURA: fundo em SOMBRA + prateleira madeira -> lê como
-                # bay aberta intencional, não "pano marrom sem divisão" (GPT v1)
-                out.append(panel(ma0, ma1, z0_m + 0.028, z0_m + h_m - 0.03, _KC["niche_back"], off=AEREO_DEPTH - 0.025, thick=M(0.02), k="niche_back"))  # fundo sombreado
-                out.append(panel(ma0, ma1, z0_m + h_m * 0.5 - 0.012, z0_m + h_m * 0.5 + 0.012, _KC["niche_wood"], off=0.04, k="niche_wood"))  # prateleira madeira
-            else:
-                out.append(panel(ma0, ma1, z0_m + 0.05, z0_m + h_m - 0.018, _KC["porta_sup"], off=-0.010, k="porta_sup"))  # porta em RELEVO (junta lê como sombra)
-                # GOLA = sombra FINA recuada no rodapé da porta (handle-less, não domina)
-                out.append(panel(ma0 + M(0.02), ma1 - M(0.02), z0_m + 0.036, z0_m + 0.046, _KC["torneira"], off=0.0, thick=M(0.01), k="gola"))
+                continue
+            ma0, ma1 = a0 + i * mw + M(0.022), a0 + (i + 1) * mw - M(0.022)            # reveal de junta planejada (shadow gap)
+            out.append(panel(ma0, ma1, z0_m + 0.05, z0_m + h_m - 0.018, _KC["porta_sup"], off=-0.010, k="porta_sup"))  # porta em RELEVO (junta lê como sombra)
+            # GOLA = sombra FINA recuada no rodapé da porta (handle-less, não domina)
+            out.append(panel(ma0 + M(0.02), ma1 - M(0.02), z0_m + 0.036, z0_m + 0.046, _KC["torneira"], off=0.0, thick=M(0.01), k="gola"))
     elif kind == "aereo_fridge":
         # TORRE da geladeira (GPT v1): UM aéreo na largura da geladeira, porta única
         # alinhada — nunca 2 armarinhos "empilhados por acaso" sobre o frigobar.
