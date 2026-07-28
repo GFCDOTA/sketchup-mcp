@@ -167,14 +167,12 @@ def build_layout(sm, hb, bed_dims=KING, bed_label="king", minimalist=True):
     # --- P0: TAPETE grande sob a cama (decorativo; sai da parede e estende no
     # pé/laterais; pode sobrepor cama/criados pois é piso) ---
     rug = _fbox(o, face, sgn, ac, M(MARGIN_M), M(RUG[0]), M(RUG[1]))
-    if comodo.buffer(M(0.10)).contains(rug):
-        items.append({"name": "tapete", "type": "rug", "box": rug, "decorative": True,
-                      "anchor_wall": hb["id"], "reason": "sob a cama, sai nas laterais e no pé"})
-    else:
-        # encolhe pra caber (mantém proporção, tapete menor)
-        items.append({"name": "tapete", "type": "rug",
-                      "box": rug.intersection(comodo), "decorative": True,
-                      "anchor_wall": hb["id"], "reason": "sob a cama (recortado ao quarto)"})
+    # Clipa SEMPRE ao cômodo REAL (cell), não ao buffer (comodo = cell+FOLGA): o buffer
+    # extravasa as paredes e o canto do tapete vazava pro cômodo vizinho (ex.: SUÍTE 02
+    # -> BANHO 02). Contido no cell -> tapete inteiro; senão -> recortado ao quarto.
+    rug_fit = rug if cell.contains(rug) else rug.intersection(cell)
+    items.append({"name": "tapete", "type": "rug", "box": rug_fit, "decorative": True,
+                  "anchor_wall": hb["id"], "reason": "sob a cama (recortado ao quarto)"})
 
     # --- P0: criados-mudos simétricos, alinhados à LINHA DA CABECEIRA, com folga
     # mínima da cama (GPT review: criados menores/leves, não colados no bloco) ---
