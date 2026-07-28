@@ -186,10 +186,23 @@ def pl_run
   log << "texturas aplicadas: #{tex_applied.size} kind(s) via LAYOUT_TEX_MAP"
   log << "MOVEIS (comodo | movel): #{mod_groups.keys.sort.join(' ; ')}"
   mod_groups.each_value { |mg| (furn_bb.add(mg.bounds) rescue nil) }
+  # PISO NEUTRO (deliverable mobiliado): o shell canonico color-codeia cada comodo
+  # (ROOM_PALETTE, util no _floors_top de fidelidade), mas isso vira um chao MULTICOLOR
+  # feio na mobiliada (rosa da suite etc.). Repinta as FACES dos Floor_Group com UM material
+  # neutro (nao gp.material= — as faces tem floor_<id> explicito e nao herdam). So aparencia
+  # do furnished; NAO toca o shell canonico. Gate FURNISH_NEUTRAL_FLOOR (default ON; =0 preserva).
+  neutral_floor = nil
+  unless ENV['FURNISH_NEUTRAL_FLOOR'] == '0'
+    neutral_floor = model.materials['furnished_floor'] || model.materials.add('furnished_floor')
+    neutral_floor.color = Sketchup::Color.new(214, 208, 198)   # carvalho/cimento claro quente
+  end
   # TRAVA o shell (paredes/piso/portas/janelas) — mover/editar movel NAO atrapalha a base
   nlock = 0
   ents.grep(Sketchup::Group).each do |gp|
     nm = gp.name.to_s
+    if neutral_floor && nm.start_with?('Floor_Group')
+      gp.entities.grep(Sketchup::Face).each { |f| f.material = neutral_floor; f.back_material = neutral_floor }
+    end
     if %w[PlanShell Floor_Group DoorLeaf Window GlazedBalcony SoftBarrier PassageMarker].any? { |p| nm.start_with?(p) }
       (gp.locked = true; nlock += 1) rescue nil
     end
