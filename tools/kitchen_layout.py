@@ -25,6 +25,8 @@ AEREO_DEPTH, AEREO_Z0, AEREO_H = 0.33, 1.50, 0.60   # clearance bancada->aéreo 
 PIA_W, PIA_D, PIA_Z0 = 0.50, 0.46, 0.90         # cuba UNDERMOUNT: abertura escura lê de cima; bojo recua p/ baixo
 COOK_W, COOK_D, COOK_Z0 = 0.46, 0.50, 0.898     # cooktop: vidro FINO proud <=8mm acima do plano do tampo (0.90)
 TOE_KICK, TAMPO_THK = 0.09, 0.03                # sóculo 9cm recuado (GPT v1: 8-10cm, base "flutuante") / tampo fino 3cm
+CEILING_H = 2.70                                 # pé-direito do builder (DIFF-006: cravado p/ planta_74)
+MALEIRO_DEPTH = 0.60                             # maleiro OVERHANG: avança até a prumada da bancada/torre (ref Felipe 2026-07-28)
 BANCADA_MIN_DEPTH = 0.35                         # abaixo disso = sliver inútil, descarta
 RGB_COUNTER = [30, 29, 32]                      # porcelanato preto-dourado MATE (DesignDirective BLACK_WOOD_GOLD)
 RGB_TORRE = [38, 39, 40]                        # torre grafite fosco (matte_black_cabinetry)
@@ -255,12 +257,41 @@ def _kmod(kind, shp, h_m, rgb, z0_m, ws):
             out.append(panel(ma0, ma1, z0_m + 0.05, z0_m + h_m - 0.018, _KC["porta_sup"], off=-0.010, k="porta_sup"))  # porta em RELEVO (junta lê como sombra)
             # GOLA = sombra FINA recuada no rodapé da porta (handle-less, não domina)
             out.append(panel(ma0 + M(0.02), ma1 - M(0.02), z0_m + 0.036, z0_m + 0.046, _KC["torneira"], off=0.0, thick=M(0.01), k="gola"))
+        # MALEIRO PROFUNDO até o teto (Felipe 2026-07-28 + referência visual: "a
+        # seção de cima VEM MAIS PRA FRENTE"). Gramática da imagem: o volume
+        # superior avança até a prumada da bancada/torre (overhang), o aéreo fica
+        # RECUADO embaixo e uma fita de LED sob o soffit lava o recuo. Anti-poeira:
+        # topo colado no teto (scribe 1cm). Prumada dos módulos preservada — porta
+        # inclusive sobre o nicho (o vão fica só na seção de baixo).
+        mz0 = z0_m + h_m
+        if mz0 < CEILING_H - 0.12:
+            fm = back + s * M(MALEIRO_DEPTH)                                       # frente do maleiro (avança além do aéreo)
+            t2 = M(0.019)
+
+            def dk(kind_, sa0, sa1, f0, f1, za, zb, c):
+                """peça do maleiro com frente PRÓPRIA (mais funda que o front do módulo)."""
+                return _kp(kind_, min(f0, f1), sa0, max(f0, f1), sa1, za, zb, c) if vert \
+                    else _kp(kind_, sa0, min(f0, f1), sa1, max(f0, f1), za, zb, c)
+
+            out.append(dk("kc_corpo_sup", a0, a1, back, fm, mz0 + 0.006, CEILING_H - 0.01, _KC["corpo_sup"]))  # carcaça funda — o fundo dela é o soffit do overhang
+            for i in range(nmod):
+                ma0, ma1 = a0 + i * mw + M(0.022), a0 + (i + 1) * mw - M(0.022)
+                out.append(dk("kc_porta_sup", ma0, ma1, fm - s * t2, fm + s * M(0.010), mz0 + 0.024, CEILING_H - 0.026, _KC["porta_sup"]))  # porta em RELEVO na frente funda
+                out.append(dk("kc_gola", ma0 + M(0.02), ma1 - M(0.02), fm - s * M(0.002), fm + s * M(0.008), mz0 + 0.012, mz0 + 0.022, _KC["torneira"]))
+            out.append(dk("kc_led", a0 + M(0.02), a1 - M(0.02), fm - s * M(0.045), fm - s * M(0.02), mz0 - 0.014, mz0 + 0.004, _KC["led"]))  # LED sob o soffit, recuado 2cm — lava o aéreo
     elif kind == "aereo_fridge":
         # TORRE da geladeira (GPT v1): UM aéreo na largura da geladeira, porta única
         # alinhada — nunca 2 armarinhos "empilhados por acaso" sobre o frigobar.
         out.append(body(z0_m + 0.012, z0_m + h_m, _KC["corpo_sup"], k="corpo_sup"))
         out.append(panel(a0 + M(0.022), a1 - M(0.022), z0_m + 0.032, z0_m + h_m - 0.018, _KC["porta_sup"], off=-0.010, k="porta_sup"))
         out.append(panel(a0 + M(0.04), a1 - M(0.04), z0_m + 0.018, z0_m + 0.03, _KC["torneira"], off=0.0, thick=M(0.01), k="gola"))
+        # MALEIRO da torre até o teto (mesma prumada da porta única — anti-poeira)
+        mz0 = z0_m + h_m
+        if mz0 < CEILING_H - 0.12:
+            out.append(panel(a0 + M(0.02), a1 - M(0.02), mz0 - 0.004, mz0 + 0.006, _KC["torneira"], off=0.0, thick=M(0.012), k="gola"))
+            out.append(body(mz0 + 0.006, CEILING_H - 0.01, _KC["corpo_sup"], k="corpo_sup"))
+            out.append(panel(a0 + M(0.022), a1 - M(0.022), mz0 + 0.024, CEILING_H - 0.026, _KC["porta_sup"], off=-0.010, k="porta_sup"))
+            out.append(panel(a0 + M(0.04), a1 - M(0.04), mz0 + 0.012, mz0 + 0.022, _KC["torneira"], off=0.0, thick=M(0.01), k="gola"))
     elif kind == "coifa":
         if h_m <= 0.20:                                                                # coifa SLIM under-cabinet preta (D3) — coadjuvante
             out.append(body(z0_m, z0_m + h_m, _KC["coifa"], inset_side=0.008, inset_front=0.012, k="coifa"))
@@ -438,15 +469,21 @@ def build_boxes(con, room_id):
         tcb = clip(fb(ws, gel_c, GEL_W, GEL_D), carve=False)
         if tcb is not None:
             add("aereo_fridge", tcb, aereo_top - (GEL_H - 0.05), RGB_AEREO, z0_m=GEL_H - 0.05, mark=False, ws=ws)
-    # FILLER vertical (painel-gable) na junção bancada/coluna-geladeira -> fecha o gap diagonal
-    # até o TOPO. Direto via fb (footprint fino cai abaixo do AREA_MIN no clip).
+    # FILLER vertical (painel-gable) SÓ NO GAP bancada/coluna-geladeira. O gable
+    # centrado na junção afundava metade em cada vizinho ("armário dentro da
+    # geladeira", Felipe 2026-07-28) — agora ele mede o VÃO real e mora só nele;
+    # vizinhos encostados (gap < 3cm) = sem filler.
     if gel_c is not None:
         junc = b_hi if g_end != "lo" else b_lo
-        fil = fb(ws, junc, 0.16, GEL_D).intersection(cell)   # painel-gable 16cm (ergonomia filler 15-18)
-        if not fil.is_empty:
-            if fil.geom_type == "MultiPolygon":
-                fil = max(fil.geoms, key=lambda g: g.area)
-            add("filler", fil, aereo_top - 0.08, _KC["filler"], z0_m=0.08, mark=False, ws=ws)
+        g_near = (gel_c - M(GEL_W) / 2) if g_end != "lo" else (gel_c + M(GEL_W) / 2)
+        gap_lo, gap_hi = (junc, g_near) if g_end != "lo" else (g_near, junc)
+        gap_w_m = (gap_hi - gap_lo) * PT_TO_M
+        if gap_w_m >= 0.03:
+            fil = fb(ws, (gap_lo + gap_hi) / 2, gap_w_m, GEL_D).intersection(cell)
+            if not fil.is_empty:
+                if fil.geom_type == "MultiPolygon":
+                    fil = max(fil.geoms, key=lambda g: g.area)
+                add("filler", fil, aereo_top - 0.08, _KC["filler"], z0_m=0.08, mark=False, ws=ws)
 
     if not items:
         return None, {"result": "NO_VALID_LAYOUT", "room_name": sm.get("room_name"),
