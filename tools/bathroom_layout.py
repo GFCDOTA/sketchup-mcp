@@ -35,9 +35,13 @@ def _to_box(kind, shp):
             "ambiguous": False, "decorative": False}
 
 
-# ---- fixtures MULTI-PEÇA (MVP banheiro de verdade, não caixa pelada) ----
-RGB2 = {"gabinete": [86, 64, 48], "tampo_banho": [196, 196, 202], "cuba": [236, 239, 243],
-        "espelho": [188, 206, 216], "vaso": [240, 242, 246], "box_vidro": [176, 208, 224]}
+# ---- fixtures MULTI-PEÇA na gramática BLACK_WOOD_GOLD (programa apê-inteiro
+# 2026-08-03): gabinete suspenso nogueira + pedra quieta + cuba preta + metais
+# pretos PVD; bronze SÓ no lavabo (área molhada de uso diário mancha bronze).
+RGB2 = {"gabinete": [108, 80, 58], "tampo_banho": [45, 43, 40], "cuba": [33, 32, 34],
+        "espelho": [150, 158, 164], "vaso": [222, 222, 218], "box_vidro": [168, 186, 194],
+        "gola": [24, 24, 24], "led": [255, 250, 232], "metal": [28, 28, 30],
+        "bronze": [171, 119, 63], "tampo_lavabo": [30, 29, 32]}
 
 
 def _pp(kind, x0, y0, x1, y1, z0_m, z1_m, rgb, module):
@@ -54,7 +58,7 @@ def _pp(kind, x0, y0, x1, y1, z0_m, z1_m, rgb, module):
             "rgb": rgb, "label": kind, "module": module, "ambiguous": False, "decorative": False}
 
 
-def _emit(kind, b, ws):
+def _emit(kind, b, ws, lavabo=False):
     """Geometria CRÍVEL por fixture (substitui a caixa única)."""
     x0, y0, x1, y1 = b.bounds
     w, d = x1 - x0, y1 - y0
@@ -71,24 +75,75 @@ def _emit(kind, b, ws):
         out.append(bowl)
         out.append(_pp("vaso", x0 + ins, y0 + ins, x1 - ins, y1 - ins, 0.42, 0.45, RGB2["vaso"], "Vaso"))
     elif kind == "bancada_banho":
+        # GABINETE SUSPENSO nogueira (0.35-0.78, vão livre embaixo) + gola sombra
         out.append(_pp("gabinete", x0 + w * 0.04, y0 + d * 0.04, x1 - w * 0.04, y1 - d * 0.04,
-                       0.10, 0.78, RGB2["gabinete"], "Bancada"))               # gabinete madeira
-        out.append(_pp("bancada_banho", x0, y0, x1, y1, 0.78, 0.86, RGB2["tampo_banho"], "Bancada"))  # tampo pedra
+                       0.35, 0.78, RGB2["gabinete"], "Bancada"))
+        out.append(_pp("kb_gola", x0 + w * 0.10, y0 + d * 0.10, x1 - w * 0.10, y1 - d * 0.10,
+                       0.338, 0.35, RGB2["gola"], "Bancada"))
+        # tampo PEDRA: quieta [45,43,40] nos banhos; lavabo = a joia (nero-gold base)
+        _tampo = RGB2["tampo_lavabo"] if lavabo else RGB2["tampo_banho"]
+        out.append(_pp("bancada_banho", x0, y0, x1, y1, 0.78, 0.86, _tampo, "Bancada"))
         cwid = min(w, d) * 0.46
         out.append(_pp("cuba", cx - cwid / 2, cy - cwid / 2, cx + cwid / 2, cy + cwid / 2,
-                       0.86, 1.0, RGB2["cuba"], "Bancada"))                    # cuba de apoio
-        # espelho na PAREDE acima (usa ws p/ achar o lado da parede): thin, spanning o longo
+                       0.86, 1.0, RGB2["cuba"], "Bancada"))                    # cuba PRETA de apoio
+        # TORNEIRA preta PVD (montante + bica L) atrás da cuba, lado da parede;
+        # no LAVABO o anel bronze da torneira = o ÚNICO ouro do ambiente.
         t = M(0.015)
+        if ws is not None:
+            _po = M(0.10)
+            if ws["orient"] == "v":
+                px_ = ws["face"] + ws["sgn"] * _po
+                out.append(_pp("kb_torneira", px_ - M(0.015), cy - M(0.015), px_ + M(0.015), cy + M(0.015),
+                               0.86, 1.14, RGB2["metal"], "Bancada"))
+                out.append(_pp("kb_torneira", px_, cy - M(0.012), px_ + ws["sgn"] * M(0.14), cy + M(0.012),
+                               1.11, 1.14, RGB2["metal"], "Bancada"))
+                if lavabo:
+                    out.append(_pp("kb_bronze", px_ - M(0.019), cy - M(0.019), px_ + M(0.019), cy + M(0.019),
+                                   0.97, 1.00, RGB2["bronze"], "Bancada"))
+            else:
+                py_ = ws["face"] + ws["sgn"] * _po
+                out.append(_pp("kb_torneira", cx - M(0.015), py_ - M(0.015), cx + M(0.015), py_ + M(0.015),
+                               0.86, 1.14, RGB2["metal"], "Bancada"))
+                out.append(_pp("kb_torneira", cx - M(0.012), py_, cx + M(0.012), py_ + ws["sgn"] * M(0.14),
+                               1.11, 1.14, RGB2["metal"], "Bancada"))
+                if lavabo:
+                    out.append(_pp("kb_bronze", cx - M(0.019), py_ - M(0.019), cx + M(0.019), py_ + M(0.019),
+                                   0.97, 1.00, RGB2["bronze"], "Bancada"))
+        # ESPELHO RETROILUMINADO: halo LED 2700K maior atrás + espelho na frente
         if ws is not None and ws["orient"] == "v":
             wx = (ws["face"] + ws["sgn"] * M(0.04))
-            out.append(_pp("espelho", wx, y0 + d * 0.12, wx + t * ws["sgn"], y1 - d * 0.12,
+            out.append(_pp("kb_led", wx - ws["sgn"] * M(0.005), y0 + d * 0.08, wx + t * ws["sgn"], y1 - d * 0.08,
+                           1.02, 1.78, RGB2["led"], "Espelho"))
+            out.append(_pp("espelho", wx + ws["sgn"] * M(0.006), y0 + d * 0.12,
+                           wx + ws["sgn"] * (M(0.006) + t), y1 - d * 0.12,
                            1.05, 1.75, RGB2["espelho"], "Espelho"))
         elif ws is not None:
             wy = (ws["face"] + ws["sgn"] * M(0.04))
-            out.append(_pp("espelho", x0 + w * 0.12, wy, x1 - w * 0.12, wy + t * ws["sgn"],
+            out.append(_pp("kb_led", x0 + w * 0.08, wy - ws["sgn"] * M(0.005), x1 - w * 0.08, wy + t * ws["sgn"],
+                           1.02, 1.78, RGB2["led"], "Espelho"))
+            out.append(_pp("espelho", x0 + w * 0.12, wy + ws["sgn"] * M(0.006),
+                           x1 - w * 0.12, wy + ws["sgn"] * (M(0.006) + t),
                            1.05, 1.75, RGB2["espelho"], "Espelho"))
     elif kind == "box":
+        # box de vidro com PERFIL preto (2 montantes + travessa) + DUCHA preta
         out.append(_pp("box_vidro", x0, y0, x1, y1, 0.0, 2.0, RGB2["box_vidro"], "Box"))
+        _pf = M(0.02)
+        out.append(_pp("kb_perfil", x0, y0, x0 + _pf, y0 + _pf, 0.0, 2.0, RGB2["gola"], "Box"))
+        out.append(_pp("kb_perfil", x1 - _pf, y1 - _pf, x1, y1, 0.0, 2.0, RGB2["gola"], "Box"))
+        out.append(_pp("kb_perfil", x0, y0, x1, y1, 1.98, 2.02, RGB2["gola"], "Box"))
+        if ws is not None:
+            if ws["orient"] == "v":
+                hx = ws["face"] + ws["sgn"] * M(0.22)
+                out.append(_pp("kb_ducha", ws["face"], cy - M(0.012), hx, cy + M(0.012),
+                               2.05, 2.08, RGB2["metal"], "Box"))              # braço
+                out.append(_pp("kb_ducha", hx - M(0.10), cy - M(0.10), hx + M(0.10), cy + M(0.10),
+                               2.03, 2.05, RGB2["metal"], "Box"))              # cabeça
+            else:
+                hy = ws["face"] + ws["sgn"] * M(0.22)
+                out.append(_pp("kb_ducha", cx - M(0.012), ws["face"], cx + M(0.012), hy,
+                               2.05, 2.08, RGB2["metal"], "Box"))
+                out.append(_pp("kb_ducha", cx - M(0.10), hy - M(0.10), cx + M(0.10), hy + M(0.10),
+                               2.03, 2.05, RGB2["metal"], "Box"))
     return out
 
 
@@ -152,11 +207,12 @@ def build_boxes(con, room_id):
     if area >= BOX_MIN_AREA_M2:
         fixtures.append((BOX, True))
 
+    lavabo = "LAVABO" in str(sm.get("room_name", "")).upper()
     items, placed = [], []
     for (kind, w_m, d_m), tall in fixtures:
         b, ws = _place_fixture(sm, walls, w_m, d_m, placed, circ_u, comodo, cell, win_zone, tall)
         if b is not None:
-            items.extend(_emit(kind, b, ws))   # geometria CRÍVEL multi-peça
+            items.extend(_emit(kind, b, ws, lavabo=lavabo))   # geometria CRÍVEL multi-peça
             placed.append(b)
     if not items:
         return None, {"result": "NO_VALID_LAYOUT", "room_name": sm.get("room_name"),
