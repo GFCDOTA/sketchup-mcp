@@ -19,7 +19,7 @@ from tools.spatial_model import PT_TO_M, build_spatial_model   # noqa: E402
 from core.scale import PT_TO_IN  # noqa: E402  (fonte unica de escala; nao redefinir)
 COUNTER_DEPTH = 0.60
 COUNTER_H = 0.90
-GEL_W, GEL_D, GEL_H = 0.70, 0.66, 1.80          # geladeira (ponta, full-height)
+GEL_W, GEL_D, GEL_H = 0.700, 0.672, 1.785       # Samsung RT42 Evolution duplex REAL (700x672x1785mm — foto do Felipe 2026-07-28)
 TORRE_W, TORRE_D, TORRE_H = 0.60, 0.62, 2.10    # coluna forno+microondas (outra ponta)
 AEREO_DEPTH, AEREO_Z0, AEREO_H = 0.33, 1.50, 0.60   # clearance bancada->aéreo = 60cm (ergonomia 50-60)
 PIA_W, PIA_D, PIA_Z0 = 0.50, 0.46, 0.90         # cuba UNDERMOUNT: abertura escura lê de cima; bojo recua p/ baixo
@@ -31,7 +31,7 @@ BANCADA_MIN_DEPTH = 0.35                         # abaixo disso = sliver inútil
 RGB_COUNTER = [30, 29, 32]                      # porcelanato preto-dourado MATE (DesignDirective BLACK_WOOD_GOLD)
 RGB_TORRE = [38, 39, 40]                        # torre grafite fosco (matte_black_cabinetry)
 RGB_AEREO = [108, 80, 58]                       # nogueira quente (acento anti-caverna)
-RGB_GELADEIRA = [36, 36, 38]                    # preto fosco antidigital (D8 — NUNCA inox claro)
+RGB_GELADEIRA = [118, 122, 126]                 # inox escuro escovado (foto RT42 do Felipe)
 RGB_PIA = [33, 32, 34]                          # cuba composto preto satin (D5)
 RGB_COOKTOP = [22, 22, 26]                      # vitrocerâmico preto (D1)
 DOOR_KINDS = {"interior_door", "interior_passage", "glazed_balcony"}
@@ -68,7 +68,7 @@ _KC = {
     "niche_back": [56, 42, 30],                                                    # fundo do nicho em sombra → prateleira lê, bay não vira "pano" chapado
     "soculo": [18, 18, 20],                                                        # sóculo preto profundo (shadow line)
     "inox": [82, 84, 84],                                                          # dark stainless satin (não inox claro)
-    "geladeira": [36, 36, 38],                                                     # preto fosco antidigital, pega embutida (D8)
+    "geladeira": [118, 122, 126],                                                  # inox ESCURO escovado (foto RT42 do Felipe 2026-07-28)
     "vidro": [22, 22, 26], "boca": [118, 118, 122], "anel": [150, 150, 154],       # GPT v2: discos/anéis MAIS claros — cooktop com presença de produto
     "cuba": [46, 44, 48], "cuba_rim": [150, 148, 144], "torneira": [28, 28, 30],   # GPT v2: aro AINDA mais claro × interior fundo escuro = recorte salta (pia lê)
     "bronze": [171, 119, 63],                                                      # o ÚNICO ponto de ouro do ambiente (D4)
@@ -147,15 +147,15 @@ def _kmod(kind, shp, h_m, rgb, z0_m, ws):
 
     out = []
     if kind == "geladeira":
-        out.append(body(z0_m + 0.03, z0_m + h_m - 0.06, _KC["geladeira"], inset_side=0.014, k="geladeira"))   # corpo INOX + respiro lateral/superior
-        out.append(panel(a0 + M(0.02), a1 - M(0.02), z0_m + h_m - 0.055, z0_m + h_m - 0.035, _KC["soculo"], off=0.0, k="soculo"))  # reveal de respiro no topo
-        split = z0_m + h_m * 0.62                                                       # freezer no topo (~38%)
-        out.append(panel(a0 + M(0.018), a1 - M(0.018), split + 0.022, z0_m + h_m - 0.055, _KC["geladeira"], k="geladeira"))  # porta freezer
-        out.append(panel(a0 + M(0.018), a1 - M(0.018), z0_m + 0.05, split - 0.022, _KC["geladeira"], k="geladeira"))         # porta geladeira
-        out.append(panel(a0 + M(0.018), a1 - M(0.018), split - 0.02, split + 0.02, _KC["soculo"], off=0.002, k="soculo"))    # REVEAL escuro da divisão freezer/fridge
-        hp = a1 - M(0.10)                                                               # puxadores = BARRAS VERTICAIS longas (cava)
-        out.append(panel(hp, hp + M(0.04), split + 0.06, z0_m + h_m - 0.10, _KC["puxador"], off=0.03, k="puxador"))          # freezer
-        out.append(panel(hp, hp + M(0.04), z0_m + 0.12, split - 0.06, _KC["puxador"], off=0.03, k="puxador"))                # geladeira (barra longa)
+        # SAMSUNG RT42 EVOLUTION duplex (foto do Felipe, 2026-07-28): inox escuro
+        # escovado, freezer em CIMA (~28%), portas HANDLELESS (pega embutida — sem
+        # barra), friso CLARO fino na divisão (como na foto).
+        out.append(body(z0_m + 0.02, z0_m + h_m - 0.03, _KC["geladeira"], inset_side=0.012, k="geladeira"))   # corpo inox escovado
+        split = z0_m + h_m * 0.72                                                       # freezer em CIMA
+        out.append(panel(a0 + M(0.014), a1 - M(0.014), split + 0.012, z0_m + h_m - 0.03, _KC["geladeira"], k="geladeira"))  # porta FREEZER (topo)
+        out.append(panel(a0 + M(0.014), a1 - M(0.014), z0_m + 0.035, split - 0.012, _KC["geladeira"], k="geladeira"))       # porta GELADEIRA (grande)
+        out.append(panel(a0 + M(0.01), a1 - M(0.01), split - 0.006, split + 0.006, _KC["inox"], off=0.004, k="inox"))       # FRISO claro da divisão
+        out.append(panel(a0 + M(0.02), a1 - M(0.02), split - 0.028, split - 0.014, _KC["soculo"], off=0.0, k="soculo"))     # pega embutida (sombra sob a porta do freezer... lê handleless)
     elif kind == "bancada":
         tt, sk = TAMPO_THK, TOE_KICK                                                   # tampo fino + sóculo (constantes ergonômicas)
         out.append(body(z0_m, z0_m + sk, _KC["soculo"], inset_front=0.09, k="soculo"))   # sóculo recuado 9cm (GPT v1: shadow gap, base "suspensa")
@@ -282,16 +282,20 @@ def _kmod(kind, shp, h_m, rgb, z0_m, ws):
     elif kind == "aereo_fridge":
         # TORRE da geladeira (GPT v1): UM aéreo na largura da geladeira, porta única
         # alinhada — nunca 2 armarinhos "empilhados por acaso" sobre o frigobar.
-        out.append(body(z0_m + 0.012, z0_m + h_m, _KC["corpo_sup"], k="corpo_sup"))
-        out.append(panel(a0 + M(0.022), a1 - M(0.022), z0_m + 0.032, z0_m + h_m - 0.018, _KC["porta_sup"], off=-0.010, k="porta_sup"))
-        out.append(panel(a0 + M(0.04), a1 - M(0.04), z0_m + 0.018, z0_m + 0.03, _KC["torneira"], off=0.0, thick=M(0.01), k="gola"))
-        # MALEIRO da torre até o teto (mesma prumada da porta única — anti-poeira)
-        mz0 = z0_m + h_m
-        if mz0 < CEILING_H - 0.12:
-            out.append(panel(a0 + M(0.02), a1 - M(0.02), mz0 - 0.004, mz0 + 0.006, _KC["torneira"], off=0.0, thick=M(0.012), k="gola"))
-            out.append(body(mz0 + 0.006, CEILING_H - 0.01, _KC["corpo_sup"], k="corpo_sup"))
-            out.append(panel(a0 + M(0.022), a1 - M(0.022), mz0 + 0.024, CEILING_H - 0.026, _KC["porta_sup"], off=-0.010, k="porta_sup"))
-            out.append(panel(a0 + M(0.04), a1 - M(0.04), mz0 + 0.012, mz0 + 0.022, _KC["torneira"], off=0.0, thick=M(0.01), k="gola"))
+        # Armário da torre "mais interessante" (Felipe 2026-07-28): NICHO ABERTO de
+        # madeira embaixo (eco do nicho de assinatura do aéreo — decor/vinho sobre a
+        # geladeira) + DUAS FOLHAS fechadas até o teto. Um volume só, no plano da geladeira.
+        nh = 0.28                                                                       # faixa do nicho
+        out.append(body(z0_m + 0.012, z0_m + 0.03, _KC["corpo_sup"], k="corpo_sup"))    # base do nicho
+        out.append(panel(a0 + M(0.012), a1 - M(0.012), z0_m + 0.03, z0_m + nh, _KC["niche_back"], off=GEL_D - 0.06, thick=M(0.02), k="niche_back"))  # fundo sombreado
+        nm = (a0 + a1) / 2
+        out.append(panel(nm - M(0.009), nm + M(0.009), z0_m + 0.03, z0_m + nh, _KC["niche_wood"], off=0.02, thick=M(GEL_D - 0.10), k="niche_wood"))  # divisória madeira
+        out.append(body(z0_m + nh, z0_m + nh + 0.022, _KC["niche_wood"], k="niche_wood"))  # prateleira/teto do nicho em madeira (borda quente lê na frente)
+        out.append(body(z0_m + nh + 0.022, z0_m + h_m, _KC["corpo_sup"], k="corpo_sup"))   # carcaça fechada
+        mid = (a0 + a1) / 2
+        out.append(panel(a0 + M(0.022), mid - M(0.008), z0_m + nh + 0.05, z0_m + h_m - 0.018, _KC["porta_sup"], off=-0.010, k="porta_sup"))
+        out.append(panel(mid + M(0.008), a1 - M(0.022), z0_m + nh + 0.05, z0_m + h_m - 0.018, _KC["porta_sup"], off=-0.010, k="porta_sup"))
+        out.append(panel(a0 + M(0.02), a1 - M(0.02), z0_m + nh + 0.034, z0_m + nh + 0.044, _KC["torneira"], off=0.0, thick=M(0.01), k="gola"))
     elif kind == "coifa":
         if h_m <= 0.20:                                                                # coifa SLIM under-cabinet preta (D3) — coadjuvante
             out.append(body(z0_m, z0_m + h_m, _KC["coifa"], inset_side=0.008, inset_front=0.012, k="coifa"))
@@ -462,13 +466,14 @@ def build_boxes(con, room_id):
                     vb = max(vb.geoms, key=lambda g: g.area)
                 add("decor_vaso", vb, 0.17, _KC["vaso_d"], z0_m=COUNTER_H, mark=False, ws=ws)    # vasinho de tempero
 
-    # ARMÁRIO sobre a geladeira -> alinha o TOPO com o aéreo (linha superior contínua)
+    # ARMÁRIO sobre a geladeira -> UM armário só, porta única, do topo da geladeira
+    # ATÉ O TETO (Felipe 2026-07-28; scribe 1cm) — torre integrada, sem empilhar seções
     aereo_top = AEREO_Z0 + AEREO_H
-    if gel_c is not None and (aereo_top - GEL_H) > 0.20:
+    if gel_c is not None and (CEILING_H - GEL_H) > 0.30:   # guard vs TETO (o armário vai até lá)
         # começa no TOPO da geladeira (sem fenda) -> torre integrada, não caixinha solta
         tcb = clip(fb(ws, gel_c, GEL_W, GEL_D), carve=False)
         if tcb is not None:
-            add("aereo_fridge", tcb, aereo_top - (GEL_H - 0.05), RGB_AEREO, z0_m=GEL_H - 0.05, mark=False, ws=ws)
+            add("aereo_fridge", tcb, (CEILING_H - 0.01) - (GEL_H - 0.05), RGB_AEREO, z0_m=GEL_H - 0.05, mark=False, ws=ws)
     # FILLER vertical (painel-gable) SÓ NO GAP bancada/coluna-geladeira. O gable
     # centrado na junção afundava metade em cada vizinho ("armário dentro da
     # geladeira", Felipe 2026-07-28) — agora ele mede o VÃO real e mora só nele;

@@ -36,12 +36,23 @@ def test_palette_has_no_white_surfaces_except_led():
         assert sum(rgb) / 3 <= 200, f"_KC[{name!r}]={rgb} lê como branco/creme"
 
 
-def test_fridge_is_matte_black_not_light_stainless():
-    body = [p for p in _pieces("geladeira", 0.70, 0.66, 1.80, 0.0)
-            if p["kind"] == "kc_geladeira"]
+def test_fridge_is_samsung_rt42_duplex_real_dims():
+    # Felipe 2026-07-28 (foto): Samsung RT42 Evolution duplex — 700x672x1785mm
+    # (âncora REAL, samsung.com/br). Inox ESCURO escovado, freezer em CIMA,
+    # HANDLELESS (zero barra de puxador), friso claro na divisão.
+    assert abs(kl.GEL_W - 0.700) < 0.01, f"largura {kl.GEL_W} != RT42 (0.700)"
+    assert abs(kl.GEL_H - 1.785) < 0.01, f"altura {kl.GEL_H} != RT42 (1.785)"
+    assert abs(kl.GEL_D - 0.672) < 0.01, f"prof {kl.GEL_D} != RT42 (0.672)"
+    ps = _pieces("geladeira", kl.GEL_D, kl.GEL_W, kl.GEL_H, 0.0)
+    body = [p for p in ps if p["kind"] == "kc_geladeira"]
     assert body, "geladeira sem corpo"
     for p in body:
-        assert sum(p["rgb"]) / 3 < 100, f"geladeira clara demais: {p['rgb']} (D8)"
+        m = sum(p["rgb"]) / 3
+        assert 90 <= m <= 160, f"fora do inox escuro escovado da foto: {p['rgb']}"
+    assert not [p for p in ps if p["kind"] == "kc_puxador"], \
+        "RT42 é handleless — nada de barra de puxador"
+    friso = [p for p in ps if p["kind"] == "kc_inox"]
+    assert friso, "sem o friso claro da divisão freezer/geladeira"
 
 
 def test_cooktop_glass_is_thin_and_near_flush():
@@ -135,6 +146,19 @@ def test_filler_never_penetrates_neighbors():
         dz = min(fil[5], o[5]) - max(fil[4], o[4])
         assert not (dx > 0.4 and dy > 0.4 and dz > 0.4), \
             f"filler penetra {name}: {round(dx,1)}x{round(dy,1)}x{round(dz,1)} in"
+
+
+def test_fridge_tower_has_single_cabinet_to_ceiling():
+    # Felipe 2026-07-28: "deixa só 1 armário em cima da geladeira" — porta ÚNICA,
+    # do topo da geladeira até o teto; nada de seções empilhadas.
+    h = (kl.CEILING_H - 0.01) - (kl.GEL_H - 0.05)
+    ps = _pieces("aereo_fridge", kl.GEL_D, kl.GEL_W, h, kl.GEL_H - 0.05)
+    doors = [p for p in ps if p["kind"] == "kc_porta_sup"]
+    assert len(doors) == 2, f"torre com {len(doors)} folhas — referência 2 pede DUAS folhas num armário só"
+    assert max(_tops_m(p) for p in ps) >= kl.CEILING_H - 0.02, "torre não fecha no teto"
+    # "armário mais interessante": nicho de madeira aberto na base do armário.
+    # (Proporção agora é ditada pela MEDIDA REAL da RS60 — 1.78m — não por estética.)
+    assert any(p["kind"] == "kc_niche_wood" for p in ps), "sem nicho — voltou o blocão"
 
 
 def test_faucet_is_L_shape_with_single_bronze_accent():
