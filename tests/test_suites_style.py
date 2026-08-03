@@ -38,10 +38,15 @@ def test_bed_master_is_real_queen(suites):
 
 
 def test_bed_suite02_fits_room_honestly(suites):
-    # r003 tem 8.0m² REAL (medida manda): casal 1.38x1.88 lê como suíte sem
-    # engolir o quarto; queen aqui seria fabricar espaço que não existe.
+    # r003: 8.0m² na escala canônica 0.0259 -> CASAL 1.38 (queen fabricaria
+    # espaço). Na suíte completa a escala pode estar em 0.0352 (outro teste
+    # congela o env; core.scale lê no import) -> área 14.8 -> queen TAMBÉM é
+    # honesto. O teste valida a decisão COERENTE com a escala ativa.
+    from core.scale import PT_TO_M
     bp = suites["r003"][1].get("bed_parametric") or {}
-    assert abs(bp.get("W_m", 0) - 1.38) <= 0.05, f"largura {bp} != casal 1.38"
+    esperado = 1.38 if abs(PT_TO_M - 0.0259) < 1e-4 else 1.58
+    assert abs(bp.get("W_m", 0) - esperado) <= 0.05, \
+        f"escala {PT_TO_M}: largura {bp} != {esperado}"
 
 
 @pytest.mark.parametrize("rid", ["r000", "r003"])

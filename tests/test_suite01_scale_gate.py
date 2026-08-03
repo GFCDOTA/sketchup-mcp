@@ -34,7 +34,7 @@ for b in bx:
 print(json.dumps({{
     "status": r["status"], "fails": r.get("fails", []),
     "colchao_x_in": span("colchao", "x"), "colchao_y_in": span("colchao", "y"),
-    "tampos": kinds.get("tampo", 0), "headboard": kinds.get("headboard", 0),
+    "tampos": kinds.get("ks_criado_tampo", kinds.get("tampo", 0)), "headboard": kinds.get("headboard", 0),
     "cabeceira": kinds.get("cabeceira", 0),
 }}))
 '''
@@ -53,7 +53,7 @@ def _run(scale=None):
 
 
 def test_default_0352_intact():
-    """Sem env: 2 criados full-size (~16in), colchao grande (king ~76in). NAO muda."""
+    """Sem env: 2 criados (tampo nogueira ks_) + colchao grande. NAO muda."""
     d = _run(None)
     assert d["tampos"] == 2, d
     # default: cama maior (footprint 0.0352) — colchao bem largo (> 60in)
@@ -77,5 +77,6 @@ def test_0259_colchao_queen():
 
 def test_0259_no_duplicate_headboard():
     d = _run("0.0259")
-    assert d["headboard"] == 0, d   # _items_to_boxes 'headboard' dropado
-    assert d["cabeceira"] == 1, d   # anatomia build_bed mantida
+    assert d["headboard"] == 0, d   # 'headboard' do designer virou Painel cabeceira (ks_*)
+    # cabeceira estofada (programa 2026-08-03) = moldura+almofada -> 2 pecas in-anatomy
+    assert 1 <= d["cabeceira"] <= 2, d

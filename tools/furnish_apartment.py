@@ -439,8 +439,9 @@ def living_room_boxes(con, room_id):
     rfx, rfy = rack_f
     _rn2 = _m.hypot(rfx, rfy) or 1.0
     rfx, rfy = rfx / _rn2, rfy / _rn2
-    # rack avança 7cm pra abrir espaço pro PAINEL na parede (sem interseção)
-    _rack_c2 = (rack_c[0] + rfx * 0.07 * M2IN, rack_c[1] + rfy * 0.07 * M2IN)
+    # rack avança 13cm pra abrir espaço pro PAINEL na parede (medido: 7cm deixava
+    # 3cm de invasão — overlap_gate WARN 493cm²; 13cm dá folga de ~3cm)
+    _rack_c2 = (rack_c[0] + rfx * 0.13 * M2IN, rack_c[1] + rfy * 0.13 * M2IN)
     _rb = place_sofa_boxes(_rparts, _rack_c2, rack_f)
     for _b in _rb:
         _b["module"] = "Rack TV"
@@ -526,7 +527,7 @@ def living_room_boxes(con, room_id):
         # de bronze da sala no anel da cúpula (regra global: 1 bronze por ambiente;
         # a célula open-plan é UM campo visual, o estar recebe zero).
         boxes.append(_oriented_box("pend_cabo", (_dc.x, _dc.y), (0.0, 1.0),
-                                   0.015, 0.015, 2.10, 0.60, [26, 26, 28], module="Pendente"))
+                                   0.032, 0.032, 2.10, 0.60, [26, 26, 28], module="Pendente"))  # haste 3cm (>= min_footprint do geometry_sanity; cabo de 1.5cm era 'degenerate')
         boxes.append(_oct_in("pend_cupula", _dc.x, _dc.y, 0.20, 1.85, 0.25, [30, 31, 32], "Pendente"))
         boxes.append(_oct_in("pend_bronze", _dc.x, _dc.y, 0.206, 1.842, 0.010, [171, 119, 63], "Pendente"))
 
@@ -615,7 +616,10 @@ def collect_boxes(con):
         # quarto/sala vazar pra ca, LOGA (nao aborta) -> pega regressao futura de roteamento.
         if r["room_type"] == BATHROOM:
             _WET = {"gabinete", "bancada_banho", "cuba", "espelho", "vaso", "box_vidro", "box"}
-            estranhos = sorted({str(b.get("kind")) for b in (boxes or []) if str(b.get("kind")) not in _WET})
+            # kb_* = ferragem/luz legitima do banho (gola, torneira, LED, perfil, ducha, bronze)
+            estranhos = sorted({str(b.get("kind")) for b in (boxes or [])
+                                if str(b.get("kind")) not in _WET
+                                and not str(b.get("kind")).startswith("kb_")})
             if estranhos:
                 print(f"[furnish-apt] WARN wet-room {r['name']!r}: kind(s) fora da louca -> {estranhos}")
         n = len(boxes) if boxes else 0
