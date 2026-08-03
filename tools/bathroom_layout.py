@@ -18,7 +18,7 @@ from tools.bedroom_layout import (M, _door_zones, _fbox, _wall_setup,   # noqa: 
 from tools.spatial_model import PT_TO_M, build_spatial_model   # noqa: E402
 
 from core.scale import PT_TO_IN  # noqa: E402  (fonte unica de escala; nao redefinir)
-BOX_MIN_AREA_M2 = 4.0
+BOX_MIN_AREA_M2 = 2.8   # banho compacto BR (3.2m² real na planta_74) TEM box 80x80; 4.0 vetava TODOS os banhos na escala canônica 0.0259 (Felipe: 'faltaram os banheiros')
 VASO = ("vaso", 0.40, 0.65)
 BOX = ("box", 0.90, 0.90)
 RGB = {"bancada_banho": [205, 205, 212], "vaso": [238, 240, 245], "box": [170, 210, 230]}
@@ -205,14 +205,40 @@ def build_boxes(con, room_id):
     pia = ("bancada_banho", 0.50, 0.40) if area < 4.5 else ("bancada_banho", 0.80, 0.50)
     fixtures = [(pia, False), (VASO, False)]
     if area >= BOX_MIN_AREA_M2:
-        fixtures.append((BOX, True))
+        # tall=False: box é VIDRO — pode ficar sob a janela alta do banho (padrão
+        # real; não bloqueia luz). Tamanho adaptativo: 90x90 em banho folgado,
+        # 80x80 no compacto (3.2m² da planta_74).
+        _box = BOX if area >= 4.0 else ("box", 0.80, 0.80)
+        fixtures.append((_box, False))
 
     lavabo = "LAVABO" in str(sm.get("room_name", "")).upper()
     items, placed = [], []
+    box_ok = False
     for (kind, w_m, d_m), tall in fixtures:
         b, ws = _place_fixture(sm, walls, w_m, d_m, placed, circ_u, comodo, cell, win_zone, tall)
         if b is not None:
             items.extend(_emit(kind, b, ws, lavabo=lavabo))   # geometria CRÍVEL multi-peça
+            placed.append(b)
+            box_ok = box_ok or kind == "box"
+    # BANHO sem box que coube = ducha ABERTA de canto (banheiro sem chuveiro não
+    # existe; footprint mínimo 0.30 quase sempre cabe encostado)
+    if (not lavabo) and (not box_ok) and area >= BOX_MIN_AREA_M2:
+        b, ws = _place_fixture(sm, walls, 0.30, 0.30, placed, circ_u, comodo, cell, win_zone, False)
+        if b is not None and ws is not None:
+            x0, y0, x1, y1 = b.bounds
+            cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+            if ws["orient"] == "v":
+                hx = ws["face"] + ws["sgn"] * M(0.20)
+                items.append(_pp("kb_ducha", ws["face"], cy - M(0.012), hx, cy + M(0.012),
+                                 2.05, 2.08, RGB2["metal"], "Ducha"))
+                items.append(_pp("kb_ducha", hx - M(0.10), cy - M(0.10), hx + M(0.10), cy + M(0.10),
+                                 2.03, 2.05, RGB2["metal"], "Ducha"))
+            else:
+                hy = ws["face"] + ws["sgn"] * M(0.20)
+                items.append(_pp("kb_ducha", cx - M(0.012), ws["face"], cx + M(0.012), hy,
+                                 2.05, 2.08, RGB2["metal"], "Ducha"))
+                items.append(_pp("kb_ducha", cx - M(0.10), hy - M(0.10), cx + M(0.10), hy + M(0.10),
+                                 2.03, 2.05, RGB2["metal"], "Ducha"))
             placed.append(b)
     if not items:
         return None, {"result": "NO_VALID_LAYOUT", "room_name": sm.get("room_name"),

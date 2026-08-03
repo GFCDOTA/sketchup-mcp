@@ -18,10 +18,15 @@ def ka_cam(model, eye, tgt, fov, ortho_h = nil)
 end
 
 def ka_run
+  # KA_KEEP aceita LISTA separada por ';' (ex. 'BANHO 01;BANHO 02;LAVABO') —
+  # um boot de SU, N cômodos isolados/renderizados em sequência.
+  (ENV['KA_KEEP'] || 'COZINHA').split(';').each { |k| ka_room(k.strip) }
+end
+
+def ka_room(keep)
   model = Sketchup.active_model
   ents = model.entities
-  # 1) ISOLA: esconde tudo que não é módulo do cômodo-alvo (KA_KEEP) -> mata oclusão
-  keep = ENV['KA_KEEP'] || 'COZINHA'
+  # 1) ISOLA: esconde tudo que não é módulo do cômodo-alvo -> mata oclusão
   hide = ENV['KA_HIDE']   # substring de módulo a esconder MESMO sendo do cômodo (ex. parede que oclui)
   kbb = Geom::BoundingBox.new
   ents.grep(Sketchup::Group).each do |g|
@@ -50,6 +55,7 @@ def ka_run
   fx = kbb.max.x              # plano das frentes
   dir = ENV['KA_DIR'] || '.'
   tag = ENV['KA_TAG'] || 'cozinha_ang'
+  tag = "#{tag}_#{keep.gsub(/[^A-Za-z0-9]+/, '_').downcase}" if ENV['KA_KEEP'].to_s.include?(';')
 
   shots = [
     # nome,            eye,                                      target,                         fov, ortho_h
