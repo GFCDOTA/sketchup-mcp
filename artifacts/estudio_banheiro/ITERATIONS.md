@@ -72,3 +72,19 @@ Receita pra QUALQUER cômodo que ganhar a pele do estúdio (aplicar nos demais):
    no eixo CURTO (nunca bloquear rota até o vaso); gabinete em cascata de
    tamanhos até caber; câmera hero parte da porta (o que fica adjacente à
    porta não entra no quadro — informar o juiz).
+
+## STONE_MONOLITH — prompt oficial do Felipe (2026-08-05, noite)
+
+Virada: sem madeira protagonista; monólito pedra greige; dourado ZERO; cuba
+under-mount; espelho maior moldura preta; piso porcelanato área seca; box
+antracite. Travas red→green (25/25).
+
+| Iter | Nota | Mudanças |
+|------|------|----------|
+| p09 | — | Shaft respeitado (clip ao polígono) + porta de correr + chuveiro real + enxoval completo (consultoria GPT). |
+| p10 | 7.4 | Primeira STONE_MONOLITH. |
+| p11 | **7.8** | stone_greige_veins.png (PIL) + cuba mais funda + box +0.3EV. |
+
+TOP3 (p11→p12): espelho reflexo 30–40%; pedra menos granulada (veios mais
+longos/sutis, ruído −25%, separar tampo×cuba×frente); anatomia do box de correr
+legível (sobreposição fixo×folha + puxador/trilho + interior +0.2EV).
