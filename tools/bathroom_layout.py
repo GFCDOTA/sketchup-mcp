@@ -118,11 +118,11 @@ def _emit(kind, b, ws, lavabo=False):
         # lida (anel escuro + poço quase-preto)
         _tampo = RGB2["tampo_lavabo"] if lavabo else RGB2["tampo_banho"]
         out.append(_pp("bancada_banho", x0, y0, x1, y1, 0.78, 0.88, _tampo, "Bancada"))
-        cwid = min(w, d) * 0.58
-        out.append(_pp("cuba", cx - cwid / 2, cy - cwid / 2, cx + cwid / 2, cy + cwid / 2,
-                       0.881, 0.883, [40, 38, 40], "Bancada"))                 # anel da abertura
-        out.append(_pp("cuba", cx - cwid * 0.42, cy - cwid * 0.42, cx + cwid * 0.42, cy + cwid * 0.42,
-                       0.8825, 0.8855, [8, 8, 10], "Bancada"))                 # poço (profundidade)
+        cbw, cbd = w * 0.52, d * 0.58                                        # cuba RETANGULAR esculpida
+        out.append(_pp("cuba", cx - cbw / 2, cy - cbd / 2, cx + cbw / 2, cy + cbd / 2,
+                       0.881, 0.884, [34, 32, 34], "Bancada"))                 # anel da abertura
+        out.append(_pp("cuba", cx - cbw * 0.42, cy - cbd * 0.42, cx + cbw * 0.42, cy + cbd * 0.42,
+                       0.884, 0.887, [6, 6, 8], "Bancada"))                    # poço (profundidade)
         # TORNEIRA DE BANCADA preta com ANEL DOURADO na base — gramatica do
         # ESTUDIO BANHEIRO (loop GPT 8.0/10, 2026-08-05). Sai a bronze de parede:
         # ouro aparece em UM ponto so; corpo/bica/manopla preto fosco.
