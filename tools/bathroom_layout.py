@@ -52,8 +52,8 @@ RGB2 = {"gabinete": [148, 140, 128], "tampo_banho": [146, 138, 126], "cuba": [16
 # ESTUDIO BANHEIRO: o .skp NAVEGAVEL recebe as MESMAS texturas do render
 # (FP-036 interativo) + vidro translucido — sem isso o Felipe abre o modelo e
 # ve "outra coisa" (vidro opaco azul, madeira/pedra chapadas).
-_KIND_TEX = {"gabinete": ("candidates/D_veio_suave.png", 60),
-             "bancada_banho": ("candidates/D_veio_suave.png", 60),
+_KIND_TEX = {"gabinete": ("stone_greige_veins.png", 60),
+             "bancada_banho": ("stone_greige_veins.png", 60),
              "kb_parede": ("floor_cimento_queimado.png", 80),
              "kb_parede_pedra": ("stone_antracite_veins.png", 80),
              "kb_piso": ("porcelain.png", 60)}
@@ -138,7 +138,7 @@ def _emit(kind, b, ws, lavabo=False, door_c=None):
         # recorte limpo no tampo com poço grafite RECUADO abaixo do topo
         cbw, cbd = w * 0.50, d * 0.55
         out.append(_pp("cuba", cx - cbw / 2, cy - cbd / 2, cx + cbw / 2, cy + cbd / 2,
-                       0.845, 0.879, [40, 40, 43], "Bancada"))                 # poço under-mount
+                       0.845, 0.879, [32, 32, 35], "Bancada"))                 # poço under-mount
         out.append(_pp("cuba", cx - cbw / 2 + M(0.015), cy - cbd / 2 + M(0.015),
                        cx + cbw / 2 - M(0.015), cy + cbd / 2 - M(0.015),
                        0.845, 0.862, [22, 22, 25], "Bancada"))                 # fundo com queda

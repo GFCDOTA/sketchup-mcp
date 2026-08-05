@@ -103,8 +103,8 @@ def vray_export_run
           'ph_kb_piso' => 'porcelain.png',
           'ph_kb_parede' => 'floor_cimento_queimado.png',
           'ph_kb_parede_pedra' => 'stone_antracite_veins.png',
-          'ph_bancada_banho' => 'candidates/D_veio_suave.png',
-          'ph_gabinete' => 'candidates/D_veio_suave.png'
+          'ph_bancada_banho' => 'stone_greige_veins.png',
+          'ph_gabinete' => 'stone_greige_veins.png'
         })
       end
       big_tile = %w[ph_parede_concreto ph_kb_piso ph_kb_parede ph_kb_parede_pedra]
