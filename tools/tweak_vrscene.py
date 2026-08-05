@@ -102,6 +102,54 @@ def apply_materials(text: str) -> str:
     return text
 
 
+def apply_theme_estudio_banho(text: str) -> str:
+    """THEME ESTUDIO BANHEIRO nos materiais _ph_* do apê mobiliado (banhos da
+    planta_74). Mesmo vocabulario do apply_scene_theme_estudio_banheiro (loop GPT
+    4.4->8.0), portado pros kinds do bathroom_layout. Skin-swap; geometria da
+    planta congelada."""
+    walnut = {"diffuse": "AColor(0.034, 0.020, 0.011, 1)", "reflect": "AColor(0.09, 0.09, 0.09, 1)",
+              "reflect_glossiness": "0.62", "fresnel_ior": "1.5", "metalness": "0"}
+    dark_stone = {"reflect": "AColor(0.20, 0.20, 0.20, 1)", "reflect_glossiness": "0.82",
+                  "fresnel_ior": "1.6", "metalness": "0"}
+    stone_matte = {"reflect": "AColor(0.16, 0.16, 0.16, 1)", "reflect_glossiness": "0.72",
+                   "fresnel_ior": "1.5", "metalness": "0"}
+    black_metal = {"diffuse": "AColor(0.014, 0.014, 0.015, 1)", "reflect": "AColor(0.30, 0.30, 0.30, 1)",
+                   "reflect_glossiness": "0.42", "fresnel_ior": "1.6", "metalness": "1"}
+    black_ceramic = {"diffuse": "AColor(0.020, 0.020, 0.022, 1)", "reflect": "AColor(0.22, 0.22, 0.22, 1)",
+                     "reflect_glossiness": "0.72", "fresnel_ior": "1.5", "metalness": "0"}
+    gold = {"diffuse": "AColor(0.32, 0.22, 0.09, 1)", "reflect": "AColor(0.62, 0.47, 0.24, 1)",
+            "reflect_glossiness": "0.78", "fresnel_ior": "12", "metalness": "1"}
+    champagne = {"diffuse": "AColor(0.30, 0.24, 0.14, 1)", "reflect": "AColor(0.55, 0.46, 0.30, 1)",
+                 "reflect_glossiness": "0.72", "fresnel_ior": "10", "metalness": "1"}
+    mirror = {"diffuse": "AColor(0.002, 0.002, 0.002, 1)", "reflect": "AColor(0.985, 0.99, 0.995, 1)",
+              "reflect_glossiness": "1.0", "roughness": "0.02", "fresnel_ior": "60", "metalness": "1"}
+    glass = {"diffuse": "AColor(0.004, 0.005, 0.005, 1)", "reflect": "AColor(0.24, 0.24, 0.24, 1)",
+             "reflect_glossiness": "1.0", "fresnel_ior": "1.5", "metalness": "0",
+             "opacity": "AColor(0.12, 0.12, 0.12, 1)"}
+    towel = {"diffuse": "AColor(0.085, 0.080, 0.072, 1)", "reflect": "AColor(0, 0, 0, 1)",
+             "reflect_glossiness": "1", "roughness": "0.6", "metalness": "0"}
+    wall_matte = {"reflect": "AColor(0.02, 0.02, 0.02, 1)", "reflect_glossiness": "0.5",
+                  "metalness": "0"}
+    led_warm = {"diffuse": "AColor(0.55, 0.44, 0.26, 1)",
+                "self_illumination": "AColor(9.0, 6.2, 3.2, 1)", "self_illumination_gi": "1"}
+    dark = {"diffuse": "AColor(0.035, 0.030, 0.026, 1)", "reflect": "AColor(0.06, 0.06, 0.06, 1)",
+            "reflect_glossiness": "0.55", "metalness": "0"}
+
+    for k, params in (("gabinete", walnut), ("bancada_banho", dark_stone),
+                      ("cuba", {"diffuse": "AColor(0.006, 0.006, 0.007, 1)"}),
+                      ("kb_torneira", black_metal), ("kb_perfil", black_metal),
+                      ("kb_ducha", black_metal), ("kb_gola", black_metal),
+                      ("kb_sombra", black_metal), ("kb_anel", gold),
+                      ("kb_moldura", champagne), ("espelho", mirror),
+                      ("vaso", black_ceramic), ("box_vidro", glass),
+                      ("kb_toalha", towel), ("kb_frasco", dark),
+                      ("kb_nicho_fundo", dark), ("kb_nicho_box", stone_matte),
+                      ("kb_piso", stone_matte), ("kb_parede", wall_matte),
+                      ("kb_parede_pedra", stone_matte), ("kb_led", led_warm)):
+        text = _set_block(text, f"_ph_{k}_BRDFVRayMtl", params)
+    return text
+
+
 def apply_theme_dark_walnut(text: str) -> str:
     """THEME DARK_WALNUT_MOODY_PREMIUM — troca a PELE da cozinha (preto fosco + nogueira)
     sem rebuildar o .skp nem tocar geometria. Override do diffuse+BRDF por kind; o
@@ -444,7 +492,9 @@ def tweak(text: str, iso=200, fnum=4.0, shutter=100, sky=1.0, width=None, height
             text = re.sub(rf"(\b{k}=)\d+", rf"\g<1>{height}", text, count=1)
     if materials:
         text = apply_materials(text)
-    if theme == "dark_walnut":
+    if theme == "estudio_banho":
+        text = apply_theme_estudio_banho(text)
+    elif theme == "dark_walnut":
         text = apply_theme_dark_walnut(text)
     elif theme == "hotel_boutique":
         text = apply_theme_hotel_boutique(text)

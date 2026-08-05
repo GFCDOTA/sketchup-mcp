@@ -84,6 +84,17 @@ def vray_export_run
           'ph_kc_niche_wood' => 'wood_dark.png', 'ph_kc_board' => 'wood_dark.png'
         })
       end
+      # ESTUDIO BANHEIRO na PLANTA (gated): pele do banho — piso grafite, parede
+      # cimento queimado, pedra antracite de veios finos no box + bancada.
+      if ENV['VRAY_BATH_THEME'] == 'estudio'
+        tex_map = tex_map.merge({
+          'ph_kb_piso' => 'floor_grafite_medio.png',
+          'ph_kb_parede' => 'floor_cimento_queimado.png',
+          'ph_kb_parede_pedra' => 'stone_antracite_veins.png',
+          'ph_bancada_banho' => 'stone_antracite_veins.png'
+        })
+      end
+      big_tile = %w[ph_parede_concreto ph_kb_piso ph_kb_parede ph_kb_parede_pedra]
       n_tex = 0
       tex_map.each do |matname, png|
         m = model.materials[matname]
@@ -92,7 +103,7 @@ def vray_export_run
         next unless File.exist?(path)
         begin
           m.texture = path
-          m.texture.size = (matname == 'ph_parede_concreto' ? [80, 80] : [40, 40])   # parede ~2m = tile maior
+          m.texture.size = (big_tile.include?(matname) ? [80, 80] : [40, 40])   # parede ~2m = tile maior
           n_tex += 1
         rescue StandardError => e
           out << "tex ERR #{matname}: #{e.message}"

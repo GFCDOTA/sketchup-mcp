@@ -183,41 +183,98 @@ def _emit(kind, b, ws, lavabo=False):
                                1.12, 1.84, RGB2["champagne"], "Espelho"))
     elif kind == "box":
         # box de vidro com PERFIL preto (2 montantes + travessa) + DUCHA preta
-        out.append(_pp("box_vidro", x0, y0, x1, y1, 0.0, 2.0, RGB2["box_vidro"], "Box"))
+        # z0 0.014: nasce ACIMA do overlay de piso-pedra da PELE (sem overlap)
+        out.append(_pp("box_vidro", x0, y0, x1, y1, 0.014, 2.0, RGB2["box_vidro"], "Box"))
         _pf = M(0.026)   # perfil 2.6cm (>= min_footprint 1in² do geometry_sanity; 2cm era 'degenerate')
-        out.append(_pp("kb_perfil", x0, y0, x0 + _pf, y0 + _pf, 0.0, 2.0, RGB2["gola"], "Box"))
-        out.append(_pp("kb_perfil", x1 - _pf, y1 - _pf, x1, y1, 0.0, 2.0, RGB2["gola"], "Box"))
+        out.append(_pp("kb_perfil", x0, y0, x0 + _pf, y0 + _pf, 0.014, 2.0, RGB2["gola"], "Box"))
+        out.append(_pp("kb_perfil", x1 - _pf, y1 - _pf, x1, y1, 0.014, 2.0, RGB2["gola"], "Box"))
         out.append(_pp("kb_perfil", x0, y0, x1, y1, 1.98, 2.02, RGB2["gola"], "Box"))
         if ws is not None:
             # DUCHA redonda BRONZE (referência) + NICHO DE PAREDE iluminado com amenities
             if ws["orient"] == "v":
-                hx = ws["face"] + ws["sgn"] * M(0.22)
-                out.append(_pp("kb_ducha", ws["face"], cy - M(0.012), hx, cy + M(0.012),
+                wf = ws["face"] + ws["sgn"] * M(0.02)   # face da PELE de pedra
+                hx = wf + ws["sgn"] * M(0.22)
+                out.append(_pp("kb_ducha", wf, cy - M(0.012), hx, cy + M(0.012),
                                2.05, 2.08, RGB2["metal"], "Box"))             # braço
                 out.append(_pp("kb_ducha", hx - M(0.10), cy - M(0.10), hx + M(0.10), cy + M(0.10),
                                2.03, 2.05, RGB2["metal"], "Box"))             # cabeça
-                nx = ws["face"] + ws["sgn"] * M(0.03)
-                out.append(_pp("kb_nicho_box", ws["face"], cy - M(0.30), nx, cy + M(0.30),
+                nx = wf + ws["sgn"] * M(0.03)
+                out.append(_pp("kb_nicho_box", wf, cy - M(0.30), nx, cy + M(0.30),
                                1.10, 1.40, RGB2["nicho_box"], "Box"))          # nicho raso
-                out.append(_pp("kb_led", ws["face"], cy - M(0.27), nx + ws["sgn"] * M(0.004), cy + M(0.27),
+                out.append(_pp("kb_led", wf, cy - M(0.27), nx + ws["sgn"] * M(0.004), cy + M(0.27),
                                1.365, 1.385, RGB2["led"], "Box"))              # fita do nicho
                 for _fx in (cy - M(0.14), cy + M(0.06)):
                     out.append(_pp("kb_frasco", nx, _fx, nx + ws["sgn"] * M(0.05), _fx + M(0.05),
                                    1.10, 1.26, RGB2["frasco"], "Box"))
             else:
-                hy = ws["face"] + ws["sgn"] * M(0.22)
-                out.append(_pp("kb_ducha", cx - M(0.012), ws["face"], cx + M(0.012), hy,
+                wf = ws["face"] + ws["sgn"] * M(0.02)
+                hy = wf + ws["sgn"] * M(0.22)
+                out.append(_pp("kb_ducha", cx - M(0.012), wf, cx + M(0.012), hy,
                                2.05, 2.08, RGB2["metal"], "Box"))
                 out.append(_pp("kb_ducha", cx - M(0.10), hy - M(0.10), cx + M(0.10), hy + M(0.10),
                                2.03, 2.05, RGB2["metal"], "Box"))
-                ny = ws["face"] + ws["sgn"] * M(0.03)
-                out.append(_pp("kb_nicho_box", cx - M(0.30), ws["face"], cx + M(0.30), ny,
+                ny = wf + ws["sgn"] * M(0.03)
+                out.append(_pp("kb_nicho_box", cx - M(0.30), wf, cx + M(0.30), ny,
                                1.10, 1.40, RGB2["nicho_box"], "Box"))
-                out.append(_pp("kb_led", cx - M(0.27), ws["face"], cx + M(0.27), ny + ws["sgn"] * M(0.004),
+                out.append(_pp("kb_led", cx - M(0.27), wf, cx + M(0.27), ny + ws["sgn"] * M(0.004),
                                1.365, 1.385, RGB2["led"], "Box"))
                 for _fx in (cx - M(0.14), cx + M(0.06)):
                     out.append(_pp("kb_frasco", _fx, ny, _fx + M(0.05), ny + ws["sgn"] * M(0.05),
                                    1.10, 1.26, RGB2["frasco"], "Box"))
+    return out
+
+
+def _skin_parts(cell, ws_by_kind, zones_u):
+    """PELE do banheiro (Estudio Banheiro 2026-08-05): o que faltava entre o
+    laboratorio 8.0/10 e a planta — piso de pedra grafite + revestimento das
+    paredes que hospedam as pecas (cimento queimado; pedra antracite atras do
+    box/ducha). Paineis desviam de porta/janela via difference (shapely)."""
+    from shapely.geometry import box as _sbox
+    out = []
+    piso = cell.buffer(-M(0.004))
+    if not piso.is_empty:
+        p = _pp("kb_piso", *piso.bounds, 0.001, 0.012, [66, 62, 58], "Pele")
+        p["corners"] = [[round(px * PT_TO_IN, 2), round(py * PT_TO_IN, 2)]
+                        for px, py in list(piso.exterior.coords)[:-1]]
+        p["decorative"] = True   # recortado ao comodo (mesmo precedente do tapete)
+        out.append(p)
+    # TETO do banho (fecha o comodo pro V-Ray interior — sem ele o ceu lava a
+    # cena; modulo proprio pra KA_HIDE nos renders dollhouse)
+    laje = cell.buffer(M(0.14))   # cobre a espessura das paredes (sem fresta de sol)
+    if not laje.is_empty:
+        t = _pp("kb_teto", *laje.bounds, 2.50, 2.56, [58, 54, 50], "PeleTeto")
+        t["corners"] = [[round(px * PT_TO_IN, 2), round(py * PT_TO_IN, 2)]
+                        for px, py in list(laje.exterior.coords)[:-1]]
+        t["decorative"] = True
+        out.append(t)
+    _t = M(0.02)
+    done = []
+    for kind, ws in ws_by_kind.items():
+        if ws is None:
+            continue
+        key = (ws["orient"], round(ws["face"], 1), ws["sgn"])
+        if key in done:
+            continue
+        done.append(key)
+        stone = kind in ("box", "ducha")
+        rgb = [40, 38, 40] if stone else [166, 152, 136]
+        pk = "kb_parede_pedra" if stone else "kb_parede"
+        lo, hi = _room_span(ws, cell)
+        if hi - lo < M(0.30):
+            continue
+        if ws["orient"] == "v":
+            panel = _sbox(min(ws["face"], ws["face"] + ws["sgn"] * _t), lo,
+                          max(ws["face"], ws["face"] + ws["sgn"] * _t), hi)
+        else:
+            panel = _sbox(lo, min(ws["face"], ws["face"] + ws["sgn"] * _t),
+                          hi, max(ws["face"], ws["face"] + ws["sgn"] * _t))
+        geom = panel.difference(zones_u) if zones_u is not None else panel
+        geoms = getattr(geom, "geoms", [geom])
+        for g in geoms:
+            if g.is_empty or g.area < M(0.05) ** 2:
+                continue
+            gx0, gy0, gx1, gy1 = g.bounds
+            out.append(_pp(pk, gx0, gy0, gx1, gy1, 0.012, 2.30, rgb, "Pele"))
     return out
 
 
@@ -287,12 +344,14 @@ def build_boxes(con, room_id):
 
     lavabo = "LAVABO" in str(sm.get("room_name", "")).upper()
     items, placed = [], []
+    ws_by_kind = {}
     box_ok = False
     for (kind, w_m, d_m), tall in fixtures:
         b, ws = _place_fixture(sm, walls, w_m, d_m, placed, circ_u, comodo, cell, win_zone, tall)
         if b is not None:
             items.extend(_emit(kind, b, ws, lavabo=lavabo))   # geometria CRÍVEL multi-peça
             placed.append(b)
+            ws_by_kind[kind] = ws
             box_ok = box_ok or kind == "box"
     # BANHO sem box que coube = ducha ABERTA de canto (banheiro sem chuveiro não
     # existe; footprint mínimo 0.30 quase sempre cabe encostado)
@@ -314,9 +373,12 @@ def build_boxes(con, room_id):
                 items.append(_pp("kb_ducha", cx - M(0.10), hy - M(0.10), cx + M(0.10), hy + M(0.10),
                                  2.03, 2.05, RGB2["metal"], "Ducha"))
             placed.append(b)
+            ws_by_kind["ducha"] = ws
     if not items:
         return None, {"result": "NO_VALID_LAYOUT", "room_name": sm.get("room_name"),
                       "reason": "nenhuma louca coube"}
+    zones = [z for z in (door_z, win_zone) if z is not None]
+    items.extend(_skin_parts(cell, ws_by_kind, unary_union(zones) if zones else None))
     kinds = [it["kind"] for it in items]
     return items, {"result": "OK", "room_name": sm.get("room_name"),
                    "n_pecas": len(items), "pecas": kinds,
