@@ -49,11 +49,27 @@ RGB2 = {"gabinete": [88, 62, 40], "tampo_banho": [24, 23, 25], "cuba": [16, 16, 
         "champagne": [178, 148, 96], "dourado": [186, 148, 84]}
 
 
+# ESTUDIO BANHEIRO: o .skp NAVEGAVEL recebe as MESMAS texturas do render
+# (FP-036 interativo) + vidro translucido — sem isso o Felipe abre o modelo e
+# ve "outra coisa" (vidro opaco azul, madeira/pedra chapadas).
+_KIND_TEX = {"gabinete": ("wood_dark.png", 40),
+             "bancada_banho": ("stone_antracite_veins.png", 60),
+             "kb_parede": ("floor_cimento_queimado.png", 80),
+             "kb_parede_pedra": ("stone_antracite_veins.png", 80),
+             "kb_piso": ("floor_grafite_medio.png", 60)}
+_KIND_ALPHA = {"box_vidro": 0.30}
+
+
 def _pp(kind, x0, y0, x1, y1, z0_m, z1_m, rgb, module):
     """parte: x/y em POINTS (->inches), z em METROS. module = grupo no .skp."""
     x0, x1 = min(x0, x1), max(x0, x1)
     y0, y1 = min(y0, y1), max(y0, y1)
-    return {"kind": kind, "x0": x0 * PT_TO_IN, "y0": y0 * PT_TO_IN,
+    extra = {}
+    if kind in _KIND_TEX:
+        extra["tex_png"], extra["tile_in"] = _KIND_TEX[kind]
+    if kind in _KIND_ALPHA:
+        extra["alpha"] = _KIND_ALPHA[kind]
+    return {**extra, "kind": kind, "x0": x0 * PT_TO_IN, "y0": y0 * PT_TO_IN,
             "x1": x1 * PT_TO_IN, "y1": y1 * PT_TO_IN,
             "corners": [[round(x0 * PT_TO_IN, 2), round(y0 * PT_TO_IN, 2)],
                         [round(x1 * PT_TO_IN, 2), round(y0 * PT_TO_IN, 2)],

@@ -40,12 +40,13 @@ def pl_png(model, path)
     filename: path, width: 1600, height: 1200, antialias: true, transparent: false)
 end
 
-def pl_material(model, name, rgb, tex_path = nil, tile = 40)
+def pl_material(model, name, rgb, tex_path = nil, tile = 40, alpha = nil)
   m = model.materials[name]
   return m if m
   m = model.materials.add(name)
   m.color = Sketchup::Color.new(rgb[0], rgb[1], rgb[2])
-  m.alpha = 1.0
+  # alpha opcional (vidro de box) — o SKP navegavel mostra atraves do vidro
+  m.alpha = (alpha || 1.0).to_f
   # A CORRECAO DO BUG (FP-036): o path HUMANO/interativo tambem aplica textura por kind, nao so
   # o V-Ray. Sem png (ou arquivo ausente) -> cor chapada = comportamento anterior (fallback seguro).
   if tex_path && File.exist?(tex_path)
@@ -171,7 +172,7 @@ def pl_run
           log << "  tex MISS #{mat_name}: #{png} ausente -> cor chapada"
         end
       end
-      mat = pl_material(model, mat_name, b['rgb'] || [120, 120, 120], tex_path, tile)
+      mat = pl_material(model, mat_name, b['rgb'] || [120, 120, 120], tex_path, tile, b['alpha'])
       g.material = mat
       placed += 1
       bw = (b['x1'].to_f - b['x0'].to_f).round

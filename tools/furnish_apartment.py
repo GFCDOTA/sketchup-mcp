@@ -723,6 +723,9 @@ def main():
 
     env = os.environ.copy()
     env["LAYOUT_BOXES"] = json.dumps(boxes)
+    # tex_png por peca (banhos do Estudio Banheiro) precisa do dir SEMPRE;
+    # sem LAYOUT_TEX_MAP os demais comodos seguem em cor chapada (fallback)
+    env.setdefault("LAYOUT_TEX_DIR", str((ROOT / "assets/textures/procedural").resolve()))
     env["LAYOUT_OUT"] = str(skp_out).replace("\\", "/")
     env["LAYOUT_BEFORE"] = str(before).replace("\\", "/")
     env["LAYOUT_AFTER_TOP"] = str(after_top).replace("\\", "/")
