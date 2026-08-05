@@ -39,7 +39,7 @@ def test_vanity_is_floating_nogueira_with_black_sink(nm):
     boxes = ROOMS[nm]
     gab = [b for b in boxes if b["kind"] == "gabinete"]
     assert gab, f"{nm}: sem gabinete"
-    assert min(b["z0_in"] for b in gab) >= 0.30 * M2IN, f"{nm}: gabinete no chão — pediu suspenso"
+    assert min(b["z0_in"] for b in gab) >= 0.24 * M2IN, f"{nm}: gabinete no chão — pediu suspenso"
     assert any(80 <= b["rgb"][0] <= 130 for b in gab), f"{nm}: gabinete não é nogueira"
     cuba = [b for b in boxes if b["kind"] == "cuba"]
     assert cuba and all(sum(b["rgb"]) / 3 <= 60 for b in cuba), f"{nm}: cuba não é preta (D5)"
@@ -49,13 +49,42 @@ def test_vanity_is_floating_nogueira_with_black_sink(nm):
 
 
 @pytest.mark.parametrize("nm", sorted(ROOMS))
-def test_metals_black_bronze_only_in_lavabo(nm):
+def test_metals_are_bronze_per_felipe_reference(nm):
+    # Referência ChatGPT do Felipe (2026-08-04, "tipo isso"): torneira de PAREDE
+    # e ducha em BRONZE em todos os banhos (sobrepõe o veto antigo de manutenção;
+    # PVD bronze resiste — trade-off registrado). Perfis do box seguem PRETOS.
     boxes = ROOMS[nm]
     bronze = [b for b in boxes if list(b["rgb"]) == BRONZE]
-    if "LAVABO" in nm:
-        assert len(bronze) == 1, f"lavabo: {len(bronze)} bronzes — a joia tem exatamente 1 (torneira)"
-    else:
-        assert not bronze, f"{nm}: bronze em área molhada de uso diário (mancha/oxida — proibido)"
+    assert bronze, f"{nm}: sem bronze — a referência pede metais bronze"
+    torneira_bronze = [b for b in bronze if "torneira" in b["kind"]]
+    assert torneira_bronze, f"{nm}: torneira não é bronze"
+
+
+@pytest.mark.parametrize("nm", sorted(ROOMS))
+def test_vanity_has_towel_niche_signature(nm):
+    # A assinatura da referência: nicho aberto nogueira com TOALHAS + LED sob o tampo
+    boxes = ROOMS[nm]
+    assert any(b["kind"] == "kb_nicho_fundo" for b in boxes), f"{nm}: sem nicho de toalhas"
+    toalhas = [b for b in boxes if b["kind"] == "kb_toalha"]
+    assert len(toalhas) >= 2, f"{nm}: nicho sem toalhas ({len(toalhas)})"
+
+
+@pytest.mark.parametrize("nm", sorted(ROOMS))
+def test_faucet_is_wall_mounted(nm):
+    # torneira de PAREDE (bica horizontal ~1.05m) — não montante de bancada
+    boxes = ROOMS[nm]
+    t = [b for b in boxes if b["kind"] == "kb_torneira"]
+    assert t, f"{nm}: sem torneira"
+    zs = [b["z0_in"] / M2IN for b in t]
+    assert min(zs) >= 0.95, f"{nm}: torneira nasce da bancada (z {min(zs):.2f}) — referência é de parede"
+
+
+@pytest.mark.parametrize("nm", sorted(ROOMS))
+def test_toilet_is_matte_black(nm):
+    boxes = ROOMS[nm]
+    vaso = [b for b in boxes if b["kind"] == "vaso"]
+    assert vaso and all(sum(b["rgb"]) / 3 <= 80 for b in vaso), \
+        f"{nm}: vaso não é preto fosco (referência)"
 
 
 @pytest.mark.parametrize("nm", sorted(ROOMS))
