@@ -107,8 +107,8 @@ def apply_theme_estudio_banho(text: str) -> str:
     planta_74). Mesmo vocabulario do apply_scene_theme_estudio_banheiro (loop GPT
     4.4->8.0), portado pros kinds do bathroom_layout. Skin-swap; geometria da
     planta congelada."""
-    walnut = {"diffuse": "AColor(0.038, 0.023, 0.013, 1)", "reflect": "AColor(0.09, 0.09, 0.09, 1)",
-              "reflect_glossiness": "0.62", "fresnel_ior": "1.5", "metalness": "0"}
+    greige_stone = {"reflect": "AColor(0.14, 0.14, 0.14, 1)", "reflect_glossiness": "0.78",
+                    "fresnel_ior": "1.55", "metalness": "0"}   # pedra greige polida (textura)
     dark_stone = {"reflect": "AColor(0.20, 0.20, 0.20, 1)", "reflect_glossiness": "0.82",
                   "fresnel_ior": "1.6", "metalness": "0"}
     stone_matte = {"reflect": "AColor(0.16, 0.16, 0.16, 1)", "reflect_glossiness": "0.72",
@@ -135,12 +135,12 @@ def apply_theme_estudio_banho(text: str) -> str:
     dark = {"diffuse": "AColor(0.035, 0.030, 0.026, 1)", "reflect": "AColor(0.06, 0.06, 0.06, 1)",
             "reflect_glossiness": "0.55", "metalness": "0"}
 
-    for k, params in (("gabinete", walnut), ("bancada_banho", dark_stone),
+    for k, params in (("gabinete", greige_stone), ("bancada_banho", greige_stone),
                       ("cuba", {"diffuse": "AColor(0.006, 0.006, 0.007, 1)"}),
                       ("kb_torneira", black_metal), ("kb_perfil", black_metal),
                       ("kb_ducha", black_metal), ("kb_gola", black_metal),
                       ("kb_sombra", black_metal), ("kb_anel", gold),
-                      ("kb_moldura", champagne), ("espelho", mirror),
+                      ("kb_moldura", black_metal), ("espelho", mirror),
                       ("vaso", black_ceramic), ("box_vidro", glass),
                       ("kb_toalha", towel), ("kb_frasco", dark),
                       ("kb_nicho_fundo", dark), ("kb_nicho_box", stone_matte),
