@@ -199,13 +199,13 @@ def _emit(kind, b, ws, lavabo=False):
                 out.append(_pp("kb_ducha", hx - M(0.10), cy - M(0.10), hx + M(0.10), cy + M(0.10),
                                2.03, 2.05, RGB2["metal"], "Box"))             # cabeça
                 nx = wf + ws["sgn"] * M(0.03)
-                out.append(_pp("kb_nicho_box", wf, cy - M(0.30), nx, cy + M(0.30),
-                               1.10, 1.40, RGB2["nicho_box"], "Box"))          # nicho raso
-                out.append(_pp("kb_led", wf, cy - M(0.27), nx + ws["sgn"] * M(0.004), cy + M(0.27),
-                               1.365, 1.385, RGB2["led"], "Box"))              # fita do nicho
-                for _fx in (cy - M(0.14), cy + M(0.06)):
+                out.append(_pp("kb_nicho_box", wf, cy - M(0.33), nx, cy + M(0.33),
+                               1.10, 1.40, RGB2["nicho_box"], "Box"))          # nicho raso 66cm
+                out.append(_pp("kb_led", wf, cy - M(0.31), nx + ws["sgn"] * M(0.004), cy + M(0.31),
+                               1.355, 1.385, RGB2["led"], "Box"))              # fita continua do nicho
+                for _fx, _fh in ((cy - M(0.22), 0.16), (cy - M(0.05), 0.12), (cy + M(0.12), 0.14)):
                     out.append(_pp("kb_frasco", nx, _fx, nx + ws["sgn"] * M(0.05), _fx + M(0.05),
-                                   1.10, 1.26, RGB2["frasco"], "Box"))
+                                   1.10, 1.10 + _fh, RGB2["frasco"], "Box"))
             else:
                 wf = ws["face"] + ws["sgn"] * M(0.02)
                 hy = wf + ws["sgn"] * M(0.22)
@@ -214,13 +214,13 @@ def _emit(kind, b, ws, lavabo=False):
                 out.append(_pp("kb_ducha", cx - M(0.10), hy - M(0.10), cx + M(0.10), hy + M(0.10),
                                2.03, 2.05, RGB2["metal"], "Box"))
                 ny = wf + ws["sgn"] * M(0.03)
-                out.append(_pp("kb_nicho_box", cx - M(0.30), wf, cx + M(0.30), ny,
+                out.append(_pp("kb_nicho_box", cx - M(0.33), wf, cx + M(0.33), ny,
                                1.10, 1.40, RGB2["nicho_box"], "Box"))
-                out.append(_pp("kb_led", cx - M(0.27), wf, cx + M(0.27), ny + ws["sgn"] * M(0.004),
-                               1.365, 1.385, RGB2["led"], "Box"))
-                for _fx in (cx - M(0.14), cx + M(0.06)):
+                out.append(_pp("kb_led", cx - M(0.31), wf, cx + M(0.31), ny + ws["sgn"] * M(0.004),
+                               1.355, 1.385, RGB2["led"], "Box"))
+                for _fx, _fh in ((cx - M(0.22), 0.16), (cx - M(0.05), 0.12), (cx + M(0.12), 0.14)):
                     out.append(_pp("kb_frasco", _fx, ny, _fx + M(0.05), ny + ws["sgn"] * M(0.05),
-                                   1.10, 1.26, RGB2["frasco"], "Box"))
+                                   1.10, 1.10 + _fh, RGB2["frasco"], "Box"))
     return out
 
 
@@ -361,31 +361,31 @@ def build_boxes(con, room_id):
         if b is not None:
             if kind == "box" and ws is not None:
                 # Felipe 2026-08-05: box de PAREDE A PAREDE (nao "cortado") —
-                # expande ao span da parede, recuando onde colide com pecas ja postas
+                # atravessa o EIXO CURTO do comodo (faixa no fundo, longe da
+                # porta); expandir no eixo longo bloquearia vaso/circulacao.
                 from shapely.geometry import box as _sb
-                lo_r, hi_r = _room_span(ws, cell)
+                minx, miny, maxx, maxy = cell.bounds
                 bx0, by0, bx1, by1 = b.bounds
-                if ws["orient"] == "v":
-                    cand = _sb(bx0, lo_r + M(0.01), bx1, hi_r - M(0.01))
+                if (maxx - minx) <= (maxy - miny):
+                    cand = _sb(minx + M(0.005), by0, maxx - M(0.005), by1)
                 else:
-                    cand = _sb(lo_r + M(0.01), by0, hi_r - M(0.01), by1)
-                for pb in placed:
-                    if cand.intersection(pb).area > M(0.01) ** 2:
-                        px0, py0, px1, py1 = pb.bounds
+                    cand = _sb(bx0, miny + M(0.005), bx1, maxy - M(0.005))
+                ok_exp = all(cand.intersection(pb).area < M(0.02) ** 2 for pb in placed)
+                if ok_exp and circ_u is not None:
+                    inter = cand.intersection(circ_u)
+                    if inter.area > M(0.04) ** 2:
+                        # encurta a faixa AFASTANDO da porta (nunca reverte)
+                        ix0, iy0, ix1, iy1 = inter.bounds
                         cx0, cy0, cx1, cy1 = cand.bounds
-                        if ws["orient"] == "v":
-                            if py0 > by1:
-                                cand = _sb(cx0, cy0, cx1, py0 - M(0.02))
-                            elif py1 < by0:
-                                cand = _sb(cx0, py1 + M(0.02), cx1, cy1)
+                        if (maxx - minx) <= (maxy - miny):
+                            cand = (_sb(cx0, cy0, cx1, iy0 - M(0.02))
+                                    if (by0 + by1) / 2 < (iy0 + iy1) / 2
+                                    else _sb(cx0, iy1 + M(0.02), cx1, cy1))
                         else:
-                            if px0 > bx1:
-                                cand = _sb(cx0, cy0, px0 - M(0.02), cy1)
-                            elif px1 < bx0:
-                                cand = _sb(px1 + M(0.02), cy0, cx1, cy1)
-                if circ_u is not None and cand.intersection(circ_u).area > M(0.04) ** 2:
-                    pass          # porta no caminho -> mantem o box original
-                else:
+                            cand = (_sb(cx0, cy0, ix0 - M(0.02), cy1)
+                                    if (bx0 + bx1) / 2 < (ix0 + ix1) / 2
+                                    else _sb(ix1 + M(0.02), cy0, cx1, cy1))
+                if ok_exp and cand.area > b.area:
                     b = cand
             items.extend(_emit(kind, b, ws, lavabo=lavabo))   # geometria CRÍVEL multi-peça
             placed.append(b)

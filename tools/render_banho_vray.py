@@ -47,6 +47,8 @@ def main():
     ap.add_argument("--shutter", type=float, default=56)
     ap.add_argument("--sky", type=float, default=0.3)
     ap.add_argument("--sun", type=float, default=None)
+    ap.add_argument("--burn", type=float, default=None)
+    ap.add_argument("--hide", default="")
     ap.add_argument("--width", type=int, default=1100)
     ap.add_argument("--height", type=int, default=1375)
     ap.add_argument("--fill", default="", help="INCHES: 'x,y,z,int[,raio]' ;-separados")
@@ -70,6 +72,7 @@ def main():
                 "VRAY_EYE": ns.eye, "VRAY_TARGET": ns.target,
                 "VRAY_FOV": str(ns.fov),
                 "VRAY_BATH_THEME": "estudio",
+                **({"VRAY_HIDE": ns.hide} if ns.hide else {}),
                 "VRAY_TEX_DIR": str(ROOT / "assets/textures/procedural").replace("\\", "/")})
     subprocess.Popen([str(SU_EXE), str(copy), "-RubyStartup", str(EXPORT_RB)],
                      env=env, creationflags=getattr(subprocess, "DETACHED_PROCESS", 0))
@@ -96,7 +99,7 @@ def main():
             fills.append({"pos": (v[0], v[1], v[2]), "intensity": v[3],
                           "radius": v[4] if len(v) > 4 else 14.0,
                           "color": (1.0, 0.8, 0.55)})
-    tweak_file(str(vrs), iso=ns.iso, fnum=ns.fnum, shutter=ns.shutter, sky=ns.sky, sun=ns.sun,
+    tweak_file(str(vrs), iso=ns.iso, fnum=ns.fnum, shutter=ns.shutter, sky=ns.sky, sun=ns.sun, burn=ns.burn,
                width=ns.width, height=ns.height, materials=True,
                theme="estudio_banho", fill_lights=fills)
 

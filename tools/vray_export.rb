@@ -15,6 +15,14 @@ def vray_export_run
     model.entities.grep(Sketchup::Group).each do |g|
       (g.hidden = false) rescue nil if g.name.to_s.include?('PeleTeto')
     end
+    # VRAY_HIDE: esconde grupos por substring (ex. folha de porta no 1o plano)
+    if ENV['VRAY_HIDE'] && !ENV['VRAY_HIDE'].empty?
+      subs = ENV['VRAY_HIDE'].split(',')
+      model.entities.grep(Sketchup::Group).each do |g|
+        nm = g.name.to_s.downcase
+        (g.hidden = true) rescue nil if subs.any? { |sb| nm.include?(sb.strip.downcase) }
+      end
+    end
     tex_dir = ENV['VRAY_TEX_DIR']
     if tex_dir && File.directory?(tex_dir)
       wd = 'wood_dark.png'; wm = 'wood_medium.png'; fl = 'fabric_light.png'; fa = 'fabric_accent.png'
