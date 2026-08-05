@@ -200,11 +200,10 @@ def _emit(kind, b, ws, lavabo=False):
     elif kind == "box":
         # box de vidro com PERFIL preto (2 montantes + travessa) + DUCHA preta
         # z0 0.014: nasce ACIMA do overlay de piso-pedra da PELE (sem overlap)
-        out.append(_pp("box_vidro", x0, y0, x1, y1, 0.014, 2.48, RGB2["box_vidro"], "Box"))
+        out.append(_pp("box_vidro", x0, y0, x1, y1, 0.014, 2.50, RGB2["box_vidro"], "Box"))
         _pf = M(0.026)   # perfil 2.6cm (>= min_footprint 1in² do geometry_sanity; 2cm era 'degenerate')
-        out.append(_pp("kb_perfil", x0, y0, x0 + _pf, y0 + _pf, 0.014, 2.48, RGB2["gola"], "Box"))
-        out.append(_pp("kb_perfil", x1 - _pf, y1 - _pf, x1, y1, 0.014, 2.48, RGB2["gola"], "Box"))
-        out.append(_pp("kb_perfil", x0, y0, x1, y1, 2.44, 2.48, RGB2["gola"], "Box"))
+        out.append(_pp("kb_perfil", x0, y0, x0 + _pf, y0 + _pf, 0.014, 2.50, RGB2["gola"], "Box"))
+        out.append(_pp("kb_perfil", x1 - _pf, y1 - _pf, x1, y1, 0.014, 2.50, RGB2["gola"], "Box"))
         if ws is not None:
             # DUCHA redonda BRONZE (referência) + NICHO DE PAREDE iluminado com amenities
             if ws["orient"] == "v":

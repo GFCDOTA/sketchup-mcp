@@ -50,3 +50,25 @@ Gotchas novos: fill esférica colada em parede projeta a própria silhueta
 cria faixa de sombra — colar no teto dentro do box; expandir box no eixo LONGO
 bloqueia circulação (usar eixo CURTO); vaso é adjacente à porta (PDF) — hero
 cam não o inclui, restrição informada ao juiz.
+
+## LIÇÕES TRANSFERÍVEIS — "cômodo do render = cômodo do .skp" (2026-08-05)
+
+Receita pra QUALQUER cômodo que ganhar a pele do estúdio (aplicar nos demais):
+
+1. **O .skp navegável precisa da MESMA pele do render** — senão o Felipe abre
+   e "o cômodo não existe". Mecanismo: `tex_png`/`tile_in` POR PEÇA no brain
+   (`_KIND_TEX`) + `alpha` por peça (`_KIND_ALPHA`, vidro=0.30) + furnish
+   passando `LAYOUT_TEX_DIR` sempre. Nunca deixar material chapado no
+   deliverable de peça que tem textura no render.
+2. **Vidro até o teto = vidro ENCOSTA na laje (2.50), sem travessa-tampa.**
+   A travessa superior full-footprint era uma PLACA preta (lia como teto do
+   box). Perfil de topo só se for moldura fina na LINHA do vidro, nunca tampa.
+3. **Laje de render (kb_teto) nasce OCULTA no .skp** (módulo PeleTeto;
+   vray_export re-exibe). O SketchUp é pra navegar por dentro.
+4. **Luz do render** (não existe no .skp, é normal): Rectangle Light no teto
+   DENTRO do box; fills ≥50cm de qualquer parede (disco escuro); VRAY_HIDE
+   nas folhas de porta do 1º plano; burn 0.5 pra janela.
+5. **Posição vem do PDF; referência manda em linguagem/medida.** Box expande
+   no eixo CURTO (nunca bloquear rota até o vaso); gabinete em cascata de
+   tamanhos até caber; câmera hero parte da porta (o que fica adjacente à
+   porta não entra no quadro — informar o juiz).
