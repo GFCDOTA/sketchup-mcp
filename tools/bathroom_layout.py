@@ -332,9 +332,11 @@ def build_boxes(con, room_id):
         return None, {"result": "NO_VALID_LAYOUT", "room_name": sm.get("room_name"),
                       "reason": "sem parede util"}
 
-    # pia/cuba (menor em lavabo p/ caber pia+vaso) + vaso SEMPRE; box so com area
-    pia = ("bancada_banho", 0.50, 0.40) if area < 4.5 else ("bancada_banho", 0.80, 0.50)
-    fixtures = [(pia, False), (VASO, False)]
+    # pia/cuba em CASCATA (GPT 6.3 no banho real: gabinete 0.95-1.05m "nobre";
+    # tenta do maior pro menor ate caber — 0.50 fixo deixava o conjunto raquitico)
+    pia_sizes = ([(1.00, 0.48), (0.80, 0.45), (0.62, 0.42), (0.50, 0.40)]
+                 if area < 4.5 else [(1.05, 0.50), (0.85, 0.50), (0.70, 0.45)])
+    fixtures = [(("bancada_banho", 0, 0), False), (VASO, False)]
     if area >= BOX_MIN_AREA_M2:
         # tall=False: box é VIDRO — pode ficar sob a janela alta do banho (padrão
         # real; não bloqueia luz). Tamanho adaptativo: 90x90 em banho folgado,
@@ -347,7 +349,15 @@ def build_boxes(con, room_id):
     ws_by_kind = {}
     box_ok = False
     for (kind, w_m, d_m), tall in fixtures:
-        b, ws = _place_fixture(sm, walls, w_m, d_m, placed, circ_u, comodo, cell, win_zone, tall)
+        if kind == "bancada_banho":
+            b = ws = None
+            for w_m, d_m in pia_sizes:
+                b, ws = _place_fixture(sm, walls, w_m, d_m, placed, circ_u,
+                                       comodo, cell, win_zone, tall)
+                if b is not None:
+                    break
+        else:
+            b, ws = _place_fixture(sm, walls, w_m, d_m, placed, circ_u, comodo, cell, win_zone, tall)
         if b is not None:
             if kind == "box" and ws is not None:
                 # Felipe 2026-08-05: box de PAREDE A PAREDE (nao "cortado") —
