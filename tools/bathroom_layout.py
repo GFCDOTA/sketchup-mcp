@@ -39,7 +39,7 @@ def _to_box(kind, shp):
 # 2026-08-03): gabinete suspenso nogueira + pedra quieta + cuba preta + metais
 # pretos PVD; bronze SÓ no lavabo (área molhada de uso diário mancha bronze).
 RGB2 = {"gabinete": [108, 80, 58], "tampo_banho": [24, 23, 25], "cuba": [16, 16, 18],
-        "espelho": [150, 158, 164], "vaso": [40, 40, 42], "box_vidro": [168, 186, 194],
+        "espelho": [178, 188, 194], "vaso": [40, 40, 42], "box_vidro": [168, 186, 194],
         "gola": [24, 24, 24], "led": [255, 250, 232], "metal": [28, 28, 30],
         "bronze": [171, 119, 63], "tampo_lavabo": [30, 29, 32],
         "nicho_fundo": [56, 42, 30], "toalha_a": [150, 118, 88], "toalha_b": [104, 84, 64],
@@ -57,7 +57,8 @@ def _pp(kind, x0, y0, x1, y1, z0_m, z1_m, rgb, module):
                         [round(x1 * PT_TO_IN, 2), round(y1 * PT_TO_IN, 2)],
                         [round(x0 * PT_TO_IN, 2), round(y1 * PT_TO_IN, 2)]],
             "h_in": round((z1_m - z0_m) * 39.3700787402, 2), "z0_in": round(z0_m * 39.3700787402, 2),
-            "rgb": rgb, "label": kind, "module": module, "ambiguous": False, "decorative": False}
+            "rgb": rgb, "label": kind, "module": module, "ambiguous": False,
+            "decorative": kind in ("kb_moldura", "kb_frasco", "kb_toalha")}  # trim/decor fino declarado (kb_moldura decorativa)
 
 
 def _emit(kind, b, ws, lavabo=False):
@@ -81,65 +82,98 @@ def _emit(kind, b, ws, lavabo=False):
         # gavetão nogueira suspenso -> NICHO ABERTO de toalhas com LED -> tampo
         # pedra preta ESPESSO (12cm aparente) com cuba esculpida; torneira DE
         # PAREDE bronze; espelho moldura preta + halo LED.
+        # VERDICT 5.8 P2 ("marcenaria boutique"): gavetão REALMENTE suspenso com
+        # base oculta recuada (sombra), lâminas de nogueira fechando o nicho.
+        out.append(_pp("kb_sombra", x0 + w * 0.10, y0 + d * 0.10, x1 - w * 0.10, y1 - d * 0.10,
+                       0.30, 0.32, [18, 18, 20], "Bancada"))                   # base oculta recuada
         out.append(_pp("gabinete", x0 + w * 0.04, y0 + d * 0.04, x1 - w * 0.04, y1 - d * 0.04,
-                       0.26, 0.50, RGB2["gabinete"], "Bancada"))               # gavetão nogueira suspenso
+                       0.32, 0.50, RGB2["gabinete"], "Bancada"))               # gavetão nogueira suspenso
         out.append(_pp("kb_gola", x0 + w * 0.10, y0 + d * 0.10, x1 - w * 0.10, y1 - d * 0.10,
-                       0.248, 0.26, RGB2["gola"], "Bancada"))
-        # NICHO de toalhas (a assinatura): prateleira nogueira + fundo sombra + LED
+                       0.308, 0.32, RGB2["gola"], "Bancada"))
+        # NICHO de toalhas: fundo sombra + laterais de LÂMINA nogueira + prateleira + LED
         out.append(_pp("kb_nicho_fundo", x0 + w * 0.05, y0 + d * 0.05, x1 - w * 0.05, y1 - d * 0.05,
-                       0.50, 0.76, RGB2["nicho_fundo"], "Bancada"))
+                       0.50, 0.78, RGB2["nicho_fundo"], "Bancada"))
         out.append(_pp("gabinete", x0 + w * 0.04, y0 + d * 0.04, x1 - w * 0.04, y1 - d * 0.04,
-                       0.50, 0.525, RGB2["gabinete"], "Bancada"))              # prateleira nogueira
-        _tw = min(w, d) * 0.30
-        for _i, _tc in enumerate((cx - _tw * 0.75, cx + _tw * 0.75)):
+                       0.50, 0.522, RGB2["gabinete"], "Bancada"))              # prateleira nogueira
+        if w >= d:                                                              # lâminas laterais (cheeks)
+            out.append(_pp("gabinete", x0 + w * 0.04, y0 + d * 0.04, x0 + w * 0.075, y1 - d * 0.04,
+                           0.50, 0.78, RGB2["gabinete"], "Bancada"))
+            out.append(_pp("gabinete", x1 - w * 0.075, y0 + d * 0.04, x1 - w * 0.04, y1 - d * 0.04,
+                           0.50, 0.78, RGB2["gabinete"], "Bancada"))
+        else:
+            out.append(_pp("gabinete", x0 + w * 0.04, y0 + d * 0.04, x1 - w * 0.04, y0 + d * 0.075,
+                           0.50, 0.78, RGB2["gabinete"], "Bancada"))
+            out.append(_pp("gabinete", x0 + w * 0.04, y1 - d * 0.075, x1 - w * 0.04, y1 - d * 0.04,
+                           0.50, 0.78, RGB2["gabinete"], "Bancada"))
+        _tw = min(w, d) * 0.26
+        for _i, (_tc, _th) in enumerate(((cx - _tw * 0.95, 0.10), (cx, 0.12), (cx + _tw * 0.95, 0.09))):
             out.append(_pp("kb_toalha", _tc - _tw / 2, cy - _tw / 2, _tc + _tw / 2, cy + _tw / 2,
-                           0.525, 0.645, RGB2["toalha_a" if _i == 0 else "toalha_b"], "Bancada"))
+                           0.525, 0.525 + _th, RGB2["toalha_a" if _i % 2 == 0 else "toalha_b"], "Bancada"))
         out.append(_pp("kb_led", x0 + w * 0.10, y0 + d * 0.10, x1 - w * 0.10, y1 - d * 0.10,
-                       0.735, 0.75, RGB2["led"], "Bancada"))                   # LED do nicho
-        # tampo ESPESSO com cuba esculpida (abertura escura integrada, sem aro)
+                       0.755, 0.77, RGB2["led"], "Bancada"))                   # LED do nicho
+        # VERDICT 5.8 P3: tampo 10cm (monólito elegante) + cuba com PROFUNDIDADE
+        # lida (anel escuro + poço quase-preto)
         _tampo = RGB2["tampo_lavabo"] if lavabo else RGB2["tampo_banho"]
-        out.append(_pp("bancada_banho", x0, y0, x1, y1, 0.76, 0.88, _tampo, "Bancada"))
-        cwid = min(w, d) * 0.50
+        out.append(_pp("bancada_banho", x0, y0, x1, y1, 0.78, 0.88, _tampo, "Bancada"))
+        cwid = min(w, d) * 0.58
         out.append(_pp("cuba", cx - cwid / 2, cy - cwid / 2, cx + cwid / 2, cy + cwid / 2,
-                       0.881, 0.8845, RGB2["cuba"], "Bancada"))                # abertura esculpida
+                       0.881, 0.883, [40, 38, 40], "Bancada"))                 # anel da abertura
+        out.append(_pp("cuba", cx - cwid * 0.42, cy - cwid * 0.42, cx + cwid * 0.42, cy + cwid * 0.42,
+                       0.8825, 0.8855, [8, 8, 10], "Bancada"))                 # poço (profundidade)
         # TORNEIRA DE PAREDE em BRONZE (bica horizontal + monocomando) — referência
         t = M(0.015)
+        # VERDICT 5.8 P4: metais com PRESENÇA — bica 23cm/ø36mm + escudo de
+        # parede + monocomando maior
         if ws is not None:
             if ws["orient"] == "v":
                 wxf = ws["face"]
-                out.append(_pp("kb_torneira", wxf, cy - M(0.012), wxf + ws["sgn"] * M(0.18), cy + M(0.012),
-                               1.05, 1.075, RGB2["bronze"], "Bancada"))        # bica
-                out.append(_pp("kb_torneira", wxf, cy + M(0.07), wxf + ws["sgn"] * M(0.045), cy + M(0.13),
-                               1.02, 1.08, RGB2["bronze"], "Bancada"))         # monocomando
+                out.append(_pp("kb_torneira", wxf, cy - M(0.035), wxf + ws["sgn"] * M(0.012), cy + M(0.035),
+                               1.02, 1.13, RGB2["bronze"], "Bancada"))         # escudo de parede
+                out.append(_pp("kb_torneira", wxf, cy - M(0.018), wxf + ws["sgn"] * M(0.23), cy + M(0.018),
+                               1.06, 1.096, RGB2["bronze"], "Bancada"))        # bica 23cm ø36
+                out.append(_pp("kb_torneira", wxf, cy + M(0.09), wxf + ws["sgn"] * M(0.07), cy + M(0.18),
+                               1.00, 1.10, RGB2["bronze"], "Bancada"))         # monocomando
             else:
                 wyf = ws["face"]
-                out.append(_pp("kb_torneira", cx - M(0.012), wyf, cx + M(0.012), wyf + ws["sgn"] * M(0.18),
-                               1.05, 1.075, RGB2["bronze"], "Bancada"))
-                out.append(_pp("kb_torneira", cx + M(0.07), wyf, cx + M(0.13), wyf + ws["sgn"] * M(0.045),
-                               1.02, 1.08, RGB2["bronze"], "Bancada"))
+                out.append(_pp("kb_torneira", cx - M(0.035), wyf, cx + M(0.035), wyf + ws["sgn"] * M(0.012),
+                               1.02, 1.13, RGB2["bronze"], "Bancada"))
+                out.append(_pp("kb_torneira", cx - M(0.018), wyf, cx + M(0.018), wyf + ws["sgn"] * M(0.23),
+                               1.06, 1.096, RGB2["bronze"], "Bancada"))
+                out.append(_pp("kb_torneira", cx + M(0.09), wyf, cx + M(0.18), wyf + ws["sgn"] * M(0.07),
+                               1.00, 1.10, RGB2["bronze"], "Bancada"))
         # ESPELHO: halo LED atrás + espelho + MOLDURA PRETA fina (referência)
+        # VERDICT 5.8 P1: espelho GRANDE e LEVE — halo LED fino (1.5cm de aro),
+        # moldura preta fina nos 4 lados, superfície reflexiva; nada de "bloco".
         if ws is not None and ws["orient"] == "v":
             wx = (ws["face"] + ws["sgn"] * M(0.04))
-            out.append(_pp("kb_led", wx - ws["sgn"] * M(0.005), y0 + d * 0.08, wx + t * ws["sgn"], y1 - d * 0.08,
-                           1.10, 1.82, RGB2["led"], "Espelho"))
-            out.append(_pp("espelho", wx + ws["sgn"] * M(0.006), y0 + d * 0.12,
-                           wx + ws["sgn"] * (M(0.006) + t), y1 - d * 0.12,
-                           1.13, 1.79, RGB2["espelho"], "Espelho"))
-            for _mz0, _mz1 in ((1.11, 1.13), (1.79, 1.81)):
-                out.append(_pp("kb_moldura", wx + ws["sgn"] * M(0.008), y0 + d * 0.11,
-                               wx + ws["sgn"] * (M(0.008) + t), y1 - d * 0.11,
+            out.append(_pp("kb_led", wx - ws["sgn"] * M(0.004), y0 + d * 0.085, wx + t * ws["sgn"], y1 - d * 0.085,
+                           1.10, 1.86, RGB2["led"], "Espelho"))                # halo (aro 1.5cm)
+            out.append(_pp("espelho", wx + ws["sgn"] * M(0.006), y0 + d * 0.10,
+                           wx + ws["sgn"] * (M(0.006) + t), y1 - d * 0.10,
+                           1.12, 1.84, RGB2["espelho"], "Espelho"))            # espelho 72cm alto
+            for _mz0, _mz1 in ((1.105, 1.12), (1.84, 1.855)):                  # moldura top/bottom
+                out.append(_pp("kb_moldura", wx + ws["sgn"] * M(0.008), y0 + d * 0.10,
+                               wx + ws["sgn"] * (M(0.008) + t), y1 - d * 0.10,
                                _mz0, _mz1, RGB2["gola"], "Espelho"))
+            for _ma, _mb in ((y0 + d * 0.10, y0 + d * 0.125), (y1 - d * 0.125, y1 - d * 0.10)):
+                out.append(_pp("kb_moldura", wx + ws["sgn"] * M(0.008), _ma,
+                               wx + ws["sgn"] * (M(0.008) + t), _mb,
+                               1.12, 1.84, RGB2["gola"], "Espelho"))           # moldura laterais
         elif ws is not None:
             wy = (ws["face"] + ws["sgn"] * M(0.04))
-            out.append(_pp("kb_led", x0 + w * 0.08, wy - ws["sgn"] * M(0.005), x1 - w * 0.08, wy + t * ws["sgn"],
-                           1.10, 1.82, RGB2["led"], "Espelho"))
-            out.append(_pp("espelho", x0 + w * 0.12, wy + ws["sgn"] * M(0.006),
-                           x1 - w * 0.12, wy + ws["sgn"] * (M(0.006) + t),
-                           1.13, 1.79, RGB2["espelho"], "Espelho"))
-            for _mz0, _mz1 in ((1.11, 1.13), (1.79, 1.81)):
-                out.append(_pp("kb_moldura", x0 + w * 0.11, wy + ws["sgn"] * M(0.008),
-                               x1 - w * 0.11, wy + ws["sgn"] * (M(0.008) + t),
+            out.append(_pp("kb_led", x0 + w * 0.085, wy - ws["sgn"] * M(0.004), x1 - w * 0.085, wy + t * ws["sgn"],
+                           1.10, 1.86, RGB2["led"], "Espelho"))
+            out.append(_pp("espelho", x0 + w * 0.10, wy + ws["sgn"] * M(0.006),
+                           x1 - w * 0.10, wy + ws["sgn"] * (M(0.006) + t),
+                           1.12, 1.84, RGB2["espelho"], "Espelho"))
+            for _mz0, _mz1 in ((1.105, 1.12), (1.84, 1.855)):
+                out.append(_pp("kb_moldura", x0 + w * 0.10, wy + ws["sgn"] * M(0.008),
+                               x1 - w * 0.10, wy + ws["sgn"] * (M(0.008) + t),
                                _mz0, _mz1, RGB2["gola"], "Espelho"))
+            for _ma, _mb in ((x0 + w * 0.10, x0 + w * 0.125), (x1 - w * 0.125, x1 - w * 0.10)):
+                out.append(_pp("kb_moldura", _ma, wy + ws["sgn"] * M(0.008),
+                               _mb, wy + ws["sgn"] * (M(0.008) + t),
+                               1.12, 1.84, RGB2["gola"], "Espelho"))
     elif kind == "box":
         # box de vidro com PERFIL preto (2 montantes + travessa) + DUCHA preta
         out.append(_pp("box_vidro", x0, y0, x1, y1, 0.0, 2.0, RGB2["box_vidro"], "Box"))

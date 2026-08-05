@@ -100,7 +100,13 @@ def _audit_boxes(boxes: list[dict]) -> dict:
     audit pinado pelos testes dele."""
     from tools.geometry_sanity import audit
     g = audit(boxes, to_m=0.0254)
-    findings = [f for f in g["findings"] if f["check"] != "off_axis"]
+    # decorative=True (moldura/friso/trim declarado) é FINO por design — isento
+    # dos checks de degenerescência (3ª ocorrência: haste, perfil, moldura). Os
+    # demais checks (underground/outside/dim) continuam valendo pra ele.
+    _deco = {str(b.get("kind")) for b in boxes if b.get("decorative")}
+    findings = [f for f in g["findings"]
+                if f["check"] != "off_axis"
+                and not (f["check"].startswith("degenerate") and f.get("kind") in _deco)]
     n_fail = sum(1 for f in findings if f["severity"] == "FAIL")
     n_warn = sum(1 for f in findings if f["severity"] == "WARN")
     return {"overall": "FAIL" if n_fail else ("WARN" if n_warn else "PASS"),

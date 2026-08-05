@@ -52,3 +52,23 @@ de colisões e folgas mínimas**.
 - Rodada P1 (circulação+portas) → **~7.5**
 - - fidelidade comprovada (overlay) + integração sala–varanda + móveis com
   linguagem de produto → **~8.5**
+
+---
+
+# ADENDO — VERDICT estudo BANHO (referência ChatGPT), 2026-08-05
+
+**Nota: 5.8/10** (potencial 8+ com proporção+materiais+luz). "Chegou na ideia,
+não chegou perto visualmente. Existe 'estudo do banheiro', não 'banheiro foda'."
+
+Composição-base OK (bancada preta+cuba, torneira parede bronze, marcenaria,
+espelho, vaso preto). Prioridades DELE:
+1. **ESPELHO**: lê como bloco/armário chapado → espelho grande LEVE, moldura
+   fina, halo LED, menos volume aparente.
+2. **MÓVEL DA CUBA**: menos bloco-sobre-bloco → realmente suspenso, recuo/base
+   oculta, nicho mais bonito, lâmina de madeira aparente ("marcenaria boutique").
+3. **BANCADA/CUBA**: menos caixote → espessura elegante, abertura de cuba
+   definida, leitura de pedra premium monolítica.
+4. **METAIS**: torneira pequena/frágil → bica mais comprida, corpo mais grosso,
+   presença do bronze.
+5. **RENDER/LUZ**: "sem isso nunca chega" — pedra com veio, madeira rica, LED
+   quente, reflexo em vidro/metais (= passe V-Ray).
