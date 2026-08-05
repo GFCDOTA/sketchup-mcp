@@ -131,14 +131,12 @@ def vray_export_run
       # ESTUDIO BANHEIRO (gated por VRAY_SCENE_THEME): nogueira no gabinete, pedra
       # escura veinada na bancada + box, grafite no piso, cimento queimado nas paredes.
       if ENV['VRAY_SCENE_THEME'] == 'estudio_banheiro'
+        # iter 2 (GPT 4.4/10): nogueira SEM textura laranja (flat escuro no tweak);
+        # pedra com veios FINOS (A_sutil), sem manchoes dourados (D_nero saiu)
         fz_tex = fz_tex.merge({
-          'fz_gabinete__corpo' => ['wood_dark.png', 40],
-          'fz_gabinete__frente' => ['wood_dark.png', 40],
-          'fz_gabinete__lateral' => ['wood_dark.png', 40],
-          'fz_gabinete__prateleira' => ['wood_dark.png', 40],
-          'fz_bancada__tampo' => ['stone_dark_gold_D_nero.png', 60],
-          'fz_bancada__frontal' => ['stone_dark_gold_D_nero.png', 60],
-          'fz_box__pedra' => ['floor_grafite_medio.png', 80],
+          'fz_bancada__tampo' => ['stone_antracite_veins.png', 70],
+          'fz_bancada__frontal' => ['stone_antracite_veins.png', 70],
+          'fz_box__pedra' => ['stone_antracite_veins.png', 110],
           'fz_box__piso_pedra' => ['floor_grafite_medio.png', 60],
           'fz_wall_' => ['floor_cimento_queimado.png', 150],
           'fz_floor' => ['floor_grafite_medio.png', 60]

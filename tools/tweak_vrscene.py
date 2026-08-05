@@ -248,8 +248,9 @@ def apply_scene_theme_estudio_banheiro(text: str) -> str:
     (bancada/box, textura nero do export), metais PRETO fosco, ouro em DOIS toques
     combinados (anel da torneira + moldura champagne do espelho — a identidade da
     referencia), paredes cimento queimado taupe, LEDs 2700-3000K emissivos."""
-    walnut = {"reflect": "AColor(0.09, 0.09, 0.09, 1)", "reflect_glossiness": "0.68",
-              "fresnel_ior": "1.5", "metalness": "0"}                                    # nogueira satin (textura)
+    walnut = {"diffuse": "AColor(0.050, 0.030, 0.017, 1)",                               # nogueira ESCURA flat
+              "reflect": "AColor(0.09, 0.09, 0.09, 1)", "reflect_glossiness": "0.62",
+              "fresnel_ior": "1.5", "metalness": "0"}       # iter2: 30-40% mais escura, menos laranja (GPT)
     dark_stone = {"reflect": "AColor(0.20, 0.20, 0.20, 1)", "reflect_glossiness": "0.82",
                   "fresnel_ior": "1.6", "metalness": "0"}                                # pedra escura polida (textura)
     stone_matte = {"reflect": "AColor(0.10, 0.10, 0.10, 1)", "reflect_glossiness": "0.6",
@@ -266,7 +267,8 @@ def apply_scene_theme_estudio_banheiro(text: str) -> str:
               "reflect_glossiness": "0.99", "fresnel_ior": "40", "metalness": "1"}        # espelho real
     glass = {"diffuse": "AColor(0.004, 0.005, 0.005, 1)", "reflect": "AColor(0.24, 0.24, 0.24, 1)",
              "reflect_glossiness": "1.0", "fresnel_ior": "1.5", "metalness": "0"}         # vidro claro (opacity vem do SU alpha)
-    towel_dark = {"reflect": "AColor(0, 0, 0, 1)", "reflect_glossiness": "1",
+    towel_dark = {"diffuse": "AColor(0.045, 0.043, 0.042, 1)",
+                  "reflect": "AColor(0, 0, 0, 1)", "reflect_glossiness": "1",
                   "roughness": "0.6", "metalness": "0"}
     wall_taupe = {"reflect": "AColor(0.02, 0.02, 0.02, 1)", "reflect_glossiness": "0.5",
                   "metalness": "0"}                                                       # cimento queimado fosco (textura)
@@ -275,7 +277,7 @@ def apply_scene_theme_estudio_banheiro(text: str) -> str:
     led_warm = {"diffuse": "AColor(0.55, 0.44, 0.26, 1)",
                 "self_illumination": "AColor(9.0, 6.2, 3.2, 1)", "self_illumination_gi": "1"}
     spot_warm = {"diffuse": "AColor(0.55, 0.44, 0.26, 1)",
-                 "self_illumination": "AColor(16.0, 11.0, 5.5, 1)", "self_illumination_gi": "1"}
+                 "self_illumination": "AColor(9.0, 6.2, 3.1, 1)", "self_illumination_gi": "1"}
 
     for sub in ("gabinete__corpo", "gabinete__frente", "gabinete__lateral",
                 "gabinete__prateleira"):
@@ -331,7 +333,9 @@ def _light_sphere(name, pos, intensity, color=(1.0, 0.8, 0.55), radius=14.0, uni
         f"  shadows=1;\n"
         f"  affectDiffuse=1;\n"
         f"  affectSpecular=1;\n"
-        f"  affectReflections=1;\n"
+        # invisible=1 renderiza a esfera PRETA em espelho/reflexo (disco preto no
+        # espelho do banheiro) -> reflexos ignoram a luz-fantasma
+        f"  affectReflections=0;\n"
         f"  invisible=1;\n"
         f"  storeWithIrradianceMap=0;\n"
         f"  noDecay=0;\n"

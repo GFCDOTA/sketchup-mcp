@@ -114,7 +114,7 @@ def build_parts():
         _p("deco", "frasco", 0.16, 1.30, 0.22, 1.36, 0.90, 1.08, RGB["frasco"]),
         _p("deco", "frasco", 0.24, 1.32, 0.28, 1.36, 0.90, 1.02, RGB["frasco"]),
         _p("deco", "vaso_deco", 0.12, 1.40, 0.20, 1.48, 0.90, 1.00, RGB["vaso_deco"]),
-        _p("deco", "planta", 0.10, 1.38, 0.22, 1.50, 1.00, 1.14, [46, 58, 38]),
+        _p("deco", "planta", 0.10, 1.38, 0.22, 1.50, 1.00, 1.14, [34, 42, 28]),
     ]
 
     # ---------------- ESPELHO 1.00x1.10 com halo LED + moldura champagne fina
@@ -185,15 +185,17 @@ def build_parts():
 
     # ---------------- SPOTS de teto (2700-3000K): circulacao/espelho + box
     for sx, sy in ((0.50, 0.90), (1.10, 1.95)):
-        parts.append(_p("spot", "lente", sx - 0.045, sy - 0.045, sx + 0.045, sy + 0.045,
-                        H - 0.012, H - 0.002, RGB["led"]))
+        parts.append(_p("spot", "lente", sx - 0.032, sy - 0.032, sx + 0.032, sy + 0.032,
+                        H - 0.008, H - 0.001, RGB["led"]))
     return parts
 
 
 def build_scene(out_dir):
     parts = build_parts()
-    eye = [1.32, 0.30, 1.58]
-    target = [0.42, 1.75, 1.02]
+    # iter 2 (GPT): 4:5 vertical, 1.60m, lente ~35-40mm, MENOS tilt pra baixo,
+    # recuada junto a porta — gabinete/espelho/vaso/box INTEIROS no quadro
+    eye = [1.45, 0.14, 1.60]
+    target = [0.50, 1.80, 1.30]
     dx, dy, dz = eye[0] - target[0], eye[1] - target[1], eye[2] - target[2]
     cam = {"kind": "reference_match_door", "eye": eye, "target": target,
            "elev_deg": round(math.degrees(math.atan2(dz, math.hypot(dx, dy))), 1),
