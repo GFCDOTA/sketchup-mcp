@@ -57,7 +57,7 @@ _KIND_TEX = {"gabinete": ("wood_dark.png", 40),
              "kb_parede": ("floor_cimento_queimado.png", 80),
              "kb_parede_pedra": ("stone_antracite_veins.png", 80),
              "kb_piso": ("floor_grafite_medio.png", 60)}
-_KIND_ALPHA = {"box_vidro": 0.30}
+_KIND_ALPHA = {"box_vidro": 0.30, "kb_folha": 0.30}
 
 
 def _pp(kind, x0, y0, x1, y1, z0_m, z1_m, rgb, module):
@@ -77,10 +77,10 @@ def _pp(kind, x0, y0, x1, y1, z0_m, z1_m, rgb, module):
                         [round(x0 * PT_TO_IN, 2), round(y1 * PT_TO_IN, 2)]],
             "h_in": round((z1_m - z0_m) * 39.3700787402, 2), "z0_in": round(z0_m * 39.3700787402, 2),
             "rgb": rgb, "label": kind, "module": module, "ambiguous": False,
-            "decorative": kind in ("kb_moldura", "kb_frasco", "kb_toalha")}  # trim/decor fino declarado (kb_moldura decorativa)
+            "decorative": kind in ("kb_moldura", "kb_frasco", "kb_toalha", "kb_trilho", "kb_puxador", "kb_haste", "kb_ducha", "kb_ralo", "kb_misturador", "kb_ducha_manual", "kb_argola", "kb_gancho", "kb_papeleira", "kb_escova", "kb_toalheiro", "kb_tapete", "kb_bandeja", "kb_sabonete", "kb_copo")}  # trim/decor fino declarado (kb_moldura decorativa)
 
 
-def _emit(kind, b, ws, lavabo=False):
+def _emit(kind, b, ws, lavabo=False, door_c=None):
     """Geometria CRÍVEL por fixture (substitui a caixa única)."""
     x0, y0, x1, y1 = b.bounds
     w, d = x1 - x0, y1 - y0
@@ -198,36 +198,115 @@ def _emit(kind, b, ws, lavabo=False):
                                _mb, wy + ws["sgn"] * (M(0.008) + t),
                                1.12, 1.84, RGB2["champagne"], "Espelho"))
     elif kind == "box":
-        # box de vidro com PERFIL preto (2 montantes + travessa) + DUCHA preta
-        # z0 0.014: nasce ACIMA do overlay de piso-pedra da PELE (sem overlap)
-        out.append(_pp("box_vidro", x0, y0, x1, y1, 0.014, 2.50, RGB2["box_vidro"], "Box"))
-        _pf = M(0.026)   # perfil 2.6cm (>= min_footprint 1in² do geometry_sanity; 2cm era 'degenerate')
-        out.append(_pp("kb_perfil", x0, y0, x0 + _pf, y0 + _pf, 0.014, 2.50, RGB2["gola"], "Box"))
-        out.append(_pp("kb_perfil", x1 - _pf, y1 - _pf, x1, y1, 0.014, 2.50, RGB2["gola"], "Box"))
+        # BOX (consultoria GPT 2026-08-05): vidro FIXO + FOLHA DE CORRER
+        # sobreposta + trilho superior discreto + puxador vertical; chuveiro de
+        # teto com haste + cabeca redonda; misturador na face do fixo (shaft);
+        # ducha manual slim; ralo linear. NADA de toalheiro dentro do box.
+        gt = M(0.008)
+        _pf = M(0.022)
+        horiz = (x1 - x0) >= (y1 - y0)          # frente corre no eixo maior
+        da, dp = (door_c if door_c is not None else (cx, cy))
+        if horiz:
+            a0, a1, along_door = x0, x1, da
+            front, back = ((y1, y0) if dp >= cy else (y0, y1))
+            sin = -1.0 if front > back else 1.0             # interior a partir da frente
+            def pane(al, ah, off, z0, z1, kd, rgb):
+                return _pp(kd, al, front + sin * M(off), ah,
+                           front + sin * (M(off) + gt), z0, z1, rgb, "Box")
+        else:
+            a0, a1, along_door = y0, y1, dp
+            front, back = ((x1, x0) if da >= cx else (x0, x1))
+            sin = -1.0 if front > back else 1.0
+            def pane(al, ah, off, z0, z1, kd, rgb):
+                return _pp(kd, front + sin * M(off), al,
+                           front + sin * (M(off) + gt), ah, z0, z1, rgb, "Box")
+        span = a1 - a0
+        fixw = min(M(0.48), span * 0.45)
+        leaf_lo = abs(along_door - a0) <= abs(along_door - a1)
+        if leaf_lo:
+            lf0, lf1 = a0, a1 - fixw + M(0.05)
+            fx0_, fx1_ = a1 - fixw, a1
+            free_edge = a0
+        else:
+            lf0, lf1 = a0 + fixw - M(0.05), a1
+            fx0_, fx1_ = a0, a0 + fixw
+            free_edge = a1
+        out.append(pane(fx0_, fx1_, 0.0, 0.014, 2.44, "box_vidro", RGB2["box_vidro"]))
+        out.append(pane(lf0, lf1, 0.045, 0.014, 2.44, "kb_folha", RGB2["box_vidro"]))
+        # trilho superior discreto (NAO tampa): so a faixa da frente
+        if horiz:
+            out.append(_pp("kb_trilho", a0, front - sin * M(0.004), a1,
+                           front + sin * M(0.065), 2.44, 2.475, RGB2["gola"], "Box"))
+        else:
+            out.append(_pp("kb_trilho", front - sin * M(0.004), a0,
+                           front + sin * M(0.065), a1, 2.44, 2.475, RGB2["gola"], "Box"))
+        # montantes finos nas duas pontas da frente
+        for ae in (a0, a1):
+            if horiz:
+                out.append(_pp("kb_perfil", ae - _pf / 2, front - _pf / 2, ae + _pf / 2,
+                               front + _pf / 2, 0.014, 2.44, RGB2["gola"], "Box"))
+            else:
+                out.append(_pp("kb_perfil", front - _pf / 2, ae - _pf / 2, front + _pf / 2,
+                               ae + _pf / 2, 0.014, 2.44, RGB2["gola"], "Box"))
+        # puxador vertical 38cm a ~6cm da borda livre da folha
+        ph = free_edge + (M(0.06) if leaf_lo else -M(0.095))
+        if horiz:
+            out.append(_pp("kb_puxador", ph, front + sin * M(0.075), ph + M(0.035),
+                           front + sin * M(0.11), 1.00, 1.38, RGB2["gola"], "Box"))
+        else:
+            out.append(_pp("kb_puxador", front + sin * M(0.075), ph,
+                           front + sin * M(0.11), ph + M(0.035), 1.00, 1.38, RGB2["gola"], "Box"))
+        # CHUVEIRO: haste do teto + cabeca redonda ~o25 a 2.22m; 50cm da parede do fundo
+        sx_ = (a0 + a1) / 2
+        sp_ = back + (M(0.50) if back < front else -M(0.50))
+        hx_, hy_ = (sx_, sp_) if horiz else (sp_, sx_)
+        out.append(_pp("kb_haste", hx_ - M(0.012), hy_ - M(0.012), hx_ + M(0.012),
+                       hy_ + M(0.012), 2.245, 2.50, RGB2["metal"], "Box"))
+        import math as _m
+        _r = M(0.125)
+        cab = _pp("kb_ducha", hx_ - _r, hy_ - _r, hx_ + _r, hy_ + _r, 2.22, 2.245,
+                  RGB2["metal"], "Box")
+        cab["corners"] = [[round((hx_ + _r * _m.cos(_a)) * PT_TO_IN, 2),
+                           round((hy_ + _r * _m.sin(_a)) * PT_TO_IN, 2)]
+                          for _a in [_m.pi / 8 + i * _m.pi / 4 for i in range(8)]]
+        out.append(cab)
+        # misturador (placa 14cm) + ducha manual slim na face interna do painel FIXO
+        mf = fx1_ - M(0.02) if not leaf_lo else fx0_ + M(0.02)
+        msgn = -1.0 if not leaf_lo else 1.0
+        mid_p = back + (M(0.45) if back < front else -M(0.45))
+        if horiz:
+            out.append(_pp("kb_misturador", mf, mid_p - M(0.07), mf + msgn * M(0.015),
+                           mid_p + M(0.07), 1.02, 1.16, RGB2["metal"], "Box"))
+            out.append(_pp("kb_ducha_manual", mf, mid_p + M(0.11), mf + msgn * M(0.05),
+                           mid_p + M(0.16), 1.12, 1.34, RGB2["metal"], "Box"))
+        else:
+            out.append(_pp("kb_misturador", mid_p - M(0.07), mf, mid_p + M(0.07),
+                           mf + msgn * M(0.015), 1.02, 1.16, RGB2["metal"], "Box"))
+            out.append(_pp("kb_ducha_manual", mid_p + M(0.11), mf, mid_p + M(0.16),
+                           mf + msgn * M(0.05), 1.12, 1.34, RGB2["metal"], "Box"))
+        # ralo linear escuro junto a parede do fundo
+        rlo = back + (M(0.09) if back < front else -M(0.14))
+        rhi = rlo + M(0.05)
+        if horiz:
+            out.append(_pp("kb_ralo", sx_ - M(0.35), min(rlo, rhi), sx_ + M(0.35),
+                           max(rlo, rhi), 0.014, 0.018, RGB2["gola"], "Box"))
+        else:
+            out.append(_pp("kb_ralo", min(rlo, rhi), sx_ - M(0.35), max(rlo, rhi),
+                           sx_ + M(0.35), 0.014, 0.018, RGB2["gola"], "Box"))
         if ws is not None:
-            # DUCHA redonda BRONZE (referência) + NICHO DE PAREDE iluminado com amenities
+            # NICHO iluminado com 3 frascos (unica coisa na parede interna do box)
             if ws["orient"] == "v":
-                wf = ws["face"] + ws["sgn"] * M(0.02)   # face da PELE de pedra
-                hx = wf + ws["sgn"] * M(0.22)
-                out.append(_pp("kb_ducha", wf, cy - M(0.012), hx, cy + M(0.012),
-                               2.05, 2.08, RGB2["metal"], "Box"))             # braço
-                out.append(_pp("kb_ducha", hx - M(0.10), cy - M(0.10), hx + M(0.10), cy + M(0.10),
-                               2.03, 2.05, RGB2["metal"], "Box"))             # cabeça
+                wf = ws["face"] + ws["sgn"] * M(0.02)
                 nx = wf + ws["sgn"] * M(0.03)
                 out.append(_pp("kb_nicho_box", wf, cy - M(0.33), nx, cy + M(0.33),
-                               1.10, 1.40, RGB2["nicho_box"], "Box"))          # nicho raso 66cm
+                               1.10, 1.40, RGB2["nicho_box"], "Box"))
                 out.append(_pp("kb_led", wf, cy - M(0.31), nx + ws["sgn"] * M(0.004), cy + M(0.31),
-                               1.355, 1.385, RGB2["led"], "Box"))              # fita continua do nicho
+                               1.355, 1.385, RGB2["led"], "Box"))
                 for _fx, _fh in ((cy - M(0.22), 0.16), (cy - M(0.05), 0.12), (cy + M(0.12), 0.14)):
                     out.append(_pp("kb_frasco", nx, _fx, nx + ws["sgn"] * M(0.05), _fx + M(0.05),
                                    1.10, 1.10 + _fh, RGB2["frasco"], "Box"))
             else:
                 wf = ws["face"] + ws["sgn"] * M(0.02)
-                hy = wf + ws["sgn"] * M(0.22)
-                out.append(_pp("kb_ducha", cx - M(0.012), wf, cx + M(0.012), hy,
-                               2.05, 2.08, RGB2["metal"], "Box"))
-                out.append(_pp("kb_ducha", cx - M(0.10), hy - M(0.10), cx + M(0.10), hy + M(0.10),
-                               2.03, 2.05, RGB2["metal"], "Box"))
                 ny = wf + ws["sgn"] * M(0.03)
                 out.append(_pp("kb_nicho_box", cx - M(0.33), wf, cx + M(0.33), ny,
                                1.10, 1.40, RGB2["nicho_box"], "Box"))
@@ -293,6 +372,142 @@ def _skin_parts(cell, ws_by_kind, zones_u):
     return out
 
 
+
+
+def _enxoval_parts(cell, ws_by_kind, bb_by_kind, door_c, lavabo):
+    """ENXOVAL fora do box (consultoria GPT 2026-08-05): toalheiro na parede do
+    box (lado de fora), argola de rosto junto ao gabinete, papeleira ao lado do
+    vaso, 2 ganchos perto da porta, lixeira, escova, tapete diante do box e
+    acessorios de bancada. Alturas em metros conforme a consultoria."""
+    out = []
+    comodo = cell.buffer(M(0.02))
+    from shapely.geometry import box as _sb
+
+    def _ok(p):
+        return comodo.contains(_sb(p["x0"] / PT_TO_IN, p["y0"] / PT_TO_IN,
+                                   p["x1"] / PT_TO_IN, p["y1"] / PT_TO_IN))
+
+    def _add(p):
+        if _ok(p):
+            out.append(p)
+
+    pia_bb = bb_by_kind.get("bancada_banho")
+    vaso_bb = bb_by_kind.get("vaso")
+    box_bb = bb_by_kind.get("box")
+    pia_ws = ws_by_kind.get("bancada_banho")
+    vaso_ws = ws_by_kind.get("vaso")
+    box_ws = ws_by_kind.get("box") or ws_by_kind.get("ducha")
+
+    # --- toalheiro barra 55cm na parede do box, LADO DE FORA (z 1.10-1.15)
+    if box_bb is not None and box_ws is not None and door_c is not None:
+        bx0, by0, bx1, by1 = box_bb
+        if box_ws["orient"] == "v":
+            wf = box_ws["face"] + box_ws["sgn"] * M(0.03)
+            frente = by1 if door_c[1] >= (by0 + by1) / 2 else by0
+            sgn_out = 1.0 if frente == by1 else -1.0
+            t0 = frente + sgn_out * M(0.14)
+            _add(_pp("kb_toalheiro", wf, t0, wf + box_ws["sgn"] * M(0.022),
+                     t0 + sgn_out * M(0.55), 1.10, 1.14, RGB2["metal"], "Enxoval"))
+        else:
+            wf = box_ws["face"] + box_ws["sgn"] * M(0.03)
+            frente = bx1 if door_c[0] >= (bx0 + bx1) / 2 else bx0
+            sgn_out = 1.0 if frente == bx1 else -1.0
+            t0 = frente + sgn_out * M(0.14)
+            _add(_pp("kb_toalheiro", t0, wf, t0 + sgn_out * M(0.55),
+                     wf + box_ws["sgn"] * M(0.022), 1.10, 1.14, RGB2["metal"], "Enxoval"))
+
+    # --- argola/barra curta de rosto ao lado do gabinete (z ~1.00)
+    if pia_bb is not None and pia_ws is not None:
+        px0, py0, px1, py1 = pia_bb
+        if pia_ws["orient"] == "v":
+            wf = pia_ws["face"] + pia_ws["sgn"] * M(0.03)
+            a0 = py1 + M(0.10)
+            _add(_pp("kb_argola", wf, a0, wf + pia_ws["sgn"] * M(0.022), a0 + M(0.28),
+                     0.99, 1.02, RGB2["metal"], "Enxoval"))
+        else:
+            wf = pia_ws["face"] + pia_ws["sgn"] * M(0.03)
+            a0 = px1 + M(0.10)
+            _add(_pp("kb_argola", a0, wf, a0 + M(0.28), wf + pia_ws["sgn"] * M(0.022),
+                     0.99, 1.02, RGB2["metal"], "Enxoval"))
+
+        # --- acessorios de bancada sobre o tampo (z 0.90+): bandeja + sabonete + copo
+        bcx, bcy = (px0 + px1) / 2, (py0 + py1) / 2
+        if pia_ws["orient"] == "v":
+            offx = pia_ws["face"] + pia_ws["sgn"] * M(0.16)
+            _add(_pp("kb_bandeja", offx - M(0.07), bcy + M(0.26), offx + M(0.07),
+                     bcy + M(0.50), 0.90, 0.915, RGB2["gola"], "Enxoval"))
+            _add(_pp("kb_sabonete", offx - M(0.04), bcy + M(0.30), offx + M(0.03),
+                     bcy + M(0.38), 0.915, 0.945, RGB2["frasco"], "Enxoval"))
+            _add(_pp("kb_copo", offx - M(0.03), bcy + M(0.41), offx + M(0.03),
+                     bcy + M(0.47), 0.915, 0.995, RGB2["frasco"], "Enxoval"))
+        else:
+            offy = pia_ws["face"] + pia_ws["sgn"] * M(0.16)
+            _add(_pp("kb_bandeja", bcx + M(0.26), offy - M(0.07), bcx + M(0.50),
+                     offy + M(0.07), 0.90, 0.915, RGB2["gola"], "Enxoval"))
+            _add(_pp("kb_sabonete", bcx + M(0.30), offy - M(0.04), bcx + M(0.38),
+                     offy + M(0.03), 0.915, 0.945, RGB2["frasco"], "Enxoval"))
+            _add(_pp("kb_copo", bcx + M(0.41), offy - M(0.03), bcx + M(0.47),
+                     offy + M(0.03), 0.915, 0.995, RGB2["frasco"], "Enxoval"))
+
+        # --- lixeira 5-7L no chao entre gabinete e box
+        if pia_ws["orient"] == "v":
+            lf = pia_ws["face"] + pia_ws["sgn"] * M(0.06)
+            _add(_pp("kb_lixeira", lf, py0 - M(0.30), lf + pia_ws["sgn"] * M(0.20),
+                     py0 - M(0.10), 0.013, 0.31, RGB2["gola"], "Enxoval"))
+        else:
+            lf = pia_ws["face"] + pia_ws["sgn"] * M(0.06)
+            _add(_pp("kb_lixeira", px0 - M(0.30), lf, px0 - M(0.10),
+                     lf + pia_ws["sgn"] * M(0.20), 0.013, 0.31, RGB2["gola"], "Enxoval"))
+
+    # --- papeleira ao lado do vaso (z 0.66-0.72) + escova no chao
+    if vaso_bb is not None and vaso_ws is not None:
+        vx0, vy0, vx1, vy1 = vaso_bb
+        if vaso_ws["orient"] == "v":
+            wf = vaso_ws["face"] + vaso_ws["sgn"] * M(0.03)
+            _add(_pp("kb_papeleira", wf, vy1 + M(0.08), wf + vaso_ws["sgn"] * M(0.10),
+                     vy1 + M(0.22), 0.66, 0.72, RGB2["metal"], "Enxoval"))
+            _add(_pp("kb_escova", wf, vy0 - M(0.16), wf + vaso_ws["sgn"] * M(0.10),
+                     vy0 - M(0.06), 0.013, 0.40, RGB2["gola"], "Enxoval"))
+        else:
+            wf = vaso_ws["face"] + vaso_ws["sgn"] * M(0.03)
+            _add(_pp("kb_papeleira", vx1 + M(0.08), wf, vx1 + M(0.22),
+                     wf + vaso_ws["sgn"] * M(0.10), 0.66, 0.72, RGB2["metal"], "Enxoval"))
+            _add(_pp("kb_escova", vx0 - M(0.16), wf, vx0 - M(0.06),
+                     wf + vaso_ws["sgn"] * M(0.10), 0.013, 0.40, RGB2["gola"], "Enxoval"))
+
+        # --- 2 ganchos na mesma parede, do outro lado da porta (z 1.66-1.70)
+        if door_c is not None:
+            wf = vaso_ws["face"] + vaso_ws["sgn"] * M(0.03)
+            if vaso_ws["orient"] == "h":
+                for gx in (door_c[0] - M(0.28), door_c[0] - M(0.44)):
+                    _add(_pp("kb_gancho", gx, wf, gx + M(0.035),
+                             wf + vaso_ws["sgn"] * M(0.05), 1.66, 1.70, RGB2["gola"], "Enxoval"))
+            else:
+                for gy in (door_c[1] - M(0.28), door_c[1] - M(0.44)):
+                    _add(_pp("kb_gancho", wf, gy, wf + vaso_ws["sgn"] * M(0.05),
+                             gy + M(0.035), 1.66, 1.70, RGB2["gola"], "Enxoval"))
+
+    # --- tapete 50x80 grafite-taupe diante da abertura do box
+    if box_bb is not None and door_c is not None:
+        bx0, by0, bx1, by1 = box_bb
+        bcx = (bx0 + bx1) / 2
+        if (bx1 - bx0) >= (by1 - by0):
+            frente = by1 if door_c[1] >= (by0 + by1) / 2 else by0
+            sgn_out = 1.0 if frente == by1 else -1.0
+            t0 = frente + sgn_out * M(0.12)
+            _add(_pp("kb_tapete", bcx - M(0.40), min(t0, t0 + sgn_out * M(0.50)),
+                     bcx + M(0.40), max(t0, t0 + sgn_out * M(0.50)),
+                     0.013, 0.020, [96, 90, 82], "Enxoval"))
+        else:
+            bcy = (by0 + by1) / 2
+            frente = bx1 if door_c[0] >= (bx0 + bx1) / 2 else bx0
+            sgn_out = 1.0 if frente == bx1 else -1.0
+            t0 = frente + sgn_out * M(0.12)
+            _add(_pp("kb_tapete", min(t0, t0 + sgn_out * M(0.50)), bcy - M(0.40),
+                     max(t0, t0 + sgn_out * M(0.50)), bcy + M(0.40),
+                     0.013, 0.020, [96, 90, 82], "Enxoval"))
+    return out
+
 def _room_span(ws, cell):
     """Range ao-longo da parede que faz fronteira com o comodo (clipa ao bbox do
     cell — parede compartilhada longa nao posiciona fora do comodo)."""
@@ -340,6 +555,7 @@ def build_boxes(con, room_id):
         circ.append(door_z)
     circ_u = unary_union(circ) if circ else None
     win_zone = _window_zones(sm)
+    door_c = ((door_z.centroid.x, door_z.centroid.y) if door_z is not None else None)
 
     walls = [ws for ws in (_wall_setup(sm, w["id"]) for w in sm["walls"]) if ws is not None]
     walls.sort(key=lambda ws: -(_room_span(ws, cell)[1] - _room_span(ws, cell)[0]))
@@ -362,6 +578,7 @@ def build_boxes(con, room_id):
     lavabo = "LAVABO" in str(sm.get("room_name", "")).upper()
     items, placed = [], []
     ws_by_kind = {}
+    bb_by_kind = {}
     box_ok = False
     for (kind, w_m, d_m), tall in fixtures:
         if kind == "bancada_banho":
@@ -400,11 +617,25 @@ def build_boxes(con, room_id):
                             cand = (_sb(cx0, cy0, ix0 - M(0.02), cy1)
                                     if (bx0 + bx1) / 2 < (ix0 + ix1) / 2
                                     else _sb(ix1 + M(0.02), cy0, cx1, cy1))
-                if ok_exp and cand.area > b.area:
+                if ok_exp:
+                    # SHAFT (Felipe 2026-08-05): recorta ao POLIGONO real do
+                    # comodo — o bounding box inclui o notch do shaft e o vidro
+                    # invadia a area tecnica (piso nem encosta la)
+                    inter = cand.intersection(cell.buffer(-M(0.004)))
+                    if not inter.is_empty:
+                        rb = _sb(*inter.bounds)
+                        if cell.buffer(M(0.02)).contains(rb):
+                            cand = rb
+                        else:
+                            cand = None
+                    else:
+                        cand = None
+                if ok_exp and cand is not None and cand.area > b.area:
                     b = cand
-            items.extend(_emit(kind, b, ws, lavabo=lavabo))   # geometria CRÍVEL multi-peça
+            items.extend(_emit(kind, b, ws, lavabo=lavabo, door_c=door_c))
             placed.append(b)
             ws_by_kind[kind] = ws
+            bb_by_kind[kind] = b.bounds
             box_ok = box_ok or kind == "box"
     # BANHO sem box que coube = ducha ABERTA de canto (banheiro sem chuveiro não
     # existe; footprint mínimo 0.30 quase sempre cabe encostado)
@@ -432,6 +663,7 @@ def build_boxes(con, room_id):
                       "reason": "nenhuma louca coube"}
     zones = [z for z in (door_z, win_zone) if z is not None]
     items.extend(_skin_parts(cell, ws_by_kind, unary_union(zones) if zones else None))
+    items.extend(_enxoval_parts(cell, ws_by_kind, bb_by_kind, door_c, lavabo))
     kinds = [it["kind"] for it in items]
     return items, {"result": "OK", "room_name": sm.get("room_name"),
                    "n_pecas": len(items), "pecas": kinds,
