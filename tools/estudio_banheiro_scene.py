@@ -204,7 +204,7 @@ def build_scene(out_dir):
     parts = build_parts()
     # iter 2 (GPT): 4:5 vertical, 1.60m, lente ~35-40mm, MENOS tilt pra baixo,
     # recuada junto a porta — gabinete/espelho/vaso/box INTEIROS no quadro
-    eye = [1.48, 0.10, 1.60]   # maximo recuo/direita FISICO (vao da porta x0.85-1.55)
+    eye = [1.41, 0.10, 1.60]   # maximo recuo/direita FISICO (vao da porta x0.85-1.55)
     target = [0.52, 1.80, 1.28]
     dx, dy, dz = eye[0] - target[0], eye[1] - target[1], eye[2] - target[2]
     cam = {"kind": "reference_match_door", "eye": eye, "target": target,

@@ -264,7 +264,7 @@ def apply_scene_theme_estudio_banheiro(text: str) -> str:
     champagne = {"diffuse": "AColor(0.30, 0.24, 0.14, 1)", "reflect": "AColor(0.55, 0.46, 0.30, 1)",
                  "reflect_glossiness": "0.72", "fresnel_ior": "10", "metalness": "1"}     # moldura champagne
     mirror = {"diffuse": "AColor(0.002, 0.002, 0.002, 1)", "reflect": "AColor(0.985, 0.99, 0.995, 1)",
-              "reflect_glossiness": "1.0", "fresnel_ior": "60", "metalness": "1"}        # espelho real
+              "reflect_glossiness": "1.0", "roughness": "0.02", "fresnel_ior": "60", "metalness": "1"}        # espelho real
     glass = {"diffuse": "AColor(0.004, 0.005, 0.005, 1)", "reflect": "AColor(0.24, 0.24, 0.24, 1)",
              "reflect_glossiness": "1.0", "fresnel_ior": "1.5", "metalness": "0"}         # vidro claro (opacity vem do SU alpha)
     towel_dark = {"diffuse": "AColor(0.085, 0.080, 0.072, 1)",     # iter3: leitura do nicho
@@ -312,7 +312,7 @@ def apply_scene_theme_estudio_banheiro(text: str) -> str:
     # espelho protagonista: halo mais quente e mais forte que os demais LEDs
     text = _set_blocks_matching(text, "espelho__led_halo",
         {"diffuse": "AColor(0.55, 0.44, 0.26, 1)",
-         "self_illumination": "AColor(9.8, 6.5, 3.2, 1)", "self_illumination_gi": "1"})
+         "self_illumination": "AColor(7.8, 5.2, 2.6, 1)", "self_illumination_gi": "1"})
     text = _set_blocks_matching(text, "spot__lente", spot_warm)
     return text
 
