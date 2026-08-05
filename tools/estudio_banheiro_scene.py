@@ -42,7 +42,8 @@ RGB = {"nogueira": [96, 68, 44], "gola": [22, 22, 24], "pedra_escura": [30, 28, 
 # trims finos legit (<1in² de footprint) — mesma politica do variant_sweep:
 # decorative=True fica ISENTO de degenerate_* no gate (fix na causa, ce7f132)
 DECORATIVE = {"moldura", "puxador", "barra", "gola", "anel", "led_halo",
-              "nicho_led", "led_under", "lente", "cabeca"}   # cabeca: octogono (off_axis intencional)
+              "nicho_led", "led_under", "lente", "cabeca",   # cabeca: octogono (off_axis intencional)
+              "perfil"}   # perfil 22mm do box (GPT it.3) — trim fino, nao estrutura
 
 
 def _p(item, label, x0, y0, x1, y1, z0, z1, rgb, alpha=None):
@@ -149,10 +150,10 @@ def build_parts():
     bxx0, bxy0 = 0.75, 1.35                                        # box 0.90 (x) x 1.10 (y)
     parts += [
         _p("box", "piso_pedra", bxx0, bxy0, W, D, 0.0, 0.012, RGB["pedra_box"]),
-        _p("box", "pedra_e", W - 0.02, bxy0, W, D, 0.012, 2.30, RGB["pedra_box"]),          # lateral leste
+        _p("box", "pedra_e", W - 0.02, bxy0, W, D, 0.012, 2.40, RGB["pedra_box"]),          # lateral leste
     ]
     # pedra do fundo (norte, trecho do box) com NICHO horizontal 0.66x0.20 + LED
-    nx0, nx1, nz0, nz1 = 0.95, 1.45, 1.10, 1.30
+    nx0, nx1, nz0, nz1 = 0.90, 1.55, 1.10, 1.30
     parts += [
         _p("box", "pedra_n", bxx0, D - 0.045, W, D, 0.012, nz0, RGB["pedra_box"]),          # abaixo
         _p("box", "pedra_n", bxx0, D - 0.045, W, D, nz1, 2.30, RGB["pedra_box"]),           # acima
@@ -161,17 +162,17 @@ def build_parts():
         _p("box", "nicho_fundo", nx0, D - 0.02, nx1, D, nz0, nz1, RGB["gola"]),             # fundo
         _p("box", "nicho_base", nx0, D - 0.045, nx1, D - 0.02, nz0, nz0 + 0.012, RGB["pedra_box"]),
         _p("box", "nicho_led", nx0 + 0.01, D - 0.043, nx1 - 0.01, D - 0.033, nz1 - 0.018, nz1 - 0.006, RGB["led"]),
-        _p("box", "frasco", 1.02, D - 0.10, 1.07, D - 0.05, nz0 + 0.012, nz0 + 0.15, RGB["frasco"]),
-        _p("box", "frasco", 1.13, D - 0.095, 1.17, D - 0.055, nz0 + 0.012, nz0 + 0.12, RGB["frasco"]),
+        _p("box", "frasco", 1.04, D - 0.085, 1.08, D - 0.045, nz0 + 0.012, nz0 + 0.13, RGB["frasco"]),
+        _p("box", "frasco", 1.12, D - 0.085, 1.16, D - 0.045, nz0 + 0.012, nz0 + 0.11, RGB["frasco"]),
     ]
     gt = 0.008                                                     # vidro 8mm
     parts += [                                                     # plano frontal x=bxx0 (porta de correr)
         _p("box", "vidro_frente", bxx0, bxy0, bxx0 + gt, D - 0.045, 0.012, 2.10, RGB["vidro"], alpha=0.10),
         _p("box", "vidro_retorno", bxx0, bxy0, W - 0.02, bxy0 + gt, 0.012, 2.10, RGB["vidro"], alpha=0.10),
-        _p("box", "perfil", bxx0 - 0.013, bxy0 - 0.013, bxx0 + 0.013, bxy0 + 0.013, 0.0, 2.12, RGB["preto_fosco"]),
-        _p("box", "perfil", bxx0 - 0.013, D - 0.026, bxx0 + 0.013, D, 0.0, 2.12, RGB["preto_fosco"]),
-        _p("box", "perfil", bxx0 - 0.010, bxy0 - 0.013, W, bxy0 + 0.010, 2.10, 2.14, RGB["preto_fosco"]),
-        _p("box", "perfil", bxx0 - 0.013, bxy0 - 0.010, bxx0 + 0.010, D, 2.10, 2.14, RGB["preto_fosco"]),
+        _p("box", "perfil", bxx0 - 0.011, bxy0 - 0.011, bxx0 + 0.011, bxy0 + 0.011, 0.0, 2.12, RGB["preto_fosco"]),
+        _p("box", "perfil", bxx0 - 0.011, D - 0.022, bxx0 + 0.011, D, 0.0, 2.12, RGB["preto_fosco"]),
+        _p("box", "perfil", bxx0 - 0.009, bxy0 - 0.011, W, bxy0 + 0.009, 2.10, 2.135, RGB["preto_fosco"]),
+        _p("box", "perfil", bxx0 - 0.011, bxy0 - 0.009, bxx0 + 0.009, D, 2.10, 2.135, RGB["preto_fosco"]),
         _p("box", "puxador", bxx0 - 0.025, 1.55, bxx0, 1.58, 0.95, 1.45, RGB["preto_fosco"]),
     ]
 
@@ -203,8 +204,8 @@ def build_scene(out_dir):
     parts = build_parts()
     # iter 2 (GPT): 4:5 vertical, 1.60m, lente ~35-40mm, MENOS tilt pra baixo,
     # recuada junto a porta — gabinete/espelho/vaso/box INTEIROS no quadro
-    eye = [1.45, 0.14, 1.60]
-    target = [0.50, 1.80, 1.30]
+    eye = [1.48, 0.10, 1.60]   # maximo recuo/direita FISICO (vao da porta x0.85-1.55)
+    target = [0.52, 1.80, 1.28]
     dx, dy, dz = eye[0] - target[0], eye[1] - target[1], eye[2] - target[2]
     cam = {"kind": "reference_match_door", "eye": eye, "target": target,
            "elev_deg": round(math.degrees(math.atan2(dz, math.hypot(dx, dy))), 1),
