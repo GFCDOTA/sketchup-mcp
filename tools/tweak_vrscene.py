@@ -107,7 +107,7 @@ def apply_theme_estudio_banho(text: str) -> str:
     planta_74). Mesmo vocabulario do apply_scene_theme_estudio_banheiro (loop GPT
     4.4->8.0), portado pros kinds do bathroom_layout. Skin-swap; geometria da
     planta congelada."""
-    walnut = {"diffuse": "AColor(0.034, 0.020, 0.011, 1)", "reflect": "AColor(0.09, 0.09, 0.09, 1)",
+    walnut = {"diffuse": "AColor(0.038, 0.023, 0.013, 1)", "reflect": "AColor(0.09, 0.09, 0.09, 1)",
               "reflect_glossiness": "0.62", "fresnel_ior": "1.5", "metalness": "0"}
     dark_stone = {"reflect": "AColor(0.20, 0.20, 0.20, 1)", "reflect_glossiness": "0.82",
                   "fresnel_ior": "1.6", "metalness": "0"}

@@ -106,8 +106,9 @@ def main():
         rects = []
         for spec in ns.rect.split(";"):
             v = [float(x) for x in spec.split(",")]
+            nrm = tuple(v[6:9]) if len(v) >= 9 else (0, 0, -1)
             rects.append({"center": (v[0], v[1], v[2]), "u_dir": (1, 0, 0),
-                          "v_dir": (0, 1, 0), "normal": (0, 0, -1),
+                          "v_dir": (0, 1, 0), "normal": nrm,
                           "u_size": v[3], "v_size": v[4], "intensity": v[5],
                           "color": (1.0, 0.78, 0.5)})
     tweak_file(str(vrs), iso=ns.iso, fnum=ns.fnum, shutter=ns.shutter, sky=ns.sky, sun=ns.sun, burn=ns.burn,
