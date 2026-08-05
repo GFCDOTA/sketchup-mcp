@@ -503,33 +503,57 @@ def living_room_boxes(con, room_id):
     if _free.geom_type == "MultiPolygon":
         _free = max(_free.geoms, key=lambda g: g.area)
     if (not _free.is_empty) and _free.area > (2.4 * M2IN * M2IN):
-        _dc = _free.centroid
-        # MESA RETANGULAR 6 LUGARES real (1.60x0.90, tampo nogueira = painel TV,
-        # pernas metal) — a quadrada de 4 saiu; cadeiras em posições de MESA
-        # (2+2 laterais + 2 cabeceiras), não radiais.
-        _dtp = _dining_table_rect(w=1.60, d=0.90, top_rgb=(108, 80, 58), leg_rgb=(30, 30, 33))
-        _dtb = place_sofa_boxes(_dtp, (_dc.x, _dc.y), (0.0, 1.0))
-        for _b in _dtb:
-            _b["module"] = "Mesa de jantar"
-        boxes += _dtb
-        _chair_spots = [(-0.38, 0.72, (0.0, -1.0)), (0.38, 0.72, (0.0, -1.0)),
-                        (-0.38, -0.72, (0.0, 1.0)), (0.38, -0.72, (0.0, 1.0)),
-                        (-1.08, 0.0, (1.0, 0.0)), (1.08, 0.0, (-1.0, 0.0))]
-        for _dx, _dy, _cf in _chair_spots:
-            _chc = (_dc.x + _dx * M2IN, _dc.y + _dy * M2IN)
-            _pt = Point(_chc)
-            if cell_in.contains(_pt) and cell_in.exterior.distance(_pt) >= 4:
-                _chb = place_sofa_boxes(_chair_parts(), _chc, _cf)
-                for _b in _chb:
-                    _b["module"] = "Cadeira jantar"
-                boxes += _chb
-        # PENDENTE sobre a mesa: cúpula octogonal preta + cabo — e o ÚNICO ponto
-        # de bronze da sala no anel da cúpula (regra global: 1 bronze por ambiente;
-        # a célula open-plan é UM campo visual, o estar recebe zero).
-        boxes.append(_oriented_box("pend_cabo", (_dc.x, _dc.y), (0.0, 1.0),
-                                   0.032, 0.032, 2.10, 0.60, [26, 26, 28], module="Pendente"))  # haste 3cm (>= min_footprint do geometry_sanity; cabo de 1.5cm era 'degenerate')
-        boxes.append(_oct_in("pend_cupula", _dc.x, _dc.y, 0.20, 1.85, 0.25, [30, 31, 32], "Pendente"))
-        boxes.append(_oct_in("pend_bronze", _dc.x, _dc.y, 0.206, 1.842, 0.010, [171, 119, 63], "Pendente"))
+        # P1 do VERDICT 6.5 (Felipe): mesa MENOR (1.40x0.85, ainda 6 lugares) e
+        # POSIÇÃO ESCOLHIDA PELO GATE — busca candidatos e só aceita onde a
+        # circulação PASSA (90cm contínuo + 0.70 atrás + cadeira PUXADA).
+        from tools.circulation_gate import gate as _circ_gate
+        _MW, _MD = 1.40, 0.85
+        _chair_spots = [(-0.33, 0.70, (0.0, -1.0)), (0.33, 0.70, (0.0, -1.0)),
+                        (-0.33, -0.70, (0.0, 1.0)), (0.33, -0.70, (0.0, 1.0)),
+                        (-0.98, 0.0, (1.0, 0.0)), (0.98, 0.0, (-1.0, 0.0))]
+
+        def _dining_set(cx, cy):
+            out_ = []
+            _dtp = _dining_table_rect(w=_MW, d=_MD, top_rgb=(108, 80, 58), leg_rgb=(30, 30, 33))
+            for _b in place_sofa_boxes(_dtp, (cx, cy), (0.0, 1.0)):
+                _b["module"] = "Mesa de jantar"
+                out_.append(_b)
+            for _dx, _dy, _cf in _chair_spots:
+                _chc = (cx + _dx * M2IN, cy + _dy * M2IN)
+                _pt = Point(_chc)
+                if cell_in.contains(_pt) and cell_in.exterior.distance(_pt) >= 4:
+                    for _b in place_sofa_boxes(_chair_parts(), _chc, _cf):
+                        _b["module"] = "Cadeira jantar"
+                        out_.append(_b)
+            out_.append(_oriented_box("pend_cabo", (cx, cy), (0.0, 1.0), 0.032, 0.032,
+                                      2.10, 0.60, [26, 26, 28], module="Pendente"))
+            out_.append(_oct_in("pend_cupula", cx, cy, 0.20, 1.85, 0.25, [30, 31, 32], "Pendente"))
+            out_.append(_oct_in("pend_bronze", cx, cy, 0.206, 1.842, 0.010, [171, 119, 63], "Pendente"))
+            return out_
+
+        _fc = _free.centroid
+        _cands = [(0.0, 0.0)] + [(dx, dy) for r_ in (0.30, 0.55, 0.80)
+                                 for dx, dy in ((r_, 0), (-r_, 0), (0, r_), (0, -r_),
+                                                (r_ * 0.7, r_ * 0.7), (-r_ * 0.7, r_ * 0.7),
+                                                (r_ * 0.7, -r_ * 0.7), (-r_ * 0.7, -r_ * 0.7))]
+        _best, _best_fails = None, 99
+        for _dx, _dy in _cands:
+            _cx, _cy = _fc.x + _dx * M2IN, _fc.y + _dy * M2IN
+            if not _inside((_cx, _cy), margin_in=int(_MW / 2 * M2IN)):
+                continue
+            _cand_boxes = _dining_set(_cx, _cy)
+            _g = _circ_gate(con, boxes + _cand_boxes, room_id)
+            _nf = sum(1 for c in _g["checks"].values() if c["result"] != "PASS")
+            if _nf == 0:
+                _best, _best_fails = _cand_boxes, 0
+                break
+            if _nf < _best_fails:
+                _best, _best_fails = _cand_boxes, _nf
+        if _best is not None:
+            if _best_fails:
+                print(f"[furnish-apt] circulation_gate: melhor candidato ainda com "
+                      f"{_best_fails} check(s) FAIL (WARN-log)")
+            boxes += _best
 
     # ---- camada de ESTILO (gated, AESTHETIC — NÃO entra no layout-fix): parede de concreto na
     # parede-TV + decor (planta/quadro/prateleira/trilho). Só sob FURNISH_STYLE.
