@@ -248,12 +248,12 @@ def apply_scene_theme_estudio_banheiro(text: str) -> str:
     (bancada/box, textura nero do export), metais PRETO fosco, ouro em DOIS toques
     combinados (anel da torneira + moldura champagne do espelho — a identidade da
     referencia), paredes cimento queimado taupe, LEDs 2700-3000K emissivos."""
-    walnut = {"diffuse": "AColor(0.038, 0.023, 0.013, 1)",                               # nogueira ESCURA flat
+    walnut = {"diffuse": "AColor(0.034, 0.020, 0.011, 1)",                               # nogueira ESCURA flat
               "reflect": "AColor(0.09, 0.09, 0.09, 1)", "reflect_glossiness": "0.62",
               "fresnel_ior": "1.5", "metalness": "0"}       # iter3: ainda mais escura (GPT 5.9)
     dark_stone = {"reflect": "AColor(0.20, 0.20, 0.20, 1)", "reflect_glossiness": "0.82",
                   "fresnel_ior": "1.6", "metalness": "0"}                                # pedra escura polida (textura)
-    stone_matte = {"reflect": "AColor(0.10, 0.10, 0.10, 1)", "reflect_glossiness": "0.6",
+    stone_matte = {"reflect": "AColor(0.16, 0.16, 0.16, 1)", "reflect_glossiness": "0.72",
                    "fresnel_ior": "1.5", "metalness": "0"}                               # pedra fosca (box/piso)
     black_metal = {"diffuse": "AColor(0.014, 0.014, 0.015, 1)", "reflect": "AColor(0.30, 0.30, 0.30, 1)",
                    "reflect_glossiness": "0.42", "fresnel_ior": "1.6", "metalness": "1"}  # preto fosco

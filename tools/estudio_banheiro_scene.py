@@ -94,9 +94,9 @@ def build_parts():
 
     # ---------------- BANCADA pedra escura (6cm) + cuba retangular esculpida
     bx1, by0, by1 = gdep + 0.03, gy0 - 0.02, gy1 + 0.02
-    parts.append(_p("bancada", "tampo", 0.0, by0, bx1, by1, 0.84, 0.90, RGB["pedra_escura"]))
-    parts.append(_p("bancada", "frontal", bx1 - 0.02, by0, bx1, by1, 0.78, 0.84, RGB["pedra_escura"]))
-    cx, cy, cw, cd = 0.27, 0.95, 0.40, 0.30                       # cuba retangular
+    parts.append(_p("bancada", "tampo", 0.0, by0, bx1, by1, 0.85, 0.90, RGB["pedra_escura"]))
+    parts.append(_p("bancada", "frontal", bx1 - 0.02, by0, bx1, by1, 0.80, 0.85, RGB["pedra_escura"]))
+    cx, cy, cw, cd = 0.27, 0.95, 0.44, 0.33                       # cuba retangular
     parts.append(_p("bancada", "cuba_anel", cx - cw / 2, cy - cd / 2, cx + cw / 2, cy + cd / 2,
                     0.900, 0.903, RGB["gola"]))
     parts.append(_p("bancada", "cuba_poco", cx - cw / 2 + 0.03, cy - cd / 2 + 0.03,
@@ -204,7 +204,7 @@ def build_scene(out_dir):
     parts = build_parts()
     # iter 2 (GPT): 4:5 vertical, 1.60m, lente ~35-40mm, MENOS tilt pra baixo,
     # recuada junto a porta — gabinete/espelho/vaso/box INTEIROS no quadro
-    eye = [1.41, 0.10, 1.60]   # maximo recuo/direita FISICO (vao da porta x0.85-1.55)
+    eye = [1.37, 0.10, 1.60]   # maximo recuo/direita FISICO (vao da porta x0.85-1.55)
     target = [0.52, 1.80, 1.28]
     dx, dy, dz = eye[0] - target[0], eye[1] - target[1], eye[2] - target[2]
     cam = {"kind": "reference_match_door", "eye": eye, "target": target,
