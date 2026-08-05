@@ -29,3 +29,24 @@ Referência: imagem gerada pelo GPT no chat fixo "Estúdio Banheiro — Claude �
 - Fill `LightSphere` invisible aparecia PRETA em reflexo → `affectReflections=0`.
 - Espelho preto não era material: fisicamente refletia o interior escuro do box —
   iluminar o CONTEÚDO refletido é o fix honesto.
+
+## Loop no banho REAL da planta_74 (2026-08-05, tarde)
+
+| Iter | Nota | Principais mudanças |
+|------|------|---------------------|
+| p01 | 6.3 | Primeira com pele completa; GPT valida box parede-a-parede até o teto (janela dentro; pede exaustão). |
+| p02 | 7.0 | Gabinete cascata 1.00m nobre; espelho cresce junto; +0.4 EV. |
+| p03 | 7.3 | Cuba retangular esculpida; veios −15%; +0.25 EV box. |
+| p04/p05 | 6.7 | Porta fora do 1º plano (VRAY_HIDE); burn na janela; box EIXO CURTO; fills longe de parede (mata discos) — mas cena escureceu. |
+| p06 | 7.0 | Rectangle Light no box (lavou teto). |
+| p07 | 7.2 | Rect baixa/inclinada; faixa dura de sombra. |
+| p08 | **7.7** | Rect no TETO dentro do box (vidro segura a luz) = teto luminoso; faixa eliminada. |
+
+TOP3 pendentes (p08→p09): espelho reflexo 25–40%; nicho/chuveiro/comandos
+protagonistas (não só teto aceso); 1º plano +8–12% com contraste cuba×tampo.
+
+Gotchas novos: fill esférica colada em parede projeta a própria silhueta
+(disco escuro no halo) — manter ≥20in de qualquer parede; rect a meia altura
+cria faixa de sombra — colar no teto dentro do box; expandir box no eixo LONGO
+bloqueia circulação (usar eixo CURTO); vaso é adjacente à porta (PDF) — hero
+cam não o inclui, restrição informada ao juiz.
