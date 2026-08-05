@@ -11,6 +11,10 @@ def vray_export_run
 
     # TEXTURAS premium: aplica texturas procedurais nos materiais dos moveis (SU da UV;
     # V-Ray traduz). So na exportacao V-Ray (line renders continuam chapados). VRAY_TEX_DIR.
+    # PeleTeto vem OCULTO do .skp (deliverable navegavel) -> re-exibe pro render
+    model.entities.grep(Sketchup::Group).each do |g|
+      (g.hidden = false) rescue nil if g.name.to_s.include?('PeleTeto')
+    end
     tex_dir = ENV['VRAY_TEX_DIR']
     if tex_dir && File.directory?(tex_dir)
       wd = 'wood_dark.png'; wm = 'wood_medium.png'; fl = 'fabric_light.png'; fa = 'fabric_accent.png'

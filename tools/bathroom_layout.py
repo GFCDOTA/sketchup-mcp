@@ -184,11 +184,11 @@ def _emit(kind, b, ws, lavabo=False):
     elif kind == "box":
         # box de vidro com PERFIL preto (2 montantes + travessa) + DUCHA preta
         # z0 0.014: nasce ACIMA do overlay de piso-pedra da PELE (sem overlap)
-        out.append(_pp("box_vidro", x0, y0, x1, y1, 0.014, 2.0, RGB2["box_vidro"], "Box"))
+        out.append(_pp("box_vidro", x0, y0, x1, y1, 0.014, 2.48, RGB2["box_vidro"], "Box"))
         _pf = M(0.026)   # perfil 2.6cm (>= min_footprint 1in² do geometry_sanity; 2cm era 'degenerate')
-        out.append(_pp("kb_perfil", x0, y0, x0 + _pf, y0 + _pf, 0.014, 2.0, RGB2["gola"], "Box"))
-        out.append(_pp("kb_perfil", x1 - _pf, y1 - _pf, x1, y1, 0.014, 2.0, RGB2["gola"], "Box"))
-        out.append(_pp("kb_perfil", x0, y0, x1, y1, 1.98, 2.02, RGB2["gola"], "Box"))
+        out.append(_pp("kb_perfil", x0, y0, x0 + _pf, y0 + _pf, 0.014, 2.48, RGB2["gola"], "Box"))
+        out.append(_pp("kb_perfil", x1 - _pf, y1 - _pf, x1, y1, 0.014, 2.48, RGB2["gola"], "Box"))
+        out.append(_pp("kb_perfil", x0, y0, x1, y1, 2.44, 2.48, RGB2["gola"], "Box"))
         if ws is not None:
             # DUCHA redonda BRONZE (referência) + NICHO DE PAREDE iluminado com amenities
             if ws["orient"] == "v":
@@ -349,6 +349,34 @@ def build_boxes(con, room_id):
     for (kind, w_m, d_m), tall in fixtures:
         b, ws = _place_fixture(sm, walls, w_m, d_m, placed, circ_u, comodo, cell, win_zone, tall)
         if b is not None:
+            if kind == "box" and ws is not None:
+                # Felipe 2026-08-05: box de PAREDE A PAREDE (nao "cortado") —
+                # expande ao span da parede, recuando onde colide com pecas ja postas
+                from shapely.geometry import box as _sb
+                lo_r, hi_r = _room_span(ws, cell)
+                bx0, by0, bx1, by1 = b.bounds
+                if ws["orient"] == "v":
+                    cand = _sb(bx0, lo_r + M(0.01), bx1, hi_r - M(0.01))
+                else:
+                    cand = _sb(lo_r + M(0.01), by0, hi_r - M(0.01), by1)
+                for pb in placed:
+                    if cand.intersection(pb).area > M(0.01) ** 2:
+                        px0, py0, px1, py1 = pb.bounds
+                        cx0, cy0, cx1, cy1 = cand.bounds
+                        if ws["orient"] == "v":
+                            if py0 > by1:
+                                cand = _sb(cx0, cy0, cx1, py0 - M(0.02))
+                            elif py1 < by0:
+                                cand = _sb(cx0, py1 + M(0.02), cx1, cy1)
+                        else:
+                            if px0 > bx1:
+                                cand = _sb(cx0, cy0, px0 - M(0.02), cy1)
+                            elif px1 < bx0:
+                                cand = _sb(px1 + M(0.02), cy0, cx1, cy1)
+                if circ_u is not None and cand.intersection(circ_u).area > M(0.04) ** 2:
+                    pass          # porta no caminho -> mantem o box original
+                else:
+                    b = cand
             items.extend(_emit(kind, b, ws, lavabo=lavabo))   # geometria CRÍVEL multi-peça
             placed.append(b)
             ws_by_kind[kind] = ws

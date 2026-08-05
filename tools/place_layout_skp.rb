@@ -182,6 +182,9 @@ def pl_run
       log << "  FAIL #{b['kind']}: #{e.class}: #{e.message}"
     end
   end
+  # PeleTeto (laje do V-Ray dos banhos) OCULTO no deliverable: o Felipe abre o
+  # .skp e enxerga dentro; o vray_export re-exibe antes de exportar.
+  mod_groups.each { |k, g| (g.hidden = true) rescue nil if k.include?('PeleTeto') }
   log << "placed #{placed}/#{boxes.size} placeholders"
   log << "texturas aplicadas: #{tex_applied.size} kind(s) via LAYOUT_TEX_MAP"
   log << "MOVEIS (comodo | movel): #{mod_groups.keys.sort.join(' ; ')}"
