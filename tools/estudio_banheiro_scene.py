@@ -42,7 +42,7 @@ RGB = {"nogueira": [96, 68, 44], "gola": [22, 22, 24], "pedra_escura": [30, 28, 
 # trims finos legit (<1in² de footprint) — mesma politica do variant_sweep:
 # decorative=True fica ISENTO de degenerate_* no gate (fix na causa, ce7f132)
 DECORATIVE = {"moldura", "puxador", "barra", "gola", "anel", "led_halo",
-              "nicho_led", "led_under", "lente"}
+              "nicho_led", "led_under", "lente", "cabeca"}   # cabeca: octogono (off_axis intencional)
 
 
 def _p(item, label, x0, y0, x1, y1, z0, z1, rgb, alpha=None):
@@ -118,9 +118,11 @@ def build_parts():
     ]
 
     # ---------------- ESPELHO 1.00x1.10 com halo LED + moldura champagne fina
+    # iter3 (GPT): espelho PROTAGONISTA — halo continuo VISIVEL transbordando
+    # 3.5cm alem da borda nos 4 lados
     my0, my1, mz0, mz1 = 0.45, 1.45, 1.10, 2.20
-    parts.append(_p("espelho", "led_halo", 0.004, my0 - 0.015, 0.012, my1 + 0.015,
-                    mz0 - 0.015, mz1 + 0.015, RGB["led"]))
+    parts.append(_p("espelho", "led_halo", 0.004, my0 - 0.035, 0.012, my1 + 0.035,
+                    mz0 - 0.035, mz1 + 0.035, RGB["led"]))
     parts.append(_p("espelho", "vidro", 0.012, my0, 0.024, my1, mz0, mz1, RGB["espelho"]))
     for za, zb in ((mz0 - 0.012, mz0), (mz1, mz1 + 0.012)):        # moldura top/bottom
         parts.append(_p("espelho", "moldura", 0.010, my0 - 0.012, 0.026, my1 + 0.012, za, zb, RGB["champagne"]))
@@ -173,14 +175,21 @@ def build_parts():
         _p("box", "puxador", bxx0 - 0.025, 1.55, bxx0, 1.58, 0.95, 1.45, RGB["preto_fosco"]),
     ]
 
-    # ---------------- DUCHA preta: rain shower + barra/ducha manual + comando
-    dcx = (bxx0 + W) / 2
+    # ---------------- DUCHA preta: rain shower REDONDO (octogono ~o0.28) +
+    # barra/ducha manual + comando maiores (iter3: "mostrar com clareza")
+    dcx, dcy = (bxx0 + W) / 2, D - 0.30
+    oct_r = 0.14
+    octg = [[round(dcx + oct_r * math.cos(a), 4), round(dcy + oct_r * math.sin(a), 4)]
+            for a in [math.pi / 8 + i * math.pi / 4 for i in range(8)]]
+    cab = _p("ducha", "cabeca", dcx - oct_r, dcy - oct_r, dcx + oct_r, dcy + oct_r,
+             2.14, 2.17, RGB["preto_fosco"])
+    cab["poly"] = octg
     parts += [
-        _p("ducha", "braco", dcx - 0.012, D - 0.30, dcx + 0.012, D - 0.045, 2.18, 2.21, RGB["preto_fosco"]),
-        _p("ducha", "cabeca", dcx - 0.135, D - 0.44, dcx + 0.135, D - 0.17, 2.15, 2.17, RGB["preto_fosco"]),
-        _p("ducha", "barra", W - 0.06, 1.70, W - 0.035, 1.725, 1.00, 1.90, RGB["preto_fosco"]),
-        _p("ducha", "manual", W - 0.075, 1.68, W - 0.045, 1.735, 1.60, 1.80, RGB["preto_fosco"]),
-        _p("ducha", "comando", W - 0.05, 1.95, W - 0.02, 2.05, 1.05, 1.15, RGB["preto_fosco"]),
+        _p("ducha", "braco", dcx - 0.014, D - 0.30, dcx + 0.014, D - 0.045, 2.18, 2.22, RGB["preto_fosco"]),
+        cab,
+        _p("ducha", "barra", W - 0.065, 1.66, W - 0.035, 1.69, 0.95, 1.95, RGB["preto_fosco"]),
+        _p("ducha", "manual", W - 0.085, 1.635, W - 0.045, 1.715, 1.55, 1.82, RGB["preto_fosco"]),
+        _p("ducha", "comando", W - 0.055, 1.92, W - 0.015, 2.08, 1.02, 1.18, RGB["preto_fosco"]),
     ]
 
     # ---------------- SPOTS de teto (2700-3000K): circulacao/espelho + box

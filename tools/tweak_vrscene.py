@@ -248,9 +248,9 @@ def apply_scene_theme_estudio_banheiro(text: str) -> str:
     (bancada/box, textura nero do export), metais PRETO fosco, ouro em DOIS toques
     combinados (anel da torneira + moldura champagne do espelho — a identidade da
     referencia), paredes cimento queimado taupe, LEDs 2700-3000K emissivos."""
-    walnut = {"diffuse": "AColor(0.050, 0.030, 0.017, 1)",                               # nogueira ESCURA flat
+    walnut = {"diffuse": "AColor(0.038, 0.023, 0.013, 1)",                               # nogueira ESCURA flat
               "reflect": "AColor(0.09, 0.09, 0.09, 1)", "reflect_glossiness": "0.62",
-              "fresnel_ior": "1.5", "metalness": "0"}       # iter2: 30-40% mais escura, menos laranja (GPT)
+              "fresnel_ior": "1.5", "metalness": "0"}       # iter3: ainda mais escura (GPT 5.9)
     dark_stone = {"reflect": "AColor(0.20, 0.20, 0.20, 1)", "reflect_glossiness": "0.82",
                   "fresnel_ior": "1.6", "metalness": "0"}                                # pedra escura polida (textura)
     stone_matte = {"reflect": "AColor(0.10, 0.10, 0.10, 1)", "reflect_glossiness": "0.6",
@@ -267,7 +267,7 @@ def apply_scene_theme_estudio_banheiro(text: str) -> str:
               "reflect_glossiness": "0.99", "fresnel_ior": "40", "metalness": "1"}        # espelho real
     glass = {"diffuse": "AColor(0.004, 0.005, 0.005, 1)", "reflect": "AColor(0.24, 0.24, 0.24, 1)",
              "reflect_glossiness": "1.0", "fresnel_ior": "1.5", "metalness": "0"}         # vidro claro (opacity vem do SU alpha)
-    towel_dark = {"diffuse": "AColor(0.045, 0.043, 0.042, 1)",
+    towel_dark = {"diffuse": "AColor(0.085, 0.080, 0.072, 1)",     # iter3: leitura do nicho
                   "reflect": "AColor(0, 0, 0, 1)", "reflect_glossiness": "1",
                   "roughness": "0.6", "metalness": "0"}
     wall_taupe = {"reflect": "AColor(0.02, 0.02, 0.02, 1)", "reflect_glossiness": "0.5",
@@ -307,8 +307,12 @@ def apply_scene_theme_estudio_banheiro(text: str) -> str:
         text = _set_blocks_matching(text, d, wall_taupe)
     text = _set_block(text, "_fz_floor_BRDFVRayMtl", stone_matte)
     text = _set_block(text, "_fz_ceiling_BRDFVRayMtl", art_dark)
-    for sub in ("espelho__led_halo", "gabinete__led_under", "box__nicho_led"):
+    for sub in ("gabinete__led_under", "box__nicho_led"):
         text = _set_blocks_matching(text, sub, led_warm)
+    # espelho protagonista: halo mais quente e mais forte que os demais LEDs
+    text = _set_blocks_matching(text, "espelho__led_halo",
+        {"diffuse": "AColor(0.55, 0.44, 0.26, 1)",
+         "self_illumination": "AColor(15.0, 10.0, 4.9, 1)", "self_illumination_gi": "1"})
     text = _set_blocks_matching(text, "spot__lente", spot_warm)
     return text
 
