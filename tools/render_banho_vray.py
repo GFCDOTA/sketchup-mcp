@@ -52,6 +52,8 @@ def main():
     ap.add_argument("--width", type=int, default=1100)
     ap.add_argument("--height", type=int, default=1375)
     ap.add_argument("--fill", default="", help="INCHES: 'x,y,z,int[,raio]' ;-separados")
+    ap.add_argument("--rect", default="",
+                    help="LightRectangle horizontal p/ baixo: 'cx,cy,cz,meia_w,meia_d,int' ;-separados (in)")
     ns = ap.parse_args()
 
     SCRATCH.mkdir(parents=True, exist_ok=True)
@@ -99,9 +101,18 @@ def main():
             fills.append({"pos": (v[0], v[1], v[2]), "intensity": v[3],
                           "radius": v[4] if len(v) > 4 else 14.0,
                           "color": (1.0, 0.8, 0.55)})
+    rects = None
+    if ns.rect:
+        rects = []
+        for spec in ns.rect.split(";"):
+            v = [float(x) for x in spec.split(",")]
+            rects.append({"center": (v[0], v[1], v[2]), "u_dir": (1, 0, 0),
+                          "v_dir": (0, 1, 0), "normal": (0, 0, -1),
+                          "u_size": v[3], "v_size": v[4], "intensity": v[5],
+                          "color": (1.0, 0.78, 0.5)})
     tweak_file(str(vrs), iso=ns.iso, fnum=ns.fnum, shutter=ns.shutter, sky=ns.sky, sun=ns.sun, burn=ns.burn,
                width=ns.width, height=ns.height, materials=True,
-               theme="estudio_banho", fill_lights=fills)
+               theme="estudio_banho", fill_lights=fills, rect_lights=rects)
 
     out_png = Path(ns.out).resolve()
     if out_png.exists():
