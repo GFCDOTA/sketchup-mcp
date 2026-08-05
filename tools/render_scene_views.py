@@ -111,6 +111,7 @@ def scene_boxes(parts):
             "h_in": round((p["z1"] - p["z0"]) * M_TO_IN, 2),
             "z0_in": round(p["z0"] * M_TO_IN, 2),
             "rgb": p["rgb"], "ambiguous": False, "decorative": False,
+            **({"alpha": p["alpha"]} if p.get("alpha") is not None else {}),
         })
     return boxes
 

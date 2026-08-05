@@ -242,6 +242,75 @@ def apply_scene_theme_black_wood_gold(text: str) -> str:
     return text
 
 
+def apply_scene_theme_estudio_banheiro(text: str) -> str:
+    """THEME ESTUDIO_BANHEIRO (2026-08-05) — recriacao da referencia do GPT (chat
+    fixo): industrial sofisticado. Nogueira satin no gabinete, pedra escura polida
+    (bancada/box, textura nero do export), metais PRETO fosco, ouro em DOIS toques
+    combinados (anel da torneira + moldura champagne do espelho — a identidade da
+    referencia), paredes cimento queimado taupe, LEDs 2700-3000K emissivos."""
+    walnut = {"reflect": "AColor(0.09, 0.09, 0.09, 1)", "reflect_glossiness": "0.68",
+              "fresnel_ior": "1.5", "metalness": "0"}                                    # nogueira satin (textura)
+    dark_stone = {"reflect": "AColor(0.20, 0.20, 0.20, 1)", "reflect_glossiness": "0.82",
+                  "fresnel_ior": "1.6", "metalness": "0"}                                # pedra escura polida (textura)
+    stone_matte = {"reflect": "AColor(0.10, 0.10, 0.10, 1)", "reflect_glossiness": "0.6",
+                   "fresnel_ior": "1.5", "metalness": "0"}                               # pedra fosca (box/piso)
+    black_metal = {"diffuse": "AColor(0.014, 0.014, 0.015, 1)", "reflect": "AColor(0.30, 0.30, 0.30, 1)",
+                   "reflect_glossiness": "0.42", "fresnel_ior": "1.6", "metalness": "1"}  # preto fosco
+    black_ceramic = {"diffuse": "AColor(0.020, 0.020, 0.022, 1)", "reflect": "AColor(0.22, 0.22, 0.22, 1)",
+                     "reflect_glossiness": "0.72", "fresnel_ior": "1.5", "metalness": "0"}  # vaso preto acetinado
+    gold = {"diffuse": "AColor(0.32, 0.22, 0.09, 1)", "reflect": "AColor(0.62, 0.47, 0.24, 1)",
+            "reflect_glossiness": "0.78", "fresnel_ior": "12", "metalness": "1"}          # dourado discreto
+    champagne = {"diffuse": "AColor(0.30, 0.24, 0.14, 1)", "reflect": "AColor(0.55, 0.46, 0.30, 1)",
+                 "reflect_glossiness": "0.72", "fresnel_ior": "10", "metalness": "1"}     # moldura champagne
+    mirror = {"diffuse": "AColor(0.005, 0.005, 0.005, 1)", "reflect": "AColor(0.92, 0.94, 0.95, 1)",
+              "reflect_glossiness": "0.99", "fresnel_ior": "40", "metalness": "1"}        # espelho real
+    glass = {"diffuse": "AColor(0.004, 0.005, 0.005, 1)", "reflect": "AColor(0.24, 0.24, 0.24, 1)",
+             "reflect_glossiness": "1.0", "fresnel_ior": "1.5", "metalness": "0"}         # vidro claro (opacity vem do SU alpha)
+    towel_dark = {"reflect": "AColor(0, 0, 0, 1)", "reflect_glossiness": "1",
+                  "roughness": "0.6", "metalness": "0"}
+    wall_taupe = {"reflect": "AColor(0.02, 0.02, 0.02, 1)", "reflect_glossiness": "0.5",
+                  "metalness": "0"}                                                       # cimento queimado fosco (textura)
+    art_dark = {"diffuse": "AColor(0.035, 0.030, 0.026, 1)", "reflect": "AColor(0.06, 0.06, 0.06, 1)",
+                "reflect_glossiness": "0.55", "metalness": "0"}
+    led_warm = {"diffuse": "AColor(0.55, 0.44, 0.26, 1)",
+                "self_illumination": "AColor(9.0, 6.2, 3.2, 1)", "self_illumination_gi": "1"}
+    spot_warm = {"diffuse": "AColor(0.55, 0.44, 0.26, 1)",
+                 "self_illumination": "AColor(16.0, 11.0, 5.5, 1)", "self_illumination_gi": "1"}
+
+    for sub in ("gabinete__corpo", "gabinete__frente", "gabinete__lateral",
+                "gabinete__prateleira"):
+        text = _set_blocks_matching(text, sub, walnut)
+    for sub in ("bancada__tampo", "bancada__frontal"):
+        text = _set_blocks_matching(text, sub, dark_stone)
+    for sub in ("bancada__cuba_anel", "bancada__cuba_poco", "gabinete__gola",
+                "gabinete__nicho_fundo", "box__nicho_fundo", "arte__moldura",
+                "vaso__placa_flush"):
+        text = _set_blocks_matching(text, sub, black_metal)
+    text = _set_blocks_matching(text, "torneira__", black_metal)
+    text = _set_blocks_matching(text, "torneira__anel", gold)                # ouro: 1 ponto
+    text = _set_blocks_matching(text, "espelho__moldura", champagne)
+    text = _set_blocks_matching(text, "espelho__vidro", mirror)
+    text = _set_blocks_matching(text, "vaso__", black_ceramic)
+    for sub in ("box__vidro_frente", "box__vidro_lado"):
+        text = _set_blocks_matching(text, sub, glass)
+    for sub in ("box__perfil", "box__puxador", "ducha__", "deco__vaso_deco"):
+        text = _set_blocks_matching(text, sub, black_metal)
+    for sub in ("box__pedra", "box__piso_pedra", "box__nicho_base"):
+        text = _set_blocks_matching(text, sub, stone_matte)
+    for sub in ("gabinete__toalha", "deco__planta"):
+        text = _set_blocks_matching(text, sub, towel_dark)
+    text = _set_blocks_matching(text, "deco__frasco", art_dark)
+    text = _set_blocks_matching(text, "arte__quadro", art_dark)
+    for d in ("wall_east", "wall_north", "wall_south", "wall_west"):
+        text = _set_blocks_matching(text, d, wall_taupe)
+    text = _set_block(text, "_fz_floor_BRDFVRayMtl", stone_matte)
+    text = _set_block(text, "_fz_ceiling_BRDFVRayMtl", art_dark)
+    for sub in ("espelho__led_halo", "gabinete__led_under", "box__nicho_led"):
+        text = _set_blocks_matching(text, sub, led_warm)
+    text = _set_blocks_matching(text, "spot__lente", spot_warm)
+    return text
+
+
 def _light_sphere(name, pos, intensity, color=(1.0, 0.8, 0.55), radius=14.0, units=0):
     """Bloco LightSphere V-Ray (area light esferica, quente, invisivel) — fill interior.
     pos/radius em INCHES (unidade do modelo exportado). units=0 (radiancia escalar,
@@ -356,10 +425,15 @@ def tweak(text: str, iso=200, fnum=4.0, shutter=100, sky=1.0, width=None, height
         # Reinhard burn (<1 comprime highlights): janela mostra gradacao do ceu
         # em vez de buraco branco estourado ("janela viva" — pedido do juiz)
         text = set_block_param(text, r"SettingsColorMapping\s+\S+\s*\{", "bright_mult", burn)
+    # img_* E a REGIAO de render (rgn_/bmp_/r_) juntos: o export SU fixa a regiao no
+    # default 1280x720 — mudar so img_width/height renderizava um retangulo 1280x720
+    # com L PRETO no resto (a "faixa preta inferior" que o juiz apontou na sala).
     if width:
-        text = re.sub(r"(\bimg_width=)\d+", rf"\g<1>{width}", text, count=1)
+        for k in ("img_width", "rgn_width", "bmp_width", "r_width"):
+            text = re.sub(rf"(\b{k}=)\d+", rf"\g<1>{width}", text, count=1)
     if height:
-        text = re.sub(r"(\bimg_height=)\d+", rf"\g<1>{height}", text, count=1)
+        for k in ("img_height", "rgn_height", "bmp_height", "r_height"):
+            text = re.sub(rf"(\b{k}=)\d+", rf"\g<1>{height}", text, count=1)
     if materials:
         text = apply_materials(text)
     if theme == "dark_walnut":
@@ -370,6 +444,8 @@ def tweak(text: str, iso=200, fnum=4.0, shutter=100, sky=1.0, width=None, height
         text = apply_theme_black_wood_gold(text)
     if scene_theme == "black_wood_gold":     # tema da CENA (materiais _fz_*), distinto do _ph_kc_ da cozinha
         text = apply_scene_theme_black_wood_gold(text)
+    elif scene_theme == "estudio_banheiro":
+        text = apply_scene_theme_estudio_banheiro(text)
     if fill_lights:
         text = add_fill_light(text, fill_lights)
     if rect_lights:

@@ -1,0 +1,33 @@
+{
+  "geometry_sanity": {
+    "overall": "WARN",
+    "n_parts": 49,
+    "n_fail": 0,
+    "n_warn": 2,
+    "findings": [
+      {
+        "severity": "WARN",
+        "check": "degenerate_height",
+        "label": "bancada__cuba_anel",
+        "kind": "cuba_anel",
+        "detail": "h_in=0.12"
+      },
+      {
+        "severity": "WARN",
+        "check": "degenerate_height",
+        "label": "bancada__cuba_poco",
+        "kind": "cuba_poco",
+        "detail": "h_in=0.08"
+      }
+    ],
+    "checks_run": [
+      "underground",
+      "degenerate_footprint",
+      "degenerate_height",
+      "off_axis",
+      "absurd_bbox"
+    ],
+    "note": "PASS = sem regressao geometrica obvia; NAO julga estetica/premium (isso e o visual review)."
+  },
+  "all_inside_room": true
+}

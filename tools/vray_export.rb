@@ -128,6 +128,22 @@ def vray_export_run
         'fz_rug__' => ['fabric_linen.png', 60],
         'fz_floor' => ['wood_floor.png', 120]
       }
+      # ESTUDIO BANHEIRO (gated por VRAY_SCENE_THEME): nogueira no gabinete, pedra
+      # escura veinada na bancada + box, grafite no piso, cimento queimado nas paredes.
+      if ENV['VRAY_SCENE_THEME'] == 'estudio_banheiro'
+        fz_tex = fz_tex.merge({
+          'fz_gabinete__corpo' => ['wood_dark.png', 40],
+          'fz_gabinete__frente' => ['wood_dark.png', 40],
+          'fz_gabinete__lateral' => ['wood_dark.png', 40],
+          'fz_gabinete__prateleira' => ['wood_dark.png', 40],
+          'fz_bancada__tampo' => ['stone_dark_gold_D_nero.png', 60],
+          'fz_bancada__frontal' => ['stone_dark_gold_D_nero.png', 60],
+          'fz_box__pedra' => ['floor_grafite_medio.png', 80],
+          'fz_box__piso_pedra' => ['floor_grafite_medio.png', 60],
+          'fz_wall_' => ['floor_cimento_queimado.png', 150],
+          'fz_floor' => ['floor_grafite_medio.png', 60]
+        })
+      end
       model.materials.each do |m|
         name = m.name.to_s
         # 'fz_floor' e' match EXATO: start_with pegaria fz_floor_lamp__* (haste de
