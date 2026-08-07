@@ -77,7 +77,7 @@ def _pp(kind, x0, y0, x1, y1, z0_m, z1_m, rgb, module):
                         [round(x0 * PT_TO_IN, 2), round(y1 * PT_TO_IN, 2)]],
             "h_in": round((z1_m - z0_m) * 39.3700787402, 2), "z0_in": round(z0_m * 39.3700787402, 2),
             "rgb": rgb, "label": kind, "module": module, "ambiguous": False,
-            "decorative": kind in ("kb_moldura", "kb_frasco", "kb_toalha", "kb_trilho", "kb_puxador", "kb_haste", "kb_ducha", "kb_ralo", "kb_misturador", "kb_ducha_manual", "kb_argola", "kb_gancho", "kb_papeleira", "kb_escova", "kb_toalheiro", "kb_tapete", "kb_bandeja", "kb_sabonete", "kb_copo")}  # trim/decor fino declarado (kb_moldura decorativa)
+            "decorative": kind in ("kb_moldura", "kb_frasco", "kb_toalha", "kb_trilho", "kb_puxador", "kb_haste", "kb_ducha", "kb_ralo", "kb_misturador", "kb_ducha_manual", "kb_argola", "kb_gancho", "kb_papeleira", "kb_escova", "kb_toalheiro", "kb_tapete", "kb_bandeja", "kb_sabonete", "kb_copo", "kb_botao")}  # trim/decor fino declarado (kb_moldura decorativa)
 
 
 def _emit(kind, b, ws, lavabo=False, door_c=None):
@@ -87,15 +87,54 @@ def _emit(kind, b, ws, lavabo=False, door_c=None):
     cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
     out = []
     if kind == "vaso":
-        # vaso SUSPENSO (sem caixa acoplada): bacia afunilada off-floor + assento
-        ins = min(w, d) * 0.12
-        bowl = _pp("vaso", x0 + ins, y0 + ins, x1 - ins, y1 - ins, 0.28, 0.42, RGB2["vaso"], "Vaso")
-        bowl["verts8"] = [(x0 + ins * 1.7, y0 + ins * 1.7, 0.28), (x1 - ins * 1.7, y0 + ins * 1.7, 0.28),
-                          (x1 - ins * 1.7, y1 - ins * 1.7, 0.28), (x0 + ins * 1.7, y1 - ins * 1.7, 0.28),
-                          (x0 + ins, y0 + ins, 0.42), (x1 - ins, y0 + ins, 0.42),
-                          (x1 - ins, y1 - ins, 0.42), (x0 + ins, y1 - ins, 0.42)]
-        out.append(bowl)
-        out.append(_pp("vaso", x0 + ins, y0 + ins, x1 - ins, y1 - ins, 0.42, 0.45, RGB2["vaso"], "Vaso"))
+        # ANATOMIA DE PRIVADA (consultoria GPT 2026-08-05; Felipe: 'parece um
+        # quadrado'): caixa acoplada com botao + base estreita + bacia OVAL
+        # (octogono alongado) + assento/tampa. Nunca prisma retangular.
+        import math as _m
+
+        def _oval(cx_, cy_, rx, ry, z0_, z1_, kd="vaso"):
+            part = _pp(kd, cx_ - rx, cy_ - ry, cx_ + rx, cy_ + ry, z0_, z1_,
+                       RGB2["vaso"], "Vaso")
+            part["corners"] = [[round((cx_ + rx * _m.cos(a)) * PT_TO_IN, 2),
+                                round((cy_ + ry * _m.sin(a)) * PT_TO_IN, 2)]
+                               for a in [_m.pi / 8 + i * _m.pi / 4 for i in range(8)]]
+            return part
+
+        if ws is not None:
+            wf = ws["face"] + ws["sgn"] * M(0.02)
+            sgn = ws["sgn"]
+            if ws["orient"] == "v":
+                ca_, cd_ = cy, None
+                # caixa acoplada 38x16, z 0.42-0.79 + botao
+                out.append(_pp("vaso", wf, cy - M(0.19), wf + sgn * M(0.16), cy + M(0.19),
+                               0.42, 0.79, RGB2["vaso"], "Vaso"))
+                out.append(_pp("kb_botao", wf + sgn * M(0.05), cy - M(0.045),
+                               wf + sgn * M(0.11), cy + M(0.045), 0.79, 0.802,
+                               RGB2["metal"], "Vaso"))
+                bx_ = wf + sgn * (M(0.16) + M(0.20))
+                out.append(_oval(bx_, cy, M(0.15), M(0.125), 0.013, 0.24))       # base estreita
+                bo_ = wf + sgn * (M(0.16) + M(0.255))
+                out.append(_oval(bo_, cy, M(0.26), M(0.185), 0.24, 0.405))       # bacia oval
+                out.append(_oval(bo_, cy, M(0.245), M(0.175), 0.405, 0.428))     # assento
+                out.append(_oval(bo_ - sgn * M(0.012), cy, M(0.235), M(0.168),
+                                 0.428, 0.448))                                  # tampa
+            else:
+                out.append(_pp("vaso", cx - M(0.19), wf, cx + M(0.19), wf + sgn * M(0.16),
+                               0.42, 0.79, RGB2["vaso"], "Vaso"))
+                out.append(_pp("kb_botao", cx - M(0.045), wf + sgn * M(0.05),
+                               cx + M(0.045), wf + sgn * M(0.11), 0.79, 0.802,
+                               RGB2["metal"], "Vaso"))
+                by_ = wf + sgn * (M(0.16) + M(0.20))
+                out.append(_oval(cx, by_, M(0.125), M(0.15), 0.013, 0.24))
+                bo_ = wf + sgn * (M(0.16) + M(0.255))
+                out.append(_oval(cx, bo_, M(0.185), M(0.26), 0.24, 0.405))
+                out.append(_oval(cx, bo_, M(0.175), M(0.245), 0.405, 0.428))
+                out.append(_oval(cx, bo_ - sgn * M(0.012), M(0.168), M(0.235),
+                                 0.428, 0.448))
+        else:
+            ins = min(w, d) * 0.12
+            out.append(_pp("vaso", x0 + ins, y0 + ins, x1 - ins, y1 - ins,
+                           0.28, 0.45, RGB2["vaso"], "Vaso"))
     elif kind == "bancada_banho":
         # GRAMÁTICA DA REFERÊNCIA ChatGPT do Felipe (2026-08-04, "tipo isso"):
         # gavetão nogueira suspenso -> NICHO ABERTO de toalhas com LED -> tampo
@@ -255,9 +294,10 @@ def _emit(kind, b, ws, lavabo=False, door_c=None):
         else:
             out.append(_pp("kb_puxador", front + sin * M(0.075), ph,
                            front + sin * M(0.11), ph + M(0.035), 1.00, 1.38, RGB2["gola"], "Box"))
-        # CHUVEIRO: haste do teto + cabeca redonda ~o25 a 2.22m; 50cm da parede do fundo
-        sx_ = (a0 + a1) / 2
-        sp_ = back + (M(0.50) if back < front else -M(0.50))
+        # CHUVEIRO (consultoria layout): NAO no centro — 33cm da face do shaft
+        # (lado do painel fixo) e 38cm pra dentro do vidro frontal
+        sx_ = (a1 - M(0.33)) if leaf_lo else (a0 + M(0.33))
+        sp_ = front + sin * M(0.38)
         hx_, hy_ = (sx_, sp_) if horiz else (sp_, sx_)
         out.append(_pp("kb_haste", hx_ - M(0.012), hy_ - M(0.012), hx_ + M(0.012),
                        hy_ + M(0.012), 2.245, 2.50, RGB2["metal"], "Box"))
@@ -507,6 +547,65 @@ def _enxoval_parts(cell, ws_by_kind, bb_by_kind, door_c, lavabo):
                      0.013, 0.020, [96, 90, 82], "Enxoval"))
     return out
 
+
+
+def _directed_pia_vaso(cell, walls, door_c, circ_u, comodo, win_zone, pia_sizes):
+    """Layout DIRIGIDO (consultoria GPT 2026-08-05, reprovacao do Felipe):
+    entrada -> GABINETE primeiro na parede longa oposta ao lado da folha da
+    porta (comecando ~8cm do canto) -> VASO imediatamente ao lado, de LADO pra
+    porta (traseira na mesma parede), eixo >=38cm da lateral do gabinete.
+    Devolve {"bancada_banho": (box, ws), "vaso": (box, ws)} ou None (fallback
+    pro first-fit generico)."""
+    from shapely.geometry import box as _sb
+    if door_c is None:
+        return None
+    minx, miny, maxx, maxy = cell.bounds
+    if (maxx - minx) >= (maxy - miny):
+        return None                      # so trata comodo alongado em Y (caso canonico)
+    host_face = maxx if door_c[0] < (minx + maxx) / 2 else minx
+    host = None
+    for ws in walls:
+        if ws["orient"] == "v" and abs(ws["face"] - host_face) < M(0.10):
+            host = ws
+            break
+    if host is None:
+        return None
+    door_end = maxy if door_c[1] > (miny + maxy) / 2 else miny
+    sgn_in = 1.0 if door_end == maxy else -1.0          # sentido porta -> fundo
+    tol = 0.02 / PT_TO_M ** 2
+
+    def _try(along0, w_m, d_m):
+        a_hi = along0 - sgn_in * M(0.0)
+        a_lo = along0 - sgn_in * M(w_m)
+        y0_, y1_ = min(a_lo, a_hi), max(a_lo, a_hi)
+        x0_ = min(host["face"], host["face"] + host["sgn"] * M(0.03 + d_m))
+        x1_ = max(host["face"], host["face"] + host["sgn"] * M(0.03 + d_m))
+        bx = _sb(x0_ + M(0.001), y0_, x1_ - M(0.001), y1_)
+        if not comodo.contains(bx):
+            return None
+        if circ_u is not None and bx.intersection(circ_u).area > tol:
+            return None
+        if win_zone is not None and bx.intersection(win_zone).area > tol:
+            return None
+        return bx
+
+    # gabinete: comeca 8cm do canto da entrada
+    pia = None
+    for w_m, d_m in pia_sizes:
+        pia = _try(door_end - sgn_in * M(0.08), w_m, d_m)
+        if pia is not None:
+            pia_w = w_m
+            break
+    if pia is None:
+        return None
+    # vaso: logo apos o gabinete (gap 10cm), 38cm de largura ao longo da parede,
+    # bacia projetando 66cm pra dentro
+    vaso_start = door_end - sgn_in * M(0.08 + pia_w + 0.10)
+    vaso = _try(vaso_start, 0.38, 0.63)
+    if vaso is None:
+        return None
+    return {"bancada_banho": (pia, host), "vaso": (vaso, host)}
+
 def _room_span(ws, cell):
     """Range ao-longo da parede que faz fronteira com o comodo (clipa ao bbox do
     cell — parede compartilhada longa nao posiciona fora do comodo)."""
@@ -564,8 +663,8 @@ def build_boxes(con, room_id):
 
     # pia/cuba em CASCATA (GPT 6.3 no banho real: gabinete 0.95-1.05m "nobre";
     # tenta do maior pro menor ate caber — 0.50 fixo deixava o conjunto raquitico)
-    pia_sizes = ([(1.00, 0.48), (0.80, 0.45), (0.62, 0.42), (0.50, 0.40)]
-                 if area < 4.5 else [(1.05, 0.50), (0.85, 0.50), (0.70, 0.45)])
+    pia_sizes = ([(0.78, 0.46), (0.65, 0.44), (0.52, 0.40)]
+                 if area < 4.5 else [(0.90, 0.48), (0.78, 0.46), (0.65, 0.44)])
     fixtures = [(("bancada_banho", 0, 0), False), (VASO, False)]
     if area >= BOX_MIN_AREA_M2:
         # tall=False: box é VIDRO — pode ficar sob a janela alta do banho (padrão
@@ -579,8 +678,12 @@ def build_boxes(con, room_id):
     ws_by_kind = {}
     bb_by_kind = {}
     box_ok = False
+    directed = _directed_pia_vaso(cell, walls, door_c, circ_u, comodo,
+                                  win_zone, pia_sizes)
     for (kind, w_m, d_m), tall in fixtures:
-        if kind == "bancada_banho":
+        if directed and kind in directed:
+            b, ws = directed[kind]
+        elif kind == "bancada_banho":
             b = ws = None
             for w_m, d_m in pia_sizes:
                 b, ws = _place_fixture(sm, walls, w_m, d_m, placed, circ_u,
