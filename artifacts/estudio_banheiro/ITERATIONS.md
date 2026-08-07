@@ -88,3 +88,23 @@ antracite. Travas red→green (25/25).
 TOP3 (p11→p12): espelho reflexo 30–40%; pedra menos granulada (veios mais
 longos/sutis, ruído −25%, separar tampo×cuba×frente); anatomia do box de correr
 legível (sobreposição fixo×folha + puxador/trilho + interior +0.2EV).
+
+## Correção de LAYOUT (reprovação do Felipe + consultoria GPT, 2026-08-05)
+
+Felipe pegou de cima: vaso de frente pra porta, gabinete no shaft, chuveiro no
+centro, vaso-quadrado. GPT especificou o layout; implementado:
+`_directed_pia_vaso` (gabinete 78cm colado na entrada → vaso ao lado, DE LADO
+pra porta), chuveiro 33cm do shaft/38cm do vidro, anatomia de privada
+(caixa+botão, base estreita, bacia oval, assento/tampa).
+
+| Iter | Nota | Mudanças |
+|------|------|----------|
+| p12 | **8.2** ⭐ | Layout correto + privada de verdade. RECORDE (lab parou em 8.0). |
+
+TOP3 (p12→p13): box lendo como porta de correr premium (fixo×folha evidente,
+sobreposição 4-6cm, puxador 30-40cm, trilho discreto); vaso menos facetado
+(bacia/assento mais suaves, menos low-poly); espelho 30-40% reflexo + bancada
+com contraste tampo×cuba×frente.
+
+LIÇÃO: o olho do Felipe na PLANTA (top view) pega erro de layout que o render
+hero esconde — sempre validar top view com ele antes de polir material/luz.
