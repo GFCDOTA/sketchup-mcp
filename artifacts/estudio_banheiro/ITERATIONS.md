@@ -108,3 +108,16 @@ com contraste tampo×cuba×frente.
 
 LIÇÃO: o olho do Felipe na PLANTA (top view) pega erro de layout que o render
 hero esconde — sempre validar top view com ele antes de polir material/luz.
+
+## Pós-auditoria impiedosa (2026-08-05)
+
+Auditoria p12 no rigor máximo: 21 defeitos, régua re-calibrada pra 7.1
+(AUDITORIA_P12.md). Ataque ao cluster "look CG":
+
+| Iter | Nota | Mudanças |
+|------|------|----------|
+| p13 | **8.0** | Piso porcelanato greige CALMO (novo, junta fina) + antracite limpo no box; vaso/chuveiro 16 lados; caixilho + vidro fosco na janela; folha offset 6.5cm + guia; escalas de tile revisadas. (+0.9 em 1 ciclo) |
+
+TOP3 (p13→p14): espelho 30-40% + câmera 3-5cm esq/trás (mostrar cuba+tampo);
+box interior +0.2-0.3EV com vidro menos leitoso; monolito com veio mais sutil
++ separação tampo×cuba×frente (menos caixa reta).
