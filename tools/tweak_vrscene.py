@@ -113,16 +113,16 @@ def apply_theme_estudio_banho(text: str) -> str:
                   "fresnel_ior": "1.6", "metalness": "0"}
     stone_matte = {"reflect": "AColor(0.16, 0.16, 0.16, 1)", "reflect_glossiness": "0.72",
                    "fresnel_ior": "1.5", "metalness": "0"}
-    black_metal = {"diffuse": "AColor(0.014, 0.014, 0.015, 1)", "reflect": "AColor(0.30, 0.30, 0.30, 1)",
-                   "reflect_glossiness": "0.42", "fresnel_ior": "1.6", "metalness": "1"}
+    black_metal = {"diffuse": "AColor(0.014, 0.014, 0.015, 1)", "reflect": "AColor(0.38, 0.38, 0.38, 1)",
+                   "reflect_glossiness": "0.50", "fresnel_ior": "1.6", "metalness": "1"}  # p20: glint (misturador/chuveiro presentes)
     black_ceramic = {"diffuse": "AColor(0.020, 0.020, 0.022, 1)", "reflect": "AColor(0.22, 0.22, 0.22, 1)",
                      "reflect_glossiness": "0.72", "fresnel_ior": "1.5", "metalness": "0"}
     gold = {"diffuse": "AColor(0.32, 0.22, 0.09, 1)", "reflect": "AColor(0.62, 0.47, 0.24, 1)",
             "reflect_glossiness": "0.78", "fresnel_ior": "12", "metalness": "1"}
     champagne = {"diffuse": "AColor(0.30, 0.24, 0.14, 1)", "reflect": "AColor(0.55, 0.46, 0.30, 1)",
                  "reflect_glossiness": "0.72", "fresnel_ior": "10", "metalness": "1"}
-    mirror = {"diffuse": "AColor(0.002, 0.002, 0.002, 1)", "reflect": "AColor(0.985, 0.99, 0.995, 1)",
-              "reflect_glossiness": "1.0", "roughness": "0.02", "fresnel_ior": "60", "metalness": "1"}
+    mirror = {"diffuse": "AColor(0.010, 0.010, 0.011, 1)", "reflect": "AColor(0.985, 0.99, 0.995, 1)",
+              "reflect_glossiness": "1.0", "roughness": "0.02", "fresnel_ior": "60", "metalness": "1"}  # p20: preto menos absoluto
     glass = {"diffuse": "AColor(0.004, 0.005, 0.005, 1)", "reflect": "AColor(0.24, 0.24, 0.24, 1)",
              "reflect_glossiness": "1.0", "fresnel_ior": "1.5", "metalness": "0",
              "opacity": "AColor(0.12, 0.12, 0.12, 1)"}
@@ -135,11 +135,17 @@ def apply_theme_estudio_banho(text: str) -> str:
     dark = {"diffuse": "AColor(0.035, 0.030, 0.026, 1)", "reflect": "AColor(0.06, 0.06, 0.06, 1)",
             "reflect_glossiness": "0.55", "metalness": "0"}
 
+    # p20: cuba under-mount NITIDA (leve reflexo pega o halo) + shadow gap = void
+    # matte de verdade (era black_metal refletivo — matava a transicao suave)
+    cuba_dark = {"diffuse": "AColor(0.006, 0.006, 0.007, 1)", "reflect": "AColor(0.10, 0.10, 0.10, 1)",
+                 "reflect_glossiness": "0.60", "fresnel_ior": "1.5", "metalness": "0"}
+    gap_void = {"diffuse": "AColor(0.006, 0.006, 0.006, 1)", "reflect": "AColor(0, 0, 0, 1)",
+                "reflect_glossiness": "1", "metalness": "0"}
     for k, params in (("gabinete", greige_stone), ("bancada_banho", greige_stone),
-                      ("cuba", {"diffuse": "AColor(0.006, 0.006, 0.007, 1)"}),
+                      ("cuba", cuba_dark),
                       ("kb_torneira", black_metal), ("kb_perfil", black_metal),
                       ("kb_ducha", black_metal), ("kb_gola", black_metal),
-                      ("kb_sombra", black_metal), ("kb_anel", gold),
+                      ("kb_sombra", gap_void), ("kb_anel", gold),
                       ("kb_moldura", black_metal), ("espelho", mirror),
                       ("vaso", black_ceramic), ("box_vidro", glass),
                       ("kb_folha", glass),   # p19: folha INCOLOR (a cor SU esverdeada lia "leitoso")

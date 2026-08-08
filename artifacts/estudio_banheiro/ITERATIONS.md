@@ -144,6 +144,14 @@ under-mount + shadow gap, 1ª leitura = lavatório+espelho); box refino final
 (nicho/misturador/chuveiro legíveis, menos massa na parede direita, vidro
 INCOLOR sofisticado — não leitoso).
 
+| p19 | **9.0** ⭐ | AINDA_NÃO | Folha no theme glass INCOLOR (a cor SU esverdeada era o "leitoso") + halo −20% + wash direita +25% + câmera recuada/alta (espelho inteiro + bancada presente). |
+
+TOP3 (p19→p20): espelho 25-35% conteúdo real, preto menos absoluto, halo ainda
+mais refinado; parede direita pesa — textura/luz útil OU cortar mais no
+enquadramento (leitura = lavatório+espelho+box); refino portfólio — transição
+tampo/frente/shadow gap suave, cuba under-mount nítida, nicho+misturador+
+chuveiro presentes.
+
 GOTCHA reconfirmado: resposta do /ask em <20s idêntica à anterior = STALE
 (streaming não detectado) — SEMPRE conferir no Chrome antes de agir.
 GOTCHA novo (2026-08-08): /ask 504 "streaming não começou" ≠ falha — a msg
