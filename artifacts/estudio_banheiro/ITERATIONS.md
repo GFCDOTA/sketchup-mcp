@@ -154,6 +154,13 @@ chuveiro presentes.
 
 | p20 | **9.2** 🏆 | **SIM — APROVADO_DESIGN** | Espelho diffuse 5x (preto menos absoluto) + shadow gap void matte + cuba c/ reflexo leve + metais glint + pan esq + wash 34/rect 62. |
 
+| p21 | **9.4** 🏆 | **SIM** | KIT CURADO PELO FELIPE (front :8788): torneira Unic bica baixa + gabinete 2 frentes Elite-like (sai nicho de toalhas; trava atualizada) + ducha de PAREDE FlexMax Ø22 + cuba Slim. Curadoria→builder→render→nota em 1 ciclo. |
+
+TOP3 residual (p21→polish): espelho 20-30% reflexo legível; braço da ducha
+mais fino + cabeça mais circular; montante do box cortando janela/chuveiro na
+hero (câmera uns cm). Referências reais: REFERENCE_KIT_PRODUTOS.md + fotos em
+reference_lab/inbox/kit_banho01/.
+
 ## 🏆 APROVADO_DESIGN (2026-08-08) — critério de parada do Felipe ATINGIDO
 
 Placar do banho real: 6.3 → … → 8.6 (p17) → 8.8 (p18) → 9.0 (p19) → **9.2 (p20)
