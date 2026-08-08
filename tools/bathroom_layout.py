@@ -294,11 +294,11 @@ def _emit(kind, b, ws, lavabo=False, door_c=None):
         # puxador vertical 38cm a ~6cm da borda livre da folha
         ph = free_edge + (M(0.06) if leaf_lo else -M(0.095))
         if horiz:
-            out.append(_pp("kb_puxador", ph, front + sin * M(0.075), ph + M(0.035),
-                           front + sin * M(0.11), 1.00, 1.38, RGB2["gola"], "Box"))
+            out.append(_pp("kb_puxador", ph, front + sin * M(0.075), ph + M(0.045),
+                           front + sin * M(0.11), 0.95, 1.42, RGB2["gola"], "Box"))
         else:
             out.append(_pp("kb_puxador", front + sin * M(0.075), ph,
-                           front + sin * M(0.11), ph + M(0.035), 1.00, 1.38, RGB2["gola"], "Box"))
+                           front + sin * M(0.11), ph + M(0.045), 0.95, 1.42, RGB2["gola"], "Box"))
         # GUIA inferior minima da folha (auditoria: sistema de correr legivel)
         if horiz:
             out.append(_pp("kb_guia", lf0, front + sin * M(0.06), lf1,
