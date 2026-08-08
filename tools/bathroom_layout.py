@@ -52,12 +52,13 @@ RGB2 = {"gabinete": [148, 140, 128], "tampo_banho": [146, 138, 126], "cuba": [16
 # ESTUDIO BANHEIRO: o .skp NAVEGAVEL recebe as MESMAS texturas do render
 # (FP-036 interativo) + vidro translucido — sem isso o Felipe abre o modelo e
 # ve "outra coisa" (vidro opaco azul, madeira/pedra chapadas).
-_KIND_TEX = {"gabinete": ("stone_greige_veins.png", 60),
-             "bancada_banho": ("stone_greige_veins.png", 60),
-             "kb_parede": ("floor_cimento_queimado.png", 80),
+_KIND_TEX = {"gabinete": ("stone_greige_veins.png", 90),
+             "bancada_banho": ("stone_greige_veins.png", 90),
+             "kb_parede": ("floor_cimento_queimado.png", 120),
              "kb_parede_pedra": ("stone_antracite_veins.png", 80),
-             "kb_piso": ("porcelain.png", 60)}
-_KIND_ALPHA = {"box_vidro": 0.30, "kb_folha": 0.30}
+             "kb_piso": ("porcelanato_greige_calmo.png", 80),
+             "kb_piso_box": ("antracite_calmo.png", 60)}
+_KIND_ALPHA = {"box_vidro": 0.30, "kb_folha": 0.30, "kb_janela_fosco": 0.55}
 
 
 def _pp(kind, x0, y0, x1, y1, z0_m, z1_m, rgb, module):
@@ -77,7 +78,7 @@ def _pp(kind, x0, y0, x1, y1, z0_m, z1_m, rgb, module):
                         [round(x0 * PT_TO_IN, 2), round(y1 * PT_TO_IN, 2)]],
             "h_in": round((z1_m - z0_m) * 39.3700787402, 2), "z0_in": round(z0_m * 39.3700787402, 2),
             "rgb": rgb, "label": kind, "module": module, "ambiguous": False,
-            "decorative": kind in ("kb_moldura", "kb_frasco", "kb_toalha", "kb_trilho", "kb_puxador", "kb_haste", "kb_ducha", "kb_ralo", "kb_misturador", "kb_ducha_manual", "kb_argola", "kb_gancho", "kb_papeleira", "kb_escova", "kb_toalheiro", "kb_tapete", "kb_bandeja", "kb_sabonete", "kb_copo", "kb_botao")}  # trim/decor fino declarado (kb_moldura decorativa)
+            "decorative": kind in ("kb_moldura", "kb_frasco", "kb_toalha", "kb_trilho", "kb_puxador", "kb_haste", "kb_ducha", "kb_ralo", "kb_misturador", "kb_ducha_manual", "kb_argola", "kb_gancho", "kb_papeleira", "kb_escova", "kb_toalheiro", "kb_tapete", "kb_bandeja", "kb_sabonete", "kb_copo", "kb_botao", "kb_guia", "kb_caixilho")}  # trim/decor fino declarado (kb_moldura decorativa)
 
 
 def _emit(kind, b, ws, lavabo=False, door_c=None):
@@ -97,7 +98,7 @@ def _emit(kind, b, ws, lavabo=False, door_c=None):
                        RGB2["vaso"], "Vaso")
             part["corners"] = [[round((cx_ + rx * _m.cos(a)) * PT_TO_IN, 2),
                                 round((cy_ + ry * _m.sin(a)) * PT_TO_IN, 2)]
-                               for a in [_m.pi / 8 + i * _m.pi / 4 for i in range(8)]]
+                               for a in [_m.pi / 16 + i * _m.pi / 8 for i in range(16)]]
             return part
 
         if ws is not None:
@@ -270,7 +271,7 @@ def _emit(kind, b, ws, lavabo=False, door_c=None):
             fx0_, fx1_ = a0, a0 + fixw
             free_edge = a1
         out.append(pane(fx0_, fx1_, 0.0, 0.014, 2.44, "box_vidro", RGB2["box_vidro"]))
-        out.append(pane(lf0, lf1, 0.045, 0.014, 2.44, "kb_folha", RGB2["box_vidro"]))
+        out.append(pane(lf0, lf1, 0.065, 0.014, 2.44, "kb_folha", RGB2["box_vidro"]))
         # trilho superior discreto (NAO tampa): so a faixa da frente
         if horiz:
             out.append(_pp("kb_trilho", a0, front - sin * M(0.004), a1,
@@ -294,6 +295,19 @@ def _emit(kind, b, ws, lavabo=False, door_c=None):
         else:
             out.append(_pp("kb_puxador", front + sin * M(0.075), ph,
                            front + sin * M(0.11), ph + M(0.035), 1.00, 1.38, RGB2["gola"], "Box"))
+        # GUIA inferior minima da folha (auditoria: sistema de correr legivel)
+        if horiz:
+            out.append(_pp("kb_guia", lf0, front + sin * M(0.06), lf1,
+                           front + sin * M(0.085), 0.014, 0.028, RGB2["gola"], "Box"))
+            out.append(_pp("kb_piso_box", a0 + M(0.01), min(front, back) + M(0.01),
+                           a1 - M(0.01), max(front, back) - M(0.01),
+                           0.0125, 0.016, [52, 51, 53], "Box"))
+        else:
+            out.append(_pp("kb_guia", front + sin * M(0.06), lf0,
+                           front + sin * M(0.085), lf1, 0.014, 0.028, RGB2["gola"], "Box"))
+            out.append(_pp("kb_piso_box", min(front, back) + M(0.01), a0 + M(0.01),
+                           max(front, back) - M(0.01), a1 - M(0.01),
+                           0.0125, 0.016, [52, 51, 53], "Box"))
         # CHUVEIRO (consultoria layout): NAO no centro — 33cm da face do shaft
         # (lado do painel fixo) e 38cm pra dentro do vidro frontal
         sx_ = (a1 - M(0.33)) if leaf_lo else (a0 + M(0.33))
@@ -307,7 +321,7 @@ def _emit(kind, b, ws, lavabo=False, door_c=None):
                   RGB2["metal"], "Box")
         cab["corners"] = [[round((hx_ + _r * _m.cos(_a)) * PT_TO_IN, 2),
                            round((hy_ + _r * _m.sin(_a)) * PT_TO_IN, 2)]
-                          for _a in [_m.pi / 8 + i * _m.pi / 4 for i in range(8)]]
+                          for _a in [_m.pi / 16 + i * _m.pi / 8 for i in range(16)]]
         out.append(cab)
         # misturador (placa 14cm) + ducha manual slim na face interna do painel FIXO
         mf = fx1_ - M(0.02) if not leaf_lo else fx0_ + M(0.02)
@@ -357,7 +371,7 @@ def _emit(kind, b, ws, lavabo=False, door_c=None):
     return out
 
 
-def _skin_parts(cell, ws_by_kind, zones_u):
+def _skin_parts(cell, ws_by_kind, zones_u, win_zone=None):
     """PELE do banheiro (Estudio Banheiro 2026-08-05): o que faltava entre o
     laboratorio 8.0/10 e a planta — piso de pedra grafite + revestimento das
     paredes que hospedam as pecas (cimento queimado; pedra antracite atras do
@@ -408,7 +422,47 @@ def _skin_parts(cell, ws_by_kind, zones_u):
                 continue
             gx0, gy0, gx1, gy1 = g.bounds
             out.append(_pp(pk, gx0, gy0, gx1, gy1, 0.012, 2.30, rgb, "Pele"))
+    # JANELA como elemento de projeto (auditoria: 'buraco branco'): caixilho
+    # preto fino + vidro FOSCO translucido no vao, na face interna da parede
+    if win_zone is not None and not win_zone.is_empty:
+        wzx0, wzy0, wzx1, wzy1 = win_zone.bounds
+        minx, miny, maxx, maxy = cell.bounds
+        zs, zh = 1.32, 2.04
+        cands = [(abs(wzy0 - miny), 'S'), (abs(maxy - wzy1), 'N'),
+                 (abs(wzx0 - minx), 'W'), (abs(maxx - wzx1), 'E')]
+        side = min(cands)[1]
+        fr = M(0.035)
+        if side in ('S', 'N'):
+            fy = miny if side == 'S' else maxy
+            sgn = 1.0 if side == 'S' else -1.0
+            a0w, a1w = max(wzx0, minx) + M(0.02), min(wzx1, maxx) - M(0.02)
+            g0, g1 = fy + sgn * M(0.006), fy + sgn * M(0.014)
+            pane = _pp("kb_janela_fosco", a0w, min(g0, g1), a1w, max(g0, g1),
+                       zs, zh, [214, 219, 223], "Pele")
+            out.append(pane)
+            f0, f1 = fy + sgn * M(0.004), fy + sgn * M(0.018)
+            for za, zb in ((zs - 0.035, zs), (zh, zh + 0.035)):
+                out.append(_pp("kb_caixilho", a0w - fr, min(f0, f1), a1w + fr,
+                               max(f0, f1), za, zb, [24, 24, 26], "Pele"))
+            for aa, ab in ((a0w - fr, a0w), (a1w, a1w + fr)):
+                out.append(_pp("kb_caixilho", aa, min(f0, f1), ab, max(f0, f1),
+                               zs, zh, [24, 24, 26], "Pele"))
+        else:
+            fx = minx if side == 'W' else maxx
+            sgn = 1.0 if side == 'W' else -1.0
+            a0w, a1w = max(wzy0, miny) + M(0.02), min(wzy1, maxy) - M(0.02)
+            g0, g1 = fx + sgn * M(0.006), fx + sgn * M(0.014)
+            out.append(_pp("kb_janela_fosco", min(g0, g1), a0w, max(g0, g1), a1w,
+                           zs, zh, [214, 219, 223], "Pele"))
+            f0, f1 = fx + sgn * M(0.004), fx + sgn * M(0.018)
+            for za, zb in ((zs - 0.035, zs), (zh, zh + 0.035)):
+                out.append(_pp("kb_caixilho", min(f0, f1), a0w - fr, max(f0, f1),
+                               a1w + fr, za, zb, [24, 24, 26], "Pele"))
+            for aa, ab in ((a0w - fr, a0w), (a1w, a1w + fr)):
+                out.append(_pp("kb_caixilho", min(f0, f1), aa, max(f0, f1), ab,
+                               zs, zh, [24, 24, 26], "Pele"))
     return out
+
 
 
 
@@ -764,7 +818,7 @@ def build_boxes(con, room_id):
         return None, {"result": "NO_VALID_LAYOUT", "room_name": sm.get("room_name"),
                       "reason": "nenhuma louca coube"}
     zones = [z for z in (door_z, win_zone) if z is not None]
-    items.extend(_skin_parts(cell, ws_by_kind, unary_union(zones) if zones else None))
+    items.extend(_skin_parts(cell, ws_by_kind, unary_union(zones) if zones else None, win_zone))
     items.extend(_enxoval_parts(cell, ws_by_kind, bb_by_kind, door_c, lavabo))
     kinds = [it["kind"] for it in items]
     return items, {"result": "OK", "room_name": sm.get("room_name"),

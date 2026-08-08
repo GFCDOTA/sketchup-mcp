@@ -100,7 +100,8 @@ def vray_export_run
       # cimento queimado, pedra antracite de veios finos no box + bancada.
       if ENV['VRAY_BATH_THEME'] == 'estudio'
         tex_map = tex_map.merge({
-          'ph_kb_piso' => 'porcelain.png',
+          'ph_kb_piso' => 'porcelanato_greige_calmo.png',
+          'ph_kb_piso_box' => 'antracite_calmo.png',
           'ph_kb_parede' => 'floor_cimento_queimado.png',
           'ph_kb_parede_pedra' => 'stone_antracite_veins.png',
           'ph_bancada_banho' => 'stone_greige_veins.png',

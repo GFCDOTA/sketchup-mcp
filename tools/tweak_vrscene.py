@@ -144,7 +144,12 @@ def apply_theme_estudio_banho(text: str) -> str:
                       ("vaso", black_ceramic), ("box_vidro", glass),
                       ("kb_toalha", towel), ("kb_frasco", dark),
                       ("kb_nicho_fundo", dark), ("kb_nicho_box", stone_matte),
-                      ("kb_piso", stone_matte), ("kb_parede", wall_matte),
+                      ("kb_piso", stone_matte), ("kb_piso_box", stone_matte),
+                      ("kb_guia", black_metal), ("kb_caixilho", black_metal),
+                      ("kb_janela_fosco", {"diffuse": "AColor(0.72, 0.75, 0.77, 1)",
+                                           "reflect": "AColor(0.06, 0.06, 0.06, 1)",
+                                           "reflect_glossiness": "0.55", "metalness": "0"}),
+                      ("kb_parede", wall_matte),
                       ("kb_parede_pedra", stone_matte), ("kb_led", led_warm)):
         text = _set_block(text, f"_ph_{k}_BRDFVRayMtl", params)
     return text
