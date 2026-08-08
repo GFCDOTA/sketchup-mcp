@@ -152,6 +152,24 @@ enquadramento (leitura = lavatório+espelho+box); refino portfólio — transiç
 tampo/frente/shadow gap suave, cuba under-mount nítida, nicho+misturador+
 chuveiro presentes.
 
+| p20 | **9.2** 🏆 | **SIM — APROVADO_DESIGN** | Espelho diffuse 5x (preto menos absoluto) + shadow gap void matte + cuba c/ reflexo leve + metais glint + pan esq + wash 34/rect 62. |
+
+## 🏆 APROVADO_DESIGN (2026-08-08) — critério de parada do Felipe ATINGIDO
+
+Placar do banho real: 6.3 → … → 8.6 (p17) → 8.8 (p18) → 9.0 (p19) → **9.2 (p20)
+com APROVADO_DESIGN: SIM**. Heroes de portfólio (1500×1875, shutter 75):
+`kitchen_angles/banho01_stone_HERO.png` + `banho01_stone_HERO_lavatorio.png`.
+
+TOP3 residual do juiz (polish NÃO-bloqueante, se o Felipe quiser ir além):
+espelho 20-30% reflexo útil sem perder mood; veio da bancada mais suave +
+antracite da direita menos "massa contínua"; (feito) hero em alta resolução.
+
+Cmd final congelado:
+`--eye "520,634,64" --target "533.5,567,45" --fov 60 --iso 160 --shutter 80
+--fnum 5.6 --sky 0.16 --sun 0.05 --burn 0.5 --hide "porta,door"
+--fill "534,585,72,30,10;525,546,68,36,8;528,588,88,18,10;520,610,72,12,10;523,584,55,34,9;523,596,76,34,9"
+--rect "521,545,93,22,16,62,0,0,-1"`
+
 GOTCHA reconfirmado: resposta do /ask em <20s idêntica à anterior = STALE
 (streaming não detectado) — SEMPRE conferir no Chrome antes de agir.
 GOTCHA novo (2026-08-08): /ask 504 "streaming não começou" ≠ falha — a msg

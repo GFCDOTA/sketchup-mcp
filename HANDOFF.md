@@ -1,39 +1,38 @@
-# HANDOFF — Estúdio Banheiro (2026-08-05, fim da sessão 1)
+# HANDOFF — Estúdio Banheiro (2026-08-08 — 🏆 APROVADO_DESIGN)
 
-## Retomada em 1 linha
-Loop YOLO no BANHO 01 da planta_74 até o GPT dar APROVADO_DESIGN=SIM.
-Estado: **p17 = 8.6/10, AINDA_NÃO**. Próximo passo: p18 (TOP3 abaixo).
+## Estado em 1 linha
+Loop CONCLUÍDO: **p20 = 9.2/10 com APROVADO_DESIGN: SIM** (critério de parada
+do Felipe: "faz sentido pra um designer de interiores"). Placar completo e
+lições em `artifacts/estudio_banheiro/ITERATIONS.md`.
 
-## Onde está tudo
-- Worktree: `E:\Claude\worktrees\estudio-banheiro` (branch `feat/estudio-banheiro`, pushed).
-- Placar + gotchas: `artifacts/estudio_banheiro/ITERATIONS.md` (LER PRIMEIRO).
-- Backlog de defeitos: `artifacts/estudio_banheiro/AUDITORIA_P12.md`.
-- Renders: `artifacts/estudio_banheiro/iterations/planta_iter_*.png`.
-- Memória persistente: `project_estudio_banheiro.md` (fases 1-6 completas).
-- Juiz: chat fixo GPT "Estúdio Banheiro — Claude ⇄ GPT" via bridge :8899
-  (Docker Desktop precisa estar de pé; /health primeiro).
+## Deliverables
+- Heroes de portfólio (1500×1875):
+  `artifacts/planta_74/furnished/kitchen_angles/banho01_stone_HERO.png` e
+  `banho01_stone_HERO_lavatorio.png`.
+- Renders do loop: `artifacts/estudio_banheiro/iterations/planta_iter_01..20.png`.
+- `.skp` navegável com a MESMA pele (alpha 0.16 no vidro): rebuild via
+  `python -m tools.furnish_apartment` (venv canônico).
 
-## Ciclo padrão (por iteração)
-1. Editar `tools/bathroom_layout.py` (geometria) e/ou `tools/tweak_vrscene.py`
-   (theme estudio_banho) e/ou texturas em `assets/textures/procedural/`.
-2. `pytest tests/test_bathrooms_style.py` (25 travas) → `python -m tools.furnish_apartment`.
-3. Render:
-   python -m tools.render_banho_vray --eye "518,631,63" --target "536,567,46"
-     --fov 60 --iso 160 --shutter 80 --fnum 5.6 --sky 0.16 --sun 0.05
-     --burn 0.5 --hide "porta,door"
-     --fill "534,585,72,30,10;525,546,68,36,8;528,588,88,18,10;520,610,72,12,10;523,584,55,22,9;523,596,76,22,9"
-     --rect "521,545,93,22,16,52,0,0,-1"
-     --out artifacts/planta_74/furnished/kitchen_angles/banho01_stone_iNN.png
-4. cp pra `artifacts/estudio_banheiro/iterations/planta_iter_NN.png` → commit → push.
-5. /ask no bridge (formato do prompt do Felipe, pedir NOTA + APROVADO_DESIGN +
-   TOP3). Timeout ou resposta <20s idêntica = STALE → ler no Chrome.
+## O que mudou nesta retomada (p18→p20)
+- `bathroom_layout.py`: montante preto no bordo da folha (correr inequívoco);
+  `_KIND_ALPHA` vidro 0.16.
+- `tweak_vrscene.py` (theme estudio_banho): kb_folha no glass INCOLOR (a cor SU
+  esverdeada era o "leitoso"); espelho diffuse 0.010; shadow gap void matte;
+  cuba com reflexo leve; metais pretos com glint; halo LED −20%.
+- Câmera final: eye 520,634,64 → target 533.5,567,45 (cmd completo no
+  ITERATIONS.md).
 
-## TOP3 da p18
-1. Espelho: reflexo 30-40% (borda esquerda enquadrada com intenção).
-2. Box: fixo×folha inequívocos; vidro alpha ~0.16; nicho/chuveiro/misturador revelados.
-3. Câmera 2-4cm trás/esquerda — 1ª leitura = espelho+bancada+box.
+## Se retomar (polish opcional, TOP3 residual do juiz)
+1. Espelho: 20-30% de reflexo útil sem perder o mood escuro.
+2. Bancada: veio mais suave; antracite da direita menos massa contínua.
+3. (Feito) hero em alta resolução.
 
-## Regras vivas (não esquecer)
-- SKP navegável = mesma pele do render (tex/alpha por peça); PeleTeto oculto.
-- Posição vem do PDF; shaft SE intocável; top view validada com o Felipe.
-- Fills ≥50cm de parede; rect no teto DENTRO do box; STONE_MONOLITH (dourado 0).
+## Pendências de repo (NÃO do estúdio)
+- Branch `feat/estudio-banheiro` está off `fix/planta74-furnished-fidelity`
+  (20+ commits pendentes de PR pra develop) — decisão de merge é outra frente.
+
+## Gotchas vivos do bridge :8899
+- /ask 504 "streaming não começou" ≠ falha: a msg POSTA e o GPT responde —
+  ler o chat fixo pelo Chrome real (get_page_text) antes de reenviar.
+- Resposta <20s idêntica à anterior = STALE; conferir no Chrome.
+- Docker Desktop precisa estar de pé (container gpt-chrome-bridge sobe junto).
