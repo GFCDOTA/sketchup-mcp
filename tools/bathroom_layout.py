@@ -88,51 +88,57 @@ def _emit(kind, b, ws, lavabo=False, door_c=None):
     cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
     out = []
     if kind == "vaso":
-        # ANATOMIA DE PRIVADA (consultoria GPT 2026-08-05; Felipe: 'parece um
-        # quadrado'): caixa acoplada com botao + base estreita + bacia OVAL
-        # (octogono alongado) + assento/tampa. Nunca prisma retangular.
+        # ANATOMIA ROCA THE GAP (curadoria Felipe 2026-08-08: ele MANTEVE o Gap
+        # — então o builder tem que TER A CARA do Gap): 650x365x800, linhas
+        # RETAS com cantos suaves, caixa slim, SAIA FECHADA até o chão (sem
+        # base estreita oval), assento/tampa retos. Rounded-rect, não oval.
         import math as _m
 
-        def _oval(cx_, cy_, rx, ry, z0_, z1_, kd="vaso"):
-            part = _pp(kd, cx_ - rx, cy_ - ry, cx_ + rx, cy_ + ry, z0_, z1_,
+        def _rr(cx_, cy_, hx, hy, rr_, z0_, z1_, kd="vaso"):
+            part = _pp(kd, cx_ - hx, cy_ - hy, cx_ + hx, cy_ + hy, z0_, z1_,
                        RGB2["vaso"], "Vaso")
-            part["corners"] = [[round((cx_ + rx * _m.cos(a)) * PT_TO_IN, 2),
-                                round((cy_ + ry * _m.sin(a)) * PT_TO_IN, 2)]
-                               for a in [_m.pi / 24 + i * _m.pi / 12 for i in range(24)]]
+            pts = []
+            for ccx, ccy, a0 in ((cx_ + hx - rr_, cy_ + hy - rr_, 0.0),
+                                 (cx_ - hx + rr_, cy_ + hy - rr_, _m.pi / 2),
+                                 (cx_ - hx + rr_, cy_ - hy + rr_, _m.pi),
+                                 (cx_ + hx - rr_, cy_ - hy + rr_, 1.5 * _m.pi)):
+                for i in range(6):
+                    a = a0 + i * (_m.pi / 2) / 5
+                    pts.append([round((ccx + rr_ * _m.cos(a)) * PT_TO_IN, 2),
+                                round((ccy + rr_ * _m.sin(a)) * PT_TO_IN, 2)])
+            part["corners"] = pts
             part["smooth"] = True
             return part
 
         if ws is not None:
             wf = ws["face"] + ws["sgn"] * M(0.02)
             sgn = ws["sgn"]
+            hw = M(0.1825)                                   # meia-largura 36.5cm
             if ws["orient"] == "v":
-                ca_, cd_ = cy, None
-                # caixa acoplada 38x16, z 0.42-0.79 + botao
-                out.append(_pp("vaso", wf, cy - M(0.19), wf + sgn * M(0.16), cy + M(0.19),
-                               0.42, 0.79, RGB2["vaso"], "Vaso"))
-                out.append(_pp("kb_botao", wf + sgn * M(0.05), cy - M(0.045),
-                               wf + sgn * M(0.11), cy + M(0.045), 0.79, 0.802,
+                # caixa acoplada slim 36.5x15, z 0.40-0.80 + botao duplo no topo
+                ccx = wf + sgn * M(0.075)
+                out.append(_rr(ccx, cy, M(0.075), hw, M(0.022), 0.40, 0.80))
+                out.append(_pp("kb_botao", ccx - M(0.028), cy - M(0.045),
+                               ccx + M(0.028), cy + M(0.045), 0.80, 0.812,
                                RGB2["metal"], "Vaso"))
-                bx_ = wf + sgn * (M(0.16) + M(0.20))
-                out.append(_oval(bx_, cy, M(0.15), M(0.125), 0.013, 0.24))       # base estreita
-                bo_ = wf + sgn * (M(0.16) + M(0.255))
-                out.append(_oval(bo_, cy, M(0.26), M(0.185), 0.24, 0.405))       # bacia oval
-                out.append(_oval(bo_, cy, M(0.245), M(0.175), 0.405, 0.428))     # assento
-                out.append(_oval(bo_ - sgn * M(0.012), cy, M(0.228), M(0.162),
-                                 0.428, 0.442))                                  # tampa
+                # bacia MONOBLOCO com saia fechada ate o chao (Gap: reta+suave)
+                bcx = wf + sgn * (M(0.15) + M(0.25))
+                out.append(_rr(bcx, cy, M(0.25), hw, M(0.09), 0.013, 0.405))
+                # assento + tampa retos, levemente recuados
+                out.append(_rr(bcx, cy, M(0.24), hw - M(0.010), M(0.085), 0.405, 0.425))
+                out.append(_rr(bcx - sgn * M(0.008), cy, M(0.235), hw - M(0.016),
+                               M(0.082), 0.425, 0.44))
             else:
-                out.append(_pp("vaso", cx - M(0.19), wf, cx + M(0.19), wf + sgn * M(0.16),
-                               0.42, 0.79, RGB2["vaso"], "Vaso"))
-                out.append(_pp("kb_botao", cx - M(0.045), wf + sgn * M(0.05),
-                               cx + M(0.045), wf + sgn * M(0.11), 0.79, 0.802,
+                ccy = wf + sgn * M(0.075)
+                out.append(_rr(cx, ccy, hw, M(0.075), M(0.022), 0.40, 0.80))
+                out.append(_pp("kb_botao", cx - M(0.045), ccy - M(0.028),
+                               cx + M(0.045), ccy + M(0.028), 0.80, 0.812,
                                RGB2["metal"], "Vaso"))
-                by_ = wf + sgn * (M(0.16) + M(0.20))
-                out.append(_oval(cx, by_, M(0.125), M(0.15), 0.013, 0.24))
-                bo_ = wf + sgn * (M(0.16) + M(0.255))
-                out.append(_oval(cx, bo_, M(0.185), M(0.26), 0.24, 0.405))
-                out.append(_oval(cx, bo_, M(0.175), M(0.245), 0.405, 0.428))
-                out.append(_oval(cx, bo_ - sgn * M(0.012), M(0.162), M(0.228),
-                                 0.428, 0.442))
+                bcy = wf + sgn * (M(0.15) + M(0.25))
+                out.append(_rr(cx, bcy, hw, M(0.25), M(0.09), 0.013, 0.405))
+                out.append(_rr(cx, bcy, hw - M(0.010), M(0.24), M(0.085), 0.405, 0.425))
+                out.append(_rr(cx, bcy - sgn * M(0.008), hw - M(0.016), M(0.235),
+                               M(0.082), 0.425, 0.44))
         else:
             ins = min(w, d) * 0.12
             out.append(_pp("vaso", x0 + ins, y0 + ins, x1 - ins, y1 - ins,
