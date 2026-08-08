@@ -131,7 +131,7 @@ def apply_theme_estudio_banho(text: str) -> str:
     wall_matte = {"reflect": "AColor(0.02, 0.02, 0.02, 1)", "reflect_glossiness": "0.5",
                   "metalness": "0"}
     led_warm = {"diffuse": "AColor(0.55, 0.44, 0.26, 1)",
-                "self_illumination": "AColor(9.0, 6.2, 3.2, 1)", "self_illumination_gi": "1"}
+                "self_illumination": "AColor(7.2, 5.0, 2.6, 1)", "self_illumination_gi": "1"}  # p19: halo mais sutil (GPT)
     dark = {"diffuse": "AColor(0.035, 0.030, 0.026, 1)", "reflect": "AColor(0.06, 0.06, 0.06, 1)",
             "reflect_glossiness": "0.55", "metalness": "0"}
 
@@ -142,6 +142,7 @@ def apply_theme_estudio_banho(text: str) -> str:
                       ("kb_sombra", black_metal), ("kb_anel", gold),
                       ("kb_moldura", black_metal), ("espelho", mirror),
                       ("vaso", black_ceramic), ("box_vidro", glass),
+                      ("kb_folha", glass),   # p19: folha INCOLOR (a cor SU esverdeada lia "leitoso")
                       ("kb_toalha", towel), ("kb_frasco", dark),
                       ("kb_nicho_fundo", dark), ("kb_nicho_box", stone_matte),
                       ("kb_piso", stone_matte), ("kb_piso_box", stone_matte),

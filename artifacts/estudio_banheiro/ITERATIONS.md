@@ -136,5 +136,16 @@ fixo×folha mais claros + vidro menos leitoso (alpha ~0.16?) + nicho/chuveiro/
 misturador revelados; câmera 2-4cm trás/esquerda — 1ª leitura = espelho+
 bancada+box, não parede lateral.
 
+| p18 | **8.8** ⭐ | AINDA_NÃO | Montante preto no bordo da folha (correr inequívoco) + alpha 0.16 + câmera trás/esq + wash +2. GPT: "anatomia da porta de correr agora está clara". |
+
+TOP3 (p18→p19): espelho protagonista (conteúdo real 30-40%, halo mais sutil,
+peça inteira enquadrada); bancada hero (câmera recuar/abrir +2-4cm, cuba
+under-mount + shadow gap, 1ª leitura = lavatório+espelho); box refino final
+(nicho/misturador/chuveiro legíveis, menos massa na parede direita, vidro
+INCOLOR sofisticado — não leitoso).
+
 GOTCHA reconfirmado: resposta do /ask em <20s idêntica à anterior = STALE
 (streaming não detectado) — SEMPRE conferir no Chrome antes de agir.
+GOTCHA novo (2026-08-08): /ask 504 "streaming não começou" ≠ falha — a msg
+POSTOU e o GPT respondeu; ler o chat fixo pelo Chrome real (get_page_text)
+antes de reenviar (não duplicar o pedido).
