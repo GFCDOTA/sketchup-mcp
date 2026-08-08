@@ -182,3 +182,5 @@ GOTCHA reconfirmado: resposta do /ask em <20s idêntica à anterior = STALE
 GOTCHA novo (2026-08-08): /ask 504 "streaming não começou" ≠ falha — a msg
 POSTOU e o GPT respondeu; ler o chat fixo pelo Chrome real (get_page_text)
 antes de reenviar (não duplicar o pedido).
+
+| p22 | **9.5** 🏆 | **SIM** | Vaso refeito com anatomia ROCA GAP real (feedback direto do Felipe: "por que manteve esse vaso zuado?") — rounded-rect, saia fechada, caixa slim. |
