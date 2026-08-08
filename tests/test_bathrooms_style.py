@@ -75,12 +75,18 @@ def test_mirror_frame_is_thin_black(nm):
 
 
 @pytest.mark.parametrize("nm", sorted(ROOMS))
-def test_vanity_has_towel_niche_signature(nm):
-    # A assinatura da referência: nicho aberto nogueira com TOALHAS + LED sob o tampo
+def test_vanity_has_two_drawer_fronts_with_shadow_gap(nm):
+    # Curadoria Felipe 2026-08-08 (kit banho01): gabinete linguagem Celite
+    # Elite — 2 frentes limpas + shadow gap entre elas; SAI o nicho de toalhas
     boxes = ROOMS[nm]
-    assert any(b["kind"] == "kb_nicho_fundo" for b in boxes), f"{nm}: sem nicho de toalhas"
-    toalhas = [b for b in boxes if b["kind"] == "kb_toalha"]
-    assert len(toalhas) >= 2, f"{nm}: nicho sem toalhas ({len(toalhas)})"
+    fronts = [b for b in boxes if b["kind"] == "gabinete"
+              and b["z0_in"] + b["h_in"] <= 0.79 * M2IN and b["h_in"] >= 0.10 * M2IN]
+    assert len(fronts) >= 2, f"{nm}: gabinete sem as 2 frentes de gaveta"
+    gaps = [b for b in boxes if b["kind"] == "kb_sombra"
+            and 0.55 * M2IN <= b["z0_in"] <= 0.65 * M2IN]
+    assert gaps, f"{nm}: sem shadow gap entre as frentes"
+    assert not any(b["kind"] == "kb_nicho_fundo" for b in boxes), \
+        f"{nm}: nicho de toalhas devia ter saído (curadoria 2026-08-08)"
 
 
 @pytest.mark.parametrize("nm", sorted(ROOMS))

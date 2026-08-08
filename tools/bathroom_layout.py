@@ -142,71 +142,61 @@ def _emit(kind, b, ws, lavabo=False, door_c=None):
         # gavetão nogueira suspenso -> NICHO ABERTO de toalhas com LED -> tampo
         # pedra preta ESPESSO (12cm aparente) com cuba esculpida; torneira DE
         # PAREDE bronze; espelho moldura preta + halo LED.
-        # VERDICT 5.8 P2 ("marcenaria boutique"): gavetão REALMENTE suspenso com
-        # base oculta recuada (sombra), lâminas de nogueira fechando o nicho.
-        out.append(_pp("kb_sombra", x0 + w * 0.10, y0 + d * 0.10, x1 - w * 0.10, y1 - d * 0.10,
-                       0.30, 0.32, [18, 18, 20], "Bancada"))                   # base oculta recuada
-        out.append(_pp("gabinete", x0 + w * 0.04, y0 + d * 0.04, x1 - w * 0.04, y1 - d * 0.04,
-                       0.32, 0.50, RGB2["gabinete"], "Bancada"))               # gavetão nogueira suspenso
-        out.append(_pp("kb_gola", x0 + w * 0.10, y0 + d * 0.10, x1 - w * 0.10, y1 - d * 0.10,
-                       0.308, 0.32, RGB2["gola"], "Bancada"))
-        # NICHO de toalhas: fundo sombra + laterais de LÂMINA nogueira + prateleira + LED
-        out.append(_pp("kb_nicho_fundo", x0 + w * 0.05, y0 + d * 0.05, x1 - w * 0.05, y1 - d * 0.05,
-                       0.50, 0.78, RGB2["nicho_fundo"], "Bancada"))
-        out.append(_pp("gabinete", x0 + w * 0.04, y0 + d * 0.04, x1 - w * 0.04, y1 - d * 0.04,
-                       0.50, 0.522, RGB2["gabinete"], "Bancada"))              # prateleira nogueira
-        if w >= d:                                                              # lâminas laterais (cheeks)
-            out.append(_pp("gabinete", x0 + w * 0.04, y0 + d * 0.04, x0 + w * 0.075, y1 - d * 0.04,
-                           0.50, 0.78, RGB2["gabinete"], "Bancada"))
-            out.append(_pp("gabinete", x1 - w * 0.075, y0 + d * 0.04, x1 - w * 0.04, y1 - d * 0.04,
-                           0.50, 0.78, RGB2["gabinete"], "Bancada"))
-        else:
-            out.append(_pp("gabinete", x0 + w * 0.04, y0 + d * 0.04, x1 - w * 0.04, y0 + d * 0.075,
-                           0.50, 0.78, RGB2["gabinete"], "Bancada"))
-            out.append(_pp("gabinete", x0 + w * 0.04, y1 - d * 0.075, x1 - w * 0.04, y1 - d * 0.04,
-                           0.50, 0.78, RGB2["gabinete"], "Bancada"))
-        _tw = min(w, d) * 0.26
-        for _i, (_tc, _th) in enumerate(((cx - _tw * 0.95, 0.10), (cx, 0.12), (cx + _tw * 0.95, 0.09))):
-            out.append(_pp("kb_toalha", _tc - _tw / 2, cy - _tw / 2, _tc + _tw / 2, cy + _tw / 2,
-                           0.525, 0.525 + _th, RGB2["toalha_a" if _i % 2 == 0 else "toalha_b"], "Bancada"))
-        out.append(_pp("kb_led", x0 + w * 0.10, y0 + d * 0.10, x1 - w * 0.10, y1 - d * 0.10,
-                       0.755, 0.77, RGB2["led"], "Bancada"))                   # LED do nicho
+        # CURADORIA FELIPE 2026-08-08 (front :8788) + consultoria GPT: gabinete
+        # linguagem Celite Elite — 2 frentes de gaveta LIMPAS sem puxador,
+        # shadow gap 7mm entre elas + gap void sob o tampo, suspenso (fundo
+        # ~0.38). SAI o nicho aberto de toalhas. Exterior segue STONE_MONOLITH
+        # greige (Elite é só referência de proporção, não MDF aparente).
+        ix0, iy0 = x0 + w * 0.04, y0 + d * 0.04
+        ix1, iy1 = x1 - w * 0.04, y1 - d * 0.04
+        gap0, gap1 = 0.6035, 0.6105                       # shadow gap entre frentes
+        out.append(_pp("gabinete", ix0, iy0, ix1, iy1, 0.38, gap0,
+                       RGB2["gabinete"], "Bancada"))       # frente inferior (~224mm)
+        out.append(_pp("gabinete", ix0, iy0, ix1, iy1, gap1, 0.77,
+                       RGB2["gabinete"], "Bancada"))       # frente superior (~160mm)
+        rx0, ry0 = x0 + w * 0.06, y0 + d * 0.06
+        rx1, ry1 = x1 - w * 0.06, y1 - d * 0.06
+        out.append(_pp("kb_sombra", rx0, ry0, rx1, ry1, gap0, gap1,
+                       [16, 16, 18], "Bancada"))           # recuo escuro entre frentes
+        out.append(_pp("kb_gola", ix0, iy0, ix1, iy1, 0.368, 0.38,
+                       RGB2["gola"], "Bancada"))           # gola inferior handleless
         # VERDICT 5.8 P3: tampo 10cm (monólito elegante) + cuba com PROFUNDIDADE
         # lida (anel escuro + poço quase-preto)
         _tampo = RGB2["tampo_lavabo"] if lavabo else RGB2["tampo_banho"]
         out.append(_pp("bancada_banho", x0, y0, x1, y1, 0.78, 0.88, _tampo, "Bancada"))
-        # SHADOW GAP sob o tampo (auditoria: separar tampo x frente, menos caixa)
-        out.append(_pp("kb_gola", x0 + w * 0.05, y0 + d * 0.05, x1 - w * 0.05,
-                       y1 - d * 0.05, 0.765, 0.78, RGB2["gola"], "Bancada"))
-        # cuba UNDER-MOUNT retangular (Felipe: nada de esculpida que suja):
-        # recorte limpo no tampo com poço grafite RECUADO abaixo do topo
-        cbw, cbd = w * 0.50, d * 0.55
+        # gap superior VOID matte sob o tampo (GPT p20: transição suave, não metal)
+        out.append(_pp("kb_sombra", rx0, ry0, rx1, ry1, 0.77, 0.78,
+                       [16, 16, 18], "Bancada"))
+        # cuba UNDER-MOUNT retangular — anatomia Deca Slim 50x37 (curadoria
+        # 2026-08-08: Felipe manteve), borda fina, clampada ao módulo
+        cbw, cbd = min(M(0.50), w * 0.72), min(M(0.37), d * 0.62)
         out.append(_pp("cuba", cx - cbw / 2, cy - cbd / 2, cx + cbw / 2, cy + cbd / 2,
                        0.845, 0.879, [32, 32, 35], "Bancada"))                 # poço under-mount
         out.append(_pp("cuba", cx - cbw / 2 + M(0.015), cy - cbd / 2 + M(0.015),
                        cx + cbw / 2 - M(0.015), cy + cbd / 2 - M(0.015),
                        0.845, 0.862, [22, 22, 25], "Bancada"))                 # fundo com queda
-        # TORNEIRA DE BANCADA preta com ANEL DOURADO na base — gramatica do
-        # ESTUDIO BANHEIRO (loop GPT 8.0/10, 2026-08-05). Sai a bronze de parede:
-        # ouro aparece em UM ponto so; corpo/bica/manopla preto fosco.
+        # TORNEIRA — Deca Unic bica baixa Black Matte (curadoria 2026-08-08:
+        # Felipe rejeitou a Level; GPT travou a Unic). Corpo 54mm x 152mm,
+        # projecao total ~174mm, alavanca monocomando no TOPO (sem manopla
+        # lateral), tudo preto fosco.
         t = M(0.015)
         if ws is not None:
             if ws["orient"] == "v":
                 fx = ws["face"] + ws["sgn"] * M(0.10)               # deck junto da parede
-                out.append(_pp("kb_torneira", fx - M(0.02), cy - M(0.02), fx + M(0.02), cy + M(0.02),
-                               0.88, 1.06, RGB2["metal"], "Bancada"))          # corpo vertical
-                out.append(_pp("kb_torneira", fx, cy - M(0.015), fx + ws["sgn"] * M(0.16), cy + M(0.015),
-                               1.03, 1.06, RGB2["metal"], "Bancada"))          # bica p/ cuba
-                out.append(_pp("kb_torneira", fx - M(0.015), cy + M(0.10), fx + M(0.015), cy + M(0.16),
-                               0.90, 0.93, RGB2["metal"], "Bancada"))          # manopla
+                out.append(_pp("kb_torneira", fx - M(0.027), cy - M(0.027), fx + M(0.027), cy + M(0.027),
+                               0.88, 1.032, RGB2["metal"], "Bancada"))         # corpo 54mm
+                out.append(_pp("kb_torneira", fx, cy - M(0.014), fx + ws["sgn"] * M(0.147), cy + M(0.014),
+                               1.00, 1.028, RGB2["metal"], "Bancada"))         # bica baixa
+                out.append(_pp("kb_torneira", fx - M(0.020), cy - M(0.020), fx + M(0.020), cy + M(0.020),
+                               1.032, 1.047, RGB2["metal"], "Bancada"))        # alavanca no topo
             else:
                 fy = ws["face"] + ws["sgn"] * M(0.10)
-                out.append(_pp("kb_torneira", cx - M(0.02), fy - M(0.02), cx + M(0.02), fy + M(0.02),
-                               0.88, 1.06, RGB2["metal"], "Bancada"))
-                out.append(_pp("kb_torneira", cx - M(0.015), fy, cx + M(0.015), fy + ws["sgn"] * M(0.16),
-                               1.03, 1.06, RGB2["metal"], "Bancada"))
-                out.append(_pp("kb_torneira", cx + M(0.10), fy - M(0.015), cx + M(0.16), fy + M(0.015),
-                               0.90, 0.93, RGB2["metal"], "Bancada"))
+                out.append(_pp("kb_torneira", cx - M(0.027), fy - M(0.027), cx + M(0.027), fy + M(0.027),
+                               0.88, 1.032, RGB2["metal"], "Bancada"))
+                out.append(_pp("kb_torneira", cx - M(0.014), fy, cx + M(0.014), fy + ws["sgn"] * M(0.147),
+                               1.00, 1.028, RGB2["metal"], "Bancada"))
+                out.append(_pp("kb_torneira", cx - M(0.020), fy - M(0.020), cx + M(0.020), fy + M(0.020),
+                               1.032, 1.047, RGB2["metal"], "Bancada"))
         # ESPELHO: halo LED atrás + espelho + MOLDURA PRETA fina (referência)
         # VERDICT 5.8 P1: espelho GRANDE e LEVE — halo LED fino (1.5cm de aro),
         # moldura preta fina nos 4 lados, superfície reflexiva; nada de "bloco".
@@ -317,16 +307,31 @@ def _emit(kind, b, ws, lavabo=False, door_c=None):
             out.append(_pp("kb_piso_box", min(front, back) + M(0.01), a0 + M(0.01),
                            max(front, back) - M(0.01), a1 - M(0.01),
                            0.0125, 0.016, [52, 51, 53], "Box"))
-        # CHUVEIRO (consultoria layout): NAO no centro — 33cm da face do shaft
-        # (lado do painel fixo) e 38cm pra dentro do vidro frontal
-        sx_ = (a1 - M(0.33)) if leaf_lo else (a0 + M(0.33))
+        # CHUVEIRO DE PAREDE — Deca Flex Max Ø22 Black Matte (curadoria
+        # 2026-08-08: Felipe aboliu o de teto, "zoado"). Braco horizontal
+        # ~31cm saindo da parede interna a ~2.28m; cabeca redonda com face
+        # inferior ~2.13; queda curta liga braco e cabeca.
+        sx_ = (a1 - M(0.33)) if leaf_lo else (a0 + M(0.33))     # eixo do ralo
         sp_ = front + sin * M(0.38)
-        hx_, hy_ = (sx_, sp_) if horiz else (sp_, sx_)
-        out.append(_pp("kb_haste", hx_ - M(0.012), hy_ - M(0.012), hx_ + M(0.012),
-                       hy_ + M(0.012), 2.245, 2.50, RGB2["metal"], "Box"))
         import math as _m
-        _r = M(0.125)
-        cab = _pp("kb_ducha", hx_ - _r, hy_ - _r, hx_ + _r, hy_ + _r, 2.22, 2.245,
+        _r = M(0.11)
+        if ws is not None:
+            wf0 = ws["face"]
+            if ws["orient"] == "v":
+                hx_, hy_ = wf0 + ws["sgn"] * M(0.31), cy
+                out.append(_pp("kb_haste", wf0, cy - M(0.012), hx_, cy + M(0.012),
+                               2.267, 2.29, RGB2["metal"], "Box"))       # braco de parede
+            else:
+                hx_, hy_ = cx, wf0 + ws["sgn"] * M(0.31)
+                out.append(_pp("kb_haste", cx - M(0.012), wf0, cx + M(0.012), hy_,
+                               2.267, 2.29, RGB2["metal"], "Box"))
+            out.append(_pp("kb_haste", hx_ - M(0.012), hy_ - M(0.012), hx_ + M(0.012),
+                           hy_ + M(0.012), 2.156, 2.29, RGB2["metal"], "Box"))
+        else:
+            hx_, hy_ = (sx_, sp_) if horiz else (sp_, sx_)
+            out.append(_pp("kb_haste", hx_ - M(0.012), hy_ - M(0.012), hx_ + M(0.012),
+                           hy_ + M(0.012), 2.156, 2.50, RGB2["metal"], "Box"))
+        cab = _pp("kb_ducha", hx_ - _r, hy_ - _r, hx_ + _r, hy_ + _r, 2.13, 2.156,
                   RGB2["metal"], "Box")
         cab["corners"] = [[round((hx_ + _r * _m.cos(_a)) * PT_TO_IN, 2),
                            round((hy_ + _r * _m.sin(_a)) * PT_TO_IN, 2)]
