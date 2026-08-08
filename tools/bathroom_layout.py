@@ -58,7 +58,7 @@ _KIND_TEX = {"gabinete": ("stone_greige_veins.png", 90),
              "kb_parede_pedra": ("stone_antracite_veins.png", 80),
              "kb_piso": ("porcelanato_greige_calmo.png", 80),
              "kb_piso_box": ("antracite_calmo.png", 60)}
-_KIND_ALPHA = {"box_vidro": 0.30, "kb_folha": 0.30, "kb_janela_fosco": 0.55}
+_KIND_ALPHA = {"box_vidro": 0.22, "kb_folha": 0.22, "kb_janela_fosco": 0.55}
 
 
 def _pp(kind, x0, y0, x1, y1, z0_m, z1_m, rgb, module):
@@ -175,6 +175,9 @@ def _emit(kind, b, ws, lavabo=False, door_c=None):
         # lida (anel escuro + poço quase-preto)
         _tampo = RGB2["tampo_lavabo"] if lavabo else RGB2["tampo_banho"]
         out.append(_pp("bancada_banho", x0, y0, x1, y1, 0.78, 0.88, _tampo, "Bancada"))
+        # SHADOW GAP sob o tampo (auditoria: separar tampo x frente, menos caixa)
+        out.append(_pp("kb_gola", x0 + w * 0.05, y0 + d * 0.05, x1 - w * 0.05,
+                       y1 - d * 0.05, 0.765, 0.78, RGB2["gola"], "Bancada"))
         # cuba UNDER-MOUNT retangular (Felipe: nada de esculpida que suja):
         # recorte limpo no tampo com poço grafite RECUADO abaixo do topo
         cbw, cbd = w * 0.50, d * 0.55
