@@ -118,8 +118,8 @@ def _emit(kind, b, ws, lavabo=False, door_c=None):
                 bo_ = wf + sgn * (M(0.16) + M(0.255))
                 out.append(_oval(bo_, cy, M(0.26), M(0.185), 0.24, 0.405))       # bacia oval
                 out.append(_oval(bo_, cy, M(0.245), M(0.175), 0.405, 0.428))     # assento
-                out.append(_oval(bo_ - sgn * M(0.012), cy, M(0.235), M(0.168),
-                                 0.428, 0.448))                                  # tampa
+                out.append(_oval(bo_ - sgn * M(0.012), cy, M(0.228), M(0.162),
+                                 0.428, 0.442))                                  # tampa
             else:
                 out.append(_pp("vaso", cx - M(0.19), wf, cx + M(0.19), wf + sgn * M(0.16),
                                0.42, 0.79, RGB2["vaso"], "Vaso"))
@@ -131,8 +131,8 @@ def _emit(kind, b, ws, lavabo=False, door_c=None):
                 bo_ = wf + sgn * (M(0.16) + M(0.255))
                 out.append(_oval(cx, bo_, M(0.185), M(0.26), 0.24, 0.405))
                 out.append(_oval(cx, bo_, M(0.175), M(0.245), 0.405, 0.428))
-                out.append(_oval(cx, bo_ - sgn * M(0.012), M(0.168), M(0.235),
-                                 0.428, 0.448))
+                out.append(_oval(cx, bo_ - sgn * M(0.012), M(0.162), M(0.228),
+                                 0.428, 0.442))
         else:
             ins = min(w, d) * 0.12
             out.append(_pp("vaso", x0 + ins, y0 + ins, x1 - ins, y1 - ins,
@@ -279,10 +279,10 @@ def _emit(kind, b, ws, lavabo=False, door_c=None):
         # trilho superior discreto (NAO tampa): so a faixa da frente
         if horiz:
             out.append(_pp("kb_trilho", a0, front - sin * M(0.004), a1,
-                           front + sin * M(0.065), 2.44, 2.475, RGB2["gola"], "Box"))
+                           front + sin * M(0.065), 2.44, 2.462, RGB2["gola"], "Box"))
         else:
             out.append(_pp("kb_trilho", front - sin * M(0.004), a0,
-                           front + sin * M(0.065), a1, 2.44, 2.475, RGB2["gola"], "Box"))
+                           front + sin * M(0.065), a1, 2.44, 2.462, RGB2["gola"], "Box"))
         # montantes finos nas duas pontas da frente
         for ae in (a0, a1):
             if horiz:
