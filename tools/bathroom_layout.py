@@ -98,7 +98,8 @@ def _emit(kind, b, ws, lavabo=False, door_c=None):
                        RGB2["vaso"], "Vaso")
             part["corners"] = [[round((cx_ + rx * _m.cos(a)) * PT_TO_IN, 2),
                                 round((cy_ + ry * _m.sin(a)) * PT_TO_IN, 2)]
-                               for a in [_m.pi / 16 + i * _m.pi / 8 for i in range(16)]]
+                               for a in [_m.pi / 24 + i * _m.pi / 12 for i in range(24)]]
+            part["smooth"] = True
             return part
 
         if ws is not None:
@@ -321,7 +322,8 @@ def _emit(kind, b, ws, lavabo=False, door_c=None):
                   RGB2["metal"], "Box")
         cab["corners"] = [[round((hx_ + _r * _m.cos(_a)) * PT_TO_IN, 2),
                            round((hy_ + _r * _m.sin(_a)) * PT_TO_IN, 2)]
-                          for _a in [_m.pi / 16 + i * _m.pi / 8 for i in range(16)]]
+                          for _a in [_m.pi / 24 + i * _m.pi / 12 for i in range(24)]]
+        cab["smooth"] = True
         out.append(cab)
         # misturador (placa 14cm) + ducha manual slim na face interna do painel FIXO
         mf = fx1_ - M(0.02) if not leaf_lo else fx0_ + M(0.02)

@@ -172,6 +172,18 @@ def pl_run
           log << "  tex MISS #{mat_name}: #{png} ausente -> cor chapada"
         end
       end
+      # b['smooth']: peca curva (vaso/chuveiro) — suaviza as arestas VERTICAIS
+      # da extrusao pro shading ler redondo (anti-Minecraft; padrao do sofa)
+      if b['smooth']
+        g.entities.grep(Sketchup::Edge).each do |e|
+          p0 = e.start.position
+          p1 = e.end.position
+          if (p0.x - p1.x).abs < 0.01 && (p0.y - p1.y).abs < 0.01
+            e.soft = true
+            e.smooth = true
+          end
+        end
+      end
       mat = pl_material(model, mat_name, b['rgb'] || [120, 120, 120], tex_path, tile, b['alpha'])
       g.material = mat
       placed += 1
