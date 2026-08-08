@@ -121,3 +121,20 @@ Auditoria p12 no rigor máximo: 21 defeitos, régua re-calibrada pra 7.1
 TOP3 (p13→p14): espelho 30-40% + câmera 3-5cm esq/trás (mostrar cuba+tampo);
 box interior +0.2-0.3EV com vidro menos leitoso; monolito com veio mais sutil
 + separação tampo×cuba×frente (menos caixa reta).
+
+## Rumo ao APROVADO_DESIGN (critério do Felipe: parada = veredito de designer)
+
+| Iter | Nota | Veredito | Mudanças |
+|------|------|----------|----------|
+| p14 | — | — | Privada REDONDA (24 gomos + soft/smooth arestas verticais — padrão do sofá). |
+| p15 | 8.1 | AINDA_NÃO | Vidro alpha 0.22 + shadow gap sob tampo + box +0.3EV + câmera recuada. |
+| p16 | 8.4 | AINDA_NÃO | Trilho fino + rect fundo (mata barra branca) + tampa suave + espelho inteiro no quadro. |
+| p17 | **8.6** ⭐ | AINDA_NÃO | WASH na parede oeste = conteúdo real pro espelho + pedra "ganhou vida" + puxador presente. |
+
+TOP3 (p17→p18): espelho 30-40% reflexo (borda esquerda com intenção);
+fixo×folha mais claros + vidro menos leitoso (alpha ~0.16?) + nicho/chuveiro/
+misturador revelados; câmera 2-4cm trás/esquerda — 1ª leitura = espelho+
+bancada+box, não parede lateral.
+
+GOTCHA reconfirmado: resposta do /ask em <20s idêntica à anterior = STALE
+(streaming não detectado) — SEMPRE conferir no Chrome antes de agir.
