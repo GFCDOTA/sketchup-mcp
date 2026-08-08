@@ -58,7 +58,7 @@ _KIND_TEX = {"gabinete": ("stone_greige_veins.png", 90),
              "kb_parede_pedra": ("stone_antracite_veins.png", 80),
              "kb_piso": ("porcelanato_greige_calmo.png", 80),
              "kb_piso_box": ("antracite_calmo.png", 60)}
-_KIND_ALPHA = {"box_vidro": 0.22, "kb_folha": 0.22, "kb_janela_fosco": 0.55}
+_KIND_ALPHA = {"box_vidro": 0.16, "kb_folha": 0.16, "kb_janela_fosco": 0.55}
 
 
 def _pp(kind, x0, y0, x1, y1, z0_m, z1_m, rgb, module):
@@ -276,6 +276,11 @@ def _emit(kind, b, ws, lavabo=False, door_c=None):
             free_edge = a1
         out.append(pane(fx0_, fx1_, 0.0, 0.014, 2.44, "box_vidro", RGB2["box_vidro"]))
         out.append(pane(lf0, lf1, 0.065, 0.014, 2.44, "kb_folha", RGB2["box_vidro"]))
+        # montante da FOLHA no bordo de sobreposicao — a aresta preta full-height
+        # na frente do fixo e o que le "porta de correr" de longe (fixo x folha)
+        fe = lf1 if leaf_lo else lf0
+        out.append(pane(fe - M(0.011), fe + M(0.011), 0.062, 0.014, 2.44,
+                        "kb_perfil", RGB2["gola"]))
         # trilho superior discreto (NAO tampa): so a faixa da frente
         if horiz:
             out.append(_pp("kb_trilho", a0, front - sin * M(0.004), a1,
