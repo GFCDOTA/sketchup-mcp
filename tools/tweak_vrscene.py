@@ -141,6 +141,10 @@ def apply_theme_estudio_banho(text: str) -> str:
                 "self_illumination": "AColor(7.2, 5.0, 2.6, 1)", "self_illumination_gi": "1"}  # p19: halo mais sutil (GPT)
     dark = {"diffuse": "AColor(0.035, 0.030, 0.026, 1)", "reflect": "AColor(0.06, 0.06, 0.06, 1)",
             "reflect_glossiness": "0.55", "metalness": "0"}
+    # BEAUTY PASS — GPT OPÇÃO A: slot rasante na parede que o espelho reflete.
+    # Mais fraco que o halo do espelho — é conteúdo pro reflexo, não protagonista.
+    slot_led = {"diffuse": "AColor(0.30, 0.24, 0.14, 1)",
+                "self_illumination": "AColor(0.55, 0.38, 0.20, 1)", "self_illumination_gi": "1"}
 
     # p20: cuba under-mount NITIDA (leve reflexo pega o halo) + shadow gap = void
     # matte de verdade (era black_metal refletivo — matava a transicao suave)
@@ -170,7 +174,8 @@ def apply_theme_estudio_banho(text: str) -> str:
                                            "reflect": "AColor(0.06, 0.06, 0.06, 1)",
                                            "reflect_glossiness": "0.55", "metalness": "0"}),
                       ("kb_parede", wall_matte),
-                      ("kb_parede_pedra", stone_matte), ("kb_led", led_warm)))
+                      ("kb_parede_pedra", stone_matte), ("kb_led", led_warm),
+                      ("kb_slot_led", slot_led)))
     for k, params in base.items():
         text = _set_block(text, f"_ph_{k}_BRDFVRayMtl", params)
 

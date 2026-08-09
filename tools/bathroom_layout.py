@@ -297,6 +297,16 @@ def _emit(kind, b, ws, lavabo=False, door_c=None):
                 out.append(_pp("kb_moldura", wx + ws["sgn"] * M(0.008), _ma,
                                wx + ws["sgn"] * (M(0.008) + t), _mb,
                                1.08, 2.00, RGB2["gola"], "Espelho"))           # moldura laterais
+            # GPT OPÇÃO A (2026-08-08): espelho lia "plano preto" porque
+            # refletia a parede antracite sem conteúdo — light slot vertical
+            # RASANTE na parede OPOSTA (dentro do cone que o espelho enxerga)
+            # dá textura/gradiente real ao reflexo sem clarear o banheiro.
+            far_x = x1 - M(0.02) if abs(wx - x0) < abs(wx - x1) else x0 + M(0.02)
+            far_sgn = -1.0 if far_x == x1 - M(0.02) else 1.0
+            _sc = max(min(cy, y1 - d * 0.10), y0 + d * 0.10)   # rasgo FINO (3cm), ALTO (135cm)
+            out.append(_pp("kb_slot_led", far_x, _sc - M(0.015),
+                           far_x + far_sgn * M(0.012), _sc + M(0.015),
+                           1.15, 2.50, RGB2["led"], "Espelho"))
         elif ws is not None:
             wy = (ws["face"] + ws["sgn"] * M(0.04))
             out.append(_pp("kb_led", x0 + w * 0.055, wy - ws["sgn"] * M(0.004), x1 - w * 0.055, wy + t * ws["sgn"],
@@ -312,6 +322,12 @@ def _emit(kind, b, ws, lavabo=False, door_c=None):
                 out.append(_pp("kb_moldura", _ma, wy + ws["sgn"] * M(0.008),
                                _mb, wy + ws["sgn"] * (M(0.008) + t),
                                1.08, 2.00, RGB2["gola"], "Espelho"))
+            far_y = y1 - M(0.02) if abs(wy - y0) < abs(wy - y1) else y0 + M(0.02)
+            far_sgn = -1.0 if far_y == y1 - M(0.02) else 1.0
+            _sc = max(min(cx, x1 - w * 0.10), x0 + w * 0.10)
+            out.append(_pp("kb_slot_led", _sc - M(0.015), far_y,
+                           _sc + M(0.015), far_y + far_sgn * M(0.012),
+                           1.15, 2.50, RGB2["led"], "Espelho"))
     elif kind == "box":
         # BOX (consultoria GPT 2026-08-05): vidro FIXO + FOLHA DE CORRER
         # sobreposta + trilho superior discreto + puxador vertical; chuveiro de
