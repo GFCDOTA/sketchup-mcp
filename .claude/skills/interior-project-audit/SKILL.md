@@ -3,12 +3,15 @@ name: interior-project-audit
 description: >-
   Audita um cômodo mobiliado/renderizado (banho, cozinha, quarto, sala) como um
   ARQUITETO/EMPRESA DE MOBILIÁRIO REAL assinaria pra OBRA — não como crítico de imagem.
-  Regra central: render bonito NUNCA aprova projeto tecnicamente incompleto. Separa
-  design_score (estética) de execution_status (construtibilidade): PASS/WARN/FAIL
-  técnico vence qualquer nota visual alta. Use ANTES de declarar um cômodo "fechado"/
-  DESIGN_LOCKED, depois que o hero + auditoria 360° (4 cantos) já tiverem veredito
-  visual. Dispara em "fecha o banho/cozinha", "pronto pra obra?", "audita como
-  arquiteto", "isso é fabricável?", "empresa de mobiliário aprovaria isso?".
+  Postura de OLHOS DE ÁGUIA (escrutínio agressivo, nada passa batido) + consultoria de
+  LOJA DE MOBILIADOS (todo apontamento vem com sugestão de produto/solução concreta,
+  não só o diagnóstico). Regra central: render bonito NUNCA aprova projeto tecnicamente
+  incompleto. Separa design_score (estética) de execution_status (construtibilidade):
+  PASS/WARN/FAIL técnico vence qualquer nota visual alta. Use ANTES de declarar um
+  cômodo "fechado"/DESIGN_LOCKED, depois que o hero + auditoria 360° (4 cantos) já
+  tiverem veredito visual. Dispara em "fecha o banho/cozinha", "pronto pra obra?",
+  "audita como arquiteto", "isso é fabricável?", "empresa de mobiliário aprovaria
+  isso?", "olhos de águia", "sugere trocas".
 ---
 
 # Interior Project Audit — buildability gate
@@ -21,6 +24,13 @@ description: >-
 **Regra-raiz (Felipe, via GPT):** *"render bonito nunca pode transformar projeto
 tecnicamente incompleto em aprovado."* Um `execution_status: FAIL` bloqueia
 `DESIGN_LOCKED` mesmo com nota visual 9.8.
+
+**Postura obrigatória (Felipe, 2026-08-09): olhos de águia + consultoria de loja de
+mobiliados.** Não é auditoria passiva de "aprovar/reprovar" — é escrutínio ATIVO
+(procurar defeito que não salta aos olhos, não só reagir ao óbvio) **e** toda
+reprovação/WARN vem empacotada com a sugestão de produto/solução que resolveria,
+como faria um bom vendedor técnico de loja premium (Tok&Stok/Westwing/marcenaria) —
+nunca só "isso está errado", sempre "troca por X / resolve assim, porque Y".
 
 ## Quando dispara
 
@@ -117,3 +127,5 @@ crítica estética de imagem que já rodou no `gpt-review-gate`.
 - NÃO inventar dimensão/fonte de produto — sem `technical_source`, é `UNVERIFIED`.
 - NÃO deixar o hero (1 ângulo) representar o cômodo inteiro — gate 10 é obrigatório.
 - NÃO manter feature cujo `purpose` é só "ficar bonito no render" (gate 8).
+- NÃO entregar diagnóstico sem sugestão — cada FAIL/WARN carrega o produto/solução
+  concreta que resolveria (postura de loja), não só "está errado".
