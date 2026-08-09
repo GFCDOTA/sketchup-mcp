@@ -491,20 +491,38 @@ def _skin_parts(cell, ws_by_kind, zones_u, win_zone=None):
     box/ducha). Paineis desviam de porta/janela via difference (shapely)."""
     from shapely.geometry import box as _sbox
     out = []
-    piso = cell.buffer(-M(0.004))
+
+    def _clean_ring_corners(poly):
+        """Corners prontos pro Ruby `add_face` (place_layout_skp.rb): buffer()
+        com join_style default (round) aproxima cada canto CONVEXO por um
+        arco de varios segmentos quase-colineares — num poligono de comodo
+        nao-retangular (varios vertices/degrau) isso produz uma boundary que
+        o add_face do SketchUp as vezes rejeita (self-intersecting/degenerada
+        apos triangulacao), e o `rescue StandardError` do .rb engole a falha
+        em silencio: a peca some (kb_teto vira 'ceu vazando' num canto). Fix:
+        `simplify` colapsa os quase-colineares E buffer(0) garante anel valido
+        antes de exportar os corners — mesmo poligono geometrico, boundary
+        limpa pro add_face."""
+        cleaned = poly.buffer(0).simplify(M(0.01), preserve_topology=True)
+        if cleaned.is_empty or cleaned.geom_type != "Polygon":
+            cleaned = poly   # fallback: nunca perder a peca por causa do clean
+        return [[round(px * PT_TO_IN, 2), round(py * PT_TO_IN, 2)]
+                for px, py in list(cleaned.exterior.coords)[:-1]]
+
+    piso = cell.buffer(-M(0.004), join_style=2)
     if not piso.is_empty:
         p = _pp("kb_piso", *piso.bounds, 0.001, 0.012, [66, 62, 58], "Pele")
-        p["corners"] = [[round(px * PT_TO_IN, 2), round(py * PT_TO_IN, 2)]
-                        for px, py in list(piso.exterior.coords)[:-1]]
+        p["corners"] = _clean_ring_corners(piso)
         p["decorative"] = True   # recortado ao comodo (mesmo precedente do tapete)
         out.append(p)
     # TETO do banho (fecha o comodo pro V-Ray interior — sem ele o ceu lava a
     # cena; modulo proprio pra KA_HIDE nos renders dollhouse)
-    laje = cell.buffer(M(0.14))   # cobre a espessura das paredes (sem fresta de sol)
+    laje = cell.buffer(M(0.14), join_style=2)   # cobre a espessura das paredes (sem fresta de sol);
+    # join_style=2 (mitre) evita a curva-arco do round nos cantos convexos —
+    # menos pontos quase-colineares pro add_face brigar com concavidade real.
     if not laje.is_empty:
         t = _pp("kb_teto", *laje.bounds, 2.50, 2.56, [58, 54, 50], "PeleTeto")
-        t["corners"] = [[round(px * PT_TO_IN, 2), round(py * PT_TO_IN, 2)]
-                        for px, py in list(laje.exterior.coords)[:-1]]
+        t["corners"] = _clean_ring_corners(laje)
         t["decorative"] = True
         out.append(t)
     _t = M(0.02)
