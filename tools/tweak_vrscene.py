@@ -143,8 +143,8 @@ def apply_theme_estudio_banho(text: str) -> str:
             "reflect_glossiness": "0.55", "metalness": "0"}
     # BEAUTY PASS — GPT OPÇÃO A: slot rasante na parede que o espelho reflete.
     # Mais fraco que o halo do espelho — é conteúdo pro reflexo, não protagonista.
-    slot_led = {"diffuse": "AColor(0.30, 0.24, 0.14, 1)",
-                "self_illumination": "AColor(0.55, 0.38, 0.20, 1)", "self_illumination_gi": "1"}
+    slot_led = {"diffuse": "AColor(0.34, 0.27, 0.15, 1)",
+                "self_illumination": "AColor(0.85, 0.58, 0.30, 1)", "self_illumination_gi": "1"}
 
     # p20: cuba under-mount NITIDA (leve reflexo pega o halo) + shadow gap = void
     # matte de verdade (era black_metal refletivo — matava a transicao suave)
