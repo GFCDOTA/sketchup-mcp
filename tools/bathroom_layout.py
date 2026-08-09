@@ -60,6 +60,77 @@ _KIND_TEX = {"gabinete": ("stone_greige_veins.png", 90),
              "kb_piso_box": ("antracite_calmo.png", 60)}
 _KIND_ALPHA = {"box_vidro": 0.16, "kb_folha": 0.16, "kb_janela_fosco": 0.55}
 
+# ---- TEMA POR CÔMODO (Felipe 2026-08-08: "faz nos outros banheiros mas muda
+# o tema deles"). O .skp resolve o material POR PEÇA via `mat_name`
+# (place_layout_skp.rb: b['mat_name'] || "ph_<kind>"), então cada cômodo ganha
+# pele própria sem colidir com o BANHO 01 — que fica CONGELADO no
+# STONE_MONOLITH aprovado (9.6). Regras universais da casa continuam valendo
+# em todos: metais preto fosco, dourado zero, cuba under-mount, gabinete
+# suspenso, madeira NUNCA na área molhada do box.
+BASE_THEME = "stone_monolith"
+THEMES = {
+    # BANHO 01 (suíte) — CONGELADO: aprovado 9.6 pelo juiz.
+    "stone_monolith": {"suffix": "", "rooms": (), "tex": {}, "rgb": {}},
+    # BANHO 02 (social) — OAK_SERENO: inverte o 01 (paredes claras / piso
+    # grafite), marcenaria em carvalho na área SECA; box em cimento (madeira
+    # nunca na área molhada).
+    "oak_sereno": {
+        "suffix": "oak", "rooms": ("BANHO 02", "BANHO 2"),
+        "tex": {"gabinete": ("wood_medium.png", 70),
+                "bancada_banho": ("stone_counter.png", 90),
+                "kb_parede": ("porcelanato_greige_calmo.png", 140),
+                "kb_parede_pedra": ("concrete.png", 110),
+                "kb_piso": ("floor_grafite_medio.png", 80),
+                "kb_piso_box": ("floor_grafite_medio.png", 60)},
+        "rgb": {"gabinete": [154, 112, 68], "tampo_banho": [196, 190, 179],
+                "tampo_lavabo": [196, 190, 179], "nicho_box": [88, 86, 84],
+                "toalha_a": [206, 200, 188], "toalha_b": [170, 164, 152]},
+    },
+    # LAVABO — NERO_ARDOSIA: o cômodo de ousar (a visita vê). Ardósia escura
+    # veinada nas paredes + bancada do MESMO material (monólito total), luz do
+    # espelho como único protagonista. Sem box, então sem risco de molhado.
+    "nero_ardosia": {
+        "suffix": "nero", "rooms": ("LAVABO",),
+        "tex": {"gabinete": ("stone_antracite_veins.png", 85),
+                "bancada_banho": ("stone_antracite_veins.png", 85),
+                "kb_parede": ("stone_antracite_veins.png", 130),
+                "kb_parede_pedra": ("stone_antracite_veins.png", 90),
+                "kb_piso": ("floor_grafite_medio.png", 80)},
+        "rgb": {"gabinete": [58, 56, 56], "tampo_banho": [62, 60, 60],
+                "tampo_lavabo": [62, 60, 60], "toalha_a": [198, 192, 182],
+                "toalha_b": [168, 162, 152]},
+    },
+}
+
+
+def theme_of(room_name) -> str:
+    """Tema da pele a partir do nome do cômodo (BANHO 01 = base congelada)."""
+    up = str(room_name or "").upper()
+    for key, th in THEMES.items():
+        for pat in th.get("rooms", ()):
+            if pat in up:
+                return key
+    return BASE_THEME
+
+
+def _apply_theme(items, theme_key):
+    """Reescreve material/pele das peças conforme o tema do cômodo."""
+    th = THEMES.get(theme_key) or THEMES[BASE_THEME]
+    suffix, tex, rgb = th["suffix"], th["tex"], th["rgb"]
+    if not suffix:
+        return items
+    for it in items:
+        kind = it["kind"]
+        it["mat_name"] = f"ph_{kind}_{suffix}"
+        if kind in tex:
+            it["tex_png"], it["tile_in"] = tex[kind]
+        elif kind in _KIND_TEX:
+            it.pop("tex_png", None)
+            it.pop("tile_in", None)
+        if kind in rgb:
+            it["rgb"] = list(rgb[kind])
+    return items
+
 
 def _pp(kind, x0, y0, x1, y1, z0_m, z1_m, rgb, module):
     """parte: x/y em POINTS (->inches), z em METROS. module = grupo no .skp."""
@@ -842,8 +913,11 @@ def build_boxes(con, room_id):
     zones = [z for z in (door_z, win_zone) if z is not None]
     items.extend(_skin_parts(cell, ws_by_kind, unary_union(zones) if zones else None, win_zone))
     items.extend(_enxoval_parts(cell, ws_by_kind, bb_by_kind, door_c, lavabo))
+    theme = theme_of(sm.get("room_name"))
+    _apply_theme(items, theme)
     kinds = [it["kind"] for it in items]
     return items, {"result": "OK", "room_name": sm.get("room_name"),
+                   "theme": theme,
                    "n_pecas": len(items), "pecas": kinds,
                    "tem_vaso": "vaso" in kinds, "tem_box": "box" in kinds}
 

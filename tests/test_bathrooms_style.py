@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.bathroom_layout import build_boxes
+from tools.bathroom_layout import BASE_THEME, build_boxes, theme_of
 
 M2IN = 39.3700787402
 BRONZE = [171, 119, 63]
@@ -41,7 +41,8 @@ def test_vanity_is_floating_stone_monolith(nm):
     gab = [b for b in boxes if b["kind"] == "gabinete"]
     assert gab, f"{nm}: sem gabinete"
     assert min(b["z0_in"] for b in gab) >= 0.24 * M2IN, f"{nm}: gabinete no chão — pediu suspenso"
-    assert any(130 <= b["rgb"][0] <= 170 for b in gab), f"{nm}: gabinete não é pedra greige"
+    if theme_of(nm) == BASE_THEME:      # greige só é regra no tema do BANHO 01
+        assert any(130 <= b["rgb"][0] <= 170 for b in gab), f"{nm}: gabinete não é pedra greige"
     cuba = [b for b in boxes if b["kind"] == "cuba"]
     assert cuba and all(b["z0_in"] / M2IN < 0.88 for b in cuba), \
         f"{nm}: cuba deve ser under-mount (abaixo do tampo)"
@@ -113,12 +114,32 @@ def test_toilet_is_matte_black(nm):  # inclui assento/tampa (kb_tampa, p23)
 
 @pytest.mark.parametrize("nm", sorted(ROOMS))
 def test_stone_top_is_greige(nm):
-    # STONE_MONOLITH: tampo em pedra greige clara-media (area seca)
+    # STONE_MONOLITH: tampo em pedra greige clara-media (area seca). Nos temas
+    # dos outros banhos o tom muda, mas o tampo continua sendo PEDRA lida
+    # (nunca branco estourado nem preto absoluto) — ver test_no_pure_white.
     boxes = ROOMS[nm]
     tampo = [b for b in boxes if b["kind"] == "bancada_banho"]
     assert tampo, f"{nm}: sem tampo"
+    lo, hi = (110, 175) if theme_of(nm) == BASE_THEME else (45, 205)
     for b in tampo:
-        assert 110 <= sum(b["rgb"]) / 3 <= 175, f"{nm}: tampo {b['rgb']} fora do greige"
+        assert lo <= sum(b["rgb"]) / 3 <= hi, f"{nm}: tampo {b['rgb']} fora da faixa do tema"
+
+
+@pytest.mark.parametrize("nm", sorted(ROOMS))
+def test_theme_isolates_materials_and_keeps_wood_dry(nm):
+    # Tema por cômodo (2026-08-08): cada sala fora do tema-base precisa de
+    # mat_name PRÓPRIO (senão pinta por cima do BANHO 01 aprovado), e madeira
+    # nunca entra na área molhada do box (regra fixa do Felipe).
+    boxes = ROOMS[nm]
+    th = theme_of(nm)
+    if th != BASE_THEME:
+        semt = [b["kind"] for b in boxes if not b.get("mat_name")]
+        assert not semt, f"{nm} ({th}): peças sem mat_name próprio: {semt[:5]}"
+    molhado = ("kb_piso_box", "kb_parede_pedra", "kb_nicho_box", "box_vidro", "kb_folha")
+    for b in boxes:
+        if b["kind"] in molhado:
+            assert "wood" not in str(b.get("tex_png", "")).lower(), \
+                f"{nm}: madeira na área molhada ({b['kind']} = {b.get('tex_png')})"
 
 
 def test_shower_box_has_black_profile_and_shower():

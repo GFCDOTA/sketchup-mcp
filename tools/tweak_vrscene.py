@@ -141,7 +141,7 @@ def apply_theme_estudio_banho(text: str) -> str:
                  "reflect_glossiness": "0.60", "fresnel_ior": "1.5", "metalness": "0"}
     gap_void = {"diffuse": "AColor(0.006, 0.006, 0.006, 1)", "reflect": "AColor(0, 0, 0, 1)",
                 "reflect_glossiness": "1", "metalness": "0"}
-    for k, params in (("gabinete", greige_stone), ("bancada_banho", greige_stone),
+    base = dict((("gabinete", greige_stone), ("bancada_banho", greige_stone),
                       ("cuba", cuba_dark),
                       ("kb_torneira", black_metal), ("kb_perfil", black_metal),
                       ("kb_ducha", black_metal), ("kb_gola", black_metal),
@@ -163,8 +163,37 @@ def apply_theme_estudio_banho(text: str) -> str:
                                            "reflect": "AColor(0.06, 0.06, 0.06, 1)",
                                            "reflect_glossiness": "0.55", "metalness": "0"}),
                       ("kb_parede", wall_matte),
-                      ("kb_parede_pedra", stone_matte), ("kb_led", led_warm)):
+                      ("kb_parede_pedra", stone_matte), ("kb_led", led_warm)))
+    for k, params in base.items():
         text = _set_block(text, f"_ph_{k}_BRDFVRayMtl", params)
+
+    # ---- TEMA POR CÔMODO (Felipe 2026-08-08). O brain sufixa o mat_name por
+    # sala (bathroom_layout.THEMES), então cada banheiro tem pele própria e o
+    # BANHO 01 (aprovado 9.6) fica congelado. Regras universais da casa —
+    # metais preto fosco, dourado zero, espelho/vidro — vêm do `base`.
+    oak_wood = {"reflect": "AColor(0.10, 0.10, 0.10, 1)", "reflect_glossiness": "0.60",
+                "fresnel_ior": "1.5", "metalness": "0"}          # carvalho acetinado (textura)
+    light_stone = {"reflect": "AColor(0.16, 0.16, 0.16, 1)", "reflect_glossiness": "0.80",
+                   "fresnel_ior": "1.55", "metalness": "0"}      # pedra clara polida
+    light_wall = {"reflect": "AColor(0.03, 0.03, 0.03, 1)", "reflect_glossiness": "0.5",
+                  "metalness": "0"}
+    slate = {"reflect": "AColor(0.22, 0.22, 0.22, 1)", "reflect_glossiness": "0.74",
+             "fresnel_ior": "1.6", "metalness": "0"}             # ardósia nero polida
+    themes = {
+        "oak": {"gabinete": oak_wood, "bancada_banho": light_stone,
+                "kb_parede": light_wall, "kb_parede_pedra": stone_matte,
+                "kb_piso": stone_matte, "kb_piso_box": stone_matte},
+        "nero": {"gabinete": slate, "bancada_banho": slate,
+                 "kb_parede": slate, "kb_parede_pedra": slate,
+                 # lavabo é o cômodo de ousar, mas NÃO pode virar caverna:
+                 # halo do espelho puxa +25% pra segurar os meios-tons
+                 "kb_led": {"diffuse": "AColor(0.55, 0.44, 0.26, 1)",
+                            "self_illumination": "AColor(9.0, 6.3, 3.3, 1)",
+                            "self_illumination_gi": "1"}},
+    }
+    for suffix, over in themes.items():
+        for k, params in {**base, **over}.items():
+            text = _set_block(text, f"_ph_{k}_{suffix}_BRDFVRayMtl", params)
     return text
 
 
