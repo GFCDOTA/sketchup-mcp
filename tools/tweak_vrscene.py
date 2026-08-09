@@ -107,25 +107,32 @@ def apply_theme_estudio_banho(text: str) -> str:
     planta_74). Mesmo vocabulario do apply_scene_theme_estudio_banheiro (loop GPT
     4.4->8.0), portado pros kinds do bathroom_layout. Skin-swap; geometria da
     planta congelada."""
-    greige_stone = {"reflect": "AColor(0.14, 0.14, 0.14, 1)", "reflect_glossiness": "0.78",
-                    "fresnel_ior": "1.55", "metalness": "0"}   # pedra greige polida (textura)
+    # BEAUTY PASS 01 (2026-08-08): pedra mais nobre/menos granulada — glossiness
+    # +4% e reflect levemente mais quente pra ler como pedra polida cara, nao ruido
+    greige_stone = {"reflect": "AColor(0.155, 0.15, 0.145, 1)", "reflect_glossiness": "0.82",
+                    "fresnel_ior": "1.55", "metalness": "0"}   # pedra greige polida (textura) — TAMPO
+    # beauty pass: FRENTE (gabinete) um tico mais fosca/escura que o tampo —
+    # separa as duas por VALOR (juiz pediu "tampo/frente/cuba" varias vezes)
+    greige_front = {"reflect": "AColor(0.12, 0.115, 0.11, 1)", "reflect_glossiness": "0.68",
+                    "fresnel_ior": "1.5", "metalness": "0"}
     dark_stone = {"reflect": "AColor(0.20, 0.20, 0.20, 1)", "reflect_glossiness": "0.82",
                   "fresnel_ior": "1.6", "metalness": "0"}
     stone_matte = {"reflect": "AColor(0.16, 0.16, 0.16, 1)", "reflect_glossiness": "0.72",
                    "fresnel_ior": "1.5", "metalness": "0"}
-    black_metal = {"diffuse": "AColor(0.014, 0.014, 0.015, 1)", "reflect": "AColor(0.38, 0.38, 0.38, 1)",
-                   "reflect_glossiness": "0.50", "fresnel_ior": "1.6", "metalness": "1"}  # p20: glint (misturador/chuveiro presentes)
+    black_metal = {"diffuse": "AColor(0.014, 0.014, 0.015, 1)", "reflect": "AColor(0.40, 0.40, 0.40, 1)",
+                   "reflect_glossiness": "0.56", "fresnel_ior": "1.6", "metalness": "1"}  # beauty pass: glint controlado, menos chapado
     black_ceramic = {"diffuse": "AColor(0.020, 0.020, 0.022, 1)", "reflect": "AColor(0.22, 0.22, 0.22, 1)",
                      "reflect_glossiness": "0.72", "fresnel_ior": "1.5", "metalness": "0"}
     gold = {"diffuse": "AColor(0.32, 0.22, 0.09, 1)", "reflect": "AColor(0.62, 0.47, 0.24, 1)",
             "reflect_glossiness": "0.78", "fresnel_ior": "12", "metalness": "1"}
     champagne = {"diffuse": "AColor(0.30, 0.24, 0.14, 1)", "reflect": "AColor(0.55, 0.46, 0.30, 1)",
                  "reflect_glossiness": "0.72", "fresnel_ior": "10", "metalness": "1"}
-    mirror = {"diffuse": "AColor(0.010, 0.010, 0.011, 1)", "reflect": "AColor(0.985, 0.99, 0.995, 1)",
-              "reflect_glossiness": "1.0", "roughness": "0.02", "fresnel_ior": "60", "metalness": "1"}  # p20: preto menos absoluto
-    glass = {"diffuse": "AColor(0.004, 0.005, 0.005, 1)", "reflect": "AColor(0.24, 0.24, 0.24, 1)",
+    # beauty pass: preto ainda menos absoluto (segura reflexo util sem perder mood)
+    mirror = {"diffuse": "AColor(0.016, 0.016, 0.018, 1)", "reflect": "AColor(0.985, 0.99, 0.995, 1)",
+              "reflect_glossiness": "1.0", "roughness": "0.02", "fresnel_ior": "60", "metalness": "1"}
+    glass = {"diffuse": "AColor(0.003, 0.004, 0.004, 1)", "reflect": "AColor(0.20, 0.20, 0.20, 1)",
              "reflect_glossiness": "1.0", "fresnel_ior": "1.5", "metalness": "0",
-             "opacity": "AColor(0.12, 0.12, 0.12, 1)"}
+             "opacity": "AColor(0.08, 0.08, 0.08, 1)"}   # beauty pass: mais limpo/incolor
     towel = {"diffuse": "AColor(0.085, 0.080, 0.072, 1)", "reflect": "AColor(0, 0, 0, 1)",
              "reflect_glossiness": "1", "roughness": "0.6", "metalness": "0"}
     wall_matte = {"reflect": "AColor(0.02, 0.02, 0.02, 1)", "reflect_glossiness": "0.5",
@@ -141,7 +148,7 @@ def apply_theme_estudio_banho(text: str) -> str:
                  "reflect_glossiness": "0.60", "fresnel_ior": "1.5", "metalness": "0"}
     gap_void = {"diffuse": "AColor(0.006, 0.006, 0.006, 1)", "reflect": "AColor(0, 0, 0, 1)",
                 "reflect_glossiness": "1", "metalness": "0"}
-    base = dict((("gabinete", greige_stone), ("bancada_banho", greige_stone),
+    base = dict((("gabinete", greige_front), ("bancada_banho", greige_stone),
                       ("cuba", cuba_dark),
                       ("kb_torneira", black_metal), ("kb_perfil", black_metal),
                       ("kb_ducha", black_metal), ("kb_gola", black_metal),

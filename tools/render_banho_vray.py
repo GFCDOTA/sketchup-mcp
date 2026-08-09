@@ -54,6 +54,7 @@ def main():
     ap.add_argument("--fill", default="", help="INCHES: 'x,y,z,int[,raio]' ;-separados")
     ap.add_argument("--rect", default="",
                     help="LightRectangle horizontal p/ baixo: 'cx,cy,cz,meia_w,meia_d,int' ;-separados (in)")
+    ap.add_argument("--noise", type=float, default=None, help="noise_threshold (menor = menos grao, mais lento)")
     ns = ap.parse_args()
 
     SCRATCH.mkdir(parents=True, exist_ok=True)
@@ -113,7 +114,7 @@ def main():
                           "color": (1.0, 0.78, 0.5)})
     tweak_file(str(vrs), iso=ns.iso, fnum=ns.fnum, shutter=ns.shutter, sky=ns.sky, sun=ns.sun, burn=ns.burn,
                width=ns.width, height=ns.height, materials=True,
-               theme="estudio_banho", fill_lights=fills, rect_lights=rects)
+               theme="estudio_banho", fill_lights=fills, rect_lights=rects, noise_thresh=ns.noise)
 
     out_png = Path(ns.out).resolve()
     if out_png.exists():
