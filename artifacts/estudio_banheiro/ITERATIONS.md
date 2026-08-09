@@ -184,3 +184,27 @@ POSTOU e o GPT respondeu; ler o chat fixo pelo Chrome real (get_page_text)
 antes de reenviar (não duplicar o pedido).
 
 | p22 | **9.5** 🏆 | **SIM** | Vaso refeito com anatomia ROCA GAP real (feedback direto do Felipe: "por que manteve esse vaso zuado?") — rounded-rect, saia fechada, caixa slim. |
+
+## Tema POR CÔMODO (2026-08-08, pedido do Felipe "muda o tema deles")
+
+Mecanismo: `bathroom_layout.THEMES` sufixa o `mat_name` por sala (o .rb usa
+`b[mat_name] || ph_<kind>`), então cada banheiro tem pele própria e o BANHO 01
+(9.6) fica CONGELADO. `tweak_vrscene` pinta os sufixos; `render_banho_auto`
+enquadra/ilumina qualquer banho pela receita aprovada no 01.
+
+| Cômodo | Tema | p24 | p25 |
+|--------|------|-----|-----|
+| BANHO 01 | STONE_MONOLITH (congelado) | 9.6 | — |
+| BANHO 02 | OAK_SERENO (paredes claras, piso grafite, carvalho seco) | 8.7 | **8.8** |
+| LAVABO | NERO_ARDOSIA (monólito escuro, espelho protagonista) | 8.4 | **8.6** |
+
+Juiz: "FAMILIA: SIM — os três conversam por pedra/mineralidade, metais pretos e
+luz quente, sem repetir". TOP3 aberto: parede do box do 02 áspera demais
+(concrete → limestone homogêneo −30/40%); câmera do 02 mostrando mais
+bancada+carvalho; lavabo precisa da ardósia VEINADA expressiva na parede da
+bancada (hoje ficou clara — perdeu ousadia).
+
+GOTCHAS pagos aqui: (1) `PT_TO_M=0.0259` tem que estar no env ANTES de importar
+o brain, senão as coords saem 1.36x e a câmera aponta pro vazio (render PRETO);
+(2) câmera a <8in da pele = preto total; (3) fill a <18in de parede projeta a
+própria silhueta (discos escuros no espelho) — clampar sempre.
