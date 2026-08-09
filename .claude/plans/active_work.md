@@ -6,14 +6,18 @@ Branch em curso, objetivo, escopo, validação.
 > arquivo estiver stale, qualquer agente deve reconciliar antes
 > de operar.
 
-> **Snapshot:** 2026-07-23 (handoff). Branch ativa:
-> `fix/planta74-furnished-fidelity` @ `a35ece6` (== `origin/develop`, local-only,
-> sem commit próprio). ⚠️ **3 fixes de furnish NÃO commitados** na working tree
-> (tapete clipado ao cell · guard wet-room · piso neutro FURNISH_NEUTRAL_FLOOR)
-> — resposta ao **9× WORSE** da campanha de baseline. Suíte verde COM os fixes:
-> **1381 passed, 9 skipped** (2026-07-23). `feat/fp035-retrieval-eval` @ `205c200`
-> pushada SEM PR (2 commits: golden-set/eval + RRF). Verdicts/propostas do loop
-> ainda untracked. Detalhe em `HANDOFF.md`; plano de ataque em `KICKOFF.md`.
+> **Snapshot:** 2026-08-09 (handoff, fim de sessão — troca de computador).
+> Branch ativa: **`develop`** @ `4a70232`, sincronizada com `origin/develop`
+> (pushado). Hoje mergeou `feat/estudio-banheiro` (101 commits: skill+agent
+> `interior-project-audit`, fix de escala 1.36x, fix de teto/parede do banho,
+> BOM real, painel `ops/estudio-front` em React) + `fix/planta74-furnished-fidelity`
+> (32 commits) direto em develop. Suíte: **1262 passed, 19 failed
+> (pré-existentes, mesmas de sempre), 6 skipped**. `feat/mobiliar-bedroom-layout`
+> (57 commits, só no GitHub, scale-leak/WARN conhecido) e as 6
+> `chore/noc-nf-*` (sistema NOC removido) **deliberadamente NÃO mergeadas**.
+> 65 PNGs scratch untracked em `kitchen_angles/` + 1 stash meu de hoje + 4
+> stashes de outras sessões, todos preservados sem mexer. Detalhe completo em
+> `HANDOFF.md` (reescrito 2026-08-09) — ler antes de operar.
 
 ## Estado do repo
 
