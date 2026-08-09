@@ -1,0 +1,215 @@
+{
+  "agora": "🎨 Interior Designer concluiu os 8 cômodos do apê",
+  "hint": "Mesmo agente que aprovou o BANHO 01 (paleta/tom de parede/luz) agora passa pelos 8 cômodos da planta_74 — sala, quartos, cozinha, banhos, área de serviço. Cada linha abaixo atualiza sozinha assim que o agente termina de pensar naquele cômodo.",
+  "curadoria_aberta": false,
+  "designer": [
+    {
+      "room": "SUITE 01",
+      "state": "done",
+      "resumo": "Herda BLACK_WOOD_GOLD do DNA: cabeceira dark + parede clara [96,92,86] + madeira + LED 2700K",
+      "mood": "dark boutique aconchegante quente"
+    },
+    {
+      "room": "SALA DE ESTAR/JANTAR",
+      "state": "done",
+      "resumo": "Sala grafite-quente continua com a cozinha, painel nogueira, sofá couro fosco, bronze único no pendente",
+      "mood": "moody premium aterrado"
+    },
+    {
+      "room": "SUITE 02",
+      "state": "done",
+      "resumo": "Cabeceira em freijó com backlight como protagonista, paredes grafite-quente claras, um ponto de bronze",
+      "mood": "boutique premium quente compacto"
+    },
+    {
+      "room": "COZINHA",
+      "state": "done",
+      "resumo": "Confirma BLACK_WOOD_GOLD B; exige fill leste + parede [60,60,65] + veio controlado antes de aprovar",
+      "mood": "moody premium, black-wood-gold"
+    },
+    {
+      "room": "BANHO 01",
+      "state": "done",
+      "resumo": "STONE_MONOLITH — já aprovado (9.2-9.6)",
+      "mood": "aprovado"
+    },
+    {
+      "room": "BANHO 02",
+      "state": "done",
+      "resumo": "Manter OAK_SERENO mas trocar textura suja do box e aquecer o teto pra tirar a monotonia",
+      "mood": "sereno, claro-quente, mineral"
+    },
+    {
+      "room": "LAVABO",
+      "state": "done",
+      "resumo": "Tema NERO_ARDOSIA correto, mas parede da bancada nunca recebe ardosia veinada (bug de codigo, nao geometria)",
+      "mood": "monólito escuro ousado"
+    },
+    {
+      "room": "A.S./TERRAÇOS",
+      "state": "done",
+      "resumo": "Área de serviço/terraço herda DNA grafite+madeira-acento+LED 2700K, sem madeira molhada nem dourado",
+      "mood": "utilitário premium, boutique claro"
+    }
+  ],
+  "etapas": [
+    {
+      "txt": "Loop p18–p20 — nota subiu 8.6 → 9.2",
+      "when": "10:43–12:06",
+      "state": "done"
+    },
+    {
+      "txt": "APROVADO_DESIGN pelo juiz GPT 🏆",
+      "when": "12:06",
+      "state": "done"
+    },
+    {
+      "txt": "Kit de produtos reais consultado ao GPT",
+      "when": "12:10",
+      "state": "done"
+    },
+    {
+      "txt": "Scout baixou as fotos oficiais das 6 peças",
+      "when": "12:26",
+      "state": "done"
+    },
+    {
+      "txt": "Sua curadoria — vaso/cuba/box ✓ · trocar torneira/gabinete/chuveiro",
+      "when": "18:57",
+      "state": "done"
+    },
+    {
+      "txt": "GPT escolhendo substitutos (chuveiro vira DE PAREDE)",
+      "when": "19:05",
+      "state": "done"
+    },
+    {
+      "txt": "Builders ganham anatomia real (vaso Gap, cuba Slim…)",
+      "when": "19:08",
+      "state": "done"
+    },
+    {
+      "txt": "Render novo do banho",
+      "when": "19:12",
+      "state": "done"
+    },
+    {
+      "txt": "Nota do juiz: 9.4/10 APROVADO 🏆",
+      "when": "19:20",
+      "state": "done"
+    },
+    {
+      "txt": "Vaso refeito: anatomia Roca Gap (feedback do Felipe)",
+      "when": "19:35",
+      "state": "done"
+    },
+    {
+      "txt": "Nota do juiz p22: 9.5/10 🏆",
+      "when": "19:40",
+      "state": "done"
+    },
+    {
+      "txt": "Banho 02 + lavabo ganharam tema próprio",
+      "when": "20:05",
+      "state": "done"
+    },
+    {
+      "txt": "Nota do juiz pros dois novos",
+      "when": "20:20",
+      "state": "done"
+    },
+    {
+      "txt": "Polish do juiz nos dois temas novos (p25)",
+      "when": "20:22",
+      "state": "done"
+    },
+    {
+      "txt": "BEAUTY PASS 01 no banho 01 (modelagem/materiais/render)",
+      "when": "20:45",
+      "state": "done"
+    },
+    {
+      "txt": "Espelho: light slot vertical implementado (YOLO)",
+      "when": "21:05",
+      "state": "done"
+    },
+    {
+      "txt": "Espelho: 9.0→9.1 com câmera+slot; falta YAW (feature nova)",
+      "when": "21:20",
+      "state": "done"
+    },
+    {
+      "txt": "Orçamento V0: R$ 35.727,31 (BANHO01 13,9k + BANHO02 13,9k + LAVABO 7,9k)",
+      "when": "21:38",
+      "state": "done"
+    }
+  ],
+  "placar": [
+    {
+      "nota": 6.3,
+      "rot": "início"
+    },
+    {
+      "nota": 8.4,
+      "rot": "p16"
+    },
+    {
+      "nota": 8.6,
+      "rot": "p17"
+    },
+    {
+      "nota": 8.8,
+      "rot": "p18"
+    },
+    {
+      "nota": 9.0,
+      "rot": "p19"
+    },
+    {
+      "nota": 9.2,
+      "rot": "p20"
+    },
+    {
+      "nota": 9.4,
+      "rot": "p21"
+    },
+    {
+      "nota": 9.5,
+      "rot": "p22"
+    },
+    {
+      "nota": 9.3,
+      "rot": "beauty01"
+    },
+    {
+      "nota": 8.5,
+      "rot": "gptmatch"
+    }
+  ],
+  "badge": "8.5 · mood aproximado + espelho OK",
+  "render": "/assets/p22.png",
+  "render_rot": "Render p22 — vaso anatomia Roca Gap",
+  "top3": [
+    "Cômodo continua estreito (fidelidade real à planta 74m² — isso não muda por render).",
+    "Backlog aberto: banho02/lavabo ainda pedem o mesmo tratamento de luz.",
+    "V1 do orçamento (pedra+porcelanato m²+vidro+instalação) segue disponível se quiser."
+  ],
+  "atualizado": "2026-08-09 12:00",
+  "galeria": [
+    {
+      "rot": "Banho 01 — mood aproximado + espelho resolvido",
+      "tema": "STONE_MONOLITH · render final da sessão",
+      "src": "/assets/banho01.png"
+    },
+    {
+      "rot": "Banho 02 — social",
+      "tema": "OAK_SERENO · paredes claras, piso grafite, carvalho na área seca",
+      "src": "/assets/banho02.png"
+    },
+    {
+      "rot": "Lavabo",
+      "tema": "NERO_ARDÓSIA · monólito escuro contra parede clara, espelho protagonista",
+      "src": "/assets/lavabo.png"
+    }
+  ]
+}
