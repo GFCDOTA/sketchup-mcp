@@ -1,0 +1,12 @@
+[
+  {
+    "role": "user",
+    "text": "oi, teste da UI - lembra que eu nao gosto de piso branco",
+    "ts": 1786309726.6924915
+  },
+  {
+    "role": "assistant",
+    "text": "Lembrei! Não vamos usar piso branco nesse projeto. O que você gostaria de discutir primeiro? A planta do apartamento ou a escolha de cores e materiais?",
+    "ts": 1786309733.4493086
+  }
+]

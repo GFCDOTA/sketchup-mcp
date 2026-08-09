@@ -6,93 +6,115 @@
 <title>Estúdio — ao vivo</title>
 <style>
   :root{
-    --bg:#EDE9E1; --panel:#F7F4ED; --ink:#28221A; --muted:#7C7364;
-    --line:#D9D2C3; --accent:#A97B2F; --accent-soft:#EADFC8;
-    --ok:#5E8A67; --shadow:0 1px 3px rgba(40,34,26,.08);
+    --bg:#F3F1EC; --panel:#FFFFFF; --panel2:#FAF8F4; --ink:#1E1B16; --muted:#847A6B;
+    --line:#E7E1D4; --accent:#B5822F; --accent2:#8C6A2E; --accent-soft:#F3E6CC;
+    --ok:#4E8A5C; --danger:#B85C4D; --shadow:0 2px 10px rgba(30,27,22,.06);
+    --radius:16px;
   }
   @media (prefers-color-scheme: dark){
     :root{
-      --bg:#16130E; --panel:#1F1A13; --ink:#EAE3D4; --muted:#9C9280;
-      --line:#332C20; --accent:#D2A759; --accent-soft:#3A2F1B;
-      --ok:#7FA987; --shadow:none;
+      --bg:#111009; --panel:#1B1811; --panel2:#201C14; --ink:#F1ECDF; --muted:#9E9683;
+      --line:#2E2A1E; --accent:#E0AC55; --accent2:#F0C077; --accent-soft:#382C17;
+      --ok:#7CBB8B; --danger:#E28674; --shadow:0 2px 16px rgba(0,0,0,.35);
     }
   }
   *{box-sizing:border-box;}
   body{background:var(--bg); color:var(--ink);
-    font:16px/1.55 -apple-system,"Segoe UI",Roboto,sans-serif;
-    margin:0; padding:28px 16px 64px;}
-  main{max-width:680px; margin:0 auto; display:flex; flex-direction:column; gap:22px;}
-  h1{font-family:Georgia,'Times New Roman',serif; font-weight:600; font-size:1.7rem;
-     margin:0; letter-spacing:-.01em;}
-  .sub{color:var(--muted); margin:2px 0 0; font-size:.92rem;}
-  .live{display:inline-flex; align-items:center; gap:6px; font-size:.78rem; color:var(--ok);
-        font-weight:600;}
-  .live i{width:8px; height:8px; border-radius:50%; background:var(--ok); display:inline-block;}
+    font:15px/1.55 -apple-system,"Segoe UI",Roboto,sans-serif;
+    margin:0; padding:0 0 80px;}
+  main{max-width:720px; margin:0 auto; padding:0 16px; display:flex; flex-direction:column; gap:18px;}
+
+  header{position:sticky; top:0; z-index:40; backdrop-filter:blur(10px);
+    background:color-mix(in srgb, var(--bg) 88%, transparent);
+    padding:18px 16px 14px; border-bottom:1px solid var(--line); margin-bottom:2px;}
+  header .inner{max-width:720px; margin:0 auto;}
+  h1{font-weight:800; font-size:1.32rem; margin:0; letter-spacing:-.02em;}
+  .sub{color:var(--muted); margin:3px 0 0; font-size:.84rem; display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  .live{display:inline-flex; align-items:center; gap:6px; font-size:.78rem; color:var(--ok); font-weight:700;}
+  .live i{width:7px; height:7px; border-radius:50%; background:var(--ok); display:inline-block;}
   @media (prefers-reduced-motion: no-preference){
-    .live i{animation:blink 1.4s ease-in-out infinite;}
-    @keyframes blink{50%{opacity:.25}}
+    .live i{animation:blink 1.6s ease-in-out infinite;}
+    @keyframes blink{50%{opacity:.3}}
   }
-  .card{background:var(--panel); border:1px solid var(--line); border-radius:10px;
-        padding:18px 20px; box-shadow:var(--shadow);}
-  .label{font-size:.72rem; text-transform:uppercase; letter-spacing:.09em;
-         color:var(--muted); margin:0 0 10px; font-weight:600;}
-  .now{border-left:4px solid var(--accent);}
-  .now .big{font-size:1.15rem; font-weight:600; margin:0;}
-  .now .hint{color:var(--muted); margin:6px 0 0; font-size:.92rem;}
-  ol.steps{list-style:none; margin:0; padding:0;}
-  ol.steps li{display:flex; gap:12px; padding:7px 0; align-items:baseline;}
-  .dot{flex:none; width:12px; height:12px; border-radius:50%; position:relative; top:1px;
-       border:2px solid var(--line);}
-  li.done .dot{background:var(--ok); border-color:var(--ok);}
-  li.current .dot{background:var(--accent); border-color:var(--accent);}
-  @media (prefers-reduced-motion: no-preference){
-    li.current .dot{animation:pulse 1.6s ease-in-out infinite;}
-    @keyframes pulse{50%{box-shadow:0 0 0 5px color-mix(in srgb, var(--accent) 25%, transparent);}}
-  }
-  li.done, li.pending{color:var(--muted);}
-  li.current{font-weight:600;}
-  .t{margin-left:auto; font:.78rem ui-monospace,Consolas,monospace; color:var(--muted);}
-  .kit-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px;}
-  .kcard{border:1px solid var(--line); border-radius:8px; padding:10px; background:var(--bg);}
-  .kcard .ph{background:#fff; border-radius:6px; height:118px; display:flex;
-             align-items:center; justify-content:center; margin-bottom:8px; overflow:hidden;}
-  .kcard .ph.tall{height:210px; background:transparent;}
-  .kcard img{max-height:108px; max-width:100%;}
-  .kcard .ph.tall img{max-height:200px;}
-  .kcard .nm{font-size:.85rem; font-weight:600; margin:0;}
-  .kcard .ds{font-size:.74rem; color:var(--muted); margin:0 0 8px;}
+
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+        padding:20px 22px; box-shadow:var(--shadow);}
+  .label{font-size:.7rem; text-transform:uppercase; letter-spacing:.1em;
+         color:var(--muted); margin:0 0 12px; font-weight:800;}
+
+  .now{background:linear-gradient(160deg, var(--panel), var(--panel2));
+       border:1px solid var(--line); position:relative; overflow:hidden;}
+  .now::before{content:''; position:absolute; left:0; top:0; bottom:0; width:4px;
+    background:linear-gradient(180deg, var(--accent), var(--accent2));}
+  .now .big{font-size:1.18rem; font-weight:700; margin:0; padding-left:2px;}
+  .now .hint{color:var(--muted); margin:8px 0 0; font-size:.88rem; padding-left:2px; line-height:1.5;}
+
+  .kit-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px;}
+  .kcard{border:1px solid var(--line); border-radius:12px; padding:12px; background:var(--panel2);}
+  .kcard .ph{background:#fff; border-radius:8px; height:110px; display:flex;
+             align-items:center; justify-content:center; margin-bottom:10px; overflow:hidden;}
+  .kcard .ph.tall{height:220px; background:transparent; border-radius:10px;}
+  .kcard img{max-height:100px; max-width:100%;}
+  .kcard .ph.tall img{max-height:100%; max-width:100%; object-fit:cover; border-radius:10px;}
+  .kcard .nm{font-size:.84rem; font-weight:700; margin:0;}
+  .kcard .ds{font-size:.74rem; color:var(--muted); margin:2px 0 8px;}
   .opts{display:flex; gap:6px;}
-  .opt{flex:1; font:600 .78rem inherit; font-family:inherit; padding:6px 0; cursor:pointer;
-       border:1px solid var(--line); border-radius:6px; background:transparent; color:var(--muted);}
-  .opt.sel{background:var(--accent-soft); border-color:var(--accent); color:var(--accent);}
-  textarea{width:100%; min-height:74px; margin-top:14px; padding:10px 12px;
-           border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--ink);
-           font:inherit; font-size:.92rem; resize:vertical;}
+  .opt{flex:1; font:700 .76rem inherit; font-family:inherit; padding:7px 0; cursor:pointer;
+       border:1px solid var(--line); border-radius:8px; background:transparent; color:var(--muted);
+       transition:.15s;}
+  .opt.sel{background:var(--accent-soft); border-color:var(--accent); color:var(--accent2);}
+  textarea{width:100%; min-height:70px; margin-top:14px; padding:12px 14px;
+           border:1px solid var(--line); border-radius:10px; background:var(--panel2); color:var(--ink);
+           font:inherit; font-size:.9rem; resize:vertical;}
   .sendrow{display:flex; align-items:center; gap:14px; margin-top:12px; flex-wrap:wrap;}
-  #send{font:600 .95rem inherit; font-family:inherit; padding:11px 26px; cursor:pointer;
-        border:none; border-radius:8px; background:var(--accent); color:var(--bg);}
-  #send:disabled{opacity:.5; cursor:default;}
-  #send:active{transform:scale(.98);}
-  .msg{font-size:.85rem; color:var(--muted);}
-  .score-row{display:flex; align-items:flex-end; gap:8px; height:110px; margin-top:6px;}
-  .bar{flex:1; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:5px; height:100%;}
-  .bar i{display:block; width:100%; border-radius:3px 3px 0 0; background:var(--line); font-style:normal;}
-  .bar.last i{background:var(--accent);}
-  .bar b{font:.8rem ui-monospace,Consolas,monospace; font-weight:400; font-variant-numeric:tabular-nums;}
-  .bar.last b{font-weight:700;}
-  .bar span{font-size:.68rem; color:var(--muted);}
-  .badge{display:inline-block; background:var(--accent-soft); color:var(--accent);
-         border-radius:999px; padding:3px 11px; font-size:.78rem; font-weight:700;}
-  img.render{width:100%; border-radius:8px; display:block;}
-  .top3{margin:0; padding-left:20px;}
-  .top3 li{margin:6px 0;}
-  footer{color:var(--muted); font-size:.8rem; text-align:center;}
+  button.primary{font:700 .9rem inherit; font-family:inherit; padding:11px 24px; cursor:pointer;
+        border:none; border-radius:10px; background:var(--accent); color:#1a1408;}
+  button.primary:disabled{opacity:.45; cursor:default;}
+  button.primary:active{transform:scale(.97);}
+  .msg{font-size:.82rem; color:var(--muted);}
+
+  img.render{width:100%; border-radius:12px; display:block; background:var(--panel2);}
+  .render-sub{color:var(--muted); font-size:.8rem; margin:10px 0 0;}
+
+  footer{color:var(--muted); font-size:.76rem; text-align:center; padding-top:4px;}
+
+  /* ---- chat com o designer / RAG ---- */
+  .chat-log{display:flex; flex-direction:column; gap:10px; max-height:360px; overflow-y:auto;
+    padding:2px 2px 6px; margin-bottom:12px;}
+  .chat-empty{color:var(--muted); font-size:.86rem; padding:8px 2px;}
+  .bubble{max-width:82%; padding:10px 14px; border-radius:14px; font-size:.87rem; line-height:1.48;
+    white-space:pre-wrap; word-break:break-word;}
+  .bubble.user{align-self:flex-end; background:var(--accent); color:#1a1408; border-bottom-right-radius:4px;}
+  .bubble.assistant{align-self:flex-start; background:var(--panel2); border:1px solid var(--line);
+    border-bottom-left-radius:4px;}
+  .bubble.system{align-self:center; background:transparent; color:var(--muted); font-size:.76rem;
+    font-style:italic; border:none; padding:2px 8px;}
+  .bubble-row{display:flex; flex-direction:column;}
+  .bubble-row.user{align-items:flex-end;}
+  .save-btn{align-self:flex-start; margin-top:4px; font:700 .68rem inherit; font-family:inherit;
+    padding:3px 10px; border-radius:999px; border:1px solid var(--line); background:transparent;
+    color:var(--muted); cursor:pointer;}
+  .save-btn:hover{border-color:var(--accent); color:var(--accent2);}
+  .save-btn.saved{border-color:var(--ok); color:var(--ok);}
+  .chat-inputrow{display:flex; gap:8px; align-items:flex-end;}
+  .chat-input{flex:1; min-height:44px; max-height:120px; padding:11px 14px; border-radius:12px;
+    border:1px solid var(--line); background:var(--panel2); color:var(--ink); font:inherit;
+    font-size:.9rem; resize:none;}
+  .chat-send{flex:none; width:44px; height:44px; border-radius:12px; border:none; cursor:pointer;
+    background:var(--accent); color:#1a1408; font-size:1.1rem; display:flex; align-items:center;
+    justify-content:center;}
+  .chat-send:disabled{opacity:.4; cursor:default;}
+  .infra-flags{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;}
+  .flag{font-size:.68rem; font-weight:700; padding:3px 9px; border-radius:999px; border:1px solid var(--line);
+    color:var(--muted);}
+  .flag.up{color:var(--ok); border-color:color-mix(in srgb, var(--ok) 45%, var(--line));}
+  .flag.down{color:var(--danger); border-color:color-mix(in srgb, var(--danger) 45%, var(--line));}
 
   /* ---- widget: monitor de atividade ao vivo, canto flutuante ---- */
   #designer-widget{position:fixed; right:18px; bottom:18px; z-index:50;
     font:16px/1.4 -apple-system,"Segoe UI",Roboto,sans-serif;}
   .dw-app{display:flex; align-items:center; gap:12px; background:var(--panel);
-    border:1px solid var(--line); box-shadow:0 6px 22px rgba(40,34,26,.20);
+    border:1px solid var(--line); box-shadow:0 8px 26px rgba(20,17,10,.25);
     border-radius:16px; padding:10px 18px 10px 10px; cursor:pointer; user-select:none;
     max-width:300px;}
   .dw-app:hover{border-color:var(--accent);}
@@ -104,16 +126,16 @@
     @keyframes dwspin{to{transform:rotate(360deg);}}
   }
   .dw-now{min-width:0;}
-  .dw-now .dw-tag{font-size:.66rem; text-transform:uppercase; letter-spacing:.08em;
+  .dw-now .dw-tag{font-size:.65rem; text-transform:uppercase; letter-spacing:.08em;
     color:var(--muted); font-weight:700; margin:0 0 2px;}
-  .dw-now .dw-current{font-size:.86rem; font-weight:700; margin:0; line-height:1.3;
+  .dw-now .dw-current{font-size:.85rem; font-weight:700; margin:0; line-height:1.3;
     overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2;
     -webkit-box-orient:vertical;}
   .dw-panel{position:absolute; right:0; bottom:calc(100% + 10px); width:320px; max-height:60vh;
-    overflow-y:auto; background:var(--panel); border:1px solid var(--line); border-radius:12px;
-    box-shadow:0 8px 28px rgba(40,34,26,.22); padding:14px 16px;}
-  .dw-panel h4{margin:0 0 10px; font-size:.72rem; text-transform:uppercase; letter-spacing:.08em;
-    color:var(--muted); font-weight:700;}
+    overflow-y:auto; background:var(--panel); border:1px solid var(--line); border-radius:14px;
+    box-shadow:0 10px 32px rgba(20,17,10,.3); padding:14px 16px;}
+  .dw-panel h4{margin:0 0 10px; font-size:.7rem; text-transform:uppercase; letter-spacing:.08em;
+    color:var(--muted); font-weight:800;}
   .dw-row{display:flex; gap:10px; padding:8px 0; border-top:1px solid var(--line);}
   .dw-row:first-of-type{border-top:none;}
   .dw-dot{width:9px; height:9px; border-radius:50%; flex:none; margin-top:5px; background:var(--accent);}
@@ -125,7 +147,7 @@
   .dw-row .dw-body{min-width:0;}
   .dw-room{font-size:.82rem; font-weight:700; margin:0;}
   .dw-resumo{font-size:.76rem; color:var(--muted); margin:2px 0 0; line-height:1.35;}
-  .dw-mood{display:inline-block; margin-top:4px; font-size:.68rem; color:var(--accent);
+  .dw-mood{display:inline-block; margin-top:4px; font-size:.68rem; color:var(--accent2);
     background:var(--accent-soft); border-radius:999px; padding:1px 8px;}
 </style>
 </head>
@@ -141,7 +163,8 @@ const { useState, useEffect, useRef } = React;
 
 // app inteiro em React (sem build — Babel standalone transpila JSX no browser;
 // server.py continua stdlib puro, só serve este HTML). Poll de /api/status a
-// cada 5s é a única fonte de verdade — nada de estado local pra dados do Claude.
+// cada 5s é a única fonte de verdade pro que o Claude está produzindo. O chat
+// (/api/chat) tem seu próprio poll mais rápido pra sentir vivo.
 
 const PECAS = [
   {id:'vaso',     nm:'Vaso',             ds:'Roca The Gap, caixa acoplada',            img:'/assets/vaso_roca_gap.jpg'},
@@ -152,30 +175,32 @@ const PECAS = [
   {id:'chuveiro', nm:'Chuveiro de teto', ds:'Deca Flex Max 22cm + comando You',        img:'/assets/chuveiro_deca_flexmax_22.jpg'}
 ];
 
-function useStatus(intervalMs){
-  const [st, setSt] = useState(null);
+function usePoll(url, intervalMs){
+  const [data, setData] = useState(null);
   useEffect(() => {
     let alive = true;
     function load(){
-      fetch('/api/status').then(r => r.json())
-        .then(d => { if (alive) setSt(d); })
+      fetch(url).then(r => r.json())
+        .then(d => { if (alive) setData(d); })
         .catch(() => {});
     }
     load();
     const t = setInterval(load, intervalMs);
     return () => { alive = false; clearInterval(t); };
-  }, [intervalMs]);
-  return st;
+  }, [url, intervalMs]);
+  return data;
 }
 
 function Header(){
   return (
     <header>
-      <h1>Estúdio Banheiro — acompanhamento ao vivo</h1>
-      <p className="sub">
-        Banho 01 · planta_74 · STONE_MONOLITH ·{' '}
-        <span className="live"><i></i>ao vivo, atualiza sozinho</span>
-      </p>
+      <div className="inner">
+        <h1>Estúdio — planta_74</h1>
+        <p className="sub">
+          <span className="live"><i></i>ao vivo</span>
+          <span>· acompanhamento em tempo real do que o Claude está gerando</span>
+        </p>
+      </div>
     </header>
   );
 }
@@ -185,7 +210,7 @@ function NowCard({ agora, hint }){
     <section className="card now">
       <p className="label">Agora</p>
       <p className="big">{agora || 'carregando…'}</p>
-      <p className="hint">{hint || ''}</p>
+      {hint ? <p className="hint">{hint}</p> : null}
     </section>
   );
 }
@@ -242,55 +267,22 @@ function CuradoriaCard({ open }){
       <textarea placeholder="O que você não gostou, o que quer diferente, qualquer observação — escreve do teu jeito"
                 value={obs} onChange={e => setObs(e.target.value)} />
       <div className="sendrow">
-        <button id="send" disabled={sending} onClick={enviar}>Enviar escolhas</button>
+        <button className="primary" disabled={sending} onClick={enviar}>Enviar escolhas</button>
         <span className="msg">{msg}</span>
       </div>
     </section>
   );
 }
 
-function StepsCard({ etapas }){
+function RenderCard({ render, renderRot, badge }){
+  if (!render) return null;
   return (
     <section className="card">
-      <p className="label">Etapas do pedido</p>
-      <ol className="steps">
-        {(etapas || []).map((e, i) => (
-          <li className={e.state} key={i}>
-            <span className="dot"></span>{e.txt}
-            {e.when ? <span className="t">{e.when}</span> : null}
-          </li>
-        ))}
-      </ol>
-    </section>
-  );
-}
-
-function ScoreCard({ placar, badge }){
-  const pl = placar || [];
-  return (
-    <section className="card">
-      <p className="label">Placar do loop &nbsp;<span className="badge">{badge || ''}</span></p>
-      <div className="score-row">
-        {pl.map((p, i) => {
-          const h = Math.max(8, Math.round((p.nota - 5.5) / 4.5 * 100));
-          return (
-            <div className={'bar' + (i === pl.length - 1 ? ' last' : '')} key={i}>
-              <b>{p.nota.toFixed(1)}</b>
-              <i style={{ height: h + '%' }}></i>
-              <span>{p.rot}</span>
-            </div>
-          );
-        })}
-      </div>
-    </section>
-  );
-}
-
-function RenderCard({ render, renderRot }){
-  return (
-    <section className="card">
-      <p className="label">{renderRot || 'Último render'}</p>
-      {render ? <img className="render" src={render} alt="Render mais recente do banho 01" /> : null}
+      <p className="label">
+        Progresso do render {badge ? <span style={{color:'var(--accent2)', textTransform:'none', letterSpacing:'normal', fontWeight:700}}>· {badge}</span> : null}
+      </p>
+      <img className="render" src={render} alt="Render mais recente" />
+      <p className="render-sub">{renderRot || ''}</p>
     </section>
   );
 }
@@ -315,18 +307,119 @@ function GaleriaCard({ galeria }){
 }
 
 function Top3Card({ top3 }){
+  const items = top3 || [];
+  if (!items.length) return null;
   return (
     <section className="card">
       <p className="label">O que o juiz ainda sugeriu</p>
-      <ol className="top3">
-        {(top3 || []).map((t, i) => <li key={i}>{t}</li>)}
-      </ol>
+      <div style={{display:'flex', flexDirection:'column', gap:8}}>
+        {items.map((t, i) => (
+          <div key={i} style={{display:'flex', gap:10, fontSize:'.87rem', lineHeight:1.5}}>
+            <span style={{color:'var(--accent2)', fontWeight:800}}>{i+1}</span>
+            <span>{t}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ---- chat com o designer + memória vetorial (RAG) ----
+function ChatCard(){
+  const [chatData, setChatData] = useState(null);
+  const [text, setText] = useState('');
+  const [sending, setSending] = useState(false);
+  const [savedIdx, setSavedIdx] = useState({});
+  const logRef = useRef(null);
+
+  function load(){
+    fetch('/api/chat').then(r => r.json()).then(setChatData).catch(() => {});
+  }
+  useEffect(() => { load(); const t = setInterval(load, 8000); return () => clearInterval(t); }, []);
+  useEffect(() => {
+    if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
+  }, [chatData]);
+
+  function send(){
+    const msg = text.trim();
+    if (!msg || sending) return;
+    setSending(true);
+    setText('');
+    // otimista: mostra a msg do usuario na hora, sem esperar o servidor
+    setChatData(prev => ({
+      ...(prev || {}),
+      history: [...((prev && prev.history) || []), { role: 'user', text: msg, ts: Date.now()/1000 }]
+    }));
+    fetch('/api/chat', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: msg })
+    }).then(r => r.json()).then(() => { setSending(false); load(); })
+      .catch(() => { setSending(false); load(); });
+  }
+
+  function salvar(idx, textoParaSalvar){
+    fetch('/api/chat/save', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: textoParaSalvar })
+    }).then(r => {
+      if (r.ok) setSavedIdx(prev => ({ ...prev, [idx]: true }));
+    });
+  }
+
+  const hist = (chatData && chatData.history) || [];
+  const ollamaUp = chatData ? chatData.ollama_up : null;
+  const qdrantUp = chatData ? chatData.qdrant_up : null;
+
+  return (
+    <section className="card">
+      <p className="label">Conversa com o designer — vira memória (RAG)</p>
+      <div className="chat-log" ref={logRef}>
+        {!hist.length && (
+          <p className="chat-empty">
+            Escreve aqui o que você gosta ou não gosta (materiais, cores, estilo —
+            "não gosto de piso branco", "quero mais madeira"). O designer responde na
+            hora; quando quiser guardar de vez, clica em "salvar" na resposta dele.
+          </p>
+        )}
+        {hist.map((h, i) => {
+          if (h.role === 'assistant') {
+            return (
+              <div className="bubble-row" key={i}>
+                <div className="bubble assistant">{h.text}</div>
+                <button className={'save-btn' + (savedIdx[i] ? ' saved' : '')}
+                        onClick={() => salvar(i, h.text)}>
+                  {savedIdx[i] ? '✔ salvo na memória' : '💾 salvar na memória'}
+                </button>
+              </div>
+            );
+          }
+          return (
+            <div className="bubble-row user" key={i}>
+              <div className="bubble user">{h.text}</div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="chat-inputrow">
+        <textarea className="chat-input" rows={1} placeholder="Escreve aqui pro designer…"
+          value={text} onChange={e => setText(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }} />
+        <button className="chat-send" disabled={sending || !text.trim()} onClick={send}>
+          {sending ? '…' : '➤'}
+        </button>
+      </div>
+      {chatData && (
+        <div className="infra-flags">
+          <span className={'flag ' + (ollamaUp ? 'up' : 'down')}>{ollamaUp ? '● Ollama' : '○ Ollama offline'}</span>
+          <span className={'flag ' + (qdrantUp ? 'up' : 'down')}>{qdrantUp ? '● Qdrant' : '○ Qdrant offline'}</span>
+        </div>
+      )}
     </section>
   );
 }
 
 function Footer({ atualizado }){
-  return <footer>Atualizado {atualizado || ''} — a página se atualiza sozinha a cada 5s.</footer>;
+  return <footer>Atualizado {atualizado || ''} — a página se atualiza sozinha.</footer>;
 }
 
 // engrenagem SVG (currentColor — segue o tema claro/escuro)
@@ -391,19 +484,18 @@ function DesignerWidget({ rooms }){
 }
 
 function App(){
-  const st = useStatus(5000);
+  const st = usePoll('/api/status', 5000);
   if (!st) {
     return <main><Header /><section className="card now"><p className="big">carregando…</p></section></main>;
   }
   return (
     <React.Fragment>
+      <Header />
       <main>
-        <Header />
         <NowCard agora={st.agora} hint={st.hint} />
         <CuradoriaCard open={!!st.curadoria_aberta} />
-        <StepsCard etapas={st.etapas} />
-        <ScoreCard placar={st.placar} badge={st.badge} />
-        <RenderCard render={st.render} renderRot={st.render_rot} />
+        <RenderCard render={st.render} renderRot={st.render_rot} badge={st.badge} />
+        <ChatCard />
         <GaleriaCard galeria={st.galeria} />
         <Top3Card top3={st.top3} />
         <Footer atualizado={st.atualizado} />
