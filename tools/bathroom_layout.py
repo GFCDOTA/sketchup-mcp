@@ -136,6 +136,34 @@ def _apply_theme(items, theme_key):
     return items
 
 
+# GATE 2 (interior-project-audit) — product identity real, nao comentario de
+# codigo. Curadoria Felipe/GPT 2026-08-08 (linhas 166-408) tinha a fonte real
+# mas nunca virou atributo persistido na peca/no .skp: "parece com" != "e".
+# Kinds ausentes daqui saem com product.verification_status=UNVERIFIED (nunca
+# omitido em silencio) — auditavel sem precisar ler comentario de codigo.
+PRODUCT_BY_KIND: dict[str, dict] = {
+    "vaso": {"manufacturer": "Roca", "line": "The Gap", "sku_hint": "A34275700B",
+             "catalog_dimensions_mm": [650, 365, 800],
+             "technical_source": "curadoria Felipe 2026-08-08 (comentario linha 166)",
+             "verification_status": "UNVERIFIED_SKU"},  # sku_hint plausivel, nao confirmado no catalogo
+    "cuba": {"manufacturer": "Deca", "line": "Slim", "sku_hint": "L82 50x37",
+             "catalog_dimensions_mm": [500, 370, None],
+             "technical_source": "curadoria Felipe 2026-08-08 (comentario linha 252)",
+             "verification_status": "UNVERIFIED_SKU"},
+    "kb_torneira": {"manufacturer": "Deca", "line": "Unic Black Matte",
+                     "sku_hint": "1194.C.BMT", "catalog_dimensions_mm": [54, 152, 174],
+                     "technical_source": "curadoria Felipe 2026-08-08 (comentario linha 261)",
+                     "verification_status": "UNVERIFIED_SKU"},
+    "kb_ducha": {"manufacturer": "Deca", "line": "Flex Max", "sku_hint": None,
+                 "catalog_dimensions_mm": [220, None, None],
+                 "technical_source": "curadoria Felipe 2026-08-08 (comentario linha 408)",
+                 "verification_status": "UNVERIFIED_SKU"},
+}
+_UNVERIFIED_PRODUCT = {"manufacturer": None, "line": None, "sku_hint": None,
+                        "catalog_dimensions_mm": None, "technical_source": None,
+                        "verification_status": "UNVERIFIED"}
+
+
 def _pp(kind, x0, y0, x1, y1, z0_m, z1_m, rgb, module):
     """parte: x/y em POINTS (->inches), z em METROS. module = grupo no .skp."""
     x0, x1 = min(x0, x1), max(x0, x1)
@@ -145,6 +173,7 @@ def _pp(kind, x0, y0, x1, y1, z0_m, z1_m, rgb, module):
         extra["tex_png"], extra["tile_in"] = _KIND_TEX[kind]
     if kind in _KIND_ALPHA:
         extra["alpha"] = _KIND_ALPHA[kind]
+    extra["product"] = PRODUCT_BY_KIND.get(kind, _UNVERIFIED_PRODUCT)
     return {**extra, "kind": kind, "x0": x0 * PT_TO_IN, "y0": y0 * PT_TO_IN,
             "x1": x1 * PT_TO_IN, "y1": y1 * PT_TO_IN,
             "corners": [[round(x0 * PT_TO_IN, 2), round(y0 * PT_TO_IN, 2)],
