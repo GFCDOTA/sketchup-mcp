@@ -1,5 +1,20 @@
 # HANDOFF — Estúdio Banheiro + merge pra develop (2026-08-09, fim de sessão)
 
+> **Atualização final (mesma sessão, commit `100b3be`):** depois do merge
+> (§abaixo), o Felipe pediu redesign do painel `ops/estudio-front` (tirar
+> "Etapas do Pedido", consertar "Placar do Loop", render em destaque) + um
+> **chat com memória vetorial**: `ops/estudio-front/rag_chat.py` (novo) fala
+> com Ollama (`llama3.1:8b` — o modelo `interior-designer` local é fixado pra
+> JSON de layout, não serve pra bate-papo) e salva preferências explícitas
+> (botão "salvar na memória") numa coleção Qdrant própria
+> (`felipe_preferences`, separada do `rag_chunks` do RAG de fidelidade — não
+> mexe naquele corpus). Testado ponta a ponta: salvou "Felipe odeia piso
+> branco" e uma pergunta nova recuperou e usou esse contexto. Commitado e
+> pushado DIRETO em `develop` (já estava nela, sem branch nova). Máquina foi
+> desligada logo em seguida a pedido do Felipe — se esta sessão reabrir e o
+> painel não responder, é só isso: `cd ops/estudio-front &&
+> ../../.venv/Scripts/python.exe server.py` sobe de novo.
+
 > Substitui o HANDOFF de 2026-08-09 anterior (o que dizia "branch NÃO é
 > develop" — isso mudou: **já está em develop, pushado**). Sessão terminando
 > aqui porque o Felipe vai logar de outro computador. Ler inteiro antes de
