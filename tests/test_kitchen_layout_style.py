@@ -12,9 +12,17 @@ O veredito visual segue sendo humano/GPT — isto pina a GEOMETRIA/PALETA, não 
 """
 from __future__ import annotations
 
-from shapely.geometry import box as sbox
+import os
 
-from tools import kitchen_layout as kl
+# planta_74 tem escala verificada por cota (0.0259), diferente do default de
+# core.scale — precisa estar setada ANTES do primeiro import de
+# tools.kitchen_layout (cascata até core.scale) ou o guard
+# core.scale.assert_pt_to_m_for_source levanta RuntimeError.
+os.environ.setdefault("PT_TO_M", "0.0259")
+
+from shapely.geometry import box as sbox  # noqa: E402
+
+from tools import kitchen_layout as kl  # noqa: E402
 
 WS_V = {"orient": "v", "sgn": 1}
 M2IN = kl.M2IN

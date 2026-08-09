@@ -8,11 +8,19 @@ preto + ducha, metais 100% pretos nos banhos (bronze ZERO) e o lavabo como joia
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 import pytest
 
-from tools.bathroom_layout import BASE_THEME, build_boxes, theme_of
+# planta_74 tem escala verificada por cota (0.0259) que difere do default de
+# core.scale (ancoragem por wall-thickness, ~0.0352) — precisa estar setada
+# ANTES do primeiro import de tools.bathroom_layout (que importa core.scale
+# em cascata) ou o guard de core.scale.assert_pt_to_m_for_source levanta
+# RuntimeError (e, sem o guard, a geometria sairia ~36% grande em silêncio).
+os.environ.setdefault("PT_TO_M", "0.0259")
+
+from tools.bathroom_layout import BASE_THEME, build_boxes, theme_of  # noqa: E402
 
 M2IN = 39.3700787402
 BRONZE = [171, 119, 63]
