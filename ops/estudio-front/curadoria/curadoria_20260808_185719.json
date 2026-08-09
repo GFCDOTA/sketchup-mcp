@@ -1,0 +1,13 @@
+{
+  "kit": "banho01",
+  "quando": "2026-08-08T21:57:19.491Z",
+  "escolhas": {
+    "vaso": "manter",
+    "cuba": "manter",
+    "torneira": "trocar",
+    "box": "manter",
+    "gabinete": "trocar",
+    "chuveiro": "trocar"
+  },
+  "obs": "Box precisa ser ate o teto esse chiveiro ai de teto e zoado"
+}

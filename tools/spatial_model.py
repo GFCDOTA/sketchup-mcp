@@ -26,7 +26,9 @@ from tools.build_plan_shell_skp import compute_room_floors, wall_footprint
 
 # escala vem da FONTE ÚNICA (core.scale); re-export p/ quem faz
 # `from tools.spatial_model import PT_TO_M`. NÃO redefinir escala aqui.
-from core.scale import M, M_TO_IN, PT_TO_IN, PT_TO_M  # noqa: F401
+from core.scale import (  # noqa: F401
+    M, M_TO_IN, PT_TO_IN, PT_TO_M, assert_pt_to_m_for_source,
+)
 CIRC_M = 0.85          # faixa de circulacao em frente a porta (m)
 MIN_USEFUL_M = 1.2     # comprimento minimo de parede util (m)
 SOFA_MIN_DEPTH_M = 2.2  # distancia minima sofa->TV pra a parede valer
@@ -79,6 +81,7 @@ def _tv_depth_m(w, usable):
 
 
 def build_spatial_model(con: dict, room_id: str) -> dict:
+    assert_pt_to_m_for_source(con.get("source"))
     wt = float(con.get("wall_thickness_pts") or 5.4)
     walls = {w["id"]: w for w in con["walls"]}
     wp = [wall_footprint(w, extend_endpoints=True) for w in con["walls"]]

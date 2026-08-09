@@ -118,7 +118,8 @@ def render_scene_vray(scene_dir, out_png=None, iso=100, fnum=7.0, shutter=160,
                 "VRAY_EYE": eye, "VRAY_TARGET": target,
                 "VRAY_FOV": str(fov),
                 # texturas procedurais (fz_* da cena: sofa charcoal/tapete fibra/piso veio)
-                "VRAY_TEX_DIR": str(ROOT / "assets/textures/procedural").replace("\\", "/")})
+                "VRAY_TEX_DIR": str(ROOT / "assets/textures/procedural").replace("\\", "/"),
+                **({"VRAY_SCENE_THEME": scene_theme} if scene_theme else {})})
     ps = (f"Start-Process -FilePath '{SU_EXE}' "
           f"-ArgumentList '\"{copy}\"','-RubyStartup','\"{EXPORT_RB}\"'")
     t0 = time.time()

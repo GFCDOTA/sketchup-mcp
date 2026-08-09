@@ -40,12 +40,13 @@ def pl_png(model, path)
     filename: path, width: 1600, height: 1200, antialias: true, transparent: false)
 end
 
-def pl_material(model, name, rgb, tex_path = nil, tile = 40)
+def pl_material(model, name, rgb, tex_path = nil, tile = 40, alpha = nil)
   m = model.materials[name]
   return m if m
   m = model.materials.add(name)
   m.color = Sketchup::Color.new(rgb[0], rgb[1], rgb[2])
-  m.alpha = 1.0
+  # alpha opcional (vidro de box) — o SKP navegavel mostra atraves do vidro
+  m.alpha = (alpha || 1.0).to_f
   # A CORRECAO DO BUG (FP-036): o path HUMANO/interativo tambem aplica textura por kind, nao so
   # o V-Ray. Sem png (ou arquivo ausente) -> cor chapada = comportamento anterior (fallback seguro).
   if tex_path && File.exist?(tex_path)
@@ -171,7 +172,19 @@ def pl_run
           log << "  tex MISS #{mat_name}: #{png} ausente -> cor chapada"
         end
       end
-      mat = pl_material(model, mat_name, b['rgb'] || [120, 120, 120], tex_path, tile)
+      # b['smooth']: peca curva (vaso/chuveiro) — suaviza as arestas VERTICAIS
+      # da extrusao pro shading ler redondo (anti-Minecraft; padrao do sofa)
+      if b['smooth']
+        g.entities.grep(Sketchup::Edge).each do |e|
+          p0 = e.start.position
+          p1 = e.end.position
+          if (p0.x - p1.x).abs < 0.01 && (p0.y - p1.y).abs < 0.01
+            e.soft = true
+            e.smooth = true
+          end
+        end
+      end
+      mat = pl_material(model, mat_name, b['rgb'] || [120, 120, 120], tex_path, tile, b['alpha'])
       g.material = mat
       placed += 1
       bw = (b['x1'].to_f - b['x0'].to_f).round
@@ -182,6 +195,9 @@ def pl_run
       log << "  FAIL #{b['kind']}: #{e.class}: #{e.message}"
     end
   end
+  # PeleTeto (laje do V-Ray dos banhos) OCULTO no deliverable: o Felipe abre o
+  # .skp e enxerga dentro; o vray_export re-exibe antes de exportar.
+  mod_groups.each { |k, g| (g.hidden = true) rescue nil if k.include?('PeleTeto') }
   log << "placed #{placed}/#{boxes.size} placeholders"
   log << "texturas aplicadas: #{tex_applied.size} kind(s) via LAYOUT_TEX_MAP"
   log << "MOVEIS (comodo | movel): #{mod_groups.keys.sort.join(' ; ')}"

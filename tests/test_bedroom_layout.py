@@ -12,11 +12,18 @@ Dimensoes/regras validadas com ChatGPT (consult "Prioridade Quartos e Layout",
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 import pytest
 
-from tools.bedroom_layout import _bed_order, run
+# planta_74 tem escala verificada por cota (0.0259), diferente do default de
+# core.scale — precisa estar setada ANTES do primeiro import de
+# tools.bedroom_layout (cascata até core.scale) ou o guard
+# core.scale.assert_pt_to_m_for_source levanta RuntimeError.
+os.environ.setdefault("PT_TO_M", "0.0259")
+
+from tools.bedroom_layout import _bed_order, run  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[1]
 SYN = REPO / "fixtures" / "synthetic_rooms"

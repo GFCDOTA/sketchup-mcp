@@ -93,7 +93,12 @@ def scene_boxes(parts):
     for p in parts:
         x0, y0, x1, y1 = (p["x0"] * M_TO_IN, p["y0"] * M_TO_IN,
                           p["x1"] * M_TO_IN, p["y1"] * M_TO_IN)
-        if p.get("verts8"):
+        if p.get("poly"):
+            # footprint poligonal livre (m) — ex. chuveiro octogonal "redondo";
+            # o fz_solid do .rb extruda qualquer poligono
+            corners = [[round(v[0] * M_TO_IN, 2), round(v[1] * M_TO_IN, 2)]
+                       for v in p["poly"]]
+        elif p.get("verts8"):
             corners = [[round(v[0] * M_TO_IN, 2), round(v[1] * M_TO_IN, 2)]
                        for v in p["verts8"][:4]]
         else:
@@ -111,6 +116,7 @@ def scene_boxes(parts):
             "h_in": round((p["z1"] - p["z0"]) * M_TO_IN, 2),
             "z0_in": round(p["z0"] * M_TO_IN, 2),
             "rgb": p["rgb"], "ambiguous": False, "decorative": False,
+            **({"alpha": p["alpha"]} if p.get("alpha") is not None else {}),
         })
     return boxes
 
