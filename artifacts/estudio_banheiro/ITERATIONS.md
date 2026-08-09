@@ -242,3 +242,23 @@ TOP3 aberto do juiz: (1) precisa YAW no plano do espelho (2deg) pra pegar
 mais da linha+box — **builder atual nao suporta rotacao de peca** (feature
 nova, nao so parametro); (2) o slot hoje le como "faixa solta" — integrar
 melhor a leitura; (3) camera 2-3cm mais a esquerda.
+
+## Aproximando mood da referencia (GPT-gerada) — 2026-08-09
+
+Felipe pediu pra chegar mais perto da imagem que o proprio GPT gerou como
+referencia. Separado em DUAS naturezas: (1) qualidade de render/luz/material
+— atacavel; (2) generosidade espacial — FIXA pela planta real (~1.2m largura),
+nao ajustavel sem mexer em parede de verdade.
+
+Ataque em (1): sky/sun/burn maiores, mais fill quente, iteracoes de ajuste
+fino guiadas pelo juiz.
+
+| Iter | Nota | Mudanca |
+|---|---|---|
+| GPTMATCH02 | 8.5 | Mood mais quente/aberto. Juiz: "CHEGOU_MAIS_PERTO: SIM" + "espelho finalmente deixou de ser o maior problema" (7 iteracoes resolvidas). |
+| GPTMATCH03 | 8.9 | Fills -25%, box -0.3EV recupera profundidade/antracite. |
+| GPTMATCH04 | — | Highlight da parede esquerda reduzido (TOP3 do 8.9). |
+
+LICAO: pedir ao GPT pra gerar a PROPRIA imagem de referencia + comparar lado
+a lado destravou o espelho que travava desde a p14 — ver o alvo visual ajudou
+mais que so ler texto de TOP3.
