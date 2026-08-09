@@ -148,6 +148,12 @@ def apply_theme_estudio_banho(text: str) -> str:
                       ("kb_sombra", gap_void), ("kb_anel", gold),
                       ("kb_moldura", black_metal), ("espelho", mirror),
                       ("vaso", black_ceramic), ("box_vidro", glass),
+                      # p23: assento/tampa em SATIN mais claro que a caixa — o
+                      # vaso parava de ler como massa preta unica (GPT p22)
+                      ("kb_tampa", {"diffuse": "AColor(0.031, 0.031, 0.034, 1)",
+                                    "reflect": "AColor(0.34, 0.34, 0.34, 1)",
+                                    "reflect_glossiness": "0.80", "fresnel_ior": "1.55",
+                                    "metalness": "0"}),
                       ("kb_folha", glass),   # p19: folha INCOLOR (a cor SU esverdeada lia "leitoso")
                       ("kb_toalha", towel), ("kb_frasco", dark),
                       ("kb_nicho_fundo", dark), ("kb_nicho_box", stone_matte),

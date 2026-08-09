@@ -102,11 +102,13 @@ def test_faucet_is_deck_mounted_from_countertop(nm):
 
 
 @pytest.mark.parametrize("nm", sorted(ROOMS))
-def test_toilet_is_matte_black(nm):
+def test_toilet_is_matte_black(nm):  # inclui assento/tampa (kb_tampa, p23)
     boxes = ROOMS[nm]
-    vaso = [b for b in boxes if b["kind"] == "vaso"]
+    vaso = [b for b in boxes if b["kind"] in ("vaso", "kb_tampa")]
     assert vaso and all(sum(b["rgb"]) / 3 <= 80 for b in vaso), \
         f"{nm}: vaso não é preto fosco (referência)"
+    assert any(b["kind"] == "kb_tampa" for b in vaso), \
+        f"{nm}: assento/tampa precisam de kind próprio (satin separa da caixa)"
 
 
 @pytest.mark.parametrize("nm", sorted(ROOMS))

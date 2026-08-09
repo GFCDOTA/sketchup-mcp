@@ -124,10 +124,11 @@ def _emit(kind, b, ws, lavabo=False, door_c=None):
                 # bacia MONOBLOCO com saia fechada ate o chao (Gap: reta+suave)
                 bcx = wf + sgn * (M(0.15) + M(0.25))
                 out.append(_rr(bcx, cy, M(0.25), hw, M(0.09), 0.013, 0.405))
-                # assento + tampa retos, levemente recuados
-                out.append(_rr(bcx, cy, M(0.24), hw - M(0.010), M(0.085), 0.405, 0.425))
+                # assento + tampa retos, levemente recuados (kind proprio: no
+                # render ganham satin p/ SEPARAR da caixa fosca — GPT p22)
+                out.append(_rr(bcx, cy, M(0.24), hw - M(0.010), M(0.085), 0.405, 0.425, "kb_tampa"))
                 out.append(_rr(bcx - sgn * M(0.008), cy, M(0.235), hw - M(0.016),
-                               M(0.082), 0.425, 0.44))
+                               M(0.082), 0.425, 0.44, "kb_tampa"))
             else:
                 ccy = wf + sgn * M(0.075)
                 out.append(_rr(cx, ccy, hw, M(0.075), M(0.022), 0.40, 0.80))
@@ -136,9 +137,9 @@ def _emit(kind, b, ws, lavabo=False, door_c=None):
                                RGB2["metal"], "Vaso"))
                 bcy = wf + sgn * (M(0.15) + M(0.25))
                 out.append(_rr(cx, bcy, hw, M(0.25), M(0.09), 0.013, 0.405))
-                out.append(_rr(cx, bcy, hw - M(0.010), M(0.24), M(0.085), 0.405, 0.425))
+                out.append(_rr(cx, bcy, hw - M(0.010), M(0.24), M(0.085), 0.405, 0.425, "kb_tampa"))
                 out.append(_rr(cx, bcy - sgn * M(0.008), hw - M(0.016), M(0.235),
-                               M(0.082), 0.425, 0.44))
+                               M(0.082), 0.425, 0.44, "kb_tampa"))
         else:
             ins = min(w, d) * 0.12
             out.append(_pp("vaso", x0 + ins, y0 + ins, x1 - ins, y1 - ins,
