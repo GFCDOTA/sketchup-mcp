@@ -184,7 +184,11 @@ def apply_theme_estudio_banho(text: str) -> str:
                 "kb_parede": light_wall, "kb_parede_pedra": stone_matte,
                 "kb_piso": stone_matte, "kb_piso_box": stone_matte},
         "nero": {"gabinete": slate, "bancada_banho": slate,
-                 "kb_parede": slate, "kb_parede_pedra": slate,
+                 "kb_parede": light_wall, "kb_parede_pedra": slate,
+                 # metal preto contra ardósia escura sumia: mais glint pra
+                 # torneira/acabamentos aparecerem (GPT p24)
+                 "kb_torneira": {**black_metal, "reflect": "AColor(0.48, 0.48, 0.48, 1)",
+                                 "reflect_glossiness": "0.58"},
                  # lavabo é o cômodo de ousar, mas NÃO pode virar caverna:
                  # halo do espelho puxa +25% pra segurar os meios-tons
                  "kb_led": {"diffuse": "AColor(0.55, 0.44, 0.26, 1)",

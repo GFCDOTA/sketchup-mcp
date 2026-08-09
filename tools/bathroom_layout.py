@@ -82,8 +82,9 @@ THEMES = {
                 "kb_parede_pedra": ("concrete.png", 110),
                 "kb_piso": ("floor_grafite_medio.png", 80),
                 "kb_piso_box": ("floor_grafite_medio.png", 60)},
-        "rgb": {"gabinete": [154, 112, 68], "tampo_banho": [196, 190, 179],
-                "tampo_lavabo": [196, 190, 179], "nicho_box": [88, 86, 84],
+        # carvalho mais claro/natural = protagonista quente (GPT p24)
+        "rgb": {"gabinete": [178, 138, 94], "tampo_banho": [196, 190, 179],
+                "tampo_lavabo": [196, 190, 179], "nicho_box": [104, 102, 100],
                 "toalha_a": [206, 200, 188], "toalha_b": [170, 164, 152]},
     },
     # LAVABO — NERO_ARDOSIA: o cômodo de ousar (a visita vê). Ardósia escura
@@ -91,13 +92,16 @@ THEMES = {
     # espelho como único protagonista. Sem box, então sem risco de molhado.
     "nero_ardosia": {
         "suffix": "nero", "rooms": ("LAVABO",),
+        # GPT p24: NERO forte só na parede da bancada; paredes secundárias e
+        # piso abrem ~0.4EV pra não virar caverna. Tampo um valor acima das
+        # frentes = tampo/cuba/frente param de se fundir.
         "tex": {"gabinete": ("stone_antracite_veins.png", 85),
                 "bancada_banho": ("stone_antracite_veins.png", 85),
-                "kb_parede": ("stone_antracite_veins.png", 130),
+                "kb_parede": ("porcelanato_greige_calmo.png", 140),
                 "kb_parede_pedra": ("stone_antracite_veins.png", 90),
-                "kb_piso": ("floor_grafite_medio.png", 80)},
-        "rgb": {"gabinete": [58, 56, 56], "tampo_banho": [62, 60, 60],
-                "tampo_lavabo": [62, 60, 60], "toalha_a": [198, 192, 182],
+                "kb_piso": ("porcelanato_greige_calmo.png", 80)},
+        "rgb": {"gabinete": [52, 50, 50], "tampo_banho": [86, 83, 82],
+                "tampo_lavabo": [86, 83, 82], "toalha_a": [198, 192, 182],
                 "toalha_b": [168, 162, 152]},
     },
 }

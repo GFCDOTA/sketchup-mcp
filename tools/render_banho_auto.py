@@ -91,8 +91,11 @@ def frame(room_id: str) -> dict:
     rects = []
     if box:
         bx0, by0, bx1, by1 = box
+        # OAK_SERENO pede o interior do box +0.3EV (GPT p24); os demais na
+        # intensidade da receita aprovada no BANHO 01.
+        watts = 76 if meta.get("theme") == "oak_sereno" else 62
         rects.append(((bx0 + bx1) / 2, (by0 + by1) / 2, 93,
-                      max(14.0, (bx1 - bx0) / 2), max(12.0, (by1 - by0) / 2), 62))
+                      max(14.0, (bx1 - bx0) / 2), max(12.0, (by1 - by0) / 2), watts))
     return {"room": meta.get("room_name"), "theme": meta.get("theme"),
             "eye": eye, "target": tgt, "fills": fills, "rects": rects}
 
