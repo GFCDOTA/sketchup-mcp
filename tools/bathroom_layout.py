@@ -549,11 +549,13 @@ def _skin_parts(cell, ws_by_kind, zones_u, win_zone=None):
     laje = cell.buffer(M(0.14), join_style=2)   # cobre a espessura das paredes (sem fresta de sol);
     # join_style=2 (mitre) evita a curva-arco do round nos cantos convexos —
     # menos pontos quase-colineares pro add_face brigar com concavidade real.
+    CEILING_Z0_M = 2.50   # base do kb_teto; painel de parede precisa encostar aqui
     if not laje.is_empty:
-        t = _pp("kb_teto", *laje.bounds, 2.50, 2.56, [58, 54, 50], "PeleTeto")
+        t = _pp("kb_teto", *laje.bounds, CEILING_Z0_M, 2.56, [58, 54, 50], "PeleTeto")
         t["corners"] = _clean_ring_corners(laje)
         t["decorative"] = True
         out.append(t)
+    WALL_TOP_M = CEILING_Z0_M + 0.002   # painel encosta no teto (leve overlap anti z-fighting)
     _t = M(0.02)
     done = []
     for kind, ws in ws_by_kind.items():
@@ -581,7 +583,12 @@ def _skin_parts(cell, ws_by_kind, zones_u, win_zone=None):
             if g.is_empty or g.area < M(0.05) ** 2:
                 continue
             gx0, gy0, gx1, gy1 = g.bounds
-            out.append(_pp(pk, gx0, gy0, gx1, gy1, 0.012, 2.30, rgb, "Pele"))
+            # painel ia so ate 2.30m mas o teto (kb_teto) comeca em 2.50m — um
+            # vao de 20cm sem parede nenhuma, exatamente a frestinha residual
+            # que sobrou apos o fix do join_style do teto (achado por render,
+            # nao so por leitura de codigo). WALL_TOP encosta no teto com leve
+            # overlap (2mm) pra evitar costura coplanar/z-fighting no V-Ray.
+            out.append(_pp(pk, gx0, gy0, gx1, gy1, 0.012, WALL_TOP_M, rgb, "Pele"))
     # JANELA como elemento de projeto (auditoria: 'buraco branco'): caixilho
     # preto fino + vidro FOSCO translucido no vao, na face interna da parede
     if win_zone is not None and not win_zone.is_empty:

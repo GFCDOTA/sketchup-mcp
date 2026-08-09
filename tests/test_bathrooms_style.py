@@ -166,3 +166,45 @@ def test_no_pure_white(nm):
         if "led" in str(b["kind"]).lower():
             continue
         assert sum(b["rgb"]) / 3 <= 228, f"{nm}: branco em {b['kind']} {b['rgb']}"
+
+
+# ---- GEOMETRY_INTEGRITY_GATE (interior-project-audit Gate 1 + Gate 10) ----
+# GPT-Docker 2026-08-09: o "ceu vazando nos cantos" so foi descoberto olhando
+# render — isso nao pode depender de imagem. add_face(corners) do SketchUp
+# retorna nil (peca desaparece em silencio, engolida pelo rescue do .rb) para
+# um poligono invalido/self-intersecting; e mesmo com poligono valido, um
+# vao vertical entre o topo do painel de parede e a base do teto vaza fundo
+# no render. Os dois testes abaixo travam essas duas causas RAIZ do gotcha,
+# sem precisar renderizar nada.
+
+@pytest.mark.parametrize("nm", sorted(ROOMS))
+def test_ceiling_polygon_is_valid_simple(nm):
+    """kb_teto precisa ser um poligono valido/simples — senao add_face(corners)
+    do SketchUp retorna nil e a peca desaparece em silencio (rescue do .rb)."""
+    from shapely.geometry import Polygon
+    teto = [b for b in ROOMS[nm] if b["kind"] == "kb_teto"]
+    assert teto, f"{nm}: sem kb_teto — comodo sem fechamento de teto"
+    for t in teto:
+        poly = Polygon(t["corners"])
+        assert poly.is_valid, f"{nm}: kb_teto poligono invalido/self-intersecting ({len(t['corners'])} pts)"
+        assert poly.area > 0, f"{nm}: kb_teto com area zero"
+
+
+@pytest.mark.parametrize("nm", sorted(ROOMS))
+def test_wall_panels_reach_ceiling_no_gap(nm):
+    """Painel de parede (kb_parede/kb_parede_pedra) precisa encostar na base
+    do teto — vao vertical entre os dois vaza fundo/ceu no render (gotcha
+    pago 2026-08-09: painel parava em 2.30m, teto comecava em 2.50m)."""
+    boxes = ROOMS[nm]
+    teto = [b for b in boxes if b["kind"] == "kb_teto"]
+    if not teto:
+        pytest.skip(f"{nm}: sem kb_teto (coberto por test_ceiling_polygon_is_valid_simple)")
+    ceiling_z0_in = min(t["z0_in"] for t in teto)
+    panels = [b for b in boxes if b["kind"] in ("kb_parede", "kb_parede_pedra")]
+    assert panels, f"{nm}: sem painel de parede nenhum"
+    tol_in = 0.20   # ~5mm de folga (arredondamento de escala), nao 20cm do bug
+    for p in panels:
+        top_in = p["z0_in"] + p["h_in"]
+        assert top_in >= ceiling_z0_in - tol_in, (
+            f"{nm}: painel {p['kind']} para em {top_in:.1f}in mas o teto comeca "
+            f"em {ceiling_z0_in:.1f}in — vao de {ceiling_z0_in - top_in:.1f}in vaza fundo")
