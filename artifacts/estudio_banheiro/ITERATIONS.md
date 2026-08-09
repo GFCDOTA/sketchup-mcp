@@ -219,3 +219,26 @@ praticamente zero). Nota do juiz: **9.3/10**, ganho confirmado em modelagem/
 materiais/luz/render-pos. TOP3 aberto: espelho ainda o ponto mais fraco;
 parede direita pesa na hero (câmera mais aberta/esquerda); nicho/misturador/
 ducha podem ganhar beauty pass LOCALIZADO de luz.
+
+## Espelho — light slot (2026-08-08, modo YOLO)
+
+Diagnostico confirmado com imagem do GPT gerada p/ comparacao: o espelho
+reflete fisicamente a parede escura do box, sem conteudo — nao era so luz de
+preenchimento, era FALTA DE GEOMETRIA refletivel. GPT deu 3 opcoes; escolhida
+OPCAO A (light slot vertical rasante, 3cm x 135cm, LED 2700K) por custo/
+beneficio. Implementado como kind proprio `kb_slot_led` nos dois branches
+(orient v/h) do espelho, material dedicado (mais fraco que o halo).
+
+Placar: p-BEAUTY05 (slot only) = 9.0, ESPELHO_RESOLVIDO=AINDA_NAO (camera so
+mostrava fatia estreita). p-BEAUTY06 (camera fov62 mais aberta + slot mais
+forte) = **9.1**, ainda AINDA_NAO. Ganho real e mensurado, nao resolvido 100%.
+
+GOTCHA pago: errei os EIXOS na primeira tentativa — pra parede orient="v" o
+rasgo tem que ser FINO em Y (largura ao longo da parede) e ALTO em Z, nao o
+contrario; virou um painel 90x70cm que estourou o espelho (branco morto).
+Corrigido: fino em Y (~3cm), alto em Z (1.15-2.50, ~135cm).
+
+TOP3 aberto do juiz: (1) precisa YAW no plano do espelho (2deg) pra pegar
+mais da linha+box — **builder atual nao suporta rotacao de peca** (feature
+nova, nao so parametro); (2) o slot hoje le como "faixa solta" — integrar
+melhor a leitura; (3) camera 2-3cm mais a esquerda.
