@@ -208,3 +208,14 @@ GOTCHAS pagos aqui: (1) `PT_TO_M=0.0259` tem que estar no env ANTES de importar
 o brain, senão as coords saem 1.36x e a câmera aponta pro vazio (render PRETO);
 (2) câmera a <8in da pele = preto total; (3) fill a <18in de parede projeta a
 própria silhueta (discos escuros no espelho) — clampar sempre.
+
+## BEAUTY PASS 01 (2026-08-08) — layout congelado, só qualidade de render
+
+Pedra menos granulada (glossiness+4%) + tampo/frente separados por VALOR
+(tampo mais claro/polido, frente mais fosca) + vidro mais limpo/incolor
+(opacity 0.08) + espelho preto menos absoluto + metais com glint controlado +
+noise_threshold exposto no render_banho_vray (0.008 @ 1600x2000 = ruido
+praticamente zero). Nota do juiz: **9.3/10**, ganho confirmado em modelagem/
+materiais/luz/render-pos. TOP3 aberto: espelho ainda o ponto mais fraco;
+parede direita pesa na hero (câmera mais aberta/esquerda); nicho/misturador/
+ducha podem ganhar beauty pass LOCALIZADO de luz.
