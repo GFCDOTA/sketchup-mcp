@@ -25,7 +25,7 @@ from tools.spatial_model import PT_TO_IN, PT_TO_M, build_spatial_model
 
 # --- móveis (m): (largura ao-longo da parede, profundidade perp, altura) ---
 KING = (1.93, 2.03, 0.55)
-QUEEN = (1.58, 2.03, 0.55)          # quarto secundário: king engole o guarda-roupa
+QUEEN = (1.58, 1.98, 0.55)          # QUEEN REAL 1.58x1.98 (programa apê-inteiro 2026-08-03)
 CASAL = (1.38, 1.88, 0.50)
 SOLTEIRO = (0.88, 1.88, 0.45)
 NIGHTSTAND = (0.45, 0.40, 0.55)     # GPT review: criado menor/compacto, leve
@@ -113,11 +113,13 @@ def _free_after(usable, solids):
 def _bed_for_area(area_m2):
     """Maior cama coerente com o tamanho do quarto. Designer ESCOLHE a cama: king
     num quarto pequeno engole o guarda-roupa (review suite02). Não enfia king."""
-    if area_m2 >= 18:
-        return "king", KING
     if area_m2 >= 13:
+        # QUEEN nas duas suítes (Felipe/diretriz 2026-08-03): queen real respira
+        # melhor no 74m² — king engolia criados+circulação até na master.
         return "queen", QUEEN
-    if area_m2 >= 9:
+    if area_m2 >= 7.5:
+        # suíte pequena (r003 = 8.0m² REAL): casal 1.38 cabe e lê como suíte;
+        # solteiro só em quarto de serviço/escritório (<7.5).
         return "casal", CASAL
     return "solteiro", SOLTEIRO
 
@@ -167,14 +169,12 @@ def build_layout(sm, hb, bed_dims=KING, bed_label="king", minimalist=True):
     # --- P0: TAPETE grande sob a cama (decorativo; sai da parede e estende no
     # pé/laterais; pode sobrepor cama/criados pois é piso) ---
     rug = _fbox(o, face, sgn, ac, M(MARGIN_M), M(RUG[0]), M(RUG[1]))
-    if comodo.buffer(M(0.10)).contains(rug):
-        items.append({"name": "tapete", "type": "rug", "box": rug, "decorative": True,
-                      "anchor_wall": hb["id"], "reason": "sob a cama, sai nas laterais e no pé"})
-    else:
-        # encolhe pra caber (mantém proporção, tapete menor)
-        items.append({"name": "tapete", "type": "rug",
-                      "box": rug.intersection(comodo), "decorative": True,
-                      "anchor_wall": hb["id"], "reason": "sob a cama (recortado ao quarto)"})
+    # Clipa SEMPRE ao cômodo REAL (cell), não ao buffer (comodo = cell+FOLGA): o buffer
+    # extravasa as paredes e o canto do tapete vazava pro cômodo vizinho (ex.: SUÍTE 02
+    # -> BANHO 02). Contido no cell -> tapete inteiro; senão -> recortado ao quarto.
+    rug_fit = rug if cell.contains(rug) else rug.intersection(cell)
+    items.append({"name": "tapete", "type": "rug", "box": rug_fit, "decorative": True,
+                  "anchor_wall": hb["id"], "reason": "sob a cama (recortado ao quarto)"})
 
     # --- P0: criados-mudos simétricos, alinhados à LINHA DA CABECEIRA, com folga
     # mínima da cama (GPT review: criados menores/leves, não colados no bloco) ---

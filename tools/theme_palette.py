@@ -41,7 +41,8 @@ RUG = {"rug", "tapete"}
 # identidade própria — nunca recolorir (louça, colchão, vidro, inox, LED, pedra)
 KEEP = {"cuba", "vaso", "espelho", "colchao", "travesseiro", "kc_led",
         "kc_geladeira", "kc_inox", "kc_backsplash", "kc_tampo", "kc_cuba",
-        "kc_vidro", "kc_ralo", "kc_boca", "bancada_banho", "decor_vaso", "filler"}
+        "kc_cuba_rim", "kc_niche_back", "kc_vidro", "kc_ralo", "kc_boca",
+        "bancada_banho", "decor_vaso", "filler"}
 
 # paletas derivadas dos presets artifacts/reference_lab/themes/*.json
 THEMES: dict[str, dict[str, list[int]]] = {
