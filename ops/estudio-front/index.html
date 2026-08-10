@@ -5,22 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ateliê 74</title>
 <style>
-  /* paleta fixa BLACK_WOOD_GOLD_INDUSTRIAL_BOUTIQUE (a mesma linguagem usada
-     nos renders do projeto — não um tema claro/escuro genérico) */
+  /* paleta moderna dark (dashboard-style, sem serifa/dourado "de veio") —
+     preto quase puro + um único accent vívido (indigo elétrico) */
   :root{
-    --bg:#0E0D0A; --bg2:#161310; --panel:#1A1712; --panel2:#211D16; --ink:#F2ECDE;
-    --muted:#9C9280; --line:#2E2A20; --wood:#C08A4E; --gold:#E8B65C; --gold-soft:#3A2C15;
-    --accent:var(--gold); --accent2:var(--wood); --accent-soft:var(--gold-soft);
-    --ok:#7CBB8B; --danger:#E28674;
-    --shadow:0 4px 24px rgba(0,0,0,.45); --radius:14px;
+    --bg:#09090B; --bg2:#0F0F12; --panel:#131317; --panel2:#18181D; --ink:#F5F5F7;
+    --muted:#87878F; --line:#232329; --accent:#7C6CFF; --accent2:#5B4FE0; --accent-soft:#1E1B33;
+    --ok:#3DD68C; --danger:#FF6B6B;
+    --shadow:0 8px 30px rgba(0,0,0,.5); --radius:14px;
   }
   *{box-sizing:border-box;}
   body{background:
-      radial-gradient(1100px 480px at 15% -10%, color-mix(in srgb, var(--gold) 7%, transparent), transparent),
+      radial-gradient(900px 420px at 12% -12%, color-mix(in srgb, var(--accent) 9%, transparent), transparent),
       var(--bg);
     color:var(--ink);
-    font:15px/1.55 -apple-system,"Segoe UI",Roboto,sans-serif;
-    margin:0; padding:0 0 90px;}
+    font:15px/1.55 "Inter",-apple-system,"Segoe UI",Roboto,sans-serif;
+    margin:0; padding:0 0 90px; -webkit-font-smoothing:antialiased;}
   main{max-width:720px; margin:0 auto; padding:0 16px; display:flex; flex-direction:column; gap:18px;}
 
   header{position:sticky; top:0; z-index:40;
@@ -28,14 +27,13 @@
     backdrop-filter:blur(12px);
     padding:20px 16px 16px; border-bottom:1px solid var(--line); margin-bottom:2px;}
   header .inner{max-width:720px; margin:0 auto; display:flex; align-items:center; gap:14px;}
-  .brand-mark{flex:none; width:44px; height:44px; border-radius:11px;
-    background:linear-gradient(150deg, var(--gold), var(--wood));
+  .brand-mark{flex:none; width:40px; height:40px; border-radius:10px;
+    background:var(--accent);
     display:flex; align-items:center; justify-content:center;
-    font-family:Georgia,'Times New Roman',serif; font-weight:700; font-size:1.05rem; color:#1a1408;
-    letter-spacing:-.02em; box-shadow:0 4px 14px rgba(232,182,92,.25);}
+    font-weight:800; font-size:.95rem; color:#0A0A0D; letter-spacing:-.03em;
+    box-shadow:0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent), 0 6px 18px color-mix(in srgb, var(--accent) 35%, transparent);}
   .brand-text{min-width:0;}
-  h1{font-family:Georgia,'Times New Roman',serif; font-weight:700; font-size:1.5rem;
-     margin:0; letter-spacing:-.01em; color:var(--ink);}
+  h1{font-weight:800; font-size:1.3rem; margin:0; letter-spacing:-.02em; color:var(--ink);}
   .sub{color:var(--muted); margin:3px 0 0; font-size:.83rem; display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
   .live{display:inline-flex; align-items:center; gap:6px; font-size:.78rem; color:var(--ok); font-weight:700;}
   .live i{width:7px; height:7px; border-radius:50%; background:var(--ok); display:inline-block;}
@@ -75,7 +73,7 @@
            font:inherit; font-size:.9rem; resize:vertical;}
   .sendrow{display:flex; align-items:center; gap:14px; margin-top:12px; flex-wrap:wrap;}
   button.primary{font:700 .9rem inherit; font-family:inherit; padding:11px 24px; cursor:pointer;
-        border:none; border-radius:10px; background:var(--accent); color:#1a1408;}
+        border:none; border-radius:10px; background:var(--accent); color:#FFFFFF;}
   button.primary:disabled{opacity:.45; cursor:default;}
   button.primary:active{transform:scale(.97);}
   .msg{font-size:.82rem; color:var(--muted);}
@@ -91,7 +89,7 @@
   .chat-empty{color:var(--muted); font-size:.86rem; padding:8px 2px;}
   .bubble{max-width:82%; padding:10px 14px; border-radius:14px; font-size:.87rem; line-height:1.48;
     white-space:pre-wrap; word-break:break-word;}
-  .bubble.user{align-self:flex-end; background:var(--accent); color:#1a1408; border-bottom-right-radius:4px;}
+  .bubble.user{align-self:flex-end; background:var(--accent); color:#FFFFFF; border-bottom-right-radius:4px;}
   .bubble.assistant{align-self:flex-start; background:var(--panel2); border:1px solid var(--line);
     border-bottom-left-radius:4px;}
   .bubble.system{align-self:center; background:transparent; color:var(--muted); font-size:.76rem;
@@ -108,7 +106,7 @@
     border:1px solid var(--line); background:var(--panel2); color:var(--ink); font:inherit;
     font-size:.9rem; resize:none;}
   .chat-send{flex:none; width:44px; height:44px; border-radius:12px; border:none; cursor:pointer;
-    background:var(--accent); color:#1a1408; font-size:1.1rem; display:flex; align-items:center;
+    background:var(--accent); color:#FFFFFF; font-size:1.1rem; display:flex; align-items:center;
     justify-content:center;}
   .chat-send:disabled{opacity:.4; cursor:default;}
   .infra-flags{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;}
