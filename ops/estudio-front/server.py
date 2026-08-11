@@ -50,8 +50,11 @@ class Handler(BaseHTTPRequestHandler):
             return
         if path == "/api/chat":
             hist = rag_chat.load_history()
+            qup = rag_chat.qdrant_up()
             body = json.dumps({"history": hist, "ollama_up": rag_chat.ollama_up(),
-                                "qdrant_up": rag_chat.qdrant_up()}, ensure_ascii=False).encode("utf-8")
+                                "qdrant_up": qup,
+                                "prefs_count": rag_chat.count_preferences() if qup else 0},
+                               ensure_ascii=False).encode("utf-8")
             self._send(200, body)
             return
         target = (ROOT / path.lstrip("/")).resolve()

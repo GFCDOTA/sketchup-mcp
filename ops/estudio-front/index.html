@@ -420,6 +420,7 @@ function ChatCard(){
         <div className="infra-flags">
           <span className={'flag ' + (ollamaUp ? 'up' : 'down')}>{ollamaUp ? '● Ollama' : '○ Ollama offline'}</span>
           <span className={'flag ' + (qdrantUp ? 'up' : 'down')}>{qdrantUp ? '● Qdrant' : '○ Qdrant offline'}</span>
+          {qdrantUp ? <span className="flag up">🧠 {chatData.prefs_count} preferência{chatData.prefs_count === 1 ? '' : 's'} salva{chatData.prefs_count === 1 ? '' : 's'}</span> : null}
         </div>
       )}
     </section>

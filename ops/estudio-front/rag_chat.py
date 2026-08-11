@@ -116,6 +116,14 @@ def save_preference(text: str) -> dict:
     return {"ok": True, "text": text}
 
 
+def count_preferences() -> int:
+    try:
+        out = _http("GET", f"{QDRANT_URL}/collections/{COLLECTION}", timeout=5)
+        return int(out.get("result", {}).get("points_count", 0))
+    except InfraUnavailable:
+        return 0
+
+
 def search_preferences(query: str, top_k: int = 5) -> list[dict]:
     """Busca semântica nas preferências já salvas. [] se offline ou vazio."""
     try:
