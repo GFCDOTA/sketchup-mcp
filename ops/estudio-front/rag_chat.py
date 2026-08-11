@@ -43,9 +43,12 @@ SYSTEM_PROMPT = (
     "(materiais, cores, estilos, erros que ja viu em renders) e voce responde "
     "curto, direto, como um designer de verdade bateria papo - nao burocratico, "
     "nao lista enumerada toda hora. Quando ele pedir pra salvar/lembrar algo, "
-    "confirme que anotou. Use as preferencias ja salvas (se houver, no contexto "
-    "abaixo) pra dar respostas coerentes com o gosto dele ja conhecido. "
-    "Responda sempre em portugues do Brasil."
+    "confirme que anotou. Use as preferencias e o conhecimento tecnico ja "
+    "salvos (se houver, no contexto abaixo) pra dar respostas coerentes e "
+    "fundamentadas, citando a fonte quando vier de uma regra tecnica ou "
+    "decisao anterior do projeto (nao so opiniao solta). Se perguntarem como "
+    "melhorar um comodo, proponha algo concreto usando esse contexto, nao "
+    "generico. Responda sempre em portugues do Brasil."
 )
 
 
@@ -166,8 +169,21 @@ def chat(message: str) -> dict:
     prefs = search_preferences(message, top_k=5)
     ctx = ""
     if prefs:
-        ctx = "\n\nPreferencias ja salvas relevantes:\n" + "\n".join(
+        ctx += "\n\nPreferencias ja salvas relevantes:\n" + "\n".join(
             f"- {p['text']}" for p in prefs)
+
+    # conhecimento tecnico (decisoes anteriores, regras, PDFs quando existirem)
+    # — import tardio pra evitar import circular (knowledge_ingest importa este
+    # modulo pra reusar embed()/Qdrant helpers)
+    kb_hits: list[dict] = []
+    try:
+        import knowledge_ingest as ki
+        kb_hits = ki.search_knowledge(message, top_k=4)
+    except Exception:
+        pass
+    if kb_hits:
+        ctx += "\n\nConhecimento tecnico/decisoes anteriores relevantes:\n" + "\n".join(
+            f"- [{h.get('category', '?')}/{h.get('source', '?')}] {h['text']}" for h in kb_hits)
 
     recent = hist[-10:]
     convo = "\n".join(f"{'Felipe' if h['role']=='user' else 'Voce'}: {h['text']}"
@@ -181,4 +197,5 @@ def chat(message: str) -> dict:
 
     hist.append({"role": "assistant", "text": reply, "ts": time.time()})
     _save_history(hist)
-    return {"reply": reply, "context_used": [p["text"] for p in prefs]}
+    return {"reply": reply, "context_used": [p["text"] for p in prefs],
+            "kb_used": [h["text"][:120] for h in kb_hits]}
