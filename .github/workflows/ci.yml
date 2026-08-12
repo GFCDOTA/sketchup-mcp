@@ -44,6 +44,7 @@ jobs:
       - name: Contract + gate test suite (default scale — fixtures sintéticas)
         run: python -m pytest tests/ -q -m "not planta74_scale"
       - name: Contract + gate test suite (planta_74 real — escala 0.0259)
+        if: always()
         env:
           PT_TO_M: "0.0259"
         run: python -m pytest tests/ -q -m planta74_scale
