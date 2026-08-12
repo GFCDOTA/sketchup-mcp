@@ -114,10 +114,18 @@ def gate(con, boxes, room_id):
     # 2/3) cadeiras: 0.70 atrás + envelope PUXADA
     mesa = [g for b, g in blockers if str(b.get("module", "")).startswith("Mesa de jantar")]
     mesa_u = unary_union(mesa) if mesa else None
-    cad = {}
-    for b, g in blockers:
-        if str(b.get("module", "")).startswith("Cadeira"):
-            cad.setdefault(id(b) if False else round(g.centroid.x, 0), []).append(g)
+    # Uma cadeira = várias boxes (seat/back/frame×2/foot×4). O box kind="seat"
+    # já é o footprint INTEIRO da cadeira (back/frame/foot ficam contidos
+    # nele) — usar ele como representante único evita reconstruir
+    # identidade de instância por coordenada (bug real achado via
+    # test_circulation_gate: agrupar por round(centroid.x, 0) fundia
+    # cadeiras DIFERENTES que compartilham X — ex.: par frente/trás de uma
+    # mesa 6-lugares — numa "cadeira" só, corrompendo a métrica; agrupar por
+    # (x,y) arredondado piorou, porque as peças de UMA MESMA cadeira também
+    # têm centroide em (x,y) ligeiramente diferentes e viravam "cadeiras"
+    # fantasma extras).
+    cad = {i: [g] for i, (b, g) in enumerate(blockers)
+           if str(b.get("module", "")).startswith("Cadeira") and b.get("kind") == "seat"}
     behind_ok, pull_ok, cdetail = True, True, []
     if mesa_u is not None and cad:
         others = unary_union([g for b, g in blockers
