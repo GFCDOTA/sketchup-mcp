@@ -229,8 +229,9 @@ def test_pl_material_sets_texture_when_png_present():
     assert "LAYOUT_TEX_MAP" in rb and "LAYOUT_TILE_MAP" in rb, ".rb nao le os mapas injetados"
     assert "tex_path = (png && tex_dir)" in rb, "kind != fonte unica (deveria resolver png por kind)"
     assert "File.exist?(tex_path)" in rb, "sem fallback: png ausente deve cair na cor chapada"
-    # sanity: pl_material assinatura estendida
-    assert "def pl_material(model, name, rgb, tex_path = nil, tile = 40)" in rb
+    # sanity: pl_material assinatura estendida (alpha adicionado em 6fee05f p/
+    # vidro translúcido dos banhos — SKP navegável com a mesma pele do render)
+    assert "def pl_material(model, name, rgb, tex_path = nil, tile = 40, alpha = nil)" in rb
 
 
 def test_furnish_and_slice_call_texture_env():

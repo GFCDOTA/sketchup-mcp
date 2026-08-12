@@ -27,7 +27,10 @@ AREA_MIN_M2 = 0.04                   # cruzamento menor que isso = roçar, ignor
 FRAC_MIN = 0.12                      # E >=12% da área do menor módulo
 FRAC_FAIL = 0.30                     # >=30% do menor módulo = FAIL (abaixo, WARN)
 # módulos que legitimamente se sobrepõem a tudo (não são "móvel sobre móvel")
-EXCLUDE = ("tapete", "rug", "parede", "piso", "floor")
+# "pele" = painel de revestimento parede-a-teto dos banhos (commits
+# 40b3254/6fee05f) — cumpre o mesmo papel de "parede" pro propósito deste
+# gate, só nunca tinha sido adicionado quando o módulo entrou depois.
+EXCLUDE = ("tapete", "rug", "parede", "piso", "floor", "pele")
 # embutidos LEGÍTIMOS na cozinha: eletro/cuba (cooktop/pia/cuba) DENTRO da bancada
 # (base_cabinet + countertop). Counter sobre cabinet idem (mesma unidade física).
 _FIX = ("cooktop", "sink", "pia", "cuba")
@@ -48,12 +51,20 @@ def _is_embedded(a, b):
 
 
 def _module_geom(boxes):
-    """module -> (footprint Polygon unida, z0_in, z1_in)."""
+    """module -> (footprint Polygon unida, z0_in, z1_in).
+
+    Peças cujo KIND (não só o módulo pai) bate com EXCLUDE (ex.: "kb_tapete"
+    dentro do módulo "Enxoval") ficam de fora da união — um tapete/rug
+    aninhado num módulo maior não pode fazer o módulo inteiro "herdar"
+    colisão com o que está por baixo dele só por causa do nome do pai."""
     from shapely.geometry import Polygon
     from shapely.ops import unary_union
     polys = defaultdict(list)
     zr = defaultdict(lambda: [9e9, -9e9])
     for b in boxes:
+        kind = str(b.get("kind", "")).lower()
+        if any(e in kind for e in EXCLUDE):
+            continue
         mod = str(b.get("module", b.get("kind", "movel")))
         if not b.get("corners"):
             continue

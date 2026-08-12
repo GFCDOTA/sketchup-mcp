@@ -182,7 +182,7 @@ def _pp(kind, x0, y0, x1, y1, z0_m, z1_m, rgb, module):
                         [round(x0 * PT_TO_IN, 2), round(y1 * PT_TO_IN, 2)]],
             "h_in": round((z1_m - z0_m) * 39.3700787402, 2), "z0_in": round(z0_m * 39.3700787402, 2),
             "rgb": rgb, "label": kind, "module": module, "ambiguous": False,
-            "decorative": kind in ("kb_moldura", "kb_frasco", "kb_toalha", "kb_trilho", "kb_puxador", "kb_haste", "kb_ducha", "kb_ralo", "kb_misturador", "kb_ducha_manual", "kb_argola", "kb_gancho", "kb_papeleira", "kb_escova", "kb_toalheiro", "kb_tapete", "kb_bandeja", "kb_sabonete", "kb_copo", "kb_botao", "kb_guia", "kb_caixilho")}  # trim/decor fino declarado (kb_moldura decorativa)
+            "decorative": kind in ("kb_moldura", "kb_frasco", "kb_toalha", "kb_trilho", "kb_puxador", "kb_haste", "kb_ducha", "kb_ralo", "kb_misturador", "kb_ducha_manual", "kb_argola", "kb_gancho", "kb_papeleira", "kb_escova", "kb_toalheiro", "kb_tapete", "kb_bandeja", "kb_sabonete", "kb_copo", "kb_botao", "kb_guia", "kb_caixilho", "kb_perfil")}  # trim/decor fino declarado (kb_moldura decorativa; kb_perfil = perfil/friso fino, mesma classe)
 
 
 def _emit(kind, b, ws, lavabo=False, door_c=None):
@@ -643,16 +643,26 @@ def _enxoval_parts(cell, ws_by_kind, bb_by_kind, door_c, lavabo):
     comodo = cell.buffer(M(0.02))
     from shapely.geometry import box as _sb
 
+    vaso_bb = bb_by_kind.get("vaso")
+    _vaso_poly = _sb(*vaso_bb) if vaso_bb is not None else None
+
     def _ok(p):
-        return comodo.contains(_sb(p["x0"] / PT_TO_IN, p["y0"] / PT_TO_IN,
-                                   p["x1"] / PT_TO_IN, p["y1"] / PT_TO_IN))
+        box = _sb(p["x0"] / PT_TO_IN, p["y0"] / PT_TO_IN,
+                  p["x1"] / PT_TO_IN, p["y1"] / PT_TO_IN)
+        if not comodo.contains(box):
+            return False
+        # acessório de enxoval nunca pode sobrepor a louça do vaso (achado
+        # real do furniture_overlap_gate: kb_lixeira caindo em cima do vaso
+        # em banhos compactos — não é decisão de estilo, é colisão física).
+        if _vaso_poly is not None and box.intersects(_vaso_poly):
+            return False
+        return True
 
     def _add(p):
         if _ok(p):
             out.append(p)
 
     pia_bb = bb_by_kind.get("bancada_banho")
-    vaso_bb = bb_by_kind.get("vaso")
     box_bb = bb_by_kind.get("box")
     pia_ws = ws_by_kind.get("bancada_banho")
     vaso_ws = ws_by_kind.get("vaso")

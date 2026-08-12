@@ -47,6 +47,16 @@ DEFAULTS = {
     "outside_margin": 1.0,       # margem p/ "fora do cômodo" (mesma unidade das caixas)
 }
 
+# elementos decorativos FINOS por design (fresta de LED etc.) — footprint
+# pequeno é intencional, não uma caixa degenerada por bug. Espelha
+# furniture_overlap_gate.py::_TRIM (mesma classe de elemento, gate irmão).
+_TRIM_KINDS = ("led", "slot")
+
+
+def _is_trim(b) -> bool:
+    kind = str(b.get("kind") or "").lower()
+    return any(t in kind for t in _TRIM_KINDS)
+
 
 def _wh(b):
     return (b["x1"] - b["x0"], b["y1"] - b["y0"])
@@ -88,7 +98,7 @@ def audit(parts, *, rooms=None, to_m=1.0, cfg=None) -> dict:
         z0 = b.get("z0_in")
         if z0 is not None and z0 < c["z_under_tol_in"]:
             add("FAIL", "underground", b, f"z0_in={round(z0, 2)} < {c['z_under_tol_in']}")
-        if w * d < c["min_footprint_in2"]:
+        if w * d < c["min_footprint_in2"] and not _is_trim(b):
             add("FAIL", "degenerate_footprint", b, f"footprint={round(w * d, 3)} (w={round(w,2)} d={round(d,2)})")
         h = b.get("h_in")
         if h is not None and 0 < h < c["min_height_in"]:
