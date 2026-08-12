@@ -34,11 +34,36 @@
 >   fundo ainda. Afeta `test_bedroom_layout.py` (3) +
 >   `test_bed_placement_gate.py` (3 dos 4 restantes).
 >
-> Rodar local: `pytest tests/ -m "not planta74_scale"` (deve estar
-> 1245+ passed / 1 failed) e `PT_TO_M=0.0259 pytest tests/ -m
-> planta74_scale` (60 passed / 10 failed, as 2 regressões acima).
-> **Não force os 10 a passar sem investigar de verdade** — os 2 problemas
-> acima são reais, não são o mesmo tipo de ruído que eu já limpei.
+> Rodar local: `pytest tests/ -m "not planta74_scale"` (1245 passed / 1
+> failed) e `PT_TO_M=0.0259 pytest tests/ -m planta74_scale` (66 passed / 4
+> failed). **Não force os 4 a passar sem investigar de verdade.**
+>
+> **Round 2 (mesmo dia, Felipe pediu insistindo pra terminar antes de
+> voltar pro RAG):** dos 2 problemas acima, o de CAMA foi resolvido de
+> verdade — não era regressão, eram 2 bugs reais + 3 testes com
+> expectativa historicamente errada (provado com git: mesmo no commit que
+> gerou o artefato "14.7m²" pra SUITE 02, o consensus.json já computava
+> 8.0m² — a geometria nunca mudou, o artefato antigo é que estava errado).
+> Ver commit `8453e97` pro detalhe completo.
+>
+> **O problema da MESA DE JANTAR virou outra coisa, maior**: testei
+> empiricamente e descobri que NÃO é a mesa de 6 lugares — nem removendo
+> ela pra 4 lugares passa, e **mesmo com o cômodo TOTALMENTE VAZIO (zero
+> móveis) 3 dos 5 portais da sala já ficam desconectados**. O polígono de
+> r002 (SALA DE JANTAR | SALA DE ESTAR) tem 35 vértices — um L bastante
+> complexo com um "braço" estreito que parece ser fisicamente apertado
+> demais pro padrão de 90cm de corredor contínuo que o `circulation_gate.py`
+> exige (ver docstring dele — é intencional, veio do VERDICT 6.5 do
+> Felipe). **Isso não é bug de código nem de mobília — é um achado
+> arquitetônico real** (ou um pinch de verdade na planta, ou os 90cm são
+> rígidos demais pra essa conexão secundária tipo passagem de cozinha).
+> NÃO mexi em parede/geometria (Hard Rule #1). Fica pra você decidir: (a)
+> aceitar o pinch como constraint real da planta 74m², (b) relaxar o
+> padrão de 90cm pra conexões secundárias (não a principal), ou (c)
+> revisar se o wall/opening dessa área está desenhado certo no consensus
+> (pedir pro GPT-Docker quando voltar online, ou olhar você mesmo o PDF
+> nessa região). Comando pra reproduzir: `PT_TO_M=0.0259
+> python -m tools.circulation_gate` roda o gate isolado em r002.
 
 > **Atualização final (mesma sessão, commit `100b3be`):** depois do merge
 > (§abaixo), o Felipe pediu redesign do painel `ops/estudio-front` (tirar
