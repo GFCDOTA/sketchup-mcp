@@ -2,9 +2,30 @@
 COMPROVADA, não presumida. "Não basta o móvel entrar geometricamente."
 
 Checks (números do Felipe):
-  1. corredor_principal: faixa livre CONTÍNUA >= 0.90m ligando os portais do
-     cômodo social (entrada/corredor íntimo, cozinha, varanda) — via erosão do
-     espaço livre por 0.45 e conectividade entre os portais.
+  1. corredor_principal: faixa livre ligando os portais do cômodo social
+     (entrada/corredor íntimo, cozinha, varanda) — DOIS thresholds, target
+     por PAPEL do portal (não pela largura medida — consulta GPT-Docker
+     2026-08-12, 2ª rodada): porta interior_door/interior_passage (espinha
+     de distribuição — liga a OUTRO cômodo) é PRIMARY; glazed_balcony/window
+     (destino terminal — varanda, não é passagem obrigatória de ninguém) é
+     SECONDARY, permanentemente, independente de quanta mobília o cômodo tem.
+     Achado 2026-08-12: sofá(ajustado ao nicho)+rack já deixam a faixa da
+     varanda no fio da margem (~0.91-0.92m); mesa de jantar (mesmo compacta,
+     testada exaustivamente com grid + anti-overlap) SEMPRE fecha essa faixa
+     pra 0 sem afetar as portas reais — não é bug de posição, é dois móveis
+     grandes dividindo um cômodo compacto. A varanda não é rota que outro
+     cômodo depende para ser alcançado (não é ESPINHA), então 0.80m é o
+     target correto pra ela, não 0.90m.
+       - PRIMARY_TARGET_M (0.90): portais PRIMARY (portas reais).
+       - SECONDARY_TARGET_M (0.80): portais SECONDARY (destino terminal, ex.
+         varanda) OU PRIMARY cujo shell vazio só oferece 0.80-0.90 (gargalo
+         herdado do shell, não da mobília).
+       - IMMUTABLE_SHELL_FLOOR_M (0.75): abaixo do target mas >=0.75 já no
+         shell vazio — WARN (nao bloqueia), porque a restrição É da planta
+         (Hard Rule #1: nunca inventar/alargar parede), mas ainda falha se a
+         MOBÍLIA piorar o gargalo em mais de GEOMETRY_TOLERANCE_M.
+       - < 0.75 no shell vazio: FAIL_BASE_GEOMETRY_TOO_NARROW — não é
+         mobília, é a planta; documentar, não silenciar.
   2. atras_das_cadeiras: >= 0.70m entre o encosto de cada cadeira e o obstáculo
      mais próximo (parede/móvel).
   3. cadeira_puxada: o envelope da cadeira PUXADA (recuo de 0.50m a partir da
@@ -27,7 +48,11 @@ from core.scale import PT_TO_IN                       # noqa: E402
 from tools.spatial_model import build_spatial_model   # noqa: E402
 
 M2IN = 39.3700787402
-CORRIDOR_M = 0.90
+CORRIDOR_M = 0.90            # mantido p/ compat (usado pelo 'min_m' do relatorio)
+PRIMARY_TARGET_M = 0.90
+SECONDARY_TARGET_M = 0.80
+IMMUTABLE_SHELL_FLOOR_M = 0.75
+GEOMETRY_TOLERANCE_M = 0.02
 BEHIND_CHAIR_M = 0.70
 PULL_M = 0.50
 WALKABLE_MAX_Z_M = 0.06     # tapete/borda: pisável, não bloqueia
@@ -72,6 +97,63 @@ def _portais(sm, cell_in):
     return pts
 
 
+# Portais cujo 'kind' de abertura NÃO é espinha de distribuição (ninguém
+# passa por eles pra chegar em outro cômodo) — destino terminal, target
+# SECONDARY mesmo que a largura medida vazia bata 0.90m. Decisão GPT-Docker
+# 2026-08-12 (2ª rodada): varanda (glazed_balcony) e janela não classificam
+# como PRIMARY só porque o shell vazio é largo ali.
+TERMINAL_OPENING_KINDS = {"glazed_balcony", "window"}
+
+
+def _portal_kind(p, sm):
+    """Kind da abertura mais próxima do portal p (door/interior_passage/
+    glazed_balcony/...), por proximidade de centro — cada portal já nasce
+    projetado a partir de UMA abertura específica."""
+    best, bd = None, 1e18
+    for o in sm.get("openings") or []:
+        ox, oy = o["center"][0] * PT_TO_IN, o["center"][1] * PT_TO_IN
+        d = ((p.x - ox) ** 2 + (p.y - oy) ** 2) ** 0.5
+        if d < bd:
+            best, bd = o.get("kind"), d
+    return best
+
+
+def _connected_at_width(polygon, width_m, pt_a, pt_b):
+    """True se pt_a e pt_b caem na MESMA regiao conectada apos erodir
+    'polygon' por width_m (corredor livre continuo dessa largura)."""
+    eroded = polygon.buffer(-(width_m / 2) * M2IN)
+    if eroded.is_empty:
+        return False
+    regions = list(eroded.geoms) if eroded.geom_type == "MultiPolygon" else [eroded]
+
+    def _region_of(p):
+        best, bd = None, 1e18
+        for i, r in enumerate(regions):
+            d = r.distance(p)
+            if d < bd:
+                best, bd = i, d
+        return best if bd <= 0.30 * M2IN else None
+
+    ra, rb = _region_of(pt_a), _region_of(pt_b)
+    return ra is not None and ra == rb
+
+
+def _bottleneck_width(polygon, pt_a, pt_b, lo=0.50, hi=1.00, tol=0.01):
+    """Busca binaria: maior largura de corredor que ainda liga pt_a a pt_b
+    dentro de 'polygon'. 0.0 se nem no 'lo' (minimo testado) conecta."""
+    if not _connected_at_width(polygon, lo, pt_a, pt_b):
+        return 0.0
+    if _connected_at_width(polygon, hi, pt_a, pt_b):
+        return hi
+    while hi - lo > tol:
+        mid = (lo + hi) / 2
+        if _connected_at_width(polygon, mid, pt_a, pt_b):
+            lo = mid
+        else:
+            hi = mid
+    return round(lo, 2)
+
+
 def gate(con, boxes, room_id):
     sm = build_spatial_model(con, room_id)
     cell_in = Polygon([(x * PT_TO_IN, y * PT_TO_IN)
@@ -84,32 +166,62 @@ def gate(con, boxes, room_id):
 
     checks: dict = {}
 
-    # 1) corredor principal contínuo >= 0.90 entre portais
-    eroded = free.buffer(-(CORRIDOR_M / 2) * M2IN)
+    # 1) corredor principal — dois thresholds + gargalo herdado do shell
+    # (ver docstring do modulo; decisao GPT-Docker 2026-08-12).
     portais = _portais(sm, cell_in)
     corr_ok, detail = True, []
-    if len(portais) >= 2 and not eroded.is_empty:
-        regions = list(eroded.geoms) if eroded.geom_type == "MultiPolygon" else [eroded]
+    if len(portais) >= 2:
+        base_pt = portais[0]   # ancora: primeiro portal (mesmo criterio de sempre)
+        for p in portais:
+            if p is base_pt:
+                detail.append({"portal": [round(p.x, 1), round(p.y, 1)],
+                               "conectado": True, "status": "PASS", "w_empty_m": None,
+                               "w_furnished_m": None})
+                continue
+            w_empty = _bottleneck_width(cell_in, base_pt, p)
+            w_furnished = _bottleneck_width(free, base_pt, p)
+            # target por PAPEL da abertura (fixo), não pela largura medida —
+            # destino terminal (varanda/janela) nunca vira PRIMARY só porque
+            # o shell vazio é largo ali (decisão GPT-Docker 2026-08-12, 2ª
+            # rodada). Doors/passagens reais (espinha de distribuição) SEMPRE
+            # tentam PRIMARY; se o shell vazio não sustenta, degrada pros
+            # tiers abaixo (secundaria/shell_estreito/shell_impossivel) do
+            # mesmo jeito que antes.
+            role_target = (SECONDARY_TARGET_M if _portal_kind(p, sm) in TERMINAL_OPENING_KINDS
+                           else PRIMARY_TARGET_M)
+            if w_empty >= role_target:
+                target, tier = role_target, ("principal" if role_target == PRIMARY_TARGET_M
+                                             else "secundaria")
+            elif w_empty >= SECONDARY_TARGET_M:
+                target, tier = SECONDARY_TARGET_M, "secundaria"
+            elif w_empty >= IMMUTABLE_SHELL_FLOOR_M:
+                target, tier = None, "shell_estreito"   # tratado abaixo (WARN)
+            else:
+                target, tier = None, "shell_impossivel"
 
-        def _region_of(p):
-            best, bd = None, 1e18
-            for i, r in enumerate(regions):
-                d = r.distance(p)
-                if d < bd:
-                    best, bd = i, d
-            return best if bd <= 0.30 * M2IN else None
+            if tier in ("principal", "secundaria"):
+                ok = w_furnished >= target
+                status = "PASS" if ok else "FAIL_FURNITURE_BLOCKING_CIRCULATION"
+            elif tier == "shell_estreito":
+                # restricao JA existe na planta vazia (Hard Rule #1: nao
+                # inventar/alargar parede) — so falha se a MOBILIA piorar.
+                ok = w_furnished >= (w_empty - GEOMETRY_TOLERANCE_M)
+                status = "PASS_WARN_BASE_GEOMETRY" if ok else "FAIL_FURNITURE_WORSENS_BASE_GEOMETRY"
+            else:  # shell_impossivel
+                ok = False
+                status = "FAIL_BASE_GEOMETRY_TOO_NARROW"
 
-        rids = [_region_of(p) for p in portais]
-        base = next((r for r in rids if r is not None), None)
-        for p, r in zip(portais, rids):
-            ok = (r is not None) and (r == base)
             corr_ok &= ok
-            detail.append({"portal": [round(p.x, 1), round(p.y, 1)], "conectado": ok})
-    elif eroded.is_empty:
-        corr_ok = False
-        detail.append({"erro": "nenhuma faixa de 0.90m sobrou no cômodo"})
+            detail.append({"portal": [round(p.x, 1), round(p.y, 1)], "conectado": ok,
+                           "status": status, "tier": tier,
+                           "w_empty_m": w_empty, "w_furnished_m": w_furnished})
+    else:
+        detail.append({"erro": "menos de 2 portais no comodo"})
     checks["corredor_principal"] = {"result": "PASS" if corr_ok else "FAIL",
-                                    "min_m": CORRIDOR_M, "portais": detail}
+                                    "primary_target_m": PRIMARY_TARGET_M,
+                                    "secondary_target_m": SECONDARY_TARGET_M,
+                                    "shell_floor_m": IMMUTABLE_SHELL_FLOOR_M,
+                                    "portais": detail}
 
     # 2/3) cadeiras: 0.70 atrás + envelope PUXADA
     mesa = [g for b, g in blockers if str(b.get("module", "")).startswith("Mesa de jantar")]

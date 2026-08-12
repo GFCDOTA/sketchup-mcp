@@ -27,7 +27,11 @@ AREA_MIN_M2 = 0.04                   # cruzamento menor que isso = roçar, ignor
 FRAC_MIN = 0.12                      # E >=12% da área do menor módulo
 FRAC_FAIL = 0.30                     # >=30% do menor módulo = FAIL (abaixo, WARN)
 # módulos que legitimamente se sobrepõem a tudo (não são "móvel sobre móvel")
-EXCLUDE = ("tapete", "rug", "parede", "piso", "floor")
+# "pele"/"peleteto" (bathroom_layout.py): revestimento fino de parede/piso/teto —
+# mesma categoria de "parede"/"piso", achado 2026-08-12 (faltava aqui e gerava
+# FAIL sistemático em todo banheiro: bancada/box/enxoval/vaso "colidindo" com o
+# próprio revestimento da parede que encostam, não com outro móvel de verdade).
+EXCLUDE = ("tapete", "rug", "parede", "piso", "floor", "pele")
 # embutidos LEGÍTIMOS na cozinha: eletro/cuba (cooktop/pia/cuba) DENTRO da bancada
 # (base_cabinet + countertop). Counter sobre cabinet idem (mesma unidade física).
 _FIX = ("cooktop", "sink", "pia", "cuba")

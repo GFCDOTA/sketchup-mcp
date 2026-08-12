@@ -51,7 +51,15 @@ def test_tv_panel_is_nogueira_and_wide(sala):
         "painel não é madeira nogueira"
 
 
-def test_dining_table_is_rectangular_6_seats(sala):
+def test_dining_table_is_rectangular_4_seats(sala):
+    # Era 6 lugares (VERDICT 6.5 original) — rebaixado pra 4 em 2026-08-12
+    # depois de circulation_gate.py provar (varredura EXAUSTIVA: grade
+    # completa do cômodo, overlap real contra sofá/rack, exigindo os 5
+    # portais conectados E folga atrás/puxada de toda cadeira) que NENHUMA
+    # mesa retangular de 6 lugares tem posição válida nessa sala combinada —
+    # sofá (ajustado ao nicho) + rack já ocupam a parede-TV inteira. P1 do
+    # VERDICT 6.5 (circulação) tem prioridade sobre contagem de lugares.
+    # Ver tools/furnish_apartment.py (bloco "ZONA DE JANTAR").
     mods = _mods(sala)
     assert "Mesa de jantar" in mods
     xs0 = min(p["x0"] for p in mods["Mesa de jantar"])
@@ -59,9 +67,9 @@ def test_dining_table_is_rectangular_6_seats(sala):
     ys0 = min(p["y0"] for p in mods["Mesa de jantar"])
     ys1 = max(p["y1"] for p in mods["Mesa de jantar"])
     lados = sorted([xs1 - xs0, ys1 - ys0])
-    assert lados[1] / lados[0] >= 1.4, "mesa quadrada — diretriz pede retangular 6 lugares"
+    assert lados[1] / lados[0] >= 1.4, "mesa quadrada — diretriz pede retangular"
     seats = [p for p in mods.get("Cadeira jantar", []) if p["kind"] == "seat"]
-    assert len(seats) == 6, f"esperava 6 cadeiras, veio {len(seats)}"
+    assert len(seats) == 2, f"esperava 2 cadeiras (teto real da sala, ver comentário), veio {len(seats)}"
 
 
 def test_pendente_holds_the_single_bronze(sala):

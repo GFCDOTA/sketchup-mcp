@@ -460,27 +460,6 @@ def living_room_boxes(con, room_id):
     boxes.append(_oriented_box("tv_frame", _tv_c, rack_f, 1.27, 0.025, 0.735, 0.73, [22, 22, 26], module="TV"))
     boxes.append(_oriented_box("tv_glass", (_tv_c[0] + rfx * 0.014 * M2IN, _tv_c[1] + rfy * 0.014 * M2IN),
                                rack_f, 1.23, 0.012, 0.755, 0.69, [16, 16, 18], module="TV"))
-    # almofadas soltas no sofá (decor mínimo, pontuação não frase)
-    for _adx, _aang in ((-0.55, 12), (0.55, -12)):
-        _af = (fnx * _m.cos(_m.radians(_aang)) - fny * _m.sin(_m.radians(_aang)),
-               fnx * _m.sin(_m.radians(_aang)) + fny * _m.cos(_m.radians(_aang)))
-        _ac = (sofa_c[0] - fnx * 0.18 * M2IN + (-fny) * _adx * M2IN,
-               sofa_c[1] - fny * 0.18 * M2IN + fnx * _adx * M2IN)
-        boxes.append(_oriented_box("almofada", _ac, _af, 0.45, 0.14, 0.47, 0.45,
-                                   [96, 88, 76], module="Sofa"))
-    # tapete COM BORDA (campo + moldura 8cm mais escura — deixa de ser laje)
-    boxes.append(_oriented_box("rug_border", _ahead(0.70), sofa_f, 1.80, 1.20, 0.0, 0.018, [96, 88, 76], module="Tapete"))
-    boxes.append(_oriented_box("rug_field", _ahead(0.70), sofa_f, 1.64, 1.04, 0.0, 0.02, [140, 128, 112], module="Tapete"))
-    # MESA DE CENTRO: tampo pedra preta (eco do tampo da cozinha) + pernas metal
-    from tools.coffee_table_class import CoffeeTableClassSpec, build_coffee_table_v2
-    _ct = CoffeeTableClassSpec(style="two_tier", length=0.95, width=0.50, height=0.38, shelf=True,
-                               top_rgb=(30, 29, 32), leg_rgb=(26, 26, 28))
-    _ctp, _ = build_coffee_table_v2(_ct.validate())
-    _ctb = place_sofa_boxes(_ctp, _ahead(0.80), sofa_f)
-    for _b in _ctb:
-        _b["module"] = "Mesa de centro"
-    boxes += _ctb
-
     # cell + helper (SEMPRE — jantar e decor usam o polígono do cômodo)
     from shapely.geometry import Point, Polygon
 
@@ -503,14 +482,27 @@ def living_room_boxes(con, room_id):
     if _free.geom_type == "MultiPolygon":
         _free = max(_free.geoms, key=lambda g: g.area)
     if (not _free.is_empty) and _free.area > (2.4 * M2IN * M2IN):
-        # P1 do VERDICT 6.5 (Felipe): mesa MENOR (1.40x0.85, ainda 6 lugares) e
-        # POSIÇÃO ESCOLHIDA PELO GATE — busca candidatos e só aceita onde a
-        # circulação PASSA (90cm contínuo + 0.70 atrás + cadeira PUXADA).
+        # P1 do VERDICT 6.5 (Felipe): mesa MENOR e POSIÇÃO ESCOLHIDA PELO GATE
+        # — busca candidatos e só aceita onde a circulação PASSA de verdade
+        # (90/80cm contínuo por PAPEL do portal + 0.70 atrás + cadeira PUXADA).
         from tools.circulation_gate import gate as _circ_gate
-        _MW, _MD = 1.40, 0.85
-        _chair_spots = [(-0.33, 0.70, (0.0, -1.0)), (0.33, 0.70, (0.0, -1.0)),
-                        (-0.33, -0.70, (0.0, 1.0)), (0.33, -0.70, (0.0, 1.0)),
-                        (-0.98, 0.0, (1.0, 0.0)), (0.98, 0.0, (-1.0, 0.0))]
+        # 1.00x0.65, 4 lugares (2+2 nos lados COMPRIDOS) — achado 2026-08-12,
+        # varredura EXAUSTIVA (grade completa do cômodo, passo 6-8in, overlap
+        # real contra sofá/rack, exigindo os 5 portais conectados E folga
+        # atrás/puxada de TODA cadeira): nenhuma mesa retangular de 6 lugares
+        # (testadas 1.10-1.40m, com/sem cabeceira, 2+2+2 e 3+3) tem posição
+        # válida nesse cômodo — sofá (ajustado ao nicho) + rack já ocupam a
+        # parede-TV inteira, e 6 cadeiras ao redor de qualquer mesa >=1.0m²
+        # sempre fecham pelo menos 1 dos 5 vãos OU deixam alguma cadeira sem
+        # 0.70m de folga atrás. 4 lugares em mesa retangular (ratio 1.5, ainda
+        # "mesa de jantar" de verdade, não bistrô) É o teto real do apê 74m²
+        # pra essa sala combinada sem violar circulação (P1, prioridade sobre
+        # contagem de lugares).
+        _MW, _MD = 1.00, 0.65
+        _CHAIR_GAP = 0.30
+        _seat_xs = (-0.25, 0.25)
+        _chair_spots = ([(sx, _MD / 2 + _CHAIR_GAP, (0.0, -1.0)) for sx in _seat_xs]
+                        + [(sx, -(_MD / 2 + _CHAIR_GAP), (0.0, 1.0)) for sx in _seat_xs])
 
         def _dining_set(cx, cy):
             out_ = []
@@ -531,29 +523,124 @@ def living_room_boxes(con, room_id):
             out_.append(_oct_in("pend_bronze", cx, cy, 0.206, 1.842, 0.010, [171, 119, 63], "Pendente"))
             return out_
 
-        _fc = _free.centroid
-        _cands = [(0.0, 0.0)] + [(dx, dy) for r_ in (0.30, 0.55, 0.80)
-                                 for dx, dy in ((r_, 0), (-r_, 0), (0, r_), (0, -r_),
-                                                (r_ * 0.7, r_ * 0.7), (-r_ * 0.7, r_ * 0.7),
-                                                (r_ * 0.7, -r_ * 0.7), (-r_ * 0.7, -r_ * 0.7))]
-        _best, _best_fails = None, 99
-        for _dx, _dy in _cands:
-            _cx, _cy = _fc.x + _dx * M2IN, _fc.y + _dy * M2IN
-            if not _inside((_cx, _cy), margin_in=int(_MW / 2 * M2IN)):
-                continue
-            _cand_boxes = _dining_set(_cx, _cy)
-            _g = _circ_gate(con, boxes + _cand_boxes, room_id)
-            _nf = sum(1 for c in _g["checks"].values() if c["result"] != "PASS")
-            if _nf == 0:
-                _best, _best_fails = _cand_boxes, 0
+        # grade no cômodo INTEIRO (não mais radial-do-centroide): achado
+        # 2026-08-12 — a busca radial (raio até 1.60m a partir do centroide da
+        # zona livre) nunca alcançava as poucas posições que de fato preservam
+        # os 5 portais (comprovado por varredura exaustiva com passo de 6-10in +
+        # checagem de overlap real contra sofá/rack, que a busca radial também
+        # não fazia — só evitava a zona de circulação, não a mobília em si).
+        # Métrica: nº de portais desconectados (pesa mais) + nº de categorias
+        # FAIL como desempate; primeira posição com 0 (circulação E folga de
+        # cadeira) vence.
+        _bx0, _by0, _bx1, _by1 = cell_in.bounds
+        _occ_now = _uni(_occ) if _occ else None
+        _best, _best_score, _best_fails = None, 999, 99
+        _step = 6
+        for _cx in range(int(_bx0) + 8, int(_bx1) - 8, _step):
+            if _best_score == 0:
                 break
-            if _nf < _best_fails:
-                _best, _best_fails = _cand_boxes, _nf
+            for _cy in range(int(_by0) + 8, int(_by1) - 8, _step):
+                if not _inside((_cx, _cy), margin_in=20):
+                    continue
+                _cand_boxes = _dining_set(_cx, _cy)
+                if not _cand_boxes:
+                    continue
+                if _occ_now is not None:
+                    _cand_occ = _uni([Polygon([(c[0], c[1]) for c in _b["corners"]])
+                                      for _b in _cand_boxes if _b.get("corners")])
+                    if _cand_occ.intersection(_occ_now).area > 50:   # in^2
+                        continue
+                _g = _circ_gate(con, boxes + _cand_boxes, room_id)
+                _ndisc = sum(1 for p in _g["checks"]["corredor_principal"]["portais"]
+                            if not p.get("conectado", True))
+                _nf = sum(1 for c in _g["checks"].values() if c["result"] != "PASS")
+                _score = _ndisc * 10 + _nf
+                if _score < _best_score:
+                    _best, _best_score, _best_fails = _cand_boxes, _score, _nf
+                if _score == 0:
+                    break
         if _best is not None:
             if _best_fails:
                 print(f"[furnish-apt] circulation_gate: melhor candidato ainda com "
                       f"{_best_fails} check(s) FAIL (WARN-log)")
             boxes += _best
+
+    # almofadas soltas no sofá (decor mínimo, pontuação não frase)
+    for _adx, _aang in ((-0.55, 12), (0.55, -12)):
+        _af = (fnx * _m.cos(_m.radians(_aang)) - fny * _m.sin(_m.radians(_aang)),
+               fnx * _m.sin(_m.radians(_aang)) + fny * _m.cos(_m.radians(_aang)))
+        _ac = (sofa_c[0] - fnx * 0.18 * M2IN + (-fny) * _adx * M2IN,
+               sofa_c[1] - fny * 0.18 * M2IN + fnx * _adx * M2IN)
+        boxes.append(_oriented_box("almofada", _ac, _af, 0.45, 0.14, 0.47, 0.45,
+                                   [96, 88, 76], module="Sofa"))
+    # tapete COM BORDA (campo + moldura 8cm mais escura — deixa de ser laje)
+    boxes.append(_oriented_box("rug_border", _ahead(0.70), sofa_f, 1.80, 1.20, 0.0, 0.018, [96, 88, 76], module="Tapete"))
+    boxes.append(_oriented_box("rug_field", _ahead(0.70), sofa_f, 1.64, 1.04, 0.0, 0.02, [140, 128, 112], module="Tapete"))
+    # MESA DE CENTRO: tampo pedra preta (eco do tampo da cozinha) + pernas metal.
+    # Posicionada por ÚLTIMO (depois da mesa de jantar) de propósito — achado
+    # 2026-08-12: a conectividade dos portais é uma checagem de conjunto (flood-fill
+    # no cômodo inteiro), então a mesa de jantar decide primeiro o "istmo" livre e a
+    # mesa de centro busca (2D, gate real) o que ainda sobrou sem fechar o resto.
+    from tools.coffee_table_class import CoffeeTableClassSpec, build_coffee_table_v2
+    _ct = CoffeeTableClassSpec(style="two_tier", length=0.95, width=0.50, height=0.38, shelf=True,
+                               top_rgb=(30, 29, 32), leg_rgb=(26, 26, 28))
+    _ctp, _ = build_coffee_table_v2(_ct.validate())
+    _perp = (-fny, fnx)
+
+    def _clear_of_circulation(parts, facing, base_dist_m=0.70):
+        from tools.circulation_gate import gate as _cgate
+        base = _ahead(base_dist_m)
+        # overlap real contra a mobília já colocada (sofá/rack/mesa de jantar/
+        # etc. — 'boxes' já reflete o que foi decidido até aqui) — achado
+        # 2026-08-12: a busca só evitava a zona de circulação, não a mobília em
+        # si; um candidato "mais perto" (raio pequeno) podia grudar no sofá
+        # (furniture_overlap_gate: Mesa de centro × Sofa, ~48% sobreposto).
+        _occ_polys = [Polygon([(c[0], c[1]) for c in _b["corners"]]) for _b in boxes if _b.get("corners")]
+        _occ_now = _uni(_occ_polys) if _occ_polys else None
+        _best_c, _best_fails = base, None
+        cands = [(0.0, 0.0)] + [(along, side) for r in (0.20, 0.40, 0.60, 0.80)
+                                for along, side in ((0, r), (0, -r), (r, 0), (-r, 0),
+                                                     (r * 0.7, r * 0.7), (-r * 0.7, r * 0.7),
+                                                     (r * 0.7, -r * 0.7), (-r * 0.7, -r * 0.7))]
+        for along, side in cands:
+            c = (base[0] + fnx * along * M2IN + _perp[0] * side * M2IN,
+                 base[1] + fny * along * M2IN + _perp[1] * side * M2IN)
+            if not _inside(c, margin_in=int(_ct.width / 2 * M2IN)):
+                continue
+            _cand = place_sofa_boxes(parts, c, facing)
+            for _b in _cand:
+                _b["module"] = "Mesa de centro"
+            if _occ_now is not None:
+                _cand_occ = _uni([Polygon([(cc[0], cc[1]) for cc in _b["corners"]])
+                                  for _b in _cand if _b.get("corners")])
+                if _cand_occ.intersection(_occ_now).area > 50:   # in^2
+                    continue
+            _g = _cgate(con, boxes + _cand, room_id)
+            _nf = sum(1 for p in _g["checks"]["corredor_principal"]["portais"]
+                     if not p.get("conectado", True))
+            if _nf == 0:
+                return c, True
+            if _best_fails is None or _nf < _best_fails:
+                _best_c, _best_fails = c, _nf
+        return _best_c, False
+
+    # sofá+rack (parede-a-parede) já deixam a faixa do portal da varanda no fio
+    # da margem (~0.91-0.92m contra o alvo 0.90m) — achado 2026-08-12: QUALQUER
+    # objeto plantado nesse "istmo" (na frente do sofá, entre sofá e rack) fecha
+    # a conexão pra 0 (erosão é tudo-ou-nada, não degrada aos poucos). Coloca a
+    # mesa de centro só se algum candidato preservar os 5 portais conectados;
+    # senão pula (sala compacta: melhor sem mesa de centro do que bloqueando a
+    # varanda) — mesmo padrão já usado pra mesa de jantar (só entra se couber).
+    _ct_center, _ct_ok = _clear_of_circulation(_ctp, sofa_f)
+    if _ct_ok:
+        _ctb = place_sofa_boxes(_ctp, _ct_center, sofa_f)
+        for _b in _ctb:
+            _b["module"] = "Mesa de centro"
+        boxes += _ctb
+    else:
+        print("[furnish-apt] circulation_gate: mesa de centro OMITIDA — nenhuma "
+              "posição preserva os 5 portais conectados (sala compacta, sofá+rack "
+              "já deixam a faixa da varanda no limite)")
 
     # ---- camada de ESTILO (gated, AESTHETIC — NÃO entra no layout-fix): parede de concreto na
     # parede-TV + decor (planta/quadro/prateleira/trilho). Só sob FURNISH_STYLE.

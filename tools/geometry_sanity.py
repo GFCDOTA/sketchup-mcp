@@ -88,7 +88,12 @@ def audit(parts, *, rooms=None, to_m=1.0, cfg=None) -> dict:
         z0 = b.get("z0_in")
         if z0 is not None and z0 < c["z_under_tol_in"]:
             add("FAIL", "underground", b, f"z0_in={round(z0, 2)} < {c['z_under_tol_in']}")
-        if w * d < c["min_footprint_in2"]:
+        # fita/rasgo de LED é INTENCIONALMENTE fina (luz, não móvel) — achado
+        # 2026-08-12: kb_slot_led (bathroom_layout.py, rasgo de luz no espelho)
+        # sempre teve footprint pequeno por design; mesma isenção que off_axis
+        # já dá pra 'decorative' (linha abaixo), aqui por 'kind' porque LED não
+        # está marcado decorative=True em todo lugar que o cria.
+        if w * d < c["min_footprint_in2"] and "led" not in str(b.get("kind", "")).lower():
             add("FAIL", "degenerate_footprint", b, f"footprint={round(w * d, 3)} (w={round(w,2)} d={round(d,2)})")
         h = b.get("h_in")
         if h is not None and 0 < h < c["min_height_in"]:
