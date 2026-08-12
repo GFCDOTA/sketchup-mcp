@@ -8,17 +8,14 @@ preto + ducha, metais 100% pretos nos banhos (bronze ZERO) e o lavabo como joia
 from __future__ import annotations
 
 import json
-import os
 from pathlib import Path
 
 import pytest
 
-# planta_74 tem escala verificada por cota (0.0259) que difere do default de
-# core.scale (ancoragem por wall-thickness, ~0.0352) — precisa estar setada
-# ANTES do primeiro import de tools.bathroom_layout (que importa core.scale
-# em cascata) ou o guard de core.scale.assert_pt_to_m_for_source levanta
-# RuntimeError (e, sem o guard, a geometria sairia ~36% grande em silêncio).
-os.environ.setdefault("PT_TO_M", "0.0259")
+# Escala real de planta_74 (0.0259) e' setada pelo tests/conftest.py, marcada
+# via pytest_collection_modifyitems (este arquivo roda inteiro na invocacao
+# `pytest -m planta74_scale`) — nao setar aqui, so no conftest (fonte unica).
+pytestmark = pytest.mark.planta74_scale
 
 from tools.bathroom_layout import BASE_THEME, build_boxes, theme_of  # noqa: E402
 

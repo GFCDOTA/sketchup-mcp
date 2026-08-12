@@ -37,8 +37,16 @@ jobs:
           cache-dependency-path: pyproject.toml
       - name: Install (core + dev)
         run: pip install -e ".[dev]"
-      - name: Contract + gate test suite
-        run: python -m pytest tests/ -q
+      # PT_TO_M (core/scale.py) e' lido UMA vez por processo — nao da pra
+      # misturar fixtures sinteticas (default ~0.0352) com a escala real de
+      # planta_74 (0.0259, cota-anchored) no MESMO `pytest tests/`. Duas
+      # invocacoes, cada uma com o env certo (ver tests/conftest.py).
+      - name: Contract + gate test suite (default scale — fixtures sintéticas)
+        run: python -m pytest tests/ -q -m "not planta74_scale"
+      - name: Contract + gate test suite (planta_74 real — escala 0.0259)
+        env:
+          PT_TO_M: "0.0259"
+        run: python -m pytest tests/ -q -m planta74_scale
 
   fidelity-gates:
     name: deterministic fidelity gates

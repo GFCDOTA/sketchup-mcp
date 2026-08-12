@@ -114,10 +114,24 @@ def gate(con, boxes, room_id):
     # 2/3) cadeiras: 0.70 atrás + envelope PUXADA
     mesa = [g for b, g in blockers if str(b.get("module", "")).startswith("Mesa de jantar")]
     mesa_u = unary_union(mesa) if mesa else None
-    cad = {}
-    for b, g in blockers:
-        if str(b.get("module", "")).startswith("Cadeira"):
-            cad.setdefault(id(b) if False else round(g.centroid.x, 0), []).append(g)
+    # Agrupar as partes (foot/frame/seat/back) de CADA cadeira por INSTANCIA:
+    # round(centroid.x) quebra pra cadeiras giradas 90 graus (nas pontas da
+    # mesa) — o encosto/pernas dessas cadeiras variam em X quase tanto quanto
+    # a distancia entre cadeiras vizinhas, e a peca vira "cadeira fantasma"
+    # com folga zero (bug pago: 16 clusters pra 6 cadeiras reais). Fix:
+    # clusteriza por PROXIMIDADE geometrica real (buffer pequeno + uniao) —
+    # as partes de uma mesma cadeira ficam bem mais perto entre si (<0.5m)
+    # do que a distancia real entre cadeiras (~0.7m+).
+    cad_geoms = [g for b, g in blockers if str(b.get("module", "")).startswith("Cadeira")]
+    cad: dict[int, list] = {}
+    if cad_geoms:
+        CLUSTER_PAD_IN = 0.08 * M2IN   # funde partes DA MESMA cadeira (quase encostadas),
+        # bem abaixo do espacamento real entre cadeiras vizinhas (~0.21m de gap)
+        merged = unary_union([g.buffer(CLUSTER_PAD_IN) for g in cad_geoms])
+        clusters = list(merged.geoms) if merged.geom_type == "MultiPolygon" else [merged]
+        for g in cad_geoms:
+            ci = next(i for i, c in enumerate(clusters) if c.intersects(g))
+            cad.setdefault(ci, []).append(g)
     behind_ok, pull_ok, cdetail = True, True, []
     if mesa_u is not None and cad:
         others = unary_union([g for b, g in blockers

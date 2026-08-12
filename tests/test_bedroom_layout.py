@@ -12,17 +12,16 @@ Dimensoes/regras validadas com ChatGPT (consult "Prioridade Quartos e Layout",
 from __future__ import annotations
 
 import json
-import os
 from pathlib import Path
 
 import pytest
 
-# planta_74 tem escala verificada por cota (0.0259), diferente do default de
-# core.scale — precisa estar setada ANTES do primeiro import de
-# tools.bedroom_layout (cascata até core.scale) ou o guard
-# core.scale.assert_pt_to_m_for_source levanta RuntimeError.
-os.environ.setdefault("PT_TO_M", "0.0259")
-
+# Este arquivo MISTURA fixtures sinteticas (default scale) com planta_74 REAL
+# (0.0259) — nao da pra forcar uma escala global aqui. tests/conftest.py
+# marca test_planta_74_suites_furnish/test_fallback_machinery_recorded com
+# @pytest.mark.planta74_scale e roda esses numa invocacao `pytest -m
+# planta74_scale` separada, com o env correto. Os demais (SYN_CASES) rodam
+# na invocacao default (`-m "not planta74_scale"`), sem override.
 from tools.bedroom_layout import _bed_order, run  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[1]

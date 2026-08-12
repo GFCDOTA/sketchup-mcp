@@ -12,14 +12,10 @@ O veredito visual segue sendo humano/GPT — isto pina a GEOMETRIA/PALETA, não 
 """
 from __future__ import annotations
 
-import os
-
-# planta_74 tem escala verificada por cota (0.0259), diferente do default de
-# core.scale — precisa estar setada ANTES do primeiro import de
-# tools.kitchen_layout (cascata até core.scale) ou o guard
-# core.scale.assert_pt_to_m_for_source levanta RuntimeError.
-os.environ.setdefault("PT_TO_M", "0.0259")
-
+# Maioria destes testes usa M()/pecas sinteticas (escala nao importa pro
+# contrato de paleta/geometria). Só test_filler_never_penetrates_neighbors
+# carrega planta_74 real — marcado @pytest.mark.planta74_scale pelo
+# tests/conftest.py (roda na invocacao `pytest -m planta74_scale` separada).
 from shapely.geometry import box as sbox  # noqa: E402
 
 from tools import kitchen_layout as kl  # noqa: E402
