@@ -226,13 +226,24 @@ def _fixtures(con, room_id="r000"):
     out = []
     dz = _door_zones(brain.sm)
     cc = brain.cell.centroid
+    # "far_pt": ponto GARANTIDAMENTE a mais de ANCHOR_MAX_M de toda parede —
+    # o centroide bruto do poligono nao serve pra isso em comodo NAO-CONVEXO
+    # (em L): o centroide de um L pode cair perto de uma parede/do notch,
+    # fazendo o fixture "cama flutuando" acidentalmente passar no anchor
+    # check (gotcha pago: SUITE 01 real e em L, area 15.9m2 << bbox 22.5m2).
+    # buffer(-d) erode o poligono por d en TODAS as direcoes; o centroide do
+    # que sobra esta, por construcao, a >= d de qualquer parede original.
+    _eroded = brain.cell.buffer(-M(ANCHOR_MAX_M + 0.30))
+    far_pt = (max(_eroded.geoms, key=lambda g: g.area).centroid
+              if _eroded.geom_type == "MultiPolygon" else _eroded.centroid) \
+        if not _eroded.is_empty else cc
     if not real:
         return out
     out.append(("quarto valido (designer)", real, "PASS"))
     # --- CAMA (hard -> FAIL) ---
     rot = _clone(real); rot["bed"]["facing"] = [0.7, 0.7]
     out.append(("cama rotacionada aleatoria", rot, "FAIL"))
-    flo = _clone(real); flo["bed"]["center_in"] = [cc.x * PT_TO_IN, cc.y * PT_TO_IN]
+    flo = _clone(real); flo["bed"]["center_in"] = [far_pt.x * PT_TO_IN, far_pt.y * PT_TO_IN]
     out.append(("cama flutuando no centro", flo, "FAIL"))
     if dz is not None:
         p = dz.representative_point()
@@ -249,7 +260,17 @@ def _fixtures(con, room_id="r000"):
         out.append(("guarda-roupa sem frente livre", wf, "WARN"))
     # --- CRIADO solto (soft -> WARN) ---
     if real.get("nightstands"):
-        nl = _clone(real); nl["nightstands"][0]["center_in"] = [cc.x * PT_TO_IN, cc.y * PT_TO_IN]
+        # ponto GARANTIDAMENTE longe da cama: o centroide bruto do comodo (cc)
+        # pode cair perto da cama de verdade em comodo NAO-CONVEXO (mesmo
+        # gotcha do fixture "cama flutuando" acima) — usa o vertice do
+        # contorno do comodo mais distante do centro da cama, sempre um ponto
+        # real dentro/na borda do comodo.
+        bcx, bcy = (real["bed"]["center_in"][0] / PT_TO_IN,
+                    real["bed"]["center_in"][1] / PT_TO_IN)
+        far_corner = max(brain.cell.exterior.coords,
+                         key=lambda p: (p[0] - bcx) ** 2 + (p[1] - bcy) ** 2)
+        nl = _clone(real)
+        nl["nightstands"][0]["center_in"] = [far_corner[0] * PT_TO_IN, far_corner[1] * PT_TO_IN]
         out.append(("criado solto (longe da cama)", nl, "WARN"))
     return out
 

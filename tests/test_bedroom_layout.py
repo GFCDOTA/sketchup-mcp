@@ -100,7 +100,16 @@ def test_no_wall_fits_bed_is_no_valid_layout():
 # ---- planta REAL (canonico): as 2 suites mobiliam ----
 
 @pytest.mark.skipif(not _PLANTA.exists(), reason="planta_74 fixture absent")
-@pytest.mark.parametrize("room,bed", [("r003", "queen"), ("r000", "king")])
+# r003 (SUITE 02): poligono real 8.0m2 (bbox 2.46x3.34 - comodo em L, nao o
+# bbox inteiro) -> _bed_order degrada honesto pra "single". r000 (SUITE 01):
+# poligono real 15.9m2 (bbox 5.53x4.07, cota 5.45x4.00 confere - a folga vem
+# do notch em L) -> fica no bracket [14,18) = queen, nao atinge os 18m2 pro
+# king. Verificado ESTAVEL desde o commit que gerou o artefato congelado
+# bedroom_designer_r003.md (62ca40f) — aquele artefato dizia "14.7 m2" mas
+# o consensus.json JA computava 8.0m2 na mesma epoca (bug de relatorio do
+# script antigo, nao regressao de geometria). "king"/"queen" antigos aqui
+# eram a expectativa errada, nao o codigo.
+@pytest.mark.parametrize("room,bed", [("r003", "single"), ("r000", "queen")])
 def test_planta_74_suites_furnish(room, bed):
     sm, out = _run(_PLANTA, room)
     assert out["result"] == "OK"
@@ -134,7 +143,10 @@ def test_new_hard_gates_present_and_pass(fname, _bed):
 def test_fallback_machinery_recorded():
     """run() registra alvo + tentativas de tamanho de cama (mesmo sem disparar)."""
     sm, out = _run(_PLANTA, "r003")
-    assert out["bed_size_target"] == "queen"
+    # r003 (SUITE 02) tem poligono real de 8.0m2 (comodo em L) -> _bed_order
+    # so oferece "single" nesse bracket (<10m2); ver comentario em
+    # test_planta_74_suites_furnish pra a verificacao historica completa.
+    assert out["bed_size_target"] == "single"
     assert isinstance(out.get("bed_tried"), list) and out["bed_tried"]
     order = ["single", "double", "queen", "king"]
     assert order.index(out["bed_size"]) <= order.index(out["bed_size_target"])
