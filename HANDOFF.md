@@ -1,5 +1,45 @@
 # HANDOFF — Estúdio Banheiro + merge pra develop (2026-08-09, fim de sessão)
 
+> **Atualização 2026-08-12 — investigação de CI ("gates falhando há
+> semanas"):** Felipe reportou o Actions vermelho há tempo
+> (github.com/GFCDOTA/sketchup-mcp/actions, último verde 26/07). Achado: 3
+> causas raiz MISTURADAS nas mesmas 19 falhas que eu vinha rotulando de
+> "pré-existentes, sem regressão" sem investigar a fundo — esse rótulo era
+> preguiçoso, não errado por má-fé, mas também não era verdade completa.
+> 1. **Arquitetura de escala** — `PT_TO_M` é lido 1x por processo
+>    (`core/scale.py`); meu próprio guard/conftest de sessão anterior forçava
+>    0.0259 GLOBALMENTE, quebrando fixtures sintéticas (esperam o default
+>    ~0.0352). Fix real: marker `planta74_scale` + CI roda **2 invocações**
+>    de pytest agora (`.github/workflows/ci.yml`), cada uma com o env certo.
+>    Ver `tests/conftest.py`.
+> 2. **Bug real em `tools/circulation_gate.py`** — agrupava partes de
+>    cadeira por `round(centroid.x)`, quebrando pra cadeiras giradas 90°
+>    (pontas da mesa). Corrigido (cluster por proximidade geométrica).
+> 3. **Teste desatualizado** (`test_material_de_verdade.py` — assinatura
+>    stale do `pl_material`). Corrigido.
+>
+> **Restam 2 regressões REAIS, agora isoladas e diagnosticadas (não é mais
+> ruído), NÃO corrigidas — precisam de decisão de produto ou investigação
+> dedicada:**
+> - **Mesa de jantar 6 lugares (sala r002) sem folga de circulação** — nem
+>   nas 25 posições candidatas que `furnish_apartment.py` já tenta. Afeta
+>   `test_circulation_gate.py` (3), `test_bed_placement_gate.py::
+>   test_sofa_no_regression`, `test_variant_sweep.py` (via verdict FAIL).
+>   Decisão: mesa menor / reposicionar / aceitar o WARN-log que o pipeline
+>   já aplica internamente.
+> - **Seleção de tamanho de cama nas suítes reais (r000/r003) downgrada**
+>   mesmo com escala correta (r000 pede king, sai queen; r003 pede queen,
+>   sai single). Candidato: alguma peça nova de mobília consumindo
+>   clearance que `bed_order`/o gate de cama não previa. NÃO investigado a
+>   fundo ainda. Afeta `test_bedroom_layout.py` (3) +
+>   `test_bed_placement_gate.py` (3 dos 4 restantes).
+>
+> Rodar local: `pytest tests/ -m "not planta74_scale"` (deve estar
+> 1245+ passed / 1 failed) e `PT_TO_M=0.0259 pytest tests/ -m
+> planta74_scale` (60 passed / 10 failed, as 2 regressões acima).
+> **Não force os 10 a passar sem investigar de verdade** — os 2 problemas
+> acima são reais, não são o mesmo tipo de ruído que eu já limpei.
+
 > **Atualização final (mesma sessão, commit `100b3be`):** depois do merge
 > (§abaixo), o Felipe pediu redesign do painel `ops/estudio-front` (tirar
 > "Etapas do Pedido", consertar "Placar do Loop", render em destaque) + um
