@@ -217,6 +217,25 @@ def _clone(d):
     return json.loads(json.dumps(d))
 
 
+def _pole_of_inaccessibility(cell, tol_m=0.02):
+    """Ponto que maximiza a distancia MINIMA ate a borda do comodo (raio do
+    maior circulo inscrito), via bisecao no buffer negativo — GENUINAMENTE
+    longe de toda parede, ao contrario do centroide cru (que pode cair perto
+    de uma parede em comodos em L/irregulares; achado real: planta_74 r000
+    mudou de forma e o centroide parou de violar o gate por acidente de
+    geometria, nao por o gate ter afrouxado). Devolve (ponto, raio_m)."""
+    lo, hi = 0.0, 5.0
+    core, best_r = cell.centroid, 0.0
+    while hi - lo > tol_m:
+        mid = (lo + hi) / 2
+        candidate = cell.buffer(-M(mid))
+        if not candidate.is_empty:
+            core, best_r, lo = candidate.representative_point(), mid, mid
+        else:
+            hi = mid
+    return core, best_r
+
+
 def _fixtures(con, room_id="r000"):
     """valido(real) + erros sinteticos p/ CADA ramo do gate (cama/guarda-roupa/criado).
     Devolve [(nome, layout, expect_verdict)]. expect = verdict GLOBAL:
@@ -225,7 +244,7 @@ def _fixtures(con, room_id="r000"):
     real = real_layout(con, room_id)
     out = []
     dz = _door_zones(brain.sm)
-    cc = brain.cell.centroid
+    cc, _cc_radius_m = _pole_of_inaccessibility(brain.cell)
     if not real:
         return out
     out.append(("quarto valido (designer)", real, "PASS"))
