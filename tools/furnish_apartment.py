@@ -230,7 +230,8 @@ def bedroom_designer_boxes(con, room_id):
     return boxes, out
 
 
-def _oriented_box(kind, center_in, facing, w_m, d_m, z0_m, h_m, rgb, label=None, module=None):
+def _oriented_box(kind, center_in, facing, w_m, d_m, z0_m, h_m, rgb, label=None, module=None,
+                  decorative=False):
     """Caixa (rack/mesa/tapete) centrada em center_in (shell inches) com a FRENTE
     (-Y local) apontando 'facing'. Mesma rotacao do place_sofa_boxes -> qualquer
     angulo. w=largura (perp ao facing), d=profundidade (ao longo do facing)."""
@@ -252,7 +253,7 @@ def _oriented_box(kind, center_in, facing, w_m, d_m, z0_m, h_m, rgb, label=None,
     return {"kind": kind, "x0": min(xs), "y0": min(ys), "x1": max(xs), "y1": max(ys),
             "corners": corners, "h_in": round(h_m * M2IN, 2), "z0_in": round(z0_m * M2IN, 2),
             "rgb": rgb, "label": label or kind, "module": module or kind,
-            "ambiguous": False, "decorative": False}
+            "ambiguous": False, "decorative": decorative}
 
 
 def place_decor_boxes(kind, center_in, facing, z_lift=0.0, module=None, **overrides):
@@ -285,7 +286,12 @@ def _oct_in(kind, cx, cy, r_m, z0_m, h_m, rgb, module):
     return {"kind": kind, "x0": min(xs), "y0": min(ys), "x1": max(xs), "y1": max(ys),
             "corners": [[round(px, 2), round(py, 2)] for px, py in pts],
             "h_in": round(h_m * M2IN, 2), "z0_in": round(z0_m * M2IN, 2), "rgb": rgb,
-            "label": kind, "module": module, "ambiguous": False, "decorative": False}
+            "label": kind, "module": module, "ambiguous": False,
+            # octógono (aproximação circular low-poly) — não-retangular por
+            # design (cúpula/anel de pendente), não bug de rotação. Achado
+            # 2026-08-12: geometry_sanity.off_axis rejeitava (decorative
+            # estava False por engano; todo uso de _oct_in é decor redondo).
+            "decorative": True}
 
 
 def _dining_table_rect(w=1.60, d=0.90, h=0.75, top_t=0.04, top_rgb=(108, 80, 58), leg_rgb=(30, 30, 33)):
@@ -571,8 +577,11 @@ def living_room_boxes(con, room_id):
                fnx * _m.sin(_m.radians(_aang)) + fny * _m.cos(_m.radians(_aang)))
         _ac = (sofa_c[0] - fnx * 0.18 * M2IN + (-fny) * _adx * M2IN,
                sofa_c[1] - fny * 0.18 * M2IN + fnx * _adx * M2IN)
+        # decorative=True: almofada "jogada" (12°/-12° de propósito, look
+        # tossed) — não-axis-aligned por design, não bug de rotação. Achado
+        # 2026-08-12 (geometry_sanity.off_axis rejeitava).
         boxes.append(_oriented_box("almofada", _ac, _af, 0.45, 0.14, 0.47, 0.45,
-                                   [96, 88, 76], module="Sofa"))
+                                   [96, 88, 76], module="Sofa", decorative=True))
     # tapete COM BORDA (campo + moldura 8cm mais escura — deixa de ser laje)
     boxes.append(_oriented_box("rug_border", _ahead(0.70), sofa_f, 1.80, 1.20, 0.0, 0.018, [96, 88, 76], module="Tapete"))
     boxes.append(_oriented_box("rug_field", _ahead(0.70), sofa_f, 1.64, 1.04, 0.0, 0.02, [140, 128, 112], module="Tapete"))

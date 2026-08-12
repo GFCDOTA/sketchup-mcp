@@ -58,9 +58,16 @@ def _module_geom(boxes):
     polys = defaultdict(list)
     zr = defaultdict(lambda: [9e9, -9e9])
     for b in boxes:
-        mod = str(b.get("module", b.get("kind", "movel")))
         if not b.get("corners"):
             continue
+        # tapete/piso pisável NÃO conta pra colisão mesmo dentro de um módulo
+        # maior (achado 2026-08-12: "kb_tapete" agrupado sob module="Enxoval"
+        # inflava a footprint do módulo inteiro com área de tapete, gerando
+        # "Enxoval × Vaso" FAIL falso — EXCLUDE já cobria módulo="Tapete" mas
+        # não pega tapete aninhado dentro de outro módulo por 'kind').
+        if any(e in str(b.get("kind", "")).lower() for e in ("tapete", "rug")):
+            continue
+        mod = str(b.get("module", b.get("kind", "movel")))
         try:
             polys[mod].append(Polygon([(c[0], c[1]) for c in b["corners"]]).buffer(0))
         except Exception:  # noqa: BLE001

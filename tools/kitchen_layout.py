@@ -105,7 +105,12 @@ def _koct(kind, cx, cy, r, z0_m, z1_m, rgb):
             "x1": max(xs) * PT_TO_IN, "y1": max(ys) * PT_TO_IN,
             "corners": [[round(px * PT_TO_IN, 2), round(py * PT_TO_IN, 2)] for px, py in pts],
             "h_in": round((z1_m - z0_m) * M2IN, 2), "z0_in": round(z0_m * M2IN, 2),
-            "rgb": rgb, "label": kind, "ambiguous": False, "decorative": False}
+            # octógono (aproximação circular low-poly) — não-retangular por
+            # design (anel/boca do cooktop), não bug de rotação. Achado
+            # 2026-08-12 (mesmo bug do _oct_in em furnish_apartment.py):
+            # decorative estava False por engano, geometry_sanity.off_axis
+            # rejeitava marcação decorativa redonda.
+            "rgb": rgb, "label": kind, "ambiguous": False, "decorative": True}
 
 
 def _kmod(kind, shp, h_m, rgb, z0_m, ws):

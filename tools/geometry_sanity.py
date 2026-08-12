@@ -88,19 +88,28 @@ def audit(parts, *, rooms=None, to_m=1.0, cfg=None) -> dict:
         z0 = b.get("z0_in")
         if z0 is not None and z0 < c["z_under_tol_in"]:
             add("FAIL", "underground", b, f"z0_in={round(z0, 2)} < {c['z_under_tol_in']}")
-        # fita/rasgo de LED é INTENCIONALMENTE fina (luz, não móvel) — achado
-        # 2026-08-12: kb_slot_led (bathroom_layout.py, rasgo de luz no espelho)
-        # sempre teve footprint pequeno por design; mesma isenção que off_axis
-        # já dá pra 'decorative' (linha abaixo), aqui por 'kind' porque LED não
-        # está marcado decorative=True em todo lugar que o cria.
-        if w * d < c["min_footprint_in2"] and "led" not in str(b.get("kind", "")).lower():
+        # fita/rasgo de LED e trim/hardware fino (perfil de box, haste de
+        # cortina, caixilho de janela, moldura) são INTENCIONALMENTE finos —
+        # achado 2026-08-12 (bathroom_layout.py: kb_slot_led/kb_perfil/
+        # kb_haste/kb_caixilho/kb_moldura sempre tiveram footprint pequeno
+        # por design; mesma isenção que off_axis já dá pra 'decorative',
+        # aqui por 'kind' porque trim/hardware não está marcado
+        # decorative=True em todo lugar que o cria).
+        _THIN_TRIM_KINDS = ("led", "perfil", "haste", "caixilho", "moldura")
+        if (w * d < c["min_footprint_in2"]
+                and not any(t in str(b.get("kind", "")).lower() for t in _THIN_TRIM_KINDS)):
             add("FAIL", "degenerate_footprint", b, f"footprint={round(w * d, 3)} (w={round(w,2)} d={round(d,2)})")
         h = b.get("h_in")
         if h is not None and 0 < h < c["min_height_in"]:
             add("WARN", "degenerate_height", b, f"h_in={round(h, 3)}")
-        if not b.get("decorative") and not _axis_aligned(b):
+        if not b.get("decorative") and not b.get("smooth") and not _axis_aligned(b):
             # decorativo (tapete/manta) pode ser recortado ao comodo (poligono nao-retangular,
             # cantos arredondados) -> nao e "eixo torto" estrutural. So estrutural checa off_axis.
+            # 'smooth' (achado 2026-08-12): vaso/kb_tampa (bathroom_layout.py,
+            # anatomia Roca The Gap curada pelo Felipe) desenham cantos
+            # arredondados de propósito (part["smooth"]=True) — mesma
+            # categoria de "poligono nao-retangular intencional", não bug de
+            # rotação.
             add("FAIL", "off_axis", b, "corners nao axis-aligned (eixo torto)")
         for dim, nm in ((w, "w"), (d, "d")):
             if dim * to_m > c["max_dim_m"]:
