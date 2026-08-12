@@ -33,8 +33,12 @@ dev = [
   "jsonschema>=4.18,<5.0",
 ]
 # Servidor MCP (tools/mcp_server). Instale com: pip install -e .[mcp]
+# Teto <2.0: mcp 2.0.0 (lançado ~2026-08) quebra compat — moveu FastMCP pra
+# fora de mcp.server.fastmcp (empacotado agora com mcp-types separado).
+# ModuleNotFoundError confirmado em CI (job mcp-server) até essa versão ser
+# resolvida/adaptada de propósito.
 mcp = [
-  "mcp>=1.2",
+  "mcp>=1.2,<2.0",
 ]
 # RAG do arquiteto (FP-037) — recall semântico OPCIONAL via Qdrant. NÃO entra no
 # [dev]/CI: o adapter usa urllib puro (stdlib) e degrada pro faceted se a infra

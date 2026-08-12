@@ -7,6 +7,7 @@ Roda: python -m tools.mcp_server.stdio_check
 from __future__ import annotations
 
 import asyncio
+import os
 import sys
 
 from mcp import ClientSession, StdioServerParameters
@@ -14,10 +15,15 @@ from mcp.client.stdio import stdio_client
 
 
 async def main() -> int:
+    # PT_TO_M=0.0259 (planta_74) precisa estar no env do SUBPROCESSO do
+    # server, não só neste processo — ver smoke.py e core/scale.py.
+    child_env = dict(os.environ)
+    child_env.setdefault("PT_TO_M", "0.0259")
     params = StdioServerParameters(
         command=sys.executable,
         args=["-m", "tools.mcp_server.server"],
         cwd=".",
+        env=child_env,
     )
     async with stdio_client(params) as (read, write):
         async with ClientSession(read, write) as session:
