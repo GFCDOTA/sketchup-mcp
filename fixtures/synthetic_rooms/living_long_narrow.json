@@ -1,5 +1,5 @@
 {
-  "wall_thickness_pts": 5.4,
+  "wall_thickness_pts": 7.3359,
   "walls": [
     {
       "id": "wB",
@@ -8,37 +8,37 @@
         0
       ],
       "end": [
-        184.74,
+        250.97,
         0
       ],
       "orientation": "h",
-      "thickness": 5.4
+      "thickness": 7.3359
     },
     {
       "id": "wR",
       "start": [
-        184.74,
+        250.97,
         0
       ],
       "end": [
-        184.74,
-        71.05
+        250.97,
+        96.53
       ],
       "orientation": "v",
-      "thickness": 5.4
+      "thickness": 7.3359
     },
     {
       "id": "wT",
       "start": [
         0,
-        71.05
+        96.53
       ],
       "end": [
-        184.74,
-        71.05
+        250.97,
+        96.53
       ],
       "orientation": "h",
-      "thickness": 5.4
+      "thickness": 7.3359
     },
     {
       "id": "wL",
@@ -48,10 +48,10 @@
       ],
       "end": [
         0,
-        71.05
+        96.53
       ],
       "orientation": "v",
-      "thickness": 5.4
+      "thickness": 7.3359
     }
   ],
   "openings": [
@@ -62,9 +62,9 @@
       "wall_id": "wL",
       "center": [
         0.0,
-        12.79
+        17.38
       ],
-      "opening_width_pts": 24.16,
+      "opening_width_pts": 32.82,
       "geometry_origin": "synthetic"
     },
     {
@@ -73,10 +73,10 @@
       "kind": "glazed_balcony",
       "wall_id": "wR",
       "center": [
-        184.74,
-        35.52
+        250.97,
+        48.27
       ],
-      "opening_width_pts": 45.47,
+      "opening_width_pts": 61.78,
       "geometry_origin": "synthetic"
     }
   ],
@@ -90,16 +90,16 @@
           0
         ],
         [
-          184.73684210526318,
+          250.96525096525096,
           0
         ],
         [
-          184.73684210526318,
-          71.05263157894737
+          250.96525096525096,
+          96.52509652509652
         ],
         [
           0,
-          71.05263157894737
+          96.52509652509652
         ],
         [
           0,

@@ -1,5 +1,5 @@
 {
-  "wall_thickness_pts": 5.4,
+  "wall_thickness_pts": 7.3359,
   "walls": [
     {
       "id": "wB",
@@ -8,37 +8,37 @@
         0
       ],
       "end": [
-        119.37,
+        162.16,
         0
       ],
       "orientation": "h",
-      "thickness": 5.4
+      "thickness": 7.3359
     },
     {
       "id": "wR",
       "start": [
-        119.37,
+        162.16,
         0
       ],
       "end": [
-        119.37,
-        122.21
+        162.16,
+        166.02
       ],
       "orientation": "v",
-      "thickness": 5.4
+      "thickness": 7.3359
     },
     {
       "id": "wT",
       "start": [
         0,
-        122.21
+        166.02
       ],
       "end": [
-        119.37,
-        122.21
+        162.16,
+        166.02
       ],
       "orientation": "h",
-      "thickness": 5.4
+      "thickness": 7.3359
     },
     {
       "id": "wL",
@@ -48,10 +48,10 @@
       ],
       "end": [
         0,
-        122.21
+        166.02
       ],
       "orientation": "v",
-      "thickness": 5.4
+      "thickness": 7.3359
     }
   ],
   "openings": [
@@ -61,10 +61,10 @@
       "kind": "interior_door",
       "wall_id": "wB",
       "center": [
-        21.49,
+        29.19,
         0.0
       ],
-      "opening_width_pts": 22.74,
+      "opening_width_pts": 30.89,
       "geometry_origin": "synthetic"
     },
     {
@@ -73,10 +73,10 @@
       "kind": "window",
       "wall_id": "wT",
       "center": [
-        59.69,
-        122.21
+        81.08,
+        166.02
       ],
-      "opening_width_pts": 34.11,
+      "opening_width_pts": 46.33,
       "geometry_origin": "synthetic"
     }
   ],
@@ -90,16 +90,16 @@
           0
         ],
         [
-          119.36842105263159,
+          162.16216216216216,
           0
         ],
         [
-          119.36842105263159,
-          122.21052631578948
+          162.16216216216216,
+          166.023166023166
         ],
         [
           0,
-          122.21052631578948
+          166.023166023166
         ],
         [
           0,

@@ -17,7 +17,13 @@ Uso: python tools/make_synthetic_bedrooms.py
 import json
 from pathlib import Path
 
-M = 5.4 / 0.19   # metros -> pdf-points (~28.42); mesma ancora de make_synthetic_rooms
+# PT_TO_M=0.0259 é o valor que tests/conftest.py fixa pra TODO o processo
+# pytest (escala verificada do planta_74) — mesma âncora de make_synthetic_rooms
+# (ver comentário lá; bug histórico corrigido em 2026-08-12).
+PT_TO_M = 0.0259
+WALL_THICKNESS_M = 0.19
+M = 1 / PT_TO_M   # metros -> pdf-points
+WALL_THICKNESS_PT = round(WALL_THICKNESS_M * M, 4)
 OUT = Path(__file__).resolve().parents[1] / "fixtures" / "synthetic_rooms"
 DOOR_W, WIN_W = 0.80, 1.20   # m
 
@@ -25,7 +31,7 @@ DOOR_W, WIN_W = 0.80, 1.20   # m
 def _wall(wid, a, b, orient):
     return {"id": wid, "start": [round(a[0], 2), round(a[1], 2)],
             "end": [round(b[0], 2), round(b[1], 2)], "orientation": orient,
-            "thickness": 5.4}
+            "thickness": WALL_THICKNESS_PT}
 
 
 def _open(oid, kind, wid, center, width_m):
@@ -55,7 +61,7 @@ def rect_bedroom(room_name, w_m, d_m, door_wall="wL", door_frac=0.18,
     ]
     room = {"id": "bedroom", "name": room_name,
             "polygon_pts": [[0, 0], [W, 0], [W, D], [0, D], [0, 0]]}
-    return {"wall_thickness_pts": 5.4, "walls": walls, "openings": openings,
+    return {"wall_thickness_pts": WALL_THICKNESS_PT, "walls": walls, "openings": openings,
             "rooms": [room], "soft_barriers": []}
 
 

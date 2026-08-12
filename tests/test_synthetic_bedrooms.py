@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import pytest
 
-from tools.make_synthetic_bedrooms import SPECS, rect_bedroom
+from tools.make_synthetic_bedrooms import SPECS, WALL_THICKNESS_PT, rect_bedroom
 from tools.room_type import BEDROOM, classify_room_type
 
 _CASES = [(fname, room_name, kw) for fname, (room_name, kw) in SPECS.items()]
@@ -24,7 +24,11 @@ def bedroom(request):
 
 def test_is_wellformed_consensus(bedroom):
     _, _, con = bedroom
-    assert con["wall_thickness_pts"] == 5.4
+    # WALL_THICKNESS_PT deriva de WALL_THICKNESS_M=0.19 na escala do processo
+    # (PT_TO_M=0.0259, ver tools/make_synthetic_bedrooms.py) — não é mais um
+    # literal fixo, o valor em "pt" muda se a escala do processo mudar, mas o
+    # significado real (0.19m) não.
+    assert con["wall_thickness_pts"] == WALL_THICKNESS_PT
     assert len(con["walls"]) == 4
     assert {w["id"] for w in con["walls"]} == {"wB", "wR", "wT", "wL"}
     room = con["rooms"][0]

@@ -9,7 +9,16 @@ Uso: python -m tools.make_synthetic_rooms   (gera fixtures/synthetic_rooms/*.jso
 import json
 from pathlib import Path
 
-M = 5.4 / 0.19   # metros -> pdf-points (~28.42)
+# PT_TO_M=0.0259 é o valor que tests/conftest.py fixa pra TODO o processo
+# pytest (escala verificada do planta_74) — como PT_TO_M é lido uma única vez
+# no import de core.scale, estas fixtures sintéticas precisam ser geradas na
+# MESMA escala do processo de teste, não numa própria. Gerar num valor
+# diferente encolhe/infla a área real quando o teste roda sob o PT_TO_M do
+# processo (bug histórico corrigido em 2026-08-12, ver conftest.py).
+PT_TO_M = 0.0259
+WALL_THICKNESS_M = 0.19
+M = 1 / PT_TO_M   # metros -> pdf-points
+WALL_THICKNESS_PT = round(WALL_THICKNESS_M * M, 4)
 OUT = Path(__file__).resolve().parents[1] / "fixtures" / "synthetic_rooms"
 DOOR_W, BALC_W = 0.85, 1.60   # m
 
@@ -17,7 +26,7 @@ DOOR_W, BALC_W = 0.85, 1.60   # m
 def _wall(wid, a, b, orient):
     return {"id": wid, "start": [round(a[0], 2), round(a[1], 2)],
             "end": [round(b[0], 2), round(b[1], 2)], "orientation": orient,
-            "thickness": 5.4}
+            "thickness": WALL_THICKNESS_PT}
 
 
 def _open(oid, kind, wid, center, width_m):
@@ -44,7 +53,7 @@ def rect_room(name, w_m, d_m, door_wall="wL", door_frac=0.18, balcony_wall="wT")
                 _open("balc1", "glazed_balcony", balcony_wall, pt_on(balcony_wall, 0.5), BALC_W)]
     room = {"id": "living", "name": name,
             "polygon_pts": [[0, 0], [W, 0], [W, D], [0, D], [0, 0]]}
-    return {"wall_thickness_pts": 5.4, "walls": walls, "openings": openings,
+    return {"wall_thickness_pts": WALL_THICKNESS_PT, "walls": walls, "openings": openings,
             "rooms": [room], "soft_barriers": []}
 
 
