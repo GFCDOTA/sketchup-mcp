@@ -48,13 +48,25 @@ from core.scale import PT_TO_IN                       # noqa: E402
 from tools.spatial_model import build_spatial_model   # noqa: E402
 
 M2IN = 39.3700787402
+# thresholds numéricos vêm de core/project_policy.py (value+source+scope+
+# applicability) — achado 2026-08-12 (revisão GPT-Docker): esses números são
+# POLICY DE PROJETO (apê residencial planta_74), não lei do engine; outro
+# projeto/planta pode exigir valores diferentes. O motor aqui só lê `.value`.
+from core.project_policy import (                                      # noqa: E402
+    BEHIND_CHAIR_M as _POLICY_BEHIND_CHAIR,
+    CHAIR_PULL_M as _POLICY_CHAIR_PULL,
+    CIRCULATION_GEOMETRY_TOLERANCE_M as _POLICY_TOLERANCE,
+    CIRCULATION_PRIMARY_TARGET_M as _POLICY_PRIMARY,
+    CIRCULATION_SECONDARY_TARGET_M as _POLICY_SECONDARY,
+    CIRCULATION_SHELL_FLOOR_M as _POLICY_SHELL_FLOOR,
+)
 CORRIDOR_M = 0.90            # mantido p/ compat (usado pelo 'min_m' do relatorio)
-PRIMARY_TARGET_M = 0.90
-SECONDARY_TARGET_M = 0.80
-IMMUTABLE_SHELL_FLOOR_M = 0.75
-GEOMETRY_TOLERANCE_M = 0.02
-BEHIND_CHAIR_M = 0.70
-PULL_M = 0.50
+PRIMARY_TARGET_M = _POLICY_PRIMARY.value
+SECONDARY_TARGET_M = _POLICY_SECONDARY.value
+IMMUTABLE_SHELL_FLOOR_M = _POLICY_SHELL_FLOOR.value
+GEOMETRY_TOLERANCE_M = _POLICY_TOLERANCE.value
+BEHIND_CHAIR_M = _POLICY_BEHIND_CHAIR.value
+PULL_M = _POLICY_CHAIR_PULL.value
 WALKABLE_MAX_Z_M = 0.06     # tapete/borda: pisável, não bloqueia
 HEAD_MAX_Z0_M = 1.20        # acima disso (aéreo/maleiro/pendente) não bloqueia passo
 
@@ -67,9 +79,23 @@ def _footprint(b):
 
 
 def _blockers(boxes):
-    """Footprints que de fato bloqueiam passagem (nível do corpo)."""
+    """Footprints que de fato bloqueiam passagem (nível do corpo).
+
+    Fonte primária: interaction_policy.circulation declarado (core/spatial_semantics.py)
+    — WALKABLE/IGNORE/OVERHEAD nunca bloqueiam, independente de altura (tapete/
+    decor/pendente ficam de fora mesmo se algum builder futuro der z0/h_in
+    estranho). A checagem de altura (achado original, 2026-08) continua como
+    SEGUNDA trava — só ela pode EXCLUIR um item marcado BLOCK que por algum
+    motivo esteja alto/fino demais pra bloquear passo; nunca INCLUI algo que a
+    política já isentou. Achado 2026-08-12 (consulta GPT-Docker): antes disso
+    cada gate tinha sua própria heurística de "isso bloqueia?" — altura aqui,
+    bool solto em geometry_sanity, substring em furniture_overlap_gate.
+    """
     out = []
     for b in boxes:
+        policy = (b.get("interaction_policy") or {}).get("circulation", "BLOCK")
+        if policy != "BLOCK":
+            continue
         z0 = (b.get("z0_in") or 0) / M2IN
         top = z0 + (b.get("h_in") or 0) / M2IN
         if z0 >= HEAD_MAX_Z0_M:            # pendurado alto (pendente, maleiro, LED)
@@ -155,6 +181,8 @@ def _bottleneck_width(polygon, pt_a, pt_b, lo=0.50, hi=1.00, tol=0.01):
 
 
 def gate(con, boxes, room_id):
+    from core.spatial_semantics import annotate_all
+    annotate_all(boxes)   # idempotente — garante geometry_intent/interaction_policy
     sm = build_spatial_model(con, room_id)
     cell_in = Polygon([(x * PT_TO_IN, y * PT_TO_IN)
                        for x, y in sm["_geom"]["cell"].exterior.coords])
@@ -173,8 +201,15 @@ def gate(con, boxes, room_id):
     if len(portais) >= 2:
         base_pt = portais[0]   # ancora: primeiro portal (mesmo criterio de sempre)
         for p in portais:
+            # portal_role: DECLARADO pelo papel arquitetônico da abertura
+            # (kind_v5 — porta real vs destino terminal), não inferido pela
+            # largura medida. Explícito pra TODO portal, mesmo a âncora —
+            # achado 2026-08-12 (revisão GPT-Docker): "nunca infira semântica
+            # por forma/dimensão quando ela pode ser declarada".
+            portal_role = ("SECONDARY" if _portal_kind(p, sm) in TERMINAL_OPENING_KINDS
+                           else "PRIMARY")
             if p is base_pt:
-                detail.append({"portal": [round(p.x, 1), round(p.y, 1)],
+                detail.append({"portal": [round(p.x, 1), round(p.y, 1)], "portal_role": portal_role,
                                "conectado": True, "status": "PASS", "w_empty_m": None,
                                "w_furnished_m": None})
                 continue
@@ -187,8 +222,7 @@ def gate(con, boxes, room_id):
             # tentam PRIMARY; se o shell vazio não sustenta, degrada pros
             # tiers abaixo (secundaria/shell_estreito/shell_impossivel) do
             # mesmo jeito que antes.
-            role_target = (SECONDARY_TARGET_M if _portal_kind(p, sm) in TERMINAL_OPENING_KINDS
-                           else PRIMARY_TARGET_M)
+            role_target = SECONDARY_TARGET_M if portal_role == "SECONDARY" else PRIMARY_TARGET_M
             if w_empty >= role_target:
                 target, tier = role_target, ("principal" if role_target == PRIMARY_TARGET_M
                                              else "secundaria")
@@ -212,8 +246,8 @@ def gate(con, boxes, room_id):
                 status = "FAIL_BASE_GEOMETRY_TOO_NARROW"
 
             corr_ok &= ok
-            detail.append({"portal": [round(p.x, 1), round(p.y, 1)], "conectado": ok,
-                           "status": status, "tier": tier,
+            detail.append({"portal": [round(p.x, 1), round(p.y, 1)], "portal_role": portal_role,
+                           "conectado": ok, "status": status, "tier": tier,
                            "w_empty_m": w_empty, "w_furnished_m": w_furnished})
     else:
         detail.append({"erro": "menos de 2 portais no comodo"})

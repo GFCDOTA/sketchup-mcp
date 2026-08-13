@@ -1,5 +1,129 @@
 # HANDOFF — Estúdio Banheiro + merge pra develop (2026-08-09, fim de sessão)
 
+> **Atualização 2026-08-12 (round 5 — CONTRATO SEMÂNTICO DE GEOMETRIA,
+> evolução da skill interior-project-audit)** — depois do CI 100% verde
+> (round 4), Felipe pediu pra generalizar os aprendizados em padrão de
+> arquitetura: 3 conceitos novos (geometry_intent/interaction_policy,
+> collision_envelope, optimizer_consistency), consultando o GPT-Docker como
+> revisor de arquitetura ANTES de implementar, sem inventar regra sozinho.
+>
+> **Divergência documentada (Felipe pediu explicitamente pra registrar
+> quando eu discordasse ou o GPT discordasse da proposta original):** a
+> proposta inicial do Felipe tinha um único `collision_policy: SOLID|
+> FOOTPRINT|IGNORE`. O GPT-Docker (consultado como arquiteto + revisor de
+> software + guardião do CI) apontou que isso perde informação — um tapete
+> precisa responder DIFERENTE pra circulação (WALKABLE) vs overlap (ALLOW)
+> vs geometry_sanity (forma não-retangular válida). Segui a correção do GPT:
+> `interaction_policy` por domínio (`circulation`, `furniture_overlap`) +
+> `shape_policy` separado (rotação vs forma não-retangular — SÃO PERGUNTAS
+> DIFERENTES; o bug real da almofada girada vs vaso arredondado é
+> precisamente essa confusão). Ver `core/spatial_semantics.py` (docstring
+> completa com o raciocínio).
+>
+> **Implementado (fases 1-2 do plano faseado do GPT — fases 3-5 dele,
+> canonical envelope resolver completo + migração de bedroom/kitchen/bathroom
+> pro mesmo padrão de optimizer, ficaram de fora por escopo/tempo, ver
+> pendências):**
+> - `core/spatial_semantics.py` — contrato único: `geometry_intent`
+>   (STRUCTURAL/FURNITURE/SOFT/DECORATIVE/FIXTURE), `shape_policy`
+>   (rotation_allowed/non_rectangular_allowed/curved_allowed),
+>   `interaction_policy` (circulation: BLOCK/WALKABLE/OVERHEAD/IGNORE;
+>   furniture_overlap: EXCLUSIVE/ALLOW/HOSTED/IGNORE), `host` (relationship).
+>   Registro central por kind/module (`KIND_REGISTRY`/`MODULE_REGISTRY`) —
+>   cobre o apê INTEIRO (todos os 8 cômodos com brain), não só r002.
+>   `annotate_all()` chamado em `collect_boxes()` + defensivamente em cada
+>   gate (idempotente).
+> - `core/project_policy.py` — thresholds numéricos (0.90/0.80/0.75/0.02/
+>   0.70/0.50) viraram `NumericPolicy(value, source, scope, applicability)`
+>   em vez de constante solta — achado GPT: esses números são POLICY DE
+>   PROJETO (apê residencial planta_74), não lei do engine.
+> - `tools/circulation_gate.py` — `_blockers()` agora lê
+>   `interaction_policy.circulation` (fonte primária) com a checagem de
+>   altura antiga como SEGUNDA trava de segurança (nunca INCLUI o que a
+>   política já isentou, só pode EXCLUIR mais). `portal_role` (PRIMARY/
+>   SECONDARY) explícito em todo portal do relatório (era só `tier`,
+>   inferido depois da degradação — agora é campo próprio, declarado ANTES).
+> - `tools/geometry_sanity.py` — `_is_rectangle()` novo: distingue
+>   matematicamente "retângulo girado" de "polígono não-retangular" (o bug
+>   real: os dois caíam na mesma checagem `off_axis` antes). `off_axis` e
+>   `degenerate_footprint` agora consultam `shape_policy`/`geometry_intent`
+>   em vez de bool solto (`decorative`/`smooth`, mantidos por
+>   compatibilidade) ou substring de kind.
+> - `tools/furniture_overlap_gate.py` — `_module_geom()` filtra por
+>   `interaction_policy.furniture_overlap` (EXCLUSIVE) ANTES de unir
+>   footprint por módulo — mata a classe de bug "item pisável/decorativo
+>   aninhado infla módulo hospedeiro" na raiz, não com mais uma exceção de
+>   substring. `host` relationship roda em PARALELO ao `_is_embedded()`
+>   antigo (OR, não substitui ainda — migração gradual, ver GPT).
+>   **Bug real encontrado durante a migração**: `tools/correction_fixes.py`
+>   tinha uma CÓPIA própria do loop pairwise (`_overlapping_module_pairs`)
+>   em vez de reusar `pairwise_overlap()` — quebrou (`ValueError: too many
+>   values to unpack`) quando `_module_geom()` ganhou um 4º campo. Extraí
+>   `iter_overlap_pairs()` como núcleo canônico único; `pairwise_overlap()`
+>   (gate) e `correction_fixes.py` (nudge) agora DELEGAM pra ele — exatamente
+>   o anti-padrão "duplicated policy" que o `optimizer_consistency_gate`
+>   existe pra pegar, encontrado na prática no mesmo dia que o gate nasceu.
+> - `tools/semantic_geometry_contract_gate.py` (NOVO) — PASS se
+>   geometry_intent é declarado (registro central ou explícito no box);
+>   WARN_LEGACY_SEMANTICS se caiu no fallback mas é forma simples;
+>   FAIL_MISSING_SEMANTICS se caiu no fallback E é forma complexa (rotação/
+>   não-retangular) — essa é exatamente a classe de bug real desta sessão.
+>   Rodado no apê inteiro: **PASS, 0 warn, 0 fail** (registrei os ~10 kinds
+>   que faltavam — criado-mudo, box de vidro, decor de cozinha — durante a
+>   implementação, não deixei como pendência).
+> - `tools/collision_envelope_gate.py` (NOVO) — 3 checks: geometria visual
+>   existe; item SOFT/DECORATIVE nunca pode ter política de sólido (o
+>   invariante que a classe de bug do tapete violava — testado com
+>   regressão direta); cadeira que participa de mesa de jantar tem envelope
+>   de uso (atrás+puxada) resolvido pelo circulation_gate, não só existe
+>   geometricamente.
+> - `tools/optimizer_consistency_gate.py` (NOVO) — 3 camadas (GPT-Docker):
+>   implementação canônica única (verificado, não só assumido), provenance
+>   persistida (`out["placement_decisions"]`, gravada em
+>   `furnish_apartment.py` na escolha da mesa de jantar/mesa de centro), e
+>   **REAVALIAÇÃO** do gate canônico contra o estado FINAL — nunca confia no
+>   `gate_result` gravado no momento da escolha (só ele prova "como foi
+>   escolhido", nunca "ainda é válido"). `evaluate_decisions()` extraído
+>   como núcleo puro testável por injeção de `circulation_gate_fn`.
+>
+> **O que o GPT disse que NÃO deve virar regra global** (documentado, não
+> silenciado — evita generalizar demais):  os números específicos (0.90/
+> 0.80/0.75/0.02/0.70/0.50) são project_policy, não lei do engine (fix
+> acima); grid search 6-8in é implementação do optimizer, não contrato;
+> "omitir mesa de centro se não couber" é decisão de programa da sala, não
+> lei global; sofá "melhor esforço" é exceção específica de r002 com
+> provenance, nunca fallback genérico.
+>
+> **Testes novos**: `test_semantic_geometry_contract_gate.py` (6),
+> `test_collision_envelope_gate.py` (6), `test_optimizer_consistency_gate.py`
+> (5), + `test_portal_role_is_explicit_not_inferred` em
+> `test_circulation_gate.py`. Total 1267/1267 (`not planta74_scale`) +
+> 71/71 (`planta74_scale`), 0 regressões. `run_deterministic_gates` +
+> `mcp_server.smoke`/`stdio_check` + `variant_sweep --n 2` PASS.
+>
+> **Pendências reais (não escondidas)**:
+> 1. `interaction_policy`/`host` rodam em PARALELO aos heurísticos antigos
+>    (substring de kind/module, altura Z) — ainda não SUBSTITUÍRAM (fases 1-2
+>    do plano do GPT, não 3-5). Retirar o heurístico antigo só depois que
+>    `semantic_geometry_contract_gate` rodar com `ALLOW_LEGACY_SEMANTICS=False`
+>    (conceito do GPT, não implementado — hoje o "legado" é só o
+>    `default_fallback`, sem flag de corte).
+> 2. `optimizer_consistency_gate` só tem cobertura real na sala (mesa de
+>    jantar + mesa de centro) — quarto/cozinha/banheiro não têm busca de
+>    posição validada por gate canônico DURANTE a escolha (bed_placement_gate
+>    existe mas roda só depois, como teste isolado). Gate reporta isso
+>    honestamente (`n_decisions: 0` + nota), não finge cobertura.
+> 3. Canonical envelope resolver (fase 3 do GPT — `resolve_envelopes` central
+>    persistindo em consensus.json normalizado) não foi implementado; hoje
+>    é derivado on-demand em cada gate, redundante mas correto.
+> 4. `gate_version` é uma string fixa, não hash do código+config (sugestão
+>    do GPT pra rigor total) — suficiente pra hoje, revisar se o gate mudar
+>    com frequência sem o optimizer saber.
+>
+> Comandos: `python -m tools.semantic_geometry_contract_gate [room_id|all]`,
+> `python -m tools.collision_envelope_gate [room_id|all]`,
+> `python -m tools.optimizer_consistency_gate [room_id|all]`.
+
 > **Atualização 2026-08-12 (round 4, CI 100% VERDE)** — Felipe: "resolveu
 > tudo? se não, remove os gates e constrói novos, tá ridículo". Os 2
 > pré-existentes do round 3 (abaixo) NÃO eram bugs de arquitetura nem

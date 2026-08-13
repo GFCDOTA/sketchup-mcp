@@ -52,19 +52,36 @@ def _is_embedded(a, b):
 
 
 def _module_geom(boxes):
-    """module -> (footprint Polygon unida, z0_in, z1_in)."""
+    """module -> (footprint Polygon unida, z0_in, z1_in, host_kinds set).
+
+    achado 2026-08-12 (consulta GPT-Docker): EXCLUDE/_FIX/_HOST/_TRIM eram
+    substring matching de module/kind, cada gate reinventando a mesma
+    pergunta. Migração ADITIVA (não substitui, soma): interaction_policy.
+    furniture_overlap (core/spatial_semantics.py) e' o sinal NOVO — qualquer
+    box com furniture_overlap!='EXCLUSIVE' já não entra na footprint do
+    módulo (nem pisável tipo tapete, nem decorativo, nem HOSTED tipo cuba
+    embutida). O substring antigo continua rodando em paralelo em
+    pairwise_overlap (não removido ainda — retirar só depois que todo
+    builder declarar geometry_intent explícito, ver semantic_geometry_
+    contract_gate)."""
     from shapely.geometry import Polygon
     from shapely.ops import unary_union
+    from core.spatial_semantics import annotate
     polys = defaultdict(list)
     zr = defaultdict(lambda: [9e9, -9e9])
+    host_kinds = defaultdict(set)
     for b in boxes:
         if not b.get("corners"):
+            continue
+        annotate(b)
+        pol = (b.get("interaction_policy") or {}).get("furniture_overlap", "EXCLUSIVE")
+        if pol != "EXCLUSIVE":
             continue
         # tapete/piso pisável NÃO conta pra colisão mesmo dentro de um módulo
         # maior (achado 2026-08-12: "kb_tapete" agrupado sob module="Enxoval"
         # inflava a footprint do módulo inteiro com área de tapete, gerando
-        # "Enxoval × Vaso" FAIL falso — EXCLUDE já cobria módulo="Tapete" mas
-        # não pega tapete aninhado dentro de outro módulo por 'kind').
+        # "Enxoval × Vaso" FAIL falso — legado, mantido em paralelo ao check
+        # de interaction_policy acima).
         if any(e in str(b.get("kind", "")).lower() for e in ("tapete", "rug")):
             continue
         mod = str(b.get("module", b.get("kind", "movel")))
@@ -75,28 +92,40 @@ def _module_geom(boxes):
         z0 = float(b.get("z0_in", 0.0))
         zr[mod][0] = min(zr[mod][0], z0)
         zr[mod][1] = max(zr[mod][1], z0 + float(b.get("h_in", 0.0)))
+        host = b.get("host") or {}
+        if host.get("relationship", "NONE") != "NONE" and host.get("host_kind_hint"):
+            host_kinds[mod].add(host["host_kind_hint"])
     out = {}
     for mod, ps in polys.items():
-        out[mod] = (unary_union(ps), zr[mod][0], zr[mod][1])
+        out[mod] = (unary_union(ps), zr[mod][0], zr[mod][1], host_kinds.get(mod, set()))
     return out
 
 
-def pairwise_overlap(geoms):
-    """Loop pairwise CANÔNICO de colisão sobre module -> (footprint, z0_in, z1_in)
-    (saída de _module_geom). Aplica EXCLUDE, _is_embedded e os thresholds
-    Z_EPS_IN/AREA_MIN_M2/FRAC_MIN/FRAC_FAIL — fonte ÚNICA do veredito de colisão
-    (o variant_sweep reusa direto nos boxes da variante; mudar aqui muda os dois).
-    Devolve (fails, warns, n_modules)."""
+def iter_overlap_pairs(geoms):
+    """Núcleo CANÔNICO ÚNICO do pairwise loop — geoms: module -> (footprint,
+    z0_in, z1_in, host_kinds) (saída de _module_geom). Aplica EXCLUDE,
+    _is_embedded/host relationship e os thresholds Z_EPS_IN/AREA_MIN_M2/FRAC_MIN
+    — quem quiser resultado por par (correction_fixes.py, nudge) OU só o
+    veredito PASS/WARN/FAIL (pairwise_overlap, abaixo) consome ISTO, nunca
+    reimplementa o loop (achado 2026-08-12: correction_fixes.py tinha cópia
+    própria do MESMO loop, quebrou silenciosamente quando _module_geom mudou
+    de forma — exatamente o anti-padrão "duplicated policy" que motivou o
+    optimizer_consistency_gate). Yields (mod_a, mod_b, inter_m2, frac)."""
     geoms = {m: g for m, g in geoms.items()
              if not any(e in m.lower() for e in EXCLUDE)}
     mods = sorted(geoms)
-    fails, warns = [], []
     for i in range(len(mods)):
         for j in range(i + 1, len(mods)):
             if _is_embedded(mods[i], mods[j]):   # eletro/cuba embutido na bancada+tampo: legítimo
                 continue
-            pa, za0, za1 = geoms[mods[i]]
-            pb, zb0, zb1 = geoms[mods[j]]
+            pa, za0, za1, hosts_a = geoms[mods[i]]
+            pb, zb0, zb1, hosts_b = geoms[mods[j]]
+            # host relationship declarado (core/spatial_semantics.py) — mesmo
+            # espírito de _is_embedded, mas via contrato explícito em vez de
+            # substring; roda em PARALELO (OR), não substitui ainda.
+            if (any(h in mods[j].lower() for h in hosts_a)
+                    or any(h in mods[i].lower() for h in hosts_b)):
+                continue
             z_ov = min(za1, zb1) - max(za0, zb0)
             if z_ov <= Z_EPS_IN:                       # alturas não se cruzam -> ok (empilhado)
                 continue
@@ -106,9 +135,19 @@ def pairwise_overlap(geoms):
             amin = min(pa.area, pb.area) / (M2IN * M2IN)
             frac = inter / amin if amin else 0.0
             if frac >= FRAC_MIN:
-                msg = f"{mods[i]} × {mods[j]}: {inter*10000:.0f} cm² sobrepostos ({frac:.0%} do menor)"
-                (fails if frac >= FRAC_FAIL else warns).append(msg)
-    return fails, warns, len(mods)
+                yield mods[i], mods[j], inter, frac
+
+
+def pairwise_overlap(geoms):
+    """Loop pairwise CANÔNICO de colisão — ver iter_overlap_pairs(). Devolve
+    (fails, warns, n_modules): fails/warns são a mesma checagem, só formatada
+    como PASS/WARN/FAIL (frac >= FRAC_FAIL = FAIL, senão WARN)."""
+    fails, warns = [], []
+    n_modules = len({m for m, g in geoms.items() if not any(e in m.lower() for e in EXCLUDE)})
+    for mod_a, mod_b, inter, frac in iter_overlap_pairs(geoms):
+        msg = f"{mod_a} × {mod_b}: {inter*10000:.0f} cm² sobrepostos ({frac:.0%} do menor)"
+        (fails if frac >= FRAC_FAIL else warns).append(msg)
+    return fails, warns, n_modules
 
 
 def overlap_gate(con, room_id):

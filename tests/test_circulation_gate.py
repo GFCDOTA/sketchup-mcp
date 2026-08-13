@@ -39,3 +39,16 @@ def test_every_chair_has_room_behind(sala_gate):
         # 0.25m atrás do encosto — 0.59 medido = 0.84 real de folga)
         assert c["atras_ok"], f"sem folga atrás: {c}"
         assert c["puxada_ok"], f"cadeira não puxa: {c}"
+
+
+def test_portal_role_is_explicit_not_inferred(sala_gate):
+    # achado 2026-08-12 (revisão GPT-Docker): portal_role vem do PAPEL
+    # arquitetônico da abertura (kind_v5), nunca da largura medida. A varanda
+    # (glazed_balcony, destino terminal) tem que ser SECONDARY mesmo tendo
+    # 1.0m de largura vazia (mais larga que qualquer porta PRIMARY da sala).
+    portais = sala_gate["checks"]["corredor_principal"]["portais"]
+    for p in portais:
+        assert p.get("portal_role") in ("PRIMARY", "SECONDARY"), f"portal sem role: {p}"
+    varanda = [p for p in portais if p.get("w_empty_m") == 1.0]
+    assert varanda and varanda[0]["portal_role"] == "SECONDARY", \
+        "varanda (maior largura vazia) deveria ser SECONDARY (destino terminal), não PRIMARY"

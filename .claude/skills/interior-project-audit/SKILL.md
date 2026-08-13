@@ -58,6 +58,11 @@ manufacturer_references}`.
 `windows`, `shafts`, `structure`. Qualquer valor presumido = `UNVERIFIED`, nunca
 inventado. (Pega o gotcha real do BANHO 01: vãos de teto abertos vazando background —
 isso é bug de geometria, não estética, e é HARD FAIL aqui.)
+Antes de julgar aqui: rodar `python -m tools.semantic_geometry_contract_gate <room>`
+e `python -m tools.collision_envelope_gate <room>` (determinísticos, 2026-08-12 —
+ver `core/spatial_semantics.py`). Este GATE 1 **audita o resultado**, não reimplementa
+a checagem — se algum item vier `FAIL_MISSING_SEMANTICS` ou `soft_items_never_solid`,
+já é HARD FAIL aqui, sem precisar de julgamento humano/GPT pra essa parte.
 
 **GATE 2 — PRODUCT REALITY.** Cada peça: `manufacturer, model, sku, width, depth,
 height, installation_type, technical_source`. Checar `catalog_bbox == model_bbox`.
@@ -68,11 +73,23 @@ Nada de objeto genérico tipo `black_rectangle_02` — vira `toilet_paper_holder
 `WALL + FAUCET + COUNTERTOP + BASIN + TRAP + DRAWER + USER`. Saída:
 `front_margin, rear_margin, drill_clearance, trap_collision, drawer_collision,
 service_access → PASS|WARN|FAIL`.
+Se algum otimizador/busca de posição escolheu onde essa peça vai, rodar
+`python -m tools.optimizer_consistency_gate <room>` — otimizador que aprova
+uma posição usando heurística diferente do gate real é o mesmo bug de
+"testar peça isolada" (achado 2026-08-12: `correction_fixes.py` tinha uma
+cópia própria da regra de colisão que divergiu da canônica sem ninguém notar).
 
 **GATE 4 — ERGONOMIA.** Dois envelopes por objeto: `physical_bbox` + `usage_bbox`
 (usuário, abertura, alcance, passagem, manutenção). Todo threshold tem
 `value` + `source` (`office_rule|manufacturer|standard|client_requirement`).
 Sem fonte = `UNVERIFIED`. Nunca hardcode "60cm porque acho".
+Isso já é CÓDIGO pra circulação/cadeira (não só julgamento humano): thresholds
+com value/source/scope/applicability em `core/project_policy.py`;
+`portal_role` (PRIMARY/SECONDARY) declarado por papel arquitetônico da
+abertura em `circulation_gate.py`, nunca inferido pela largura medida — a
+mesma regra vale aqui: threshold de ergonomia sem `source` fica `UNVERIFIED`,
+threshold que É `project_decision` (não norma) tem que dizer isso, não se
+disfarçar de norma técnica.
 
 **GATE 5 — MEP** (hidráulica/elétrica). `cold_water, hot_water, sewer, drain,
 electricity, ventilation, route_to_shaft` → `VERIFIED|UNVERIFIED|CONFLICT`.

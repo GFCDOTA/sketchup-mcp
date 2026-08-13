@@ -383,6 +383,12 @@ def living_room_boxes(con, room_id):
     o solver rejeita sofa em circulacao / sem eixo pra TV. Fallback: brain antigo."""
     from tools.sofa_builder import build_sofa, place_sofa_boxes
     from interior.planners.living_room_planner import plan_living
+    # provenance de decisões de posicionamento (optimizer_consistency_gate) —
+    # achado 2026-08-12: toda busca de posição JÁ usa circulation_gate.gate()
+    # de verdade (não proxy), mas a decisão morria depois de escolhida; agora
+    # fica registrada em out["placement_decisions"] pra auditoria/CI.
+    _CANONICAL_GATE_VERSION = "circulation_gate.py::gate/2026-08-12-role-based"
+    _placement_decisions = []
     plan = plan_living(con, room_id)
     if not plan.get("plan"):
         # sem parede util no comodo (raríssimo): NAO flutua moveis — sala vazia e
@@ -540,7 +546,8 @@ def living_room_boxes(con, room_id):
         # cadeira) vence.
         _bx0, _by0, _bx1, _by1 = cell_in.bounds
         _occ_now = _uni(_occ) if _occ else None
-        _best, _best_score, _best_fails = None, 999, 99
+        _best, _best_score, _best_fails, _best_gate_result = None, 999, 99, None
+        _n_candidates = 0
         _step = 6
         for _cx in range(int(_bx0) + 8, int(_bx1) - 8, _step):
             if _best_score == 0:
@@ -556,6 +563,7 @@ def living_room_boxes(con, room_id):
                                       for _b in _cand_boxes if _b.get("corners")])
                     if _cand_occ.intersection(_occ_now).area > 50:   # in^2
                         continue
+                _n_candidates += 1
                 _g = _circ_gate(con, boxes + _cand_boxes, room_id)
                 _ndisc = sum(1 for p in _g["checks"]["corredor_principal"]["portais"]
                             if not p.get("conectado", True))
@@ -563,6 +571,7 @@ def living_room_boxes(con, room_id):
                 _score = _ndisc * 10 + _nf
                 if _score < _best_score:
                     _best, _best_score, _best_fails = _cand_boxes, _score, _nf
+                    _best_gate_result = _g["result"]
                 if _score == 0:
                     break
         if _best is not None:
@@ -570,6 +579,12 @@ def living_room_boxes(con, room_id):
                 print(f"[furnish-apt] circulation_gate: melhor candidato ainda com "
                       f"{_best_fails} check(s) FAIL (WARN-log)")
             boxes += _best
+            _placement_decisions.append({
+                "candidate_id": "mesa_de_jantar", "optimizer": "dining_grid_search_v1",
+                "canonical_gate": _CANONICAL_GATE_VERSION,
+                "gate_result": _best_gate_result, "score": _best_score,
+                "n_candidates_tried": _n_candidates,
+            })
 
     # almofadas soltas no sofá (decor mínimo, pontuação não frase)
     for _adx, _aang in ((-0.55, 12), (0.55, -12)):
@@ -607,6 +622,7 @@ def living_room_boxes(con, room_id):
         _occ_polys = [Polygon([(c[0], c[1]) for c in _b["corners"]]) for _b in boxes if _b.get("corners")]
         _occ_now = _uni(_occ_polys) if _occ_polys else None
         _best_c, _best_fails = base, None
+        _n_tried = 0
         cands = [(0.0, 0.0)] + [(along, side) for r in (0.20, 0.40, 0.60, 0.80)
                                 for along, side in ((0, r), (0, -r), (r, 0), (-r, 0),
                                                      (r * 0.7, r * 0.7), (-r * 0.7, r * 0.7),
@@ -624,13 +640,24 @@ def living_room_boxes(con, room_id):
                                   for _b in _cand if _b.get("corners")])
                 if _cand_occ.intersection(_occ_now).area > 50:   # in^2
                     continue
+            _n_tried += 1
             _g = _cgate(con, boxes + _cand, room_id)
             _nf = sum(1 for p in _g["checks"]["corredor_principal"]["portais"]
                      if not p.get("conectado", True))
             if _nf == 0:
+                _placement_decisions.append({
+                    "candidate_id": "mesa_de_centro", "optimizer": "coffee_table_radial_search_v1",
+                    "canonical_gate": _CANONICAL_GATE_VERSION, "gate_result": _g["result"],
+                    "score": _nf, "n_candidates_tried": _n_tried,
+                })
                 return c, True
             if _best_fails is None or _nf < _best_fails:
                 _best_c, _best_fails = c, _nf
+        _placement_decisions.append({
+            "candidate_id": "mesa_de_centro", "optimizer": "coffee_table_radial_search_v1",
+            "canonical_gate": _CANONICAL_GATE_VERSION, "gate_result": "OMITTED_NO_VALID_CANDIDATE",
+            "score": _best_fails, "n_candidates_tried": _n_tried,
+        })
         return _best_c, False
 
     # sofá+rack (parede-a-parede) já deixam a faixa do portal da varanda no fio
@@ -700,7 +727,8 @@ def living_room_boxes(con, room_id):
 
     out = {"result": "OK", "room_name": plan.get("room_name"), "n_placed": len(boxes),
            "placement": "common_sense_solver", "tv_wall": plan.get("tv_wall"),
-           "sofa_wall": p["sofa"]["wall_id"], "view_dist_m": p["sofa"]["rule"]}
+           "sofa_wall": p["sofa"]["wall_id"], "view_dist_m": p["sofa"]["rule"],
+           "placement_decisions": _placement_decisions}
     return boxes, out
 
 
@@ -756,6 +784,12 @@ def collect_boxes(con):
         # no rack/mesa (kinds base/top/front) SEM contaminar o sofa (sofa.base = flat/grafite).
         ntex = attach_materials(all_boxes, style)
         print(f"[furnish-apt] material por modulo: {ntex} boxes com textura resolvida")
+    # contrato semântico único (geometry_intent/shape_policy/interaction_policy/
+    # host) — achado 2026-08-12, consulta GPT-Docker: preenche o que os builders
+    # não declararam explicitamente, com provenance rastreável (não silenciosa).
+    # Ver core/spatial_semantics.py.
+    from core.spatial_semantics import annotate_all
+    annotate_all(all_boxes)
     return all_boxes, summary
 
 

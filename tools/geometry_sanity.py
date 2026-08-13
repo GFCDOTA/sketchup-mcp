@@ -61,6 +61,47 @@ def _axis_aligned(b) -> bool:
     return len(xs) <= 2 and len(ys) <= 2
 
 
+def _is_rectangle(corners, tol=0.05) -> bool:
+    """4 cantos formando um retângulo em QUALQUER rotação (lados opostos
+    paralelos+iguais, ângulos retos) — distingue 'retângulo girado de
+    propósito' (ex. almofada a 12°) de 'polígono genuinamente não-retangular'
+    (ex. vaso com cantos arredondados, tapete recortado em L). Achado
+    2026-08-12: o check antigo (_axis_aligned) misturava os dois casos na
+    MESMA checagem off_axis — bug real (rejeitava rotação legítima junto com
+    forma ilegítima)."""
+    if len(corners) != 4:
+        return False
+    p = [(float(c[0]), float(c[1])) for c in corners]
+    for i in range(4):
+        ax, ay = p[i]
+        bx, by = p[(i + 1) % 4]
+        cx, cy = p[(i + 2) % 4]
+        v1 = (bx - ax, by - ay)
+        v2 = (cx - bx, cy - by)
+        dot = v1[0] * v2[0] + v1[1] * v2[1]
+        len1 = (v1[0] ** 2 + v1[1] ** 2) ** 0.5 or 1e-9
+        len2 = (v2[0] ** 2 + v2[1] ** 2) ** 0.5 or 1e-9
+        if abs(dot) > tol * len1 * len2:      # angulo entre lados adjacentes != 90
+            return False
+    return True
+
+
+def _shape_policy_of(b) -> dict:
+    """shape_policy explícito no box; senão resolve por geometry_intent
+    (explícito ou por kind/module via core/spatial_semantics.py). Compat:
+    'decorative'/'smooth' (booleans antigos, pré-contrato semântico) ainda
+    liberam forma não-retangular/rotação — não quebra caller que não migrou."""
+    if b.get("shape_policy"):
+        return b["shape_policy"]
+    from core.spatial_semantics import resolve_geometry_intent, resolve_shape_policy
+    if b.get("decorative") or b.get("smooth"):
+        return {"rotation_allowed": True, "non_rectangular_allowed": True, "curved_allowed": True}
+    intent = b.get("geometry_intent")
+    if not intent:
+        intent, _ = resolve_geometry_intent(b.get("kind"), b.get("module"))
+    return resolve_shape_policy(intent)
+
+
 def _pt_in_poly(x, y, poly) -> bool:
     inside, n, j = False, len(poly), len(poly) - 1
     for i in range(n):
@@ -88,29 +129,34 @@ def audit(parts, *, rooms=None, to_m=1.0, cfg=None) -> dict:
         z0 = b.get("z0_in")
         if z0 is not None and z0 < c["z_under_tol_in"]:
             add("FAIL", "underground", b, f"z0_in={round(z0, 2)} < {c['z_under_tol_in']}")
-        # fita/rasgo de LED e trim/hardware fino (perfil de box, haste de
-        # cortina, caixilho de janela, moldura) são INTENCIONALMENTE finos —
-        # achado 2026-08-12 (bathroom_layout.py: kb_slot_led/kb_perfil/
-        # kb_haste/kb_caixilho/kb_moldura sempre tiveram footprint pequeno
-        # por design; mesma isenção que off_axis já dá pra 'decorative',
-        # aqui por 'kind' porque trim/hardware não está marcado
-        # decorative=True em todo lugar que o cria).
-        _THIN_TRIM_KINDS = ("led", "perfil", "haste", "caixilho", "moldura")
-        if (w * d < c["min_footprint_in2"]
-                and not any(t in str(b.get("kind", "")).lower() for t in _THIN_TRIM_KINDS)):
+        # trim/hardware fino (LED, perfil de box, haste de cortina, caixilho,
+        # moldura) é INTENCIONALMENTE fino por natureza — geometry_intent
+        # DECORATIVE (core/spatial_semantics.py) é a fonte única disso agora;
+        # achado 2026-08-12 era substring de kind ad-hoc, migrado.
+        _intent = b.get("geometry_intent")
+        if not _intent:
+            from core.spatial_semantics import resolve_geometry_intent
+            _intent, _ = resolve_geometry_intent(b.get("kind"), b.get("module"))
+        if (w * d < c["min_footprint_in2"] and _intent != "DECORATIVE"):
             add("FAIL", "degenerate_footprint", b, f"footprint={round(w * d, 3)} (w={round(w,2)} d={round(d,2)})")
         h = b.get("h_in")
         if h is not None and 0 < h < c["min_height_in"]:
             add("WARN", "degenerate_height", b, f"h_in={round(h, 3)}")
-        if not b.get("decorative") and not b.get("smooth") and not _axis_aligned(b):
-            # decorativo (tapete/manta) pode ser recortado ao comodo (poligono nao-retangular,
-            # cantos arredondados) -> nao e "eixo torto" estrutural. So estrutural checa off_axis.
-            # 'smooth' (achado 2026-08-12): vaso/kb_tampa (bathroom_layout.py,
-            # anatomia Roca The Gap curada pelo Felipe) desenham cantos
-            # arredondados de propósito (part["smooth"]=True) — mesma
-            # categoria de "poligono nao-retangular intencional", não bug de
-            # rotação.
-            add("FAIL", "off_axis", b, "corners nao axis-aligned (eixo torto)")
+        cs = b.get("corners")
+        if cs and not _is_rectangle(cs):
+            # não é um retângulo (nem girado) — só ok se shape_policy permitir
+            # forma não-retangular de propósito (tapete recortado em L, vaso
+            # arredondado). Achado 2026-08-12: antes, rotação legítima
+            # (almofada a 12°) e forma ilegítima (não-retângulo) caíam na
+            # MESMA checagem _axis_aligned — bug real, agora separados.
+            if not _shape_policy_of(b).get("non_rectangular_allowed"):
+                add("FAIL", "off_axis", b, "corners nao formam retangulo e non_rectangular_allowed=False")
+        elif cs and not _axis_aligned(b):
+            # é um retângulo, só que GIRADO — ok se shape_policy permitir
+            # rotação de propósito (almofada "jogada", móvel de frente pra
+            # outra parede não-cardinal).
+            if not _shape_policy_of(b).get("rotation_allowed"):
+                add("FAIL", "off_axis", b, "retangulo girado e rotation_allowed=False")
         for dim, nm in ((w, "w"), (d, "d")):
             if dim * to_m > c["max_dim_m"]:
                 add("FAIL", "absurd_bbox", b, f"{nm}={round(dim * to_m, 2)}m > {c['max_dim_m']}m (escala explodida)")
