@@ -139,6 +139,10 @@ docs/archive/**/scratch_preserved/*.skp
 .github/skills/impeccable/
 .github/agents/impeccable-*.agent.md
 .github/hooks/impeccable.json
+# ...mas .impeccable/config.json FICA versionado: é o interruptor durável que
+# mantém o hook de design DESLIGADO neste projeto mesmo após um reinstall.
+.impeccable/config.local.json
+.impeccable/hook.cache.json
 
 # Traces do AI Pipeline Inspector — derivados e descartáveis (INSPECTOR=1).
 .ai_bridge/traces/
