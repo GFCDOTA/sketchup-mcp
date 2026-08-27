@@ -636,13 +636,27 @@ do modo ligado é o `append_jsonl` abrir o arquivo por evento. Bufferizar por ru
 resolveria, ao custo de perder eventos num crash; não vale a complexidade
 enquanto o número absoluto for 2 ms.
 
-#### Achado incidental (não corrigido — seria mudar execução)
+#### PERF-001 — 6,1 s desperdiçados no caminho degradado do RAG
 
-O caminho `backend=embed` custa **~6,1 s mesmo quando degrada**: paga 2,0 s de
-embedding no Ollama e só então descobre, em ~4,1 s de conexão recusada, que o
-Qdrant está fora. Um probe de saúde antes do embedding economizaria os 6 s no
-caminho degradado. É exatamente o tipo de coisa que o Inspector existe pra
-mostrar — e é mudança de comportamento, então fica fora da Fase 3.
+> **Status:** registrado, NÃO corrigido. Corrigir seria mudar execução, o que a
+> Fase 3 proíbe. Fica como o **primeiro caso real** que o Inspector deve tornar
+> visível — é literalmente o tipo de coisa que motivou a ferramenta.
+
+
+```
+2,0 s  embedding no Ollama          <- desperdiçado: ninguém vai usar o vetor
+4,1 s  conexão recusada no Qdrant   <- só aqui se descobre que está fora
+-----
+6,1 s  antes do fallback começar
+```
+
+Medido na run real: `rag.embedding.finished` 2097 ms, `rag.retrieval.finished`
+(qdrant) 4072 ms com status FAIL, e só então `reference_db.faceted` roda em
+**1,0 ms**. O trabalho útil do caminho degradado leva 1 ms; o desperdício, 6100.
+
+Correção óbvia (fora de escopo): probar a saúde do Qdrant **antes** de embedar.
+Também explica por que os testes que exercitam `backend="embed"` levam ~6 s cada
+localmente — em CI, sem Ollama, a falha é imediata.
 
 ### Estado das Fases 1 + 2 (landadas)
 
