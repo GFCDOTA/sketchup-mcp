@@ -43,6 +43,9 @@ RUN_EVENTS = (
 HARNESS_EVENTS = (
     "harness.started", "harness.finished",
     "harness.cycle.started", "harness.cycle.finished",
+    # as quatro fases do correction_loop, nomeadas — são elas que mostram o
+    # APPLICATION HARNESS trabalhando (distinto do runtime de agente externo)
+    "harness.detect", "harness.classify", "harness.fix", "harness.recheck",
     "harness.terminal",
     "agent.retry", "agent.correction",
 )

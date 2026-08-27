@@ -115,8 +115,12 @@ def attach(ctx: RunContext, *, span_id: str | None = None) -> Iterator[RunContex
 
     `contextvars` não atravessa `threading.Thread`: uma thread nova nasce com
     contexto vazio, então um `emit()` lá dentro não acha a run e é descartado em
-    silêncio. Isso não é teórico — o BFF é `ThreadingHTTPServer` e o
-    `variant_sweep` roda em pool.
+    silêncio. Isso não é teórico: o BFF (`ops/estudio-front/server.py`) é
+    `ThreadingHTTPServer`, uma thread por requisição. É o ÚNICO boundary de
+    thread do repo hoje — não há `ThreadPoolExecutor` nem `Thread()` em
+    `tools/` (verificado por grep). Lá a run nasce dentro do handler, na
+    própria thread, então não precisa reatar; `attach` existe para o dia em
+    que uma requisição delegar trabalho a outra thread.
 
     Quem cria a thread reata explicitamente:
 

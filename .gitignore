@@ -131,10 +131,14 @@ docs/archive/**/scratch_preserved/*.skp
 # Impeccable (skill de design) — instalada por `npx impeccable install` na raiz
 # do projeto. ~7 MB espelhados em .claude/ E .github/; reproduzível, não usada
 # pelo CI, e só serve à sessão interativa. Fora do git de propósito.
+#
+# ESCOPO ESTREITO de propósito: só os artefatos DO impeccable. `.github/` e
+# `.claude/` continuam versionáveis — `.github/workflows/` (o CI) nunca foi
+# tocado, e um agente/hook legítimo futuro nessas pastas entra no git normal.
 .claude/skills/impeccable/
-.github/skills/
-.github/agents/
-.github/hooks/
+.github/skills/impeccable/
+.github/agents/impeccable-*.agent.md
+.github/hooks/impeccable.json
 
 # Traces do AI Pipeline Inspector — derivados e descartáveis (INSPECTOR=1).
 .ai_bridge/traces/

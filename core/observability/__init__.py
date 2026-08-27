@@ -45,6 +45,19 @@ from core.observability.events import (
     default_category,
     is_well_formed,
 )
+from core.observability.llm import (
+    ContextComposition,
+    ContextSource,
+    LLMCall,
+    from_ollama,
+)
+from core.observability.retrieval import (
+    ChunkLedger,
+    ChunkRef,
+    FusionTrace,
+    RetrievalOutcome,
+    observe_fusion,
+)
 from core.observability.sink import (
     JsonlSink,
     MemorySink,
@@ -65,12 +78,14 @@ from core.observability.taxonomy import (
 )
 
 __all__ = [
-    "Category", "DecisionEvidence", "Event", "HarnessKind", "IndexKind", "attach",
-    "JsonlSink", "MemorySink", "NullSink", "RetrievalKind", "RunContext",
-    "SCHEMA_VERSION", "Sink", "Status", "UnknownEventName",
-    "classify_retrieval", "configure", "current_run", "current_span_id",
-    "default_traces_dir", "emit", "is_enabled", "is_rag", "is_well_formed",
-    "new_run_id", "reset_for_tests", "run", "stage", "span_scope",
+    "Category", "ChunkLedger", "ChunkRef", "ContextComposition", "ContextSource",
+    "DecisionEvidence", "Event", "FusionTrace", "HarnessKind", "IndexKind",
+    "JsonlSink", "LLMCall", "MemorySink", "NullSink", "RetrievalKind",
+    "RetrievalOutcome", "RunContext", "SCHEMA_VERSION", "Sink", "Status",
+    "UnknownEventName", "attach", "classify_retrieval", "configure",
+    "current_run", "current_span_id", "default_traces_dir", "emit",
+    "from_ollama", "is_enabled", "is_rag", "is_well_formed", "new_run_id",
+    "observe_fusion", "reset_for_tests", "run", "span_scope", "stage",
 ]
 
 _ENV_FLAG = "INSPECTOR"

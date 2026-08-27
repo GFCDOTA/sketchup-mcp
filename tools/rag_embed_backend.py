@@ -23,6 +23,8 @@ import os
 import urllib.error
 import urllib.request
 
+from core import observability as obs
+
 log = logging.getLogger("rag_embed_backend")
 
 QDRANT_URL = os.environ.get("QDRANT_URL", "http://localhost:6333")
@@ -90,13 +92,18 @@ def embed(text: str, *, prefix: str = "", timeout: int = 120) -> list[float]:
     """Embedding via Ollama nomic-embed-text (768d). `prefix` = esquema assimétrico
     do nomic (EMBED_DOC_PREFIX no índice, EMBED_QUERY_PREFIX na query). Levanta
     InfraUnavailable se off ou vazio -> chamador degrada."""
-    body = _http("POST", f"{OLLAMA_URL}/api/embeddings",
-                 {"model": EMBED_MODEL, "prompt": f"{prefix}{text}"}, timeout=timeout)
-    vec = body.get("embedding") or []
-    if not vec:
-        raise InfraUnavailable(
-            f"embedding vazio p/ texto de {len(text)} chars (modelo {EMBED_MODEL!r})")
-    return [float(x) for x in vec]
+    with obs.stage("rag.embedding.started", "rag.embedding.finished",
+                   component=f"ollama.{EMBED_MODEL}",
+                   meta={"embedModel": EMBED_MODEL, "embedDim": EMBED_DIM,
+                         "prefix": prefix.strip() or None,
+                         "queryChars": len(text)}):
+        body = _http("POST", f"{OLLAMA_URL}/api/embeddings",
+                     {"model": EMBED_MODEL, "prompt": f"{prefix}{text}"}, timeout=timeout)
+        vec = body.get("embedding") or []
+        if not vec:
+            raise InfraUnavailable(
+                f"embedding vazio p/ texto de {len(text)} chars (modelo {EMBED_MODEL!r})")
+        return [float(x) for x in vec]
 
 
 # ---------------------------------------------------------------------------
@@ -155,17 +162,24 @@ def search(vector: list[float], *, corpus_version: str, top_k: int = 12,
         "with_payload": True,
         "filter": {"must": must},
     }
-    res = _http("POST", f"{QDRANT_URL}/collections/{COLLECTION}/points/search",
-                body, timeout=timeout)
-    out = []
-    for hit in res.get("result") or []:
-        payload = hit.get("payload") or {}
-        out.append({
-            "chunk_id": payload.get("chunk_id"),
-            "score": float(hit.get("score", 0.0)),
-            "payload": payload,
-        })
-    return out
+    with obs.stage("rag.retrieval.started", "rag.retrieval.finished",
+                   component=f"qdrant.{COLLECTION}",
+                   meta={"collection": COLLECTION, "topK": top_k,
+                         "corpusVersion": corpus_version,
+                         "sourceType": source_type,
+                         "indexKind": "VECTOR"}) as st:
+        res = _http("POST", f"{QDRANT_URL}/collections/{COLLECTION}/points/search",
+                    body, timeout=timeout)
+        out = []
+        for hit in res.get("result") or []:
+            payload = hit.get("payload") or {}
+            out.append({
+                "chunk_id": payload.get("chunk_id"),
+                "score": float(hit.get("score", 0.0)),
+                "payload": payload,
+            })
+        st.meta["nRetrieved"] = len(out)
+        return out
 
 
 # ---------------------------------------------------------------------------

@@ -21,6 +21,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 import rag_chat
+from rag_chat import obs
 
 ROOT = Path(__file__).resolve().parent
 CURADORIA = ROOT / "curadoria"
@@ -89,8 +90,14 @@ class Handler(BaseHTTPRequestHandler):
             if not msg:
                 self._send(400, b'{"erro":"message vazia"}')
                 return
+            # PONTO DE PROPAGAÇÃO DO CONTEXTO: o ThreadingHTTPServer dá uma
+            # thread por requisição, e `contextvars` não atravessa thread. A run
+            # é aberta AQUI, já dentro da thread que vai executar tudo — por isso
+            # não há `attach` a lembrar. Se um dia o handler delegar a outra
+            # thread, é ali que `obs.attach(ctx)` entra.
             try:
-                out = rag_chat.chat(msg)
+                with obs.run(component="estudio-front.chat"):
+                    out = rag_chat.chat(msg)
             except Exception as e:  # nao derruba o servidor por erro de infra
                 out = {"reply": f"Deu erro tentando responder: {e}", "context_used": []}
             body = json.dumps(out, ensure_ascii=False).encode("utf-8")
@@ -120,6 +127,9 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main() -> None:
+    # desligado por padrão; INSPECTOR=1 liga o sink de trace
+    if hasattr(obs, "configure"):
+        obs.configure()
     bind = os.environ.get("ESTUDIO_BIND", "127.0.0.1")
     port = int(os.environ.get("ESTUDIO_PORT", "8788"))
     print(f"estudio-front em http://{bind}:{port} (curadoria -> {CURADORIA})", flush=True)

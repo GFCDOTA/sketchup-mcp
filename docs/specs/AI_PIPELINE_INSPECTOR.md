@@ -3,9 +3,10 @@
 > Investigação: 2026-08-26, sobre `develop` @ `3515cfd`. Toda afirmação foi
 > confirmada por leitura direta do código — `arquivo:linha` quando aplicável.
 >
-> **Status: Fases 1 e 2 LANDADAS** em `feat/ai-pipeline-inspector-observability`.
-> Nenhum call-site do pipeline foi tocado ainda (Fase 3): `core/observability/`
-> existe, é testado, e está **desligado por padrão**. Fases 3–10 pendentes.
+> **Status: Fases 1, 2 e 3 LANDADAS** em `feat/ai-pipeline-inspector-observability`.
+> Os call-sites estão instrumentados e uma run real produz trace completo.
+> Segue **desligado por padrão** (`INSPECTOR=1` liga). Fases 4–10 pendentes:
+> nenhuma UI foi construída — é deliberado.
 >
 > A §2 foi **reescrita** após correção conceitual do Felipe: RAG é categoria
 > ampla (retrieval + augmentation + generation); a tecnologia do índice define o
@@ -558,7 +559,7 @@ o grafo nasce mentindo sobre PASS/FAIL.
 |---|---|---|
 | **1 — Fundação de instrumentação** ✅ | `core/observability/`: `taxonomy.py`, `events.py`, `context.py`, `sink.py`, `redact.py`, `replay.py`. Zero call-site tocado. | **95 testes verdes**; suíte cheia 1387✓ sem regressão |
 | **2 — Normalizador de gate** ✅ | `core/observability/gates.py` — os 5 formatos → `NormalizedGate{status, measurements[], counts}` | **29 testes**, incluindo contrato contra o `run_all` REAL na fixture `quadrado` |
-| **3 — Call-sites (cirúrgico)** | instrumentar: `rag_embed_backend.embed/search`, `reference_db._embed_recall_chunks/_rrf_fuse`, `rag_chat.search_preferences`, `knowledge_ingest.search_knowledge`, `architect_program.guard_bundle_freshness/render_bundle_for_prompt`, chamadas Ollama, `run_deterministic_gates.run_all`, `correction_loop.run_loop` | um run real produz `.ai_bridge/traces/<runId>.jsonl` legível |
+| **3 — Call-sites (cirúrgico)** ✅ | 8 módulos instrumentados; contratos novos `retrieval.py` (intenção×execução, fusão) e `llm.py` (tokens, origens de contexto) | run real de 43,9 s com 24 eventos, 0 lacunas; **39 testes**; bundles byte-idênticos ligado×desligado |
 | **4 — Transporte** | `GET /api/trace/<runId>`, `GET /api/trace/stream` (SSE + Last-Event-ID), rotas de conteúdo sob demanda | reconnect testado |
 | **5 — Grafo vivo + trace tree** | `inspector.html` + `PipelineGraph` + `TraceTree` + vendorização React | run ao vivo desenha sozinho |
 | **6 — RAG/chunk inspector + context inspector** | painel de chunks e composição de contexto | clique em chunk mostra conteúdo real |
@@ -568,6 +569,80 @@ o grafo nasce mentindo sobre PASS/FAIL.
 | **10 — Design pass** | Impeccable `document` (gera DESIGN.md do código) → `critique` → `audit` → `polish` | ver §11 |
 
 Fase 3 é a única que toca caminho quente — vai sozinha, com benchmark antes/depois.
+
+### Estado da Fase 3 (landada)
+
+**Regra-mãe:** *observability must describe execution, not change execution.*
+Traduzida em teste: cada caminho instrumentado produz saída byte-idêntica com a
+observabilidade ligada e desligada (`test_instrumentation_call_sites.py`).
+
+#### Intenção × execução
+
+`RetrievalOutcome` separa o que foi PEDIDO do que EXECUTOU, e o rótulo
+taxonômico é uma **property derivada** — não existe setter, então é impossível
+carimbar um rótulo que a execução não sustenta:
+
+```
+backendRequested      = embed
+backendActual         = faceted
+fallbackTriggered     = true
+fallbackReason        = InfraUnavailable: POST …/points/search falhou
+resultingTaxonomy     = FACETED_STRUCTURED_RAG
+intentMatchedExecution= false
+```
+
+**Correção feita durante a Fase 3:** a primeira versão derivava
+`augments_context` da contagem de resultados, e um retrieval que voltava vazio
+virava `RETRIEVAL_ONLY`. Errado — ser órfão é propriedade da FIAÇÃO (nunca ser
+consumido por geração), não do resultado de uma execução. Um retrieval vazio
+continua sendo RAG; quem conta a história do vazio é `nSelected=0`.
+
+#### Proveniência da fusão
+
+`observe_fusion()` deriva a proveniência COMPARANDO as rank-lists de entrada com
+a de saída — `_rrf_fuse` não foi tocado. Responde as quatro perguntas: de qual
+retriever veio, se apareceu em mais de um, rank original por retriever, rank
+após a fusão. O evento leva um resumo + os 24 primeiros itens e marca
+`truncated`; o objeto comporta o detalhe inteiro para a Fase 4 servir sob demanda.
+
+#### LLM e contexto
+
+`prompt_eval_count`/`eval_count` do Ollama eram **descartados** por `_ollama()` e
+por `ollama_bridge.ask()`. Agora são normalizados no NOSSO contrato
+(`prompt_tokens`/`completion_tokens`) por um adapter `from_ollama` — outro
+provider exige outro adapter, a semântica não é assumida. Contagem ausente é
+`None`, nunca `0`.
+
+A decomposição do contexto é medida em **caracteres** sobre as mesmas strings
+que o prompt já concatena. Tokens por origem: `NOT_INSTRUMENTED` — estimar seria
+inventar. `attributedFraction` denuncia quanto do prompt as seções declaradas
+não explicam, em vez de normalizar tudo para 100%.
+
+#### Benchmark (N=12, mediana)
+
+| workload | OFF | MEMORY | JSONL | ovh MEM | ovh JSONL | eventos | bytes/ev |
+|---|---|---|---|---|---|---|---|
+| `retrieve(faceted)` | 2,14 ms | 2,27 ms | 3,77 ms | +6,3% | +76% | 3 | 398 |
+| `retrieve(embed→fallback)` | 6132 ms | 6135 ms | 6143 ms | +0,0% | +0,2% | 8 | 505 |
+| `run_deterministic_gates` | 0,157 ms | 0,250 ms | 2,15 ms | +60% | +1274% | 5 | 322 |
+| `correction_loop` (2 ciclos) | 2,71 ms | 3,12 ms | 7,26 ms | +15% | +168% | 12 | 397 |
+
+`emit()` desligado: **91 ns/chamada** (retorna na segunda linha, `sink is None`).
+Ligado: 6,2 µs.
+
+Leitura honesta dos percentuais: o `+1274%` do gate é **+2 ms absolutos** sobre
+um workload de 0,157 ms — percentual sobre sub-milissegundo engana. O custo real
+do modo ligado é o `append_jsonl` abrir o arquivo por evento. Bufferizar por run
+resolveria, ao custo de perder eventos num crash; não vale a complexidade
+enquanto o número absoluto for 2 ms.
+
+#### Achado incidental (não corrigido — seria mudar execução)
+
+O caminho `backend=embed` custa **~6,1 s mesmo quando degrada**: paga 2,0 s de
+embedding no Ollama e só então descobre, em ~4,1 s de conexão recusada, que o
+Qdrant está fora. Um probe de saúde antes do embedding economizaria os 6 s no
+caminho degradado. É exatamente o tipo de coisa que o Inspector existe pra
+mostrar — e é mudança de comportamento, então fica fora da Fase 3.
 
 ### Estado das Fases 1 + 2 (landadas)
 

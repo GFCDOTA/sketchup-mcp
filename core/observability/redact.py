@@ -37,18 +37,23 @@ _MAX_LIST = 64          # nenhuma lista de meta passa disso
 ALLOWED_META_KEYS: frozenset[str] = frozenset({
     # identidade / classificação
     "retrievalKind", "harnessKind", "indexKind", "isRag", "ragCycleComplete",
-    # RAG
+    "resultingTaxonomy", "intentMatchedExecution",
+    # RAG — intenção vs execução (ver core/observability/retrieval.py)
+    "retriever", "backendRequested", "backendActual", "fallbackTriggered",
+    "fallbackReason", "degradedTo",
     "collection", "corpusVersion", "topK", "threshold", "queryChars", "queryHash",
-    "embedModel", "embedDim", "prefix", "retrieversFused", "fusionMethod",
-    "fusionK", "backend", "requestedBackend", "effectiveBackend",
-    "nRetrieved", "nSelected", "nRejected", "nStale", "nKept",
+    "embedModel", "embedDim", "prefix", "retrieversFused",
+    "fusionStrategy", "fusionK", "inputs", "provenance",
+    "candidatesCount", "nRetrieved", "nSelected", "nRejected", "nStale", "nKept",
     "chunkId", "score", "rank", "source", "sourceType", "sourceKind",
     "chars", "selected", "reason", "documentId", "documentVersion",
+    "latencyMs",
     # contexto
-    "sections", "totalChars", "promptSha12", "promptChars", "systemPromptSha12",
+    "sections", "totalChars", "totalTokens", "attributedFraction",
+    "promptSha12", "promptChars", "systemPromptSha12",
     # LLM
-    "model", "promptTokens", "completionTokens", "totalTokens", "stream",
-    "temperature", "numPredict",
+    "model", "promptTokens", "completionTokens", "stream", "finishReason",
+    "providerRaw", "temperature", "numPredict",
     # tools / sketchup
     "tool", "args", "argKeys", "exitCode", "script", "entityRef", "entitiesDelta",
     "artifact", "plant", "room", "roomId",
@@ -61,7 +66,7 @@ ALLOWED_META_KEYS: frozenset[str] = frozenset({
     # evidência de decisão (taxonomy.DecisionEvidence.to_meta)
     "triggerEvent", "gateResult", "contextRefs", "toolCalled", "effect",
     # diagnóstico
-    "error", "errorType", "degradedTo", "truncated", "note",
+    "error", "errorType", "truncated", "note", "stage",
 })
 
 # ---------------------------------------------------------------------------

@@ -12,9 +12,12 @@ Felipe pede explicitamente ("salva isso"), via POST /api/chat/save.
 """
 from __future__ import annotations
 
+import contextlib
 import json
 import os
+import sys
 import time
+import types
 import urllib.error
 import urllib.request
 import zlib
@@ -54,6 +57,81 @@ SYSTEM_PROMPT = (
 
 class InfraUnavailable(RuntimeError):
     pass
+
+# ---------------------------------------------------------------------------
+# observabilidade — import DEFENSIVO de propósito
+#
+# Este módulo é importado como top-level (`import rag_chat`) com o cwd em
+# ops/estudio-front, não como parte do pacote. Sem o sys.path abaixo, `core`
+# não resolve. E se por qualquer motivo não resolver mesmo assim, a regra
+# "observability must not change execution" exige que o chat continue de pé:
+# o shim no-op garante isso. Não é framework paralelo — são 8 linhas para não
+# deixar o observador derrubar o observado.
+# ---------------------------------------------------------------------------
+_REPO_ROOT = ROOT.parents[1]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+try:
+    from core import observability as obs
+    from core.observability.llm import ContextComposition, ContextSource, from_ollama
+except Exception:  # noqa: BLE001 — front fora da árvore do repo
+    class _NoObs:
+        def emit(self, *a, **k):
+            return None
+
+        def run(self, *a, **k):
+            return contextlib.nullcontext()
+
+        def stage(self, *a, **k):
+            return contextlib.nullcontext(types.SimpleNamespace(meta={}))
+
+        def is_enabled(self):
+            return False
+
+    obs = _NoObs()
+    ContextComposition = ContextSource = from_ollama = None
+
+
+def _emit_chunks(collection: str, results: list, *, threshold: float,
+                 top_k: int, query: str) -> None:
+    """Emite UM evento leve por candidato, marcando quem entrou e quem não.
+
+    Existe porque o corte (`score > threshold`) é uma list-comp que DESCARTA o
+    rejeitado no ato: "vieram 9, entraram 4" era informação perdida. O corte em
+    si continua idêntico — aqui só se observa a lista antes dele.
+    """
+    for i, r in enumerate(results):
+        score = r.get("score", 0)
+        selected = score > threshold
+        payload = r.get("payload") or {}
+        obs.emit("rag.chunk.selected" if selected else "rag.chunk.rejected",
+                 component=f"qdrant.{collection}",
+                 meta={"chunkId": str(r.get("id")), "score": score, "rank": i + 1,
+                       "collection": collection, "threshold": threshold,
+                       "selected": selected,
+                       "source": payload.get("source"),
+                       "sourceType": payload.get("category"),
+                       "chars": len(payload.get("text") or "") or None,
+                       "reason": None if selected else "abaixo do threshold"})
+    n_sel = sum(1 for r in results if r.get("score", 0) > threshold)
+    obs.emit("rag.query.finished", component=f"qdrant.{collection}",
+             meta={"retriever": collection, "collection": collection,
+                   "indexKind": "VECTOR", "backendRequested": "embed",
+                   "backendActual": "embed", "fallbackTriggered": False,
+                   "resultingTaxonomy": "VECTOR_SEMANTIC_RAG", "isRag": True,
+                   "topK": top_k, "threshold": threshold,
+                   "embedModel": EMBED_MODEL, "queryChars": len(query),
+                   "candidatesCount": len(results), "nRetrieved": len(results),
+                   "nSelected": n_sel, "nRejected": len(results) - n_sel})
+
+
+def _emit_retrieval_degraded(collection: str, reason: str) -> None:
+    obs.emit("rag.degraded", component=f"qdrant.{collection}", status="degraded",
+             meta={"retriever": collection, "collection": collection,
+                   "indexKind": "VECTOR", "backendRequested": "embed",
+                   "backendActual": "none", "fallbackTriggered": True,
+                   "fallbackReason": reason, "nRetrieved": 0, "nSelected": 0})
+
 
 
 def _http(method: str, url: str, payload: dict | None = None, *, timeout: int = 60) -> dict:
@@ -134,8 +212,11 @@ def search_preferences(query: str, top_k: int = 5) -> list[dict]:
         vec = embed(query, prefix="search_query: ")
         out = _http("POST", f"{QDRANT_URL}/collections/{COLLECTION}/points/search",
                     {"vector": vec, "limit": top_k, "with_payload": True}, timeout=15)
-        return [r["payload"] for r in out.get("result", []) if r.get("score", 0) > 0.3]
-    except InfraUnavailable:
+        results = out.get("result", [])
+        _emit_chunks(COLLECTION, results, threshold=0.3, top_k=top_k, query=query)
+        return [r["payload"] for r in results if r.get("score", 0) > 0.3]
+    except InfraUnavailable as e:
+        _emit_retrieval_degraded(COLLECTION, f"InfraUnavailable: {e}")
         return []
 
 
@@ -171,6 +252,7 @@ def chat(message: str) -> dict:
     if prefs:
         ctx += "\n\nPreferencias ja salvas relevantes:\n" + "\n".join(
             f"- {p['text']}" for p in prefs)
+    _ctx_prefs = ctx          # fatia de PREFERÊNCIA recuperada (só medição)
 
     # conhecimento tecnico (decisoes anteriores, regras, PDFs quando existirem)
     # — import tardio pra evitar import circular (knowledge_ingest importa este
@@ -184,15 +266,33 @@ def chat(message: str) -> dict:
     if kb_hits:
         ctx += "\n\nConhecimento tecnico/decisoes anteriores relevantes:\n" + "\n".join(
             f"- [{h.get('category', '?')}/{h.get('source', '?')}] {h['text']}" for h in kb_hits)
+    _ctx_kb = ctx[len(_ctx_prefs):]   # fatia de CONHECIMENTO recuperado
 
     recent = hist[-10:]
     convo = "\n".join(f"{'Felipe' if h['role']=='user' else 'Voce'}: {h['text']}"
                        for h in recent)
 
     prompt = SYSTEM_PROMPT + ctx + "\n\n" + convo + "\nVoce:"
+    if ContextComposition is not None:
+        obs.emit("context.build.finished", component="rag_chat",
+                 meta=(ContextComposition()
+                       .add(ContextSource.SYSTEM_STATIC, SYSTEM_PROMPT)
+                       .add(ContextSource.RETRIEVED_PREFERENCES, _ctx_prefs)
+                       .add(ContextSource.RETRIEVED_KNOWLEDGE, _ctx_kb)
+                       .add(ContextSource.CONVERSATION, convo)
+                       ).to_meta(prompt))
+    _t0 = time.perf_counter()
+    obs.emit("llm.started", component=f"ollama.{CHAT_MODEL}", status="started",
+             meta={"model": CHAT_MODEL, "stream": False, "numPredict": 400,
+                   "promptChars": len(prompt)})
     out = _http("POST", f"{OLLAMA_URL}/api/generate",
                 {"model": CHAT_MODEL, "prompt": prompt, "stream": False,
                  "options": {"num_predict": 400}}, timeout=90)
+    if from_ollama is not None:
+        _lat = (time.perf_counter() - _t0) * 1000.0
+        obs.emit("llm.finished", component=f"ollama.{CHAT_MODEL}",
+                 duration_ms=_lat,
+                 meta=from_ollama(out, model=CHAT_MODEL, latency_ms=_lat).to_meta())
     reply = (out.get("response") or "").strip() or "…"
 
     hist.append({"role": "assistant", "text": reply, "ts": time.time()})

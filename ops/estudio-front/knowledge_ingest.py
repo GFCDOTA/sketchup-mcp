@@ -95,8 +95,12 @@ def search_knowledge(query: str, top_k: int = 5) -> list[dict]:
         vec = rc.embed(query, prefix="search_query: ")
         out = rc._http("POST", f"{rc.QDRANT_URL}/collections/{KB_COLLECTION}/points/search",
                        {"vector": vec, "limit": top_k, "with_payload": True}, timeout=15)
-        return [r["payload"] for r in out.get("result", []) if r.get("score", 0) > 0.28]
-    except rc.InfraUnavailable:
+        results = out.get("result", [])
+        rc._emit_chunks(KB_COLLECTION, results, threshold=0.28, top_k=top_k,
+                        query=query)
+        return [r["payload"] for r in results if r.get("score", 0) > 0.28]
+    except rc.InfraUnavailable as e:
+        rc._emit_retrieval_degraded(KB_COLLECTION, f"InfraUnavailable: {e}")
         return []
 
 

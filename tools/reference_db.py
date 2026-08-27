@@ -427,6 +427,20 @@ def _rrf_fuse(faceted_ranked: list[dict], semantic_sources: list[str],
         key=lambda it: (-_rrf(it[0], it[1]), it[1]["name"]))]
 
 
+def _emit_fallback(obs, reason: str) -> None:
+    """Registra que a INTENÇÃO (embed) não foi o que EXECUTOU (faceted).
+
+    Todo caminho de degradação de `_embed_recall_chunks` passa por aqui, pra
+    que a trace nunca diga "Vector RAG" por causa da CONFIGURAÇÃO quando o
+    recall vetorial não rodou. Só observa: a degradação em si já existia e
+    continua byte-idêntica."""
+    obs.emit("rag.degraded", component="reference_db.embed_recall",
+             status="degraded",
+             meta={"backendRequested": "embed", "backendActual": "faceted",
+                   "fallbackTriggered": True, "indexKind": "VECTOR",
+                   "fallbackReason": reason})
+
+
 def _embed_recall_chunks(room: str, style_norm: str | None) -> tuple[list[dict], str | None, list[str]]:
     """FP-037 Camada 2 — recall semântico OPCIONAL via Qdrant+Ollama.
 
@@ -438,11 +452,14 @@ def _embed_recall_chunks(room: str, style_norm: str | None) -> tuple[list[dict],
     Import LAZY do adapter (urllib puro) — o CI que só tem [dev] não toca infra.
     """
     notes: list[str] = []
+    from core import observability as obs
+
     try:
         from tools import rag_embed_backend as reb
         from tools import rag_freshness as rf
     except Exception as e:  # noqa: BLE001 — módulo ausente não derruba retrieve
         notes.append(f"backend=embed indisponível (import): {e!r} -> faceted.")
+        _emit_fallback(obs, f"import falhou: {type(e).__name__}")
         return [], None, notes
 
     con_fresh = None
@@ -452,6 +469,7 @@ def _embed_recall_chunks(room: str, style_norm: str | None) -> tuple[list[dict],
         if corpus_version is None:
             notes.append("backend=embed: índice de freshness vazio "
                          "(rode `reference_db reindex`) -> faceted.")
+            _emit_fallback(obs, "índice de freshness vazio")
             return [], None, notes
         query_text = build_retrieval_query(room, style_norm)
         # UM embed, DUAS buscas (regressão pega por test_taste_writeback_recall):
@@ -477,13 +495,20 @@ def _embed_recall_chunks(room: str, style_norm: str | None) -> tuple[list[dict],
                 "source_type": h["payload"].get("source_type"),
                 "confidence": round(h["score"], 4),
             })
+        for i, c in enumerate(retrieved):
+            obs.emit("rag.chunk.retrieved", component="qdrant.rag_chunks",
+                     meta={"chunkId": c["chunk_id"], "source": c["source"],
+                           "sourceType": c["source_type"], "score": c["confidence"],
+                           "rank": i + 1})
         if not retrieved:
             notes.append("backend=embed: Qdrant vazio p/ o corpus atual "
                          "(reindex do Qdrant pendente) -> faceted mantém a decisão.")
+            _emit_fallback(obs, "Qdrant sem chunk p/ o corpus atual")
         return retrieved, corpus_version, notes
     except reb.InfraUnavailable as e:  # Qdrant/Ollama off
         notes.append(f"backend=embed degradou p/ faceted: infra off ({e}). "
                      "confidence NÃO inflada.")
+        _emit_fallback(obs, f"InfraUnavailable: {e}")
         cv = None
         if con_fresh is not None:
             try:
@@ -493,6 +518,7 @@ def _embed_recall_chunks(room: str, style_norm: str | None) -> tuple[list[dict],
         return [], cv, notes
     except Exception as e:  # noqa: BLE001 — qualquer erro -> faceted, honesto
         notes.append(f"backend=embed erro inesperado -> faceted: {e!r}")
+        _emit_fallback(obs, f"erro inesperado: {type(e).__name__}")
         return [], None, notes
     finally:
         if con_fresh is not None:
@@ -502,6 +528,12 @@ def _embed_recall_chunks(room: str, style_norm: str | None) -> tuple[list[dict],
 def retrieve(room, style=None, budget=None, *, con=None, top_n=6,
              backend="faceted") -> dict:
     """room/style/budget -> DesignSpecBundle.v1 (faceted+ranked).
+
+    Wrapper fino: abre o span de observabilidade e delega. A lógica vive em
+    `_retrieve_impl` — assim o embedding e a busca no Qdrant, que acontecem lá
+    dentro, ficam ANINHADOS sob esta chamada no trace tree, em vez de irmãos
+    soltos. A causalidade é real (retrieve chama os dois); o trace só passou a
+    refleti-la.
 
     Lê os tokens curados de references/tokens/ (fonte builder-consumível) e usa o
     índice SQLite (se existir) só como SINAL de curadoria/gates pro ranking.
@@ -518,6 +550,39 @@ def retrieve(room, style=None, budget=None, *, con=None, top_n=6,
     loga, e a confidence NÃO infla. backend='faceted' (default) NUNCA toca infra.
     O bundle carrega SEMPRE rag_corpus_version + retrieved_chunks (aditivo/retrocompat).
     """
+    from core import observability as obs
+
+    with obs.stage("rag.query.started", "rag.query.finished",
+                   component="reference_db.retrieve",
+                   meta={"retriever": "reference_db.tokens",
+                         "backendRequested": backend, "topK": top_n}) as _st:
+        bundle, outcome, fusion = _retrieve_impl(
+            room, style, budget, con=con, top_n=top_n, backend=backend)
+        _st.meta.update(outcome.to_meta())
+        if outcome.fallback_triggered:
+            _st.status = obs.Status.DEGRADED
+        if fusion is not None:
+            obs.emit("rag.fusion.finished", component="reference_db.rrf",
+                     meta=fusion.to_meta())
+        return bundle
+
+
+def _retrieve_impl(room, style=None, budget=None, *, con=None, top_n=6,
+                   backend="faceted") -> tuple:
+    """A lógica de `retrieve`, devolvendo também o que a trace precisa.
+
+    Retorna (bundle, RetrievalOutcome, FusionTrace|None). O bundle é
+    byte-idêntico ao que `retrieve` sempre devolveu — os dois extras são
+    descritivos e morrem no wrapper."""
+    import time as _time
+
+    from core.observability.retrieval import RetrievalOutcome, observe_fusion
+    from core.observability.taxonomy import IndexKind
+
+    _t0 = _time.perf_counter()
+    backend_requested = backend        # INTENÇÃO, antes de qualquer degradação
+    _fusion = None
+
     room = (room or "").strip().lower()
     style_norm = normalize_theme(style)
     notes: list[str] = []
@@ -568,7 +633,14 @@ def retrieve(room, style=None, budget=None, *, con=None, top_n=6,
         # os demais (verdicts/estilo) ficam auditáveis nos retrieved_chunks.
         sem_sources = [c["source"] for c in retrieved_chunks
                        if c.get("source") and c.get("source_type") == "token"]
+        # proveniência observada de FORA: compara as rank-lists de entrada com a
+        # de saída. `_rrf_fuse` não é tocado — observar != instrumentar por dentro.
+        _before = [t.get("source_path") for t in ranked]
         ranked = _rrf_fuse(ranked, sem_sources)
+        _fusion = observe_fusion(
+            strategy="RRF", k=60,
+            ranked_inputs={"faceted": _before, "semantic": sem_sources},
+            fused=[t.get("source_path") for t in ranked])
 
     tokens_out: list[dict] = []
     anti: list[str] = []
@@ -639,7 +711,35 @@ def retrieve(room, style=None, budget=None, *, con=None, top_n=6,
         any_pass = any(_gate_pass_count(s["gate_verdicts"]) for s in db_signal)
         confidence = "HIGH" if any_pass else "MEDIUM"
 
-    return {
+    # A EXECUÇÃO real: houve recall vetorial NESTA run, ou o embed degradou?
+    _vector_ran = bool(retrieved_chunks)
+    _outcome = RetrievalOutcome(
+        retriever="reference_db.tokens",
+        index=IndexKind.VECTOR if _vector_ran else IndexKind.STRUCTURED,
+        backend_requested=backend_requested,
+        backend_actual="embed" if _vector_ran else "faceted",
+        fallback_triggered=backend_requested == "embed" and not _vector_ran,
+        fallback_reason=(notes[0] if (backend_requested == "embed"
+                                      and not _vector_ran and notes) else None),
+        top_k=top_n,
+        collection="rag_chunks" if _vector_ran else None,
+        embedding_model="nomic-embed-text" if _vector_ran else None,
+        fusion_strategy=_fusion.strategy if _fusion else None,
+        retrievers_fused=len(_fusion.inputs) if _fusion else 1,
+        retrieved_count=len(retrieved_chunks),
+        selected_count=len(tokens_out),
+        latency_ms=(_time.perf_counter() - _t0) * 1000.0,
+        # FIAÇÃO, não contagem: este bundle É consumido por
+        # architect_program.render_bundle_for_prompt, que vira prompt do
+        # deepseek. Um retrieval que voltou VAZIO continua sendo RAG — quem
+        # conta essa história é nSelected=0, não o rótulo taxonômico. Ser
+        # órfão é propriedade de quem NUNCA é consumido (project_memory_db),
+        # e isso não depende do resultado de uma execução.
+        augments_context=True,
+        feeds_generation=True,
+        query_chars=len(build_retrieval_query(room, style_norm)),
+    )
+    return ({
         "schema_version": BUNDLE_SCHEMA_VERSION,
         "query": {"room": room, "style": style_norm, "budget": budget},
         "tokens": tokens_out,
@@ -656,7 +756,7 @@ def retrieve(room, style=None, budget=None, *, con=None, top_n=6,
         # puro ou quando a infra está off; nunca infla confidence).
         "rag_corpus_version": rag_corpus_version,
         "retrieved_chunks": retrieved_chunks,
-    }
+    }, _outcome, _fusion)
 
 
 def normalize_theme(style: str | None) -> str | None:

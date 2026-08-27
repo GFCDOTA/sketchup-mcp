@@ -10,9 +10,12 @@ from __future__ import annotations
 import json
 import os
 import re
+import time
 import urllib.request
 from pathlib import Path
 
+from core import observability as obs
+from core.observability.llm import ContextComposition, ContextSource, from_ollama
 from tools.interior_studio import project_state as ps
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -161,6 +164,19 @@ def guard_bundle_freshness(bundle: dict | None) -> dict | None:
             con.close()
         fresh_ids = {c["chunk_id"] for c in res.fresh_chunks}
         kept = [c for c in chunks if c.get("chunk_id") in fresh_ids]
+        obs.emit("rag.freshness.filtered", component="rag_freshness.guard",
+                 status="degraded" if (res.rejected or res.stale) else "ok",
+                 meta={"nKept": len(kept), "nRejected": len(res.rejected),
+                       "nStale": len(res.stale),
+                       "corpusVersion": res.corpus_version})
+        for c in chunks:
+            hit = c.get("chunk_id") in fresh_ids
+            obs.emit("rag.chunk.selected" if hit else "rag.chunk.rejected",
+                     component="rag_freshness.guard",
+                     meta={"chunkId": c.get("chunk_id"), "source": c.get("source"),
+                           "sourceType": c.get("source_type"),
+                           "score": c.get("confidence"), "selected": hit,
+                           "reason": None if hit else "stale/inativo no índice"})
         bundle = {**bundle, "retrieved_chunks": kept, "freshness": {
             "kept": len(kept), "rejected": res.rejected, "stale": res.stale,
             "corpus_version": res.corpus_version,
@@ -230,8 +246,19 @@ def _ollama(model: str, prompt: str, timeout: int = 240) -> str:
     body = json.dumps({"model": model, "prompt": prompt, "stream": False,
                        "options": {"temperature": 0.3, "num_predict": 2400}}).encode("utf-8")
     req = urllib.request.Request(OLLAMA, data=body, headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        return json.loads(r.read().decode("utf-8")).get("response", "")
+    with obs.stage("llm.started", "llm.finished", failed="llm.failed",
+                   component=f"ollama.{model}",
+                   meta={"model": model, "stream": False, "temperature": 0.3,
+                         "numPredict": 2400, "promptChars": len(prompt)}) as st:
+        _t0 = time.perf_counter()
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            payload = json.loads(r.read().decode("utf-8"))
+        # prompt_eval_count/eval_count vinham na resposta e eram jogados fora;
+        # ler é de graça. O contrato é NOSSO — outro provider, outro adapter.
+        st.meta.update(from_ollama(
+            payload, model=model,
+            latency_ms=(time.perf_counter() - _t0) * 1000.0).to_meta())
+        return payload.get("response", "")
 
 
 def _extract_json(txt: str) -> dict | None:
@@ -282,6 +309,19 @@ def propose_program(room_id: str, model: str = "deepseek") -> dict:
                            design_spec=design_spec,
                            existing=", ".join(ctx["existing"]) or "(nada ainda)",
                            key=rkey, core_hint=core_hint)
+    # Decomposição do contexto por ORIGEM, medida sobre as MESMAS strings que
+    # o prompt já concatena — nada é remontado, nada muda. Tokens por origem
+    # exigiriam tokenizer no caminho quente: fica NOT_INSTRUMENTED.
+    _comp = (ContextComposition()
+             .add(ContextSource.SYSTEM_STATIC, PROMPT, "template")
+             .add(ContextSource.SYSTEM_STATIC, core_hint, "core_hint")
+             .add(ContextSource.STYLE_STATIC, ctx["dna"][:dna_len], "felipe_style_dna.md")
+             .add(ContextSource.RETRIEVED_KNOWLEDGE, design_spec, "DesignSpecBundle")
+             .add(ContextSource.PROJECT_STATE, ", ".join(ctx["existing"]), "assets existentes")
+             .add(ContextSource.PROJECT_STATE,
+                  f'{rm["name"]} {rm["area_m2"]} {rm["w_m"]} {rm["d_m"]}', "dims do cômodo"))
+    obs.emit("context.build.finished", component="architect_program",
+             meta=_comp.to_meta(prompt))
     raw = _ollama(mdl, prompt)
     prog = _extract_json(raw)
     used = mdl

@@ -37,6 +37,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
 
+from core import observability as obs
+from core.observability.taxonomy import DecisionEvidence, HarnessKind
 from tools import correction_finding as cfind
 from tools import correction_fixes as cfix
 from tools import finding_router as frouter
@@ -173,7 +175,22 @@ def run_loop(
     fixes_applied: list[str] = []
     prev_sig: tuple | None = None
 
+    _HARNESS = {"harnessKind": HarnessKind.APPLICATION_HARNESS.value}
+
     def _beat(cycle: int, stage: str) -> None:
+        # o heartbeat JÁ marcava as três fases; a telemetria pega carona
+        # nele em vez de espalhar call-sites novos pelo corpo do laço.
+        if stage == "detect":
+            obs.emit("harness.cycle.started", component="correction_loop",
+                     status="started",
+                     meta={**_HARNESS, "cycle": cycle, "maxCycles": max_cycles})
+            if cycle > 1:
+                obs.emit("agent.retry", component="correction_loop",
+                         meta={**_HARNESS, "cycle": cycle,
+                               **DecisionEvidence(
+                                   trigger_event="harness.recheck",
+                                   gate_result="findings restantes",
+                                   effect=f"abre ciclo {cycle}").to_meta()})
         if heartbeat is None:
             return
         try:
@@ -207,6 +224,15 @@ def run_loop(
                          felipe_queued=len(queued_felipe),
                          vision_queued=len(queued_vision),
                          final_findings=findings)
+        # o estado terminal é o dado mais valioso do harness: diz POR QUE o
+        # laço parou, no vocabulário que o próprio laço já usa.
+        obs.emit("harness.terminal", component="correction_loop",
+                 status="failed" if state == RED else "ok",
+                 meta={**_HARNESS, "terminal": state, "cycle": cycle,
+                       "reason": reason, "fix": fixes_applied[-1] if fixes_applied else None,
+                       "counts": {"fixes": len(fixes_applied),
+                                  "felipeQueued": len(queued_felipe),
+                                  "visionQueued": len(queued_vision)}})
         # the loop's OUTPUT candidate: final corrected state (input untouched);
         # promoting it to fixtures/ stays a gated human/NOC step (Hard Rule #3)
         if ctx.consensus is not None and fixes_applied and not dry_run:
@@ -227,6 +253,9 @@ def run_loop(
         for cycle in range(1, max_cycles + 1):
             _beat(cycle, "detect")
             findings = frouter.classified(detect(ctx))
+            obs.emit("harness.detect", component="correction_loop",
+                     meta={**_HARNESS, "cycle": cycle,
+                           "counts": {"findings": len(findings)}})
             _persist_cycle(cycle, findings)
             if not findings:
                 return _finish(CLEAN, cycle,
@@ -244,6 +273,10 @@ def run_loop(
                        if f["route"] == frouter.DETERMINISTIC_AUTOFIX]
             vision = [f for f in findings if f["route"] == frouter.NEEDS_VISION]
             felipe = [f for f in findings if f["route"] == frouter.NEEDS_FELIPE]
+            obs.emit("harness.classify", component="finding_router",
+                     meta={**_HARNESS, "cycle": cycle,
+                           "counts": {"autofix": len(autofix), "vision": len(vision),
+                                      "felipe": len(felipe)}})
 
             if felipe:
                 n = _queue("visual_review_queue", felipe, queued_felipe)
@@ -288,6 +321,14 @@ def run_loop(
                 fr = apply_fix(ctx, f)
                 if fr.ok and fr.changed:
                     applied_now.append(f"{fr.finding_type}: {fr.action}")
+                    obs.emit("agent.correction", component="correction_fixes",
+                             meta={**_HARNESS, "cycle": cycle, "fix": fr.action,
+                                   "findingType": fr.finding_type, "reverted": False,
+                                   **DecisionEvidence(
+                                       trigger_event="harness.classify",
+                                       gate_result=f.get("severity"),
+                                       tool_called=fr.action,
+                                       effect=fr.detail).to_meta()})
                 elif not fr.ok:
                     # honest escalation: could not fix deterministically
                     _queue("visual_review_queue",
@@ -303,13 +344,29 @@ def run_loop(
             # RE-CHECK
             _beat(cycle, "recheck")
             post = frouter.classified(detect(ctx))
+            obs.emit("harness.recheck", component="correction_loop",
+                     meta={**_HARNESS, "cycle": cycle,
+                           "badness": list(_badness(post)),
+                           "counts": {"findingsBefore": len(findings),
+                                      "findingsAfter": len(post)}})
             if _badness(post) > pre_badness:
                 ctx.consensus, ctx.boxes = snapshot   # revert whole batch
+                obs.emit("agent.correction", component="correction_loop",
+                         status="failed",
+                         meta={**_HARNESS, "cycle": cycle, "reverted": True,
+                               "badness": list(_badness(post)),
+                               **DecisionEvidence(
+                                   trigger_event="harness.recheck",
+                                   gate_result="badness piorou",
+                                   effect="lote de fixes REVERTIDO").to_meta()})
                 return _finish(STALL, cycle,
                                "fix piorou a métrica determinística — REVERTIDO "
                                "(paridade com SAME/WORSE->revert)", findings)
 
             fixes_applied.extend(applied_now)
+            obs.emit("harness.cycle.finished", component="correction_loop",
+                     meta={**_HARNESS, "cycle": cycle,
+                           "counts": {"applied": len(applied_now)}})
             log(f"[loop] cycle {cycle}: PROGRESS — {len(applied_now)} fix(es): "
                 f"{'; '.join(applied_now)}")
 

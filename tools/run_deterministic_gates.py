@@ -105,7 +105,14 @@ def run_all(
         overall = "INCOMPLETE"
     else:
         overall = "PASS"
-    return {"overall": overall, "gates": gates}
+    result = {"overall": overall, "gates": gates}
+
+    # A UI do Inspector NUNCA vê os cinco formatos legados: o adapter da Fase 2
+    # traduz tudo para NormalizedGate antes de virar evento. No-op se desligado.
+    from core.observability.gates import emit_all
+    emit_all("run_deterministic_gates", result)
+
+    return result
 
 
 def _summary_line(name: str, g: dict) -> str:
