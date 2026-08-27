@@ -127,3 +127,14 @@ artifacts/reference_lab/inbox/*.jpeg
 # runtime do auto-decider (trilha jsonl) — TTL, nao commitar
 artifacts/_archive/**/attempt_0/
 docs/archive/**/scratch_preserved/*.skp
+
+# Impeccable (skill de design) — instalada por `npx impeccable install` na raiz
+# do projeto. ~7 MB espelhados em .claude/ E .github/; reproduzível, não usada
+# pelo CI, e só serve à sessão interativa. Fora do git de propósito.
+.claude/skills/impeccable/
+.github/skills/
+.github/agents/
+.github/hooks/
+
+# Traces do AI Pipeline Inspector — derivados e descartáveis (INSPECTOR=1).
+.ai_bridge/traces/
