@@ -130,6 +130,116 @@ def load_run(path: Path | str, *, run_id: str | None = None) -> RunTrace:
     return parse_rows(read_jsonl(p), run_id=run_id or p.stem)
 
 
+@dataclass(frozen=True)
+class Violation:
+    """Uma quebra de invariante do trace. `code` é estável para teste."""
+
+    code: str
+    detail: str
+
+
+_TERMINALS = ("run.finished", "run.failed", "run.canceled")
+
+
+def validate(trace: RunTrace) -> tuple[Violation, ...]:
+    """Invariantes de uma run FINALIZADA. Vazio = trace íntegro.
+
+    Existe porque um relatório escrito à mão mente: nesta mesma sessão eu
+    afirmei "25 eventos, zero lacunas" e depois transcrevi uma tabela que pulava
+    o `seq=20`. O dado estava certo; a apresentação não. A defesa contra isso não
+    é ter mais cuidado — é ter um invariante que qualquer renderizador possa
+    executar antes de afirmar integridade.
+
+    Um trace INCOMPLETO (processo morto no meio) viola `missing_terminal` por
+    construção, e isso é informação, não falso positivo — quem chama decide se
+    aquela run devia estar completa.
+    """
+    v: list[Violation] = []
+    events = trace.events
+
+    if not events:
+        return (Violation("empty_trace", "nenhum evento legível"),)
+
+    # 1. exatamente um run.started
+    n_started = sum(1 for e in events if e.name == "run.started")
+    if n_started != 1:
+        v.append(Violation("run_started_count",
+                           f"esperado exatamente 1 run.started, achei {n_started}"))
+    elif events[0].name != "run.started":
+        v.append(Violation("run_started_not_first",
+                           f"primeiro evento é {events[0].name!r}, não run.started"))
+
+    # 2. exatamente um terminal
+    terminals = [e for e in events if e.name in _TERMINALS]
+    if len(terminals) == 0:
+        v.append(Violation("missing_terminal",
+                           "run sem run.finished/failed/canceled — trace aberto"))
+    elif len(terminals) > 1:
+        v.append(Violation("multiple_terminals",
+                           f"{len(terminals)} terminais: "
+                           f"{[e.name for e in terminals]}"))
+    elif events[-1] is not terminals[0]:
+        v.append(Violation("terminal_not_last",
+                           f"último evento é {events[-1].name!r}, não o terminal"))
+
+    # 3. seq == 1..N, sem buraco e sem duplicata
+    seqs = [e.seq for e in events]
+    if seqs != list(range(1, len(seqs) + 1)):
+        missing = sorted(set(range(1, max(seqs) + 1)) - set(seqs))
+        v.append(Violation("seq_not_contiguous",
+                           f"seq deve ser 1..{len(seqs)}; faltando={missing or 'nenhum'}, "
+                           f"min={min(seqs)} max={max(seqs)}"))
+    if trace.duplicates_dropped:
+        v.append(Violation("duplicate_seq",
+                           f"{trace.duplicates_dropped} evento(s) com seq repetido"))
+
+    # 4. timestamps não-decrescentes dentro da run
+    last_ms: float | None = None
+    for e in events:
+        ms = _epoch_ms(e.ts)
+        if ms is None:
+            v.append(Violation("unparsable_ts", f"seq={e.seq} ts={e.ts!r}"))
+            continue
+        if last_ms is not None and ms < last_ms:
+            v.append(Violation("ts_not_monotonic",
+                               f"seq={e.seq} ({e.ts}) anterior ao seq precedente"))
+        last_ms = ms
+
+    # 5. nenhum span aponta para um parent inexistente
+    known = {e.span_id for e in events if e.span_id}
+    for e in events:
+        if e.parent_span_id and e.parent_span_id not in known:
+            v.append(Violation("orphan_parent",
+                               f"seq={e.seq} aponta para parentSpanId="
+                               f"{e.parent_span_id!r}, que não existe no trace"))
+
+    # 6. correlação: um runId e um traceId por trace
+    if len({e.trace_id for e in events}) > 1:
+        v.append(Violation("mixed_trace_ids", "mais de um traceId no mesmo runId"))
+    if trace.foreign_run_ids:
+        v.append(Violation("foreign_runs",
+                           f"runIds estranhos no arquivo: {list(trace.foreign_run_ids)}"))
+
+    # 7. linhas descartadas por má-formação
+    if trace.dropped_malformed:
+        v.append(Violation("malformed_rows",
+                           f"{trace.dropped_malformed} linha(s) descartada(s)"))
+
+    # 8. trace cortado no teto de tamanho
+    #
+    # Um trace truncado é ESTRUTURALMENTE PERFEITO: o sink reusa o seq do evento
+    # que estourou o teto para escrever o marcador terminal, então seq fica
+    # contíguo, há um run.started e um terminal, e nenhum outro invariante
+    # acusa. Sem esta checagem, um trace que perdeu 40 eventos passa como
+    # íntegro — que é exatamente a mentira que `validate` existe para impedir.
+    if trace.truncated:
+        v.append(Violation("truncated_trace",
+                           "trace cortado no teto de tamanho — há eventos que "
+                           "nunca chegaram ao disco"))
+
+    return tuple(v)
+
+
 def timeline(trace: RunTrace) -> list[tuple[float, Event]]:
     """[(offset_ms desde o 1º evento, Event)] — o eixo do scrubber.
 

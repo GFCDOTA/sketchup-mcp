@@ -567,33 +567,17 @@ def retrieve(room, style=None, budget=None, *, con=None, top_n=6,
         return bundle
 
 
-def _retrieve_impl(room, style=None, budget=None, *, con=None, top_n=6,
-                   backend="faceted") -> tuple:
-    """A lógica de `retrieve`, devolvendo também o que a trace precisa.
+def _faceted_rank(room: str, style_norm: str | None, budget: str | None,
+                  con) -> tuple[list[dict], list[dict], bool, int]:
+    """O retrieval FACETED, extraído: carrega candidatos e ranqueia.
 
-    Retorna (bundle, RetrievalOutcome, FusionTrace|None). O bundle é
-    byte-idêntico ao que `retrieve` sempre devolveu — os dois extras são
-    descritivos e morrem no wrapper."""
-    import time as _time
+    Código movido verbatim de `retrieve` — mesma leitura, mesmo ranking, mesmo
+    desempate. Virou função para poder ter um SPAN PRÓPRIO no trace: no caminho
+    degradado é ele que produz o resultado, e "aconteceu" precisa ser um evento
+    observável, não uma inferência a partir de `backendActual=faceted`.
 
-    from core.observability.retrieval import RetrievalOutcome, observe_fusion
-    from core.observability.taxonomy import IndexKind
-
-    _t0 = _time.perf_counter()
-    backend_requested = backend        # INTENÇÃO, antes de qualquer degradação
-    _fusion = None
-
-    room = (room or "").strip().lower()
-    style_norm = normalize_theme(style)
-    notes: list[str] = []
-    rag_corpus_version: str | None = None
-    retrieved_chunks: list[dict] = []
-    if backend == "embed":
-        retrieved_chunks, rag_corpus_version, embed_notes = _embed_recall_chunks(
-            room, style_norm)
-        notes.extend(embed_notes)
-        backend = "embed"  # registra a INTENÇÃO; o ranking segue faceted (honesto)
-
+    Devolve (ranked, db_signal, fp034_present, n_candidatos_em_disco).
+    """
     disk_tokens = _load_disk_tokens(room)
     db_signal = _load_db_signal(con, room, style_norm)
 
@@ -623,6 +607,59 @@ def _retrieve_impl(room, style=None, budget=None, *, con=None, top_n=6,
     collapsed = list(by_canon.values())
 
     ranked = sorted(collapsed, key=lambda t: (-_score(t)[0], t["name"]))
+    return ranked, db_signal, fp034_present, len(disk_tokens)
+
+
+def _retrieve_impl(room, style=None, budget=None, *, con=None, top_n=6,
+                   backend="faceted") -> tuple:
+    """A lógica de `retrieve`, devolvendo também o que a trace precisa.
+
+    Retorna (bundle, RetrievalOutcome, FusionTrace|None). O bundle é
+    byte-idêntico ao que `retrieve` sempre devolveu — os dois extras são
+    descritivos e morrem no wrapper."""
+    import time as _time
+
+    from core import observability as obs
+    from core.observability.retrieval import RetrievalOutcome, observe_fusion
+    from core.observability.taxonomy import IndexKind
+
+    _t0 = _time.perf_counter()
+    backend_requested = backend        # INTENÇÃO, antes de qualquer degradação
+    _fusion = None
+
+    room = (room or "").strip().lower()
+    style_norm = normalize_theme(style)
+    notes: list[str] = []
+    rag_corpus_version: str | None = None
+    retrieved_chunks: list[dict] = []
+    if backend == "embed":
+        retrieved_chunks, rag_corpus_version, embed_notes = _embed_recall_chunks(
+            room, style_norm)
+        notes.extend(embed_notes)
+        backend = "embed"  # registra a INTENÇÃO; o ranking segue faceted (honesto)
+
+    # O faceted é EXECUÇÃO, não conclusão: span próprio, com candidatos e
+    # latência. Quando o embed degrada, é ELE quem produz o resultado — então
+    # `backendActual=faceted` passa a ser CONSEQUÊNCIA observável deste span, e
+    # não a única evidência de que ele rodou.
+    _fell_back = backend == "embed" and not retrieved_chunks
+    _will_fuse = backend == "embed" and bool(retrieved_chunks)
+    with obs.stage("rag.retrieval.started", "rag.retrieval.finished",
+                   component="reference_db.faceted",
+                   meta={"retriever": "reference_db.faceted",
+                         "indexKind": "STRUCTURED",
+                         "backendActual": "faceted",
+                         "fallbackTriggered": _fell_back,
+                         "topK": top_n}) as _fs:
+        ranked, db_signal, fp034_present, _n_disk = _faceted_rank(
+            room, style_norm, budget, con)
+        _fs.meta["candidatesCount"] = _n_disk
+        _fs.meta["nRetrieved"] = len(ranked)
+        if not _will_fuse:
+            # sem fusão, este ranking JÁ é o final: o top_n dele é exatamente o
+            # que será selecionado. Com fusão, quem seleciona é o passo seguinte,
+            # e afirmar aqui seria adiantar um número que ainda pode mudar.
+            _fs.meta["nSelected"] = min(len(ranked), top_n)
 
     # FP-035 epic "ligar o embed": funde o recall semântico (antes DESCARTADO em
     # :467) no ranking via RRF. SÓ no caminho embed COM chunks reais -> o caminho
