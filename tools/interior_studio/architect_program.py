@@ -16,6 +16,7 @@ from pathlib import Path
 
 from core import observability as obs
 from core.observability.llm import ContextComposition, ContextSource, from_ollama
+from core.observability.retrieval import ChunkRef
 from tools.interior_studio import project_state as ps
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -173,10 +174,13 @@ def guard_bundle_freshness(bundle: dict | None) -> dict | None:
             hit = c.get("chunk_id") in fresh_ids
             obs.emit("rag.chunk.selected" if hit else "rag.chunk.rejected",
                      component="rag_freshness.guard",
-                     meta={"chunkId": c.get("chunk_id"), "source": c.get("source"),
-                           "sourceType": c.get("source_type"),
-                           "score": c.get("confidence"), "selected": hit,
-                           "reason": None if hit else "stale/inativo no índice"})
+                     meta=ChunkRef(
+                         chunk_id=str(c.get("chunk_id") or "?"),
+                         source=c.get("source"),
+                         source_type=c.get("source_type"),
+                         score=c.get("confidence"), selected=hit,
+                         rejection_reason=None if hit
+                         else "stale/inativo no índice").to_meta())
         bundle = {**bundle, "retrieved_chunks": kept, "freshness": {
             "kept": len(kept), "rejected": res.rejected, "stale": res.stale,
             "corpus_version": res.corpus_version,

@@ -453,6 +453,7 @@ def _embed_recall_chunks(room: str, style_norm: str | None) -> tuple[list[dict],
     """
     notes: list[str] = []
     from core import observability as obs
+    from core.observability.retrieval import ChunkRef
 
     try:
         from tools import rag_embed_backend as reb
@@ -497,9 +498,9 @@ def _embed_recall_chunks(room: str, style_norm: str | None) -> tuple[list[dict],
             })
         for i, c in enumerate(retrieved):
             obs.emit("rag.chunk.retrieved", component="qdrant.rag_chunks",
-                     meta={"chunkId": c["chunk_id"], "source": c["source"],
-                           "sourceType": c["source_type"], "score": c["confidence"],
-                           "rank": i + 1})
+                     meta=ChunkRef(chunk_id=c["chunk_id"], source=c["source"],
+                                   source_type=c["source_type"],
+                                   score=c["confidence"], rank=i + 1).to_meta())
         if not retrieved:
             notes.append("backend=embed: Qdrant vazio p/ o corpus atual "
                          "(reindex do Qdrant pendente) -> faceted mantém a decisão.")

@@ -74,6 +74,7 @@ if str(_REPO_ROOT) not in sys.path:
 try:
     from core import observability as obs
     from core.observability.llm import ContextComposition, ContextSource, from_ollama
+    from core.observability.retrieval import ChunkLedger, ChunkRef
 except Exception:  # noqa: BLE001 — front fora da árvore do repo
     class _NoObs:
         def emit(self, *a, **k):
@@ -90,6 +91,7 @@ except Exception:  # noqa: BLE001 — front fora da árvore do repo
 
     obs = _NoObs()
     ContextComposition = ContextSource = from_ollama = None
+    ChunkLedger = ChunkRef = None
 
 
 def _emit_chunks(collection: str, results: list, *, threshold: float,
@@ -100,20 +102,24 @@ def _emit_chunks(collection: str, results: list, *, threshold: float,
     rejeitado no ato: "vieram 9, entraram 4" era informação perdida. O corte em
     si continua idêntico — aqui só se observa a lista antes dele.
     """
+    if ChunkLedger is None:            # shim no-op: sem contrato, sem evento
+        return
+    ledger = ChunkLedger()
     for i, r in enumerate(results):
         score = r.get("score", 0)
         selected = score > threshold
         payload = r.get("payload") or {}
+        ref = ledger.add(ChunkRef(
+            chunk_id=str(r.get("id")), source=payload.get("source"),
+            rank=i + 1, score=score, selected=selected,
+            source_type=payload.get("category"),
+            chars=len(payload.get("text") or "") or None,
+            rejection_reason=None if selected else "abaixo do threshold"))
         obs.emit("rag.chunk.selected" if selected else "rag.chunk.rejected",
                  component=f"qdrant.{collection}",
-                 meta={"chunkId": str(r.get("id")), "score": score, "rank": i + 1,
-                       "collection": collection, "threshold": threshold,
-                       "selected": selected,
-                       "source": payload.get("source"),
-                       "sourceType": payload.get("category"),
-                       "chars": len(payload.get("text") or "") or None,
-                       "reason": None if selected else "abaixo do threshold"})
-    n_sel = sum(1 for r in results if r.get("score", 0) > threshold)
+                 meta={**ref.to_meta(), "collection": collection,
+                       "threshold": threshold})
+    n_sel = len(ledger.selected)
     obs.emit("rag.query.finished", component=f"qdrant.{collection}",
              meta={"retriever": collection, "collection": collection,
                    "indexKind": "VECTOR", "backendRequested": "embed",
