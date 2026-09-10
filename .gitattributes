@@ -1,0 +1,2 @@
+# mvnw e script sh: CRLF quebra o shebang em CI Linux (gotcha ja pago antes).
+inspector-desktop/mvnw text eol=lf
