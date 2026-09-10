@@ -422,16 +422,61 @@ Teto duro: evento ≤ 2 KB; `rag.chunk.retrieved` ≤ 40 por retrieval; trace �
 
 ## 7. Proposed UI Architecture
 
-### 7.1 Onde mora
+### 7.1 Onde mora — ADR-001 (2026-09-09)
 
-Estende `ops/estudio-front/` (mesmo servidor, mesmo processo, mesma stack React
-UMD sem build). **Nova página**, não novo app: `GET /inspector` → `inspector.html`.
-Motivo: já existe front + BFF ali; criar um segundo servidor violaria "não crie
-arquitetura paralela".
+**Status:** aceito. **Supersede** a decisão original desta seção.
 
-⚠️ Dependência a resolver: o front atual puxa React/Babel de **CDN unpkg**. Sem
-internet, o Inspector não abre. Proposta: vendorizar React+Babel em
-`ops/estudio-front/assets/vendor/` (3 arquivos, ~1.5 MB) na Fase 2.
+**Decisão original (2026-08-26), agora superada:** *"Estende `ops/estudio-front/`
+(mesma stack React UMD sem build). Nova página, não novo app: `GET /inspector`.
+Motivo: criar um segundo servidor violaria 'não crie arquitetura paralela'."*
+
+**Por que mudou:** o requisito mudou, não a análise. O Felipe declarou uma restrição
+dura que não existia quando a §7.1 foi escrita — **ele não quer depender de aba de
+navegador aberta**; a aba é precisamente o incômodo. Uma página `/inspector` no
+browser é exatamente o que ele rejeita como experiência principal. O princípio
+original ("não criar arquitetura paralela") continua válido e está preservado abaixo.
+
+**Decisão:**
+
+- A **UI continua sendo React.** Não se reescreve grafo/timeline/árvore/scrubber em
+  toolkit nativo.
+- A **apresentação principal é um app desktop Java + JavaFX WebView**, hospedando
+  essa mesma UI React numa janela nativa. Sem aba, sem Electron.
+- O browser `/inspector` **pode seguir como superfície opcional de debug** — nunca
+  como a experiência principal.
+- **Não se cria um segundo backend HTTP.** `ops/estudio-front/server.py` segue o
+  único servidor; o desktop é **cliente**.
+- **Java = domínio + I/O. React = visualização.**
+- **Proibido enquanto o JavaFX atender:** Spring Boot, Electron, JNI, WebView2.
+
+**Evidência:** spike **PASS 13/13** (2026-09-09) —
+`docs/field-notes-javafx-webview-spike.md` (o transcript da consulta ao oráculo fica
+em `.ai_bridge/responses/`, que é gitignored por convenção). O WebKit do JavaFX 25.0.4 é
+classe Safari 18.4 (`AppleWebKit/623.1 … Version/18.4`); React 18.3.1 + Babel
+standalone 8.0.4 + SVG + `<canvas>` + scroll + resize + push Java→JS de 27 eventos
+reais, **zero erro de JS**.
+
+**Consequências (travas duras):**
+
+1. **Zero dependência de CDN no desktop.** Assets React vendorizados localmente. Um
+   app de observabilidade não pode morrer porque a internet caiu — falharia
+   exatamente quando é mais necessário. (Isto **endurece** o ⚠️ da versão anterior
+   desta seção, que era só uma "proposta" para a Fase 2.)
+2. **`netscape.javascript.JSObject` NÃO é a bridge.** Está *deprecated e marcado para
+   remoção* (achado do spike). A fronteira é `executeScript()` chamando uma API JS
+   mínima — `window.inspector.loadRun(json)` / `window.inspector.appendEvent(json)`.
+   **Nenhum objeto Java é exposto ao JavaScript.**
+3. **Build por Maven Wrapper.** Não se versiona 44 MB de jars do JavaFX à mão.
+4. O código do spike **não vai para produção por copy/paste**. Ele provou
+   viabilidade e morre em `data/runs/` (TTL).
+5. A regra-mãe segue intacta: *observability describes execution; it never changes
+   execution.*
+
+**Fronteira — uma direção só:**
+
+```
+TraceSource → domain/model → TraceProjection → JSON → React UI
+```
 
 ### 7.2 Layout (desktop-first, alta densidade)
 
@@ -569,6 +614,15 @@ o grafo nasce mentindo sobre PASS/FAIL.
 | **10 — Design pass** | Impeccable `document` (gera DESIGN.md do código) → `critique` → `audit` → `polish` | ver §11 |
 
 Fase 3 é a única que toca caminho quente — vai sozinha, com benchmark antes/depois.
+
+> **Amenda de ordem (2026-09-09, junto do ADR-001):** a Fase 4 original (transporte
+> SSE) **cede a vez** para um vertical slice `JSONL → domínio Java → caixas React` no
+> app desktop. Motivo: já existe um trace real gravado, e começar pelo SSE adicionaria
+> reconexão, concorrência e lifecycle **antes** de sabermos se o produto visual presta.
+> Replay prova UX; SSE acrescenta tempo real. Quando o SSE entrar, muda **só o
+> adapter** (`SseTraceSource`) — domínio e UI já falam `TraceEvent`.
+> Nova ordem: **4 replay desktop → 5 SSE + Last-Event-ID → 6 health HTTP →
+> 6.5 geometry observability → 7 learning mode → 8 replay/scrubber sofisticado**.
 
 ### Estado da Fase 3 (landada)
 
