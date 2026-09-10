@@ -478,6 +478,24 @@ reais, **zero erro de JS**.
 TraceSource → domain/model → TraceProjection → JSON → React UI
 ```
 
+**Onde o desktop mora (2026-09-10):** repositório próprio,
+**https://github.com/GFCDOTA/harness-app** (checkout local em
+`E:\Claudepps\harness-app`). Saiu de dentro deste repo para ter ciclo e
+toolchain próprios — é Java/Maven/npm, não Python. Este repo segue dono do
+**contrato**: o envelope de evento e o catálogo de 44 nomes em
+`core/observability/`. O desktop é consumidor.
+
+⚠️ **Consequência a vigiar:** o envelope virou contrato ENTRE REPOSITÓRIOS. Mudar o
+catálogo aqui pode quebrar o leitor Java em silêncio. Hoje a mitigação é a fixture
+`traces/sample_run.jsonl` do lado Java, que é escrita à mão; o fechamento honesto é
+gerá-la a partir daqui. Dívida nomeada, não resolvida.
+
+**UI (2026-09-10):** a superfície principal virou uma **Pipeline View** em
+React Flow — os eventos viram ~8 caixas com persona, status, duração e o desvio de
+fallback explícito; a lista de eventos continua como debugger secundário. O bundle é
+gerado por Vite e versionado no repo do app (zero CDN, zero Babel em runtime), e o
+app é distribuído como `app-image` do `jpackage` com atalho na área de trabalho.
+
 ### 7.2 Layout (desktop-first, alta densidade)
 
 ```
