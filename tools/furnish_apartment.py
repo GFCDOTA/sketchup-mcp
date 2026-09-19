@@ -31,7 +31,8 @@ from tools.bathroom_layout import build_boxes as bath_boxes   # noqa: E402
 from tools.kitchen_layout import build_boxes as kitchen_boxes   # noqa: E402
 from tools.place_layout_skp import build_boxes as living_boxes   # noqa: E402
 from tools.room_type import (BATHROOM, BEDROOM, KITCHEN, LIVING,   # noqa: E402
-                             classify_rooms)
+                             SERVICE, classify_rooms)
+from tools.service_layout import build_boxes as service_boxes   # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 SKETCHUP_EXE = r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
@@ -219,6 +220,41 @@ def bedroom_designer_boxes(con, room_id):
         boxes = [b for b in boxes if b.get("kind") != "wardrobe"] + wboxes
         out["wardrobe_parametric"] = {"n_parts": len(wboxes), "W_m": round(ww_m, 2),
                                       "D_m": round(wd_m, 2), "to_ceiling": True}
+    # ESCRIVANINHA / mesa de PC (2026-09-11): tampo nogueira + saia + 2 laterais
+    # estrutura preta + gaveteiro suspenso; cadeira = a MESMA da mesa de jantar
+    # (linguagem única no apê). Troca o bloco chapado 'desk'/'desk_chair'.
+    dk_item = next((it for it in items if it.get("type") == "desk"), None)
+    if dk_item is not None:
+        from tools.sofa_builder import _p, place_sofa_boxes
+        dfx, dfy = _wd_facing(dk_item)
+        dw_m, dd_m, dcen = _wd_dims(dk_item["box"], (dfx, dfy))
+        h, tt, lt = 0.75, 0.035, 0.05
+        dparts = [_p("top", "top", 0.0, 0.0, dw_m, dd_m, h - tt, h, (108, 80, 58)),
+                  _p("apron", "saia", 0.06, 0.05, dw_m - 0.06, dd_m - 0.05,
+                     h - tt - 0.08, h - tt, (30, 31, 32))]
+        for x0 in (0.04, dw_m - 0.04 - lt):                       # laterais estrutura
+            dparts.append(_p("leg", "foot", x0, 0.05, x0 + lt, dd_m - 0.05, 0.0, h - tt, (26, 26, 29)))
+        dparts.append(_p("gaveteiro", "base", dw_m - 0.52, 0.08, dw_m - 0.10, dd_m - 0.08,
+                         0.34, h - tt - 0.09, (44, 45, 47)))      # suspenso: nao toca o piso
+        dparts.append(_p("ks_gola", "frame", dw_m - 0.52, 0.07, dw_m - 0.10, 0.085,
+                         0.33, h - tt - 0.08, (24, 24, 24)))
+        dboxes = place_sofa_boxes(dparts, dcen, (dfx, dfy))
+        for _b in dboxes:
+            _b["module"] = "Escrivaninha"
+        boxes = [b for b in boxes if b.get("kind") != "desk"] + dboxes
+        out["desk_parametric"] = {"n_parts": len(dboxes), "W_m": round(dw_m, 2),
+                                  "D_m": round(dd_m, 2)}
+    dc_item = next((it for it in items if it.get("type") == "desk_chair"), None)
+    if dc_item is not None:
+        from tools.sofa_builder import place_sofa_boxes
+        cfx, cfy = _wd_facing(dc_item)
+        _, _, ccen = _wd_dims(dc_item["box"], (cfx, cfy))
+        # a cadeira encara a mesa: facing oposto ao da escrivaninha
+        cboxes = place_sofa_boxes(_chair_parts(), ccen, (-cfx, -cfy))
+        for _b in cboxes:
+            _b["module"] = "Cadeira escrivaninha"
+        boxes = [b for b in boxes if b.get("kind") != "desk_chair"] + cboxes
+
     # paleta ks_* nas peças herdadas dos builders golden (cores neutras -> diretriz)
     _KS_BY_KIND = {"estrado": [38, 39, 40], "colchao": [214, 202, 184],
                    "travesseiro": [222, 212, 196], "manta": [176, 128, 88],
@@ -734,7 +770,7 @@ def living_room_boxes(con, room_id):
 
 # dispatch por tipo de comodo (cresce conforme novos brains entram)
 BRAINS = {BEDROOM: bedroom_designer_boxes, KITCHEN: kitchen_boxes, LIVING: living_room_boxes,
-          BATHROOM: bath_boxes}
+          BATHROOM: bath_boxes, SERVICE: service_boxes}
 
 
 def collect_boxes(con):
@@ -770,6 +806,13 @@ def collect_boxes(con):
                                 and not str(b.get("kind")).startswith("kb_")})
             if estranhos:
                 print(f"[furnish-apt] WARN wet-room {r['name']!r}: kind(s) fora da louca -> {estranhos}")
+        # TRADE-OFF VISIVEL: peca que o brain teve que encolher/descartar por
+        # circulacao vira linha no relatorio, nao some. Sem isto o apê "parecia
+        # completo" enquanto quarto ficava sem guarda-roupa em silêncio.
+        for why in (out.get("downgrades") or []):
+            print(f"[furnish-apt] TRADE-OFF {r['name']!r}: {why}")
+        for kind, why in (out.get("dropped") or []):
+            print(f"[furnish-apt] TRADE-OFF {r['name']!r}: {kind} -> {why}")
         n = len(boxes) if boxes else 0
         all_boxes += boxes or []
         summary.append((r["id"], r["name"], r["room_type"], out.get("result"), n))

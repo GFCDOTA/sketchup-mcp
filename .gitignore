@@ -127,3 +127,13 @@ artifacts/reference_lab/inbox/*.jpeg
 # runtime do auto-decider (trilha jsonl) — TTL, nao commitar
 artifacts/_archive/**/attempt_0/
 docs/archive/**/scratch_preserved/*.skp
+
+# Pacote Impeccable (3rd-party, instalado por sessao — ver TOOLCHAIN-SKILLS.md do workspace)
+.claude/skills/impeccable/
+.github/skills/
+.github/agents/impeccable-*
+.github/hooks/
+# Build leftover do inspector-desktop (o codigo vive em GFCDOTA/harness-app)
+inspector-desktop/
+# Traces do ai-bridge sao scratch
+.ai_bridge/traces/

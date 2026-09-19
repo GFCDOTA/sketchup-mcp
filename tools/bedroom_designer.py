@@ -34,6 +34,9 @@ WARDROBE_DEPTH, WARDROBE_H = 0.60, 2.20
 HEADBOARD_DEPTH, HEADBOARD_H = 0.06, 1.10   # painel fino na parede da cabeceira (GPT)
 BANCO = (1.40, 0.45, 0.45)          # ottoman aos pés
 DRESSER = (1.60, 0.40, 0.50)        # GPT review: console BAIXO e comprido (não cômoda pesada)
+DESK = (1.20, 0.55, 0.75)           # escrivaninha/mesa de PC (Felipe 2026-09-11)
+DESK_CHAIR = (0.50, 0.50, 0.90)
+DESK_PULL_M = 0.70                  # recuo da cadeira PUXADA (area de uso real)
 POLTRONA = (0.80, 0.80, 0.80)
 MESA_LAT = (0.40, 0.40, 0.45)
 NS_GAP = 0.05                       # folga visual cama<->criado (GPT review)
@@ -51,10 +54,11 @@ COMODO_FOLGA = 0.06
 
 RGB = {"bed": [21, 101, 192], "nightstand": [0, 131, 143], "rug": [201, 185, 160],
        "wardrobe": [106, 27, 154], "bench": [120, 144, 156], "dresser": [141, 110, 99],
-       "armchair": [0, 150, 136], "side_table": [255, 171, 64], "headboard": [121, 85, 72]}
+       "armchair": [0, 150, 136], "side_table": [255, 171, 64], "headboard": [121, 85, 72],
+       "desk": [92, 64, 46], "desk_chair": [38, 39, 40]}
 HEIGHT = {"bed": 0.55, "nightstand": 0.55, "rug": 0.02, "wardrobe": 2.20,
           "bench": 0.45, "dresser": 0.50, "armchair": 0.80, "side_table": 0.45,
-          "headboard": 1.10}
+          "headboard": 1.10, "desk": 0.75, "desk_chair": 0.90}
 
 
 def _ward_widths(area_m2):               # GPT review: tenta + largo (embutido); encolhe se não couber.
@@ -64,7 +68,9 @@ def _ward_widths(area_m2):               # GPT review: tenta + largo (embutido);
         return [3.00, 2.60, 2.40, 2.00, 1.80, 1.50]
     if area_m2 >= 11:
         return [2.40, 2.00, 1.80, 1.50, 1.20]
-    return [1.60, 1.20, 1.00]
+    # quarto pequeno (suite 02, 8 m2): desce ate 0.80 — guarda-roupa estreito
+    # ainda e' guarda-roupa; quarto SEM guarda-roupa nao e' quarto.
+    return [1.60, 1.20, 1.00, 0.90, 0.80]
 
 
 def _clear(v):                      # m, arredonda
@@ -75,8 +81,16 @@ def _bbox_m(b):
     return [round(b.bounds[i] * PT_TO_M, 2) for i in range(4)]
 
 
+def _along_of(shp, orient):
+    """Centro do box no eixo AO LONGO da parede (o mesmo `along_c` do _fbox):
+    y pra parede vertical, x pra horizontal."""
+    x0, y0, x1, y1 = shp.bounds
+    return (y0 + y1) / 2 if orient == "v" else (x0 + x1) / 2
+
+
 def _wardrobe_walls(sm, exclude_id):
-    """Paredes p/ guarda-roupa/dresser (!= cabeceira). Ranqueia por comprimento +
+    """Paredes p/ guarda-roupa/dresser (exclude_id=None nao exclui nenhuma —
+    usado na 2a rodada, que aceita a propria parede da cabeceira). Ranqueia por comprimento +
     bônus se limpa de janela. INCLUI paredes com PORTA (o circ_u/door-zone mantém o
     móvel longe do vão/giro, e o trecho limpo ao lado da porta serve) mas penaliza;
     exclui só passagem/porta-balcão (vãos full-height que não dá pra bloquear) e
@@ -215,26 +229,95 @@ def build_layout(sm, hb, bed_dims=KING, bed_label="king", minimalist=True):
 
     # --- P0: guarda-roupa em parede alternativa (frente livre). GPT review: tenta
     # o mais largo possível (parecer planejado/embutido) e só encolhe se não couber. ---
-    ward = None
-    for ww in _ward_widths(sm["area_m2"]):
-        ward = _place_against(sm, _wardrobe_walls(sm, hb["id"]), ww, WARDROBE_DEPTH,
-                              items, comodo, circ_u, win_zone, front=WARD_FRONT[1], tall=True,
-                              wfoot=wfoot)
+    # Duas rodadas: primeiro as paredes ALTERNATIVAS (leitura ideal, guarda-roupa
+    # de frente pra cama); se nenhuma largura couber, ULTIMO RECURSO = o trecho
+    # que sobra na PROPRIA parede da cabeceira, ao lado da cama. Em quarto pequeno
+    # (suite 02) essa e' a unica vaga real, e guarda-roupa ao lado da cama e'
+    # solucao corrente — melhor que quarto sem armario nenhum (P0 de storage).
+    ward, ward_same_wall = None, False
+    for same_wall in (False, True):
+        walls = _wardrobe_walls(sm, None if same_wall else hb["id"])
+        if same_wall:
+            walls = [c for c in walls if c[1]["id"] == hb["id"]]
+        if not walls:
+            continue
+        for ww in _ward_widths(sm["area_m2"]):
+            ward = _place_against(sm, walls, ww, WARDROBE_DEPTH,
+                                  items, comodo, circ_u, win_zone, front=WARD_FRONT[1], tall=True,
+                                  wfoot=wfoot)
+            if ward is not None:
+                ward["name"] = "guarda_roupa"
+                ward["type"] = "wardrobe"
+                ward["reason"] = (f"trecho livre ao lado da cama, {ww:.2f} m (unica vaga)"
+                                  if same_wall else
+                                  f"parede limpa, frente livre, {ww:.2f} m (planejado linear)")
+                items.append(ward)
+                ward_same_wall = same_wall
+                break
         if ward is not None:
-            ward["name"] = "guarda_roupa"
-            ward["type"] = "wardrobe"
-            ward["reason"] = f"parede limpa, frente livre, {ww:.2f} m (planejado linear)"
-            items.append(ward)
             break
     if ward is None:
         downgrades.append("guarda-roupa não coube com frente livre")
+    elif ward_same_wall:
+        downgrades.append("guarda-roupa foi pra parede da cabeceira (sem parede alternativa livre)")
 
-    # --- secundario: dresser/comoda baixa numa parede livre (UNICO extra do
-    # minimalista; GPT review 2026-06: nucleo + 'talvez dresser') ---
+    # --- P1: ESCRIVANINHA / mesa de PC (pedido do Felipe 2026-09-11). Ao
+    # contrario do guarda-roupa ela e' BAIXA, entao pode ficar sob janela — e' onde
+    # ela quer estar (luz natural). So entra com a CADEIRA PUXADA cabendo: mesa com
+    # cadeira sem area de uso e' pior que nao ter mesa. ---
+    # Busca propria (nao reusa _place_against) porque a CADEIRA faz parte do
+    # criterio de caber: _place_against devolve so o melhor spot por largura, e se
+    # a cadeira nao couber NAQUELE spot os outros spots validos ficariam perdidos.
+    # Toda parede serve, inclusive a do guarda-roupa e a da cabeceira: o que
+    # protege e' o _ov (nao encosta em movel) + o teste da cadeira. Excluir
+    # paredes por principio so fazia a mesa sumir de quarto onde ela cabia.
+    desk = None
+    for dw in (DESK[0], 1.00, 0.90):
+        if desk is not None:
+            break
+        for _s, ws, _win in _wardrobe_walls(sm, None):
+            lo = ws["along_lo"] + M(dw / 2 + 0.05)
+            hi = ws["along_hi"] - M(dw / 2 + 0.05)
+            if hi <= lo:
+                continue
+            n = max(1, int((hi - lo) / M(0.15)))
+            mid = (lo + hi) / 2
+            for ac in sorted((lo + (hi - lo) * i / n for i in range(n + 1)),
+                             key=lambda a: abs(a - mid)):
+                b = _fbox(ws["orient"], ws["face"], ws["sgn"], ac, M(MARGIN_M), M(dw), M(DESK[1]))
+                chair = _fbox(ws["orient"], ws["face"], ws["sgn"], ac,
+                              M(MARGIN_M + DESK[1] + 0.06), M(DESK_CHAIR[0]), M(DESK_CHAIR[1]))
+                pull = _fbox(ws["orient"], ws["face"], ws["sgn"], ac,
+                             M(MARGIN_M + DESK[1]), M(dw), M(DESK_PULL_M))
+                if not comodo.contains(b) or _hit(b, circ_u) or _ov(b, items):
+                    continue
+                if wfoot is not None and b.intersection(wfoot).area > (0.06 / PT_TO_M ** 2):
+                    continue
+                if not comodo.contains(pull.buffer(-M(0.02))) or _ov(pull, items):
+                    continue
+                if not comodo.contains(chair) or _hit(chair, circ_u) or _ov(chair, items):
+                    continue
+                facing = _facing(ws["orient"], ws["sgn"])
+                desk = {"name": "escrivaninha", "type": "desk", "box": b,
+                        "anchor_wall": ws["id"], "facing": facing,
+                        "reason": f"mesa de PC {dw:.2f} m com cadeira puxada livre"}
+                items.append(desk)
+                items.append({"name": "cadeira_escrivaninha", "type": "desk_chair",
+                              "box": chair, "anchor_wall": ws["id"], "facing": facing,
+                              "reason": "area de uso da escrivaninha comprovada"})
+                break
+            if desk is not None:
+                break
+    if desk is None:
+        downgrades.append("escrivaninha não coube com cadeira puxada livre")
+
+    # --- secundario: dresser/comoda baixa numa parede livre. So se a escrivaninha
+    # NAO entrou — os dois juntos viram showroom em quarto de ape 74 m2. ---
     used = {hb["id"]} | {it.get("anchor_wall") for it in items if it.get("type") == "wardrobe"}
-    dresser = _place_against(sm, [c for c in _wardrobe_walls(sm, hb["id"]) if c[1]["id"] not in used],
-                             DRESSER[0], DRESSER[1], items, comodo, circ_u, win_zone,
-                             front=0.60, tall=True, wfoot=wfoot)   # tall=True: console foge da janela
+    dresser = None if desk is not None else _place_against(
+        sm, [c for c in _wardrobe_walls(sm, hb["id"]) if c[1]["id"] not in used],
+        DRESSER[0], DRESSER[1], items, comodo, circ_u, win_zone,
+        front=0.60, tall=True, wfoot=wfoot)   # tall=True: console foge da janela
     if dresser is not None:
         dresser["name"] = "dresser"
         dresser["type"] = "dresser"
@@ -506,6 +589,10 @@ def run(con, room_id, minimalist=True):
                        "downgrades": c.get("downgrades")}
                       for i, c in enumerate(order)]
     out["_winner_items"] = order[0]["_items"]
+    # degradacao HONESTA no topo: sem isto o furnish_apartment (e o relatorio pro
+    # Felipe) nunca via "guarda-roupa/escrivaninha nao coube" — ficava so dentro
+    # do candidato vencedor, invisivel pra quem consome run().
+    out["downgrades"] = list(order[0].get("downgrades") or [])
     return sm, out
 
 
