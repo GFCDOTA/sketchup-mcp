@@ -6,7 +6,20 @@ Branch em curso, objetivo, escopo, validação.
 > arquivo estiver stale, qualquer agente deve reconciliar antes
 > de operar.
 
-> **Snapshot:** 2026-08-09 (handoff, fim de sessão — troca de computador).
+> **Snapshot:** 2026-08-27 (handoff — AI Pipeline Inspector, Fases 1-3).
+> Branch ativa: **`feat/ai-pipeline-inspector-observability`** @ `1f0d677`,
+> **8 commits à frente de `develop`**, 1 commit à frente do próprio remoto
+> (o `1f0d677` ainda NÃO foi pushado). **Nenhuma PR aberta** — decisão pendente
+> do Felipe: landar agora ou seguir pra Fase 4 e landar tudo junto.
+> Entregue: `core/observability/` (9 módulos stdlib, DESLIGADO por padrão) +
+> `tools/trace_view.py` (CLI de leitura de trace) + ~250 testes novos.
+> Suíte: **1470 passed / 71 planta74_scale**, ruff limpo, working tree limpa.
+> Nada de geometria/fidelidade/aparência foi tocado — a instrumentação é
+> aditiva e não muda execução (provado: bundles byte-idênticos ligado×desligado).
+> Próximo: **Fase 4** (transporte SSE em `ops/estudio-front/server.py`).
+> Detalhe completo em `HANDOFF.md` (topo, reescrito 2026-08-27) — ler antes de operar.
+>
+> **Snapshot anterior:** 2026-08-09 (handoff, fim de sessão — troca de computador).
 > Branch ativa: **`develop`** @ `4a70232`, sincronizada com `origin/develop`
 > (pushado). Hoje mergeou `feat/estudio-banheiro` (101 commits: skill+agent
 > `interior-project-audit`, fix de escala 1.36x, fix de teto/parede do banho,

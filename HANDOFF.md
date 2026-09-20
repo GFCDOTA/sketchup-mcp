@@ -1,3 +1,266 @@
+# HANDOFF — AI Pipeline Inspector: fundação de observabilidade (Fases 1–3)
+
+- **Data / sessão:** 2026-08-27 · sessão do AI Pipeline Inspector
+- **Repo / app:** `apps/sketchup-mcp`
+- **Status geral:** **GREEN** — suíte verde, working tree limpa, sem débito
+  técnico aberto. Uma decisão humana pendente (abrir PR ou seguir pra Fase 4).
+
+> Histórico anterior (Estúdio Banheiro, contrato semântico de geometria etc.)
+> preservado abaixo, a partir de "HISTÓRICO ANTERIOR". Nada dele foi invalidado
+> por esta sessão — a instrumentação é aditiva e desligada por padrão.
+
+## 1. Objetivo atual
+
+Construir o **AI Pipeline Inspector**: um debugger visual + ferramenta
+educacional que torna o pipeline de IA/RAG do sketchup-mcp observável — pra o
+Felipe conseguir rodar "crie um banheiro seguindo minhas preferências" e ver,
+etapa por etapa, o que é RAG, o que é LLM, o que é harness e o que é código
+determinístico, no seu próprio sistema.
+
+Plano de 10 fases em `docs/specs/AI_PIPELINE_INSPECTOR.md`. **Fases 1, 2 e 3
+landadas.** Fase 4 (transporte SSE) é a próxima; a UI só começa na Fase 5.
+
+## 2. Branch atual
+
+- **Branch:** `feat/ai-pipeline-inspector-observability` · **base:** `origin/develop`
+- **Último commit:** `1f0d677` — *chore(observability): elimina o débito da Fase 3 — ChunkRef em produção + CLI de trace*
+- **Ahead/behind:** **8 commits à frente de `develop`**; **1 commit à frente do
+  próprio remoto** (o `1f0d677` ainda NÃO foi pushado).
+- **PR:** nenhuma aberta. ⚠️ `gh pr list` devolveu saída vazia — pode ser
+  "nenhuma PR" ou falha silenciosa de escopo do PAT (esta máquina só tem
+  `Contents:write`). Confirmar antes de concluir qualquer coisa.
+
+Commits da sessão (mais recente primeiro):
+
+```
+1f0d677 chore(observability): elimina o débito da Fase 3 — ChunkRef + CLI de trace
+de7f34f chore(artifacts): versiona 58 renders de planta_74 que estavam soltos
+79a65aa chore(verdicts): preserva 8 vereditos de curadoria que estavam soltos
+00e7641 docs: registra PERF-001 — 6,1s desperdiçados no caminho degradado do RAG
+606a367 feat(observability): fallback faceted vira execução observável + invariantes
+abd3c10 chore(impeccable): mantém o hook de design DESLIGADO neste projeto
+4f1ae64 feat(observability): instrumenta os call-sites reais (Fase 3)
+5f3a230 feat(observability): fundação de eventos + normalizador de gates (Fases 1-2)
+```
+
+## 3. Arquivos alterados
+
+**Novos — o núcleo (`core/observability/`, stdlib puro):**
+
+| Arquivo | Papel |
+|---|---|
+| `taxonomy.py` | `Category` · `RetrievalKind` · `HarnessKind` · `classify_retrieval()` · `DecisionEvidence` · cards do Learning Mode |
+| `context.py` | `run_scope` · `span_scope` · `attach` · `seq` monotônico com lock |
+| `events.py` | envelope v1 + catálogo FECHADO de 44 nomes + `is_well_formed()` |
+| `sink.py` | `NullSink` (default) · `MemorySink` · `JsonlSink` (teto 5 MB + `truncated`) |
+| `redact.py` | allowlist de chave + scrub de segredo + relativização de path |
+| `retrieval.py` | `RetrievalOutcome` (intenção × execução) · `FusionTrace` · `ChunkRef`/`ChunkLedger` |
+| `llm.py` | `LLMCall` + adapter Ollama · `ContextComposition` (origens do contexto) |
+| `replay.py` | leitura ordenada, dedup, lacunas, árvore de spans, **`validate()`** |
+| `gates.py` | normalizador dos 5 formatos legados → `NormalizedGate` |
+| `tools/trace_view.py` | CLI de leitura de trace no terminal |
+
+**Alterados (todos ADITIVOS, nenhum muda comportamento):**
+
+```
+tools/reference_db.py                       164 +    (intenção×execução, fusão, span faceted)
+tools/rag_embed_backend.py                   50 +    (embed/search com span)
+tools/correction_loop.py                     57 +    (DETECT/CLASSIFY/FIX/RE-CHECK/terminal)
+tools/interior_studio/architect_program.py   48 +/-  (LLM tokens + composição de contexto)
+tools/ollama_bridge.py                       24 +
+tools/run_deterministic_gates.py              9 +/-  (emite só o contrato normalizado)
+ops/estudio-front/{server,rag_chat,knowledge_ingest}.py   (RAG #3 + boundary de thread)
+.gitignore                                            (impeccable + .ai_bridge/traces/)
+docs/specs/AI_PIPELINE_INSPECTOR.md                   (spec viva, 11 seções)
+```
+
+**Sensíveis tocados:** nenhum. Fixtures, `.rb` builders, `constitution.md` e
+`consensus*.json` **não foram alterados**. `furnish_apartment`, `bathroom_layout`
+e `kitchen_layout` também não — instrumentar geometria não ensina nada sobre IA
+e arriscaria o pipeline que já está verde.
+
+**Testes novos:** 8 arquivos, ~250 testes
+(`test_observability_{taxonomy,events,redact,replay,contracts,invariants}.py`,
+`test_gate_normalizer.py`, `test_instrumentation_call_sites.py`,
+`test_trace_view.py`).
+
+## 4. Decisões tomadas
+
+1. **RAG é categoria AMPLA** — correção do Felipe, e ela reescreveu a §2 da spec.
+   O que define RAG é o ciclo *recuperar → augmentar → gerar*, não a tecnologia
+   do índice. Consequência: `retrieve(backend="faceted")` **É RAG**
+   (`FACETED_STRUCTURED_RAG`). Minha classificação inicial ("não é RAG porque não
+   tem embedding") estava errada pro propósito da ferramenta.
+2. **Classificação DERIVADA, não asserida.** `classify_retrieval()` calcula o
+   rótulo a partir dos fatos observados *daquela run*. Com o Qdrant fora, o
+   caminho `embed` degrada e a run é honestamente `FACETED_STRUCTURED_RAG` — um
+   rótulo fixo por call-site mentiria. `taxonomy` é property sem setter.
+3. **Duas camadas de harness que nunca colapsam.** `EXTERNAL_AGENT_RUNTIME` (a
+   sessão do Claude Code, cujo raciocínio NÃO é observável) vs
+   `APPLICATION_HARNESS` (`correction_loop`, `cycles`, `auto_decider`, cujo
+   estado é observável por inteiro).
+4. **Zero chain-of-thought.** `DecisionEvidence` tem 5 slots de sinal externo
+   (evento causador, gate, refs de contexto, tool, efeito).
+   `FORBIDDEN_EVIDENCE_FIELDS` + 2 testes travam isso — um inspeciona os campos
+   do dataclass, outro prova que a allowlist descarta `reasoning` no `meta`.
+5. **Normalizar os gates ANTES da UI** (reordenei o plano do Felipe). Os 5
+   formatos legados (`overall`/`result`/`verdict`, chaves distintas) sem adapter
+   fariam o grafo desenhar nó verde sobre FAIL. Veredito ausente vira `UNKNOWN`,
+   nunca `PASS`; medida ausente é `None`, nunca `0.0`.
+6. **Desligado por padrão.** Sem `INSPECTOR=1`, `emit()` retorna na 1ª linha;
+   `redact` nem é importado. É a resposta ao risco "instrumentação vira carroça".
+7. **jsonl + SSE em vez de framework de tracing.** Reúso de `jsonl_io`,
+   `make_trace_id`, `RetrievalTrace`, `gate_verdict` e do `server.py` que já
+   existe. Zero dependência nova, zero broker.
+8. **Impeccable v4.1.1 instalado, hooks DESLIGADOS** a pedido do Felipe (só
+   ligar na fase de UI). ~7 MB espelhados em `.claude/` e `.github/` →
+   gitignorados com escopo ESTREITO (só os artefatos do impeccable;
+   `.github/workflows/` segue versionado).
+9. **Observabilidade descreve execução, não muda execução** (regra do Felipe na
+   Fase 3). Provado por script que compara bundles ligado × desligado.
+
+**Bifurcações consultadas:** nenhuma ida ao GPT-Docker nesta sessão — o
+`:8899` esteve **DOWN** o tempo todo. As decisões foram técnicas/determinísticas
+(modo B) ou vieram direto do Felipe.
+
+## 5. Testes rodados + evidências
+
+- **Suíte (escala default):** `python -m pytest tests/ -q -m "not planta74_scale"`
+  → **1470 passed, 9 skipped**
+- **Suíte (planta_74):** `python -m pytest tests/ -q -m planta74_scale`
+  → **71 passed, 1 skipped**
+- **Lint:** `ruff check` limpo em tudo que foi tocado. (43 erros I001/E741
+  pré-existentes em testes antigos foram deixados de propósito — fora de escopo.)
+- **Não-regressão comportamental:** script comparou o `DesignSpecBundle` em 4
+  combinações (kitchen/bathroom/living × faceted/embed) com observabilidade
+  ligada e desligada → **JSON byte-idêntico**.
+- **Gate determinístico:** `run_deterministic_gates --fixture quadrado` → PASS
+  (rodado dentro do teste de contrato do normalizador, contra o gate REAL).
+- **Run real ponta a ponta:** `.ai_bridge/traces/run_20260827T021348Z_banho.jsonl`
+  — 27 eventos, seq 1..27 sem lacuna, 16,75 s, 12,6 KB, terminal `finished`,
+  invariantes OK. Inclui LLM real (`deepseek-r1:14b`, 595 in / 614 out tokens),
+  gates reais e 2 ciclos do `correction_loop` com fix aplicado e terminal CLEAN.
+- **Evidência humana (.skp/render):** **nenhuma** — esta sessão não gerou
+  geometria nem tocou aparência.
+- **Veredito visual:** **N/A** — nada de aparência mudou. Nenhum autojulgamento.
+
+## 6. Pendências
+
+**Esperando decisão do Felipe:**
+- **Abrir a PR ou não.** 8 commits parados na branch. A regra do repo é "nunca
+  deixar PR aberta ao fim da sessão" — mas nada foi mergeado ainda. Perguntei e
+  não houve resposta antes do handoff.
+- **Sequência:** landar agora vs seguir pra Fase 4 e landar tudo junto.
+
+**Falta fazer (técnico, sem bloqueio):**
+- **Fase 4** — transporte: `GET /api/trace/<runId>`, SSE com `Last-Event-ID`,
+  rotas de conteúdo sob demanda (chunk/prompt). Sem UI.
+- **Fases 5–10** — grafo vivo, chunk/context inspector, Learning Mode, replay,
+  RAG health, passe de design com Impeccable.
+- **`retrieval_eval` no CI** — planejado pra Fase 9, ainda não entrou.
+- **Push do `1f0d677`** — o último commit está só local.
+
+## 7. Riscos
+
+| Risco | Situação |
+|---|---|
+| **Instrumentação no caminho quente** | Mitigado: no-op por padrão; benchmark feito; bundles byte-idênticos. O risco residual é alguém ligar `INSPECTOR=1` num loop longo — o teto de 5 MB por trace protege. |
+| **PERF-001 (6,1 s no fallback do RAG)** | **Registrado, NÃO corrigido**, de propósito (corrigir seria mudar execução na Fase 3). 2,0 s de embedding desperdiçado + 4,1 s de timeout do Qdrant antes de degradar; o faceted útil leva 1,0 ms. |
+| **Qdrant :6333 DOWN** | Estava fora a sessão inteira. Todo caminho `embed` degradou pro faceted. Isso virou *feature* da demo (mostra intenção × execução), mas significa que o caminho `HYBRID_RAG` **nunca foi exercido de verdade** — só por teste unitário. |
+| **GPT-Docker :8899 DOWN** | Nenhuma consulta de oráculo foi possível. |
+| **Front puxa React/Babel de CDN unpkg** | Sem internet, o Inspector da Fase 5 não abre. Vendorizar está no plano da Fase 5. |
+| **MCP `sketchup` e `MCP_DOCKER` falharam ao conectar** | Aconteceu no fim desta sessão (`CONNECTION_CLOSED`). Não afetou o trabalho (tudo foi por CLI), mas a próxima sessão deve checar. |
+| **`candidatesCount=0` no banheiro** | Não é bug: **não existe token de banheiro curado** em `references/tokens/`. É um achado que o Inspector torna visível. |
+
+## 8. Próximos 5 passos
+
+1. **Decidir PR vs seguir** (Felipe). Se PR: `git push` do `1f0d677` primeiro,
+   depois URL de compare manual (o PAT não tem `Pull requests:write`).
+2. **Fase 4 — transporte.** `GET /api/trace/<runId>` + `GET /api/trace/stream`
+   (SSE, `Last-Event-ID` = `seq`) + rotas de conteúdo sob demanda, em
+   `ops/estudio-front/server.py`. Teste de reconnect com sobreposição de janela
+   (o dedup por `(runId, seq)` do `replay.parse_rows` já cobre a semântica).
+3. **Subir o Qdrant** e rodar a demo de novo pra exercitar `HYBRID_RAG` de
+   verdade — o único caminho ainda não validado com infra real.
+4. **Fase 5 — UI.** Antes: vendorizar React/Babel e rodar `/impeccable document`
+   pra gerar o `DESIGN.md` a partir do código.
+5. **`retrieval_eval` no CI** contra `references/eval/retrieval_baseline.json`
+   (recall@6 0.7225 · MRR 0.90 · nDCG 0.8083).
+
+## 9. Comandos úteis
+
+```bash
+# ---- ler uma trace (a CLI nova) ----
+cd E:/Claude/apps/sketchup-mcp
+.venv/Scripts/python.exe -m tools.trace_view --list         # todas as runs
+.venv/Scripts/python.exe -m tools.trace_view --tree         # a mais recente
+.venv/Scripts/python.exe -m tools.trace_view <runId> --json # p/ script/CI
+.venv/Scripts/python.exe -m tools.trace_view --check        # exit 1 se violar
+
+# ---- gravar uma trace nova (a instrumentação é OPT-IN) ----
+INSPECTOR=1 .venv/Scripts/python.exe -m tools.run_deterministic_gates --fixture quadrado
+#   ou, em Python:  obs.configure(traces_dir=...);  with obs.run(...): ...
+
+# ---- suíte (DOIS passes, escalas diferentes — ver pyproject) ----
+.venv/Scripts/python.exe -m pytest tests/ -q -m "not planta74_scale"
+.venv/Scripts/python.exe -m pytest tests/ -q -m planta74_scale
+.venv/Scripts/python.exe -m ruff check core/observability tools/trace_view.py
+
+# ---- infra que o RAG usa ----
+curl -s http://localhost:11434/api/tags | head -c 200      # Ollama
+curl -s http://localhost:6333/collections                  # Qdrant (estava DOWN)
+curl -s http://127.0.0.1:8899/health                       # GPT-Docker (estava DOWN)
+
+# ---- git ----
+git -C E:/Claude/apps/sketchup-mcp log --oneline develop..HEAD
+git -C E:/Claude/apps/sketchup-mcp push          # o 1f0d677 ainda não subiu
+```
+
+## 10. O que NÃO fazer
+
+- **Não instrumentar geometria.** `furnish_apartment`, `bathroom_layout`,
+  `kitchen_layout` e os `.rb` ficam fora: não ensinam nada sobre IA e arriscam o
+  pipeline verde.
+- **Não deixar `emit()` mudar fluxo.** A regra da Fase 3 continua valendo nas
+  próximas: observabilidade descreve execução, não altera. Se um patch mexer em
+  threshold, retrieval, fallback, gate ou prompt, ele saiu do escopo.
+- **Não afirmar integridade de trace à mão.** Use `tools.trace_view` /
+  `replay.validate()`. Esta regra nasceu de um erro real meu nesta sessão: eu
+  disse "25 eventos, zero lacunas" e transcrevi uma tabela pulando o `seq=20`.
+- **Não corrigir o PERF-001 como parte de outra tarefa.** É mudança de
+  comportamento e merece o próprio ciclo.
+- **Não ligar o hook do Impeccable** antes da fase de UI (decisão do Felipe).
+- **Não commitar `.ai_bridge/traces/`** nem os diretórios do impeccable — já
+  gitignorados; não alargar esses padrões para `.github/` ou `.claude/` inteiros.
+- **Não push direto em `main`.** Hard Rule #4 do projeto.
+- **Não autojulgar veredito visual.** Nada de aparência mudou aqui; se mudar,
+  o juiz é o Felipe (ou GPT-via-Chrome).
+
+## 11. Checkpoint p/ próxima sessão
+
+Parei com **Fases 1–3 completas e commitadas** (`1f0d677`), working tree limpa,
+suíte verde, e **uma pergunta em aberto pro Felipe**: abrir a PR dos 8 commits
+contra `develop` agora, ou seguir pra Fase 4 e landar tudo junto.
+
+**Primeiro movimento ao retomar:** rodar
+`.venv/Scripts/python.exe -m tools.trace_view --tree` — se a árvore sair com
+`INVARIANTES: OK` e mostrar `reference_db.faceted` aninhado sob
+`reference_db.retrieve`, a fundação está de pé. Depois, `git log --oneline
+develop..HEAD` deve mostrar 8 commits.
+
+**Sinal de que algo mudou fora de banda:** working tree suja, ou `git status`
+apontando que o remoto avançou — nesse caso, usar a skill `multi-agent-handoff`
+antes de tocar em qualquer coisa.
+
+---
+---
+
+# HISTÓRICO ANTERIOR
+
+> Tudo abaixo é de sessões anteriores e **continua válido** — a instrumentação
+> desta sessão é aditiva e desligada por padrão, não invalidou nenhuma decisão
+> de geometria, fidelidade ou design.
+
 # HANDOFF — Estúdio Banheiro + merge pra develop (2026-08-09, fim de sessão)
 
 > **Atualização 2026-08-12 (round 5 — CONTRATO SEMÂNTICO DE GEOMETRIA,

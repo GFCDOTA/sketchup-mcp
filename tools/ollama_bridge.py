@@ -12,8 +12,12 @@ import base64
 import json
 import os
 import sys
+import time
 import urllib.error
 import urllib.request
+
+from core import observability as obs
+from core.observability.llm import from_ollama
 
 # host configurável: no container Docker, OLLAMA_HOST=http://host.docker.internal:11434 alcança o host
 OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://127.0.0.1:11434")
@@ -87,20 +91,40 @@ def ask(
         except OSError as exc:
             return {"ok": False, "error": f"cannot read image {image!r}: {exc}"}
 
+    _t0 = time.perf_counter()
+    obs.emit("llm.started", component=f"ollama.{model}", status="started",
+             meta={"model": model, "stream": False,
+                   "promptChars": len(prompt)})
     try:
         body = _post_json("/api/generate", payload, timeout)
     except urllib.error.HTTPError as exc:
+        _emit_llm_failure(model, _t0, f"HTTP {exc.code}: {exc.reason}", exc)
         return {"ok": False, "error": f"HTTP {exc.code}: {exc.reason}"}
     except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        _emit_llm_failure(model, _t0, f"ollama unreachable: {exc}", exc)
         return {"ok": False, "error": f"ollama unreachable: {exc}"}
     except ValueError as exc:
+        _emit_llm_failure(model, _t0, f"bad response: {exc}", exc)
         return {"ok": False, "error": f"bad response: {exc}"}
 
+    _latency = (time.perf_counter() - _t0) * 1000.0
+    obs.emit("llm.finished", component=f"ollama.{model}",
+             duration_ms=_latency,
+             meta=from_ollama(body, model=model, latency_ms=_latency).to_meta())
     return {
         "ok": True,
         "model": body.get("model", model),
         "response": body.get("response", ""),
     }
+
+
+def _emit_llm_failure(model: str, t0: float, reason: str, exc: Exception) -> None:
+    """`ask()` NUNCA levanta (contrato do módulo) — então a falha precisa
+    virar evento explícito, senão o Inspector veria um `llm.started` órfão."""
+    obs.emit("llm.failed", component=f"ollama.{model}", status="failed",
+             duration_ms=(time.perf_counter() - t0) * 1000.0,
+             meta={"model": model, "error": reason,
+                   "errorType": type(exc).__name__})
 
 
 def _cli(argv: list[str]) -> int:
