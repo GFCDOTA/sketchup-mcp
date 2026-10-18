@@ -16,9 +16,15 @@ from tools.furnish_apartment import CONSENSUS, collect_boxes
 
 
 @pytest.fixture(scope="module")
-def sala_gate():
+def sala_boxes():
     con = json.loads(CONSENSUS.read_text("utf-8"))
     boxes, _ = collect_boxes(con)
+    return con, boxes
+
+
+@pytest.fixture(scope="module")
+def sala_gate(sala_boxes):
+    con, boxes = sala_boxes
     return gate(con, boxes, "r002")
 
 
@@ -52,3 +58,15 @@ def test_portal_role_is_explicit_not_inferred(sala_gate):
     varanda = [p for p in portais if p.get("w_empty_m") == 1.0]
     assert varanda and varanda[0]["portal_role"] == "SECONDARY", \
         "varanda (maior largura vazia) deveria ser SECONDARY (destino terminal), não PRIMARY"
+
+
+def test_one_clearance_entry_per_real_chair(sala_boxes, sala_gate):
+    # folga atras/puxada e POR CADEIRA: cadeiras vizinhas (gap real 0.08m na
+    # mesa 1.00x0.65) nao podem ser fundidas numa "cadeira" medida pelo ponto
+    # medio — senao uma cadeira sem folga se esconde atras da vizinha.
+    _, boxes = sala_boxes
+    n_real = sum(1 for b in boxes
+                 if b.get("module") == "Cadeira jantar" and b.get("kind") == "seat")
+    cad = sala_gate["checks"]["atras_das_cadeiras"]["cadeiras"]
+    assert n_real >= 2
+    assert len(cad) == n_real, f"{len(cad)} entradas p/ {n_real} cadeiras reais: {cad}"
