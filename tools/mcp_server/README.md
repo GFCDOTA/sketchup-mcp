@@ -95,8 +95,8 @@ resultado existir é a prova de que **esta** execução terminou. Diferente do
 
 Regras que o código faz cumprir (não o prompt):
 
-- **O original nunca é aberto.** Editar, renderizar e mobiliar trabalham numa
-  cópia; em modo `interactive` a janela fica aberta, e um Ctrl+S nela não
+- **O original nunca é aberto.** Inspecionar, editar, renderizar e mobiliar
+  trabalham numa cópia; em modo `interactive` a janela fica aberta, e um Ctrl+S nela não
   alcança o original (que pode ser o `.skp` canônico).
 - **Nada escreve em `fixtures/` ou `artifacts/`.** Saída default:
   `runs/<plant>/mcp/<job>_<stamp>/`. Entregável só via `promote_canonical`.

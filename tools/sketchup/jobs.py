@@ -98,8 +98,14 @@ def inspect_model(skp_path: str, *, max_depth: int = 2, out_dir: str | None = No
     d, err = _out_dir(out_dir, "inspect")
     if err:
         return err
-    return run_job(_su(su), "inspect_model", out_dir=d, skp_in=p, timeout_s=timeout_s, mode=mode,
-                   params={"max_depth": max_depth, "protected_prefixes": list(PROTECTED_PREFIXES)})
+    # mesmo sendo só leitura: em modo interactive a janela fica aberta, e um
+    # Ctrl+S no original (às vezes o canônico) o regravaria — até convertendo a
+    # versão do arquivo. O SketchUp abre a cópia.
+    copy = _working_copy(p, d / f"_inspect_{p.name}")
+    res = run_job(_su(su), "inspect_model", out_dir=d, skp_in=copy, timeout_s=timeout_s, mode=mode,
+                  params={"max_depth": max_depth, "protected_prefixes": list(PROTECTED_PREFIXES)})
+    res["input_skp"] = str(p)
+    return res
 
 
 def _check_views(views: list[dict] | None) -> str | None:

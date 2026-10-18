@@ -434,6 +434,14 @@ def test_furnish_abre_copia_e_nunca_o_shell_base(monkeypatch, tmp_path):
     assert base.read_bytes() == b"CANONICO"
 
 
+def test_inspect_abre_copia_e_nunca_o_original(tmp_path, skp):
+    job, seen = ruby_writes({"ok": True, "nodes": []})
+    r = jobs.inspect_model(str(skp), out_dir=str(tmp_path / "i"), mode="interactive",
+                           su=su_with(FakeSystem(job=job)))
+    assert r["status"] == "OK" and r["input_skp"] == str(skp.resolve())
+    assert Path(seen["cmd"][1]) != skp.resolve()
+
+
 def test_su_marcadas_como_nao_provadas_no_sketchup():
     st = jobs.status(su=su_with(FakeSystem()))
     assert st["proof_state"] == "UNVERIFIED_ON_SKETCHUP"
