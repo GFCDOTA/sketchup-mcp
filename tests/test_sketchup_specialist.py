@@ -402,6 +402,43 @@ def test_furnish_recusa_escala_errada(monkeypatch):
     assert r["status"] == "ERROR" and "0.0259" in r["reason"]
 
 
+def test_furnish_abre_copia_e_nunca_o_shell_base(monkeypatch, tmp_path):
+    """Defeito achado na revisão do #249: o furnish abria o .skp canônico direto.
+    Em modo interactive a janela fica aberta — um Ctrl+S gravaria por cima dele."""
+    import sys
+    import types
+
+    from core import scale
+
+    monkeypatch.setattr(scale, "PT_TO_M", 0.0259)
+    fake = types.ModuleType("tools.furnish_apartment")
+    fake.collect_boxes = lambda con: ([{"kind": "bed", "x0": 0, "y0": 0, "x1": 1, "y1": 1}],
+                                      [("r1", "Quarto", "BEDROOM", "PASS", 1)])
+    monkeypatch.setitem(sys.modules, "tools.furnish_apartment", fake)
+    base = tmp_path / "planta_74.skp"
+    base.write_bytes(b"CANONICO")
+    con = tmp_path / "consensus.json"
+    con.write_text("{}", "utf-8")
+    seen = {}
+
+    def job(cmd, env, handle):
+        seen["cmd"] = cmd
+        Path(env["LAYOUT_OUT"]).write_bytes(b"MOBILIADO")
+        Path(env["LAYOUT_LOG"]).write_text("ok", "utf-8")
+
+    r = jobs.furnish(consensus_path=str(con), base_skp=str(base), out_dir=str(tmp_path / "out"),
+                     mode="interactive", su=su_with(FakeSystem(job=job)))
+    assert r["status"] == "OK"
+    aberto = Path(seen["cmd"][1])
+    assert aberto != base.resolve() and aberto.parent == (tmp_path / "out").resolve()
+    assert base.read_bytes() == b"CANONICO"
+
+
+def test_su_marcadas_como_nao_provadas_no_sketchup():
+    st = jobs.status(su=su_with(FakeSystem()))
+    assert st["proof_state"] == "UNVERIFIED_ON_SKETCHUP"
+
+
 def test_render_vray_sem_vray_e_unavailable(tmp_path):
     r = jobs.render_vray(str(tmp_path), su=su_with(FakeSystem(virtual=(EXE,))))
     assert r["status"] == "UNAVAILABLE"

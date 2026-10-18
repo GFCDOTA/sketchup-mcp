@@ -3,6 +3,7 @@
 # Rodado por tools/sketchup/batch.py:
 #   SketchUp.exe <modelo.skp> -RubyStartup inspect_model.rb   (env SKMCP_*)
 # Params: max_depth (default 2), protected_prefixes.
+# Medidas em metros. bbox_local_m = referencial do pai; bbox_world_m = mundo.
 require_relative 'skmcp_runtime'
 
 SkmcpRuntime.run('inspect_model') do |params, model|
@@ -10,16 +11,35 @@ SkmcpRuntime.run('inspect_model') do |params, model|
   prefixes = params['protected_prefixes'] || []
   ents = model.entities
 
-  nodes = SkmcpRuntime.walk(ents, depth: depth).map do |e, info|
-    info.merge(
+  pairs = SkmcpRuntime.walk(ents, depth: depth)
+  by_pid = pairs.to_h { |e, info| [info['pid'], e] }
+  nodes = SkmcpCore.dedupe(pairs.map(&:last)).map do |info|
+    e = by_pid[info['pid']]
+    own = SkmcpCore.protected_name?(info['name'], prefixes) ||
+          SkmcpCore.protected_name?(info['definition'], prefixes)
+    inherited = info['ancestors'].any? do |a|
+      SkmcpCore.protected_name?(a['name'], prefixes) || SkmcpCore.protected_name?(a['definition'], prefixes)
+    end
+    w = SkmcpCore.normalize(info['world'])
+    {
+      'name' => info['name'], 'definition' => info['definition'], 'pid' => info['pid'],
+      'path' => info['path'], 'paths' => info['paths'], 'type' => info['type'],
+      # contexts > 1: a entidade vive numa definição usada em vários lugares
+      'contexts' => info['contexts'],
       'tag' => (e.layer.name rescue nil),
-      'locked' => (e.locked? rescue false),
+      'locked' => info['locked'],
       'hidden' => e.hidden?,
       'material' => (e.material ? e.material.name : nil),
-      'bbox_m' => SkmcpRuntime.bbox_m(e.bounds),
-      'protected' => SkmcpCore.protected_name?(info['name'], prefixes),
+      # bbox_local_m: no referencial do PAI (o que Entity#bounds devolve);
+      # bbox_world_m: no mundo. Iguais só para entidades na raiz.
+      'bbox_local_m' => SkmcpRuntime.bbox_m(e.bounds),
+      'bbox_world_m' => SkmcpRuntime.bbox_world_m(e, info['world']),
+      'world_origin_m' => [w[12], w[13], w[14]].map { |v| SkmcpRuntime.to_m(v) },
+      'world_transform' => w.map { |v| v.round(6) },
+      'protected' => own || inherited,
+      'protected_by' => own ? 'self' : (inherited ? 'ancestor' : nil),
       'children' => e.definition.entities.count { |c| c.is_a?(Sketchup::Group) || c.is_a?(Sketchup::ComponentInstance) },
-    )
+    }
   end
 
   materials = model.materials.map do |m|

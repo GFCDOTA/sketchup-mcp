@@ -9,7 +9,13 @@
 #
 # Params: ops (já validadas por tools/sketchup/ops.py), protected_prefixes.
 # A regra de arquitetura é revalidada aqui: `name_contains`/`persistent_id` só
-# revelam QUAIS entidades casam dentro do modelo.
+# revelam QUAIS entidades casam dentro do modelo. A recusa olha a entidade, os
+# ancestrais, os descendentes, a definição, `locked` e se a definição é
+# compartilhada (SkmcpCore.guard_violation).
+#
+# Referencial: `by_m` e `rotate` são em eixos do MUNDO. Entity#transform! age no
+# referencial do PAI — num grupo girado, um move "cru" andaria nos eixos girados.
+# Por isso o vetor e o centro vão para o local do pai antes de aplicar.
 require_relative 'skmcp_runtime'
 
 # rename entra junto: renomear tiraria o grupo da proteção e liberaria o move seguinte
@@ -36,14 +42,27 @@ def skmcp_material(model, op)
   mat
 end
 
-def skmcp_apply(model, op, entity)
+def skmcp_apply(model, op, entity, info)
   case op['op']
   when 'set_material' then entity.material = skmcp_material(model, op)
   when 'move'
-    dx, dy, dz = op['by_m'].map { |v| v.to_f.m }
-    entity.transform!(Geom::Transformation.translation(Geom::Vector3d.new(dx, dy, dz)))
+    v_world = op['by_m'].map { |v| v.to_f.m.to_f }
+    v_local = SkmcpCore.world_to_local_vector(info['parent_world'], v_world)
+    entity.transform!(Geom::Transformation.translation(Geom::Vector3d.new(*v_local)))
   when 'rotate'
-    entity.transform!(Geom::Transformation.rotation(entity.bounds.center, Z_AXIS, op['degrees'].to_f.degrees))
+    unless SkmcpCore.uniform_frame?(info['parent_world'])
+      raise "#{info['path']}: o referencial do pai tem escala não uniforme — girar no Z do " \
+            'mundo deformaria a peça; corrija a escala do pai antes'
+    end
+    bb = entity.definition.bounds
+    lo, hi = SkmcpCore.world_bbox([bb.min.x, bb.min.y, bb.min.z].map(&:to_f),
+                                  [bb.max.x, bb.max.y, bb.max.z].map(&:to_f), info['world'])
+    c_world = (0..2).map { |i| (lo[i] + hi[i]) / 2.0 }
+    c_local = SkmcpCore.world_to_local_point(info['parent_world'], c_world)
+    axis_local = SkmcpCore.world_to_local_vector(info['parent_world'], [0.0, 0.0, 1.0])
+    entity.transform!(Geom::Transformation.rotation(Geom::Point3d.new(*c_local),
+                                                    Geom::Vector3d.new(*axis_local),
+                                                    op['degrees'].to_f.degrees))
   when 'set_tag' then entity.layer = (model.layers[op['tag']] || model.layers.add(op['tag']))
   when 'set_hidden' then entity.hidden = op['hidden']
   when 'rename' then entity.name = op['name']
@@ -71,22 +90,21 @@ SkmcpRuntime.run('apply_edits') do |params, model|
         next
       end
 
-      infos = SkmcpRuntime.walk(model.entities)
-      hits, err = SkmcpCore.select(infos.map(&:last), op['target'])
+      pairs = SkmcpRuntime.walk(model.entities) # recalculado a cada op: a anterior pode ter movido/apagado
+      infos = SkmcpCore.dedupe(pairs.map(&:last))
+      hits, err = SkmcpCore.select(infos, op['target'])
       raise "ops[#{i}] (#{op['op']}): #{err}" if err
       if GUARDED.include?(op['op'])
-        prot = hits.select { |h| SkmcpCore.protected_name?(h['name'], prefixes) }
-        unless prot.empty?
-          raise "ops[#{i}] (#{op['op']}): #{prot.map { |h| h['path'] }.inspect} é arquitetura " \
-                "derivada do PDF — #{op['op']} proibido (Hard Rule #1)"
-        end
+        bad = hits.map { |h| SkmcpCore.guard_violation(h, infos, prefixes) }.compact
+        raise "ops[#{i}] (#{op['op']}) recusado: #{bad.first(5).join('; ')} (Hard Rule #1)" unless bad.empty?
       end
-      by_pid = infos.to_h { |e, info| [info['pid'], e] }
+      by_pid = pairs.to_h { |e, info| [info['pid'], e] }
       hits.each do |h|
         e = by_pid[h['pid']]
-        skmcp_apply(model, op, e) unless e.deleted? # pai apagado antes leva o filho junto
+        skmcp_apply(model, op, e, h) unless e.deleted? # pai apagado antes leva o filho junto
       end
-      report << { 'index' => i, 'op' => op['op'], 'matched' => hits.map { |h| h['path'] } }
+      report << { 'index' => i, 'op' => op['op'], 'matched' => hits.map { |h| h['path'] },
+                  'contexts' => hits.map { |h| h['contexts'] } }
     end
     model.commit_operation
   rescue Exception # rubocop:disable Lint/RescueException

@@ -35,3 +35,15 @@ def test_todo_job_usa_o_runtime_comum():
             continue
         src = rb.read_text("utf-8")
         assert "require_relative 'skmcp_runtime'" in src and "SkmcpRuntime.run(" in src, rb.name
+
+
+def test_jobs_usam_a_logica_testada_do_core():
+    """A lógica pura só protege se os jobs a chamarem: proteção completa e
+    referencial de mundo no apply_edits, bbox de mundo no inspect."""
+    apply_src = (RUBY_DIR / "apply_edits.rb").read_text("utf-8")
+    for needle in ("SkmcpCore.guard_violation", "SkmcpCore.dedupe",
+                   "SkmcpCore.world_to_local_vector", "SkmcpCore.world_to_local_point",
+                   "SkmcpCore.uniform_frame?"):
+        assert needle in apply_src, needle
+    inspect_src = (RUBY_DIR / "inspect_model.rb").read_text("utf-8")
+    assert "bbox_world_m" in inspect_src and "SkmcpCore.dedupe" in inspect_src

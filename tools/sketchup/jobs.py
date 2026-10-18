@@ -27,6 +27,11 @@ BASE_SKP_DEFAULT = REPO / "artifacts" / "planta_74" / "planta_74.skp"
 PRESETS = ("top", "iso", "front", "back", "left", "right")
 VISUAL_REVIEW = ("mudança de APARÊNCIA: o veredito IMPROVED/SAME/WORSE é do Felipe "
                  "(VISUAL_REVIEW) — nunca automático")
+# Estado de prova das su_* que sobem o SketchUp: testadas só contra um dublê de
+# Windows+SketchUp. Nenhuma rodou num SketchUp real ainda — quem consome (agente,
+# harness) não pode tratá-las como capacidade comprovada. Muda só com evidência
+# de um run real commitada em artifacts/review/.
+PROOF_STATE = "UNVERIFIED_ON_SKETCHUP"
 
 
 def _su(su: SketchUp | None) -> SketchUp:
@@ -67,6 +72,7 @@ def status(su: SketchUp | None = None) -> dict[str, Any]:
     out = su.status()
     out["ruby_jobs"] = sorted(p.stem for p in RUBY_DIR.glob("*.rb") if not p.stem.startswith("skmcp_"))
     out["default_mode"] = resolve_mode()
+    out["proof_state"] = PROOF_STATE
     out["status"] = "OK"
     return out
 
@@ -262,6 +268,9 @@ def furnish(*, consensus_path: str | None = None, base_skp: str | None = None,
     if not boxes:
         return {"status": "FAILED", "reason": "nenhum cômodo gerou móveis", "rooms": summary}
     d.mkdir(parents=True, exist_ok=True)
+    # o shell base costuma ser o .skp CANÔNICO (artifacts/): o SketchUp abre uma
+    # cópia, nunca ele — em modo interactive a janela fica aberta depois do job
+    base_copy = _working_copy(base, d / f"_furnish_base_{base.name}")
     files = {k: d / f"planta_74_furnished{suffix}" for k, suffix in (
         ("skp", ".skp"), ("before", "_before_top.png"), ("top", "_after_top.png"),
         ("iso", "_after_iso.png"), ("log", "_log.txt"))}
@@ -283,8 +292,8 @@ def furnish(*, consensus_path: str | None = None, base_skp: str | None = None,
         env["FURNISH_STYLE"] = style
         env.update(texture_env(style, (REPO / "assets/textures/procedural").resolve()))
     run = run_script(su, script=REPO / "tools" / "place_layout_skp.rb", done_marker=files["log"],
-                     skp_in=base, env_extra=env, timeout_s=timeout_s, mode=mode)
-    out: dict[str, Any] = {**run, "boxes": len(boxes),
+                     skp_in=base_copy, env_extra=env, timeout_s=timeout_s, mode=mode)
+    out: dict[str, Any] = {**run, "boxes": len(boxes), "base_skp": str(base),
                            "rooms": [{"room_id": r[0], "name": r[1], "type": r[2], "result": r[3], "boxes": r[4]}
                                      for r in summary]}
     if run["status"] != "DONE":

@@ -146,6 +146,9 @@ def list_capabilities() -> dict[str, Any]:
             "promote_canonical": "promove um build abençoado pra artifacts/<plant>/.",
             "skp_inventory": "inventário categorizado dos .skp do repo (dedup + git status).",
         },
+        # su_* que sobem o SketchUp: testadas só contra dublê; nenhuma rodou num
+        # SketchUp real. Não tratar como capacidade comprovada.
+        "sketchup_specialist_proof_state": su_jobs.PROOF_STATE,
         "sketchup_specialist": {
             "su_status": "SketchUp instalado? instâncias rodando (PID), plugin de autorun, V-Ray. Rápido, sem subir nada.",
             "su_open": "abre um .skp numa janela nova (desanexada).",
@@ -351,7 +354,10 @@ def skp_inventory() -> dict[str, Any]:
 def su_status() -> dict[str, Any]:
     """Estado do SketchUp nesta máquina, sem subir nada: executável encontrado,
     instâncias rodando (PID + memória), plugin de autorun do build do shell,
-    V-Ray, jobs Ruby disponíveis e o modo padrão. Chame antes das outras su_*."""
+    V-Ray, jobs Ruby disponíveis e o modo padrão. Chame antes das outras su_*.
+
+    `proof_state` = UNVERIFIED_ON_SKETCHUP: as su_* ainda não rodaram num
+    SketchUp real — o resultado delas não é capacidade comprovada."""
     return su_jobs.status()
 
 
@@ -381,8 +387,10 @@ def su_close(
 @mcp.tool()
 def su_inspect(skp_path: str, max_depth: int = 2, mode: str | None = None) -> dict[str, Any]:
     """Inventário estruturado de um .skp (não modifica): grupos/componentes até
-    `max_depth` níveis com nome, definição, persistent_id, tag, material, bbox
-    em metros e se é arquitetura protegida; materiais, tags e cenas.
+    `max_depth` níveis com nome, definição, persistent_id, tag, material,
+    bbox_local_m (referencial do pai) e bbox_world_m (mundo), se é arquitetura
+    protegida (própria ou herdada do pai) e `contexts` (>1 = definição
+    compartilhada entre instâncias); materiais, tags e cenas.
 
     Use o `pid` daqui como alvo inequívoco em su_apply_edits."""
     return su_jobs.inspect_model(skp_path, max_depth=max_depth, mode=mode)
@@ -422,11 +430,14 @@ def su_apply_edits(
     Cada op tem "op" e, exceto insert_component, um "target":
     {name | name_contains | persistent_id, expect: "one"(default)|"all"}.
       set_material {color:[r,g,b] | material:"nome" | texture:"x.png", texture_size_m?}
-      move {by_m:[dx,dy,dz]}        rotate {degrees}   (em Z, no centro do bbox)
+      move {by_m:[dx,dy,dz]}        rotate {degrees}   (eixos do MUNDO; rotate em Z no
+                                     centro do bbox de mundo)
       set_tag {tag}  set_hidden {hidden}  rename {name}  delete {}
       insert_component {skp_path, position_m:[x,y,z], rotation_deg?, name?, tag?}
-    Medidas são explícitas e em METROS. Arquitetura do PDF (paredes, piso,
-    portas, janelas) recusa move/rotate/delete."""
+    Medidas são explícitas e em METROS. move/rotate/delete/rename são recusados
+    quando o alvo, um ancestral ou um descendente é arquitetura do PDF (paredes,
+    piso, portas, janelas), quando está travado (locked) ou quando vive numa
+    definição compartilhada (faça make_unique antes)."""
     return su_jobs.apply_edits(skp_path, ops, out_path=out_path, mode=mode)
 
 

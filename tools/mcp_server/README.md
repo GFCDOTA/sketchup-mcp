@@ -70,6 +70,12 @@ Implementação em [`tools/sketchup/`](../sketchup/) — o conhecimento de Sketc
 é **código testável**, não prompt. Sobe o SketchUp (Windows); fora dele as
 tools respondem `UNAVAILABLE` com o motivo, nunca sucesso fabricado.
 
+> **Estado de prova: `UNVERIFIED_ON_SKETCHUP`.** As `su_*` foram testadas só
+> contra um dublê de Windows+SketchUp (e a lógica pura em Ruby comum). Nenhuma
+> rodou num SketchUp real. `su_status` e `list_capabilities` dizem isso em
+> `proof_state`. O estado só muda com evidência de um run real commitada em
+> `artifacts/review/`.
+
 | Tool | O que faz | Tempo |
 |------|-----------|-------|
 | `su_status` | SketchUp instalado? Instâncias (PID), plugin de autorun, V-Ray, jobs | instantâneo |
@@ -89,13 +95,20 @@ resultado existir é a prova de que **esta** execução terminou. Diferente do
 
 Regras que o código faz cumprir (não o prompt):
 
-- **O original nunca é aberto.** Editar e renderizar trabalham numa cópia; em
-  modo `interactive` a janela fica aberta, e um Ctrl+S nela não alcança o
-  original (que pode ser o `.skp` canônico).
+- **O original nunca é aberto.** Editar, renderizar e mobiliar trabalham numa
+  cópia; em modo `interactive` a janela fica aberta, e um Ctrl+S nela não
+  alcança o original (que pode ser o `.skp` canônico).
 - **Nada escreve em `fixtures/` ou `artifacts/`.** Saída default:
   `runs/<plant>/mcp/<job>_<stamp>/`. Entregável só via `promote_canonical`.
 - **Arquitetura é do PDF.** `PlanShell_*`, `Floor_*`, `Window_*`, `DoorLeaf_*`…
-  recusam `move/rotate/delete/rename` (Hard Rule #1); aparência é permitida.
+  recusam `move/rotate/delete/rename` (Hard Rule #1); aparência é permitida. A
+  recusa vale também quando a arquitetura é o **ancestral** ou um **descendente**
+  do alvo, quando casa pelo **nome da definição**, quando o alvo (ou o pai) está
+  **`locked`** e quando ele vive numa **definição compartilhada** entre
+  instâncias (a edição vazaria para todas — `make_unique` antes).
+- **Referencial de mundo.** `move.by_m` e `rotate` são em eixos do mundo; o job
+  converte para o local do pai (num grupo girado, um move "cru" andaria nos eixos
+  girados). `su_inspect` dá `bbox_local_m` (referencial do pai) e `bbox_world_m`.
 - **Medida é explícita, em metros.** `move` sem `by_m` é recusado antes de subir
   o SketchUp. Alvo ambíguo (`expect=one` com 2+ casamentos) é recusado — use o
   `pid` do `su_inspect`.

@@ -75,3 +75,130 @@ class TestSkmcpCore < Minitest::Test
     assert_equal 'view', SkmcpCore.safe_filename('')
   end
 end
+
+# Proteção: cada brecha achada na revisão do PR #249 tem um caso aqui.
+class TestSkmcpGuard < Minitest::Test
+  PREFIXES = %w[PlanShell_ Window_ Floor_].freeze
+
+  def node(pid, name, definition: "Group##{pid}", ancestors: [], locked: false, contexts: 1)
+    { 'pid' => pid, 'name' => name, 'definition' => definition, 'path' => name,
+      'locked' => locked, 'contexts' => contexts, 'ancestors' => ancestors,
+      'ancestor_pids' => ancestors.map { |a| a['pid'] } }
+  end
+
+  def anc(pid, name, definition: "Group##{pid}", locked: false)
+    { 'pid' => pid, 'label' => name, 'name' => name, 'definition' => definition, 'locked' => locked }
+  end
+
+  def violation(info, infos = [info])
+    SkmcpCore.guard_violation(info, infos, PREFIXES)
+  end
+
+  def test_movel_comum_passa
+    assert_nil violation(node(1, 'Sofa'))
+  end
+
+  def test_nome_proprio_protegido
+    assert_match(/arquitetura/, violation(node(1, 'PlanShell_Group')))
+  end
+
+  def test_protegido_pelo_nome_da_definicao
+    # instância sem nome: o Outliner mostra a definição — e a proteção também tem que olhar
+    assert_match(/arquitetura/, violation(node(1, '', definition: 'Window_Group_w1')))
+  end
+
+  def test_dentro_de_arquitetura
+    child = node(2, 'peca', ancestors: [anc(1, 'PlanShell_Group')])
+    assert_match(/dentro de arquitetura/, violation(child))
+  end
+
+  def test_pai_que_contem_arquitetura
+    parent = node(1, 'Pavimento')
+    wall = node(2, 'PlanShell_Group', ancestors: [anc(1, 'Pavimento')])
+    assert_match(/contém arquitetura/, violation(parent, [parent, wall]))
+  end
+
+  def test_travado
+    assert_match(/locked/, violation(node(1, 'Sofa', locked: true)))
+  end
+
+  def test_dentro_de_grupo_travado
+    child = node(2, 'braco', ancestors: [anc(1, 'Sofa', locked: true)])
+    assert_match(/travado/, violation(child))
+  end
+
+  def test_definicao_compartilhada
+    assert_match(/make_unique/, violation(node(1, 'perna', contexts: 4)))
+  end
+
+  def test_dedupe_junta_mesma_entidade_em_varias_instancias
+    a = { 'pid' => 9, 'name' => 'perna', 'path' => 'Cadeira/perna' }
+    b = { 'pid' => 9, 'name' => 'perna', 'path' => 'Cadeira#2/perna' }
+    out = SkmcpCore.dedupe([a, b])
+    assert_equal 1, out.size
+    assert_equal 2, out.first['contexts']
+    assert_equal ['Cadeira/perna', 'Cadeira#2/perna'], out.first['paths']
+  end
+end
+
+# Referencial: transform!/bounds aninhados trabalham no eixo LOCAL do pai.
+class TestSkmcpFrame < Minitest::Test
+  # layout de Geom::Transformation#to_a (coluna-major, origem em 12..14)
+  def rot_z90(origin = [0.0, 0.0, 0.0])
+    [0.0, 1.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, *origin, 1.0]
+  end
+
+  def assert_vec(exp, got, tol = 1e-9)
+    exp.zip(got).each { |e, g| assert_in_delta e, g, tol }
+  end
+
+  def test_identidade
+    m = SkmcpCore.mat_mul(SkmcpCore::IDENTITY, rot_z90([5.0, 0, 0]))
+    assert_vec rot_z90([5.0, 0, 0]), m
+  end
+
+  def test_w_diferente_de_1_e_normalizado
+    # SketchUp guarda escala uniforme 2x como w = 0.5
+    m = [1.0, 0, 0, 0, 0, 1.0, 0, 0, 0, 0, 1.0, 0, 0, 0, 0, 0.5]
+    assert_vec [2.0, 2.0, 2.0], SkmcpCore.apply_point(m, [1.0, 1.0, 1.0])
+  end
+
+  def test_inversa_desfaz
+    m = rot_z90([10.0, 20.0, 3.0])
+    p = [1.5, -2.0, 7.0]
+    back = SkmcpCore.apply_point(SkmcpCore.inverse_affine(m), SkmcpCore.apply_point(m, p))
+    assert_vec p, back
+  end
+
+  def test_mover_em_x_do_mundo_dentro_de_pai_girado_90
+    # o caso real: o sofá integrado vive num wrapper girado theta=90.
+    # Andar +X no mundo = andar -Y no local do pai. Um move "cru" andaria em +Y.
+    local = SkmcpCore.world_to_local_vector(rot_z90([100.0, 50.0, 0.0]), [1.0, 0.0, 0.0])
+    assert_vec [0.0, -1.0, 0.0], local
+  end
+
+  def test_translacao_do_pai_nao_afeta_vetor
+    local = SkmcpCore.world_to_local_vector([1.0, 0, 0, 0, 0, 1.0, 0, 0, 0, 0, 1.0, 0, 9, 9, 9, 1.0], [0, 0, 1.0])
+    assert_vec [0.0, 0.0, 1.0], local
+  end
+
+  def test_ponto_do_mundo_para_o_local
+    local = SkmcpCore.world_to_local_point(rot_z90([100.0, 0.0, 0.0]), [100.0, 1.0, 0.0])
+    assert_vec [1.0, 0.0, 0.0], local
+  end
+
+  def test_bbox_de_mundo_de_caixa_girada
+    lo, hi = SkmcpCore.world_bbox([0.0, 0.0, 0.0], [2.0, 1.0, 1.0], rot_z90)
+    assert_vec [-1.0, 0.0, 0.0], lo
+    assert_vec [0.0, 2.0, 1.0], hi
+  end
+
+  def test_escala_nao_uniforme_bloqueia_rotacao
+    assert SkmcpCore.uniform_frame?(rot_z90)
+    refute SkmcpCore.uniform_frame?([2.0, 0, 0, 0, 0, 1.0, 0, 0, 0, 0, 1.0, 0, 0, 0, 0, 1.0])
+  end
+
+  def test_singular_recusa
+    assert_raises(ArgumentError) { SkmcpCore.inverse_affine(Array.new(15, 0.0) + [1.0]) }
+  end
+end

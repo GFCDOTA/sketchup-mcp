@@ -38,19 +38,47 @@ module SkmcpRuntime
 
   # Grupos e instâncias de componente até `depth` níveis, com o caminho do
   # Outliner. Retorna [[entity, info], ...].
-  def walk(entities, depth: 4, prefix: nil, acc: [])
+  #
+  # Cada info carrega o que a proteção e o referencial precisam:
+  #   ancestors / ancestor_pids — a cadeia até a raiz (proteção olha o pai também)
+  #   parent_world — transformação de MUNDO do contexto onde a entidade vive;
+  #                  transform! e bounds trabalham nesse referencial, não no mundo
+  #   world        — parent_world × transformação da própria entidade
+  # Lê `definition.entities` (nunca `Group#entities`, que tornaria o grupo único).
+  # Default de profundidade alto: a proteção precisa ver TUDO, não só 4 níveis.
+  def walk(entities, depth: 64, prefix: nil, parent_world: SkmcpCore::IDENTITY,
+           ancestors: [], acc: [])
     entities.each do |e|
       next unless e.is_a?(Sketchup::Group) || e.is_a?(Sketchup::ComponentInstance)
       name = e.name.to_s
       defn = e.definition.name.to_s
       label = name.empty? ? defn : name
       path = prefix ? "#{prefix}/#{label}" : label
+      world = SkmcpCore.mat_mul(parent_world, e.transformation.to_a)
+      locked = (e.locked? rescue false)
       info = { 'name' => name, 'definition' => defn, 'pid' => e.persistent_id, 'path' => path,
-               'type' => e.is_a?(Sketchup::Group) ? 'group' : 'component' }
+               'type' => e.is_a?(Sketchup::Group) ? 'group' : 'component',
+               'locked' => locked, 'ancestors' => ancestors,
+               'ancestor_pids' => ancestors.map { |a| a['pid'] },
+               'parent_world' => parent_world, 'world' => world }
       acc << [e, info]
-      walk(e.definition.entities, depth: depth - 1, prefix: path, acc: acc) if depth > 1
+      next unless depth > 1
+
+      me = { 'pid' => e.persistent_id, 'label' => label, 'name' => name,
+             'definition' => defn, 'locked' => locked }
+      walk(e.definition.entities, depth: depth - 1, prefix: path, parent_world: world,
+                                  ancestors: ancestors + [me], acc: acc)
     end
     acc
+  end
+
+  # bbox de mundo em metros, a partir do bbox da definição e da matriz de mundo.
+  def bbox_world_m(entity, world)
+    bb = entity.definition.bounds
+    lo, hi = SkmcpCore.world_bbox([bb.min.x, bb.min.y, bb.min.z].map(&:to_f),
+                                  [bb.max.x, bb.max.y, bb.max.z].map(&:to_f), world)
+    { 'min' => lo.map { |v| to_m(v) }, 'max' => hi.map { |v| to_m(v) },
+      'size' => (0..2).map { |i| to_m(hi[i] - lo[i]) } }
   end
 
   def run(job)
