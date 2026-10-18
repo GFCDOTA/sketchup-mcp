@@ -21,6 +21,12 @@
 
 ## O que landou desde o último snapshot (jul/07 → set/20)
 
+- **NOC/cockpit `:8765` APOSENTADO** (`4ddfaf7`, pedido do Felipe 2026-07-24)
+  — saíram `claude_bridge` server, dispatcher/feeder/curation, dashboards
+  (`:8782`) e vitrine. **Oráculo de decisão agora = GPT-Docker `:8899`**
+  (`ops/gpt-docker/`, skill `gpt-docker-consult`). Ficaram: stack de visão,
+  todo o RAG/write-back, `_paths`/`skp_inventory`. Lições em
+  `E:\Claude\LESSONS-NOC.md`.
 - **Estúdio / Ateliê 74** — `ops/estudio-front/` (:8788) com chat RAG de
   preferências + `knowledge_ingest.py`; merge `feat/estudio-banheiro`.
 - **Domínio compartilhado** (PR #243) — `core/domain/` (ids, contratos,
@@ -51,8 +57,8 @@ Stack autônomo de melhoria de planta, sob a regra dura: máquina emite
 `findings` tipados + roda gates determinísticos; veredito estético
 `IMPROVED/SAME/WORSE` continua **só do Felipe** (VISUAL_REVIEW).
 
-- **FP-032 Vision ACL** (live) — rota `/ask-vision` no `:8765`; o modelo vê
-  o render e discrimina defeito real vs ruído (provado em prod).
+- **FP-032 Vision ACL** — rota `/ask-vision` no `:8765` (servidor
+  aposentado em jul/24; a stack de visão ficou).
 - **FP-033 Correction Loop** (live) — detect→classifica→conserta o
   determinístico→re-checa; aparência sobe pro Felipe.
 - **FP-034 Variant Sweep** (live) — eixos tipados + varredura SU-free +
@@ -63,10 +69,8 @@ Stack autônomo de melhoria de planta, sob a regra dura: máquina emite
 - **FP-036/037/038 Material de verdade** (done) — textura real por peça no
   `.skp` + material por (família, peça) + câmera de prova por cômodo.
 - **FP-039 Fingerprint honesto v2** (done) — tiers reliable/advisory/forbidden.
-- **FP-040 Bridge hardening** (live) — watchdog v3 (singleton + backoff +
-  spawn capturado + BOM-safe) + `/health` com build-id.
-- **Night loop** (live) — `night_feeder` capado + painel de 3 juízes no
-  `/ask-vision` + `variant-vision-drain` fecham o laço sem clique humano.
+- **FP-040 Bridge hardening** / **Night loop** (`night_feeder`,
+  `variant-vision-drain`) — **removidos** junto com o `:8765` (jul/24).
 
 ## Baselines estáveis (não retrabalhar)
 
@@ -90,13 +94,10 @@ Stack autônomo de melhoria de planta, sob a regra dura: máquina emite
   — DEFERRED/roadmap (M4).
 - **Branches remotas soltas:** `backup/stash-0..4` (sem PR) — decidir
   arquivar/deletar com o Felipe.
-- **Higiene de branches NOC:** o `night_feeder`/dispatcher gera branches
-  `chore/noc-*` efêmeras; podar as consumidas periodicamente (as `visdrain`
-  carregam corpus único → drenar/arquivar antes de deletar).
 
 ## TODO — verificar live
 
 - [ ] `git worktree list` — confirmar agentes ativos ANTES de op de
       branch/worktree (o tree principal `E:/Claude/apps/sketchup-mcp` pode
       estar em branch stale; ler fonte-da-verdade via `git show develop:<path>`).
-- [ ] NOC `:8765` → `/health` (build_sha12) + placar.
+- [ ] GPT-Docker `:8899` → `/health` antes de rotear decisão pelo gate.
