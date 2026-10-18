@@ -447,9 +447,33 @@ def test_su_marcadas_como_nao_provadas_no_sketchup():
     assert st["proof_state"] == "UNVERIFIED_ON_SKETCHUP"
 
 
-def test_render_vray_sem_vray_e_unavailable(tmp_path):
-    r = jobs.render_vray(str(tmp_path), su=su_with(FakeSystem(virtual=(EXE,))))
-    assert r["status"] == "UNAVAILABLE"
+def test_render_vray_recusa_enquanto_o_launcher_mata_por_imagem(tmp_path):
+    """O launcher legado roda `taskkill /F /IM SketchUp.exe` após a exportação:
+    a tool recusa com o motivo, mesmo com SketchUp e V-Ray presentes, e nunca
+    chega a importá-lo."""
+    sys_ = FakeSystem()
+    r = jobs.render_vray(str(tmp_path), su=su_with(sys_))
+    assert r["status"] == "REFUSED" and "taskkill" in r["reason"]
+    assert sys_.launched == []
+
+
+def test_apply_edits_recusa_destino_que_ja_existe(tmp_path, skp):
+    """Antes: a cópia sobrescrevia o destino e uma falha depois o APAGAVA —
+    destruindo um arquivo que o job nunca criou."""
+    out = tmp_path / "ja_existe.skp"
+    out.write_bytes(b"TRABALHO DO FELIPE")
+    sys_ = FakeSystem()
+    r = jobs.apply_edits(str(skp), [{"op": "set_hidden", "target": {"name": "Cama"}, "hidden": True}],
+                         out_path=str(out), su=su_with(sys_))
+    assert r["status"] == "REFUSED" and sys_.launched == []
+    assert out.read_bytes() == b"TRABALHO DO FELIPE"
+
+
+def test_insert_component_com_nome_de_arquitetura_e_recusado(tmp_path):
+    comp = tmp_path / "Window_Group_w9.skp"
+    comp.write_bytes(b"x")
+    with pytest.raises(ops.OpsInvalid, match="reservado para arquitetura"):
+        ops.validate([{"op": "insert_component", "skp_path": str(comp), "position_m": [0, 0, 0]}])
 
 
 def test_status_lista_os_jobs_ruby_versionados():

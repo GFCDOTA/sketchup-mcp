@@ -180,6 +180,11 @@ def apply_edits(skp_path: str, ops: list[dict], *, out_path: str | None = None,
     else:
         d = paths.default_out_dir("edit")
         out = d / f"{p.stem}_edited.skp"
+    if out.exists():
+        # a cópia o sobrescreveria, e uma falha depois o apagaria — destruindo um
+        # arquivo que este job nunca criou
+        return {"status": "REFUSED",
+                "reason": f"out_path já existe ({out}); a edição sai sempre em arquivo novo"}
     _working_copy(p, out)
     # a cópia já existe, então existir não prova nada: a prova é o Ruby ter
     # salvo DEPOIS da cópia (mtime) e ter dito saved=true
@@ -314,31 +319,25 @@ def furnish(*, consensus_path: str | None = None, base_skp: str | None = None,
     return out
 
 
+# O launcher legado (tools/render_scene_vray.py) mata o SketchUp por NOME DE
+# IMAGEM depois da exportação (`taskkill /F /IM SketchUp.exe`) e escreve dentro
+# do scene_dir. A checagem "SketchUp aberto?" dele é só no início: uma janela que
+# o Felipe abrir durante a exportação morre sem salvar. Até o launcher passar por
+# tools.sketchup.batch (PID próprio + destino checado), a tool recusa.
+VRAY_REFUSAL = ("su_render_vray desabilitada: o launcher tools/render_scene_vray.py roda "
+                "`taskkill /F /IM SketchUp.exe` após a exportação (fecharia sem salvar qualquer "
+                "SketchUp aberto nesse meio-tempo) e escreve dentro do scene_dir. Rode o launcher "
+                "à mão, com o SketchUp fechado, até ele ser portado para tools.sketchup.batch.")
+
+
 def render_vray(scene_dir: str, *, out_png: str | None = None, su: SketchUp | None = None,
                 **opts: Any) -> dict[str, Any]:
-    """Render V-Ray de uma cena composta (`tools.render_scene_vray`). O launcher
-    já recusa rodar com SketchUp aberto (no-disrupt). Ele usa os caminhos
-    padrão de SketchUp/V-Ray dele próprio, não SKETCHUP_EXE/VRAY_EXE."""
-    su = _su(su)
-    why = su.unavailable()
-    if why:
-        return {"status": "UNAVAILABLE", "reason": why}
-    if not su.system.exists(su.loc.vray_exe):
-        return {"status": "UNAVAILABLE", "reason": f"vray.exe não encontrado em {su.loc.vray_exe} (env VRAY_EXE)"}
-    sd = paths.resolve(scene_dir)
-    if not sd.is_dir():
-        return {"status": "ERROR", "reason": f"scene_dir não é diretório: {sd}"}
-    if out_png:
-        try:
-            out_png = str(paths.check_output(out_png))
-        except paths.OutputPathRefused as e:
-            return {"status": "REFUSED", "reason": str(e)}
-    from tools.render_scene_vray import render_scene_vray
+    """Render V-Ray de uma cena composta (`tools.render_scene_vray`).
 
-    res = render_scene_vray(sd, out_png=out_png, **opts)
-    st = str(res.get("status", "")).lower()
-    return {"status": {"success": "OK", "skipped": "UNAVAILABLE", "fail": "FAILED"}.get(st, st.upper() or "FAILED"),
-            "render": res, "visual_review": VISUAL_REVIEW}
+    RECUSA hoje (VRAY_REFUSAL): o launcher legado mata o SketchUp por nome de
+    imagem. A tool continua registrada para dizer POR QUE não roda — capacidade
+    ausente é recusa com motivo, não sumiço."""
+    return {"status": "REFUSED", "reason": VRAY_REFUSAL, "scene_dir": scene_dir}
 
 
 __all__ = ["status", "open_model", "close", "inspect_model", "render_views", "apply_edits",

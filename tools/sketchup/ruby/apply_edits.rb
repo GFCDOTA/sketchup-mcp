@@ -58,11 +58,11 @@ def skmcp_apply(model, op, entity, info)
     lo, hi = SkmcpCore.world_bbox([bb.min.x, bb.min.y, bb.min.z].map(&:to_f),
                                   [bb.max.x, bb.max.y, bb.max.z].map(&:to_f), info['world'])
     c_world = (0..2).map { |i| (lo[i] + hi[i]) / 2.0 }
-    c_local = SkmcpCore.world_to_local_point(info['parent_world'], c_world)
-    axis_local = SkmcpCore.world_to_local_vector(info['parent_world'], [0.0, 0.0, 1.0])
-    entity.transform!(Geom::Transformation.rotation(Geom::Point3d.new(*c_local),
-                                                    Geom::Vector3d.new(*axis_local),
-                                                    op['degrees'].to_f.degrees))
+    # conjuga a rotação de MUNDO inteira para o local do pai: exato também sob
+    # pai espelhado, onde levar só eixo+centro inverteria o sentido
+    t_local = SkmcpCore.local_transform_for_world(info['parent_world'],
+                                                  SkmcpCore.rotation_z(c_world, op['degrees']))
+    entity.transform!(Geom::Transformation.new(t_local))
   when 'set_tag' then entity.layer = (model.layers[op['tag']] || model.layers.add(op['tag']))
   when 'set_hidden' then entity.hidden = op['hidden']
   when 'rename' then entity.name = op['name']
@@ -79,6 +79,12 @@ SkmcpRuntime.run('apply_edits') do |params, model|
     params.fetch('ops').each_with_index do |op, i|
       if op['op'] == 'insert_component'
         defn = model.definitions.load(op['skp_path'])
+        # DefinitionList#load nomeia a definição pelo nome do ARQUIVO: um
+        # Window_x.skp viraria "arquitetura do PDF" para a guarda e o inspect
+        if SkmcpCore.protected_name?(defn.name, prefixes)
+          raise "ops[#{i}] (insert_component): a definição carregada '#{defn.name}' usa prefixo " \
+                'reservado para arquitetura do PDF (Hard Rule #1)'
+        end
         x, y, z = op['position_m'].map { |v| v.to_f.m }
         origin = Geom::Point3d.new(x, y, z)
         tr = Geom::Transformation.translation(origin) *
@@ -97,6 +103,13 @@ SkmcpRuntime.run('apply_edits') do |params, model|
       if GUARDED.include?(op['op'])
         bad = hits.map { |h| SkmcpCore.guard_violation(h, infos, prefixes) }.compact
         raise "ops[#{i}] (#{op['op']}) recusado: #{bad.first(5).join('; ')} (Hard Rule #1)" unless bad.empty?
+      end
+      if %w[move rotate].include?(op['op'])
+        nested = SkmcpCore.nested_hits(hits)
+        unless nested.empty?
+          raise "ops[#{i}] (#{op['op']}): o alvo casa um grupo E peças dentro dele — elas andariam " \
+                "duas vezes: #{nested.first(5).map { |h| h['path'] }.inspect}; restrinja o alvo"
+        end
       end
       by_pid = pairs.to_h { |e, info| [info['pid'], e] }
       hits.each do |h|

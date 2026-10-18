@@ -120,17 +120,34 @@ module SkmcpCore
   # O walk visita o conteúdo de um componente uma vez POR INSTÂNCIA, e as
   # entidades dentro da definição têm o mesmo persistent_id em todas. Junta por
   # pid; `contexts` > 1 = a entidade é compartilhada entre instâncias.
+  #
+  # A ancestralidade é a UNIÃO de todas as visitas: guardar só a 1ª deixava a
+  # arquitetura dentro das outras instâncias de um container compartilhado
+  # invisível para descendants() — mover a 2ª cópia passava pela guarda.
   def dedupe(infos)
     by = {}
     infos.each do |i|
-      if by[i['pid']]
-        by[i['pid']]['contexts'] += 1
-        by[i['pid']]['paths'] << i['path']
+      cur = by[i['pid']]
+      if cur
+        cur['contexts'] += 1
+        cur['paths'] << i['path']
+        cur['ancestor_pids'] = cur['ancestor_pids'] | (i['ancestor_pids'] || [])
+        cur['ancestors'] = (cur['ancestors'] + (i['ancestors'] || [])).uniq { |a| a['pid'] }
+        cur['locked'] ||= i['locked']
       else
-        by[i['pid']] = i.merge('contexts' => 1, 'paths' => [i['path']])
+        by[i['pid']] = i.merge('contexts' => 1, 'paths' => [i['path']],
+                               'ancestor_pids' => (i['ancestor_pids'] || []).dup,
+                               'ancestors' => (i['ancestors'] || []).dup)
       end
     end
     by.values
+  end
+
+  # Alvos de move/rotate em que um é ancestral de outro: o filho já anda com o
+  # pai, e transformá-lo de novo dobraria o movimento. Devolve os aninhados.
+  def nested_hits(hits)
+    pids = hits.map { |h| h['pid'] }
+    hits.select { |h| (h['ancestor_pids'] || []).any? { |p| pids.include?(p) } }
   end
 
   # -- referencial -------------------------------------------------------------
@@ -195,8 +212,24 @@ module SkmcpCore
     apply_vector(inverse_affine(parent_world), v)
   end
 
-  def world_to_local_point(parent_world, p)
-    apply_point(inverse_affine(parent_world), p)
+  # Rotação de `degrees` em torno do Z do MUNDO passando por `center`, como
+  # matriz no layout de Geom::Transformation#to_a.
+  def rotation_z(center, degrees)
+    t = degrees.to_f * Math::PI / 180.0
+    c = Math.cos(t)
+    s = Math.sin(t)
+    cx, cy, = center.map(&:to_f)
+    [c, s, 0.0, 0.0, -s, c, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
+     cx - c * cx + s * cy, cy - s * cx - c * cy, 0.0, 1.0]
+  end
+
+  # Transformação a aplicar com transform! (que age no referencial do PAI) para
+  # que o efeito no MUNDO seja exatamente `world_mat`: inv(P) · W · P.
+  # Conjugar a matriz inteira — e não só levar eixo e centro para o local — é o
+  # que mantém o sentido certo sob pai ESPELHADO (Flip Along, det < 0): ali uma
+  # rotação de +θ no eixo local vira -θ no mundo.
+  def local_transform_for_world(parent_world, world_mat)
+    mat_mul(inverse_affine(parent_world), mat_mul(world_mat, parent_world))
   end
 
   # Eixos ortogonais e de mesmo comprimento: só aí uma rotação em torno do Z do

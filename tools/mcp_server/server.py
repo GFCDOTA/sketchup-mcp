@@ -158,7 +158,7 @@ def list_capabilities() -> dict[str, Any]:
             "su_apply_edits": "material/cor/textura, mover, girar, tag, visibilidade, renomear, apagar, inserir componente — salva CÓPIA.",
             "su_build_shell": "consensus -> shell .skp + renders + gates determinísticos (não promove).",
             "su_furnish": "mobilia a planta_74 no shell (brains de layout -> place_layout_skp.rb).",
-            "su_render_vray": "render V-Ray de uma cena composta (runs/scenes/<id>).",
+            "su_render_vray": "RECUSA hoje: o launcher legado mata o SketchUp por nome de imagem (taskkill /IM); devolve o motivo.",
         },
         "furniture_kinds": sorted(_FURN),
         "edit_ops": sorted(su_ops.ALL_OPS),
@@ -476,8 +476,12 @@ def su_render_vray(
     height: int = 1000,
     fov: float = 65,
 ) -> dict[str, Any]:
-    """Render V-Ray de uma cena composta (dir com scene.skp + scene.json, ex.
-    runs/scenes/<id>). Não roda com SketchUp aberto (no-disrupt). ~2-3 min."""
+    """Render V-Ray de uma cena composta (dir com scene.skp + scene.json).
+
+    DESABILITADA: responde REFUSED com o motivo. O launcher legado
+    (tools/render_scene_vray.py) roda `taskkill /F /IM SketchUp.exe` depois da
+    exportação e escreve dentro do scene_dir; volta quando for portado para
+    tools.sketchup.batch (PID próprio + destino checado)."""
     return su_jobs.render_vray(scene_dir, out_png=out_png, width=width, height=height, fov=fov)
 
 

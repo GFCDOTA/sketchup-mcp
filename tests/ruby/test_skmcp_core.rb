@@ -131,6 +131,27 @@ class TestSkmcpGuard < Minitest::Test
     assert_match(/make_unique/, violation(node(1, 'perna', contexts: 4)))
   end
 
+  def test_dedupe_une_a_ancestralidade_de_todas_as_visitas
+    # mesma parede vista por 2 caminhos: a união é o que deixa descendants()
+    # achar a arquitetura dentro de QUALQUER instância do container
+    a = { 'pid' => 100, 'path' => 'Sala/Modulo/PlanShell_piece_1', 'ancestor_pids' => [5, 11],
+          'ancestors' => [{ 'pid' => 5 }, { 'pid' => 11 }], 'locked' => false }
+    b = { 'pid' => 100, 'path' => 'Modulo/PlanShell_piece_1', 'ancestor_pids' => [12],
+          'ancestors' => [{ 'pid' => 12, 'locked' => true }], 'locked' => true }
+    out = SkmcpCore.dedupe([a, b]).first
+    assert_equal [5, 11, 12], out['ancestor_pids']
+    assert_equal [5, 11, 12], out['ancestors'].map { |x| x['pid'] }
+    assert out['locked']
+  end
+
+  def test_alvos_aninhados_sao_detectados
+    pai = { 'pid' => 1, 'path' => 'Sofa', 'ancestor_pids' => [] }
+    filho = { 'pid' => 2, 'path' => 'Sofa/braco', 'ancestor_pids' => [1] }
+    outro = { 'pid' => 3, 'path' => 'Mesa', 'ancestor_pids' => [] }
+    assert_equal [2], SkmcpCore.nested_hits([pai, filho, outro]).map { |h| h['pid'] }
+    assert_empty SkmcpCore.nested_hits([pai, outro])
+  end
+
   def test_dedupe_junta_mesma_entidade_em_varias_instancias
     a = { 'pid' => 9, 'name' => 'perna', 'path' => 'Cadeira/perna' }
     b = { 'pid' => 9, 'name' => 'perna', 'path' => 'Cadeira#2/perna' }
@@ -182,11 +203,6 @@ class TestSkmcpFrame < Minitest::Test
     assert_vec [0.0, 0.0, 1.0], local
   end
 
-  def test_ponto_do_mundo_para_o_local
-    local = SkmcpCore.world_to_local_point(rot_z90([100.0, 0.0, 0.0]), [100.0, 1.0, 0.0])
-    assert_vec [1.0, 0.0, 0.0], local
-  end
-
   def test_bbox_de_mundo_de_caixa_girada
     lo, hi = SkmcpCore.world_bbox([0.0, 0.0, 0.0], [2.0, 1.0, 1.0], rot_z90)
     assert_vec [-1.0, 0.0, 0.0], lo
@@ -196,6 +212,23 @@ class TestSkmcpFrame < Minitest::Test
   def test_escala_nao_uniforme_bloqueia_rotacao
     assert SkmcpCore.uniform_frame?(rot_z90)
     refute SkmcpCore.uniform_frame?([2.0, 0, 0, 0, 0, 1.0, 0, 0, 0, 0, 1.0, 0, 0, 0, 0, 1.0])
+  end
+
+  def test_rotacao_de_mundo_exata_sob_pai_espelhado
+    # Flip Along no wrapper (det < 0): levar só eixo+centro para o local
+    # inverteria o sentido. A conjugação inteira mantém o efeito no MUNDO.
+    flip = [-1.0, 0, 0, 0, 0, 1.0, 0, 0, 0, 0, 1.0, 0, 30.0, 0, 0, 1.0]
+    r_world = SkmcpCore.rotation_z([10.0, 5.0, 0.0], 90)
+    t_local = SkmcpCore.local_transform_for_world(flip, r_world)
+    p_local = [3.0, 2.0, 1.0]
+    via_local = SkmcpCore.apply_point(SkmcpCore.mat_mul(flip, t_local), p_local)
+    direto = SkmcpCore.apply_point(r_world, SkmcpCore.apply_point(flip, p_local))
+    assert_vec direto, via_local
+  end
+
+  def test_rotacao_z_gira_no_sentido_anti_horario
+    assert_vec [0.0, 1.0, 0.0], SkmcpCore.apply_point(SkmcpCore.rotation_z([0, 0, 0], 90), [1.0, 0, 0])
+    assert_vec [10.0, 1.0, 0.0], SkmcpCore.apply_point(SkmcpCore.rotation_z([10.0, 0, 0], 90), [11.0, 0, 0])
   end
 
   def test_singular_recusa

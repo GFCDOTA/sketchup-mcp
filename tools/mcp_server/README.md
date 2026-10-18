@@ -86,7 +86,7 @@ tools respondem `UNAVAILABLE` com o motivo, nunca sucesso fabricado.
 | `su_apply_edits` | Material/cor/textura, mover, girar, tag, visibilidade, renomear, apagar, inserir componente | ~30–60 s |
 | `su_build_shell` | consensus → shell `.skp` + renders + gates determinísticos | ~60–90 s |
 | `su_furnish` | Mobilia a planta_74 no shell (brains → `place_layout_skp.rb`) | ~3 min |
-| `su_render_vray` | Render V-Ray de uma cena composta | ~2–3 min |
+| `su_render_vray` | **Recusa hoje, com motivo**: o launcher legado roda `taskkill /F /IM SketchUp.exe`. Volta quando for portado para `tools.sketchup.batch` | — |
 
 Como roda: `SketchUp.exe <cópia.skp> -RubyStartup tools/sketchup/ruby/<job>.rb`.
 O job lê `SKMCP_PARAMS` e escreve `SKMCP_RESULT` (JSON, atômico, por último): o
@@ -109,6 +109,11 @@ Regras que o código faz cumprir (não o prompt):
 - **Referencial de mundo.** `move.by_m` e `rotate` são em eixos do mundo; o job
   converte para o local do pai (num grupo girado, um move "cru" andaria nos eixos
   girados). `su_inspect` dá `bbox_local_m` (referencial do pai) e `bbox_world_m`.
+- **Nada de transformação dupla.** `move`/`rotate` cujo alvo casa um grupo E
+  peças dentro dele é recusado (as peças andariam duas vezes). `rotate` conjuga a
+  rotação de mundo inteira para o local do pai, então continua certo sob pai
+  espelhado (Flip Along).
+- **Destino novo sempre.** `su_apply_edits` recusa `out_path` que já existe.
 - **Medida é explícita, em metros.** `move` sem `by_m` é recusado antes de subir
   o SketchUp. Alvo ambíguo (`expect=one` com 2+ casamentos) é recusado — use o
   `pid` do `su_inspect`.

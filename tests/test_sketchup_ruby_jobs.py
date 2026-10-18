@@ -28,6 +28,13 @@ def test_logica_pura_do_core_ruby():
     assert r.returncode == 0, r.stdout + r.stderr
 
 
+def test_composicao_walk_dedupe_guarda_com_sketchup_falso():
+    """O walk REAL sobre classes falsas: prova que walk -> dedupe -> guarda e o
+    referencial se encaixam (os testes do core usam infos montadas à mão)."""
+    r = subprocess.run([RUBY, "tests/ruby/test_skmcp_walk.rb"], capture_output=True, text=True)
+    assert r.returncode == 0, r.stdout + r.stderr
+
+
 def test_todo_job_usa_o_runtime_comum():
     """Sem o runtime, o job não escreve o JSON de resultado e o Python espera até o timeout."""
     for rb in RUBY_DIR.glob("*.rb"):
@@ -41,9 +48,9 @@ def test_jobs_usam_a_logica_testada_do_core():
     """A lógica pura só protege se os jobs a chamarem: proteção completa e
     referencial de mundo no apply_edits, bbox de mundo no inspect."""
     apply_src = (RUBY_DIR / "apply_edits.rb").read_text("utf-8")
-    for needle in ("SkmcpCore.guard_violation", "SkmcpCore.dedupe",
-                   "SkmcpCore.world_to_local_vector", "SkmcpCore.world_to_local_point",
-                   "SkmcpCore.uniform_frame?"):
+    for needle in ("SkmcpCore.guard_violation", "SkmcpCore.dedupe", "SkmcpCore.nested_hits",
+                   "SkmcpCore.world_to_local_vector", "SkmcpCore.local_transform_for_world",
+                   "SkmcpCore.rotation_z", "SkmcpCore.uniform_frame?"):
         assert needle in apply_src, needle
     inspect_src = (RUBY_DIR / "inspect_model.rb").read_text("utf-8")
     assert "bbox_world_m" in inspect_src and "SkmcpCore.dedupe" in inspect_src

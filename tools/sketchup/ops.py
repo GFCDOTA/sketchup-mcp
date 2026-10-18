@@ -161,6 +161,11 @@ def validate(ops: Any, *, exists=lambda p: Path(p).exists()) -> list[dict[str, A
             p = op.get("skp_path")
             if not (isinstance(p, str) and p.lower().endswith(".skp") and exists(p)):
                 errs.append(f"{where}: insert_component exige skp_path de um .skp existente")
+            elif is_protected(Path(p).stem):
+                # o SketchUp nomeia a definição pelo nome do arquivo: Window_x.skp
+                # viraria "arquitetura do PDF" para a guarda e para o inspect
+                errs.append(f"{where}: o arquivo '{Path(p).name}' daria à definição um nome "
+                            "reservado para arquitetura do PDF")
             else:
                 norm["skp_path"] = str(Path(p).resolve())
             if not _vec3(op.get("position_m")):
