@@ -31,7 +31,8 @@ async def main() -> int:
             listed = await session.list_tools()
             names = sorted(t.name for t in listed.tools)
             print("tools via stdio:", names)
-            assert len(names) >= 9, names
+            assert len(names) >= 18, names
+            assert "su_status" in names, names
 
             res = await session.call_tool("list_capabilities", {})
             txt = res.content[0].text if res.content else ""

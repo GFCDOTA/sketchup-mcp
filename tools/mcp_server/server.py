@@ -1,14 +1,17 @@
-"""sketchup-mcp — servidor MCP (FastMCP), fatia 1.
+"""sketchup-mcp — servidor MCP (FastMCP), fatias 1 + 2.
 
-Expõe os "verbos" PUROS/rápidos do pipeline (sem SketchUp.exe) como tools MCP
-estruturadas, pra o Claude chamar direto — JSON minúsculo entra/sai, em vez de
-construir comando bash + parsear log (corta token), e com os gotchas embutidos
-(ex.: PT_TO_M=0.0259 default nos gates de mobília).
+Expõe os "verbos" do pipeline como tools MCP estruturadas, pra um agente
+(Claude Code / Claude Desktop / harness-app) chamar direto — JSON minúsculo
+entra/sai, em vez de construir comando bash + parsear log, e com os gotchas
+embutidos (ex.: PT_TO_M=0.0259 da planta_74).
 
-Fatia 1 (esta): gates determinísticos, classes de móvel (derive+gate),
-tradutor de referência Pinterest (contrato/normalizador/validador), promoção
-de artefato, inventário de SKP. As tools PESADAS (build_shell/furnish/V-Ray,
-que sobem o SketchUp) ficam pra fatia 2.
+Fatia 1: tools PURAS (sem SketchUp) — gates determinísticos, classes de móvel
+(derive+gate), tradutor de referência Pinterest, promoção, inventário de SKP.
+
+Fatia 2: o ESPECIALISTA EM SKETCHUP (`su_*`, implementado em tools/sketchup/)
+— ciclo de vida do SketchUp, inspeção, render, edição do modelo, build do
+shell, mobiliado e V-Ray. Sobem o SketchUp (Windows); fora dele respondem
+UNAVAILABLE com o motivo, nunca sucesso fabricado.
 
 Rodar:  python -m tools.mcp_server.server      (stdio)
 Registrar em .mcp.json apontando pra este módulo via a venv do repo.
@@ -22,6 +25,12 @@ import os
 import sys
 from pathlib import Path
 from typing import Any
+
+# planta_74 tem escala verificada (core.scale.PLANT_PT_TO_M) e core.scale congela
+# PT_TO_M no PRIMEIRO import — setar depois (como room_gates fazia) não corrige.
+# Este servidor é planta_74: o default entra ANTES de qualquer import do pipeline.
+# Env explícito do cliente continua vencendo.
+os.environ.setdefault("PT_TO_M", "0.0259")
 
 # Torna `tools.*` importável independente do cwd com que o MCP foi spawnado.
 _REPO = Path(__file__).resolve().parents[2]
@@ -46,6 +55,8 @@ from tools.armchair_class import derive_armchair_spec, armchair_class_gate  # no
 from tools.dining_table_class import derive_dining_spec, dining_class_gate  # noqa: E402
 from tools.rack_class import derive_rack_spec, rack_class_gate  # noqa: E402
 from tools.coffee_table_class import derive_coffee_spec, coffee_table_class_gate  # noqa: E402
+from tools.sketchup import jobs as su_jobs  # noqa: E402
+from tools.sketchup import ops as su_ops  # noqa: E402
 
 mcp = FastMCP(
     "sketchup-mcp",
@@ -53,8 +64,13 @@ mcp = FastMCP(
         "Pipeline PDF->.skp do sketchup-mcp. Tools puras (sem SketchUp): gates "
         "determinísticos, classes paramétricas de móvel (derive+gate), tradutor "
         "de referência visual (Pinterest) -> DesignGrammarSpec, promoção e "
-        "inventário. REGRA-MÃE do tradutor: a referência manda na LINGUAGEM; o "
-        "PDF/consensus manda na POSIÇÃO (imutável). Comece por list_capabilities."
+        "inventário. Especialista em SketchUp (su_*): status/abrir/fechar, "
+        "inspecionar, renderizar, editar (cópia nova, nunca o original), build do "
+        "shell, mobiliar e V-Ray. REGRAS: o PDF/consensus manda na POSIÇÃO "
+        "(arquitetura não aceita edição geométrica); nada escreve em fixtures/ ou "
+        "artifacts/ (promoção só via promote_canonical); fechar SketchUp exige "
+        "confirm=true e é por PID; aparência nova pede VISUAL_REVIEW do Felipe. "
+        "Comece por list_capabilities e su_status."
     ),
 )
 
@@ -112,13 +128,14 @@ _FURN_ALIASES = {"dining": "dining_table", "coffee": "coffee_table"}
 
 @mcp.tool()
 def list_capabilities() -> dict[str, Any]:
-    """Catálogo do que este MCP expõe (fatia 1) + o que está adiado pra fatia 2.
+    """Catálogo do que este MCP expõe: tools puras (fatia 1) + especialista em
+    SketchUp `su_*` (fatia 2).
 
     Leia isto primeiro — descreve as tools, seus argumentos e os gotchas
     embutidos, pra você não precisar adivinhar invocação de CLI."""
     return {
         "server": "sketchup-mcp",
-        "slice": 1,
+        "slice": 2,
         "tools": {
             "run_deterministic_gates": "gates de consensus/render (PASS/FAIL/INCOMPLETE), sem SketchUp.",
             "furniture_class_derive": "deriva + valida uma classe de móvel (sofa/bed/armchair/dining_table/rack/coffee_table).",
@@ -129,12 +146,28 @@ def list_capabilities() -> dict[str, Any]:
             "promote_canonical": "promove um build abençoado pra artifacts/<plant>/.",
             "skp_inventory": "inventário categorizado dos .skp do repo (dedup + git status).",
         },
+        "sketchup_specialist": {
+            "su_status": "SketchUp instalado? instâncias rodando (PID), plugin de autorun, V-Ray. Rápido, sem subir nada.",
+            "su_open": "abre um .skp numa janela nova (desanexada).",
+            "su_close": "fecha por PID ou todas — SÓ com confirm=true; gracioso (pergunta se salva) salvo force=true.",
+            "su_inspect": "inventário do .skp: grupos/componentes (nome, PID persistente, tag, material, bbox em m), materiais, tags, cenas.",
+            "su_render": "PNGs por preset (top/iso/front/back/left/right) ou câmera em metros; esconde/enquadra por nome.",
+            "su_apply_edits": "material/cor/textura, mover, girar, tag, visibilidade, renomear, apagar, inserir componente — salva CÓPIA.",
+            "su_build_shell": "consensus -> shell .skp + renders + gates determinísticos (não promove).",
+            "su_furnish": "mobilia a planta_74 no shell (brains de layout -> place_layout_skp.rb).",
+            "su_render_vray": "render V-Ray de uma cena composta (runs/scenes/<id>).",
+        },
         "furniture_kinds": sorted(_FURN),
-        "deferred_to_slice2": [
-            "build_shell (PDF->.skp, ~60-90s, sobe SketchUp)",
-            "furnish_apartment (~180s, sobe SketchUp)",
-            "render_scene_vray (~120-180s, SketchUp + V-Ray)",
-            "consult_oracle (proxy do :8765)",
+        "edit_ops": sorted(su_ops.ALL_OPS),
+        "protected_prefixes": list(su_ops.PROTECTED_PREFIXES),
+        "gotchas": [
+            "Unidade da API é METRO; o SketchUp guarda polegadas — a conversão é interna.",
+            "Grupos de arquitetura (protected_prefixes) não aceitam move/rotate/delete: vêm do PDF.",
+            "Edição sempre sai em .skp NOVO; nunca em fixtures/ ou artifacts/.",
+            "mode: 'interactive' (default local) deixa o SketchUp aberto pra inspeção; "
+            "'headless' (default no CI) fecha a instância que o job subiu — nunca outra.",
+            "Jobs pesados levam 30-300 s (sobem o SketchUp). Alvo ambíguo é recusado: use persistent_id do su_inspect.",
+            "Aparência nova (render/furnish/build) pede VISUAL_REVIEW do Felipe — nunca auto-aprovar.",
         ],
         "rule": "Tradutor de referência: referência=LINGUAGEM, PDF=POSIÇÃO (imutável).",
     }
@@ -308,6 +341,133 @@ def skp_inventory() -> dict[str, Any]:
     """Inventário categorizado dos .skp do repo (tamanho, sha, git status,
     dedup, ação sugerida KEEP/ARCHIVE/...). Sem SketchUp."""
     return skp_inventory_v2()
+
+
+# ---------------------------------------------------------------------------
+# especialista em SketchUp (fatia 2) — implementação em tools/sketchup/
+# ---------------------------------------------------------------------------
+
+@mcp.tool()
+def su_status() -> dict[str, Any]:
+    """Estado do SketchUp nesta máquina, sem subir nada: executável encontrado,
+    instâncias rodando (PID + memória), plugin de autorun do build do shell,
+    V-Ray, jobs Ruby disponíveis e o modo padrão. Chame antes das outras su_*."""
+    return su_jobs.status()
+
+
+@mcp.tool()
+def su_open(skp_path: str) -> dict[str, Any]:
+    """Abre um .skp numa janela nova do SketchUp, DESANEXADA (fechar o MCP não
+    fecha o SketchUp). Retorna {status: OPENED, pid}."""
+    return su_jobs.open_model(skp_path)
+
+
+@mcp.tool()
+def su_close(
+    pid: int | None = None,
+    all_instances: bool = False,
+    force: bool = False,
+    confirm: bool = False,
+) -> dict[str, Any]:
+    """Fecha SketchUp por PID (ou todas as instâncias com all_instances=true).
+
+    SEM confirm=true só devolve o que fecharia (CONFIRMATION_REQUIRED) — fechar
+    pode descartar trabalho não salvo. Padrão é gracioso (o SketchUp pergunta
+    se quer salvar); force=true mata sem perguntar. Nunca fecha por nome de
+    imagem."""
+    return su_jobs.close(pid=pid, all_instances=all_instances, force=force, confirm=confirm)
+
+
+@mcp.tool()
+def su_inspect(skp_path: str, max_depth: int = 2, mode: str | None = None) -> dict[str, Any]:
+    """Inventário estruturado de um .skp (não modifica): grupos/componentes até
+    `max_depth` níveis com nome, definição, persistent_id, tag, material, bbox
+    em metros e se é arquitetura protegida; materiais, tags e cenas.
+
+    Use o `pid` daqui como alvo inequívoco em su_apply_edits."""
+    return su_jobs.inspect_model(skp_path, max_depth=max_depth, mode=mode)
+
+
+@mcp.tool()
+def su_render(
+    skp_path: str,
+    views: list[dict[str, Any]] | None = None,
+    width: int = 1600,
+    height: int = 1200,
+    hide_contains: list[str] | None = None,
+    focus_contains: str | None = None,
+    mode: str | None = None,
+) -> dict[str, Any]:
+    """Renderiza PNGs de um .skp (não salva o modelo).
+
+    views: [{name, preset}] com preset ∈ top/iso/front/back/left/right, ou
+    [{name, eye_m:[x,y,z], target_m:[x,y,z], fov?}] em METROS. Default: top+iso.
+    hide_contains: esconde grupos cujo nome contém o texto (ex. "PeleTeto").
+    focus_contains: enquadra só os grupos cujo nome contém o texto."""
+    return su_jobs.render_views(skp_path, views=views, width=width, height=height,
+                                hide_contains=hide_contains, focus_contains=focus_contains,
+                                mode=mode)
+
+
+@mcp.tool()
+def su_apply_edits(
+    skp_path: str,
+    ops: list[dict[str, Any]],
+    out_path: str | None = None,
+    mode: str | None = None,
+) -> dict[str, Any]:
+    """Aplica edições e salva numa CÓPIA (.skp novo; o original fica intacto).
+    Tudo-ou-nada: um erro aborta todas as ops e nada é salvo.
+
+    Cada op tem "op" e, exceto insert_component, um "target":
+    {name | name_contains | persistent_id, expect: "one"(default)|"all"}.
+      set_material {color:[r,g,b] | material:"nome" | texture:"x.png", texture_size_m?}
+      move {by_m:[dx,dy,dz]}        rotate {degrees}   (em Z, no centro do bbox)
+      set_tag {tag}  set_hidden {hidden}  rename {name}  delete {}
+      insert_component {skp_path, position_m:[x,y,z], rotation_deg?, name?, tag?}
+    Medidas são explícitas e em METROS. Arquitetura do PDF (paredes, piso,
+    portas, janelas) recusa move/rotate/delete."""
+    return su_jobs.apply_edits(skp_path, ops, out_path=out_path, mode=mode)
+
+
+@mcp.tool()
+def su_build_shell(
+    consensus_path: str | None = None,
+    out_path: str | None = None,
+    force: bool = False,
+    mode: str | None = None,
+) -> dict[str, Any]:
+    """Gera o shell .skp a partir de um consensus (default: fixture planta_74)
+    + renders + geometry_report, e roda os gates determinísticos em cima.
+    Saída em runs/ (nunca promove). force=true ignora o cache por hash."""
+    return su_jobs.build_shell(consensus_path, out_path=out_path, force=force, mode=mode)
+
+
+@mcp.tool()
+def su_furnish(
+    style: str | None = None,
+    base_skp: str | None = None,
+    consensus_path: str | None = None,
+    mode: str | None = None,
+) -> dict[str, Any]:
+    """Mobilia a planta_74 inteira: classifica cômodos, roda os brains de
+    layout e coloca os móveis no shell (default: artifacts/planta_74/planta_74.skp,
+    só leitura). Saída em runs/. `style` aplica a textura por peça do estilo."""
+    return su_jobs.furnish(style=style, base_skp=base_skp, consensus_path=consensus_path,
+                           mode=mode)
+
+
+@mcp.tool()
+def su_render_vray(
+    scene_dir: str,
+    out_png: str | None = None,
+    width: int = 1500,
+    height: int = 1000,
+    fov: float = 65,
+) -> dict[str, Any]:
+    """Render V-Ray de uma cena composta (dir com scene.skp + scene.json, ex.
+    runs/scenes/<id>). Não roda com SketchUp aberto (no-disrupt). ~2-3 min."""
+    return su_jobs.render_vray(scene_dir, out_png=out_png, width=width, height=height, fov=fov)
 
 
 def main() -> None:

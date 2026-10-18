@@ -1,4 +1,4 @@
-"""Smoke test do MCP da fatia 1 — exercita cada tool em processo.
+"""Smoke test do MCP (fatias 1 + 2) — exercita cada tool em processo.
 
 Roda: python -m tools.mcp_server.smoke
 Sai 0 se tudo ok; 1 se alguma asserção falhar.
@@ -41,14 +41,17 @@ def main() -> int:
         "list_capabilities", "run_deterministic_gates", "furniture_class_derive",
         "reference_to_grammar", "validate_grammar_spec", "room_gates",
         "kitchen_ergonomics_audit", "promote_canonical", "skp_inventory",
+        "su_status", "su_open", "su_close", "su_inspect", "su_render",
+        "su_apply_edits", "su_build_shell", "su_furnish", "su_render_vray",
     }
-    check("8+ tools registradas", len(names) >= 9, f"{names}")
+    check("18+ tools registradas", len(names) >= 18, f"{names}")
     check("tools esperadas presentes", expected.issubset(set(names)),
           f"faltando: {expected - set(names)}")
 
     print("== list_capabilities ==")
     cap = S.list_capabilities()
-    check("slice == 1", cap.get("slice") == 1)
+    check("slice == 2", cap.get("slice") == 2)
+    check("catálogo do especialista", "su_apply_edits" in cap.get("sketchup_specialist", {}))
 
     print("== furniture_class_derive ==")
     for kind in ("sofa", "bed", "armchair", "dining_table", "rack", "coffee_table"):
@@ -129,6 +132,18 @@ def main() -> int:
         check("inventário tem total", "total" in inv, f"total={inv.get('total')}")
     except Exception as e:  # noqa: BLE001
         check("inventário rodou", False, f"exceção: {e!r}")
+
+    # Sem SketchUp (CI/Linux) as su_* que sobem o SU respondem UNAVAILABLE ou
+    # recusam a entrada ANTES de tentar — nunca sucesso fabricado.
+    print("== especialista SketchUp (sem SketchUp) ==")
+    st = S.su_status()
+    check("su_status responde", st.get("status") == "OK" and "instances" in st,
+          f"supported={st.get('platform_supported')} exe_found={st.get('exe_found')}")
+    bad = S.su_apply_edits("nope.skp", [{"op": "move", "target": {"name": "x"}}])
+    check("su_apply_edits recusa skp inexistente", bad.get("status") == "ERROR")
+    cl = S.su_close(all_instances=True)
+    check("su_close nunca fecha sem confirm", cl.get("status") in
+          ("UNAVAILABLE", "NOTHING_TO_CLOSE", "CONFIRMATION_REQUIRED"), f"{cl.get('status')}")
 
     print()
     if _fail:

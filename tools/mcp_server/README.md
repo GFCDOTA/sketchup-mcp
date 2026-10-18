@@ -1,8 +1,9 @@
-# sketchup-mcp — servidor MCP (fatia 1)
+# sketchup-mcp — servidor MCP (fatias 1 + 2)
 
-Expõe os **verbos puros/rápidos** do pipeline (sem `SketchUp.exe`) como
-ferramentas [MCP](https://modelcontextprotocol.io) estruturadas, pra um agente
-(Claude Code) chamar direto. Ganho: JSON minúsculo entra/sai em vez de montar
+Expõe os verbos do pipeline como ferramentas
+[MCP](https://modelcontextprotocol.io) estruturadas, pra um agente (Claude
+Code, Claude Desktop, harness-app) chamar direto. Fatia 1 = verbos **puros**
+(sem `SketchUp.exe`); fatia 2 = o **especialista em SketchUp** (`su_*`). Ganho: JSON minúsculo entra/sai em vez de montar
 comando bash + parsear log (corta token), com os **gotchas embutidos** (ex.:
 `PT_TO_M=0.0259` default nos gates de mobília).
 
@@ -29,7 +30,8 @@ python -m tools.mcp_server.stdio_check     # handshake MCP real sobre stdio
     "sketchup": {
       "command": "E:\\Claude\\apps\\sketchup-mcp\\.venv\\Scripts\\python.exe",
       "args": ["-m", "tools.mcp_server.server"],
-      "cwd": "E:\\Claude\\apps\\sketchup-mcp"
+      "cwd": "E:\\Claude\\apps\\sketchup-mcp",
+      "env": { "PT_TO_M": "0.0259" }
     }
   }
 }
@@ -38,11 +40,21 @@ python -m tools.mcp_server.stdio_check     # handshake MCP real sobre stdio
 Ativa ao **reabrir** o Claude Code (aprovar o server novo). As tools aparecem
 como `mcp__sketchup__*`.
 
-## Ferramentas (fatia 1)
+**Claude Desktop:** o mesmo bloco `mcpServers` vai em
+`%APPDATA%\Claude\claude_desktop_config.json` (Settings → Developer → Edit
+Config). Reabra o app.
+
+`PT_TO_M` já é `0.0259` por default dentro do server (planta_74), porque
+`core.scale` congela a escala no primeiro import — o `env` acima só deixa isso
+explícito. Opcionais: `SKETCHUP_EXE`, `SKETCHUP_PLUGINS`, `VRAY_EXE`,
+`RUN_MODE` (`interactive` default local; `headless` fecha o SketchUp que o job
+subiu).
+
+## Ferramentas puras (fatia 1)
 
 | Tool | O que faz | SketchUp? |
 |------|-----------|-----------|
-| `list_capabilities` | Catálogo + o que está adiado pra fatia 2 | não |
+| `list_capabilities` | Catálogo das tools + gotchas do especialista | não |
 | `run_deterministic_gates` | Gates de consensus/render (PASS/FAIL/INCOMPLETE) | não |
 | `furniture_class_derive` | Deriva + valida classe de móvel (sofa/bed/armchair/dining_table/rack/coffee_table) | não |
 | `reference_to_grammar` | **Tradutor Pinterest**: sem draft → contrato; com draft → DesignGrammarSpec | não |
@@ -52,8 +64,65 @@ como `mcp__sketchup__*`.
 | `promote_canonical` | Promove build abençoado → `artifacts/<plant>/` | não |
 | `skp_inventory` | Inventário categorizado dos `.skp` | não |
 
-**Adiado pra fatia 2** (sobem o SketchUp/V-Ray, ~60–180s): `build_shell`,
-`furnish_apartment`, `render_scene_vray`, e `consult_oracle` (proxy do `:8765`).
+## Especialista em SketchUp (fatia 2)
+
+Implementação em [`tools/sketchup/`](../sketchup/) — o conhecimento de SketchUp
+é **código testável**, não prompt. Sobe o SketchUp (Windows); fora dele as
+tools respondem `UNAVAILABLE` com o motivo, nunca sucesso fabricado.
+
+| Tool | O que faz | Tempo |
+|------|-----------|-------|
+| `su_status` | SketchUp instalado? Instâncias (PID), plugin de autorun, V-Ray, jobs | instantâneo |
+| `su_open` | Abre um `.skp` numa janela nova (desanexada) | instantâneo |
+| `su_close` | Fecha por PID / todas — **só com `confirm=true`**; gracioso salvo `force=true` | segundos |
+| `su_inspect` | Grupos/componentes (nome, `pid` persistente, tag, material, bbox em m), materiais, tags, cenas | ~30 s |
+| `su_render` | PNGs por preset (`top/iso/front/back/left/right`) ou câmera em metros | ~30–60 s |
+| `su_apply_edits` | Material/cor/textura, mover, girar, tag, visibilidade, renomear, apagar, inserir componente | ~30–60 s |
+| `su_build_shell` | consensus → shell `.skp` + renders + gates determinísticos | ~60–90 s |
+| `su_furnish` | Mobilia a planta_74 no shell (brains → `place_layout_skp.rb`) | ~3 min |
+| `su_render_vray` | Render V-Ray de uma cena composta | ~2–3 min |
+
+Como roda: `SketchUp.exe <cópia.skp> -RubyStartup tools/sketchup/ruby/<job>.rb`.
+O job lê `SKMCP_PARAMS` e escreve `SKMCP_RESULT` (JSON, atômico, por último): o
+resultado existir é a prova de que **esta** execução terminou. Diferente do
+`autorun_consume.rb`, os jobs são versionados e não deixam estado no `Plugins`.
+
+Regras que o código faz cumprir (não o prompt):
+
+- **O original nunca é aberto.** Editar e renderizar trabalham numa cópia; em
+  modo `interactive` a janela fica aberta, e um Ctrl+S nela não alcança o
+  original (que pode ser o `.skp` canônico).
+- **Nada escreve em `fixtures/` ou `artifacts/`.** Saída default:
+  `runs/<plant>/mcp/<job>_<stamp>/`. Entregável só via `promote_canonical`.
+- **Arquitetura é do PDF.** `PlanShell_*`, `Floor_*`, `Window_*`, `DoorLeaf_*`…
+  recusam `move/rotate/delete/rename` (Hard Rule #1); aparência é permitida.
+- **Medida é explícita, em metros.** `move` sem `by_m` é recusado antes de subir
+  o SketchUp. Alvo ambíguo (`expect=one` com 2+ casamentos) é recusado — use o
+  `pid` do `su_inspect`.
+- **Tudo-ou-nada** nas edições: um erro aborta todas as ops.
+- **Nunca `taskkill /IM`.** Fechar é por PID e com confirmação; o modo
+  `headless` só fecha a instância que o próprio job subiu.
+- **Aparência nova pede VISUAL_REVIEW do Felipe** — o resultado lembra.
+
+Exemplo — pintar a cama de preto e conferir (os grupos de móvel se chamam pelo `kind`, ex. `bed`; confira no `su_inspect`):
+
+```json
+su_inspect {"skp_path": "artifacts/planta_74/furnished/planta_74_furnished.skp"}
+su_apply_edits {
+  "skp_path": "artifacts/planta_74/furnished/planta_74_furnished.skp",
+  "ops": [{"op": "set_material", "target": {"name_contains": "bed", "expect": "all"},
+           "color": [20, 20, 22]}]
+}
+su_render {"skp_path": "<out_skp do passo anterior>", "views": [{"name": "top", "preset": "top"}]}
+```
+
+Testes (sem SketchUp): `tests/test_sketchup_specialist.py` (fiação, regras,
+dublê do SketchUp) e `tests/test_sketchup_ruby_jobs.py` (`ruby -c` + lógica pura
+em `tests/ruby/test_skmcp_core.rb`). O lado Ruby que usa a API do SketchUp só se
+prova numa máquina com SketchUp.
+
+Fora daqui: `consult_oracle` (o `:8765` foi aposentado; o oráculo é o
+GPT-Docker `:8899`, via `tools.ask_gpt_gate`).
 
 ## Especialista Pinterest (esqueleto)
 

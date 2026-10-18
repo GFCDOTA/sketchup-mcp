@@ -80,8 +80,8 @@ jobs:
           cache-dependency-path: pyproject.toml
       - name: Install (core + mcp)
         run: pip install -e ".[mcp]"
-      # Exercita as 9 tools SU-free in-process.
-      - name: In-process smoke (9 tools)
+      # Exercita as tools in-process (as su_* respondem UNAVAILABLE sem SketchUp).
+      - name: In-process smoke (18 tools)
         run: python -m tools.mcp_server.smoke
       # Sobe o server por stdio (como o Claude Code faz) e fala MCP de verdade.
       - name: Real stdio handshake (initialize / tools-list / call_tool)
