@@ -62,3 +62,12 @@ def test_jobs_usam_a_logica_testada_do_core():
     for src in (inspect_src, (RUBY_DIR / "render_views.rb").read_text("utf-8")):
         assert "SkmcpRuntime.close_edit_context(model)" in src
     assert "params['protected_substrings']" in inspect_src
+
+
+def test_mobiliar_fecha_grupo_aberto_e_constroi_na_raiz():
+    """su_furnish roda o place_layout sobre um .skp base que pode ter sido salvo
+    com um grupo aberto: os móveis nasceriam dentro da arquitetura."""
+    src = Path("tools/place_layout_skp.rb").read_text("utf-8")
+    assert "model.active_entities" not in src
+    assert "ents = model.entities" in src
+    assert src.index("model.active_path = nil") < src.index("add_group")

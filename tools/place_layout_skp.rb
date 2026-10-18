@@ -64,6 +64,16 @@ def pl_run
   boxes = JSON.parse(ENV['LAYOUT_BOXES'] || '[]')
   model = Sketchup.active_model
   log = []
+  # Base salva com um grupo ABERTO reabre dentro dele: os moveis nasceriam dentro
+  # da arquitetura e a trava do shell nao veria os grupos da raiz. Fecha antes
+  # (Model#active_path=, SketchUp 2020+), fora de operacao — mesma regra de
+  # tools/sketchup/ruby/skmcp_runtime.rb::close_edit_context.
+  ap = model.active_path
+  if ap && !ap.empty?
+    model.active_path = nil
+    raise 'place_layout: nao consegui fechar o grupo aberto no .skp base' unless model.active_path.nil?
+    log << 'grupo aberto no .skp base fechado antes de mobiliar'
+  end
 
   # FP-036: mapa de textura por KIND (de style_spec.texture_map_for), injetado pelo Python.
   # kind = FONTE UNICA -> cada ph_<kind> recebe SO a textura do seu kind (nunca a 1a peca em tudo).
@@ -80,7 +90,7 @@ def pl_run
     log << "BEFORE render -> #{File.basename(ENV['LAYOUT_BEFORE'])}"
   end
 
-  ents = model.active_entities
+  ents = model.entities   # raiz: moveis top-level e a trava do shell olham a raiz
   # EDITABILIDADE (Felipe 2026-06-18): cada MOVEL = um GRUPO TOP-LEVEL nomeado, pra
   # clique UNICO selecionar SO aquele movel (nao o apê todo). Organizacao por COMODO
   # via TAG/Layer (Outliner mostra; nao aninha a selecao). Nada de mega-grupo 'Mobilia'.
