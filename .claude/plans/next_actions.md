@@ -7,17 +7,22 @@ valor claro pro produto.
 
 ## Fila atual
 
-### 1. VISUAL_REVIEW do PR #247 (cômodo SERVICE)
+### 1. Provar as tools `su_*` num SketchUp real (#249)
 
-- **Objetivo:** Felipe valida o render/`.skp` do brain SERVICE vs PDF.
-- **Por quê:** é o único gate humano; sem ele o PR não lança.
-- **Critério de parada:** veredito IMPROVED/SAME/WORSE registrado + merge ou ajuste.
+- **Objetivo:** rodar o checklist do corpo do PR #249 no Windows com SketchUp
+  2026 (status, inspect × Outliner, render, apply_edits + VISUAL_REVIEW,
+  recusas de arquitetura, move em eixo de mundo dentro do sofá girado).
+- **Por quê:** hoje toda a prova é lógica pura + dublês
+  (`proof_state = UNVERIFIED_ON_SKETCHUP`); nenhum cliente deve tratar as
+  `su_*` como capacidade comprovada antes disso.
+- **Critério de parada:** evidência em `artifacts/review/` e `PROOF_STATE`
+  atualizado no código.
 
-### 2. Reconciliar ou fechar o PR #245
+### 2. Gate B do FP-041 (aguarda autorização)
 
-- **Objetivo:** checar se as 19 correções de baseline já estão em `develop`
-  (CI verde desde ago/12); fechar se superado, rebasear se houver delta real.
-- **Critério de parada:** PR fechado ou mergeado.
+- **Objetivo:** Fase 1 do SketchUp Tooling Specialist (plano rev. 3:
+  competência operacional + ledger/validador de 3 camadas).
+- **NÃO INICIAR** sem ok explícito do Felipe.
 
 ### 3. AI Pipeline Inspector — SSE + `Last-Event-ID`
 

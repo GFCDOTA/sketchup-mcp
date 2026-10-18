@@ -27,21 +27,23 @@ fidelidade do `.skp` tocada.
 
 ## Branches / PRs em voo
 
-| PR | Branch | O quê | Estado |
-|---|---|---|---|
-| #247 | `feat/apartamento-mobiliado-completo` | brain do cômodo SERVICE | aguarda VISUAL_REVIEW do Felipe |
-| #245 | `fix/baseline-test-failures` | 19 falhas de baseline (ago/12) | stale — CI já verde; reconciliar ou fechar |
-| — | `chore/refresh-memory-state` | este refresh de docs | draft → `develop` |
+Nenhum PR aberto depois do Gate A (2026-10-18): #247, #248, #249 e #250
+mergeados; #245 fechado como superado (os 2 bugs reais foram no #250).
 
 ## Comandos de validação
 
 ```bash
-python -m pytest tests/ -q -m "not planta74_scale"            # 1470 passed, 9 skipped
-PT_TO_M=0.0259 python -m pytest tests/ -q -m planta74_scale   # 71 passed, 1 skipped
+python -m pytest tests/ -q -m "not planta74_scale"            # 1521 passed, 9 skipped
+PT_TO_M=0.0259 python -m pytest tests/ -q -m planta74_scale   # 74 passed
 git diff --quiet origin/main origin/develop && echo "main == develop (árvore)"
 ```
 
 ## Aguardando
 
-- VISUAL_REVIEW do #247 (Felipe).
-- Decisão sobre #245 e sobre as branches `backup/stash-0..4`.
+- **VISUAL_REVIEW** (Felipe) da próxima regeneração do furnish: BANHO 01/02
+  ficam sem `kb_lixeira` (#250).
+- **Prova num SketchUp real** das tools `su_*` (#249, checklist no PR) —
+  até lá `proof_state = UNVERIFIED_ON_SKETCHUP`.
+- **Gate B do FP-041** (implementação do SketchUp Tooling Specialist) — só com
+  autorização explícita do Felipe.
+- Decisão sobre as branches `backup/stash-0..4`.

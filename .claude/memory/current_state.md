@@ -8,16 +8,35 @@
 `develop` é a integration branch. `main` só recebe `develop` via merge
 (Hard Rule #4 — nunca commitar/push direto em `main`).
 
-- **`develop` @ `7a5886a`** (merge do PR #246, 2026-09-20) — tip canônico.
-- **`main` @ `09d9321`** — release merge `develop -> main` em 2026-10-18;
-  antes estava **258 commits atrás** (último release = 07/jul). Árvore de
-  `main` == árvore de `develop`.
+- **`develop`** — último merge funcional = PR #249 (`ba91c03`, 2026-10-18).
+- **`main`** — recebe este estado no release `develop -> main` de 2026-10-18
+  (o 2º do dia; o 1º foi `09d9321`). Conferir com
+  `git diff --quiet origin/main origin/develop`.
 - **CI** (`.github/workflows/ci.yml`, jobs `pytest` [3.11+3.12] ·
-  `fidelity-gates` · `mcp-server`) **verde** em `develop` desde ago/12.
-- **Suíte:** 123 arquivos de teste. Medido 2026-10-18 (py3.13, venv limpo):
-  `-m "not planta74_scale"` = **1470 passed, 9 skipped**;
-  `PT_TO_M=0.0259 -m planta74_scale` = **71 passed, 1 skipped**
+  `fidelity-gates` · `mcp-server`) **verde** em `develop`.
+- **Suíte:** 126 arquivos de teste. Medido 2026-10-18 (py3.13):
+  `-m "not planta74_scale"` = **1521 passed, 9 skipped**;
+  `PT_TO_M=0.0259 -m planta74_scale` = **74 passed**
   (skips = precisam de SketchUp ou Qdrant/Ollama).
+
+## O que landou em 2026-10-18 (Gate A — fechamento dos PRs)
+
+- **#248** docs de memória (`current_state`/`active_work`/`next_actions`).
+- **#247** brain do cômodo SERVICE + `.skp` mobiliado regerado — VISUAL_REVIEW
+  aprovado pelo Felipe na conversa.
+- **#249** especialista SketchUp no MCP: 9 tools `su_*` em `tools/sketchup/`
+  (status/open/close/inspect/render/apply_edits/build_shell/furnish/render_vray).
+  **`proof_state = UNVERIFIED_ON_SKETCHUP`** — nada rodou num SketchUp real
+  (checklist no corpo do PR). `su_render_vray` RECUSA até o launcher legado
+  (`taskkill /F /IM`) ser portado. Passou por 3 rodadas de revisão adversarial.
+- **#250** porta os 2 bugs reais do #245: cadeira fantasma no
+  `circulation_gate` (agora 1 entrada por box `kind="seat"`) e `kb_lixeira`
+  dentro do vaso em BANHO 01/02 (removida; **VISUAL_REVIEW** na próxima
+  regeneração do furnish — os 2 banhos ficam sem lixeira).
+- **#245** fechado como superado (11 de 13 mudanças já estavam no develop;
+  `d09da3d` quebrava 5 testes da escala default).
+- **FP-041** (SketchUp Tooling Specialist Agent): plano rev. 3 aprovado
+  arquiteturalmente; **Gate B (implementação) NÃO autorizado ainda**.
 
 ## O que landou desde o último snapshot (jul/07 → set/20)
 
@@ -46,10 +65,7 @@
 
 ## PRs abertos (2026-10-18)
 
-- **#247** `feat/apartamento-mobiliado-completo` — brain do cômodo SERVICE;
-  pede **VISUAL_REVIEW** (gate humano).
-- **#245** `fix/baseline-test-failures` — base antiga (ago/12); provavelmente
-  superado pelo CI verde atual — reconciliar ou fechar.
+Nenhum em `sketchup-mcp` nem em `harness-app` depois do Gate A.
 
 ## Programa anterior — FP-032 → 040 (jun/28 → jul/04)
 
