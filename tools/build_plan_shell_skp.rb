@@ -375,7 +375,15 @@ def barrier_source(sb)
 end
 
 # Returns 'railing', 'low_wall', or nil (unsourced -> do not render).
+# FONTE ÚNICA da decisão de render: o `render_as` explícito do consensus
+# (curadoria humana, ex. h_sb000 'grade') VENCE o mapeamento por tipo.
+# build_soft_barrier recebe o valor resolvido — não re-deriva (a
+# re-derivação divergia: grade construída com material de parapeito e
+# report gravando 'low_wall').
 def barrier_render_as(sb)
+  explicit = (sb['render_as'] || '').to_s.strip.downcase
+  return 'railing'  if %w[grade railing guardrail].include?(explicit)
+  return 'low_wall' if %w[low_wall mureta peitoril parapet].include?(explicit)
   bt = (sb['barrier_type'] || '').to_s.strip.downcase
   return 'railing'  if RAILING_BARRIER_TYPES.include?(bt)
   return 'low_wall' if LOW_WALL_BARRIER_TYPES.include?(bt)
@@ -468,7 +476,7 @@ def add_grade_box(ents, quad_xy, z0, z1, material)
 end
 
 def build_soft_barrier(parent_ents, barrier, material, index,
-                       wall_footprints: nil)
+                       wall_footprints: nil, render_as: nil)
   # Per-segment swept slab. For each consecutive pair (a, b) on the
   # polyline, build a thin rectangle perpendicular to the segment
   # direction with half-width SOFT_BARRIER_THICKNESS_IN/2. The slab is
@@ -481,17 +489,24 @@ def build_soft_barrier(parent_ents, barrier, material, index,
   return {'ok' => false, 'reason' => 'no polyline_pts'} if pts_pdf.length < 2
 
   # SOURCE GATE (Felipe 2026-06-02): so renderiza com FONTE EXPLICITA.
-  # sem barrier_type + sem human_annotation => SKIP TOTAL (caso sb000-sb007).
+  # sem barrier_type + sem origem whitelisted => SKIP TOTAL (caso sb000-sb007).
   # NADA de fallback fisico — nem grade, nem mureta, nem bloco cinza. Fica
   # ausente do SKP; aparece so como WARN no soft_barrier_source_audit.
+  # Origens aceitas: human_annotation (curadoria por imagem) e pdf_vector /
+  # pdf_text_label (extracao honesta de vetor+texto do PDF; ex. h_sb001
+  # MURETA H=0,70M, audit pdf_height_labels 2026-07-11).
   bt = barrier['barrier_type']
-  has_source = (barrier['geometry_origin'] == 'human_annotation')
+  has_source = %w[human_annotation pdf_vector pdf_text_label]
+               .include?(barrier['geometry_origin'].to_s)
   unless bt && has_source
     return {'ok' => false,
-            'reason' => "skip(no_source): barrier_type=#{bt.inspect} human_annotation=#{has_source}"}
+            'reason' => "skip(no_source): barrier_type=#{bt.inspect} sourced=#{has_source}"}
   end
   # GRADE so com autorizacao explicita; peitoril/mureta = elemento baixo opaco.
-  render_grade = (barrier['render_as'] == 'grade' || bt == 'guardrail' || bt == 'railing')
+  # Decisao vem RESOLVIDA do call site (barrier_render_as) — fonte unica;
+  # fallback local so pra chamadas legadas sem o kwarg.
+  resolved = render_as || barrier_render_as(barrier)
+  render_grade = (resolved == 'railing')
 
   group = parent_ents.add_group
   group.name = "SoftBarrier_Group_#{index}"
@@ -595,7 +610,11 @@ def build_soft_barrier(parent_ents, barrier, material, index,
       end
       ok_seg = boxes > 0
     else
-      # MURETA OPACA (default): laje fina extrudada ate 1,10m.
+      # MURETA OPACA (default): laje fina extrudada ate height_m do
+      # consensus (medida do PDF, ex. h_sb001 = 0,70m); fallback 1,10m
+      # (PARAPET_HEIGHT_M) pra barreira legada sem o campo.
+      mureta_h_in = (barrier['height_m'] ? barrier['height_m'].to_f
+                                         : PARAPET_HEIGHT_M) * M_TO_IN
       half_t = SOFT_BARRIER_THICKNESS_IN / 2.0
       nx = -uy * half_t
       ny =  ux * half_t
@@ -608,7 +627,7 @@ def build_soft_barrier(parent_ents, barrier, material, index,
       face = (se.add_face(quad) rescue nil)
       if face
         face.reverse! if face.normal.z < 0
-        face.pushpull(PARAPET_HEIGHT_IN)
+        face.pushpull(mureta_h_in)
         se.grep(Sketchup::Face).each { |f| f.material = material; f.back_material = material }
         ok_seg = true
       else
@@ -729,18 +748,25 @@ def build_door_leaf(parent_ents, opening, host_wall, _thickness_pt, material, in
   along = axis_idx == 0 ? cx.to_f : cy.to_f
   width_pt = opening['opening_width_pts'].to_f
   hinge_side = opening['hinge_side'] || opening['hinge'] || 'left'
+  # Lado do swing medido do arco do PDF (tools/door_swing_audit.py, vf_004):
+  # 'pos' = folha na face +cross do wall, 'neg' = face -cross.
+  # Default 'pos' preserva o comportamento legado p/ consensus sem o campo.
+  swing_side = opening['swing_side'] || 'pos'
 
   # Hinge end along the wall axis.
   hinge_along = (hinge_side == 'right') ? along + width_pt / 2.0 : along - width_pt / 2.0
   far_along   = (hinge_side == 'right') ? along - width_pt / 2.0 : along + width_pt / 2.0
 
-  # Place leaf on one face of the wall (offset by half thickness on the
+  # Place leaf on the wall face do lado do swing (offset meia espessura no
   # cross axis). Closed leaf base: a rectangle hinge_along..far_along
   # along the wall axis × DOOR_THICK_IN across.
   cross_offset_pt = host_wall['thickness'].to_f / 2.0
-  # Leaf sits aligned with one wall face — pick the side based on
-  # opening direction. We don't have side info; use cross+offset.
-  cross_base = cross_value + cross_offset_pt
+  door_thick_pt = DOOR_THICK_M / PT_TO_M
+  cross_base = if swing_side == 'neg'
+    cross_value - cross_offset_pt - door_thick_pt
+  else
+    cross_value + cross_offset_pt
+  end
 
   # Build the leaf's flat footprint at z=0, then pushpull to DOOR_HEIGHT.
   if axis_idx == 0
@@ -784,25 +810,36 @@ def build_door_leaf(parent_ents, opening, host_wall, _thickness_pt, material, in
   # and was visibly translated metres away from the host wall —
   # "floating doors" in the .skp.
   # The correct mapping:
-  #   horizontal wall (axis_idx == 0): hinge_world = (hinge_along, cross_base, 0)
-  #   vertical wall  (axis_idx == 1): hinge_world = (cross_base, hinge_along, 0)
+  #   horizontal wall (axis_idx == 0): hinge_world = (hinge_along, hinge_cross, 0)
+  #   vertical wall  (axis_idx == 1): hinge_world = (hinge_cross, hinge_along, 0)
+  # O pivô fica na aresta da folha ENCOSTADA no wall: face +cross quando
+  # swing 'pos' (cross_base), face -cross quando 'neg' (cross_base + espessura).
+  hinge_cross = (swing_side == 'neg') ? cross_base + door_thick_pt : cross_base
   hinge_world = if axis_idx == 0
     Geom::Point3d.new(
       hinge_along * PT_TO_IN,
-      cross_base * PT_TO_IN,
+      hinge_cross * PT_TO_IN,
       0,
     )
   else
     Geom::Point3d.new(
-      cross_base * PT_TO_IN,
+      hinge_cross * PT_TO_IN,
       hinge_along * PT_TO_IN,
       0,
     )
   end
   hinge_axis = Geom::Vector3d.new(0, 0, 1)
+  # Sinal da rotação: a folha precisa girar DO wall PARA o cômodo do lado do
+  # swing. Derivação (validada pelo caso legado h_o001: H + hinge left +
+  # swing pos renderizava correto com +DOOR_SWING_DEG):
+  #   H  (axis 0): tip parte ao longo de ±x; CCW leva hinge-left p/ +y.
+  #   V  (axis 1): tip parte ao longo de ±y; CCW leva hinge-left p/ -x.
+  rot_sign = (hinge_side == 'right' ? -1.0 : 1.0) *
+             (swing_side == 'neg' ? -1.0 : 1.0) *
+             (axis_idx == 0 ? 1.0 : -1.0)
   hinge_xform = Geom::Transformation.rotation(
     hinge_world, hinge_axis,
-    DOOR_SWING_DEG * Math::PI / 180.0,
+    rot_sign * DOOR_SWING_DEG * Math::PI / 180.0,
   )
   group.transform!(hinge_xform)
 
@@ -1538,7 +1575,8 @@ if sb_mode == 'groups'
     end
     mat = render_as == 'railing' ? railing_mat : parapet_mat
     res = build_soft_barrier(
-      model.active_entities, sb, mat, i, wall_footprints: wall_footprints,
+      model.active_entities, sb, mat, i,
+      wall_footprints: wall_footprints, render_as: render_as,
     )
     if res['ok']
       sb_built += 1
@@ -1603,7 +1641,11 @@ openings.each_with_index do |op, i|
   end
   kind = opening_kind_v5(op)
   origin = op['geometry_origin'] || ''
-  carved = CARVING_ORIGINS.include?(origin)
+  # Paridade com o driver Python (build_plan_shell_skp.py): origin
+  # VAZIO/ausente também carva (lá: `if origin and origin not in
+  # CARVING_ORIGINS -> skip`). Sem isto, consensus futuro sem
+  # geometry_origin ganharia gap carvado + marker + porta SEM folha.
+  carved = origin.empty? || CARVING_ORIGINS.include?(origin)
 
   case kind
   when 'interior_door'

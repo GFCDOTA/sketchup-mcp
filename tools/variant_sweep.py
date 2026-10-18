@@ -100,7 +100,13 @@ def _audit_boxes(boxes: list[dict]) -> dict:
     audit pinado pelos testes dele."""
     from tools.geometry_sanity import audit
     g = audit(boxes, to_m=0.0254)
-    findings = [f for f in g["findings"] if f["check"] != "off_axis"]
+    # decorative=True (moldura/friso/trim declarado) é FINO por design — isento
+    # dos checks de degenerescência (3ª ocorrência: haste, perfil, moldura). Os
+    # demais checks (underground/outside/dim) continuam valendo pra ele.
+    _deco = {str(b.get("kind")) for b in boxes if b.get("decorative")}
+    findings = [f for f in g["findings"]
+                if f["check"] != "off_axis"
+                and not (f["check"].startswith("degenerate") and f.get("kind") in _deco)]
     n_fail = sum(1 for f in findings if f["severity"] == "FAIL")
     n_warn = sum(1 for f in findings if f["severity"] == "WARN")
     return {"overall": "FAIL" if n_fail else ("WARN" if n_warn else "PASS"),
@@ -350,6 +356,35 @@ def build_record(v: Variant, *, run_id: str, gates: dict, gate_detail: dict | No
     }
 
 
+def emit_gallery_item(corpus: Path, v: Variant, *, png: Path | None = None,
+                      gates: dict | None = None, gate_detail: dict | None = None,
+                      findings: dict | None = None, renderer: str = "su-free",
+                      run_id: str | None = None, log=print) -> dict:
+    """APARENCIA NAO-BLOQUEIA: materializa UM item de galeria PENDENTE
+    (build_record, human_verdict=None) e faz append IDEMPOTENTE por variant_id no
+    corpus append-only — pra uma saida mobiliada / mudanca de aparencia virar um
+    item RECUPERAVEL na galeria em vez de morrer travada numa fila-arquivo ou numa
+    branch wip. NUNCA espera veredito humano (esse e' do Felipe, offline).
+
+    Fabrica canonica REUSADA = build_record (mesmo shape do sweep). O CHAMADOR
+    controla `gates`: pra nao BLOQUEAR aparencia, nunca passe um gate FAIL aqui —
+    sem FAIL e sem findings o verdict nasce PENDING_VISION (findings PASS -> CANDIDATE).
+
+    Idempotente: variant_id ja no corpus -> NAO re-appenda (retorna o registro
+    existente). Deterministico, safe pra rodar 2x (o corpus nunca e' reescrito)."""
+    corpus = Path(corpus)
+    existing = {r.get("variant_id"): r for r in read_jsonl(corpus)}
+    if v.variant_id in existing:
+        log(f"[gallery] {v.variant_id}: ja no corpus (skip idempotente)")
+        return existing[v.variant_id]
+    rec = build_record(v, run_id=run_id or corpus.parent.name, gates=gates or {},
+                       gate_detail=gate_detail, png=png, renderer=renderer,
+                       findings=findings, out_root=corpus.parent)
+    append_jsonl(corpus, [rec])
+    log(f"[gallery] {v.variant_id}: {rec['verdict']} (human_verdict=None) -> {corpus}")
+    return rec
+
+
 def run_variant(v: Variant, out_dir: Path, *, con_path: Path | None = None,
                 provider=None, discrimination=None, render: str = "su-free",
                 find_adapter=None, run_id: str | None = None,
@@ -376,10 +411,23 @@ def run_variant(v: Variant, out_dir: Path, *, con_path: Path | None = None,
             gate_detail={"kitchen_validation": str(e)}, renderer=renderer,
             layout_source="brain_default", out_root=out_root)
     boxes, layout_source = _apply_layout_seed(con, boxes, v.layout_seed)
+    # o TEMA pinta os pixels (binding nome->cor que faltava; mata os placeholders
+    # primarios dos templates) — cor nao afeta gates geometricos
+    from tools.theme_palette import apply_theme_palette
+    boxes = apply_theme_palette(boxes, v.theme)
     gates, gate_detail = run_deterministic_gates(boxes, con)
     from tools.render_parts_iso import render_parts
-    png = Path(render_parts(_boxes_to_parts(boxes), out_dir / "iso.png",
-                            elev=24, azim=-56, title=v.variant_id))
+    # ENVELOPE-FIRST (nota 2/10 unânime do painel/GPT era "furniture-only, sem
+    # envelope"): paredes/portas/janelas do consensus entram ANTES da mobília,
+    # em corte dollhouse. SWEEP_SHELL=0 desliga (comparação/depuração).
+    parts = _boxes_to_parts(boxes)
+    if os.environ.get("SWEEP_SHELL", "1") != "0":
+        from tools.shell_parts import shell_parts
+        parts = shell_parts(con) + parts
+    # elev 24→38 pós-shell (GPT: câmera baixa escondia os ambientes atrás da
+    # massa cortada; mais zenital revela o interior sem virar top-down)
+    png = Path(render_parts(parts, out_dir / "iso.png",
+                            elev=38, azim=-56, title=v.variant_id))
     if find_adapter is not None:
         findings = find_adapter(png)
     else:
@@ -395,14 +443,18 @@ def run_variant(v: Variant, out_dir: Path, *, con_path: Path | None = None,
 def sweep(n: int | None, out_root: Path, *, plant: str = "planta_74",
           axes: dict | None = None, render: str = "su-free", provider=None,
           discrimination=None, con_path: Path | None = None, run_one=None,
-          only: str | None = None, log=print) -> list[dict]:
+          only: str | None = None, force_rerender: bool = False,
+          log=print) -> list[dict]:
     """Roda as celulas do grid em serie (NUNCA paraleliza contra o :8765).
     corpus.jsonl e' append-only e idempotente por variant_id: celula ja vista e'
     pulada; excecao unica = registro PENDING_VISION com provider disponivel
     (upgrade de visao), que APPENDA um registro superseding (last-wins por
     variant_id na leitura — o arquivo nunca e' reescrito). Upgrade que volta
     PENDING_VISION (bridge fora / probe FAIL) NAO appenda — nao supersede nada;
-    rerun com --ask-vision offline fica idempotente."""
+    rerun com --ask-vision offline fica idempotente.
+    force_rerender=True re-roda celula JA vista e appenda supersede — o caso
+    'o RENDERER evoluiu' (ex.: shell arquitetonico novo): a idempotencia por
+    presenca esconderia o render novo do corpus. Explicito, nunca default."""
     out_root = Path(out_root).resolve()
     out_root.mkdir(parents=True, exist_ok=True)
     corpus = out_root / "corpus.jsonl"
@@ -418,16 +470,17 @@ def sweep(n: int | None, out_root: Path, *, plant: str = "planta_74",
         prev = by_id.get(v.variant_id)
         upgrade = (prev is not None and prev.get("verdict") == "PENDING_VISION"
                    and provider is not None)
-        if prev is not None and not upgrade:
+        if prev is not None and not upgrade and not force_rerender:
             records.append(prev)
             log(f"[variant-sweep] {v.variant_id}: ja no corpus (skip)")
             continue
         rec = runner(v, out_root / v.variant_id, con_path=con_path,
                      provider=provider, discrimination=discrimination,
                      render=render, run_id=out_root.name, out_root=out_root)
-        if upgrade and rec.get("verdict") == "PENDING_VISION":
+        if upgrade and rec.get("verdict") == "PENDING_VISION" and not force_rerender:
             # upgrade que NAO trouxe visao: o rec e' semanticamente o prev —
-            # appendar duplicaria uma linha que nao supersede nada
+            # appendar duplicaria uma linha que nao supersede nada (com
+            # force_rerender o render NOVO supersede mesmo sem visao)
             records.append(prev)
             log(f"[variant-sweep] {v.variant_id}: upgrade sem visao "
                 "(PENDING_VISION mantido; corpus intacto)")
@@ -471,6 +524,8 @@ def main(argv=None) -> int:
     ap.add_argument("--bridge-url", default=None)
     ap.add_argument("--tier", default=None)
     ap.add_argument("--only", default=None, help="roda so este variant_id (grid inteiro)")
+    ap.add_argument("--force-rerender", action="store_true",
+                    help="re-roda celulas JA no corpus e appenda supersede (renderer evoluiu)")
     a = ap.parse_args(argv)
     provider = None
     if a.ask_vision and not a.dry_run:
@@ -482,7 +537,7 @@ def main(argv=None) -> int:
             provider.tier = a.tier
     try:
         recs = sweep(a.n, a.out, plant=a.plant, render=a.render,
-                     provider=provider, only=a.only)
+                     provider=provider, only=a.only, force_rerender=a.force_rerender)
     except Exception as e:  # noqa: BLE001 — CLI: erro vira exit 1, nao traceback cru
         print(f"[variant-sweep] ERRO: {type(e).__name__}: {e}", file=sys.stderr)
         return 1

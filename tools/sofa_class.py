@@ -139,6 +139,18 @@ PLINTH_FOOT = 0.02
 ARM_MASS_THRESHOLD = 0.22
 ARM_RELIEF_STD = 0.05
 
+# FP-SOFA-PREMIUM (alt_001-005) — estofaria PREMIUM APROVADA (Felipe) do sofá de SALA.
+# FONTE ÚNICA: o builder de produção (via derive_living_sofa) E o sofa_premium_harness
+# leem daqui, pra nunca divergirem. Uma melhoria aprovada num harness isolado só "conta"
+# quando o builder de PRODUÇÃO a emite — travado por
+# tests/test_living_sofa_is_approved_premium.py (regressão).
+PREMIUM_LIVING_UPHOLSTERY = {
+    "arm_width": 0.14, "arm_height": 0.56, "arm_profile": "rounded",
+    "arm_front_recess": 0.07, "arm_edge_radius": 0.03,
+    "base_style": "plinth", "back_style": "single_crowned",
+    "seat_style": "single_crowned", "base_rail": "recessed_rounded",
+}
+
 
 def derive_spec(seats=3, archetype="standard", arm_style="medium",
                 base_style="legs", variant="straight", **overrides) -> SofaSpec:
@@ -190,8 +202,14 @@ def derive_living_sofa(width_m, archetype="venezia", arm_style="thin",
     # da classe (sofa um tico mais estreito que o nicho >> sofa fora da classe).
     max_w = seats * ps_hi + 2 * arm
     width = round(min(width_m, max_w), 3)
-    return derive_spec(seats, archetype=archetype, arm_style=arm_style,
+    spec = derive_spec(seats, archetype=archetype, arm_style=arm_style,
                        base_style=base_style, width=width)
+    # o sofá de SALA embarca a estofaria premium aprovada por padrão (fonte única
+    # PREMIUM_LIVING_UPHOLSTERY) — plinto sem pés, almofada única coroada, braço fino
+    # arredondado. Aplicado DEPOIS do derive (mesma ordem que o harness aprovado).
+    for k, v in PREMIUM_LIVING_UPHOLSTERY.items():
+        setattr(spec, k, v)
+    return spec
 
 
 def sofa_class_gate(spec: SofaSpec, parts=None):

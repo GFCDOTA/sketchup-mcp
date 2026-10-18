@@ -6,7 +6,7 @@ this gate packages the context and sends it to the local ChatGPT bridge
 at `localhost:8765/ask` automatically — so the user does NOT become a
 copy/paste relay for the conversation.
 
-The 9 canonical triggers (only one needs to apply):
+The 10 canonical triggers (only one needs to apply):
 
 1. `oracle_verdict_neq_final_verdict`         — oracle and final disagree
 2. `oracle_pass_but_known_warnings`           — oracle PASS but baseline WARNs carry
@@ -17,6 +17,7 @@ The 9 canonical triggers (only one needs to apply):
 7. `require_oracle_blocks_backend`            — --require-oracle BLOCKED
 8. `big_pr_changes_gate_or_spec`              — friction tax risk
 9. `user_requested_consult`                   — explicit user trigger
+10. `objective_gate_borderline`               — carteiro escalates a WARN (mode B)
 
 NOT consult when (per LL-024 spec):
 - typo / doc-only trivial
@@ -55,7 +56,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
@@ -67,9 +67,18 @@ from tools.gate_verdict import parse_verdict
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
-BRIDGE_URL = "http://localhost:8765"
+# NOC :8765 removido 2026-07-24 — o backend default do gate é o GPT-Docker
+# (ops/gpt-docker, mesmo contrato /health+/ask; degrada SKIPPED_OFFLINE).
+BRIDGE_URL = "http://localhost:8899"
 BRIDGE_HEALTH_TIMEOUT_SEC = 5
 BRIDGE_CALL_TIMEOUT_SEC = 260   # > server CLAUDE_TIMEOUT(240); Opus+xhigh is slow
+
+# 10th trigger — the semi-autonomous carteiro (auto_decider) escalating a
+# BORDERLINE objective decision (any deterministic WARN) to the delegated gate
+# (mode B). Distinct from the 9 human/architectural triggers: it fires from a job,
+# not a human, and carries the deterministic evidence (gates, fill%, overlap cm²)
+# in the context so the oracle rules on measured facts, never on taste.
+OBJECTIVE_GATE_BORDERLINE = "objective_gate_borderline"
 
 CANONICAL_TRIGGERS = (
     "oracle_verdict_neq_final_verdict",
@@ -81,6 +90,7 @@ CANONICAL_TRIGGERS = (
     "require_oracle_blocks_backend",
     "big_pr_changes_gate_or_spec",
     "user_requested_consult",
+    OBJECTIVE_GATE_BORDERLINE,
 )
 
 # Heavy/high-stakes triggers where one Claude consulting another risks agreement
@@ -272,7 +282,8 @@ def call_bridge(prompt: str, url: str = BRIDGE_URL, mode: str = "", tier: str = 
         body = resp.read().decode("utf-8")
     try:
         parsed = json.loads(body)
-        return str(parsed.get("response", body))
+        # backend-agnóstico: :8765 devolve "response"; o GPT-no-Docker (:8899) "answer".
+        return str(parsed.get("response") or parsed.get("answer") or body)
     except json.JSONDecodeError:
         return body
 

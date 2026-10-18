@@ -6,54 +6,77 @@ Branch em curso, objetivo, escopo, validação.
 > arquivo estiver stale, qualquer agente deve reconciliar antes
 > de operar.
 
-> **Snapshot:** 2026-06-06.
+> **Snapshot:** 2026-08-27 (handoff — AI Pipeline Inspector, Fases 1-3).
+> Branch ativa: **`feat/ai-pipeline-inspector-observability`** @ `1f0d677`,
+> **8 commits à frente de `develop`**, 1 commit à frente do próprio remoto
+> (o `1f0d677` ainda NÃO foi pushado). **Nenhuma PR aberta** — decisão pendente
+> do Felipe: landar agora ou seguir pra Fase 4 e landar tudo junto.
+> Entregue: `core/observability/` (9 módulos stdlib, DESLIGADO por padrão) +
+> `tools/trace_view.py` (CLI de leitura de trace) + ~250 testes novos.
+> Suíte: **1470 passed / 71 planta74_scale**, ruff limpo, working tree limpa.
+> Nada de geometria/fidelidade/aparência foi tocado — a instrumentação é
+> aditiva e não muda execução (provado: bundles byte-idênticos ligado×desligado).
+> Próximo: **Fase 4** (transporte SSE em `ops/estudio-front/server.py`).
+> Detalhe completo em `HANDOFF.md` (topo, reescrito 2026-08-27) — ler antes de operar.
+>
+> **Snapshot anterior:** 2026-08-09 (handoff, fim de sessão — troca de computador).
+> Branch ativa: **`develop`** @ `4a70232`, sincronizada com `origin/develop`
+> (pushado). Hoje mergeou `feat/estudio-banheiro` (101 commits: skill+agent
+> `interior-project-audit`, fix de escala 1.36x, fix de teto/parede do banho,
+> BOM real, painel `ops/estudio-front` em React) + `fix/planta74-furnished-fidelity`
+> (32 commits) direto em develop. Suíte: **1262 passed, 19 failed
+> (pré-existentes, mesmas de sempre), 6 skipped**. `feat/mobiliar-bedroom-layout`
+> (57 commits, só no GitHub, scale-leak/WARN conhecido) e as 6
+> `chore/noc-nf-*` (sistema NOC removido) **deliberadamente NÃO mergeadas**.
+> 65 PNGs scratch untracked em `kitchen_angles/` + 1 stash meu de hoje + 4
+> stashes de outras sessões, todos preservados sem mexer. Detalhe completo em
+> `HANDOFF.md` (reescrito 2026-08-09) — ler antes de operar.
 
-## Contexto da sessão (2026-06-06)
+## Estado do repo
 
-Sessão de **higiene de repo + reconciliação**, sem tocar a superfície de
-fidelidade do `.skp` (ambiente remoto sem SketchUp — geometria não valida
-aqui). Foco: destravar o suite de testes e reconciliar branches/docs.
+- `develop` = linha viva; tudo mergeado e pushado, CI verde, zero
+  branches órfãs (limpeza de branches noc-nf feita em 2026-07-10).
+- 2026-07-12: **campanha de baseline visual** — `planta_74` mobiliada renderizada
+  em 3 perfis (`warm_compact`, `dark_walnut`, `black_wood_gold`) × L0/L1/L2 e
+  publicada pro score do GPT/Felipe; `fix(curation)` `bc46b62` nota item
+  humano-julgado sem review anterior. Único verdict gravado:
+  `warm_compact__L0` = **WORSE**; demais pendentes.
+- Programas landados desde o snapshot anterior (2026-06-06):
+  FP-032..040 (olho /ask-vision com painel de 3 juízes, correction
+  loop, placar, materiais/gates, watchdog v3), FP-035 (RAG: retrieve
+  + DesignSpecBundle + taste write-back, Qdrant+Ollama), pipeline
+  semi-autônomo (carteiro auto-decider + galeria + curadoria em lote
+  + write-back), semantic_zones (room fidelity resolvida),
+  sofa_class_gate (Fase 0 do furniture-class wiring).
+- 2026-07-11: **fix vf_004** — swing/dobradiça das 7 portas medidos
+  do arco do PDF (`tools/door_swing_audit.py`), fixture emendada com
+  provenance, `build_door_leaf` respeita `swing_side`; painel votou
+  IMPROVED. Higiene geral executada (archives em
+  `docs/archive/2026-07-11/`, ~116M de lixo removido).
 
-## Branches / PRs em voo
+## Em curso
 
-Todos **draft → `develop`** (Hard Rule #4):
+- `fix/planta74-furnished-fidelity` — 3 fixes de furnish prontos na working
+  tree, falta commit → veredito visual → PR (ver `KICKOFF.md`).
+- ✅ 2026-07-23: **FP-035 LANDADO em develop** (fusão RRF + fix write-back recall
+  + card 🧠 Memória vetorial no :8782); tree principal atualizado (`dd9112e`),
+  suíte 1410/0/5 c/ infra viva, Qdrant rebuild (218 chunks). Resta o flip
+  `RAG_BACKEND=embed` do gerador (visual-gated) + Felipe revisar golden-set DRAFT.
+- Fila seguinte em `next_actions.md`.
 
-| PR | Branch | O quê | Risco |
-|---|---|---|---|
-| #222 | `feat/noc-dispatcher` | atuador do NOC (dispatcher + worktree-lock) | MED — muda `:8765` vivo, bem-railed, não auto-merge |
-| #223 | `chore/noc-t1` | doc `NOC_DISPATCHER.md` (output dogfooded da task T1) | baixo; mergear **depois** do #222 |
-| #224 | `chore/refresh-nba-seed` | cura `_NBA_SEED` (remove 2 itens já feitos) | baixo, independente |
-| #225 | `claude/repo-overview-NDPaj` | `fix(deps)` matplotlib+numpy | baixo; **destrava `pytest`** (coleção quebrava) |
-| #226 | `fix/consult-path-resolution` | `fix(cockpit)` resolve consult paths em call-time | baixo; conserta 4 testes, prod byte-equivalente |
-
-## Feito nesta sessão
-
-- **`main` == `develop`** reconciliadas em `73eb9da` (FF limpo; `develop`
-  estava 292 commits atrás).
-- **Revisão das branches órfãs** → viraram PRs #222–224.
-- **2 bugs reais** achados + corrigidos com prova em venv limpo (#225, #226):
-  antes `Interrupted: 1 error during collection`; depois **467 passed, 5 skipped**.
-- **Docs reconciliados** (este branch `chore/refresh-stale-docs`): `current_state.md`
-  (folded do `chore/refresh-current-state`, atualizado p/ hoje), `active_work.md`,
-  `next_actions.md`.
-
-## Comandos de validação
+## Validação (comandos atuais)
 
 ```bash
-# Suite verde (precisa do #225 mergeado OU matplotlib/numpy instalados)
-python -m pytest tests/ -q          # esperado: 467 passed, 5 skipped
-
-# main == develop
-git rev-parse origin/main origin/develop   # mesmo SHA
-
-# Bootloader @imports resolvem
-cat .claude/CLAUDE.md CLAUDE.md | grep -oE '@\.claude/[a-zA-Z_/-]+\.md' \
-  | sed 's/@//' | sort -u \
-  | while read f; do test -f "$f" && echo OK $f || echo MISS $f; done
+.venv/Scripts/python.exe -m pytest tests/ -q        # ~1319 passed
+.venv/Scripts/python.exe -m tools.door_swing_audit   # PASS 7/7
+git rev-parse origin/develop                          # == develop local
 ```
 
 ## Aguardando
 
-- Review humano + merge dos PRs #222–226 (ordem sugerida: #225 → #226 → #222 → #223; #224 a qualquer hora).
-- Decisão sobre fechar `chore/refresh-current-state` (conteúdo único folded aqui).
-- `feat/mobiliar-bedroom-layout` é **WIP de peer vivo** — hands-off.
+- VISUAL_REVIEW humano (Felipe) do swing-fix — evidência em
+  `artifacts/review/planta_74/visual_regression_20260711T041950Z/`.
+- Notas visuais (Felipe/GPT) dos 8 baselines restantes da campanha 2026-07-12
+  (só `warm_compact__L0` = WORSE gravado).
+- Decisão sobre a working tree suja: commitar verdicts/propostas/`.skp` regerado
+  OU deixar o loop autônomo consumir.

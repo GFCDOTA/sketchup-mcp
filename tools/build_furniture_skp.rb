@@ -5,12 +5,13 @@
 # Env: LAYOUT_BOXES, LAYOUT_OUT, RENDER_TOP/FRONT/ISO, LAYOUT_LOG (sinal de done).
 require 'json'
 
-def fz_material(model, name, rgb)
+def fz_material(model, name, rgb, alpha = nil)
   m = model.materials[name]
   return m if m
   m = model.materials.add(name)
   m.color = Sketchup::Color.new(rgb[0], rgb[1], rgb[2])
-  m.alpha = 1.0
+  # alpha opcional (vidro de box etc.) — SU alpha vira opacity no export V-Ray
+  m.alpha = (alpha || 1.0).to_f
   m
 end
 
@@ -90,7 +91,7 @@ def fz_run
       bevel = %w[seat_cushion back_cushion arm colchao travesseiro manta cabeceira].include?(b['kind']) ? BEVEL_IN : 0.0
       mode = b['kind'] == 'arm' ? 'frustum' : 'lid'   # braco = casca inclinada; almofada/cama = inset
       fz_solid(g.entities, b['corners'] || [], z0, h, bevel, mode)
-      g.material = fz_material(model, "fz_#{b['label']}", b['rgb'] || [120, 120, 120])
+      g.material = fz_material(model, "fz_#{b['label']}", b['rgb'] || [120, 120, 120], b['alpha'])
       placed += 1
     rescue StandardError => e
       log << "FAIL #{b['label']}: #{e.class}: #{e.message}"

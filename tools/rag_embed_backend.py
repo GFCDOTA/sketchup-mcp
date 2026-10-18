@@ -23,6 +23,8 @@ import os
 import urllib.error
 import urllib.request
 
+from core import observability as obs
+
 log = logging.getLogger("rag_embed_backend")
 
 QDRANT_URL = os.environ.get("QDRANT_URL", "http://localhost:6333")
@@ -30,6 +32,13 @@ OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434")
 EMBED_MODEL = os.environ.get("EMBED_MODEL", "nomic-embed-text")
 COLLECTION = os.environ.get("RAG_COLLECTION", "rag_chunks")
 EMBED_DIM = 768   # nomic-embed-text
+
+# nomic-embed-text é instruction-tuned p/ retrieval ASSIMÉTRICO: documentos e
+# queries levam prefixos distintos. Sem eles o recall degrada de graça. Doc e
+# query DEVEM viver com o mesmo esquema -> mudar aqui exige `reference_db reindex
+# --rebuild` p/ re-embedar o corpus com o prefixo de documento.
+EMBED_DOC_PREFIX = "search_document: "
+EMBED_QUERY_PREFIX = "search_query: "
 
 
 class InfraUnavailable(RuntimeError):
@@ -79,16 +88,22 @@ def infra_up(timeout: int = 3) -> bool:
 # ---------------------------------------------------------------------------
 # Ollama embed (urllib)
 # ---------------------------------------------------------------------------
-def embed(text: str, *, timeout: int = 120) -> list[float]:
-    """Embedding via Ollama nomic-embed-text (768d). Levanta InfraUnavailable
-    se off ou vazio -> chamador degrada."""
-    body = _http("POST", f"{OLLAMA_URL}/api/embeddings",
-                 {"model": EMBED_MODEL, "prompt": text}, timeout=timeout)
-    vec = body.get("embedding") or []
-    if not vec:
-        raise InfraUnavailable(
-            f"embedding vazio p/ texto de {len(text)} chars (modelo {EMBED_MODEL!r})")
-    return [float(x) for x in vec]
+def embed(text: str, *, prefix: str = "", timeout: int = 120) -> list[float]:
+    """Embedding via Ollama nomic-embed-text (768d). `prefix` = esquema assimétrico
+    do nomic (EMBED_DOC_PREFIX no índice, EMBED_QUERY_PREFIX na query). Levanta
+    InfraUnavailable se off ou vazio -> chamador degrada."""
+    with obs.stage("rag.embedding.started", "rag.embedding.finished",
+                   component=f"ollama.{EMBED_MODEL}",
+                   meta={"embedModel": EMBED_MODEL, "embedDim": EMBED_DIM,
+                         "prefix": prefix.strip() or None,
+                         "queryChars": len(text)}):
+        body = _http("POST", f"{OLLAMA_URL}/api/embeddings",
+                     {"model": EMBED_MODEL, "prompt": f"{prefix}{text}"}, timeout=timeout)
+        vec = body.get("embedding") or []
+        if not vec:
+            raise InfraUnavailable(
+                f"embedding vazio p/ texto de {len(text)} chars (modelo {EMBED_MODEL!r})")
+        return [float(x) for x in vec]
 
 
 # ---------------------------------------------------------------------------
@@ -130,29 +145,41 @@ def delete_points(chunk_ids: list[str], *, timeout: int = 30) -> None:
 
 
 def search(vector: list[float], *, corpus_version: str, top_k: int = 12,
-           timeout: int = 30) -> list[dict]:
+           source_type: str | None = None, timeout: int = 30) -> list[dict]:
     """Busca semântica FILTRANDO por is_active=true E corpus_version==atual no
-    payload. Devolve [{chunk_id, score, payload}] ordenado por score desc."""
+    payload. `source_type` (ex. 'token') filtra NATIVO no Qdrant — sem ele os
+    chunks-de-token ficam esparsos no top_k do corpus inteiro e a fusão colapsa.
+    Devolve [{chunk_id, score, payload}] ordenado por score desc."""
+    must = [
+        {"key": "is_active", "match": {"value": True}},
+        {"key": "corpus_version", "match": {"value": corpus_version}},
+    ]
+    if source_type is not None:
+        must.append({"key": "source_type", "match": {"value": source_type}})
     body = {
         "vector": vector,
         "limit": top_k,
         "with_payload": True,
-        "filter": {"must": [
-            {"key": "is_active", "match": {"value": True}},
-            {"key": "corpus_version", "match": {"value": corpus_version}},
-        ]},
+        "filter": {"must": must},
     }
-    res = _http("POST", f"{QDRANT_URL}/collections/{COLLECTION}/points/search",
-                body, timeout=timeout)
-    out = []
-    for hit in res.get("result") or []:
-        payload = hit.get("payload") or {}
-        out.append({
-            "chunk_id": payload.get("chunk_id"),
-            "score": float(hit.get("score", 0.0)),
-            "payload": payload,
-        })
-    return out
+    with obs.stage("rag.retrieval.started", "rag.retrieval.finished",
+                   component=f"qdrant.{COLLECTION}",
+                   meta={"collection": COLLECTION, "topK": top_k,
+                         "corpusVersion": corpus_version,
+                         "sourceType": source_type,
+                         "indexKind": "VECTOR"}) as st:
+        res = _http("POST", f"{QDRANT_URL}/collections/{COLLECTION}/points/search",
+                    body, timeout=timeout)
+        out = []
+        for hit in res.get("result") or []:
+            payload = hit.get("payload") or {}
+            out.append({
+                "chunk_id": payload.get("chunk_id"),
+                "score": float(hit.get("score", 0.0)),
+                "payload": payload,
+            })
+        st.meta["nRetrieved"] = len(out)
+        return out
 
 
 # ---------------------------------------------------------------------------
@@ -179,7 +206,8 @@ def reindex_qdrant(con, *, corpus_version: str, now_iso: str,
 
     buf: list[dict] = []
     for r in pending:
-        vec = embed(f"[{r['source_type']}] {r['title'] or ''}\n{r['text']}")
+        vec = embed(f"[{r['source_type']}] {r['title'] or ''}\n{r['text']}",
+                    prefix=EMBED_DOC_PREFIX)
         buf.append({
             "chunk_id": r["chunk_id"],
             "vector": vec,
@@ -223,8 +251,11 @@ def reindex_qdrant(con, *, corpus_version: str, now_iso: str,
     return report
 
 
-def semantic_recall(query: str, *, corpus_version: str, top_k: int = 12) -> list[dict]:
-    """Embeda a query e busca no Qdrant. Levanta InfraUnavailable se off.
+def semantic_recall(query: str, *, corpus_version: str, top_k: int = 12,
+                    source_type: str | None = None) -> list[dict]:
+    """Embeda a query (com o prefixo de QUERY do nomic) e busca no Qdrant,
+    opcionalmente filtrando por source_type. Levanta InfraUnavailable se off.
     Devolve [{chunk_id, score, payload}]."""
-    vec = embed(query)
-    return search(vec, corpus_version=corpus_version, top_k=top_k)
+    vec = embed(query, prefix=EMBED_QUERY_PREFIX)
+    return search(vec, corpus_version=corpus_version, top_k=top_k,
+                  source_type=source_type)

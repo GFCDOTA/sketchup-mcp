@@ -1,13 +1,13 @@
 {
   "schema_version": "1.0.0",
   "tool": "build_plan_shell_skp",
-  "consensus_path": "E:/Claude/worktrees/scale-fix/fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json",
-  "skp_path": "E:/Claude/worktrees/scale-fix/runs/planta_74/model.skp",
-  "shell_json_path": "E:/Claude/worktrees/scale-fix/runs/planta_74/_shell_polygon.json",
+  "consensus_path": "E:/Claude/apps/sketchup-mcp/fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json",
+  "skp_path": "E:/Claude/apps/sketchup-mcp/runs/planta_74/model.skp",
+  "shell_json_path": "E:/Claude/apps/sketchup-mcp/runs/planta_74/_shell_polygon.json",
   "soft_barriers_mode": "groups",
   "plan_shell": {
-    "faces": 109,
-    "edges": 309,
+    "faces": 114,
+    "edges": 324,
     "sub_groups": 3,
     "faces_with_holes": 7,
     "top_or_bottom_faces": 14,
@@ -32,9 +32,9 @@
       {
         "name": "Floor_Group_r001",
         "faces": 1,
-        "edges": 26,
-        "area_in2": 24119.66,
-        "area_m2": 15.561
+        "edges": 28,
+        "area_in2": 23883.98,
+        "area_m2": 15.409
       },
       {
         "name": "Floor_Group_r002",
@@ -82,7 +82,7 @@
   },
   "soft_barrier_groups": {
     "present": true,
-    "count": 1,
+    "count": 2,
     "skipped_count": 8,
     "skip_reasons": [
       "sb[0] sb000: unsourced_no_provenance (not rendered)",
@@ -164,32 +164,41 @@
         "barrier_type": "peitoril",
         "sourced": true,
         "rendered": true,
-        "render_as": "low_wall",
+        "render_as": "railing",
         "host_wall_id": null,
         "length_m": 5.571
+      },
+      {
+        "id": "h_sb001",
+        "barrier_type": "mureta",
+        "sourced": true,
+        "rendered": true,
+        "render_as": "low_wall",
+        "host_wall_id": null,
+        "length_m": 2.388
       }
     ]
   },
   "totals": {
-    "top_level_groups": 24,
+    "top_level_groups": 25,
     "faces": 50,
-    "edges": 219
+    "edges": 221
   },
   "groups_diagnostic": [
     {
       "name": "PlanShell_Group",
       "entity_count": 3,
-      "face_count": 109,
-      "edge_count": 309,
+      "face_count": 114,
+      "edge_count": 324,
       "sub_group_count": 3,
-      "lateral_face_count": 95,
+      "lateral_face_count": 100,
       "top_or_bottom_face_count": 14,
       "top_face_count": 7,
       "default_material_face_count": 0,
       "primary_material": "plan_wall",
       "bbox_in": {
         "min": [
-          50.1721,
+          50.1723,
           409.8339,
           0.0
         ],
@@ -212,8 +221,8 @@
         ]
       },
       "height_m": 2.7,
-      "footprint_bbox_m2": 101.033,
-      "footprint_top_face_m2": 8.563
+      "footprint_bbox_m2": 101.0329,
+      "footprint_top_face_m2": 8.5751
     },
     {
       "name": "Floor_Group_r000",
@@ -256,9 +265,9 @@
     },
     {
       "name": "Floor_Group_r001",
-      "entity_count": 27,
+      "entity_count": 29,
       "face_count": 1,
-      "edge_count": 26,
+      "edge_count": 28,
       "sub_group_count": 0,
       "lateral_face_count": 0,
       "top_or_bottom_face_count": 1,
@@ -291,7 +300,7 @@
       },
       "height_m": 0.0,
       "footprint_bbox_m2": 24.4777,
-      "footprint_top_face_m2": 15.561
+      "footprint_top_face_m2": 15.409
     },
     {
       "name": "Floor_Group_r002",
@@ -537,7 +546,7 @@
       "top_or_bottom_face_count": 26,
       "top_face_count": 13,
       "default_material_face_count": 0,
-      "primary_material": "plan_parapet",
+      "primary_material": "plan_railing",
       "bbox_in": {
         "min": [
           104.0433,
@@ -567,6 +576,45 @@
       "footprint_top_face_m2": 0.5194
     },
     {
+      "name": "SoftBarrier_Group_9",
+      "entity_count": 1,
+      "face_count": 6,
+      "edge_count": 12,
+      "sub_group_count": 1,
+      "lateral_face_count": 4,
+      "top_or_bottom_face_count": 2,
+      "top_face_count": 1,
+      "default_material_face_count": 0,
+      "primary_material": "plan_parapet",
+      "bbox_in": {
+        "min": [
+          230.7185,
+          416.0315,
+          0.0
+        ],
+        "max": [
+          232.2185,
+          510.0465,
+          27.5591
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          5.8603,
+          10.5672,
+          0.0
+        ],
+        "max": [
+          5.8983,
+          12.9552,
+          0.7
+        ]
+      },
+      "height_m": 0.7,
+      "footprint_bbox_m2": 0.091,
+      "footprint_top_face_m2": 0.091
+    },
+    {
       "name": "DoorLeaf_Group_h_o000",
       "entity_count": 18,
       "face_count": 6,
@@ -580,24 +628,24 @@
       "bbox_in": {
         "min": [
           137.7256,
-          696.5016,
+          672.8383,
           0.0
         ],
         "max": [
           167.5997,
-          714.6586,
+          690.9953,
           82.6772
         ]
       },
       "bbox_m": {
         "min": [
           3.4982,
-          17.6911,
+          17.0901,
           0.0
         ],
         "max": [
           4.257,
-          18.1523,
+          17.5513,
           2.1
         ]
       },
@@ -658,24 +706,24 @@
       "bbox_in": {
         "min": [
           505.2007,
-          635.0819,
+          615.793,
           0.0
         ],
         "max": [
           527.498,
-          648.8645,
+          629.5756,
           82.6772
         ]
       },
       "bbox_m": {
         "min": [
           12.8321,
-          16.1311,
+          15.6411,
           0.0
         ],
         "max": [
           13.3984,
-          16.4812,
+          15.9912,
           2.1
         ]
       },
@@ -696,25 +744,25 @@
       "primary_material": "plan_door",
       "bbox_in": {
         "min": [
-          328.6899,
-          604.8165,
+          342.7121,
+          604.0291,
           0.0
         ],
         "max": [
-          344.0759,
-          629.8911,
+          358.0981,
+          629.1037,
           82.6772
         ]
       },
       "bbox_m": {
         "min": [
-          8.3487,
-          15.3623,
+          8.7049,
+          15.3423,
           0.0
         ],
         "max": [
-          8.7395,
-          15.9992,
+          9.0957,
+          15.9792,
           2.1
         ]
       },
@@ -735,25 +783,25 @@
       "primary_material": "plan_door",
       "bbox_in": {
         "min": [
-          304.5287,
-          601.4347,
+          309.0596,
+          580.594,
           0.0
         ],
         "max": [
-          329.5141,
-          616.7693,
+          334.0449,
+          595.9285,
           82.6772
         ]
       },
       "bbox_m": {
         "min": [
-          7.735,
-          15.2764,
+          7.8501,
+          14.7471,
           0.0
         ],
         "max": [
-          8.3697,
-          15.6659,
+          8.4847,
+          15.1366,
           2.1
         ]
       },
@@ -774,25 +822,25 @@
       "primary_material": "plan_door",
       "bbox_in": {
         "min": [
-          89.1804,
-          594.4621,
+          94.8079,
+          569.5288,
           0.0
         ],
         "max": [
-          121.2542,
-          613.8891,
+          126.8817,
+          588.9558,
           82.6772
         ]
       },
       "bbox_m": {
         "min": [
-          2.2652,
-          15.0993,
+          2.4081,
+          14.466,
           0.0
         ],
         "max": [
-          3.0799,
-          15.5928,
+          3.2228,
+          14.9595,
           2.1
         ]
       },
@@ -813,25 +861,25 @@
       "primary_material": "plan_door",
       "bbox_in": {
         "min": [
-          331.004,
-          569.4197,
+          342.7121,
+          572.5568,
           0.0
         ],
         "max": [
-          344.0759,
-          590.486,
+          355.7839,
+          593.6231,
           82.6772
         ]
       },
       "bbox_m": {
         "min": [
-          8.4075,
-          14.4633,
+          8.7049,
+          14.5429,
           0.0
         ],
         "max": [
-          8.7395,
-          14.9983,
+          9.0369,
+          15.078,
           2.1
         ]
       },
@@ -1118,8 +1166,8 @@
     "input_openings": 12,
     "openings_carved": 8,
     "window_apertures_3d": 4,
-    "endpoints_free": 17,
-    "endpoints_junction": 23,
+    "endpoints_free": 22,
+    "endpoints_junction": 18,
     "openings_skipped_by_origin": [
 
     ],
@@ -1132,7 +1180,7 @@
     "shell_pieces_after_union": 3,
     "shell_pieces_after_sliver_filter": 3,
     "slivers_removed": 0,
-    "redundant_vertices_dropped": 31,
+    "redundant_vertices_dropped": 3,
     "snap_eps_pts": 0.1,
     "min_sliver_area_pts2": 0.5,
     "carving_origins": [
@@ -1140,7 +1188,7 @@
       "svg_arc",
       "svg_segments"
     ],
-    "total_shell_area_pts2": 11945.2422,
+    "total_shell_area_pts2": 11963.2201,
     "window_apertures": [
       {
         "id": "h_o007",

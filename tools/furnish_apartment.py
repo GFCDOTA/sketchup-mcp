@@ -39,6 +39,22 @@ CONSENSUS = ROOT / "fixtures/planta_74/consensus_with_human_walls_and_soft_barri
 BASE_SKP = Path(os.environ.get("FURNISH_BASE_SKP") or str(ROOT / "artifacts/planta_74/planta_74.skp"))  # shell override p/ escala: @0.0259 usa o shell rebuildado (base default 0.0352 intacta)
 OUT_DIR = ROOT / "artifacts/planta_74/furnished"   # pasta UNICA fixa
 RB = ROOT / "tools/place_layout_skp.rb"
+PLANT = "planta_74"   # pipeline planta_74-only (mesmo escopo do resto do modulo)
+
+
+def _gallery_corpus_root() -> Path:
+    """Raiz do corpus de galeria = a MESMA do variant_sweep/feeder
+    (data/runs/noc_variant_sweep sob a raiz do WORKSPACE), pra o apê mobiliado
+    virar mais um item da UNICA galeria que a curadoria/RAG ja leem — nao um
+    silo paralelo. Fallback repo-relativo se a raiz do workspace nao resolver."""
+    try:
+        from tools.claude_bridge._paths import WORKSPACE_ROOT
+        return WORKSPACE_ROOT / "data" / "runs" / "noc_variant_sweep"
+    except Exception:  # noqa: BLE001 — checkout solto / sem apps+ops: repo-relativo
+        return ROOT / "data" / "runs" / "noc_variant_sweep"
+
+
+GALLERY_CORPUS_ROOT = _gallery_corpus_root()
 
 def bedroom_designer_boxes(con, room_id):
     """Adapter: roda o bedroom_designer (cama por tamanho do quarto + cabeceira +
@@ -82,30 +98,84 @@ def bedroom_designer_boxes(con, room_id):
         w_m, l_m, cen = _wd_dims(bed_item["box"], (fx, fy))
         nm = str(bed_item.get("name", ""))
         size = next((s for s in ("king", "queen", "casal", "solteiro") if s in nm), "king")
-        parts, _ = build_bed(bed_spec(size, width=round(w_m, 3), length=round(l_m, 3)))
+        parts, _ = build_bed(bed_spec(size, width=round(w_m, 3), length=round(l_m, 3),
+                                      headboard_style="upholstered"))
         bed_parts = place_bed_boxes(parts, cen, (fx, fy))
         for _b in bed_parts:
             _b["module"] = "Cama"
-        # a anatomia do build_bed JA tem a 'cabeceira'; dropa tambem o 'headboard' do
-        # _items_to_boxes pra nao duplicar o painel (ruido visual no render). Felipe 2026-06-08.
+        # a anatomia do build_bed JA tem a 'cabeceira'; o 'headboard' do designer vira
+        # PAINEL RIPADO nogueira (diretriz suítes 2026-08-03) — não some mais.
         boxes = [b for b in boxes if b.get("kind") not in ("bed", "headboard")] + bed_parts
         out["bed_parametric"] = {"size": size, "n_parts": len(bed_parts),
                                  "W_m": round(w_m, 2), "L_m": round(l_m, 2)}
+        # PAINEL RIPADO de cabeceira (gramática da cozinha: sulco-sombra desenha) +
+        # LED 2700K no topo + ARANDELAS com aro bronze (só master; o único ouro).
+        hb_item = next((it for it in items if it.get("type") == "headboard"), None)
+        _area = float(out.get("area_m2") or (sm or {}).get("area_m2") or 0)
+        _is_master = _area >= 18
+        if hb_item is not None:
+            pw_m, _pd_m, pcen = _wd_dims(hb_item["box"], (fx, fy))
+            ph_m = 2.20 if _is_master else 1.60
+            boxes.append(_oriented_box("ks_painel_base", pcen, (fx, fy), pw_m, 0.05, 0.0,
+                                       ph_m, [56, 42, 30], module="Painel cabeceira"))
+            import math as _mm
+            _fn = _mm.hypot(fx, fy) or 1.0
+            _ux, _uy = fx / _fn, fy / _fn
+            _px, _py = -_uy, _ux                       # eixo ao longo da parede
+            M2IN_ = 39.3700787402
+            _n_ripas = max(8, int(pw_m / 0.08))
+            for _i in range(_n_ripas):
+                _off = (_i + 0.5) / _n_ripas * pw_m - pw_m / 2
+                _rc = (pcen[0] + _px * _off * M2IN_ + _ux * 0.02 * M2IN_,
+                       pcen[1] + _py * _off * M2IN_ + _uy * 0.02 * M2IN_)
+                boxes.append(_oriented_box("ks_ripa", _rc, (fx, fy), 0.06, 0.025, 0.0,
+                                           ph_m, [108, 80, 58], module="Painel cabeceira"))
+            boxes.append(_oriented_box("ks_led", (pcen[0] + _ux * 0.045 * M2IN_, pcen[1] + _uy * 0.045 * M2IN_),
+                                       (fx, fy), pw_m - 0.15, 0.02, ph_m - 0.04, 0.02,
+                                       [255, 250, 232], module="Painel cabeceira"))
+            if _is_master:
+                for _side in (-1, 1):
+                    _aoff = _side * (w_m / 2 + 0.30)
+                    _ac = (pcen[0] + _px * _aoff * M2IN_ + _ux * 0.09 * M2IN_,
+                           pcen[1] + _py * _aoff * M2IN_ + _uy * 0.09 * M2IN_)
+                    boxes.append(_oriented_box("ks_arandela", _ac, (fx, fy), 0.14, 0.16, 1.28,
+                                               0.14, [28, 28, 30], module="Arandela"))
+                    boxes.append(_oriented_box("ks_bronze", _ac, (fx, fy), 0.15, 0.14, 1.26,
+                                               0.018, [171, 119, 63], module="Arandela"))
+            else:
+                # suíte pequena: o único bronze mora num friso fino do painel
+                # (o guarda-roupa pode nem caber no cômodo — 8m² reais)
+                boxes.append(_oriented_box("ks_bronze", (pcen[0] + _ux * 0.05 * M2IN_,
+                                                         pcen[1] + _uy * 0.05 * M2IN_),
+                                           (fx, fy), 0.30, 0.02, 0.92, 0.02,
+                                           [171, 119, 63], module="Painel cabeceira"))
 
-    # CRIADOS golden (pes+corpo+tampo+gaveta+knob), gaveta vira p/ fora (facing da cama).
+    # CRIADOS SUSPENSOS handleless (diretriz suítes 2026-08-03): morre o builder de
+    # pés+knob — corpo grafite flutuando (0.32-0.52) + gola sombra + tampo nogueira
+    # proud + LED 2700K por baixo (eco under_cabinet_led).
     ns_items = [it for it in items if it.get("type") == "nightstand"]
     if ns_items:
         ns_boxes, n_ns = [], 0
         for it in ns_items:
             nw, nd, ncen = _wd_dims(it["box"], bed_facing)
-            nparts, _ = build_nightstand(nightstand_spec(width=round(nw, 3), depth=round(max(nd, 0.30), 3)))
+            nw, nd = round(max(nw, 0.40), 3), round(max(nd, 0.34), 3)
             n_ns += 1
-            _cb = place_nightstand_boxes(nparts, ncen, bed_facing)
-            for _b in _cb:                                  # cada criado = modulo separado
-                _b["module"] = f"Criado-mudo {n_ns}"
+            _mod = f"Criado-mudo {n_ns}"
+            _cb = [
+                _oriented_box("ks_criado_corpo", ncen, bed_facing, nw, nd, 0.32, 0.20,
+                              [30, 31, 32], module=_mod),
+                _oriented_box("ks_criado_frente", ncen, bed_facing, nw - 0.03, nd + 0.006, 0.335, 0.165,
+                              [44, 45, 47], module=_mod),
+                _oriented_box("ks_gola", ncen, bed_facing, nw - 0.07, nd + 0.008, 0.322, 0.012,
+                              [24, 24, 24], module=_mod),
+                _oriented_box("ks_criado_tampo", ncen, bed_facing, nw + 0.02, nd + 0.02, 0.52, 0.025,
+                              [118, 90, 66], module=_mod),
+                _oriented_box("ks_led", ncen, bed_facing, nw - 0.06, nd - 0.06, 0.30, 0.014,
+                              [255, 250, 232], module=_mod),
+            ]
             ns_boxes += _cb
         boxes = [b for b in boxes if b.get("kind") != "nightstand"] + ns_boxes
-        out["nightstand_parametric"] = {"count": n_ns, "n_parts": len(ns_boxes)}
+        out["nightstand_parametric"] = {"count": n_ns, "n_parts": len(ns_boxes), "floating": True}
 
     # GUARDA-ROUPA golden (corpo+portas+puxadores+rodape) no mesmo footprint/facing (portas
     # viram p/ dentro do quarto). Troca o bloco roxo liso 'wardrobe'.
@@ -115,14 +185,53 @@ def bedroom_designer_boxes(con, room_id):
         ww_m, wd_m, wcen = _wd_dims(wd_item["box"], (wfx, wfy))
         wparts, _ = build_wardrobe(wardrobe_spec(width=round(ww_m, 3), depth=round(max(wd_m, 0.45), 3)))
         wboxes = place_wardrobe_boxes(wparts, wcen, (wfx, wfy))
+        # HANDLELESS até o TETO (diretriz suítes): mata a barra de puxador; recolor
+        # por papel (carcaça escura x porta por suíte); maleiro 2.20->2.69 com junta
+        # sombra; gola contínua no rodapé das portas; S02 leva o bronze na gola central.
+        _area_w = float(out.get("area_m2") or (sm or {}).get("area_m2") or 0)
+        _porta_rgb = [44, 45, 47] if _area_w >= 18 else [108, 80, 58]
+        wboxes = [b for b in wboxes if b.get("kind") != "puxador"]
         for _b in wboxes:
             _b["module"] = "Guarda-roupa"
+            if _b["kind"] == "corpo":
+                _b["rgb"] = [30, 31, 32]
+            elif _b["kind"] == "porta":
+                _b["rgb"] = _porta_rgb
+            elif _b["kind"] == "rodape":
+                _b["rgb"] = [18, 18, 20]
+        _wtop = max(_b["z0_in"] + _b["h_in"] for _b in wboxes) / 39.3700787402
+        if _wtop < 2.60:
+            boxes_mal = [
+                _oriented_box("ks_gola", wcen, (wfx, wfy), ww_m - 0.02, max(wd_m, 0.45), _wtop - 0.002, 0.014,
+                              [24, 24, 24], module="Guarda-roupa"),
+                _oriented_box("ks_maleiro", wcen, (wfx, wfy), ww_m, max(wd_m, 0.45), _wtop + 0.012,
+                              2.69 - (_wtop + 0.012), _porta_rgb, module="Guarda-roupa"),
+            ]
+            wboxes += boxes_mal
+        _pz0 = min((_b["z0_in"] for _b in wboxes if _b["kind"] == "porta"), default=None)
+        if _pz0 is not None:
+            wboxes.append(_oriented_box("ks_gola", wcen, (wfx, wfy), ww_m - 0.06, max(wd_m, 0.45) + 0.006,
+                                        _pz0 / 39.3700787402 + 0.012, 0.012, [24, 24, 24], module="Guarda-roupa"))
+        if _area_w < 18:
+            wboxes.append(_oriented_box("ks_bronze", wcen, (wfx, wfy), 0.28,
+                                        max(wd_m, 0.45) + 0.01, 1.10, 0.025, [171, 119, 63],
+                                        module="Guarda-roupa"))
         boxes = [b for b in boxes if b.get("kind") != "wardrobe"] + wboxes
-        out["wardrobe_parametric"] = {"n_parts": len(wboxes), "W_m": round(ww_m, 2), "D_m": round(wd_m, 2)}
+        out["wardrobe_parametric"] = {"n_parts": len(wboxes), "W_m": round(ww_m, 2),
+                                      "D_m": round(wd_m, 2), "to_ceiling": True}
+    # paleta ks_* nas peças herdadas dos builders golden (cores neutras -> diretriz)
+    _KS_BY_KIND = {"estrado": [38, 39, 40], "colchao": [214, 202, 184],
+                   "travesseiro": [222, 212, 196], "manta": [176, 128, 88],
+                   "cabeceira": [172, 150, 124], "tapete": [122, 110, 98], "rug": [122, 110, 98]}
+    for _b in boxes:
+        _new = _KS_BY_KIND.get(str(_b.get("kind", "")))
+        if _new:
+            _b["rgb"] = _new
     return boxes, out
 
 
-def _oriented_box(kind, center_in, facing, w_m, d_m, z0_m, h_m, rgb, label=None, module=None):
+def _oriented_box(kind, center_in, facing, w_m, d_m, z0_m, h_m, rgb, label=None, module=None,
+                  decorative=False):
     """Caixa (rack/mesa/tapete) centrada em center_in (shell inches) com a FRENTE
     (-Y local) apontando 'facing'. Mesma rotacao do place_sofa_boxes -> qualquer
     angulo. w=largura (perp ao facing), d=profundidade (ao longo do facing)."""
@@ -144,7 +253,7 @@ def _oriented_box(kind, center_in, facing, w_m, d_m, z0_m, h_m, rgb, label=None,
     return {"kind": kind, "x0": min(xs), "y0": min(ys), "x1": max(xs), "y1": max(ys),
             "corners": corners, "h_in": round(h_m * M2IN, 2), "z0_in": round(z0_m * M2IN, 2),
             "rgb": rgb, "label": label or kind, "module": module or kind,
-            "ambiguous": False, "decorative": False}
+            "ambiguous": False, "decorative": decorative}
 
 
 def place_decor_boxes(kind, center_in, facing, z_lift=0.0, module=None, **overrides):
@@ -164,6 +273,39 @@ def place_decor_boxes(kind, center_in, facing, z_lift=0.0, module=None, **overri
     return bx
 
 
+def _oct_in(kind, cx, cy, r_m, z0_m, h_m, rgb, module):
+    """Disco octogonal flat em INCHES (cx,cy do shell) — leitura circular low-poly
+    (cúpula de pendente; mesma gramática dos discos do cooktop)."""
+    import math
+    M2IN = 39.3700787402
+    r = r_m * M2IN
+    pts = [(cx + r * math.cos(a), cy + r * math.sin(a))
+           for a in (math.pi / 8 + i * math.pi / 4 for i in range(8))]
+    xs = [p[0] for p in pts]
+    ys = [p[1] for p in pts]
+    return {"kind": kind, "x0": min(xs), "y0": min(ys), "x1": max(xs), "y1": max(ys),
+            "corners": [[round(px, 2), round(py, 2)] for px, py in pts],
+            "h_in": round(h_m * M2IN, 2), "z0_in": round(z0_m * M2IN, 2), "rgb": rgb,
+            "label": kind, "module": module, "ambiguous": False,
+            # octógono (aproximação circular low-poly) — não-retangular por
+            # design (cúpula/anel de pendente), não bug de rotação. Achado
+            # 2026-08-12: geometry_sanity.off_axis rejeitava (decorative
+            # estava False por engano; todo uso de _oct_in é decor redondo).
+            "decorative": True}
+
+
+def _dining_table_rect(w=1.60, d=0.90, h=0.75, top_t=0.04, top_rgb=(108, 80, 58), leg_rgb=(30, 30, 33)):
+    """Mesa de jantar RETANGULAR 6 lugares (1.60x0.90 real, joelho >=0.60): tampo
+    sólido nogueira + saia + 4 pernas metal inset. Metros, origem no canto."""
+    from tools.sofa_builder import _p
+    lt, ins = 0.08, 0.05
+    parts = [_p("top", "top", 0.0, 0.0, w, d, h - top_t, h, top_rgb)]
+    parts.append(_p("apron", "saia", ins, ins, w - ins, d - ins, h - top_t - 0.10, h - top_t, leg_rgb))
+    for x0, y0 in ((ins, ins), (w - ins - lt, ins), (ins, d - ins - lt), (w - ins - lt, d - ins - lt)):
+        parts.append(_p("leg", "foot", x0, y0, x0 + lt, y0 + lt, 0.0, h - top_t, leg_rgb))
+    return parts
+
+
 def _dining_table_square(side=0.92, h=0.76, top_t=0.045, top_rgb=(96, 70, 48), leg_rgb=(30, 30, 33)):
     """Mesa de jantar QUADRADA: tampo SÓLIDO (não fatias/palito) + 4 pernas grossas +
     saia fina. Metros, origem no canto. (preferência do Felipe: quadrada/canto alemão)."""
@@ -178,16 +320,18 @@ def _dining_table_square(side=0.92, h=0.76, top_t=0.045, top_rgb=(96, 70, 48), l
 
 
 def _chair_parts():
-    """Cadeira de jantar simples (Tolix-ish, metal preto): 4 pés + assento + encosto.
-    Metros, frente = -Y (encosto em +Y). Orientada por place_sofa_boxes."""
+    """Cadeira de jantar ESTOFADA (frame metal preto + assento/encosto grafite =
+    tecido do sofá). Metros, frente = -Y (encosto em +Y). place_sofa_boxes orienta."""
     from tools.sofa_builder import _p
-    w, d, sh, bh, lt = 0.42, 0.44, 0.46, 0.86, 0.028
-    seat, frame = (52, 52, 56), (26, 26, 29)
+    w, d, sh, bh, lt = 0.45, 0.50, 0.45, 0.90, 0.028
+    fabric, frame = (74, 72, 78), (26, 26, 29)
     parts = []
     for x0, y0 in ((0.02, 0.02), (w - 0.02 - lt, 0.02), (0.02, d - 0.02 - lt), (w - 0.02 - lt, d - 0.02 - lt)):
-        parts.append(_p("leg", "foot", x0, y0, x0 + lt, y0 + lt, 0.0, sh, frame))
-    parts.append(_p("seat", "seat", 0.0, 0.0, w, d, sh, sh + 0.04, seat))
-    parts.append(_p("back", "back", 0.0, d - 0.05, w, d, sh, bh, frame))
+        parts.append(_p("leg", "foot", x0, y0, x0 + lt, y0 + lt, 0.0, sh - 0.05, frame))
+    parts.append(_p("seat_frame", "frame", 0.02, 0.02, w - 0.02, d - 0.02, sh - 0.05, sh - 0.03, frame))
+    parts.append(_p("seat", "seat", 0.015, 0.015, w - 0.015, d - 0.015, sh - 0.03, sh + 0.02, fabric))
+    parts.append(_p("back_frame", "frame", 0.03, d - 0.045, w - 0.03, d - 0.02, sh, bh - 0.02, frame))
+    parts.append(_p("back", "back", 0.02, d - 0.06, w - 0.02, d - 0.038, sh + 0.10, bh, fabric))
     return parts
 
 
@@ -195,7 +339,7 @@ def _bwg_recolor(boxes):
     """Linguagem black_wood_gold (GOLDEN_SAMPLE_004) na SALA: madeira escura coordenada +
     preto/grafite controlado + tecido escuro + tapete neutro quente + LED quente. SO cor (rgb),
     NUNCA geometria/posicao -> o layout JA validado fica intacto. Coerente com a cozinha."""
-    WOOD = [110, 84, 58]
+    WOOD = [108, 80, 58]
     BLACK = [44, 44, 48]
     FABRIC = [74, 72, 78]
     RUG = [140, 128, 112]
@@ -206,6 +350,8 @@ def _bwg_recolor(boxes):
     for b in boxes:
         mod = str(b.get("module", "")).lower()
         kind = str(b.get("kind", "")).lower()
+        if kind.startswith(("rug_", "pend_", "tv_", "painel", "almofada", "lv_led")):
+            continue                                        # peças novas já nascem na paleta certa
         if "spot" in kind:
             b["rgb"] = LED                                  # spot quente
         elif "rail" in kind or "trilho" in mod:
@@ -219,7 +365,7 @@ def _bwg_recolor(boxes):
         elif "sofa" in mod:
             b["rgb"] = BLACK if any(k in kind for k in bk) else FABRIC
         elif "cadeira" in mod:
-            b["rgb"] = BLACK                                # cadeiras escuras elegantes
+            b["rgb"] = BLACK if any(k in kind for k in bk) else FABRIC   # estofado = tecido do sofá
         elif any(k in kind for k in bk):
             b["rgb"] = BLACK
         elif any(k in kind for k in wk):
@@ -237,6 +383,12 @@ def living_room_boxes(con, room_id):
     o solver rejeita sofa em circulacao / sem eixo pra TV. Fallback: brain antigo."""
     from tools.sofa_builder import build_sofa, place_sofa_boxes
     from interior.planners.living_room_planner import plan_living
+    # provenance de decisões de posicionamento (optimizer_consistency_gate) —
+    # achado 2026-08-12: toda busca de posição JÁ usa circulation_gate.gate()
+    # de verdade (não proxy), mas a decisão morria depois de escolhida; agora
+    # fica registrada em out["placement_decisions"] pra auditoria/CI.
+    _CANONICAL_GATE_VERSION = "circulation_gate.py::gate/2026-08-12-role-based"
+    _placement_decisions = []
     plan = plan_living(con, room_id)
     if not plan.get("plan"):
         # sem parede util no comodo (raríssimo): NAO flutua moveis — sala vazia e
@@ -289,30 +441,37 @@ def living_room_boxes(con, room_id):
     # LIVING_ROOM_LAYOUT_FIX_OPTION_A: a FORMA entra SEMPRE (sai do proxy); a cor é neutra no baseline
     # e escura só sob FURNISH_STYLE (a estética black_wood_gold entra numa fase posterior).
     from tools.rack_class import build_rack, derive_rack_spec
-    _styled = os.environ.get("FURNISH_STYLE") in ("industrial", "modern_warm")
+    # BLACK_WOOD_GOLD DIRETO (programa apê-inteiro 2026-08-03): a sala nasce
+    # estilizada como a cozinha — a estética não depende mais de FURNISH_STYLE.
     _rlen = round(min(1.55, max(1.30, _rack_wall_len - 0.35)), 2)
     _rspec = derive_rack_spec("55", "low_credenza", length=_rlen,
-                              body_rgb=(60, 47, 36) if _styled else (122, 98, 70),
-                              front_rgb=(80, 62, 46) if _styled else (138, 112, 82),
-                              feet_rgb=(26, 26, 28) if _styled else (64, 64, 68))
+                              body_rgb=(38, 39, 40), front_rgb=(44, 45, 47),
+                              feet_rgb=(26, 26, 28))
     _rparts, _ = build_rack(_rspec)
-    _rb = place_sofa_boxes(_rparts, rack_c, rack_f)
+    rfx, rfy = rack_f
+    _rn2 = _m.hypot(rfx, rfy) or 1.0
+    rfx, rfy = rfx / _rn2, rfy / _rn2
+    # rack avança 13cm pra abrir espaço pro PAINEL na parede (medido: 7cm deixava
+    # 3cm de invasão — overlap_gate WARN 493cm²; 13cm dá folga de ~3cm)
+    _rack_c2 = (rack_c[0] + rfx * 0.13 * M2IN, rack_c[1] + rfy * 0.13 * M2IN)
+    _rb = place_sofa_boxes(_rparts, _rack_c2, rack_f)
     for _b in _rb:
         _b["module"] = "Rack TV"
     boxes += _rb
-    # tapete + mesa COMPACTOS, agrupados perto do sofa (nao transbordam o nicho).
-    boxes.append(_oriented_box("tapete", _ahead(0.70), sofa_f, 1.60, 1.10, 0.0, 0.02, [165, 156, 140], module="Tapete"))
-    # MESA DE CENTRO = classe planejada COMPACTA (NUNCA cubo). Forma sempre; cor neutra no baseline.
-    from tools.coffee_table_class import CoffeeTableClassSpec, build_coffee_table_v2
-    _ct = CoffeeTableClassSpec(style="two_tier", length=0.95, width=0.50, height=0.38, shelf=True,
-                               top_rgb=(80, 62, 46) if _styled else (120, 96, 70),
-                               leg_rgb=(30, 30, 33) if _styled else (64, 64, 68))
-    _ctp, _ = build_coffee_table_v2(_ct.validate())
-    _ctb = place_sofa_boxes(_ctp, _ahead(0.80), sofa_f)
-    for _b in _ctb:
-        _b["module"] = "Mesa de centro"
-    boxes += _ctb
-
+    # PAINEL DE TV em NOGUEIRA (SEMPRE — substitui o proxy gated 'parede_concreto'):
+    # é o fundo que faz rack+TV lerem como estar planejado. Fita LED 2700K no topo.
+    _pan_w = round(max(1.80, min(_rack_wall_len - 0.10, 2.60)), 2)
+    _pan_c = (rack_c[0] - rfx * 0.15 * M2IN, rack_c[1] - rfy * 0.15 * M2IN)
+    boxes.append(_oriented_box("painel_tv", _pan_c, rack_f, _pan_w, 0.05, 0.0, 2.40,
+                               [92, 64, 46], module="Painel TV"))
+    boxes.append(_oriented_box("lv_led", (_pan_c[0] + rfx * 0.033 * M2IN, _pan_c[1] + rfy * 0.033 * M2IN),
+                               rack_f, _pan_w - 0.20, 0.016, 2.32, 0.02, [255, 250, 232], module="Painel TV"))
+    # TV 55" REAL em produção (era só proxy na matriz do juiz): moldura fina +
+    # vidro preto profundo — o preto mais escuro do ambiente, montada no painel.
+    _tv_c = (_pan_c[0] + rfx * 0.045 * M2IN, _pan_c[1] + rfy * 0.045 * M2IN)
+    boxes.append(_oriented_box("tv_frame", _tv_c, rack_f, 1.27, 0.025, 0.735, 0.73, [22, 22, 26], module="TV"))
+    boxes.append(_oriented_box("tv_glass", (_tv_c[0] + rfx * 0.014 * M2IN, _tv_c[1] + rfy * 0.014 * M2IN),
+                               rack_f, 1.23, 0.012, 0.755, 0.69, [16, 16, 18], module="TV"))
     # cell + helper (SEMPRE — jantar e decor usam o polígono do cômodo)
     from shapely.geometry import Point, Polygon
 
@@ -335,27 +494,189 @@ def living_room_boxes(con, room_id):
     if _free.geom_type == "MultiPolygon":
         _free = max(_free.geoms, key=lambda g: g.area)
     if (not _free.is_empty) and _free.area > (2.4 * M2IN * M2IN):
-        _dc = _free.centroid
-        _dtp = _dining_table_square(side=0.92,
-                                    top_rgb=(96, 70, 48) if _styled else (120, 96, 70),
-                                    leg_rgb=(30, 30, 33) if _styled else (64, 64, 68))
-        _dtb = place_sofa_boxes(_dtp, (_dc.x, _dc.y), (0.0, 1.0))
-        for _b in _dtb:
-            _b["module"] = "Mesa de jantar"
-        boxes += _dtb
-        _nch = 0
-        for _ang in range(0, 360, 45):                 # 8 direções; pega as que cabem
-            _ux, _uy = _m.cos(_m.radians(_ang)), _m.sin(_m.radians(_ang))
-            _chc = (_dc.x + _ux * 0.70 * M2IN, _dc.y + _uy * 0.70 * M2IN)
-            _pt = Point(_chc)
-            if cell_in.contains(_pt) and cell_in.exterior.distance(_pt) >= 4:
-                _chb = place_sofa_boxes(_chair_parts(), _chc, (-_ux, -_uy))
-                for _b in _chb:
-                    _b["module"] = "Cadeira jantar"
-                boxes += _chb
-                _nch += 1
-                if _nch >= 4:
+        # P1 do VERDICT 6.5 (Felipe): mesa MENOR e POSIÇÃO ESCOLHIDA PELO GATE
+        # — busca candidatos e só aceita onde a circulação PASSA de verdade
+        # (90/80cm contínuo por PAPEL do portal + 0.70 atrás + cadeira PUXADA).
+        from tools.circulation_gate import gate as _circ_gate
+        # 1.00x0.65, 4 lugares (2+2 nos lados COMPRIDOS) — achado 2026-08-12,
+        # varredura EXAUSTIVA (grade completa do cômodo, passo 6-8in, overlap
+        # real contra sofá/rack, exigindo os 5 portais conectados E folga
+        # atrás/puxada de TODA cadeira): nenhuma mesa retangular de 6 lugares
+        # (testadas 1.10-1.40m, com/sem cabeceira, 2+2+2 e 3+3) tem posição
+        # válida nesse cômodo — sofá (ajustado ao nicho) + rack já ocupam a
+        # parede-TV inteira, e 6 cadeiras ao redor de qualquer mesa >=1.0m²
+        # sempre fecham pelo menos 1 dos 5 vãos OU deixam alguma cadeira sem
+        # 0.70m de folga atrás. 4 lugares em mesa retangular (ratio 1.5, ainda
+        # "mesa de jantar" de verdade, não bistrô) É o teto real do apê 74m²
+        # pra essa sala combinada sem violar circulação (P1, prioridade sobre
+        # contagem de lugares).
+        _MW, _MD = 1.00, 0.65
+        _CHAIR_GAP = 0.30
+        _seat_xs = (-0.25, 0.25)
+        _chair_spots = ([(sx, _MD / 2 + _CHAIR_GAP, (0.0, -1.0)) for sx in _seat_xs]
+                        + [(sx, -(_MD / 2 + _CHAIR_GAP), (0.0, 1.0)) for sx in _seat_xs])
+
+        def _dining_set(cx, cy):
+            out_ = []
+            _dtp = _dining_table_rect(w=_MW, d=_MD, top_rgb=(108, 80, 58), leg_rgb=(30, 30, 33))
+            for _b in place_sofa_boxes(_dtp, (cx, cy), (0.0, 1.0)):
+                _b["module"] = "Mesa de jantar"
+                out_.append(_b)
+            for _dx, _dy, _cf in _chair_spots:
+                _chc = (cx + _dx * M2IN, cy + _dy * M2IN)
+                _pt = Point(_chc)
+                if cell_in.contains(_pt) and cell_in.exterior.distance(_pt) >= 4:
+                    for _b in place_sofa_boxes(_chair_parts(), _chc, _cf):
+                        _b["module"] = "Cadeira jantar"
+                        out_.append(_b)
+            out_.append(_oriented_box("pend_cabo", (cx, cy), (0.0, 1.0), 0.032, 0.032,
+                                      2.10, 0.60, [26, 26, 28], module="Pendente"))
+            out_.append(_oct_in("pend_cupula", cx, cy, 0.20, 1.85, 0.25, [30, 31, 32], "Pendente"))
+            out_.append(_oct_in("pend_bronze", cx, cy, 0.206, 1.842, 0.010, [171, 119, 63], "Pendente"))
+            return out_
+
+        # grade no cômodo INTEIRO (não mais radial-do-centroide): achado
+        # 2026-08-12 — a busca radial (raio até 1.60m a partir do centroide da
+        # zona livre) nunca alcançava as poucas posições que de fato preservam
+        # os 5 portais (comprovado por varredura exaustiva com passo de 6-10in +
+        # checagem de overlap real contra sofá/rack, que a busca radial também
+        # não fazia — só evitava a zona de circulação, não a mobília em si).
+        # Métrica: nº de portais desconectados (pesa mais) + nº de categorias
+        # FAIL como desempate; primeira posição com 0 (circulação E folga de
+        # cadeira) vence.
+        _bx0, _by0, _bx1, _by1 = cell_in.bounds
+        _occ_now = _uni(_occ) if _occ else None
+        _best, _best_score, _best_fails, _best_gate_result = None, 999, 99, None
+        _n_candidates = 0
+        _step = 6
+        for _cx in range(int(_bx0) + 8, int(_bx1) - 8, _step):
+            if _best_score == 0:
+                break
+            for _cy in range(int(_by0) + 8, int(_by1) - 8, _step):
+                if not _inside((_cx, _cy), margin_in=20):
+                    continue
+                _cand_boxes = _dining_set(_cx, _cy)
+                if not _cand_boxes:
+                    continue
+                if _occ_now is not None:
+                    _cand_occ = _uni([Polygon([(c[0], c[1]) for c in _b["corners"]])
+                                      for _b in _cand_boxes if _b.get("corners")])
+                    if _cand_occ.intersection(_occ_now).area > 50:   # in^2
+                        continue
+                _n_candidates += 1
+                _g = _circ_gate(con, boxes + _cand_boxes, room_id)
+                _ndisc = sum(1 for p in _g["checks"]["corredor_principal"]["portais"]
+                            if not p.get("conectado", True))
+                _nf = sum(1 for c in _g["checks"].values() if c["result"] != "PASS")
+                _score = _ndisc * 10 + _nf
+                if _score < _best_score:
+                    _best, _best_score, _best_fails = _cand_boxes, _score, _nf
+                    _best_gate_result = _g["result"]
+                if _score == 0:
                     break
+        if _best is not None:
+            if _best_fails:
+                print(f"[furnish-apt] circulation_gate: melhor candidato ainda com "
+                      f"{_best_fails} check(s) FAIL (WARN-log)")
+            boxes += _best
+            _placement_decisions.append({
+                "candidate_id": "mesa_de_jantar", "optimizer": "dining_grid_search_v1",
+                "canonical_gate": _CANONICAL_GATE_VERSION,
+                "gate_result": _best_gate_result, "score": _best_score,
+                "n_candidates_tried": _n_candidates,
+            })
+
+    # almofadas soltas no sofá (decor mínimo, pontuação não frase)
+    for _adx, _aang in ((-0.55, 12), (0.55, -12)):
+        _af = (fnx * _m.cos(_m.radians(_aang)) - fny * _m.sin(_m.radians(_aang)),
+               fnx * _m.sin(_m.radians(_aang)) + fny * _m.cos(_m.radians(_aang)))
+        _ac = (sofa_c[0] - fnx * 0.18 * M2IN + (-fny) * _adx * M2IN,
+               sofa_c[1] - fny * 0.18 * M2IN + fnx * _adx * M2IN)
+        # decorative=True: almofada "jogada" (12°/-12° de propósito, look
+        # tossed) — não-axis-aligned por design, não bug de rotação. Achado
+        # 2026-08-12 (geometry_sanity.off_axis rejeitava).
+        boxes.append(_oriented_box("almofada", _ac, _af, 0.45, 0.14, 0.47, 0.45,
+                                   [96, 88, 76], module="Sofa", decorative=True))
+    # tapete COM BORDA (campo + moldura 8cm mais escura — deixa de ser laje)
+    boxes.append(_oriented_box("rug_border", _ahead(0.70), sofa_f, 1.80, 1.20, 0.0, 0.018, [96, 88, 76], module="Tapete"))
+    boxes.append(_oriented_box("rug_field", _ahead(0.70), sofa_f, 1.64, 1.04, 0.0, 0.02, [140, 128, 112], module="Tapete"))
+    # MESA DE CENTRO: tampo pedra preta (eco do tampo da cozinha) + pernas metal.
+    # Posicionada por ÚLTIMO (depois da mesa de jantar) de propósito — achado
+    # 2026-08-12: a conectividade dos portais é uma checagem de conjunto (flood-fill
+    # no cômodo inteiro), então a mesa de jantar decide primeiro o "istmo" livre e a
+    # mesa de centro busca (2D, gate real) o que ainda sobrou sem fechar o resto.
+    from tools.coffee_table_class import CoffeeTableClassSpec, build_coffee_table_v2
+    _ct = CoffeeTableClassSpec(style="two_tier", length=0.95, width=0.50, height=0.38, shelf=True,
+                               top_rgb=(30, 29, 32), leg_rgb=(26, 26, 28))
+    _ctp, _ = build_coffee_table_v2(_ct.validate())
+    _perp = (-fny, fnx)
+
+    def _clear_of_circulation(parts, facing, base_dist_m=0.70):
+        from tools.circulation_gate import gate as _cgate
+        base = _ahead(base_dist_m)
+        # overlap real contra a mobília já colocada (sofá/rack/mesa de jantar/
+        # etc. — 'boxes' já reflete o que foi decidido até aqui) — achado
+        # 2026-08-12: a busca só evitava a zona de circulação, não a mobília em
+        # si; um candidato "mais perto" (raio pequeno) podia grudar no sofá
+        # (furniture_overlap_gate: Mesa de centro × Sofa, ~48% sobreposto).
+        _occ_polys = [Polygon([(c[0], c[1]) for c in _b["corners"]]) for _b in boxes if _b.get("corners")]
+        _occ_now = _uni(_occ_polys) if _occ_polys else None
+        _best_c, _best_fails = base, None
+        _n_tried = 0
+        cands = [(0.0, 0.0)] + [(along, side) for r in (0.20, 0.40, 0.60, 0.80)
+                                for along, side in ((0, r), (0, -r), (r, 0), (-r, 0),
+                                                     (r * 0.7, r * 0.7), (-r * 0.7, r * 0.7),
+                                                     (r * 0.7, -r * 0.7), (-r * 0.7, -r * 0.7))]
+        for along, side in cands:
+            c = (base[0] + fnx * along * M2IN + _perp[0] * side * M2IN,
+                 base[1] + fny * along * M2IN + _perp[1] * side * M2IN)
+            if not _inside(c, margin_in=int(_ct.width / 2 * M2IN)):
+                continue
+            _cand = place_sofa_boxes(parts, c, facing)
+            for _b in _cand:
+                _b["module"] = "Mesa de centro"
+            if _occ_now is not None:
+                _cand_occ = _uni([Polygon([(cc[0], cc[1]) for cc in _b["corners"]])
+                                  for _b in _cand if _b.get("corners")])
+                if _cand_occ.intersection(_occ_now).area > 50:   # in^2
+                    continue
+            _n_tried += 1
+            _g = _cgate(con, boxes + _cand, room_id)
+            _nf = sum(1 for p in _g["checks"]["corredor_principal"]["portais"]
+                     if not p.get("conectado", True))
+            if _nf == 0:
+                _placement_decisions.append({
+                    "candidate_id": "mesa_de_centro", "optimizer": "coffee_table_radial_search_v1",
+                    "canonical_gate": _CANONICAL_GATE_VERSION, "gate_result": _g["result"],
+                    "score": _nf, "n_candidates_tried": _n_tried,
+                })
+                return c, True
+            if _best_fails is None or _nf < _best_fails:
+                _best_c, _best_fails = c, _nf
+        _placement_decisions.append({
+            "candidate_id": "mesa_de_centro", "optimizer": "coffee_table_radial_search_v1",
+            "canonical_gate": _CANONICAL_GATE_VERSION, "gate_result": "OMITTED_NO_VALID_CANDIDATE",
+            "score": _best_fails, "n_candidates_tried": _n_tried,
+        })
+        return _best_c, False
+
+    # sofá+rack (parede-a-parede) já deixam a faixa do portal da varanda no fio
+    # da margem (~0.91-0.92m contra o alvo 0.90m) — achado 2026-08-12: QUALQUER
+    # objeto plantado nesse "istmo" (na frente do sofá, entre sofá e rack) fecha
+    # a conexão pra 0 (erosão é tudo-ou-nada, não degrada aos poucos). Coloca a
+    # mesa de centro só se algum candidato preservar os 5 portais conectados;
+    # senão pula (sala compacta: melhor sem mesa de centro do que bloqueando a
+    # varanda) — mesmo padrão já usado pra mesa de jantar (só entra se couber).
+    _ct_center, _ct_ok = _clear_of_circulation(_ctp, sofa_f)
+    if _ct_ok:
+        _ctb = place_sofa_boxes(_ctp, _ct_center, sofa_f)
+        for _b in _ctb:
+            _b["module"] = "Mesa de centro"
+        boxes += _ctb
+    else:
+        print("[furnish-apt] circulation_gate: mesa de centro OMITIDA — nenhuma "
+              "posição preserva os 5 portais conectados (sala compacta, sofá+rack "
+              "já deixam a faixa da varanda no limite)")
 
     # ---- camada de ESTILO (gated, AESTHETIC — NÃO entra no layout-fix): parede de concreto na
     # parede-TV + decor (planta/quadro/prateleira/trilho). Só sob FURNISH_STYLE.
@@ -401,13 +722,13 @@ def living_room_boxes(con, room_id):
         boxes += place_decor_boxes("track_light", mid, track_face, z_lift=2.15, module="Trilho de luz",
                                    length=1.5, n_spots=3)
 
-    # LINGUAGEM black_wood_gold (fase de propagacao) — so cor, gated. Layout intacto.
-    if os.environ.get("FURNISH_STYLE") in ("industrial", "modern_warm"):
-        _bwg_recolor(boxes)
+    # LINGUAGEM black_wood_gold SEMPRE (programa apê-inteiro): só cor, layout intacto.
+    _bwg_recolor(boxes)
 
     out = {"result": "OK", "room_name": plan.get("room_name"), "n_placed": len(boxes),
            "placement": "common_sense_solver", "tv_wall": plan.get("tv_wall"),
-           "sofa_wall": p["sofa"]["wall_id"], "view_dist_m": p["sofa"]["rule"]}
+           "sofa_wall": p["sofa"]["wall_id"], "view_dist_m": p["sofa"]["rule"],
+           "placement_decisions": _placement_decisions}
     return boxes, out
 
 
@@ -439,6 +760,16 @@ def collect_boxes(con):
         for b in (boxes or []):              # cada box leva COMODO + MODULO -> grupos editaveis no .skp
             b["room"] = str(r.get("name") or r["id"])
             b.setdefault("module", str(b.get("kind", "movel")))
+        # GUARD anti-regressao (wet room): banheiro so aceita kinds de LOUCA. Se um movel de
+        # quarto/sala vazar pra ca, LOGA (nao aborta) -> pega regressao futura de roteamento.
+        if r["room_type"] == BATHROOM:
+            _WET = {"gabinete", "bancada_banho", "cuba", "espelho", "vaso", "box_vidro", "box"}
+            # kb_* = ferragem/luz legitima do banho (gola, torneira, LED, perfil, ducha, bronze)
+            estranhos = sorted({str(b.get("kind")) for b in (boxes or [])
+                                if str(b.get("kind")) not in _WET
+                                and not str(b.get("kind")).startswith("kb_")})
+            if estranhos:
+                print(f"[furnish-apt] WARN wet-room {r['name']!r}: kind(s) fora da louca -> {estranhos}")
         n = len(boxes) if boxes else 0
         all_boxes += boxes or []
         summary.append((r["id"], r["name"], r["room_type"], out.get("result"), n))
@@ -453,7 +784,42 @@ def collect_boxes(con):
         # no rack/mesa (kinds base/top/front) SEM contaminar o sofa (sofa.base = flat/grafite).
         ntex = attach_materials(all_boxes, style)
         print(f"[furnish-apt] material por modulo: {ntex} boxes com textura resolvida")
+    # contrato semântico único (geometry_intent/shape_policy/interaction_policy/
+    # host) — achado 2026-08-12, consulta GPT-Docker: preenche o que os builders
+    # não declararam explicitamente, com provenance rastreável (não silenciosa).
+    # Ver core/spatial_semantics.py.
+    from core.spatial_semantics import annotate_all
+    annotate_all(all_boxes)
     return all_boxes, summary
+
+
+def _emit_furnished_gallery_item(iso_png, *, skp, style, plant=PLANT,
+                                 flat_white=None, corpus=None):
+    """APARENCIA NAO-BLOQUEIA (Bloco 2): DEPOIS que o .skp canonico + renders +
+    flat_white_gate ja rodaram (geracao INTACTA, isto e' additivo puro), emite um
+    item de galeria PENDENTE do apê mobiliado canonico e SEGUE. human_verdict fica
+    None; verdict = PENDING_VISION (o furnish nao coleta visao). O flat_white e'
+    um sinal de APARENCIA — vai pro gate_detail (recuperavel pelo olho do Felipe),
+    NUNCA como gate FAIL que travaria o item. Reusa variant_sweep.build_record via
+    emit_gallery_item (fabrica canonica + append idempotente por variant_id).
+    NUNCA espera veredito nem aborta o furnish."""
+    from tools.variant_axes import Variant
+    from tools.variant_sweep import emit_gallery_item
+    corpus = Path(corpus) if corpus else (GALLERY_CORPUS_ROOT / plant / "corpus.jsonl")
+    corpus.parent.mkdir(parents=True, exist_ok=True)
+    v = Variant(plant=plant, style=style or None, theme="", layout_seed=0)
+    gate_detail = {"source": "furnish_apartment", "skp": Path(skp).name if skp else None}
+    if isinstance(flat_white, dict):  # sinal de aparencia, NAO-bloqueante
+        gate_detail["flat_white"] = {"result": flat_white.get("result"),
+                                     "flags": flat_white.get("flags", []),
+                                     "fails": flat_white.get("fails", []),
+                                     "warns": flat_white.get("warns", [])}
+    # kitchen_validation PASSOU (o build abortaria em collect_boxes se nao); e' o
+    # unico gate deterministico que conhecemos aqui, e nao e' FAIL -> PENDING_VISION.
+    return emit_gallery_item(corpus, v, png=iso_png,
+                             gates={"kitchen_validation": "PASS"},
+                             gate_detail=gate_detail, findings=None,
+                             renderer="sketchup")
 
 
 def main():
@@ -487,6 +853,9 @@ def main():
 
     env = os.environ.copy()
     env["LAYOUT_BOXES"] = json.dumps(boxes)
+    # tex_png por peca (banhos do Estudio Banheiro) precisa do dir SEMPRE;
+    # sem LAYOUT_TEX_MAP os demais comodos seguem em cor chapada (fallback)
+    env.setdefault("LAYOUT_TEX_DIR", str((ROOT / "assets/textures/procedural").resolve()))
     env["LAYOUT_OUT"] = str(skp_out).replace("\\", "/")
     env["LAYOUT_BEFORE"] = str(before).replace("\\", "/")
     env["LAYOUT_AFTER_TOP"] = str(after_top).replace("\\", "/")
@@ -526,6 +895,7 @@ def main():
 
     # FP-036: gate DETERMINISTICO anti-chapado (nao julga estetica; so 'os moveis tem textura?').
     # Roda no render gerado ANTES de entregar pro veredito do Felipe. FAIL = provavel sem textura.
+    fw = None
     if after_iso.exists():
         try:
             from tools.flat_white_gate import flat_white_check
@@ -537,6 +907,19 @@ def main():
                 print("[furnish-apt] /!\\ render CHAPADO (provavel sem textura) — inspecionar antes do veredito")
         except Exception as e:  # noqa: BLE001
             print(f"[furnish-apt] flat_white_check pulado: {e}")
+
+    # APARENCIA NAO-BLOQUEIA: o .skp canonico + renders JA existem (geracao acima
+    # INTACTA). Emite um item de galeria PENDENTE (human_verdict=None) na MESMA
+    # galeria do sweep e SEGUE — o veredito de aparencia e' do Felipe, offline, e
+    # NUNCA trava o pipeline. Best-effort: falhar aqui nunca derruba o furnish.
+    try:
+        rec = _emit_furnished_gallery_item(
+            after_iso if after_iso.exists() else None,
+            skp=skp_out, style=os.environ.get("FURNISH_STYLE"), flat_white=fw)
+        print(f"[furnish-apt] item de galeria: {rec['variant_id']} "
+              f"=> {rec['verdict']} (human_verdict={rec['human_verdict']})")
+    except Exception as e:  # noqa: BLE001 — galeria nunca bloqueia a cozinha/apê
+        print(f"[furnish-apt] item de galeria pulado (nao-fatal): {e}")
 
     print(f"\n[furnish-apt] -> {OUT_DIR}/")
     print(f"  SKP:   {skp_out.name}")

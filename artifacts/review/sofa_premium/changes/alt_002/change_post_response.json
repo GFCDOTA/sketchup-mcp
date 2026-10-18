@@ -1,0 +1,4 @@
+{"alteration_id":"alt_002","phase":"AFTER_CHANGE","verdict":"IMPROVED","kept":true,
+ "single_instruction":"Reconstrua somente os tres encostos como almofadas unicas nao empilhadas, incorporando e eliminando os blocos superiores separados, com coroamento suave e edge radius visivel de 25mm.",
+ "evidence_resumo":"postes sumiram; linha de sombra unica sob toda a largura; plinto lido como faixa baixa retraida (nao pedestal); subordinado ao corpo",
+ "next_change_allowed":true,"fonte":"GPT :8899, 2026-07-11"}

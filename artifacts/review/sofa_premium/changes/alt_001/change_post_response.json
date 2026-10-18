@@ -1,0 +1,4 @@
+{"alteration_id":"alt_001","phase":"AFTER_CHANGE","verdict":"IMPROVED","kept":true,
+ "single_instruction":"Reconstrua apenas a base como um plinto continuo escuro, recuado em relacao as quatro faces do sofa, eliminando os quatro pes quadrados aparentes e criando um shadow gap uniforme.",
+ "evidence_resumo":"linha superior arredondada e mais baixa; bracos mais finos/menos altos (sem leitura de pilares); topo curvo interrompe a silhueta quadrada; recuo frontal perceptivel na iso alta; melhoria clara porem moderada (5 segmentos discretamente facetados)",
+ "next_change_allowed":true,"fonte":"GPT :8899, 2026-07-11"}

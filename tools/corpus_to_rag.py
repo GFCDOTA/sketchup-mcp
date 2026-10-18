@@ -58,6 +58,21 @@ def _last_wins(corpus_path: Path) -> list[dict]:
     return list(by_id.values())
 
 
+def _room_of(rec: dict) -> str | None:
+    """room do rec (galeria per-comodo, quando existir) — NAO hardcode None: o
+    None fixo matava o facet de room no retrieve. Variante de planta inteira nao
+    declara room -> fica None honesto (Hard Rule #1: nao inventar comodo)."""
+    params = rec.get("params") or {}
+    return rec.get("room") or rec.get("room_id") or params.get("room") or None
+
+
+def _skp_of(rec: dict) -> str | None:
+    """linked_skp do rec — de skp_path / linked_skp / render_refs.skp. Pipeline
+    SU-free hoje (so iso.png) -> None honesto ate' um .skp real ser anexado."""
+    render = rec.get("render_refs") or {}
+    return rec.get("skp_path") or rec.get("linked_skp") or render.get("skp") or None
+
+
 def export_reference_rows(corpus_path: Path) -> list[tuple[dict, list[str]]]:
     """corpus.jsonl -> [(row 18-colunas do reference_db._upsert, tags)]."""
     rows: list[tuple[dict, list[str]]] = []
@@ -75,7 +90,7 @@ def export_reference_rows(corpus_path: Path) -> list[tuple[dict, list[str]]]:
             "slug": f"variant/{vid}",
             "kind": "judged_variant",
             "path": render.get("iso") or "",
-            "room": None,
+            "room": _room_of(rec),
             "theme": params.get("theme") or "warm_compact",
             "style": params.get("style") or "baseline",
             "sub_element": "variant",
@@ -88,11 +103,17 @@ def export_reference_rows(corpus_path: Path) -> list[tuple[dict, list[str]]]:
             "sha256": render.get("sha256"),
             "curation_status": "candidate",  # NUNCA golden: candidato != canonico
             "gate_verdicts": json.dumps(gates, ensure_ascii=False) if gates else None,
-            "linked_skp": None,
+            "linked_skp": _skp_of(rec),
             "sidecar": Path(corpus_path).as_posix(),
             "notes": notes,
             "created_at": rec.get("created_at"),
         }
+        if hv.get("verdict"):
+            # bloco de veredito ESTRUTURADO alem do notes-prosa: o gosto do humano
+            # viaja como OBJETO ({verdict, note, t}), nao so' concatenado no texto.
+            row["human_verdict"] = {"verdict": hv["verdict"],
+                                    "note": hv.get("note") or "",
+                                    "t": hv.get("t")}
         tags = [t for t in (rec.get("plant"),
                             (rec.get("verdict") or "").lower(),
                             f"seed{params.get('layout_seed')}",

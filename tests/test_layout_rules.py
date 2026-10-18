@@ -11,7 +11,10 @@ from pathlib import Path
 
 import pytest
 
-from tools.layout_rules import (MIN_SOFA_TV, RULE_BY_ID, RULES,
+# So test_ambiguous_tv_wall_is_explained_not_crammed carrega planta_74 real —
+# marcado @pytest.mark.planta74_scale pelo tests/conftest.py (roda na
+# invocacao `pytest -m planta74_scale` separada, com o env correto).
+from tools.layout_rules import (MIN_SOFA_TV, RULE_BY_ID, RULES,  # noqa: E402
                                  flag_anti_patterns)
 
 REPO = Path(__file__).resolve().parents[1]

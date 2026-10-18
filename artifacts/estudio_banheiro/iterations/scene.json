@@ -1,0 +1,82 @@
+{
+  "scene_id": "estudio_banheiro_v1",
+  "room": {
+    "width_m": 1.65,
+    "depth_m": 2.45,
+    "height_m": 2.5
+  },
+  "openings": [
+    {
+      "wall": "south",
+      "type": "door",
+      "center_along_m": 1.2,
+      "width_m": 0.7,
+      "head_m": 2.1
+    }
+  ],
+  "placements": [
+    {
+      "type": "vanity",
+      "role": "hero",
+      "center": [
+        0.26,
+        0.95
+      ],
+      "bbox": [
+        0.0,
+        0.33,
+        0.53,
+        1.57
+      ]
+    },
+    {
+      "type": "toilet",
+      "role": "anchor",
+      "center": [
+        0.35,
+        2.19
+      ],
+      "bbox": [
+        0.16,
+        1.95,
+        0.54,
+        2.45
+      ]
+    },
+    {
+      "type": "shower_box",
+      "role": "anchor",
+      "center": [
+        1.2,
+        1.9
+      ],
+      "bbox": [
+        0.75,
+        1.35,
+        1.65,
+        2.45
+      ]
+    }
+  ],
+  "camera": {
+    "kind": "reference_match_door",
+    "eye": [
+      1.32,
+      0.3,
+      1.58
+    ],
+    "target": [
+      0.42,
+      1.75,
+      1.02
+    ],
+    "elev_deg": 18.2,
+    "azim_deg": -58.2,
+    "hide_walls": [
+      "south",
+      "east"
+    ],
+    "min_hero_coverage": 0.1
+  },
+  "style_id": "estudio_banheiro_dark_stone"
+}

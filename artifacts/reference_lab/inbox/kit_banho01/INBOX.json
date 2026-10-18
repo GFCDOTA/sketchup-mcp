@@ -1,0 +1,82 @@
+{
+  "kit": "kit_banho01",
+  "room": "bathroom",
+  "theme": "stone_monolith",
+  "brief": "Kit de 6 produtos reais travado pelo GPT para BANHO 01 (STONE_MONOLITH) — artifacts/estudio_banheiro/REFERENCE_KIT_PRODUTOS.md. Aprovacao de download dada pelo Felipe em 2026-08-08.",
+  "note": "Sessao do scout sem ferramenta de download binario (so WebSearch/WebFetch/Read/Write). URLs de pagina e de imagem VERIFICADAS via fetch real; bytes dos .jpg/.png devem ser materializados pelo chamador (Invoke-WebRequest/curl) usando image_url -> local_path. Apos baixar, promover status para downloaded.",
+  "found_at": "2026-08-08",
+  "items": [
+    {
+      "slug": "vaso_roca_gap",
+      "peca": "vaso sanitario",
+      "fabricante_modelo": "Roca The Gap — kit bacia + caixa acoplada C323723000 (650x365x800mm)",
+      "source_url": "https://www.rocabrasilstore.com.br/kit-de-bacia-com-caixa-acoplada-e-itens-de-instalac-o-gap-branco",
+      "source_kind": "loja oficial Roca Brasil Store",
+      "image_url": "https://www.rocabrasilstore.com.br/media/catalog/product/cache/207e23213cf636ccdef205098cf3c8a3/2/0/20260329_C323723000_0_1.jpg",
+      "local_path": "artifacts/reference_lab/inbox/kit_banho01/vaso_roca_gap.jpg",
+      "intent": "Forma-referencia principal do vaso: retas com cantos suaves, caixa acoplada trapezoidal.",
+      "status": "downloaded",
+      "obs": "Pagina de produto no br.roca.com existe mas o slug exato nao foi resolvido (tentativa deu 404); a loja oficial Roca cobre a exigencia de fonte oficial."
+    },
+    {
+      "slug": "cuba_deca_slim_L33050",
+      "peca": "cuba de embutir",
+      "fabricante_modelo": "Deca Slim retangular de embutir 50cm L.33050 (foto = variante branca L.33050.17)",
+      "source_url": "https://lojaobrafacil.com.br/cuba-retangular-de-embutir-50cm-branco-deca-l3305017",
+      "source_kind": "revendedor (Obra Facil) — foto de catalogo Deca",
+      "image_url": "https://lojaobrafacil.com.br/image/cache/catalog/storeimages/deca-l3305017-p_1716907119899-600x770.jpg",
+      "local_path": "artifacts/reference_lab/inbox/kit_banho01/cuba_deca_slim_L33050.jpg",
+      "intent": "Bordas finas Slim e proporcao retangular 50cm; anatomia vale para a variante Ebano Fosco do kit.",
+      "status": "downloaded",
+      "obs": "Pagina oficial Deca (variante Ebano Fosco L.33050.94, cor do kit STONE_MONOLITH): https://www.deca.com.br/ambientes/banheiro-e-lavabo/cubas-para-banheiro/cuba-de-embutir/cuba-retangular-de-embutir-50cm-ebano-foscol3305094 — site Deca e JS-rendered, imagem principal nao exposta no HTML estatico; por isso foto de catalogo via revendedor."
+    },
+    {
+      "slug": "torneira_deca_level_2880BL",
+      "peca": "torneira/misturador monocomando",
+      "fabricante_modelo": "Deca Level monocomando de mesa bica media Black Matte 2880.BL26.MT",
+      "source_url": "https://www.deca.com.br/ambientes/banheiro-e-lavabo/torneiras-e-misturadores-para-banheiro/monocomando-para-cuba-e-lavatorio/misturador-monocomando-de-mesa-bica-media-para-lavatorio-level-black-matte-2880bl26mt",
+      "source_kind": "pagina oficial Deca + foto de catalogo via revendedor (Casa Tognini)",
+      "image_url": "https://casatognini.com.br/image/cache/catalog/Deca/revestir2023/2880.bl26.mt-1000x1000.jpg",
+      "local_path": "artifacts/reference_lab/inbox/kit_banho01/torneira_deca_level_2880BL.jpg",
+      "intent": "Linguagem reta/arquitetonica da bica media preta de verdade (Black Matte).",
+      "status": "downloaded",
+      "obs": "Site Deca e JS-rendered; imagem 1000x1000 fundo limpo via Casa Tognini (catalogo Deca)."
+    },
+    {
+      "slug": "box_ideiaglass_nobre",
+      "peca": "box de correr",
+      "fabricante_modelo": "Ideia Glass Box Nobre Preto (porta de correr com amortecimento, vidro 8mm)",
+      "source_url": "https://www.ideiaglass.com.br/box-de-banheiro/box-nobre/",
+      "source_kind": "site oficial Ideia Glass",
+      "image_url": "https://www.ideiaglass.com.br/wp-content/uploads/2022/05/box-black-fosco.jpg",
+      "local_path": "artifacts/reference_lab/inbox/kit_banho01/box_ideiaglass_nobre.jpg",
+      "intent": "Logica fixo+folha+trilho+puxador com ferragem preta fosca — copiar a gramatica, nao o mesh.",
+      "status": "downloaded",
+      "obs": "Imagens alternativas oficiais na mesma pagina: nobre-box-black-.jpg e nobre-black-fosco-troca.jpg."
+    },
+    {
+      "slug": "gabinete_roca_tura",
+      "peca": "gabinete suspenso",
+      "fabricante_modelo": "Roca Tura Unik — movel suspenso 2 gavetas com lavatorio (A852033558, 800x430x600mm; foto = variante 1000mm A852036xxx)",
+      "source_url": "https://www.banodecoracion.com/mueble-de-bano-tura-roca",
+      "source_kind": "revendedor (Bano Decoracion, ES) — imagem de catalogo Roca; pagina oficial listada em obs",
+      "image_url": "https://dhb3yazwboecu.cloudfront.net/634/mueble-unik-tura-roca_l.jpg",
+      "local_path": "artifacts/reference_lab/inbox/kit_banho01/gabinete_roca_tura.jpg",
+      "intent": "Proporcao, shadow gaps e frentes das 2 gavetas suspensas — revestir em greige no builder para manter STONE_MONOLITH.",
+      "status": "downloaded",
+      "obs": "Colecao oficial: https://www.roca.pt/tura/lavatorios-moveis (JS-rendered, sem imagem no HTML). Linha Tura moveis nao aparece na Roca Brasil Store (so loucas Tura no BR). Codigos por cor da foto: A852036558 blanco roto / 559 gris noble / 560 terracota / 565 olmo claro."
+    },
+    {
+      "slug": "chuveiro_deca_flexmax_22",
+      "peca": "chuveiro de teto",
+      "fabricante_modelo": "Deca Flex Max chuveiro redondo de teto 22cm Black Matte 2085.BL.TET.MT",
+      "source_url": "https://www.deca.com.br/ambientes/banheiro-e-lavabo/chuveiros-e-duchas/chuveiro-de-teto/chuveiro-redondo-de-teto-22cm-black-matte2085bltetmt",
+      "source_kind": "pagina oficial Deca + foto de catalogo via revendedor (Casa Tognini)",
+      "image_url": "https://casatognini.com.br/image/cache/catalog/deca-produtos9/2085.bl.tet.mt1-1000x1000.png",
+      "local_path": "artifacts/reference_lab/inbox/kit_banho01/chuveiro_deca_flexmax_22.jpg",
+      "intent": "Disco redondo 22cm de teto black matte — escala certa para o box 1.03x0.95.",
+      "status": "downloaded",
+      "obs": "Imagem de origem e PNG 1000x1000; salvar como .jpg pedido ou manter .png e ajustar local_path. Site Deca e JS-rendered."
+    }
+  ]
+}

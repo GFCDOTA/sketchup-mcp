@@ -65,6 +65,33 @@ def plant_from_fixture_path(consensus_path) -> str | None:
     return None
 
 
+def assert_pt_to_m_for_source(source: str | None, tol: float = 1e-6) -> None:
+    """Fail-fast guard: raise if the ACTIVE PT_TO_M doesn't match the verified
+    scale for the plant named by ``consensus['source']`` (e.g. "planta_74.pdf").
+
+    Callers that build a spatial model from a consensus dict pass its "source"
+    field here. Silent scale mismatch is the 1.36x historical gotcha (a room's
+    area/bbox coming out ~36% too large because PT_TO_M fell back to the
+    wall-thickness default instead of the plant's verified cota-anchored
+    value) — this makes it a loud RuntimeError instead of bad geometry.
+    Plants absent from PLANT_PT_TO_M are not checked (no verified value to
+    compare against).
+    """
+    if not source:
+        return
+    plant = str(source).rsplit(".", 1)[0]
+    expected = PLANT_PT_TO_M.get(plant)
+    if expected is None or abs(PT_TO_M - expected) <= tol:
+        return
+    raise RuntimeError(
+        f"PT_TO_M mismatch for plant '{plant}': active PT_TO_M={PT_TO_M} but "
+        f"the verified cota-anchored scale is {expected}. Set env "
+        f"PT_TO_M={expected} BEFORE the first import of core.scale in this "
+        f"process (see core/scale.py docstring) — a script that forgets this "
+        f"produces silently wrong area/bbox, not an error."
+    )
+
+
 def resolve_plant_pt_to_m(consensus_path, env: dict | None = None) -> str | None:
     """PT_TO_M string to inject for a plant build, or None to keep the default.
 

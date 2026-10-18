@@ -1,0 +1,4 @@
+{"alteration_id":"alt_004","phase":"AFTER_CHANGE","verdict":"IMPROVED","kept":true,"blockiness_score_atual":2,
+ "single_instruction":"Reconstrua somente a travessa frontal continua sob os assentos, recuando sua face 35mm em relacao a borda frontal das almofadas e aplicando raio real de 20mm na aresta superior, sem alterar altura, plinto ou assentos.",
+ "evidence_resumo":"placa inset eliminada; modulo le como volume estofado unico; perfil superior convexo; travessa frontal = principal bloco restante",
+ "next_change_allowed":true,"fonte":"GPT :8899, 2026-07-11"}

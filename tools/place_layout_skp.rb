@@ -40,12 +40,13 @@ def pl_png(model, path)
     filename: path, width: 1600, height: 1200, antialias: true, transparent: false)
 end
 
-def pl_material(model, name, rgb, tex_path = nil, tile = 40)
+def pl_material(model, name, rgb, tex_path = nil, tile = 40, alpha = nil)
   m = model.materials[name]
   return m if m
   m = model.materials.add(name)
   m.color = Sketchup::Color.new(rgb[0], rgb[1], rgb[2])
-  m.alpha = 1.0
+  # alpha opcional (vidro de box) — o SKP navegavel mostra atraves do vidro
+  m.alpha = (alpha || 1.0).to_f
   # A CORRECAO DO BUG (FP-036): o path HUMANO/interativo tambem aplica textura por kind, nao so
   # o V-Ray. Sem png (ou arquivo ausente) -> cor chapada = comportamento anterior (fallback seguro).
   if tex_path && File.exist?(tex_path)
@@ -103,6 +104,27 @@ def pl_run
       end
       g = mg.entities.add_group        # a peca, DENTRO do movel
       g.name = b['label'] || b['kind']
+      # PERFIL: peca com face 3D no mundo + vetor de extrusao (place_sofa_boxes) ->
+      # desenha as CURVAS reais (coroamento/arredondado) em vez de caixa. Padrao p/
+      # QUALQUER peca com profile (sofa hoje; qualquer movel refinado no futuro).
+      if (pw_face = b['profile_world'])
+        ppts = pw_face.map { |c| Geom::Point3d.new(c[0].to_f, c[1].to_f, c[2].to_f) }
+        pface = g.entities.add_face(ppts)
+        if pface
+          ev = b['extrude_vec'] || [0, 0, 0]
+          pvec = Geom::Vector3d.new(ev[0].to_f, ev[1].to_f, ev[2].to_f)
+          d = pvec.dot(pface.normal)
+          pface.pushpull(d.abs < 1e-6 ? pvec.length : d)
+        end
+        # suaviza as arestas do perfil: sem isto as facetas do coroamento viram
+        # 'ranhuras' e o sofa parece faceteado/rugoso, nao curvo liso (regra do harness).
+        g.entities.grep(Sketchup::Edge).each do |e|
+          if e.faces.length == 2 && e.faces[0].normal.angle_between(e.faces[1].normal) < 0.45
+            e.soft = true
+            e.smooth = true
+          end
+        end
+      else
       # desenha o POLIGONO real (cantos) na cota z0; almofadas ganham chanfro no topo
       # (Visual Quality Layer: nao parecer cubo/game asset)
       pts = (b['corners'] || []).map { |c| Geom::Point3d.new(c[0].to_f, c[1].to_f, z0) }
@@ -132,6 +154,7 @@ def pl_run
       else
         face.pushpull(face.normal.z >= 0 ? h : -h)
       end
+      end   # fecha o if (pw_face = b['profile_world'])
       kind = b['kind']
       # FP-037: prefere o material JA RESOLVIDO por (familia,kind) no Python (mat_name/tex_png/
       # tile_in) — assim rack.base=madeira e sofa.base=grafite viram materiais SEPARADOS. Sem os
@@ -149,7 +172,19 @@ def pl_run
           log << "  tex MISS #{mat_name}: #{png} ausente -> cor chapada"
         end
       end
-      mat = pl_material(model, mat_name, b['rgb'] || [120, 120, 120], tex_path, tile)
+      # b['smooth']: peca curva (vaso/chuveiro) — suaviza as arestas VERTICAIS
+      # da extrusao pro shading ler redondo (anti-Minecraft; padrao do sofa)
+      if b['smooth']
+        g.entities.grep(Sketchup::Edge).each do |e|
+          p0 = e.start.position
+          p1 = e.end.position
+          if (p0.x - p1.x).abs < 0.01 && (p0.y - p1.y).abs < 0.01
+            e.soft = true
+            e.smooth = true
+          end
+        end
+      end
+      mat = pl_material(model, mat_name, b['rgb'] || [120, 120, 120], tex_path, tile, b['alpha'])
       g.material = mat
       placed += 1
       bw = (b['x1'].to_f - b['x0'].to_f).round
@@ -160,14 +195,30 @@ def pl_run
       log << "  FAIL #{b['kind']}: #{e.class}: #{e.message}"
     end
   end
+  # PeleTeto (laje do V-Ray dos banhos) OCULTO no deliverable: o Felipe abre o
+  # .skp e enxerga dentro; o vray_export re-exibe antes de exportar.
+  mod_groups.each { |k, g| (g.hidden = true) rescue nil if k.include?('PeleTeto') }
   log << "placed #{placed}/#{boxes.size} placeholders"
   log << "texturas aplicadas: #{tex_applied.size} kind(s) via LAYOUT_TEX_MAP"
   log << "MOVEIS (comodo | movel): #{mod_groups.keys.sort.join(' ; ')}"
   mod_groups.each_value { |mg| (furn_bb.add(mg.bounds) rescue nil) }
+  # PISO NEUTRO (deliverable mobiliado): o shell canonico color-codeia cada comodo
+  # (ROOM_PALETTE, util no _floors_top de fidelidade), mas isso vira um chao MULTICOLOR
+  # feio na mobiliada (rosa da suite etc.). Repinta as FACES dos Floor_Group com UM material
+  # neutro (nao gp.material= — as faces tem floor_<id> explicito e nao herdam). So aparencia
+  # do furnished; NAO toca o shell canonico. Gate FURNISH_NEUTRAL_FLOOR (default ON; =0 preserva).
+  neutral_floor = nil
+  unless ENV['FURNISH_NEUTRAL_FLOOR'] == '0'
+    neutral_floor = model.materials['furnished_floor'] || model.materials.add('furnished_floor')
+    neutral_floor.color = Sketchup::Color.new(214, 208, 198)   # carvalho/cimento claro quente
+  end
   # TRAVA o shell (paredes/piso/portas/janelas) — mover/editar movel NAO atrapalha a base
   nlock = 0
   ents.grep(Sketchup::Group).each do |gp|
     nm = gp.name.to_s
+    if neutral_floor && nm.start_with?('Floor_Group')
+      gp.entities.grep(Sketchup::Face).each { |f| f.material = neutral_floor; f.back_material = neutral_floor }
+    end
     if %w[PlanShell Floor_Group DoorLeaf Window GlazedBalcony SoftBarrier PassageMarker].any? { |p| nm.start_with?(p) }
       (gp.locked = true; nlock += 1) rescue nil
     end

@@ -1,0 +1,12 @@
+{
+  "alteration_id": "alt_005",
+  "phase": "BEFORE_CHANGE",
+  "current_version": "alt_004 KEPT (blockiness 5->2)",
+  "dominant_defect": "travessa frontal da base = caixa longa retangular dominante (single_instruction do seu POST da alt_004)",
+  "single_change": "Reconstruir APENAS a travessa frontal da base (base_main): face frontal RECUADA para 35mm atras da borda frontal das almofadas de assento, e aresta SUPERIOR-frontal com raio geometrico real de 20mm (perfil extrudado). Altura da travessa, plinto/riser, assentos, encostos e bracos intocados.",
+  "values_before": {"recuo_vs_almofada_mm": 25, "edge_radius_mm": 0, "forma": "caixa reta"},
+  "values_after": {"recuo_vs_almofada_mm": 35, "edge_radius_mm": 20, "arc_segments": 5, "forma": "perfil com topo frontal arredondado"},
+  "frozen_elements": ["assentos alt_004", "encostos alt_003", "bracos alt_001", "plinto+riser alt_002", "altura da travessa", "largura/3 lugares", "cores", "cameras"],
+  "validation_cameras": [{"elev": 20, "azim": -35}, {"elev": 8, "azim": -90}, {"elev": 8, "azim": 0}, {"elev": 35, "azim": -55}],
+  "current_evidence": "https://raw.githubusercontent.com/GFCDOTA/sketchup-mcp/feat/sofa-premium-alt001/artifacts/review/sofa_premium/alt_004_before_after.png"
+}

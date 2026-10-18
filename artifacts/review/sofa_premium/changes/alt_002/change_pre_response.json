@@ -1,0 +1,3 @@
+{"alteration_id":"alt_002","phase":"BEFORE_CHANGE","verdict":"REVISE_CHANGE",
+ "single_instruction":"plinto continuo recuado 60mm nas 4 faces, altura visivel 80mm (z=0-0.08) + riser central oculto (recuo >=120mm, z=0.08-0.14) preservando a cota de apoio",
+ "razao":"140mm de plinto continuo viraria pedestal preto dominante","fonte":"GPT :8899, 2026-07-11"}

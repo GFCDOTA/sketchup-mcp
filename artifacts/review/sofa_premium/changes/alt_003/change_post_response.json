@@ -1,0 +1,4 @@
+{"alteration_id":"alt_003","phase":"AFTER_CHANGE","verdict":"IMPROVED","kept":true,
+ "single_instruction":"Reconstrua somente os tres assentos como almofadas estofadas unicas, mantendo footprint/altura/posicao/gaps, com coroamento superior de 15mm e raio real de 25mm nas arestas superiores e frontais expostas.",
+ "evidence_resumo":"placas empilhadas eliminadas; silhueta superior limpa; perfil unico inclinado na lateral; gaps legiveis",
+ "next_change_allowed":true,"fonte":"GPT :8899, 2026-07-11"}

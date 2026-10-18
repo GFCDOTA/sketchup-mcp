@@ -20,9 +20,7 @@ from __future__ import annotations
 import copy
 from dataclasses import dataclass, field
 
-from tools.furniture_overlap_gate import (
-    AREA_MIN_M2, EXCLUDE, FRAC_MIN, M2IN, Z_EPS_IN, _is_embedded, _module_geom,
-)
+from tools.furniture_overlap_gate import _module_geom, iter_overlap_pairs
 
 
 @dataclass
@@ -127,29 +125,13 @@ def fix_wall_overlap(ctx: FixContext, finding: dict) -> FixResult:
 
 
 def _overlapping_module_pairs(boxes: list[dict]) -> list[tuple[str, str, float]]:
-    """Same criteria as `furniture_overlap_gate.overlap_gate` (shared constants):
-    z-ranges cross AND intersection >= AREA_MIN_M2 AND >= FRAC_MIN of the smaller
-    footprint. Returns sorted (mod_a, mod_b, frac)."""
-    geoms = {m: g for m, g in _module_geom(boxes or []).items()
-             if not any(e in m.lower() for e in EXCLUDE)}
-    mods = sorted(geoms)
-    out = []
-    for i in range(len(mods)):
-        for j in range(i + 1, len(mods)):
-            if _is_embedded(mods[i], mods[j]):  # parity with the gate: embutido legítimo
-                continue
-            pa, za0, za1 = geoms[mods[i]]
-            pb, zb0, zb1 = geoms[mods[j]]
-            if min(za1, zb1) - max(za0, zb0) <= Z_EPS_IN:
-                continue
-            inter = pa.intersection(pb).area / (M2IN * M2IN)
-            if inter < AREA_MIN_M2:
-                continue
-            amin = min(pa.area, pb.area) / (M2IN * M2IN)
-            frac = inter / amin if amin else 0.0
-            if frac >= FRAC_MIN:
-                out.append((mods[i], mods[j], frac))
-    return out
+    """Same criteria as `furniture_overlap_gate.overlap_gate` — DELEGATES to
+    `iter_overlap_pairs`, the single canonical loop (achado 2026-08-12: esta
+    função tinha uma cópia própria do MESMO loop pairwise; quebrou em
+    silêncio quando `_module_geom` mudou de shape — exatamente o bug que
+    "single source of truth" existe pra prevenir). Returns sorted (mod_a,
+    mod_b, frac)."""
+    return sorted((a, b, frac) for a, b, _inter, frac in iter_overlap_pairs(_module_geom(boxes or [])))
 
 
 def _translate_module(boxes: list[dict], module: str, dx: float, dy: float) -> None:

@@ -1,0 +1,4 @@
+{"alteration_id":"alt_005","phase":"AFTER_CHANGE","verdict":"IMPROVED","kept":true,"blockiness_score_atual":2,
+ "single_instruction":"alt_006: roundover real 25mm nas 2 arestas VERTICAIS frontais dos bracos (5 seg), preservando dimensoes/recuo/roundover superior — exige primitivo com fillet em 2 eixos (mesh), proximo ciclo",
+ "evidence_resumo":"camada de sombra legivel entre almofadas e travessa; overhang legivel; residuo de blockiness = quinas verticais frontais dos bracos",
+ "next_change_allowed":true,"fonte":"GPT :8899, 2026-07-11"}

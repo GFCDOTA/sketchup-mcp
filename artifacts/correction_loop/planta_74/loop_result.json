@@ -1,0 +1,10 @@
+{
+  "fixture": "planta_74",
+  "state": "CLEAN",
+  "cycles": 1,
+  "reason": "sem findings — laço fechado, não invento ciclo",
+  "fixes_applied": [],
+  "felipe_queued": 0,
+  "vision_queued": 0,
+  "dry_run": false
+}

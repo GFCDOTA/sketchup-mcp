@@ -11,6 +11,18 @@ def vray_export_run
 
     # TEXTURAS premium: aplica texturas procedurais nos materiais dos moveis (SU da UV;
     # V-Ray traduz). So na exportacao V-Ray (line renders continuam chapados). VRAY_TEX_DIR.
+    # PeleTeto vem OCULTO do .skp (deliverable navegavel) -> re-exibe pro render
+    model.entities.grep(Sketchup::Group).each do |g|
+      (g.hidden = false) rescue nil if g.name.to_s.include?('PeleTeto')
+    end
+    # VRAY_HIDE: esconde grupos por substring (ex. folha de porta no 1o plano)
+    if ENV['VRAY_HIDE'] && !ENV['VRAY_HIDE'].empty?
+      subs = ENV['VRAY_HIDE'].split(',')
+      model.entities.grep(Sketchup::Group).each do |g|
+        nm = g.name.to_s.downcase
+        (g.hidden = true) rescue nil if subs.any? { |sb| nm.include?(sb.strip.downcase) }
+      end
+    end
     tex_dir = ENV['VRAY_TEX_DIR']
     if tex_dir && File.directory?(tex_dir)
       wd = 'wood_dark.png'; wm = 'wood_medium.png'; fl = 'fabric_light.png'; fa = 'fabric_accent.png'
@@ -84,6 +96,19 @@ def vray_export_run
           'ph_kc_niche_wood' => 'wood_dark.png', 'ph_kc_board' => 'wood_dark.png'
         })
       end
+      # ESTUDIO BANHEIRO na PLANTA (gated): pele do banho — piso grafite, parede
+      # cimento queimado, pedra antracite de veios finos no box + bancada.
+      if ENV['VRAY_BATH_THEME'] == 'estudio'
+        tex_map = tex_map.merge({
+          'ph_kb_piso' => 'porcelanato_greige_calmo.png',
+          'ph_kb_piso_box' => 'antracite_calmo.png',
+          'ph_kb_parede' => 'floor_cimento_queimado.png',
+          'ph_kb_parede_pedra' => 'stone_antracite_veins.png',
+          'ph_bancada_banho' => 'stone_greige_veins.png',
+          'ph_gabinete' => 'stone_greige_veins.png'
+        })
+      end
+      big_tile = %w[ph_parede_concreto ph_kb_piso ph_kb_parede ph_kb_parede_pedra]
       n_tex = 0
       tex_map.each do |matname, png|
         m = model.materials[matname]
@@ -92,7 +117,7 @@ def vray_export_run
         next unless File.exist?(path)
         begin
           m.texture = path
-          m.texture.size = (matname == 'ph_parede_concreto' ? [80, 80] : [40, 40])   # parede ~2m = tile maior
+          m.texture.size = (big_tile.include?(matname) ? [80, 80] : [40, 40])   # parede ~2m = tile maior
           n_tex += 1
         rescue StandardError => e
           out << "tex ERR #{matname}: #{e.message}"
@@ -128,6 +153,20 @@ def vray_export_run
         'fz_rug__' => ['fabric_linen.png', 60],
         'fz_floor' => ['wood_floor.png', 120]
       }
+      # ESTUDIO BANHEIRO (gated por VRAY_SCENE_THEME): nogueira no gabinete, pedra
+      # escura veinada na bancada + box, grafite no piso, cimento queimado nas paredes.
+      if ENV['VRAY_SCENE_THEME'] == 'estudio_banheiro'
+        # iter 2 (GPT 4.4/10): nogueira SEM textura laranja (flat escuro no tweak);
+        # pedra com veios FINOS (A_sutil), sem manchoes dourados (D_nero saiu)
+        fz_tex = fz_tex.merge({
+          'fz_bancada__tampo' => ['stone_antracite_veins.png', 70],
+          'fz_bancada__frontal' => ['stone_antracite_veins.png', 70],
+          'fz_box__pedra' => ['stone_antracite_veins.png', 110],
+          'fz_box__piso_pedra' => ['floor_grafite_medio.png', 60],
+          'fz_wall_' => ['floor_cimento_queimado.png', 150],
+          'fz_floor' => ['floor_grafite_medio.png', 60]
+        })
+      end
       model.materials.each do |m|
         name = m.name.to_s
         # 'fz_floor' e' match EXATO: start_with pegaria fz_floor_lamp__* (haste de

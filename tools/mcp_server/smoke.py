@@ -7,9 +7,17 @@ Sai 0 se tudo ok; 1 se alguma asserção falhar.
 from __future__ import annotations
 
 import asyncio
+import os
 import sys
 
-from tools.mcp_server import server as S
+# planta_74 tem escala verificada por cota (PT_TO_M=0.0259) — precisa estar no
+# env ANTES do primeiro import de core.scale (direto ou em cascata via
+# tools.mcp_server.server -> kitchen_ergonomics/room_gates). Mesmo padrão de
+# tests/conftest.py; este script roda fora do pytest, então precisa do seu
+# próprio guard. Ver core/scale.py::assert_pt_to_m_for_source.
+os.environ.setdefault("PT_TO_M", "0.0259")
+
+from tools.mcp_server import server as S  # noqa: E402
 
 _fail: list[str] = []
 
