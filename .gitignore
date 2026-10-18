@@ -144,5 +144,8 @@ docs/archive/**/scratch_preserved/*.skp
 .impeccable/config.local.json
 .impeccable/hook.cache.json
 
+# Build leftover do inspector-desktop (o codigo vive em GFCDOTA/harness-app)
+inspector-desktop/
+
 # Traces do AI Pipeline Inspector — derivados e descartáveis (INSPECTOR=1).
 .ai_bridge/traces/

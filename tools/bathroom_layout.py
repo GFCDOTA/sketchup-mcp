@@ -643,16 +643,29 @@ def _enxoval_parts(cell, ws_by_kind, bb_by_kind, door_c, lavabo):
     comodo = cell.buffer(M(0.02))
     from shapely.geometry import box as _sb
 
+    from core.spatial_semantics import resolve_geometry_intent
+    vaso_bb = bb_by_kind.get("vaso")
+    _vaso_poly = _sb(*vaso_bb) if vaso_bb is not None else None
+
     def _ok(p):
-        return comodo.contains(_sb(p["x0"] / PT_TO_IN, p["y0"] / PT_TO_IN,
-                                   p["x1"] / PT_TO_IN, p["y1"] / PT_TO_IN))
+        bx = _sb(p["x0"] / PT_TO_IN, p["y0"] / PT_TO_IN,
+                 p["x1"] / PT_TO_IN, p["y1"] / PT_TO_IN)
+        if not comodo.contains(bx):
+            return False
+        # acessorio SOLIDO de enxoval nunca dentro da louca do vaso (PR #245
+        # f159f58: kb_lixeira caia na bacia em BANHO 01/02). kb_lixeira e'
+        # DECORATIVE -> furniture_overlap=IGNORE, entao o gate nao ve: a guarda
+        # e' do builder. SOFT (tapete, overlap ALLOW no contrato) fica de fora.
+        if (_vaso_poly is not None and bx.intersection(_vaso_poly).area > 0
+                and resolve_geometry_intent(p.get("kind"), p.get("module"))[0] != "SOFT"):
+            return False
+        return True
 
     def _add(p):
         if _ok(p):
             out.append(p)
 
     pia_bb = bb_by_kind.get("bancada_banho")
-    vaso_bb = bb_by_kind.get("vaso")
     box_bb = bb_by_kind.get("box")
     pia_ws = ws_by_kind.get("bancada_banho")
     vaso_ws = ws_by_kind.get("vaso")
