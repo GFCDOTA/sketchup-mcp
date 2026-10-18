@@ -18,7 +18,7 @@ from typing import Any
 
 from tools.sketchup import paths
 from tools.sketchup.batch import RUBY_DIR, resolve_mode, run_job, run_script
-from tools.sketchup.ops import PROTECTED_PREFIXES, OpsInvalid, validate
+from tools.sketchup.ops import OpsInvalid, protection_params, validate
 from tools.sketchup.process import SketchUp
 
 REPO = paths.REPO_ROOT
@@ -103,7 +103,7 @@ def inspect_model(skp_path: str, *, max_depth: int = 2, out_dir: str | None = No
     # versão do arquivo. O SketchUp abre a cópia.
     copy = _working_copy(p, d / f"_inspect_{p.name}")
     res = run_job(_su(su), "inspect_model", out_dir=d, skp_in=copy, timeout_s=timeout_s, mode=mode,
-                  params={"max_depth": max_depth, "protected_prefixes": list(PROTECTED_PREFIXES)})
+                  params={"max_depth": max_depth, **protection_params()})
     res["input_skp"] = str(p)
     return res
 
@@ -190,7 +190,7 @@ def apply_edits(skp_path: str, ops: list[dict], *, out_path: str | None = None,
     # salvo DEPOIS da cópia (mtime) e ter dito saved=true
     copied_at = out.stat().st_mtime_ns
     res = run_job(_su(su), "apply_edits", out_dir=d, skp_in=out, timeout_s=timeout_s, mode=mode,
-                  params={"ops": norm, "protected_prefixes": list(PROTECTED_PREFIXES)})
+                  params={"ops": norm, **protection_params()})
     res["input_skp"] = str(p)
     res["out_skp"] = str(out)
     if res.get("status") == "OK":

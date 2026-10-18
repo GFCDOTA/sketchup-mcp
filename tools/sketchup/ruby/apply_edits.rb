@@ -7,15 +7,19 @@
 # Tudo-ou-nada: as ops rodam dentro de UMA operação do SketchUp; qualquer erro
 # aborta a operação inteira e nada é salvo.
 #
-# Params: ops (já validadas por tools/sketchup/ops.py), protected_prefixes.
-# A regra de arquitetura é revalidada aqui: `name_contains`/`persistent_id` só
-# revelam QUAIS entidades casam dentro do modelo. A recusa olha a entidade, os
-# ancestrais, os descendentes, a definição, `locked` e se a definição é
-# compartilhada (SkmcpCore.guard_violation).
+# Params: ops (já validadas por tools/sketchup/ops.py), protected_prefixes,
+# protected_substrings. A regra de arquitetura é revalidada aqui:
+# `name_contains`/`persistent_id` só revelam QUAIS entidades casam dentro do
+# modelo. A recusa olha a entidade, os ancestrais, os descendentes, a definição,
+# `locked` e se a definição é compartilhada (SkmcpCore.guard_violation).
+# insert_component também recusa um .skp que TRAGA arquitetura dentro (uma 2ª
+# cópia da planta inventaria paredes — Hard Rule #1).
 #
 # Referencial: `by_m` e `rotate` são em eixos do MUNDO. Entity#transform! age no
 # referencial do PAI — num grupo girado, um move "cru" andaria nos eixos girados.
-# Por isso o vetor e o centro vão para o local do pai antes de aplicar.
+# Por isso o vetor vai para o local do pai, e a rotação de mundo é conjugada
+# inteira (SkmcpCore.local_transform_for_world). Qualquer grupo aberto no .skp é
+# fechado antes (SkmcpRuntime.close_edit_context): o walk e o insert assumem a raiz.
 require_relative 'skmcp_runtime'
 
 # rename entra junto: renomear tiraria o grupo da proteção e liberaria o move seguinte
@@ -50,16 +54,12 @@ def skmcp_apply(model, op, entity, info)
     v_local = SkmcpCore.world_to_local_vector(info['parent_world'], v_world)
     entity.transform!(Geom::Transformation.translation(Geom::Vector3d.new(*v_local)))
   when 'rotate'
-    unless SkmcpCore.uniform_frame?(info['parent_world'])
-      raise "#{info['path']}: o referencial do pai tem escala não uniforme — girar no Z do " \
-            'mundo deformaria a peça; corrija a escala do pai antes'
-    end
     bb = entity.definition.bounds
     lo, hi = SkmcpCore.world_bbox([bb.min.x, bb.min.y, bb.min.z].map(&:to_f),
                                   [bb.max.x, bb.max.y, bb.max.z].map(&:to_f), info['world'])
     c_world = (0..2).map { |i| (lo[i] + hi[i]) / 2.0 }
-    # conjuga a rotação de MUNDO inteira para o local do pai: exato também sob
-    # pai espelhado, onde levar só eixo+centro inverteria o sentido
+    # conjuga a rotação de MUNDO inteira para o local do pai: exato sob qualquer
+    # pai invertível (espelhado, escala não uniforme) — no mundo segue rígido
     t_local = SkmcpCore.local_transform_for_world(info['parent_world'],
                                                   SkmcpCore.rotation_z(c_world, op['degrees']))
     entity.transform!(Geom::Transformation.new(t_local))
@@ -73,7 +73,9 @@ end
 
 SkmcpRuntime.run('apply_edits') do |params, model|
   prefixes = params['protected_prefixes'] || []
+  substrings = params['protected_substrings'] || []
   report = []
+  SkmcpRuntime.close_edit_context(model)
   model.start_operation('skmcp apply_edits', true)
   begin
     params.fetch('ops').each_with_index do |op, i|
@@ -81,15 +83,23 @@ SkmcpRuntime.run('apply_edits') do |params, model|
         defn = model.definitions.load(op['skp_path'])
         # DefinitionList#load nomeia a definição pelo nome do ARQUIVO: um
         # Window_x.skp viraria "arquitetura do PDF" para a guarda e o inspect
-        if SkmcpCore.protected_name?(defn.name, prefixes)
+        if SkmcpCore.protected_name?(defn.name, prefixes, substrings)
           raise "ops[#{i}] (insert_component): a definição carregada '#{defn.name}' usa prefixo " \
                 'reservado para arquitetura do PDF (Hard Rule #1)'
+        end
+        # ...e o CONTEÚDO: carregar o .skp de uma planta traria PlanShell_/Window_
+        # aninhados — paredes fora do consensus, e um móvel que a guarda nunca
+        # mais deixaria mover. O raise cai no rescue: abort_operation, nada salvo.
+        inner = SkmcpRuntime.protected_inside(defn, prefixes, substrings)
+        unless inner.empty?
+          raise "ops[#{i}] (insert_component): '#{File.basename(op['skp_path'])}' traz entidades com " \
+                "nome de arquitetura do PDF: #{inner.first(5).map { |n| n['path'] }.inspect} (Hard Rule #1)"
         end
         x, y, z = op['position_m'].map { |v| v.to_f.m }
         origin = Geom::Point3d.new(x, y, z)
         tr = Geom::Transformation.translation(origin) *
              Geom::Transformation.rotation(ORIGIN, Z_AXIS, op['rotation_deg'].to_f.degrees)
-        inst = model.active_entities.add_instance(defn, tr)
+        inst = model.entities.add_instance(defn, tr) # raiz: position_m é de mundo
         inst.name = op['name'] if op['name']
         inst.layer = (model.layers[op['tag']] || model.layers.add(op['tag'])) if op['tag']
         report << { 'index' => i, 'op' => op['op'], 'inserted' => defn.name, 'pid' => inst.persistent_id }
@@ -101,7 +111,7 @@ SkmcpRuntime.run('apply_edits') do |params, model|
       hits, err = SkmcpCore.select(infos, op['target'])
       raise "ops[#{i}] (#{op['op']}): #{err}" if err
       if GUARDED.include?(op['op'])
-        bad = hits.map { |h| SkmcpCore.guard_violation(h, infos, prefixes) }.compact
+        bad = hits.map { |h| SkmcpCore.guard_violation(h, infos, prefixes, substrings) }.compact
         raise "ops[#{i}] (#{op['op']}) recusado: #{bad.first(5).join('; ')} (Hard Rule #1)" unless bad.empty?
       end
       if %w[move rotate].include?(op['op'])

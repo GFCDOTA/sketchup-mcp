@@ -17,6 +17,8 @@ SkmcpRuntime.run('render_views') do |params, model|
   height = (params['height'] || 1200).to_i
   view = model.active_view
   (model.rendering_options['Texture'] = true) rescue nil
+  # grupo aberto no .skp: o resto do modelo sairia esmaecido na imagem
+  SkmcpRuntime.close_edit_context(model)
 
   hide = (params['hide_contains'] || []).map(&:downcase)
   hidden = []

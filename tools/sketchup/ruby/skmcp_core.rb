@@ -8,9 +8,11 @@
 module SkmcpCore
   module_function
 
-  def protected_name?(name, prefixes)
+  # Mesma regra de tools/sketchup/ops.py::is_protected: prefixo do builder do
+  # shell OU substring (a laje "<cômodo> · PeleTeto" tem o cômodo na frente).
+  def protected_name?(name, prefixes, substrings = [])
     n = name.to_s
-    prefixes.any? { |p| n.start_with?(p) }
+    prefixes.any? { |p| n.start_with?(p) } || substrings.any? { |s| n.include?(s) }
   end
 
   # info = {'name'=>, 'definition'=>, 'pid'=>}. Componente costuma ter nome de
@@ -87,18 +89,18 @@ module SkmcpCore
   # ou nil. Olhar só o nome da INSTÂNCIA deixava passar: mover o pai que contém
   # a parede, casar pela definição, editar dentro de grupo travado ou dentro de
   # componente com várias instâncias (a edição vazaria para todas).
-  def guard_violation(info, infos, prefixes)
-    if protected_name?(info['name'], prefixes) || protected_name?(info['definition'], prefixes)
-      return "#{info['path']} é arquitetura derivada do PDF"
-    end
-    anc = (info['ancestors'] || []).find do |a|
-      protected_name?(a['name'], prefixes) || protected_name?(a['definition'], prefixes)
-    end
+  #
+  # Lock protege a entidade e o que está DENTRO dela (como na GUI); não impede
+  # mover/apagar o pai destravado, que leva o filho junto — também como na GUI.
+  def guard_violation(info, infos, prefixes, substrings = [])
+    prot = ->(n) { protected_name?(n['name'], prefixes, substrings) ||
+                   protected_name?(n['definition'], prefixes, substrings) }
+    return "#{info['path']} é arquitetura derivada do PDF" if prot.(info)
+
+    anc = (info['ancestors'] || []).find { |a| prot.(a) }
     return "#{info['path']} está dentro de arquitetura (#{anc['label']})" if anc
 
-    inner = descendants(infos, info['pid']).select do |d|
-      protected_name?(d['name'], prefixes) || protected_name?(d['definition'], prefixes)
-    end
+    inner = descendants(infos, info['pid']).select { |d| prot.(d) }
     unless inner.empty?
       return "#{info['path']} contém arquitetura: #{inner.first(5).map { |d| d['path'] }.inspect}"
     end
@@ -227,21 +229,12 @@ module SkmcpCore
   # que o efeito no MUNDO seja exatamente `world_mat`: inv(P) · W · P.
   # Conjugar a matriz inteira — e não só levar eixo e centro para o local — é o
   # que mantém o sentido certo sob pai ESPELHADO (Flip Along, det < 0): ali uma
-  # rotação de +θ no eixo local vira -θ no mundo.
+  # rotação de +θ no eixo local vira -θ no mundo. Vale para QUALQUER pai
+  # invertível, inclusive com escala não uniforme: no mundo o efeito continua
+  # rígido; só a matriz LOCAL resultante carrega escala/cisalhamento, o que a
+  # API aceita. Pai singular cai no ArgumentError de inverse_affine.
   def local_transform_for_world(parent_world, world_mat)
     mat_mul(inverse_affine(parent_world), mat_mul(world_mat, parent_world))
-  end
-
-  # Eixos ortogonais e de mesmo comprimento: só aí uma rotação em torno do Z do
-  # mundo continua sendo rotação depois de levada para o local do pai.
-  def uniform_frame?(m, tol = 1e-6)
-    m = normalize(m)
-    cols = [[m[0], m[1], m[2]], [m[4], m[5], m[6]], [m[8], m[9], m[10]]]
-    lens = cols.map { |c| Math.sqrt(c.sum { |x| x * x }) }
-    return false if lens.min < tol
-
-    dots = [[0, 1], [0, 2], [1, 2]].map { |i, j| (0..2).sum { |k| cols[i][k] * cols[j][k] } }
-    dots.all? { |d| d.abs <= tol * lens.max**2 } && (lens.max - lens.min) <= tol * lens.max
   end
 
   # bbox de MUNDO a partir do bbox local da definição (8 cantos transformados).

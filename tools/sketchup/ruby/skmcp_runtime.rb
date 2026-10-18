@@ -72,6 +72,31 @@ module SkmcpRuntime
     acc
   end
 
+  # Entidades com nome de arquitetura DENTRO de uma definição (ex. o .skp que o
+  # insert_component acabou de carregar). Devolve os infos que casam.
+  def protected_inside(definition, prefixes, substrings = [])
+    walk(definition.entities).map(&:last).select do |n|
+      SkmcpCore.protected_name?(n['name'], prefixes, substrings) ||
+        SkmcpCore.protected_name?(n['definition'], prefixes, substrings)
+    end
+  end
+
+  # Um .skp salvo com um grupo aberto reabre DENTRO dele. Aí active_entities é
+  # o grupo aberto (o insert cairia dentro dele) e as transformações do contexto
+  # aberto vêm em coordenadas de MUNDO (ModelObserver#onActivePathChanged), o que
+  # dobraria o parent_world do walk. Fecha tudo antes: Model#active_path= nil
+  # (SketchUp 2020+). Fora de start_operation — a API quebra a operação ali.
+  # Levanta se não der para fechar (instância travada no caminho): o job falha
+  # com o motivo, em vez de editar no referencial errado.
+  def close_edit_context(model)
+    return false if model.active_path.nil? || model.active_path.empty?
+
+    model.active_path = nil
+    raise 'não consegui fechar o grupo aberto no .skp (active_path)' unless model.active_path.nil?
+
+    true
+  end
+
   # bbox de mundo em metros, a partir do bbox da definição e da matriz de mundo.
   def bbox_world_m(entity, world)
     bb = entity.definition.bounds

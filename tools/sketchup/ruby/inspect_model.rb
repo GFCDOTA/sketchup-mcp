@@ -2,23 +2,28 @@
 #
 # Rodado por tools/sketchup/batch.py:
 #   SketchUp.exe <modelo.skp> -RubyStartup inspect_model.rb   (env SKMCP_*)
-# Params: max_depth (default 2), protected_prefixes.
+# Params: max_depth (default 2), protected_prefixes, protected_substrings.
+# Fecha um grupo aberto antes (SkmcpRuntime.close_edit_context): dentro dele as
+# transformações vêm em mundo e o bbox de mundo sairia errado. Roda numa cópia.
 # Medidas em metros. bbox_local_m = referencial do pai; bbox_world_m = mundo.
 require_relative 'skmcp_runtime'
 
 SkmcpRuntime.run('inspect_model') do |params, model|
   depth = (params['max_depth'] || 2).to_i.clamp(1, 6)
   prefixes = params['protected_prefixes'] || []
+  substrings = params['protected_substrings'] || []
+  SkmcpRuntime.close_edit_context(model)
   ents = model.entities
 
   pairs = SkmcpRuntime.walk(ents, depth: depth)
   by_pid = pairs.to_h { |e, info| [info['pid'], e] }
   nodes = SkmcpCore.dedupe(pairs.map(&:last)).map do |info|
     e = by_pid[info['pid']]
-    own = SkmcpCore.protected_name?(info['name'], prefixes) ||
-          SkmcpCore.protected_name?(info['definition'], prefixes)
+    own = SkmcpCore.protected_name?(info['name'], prefixes, substrings) ||
+          SkmcpCore.protected_name?(info['definition'], prefixes, substrings)
     inherited = info['ancestors'].any? do |a|
-      SkmcpCore.protected_name?(a['name'], prefixes) || SkmcpCore.protected_name?(a['definition'], prefixes)
+      SkmcpCore.protected_name?(a['name'], prefixes, substrings) ||
+        SkmcpCore.protected_name?(a['definition'], prefixes, substrings)
     end
     w = SkmcpCore.normalize(info['world'])
     {

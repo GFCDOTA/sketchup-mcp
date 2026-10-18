@@ -162,10 +162,11 @@ def list_capabilities() -> dict[str, Any]:
         },
         "furniture_kinds": sorted(_FURN),
         "edit_ops": sorted(su_ops.ALL_OPS),
-        "protected_prefixes": list(su_ops.PROTECTED_PREFIXES),
+        **su_ops.protection_params(),
         "gotchas": [
             "Unidade da API é METRO; o SketchUp guarda polegadas — a conversão é interna.",
-            "Grupos de arquitetura (protected_prefixes) não aceitam move/rotate/delete: vêm do PDF.",
+            "Grupos de arquitetura (protected_prefixes/protected_substrings) não aceitam "
+            "move/rotate/delete/rename: vêm do PDF.",
             "Edição sempre sai em .skp NOVO; nunca em fixtures/ ou artifacts/.",
             "mode: 'interactive' (default local) deixa o SketchUp aberto pra inspeção; "
             "'headless' (default no CI) fecha a instância que o job subiu — nunca outra.",
@@ -436,8 +437,10 @@ def su_apply_edits(
       insert_component {skp_path, position_m:[x,y,z], rotation_deg?, name?, tag?}
     Medidas são explícitas e em METROS. move/rotate/delete/rename são recusados
     quando o alvo, um ancestral ou um descendente é arquitetura do PDF (paredes,
-    piso, portas, janelas), quando está travado (locked) ou quando vive numa
-    definição compartilhada (faça make_unique antes)."""
+    piso, portas, janelas, laje do banho), quando ele ou um ancestral está travado
+    (locked) ou quando vive numa definição compartilhada (faça make_unique antes).
+    insert_component recusa um .skp que traga arquitetura dentro; caminhos
+    relativos são do repo."""
     return su_jobs.apply_edits(skp_path, ops, out_path=out_path, mode=mode)
 
 

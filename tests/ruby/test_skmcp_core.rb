@@ -127,6 +127,18 @@ class TestSkmcpGuard < Minitest::Test
     assert_match(/travado/, violation(child))
   end
 
+  def test_laje_do_banho_protegida_por_substring
+    # o place_layout nomeia "<cômodo> · PeleTeto": prefixo nunca casaria
+    subs = %w[PeleTeto]
+    assert SkmcpCore.protected_name?('BANHO 01 · PeleTeto', PREFIXES, subs)
+    refute SkmcpCore.protected_name?('BANHO 01 · PeleTeto', PREFIXES)
+    refute SkmcpCore.protected_name?('BANHO 01 · Vaso', PREFIXES, subs)
+    laje = node(1, 'BANHO 01 · PeleTeto')
+    peca = node(2, 'kb_teto', ancestors: [anc(1, 'BANHO 01 · PeleTeto')])
+    assert_match(/arquitetura/, SkmcpCore.guard_violation(laje, [laje, peca], PREFIXES, subs))
+    assert_match(/dentro de arquitetura/, SkmcpCore.guard_violation(peca, [laje, peca], PREFIXES, subs))
+  end
+
   def test_definicao_compartilhada
     assert_match(/make_unique/, violation(node(1, 'perna', contexts: 4)))
   end
@@ -209,9 +221,24 @@ class TestSkmcpFrame < Minitest::Test
     assert_vec [0.0, 2.0, 1.0], hi
   end
 
-  def test_escala_nao_uniforme_bloqueia_rotacao
-    assert SkmcpCore.uniform_frame?(rot_z90)
-    refute SkmcpCore.uniform_frame?([2.0, 0, 0, 0, 0, 1.0, 0, 0, 0, 0, 1.0, 0, 0, 0, 0, 1.0])
+  def test_rotacao_de_mundo_exata_e_rigida_sob_pai_nao_uniforme
+    # Antes: escala não uniforme no pai era RECUSADA com "deformaria a peça" —
+    # falso desde a conjugação inteira. Pai esticado 2x em X, filho girado 30°.
+    pw = [2.0, 0, 0, 0, 0, 1.0, 0, 0, 0, 0, 1.0, 0, 7.0, -3.0, 0, 1.0]
+    e = SkmcpCore.mat_mul([1.0, 0, 0, 0, 0, 1.0, 0, 0, 0, 0, 1.0, 0, 10.0, 0, 0, 1.0],
+                          SkmcpCore.rotation_z([0, 0, 0], 30))
+    r = SkmcpCore.rotation_z([12.0, 4.0, 0.0], 90)
+    t = SkmcpCore.local_transform_for_world(pw, r)
+    world_before = SkmcpCore.mat_mul(pw, e)
+    world_after = SkmcpCore.mat_mul(pw, SkmcpCore.mat_mul(t, e))
+    assert_vec SkmcpCore.mat_mul(r, world_before), world_after, 1e-9
+    pts = [[0.0, 0, 0], [3.0, 0, 0], [0.0, 2.0, 0], [1.0, 1.0, 5.0]]
+    before = pts.map { |p| SkmcpCore.apply_point(world_before, p) }
+    after = pts.map { |p| SkmcpCore.apply_point(world_after, p) }
+    dist = ->(a, b) { Math.sqrt((0..2).sum { |k| (a[k] - b[k])**2 }) }
+    pts.size.times.to_a.combination(2).each do |i, j|
+      assert_in_delta dist.(before[i], before[j]), dist.(after[i], after[j]), 1e-9
+    end
   end
 
   def test_rotacao_de_mundo_exata_sob_pai_espelhado

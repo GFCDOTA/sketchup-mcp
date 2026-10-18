@@ -79,6 +79,47 @@ class TestSkmcpWalk < Minitest::Test
     [0.0, -1.0, 0.0].zip(local).each { |e, g| assert_in_delta e, g, 1e-9 }
   end
 
+  # insert_component: o CONTEÚDO do .skp carregado também é checado.
+  def test_conteudo_com_arquitetura_e_detectado_em_qualquer_profundidade
+    piece = Sketchup::Group.new(31, 'PlanShell_piece_0', FakeDefinition.new('Group#31', []))
+    shell = Sketchup::Group.new(30, 'PlanShell_Group', FakeDefinition.new('Group#30', [piece]))
+    janela = Sketchup::ComponentInstance.new(32, '', FakeDefinition.new('Window_Group_w1', []))
+    planta = FakeDefinition.new('planta_74', [shell, janela])
+    paths = SkmcpRuntime.protected_inside(planta, PREFIXES).map { |n| n['path'] }
+    assert_equal ['PlanShell_Group', 'PlanShell_Group/PlanShell_piece_0', 'Window_Group_w1'], paths
+
+    caixilho = Sketchup::ComponentInstance.new(42, '', FakeDefinition.new('Window_Frame', []))
+    folha = Sketchup::Group.new(41, 'Folha', FakeDefinition.new('Group#41', [caixilho]))
+    asset = FakeDefinition.new('Janela3DW', [Sketchup::Group.new(40, 'Corpo', FakeDefinition.new('G', [folha]))])
+    assert_equal ['Corpo/Folha/Window_Frame'], SkmcpRuntime.protected_inside(asset, PREFIXES).map { |n| n['path'] }
+
+    perna = Sketchup::Group.new(51, 'perna', FakeDefinition.new('Group#51', []))
+    sofa = FakeDefinition.new('Sofa', [Sketchup::Group.new(50, 'assento', FakeDefinition.new('G2', [perna]))])
+    assert_empty SkmcpRuntime.protected_inside(sofa, PREFIXES)
+  end
+
+  class FakeModel
+    attr_reader :active_path
+
+    def initialize(path, closes: true)
+      @active_path = path
+      @closes = closes
+    end
+
+    def active_path=(value)
+      @active_path = value if @closes
+    end
+  end
+
+  def test_grupo_aberto_no_skp_e_fechado_antes_de_editar
+    aberto = FakeModel.new([:sofa_wrapper])
+    assert SkmcpRuntime.close_edit_context(aberto)
+    assert_nil aberto.active_path
+    refute SkmcpRuntime.close_edit_context(FakeModel.new(nil))
+    refute SkmcpRuntime.close_edit_context(FakeModel.new([]))
+    assert_raises(RuntimeError) { SkmcpRuntime.close_edit_context(FakeModel.new([:x], closes: false)) }
+  end
+
   def test_ancestral_travado_chega_ate_o_filho
     braco = Sketchup::Group.new(2, 'braco', FakeDefinition.new('Group#2', []))
     sofa = Sketchup::Group.new(1, 'Sofa', FakeDefinition.new('Group#1', [braco]), nil, locked: true)

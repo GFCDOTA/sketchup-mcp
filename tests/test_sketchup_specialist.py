@@ -480,3 +480,44 @@ def test_status_lista_os_jobs_ruby_versionados():
     st = jobs.status(su=su_with(FakeSystem(tasklist=TASKLIST_TWO)))
     assert {"inspect_model", "render_views", "apply_edits"} <= set(st["ruby_jobs"])
     assert [i["pid"] for i in st["instances"]] == [4242, 5150]
+
+
+# -- revisão adversarial, rodada 2 ---------------------------------------------
+
+def test_laje_do_banho_e_protegida_com_o_nome_que_o_place_layout_da():
+    """O prefixo 'PeleTeto' nunca casava: o grupo se chama '<cômodo> · PeleTeto'."""
+    layout = Path("tools/place_layout_skp.rb").read_text("utf-8")
+    assert '"#{room} · #{mod}"' in layout                 # o nome que o grupo recebe
+    assert '"PeleTeto")' in Path("tools/bathroom_layout.py").read_text("utf-8")  # módulo da laje
+    for room in ("BANHO 01", "BANHO 02", "LAVABO"):
+        assert ops.is_protected(f"{room} · PeleTeto")
+        with pytest.raises(ops.OpsInvalid, match="Hard Rule #1"):
+            ops.validate([{"op": "move", "target": {"name": f"{room} · PeleTeto"}, "by_m": [0, 0, -1]}])
+    assert not ops.is_protected("BANHO 01 · Vaso")
+
+
+def test_jobs_mandam_a_mesma_regra_de_protecao_ao_ruby(tmp_path, skp):
+    seen = {}
+    out = tmp_path / "o" / "e.skp"
+    jobs.apply_edits(str(skp), [{"op": "set_hidden", "target": {"name": "Cama"}, "hidden": True}],
+                     out_path=str(out), mode="interactive",
+                     su=su_with(FakeSystem(job=_salva_no_modelo_aberto(check=lambda c, p: seen.update(p)))))
+    assert seen["protected_substrings"] == ["PeleTeto"]
+    assert seen["protected_prefixes"] == list(ops.PROTECTED_PREFIXES)
+
+
+def test_caminho_relativo_de_textura_e_componente_e_do_repo_nao_do_cwd(repo_temporario, tmp_path,
+                                                                     monkeypatch):
+    (repo_temporario / "assets").mkdir()
+    (repo_temporario / "assets" / "wood.png").write_bytes(b"png")
+    (repo_temporario / "assets" / "chair.skp").write_bytes(b"skp")
+    cwd = tmp_path / "outro_cwd"
+    (cwd / "assets").mkdir(parents=True)
+    (cwd / "assets" / "chair.skp").write_bytes(b"OUTRO")    # homônimo que NÃO deve ser usado
+    monkeypatch.chdir(cwd)
+    norm = ops.validate([
+        {"op": "set_material", "target": {"name": "Cama"}, "texture": "assets/wood.png"},
+        {"op": "insert_component", "skp_path": "assets/chair.skp", "position_m": [0, 0, 0]},
+    ])
+    assert norm[0]["texture"] == str((repo_temporario / "assets" / "wood.png").resolve())
+    assert norm[1]["skp_path"] == str((repo_temporario / "assets" / "chair.skp").resolve())

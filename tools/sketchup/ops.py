@@ -20,11 +20,17 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from tools.sketchup import paths
+
 # Nomes de grupo que `build_plan_shell_skp.rb` cria a partir do consensus.
 PROTECTED_PREFIXES = (
     "PlanShell_", "Floor_", "SoftBarrier_", "DoorLeaf_", "Window_",
-    "WindowGlass_", "WindowSash_", "GlazedBalcony_", "PassageMarker_", "PeleTeto",
+    "WindowGlass_", "WindowSash_", "GlazedBalcony_", "PassageMarker_",
 )
+# A laje de teto do banho vem com o nome do cômodo NA FRENTE: o place_layout
+# nomeia o grupo "<cômodo> · PeleTeto" (ex. "BANHO 01 · PeleTeto"). Um prefixo
+# nunca casaria, então ela é protegida por substring.
+PROTECTED_SUBSTRINGS = ("PeleTeto",)
 # ops que a arquitetura protegida recusa (geometria + rename, que furaria a proteção)
 GUARDED_OPS = frozenset({"move", "rotate", "delete", "rename"})
 TARGET_OPS = frozenset({"set_material", "move", "rotate", "set_tag",
@@ -48,7 +54,21 @@ def _vec3(v: Any) -> bool:
 
 
 def is_protected(name: str) -> bool:
-    return any(name.startswith(p) for p in PROTECTED_PREFIXES)
+    return (any(name.startswith(p) for p in PROTECTED_PREFIXES)
+            or any(s in name for s in PROTECTED_SUBSTRINGS))
+
+
+def protection_params() -> dict[str, list[str]]:
+    """O que os jobs Ruby precisam para aplicar a MESMA regra de is_protected."""
+    return {"protected_prefixes": list(PROTECTED_PREFIXES),
+            "protected_substrings": list(PROTECTED_SUBSTRINGS)}
+
+
+def _repo_file(p: Any) -> Path | None:
+    # Relativo é relativo ao REPO, como o skp_path principal (paths.resolve):
+    # contra o CWD do servidor, o mesmo texto recusaria o arquivo certo ou
+    # pegaria outro com o mesmo nome.
+    return paths.resolve(p) if isinstance(p, str) and p.strip() else None
 
 
 def _target(op: dict, where: str, errs: list[str]) -> dict | None:
@@ -118,12 +138,12 @@ def validate(ops: Any, *, exists=lambda p: Path(p).exists()) -> list[dict[str, A
                 else:
                     norm["material"] = op["material"]
             else:
-                tex = op["texture"]
-                if not (isinstance(tex, str) and Path(tex).suffix.lower() in (".png", ".jpg", ".jpeg")
+                tex = _repo_file(op["texture"])
+                if not (tex is not None and tex.suffix.lower() in (".png", ".jpg", ".jpeg")
                         and exists(tex)):
                     errs.append(f"{where}: texture precisa ser um .png/.jpg existente")
                 else:
-                    norm["texture"] = str(Path(tex).resolve())
+                    norm["texture"] = str(tex)
                     size = op.get("texture_size_m", 1.0)
                     if not (_num(size) and size > 0):
                         errs.append(f"{where}: texture_size_m > 0")
@@ -158,16 +178,17 @@ def validate(ops: Any, *, exists=lambda p: Path(p).exists()) -> list[dict[str, A
             else:
                 norm["name"] = op["name"]
         elif kind == "insert_component":
-            p = op.get("skp_path")
-            if not (isinstance(p, str) and p.lower().endswith(".skp") and exists(p)):
+            p = _repo_file(op.get("skp_path"))
+            if not (p is not None and p.suffix.lower() == ".skp" and exists(p)):
                 errs.append(f"{where}: insert_component exige skp_path de um .skp existente")
-            elif is_protected(Path(p).stem):
+            elif is_protected(p.stem):
                 # o SketchUp nomeia a definição pelo nome do arquivo: Window_x.skp
-                # viraria "arquitetura do PDF" para a guarda e para o inspect
-                errs.append(f"{where}: o arquivo '{Path(p).name}' daria à definição um nome "
+                # viraria "arquitetura do PDF" para a guarda e para o inspect.
+                # O CONTEÚDO do arquivo só o Ruby vê (apply_edits.rb).
+                errs.append(f"{where}: o arquivo '{p.name}' daria à definição um nome "
                             "reservado para arquitetura do PDF")
             else:
-                norm["skp_path"] = str(Path(p).resolve())
+                norm["skp_path"] = str(p)
             if not _vec3(op.get("position_m")):
                 errs.append(f"{where}: insert_component exige position_m [x,y,z] em metros")
             else:

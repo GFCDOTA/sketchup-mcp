@@ -50,7 +50,15 @@ def test_jobs_usam_a_logica_testada_do_core():
     apply_src = (RUBY_DIR / "apply_edits.rb").read_text("utf-8")
     for needle in ("SkmcpCore.guard_violation", "SkmcpCore.dedupe", "SkmcpCore.nested_hits",
                    "SkmcpCore.world_to_local_vector", "SkmcpCore.local_transform_for_world",
-                   "SkmcpCore.rotation_z", "SkmcpCore.uniform_frame?"):
+                   "SkmcpCore.rotation_z", "SkmcpRuntime.protected_inside",
+                   "params['protected_substrings']", "model.entities.add_instance"):
         assert needle in apply_src, needle
+    # o insert vai para a RAIZ (position_m é de mundo), nunca para um grupo aberto
+    assert "active_entities" not in apply_src
+    # fechar o grupo aberto quebra a operação na API: tem que vir ANTES dela
+    assert apply_src.index("SkmcpRuntime.close_edit_context(model)") < apply_src.index("start_operation")
     inspect_src = (RUBY_DIR / "inspect_model.rb").read_text("utf-8")
     assert "bbox_world_m" in inspect_src and "SkmcpCore.dedupe" in inspect_src
+    for src in (inspect_src, (RUBY_DIR / "render_views.rb").read_text("utf-8")):
+        assert "SkmcpRuntime.close_edit_context(model)" in src
+    assert "params['protected_substrings']" in inspect_src
