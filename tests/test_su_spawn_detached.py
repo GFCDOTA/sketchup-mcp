@@ -58,7 +58,7 @@ def test_build_shell_usa_o_mesmo_lancamento():
     assert "subprocess.Popen(" not in run_src
 
 
-def test_servidor_mcp_carrega_extensoes_c_antes_de_ler_o_stdin_sem_fixar_escala():
+def test_servidor_mcp_carrega_extensoes_c_antes_de_ler_o_stdin_sem_fixar_escala(require_mcp):
     """L2 2026-10-19: su_furnish via MCP travava para sempre importando numpy (via
     shapely) DENTRO da tool, com a leitura do pipe do JSON-RPC pendente. O servidor
     pré-carrega as extensões C no import — só as bibliotecas: importar o
@@ -66,7 +66,6 @@ def test_servidor_mcp_carrega_extensoes_c_antes_de_ler_o_stdin_sem_fixar_escala(
     import os
     import sys
 
-    pytest.importorskip("mcp")  # o job pytest do CI não instala o extra [mcp]
     env = {k: v for k, v in os.environ.items() if k != "PT_TO_M"}
     code = ("import os, sys, tools.mcp_server.server; "
             "missing = [m for m in ('numpy', 'shapely.geometry', 'shapely.ops', 'PIL.Image') if m not in sys.modules]; "

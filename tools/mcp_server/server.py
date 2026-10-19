@@ -68,6 +68,7 @@ from tools.rack_class import derive_rack_spec, rack_class_gate  # noqa: E402
 from tools.coffee_table_class import derive_coffee_spec, coffee_table_class_gate  # noqa: E402
 from tools.sketchup import jobs as su_jobs  # noqa: E402
 from tools.sketchup import ops as su_ops  # noqa: E402
+from tools.mcp_server.stdio_isolation import isolate_stdio, quiet_tools  # noqa: E402
 
 mcp = FastMCP(
     "sketchup-mcp",
@@ -84,6 +85,10 @@ mcp = FastMCP(
         "Comece por list_capabilities e su_status."
     ),
 )
+
+
+# stdout é do protocolo: print/escrita em tool ou em processo filho vai para o stderr (stdio_isolation).
+quiet_tools(mcp)
 
 
 # ---------------------------------------------------------------------------
@@ -499,6 +504,7 @@ def su_render_vray(
 
 
 def main() -> None:
+    isolate_stdio()
     mcp.run()
 
 

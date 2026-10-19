@@ -33,6 +33,49 @@ VRAY_EXE_DEFAULT = (r"C:\Program Files\Chaos\V-Ray\V-Ray for SketchUp"
 AUTORUN_PLUGIN = "autorun_consume.rb"
 
 
+def job_info() -> dict[str, Any]:
+    """Como ESTE processo está preso a um Job Object do Windows (diagnóstico, só leitura).
+
+    Clientes MCP no Windows costumam pôr o servidor num job `KILL_ON_JOB_CLOSE`: fechar o cliente mata a árvore, SketchUp
+    incluso, a menos que o job permita breakaway. `sketchup_survives_server_exit` diz se uma instância aberta por
+    `spawn_detached` sobreviveria ao servidor; `None` quando não dá para saber (não Windows / consulta falhou)."""
+    if sys.platform != "win32":
+        return {"supported": False, "sketchup_survives_server_exit": None}
+    import ctypes
+    from ctypes import wintypes
+
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel32.GetCurrentProcess.restype = wintypes.HANDLE
+    kernel32.IsProcessInJob.argtypes = [wintypes.HANDLE, wintypes.HANDLE, ctypes.POINTER(wintypes.BOOL)]
+    kernel32.QueryInformationJobObject.argtypes = [wintypes.HANDLE, ctypes.c_int, ctypes.c_void_p, wintypes.DWORD,
+                                                   ctypes.POINTER(wintypes.DWORD)]
+    in_job = wintypes.BOOL()
+    if not kernel32.IsProcessInJob(kernel32.GetCurrentProcess(), None, ctypes.byref(in_job)):
+        return {"supported": True, "in_job": None, "sketchup_survives_server_exit": None}
+    if not in_job.value:
+        return {"supported": True, "in_job": False, "sketchup_survives_server_exit": True}
+
+    class Basic(ctypes.Structure):
+        _fields_ = [("PerProcessUserTimeLimit", ctypes.c_longlong), ("PerJobUserTimeLimit", ctypes.c_longlong),
+                    ("LimitFlags", wintypes.DWORD), ("MinimumWorkingSetSize", ctypes.c_size_t),
+                    ("MaximumWorkingSetSize", ctypes.c_size_t), ("ActiveProcessLimit", wintypes.DWORD),
+                    ("Affinity", ctypes.c_size_t), ("PriorityClass", wintypes.DWORD), ("SchedulingClass", wintypes.DWORD)]
+
+    class Extended(ctypes.Structure):
+        _fields_ = [("Basic", Basic), ("IoInfo", ctypes.c_ulonglong * 6), ("ProcessMemoryLimit", ctypes.c_size_t),
+                    ("JobMemoryLimit", ctypes.c_size_t), ("PeakProcessMemoryUsed", ctypes.c_size_t),
+                    ("PeakJobMemoryUsed", ctypes.c_size_t)]
+
+    info = Extended()
+    ok = kernel32.QueryInformationJobObject(None, 9, ctypes.byref(info), ctypes.sizeof(info), None)  # 9 = ExtendedLimit
+    if not ok:
+        return {"supported": True, "in_job": True, "sketchup_survives_server_exit": None}
+    flags = info.Basic.LimitFlags
+    kill, brk, silent = bool(flags & 0x2000), bool(flags & 0x800), bool(flags & 0x1000)
+    return {"supported": True, "in_job": True, "kill_on_job_close": kill, "breakaway_ok": brk,
+            "silent_breakaway_ok": silent, "sketchup_survives_server_exit": (not kill) or brk or silent}
+
+
 def spawn_detached(cmd: list[str], env: dict[str, str] | None = None) -> subprocess.Popen:
     """Sobe o SketchUp DESANEXADO de quem chamou.
 
@@ -156,6 +199,7 @@ class SketchUp:
             "autorun_plugin_present": self.system.exists(self.loc.plugins_dir / AUTORUN_PLUGIN),
             "vray_exe_found": self.system.exists(self.loc.vray_exe),
             "instances": self.instances(),
+            "server_job": job_info(),
         }
         if not out["platform_supported"]:
             out["note"] = ("SketchUp só roda no Windows. As tools puras (gates, "
