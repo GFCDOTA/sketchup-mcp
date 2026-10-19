@@ -1,0 +1,62 @@
+# tests/test_window_aperture_geometry.py contra o build REAL do quadrado (shell + relatorio gerados por su_build_shell nesta rodada,
+# copiados para runs/quadrado_v3_aperture, que e onde os testes condicionais olham). D-001: a falha abaixo e a divergencia
+# conhecida (builder 1,50-2,10 m x referencia 0,90-2,10 m). NAO foi escondida nem relaxada.
+
+.......F.                                                                [100%]
+================================== FAILURES ===================================
+___________________ test_quadrado_window_glass_group_exists ___________________
+
+    @pytest.mark.skipif(
+        not QUADRADO_GEOMETRY_REPORT.exists(),
+        reason="quadrado geometry_report.json not present",
+    )
+    def test_quadrado_window_glass_group_exists():
+        """A WindowGlass_Group_<id> must exist per window aperture, sized
+        sill-to-head (NOT floor-to-ceiling)."""
+        report = json.loads(QUADRADO_GEOMETRY_REPORT.read_text(encoding="utf-8"))
+        glass_groups = [
+            g for g in report.get("groups_diagnostic", [])
+            if str(g.get("name", "")).startswith("WindowGlass_Group_")
+        ]
+        assert len(glass_groups) >= 1, (
+            "no WindowGlass_Group_* found — 3D aperture path did not "
+            "emit glass face; window may have been routed to legacy "
+            "full-height carve + 3-band infill"
+        )
+        for g in glass_groups:
+            z_range = _bbox_z_range_m(g)
+            if z_range is None:
+                continue
+            z_min, z_max = z_range
+            assert z_min > 0.5, (
+                f"{g['name']} touches the floor (z_min={z_min:.3f} m). "
+                f"Glass should sit at sill height (~{WINDOW_SILL_M} m). "
+                f"This is the door-like-void regression."
+            )
+            assert z_max < WALL_HEIGHT_M - 0.3, (
+                f"{g['name']} reaches the ceiling (z_max={z_max:.3f} m). "
+                f"Glass should top at head height (~{WINDOW_HEAD_M} m)."
+            )
+            # The exact window-pane height (head - sill = 1.20 m)
+>           assert abs((z_max - z_min) - (WINDOW_HEAD_M - WINDOW_SILL_M)) < 0.05, (
+                f"{g['name']} height = {z_max - z_min:.3f} m; "
+                f"expected {WINDOW_HEAD_M - WINDOW_SILL_M:.3f} m "
+                f"(WINDOW_HEAD - WINDOW_SILL)"
+            )
+E           AssertionError: WindowGlass_Group_win_south height = 0.600 m; expected 1.200 m (WINDOW_HEAD - WINDOW_SILL)
+E           assert 0.6000000000000001 < 0.05
+E            +  where 0.6000000000000001 = abs(((2.1 - 1.5) - (2.1 - 0.9)))
+
+tests\test_window_aperture_geometry.py:189: AssertionError
+=================================== PASSES ====================================
+=========================== short test summary info ===========================
+PASSED tests/test_window_aperture_geometry.py::test_window_sill_head_within_wall_height
+PASSED tests/test_window_aperture_geometry.py::test_window_aperture_height_positive
+PASSED tests/test_window_aperture_geometry.py::test_wall_mass_below_sill_is_positive
+PASSED tests/test_window_aperture_geometry.py::test_wall_mass_above_head_is_positive
+PASSED tests/test_window_aperture_geometry.py::test_quadrado_shell_has_window_aperture_not_carve
+PASSED tests/test_window_aperture_geometry.py::test_quadrado_shell_remains_single_continuous_ring
+PASSED tests/test_window_aperture_geometry.py::test_quadrado_planshell_height_full_walls
+PASSED tests/test_window_aperture_geometry.py::test_quadrado_no_window_panel_legacy_groups
+FAILED tests/test_window_aperture_geometry.py::test_quadrado_window_glass_group_exists
+1 failed, 8 passed in 0.08s

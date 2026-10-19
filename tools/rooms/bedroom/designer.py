@@ -726,8 +726,6 @@ def build_skp(out_dir, tag, items):
              "LAYOUT_AFTER_TOP": out_dir / f"bedroom_designer_{tag}_after_top.png",
              "LAYOUT_AFTER_ISO": out_dir / f"bedroom_designer_{tag}_after_iso.png",
              "LAYOUT_LOG": out_dir / f"bedroom_designer_{tag}_skp_log.txt"}
-    subprocess.run(["taskkill", "/F", "/IM", "SketchUp.exe"], capture_output=True)
-    time.sleep(1)
     for p in list(paths.values()):
         try:
             if p.exists():
@@ -741,7 +739,7 @@ def build_skp(out_dir, tag, items):
         env[k] = str(p).replace("\\", "/")
     # SU precisa de JANELA real pra renderizar (write_image): DETACHED_PROCESS
     # quebra os renders silenciosamente (o log nunca sai). Launch janelado.
-    subprocess.Popen([su, str(base), "-RubyStartup", str(rb)], env=env)
+    proc = subprocess.Popen([su, str(base), "-RubyStartup", str(rb)], env=env)
     log = paths["LAYOUT_LOG"]
     deadline = time.time() + 240
     while time.time() < deadline:
@@ -749,7 +747,8 @@ def build_skp(out_dir, tag, items):
             time.sleep(2)
             break
         time.sleep(1)
-    subprocess.run(["taskkill", "/F", "/IM", "SketchUp.exe"], capture_output=True)
+    from tools.sketchup.legacy_process import terminate_owned
+    terminate_owned(proc.pid)                  # so o SketchUp que ESTA funcao subiu (nunca por nome de imagem)
     return skp if skp.exists() else None
 
 

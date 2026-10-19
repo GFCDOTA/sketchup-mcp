@@ -1,0 +1,90 @@
+{
+ "A.S. | TERRACO SOCIAL | TERRACO TECNICO": {
+  "boxes": 13,
+  "placed_log": 13,
+  "pieces_iso": 24,
+  "pieces_integrated": 24,
+  "identical_to_integrated": true,
+  "foreign_modules": [],
+  "shell_identical": true,
+  "run": "DONE",
+  "inspect": "OK"
+ },
+ "BANHO 01": {
+  "boxes": 59,
+  "placed_log": 59,
+  "pieces_iso": 66,
+  "pieces_integrated": 66,
+  "identical_to_integrated": true,
+  "foreign_modules": [],
+  "shell_identical": true,
+  "run": "DONE",
+  "inspect": "OK"
+ },
+ "BANHO 02": {
+  "boxes": 58,
+  "placed_log": 58,
+  "pieces_iso": 65,
+  "pieces_integrated": 65,
+  "identical_to_integrated": true,
+  "foreign_modules": [],
+  "shell_identical": true,
+  "run": "DONE",
+  "inspect": "OK"
+ },
+ "COZINHA": {
+  "boxes": 76,
+  "placed_log": 76,
+  "pieces_iso": 87,
+  "pieces_integrated": 87,
+  "identical_to_integrated": true,
+  "foreign_modules": [],
+  "shell_identical": true,
+  "run": "DONE",
+  "inspect": "OK"
+ },
+ "LAVABO": {
+  "boxes": 33,
+  "placed_log": 33,
+  "pieces_iso": 39,
+  "pieces_integrated": 39,
+  "identical_to_integrated": true,
+  "foreign_modules": [],
+  "shell_identical": true,
+  "run": "DONE",
+  "inspect": "OK"
+ },
+ "SALA DE JANTAR | SALA DE ESTAR": {
+  "boxes": 51,
+  "placed_log": 51,
+  "pieces_iso": 59,
+  "pieces_integrated": 59,
+  "identical_to_integrated": true,
+  "foreign_modules": [],
+  "shell_identical": true,
+  "run": "DONE",
+  "inspect": "OK"
+ },
+ "SUITE 01": {
+  "boxes": 65,
+  "placed_log": 65,
+  "pieces_iso": 73,
+  "pieces_integrated": 73,
+  "identical_to_integrated": true,
+  "foreign_modules": [],
+  "shell_identical": true,
+  "run": "DONE",
+  "inspect": "OK"
+ },
+ "SUITE 02": {
+  "boxes": 47,
+  "placed_log": 47,
+  "pieces_iso": 53,
+  "pieces_integrated": 53,
+  "identical_to_integrated": true,
+  "foreign_modules": [],
+  "shell_identical": true,
+  "run": "DONE",
+  "inspect": "OK"
+ }
+}

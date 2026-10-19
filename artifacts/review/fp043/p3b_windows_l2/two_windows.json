@@ -1,0 +1,165 @@
+{
+ "commit": "32265d11831a107601c1d8caf4ecf6aca53ea2da",
+ "steps": [
+  {
+   "step": "preflight",
+   "sketchup_instances": [],
+   "control_files_in_plugins": []
+  },
+  {
+   "step": "human_window_a",
+   "pid": 27628,
+   "modified": true,
+   "groups": [
+    "HUMAN_UNSAVED_WORK"
+   ],
+   "path": "E:\\Claude\\worktrees\\w-gates\\runs\\fp043_p3b\\two\\human.skp",
+   "count": 2
+  },
+  {
+   "step": "mcp_status",
+   "instances": [
+    {
+     "pid": 27628,
+     "mem_kb": 636660
+    }
+   ],
+   "sees_a": true,
+   "server_job": {
+    "supported": true,
+    "in_job": true,
+    "kill_on_job_close": true,
+    "breakaway_ok": false,
+    "silent_breakaway_ok": true,
+    "sketchup_survives_server_exit": true
+   }
+  },
+  {
+   "step": "job_b_inspect",
+   "status": "OK",
+   "pid_b": 37360,
+   "pid_b_is_not_a": true,
+   "model_path_in_job": "E:\\Claude\\worktrees\\w-gates\\runs\\planta_74\\mcp\\inspect_20261019_183601\\_inspect_target.skp",
+   "job_ran_on_copy_not_human": true
+  },
+  {
+   "step": "a_intact_after_job_b",
+   "ok": true,
+   "heartbeat_advanced": true,
+   "modified": true,
+   "groups": [
+    "HUMAN_UNSAVED_WORK"
+   ],
+   "alive": true
+  },
+  {
+   "step": "close_all_without_confirm",
+   "status": "CONFIRMATION_REQUIRED"
+  },
+  {
+   "step": "a_intact_after_close_refusal",
+   "ok": true,
+   "heartbeat_advanced": true,
+   "modified": true,
+   "groups": [
+    "HUMAN_UNSAVED_WORK"
+   ],
+   "alive": true
+  },
+  {
+   "step": "close_pid_b",
+   "status": "CLOSED",
+   "closed": [
+    37360
+   ],
+   "b_alive": false,
+   "a_alive": true
+  },
+  {
+   "step": "a_intact_after_close_pid_b",
+   "ok": true,
+   "heartbeat_advanced": true,
+   "modified": true,
+   "groups": [
+    "HUMAN_UNSAVED_WORK"
+   ],
+   "alive": true
+  },
+  {
+   "step": "close_unknown_pid",
+   "status": "ERROR"
+  },
+  {
+   "step": "timeout_job_b",
+   "status": "TIMEOUT",
+   "reason": "sem resultado em 1s",
+   "pid_b": 36432,
+   "b_left_running": true,
+   "elapsed_s": 1.0
+  },
+  {
+   "step": "timeout_cleanup",
+   "b_alive": false,
+   "a_alive": true
+  },
+  {
+   "step": "a_intact_after_timeout",
+   "ok": true,
+   "heartbeat_advanced": true,
+   "modified": true,
+   "groups": [
+    "HUMAN_UNSAVED_WORK"
+   ],
+   "alive": true
+  },
+  {
+   "step": "error_job_b",
+   "status": "TIMEOUT",
+   "reason": "sem resultado em 45s",
+   "pid_b": 32108,
+   "elapsed_s": 45.02,
+   "no_positive_result": true
+  },
+  {
+   "step": "a_intact_after_error",
+   "ok": true,
+   "heartbeat_advanced": true,
+   "modified": true,
+   "groups": [
+    "HUMAN_UNSAVED_WORK"
+   ],
+   "alive": true
+  },
+  {
+   "step": "legacy_launch_close_owned",
+   "pid_legacy": 13336,
+   "instances_before_close": [
+    13336,
+    27628
+   ],
+   "legacy_alive_after": false,
+   "a_alive": true
+  },
+  {
+   "step": "a_intact_after_legacy_close_owned",
+   "ok": true,
+   "heartbeat_advanced": true,
+   "modified": true,
+   "groups": [
+    "HUMAN_UNSAVED_WORK"
+   ],
+   "alive": true
+  },
+  {
+   "step": "final",
+   "control_files_in_plugins": [],
+   "instances_before_cleanup": [
+    27628
+   ]
+  }
+ ],
+ "a_intact_everywhere": true,
+ "checks_a_intact": 6,
+ "a_closed_by_test_cleanup": true,
+ "instances_after_cleanup": []
+}

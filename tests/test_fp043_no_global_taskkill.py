@@ -50,3 +50,15 @@ def test_ps1_closes_only_created_pid():
     assert "$p=Start-Process" in script and "-PassThru" in script
     assert "$p.CloseMainWindow()" in script
     assert not re.search(r"taskkill[^\\n]*/IM", script, re.I)
+
+
+def test_terminate_owned_so_encerra_o_pid_dado_e_recusa_pid_invalido(monkeypatch):
+    import subprocess
+
+    from tools.sketchup import legacy_process
+    seen = []
+    monkeypatch.setattr(legacy_process.subprocess, "run", lambda cmd, **kw: seen.append(cmd) or subprocess.CompletedProcess(cmd, 0))
+    assert legacy_process.terminate_owned(4242) is True and seen == [["taskkill", "/PID", "4242", "/F"]]
+    for bad in (0, -1, "12", None, True):
+        with pytest.raises(ValueError):
+            legacy_process.terminate_owned(bad)

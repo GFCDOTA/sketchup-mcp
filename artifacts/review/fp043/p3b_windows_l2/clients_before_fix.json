@@ -1,0 +1,143 @@
+{
+ "commit": "32265d11831a107601c1d8caf4ecf6aca53ea2da",
+ "cases": [
+  {
+   "client": "python-mcp",
+   "python": "3.12.13",
+   "connect_ms": 595,
+   "tool_count": 18,
+   "tools": [
+    "list_capabilities",
+    "run_deterministic_gates",
+    "furniture_class_derive",
+    "reference_to_grammar",
+    "validate_grammar_spec",
+    "room_gates",
+    "kitchen_ergonomics_audit",
+    "promote_canonical",
+    "skp_inventory",
+    "su_status",
+    "su_open",
+    "su_close",
+    "su_inspect",
+    "su_render",
+    "su_apply_edits",
+    "su_build_shell",
+    "su_furnish",
+    "su_render_vray"
+   ],
+   "su_status": {
+    "server_job": {
+     "supported": true,
+     "in_job": true,
+     "kill_on_job_close": true,
+     "breakaway_ok": false,
+     "silent_breakaway_ok": true,
+     "sketchup_survives_server_exit": true
+    },
+    "instances": [],
+    "mode_default": null,
+    "proof_state": "UNVERIFIED_ON_SKETCHUP"
+   },
+   "su_open": {
+    "status": "OPENED",
+    "pid": 32624,
+    "reason": null
+   }
+  },
+  {
+   "client": "node",
+   "sdk": "1.29.0",
+   "node": "v24.14.1",
+   "connect_ms": 1092,
+   "tool_count": 18,
+   "tools": [
+    "list_capabilities",
+    "run_deterministic_gates",
+    "furniture_class_derive",
+    "reference_to_grammar",
+    "validate_grammar_spec",
+    "room_gates",
+    "kitchen_ergonomics_audit",
+    "promote_canonical",
+    "skp_inventory",
+    "su_status",
+    "su_open",
+    "su_close",
+    "su_inspect",
+    "su_render",
+    "su_apply_edits",
+    "su_build_shell",
+    "su_furnish",
+    "su_render_vray"
+   ],
+   "su_status": {
+    "server_job": {
+     "supported": true,
+     "in_job": true,
+     "kill_on_job_close": true,
+     "breakaway_ok": false,
+     "silent_breakaway_ok": true,
+     "sketchup_survives_server_exit": true
+    },
+    "instances": [],
+    "proof_state": "UNVERIFIED_ON_SKETCHUP"
+   }
+  },
+  {
+   "client": "node",
+   "sdk": "1.29.0",
+   "node": "v24.14.1",
+   "connect_ms": 576,
+   "tool_count": 18,
+   "tools": [
+    "list_capabilities",
+    "run_deterministic_gates",
+    "furniture_class_derive",
+    "reference_to_grammar",
+    "validate_grammar_spec",
+    "room_gates",
+    "kitchen_ergonomics_audit",
+    "promote_canonical",
+    "skp_inventory",
+    "su_status",
+    "su_open",
+    "su_close",
+    "su_inspect",
+    "su_render",
+    "su_apply_edits",
+    "su_build_shell",
+    "su_furnish",
+    "su_render_vray"
+   ],
+   "su_status": {
+    "server_job": {
+     "supported": true,
+     "in_job": true,
+     "kill_on_job_close": true,
+     "breakaway_ok": false,
+     "silent_breakaway_ok": true,
+     "sketchup_survives_server_exit": true
+    },
+    "instances": [],
+    "proof_state": "UNVERIFIED_ON_SKETCHUP"
+   },
+   "su_open": {
+    "status": "OPENED",
+    "pid": 32480
+   }
+  }
+ ],
+ "sketchup_instances_before": 0,
+ "python_survival": {
+  "label": "python client closed",
+  "pid": 32624,
+  "alive_4s_after_client_closed": false
+ },
+ "node_survival": {
+  "label": "node client closed",
+  "pid": 32480,
+  "alive_4s_after_client_closed": true,
+  "cleanup_closed_by_pid": true
+ }
+}
