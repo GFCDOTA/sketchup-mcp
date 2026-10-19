@@ -4,7 +4,7 @@
 # Regressão do L2 de 2026-10-19: peça macia girada 30° ganhava topo inset calculado
 # do AABB e vazava da pegada. O inset precisa ficar DENTRO do polígono da peça.
 require 'minitest/autorun'
-require_relative '../../tools/place_layout_geom'
+require_relative '../../tools/sketchup/furnish/place_layout_geom'
 
 class TestPlaceLayoutGeom < Minitest::Test
   G = PlaceLayoutGeom
