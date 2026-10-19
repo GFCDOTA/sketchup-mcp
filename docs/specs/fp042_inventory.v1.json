@@ -7,791 +7,14 @@
   "status": "INITIAL_CLASSIFICATION_NOT_FULL_MIGRATION",
   "entries": [
     {
-      "path": ".ai_bridge/fidelity/ledger.jsonl",
+      "path": ".impeccable/config.json",
       "domain": "documentation_or_agent",
       "disposition": "review_knowledge_ownership",
       "phase": "P5",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": ".ai_bridge/fidelity/verdicts/ARMCHAIR-CLASS_cycle001.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/fidelity/verdicts/ARMCHAIR-CLASS_cycle002.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/fidelity/verdicts/BED-CLASS_cycle001.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/fidelity/verdicts/BED-CLASS_cycle002.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/fidelity/verdicts/COFFEE-TABLE-CLASS_cycle001.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/fidelity/verdicts/COFFEE-TABLE-CLASS_cycle002.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/fidelity/verdicts/RACK-CLASS_cycle001.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/fidelity/verdicts/RACK-CLASS_cycle002.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/fidelity/verdicts/SCENE-LIVINGROOM-MWM_cycle001.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/fidelity/verdicts/SCENE-LIVINGROOM-MWM_cycle002.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/fidelity/verdicts/SCENE-LIVINGROOM-MWM_cycle003.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/fidelity/verdicts/SCENE-LIVINGROOM-MWM_render_light_cycles.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/fidelity/verdicts/SOFA-CLASS_cycle001.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/fidelity/verdicts/SOFA-CLASS_cycle002.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/fidelity/verdicts/SOFA-CLASS_cycle003.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/fidelity/verdicts/SOFA-STRAIGHT-3SEAT_attempt001.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/fidelity/verdicts/SOFA-STRAIGHT-3SEAT_attempt002.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/fidelity/verdicts/SOFA-STRAIGHT-3SEAT_attempt003.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/fidelity/verdicts/SOFA-STRAIGHT-3SEAT_attempt004.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/gpt_review/.gitignore",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.json",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/HANDOFF.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/knowledge/architect.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/learning_patches/LP-SOFA-001.json",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/lessons/interior-orchestrator.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/questions/20260529T184522Z_oracle_pass_but_known_warnings.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/questions/20260529T190248Z_oracle_pass_but_known_warnings.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/questions/20260529T190315Z_oracle_pass_but_known_warnings.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/questions/20260529T200636Z_a_b_c_decision_with_tradeoff.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/questions/20260529T201437Z_final_fail_non_obvious_fix.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/questions/20260529T201947Z_about_to_open_new_cycle_post_slice.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/reference_packs/sofa_reference_pack_001.json",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/research/furniture_classes_ergonomics_2026-06-12.json",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/responses/20260529T200636Z_a_b_c_decision_with_tradeoff.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/responses/20260529T201437Z_final_fail_non_obvious_fix.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".ai_bridge/responses/20260529T201947Z_about_to_open_new_cycle_post_slice.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/agents/interior-designer.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/agents/interior-orchestrator.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/agents/interior-pm.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/agents/interior-project-auditor.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/agents/reference-scout.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/agents/sketchup-tooling-specialist.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/CLAUDE.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/constitution.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/docs/2026-05-31_agentic_system_retro_roadmap.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/docs/adr/0001-gate-oracle-and-pipeline-architecture.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/docs/adr/0002-interior-project-audit-and-atelie74-rag.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/docs/audits/2026-05-27_claude_structure_audit.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/docs/audits/2026-05-28_q1_constitution_8_friction_review.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/docs/audits/2026-05-28_skp_proof_of_progress_gate.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/docs/index.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/evals/eval_strategy.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/evals/fidelity_rubric.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/evals/regression_matrix.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/memory/artifact_policy.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/memory/current_state.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/memory/deprecated_context.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/memory/felipe_style_dna.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/memory/git_workflow.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/memory/lessons_learned.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/memory/multi_agent_coordination.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/memory/operational_rules.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/memory/project_context.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/plans/active_work.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/plans/interior_phased_plan.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/plans/next_actions.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/plans/roadmap.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/plans/stopped_work.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/README.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/skills/autonomous-fidelity-loop/SKILL.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/skills/fidelity-review/SKILL.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/skills/furniture-reference-analyzer/SKILL.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/skills/generate-and-compare-skp-after-change/SKILL.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/skills/gh-autopilot/SKILL.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/skills/gpt-docker-consult/SKILL.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/skills/gpt-review-gate/SKILL.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/skills/interior-architect-planner/SKILL.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/skills/interior-design/Modelfile",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/skills/interior-design/SKILL.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/skills/interior-project-audit/SKILL.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/skills/joinery-ergonomics-reference/SKILL.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/skills/multi-agent-handoff/SKILL.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/skills/pdf-to-skp-pipeline/SKILL.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/skills/planned-furniture-designer/SKILL.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/skills/planned-joinery-translator/design_grammar_spec.template.json",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/skills/planned-joinery-translator/SKILL.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/skills/reference-to-joinery-translator/SKILL.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/skills/repo-governance/SKILL.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/skills/sketchup-room-knowledge/SKILL.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/skills/sketchup-video-knowledge/SKILL.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/skills/skp-artifact-management/SKILL.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/skills/skp-visual-self-correction/SKILL.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/specs/autonomous_planta_prep.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/specs/fidelity_gate.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/specs/gate_framework_and_audit.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/specs/generalize_any_plant.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/specs/generalize_builder_constants.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/specs/interior_common_sense.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/specs/perfect_reference_strategy.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/specs/product_goal.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/specs/repository_hygiene.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/specs/room_furnishing_method.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/specs/sdd_and_harness_engineering.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/specs/skp_artifact_layout.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/specs/skp_proof_of_progress_gate.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/specs/templates/artifact_contract_template.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/specs/templates/feature_spec_template.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/specs/templates/fidelity_spec_template.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/specs/templates/regression_summary_template.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".dockerignore",
-      "domain": "tooling_ci",
-      "disposition": "retain_infrastructure",
-      "phase": "P1",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".gitattributes",
+      "path": ".gitignore",
       "domain": "tooling_ci",
       "disposition": "retain_infrastructure",
       "phase": "P1",
@@ -805,14 +28,791 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": ".gitignore",
+      "path": ".gitattributes",
       "domain": "tooling_ci",
       "disposition": "retain_infrastructure",
       "phase": "P1",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": ".impeccable/config.json",
+      "path": ".dockerignore",
+      "domain": "tooling_ci",
+      "disposition": "retain_infrastructure",
+      "phase": "P1",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/specs/templates/regression_summary_template.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/specs/templates/fidelity_spec_template.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/specs/templates/feature_spec_template.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/specs/templates/artifact_contract_template.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/specs/skp_proof_of_progress_gate.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/specs/skp_artifact_layout.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/specs/sdd_and_harness_engineering.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/specs/room_furnishing_method.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/specs/repository_hygiene.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/specs/product_goal.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/specs/perfect_reference_strategy.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/specs/interior_common_sense.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/specs/generalize_builder_constants.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/specs/generalize_any_plant.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/specs/gate_framework_and_audit.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/specs/fidelity_gate.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/specs/autonomous_planta_prep.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/skills/skp-visual-self-correction/SKILL.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/skills/skp-artifact-management/SKILL.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/skills/sketchup-video-knowledge/SKILL.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/skills/sketchup-room-knowledge/SKILL.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/skills/repo-governance/SKILL.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/skills/reference-to-joinery-translator/SKILL.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/skills/planned-joinery-translator/SKILL.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/skills/planned-joinery-translator/design_grammar_spec.template.json",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/skills/planned-furniture-designer/SKILL.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/skills/pdf-to-skp-pipeline/SKILL.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/skills/multi-agent-handoff/SKILL.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/skills/joinery-ergonomics-reference/SKILL.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/skills/interior-project-audit/SKILL.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/skills/interior-design/SKILL.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/skills/interior-design/Modelfile",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/skills/interior-architect-planner/SKILL.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/skills/gpt-review-gate/SKILL.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/skills/gpt-docker-consult/SKILL.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/skills/gh-autopilot/SKILL.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/skills/generate-and-compare-skp-after-change/SKILL.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/skills/furniture-reference-analyzer/SKILL.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/skills/fidelity-review/SKILL.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/skills/autonomous-fidelity-loop/SKILL.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/README.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/plans/stopped_work.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/plans/roadmap.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/plans/next_actions.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/plans/interior_phased_plan.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/plans/active_work.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/memory/project_context.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/memory/operational_rules.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/memory/multi_agent_coordination.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/memory/lessons_learned.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/memory/git_workflow.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/memory/felipe_style_dna.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/memory/deprecated_context.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/memory/current_state.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/memory/artifact_policy.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/evals/regression_matrix.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/evals/fidelity_rubric.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/evals/eval_strategy.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/docs/index.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/docs/audits/2026-05-28_skp_proof_of_progress_gate.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/docs/audits/2026-05-28_q1_constitution_8_friction_review.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/docs/audits/2026-05-27_claude_structure_audit.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/docs/adr/0002-interior-project-audit-and-atelie74-rag.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/docs/adr/0001-gate-oracle-and-pipeline-architecture.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/docs/2026-05-31_agentic_system_retro_roadmap.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/constitution.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/CLAUDE.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/agents/sketchup-tooling-specialist.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/agents/reference-scout.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/agents/interior-project-auditor.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/agents/interior-pm.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/agents/interior-orchestrator.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/agents/interior-designer.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/responses/20260529T201947Z_about_to_open_new_cycle_post_slice.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/responses/20260529T201437Z_final_fail_non_obvious_fix.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/responses/20260529T200636Z_a_b_c_decision_with_tradeoff.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/research/furniture_classes_ergonomics_2026-06-12.json",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/reference_packs/sofa_reference_pack_001.json",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/questions/20260529T201947Z_about_to_open_new_cycle_post_slice.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/questions/20260529T201437Z_final_fail_non_obvious_fix.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/questions/20260529T200636Z_a_b_c_decision_with_tradeoff.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/questions/20260529T190315Z_oracle_pass_but_known_warnings.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/questions/20260529T190248Z_oracle_pass_but_known_warnings.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/questions/20260529T184522Z_oracle_pass_but_known_warnings.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/lessons/interior-orchestrator.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/learning_patches/LP-SOFA-001.json",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/knowledge/architect.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/HANDOFF.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.json",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/gpt_review/.gitignore",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/fidelity/verdicts/SOFA-STRAIGHT-3SEAT_attempt004.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/fidelity/verdicts/SOFA-STRAIGHT-3SEAT_attempt003.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/fidelity/verdicts/SOFA-STRAIGHT-3SEAT_attempt002.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/fidelity/verdicts/SOFA-STRAIGHT-3SEAT_attempt001.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/fidelity/verdicts/SOFA-CLASS_cycle003.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/fidelity/verdicts/SOFA-CLASS_cycle002.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/fidelity/verdicts/SOFA-CLASS_cycle001.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/fidelity/verdicts/SCENE-LIVINGROOM-MWM_render_light_cycles.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/fidelity/verdicts/SCENE-LIVINGROOM-MWM_cycle003.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/fidelity/verdicts/SCENE-LIVINGROOM-MWM_cycle002.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/fidelity/verdicts/SCENE-LIVINGROOM-MWM_cycle001.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/fidelity/verdicts/RACK-CLASS_cycle002.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/fidelity/verdicts/RACK-CLASS_cycle001.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/fidelity/verdicts/COFFEE-TABLE-CLASS_cycle002.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/fidelity/verdicts/COFFEE-TABLE-CLASS_cycle001.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/fidelity/verdicts/BED-CLASS_cycle002.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/fidelity/verdicts/BED-CLASS_cycle001.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/fidelity/verdicts/ARMCHAIR-CLASS_cycle002.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/fidelity/verdicts/ARMCHAIR-CLASS_cycle001.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".ai_bridge/fidelity/ledger.jsonl",
       "domain": "documentation_or_agent",
       "disposition": "review_knowledge_ownership",
       "phase": "P5",
@@ -12240,6 +12240,20 @@
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tools/rooms/bathroom/validation.py",
+      "domain": "room_bathroom",
+      "disposition": "retain_current_owner",
+      "phase": "P2",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tests/test_fp042_bathroom_validation.py",
+      "domain": "test",
+      "disposition": "retain_current_owner",
+      "phase": "P5",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     }
   ]
