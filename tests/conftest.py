@@ -26,6 +26,8 @@ from __future__ import annotations
 
 import os
 
+import pytest
+
 PLANTA74_SCALE = "0.0259"
 
 
@@ -38,6 +40,18 @@ def pytest_configure(config) -> None:
         # mas tambem nao herdar um PT_TO_M de shell antigo (gotcha real:
         # sessao anterior tinha `setx PT_TO_M=0.0259` ou export vivo).
         os.environ.pop("PT_TO_M", None)
+
+
+@pytest.fixture(scope="session")
+def require_mcp():
+    """O extra `mcp` (pip install -e .[mcp]) existe? Local: pula. No job do CI que PROMETE cobri-lo
+    (`REQUIRE_EXTRAS=1`): FALHA — skip silencioso lá esconde regressão do servidor."""
+    try:
+        import mcp  # noqa: F401
+    except ModuleNotFoundError:
+        if os.environ.get("REQUIRE_EXTRAS"):
+            pytest.fail("REQUIRE_EXTRAS=1 mas o extra `mcp` não está instalado neste job")
+        pytest.skip("extra [mcp] não instalado")
 
 
 # test_bathrooms_style.py computa `ROOMS = _rooms()` no IMPORT (nao dentro de
