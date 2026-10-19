@@ -101,6 +101,41 @@ def living_room_boxes(con, room_id):
     # é o fundo que faz rack+TV lerem como estar planejado. Fita LED 2700K no topo.
     _pan_w = round(max(1.80, min(_rack_wall_len - 0.10, 2.60)), 2)
     _pan_c = (rack_c[0] - rfx * 0.15 * M2IN, rack_c[1] - rfy * 0.15 * M2IN)
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union as _uni
+    from core.scale import PT_TO_IN
+    from tools.spatial_model import build_spatial_model, wall_footprint
+
+    _sm = build_spatial_model(con, room_id)
+    _room_walls = _uni([
+        wall_footprint(_sm["_geom"]["walls"][wid], extend_endpoints=True)
+        for wid in _sm["_geom"]["room_walls"]
+    ])
+    _perp = (-rfy, rfx)   # deslocamento AO LONGO da parede-TV, não afastamento.
+    _pan_choice = None
+    _pan_best_overlap = float("inf")
+    _candidate_w = _pan_w
+    while _candidate_w >= 2.0 - 1e-8:
+        for _shift in (0.0, 0.02, -0.02, 0.04, -0.04, 0.06, -0.06,
+                       0.08, -0.08, 0.10, -0.10, 0.14, -0.14, 0.20, -0.20):
+            _cc = (_pan_c[0] + _perp[0] * _shift * M2IN,
+                   _pan_c[1] + _perp[1] * _shift * M2IN)
+            _probe = _oriented_box("painel_tv", _cc, rack_f, _candidate_w, 0.05,
+                                   0.0, 2.40, [92, 64, 46], module="Painel TV")
+            _shape = Polygon([(x / PT_TO_IN, y / PT_TO_IN) for x, y in _probe["corners"]])
+            _intr = _shape.intersection(_room_walls).area
+            if _intr < _pan_best_overlap:
+                _pan_choice, _pan_best_overlap = (_candidate_w, _cc), _intr
+            if _intr < 1e-8:
+                break
+        if _pan_best_overlap < 1e-8:
+            break
+        _candidate_w = round(_candidate_w - 0.04, 3)
+    if _pan_choice is not None:
+        _pan_w, _pan_c = _pan_choice
+    if _pan_best_overlap > 1e-8:
+        print(f"[furnish-apt] PAINEL_TV_WALL_COLLISION: {_pan_best_overlap:.3f} pt2 "
+              f"(sem posicao livre; exige correcao, nao promover)")
     boxes.append(_oriented_box("painel_tv", _pan_c, rack_f, _pan_w, 0.05, 0.0, 2.40,
                                [92, 64, 46], module="Painel TV"))
     boxes.append(_oriented_box("lv_led", (_pan_c[0] + rfx * 0.033 * M2IN, _pan_c[1] + rfy * 0.033 * M2IN),
@@ -185,41 +220,95 @@ def living_room_boxes(con, room_id):
         # cadeira) vence.
         _bx0, _by0, _bx1, _by1 = cell_in.bounds
         _occ_now = _uni(_occ) if _occ else None
-        _best, _best_score, _best_fails, _best_gate_result = None, 999, 99, None
+        from tools.rooms.shared.geometry import door_swing_polygons
+        _swings = door_swing_polygons(con)
+        _room_door_swings = [
+            Polygon([(x * PT_TO_IN, y * PT_TO_IN) for x, y in _swings[o2["id"]].exterior.coords])
+            for o2 in con.get("openings", [])
+            if o2["id"] in _swings and o2["wall_id"] in _sm["_geom"]["room_walls"]
+        ]
+        # A grade de 6in acha o layout com circulacao PASS, mas o tampo
+        # tangenciava o arco h_o000 (~36 cm2). Uma grade nova de 3in buscava
+        # somente candidatos sem intersecao e perdia a faixa viavel, deixando
+        # corredor/varanda bloqueados. Resolver PRIMEIRO a circulacao real e
+        # refinar LOCALMENTE o candidato com pequeno slide, mantendo ambos gates.
+        _best, _best_score, _best_gate_result = None, 999, None
         _n_candidates = 0
-        _step = 6
-        for _cx in range(int(_bx0) + 8, int(_bx1) - 8, _step):
+        _valid_but_swinging = []
+
+        def _candidate(cx, cy):
+            if not _inside((cx, cy), margin_in=20):
+                return None
+            cand = _dining_set(cx, cy)
+            if sum(b.get("kind") == "seat" for b in cand if b.get("module") == "Cadeira jantar") != 2:
+                return None
+            if _occ_now is not None:
+                cand_occ = _uni([Polygon([(v[0], v[1]) for v in b["corners"]])
+                                 for b in cand if b.get("corners")])
+                if cand_occ.intersection(_occ_now).area > 50:
+                    return None
+            return cand
+
+        def _swing_hit(cand):
+            return any(
+                Polygon([tuple(pt) for pt in b["corners"]]).intersection(sw).area > 1e-8
+                for b in cand if b.get("module") == "Mesa de jantar" and b.get("corners")
+                for sw in _room_door_swings
+            )
+
+        for _cx in range(int(_bx0) + 8, int(_bx1) - 8, 6):
             if _best_score == 0:
                 break
-            for _cy in range(int(_by0) + 8, int(_by1) - 8, _step):
-                if not _inside((_cx, _cy), margin_in=20):
+            for _cy in range(int(_by0) + 8, int(_by1) - 8, 6):
+                cand = _candidate(_cx, _cy)
+                if cand is None:
                     continue
-                _cand_boxes = _dining_set(_cx, _cy)
-                if not _cand_boxes:
-                    continue
-                if _occ_now is not None:
-                    _cand_occ = _uni([Polygon([(c[0], c[1]) for c in _b["corners"]])
-                                      for _b in _cand_boxes if _b.get("corners")])
-                    if _cand_occ.intersection(_occ_now).area > 50:   # in^2
-                        continue
                 _n_candidates += 1
-                _g = _circ_gate(con, boxes + _cand_boxes, room_id)
-                _ndisc = sum(1 for p in _g["checks"]["corredor_principal"]["portais"]
-                            if not p.get("conectado", True))
-                _nf = sum(1 for c in _g["checks"].values() if c["result"] != "PASS")
-                _score = _ndisc * 10 + _nf
-                if _score < _best_score:
-                    _best, _best_score, _best_fails = _cand_boxes, _score, _nf
-                    _best_gate_result = _g["result"]
-                if _score == 0:
+                _g = _circ_gate(con, boxes + cand, room_id)
+                if _g["result"] != "PASS":
+                    continue
+                if _swing_hit(cand):
+                    # Guardar layout funcional para o refinamento (maximo 8);
+                    # nunca promover este candidato com colisao.
+                    if len(_valid_but_swinging) < 8:
+                        _valid_but_swinging.append((_cx, _cy))
+                    continue
+                _best, _best_score, _best_gate_result = cand, 0, "PASS"
+                break
+
+        if _best is None:
+            # Refinar em passos de 0.5in (~1.27cm) ao redor de cada layout
+            # aprovado na circulacao. Pequenos slides sao menos invasivos
+            # que trocar a mesa por outra localizacao e perder os portais.
+            _shifts = [0.0]
+            for d in range(1, 13):
+                _shifts.extend((d * 0.5, -d * 0.5))
+            _pairs = sorted(
+                ((dx, dy) for dx in _shifts for dy in _shifts
+                 if (dx or dy) and max(abs(dx), abs(dy)) <= 6.0),
+                key=lambda pair: (pair[0] ** 2 + pair[1] ** 2, abs(pair[0]), abs(pair[1]))
+            )
+            for bx, by in _valid_but_swinging:
+                for dx, dy in _pairs:
+                    cand = _candidate(bx + dx, by + dy)
+                    if cand is None or _swing_hit(cand):
+                        continue
+                    _n_candidates += 1
+                    _g = _circ_gate(con, boxes + cand, room_id)
+                    if _g["result"] == "PASS":
+                        _best, _best_score, _best_gate_result = cand, 0, "PASS"
+                        break
+                if _best is not None:
                     break
-        if _best is not None:
-            if _best_fails:
-                print(f"[furnish-apt] circulation_gate: melhor candidato ainda com "
-                      f"{_best_fails} check(s) FAIL (WARN-log)")
+
+        if _best is None:
+            print("[furnish-apt] circulation_gate: FAIL (WARN — DINING_TABLE_BLOCKED): "
+                  "nenhuma posicao preserva corredor+cadeiras+arco; nao inserir mesa inviavel")
+        else:
             boxes += _best
             _placement_decisions.append({
-                "candidate_id": "mesa_de_jantar", "optimizer": "dining_grid_search_v1",
+                "candidate_id": "mesa_de_jantar",
+                "optimizer": "dining_grid_search_v2_door_swing_refine",
                 "canonical_gate": _CANONICAL_GATE_VERSION,
                 "gate_result": _best_gate_result, "score": _best_score,
                 "n_candidates_tried": _n_candidates,
