@@ -227,54 +227,88 @@ def living_room_boxes(con, room_id):
             for o2 in con.get("openings", [])
             if o2["id"] in _swings and o2["wall_id"] in _sm["_geom"]["room_walls"]
         ]
-        _best, _best_score, _best_fails, _best_gate_result = None, 999, 99, None
+        # A grade de 6in acha o layout com circulacao PASS, mas o tampo
+        # tangenciava o arco h_o000 (~36 cm2). Uma grade nova de 3in buscava
+        # somente candidatos sem intersecao e perdia a faixa viavel, deixando
+        # corredor/varanda bloqueados. Resolver PRIMEIRO a circulacao real e
+        # refinar LOCALMENTE o candidato com pequeno slide, mantendo ambos gates.
+        _best, _best_score, _best_gate_result = None, 999, None
         _n_candidates = 0
-        _step = 3   # resolucao fina: salto de 6in pulava a faixa fora do giro h_o000
-        for _cx in range(int(_bx0) + 8, int(_bx1) - 8, _step):
+        _valid_but_swinging = []
+
+        def _candidate(cx, cy):
+            if not _inside((cx, cy), margin_in=20):
+                return None
+            cand = _dining_set(cx, cy)
+            if sum(b.get("kind") == "seat" for b in cand if b.get("module") == "Cadeira jantar") != 2:
+                return None
+            if _occ_now is not None:
+                cand_occ = _uni([Polygon([(v[0], v[1]) for v in b["corners"]])
+                                 for b in cand if b.get("corners")])
+                if cand_occ.intersection(_occ_now).area > 50:
+                    return None
+            return cand
+
+        def _swing_hit(cand):
+            return any(
+                Polygon([tuple(pt) for pt in b["corners"]]).intersection(sw).area > 1e-8
+                for b in cand if b.get("module") == "Mesa de jantar" and b.get("corners")
+                for sw in _room_door_swings
+            )
+
+        for _cx in range(int(_bx0) + 8, int(_bx1) - 8, 6):
             if _best_score == 0:
                 break
-            for _cy in range(int(_by0) + 8, int(_by1) - 8, _step):
-                if not _inside((_cx, _cy), margin_in=20):
+            for _cy in range(int(_by0) + 8, int(_by1) - 8, 6):
+                cand = _candidate(_cx, _cy)
+                if cand is None:
                     continue
-                _cand_boxes = _dining_set(_cx, _cy)
-                if not _cand_boxes:
-                    continue
-                # Preserva o contrato de 2 cadeiras materializadas no layout
-                # compacto aprovado; 4 cadeiras aparentes sao inviaveis neste
-                # corredor (o gate considera pull/behind para TODAS).
-                if sum(b.get("kind") == "seat" for b in _cand_boxes if b.get("module") == "Cadeira jantar") != 2:
-                    continue
-                # A circulacao por portais NAO testa o quarto de circulo
-                # da folha. Rejeitar qualquer tampo/pe de mesa no arco real.
-                if any(
-                    Polygon([tuple(p) for p in _b["corners"]]).intersection(sw).area > 1e-8
-                    for _b in _cand_boxes if _b.get("module") == "Mesa de jantar" and _b.get("corners")
-                    for sw in _room_door_swings
-                ):
-                    continue
-                if _occ_now is not None:
-                    _cand_occ = _uni([Polygon([(c[0], c[1]) for c in _b["corners"]])
-                                      for _b in _cand_boxes if _b.get("corners")])
-                    if _cand_occ.intersection(_occ_now).area > 50:   # in^2
-                        continue
                 _n_candidates += 1
-                _g = _circ_gate(con, boxes + _cand_boxes, room_id)
-                _ndisc = sum(1 for p in _g["checks"]["corredor_principal"]["portais"]
-                            if not p.get("conectado", True))
-                _nf = sum(1 for c in _g["checks"].values() if c["result"] != "PASS")
-                _score = _ndisc * 10 + _nf
-                if _score < _best_score:
-                    _best, _best_score, _best_fails = _cand_boxes, _score, _nf
-                    _best_gate_result = _g["result"]
-                if _score == 0:
+                _g = _circ_gate(con, boxes + cand, room_id)
+                if _g["result"] != "PASS":
+                    continue
+                if _swing_hit(cand):
+                    # Guardar layout funcional para o refinamento (maximo 8);
+                    # nunca promover este candidato com colisao.
+                    if len(_valid_but_swinging) < 8:
+                        _valid_but_swinging.append((_cx, _cy))
+                    continue
+                _best, _best_score, _best_gate_result = cand, 0, "PASS"
+                break
+
+        if _best is None:
+            # Refinar em passos de 0.5in (~1.27cm) ao redor de cada layout
+            # aprovado na circulacao. Pequenos slides sao menos invasivos
+            # que trocar a mesa por outra localizacao e perder os portais.
+            _shifts = [0.0]
+            for d in range(1, 13):
+                _shifts.extend((d * 0.5, -d * 0.5))
+            _pairs = sorted(
+                ((dx, dy) for dx in _shifts for dy in _shifts
+                 if (dx or dy) and max(abs(dx), abs(dy)) <= 6.0),
+                key=lambda pair: (pair[0] ** 2 + pair[1] ** 2, abs(pair[0]), abs(pair[1]))
+            )
+            for bx, by in _valid_but_swinging:
+                for dx, dy in _pairs:
+                    cand = _candidate(bx + dx, by + dy)
+                    if cand is None or _swing_hit(cand):
+                        continue
+                    _n_candidates += 1
+                    _g = _circ_gate(con, boxes + cand, room_id)
+                    if _g["result"] == "PASS":
+                        _best, _best_score, _best_gate_result = cand, 0, "PASS"
+                        break
+                if _best is not None:
                     break
-        if _best is not None:
-            if _best_fails:
-                print(f"[furnish-apt] circulation_gate: melhor candidato ainda com "
-                      f"{_best_fails} check(s) FAIL (WARN-log)")
+
+        if _best is None:
+            print("[furnish-apt] DINING_TABLE_BLOCKED: nenhuma posicao preserva "
+                  "corredor+cadeiras+arco; nao inserir mesa inviavel")
+        else:
             boxes += _best
             _placement_decisions.append({
-                "candidate_id": "mesa_de_jantar", "optimizer": "dining_grid_search_v1",
+                "candidate_id": "mesa_de_jantar",
+                "optimizer": "dining_grid_search_v2_door_swing_refine",
                 "canonical_gate": _CANONICAL_GATE_VERSION,
                 "gate_result": _best_gate_result, "score": _best_score,
                 "n_candidates_tried": _n_candidates,
