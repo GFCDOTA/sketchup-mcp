@@ -23,11 +23,22 @@ ROOT = Path(__file__).resolve().parents[2]
 BLOCKED = "BLOCKED_CAPABILITY_MISSING"
 PLAN_READY = "PLAN_READY_NOT_EXECUTED"
 LENGTH_UNITS = ("m", "cm", "mm")
-ARCHITECTURE_TERMS = (
-    "mover parede", "remover parede", "derrubar parede", "tirar parede", "apagar parede", "abrir vao", "fechar vao",
-    "mover porta", "mover janela", "remover porta", "remover janela", "alterar arquitetura",
-    "move wall", "remove wall", "delete wall", "move door", "move window", "remove door", "remove window",
-)
+# Pedido que MEXE na arquitetura derivada do PDF (Hard Rule #1): verbo de alteracao ate 4 palavras de um elemento arquitetonico.
+# Texto ja normalizado (minusculo, sem acento, hifen -> espaco). O gabinete tem as proprias portas: "porta do gabinete",
+# "porta shaker" e "porta de correr" NAO sao arquitetura.
+_ARCH_VERBS = (r"remov\w*|tir\w+|derrub\w*|demol\w*|apag\w*|delet\w*|exclu\w*|mov\w*|desloc\w*|abr\w*|fech\w*|quebr\w*|"
+               r"alter\w*|modific\w*|troc\w*|ampli\w*|reduz\w*|cort\w*|fur\w*|shift\w*|open\w*|close\w*|break\w*|knock\w*|"
+               r"cut\w*|change\w*|remove\w*|delete\w*|demolish\w*|move\w*")
+_ARCH_NOUNS = (r"parede\w*|porta\w*|janela\w*|vao\w*|pilar\w*|pilares|viga\w*|laje\w*|muro\w*|shell|arquitetura|"
+               r"wall\w*|door\w*|window\w*|opening\w*|column\w*|slab\w*|architecture|piso|floor")
+_FILLER = r"(?:\W+(?:o|a|os|as|um|uma|uns|umas|de|do|da|dos|das|toda|todo|todas|todos|essa|esse|esta|este|aquela|aquele|the|an|this|that|my|our|all))*"
+ARCHITECTURE_PATTERN = re.compile(rf"\b(?:{_ARCH_VERBS})\b{_FILLER}\W+\b(?:{_ARCH_NOUNS})\b")
+_OWN_DOORS = re.compile(r"\bportas? (?:do|da|dos|das|de) (?:gabinete|armario|modulo|bancada|movel|correr)s?\b|\bportas? shaker\b")
+
+
+def touches_architecture(text: str) -> bool:
+    n = _OWN_DOORS.sub(" ", _norm(text))
+    return bool(ARCHITECTURE_PATTERN.search(n))
 
 
 def _norm(text: str) -> str:
@@ -209,7 +220,7 @@ def plan(request: dict, root: Path = ROOT) -> dict:
     text = str(request.get("text") or "")
     norm_text = _norm(text)
     touches = {str(t).lower() for t in request.get("touches", [])}
-    if touches & {"walls", "openings", "architecture"} or any(term in norm_text for term in ARCHITECTURE_TERMS):
+    if touches & {"walls", "openings", "architecture"} or touches_architecture(text):
         return _blocked("BLOCKED_ARCHITECTURE_CHANGE", "o pedido altera arquitetura derivada do PDF (Hard Rule #1)",
                         "tratar como proposta ao Felipe; o especialista nao altera paredes, portas ou janelas")
     routed = route(text, request.get("room"), root)

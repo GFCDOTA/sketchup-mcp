@@ -175,7 +175,7 @@ def test_entrada_sem_unidade_ou_origem_vira_pergunta_nao_execucao(tmp_path):
 
 
 def test_tentativa_de_alterar_arquitetura_e_bloqueada(tmp_path):
-    _blocked(World(tmp_path), _request(text="gabinete de cozinha e remover parede ao lado"), "BLOCKED_ARCHITECTURE_CHANGE")
+    _blocked(World(tmp_path), _request(text="gabinete de cozinha e remover a parede oeste"), "BLOCKED_ARCHITECTURE_CHANGE")
     _blocked(World(tmp_path / "b"), _request(touches=["walls"]), "BLOCKED_ARCHITECTURE_CHANGE")
 
 
