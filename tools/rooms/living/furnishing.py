@@ -302,8 +302,8 @@ def living_room_boxes(con, room_id):
                     break
 
         if _best is None:
-            print("[furnish-apt] DINING_TABLE_BLOCKED: nenhuma posicao preserva "
-                  "corredor+cadeiras+arco; nao inserir mesa inviavel")
+            print("[furnish-apt] circulation_gate: FAIL (WARN — DINING_TABLE_BLOCKED): "
+                  "nenhuma posicao preserva corredor+cadeiras+arco; nao inserir mesa inviavel")
         else:
             boxes += _best
             _placement_decisions.append({
