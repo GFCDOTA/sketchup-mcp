@@ -22,7 +22,7 @@
 | `kitchen.sink-anchor-guard` | IMPLEMENTED | L1_PASS |
 | `kitchen.ergonomics.audit` | IMPLEMENTED | UNTESTED |
 | `kitchen.cabinet.plain-fronts` | IMPLEMENTED | L1_PASS |
-| `shared.cabinet.parametric` | IMPLEMENTED | L1_PASS |
+| `shared.cabinet.parametric` | IMPLEMENTED | L2_PASS |
 
 Recipes (so conhecimento, `KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP`): `cross.room.material-and-instance-rules`, `room.kitchen.cabinet-assemblies`, `cabinet.countertop-separate-and-bevel`, `cabinet.drawer-box-and-hardware`, `cabinet.front-gaps-and-profiles`, `cabinet.recessed-shaker-and-louvers`, `cabinet.reusable-components`, `cabinet.sink-and-wet-channel-cutouts`.
 
@@ -35,6 +35,10 @@ Recipes (so conhecimento, `KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP`): `cross.room.ma
 - `python:tools.rooms.kitchen.validation.ergonomics.audit`
 - `python:tools.rooms.shared.cabinet.plan.plan_cabinet`
 - `python:tools.rooms.shared.cabinet.plan.require_valid`
+- `python:tools.rooms.shared.cabinet.sketchup.inspect`
+- `python:tools.rooms.shared.cabinet.sketchup.materialize`
+- `ruby:tools/rooms/shared/cabinet/ruby/cabinet_build.rb`
+- `ruby:tools/rooms/shared/cabinet/ruby/cabinet_inspect.rb`
 - `ruby:tools/sketchup/furnish/place_layout_skp.rb`
 
 Qualquer outra ferramenta e recusada (`TOOL_NOT_ALLOWLISTED`).

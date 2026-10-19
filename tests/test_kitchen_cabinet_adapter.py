@@ -135,3 +135,43 @@ def test_pose_com_rotacao_nao_ortogonal_usa_a_pegada_real_e_nao_o_aabb():
     aabb = (max(xs) - min(xs)) * (max(ys) - min(ys))
     W, D, _ = plan["envelope_m"]
     assert aabb > W * D * 1.1                                                # o AABB de 30 graus e bem maior que a pegada real
+
+
+# ------------------------------------------------------------------ materializacao (so a fiacao; o SketchUp real e a P6b/P7 L2)
+def _fake_su(job):
+    from pathlib import Path as _P
+    from tests.test_sketchup_specialist import FakeSystem
+    from tools.sketchup.process import Locations, SketchUp
+    exe = _P("C:/SU/SketchUp.exe")
+    return SketchUp(FakeSystem(job=job, virtual=(exe,)), Locations(exe=exe, plugins_dir=_P("C:/SU/Plugins"), vray_exe=_P("C:/SU/vray.exe")))
+
+
+def test_materializacao_da_cozinha_recusa_antes_do_sketchup_quando_um_gate_reprova(tmp_path):
+    from tools.rooms.kitchen.capabilities.cabinet import materialize_kitchen_cabinet
+    from tools.rooms.shared.cabinet import PlanRefused
+
+    class Boom:
+        def __getattr__(self, name):
+            raise AssertionError("SketchUp nao deveria ser usado")
+    base = tmp_path / "shell.skp"
+    base.write_bytes(b"SKP-SHELL")
+    with pytest.raises(PlanRefused):
+        materialize_kitchen_cabinet(_con(), "r004", _req(0.5, 0.5), tmp_path / "out" / "c.skp", base_skp=base, su=Boom())
+    assert base.read_bytes() == b"SKP-SHELL" and not (tmp_path / "out").exists()
+
+
+def test_materializacao_da_cozinha_abre_so_a_copia_da_base(tmp_path):
+    from tools.rooms.kitchen.capabilities.cabinet import materialize_kitchen_cabinet
+    seen = {}
+
+    def job(cmd, env, handle):
+        seen["cmd"] = cmd
+        Path(cmd[1]).write_bytes(b"SKP-SAVED")
+        Path(env["SKMCP_RESULT"]).write_text(json.dumps({"ok": True, "saved": True}), "utf-8")
+    base = tmp_path / "shell.skp"
+    base.write_bytes(b"SKP-SHELL")
+    out = tmp_path / "out" / "c.skp"
+    res = materialize_kitchen_cabinet(_con(), "r004", _req(), out, base_skp=base, mode="interactive", su=_fake_su(job))
+    assert res["plan"]["status"] == "OK" and res["materialization"]["status"] == "OK"
+    assert seen["cmd"][1] == str(out.resolve()) and seen["cmd"][3].endswith("cabinet_build.rb")
+    assert base.read_bytes() == b"SKP-SHELL"                                 # a base (shell) nunca e aberta

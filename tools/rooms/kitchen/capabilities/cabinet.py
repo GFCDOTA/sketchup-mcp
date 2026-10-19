@@ -93,3 +93,16 @@ def plan_kitchen_cabinet(consensus: dict, room_id: str, request: dict) -> dict:
         return refuse(_gate("circulation", False, "circulation_gate do projeto reprova com a peca"))
     plan["gates"].append(_gate("circulation", True, "zonas de porta livres e circulation_gate PASS com a peca"))
     return plan
+
+
+def materialize_kitchen_cabinet(consensus: dict, room_id: str, request: dict, out_skp, *, base_skp, mode=None, su=None) -> dict:
+    """Plano da cozinha (4 gates) -> `require_valid` -> materializacao numa COPIA do `base_skp` (nunca o original).
+
+    Um gate reprovado levanta `PlanRefused` antes de qualquer SketchUp. Nao altera paredes, janelas, portas nem a mobilia
+    ja planejada: so acrescenta o grupo `Cabinet_<request_id>`."""
+    from tools.rooms.shared.cabinet import require_valid
+    from tools.rooms.shared.cabinet import sketchup as cabinet_sketchup
+
+    plan = plan_kitchen_cabinet(consensus, room_id, request)
+    require_valid(plan)
+    return {"plan": plan, "materialization": cabinet_sketchup.materialize(plan, out_skp, base_skp=base_skp, mode=mode, su=su)}

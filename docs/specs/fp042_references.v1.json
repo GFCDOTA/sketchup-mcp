@@ -7005,6 +7005,180 @@
       "blob_sha": "8a2124c6a17cc3de274e4c60d656022f35fcfa45",
       "blob_size": 1463,
       "owner_group": "fixtures"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/README.md",
+      "blob_sha": "e488201c1b28728872c4a0e04bcf58d7a241bed9",
+      "blob_size": 3913,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/l2_matrix.py",
+      "blob_sha": "fac0fa0c1a5b60f1c53371d7f9aa68c895627742",
+      "blob_size": 9348,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_holdout_c_r0.json",
+      "blob_sha": "0a0f2644068828f241f53a2f6918075a36f6b28c",
+      "blob_size": 14877,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_holdout_c_r0.skp",
+      "blob_sha": "150ba5f0a11f032a5975bce8a811018966683501",
+      "blob_size": 182650,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_holdout_c_r30.json",
+      "blob_sha": "509e68f7d9d3bf7b4d0f304b694aff57ff8fef9e",
+      "blob_size": 15126,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_holdout_c_r30.skp",
+      "blob_sha": "16e5fc102b6607fbb6b3c967393165e8413a59da",
+      "blob_size": 181353,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_valid_a_base_600_r0.json",
+      "blob_sha": "9021705575c3f26a379fb93641b64866fa412235",
+      "blob_size": 14588,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_valid_a_base_600_r0.skp",
+      "blob_sha": "46e64f4ec1b96a3ad7bdc5222a732cbd335faada",
+      "blob_size": 183482,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_valid_a_base_600_r30.json",
+      "blob_sha": "27e1feb91e11402d832f2967ca0be3fc10de8304",
+      "blob_size": 14944,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_valid_a_base_600_r30.skp",
+      "blob_sha": "ff40c016ebdf779110119e492515b39a332d6992",
+      "blob_size": 182067,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_valid_a_base_600_r90.json",
+      "blob_sha": "2d1d931e268a676f8c477d9bfb7e67c2cc25ed2b",
+      "blob_size": 14654,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_valid_a_base_600_r90.skp",
+      "blob_sha": "4319f231fbdfc64c3aca906ab4927ed1bf22de71",
+      "blob_size": 182409,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_valid_b_tall_900_r30.json",
+      "blob_sha": "930cd9403b50ec89c4b602e06d874d5afe03bdd2",
+      "blob_size": 18967,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_valid_b_tall_900_r30.skp",
+      "blob_sha": "d835377e1217f462d82bf6d9a85ebdad07f4a7bf",
+      "blob_size": 182037,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_valid_b_tall_900_r90.json",
+      "blob_sha": "44b38849ab6c4503c5f2e551c5c941d91cf5a763",
+      "blob_size": 18606,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_valid_b_tall_900_r90.skp",
+      "blob_sha": "113688ed75e4130b18bbe12a521db395a31b344b",
+      "blob_size": 183242,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m2_idempotent_rebuild.json",
+      "blob_sha": "c52fa6bb65858ee3485e605cddb448efb1690501",
+      "blob_size": 14699,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m2_idempotent_rebuild.skp",
+      "blob_sha": "2270f89a5bf1d7b552061326b9c5fd2d3fee91c2",
+      "blob_size": 183506,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m3_edit_local.json",
+      "blob_sha": "a1b07a54d1d6739a9e4d8f5c808612ed2ea91d7e",
+      "blob_size": 30149,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m3_edit_local.skp",
+      "blob_sha": "f30a972202e36ac22808af7a5209104d1fc6b32c",
+      "blob_size": 187244,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m3_edit_propagate.json",
+      "blob_sha": "4cbf12e5018b5ffb62e5fa4d3a8ece534777fb3b",
+      "blob_size": 30225,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m3_edit_propagate.skp",
+      "blob_sha": "a8bdca34935cbd0a6297f903a128e509a51c37e0",
+      "blob_size": 187293,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m3_repeat_x.json",
+      "blob_sha": "53af5f462222af556a1623bdfedc2bfe6e759b4b",
+      "blob_size": 28985,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m3_repeat_x.skp",
+      "blob_sha": "2c7baa55a38917f49edc815b16f465c59e7ae0ff",
+      "blob_size": 183794,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m3_repeat_y.json",
+      "blob_sha": "0770b5ea8341ccc7fd5ff51f37d779dc54c21dfc",
+      "blob_size": 29234,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m3_repeat_y.skp",
+      "blob_sha": "16e7738e9ff4a7a7f4b4de5fac567f8fd859bc30",
+      "blob_size": 186060,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m3_set_material.json",
+      "blob_sha": "04c046d739fdae838b3dca24b14f430ebedcfe9e",
+      "blob_size": 24118,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m3_set_material.skp",
+      "blob_sha": "c035569b63897a0ee5775e32e549c52ac3254fc1",
+      "blob_size": 188003,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/summary.json",
+      "blob_sha": "d363ca478fe9b23b705c266c4196b189ce9032df",
+      "blob_size": 4020,
+      "owner_group": "artifacts"
     }
   ]
 }

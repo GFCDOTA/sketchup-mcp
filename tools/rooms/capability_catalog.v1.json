@@ -172,7 +172,7 @@
       "room": "shared",
       "version": "1.0.0",
       "owner": "tools.rooms.shared",
-      "title": "Gabinete parametrico compartilhado (caixaria retangular + frentes lisas separadas): plano L1",
+      "title": "Gabinete parametrico compartilhado (caixaria retangular + frentes lisas separadas): plano L1 e materializacao L2 em micro-fixtures",
       "implementation": {
         "state": "IMPLEMENTED",
         "symbols": [
@@ -183,27 +183,68 @@
           {
             "lang": "python",
             "ref": "tools.rooms.shared.cabinet.plan.require_valid"
+          },
+          {
+            "lang": "python",
+            "ref": "tools.rooms.shared.cabinet.sketchup.materialize"
+          },
+          {
+            "lang": "python",
+            "ref": "tools.rooms.shared.cabinet.sketchup.inspect"
+          },
+          {
+            "lang": "python",
+            "ref": "tools.rooms.shared.cabinet.sketchup.verify"
+          },
+          {
+            "lang": "ruby",
+            "ref": "tools/rooms/shared/cabinet/ruby/cabinet_build.rb"
+          },
+          {
+            "lang": "ruby",
+            "ref": "tools/rooms/shared/cabinet/ruby/cabinet_inspect.rb"
           }
         ]
       },
       "validation": {
-        "state": "L1_PASS",
+        "state": "L2_PASS",
         "fixtures": [
           "fixtures/synthetic_cabinets/valid_a_base_600.json",
           "fixtures/synthetic_cabinets/valid_b_tall_900.json",
           "fixtures/synthetic_cabinets/holdout_c.json"
         ],
         "tests": [
-          "tests/test_cabinet_plan.py"
+          "tests/test_cabinet_plan.py",
+          "tests/test_cabinet_sketchup_driver.py"
         ],
-        "evidence": []
+        "evidence": [
+          {
+            "ref": "artifacts/review/fp043/p6b_cabinet_l2/README.md",
+            "sketchup_version": "26.0.429",
+            "commit": "cdb9dde",
+            "scope": "micro-fixtures sinteticos (3 dimensoes, poses 0/90/30, reexecucao, make_unique, edicao local), modelo base do template, SketchUp 26.0.429; NAO inclui cozinha real, ferragem, gaveta nem veio",
+            "symbol_digests": {
+              "python:tools.rooms.shared.cabinet.plan.plan_cabinet": "80b8bd953b0516ad10443be865d73e21b4d15c87b138cddbcdb82c75431063cf",
+              "python:tools.rooms.shared.cabinet.plan.require_valid": "a641fbdb69d48374c799154304bf31036cc654600ee18de2b85fcb071b86bd39",
+              "python:tools.rooms.shared.cabinet.sketchup.materialize": "b308f51e8aa0d63cea20f5dbcc75109fdca507da5ac3be21e4094c152352e888",
+              "python:tools.rooms.shared.cabinet.sketchup.inspect": "833ce948f9de37e6352529149126881ee2178a6cf3a723e522c99eb081e40eeb",
+              "python:tools.rooms.shared.cabinet.sketchup.verify": "d7d3dc62dbb699890468614a89e09088fc3a1a23c70d32d2445ccdded23903dd",
+              "ruby:tools/rooms/shared/cabinet/ruby/cabinet_build.rb": "faad1fe33e175ac0026a16eaa765f91b657116d72d6d7603da50af07273f24b9",
+              "ruby:tools/rooms/shared/cabinet/ruby/cabinet_inspect.rb": "51bb6da37730081ac8274f533fc2c8923c1018526fbf21163291724c08052bce"
+            }
+          }
+        ]
       },
       "visual": {
         "state": "NOT_REVIEWED"
       },
       "tools": [
         "python:tools.rooms.shared.cabinet.plan.plan_cabinet",
-        "python:tools.rooms.shared.cabinet.plan.require_valid"
+        "python:tools.rooms.shared.cabinet.plan.require_valid",
+        "python:tools.rooms.shared.cabinet.sketchup.materialize",
+        "python:tools.rooms.shared.cabinet.sketchup.inspect",
+        "ruby:tools/rooms/shared/cabinet/ruby/cabinet_build.rb",
+        "ruby:tools/rooms/shared/cabinet/ruby/cabinet_inspect.rb"
       ],
       "parameters": [
         {
@@ -303,12 +344,14 @@
       "invariants": [
         "plano so e materializavel depois de `require_valid`",
         "geometria inviavel/nao finita/colidente e recusada",
+        "so cria o grupo Cabinet_<request_id>; reexecucao substitui, nao duplica",
         "ferragem, gaveta, Shaker, recorte de bancada e fabricacao NAO existem"
       ],
-      "side_effects": "NONE",
+      "side_effects": "WRITES_WORKING_COPY",
       "limitations": [
-        "so L1: ainda nao ha materializacao no SketchUp (P6b)",
-        "orientacao do veio so e registrada; aplicacao depende de suporte de UV (P6b)"
+        "veio da madeira: NOT_SUPPORTED (registrado em atributo, nao aplicado: sem textura/UV)",
+        "material = nome do plano + cor derivada do nome (sem textura)",
+        "L2 so em micro-fixtures sinteticos; cozinha real e a P7"
       ]
     },
     {

@@ -1,0 +1,863 @@
+{
+ "case": "m1_valid_b_tall_900_r30",
+ "build": {
+  "status": "OK",
+  "pid": 35580,
+  "elapsed_s": 10.01,
+  "mode": "interactive",
+  "sketchup_version": "26.0.429",
+  "replaced_previous": 0,
+  "edits": [],
+  "definitions": {
+   "CabinetDef_validb-r30_def:side_left:18.000x330.000x2100.000": 2,
+   "CabinetDef_validb-r30_def:bottom:864.000x330.000x18.000": 2,
+   "CabinetDef_validb-r30_def:back:864.000x6.000x2064.000": 1,
+   "CabinetDef_validb-r30_def:shelf:864.000x324.000x18.000": 1,
+   "CabinetDef_validb-r30_def:front:446.250x18.000x2095.000": 2
+  },
+  "grain_support": "NOT_SUPPORTED"
+ },
+ "reopen_inspect": {
+  "pid": 21672,
+  "note": null,
+  "result": {
+   "ok": true,
+   "job": "cabinet_inspect",
+   "path": "E:\\Claude\\worktrees\\w-gates\\runs\\fp043_p6b\\final\\m1_valid_b_tall_900_r30\\_cab_inspect\\_copy_cab.skp",
+   "cabinets": [
+    {
+     "name": "Cabinet_validb-r30",
+     "request_id": "validb-r30",
+     "capability": "shared.cabinet.parametric",
+     "capability_version": "1.0.0",
+     "signature": "d7f0e27ce418a25c706a045014ac441499c862669bfd6ddbd68e268a2f3ef436",
+     "tag": "Cabinet",
+     "pid": 48880,
+     "world_transform": [
+      0.866025,
+      0.5,
+      -0.0,
+      0.0,
+      -0.5,
+      0.866025,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      19.685039,
+      9.84252,
+      0.0,
+      1.0
+     ],
+     "loose_faces": 0,
+     "loose_edges": 0,
+     "parts": [
+      {
+       "name": "validb-r30/side_left",
+       "part_id": "validb-r30/side_left",
+       "role": "carcass",
+       "definition": "CabinetDef_validb-r30_def:side_left:18.000x330.000x2100.000",
+       "definition_instances": 2,
+       "manifold": true,
+       "tag": "Cabinet_carcass",
+       "material": "mdf_branco",
+       "attr_material": "mdf_branco",
+       "attr_grain": "along_height",
+       "attr_signature": "d7f0e27ce418a25c706a045014ac441499c862669bfd6ddbd68e268a2f3ef436",
+       "geometry": {
+        "faces": 6,
+        "edges": 12,
+        "vertices": 8,
+        "area_m2": 1.47348
+       },
+       "world_corners_m": [
+        [
+         0.5,
+         0.25,
+         0.0
+        ],
+        [
+         0.515588,
+         0.259,
+         0.0
+        ],
+        [
+         0.335,
+         0.535788,
+         0.0
+        ],
+        [
+         0.350588,
+         0.544788,
+         0.0
+        ],
+        [
+         0.5,
+         0.25,
+         2.1
+        ],
+        [
+         0.515588,
+         0.259,
+         2.1
+        ],
+        [
+         0.335,
+         0.535788,
+         2.1
+        ],
+        [
+         0.350588,
+         0.544788,
+         2.1
+        ]
+       ],
+       "pid": 48914
+      },
+      {
+       "name": "validb-r30/side_right",
+       "part_id": "validb-r30/side_right",
+       "role": "carcass",
+       "definition": "CabinetDef_validb-r30_def:side_left:18.000x330.000x2100.000",
+       "definition_instances": 2,
+       "manifold": true,
+       "tag": "Cabinet_carcass",
+       "material": "mdf_branco",
+       "attr_material": "mdf_branco",
+       "attr_grain": "along_height",
+       "attr_signature": "d7f0e27ce418a25c706a045014ac441499c862669bfd6ddbd68e268a2f3ef436",
+       "geometry": {
+        "faces": 6,
+        "edges": 12,
+        "vertices": 8,
+        "area_m2": 1.47348
+       },
+       "world_corners_m": [
+        [
+         1.263834,
+         0.691,
+         0.0
+        ],
+        [
+         1.279423,
+         0.7,
+         0.0
+        ],
+        [
+         1.098834,
+         0.976788,
+         0.0
+        ],
+        [
+         1.114423,
+         0.985788,
+         0.0
+        ],
+        [
+         1.263834,
+         0.691,
+         2.1
+        ],
+        [
+         1.279423,
+         0.7,
+         2.1
+        ],
+        [
+         1.098834,
+         0.976788,
+         2.1
+        ],
+        [
+         1.114423,
+         0.985788,
+         2.1
+        ]
+       ],
+       "pid": 48918
+      },
+      {
+       "name": "validb-r30/bottom",
+       "part_id": "validb-r30/bottom",
+       "role": "carcass",
+       "definition": "CabinetDef_validb-r30_def:bottom:864.000x330.000x18.000",
+       "definition_instances": 2,
+       "manifold": true,
+       "tag": "Cabinet_carcass",
+       "material": "mdf_branco",
+       "attr_material": "mdf_branco",
+       "attr_grain": "along_height",
+       "attr_signature": "d7f0e27ce418a25c706a045014ac441499c862669bfd6ddbd68e268a2f3ef436",
+       "geometry": {
+        "faces": 6,
+        "edges": 12,
+        "vertices": 8,
+        "area_m2": 0.613224
+       },
+       "world_corners_m": [
+        [
+         0.515588,
+         0.259,
+         0.0
+        ],
+        [
+         1.263834,
+         0.691,
+         0.0
+        ],
+        [
+         0.350588,
+         0.544788,
+         0.0
+        ],
+        [
+         1.098834,
+         0.976788,
+         0.0
+        ],
+        [
+         0.515588,
+         0.259,
+         0.018
+        ],
+        [
+         1.263834,
+         0.691,
+         0.018
+        ],
+        [
+         0.350588,
+         0.544788,
+         0.018
+        ],
+        [
+         1.098834,
+         0.976788,
+         0.018
+        ]
+       ],
+       "pid": 48950
+      },
+      {
+       "name": "validb-r30/top",
+       "part_id": "validb-r30/top",
+       "role": "carcass",
+       "definition": "CabinetDef_validb-r30_def:bottom:864.000x330.000x18.000",
+       "definition_instances": 2,
+       "manifold": true,
+       "tag": "Cabinet_carcass",
+       "material": "mdf_branco",
+       "attr_material": "mdf_branco",
+       "attr_grain": "along_height",
+       "attr_signature": "d7f0e27ce418a25c706a045014ac441499c862669bfd6ddbd68e268a2f3ef436",
+       "geometry": {
+        "faces": 6,
+        "edges": 12,
+        "vertices": 8,
+        "area_m2": 0.613224
+       },
+       "world_corners_m": [
+        [
+         0.515588,
+         0.259,
+         2.082
+        ],
+        [
+         1.263834,
+         0.691,
+         2.082
+        ],
+        [
+         0.350588,
+         0.544788,
+         2.082
+        ],
+        [
+         1.098834,
+         0.976788,
+         2.082
+        ],
+        [
+         0.515588,
+         0.259,
+         2.1
+        ],
+        [
+         1.263834,
+         0.691,
+         2.1
+        ],
+        [
+         0.350588,
+         0.544788,
+         2.1
+        ],
+        [
+         1.098834,
+         0.976788,
+         2.1
+        ]
+       ],
+       "pid": 48951
+      },
+      {
+       "name": "validb-r30/back",
+       "part_id": "validb-r30/back",
+       "role": "back",
+       "definition": "CabinetDef_validb-r30_def:back:864.000x6.000x2064.000",
+       "definition_instances": 1,
+       "manifold": true,
+       "tag": "Cabinet_back",
+       "material": "hdf_branco",
+       "attr_material": "hdf_branco",
+       "attr_grain": "none",
+       "attr_signature": "d7f0e27ce418a25c706a045014ac441499c862669bfd6ddbd68e268a2f3ef436",
+       "geometry": {
+        "faces": 6,
+        "edges": 12,
+        "vertices": 8,
+        "area_m2": 3.601728
+       },
+       "world_corners_m": [
+        [
+         0.515588,
+         0.259,
+         0.018
+        ],
+        [
+         1.263834,
+         0.691,
+         0.018
+        ],
+        [
+         0.512588,
+         0.264196,
+         0.018
+        ],
+        [
+         1.260834,
+         0.696196,
+         0.018
+        ],
+        [
+         0.515588,
+         0.259,
+         2.082
+        ],
+        [
+         1.263834,
+         0.691,
+         2.082
+        ],
+        [
+         0.512588,
+         0.264196,
+         2.082
+        ],
+        [
+         1.260834,
+         0.696196,
+         2.082
+        ]
+       ],
+       "pid": 48983
+      },
+      {
+       "name": "validb-r30/shelf",
+       "part_id": "validb-r30/shelf",
+       "role": "shelf",
+       "definition": "CabinetDef_validb-r30_def:shelf:864.000x324.000x18.000",
+       "definition_instances": 1,
+       "manifold": true,
+       "tag": "Cabinet_shelf",
+       "material": "mdf_branco",
+       "attr_material": "mdf_branco",
+       "attr_grain": "along_width",
+       "attr_signature": "d7f0e27ce418a25c706a045014ac441499c862669bfd6ddbd68e268a2f3ef436",
+       "geometry": {
+        "faces": 6,
+        "edges": 12,
+        "vertices": 8,
+        "area_m2": 0.60264
+       },
+       "world_corners_m": [
+        [
+         0.512588,
+         0.264196,
+         1.05
+        ],
+        [
+         1.260834,
+         0.696196,
+         1.05
+        ],
+        [
+         0.350588,
+         0.544788,
+         1.05
+        ],
+        [
+         1.098834,
+         0.976788,
+         1.05
+        ],
+        [
+         0.512588,
+         0.264196,
+         1.068
+        ],
+        [
+         1.260834,
+         0.696196,
+         1.068
+        ],
+        [
+         0.350588,
+         0.544788,
+         1.068
+        ],
+        [
+         1.098834,
+         0.976788,
+         1.068
+        ]
+       ],
+       "pid": 49018
+      },
+      {
+       "name": "validb-r30/front_1",
+       "part_id": "validb-r30/front_1",
+       "role": "front",
+       "definition": "CabinetDef_validb-r30_def:front:446.250x18.000x2095.000",
+       "definition_instances": 2,
+       "manifold": true,
+       "tag": "Cabinet_front",
+       "material": "mdf_branco",
+       "attr_material": "mdf_branco",
+       "attr_grain": "along_height",
+       "attr_signature": "d7f0e27ce418a25c706a045014ac441499c862669bfd6ddbd68e268a2f3ef436",
+       "geometry": {
+        "faces": 6,
+        "edges": 12,
+        "vertices": 8,
+        "area_m2": 1.961272
+       },
+       "world_corners_m": [
+        [
+         0.336165,
+         0.53877,
+         0.0025
+        ],
+        [
+         0.722629,
+         0.761895,
+         0.0025
+        ],
+        [
+         0.327165,
+         0.554359,
+         0.0025
+        ],
+        [
+         0.713629,
+         0.777484,
+         0.0025
+        ],
+        [
+         0.336165,
+         0.53877,
+         2.0975
+        ],
+        [
+         0.722629,
+         0.761895,
+         2.0975
+        ],
+        [
+         0.327165,
+         0.554359,
+         2.0975
+        ],
+        [
+         0.713629,
+         0.777484,
+         2.0975
+        ]
+       ],
+       "pid": 49052
+      },
+      {
+       "name": "validb-r30/front_2",
+       "part_id": "validb-r30/front_2",
+       "role": "front",
+       "definition": "CabinetDef_validb-r30_def:front:446.250x18.000x2095.000",
+       "definition_instances": 2,
+       "manifold": true,
+       "tag": "Cabinet_front",
+       "material": "mdf_branco",
+       "attr_material": "mdf_branco",
+       "attr_grain": "along_height",
+       "attr_signature": "d7f0e27ce418a25c706a045014ac441499c862669bfd6ddbd68e268a2f3ef436",
+       "geometry": {
+        "faces": 6,
+        "edges": 12,
+        "vertices": 8,
+        "area_m2": 1.961272
+       },
+       "world_corners_m": [
+        [
+         0.724794,
+         0.763145,
+         0.0025
+        ],
+        [
+         1.111258,
+         0.98627,
+         0.0025
+        ],
+        [
+         0.715794,
+         0.778734,
+         0.0025
+        ],
+        [
+         1.102258,
+         1.001859,
+         0.0025
+        ],
+        [
+         0.724794,
+         0.763145,
+         2.0975
+        ],
+        [
+         1.111258,
+         0.98627,
+         2.0975
+        ],
+        [
+         0.715794,
+         0.778734,
+         2.0975
+        ],
+        [
+         1.102258,
+         1.001859,
+         2.0975
+        ]
+       ],
+       "pid": 49055
+      }
+     ]
+    }
+   ],
+   "non_cabinet": {
+    "count": 1,
+    "fingerprint": "35371dffc707a87befc699d3646fcf211e74f3328ae645ee5a00e9ae9357ec25",
+    "items": 1
+   },
+   "counts": {
+    "top_groups": 1,
+    "top_components": 1,
+    "loose_faces_at_root": 0,
+    "loose_edges_at_root": 0,
+    "definitions": 7,
+    "cabinet_definitions": 5,
+    "materials": 23,
+    "tags": [
+     "Layer0",
+     "Cabinet",
+     "Cabinet_carcass",
+     "Cabinet_back",
+     "Cabinet_shelf",
+     "Cabinet_front"
+    ]
+   },
+   "definitions": {
+    "CabinetDef_validb-r30_def:side_left:18.000x330.000x2100.000": 2,
+    "CabinetDef_validb-r30_def:bottom:864.000x330.000x18.000": 2,
+    "CabinetDef_validb-r30_def:back:864.000x6.000x2064.000": 1,
+    "CabinetDef_validb-r30_def:shelf:864.000x324.000x18.000": 1,
+    "CabinetDef_validb-r30_def:front:446.250x18.000x2095.000": 2
+   },
+   "elapsed_s": 0.0,
+   "sketchup_version": "26.0.429"
+  }
+ },
+ "verify": {
+  "ok": true,
+  "checks": [
+   {
+    "check": "exactly_one_cabinet_root",
+    "ok": true,
+    "detail": "1 grupo(s) para validb-r30"
+   },
+   {
+    "check": "capability_attribute",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "check": "signature_attribute",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "check": "root_tag",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "check": "no_loose_geometry_in_root",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "check": "part_ids_match_plan",
+    "ok": true,
+    "detail": "plano=8 modelo=8"
+   },
+   {
+    "check": "corners:validb-r30/side_left",
+    "ok": true,
+    "detail": "max 5.97e-07 m"
+   },
+   {
+    "check": "solid:validb-r30/side_left",
+    "ok": true,
+    "detail": "manifold=True faces=6 edges=12"
+   },
+   {
+    "check": "material:validb-r30/side_left",
+    "ok": true,
+    "detail": "'mdf_branco'"
+   },
+   {
+    "check": "tag:validb-r30/side_left",
+    "ok": true,
+    "detail": "Cabinet_carcass"
+   },
+   {
+    "check": "name:validb-r30/side_left",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "check": "corners:validb-r30/side_right",
+    "ok": true,
+    "detail": "max 5.58e-07 m"
+   },
+   {
+    "check": "solid:validb-r30/side_right",
+    "ok": true,
+    "detail": "manifold=True faces=6 edges=12"
+   },
+   {
+    "check": "material:validb-r30/side_right",
+    "ok": true,
+    "detail": "'mdf_branco'"
+   },
+   {
+    "check": "tag:validb-r30/side_right",
+    "ok": true,
+    "detail": "Cabinet_carcass"
+   },
+   {
+    "check": "name:validb-r30/side_right",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "check": "corners:validb-r30/bottom",
+    "ok": true,
+    "detail": "max 5.97e-07 m"
+   },
+   {
+    "check": "solid:validb-r30/bottom",
+    "ok": true,
+    "detail": "manifold=True faces=6 edges=12"
+   },
+   {
+    "check": "material:validb-r30/bottom",
+    "ok": true,
+    "detail": "'mdf_branco'"
+   },
+   {
+    "check": "tag:validb-r30/bottom",
+    "ok": true,
+    "detail": "Cabinet_carcass"
+   },
+   {
+    "check": "name:validb-r30/bottom",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "check": "corners:validb-r30/top",
+    "ok": true,
+    "detail": "max 5.97e-07 m"
+   },
+   {
+    "check": "solid:validb-r30/top",
+    "ok": true,
+    "detail": "manifold=True faces=6 edges=12"
+   },
+   {
+    "check": "material:validb-r30/top",
+    "ok": true,
+    "detail": "'mdf_branco'"
+   },
+   {
+    "check": "tag:validb-r30/top",
+    "ok": true,
+    "detail": "Cabinet_carcass"
+   },
+   {
+    "check": "name:validb-r30/top",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "check": "corners:validb-r30/back",
+    "ok": true,
+    "detail": "max 4.82e-07 m"
+   },
+   {
+    "check": "solid:validb-r30/back",
+    "ok": true,
+    "detail": "manifold=True faces=6 edges=12"
+   },
+   {
+    "check": "material:validb-r30/back",
+    "ok": true,
+    "detail": "'hdf_branco'"
+   },
+   {
+    "check": "tag:validb-r30/back",
+    "ok": true,
+    "detail": "Cabinet_back"
+   },
+   {
+    "check": "name:validb-r30/back",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "check": "corners:validb-r30/shelf",
+    "ok": true,
+    "detail": "max 5.97e-07 m"
+   },
+   {
+    "check": "solid:validb-r30/shelf",
+    "ok": true,
+    "detail": "manifold=True faces=6 edges=12"
+   },
+   {
+    "check": "material:validb-r30/shelf",
+    "ok": true,
+    "detail": "'mdf_branco'"
+   },
+   {
+    "check": "tag:validb-r30/shelf",
+    "ok": true,
+    "detail": "Cabinet_shelf"
+   },
+   {
+    "check": "name:validb-r30/shelf",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "check": "corners:validb-r30/front_1",
+    "ok": true,
+    "detail": "max 4.45e-07 m"
+   },
+   {
+    "check": "solid:validb-r30/front_1",
+    "ok": true,
+    "detail": "manifold=True faces=6 edges=12"
+   },
+   {
+    "check": "material:validb-r30/front_1",
+    "ok": true,
+    "detail": "'mdf_branco'"
+   },
+   {
+    "check": "tag:validb-r30/front_1",
+    "ok": true,
+    "detail": "Cabinet_front"
+   },
+   {
+    "check": "name:validb-r30/front_1",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "check": "corners:validb-r30/front_2",
+    "ok": true,
+    "detail": "max 4.78e-07 m"
+   },
+   {
+    "check": "solid:validb-r30/front_2",
+    "ok": true,
+    "detail": "manifold=True faces=6 edges=12"
+   },
+   {
+    "check": "material:validb-r30/front_2",
+    "ok": true,
+    "detail": "'mdf_branco'"
+   },
+   {
+    "check": "tag:validb-r30/front_2",
+    "ok": true,
+    "detail": "Cabinet_front"
+   },
+   {
+    "check": "name:validb-r30/front_2",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "check": "definition_sharing:def:side_left:18.000x330.000x2100.000",
+    "ok": true,
+    "detail": "['CabinetDef_validb-r30_def:side_left:18.000x330.000x2100.000']"
+   },
+   {
+    "check": "definition_sharing:def:bottom:864.000x330.000x18.000",
+    "ok": true,
+    "detail": "['CabinetDef_validb-r30_def:bottom:864.000x330.000x18.000']"
+   },
+   {
+    "check": "definition_sharing:def:back:864.000x6.000x2064.000",
+    "ok": true,
+    "detail": "['CabinetDef_validb-r30_def:back:864.000x6.000x2064.000']"
+   },
+   {
+    "check": "definition_sharing:def:shelf:864.000x324.000x18.000",
+    "ok": true,
+    "detail": "['CabinetDef_validb-r30_def:shelf:864.000x324.000x18.000']"
+   },
+   {
+    "check": "definition_sharing:def:front:446.250x18.000x2095.000",
+    "ok": true,
+    "detail": "['CabinetDef_validb-r30_def:front:446.250x18.000x2095.000']"
+   },
+   {
+    "check": "grain_not_claimed",
+    "ok": true,
+    "detail": "veio registrado, nao aplicado"
+   },
+   {
+    "check": "non_cabinet_unchanged",
+    "ok": true,
+    "detail": "arquitetura/outros objetos intactos"
+   }
+  ],
+  "max_corner_error_m": 5.966354211612855e-07
+ },
+ "skp": "m1_valid_b_tall_900_r30.skp",
+ "skp_sha256": "5a7214eec43bfa44d9a83790ee2aac56d309bc2df29e8354c0e777d3286edf01",
+ "skp_bytes": 182037
+}

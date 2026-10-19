@@ -111,8 +111,9 @@ def run_script(su: SketchUp, *, script: Path, done_marker: Path,
 
 def run_job(su: SketchUp, job: str, *, out_dir: Path, params: dict[str, Any],
             skp_in: Path | None = None, timeout_s: int = 240,
-            mode: str | None = None) -> dict[str, Any]:
-    """Roda `ruby/<job>.rb` com `params` e devolve o JSON que o Ruby escreveu."""
+            mode: str | None = None, script: Path | None = None) -> dict[str, Any]:
+    """Roda `ruby/<job>.rb` (ou `script`, para jobs de capacidade fora de tools/sketchup/ruby) com `params` e devolve o
+    JSON que o Ruby escreveu."""
     try:
         mode = resolve_mode(mode)
     except ValueError as e:
@@ -124,7 +125,7 @@ def run_job(su: SketchUp, job: str, *, out_dir: Path, params: dict[str, Any],
     params_p.write_text(json.dumps({**params, "out_dir": _slash(out_dir)}, indent=2),
                         encoding="utf-8")
     run = run_script(
-        su, script=RUBY_DIR / f"{job}.rb", done_marker=result_p, skp_in=skp_in,
+        su, script=script or RUBY_DIR / f"{job}.rb", done_marker=result_p, skp_in=skp_in,
         timeout_s=timeout_s, mode=mode,
         env_extra={
             "SKMCP_PARAMS": _slash(params_p),
