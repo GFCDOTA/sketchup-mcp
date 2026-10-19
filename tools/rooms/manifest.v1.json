@@ -3,7 +3,9 @@
   "policy": "READ_ONLY_ROUTING_NO_DYNAMIC_IMPORT_OR_SKP_WRITES",
   "shared": {
     "code": [
-      "tools.rooms.shared.geometry"
+      "tools.rooms.shared.geometry",
+      "tools.rooms.shared.decor",
+      "tools.rooms.shared.furniture"
     ],
     "knowledge": [
       "cross.room.material-and-instance-rules",
@@ -50,7 +52,7 @@
     },
     "kitchen": {
       "providers": [
-        "tools.kitchen_layout.build_boxes",
+        "tools.rooms.kitchen.layout.build_boxes",
         "tools.rooms.kitchen.anchor_rules.validate",
         "tools.kitchen_ergonomics.audit"
       ],
@@ -63,7 +65,7 @@
     },
     "bathroom": {
       "providers": [
-        "tools.bathroom_layout.build_boxes"
+        "tools.rooms.bathroom.layout.build_boxes"
       ],
       "sources": [
         "room.bathroom.vanity-and-shower"
