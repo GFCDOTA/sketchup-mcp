@@ -99,3 +99,8 @@ que preservam API, CLI e imports públicos. Dependência entre planners agora
 permanece dentro de bedroom. A rotina que exporta SKP resolve a raiz do repo
 no novo nível de pacote. Regressão unitária e suíte de escala real obrigatórias
 antes do merge; equivalência visual L2 ainda não comprovada.
+
+
+### FP-042/P6 — abrangência dos artefatos versionados
+
+O gate de binários protege 707 arquivos e o novo gate `reference_provenance` expande a preservação a **1060 referências e artefatos versionados**, inclusive JSON, MD e outros não binários. Cada registro P6 com `retain_canonical_location` possui hash Git e owner_group registrado. Essa evidência comprova somente integridade de bytes/caminhos, não SketchUp L2, visual nem arquivos não versionados.

@@ -65,6 +65,8 @@ jobs:
       # exit 0=PASS, 1=FAIL, 3=INCOMPLETE — o exit code É o gate.
       - name: FP-042 P6 — binary asset provenance
         run: python -m tools.rooms.asset_provenance
+      - name: FP-042 P6 — all canonical reference provenance
+        run: python -m tools.rooms.reference_provenance
       - name: Gate — planta_74
         run: python -m tools.run_deterministic_gates --fixture planta_74
       - name: Gate — quadrado (micro-fixture canônico)
