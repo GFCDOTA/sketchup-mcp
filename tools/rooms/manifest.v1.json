@@ -10,7 +10,8 @@
       "tools.rooms.shared.sofa",
       "tools.rooms.shared.bed",
       "tools.rooms.shared.wardrobe",
-      "tools.rooms.shared.nightstand"
+      "tools.rooms.shared.nightstand",
+      "tools.rooms.shared.materials"
     ],
     "knowledge": [
       "cross.room.material-and-instance-rules",

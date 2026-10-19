@@ -115,3 +115,13 @@ identidade de métodos, helpers e entrada `python -m` preservada.
 O conteúdo dos builders foi transferido literalmente; testes cobrem
 identidade dos contratos e anatomia básica. Nenhum arquivo SKP
 foi modificado e prova visual L2 continua pendente.
+
+
+### FP-042/P2 — materiais multicomodos em shared
+
+A fonte real de `StyleSpec`, `STYLE_TOKENS`, `apply_style`,
+`resolve_material` e `attach_materials` passou a
+`tools.rooms.shared.materials`; `tools.style_spec` mantém referências
+idênticas para API legada. Aplicação de material por família de módulo,
+RGB e texturas não foi reescrita. Testes de compatibilidade e gates de
+render/determinísticos devem permanecer verdes antes do merge.
