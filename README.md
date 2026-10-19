@@ -2,6 +2,8 @@
 
 [![ci](https://github.com/GFCDOTA/sketchup-mcp/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/GFCDOTA/sketchup-mcp/actions/workflows/ci.yml)
 
+**Próxima fase (spec proposta, não implementada):** [FP-043 — organização do repositório e especialistas por cômodo](docs/specs/FP-043_repository_navigation_and_room_specialists.md). Inclui migração física, navegação, conhecimento, capacidades e validação no SketchUp.
+
 **PDF architectural floor plan → a faithful SketchUp `.skp` model.**
 
 Given a `consensus.json` describing the walls, openings and rooms of an
