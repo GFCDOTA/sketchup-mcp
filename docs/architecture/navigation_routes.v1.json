@@ -1,0 +1,60 @@
+{
+  "schema_version": "fp043_navigation_routes.v1",
+  "start": "README.md",
+  "policy": "Cada rota parte do README, chega ao índice em até 3 cliques (cada salto é link real do .md anterior) e o índice cita as respostas. `absent` = capacidade que NÃO existe: o índice precisa explicar a ausência e o caminho tem de continuar ausente (se nascer, a rota e a doc mudam no mesmo PR). Verificado por tools.navigation.docs_check.",
+  "routes": [
+    {
+      "id": "kitchen-planner-and-sink-rule",
+      "question": "Onde está o planner da cozinha e a regra que protege a pia?",
+      "hops": ["README.md", "docs/architecture/repository_map.md", "tools/rooms/kitchen/README.md"],
+      "answers": [
+        {"path": "tools/rooms/kitchen/layout.py", "symbol": "build_boxes", "role": "planner"},
+        {"path": "tools/rooms/kitchen/layout.py", "symbol": "KITCHEN_SINK_SIDE", "role": "âncora hidráulica (parede oeste)"},
+        {"path": "tools/rooms/kitchen/anchor_rules.py", "symbol": "validate", "role": "checagem da âncora"},
+        {"path": "tools/rooms/kitchen/validation.py", "symbol": "require_kitchen_anchor", "role": "trava fail-closed"}
+      ]
+    },
+    {
+      "id": "shared-cabinet-builder",
+      "question": "Onde está o builder compartilhado de gabinete e quem o usa?",
+      "hops": ["README.md", "docs/architecture/repository_map.md", "tools/rooms/kitchen/README.md"],
+      "answers": [
+        {"path": "tools/sketchup/knowledge.py", "symbol": "cabinet_plan", "role": "plano consultivo (não é builder)"}
+      ],
+      "absent": [
+        {"path": "tools/rooms/shared/cabinet", "why": "previsto em P6; hoje não existe builder compartilhado de gabinete"}
+      ]
+    },
+    {
+      "id": "shaker-door-recipe",
+      "question": "Existe porta Shaker?",
+      "hops": ["README.md", "docs/architecture/repository_map.md", "tools/rooms/kitchen/README.md"],
+      "answers": [
+        {"path": "references/sketchup/knowledge/video_recipes.v1.json", "symbol": "cabinet.recessed-shaker-and-louvers", "role": "recipe (consultiva)"}
+      ],
+      "absent": [
+        {"path": "tools/rooms/kitchen/capabilities", "why": "a capacidade de portas rebaixadas/Shaker não existe: BLOCKED_CAPABILITY_MISSING"}
+      ]
+    },
+    {
+      "id": "kitchen-test-and-l2-evidence",
+      "question": "Qual teste e qual evidência L2 provam a âncora da pia?",
+      "hops": ["README.md", "docs/architecture/repository_map.md", "tools/rooms/kitchen/README.md"],
+      "answers": [
+        {"path": "tests/test_fp042_kitchen_anchor_ownership.py", "symbol": "test_legacy_cli_module_reexports_canonical_rules", "role": "teste L1"},
+        {"path": "artifacts/review/l2_fp042_20261019/README.md", "role": "evidência L2 (SketchUp real)"}
+      ]
+    },
+    {
+      "id": "mcp-to-skp",
+      "question": "Onde entra o MCP, quem executa no SketchUp e onde sai o .skp?",
+      "hops": ["README.md", "docs/architecture/repository_map.md"],
+      "answers": [
+        {"path": "tools/mcp_server/server.py", "symbol": "su_apply_edits", "role": "protocolo (registro da tool)"},
+        {"path": "tools/sketchup/jobs.py", "symbol": "apply_edits", "role": "verbo: valida e escolhe o destino"},
+        {"path": "tools/sketchup/process.py", "symbol": "spawn_detached", "role": "processo próprio do SketchUp"},
+        {"path": "tools/sketchup/paths.py", "symbol": "default_out_dir", "role": "destino em runs/<planta>/mcp/"}
+      ]
+    }
+  ]
+}
