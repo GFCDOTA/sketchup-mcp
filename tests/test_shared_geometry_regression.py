@@ -1,11 +1,6 @@
 """Gates sintéticos da geometria cross-room. Não dependem de SketchUp."""
-import math
-
 import pytest
-from shapely.geometry import box
-
-from core.scale import M
-from tools.rooms.shared.geometry import _fbox, _front_strip, _oriented_box
+from tools.rooms.shared.geometry import _fbox, _oriented_box
 
 
 @pytest.mark.parametrize("orientation,expected", [
