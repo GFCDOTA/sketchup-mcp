@@ -39,3 +39,13 @@ Não significa converter TODOS os arquivos em código de cômodo. Para cada arqu
 P0 (inventário/gate) e o primeiro gate AST de P1 já foram integrados. Em P2, os boundaries wet-room e hidráulico (PRs #258/#259) estão na `develop`. A fatia seguinte extrai `place_decor_boxes` e `_chair_parts` para `shared` e componentes exclusivos da sala para `living`, com re-exports públicos em `furnish_apartment`. A cadeira é consumida tanto pela sala quanto pelo quarto. **P2–P6 seguem em andamento**, incluindo migração de builders inteiros, revisão de ownership e prova L2 no SketchUp. A aprovação da nova fatia depende de CI verde.
 
 Classificações iniciais são heurísticas para triagem, **não certificação de propriedade**. Inventário fechado sobre a árvore base; para novas adições, atualizar o inventário no mesmo PR. Não afirmar que P1–P6 terminaram.
+
+
+### Fatia P3 — adapter de bedroom
+
+O adapter `bedroom_designer_boxes` foi movido para `tools.rooms.bedroom.furnishing`,
+com re-export em `tools.furnish_apartment` e provider atualizado no manifesto.
+Seus helpers de cadeira e caixa orientada são consumidos a partir de `shared`.
+Teste de não-OK (fail-safe), OK vazio e cadeira de escrivaninha acompanha a
+identidade do dispatch. **Builders legados de cama, guarda-roupa e bedroom_designer
+ainda não foram integralmente migrados.** Merge condicionado a CI verde.
