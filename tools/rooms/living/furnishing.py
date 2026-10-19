@@ -101,6 +101,41 @@ def living_room_boxes(con, room_id):
     # é o fundo que faz rack+TV lerem como estar planejado. Fita LED 2700K no topo.
     _pan_w = round(max(1.80, min(_rack_wall_len - 0.10, 2.60)), 2)
     _pan_c = (rack_c[0] - rfx * 0.15 * M2IN, rack_c[1] - rfy * 0.15 * M2IN)
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union as _uni
+    from core.scale import PT_TO_IN
+    from tools.spatial_model import build_spatial_model, wall_footprint
+
+    _sm = build_spatial_model(con, room_id)
+    _room_walls = _uni([
+        wall_footprint(_sm["_geom"]["walls"][wid], extend_endpoints=True)
+        for wid in _sm["_geom"]["room_walls"]
+    ])
+    _perp = (-rfy, rfx)   # deslocamento AO LONGO da parede-TV, não afastamento.
+    _pan_choice = None
+    _pan_best_overlap = float("inf")
+    _candidate_w = _pan_w
+    while _candidate_w >= 2.0 - 1e-8:
+        for _shift in (0.0, 0.02, -0.02, 0.04, -0.04, 0.06, -0.06,
+                       0.08, -0.08, 0.10, -0.10, 0.14, -0.14, 0.20, -0.20):
+            _cc = (_pan_c[0] + _perp[0] * _shift * M2IN,
+                   _pan_c[1] + _perp[1] * _shift * M2IN)
+            _probe = _oriented_box("painel_tv", _cc, rack_f, _candidate_w, 0.05,
+                                   0.0, 2.40, [92, 64, 46], module="Painel TV")
+            _shape = Polygon([(x / PT_TO_IN, y / PT_TO_IN) for x, y in _probe["corners"]])
+            _intr = _shape.intersection(_room_walls).area
+            if _intr < _pan_best_overlap:
+                _pan_choice, _pan_best_overlap = (_candidate_w, _cc), _intr
+            if _intr < 1e-8:
+                break
+        if _pan_best_overlap < 1e-8:
+            break
+        _candidate_w = round(_candidate_w - 0.04, 3)
+    if _pan_choice is not None:
+        _pan_w, _pan_c = _pan_choice
+    if _pan_best_overlap > 1e-8:
+        print(f"[furnish-apt] PAINEL_TV_WALL_COLLISION: {_pan_best_overlap:.3f} pt2 "
+              f"(sem posicao livre; exige correcao, nao promover)")
     boxes.append(_oriented_box("painel_tv", _pan_c, rack_f, _pan_w, 0.05, 0.0, 2.40,
                                [92, 64, 46], module="Painel TV"))
     boxes.append(_oriented_box("lv_led", (_pan_c[0] + rfx * 0.033 * M2IN, _pan_c[1] + rfy * 0.033 * M2IN),
@@ -185,6 +220,13 @@ def living_room_boxes(con, room_id):
         # cadeira) vence.
         _bx0, _by0, _bx1, _by1 = cell_in.bounds
         _occ_now = _uni(_occ) if _occ else None
+        from tools.rooms.shared.geometry import door_swing_polygons
+        _swings = door_swing_polygons(con)
+        _room_door_swings = [
+            Polygon([(x * PT_TO_IN, y * PT_TO_IN) for x, y in _swings[o2["id"]].exterior.coords])
+            for o2 in con.get("openings", [])
+            if o2["id"] in _swings and o2["wall_id"] in _sm["_geom"]["room_walls"]
+        ]
         _best, _best_score, _best_fails, _best_gate_result = None, 999, 99, None
         _n_candidates = 0
         _step = 6
@@ -196,6 +238,14 @@ def living_room_boxes(con, room_id):
                     continue
                 _cand_boxes = _dining_set(_cx, _cy)
                 if not _cand_boxes:
+                    continue
+                # A circulacao por portais NAO testa o quarto de circulo
+                # da folha. Rejeitar qualquer tampo/pe de mesa no arco real.
+                if any(
+                    Polygon([tuple(p) for p in _b["corners"]]).intersection(sw).area > 1e-8
+                    for _b in _cand_boxes if _b.get("module") == "Mesa de jantar" and _b.get("corners")
+                    for sw in _room_door_swings
+                ):
                     continue
                 if _occ_now is not None:
                     _cand_occ = _uni([Polygon([(c[0], c[1]) for c in _b["corners"]])

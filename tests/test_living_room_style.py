@@ -90,3 +90,41 @@ def test_no_pure_white_surfaces(sala):
             continue
         assert sum(p["rgb"]) / 3 <= 200, \
             f"branco puro na sala: {p.get('module')}/{p.get('kind')} {p['rgb']}"
+
+
+def test_fp043_tv_panel_is_outside_shell_wall_return(sala):
+    """P3a-03: testa o painel construido contra a massa real da parede."""
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union
+    from core.scale import PT_TO_IN, PT_TO_M
+    from tools.rooms.shared.spatial_model import build_spatial_model, wall_footprint
+
+    con = json.loads(Path("fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json")
+                     .read_text("utf-8"))
+    sm = build_spatial_model(con, "r002")
+    walls = unary_union([wall_footprint(sm["_geom"]["walls"][wid], extend_endpoints=True)
+                         for wid in sm["_geom"]["room_walls"]])
+    for b in sala:
+        if b["kind"] != "painel_tv":
+            continue
+        p = Polygon([(x / PT_TO_IN, y / PT_TO_IN) for x, y in b["corners"]])
+        collision_cm2 = p.intersection(walls).area * PT_TO_M ** 2 * 10000
+        assert collision_cm2 < 0.1, f"painel TV entra no retorno de parede: {collision_cm2:.2f}cm2"
+
+
+def test_fp043_dining_table_avoids_real_door_swing(sala):
+    """P3a-03: h_o000 tinha ~36cm2 de colisao no tampo da mesa."""
+    from shapely.geometry import Polygon
+    from core.scale import PT_TO_IN, PT_TO_M
+    from tools.rooms.shared.geometry import door_swing_polygons
+
+    con = json.loads(Path("fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json")
+                     .read_text("utf-8"))
+    swings = door_swing_polygons(con, strict=True)
+    table = [b for b in sala if b.get("module") == "Mesa de jantar"]
+    assert table
+    for b in table:
+        poly = Polygon([(x / PT_TO_IN, y / PT_TO_IN) for x, y in b["corners"]])
+        for oid, door in swings.items():
+            overlap_cm2 = poly.intersection(door).area * PT_TO_M ** 2 * 10000
+            assert overlap_cm2 < 0.1, f"mesa de jantar invade {oid}: {overlap_cm2:.2f}cm2"
