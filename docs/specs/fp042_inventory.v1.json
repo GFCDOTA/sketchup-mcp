@@ -7,13 +7,6 @@
   "status": "INITIAL_CLASSIFICATION_NOT_FULL_MIGRATION",
   "entries": [
     {
-      "path": ".ai_bridge/HANDOFF.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": ".ai_bridge/fidelity/ledger.jsonl",
       "domain": "documentation_or_agent",
       "disposition": "review_knowledge_ownership",
@@ -175,6 +168,13 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": ".ai_bridge/HANDOFF.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": ".ai_bridge/knowledge/architect.md",
       "domain": "documentation_or_agent",
       "disposition": "review_knowledge_ownership",
@@ -273,20 +273,6 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": ".claude/CLAUDE.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": ".claude/README.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": ".claude/agents/interior-designer.md",
       "domain": "documentation_or_agent",
       "disposition": "review_knowledge_ownership",
@@ -323,6 +309,13 @@
     },
     {
       "path": ".claude/agents/sketchup-tooling-specialist.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": ".claude/CLAUDE.md",
       "domain": "documentation_or_agent",
       "disposition": "review_knowledge_ownership",
       "phase": "P5",
@@ -504,6 +497,13 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": ".claude/README.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": ".claude/skills/autonomous-fidelity-loop/SKILL.md",
       "domain": "documentation_or_agent",
       "disposition": "review_knowledge_ownership",
@@ -609,14 +609,14 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": ".claude/skills/planned-joinery-translator/SKILL.md",
+      "path": ".claude/skills/planned-joinery-translator/design_grammar_spec.template.json",
       "domain": "documentation_or_agent",
       "disposition": "review_knowledge_ownership",
       "phase": "P5",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": ".claude/skills/planned-joinery-translator/design_grammar_spec.template.json",
+      "path": ".claude/skills/planned-joinery-translator/SKILL.md",
       "domain": "documentation_or_agent",
       "disposition": "review_knowledge_ownership",
       "phase": "P5",
@@ -813,48 +813,6 @@
     },
     {
       "path": ".impeccable/config.json",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "CLAUDE.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "CLAUDE_COGNITIVE_ARCHITECTURE.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "HANDOFF.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "HISTORICO_SOFA.json",
-      "domain": "unclassified_special_case",
-      "disposition": "manual_owner_review",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "KICKOFF.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "README.md",
       "domain": "documentation_or_agent",
       "disposition": "review_knowledge_ownership",
       "phase": "P5",
@@ -1155,13 +1113,6 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/_archive/review_legacy_20260609/loop_cycle2/final/model.skp",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "artifacts/_archive/review_legacy_20260609/loop_cycle2/final/model_iso.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -1170,6 +1121,13 @@
     },
     {
       "path": "artifacts/_archive/review_legacy_20260609/loop_cycle2/final/model_top.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/loop_cycle2/final/model.skp",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -1449,13 +1407,6 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/_archive/review_legacy_20260609/oracle_pluggable_20260529_165259/final/oracle_request_package/README.md",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "artifacts/_archive/review_legacy_20260609/oracle_pluggable_20260529_165259/final/oracle_request_package/context.json",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -1492,6 +1443,13 @@
     },
     {
       "path": "artifacts/_archive/review_legacy_20260609/oracle_pluggable_20260529_165259/final/oracle_request_package/prompt.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/oracle_pluggable_20260529_165259/final/oracle_request_package/README.md",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -1596,41 +1554,6 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/estudio_banheiro/ITERATIONS.md",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/estudio_banheiro/ORCAMENTO_V0.md",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/estudio_banheiro/REFERENCE_KIT_PRODUTOS.md",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/estudio_banheiro/REFERENCE_SPEC.md",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/estudio_banheiro/corner_audit/banho01_c1_NO.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "artifacts/estudio_banheiro/corner_audit/banho01_c1_NO_ceilingfix.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -1639,6 +1562,13 @@
     },
     {
       "path": "artifacts/estudio_banheiro/corner_audit/banho01_c1_NO_walltop_fix.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/corner_audit/banho01_c1_NO.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -1660,6 +1590,13 @@
     },
     {
       "path": "artifacts/estudio_banheiro/corner_audit/banho01_c4_SE.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/ITERATIONS.md",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -1708,14 +1645,14 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/estudio_banheiro/iterations/banho01_raiox.png",
+      "path": "artifacts/estudio_banheiro/iterations/banho01_raiox_v2.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/estudio_banheiro/iterations/banho01_raiox_v2.png",
+      "path": "artifacts/estudio_banheiro/iterations/banho01_raiox.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -1974,6 +1911,27 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": "artifacts/estudio_banheiro/ORCAMENTO_V0.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/REFERENCE_KIT_PRODUTOS.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/REFERENCE_SPEC.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": "artifacts/kitchen_research/component_specs.md",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -2009,13 +1967,6 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/kitchen_research/validation_report.md",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "artifacts/kitchen_research/validation_report_critic.md",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -2023,7 +1974,7 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/README.md",
+      "path": "artifacts/kitchen_research/validation_report.md",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -2031,13 +1982,6 @@
     },
     {
       "path": "artifacts/planta_74/design_intent/r004.json",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/MVP_apto_mobiliado.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -2065,6 +2009,13 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": "artifacts/planta_74/furnished/banho01_raiox_v2.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": "artifacts/planta_74/furnished/banho01_raiox.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -2072,7 +2023,21 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/banho01_raiox_v2.png",
+      "path": "artifacts/planta_74/furnished/bedroom_designer_r000_after_iso.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/bedroom_designer_r000_after_top.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/bedroom_designer_r000_before.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -2107,21 +2072,21 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/bedroom_designer_r000_after_iso.png",
+      "path": "artifacts/planta_74/furnished/bedroom_designer_r003_after_iso.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/bedroom_designer_r000_after_top.png",
+      "path": "artifacts/planta_74/furnished/bedroom_designer_r003_after_top.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/bedroom_designer_r000_before.png",
+      "path": "artifacts/planta_74/furnished/bedroom_designer_r003_before.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -2156,27 +2121,6 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/bedroom_designer_r003_after_iso.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/bedroom_designer_r003_after_top.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/bedroom_designer_r003_before.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "artifacts/planta_74/furnished/bedroom_designer_synthetic_king.json",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -2192,13 +2136,6 @@
     },
     {
       "path": "artifacts/planta_74/furnished/bedroom_designer_synthetic_king.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/bedroom_r000_SUITE01_2Ddiagram.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -2226,7 +2163,7 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/bedroom_r003_SUITE02_2Ddiagram.png",
+      "path": "artifacts/planta_74/furnished/bedroom_r000_SUITE01_2Ddiagram.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -2248,6 +2185,13 @@
     },
     {
       "path": "artifacts/planta_74/furnished/bedroom_r003_before_top.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/bedroom_r003_SUITE02_2Ddiagram.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -2283,13 +2227,6 @@
     },
     {
       "path": "artifacts/planta_74/furnished/editability_report.txt",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/fp035_kitchen/README.md",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -2352,6 +2289,13 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": "artifacts/planta_74/furnished/fp035_kitchen/README.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": "artifacts/planta_74/furnished/fp035_kitchen/retrieved_bundle_kitchen_black_wood_gold.json",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -2360,20 +2304,6 @@
     },
     {
       "path": "artifacts/planta_74/furnished/kitchen_angles/A_golden_atual.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/B_moody_premium.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/C_stress_nero.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -2415,210 +2345,7 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_GPTMATCH04.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_HERO.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_HERO_lavatorio.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i10.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i11.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i12.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i13.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i14.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i15.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i16.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i17.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i18.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i19.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i20.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i21.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i22.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i23.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_tema_p24.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_vray_estudio.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_vray_estudio_i1.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_vray_estudio_i2.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_vray_estudio_i3.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_vray_estudio_i4.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_vray_estudio_i5.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_vray_estudio_i6.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_vray_estudio_i7.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_vray_estudio_i8.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_vray_estudio_i9.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/banho02_oak_p24.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/banho02_oak_p25.png",
+      "path": "artifacts/planta_74/furnished/kitchen_angles/B_moody_premium.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -2800,7 +2527,252 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_GPTMATCH04.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_HERO_lavatorio.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_HERO.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i10.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i11.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i12.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i13.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i14.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i15.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i16.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i17.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i18.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i19.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i20.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i21.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i22.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i23.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_tema_p24.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_vray_estudio_i1.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_vray_estudio_i2.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_vray_estudio_i3.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_vray_estudio_i4.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_vray_estudio_i5.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_vray_estudio_i6.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_vray_estudio_i7.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_vray_estudio_i8.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_vray_estudio_i9.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_vray_estudio.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho02_oak_p24.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho02_oak_p25.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": "artifacts/planta_74/furnished/kitchen_angles/before_kitchen_iso.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v1_01_hero_3q.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v1_02_elevacao.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v1_03_3q_alt.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v1_04_dollhouse.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v1_05_detalhe.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -2871,41 +2843,6 @@
     },
     {
       "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v11_rt42_05_detalhe.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v1_01_hero_3q.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v1_02_elevacao.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v1_03_3q_alt.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v1_04_dollhouse.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v1_05_detalhe.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -3192,14 +3129,14 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_AB_clara_dark.png",
+      "path": "artifacts/planta_74/furnished/kitchen_angles/C_stress_nero.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_B_antes_depois.png",
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_AB_clara_dark.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -3248,6 +3185,13 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_B_antes_depois.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_biblioteca_temas.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -3255,14 +3199,14 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_montagem.png",
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_montagem_v2.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_montagem_v2.png",
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_montagem.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -3318,14 +3262,14 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_variante_B.png",
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_variante_B_v2.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_variante_B_v2.png",
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_variante_B.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -3340,13 +3284,6 @@
     },
     {
       "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_vray_elev.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_vray_hero.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -3374,6 +3311,13 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_vray_hero.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_vray_iso.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -3395,14 +3339,14 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/kitchen_materials.html",
+      "path": "artifacts/planta_74/furnished/kitchen_angles/kitchen_materials_candidates.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/kitchen_materials_candidates.png",
+      "path": "artifacts/planta_74/furnished/kitchen_angles/kitchen_materials.html",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -3444,13 +3388,6 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/sala_baseline.html",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "artifacts/planta_74/furnished/kitchen_angles/sala_baseline_montagem.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -3465,7 +3402,7 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/sala_bwg_flat.html",
+      "path": "artifacts/planta_74/furnished/kitchen_angles/sala_baseline.html",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -3473,6 +3410,13 @@
     },
     {
       "path": "artifacts/planta_74/furnished/kitchen_angles/sala_bwg_flat_montagem.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/sala_bwg_flat.html",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -3521,13 +3465,6 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/sala_eyelevel.html",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "artifacts/planta_74/furnished/kitchen_angles/sala_eyelevel_montagem.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -3535,7 +3472,7 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/kitchen_angles/sala_fixed.html",
+      "path": "artifacts/planta_74/furnished/kitchen_angles/sala_eyelevel.html",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -3543,6 +3480,13 @@
     },
     {
       "path": "artifacts/planta_74/furnished/kitchen_angles/sala_fixed_top_crop.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/sala_fixed.html",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -3570,14 +3514,14 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/p1_antes_depois_social.png",
+      "path": "artifacts/planta_74/furnished/MVP_apto_mobiliado.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/planta_74_aereo.png",
+      "path": "artifacts/planta_74/furnished/p1_antes_depois_social.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -3598,7 +3542,7 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/planta_74_banho01.png",
+      "path": "artifacts/planta_74/furnished/planta_74_aereo.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -3606,6 +3550,13 @@
     },
     {
       "path": "artifacts/planta_74/furnished/planta_74_banho01_crop.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_banho01.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -3626,7 +3577,7 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/planta_74_cozinha.png",
+      "path": "artifacts/planta_74/furnished/planta_74_cozinha_aerea_crop.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -3634,13 +3585,6 @@
     },
     {
       "path": "artifacts/planta_74/furnished/planta_74_cozinha_aerea.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/furnished/planta_74_cozinha_aerea_crop.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -3682,13 +3626,6 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/planta_74_cozinha_vray.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "artifacts/planta_74/furnished/planta_74_cozinha_vray_crop.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -3696,7 +3633,14 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/planta_74_furnished.skp",
+      "path": "artifacts/planta_74/furnished/planta_74_cozinha_vray.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_cozinha.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -3745,7 +3689,7 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/planta_74_industrial_classes.png",
+      "path": "artifacts/planta_74/furnished/planta_74_furnished.skp",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -3759,7 +3703,7 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/planta_74_industrial_pbr.png",
+      "path": "artifacts/planta_74/furnished/planta_74_industrial_classes.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -3773,7 +3717,7 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/planta_74_industrial_r002.png",
+      "path": "artifacts/planta_74/furnished/planta_74_industrial_pbr.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -3787,14 +3731,14 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/planta_74_industrial_rackclass.png",
+      "path": "artifacts/planta_74/furnished/planta_74_industrial_r002.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/planta_74_jantar.png",
+      "path": "artifacts/planta_74/furnished/planta_74_industrial_rackclass.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -3808,13 +3752,6 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/planta_74_jantar_quadrada.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "artifacts/planta_74/furnished/planta_74_jantar_quadrada_crop.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -3822,7 +3759,14 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/planta_74_quarto_pbr.png",
+      "path": "artifacts/planta_74/furnished/planta_74_jantar_quadrada.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_jantar.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -3836,7 +3780,7 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/planta_74_quarto_suite01.png",
+      "path": "artifacts/planta_74/furnished/planta_74_quarto_pbr.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -3850,14 +3794,14 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/planta_74_vray_bright.png",
+      "path": "artifacts/planta_74/furnished/planta_74_quarto_suite01.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/planta_74_vray_cozinha_auto.png",
+      "path": "artifacts/planta_74/furnished/planta_74_vray_bright.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -3871,14 +3815,14 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/planta_74_vray_cozinha_product.png",
+      "path": "artifacts/planta_74/furnished/planta_74_vray_cozinha_auto.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/planta_74_vray_iso.png",
+      "path": "artifacts/planta_74/furnished/planta_74_vray_cozinha_product.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -3892,14 +3836,14 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/planta_74_vray_provider_iso.png",
+      "path": "artifacts/planta_74/furnished/planta_74_vray_iso.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/planta_74_vray_quarto_WARN_promotable.png",
+      "path": "artifacts/planta_74/furnished/planta_74_vray_provider_iso.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -3920,7 +3864,7 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/planta_74_vray_sala.png",
+      "path": "artifacts/planta_74/furnished/planta_74_vray_quarto_WARN_promotable.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -3948,14 +3892,14 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/planta_74_vray_sala_eyefill3.png",
+      "path": "artifacts/planta_74/furnished/planta_74_vray_sala_eyefill_crop.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/planta_74_vray_sala_eyefill_crop.png",
+      "path": "artifacts/planta_74/furnished/planta_74_vray_sala_eyefill3.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -3969,14 +3913,14 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/planta_74_vray_sala_floor.png",
+      "path": "artifacts/planta_74/furnished/planta_74_vray_sala_floor_crop.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/planta_74_vray_sala_floor_crop.png",
+      "path": "artifacts/planta_74/furnished/planta_74_vray_sala_floor.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -3997,7 +3941,7 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/furnished/planta_74_vray_suite02.png",
+      "path": "artifacts/planta_74/furnished/planta_74_vray_sala.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -4005,6 +3949,13 @@
     },
     {
       "path": "artifacts/planta_74/furnished/planta_74_vray_suite02_crop.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_vray_suite02.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -4116,20 +4067,6 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/planta_74/planta_74.skp",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/planta_74/planta_74.skp.metadata.json",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "artifacts/planta_74/planta_74_floors_top.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -4158,6 +4095,27 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": "artifacts/planta_74/planta_74.skp",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/planta_74.skp.metadata.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/planta_74/README.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": "artifacts/planta_74/regression_summary.md",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -4166,55 +4124,6 @@
     },
     {
       "path": "artifacts/planta_74/side_by_side_pdf_vs_skp.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/reference_lab/DECISIONS.md",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/reference_lab/FELIPE_KITCHEN_PREFERENCES.md",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/reference_lab/GOLDEN_SAMPLES.md",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/reference_lab/HOW_TO_USE.md",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/reference_lab/INTERIOR_QUALITY_SYSTEM.md",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/reference_lab/README.md",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/reference_lab/REFERENCE_DB_DESIGN.md",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -4242,6 +4151,20 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": "artifacts/reference_lab/DECISIONS.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/reference_lab/FELIPE_KITCHEN_PREFERENCES.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": "artifacts/reference_lab/gates/reference_system_gates.md",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -4249,21 +4172,21 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": "artifacts/reference_lab/GOLDEN_SAMPLES.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/reference_lab/HOW_TO_USE.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": "artifacts/reference_lab/inbox/INBOX.json",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/reference_lab/inbox/README.md",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/reference_lab/inbox/kit_banho01/INBOX.json",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -4298,6 +4221,13 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": "artifacts/reference_lab/inbox/kit_banho01/INBOX.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": "artifacts/reference_lab/inbox/kit_banho01/torneira_deca_level_2880BL.jpg",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -4312,14 +4242,91 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/reference_lab/kitchen/EXAMPLE_001_KITCHEN.md",
+      "path": "artifacts/reference_lab/inbox/README.md",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/reference_lab/kitchen/EXAMPLE_BLACK_WOOD_GOLD.md",
+      "path": "artifacts/reference_lab/INTERIOR_QUALITY_SYSTEM.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/reference_lab/kitchen_dark_walnut/cards/box_hood_wood_underside.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/reference_lab/kitchen_dark_walnut/cards/compact_dark_cave_gate.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/reference_lab/kitchen_dark_walnut/cards/matte_black_fixtures.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/reference_lab/kitchen_dark_walnut/cards/matte_black_joinery.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/reference_lab/kitchen_dark_walnut/cards/moody_low_key_warm_light.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/reference_lab/kitchen_dark_walnut/cards/warm_walnut_surface.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/reference_lab/kitchen_dark_walnut/cards/wood_wetzone_gate.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/reference_lab/kitchen_dark_walnut/EXAMPLE_002_KITCHEN_DARK_WALNUT.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/reference_lab/kitchen_dark_walnut/specs/dark_walnut_kitchen.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/reference_lab/kitchen_dark_walnut/THEME_DARK_WALNUT_MOODY_PREMIUM.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/reference_lab/kitchen_hotel_boutique/THEME_HOTEL_BOUTIQUE_WARM_LUXURY.json",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -4452,6 +4459,20 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": "artifacts/reference_lab/kitchen/EXAMPLE_001_KITCHEN.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/reference_lab/kitchen/EXAMPLE_BLACK_WOOD_GOLD.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": "artifacts/reference_lab/kitchen/references/versalle_cozinhas_planejadas.md",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -4480,6 +4501,13 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": "artifacts/reference_lab/kitchen/spec/appliances_components.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": "artifacts/reference_lab/kitchen/spec/COMPLETE_KITCHEN_SPEC.md",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -4494,27 +4522,6 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/reference_lab/kitchen/spec/KITCHEN_DECISIONS_FELIPE_V1.md",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/reference_lab/kitchen/spec/KITCHEN_TO_100.md",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/reference_lab/kitchen/spec/appliances_components.md",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "artifacts/reference_lab/kitchen/spec/floor.md",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -4523,6 +4530,20 @@
     },
     {
       "path": "artifacts/reference_lab/kitchen/spec/fridge.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/reference_lab/kitchen/spec/KITCHEN_DECISIONS_FELIPE_V1.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/reference_lab/kitchen/spec/KITCHEN_TO_100.md",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -4550,83 +4571,6 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/reference_lab/kitchen_dark_walnut/EXAMPLE_002_KITCHEN_DARK_WALNUT.md",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/reference_lab/kitchen_dark_walnut/THEME_DARK_WALNUT_MOODY_PREMIUM.json",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/reference_lab/kitchen_dark_walnut/cards/box_hood_wood_underside.json",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/reference_lab/kitchen_dark_walnut/cards/compact_dark_cave_gate.json",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/reference_lab/kitchen_dark_walnut/cards/matte_black_fixtures.json",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/reference_lab/kitchen_dark_walnut/cards/matte_black_joinery.json",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/reference_lab/kitchen_dark_walnut/cards/moody_low_key_warm_light.json",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/reference_lab/kitchen_dark_walnut/cards/warm_walnut_surface.json",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/reference_lab/kitchen_dark_walnut/cards/wood_wetzone_gate.json",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/reference_lab/kitchen_dark_walnut/specs/dark_walnut_kitchen.json",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/reference_lab/kitchen_hotel_boutique/THEME_HOTEL_BOUTIQUE_WARM_LUXURY.json",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "artifacts/reference_lab/living_room/LIVING_ROOM_BASELINE_AUDIT.md",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -4634,7 +4578,14 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/reference_lab/renders/THEME_RANKING.md",
+      "path": "artifacts/reference_lab/README.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/reference_lab/REFERENCE_DB_DESIGN.md",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -4642,6 +4593,13 @@
     },
     {
       "path": "artifacts/reference_lab/renders/kitchen_themes_ABC.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/reference_lab/renders/THEME_RANKING.md",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -4697,13 +4655,6 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/review/furniture/LL-FURN.md",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "artifacts/review/furniture/armchair_class/armchair_class_matrix.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -4712,27 +4663,6 @@
     },
     {
       "path": "artifacts/review/furniture/armchair_class/matrix_report.json",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/review/furniture/bed/README.md",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/review/furniture/bed/bed_iso.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/review/furniture/bed/bed_top.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -4753,7 +4683,21 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/review/furniture/bedroom_anatomy_montage.png",
+      "path": "artifacts/review/furniture/bed/bed_iso.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/review/furniture/bed/bed_top.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/review/furniture/bed/README.md",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -4761,6 +4705,13 @@
     },
     {
       "path": "artifacts/review/furniture/bedroom_anatomy_montage_v2.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/review/furniture/bedroom_anatomy_montage.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -4844,7 +4795,7 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/review/furniture/nightstand/README.md",
+      "path": "artifacts/review/furniture/LL-FURN.md",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -4872,6 +4823,13 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": "artifacts/review/furniture/nightstand/README.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": "artifacts/review/furniture/rack_class/apt_rack_industrial.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -4887,6 +4845,34 @@
     },
     {
       "path": "artifacts/review/furniture/rack_class/rack_class_matrix.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/review/furniture/sofa_class/matrix_report.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/review/furniture/sofa_class/sofa_class_matrix_iso.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/review/furniture/sofa_class/sofa_class_matrix.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/review/furniture/sofa_class/sofa_class_matrix.skp",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -4928,13 +4914,6 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/review/furniture/sofa/sofa_fixtures.skp",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "artifacts/review/furniture/sofa/sofa_fixtures_front.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -4963,6 +4942,13 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": "artifacts/review/furniture/sofa/sofa_fixtures.skp",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": "artifacts/review/furniture/sofa/sofa_form_PASS.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -4971,27 +4957,6 @@
     },
     {
       "path": "artifacts/review/furniture/sofa/sofa_gate_report.json",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/review/furniture/sofa/venezia/NEW_venezia_2l.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/review/furniture/sofa/venezia/NEW_venezia_3l.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/review/furniture/sofa/venezia/OLD_caixa_3l.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -5026,6 +4991,27 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": "artifacts/review/furniture/sofa/venezia/NEW_venezia_2l.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/review/furniture/sofa/venezia/NEW_venezia_3l.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/review/furniture/sofa/venezia/OLD_caixa_3l.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": "artifacts/review/furniture/sofa/venezia/room_NEW.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -5048,34 +5034,6 @@
     },
     {
       "path": "artifacts/review/furniture/sofa/venezia/sofa_venezia_room.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/review/furniture/sofa_class/matrix_report.json",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/review/furniture/sofa_class/sofa_class_matrix.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/review/furniture/sofa_class/sofa_class_matrix.skp",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/review/furniture/sofa_class/sofa_class_matrix_iso.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -5201,20 +5159,6 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/review/planta_74/README.md",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/review/planta_74/SKP_CORRECTION_JOURNEY.md",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "artifacts/review/planta_74/_preview/layout_r002_estar_ancorado_after_iso.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -5271,13 +5215,6 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/review/planta_74/canonical_20260531/final/model.skp",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "artifacts/review/planta_74/canonical_20260531/final/model_iso.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -5286,6 +5223,13 @@
     },
     {
       "path": "artifacts/review/planta_74/canonical_20260531/final/model_top.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/review/planta_74/canonical_20260531/final/model.skp",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -5397,13 +5341,6 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/review/planta_74/railing_source_fix/final/model.skp",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "artifacts/review/planta_74/railing_source_fix/final/model_iso.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -5425,7 +5362,14 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/review/planta_74/regen_candidate_20260531/VISUAL_REVIEW.md",
+      "path": "artifacts/review/planta_74/railing_source_fix/final/model.skp",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/review/planta_74/README.md",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -5461,6 +5405,13 @@
     },
     {
       "path": "artifacts/review/planta_74/regen_candidate_20260531/final/model_top.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/review/planta_74/regen_candidate_20260531/VISUAL_REVIEW.md",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -5552,6 +5503,13 @@
     },
     {
       "path": "artifacts/review/planta_74/shell_proof/warm_compact_L0_with_shell.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/review/planta_74/SKP_CORRECTION_JOURNEY.md",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -5768,6 +5726,13 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": "artifacts/review/scenes/living_room_modern_warm_minimal/scene_report.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": "artifacts/review/scenes/living_room_modern_warm_minimal/scene.json",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -5776,13 +5741,6 @@
     },
     {
       "path": "artifacts/review/scenes/living_room_modern_warm_minimal/scene.skp",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/review/scenes/living_room_modern_warm_minimal/scene_report.json",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -5838,20 +5796,6 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "artifacts/review/sofa_premium/STATUS.md",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "artifacts/review/sofa_premium/alt006_before_after.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "artifacts/review/sofa_premium/alt_001_before_after.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -5881,6 +5825,13 @@
     },
     {
       "path": "artifacts/review/sofa_premium/alt_005_before_after.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "artifacts/review/sofa_premium/alt006_before_after.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -6034,6 +5985,13 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": "artifacts/review/sofa_premium/STATUS.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": "artifacts/review/sofa_premium/su_baseline_contact_sheet.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -6132,13 +6090,6 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "assets/textures/pbr/SOURCES.md",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "assets/textures/pbr/pbr_concrete.jpg",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -6168,6 +6119,13 @@
     },
     {
       "path": "assets/textures/pbr/pbr_wood_furniture.jpg",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "assets/textures/pbr/SOURCES.md",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -6426,6 +6384,20 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": "CLAUDE_COGNITIVE_ARCHITECTURE.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "CLAUDE.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": "configs/sofa_archetypes.json",
       "domain": "tooling_ci",
       "disposition": "retain_infrastructure",
@@ -6608,55 +6580,6 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "docs/SOFA_CLASS_SPEC.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "docs/SOFA_EVAL_GATE.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "docs/SOFA_FAMILIES.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "docs/SOFA_GPT_REVIEW_LOOP.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "docs/SOFA_LEARNING_LOG.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "docs/SOFA_SKILL.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "docs/SOFA_VRAY_TRACK.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "docs/adr/.gitkeep",
       "domain": "documentation_or_agent",
       "disposition": "review_knowledge_ownership",
@@ -6685,13 +6608,6 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/apt_full_0259/STATUS.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/apt_full_0259/apt_full_0259.skp",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -6713,7 +6629,7 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/bedroom-window-ratio/README.md",
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/apt_full_0259/STATUS.md",
       "domain": "documentation_or_agent",
       "disposition": "review_knowledge_ownership",
       "phase": "P5",
@@ -6727,17 +6643,17 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/bedroom-window-ratio/README.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/bedroom-window-ratio/windows_zoom.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/furniture_canonical_0259/VALIDATION.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
@@ -6769,7 +6685,7 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/glass-railing-3dw/README.md",
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/furniture_canonical_0259/VALIDATION.md",
       "domain": "documentation_or_agent",
       "disposition": "review_knowledge_ownership",
       "phase": "P5",
@@ -6797,17 +6713,17 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_aligned_20260602T011150/final/geometry_report.json",
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/glass-railing-3dw/README.md",
       "domain": "documentation_or_agent",
       "disposition": "review_knowledge_ownership",
       "phase": "P5",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_aligned_20260602T011150/final/model.skp",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_aligned_20260602T011150/final/geometry_report.json",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
@@ -6819,6 +6735,13 @@
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_aligned_20260602T011150/final/model_top.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_aligned_20260602T011150/final/model.skp",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -6853,13 +6776,6 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_closed_20260602T014123/final/model.skp",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_closed_20260602T014123/final/model_iso.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -6868,6 +6784,13 @@
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_closed_20260602T014123/final/model_top.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_closed_20260602T014123/final/model.skp",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -6902,13 +6825,6 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_sourcegate_20260602T010239/final/model.skp",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_sourcegate_20260602T010239/final/model_iso.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -6917,6 +6833,13 @@
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_sourcegate_20260602T010239/final/model_top.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_sourcegate_20260602T010239/final/model.skp",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -6944,13 +6867,6 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/janelas-esquadria/README.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/janelas-esquadria/basculante_final.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -6962,6 +6878,13 @@
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/janelas-esquadria/README.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
@@ -6979,13 +6902,6 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/kitchen_fix_20260602T021617/final/model.skp",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/kitchen_fix_20260602T021617/final/model_iso.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -6994,6 +6910,13 @@
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/kitchen_fix_20260602T021617/final/model_top.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/kitchen_fix_20260602T021617/final/model.skp",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -7021,17 +6944,17 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_candidate_20260608/VISUAL_REVIEW.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_candidate_20260608/overlay_consensus_on_pdf.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_candidate_20260608/VISUAL_REVIEW.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
@@ -7091,13 +7014,6 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_rebuild_0259_20260608/VALIDATION.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_rebuild_0259_20260608/_shell_polygon.json",
       "domain": "documentation_or_agent",
       "disposition": "review_knowledge_ownership",
@@ -7106,20 +7022,6 @@
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_rebuild_0259_20260608/geometry_report.json",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_rebuild_0259_20260608/model.skp",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_rebuild_0259_20260608/model.skp.metadata.json",
       "domain": "documentation_or_agent",
       "disposition": "review_knowledge_ownership",
       "phase": "P5",
@@ -7154,7 +7056,21 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/suite01_furnished_0259/VALIDATION.md",
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_rebuild_0259_20260608/model.skp",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_rebuild_0259_20260608/model.skp.metadata.json",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_rebuild_0259_20260608/VALIDATION.md",
       "domain": "documentation_or_agent",
       "disposition": "review_knowledge_ownership",
       "phase": "P5",
@@ -7189,6 +7105,13 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/suite01_furnished_0259/suite01_vray_0259_crop.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/suite01_furnished_0259/suite01_vray_0259.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -7196,10 +7119,10 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/suite01_furnished_0259/suite01_vray_0259_crop.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/suite01_furnished_0259/VALIDATION.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
@@ -7350,17 +7273,17 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/window_fix_20260530/final/DECISION.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/window_fix_20260530/final/before_after_removal.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/window_fix_20260530/final/DECISION.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
@@ -7567,14 +7490,14 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "docs/interiors/DESIGN_VISION.md",
+      "path": "docs/interiors/anti_patterns.md",
       "domain": "documentation_or_agent",
       "disposition": "review_knowledge_ownership",
       "phase": "P5",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "docs/interiors/anti_patterns.md",
+      "path": "docs/interiors/DESIGN_VISION.md",
       "domain": "documentation_or_agent",
       "disposition": "review_knowledge_ownership",
       "phase": "P5",
@@ -7603,13 +7526,6 @@
     },
     {
       "path": "docs/interiors/rules_layout.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "docs/interview-study/README.md",
       "domain": "documentation_or_agent",
       "disposition": "review_knowledge_ownership",
       "phase": "P5",
@@ -7651,6 +7567,13 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": "docs/interview-study/README.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": "docs/screenshots/harness-app/01-pipeline.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -7672,7 +7595,84 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": "docs/SOFA_CLASS_SPEC.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "docs/SOFA_EVAL_GATE.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "docs/SOFA_FAMILIES.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "docs/SOFA_GPT_REVIEW_LOOP.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "docs/SOFA_LEARNING_LOG.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "docs/SOFA_SKILL.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "docs/SOFA_VRAY_TRACK.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "docs/specs/_assets/quadrado_canonical_geometry_report.json",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "docs/specs/_assets/quadrado_canonical_shell_polygon.json",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "docs/specs/_assets/quadrado_canonical_success_render.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": "docs/specs/AI_PIPELINE_INSPECTOR.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "docs/specs/brain_muscle.md",
       "domain": "documentation_or_agent",
       "disposition": "review_knowledge_ownership",
       "phase": "P5",
@@ -7784,6 +7784,13 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": "docs/specs/FP-042_P1_owner_dependency_audit.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": "docs/specs/FP-SOFA-PREMIUM/ALTERATION_REVIEW_CONTRACT.json",
       "domain": "documentation_or_agent",
       "disposition": "review_knowledge_ownership",
@@ -7819,42 +7826,14 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "docs/specs/LL-024_gpt_auto_consult_gate.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "docs/specs/_assets/quadrado_canonical_geometry_report.json",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "docs/specs/_assets/quadrado_canonical_shell_polygon.json",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "docs/specs/_assets/quadrado_canonical_success_render.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "docs/specs/brain_muscle.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "docs/specs/geometry_sanity_gate.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "docs/specs/LL-024_gpt_auto_consult_gate.md",
       "domain": "documentation_or_agent",
       "disposition": "review_knowledge_ownership",
       "phase": "P5",
@@ -7988,13 +7967,6 @@
     },
     {
       "path": "fixtures/synthetic_rooms/living_small_rect_10m2.json",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "fixtures/visual_oracle_examples/README.md",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -8274,7 +8246,7 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "fixtures/visual_oracle_negative/README.md",
+      "path": "fixtures/visual_oracle_examples/README.md",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -8323,7 +8295,35 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": "fixtures/visual_oracle_negative/README.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "HANDOFF.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "HISTORICO_SOFA.json",
+      "domain": "unclassified_special_case",
+      "disposition": "manual_owner_review",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": "interior/__init__.py",
+      "domain": "interior_engine",
+      "disposition": "review_shared_vs_room",
+      "phase": "P3",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "interior/class_specs/__init__.py",
       "domain": "interior_engine",
       "disposition": "review_shared_vs_room",
       "phase": "P3",
@@ -8348,13 +8348,6 @@
       "domain": "documentation_or_agent",
       "disposition": "review_knowledge_ownership",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "interior/class_specs/__init__.py",
-      "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
-      "phase": "P3",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
@@ -8519,13 +8512,6 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "interior/validators/PHASE2_PLACEMENT_HANDOFF.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "interior/validators/__init__.py",
       "domain": "interior_engine",
       "disposition": "review_shared_vs_room",
@@ -8561,6 +8547,13 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": "interior/validators/PHASE2_PLACEMENT_HANDOFF.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": "interior/validators/scene_spatial_gate.py",
       "domain": "interior_engine",
       "disposition": "review_shared_vs_room",
@@ -8586,6 +8579,13 @@
       "domain": "interior_engine",
       "disposition": "review_shared_vs_room",
       "phase": "P3",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "KICKOFF.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
@@ -8743,10 +8743,10 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "references/README.md",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
+      "path": "README.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
@@ -8785,13 +8785,6 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "references/felipe/VERDICT_APE_V1_2026_08_03.md",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "references/felipe/anti_patterns/sofa-ref-06-anti-povison.json",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -8814,6 +8807,13 @@
     },
     {
       "path": "references/felipe/approved/sofa-ref-03-chiavari.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "references/felipe/VERDICT_APE_V1_2026_08_03.md",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -8960,6 +8960,13 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": "references/README.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": "references/sketchup/knowledge/environment_recipes.v1.json",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -8975,6 +8982,13 @@
     },
     {
       "path": "references/sofas/audit/group60_learning_report.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "references/sofas/audit/modern_dark_gray_learning_report.md",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -9024,13 +9038,6 @@
     },
     {
       "path": "references/sofas/audit/modern_dark_gray/modern_dark_gray_top.png",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "references/sofas/audit/modern_dark_gray_learning_report.md",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -9730,14 +9737,14 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "tests/test_auto_decider.py",
+      "path": "tests/test_auto_decider_gate.py",
       "domain": "test",
       "disposition": "test_suite",
       "phase": "P5",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "tests/test_auto_decider_gate.py",
+      "path": "tests/test_auto_decider.py",
       "domain": "test",
       "disposition": "test_suite",
       "phase": "P5",
@@ -9835,14 +9842,14 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "tests/test_corpus_to_rag.py",
+      "path": "tests/test_corpus_to_rag_human_verdicts.py",
       "domain": "test",
       "disposition": "test_suite",
       "phase": "P5",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "tests/test_corpus_to_rag_human_verdicts.py",
+      "path": "tests/test_corpus_to_rag.py",
       "domain": "test",
       "disposition": "test_suite",
       "phase": "P5",
@@ -9926,6 +9933,13 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": "tests/test_fp042_ownership_audit.py",
+      "domain": "test",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": "tests/test_furnish_sofa_gate.py",
       "domain": "test",
       "disposition": "test_suite",
@@ -9968,14 +9982,14 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "tests/test_geometry_sanity.py",
+      "path": "tests/test_geometry_sanity_brains.py",
       "domain": "test",
       "disposition": "test_suite",
       "phase": "P5",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "tests/test_geometry_sanity_brains.py",
+      "path": "tests/test_geometry_sanity.py",
       "domain": "test",
       "disposition": "test_suite",
       "phase": "P5",
@@ -10262,14 +10276,14 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "tests/test_rag_freshness.py",
+      "path": "tests/test_rag_freshness_architect.py",
       "domain": "test",
       "disposition": "test_suite",
       "phase": "P5",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "tests/test_rag_freshness_architect.py",
+      "path": "tests/test_rag_freshness.py",
       "domain": "test",
       "disposition": "test_suite",
       "phase": "P5",
@@ -10290,14 +10304,14 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "tests/test_reference_db.py",
+      "path": "tests/test_reference_db_retrieve.py",
       "domain": "test",
       "disposition": "test_suite",
       "phase": "P5",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "tests/test_reference_db_retrieve.py",
+      "path": "tests/test_reference_db.py",
       "domain": "test",
       "disposition": "test_suite",
       "phase": "P5",
@@ -10528,14 +10542,14 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "tests/test_taste_writeback.py",
+      "path": "tests/test_taste_writeback_recall.py",
       "domain": "test",
       "disposition": "test_suite",
       "phase": "P5",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "tests/test_taste_writeback_recall.py",
+      "path": "tests/test_taste_writeback.py",
       "domain": "test",
       "disposition": "test_suite",
       "phase": "P5",
@@ -10672,20 +10686,6 @@
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "tools/Dockerfile.dashboard",
-      "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
-      "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "tools/README_project_memory.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
@@ -10920,6 +10920,13 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": "tools/Dockerfile.dashboard",
+      "domain": "runtime_or_orchestrator",
+      "disposition": "manual_owner_review",
+      "phase": "P4",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": "tools/door_swing_audit.py",
       "domain": "runtime_or_orchestrator",
       "disposition": "manual_owner_review",
@@ -11074,13 +11081,6 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "tools/interior_studio/README_render_judges.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "tools/interior_studio/__init__.py",
       "domain": "runtime_or_orchestrator",
       "disposition": "manual_owner_review",
@@ -11106,13 +11106,6 @@
       "domain": "runtime_or_orchestrator",
       "disposition": "manual_owner_review",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
-      "path": "tools/interior_studio/consult_gpt_bridge/README.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
@@ -11186,6 +11179,13 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": "tools/interior_studio/consult_gpt_bridge/README.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": "tools/interior_studio/consult_gpt_bridge/store.py",
       "domain": "runtime_or_orchestrator",
       "disposition": "manual_owner_review",
@@ -11246,6 +11246,13 @@
       "domain": "runtime_or_orchestrator",
       "disposition": "manual_owner_review",
       "phase": "P4",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tools/interior_studio/README_render_judges.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
@@ -11368,17 +11375,17 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "tools/mcp_server/README.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "tools/mcp_server/__init__.py",
       "domain": "runtime_or_orchestrator",
       "disposition": "manual_owner_review",
       "phase": "P4",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tools/mcp_server/README.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
@@ -11480,13 +11487,6 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "tools/pdf_knowledge/README.md",
-      "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
-    },
-    {
       "path": "tools/pdf_knowledge/__init__.py",
       "domain": "runtime_or_orchestrator",
       "disposition": "manual_owner_review",
@@ -11512,6 +11512,13 @@
       "domain": "runtime_or_orchestrator",
       "disposition": "manual_owner_review",
       "phase": "P4",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tools/pdf_knowledge/README.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
@@ -11645,6 +11652,13 @@
       "domain": "shared_or_cross_cutting",
       "disposition": "manual_owner_review",
       "phase": "P2",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tools/README_project_memory.md",
+      "domain": "documentation_or_agent",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P5",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
@@ -11837,6 +11851,13 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
+      "path": "tools/rooms/ownership_audit.py",
+      "domain": "room_module_existing",
+      "disposition": "review_knowledge_ownership",
+      "phase": "P1",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
       "path": "tools/rooms/registry.py",
       "domain": "room_module_existing",
       "disposition": "retain_current_owner",
@@ -12019,14 +12040,14 @@
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "tools/sofa_class.py",
+      "path": "tools/sofa_class_matrix.py",
       "domain": "room_living_or_shared",
       "disposition": "manual_owner_review",
       "phase": "P3",
       "status": "PENDING_REVIEW_OR_MIGRATION"
     },
     {
-      "path": "tools/sofa_class_matrix.py",
+      "path": "tools/sofa_class.py",
       "domain": "room_living_or_shared",
       "disposition": "manual_owner_review",
       "phase": "P3",
