@@ -199,8 +199,27 @@ def apply_edits(skp_path: str, ops: list[dict], *, out_path: str | None = None,
             res.update(status="FAILED",
                        reason=f"o job disse ok mas {out} não foi regravado depois da cópia")
     else:
-        out.unlink(missing_ok=True)  # cópia sem edição não pode parecer resultado
+        _discard_unedited(out, res)
     return res
+
+
+def _discard_unedited(out: Path, res: dict[str, Any]) -> None:
+    """Cópia sem edição não pode parecer resultado. No modo interactive o SketchUp
+    que recusou o lote AINDA tem a cópia aberta: no Windows o unlink falha
+    (WinError 32) e antes estourava como erro da tool, deixando a cópia intacta
+    no destino (L2 2026-10-19). Agora a recusa original é devolvida e a cópia
+    ganha um marcador ao lado dizendo que NÃO é resultado."""
+    try:
+        out.unlink(missing_ok=True)
+    except OSError as e:
+        marker = out.with_name(out.name + ".NOT_A_RESULT.txt")
+        marker.write_text(f"{out.name} é a cópia NÃO editada (o lote falhou: "
+                          f"{res.get('reason') or (res.get('result') or {}).get('error')}). "
+                          f"Ainda aberta no SketchUp PID {res.get('pid')}; apague depois de fechar.\n",
+                          encoding="utf-8")
+        res["unedited_copy_left_open"] = str(out)
+        res["unedited_copy_marker"] = str(marker)
+        res["cleanup_error"] = f"{type(e).__name__}: {e}"
 
 
 # -- pipeline pesado (reuso dos launchers existentes) -------------------------

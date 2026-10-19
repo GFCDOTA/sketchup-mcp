@@ -338,6 +338,27 @@ def test_apply_edits_que_falha_nao_deixa_copia_parecendo_resultado(tmp_path, skp
     assert r["status"] == "FAILED" and not out.exists()
 
 
+def test_apply_edits_recusado_com_copia_presa_no_sketchup_devolve_a_recusa(tmp_path, skp, monkeypatch):
+    """L2 2026-10-19: no modo interactive o SketchUp que recusou o lote mantém a
+    cópia aberta e o unlink dá WinError 32 — antes a tool estourava e a cópia
+    NÃO editada ficava no destino parecendo resultado."""
+    job, _ = ruby_writes({"ok": False, "error": "ops[0] (move) recusado: PlanShell_Group (Hard Rule #1)"})
+    out = tmp_path / "preso.skp"
+    real_unlink = Path.unlink
+
+    def locked(self, missing_ok=False):
+        if self == out:
+            raise PermissionError(32, "O arquivo já está sendo usado por outro processo")
+        return real_unlink(self, missing_ok=missing_ok)
+
+    monkeypatch.setattr(Path, "unlink", locked)
+    r = jobs.apply_edits(str(skp), [{"op": "set_hidden", "target": {"name": "Cama"}, "hidden": True}],
+                         out_path=str(out), mode="interactive", su=su_with(FakeSystem(job=job)))
+    assert r["status"] == "FAILED" and "Hard Rule" in r["result"]["error"]
+    assert r["unedited_copy_left_open"] == str(out)
+    assert "NÃO editada" in Path(r["unedited_copy_marker"]).read_text("utf-8")
+
+
 def test_rename_de_arquitetura_e_recusado_porque_furaria_a_protecao():
     with pytest.raises(ops.OpsInvalid, match="Hard Rule #1"):
         ops.validate([{"op": "rename", "target": {"name": "Window_Group_w1"}, "name": "janela"}])
