@@ -12325,6 +12325,20 @@
       "disposition": "retain_current_owner",
       "phase": "P3",
       "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tools/rooms/kitchen/anchor_rules.py",
+      "domain": "room_kitchen",
+      "disposition": "tools.rooms.kitchen",
+      "phase": "P2",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tests/test_fp042_kitchen_anchor_ownership.py",
+      "domain": "test",
+      "disposition": "retain_current_owner",
+      "phase": "P2",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
     }
   ]
 }

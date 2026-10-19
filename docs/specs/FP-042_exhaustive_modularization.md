@@ -60,3 +60,15 @@ Validação regressiva de `no_plan_skip` impede sofá flutuante quando o
 planejador não apresenta uma planta válida. `furnish_apartment` permanece
 responsável por agregação, gates, estilos e geração de SKP; a migração
 dos builders originais da sala, cozinha, banheiro e service ainda é pendente.
+
+
+### Fatia P2 — regra hidráulica canônica da cozinha
+
+A implementação real de `validate`, `_modules` e `TOUCH_TOL_IN`
+foi migrada de `tools.kitchen_validation` para
+`tools.rooms.kitchen.anchor_rules`. O módulo legado mantém CLI
+`python -m tools.kitchen_validation` e re-exports dos nomes públicos.
+`tools.rooms.kitchen.validation` continua invocando o nome legado,
+permitindo mocks existentes e preservando o gate fail-closed.
+Testes abrangem agregação geométrica, API antiga, delegação e falta
+de layout. A validação visual/L2 continua pendente.

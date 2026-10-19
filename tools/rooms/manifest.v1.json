@@ -51,7 +51,7 @@
     "kitchen": {
       "providers": [
         "tools.kitchen_layout.build_boxes",
-        "tools.kitchen_validation.validate",
+        "tools.rooms.kitchen.anchor_rules.validate",
         "tools.kitchen_ergonomics.audit"
       ],
       "sources": [
