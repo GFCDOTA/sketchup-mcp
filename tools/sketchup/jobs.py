@@ -338,25 +338,122 @@ def furnish(*, consensus_path: str | None = None, base_skp: str | None = None,
     return out
 
 
-# O launcher legado (tools/render_scene_vray.py) mata o SketchUp por NOME DE
-# IMAGEM depois da exportação (`taskkill /F /IM SketchUp.exe`) e escreve dentro
-# do scene_dir. A checagem "SketchUp aberto?" dele é só no início: uma janela que
-# o Felipe abrir durante a exportação morre sem salvar. Até o launcher passar por
-# tools.sketchup.batch (PID próprio + destino checado), a tool recusa.
-VRAY_REFUSAL = ("su_render_vray desabilitada: o launcher tools/render_scene_vray.py roda "
-                "`taskkill /F /IM SketchUp.exe` após a exportação (fecharia sem salvar qualquer "
-                "SketchUp aberto nesse meio-tempo) e escreve dentro do scene_dir. Rode o launcher "
-                "à mão, com o SketchUp fechado, até ele ser portado para tools.sketchup.batch.")
+# V-Ray: o launcher legado (tools/render_scene_vray.py) matava o SketchUp por NOME
+# DE IMAGEM (`taskkill /F /IM SketchUp.exe`) depois da exportação e escrevia dentro
+# do scene_dir. Aqui a exportação passa por batch.run_script (a PRÓPRIA instância,
+# fechada só pelo modo/PID dela), o scene_dir é só leitura e tudo sai no out_dir.
+VRAY_EXPORT_RB = REPO / "tools" / "vray_export.rb"
+VRAY_RECIPE = {"iso": 100, "fnum": 7.0, "shutter": 160, "sky": 0.3}  # receita interior (suite01)
 
 
-def render_vray(scene_dir: str, *, out_png: str | None = None, su: SketchUp | None = None,
-                **opts: Any) -> dict[str, Any]:
-    """Render V-Ray de uma cena composta (`tools.render_scene_vray`).
+def _vray_exe_run(cmd: list[str], timeout_s: int) -> dict[str, Any]:
+    """vray.exe headless (não é o SketchUp). Isolado para os testes dublarem."""
+    import subprocess
 
-    RECUSA hoje (VRAY_REFUSAL): o launcher legado mata o SketchUp por nome de
-    imagem. A tool continua registrada para dizer POR QUE não roda — capacidade
-    ausente é recusa com motivo, não sumiço."""
-    return {"status": "REFUSED", "reason": VRAY_REFUSAL, "scene_dir": scene_dir}
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout_s,  # noqa: S603
+                           stdin=subprocess.DEVNULL)
+    except subprocess.TimeoutExpired:
+        return {"returncode": None, "timeout": True, "tail": ""}
+    return {"returncode": r.returncode, "timeout": False, "tail": ((r.stdout or "") + (r.stderr or ""))[-800:]}
+
+
+def _sha(p: Path) -> str | None:
+    import hashlib
+
+    return hashlib.sha256(p.read_bytes()).hexdigest() if p.exists() else None
+
+
+def render_vray(scene_dir: str, *, out_png: str | None = None, width: int = 1500,
+                height: int = 1000, fov: float = 65, out_dir: str | None = None,
+                mode: str | None = None, timeout_s: int = 240, render_timeout_s: int = 600,
+                su: SketchUp | None = None) -> dict[str, Any]:
+    """Render V-Ray de uma cena composta: `scene_dir` com scene.json (câmera em
+    metros) + scene_closed.skp (modelo fechado). Exporta o .vrscene numa CÓPIA via
+    -RubyStartup tools/vray_export.rb e renderiza com vray.exe headless.
+
+    O scene_dir nunca é escrito; .vrscene, log e PNG saem em `out_dir` (default
+    runs/planta_74/mcp/render_vray_<stamp>/). Nenhum SketchUp alheio é tocado."""
+    su = _su(su)
+    why = su.unavailable()
+    if why:
+        return {"status": "UNAVAILABLE", "reason": why}
+    if not su.system.exists(su.loc.vray_exe):
+        return {"status": "UNAVAILABLE", "reason": f"vray.exe não encontrado em {su.loc.vray_exe} (env VRAY_EXE)"}
+    if not (100 <= width <= 8000 and 100 <= height <= 8000):
+        return {"status": "ERROR", "reason": "width/height entre 100 e 8000 px"}
+    if not (10 <= fov <= 120):
+        return {"status": "ERROR", "reason": "fov entre 10 e 120 graus"}
+    d = paths.resolve(scene_dir)
+    scene_json, closed = d / "scene.json", d / "scene_closed.skp"
+    for what, p in (("scene.json", scene_json), ("scene_closed.skp", closed)):
+        if not p.exists():
+            return {"status": "ERROR", "reason": f"{what} ausente em {d} (o modelo fechado vem do composer)"}
+    try:
+        cam = json.loads(scene_json.read_text("utf-8"))["camera"]
+        eye, target = cam["eye"], cam["target"]
+        assert len(eye) == 3 and len(target) == 3
+    except (ValueError, KeyError, TypeError, AssertionError) as e:
+        return {"status": "ERROR", "reason": f"scene.json sem camera.eye/target [x,y,z] em metros: {e}"}
+    od, err = _out_dir(out_dir, "render_vray", inputs=(closed, scene_json))
+    if err:
+        return err
+    if out_png:
+        try:
+            png = paths.check_output(out_png, inputs=(closed, scene_json))
+        except paths.OutputPathRefused as e:
+            return {"status": "REFUSED", "reason": str(e)}
+        if png.suffix.lower() != ".png":
+            return {"status": "ERROR", "reason": f"out_png precisa terminar em .png: {png}"}
+    else:
+        png = od / "vray.png"
+    if png.exists():
+        return {"status": "REFUSED", "reason": f"out_png já existe ({png}); render sai sempre em arquivo novo"}
+    od.mkdir(parents=True, exist_ok=True)
+    png.parent.mkdir(parents=True, exist_ok=True)
+    before = {str(p): _sha(p) for p in (scene_json, closed)}
+    copy = _working_copy(closed, od / f"_vray_{closed.name}")
+    vrs, log = od / "scene.vrscene", od / "vray_export_log.txt"
+    from core.scale import M_TO_IN
+
+    fmt = lambda v: ",".join(f"{c * M_TO_IN:.2f}" for c in v)  # noqa: E731
+    env = {"VRSCENE_OUT": str(vrs).replace("\\", "/"), "VRAY_LOG": str(log).replace("\\", "/"),
+           "VRAY_EYE": fmt(eye), "VRAY_TARGET": fmt(target), "VRAY_FOV": str(fov),
+           "VRAY_TEX_DIR": str((REPO / "assets/textures/procedural").resolve()).replace("\\", "/")}
+    run = run_script(su, script=VRAY_EXPORT_RB, done_marker=log, skp_in=copy, env_extra=env,
+                     timeout_s=timeout_s, mode=mode)
+    out: dict[str, Any] = {**run, "scene_dir": str(d), "out_dir": str(od)}
+    if run["status"] != "DONE":
+        return out
+    log_txt = log.read_text("utf-8", errors="replace")
+    out["export_log"] = log_txt[-600:]
+    if not vrs.exists() or vrs.stat().st_size == 0:
+        out.update(status="FAILED", reason="vray_export.rb terminou sem .vrscene (V-Ray carregado no SketchUp?)")
+        return out
+    from tools.tweak_vrscene import tweak_file
+
+    tweak_file(str(vrs), width=width, height=height, materials=True, **VRAY_RECIPE)
+    r = _vray_exe_run([str(su.loc.vray_exe), f"-sceneFile={vrs}", f"-imgFile={png}",
+                       "-display=0", "-autoClose=1"], render_timeout_s)
+    out["vray"] = r
+    out["inputs_intact"] = all(_sha(Path(p)) == h for p, h in before.items())
+    if not png.exists() or png.stat().st_size == 0:
+        out.update(status="FAILED", reason=("vray.exe estourou o tempo" if r["timeout"]
+                                            else "vray.exe não produziu imagem (licença?)"))
+        return out
+    try:
+        from PIL import Image
+
+        im = Image.open(png)
+        if im.mode == "RGBA":  # céu sai com alpha 0: achata (mesmo motivo do launcher legado)
+            im.convert("RGB").save(png)
+    except Exception:  # noqa: BLE001 — sem PIL o PNG continua válido, só com alpha
+        pass
+    out.update(status="OK" if out["inputs_intact"] else "FAILED", png=str(png),
+               vrscene_bytes=vrs.stat().st_size, visual_review=VISUAL_REVIEW)
+    if not out["inputs_intact"]:
+        out["reason"] = "o scene_dir mudou durante o render — investigar antes de usar o PNG"
+    return out
 
 
 __all__ = ["status", "open_model", "close", "inspect_model", "render_views", "apply_edits",
