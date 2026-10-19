@@ -136,3 +136,12 @@ significa **somente classificação de path/owner**, não prova semântica
 das aulas, nem execução SketchUp L2. Arquivos de infraestrutura
 (`docker-compose*`) são explicitamente mantidos como configuração
 operacional, sem mover ou alterar sua interpretação.
+
+
+### FP-042/P1-P2 — ownership estático de infraestrutura e shared
+
+Arquivos de infraestrutura, registry, core, schemas e gates têm
+`architecture_owner` explícito. `tools.rooms.architecture_ownership`
+reprova paths P1/P2 não reconhecidos; `ownership_audit` continua
+impedindo dependências AST entre implementações de cômodos. Escopo
+**classificação de caminho/owner**, não equivalência semântica/L2.
