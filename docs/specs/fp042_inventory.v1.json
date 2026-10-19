@@ -12297,6 +12297,20 @@
       "disposition": "retain_current_owner",
       "phase": "P3",
       "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tools/rooms/bedroom/furnishing.py",
+      "domain": "room_bedroom",
+      "disposition": "tools.rooms.bedroom",
+      "phase": "P3",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tests/test_fp042_bedroom_furnishing_adapter.py",
+      "domain": "test",
+      "disposition": "retain_current_owner",
+      "phase": "P3",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
     }
   ]
 }
