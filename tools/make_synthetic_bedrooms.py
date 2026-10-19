@@ -34,8 +34,12 @@ def _open(oid, kind, wid, center, width_m):
             "opening_width_pts": round(width_m * M, 2), "geometry_origin": "synthetic"}
 
 
+POLYGON_CONVENTIONS = ("axis", "inner_face")
+WALL_T_PTS = 5.4
+
+
 def rect_bedroom(room_name, w_m, d_m, door_wall="wL", door_frac=0.18,
-                 window_wall="wT", window_frac=0.5):
+                 window_wall="wT", window_frac=0.5, polygon_convention="axis"):
     """Retangulo W x D (m). Porta perto de um CANTO de uma parede lateral +
     janela no meio de uma parede de fundo. wB/wT = h (largura W); wL/wR = v
     (profundidade D). A(s) parede(s) sem porta nem janela = candidata(s) a
@@ -53,10 +57,41 @@ def rect_bedroom(room_name, w_m, d_m, door_wall="wL", door_frac=0.18,
         _open("door1", "interior_door", door_wall, pt_on(door_wall, door_frac), DOOR_W),
         _open("win1", "window", window_wall, pt_on(window_wall, window_frac), WIN_W),
     ]
+    # `axis` (legado das fixtures antigas): vertices no EIXO das paredes.
+    # `inner_face` (convencao da planta_74): vertices na FACE INTERNA, a meia espessura do eixo.
+    if polygon_convention not in POLYGON_CONVENTIONS:
+        raise ValueError(f"polygon_convention invalida: {polygon_convention!r}")
+    i = WALL_T_PTS / 2 if polygon_convention == "inner_face" else 0.0
+    x0, y0, x1, y1 = (round(v, 2) for v in (i, i, W - i, D - i))
     room = {"id": "bedroom", "name": room_name,
-            "polygon_pts": [[0, 0], [W, 0], [W, D], [0, D], [0, 0]]}
+            "polygon_pts": [[x0, y0], [x1, y0], [x1, y1], [x0, y1], [x0, y0]]}
     return {"wall_thickness_pts": 5.4, "walls": walls, "openings": openings,
             "rooms": [room], "soft_barriers": []}
+
+
+def classify_polygon_convention(consensus, tol_pts=0.5):
+    """Onde ficam os vertices do poligono do comodo em relacao ao eixo das paredes:
+    'axis' (distancia ~0), 'inner_face' (~meia espessura) ou 'ambiguous'.
+    Entrada sem parede/poligono/espessura positiva -> ValueError (nao adivinha)."""
+    t = consensus.get("wall_thickness_pts")
+    walls, rooms = consensus.get("walls") or [], consensus.get("rooms") or []
+    if not walls or not rooms or not isinstance(t, (int, float)) or t <= 0:
+        raise ValueError("consensus sem paredes, comodos ou wall_thickness_pts positivo")
+
+    def dist(p, w):
+        (ax, ay), (bx, by) = w["start"], w["end"]
+        dx, dy = bx - ax, by - ay
+        k = max(0.0, min(1.0, ((p[0] - ax) * dx + (p[1] - ay) * dy) / ((dx * dx + dy * dy) or 1.0)))
+        return ((p[0] - ax - k * dx) ** 2 + (p[1] - ay - k * dy) ** 2) ** 0.5
+    kinds = set()
+    for r in rooms:
+        poly = r.get("polygon_pts")
+        if not poly or len(poly) < 3:
+            raise ValueError(f"comodo {r.get('id')!r} sem polygon_pts valido")
+        ds = sorted(min(dist(p, w) for w in walls) for p in poly)
+        d = ds[len(ds) // 4]   # 1o quartil: polígonos reais tem arcos/recortes que se afastam da parede
+        kinds.add("axis" if d <= tol_pts else "inner_face" if abs(d - t / 2) <= tol_pts else "other")
+    return kinds.pop() if len(kinds) == 1 and "other" not in kinds else "ambiguous"
 
 
 # (filename) -> (room_name, kwargs). room_name casa como BEDROOM em room_type.
@@ -68,6 +103,8 @@ SPECS = {
     "bedroom_medium_14m2": ("SUITE 02", dict(w_m=3.5, d_m=4.0)),
     "bedroom_large_18m2":  ("SUITE MASTER",
                             dict(w_m=4.2, d_m=4.3, door_wall="wB", window_wall="wT")),
+    # FP-043 P3a-02: mesma sala da medium, poligono na FACE INTERNA (convencao da planta_74).
+    "bedroom_medium_14m2_inner_face": ("SUITE 02", dict(w_m=3.5, d_m=4.0, polygon_convention="inner_face")),
 }
 
 
