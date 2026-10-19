@@ -64,6 +64,23 @@ Os movimentos de arquivos protegidos estão registrados em
 Prova: `tests/test_fp043_p4_migration.py` (fachada só delega; import frio nas duas ordens devolve o mesmo módulo) e saída de
 `collect_boxes` da `planta_74` idêntica antes/depois (402 caixas).
 
+## P4b — demais cômodos (feito)
+
+| Antes | Agora | Compatibilidade |
+|---|---|---|
+| `scripts/{build_sofa_*,sofa_components,sofa_generator,sofa_primitives,sofa_vray_render}.rb` | `tools/rooms/living/capabilities/ruby/sofa_program/` | caminho único (raiz do repo via `__dir__`); referências reescritas |
+| `tools/{render_sala_eyelevel,sofa_premium_harness,sofa_premium_integrate}.rb` | `tools/rooms/living/capabilities/ruby/` | caminho único |
+| `scripts/sofa_fabric_material.py`, `tools/{make_synthetic_rooms,sofa_class_matrix,sofa_furnish_fase1_compare,sofa_premium_harness,sofa_venezia_*}.py` | `tools/rooms/living/capabilities/` | fachada |
+| `tools/layout_candidates.py`, `tools/sofa_gate.py` | `tools/rooms/living/{planning,validation}/` | fachada |
+| `tools/{make_synthetic_bedrooms,place_bedroom_skp}.py` | `tools/rooms/bedroom/capabilities/` | fachada |
+| `tools/{estudio_banheiro_scene,render_banho_auto,render_banho_vray}.py` | `tools/rooms/bathroom/capabilities/` | fachada |
+| `interior/validators/{bed,bed_placement,nightstand,wardrobe}_gate.py` | `tools/rooms/bedroom/validation/` | fachada em `interior/validators/` |
+| `interior/validators/sofa_placement_gate.py` | `tools/rooms/living/validation/` | fachada |
+| `interior/validators/{scene_spatial,furniture_visual}_gate.py`, `validation_report.py` | `tools/validation/` | fachada |
+
+`service` já tinha o dono único (`tools/rooms/service/layout.py`); `balcony`, `closet` e `home_office` seguem advisory/reuso e
+`circulation` validation-only — nenhum builder foi criado.
+
 ## Para quem vai mover um arquivo (checklist do PR)
 
 1. `python -m tools.navigation.consumers <caminho>`: leia **todos** os consumidores (código, testes, CI, MCP, config, docs).

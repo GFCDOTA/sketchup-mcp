@@ -1,7 +1,7 @@
 # SOFA_SKILL — modelagem de sofá low/mid-poly para SketchUp
 
-> **Ensinador**, não asset. Este doc é a regra que `scripts/sofa_primitives.rb`
-> e `scripts/build_sofa_3seat_v1.rb` implementam. Objetivo: sair do **blockout
+> **Ensinador**, não asset. Este doc é a regra que `tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb`
+> e `tools/rooms/living/capabilities/ruby/sofa_program/build_sofa_3seat_v1.rb` implementam. Objetivo: sair do **blockout
 > caixotão** → asset com cara de sofá real, próximo de um bom modelo do
 > 3D Warehouse, **sem** depender de asset externo (geometria paramétrica própria).
 
@@ -136,7 +136,7 @@ Peças obrigatórias (componente/grupo nomeado cada):
 
 ---
 
-## 7. Contrato das primitivas (`scripts/sofa_primitives.rb`)
+## 7. Contrato das primitivas (`tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb`)
 
 Unidade da API: **metros** (converte p/ polegadas internas do SU). Cada primitiva
 desenha num `entities` passado (normalmente um grupo nomeado) e devolve o grupo.

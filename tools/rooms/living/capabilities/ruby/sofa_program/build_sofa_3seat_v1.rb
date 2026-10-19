@@ -1,7 +1,7 @@
 # build_sofa_3seat_v1.rb — monta o sofa de 3 lugares v1 usando SO as primitivas
 # de sofa_primitives.rb (docs/SOFA_SKILL.md). Renderiza front/3-4/top/side.
 #
-# Rodar:  SketchUp.exe <bootstrap.skp> -RubyStartup scripts/build_sofa_3seat_v1.rb
+# Rodar:  SketchUp.exe <bootstrap.skp> -RubyStartup tools/rooms/living/capabilities/ruby/sofa_program/build_sofa_3seat_v1.rb
 # Saidas (ENV ou default relativo ao repo):
 #   SOFA_OUT_SKP  -> .skp do sofa
 #   SOFA_DIR      -> pasta dos renders (default <repo>/renders/check)
@@ -14,7 +14,7 @@ require 'fileutils'
 require_relative 'sofa_primitives'
 SP = SofaPrimitives
 
-REPO = File.dirname(File.dirname(__FILE__))
+REPO = File.expand_path('../../../../../..', __dir__)
 RDIR = ENV['SOFA_DIR'] || File.join(REPO, 'renders', 'check')
 LOGP = ENV['SOFA_LOG'] || File.join(RDIR, 'build_done.txt')
 OUTP = ENV['SOFA_OUT_SKP'] || File.join(RDIR, 'sofa_3seat_v1.skp')

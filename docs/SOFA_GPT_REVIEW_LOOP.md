@@ -8,7 +8,7 @@
 ## O loop (1 ciclo)
 
 ```
-1. BUILD    — gerar/ajustar o sistema e rodar a suite (scripts/build_sofa_eval_suite.rb)
+1. BUILD    — gerar/ajustar o sistema e rodar a suite (tools/rooms/living/capabilities/ruby/sofa_program/build_sofa_eval_suite.rb)
 2. RENDER   — front / side / top / three_quarter do(s) caso(s) (ja sai da suite)
 3. SHEET    — montar a folha REFERENCIA x GERADO:
               python scripts/make_gpt_review_sheet.py <case_id> [modern_dark|kivik]

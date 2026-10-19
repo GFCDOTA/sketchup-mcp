@@ -1,5 +1,5 @@
 # build_sofa_eval_suite.rb — primitives board + suite de avaliacao (rescue por caso).
-# Rodar: SketchUp.exe <bootstrap.skp> -RubyStartup scripts/build_sofa_eval_suite.rb
+# Rodar: SketchUp.exe <bootstrap.skp> -RubyStartup tools/rooms/living/capabilities/ruby/sofa_program/build_sofa_eval_suite.rb
 # ENV: SOFA_SCHEMA, SOFA_ARCHETYPES, SOFA_EVAL, SOFA_EVAL_DIR, SOFA_LOG,
 #      SOFA_SUBSET (ids separados por virgula; vazio = subset minimo da Fase 15).
 
@@ -9,7 +9,7 @@ require_relative 'sofa_generator'
 require_relative 'sofa_primitives'
 
 SP = SofaPrimitives
-ROOT = File.dirname(File.dirname(__FILE__))
+ROOT = File.expand_path('../../../../../..', __dir__)
 EVAL = ENV['SOFA_EVAL_DIR'] || File.join(ROOT, 'renders', 'sofa_eval')
 LOGP = ENV['SOFA_LOG'] || File.join(EVAL, 'suite_done.txt')
 

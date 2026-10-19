@@ -621,7 +621,8 @@
           "tests/test_intent_to_scene.py"
         ]
       },
-      "files": 10
+      "files": 10,
+      "status": "done"
     },
     {
       "item": "ops/estudio-front/",
@@ -724,7 +725,8 @@
           "code": 1,
           "docs": 3
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "scripts/build_sofa_eval_suite.rb",
@@ -747,7 +749,8 @@
           "code": 1,
           "docs": 3
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "scripts/build_sofa_from_config.rb",
@@ -770,7 +773,8 @@
           "code": 1,
           "docs": 2
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "scripts/generalization_gate.py",
@@ -851,7 +855,8 @@
           "code": 1,
           "docs": 2
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "scripts/sofa_fabric_material.py",
@@ -870,7 +875,8 @@
           "data": 1,
           "docs": 3
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "scripts/sofa_generator.rb",
@@ -898,7 +904,8 @@
         "tests_sample": [
           "tests/test_fp043_p0_map.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "scripts/sofa_primitives.rb",
@@ -920,7 +927,8 @@
           "code": 2,
           "docs": 4
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "scripts/sofa_vray_render.rb",
@@ -943,7 +951,8 @@
           "code": 1,
           "docs": 2
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/Dockerfile.dashboard",
@@ -1810,7 +1819,8 @@
         "counts": {
           "docs": 3
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/fidelity_loop.py",
@@ -2481,7 +2491,8 @@
           "tests/test_layout_rules.py",
           "tests/test_room_modes.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/layout_rules.py",
@@ -2531,7 +2542,8 @@
           "tests/test_bedroom_layout.py",
           "tests/test_synthetic_bedrooms.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/make_synthetic_rooms.py",
@@ -2553,7 +2565,8 @@
           "code": 1,
           "docs": 4
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/material_review.py",
@@ -2969,7 +2982,8 @@
           "code": 1,
           "docs": 4
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/place_layout_geom.rb",
@@ -3436,7 +3450,8 @@
         "counts": {
           "docs": 2
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/render_banho_vray.py",
@@ -3456,7 +3471,8 @@
           "code": 1,
           "docs": 2
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/render_bbox_audit.py",
@@ -3564,7 +3580,8 @@
         "counts": {
           "docs": 2
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/render_scene_views.py",
@@ -4058,7 +4075,8 @@
         "tests_sample": [
           "tests/test_sofa_class.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/sofa_furnish_fase1_compare.py",
@@ -4080,7 +4098,8 @@
           "code": 1,
           "docs": 3
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/sofa_gate.py",
@@ -4104,7 +4123,8 @@
         "tests_sample": [
           "tests/test_sofa_class.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/sofa_premium_harness.py",
@@ -4126,7 +4146,8 @@
           "code": 1,
           "docs": 2
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/sofa_premium_harness.rb",
@@ -4148,7 +4169,8 @@
           "code": 2,
           "docs": 2
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/sofa_premium_integrate.rb",
@@ -4170,7 +4192,8 @@
           "code": 1,
           "docs": 2
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/sofa_venezia_compare.py",
@@ -4192,7 +4215,8 @@
           "code": 2,
           "docs": 2
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/sofa_venezia_room.py",
@@ -4214,7 +4238,8 @@
           "code": 1,
           "docs": 2
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/soft_barrier_source_audit.py",

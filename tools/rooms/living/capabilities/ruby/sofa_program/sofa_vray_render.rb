@@ -1,5 +1,5 @@
 # sofa_vray_render.rb — render V-Ray HEADLESS scriptado (track de realismo).
-# Rodar: SketchUp.exe <sofa.skp> -RubyStartup scripts/sofa_vray_render.rb
+# Rodar: SketchUp.exe <sofa.skp> -RubyStartup tools/rooms/living/capabilities/ruby/sofa_program/sofa_vray_render.rb
 # ENV: VRAY_DIR (saida), VRAY_LOG, VRAY_W/VRAY_H (tamanho), VRAY_CAM (front|side|three_quarter).
 #
 # DESCOBERTA-CHAVE (2026-06-10): renderer.start SOZINHO nao exporta a geometria ->
@@ -11,7 +11,7 @@
 # Materiais do SketchUp sao AUTO-convertidos pra VRayBRDF no export (albedo -> diffuse).
 # Ajuste fino de roughness/bump/sheen = via subscriber on_model_exported (proximo passo).
 
-DIR = ENV['VRAY_DIR'] || File.join(File.dirname(File.dirname(__FILE__)), 'renders', 'sofa_vray')
+DIR = ENV['VRAY_DIR'] || File.join(File.expand_path('../../../../../..', __dir__), 'renders', 'sofa_vray')
 OUT = "#{DIR}/vray_out.png"
 LOG = ENV['VRAY_LOG'] || "#{DIR}/vray_log.txt"
 W = (ENV['VRAY_W'] || '1200').to_i
@@ -56,7 +56,7 @@ end
 # diffuse = escala 0.30m) + roughness 0.85 (fosco, mata plastico) + reflect baixo.
 # Aplica em qualquer material_style (deriva o bump png do nome /<fab|back|base>_<style>/).
 class FabricShaderSub
-  TEX_DIR = File.join(File.dirname(File.dirname(__FILE__)), 'textures')
+  TEX_DIR = File.join(File.expand_path('../../../../../..', __dir__), 'textures')
   def on_model_exported(exporter)
     r = exporter.renderer
     r.grep(:BRDFVRayMtl) { |b|

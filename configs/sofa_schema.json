@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "doc": "Contrato parametrico da CLASSE sofa. O gerador (scripts/sofa_generator.rb) valida toda config contra este schema: rejeita enums invalidos, faz clamp+warning para dimensoes fora de range, e FALHA explicito para configs incoerentes. Nunca gerar silenciosamente um sofa implausivel.",
+  "doc": "Contrato parametrico da CLASSE sofa. O gerador (tools/rooms/living/capabilities/ruby/sofa_program/sofa_generator.rb) valida toda config contra este schema: rejeita enums invalidos, faz clamp+warning para dimensoes fora de range, e FALHA explicito para configs incoerentes. Nunca gerar silenciosamente um sofa implausivel.",
   "required": [
     "id",
     "family",
