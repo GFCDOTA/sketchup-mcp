@@ -792,7 +792,8 @@
           "data": 1,
           "docs": 2
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "scripts/make_gpt_review_sheet.py",
@@ -1394,7 +1395,8 @@
           "tests/test_fp042_ownership_audit.py",
           "tests/test_living_room_style.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/claude_bridge/",
@@ -1477,7 +1479,8 @@
         "tests_sample": [
           "tests/test_collision_envelope_gate.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/compose_side_by_side.py",
@@ -1731,7 +1734,8 @@
         "tests_sample": [
           "tests/test_wall_stub_canonicalization.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/dining_table_class.py",
@@ -1804,7 +1808,8 @@
         "tests_sample": [
           "tests/test_door_swing_contract.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/estudio_banheiro_scene.py",
@@ -1896,7 +1901,8 @@
           "tests/test_honest_fingerprint.py",
           "tests/test_material_de_verdade.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/furnish_apartment.py",
@@ -2027,7 +2033,8 @@
           "tests/test_correction_fixes.py",
           "tests/test_fp042_ownership_audit.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/furniture_reference_analyzer.py",
@@ -2066,7 +2073,8 @@
         "tests_sample": [
           "tests/test_furniture_wall_gap.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/gate_filefetch.py",
@@ -2087,7 +2095,8 @@
         "tests_sample": [
           "tests/test_gate_filefetch.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/gate_util.py",
@@ -2109,7 +2118,8 @@
         "tests_sample": [
           "tests/test_gate_util.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/gate_verdict.py",
@@ -2131,7 +2141,8 @@
         "tests_sample": [
           "tests/test_gate_verdict.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/gen_textures.py",
@@ -2179,7 +2190,8 @@
           "tests/test_geometry_sanity_brains.py",
           "tests/test_suite01_scale_gate.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/gpt_docker_visual_score.py",
@@ -2762,7 +2774,8 @@
         "tests_sample": [
           "tests/test_opening_aperture_audit.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/opening_audit.py",
@@ -2782,7 +2795,8 @@
           "docs": 6,
           "history": 3
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/opening_host_audit.py",
@@ -2807,7 +2821,8 @@
           "tests/test_opening_host_audit.py",
           "tests/test_regenerate_consensus.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/optimizer_consistency_gate.py",
@@ -2830,7 +2845,8 @@
         "tests_sample": [
           "tests/test_optimizer_consistency_gate.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/oracle_providers.py",
@@ -2905,7 +2921,8 @@
           "tests/test_railing_gates.py",
           "tests/test_railing_real_build.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/pdf_height_labels_audit.py",
@@ -2928,7 +2945,8 @@
         "tests_sample": [
           "tests/test_pdf_height_labels.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/pdf_knowledge/",
@@ -3109,7 +3127,8 @@
         "tests_sample": [
           "tests/test_position_fidelity_gate.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/project_memory_db.py",
@@ -3332,7 +3351,8 @@
           "tests/test_railing_gates.py",
           "tests/test_railing_real_build.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/recolor_kitchen_theme.rb",
@@ -3503,7 +3523,8 @@
         "tests_sample": [
           "tests/test_render_bbox_audit.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/render_kitchen_angles.rb",
@@ -3660,7 +3681,8 @@
           "data": 1,
           "docs": 5
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/retrieval_eval.py",
@@ -3793,7 +3815,8 @@
           "tests/test_observability_invariants.py",
           "tests/test_run_deterministic_gates.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/run_skp_visual_review.py",
@@ -3867,7 +3890,8 @@
         "tests_sample": [
           "tests/test_semantic_geometry_contract_gate.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/semantic_zones.py",
@@ -4272,7 +4296,8 @@
         "tests_sample": [
           "tests/test_soft_barrier_source_audit.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/spatial_model.py",
@@ -4343,7 +4368,8 @@
         "mcp": [
           "tools/mcp_server/server.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/style_spec.py",
@@ -4576,7 +4602,8 @@
         "counts": {
           "docs": 5
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/vray_export.rb",
@@ -4623,7 +4650,8 @@
         "counts": {
           "docs": 3
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/wall_overlap_audit.py",
@@ -4648,7 +4676,8 @@
           "tests/test_regenerate_consensus.py",
           "tests/test_wall_overlap_audit.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/wardrobe_builder.py",

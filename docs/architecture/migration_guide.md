@@ -96,6 +96,16 @@ gates PASS; `su_furnish` materializa 402 caixas; a bateria MCP de 38 chamadas (i
 idêntico ao baseline, salvo `N25` (muda por causa do porte do V-Ray, #285) e `N06` (uma saída transitória do SketchUp que não se
 repetiu em 2 reexecuções).
 
+## P4c-2 — validação transversal (feito)
+
+| Antes | Agora | Compatibilidade |
+|---|---|---|
+| 28 gates/auditorias em `tools/` (`*_gate.py`, `*_audit.py`, `gate_*`, `geometry_sanity`, `run_deterministic_gates`, `repo_health_gate`, `furniture_wall_gap`, `diagnose_wall_stubs`, `render_bbox_audit`) e `scripts/generalization_gate.py` | `tools/validation/` | fachada (import, `-m`, script) |
+
+Os 8 módulos de governança de `tools/rooms/` (`inventory_gate`, `ownership_audit`, …) **ficam** onde estão: o mapa classifica `tools/rooms/` como
+`retain` e o CI os chama por esse caminho; mover seria mudança de política, não de responsabilidade comprovada (registrado como exceção
+nomeada, não esquecimento).
+
 ## Para quem vai mover um arquivo (checklist do PR)
 
 1. `python -m tools.navigation.consumers <caminho>`: leia **todos** os consumidores (código, testes, CI, MCP, config, docs).
