@@ -34,6 +34,11 @@ from tools.place_layout_skp import build_boxes as living_boxes   # noqa: E402
 from tools.room_type import (BATHROOM, BEDROOM, KITCHEN, LIVING,   # noqa: E402
                              SERVICE, classify_rooms)
 from tools.service_layout import build_boxes as service_boxes   # noqa: E402
+from tools.rooms.living.components import (  # noqa: E402,F401 (re-exports legados)
+    _bwg_recolor, _dining_table_rect, _dining_table_square, _oct_in,
+)
+from tools.rooms.shared.decor import place_decor_boxes  # noqa: E402,F401 (re-export legado)
+from tools.rooms.shared.furniture import _chair_parts  # noqa: E402,F401 (re-export legado)
 
 ROOT = Path(__file__).resolve().parents[1]
 SKETCHUP_EXE = r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
@@ -268,124 +273,6 @@ def bedroom_designer_boxes(con, room_id):
     return boxes, out
 
 
-
-def place_decor_boxes(kind, center_in, facing, z_lift=0.0, module=None, **overrides):
-    """Adapter de DECOR: build_decor(kind) (parts em metros, frente -Y) -> boxes
-    orientados pra 'facing' em center_in (inches), REUSANDO place_sofa_boxes (rotacao
-    provada). z_lift (m) sobe a peca (quadro na parede). module = grupo editavel no .skp."""
-    from tools.decor_builders import build_decor
-    from tools.sofa_builder import place_sofa_boxes
-    parts, _ = build_decor(kind, **overrides)
-    if z_lift:
-        for p in parts:
-            p["z0"] += z_lift
-            p["z1"] += z_lift
-    bx = place_sofa_boxes(parts, center_in, facing)
-    for b in bx:
-        b["module"] = module or kind
-    return bx
-
-
-def _oct_in(kind, cx, cy, r_m, z0_m, h_m, rgb, module):
-    """Disco octogonal flat em INCHES (cx,cy do shell) — leitura circular low-poly
-    (cúpula de pendente; mesma gramática dos discos do cooktop)."""
-    import math
-    M2IN = 39.3700787402
-    r = r_m * M2IN
-    pts = [(cx + r * math.cos(a), cy + r * math.sin(a))
-           for a in (math.pi / 8 + i * math.pi / 4 for i in range(8))]
-    xs = [p[0] for p in pts]
-    ys = [p[1] for p in pts]
-    return {"kind": kind, "x0": min(xs), "y0": min(ys), "x1": max(xs), "y1": max(ys),
-            "corners": [[round(px, 2), round(py, 2)] for px, py in pts],
-            "h_in": round(h_m * M2IN, 2), "z0_in": round(z0_m * M2IN, 2), "rgb": rgb,
-            "label": kind, "module": module, "ambiguous": False,
-            # octógono (aproximação circular low-poly) — não-retangular por
-            # design (cúpula/anel de pendente), não bug de rotação. Achado
-            # 2026-08-12: geometry_sanity.off_axis rejeitava (decorative
-            # estava False por engano; todo uso de _oct_in é decor redondo).
-            "decorative": True}
-
-
-def _dining_table_rect(w=1.60, d=0.90, h=0.75, top_t=0.04, top_rgb=(108, 80, 58), leg_rgb=(30, 30, 33)):
-    """Mesa de jantar RETANGULAR 6 lugares (1.60x0.90 real, joelho >=0.60): tampo
-    sólido nogueira + saia + 4 pernas metal inset. Metros, origem no canto."""
-    from tools.sofa_builder import _p
-    lt, ins = 0.08, 0.05
-    parts = [_p("top", "top", 0.0, 0.0, w, d, h - top_t, h, top_rgb)]
-    parts.append(_p("apron", "saia", ins, ins, w - ins, d - ins, h - top_t - 0.10, h - top_t, leg_rgb))
-    for x0, y0 in ((ins, ins), (w - ins - lt, ins), (ins, d - ins - lt), (w - ins - lt, d - ins - lt)):
-        parts.append(_p("leg", "foot", x0, y0, x0 + lt, y0 + lt, 0.0, h - top_t, leg_rgb))
-    return parts
-
-
-def _dining_table_square(side=0.92, h=0.76, top_t=0.045, top_rgb=(96, 70, 48), leg_rgb=(30, 30, 33)):
-    """Mesa de jantar QUADRADA: tampo SÓLIDO (não fatias/palito) + 4 pernas grossas +
-    saia fina. Metros, origem no canto. (preferência do Felipe: quadrada/canto alemão)."""
-    from tools.sofa_builder import _p
-    lt, ins = 0.07, 0.05
-    parts = [_p("top", "top", 0.0, 0.0, side, side, h - top_t, h, top_rgb)]          # tampo sólido
-    sa = 0.07                                                                          # saia sob o tampo
-    parts.append(_p("apron", "saia", ins, ins, side - ins, side - ins, h - top_t - sa, h - top_t, leg_rgb))
-    for x0, y0 in ((ins, ins), (side - ins - lt, ins), (ins, side - ins - lt), (side - ins - lt, side - ins - lt)):
-        parts.append(_p("leg", "foot", x0, y0, x0 + lt, y0 + lt, 0.0, h - top_t, leg_rgb))
-    return parts
-
-
-def _chair_parts():
-    """Cadeira de jantar ESTOFADA (frame metal preto + assento/encosto grafite =
-    tecido do sofá). Metros, frente = -Y (encosto em +Y). place_sofa_boxes orienta."""
-    from tools.sofa_builder import _p
-    w, d, sh, bh, lt = 0.45, 0.50, 0.45, 0.90, 0.028
-    fabric, frame = (74, 72, 78), (26, 26, 29)
-    parts = []
-    for x0, y0 in ((0.02, 0.02), (w - 0.02 - lt, 0.02), (0.02, d - 0.02 - lt), (w - 0.02 - lt, d - 0.02 - lt)):
-        parts.append(_p("leg", "foot", x0, y0, x0 + lt, y0 + lt, 0.0, sh - 0.05, frame))
-    parts.append(_p("seat_frame", "frame", 0.02, 0.02, w - 0.02, d - 0.02, sh - 0.05, sh - 0.03, frame))
-    parts.append(_p("seat", "seat", 0.015, 0.015, w - 0.015, d - 0.015, sh - 0.03, sh + 0.02, fabric))
-    parts.append(_p("back_frame", "frame", 0.03, d - 0.045, w - 0.03, d - 0.02, sh, bh - 0.02, frame))
-    parts.append(_p("back", "back", 0.02, d - 0.06, w - 0.02, d - 0.038, sh + 0.10, bh, fabric))
-    return parts
-
-
-def _bwg_recolor(boxes):
-    """Linguagem black_wood_gold (GOLDEN_SAMPLE_004) na SALA: madeira escura coordenada +
-    preto/grafite controlado + tecido escuro + tapete neutro quente + LED quente. SO cor (rgb),
-    NUNCA geometria/posicao -> o layout JA validado fica intacto. Coerente com a cozinha."""
-    WOOD = [108, 80, 58]
-    BLACK = [44, 44, 48]
-    FABRIC = [74, 72, 78]
-    RUG = [140, 128, 112]
-    LED = [255, 240, 212]
-    bk = ("foot", "leg", "perna", "pe", "frame", "base", "soculo", "bracket", "vidro", "boca", "door")
-    fk = ("cushion", "seat", "back", "arm")
-    wk = ("top", "corpo", "porta", "front", "body", "plank", "panel", "shelf", "tampo", "gaveta", "board", "stem")
-    for b in boxes:
-        mod = str(b.get("module", "")).lower()
-        kind = str(b.get("kind", "")).lower()
-        if kind.startswith(("rug_", "pend_", "tv_", "painel", "almofada", "lv_led")):
-            continue                                        # peças novas já nascem na paleta certa
-        if "spot" in kind:
-            b["rgb"] = LED                                  # spot quente
-        elif "rail" in kind or "trilho" in mod:
-            b["rgb"] = BLACK                                # trilho preto
-        elif "tapete" in mod:
-            b["rgb"] = RUG
-        elif "parede" in mod or "concreto" in mod:
-            b["rgb"] = BLACK                                # painel de midia DARK (nao concreto claro)
-        elif "planta" in mod or "foliage" in kind or "quadro" in mod:
-            continue                                        # acento (verde/arte) — mantem
-        elif "sofa" in mod:
-            b["rgb"] = BLACK if any(k in kind for k in bk) else FABRIC
-        elif "cadeira" in mod:
-            b["rgb"] = BLACK if any(k in kind for k in bk) else FABRIC   # estofado = tecido do sofá
-        elif any(k in kind for k in bk):
-            b["rgb"] = BLACK
-        elif any(k in kind for k in wk):
-            b["rgb"] = WOOD
-        elif any(k in kind for k in fk):
-            b["rgb"] = FABRIC
-    return boxes
 
 
 def living_room_boxes(con, room_id):
