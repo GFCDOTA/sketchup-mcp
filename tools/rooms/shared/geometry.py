@@ -124,3 +124,42 @@ def _oriented_box(kind, center_in, facing, w_m, d_m, z0_m, h_m, rgb, label=None,
             "rgb": rgb, "label": label or kind, "module": module or kind,
             "ambiguous": False, "decorative": decorative}
 
+
+
+def door_swing_polygons(con: dict, *, strict: bool = False) -> dict[str, object]:
+    """Arcos reais das portas (PDF pt), pelo hinge/swing do consensus.
+
+    Convenção idêntica à bateria L2 planta_check: quarto de círculo com
+    raio=largura, 24 segmentos, pivô junto à face da parede hospedeira.
+    Em modo estrito, qualquer metadado de porta ausente bloqueia a auditoria.
+    """
+    import math
+    from shapely.geometry import Polygon
+
+    walls = {w["id"]: w for w in con.get("walls", [])}
+    result = {}
+    for op in con.get("openings", []):
+        if (op.get("kind_v5") or op.get("kind")) not in ("interior_door", "door"):
+            continue
+        if (op.get("hinge_side") not in ("left", "right")
+                or op.get("swing_side") not in ("pos", "neg")
+                or op.get("wall_id") not in walls):
+            if strict:
+                raise ValueError(f"DOOR_SWING_METADATA_MISSING: {op.get('id')}")
+            continue
+        wall = walls[op["wall_id"]]
+        horiz = abs(wall["start"][1] - wall["end"][1]) < 1e-6
+        along, cross = op["center"] if horiz else op["center"][::-1]
+        radius = float(op["opening_width_pts"])
+        hinge_left = op["hinge_side"] == "left"
+        sgn = 1 if op["swing_side"] == "pos" else -1
+        hinge_a = along - radius / 2 if hinge_left else along + radius / 2
+        hinge_c = cross + sgn * float(wall.get("thickness", con.get("wall_thickness_pts", 5.4))) / 2
+        travel = 1 if hinge_left else -1
+        pts = [(hinge_a, hinge_c)] + [
+            (hinge_a + travel * radius * math.cos(i * math.pi / 48),
+             hinge_c + sgn * radius * math.sin(i * math.pi / 48))
+            for i in range(25)
+        ]
+        result[op["id"]] = Polygon(pts if horiz else [(b, a) for a, b in pts])
+    return result
