@@ -27,10 +27,10 @@ O único render de revisão é o iso do apê inteiro, onde:
 - não há enquadramento por cômodo nem um close "material proof" perto do sofá/rack.
 
 Evidência de que dá pra resolver com o que já existe:
-- `tools/place_layout_skp.rb::pl_top_camera(model, bbox)` e `pl_iso_camera(model, bbox)` **já aceitam
+- `tools/sketchup/furnish/place_layout_skp.rb::pl_top_camera(model, bbox)` e `pl_iso_camera(model, bbox)` **já aceitam
   um bbox** pra enquadrar só uma região (l.10-36); `LAYOUT_ZOOM_GROUP` já enquadra o bbox da mobília
   (`furn_bb`, l.144-150).
-- `tools/vray_export.rb` tem `VRAY_ISOLATE` (l.147-159): **esconde** todos os grupos cujo nome não
+- `tools/sketchup/vray/vray_export.rb` tem `VRAY_ISOLATE` (l.147-159): **esconde** todos os grupos cujo nome não
   contém a substring — o padrão exato de "isola um cômodo, some com o resto".
 - No `.rb`, cada móvel é um grupo top-level nomeado **`"#{room} · #{module}"`** (l.82) e o shell é
   travado por grupos nomeados `PlanShell/Floor_Group/DoorLeaf/Window/GlazedBalcony/SoftBarrier/
@@ -71,8 +71,8 @@ Evidência de que dá pra resolver com o que já existe:
 |---|---|---|
 | `tools/material_review.py` | **NOVO** — abre o `.skp` furnished, orquestra as câmeras por cômodo | NOVO |
 | `tools/material_review.rb` | **NOVO** — dentro do SU: esconde não-alvo, frameia bbox do cômodo, renderiza cada câmera; NÃO salva o `.skp` | NOVO |
-| `tools/place_layout_skp.rb` | `pl_top_camera`/`pl_iso_camera(bbox)`, group naming `"#{room} · #{module}"`, shell lock names | READ-ONLY (reusar helpers/convenções) |
-| `tools/vray_export.rb` | `VRAY_ISOLATE` (padrão de esconder grupos) | READ-ONLY (padrão a espelhar) |
+| `tools/sketchup/furnish/place_layout_skp.rb` | `pl_top_camera`/`pl_iso_camera(bbox)`, group naming `"#{room} · #{module}"`, shell lock names | READ-ONLY (reusar helpers/convenções) |
+| `tools/sketchup/vray/vray_export.rb` | `VRAY_ISOLATE` (padrão de esconder grupos) | READ-ONLY (padrão a espelhar) |
 | `artifacts/planta_74/furnished/planta_74_furnished.skp` | input (do FP-036) | READ-ONLY |
 | `artifacts/planta_74/furnished/material_review/*.png` | saída | NOVO (dir) |
 

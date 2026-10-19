@@ -25,7 +25,7 @@ consensus.json
   → layout.build_boxes            segmenta a parede principal: geladeira → bancada (pia e cooktop embutidos) → torre;
                                   aéreo só sobre a bancada; 2ª parede livre ganha bancada extra
   → validation.require_kitchen_anchor   a pia tem de estar na parede OESTE do PDF; se não, o build ABORTA antes de renderizar
-  → boxes (peças com módulo e cômodo) → tools/place_layout_skp.rb   materializa como grupos no SketchUp
+  → boxes (peças com módulo e cômodo) → tools/sketchup/furnish/place_layout_skp.rb   materializa como grupos no SketchUp
 ```
 
 A pia é **ponto hidráulico fixo** do PDF (parede oeste). Mover de parede exige reforma hidráulica, não ajuste de layout.

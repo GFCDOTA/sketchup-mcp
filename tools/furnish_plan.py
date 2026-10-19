@@ -110,7 +110,7 @@ def main():
 
     time.sleep(1)
 
-    cmd = [SKETCHUP_EXE, str(BASE_SKP), "-RubyStartup", str(ROOT / "tools/furnish_plan.rb")]
+    cmd = [SKETCHUP_EXE, str(BASE_SKP), "-RubyStartup", str(ROOT / "tools/sketchup/furnish/furnish_plan.rb")]
     print(f"[furnish] launching SU with {len(jobs)} job(s)...")
     owned_su = subprocess.Popen(cmd, env=env,
                      creationflags=getattr(subprocess, "DETACHED_PROCESS", 0))

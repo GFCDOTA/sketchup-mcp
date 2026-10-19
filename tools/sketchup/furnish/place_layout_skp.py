@@ -8,7 +8,7 @@ render before/after pra VISUAL_REVIEW. Felipe 2026-06-04.
 Coordenadas: usa a MESMA conversao do furnish_plan (SU = pdf * PT_TO_IN, sem
 flip de Y) que comprovadamente bate com o shell artifacts/planta_74.skp.
 
-Uso: python tools/place_layout_skp.py [--room r002]
+Uso: python tools/sketchup/furnish/place_layout_skp.py [--room r002]
 """
 import argparse
 import json
@@ -21,7 +21,7 @@ from pathlib import Path
 from tools.layout_candidates import (EXTRA_TEMPLATES, M, TEMPLATES, _tv_setup,
                                      run, score)
 
-ROOT = Path(__file__).resolve().parents[1]   # repo root (era E:\Claude\sketchup-mcp, morto pos-consolidacao 2026-06-09)
+ROOT = Path(__file__).resolve().parents[3]   # repo root (era E:\Claude\sketchup-mcp, morto pos-consolidacao 2026-06-09)
 SKETCHUP_EXE = r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
 from core.scale import PT_TO_IN  # noqa: E402  (fonte unica de escala; nao redefinir)
 CONSENSUS = ROOT / "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json"
@@ -177,7 +177,7 @@ def main():
                   f"{len(json.loads(tex_env['LAYOUT_TEX_MAP']))} kind(s) mapeados (estilo {style})")
 
     time.sleep(1)
-    cmd = [SKETCHUP_EXE, str(BASE_SKP), "-RubyStartup", str(ROOT / "tools/place_layout_skp.rb")]
+    cmd = [SKETCHUP_EXE, str(BASE_SKP), "-RubyStartup", str(ROOT / "tools/sketchup/furnish/place_layout_skp.rb")]
     print(f"[place] launching SU (base={BASE_SKP.name})...")
     owned_su = subprocess.Popen(cmd, env=env, creationflags=getattr(subprocess, "DETACHED_PROCESS", 0))
 

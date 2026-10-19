@@ -50,7 +50,8 @@ def test_origem_e_fachada_que_so_delega(row):
 def test_caminho_unico_resolvido_sem_origem_nem_referencia_de_codigo(row):
     assert not (ROOT / row["item"]).exists()
     assert _dest(row) in _tracked()
-    hits = subprocess.run(["git", "grep", "-l", "-F", row["item"], "--", "*.py", "*.rb", "*.ps1", "*.cmd", "*.yml"],
+    hits = subprocess.run(["git", "grep", "-l", "-F", row["item"], "--", "*.py", "*.rb", "*.ps1", "*.cmd", "*.yml",
+                           ":!artifacts"],   # evidencia congelada (L2 FP-042) cita os caminhos de quando rodou
                           cwd=ROOT, capture_output=True, text=True).stdout.split()
     assert hits == [], hits
 

@@ -575,7 +575,7 @@ def test_status_lista_os_jobs_ruby_versionados():
 
 def test_laje_do_banho_e_protegida_com_o_nome_que_o_place_layout_da():
     """O prefixo 'PeleTeto' nunca casava: o grupo se chama '<cômodo> · PeleTeto'."""
-    layout = Path("tools/place_layout_skp.rb").read_text("utf-8")
+    layout = Path("tools/sketchup/furnish/place_layout_skp.rb").read_text("utf-8")
     assert '"#{room} · #{mod}"' in layout                 # o nome que o grupo recebe
     assert '"PeleTeto")' in Path("tools/rooms/bathroom/layout.py").read_text("utf-8")  # dono canônico da laje
     for room in ("BANHO 01", "BANHO 02", "LAVABO"):

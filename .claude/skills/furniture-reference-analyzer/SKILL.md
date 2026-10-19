@@ -20,7 +20,7 @@ passo de análise.
 
 ## Pipeline (2 passos)
 
-1. **Inspeção (SketchUp)** — `tools/inspect_skp.rb` abre o `.skp` e escreve
+1. **Inspeção (SketchUp)** — `tools/sketchup/inspect/inspect_skp.rb` abre o `.skp` e escreve
    `<name>_inspect.json` (unidade, bbox in+m, materiais, definições de componentes,
    contagem de entidades, hierarquia com `size_m`/`center_m` até 2 níveis) + renders
    `top/front/iso`. **SU só renderiza com desktop interativo** → lançar via PowerShell
@@ -32,7 +32,7 @@ passo de análise.
    $env:INSPECT_OUT="...\group_60_inspect.json"; $env:INSPECT_LOG="...\log.txt"
    $env:RENDER_TOP="...\group_60_top.png"; $env:RENDER_FRONT="..._front.png"; $env:RENDER_ISO="..._iso.png"
    Start-Process "C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe" `
-     -ArgumentList "`"$copy`"","-RubyStartup","`"...\tools\inspect_skp.rb`""
+     -ArgumentList "`"$copy`"","-RubyStartup","`"...\tools\sketchup\inspect\inspect_skp.rb`""
    # poll do INSPECT_LOG, depois Stop-Process SketchUp
    ```
 

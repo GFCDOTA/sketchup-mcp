@@ -1,7 +1,7 @@
 """furnish_apartment.py — mobilia a planta INTEIRA num UNICO .skp: classifica
 cada comodo (tools.room_type), roda o brain certo por tipo, junta TODOS os boxes
 e materializa um so planta_74_furnished.skp (+ renders) no shell real. REUSA
-tools/place_layout_skp.rb (generico). Pasta fixa artifacts/planta_74/furnished/.
+tools/sketchup/furnish/place_layout_skp.rb (generico). Pasta fixa artifacts/planta_74/furnished/.
 
 Hoje mobilia: BEDROOM (bedroom_layout). Arquitetura cresce: e so registrar mais
 brains em BRAINS (KITCHEN, BATHROOM, LIVING). Felipe 2026-06-05. Placeholders,
@@ -30,7 +30,7 @@ from tools import bedroom_designer   # noqa: E402  (quartos: brain novo GPT-appr
 from tools.rooms.shared.geometry import _oriented_box  # noqa: E402,F401 (re-export legado)
 from tools.bathroom_layout import build_boxes as bath_boxes   # noqa: E402
 from tools.kitchen_layout import build_boxes as kitchen_boxes   # noqa: E402
-from tools.place_layout_skp import build_boxes as living_boxes   # noqa: E402
+from tools.sketchup.furnish.place_layout_skp import build_boxes as living_boxes   # noqa: E402
 from tools.room_type import (BATHROOM, BEDROOM, KITCHEN, LIVING,   # noqa: E402
                              SERVICE, classify_rooms)
 from tools.service_layout import build_boxes as service_boxes   # noqa: E402
@@ -48,7 +48,7 @@ from tools.rooms.shared.project_paths import PLANTA_74_CONSENSUS
 CONSENSUS = PLANTA_74_CONSENSUS
 BASE_SKP = Path(os.environ.get("FURNISH_BASE_SKP") or str(ROOT / "artifacts/planta_74/planta_74.skp"))  # shell override p/ escala: @0.0259 usa o shell rebuildado (base default 0.0352 intacta)
 OUT_DIR = ROOT / "artifacts/planta_74/furnished"   # pasta UNICA fixa
-RB = ROOT / "tools/place_layout_skp.rb"
+RB = ROOT / "tools/sketchup/furnish/place_layout_skp.rb"
 PLANT = "planta_74"   # pipeline planta_74-only (mesmo escopo do resto do modulo)
 
 

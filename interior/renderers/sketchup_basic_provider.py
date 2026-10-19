@@ -21,8 +21,8 @@ from tools.sketchup.legacy_process import launch_owned, close_owned
 SU_EXE = r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
 BASE_SKP = ROOT / "artifacts/planta_74/planta_74.skp"
 SCRATCH = ROOT / ".claude/scratch"
-RB = {"layout": ROOT / "tools/place_layout_skp.rb",
-      "furniture": ROOT / "tools/build_furniture_skp.rb"}
+RB = {"layout": ROOT / "tools/sketchup/furnish/place_layout_skp.rb",
+      "furniture": ROOT / "tools/sketchup/furnish/build_furniture_skp.rb"}
 # render_type -> env var, por renderer
 ENV_MAP = {
     "layout": {"top": "LAYOUT_AFTER_TOP", "iso": "LAYOUT_AFTER_ISO", "before": "LAYOUT_BEFORE"},

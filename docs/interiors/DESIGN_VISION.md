@@ -96,7 +96,7 @@ Renders (servíveis pelo cockpit `:8765/artifact?path=<...>`):
 
 Código (em `develop`): `tools/layout_candidates.py` + `tools/layout_rules.py`
 (candidatos + regras/ranking), `tools/furnish_plan.{py,rb}` +
-`tools/place_layout_skp.{py,rb}` (coloca o móvel no SKP),
+`tools/sketchup/furnish/place_layout_skp.{py,rb}` (coloca o móvel no SKP),
 `tools/make_synthetic_rooms.py` (cômodos sintéticos), e o harness de
 regressão (`190f786`).
 

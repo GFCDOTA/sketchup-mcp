@@ -317,7 +317,7 @@ def furnish(*, consensus_path: str | None = None, base_skp: str | None = None,
 
         env["FURNISH_STYLE"] = style
         env.update(texture_env(style, (REPO / "assets/textures/procedural").resolve()))
-    run = run_script(su, script=REPO / "tools" / "place_layout_skp.rb", done_marker=files["log"],
+    run = run_script(su, script=REPO / "tools" / "sketchup" / "furnish" / "place_layout_skp.rb", done_marker=files["log"],
                      skp_in=base_copy, env_extra=env, timeout_s=timeout_s, mode=mode)
     out: dict[str, Any] = {**run, "boxes": len(boxes), "base_skp": str(base),
                            "rooms": [{"room_id": r[0], "name": r[1], "type": r[2], "result": r[3], "boxes": r[4]}
@@ -338,7 +338,7 @@ def furnish(*, consensus_path: str | None = None, base_skp: str | None = None,
 # DE IMAGEM (`taskkill /F /IM SketchUp.exe`) depois da exportação e escrevia dentro
 # do scene_dir. Aqui a exportação passa por batch.run_script (a PRÓPRIA instância,
 # fechada só pelo modo/PID dela), o scene_dir é só leitura e tudo sai no out_dir.
-VRAY_EXPORT_RB = REPO / "tools" / "vray_export.rb"
+VRAY_EXPORT_RB = REPO / "tools" / "sketchup" / "vray" / "vray_export.rb"
 VRAY_RECIPE = {"iso": 100, "fnum": 7.0, "shutter": 160, "sky": 0.3}  # receita interior (suite01)
 
 
@@ -366,7 +366,7 @@ def render_vray(scene_dir: str, *, out_png: str | None = None, width: int = 1500
                 su: SketchUp | None = None) -> dict[str, Any]:
     """Render V-Ray de uma cena composta: `scene_dir` com scene.json (câmera em
     metros) + scene_closed.skp (modelo fechado). Exporta o .vrscene numa CÓPIA via
-    -RubyStartup tools/vray_export.rb e renderiza com vray.exe headless.
+    -RubyStartup tools/sketchup/vray/vray_export.rb e renderiza com vray.exe headless.
 
     O scene_dir nunca é escrito; .vrscene, log e PNG saem em `out_dir` (default
     runs/planta_74/mcp/render_vray_<stamp>/). Nenhum SketchUp alheio é tocado."""

@@ -33,7 +33,7 @@ from tools.sketchup.legacy_process import launch_owned, close_owned
 SU_EXE = Path(r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe")
 VRAY_SO = Path(r"C:\Program Files\Chaos\V-Ray\V-Ray for SketchUp\extension\vray4sketchup2026.so")
 VRAY_EXE = Path(r"C:\Program Files\Chaos\V-Ray\V-Ray for SketchUp\extension\vray\bin\vray.exe")
-VRAY_EXPORT_RB = ROOT / "tools/vray_export.rb"
+VRAY_EXPORT_RB = ROOT / "tools/sketchup/vray/vray_export.rb"
 SCRATCH = ROOT / ".claude/scratch"
 
 

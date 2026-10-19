@@ -48,7 +48,7 @@ CANONICAL_CONSENSUS = REPO_ROOT / "fixtures" / "quadrado" / "consensus_with_wind
 CANONICAL_GEOM_REPORT = REPO_ROOT / "docs" / "specs" / "_assets" / "quadrado_canonical_geometry_report.json"
 CANONICAL_SHELL_JSON = REPO_ROOT / "docs" / "specs" / "_assets" / "quadrado_canonical_shell_polygon.json"
 
-# Constants mirrored from tools/build_plan_shell_skp.rb.
+# Constants mirrored from tools/sketchup/shell/build_plan_shell_skp.rb.
 M_TO_IN = 39.3700787402
 WALL_HEIGHT_M = 2.70
 WINDOW_SILL_M = 0.90

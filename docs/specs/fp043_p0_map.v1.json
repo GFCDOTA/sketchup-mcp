@@ -1301,7 +1301,8 @@
           "docs": 4,
           "history": 1
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/build_plan_shell_skp.py",
@@ -1334,7 +1335,8 @@
           "tests/test_quadrado_canonical_smoke.py",
           "tests/test_shell_geometry_integrity.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/build_plan_shell_skp.rb",
@@ -1364,7 +1366,8 @@
           "tests/test_shell_geometry_integrity.py",
           "tests/test_window_aperture_geometry.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/circulation_gate.py",
@@ -1775,7 +1778,8 @@
           "code": 1,
           "docs": 3
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/door_swing_audit.py",
@@ -1964,7 +1968,8 @@
           "code": 1,
           "docs": 3
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/furniture_anatomy_spec.py",
@@ -2266,7 +2271,8 @@
           "docs": 3,
           "history": 1
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/interior_quality_scorecard.py",
@@ -3010,7 +3016,8 @@
           "tests/ruby/test_place_layout_geom.rb",
           "tests/test_place_layout_geom.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/place_layout_skp.py",
@@ -3037,7 +3044,8 @@
         "tests_sample": [
           "tests/test_material_de_verdade.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/place_layout_skp.rb",
@@ -3078,7 +3086,8 @@
           "tests/test_place_layout_geom.py",
           "tests/test_sketchup_ruby_jobs.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/position_fidelity_gate.py",
@@ -3834,7 +3843,8 @@
         "counts": {
           "docs": 2
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/semantic_geometry_contract_gate.py",
@@ -3984,7 +3994,8 @@
         "counts": {
           "docs": 4
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/sofa_builder.py",
@@ -4377,7 +4388,8 @@
           "code": 2,
           "docs": 5
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/taste_writeback.py",
@@ -4593,7 +4605,8 @@
           "tests/test_module_aware_material.py",
           "tests/test_sketchup_specialist.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/wall_exact_match_gate.py",

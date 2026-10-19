@@ -224,7 +224,7 @@ def test_texture_env_empty_for_unknown_style():
 def test_pl_material_sets_texture_when_png_present():
     """O .rb nao roda headless aqui -> contrato-TEXTO: o path interativo aplica m.texture por kind
     lendo LAYOUT_TEX_MAP/LAYOUT_TILE_MAP. FLAG: confirmar visualmente em build SU real (Felipe)."""
-    rb = (ROOT / "tools/place_layout_skp.rb").read_text("utf-8")
+    rb = (ROOT / "tools/sketchup/furnish/place_layout_skp.rb").read_text("utf-8")
     assert "m.texture = tex_path" in rb, "pl_material nao seta m.texture (o BUG do FP-036)"
     assert "LAYOUT_TEX_MAP" in rb and "LAYOUT_TILE_MAP" in rb, ".rb nao le os mapas injetados"
     assert "tex_path = (png && tex_dir)" in rb, "kind != fonte unica (deveria resolver png por kind)"
@@ -235,6 +235,6 @@ def test_pl_material_sets_texture_when_png_present():
 
 def test_furnish_and_slice_call_texture_env():
     """Ambos os callers do path interativo injetam via style_spec.texture_env (fonte unica)."""
-    for f in ("tools/furnish_apartment.py", "tools/place_layout_skp.py"):
+    for f in ("tools/furnish_apartment.py", "tools/sketchup/furnish/place_layout_skp.py"):
         src = (ROOT / f).read_text("utf-8")
         assert "texture_env" in src, f"{f} nao injeta LAYOUT_TEX_MAP via texture_env"

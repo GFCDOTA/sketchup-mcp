@@ -52,7 +52,7 @@ def test_tenta_sair_do_job_e_cai_para_sem_breakaway_quando_o_job_recusa(monkeypa
 
 def test_build_shell_usa_o_mesmo_lancamento():
     """su_build_shell sobe o SketchUp por build_plan_shell_skp.run — mesmo travamento."""
-    src = open("tools/build_plan_shell_skp.py", encoding="utf-8").read()
+    src = open("tools/sketchup/shell/build_plan_shell_skp.py", encoding="utf-8").read()
     run_src = src[src.index("def run("):src.index("def _infer_plant(")]
     assert "spawn_detached(cmd, env)" in run_src
     assert "subprocess.Popen(" not in run_src

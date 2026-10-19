@@ -24,7 +24,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 FIXTURE = REPO / "fixtures" / "planta_74" / "consensus_with_human_walls_and_soft_barriers.json"
-RB = REPO / "tools" / "build_plan_shell_skp.rb"
+RB = REPO / "tools" / "sketchup" / "shell" / "build_plan_shell_skp.rb"
 
 # Verdade medida do PDF (tools.door_swing_audit, 2026-07-11) — não editar sem
 # re-rodar o audit contra o PDF.

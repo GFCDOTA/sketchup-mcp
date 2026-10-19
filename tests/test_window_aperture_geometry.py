@@ -22,7 +22,7 @@ from pathlib import Path
 
 import pytest
 
-# Constants mirrored from tools/build_plan_shell_skp.rb (kept in sync
+# Constants mirrored from tools/sketchup/shell/build_plan_shell_skp.rb (kept in sync
 # manually). If these drift the geometry tests will catch the change
 # via the wall_height assertion.
 M_TO_IN = 39.3700787402
