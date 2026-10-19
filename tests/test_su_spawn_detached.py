@@ -66,6 +66,7 @@ def test_servidor_mcp_carrega_extensoes_c_antes_de_ler_o_stdin_sem_fixar_escala(
     import os
     import sys
 
+    pytest.importorskip("mcp")  # o job pytest do CI não instala o extra [mcp]
     env = {k: v for k, v in os.environ.items() if k != "PT_TO_M"}
     code = ("import os, sys, tools.mcp_server.server; "
             "missing = [m for m in ('numpy', 'shapely.geometry', 'shapely.ops', 'PIL.Image') if m not in sys.modules]; "
