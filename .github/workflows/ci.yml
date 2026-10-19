@@ -63,7 +63,9 @@ jobs:
         run: pip install -e .
       # Consensus-only detectors (opening<->host, wall overlap). Puros, sem SU/rede.
       # exit 0=PASS, 1=FAIL, 3=INCOMPLETE — o exit code É o gate.
-      - name: FP-042 P6 — binary asset provenance\n        run: python -m tools.rooms.asset_provenance\n      - name: Gate — planta_74
+      - name: FP-042 P6 — binary asset provenance
+        run: python -m tools.rooms.asset_provenance
+      - name: Gate — planta_74
         run: python -m tools.run_deterministic_gates --fixture planta_74
       - name: Gate — quadrado (micro-fixture canônico)
         run: python -m tools.run_deterministic_gates --fixture quadrado
