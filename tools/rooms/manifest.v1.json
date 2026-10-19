@@ -74,7 +74,7 @@
     },
     "service": {
       "providers": [
-        "tools.service_layout.build_boxes"
+        "tools.rooms.service.layout.build_boxes"
       ],
       "sources": [
         "room.laundry.casework-and-appliances"

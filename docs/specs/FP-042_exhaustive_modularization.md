@@ -72,3 +72,8 @@ foi migrada de `tools.kitchen_validation` para
 permitindo mocks existentes e preservando o gate fail-closed.
 Testes abrangem agregação geométrica, API antiga, delegação e falta
 de layout. A validação visual/L2 continua pendente.
+
+
+### FP-042/P3/P4 — ownership do brain SERVICE
+
+`tools.rooms.service.layout` agora possui a implementação completa do builder A.S. + terraços, sem criar cômodos adicionais. `tools.service_layout` é uma fachada estável para imports históricos e CLI, com teste negativo para seeds inválidos. Alteração sem SKP/render, dependente dos gates de CI e de prova L2 futura.

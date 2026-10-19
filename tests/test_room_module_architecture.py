@@ -68,9 +68,14 @@ def test_no_direct_bedroom_helpers_in_other_room_modules():
 
 
 def test_service_no_longer_imports_orchestrator_for_geometry():
-    source = (ROOT / "tools/service_layout.py").read_text(encoding="utf-8")
-    assert "from tools.furnish_apartment import _oriented_box" not in source
-    assert "from tools.rooms.shared.geometry import _oriented_box" in source
+    # The legacy entrypoint is a thin facade; shared geometry belongs to the
+    # actual room-specific implementation, not the compatibility shim.
+    facade = (ROOT / "tools/service_layout.py").read_text(encoding="utf-8")
+    implementation = (ROOMS / "service" / "layout.py").read_text(encoding="utf-8")
+    assert "from tools.furnish_apartment import _oriented_box" not in facade
+    assert "from tools.furnish_apartment import _oriented_box" not in implementation
+    assert "from tools.rooms.service import layout as _service" in facade
+    assert "from tools.rooms.shared.geometry import _oriented_box" in implementation
 
 
 def test_room_modules_do_not_turn_consultative_knowledge_into_execution():
