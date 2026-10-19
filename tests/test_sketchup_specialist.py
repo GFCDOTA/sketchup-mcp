@@ -488,7 +488,7 @@ def test_laje_do_banho_e_protegida_com_o_nome_que_o_place_layout_da():
     """O prefixo 'PeleTeto' nunca casava: o grupo se chama '<cômodo> · PeleTeto'."""
     layout = Path("tools/place_layout_skp.rb").read_text("utf-8")
     assert '"#{room} · #{mod}"' in layout                 # o nome que o grupo recebe
-    assert '"PeleTeto")' in Path("tools/bathroom_layout.py").read_text("utf-8")  # módulo da laje
+    assert '"PeleTeto")' in Path("tools/rooms/bathroom/layout.py").read_text("utf-8")  # dono canônico da laje
     for room in ("BANHO 01", "BANHO 02", "LAVABO"):
         assert ops.is_protected(f"{room} · PeleTeto")
         with pytest.raises(ops.OpsInvalid, match="Hard Rule #1"):

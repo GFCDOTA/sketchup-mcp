@@ -12388,6 +12388,27 @@
       "disposition": "retain_current_owner",
       "phase": "P5",
       "status": "REFERENTIAL_TEST_PENDING_CI"
+    },
+    {
+      "path": "tools/rooms/kitchen/layout.py",
+      "domain": "room_kitchen",
+      "disposition": "tools.rooms.kitchen",
+      "phase": "P3",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tools/rooms/bathroom/layout.py",
+      "domain": "room_bathroom",
+      "disposition": "tools.rooms.bathroom",
+      "phase": "P3",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tests/test_fp042_kitchen_bathroom_builder_ownership.py",
+      "domain": "test",
+      "disposition": "retain_current_owner",
+      "phase": "P3",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
     }
   ]
 }

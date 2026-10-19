@@ -77,3 +77,14 @@ de layout. A validação visual/L2 continua pendente.
 ### FP-042/P3/P4 — ownership do brain SERVICE
 
 `tools.rooms.service.layout` agora possui a implementação completa do builder A.S. + terraços, sem criar cômodos adicionais. `tools.service_layout` é uma fachada estável para imports históricos e CLI, com teste negativo para seeds inválidos. Alteração sem SKP/render, dependente dos gates de CI e de prova L2 futura.
+
+
+### FP-042/P3 — implementação de layout em kitchen e bathroom
+
+`tools.rooms.kitchen.layout` e `tools.rooms.bathroom.layout` passam a
+conter os algoritmos completos dos layouts; os entrypoints legados
+`tools.kitchen_layout` / `tools.bathroom_layout` permanecem fachadas de
+compatibilidade e CLI (sem cópia de algoritmo). As funções compartilhadas
+de geometria continuam em `tools.rooms.shared.geometry`. Testes de
+contrato e as suites de fidelidade validam que os casos reais não
+regrediram. Isso não prova L2/SketchUp.
