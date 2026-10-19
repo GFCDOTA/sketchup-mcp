@@ -26,6 +26,12 @@ def _mod(path: str) -> str:
     return ".".join(Path(path).with_suffix("").parts)
 
 
+def _dest(row: dict) -> str:
+    """Destino arquivo-a-arquivo; o mapa pode dar so a pasta (varios arquivos para o mesmo lugar)."""
+    d = row["destination"]
+    return d if Path(d).suffix else d.rstrip("/") + "/" + Path(row["item"]).name
+
+
 def _tracked() -> set[str]:
     return set(subprocess.check_output(["git", "ls-files", "-z"], cwd=ROOT).decode().split("\0"))
 
@@ -36,14 +42,14 @@ def test_origem_e_fachada_que_so_delega(row):
     logic = [n for n in tree.body if isinstance(n, (ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef))]
     assert logic == [], f"{row['item']} tem logica propria: {[n.name for n in logic]}"
     text = (ROOT / row["item"]).read_text("utf-8")
-    assert f'_TARGET = "{_mod(row["destination"])}"' in text
-    assert row["destination"] in _tracked()
+    assert f'_TARGET = "{_mod(_dest(row))}"' in text
+    assert _dest(row) in _tracked()
 
 
 @pytest.mark.parametrize("row", RESOLVED, ids=lambda r: r["item"])
 def test_caminho_unico_resolvido_sem_origem_nem_referencia_de_codigo(row):
     assert not (ROOT / row["item"]).exists()
-    assert row["destination"] in _tracked()
+    assert _dest(row) in _tracked()
     hits = subprocess.run(["git", "grep", "-l", "-F", row["item"], "--", "*.py", "*.rb", "*.ps1", "*.cmd", "*.yml"],
                           cwd=ROOT, capture_output=True, text=True).stdout.split()
     assert hits == [], hits
@@ -64,7 +70,7 @@ print("OK", len(pairs))
 
 @pytest.mark.parametrize("order", ["old_first", "new_first"])
 def test_import_frio_nas_duas_ordens_devolve_o_mesmo_modulo(order):
-    pairs = [(_mod(r["item"]), _mod(r["destination"])) for r in PY_FACADES]
+    pairs = [(_mod(r["item"]), _mod(_dest(r))) for r in PY_FACADES]
     code = "import sys;sys.path.insert(0, sys.argv[1]);" + _PROBE.format(pairs=pairs, order=order)
     done = subprocess.run([sys.executable, "-c", code, str(ROOT)], cwd=ROOT, capture_output=True, text=True,
                           encoding="utf-8", errors="replace", timeout=300)

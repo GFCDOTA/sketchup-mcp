@@ -1,12 +1,12 @@
 # build_sofa_from_config.rb — gera UM sofa a partir de um config JSON.
-# Rodar: SketchUp.exe <bootstrap.skp> -RubyStartup scripts/build_sofa_from_config.rb
+# Rodar: SketchUp.exe <bootstrap.skp> -RubyStartup tools/rooms/living/capabilities/ruby/sofa_program/build_sofa_from_config.rb
 # ENV: SOFA_CONFIG (json com 1 config), SOFA_SCHEMA, SOFA_OUT_DIR, SOFA_LOG.
 
 require 'json'
 require 'fileutils'
 require_relative 'sofa_generator'
 
-ROOT = File.dirname(File.dirname(__FILE__))
+ROOT = File.expand_path('../../../../../..', __dir__)
 LOGP = ENV['SOFA_LOG'] || File.join(ROOT, 'renders', 'sofa_eval', 'from_config_done.txt')
 
 begin

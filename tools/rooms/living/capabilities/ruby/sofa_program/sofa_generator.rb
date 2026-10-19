@@ -136,7 +136,7 @@ module SofaGenerator
   FABRIC_TILE_M = 0.30  # escala fisica do tile (GPT). CLASSE: igual p/ todo material_style.
 
   def fabric_albedo_path(ms)
-    File.join(File.dirname(File.dirname(__FILE__)), 'textures', "fabric_#{ms}_albedo.png")
+    File.join(File.expand_path('../../../../../..', __dir__), 'textures', "fabric_#{ms}_albedo.png")
   end
 
   def build_materials(model, cfg)
