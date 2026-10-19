@@ -1,0 +1,70 @@
+# FP-043 — Decisões em aberto
+
+Pendências que **não se resolvem pelas fontes** e por isso estão registradas em vez de decididas por mim. Cada uma diz o
+que está provado, o que cada opção muda, a recomendação e o que continua andando enquanto isso. Quando o Felipe decide, a
+linha vira uma nota de decisão com data e o item sai daqui.
+
+| ID | Assunto | Decide | Bloqueia |
+|---|---|---|---|
+| D-001 | Referência canônica do `quadrado` × builder aprovado em 2026-06-04 | Felipe | só a re-baseline da referência; nenhum fluxo |
+| D-002 | `tools/Dockerfile.dashboard` + `docker-compose.yml` do dashboard morto | Felipe | nada |
+| D-003 | `tools/furnish_plan.py` / `.rb` (3D Warehouse): vigente ou histórico | Felipe | só o destino desses 2 arquivos em P4 |
+| D-004 | Dono da CLI `tools/trace_view.py` | Felipe | só o destino dele em P4 |
+| D-005 | `scripts/set_clipboard_image.ps1` ainda útil | Felipe | só o destino dele em P4 |
+| D-006 | `repo_health_gate` fora do CI e hoje com 4 violações | Felipe | nada |
+
+## D-001 — Peitoril (e mais) do `quadrado`: referência de 2026-05-24 × builder aprovado em 2026-06-04
+
+**O que está provado (L2, SketchUp 26.0.429, `artifacts/review/l2_fp042_20261019/`)**
+O shell do `quadrado` gerado hoje preserva massa de parede abaixo e acima da janela (raios: sólido em z = 0,5 / 1,2 m e em
+2,4 / 2,65 m; vão aberto em 1,8 m), sem faces degeneradas. O contrato **semântico** (ADR-007 / LL-016: janela é abertura 3D
+que preserva peitoril e verga, nunca carve em altura cheia) **vale**. O que diverge são **números** da referência:
+
+| | Referência `docs/specs/_assets/quadrado_canonical_geometry_report.json` (2026-05-24) | Build atual (medido) |
+|---|---|---|
+| Janela (peitoril → verga) | 0,90 → 2,10 m, um painel de vidro (1 face) | 1,50 → 2,10 m, esquadria basculante (vidro com 4 sub-grupos) + grupo `WindowSash` |
+| Grupos de nível raiz | 3 | 4 |
+| Piso do cômodo | 14,516 m² (3,6135 → 7,4235 m) | 15,697 m² (3,5375 → 7,4995 m): o piso passa por baixo da parede |
+| `PlanShell_Group` | idêntico | idêntico |
+
+**De onde veio a divergência (fontes)**
+- `b45712a` (2026-06-04): "janelas viram esquadria" — Felipe aprovou `VISUAL_REVIEW=IMPROVED` **sobre a planta_74**; janelas
+  horizontais ≤ 1,20 m viram basculante (peitoril 1,50 m), as de quarto ganham 1,10 m. O comentário do builder diz que a
+  regra é para "as pequenas de banheiro/serviço".
+- O piso "tucado" sob a parede é de 2026-06-04 também (comentário em `build_floor`, "Felipe 2026-06-04").
+- A janela do `quadrado` tem 30 pt ≈ 1,06 m: **cai na regra do basculante por efeito colateral**, não por decisão sobre o
+  `quadrado`. Não existe registro de aprovação humana para o `quadrado` depois disso, e a referência nunca foi re-baselinada.
+
+**Por que não mexi no esperado:** a referência é protegida (`docs/specs/_assets/`), o teste que a pina é canônico, e a
+fonte não diz se o `quadrado` deve seguir a regra nova. Mudar o esperado para o teste passar é o que a FP-043 §8 proíbe.
+
+**Invisível hoje:** `tests/test_window_aperture_geometry.py` só roda esses checks quando existe `runs/quadrado_v3_aperture/`
+(cinco testes **pulam** no CI); com o build real presente, `test_quadrado_window_glass_group_exists` falha
+("altura 0,600 m; esperado 1,200 m"). A divergência só aparece rodando no SketchUp.
+
+**Opções**
+- **A (recomendada):** re-baselinar a referência (relatório de geometria + constantes do teste) a partir de um build real,
+  declarando que o `quadrado` exercita a regra de janela estreita aprovada; exige o seu OK por ser referência protegida, e
+  um `VISUAL_REVIEW` do render novo.
+- **B:** alargar a janela do `quadrado` (≥ 1,25 m) para que volte ao painel simples. Muda `fixtures/quadrado/` (protegida)
+  e perde a cobertura de janela estreita.
+- **C:** o builder não aplicar a regra do basculante em micro-fixtures. Cria caso especial sem fonte; não recomendado.
+
+**Continua andando:** shells da `planta_74`, validação por cômodo e todo o resto (a `planta_74` reconstruída é idêntica ao
+canônico aprovado; só a referência do `quadrado` está defasada).
+
+## D-002 a D-005 — vindas do mapa P0
+
+Ver [mapa P0](FP-043_P0_map.md), seção "Perguntas abertas". Resumo: o dashboard do estúdio foi removido em 2026-07-24 e
+`docker-compose.yml` ainda o sobe (`tools/studio_dashboard.py` não existe); `furnish_plan` insere componentes do 3D
+Warehouse sem consumidor; `trace_view` lê traces do AI Pipeline Inspector e não tem dono óbvio; `set_clipboard_image.ps1`
+colava imagem no ChatGPT, e a memória do projeto registra que Ctrl+V/upload não funcionam (o GPT vê via URL raw).
+
+## D-006 — `repo_health_gate` não roda no CI e hoje falha
+
+`python tools/repo_health_gate.py` reprova **4** coisas (depois da FP-043/P2, que resolveu as 2 de `.md` solto na raiz):
+`artifacts/review/furniture/kitchen`, `artifacts/review/planta_74/curation` e `artifacts/review/planta_74/shell_proof`
+sem report (`.json`/`.md`), e `SCALE_DEF_FORA_DO_CORE` em `tools/interior_studio/architect_program.py:23`. O gate está
+definido com um `test_repo_health` dentro de `tools/` (que o pytest não coleta) e nenhum teste de `tests/` o importa.
+Ligá-lo ao CI exige decidir: adicionar report às 3 pastas de evidência (mexe em `artifacts/`) e corrigir a definição de
+escala, ou aposentar essas regras.
