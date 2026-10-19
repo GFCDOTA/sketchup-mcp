@@ -14,7 +14,8 @@ from tools.rooms.shared.clearance import EPS_AREA_PT2, box_footprint_pt, depth_c
 IN_TO_M = 0.0254
 WALKABLE_TOP_M = 0.02          # topo ate 2 cm = piso/acabamento: nao bloqueia giro de porta
 DOOR_LEAF_TOP_M = 2.10         # a folha vai ate 2,10 m
-AUDITED_INTENTS = ("FURNITURE", "FIXTURE")
+AUDITED_INTENTS = ("FURNITURE", "FIXTURE")          # parede: so o que e mobiliario/loucas (decor fino e hospedado por desenho)
+SWING_INTENTS = AUDITED_INTENTS + ("DECORATIVE",)   # giro: tambem o decor de piso (lixeira, escova) bloqueia a folha
 
 
 def audit(consensus: dict, boxes: list[dict]) -> dict[str, dict[str, list[dict]]]:
@@ -26,7 +27,8 @@ def audit(consensus: dict, boxes: list[dict]) -> dict[str, dict[str, list[dict]]
     for b in boxes:
         room = str(b.get("room"))
         out[room]                                              # garante a chave mesmo sem achado
-        if b.get("geometry_intent") not in AUDITED_INTENTS:
+        intent = b.get("geometry_intent")
+        if intent not in SWING_INTENTS:
             continue
         fp = box_footprint_pt(b, PT_TO_IN)
         if fp is None or fp.is_empty:
@@ -36,7 +38,7 @@ def audit(consensus: dict, boxes: list[dict]) -> dict[str, dict[str, list[dict]]
         ip = b.get("interaction_policy") or {}
         hosted = (b.get("host") or {}).get("relationship", "NONE") != "NONE" or ip.get("furniture_overlap") != "EXCLUSIVE"
         inter = fp.intersection(walls)
-        if inter.area > EPS_AREA_PT2 and not hosted:
+        if inter.area > EPS_AREA_PT2 and not hosted and intent in AUDITED_INTENTS:
             out[room]["wall_penetration"].append({"module": b.get("module"), "label": b.get("label") or b.get("kind"),
                                                   "area_cm2": round(inter.area * PT_TO_M**2 * 1e4, 1), "depth_cm": depth_cm(inter, PT_TO_M)})
         if ip.get("circulation") != "WALKABLE" and z1 > WALKABLE_TOP_M and z0 < DOOR_LEAF_TOP_M:

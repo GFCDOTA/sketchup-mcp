@@ -90,3 +90,26 @@ def clip_box_outside(box: dict, wall_in) -> dict | None:
         rest = max(rest.geoms, key=lambda g: g.area)
     x0, y0, x1, y1 = (round(v, 2) for v in rest.bounds)
     return {**box, "x0": x0, "y0": y0, "x1": x1, "y1": y1, "corners": [[x0, y0], [x1, y0], [x1, y1], [x0, y1]]}
+
+
+def nudge_out_of_swing(box: dict, swings_in: dict, wall_in, cell_in, others_in: list, step_in: float = 2.0, max_steps: int = 16) -> dict | None:
+    """Desloca uma peca pequena (axial, cantos em polegadas) para fora do giro da porta; None se nao achar lugar.
+
+    Procura, na ordem de menor deslocamento, uma posicao que (1) saia de todos os giros, (2) fique dentro do comodo,
+    (3) fora da parede e (4) sem tocar nas outras pecas. Nao mexe na peca se ela ja esta livre.
+    """
+    from shapely.affinity import translate
+    fp = Polygon(box["corners"])
+    swing = unary_union(list(swings_in.values())) if swings_in else None
+    if swing is None or fp.intersection(swing).area < EPS_AREA_PT2:
+        return box
+    moves = sorted(((dx * step_in, dy * step_in) for dx in range(-max_steps, max_steps + 1) for dy in range(-max_steps, max_steps + 1)
+                    if (dx or dy)), key=lambda m: (abs(m[0]) + abs(m[1]), m))
+    for dx, dy in moves:
+        c = translate(fp, dx, dy)
+        if (c.intersection(swing).area < EPS_AREA_PT2 and cell_in.buffer(0.5).contains(c)
+                and c.intersection(wall_in).area < EPS_AREA_PT2 and all(c.intersection(o).area < EPS_AREA_PT2 for o in others_in)):
+            xs, ys = [p[0] + dx for p in box["corners"]], [p[1] + dy for p in box["corners"]]
+            return {**box, "x0": min(xs), "x1": max(xs), "y0": min(ys), "y1": max(ys),
+                    "corners": [[p[0] + dx, p[1] + dy] for p in box["corners"]]}
+    return None

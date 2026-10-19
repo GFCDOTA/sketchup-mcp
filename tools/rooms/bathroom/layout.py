@@ -1003,10 +1003,22 @@ def build_boxes(con, room_id):
     theme = theme_of(sm.get("room_name"))
     _apply_theme(items, theme)
     # FP-043/P3a-03: ralo linear e vidro fixo estendem-se ate a parede do fundo; encurta a ponta que entraria nela.
-    from tools.rooms.shared.clearance import clip_box_outside, obstacles_in
-    _wall_in, _ = obstacles_in(con, PT_TO_IN)
+    from shapely.affinity import scale as _scale
+    from shapely.geometry import Polygon as _Poly
+
+    from tools.rooms.shared.clearance import clip_box_outside, nudge_out_of_swing, obstacles_in
+    _wall_in, _swings_in = obstacles_in(con, PT_TO_IN)
     items = [c for c in (clip_box_outside(it, _wall_in) if it.get("kind") in ("kb_ralo", "box_vidro") else it
                          for it in items) if c is not None]
+    # a escova de piso nao fica no giro da porta: desloca para o lugar livre mais proximo (ou sai, declarado)
+    _cell_in = _scale(cell, PT_TO_IN, PT_TO_IN, origin=(0, 0))
+    for _i, _it in enumerate(items):
+        if _it.get("kind") != "kb_escova":
+            continue
+        _others = [_Poly(o["corners"]) for k, o in enumerate(items) if k != _i and o.get("corners") and o.get("geometry_intent") != "STRUCTURAL"
+                   and o.get("kind") not in ("kb_piso", "kb_teto") and o.get("module") not in ("Pele", "PeleTeto")]
+        items[_i] = nudge_out_of_swing(_it, _swings_in, _wall_in, _cell_in, _others)
+    items = [it for it in items if it is not None]
     kinds = [it["kind"] for it in items]
     return items, {"result": "OK", "room_name": sm.get("room_name"),
                    "theme": theme,
