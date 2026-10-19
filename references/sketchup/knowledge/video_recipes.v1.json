@@ -1,0 +1,462 @@
+{
+  "schema_version": "video_sketchup_knowledge.v1",
+  "project": "FP-041",
+  "intent": "ADVISORY_ONLY",
+  "execution_policy": "NEVER_AUTHORIZE_MODEL_MUTATIONS_FROM_THIS_CATALOG",
+  "sources": [
+    {
+      "id": "yt-cabinet-tips-2021",
+      "title": "10 Tips for Modeling CABINETS in SketchUp!",
+      "creator": "TheSketchUpEssentials",
+      "url": "https://www.youtube.com/watch?v=39x1vITTNKw",
+      "language": "en",
+      "duration": "11:02",
+      "evidence": "TRANSCRIPT_AND_VISUAL_WALKTHROUGH",
+      "reviewed": "2026-10-18",
+      "license": "VIDEO_REFERENCE_ONLY_NO_REPUBLICATION"
+    },
+    {
+      "id": "yt-kitchen-joinery-2024",
+      "title": "Técnicas de modelagem de projeto de marcenaria no Sketchup",
+      "creator": "Sara Vieira",
+      "url": "https://www.youtube.com/watch?v=RMJEqzbji5I",
+      "language": "pt",
+      "duration": "49:39",
+      "evidence": "TRANSCRIPT_AND_VISUAL_WALKTHROUGH",
+      "reviewed": "2026-10-18",
+      "license": "VIDEO_REFERENCE_ONLY_NO_REPUBLICATION"
+    },
+    {
+      "id": "yt-cabinet-styles-2024",
+      "title": "The ULTIMATE GUIDE To Modeling Cabinets in SketchUp!",
+      "creator": "TheSketchUpEssentials",
+      "url": "https://www.youtube.com/watch?v=OBtmisvuOHc",
+      "language": "en",
+      "duration": "35:32",
+      "evidence": "TRANSCRIPT_AND_DESCRIPTION_ONLY",
+      "reviewed": "2026-10-18",
+      "license": "VIDEO_REFERENCE_ONLY_NO_REPUBLICATION"
+    }
+  ],
+  "recipes": [
+    {
+      "id": "cabinet.detail-by-purpose",
+      "domain": "workflow",
+      "title": "Modelar no nível de detalhe necessário",
+      "sources": [
+        {
+          "id": "yt-cabinet-tips-2021",
+          "locator": "00:15–02:22"
+        }
+      ],
+      "goal": "Escolher entre volume para visualização arquitetônica e caixaria de fabricação, sem inflar o modelo.",
+      "when_use": "Antes de desenhar módulos repetidos ou importar componentes de terceiros.",
+      "avoid_when": "Não omitir ferragens, folgas, suportes ou afastamentos exigidos pela avaliação de fabricação.",
+      "gui_steps": [
+        "Definir a finalidade: layout/render ou detalhamento construtivo.",
+        "Para visualização, começar pelo volume de gabinete e frentes separadas.",
+        "Para fabricação, decompor em laterais, fundo, base, prateleiras, ferragens e montagem, mantendo medidas rastreáveis.",
+        "Organizar cada peça em grupo/componente nomeado no Outliner."
+      ],
+      "api_candidates": [
+        {
+          "method": "Entities#add_group",
+          "status": "DOCUMENTED_API"
+        },
+        {
+          "method": "Entities#add_instance",
+          "status": "DOCUMENTED_API"
+        }
+      ],
+      "implementation_route": "PARAMETRIC_BUILDER_EXTENSION_REQUIRED",
+      "preconditions": [
+        "Objetivo LOD declarado",
+        "Requisitos de montagem e auditoria verificados"
+      ],
+      "invariants": [
+        "Peças editáveis não se fundem com arquitetura",
+        "Módulos nomeados, sem geometria solta na raiz",
+        "Nenhuma especificação arquitetônica alterada"
+      ],
+      "pitfalls": [
+        "LOD arquitetônico não comprova fabricabilidade",
+        "Excesso de polígonos aumenta peso sem melhorar a decisão"
+      ],
+      "proof_state": "KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP"
+    },
+    {
+      "id": "cabinet.reusable-components",
+      "domain": "structure",
+      "title": "Repetição de portas e módulos com componentes",
+      "sources": [
+        {
+          "id": "yt-cabinet-tips-2021",
+          "locator": "02:22–06:15"
+        }
+      ],
+      "goal": "Permitir duplicação e alteração consciente de peças idênticas.",
+      "when_use": "Portas iguais, puxadores reutilizados, módulos seriados.",
+      "avoid_when": "Quando uma instância precisa de geometria individual sem propagar a alteração; tornar única antes.",
+      "gui_steps": [
+        "Modelar e isolar a geometria de uma frente.",
+        "Transformar a frente em componente com nome funcional.",
+        "Duplicar por Move+Copy, respeitando orientação e folgas.",
+        "Criar grupo ou componente de módulo contendo caixa, frentes e ferragens; nomear no Outliner.",
+        "Antes de editar a definição, identificar quantas instâncias a compartilham."
+      ],
+      "api_candidates": [
+        {
+          "method": "Group#to_component",
+          "status": "DOCUMENTED_API"
+        },
+        {
+          "method": "Entities#add_instance",
+          "status": "DOCUMENTED_API"
+        },
+        {
+          "method": "ComponentInstance#make_unique",
+          "status": "DOCUMENTED_API_RECHECK_VERSION"
+        }
+      ],
+      "implementation_route": "BUILDER_COMPONENT_HIERARCHY_NOT_VERIFIED",
+      "preconditions": [
+        "Instâncias compartilhadas identificadas",
+        "Eixos locais e facing declarados"
+      ],
+      "invariants": [
+        "Instâncias não-alvo preservadas",
+        "Hierarquia de módulo estável",
+        "Folgas entre portas preservadas"
+      ],
+      "pitfalls": [
+        "Editar definição compartilhada altera múltiplas instâncias",
+        "Espelhar por escala negativa pode afetar handedness e materiais"
+      ],
+      "proof_state": "KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP"
+    },
+    {
+      "id": "cabinet.front-gaps-and-profiles",
+      "domain": "geometry",
+      "title": "Folgas reais e frentes com rebaixo",
+      "sources": [
+        {
+          "id": "yt-cabinet-tips-2021",
+          "locator": "03:13–04:29"
+        },
+        {
+          "id": "yt-cabinet-styles-2024",
+          "locator": "04:36–05:24; 11:00–12:34; 16:19–23:36"
+        }
+      ],
+      "goal": "Ler corretamente portas, gavetas e frentes de estilo Shaker/rebaixadas.",
+      "when_use": "Precisar representar juntas, portas almofadadas ou frentes com detalhe geométrico.",
+      "avoid_when": "Não inventar folga ou largura de moldura sem projeto de marcenaria e ferragem escolhida.",
+      "gui_steps": [
+        "Modelar a frente como peça separada da caixa.",
+        "Definir gap perimetral no desenho antes de duplicar.",
+        "Para painel em rebaixo, criar perfil interno por Offset e extrusão negativa controlada.",
+        "Verificar normais, faces internas e contorno; suavização não substitui o recorte real.",
+        "Ao espelhar, inspecionar posição das juntas e handedness."
+      ],
+      "api_candidates": [
+        {
+          "method": "Entities#add_face",
+          "status": "DOCUMENTED_API"
+        },
+        {
+          "method": "Face#pushpull",
+          "status": "DOCUMENTED_API"
+        },
+        {
+          "method": "Face#offset",
+          "status": "ABSENT_METHOD_COMPUTE_PROFILE"
+        }
+      ],
+      "implementation_route": "PROFILE_BUILDER_EXTENSION_REQUIRED",
+      "preconditions": [
+        "Folgas cotadas pela spec ou hardware",
+        "Espessura mínima do painel verificada"
+      ],
+      "invariants": [
+        "Gap geométrico existe e é mensurável",
+        "Sem face degenerada ou auto-interseção",
+        "Portas não colidem nos envelopes de abertura"
+      ],
+      "pitfalls": [
+        "Offset da GUI não equivale a Face#offset na Ruby API",
+        "Apenas desenhar linha de divisão não cria folga",
+        "Tratamento especial para canto côncavo"
+      ],
+      "proof_state": "KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP"
+    },
+    {
+      "id": "cabinet.countertop-separate-and-bevel",
+      "domain": "geometry",
+      "title": "Tampo separado e arredondamento real na borda",
+      "sources": [
+        {
+          "id": "yt-cabinet-tips-2021",
+          "locator": "07:09–08:53"
+        }
+      ],
+      "goal": "Preservar editabilidade do tampo e melhorar a silhueta frontal.",
+      "when_use": "Bancadas que atravessam múltiplos gabinetes, com balanço e perfil de acabamento.",
+      "avoid_when": "Não assumir raio nem balanço da bancada a partir de vídeo demonstrativo.",
+      "gui_steps": [
+        "Concluir a distribuição dos módulos de base.",
+        "Desenhar contorno do tampo cobrindo módulos conforme a spec, com balanço declarado.",
+        "Extrudar a espessura e isolar em grupo independente.",
+        "Desenhar pequeno arco de perfil na borda e remover/gerar geometria para produzir bevel real.",
+        "Conferir bbox, seção, normais, arestas suavizadas e silhueta."
+      ],
+      "api_candidates": [
+        {
+          "method": "Entities#add_face",
+          "status": "DOCUMENTED_API"
+        },
+        {
+          "method": "Face#pushpull",
+          "status": "DOCUMENTED_API"
+        },
+        {
+          "method": "Face#followme",
+          "status": "DOCUMENTED_API_OPTIONAL_REQUIRES_PROBE"
+        }
+      ],
+      "implementation_route": "PARAMETRIC_PROFILE_OR_SWEEP_MISSING",
+      "preconditions": [
+        "Dimensões do tampo e balanço aprovados",
+        "Método de bevel escolhido após inspeção da topologia"
+      ],
+      "invariants": [
+        "Tampo independente do gabinete",
+        "Balanço e espessura conforme a spec",
+        "Sem aresta decorativa que só esconda um canto rígido"
+      ],
+      "pitfalls": [
+        "Soften não altera silhueta",
+        "Bevel com raio superior à espessura não é válido",
+        "Extrusão sobre geometria misturada gera aderência indevida"
+      ],
+      "proof_state": "KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP"
+    },
+    {
+      "id": "cabinet.sink-and-wet-channel-cutouts",
+      "domain": "geometry",
+      "title": "Recortes em bancada para cuba e calha",
+      "sources": [
+        {
+          "id": "yt-kitchen-joinery-2024",
+          "locator": "07:02–17:02"
+        }
+      ],
+      "goal": "Abrir furos reais e posicionar elementos sem perder material do tampo.",
+      "when_use": "Cuba de embutir e calha úmida com abertura definida por projeto e fabricante.",
+      "avoid_when": "Nunca copiar as medidas da aula como padrão do apartamento.",
+      "gui_steps": [
+        "Inserir componentes de cuba/calha como referência em posição verificada.",
+        "Marcar aberturas com guias em eixos da bancada, não inferência de câmera.",
+        "Criar geometria de recorte dentro do grupo correto; a aula usa Intersect Faces with Model.",
+        "Remover faces internas com inspeção explícita e finalizar espessura de borda.",
+        "Validar suporte, distância à borda, sifão/instalação e ausência de face residual."
+      ],
+      "api_candidates": [
+        {
+          "method": "Entities#intersect_with",
+          "status": "DOCUMENTED_API_REQUIRES_MICRO_FIXTURE"
+        },
+        {
+          "method": "Face#erase!",
+          "status": "DOCUMENTED_API_VALIDATE_RESULT"
+        }
+      ],
+      "implementation_route": "NO_PROVEN_AUTOMATED_CUTOUT",
+      "preconditions": [
+        "Ficha técnica do produto e perímetro do recorte",
+        "Aprovação hidráulica e dimensões da planta",
+        "Modelo de bancada editável em cópia"
+      ],
+      "invariants": [
+        "Abertura passante real, não pintura falsa",
+        "Espessura remanescente válida",
+        "Geometria de outros módulos e arquitetura intocada"
+      ],
+      "pitfalls": [
+        "Intersect Faces produz arestas, não garante recorte fechado automaticamente",
+        "Cuba 3D Warehouse pode vir em escala/unidades erradas",
+        "Medidas de referência do vídeo não são regra universal"
+      ],
+      "case_only_measures": [
+        "A aula usa bancada a 0,907m, recortes e calha com medidas próprias; NÃO importar para planta_74."
+      ],
+      "proof_state": "KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP"
+    },
+    {
+      "id": "cabinet.drawer-box-and-hardware",
+      "domain": "joinery",
+      "title": "Caixaria de gaveta e folgas dependentes da corrediça",
+      "sources": [
+        {
+          "id": "yt-kitchen-joinery-2024",
+          "locator": "21:20–39:23"
+        }
+      ],
+      "goal": "Gerar frentes, laterais, fundo, divisórias e envelope de deslizamento com montagem compreensível.",
+      "when_use": "Armário com gavetas funcionais e auditoria de construção.",
+      "avoid_when": "Sem modelo específico de ferragem, não certificar folgas nem carga.",
+      "gui_steps": [
+        "Definir vão interno e escolher corrediça/ferragem.",
+        "Reservar folgas laterais e de instalação fornecidas pelo fabricante.",
+        "Desenhar frentes com juntas visíveis e alturas por divisão, em peças isoladas.",
+        "Modelar laterais, traseira, base e fundo da gaveta com espessuras explícitas.",
+        "Agrupar caixa com frente somente se o propósito de abertura/edição exigir; verificar colisão ao movimentar."
+      ],
+      "api_candidates": [
+        {
+          "method": "Entities#add_group",
+          "status": "DOCUMENTED_API"
+        },
+        {
+          "method": "Entities#add_face",
+          "status": "DOCUMENTED_API"
+        },
+        {
+          "method": "Face#pushpull",
+          "status": "DOCUMENTED_API"
+        }
+      ],
+      "implementation_route": "PARAMETRIC_DRAWER_ASSEMBLY_MISSING",
+      "preconditions": [
+        "Dimensões livres do vão",
+        "Ficha técnica e curso da corrediça",
+        "Espessuras de chapa de projeto"
+      ],
+      "invariants": [
+        "Folgas laterais compatíveis com ferragem",
+        "Gaveta não atravessa sifão ou estrutura",
+        "Frente e caixaria editáveis de modo intencional"
+      ],
+      "pitfalls": [
+        "Aula demonstra valores de um exemplo, não norma",
+        "Envelope de uso precisa ser auditado",
+        "Scale na frente pode alterar espessura: preferir alterar a spec"
+      ],
+      "case_only_measures": [
+        "A aula exemplifica recuos de 2cm, painéis de 15mm e fundo de 6mm; exigir fabricante e projeto antes de usar."
+      ],
+      "proof_state": "KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP"
+    },
+    {
+      "id": "cabinet.materials-and-texture-direction",
+      "domain": "finishing",
+      "title": "Materiais aplicados às faces e orientação de veio",
+      "sources": [
+        {
+          "id": "yt-cabinet-tips-2021",
+          "locator": "06:16–07:10"
+        },
+        {
+          "id": "yt-cabinet-styles-2024",
+          "locator": "12:34–13:58; 13:58–16:19"
+        },
+        {
+          "id": "yt-kitchen-joinery-2024",
+          "locator": "41:18–48:58"
+        }
+      ],
+      "goal": "Garantir escala e orientação de texturas e evitar links quebrados em render.",
+      "when_use": "Madeira, painéis, frentes e V-Ray com texturas importadas.",
+      "avoid_when": "Não tratar imagem importada ou material de terceiros como livre para redistribuição.",
+      "gui_steps": [
+        "Aplicar material explicitamente às faces corretas quando a herança do container for ambígua.",
+        "Conferir orientação do veio em portas, laterais e painéis; não basta cor do grupo.",
+        "Conferir escala física da textura contra a dimensão de referência do material.",
+        "Se a textura sumir, auditar o caminho do bitmap no V-Ray antes de substituir o acabamento.",
+        "Renderizar com câmera e luz idênticas antes/depois para avaliação humana."
+      ],
+      "api_candidates": [
+        {
+          "method": "Face#material=",
+          "status": "DOCUMENTED_API"
+        },
+        {
+          "method": "Face#position_material",
+          "status": "DOCUMENTED_API_REQUIRES_MICRO_FIXTURE"
+        },
+        {
+          "method": "Material#texture=",
+          "status": "DOCUMENTED_API_REQUIRES_MICRO_FIXTURE"
+        }
+      ],
+      "implementation_route": "MATERIAL_PLACEMENT_PARTIAL_ONLY",
+      "preconditions": [
+        "Origem e licença da textura verificadas",
+        "Diretriz de design aprovada",
+        "Tamanho real da textura conhecido"
+      ],
+      "invariants": [
+        "Orientação do veio consistente com a peça",
+        "Textura com escala rastreável",
+        "Nenhuma mudança geométrica como efeito colateral"
+      ],
+      "pitfalls": [
+        "Aplicar no grupo e aplicar diretamente à face têm semânticas distintas",
+        "Material faltante no V-Ray pode ser caminho quebrado, não erro da geometria",
+        "Aprovação visual não pode ser autoatribuída"
+      ],
+      "proof_state": "KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP"
+    },
+    {
+      "id": "cabinet.recessed-shaker-and-louvers",
+      "domain": "geometry",
+      "title": "Variações Shaker, frentes rebaixadas e venezianas",
+      "sources": [
+        {
+          "id": "yt-cabinet-styles-2024",
+          "locator": "11:00–12:34; 16:19–31:51"
+        }
+      ],
+      "goal": "Expandir repertório de perfis sem transformar todo gabinete em uma caixa chapada.",
+      "when_use": "Referência de design pede moldura/rebaixo/veneziana, e espessura da peça permite.",
+      "avoid_when": "Não escalar o gabinete inteiro para alterar largura; pode deformar espessura da moldura.",
+      "gui_steps": [
+        "Construir frente independente na espessura especificada.",
+        "Produzir moldura/perfil interno mediante geometria offset calculada.",
+        "Rebaixar o painel central sem gerar faces internas degeneradas.",
+        "Para venezianas, criar uma lâmina com ângulo e repetir em passos definidos, respeitando espessura.",
+        "Suavizar somente arestas adequadas; preservar contorno real."
+      ],
+      "api_candidates": [
+        {
+          "method": "Entities#add_face",
+          "status": "DOCUMENTED_API"
+        },
+        {
+          "method": "Face#pushpull",
+          "status": "DOCUMENTED_API"
+        },
+        {
+          "method": "Entities#add_instance",
+          "status": "DOCUMENTED_API"
+        }
+      ],
+      "implementation_route": "PROFILE_AND_ARRAY_BUILDER_REQUIRED",
+      "preconditions": [
+        "Perfil/espessura da frente definidos",
+        "Critério de repetição de lâminas definido por geometria",
+        "Opção de edição individual de instâncias avaliada"
+      ],
+      "invariants": [
+        "Espessura constante onde exigida",
+        "Número de venezianas e espaçamento conferíveis",
+        "Peça permanece separada do gabinete"
+      ],
+      "pitfalls": [
+        "Conteúdo só transcrito para este vídeo: detalhes visuais não auditados",
+        "Offset GUI sem equivalente direto Face#offset",
+        "Lâminas do modelo não implicam ensaio físico de ventilação"
+      ],
+      "proof_state": "KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP"
+    }
+  ]
+}
