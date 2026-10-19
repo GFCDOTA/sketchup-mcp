@@ -10397,9 +10397,9 @@
     {
       "path": "tests/test_room_module_architecture.py",
       "domain": "test",
-      "disposition": "test_suite",
-      "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "disposition": "retain_current_owner",
+      "phase": "P3",
+      "status": "VERIFIED_ARCHITECTURE_TEST_UPDATED_PENDING_CI"
     },
     {
       "path": "tests/test_room_registry.py",
@@ -11930,9 +11930,9 @@
     {
       "path": "tools/service_layout.py",
       "domain": "room_service_or_balcony",
-      "disposition": "manual_owner_review",
-      "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "disposition": "legacy_compatibility_shim",
+      "phase": "P4",
+      "status": "VERIFIED_COMPATIBILITY_SHIM_PENDING_CI"
     },
     {
       "path": "tools/shell_parts.py",
@@ -12339,6 +12339,20 @@
       "disposition": "retain_current_owner",
       "phase": "P2",
       "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tools/rooms/service/layout.py",
+      "domain": "room_service",
+      "disposition": "tools.rooms.service",
+      "phase": "P3",
+      "status": "VERIFIED_CODE_OWNERSHIP_PENDING_CI"
+    },
+    {
+      "path": "tests/test_fp042_service_layout_ownership.py",
+      "domain": "test",
+      "disposition": "retain_current_owner",
+      "phase": "P3",
+      "status": "VERIFIED_TEST_OWNERSHIP_PENDING_CI"
     }
   ]
 }
