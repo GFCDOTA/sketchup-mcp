@@ -1,0 +1,10 @@
+{
+ "status": "SU_EXITED",
+ "reason": "o SketchUp fechou antes de escrever o resultado",
+ "killed_pid": 15068,
+ "out_skp_exists": false,
+ "unedited_copy_removed": true,
+ "base_unchanged": true,
+ "result_file_exists": false,
+ "no_positive_proof": true
+}

@@ -7179,6 +7179,72 @@
       "blob_sha": "d363ca478fe9b23b705c266c4196b189ce9032df",
       "blob_size": 4020,
       "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p7_kitchen_cabinet/README.md",
+      "blob_sha": "ffcfda3f9a86e58303d23261f2af8df5dc7ccd62",
+      "blob_size": 5416,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p7_kitchen_cabinet/cabinet.skp",
+      "blob_sha": "b65dcd66f4fbfa3805e5d5064867049aa0cc2ff8",
+      "blob_size": 3435398,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p7_kitchen_cabinet/interrupted_job.json",
+      "blob_sha": "4300e19f00ca4ba20f0a85762e2a725e1ee4ed76",
+      "blob_size": 260,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p7_kitchen_cabinet/l2_p7.py",
+      "blob_sha": "f6dd1cacfab60486ee626ebb99119e429fe96065",
+      "blob_size": 5980,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p7_kitchen_cabinet/negatives.json",
+      "blob_sha": "2b4d2ce4e6b35a41184177cff80550deec26f96c",
+      "blob_size": 2492,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p7_kitchen_cabinet/p6b_matrix_rerun.json",
+      "blob_sha": "5fddb8efe05958ea326af33b5ec57880fda68dd6",
+      "blob_size": 2894,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p7_kitchen_cabinet/request.json",
+      "blob_sha": "62d715bba518129eeb12f4f251038f8520f30cbf",
+      "blob_size": 2475,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p7_kitchen_cabinet/summary.json",
+      "blob_sha": "8991e01af34be6864402c74c6928c64a30799fd4",
+      "blob_size": 723,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p7_kitchen_cabinet/trace.json",
+      "blob_sha": "7731fe5a6b323841b25b6b3d8274ab11602c5757",
+      "blob_size": 10029,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p7_kitchen_cabinet/iso.png",
+      "blob_sha": "663f8c40ee93d13f9e8db6642a13f67d0630f29e",
+      "blob_size": 189803,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p7_kitchen_cabinet/top.png",
+      "blob_sha": "85aed5b74207d3ff6802d2dfad732d266451d2c4",
+      "blob_size": 17652,
+      "owner_group": "artifacts"
     }
   ]
 }

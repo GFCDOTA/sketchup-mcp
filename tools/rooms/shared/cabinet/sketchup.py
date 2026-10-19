@@ -63,7 +63,21 @@ def materialize(plan: dict, out_skp: str | Path, *, base_skp: str | Path | None 
         saved = res["result"].get("saved") is True and out.exists() and out.stat().st_mtime_ns >= started_ns
         if not saved:
             res.update(status="FAILED", reason=f"o job disse ok mas {out} nao foi gravado")
+    if res.get("status") != "OK":
+        _discard_unedited(out, res)          # job interrompido/falho: a copia nao editada NAO pode parecer resultado
     return res
+
+
+def _discard_unedited(out: Path, res: dict[str, Any]) -> None:
+    """Copia sem o gabinete nao e resultado. Se o SketchUp ainda a segura aberta (Windows), deixa um marcador ao lado."""
+    try:
+        out.unlink(missing_ok=True)
+        res["unedited_copy_removed"] = True
+    except OSError as exc:
+        marker = out.with_name(out.name + ".NOT_A_RESULT.txt")
+        marker.write_text(f"{out.name} e a copia NAO editada (o job nao concluiu: {res.get('reason') or res.get('status')}). "
+                          f"Pode estar aberta no SketchUp PID {res.get('pid')}; apague depois de fechar." + chr(10), encoding="utf-8")
+        res.update(unedited_copy_removed=False, unedited_copy_marker=str(marker), cleanup_error=f"{type(exc).__name__}: {exc}")
 
 
 def inspect(skp: str | Path, *, mode: str | None = None, timeout_s: int = 180, su: SketchUp | None = None) -> dict[str, Any]:

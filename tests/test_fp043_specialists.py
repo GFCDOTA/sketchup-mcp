@@ -105,12 +105,16 @@ CAB_INPUTS = {
 }
 
 
-def test_gabinete_de_frentes_lisas_tem_capacidade_l1_e_gera_plano_sem_executar():
+def test_gabinete_de_frentes_lisas_tem_capacidade_l2_e_gera_plano_sem_executar():
     res = sp.plan({"text": "gabinete de cozinha com frentes lisas", "room": "kitchen", "inputs": CAB_INPUTS})
     assert res["state"] == "PLAN_READY_NOT_EXECUTED" and res["execution_authorized"] is False
-    assert res["capability"]["id"] == "kitchen.cabinet.plain-fronts" and res["capability"]["validation"] == "L1_PASS"
-    assert [s["tool"] for s in res["steps"]] == ["python:tools.rooms.kitchen.capabilities.cabinet.plan_kitchen_cabinet",
-                                                 "python:tools.rooms.shared.cabinet.plan.plan_cabinet"]
+    assert res["capability"]["id"] == "kitchen.cabinet.plain-fronts" and res["capability"]["validation"] == "L2_PASS"
+    assert [s["tool"] for s in res["steps"]] == [
+        "python:tools.rooms.kitchen.capabilities.cabinet.plan_kitchen_cabinet", "python:tools.rooms.shared.cabinet.plan.plan_cabinet",
+        "python:tools.rooms.shared.cabinet.plan.require_valid", "python:tools.rooms.shared.cabinet.sketchup.materialize",
+        "python:tools.rooms.shared.cabinet.sketchup.inspect", "ruby:tools/rooms/shared/cabinet/ruby/cabinet_build.rb",
+        "ruby:tools/rooms/shared/cabinet/ruby/cabinet_inspect.rb"]
+    assert res["execution_authorized"] is False                       # o plano nunca autoriza; o fluxo (P7) liga allowlist + gates + job
 
 
 def test_gabinete_sem_medidas_pergunta_em_vez_de_inventar_padrao():
@@ -254,3 +258,24 @@ def test_indice_de_conhecimento_nao_copia_texto_de_recipe():
     for room in cc.ROOMS:
         raw = (ROOT / "tools/rooms" / room / "knowledge/index.v1.json").read_text("utf-8")
         assert "gui_workflow" not in raw and "gui_steps" not in raw
+
+
+# ------------------------------------------------------------------ deteccao de pedido que mexe na arquitetura
+# (o L2 real achou que "remover a parede oeste" nao era pego: a regra antiga exigia "remover parede" colado)
+@pytest.mark.parametrize("text", [
+    "gabinete de cozinha e remover a parede oeste", "derrubar a parede da sala", "tirar a porta da cozinha", "mova a janela para a esquerda",
+    "fechar o vao da sacada", "abrir um vao na parede", "demolish the wall", "delete the window", "alterar a arquitetura",
+    "quebrar a parede", "trocar a porta de lugar", "remova a parede", "mover porta da sala para o corredor",
+])
+def test_verbo_de_alteracao_sobre_elemento_arquitetonico_bloqueia(text):
+    assert sp.touches_architecture(text) is True
+    assert sp.plan({"text": text, "room": "kitchen"})["state"] == "BLOCKED_ARCHITECTURE_CHANGE"
+
+
+@pytest.mark.parametrize("text", [
+    "gabinete perto da porta", "mover o gabinete para a esquerda", "armario com porta Shaker", "armario com portas de correr",
+    "gabinete com porta do gabinete mais larga", "gabinete ao lado da janela", "abrir gaveta", "gabinete de cozinha com frentes lisas",
+    "mover o gabinete para a parede oeste", "tirar o gabinete da parede", "mover o gabinete para perto da porta",
+])
+def test_pedido_sobre_o_proprio_gabinete_nao_e_confundido_com_arquitetura(text):
+    assert sp.touches_architecture(text) is False

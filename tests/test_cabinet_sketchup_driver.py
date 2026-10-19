@@ -241,3 +241,38 @@ def test_ruby_nao_toca_entidades_de_arquitetura():
     assert "PlanShell" not in src and "Window_" not in src and "Floor_Group" not in src
     # unica remocao: grupos de gabinete com request_id igual (reexecucao controlada)
     assert src.count("erase!") == 1
+
+
+# ------------------------------------------------------------------ job interrompido/falho nao deixa resultado
+def test_job_que_sai_sem_resultado_nao_deixa_copia_que_pareca_resultado(tmp_path):
+    base = tmp_path / "base.skp"
+    base.write_bytes(b"SKP-BASE")
+
+    def job(cmd, env, handle):          # o SketchUp morre no meio: nao escreve resultado
+        handle.returncode = 1
+    su, _ = fake_su(job)
+    out = tmp_path / "res" / "cab.skp"
+    res = cs.materialize(plan_cabinet(req()), out, base_skp=base, mode="interactive", su=su)
+    assert res["status"] == "SU_EXITED" and not out.exists() and res["unedited_copy_removed"] is True
+    assert base.read_bytes() == b"SKP-BASE"
+
+
+def test_job_que_falha_no_ruby_tambem_descarta_a_copia(tmp_path):
+    base = tmp_path / "base.skp"
+    base.write_bytes(b"SKP-BASE")
+
+    def job(cmd, env, handle):
+        Path(env["SKMCP_RESULT"]).write_text(json.dumps({"ok": False, "error": "RuntimeError: x"}), "utf-8")
+    su, _ = fake_su(job)
+    out = tmp_path / "res" / "cab.skp"
+    res = cs.materialize(plan_cabinet(req()), out, base_skp=base, mode="interactive", su=su)
+    assert res["status"] == "FAILED" and not out.exists()
+
+
+def test_copia_que_nao_da_para_apagar_ganha_marcador(tmp_path, monkeypatch):
+    out = tmp_path / "cab.skp"
+    out.write_bytes(b"SKP")
+    monkeypatch.setattr(Path, "unlink", lambda self, missing_ok=False: (_ for _ in ()).throw(PermissionError("aberta")))
+    res = {"status": "SU_EXITED", "reason": "x", "pid": 7}
+    cs._discard_unedited(out, res)
+    assert res["unedited_copy_removed"] is False and Path(res["unedited_copy_marker"]).exists()

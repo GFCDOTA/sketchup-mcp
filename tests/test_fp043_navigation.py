@@ -37,7 +37,7 @@ def test_rotas_de_navegacao_passam():
     assert check_routes(doc, ROOT) == []
     ids = {r["id"] for r in doc["routes"]}
     assert ids == {"kitchen-planner-and-sink-rule", "shared-cabinet-builder", "shaker-door-recipe",
-                   "kitchen-test-and-l2-evidence", "mcp-to-skp", "kitchen-specialist-and-catalog", "specialists-all-rooms"}
+                   "kitchen-test-and-l2-evidence", "mcp-to-skp", "kitchen-specialist-and-catalog", "specialists-all-rooms", "kitchen-vertical-trace"}
     assert all(len(r["hops"]) - 1 <= 3 for r in doc["routes"])
 
 
