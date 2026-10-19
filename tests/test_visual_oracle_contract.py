@@ -21,7 +21,7 @@ SCHEMA = REPO_ROOT / "schemas" / "visual_findings.schema.json"
 SKILL = REPO_ROOT / ".claude" / "skills" / "skp-visual-self-correction" / "SKILL.md"
 SPEC = REPO_ROOT / "docs" / "specs" / "FP-030_visual_oracle_gate.md"
 TOOL = REPO_ROOT / "tools" / "oracle" / "run_skp_visual_review.py"
-REVIEWER_PROMPT = REPO_ROOT / "tools" / "prompts" / "visual_oracle_reviewer.md"
+REVIEWER_PROMPT = REPO_ROOT / "tools" / "oracle" / "prompts" / "visual_oracle_reviewer.md"
 
 
 # ---- existence ------------------------------------------------------

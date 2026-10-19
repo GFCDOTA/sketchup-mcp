@@ -120,6 +120,17 @@ nomeada, não esquecimento).
 
 L2: `material_review.rb` no caminho novo gera os 4 proofs **byte-idênticos** (SHA-256) aos do caminho antigo, sobre o mesmo `.skp` mobiliado.
 
+## P4d — pastas inteiras (feito)
+
+| Antes | Agora | Compatibilidade |
+|---|---|---|
+| `tools/pdf_knowledge/` | `tools/knowledge/pdf/` | CLIs `*.py` com fachada no caminho antigo; README e manifesto-modelo movidos (README antigo vira ponteiro); `.gitignore` cobre o novo `output/` |
+| `tools/prompts/` | `tools/oracle/prompts/` | caminho único (referências reescritas); `tools/prompts/README.md` é ponteiro |
+| `tools/quadrado/` | `tools/rendering/quadrado/` | `render_view.py` com fachada; `render_view.rb` com stub no caminho antigo |
+
+**Congelados por decisão (D-002…D-005):** `tools/furnish_plan.py` (+`.rb` já movido), `tools/trace_view.py` e `scripts/set_clipboard_image.ps1`
+seguem onde estão até a decisão do Felipe — ver [decisões abertas](../specs/FP-043_open_decisions.md).
+
 ## Para quem vai mover um arquivo (checklist do PR)
 
 1. `python -m tools.navigation.consumers <caminho>`: leia **todos** os consumidores (código, testes, CI, MCP, config, docs).

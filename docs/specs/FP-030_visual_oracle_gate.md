@@ -296,7 +296,7 @@ See `schemas/visual_findings.schema.json`. Required fields:
 ## Tooling
 
 - `tools/run_skp_visual_review.py` — MVP runner
-- `tools/prompts/visual_oracle_reviewer.md` — prompt for downstream
+- `tools/oracle/prompts/visual_oracle_reviewer.md` — prompt for downstream
   vision agent
 - `tests/test_visual_oracle_contract.py` — schema + manifest contract
 - `.claude/skills/skp-visual-self-correction/SKILL.md` — operational skill

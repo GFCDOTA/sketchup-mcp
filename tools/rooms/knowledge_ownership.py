@@ -36,7 +36,7 @@ def owner_for(path: str) -> str | None:
         return "tooling_documentation"
     if path.startswith("tools/") and path.endswith(".md"):
         return "tooling_documentation"
-    if path.startswith("tools/prompts/"):
+    if path.startswith(("tools/prompts/", "tools/oracle/prompts/")):
         return "agent_prompts"
     return None
 
