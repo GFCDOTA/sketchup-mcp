@@ -69,7 +69,7 @@ reference_image → design_grammar_tokens → room_constraints(PDF) → DesignGr
    cor por PAPEL (kind próprio, senão o cache de material pinta o módulo todo da 1ª peça).
    Reusar os brains/builders (`kitchen_layout`, `bedroom_layout`, `decor_builders`, classes).
 6. **Renderizar 5 ângulos** isolados em massa cinza/material básico:
-   `tools/render_kitchen_angles.rb` (KA_KEEP=<tag do cômodo>, KA_HIDE p/ oclusor).
+   `tools/rooms/kitchen/capabilities/ruby/render_kitchen_angles.rb` (KA_KEEP=<tag do cômodo>, KA_HIDE p/ oclusor).
 7. **Rodar os gates** (abaixo). FAIL = consertar/avisar, nunca mostrar calado.
 
 ## Vocabulário de extração (design_grammar_tokens)

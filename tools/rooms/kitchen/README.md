@@ -9,7 +9,7 @@ prova, está escrito.
 | Preciso de… | Arquivo |
 |---|---|
 | o **planner** (layout da cozinha) | [`layout.py`](layout.py) → `build_boxes(con, room_id)` |
-| a **regra que protege a pia** (ponto hidráulico do PDF) | constantes `KITCHEN_SINK_ANCHOR` / `KITCHEN_SINK_SIDE` em `layout.py`; checagem em [`anchor_rules.py`](anchor_rules.py) → `validate`; trava fail-closed em [`validation.py`](validation.py) → `require_kitchen_anchor` |
+| a **regra que protege a pia** (ponto hidráulico do PDF) | constantes `KITCHEN_SINK_ANCHOR` / `KITCHEN_SINK_SIDE` em `layout.py`; checagem em [`anchor_rules.py`](anchor_rules.py) → `validate`; trava fail-closed em [`validation/__init__.py`](validation/__init__.py) → `require_kitchen_anchor` |
 | a medição ergonômica | [`tools/kitchen_ergonomics.py`](../../kitchen_ergonomics.py) → `audit` (ainda em `tools/`; vai para `validation/` em P4) |
 | quem chama a cozinha | `tools/furnish_apartment.py` (`collect_boxes`) via [`../dispatch.py`](../dispatch.py); manifesto em [`../manifest.v1.json`](../manifest.v1.json) |
 
@@ -52,7 +52,7 @@ Estados separados: **implementação**, **validação** e **visual** não se con
 | Gavetas, ferragens, recorte de cuba em bancada | **ausentes** (recipes consultivas) | `BLOCKED_CAPABILITY_MISSING` | — |
 | Lista de corte / fabricação | **ausente** | — | — |
 
-Os adapters de capacidade da cozinha ficarão em `tools/rooms/kitchen/capabilities/` (previsto, P6); hoje a pasta não existe.
+Capacidades exclusivas da cozinha ficam em [`capabilities/`](capabilities/) (V-Ray, bake de tema e os `.rb` de recolor/ângulos, movidos da raiz de `tools/` na FP-043/P4a); o adapter do gabinete paramétrico (`capabilities/cabinet.py`) é previsto (P6) e hoje não existe.
 
 O plano consultivo `cabinet_plan` ([`tools/sketchup/knowledge.py`](../../sketchup/knowledge.py)) devolve BOM proposta e
 caixas de um caso sintético com `plan_state = BLOCKED_CAPABILITY_MISSING` e `execution_authorized = false`: **não é
