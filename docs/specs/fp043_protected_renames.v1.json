@@ -1,0 +1,41 @@
+{
+ "schema_version": "fp043_protected_renames.v1",
+ "spec": "docs/specs/FP-043_repository_navigation_and_room_specialists.md",
+ "baseline_commit": "07959bfdd153031de13190e883583c7e8acb5c70",
+ "policy": "Só renomeações listadas aqui são autorizadas para arquivos protegidos. O conteúdo (blob do git e SHA256 do blob) não muda; os manifestos FP-042 são editados cirurgicamente (mesmo blob, novo caminho), nunca regenerados.",
+ "renames": [
+  {
+   "old_path": "HISTORICO_SOFA.json",
+   "new_path": "references/sofas/history/HISTORICO_SOFA.json",
+   "status": "done",
+   "blob_sha": "ceac4316e24214ae6ef920aa65191217ed2a5670",
+   "sha256": "aaa24464667c61718ed911952360a2937a62696ab5fb349541d827f9aeddc9f6",
+   "owner_group": "references",
+   "in_assets": false,
+   "in_references": true,
+   "consumers_reviewed": [
+    "tools/rooms/knowledge_ownership.py",
+    "tests/test_fp042_knowledge_ownership.py",
+    "docs/handoffs/2026-06-24_interior_studio_and_class_program_handoff.md (histórico, com nota)"
+   ],
+   "justification": "Dado histórico do programa do sofá: sai da raiz para references/ (FP-043 §4.1), conteúdo idêntico.",
+   "authorized_by": "FP-043 §4.1 (destino proposto) e §9.5; execução P2"
+  },
+  {
+   "old_path": "vray_pipeline_proof.png",
+   "new_path": "artifacts/review/vray_pipeline_proof_2026-06/vray_pipeline_proof.png",
+   "status": "done",
+   "blob_sha": "42f50d658683639ac9decb78d373c8463b9dc043",
+   "sha256": "aac82e3a638d8a3a6926bb62a51c74a2268b9095e559d807247182cd32ee0532",
+   "owner_group": "artifacts",
+   "in_assets": true,
+   "in_references": true,
+   "consumers_reviewed": [
+    "docs/handoffs/2026-06-24_interior_studio_and_class_program_handoff.md (histórico, com nota)",
+    "manifestos FP-042 (inventário, referências, assets)"
+   ],
+   "justification": "Evidência de prova V-Ray (não é render canônico): sai da raiz para uma pasta de evidência identificada com README (FP-043 §4.1).",
+   "authorized_by": "FP-043 §4.1 (destino proposto) e §9.5; execução P2"
+  }
+ ]
+}

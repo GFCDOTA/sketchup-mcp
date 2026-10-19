@@ -1,5 +1,7 @@
 # KICKOFF — próxima sessão sketchup-mcp
 
+> **Histórico — movido da raiz (FP-043/P2).** Kickoff de 2026-07-23, escrito junto de um HANDOFF anterior; não é o plano vigente.
+
 > Gerado 2026-07-23 junto com o `HANDOFF.md` (leia-o primeiro; este arquivo é o
 > plano de ataque, aquele é o estado). Apagar/atualizar quando a missão landar.
 

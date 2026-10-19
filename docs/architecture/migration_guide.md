@@ -6,8 +6,13 @@ Para quem procura um arquivo que mudou de lugar, e para quem vai mover um. Mapa 
 
 ## Estado
 
-**Nada foi movido ainda.** A FP-043 está na fase de navegação (P1); a raiz muda em P2 e `tools/` em P4. Este guia
-vale desde já porque fixa as regras que toda movimentação segue.
+- **Raiz (P2):** `CLAUDE_COGNITIVE_ARCHITECTURE.md`, `HANDOFF.md`, `KICKOFF.md`, `HISTORICO_SOFA.json` e
+  `vray_pipeline_proof.png` **já foram movidos** (tabela abaixo). `planta_74.pdf` ainda está na raiz: migra em PR próprio,
+  com resolvedor único.
+- **`tools/` (P4):** nada movido ainda.
+
+Os movimentos de arquivos protegidos estão registrados em
+[`fp043_protected_renames.v1.json`](../specs/fp043_protected_renames.v1.json) (conteúdo idêntico, verificado por teste).
 
 ## Regras de compatibilidade
 
@@ -37,9 +42,12 @@ vale desde já porque fixa as regras que toda movimentação segue.
 | `kitchen_*`, `sofa_*`, `render_banho_*`, `place_bedroom_skp`, `make_synthetic_*` | `tools/rooms/<cômodo>/…` | P4 |
 | `room_type`, `spatial_model`, `layout_rules`, `shell_parts`, `decor_*` | `tools/rooms/shared/` | P4 |
 | `scripts/*sofa*.rb` | `tools/rooms/living/capabilities/` | P4 |
-| `HANDOFF.md`, `KICKOFF.md`, `CLAUDE_COGNITIVE_ARCHITECTURE.md` (raiz) | `docs/handoffs/`, `docs/architecture/` | P2 |
-| `HISTORICO_SOFA.json`, `vray_pipeline_proof.png` (raiz) | `references/sofas/history/`, `artifacts/review/` | P2 |
-| `planta_74.pdf` (raiz) | `projects/planta_74/source/` | P2 |
+| `HANDOFF.md` (raiz) | `docs/handoffs/2026-08-27_ai_pipeline_inspector_handoff.md` | **feito** (P2) |
+| `KICKOFF.md` (raiz) | `docs/handoffs/2026-07-23_kickoff_proxima_sessao.md` | **feito** (P2) |
+| `CLAUDE_COGNITIVE_ARCHITECTURE.md` (raiz) | `docs/architecture/agent_architecture.md` | **feito** (P2) |
+| `HISTORICO_SOFA.json` (raiz) | `references/sofas/history/HISTORICO_SOFA.json` | **feito** (P2) |
+| `vray_pipeline_proof.png` (raiz) | `artifacts/review/vray_pipeline_proof_2026-06/` | **feito** (P2) |
+| `planta_74.pdf` (raiz) | `projects/planta_74/source/` | P2 (PR próprio, resolvedor único) |
 
 ## Para quem vai mover um arquivo (checklist do PR)
 

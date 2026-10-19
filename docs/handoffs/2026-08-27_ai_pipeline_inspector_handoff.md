@@ -1,5 +1,7 @@
 # HANDOFF — AI Pipeline Inspector: fundação de observabilidade (Fases 1–3)
 
+> **Histórico — movido da raiz (FP-043/P2).** Estado de 2026-08-27 (AI Pipeline Inspector). O fio vivo entre sessões é `.ai_bridge/HANDOFF.md`.
+
 - **Data / sessão:** 2026-08-27 · sessão do AI Pipeline Inspector
 - **Repo / app:** `apps/sketchup-mcp`
 - **Status geral:** **GREEN** — suíte verde, working tree limpa, sem débito

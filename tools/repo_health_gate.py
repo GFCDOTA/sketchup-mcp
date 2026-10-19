@@ -3,7 +3,7 @@
 Impede regressão da organização (chore/repo-folder-hygiene 2026-06-08). Checa só o
 que dá pra checar ESTATICAMENTE sobre os arquivos TRACKED + o working tree:
 
-1. `.md` solto no root só se estiver na allowlist (CLAUDE/README/COGNITIVE).
+1. `.md` solto no root só se estiver na allowlist (CLAUDE/README).
 2. nenhum `.skp` TRACKED em `runs/` (runs é scratch gitignored; evidência vai p/
    artifacts/review|canonical — regra 7).
 3. nenhum worktree DENTRO do repo (arquivo `.git` em subpasta = worktree aninhado).
@@ -24,7 +24,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-ROOT_MD_ALLOWLIST = {"CLAUDE.md", "README.md", "CLAUDE_COGNITIVE_ARCHITECTURE.md"}
+ROOT_MD_ALLOWLIST = {"CLAUDE.md", "README.md"}
 _SKIP_DIRS = (".venv", "node_modules", ".git", ".pytest_cache")
 _SCALE_SOURCE = "core/scale.py"                      # único arquivo que pode definir escala
 _SCALE_DEF = re.compile(r"^(PT_TO_M|PT_TO_IN)\s*=")   # def nível-módulo (coluna 0)

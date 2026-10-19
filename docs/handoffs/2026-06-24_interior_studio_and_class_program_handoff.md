@@ -1,5 +1,7 @@
 # sketchup-mcp — HANDOFF (2026-06-24): the interior studio + the furniture-class program
 
+> **Nota FP-043/P2:** `HISTORICO_SOFA.json`, `CLAUDE_COGNITIVE_ARCHITECTURE.md` e `vray_pipeline_proof.png`, citados aqui como "repo root", **não estão mais na raiz** — novos caminhos em [`docs/architecture/migration_guide.md`](../architecture/migration_guide.md).
+
 > **For:** the next maintainer / successor session.
 > **What this is:** an **incremental** handoff covering the ~2 weeks and ~280 commits since
 > [`2026-06-14_learnings_and_handoff.md`](2026-06-14_learnings_and_handoff.md). It records the **mission pivot** — from "produce a faithful empty `.skp` shell" to "shell **+** a procedurally-learned, judge-validated furniture program **+** a photoreal interior render," driven by a small **multi-agent design studio**.

@@ -36,7 +36,7 @@ def test_mapa_cobre_exatamente_o_escopo_atual(doc, tracked):
 
 def test_raiz_e_tools_inteiros_estao_no_escopo(tracked):
     items = set(scope_items(tracked))
-    assert {"README.md", "planta_74.pdf", "HANDOFF.md", "tools/furnish_apartment.py", "tools/rooms/",
+    assert {"README.md", "planta_74.pdf", "CLAUDE.md", "tools/furnish_apartment.py", "tools/rooms/",
             "scripts/sofa_generator.rb", "interior/validators/", "ops/estudio-front/"} <= items
     assert not any(i.startswith("tests/") or i.startswith("docs/") for i in items)
 
@@ -79,16 +79,35 @@ def test_move_exige_destino_e_compat_decisao_exige_pergunta_fachada_exige_canoni
     assert erros["FACADE_CANONICAL_MISSING"] == ["tools/sofa_builder.py -> tools/rooms/shared/nao_existe.py"]
 
 
-def test_movimento_executado_exige_destino_presente_e_origem_ausente(doc, tracked):
-    feito = copy.deepcopy(doc)
-    e = next(r for r in feito["items"] if r["item"] == "HISTORICO_SOFA.json")
-    e["status"] = "done"
-    erros = check(feito, tracked)["errors"]
-    assert erros["DONE_DESTINATION_MISSING"] == ["HISTORICO_SOFA.json -> references/sofas/history/HISTORICO_SOFA.json"]
-    assert erros["DONE_ORIGIN_STILL_PRESENT"] == ["HISTORICO_SOFA.json"]
-    # origem e destino coerentes: simula a árvore depois do movimento
-    depois = [p for p in tracked if p != "HISTORICO_SOFA.json"] + ["references/sofas/history/HISTORICO_SOFA.json"]
-    assert check(feito, depois)["result"] == "PASS"
+def _doc_sintetico(compat):
+    base = {"phase": "P4", "risk": "low", "rationale": "item sintético de teste do gate"}
+    return {"schema_version": "fp043_p0_map.v1", "items": [
+        {**base, "item": "tools/x.py", "disposition": "move", "destination": "tools/validation/x.py",
+         "compat": compat, "status": "done"},
+        {**base, "item": "tools/validation/", "disposition": "retain", "destination": None},
+    ]}
+
+
+def test_movimento_executado_sem_fachada_exige_destino_presente_e_origem_ausente():
+    doc = _doc_sintetico("none_needed")
+    erros = check(doc, ["tools/x.py"])["errors"]
+    assert erros["DONE_DESTINATION_MISSING"] == ["tools/x.py -> tools/validation/x.py"]
+    assert erros["DONE_ORIGIN_STILL_PRESENT"] == ["tools/x.py"]
+    assert check(doc, ["tools/validation/x.py"])["result"] == "PASS"
+
+
+def test_movimento_executado_com_fachada_mantem_a_origem_no_escopo():
+    doc = _doc_sintetico("facade_at_old_path")
+    assert check(doc, ["tools/x.py", "tools/validation/x.py"])["result"] == "PASS"
+    erros = check(doc, ["tools/validation/x.py"])["errors"]         # a fachada sumiu: o item sobra no mapa
+    assert erros["STALE_ITEMS"] == ["tools/x.py"]
+
+
+def test_pasta_nova_em_tools_exige_entrada_no_mapa():
+    doc = _doc_sintetico("none_needed")
+    doc["items"] = doc["items"][:1]                                   # sem a entrada da pasta de destino
+    erros = check(doc, ["tools/validation/x.py"])["errors"]
+    assert erros["MISSING_ITEMS"] == ["tools/validation/"]
 
 
 def test_nenhuma_decisao_e_fachada_sem_justificativa_e_riscos_consistentes(doc):
