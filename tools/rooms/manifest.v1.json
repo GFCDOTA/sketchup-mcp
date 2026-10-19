@@ -21,6 +21,7 @@
   "rooms": {
     "living": {
       "providers": [
+        "tools.rooms.living.furnishing.living_room_boxes",
         "tools.place_layout_skp.build_boxes",
         "tools.layout_candidates.run",
         "tools.sofa_builder.build_sofa"
