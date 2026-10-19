@@ -19,10 +19,9 @@
       "question": "Onde está o builder compartilhado de gabinete e quem o usa?",
       "hops": ["README.md", "docs/architecture/repository_map.md", "tools/rooms/kitchen/README.md"],
       "answers": [
-        {"path": "tools/sketchup/knowledge.py", "symbol": "cabinet_plan", "role": "plano consultivo (não é builder)"}
-      ],
-      "absent": [
-        {"path": "tools/rooms/shared/cabinet", "why": "previsto em P6; hoje não existe builder compartilhado de gabinete"}
+        {"path": "tools/rooms/shared/cabinet/plan.py", "symbol": "plan_cabinet", "role": "plano L1 do gabinete (builder compartilhado; ainda sem materialização)"},
+        {"path": "tools/rooms/kitchen/capabilities/cabinet.py", "symbol": "plan_kitchen_cabinet", "role": "adapter da cozinha (consumidor)"},
+        {"path": "tools/sketchup/knowledge.py", "symbol": "cabinet_plan", "role": "plano consultivo (separado; não é builder)"}
       ]
     },
     {
@@ -33,7 +32,7 @@
         {"path": "references/sketchup/knowledge/video_recipes.v1.json", "symbol": "cabinet.recessed-shaker-and-louvers", "role": "recipe (consultiva)"}
       ],
       "absent": [
-        {"path": "tools/rooms/kitchen/capabilities/cabinet.py", "why": "a capacidade de portas rebaixadas/Shaker não existe: BLOCKED_CAPABILITY_MISSING"}
+        {"path": "tools/rooms/kitchen/capabilities/shaker.py", "why": "a capacidade de portas rebaixadas/Shaker não existe: BLOCKED_CAPABILITY_MISSING"}
       ]
     },
     {

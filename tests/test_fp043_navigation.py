@@ -41,10 +41,10 @@ def test_rotas_de_navegacao_passam():
     assert all(len(r["hops"]) - 1 <= 3 for r in doc["routes"])
 
 
-def test_gabinete_compartilhado_e_shaker_estao_declarados_ausentes_e_continuam_ausentes():
+def test_shaker_esta_declarado_ausente_e_continua_ausente():
     doc = json.loads((ROOT / ROUTES_PATH).read_text(encoding="utf-8"))
     ausentes = {a["path"] for r in doc["routes"] for a in r.get("absent", [])}
-    assert ausentes == {"tools/rooms/shared/cabinet", "tools/rooms/kitchen/capabilities/cabinet.py"}
+    assert ausentes == {"tools/rooms/kitchen/capabilities/shaker.py"}
     assert not any((ROOT / p).exists() for p in ausentes)
     readme = (ROOT / "tools/rooms/kitchen/README.md").read_text(encoding="utf-8")
     assert "BLOCKED_CAPABILITY_MISSING" in readme and "ausente" in readme

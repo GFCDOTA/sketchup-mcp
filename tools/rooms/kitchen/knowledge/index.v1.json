@@ -21,6 +21,7 @@
     "kitchen.layout.galley",
     "kitchen.sink-anchor-guard",
     "kitchen.ergonomics.audit",
+    "kitchen.cabinet.plain-fronts",
     "shared.cabinet.parametric"
   ],
   "bindings": [

@@ -87,14 +87,37 @@ def test_tecnica_conhecida_so_como_recipe_responde_capability_missing(text, bind
 
 
 def test_shaker_continua_bloqueado_mesmo_com_o_gabinete_liso_planejado():
-    res = sp.plan({"text": "armario de cozinha com porta Shaker", "room": "kitchen"})
+    res = sp.plan({"text": "armario de cozinha com porta Shaker", "room": "kitchen", "inputs": CAB_INPUTS})
     assert res["state"] == "BLOCKED_CAPABILITY_MISSING" and res["binding"] == "bind.kitchen.shaker"
     assert "bind.kitchen.cabinet" in res["also_matched"]
 
 
-def test_gabinete_parametrico_planejado_ainda_nao_executa():
+CAB_INPUTS = {
+    **{f"dimensions.{k}": {"value": v, "unit": "mm", "origin": "user_request"} for k, v in (("width", 600), ("depth", 560), ("height", 720))},
+    **{f"panels.{k}": {"value": v, "unit": "mm", "origin": "user_request"} for k, v in (("side", 18), ("top_bottom", 18), ("back", 6), ("front", 18))},
+    "gaps.front_clearance": {"value": 2, "unit": "mm", "origin": "user_request"},
+    "gaps.front_reveal": {"value": 3, "unit": "mm", "origin": "user_request"},
+    "fronts.count": {"value": 1, "unit": "count", "origin": "user_request"},
+    "shelf.count": {"value": 0, "unit": "count", "origin": "user_request"},
+    **{f"materials.{k}": {"value": v, "unit": "text", "origin": "user_request"} for k, v in (("carcass", "mdf_branco"), ("back", "hdf_branco"), ("front", "mdf_carvalho"))},
+    **{f"pose.{k}": {"value": v, "unit": "m", "origin": "user_request"} for k, v in (("x", 2.0), ("y", 1.0), ("z", 0.0))},
+    "pose.rotation_deg": {"value": 0, "unit": "deg", "origin": "user_request"},
+}
+
+
+def test_gabinete_de_frentes_lisas_tem_capacidade_l1_e_gera_plano_sem_executar():
+    res = sp.plan({"text": "gabinete de cozinha com frentes lisas", "room": "kitchen", "inputs": CAB_INPUTS})
+    assert res["state"] == "PLAN_READY_NOT_EXECUTED" and res["execution_authorized"] is False
+    assert res["capability"]["id"] == "kitchen.cabinet.plain-fronts" and res["capability"]["validation"] == "L1_PASS"
+    assert [s["tool"] for s in res["steps"]] == ["python:tools.rooms.kitchen.capabilities.cabinet.plan_kitchen_cabinet",
+                                                 "python:tools.rooms.shared.cabinet.plan.plan_cabinet"]
+
+
+def test_gabinete_sem_medidas_pergunta_em_vez_de_inventar_padrao():
     res = sp.plan({"text": "gabinete de cozinha", "room": "kitchen"})
-    assert res["state"] == "BLOCKED_CAPABILITY_MISSING" and res["capability"]["implementation"] == "PLANNED"
+    assert res["state"] == "BLOCKED_INPUT_INCOMPLETE" and "dimensions.width" in res["missing"]
+    partial = {k: v for k, v in CAB_INPUTS.items() if k != "dimensions.height"}
+    assert "dimensions.height" in sp.plan({"text": "gabinete de cozinha", "room": "kitchen", "inputs": partial})["missing"]
 
 
 def test_ferramenta_fora_da_allowlist_e_recusada():
