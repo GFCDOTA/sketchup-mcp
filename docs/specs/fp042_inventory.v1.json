@@ -12269,6 +12269,34 @@
       "disposition": "retain_current_owner",
       "phase": "P2",
       "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tools/rooms/shared/decor.py",
+      "domain": "shared",
+      "disposition": "tools.rooms.shared",
+      "phase": "P2",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tools/rooms/shared/furniture.py",
+      "domain": "shared",
+      "disposition": "tools.rooms.shared",
+      "phase": "P2",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tools/rooms/living/components.py",
+      "domain": "room_living",
+      "disposition": "tools.rooms.living",
+      "phase": "P3",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tests/test_fp042_living_component_ownership.py",
+      "domain": "test",
+      "disposition": "retain_current_owner",
+      "phase": "P3",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
     }
   ]
 }
