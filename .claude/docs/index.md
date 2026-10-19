@@ -87,7 +87,7 @@ aponta pra source-of-truth, não pra cópia.
 - `../../artifacts/review/<plant>/<run_id>/final/` — Review artifacts pra PR
 - `../../tests/` — Contract suite (`test_visual_oracle_contract.py` inclusive)
 - `../../tools/run_skp_visual_review.py` — FP-030 runner
-- `../../tools/prompts/visual_oracle_reviewer.md` — prompt pra agente de visão
+- `../../tools/oracle/prompts/visual_oracle_reviewer.md` — prompt pra agente de visão
 - `../../schemas/visual_findings.schema.json` — JSON Schema v1
 - `../../fixtures/visual_oracle_examples/` — 19 exemplos seed (good_real + bad_real + synthetic)
 - `../../planta_74.pdf` — PDF source da planta real

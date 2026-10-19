@@ -519,7 +519,7 @@ Salto efetivo de ~35% → ~60% no Visual Oracle (cap honesto 70% sem bridge / 85
 
 - `tools/compose_side_by_side.py` — composer oficial substituindo ad-hoc PIL (PR #200)
 - `tools/run_skp_visual_review.py` — 10 deterministic checks (era 6); composer integration; `--oracle none|chatgpt_bridge`; `--require-oracle`
-- `tools/prompts/visual_oracle_reviewer.md` — prompt fixo com JSON estrito
+- `tools/oracle/prompts/visual_oracle_reviewer.md` — prompt fixo com JSON estrito
 - `fixtures/visual_oracle_negative/` — 3 fixtures sintéticas que comprovam FAIL
 - `tests/test_side_by_side_composer.py`, `test_skp_visual_review_contract.py`, `test_visual_oracle_negative_fixtures.py` — 30 testes novos
 - Maturity classification honesta em `regression_summary.md` (cap 70% sem bridge, 85% com bridge, 100% nunca)

@@ -5,7 +5,7 @@
 Fontes hoje: decisões anteriores do projeto (ITERATIONS.md, HANDOFF.md),
 regras técnicas (felipe_visual_judge_rules.json, skills de audit/ergonomia).
 PDFs de arquitetura/normas/ergonomia AINDA NÃO EXISTEM no repo (só o
-manifest-modelo em tools/pdf_knowledge/pdf_manifest.template.yml, sem PDF
+manifest-modelo em tools/knowledge/pdf/pdf_manifest.template.yml, sem PDF
 real) — quando existirem em references/pdfs/, rodar
 `tools/pdf_knowledge/ingest_pdfs.py` primeiro (PDF -> JSONL por página) e
 depois `index_jsonl()` daqui pra jogar no Qdrant.

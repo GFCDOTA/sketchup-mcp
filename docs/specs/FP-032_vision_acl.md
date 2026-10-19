@@ -73,7 +73,7 @@ escreve `oracle_request_package/` — exatamente porque o servidor recusa imagem
 | `tools/claude_bridge/server.py` | **EDIT (REAL→NOVO)** — nova rota `/ask-vision` (ou `images` no `/ask`): aceita PNGs b64/multipart + prompt, chama `claude -p` com as imagens, devolve `visual_findings.v1` | sessão |
 | `tools/negative_dogfood.py` | **EDIT (REAL)** — multi-backend + multi-defeito; emite `discrimination_report.json` com taxa por backend×defeito; vira gate | sessão |
 | `tools/run_skp_visual_review.py` | **EDIT (REAL)** — quando um backend foi PROVADO discriminativo p/ um defeito, deixar de rebaixar `global_visual`/`scale_rotation` p/ WARN-automático e usar o veredito do oráculo (marcado `source`) | sessão |
-| `tools/prompts/visual_oracle_reviewer.md` | **EDIT (REAL)** — já existe; ajustar p/ casar campos novos do schema | sessão |
+| `tools/oracle/prompts/visual_oracle_reviewer.md` | **EDIT (REAL)** — já existe; ajustar p/ casar campos novos do schema | sessão |
 | `tools/prompts/visual_oracle_reviewer_compact.md` | **NOVO (opcional)** — extrair o prompt compacto hoje hardcoded em `OllamaVisionProvider._build_compact_prompt` p/ arquivo (ler-arquivo > hardcode) | sessão |
 | `fixtures/visual_acl/defects/*.json` | **NOVO** — catálogo de defeitos injetáveis (rect, rgb, tipo esperado) p/ o dogfood multi-defeito | sessão |
 | `tests/test_vision_acl.py` | **NOVO** — contract test do schema endurecido + normalização dos 2 providers + parse da rota de imagem | sessão |
@@ -167,7 +167,7 @@ run_skp_visual_review --oracle <backend>:
 - `tools/claude_bridge/server.py` — `_ask_route` (TEXT-ONLY: `parse_ask_payload` lê só `prompt`/`question`); `GET_ROUTES`/`POST_ROUTES` (sem rota de imagem); modo B (Opus 4.8, `VISUAL_REVIEW` é o único gate humano).
 - `tools/negative_dogfood.py` — harness de discriminação (REAL). Prova em `artifacts/_archive/review_legacy_20260609/negative_dogfood_20260529T201219Z/summary.md`: ollama_vision deu FAIL no LIMPO e no CORROMPIDO → **NOT_DISCRIMINATED**.
 - `schemas/visual_findings.schema.json` — `visual_findings.v1` (campos: `kind`/`type`, `severity`, `axis`, `location`, `evidence`, `source_check`, `suspected_owner`, `proposed_fix`).
-- `tools/prompts/visual_oracle_reviewer.md` — prompt full do reviewer (6 eixos + tabela de defeitos + JSON estrito).
+- `tools/oracle/prompts/visual_oracle_reviewer.md` — prompt full do reviewer (6 eixos + tabela de defeitos + JSON estrito).
 - `fixtures/planta_74/known_warnings.json` — WARNs arquiteturais carregados (oráculo PASS não os apaga).
 - Modelos Ollama instalados (host, :11434, confirmado): `qwen2.5vl:7b`, `moondream` (ambos visão), `deepseek-r1:14b`, `qwen2.5-coder:14b`, `interior-designer`.
 - Renders consumíveis: `furnish_apartment.py` → `planta_74_furnished_after_top.png` / `_after_iso.png`; `run_skp_visual_review` → `model_top.png`/`model_iso.png` + `side_by_side_pdf_vs_skp.png` (via `compose_side_by_side.compose_to_file`).

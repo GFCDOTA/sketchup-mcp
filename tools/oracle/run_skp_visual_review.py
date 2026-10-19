@@ -1382,7 +1382,7 @@ def main() -> int:
     parser.add_argument(
         "--prompt-file", type=Path,
         default=REPO_ROOT / "tools" / "prompts" / "visual_oracle_reviewer.md",
-        help="Prompt file for the oracle (default: tools/prompts/visual_oracle_reviewer.md)",
+        help="Prompt file for the oracle (default: tools/oracle/prompts/visual_oracle_reviewer.md)",
     )
     args = parser.parse_args()
 

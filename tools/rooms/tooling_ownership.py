@@ -18,6 +18,9 @@ OWNER_DIRS = (
     ("tools/pdf_knowledge/", "pdf_knowledge_runtime"),
     ("tools/quadrado/", "synthetic_fixture_tooling"),
     ("tools/prompts/", "agent_prompt_assets"),
+    ("tools/oracle/prompts/", "agent_prompt_assets"),
+    ("tools/knowledge/pdf/", "pdf_knowledge_runtime"),
+    ("tools/rendering/quadrado/", "synthetic_fixture_tooling"),
 )
 
 

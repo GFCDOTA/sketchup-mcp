@@ -105,7 +105,7 @@ for CLI usage examples.
 
 ## Prompt
 
-`tools/prompts/gpt_auto_consult_gate.md` — short reviewer prompt that
+`tools/oracle/prompts/gpt_auto_consult_gate.md` — short reviewer prompt that
 forces a 4-section response (Verdict / Reasoning / Risks / Suggested
 next action). No markdown fences, no fluff.
 

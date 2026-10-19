@@ -92,5 +92,5 @@ def test_launcher_ruby_carrega_o_script_depois_da_janela_e_registra_falha():
 
 
 def test_quadrado_render_view_tambem_nao_usa_o_control_file():
-    src = (ROOT / "tools/quadrado/render_view.py").read_text(encoding="utf-8")
+    src = (ROOT / "tools/rendering/quadrado/render_view.py").read_text(encoding="utf-8")
     assert "autorun_control.txt\"" not in src and "-RubyStartup" in src and "spawn_detached" in src
