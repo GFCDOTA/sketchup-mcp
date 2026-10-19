@@ -22,7 +22,7 @@
   (RenderSessionProduction/Export.new(context:).start, VRayImage#save, ModelExporter#update_camera,
   vray.exe headless). vray_final_provider.available()=True. Probes: .claude/scratch/probe_vray*.rb.
   - **FASE 8 (V-Ray render) FUNCIONANDO** (commit ae85b8c): pipeline premium PROVADO end-to-end.
-    `context = VRay::Context.active`; `tools/vray_export.rb` (camera iso/top + RenderSessionExport →
+    `context = VRay::Context.active`; `tools/sketchup/vray/vray_export.rb` (camera iso/top + RenderSessionExport →
     .vrscene); `vray.exe -sceneFile=x.vrscene -imgFile=y.png -display=0 -autoClose=1` → PNG ~3s GPU.
     `VRayFinalProvider.render(in_skp)` funcional, available()=True. Render planta mobiliada gerado.
     **REFINO premium EM ANDAMENTO** (commits 2e1c2a5 exposure, 01a5aa1 camera, eaf0999 exposure-balance):

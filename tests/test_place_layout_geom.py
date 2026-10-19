@@ -19,7 +19,7 @@ TOOLS = Path("tools")
 
 
 def test_place_layout_e_geom_compilam():
-    for rb in (TOOLS / "place_layout_skp.rb", TOOLS / "place_layout_geom.rb"):
+    for rb in (TOOLS / "sketchup" / "furnish" / "place_layout_skp.rb", TOOLS / "sketchup" / "furnish" / "place_layout_geom.rb"):
         r = subprocess.run([RUBY, "-c", str(rb)], capture_output=True, text=True)
         assert r.returncode == 0, f"{rb}: {r.stderr}"
 
@@ -31,7 +31,7 @@ def test_inset_da_pegada_girada():
 
 def test_chanfro_nao_usa_mais_o_bounds_do_topo():
     """O topo inset sai do polígono da peça; `top.bounds` (AABB) era a causa do vazamento."""
-    src = (TOOLS / "place_layout_skp.rb").read_text(encoding="utf-8")
+    src = (TOOLS / "sketchup" / "furnish" / "place_layout_skp.rb").read_text(encoding="utf-8")
     assert "require_relative 'place_layout_geom'" in src
     assert "PlaceLayoutGeom.inset_convex" in src
     assert "bb = top.bounds" not in src

@@ -179,7 +179,7 @@ def _apply_layout_seed(con: dict, boxes: list[dict], seed: int) -> tuple[list[di
     if seed <= 0:
         return boxes, "brain_default"
     from tools.layout_candidates import run as lc_run
-    from tools.place_layout_skp import build_boxes as template_boxes
+    from tools.sketchup.furnish.place_layout_skp import build_boxes as template_boxes
     from tools.room_type import LIVING, classify_rooms
     living = next((r for r in classify_rooms(con) if r["room_type"] == LIVING), None)
     if living is None:

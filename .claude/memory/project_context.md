@@ -24,7 +24,7 @@ consensus.json (PDF-points coords)
 _shell_polygon.json
    │
    ▼
-[Ruby/SU] tools/build_plan_shell_skp.rb (autorun plugin)
+[Ruby/SU] tools/sketchup/shell/build_plan_shell_skp.rb (autorun plugin)
    - extrude wall shell até ceiling height
    - 3D carve windows preservando peitoril + verga
    - floor + window-glass groups separados

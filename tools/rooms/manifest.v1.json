@@ -30,7 +30,7 @@
     "living": {
       "providers": [
         "tools.rooms.living.furnishing.living_room_boxes",
-        "tools.place_layout_skp.build_boxes",
+        "tools.sketchup.furnish.place_layout_skp.build_boxes",
         "tools.layout_candidates.run",
         "tools.rooms.shared.sofa.build_sofa"
       ],

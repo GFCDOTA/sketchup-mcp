@@ -91,7 +91,7 @@ reference_image → design_grammar_tokens → room_constraints(PDF) → DesignGr
 | PDF-anchor | `tools/kitchen_validation.py` (molde p/ outros cômodos) | ponto fixo (pia/porta) na posição do PDF; aborta se migrar |
 | Circulação livre | `tools/geometry_sanity.py` | nada fora do cômodo / bloqueando porta/passagem |
 | Sem colisão | `tools/furniture_overlap_gate.py` | nenhum móvel em cima de móvel (trim/embutido isento) |
-| Editabilidade | `tools/skp_editability_report.rb` | cada módulo = grupo nomeado isolável; 0 geometria solta no root; shell locked |
+| Editabilidade | `tools/sketchup/inspect/skp_editability_report.rb` | cada módulo = grupo nomeado isolável; 0 geometria solta no root; shell locked |
 | Coerência de linguagem | `tools/style_coherence_gate.py` + olho | paleta/tokens aplicados; sem material default vazando |
 | Proporção realista | olho + dims reais | compacto p/ o apê; nada de cubo genérico |
 | Veredito visual | GPT via Chrome (URL raw) **ou** Felipe | NUNCA auto-julgar IMPROVED/PASS — é humano/GPT |

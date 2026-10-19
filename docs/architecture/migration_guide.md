@@ -81,6 +81,21 @@ Prova: `tests/test_fp043_p4_migration.py` (fachada só delega; import frio nas d
 `service` já tinha o dono único (`tools/rooms/service/layout.py`); `balcony`, `closet` e `home_office` seguem advisory/reuso e
 `circulation` validation-only — nenhum builder foi criado.
 
+## P4c-1 — executor SketchUp (feito)
+
+| Antes | Agora | Compatibilidade |
+|---|---|---|
+| `tools/build_plan_shell_skp.{py,rb}` | `tools/sketchup/shell/` | `.py` com fachada; `.rb` caminho único |
+| `tools/{place_layout_skp.py,place_layout_skp.rb,place_layout_geom.rb,build_furniture_skp.rb,furnish_plan.rb}` | `tools/sketchup/furnish/` | `place_layout_skp.py` e `.rb` caminho único (mapa `path_resolver_unico`); `furnish_apartment` importa do novo |
+| `tools/{inspect_skp,screenshot_camera,skp_editability_report}.rb` | `tools/sketchup/inspect/` | caminho único |
+| `tools/vray_export.rb` | `tools/sketchup/vray/` | caminho único |
+| `tools/disarm_sketchup_autoruns.py`, `tools/su_runner_safety.py` | `tools/sketchup/{disarm_autoruns,runner_safety}.py` | fachada |
+
+L2 no SketchUp 26 (processo próprio): `su_build_shell` da planta_74 reproduz o `geometry_report` canônico (só caminhos diferem) com todos os
+gates PASS; `su_furnish` materializa 402 caixas; a bateria MCP de 38 chamadas (inspect/apply_edits/render/close) tem veredito
+idêntico ao baseline, salvo `N25` (muda por causa do porte do V-Ray, #285) e `N06` (uma saída transitória do SketchUp que não se
+repetiu em 2 reexecuções).
+
 ## Para quem vai mover um arquivo (checklist do PR)
 
 1. `python -m tools.navigation.consumers <caminho>`: leia **todos** os consumidores (código, testes, CI, MCP, config, docs).

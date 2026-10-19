@@ -5,7 +5,7 @@ uma HIPOTESE SEMANTICA estruturada: tipo do objeto, variante, papeis das pecas
 eixo frontal, e flag is_single_block. NAO abre o SketchUp (consome o JSON).
 
 Pipeline:
-  1) SketchUp.exe <ref.skp> -RubyStartup tools/inspect_skp.rb  -> <name>_inspect.json + renders top/front/iso
+  1) SketchUp.exe <ref.skp> -RubyStartup tools/sketchup/inspect/inspect_skp.rb  -> <name>_inspect.json + renders top/front/iso
   2) python tools/furniture_reference_analyzer.py <inspect.json>  -> <name>_analysis.{json,md}
 
 As heuristicas geram HIPOTESE (com confianca), nao verdade — o objetivo e virar

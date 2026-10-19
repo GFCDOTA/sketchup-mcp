@@ -79,7 +79,7 @@ pedido (humano ou agente)
 
 planejamento do cômodo (antes do Ruby):
   consensus.json → tools/room_type.py → tools/rooms/dispatch.py → brain do cômodo (tools/rooms/<room>/)
-  → caixas/peças → tools/place_layout_skp.rb
+  → caixas/peças → tools/sketchup/furnish/place_layout_skp.rb
 ```
 
 Mapa completo, com o estado de cada pasta, em [`docs/architecture/repository_map.md`](docs/architecture/repository_map.md).

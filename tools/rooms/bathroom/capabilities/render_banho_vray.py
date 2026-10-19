@@ -24,7 +24,7 @@ from tools.tweak_vrscene import tweak_file          # noqa: E402
 
 SU_EXE = Path(r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe")
 VRAY_EXE = Path(r"C:\Program Files\Chaos\V-Ray\V-Ray for SketchUp\extension\vray\bin\vray.exe")
-EXPORT_RB = ROOT / "tools" / "vray_export.rb"
+EXPORT_RB = ROOT / "tools" / "sketchup" / "vray" / "vray_export.rb"
 SCRATCH = ROOT / ".claude" / "scratch"
 BASE = ROOT / "artifacts/planta_74/furnished/planta_74_furnished.skp"
 

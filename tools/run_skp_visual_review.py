@@ -376,7 +376,7 @@ def _check_door_count(report: dict, consensus: dict) -> list[dict]:
             "type": "door_count_mismatch",
             "location": "geometry_report.groups_diagnostic[DoorLeaf_Group*]",
             "evidence": f"DoorLeaf_Group count={actual} != count(kind_v5==interior_door)={expected}",
-            "source_check": "tools/build_plan_shell_skp.rb door emission loop; consensus.openings",
+            "source_check": "tools/sketchup/shell/build_plan_shell_skp.rb door emission loop; consensus.openings",
             "suspected_owner": "opening_routing",
             "proposed_fix": "Check if a door was duplicated or skipped during Ruby emission.",
         })
@@ -399,7 +399,7 @@ def _check_glazed_balcony_count(report: dict, consensus: dict) -> list[dict]:
             "type": "glazed_balcony_count_mismatch",
             "location": "geometry_report.groups_diagnostic[GlazedBalcony_Group*]",
             "evidence": f"GlazedBalcony_Group count={actual} != count(kind_v5==glazed_balcony)={expected}",
-            "source_check": "tools/build_plan_shell_skp.rb glazed_balcony emission",
+            "source_check": "tools/sketchup/shell/build_plan_shell_skp.rb glazed_balcony emission",
             "suspected_owner": "opening_routing",
             "proposed_fix": "Verify glazed_balcony routing — must produce its own group, NOT counted as window.",
         })
@@ -420,7 +420,7 @@ def _check_floating_doors(report: dict, eps: float = 0.05) -> list[dict]:
                 "type": "floating_door",
                 "location": f"groups_diagnostic[name={g['name']}].bbox_m.min[2]={z_min}",
                 "evidence": f"door group `{g['name']}` has bbox z_min={z_min:.3f}m > {eps}m; door should touch floor.",
-                "source_check": "tools/build_plan_shell_skp.rb door_leaf_group origin Z",
+                "source_check": "tools/sketchup/shell/build_plan_shell_skp.rb door_leaf_group origin Z",
                 "suspected_owner": "builder",
                 "proposed_fix": "Ensure DoorLeaf_Group transforms set Z origin to 0.",
             })
@@ -518,7 +518,7 @@ def _check_window_height(report: dict, eps: float = 0.1) -> list[dict]:
                 "evidence": f"window aperture height_m={h:.3f} fora do range esperado "
                             f"[{lo}, {hi}]m ({'basculante' if is_basculante else 'janela'}); "
                             f"peitoril/verga provavelmente faltando — possivel full-height void.",
-                "source_check": "tools/build_plan_shell_skp.rb window_aperture_z",
+                "source_check": "tools/sketchup/shell/build_plan_shell_skp.rb window_aperture_z",
                 "suspected_owner": "builder",
                 "proposed_fix": "Confirm FP-024 partial-height aperture path is active (not 2D full-height carve).",
             })
@@ -540,7 +540,7 @@ def _check_window_z_min_nonzero(report: dict, eps: float = 0.3) -> list[dict]:
                 "type": "full_height_window_void",
                 "location": f"groups_diagnostic[name={g['name']}].bbox_m.min[2]={z_min}",
                 "evidence": f"window glass starts at z={z_min:.3f}m (≈ floor); FP-024 expects peitoril preserved with z_min ≥ {eps}m.",
-                "source_check": "tools/build_plan_shell_skp.rb window aperture Z origin",
+                "source_check": "tools/sketchup/shell/build_plan_shell_skp.rb window aperture Z origin",
                 "suspected_owner": "builder",
                 "proposed_fix": "FP-024 window aperture must start at peitoril height (~0.9m), not 0.",
             })

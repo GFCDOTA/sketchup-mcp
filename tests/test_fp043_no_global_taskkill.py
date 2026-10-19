@@ -15,7 +15,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 
 MIGRATED_PY = (
-    "tools/place_layout_skp.py",
+    "tools/sketchup/furnish/place_layout_skp.py",
     "tools/place_bedroom_skp.py",
     "tools/furnish_plan.py",
     "tools/furnish_apartment.py",

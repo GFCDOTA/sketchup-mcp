@@ -719,7 +719,7 @@ def build_skp(out_dir, tag, items):
     root = Path(__file__).resolve().parents[3]
     su = r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
     base = root / "artifacts/planta_74/planta_74.skp"
-    rb = root / "tools/place_layout_skp.rb"
+    rb = root / "tools/sketchup/furnish/place_layout_skp.rb"
     boxes = _items_to_boxes(items)
     skp = out_dir / f"bedroom_designer_{tag}.skp"
     paths = {"LAYOUT_OUT": skp, "LAYOUT_BEFORE": out_dir / f"bedroom_designer_{tag}_before.png",

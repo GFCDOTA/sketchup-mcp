@@ -12,7 +12,7 @@
    build se ela migrar. (Consensus pode não ter o símbolo → ancorar na borda do polígono.)
 2. **Componentização** — cada móvel/módulo = grupo top-level SEPARADO, nomeado, editável,
    validável. Clique único seleciona só aquela peça. 0 geometria solta no root; shell
-   (paredes/piso/portas) locked. Prova: `tools/skp_editability_report.rb`.
+   (paredes/piso/portas) locked. Prova: `tools/sketchup/inspect/skp_editability_report.rb`.
 3. **Forma técnica** — módulos com proporção REAL (não cubo): espessura de chapa/tampo,
    sóculo recuado, portas/gavetas separadas com reveals, embutidos (cooktop/cuba),
    respiro/folga. Critério: lê como planejado MESMO em massa cinza.

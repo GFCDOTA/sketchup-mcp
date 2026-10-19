@@ -1,6 +1,6 @@
 """place_bedroom_skp.py — materializa o layout VENCEDOR de QUARTO (bedroom_layout)
 no .skp real como PLACEHOLDERS (boxes coloridos extrudados), pra o Felipe ABRIR
-no SketchUp e dar o veredito visual. REUSA tools/place_layout_skp.rb (generico,
+no SketchUp e dar o veredito visual. REUSA tools/sketchup/furnish/place_layout_skp.rb (generico,
 desenha qualquer LAYOUT_BOXES). NAO usa 3D Warehouse / asset.
 
 Mesma conversao do furnish_plan/place_layout_skp (SU = pdf * PT_TO_IN, sem flip
@@ -30,7 +30,7 @@ BASE_SKP = ROOT / "artifacts/planta_74/planta_74.skp"
 # PASTA CANONICA fixa do mobiliado (NAO scratch): committed + servida + GitHub.
 # Felipe 2026-06-05: parar de espalhar .skp em runs/ — UMA pasta so, sempre.
 OUT_DIR = ROOT / "artifacts/planta_74/furnished"
-RB = ROOT / "tools/place_layout_skp.rb"   # generico, reutilizado (nao alterado)
+RB = ROOT / "tools/sketchup/furnish/place_layout_skp.rb"   # generico, reutilizado (nao alterado)
 
 # altura de extrusao (m) + cor RGB (= cores do diagrama 2D) por tipo de movel
 KIND_H_M = {"bed": 0.55, "nightstand": 0.60, "wardrobe": 2.20}

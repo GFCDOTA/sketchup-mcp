@@ -124,7 +124,7 @@ def test_attach_materials_noop_without_style():
 # ---------------------------------------------------------------- Fatia 3: contrato-texto do .rb
 def test_pl_run_prefers_resolved_material():
     """.rb nao roda headless -> contrato-TEXTO. FLAG: confirmar madeira no rack em build SU real."""
-    rb = (ROOT / "tools/place_layout_skp.rb").read_text("utf-8")
+    rb = (ROOT / "tools/sketchup/furnish/place_layout_skp.rb").read_text("utf-8")
     assert "b['mat_name']" in rb, "o .rb precisa preferir o material resolvido (mat_name)"
     assert "b.key?('tex_png')" in rb, "o .rb precisa preferir o tex_png por box (com fallback FP-036)"
     assert "b['tile_in']" in rb, "o .rb precisa usar o tile_in resolvido"
@@ -141,7 +141,7 @@ def test_vray_tex_map_has_module_aware_aliases():
     """Anti-regressao (review adversarial): FP-037 renomeou o corpo do rack de ph_base p/ ph_rack_base.
     O V-Ray casa material por NOME EXATO; sem os aliases o rack (que era 'ph_base'=>wd = madeira no
     FP-036) ficaria FLAT no V-Ray. Chaves novas => renders PASS antigos byte-estaveis."""
-    vr = (ROOT / "tools/vray_export.rb").read_text("utf-8")
+    vr = (ROOT / "tools/sketchup/vray/vray_export.rb").read_text("utf-8")
     for alias in ("ph_rack_base", "ph_rack_top", "ph_rack_front", "ph_rack_niche",
                   "ph_coffee_table_top", "ph_dining_table_top"):
         assert f"'{alias}'" in vr, f"V-Ray tex_map sem alias {alias} (rack regride pra flat no V-Ray)"

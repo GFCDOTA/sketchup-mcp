@@ -88,7 +88,7 @@ Build do cérebro: `ollama create interior-designer -f .claude/skills/interior-d
 
 - `.claude/skills/interior-design/Modelfile` — o cérebro `interior-designer`.
 - `tools/furnish_plan.py` — launcher (centro do cômodo, jobs, gates).
-- `tools/furnish_plan.rb` — insere/auto-escala/render no SketchUp.
+- `tools/sketchup/furnish/furnish_plan.rb` — insere/auto-escala/render no SketchUp.
 - `runs/<plant>/_furniture/` — componentes baixados.
 - `runs/<plant>/planta_<plant>_vN.skp` — variantes mobiliadas.
 

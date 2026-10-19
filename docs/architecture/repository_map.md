@@ -15,12 +15,12 @@ pedido (humano ou agente)
   → verbos        tools/sketchup/jobs.py            su_*: valida entrada; destino em tools/sketchup/paths.py
   → processo      tools/sketchup/batch.py + tools/sketchup/process.py   SketchUp próprio via -RubyStartup; resultado em JSON
   → Ruby          tools/sketchup/ruby/*.rb          jobs MCP (inspect, render, apply_edits)
-                  tools/*.rb                        build do shell, mobília, vray (legado, carregados por caminho)
+                  tools/sketchup/{shell,furnish,inspect,vray}/*.rb   build do shell, mobília, inspeção e vray (carregados por caminho)
   → saída         runs/<planta>/mcp/<job>_<data>/   scratch; promoção → artifacts/<planta>/ (promote_canonical)
 
 planejamento (antes do Ruby, sem SketchUp)
   consensus.json → tools/room_type.py (classifica o cômodo) → tools/rooms/dispatch.py (escolhe o brain)
-  → tools/rooms/<cômodo>/ (planner + regras) → caixas/peças → tools/place_layout_skp.rb (materializa)
+  → tools/rooms/<cômodo>/ (planner + regras) → caixas/peças → tools/sketchup/furnish/place_layout_skp.rb (materializa)
 ```
 
 Quem decide o quê: **cômodo** decide posição e regras do ambiente; **shared** guarda geometria, materiais e builders

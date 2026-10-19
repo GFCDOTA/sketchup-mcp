@@ -124,13 +124,13 @@ def test_whitelist_matches_known_kinds():
 # ---- contratos de texto do .rb (não executável em pytest) -----------
 
 def test_rb_origin_default_parity_with_python():
-    src = (REPO / "tools" / "build_plan_shell_skp.rb").read_text("utf-8")
+    src = (REPO / "tools" / "sketchup" / "shell" / "build_plan_shell_skp.rb").read_text("utf-8")
     assert "origin.empty? || CARVING_ORIGINS.include?(origin)" in src, (
         ".rb diverge do Python no default de geometry_origin ausente")
 
 
 def test_rb_soft_barrier_single_render_classifier():
-    src = (REPO / "tools" / "build_plan_shell_skp.rb").read_text("utf-8")
+    src = (REPO / "tools" / "sketchup" / "shell" / "build_plan_shell_skp.rb").read_text("utf-8")
     assert "render_as: render_as" in src, (
         "call site não passa render_as resolvido pro build_soft_barrier")
     assert "resolved = render_as || barrier_render_as(barrier)" in src, (
