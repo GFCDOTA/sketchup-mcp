@@ -229,7 +229,7 @@ def living_room_boxes(con, room_id):
         ]
         _best, _best_score, _best_fails, _best_gate_result = None, 999, 99, None
         _n_candidates = 0
-        _step = 6
+        _step = 3   # resolucao fina: salto de 6in pulava a faixa fora do giro h_o000
         for _cx in range(int(_bx0) + 8, int(_bx1) - 8, _step):
             if _best_score == 0:
                 break
@@ -238,6 +238,11 @@ def living_room_boxes(con, room_id):
                     continue
                 _cand_boxes = _dining_set(_cx, _cy)
                 if not _cand_boxes:
+                    continue
+                # Preserva o contrato de 2 cadeiras materializadas no layout
+                # compacto aprovado; 4 cadeiras aparentes sao inviaveis neste
+                # corredor (o gate considera pull/behind para TODAS).
+                if sum(b.get("kind") == "seat" for b in _cand_boxes if b.get("module") == "Cadeira jantar") != 2:
                     continue
                 # A circulacao por portais NAO testa o quarto de circulo
                 # da folha. Rejeitar qualquer tampo/pe de mesa no arco real.
