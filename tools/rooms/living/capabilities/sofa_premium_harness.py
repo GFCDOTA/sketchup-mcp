@@ -65,8 +65,6 @@ def main() -> int:
     env["SOFA_HARNESS_ALT006"] = "1" if args.alt006 else "0"
     env["SOFA_HARNESS_LOG"] = str(log.resolve()).replace("\\", "/")
 
-    subprocess.run(["taskkill", "/F", "/IM", "SketchUp.exe"], capture_output=True)
-    time.sleep(1.5)
     print(f"[harness] launching SU tag={tag} alt006={args.alt006}")
     subprocess.Popen([SKETCHUP_EXE, str(boot), "-RubyStartup", str(RB)], env=env,
                      creationflags=getattr(subprocess, "DETACHED_PROCESS", 0))

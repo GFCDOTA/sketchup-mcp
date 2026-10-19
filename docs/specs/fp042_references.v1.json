@@ -7245,6 +7245,144 @@
       "blob_sha": "85aed5b74207d3ff6802d2dfad732d266451d2c4",
       "blob_size": 17652,
       "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/README.md",
+      "blob_sha": "59dffe22fe51dee8569b08ec79f7a838d4ae38e6",
+      "blob_size": 7851,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/clients.json",
+      "blob_sha": "3752c2e5137f9ae451d43db5de556ec8a840c7c7",
+      "blob_size": 3215,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/clients_before_fix.json",
+      "blob_sha": "0db0c3bb7c07ba4ac91c1503494833c2bc398ee0",
+      "blob_size": 3183,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/reg_apply_edits.json",
+      "blob_sha": "87206b19a4f19e48706ad6121e7928ec693798ad",
+      "blob_size": 1437,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/reg_compare_furnish.json",
+      "blob_sha": "8ccdf5b945844b6ee9f0820c3908c945519cb81e",
+      "blob_size": 259138,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/reg_furnish.json",
+      "blob_sha": "2d7b6204fae417e72436861f431153606d791d08",
+      "blob_size": 4305,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/reg_planta_build.json",
+      "blob_sha": "886ffae4e72173ed6f2ffcb2149b9a27f8bb3355",
+      "blob_size": 7754,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/reg_quadrado_build.json",
+      "blob_sha": "051871dd0837cbdec70b48df8e9f3f72605924f4",
+      "blob_size": 3776,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/reg_quadrado_inspect.json",
+      "blob_sha": "489eb33b313aa0e718371d2586d52166d69fc826",
+      "blob_size": 23101,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/reg_su_status.json",
+      "blob_sha": "8fde258aad4f0f184f57e795bf875520314640eb",
+      "blob_size": 705,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/reg_summary.json",
+      "blob_sha": "3417b741d2c2f625c3fbe52b21d7cda5c9092207",
+      "blob_size": 4902,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/reg_vray.json",
+      "blob_sha": "45630afd733ca5fc832b300544c77bea6ff1299f",
+      "blob_size": 1985,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/render_planta_iso.png",
+      "blob_sha": "b92a2a17e8e4980ed1712dceb069fec7252bb1f2",
+      "blob_size": 59609,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/render_planta_top.png",
+      "blob_sha": "44286545db466685f0ee86bed4c25ef8dfa1ba70",
+      "blob_size": 19536,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/rooms_isolated_report.json",
+      "blob_sha": "b00af052702999e8892f889a0430bbf55e92a610",
+      "blob_size": 1925,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/tools/p3b_clients.py",
+      "blob_sha": "e6fbbae72edafeb0f48412845516b8a48f1ef7c8",
+      "blob_size": 3984,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/tools/p3b_regression.py",
+      "blob_sha": "02575915bde0cd5d717eafb58178436d76e95483",
+      "blob_size": 14878,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/tools/p3b_two_windows.py",
+      "blob_sha": "f7b4cedcd6d66863682db7970ec50245afcb8941",
+      "blob_size": 8371,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/tools/planta_rooms_isolated.py",
+      "blob_sha": "90f3bd382a0c23ccc4b60f8130212dd9e7fd3208",
+      "blob_size": 3516,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/two_windows.json",
+      "blob_sha": "2c59c5db5f0489bc7e869a961a93ef8d853b02b9",
+      "blob_size": 3315,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/vray_living.png",
+      "blob_sha": "ce5f6135a4ad2ef2fc33d387def7e921206be4b3",
+      "blob_size": 635303,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/aperture_conditional_tests.txt",
+      "blob_sha": "c73f8d9c7ac621959359426e16010c993e04742e",
+      "blob_size": 3773,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/tools/node_client.mjs",
+      "blob_sha": "3b864c359c8271fee6fe5dc39adffa6ef55f9e7d",
+      "blob_size": 1979,
+      "owner_group": "artifacts"
     }
   ]
 }

@@ -1,0 +1,58 @@
+{
+ "job": "apply_edits",
+ "out_dir": "E:\\Claude\\worktrees\\w-gates\\runs\\fp043_p3b\\reg3\\edits",
+ "status": "OK",
+ "mode": "interactive",
+ "pid": 35492,
+ "elapsed_s": 10.01,
+ "su_left_running": true,
+ "command": [
+  "C:\\Program Files\\SketchUp\\SketchUp 2026\\SketchUp\\SketchUp.exe",
+  "E:\\Claude\\worktrees\\w-gates\\runs\\fp043_p3b\\reg3\\edits\\edited.skp",
+  "-RubyStartup",
+  "E:\\Claude\\worktrees\\w-gates\\tools\\sketchup\\ruby\\apply_edits.rb"
+ ],
+ "result": {
+  "ok": true,
+  "job": "apply_edits",
+  "applied": [
+   {
+    "index": 0,
+    "op": "set_tag",
+    "matched": [
+     "SALA DE JANTAR | SALA DE ESTAR · Sofa"
+    ],
+    "contexts": [
+     1
+    ]
+   },
+   {
+    "index": 1,
+    "op": "move",
+    "matched": [
+     "SALA DE JANTAR | SALA DE ESTAR · Sofa"
+    ],
+    "contexts": [
+     1
+    ]
+   },
+   {
+    "index": 2,
+    "op": "set_material",
+    "matched": [
+     "SALA DE JANTAR | SALA DE ESTAR · Sofa"
+    ],
+    "contexts": [
+     1
+    ]
+   }
+  ],
+  "saved": true,
+  "out_skp": "E:\\Claude\\worktrees\\w-gates\\runs\\fp043_p3b\\reg3\\edits\\edited.skp",
+  "size_bytes": 3359886,
+  "elapsed_s": 0.77,
+  "sketchup_version": "26.0.429"
+ },
+ "input_skp": "E:\\Claude\\worktrees\\w-gates\\runs\\planta_74\\mcp\\furnish_20261019_184803\\planta_74_furnished.skp",
+ "out_skp": "E:\\Claude\\worktrees\\w-gates\\runs\\fp043_p3b\\reg3\\edits\\edited.skp"
+}

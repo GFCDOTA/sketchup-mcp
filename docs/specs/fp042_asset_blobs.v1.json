@@ -4588,6 +4588,24 @@
       "blob_sha": "85aed5b74207d3ff6802d2dfad732d266451d2c4",
       "blob_size": 17652,
       "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/render_planta_iso.png",
+      "blob_sha": "b92a2a17e8e4980ed1712dceb069fec7252bb1f2",
+      "blob_size": 59609,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/render_planta_top.png",
+      "blob_sha": "44286545db466685f0ee86bed4c25ef8dfa1ba70",
+      "blob_size": 19536,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/vray_living.png",
+      "blob_sha": "ce5f6135a4ad2ef2fc33d387def7e921206be4b3",
+      "blob_size": 635303,
+      "owner_group": "artifacts"
     }
   ]
 }

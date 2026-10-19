@@ -39,7 +39,11 @@ def job_info() -> dict[str, Any]:
 
     Clientes MCP no Windows costumam pôr o servidor num job `KILL_ON_JOB_CLOSE`: fechar o cliente mata a árvore, SketchUp
     incluso, a menos que o job permita breakaway. `sketchup_survives_server_exit` diz se uma instância aberta por
-    `spawn_detached` sobreviveria ao servidor; `None` quando não dá para saber (não Windows / consulta falhou)."""
+    `spawn_detached` sobreviveria ao servidor; `None` quando não dá para saber (não Windows / consulta falhou).
+
+    LIMITE (L2 P3b): isto lê o job visível a este processo, não o que o CLIENTE faz depois. O cliente Python do `mcp` cria o
+    próprio job e o termina ao fechar — filhos de `spawn_detached` morrem mesmo com `sketchup_survives_server_exit=True`.
+    Por isso `su_open` usa `spawn_outside_job` (WMI); os jobs em lote seguem o job do cliente de propósito."""
     if sys.platform != "win32":
         return {"supported": False, "sketchup_survives_server_exit": None}
     import ctypes
@@ -109,6 +113,44 @@ class Handle(Protocol):
     def terminate(self) -> None: ...
 
 
+class PidHandle:
+    """Handle de um processo que NAO e nosso filho (criado via WMI): so PID, `poll` por tasklist, `terminate` por PID."""
+
+    def __init__(self, pid: int):
+        self.pid = int(pid)
+
+    def poll(self) -> int | None:
+        out = subprocess.run(["tasklist", "/FO", "CSV", "/NH", "/FI", f"PID eq {self.pid}"],  # noqa: S603,S607
+                             capture_output=True, text=True).stdout
+        return None if f'"{self.pid}"' in out else 0
+
+    def terminate(self) -> None:
+        subprocess.run(["taskkill", "/PID", str(self.pid)], capture_output=True)  # noqa: S603,S607 — so o PID dele
+
+
+def spawn_outside_job(cmd: list[str]) -> Handle | None:
+    """Sobe o processo FORA do Job Object de quem chamou (L2 P3b, 2026-10-19).
+
+    O cliente MCP em Python (mcp 1.28) poe o servidor num Job Object e o encerra com `TerminateJobObject` ao fechar: um
+    SketchUp aberto por `su_open` morria junto, apesar de `spawn_detached` tentar o breakaway (o job do cliente nao o
+    permite e o fallback entra no job). `su_open` abre uma janela PARA O HUMANO, que nao pode acompanhar o ciclo de vida
+    do cliente. Um processo criado por `Win32_Process.Create` (WMI) e filho do servico WMI, nao do servidor: fica fora
+    do job. Devolve None quando nao da (nao Windows, WMI recusou, PID nao veio) — o chamador cai no `spawn_detached`.
+    Sem env customizado: o processo herda o ambiente do servico WMI, nao o do servidor."""
+    if sys.platform != "win32":
+        return None
+    line = subprocess.list2cmdline(cmd).replace("'", "''")
+    script = ("$r = Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{CommandLine='" + line + "'}; "
+              "if ($r.ReturnValue -ne 0) { exit 2 }; Write-Output $r.ProcessId")
+    try:
+        done = subprocess.run(["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", script],  # noqa: S603,S607
+                              capture_output=True, text=True, timeout=30)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    pid = (done.stdout or "").strip().splitlines()[-1:] or [""]
+    return PidHandle(int(pid[0])) if done.returncode == 0 and pid[0].isdigit() else None
+
+
 class System:
     """Tudo que toca SO, processo e relógio de verdade."""
 
@@ -133,6 +175,9 @@ class System:
 
     def popen(self, cmd: list[str], env: dict[str, str] | None = None) -> Handle:
         return spawn_detached(cmd, env)  # comando montado aqui, caminhos validados
+
+    def popen_outside_job(self, cmd: list[str]) -> Handle | None:
+        return spawn_outside_job(cmd)
 
     def now(self) -> float:
         return time.time()
@@ -228,8 +273,14 @@ class SketchUp:
         skp = Path(skp)
         if skp.suffix.lower() != ".skp" or not self.system.exists(skp):
             return {"status": "ERROR", "reason": f"não é um .skp existente: {skp}"}
-        h = self.system.popen([str(self.loc.exe), str(skp)])
-        return {"status": "OPENED", "pid": getattr(h, "pid", None), "skp": str(skp)}
+        # absoluto: o processo criado via WMI nasce em outro diretório de trabalho (um caminho relativo abriria "Sem nome")
+        cmd = [str(self.loc.exe), str(skp.resolve())]
+        outside = getattr(self.system, "popen_outside_job", None)
+        h = outside(cmd) if outside else None
+        escaped = h is not None
+        if h is None:                                   # sem WMI / nao Windows / dublê: filho desanexado, que pode seguir o job do cliente
+            h = self.system.popen(cmd)
+        return {"status": "OPENED", "pid": getattr(h, "pid", None), "skp": str(skp), "outside_job": escaped}
 
     def close(self, *, pid: int | None = None, all_instances: bool = False,
               force: bool = False, confirm: bool = False,

@@ -1,0 +1,25 @@
+{
+ "status": "OK",
+ "mode": "interactive",
+ "pid": 32800,
+ "elapsed_s": 21.01,
+ "su_left_running": true,
+ "command": [
+  "C:\\Program Files\\SketchUp\\SketchUp 2026\\SketchUp\\SketchUp.exe",
+  "E:\\Claude\\worktrees\\w-gates\\runs\\planta_74\\mcp\\render_vray_20261019_184915\\_vray_scene_closed.skp",
+  "-RubyStartup",
+  "E:\\Claude\\worktrees\\w-gates\\tools\\sketchup\\vray\\vray_export.rb"
+ ],
+ "scene_dir": "E:\\Claude\\apps\\sketchup-mcp\\runs\\scenes\\living_room_black_wood_gold_boutique",
+ "out_dir": "E:\\Claude\\worktrees\\w-gates\\runs\\planta_74\\mcp\\render_vray_20261019_184915",
+ "export_log": "texturas aplicadas: 19\ncamera CUSTOM eye=46.93,15.75,62.99 target=149.29,82.68,21.65\nVRay::Context.active -> VRay::Context nil?=false\nvrscene exported=true size=396960\nDONE",
+ "vray": {
+  "returncode": 0,
+  "timeout": false,
+  "tail": "es: 0\n[2026/Oct/19|18:49:51] [1019 MB]   Moving primitives: 0\n[2026/Oct/19|18:49:51] [1019 MB]   Infinite primitives: 1\n[2026/Oct/19|18:49:51] [1019 MB]   Static hair segments: 0\n[2026/Oct/19|18:49:51] [1019 MB]   Moving hair segments: 0\n[2026/Oct/19|18:49:52] [1009 MB] Successfully written image file \"E:\\Claude\\worktrees\\w-gates\\runs\\planta_74\\mcp\\render_vray_20261019_184915\\vray.png\"\n[2026/Oct/19|18:49:52] [1009 MB] Frame took 16.12 s.\n[2026/Oct/19|18:49:52] [1009 MB] Cleaning up bitmap manager\n[2026/Oct/19|18:49:52] [1009 MB] Maximum memory usage for texman: 0.00 MB\n[2026/Oct/19|18:49:52] [1009 MB] Maximum memory usage for attributes: 0.00 MB\n[2026/Oct/19|18:49:53] [125 MB] Closing log - 0 error(s), 0 warning(s).\n[2026/Oct/19|18:49:53] [2026/Oct/19|18:49:53] Max memory usage: 1019 MB\n\n\n"
+ },
+ "inputs_intact": true,
+ "png": "E:\\Claude\\worktrees\\w-gates\\runs\\planta_74\\mcp\\render_vray_20261019_184915\\vray.png",
+ "vrscene_bytes": 410575,
+ "visual_review": "mudança de APARÊNCIA: o veredito IMPROVED/SAME/WORSE é do Felipe (VISUAL_REVIEW) — nunca automático"
+}

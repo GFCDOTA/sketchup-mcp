@@ -26,6 +26,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from tools.sketchup.legacy_process import terminate_owned  # noqa: E402
+
 ROOT = Path(__file__).resolve().parents[2]
 SKETCHUP_EXE = r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
 RB = ROOT / "tools/rendering/ruby/material_review.rb"
@@ -149,18 +151,16 @@ def render_proofs(skp_path):
     env["MR_CAMERAS"] = build_cameras_env()
     env["MR_LOG"] = str(log_path).replace("\\", "/")
 
-    subprocess.run(["taskkill", "/F", "/IM", "SketchUp.exe"], capture_output=True)
-    time.sleep(1)
     cmd = [SKETCHUP_EXE, str(work), "-RubyStartup", str(RB)]
     print(f"[material-review] launching SU (base={skp.name}, {len(ROOM_CAMERAS)} cameras)...")
-    subprocess.Popen(cmd, env=env, creationflags=getattr(subprocess, "DETACHED_PROCESS", 0))
+    proc = subprocess.Popen(cmd, env=env, creationflags=getattr(subprocess, "DETACHED_PROCESS", 0))
     deadline = time.time() + 240
     while time.time() < deadline:
         if log_path.exists():
             time.sleep(2)
             break
         time.sleep(1)
-    subprocess.run(["taskkill", "/F", "/IM", "SketchUp.exe"], capture_output=True)
+    terminate_owned(proc.pid)                  # so o SketchUp que ESTE script subiu (nunca por nome de imagem)
 
     if not log_path.exists():
         print("[material-review] TIMEOUT — SU nao produziu log")

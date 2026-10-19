@@ -35,13 +35,21 @@ def launch_owned(executable: str | Path, input_skp: str | Path,
         "[Console]::Out.WriteLine($p.Id)"
     )
     result = subprocess.run(
-        ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", command],
+        ["powershell", "-NoProfile", "-NonInteractive", "-Command", command],
         env=env, capture_output=True, text=True, check=True, timeout=timeout_s,
     )
     output = (result.stdout or "").strip().splitlines()
     if not output or not output[-1].strip().isdigit() or int(output[-1]) <= 0:
         raise RuntimeError("Start-Process não retornou o PID próprio do SketchUp")
     return int(output[-1])
+
+
+def terminate_owned(pid: int) -> bool:
+    """Encerra (`taskkill /PID <pid> /F`) SO o processo que o PROPRIO script subiu — para scripts de render/prova que nao
+    salvam e nao podem ficar presos num "salvar alteracoes?". Nunca por nome de imagem, nunca um PID descoberto."""
+    if type(pid) is not int or pid <= 0:
+        raise ValueError("PID proprio invalido")
+    return subprocess.run(["taskkill", "/PID", str(pid), "/F"], capture_output=True).returncode == 0
 
 
 def close_owned(pid: int) -> bool:

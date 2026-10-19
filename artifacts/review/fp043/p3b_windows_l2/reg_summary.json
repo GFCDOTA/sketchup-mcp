@@ -1,0 +1,207 @@
+{
+ "commit": "32265d11831a107601c1d8caf4ecf6aca53ea2da",
+ "steps": [
+  {
+   "step": "tools_listed",
+   "ok": true,
+   "count": 18
+  },
+  {
+   "step": "su_status",
+   "ok": true,
+   "instances": 0,
+   "job": {
+    "supported": true,
+    "in_job": true,
+    "kill_on_job_close": true,
+    "breakaway_ok": false,
+    "silent_breakaway_ok": true,
+    "sketchup_survives_server_exit": true
+   }
+  },
+  {
+   "step": "planta_build_ok_and_report_equals_approved",
+   "ok": true,
+   "status": "OK",
+   "same_report": true
+  },
+  {
+   "step": "planta_gates_with_report",
+   "ok": true,
+   "tail": [
+    "[deterministic-gates] overall=PASS",
+    "  opening_host : PASS (0/12 openings)",
+    "  wall_overlap : PASS (0 overlapping pairs)",
+    "  scale_anchor: PASS",
+    "  railing_match: PASS (exp=1 act=1, 0 findings)",
+    "  parapet_fallbk: PASS (0 unsourced rendered)",
+    "  position_fid : PASS (0 FAIL de 0)"
+   ]
+  },
+  {
+   "step": "planta_inspect_equals_approved_nodes",
+   "ok": true,
+   "nodes": 77,
+   "bbox_m": [
+    13.0617,
+    7.7351,
+    2.7
+   ]
+  },
+  {
+   "step": "su_render_valid_preset_files_and_content",
+   "ok": true,
+   "images": [
+    {
+     "file": "top.png",
+     "bytes": 19536,
+     "size": [
+      1200,
+      900
+     ],
+     "colors": 620
+    },
+    {
+     "file": "iso.png",
+     "bytes": 59609,
+     "size": [
+      1200,
+      900
+     ],
+     "colors": 317
+    }
+   ]
+  },
+  {
+   "step": "su_render_invalid_preset_refused",
+   "ok": true,
+   "status": "ERROR"
+  },
+  {
+   "step": "su_furnish_integrated",
+   "ok": true,
+   "status": "OK",
+   "boxes": 402
+  },
+  {
+   "step": "furnished_reopened_inspected",
+   "ok": true,
+   "nodes": 543
+  },
+  {
+   "step": "su_apply_edits_move_tag_material_reopened",
+   "ok": true,
+   "status": "OK",
+   "dx_m": 0.1,
+   "tag": "P3B_TESTE",
+   "material": "skmcp_rgb_200_30_30",
+   "original_intact": true
+  },
+  {
+   "step": "su_apply_edits_architecture_refused",
+   "ok": true,
+   "status": "FAILED",
+   "reason": "RuntimeError: ops[0] (delete) recusado: PlanShell_Group é arquitetura derivada do PDF (Hard Rule #1)",
+   "unedited_copy": "left_with_NOT_A_RESULT_marker"
+  },
+  {
+   "step": "su_open_keeps_window_open",
+   "ok": true,
+   "pid": 22168,
+   "outside_job": true
+  },
+  {
+   "step": "su_close_by_pid",
+   "ok": true,
+   "close_result": {
+    "status": "CLOSED",
+    "closed": [
+     22168
+    ],
+    "still_running": []
+   }
+  },
+  {
+   "step": "su_close_all_without_confirm_refused",
+   "ok": true
+  },
+  {
+   "step": "su_render_vray",
+   "ok": true,
+   "status": "OK",
+   "png_bytes": 635303,
+   "reason": null,
+   "vray_in_status": null
+  },
+  {
+   "step": "quadrado_build_ok_and_gates",
+   "ok": true,
+   "status": "OK",
+   "tail": [
+    "[deterministic-gates] overall=PASS",
+    "  opening_host : PASS (0/1 openings)",
+    "  wall_overlap : PASS (0 overlapping pairs)",
+    "  scale_anchor: PASS",
+    "  railing_match: PASS (exp=0 act=0, 0 findings)",
+    "  parapet_fallbk: PASS (0 unsourced rendered)",
+    "  position_fid : PASS (0 FAIL de 0)"
+   ]
+  },
+  {
+   "step": "quadrado_reopened_scale_correct_and_equals_l2_baseline",
+   "ok": true,
+   "bbox_size_m": [
+    4.19,
+    4.2476,
+    2.7
+   ],
+   "equals_fp042_l2_baseline": true,
+   "note": "largura 4,19 m = 4,00 m livre + parede: escala padrao do quadrado (0,0352), nao a da planta_74; a janela sai ~5,7 cm da face sul (D-001)"
+  },
+  {
+   "step": "scale_anchor_independent_rejects_wrong_scale_model",
+   "ok": true,
+   "tail": [
+    "[deterministic-gates] overall=FAIL",
+    "  opening_host : PASS (0/1 openings)",
+    "  wall_overlap : PASS (0 overlapping pairs)",
+    "  scale_anchor: FAIL",
+    "  railing_match: PASS (exp=0 act=0, 0 findings)",
+    "  parapet_fallbk: PASS (0 unsourced rendered)",
+    "  position_fid : PASS (0 FAIL de 0)"
+   ]
+  },
+  {
+   "step": "canonicals_intact",
+   "ok": true,
+   "files": [
+    "planta_74.skp",
+    "geometry_report.json",
+    "planta_74_furnished.skp"
+   ]
+  }
+ ],
+ "pids": [
+  33280,
+  37844,
+  1564,
+  36188,
+  35492,
+  30660,
+  34288,
+  32800,
+  35760
+ ],
+ "canonical_before": {
+  "planta_74.skp": "7512d592e1d81208f3954bc24165b9ca069c7713b1fce990c4a23eaad1d91294",
+  "geometry_report.json": "dfc431da1bf299d9257057387400a057762cf42a3d2c1b06923570d0eebb63c6",
+  "planta_74_furnished.skp": "d2846ab684f47638f8177f29b3593c566d60c5cdb9c07addf56a9276e11a9397"
+ },
+ "canonical_after": {
+  "planta_74.skp": "7512d592e1d81208f3954bc24165b9ca069c7713b1fce990c4a23eaad1d91294",
+  "geometry_report.json": "dfc431da1bf299d9257057387400a057762cf42a3d2c1b06923570d0eebb63c6",
+  "planta_74_furnished.skp": "d2846ab684f47638f8177f29b3593c566d60c5cdb9c07addf56a9276e11a9397"
+ },
+ "canonical_intact": true,
+ "ok": true
+}
