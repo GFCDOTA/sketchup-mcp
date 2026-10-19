@@ -14,6 +14,20 @@ ROOM_NAMES = frozenset({
     "living", "bedroom", "kitchen", "bathroom", "service", "balcony",
     "closet", "home_office", "circulation",
 })
+# Public compatibility paths still reach the same room implementations.
+# Resolve them before checking boundaries so a facade cannot hide ownership.
+LEGACY_ROOM_MODULES = {
+    "tools.bedroom_layout": "tools.rooms.bedroom.layout",
+    "tools.bedroom_designer": "tools.rooms.bedroom.designer",
+    "tools.bed_class": "tools.rooms.bedroom.bed_class",
+    "tools.kitchen_layout": "tools.rooms.kitchen.layout",
+    "tools.kitchen_validation": "tools.rooms.kitchen.anchor_rules",
+    "tools.bathroom_layout": "tools.rooms.bathroom.layout",
+    "tools.service_layout": "tools.rooms.service.layout",
+    "interior.planners.living_room_planner": "tools.rooms.living.planner",
+    **{f"tools.{name}_class": f"tools.rooms.living.{name}_class"
+       for name in ("sofa", "rack", "coffee_table", "dining_table", "armchair")},
+}
 
 
 def collect_imports(source: str, *, module_name: str | None = None) -> set[str]:
@@ -45,7 +59,7 @@ def collect_imports(source: str, *, module_name: str | None = None) -> set[str]:
             imports.add(resolved)
         # `from .. import bedroom` and `from tools import kitchen_layout`
         # import a module through an alias; a prefix-only scan misses both.
-        if (node.module is None or resolved in {"tools", "tools.rooms"}):
+        if (node.module is None or resolved in {"tools", "tools.rooms", "interior.planners"}):
             imports.update(
                 resolved + "." + alias.name if resolved else alias.name
                 for alias in node.names if alias.name != "*"
@@ -54,7 +68,7 @@ def collect_imports(source: str, *, module_name: str | None = None) -> set[str]:
 
 
 def ownership_violations(files: dict[str, str]) -> list[dict]:
-    """Somente código dos novos pacotes; arquivos legados têm migração pendente."""
+    """Check room implementations, including imports through legacy facades."""
     result = []
     for path, source in sorted(files.items()):
         parts = Path(path).parts
@@ -65,19 +79,25 @@ def ownership_violations(files: dict[str, str]) -> list[dict]:
             continue
         module_name = ".".join(Path(path).with_suffix("").parts)
         for imported in sorted(collect_imports(source, module_name=module_name)):
-            chunks = imported.split(".")
+            canonical = imported
+            for legacy, target in LEGACY_ROOM_MODULES.items():
+                if imported == legacy or imported.startswith(legacy + "."):
+                    canonical = target + imported[len(legacy):]
+                    break
+            chunks = canonical.split(".")
             if len(chunks) >= 3 and chunks[:2] == ["tools", "rooms"]:
                 other = chunks[2]
                 if other in ROOM_NAMES and other != owner:
+                    reason = ("SHARED_IMPORTS_ROOM" if owner == "shared" and canonical != imported
+                              else "CROSS_ROOM_DEPENDENCY")
                     result.append({"path": path, "owner": owner,
-                                   "imported": imported, "reason": "CROSS_ROOM_DEPENDENCY"})
-            elif owner == "shared" and imported in (
-                "tools.furnish_apartment", "tools.bedroom_layout",
-                "tools.kitchen_layout", "tools.bathroom_layout",
-                "tools.service_layout", "tools.bedroom_designer",
-            ):
+                                   "imported": imported, "reason": reason})
+            elif (imported == "tools.furnish_apartment"
+                  or imported.startswith("tools.furnish_apartment.")):
                 result.append({"path": path, "owner": owner,
-                               "imported": imported, "reason": "SHARED_IMPORTS_ROOM"})
+                               "imported": imported,
+                               "reason": ("SHARED_IMPORTS_ROOM" if owner == "shared"
+                                          else "ROOM_IMPORTS_ORCHESTRATOR")})
     return result
 
 
@@ -90,6 +110,7 @@ def scan(root: Path = ROOT) -> dict:
     return {"result": "FAIL" if violations else "PASS",
             "files_scanned": len(files), "violations": violations,
             "scope": "NEW_ROOM_PACKAGES_ONLY",
+            "legacy_facades_checked": True,
             "legacy_migration_complete": False}
 
 

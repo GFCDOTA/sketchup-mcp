@@ -69,6 +69,8 @@ jobs:
         run: python -m tools.rooms.reference_provenance
       - name: FP-042 — strict zero-pending inventory
         run: python -m tools.rooms.inventory_gate --strict
+      - name: FP-042 — room boundaries including legacy facades
+        run: python -m tools.rooms.ownership_audit
       - name: FP-042 P3 — exact owner coverage
         run: python -m tools.rooms.p3_ownership
       - name: Gate — planta_74

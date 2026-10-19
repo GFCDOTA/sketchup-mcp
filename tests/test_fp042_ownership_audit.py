@@ -1,7 +1,17 @@
 """Gates da migração P1: AST dos módulos novos e negativos de dependência."""
+import json
+import subprocess
+import sys
+
 import pytest
 
-from tools.rooms.ownership_audit import collect_imports, ownership_violations, scan
+from tools.rooms.ownership_audit import (
+    LEGACY_ROOM_MODULES,
+    ROOT,
+    collect_imports,
+    ownership_violations,
+    scan,
+)
 
 
 def test_existing_room_packages_have_no_cross_room_dependency():
@@ -57,3 +67,63 @@ def test_relative_local_import_remains_allowed():
     assert ownership_violations({"tools/rooms/kitchen/layout.py": code}) == []
     assert "tools.rooms.kitchen.validation" in collect_imports(
         code, module_name="tools.rooms.kitchen.layout")
+
+
+@pytest.mark.parametrize('source', [
+    'import tools.bedroom_layout\n',
+    'from tools import bedroom_designer\n',
+    'from tools.bed_class import derive_spec\n',
+])
+def test_room_cannot_bypass_boundary_through_legacy_facade(source):
+    violations = ownership_violations({'tools/rooms/kitchen/planner.py': source})
+    assert any(v['reason'] == 'CROSS_ROOM_DEPENDENCY' for v in violations)
+
+
+def test_shared_cannot_import_room_class_through_legacy_facade():
+    violations = ownership_violations({
+        'tools/rooms/shared/parts.py': 'from tools import sofa_class\n',
+    })
+    assert any(v['reason'] == 'SHARED_IMPORTS_ROOM' for v in violations)
+
+
+@pytest.mark.parametrize('source', [
+    'from tools.furnish_apartment import collect_boxes\n',
+    'from tools import furnish_apartment\n',
+])
+def test_room_cannot_import_its_orchestrator(source):
+    violations = ownership_violations({'tools/rooms/kitchen/planner.py': source})
+    assert any(v['reason'] == 'ROOM_IMPORTS_ORCHESTRATOR' for v in violations)
+
+
+def test_same_room_legacy_facade_remains_compatible():
+    assert ownership_violations({
+        'tools/rooms/kitchen/validation.py': 'from tools import kitchen_validation\n',
+    }) == []
+
+
+def test_nested_legacy_module_cannot_bypass_boundary():
+    violations = ownership_violations({
+        'tools/rooms/shared/parts.py':
+            'from interior.planners import living_room_planner\n',
+    })
+    assert any(v['reason'] == 'SHARED_IMPORTS_ROOM' for v in violations)
+
+
+@pytest.mark.parametrize('reverse', [False, True])
+def test_room_packages_and_facades_import_in_a_fresh_process(reverse):
+    # Cold imports catch partial-initialization failures hidden by pytest's
+    # collection cache. No CLI entrypoints or SketchUp jobs are executed.
+    modules = set(LEGACY_ROOM_MODULES) | {
+        'tools.furnish_apartment', 'tools.variant_sweep', 'tools.geometry_sanity',
+        'tools.furniture_overlap_gate', 'tools.circulation_gate',
+    }
+    modules.update('.'.join(p.relative_to(ROOT).with_suffix('').parts)
+                   for p in (ROOT / 'tools/rooms').rglob('*.py'))
+    code = 'import importlib, json, sys; ' + (
+        '[importlib.import_module(name) for name in json.loads(sys.argv[1])]'
+    )
+    result = subprocess.run(
+        [sys.executable, '-c', code, json.dumps(sorted(modules, reverse=reverse))],
+        cwd=ROOT, capture_output=True, text=True, timeout=60,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
