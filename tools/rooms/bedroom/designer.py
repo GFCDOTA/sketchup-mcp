@@ -30,6 +30,18 @@ QUEEN = (1.58, 1.98, 0.55)          # QUEEN REAL 1.58x1.98 (programa apê-inteir
 CASAL = (1.38, 1.88, 0.50)
 SOLTEIRO = (0.88, 1.88, 0.45)
 NIGHTSTAND = (0.45, 0.40, 0.55)     # GPT review: criado menor/compacto, leve
+# FP-043/P3a: a caixaria suspensa tem dimensoes minimas e tampo saliente.
+# O PLANNER deve validar a mesma pegada que o materializador vai construir.
+NIGHTSTAND_BODY_MIN = (0.40, 0.34)
+NIGHTSTAND_TOP_EXTRA = 0.02       # total W/D (10 mm de cada lado)
+
+
+def nightstand_real_dimensions(width_m: float, depth_m: float) -> tuple[float, float, float, float]:
+    """Body W/D e top W/D, em metros; contrato unico planner -> materializador."""
+    bw = round(max(width_m, NIGHTSTAND_BODY_MIN[0]), 3)
+    bd = round(max(depth_m, NIGHTSTAND_BODY_MIN[1]), 3)
+    return bw, bd, round(bw + NIGHTSTAND_TOP_EXTRA, 3), round(bd + NIGHTSTAND_TOP_EXTRA, 3)
+
 RUG = (2.80, 3.40, 0.02)
 WARDROBE_DEPTH, WARDROBE_H = 0.60, 2.20
 HEADBOARD_DEPTH, HEADBOARD_H = 0.06, 1.10   # painel fino na parede da cabeceira (GPT)
@@ -210,21 +222,39 @@ def build_layout(sm, hb, bed_dims=KING, bed_label="king", minimalist=True):
     _tol_door = (M(0.036)) ** 2   # < ~2in2 -> geometry_sanity PASS (nao WARN)
     placed_n = 0
     for side in (1, -1):
+        # A largura base do criado define a posicao nominal para preservar a
+        # linguagem visual. Deslizes <= 4cm em direcao a cama podem liberar
+        # canto de parede sem empurrar o movel para dentro da arquitetura.
         ns_ac = ac + side * (M(bw) / 2 + M(nw) / 2 + M(NS_GAP))
-        # candidatos: default; encolhe (centrado, tira o canto do clearance); afasta da parede.
+        placed = False
         for cw, cdp, dperp in ((nw, nd, 0.0), (nw * 0.85, nd * 0.85, 0.0),
                                (nw * 0.72, nd * 0.72, 0.0), (nw, nd, 0.06),
                                (nw * 0.85, nd * 0.85, 0.06)):
-            ns = _fbox(o, face, sgn, ns_ac, M(BED_PERP + dperp), M(cw), M(cdp))
-            if not (comodo.contains(ns) and not _hit(ns, circ_u) and not _ov(ns, items)):
-                continue
-            if _door_clear is not None and ns.intersection(_door_clear).area > _tol_door:
-                continue
-            items.append({"name": f"criado_mudo_{'dir' if side > 0 else 'esq'}", "type": "nightstand",
-                          "box": ns, "anchor_wall": hb["id"],
-                          "reason": "flanqueando a cabeceira (clearance da porta respeitada)"})
-            placed_n += 1
-            break
+            body_w, body_d, top_w, top_d = nightstand_real_dimensions(cw, cdp)
+            for slide_m in (0.0, -side * 0.02, -side * 0.04):
+                along = ns_ac + M(slide_m)
+                ns = _fbox(o, face, sgn, along, M(BED_PERP + dperp),
+                           M(body_w), M(body_d))
+                # Tampo saliente domina a pegada. Preserva o MESMO centro
+                # do corpo e expande 1cm de cada lado, inclusive ate a parede.
+                top = _fbox(o, face, sgn, along,
+                            M(BED_PERP + dperp - NIGHTSTAND_TOP_EXTRA / 2),
+                            M(top_w), M(top_d))
+                if not comodo.covers(top) or top.intersection(wfoot).area > 1e-8:
+                    continue
+                if _hit(top, circ_u) or _ov(top, items):
+                    continue
+                if _door_clear is not None and top.intersection(_door_clear).area > _tol_door:
+                    continue
+                items.append({"name": f"criado_mudo_{'dir' if side > 0 else 'esq'}",
+                              "type": "nightstand", "box": ns,
+                              "visual_footprint": top, "anchor_wall": hb["id"],
+                              "reason": "tampo completo validado contra parede/circulacao/porta"})
+                placed_n += 1
+                placed = True
+                break
+            if placed:
+                break
     if placed_n < 2:
         downgrades.append(f"criados-mudos: só {placed_n} coube(ram) (ideal 2)")
 
@@ -351,7 +381,7 @@ def _hit(b, geom):
 
 def _ov(b, items):
     tol = 0.01 / PT_TO_M ** 2          # tolera sliver de borda (encoste exato)
-    return any(b.intersection(it["box"]).area > tol
+    return any(b.intersection(it.get("visual_footprint", it["box"])).area > tol
                for it in items if not it.get("decorative"))
 
 
@@ -483,15 +513,20 @@ def score(items, sm, hb, downgrades):
     ward = next((it for it in items if it["type"] == "wardrobe"), None)
     rug = next((it for it in items if it["type"] == "rug"), None)
 
-    out_room = any(not comodo.contains(it["box"]) for it in solids)
+    # Nightstand usa a pegada do TAMPO no score final, nao so o placeholder.
+    occupied = lambda it: it.get("visual_footprint", it["box"])
+    out_room = any(not comodo.covers(occupied(it)) for it in solids)
     # a cabeceira é um painel projetado PRA ficar na parede — não conta como invasão
-    hits_wall = any(it["box"].intersection(wfoot).area > (0.06 / PT_TO_M ** 2)
-                    for it in solids if it["type"] != "headboard")
-    hits_door = any(_hit(it["box"], circ_u) for it in solids)
-    hits_win = any(_hit(it["box"], win_zone) for it in solids)
+    hits_wall = any(
+        occupied(it).intersection(wfoot).area >
+        (1e-8 if it["type"] == "nightstand" else 0.06 / PT_TO_M ** 2)
+        for it in solids if it["type"] != "headboard"
+    )
+    hits_door = any(_hit(occupied(it), circ_u) for it in solids)
+    hits_win = any(_hit(occupied(it), win_zone) for it in solids)
     free = usable
     for it in solids:
-        free = free.difference(it["box"])
+        free = free.difference(occupied(it))
     passage_ok = not free.buffer(-M(CORRIDOR_MIN) / 2).is_empty
 
     pts, bd, viol = 0, {}, []
