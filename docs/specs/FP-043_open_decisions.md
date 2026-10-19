@@ -11,7 +11,8 @@ linha vira uma nota de decisão com data e o item sai daqui.
 | D-003 | `tools/furnish_plan.py` / `.rb` (3D Warehouse): vigente ou histórico | Felipe | só o destino desses 2 arquivos em P4 |
 | D-004 | Dono da CLI `tools/trace_view.py` | Felipe | só o destino dele em P4 |
 | D-005 | `scripts/set_clipboard_image.ps1` ainda útil | Felipe | só o destino dele em P4 |
-| D-006 | `repo_health_gate` fora do CI e hoje com 4 violações | Felipe | nada |
+
+**Decisão técnica já resolvida:** D-006 — o `repo_health_gate` foi corrigido e incluído no CI; evidências e contraprovas na seção histórica abaixo.
 
 ## D-001 — Peitoril (e mais) do `quadrado`: referência de 2026-05-24 × builder aprovado em 2026-06-04
 
