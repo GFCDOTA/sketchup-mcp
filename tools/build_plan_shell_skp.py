@@ -1141,6 +1141,18 @@ def run(consensus_path: Path, out_skp: Path, *, sketchup_exe: Path,
                     f"[su-runner] artifact ready; SU left running "
                     f"(PID {_pid}) per mode={resolved_mode}"
                 )
+            # Absolute scale comes from the cota/fixture, NOT from self-checks.
+            # Historical mocked callers may produce only an SKP: expose
+            # INCOMPLETE, and promotion below rejects it (never silent PASS).
+            from tools.validation.scale_anchor_gate import audit_paths as _scale_audit
+            scale_verdict = (
+                _scale_audit(consensus_path, out_report)
+                if out_report.exists()
+                else {"overall": "INCOMPLETE", "reason": "NO_REPORT_AT_ARTIFACT_MARKER"}
+            )
+            if scale_verdict["overall"] == "FAIL":
+                print(f"[scale-anchor] FAIL: {scale_verdict}")
+                return {"ok": False, "scale_anchor": scale_verdict, "stats": stats}
             # Persist sidecar metadata so a future run with the
             # same consensus short-circuits the cache check.
             if consensus_sha is not None:
@@ -1161,6 +1173,7 @@ def run(consensus_path: Path, out_skp: Path, *, sketchup_exe: Path,
                 "consensus_sha256": consensus_sha,
                 "elapsed_s": round(time.time() - started, 4),
                 "stats": stats,
+                "scale_anchor": scale_verdict,
             }
         if proc.poll() is not None:
             print(
@@ -1227,6 +1240,12 @@ def _auto_promote(args, result):
     failed = sorted(k for k, v in gates.items() if not v)
     if failed:
         return f"PROMOTE_SKIPPED self-check gates failed: {failed}"
+    # A build at the wrong absolute scale must NEVER be promoted, even
+    # when its internal/self-check geometry gates all say PASS.
+    from tools.validation.scale_anchor_gate import audit_paths as _scale_audit
+    scale_audit = _scale_audit(args.consensus, report_p)
+    if scale_audit["overall"] != "PASS":
+        return f"PROMOTE_SKIPPED scale-anchor {scale_audit['overall']}: {scale_audit.get('reason')}"
     # full deterministic fidelity suite must be green too: opening_host +
     # wall_overlap + wall_presence (exact projection). The deliverable must
     # never land at the fixed path with a deterministic FAIL/INCOMPLETE.
