@@ -32,12 +32,12 @@ def test_documentacao_real_sem_link_quebrado_nem_estado_errado():
     assert check_states(files, ROOT) == []
 
 
-def test_cinco_rotas_de_navegacao_passam():
+def test_rotas_de_navegacao_passam():
     doc = json.loads((ROOT / ROUTES_PATH).read_text(encoding="utf-8"))
     assert check_routes(doc, ROOT) == []
     ids = {r["id"] for r in doc["routes"]}
     assert ids == {"kitchen-planner-and-sink-rule", "shared-cabinet-builder", "shaker-door-recipe",
-                   "kitchen-test-and-l2-evidence", "mcp-to-skp"}
+                   "kitchen-test-and-l2-evidence", "mcp-to-skp", "kitchen-specialist-and-catalog", "specialists-all-rooms"}
     assert all(len(r["hops"]) - 1 <= 3 for r in doc["routes"])
 
 

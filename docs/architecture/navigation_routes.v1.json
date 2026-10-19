@@ -37,6 +37,34 @@
       ]
     },
     {
+      "id": "specialists-all-rooms",
+      "question": "Quem é o especialista de cada categoria de cômodo, qual a fonte, o limite e a capacidade registrada?",
+      "hops": ["README.md", "docs/architecture/repository_map.md", "docs/architecture/specialists.md"],
+      "answers": [
+        {"path": "tools/rooms/living/specialist.md", "role": "especialista de living: papel, fontes, allowlist e limites"},
+        {"path": "tools/rooms/bedroom/specialist.md", "role": "especialista de bedroom: papel, fontes, allowlist e limites"},
+        {"path": "tools/rooms/kitchen/specialist.md", "role": "especialista de kitchen: papel, fontes, allowlist e limites"},
+        {"path": "tools/rooms/bathroom/specialist.md", "role": "especialista de bathroom: papel, fontes, allowlist e limites"},
+        {"path": "tools/rooms/service/specialist.md", "role": "especialista de service: papel, fontes, allowlist e limites"},
+        {"path": "tools/rooms/balcony/specialist.md", "role": "especialista de balcony: papel, fontes, allowlist e limites"},
+        {"path": "tools/rooms/closet/specialist.md", "role": "especialista de closet: papel, fontes, allowlist e limites"},
+        {"path": "tools/rooms/home_office/specialist.md", "role": "especialista de home_office: papel, fontes, allowlist e limites"},
+        {"path": "tools/rooms/circulation/specialist.md", "role": "especialista de circulation: papel, fontes, allowlist e limites"},
+        {"path": "tools/rooms/capability_catalog.v1.json", "symbol": "circulation.gate", "role": "catálogo único de capacidades"}
+      ]
+    },
+    {
+      "id": "kitchen-specialist-and-catalog",
+      "question": "Quem é o especialista de cozinha, qual o limite dele e onde está o catálogo de capacidades?",
+      "hops": ["README.md", "docs/architecture/repository_map.md", "tools/rooms/kitchen/README.md"],
+      "answers": [
+        {"path": "tools/rooms/kitchen/specialist.md", "role": "papel, ferramentas permitidas e condições de parada"},
+        {"path": "tools/rooms/kitchen/specialist.v1.json", "role": "perfil declarativo (allowlist de ferramentas)"},
+        {"path": "tools/rooms/capability_catalog.v1.json", "symbol": "kitchen.layout.galley", "role": "capacidade provada em L2 (escopo declarado)"},
+        {"path": "tools/rooms/specialists.py", "symbol": "plan", "role": "plano fail-closed; sem capacidade devolve BLOCKED_CAPABILITY_MISSING"}
+      ]
+    },
+    {
       "id": "kitchen-test-and-l2-evidence",
       "question": "Qual teste e qual evidência L2 provam a âncora da pia?",
       "hops": ["README.md", "docs/architecture/repository_map.md", "tools/rooms/kitchen/README.md"],

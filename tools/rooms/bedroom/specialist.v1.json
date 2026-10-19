@@ -1,0 +1,56 @@
+{
+  "schema_version": "specialist_profile.v1",
+  "room": "bedroom",
+  "aliases": [
+    "bedroom",
+    "quarto",
+    "suite"
+  ],
+  "role": "planner",
+  "reuse_of": null,
+  "scope": "Quartos e suites: cama, criados-mudos e guarda-roupa. Planeja em caixas/pecas sobre o shell; nao altera a arquitetura.",
+  "owner": "tools.rooms.bedroom",
+  "state": "LEGACY_PROVIDER_PRESENT",
+  "knowledge_room_ids": [
+    "bedroom"
+  ],
+  "source_ids": [
+    "cross.room.material-and-instance-rules",
+    "room.bedroom.bed-and-headboard"
+  ],
+  "recipe_ids": [
+    "cabinet.materials-and-texture-direction",
+    "cabinet.reusable-components"
+  ],
+  "capability_ids": [
+    "bedroom.layout.boxes",
+    "bedroom.bed.build",
+    "bedroom.wardrobe.build",
+    "bedroom.wardrobe.gate"
+  ],
+  "tool_allowlist": [
+    "python:tools.rooms.bedroom.furnishing.bedroom_designer_boxes",
+    "python:tools.rooms.bedroom.validation.wardrobe_gate.wardrobe_gate",
+    "python:tools.rooms.shared.bed.build_bed",
+    "python:tools.rooms.shared.wardrobe.build_wardrobe",
+    "ruby:tools/sketchup/furnish/place_layout_skp.rb"
+  ],
+  "constraints": [
+    "Nao criar, mover ou apagar parede, porta ou janela.",
+    "Medida sem ancora no PDF/consensus nao e inventada: pedir ou recusar.",
+    "Tecnica sem capacidade registrada responde BLOCKED_CAPABILITY_MISSING; nao gerar Ruby ad hoc."
+  ],
+  "result_types": [
+    "boxes_plan",
+    "advisory_plan",
+    "blocked"
+  ],
+  "stop_conditions": [
+    "Capacidade ausente ou PLANNED para a tecnica pedida.",
+    "Medida, unidade ou origem ausente no pedido.",
+    "O pedido exige ferramenta fora da allowlist deste perfil.",
+    "O pedido altera arquitetura derivada do PDF.",
+    "Mudanca de aparencia: encaminhar para VISUAL_REVIEW do Felipe (nunca aprovar sozinho)."
+  ],
+  "execution_authorized": false
+}

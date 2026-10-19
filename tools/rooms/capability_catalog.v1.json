@@ -1,0 +1,909 @@
+{
+  "schema_version": "capability_catalog.v1",
+  "catalog_version": "1.0.0",
+  "policy": "DECLARATIVE_NO_EXECUTION_AUTHORIZATION",
+  "knowledge_catalogs": {
+    "video": "references/sketchup/knowledge/video_recipes.v1.json",
+    "environment": "references/sketchup/knowledge/environment_recipes.v1.json"
+  },
+  "capabilities": [
+    {
+      "id": "kitchen.layout.galley",
+      "room": "kitchen",
+      "version": "1.0.0",
+      "owner": "tools.rooms.kitchen",
+      "title": "Layout linear (galley) da cozinha em caixas/placeholders",
+      "implementation": {
+        "state": "IMPLEMENTED",
+        "symbols": [
+          {
+            "lang": "python",
+            "ref": "tools.rooms.kitchen.layout.build_boxes"
+          },
+          {
+            "lang": "ruby",
+            "ref": "tools/sketchup/furnish/place_layout_skp.rb"
+          }
+        ]
+      },
+      "validation": {
+        "state": "L2_PASS",
+        "fixtures": [
+          "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json"
+        ],
+        "tests": [
+          "tests/test_kitchen_layout_style.py",
+          "tests/test_fp042_kitchen_anchor_ownership.py"
+        ],
+        "evidence": [
+          {
+            "ref": "artifacts/review/l2_fp042_20261019/README.md",
+            "sketchup_version": "26.0.429",
+            "commit": "9d7a496",
+            "scope": "planta_74 r004: 76 pecas reabertas batem com o plano em 0,05 mm (SketchUp 26.0.429)",
+            "symbol_digests": {
+              "python:tools.rooms.kitchen.layout.build_boxes": "dfceb375460810d5c3b10a813576c82873ea7497048c7ee1e039f4d2dc59ba3b",
+              "ruby:tools/sketchup/furnish/place_layout_skp.rb": "20ac2eda55bb296f04286d4d83e348bfa7eb395d953fbcdbda1a9afdba254b5a"
+            }
+          }
+        ]
+      },
+      "visual": {
+        "state": "NOT_REVIEWED"
+      },
+      "tools": [
+        "python:tools.rooms.kitchen.layout.build_boxes",
+        "ruby:tools/sketchup/furnish/place_layout_skp.rb"
+      ],
+      "parameters": [
+        {
+          "name": "consensus",
+          "unit": "none",
+          "origin": "consensus"
+        },
+        {
+          "name": "room_id",
+          "unit": "text",
+          "origin": "consensus"
+        },
+        {
+          "name": "wall_thickness",
+          "unit": "pt",
+          "origin": "consensus"
+        }
+      ],
+      "preconditions": [
+        "consensus com paredes e aberturas do PDF",
+        "escala PT_TO_M da planta (0,0259 para a planta_74)"
+      ],
+      "invariants": [
+        "a pia fica na parede OESTE do PDF (ponto hidraulico)",
+        "nenhuma parede/porta/janela e criada ou movida"
+      ],
+      "side_effects": "WRITES_WORKING_COPY",
+      "limitations": [
+        "so a cozinha da planta_74 foi provada em L2",
+        "porta Shaker, gavetas e ferragens NAO existem"
+      ]
+    },
+    {
+      "id": "kitchen.sink-anchor-guard",
+      "room": "kitchen",
+      "version": "1.0.0",
+      "owner": "tools.rooms.kitchen",
+      "title": "Trava fail-closed da ancora da pia na parede oeste",
+      "implementation": {
+        "state": "IMPLEMENTED",
+        "symbols": [
+          {
+            "lang": "python",
+            "ref": "tools.rooms.kitchen.anchor_rules.validate"
+          }
+        ]
+      },
+      "validation": {
+        "state": "L1_PASS",
+        "fixtures": [
+          "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json"
+        ],
+        "tests": [
+          "tests/test_fp042_kitchen_anchor_ownership.py",
+          "tests/test_fp042_kitchen_validation_boundary.py"
+        ],
+        "evidence": []
+      },
+      "visual": {
+        "state": "NOT_REVIEWED"
+      },
+      "tools": [
+        "python:tools.rooms.kitchen.anchor_rules.validate"
+      ],
+      "parameters": [],
+      "preconditions": [
+        "consensus com a cozinha identificada"
+      ],
+      "invariants": [
+        "a pia migrar de parede aborta o build antes de renderizar"
+      ],
+      "side_effects": "NONE",
+      "limitations": [
+        "valida posicao relativa a parede; nao substitui projeto hidraulico"
+      ]
+    },
+    {
+      "id": "kitchen.ergonomics.audit",
+      "room": "kitchen",
+      "version": "1.0.0",
+      "owner": "tools.rooms.kitchen",
+      "title": "Medicao ergonomica (triangulo, folgas, aereo)",
+      "implementation": {
+        "state": "IMPLEMENTED",
+        "symbols": [
+          {
+            "lang": "python",
+            "ref": "tools.rooms.kitchen.validation.ergonomics.audit"
+          }
+        ]
+      },
+      "validation": {
+        "state": "UNTESTED",
+        "fixtures": [],
+        "tests": [],
+        "evidence": []
+      },
+      "visual": {
+        "state": "NOT_REVIEWED"
+      },
+      "tools": [
+        "python:tools.rooms.kitchen.validation.ergonomics.audit"
+      ],
+      "parameters": [],
+      "preconditions": [],
+      "invariants": [
+        "so mede; nao altera layout"
+      ],
+      "side_effects": "NONE",
+      "limitations": [
+        "sem teste proprio hoje (UNTESTED); ergonomia nao e aprovacao estetica"
+      ]
+    },
+    {
+      "id": "shared.cabinet.parametric",
+      "room": "shared",
+      "version": "1.0.0",
+      "owner": "tools.rooms.shared",
+      "title": "Gabinete parametrico compartilhado (caixaria + frentes lisas)",
+      "implementation": {
+        "state": "PLANNED",
+        "symbols": []
+      },
+      "validation": {
+        "state": "UNTESTED",
+        "fixtures": [],
+        "tests": [],
+        "evidence": []
+      },
+      "visual": {
+        "state": "NOT_REVIEWED"
+      },
+      "tools": [],
+      "parameters": [],
+      "preconditions": [],
+      "invariants": [],
+      "side_effects": "NONE",
+      "limitations": [
+        "PLANNED para a FP-043/P6; hoje so existe o plano consultivo cabinet_plan"
+      ]
+    },
+    {
+      "id": "living.layout.boxes",
+      "room": "living",
+      "version": "1.0.0",
+      "owner": "tools.rooms.living",
+      "title": "Layout da sala (sofa, rack, mesa) em caixas/pecas",
+      "implementation": {
+        "state": "IMPLEMENTED",
+        "symbols": [
+          {
+            "lang": "python",
+            "ref": "tools.rooms.living.furnishing.living_room_boxes"
+          }
+        ]
+      },
+      "validation": {
+        "state": "L1_PASS",
+        "fixtures": [
+          "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json"
+        ],
+        "tests": [
+          "tests/test_fp042_living_furnishing_adapter.py",
+          "tests/test_living_room_style.py"
+        ],
+        "evidence": []
+      },
+      "visual": {
+        "state": "NOT_REVIEWED"
+      },
+      "tools": [
+        "python:tools.rooms.living.furnishing.living_room_boxes",
+        "ruby:tools/sketchup/furnish/place_layout_skp.rb"
+      ],
+      "parameters": [],
+      "preconditions": [
+        "consensus da planta",
+        "escala da planta"
+      ],
+      "invariants": [
+        "arquitetura imutavel"
+      ],
+      "side_effects": "WRITES_WORKING_COPY",
+      "limitations": [
+        "materializacao L2 do ape (402/402 pecas) existe, mas ha achados de colisao abertos (P3a-03)"
+      ]
+    },
+    {
+      "id": "living.sofa.class",
+      "room": "living",
+      "version": "1.0.0",
+      "owner": "tools.rooms.living",
+      "title": "Classe parametrica de sofa",
+      "implementation": {
+        "state": "IMPLEMENTED",
+        "symbols": [
+          {
+            "lang": "python",
+            "ref": "tools.rooms.living.sofa_class.derive_living_sofa"
+          }
+        ]
+      },
+      "validation": {
+        "state": "L1_PASS",
+        "fixtures": [],
+        "tests": [
+          "tests/test_sofa_class.py"
+        ],
+        "evidence": []
+      },
+      "visual": {
+        "state": "NOT_REVIEWED"
+      },
+      "tools": [
+        "python:tools.rooms.living.sofa_class.derive_living_sofa"
+      ],
+      "parameters": [],
+      "preconditions": [],
+      "invariants": [],
+      "side_effects": "NONE",
+      "limitations": [
+        "linguagem visual do sofa aprovado e preservada; sem veredito visual novo"
+      ]
+    },
+    {
+      "id": "living.sofa.gate",
+      "room": "living",
+      "version": "1.0.0",
+      "owner": "tools.rooms.living",
+      "title": "Gate deterministico do sofa",
+      "implementation": {
+        "state": "IMPLEMENTED",
+        "symbols": [
+          {
+            "lang": "python",
+            "ref": "tools.rooms.living.validation.sofa_gate.gate"
+          }
+        ]
+      },
+      "validation": {
+        "state": "L1_PASS",
+        "fixtures": [],
+        "tests": [
+          "tests/test_furnish_sofa_gate.py"
+        ],
+        "evidence": []
+      },
+      "visual": {
+        "state": "NOT_REVIEWED"
+      },
+      "tools": [
+        "python:tools.rooms.living.validation.sofa_gate.gate"
+      ],
+      "parameters": [],
+      "preconditions": [],
+      "invariants": [],
+      "side_effects": "NONE",
+      "limitations": []
+    },
+    {
+      "id": "bedroom.layout.boxes",
+      "room": "bedroom",
+      "version": "1.0.0",
+      "owner": "tools.rooms.bedroom",
+      "title": "Layout do quarto (cama, criados, guarda-roupa) em caixas/pecas",
+      "implementation": {
+        "state": "IMPLEMENTED",
+        "symbols": [
+          {
+            "lang": "python",
+            "ref": "tools.rooms.bedroom.furnishing.bedroom_designer_boxes"
+          }
+        ]
+      },
+      "validation": {
+        "state": "L1_PASS",
+        "fixtures": [
+          "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json"
+        ],
+        "tests": [
+          "tests/test_fp042_bedroom_furnishing_adapter.py",
+          "tests/test_bedroom_layout.py"
+        ],
+        "evidence": []
+      },
+      "visual": {
+        "state": "NOT_REVIEWED"
+      },
+      "tools": [
+        "python:tools.rooms.bedroom.furnishing.bedroom_designer_boxes",
+        "ruby:tools/sketchup/furnish/place_layout_skp.rb"
+      ],
+      "parameters": [],
+      "preconditions": [],
+      "invariants": [],
+      "side_effects": "WRITES_WORKING_COPY",
+      "limitations": [
+        "achados de colisao abertos em SUITE 01 (P3a-03)"
+      ]
+    },
+    {
+      "id": "bedroom.bed.build",
+      "room": "bedroom",
+      "version": "1.0.0",
+      "owner": "tools.rooms.shared",
+      "title": "Construtor de cama (estrado, cabeceira, colchao)",
+      "implementation": {
+        "state": "IMPLEMENTED",
+        "symbols": [
+          {
+            "lang": "python",
+            "ref": "tools.rooms.shared.bed.build_bed"
+          }
+        ]
+      },
+      "validation": {
+        "state": "L1_PASS",
+        "fixtures": [],
+        "tests": [
+          "tests/test_bed_class.py",
+          "tests/test_fp042_shared_parametric_builders.py"
+        ],
+        "evidence": []
+      },
+      "visual": {
+        "state": "NOT_REVIEWED"
+      },
+      "tools": [
+        "python:tools.rooms.shared.bed.build_bed"
+      ],
+      "parameters": [],
+      "preconditions": [],
+      "invariants": [],
+      "side_effects": "NONE",
+      "limitations": []
+    },
+    {
+      "id": "bedroom.wardrobe.build",
+      "room": "bedroom",
+      "version": "1.0.0",
+      "owner": "tools.rooms.shared",
+      "title": "Construtor de guarda-roupa",
+      "implementation": {
+        "state": "IMPLEMENTED",
+        "symbols": [
+          {
+            "lang": "python",
+            "ref": "tools.rooms.shared.wardrobe.build_wardrobe"
+          }
+        ]
+      },
+      "validation": {
+        "state": "L1_PASS",
+        "fixtures": [],
+        "tests": [
+          "tests/test_fp042_shared_parametric_builders.py"
+        ],
+        "evidence": []
+      },
+      "visual": {
+        "state": "NOT_REVIEWED"
+      },
+      "tools": [
+        "python:tools.rooms.shared.wardrobe.build_wardrobe"
+      ],
+      "parameters": [],
+      "preconditions": [],
+      "invariants": [],
+      "side_effects": "NONE",
+      "limitations": [
+        "fabricacao nao certificada: sem lista de corte"
+      ]
+    },
+    {
+      "id": "bedroom.wardrobe.gate",
+      "room": "bedroom",
+      "version": "1.0.0",
+      "owner": "tools.rooms.bedroom",
+      "title": "Gate do guarda-roupa",
+      "implementation": {
+        "state": "IMPLEMENTED",
+        "symbols": [
+          {
+            "lang": "python",
+            "ref": "tools.rooms.bedroom.validation.wardrobe_gate.wardrobe_gate"
+          }
+        ]
+      },
+      "validation": {
+        "state": "L1_PASS",
+        "fixtures": [],
+        "tests": [
+          "tests/test_bed_placement_gate.py"
+        ],
+        "evidence": []
+      },
+      "visual": {
+        "state": "NOT_REVIEWED"
+      },
+      "tools": [
+        "python:tools.rooms.bedroom.validation.wardrobe_gate.wardrobe_gate"
+      ],
+      "parameters": [],
+      "preconditions": [],
+      "invariants": [],
+      "side_effects": "NONE",
+      "limitations": []
+    },
+    {
+      "id": "bathroom.layout.boxes",
+      "room": "bathroom",
+      "version": "1.0.0",
+      "owner": "tools.rooms.bathroom",
+      "title": "Layout de banheiro/lavabo (louca) em caixas/pecas",
+      "implementation": {
+        "state": "IMPLEMENTED",
+        "symbols": [
+          {
+            "lang": "python",
+            "ref": "tools.rooms.bathroom.layout.build_boxes"
+          }
+        ]
+      },
+      "validation": {
+        "state": "L1_PASS",
+        "fixtures": [
+          "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json"
+        ],
+        "tests": [
+          "tests/test_fp042_kitchen_bathroom_builder_ownership.py",
+          "tests/test_bathrooms_style.py"
+        ],
+        "evidence": []
+      },
+      "visual": {
+        "state": "NOT_REVIEWED"
+      },
+      "tools": [
+        "python:tools.rooms.bathroom.layout.build_boxes",
+        "ruby:tools/sketchup/furnish/place_layout_skp.rb"
+      ],
+      "parameters": [],
+      "preconditions": [],
+      "invariants": [],
+      "side_effects": "WRITES_WORKING_COPY",
+      "limitations": [
+        "sem marcenaria no banheiro; achados de colisao abertos (P3a-03)"
+      ]
+    },
+    {
+      "id": "bathroom.wet-room.guard",
+      "room": "bathroom",
+      "version": "1.0.0",
+      "owner": "tools.rooms.bathroom",
+      "title": "Guarda: banheiro so aceita louca",
+      "implementation": {
+        "state": "IMPLEMENTED",
+        "symbols": [
+          {
+            "lang": "python",
+            "ref": "tools.rooms.bathroom.validation.unexpected_wet_room_kinds"
+          }
+        ]
+      },
+      "validation": {
+        "state": "L1_PASS",
+        "fixtures": [],
+        "tests": [
+          "tests/test_fp042_bathroom_validation.py"
+        ],
+        "evidence": []
+      },
+      "visual": {
+        "state": "NOT_REVIEWED"
+      },
+      "tools": [
+        "python:tools.rooms.bathroom.validation.unexpected_wet_room_kinds"
+      ],
+      "parameters": [],
+      "preconditions": [],
+      "invariants": [],
+      "side_effects": "NONE",
+      "limitations": []
+    },
+    {
+      "id": "service.layout.boxes",
+      "room": "service",
+      "version": "1.0.0",
+      "owner": "tools.rooms.service",
+      "title": "Layout da area de servico + terracos (composto)",
+      "implementation": {
+        "state": "IMPLEMENTED",
+        "symbols": [
+          {
+            "lang": "python",
+            "ref": "tools.rooms.service.layout.build_boxes"
+          }
+        ]
+      },
+      "validation": {
+        "state": "L1_PASS",
+        "fixtures": [
+          "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json"
+        ],
+        "tests": [
+          "tests/test_fp042_service_layout_ownership.py"
+        ],
+        "evidence": []
+      },
+      "visual": {
+        "state": "NOT_REVIEWED"
+      },
+      "tools": [
+        "python:tools.rooms.service.layout.build_boxes",
+        "ruby:tools/sketchup/furnish/place_layout_skp.rb"
+      ],
+      "parameters": [],
+      "preconditions": [],
+      "invariants": [],
+      "side_effects": "WRITES_WORKING_COPY",
+      "limitations": [
+        "varanda e area de servico sao um conjunto no consensus; nao ha brain de varanda separado"
+      ]
+    },
+    {
+      "id": "circulation.gate",
+      "room": "circulation",
+      "version": "1.0.0",
+      "owner": "tools.rooms.circulation",
+      "title": "Gate de circulacao (portais e faixa de passagem)",
+      "implementation": {
+        "state": "IMPLEMENTED",
+        "symbols": [
+          {
+            "lang": "python",
+            "ref": "tools.validation.circulation_gate.gate"
+          }
+        ]
+      },
+      "validation": {
+        "state": "L1_PASS",
+        "fixtures": [
+          "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json"
+        ],
+        "tests": [
+          "tests/test_circulation_gate.py"
+        ],
+        "evidence": []
+      },
+      "visual": {
+        "state": "NOT_REVIEWED"
+      },
+      "tools": [
+        "python:tools.validation.circulation_gate.gate"
+      ],
+      "parameters": [],
+      "preconditions": [],
+      "invariants": [],
+      "side_effects": "NONE",
+      "limitations": []
+    }
+  ],
+  "bindings": [
+    {
+      "id": "bind.kitchen.layout",
+      "room": "kitchen",
+      "recipe_ids": [
+        "room.kitchen.cabinet-assemblies"
+      ],
+      "source_ids": [
+        "official-components",
+        "official-groups"
+      ],
+      "capability_id": "kitchen.layout.galley",
+      "terms": [
+        "layout",
+        "galley",
+        "cozinha linear",
+        "disposicao",
+        "bancada linear"
+      ],
+      "gap": null
+    },
+    {
+      "id": "bind.kitchen.cabinet",
+      "room": "kitchen",
+      "recipe_ids": [
+        "cabinet.reusable-components",
+        "cabinet.front-gaps-and-profiles"
+      ],
+      "source_ids": [
+        "yt-cabinet-tips-2021"
+      ],
+      "capability_id": "shared.cabinet.parametric",
+      "terms": [
+        "gabinete",
+        "armario",
+        "caixaria",
+        "modulo",
+        "cabinet"
+      ],
+      "gap": null
+    },
+    {
+      "id": "bind.kitchen.shaker",
+      "room": "kitchen",
+      "recipe_ids": [
+        "cabinet.recessed-shaker-and-louvers"
+      ],
+      "source_ids": [
+        "yt-cabinet-tips-2021"
+      ],
+      "capability_id": null,
+      "terms": [
+        "shaker",
+        "rebaixad",
+        "veneziana",
+        "louver",
+        "moldura"
+      ],
+      "gap": "porta Shaker/frente rebaixada: nao ha builder de perfil/rebaixo nem fixture L2; so existe a recipe"
+    },
+    {
+      "id": "bind.kitchen.drawer",
+      "room": "kitchen",
+      "recipe_ids": [
+        "cabinet.drawer-box-and-hardware"
+      ],
+      "source_ids": [
+        "yt-cabinet-tips-2021"
+      ],
+      "capability_id": null,
+      "terms": [
+        "gaveta",
+        "drawer",
+        "ferragem",
+        "corredica"
+      ],
+      "gap": "gaveta e ferragens: nao ha builder de caixa de gaveta nem fixture L2; so existe a recipe"
+    },
+    {
+      "id": "bind.kitchen.countertop",
+      "room": "kitchen",
+      "recipe_ids": [
+        "cabinet.countertop-separate-and-bevel"
+      ],
+      "source_ids": [
+        "yt-cabinet-tips-2021"
+      ],
+      "capability_id": null,
+      "terms": [
+        "tampo",
+        "countertop",
+        "chanfro",
+        "bevel"
+      ],
+      "gap": "tampo separado com chanfro: sem builder nem fixture"
+    },
+    {
+      "id": "bind.kitchen.sink-cutout",
+      "room": "kitchen",
+      "recipe_ids": [
+        "cabinet.sink-and-wet-channel-cutouts"
+      ],
+      "source_ids": [
+        "yt-cabinet-tips-2021"
+      ],
+      "capability_id": null,
+      "terms": [
+        "cuba",
+        "sink",
+        "recorte",
+        "cutout"
+      ],
+      "gap": "recorte de cuba e canal umido: sem builder nem fixture"
+    },
+    {
+      "id": "bind.living.layout",
+      "room": "living",
+      "recipe_ids": [
+        "room.living.media-wall"
+      ],
+      "source_ids": [
+        "official-components",
+        "official-model-organization"
+      ],
+      "capability_id": "living.layout.boxes",
+      "terms": [
+        "layout",
+        "sala",
+        "painel tv",
+        "rack",
+        "estante"
+      ],
+      "gap": null
+    },
+    {
+      "id": "bind.living.sofa",
+      "room": "living",
+      "recipe_ids": [
+        "room.living.organic-sofa"
+      ],
+      "source_ids": [
+        "official-followme",
+        "ruby-method-list"
+      ],
+      "capability_id": "living.sofa.class",
+      "terms": [
+        "sofa",
+        "sofá",
+        "poltrona"
+      ],
+      "gap": null
+    },
+    {
+      "id": "bind.bedroom.layout",
+      "room": "bedroom",
+      "recipe_ids": [
+        "room.bedroom.bed-and-headboard"
+      ],
+      "source_ids": [
+        "official-groups",
+        "official-components",
+        "official-texture-position"
+      ],
+      "capability_id": "bedroom.layout.boxes",
+      "terms": [
+        "layout",
+        "quarto",
+        "cama",
+        "cabeceira",
+        "criado"
+      ],
+      "gap": null
+    },
+    {
+      "id": "bind.bathroom.layout",
+      "room": "bathroom",
+      "recipe_ids": [
+        "room.bathroom.vanity-and-shower"
+      ],
+      "source_ids": [
+        "official-groups",
+        "official-components",
+        "official-materials"
+      ],
+      "capability_id": "bathroom.layout.boxes",
+      "terms": [
+        "layout",
+        "banheiro",
+        "box",
+        "cuba",
+        "louca"
+      ],
+      "gap": null
+    },
+    {
+      "id": "bind.service.layout",
+      "room": "service",
+      "recipe_ids": [
+        "room.laundry.casework-and-appliances"
+      ],
+      "source_ids": [
+        "yt-laundry-basic",
+        "official-components",
+        "official-groups"
+      ],
+      "capability_id": "service.layout.boxes",
+      "terms": [
+        "layout",
+        "lavanderia",
+        "area de servico",
+        "tanque"
+      ],
+      "gap": null
+    },
+    {
+      "id": "bind.balcony.pergola",
+      "room": "balcony",
+      "recipe_ids": [
+        "room.balcony.pergola-and-planter"
+      ],
+      "source_ids": [
+        "yt-pergola",
+        "official-components",
+        "official-followme"
+      ],
+      "capability_id": null,
+      "terms": [
+        "pergolado",
+        "floreira",
+        "varanda"
+      ],
+      "gap": "varanda e advisory: nao ha brain independente (esta dentro do conjunto de servico)"
+    },
+    {
+      "id": "bind.closet.sliding",
+      "room": "closet",
+      "recipe_ids": [
+        "room.closet.wardrobe-sliding-doors"
+      ],
+      "source_ids": [
+        "yt-sliding-wardrobe",
+        "official-components"
+      ],
+      "capability_id": null,
+      "terms": [
+        "portas de correr",
+        "closet",
+        "porta de correr"
+      ],
+      "gap": "closet reaproveita a marcenaria do quarto; portas de correr nao tem builder"
+    },
+    {
+      "id": "bind.home_office.desk",
+      "room": "home_office",
+      "recipe_ids": [
+        "room.office.desk-and-storage"
+      ],
+      "source_ids": [
+        "official-components",
+        "official-model-organization"
+      ],
+      "capability_id": null,
+      "terms": [
+        "escritorio",
+        "mesa",
+        "prateleira",
+        "home office"
+      ],
+      "gap": "home office reaproveita o designer de quarto; sem builder proprio"
+    },
+    {
+      "id": "bind.circulation.gate",
+      "room": "circulation",
+      "recipe_ids": [
+        "room.circulation.hall-and-doors"
+      ],
+      "source_ids": [
+        "official-groups",
+        "official-model-organization"
+      ],
+      "capability_id": "circulation.gate",
+      "terms": [
+        "circulacao",
+        "corredor",
+        "hall",
+        "porta"
+      ],
+      "gap": null
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "schema_version": "specialist_knowledge_index.v1",
+  "room": "circulation",
+  "environment_recipes": [
+    "cross.room.material-and-instance-rules",
+    "room.circulation.hall-and-doors"
+  ],
+  "video_recipes": [],
+  "knowledge_sources": [
+    "official-groups",
+    "official-model-organization"
+  ],
+  "capabilities": [
+    "circulation.gate"
+  ],
+  "bindings": [
+    "bind.circulation.gate"
+  ],
+  "note": "Indice por ID: o texto das recipes mora nos catalogos canonicos; nada e copiado aqui."
+}

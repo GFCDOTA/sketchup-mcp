@@ -21,8 +21,8 @@
     "contracts": [
       "core.scale",
       "core.domain.room_registry",
-      "tools.spatial_model",
-      "tools.room_type"
+      "tools.rooms.shared.spatial_model",
+      "tools.rooms.shared.room_type"
     ],
     "scope": "Geometria, escala, componentes, materiais, proteção arquitetônica e gates com múltiplos consumidores."
   },
@@ -31,7 +31,7 @@
       "providers": [
         "tools.rooms.living.furnishing.living_room_boxes",
         "tools.sketchup.furnish.place_layout_skp.build_boxes",
-        "tools.layout_candidates.run",
+        "tools.rooms.living.planning.layout_candidates.run",
         "tools.rooms.shared.sofa.build_sofa"
       ],
       "sources": [
@@ -60,7 +60,7 @@
       "providers": [
         "tools.rooms.kitchen.layout.build_boxes",
         "tools.rooms.kitchen.anchor_rules.validate",
-        "tools.kitchen_ergonomics.audit"
+        "tools.rooms.kitchen.validation.ergonomics.audit"
       ],
       "sources": [
         "room.kitchen.cabinet-assemblies"
@@ -120,7 +120,7 @@
     },
     "circulation": {
       "providers": [
-        "tools.circulation_gate.gate"
+        "tools.validation.circulation_gate.gate"
       ],
       "sources": [
         "room.circulation.hall-and-doors"

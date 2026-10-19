@@ -1,0 +1,21 @@
+{
+  "schema_version": "specialist_knowledge_index.v1",
+  "room": "home_office",
+  "environment_recipes": [
+    "cross.room.material-and-instance-rules",
+    "room.office.desk-and-storage"
+  ],
+  "video_recipes": [
+    "cabinet.materials-and-texture-direction",
+    "cabinet.reusable-components"
+  ],
+  "knowledge_sources": [
+    "official-components",
+    "official-model-organization"
+  ],
+  "capabilities": [],
+  "bindings": [
+    "bind.home_office.desk"
+  ],
+  "note": "Indice por ID: o texto das recipes mora nos catalogos canonicos; nada e copiado aqui."
+}

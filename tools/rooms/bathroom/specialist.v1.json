@@ -1,0 +1,52 @@
+{
+  "schema_version": "specialist_profile.v1",
+  "room": "bathroom",
+  "aliases": [
+    "banheiro",
+    "bathroom",
+    "lavabo"
+  ],
+  "role": "planner",
+  "reuse_of": null,
+  "scope": "Banheiros e lavabo: louca e acessorios; sem marcenaria. Planeja em caixas/pecas sobre o shell.",
+  "owner": "tools.rooms.bathroom",
+  "state": "LEGACY_PROVIDER_PRESENT",
+  "knowledge_room_ids": [
+    "bathroom"
+  ],
+  "source_ids": [
+    "cross.room.material-and-instance-rules",
+    "room.bathroom.vanity-and-shower"
+  ],
+  "recipe_ids": [
+    "cabinet.materials-and-texture-direction",
+    "cabinet.sink-and-wet-channel-cutouts"
+  ],
+  "capability_ids": [
+    "bathroom.layout.boxes",
+    "bathroom.wet-room.guard"
+  ],
+  "tool_allowlist": [
+    "python:tools.rooms.bathroom.layout.build_boxes",
+    "python:tools.rooms.bathroom.validation.unexpected_wet_room_kinds",
+    "ruby:tools/sketchup/furnish/place_layout_skp.rb"
+  ],
+  "constraints": [
+    "Nao criar, mover ou apagar parede, porta ou janela.",
+    "Medida sem ancora no PDF/consensus nao e inventada: pedir ou recusar.",
+    "Tecnica sem capacidade registrada responde BLOCKED_CAPABILITY_MISSING; nao gerar Ruby ad hoc."
+  ],
+  "result_types": [
+    "boxes_plan",
+    "advisory_plan",
+    "blocked"
+  ],
+  "stop_conditions": [
+    "Capacidade ausente ou PLANNED para a tecnica pedida.",
+    "Medida, unidade ou origem ausente no pedido.",
+    "O pedido exige ferramenta fora da allowlist deste perfil.",
+    "O pedido altera arquitetura derivada do PDF.",
+    "Mudanca de aparencia: encaminhar para VISUAL_REVIEW do Felipe (nunca aprovar sozinho)."
+  ],
+  "execution_authorized": false
+}

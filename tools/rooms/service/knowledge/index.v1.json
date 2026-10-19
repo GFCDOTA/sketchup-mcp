@@ -1,0 +1,24 @@
+{
+  "schema_version": "specialist_knowledge_index.v1",
+  "room": "service",
+  "environment_recipes": [
+    "cross.room.material-and-instance-rules",
+    "room.laundry.casework-and-appliances"
+  ],
+  "video_recipes": [
+    "cabinet.drawer-box-and-hardware",
+    "cabinet.reusable-components"
+  ],
+  "knowledge_sources": [
+    "official-components",
+    "official-groups",
+    "yt-laundry-basic"
+  ],
+  "capabilities": [
+    "service.layout.boxes"
+  ],
+  "bindings": [
+    "bind.service.layout"
+  ],
+  "note": "Indice por ID: o texto das recipes mora nos catalogos canonicos; nada e copiado aqui."
+}

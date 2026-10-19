@@ -1,0 +1,50 @@
+{
+  "schema_version": "specialist_profile.v1",
+  "room": "service",
+  "aliases": [
+    "laundry",
+    "lavanderia",
+    "service"
+  ],
+  "role": "planner",
+  "reuse_of": null,
+  "scope": "Area de servico e terracos como no consensus (conjunto composto): armarios, tanque e maquinas em caixas/pecas.",
+  "owner": "tools.rooms.service",
+  "state": "COMPOSITE_SERVICE_AND_TERRACE",
+  "knowledge_room_ids": [
+    "laundry"
+  ],
+  "source_ids": [
+    "cross.room.material-and-instance-rules",
+    "room.laundry.casework-and-appliances"
+  ],
+  "recipe_ids": [
+    "cabinet.drawer-box-and-hardware",
+    "cabinet.reusable-components"
+  ],
+  "capability_ids": [
+    "service.layout.boxes"
+  ],
+  "tool_allowlist": [
+    "python:tools.rooms.service.layout.build_boxes",
+    "ruby:tools/sketchup/furnish/place_layout_skp.rb"
+  ],
+  "constraints": [
+    "Nao criar, mover ou apagar parede, porta ou janela.",
+    "Medida sem ancora no PDF/consensus nao e inventada: pedir ou recusar.",
+    "Tecnica sem capacidade registrada responde BLOCKED_CAPABILITY_MISSING; nao gerar Ruby ad hoc."
+  ],
+  "result_types": [
+    "boxes_plan",
+    "advisory_plan",
+    "blocked"
+  ],
+  "stop_conditions": [
+    "Capacidade ausente ou PLANNED para a tecnica pedida.",
+    "Medida, unidade ou origem ausente no pedido.",
+    "O pedido exige ferramenta fora da allowlist deste perfil.",
+    "O pedido altera arquitetura derivada do PDF.",
+    "Mudanca de aparencia: encaminhar para VISUAL_REVIEW do Felipe (nunca aprovar sozinho)."
+  ],
+  "execution_authorized": false
+}
