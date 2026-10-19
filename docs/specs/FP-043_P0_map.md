@@ -1,6 +1,6 @@
 # FP-043 / P0 — Mapa de reorganização
 
-**Estado:** P0 entregue (mapa + gate). Nenhuma movimentação física foi feita.
+**Estado:** P0 entregue (mapa + gate). Movimentações executadas até agora: 5 arquivos da raiz (P2; ver `status: done` no JSON).
 **Baseline:** `develop` `07959bfdd153031de13190e883583c7e8acb5c70` (PR #285).
 **Fonte de verdade:** [`fp043_p0_map.v1.json`](fp043_p0_map.v1.json) · gate: `python -m tools.navigation.p0_map --check`
 · consumidores de qualquer item: `python -m tools.navigation.consumers <caminho>`.
@@ -59,12 +59,12 @@ pyproject.toml uv.lock` (lista exata em `root_allowlist`).
 
 | Arquivo | Destino | Observação |
 |---|---|---|
-| `CLAUDE_COGNITIVE_ARCHITECTURE.md` | `docs/architecture/agent_architecture.md` | conferir se o conteúdo ainda vale; gates citam o nome |
-| `HANDOFF.md` | `docs/handoffs/2026-08-27_ai_pipeline_inspector_handoff.md` | é histórico (2026-08-27); o fio vivo é `.ai_bridge/HANDOFF.md` |
-| `KICKOFF.md` | `docs/handoffs/2026-07-23_kickoff_proxima_sessao.md` | gerado junto de um HANDOFF antigo; histórico |
-| `HISTORICO_SOFA.json` | `references/sofas/history/` | bytes e hash preservados |
+| `CLAUDE_COGNITIVE_ARCHITECTURE.md` ✅ | `docs/architecture/agent_architecture.md` | conferir se o conteúdo ainda vale; gates citam o nome |
+| `HANDOFF.md` ✅ | `docs/handoffs/2026-08-27_ai_pipeline_inspector_handoff.md` | é histórico (2026-08-27); o fio vivo é `.ai_bridge/HANDOFF.md` |
+| `KICKOFF.md` ✅ | `docs/handoffs/2026-07-23_kickoff_proxima_sessao.md` | gerado junto de um HANDOFF antigo; histórico |
+| `HISTORICO_SOFA.json` ✅ | `references/sofas/history/` | bytes e hash preservados |
 | `planta_74.pdf` | `projects/planta_74/source/` | path protegido; resolvedor único; revisão manual dos f-strings |
-| `vray_pipeline_proof.png` | `artifacts/review/vray_pipeline_proof_2026-06/` | renomeação autorizada nos manifestos FP-042 |
+| `vray_pipeline_proof.png` ✅ | `artifacts/review/vray_pipeline_proof_2026-06/` | renomeação autorizada nos manifestos FP-042 |
 
 Arquivos soltos na raiz que NÃO estão no git (`sala_vray_iter6.*.png`, `sala_vray_iter7_premium.*.png`) são locais de
 outra sessão: ignorados, não tocados.

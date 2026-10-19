@@ -1,5 +1,7 @@
 # Claude Cognitive Architecture — sketchup-mcp
 
+> **Estado (FP-043/P2):** movido da raiz (`CLAUDE_COGNITIVE_ARCHITECTURE.md`). Auditoria de **2026-06-05**: o mecanismo de carregamento do `.claude/` descrito aqui segue valendo; as menções ao oráculo/cockpit `:8765` são **históricas** (cockpit removido em 2026-07-24; oráculo GPT-Docker `:8899` dormente). Fonte viva: `.claude/CLAUDE.md`.
+
 > **O que é isto:** mapa prático de COMO o Claude carrega contexto, decide e executa
 > dentro deste repositório. Baseado em **leitura real** dos arquivos do `.claude/` e nas
 > referências cruzadas encontradas (grep). Onde não há evidência, está marcado **UNKNOWN**.

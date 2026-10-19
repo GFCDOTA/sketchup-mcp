@@ -6365,12 +6365,6 @@
       "owner_group": "other_canonical_reference"
     },
     {
-      "path": "vray_pipeline_proof.png",
-      "blob_sha": "42f50d658683639ac9decb78d373c8463b9dc043",
-      "blob_size": 1239741,
-      "owner_group": "other_canonical_reference"
-    },
-    {
       "path": "artifacts/review/l2_fp042_20261019/P01_planta74_shell/geometry_report.json",
       "blob_sha": "4b1c39d8bc1ab8a5e74ef1bb7d285f19918336df",
       "blob_size": 26891,
@@ -6938,6 +6932,24 @@
       "path": "artifacts/review/l2_fp042_20261019/tools/synth_furnish.py",
       "blob_sha": "857f89e3cb984fa70c741b2d5f3b37d279ce4fc9",
       "blob_size": 2584,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "references/sofas/history/HISTORICO_SOFA.json",
+      "blob_sha": "ceac4316e24214ae6ef920aa65191217ed2a5670",
+      "blob_size": 31110,
+      "owner_group": "references"
+    },
+    {
+      "path": "artifacts/review/vray_pipeline_proof_2026-06/vray_pipeline_proof.png",
+      "blob_sha": "42f50d658683639ac9decb78d373c8463b9dc043",
+      "blob_size": 1239741,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/vray_pipeline_proof_2026-06/README.md",
+      "blob_sha": "84877b4f5732e616d5f5311d09e2d1a159e05f01",
+      "blob_size": 771,
       "owner_group": "artifacts"
     }
   ]

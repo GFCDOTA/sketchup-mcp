@@ -25,7 +25,8 @@ def test_unknown_knowledge_path_is_not_silently_accepted():
 
 
 def test_path_owner_does_not_imply_semantic_or_sketchup_proof():
-    assert owner_for("HISTORICO_SOFA.json") == "living_knowledge_history"
+    assert owner_for("docs/handoffs/2026-08-27_ai_pipeline_inspector_handoff.md") == "project_documentation"
+    assert owner_for("HANDOFF.md") is None        # saiu da raiz em FP-043/P2: a raiz não aceita mais documento solto
     assert owner_for("docker-compose.yml") == "infrastructure_compose"
     assert owner_for(".claude/skills/example/SKILL.md") == "agent_skills_memory"
     assert audit_p5_roles({"entries": []})["proof"] == "PATH_AND_ROLE_ONLY_NOT_DOCUMENT_SEMANTICS"

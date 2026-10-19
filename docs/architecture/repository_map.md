@@ -58,7 +58,10 @@ reutilizáveis; **sketchup** executa e inspeciona, sem decidir decoração; **mc
 | `ops/` | existe | operação: painel do estúdio (`ops/estudio-front/`) |
 | `docs/architecture/` | existe | esta pasta: mapa, guia de migração, rotas de navegação |
 | `docs/specs/` | existe | especificações e manifestos (FP-042, FP-043) |
-| `docs/handoffs/` | existe | passagens de bastão datadas |
+| `docs/handoffs/` | existe | passagens de bastão datadas (inclui o ex-`HANDOFF.md` e o ex-`KICKOFF.md` da raiz) |
+| `docs/architecture/agent_architecture.md` | existe | como o agente carrega contexto (ex-`CLAUDE_COGNITIVE_ARCHITECTURE.md` da raiz); auditoria de 2026-06-05 |
+| `references/sofas/history/` | existe | histórico de julgamento do programa do sofá (ex-`HISTORICO_SOFA.json` da raiz) |
+| `artifacts/review/vray_pipeline_proof_2026-06/` | existe | evidência de prova do pipeline V-Ray (ex-`vray_pipeline_proof.png` da raiz); não é render canônico |
 
 Até P4 terminar, boa parte do código ainda está direto em `tools/`. Isso é o estado atual, não o desenho: o destino
 de cada arquivo está no [mapa P0](../specs/fp043_p0_map.v1.json).

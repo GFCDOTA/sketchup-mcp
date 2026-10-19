@@ -251,7 +251,9 @@
     "tests_sample": [
      "tests/test_fp043_p0_map.py"
     ]
-   }
+   },
+   "status": "done",
+   "moved_to": "docs/architecture/agent_architecture.md"
   },
   {
    "item": "HANDOFF.md",
@@ -276,7 +278,9 @@
     "tests_sample": [
      "tests/test_fp043_p0_map.py"
     ]
-   }
+   },
+   "status": "done",
+   "moved_to": "docs/handoffs/2026-08-27_ai_pipeline_inspector_handoff.md"
   },
   {
    "item": "HISTORICO_SOFA.json",
@@ -300,7 +304,9 @@
      "tests/test_fp042_knowledge_ownership.py",
      "tests/test_fp043_p0_map.py"
     ]
-   }
+   },
+   "status": "done",
+   "moved_to": "references/sofas/history/HISTORICO_SOFA.json"
   },
   {
    "item": "KICKOFF.md",
@@ -323,7 +329,9 @@
     "tests_sample": [
      "tests/test_fp043_p0_map.py"
     ]
-   }
+   },
+   "status": "done",
+   "moved_to": "docs/handoffs/2026-07-23_kickoff_proxima_sessao.md"
   },
   {
    "item": "README.md",
@@ -4652,7 +4660,9 @@
     "tests_sample": [
      "tests/test_fp043_p0_map.py"
     ]
-   }
+   },
+   "status": "done",
+   "moved_to": "artifacts/review/vray_pipeline_proof_2026-06/vray_pipeline_proof.png"
   }
  ]
 }
