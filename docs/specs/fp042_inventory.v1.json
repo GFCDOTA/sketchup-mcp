@@ -11307,9 +11307,9 @@
     {
       "path": "tools/kitchen_layout.py",
       "domain": "room_kitchen",
-      "disposition": "tools.rooms.kitchen",
-      "phase": "P2",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "disposition": "legacy_compatibility_shim",
+      "phase": "P4",
+      "status": "VERIFIED_COMPATIBILITY_SHIM_PENDING_CI"
     },
     {
       "path": "tools/kitchen_validation.py",
@@ -12388,6 +12388,20 @@
       "disposition": "retain_current_owner",
       "phase": "P5",
       "status": "REFERENTIAL_TEST_PENDING_CI"
+    },
+    {
+      "path": "tools/rooms/kitchen/layout.py",
+      "domain": "room_kitchen",
+      "disposition": "tools.rooms.kitchen",
+      "phase": "P3",
+      "status": "VERIFIED_BUILDER_OWNERSHIP_PENDING_CI"
+    },
+    {
+      "path": "tests/test_fp042_kitchen_layout_ownership.py",
+      "domain": "test",
+      "disposition": "retain_current_owner",
+      "phase": "P3",
+      "status": "VERIFIED_COMPATIBILITY_PENDING_CI"
     }
   ]
 }

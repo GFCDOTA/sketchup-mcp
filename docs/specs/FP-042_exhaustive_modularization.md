@@ -77,3 +77,8 @@ de layout. A validação visual/L2 continua pendente.
 ### FP-042/P3/P4 — ownership do brain SERVICE
 
 `tools.rooms.service.layout` agora possui a implementação completa do builder A.S. + terraços, sem criar cômodos adicionais. `tools.service_layout` é uma fachada estável para imports históricos e CLI, com teste negativo para seeds inválidos. Alteração sem SKP/render, dependente dos gates de CI e de prova L2 futura.
+
+
+### FP-042/P3/P4 — implementação paramétrica da cozinha
+
+O builder completo `tools.kitchen_layout` foi relocado para `tools.rooms.kitchen.layout` com fachada legada e entrypoint CLI preservados. Os helpers originais e a geometria da bancada/pia/cooktop permanecem canônicos. Testes da arquitetura agora examinam o arquivo proprietário em vez da fachada. Nenhum `.skp`, escala ou fixture foi alterado; prova L2 pendente.

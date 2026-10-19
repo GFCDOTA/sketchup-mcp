@@ -57,7 +57,7 @@ def test_cross_room_geometry_is_in_shared_and_legacy_aliases_match():
 
 def test_no_direct_bedroom_helpers_in_other_room_modules():
     for path in [
-        ROOT / "tools/kitchen_layout.py",
+        ROOMS / "kitchen/layout.py",
         ROOT / "tools/bathroom_layout.py",
         ROOT / "interior/planners/living_room_planner.py",
     ]:

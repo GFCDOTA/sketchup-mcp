@@ -50,7 +50,7 @@
     },
     "kitchen": {
       "providers": [
-        "tools.kitchen_layout.build_boxes",
+        "tools.rooms.kitchen.layout.build_boxes",
         "tools.rooms.kitchen.anchor_rules.validate",
         "tools.kitchen_ergonomics.audit"
       ],
