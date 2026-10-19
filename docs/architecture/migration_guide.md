@@ -6,9 +6,9 @@ Para quem procura um arquivo que mudou de lugar, e para quem vai mover um. Mapa 
 
 ## Estado
 
-- **Raiz (P2):** `CLAUDE_COGNITIVE_ARCHITECTURE.md`, `HANDOFF.md`, `KICKOFF.md`, `HISTORICO_SOFA.json` e
-  `vray_pipeline_proof.png` **já foram movidos** (tabela abaixo). `planta_74.pdf` ainda está na raiz: migra em PR próprio,
-  com resolvedor único.
+- **Raiz (P2):** `CLAUDE_COGNITIVE_ARCHITECTURE.md`, `HANDOFF.md`, `KICKOFF.md`, `HISTORICO_SOFA.json`,
+  `vray_pipeline_proof.png` e `planta_74.pdf` **já foram movidos** (tabela abaixo). O caminho do PDF é resolvido só por
+  `core.project_sources.plant_pdf_path`; a raiz só tem arquivos de papel explícito.
 - **`tools/` (P4):** nada movido ainda.
 
 Os movimentos de arquivos protegidos estão registrados em
@@ -47,7 +47,7 @@ Os movimentos de arquivos protegidos estão registrados em
 | `CLAUDE_COGNITIVE_ARCHITECTURE.md` (raiz) | `docs/architecture/agent_architecture.md` | **feito** (P2) |
 | `HISTORICO_SOFA.json` (raiz) | `references/sofas/history/HISTORICO_SOFA.json` | **feito** (P2) |
 | `vray_pipeline_proof.png` (raiz) | `artifacts/review/vray_pipeline_proof_2026-06/` | **feito** (P2) |
-| `planta_74.pdf` (raiz) | `projects/planta_74/source/` | P2 (PR próprio, resolvedor único) |
+| `planta_74.pdf` (raiz) | `projects/planta_74/source/planta_74.pdf` | **feito** (P2, via `core.project_sources`) |
 
 ## Para quem vai mover um arquivo (checklist do PR)
 

@@ -9,13 +9,14 @@ from pathlib import Path
 
 import pytest
 
+from core.project_sources import plant_pdf_path
 from tools.compose_side_by_side import (
     DEFAULT_PDF_CROP, compose, compose_to_file, crop_pdf_to_floorplan,
     fit_to_height, render_pdf_page,
 )
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-PDF = REPO_ROOT / "planta_74.pdf"
+PDF = plant_pdf_path("planta_74", REPO_ROOT)
 TOP = REPO_ROOT / "artifacts" / "planta_74" / "planta_74_top.png"
 ISO = REPO_ROOT / "artifacts" / "planta_74" / "planta_74_iso.png"
 

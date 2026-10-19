@@ -36,6 +36,25 @@
    ],
    "justification": "Evidência de prova V-Ray (não é render canônico): sai da raiz para uma pasta de evidência identificada com README (FP-043 §4.1).",
    "authorized_by": "FP-043 §4.1 (destino proposto) e §9.5; execução P2"
+  },
+  {
+   "old_path": "planta_74.pdf",
+   "new_path": "projects/planta_74/source/planta_74.pdf",
+   "status": "done",
+   "blob_sha": "91d81dacba3ff50ac9213b33e25e67b9a259e43a",
+   "sha256": "81722670c0281ee4caff473b2037d42ac3b41ef248abc57b49eeecebd795067a",
+   "owner_group": "projects",
+   "in_assets": true,
+   "in_references": true,
+   "consumers_reviewed": [
+    "core.project_sources.plant_pdf_path (resolvedor único; 8 módulos migrados no PR anterior)",
+    "tests/test_side_by_side_composer.py",
+    "tools/compose_side_by_side.py (docstring)",
+    "fixtures/planta_74/*.json: campo `source` é nome, não caminho (sem mudança)",
+    "docs históricas que citam o PDF na raiz (não reescritas)"
+   ],
+   "justification": "Fonte do apartamento sai da raiz para projects/planta_74/source/ (FP-043 §4.1/§9.6): caminho protegido, conteúdo idêntico, resolvedor único.",
+   "authorized_by": "FP-043 §4.1 (candidato explícito de migração de path) e §9.6; execução P2"
   }
  ]
 }

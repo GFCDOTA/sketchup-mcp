@@ -3888,10 +3888,10 @@
       "owner_group": "other_binary"
     },
     {
-      "path": "planta_74.pdf",
+      "path": "projects/planta_74/source/planta_74.pdf",
       "blob_sha": "91d81dacba3ff50ac9213b33e25e67b9a259e43a",
       "blob_size": 175850,
-      "owner_group": "other_binary"
+      "owner_group": "projects"
     },
     {
       "path": "references/sofas/audit/modern_dark_gray/modern_dark_gray_front.png",
