@@ -12311,6 +12311,20 @@
       "disposition": "retain_current_owner",
       "phase": "P3",
       "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tools/rooms/living/furnishing.py",
+      "domain": "room_living",
+      "disposition": "tools.rooms.living",
+      "phase": "P3",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tests/test_fp042_living_furnishing_adapter.py",
+      "domain": "test",
+      "disposition": "retain_current_owner",
+      "phase": "P3",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
     }
   ]
 }

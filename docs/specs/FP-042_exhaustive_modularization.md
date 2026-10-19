@@ -49,3 +49,14 @@ Seus helpers de cadeira e caixa orientada são consumidos a partir de `shared`.
 Teste de não-OK (fail-safe), OK vazio e cadeira de escrivaninha acompanha a
 identidade do dispatch. **Builders legados de cama, guarda-roupa e bedroom_designer
 ainda não foram integralmente migrados.** Merge condicionado a CI verde.
+
+
+### Fatia P3 — brain de living
+
+A lógica completa de `living_room_boxes` foi movida para
+`tools.rooms.living.furnishing` sem reescrever os cálculos.
+Acesso legado pelo orquestrador e identidade do dispatch preservados.
+Validação regressiva de `no_plan_skip` impede sofá flutuante quando o
+planejador não apresenta uma planta válida. `furnish_apartment` permanece
+responsável por agregação, gates, estilos e geração de SKP; a migração
+dos builders originais da sala, cozinha, banheiro e service ainda é pendente.
