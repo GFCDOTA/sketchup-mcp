@@ -60,14 +60,15 @@ Ver [mapa P0](FP-043_P0_map.md), seção "Perguntas abertas". Resumo: o dashboar
 Warehouse sem consumidor; `trace_view` lê traces do AI Pipeline Inspector e não tem dono óbvio; `set_clipboard_image.ps1`
 colava imagem no ChatGPT, e a memória do projeto registra que Ctrl+V/upload não funcionam (o GPT vê via URL raw).
 
-## D-006 — `repo_health_gate` não roda no CI e hoje falha
+## D-006 — `repo_health_gate` não rodava no CI e falhava — **RESOLVIDA (P3a-05)**
 
-`python tools/repo_health_gate.py` reprova **4** coisas (depois da FP-043/P2, que resolveu as 2 de `.md` solto na raiz):
-`artifacts/review/furniture/kitchen`, `artifacts/review/planta_74/curation` e `artifacts/review/planta_74/shell_proof`
-sem report (`.json`/`.md`), e `SCALE_DEF_FORA_DO_CORE` em `tools/interior_studio/architect_program.py:23`. O gate está
-definido com um `test_repo_health` dentro de `tools/` (que o pytest não coleta) e nenhum teste de `tests/` o importa.
-Ligá-lo ao CI exige decidir: adicionar report às 3 pastas de evidência (mexe em `artifacts/`) e corrigir a definição de
-escala, ou aposentar essas regras.
+As 4 ocorrências eram defeitos de autoridade estabelecida, corrigidos sem mexer em evidência: (1) as 3 pastas de imagens
+de revisão sem report (`artifacts/review/furniture/kitchen`, `.../planta_74/curation`, `.../planta_74/shell_proof`)
+ganharam um `README.md` só de proveniência (primeiro commit, arquivos; sem veredito visual; PNGs intactos, READMEs
+registrados em `fp042_references.v1.json`); (2) `SCALE_DEF_FORA_DO_CORE` em `tools/interior_studio/architect_program.py`
+agora lê `PLANT_PT_TO_M["planta_74"]` de `core.scale` (mesmo valor, 0,0259, fonte única). O gate passou a ser coletado
+pelo pytest/CI via `tests/test_repo_health_gate.py`, com contraprovas (escala fora do core e artefato sem report
+reprovam). Nenhuma regra foi afrouxada.
 
 ## D-007 — vão de mobiliar = laje (entra sob a parede) — causa do guarda-roupa "4,5 cm na parede" (P3a-02)
 

@@ -15,12 +15,13 @@ import urllib.request
 from pathlib import Path
 
 from core import observability as obs
+from core.scale import PLANT_PT_TO_M
 from core.observability.llm import ContextComposition, ContextSource, from_ollama
 from core.observability.retrieval import ChunkRef
 from tools.interior_studio import project_state as ps
 
 ROOT = Path(__file__).resolve().parents[2]
-PT_TO_M = 0.0259   # escala travada da planta_74 (ver project_planta74_scale_locked)
+PLANTA74_PT_TO_M = PLANT_PT_TO_M["planta_74"]   # escala cota-anchored da planta_74: fonte unica em core.scale
 CONSENSUS = ROOT / "artifacts/review/planta_74/regen_candidate_20260531/final/consensus_regenerated.json"
 FELIPE_DNA = ROOT / ".claude/memory/felipe_style_dna.md"
 OLLAMA = "http://127.0.0.1:11434/api/generate"
@@ -104,7 +105,7 @@ def normalize_program(items: list[dict], room_key: str) -> tuple[list[dict], dic
 
 
 def rooms() -> list[dict]:
-    """Cômodos da planta_74 com área e dims em metros (derivadas do polígono × PT_TO_M)."""
+    """Cômodos da planta_74 com área e dims em metros (derivadas do polígono × PLANTA74_PT_TO_M)."""
     if not CONSENSUS.exists():
         return []
     d = json.loads(CONSENSUS.read_text("utf-8"))
@@ -113,9 +114,9 @@ def rooms() -> list[dict]:
         poly = r.get("polygon_pts") or []
         xs = [p[0] for p in poly]
         ys = [p[1] for p in poly]
-        w = (max(xs) - min(xs)) * PT_TO_M if xs else 0.0
-        dep = (max(ys) - min(ys)) * PT_TO_M if ys else 0.0
-        area = (r.get("area_pts2") or 0) * PT_TO_M * PT_TO_M
+        w = (max(xs) - min(xs)) * PLANTA74_PT_TO_M if xs else 0.0
+        dep = (max(ys) - min(ys)) * PLANTA74_PT_TO_M if ys else 0.0
+        area = (r.get("area_pts2") or 0) * PLANTA74_PT_TO_M * PLANTA74_PT_TO_M
         out.append({"id": r.get("id"), "name": r.get("name"), "area_m2": round(area, 1),
                     "w_m": round(w, 1), "d_m": round(dep, 1), "key": ROOM_KEY.get(r.get("name", ""))})
     return out

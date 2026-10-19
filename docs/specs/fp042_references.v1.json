@@ -6957,6 +6957,24 @@
       "blob_sha": "46fa0e0bc6e9ec32dd0eba0366bc3ca42eca5e4d",
       "blob_size": 1666,
       "owner_group": "fixtures"
+    },
+    {
+      "path": "artifacts/review/furniture/kitchen/README.md",
+      "blob_sha": "b8bad0afed88fa599834a49ad19dd3eeea893ed5",
+      "blob_size": 408,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/curation/README.md",
+      "blob_sha": "f1a86b2aa01edce098e0dc48085755a465526589",
+      "blob_size": 809,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/shell_proof/README.md",
+      "blob_sha": "131e2522a55540adb2c7db31c5fb945b1acd9d02",
+      "blob_size": 407,
+      "owner_group": "artifacts"
     }
   ]
 }
