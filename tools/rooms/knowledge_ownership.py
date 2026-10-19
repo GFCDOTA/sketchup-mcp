@@ -26,7 +26,7 @@ def owner_for(path: str) -> str | None:
         return "agent_handoff"
     if path.startswith(".claude/"):
         return "agent_skills_memory"
-    if path.startswith("docs/"):
+    if path.startswith("docs/") or (path.startswith("projects/") and path.endswith(".md")):
         return "project_documentation"
     if path.startswith("tests/"):
         return "regression_test_suite"

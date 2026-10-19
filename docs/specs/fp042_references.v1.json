@@ -5651,12 +5651,6 @@
       "owner_group": "other_canonical_reference"
     },
     {
-      "path": "planta_74.pdf",
-      "blob_sha": "91d81dacba3ff50ac9213b33e25e67b9a259e43a",
-      "blob_size": 175850,
-      "owner_group": "other_canonical_reference"
-    },
-    {
       "path": "references/design_rules/design_rule.schema.json",
       "blob_sha": "6bdcbb79dbae32bdd1c0c3d572885df920705631",
       "blob_size": 1870,
@@ -6951,6 +6945,12 @@
       "blob_sha": "84877b4f5732e616d5f5311d09e2d1a159e05f01",
       "blob_size": 771,
       "owner_group": "artifacts"
+    },
+    {
+      "path": "projects/planta_74/source/planta_74.pdf",
+      "blob_sha": "91d81dacba3ff50ac9213b33e25e67b9a259e43a",
+      "blob_size": 175850,
+      "owner_group": "projects"
     }
   ]
 }

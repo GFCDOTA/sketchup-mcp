@@ -106,6 +106,7 @@ def test_raiz_so_tem_o_que_a_allowlist_permite_mais_os_movimentos_pendentes(trac
                  if "/" not in r["item"] and r["disposition"] == "move" and r.get("status", "planned") != "done"}
     esperado = set(mapa["root_allowlist"]) | pendentes
     assert {t for t in tracked if "/" not in t} == esperado
-    movidos = {"CLAUDE_COGNITIVE_ARCHITECTURE.md", "HANDOFF.md", "KICKOFF.md", "HISTORICO_SOFA.json", "vray_pipeline_proof.png"}
+    movidos = {"CLAUDE_COGNITIVE_ARCHITECTURE.md", "HANDOFF.md", "KICKOFF.md", "HISTORICO_SOFA.json", "vray_pipeline_proof.png",
+               "planta_74.pdf"}
     assert not esperado & movidos
-    assert pendentes <= {"planta_74.pdf"}        # o PDF migra em PR próprio, com resolvedor único
+    assert pendentes == set() and esperado == set(mapa["root_allowlist"])    # a raiz só tem o que a allowlist permite

@@ -54,8 +54,8 @@
   },
   {
    "dir": "projects/",
-   "responsibility": "NOVO em P2: fonte identificada do projeto (planta_74.pdf).",
-   "plan": "create"
+   "responsibility": "Fonte identificada do projeto (projects/planta_74/source/planta_74.pdf) e README com entradas/saídas canônicas.",
+   "plan": "retain"
   },
   {
    "dir": "fixtures/",
@@ -671,7 +671,9 @@
      "tests/test_fp043_p0_map.py",
      "tests/test_side_by_side_composer.py"
     ]
-   }
+   },
+   "status": "done",
+   "moved_to": "projects/planta_74/source/planta_74.pdf"
   },
   {
    "item": "pyproject.toml",

@@ -12,8 +12,8 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
-# Local do PDF relativo à raiz do repositório. Passo 1 (este): ainda na raiz, comportamento idêntico ao anterior.
-PLANT_PDF_TEMPLATE = "{plant}.pdf"
+# Local do PDF relativo à raiz do repositório: a fonte identificada do projeto (FP-043 P2).
+PLANT_PDF_TEMPLATE = "projects/{plant}/source/{plant}.pdf"
 
 
 def plant_pdf_path(plant: str, repo: Path | None = None) -> Path:

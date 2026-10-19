@@ -36,7 +36,7 @@ def test_mapa_cobre_exatamente_o_escopo_atual(doc, tracked):
 
 def test_raiz_e_tools_inteiros_estao_no_escopo(tracked):
     items = set(scope_items(tracked))
-    assert {"README.md", "planta_74.pdf", "CLAUDE.md", "tools/furnish_apartment.py", "tools/rooms/",
+    assert {"README.md", "pyproject.toml", "CLAUDE.md", "tools/furnish_apartment.py", "tools/rooms/",
             "scripts/sofa_generator.rb", "interior/validators/", "ops/estudio-front/"} <= items
     assert not any(i.startswith("tests/") or i.startswith("docs/") for i in items)
 

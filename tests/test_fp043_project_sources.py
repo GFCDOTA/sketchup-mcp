@@ -23,6 +23,7 @@ FSTRING_PDF = re.compile(r"""f["'][^"'\n]*\{[^}]+\}[^"'\n]*\.pdf["']""")
 def test_resolvedor_devolve_o_caminho_da_planta_na_raiz_informada(tmp_path):
     assert plant_pdf_path("planta_74", tmp_path) == tmp_path / PLANT_PDF_TEMPLATE.format(plant="planta_74")
     assert plant_pdf_path("planta_74").name == "planta_74.pdf"
+    assert plant_pdf_path("planta_74", tmp_path).as_posix().endswith("projects/planta_74/source/planta_74.pdf")
     assert plant_pdf_path("planta_74").is_absolute()
 
 

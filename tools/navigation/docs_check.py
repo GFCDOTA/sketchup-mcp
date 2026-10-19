@@ -143,6 +143,7 @@ def doc_files(root: Path = REPO) -> list[Path]:
     files = [root / "README.md"]
     files += sorted((root / "docs/architecture").glob("*.md"))
     files += sorted(root.glob("tools/rooms/*/README.md"))
+    files += sorted(root.glob("projects/*/README.md"))
     return [f for f in files if f.exists()]
 
 

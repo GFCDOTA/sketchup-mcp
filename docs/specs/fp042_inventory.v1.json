@@ -9305,13 +9305,6 @@
       "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     },
     {
-      "path": "planta_74.pdf",
-      "domain": "reference_or_artifact",
-      "disposition": "retain_canonical_location",
-      "phase": "P6",
-      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
-    },
-    {
       "path": "pyproject.toml",
       "domain": "tooling_ci",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
@@ -15033,6 +15026,22 @@
       "phase": "P5",
       "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
       "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "projects/planta_74/source/planta_74.pdf",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "projects/planta_74/README.md",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {

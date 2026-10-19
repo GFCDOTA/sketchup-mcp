@@ -46,7 +46,7 @@ reutilizáveis; **sketchup** executa e inspeciona, sem decidir decoração; **mc
 | `tools/orchestration/` | previsto | sequenciamento entre cômodos e executores (hoje `tools/furnish_apartment.py`) |
 | `tools/knowledge/` | previsto | RAG, memória do projeto, banco de referências |
 | `tools/oracle/` | previsto | juízes visuais e consultas; o veredito visual continua só do Felipe |
-| `projects/` | previsto | fonte identificada do projeto (a planta em PDF, hoje na raiz) |
+| `projects/` | existe | fonte identificada de cada projeto: `projects/planta_74/source/planta_74.pdf` (ex-raiz) e README com as entradas/saídas canônicas |
 | `fixtures/` | existe | inputs canônicos e sintéticos; protegidos |
 | `artifacts/` | existe | entregáveis canônicos (`artifacts/<planta>/`) e evidência (`artifacts/review/`) |
 | `references/` | existe | fontes, recipes e referências de design |
