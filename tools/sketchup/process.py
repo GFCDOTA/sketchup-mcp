@@ -33,6 +33,31 @@ VRAY_EXE_DEFAULT = (r"C:\Program Files\Chaos\V-Ray\V-Ray for SketchUp"
 AUTORUN_PLUGIN = "autorun_consume.rb"
 
 
+def spawn_detached(cmd: list[str], env: dict[str, str] | None = None) -> subprocess.Popen:
+    """Sobe o SketchUp DESANEXADO de quem chamou.
+
+    stdin=DEVNULL é obrigatório (L2 2026-10-19): dentro do servidor MCP stdio o
+    stdin é o pipe do JSON-RPC, com uma leitura síncrona sempre pendente. O
+    SketchUp herdava esse handle, bloqueava no I/O do stdin atrás daquela leitura
+    e nunca abria o modelo ("Sem nome", sem resposta) — todo su_* via MCP dava
+    TIMEOUT, enquanto o mesmo job chamado direto terminava em ~10 s.
+
+    CREATE_BREAKAWAY_FROM_JOB: clientes MCP no Windows põem o servidor num Job
+    Object KILL_ON_JOB_CLOSE; sem sair do job, o SketchUp morre quando o servidor
+    fecha. Se o job não permite breakaway, o CreateProcess recusa — tenta de novo
+    sem a flag (o SketchUp abre, mas segue o ciclo de vida do job)."""
+    base = getattr(subprocess, "DETACHED_PROCESS", 0)
+    breakaway = getattr(subprocess, "CREATE_BREAKAWAY_FROM_JOB", 0)
+    kw = dict(env=env, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+              stderr=subprocess.DEVNULL, close_fds=True)
+    if breakaway:
+        try:
+            return subprocess.Popen(cmd, creationflags=base | breakaway, **kw)  # noqa: S603
+        except OSError:
+            pass  # job sem JOB_OBJECT_LIMIT_BREAKAWAY_OK
+    return subprocess.Popen(cmd, creationflags=base, **kw)  # noqa: S603
+
+
 class Handle(Protocol):
     pid: int
 
@@ -63,10 +88,7 @@ class System:
         return subprocess.run(cmd, capture_output=True).returncode  # noqa: S603
 
     def popen(self, cmd: list[str], env: dict[str, str] | None = None) -> Handle:
-        return subprocess.Popen(  # noqa: S603 — comando montado aqui, caminhos validados
-            cmd, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-            creationflags=getattr(subprocess, "DETACHED_PROCESS", 0), close_fds=True,
-        )
+        return spawn_detached(cmd, env)  # comando montado aqui, caminhos validados
 
     def now(self) -> float:
         return time.time()

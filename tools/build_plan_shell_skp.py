@@ -55,7 +55,6 @@ import hashlib
 import json
 import os
 import shutil
-import subprocess
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -1114,11 +1113,10 @@ def run(consensus_path: Path, out_skp: Path, *, sketchup_exe: Path,
     terminate_allowed = should_terminate(resolved_mode)
 
     print(f"[run] launching SU: {' '.join(cmd)}")
-    proc = subprocess.Popen(
-        cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-        creationflags=getattr(subprocess, "DETACHED_PROCESS", 0),
-        env=env,
-    )
+    # stdin=DEVNULL + breakaway do job: ver tools.sketchup.process.spawn_detached
+    # (via MCP stdio o SketchUp herdava o pipe do JSON-RPC e travava).
+    from tools.sketchup.process import spawn_detached
+    proc = spawn_detached(cmd, env)
 
     try:
         deadline = time.time() + timeout_s
