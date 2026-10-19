@@ -12840,15 +12840,6 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
-      "path": "tools/recolor_kitchen_theme.rb",
-      "domain": "room_kitchen",
-      "disposition": "retain_architecture_boundary_with_explicit_owner",
-      "phase": "P2",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "architecture_owner": "cross_room_shared_gates",
-      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
-    },
-    {
       "path": "tools/reference_db.py",
       "domain": "runtime_or_orchestrator",
       "disposition": "retain_legacy_public_or_tooling_path",
@@ -12901,15 +12892,6 @@
       "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
       "tool_owner": "cross_room_pipeline_tooling",
       "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
-    },
-    {
-      "path": "tools/render_kitchen_angles.rb",
-      "domain": "room_kitchen",
-      "disposition": "retain_architecture_boundary_with_explicit_owner",
-      "phase": "P2",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "architecture_owner": "cross_room_shared_gates",
-      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     },
     {
       "path": "tools/render_parts_iso.py",
@@ -13596,7 +13578,7 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
-      "path": "tools/rooms/kitchen/validation.py",
+      "path": "tools/rooms/kitchen/validation/__init__.py",
       "domain": "room_kitchen",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
       "phase": "P2",
@@ -15215,6 +15197,141 @@
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "tools/rooms/kitchen/validation/ergonomics.py",
+      "domain": "room_kitchen",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "kitchen_validation_boundary",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/kitchen/validation/wall_regression.py",
+      "domain": "room_kitchen",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "kitchen_validation_boundary",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/kitchen/capabilities/vray.py",
+      "domain": "room_kitchen",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "kitchen_validation_boundary",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/kitchen/capabilities/bake_theme.py",
+      "domain": "runtime_or_orchestrator",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE",
+      "architecture_owner": "kitchen_validation_boundary"
+    },
+    {
+      "path": "tools/rooms/kitchen/capabilities/ruby/recolor_kitchen_theme.rb",
+      "domain": "room_kitchen",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "kitchen_validation_boundary",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/kitchen/capabilities/ruby/render_kitchen_angles.rb",
+      "domain": "room_kitchen",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "kitchen_validation_boundary",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/shared/layout_rules.py",
+      "domain": "shared_or_cross_cutting",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "shared_room_primitives",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/shared/decor_anatomy_spec.py",
+      "domain": "runtime_or_orchestrator",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE",
+      "architecture_owner": "shared_room_primitives"
+    },
+    {
+      "path": "tools/rooms/shared/decor_builders.py",
+      "domain": "runtime_or_orchestrator",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE",
+      "architecture_owner": "shared_room_primitives"
+    },
+    {
+      "path": "tools/rooms/shared/room_type.py",
+      "domain": "runtime_or_orchestrator",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE",
+      "architecture_owner": "shared_room_primitives"
+    },
+    {
+      "path": "tools/rooms/shared/semantic_zones.py",
+      "domain": "runtime_or_orchestrator",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE",
+      "architecture_owner": "shared_room_primitives"
+    },
+    {
+      "path": "tools/rooms/shared/shell_parts.py",
+      "domain": "runtime_or_orchestrator",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE",
+      "architecture_owner": "shared_room_primitives"
+    },
+    {
+      "path": "tools/rooms/shared/spatial_model.py",
+      "domain": "shared_or_cross_cutting",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "shared_room_primitives",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/kitchen/capabilities/__init__.py",
+      "domain": "room_kitchen",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "kitchen_validation_boundary",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tests/test_fp043_p4_migration.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     }
   ]
 }

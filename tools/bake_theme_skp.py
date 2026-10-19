@@ -1,50 +1,22 @@
-"""bake_theme_skp.py — gera um .skp da planta com a cozinha BAKEADA num tema (cor+textura).
-Copia o furnished base, abre no SketchUp headless, roda recolor_kitchen_theme.rb, salva o
-.skp tematizado em artifacts/planta_74/furnished/. NAO toca o base (cozinha clara aprovada).
-Uso: KITCHEN_THEME=black_wood_gold .venv/Scripts/python.exe .claude/scratch/bake_theme_skp.py
+"""Fachada FP-043/P4: implementacao unica em `tools.rooms.kitchen.capabilities.bake_theme`.
+
+Preserva `import tools.bake_theme_skp`, `python -m tools.bake_theme_skp` e `python tools/bake_theme_skp.py`; nada de logica aqui.
 """
-import hashlib
-import os
-import shutil
-import subprocess
-import time
+from __future__ import annotations
+
+import sys
 from pathlib import Path
-from tools.sketchup.legacy_process import launch_owned, close_owned
 
-ROOT = Path(__file__).resolve().parents[2]
-SU = Path(r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe")
-RB = ROOT / "tools/recolor_kitchen_theme.rb"
-TEX = ROOT / "assets/textures/procedural"
-BASE = ROOT / "artifacts/planta_74/furnished/planta_74_furnished.skp"
-SCRATCH = ROOT / ".claude/scratch"
+_ROOT = Path(__file__).resolve().parents[1]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
 
-theme = os.environ.get("KITCHEN_THEME", "black_wood_gold")
-out = ROOT / f"artifacts/planta_74/furnished/planta_74_furnished_{theme}.skp"
-copy = SCRATCH / "bake_copy.skp"
-log = SCRATCH / "bake_log.txt"
-for p in (copy, log):
-    if p.exists():
-        p.unlink()
-shutil.copy2(BASE, copy)
-base_hash = hashlib.sha256(BASE.read_bytes()).hexdigest()
+_TARGET = "tools.rooms.kitchen.capabilities.bake_theme"
+if __name__ == "__main__":
+    import runpy
 
-env = dict(os.environ)
-env.update({
-    "KITCHEN_THEME": theme,
-    "THEME_OUT": str(out).replace("\\", "/"),
-    "VRAY_TEX_DIR": str(TEX),
-    "RECOLOR_LOG": str(log).replace("\\", "/"),
-})
-pid = launch_owned(SU, copy, RB, env=env)
-deadline = time.time() + 150
-while time.time() < deadline:
-    if log.exists():
-        time.sleep(2)
-        break
-    time.sleep(2)
-close_owned(pid)
-time.sleep(1)
-intact = hashlib.sha256(BASE.read_bytes()).hexdigest() == base_hash
-print(log.read_text("utf-8", "ignore") if log.exists() else "(no log)")
-print(f"base_intact={intact}  OUT_exists={out.exists()}  size={out.stat().st_size if out.exists() else 0}")
-print(out)
+    runpy.run_module(_TARGET, run_name="__main__", alter_sys=True)
+else:
+    import importlib
+
+    sys.modules[__name__] = importlib.import_module(_TARGET)

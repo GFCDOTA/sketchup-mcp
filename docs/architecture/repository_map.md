@@ -94,7 +94,8 @@ A cozinha é o primeiro módulo a seguir a convenção; os demais a recebem em P
 | `tools/rooms/kitchen/specialist.md` | previsto | papel, decisões, fontes, ferramentas permitidas e condições de parada (P5) |
 | `tools/rooms/kitchen/specialist.v1.json` | previsto | IDs do perfil, roteamento e estados, sem autorização implícita (P5) |
 | `tools/rooms/kitchen/knowledge/index.v1.json` | previsto | referências por ID às recipes canônicas, sem copiá-las (P5) |
-| `tools/rooms/kitchen/capabilities/` | previsto | adapters de capacidades específicas da cozinha (P6) |
+| `tools/rooms/kitchen/capabilities/` | existe | capacidades exclusivas da cozinha: V-Ray, bake de tema e Ruby de recolor/ângulos (P4a) |
+| `tools/rooms/kitchen/capabilities/cabinet.py` | previsto | adapter do gabinete paramétrico (P6) |
 | `tools/rooms/shared/cabinet/` | previsto | builder compartilhado de gabinete: **não existe** (P6) |
 
 ## 5. O que é prova, e de quê

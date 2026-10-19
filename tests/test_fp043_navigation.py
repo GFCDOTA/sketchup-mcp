@@ -44,7 +44,7 @@ def test_cinco_rotas_de_navegacao_passam():
 def test_gabinete_compartilhado_e_shaker_estao_declarados_ausentes_e_continuam_ausentes():
     doc = json.loads((ROOT / ROUTES_PATH).read_text(encoding="utf-8"))
     ausentes = {a["path"] for r in doc["routes"] for a in r.get("absent", [])}
-    assert ausentes == {"tools/rooms/shared/cabinet", "tools/rooms/kitchen/capabilities"}
+    assert ausentes == {"tools/rooms/shared/cabinet", "tools/rooms/kitchen/capabilities/cabinet.py"}
     assert not any((ROOT / p).exists() for p in ausentes)
     readme = (ROOT / "tools/rooms/kitchen/README.md").read_text(encoding="utf-8")
     assert "BLOCKED_CAPABILITY_MISSING" in readme and "ausente" in readme

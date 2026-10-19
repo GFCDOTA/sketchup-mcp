@@ -11,7 +11,7 @@
         {"path": "tools/rooms/kitchen/layout.py", "symbol": "build_boxes", "role": "planner"},
         {"path": "tools/rooms/kitchen/layout.py", "symbol": "KITCHEN_SINK_SIDE", "role": "âncora hidráulica (parede oeste)"},
         {"path": "tools/rooms/kitchen/anchor_rules.py", "symbol": "validate", "role": "checagem da âncora"},
-        {"path": "tools/rooms/kitchen/validation.py", "symbol": "require_kitchen_anchor", "role": "trava fail-closed"}
+        {"path": "tools/rooms/kitchen/validation/__init__.py", "symbol": "require_kitchen_anchor", "role": "trava fail-closed"}
       ]
     },
     {
@@ -33,7 +33,7 @@
         {"path": "references/sketchup/knowledge/video_recipes.v1.json", "symbol": "cabinet.recessed-shaker-and-louvers", "role": "recipe (consultiva)"}
       ],
       "absent": [
-        {"path": "tools/rooms/kitchen/capabilities", "why": "a capacidade de portas rebaixadas/Shaker não existe: BLOCKED_CAPABILITY_MISSING"}
+        {"path": "tools/rooms/kitchen/capabilities/cabinet.py", "why": "a capacidade de portas rebaixadas/Shaker não existe: BLOCKED_CAPABILITY_MISSING"}
       ]
     },
     {

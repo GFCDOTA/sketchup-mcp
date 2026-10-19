@@ -49,6 +49,21 @@ Os movimentos de arquivos protegidos estão registrados em
 | `vray_pipeline_proof.png` (raiz) | `artifacts/review/vray_pipeline_proof_2026-06/` | **feito** (P2) |
 | `planta_74.pdf` (raiz) | `projects/planta_74/source/planta_74.pdf` | **feito** (P2, via `core.project_sources`) |
 
+## P4a — cozinha e compartilhado (feito)
+
+| Antes | Agora | Compatibilidade |
+|---|---|---|
+| `tools/kitchen_ergonomics.py` | `tools/rooms/kitchen/validation/ergonomics.py` | fachada (import, `-m`, script) |
+| `tools/kitchen_wall_regression_gate.py` | `tools/rooms/kitchen/validation/wall_regression.py` | fachada |
+| `tools/kitchen_vray.py` | `tools/rooms/kitchen/capabilities/vray.py` | fachada; efeitos colaterais de import viraram `main()` |
+| `tools/bake_theme_skp.py` | `tools/rooms/kitchen/capabilities/bake_theme.py` | fachada; `ROOT` corrigido (apontava para `apps/`) |
+| `tools/recolor_kitchen_theme.rb`, `tools/render_kitchen_angles.rb` | `tools/rooms/kitchen/capabilities/ruby/` | caminho único, sem stub; referências reescritas |
+| `tools/{layout_rules,decor_anatomy_spec,decor_builders,room_type,semantic_zones,shell_parts,spatial_model}.py` | `tools/rooms/shared/` | fachada |
+| `tools/rooms/kitchen/validation.py` | `tools/rooms/kitchen/validation/__init__.py` | mesmo import público |
+
+Prova: `tests/test_fp043_p4_migration.py` (fachada só delega; import frio nas duas ordens devolve o mesmo módulo) e saída de
+`collect_boxes` da `planta_74` idêntica antes/depois (402 caixas).
+
 ## Para quem vai mover um arquivo (checklist do PR)
 
 1. `python -m tools.navigation.consumers <caminho>`: leia **todos** os consumidores (código, testes, CI, MCP, config, docs).
