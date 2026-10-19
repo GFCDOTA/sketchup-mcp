@@ -12353,6 +12353,41 @@
       "disposition": "retain_current_owner",
       "phase": "P3",
       "status": "VERIFIED_TEST_OWNERSHIP_PENDING_CI"
+    },
+    {
+      "path": "tools/rooms/asset_provenance.py",
+      "domain": "tooling_ci",
+      "disposition": "retain_infrastructure",
+      "phase": "P6",
+      "status": "PROVENANCE_GATE_PENDING_CI"
+    },
+    {
+      "path": "docs/specs/fp042_asset_blobs.v1.json",
+      "domain": "artifact",
+      "disposition": "provenance_manifest",
+      "phase": "P6",
+      "status": "PROVENANCE_MANIFEST_PENDING_CI"
+    },
+    {
+      "path": "docs/specs/FP-042_asset_provenance.md",
+      "domain": "documentation",
+      "disposition": "retain_current_owner",
+      "phase": "P6",
+      "status": "PROVENANCE_POLICY_PENDING_CI"
+    },
+    {
+      "path": "tests/test_fp042_asset_provenance.py",
+      "domain": "test",
+      "disposition": "retain_current_owner",
+      "phase": "P6",
+      "status": "PROVENANCE_TEST_PENDING_CI"
+    },
+    {
+      "path": "tests/test_fp042_knowledge_integrity.py",
+      "domain": "test",
+      "disposition": "retain_current_owner",
+      "phase": "P5",
+      "status": "REFERENTIAL_TEST_PENDING_CI"
     }
   ]
 }
