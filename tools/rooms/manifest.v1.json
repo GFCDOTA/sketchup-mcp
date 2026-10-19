@@ -5,7 +5,12 @@
     "code": [
       "tools.rooms.shared.geometry",
       "tools.rooms.shared.decor",
-      "tools.rooms.shared.furniture"
+      "tools.rooms.shared.furniture",
+      "tools.rooms.shared.anatomy",
+      "tools.rooms.shared.sofa",
+      "tools.rooms.shared.bed",
+      "tools.rooms.shared.wardrobe",
+      "tools.rooms.shared.nightstand"
     ],
     "knowledge": [
       "cross.room.material-and-instance-rules",
@@ -26,7 +31,7 @@
         "tools.rooms.living.furnishing.living_room_boxes",
         "tools.place_layout_skp.build_boxes",
         "tools.layout_candidates.run",
-        "tools.sofa_builder.build_sofa"
+        "tools.rooms.shared.sofa.build_sofa"
       ],
       "sources": [
         "room.living.media-wall",
@@ -40,8 +45,8 @@
       "providers": [
         "tools.rooms.bedroom.furnishing.bedroom_designer_boxes",
         "tools.rooms.bedroom.layout.run",
-        "tools.bed_builder.build_bed",
-        "tools.wardrobe_builder.build_wardrobe"
+        "tools.rooms.shared.bed.build_bed",
+        "tools.rooms.shared.wardrobe.build_wardrobe"
       ],
       "sources": [
         "room.bedroom.bed-and-headboard"

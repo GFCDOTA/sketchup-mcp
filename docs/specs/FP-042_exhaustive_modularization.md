@@ -104,3 +104,14 @@ antes do merge; equivalência visual L2 ainda não comprovada.
 ### FP-042/P6 — abrangência dos artefatos versionados
 
 O gate de binários protege 707 arquivos e o novo gate `reference_provenance` expande a preservação a **1060 referências e artefatos versionados**, inclusive JSON, MD e outros não binários. Cada registro P6 com `retain_canonical_location` possui hash Git e owner_group registrado. Essa evidência comprova somente integridade de bytes/caminhos, não SketchUp L2, visual nem arquivos não versionados.
+
+
+### FP-042/P2 — construção paramétrica de peças de uso cruzado
+
+`tools.rooms.shared.{anatomy,sofa,bed,wardrobe,nightstand}` passa a
+conter os cinco algoritmos/contratos de peças usados pela sala, quartos,
+closet e outros consumidores. Os nomes legados continuam fachadas com
+identidade de métodos, helpers e entrada `python -m` preservada.
+O conteúdo dos builders foi transferido literalmente; testes cobrem
+identidade dos contratos e anatomia básica. Nenhum arquivo SKP
+foi modificado e prova visual L2 continua pendente.
