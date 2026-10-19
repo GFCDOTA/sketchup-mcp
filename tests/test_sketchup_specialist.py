@@ -447,14 +447,81 @@ def test_su_marcadas_como_nao_provadas_no_sketchup():
     assert st["proof_state"] == "UNVERIFIED_ON_SKETCHUP"
 
 
-def test_render_vray_recusa_enquanto_o_launcher_mata_por_imagem(tmp_path):
-    """O launcher legado roda `taskkill /F /IM SketchUp.exe` após a exportação:
-    a tool recusa com o motivo, mesmo com SketchUp e V-Ray presentes, e nunca
-    chega a importá-lo."""
+def _vray_scene(tmp_path):
+    d = tmp_path / "scene"
+    d.mkdir()
+    (d / "scene.json").write_text(json.dumps({"camera": {"eye": [0.8, 0.4, 1.6], "target": [2.6, 2.7, 0.55]}}),
+                                  "utf-8")
+    (d / "scene_closed.skp").write_bytes(b"SKP FECHADO")
+    return d
+
+
+def _vray_export_writes(vrscene=True):
+    def job(cmd, env, handle):
+        if vrscene:
+            Path(env["VRSCENE_OUT"]).write_text("// vrscene", "utf-8")
+        Path(env["VRAY_LOG"]).write_text("DONE", "utf-8")
+    return job
+
+
+def test_render_vray_exporta_pela_propria_instancia_sem_tocar_o_scene_dir(tmp_path, monkeypatch):
+    """Antes a tool recusava: o launcher legado fechava TODO SketchUp por nome de
+    imagem. Agora a exportação passa por batch.run_script (uma cópia, a própria
+    instância) e o scene_dir não ganha nem perde arquivo."""
+    d = _vray_scene(tmp_path)
+    before = sorted(p.name for p in d.iterdir())
+    monkeypatch.setattr("tools.tweak_vrscene.tweak_file", lambda *a, **k: None)
+    rendered = {}
+
+    def vray(cmd, timeout_s):
+        rendered["cmd"] = cmd
+        png = Path(next(c for c in cmd if c.startswith("-imgFile=")).split("=", 1)[1])
+        png.write_bytes(b"PNG")
+        return {"returncode": 0, "timeout": False, "tail": ""}
+
+    monkeypatch.setattr(jobs, "_vray_exe_run", vray)
+    sys_ = FakeSystem(job=_vray_export_writes())
+    r = jobs.render_vray(str(d), out_dir=str(tmp_path / "out"), su=su_with(sys_))
+    assert r["status"] == "OK", r
+    assert sys_.killed == []  # nenhum taskkill — nem por PID, nem por imagem
+    cmd, env = sys_.launched[0]
+    assert Path(cmd[1]).parent == (tmp_path / "out").resolve() and Path(cmd[1]).name.startswith("_vray_")
+    assert cmd[-1].endswith("vray_export.rb")
+    assert env["VRAY_EYE"] == "31.50,15.75,62.99"  # metros -> polegadas
+    assert Path(r["png"]).parent == (tmp_path / "out").resolve()
+    assert sorted(p.name for p in d.iterdir()) == before and r["inputs_intact"] is True
+    assert str(sys_.launched[0][0][0]) == str(EXE)
+
+
+def test_render_vray_falha_explicita_sem_vrscene(tmp_path, monkeypatch):
+    d = _vray_scene(tmp_path)
+    monkeypatch.setattr(jobs, "_vray_exe_run", lambda *a, **k: pytest.fail("não pode renderizar sem .vrscene"))
+    r = jobs.render_vray(str(d), out_dir=str(tmp_path / "out"),
+                         su=su_with(FakeSystem(job=_vray_export_writes(vrscene=False))))
+    assert r["status"] == "FAILED" and ".vrscene" in r["reason"]
+
+
+def test_render_vray_recusa_destino_protegido_e_cena_incompleta(tmp_path):
+    d = _vray_scene(tmp_path)
     sys_ = FakeSystem()
-    r = jobs.render_vray(str(tmp_path), su=su_with(sys_))
-    assert r["status"] == "REFUSED" and "taskkill" in r["reason"]
+    r = jobs.render_vray(str(d), out_png="artifacts/planta_74/vray.png", su=su_with(sys_))
+    assert r["status"] == "REFUSED"
+    (d / "scene_closed.skp").unlink()
+    r = jobs.render_vray(str(d), su=su_with(sys_))
+    assert r["status"] == "ERROR" and "scene_closed.skp" in r["reason"]
     assert sys_.launched == []
+
+
+def test_render_vray_sem_vray_exe_e_unavailable(tmp_path):
+    sys_ = FakeSystem(virtual=(EXE, PLUGINS / "autorun_consume.rb"))
+    r = jobs.render_vray(str(_vray_scene(tmp_path)), su=su_with(sys_))
+    assert r["status"] == "UNAVAILABLE" and sys_.launched == []
+
+
+def test_launcher_legado_de_vray_nao_mata_mais_por_imagem():
+    src = Path(jobs.REPO / "tools" / "render_scene_vray.py").read_text("utf-8")
+    assert "[\"taskkill\"" not in src and "Start-Process" not in src  # comentário pode citar; chamada não
+    assert "run_script(" in src
 
 
 def test_apply_edits_recusa_destino_que_ja_existe(tmp_path, skp):
