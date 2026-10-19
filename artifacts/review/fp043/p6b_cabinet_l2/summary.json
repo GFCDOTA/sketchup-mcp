@@ -1,0 +1,149 @@
+{
+ "commit": "cdb9dde52f9ebbe3f699be73c83f34df1d62fdbf",
+ "sketchup_version": "26.0.429",
+ "base_sha256": "621daa5733d8ac9d6397a97cf3469e410f1159385ffda35b429af593cb2c02f8",
+ "base_note": "modelo-base = template padrao do SketchUp (1 componente de pessoa) vindo de runs/l2_fp042_20261019/S02_synth_shell_bedroom_medium_14m2/_bootstrap.skp; nenhuma planta",
+ "grain": {
+  "state": "NOT_SUPPORTED",
+  "note": "sem textura/UV no SketchUp scratch: o veio fica como atributo, nao aplicado"
+ },
+ "pids_launched_and_closed": [
+  36900,
+  15572,
+  35116,
+  33904,
+  33176,
+  37228,
+  30388,
+  35924,
+  37132,
+  35580,
+  21672,
+  31328,
+  37584,
+  28276,
+  11068,
+  25852,
+  28884,
+  28484,
+  19592,
+  36840,
+  37828,
+  9380,
+  30192,
+  30680,
+  28668,
+  36576
+ ],
+ "cases": [
+  {
+   "case": "m1_holdout_c_r0",
+   "ok": true,
+   "checks": 42,
+   "max_corner_error_m": 3.1401849173675503e-16,
+   "skp_sha256": "b8b3790bba96556ca805b070712648e3c2f2675f73061371b0ed9cfcf890bd63",
+   "build_pid": 28276
+  },
+  {
+   "case": "m1_holdout_c_r30",
+   "ok": true,
+   "checks": 42,
+   "max_corner_error_m": 4.839123191993294e-07,
+   "skp_sha256": "18ce8d59a989cd9d5f7b4d00827e2f3142e3fb0837e2b540b45d4ea39de1f0f7",
+   "build_pid": 31328
+  },
+  {
+   "case": "m1_valid_a_base_600_r0",
+   "ok": true,
+   "checks": 42,
+   "max_corner_error_m": 3.469446951953614e-18,
+   "skp_sha256": "aea2023992ebcf6550c846841d05486ab452e638f6ea50046b55c86d576ae299",
+   "build_pid": 15572
+  },
+  {
+   "case": "m1_valid_a_base_600_r30",
+   "ok": true,
+   "checks": 42,
+   "max_corner_error_m": 5.372090346018581e-07,
+   "skp_sha256": "36113ed9fe0bbbc2b1ab0699a70bef7a2b997ea770d17091e762559bf72112c1",
+   "build_pid": 37228
+  },
+  {
+   "case": "m1_valid_a_base_600_r90",
+   "ok": true,
+   "checks": 42,
+   "max_corner_error_m": 2.220717083251841e-16,
+   "skp_sha256": "4fdf1c22d72afa34381760e41bd0c96ad7514e0a05c5da4f5522d87605a4cbb6",
+   "build_pid": 33904
+  },
+  {
+   "case": "m1_valid_b_tall_900_r30",
+   "ok": true,
+   "checks": 53,
+   "max_corner_error_m": 5.966354211612855e-07,
+   "skp_sha256": "5a7214eec43bfa44d9a83790ee2aac56d309bc2df29e8354c0e777d3286edf01",
+   "build_pid": 35580
+  },
+  {
+   "case": "m1_valid_b_tall_900_r90",
+   "ok": true,
+   "checks": 53,
+   "max_corner_error_m": 4.972820174300706e-16,
+   "skp_sha256": "5d9ba3be8a5e21a6f0eafdbffc511cebd56f05404c8638f31e73d1337a01c52b",
+   "build_pid": 35924
+  },
+  {
+   "case": "m2_idempotent_rebuild",
+   "ok": true,
+   "checks": 43,
+   "max_corner_error_m": 3.469446951953614e-18,
+   "skp_sha256": "6086c0d825a97ed14a0a0ab2e059da91cdeca3b131f13e89e21fbdea59173d96",
+   "build_pid": 25852
+  },
+  {
+   "case": "m3_edit_local",
+   "ok": true,
+   "checks": 55,
+   "max_corner_error_m": 5.087681048627601e-16,
+   "skp_sha256": "ca77f25ec290f22bb30ddba5ae3b841d9bec8797dd2b0f5c2c6c2995944bfdca",
+   "build_pid": 37828
+  },
+  {
+   "case": "m3_edit_propagate",
+   "ok": true,
+   "checks": 55,
+   "max_corner_error_m": 5.087681048627601e-16,
+   "skp_sha256": "0e139a8aeb0f7de9727f0a66881fd10b2e98b6e8e2f2573b3734e7eb420b27f6",
+   "build_pid": 30192
+  },
+  {
+   "case": "m3_repeat_x",
+   "ok": true,
+   "checks": 52,
+   "max_corner_error_m": 5.087681048627601e-16,
+   "skp_sha256": "d9a880e0884f15fda6f33517e0d79077f8fb130a2c1f54f1808c0a4d7724a077",
+   "build_pid": 28484
+  },
+  {
+   "case": "m3_repeat_y",
+   "ok": true,
+   "checks": 52,
+   "max_corner_error_m": 4.577566798522237e-16,
+   "skp_sha256": "caa11aae9cd7200f4af6864764b751f4b7fcebd99439083c51d4fd75fc2af5e7",
+   "build_pid": 19592
+  },
+  {
+   "case": "m3_set_material",
+   "ok": true,
+   "checks": 1,
+   "max_corner_error_m": 0.0,
+   "skp_sha256": "43dee2b71c359b766ef0ee9b59cd2b8b58e9b6ede1a20f3d972c2b61c2235845",
+   "build_pid": 28668
+  }
+ ],
+ "baseline_non_cabinet": {
+  "count": 1,
+  "fingerprint": "35371dffc707a87befc699d3646fcf211e74f3328ae645ee5a00e9ae9357ec25",
+  "items": 1
+ }
+}

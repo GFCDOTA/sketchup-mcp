@@ -22,7 +22,7 @@
 | `kitchen.sink-anchor-guard` | IMPLEMENTED | L1_PASS |
 | `kitchen.ergonomics.audit` | IMPLEMENTED | UNTESTED |
 | `kitchen.cabinet.plain-fronts` | IMPLEMENTED | L1_PASS |
-| `shared.cabinet.parametric` | IMPLEMENTED | L1_PASS |
+| `shared.cabinet.parametric` | IMPLEMENTED | L2_PASS |
 
 Recipes (so conhecimento, `KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP`): `cross.room.material-and-instance-rules`, `room.kitchen.cabinet-assemblies`, `cabinet.countertop-separate-and-bevel`, `cabinet.drawer-box-and-hardware`, `cabinet.front-gaps-and-profiles`, `cabinet.recessed-shaker-and-louvers`, `cabinet.reusable-components`, `cabinet.sink-and-wet-channel-cutouts`.
 

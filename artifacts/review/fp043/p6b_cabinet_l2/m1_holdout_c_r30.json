@@ -1,0 +1,681 @@
+{
+ "case": "m1_holdout_c_r30",
+ "build": {
+  "status": "OK",
+  "pid": 31328,
+  "elapsed_s": 10.01,
+  "mode": "interactive",
+  "sketchup_version": "26.0.429",
+  "replaced_previous": 0,
+  "edits": [],
+  "definitions": {
+   "CabinetDef_holdoutc-r30_def:side_left:15.500x502.400x1033.000": 2,
+   "CabinetDef_holdoutc-r30_def:bottom:406.000x502.400x15.500": 2,
+   "CabinetDef_holdoutc-r30_def:back:406.000x3.200x1002.000": 1,
+   "CabinetDef_holdoutc-r30_def:front:432.400x18.700x1028.400": 1
+  },
+  "grain_support": "NOT_SUPPORTED"
+ },
+ "reopen_inspect": {
+  "pid": 37584,
+  "note": null,
+  "result": {
+   "ok": true,
+   "job": "cabinet_inspect",
+   "path": "E:\\Claude\\worktrees\\w-gates\\runs\\fp043_p6b\\final\\m1_holdout_c_r30\\_cab_inspect\\_copy_cab.skp",
+   "cabinets": [
+    {
+     "name": "Cabinet_holdoutc-r30",
+     "request_id": "holdoutc-r30",
+     "capability": "shared.cabinet.parametric",
+     "capability_version": "1.0.0",
+     "signature": "c97f658562951aae5e6c0757bf3748ea8a378be5bf930f036e046fbef140caca",
+     "tag": "Cabinet",
+     "pid": 48880,
+     "world_transform": [
+      0.866025,
+      0.5,
+      -0.0,
+      0.0,
+      -0.5,
+      0.866025,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      48.582677,
+      31.062992,
+      0.0,
+      1.0
+     ],
+     "loose_faces": 0,
+     "loose_edges": 0,
+     "parts": [
+      {
+       "name": "holdoutc-r30/side_left",
+       "part_id": "holdoutc-r30/side_left",
+       "role": "carcass",
+       "definition": "CabinetDef_holdoutc-r30_def:side_left:15.500x502.400x1033.000",
+       "definition_instances": 2,
+       "manifold": true,
+       "tag": "Cabinet_carcass",
+       "material": "mdf_cinza",
+       "attr_material": "mdf_cinza",
+       "attr_grain": "along_height",
+       "attr_signature": "c97f658562951aae5e6c0757bf3748ea8a378be5bf930f036e046fbef140caca",
+       "geometry": {
+        "faces": 6,
+        "edges": 12,
+        "vertices": 8,
+        "area_m2": 1.085556
+       },
+       "world_corners_m": [
+        [
+         1.234,
+         0.789,
+         0.0
+        ],
+        [
+         1.247423,
+         0.79675,
+         0.0
+        ],
+        [
+         0.9828,
+         1.224091,
+         0.0
+        ],
+        [
+         0.996223,
+         1.231841,
+         0.0
+        ],
+        [
+         1.234,
+         0.789,
+         1.033
+        ],
+        [
+         1.247423,
+         0.79675,
+         1.033
+        ],
+        [
+         0.9828,
+         1.224091,
+         1.033
+        ],
+        [
+         0.996223,
+         1.231841,
+         1.033
+        ]
+       ],
+       "pid": 48914
+      },
+      {
+       "name": "holdoutc-r30/side_right",
+       "part_id": "holdoutc-r30/side_right",
+       "role": "carcass",
+       "definition": "CabinetDef_holdoutc-r30_def:side_left:15.500x502.400x1033.000",
+       "definition_instances": 2,
+       "manifold": true,
+       "tag": "Cabinet_carcass",
+       "material": "mdf_cinza",
+       "attr_material": "mdf_cinza",
+       "attr_grain": "along_height",
+       "attr_signature": "c97f658562951aae5e6c0757bf3748ea8a378be5bf930f036e046fbef140caca",
+       "geometry": {
+        "faces": 6,
+        "edges": 12,
+        "vertices": 8,
+        "area_m2": 1.085556
+       },
+       "world_corners_m": [
+        [
+         1.59903,
+         0.99975,
+         0.0
+        ],
+        [
+         1.612453,
+         1.0075,
+         0.0
+        ],
+        [
+         1.34783,
+         1.434841,
+         0.0
+        ],
+        [
+         1.361253,
+         1.442591,
+         0.0
+        ],
+        [
+         1.59903,
+         0.99975,
+         1.033
+        ],
+        [
+         1.612453,
+         1.0075,
+         1.033
+        ],
+        [
+         1.34783,
+         1.434841,
+         1.033
+        ],
+        [
+         1.361253,
+         1.442591,
+         1.033
+        ]
+       ],
+       "pid": 48918
+      },
+      {
+       "name": "holdoutc-r30/bottom",
+       "part_id": "holdoutc-r30/bottom",
+       "role": "carcass",
+       "definition": "CabinetDef_holdoutc-r30_def:bottom:406.000x502.400x15.500",
+       "definition_instances": 2,
+       "manifold": true,
+       "tag": "Cabinet_carcass",
+       "material": "mdf_cinza",
+       "attr_material": "mdf_cinza",
+       "attr_grain": "along_height",
+       "attr_signature": "c97f658562951aae5e6c0757bf3748ea8a378be5bf930f036e046fbef140caca",
+       "geometry": {
+        "faces": 6,
+        "edges": 12,
+        "vertices": 8,
+        "area_m2": 0.436109
+       },
+       "world_corners_m": [
+        [
+         1.247423,
+         0.79675,
+         0.0
+        ],
+        [
+         1.59903,
+         0.99975,
+         0.0
+        ],
+        [
+         0.996223,
+         1.231841,
+         0.0
+        ],
+        [
+         1.34783,
+         1.434841,
+         0.0
+        ],
+        [
+         1.247423,
+         0.79675,
+         0.0155
+        ],
+        [
+         1.59903,
+         0.99975,
+         0.0155
+        ],
+        [
+         0.996223,
+         1.231841,
+         0.0155
+        ],
+        [
+         1.34783,
+         1.434841,
+         0.0155
+        ]
+       ],
+       "pid": 48950
+      },
+      {
+       "name": "holdoutc-r30/top",
+       "part_id": "holdoutc-r30/top",
+       "role": "carcass",
+       "definition": "CabinetDef_holdoutc-r30_def:bottom:406.000x502.400x15.500",
+       "definition_instances": 2,
+       "manifold": true,
+       "tag": "Cabinet_carcass",
+       "material": "mdf_cinza",
+       "attr_material": "mdf_cinza",
+       "attr_grain": "along_height",
+       "attr_signature": "c97f658562951aae5e6c0757bf3748ea8a378be5bf930f036e046fbef140caca",
+       "geometry": {
+        "faces": 6,
+        "edges": 12,
+        "vertices": 8,
+        "area_m2": 0.436109
+       },
+       "world_corners_m": [
+        [
+         1.247423,
+         0.79675,
+         1.0175
+        ],
+        [
+         1.59903,
+         0.99975,
+         1.0175
+        ],
+        [
+         0.996223,
+         1.231841,
+         1.0175
+        ],
+        [
+         1.34783,
+         1.434841,
+         1.0175
+        ],
+        [
+         1.247423,
+         0.79675,
+         1.033
+        ],
+        [
+         1.59903,
+         0.99975,
+         1.033
+        ],
+        [
+         0.996223,
+         1.231841,
+         1.033
+        ],
+        [
+         1.34783,
+         1.434841,
+         1.033
+        ]
+       ],
+       "pid": 48951
+      },
+      {
+       "name": "holdoutc-r30/back",
+       "part_id": "holdoutc-r30/back",
+       "role": "back",
+       "definition": "CabinetDef_holdoutc-r30_def:back:406.000x3.200x1002.000",
+       "definition_instances": 1,
+       "manifold": true,
+       "tag": "Cabinet_back",
+       "material": "hdf_branco",
+       "attr_material": "hdf_branco",
+       "attr_grain": "none",
+       "attr_signature": "c97f658562951aae5e6c0757bf3748ea8a378be5bf930f036e046fbef140caca",
+       "geometry": {
+        "faces": 6,
+        "edges": 12,
+        "vertices": 8,
+        "area_m2": 0.822635
+       },
+       "world_corners_m": [
+        [
+         1.247423,
+         0.79675,
+         0.0155
+        ],
+        [
+         1.59903,
+         0.99975,
+         0.0155
+        ],
+        [
+         1.245823,
+         0.799521,
+         0.0155
+        ],
+        [
+         1.59743,
+         1.002521,
+         0.0155
+        ],
+        [
+         1.247423,
+         0.79675,
+         1.0175
+        ],
+        [
+         1.59903,
+         0.99975,
+         1.0175
+        ],
+        [
+         1.245823,
+         0.799521,
+         1.0175
+        ],
+        [
+         1.59743,
+         1.002521,
+         1.0175
+        ]
+       ],
+       "pid": 48983
+      },
+      {
+       "name": "holdoutc-r30/front",
+       "part_id": "holdoutc-r30/front",
+       "role": "front",
+       "definition": "CabinetDef_holdoutc-r30_def:front:432.400x18.700x1028.400",
+       "definition_instances": 1,
+       "manifold": true,
+       "tag": "Cabinet_front",
+       "material": "mdf_nogueira",
+       "attr_material": "mdf_nogueira",
+       "attr_grain": "along_height",
+       "attr_signature": "c97f658562951aae5e6c0757bf3748ea8a378be5bf930f036e046fbef140caca",
+       "geometry": {
+        "faces": 6,
+        "edges": 12,
+        "vertices": 8,
+        "area_m2": 0.943994
+       },
+       "world_corners_m": [
+        [
+         0.983842,
+         1.226887,
+         0.0023
+        ],
+        [
+         1.358311,
+         1.443087,
+         0.0023
+        ],
+        [
+         0.974492,
+         1.243081,
+         0.0023
+        ],
+        [
+         1.348961,
+         1.459281,
+         0.0023
+        ],
+        [
+         0.983842,
+         1.226887,
+         1.0307
+        ],
+        [
+         1.358311,
+         1.443087,
+         1.0307
+        ],
+        [
+         0.974492,
+         1.243081,
+         1.0307
+        ],
+        [
+         1.348961,
+         1.459281,
+         1.0307
+        ]
+       ],
+       "pid": 49018
+      }
+     ]
+    }
+   ],
+   "non_cabinet": {
+    "count": 1,
+    "fingerprint": "35371dffc707a87befc699d3646fcf211e74f3328ae645ee5a00e9ae9357ec25",
+    "items": 1
+   },
+   "counts": {
+    "top_groups": 1,
+    "top_components": 1,
+    "loose_faces_at_root": 0,
+    "loose_edges_at_root": 0,
+    "definitions": 6,
+    "cabinet_definitions": 4,
+    "materials": 24,
+    "tags": [
+     "Layer0",
+     "Cabinet",
+     "Cabinet_carcass",
+     "Cabinet_back",
+     "Cabinet_front"
+    ]
+   },
+   "definitions": {
+    "CabinetDef_holdoutc-r30_def:side_left:15.500x502.400x1033.000": 2,
+    "CabinetDef_holdoutc-r30_def:bottom:406.000x502.400x15.500": 2,
+    "CabinetDef_holdoutc-r30_def:back:406.000x3.200x1002.000": 1,
+    "CabinetDef_holdoutc-r30_def:front:432.400x18.700x1028.400": 1
+   },
+   "elapsed_s": 0.0,
+   "sketchup_version": "26.0.429"
+  }
+ },
+ "verify": {
+  "ok": true,
+  "checks": [
+   {
+    "check": "exactly_one_cabinet_root",
+    "ok": true,
+    "detail": "1 grupo(s) para holdoutc-r30"
+   },
+   {
+    "check": "capability_attribute",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "check": "signature_attribute",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "check": "root_tag",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "check": "no_loose_geometry_in_root",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "check": "part_ids_match_plan",
+    "ok": true,
+    "detail": "plano=6 modelo=6"
+   },
+   {
+    "check": "corners:holdoutc-r30/side_left",
+    "ok": true,
+    "detail": "max 4.26e-07 m"
+   },
+   {
+    "check": "solid:holdoutc-r30/side_left",
+    "ok": true,
+    "detail": "manifold=True faces=6 edges=12"
+   },
+   {
+    "check": "material:holdoutc-r30/side_left",
+    "ok": true,
+    "detail": "'mdf_cinza'"
+   },
+   {
+    "check": "tag:holdoutc-r30/side_left",
+    "ok": true,
+    "detail": "Cabinet_carcass"
+   },
+   {
+    "check": "name:holdoutc-r30/side_left",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "check": "corners:holdoutc-r30/side_right",
+    "ok": true,
+    "detail": "max 3.35e-07 m"
+   },
+   {
+    "check": "solid:holdoutc-r30/side_right",
+    "ok": true,
+    "detail": "manifold=True faces=6 edges=12"
+   },
+   {
+    "check": "material:holdoutc-r30/side_right",
+    "ok": true,
+    "detail": "'mdf_cinza'"
+   },
+   {
+    "check": "tag:holdoutc-r30/side_right",
+    "ok": true,
+    "detail": "Cabinet_carcass"
+   },
+   {
+    "check": "name:holdoutc-r30/side_right",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "check": "corners:holdoutc-r30/bottom",
+    "ok": true,
+    "detail": "max 4.26e-07 m"
+   },
+   {
+    "check": "solid:holdoutc-r30/bottom",
+    "ok": true,
+    "detail": "manifold=True faces=6 edges=12"
+   },
+   {
+    "check": "material:holdoutc-r30/bottom",
+    "ok": true,
+    "detail": "'mdf_cinza'"
+   },
+   {
+    "check": "tag:holdoutc-r30/bottom",
+    "ok": true,
+    "detail": "Cabinet_carcass"
+   },
+   {
+    "check": "name:holdoutc-r30/bottom",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "check": "corners:holdoutc-r30/top",
+    "ok": true,
+    "detail": "max 4.26e-07 m"
+   },
+   {
+    "check": "solid:holdoutc-r30/top",
+    "ok": true,
+    "detail": "manifold=True faces=6 edges=12"
+   },
+   {
+    "check": "material:holdoutc-r30/top",
+    "ok": true,
+    "detail": "'mdf_cinza'"
+   },
+   {
+    "check": "tag:holdoutc-r30/top",
+    "ok": true,
+    "detail": "Cabinet_carcass"
+   },
+   {
+    "check": "name:holdoutc-r30/top",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "check": "corners:holdoutc-r30/back",
+    "ok": true,
+    "detail": "max 4.84e-07 m"
+   },
+   {
+    "check": "solid:holdoutc-r30/back",
+    "ok": true,
+    "detail": "manifold=True faces=6 edges=12"
+   },
+   {
+    "check": "material:holdoutc-r30/back",
+    "ok": true,
+    "detail": "'hdf_branco'"
+   },
+   {
+    "check": "tag:holdoutc-r30/back",
+    "ok": true,
+    "detail": "Cabinet_back"
+   },
+   {
+    "check": "name:holdoutc-r30/back",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "check": "corners:holdoutc-r30/front",
+    "ok": true,
+    "detail": "max 4.59e-07 m"
+   },
+   {
+    "check": "solid:holdoutc-r30/front",
+    "ok": true,
+    "detail": "manifold=True faces=6 edges=12"
+   },
+   {
+    "check": "material:holdoutc-r30/front",
+    "ok": true,
+    "detail": "'mdf_nogueira'"
+   },
+   {
+    "check": "tag:holdoutc-r30/front",
+    "ok": true,
+    "detail": "Cabinet_front"
+   },
+   {
+    "check": "name:holdoutc-r30/front",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "check": "definition_sharing:def:side_left:15.500x502.400x1033.000",
+    "ok": true,
+    "detail": "['CabinetDef_holdoutc-r30_def:side_left:15.500x502.400x1033.000']"
+   },
+   {
+    "check": "definition_sharing:def:bottom:406.000x502.400x15.500",
+    "ok": true,
+    "detail": "['CabinetDef_holdoutc-r30_def:bottom:406.000x502.400x15.500']"
+   },
+   {
+    "check": "definition_sharing:def:back:406.000x3.200x1002.000",
+    "ok": true,
+    "detail": "['CabinetDef_holdoutc-r30_def:back:406.000x3.200x1002.000']"
+   },
+   {
+    "check": "definition_sharing:def:front:432.400x18.700x1028.400",
+    "ok": true,
+    "detail": "['CabinetDef_holdoutc-r30_def:front:432.400x18.700x1028.400']"
+   },
+   {
+    "check": "grain_not_claimed",
+    "ok": true,
+    "detail": "veio registrado, nao aplicado"
+   },
+   {
+    "check": "non_cabinet_unchanged",
+    "ok": true,
+    "detail": "arquitetura/outros objetos intactos"
+   }
+  ],
+  "max_corner_error_m": 4.839123191993294e-07
+ },
+ "skp": "m1_holdout_c_r30.skp",
+ "skp_sha256": "18ce8d59a989cd9d5f7b4d00827e2f3142e3fb0837e2b540b45d4ea39de1f0f7",
+ "skp_bytes": 181353
+}
