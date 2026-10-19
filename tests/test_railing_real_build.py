@@ -39,4 +39,10 @@ def test_real_build_passes_railing_gates():
     con = json.loads(_CONS.read_text("utf-8"))
     rep = json.loads(_REPORT.read_text("utf-8"))
     assert audit_parapet_not_railing_fallback(con, rep)["verdict"] == "PASS"
+    # Este build historico (review) e anterior ao `render_as: grade` curado em h_sb000: nele o peitoril
+    # sai como low_wall. O contrato entao era "decide pelo barrier_type"; remove-se o override
+    # explicito so na copia em memoria (o fixture nao e tocado). O build canonico atual e coberto
+    # por tests/test_gates_report_contract.py.
+    for sb in con["soft_barriers"]:
+        sb.pop("render_as", None)
     assert audit_railing_exact_match(con, rep)["verdict"] == "PASS"

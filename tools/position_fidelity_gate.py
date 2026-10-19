@@ -38,8 +38,14 @@ TOL = {
 }
 
 
+# Mesmas origens que o builder aceita como fonte (`build_soft_barrier` em build_plan_shell_skp.rb): curadoria por imagem
+# e extração honesta de vetor/texto do PDF (ex.: h_sb001 MURETA H=0,70M). Divergir daqui faz o gate chamar de
+# "extra sem fonte" um grupo que o builder renderizou legitimamente.
+SOURCED_ORIGINS = ("human_annotation", "pdf_vector", "pdf_text_label")
+
+
 def _has_source(b: dict) -> bool:
-    return bool(b.get("barrier_type")) and b.get("geometry_origin") == "human_annotation"
+    return bool(b.get("barrier_type")) and b.get("geometry_origin") in SOURCED_ORIGINS
 
 
 def _is_grade(b: dict) -> bool:
