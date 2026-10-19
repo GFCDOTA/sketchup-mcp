@@ -27,6 +27,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))   # roda standalone
 if not os.environ.get("PT_TO_M"):
     os.environ["PT_TO_M"] = "0.0259"
 from tools import bedroom_designer   # noqa: E402  (quartos: brain novo GPT-approved)
+from tools.rooms.shared.geometry import _oriented_box  # noqa: E402,F401 (re-export legado)
 from tools.bathroom_layout import build_boxes as bath_boxes   # noqa: E402
 from tools.kitchen_layout import build_boxes as kitchen_boxes   # noqa: E402
 from tools.place_layout_skp import build_boxes as living_boxes   # noqa: E402
@@ -265,31 +266,6 @@ def bedroom_designer_boxes(con, room_id):
             _b["rgb"] = _new
     return boxes, out
 
-
-def _oriented_box(kind, center_in, facing, w_m, d_m, z0_m, h_m, rgb, label=None, module=None,
-                  decorative=False):
-    """Caixa (rack/mesa/tapete) centrada em center_in (shell inches) com a FRENTE
-    (-Y local) apontando 'facing'. Mesma rotacao do place_sofa_boxes -> qualquer
-    angulo. w=largura (perp ao facing), d=profundidade (ao longo do facing)."""
-    import math
-    M2IN = 39.3700787402
-    cx, cy = center_in
-    fx, fy = facing
-    nrm = math.hypot(fx, fy) or 1.0
-    fx, fy = fx / nrm, fy / nrm
-    theta = math.atan2(fx, -fy)
-    ct, st = math.cos(theta), math.sin(theta)
-    corners = []
-    for lx, ly in ((-w_m / 2, -d_m / 2), (w_m / 2, -d_m / 2),
-                   (w_m / 2, d_m / 2), (-w_m / 2, d_m / 2)):
-        wx, wy = lx * ct - ly * st, lx * st + ly * ct
-        corners.append([round(cx + wx * M2IN, 2), round(cy + wy * M2IN, 2)])
-    xs = [c[0] for c in corners]
-    ys = [c[1] for c in corners]
-    return {"kind": kind, "x0": min(xs), "y0": min(ys), "x1": max(xs), "y1": max(ys),
-            "corners": corners, "h_in": round(h_m * M2IN, 2), "z0_in": round(z0_m * M2IN, 2),
-            "rgb": rgb, "label": label or kind, "module": module or kind,
-            "ambiguous": False, "decorative": decorative}
 
 
 def place_decor_boxes(kind, center_in, facing, z_lift=0.0, module=None, **overrides):
