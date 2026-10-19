@@ -39,7 +39,7 @@
     "bedroom": {
       "providers": [
         "tools.rooms.bedroom.furnishing.bedroom_designer_boxes",
-        "tools.bedroom_layout.run",
+        "tools.rooms.bedroom.layout.run",
         "tools.bed_builder.build_bed",
         "tools.wardrobe_builder.build_wardrobe"
       ],
