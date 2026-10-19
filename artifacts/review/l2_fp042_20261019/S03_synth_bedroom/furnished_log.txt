@@ -1,0 +1,72 @@
+BEFORE render -> furnished_before_top.png
+  rug bbox 132x110x1 in
+  estrado bbox 72x56x4 in
+  estrado bbox 78x62x2 in
+  estrado bbox 78x62x9 in
+  cabeceira bbox 3x62x41 in
+  cabeceira bbox 2x57x15 in
+  colchao bbox 76x61x7 in
+  travesseiro bbox 14x20x6 in
+  travesseiro bbox 14x20x6 in
+  manta bbox 22x59x3 in
+  ks_painel_base bbox 2x62x63 in
+  ks_ripa bbox 1x2x63 in
+  ks_ripa bbox 1x2x63 in
+  ks_ripa bbox 1x2x63 in
+  ks_ripa bbox 1x2x63 in
+  ks_ripa bbox 1x2x63 in
+  ks_ripa bbox 1x2x63 in
+  ks_ripa bbox 1x2x63 in
+  ks_ripa bbox 1x2x63 in
+  ks_ripa bbox 1x2x63 in
+  ks_ripa bbox 1x2x63 in
+  ks_ripa bbox 1x2x63 in
+  ks_ripa bbox 1x2x63 in
+  ks_ripa bbox 1x2x63 in
+  ks_ripa bbox 1x2x63 in
+  ks_ripa bbox 1x2x63 in
+  ks_ripa bbox 1x2x63 in
+  ks_ripa bbox 1x2x63 in
+  ks_ripa bbox 1x2x63 in
+  ks_ripa bbox 1x2x63 in
+  ks_led bbox 1x56x1 in
+  ks_bronze bbox 1x12x1 in
+  ks_criado_corpo bbox 16x18x8 in
+  ks_criado_frente bbox 16x17x7 in
+  ks_gola bbox 16x15x0 in
+  ks_criado_tampo bbox 17x19x1 in
+  ks_led bbox 13x15x1 in
+  ks_criado_corpo bbox 16x18x8 in
+  ks_criado_frente bbox 16x17x7 in
+  ks_gola bbox 16x15x0 in
+  ks_criado_tampo bbox 17x19x1 in
+  ks_led bbox 13x15x1 in
+  rodape bbox 44x20x3 in
+  corpo bbox 47x22x83 in
+  porta bbox 22x1x82 in
+  porta bbox 22x1x82 in
+  ks_gola bbox 46x24x1 in
+  ks_maleiro bbox 47x24x19 in
+  ks_gola bbox 45x24x0 in
+  ks_bronze bbox 11x24x1 in
+  top bbox 22x47x1 in
+  saia bbox 18x43x3 in
+  foot bbox 18x2x28 in
+  foot bbox 18x2x28 in
+  base bbox 15x17x11 in
+  frame bbox 1x17x12 in
+  foot bbox 1x1x16 in
+  foot bbox 1x1x16 in
+  foot bbox 1x1x16 in
+  foot bbox 1x1x16 in
+  frame bbox 18x16x1 in
+  seat bbox 19x17x2 in
+  frame bbox 1x15x17 in
+  back bbox 1x16x14 in
+placed 64/64 placeholders
+texturas aplicadas: 0 kind(s) via LAYOUT_TEX_MAP
+MOVEIS (comodo | movel): SUITE 02|Cadeira escrivaninha ; SUITE 02|Cama ; SUITE 02|Criado-mudo 1 ; SUITE 02|Criado-mudo 2 ; SUITE 02|Escrivaninha ; SUITE 02|Guarda-roupa ; SUITE 02|Painel cabeceira ; SUITE 02|rug
+shell travado: 4 grupos (paredes/piso/portas)
+AFTER top -> furnished_after_top.png
+AFTER iso -> furnished_after_iso.png
+saved -> furnished.skp

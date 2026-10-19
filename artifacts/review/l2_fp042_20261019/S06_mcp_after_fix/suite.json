@@ -1,0 +1,2358 @@
+[
+ {
+  "id": "I01",
+  "tool": "su_inspect",
+  "args": {
+   "skp_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/base.skp",
+   "max_depth": 2
+  },
+  "is_error": false,
+  "status": "OK",
+  "reason": null,
+  "verdict": "PASS",
+  "why": "86 nós",
+  "closed": {
+   "status": "CLOSED",
+   "closed": [
+    35556
+   ],
+   "still_running": []
+  }
+ },
+ {
+  "id": "E01",
+  "tool": "su_apply_edits",
+  "args": {
+   "skp_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/base.skp",
+   "out_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/E01_move.skp",
+   "ops": [
+    {
+     "op": "move",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "by_m": [
+      0.1,
+      -0.05,
+      0.0
+     ]
+    }
+   ]
+  },
+  "is_error": false,
+  "status": "OK",
+  "reason": null,
+  "verdict": "PASS",
+  "why": "salvo",
+  "closed": {
+   "status": "CLOSED",
+   "closed": [
+    34488
+   ],
+   "still_running": []
+  }
+ },
+ {
+  "id": "E01r",
+  "verdict": "PASS",
+  "why": "reaberto: cama min [1.365, 1.2098, 0.0] -> [1.465, 1.1598, 0.0]; outros/shell intactos=True"
+ },
+ {
+  "id": "E02",
+  "tool": "su_apply_edits",
+  "args": {
+   "skp_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/E01_move.skp",
+   "out_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/E02_move2.skp",
+   "ops": [
+    {
+     "op": "move",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "by_m": [
+      0.1,
+      -0.05,
+      0.0
+     ]
+    }
+   ]
+  },
+  "is_error": false,
+  "status": "OK",
+  "reason": null,
+  "verdict": "PASS",
+  "why": "salvo",
+  "closed": {
+   "status": "CLOSED",
+   "closed": [
+    34156
+   ],
+   "still_running": []
+  }
+ },
+ {
+  "id": "E02r",
+  "verdict": "PASS",
+  "why": "move relativo reaplicado ACUMULA (esperado 2x): [1.565, 1.1098, 0.0]"
+ },
+ {
+  "id": "E03",
+  "tool": "su_apply_edits",
+  "args": {
+   "skp_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/base.skp",
+   "out_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/E03_rot.skp",
+   "ops": [
+    {
+     "op": "rotate",
+     "target": {
+      "name": "SUITE 02 · Criado-mudo 1"
+     },
+     "degrees": 90
+    }
+   ]
+  },
+  "is_error": false,
+  "status": "OK",
+  "reason": null,
+  "verdict": "PASS",
+  "why": "salvo",
+  "closed": {
+   "status": "CLOSED",
+   "closed": [
+    2164
+   ],
+   "still_running": []
+  }
+ },
+ {
+  "id": "E03r",
+  "verdict": "PASS",
+  "why": "rotate 90 no centro: size [0.4199, 0.4702, 0.2449] -> [0.4702, 0.4199, 0.2449], centro [3.1449, 3.0648999999999997, 0.4224] -> [3.1449, 3.0648999999999997, 0.4224]"
+ },
+ {
+  "id": "E04",
+  "tool": "su_apply_edits",
+  "args": {
+   "skp_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/base.skp",
+   "out_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/E04_appearance.skp",
+   "ops": [
+    {
+     "op": "set_material",
+     "target": {
+      "name": "SUITE 02 · Guarda-roupa"
+     },
+     "color": [
+      200,
+      30,
+      30
+     ]
+    },
+    {
+     "op": "set_material",
+     "target": {
+      "name": "SUITE 02 · Escrivaninha"
+     },
+     "texture": "assets/textures/procedural/wood_dark.png",
+     "texture_size_m": 0.6
+    },
+    {
+     "op": "set_tag",
+     "target": {
+      "name": "SUITE 02 · rug"
+     },
+     "tag": "L2_TESTE"
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cadeira escrivaninha"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_material",
+     "target": {
+      "name": "PlanShell_Group"
+     },
+     "color": [
+      90,
+      90,
+      90
+     ]
+    },
+    {
+     "op": "rename",
+     "target": {
+      "name": "SUITE 02 · Criado-mudo 2"
+     },
+     "name": "SUITE 02 · Criado-mudo B"
+    }
+   ]
+  },
+  "is_error": false,
+  "status": "OK",
+  "reason": null,
+  "verdict": "PASS",
+  "why": "salvo",
+  "closed": {
+   "status": "CLOSED",
+   "closed": [
+    34824
+   ],
+   "still_running": []
+  }
+ },
+ {
+  "id": "E04r",
+  "verdict": "PASS",
+  "why": {
+   "cor": true,
+   "textura": true,
+   "tag": true,
+   "hidden": true,
+   "shell_material_permitido": true,
+   "shell_geometria_intacta": true,
+   "rename": true
+  }
+ },
+ {
+  "id": "E05",
+  "tool": "su_apply_edits",
+  "args": {
+   "skp_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/E04_appearance.skp",
+   "out_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/E05_reapply.skp",
+   "ops": [
+    {
+     "op": "set_material",
+     "target": {
+      "name": "SUITE 02 · Guarda-roupa"
+     },
+     "color": [
+      200,
+      30,
+      30
+     ]
+    },
+    {
+     "op": "set_tag",
+     "target": {
+      "name": "SUITE 02 · rug"
+     },
+     "tag": "L2_TESTE"
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cadeira escrivaninha"
+     },
+     "hidden": true
+    }
+   ]
+  },
+  "is_error": false,
+  "status": "OK",
+  "reason": null,
+  "verdict": "PASS",
+  "why": "salvo",
+  "closed": {
+   "status": "CLOSED",
+   "closed": [
+    27988
+   ],
+   "still_running": []
+  }
+ },
+ {
+  "id": "E05r",
+  "verdict": "PASS",
+  "why": "setters idempotentes: estado igual=True; materiais 61->61; tags 3->3"
+ },
+ {
+  "id": "E06",
+  "tool": "su_apply_edits",
+  "args": {
+   "skp_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/base.skp",
+   "out_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/E06_insert.skp",
+   "ops": [
+    {
+     "op": "insert_component",
+     "skp_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/insert_sofa.skp",
+     "position_m": [
+      1.0,
+      1.5,
+      0.0
+     ],
+     "rotation_deg": 90,
+     "name": "L2 sofa inserido",
+     "tag": "L2_TESTE"
+    }
+   ]
+  },
+  "is_error": false,
+  "status": "OK",
+  "reason": null,
+  "verdict": "PASS",
+  "why": "salvo",
+  "closed": {
+   "status": "CLOSED",
+   "closed": [
+    35752
+   ],
+   "still_running": []
+  }
+ },
+ {
+  "id": "E06r",
+  "verdict": "PASS",
+  "why": "inserido: {'type': 'component', 'tag': 'L2_TESTE', 'world_origin_m': [1.0, 1.5, 0.0], 'definition': 'insert_sofa'}"
+ },
+ {
+  "id": "N01",
+  "tool": "su_apply_edits",
+  "args": {
+   "skp_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/base.skp",
+   "out_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/N01.skp",
+   "ops": [
+    {
+     "op": "move",
+     "target": {
+      "name": "Nao Existe"
+     },
+     "by_m": [
+      0.1,
+      0,
+      0
+     ]
+    }
+   ]
+  },
+  "is_error": false,
+  "status": "FAILED",
+  "reason": "RuntimeError: ops[0] (move): nenhuma entidade casa com {\"name\"=>\"Nao Existe\"}",
+  "verdict": "FAIL",
+  "why": "status=FAILED saída_ausente=False base_intacta=True :: RuntimeError: ops[0] (move): nenhuma entidade casa com {\"name\"=>\"Nao Existe\"}",
+  "closed": {
+   "status": "CLOSED",
+   "closed": [
+    34772
+   ],
+   "still_running": []
+  },
+  "what": "alvo inexistente"
+ },
+ {
+  "id": "N02",
+  "tool": "su_apply_edits",
+  "args": {
+   "skp_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/base.skp",
+   "out_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/N02.skp",
+   "ops": [
+    {
+     "op": "move",
+     "target": {
+      "name_contains": "Criado-mudo"
+     },
+     "by_m": [
+      0.1,
+      0,
+      0
+     ]
+    }
+   ]
+  },
+  "is_error": false,
+  "status": "FAILED",
+  "reason": "RuntimeError: ops[0] (move): 2 entidades casam (expect=one): [\"SUITE 02 · Criado-mudo 1\", \"SUITE 02 · Criado-mudo 2\"]; use persistent_id ou expect=all",
+  "verdict": "FAIL",
+  "why": "status=FAILED saída_ausente=False base_intacta=True :: RuntimeError: ops[0] (move): 2 entidades casam (expect=one): [\"SUITE 02 · Criado-mudo 1\", \"SUITE 02 · Criado-mudo 2\"]; use persistent_id ou expect=all",
+  "closed": {
+   "status": "CLOSED",
+   "closed": [
+    29432
+   ],
+   "still_running": []
+  },
+  "what": "alvo ambíguo expect=one"
+ },
+ {
+  "id": "N03",
+  "tool": "su_apply_edits",
+  "args": {
+   "skp_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/base.skp",
+   "out_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/N03.skp",
+   "ops": [
+    {
+     "op": "move",
+     "target": {
+      "name": "PlanShell_Group"
+     },
+     "by_m": [
+      0.1,
+      0,
+      0
+     ]
+    }
+   ]
+  },
+  "is_error": false,
+  "status": "ERROR",
+  "reason": "ops inválidas",
+  "verdict": "PASS",
+  "why": "status=ERROR saída_ausente=True base_intacta=True :: ops inválidas",
+  "closed": null,
+  "what": "move arquitetura por nome (validador)"
+ },
+ {
+  "id": "N04",
+  "tool": "su_apply_edits",
+  "args": {
+   "skp_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/base.skp",
+   "out_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/N04.skp",
+   "ops": [
+    {
+     "op": "move",
+     "target": {
+      "persistent_id": 48881
+     },
+     "by_m": [
+      0.1,
+      0,
+      0
+     ]
+    }
+   ]
+  },
+  "is_error": false,
+  "status": "FAILED",
+  "reason": "RuntimeError: ops[0] (move) recusado: PlanShell_Group é arquitetura derivada do PDF (Hard Rule #1)",
+  "verdict": "FAIL",
+  "why": "status=FAILED saída_ausente=False base_intacta=True :: RuntimeError: ops[0] (move) recusado: PlanShell_Group é arquitetura derivada do PDF (Hard Rule #1)",
+  "closed": {
+   "status": "CLOSED",
+   "closed": [
+    34436
+   ],
+   "still_running": []
+  },
+  "what": "move arquitetura por persistent_id (guarda Ruby)"
+ },
+ {
+  "id": "N05",
+  "tool": "su_apply_edits",
+  "args": {
+   "skp_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/base.skp",
+   "out_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/N05.skp",
+   "ops": [
+    {
+     "op": "rotate",
+     "target": {
+      "name_contains": "Shell"
+     },
+     "degrees": 5
+    }
+   ]
+  },
+  "is_error": false,
+  "status": "FAILED",
+  "reason": "RuntimeError: ops[0] (rotate): 2 entidades casam (expect=one): [\"PlanShell_Group\", \"PlanShell_Group/PlanShell_piece_0\"]; use persistent_id ou expect=all",
+  "verdict": "FAIL",
+  "why": "status=FAILED saída_ausente=False base_intacta=True :: RuntimeError: ops[0] (rotate): 2 entidades casam (expect=one): [\"PlanShell_Group\", \"PlanShell_Group/PlanShell_piece_0\"]; use persistent_id ou expect=all",
+  "closed": {
+   "status": "CLOSED",
+   "closed": [
+    33748
+   ],
+   "still_running": []
+  },
+  "what": "rotate arquitetura por name_contains"
+ },
+ {
+  "id": "N06",
+  "tool": "su_apply_edits",
+  "args": {
+   "skp_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/base.skp",
+   "out_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/N06.skp",
+   "ops": [
+    {
+     "op": "delete",
+     "target": {
+      "name_contains": "Floor_Group"
+     }
+    }
+   ]
+  },
+  "is_error": false,
+  "status": "FAILED",
+  "reason": "RuntimeError: ops[0] (delete) recusado: Floor_Group_bedroom é arquitetura derivada do PDF (Hard Rule #1)",
+  "verdict": "FAIL",
+  "why": "status=FAILED saída_ausente=False base_intacta=True :: RuntimeError: ops[0] (delete) recusado: Floor_Group_bedroom é arquitetura derivada do PDF (Hard Rule #1)",
+  "closed": {
+   "status": "CLOSED",
+   "closed": [
+    31824
+   ],
+   "still_running": []
+  },
+  "what": "delete piso"
+ },
+ {
+  "id": "N07",
+  "tool": "su_apply_edits",
+  "args": {
+   "skp_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/base.skp",
+   "out_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/N07.skp",
+   "ops": [
+    {
+     "op": "rename",
+     "target": {
+      "name_contains": "WindowGlass"
+     },
+     "name": "janela livre"
+    }
+   ]
+  },
+  "is_error": false,
+  "status": "FAILED",
+  "reason": "RuntimeError: ops[0] (rename) recusado: WindowGlass_Group_win1 é arquitetura derivada do PDF (Hard Rule #1)",
+  "verdict": "FAIL",
+  "why": "status=FAILED saída_ausente=False base_intacta=True :: RuntimeError: ops[0] (rename) recusado: WindowGlass_Group_win1 é arquitetura derivada do PDF (Hard Rule #1)",
+  "closed": {
+   "status": "CLOSED",
+   "closed": [
+    32180
+   ],
+   "still_running": []
+  },
+  "what": "rename janela"
+ },
+ {
+  "id": "N08",
+  "tool": "su_apply_edits",
+  "args": {
+   "skp_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/base.skp",
+   "out_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/N08.skp",
+   "ops": [
+    {
+     "op": "rename",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "name": "PlanShell_fake"
+    }
+   ]
+  },
+  "is_error": false,
+  "status": "ERROR",
+  "reason": "ops inválidas",
+  "verdict": "PASS",
+  "why": "status=ERROR saída_ausente=True base_intacta=True :: ops inválidas",
+  "closed": null,
+  "what": "rename móvel p/ nome reservado"
+ },
+ {
+  "id": "N09",
+  "tool": "su_apply_edits",
+  "args": {
+   "skp_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/base.skp",
+   "out_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/N09.skp",
+   "ops": [
+    {
+     "op": "move",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     }
+    }
+   ]
+  },
+  "is_error": false,
+  "status": "ERROR",
+  "reason": "ops inválidas",
+  "verdict": "PASS",
+  "why": "status=ERROR saída_ausente=True base_intacta=True :: ops inválidas",
+  "closed": null,
+  "what": "move sem by_m"
+ },
+ {
+  "id": "N10",
+  "tool": "su_apply_edits",
+  "args": {
+   "skp_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/base.skp",
+   "out_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/N10.skp",
+   "ops": [
+    {
+     "op": "set_material",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "color": [
+      300,
+      0,
+      0
+     ]
+    }
+   ]
+  },
+  "is_error": false,
+  "status": "ERROR",
+  "reason": "ops inválidas",
+  "verdict": "PASS",
+  "why": "status=ERROR saída_ausente=True base_intacta=True :: ops inválidas",
+  "closed": null,
+  "what": "cor fora de 0-255"
+ },
+ {
+  "id": "N11",
+  "tool": "su_apply_edits",
+  "args": {
+   "skp_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/base.skp",
+   "out_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/N11.skp",
+   "ops": [
+    {
+     "op": "explode",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     }
+    }
+   ]
+  },
+  "is_error": false,
+  "status": "ERROR",
+  "reason": "ops inválidas",
+  "verdict": "PASS",
+  "why": "status=ERROR saída_ausente=True base_intacta=True :: ops inválidas",
+  "closed": null,
+  "what": "op desconhecida"
+ },
+ {
+  "id": "N12",
+  "tool": "su_apply_edits",
+  "args": {
+   "skp_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/base.skp",
+   "out_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/N12.skp",
+   "ops": [
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    },
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    }
+   ]
+  },
+  "is_error": false,
+  "status": "ERROR",
+  "reason": "ops inválidas",
+  "verdict": "PASS",
+  "why": "status=ERROR saída_ausente=True base_intacta=True :: ops inválidas",
+  "closed": null,
+  "what": "201 ops"
+ },
+ {
+  "id": "N13",
+  "tool": "su_apply_edits",
+  "args": {
+   "skp_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/base.skp",
+   "out_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/N13.skp",
+   "ops": [
+    {
+     "op": "insert_component",
+     "skp_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/insert_has_architecture.skp",
+     "position_m": [
+      0,
+      0,
+      0
+     ]
+    }
+   ]
+  },
+  "is_error": false,
+  "status": "FAILED",
+  "reason": "RuntimeError: ops[0] (insert_component): 'insert_has_architecture.skp' traz entidades com nome de arquitetura do PDF: [\"PlanShell_Group\", \"PlanShell_Group/PlanShell_piece_0\", \"Floor_Group_r_main\", \"WindowGlass_Group_win_south\", \"WindowSash_Group_win_south\"] (Hard Rule #1)",
+  "verdict": "FAIL",
+  "why": "status=FAILED saída_ausente=False base_intacta=True :: RuntimeError: ops[0] (insert_component): 'insert_has_architecture.skp' traz entidades com nome de arquitetura do PDF: [\"PlanShell_Group\", \"PlanShell_Group/PlanS",
+  "closed": {
+   "status": "CLOSED",
+   "closed": [
+    32992
+   ],
+   "still_running": []
+  },
+  "what": "insert .skp que traz arquitetura"
+ },
+ {
+  "id": "N14",
+  "tool": "su_apply_edits",
+  "args": {
+   "skp_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/base.skp",
+   "out_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/N14.skp",
+   "ops": [
+    {
+     "op": "set_material",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "color": [
+      1,
+      2,
+      3
+     ]
+    },
+    {
+     "op": "move",
+     "target": {
+      "name": "SUITE 02 · Guarda-roupa"
+     },
+     "by_m": [
+      0.2,
+      0,
+      0
+     ]
+    },
+    {
+     "op": "move",
+     "target": {
+      "name": "Nao Existe"
+     },
+     "by_m": [
+      0.1,
+      0,
+      0
+     ]
+    }
+   ]
+  },
+  "is_error": false,
+  "status": "FAILED",
+  "reason": "RuntimeError: ops[2] (move): nenhuma entidade casa com {\"name\"=>\"Nao Existe\"}",
+  "verdict": "FAIL",
+  "why": "status=FAILED saída_ausente=False base_intacta=True :: RuntimeError: ops[2] (move): nenhuma entidade casa com {\"name\"=>\"Nao Existe\"}",
+  "closed": {
+   "status": "CLOSED",
+   "closed": [
+    26776
+   ],
+   "still_running": []
+  },
+  "what": "lote falha no meio: atômico"
+ },
+ {
+  "id": "N15",
+  "tool": "su_apply_edits",
+  "args": {
+   "skp_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/base.skp",
+   "out_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/N15.skp",
+   "ops": [
+    {
+     "op": "move",
+     "target": {
+      "name_contains": "criado",
+      "expect": "all"
+     },
+     "by_m": [
+      0.1,
+      0,
+      0
+     ]
+    }
+   ]
+  },
+  "is_error": false,
+  "status": "FAILED",
+  "reason": "RuntimeError: ops[0] (move): o alvo casa um grupo E peças dentro dele — elas andariam duas vezes: [\"SUITE 02 · Criado-mudo 1/ks_criado_corpo\", \"SUITE 02 · Criado-mudo 1/ks_criado_frente\", \"SUITE 02 · Criado-mudo 1/ks_criado_tampo\", \"SUITE 02 · Criado-mudo 2/ks_criado_corpo\", \"SUITE 02 · Criado-mudo 2/ks_criado_frente\"]; restrinja o alvo",
+  "verdict": "FAIL",
+  "why": "status=FAILED saída_ausente=False base_intacta=True :: RuntimeError: ops[0] (move): o alvo casa um grupo E peças dentro dele — elas andariam duas vezes: [\"SUITE 02 · Criado-mudo 1/ks_criado_corpo\", \"SUITE 02 · Criad",
+  "closed": {
+   "status": "CLOSED",
+   "closed": [
+    33352
+   ],
+   "still_running": []
+  },
+  "what": "alvo casa o móvel E a peça dentro dele (dupla translação)"
+ },
+ {
+  "id": "N16",
+  "tool": "su_apply_edits",
+  "args": {
+   "skp_path": "runs/nao_existe.skp",
+   "out_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/N16.skp",
+   "ops": [
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "x"
+     },
+     "hidden": true
+    }
+   ]
+  },
+  "is_error": false,
+  "status": "ERROR",
+  "reason": "não é um .skp existente: E:\\Claude\\worktrees\\sm-l2-stdin\\runs\\nao_existe.skp",
+  "verdict": "PASS",
+  "why": "status=ERROR saída_ausente=True base_intacta=True :: não é um .skp existente: E:\\Claude\\worktrees\\sm-l2-stdin\\runs\\nao_existe.skp",
+  "closed": null
+ },
+ {
+  "id": "N17",
+  "tool": "su_apply_edits",
+  "args": {
+   "skp_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/base.skp",
+   "out_path": "fixtures/quadrado/L2_nao_pode.skp",
+   "ops": [
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    }
+   ]
+  },
+  "is_error": false,
+  "status": "REFUSED",
+  "reason": "destino dentro de fixtures/ é proibido: E:\\Claude\\worktrees\\sm-l2-stdin\\fixtures\\quadrado\\L2_nao_pode.skp — fixtures são entrada pinada",
+  "verdict": "PASS",
+  "why": "status=REFUSED saída_ausente=True base_intacta=True :: destino dentro de fixtures/ é proibido: E:\\Claude\\worktrees\\sm-l2-stdin\\fixtures\\quadrado\\L2_nao_pode.skp — fixtures são entrada pinada",
+  "closed": null
+ },
+ {
+  "id": "N18",
+  "tool": "su_apply_edits",
+  "args": {
+   "skp_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/base.skp",
+   "out_path": "artifacts/planta_74/L2_nao_pode.skp",
+   "ops": [
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    }
+   ]
+  },
+  "is_error": false,
+  "status": "REFUSED",
+  "reason": "destino dentro de artifacts/ é proibido: E:\\Claude\\worktrees\\sm-l2-stdin\\artifacts\\planta_74\\L2_nao_pode.skp — promova com promote_canonical depois dos gates",
+  "verdict": "PASS",
+  "why": "status=REFUSED saída_ausente=True base_intacta=True :: destino dentro de artifacts/ é proibido: E:\\Claude\\worktrees\\sm-l2-stdin\\artifacts\\planta_74\\L2_nao_pode.skp — promova com promote_canonical depois dos gates",
+  "closed": null
+ },
+ {
+  "id": "N19",
+  "tool": "su_apply_edits",
+  "args": {
+   "skp_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/base.skp",
+   "out_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/E01_move.skp",
+   "ops": [
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    }
+   ]
+  },
+  "is_error": false,
+  "status": "REFUSED",
+  "reason": "out_path já existe (E:\\Claude\\worktrees\\sm-l2-stdin\\runs\\l2_fp042_20261019\\S06_mcp_fixed2\\E01_move.skp); a edição sai sempre em arquivo novo",
+  "verdict": "PASS",
+  "why": "destino existente: status=REFUSED intacto=True",
+  "closed": null
+ },
+ {
+  "id": "N20",
+  "tool": "su_apply_edits",
+  "args": {
+   "skp_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/base.skp",
+   "out_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/base.skp",
+   "ops": [
+    {
+     "op": "set_hidden",
+     "target": {
+      "name": "SUITE 02 · Cama"
+     },
+     "hidden": true
+    }
+   ]
+  },
+  "is_error": false,
+  "status": "REFUSED",
+  "reason": "destino igual à entrada (E:\\Claude\\worktrees\\sm-l2-stdin\\runs\\l2_fp042_20261019\\S06_mcp_fixed2\\base.skp); edição sai em arquivo novo",
+  "verdict": "PASS",
+  "why": "destino = entrada: status=REFUSED",
+  "closed": null
+ },
+ {
+  "id": "N21",
+  "tool": "su_inspect",
+  "args": {
+   "skp_path": "runs/nao_existe.skp"
+  },
+  "is_error": false,
+  "status": "ERROR",
+  "reason": "não é um .skp existente: E:\\Claude\\worktrees\\sm-l2-stdin\\runs\\nao_existe.skp",
+  "verdict": "PASS",
+  "why": "status=ERROR não é um .skp existente: E:\\Claude\\worktrees\\sm-l2-stdin\\runs\\nao_existe.skp",
+  "closed": null
+ },
+ {
+  "id": "N22",
+  "tool": "su_render",
+  "args": {
+   "skp_path": "runs/l2_fp042_20261019/S06_mcp_fixed2/base.skp",
+   "views": [
+    {
+     "preset": "diagonal"
+    }
+   ]
+  },
+  "is_error": false,
+  "status": "ERROR",
+  "reason": "views[0].preset inválido: 'diagonal' (válidos: top, iso, front, back, left, right)",
+  "verdict": "PASS",
+  "why": "preset inválido: views[0].preset inválido: 'diagonal' (válidos: top, iso, front, back, left, right)",
+  "closed": null
+ },
+ {
+  "id": "N23",
+  "tool": "su_close",
+  "args": {
+   "pid": 999999
+  },
+  "is_error": false,
+  "status": "ERROR",
+  "reason": "PID 999999 não é um SketchUp rodando",
+  "verdict": "PASS",
+  "why": "pid que não é SketchUp: PID 999999 não é um SketchUp rodando",
+  "closed": null
+ },
+ {
+  "id": "N24",
+  "tool": "su_close",
+  "args": {
+   "all_instances": true
+  },
+  "is_error": false,
+  "status": "NOTHING_TO_CLOSE",
+  "reason": null,
+  "verdict": "PASS",
+  "why": "sem confirm não fecha: NOTHING_TO_CLOSE None",
+  "closed": null
+ },
+ {
+  "id": "N25",
+  "tool": "su_render_vray",
+  "args": {
+   "scene_dir": "runs/x"
+  },
+  "is_error": false,
+  "status": "REFUSED",
+  "reason": "su_render_vray desabilitada: o launcher tools/render_scene_vray.py roda `taskkill /F /IM SketchUp.exe` após a exportação (fecharia sem salvar qualquer SketchUp aberto nesse meio-tempo) e escreve dentro do scene_dir. Rode o launcher à mão, com o SketchUp fechado, até ele ser portado para tools.sketchup.batch.",
+  "verdict": "PASS",
+  "why": "recusa com motivo",
+  "closed": null
+ }
+]

@@ -1,0 +1,2425 @@
+{
+ "n_boxes": 64,
+ "n_matched": 64,
+ "unmatched": [],
+ "extra_skp_pieces": [
+  "PlanShell_Group/PlanShell_piece_0",
+  "PassageMarker_Group_door1/PassageMarker_door1_band",
+  "WindowGlass_Group_win1/Grupo6#1",
+  "WindowGlass_Group_win1/Grupo7#1",
+  "WindowGlass_Group_win1/Grupo8#1",
+  "WindowGlass_Group_win1/Grupo9#1",
+  "WindowGlass_Group_win1/Grupo10#1",
+  "WindowGlass_Group_win1/Grupo11#1",
+  "WindowGlass_Group_win1/Grupo12#1",
+  "WindowGlass_Group_win1/Grupo13#1"
+ ],
+ "max_err_m": 5e-05,
+ "bad_fit": [],
+ "inner_bounds_m": {
+  "x": [
+   0.095,
+   3.405
+  ],
+  "y": [
+   0.095,
+   3.905
+  ]
+ },
+ "outside_room": [
+  [
+   "SUITE 02 · rug",
+   "tapete"
+  ],
+  [
+   "SUITE 02 · Guarda-roupa",
+   "rodape"
+  ],
+  [
+   "SUITE 02 · Guarda-roupa",
+   "corpo"
+  ],
+  [
+   "SUITE 02 · Guarda-roupa",
+   "porta_1"
+  ],
+  [
+   "SUITE 02 · Guarda-roupa",
+   "ks_gola"
+  ],
+  [
+   "SUITE 02 · Guarda-roupa",
+   "ks_maleiro"
+  ],
+  [
+   "SUITE 02 · Guarda-roupa",
+   "ks_gola"
+  ]
+ ],
+ "collisions": [
+  [
+   "SUITE 02 · Cama/rail",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/rail",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/rail",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/rail",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/rail",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/rail",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/rail",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/rail",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/rail",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/rail",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/rail",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/rail",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/rail",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/rail",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/rail",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/rail",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/rail",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/rail",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/rail",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/estrado",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/estrado",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/estrado",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/estrado",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/estrado",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/estrado",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/estrado",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/estrado",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/estrado",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/estrado",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/estrado",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/estrado",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/estrado",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/estrado",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/estrado",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/estrado",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/estrado",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/estrado",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/estrado",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/cabeceira",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/cabeceira",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/cabeceira",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/cabeceira",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/cabeceira",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/cabeceira",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/cabeceira",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/cabeceira",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/cabeceira",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/cabeceira",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/cabeceira",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/cabeceira",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/cabeceira",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/cabeceira",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/cabeceira",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/cabeceira",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/cabeceira",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/cabeceira",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/cabeceira",
+   "SUITE 02 · Painel cabeceira/ks_ripa"
+  ],
+  [
+   "SUITE 02 · Cama/cabeceira",
+   "SUITE 02 · Painel cabeceira/ks_bronze"
+  ]
+ ],
+ "support": {
+  "SUITE 02 · rug": {
+   "z_min_skp": 0.0,
+   "z0_plan_min": 0.0
+  },
+  "SUITE 02 · Cama": {
+   "z_min_skp": 0.0,
+   "z0_plan_min": 0.0
+  },
+  "SUITE 02 · Painel cabeceira": {
+   "z_min_skp": 0.0,
+   "z0_plan_min": 0.0
+  },
+  "SUITE 02 · Criado-mudo 1": {
+   "z_min_skp": 0.3,
+   "z0_plan_min": 0.3
+  },
+  "SUITE 02 · Criado-mudo 2": {
+   "z_min_skp": 0.3,
+   "z0_plan_min": 0.3
+  },
+  "SUITE 02 · Guarda-roupa": {
+   "z_min_skp": 0.0,
+   "z0_plan_min": 0.0
+  },
+  "SUITE 02 · Escrivaninha": {
+   "z_min_skp": 0.0,
+   "z0_plan_min": 0.0
+  },
+  "SUITE 02 · Cadeira escrivaninha": {
+   "z_min_skp": 0.0,
+   "z0_plan_min": 0.0
+  }
+ },
+ "floating": {},
+ "door_zone_hits": [],
+ "modules": [
+  "Floor_Group_bedroom",
+  "PassageMarker_Group_door1",
+  "PlanShell_Group",
+  "SUITE 02 · Cadeira escrivaninha",
+  "SUITE 02 · Cama",
+  "SUITE 02 · Criado-mudo 1",
+  "SUITE 02 · Criado-mudo 2",
+  "SUITE 02 · Escrivaninha",
+  "SUITE 02 · Guarda-roupa",
+  "SUITE 02 · Painel cabeceira",
+  "SUITE 02 · rug",
+  "WindowGlass_Group_win1"
+ ],
+ "materials_used": [
+  "ph_back",
+  "ph_base",
+  "ph_cabeceira",
+  "ph_colchao",
+  "ph_corpo",
+  "ph_estrado",
+  "ph_foot",
+  "ph_frame",
+  "ph_ks_bronze",
+  "ph_ks_criado_corpo",
+  "ph_ks_criado_frente",
+  "ph_ks_criado_tampo",
+  "ph_ks_gola",
+  "ph_ks_led",
+  "ph_ks_maleiro",
+  "ph_ks_painel_base",
+  "ph_ks_ripa",
+  "ph_manta",
+  "ph_porta",
+  "ph_rodape",
+  "ph_rug",
+  "ph_saia",
+  "ph_seat",
+  "ph_top",
+  "ph_travesseiro"
+ ],
+ "textured_materials": {},
+ "loose_root": {
+  "loose_faces_at_root": 0,
+  "loose_edges_at_root": 0
+ },
+ "rows": [
+  {
+   "i": 0,
+   "module": "SUITE 02 · rug",
+   "label": "tapete",
+   "kind": "rug",
+   "err_m": 5e-05,
+   "exp_min": [
+    0.019,
+    0.5999,
+    0.0
+   ],
+   "exp_max": [
+    3.3749,
+    3.4,
+    0.02
+   ],
+   "skp_min": [
+    0.019,
+    0.5999,
+    0.0
+   ],
+   "skp_max": [
+    3.3749,
+    3.4,
+    0.02
+   ],
+   "material": "ph_rug",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "ALLOW",
+   "circulation": "WALKABLE",
+   "pid": 49244
+  },
+  {
+   "i": 1,
+   "module": "SUITE 02 · Cama",
+   "label": "plinto",
+   "kind": "estrado",
+   "err_m": 5e-05,
+   "exp_min": [
+    1.4448,
+    1.2898,
+    0.0
+   ],
+   "exp_max": [
+    3.2649,
+    2.7099,
+    0.1001
+   ],
+   "skp_min": [
+    1.4448,
+    1.2898,
+    0.0
+   ],
+   "skp_max": [
+    3.2649,
+    2.7099,
+    0.1001
+   ],
+   "material": "ph_estrado",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49279
+  },
+  {
+   "i": 2,
+   "module": "SUITE 02 · Cama",
+   "label": "rail",
+   "kind": "estrado",
+   "err_m": 4e-05,
+   "exp_min": [
+    1.365,
+    1.2098,
+    0.1001
+   ],
+   "exp_max": [
+    3.3449,
+    2.7899,
+    0.1501
+   ],
+   "skp_min": [
+    1.365,
+    1.2098,
+    0.1001
+   ],
+   "skp_max": [
+    3.3449,
+    2.7899,
+    0.1501
+   ],
+   "material": "ph_estrado",
+   "z0_plan_m": 0.1001,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49312
+  },
+  {
+   "i": 3,
+   "module": "SUITE 02 · Cama",
+   "label": "estrado",
+   "kind": "estrado",
+   "err_m": 4e-05,
+   "exp_min": [
+    1.365,
+    1.2098,
+    0.1501
+   ],
+   "exp_max": [
+    3.3449,
+    2.7899,
+    0.3802
+   ],
+   "skp_min": [
+    1.365,
+    1.2098,
+    0.1501
+   ],
+   "skp_max": [
+    3.3449,
+    2.7899,
+    0.3802
+   ],
+   "material": "ph_estrado",
+   "z0_plan_m": 0.1501,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49344
+  },
+  {
+   "i": 4,
+   "module": "SUITE 02 · Cama",
+   "label": "cabeceira",
+   "kind": "cabeceira",
+   "err_m": 4e-05,
+   "exp_min": [
+    3.2649,
+    1.2098,
+    0.0
+   ],
+   "exp_max": [
+    3.3449,
+    2.7899,
+    1.05
+   ],
+   "skp_min": [
+    3.2649,
+    1.2098,
+    0.0
+   ],
+   "skp_max": [
+    3.3449,
+    2.7899,
+    1.05
+   ],
+   "material": "ph_cabeceira",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49376
+  },
+  {
+   "i": 5,
+   "module": "SUITE 02 · Cama",
+   "label": "cabeceira_bolster",
+   "kind": "cabeceira",
+   "err_m": 4e-05,
+   "exp_min": [
+    3.2149,
+    1.2799,
+    0.59
+   ],
+   "exp_max": [
+    3.2649,
+    2.7198,
+    0.9799
+   ],
+   "skp_min": [
+    3.2149,
+    1.2799,
+    0.59
+   ],
+   "skp_max": [
+    3.2649,
+    2.7198,
+    0.9799
+   ],
+   "material": "ph_cabeceira",
+   "z0_plan_m": 0.59,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49409
+  },
+  {
+   "i": 6,
+   "module": "SUITE 02 · Cama",
+   "label": "colchao",
+   "kind": "colchao",
+   "err_m": 4e-05,
+   "exp_min": [
+    1.3848,
+    1.2299,
+    0.38
+   ],
+   "exp_max": [
+    3.3249,
+    2.7699,
+    0.5499
+   ],
+   "skp_min": [
+    1.3848,
+    1.2299,
+    0.38
+   ],
+   "skp_max": [
+    3.3249,
+    2.7699,
+    0.5499
+   ],
+   "material": "ph_colchao",
+   "z0_plan_m": 0.38,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49441
+  },
+  {
+   "i": 7,
+   "module": "SUITE 02 · Cama",
+   "label": "travesseiro_1",
+   "kind": "travesseiro",
+   "err_m": 3e-05,
+   "exp_min": [
+    2.9248,
+    2.0399,
+    0.5499
+   ],
+   "exp_max": [
+    3.285,
+    2.54,
+    0.7099
+   ],
+   "skp_min": [
+    2.9248,
+    2.0399,
+    0.5499
+   ],
+   "skp_max": [
+    3.285,
+    2.54,
+    0.7099
+   ],
+   "material": "ph_travesseiro",
+   "z0_plan_m": 0.5499,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49499
+  },
+  {
+   "i": 8,
+   "module": "SUITE 02 · Cama",
+   "label": "travesseiro_2",
+   "kind": "travesseiro",
+   "err_m": 4e-05,
+   "exp_min": [
+    2.9248,
+    1.46,
+    0.5499
+   ],
+   "exp_max": [
+    3.285,
+    1.9599,
+    0.7099
+   ],
+   "skp_min": [
+    2.9248,
+    1.46,
+    0.5499
+   ],
+   "skp_max": [
+    3.285,
+    1.9599,
+    0.7099
+   ],
+   "material": "ph_travesseiro",
+   "z0_plan_m": 0.5499,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49557
+  },
+  {
+   "i": 9,
+   "module": "SUITE 02 · Cama",
+   "label": "manta",
+   "kind": "manta",
+   "err_m": 3e-05,
+   "exp_min": [
+    1.4648,
+    1.2499,
+    0.5499
+   ],
+   "exp_max": [
+    2.015,
+    2.7498,
+    0.62
+   ],
+   "skp_min": [
+    1.4648,
+    1.2499,
+    0.5499
+   ],
+   "skp_max": [
+    2.015,
+    2.7498,
+    0.62
+   ],
+   "material": "ph_manta",
+   "z0_plan_m": 0.5499,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49614
+  },
+  {
+   "i": 10,
+   "module": "SUITE 02 · Painel cabeceira",
+   "label": "ks_painel_base",
+   "kind": "ks_painel_base",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.3498,
+    1.2098,
+    0.0
+   ],
+   "exp_max": [
+    3.3998,
+    2.7899,
+    1.5999
+   ],
+   "skp_min": [
+    3.3498,
+    1.2098,
+    0.0
+   ],
+   "skp_max": [
+    3.3998,
+    2.7899,
+    1.5999
+   ],
+   "material": "ph_ks_painel_base",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49674
+  },
+  {
+   "i": 11,
+   "module": "SUITE 02 · Painel cabeceira",
+   "label": "ks_ripa",
+   "kind": "ks_ripa",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.3424,
+    2.7183,
+    0.0
+   ],
+   "exp_max": [
+    3.3673,
+    2.7783,
+    1.5999
+   ],
+   "skp_min": [
+    3.3424,
+    2.7183,
+    0.0
+   ],
+   "skp_max": [
+    3.3673,
+    2.7783,
+    1.5999
+   ],
+   "material": "ph_ks_ripa",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49707
+  },
+  {
+   "i": 12,
+   "module": "SUITE 02 · Painel cabeceira",
+   "label": "ks_ripa",
+   "kind": "ks_ripa",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.3424,
+    2.6353,
+    0.0
+   ],
+   "exp_max": [
+    3.3673,
+    2.6952,
+    1.5999
+   ],
+   "skp_min": [
+    3.3424,
+    2.6353,
+    0.0
+   ],
+   "skp_max": [
+    3.3673,
+    2.6952,
+    1.5999
+   ],
+   "material": "ph_ks_ripa",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49740
+  },
+  {
+   "i": 13,
+   "module": "SUITE 02 · Painel cabeceira",
+   "label": "ks_ripa",
+   "kind": "ks_ripa",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.3424,
+    2.5519,
+    0.0
+   ],
+   "exp_max": [
+    3.3673,
+    2.6121,
+    1.5999
+   ],
+   "skp_min": [
+    3.3424,
+    2.5519,
+    0.0
+   ],
+   "skp_max": [
+    3.3673,
+    2.6121,
+    1.5999
+   ],
+   "material": "ph_ks_ripa",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49772
+  },
+  {
+   "i": 14,
+   "module": "SUITE 02 · Painel cabeceira",
+   "label": "ks_ripa",
+   "kind": "ks_ripa",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.3424,
+    2.4689,
+    0.0
+   ],
+   "exp_max": [
+    3.3673,
+    2.5288,
+    1.5999
+   ],
+   "skp_min": [
+    3.3424,
+    2.4689,
+    0.0
+   ],
+   "skp_max": [
+    3.3673,
+    2.5288,
+    1.5999
+   ],
+   "material": "ph_ks_ripa",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49804
+  },
+  {
+   "i": 15,
+   "module": "SUITE 02 · Painel cabeceira",
+   "label": "ks_ripa",
+   "kind": "ks_ripa",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.3424,
+    2.3858,
+    0.0
+   ],
+   "exp_max": [
+    3.3673,
+    2.4458,
+    1.5999
+   ],
+   "skp_min": [
+    3.3424,
+    2.3858,
+    0.0
+   ],
+   "skp_max": [
+    3.3673,
+    2.4458,
+    1.5999
+   ],
+   "material": "ph_ks_ripa",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49836
+  },
+  {
+   "i": 16,
+   "module": "SUITE 02 · Painel cabeceira",
+   "label": "ks_ripa",
+   "kind": "ks_ripa",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.3424,
+    2.3025,
+    0.0
+   ],
+   "exp_max": [
+    3.3673,
+    2.3625,
+    1.5999
+   ],
+   "skp_min": [
+    3.3424,
+    2.3025,
+    0.0
+   ],
+   "skp_max": [
+    3.3673,
+    2.3625,
+    1.5999
+   ],
+   "material": "ph_ks_ripa",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49868
+  },
+  {
+   "i": 17,
+   "module": "SUITE 02 · Painel cabeceira",
+   "label": "ks_ripa",
+   "kind": "ks_ripa",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.3424,
+    2.2195,
+    0.0
+   ],
+   "exp_max": [
+    3.3673,
+    2.2794,
+    1.5999
+   ],
+   "skp_min": [
+    3.3424,
+    2.2195,
+    0.0
+   ],
+   "skp_max": [
+    3.3673,
+    2.2794,
+    1.5999
+   ],
+   "material": "ph_ks_ripa",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49900
+  },
+  {
+   "i": 18,
+   "module": "SUITE 02 · Painel cabeceira",
+   "label": "ks_ripa",
+   "kind": "ks_ripa",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.3424,
+    2.1361,
+    0.0
+   ],
+   "exp_max": [
+    3.3673,
+    2.1963,
+    1.5999
+   ],
+   "skp_min": [
+    3.3424,
+    2.1361,
+    0.0
+   ],
+   "skp_max": [
+    3.3673,
+    2.1963,
+    1.5999
+   ],
+   "material": "ph_ks_ripa",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49932
+  },
+  {
+   "i": 19,
+   "module": "SUITE 02 · Painel cabeceira",
+   "label": "ks_ripa",
+   "kind": "ks_ripa",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.3424,
+    2.0531,
+    0.0
+   ],
+   "exp_max": [
+    3.3673,
+    2.113,
+    1.5999
+   ],
+   "skp_min": [
+    3.3424,
+    2.0531,
+    0.0
+   ],
+   "skp_max": [
+    3.3673,
+    2.113,
+    1.5999
+   ],
+   "material": "ph_ks_ripa",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49964
+  },
+  {
+   "i": 20,
+   "module": "SUITE 02 · Painel cabeceira",
+   "label": "ks_ripa",
+   "kind": "ks_ripa",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.3424,
+    1.97,
+    0.0
+   ],
+   "exp_max": [
+    3.3673,
+    2.03,
+    1.5999
+   ],
+   "skp_min": [
+    3.3424,
+    1.97,
+    0.0
+   ],
+   "skp_max": [
+    3.3673,
+    2.03,
+    1.5999
+   ],
+   "material": "ph_ks_ripa",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49996
+  },
+  {
+   "i": 21,
+   "module": "SUITE 02 · Painel cabeceira",
+   "label": "ks_ripa",
+   "kind": "ks_ripa",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.3424,
+    1.8867,
+    0.0
+   ],
+   "exp_max": [
+    3.3673,
+    1.9467,
+    1.5999
+   ],
+   "skp_min": [
+    3.3424,
+    1.8867,
+    0.0
+   ],
+   "skp_max": [
+    3.3673,
+    1.9467,
+    1.5999
+   ],
+   "material": "ph_ks_ripa",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50028
+  },
+  {
+   "i": 22,
+   "module": "SUITE 02 · Painel cabeceira",
+   "label": "ks_ripa",
+   "kind": "ks_ripa",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.3424,
+    1.8037,
+    0.0
+   ],
+   "exp_max": [
+    3.3673,
+    1.8636,
+    1.5999
+   ],
+   "skp_min": [
+    3.3424,
+    1.8037,
+    0.0
+   ],
+   "skp_max": [
+    3.3673,
+    1.8636,
+    1.5999
+   ],
+   "material": "ph_ks_ripa",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50060
+  },
+  {
+   "i": 23,
+   "module": "SUITE 02 · Painel cabeceira",
+   "label": "ks_ripa",
+   "kind": "ks_ripa",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.3424,
+    1.7203,
+    0.0
+   ],
+   "exp_max": [
+    3.3673,
+    1.7805,
+    1.5999
+   ],
+   "skp_min": [
+    3.3424,
+    1.7203,
+    0.0
+   ],
+   "skp_max": [
+    3.3673,
+    1.7805,
+    1.5999
+   ],
+   "material": "ph_ks_ripa",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50092
+  },
+  {
+   "i": 24,
+   "module": "SUITE 02 · Painel cabeceira",
+   "label": "ks_ripa",
+   "kind": "ks_ripa",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.3424,
+    1.6373,
+    0.0
+   ],
+   "exp_max": [
+    3.3673,
+    1.6972,
+    1.5999
+   ],
+   "skp_min": [
+    3.3424,
+    1.6373,
+    0.0
+   ],
+   "skp_max": [
+    3.3673,
+    1.6972,
+    1.5999
+   ],
+   "material": "ph_ks_ripa",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50124
+  },
+  {
+   "i": 25,
+   "module": "SUITE 02 · Painel cabeceira",
+   "label": "ks_ripa",
+   "kind": "ks_ripa",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.3424,
+    1.5542,
+    0.0
+   ],
+   "exp_max": [
+    3.3673,
+    1.6142,
+    1.5999
+   ],
+   "skp_min": [
+    3.3424,
+    1.5542,
+    0.0
+   ],
+   "skp_max": [
+    3.3673,
+    1.6142,
+    1.5999
+   ],
+   "material": "ph_ks_ripa",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50156
+  },
+  {
+   "i": 26,
+   "module": "SUITE 02 · Painel cabeceira",
+   "label": "ks_ripa",
+   "kind": "ks_ripa",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.3424,
+    1.4709,
+    0.0
+   ],
+   "exp_max": [
+    3.3673,
+    1.5309,
+    1.5999
+   ],
+   "skp_min": [
+    3.3424,
+    1.4709,
+    0.0
+   ],
+   "skp_max": [
+    3.3673,
+    1.5309,
+    1.5999
+   ],
+   "material": "ph_ks_ripa",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50188
+  },
+  {
+   "i": 27,
+   "module": "SUITE 02 · Painel cabeceira",
+   "label": "ks_ripa",
+   "kind": "ks_ripa",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.3424,
+    1.3879,
+    0.0
+   ],
+   "exp_max": [
+    3.3673,
+    1.4478,
+    1.5999
+   ],
+   "skp_min": [
+    3.3424,
+    1.3879,
+    0.0
+   ],
+   "skp_max": [
+    3.3673,
+    1.4478,
+    1.5999
+   ],
+   "material": "ph_ks_ripa",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50220
+  },
+  {
+   "i": 28,
+   "module": "SUITE 02 · Painel cabeceira",
+   "label": "ks_ripa",
+   "kind": "ks_ripa",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.3424,
+    1.3045,
+    0.0
+   ],
+   "exp_max": [
+    3.3673,
+    1.3647,
+    1.5999
+   ],
+   "skp_min": [
+    3.3424,
+    1.3045,
+    0.0
+   ],
+   "skp_max": [
+    3.3673,
+    1.3647,
+    1.5999
+   ],
+   "material": "ph_ks_ripa",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50252
+  },
+  {
+   "i": 29,
+   "module": "SUITE 02 · Painel cabeceira",
+   "label": "ks_ripa",
+   "kind": "ks_ripa",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.3424,
+    1.2215,
+    0.0
+   ],
+   "exp_max": [
+    3.3673,
+    1.2814,
+    1.5999
+   ],
+   "skp_min": [
+    3.3424,
+    1.2215,
+    0.0
+   ],
+   "skp_max": [
+    3.3673,
+    1.2814,
+    1.5999
+   ],
+   "material": "ph_ks_ripa",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50284
+  },
+  {
+   "i": 30,
+   "module": "SUITE 02 · Painel cabeceira",
+   "label": "ks_led",
+   "kind": "ks_led",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.3198,
+    1.285,
+    1.5601
+   ],
+   "exp_max": [
+    3.3398,
+    2.715,
+    1.5801
+   ],
+   "skp_min": [
+    3.3198,
+    1.285,
+    1.5601
+   ],
+   "skp_max": [
+    3.3398,
+    2.715,
+    1.5801
+   ],
+   "material": "ph_ks_led",
+   "z0_plan_m": 1.5601,
+   "overlap_policy": "IGNORE",
+   "circulation": "IGNORE",
+   "pid": 50316
+  },
+  {
+   "i": 31,
+   "module": "SUITE 02 · Painel cabeceira",
+   "label": "ks_bronze",
+   "kind": "ks_bronze",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.315,
+    1.8499,
+    0.92
+   ],
+   "exp_max": [
+    3.3348,
+    2.1499,
+    0.9401
+   ],
+   "skp_min": [
+    3.315,
+    1.8499,
+    0.92
+   ],
+   "skp_max": [
+    3.3348,
+    2.1499,
+    0.9401
+   ],
+   "material": "ph_ks_bronze",
+   "z0_plan_m": 0.92,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50349
+  },
+  {
+   "i": 32,
+   "module": "SUITE 02 · Criado-mudo 1",
+   "label": "ks_criado_corpo",
+   "kind": "ks_criado_corpo",
+   "err_m": 4e-05,
+   "exp_min": [
+    2.9449,
+    2.84,
+    0.32
+   ],
+   "exp_max": [
+    3.3449,
+    3.2898,
+    0.5199
+   ],
+   "skp_min": [
+    2.9449,
+    2.84,
+    0.32
+   ],
+   "skp_max": [
+    3.3449,
+    3.2898,
+    0.5199
+   ],
+   "material": "ph_ks_criado_corpo",
+   "z0_plan_m": 0.32,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50384
+  },
+  {
+   "i": 33,
+   "module": "SUITE 02 · Criado-mudo 1",
+   "label": "ks_criado_frente",
+   "kind": "ks_criado_frente",
+   "err_m": 4e-05,
+   "exp_min": [
+    2.9418,
+    2.855,
+    0.335
+   ],
+   "exp_max": [
+    3.348,
+    3.2748,
+    0.5001
+   ],
+   "skp_min": [
+    2.9418,
+    2.855,
+    0.335
+   ],
+   "skp_max": [
+    3.348,
+    3.2748,
+    0.5001
+   ],
+   "material": "ph_ks_criado_frente",
+   "z0_plan_m": 0.335,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50417
+  },
+  {
+   "i": 34,
+   "module": "SUITE 02 · Criado-mudo 1",
+   "label": "ks_gola",
+   "kind": "ks_gola",
+   "err_m": 3e-05,
+   "exp_min": [
+    2.9408,
+    2.875,
+    0.3221
+   ],
+   "exp_max": [
+    3.349,
+    3.255,
+    0.334
+   ],
+   "skp_min": [
+    2.9408,
+    2.875,
+    0.3221
+   ],
+   "skp_max": [
+    3.349,
+    3.255,
+    0.334
+   ],
+   "material": "ph_ks_gola",
+   "z0_plan_m": 0.3221,
+   "overlap_policy": "IGNORE",
+   "circulation": "IGNORE",
+   "pid": 50450
+  },
+  {
+   "i": 35,
+   "module": "SUITE 02 · Criado-mudo 1",
+   "label": "ks_criado_tampo",
+   "kind": "ks_criado_tampo",
+   "err_m": 4e-05,
+   "exp_min": [
+    2.935,
+    2.8298,
+    0.5199
+   ],
+   "exp_max": [
+    3.3548,
+    3.3,
+    0.5448
+   ],
+   "skp_min": [
+    2.935,
+    2.8298,
+    0.5199
+   ],
+   "skp_max": [
+    3.3548,
+    3.3,
+    0.5448
+   ],
+   "material": "ph_ks_criado_tampo",
+   "z0_plan_m": 0.5199,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50483
+  },
+  {
+   "i": 36,
+   "module": "SUITE 02 · Criado-mudo 1",
+   "label": "ks_led",
+   "kind": "ks_led",
+   "err_m": 5e-05,
+   "exp_min": [
+    2.9748,
+    2.8699,
+    0.3
+   ],
+   "exp_max": [
+    3.315,
+    3.2598,
+    0.3139
+   ],
+   "skp_min": [
+    2.9748,
+    2.8699,
+    0.3
+   ],
+   "skp_max": [
+    3.315,
+    3.2598,
+    0.3139
+   ],
+   "material": "ph_ks_led",
+   "z0_plan_m": 0.3,
+   "overlap_policy": "IGNORE",
+   "circulation": "IGNORE",
+   "pid": 50516
+  },
+  {
+   "i": 37,
+   "module": "SUITE 02 · Criado-mudo 2",
+   "label": "ks_criado_corpo",
+   "kind": "ks_criado_corpo",
+   "err_m": 4e-05,
+   "exp_min": [
+    2.9449,
+    0.7099,
+    0.32
+   ],
+   "exp_max": [
+    3.3449,
+    1.16,
+    0.5199
+   ],
+   "skp_min": [
+    2.9449,
+    0.7099,
+    0.32
+   ],
+   "skp_max": [
+    3.3449,
+    1.16,
+    0.5199
+   ],
+   "material": "ph_ks_criado_corpo",
+   "z0_plan_m": 0.32,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50550
+  },
+  {
+   "i": 38,
+   "module": "SUITE 02 · Criado-mudo 2",
+   "label": "ks_criado_frente",
+   "kind": "ks_criado_frente",
+   "err_m": 3e-05,
+   "exp_min": [
+    2.9418,
+    0.7249,
+    0.335
+   ],
+   "exp_max": [
+    3.348,
+    1.145,
+    0.5001
+   ],
+   "skp_min": [
+    2.9418,
+    0.7249,
+    0.335
+   ],
+   "skp_max": [
+    3.348,
+    1.145,
+    0.5001
+   ],
+   "material": "ph_ks_criado_frente",
+   "z0_plan_m": 0.335,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50582
+  },
+  {
+   "i": 39,
+   "module": "SUITE 02 · Criado-mudo 2",
+   "label": "ks_gola",
+   "kind": "ks_gola",
+   "err_m": 3e-05,
+   "exp_min": [
+    2.9408,
+    0.745,
+    0.3221
+   ],
+   "exp_max": [
+    3.349,
+    1.125,
+    0.334
+   ],
+   "skp_min": [
+    2.9408,
+    0.745,
+    0.3221
+   ],
+   "skp_max": [
+    3.349,
+    1.125,
+    0.334
+   ],
+   "material": "ph_ks_gola",
+   "z0_plan_m": 0.3221,
+   "overlap_policy": "IGNORE",
+   "circulation": "IGNORE",
+   "pid": 50614
+  },
+  {
+   "i": 40,
+   "module": "SUITE 02 · Criado-mudo 2",
+   "label": "ks_criado_tampo",
+   "kind": "ks_criado_tampo",
+   "err_m": 4e-05,
+   "exp_min": [
+    2.935,
+    0.7,
+    0.5199
+   ],
+   "exp_max": [
+    3.3548,
+    1.1699,
+    0.5448
+   ],
+   "skp_min": [
+    2.935,
+    0.7,
+    0.5199
+   ],
+   "skp_max": [
+    3.3548,
+    1.1699,
+    0.5448
+   ],
+   "material": "ph_ks_criado_tampo",
+   "z0_plan_m": 0.5199,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50646
+  },
+  {
+   "i": 41,
+   "module": "SUITE 02 · Criado-mudo 2",
+   "label": "ks_led",
+   "kind": "ks_led",
+   "err_m": 5e-05,
+   "exp_min": [
+    2.9748,
+    0.7399,
+    0.3
+   ],
+   "exp_max": [
+    3.315,
+    1.13,
+    0.3139
+   ],
+   "skp_min": [
+    2.9748,
+    0.7399,
+    0.3
+   ],
+   "skp_max": [
+    3.315,
+    1.13,
+    0.3139
+   ],
+   "material": "ph_ks_led",
+   "z0_plan_m": 0.3,
+   "overlap_policy": "IGNORE",
+   "circulation": "IGNORE",
+   "pid": 50678
+  },
+  {
+   "i": 42,
+   "module": "SUITE 02 · Guarda-roupa",
+   "label": "rodape",
+   "kind": "rodape",
+   "err_m": 5e-05,
+   "exp_min": [
+    0.0899,
+    3.315,
+    0.0
+   ],
+   "exp_max": [
+    1.2101,
+    3.8349,
+    0.08
+   ],
+   "skp_min": [
+    0.0899,
+    3.315,
+    0.0
+   ],
+   "skp_max": [
+    1.2101,
+    3.8349,
+    0.08
+   ],
+   "material": "ph_rodape",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50712
+  },
+  {
+   "i": 43,
+   "module": "SUITE 02 · Guarda-roupa",
+   "label": "corpo",
+   "kind": "corpo",
+   "err_m": 4e-05,
+   "exp_min": [
+    0.05,
+    3.3048,
+    0.08
+   ],
+   "exp_max": [
+    1.2499,
+    3.8748,
+    2.1999
+   ],
+   "skp_min": [
+    0.05,
+    3.3048,
+    0.08
+   ],
+   "skp_max": [
+    1.2499,
+    3.8748,
+    2.1999
+   ],
+   "material": "ph_corpo",
+   "z0_plan_m": 0.08,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50745
+  },
+  {
+   "i": 44,
+   "module": "SUITE 02 · Guarda-roupa",
+   "label": "porta_1",
+   "kind": "porta",
+   "err_m": 2e-05,
+   "exp_min": [
+    0.08,
+    3.2748,
+    0.1001
+   ],
+   "exp_max": [
+    0.6401,
+    3.3048,
+    2.1702
+   ],
+   "skp_min": [
+    0.08,
+    3.2748,
+    0.1001
+   ],
+   "skp_max": [
+    0.6401,
+    3.3048,
+    2.1702
+   ],
+   "material": "ph_porta",
+   "z0_plan_m": 0.1001,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50778
+  },
+  {
+   "i": 45,
+   "module": "SUITE 02 · Guarda-roupa",
+   "label": "porta_2",
+   "kind": "porta",
+   "err_m": 4e-05,
+   "exp_min": [
+    0.6599,
+    3.2748,
+    0.1001
+   ],
+   "exp_max": [
+    1.22,
+    3.3048,
+    2.1702
+   ],
+   "skp_min": [
+    0.6599,
+    3.2748,
+    0.1001
+   ],
+   "skp_max": [
+    1.22,
+    3.3048,
+    2.1702
+   ],
+   "material": "ph_porta",
+   "z0_plan_m": 0.1001,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50811
+  },
+  {
+   "i": 46,
+   "module": "SUITE 02 · Guarda-roupa",
+   "label": "ks_gola",
+   "kind": "ks_gola",
+   "err_m": 4e-05,
+   "exp_min": [
+    0.0599,
+    3.2748,
+    2.1979
+   ],
+   "exp_max": [
+    1.24,
+    3.8748,
+    2.2118
+   ],
+   "skp_min": [
+    0.0599,
+    3.2748,
+    2.1979
+   ],
+   "skp_max": [
+    1.24,
+    3.8748,
+    2.2118
+   ],
+   "material": "ph_ks_gola",
+   "z0_plan_m": 2.1979,
+   "overlap_policy": "IGNORE",
+   "circulation": "IGNORE",
+   "pid": 50843
+  },
+  {
+   "i": 47,
+   "module": "SUITE 02 · Guarda-roupa",
+   "label": "ks_maleiro",
+   "kind": "ks_maleiro",
+   "err_m": 4e-05,
+   "exp_min": [
+    0.05,
+    3.2748,
+    2.2118
+   ],
+   "exp_max": [
+    1.2499,
+    3.8748,
+    2.6899
+   ],
+   "skp_min": [
+    0.05,
+    3.2748,
+    2.2118
+   ],
+   "skp_max": [
+    1.2499,
+    3.8748,
+    2.6899
+   ],
+   "material": "ph_ks_maleiro",
+   "z0_plan_m": 2.2118,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50875
+  },
+  {
+   "i": 48,
+   "module": "SUITE 02 · Guarda-roupa",
+   "label": "ks_gola",
+   "kind": "ks_gola",
+   "err_m": 5e-05,
+   "exp_min": [
+    0.08,
+    3.2718,
+    0.112
+   ],
+   "exp_max": [
+    1.22,
+    3.8778,
+    0.124
+   ],
+   "skp_min": [
+    0.08,
+    3.2718,
+    0.112
+   ],
+   "skp_max": [
+    1.22,
+    3.8778,
+    0.124
+   ],
+   "material": "ph_ks_gola",
+   "z0_plan_m": 0.112,
+   "overlap_policy": "IGNORE",
+   "circulation": "IGNORE",
+   "pid": 50908
+  },
+  {
+   "i": 49,
+   "module": "SUITE 02 · Guarda-roupa",
+   "label": "ks_bronze",
+   "kind": "ks_bronze",
+   "err_m": 5e-05,
+   "exp_min": [
+    0.51,
+    3.2697,
+    1.1001
+   ],
+   "exp_max": [
+    0.7899,
+    3.8798,
+    1.125
+   ],
+   "skp_min": [
+    0.51,
+    3.2697,
+    1.1001
+   ],
+   "skp_max": [
+    0.7899,
+    3.8799,
+    1.125
+   ],
+   "material": "ph_ks_bronze",
+   "z0_plan_m": 1.1001,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50940
+  },
+  {
+   "i": 50,
+   "module": "SUITE 02 · Escrivaninha",
+   "label": "top",
+   "kind": "top",
+   "err_m": 4e-05,
+   "exp_min": [
+    0.125,
+    1.9558,
+    0.715
+   ],
+   "exp_max": [
+    0.6749,
+    3.1557,
+    0.7501
+   ],
+   "skp_min": [
+    0.125,
+    1.9558,
+    0.715
+   ],
+   "skp_max": [
+    0.6749,
+    3.1557,
+    0.7501
+   ],
+   "material": "ph_top",
+   "z0_plan_m": 0.715,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50974
+  },
+  {
+   "i": 51,
+   "module": "SUITE 02 · Escrivaninha",
+   "label": "apron",
+   "kind": "saia",
+   "err_m": 5e-05,
+   "exp_min": [
+    0.175,
+    2.0157,
+    0.635
+   ],
+   "exp_max": [
+    0.6251,
+    3.0958,
+    0.715
+   ],
+   "skp_min": [
+    0.175,
+    2.0157,
+    0.635
+   ],
+   "skp_max": [
+    0.6251,
+    3.0958,
+    0.715
+   ],
+   "material": "ph_saia",
+   "z0_plan_m": 0.635,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51007
+  },
+  {
+   "i": 52,
+   "module": "SUITE 02 · Escrivaninha",
+   "label": "leg",
+   "kind": "foot",
+   "err_m": 2e-05,
+   "exp_min": [
+    0.175,
+    1.9957,
+    0.0
+   ],
+   "exp_max": [
+    0.6251,
+    2.0457,
+    0.715
+   ],
+   "skp_min": [
+    0.175,
+    1.9957,
+    0.0
+   ],
+   "skp_max": [
+    0.6251,
+    2.0457,
+    0.715
+   ],
+   "material": "ph_foot",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51040
+  },
+  {
+   "i": 53,
+   "module": "SUITE 02 · Escrivaninha",
+   "label": "leg",
+   "kind": "foot",
+   "err_m": 2e-05,
+   "exp_min": [
+    0.175,
+    3.0658,
+    0.0
+   ],
+   "exp_max": [
+    0.6251,
+    3.1158,
+    0.715
+   ],
+   "skp_min": [
+    0.175,
+    3.0658,
+    0.0
+   ],
+   "skp_max": [
+    0.6251,
+    3.1158,
+    0.715
+   ],
+   "material": "ph_foot",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51073
+  },
+  {
+   "i": 54,
+   "module": "SUITE 02 · Escrivaninha",
+   "label": "gaveteiro",
+   "kind": "base",
+   "err_m": 4e-05,
+   "exp_min": [
+    0.205,
+    2.6358,
+    0.3401
+   ],
+   "exp_max": [
+    0.5951,
+    3.0559,
+    0.6251
+   ],
+   "skp_min": [
+    0.205,
+    2.6358,
+    0.3401
+   ],
+   "skp_max": [
+    0.5951,
+    3.0559,
+    0.6251
+   ],
+   "material": "ph_base",
+   "z0_plan_m": 0.3401,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51105
+  },
+  {
+   "i": 55,
+   "module": "SUITE 02 · Escrivaninha",
+   "label": "ks_gola",
+   "kind": "frame",
+   "err_m": 5e-05,
+   "exp_min": [
+    0.59,
+    2.6358,
+    0.3299
+   ],
+   "exp_max": [
+    0.605,
+    3.0559,
+    0.635
+   ],
+   "skp_min": [
+    0.59,
+    2.6358,
+    0.3299
+   ],
+   "skp_max": [
+    0.605,
+    3.0559,
+    0.635
+   ],
+   "material": "ph_frame",
+   "z0_plan_m": 0.3299,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51138
+  },
+  {
+   "i": 56,
+   "module": "SUITE 02 · Cadeira escrivaninha",
+   "label": "leg",
+   "kind": "foot",
+   "err_m": 5e-05,
+   "exp_min": [
+    0.7625,
+    2.7252,
+    0.0
+   ],
+   "exp_max": [
+    0.7904,
+    2.7534,
+    0.4
+   ],
+   "skp_min": [
+    0.7625,
+    2.7252,
+    0.0
+   ],
+   "skp_max": [
+    0.7904,
+    2.7534,
+    0.4
+   ],
+   "material": "ph_foot",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51173
+  },
+  {
+   "i": 57,
+   "module": "SUITE 02 · Cadeira escrivaninha",
+   "label": "leg",
+   "kind": "foot",
+   "err_m": 5e-05,
+   "exp_min": [
+    0.7625,
+    2.3434,
+    0.0
+   ],
+   "exp_max": [
+    0.7904,
+    2.3713,
+    0.4
+   ],
+   "skp_min": [
+    0.7625,
+    2.3434,
+    0.0
+   ],
+   "skp_max": [
+    0.7904,
+    2.3713,
+    0.4
+   ],
+   "material": "ph_foot",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51205
+  },
+  {
+   "i": 58,
+   "module": "SUITE 02 · Cadeira escrivaninha",
+   "label": "leg",
+   "kind": "foot",
+   "err_m": 5e-05,
+   "exp_min": [
+    1.1946,
+    2.7252,
+    0.0
+   ],
+   "exp_max": [
+    1.2225,
+    2.7534,
+    0.4
+   ],
+   "skp_min": [
+    1.1946,
+    2.7252,
+    0.0
+   ],
+   "skp_max": [
+    1.2225,
+    2.7534,
+    0.4
+   ],
+   "material": "ph_foot",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51237
+  },
+  {
+   "i": 59,
+   "module": "SUITE 02 · Cadeira escrivaninha",
+   "label": "leg",
+   "kind": "foot",
+   "err_m": 5e-05,
+   "exp_min": [
+    1.1946,
+    2.3434,
+    0.0
+   ],
+   "exp_max": [
+    1.2225,
+    2.3713,
+    0.4
+   ],
+   "skp_min": [
+    1.1946,
+    2.3434,
+    0.0
+   ],
+   "skp_max": [
+    1.2225,
+    2.3713,
+    0.4
+   ],
+   "material": "ph_foot",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51269
+  },
+  {
+   "i": 60,
+   "module": "SUITE 02 · Cadeira escrivaninha",
+   "label": "seat_frame",
+   "kind": "frame",
+   "err_m": 5e-05,
+   "exp_min": [
+    0.7625,
+    2.3434,
+    0.4
+   ],
+   "exp_max": [
+    1.2225,
+    2.7534,
+    0.4201
+   ],
+   "skp_min": [
+    0.7625,
+    2.3434,
+    0.4
+   ],
+   "skp_max": [
+    1.2225,
+    2.7534,
+    0.4201
+   ],
+   "material": "ph_frame",
+   "z0_plan_m": 0.4,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51301
+  },
+  {
+   "i": 61,
+   "module": "SUITE 02 · Cadeira escrivaninha",
+   "label": "seat",
+   "kind": "seat",
+   "err_m": 5e-05,
+   "exp_min": [
+    0.7574,
+    2.3383,
+    0.4201
+   ],
+   "exp_max": [
+    1.2276,
+    2.7582,
+    0.4702
+   ],
+   "skp_min": [
+    0.7574,
+    2.3383,
+    0.4201
+   ],
+   "skp_max": [
+    1.2276,
+    2.7582,
+    0.4702
+   ],
+   "material": "ph_seat",
+   "z0_plan_m": 0.4201,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51333
+  },
+  {
+   "i": 62,
+   "module": "SUITE 02 · Cadeira escrivaninha",
+   "label": "back_frame",
+   "kind": "frame",
+   "err_m": 1e-05,
+   "exp_min": [
+    1.1976,
+    2.3533,
+    0.4501
+   ],
+   "exp_max": [
+    1.2225,
+    2.7432,
+    0.8801
+   ],
+   "skp_min": [
+    1.1976,
+    2.3533,
+    0.4501
+   ],
+   "skp_max": [
+    1.2225,
+    2.7432,
+    0.8801
+   ],
+   "material": "ph_frame",
+   "z0_plan_m": 0.4501,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51366
+  },
+  {
+   "i": 63,
+   "module": "SUITE 02 · Cadeira escrivaninha",
+   "label": "back",
+   "kind": "back",
+   "err_m": 4e-05,
+   "exp_min": [
+    1.1826,
+    2.3434,
+    0.5499
+   ],
+   "exp_max": [
+    1.2045,
+    2.7534,
+    0.8999
+   ],
+   "skp_min": [
+    1.1826,
+    2.3434,
+    0.5499
+   ],
+   "skp_max": [
+    1.2045,
+    2.7534,
+    0.8999
+   ],
+   "material": "ph_back",
+   "z0_plan_m": 0.5499,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51398
+  }
+ ]
+}

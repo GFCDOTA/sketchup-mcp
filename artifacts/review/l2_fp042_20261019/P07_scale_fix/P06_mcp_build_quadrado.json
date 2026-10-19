@@ -1,0 +1,127 @@
+{
+ "transport": "stdio",
+ "tool": "su_build_shell",
+ "args": {
+  "consensus_path": "fixtures/quadrado/consensus_with_window.json",
+  "out_path": "runs/l2mcp/quadrado/model.skp",
+  "force": true
+ },
+ "is_error": false,
+ "n_tools": 18,
+ "server_env_PT_TO_M": "0.0259",
+ "result": {
+  "status": "OK",
+  "mode": "interactive",
+  "consensus": "E:\\Claude\\worktrees\\sm-l2-stdin\\fixtures\\quadrado\\consensus_with_window.json",
+  "build": {
+   "ok": true,
+   "skipped": false,
+   "skp_path": "E:\\Claude\\worktrees\\sm-l2-stdin\\runs\\l2mcp\\quadrado\\model.skp",
+   "png_iso": "E:\\Claude\\worktrees\\sm-l2-stdin\\runs\\l2mcp\\quadrado\\model_iso.png",
+   "png_top": "E:\\Claude\\worktrees\\sm-l2-stdin\\runs\\l2mcp\\quadrado\\model_top.png",
+   "report": "E:\\Claude\\worktrees\\sm-l2-stdin\\runs\\l2mcp\\quadrado\\geometry_report.json",
+   "shell_json": "E:\\Claude\\worktrees\\sm-l2-stdin\\runs\\l2mcp\\quadrado\\_shell_polygon.json",
+   "consensus_sha256": "f4a45a19d33de5713194ab09ec971dbb647948df765da62aa5ad0712f1960293",
+   "elapsed_s": 12.0141,
+   "stats": {
+    "input_walls": 4,
+    "input_openings": 1,
+    "openings_carved": 0,
+    "window_apertures_3d": 1,
+    "endpoints_free": 0,
+    "endpoints_junction": 8,
+    "openings_skipped_by_origin": [],
+    "openings_skipped_by_error": [],
+    "openings_skipped": [],
+    "shell_pieces_after_union": 1,
+    "shell_pieces_after_sliver_filter": 1,
+    "slivers_removed": 0,
+    "redundant_vertices_dropped": 0,
+    "snap_eps_pts": 0.1,
+    "min_sliver_area_pts2": 0.5,
+    "carving_origins": [
+     "human_annotation",
+     "svg_arc",
+     "svg_segments"
+    ],
+    "total_shell_area_pts2": 2455.5744,
+    "window_apertures": [
+     {
+      "id": "win_south",
+      "wall_id": "w_bottom",
+      "kind_v5": "window",
+      "center": [
+       156.842,
+       100.0
+      ],
+      "opening_width_pts": 30.0,
+      "host_wall_orientation": "h",
+      "host_wall_thickness_pts": 5.4
+     }
+    ]
+   }
+  },
+  "gates": {
+   "overall": "PASS",
+   "gates": {
+    "opening_host": {
+     "detector": "opening_host_consistency",
+     "tol_pt": 16.2,
+     "width_factor": 1.15,
+     "n_openings": 1,
+     "n_fail": 0,
+     "overall": "PASS",
+     "openings": [
+      {
+       "opening": "win_south",
+       "kind": "window",
+       "host_wall": "w_bottom",
+       "d_host_pt": 0.0,
+       "host_len_pt": 113.7,
+       "width_pt": 30.0,
+       "nearest_wall": "w_bottom",
+       "d_near_pt": 0.0,
+       "verdict": "PASS",
+       "reasons": []
+      }
+     ]
+    },
+    "wall_overlap": {
+     "detector": "wall_overlap",
+     "collinear_tol_pt": 6.5,
+     "min_overlap_pt": 10.8,
+     "n_walls": 4,
+     "n_overlaps": 0,
+     "overall": "PASS",
+     "overlaps": []
+    },
+    "render_bbox": {
+     "verdict": "PASS",
+     "reason": "framed",
+     "margins": {
+      "left": 247,
+      "top": 33,
+      "right": 247,
+      "bottom": 33
+     },
+     "worst_margin": 33,
+     "edge_min": 32
+    },
+    "wall_presence": {
+     "affine": {
+      "a": 9.258394324570311,
+      "b": -652.1050826542566,
+      "c": -9.258394324570311,
+      "d": 2037.3306616787654
+     },
+     "calibration": "sidecar_exact",
+     "n_walls": 4,
+     "findings": [],
+     "verdict": "PASS"
+    }
+   }
+  },
+  "next": "gates PASS + VISUAL_REVIEW do Felipe → promote_canonical(src_final='E:\\Claude\\worktrees\\sm-l2-stdin\\runs\\l2mcp\\quadrado')",
+  "visual_review": "mudança de APARÊNCIA: o veredito IMPROVED/SAME/WORSE é do Felipe (VISUAL_REVIEW) — nunca automático"
+ }
+}

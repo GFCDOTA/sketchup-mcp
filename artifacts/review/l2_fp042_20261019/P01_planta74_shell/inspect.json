@@ -1,0 +1,6267 @@
+{
+ "job": "inspect_model",
+ "out_dir": "E:\\Claude\\apps\\sketchup-mcp\\runs\\l2_fp042_20261019\\P01_planta74_shell\\inspect",
+ "status": "OK",
+ "mode": "interactive",
+ "pid": 33408,
+ "elapsed_s": 9.01,
+ "su_left_running": true,
+ "command": [
+  "C:\\Program Files\\SketchUp\\SketchUp 2026\\SketchUp\\SketchUp.exe",
+  "E:\\Claude\\apps\\sketchup-mcp\\runs\\l2_fp042_20261019\\P01_planta74_shell\\inspect\\_inspect_model.skp",
+  "-RubyStartup",
+  "E:\\Claude\\apps\\sketchup-mcp\\tools\\sketchup\\ruby\\inspect_model.rb"
+ ],
+ "result": {
+  "ok": true,
+  "job": "inspect_model",
+  "title": "_inspect_model",
+  "path": "E:\\Claude\\apps\\sketchup-mcp\\runs\\l2_fp042_20261019\\P01_planta74_shell\\inspect\\_inspect_model.skp",
+  "length_unit_code": 0,
+  "bbox_m": {
+   "min": [
+    1.2744,
+    10.4098,
+    0.0
+   ],
+   "max": [
+    14.3361,
+    18.1448,
+    2.7
+   ],
+   "size": [
+    13.0617,
+    7.7351,
+    2.7
+   ]
+  },
+  "counts": {
+   "top_groups": 25,
+   "top_components": 0,
+   "loose_faces_at_root": 0,
+   "loose_edges_at_root": 0,
+   "definitions": 77,
+   "materials": 39,
+   "tags": 1,
+   "scenes": 0
+  },
+  "nodes": [
+   {
+    "name": "PlanShell_Group",
+    "definition": "Grupo0#1",
+    "pid": 48881,
+    "path": "PlanShell_Group",
+    "paths": [
+     "PlanShell_Group"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      1.2744,
+      10.4098,
+      0.0
+     ],
+     "max": [
+      14.3361,
+      18.1448,
+      2.7
+     ],
+     "size": [
+      13.0617,
+      7.7351,
+      2.7
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      1.2744,
+      10.4098,
+      0.0
+     ],
+     "max": [
+      14.3361,
+      18.1448,
+      2.7
+     ],
+     "size": [
+      13.0617,
+      7.7351,
+      2.7
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 3
+   },
+   {
+    "name": "PlanShell_piece_0",
+    "definition": "Grupo1#1",
+    "pid": 48883,
+    "path": "PlanShell_Group/PlanShell_piece_0",
+    "paths": [
+     "PlanShell_Group/PlanShell_piece_0"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      1.2744,
+      10.4098,
+      0.0
+     ],
+     "max": [
+      3.5182,
+      18.1448,
+      2.7
+     ],
+     "size": [
+      2.2439,
+      7.7351,
+      2.7
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      1.2744,
+      10.4098,
+      0.0
+     ],
+     "max": [
+      3.5182,
+      18.1448,
+      2.7
+     ],
+     "size": [
+      2.2439,
+      7.7351,
+      2.7
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 0
+   },
+   {
+    "name": "PlanShell_piece_1",
+    "definition": "Grupo2#1",
+    "pid": 48999,
+    "path": "PlanShell_Group/PlanShell_piece_1",
+    "paths": [
+     "PlanShell_Group/PlanShell_piece_1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      4.3713,
+      11.7679,
+      0.0
+     ],
+     "max": [
+      14.3361,
+      17.6911,
+      2.7
+     ],
+     "size": [
+      9.9647,
+      5.9233,
+      2.7
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      4.3713,
+      11.7679,
+      0.0
+     ],
+     "max": [
+      14.3361,
+      17.6911,
+      2.7
+     ],
+     "size": [
+      9.9647,
+      5.9233,
+      2.7
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 0
+   },
+   {
+    "name": "PlanShell_piece_2",
+    "definition": "Grupo3#1",
+    "pid": 49437,
+    "path": "PlanShell_Group/PlanShell_piece_2",
+    "paths": [
+     "PlanShell_Group/PlanShell_piece_2"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      3.2028,
+      13.1757,
+      0.0
+     ],
+     "max": [
+      3.5182,
+      15.8824,
+      2.7
+     ],
+     "size": [
+      0.3154,
+      2.7068,
+      2.7
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      3.2028,
+      13.1757,
+      0.0
+     ],
+     "max": [
+      3.5182,
+      15.8824,
+      2.7
+     ],
+     "size": [
+      0.3154,
+      2.7068,
+      2.7
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 0
+   },
+   {
+    "name": "Floor_Group_r000",
+    "definition": "Grupo4#1",
+    "pid": 49540,
+    "path": "Floor_Group_r000",
+    "paths": [
+     "Floor_Group_r000"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      8.6489,
+      13.4615,
+      0.0
+     ],
+     "max": [
+      14.176,
+      17.5311,
+      0.0
+     ],
+     "size": [
+      5.527,
+      4.0695,
+      0.0
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      8.6489,
+      13.4615,
+      0.0
+     ],
+     "max": [
+      14.176,
+      17.5311,
+      0.0
+     ],
+     "size": [
+      5.527,
+      4.0695,
+      0.0
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 0
+   },
+   {
+    "name": "Floor_Group_r001",
+    "definition": "Grupo5#1",
+    "pid": 49584,
+    "path": "Floor_Group_r001",
+    "paths": [
+     "Floor_Group_r001"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      1.4468,
+      10.452,
+      0.0
+     ],
+     "max": [
+      6.8107,
+      15.0154,
+      0.0
+     ],
+     "size": [
+      5.3639,
+      4.5634,
+      0.0
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      1.4468,
+      10.452,
+      0.0
+     ],
+     "max": [
+      6.8107,
+      15.0154,
+      0.0
+     ],
+     "size": [
+      5.3639,
+      4.5634,
+      0.0
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 0
+   },
+   {
+    "name": "Floor_Group_r002",
+    "definition": "Grupo6#1",
+    "pid": 49644,
+    "path": "Floor_Group_r002",
+    "paths": [
+     "Floor_Group_r002"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      2.2113,
+      13.2595,
+      0.0
+     ],
+     "max": [
+      8.621,
+      17.6072,
+      0.0
+     ],
+     "size": [
+      6.4097,
+      4.3477,
+      0.0
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      2.2113,
+      13.2595,
+      0.0
+     ],
+     "max": [
+      8.621,
+      17.6072,
+      0.0
+     ],
+     "size": [
+      6.4097,
+      4.3477,
+      0.0
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 0
+   },
+   {
+    "name": "Floor_Group_r003",
+    "definition": "Grupo7#1",
+    "pid": 49718,
+    "path": "Floor_Group_r003",
+    "paths": [
+     "Floor_Group_r003"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      6.1612,
+      11.8517,
+      0.0
+     ],
+     "max": [
+      8.621,
+      15.1925,
+      0.0
+     ],
+     "size": [
+      2.4598,
+      3.3408,
+      0.0
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      6.1612,
+      11.8517,
+      0.0
+     ],
+     "max": [
+      8.621,
+      15.1925,
+      0.0
+     ],
+     "size": [
+      2.4598,
+      3.3408,
+      0.0
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 0
+   },
+   {
+    "name": "Floor_Group_r004",
+    "definition": "Grupo8#1",
+    "pid": 49758,
+    "path": "Floor_Group_r004",
+    "paths": [
+     "Floor_Group_r004"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      1.4437,
+      15.0496,
+      0.0
+     ],
+     "max": [
+      3.2651,
+      17.9848,
+      0.0
+     ],
+     "size": [
+      1.8213,
+      2.9352,
+      0.0
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      1.4437,
+      15.0496,
+      0.0
+     ],
+     "max": [
+      3.2651,
+      17.9848,
+      0.0
+     ],
+     "size": [
+      1.8213,
+      2.9352,
+      0.0
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 0
+   },
+   {
+    "name": "Floor_Group_r005",
+    "definition": "Grupo9#1",
+    "pid": 49778,
+    "path": "Floor_Group_r005",
+    "paths": [
+     "Floor_Group_r005"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      12.7729,
+      13.4615,
+      0.0
+     ],
+     "max": [
+      14.176,
+      16.0472,
+      0.0
+     ],
+     "size": [
+      1.4031,
+      2.5856,
+      0.0
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      12.7729,
+      13.4615,
+      0.0
+     ],
+     "max": [
+      14.176,
+      16.0472,
+      0.0
+     ],
+     "size": [
+      1.4031,
+      2.5856,
+      0.0
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 0
+   },
+   {
+    "name": "Floor_Group_r006",
+    "definition": "Grupo10#1",
+    "pid": 49802,
+    "path": "Floor_Group_r006",
+    "paths": [
+     "Floor_Group_r006"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      8.6489,
+      12.5572,
+      0.0
+     ],
+     "max": [
+      9.9029,
+      15.1164,
+      0.0
+     ],
+     "size": [
+      1.254,
+      2.5592,
+      0.0
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      8.6489,
+      12.5572,
+      0.0
+     ],
+     "max": [
+      9.9029,
+      15.1164,
+      0.0
+     ],
+     "size": [
+      1.254,
+      2.5592,
+      0.0
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 0
+   },
+   {
+    "name": "Floor_Group_r007",
+    "definition": "Grupo11#1",
+    "pid": 49826,
+    "path": "Floor_Group_r007",
+    "paths": [
+     "Floor_Group_r007"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      6.7641,
+      16.2771,
+      0.0
+     ],
+     "max": [
+      8.2931,
+      17.5311,
+      0.0
+     ],
+     "size": [
+      1.529,
+      1.2539,
+      0.0
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      6.7641,
+      16.2771,
+      0.0
+     ],
+     "max": [
+      8.2931,
+      17.5311,
+      0.0
+     ],
+     "size": [
+      1.529,
+      1.2539,
+      0.0
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 0
+   },
+   {
+    "name": "SoftBarrier_Group_8",
+    "definition": "Grupo12#1",
+    "pid": 49848,
+    "path": "SoftBarrier_Group_8",
+    "paths": [
+     "SoftBarrier_Group_8"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      2.6427,
+      10.4128,
+      0.0
+     ],
+     "max": [
+      6.8622,
+      11.8639,
+      1.1
+     ],
+     "size": [
+      4.2195,
+      1.4511,
+      1.1
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      2.6427,
+      10.4128,
+      0.0
+     ],
+     "max": [
+      6.8622,
+      11.8639,
+      1.1
+     ],
+     "size": [
+      4.2195,
+      1.4511,
+      1.1
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 2
+   },
+   {
+    "name": "SoftBarrier_8_seg_0",
+    "definition": "Grupo13#1",
+    "pid": 49850,
+    "path": "SoftBarrier_Group_8/SoftBarrier_8_seg_0",
+    "paths": [
+     "SoftBarrier_Group_8/SoftBarrier_8_seg_0"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      2.6427,
+      10.4128,
+      0.0
+     ],
+     "max": [
+      6.8622,
+      10.5041,
+      1.1
+     ],
+     "size": [
+      4.2195,
+      0.0914,
+      1.1
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      2.6427,
+      10.4128,
+      0.0
+     ],
+     "max": [
+      6.8622,
+      10.5041,
+      1.1
+     ],
+     "size": [
+      4.2195,
+      0.0914,
+      1.1
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 7
+   },
+   {
+    "name": "",
+    "definition": "Grupo14#1",
+    "pid": 49882,
+    "path": "SoftBarrier_Group_8/SoftBarrier_8_seg_0/Grupo14#1",
+    "paths": [
+     "SoftBarrier_Group_8/SoftBarrier_8_seg_0/Grupo14#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      2.6675,
+      10.4178,
+      1.02
+     ],
+     "max": [
+      6.8374,
+      10.4991,
+      1.1
+     ],
+     "size": [
+      4.1699,
+      0.0814,
+      0.08
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      2.6675,
+      10.4178,
+      1.02
+     ],
+     "max": [
+      6.8374,
+      10.4991,
+      1.1
+     ],
+     "size": [
+      4.1699,
+      0.0814,
+      0.08
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo15#1",
+    "pid": 49914,
+    "path": "SoftBarrier_Group_8/SoftBarrier_8_seg_0/Grupo15#1",
+    "paths": [
+     "SoftBarrier_Group_8/SoftBarrier_8_seg_0/Grupo15#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      2.6676,
+      10.4318,
+      0.45
+     ],
+     "max": [
+      6.8373,
+      10.4851,
+      1.02
+     ],
+     "size": [
+      4.1697,
+      0.0534,
+      0.57
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      2.6676,
+      10.4318,
+      0.45
+     ],
+     "max": [
+      6.8373,
+      10.4851,
+      1.02
+     ],
+     "size": [
+      4.1697,
+      0.0534,
+      0.57
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo16#1",
+    "pid": 49946,
+    "path": "SoftBarrier_Group_8/SoftBarrier_8_seg_0/Grupo16#1",
+    "paths": [
+     "SoftBarrier_Group_8/SoftBarrier_8_seg_0/Grupo16#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      2.6427,
+      10.4541,
+      0.45
+     ],
+     "max": [
+      2.6927,
+      10.5041,
+      1.1
+     ],
+     "size": [
+      0.05,
+      0.05,
+      0.65
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      2.6427,
+      10.4541,
+      0.45
+     ],
+     "max": [
+      2.6927,
+      10.5041,
+      1.1
+     ],
+     "size": [
+      0.05,
+      0.05,
+      0.65
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo17#1",
+    "pid": 49978,
+    "path": "SoftBarrier_Group_8/SoftBarrier_8_seg_0/Grupo17#1",
+    "paths": [
+     "SoftBarrier_Group_8/SoftBarrier_8_seg_0/Grupo17#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      3.6851,
+      10.4438,
+      0.45
+     ],
+     "max": [
+      3.7351,
+      10.4938,
+      1.1
+     ],
+     "size": [
+      0.05,
+      0.05,
+      0.65
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      3.6851,
+      10.4438,
+      0.45
+     ],
+     "max": [
+      3.7351,
+      10.4938,
+      1.1
+     ],
+     "size": [
+      0.05,
+      0.05,
+      0.65
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo18#1",
+    "pid": 50010,
+    "path": "SoftBarrier_Group_8/SoftBarrier_8_seg_0/Grupo18#1",
+    "paths": [
+     "SoftBarrier_Group_8/SoftBarrier_8_seg_0/Grupo18#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      4.7275,
+      10.4334,
+      0.45
+     ],
+     "max": [
+      4.7775,
+      10.4834,
+      1.1
+     ],
+     "size": [
+      0.05,
+      0.05,
+      0.65
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      4.7275,
+      10.4334,
+      0.45
+     ],
+     "max": [
+      4.7775,
+      10.4834,
+      1.1
+     ],
+     "size": [
+      0.05,
+      0.05,
+      0.65
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo19#1",
+    "pid": 50042,
+    "path": "SoftBarrier_Group_8/SoftBarrier_8_seg_0/Grupo19#1",
+    "paths": [
+     "SoftBarrier_Group_8/SoftBarrier_8_seg_0/Grupo19#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      5.7699,
+      10.4231,
+      0.45
+     ],
+     "max": [
+      5.8199,
+      10.4731,
+      1.1
+     ],
+     "size": [
+      0.05,
+      0.05,
+      0.65
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      5.7699,
+      10.4231,
+      0.45
+     ],
+     "max": [
+      5.8199,
+      10.4731,
+      1.1
+     ],
+     "size": [
+      0.05,
+      0.05,
+      0.65
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo20#1",
+    "pid": 50074,
+    "path": "SoftBarrier_Group_8/SoftBarrier_8_seg_0/Grupo20#1",
+    "paths": [
+     "SoftBarrier_Group_8/SoftBarrier_8_seg_0/Grupo20#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      6.8122,
+      10.4128,
+      0.45
+     ],
+     "max": [
+      6.8622,
+      10.4628,
+      1.1
+     ],
+     "size": [
+      0.05,
+      0.05,
+      0.65
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      6.8122,
+      10.4128,
+      0.45
+     ],
+     "max": [
+      6.8622,
+      10.4628,
+      1.1
+     ],
+     "size": [
+      0.05,
+      0.05,
+      0.65
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "SoftBarrier_8_seg_1",
+    "definition": "Grupo21#1",
+    "pid": 50106,
+    "path": "SoftBarrier_Group_8/SoftBarrier_8_seg_1",
+    "paths": [
+     "SoftBarrier_Group_8/SoftBarrier_8_seg_1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      6.8122,
+      10.4128,
+      0.0
+     ],
+     "max": [
+      6.8622,
+      11.8639,
+      1.1
+     ],
+     "size": [
+      0.05,
+      1.4511,
+      1.1
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      6.8122,
+      10.4128,
+      0.0
+     ],
+     "max": [
+      6.8622,
+      11.8639,
+      1.1
+     ],
+     "size": [
+      0.05,
+      1.4511,
+      1.1
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 4
+   },
+   {
+    "name": "",
+    "definition": "Grupo22#1",
+    "pid": 50138,
+    "path": "SoftBarrier_Group_8/SoftBarrier_8_seg_1/Grupo22#1",
+    "paths": [
+     "SoftBarrier_Group_8/SoftBarrier_8_seg_1/Grupo22#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      6.8172,
+      10.4378,
+      1.02
+     ],
+     "max": [
+      6.8572,
+      11.8389,
+      1.1
+     ],
+     "size": [
+      0.04,
+      1.4011,
+      0.08
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      6.8172,
+      10.4378,
+      1.02
+     ],
+     "max": [
+      6.8572,
+      11.8389,
+      1.1
+     ],
+     "size": [
+      0.04,
+      1.4011,
+      0.08
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo23#1",
+    "pid": 50170,
+    "path": "SoftBarrier_Group_8/SoftBarrier_8_seg_1/Grupo23#1",
+    "paths": [
+     "SoftBarrier_Group_8/SoftBarrier_8_seg_1/Grupo23#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      6.8312,
+      10.4378,
+      0.45
+     ],
+     "max": [
+      6.8432,
+      11.8389,
+      1.02
+     ],
+     "size": [
+      0.012,
+      1.4011,
+      0.57
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      6.8312,
+      10.4378,
+      0.45
+     ],
+     "max": [
+      6.8432,
+      11.8389,
+      1.02
+     ],
+     "size": [
+      0.012,
+      1.4011,
+      0.57
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo24#1",
+    "pid": 50202,
+    "path": "SoftBarrier_Group_8/SoftBarrier_8_seg_1/Grupo24#1",
+    "paths": [
+     "SoftBarrier_Group_8/SoftBarrier_8_seg_1/Grupo24#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      6.8122,
+      10.4128,
+      0.45
+     ],
+     "max": [
+      6.8622,
+      10.4628,
+      1.1
+     ],
+     "size": [
+      0.05,
+      0.05,
+      0.65
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      6.8122,
+      10.4128,
+      0.45
+     ],
+     "max": [
+      6.8622,
+      10.4628,
+      1.1
+     ],
+     "size": [
+      0.05,
+      0.05,
+      0.65
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo25#1",
+    "pid": 50234,
+    "path": "SoftBarrier_Group_8/SoftBarrier_8_seg_1/Grupo25#1",
+    "paths": [
+     "SoftBarrier_Group_8/SoftBarrier_8_seg_1/Grupo25#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      6.8122,
+      11.8139,
+      0.45
+     ],
+     "max": [
+      6.8622,
+      11.8639,
+      1.1
+     ],
+     "size": [
+      0.05,
+      0.05,
+      0.65
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      6.8122,
+      11.8139,
+      0.45
+     ],
+     "max": [
+      6.8622,
+      11.8639,
+      1.1
+     ],
+     "size": [
+      0.05,
+      0.05,
+      0.65
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "SoftBarrier_Group_9",
+    "definition": "Grupo26#1",
+    "pid": 50266,
+    "path": "SoftBarrier_Group_9",
+    "paths": [
+     "SoftBarrier_Group_9"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      5.8603,
+      10.5672,
+      0.0
+     ],
+     "max": [
+      5.8984,
+      12.9552,
+      0.7
+     ],
+     "size": [
+      0.0381,
+      2.388,
+      0.7
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      5.8603,
+      10.5672,
+      0.0
+     ],
+     "max": [
+      5.8984,
+      12.9552,
+      0.7
+     ],
+     "size": [
+      0.0381,
+      2.388,
+      0.7
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 1
+   },
+   {
+    "name": "SoftBarrier_9_seg_0",
+    "definition": "Grupo27#1",
+    "pid": 50268,
+    "path": "SoftBarrier_Group_9/SoftBarrier_9_seg_0",
+    "paths": [
+     "SoftBarrier_Group_9/SoftBarrier_9_seg_0"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      5.8603,
+      10.5672,
+      0.0
+     ],
+     "max": [
+      5.8984,
+      12.9552,
+      0.7
+     ],
+     "size": [
+      0.0381,
+      2.388,
+      0.7
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      5.8603,
+      10.5672,
+      0.0
+     ],
+     "max": [
+      5.8984,
+      12.9552,
+      0.7
+     ],
+     "size": [
+      0.0381,
+      2.388,
+      0.7
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 0
+   },
+   {
+    "name": "DoorLeaf_Group_h_o000",
+    "definition": "Grupo28#1",
+    "pid": 50306,
+    "path": "DoorLeaf_Group_h_o000",
+    "paths": [
+     "DoorLeaf_Group_h_o000"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      3.4982,
+      17.0901,
+      0.0
+     ],
+     "max": [
+      4.257,
+      17.5513,
+      2.1
+     ],
+     "size": [
+      0.7588,
+      0.4612,
+      2.1
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      3.4982,
+      17.0901,
+      0.0
+     ],
+     "max": [
+      4.257,
+      17.5513,
+      2.1
+     ],
+     "size": [
+      0.7588,
+      0.4612,
+      2.1
+     ]
+    },
+    "world_origin_m": [
+     -8.3043,
+     4.1105,
+     0.0
+    ],
+    "world_transform": [
+     0.866025,
+     -0.5,
+     0.0,
+     0.0,
+     0.5,
+     0.866025,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     -326.940436,
+     161.832317,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 0
+   },
+   {
+    "name": "DoorLeaf_Group_h_o001",
+    "definition": "Grupo29#1",
+    "pid": 50338,
+    "path": "DoorLeaf_Group_h_o001",
+    "paths": [
+     "DoorLeaf_Group_h_o001"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      6.8174,
+      16.3331,
+      0.0
+     ],
+     "max": [
+      7.4086,
+      16.6975,
+      2.1
+     ],
+     "size": [
+      0.5912,
+      0.3644,
+      2.1
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      6.8174,
+      16.3331,
+      0.0
+     ],
+     "max": [
+      7.4086,
+      16.6975,
+      2.1
+     ],
+     "size": [
+      0.5912,
+      0.3644,
+      2.1
+     ]
+    },
+    "world_origin_m": [
+     9.0826,
+     -1.2305,
+     0.0
+    ],
+    "world_transform": [
+     0.866025,
+     0.5,
+     0.0,
+     0.0,
+     -0.5,
+     0.866025,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     357.581688,
+     -48.444608,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 0
+   },
+   {
+    "name": "DoorLeaf_Group_h_o002",
+    "definition": "Grupo30#1",
+    "pid": 50370,
+    "path": "DoorLeaf_Group_h_o002",
+    "paths": [
+     "DoorLeaf_Group_h_o002"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      12.8321,
+      15.6411,
+      0.0
+     ],
+     "max": [
+      13.3984,
+      15.9912,
+      2.1
+     ],
+     "size": [
+      0.5664,
+      0.3501,
+      2.1
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      12.8321,
+      15.6411,
+      0.0
+     ],
+     "max": [
+      13.3984,
+      15.9912,
+      2.1
+     ],
+     "size": [
+      0.5664,
+      0.3501,
+      2.1
+     ]
+    },
+    "world_origin_m": [
+     -6.2738,
+     8.5685,
+     0.0
+    ],
+    "world_transform": [
+     0.866025,
+     -0.5,
+     0.0,
+     0.0,
+     0.5,
+     0.866025,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     -246.998247,
+     337.341192,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 0
+   },
+   {
+    "name": "DoorLeaf_Group_h_o003",
+    "definition": "Grupo31#1",
+    "pid": 50402,
+    "path": "DoorLeaf_Group_h_o003",
+    "paths": [
+     "DoorLeaf_Group_h_o003"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      8.7049,
+      15.3423,
+      0.0
+     ],
+     "max": [
+      9.0957,
+      15.9792,
+      2.1
+     ],
+     "size": [
+      0.3908,
+      0.6369,
+      2.1
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      8.7049,
+      15.3423,
+      0.0
+     ],
+     "max": [
+      9.0957,
+      15.9792,
+      2.1
+     ],
+     "size": [
+      0.3908,
+      0.6369,
+      2.1
+     ]
+    },
+    "world_origin_m": [
+     -6.5149,
+     6.4106,
+     0.0
+    ],
+    "world_transform": [
+     0.866025,
+     -0.5,
+     0.0,
+     0.0,
+     0.5,
+     0.866025,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     -256.493536,
+     252.386081,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 0
+   },
+   {
+    "name": "DoorLeaf_Group_h_o004",
+    "definition": "Grupo32#1",
+    "pid": 50434,
+    "path": "DoorLeaf_Group_h_o004",
+    "paths": [
+     "DoorLeaf_Group_h_o004"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      7.8501,
+      14.7471,
+      0.0
+     ],
+     "max": [
+      8.4847,
+      15.1366,
+      2.1
+     ],
+     "size": [
+      0.6346,
+      0.3895,
+      2.1
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      7.8501,
+      14.7471,
+      0.0
+     ],
+     "max": [
+      8.4847,
+      15.1366,
+      2.1
+     ],
+     "size": [
+      0.6346,
+      0.3895,
+      2.1
+     ]
+    },
+    "world_origin_m": [
+     8.7024,
+     -2.2045,
+     0.0
+    ],
+    "world_transform": [
+     0.866025,
+     0.5,
+     0.0,
+     0.0,
+     -0.5,
+     0.866025,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     342.612286,
+     -86.789494,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 0
+   },
+   {
+    "name": "DoorLeaf_Group_h_o005",
+    "definition": "Grupo33#1",
+    "pid": 50466,
+    "path": "DoorLeaf_Group_h_o005",
+    "paths": [
+     "DoorLeaf_Group_h_o005"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      2.4081,
+      14.466,
+      0.0
+     ],
+     "max": [
+      3.2228,
+      14.9595,
+      2.1
+     ],
+     "size": [
+      0.8147,
+      0.4934,
+      2.1
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      2.4081,
+      14.466,
+      0.0
+     ],
+     "max": [
+      3.2228,
+      14.9595,
+      2.1
+     ],
+     "size": [
+      0.8147,
+      0.4934,
+      2.1
+     ]
+    },
+    "world_origin_m": [
+     7.9088,
+     0.4028,
+     0.0
+    ],
+    "world_transform": [
+     0.866025,
+     0.5,
+     0.0,
+     0.0,
+     -0.5,
+     0.866025,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     311.371328,
+     15.85799,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 0
+   },
+   {
+    "name": "DoorLeaf_Group_h_o006",
+    "definition": "Grupo34#1",
+    "pid": 50498,
+    "path": "DoorLeaf_Group_h_o006",
+    "paths": [
+     "DoorLeaf_Group_h_o006"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      8.7049,
+      14.5429,
+      0.0
+     ],
+     "max": [
+      9.0369,
+      15.078,
+      2.1
+     ],
+     "size": [
+      0.332,
+      0.5351,
+      2.1
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      8.7049,
+      14.5429,
+      0.0
+     ],
+     "max": [
+      9.0369,
+      15.078,
+      2.1
+     ],
+     "size": [
+      0.332,
+      0.5351,
+      2.1
+     ]
+    },
+    "world_origin_m": [
+     8.6952,
+     -2.3351,
+     0.0
+    ],
+    "world_transform": [
+     0.866025,
+     0.5,
+     0.0,
+     0.0,
+     -0.5,
+     0.866025,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     342.332564,
+     -91.931112,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 0
+   },
+   {
+    "name": "WindowGlass_Group_h_o007",
+    "definition": "Grupo35#1",
+    "pid": 50555,
+    "path": "WindowGlass_Group_h_o007",
+    "paths": [
+     "WindowGlass_Group_h_o007"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      12.9811,
+      13.4076,
+      1.5
+     ],
+     "max": [
+      13.5188,
+      13.4876,
+      2.1
+     ],
+     "size": [
+      0.5377,
+      0.08,
+      0.6
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      12.9811,
+      13.4076,
+      1.5
+     ],
+     "max": [
+      13.5188,
+      13.4876,
+      2.1
+     ],
+     "size": [
+      0.5377,
+      0.08,
+      0.6
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 4
+   },
+   {
+    "name": "",
+    "definition": "Grupo37#1",
+    "pid": 50559,
+    "path": "WindowGlass_Group_h_o007/Grupo37#1",
+    "paths": [
+     "WindowGlass_Group_h_o007/Grupo37#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      12.9811,
+      13.4076,
+      1.5
+     ],
+     "max": [
+      13.5188,
+      13.4876,
+      1.55
+     ],
+     "size": [
+      0.5377,
+      0.08,
+      0.05
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      12.9811,
+      13.4076,
+      1.5
+     ],
+     "max": [
+      13.5188,
+      13.4876,
+      1.55
+     ],
+     "size": [
+      0.5377,
+      0.08,
+      0.05
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo38#1",
+    "pid": 50591,
+    "path": "WindowGlass_Group_h_o007/Grupo38#1",
+    "paths": [
+     "WindowGlass_Group_h_o007/Grupo38#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      12.9811,
+      13.4076,
+      2.05
+     ],
+     "max": [
+      13.5188,
+      13.4876,
+      2.1
+     ],
+     "size": [
+      0.5377,
+      0.08,
+      0.05
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      12.9811,
+      13.4076,
+      2.05
+     ],
+     "max": [
+      13.5188,
+      13.4876,
+      2.1
+     ],
+     "size": [
+      0.5377,
+      0.08,
+      0.05
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo39#1",
+    "pid": 50623,
+    "path": "WindowGlass_Group_h_o007/Grupo39#1",
+    "paths": [
+     "WindowGlass_Group_h_o007/Grupo39#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      12.9811,
+      13.4076,
+      1.5
+     ],
+     "max": [
+      13.0311,
+      13.4876,
+      2.1
+     ],
+     "size": [
+      0.05,
+      0.08,
+      0.6
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      12.9811,
+      13.4076,
+      1.5
+     ],
+     "max": [
+      13.0311,
+      13.4876,
+      2.1
+     ],
+     "size": [
+      0.05,
+      0.08,
+      0.6
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo40#1",
+    "pid": 50655,
+    "path": "WindowGlass_Group_h_o007/Grupo40#1",
+    "paths": [
+     "WindowGlass_Group_h_o007/Grupo40#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      13.4688,
+      13.4076,
+      1.5
+     ],
+     "max": [
+      13.5188,
+      13.4876,
+      2.1
+     ],
+     "size": [
+      0.05,
+      0.08,
+      0.6
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      13.4688,
+      13.4076,
+      1.5
+     ],
+     "max": [
+      13.5188,
+      13.4876,
+      2.1
+     ],
+     "size": [
+      0.05,
+      0.08,
+      0.6
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "WindowSash_Group_h_o007",
+    "definition": "Grupo36#1",
+    "pid": 50557,
+    "path": "WindowSash_Group_h_o007",
+    "paths": [
+     "WindowSash_Group_h_o007"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      13.0311,
+      13.295,
+      1.5608
+     ],
+     "max": [
+      13.4688,
+      13.4707,
+      2.0562
+     ],
+     "size": [
+      0.4377,
+      0.1758,
+      0.4954
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      13.0311,
+      13.295,
+      1.5608
+     ],
+     "max": [
+      13.4688,
+      13.4707,
+      2.0562
+     ],
+     "size": [
+      0.4377,
+      0.1758,
+      0.4954
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     -0.0724,
+     3.5503
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.965926,
+     -0.258819,
+     0.0,
+     0.0,
+     0.258819,
+     0.965926,
+     0.0,
+     0.0,
+     -2.849004,
+     139.776988,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 5
+   },
+   {
+    "name": "",
+    "definition": "Grupo41#1",
+    "pid": 50687,
+    "path": "WindowSash_Group_h_o007/Grupo41#1",
+    "paths": [
+     "WindowSash_Group_h_o007/Grupo41#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      13.0311,
+      13.4236,
+      1.55
+     ],
+     "max": [
+      13.4688,
+      13.4716,
+      1.58
+     ],
+     "size": [
+      0.4377,
+      0.048,
+      0.03
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      13.0311,
+      13.295,
+      1.5608
+     ],
+     "max": [
+      13.4688,
+      13.3491,
+      1.6022
+     ],
+     "size": [
+      0.4377,
+      0.0541,
+      0.0414
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     -0.0724,
+     3.5503
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.965926,
+     -0.258819,
+     0.0,
+     0.0,
+     0.258819,
+     0.965926,
+     0.0,
+     0.0,
+     -2.849004,
+     139.776988,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo42#1",
+    "pid": 50719,
+    "path": "WindowSash_Group_h_o007/Grupo42#1",
+    "paths": [
+     "WindowSash_Group_h_o007/Grupo42#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      13.0311,
+      13.4236,
+      2.02
+     ],
+     "max": [
+      13.4688,
+      13.4716,
+      2.05
+     ],
+     "size": [
+      0.4377,
+      0.048,
+      0.03
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      13.0311,
+      13.4166,
+      2.0148
+     ],
+     "max": [
+      13.4688,
+      13.4707,
+      2.0562
+     ],
+     "size": [
+      0.4377,
+      0.0541,
+      0.0414
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     -0.0724,
+     3.5503
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.965926,
+     -0.258819,
+     0.0,
+     0.0,
+     0.258819,
+     0.965926,
+     0.0,
+     0.0,
+     -2.849004,
+     139.776988,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo43#1",
+    "pid": 50751,
+    "path": "WindowSash_Group_h_o007/Grupo43#1",
+    "paths": [
+     "WindowSash_Group_h_o007/Grupo43#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      13.0311,
+      13.4236,
+      1.55
+     ],
+     "max": [
+      13.0611,
+      13.4716,
+      2.05
+     ],
+     "size": [
+      0.03,
+      0.048,
+      0.5
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      13.0311,
+      13.295,
+      1.5608
+     ],
+     "max": [
+      13.0611,
+      13.4707,
+      2.0562
+     ],
+     "size": [
+      0.03,
+      0.1758,
+      0.4954
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     -0.0724,
+     3.5503
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.965926,
+     -0.258819,
+     0.0,
+     0.0,
+     0.258819,
+     0.965926,
+     0.0,
+     0.0,
+     -2.849004,
+     139.776988,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo44#1",
+    "pid": 50783,
+    "path": "WindowSash_Group_h_o007/Grupo44#1",
+    "paths": [
+     "WindowSash_Group_h_o007/Grupo44#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      13.4388,
+      13.4236,
+      1.55
+     ],
+     "max": [
+      13.4688,
+      13.4716,
+      2.05
+     ],
+     "size": [
+      0.03,
+      0.048,
+      0.5
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      13.4388,
+      13.295,
+      1.5608
+     ],
+     "max": [
+      13.4688,
+      13.4707,
+      2.0562
+     ],
+     "size": [
+      0.03,
+      0.1758,
+      0.4954
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     -0.0724,
+     3.5503
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.965926,
+     -0.258819,
+     0.0,
+     0.0,
+     0.258819,
+     0.965926,
+     0.0,
+     0.0,
+     -2.849004,
+     139.776988,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo45#1",
+    "pid": 50815,
+    "path": "WindowSash_Group_h_o007/Grupo45#1",
+    "paths": [
+     "WindowSash_Group_h_o007/Grupo45#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      13.0611,
+      13.4476,
+      1.58
+     ],
+     "max": [
+      13.4388,
+      13.4476,
+      2.02
+     ],
+     "size": [
+      0.3777,
+      0.0,
+      0.44
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      13.0611,
+      13.3259,
+      1.596
+     ],
+     "max": [
+      13.4388,
+      13.4398,
+      2.021
+     ],
+     "size": [
+      0.3777,
+      0.1139,
+      0.425
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     -0.0724,
+     3.5503
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.965926,
+     -0.258819,
+     0.0,
+     0.0,
+     0.258819,
+     0.965926,
+     0.0,
+     0.0,
+     -2.849004,
+     139.776988,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "WindowGlass_Group_h_o008",
+    "definition": "Grupo46#1",
+    "pid": 50851,
+    "path": "WindowGlass_Group_h_o008",
+    "paths": [
+     "WindowGlass_Group_h_o008"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      10.4649,
+      13.3796,
+      1.1
+     ],
+     "max": [
+      11.9847,
+      13.5156,
+      2.3
+     ],
+     "size": [
+      1.5198,
+      0.136,
+      1.2
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      10.4649,
+      13.3796,
+      1.1
+     ],
+     "max": [
+      11.9847,
+      13.5156,
+      2.3
+     ],
+     "size": [
+      1.5198,
+      0.136,
+      1.2
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 8
+   },
+   {
+    "name": "",
+    "definition": "Grupo47#1",
+    "pid": 50853,
+    "path": "WindowGlass_Group_h_o008/Grupo47#1",
+    "paths": [
+     "WindowGlass_Group_h_o008/Grupo47#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      10.4649,
+      13.3796,
+      2.05
+     ],
+     "max": [
+      11.9847,
+      13.5156,
+      2.3
+     ],
+     "size": [
+      1.5198,
+      0.136,
+      0.25
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      10.4649,
+      13.3796,
+      2.05
+     ],
+     "max": [
+      11.9847,
+      13.5156,
+      2.3
+     ],
+     "size": [
+      1.5198,
+      0.136,
+      0.25
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo48#1",
+    "pid": 50885,
+    "path": "WindowGlass_Group_h_o008/Grupo48#1",
+    "paths": [
+     "WindowGlass_Group_h_o008/Grupo48#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      10.4649,
+      13.4076,
+      1.1
+     ],
+     "max": [
+      11.9847,
+      13.4876,
+      1.15
+     ],
+     "size": [
+      1.5198,
+      0.08,
+      0.05
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      10.4649,
+      13.4076,
+      1.1
+     ],
+     "max": [
+      11.9847,
+      13.4876,
+      1.15
+     ],
+     "size": [
+      1.5198,
+      0.08,
+      0.05
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo49#1",
+    "pid": 50917,
+    "path": "WindowGlass_Group_h_o008/Grupo49#1",
+    "paths": [
+     "WindowGlass_Group_h_o008/Grupo49#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      10.4649,
+      13.4076,
+      2.0
+     ],
+     "max": [
+      11.9847,
+      13.4876,
+      2.05
+     ],
+     "size": [
+      1.5198,
+      0.08,
+      0.05
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      10.4649,
+      13.4076,
+      2.0
+     ],
+     "max": [
+      11.9847,
+      13.4876,
+      2.05
+     ],
+     "size": [
+      1.5198,
+      0.08,
+      0.05
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo50#1",
+    "pid": 50949,
+    "path": "WindowGlass_Group_h_o008/Grupo50#1",
+    "paths": [
+     "WindowGlass_Group_h_o008/Grupo50#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      10.4649,
+      13.4076,
+      1.1
+     ],
+     "max": [
+      10.5149,
+      13.4876,
+      2.05
+     ],
+     "size": [
+      0.05,
+      0.08,
+      0.95
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      10.4649,
+      13.4076,
+      1.1
+     ],
+     "max": [
+      10.5149,
+      13.4876,
+      2.05
+     ],
+     "size": [
+      0.05,
+      0.08,
+      0.95
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo51#1",
+    "pid": 50981,
+    "path": "WindowGlass_Group_h_o008/Grupo51#1",
+    "paths": [
+     "WindowGlass_Group_h_o008/Grupo51#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      11.9347,
+      13.4076,
+      1.1
+     ],
+     "max": [
+      11.9847,
+      13.4876,
+      2.05
+     ],
+     "size": [
+      0.05,
+      0.08,
+      0.95
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      11.9347,
+      13.4076,
+      1.1
+     ],
+     "max": [
+      11.9847,
+      13.4876,
+      2.05
+     ],
+     "size": [
+      0.05,
+      0.08,
+      0.95
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo52#1",
+    "pid": 51013,
+    "path": "WindowGlass_Group_h_o008/Grupo52#1",
+    "paths": [
+     "WindowGlass_Group_h_o008/Grupo52#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      11.1998,
+      13.4076,
+      1.15
+     ],
+     "max": [
+      11.2498,
+      13.4876,
+      2.0
+     ],
+     "size": [
+      0.05,
+      0.08,
+      0.85
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      11.1998,
+      13.4076,
+      1.15
+     ],
+     "max": [
+      11.2498,
+      13.4876,
+      2.0
+     ],
+     "size": [
+      0.05,
+      0.08,
+      0.85
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo53#1",
+    "pid": 51045,
+    "path": "WindowGlass_Group_h_o008/Grupo53#1",
+    "paths": [
+     "WindowGlass_Group_h_o008/Grupo53#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      10.5149,
+      13.4476,
+      1.15
+     ],
+     "max": [
+      11.1998,
+      13.4476,
+      2.0
+     ],
+     "size": [
+      0.6849,
+      0.0,
+      0.85
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      10.5149,
+      13.4476,
+      1.15
+     ],
+     "max": [
+      11.1998,
+      13.4476,
+      2.0
+     ],
+     "size": [
+      0.6849,
+      0.0,
+      0.85
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo54#1",
+    "pid": 51056,
+    "path": "WindowGlass_Group_h_o008/Grupo54#1",
+    "paths": [
+     "WindowGlass_Group_h_o008/Grupo54#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      11.2498,
+      13.4476,
+      1.15
+     ],
+     "max": [
+      11.9347,
+      13.4476,
+      2.0
+     ],
+     "size": [
+      0.6849,
+      0.0,
+      0.85
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      11.2498,
+      13.4476,
+      1.15
+     ],
+     "max": [
+      11.9347,
+      13.4476,
+      2.0
+     ],
+     "size": [
+      0.6849,
+      0.0,
+      0.85
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "WindowGlass_Group_h_o009",
+    "definition": "Grupo55#1",
+    "pid": 51092,
+    "path": "WindowGlass_Group_h_o009",
+    "paths": [
+     "WindowGlass_Group_h_o009"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      8.9236,
+      12.5017,
+      1.5
+     ],
+     "max": [
+      9.4612,
+      12.5817,
+      2.1
+     ],
+     "size": [
+      0.5377,
+      0.08,
+      0.6
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      8.9236,
+      12.5017,
+      1.5
+     ],
+     "max": [
+      9.4612,
+      12.5817,
+      2.1
+     ],
+     "size": [
+      0.5377,
+      0.08,
+      0.6
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 4
+   },
+   {
+    "name": "",
+    "definition": "Grupo57#1",
+    "pid": 51096,
+    "path": "WindowGlass_Group_h_o009/Grupo57#1",
+    "paths": [
+     "WindowGlass_Group_h_o009/Grupo57#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      8.9236,
+      12.5017,
+      1.5
+     ],
+     "max": [
+      9.4612,
+      12.5817,
+      1.55
+     ],
+     "size": [
+      0.5377,
+      0.08,
+      0.05
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      8.9236,
+      12.5017,
+      1.5
+     ],
+     "max": [
+      9.4612,
+      12.5817,
+      1.55
+     ],
+     "size": [
+      0.5377,
+      0.08,
+      0.05
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo58#1",
+    "pid": 51128,
+    "path": "WindowGlass_Group_h_o009/Grupo58#1",
+    "paths": [
+     "WindowGlass_Group_h_o009/Grupo58#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      8.9236,
+      12.5017,
+      2.05
+     ],
+     "max": [
+      9.4612,
+      12.5817,
+      2.1
+     ],
+     "size": [
+      0.5377,
+      0.08,
+      0.05
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      8.9236,
+      12.5017,
+      2.05
+     ],
+     "max": [
+      9.4612,
+      12.5817,
+      2.1
+     ],
+     "size": [
+      0.5377,
+      0.08,
+      0.05
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo59#1",
+    "pid": 51160,
+    "path": "WindowGlass_Group_h_o009/Grupo59#1",
+    "paths": [
+     "WindowGlass_Group_h_o009/Grupo59#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      8.9236,
+      12.5017,
+      1.5
+     ],
+     "max": [
+      8.9736,
+      12.5817,
+      2.1
+     ],
+     "size": [
+      0.05,
+      0.08,
+      0.6
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      8.9236,
+      12.5017,
+      1.5
+     ],
+     "max": [
+      8.9736,
+      12.5817,
+      2.1
+     ],
+     "size": [
+      0.05,
+      0.08,
+      0.6
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo60#1",
+    "pid": 51192,
+    "path": "WindowGlass_Group_h_o009/Grupo60#1",
+    "paths": [
+     "WindowGlass_Group_h_o009/Grupo60#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      9.4112,
+      12.5017,
+      1.5
+     ],
+     "max": [
+      9.4612,
+      12.5817,
+      2.1
+     ],
+     "size": [
+      0.05,
+      0.08,
+      0.6
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      9.4112,
+      12.5017,
+      1.5
+     ],
+     "max": [
+      9.4612,
+      12.5817,
+      2.1
+     ],
+     "size": [
+      0.05,
+      0.08,
+      0.6
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "WindowSash_Group_h_o009",
+    "definition": "Grupo56#1",
+    "pid": 51094,
+    "path": "WindowSash_Group_h_o009",
+    "paths": [
+     "WindowSash_Group_h_o009"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      8.9736,
+      12.3891,
+      1.5608
+     ],
+     "max": [
+      9.4112,
+      12.5649,
+      2.0562
+     ],
+     "size": [
+      0.4377,
+      0.1758,
+      0.4954
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      8.9736,
+      12.3891,
+      1.5608
+     ],
+     "max": [
+      9.4112,
+      12.5649,
+      2.0562
+     ],
+     "size": [
+      0.4377,
+      0.1758,
+      0.4954
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     -0.1032,
+     3.3159
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.965926,
+     -0.258819,
+     0.0,
+     0.0,
+     0.258819,
+     0.965926,
+     0.0,
+     0.0,
+     -4.064236,
+     130.546384,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 5
+   },
+   {
+    "name": "",
+    "definition": "Grupo61#1",
+    "pid": 51224,
+    "path": "WindowSash_Group_h_o009/Grupo61#1",
+    "paths": [
+     "WindowSash_Group_h_o009/Grupo61#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      8.9736,
+      12.5177,
+      1.55
+     ],
+     "max": [
+      9.4112,
+      12.5657,
+      1.58
+     ],
+     "size": [
+      0.4377,
+      0.048,
+      0.03
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      8.9736,
+      12.3891,
+      1.5608
+     ],
+     "max": [
+      9.4112,
+      12.4432,
+      1.6022
+     ],
+     "size": [
+      0.4377,
+      0.0541,
+      0.0414
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     -0.1032,
+     3.3159
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.965926,
+     -0.258819,
+     0.0,
+     0.0,
+     0.258819,
+     0.965926,
+     0.0,
+     0.0,
+     -4.064236,
+     130.546384,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo62#1",
+    "pid": 51256,
+    "path": "WindowSash_Group_h_o009/Grupo62#1",
+    "paths": [
+     "WindowSash_Group_h_o009/Grupo62#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      8.9736,
+      12.5177,
+      2.02
+     ],
+     "max": [
+      9.4112,
+      12.5657,
+      2.05
+     ],
+     "size": [
+      0.4377,
+      0.048,
+      0.03
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      8.9736,
+      12.5107,
+      2.0148
+     ],
+     "max": [
+      9.4112,
+      12.5649,
+      2.0562
+     ],
+     "size": [
+      0.4377,
+      0.0541,
+      0.0414
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     -0.1032,
+     3.3159
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.965926,
+     -0.258819,
+     0.0,
+     0.0,
+     0.258819,
+     0.965926,
+     0.0,
+     0.0,
+     -4.064236,
+     130.546384,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo63#1",
+    "pid": 51288,
+    "path": "WindowSash_Group_h_o009/Grupo63#1",
+    "paths": [
+     "WindowSash_Group_h_o009/Grupo63#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      8.9736,
+      12.5177,
+      1.55
+     ],
+     "max": [
+      9.0036,
+      12.5657,
+      2.05
+     ],
+     "size": [
+      0.03,
+      0.048,
+      0.5
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      8.9736,
+      12.3891,
+      1.5608
+     ],
+     "max": [
+      9.0036,
+      12.5649,
+      2.0562
+     ],
+     "size": [
+      0.03,
+      0.1758,
+      0.4954
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     -0.1032,
+     3.3159
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.965926,
+     -0.258819,
+     0.0,
+     0.0,
+     0.258819,
+     0.965926,
+     0.0,
+     0.0,
+     -4.064236,
+     130.546384,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo64#1",
+    "pid": 51320,
+    "path": "WindowSash_Group_h_o009/Grupo64#1",
+    "paths": [
+     "WindowSash_Group_h_o009/Grupo64#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      9.3812,
+      12.5177,
+      1.55
+     ],
+     "max": [
+      9.4112,
+      12.5657,
+      2.05
+     ],
+     "size": [
+      0.03,
+      0.048,
+      0.5
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      9.3812,
+      12.3891,
+      1.5608
+     ],
+     "max": [
+      9.4112,
+      12.5649,
+      2.0562
+     ],
+     "size": [
+      0.03,
+      0.1758,
+      0.4954
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     -0.1032,
+     3.3159
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.965926,
+     -0.258819,
+     0.0,
+     0.0,
+     0.258819,
+     0.965926,
+     0.0,
+     0.0,
+     -4.064236,
+     130.546384,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo65#1",
+    "pid": 51352,
+    "path": "WindowSash_Group_h_o009/Grupo65#1",
+    "paths": [
+     "WindowSash_Group_h_o009/Grupo65#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      9.0036,
+      12.5417,
+      1.58
+     ],
+     "max": [
+      9.3812,
+      12.5417,
+      2.02
+     ],
+     "size": [
+      0.3777,
+      0.0,
+      0.44
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      9.0036,
+      12.42,
+      1.596
+     ],
+     "max": [
+      9.3812,
+      12.5339,
+      2.021
+     ],
+     "size": [
+      0.3777,
+      0.1139,
+      0.425
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     -0.1032,
+     3.3159
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.965926,
+     -0.258819,
+     0.0,
+     0.0,
+     0.258819,
+     0.965926,
+     0.0,
+     0.0,
+     -4.064236,
+     130.546384,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "WindowGlass_Group_h_o010",
+    "definition": "Grupo66#1",
+    "pid": 51388,
+    "path": "WindowGlass_Group_h_o010",
+    "paths": [
+     "WindowGlass_Group_h_o010"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      6.9951,
+      11.7698,
+      1.1
+     ],
+     "max": [
+      8.3214,
+      11.9058,
+      2.3
+     ],
+     "size": [
+      1.3262,
+      0.136,
+      1.2
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      6.9951,
+      11.7698,
+      1.1
+     ],
+     "max": [
+      8.3214,
+      11.9058,
+      2.3
+     ],
+     "size": [
+      1.3262,
+      0.136,
+      1.2
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 8
+   },
+   {
+    "name": "",
+    "definition": "Grupo67#1",
+    "pid": 51390,
+    "path": "WindowGlass_Group_h_o010/Grupo67#1",
+    "paths": [
+     "WindowGlass_Group_h_o010/Grupo67#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      6.9951,
+      11.7698,
+      2.05
+     ],
+     "max": [
+      8.3214,
+      11.9058,
+      2.3
+     ],
+     "size": [
+      1.3262,
+      0.136,
+      0.25
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      6.9951,
+      11.7698,
+      2.05
+     ],
+     "max": [
+      8.3214,
+      11.9058,
+      2.3
+     ],
+     "size": [
+      1.3262,
+      0.136,
+      0.25
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo68#1",
+    "pid": 51422,
+    "path": "WindowGlass_Group_h_o010/Grupo68#1",
+    "paths": [
+     "WindowGlass_Group_h_o010/Grupo68#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      6.9951,
+      11.7978,
+      1.1
+     ],
+     "max": [
+      8.3214,
+      11.8778,
+      1.15
+     ],
+     "size": [
+      1.3262,
+      0.08,
+      0.05
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      6.9951,
+      11.7978,
+      1.1
+     ],
+     "max": [
+      8.3214,
+      11.8778,
+      1.15
+     ],
+     "size": [
+      1.3262,
+      0.08,
+      0.05
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo69#1",
+    "pid": 51454,
+    "path": "WindowGlass_Group_h_o010/Grupo69#1",
+    "paths": [
+     "WindowGlass_Group_h_o010/Grupo69#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      6.9951,
+      11.7978,
+      2.0
+     ],
+     "max": [
+      8.3214,
+      11.8778,
+      2.05
+     ],
+     "size": [
+      1.3262,
+      0.08,
+      0.05
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      6.9951,
+      11.7978,
+      2.0
+     ],
+     "max": [
+      8.3214,
+      11.8778,
+      2.05
+     ],
+     "size": [
+      1.3262,
+      0.08,
+      0.05
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo70#1",
+    "pid": 51486,
+    "path": "WindowGlass_Group_h_o010/Grupo70#1",
+    "paths": [
+     "WindowGlass_Group_h_o010/Grupo70#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      6.9951,
+      11.7978,
+      1.1
+     ],
+     "max": [
+      7.0451,
+      11.8778,
+      2.05
+     ],
+     "size": [
+      0.05,
+      0.08,
+      0.95
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      6.9951,
+      11.7978,
+      1.1
+     ],
+     "max": [
+      7.0451,
+      11.8778,
+      2.05
+     ],
+     "size": [
+      0.05,
+      0.08,
+      0.95
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo71#1",
+    "pid": 51518,
+    "path": "WindowGlass_Group_h_o010/Grupo71#1",
+    "paths": [
+     "WindowGlass_Group_h_o010/Grupo71#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      8.2714,
+      11.7978,
+      1.1
+     ],
+     "max": [
+      8.3214,
+      11.8778,
+      2.05
+     ],
+     "size": [
+      0.05,
+      0.08,
+      0.95
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      8.2714,
+      11.7978,
+      1.1
+     ],
+     "max": [
+      8.3214,
+      11.8778,
+      2.05
+     ],
+     "size": [
+      0.05,
+      0.08,
+      0.95
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo72#1",
+    "pid": 51550,
+    "path": "WindowGlass_Group_h_o010/Grupo72#1",
+    "paths": [
+     "WindowGlass_Group_h_o010/Grupo72#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      7.6333,
+      11.7978,
+      1.15
+     ],
+     "max": [
+      7.6833,
+      11.8778,
+      2.0
+     ],
+     "size": [
+      0.05,
+      0.08,
+      0.85
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      7.6333,
+      11.7978,
+      1.15
+     ],
+     "max": [
+      7.6833,
+      11.8778,
+      2.0
+     ],
+     "size": [
+      0.05,
+      0.08,
+      0.85
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo73#1",
+    "pid": 51582,
+    "path": "WindowGlass_Group_h_o010/Grupo73#1",
+    "paths": [
+     "WindowGlass_Group_h_o010/Grupo73#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      7.0451,
+      11.8378,
+      1.15
+     ],
+     "max": [
+      7.6333,
+      11.8378,
+      2.0
+     ],
+     "size": [
+      0.5881,
+      0.0,
+      0.85
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      7.0451,
+      11.8378,
+      1.15
+     ],
+     "max": [
+      7.6333,
+      11.8378,
+      2.0
+     ],
+     "size": [
+      0.5881,
+      0.0,
+      0.85
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo74#1",
+    "pid": 51593,
+    "path": "WindowGlass_Group_h_o010/Grupo74#1",
+    "paths": [
+     "WindowGlass_Group_h_o010/Grupo74#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      7.6833,
+      11.8378,
+      1.15
+     ],
+     "max": [
+      8.2714,
+      11.8378,
+      2.0
+     ],
+     "size": [
+      0.5881,
+      0.0,
+      0.85
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      7.6833,
+      11.8378,
+      1.15
+     ],
+     "max": [
+      8.2714,
+      11.8378,
+      2.0
+     ],
+     "size": [
+      0.5881,
+      0.0,
+      0.85
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "GlazedBalcony_Group_h_o011",
+    "definition": "Grupo75#1",
+    "pid": 51604,
+    "path": "GlazedBalcony_Group_h_o011",
+    "paths": [
+     "GlazedBalcony_Group_h_o011"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      3.5182,
+      13.1756,
+      0.0
+     ],
+     "max": [
+      5.547,
+      13.3155,
+      2.7
+     ],
+     "size": [
+      2.0288,
+      0.1398,
+      2.7
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      3.5182,
+      13.1756,
+      0.0
+     ],
+     "max": [
+      5.547,
+      13.3155,
+      2.7
+     ],
+     "size": [
+      2.0288,
+      0.1398,
+      2.7
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 1
+   },
+   {
+    "name": "GlazedBalcony_h_o011_pane",
+    "definition": "Grupo76#1",
+    "pid": 51606,
+    "path": "GlazedBalcony_Group_h_o011/GlazedBalcony_h_o011_pane",
+    "paths": [
+     "GlazedBalcony_Group_h_o011/GlazedBalcony_h_o011_pane"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      3.5182,
+      13.1756,
+      0.0
+     ],
+     "max": [
+      5.547,
+      13.3155,
+      2.7
+     ],
+     "size": [
+      2.0288,
+      0.1398,
+      2.7
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      3.5182,
+      13.1756,
+      0.0
+     ],
+     "max": [
+      5.547,
+      13.3155,
+      2.7
+     ],
+     "size": [
+      2.0288,
+      0.1398,
+      2.7
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 0
+   }
+  ],
+  "materials": [
+   {
+    "name": "Sree_Complexion_2",
+    "display_name": "Sree_Complexion_2",
+    "rgb": [
+     165,
+     117,
+     93
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Complexion_3",
+    "display_name": "Sree_Complexion_3",
+    "rgb": [
+     119,
+     84,
+     67
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Laptop_1",
+    "display_name": "Sree_Laptop_1",
+    "rgb": [
+     146,
+     155,
+     160
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Pearls_2",
+    "display_name": "Sree_Pearls_2",
+    "rgb": [
+     198,
+     198,
+     198
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Dress_1",
+    "display_name": "Sree_Dress_1",
+    "rgb": [
+     26,
+     33,
+     51
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Laptop_2",
+    "display_name": "Sree_Laptop_2",
+    "rgb": [
+     130,
+     138,
+     142
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Complexion_1",
+    "display_name": "Sree_Complexion_1",
+    "rgb": [
+     181,
+     133,
+     110
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Hair",
+    "display_name": "Sree_Hair",
+    "rgb": [
+     15,
+     15,
+     15
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Dress_4",
+    "display_name": "Sree_Dress_4",
+    "rgb": [
+     17,
+     23,
+     35
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Nails_4",
+    "display_name": "Sree_Nails_4",
+    "rgb": [
+     181,
+     157,
+     146
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Dress_3",
+    "display_name": "Sree_Dress_3",
+    "rgb": [
+     25,
+     37,
+     61
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Dress_2",
+    "display_name": "Sree_Dress_2",
+    "rgb": [
+     24,
+     33,
+     53
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Pearls_1",
+    "display_name": "Sree_Pearls_1",
+    "rgb": [
+     252,
+     252,
+     252
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Watch_2",
+    "display_name": "Sree_Watch_2",
+    "rgb": [
+     43,
+     43,
+     43
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Watch_3",
+    "display_name": "Sree_Watch_3",
+    "rgb": [
+     53,
+     53,
+     53
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Watch_1",
+    "display_name": "Sree_Watch_1",
+    "rgb": [
+     15,
+     15,
+     15
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Laptop_3",
+    "display_name": "Sree_Laptop_3",
+    "rgb": [
+     193,
+     205,
+     211
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Shoes_1",
+    "display_name": "Sree_Shoes_1",
+    "rgb": [
+     23,
+     29,
+     43
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Shoes_2",
+    "display_name": "Sree_Shoes_2",
+    "rgb": [
+     48,
+     51,
+     58
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Shoes_3",
+    "display_name": "Sree_Shoes_3",
+    "rgb": [
+     67,
+     71,
+     81
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Shoes_4",
+    "display_name": "Sree_Shoes_4",
+    "rgb": [
+     17,
+     22,
+     33
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "plan_wall",
+    "display_name": "plan_wall",
+    "rgb": [
+     78,
+     78,
+     78
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "floor_r000",
+    "display_name": "floor_r000",
+    "rgb": [
+     253,
+     226,
+     192
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "floor_r001",
+    "display_name": "floor_r001",
+    "rgb": [
+     200,
+     230,
+     201
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "floor_r002",
+    "display_name": "floor_r002",
+    "rgb": [
+     187,
+     222,
+     251
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "floor_r003",
+    "display_name": "floor_r003",
+    "rgb": [
+     248,
+     187,
+     208
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "floor_r004",
+    "display_name": "floor_r004",
+    "rgb": [
+     220,
+     237,
+     200
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "floor_r005",
+    "display_name": "floor_r005",
+    "rgb": [
+     255,
+     224,
+     178
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "floor_r006",
+    "display_name": "floor_r006",
+    "rgb": [
+     209,
+     196,
+     233
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "floor_r007",
+    "display_name": "floor_r007",
+    "rgb": [
+     179,
+     229,
+     252
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "plan_parapet",
+    "display_name": "plan_parapet",
+    "rgb": [
+     130,
+     135,
+     140
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "plan_railing",
+    "display_name": "plan_railing",
+    "rgb": [
+     60,
+     62,
+     70
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "plan_glass",
+    "display_name": "plan_glass",
+    "rgb": [
+     124,
+     138,
+     181
+    ],
+    "alpha": 0.45,
+    "texture": null
+   },
+   {
+    "name": "plan_door",
+    "display_name": "plan_door",
+    "rgb": [
+     140,
+     95,
+     55
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "plan_window_sill",
+    "display_name": "plan_window_sill",
+    "rgb": [
+     130,
+     135,
+     140
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "plan_window_glass",
+    "display_name": "plan_window_glass",
+    "rgb": [
+     198,
+     222,
+     212
+    ],
+    "alpha": 0.32,
+    "texture": null
+   },
+   {
+    "name": "plan_window_frame",
+    "display_name": "plan_window_frame",
+    "rgb": [
+     238,
+     238,
+     240
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "plan_window_lintel",
+    "display_name": "plan_window_lintel",
+    "rgb": [
+     110,
+     115,
+     120
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "plan_passage_marker",
+    "display_name": "plan_passage_marker",
+    "rgb": [
+     102,
+     187,
+     230
+    ],
+    "alpha": 1.0,
+    "texture": null
+   }
+  ],
+  "tags": [
+   {
+    "name": "Layer0",
+    "visible": true
+   }
+  ],
+  "scenes": [],
+  "elapsed_s": 0.01,
+  "sketchup_version": "26.0.429"
+ },
+ "input_skp": "E:\\Claude\\apps\\sketchup-mcp\\runs\\l2_fp042_20261019\\P01_planta74_shell\\model.skp"
+}

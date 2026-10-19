@@ -4246,6 +4246,252 @@
       "blob_sha": "42f50d658683639ac9decb78d373c8463b9dc043",
       "blob_size": 1239741,
       "owner_group": "other_binary"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P01_planta74_shell/model.skp",
+      "blob_sha": "1254f5827c074503c1bf116db8db77631e483538",
+      "blob_size": 111957,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P01_planta74_shell/model_iso.png",
+      "blob_sha": "2ac14d41bf94502f6f322067cb2d861c94e74974",
+      "blob_size": 140885,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P01_planta74_shell/model_top.png",
+      "blob_sha": "2979ba98a994ddea487ced6c393e620768ca7ba7",
+      "blob_size": 29037,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/planta_74_furnished.skp",
+      "blob_sha": "25086ffffb86c298c431c762a889bd70d8229ef2",
+      "blob_size": 3359078,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/planta_74_furnished_after_iso.png",
+      "blob_sha": "d14c0a600448fcfc2e2693c04a5875362b113a0f",
+      "blob_size": 242861,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/planta_74_furnished_after_top.png",
+      "blob_sha": "16319186fbe9eafca46995512491d1255a048c20",
+      "blob_size": 88185,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/planta_74_furnished_before_top.png",
+      "blob_sha": "7fd2d32663deb12a8c98c71c757dbfb61c78c0fc",
+      "blob_size": 29027,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/A_S____TERRACO_SOCIAL___TERRACO_TECNICO_room_iso.png",
+      "blob_sha": "2278ce5e385d8113a1ef33e33dc154373d51bef1",
+      "blob_size": 119618,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/A_S____TERRACO_SOCIAL___TERRACO_TECNICO_room_top.png",
+      "blob_sha": "9afff407deb00a3cbec7f4f2917d085157a846a0",
+      "blob_size": 19772,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/BANHO_01_room_iso.png",
+      "blob_sha": "71c1b807a9bbef7b6eeda36cf43317989971cd55",
+      "blob_size": 93453,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/BANHO_01_room_top.png",
+      "blob_sha": "f6633d2fe9640da8ee92394b2e1330536ac87f93",
+      "blob_size": 31300,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/BANHO_02_room_iso.png",
+      "blob_sha": "b78f6d5ec13f0ed4efbb9dd7136a9abcb248761e",
+      "blob_size": 166101,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/BANHO_02_room_top.png",
+      "blob_sha": "6dbf450e292bbf17a5a6d0b0d6bf5d3851452f44",
+      "blob_size": 120371,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/COZINHA_room_iso.png",
+      "blob_sha": "f9999fd23b7898eae93dec762c2072f535cf3632",
+      "blob_size": 85583,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/COZINHA_room_top.png",
+      "blob_sha": "5ab1b2da5a6d2afac050a627966fba39d00ec00b",
+      "blob_size": 18100,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/LAVABO_room_iso.png",
+      "blob_sha": "d705cb7ab03a59445201ecaec3d3cefc7c4578ed",
+      "blob_size": 129813,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/LAVABO_room_top.png",
+      "blob_sha": "b82ed6824a0e87a7401a97aaf089bfb0eb499774",
+      "blob_size": 38039,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/SALA_DE_JANTAR___SALA_DE_ESTAR_room_iso.png",
+      "blob_sha": "0e098ad2a649df7bc39cc9bc306510565665050e",
+      "blob_size": 144756,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/SALA_DE_JANTAR___SALA_DE_ESTAR_room_top.png",
+      "blob_sha": "4e8e523bafd77ad378aea76c4add8f7a35461bab",
+      "blob_size": 36989,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/SUITE_01_room_iso.png",
+      "blob_sha": "7ae3b27be8a0dec7c0fb20711d645cc92ee3a06f",
+      "blob_size": 126647,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/SUITE_01_room_top.png",
+      "blob_sha": "28377b42696726caac65bf5de18647cdd7d60f6a",
+      "blob_size": 30263,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/SUITE_02_room_iso.png",
+      "blob_sha": "5746800475398d69b43b6b7671f621d185d97b5f",
+      "blob_size": 152049,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/SUITE_02_room_top.png",
+      "blob_sha": "911b143f94a4c958468d2803509b33b4525b789e",
+      "blob_size": 26791,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S01_quadrado_shell/model.skp",
+      "blob_sha": "626faa3c9da529fd6b1d8da19d2b7c38a975923b",
+      "blob_size": 72560,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S01_quadrado_shell/model_iso.png",
+      "blob_sha": "2aee5f6bd0f10984975ed77a688ff449681e6a88",
+      "blob_size": 58715,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S01_quadrado_shell/model_top.png",
+      "blob_sha": "c57af704c2b4499f064a5e1e9130e4f3bd64582d",
+      "blob_size": 9172,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_bedroom/furnished.skp",
+      "blob_sha": "920ee02e9502a74f25eb943150b4369d7e619e51",
+      "blob_size": 152966,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_bedroom/furnished_after_iso.png",
+      "blob_sha": "feffde1be0f1bb9ffcdda349906645cc01deeb59",
+      "blob_size": 72353,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_bedroom/furnished_after_top.png",
+      "blob_sha": "4ed935338fa83d643a529248be279fb2872a897a",
+      "blob_size": 13727,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_living/furnished.skp",
+      "blob_sha": "c67704b6a7a1bd6e05083243fa1ac3b6c04a8d23",
+      "blob_size": 150071,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_living/furnished_after_iso.png",
+      "blob_sha": "eec15141d306f85e2fbe6216dadd9da0faa1bd16",
+      "blob_size": 83966,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_living/furnished_after_top.png",
+      "blob_sha": "fb262ae0472301d2dd9e846b50e205c976b2cd25",
+      "blob_size": 18415,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S04_styled_living_large/furnished.skp",
+      "blob_sha": "e2cb0670c667f94e5d4c61621c66497ebe131773",
+      "blob_size": 606764,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S04_styled_living_large/furnished_after_iso.png",
+      "blob_sha": "4be25503cd7701e1d5fabbfe858f181f9e87c4be",
+      "blob_size": 121796,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S05_builders_before_fix/builders.skp",
+      "blob_sha": "032ee4a9bd9dd504d64b53d334184c79658a37df",
+      "blob_size": 234476,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S05_builders_before_fix/builders_iso.png",
+      "blob_sha": "4717517d2009a47237e1fc12eb63b83c39370c75",
+      "blob_size": 208771,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S05_builders_before_fix/builders_top.png",
+      "blob_sha": "148f3ce4ac309661e2c4cd1755c946028dbe3650",
+      "blob_size": 40167,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S08_vray_proof/vray.png",
+      "blob_sha": "6544137c2248d0681f47fb89c44988fa73708e6d",
+      "blob_size": 318551,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S09_builders_after_fix/builders.skp",
+      "blob_sha": "ae171ef85079931a7a306670f8b55eeaf6de60f1",
+      "blob_size": 235683,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S09_builders_after_fix/builders_iso.png",
+      "blob_sha": "9e2b5cbad1e4615e4e323a2820a7017af3fc3304",
+      "blob_size": 199342,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S09_builders_after_fix/builders_top.png",
+      "blob_sha": "d416cb2590f186ca82ad136fe7980ecf9d2ca389",
+      "blob_size": 64682,
+      "owner_group": "artifacts"
     }
   ]
 }

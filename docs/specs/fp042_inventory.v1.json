@@ -14193,6 +14193,671 @@
       "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
       "document_owner": "regression_test_suite",
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/integrity/hashes_after.sha256",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/integrity/hashes_before.sha256",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/integrity/S08_scene_hash_before.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P01_planta74_shell/geometry_report.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P01_planta74_shell/inspect.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P01_planta74_shell/model.skp",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P01_planta74_shell/model_iso.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P01_planta74_shell/model_top.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P01_planta74_shell/probe_result.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/inspect.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/P02_furnish_mcp.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/planta_74_furnished.skp",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/planta_74_furnished_after_iso.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/planta_74_furnished_after_top.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/planta_74_furnished_before_top.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/planta_74_furnished_log.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/planta_check.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/A_S____TERRACO_SOCIAL___TERRACO_TECNICO_room_iso.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/A_S____TERRACO_SOCIAL___TERRACO_TECNICO_room_top.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/BANHO_01_room_iso.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/BANHO_01_room_top.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/BANHO_02_room_iso.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/BANHO_02_room_top.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/COZINHA_room_iso.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/COZINHA_room_top.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/isolated_report.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/LAVABO_room_iso.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/LAVABO_room_top.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/SALA_DE_JANTAR___SALA_DE_ESTAR_room_iso.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/SALA_DE_JANTAR___SALA_DE_ESTAR_room_top.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/SUITE_01_room_iso.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/SUITE_01_room_top.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/SUITE_02_room_iso.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/SUITE_02_room_top.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P04_room_edit/edit.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P04_room_edit/inspect.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P05_sofa_premium/inspect_approved.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P07_scale_fix/geometry_report.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P07_scale_fix/P06_mcp_build_quadrado.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/README.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S01_quadrado_shell/build_result.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S01_quadrado_shell/geometry_report.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S01_quadrado_shell/inspect.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S01_quadrado_shell/model.skp",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S01_quadrado_shell/model_iso.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S01_quadrado_shell/model_top.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S01_quadrado_shell/probe_result.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_bedroom/compare.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_bedroom/furnished.skp",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_bedroom/furnished_after_iso.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_bedroom/furnished_after_top.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_bedroom/furnished_log.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_living/compare.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_living/furnished.skp",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_living/furnished_after_iso.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_living/furnished_after_top.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_living/furnished_log.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S04_styled_living_large/compare.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S04_styled_living_large/furnished.skp",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S04_styled_living_large/furnished_after_iso.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S04_styled_living_large/furnished_log.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S05_builders_before_fix/builders.skp",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S05_builders_before_fix/builders_iso.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S05_builders_before_fix/builders_top.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S05_builders_before_fix/compare.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S05_builders_before_fix/probe_result.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S06_mcp_after_fix/suite.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S06_mcp_before_fix/I01_retry.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S06_mcp_before_fix/suite_stdout.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S07_repros/job_repro.py",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S07_repros/P02_fh.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S07_repros/pending_read_repro.py",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S07_repros/stdin_repro.py",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S08_vray_proof/S08_vray_proof_result.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S08_vray_proof/vray.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S08_vray_proof/vray_export_log.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S09_builders_after_fix/builders.skp",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S09_builders_after_fix/builders_iso.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S09_builders_after_fix/builders_top.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S09_builders_after_fix/compare.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S09_builders_after_fix/probe_result.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S10_cabinet/cabinet_plan.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/SHA256SUMS",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/builders_fixture.py",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/closepid.py",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/coll_summary.py",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/compare_furnish.py",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/geometry_probe.rb",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/mcp_call.py",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/mcp_suite.py",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/planta_check.py",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/planta_rooms_isolated.py",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/probe.py",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/run.py",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/synth_furnish.py",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     }
   ]
 }

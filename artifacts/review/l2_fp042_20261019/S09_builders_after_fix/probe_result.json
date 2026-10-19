@@ -1,0 +1,1749 @@
+{
+  "ok": true,
+  "job": "geometry_probe",
+  "topology": {
+    "PlanShell_Group": [
+      {
+        "faces": 14,
+        "edges": 36,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "Floor_Group_r_main": [
+      {
+        "faces": 1,
+        "edges": 4,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "WindowGlass_Group_win_south": [
+      {
+        "faces": 24,
+        "edges": 48,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "WindowSash_Group_win_south": [
+      {
+        "faces": 25,
+        "edges": 52,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "BUILDERS · sofa_straight@0": [
+      {
+        "faces": 152,
+        "edges": 316,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "BUILDERS · sofa_straight@90": [
+      {
+        "faces": 152,
+        "edges": 316,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "BUILDERS · sofa_straight@30": [
+      {
+        "faces": 152,
+        "edges": 316,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "BUILDERS · sofa_chaise_r@0": [
+      {
+        "faces": 209,
+        "edges": 436,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "BUILDERS · sofa_chaise_r@90": [
+      {
+        "faces": 209,
+        "edges": 436,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "BUILDERS · sofa_chaise_r@30": [
+      {
+        "faces": 209,
+        "edges": 436,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "BUILDERS · poltrona@0": [
+      {
+        "faces": 89,
+        "edges": 184,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "BUILDERS · poltrona@90": [
+      {
+        "faces": 89,
+        "edges": 184,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "BUILDERS · poltrona@30": [
+      {
+        "faces": 89,
+        "edges": 184,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "BUILDERS · cama_queen@0": [
+      {
+        "faces": 68,
+        "edges": 144,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "BUILDERS · cama_queen@90": [
+      {
+        "faces": 68,
+        "edges": 144,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "BUILDERS · cama_queen@30": [
+      {
+        "faces": 68,
+        "edges": 144,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "BUILDERS · guarda_roupa@0": [
+      {
+        "faces": 48,
+        "edges": 96,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "BUILDERS · guarda_roupa@90": [
+      {
+        "faces": 48,
+        "edges": 96,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "BUILDERS · guarda_roupa@30": [
+      {
+        "faces": 48,
+        "edges": 96,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "BUILDERS · criado_mudo@0": [
+      {
+        "faces": 48,
+        "edges": 96,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "BUILDERS · criado_mudo@90": [
+      {
+        "faces": 48,
+        "edges": 96,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "BUILDERS · criado_mudo@30": [
+      {
+        "faces": 48,
+        "edges": 96,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ]
+  },
+  "rays": [
+    {
+      "id": "sofa_straight@30|arm_left|42|18.907,1.089",
+      "hit": false
+    },
+    {
+      "id": "sofa_straight@30|arm_left|42|19.378,1.842",
+      "hit": true,
+      "distance_m": 0.6702,
+      "point_m": [
+        19.3779,
+        1.8415,
+        0.4498
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "seat_1_top",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|arm_right|43|20.657,2.099",
+      "hit": true,
+      "distance_m": 0.6702,
+      "point_m": [
+        20.6565,
+        2.0988,
+        0.4498
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "seat_3_top",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|arm_right|43|21.127,2.852",
+      "hit": false
+    },
+    {
+      "id": "sofa_straight@30|seat_1|45|19.163,1.326",
+      "hit": true,
+      "distance_m": 0.2917,
+      "point_m": [
+        19.163,
+        1.3261,
+        0.6183
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "arm_left",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|seat_1|45|19.795,1.958",
+      "hit": true,
+      "distance_m": 0.4601,
+      "point_m": [
+        19.7952,
+        1.9584,
+        0.4498
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "seat_2_top",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|seat_1|45|19.163,1.958",
+      "hit": true,
+      "distance_m": 0.0601,
+      "point_m": [
+        19.163,
+        1.9584,
+        0.8499
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "back_1_top",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|seat_1|45|19.795,1.326",
+      "hit": false
+    },
+    {
+      "id": "sofa_straight@30|seat_1_top|46|19.218,1.381",
+      "hit": true,
+      "distance_m": 0.3298,
+      "point_m": [
+        19.2176,
+        1.3807,
+        0.62
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "arm_left",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|seat_1_top|46|19.741,1.904",
+      "hit": true,
+      "distance_m": 0.5799,
+      "point_m": [
+        19.7406,
+        1.9037,
+        0.37
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "seat_2",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|seat_1_top|46|19.218,1.904",
+      "hit": true,
+      "distance_m": 0.1398,
+      "point_m": [
+        19.2176,
+        1.9037,
+        0.81
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "back_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|seat_1_top|46|19.741,1.381",
+      "hit": true,
+      "distance_m": 0.6798,
+      "point_m": [
+        19.7406,
+        1.3807,
+        0.27
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "base_main",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|seat_2|47|19.709,1.641",
+      "hit": true,
+      "distance_m": 0.4601,
+      "point_m": [
+        19.7086,
+        1.6411,
+        0.4498
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "seat_1_top",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|seat_2|47|20.341,2.273",
+      "hit": true,
+      "distance_m": 0.4601,
+      "point_m": [
+        20.3408,
+        2.2733,
+        0.4498
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "seat_3_top",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|seat_2|47|19.709,2.273",
+      "hit": true,
+      "distance_m": 0.0601,
+      "point_m": [
+        19.7086,
+        2.2733,
+        0.8499
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "back_2_top",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|seat_2|47|20.341,1.641",
+      "hit": false
+    },
+    {
+      "id": "sofa_straight@30|seat_2_top|48|19.763,1.696",
+      "hit": true,
+      "distance_m": 0.5799,
+      "point_m": [
+        19.7632,
+        1.6957,
+        0.37
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "seat_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|seat_2_top|48|20.286,2.219",
+      "hit": true,
+      "distance_m": 0.5799,
+      "point_m": [
+        20.2862,
+        2.2187,
+        0.37
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "seat_3",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|seat_2_top|48|19.763,2.219",
+      "hit": true,
+      "distance_m": 0.1398,
+      "point_m": [
+        19.7632,
+        2.2187,
+        0.81
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "back_2",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|seat_2_top|48|20.286,1.696",
+      "hit": true,
+      "distance_m": 0.6798,
+      "point_m": [
+        20.2862,
+        1.6957,
+        0.27
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "base_main",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|seat_3|49|20.254,1.956",
+      "hit": true,
+      "distance_m": 0.4601,
+      "point_m": [
+        20.2542,
+        1.956,
+        0.4498
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "seat_2_top",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|seat_3|49|20.886,2.588",
+      "hit": true,
+      "distance_m": 0.2918,
+      "point_m": [
+        20.8864,
+        2.5883,
+        0.6182
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "arm_right",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|seat_3|49|20.254,2.588",
+      "hit": true,
+      "distance_m": 0.0601,
+      "point_m": [
+        20.2542,
+        2.5883,
+        0.8499
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "back_3_top",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|seat_3|49|20.886,1.956",
+      "hit": false
+    },
+    {
+      "id": "sofa_straight@30|seat_3_top|50|20.309,2.011",
+      "hit": true,
+      "distance_m": 0.5799,
+      "point_m": [
+        20.3088,
+        2.0107,
+        0.37
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "seat_2",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|seat_3_top|50|20.832,2.534",
+      "hit": true,
+      "distance_m": 0.3298,
+      "point_m": [
+        20.8318,
+        2.5337,
+        0.62
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "arm_right",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|seat_3_top|50|20.309,2.534",
+      "hit": true,
+      "distance_m": 0.1398,
+      "point_m": [
+        20.3088,
+        2.5337,
+        0.81
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "back_3",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|seat_3_top|50|20.832,2.011",
+      "hit": true,
+      "distance_m": 0.6798,
+      "point_m": [
+        20.8318,
+        2.0107,
+        0.27
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "base_main",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|back_1|51|19.029,1.828",
+      "hit": true,
+      "distance_m": 0.723,
+      "point_m": [
+        19.0287,
+        1.8283,
+        0.587
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "arm_left",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|back_1|51|19.505,2.191",
+      "hit": true,
+      "distance_m": 1.04,
+      "point_m": [
+        19.5052,
+        2.1913,
+        0.27
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "base_main",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|back_1|51|19.029,2.191",
+      "hit": false
+    },
+    {
+      "id": "sofa_straight@30|back_1|51|19.505,1.828",
+      "hit": true,
+      "distance_m": 0.8602,
+      "point_m": [
+        19.5052,
+        1.8283,
+        0.4498
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "seat_1_top",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|back_1_top|52|19.08,2.143",
+      "hit": false
+    },
+    {
+      "id": "sofa_straight@30|back_1_top|52|19.416,1.943",
+      "hit": true,
+      "distance_m": 0.5799,
+      "point_m": [
+        19.4163,
+        1.9426,
+        0.77
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "back_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|back_2|53|19.574,2.143",
+      "hit": true,
+      "distance_m": 1.04,
+      "point_m": [
+        19.5742,
+        2.1432,
+        0.27
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "base_main",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|back_2|53|20.051,2.506",
+      "hit": true,
+      "distance_m": 1.04,
+      "point_m": [
+        20.0508,
+        2.5062,
+        0.27
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "base_main",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|back_2|53|19.574,2.506",
+      "hit": false
+    },
+    {
+      "id": "sofa_straight@30|back_2|53|20.051,2.143",
+      "hit": true,
+      "distance_m": 0.8602,
+      "point_m": [
+        20.0508,
+        2.1432,
+        0.4498
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "seat_2_top",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|back_2_top|54|19.625,2.457",
+      "hit": false
+    },
+    {
+      "id": "sofa_straight@30|back_2_top|54|19.962,2.258",
+      "hit": true,
+      "distance_m": 0.5799,
+      "point_m": [
+        19.9619,
+        2.2575,
+        0.77
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "back_2",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|back_3|55|20.12,2.458",
+      "hit": true,
+      "distance_m": 1.04,
+      "point_m": [
+        20.1198,
+        2.4585,
+        0.27
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "base_main",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|back_3|55|20.596,2.821",
+      "hit": true,
+      "distance_m": 0.723,
+      "point_m": [
+        20.5964,
+        2.8212,
+        0.587
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "arm_right",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|back_3|55|20.12,2.821",
+      "hit": false
+    },
+    {
+      "id": "sofa_straight@30|back_3|55|20.596,2.458",
+      "hit": true,
+      "distance_m": 0.8602,
+      "point_m": [
+        20.5964,
+        2.4585,
+        0.4498
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "seat_3_top",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_straight@30|back_3_top|56|20.171,2.773",
+      "hit": false
+    },
+    {
+      "id": "sofa_straight@30|back_3_top|56|20.507,2.573",
+      "hit": true,
+      "distance_m": 0.5799,
+      "point_m": [
+        20.5075,
+        2.5725,
+        0.77
+      ],
+      "path": [
+        "BUILDERS · sofa_straight@30",
+        "back_3",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|arm_left|115|18.746,5.367",
+      "hit": false
+    },
+    {
+      "id": "sofa_chaise_r@30|arm_left|115|19.217,6.12",
+      "hit": true,
+      "distance_m": 0.7501,
+      "point_m": [
+        19.2171,
+        6.1199,
+        0.37
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "seat_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|arm_right|116|20.496,6.377",
+      "hit": true,
+      "distance_m": 0.6699,
+      "point_m": [
+        20.4958,
+        6.3772,
+        0.4501
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "seat_chaise_2",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|arm_right|116|20.967,7.13",
+      "hit": false
+    },
+    {
+      "id": "sofa_chaise_r@30|seat_1|120|19.002,5.604",
+      "hit": true,
+      "distance_m": 0.2918,
+      "point_m": [
+        19.0022,
+        5.6045,
+        0.6182
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "arm_left",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|seat_1|120|19.412,6.108",
+      "hit": true,
+      "distance_m": 0.4601,
+      "point_m": [
+        19.4122,
+        6.1085,
+        0.4498
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "seat_2_top",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|seat_1|120|19.002,6.108",
+      "hit": true,
+      "distance_m": 0.14,
+      "point_m": [
+        19.0022,
+        6.1085,
+        0.77
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "back_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|seat_1|120|19.412,5.604",
+      "hit": true,
+      "distance_m": 0.64,
+      "point_m": [
+        19.4122,
+        5.6045,
+        0.27
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "base_main",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|seat_1_top|121|19.057,5.659",
+      "hit": true,
+      "distance_m": 0.3298,
+      "point_m": [
+        19.0568,
+        5.6591,
+        0.62
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "arm_left",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|seat_1_top|121|19.358,6.054",
+      "hit": true,
+      "distance_m": 0.5799,
+      "point_m": [
+        19.3576,
+        6.0538,
+        0.37
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "seat_2",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|seat_2|122|19.326,5.791",
+      "hit": true,
+      "distance_m": 0.4601,
+      "point_m": [
+        19.3256,
+        5.7912,
+        0.4498
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "seat_1_top",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|seat_2|122|19.736,6.295",
+      "hit": true,
+      "distance_m": 0.4601,
+      "point_m": [
+        19.7356,
+        6.2951,
+        0.4498
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "seat_3_top",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|seat_2|122|19.326,6.295",
+      "hit": true,
+      "distance_m": 0.14,
+      "point_m": [
+        19.3256,
+        6.2951,
+        0.77
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "back_2",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|seat_2|122|19.736,5.791",
+      "hit": true,
+      "distance_m": 0.64,
+      "point_m": [
+        19.7356,
+        5.7912,
+        0.27
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "base_main",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|seat_2_top|123|19.38,5.846",
+      "hit": true,
+      "distance_m": 0.5799,
+      "point_m": [
+        19.3802,
+        5.8458,
+        0.37
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "seat_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|seat_2_top|123|19.681,6.241",
+      "hit": true,
+      "distance_m": 0.5799,
+      "point_m": [
+        19.6809,
+        6.2405,
+        0.37
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "seat_3",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|seat_3|124|19.649,5.978",
+      "hit": true,
+      "distance_m": 0.4601,
+      "point_m": [
+        19.6489,
+        5.9779,
+        0.4498
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "seat_2_top",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|seat_3|124|20.059,6.482",
+      "hit": true,
+      "distance_m": 0.4599,
+      "point_m": [
+        20.0589,
+        6.4818,
+        0.4501
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "seat_chaise_2",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|seat_3|124|19.649,6.482",
+      "hit": true,
+      "distance_m": 0.14,
+      "point_m": [
+        19.6489,
+        6.4818,
+        0.77
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "back_3",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|seat_3|124|20.059,5.978",
+      "hit": true,
+      "distance_m": 0.64,
+      "point_m": [
+        20.0589,
+        5.9779,
+        0.27
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "base_main",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|seat_3_top|125|19.704,6.032",
+      "hit": true,
+      "distance_m": 0.5799,
+      "point_m": [
+        19.7035,
+        6.0325,
+        0.37
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "seat_2",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|seat_3_top|125|20.004,6.427",
+      "hit": true,
+      "distance_m": 0.4997,
+      "point_m": [
+        20.0043,
+        6.4272,
+        0.4501
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "seat_chaise_2",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|seat_chaise_1|126|20.219,5.429",
+      "hit": false
+    },
+    {
+      "id": "sofa_chaise_r@30|seat_chaise_1|126|21.136,6.364",
+      "hit": false
+    },
+    {
+      "id": "sofa_chaise_r@30|seat_chaise_1|126|20.219,6.364",
+      "hit": true,
+      "distance_m": 0.5,
+      "point_m": [
+        20.2189,
+        6.3645,
+        0.4501
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "seat_chaise_2",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|seat_chaise_1|126|21.136,5.429",
+      "hit": false
+    },
+    {
+      "id": "sofa_chaise_r@30|seat_chaise_2|127|19.929,6.166",
+      "hit": true,
+      "distance_m": 0.5003,
+      "point_m": [
+        19.9288,
+        6.1656,
+        0.4498
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "seat_3_top",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|seat_chaise_2|127|20.711,6.867",
+      "hit": true,
+      "distance_m": 0.3301,
+      "point_m": [
+        20.7107,
+        6.8669,
+        0.62
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "arm_right",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|seat_chaise_2|127|19.929,6.867",
+      "hit": true,
+      "distance_m": 0.1,
+      "point_m": [
+        19.9288,
+        6.8669,
+        0.8501
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "back_chaise",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|seat_chaise_2|127|20.711,6.166",
+      "hit": true,
+      "distance_m": 0.5,
+      "point_m": [
+        20.7107,
+        6.1656,
+        0.4501
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "seat_chaise_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|back_1|128|18.868,6.107",
+      "hit": true,
+      "distance_m": 0.7231,
+      "point_m": [
+        18.8679,
+        6.1069,
+        0.5869
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "arm_left",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|back_1|128|19.122,6.341",
+      "hit": true,
+      "distance_m": 1.04,
+      "point_m": [
+        19.1221,
+        6.3411,
+        0.27
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "base_main",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|back_1|128|18.868,6.341",
+      "hit": false
+    },
+    {
+      "id": "sofa_chaise_r@30|back_1|128|19.122,6.107",
+      "hit": true,
+      "distance_m": 0.9401,
+      "point_m": [
+        19.1221,
+        6.1069,
+        0.37
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "seat_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|back_2|130|19.191,6.293",
+      "hit": true,
+      "distance_m": 1.04,
+      "point_m": [
+        19.1912,
+        6.2933,
+        0.27
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "base_main",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|back_2|130|19.445,6.528",
+      "hit": true,
+      "distance_m": 1.04,
+      "point_m": [
+        19.4455,
+        6.5278,
+        0.27
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "base_main",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|back_2|130|19.191,6.528",
+      "hit": false
+    },
+    {
+      "id": "sofa_chaise_r@30|back_2|130|19.445,6.293",
+      "hit": true,
+      "distance_m": 0.9401,
+      "point_m": [
+        19.4455,
+        6.2933,
+        0.37
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "seat_2",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|back_3|132|19.515,6.48",
+      "hit": true,
+      "distance_m": 1.04,
+      "point_m": [
+        19.5146,
+        6.48,
+        0.27
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "base_main",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|back_3|132|19.769,6.714",
+      "hit": true,
+      "distance_m": 0.4999,
+      "point_m": [
+        19.7688,
+        6.7145,
+        0.8101
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "back_chaise",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|back_3|132|19.515,6.714",
+      "hit": false
+    },
+    {
+      "id": "sofa_chaise_r@30|back_3|132|19.769,6.48",
+      "hit": true,
+      "distance_m": 0.9401,
+      "point_m": [
+        19.7688,
+        6.48,
+        0.37
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "seat_3",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|back_chaise|134|19.791,6.642",
+      "hit": true,
+      "distance_m": 0.5801,
+      "point_m": [
+        19.7909,
+        6.6418,
+        0.77
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "back_3",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|back_chaise|134|20.436,7.106",
+      "hit": true,
+      "distance_m": 0.7601,
+      "point_m": [
+        20.4356,
+        7.1057,
+        0.5901
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "arm_right",
+        "Face"
+      ]
+    },
+    {
+      "id": "sofa_chaise_r@30|back_chaise|134|19.791,7.106",
+      "hit": false
+    },
+    {
+      "id": "sofa_chaise_r@30|back_chaise|134|20.436,6.642",
+      "hit": true,
+      "distance_m": 0.9,
+      "point_m": [
+        20.4356,
+        6.6418,
+        0.4501
+      ],
+      "path": [
+        "BUILDERS · sofa_chaise_r@30",
+        "seat_chaise_2",
+        "Face"
+      ]
+    },
+    {
+      "id": "poltrona@30|shell_back|162|19.445,9.994",
+      "hit": false
+    },
+    {
+      "id": "poltrona@30|shell_back|162|20.23,10.569",
+      "hit": false
+    },
+    {
+      "id": "poltrona@30|shell_back|162|19.445,10.569",
+      "hit": false
+    },
+    {
+      "id": "poltrona@30|shell_back|162|20.23,9.994",
+      "hit": true,
+      "distance_m": 1.0301,
+      "point_m": [
+        20.2296,
+        9.9939,
+        0.4298
+      ],
+      "path": [
+        "BUILDERS · poltrona@30",
+        "seat_1_top",
+        "Face"
+      ]
+    },
+    {
+      "id": "poltrona@30|arm_left|163|19.58,9.431",
+      "hit": false
+    },
+    {
+      "id": "poltrona@30|arm_left|163|19.931,9.976",
+      "hit": true,
+      "distance_m": 0.7103,
+      "point_m": [
+        19.9309,
+        9.9759,
+        0.4298
+      ],
+      "path": [
+        "BUILDERS · poltrona@30",
+        "seat_1_top",
+        "Face"
+      ]
+    },
+    {
+      "id": "poltrona@30|arm_right|164|20.204,9.791",
+      "hit": true,
+      "distance_m": 0.7103,
+      "point_m": [
+        20.2037,
+        9.7909,
+        0.4298
+      ],
+      "path": [
+        "BUILDERS · poltrona@30",
+        "seat_1_top",
+        "Face"
+      ]
+    },
+    {
+      "id": "poltrona@30|arm_right|164|20.554,10.336",
+      "hit": false
+    },
+    {
+      "id": "poltrona@30|seat_1|165|19.796,9.582",
+      "hit": true,
+      "distance_m": 0.2501,
+      "point_m": [
+        19.796,
+        9.5816,
+        0.6401
+      ],
+      "path": [
+        "BUILDERS · poltrona@30",
+        "arm_left",
+        "Face"
+      ]
+    },
+    {
+      "id": "poltrona@30|seat_1|165|20.364,10.142",
+      "hit": true,
+      "distance_m": 0.2501,
+      "point_m": [
+        20.3637,
+        10.142,
+        0.6401
+      ],
+      "path": [
+        "BUILDERS · poltrona@30",
+        "arm_right",
+        "Face"
+      ]
+    },
+    {
+      "id": "poltrona@30|seat_1|165|19.796,10.142",
+      "hit": true,
+      "distance_m": 0.4901,
+      "point_m": [
+        19.796,
+        10.142,
+        0.4
+      ],
+      "path": [
+        "BUILDERS · poltrona@30",
+        "back_cushion",
+        "Face"
+      ]
+    },
+    {
+      "id": "poltrona@30|seat_1|165|20.364,9.582",
+      "hit": false
+    },
+    {
+      "id": "poltrona@30|seat_1_top|166|19.851,9.636",
+      "hit": true,
+      "distance_m": 0.2897,
+      "point_m": [
+        19.8506,
+        9.6362,
+        0.6401
+      ],
+      "path": [
+        "BUILDERS · poltrona@30",
+        "arm_left",
+        "Face"
+      ]
+    },
+    {
+      "id": "poltrona@30|seat_1_top|166|20.309,10.087",
+      "hit": true,
+      "distance_m": 0.2897,
+      "point_m": [
+        20.3091,
+        10.0874,
+        0.6401
+      ],
+      "path": [
+        "BUILDERS · poltrona@30",
+        "arm_right",
+        "Face"
+      ]
+    },
+    {
+      "id": "poltrona@30|seat_1_top|166|19.851,10.087",
+      "hit": true,
+      "distance_m": 0.5297,
+      "point_m": [
+        19.8506,
+        10.0874,
+        0.4
+      ],
+      "path": [
+        "BUILDERS · poltrona@30",
+        "back_cushion",
+        "Face"
+      ]
+    },
+    {
+      "id": "poltrona@30|seat_1_top|166|20.309,9.636",
+      "hit": false
+    },
+    {
+      "id": "poltrona@30|back_cushion|167|19.68,10.353",
+      "hit": true,
+      "distance_m": 0.5403,
+      "point_m": [
+        19.6799,
+        10.3528,
+        0.9199
+      ],
+      "path": [
+        "BUILDERS · poltrona@30",
+        "shell_back",
+        "Face"
+      ]
+    },
+    {
+      "id": "poltrona@30|back_cushion|167|20.095,10.037",
+      "hit": true,
+      "distance_m": 1.0304,
+      "point_m": [
+        20.095,
+        10.0368,
+        0.4298
+      ],
+      "path": [
+        "BUILDERS · poltrona@30",
+        "seat_1_top",
+        "Face"
+      ]
+    },
+    {
+      "id": "cama_queen@30|colchao|188|18.928,12.855",
+      "hit": false
+    },
+    {
+      "id": "cama_queen@30|colchao|188|21.072,15.145",
+      "hit": false
+    },
+    {
+      "id": "cama_queen@30|colchao|188|18.928,15.145",
+      "hit": false
+    },
+    {
+      "id": "cama_queen@30|colchao|188|21.072,12.855",
+      "hit": false
+    },
+    {
+      "id": "cama_queen@30|travesseiro_1|189|19.147,14.304",
+      "hit": true,
+      "distance_m": 0.66,
+      "point_m": [
+        19.1473,
+        14.3037,
+        0.5499
+      ],
+      "path": [
+        "BUILDERS · cama_queen@30",
+        "colchao",
+        "Face"
+      ]
+    },
+    {
+      "id": "cama_queen@30|travesseiro_1|189|19.6,14.705",
+      "hit": true,
+      "distance_m": 0.66,
+      "point_m": [
+        19.6004,
+        14.7053,
+        0.5499
+      ],
+      "path": [
+        "BUILDERS · cama_queen@30",
+        "colchao",
+        "Face"
+      ]
+    },
+    {
+      "id": "cama_queen@30|travesseiro_1|189|19.147,14.705",
+      "hit": false
+    },
+    {
+      "id": "cama_queen@30|travesseiro_1|189|19.6,14.304",
+      "hit": true,
+      "distance_m": 0.66,
+      "point_m": [
+        19.6004,
+        14.3037,
+        0.5499
+      ],
+      "path": [
+        "BUILDERS · cama_queen@30",
+        "colchao",
+        "Face"
+      ]
+    },
+    {
+      "id": "cama_queen@30|travesseiro_2|190|19.65,14.594",
+      "hit": true,
+      "distance_m": 0.66,
+      "point_m": [
+        19.6497,
+        14.5936,
+        0.5499
+      ],
+      "path": [
+        "BUILDERS · cama_queen@30",
+        "colchao",
+        "Face"
+      ]
+    },
+    {
+      "id": "cama_queen@30|travesseiro_2|190|20.103,14.995",
+      "hit": true,
+      "distance_m": 0.66,
+      "point_m": [
+        20.1026,
+        14.9954,
+        0.5499
+      ],
+      "path": [
+        "BUILDERS · cama_queen@30",
+        "colchao",
+        "Face"
+      ]
+    },
+    {
+      "id": "cama_queen@30|travesseiro_2|190|19.65,14.995",
+      "hit": false
+    },
+    {
+      "id": "cama_queen@30|travesseiro_2|190|20.103,14.594",
+      "hit": true,
+      "distance_m": 0.66,
+      "point_m": [
+        20.1026,
+        14.5936,
+        0.5499
+      ],
+      "path": [
+        "BUILDERS · cama_queen@30",
+        "colchao",
+        "Face"
+      ]
+    },
+    {
+      "id": "cama_queen@30|manta|191|19.6,12.934",
+      "hit": false
+    },
+    {
+      "id": "cama_queen@30|manta|191|21.014,14.0",
+      "hit": false
+    },
+    {
+      "id": "cama_queen@30|manta|191|19.6,14.0",
+      "hit": true,
+      "distance_m": 0.5701,
+      "point_m": [
+        19.6004,
+        14.0005,
+        0.5499
+      ],
+      "path": [
+        "BUILDERS · cama_queen@30",
+        "colchao",
+        "Face"
+      ]
+    },
+    {
+      "id": "cama_queen@30|manta|191|21.014,12.934",
+      "hit": false
+    }
+  ],
+  "model_path": "E:\\Claude\\apps\\sketchup-mcp\\runs\\l2_fp042_20261019\\S09_builders_after_bevel_fix\\bevel_probe\\_probe_builders.skp",
+  "top_level": [
+    "PlanShell_Group",
+    "Floor_Group_r_main",
+    "WindowGlass_Group_win_south",
+    "WindowSash_Group_win_south",
+    "BUILDERS · sofa_straight@0",
+    "BUILDERS · sofa_straight@90",
+    "BUILDERS · sofa_straight@30",
+    "BUILDERS · sofa_chaise_r@0",
+    "BUILDERS · sofa_chaise_r@90",
+    "BUILDERS · sofa_chaise_r@30",
+    "BUILDERS · poltrona@0",
+    "BUILDERS · poltrona@90",
+    "BUILDERS · poltrona@30",
+    "BUILDERS · cama_queen@0",
+    "BUILDERS · cama_queen@90",
+    "BUILDERS · cama_queen@30",
+    "BUILDERS · guarda_roupa@0",
+    "BUILDERS · guarda_roupa@90",
+    "BUILDERS · guarda_roupa@30",
+    "BUILDERS · criado_mudo@0",
+    "BUILDERS · criado_mudo@90",
+    "BUILDERS · criado_mudo@30"
+  ],
+  "elapsed_s": 6.72,
+  "sketchup_version": "26.0.429"
+}
