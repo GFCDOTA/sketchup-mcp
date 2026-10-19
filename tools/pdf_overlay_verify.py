@@ -13,6 +13,12 @@ PDF is ground truth. No fabrication: door width comes from the PDF arc bbox.
 from __future__ import annotations
 import json, math
 from pathlib import Path
+try:
+    from core.project_sources import plant_pdf_path
+except ModuleNotFoundError:  # `python tools/x.py` direto: a raiz do repo não está no sys.path
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from core.project_sources import plant_pdf_path
 
 REPO = Path(__file__).resolve().parent.parent
 PDF_SCALE = 3.0
@@ -57,7 +63,7 @@ def door_arcs_from_pdf(pdf_path: Path):
 
 def verify(fix="planta_74"):
     con = _consensus(fix)
-    pdf_path = REPO/f"{fix}.pdf"
+    pdf_path = plant_pdf_path(fix, REPO)
     PT = 0.19/con["wall_thickness_pts"]
     arcs = door_arcs_from_pdf(pdf_path)
     doors = [o for o in con["openings"] if (o.get("kind_v5") or o.get("kind")) in ("interior_door", "interior_passage")]
@@ -85,7 +91,7 @@ def overlay(fix="planta_74"):
     import pypdfium2 as pdfium
     from PIL import ImageDraw
     con = _consensus(fix)
-    pdf = pdfium.PdfDocument(str(REPO/f"{fix}.pdf")); page = pdf[0]
+    pdf = pdfium.PdfDocument(str(plant_pdf_path(fix, REPO))); page = pdf[0]
     PAGE_W, PAGE_H = page.get_size()
     img = page.render(scale=PDF_SCALE).to_pil().convert("RGB")
     d = ImageDraw.Draw(img, "RGBA")

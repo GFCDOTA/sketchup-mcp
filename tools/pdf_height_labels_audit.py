@@ -31,6 +31,12 @@ import json
 import math
 import re
 from pathlib import Path
+try:
+    from core.project_sources import plant_pdf_path
+except ModuleNotFoundError:  # `python tools/x.py` direto: a raiz do repo não está no sys.path
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from core.project_sources import plant_pdf_path
 
 REPO = Path(__file__).resolve().parent.parent
 
@@ -87,7 +93,7 @@ def _dist_to_polyline(pt, pts) -> float:
 
 def audit(fix: str = "planta_74") -> list[dict]:
     con = _consensus(fix)
-    labels = height_labels_from_pdf(REPO / f"{fix}.pdf")
+    labels = height_labels_from_pdf(plant_pdf_path(fix, REPO))
     barriers = [sb for sb in con.get("soft_barriers", [])
                 if sb.get("polyline_pts")]
     rows = []

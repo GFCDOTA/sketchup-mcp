@@ -41,6 +41,7 @@ from pathlib import Path
 
 from tools.oracle_providers import OracleRequest, get_provider
 from tools.run_skp_visual_review import _VERDICT_RANK
+from core.project_sources import plant_pdf_path  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -214,7 +215,7 @@ def run(fixture: str, out_dir: Path, model: str | None = None,
     src_top = art / recipe["source_render"]
     src_iso = art / f"{fixture}_iso.png"
     geom = art / "geometry_report.json"
-    pdf = REPO_ROOT / f"{fixture}.pdf"
+    pdf = plant_pdf_path(fixture, REPO_ROOT)
     if not src_top.exists():
         raise FileNotFoundError(f"source render not found: {src_top}")
 

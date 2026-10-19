@@ -27,6 +27,12 @@ import argparse
 import json
 import math
 from pathlib import Path
+try:
+    from core.project_sources import plant_pdf_path
+except ModuleNotFoundError:  # `python tools/x.py` direto: a raiz do repo não está no sys.path
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from core.project_sources import plant_pdf_path
 
 REPO = Path(__file__).resolve().parent.parent
 
@@ -107,7 +113,7 @@ def _wall_basis(wall: dict):
 def audit(fix: str = "planta_74") -> list[dict]:
     con = _consensus(fix)
     walls = {w["id"]: w for w in con["walls"]}
-    arcs = door_arc_paths_from_pdf(REPO / f"{fix}.pdf")
+    arcs = door_arc_paths_from_pdf(plant_pdf_path(fix, REPO))
     out = []
     for op in con["openings"]:
         if op.get("kind") != "door":
