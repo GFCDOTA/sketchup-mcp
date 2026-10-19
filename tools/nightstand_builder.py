@@ -1,48 +1,33 @@
-"""nightstand_builder.py — CRIADO-MUDO parametrico como PECAS separadas (espelha bed/
-wardrobe builder; regra Felipe: NAO bloco unico). De um NightstandSpec gera: 4 pes +
-corpo + tampo (transborda) + gaveta (frente) + knob — material por papel.
+"""Legacy public API for the shared parametric nightstand builder.
 
-Convencao: X=largura, Y=profundidade (FRENTE=Y=0=-Y, gaveta vira p/ fora), Z=altura.
-Coloca via place_sofa_boxes (generico)."""
+Implementation and geometry are owned by tools.rooms.shared.nightstand.
+Keep all historical names and python -m CLI behavior.
+"""
 from __future__ import annotations
 
-from tools.furniture_anatomy_spec import NIGHTSTAND_REQUIRED_PARTS, NightstandSpec, nightstand_spec  # noqa: F401,E501
-from tools.sofa_builder import PT_TO_IN, _p, parts_to_boxes  # noqa: F401
-from tools.sofa_builder import place_sofa_boxes as place_nightstand_boxes  # noqa: F401
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from tools.rooms.shared import nightstand as _impl  # noqa: E402
+
+build_nightstand = _impl.build_nightstand
+place_nightstand_boxes = _impl.place_nightstand_boxes
 
 
-def build_nightstand(spec: NightstandSpec):
-    spec.validate()
-    W, D, H = spec.width, spec.depth, spec.height
-    fh, tt, dt = spec.foot_h, spec.top_t, spec.drawer_t
-    body = tuple(spec.body_rgb)
-    top = tuple(spec.top_rgb)
-    drawer = tuple(spec.drawer_rgb)
-    foot = tuple(spec.foot_rgb)
-    knob = tuple(spec.knob_rgb)
-    fs = 0.05
-    parts = []
+def __getattr__(name: str):
+    if name.startswith("__"):
+        raise AttributeError(name)
+    return getattr(_impl, name)
 
-    # --- 4 pes ---
-    for i, (fx, fy) in enumerate([(0.02, 0.02), (W - 0.02 - fs, 0.02),
-                                  (0.02, D - 0.02 - fs), (W - 0.02 - fs, D - 0.02 - fs)]):
-        parts.append(_p(f"pe_{i + 1}", "pe", fx, fy, fx + fs, fy + fs, 0.0, fh, foot))
 
-    # --- corpo (recuado) + tampo (transborda) ---
-    parts.append(_p("corpo", "corpo", 0.02, 0.02, W - 0.02, D - 0.02, fh, H - tt, body))
-    parts.append(_p("tampo", "tampo", 0.0, 0.0, W, D, H - tt, H, top))
-
-    # --- gaveta na FRENTE (Y[0,dt]) + knob ---
-    gz0, gz1 = fh + 0.04, H - tt - 0.03
-    parts.append(_p("gaveta", "gaveta", 0.05, 0.0, W - 0.05, dt, gz0, gz1, drawer))
-    kz = (gz0 + gz1) / 2
-    parts.append(_p("knob", "puxador", W / 2 - 0.03, 0.0, W / 2 + 0.03, dt + 0.04, kz - 0.015, kz + 0.015, knob))
-
-    meta = {"n_parts": len(parts), "bbox_m": spec.bbox_m(), "front_axis": "-Y",
-            "kinds": sorted({p["kind"] for p in parts})}
-    return parts, meta
+def __dir__():
+    return sorted(set(globals()) | set(dir(_impl)))
 
 
 if __name__ == "__main__":
-    parts, meta = build_nightstand(nightstand_spec())
-    print(f"criado {meta['n_parts']} pecas | kinds={meta['kinds']} | bbox={meta['bbox_m']}")
+    import runpy
+    runpy.run_module("tools.rooms.shared.nightstand", run_name="__main__")

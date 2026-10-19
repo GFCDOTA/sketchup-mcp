@@ -12458,6 +12458,48 @@
       "disposition": "retain_current_owner",
       "phase": "P6",
       "status": "TESTED_PROOF_PENDING_CI"
+    },
+    {
+      "path": "tools/rooms/shared/anatomy.py",
+      "domain": "shared",
+      "disposition": "tools.rooms.shared",
+      "phase": "P2",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tools/rooms/shared/sofa.py",
+      "domain": "shared",
+      "disposition": "tools.rooms.shared",
+      "phase": "P2",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tools/rooms/shared/bed.py",
+      "domain": "shared",
+      "disposition": "tools.rooms.shared",
+      "phase": "P2",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tools/rooms/shared/wardrobe.py",
+      "domain": "shared",
+      "disposition": "tools.rooms.shared",
+      "phase": "P2",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tools/rooms/shared/nightstand.py",
+      "domain": "shared",
+      "disposition": "tools.rooms.shared",
+      "phase": "P2",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tests/test_fp042_shared_parametric_builders.py",
+      "domain": "test",
+      "disposition": "retain_current_owner",
+      "phase": "P2",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
     }
   ]
 }
