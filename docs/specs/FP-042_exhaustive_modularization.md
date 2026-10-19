@@ -125,3 +125,14 @@ A fonte real de `StyleSpec`, `STYLE_TOKENS`, `apply_style`,
 idênticas para API legada. Aplicação de material por família de módulo,
 RGB e texturas não foi reescrita. Testes de compatibilidade e gates de
 render/determinísticos devem permanecer verdes antes do merge.
+
+
+### FP-042/P5 — owners documentais auditáveis
+
+Os documentos, skills, handoffs, contratos e testes que pertencem à P5
+recebem `document_owner` por caminho e papel, com um gate fail-closed
+para novos casos não catalogados. `VERIFIED_PATH_BASED_OWNER_CLASSIFICATION`
+significa **somente classificação de path/owner**, não prova semântica
+das aulas, nem execução SketchUp L2. Arquivos de infraestrutura
+(`docker-compose*`) são explicitamente mantidos como configuração
+operacional, sem mover ou alterar sua interpretação.

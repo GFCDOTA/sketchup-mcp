@@ -9,779 +9,1001 @@
     {
       "path": ".ai_bridge/fidelity/ledger.jsonl",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/fidelity/verdicts/ARMCHAIR-CLASS_cycle001.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/fidelity/verdicts/ARMCHAIR-CLASS_cycle002.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/fidelity/verdicts/BED-CLASS_cycle001.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/fidelity/verdicts/BED-CLASS_cycle002.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/fidelity/verdicts/COFFEE-TABLE-CLASS_cycle001.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/fidelity/verdicts/COFFEE-TABLE-CLASS_cycle002.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/fidelity/verdicts/RACK-CLASS_cycle001.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/fidelity/verdicts/RACK-CLASS_cycle002.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/fidelity/verdicts/SCENE-LIVINGROOM-MWM_cycle001.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/fidelity/verdicts/SCENE-LIVINGROOM-MWM_cycle002.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/fidelity/verdicts/SCENE-LIVINGROOM-MWM_cycle003.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/fidelity/verdicts/SCENE-LIVINGROOM-MWM_render_light_cycles.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/fidelity/verdicts/SOFA-CLASS_cycle001.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/fidelity/verdicts/SOFA-CLASS_cycle002.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/fidelity/verdicts/SOFA-CLASS_cycle003.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/fidelity/verdicts/SOFA-STRAIGHT-3SEAT_attempt001.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/fidelity/verdicts/SOFA-STRAIGHT-3SEAT_attempt002.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/fidelity/verdicts/SOFA-STRAIGHT-3SEAT_attempt003.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/fidelity/verdicts/SOFA-STRAIGHT-3SEAT_attempt004.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/gpt_review/.gitignore",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/gpt_review/GPT_REVIEW_BUNDLE.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/HANDOFF.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/knowledge/architect.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/learning_patches/LP-SOFA-001.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/lessons/interior-orchestrator.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/questions/20260529T184522Z_oracle_pass_but_known_warnings.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/questions/20260529T190248Z_oracle_pass_but_known_warnings.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/questions/20260529T190315Z_oracle_pass_but_known_warnings.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/questions/20260529T200636Z_a_b_c_decision_with_tradeoff.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/questions/20260529T201437Z_final_fail_non_obvious_fix.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/questions/20260529T201947Z_about_to_open_new_cycle_post_slice.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/reference_packs/sofa_reference_pack_001.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/research/furniture_classes_ergonomics_2026-06-12.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/responses/20260529T200636Z_a_b_c_decision_with_tradeoff.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/responses/20260529T201437Z_final_fail_non_obvious_fix.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".ai_bridge/responses/20260529T201947Z_about_to_open_new_cycle_post_slice.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/agents/interior-designer.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/agents/interior-orchestrator.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/agents/interior-pm.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/agents/interior-project-auditor.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/agents/reference-scout.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/agents/sketchup-tooling-specialist.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/CLAUDE.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/constitution.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/docs/2026-05-31_agentic_system_retro_roadmap.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/docs/adr/0001-gate-oracle-and-pipeline-architecture.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/docs/adr/0002-interior-project-audit-and-atelie74-rag.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/docs/audits/2026-05-27_claude_structure_audit.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/docs/audits/2026-05-28_q1_constitution_8_friction_review.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/docs/audits/2026-05-28_skp_proof_of_progress_gate.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/docs/index.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/evals/eval_strategy.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/evals/fidelity_rubric.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/evals/regression_matrix.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/memory/artifact_policy.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/memory/current_state.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/memory/deprecated_context.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/memory/felipe_style_dna.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/memory/git_workflow.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/memory/lessons_learned.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/memory/multi_agent_coordination.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/memory/operational_rules.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/memory/project_context.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/plans/active_work.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/plans/interior_phased_plan.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/plans/next_actions.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/plans/roadmap.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/plans/stopped_work.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/README.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/skills/autonomous-fidelity-loop/SKILL.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/skills/fidelity-review/SKILL.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/skills/furniture-reference-analyzer/SKILL.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/skills/generate-and-compare-skp-after-change/SKILL.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/skills/gh-autopilot/SKILL.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/skills/gpt-docker-consult/SKILL.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/skills/gpt-review-gate/SKILL.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/skills/interior-architect-planner/SKILL.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/skills/interior-design/Modelfile",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/skills/interior-design/SKILL.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/skills/interior-project-audit/SKILL.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/skills/joinery-ergonomics-reference/SKILL.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/skills/multi-agent-handoff/SKILL.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/skills/pdf-to-skp-pipeline/SKILL.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/skills/planned-furniture-designer/SKILL.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/skills/planned-joinery-translator/design_grammar_spec.template.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/skills/planned-joinery-translator/SKILL.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/skills/reference-to-joinery-translator/SKILL.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/skills/repo-governance/SKILL.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/skills/sketchup-room-knowledge/SKILL.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/skills/sketchup-video-knowledge/SKILL.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/skills/skp-artifact-management/SKILL.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/skills/skp-visual-self-correction/SKILL.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/specs/autonomous_planta_prep.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/specs/fidelity_gate.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/specs/gate_framework_and_audit.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/specs/generalize_any_plant.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/specs/generalize_builder_constants.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/specs/interior_common_sense.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/specs/perfect_reference_strategy.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/specs/product_goal.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/specs/repository_hygiene.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/specs/room_furnishing_method.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/specs/sdd_and_harness_engineering.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/specs/skp_artifact_layout.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/specs/skp_proof_of_progress_gate.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/specs/templates/artifact_contract_template.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/specs/templates/feature_spec_template.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/specs/templates/fidelity_spec_template.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".claude/specs/templates/regression_summary_template.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": ".dockerignore",
@@ -814,9 +1036,11 @@
     {
       "path": ".impeccable/config.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_configuration",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "artifacts/_archive/review_legacy_20260609/diag_20260530T145603Z/verification_report.json",
@@ -6386,16 +6610,20 @@
     {
       "path": "CLAUDE_COGNITIVE_ARCHITECTURE.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_architecture_docs",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "CLAUDE.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_project_instructions",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "configs/sofa_archetypes.json",
@@ -6567,45 +6795,57 @@
     },
     {
       "path": "docker-compose.rag.yml",
-      "domain": "unclassified_special_case",
-      "disposition": "manual_owner_review",
+      "domain": "tooling_ci",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "infrastructure_compose",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docker-compose.yml",
-      "domain": "unclassified_special_case",
-      "disposition": "manual_owner_review",
+      "domain": "tooling_ci",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "infrastructure_compose",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/adr/.gitkeep",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/adr/0001-semantic-geometry-contract.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/architecture/knowledge_classification.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/canonical/planta_74/.gitkeep",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/apt_full_0259/apt_full_0259.skp",
@@ -6631,9 +6871,11 @@
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/apt_full_0259/STATUS.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/bedroom-window-ratio/model_iso_after.png",
@@ -6645,9 +6887,11 @@
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/bedroom-window-ratio/README.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/bedroom-window-ratio/windows_zoom.png",
@@ -6687,9 +6931,11 @@
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/furniture_canonical_0259/VALIDATION.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/glass-railing-3dw/glass_before_after.png",
@@ -6715,16 +6961,20 @@
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/glass-railing-3dw/README.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_aligned_20260602T011150/final/geometry_report.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_aligned_20260602T011150/final/model_iso.png",
@@ -6750,9 +7000,11 @@
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_aligned_20260602T011150/final/regression_summary.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_aligned_20260602T011150/final/side_by_side_pdf_vs_skp.png",
@@ -6764,16 +7016,20 @@
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_aligned_20260602T011150/final/visual_findings.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_closed_20260602T014123/final/geometry_report.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_closed_20260602T014123/final/model_iso.png",
@@ -6799,9 +7055,11 @@
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_closed_20260602T014123/final/regression_summary.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_closed_20260602T014123/final/side_by_side_pdf_vs_skp.png",
@@ -6813,16 +7071,20 @@
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_closed_20260602T014123/final/visual_findings.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_sourcegate_20260602T010239/final/geometry_report.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_sourcegate_20260602T010239/final/model_iso.png",
@@ -6848,9 +7110,11 @@
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_sourcegate_20260602T010239/final/regression_summary.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_sourcegate_20260602T010239/final/side_by_side_pdf_vs_skp.png",
@@ -6862,9 +7126,11 @@
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_sourcegate_20260602T010239/final/visual_findings.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/janelas-esquadria/basculante_final.png",
@@ -6883,9 +7149,11 @@
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/janelas-esquadria/README.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/janelas-esquadria/window_before_after.png",
@@ -6897,9 +7165,11 @@
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/kitchen_fix_20260602T021617/final/geometry_report.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/kitchen_fix_20260602T021617/final/model_iso.png",
@@ -6925,9 +7195,11 @@
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/kitchen_fix_20260602T021617/final/regression_summary.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/kitchen_fix_20260602T021617/final/side_by_side_pdf_vs_skp.png",
@@ -6939,9 +7211,11 @@
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/kitchen_fix_20260602T021617/final/visual_findings.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_candidate_20260608/overlay_consensus_on_pdf.png",
@@ -6953,9 +7227,11 @@
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_candidate_20260608/VISUAL_REVIEW.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_fix_20260530T182016Z/final/before_after.png",
@@ -6967,16 +7243,20 @@
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_fix_20260530T182016Z/final/decision.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_fix_20260530T182016Z/final/geometry_report.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_fix_20260530T182016Z/final/iso.png",
@@ -7009,23 +7289,29 @@
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_fix_20260530T182016Z/final/verification_report.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_rebuild_0259_20260608/_shell_polygon.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_rebuild_0259_20260608/geometry_report.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_rebuild_0259_20260608/model_floors_top.png",
@@ -7051,9 +7337,11 @@
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_rebuild_0259_20260608/model_top.png.proj.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_rebuild_0259_20260608/model.skp",
@@ -7065,16 +7353,20 @@
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_rebuild_0259_20260608/model.skp.metadata.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_rebuild_0259_20260608/VALIDATION.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/suite01_furnished_0259/suite01_furnished_0259.skp",
@@ -7086,9 +7378,11 @@
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/suite01_furnished_0259/suite01_furnished_audit_0259.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/suite01_furnished_0259/suite01_furnished_iso_0259.png",
@@ -7121,16 +7415,20 @@
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/suite01_furnished_0259/VALIDATION.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/suite01_scale_0259/geometry_report.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/suite01_scale_0259/model_floors_top.png",
@@ -7156,9 +7454,11 @@
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/suite01_scale_0259/model_top.png.proj.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/suite01_scale_0259/suite01_rebuild_0259.skp",
@@ -7170,9 +7470,11 @@
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/visual_regression_20260530T042308Z/gpt_visual_review_REQUEST.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/visual_regression_20260530T042308Z/montage_pdf_before_after.png",
@@ -7184,9 +7486,11 @@
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/visual_regression_20260530T042308Z/verdict.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/visual_regression_20260530T061448Z/montage_pdf_before_after.png",
@@ -7198,23 +7502,29 @@
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/visual_regression_20260530T061448Z/scale_experiment_report.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/visual_regression_20260530T061448Z/verdict.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/visual_regression_20260530T180822Z/decision.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/visual_regression_20260530T180822Z/montage_pdf_before_after.png",
@@ -7233,16 +7543,20 @@
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/visual_regression_20260530T180822Z/verdict.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/visual_regression_20260530T180822Z/verification_report.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/visual_regression_20260530T183405Z/montage_pdf_before_after.png",
@@ -7254,23 +7568,29 @@
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/visual_regression_20260530T183405Z/verdict.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/window_fix_20260530/baseline_consensus.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/window_fix_20260530/final/AUDIT.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/window_fix_20260530/final/before_after_removal.png",
@@ -7282,16 +7602,20 @@
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/window_fix_20260530/final/DECISION.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/window_fix_20260530/final/geometry_report.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/window_fix_20260530/final/model_iso.png",
@@ -7331,16 +7655,20 @@
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/window_frame_20260530/final/decision.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/window_frame_20260530/final/geometry_report.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/window_frame_20260530/final/model_iso.png",
@@ -7366,9 +7694,11 @@
     {
       "path": "docs/archive/2026-07-11/artifacts/review/synthetic/living_layout_candidates.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/synthetic/living_layout_candidates.png",
@@ -7380,9 +7710,11 @@
     {
       "path": "docs/archive/2026-07-11/docs/specs/SESSION_PLAN.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/scratch_preserved/recovered_human_soft_barriers_annotation.png",
@@ -7394,184 +7726,236 @@
     {
       "path": "docs/archive/2026-07-11/tools/bedroom_report.py",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/tools/compute_room_cam.py",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/tools/furniture_normalizer.py",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/tools/make_sofa_fixtures.py",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/archive/2026-07-11/tools/tune_render.ps1",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/diagrams/2026-08-09-rag-flowchart.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/diagrams/2026-08-09-session-mindmap.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/field-notes-javafx-webview-spike.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/handoffs/.gitkeep",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/handoffs/2026-06-14_learnings_and_handoff.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/handoffs/2026-06-24_interior_studio_and_class_program_handoff.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/handoffs/2026-06-28_ci_gate_handoff.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/handoffs/repo_folder_hygiene_2026-06-08.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/handoffs/scale_centralization_2026-06-09.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/interiors/anti_patterns.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/interiors/DESIGN_VISION.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/interiors/gpt_composition_spec.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/interiors/planned_bedroom_design_rules.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/interiors/room_modes.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/interiors/rules_layout.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/interview-study/architecture-lessons.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/interview-study/box-diagrams.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/interview-study/google-style-talking-points.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/interview-study/interview-questions.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/interview-study/mindmap.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/interview-study/README.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/screenshots/harness-app/01-pipeline.png",
@@ -7590,72 +7974,92 @@
     {
       "path": "docs/skp_visual_fidelity_loop.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/SOFA_CLASS_SPEC.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/SOFA_EVAL_GATE.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/SOFA_FAMILIES.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/SOFA_GPT_REVIEW_LOOP.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/SOFA_LEARNING_LOG.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/SOFA_SKILL.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/SOFA_VRAY_TRACK.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/specs/_assets/quadrado_canonical_geometry_report.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/specs/_assets/quadrado_canonical_shell_polygon.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/specs/_assets/quadrado_canonical_success_render.png",
@@ -7667,198 +8071,254 @@
     {
       "path": "docs/specs/AI_PIPELINE_INSPECTOR.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/specs/brain_muscle.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/specs/FP-026_residual_wall_stub_elimination.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/specs/FP-030_visual_oracle_gate.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/specs/FP-031_furniture_class_to_furnish_loop.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/specs/FP-032_vision_acl.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/specs/FP-033_closed_correction_loop.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/specs/FP-034_judged_variant_sweep.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/specs/FP-035_rag_design_retrieval.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/specs/FP-036_material_de_verdade.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/specs/FP-037_module_aware_material_attribution.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/specs/FP-038_room_detail_visual_review_camera.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/specs/FP-039_honest_visual_fingerprint_v2.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/specs/FP-040_bridge_hardening.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/specs/FP-041_room_knowledge_expansion.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/specs/FP-041_runtime_room_modularization.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/specs/FP-041_video_knowledge_consultation.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/specs/FP-042_P1_owner_dependency_audit.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/specs/FP-SOFA-PREMIUM/ALTERATION_REVIEW_CONTRACT.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/specs/FP-SOFA-PREMIUM/CLAUDE_EXECUTION_PROMPT.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/specs/FP-SOFA-PREMIUM/FP-SOFA-PREMIUM-SPEC.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/specs/FP-SOFA-PREMIUM/GPT_CHANGE_GATE.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/specs/FP-SOFA-PREMIUM/VISUAL_REVIEW_CONTRACT.json",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/specs/geometry_sanity_gate.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/specs/LL-024_gpt_auto_consult_gate.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/specs/quadrado_demo_spec.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/spikes/render_and_asset_providers.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "docs/vision_acl_discrimination_findings.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json",
@@ -8304,16 +8764,20 @@
     {
       "path": "HANDOFF.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "HISTORICO_SOFA.json",
-      "domain": "unclassified_special_case",
-      "disposition": "manual_owner_review",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "living_knowledge_history",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "interior/__init__.py",
@@ -8332,23 +8796,29 @@
     {
       "path": "interior/class_specs/ARMCHAIR_CLASS_SPEC.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "interior_design_contracts",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "interior/class_specs/BED_CLASS_SPEC.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "interior_design_contracts",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "interior/class_specs/SOFA_CLASS_SPEC.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "interior_design_contracts",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "interior/composer/__init__.py",
@@ -8549,9 +9019,11 @@
     {
       "path": "interior/validators/PHASE2_PLACEMENT_HANDOFF.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "interior_design_contracts",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "interior/validators/scene_spatial_gate.py",
@@ -8584,9 +9056,11 @@
     {
       "path": "KICKOFF.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_handoff",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "ops/estudio-front/assets/banho01.png",
@@ -8745,9 +9219,11 @@
     {
       "path": "README.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_readme",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "references/design_rules/design_rule.schema.json",
@@ -9655,16 +10131,20 @@
     {
       "path": "tests/__init__.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/conftest.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/data/overlay_gate/planta74_top.png",
@@ -9676,723 +10156,929 @@
     {
       "path": "tests/data/overlay_gate/planta74_top.png.proj.json",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/data/sketchup_knowledge/cabinet_case.v1.json",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/ruby/test_skmcp_core.rb",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/ruby/test_skmcp_walk.rb",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_architect_program.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_armchair_class.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_ask_gpt_gate.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_auditor.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_auto_camera.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_auto_decider_gate.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_auto_decider.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_auto_gpt_consult_wiring.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_bathroom_enxoval_clearance.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_bathrooms_style.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_bed_class.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_bed_placement_gate.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_bedroom_layout.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_build_plan_shell.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_build_promote_hook.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_circulation_gate.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_coffee_table_class.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_collision_envelope_gate.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_consult_bridge.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_consult_tier.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_corpus_to_rag_human_verdicts.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_corpus_to_rag.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_correction_finding.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_correction_fixes.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_correction_loop.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_curator.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_decision_audit_record.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_decision_judge.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_dining_table_class.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_domain_ids.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_door_swing_contract.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_fidelity_loop.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_finding_router.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_fp042_ownership_audit.py",
       "domain": "test",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_furnish_sofa_gate.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_furniture_wall_gap.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_gate_filefetch.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_gate_normalizer.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_gate_util.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_gate_verdict.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_geometry_sanity_brains.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_geometry_sanity.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_gpt_docker_visual_score.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_gpt_review.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_honest_fingerprint.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_human_verdict.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_instrumentation_call_sites.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_intent_to_scene.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_interior_cycles.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_iteration_result.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_kitchen_layout_style.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_kitchen_wall_regression_gate.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_knowledge_types.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_layout_rules.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_learning_patch.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_living_room_style.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_living_sofa_is_approved_premium.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_material_de_verdade.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_material_review.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_module_aware_material.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_negative_dogfood.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_observability_contracts.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_observability_events.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_observability_invariants.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_observability_redact.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_observability_replay.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_observability_taxonomy.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_opening_aperture_audit.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_opening_host_audit.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_opening_routing_invariants.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_optimizer_consistency_gate.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_oracle_providers.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_overlay_diff.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_pdf_height_labels.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_plant_scale_override.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_position_fidelity_gate.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_project_state.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_promote_artifact.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_promote_canonical.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_quadrado_canonical_smoke.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_rack_class.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_rag_embed_backend.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_rag_freshness_architect.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_rag_freshness.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_railing_gates.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_railing_real_build.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_reference_db_retrieve.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_reference_db.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_reference_grammar.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_regenerate_consensus.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_render_bbox_audit.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_render_judge.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_retrieval_eval.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_retrieval_fusion.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_retrieval_trace.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_room_dependency_boundaries.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_room_dispatch_regression.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_room_integration_regression.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_room_modes.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_room_module_architecture.py",
@@ -10404,247 +11090,317 @@
     {
       "path": "tests/test_room_registry.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_room_type.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_run_deterministic_gates.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_semantic_geometry_contract_gate.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_semantic_zones.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_shared_geometry_regression.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_shell_geometry_integrity.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_shell_parts.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_side_by_side_composer.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_sketchup_knowledge.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_sketchup_room_knowledge.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_sketchup_ruby_jobs.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_sketchup_specialist.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_sketchup_video_knowledge.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_skp_visual_review_contract.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_sofa_class.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_soft_barrier_source_audit.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_suite01_scale_gate.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_suites_style.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_synthetic_bedrooms.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_taste_writeback_recall.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_taste_writeback.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_theme_palette.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_trace_view.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_variant_axes.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_variant_sweep.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_vision_acl.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_vision_queue_consumer.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_visual_oracle_contract.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_visual_oracle_negative_fixtures.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_wall_overlap_audit.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_wall_shell_canonical.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_wall_stub_canonicalization.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_window_aperture_contract.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tests/test_window_aperture_geometry.py",
       "domain": "test",
-      "disposition": "test_suite",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "textures/fabric_dark_charcoal_albedo.png",
@@ -11132,16 +11888,20 @@
     {
       "path": "tools/interior_studio/consult_gpt_bridge/contracts/architect_answer_contract.v1.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "tooling_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tools/interior_studio/consult_gpt_bridge/contracts/architect_question_contract.v1.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "tooling_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tools/interior_studio/consult_gpt_bridge/contracts/schemas/answer_contract.schema.json",
@@ -11181,9 +11941,11 @@
     {
       "path": "tools/interior_studio/consult_gpt_bridge/README.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "tooling_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tools/interior_studio/consult_gpt_bridge/store.py",
@@ -11195,9 +11957,11 @@
     {
       "path": "tools/interior_studio/contracts/learning_patch.v1.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "tooling_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tools/interior_studio/cycles.py",
@@ -11251,9 +12015,11 @@
     {
       "path": "tools/interior_studio/README_render_judges.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "tooling_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tools/interior_studio/reference_packs.py",
@@ -11384,9 +12150,11 @@
     {
       "path": "tools/mcp_server/README.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "tooling_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tools/mcp_server/server.py",
@@ -11517,9 +12285,11 @@
     {
       "path": "tools/pdf_knowledge/README.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "tooling_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tools/pdf_knowledge/search_pdf_index.py",
@@ -11594,16 +12364,20 @@
     {
       "path": "tools/prompts/gpt_auto_consult_gate.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "tooling_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tools/prompts/visual_oracle_reviewer.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "tooling_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tools/quadrado/__init__.py",
@@ -11657,9 +12431,11 @@
     {
       "path": "tools/README_project_memory.md",
       "domain": "documentation_or_agent",
-      "disposition": "review_knowledge_ownership",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "tooling_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tools/recolor_kitchen_theme.rb",
@@ -12252,9 +13028,11 @@
     {
       "path": "tests/test_fp042_bathroom_validation.py",
       "domain": "test",
-      "disposition": "retain_current_owner",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tools/rooms/kitchen/validation.py",
@@ -12385,9 +13163,11 @@
     {
       "path": "tests/test_fp042_knowledge_integrity.py",
       "domain": "test",
-      "disposition": "retain_current_owner",
+      "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
-      "status": "REFERENTIAL_TEST_PENDING_CI"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tools/rooms/kitchen/layout.py",
@@ -12514,6 +13294,24 @@
       "disposition": "retain_current_owner",
       "phase": "P2",
       "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tools/rooms/knowledge_ownership.py",
+      "domain": "shared_domain",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "tooling_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "tests/test_fp042_knowledge_ownership.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     }
   ]
 }
