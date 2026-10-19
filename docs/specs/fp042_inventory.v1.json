@@ -12409,6 +12409,27 @@
       "disposition": "retain_current_owner",
       "phase": "P3",
       "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tools/rooms/bedroom/layout.py",
+      "domain": "room_bedroom",
+      "disposition": "tools.rooms.bedroom",
+      "phase": "P3",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tools/rooms/bedroom/designer.py",
+      "domain": "room_bedroom",
+      "disposition": "tools.rooms.bedroom",
+      "phase": "P3",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tests/test_fp042_bedroom_planner_ownership.py",
+      "domain": "test",
+      "disposition": "retain_current_owner",
+      "phase": "P3",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
     }
   ]
 }

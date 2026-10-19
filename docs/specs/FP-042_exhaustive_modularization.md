@@ -88,3 +88,14 @@ compatibilidade e CLI (sem cópia de algoritmo). As funções compartilhadas
 de geometria continuam em `tools.rooms.shared.geometry`. Testes de
 contrato e as suites de fidelidade validam que os casos reais não
 regrediram. Isso não prova L2/SketchUp.
+
+
+### FP-042/P3 — ownership do planejamento dos quartos
+
+As implementações integrais dos planejadores de quarto (layout alternativo e
+designer minimalista) foram movidas para `tools.rooms.bedroom.layout` e
+`tools.rooms.bedroom.designer`; entrypoints legados continuam como fachadas
+que preservam API, CLI e imports públicos. Dependência entre planners agora
+permanece dentro de bedroom. A rotina que exporta SKP resolve a raiz do repo
+no novo nível de pacote. Regressão unitária e suíte de escala real obrigatórias
+antes do merge; equivalência visual L2 ainda não comprovada.
