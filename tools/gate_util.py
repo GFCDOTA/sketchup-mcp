@@ -1,35 +1,22 @@
-#!/usr/bin/env python3
-"""Shared primitives for the deterministic gates.
+"""Fachada FP-043/P4: implementacao unica em `tools.validation.gate_util`.
 
-`kitchen_wall_regression_gate`, `wall_exact_match_gate` and
-`position_fidelity_gate` each carried a byte-identical copy of the
-point-to-segment distance (under three different names: `_dist_pt_seg`,
-`_d_pt_seg`, `_pt_dist_to_seg_m`) and the same UTF-8-BOM-tolerant JSON loader.
-
-One definition, used by all (DRY): a fix or tweak to the gate coverage geometry
-now happens in exactly one place instead of drifting across three files.
+Preserva `import tools.gate_util`, `python -m tools.gate_util` e `python tools/gate_util.py`; nada de logica aqui.
 """
 from __future__ import annotations
 
-import json
-import math
+import sys
 from pathlib import Path
 
+_ROOT = Path(__file__).resolve().parents[1]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
 
-def pt_seg_dist(px: float, py: float,
-                ax: float, ay: float, bx: float, by: float) -> float:
-    """Euclidean distance from point (px, py) to segment (ax, ay)-(bx, by).
+_TARGET = "tools.validation.gate_util"
+if __name__ == "__main__":
+    import runpy
 
-    The projection is clamped to the segment (t in [0, 1]); a zero-length
-    segment degenerates to point-to-point distance. Units are whatever the
-    inputs are in — callers needing metres multiply by their pt_to_m scale.
-    """
-    dx, dy = bx - ax, by - ay
-    L2 = dx * dx + dy * dy
-    t = 0.0 if L2 == 0 else max(0.0, min(1.0, ((px - ax) * dx + (py - ay) * dy) / L2))
-    return math.hypot(px - (ax + t * dx), py - (ay + t * dy))
+    runpy.run_module(_TARGET, run_name="__main__", alter_sys=True)
+else:
+    import importlib
 
-
-def load_json(path: str | Path) -> dict:
-    """Read a JSON file tolerating a UTF-8 BOM (utf-8-sig)."""
-    return json.loads(Path(path).read_text("utf-8-sig"))
+    sys.modules[__name__] = importlib.import_module(_TARGET)
