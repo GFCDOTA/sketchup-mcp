@@ -41,7 +41,7 @@ reutilizáveis; **sketchup** executa e inspeciona, sem decidir decoração; **mc
 | `tools/pdf_knowledge/` | existe | ingestão de PDFs de referência para um índice pesquisável |
 | `tools/prompts/` | existe | prompts do oráculo visual e do gate de consulta |
 | `tools/claude_bridge/` | existe | `skp_inventory` (MCP) e `WORKSPACE_ROOT`; o nome vem do cockpit removido |
-| `tools/validation/` | previsto | gates e auditorias transversais (hoje `tools/*_gate.py`, `tools/*_audit.py`) |
+| `tools/validation/` | existe | gate de escala física independente (`scale_anchor_gate.py`); demais gates e auditorias transversais migram em P4 |
 | `tools/rendering/` | previsto | utilidades de imagem/render e pós-processamento (hoje `tools/render_*.py`) |
 | `tools/orchestration/` | previsto | sequenciamento entre cômodos e executores (hoje `tools/furnish_apartment.py`) |
 | `tools/knowledge/` | previsto | RAG, memória do projeto, banco de referências |

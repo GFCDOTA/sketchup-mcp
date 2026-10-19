@@ -48,6 +48,11 @@ def _patch_det(monkeypatch, overall="PASS", gates=None):
     import tools.run_deterministic_gates as rdg
     monkeypatch.setattr(rdg, "run_all",
                         lambda **k: {"overall": overall, "gates": gates or {}})
+    # Estas provas isolam o hook de promoção; o gate absoluto é testado
+    # separadamente em test_fp043_scale_anchor.py com reports reais.
+    from tools.validation import scale_anchor_gate
+    monkeypatch.setattr(scale_anchor_gate, "audit_paths",
+                        lambda *a, **k: {"overall": "PASS", "reason": "ISOLATED_MOCK"})
 
 
 def test_green_build_promotes_to_stable_path(tmp_path, monkeypatch):
@@ -80,6 +85,18 @@ def test_deterministic_incomplete_blocks_promote(tmp_path, monkeypatch):
                {"wall_presence": {"verdict": "SKIPPED_NO_SIDECAR"}})
     line = _auto_promote(_args(b / "model.skp", c), {"ok": True})
     assert "PROMOTE_SKIPPED" in line and "INCOMPLETE" in line
+
+
+def test_missing_absolute_scale_blocks_promotion(tmp_path, monkeypatch):
+    b = _build_dir(tmp_path, {"a": True})
+    c = _consensus(tmp_path)
+    _patch_det(monkeypatch, "PASS")
+    from tools.validation import scale_anchor_gate
+    monkeypatch.setattr(scale_anchor_gate, "audit_paths",
+                        lambda *a, **k: {"overall": "INCOMPLETE", "reason": "NO_ANCHOR"})
+    line = _auto_promote(_args(b / "model.skp", c), {"ok": True})
+    assert "PROMOTE_SKIPPED scale-anchor INCOMPLETE" in line
+    assert not (tmp_path / "artifacts" / "planta_Z").exists()
 
 
 def test_failed_gate_does_not_promote(tmp_path):
