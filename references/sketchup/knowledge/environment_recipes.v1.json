@@ -1,0 +1,751 @@
+{
+  "schema_version": "sketchup_room_knowledge.v1",
+  "project": "FP-041",
+  "mode": "ADVISORY_ONLY",
+  "execution_policy": "NEVER_AUTHORIZE_MODEL_MUTATIONS_FROM_THIS_CATALOG",
+  "provenance_rule": "Evidence describes source access. Transfer to a room is a project adaptation, not a claim the source taught that room.",
+  "canonical_room_scope": "Nine routing categories; these are NOT nine validated apartment rooms.",
+  "reviewed_on": "2026-10-18",
+  "rooms": [
+    {
+      "id": "living",
+      "label": "Sala",
+      "routing_terms": [
+        "sala",
+        "living",
+        "sofa",
+        "sofá",
+        "rack",
+        "painel tv"
+      ]
+    },
+    {
+      "id": "bedroom",
+      "label": "Quartos",
+      "routing_terms": [
+        "quarto",
+        "suite",
+        "suíte",
+        "cama",
+        "cabeceira"
+      ]
+    },
+    {
+      "id": "kitchen",
+      "label": "Cozinha",
+      "routing_terms": [
+        "cozinha",
+        "armário",
+        "gaveta",
+        "bancada"
+      ]
+    },
+    {
+      "id": "bathroom",
+      "label": "Banheiros",
+      "routing_terms": [
+        "banheiro",
+        "banho",
+        "box",
+        "cuba",
+        "espelho"
+      ]
+    },
+    {
+      "id": "laundry",
+      "label": "Lavanderia",
+      "routing_terms": [
+        "lavanderia",
+        "área de serviço",
+        "máquina de lavar",
+        "tanque"
+      ]
+    },
+    {
+      "id": "balcony",
+      "label": "Varanda",
+      "routing_terms": [
+        "varanda",
+        "sacada",
+        "pergolado",
+        "floreira"
+      ]
+    },
+    {
+      "id": "home_office",
+      "label": "Home office",
+      "routing_terms": [
+        "escritório",
+        "home office",
+        "mesa",
+        "prateleira"
+      ]
+    },
+    {
+      "id": "closet",
+      "label": "Closet",
+      "routing_terms": [
+        "closet",
+        "guarda roupa",
+        "portas de correr"
+      ]
+    },
+    {
+      "id": "circulation",
+      "label": "Circulação",
+      "routing_terms": [
+        "corredor",
+        "hall",
+        "circulação",
+        "entrada",
+        "porta"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "official-groups",
+      "title": "Grouping Geometry",
+      "type": "OFFICIAL_DOC",
+      "url": "https://help.sketchup.com/en/sketchup/grouping-geometry",
+      "evidence": "OFFICIAL_DOCUMENTATION_READ",
+      "scope": "Separar objetos, editar por contexto, grupos aninhados, bloqueio; não prova Ruby."
+    },
+    {
+      "id": "official-components",
+      "title": "Components",
+      "type": "OFFICIAL_DOC",
+      "url": "https://help.sketchup.com/en/sketchup/components",
+      "evidence": "OFFICIAL_DOCUMENTATION_READ",
+      "scope": "Definição versus instância; alterações propagadas; tornar único."
+    },
+    {
+      "id": "official-model-organization",
+      "title": "Organizing a Model",
+      "type": "OFFICIAL_DOC",
+      "url": "https://help.sketchup.com/pt-br/sketchup/organizing-model",
+      "evidence": "OFFICIAL_DOCUMENTATION_READ",
+      "scope": "Outliner, hierarquia, tags e visibilidade."
+    },
+    {
+      "id": "official-followme",
+      "title": "Como extrudar com a ferramenta Siga-me",
+      "type": "OFFICIAL_DOC",
+      "url": "https://help.sketchup.com/pt-br/sketchup/extruding-follow-me",
+      "evidence": "OFFICIAL_DOCUMENTATION_READ",
+      "scope": "Perfil perpendicular e caminho contínuo no mesmo contexto; extrusão e formas torneadas."
+    },
+    {
+      "id": "official-materials",
+      "title": "Materiais, texturas e ambientes",
+      "type": "OFFICIAL_DOC",
+      "url": "https://help.sketchup.com/pt-br/sketchup/adding-colors-and-textures-materials",
+      "evidence": "OFFICIAL_DOCUMENTATION_READ",
+      "scope": "Tipos de materiais e texturas, uso de mapas PBR; especificidade por versão."
+    },
+    {
+      "id": "official-texture-position",
+      "title": "Como posicionar texturas",
+      "type": "OFFICIAL_DOC",
+      "url": "https://help.sketchup.com/pt-br/sketchup/positioning-textures",
+      "evidence": "OFFICIAL_DOCUMENTATION_READ",
+      "scope": "Orientação, escala e alinhamento por pinos."
+    },
+    {
+      "id": "yt-laundry-basic",
+      "title": "Modeling Interiors in SketchUp Part 1 - Laundry Room Model",
+      "type": "VIDEO",
+      "url": "https://www.youtube.com/watch?v=6BWAe-sU1TA",
+      "evidence": "PUBLIC_DESCRIPTION_ONLY",
+      "scope": "Descrição anuncia shell de lavanderia e casework; não foi assistido nem transcrito nesta etapa."
+    },
+    {
+      "id": "yt-pergola",
+      "title": "How to build a pergola in SketchUp? Modeling a pergola step-by-step.",
+      "type": "VIDEO",
+      "url": "https://www.youtube.com/watch?v=WhUNjgkbn5U",
+      "evidence": "PUBLIC_DESCRIPTION_ONLY",
+      "scope": "Descrição apresenta modelagem de pergolado em SketchUp; ferragens, estrutura e esforços não avaliados."
+    },
+    {
+      "id": "yt-sliding-wardrobe",
+      "title": "Wardrobe Design with Sliding Doors in SketchUp",
+      "type": "VIDEO",
+      "url": "https://www.youtube.com/watch?v=4roWWSkwOpw",
+      "evidence": "PUBLIC_DESCRIPTION_ONLY",
+      "scope": "Descrição menciona portas de correr, compartimentos, puxadores e materiais; sem verificação de dimensões da execução."
+    },
+    {
+      "id": "ruby-method-list",
+      "title": "SketchUp Ruby API Method List",
+      "type": "OFFICIAL_API_INDEX",
+      "url": "https://ruby.sketchup.com/method_list.html",
+      "evidence": "OFFICIAL_DOCUMENTATION_READ",
+      "scope": "Índice de métodos; assinatura, compatibilidade e comportamento exigem consulta e fixture."
+    }
+  ],
+  "recipes": [
+    {
+      "id": "room.living.media-wall",
+      "rooms": [
+        "living"
+      ],
+      "title": "Painel de TV, rack e estantes sem aderência de geometria",
+      "source_refs": [
+        {
+          "id": "official-components",
+          "locator": "Getting Started with Components",
+          "relationship": "TRANSFER_APPLIED"
+        },
+        {
+          "id": "official-model-organization",
+          "locator": "Organizing a Model",
+          "relationship": "TRANSFER_APPLIED"
+        }
+      ],
+      "prior_catalog_recipe_ids": [
+        "cabinet.reusable-components",
+        "cabinet.materials-and-texture-direction"
+      ],
+      "applicability": "PROJECT_ADAPTATION_FROM_GENERAL_TECHNIQUE",
+      "gui_workflow": [
+        "Ler a parede e aberturas no shell, não alterar sua geometria.",
+        "Criar painel, rack, nichos e portas como contextos independentes.",
+        "Usar instâncias só para módulos realmente idênticos; singularizar alterações.",
+        "Organizar por submódulo no Outliner e aplicar madeira com orientação própria por face."
+      ],
+      "parameters_required": [
+        "dimensões e aberturas validadas do cômodo",
+        "conexões elétricas e envelope de abertura",
+        "altura do móvel e recuos aprovados"
+      ],
+      "validation_criteria": [
+        "bbox por módulo e distância a portas/janelas",
+        "nenhuma face solta ou modificação do shell",
+        "veio nas faces corretas",
+        "evidência L2 da hierarquia no Outliner"
+      ],
+      "candidate_implementation": "GROUP_AND_COMPONENT_HIERARCHY_PROPOSAL",
+      "pitfalls": [
+        "Parede escura ou estética não resolve caixa de marcenaria falsa.",
+        "Painel com textura não deve ocultar tomada/janela."
+      ],
+      "knowledge_state": "KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP",
+      "execution_authorized": false,
+      "architectural_approval_required": true
+    },
+    {
+      "id": "room.living.organic-sofa",
+      "rooms": [
+        "living"
+      ],
+      "title": "Sofá curvo por perfil e malha em cópia de trabalho",
+      "source_refs": [
+        {
+          "id": "official-followme",
+          "locator": "Extrusão de perfil e caminhos; formas torneadas",
+          "relationship": "TRANSFER_APPLIED"
+        },
+        {
+          "id": "ruby-method-list",
+          "locator": "Sketchup::Face#followme",
+          "relationship": "CANDIDATE_API"
+        }
+      ],
+      "prior_catalog_recipe_ids": [],
+      "applicability": "PROJECT_ADAPTATION_FROM_GENERAL_TECHNIQUE",
+      "gui_workflow": [
+        "Obter perfil aprovado de braço/assento e medidas do footprint.",
+        "Comparar arco+extrusão e malha: Follow Me atende perfis; curvatura dupla pode exigir malha.",
+        "Prototipar geometria com partes separadas e inspecionar normais/cantos.",
+        "Comparar vistas fixas com silhueta aprovada antes de propor qualquer integração."
+      ],
+      "parameters_required": [
+        "perfil e raios validados",
+        "largura e profundidade do sofá",
+        "resolução máxima de segmentos"
+      ],
+      "validation_criteria": [
+        "ausência de facetas excessivas e autointerseções",
+        "nenhum bloco substituto autoaprovado",
+        "bbox e silhueta aprovados na revisão humana"
+      ],
+      "candidate_implementation": "FOLLOWME_OR_MESH_PROBE_REQUIRED",
+      "pitfalls": [
+        "Follow Me não modela qualquer estofado orgânico; geometria de dupla curvatura exige outra rota."
+      ],
+      "knowledge_state": "KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP",
+      "execution_authorized": false,
+      "architectural_approval_required": true
+    },
+    {
+      "id": "room.bedroom.bed-and-headboard",
+      "rooms": [
+        "bedroom"
+      ],
+      "title": "Cama, cabeceira e mesas de apoio editáveis",
+      "source_refs": [
+        {
+          "id": "official-groups",
+          "locator": "Nesting objects",
+          "relationship": "TRANSFER_APPLIED"
+        },
+        {
+          "id": "official-components",
+          "locator": "Definitions and instances",
+          "relationship": "TRANSFER_APPLIED"
+        },
+        {
+          "id": "official-texture-position",
+          "locator": "Textura > Posição",
+          "relationship": "TRANSFER_APPLIED"
+        }
+      ],
+      "prior_catalog_recipe_ids": [
+        "cabinet.reusable-components",
+        "cabinet.materials-and-texture-direction"
+      ],
+      "applicability": "PROJECT_ADAPTATION_FROM_GENERAL_TECHNIQUE",
+      "gui_workflow": [
+        "Validar cama, circulação e tomadas pela planta.",
+        "Separar base, colchão, travesseiros, cabeceira e mesas em contextos editáveis.",
+        "Duplicar mesas apenas se tiverem realmente a mesma definição.",
+        "Ajustar direção do tecido e do veio por peça, não no grupo inteiro."
+      ],
+      "parameters_required": [
+        "bbox da cama e paredes",
+        "posição de portas, tomadas e cabeceira",
+        "material/orientação por peça"
+      ],
+      "validation_criteria": [
+        "envelopes de passagem e portas sem colisão",
+        "partes semanticamente editáveis",
+        "instâncias duplicadas controladas",
+        "L2 pendente"
+      ],
+      "candidate_implementation": "SEPARATE_SEMANTIC_FURNITURE_PARTS",
+      "pitfalls": [
+        "Render de colchão bonito não prova cama viável nem folga real."
+      ],
+      "knowledge_state": "KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP",
+      "execution_authorized": false,
+      "architectural_approval_required": true
+    },
+    {
+      "id": "room.kitchen.cabinet-assemblies",
+      "rooms": [
+        "kitchen"
+      ],
+      "title": "Módulos inferiores e superiores com caixaria e frente separadas",
+      "source_refs": [
+        {
+          "id": "official-components",
+          "locator": "Definitions and instances",
+          "relationship": "DIRECT_GENERAL_TECHNIQUE"
+        },
+        {
+          "id": "official-groups",
+          "locator": "Objects do not stick to other entities",
+          "relationship": "DIRECT_GENERAL_TECHNIQUE"
+        }
+      ],
+      "prior_catalog_recipe_ids": [
+        "cabinet.reusable-components",
+        "cabinet.front-gaps-and-profiles",
+        "cabinet.drawer-box-and-hardware"
+      ],
+      "applicability": "PROJECT_ADAPTATION_FROM_GENERAL_TECHNIQUE",
+      "gui_workflow": [
+        "Ler posição fixa da pia e modulação aprovada no projeto.",
+        "Dividir carcaça, gavetas, frentes, aéreos, tampo, ferragens e eletros em objetos.",
+        "Usar componentes para repetição; preservar espessuras e folgas da spec/fabricante.",
+        "Validar pias/cooktop e reservatórios de instalação em conjunto, sem recortar automaticamente."
+      ],
+      "parameters_required": [
+        "dimensões reais da cozinha",
+        "hardware e fichas técnicas",
+        "pontos hidráulicos, elétricos, gás",
+        "abertura de portas e gavetas"
+      ],
+      "validation_criteria": [
+        "corte real só após fixture aprovada",
+        "portas/gavetas sem interferências",
+        "modulação auditável no Outliner",
+        "hidráulica imutável"
+      ],
+      "candidate_implementation": "PARAMETRIC_CABINET_MATERIALIZER_REQUIRED",
+      "pitfalls": [
+        "A distribuição de cozinha existente utiliza boxes; não afirmar componentes construtivos.",
+        "Copiar medidas de tutorial para obra é proibido."
+      ],
+      "knowledge_state": "KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP",
+      "execution_authorized": false,
+      "architectural_approval_required": true
+    },
+    {
+      "id": "room.bathroom.vanity-and-shower",
+      "rooms": [
+        "bathroom"
+      ],
+      "title": "Gabinete suspenso, cuba e box em contextos independentes",
+      "source_refs": [
+        {
+          "id": "official-groups",
+          "locator": "Group independent edit contexts",
+          "relationship": "TRANSFER_APPLIED"
+        },
+        {
+          "id": "official-components",
+          "locator": "Reusable objects",
+          "relationship": "TRANSFER_APPLIED"
+        },
+        {
+          "id": "official-materials",
+          "locator": "Materiais e ambientes",
+          "relationship": "TRANSFER_APPLIED"
+        }
+      ],
+      "prior_catalog_recipe_ids": [
+        "cabinet.sink-and-wet-channel-cutouts",
+        "cabinet.materials-and-texture-direction"
+      ],
+      "applicability": "PROJECT_ADAPTATION_FROM_GENERAL_TECHNIQUE",
+      "gui_workflow": [
+        "Preservar louças, ralo, shaft, hidráulica, janela, porta e barreiras molhadas do shell.",
+        "Separar cuba, gabinete, espelho, ferragens, box e vidro em entidades distintas.",
+        "Recorte de cuba só após confirmação do produto e prova isolada de interseção.",
+        "Diferenciar transparência visual de especificação de vidro/vedação para execução."
+      ],
+      "parameters_required": [
+        "catálogo e folgas da cuba",
+        "ponto de esgoto/água",
+        "área molhada e abertura de box",
+        "fixação do móvel"
+      ],
+      "validation_criteria": [
+        "cuba não atravessa gaveta/sifão",
+        "porta do box abre sem colidir",
+        "transparência verificada em render",
+        "sem alterações no shaft"
+      ],
+      "candidate_implementation": "ASSEMBLY_CUTOUT_AND_MEP_FIXTURE_REQUIRED",
+      "pitfalls": [
+        "Vidro transparente no render não equivale a vidro seguro de obra.",
+        "Sem ficha técnica, buildability é UNVERIFIED."
+      ],
+      "knowledge_state": "KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP",
+      "execution_authorized": false,
+      "architectural_approval_required": true
+    },
+    {
+      "id": "room.laundry.casework-and-appliances",
+      "rooms": [
+        "laundry"
+      ],
+      "title": "Armários e eletrodomésticos de lavanderia",
+      "source_refs": [
+        {
+          "id": "yt-laundry-basic",
+          "locator": "Descrição pública: overall space size and casework",
+          "relationship": "DIRECT_GENERAL_TECHNIQUE"
+        },
+        {
+          "id": "official-components",
+          "locator": "Components > definitions and instances",
+          "relationship": "TRANSFER_APPLIED"
+        },
+        {
+          "id": "official-groups",
+          "locator": "Objects and independent edit contexts",
+          "relationship": "TRANSFER_APPLIED"
+        }
+      ],
+      "prior_catalog_recipe_ids": [
+        "cabinet.reusable-components",
+        "cabinet.drawer-box-and-hardware"
+      ],
+      "applicability": "PROJECT_ADAPTATION_FROM_GENERAL_TECHNIQUE",
+      "gui_workflow": [
+        "Construir primeiro um estudo separado do shell e da caixaria, como tema declarado da aula.",
+        "Ler tomadas, água/esgoto e ventilação do projeto aprovado.",
+        "Manter máquina, armário, tanque, bancada e armário alto como objetos separados.",
+        "Antes de dimensionar nicho, confrontar folgas de instalação do fabricante e abertura da máquina."
+      ],
+      "parameters_required": [
+        "modelo exato da máquina",
+        "dimensões do tanque",
+        "folga de vibração, manutenção e circulação",
+        "tomadas, esgoto e água"
+      ],
+      "validation_criteria": [
+        "bbox da máquina não foi escalado apenas para caber",
+        "envelope de porta/tampa sem colisão",
+        "ligações físicas preservadas",
+        "L2 pendente"
+      ],
+      "candidate_implementation": "CASEWORK_ADAPTATION_UNVERIFIED",
+      "pitfalls": [
+        "A fonte em vídeo foi identificada pela descrição; etapas visuais ainda não inspecionadas.",
+        "Redimensionar eletrodoméstico para apresentação não demonstra encaixe real."
+      ],
+      "knowledge_state": "KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP",
+      "execution_authorized": false,
+      "architectural_approval_required": true
+    },
+    {
+      "id": "room.balcony.pergola-and-planter",
+      "rooms": [
+        "balcony"
+      ],
+      "title": "Módulos repetidos de varanda: floreira, deck e pergolado",
+      "source_refs": [
+        {
+          "id": "yt-pergola",
+          "locator": "Descrição pública: pergola em SketchUp",
+          "relationship": "DIRECT_TOPIC_DESCRIPTION_ONLY"
+        },
+        {
+          "id": "official-components",
+          "locator": "Component repetition",
+          "relationship": "TRANSFER_APPLIED"
+        },
+        {
+          "id": "official-followme",
+          "locator": "Follow Me por perfil/caminho",
+          "relationship": "TRANSFER_APPLIED"
+        }
+      ],
+      "prior_catalog_recipe_ids": [],
+      "applicability": "PROJECT_ADAPTATION_FROM_GENERAL_TECHNIQUE",
+      "gui_workflow": [
+        "Ler a varanda real; conferir se pergolado é permitido antes de qualquer modelagem permanente.",
+        "Criar um módulo repetível de ripa e instanciá-lo com espaçamento parametrizado.",
+        "Separar floreiras, mobiliário e guarda-corpo em grupos e não tocar no shell.",
+        "Para perfis curvos, testar extrusão em micro-fixture em vez de presumir resultado."
+      ],
+      "parameters_required": [
+        "largura útil e guarda-corpo real",
+        "restrições de condomínio/obra",
+        "carga e estrutura homologadas",
+        "drenagem/sol/vento"
+      ],
+      "validation_criteria": [
+        "não modelar elementos estruturais como se fossem aprovados",
+        "nenhuma fixação inventada em fachada",
+        "repetições e eixos inspecionáveis",
+        "L2 pendente"
+      ],
+      "candidate_implementation": "PERGOLA_AND_PLANTER_ADVISORY_ONLY",
+      "pitfalls": [
+        "Vídeo de modelagem não comprova engenharia estrutural ou autorização condominial."
+      ],
+      "knowledge_state": "KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP",
+      "execution_authorized": false,
+      "architectural_approval_required": true
+    },
+    {
+      "id": "room.office.desk-and-storage",
+      "rooms": [
+        "home_office"
+      ],
+      "title": "Estação de trabalho e prateleiras com módulos editáveis",
+      "source_refs": [
+        {
+          "id": "official-components",
+          "locator": "Reusable components",
+          "relationship": "TRANSFER_APPLIED"
+        },
+        {
+          "id": "official-model-organization",
+          "locator": "Outliner and tags",
+          "relationship": "TRANSFER_APPLIED"
+        }
+      ],
+      "prior_catalog_recipe_ids": [
+        "cabinet.reusable-components",
+        "cabinet.materials-and-texture-direction"
+      ],
+      "applicability": "PROJECT_ADAPTATION_FROM_GENERAL_TECHNIQUE",
+      "gui_workflow": [
+        "Preservar posição de janela e portas; checar passagem.",
+        "Modelar tampo, suportes, gaveteiro, canaletas e prateleiras separadamente.",
+        "Instanciar suportes e gavetas repetidos, deixando eixos locais claros.",
+        "Organizar elétrica e equipamentos como referências, sem inferir instalação aprovada."
+      ],
+      "parameters_required": [
+        "área disponível e cotas aprovadas",
+        "altura/tamanho definidos pela pessoa e equipamentos",
+        "tomadas, ventilação e cabos"
+      ],
+      "validation_criteria": [
+        "apoios e tampo em bbox próprio",
+        "circulação e abertura de gavetas verificadas",
+        "não duplicar modelos alterando itens compartilhados",
+        "L2 pendente"
+      ],
+      "candidate_implementation": "DESK_GROUPS_COMPONENTS_ADVISORY_ONLY",
+      "pitfalls": [
+        "Sem medida do equipamento, um render pode esconder interferência de gaveta/joelho."
+      ],
+      "knowledge_state": "KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP",
+      "execution_authorized": false,
+      "architectural_approval_required": true
+    },
+    {
+      "id": "room.closet.wardrobe-sliding-doors",
+      "rooms": [
+        "closet"
+      ],
+      "title": "Portas de correr e divisórias internas como subsistemas",
+      "source_refs": [
+        {
+          "id": "yt-sliding-wardrobe",
+          "locator": "Descrição pública: portas, gavetas, compartimentos e texturas",
+          "relationship": "DIRECT_GENERAL_TECHNIQUE"
+        },
+        {
+          "id": "official-components",
+          "locator": "Component uniqueness and shared definitions",
+          "relationship": "TRANSFER_APPLIED"
+        }
+      ],
+      "prior_catalog_recipe_ids": [
+        "cabinet.reusable-components",
+        "cabinet.drawer-box-and-hardware"
+      ],
+      "applicability": "PROJECT_ADAPTATION_FROM_GENERAL_TECHNIQUE",
+      "gui_workflow": [
+        "Projetar compartimentos a partir do espaço medido, sem inventar alturas.",
+        "Separar trilhos, folhas, puxadores e divisórias em objetos editáveis.",
+        "Representar trilhos e curso de folhas somente com hardware escolhido.",
+        "Verificar sobreposição e caminho das folhas antes de texturizar."
+      ],
+      "parameters_required": [
+        "hardware do trilho escolhido",
+        "espessuras e capacidade da folha",
+        "profundidade útil e interferências"
+      ],
+      "validation_criteria": [
+        "folhas sem interferência com gavetas",
+        "curso de portas fundamentado no fabricante",
+        "perfis independentes e inspecionáveis",
+        "L2 pendente"
+      ],
+      "candidate_implementation": "SLIDING_DOOR_HARDWARE_NOT_PROVEN",
+      "pitfalls": [
+        "Não reduzir a largura da porta por scale sem avaliar estrutura e trilho.",
+        "Vídeo ainda não analisado por transcript/visual."
+      ],
+      "knowledge_state": "KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP",
+      "execution_authorized": false,
+      "architectural_approval_required": true
+    },
+    {
+      "id": "room.circulation.hall-and-doors",
+      "rooms": [
+        "circulation"
+      ],
+      "title": "Circulação, portas e volumes de apoio sem alterar arquitetura",
+      "source_refs": [
+        {
+          "id": "official-groups",
+          "locator": "Locked objects, nested editing",
+          "relationship": "TRANSFER_APPLIED"
+        },
+        {
+          "id": "official-model-organization",
+          "locator": "Outliner and visibility",
+          "relationship": "TRANSFER_APPLIED"
+        }
+      ],
+      "prior_catalog_recipe_ids": [],
+      "applicability": "PROJECT_ADAPTATION_FROM_GENERAL_TECHNIQUE",
+      "gui_workflow": [
+        "Ler vãos e limites do shell canônico.",
+        "Desenhar apenas um objeto de apoio opcional e independente, sem tocar paredes.",
+        "Registrar envelope de abertura de portas e volume de uso em geometria consultiva.",
+        "Auditar conflitos com percurso antes de recomendar colocação."
+      ],
+      "parameters_required": [
+        "passagens e portais validados",
+        "envelope de giro/uso",
+        "móveis pretendidos e orientação"
+      ],
+      "validation_criteria": [
+        "não atravessar vãos",
+        "passagem mínima vinda da política do projeto, nunca inventada",
+        "sem mudanças em parede/laje",
+        "L2 pendente"
+      ],
+      "candidate_implementation": "NO_ARCHITECTURE_MUTATION",
+      "pitfalls": [
+        "Nenhuma dimensão mínima pode ser tratada como norma sem origem explícita."
+      ],
+      "knowledge_state": "KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP",
+      "execution_authorized": false,
+      "architectural_approval_required": true
+    },
+    {
+      "id": "cross.room.material-and-instance-rules",
+      "rooms": [
+        "living",
+        "bedroom",
+        "kitchen",
+        "bathroom",
+        "laundry",
+        "balcony",
+        "home_office",
+        "closet",
+        "circulation"
+      ],
+      "title": "Organização, unicidade e materiais por contexto",
+      "source_refs": [
+        {
+          "id": "official-components",
+          "locator": "Definition versus instance",
+          "relationship": "DIRECT_GENERAL_TECHNIQUE"
+        },
+        {
+          "id": "official-texture-position",
+          "locator": "Texture > Position",
+          "relationship": "DIRECT_GENERAL_TECHNIQUE"
+        },
+        {
+          "id": "official-model-organization",
+          "locator": "Tags / Outliner",
+          "relationship": "DIRECT_GENERAL_TECHNIQUE"
+        }
+      ],
+      "prior_catalog_recipe_ids": [
+        "cabinet.materials-and-texture-direction",
+        "cabinet.reusable-components"
+      ],
+      "applicability": "PROJECT_ADAPTATION_FROM_GENERAL_TECHNIQUE",
+      "gui_workflow": [
+        "Distinguir instância compartilhada de edição singular antes de tocar peças.",
+        "Usar eixos de componente e contextos de edição explícitos.",
+        "Material aplicado às faces certas; escala e veio verificados no contexto de cada superfície.",
+        "Usar Outliner para inspecionar hierarquias de cômodo > conjunto > peça."
+      ],
+      "parameters_required": [
+        "identificador do objeto e definição",
+        "material e orientação de imagem",
+        "LOD e requisitos do cômodo"
+      ],
+      "validation_criteria": [
+        "edição singular não vaza para instâncias compartilhadas",
+        "geometria crua fora do root",
+        "tags organizam objetos e não substituem grupos",
+        "L2 pendente"
+      ],
+      "candidate_implementation": "UNIVERSAL_SKETCHUP_CONSULTATIVE_RULES",
+      "pitfalls": [
+        "A cor no container não prova textura orientada corretamente.",
+        "Não declarar API suportada até prova de versão."
+      ],
+      "knowledge_state": "KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP",
+      "execution_authorized": false,
+      "architectural_approval_required": true
+    }
+  ]
+}
