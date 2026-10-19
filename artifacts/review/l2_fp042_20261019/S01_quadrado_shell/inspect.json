@@ -1,0 +1,1465 @@
+{
+ "job": "inspect_model",
+ "out_dir": "E:\\Claude\\apps\\sketchup-mcp\\runs\\l2_fp042_20261019\\S01_quadrado_shell\\inspect",
+ "status": "OK",
+ "mode": "interactive",
+ "pid": 30672,
+ "elapsed_s": 10.01,
+ "su_left_running": true,
+ "command": [
+  "C:\\Program Files\\SketchUp\\SketchUp 2026\\SketchUp\\SketchUp.exe",
+  "E:\\Claude\\apps\\sketchup-mcp\\runs\\l2_fp042_20261019\\S01_quadrado_shell\\inspect\\_inspect_model.skp",
+  "-RubyStartup",
+  "E:\\Claude\\apps\\sketchup-mcp\\tools\\sketchup\\ruby\\inspect_model.rb"
+ ],
+ "result": {
+  "ok": true,
+  "job": "inspect_model",
+  "title": "_inspect_model",
+  "path": "E:\\Claude\\apps\\sketchup-mcp\\runs\\l2_fp042_20261019\\S01_quadrado_shell\\inspect\\_inspect_model.skp",
+  "length_unit_code": 0,
+  "bbox_m": {
+   "min": [
+    3.4235,
+    3.3659,
+    0.0
+   ],
+   "max": [
+    7.6135,
+    7.6135,
+    2.7
+   ],
+   "size": [
+    4.19,
+    4.2476,
+    2.7
+   ]
+  },
+  "counts": {
+   "top_groups": 4,
+   "top_components": 0,
+   "loose_faces_at_root": 0,
+   "loose_edges_at_root": 0,
+   "definitions": 14,
+   "materials": 32,
+   "tags": 1,
+   "scenes": 0
+  },
+  "nodes": [
+   {
+    "name": "PlanShell_Group",
+    "definition": "Grupo0#1",
+    "pid": 48881,
+    "path": "PlanShell_Group",
+    "paths": [
+     "PlanShell_Group"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      3.4235,
+      3.4235,
+      0.0
+     ],
+     "max": [
+      7.6135,
+      7.6135,
+      2.7
+     ],
+     "size": [
+      4.19,
+      4.19,
+      2.7
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      3.4235,
+      3.4235,
+      0.0
+     ],
+     "max": [
+      7.6135,
+      7.6135,
+      2.7
+     ],
+     "size": [
+      4.19,
+      4.19,
+      2.7
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 1
+   },
+   {
+    "name": "PlanShell_piece_0",
+    "definition": "Grupo1#1",
+    "pid": 48883,
+    "path": "PlanShell_Group/PlanShell_piece_0",
+    "paths": [
+     "PlanShell_Group/PlanShell_piece_0"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      3.4235,
+      3.4235,
+      0.0
+     ],
+     "max": [
+      7.6135,
+      7.6135,
+      2.7
+     ],
+     "size": [
+      4.19,
+      4.19,
+      2.7
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      3.4235,
+      3.4235,
+      0.0
+     ],
+     "max": [
+      7.6135,
+      7.6135,
+      2.7
+     ],
+     "size": [
+      4.19,
+      4.19,
+      2.7
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 0
+   },
+   {
+    "name": "Floor_Group_r_main",
+    "definition": "Grupo2#1",
+    "pid": 48945,
+    "path": "Floor_Group_r_main",
+    "paths": [
+     "Floor_Group_r_main"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      3.5375,
+      3.5375,
+      0.0
+     ],
+     "max": [
+      7.4995,
+      7.4995,
+      0.0
+     ],
+     "size": [
+      3.962,
+      3.962,
+      0.0
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      3.5375,
+      3.5375,
+      0.0
+     ],
+     "max": [
+      7.4995,
+      7.4995,
+      0.0
+     ],
+     "size": [
+      3.962,
+      3.962,
+      0.0
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 0
+   },
+   {
+    "name": "WindowGlass_Group_win_south",
+    "definition": "Grupo3#1",
+    "pid": 48990,
+    "path": "WindowGlass_Group_win_south",
+    "paths": [
+     "WindowGlass_Group_win_south"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      4.9907,
+      3.4785,
+      1.5
+     ],
+     "max": [
+      6.0463,
+      3.5585,
+      2.1
+     ],
+     "size": [
+      1.0556,
+      0.08,
+      0.6
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      4.9907,
+      3.4785,
+      1.5
+     ],
+     "max": [
+      6.0463,
+      3.5585,
+      2.1
+     ],
+     "size": [
+      1.0556,
+      0.08,
+      0.6
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 4
+   },
+   {
+    "name": "",
+    "definition": "Grupo5#1",
+    "pid": 48994,
+    "path": "WindowGlass_Group_win_south/Grupo5#1",
+    "paths": [
+     "WindowGlass_Group_win_south/Grupo5#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      4.9907,
+      3.4785,
+      1.5
+     ],
+     "max": [
+      6.0463,
+      3.5585,
+      1.55
+     ],
+     "size": [
+      1.0556,
+      0.08,
+      0.05
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      4.9907,
+      3.4785,
+      1.5
+     ],
+     "max": [
+      6.0463,
+      3.5585,
+      1.55
+     ],
+     "size": [
+      1.0556,
+      0.08,
+      0.05
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo6#1",
+    "pid": 49026,
+    "path": "WindowGlass_Group_win_south/Grupo6#1",
+    "paths": [
+     "WindowGlass_Group_win_south/Grupo6#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      4.9907,
+      3.4785,
+      2.05
+     ],
+     "max": [
+      6.0463,
+      3.5585,
+      2.1
+     ],
+     "size": [
+      1.0556,
+      0.08,
+      0.05
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      4.9907,
+      3.4785,
+      2.05
+     ],
+     "max": [
+      6.0463,
+      3.5585,
+      2.1
+     ],
+     "size": [
+      1.0556,
+      0.08,
+      0.05
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo7#1",
+    "pid": 49058,
+    "path": "WindowGlass_Group_win_south/Grupo7#1",
+    "paths": [
+     "WindowGlass_Group_win_south/Grupo7#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      4.9907,
+      3.4785,
+      1.5
+     ],
+     "max": [
+      5.0407,
+      3.5585,
+      2.1
+     ],
+     "size": [
+      0.05,
+      0.08,
+      0.6
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      4.9907,
+      3.4785,
+      1.5
+     ],
+     "max": [
+      5.0407,
+      3.5585,
+      2.1
+     ],
+     "size": [
+      0.05,
+      0.08,
+      0.6
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo8#1",
+    "pid": 49090,
+    "path": "WindowGlass_Group_win_south/Grupo8#1",
+    "paths": [
+     "WindowGlass_Group_win_south/Grupo8#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      5.9963,
+      3.4785,
+      1.5
+     ],
+     "max": [
+      6.0463,
+      3.5585,
+      2.1
+     ],
+     "size": [
+      0.05,
+      0.08,
+      0.6
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      5.9963,
+      3.4785,
+      1.5
+     ],
+     "max": [
+      6.0463,
+      3.5585,
+      2.1
+     ],
+     "size": [
+      0.05,
+      0.08,
+      0.6
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "WindowSash_Group_win_south",
+    "definition": "Grupo4#1",
+    "pid": 48992,
+    "path": "WindowSash_Group_win_south",
+    "paths": [
+     "WindowSash_Group_win_south"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      5.0407,
+      3.3659,
+      1.5608
+     ],
+     "max": [
+      5.9963,
+      3.5417,
+      2.0562
+     ],
+     "size": [
+      0.9556,
+      0.1758,
+      0.4954
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      5.0407,
+      3.3659,
+      1.5608
+     ],
+     "max": [
+      5.9963,
+      3.5417,
+      2.0562
+     ],
+     "size": [
+      0.9556,
+      0.1758,
+      0.4954
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     -0.4107,
+     0.9805
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.965926,
+     -0.258819,
+     0.0,
+     0.0,
+     0.258819,
+     0.965926,
+     0.0,
+     0.0,
+     -16.168836,
+     38.602821,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "self",
+    "children": 5
+   },
+   {
+    "name": "",
+    "definition": "Grupo9#1",
+    "pid": 49122,
+    "path": "WindowSash_Group_win_south/Grupo9#1",
+    "paths": [
+     "WindowSash_Group_win_south/Grupo9#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      5.0407,
+      3.4945,
+      1.55
+     ],
+     "max": [
+      5.9963,
+      3.5425,
+      1.58
+     ],
+     "size": [
+      0.9556,
+      0.048,
+      0.03
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      5.0407,
+      3.3659,
+      1.5608
+     ],
+     "max": [
+      5.9963,
+      3.4201,
+      1.6022
+     ],
+     "size": [
+      0.9556,
+      0.0541,
+      0.0414
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     -0.4107,
+     0.9805
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.965926,
+     -0.258819,
+     0.0,
+     0.0,
+     0.258819,
+     0.965926,
+     0.0,
+     0.0,
+     -16.168836,
+     38.602821,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo10#1",
+    "pid": 49154,
+    "path": "WindowSash_Group_win_south/Grupo10#1",
+    "paths": [
+     "WindowSash_Group_win_south/Grupo10#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      5.0407,
+      3.4945,
+      2.02
+     ],
+     "max": [
+      5.9963,
+      3.5425,
+      2.05
+     ],
+     "size": [
+      0.9556,
+      0.048,
+      0.03
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      5.0407,
+      3.4876,
+      2.0148
+     ],
+     "max": [
+      5.9963,
+      3.5417,
+      2.0562
+     ],
+     "size": [
+      0.9556,
+      0.0541,
+      0.0414
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     -0.4107,
+     0.9805
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.965926,
+     -0.258819,
+     0.0,
+     0.0,
+     0.258819,
+     0.965926,
+     0.0,
+     0.0,
+     -16.168836,
+     38.602821,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo11#1",
+    "pid": 49186,
+    "path": "WindowSash_Group_win_south/Grupo11#1",
+    "paths": [
+     "WindowSash_Group_win_south/Grupo11#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      5.0407,
+      3.4945,
+      1.55
+     ],
+     "max": [
+      5.0707,
+      3.5425,
+      2.05
+     ],
+     "size": [
+      0.03,
+      0.048,
+      0.5
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      5.0407,
+      3.3659,
+      1.5608
+     ],
+     "max": [
+      5.0707,
+      3.5417,
+      2.0562
+     ],
+     "size": [
+      0.03,
+      0.1758,
+      0.4954
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     -0.4107,
+     0.9805
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.965926,
+     -0.258819,
+     0.0,
+     0.0,
+     0.258819,
+     0.965926,
+     0.0,
+     0.0,
+     -16.168836,
+     38.602821,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo12#1",
+    "pid": 49218,
+    "path": "WindowSash_Group_win_south/Grupo12#1",
+    "paths": [
+     "WindowSash_Group_win_south/Grupo12#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      5.9663,
+      3.4945,
+      1.55
+     ],
+     "max": [
+      5.9963,
+      3.5425,
+      2.05
+     ],
+     "size": [
+      0.03,
+      0.048,
+      0.5
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      5.9663,
+      3.3659,
+      1.5608
+     ],
+     "max": [
+      5.9963,
+      3.5417,
+      2.0562
+     ],
+     "size": [
+      0.03,
+      0.1758,
+      0.4954
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     -0.4107,
+     0.9805
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.965926,
+     -0.258819,
+     0.0,
+     0.0,
+     0.258819,
+     0.965926,
+     0.0,
+     0.0,
+     -16.168836,
+     38.602821,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   },
+   {
+    "name": "",
+    "definition": "Grupo13#1",
+    "pid": 49250,
+    "path": "WindowSash_Group_win_south/Grupo13#1",
+    "paths": [
+     "WindowSash_Group_win_south/Grupo13#1"
+    ],
+    "type": "group",
+    "contexts": 1,
+    "tag": "Layer0",
+    "locked": false,
+    "hidden": false,
+    "material": null,
+    "bbox_local_m": {
+     "min": [
+      5.0707,
+      3.5185,
+      1.58
+     ],
+     "max": [
+      5.9663,
+      3.5185,
+      2.02
+     ],
+     "size": [
+      0.8956,
+      0.0,
+      0.44
+     ]
+    },
+    "bbox_world_m": {
+     "min": [
+      5.0707,
+      3.3969,
+      1.596
+     ],
+     "max": [
+      5.9663,
+      3.5108,
+      2.021
+     ],
+     "size": [
+      0.8956,
+      0.1139,
+      0.425
+     ]
+    },
+    "world_origin_m": [
+     0.0,
+     -0.4107,
+     0.9805
+    ],
+    "world_transform": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.965926,
+     -0.258819,
+     0.0,
+     0.0,
+     0.258819,
+     0.965926,
+     0.0,
+     0.0,
+     -16.168836,
+     38.602821,
+     1.0
+    ],
+    "protected": true,
+    "protected_by": "ancestor",
+    "children": 0
+   }
+  ],
+  "materials": [
+   {
+    "name": "Sree_Complexion_2",
+    "display_name": "Sree_Complexion_2",
+    "rgb": [
+     165,
+     117,
+     93
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Complexion_3",
+    "display_name": "Sree_Complexion_3",
+    "rgb": [
+     119,
+     84,
+     67
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Laptop_1",
+    "display_name": "Sree_Laptop_1",
+    "rgb": [
+     146,
+     155,
+     160
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Pearls_2",
+    "display_name": "Sree_Pearls_2",
+    "rgb": [
+     198,
+     198,
+     198
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Dress_1",
+    "display_name": "Sree_Dress_1",
+    "rgb": [
+     26,
+     33,
+     51
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Laptop_2",
+    "display_name": "Sree_Laptop_2",
+    "rgb": [
+     130,
+     138,
+     142
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Complexion_1",
+    "display_name": "Sree_Complexion_1",
+    "rgb": [
+     181,
+     133,
+     110
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Hair",
+    "display_name": "Sree_Hair",
+    "rgb": [
+     15,
+     15,
+     15
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Dress_4",
+    "display_name": "Sree_Dress_4",
+    "rgb": [
+     17,
+     23,
+     35
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Nails_4",
+    "display_name": "Sree_Nails_4",
+    "rgb": [
+     181,
+     157,
+     146
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Dress_3",
+    "display_name": "Sree_Dress_3",
+    "rgb": [
+     25,
+     37,
+     61
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Dress_2",
+    "display_name": "Sree_Dress_2",
+    "rgb": [
+     24,
+     33,
+     53
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Pearls_1",
+    "display_name": "Sree_Pearls_1",
+    "rgb": [
+     252,
+     252,
+     252
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Watch_2",
+    "display_name": "Sree_Watch_2",
+    "rgb": [
+     43,
+     43,
+     43
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Watch_3",
+    "display_name": "Sree_Watch_3",
+    "rgb": [
+     53,
+     53,
+     53
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Watch_1",
+    "display_name": "Sree_Watch_1",
+    "rgb": [
+     15,
+     15,
+     15
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Laptop_3",
+    "display_name": "Sree_Laptop_3",
+    "rgb": [
+     193,
+     205,
+     211
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Shoes_1",
+    "display_name": "Sree_Shoes_1",
+    "rgb": [
+     23,
+     29,
+     43
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Shoes_2",
+    "display_name": "Sree_Shoes_2",
+    "rgb": [
+     48,
+     51,
+     58
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Shoes_3",
+    "display_name": "Sree_Shoes_3",
+    "rgb": [
+     67,
+     71,
+     81
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "Sree_Shoes_4",
+    "display_name": "Sree_Shoes_4",
+    "rgb": [
+     17,
+     22,
+     33
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "plan_wall",
+    "display_name": "plan_wall",
+    "rgb": [
+     78,
+     78,
+     78
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "floor_r_main",
+    "display_name": "floor_r_main",
+    "rgb": [
+     253,
+     226,
+     192
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "plan_parapet",
+    "display_name": "plan_parapet",
+    "rgb": [
+     130,
+     135,
+     140
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "plan_railing",
+    "display_name": "plan_railing",
+    "rgb": [
+     60,
+     62,
+     70
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "plan_glass",
+    "display_name": "plan_glass",
+    "rgb": [
+     124,
+     138,
+     181
+    ],
+    "alpha": 0.45,
+    "texture": null
+   },
+   {
+    "name": "plan_door",
+    "display_name": "plan_door",
+    "rgb": [
+     140,
+     95,
+     55
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "plan_window_sill",
+    "display_name": "plan_window_sill",
+    "rgb": [
+     130,
+     135,
+     140
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "plan_window_glass",
+    "display_name": "plan_window_glass",
+    "rgb": [
+     198,
+     222,
+     212
+    ],
+    "alpha": 0.32,
+    "texture": null
+   },
+   {
+    "name": "plan_window_frame",
+    "display_name": "plan_window_frame",
+    "rgb": [
+     238,
+     238,
+     240
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "plan_window_lintel",
+    "display_name": "plan_window_lintel",
+    "rgb": [
+     110,
+     115,
+     120
+    ],
+    "alpha": 1.0,
+    "texture": null
+   },
+   {
+    "name": "plan_passage_marker",
+    "display_name": "plan_passage_marker",
+    "rgb": [
+     102,
+     187,
+     230
+    ],
+    "alpha": 1.0,
+    "texture": null
+   }
+  ],
+  "tags": [
+   {
+    "name": "Layer0",
+    "visible": true
+   }
+  ],
+  "scenes": [],
+  "elapsed_s": 0.0,
+  "sketchup_version": "26.0.429"
+ },
+ "input_skp": "E:\\Claude\\apps\\sketchup-mcp\\runs\\l2_fp042_20261019\\S01_quadrado_shell\\model.skp"
+}

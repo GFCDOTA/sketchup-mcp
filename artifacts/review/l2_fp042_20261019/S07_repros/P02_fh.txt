@@ -1,0 +1,345 @@
+Timeout (0:01:00)!
+Thread 0x00005934 (most recent call first):
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\threading.py", line 355 in wait
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\queue.py", line 171 in get
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 1018 in run
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00007300 (most recent call first):
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 1029 in run
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0000707c (most recent call first):
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 1293 in create_module
+  File "<frozen importlib._bootstrap>", line 813 in module_from_spec
+  File "<frozen importlib._bootstrap>", line 921 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1415 in _handle_fromlist
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\numpy\_core\multiarray.py", line 11 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 999 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1415 in _handle_fromlist
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\numpy\_core\__init__.py", line 24 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 999 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1310 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\numpy\__config__.py", line 4 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 999 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\numpy\__init__.py", line 125 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 999 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1310 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1310 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 1293 in create_module
+  File "<frozen importlib._bootstrap>", line 813 in module_from_spec
+  File "<frozen importlib._bootstrap>", line 921 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\shapely\__init__.py", line 15 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 999 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1310 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "E:\Claude\worktrees\sm-l2-stdin\tools\rooms\bedroom\designer.py", line 18 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 999 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1415 in _handle_fromlist
+  File "E:\Claude\worktrees\sm-l2-stdin\tools\bedroom_designer.py", line 7 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 999 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1415 in _handle_fromlist
+  File "E:\Claude\worktrees\sm-l2-stdin\tools\furnish_apartment.py", line 29 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 999 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "E:\Claude\worktrees\sm-l2-stdin\tools\sketchup\jobs.py", line 295 in furnish
+  File "E:\Claude\worktrees\sm-l2-stdin\tools\mcp_server\server.py", line 470 in su_furnish
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\mcp\server\fastmcp\utilities\func_metadata.py", line 96 in call_fn_with_arg_validation
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\mcp\server\fastmcp\tools\base.py", line 101 in run
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\mcp\server\fastmcp\tools\tool_manager.py", line 93 in call_tool
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\mcp\server\fastmcp\server.py", line 346 in call_tool
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\mcp\server\lowlevel\server.py", line 541 in handler
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\mcp\server\lowlevel\server.py", line 776 in _handle_request
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\mcp\server\lowlevel\server.py", line 709 in _handle_message
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\anyio\_core\_tasks.py", line 278 in _run_coro
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\asyncio\events.py", line 88 in _run
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\asyncio\base_events.py", line 1999 in _run_once
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\asyncio\base_events.py", line 645 in run_forever
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\asyncio\windows_events.py", line 322 in run_forever
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\asyncio\base_events.py", line 678 in run_until_complete
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\asyncio\runners.py", line 118 in run
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2432 in run
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\anyio\_core\_eventloop.py", line 83 in run
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\mcp\server\fastmcp\server.py", line 296 in run
+  File "E:\Claude\worktrees\sm-l2-stdin\tools\mcp_server\server.py", line 492 in main
+  ...
+Timeout (0:01:00)!
+Thread 0x00005934 (most recent call first):
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\threading.py", line 355 in wait
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\queue.py", line 171 in get
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 1018 in run
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00007300 (most recent call first):
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 1029 in run
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0000707c (most recent call first):
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 1293 in create_module
+  File "<frozen importlib._bootstrap>", line 813 in module_from_spec
+  File "<frozen importlib._bootstrap>", line 921 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1415 in _handle_fromlist
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\numpy\_core\multiarray.py", line 11 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 999 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1415 in _handle_fromlist
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\numpy\_core\__init__.py", line 24 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 999 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1310 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\numpy\__config__.py", line 4 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 999 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\numpy\__init__.py", line 125 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 999 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1310 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1310 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 1293 in create_module
+  File "<frozen importlib._bootstrap>", line 813 in module_from_spec
+  File "<frozen importlib._bootstrap>", line 921 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\shapely\__init__.py", line 15 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 999 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1310 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "E:\Claude\worktrees\sm-l2-stdin\tools\rooms\bedroom\designer.py", line 18 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 999 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1415 in _handle_fromlist
+  File "E:\Claude\worktrees\sm-l2-stdin\tools\bedroom_designer.py", line 7 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 999 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1415 in _handle_fromlist
+  File "E:\Claude\worktrees\sm-l2-stdin\tools\furnish_apartment.py", line 29 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 999 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "E:\Claude\worktrees\sm-l2-stdin\tools\sketchup\jobs.py", line 295 in furnish
+  File "E:\Claude\worktrees\sm-l2-stdin\tools\mcp_server\server.py", line 470 in su_furnish
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\mcp\server\fastmcp\utilities\func_metadata.py", line 96 in call_fn_with_arg_validation
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\mcp\server\fastmcp\tools\base.py", line 101 in run
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\mcp\server\fastmcp\tools\tool_manager.py", line 93 in call_tool
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\mcp\server\fastmcp\server.py", line 346 in call_tool
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\mcp\server\lowlevel\server.py", line 541 in handler
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\mcp\server\lowlevel\server.py", line 776 in _handle_request
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\mcp\server\lowlevel\server.py", line 709 in _handle_message
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\anyio\_core\_tasks.py", line 278 in _run_coro
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\asyncio\events.py", line 88 in _run
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\asyncio\base_events.py", line 1999 in _run_once
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\asyncio\base_events.py", line 645 in run_forever
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\asyncio\windows_events.py", line 322 in run_forever
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\asyncio\base_events.py", line 678 in run_until_complete
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\asyncio\runners.py", line 118 in run
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2432 in run
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\anyio\_core\_eventloop.py", line 83 in run
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\mcp\server\fastmcp\server.py", line 296 in run
+  File "E:\Claude\worktrees\sm-l2-stdin\tools\mcp_server\server.py", line 492 in main
+  ...
+Timeout (0:01:00)!
+Thread 0x00005934 (most recent call first):
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\threading.py", line 355 in wait
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\queue.py", line 171 in get
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 1018 in run
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00007300 (most recent call first):
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 1029 in run
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0000707c (most recent call first):
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 1293 in create_module
+  File "<frozen importlib._bootstrap>", line 813 in module_from_spec
+  File "<frozen importlib._bootstrap>", line 921 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1415 in _handle_fromlist
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\numpy\_core\multiarray.py", line 11 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 999 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1415 in _handle_fromlist
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\numpy\_core\__init__.py", line 24 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 999 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1310 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\numpy\__config__.py", line 4 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 999 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\numpy\__init__.py", line 125 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 999 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1310 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1310 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 1293 in create_module
+  File "<frozen importlib._bootstrap>", line 813 in module_from_spec
+  File "<frozen importlib._bootstrap>", line 921 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\shapely\__init__.py", line 15 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 999 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1310 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "E:\Claude\worktrees\sm-l2-stdin\tools\rooms\bedroom\designer.py", line 18 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 999 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1415 in _handle_fromlist
+  File "E:\Claude\worktrees\sm-l2-stdin\tools\bedroom_designer.py", line 7 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 999 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1415 in _handle_fromlist
+  File "E:\Claude\worktrees\sm-l2-stdin\tools\furnish_apartment.py", line 29 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 999 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "E:\Claude\worktrees\sm-l2-stdin\tools\sketchup\jobs.py", line 295 in furnish
+  File "E:\Claude\worktrees\sm-l2-stdin\tools\mcp_server\server.py", line 470 in su_furnish
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\mcp\server\fastmcp\utilities\func_metadata.py", line 96 in call_fn_with_arg_validation
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\mcp\server\fastmcp\tools\base.py", line 101 in run
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\mcp\server\fastmcp\tools\tool_manager.py", line 93 in call_tool
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\mcp\server\fastmcp\server.py", line 346 in call_tool
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\mcp\server\lowlevel\server.py", line 541 in handler
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\mcp\server\lowlevel\server.py", line 776 in _handle_request
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\mcp\server\lowlevel\server.py", line 709 in _handle_message
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\anyio\_core\_tasks.py", line 278 in _run_coro
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\asyncio\events.py", line 88 in _run
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\asyncio\base_events.py", line 1999 in _run_once
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\asyncio\base_events.py", line 645 in run_forever
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\asyncio\windows_events.py", line 322 in run_forever
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\asyncio\base_events.py", line 678 in run_until_complete
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\asyncio\runners.py", line 118 in run
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2432 in run
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\anyio\_core\_eventloop.py", line 83 in run
+  File "E:\Claude\apps\sketchup-mcp\.venv\Lib\site-packages\mcp\server\fastmcp\server.py", line 296 in run
+  File "E:\Claude\worktrees\sm-l2-stdin\tools\mcp_server\server.py", line 492 in main
+  ...

@@ -1,0 +1,28 @@
+{
+ "transport": "stdio",
+ "tool": "su_inspect",
+ "args": {
+  "skp_path": "runs/l2_fp042_20261019/S06_mcp/suite/base.skp",
+  "max_depth": 2
+ },
+ "is_error": false,
+ "n_tools": 18,
+ "server_env_PT_TO_M": "0.0259",
+ "result": {
+  "job": "inspect_model",
+  "out_dir": "E:\\Claude\\apps\\sketchup-mcp\\runs\\planta_74\\mcp\\inspect_20261019_104341",
+  "status": "TIMEOUT",
+  "mode": "interactive",
+  "pid": 31540,
+  "elapsed_s": 180.08,
+  "su_left_running": true,
+  "command": [
+   "C:\\Program Files\\SketchUp\\SketchUp 2026\\SketchUp\\SketchUp.exe",
+   "E:\\Claude\\apps\\sketchup-mcp\\runs\\planta_74\\mcp\\inspect_20261019_104341\\_inspect_base.skp",
+   "-RubyStartup",
+   "E:\\Claude\\apps\\sketchup-mcp\\tools\\sketchup\\ruby\\inspect_model.rb"
+  ],
+  "reason": "sem resultado em 180s",
+  "input_skp": "E:\\Claude\\apps\\sketchup-mcp\\runs\\l2_fp042_20261019\\S06_mcp\\suite\\base.skp"
+ }
+}

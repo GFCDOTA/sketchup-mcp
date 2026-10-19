@@ -1,0 +1,3062 @@
+{
+ "n_boxes": 83,
+ "n_matched": 83,
+ "unmatched": [],
+ "extra_skp_pieces": [
+  "PlanShell_Group/PlanShell_piece_0",
+  "PassageMarker_Group_door1/PassageMarker_door1_band",
+  "GlazedBalcony_Group_balc1/GlazedBalcony_balc1_pane"
+ ],
+ "max_err_m": 5e-05,
+ "bad_fit": [],
+ "inner_bounds_m": {
+  "x": [
+   0.095,
+   6.105
+  ],
+  "y": [
+   0.095,
+   4.405
+  ]
+ },
+ "outside_room": [],
+ "collisions": [
+  [
+   "living_large_rect_28m2 · Painel TV/painel_tv",
+   "living_large_rect_28m2 · Parede concreto/parede_concreto"
+  ],
+  [
+   "living_large_rect_28m2 · Painel TV/painel_tv",
+   "living_large_rect_28m2 · Planta/foliage_1"
+  ],
+  [
+   "living_large_rect_28m2 · Painel TV/painel_tv",
+   "living_large_rect_28m2 · Planta/foliage_2"
+  ],
+  [
+   "living_large_rect_28m2 · Painel TV/painel_tv",
+   "living_large_rect_28m2 · Quadro/frame_l"
+  ],
+  [
+   "living_large_rect_28m2 · Painel TV/painel_tv",
+   "living_large_rect_28m2 · Quadro/frame_r"
+  ],
+  [
+   "living_large_rect_28m2 · Painel TV/painel_tv",
+   "living_large_rect_28m2 · Quadro/frame_b"
+  ],
+  [
+   "living_large_rect_28m2 · Painel TV/painel_tv",
+   "living_large_rect_28m2 · Quadro/frame_t"
+  ],
+  [
+   "living_large_rect_28m2 · Painel TV/painel_tv",
+   "living_large_rect_28m2 · Quadro/canvas_1"
+  ],
+  [
+   "living_large_rect_28m2 · Painel TV/painel_tv",
+   "living_large_rect_28m2 · Quadro/canvas_2"
+  ],
+  [
+   "living_large_rect_28m2 · Painel TV/painel_tv",
+   "living_large_rect_28m2 · Quadro/accent_3"
+  ],
+  [
+   "living_large_rect_28m2 · Painel TV/painel_tv",
+   "living_large_rect_28m2 · Quadro/canvas_4"
+  ],
+  [
+   "living_large_rect_28m2 · Painel TV/painel_tv",
+   "living_large_rect_28m2 · Quadro/canvas_5"
+  ],
+  [
+   "living_large_rect_28m2 · Painel TV/painel_tv",
+   "living_large_rect_28m2 · Quadro/canvas_6"
+  ],
+  [
+   "living_large_rect_28m2 · Painel TV/painel_tv",
+   "living_large_rect_28m2 · Quadro/accent_7"
+  ],
+  [
+   "living_large_rect_28m2 · Painel TV/painel_tv",
+   "living_large_rect_28m2 · Quadro/canvas_8"
+  ],
+  [
+   "living_large_rect_28m2 · Painel TV/painel_tv",
+   "living_large_rect_28m2 · Quadro/canvas_9"
+  ],
+  [
+   "living_large_rect_28m2 · Painel TV/painel_tv",
+   "living_large_rect_28m2 · Prateleira/plank_1"
+  ],
+  [
+   "living_large_rect_28m2 · Painel TV/painel_tv",
+   "living_large_rect_28m2 · Prateleira/bracket_1l"
+  ],
+  [
+   "living_large_rect_28m2 · Painel TV/painel_tv",
+   "living_large_rect_28m2 · Prateleira/bracket_1r"
+  ],
+  [
+   "living_large_rect_28m2 · Painel TV/painel_tv",
+   "living_large_rect_28m2 · Prateleira/plank_2"
+  ],
+  [
+   "living_large_rect_28m2 · Painel TV/painel_tv",
+   "living_large_rect_28m2 · Prateleira/bracket_2l"
+  ],
+  [
+   "living_large_rect_28m2 · Painel TV/painel_tv",
+   "living_large_rect_28m2 · Prateleira/bracket_2r"
+  ],
+  [
+   "living_large_rect_28m2 · TV/tv_frame",
+   "living_large_rect_28m2 · Planta/foliage_1"
+  ],
+  [
+   "living_large_rect_28m2 · TV/tv_frame",
+   "living_large_rect_28m2 · Planta/foliage_2"
+  ],
+  [
+   "living_large_rect_28m2 · TV/tv_frame",
+   "living_large_rect_28m2 · Prateleira/bracket_1l"
+  ],
+  [
+   "living_large_rect_28m2 · TV/tv_glass",
+   "living_large_rect_28m2 · Planta/foliage_1"
+  ],
+  [
+   "living_large_rect_28m2 · TV/tv_glass",
+   "living_large_rect_28m2 · Planta/foliage_2"
+  ],
+  [
+   "living_large_rect_28m2 · TV/tv_glass",
+   "living_large_rect_28m2 · Prateleira/bracket_1l"
+  ],
+  [
+   "living_large_rect_28m2 · Parede concreto/parede_concreto",
+   "living_large_rect_28m2 · Quadro/frame_l"
+  ],
+  [
+   "living_large_rect_28m2 · Parede concreto/parede_concreto",
+   "living_large_rect_28m2 · Quadro/frame_r"
+  ],
+  [
+   "living_large_rect_28m2 · Parede concreto/parede_concreto",
+   "living_large_rect_28m2 · Quadro/frame_b"
+  ],
+  [
+   "living_large_rect_28m2 · Parede concreto/parede_concreto",
+   "living_large_rect_28m2 · Quadro/frame_t"
+  ],
+  [
+   "living_large_rect_28m2 · Parede concreto/parede_concreto",
+   "living_large_rect_28m2 · Quadro/canvas_1"
+  ],
+  [
+   "living_large_rect_28m2 · Parede concreto/parede_concreto",
+   "living_large_rect_28m2 · Quadro/canvas_2"
+  ],
+  [
+   "living_large_rect_28m2 · Parede concreto/parede_concreto",
+   "living_large_rect_28m2 · Quadro/accent_3"
+  ],
+  [
+   "living_large_rect_28m2 · Parede concreto/parede_concreto",
+   "living_large_rect_28m2 · Quadro/canvas_4"
+  ],
+  [
+   "living_large_rect_28m2 · Parede concreto/parede_concreto",
+   "living_large_rect_28m2 · Quadro/canvas_5"
+  ],
+  [
+   "living_large_rect_28m2 · Parede concreto/parede_concreto",
+   "living_large_rect_28m2 · Quadro/canvas_6"
+  ],
+  [
+   "living_large_rect_28m2 · Parede concreto/parede_concreto",
+   "living_large_rect_28m2 · Quadro/accent_7"
+  ],
+  [
+   "living_large_rect_28m2 · Parede concreto/parede_concreto",
+   "living_large_rect_28m2 · Quadro/canvas_8"
+  ],
+  [
+   "living_large_rect_28m2 · Parede concreto/parede_concreto",
+   "living_large_rect_28m2 · Quadro/canvas_9"
+  ],
+  [
+   "living_large_rect_28m2 · Quadro/frame_r",
+   "living_large_rect_28m2 · Prateleira/plank_1"
+  ],
+  [
+   "living_large_rect_28m2 · Quadro/frame_t",
+   "living_large_rect_28m2 · Prateleira/bracket_2l"
+  ],
+  [
+   "living_large_rect_28m2 · Quadro/accent_3",
+   "living_large_rect_28m2 · Prateleira/plank_1"
+  ],
+  [
+   "living_large_rect_28m2 · Quadro/canvas_4",
+   "living_large_rect_28m2 · Prateleira/plank_1"
+  ],
+  [
+   "living_large_rect_28m2 · Quadro/canvas_5",
+   "living_large_rect_28m2 · Prateleira/plank_1"
+  ],
+  [
+   "living_large_rect_28m2 · Quadro/canvas_5",
+   "living_large_rect_28m2 · Prateleira/bracket_1l"
+  ],
+  [
+   "living_large_rect_28m2 · Quadro/accent_7",
+   "living_large_rect_28m2 · Prateleira/plank_1"
+  ],
+  [
+   "living_large_rect_28m2 · Quadro/canvas_9",
+   "living_large_rect_28m2 · Prateleira/plank_1"
+  ]
+ ],
+ "support": {
+  "living_large_rect_28m2 · Sofa": {
+   "z_min_skp": 0.0,
+   "z0_plan_min": 0.0
+  },
+  "living_large_rect_28m2 · Rack TV": {
+   "z_min_skp": 0.0,
+   "z0_plan_min": 0.0
+  },
+  "living_large_rect_28m2 · Painel TV": {
+   "z_min_skp": 0.0,
+   "z0_plan_min": 0.0
+  },
+  "living_large_rect_28m2 · TV": {
+   "z_min_skp": 0.7351,
+   "z0_plan_min": 0.7351
+  },
+  "living_large_rect_28m2 · Mesa de jantar": {
+   "z_min_skp": 0.0,
+   "z0_plan_min": 0.0
+  },
+  "living_large_rect_28m2 · Cadeira jantar": {
+   "z_min_skp": 0.0,
+   "z0_plan_min": 0.0
+  },
+  "living_large_rect_28m2 · Pendente": {
+   "z_min_skp": 1.842,
+   "z0_plan_min": 1.842
+  },
+  "living_large_rect_28m2 · Tapete": {
+   "z_min_skp": 0.0,
+   "z0_plan_min": 0.0
+  },
+  "living_large_rect_28m2 · Parede concreto": {
+   "z_min_skp": 0.0,
+   "z0_plan_min": 0.0
+  },
+  "living_large_rect_28m2 · Planta": {
+   "z_min_skp": 0.5199,
+   "z0_plan_min": 0.5199
+  },
+  "living_large_rect_28m2 · Quadro": {
+   "z_min_skp": 1.1501,
+   "z0_plan_min": 1.1501
+  },
+  "living_large_rect_28m2 · Prateleira": {
+   "z_min_skp": 1.4201,
+   "z0_plan_min": 1.4201
+  },
+  "living_large_rect_28m2 · Trilho de luz": {
+   "z_min_skp": 2.1501,
+   "z0_plan_min": 2.1501
+  }
+ },
+ "floating": {},
+ "door_zone_hits": [
+  {
+   "door": "door1",
+   "piece": "living_large_rect_28m2 · Mesa de jantar/top"
+  },
+  {
+   "door": "door1",
+   "piece": "living_large_rect_28m2 · Mesa de jantar/apron"
+  },
+  {
+   "door": "door1",
+   "piece": "living_large_rect_28m2 · Mesa de jantar/leg"
+  },
+  {
+   "door": "door1",
+   "piece": "living_large_rect_28m2 · Mesa de jantar/leg"
+  },
+  {
+   "door": "door1",
+   "piece": "living_large_rect_28m2 · Cadeira jantar/leg"
+  },
+  {
+   "door": "door1",
+   "piece": "living_large_rect_28m2 · Cadeira jantar/leg"
+  },
+  {
+   "door": "door1",
+   "piece": "living_large_rect_28m2 · Cadeira jantar/seat_frame"
+  },
+  {
+   "door": "door1",
+   "piece": "living_large_rect_28m2 · Cadeira jantar/seat"
+  },
+  {
+   "door": "door1",
+   "piece": "living_large_rect_28m2 · Cadeira jantar/leg"
+  },
+  {
+   "door": "door1",
+   "piece": "living_large_rect_28m2 · Cadeira jantar/seat_frame"
+  },
+  {
+   "door": "door1",
+   "piece": "living_large_rect_28m2 · Cadeira jantar/seat"
+  },
+  {
+   "door": "door1",
+   "piece": "living_large_rect_28m2 · Pendente/pend_cabo"
+  },
+  {
+   "door": "door1",
+   "piece": "living_large_rect_28m2 · Pendente/pend_cupula"
+  },
+  {
+   "door": "door1",
+   "piece": "living_large_rect_28m2 · Pendente/pend_bronze"
+  }
+ ],
+ "modules": [
+  "Floor_Group_living",
+  "GlazedBalcony_Group_balc1",
+  "PassageMarker_Group_door1",
+  "PlanShell_Group",
+  "living_large_rect_28m2 · Cadeira jantar",
+  "living_large_rect_28m2 · Mesa de jantar",
+  "living_large_rect_28m2 · Painel TV",
+  "living_large_rect_28m2 · Parede concreto",
+  "living_large_rect_28m2 · Pendente",
+  "living_large_rect_28m2 · Planta",
+  "living_large_rect_28m2 · Prateleira",
+  "living_large_rect_28m2 · Quadro",
+  "living_large_rect_28m2 · Rack TV",
+  "living_large_rect_28m2 · Sofa",
+  "living_large_rect_28m2 · TV",
+  "living_large_rect_28m2 · Tapete",
+  "living_large_rect_28m2 · Trilho de luz"
+ ],
+ "materials_used": [
+  "ph_almofada",
+  "ph_arm",
+  "ph_art_accent",
+  "ph_back",
+  "ph_back_cushion",
+  "ph_base",
+  "ph_canvas",
+  "ph_dining_table_top",
+  "ph_foliage",
+  "ph_foot",
+  "ph_frame",
+  "ph_lv_led",
+  "ph_painel_tv",
+  "ph_parede_concreto",
+  "ph_pend_bronze",
+  "ph_pend_cabo",
+  "ph_pend_cupula",
+  "ph_pot",
+  "ph_rack_base",
+  "ph_rack_front",
+  "ph_rack_niche",
+  "ph_rack_top",
+  "ph_rug_border",
+  "ph_rug_field",
+  "ph_saia",
+  "ph_seat",
+  "ph_seat_cushion",
+  "ph_shelf_bracket",
+  "ph_shelf_plank",
+  "ph_track_rail",
+  "ph_track_spot",
+  "ph_trunk",
+  "ph_tv_frame",
+  "ph_tv_glass"
+ ],
+ "textured_materials": {
+  "ph_arm": "fabric_light.png",
+  "ph_seat_cushion": "fabric_light.png",
+  "ph_back_cushion": "fabric_light.png",
+  "ph_rack_base": "wood_medium.png",
+  "ph_rack_top": "wood_medium.png",
+  "ph_rack_front": "wood_medium.png",
+  "ph_rack_niche": "wood_medium.png",
+  "ph_dining_table_top": "wood_medium.png",
+  "ph_shelf_plank": "wood_medium.png"
+ },
+ "loose_root": {
+  "loose_faces_at_root": 0,
+  "loose_edges_at_root": 0
+ },
+ "rows": [
+  {
+   "i": 0,
+   "module": "living_large_rect_28m2 · Sofa",
+   "label": "plinth",
+   "kind": "foot",
+   "err_m": 2e-05,
+   "exp_min": [
+    2.0589,
+    3.4892,
+    0.0
+   ],
+   "exp_max": [
+    4.1387,
+    4.2494,
+    0.08
+   ],
+   "skp_min": [
+    2.0589,
+    3.4892,
+    0.0
+   ],
+   "skp_max": [
+    4.1387,
+    4.2494,
+    0.08
+   ],
+   "material": "ph_foot",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49037
+  },
+  {
+   "i": 1,
+   "module": "living_large_rect_28m2 · Sofa",
+   "label": "plinth_riser",
+   "kind": "foot",
+   "err_m": 5e-05,
+   "exp_min": [
+    2.1189,
+    3.5494,
+    0.08
+   ],
+   "exp_max": [
+    4.0787,
+    4.1892,
+    0.14
+   ],
+   "skp_min": [
+    2.1189,
+    3.5494,
+    0.08
+   ],
+   "skp_max": [
+    4.0787,
+    4.1892,
+    0.14
+   ],
+   "material": "ph_foot",
+   "z0_plan_m": 0.08,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49070
+  },
+  {
+   "i": 2,
+   "module": "living_large_rect_28m2 · Sofa",
+   "label": "arm_left",
+   "kind": "arm",
+   "err_m": 1e-05,
+   "exp_min": [
+    1.9988,
+    3.4993,
+    0.14
+   ],
+   "exp_max": [
+    2.1388,
+    4.3093,
+    0.56
+   ],
+   "skp_min": [
+    1.9988,
+    3.4993,
+    0.14
+   ],
+   "skp_max": [
+    2.1388,
+    4.3093,
+    0.56
+   ],
+   "material": "ph_arm",
+   "z0_plan_m": 0.14,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49102
+  },
+  {
+   "i": 3,
+   "module": "living_large_rect_28m2 · Sofa",
+   "label": "arm_right",
+   "kind": "arm",
+   "err_m": 1e-05,
+   "exp_min": [
+    4.0588,
+    3.4993,
+    0.14
+   ],
+   "exp_max": [
+    4.1988,
+    4.3093,
+    0.56
+   ],
+   "skp_min": [
+    4.0588,
+    3.4993,
+    0.14
+   ],
+   "skp_max": [
+    4.1988,
+    4.3093,
+    0.56
+   ],
+   "material": "ph_arm",
+   "z0_plan_m": 0.14,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49198
+  },
+  {
+   "i": 4,
+   "module": "living_large_rect_28m2 · Sofa",
+   "label": "base_main",
+   "kind": "base",
+   "err_m": 2e-05,
+   "exp_min": [
+    2.1388,
+    3.5593,
+    0.14
+   ],
+   "exp_max": [
+    4.0588,
+    4.3093,
+    0.27
+   ],
+   "skp_min": [
+    2.1388,
+    3.5593,
+    0.14
+   ],
+   "skp_max": [
+    4.0588,
+    4.3093,
+    0.27
+   ],
+   "material": "ph_base",
+   "z0_plan_m": 0.14,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49293
+  },
+  {
+   "i": 5,
+   "module": "living_large_rect_28m2 · Sofa",
+   "label": "seat_1",
+   "kind": "seat_cushion",
+   "err_m": 1e-05,
+   "exp_min": [
+    2.1388,
+    3.5043,
+    0.27
+   ],
+   "exp_max": [
+    2.7455,
+    4.1093,
+    0.445
+   ],
+   "skp_min": [
+    2.1388,
+    3.5043,
+    0.27
+   ],
+   "skp_max": [
+    2.7455,
+    4.1093,
+    0.445
+   ],
+   "material": "ph_seat_cushion",
+   "z0_plan_m": 0.27,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49361
+  },
+  {
+   "i": 6,
+   "module": "living_large_rect_28m2 · Sofa",
+   "label": "seat_2",
+   "kind": "seat_cushion",
+   "err_m": 1e-05,
+   "exp_min": [
+    2.7955,
+    3.5043,
+    0.27
+   ],
+   "exp_max": [
+    3.4021,
+    4.1093,
+    0.445
+   ],
+   "skp_min": [
+    2.7955,
+    3.5043,
+    0.27
+   ],
+   "skp_max": [
+    3.4021,
+    4.1093,
+    0.445
+   ],
+   "material": "ph_seat_cushion",
+   "z0_plan_m": 0.27,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49464
+  },
+  {
+   "i": 7,
+   "module": "living_large_rect_28m2 · Sofa",
+   "label": "seat_3",
+   "kind": "seat_cushion",
+   "err_m": 1e-05,
+   "exp_min": [
+    3.4521,
+    3.5043,
+    0.27
+   ],
+   "exp_max": [
+    4.0588,
+    4.1093,
+    0.445
+   ],
+   "skp_min": [
+    3.4521,
+    3.5043,
+    0.27
+   ],
+   "skp_max": [
+    4.0588,
+    4.1093,
+    0.445
+   ],
+   "material": "ph_seat_cushion",
+   "z0_plan_m": 0.27,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49566
+  },
+  {
+   "i": 8,
+   "module": "living_large_rect_28m2 · Sofa",
+   "label": "back_1",
+   "kind": "back_cushion",
+   "err_m": 2e-05,
+   "exp_min": [
+    2.1388,
+    4.1093,
+    0.4
+   ],
+   "exp_max": [
+    2.7455,
+    4.3685,
+    0.76
+   ],
+   "skp_min": [
+    2.1388,
+    4.1093,
+    0.4
+   ],
+   "skp_max": [
+    2.7455,
+    4.3685,
+    0.76
+   ],
+   "material": "ph_back_cushion",
+   "z0_plan_m": 0.4,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49668
+  },
+  {
+   "i": 9,
+   "module": "living_large_rect_28m2 · Sofa",
+   "label": "back_2",
+   "kind": "back_cushion",
+   "err_m": 2e-05,
+   "exp_min": [
+    2.7955,
+    4.1093,
+    0.4
+   ],
+   "exp_max": [
+    3.4021,
+    4.3685,
+    0.76
+   ],
+   "skp_min": [
+    2.7955,
+    4.1093,
+    0.4
+   ],
+   "skp_max": [
+    3.4021,
+    4.3685,
+    0.76
+   ],
+   "material": "ph_back_cushion",
+   "z0_plan_m": 0.4,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49764
+  },
+  {
+   "i": 10,
+   "module": "living_large_rect_28m2 · Sofa",
+   "label": "back_3",
+   "kind": "back_cushion",
+   "err_m": 2e-05,
+   "exp_min": [
+    3.4521,
+    4.1093,
+    0.4
+   ],
+   "exp_max": [
+    4.0588,
+    4.3685,
+    0.76
+   ],
+   "skp_min": [
+    3.4521,
+    4.1093,
+    0.4
+   ],
+   "skp_max": [
+    4.0588,
+    4.3685,
+    0.76
+   ],
+   "material": "ph_back_cushion",
+   "z0_plan_m": 0.4,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49859
+  },
+  {
+   "i": 11,
+   "module": "living_large_rect_28m2 · Rack TV",
+   "label": "leg_fl",
+   "kind": "foot",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.7788,
+    0.5906,
+    0.0
+   ],
+   "exp_max": [
+    3.8237,
+    0.6355,
+    0.16
+   ],
+   "skp_min": [
+    3.7788,
+    0.5906,
+    0.0
+   ],
+   "skp_max": [
+    3.8237,
+    0.6355,
+    0.16
+   ],
+   "material": "ph_foot",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49956
+  },
+  {
+   "i": 12,
+   "module": "living_large_rect_28m2 · Rack TV",
+   "label": "leg_fr",
+   "kind": "foot",
+   "err_m": 5e-05,
+   "exp_min": [
+    2.3937,
+    0.5906,
+    0.0
+   ],
+   "exp_max": [
+    2.4389,
+    0.6355,
+    0.16
+   ],
+   "skp_min": [
+    2.3937,
+    0.5906,
+    0.0
+   ],
+   "skp_max": [
+    2.4389,
+    0.6355,
+    0.16
+   ],
+   "material": "ph_foot",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 49988
+  },
+  {
+   "i": 13,
+   "module": "living_large_rect_28m2 · Rack TV",
+   "label": "leg_bl",
+   "kind": "foot",
+   "err_m": 4e-05,
+   "exp_min": [
+    3.7788,
+    0.3155,
+    0.0
+   ],
+   "exp_max": [
+    3.8237,
+    0.3604,
+    0.16
+   ],
+   "skp_min": [
+    3.7788,
+    0.3155,
+    0.0
+   ],
+   "skp_max": [
+    3.8237,
+    0.3604,
+    0.16
+   ],
+   "material": "ph_foot",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50020
+  },
+  {
+   "i": 14,
+   "module": "living_large_rect_28m2 · Rack TV",
+   "label": "leg_br",
+   "kind": "foot",
+   "err_m": 3e-05,
+   "exp_min": [
+    2.3937,
+    0.3155,
+    0.0
+   ],
+   "exp_max": [
+    2.4389,
+    0.3604,
+    0.16
+   ],
+   "skp_min": [
+    2.3937,
+    0.3155,
+    0.0
+   ],
+   "skp_max": [
+    2.4389,
+    0.3604,
+    0.16
+   ],
+   "material": "ph_foot",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50052
+  },
+  {
+   "i": 15,
+   "module": "living_large_rect_28m2 · Rack TV",
+   "label": "body",
+   "kind": "base",
+   "err_m": 5e-05,
+   "exp_min": [
+    2.3338,
+    0.2654,
+    0.16
+   ],
+   "exp_max": [
+    3.8839,
+    0.6855,
+    0.49
+   ],
+   "skp_min": [
+    2.3338,
+    0.2654,
+    0.16
+   ],
+   "skp_max": [
+    3.8839,
+    0.6855,
+    0.49
+   ],
+   "material": "ph_rack_base",
+   "z0_plan_m": 0.16,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50084
+  },
+  {
+   "i": 16,
+   "module": "living_large_rect_28m2 · Rack TV",
+   "label": "top",
+   "kind": "top",
+   "err_m": 4e-05,
+   "exp_min": [
+    2.3137,
+    0.2654,
+    0.49
+   ],
+   "exp_max": [
+    3.9037,
+    0.7054,
+    0.5199
+   ],
+   "skp_min": [
+    2.3137,
+    0.2654,
+    0.49
+   ],
+   "skp_max": [
+    3.9037,
+    0.7054,
+    0.5199
+   ],
+   "material": "ph_rack_top",
+   "z0_plan_m": 0.49,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50117
+  },
+  {
+   "i": 17,
+   "module": "living_large_rect_28m2 · Rack TV",
+   "label": "drawer_1",
+   "kind": "front",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.3685,
+    0.6855,
+    0.19
+   ],
+   "exp_max": [
+    3.8557,
+    0.6975,
+    0.46
+   ],
+   "skp_min": [
+    3.3685,
+    0.6855,
+    0.19
+   ],
+   "skp_max": [
+    3.8557,
+    0.6975,
+    0.46
+   ],
+   "material": "ph_rack_front",
+   "z0_plan_m": 0.19,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50150
+  },
+  {
+   "i": 18,
+   "module": "living_large_rect_28m2 · Rack TV",
+   "label": "niche_2",
+   "kind": "niche",
+   "err_m": 5e-05,
+   "exp_min": [
+    2.8651,
+    0.6253,
+    0.1999
+   ],
+   "exp_max": [
+    3.3525,
+    0.6855,
+    0.4498
+   ],
+   "skp_min": [
+    2.8651,
+    0.6253,
+    0.1999
+   ],
+   "skp_max": [
+    3.3525,
+    0.6855,
+    0.4498
+   ],
+   "material": "ph_rack_niche",
+   "z0_plan_m": 0.1999,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50183
+  },
+  {
+   "i": 19,
+   "module": "living_large_rect_28m2 · Rack TV",
+   "label": "drawer_3",
+   "kind": "front",
+   "err_m": 5e-05,
+   "exp_min": [
+    2.3617,
+    0.6855,
+    0.19
+   ],
+   "exp_max": [
+    2.8491,
+    0.6975,
+    0.46
+   ],
+   "skp_min": [
+    2.3617,
+    0.6855,
+    0.19
+   ],
+   "skp_max": [
+    2.8491,
+    0.6975,
+    0.46
+   ],
+   "material": "ph_rack_front",
+   "z0_plan_m": 0.19,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50216
+  },
+  {
+   "i": 20,
+   "module": "living_large_rect_28m2 · Painel TV",
+   "label": "painel_tv",
+   "kind": "painel_tv",
+   "err_m": 5e-05,
+   "exp_min": [
+    1.7988,
+    0.1704,
+    0.0
+   ],
+   "exp_max": [
+    4.3988,
+    0.2205,
+    2.4
+   ],
+   "skp_min": [
+    1.7988,
+    0.1704,
+    0.0
+   ],
+   "skp_max": [
+    4.3988,
+    0.2205,
+    2.4
+   ],
+   "material": "ph_painel_tv",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50250
+  },
+  {
+   "i": 21,
+   "module": "living_large_rect_28m2 · Painel TV",
+   "label": "lv_led",
+   "kind": "lv_led",
+   "err_m": 4e-05,
+   "exp_min": [
+    1.8989,
+    0.2205,
+    2.32
+   ],
+   "exp_max": [
+    4.2987,
+    0.2365,
+    2.3401
+   ],
+   "skp_min": [
+    1.8989,
+    0.2205,
+    2.32
+   ],
+   "skp_max": [
+    4.2987,
+    0.2365,
+    2.3401
+   ],
+   "material": "ph_lv_led",
+   "z0_plan_m": 2.32,
+   "overlap_policy": "IGNORE",
+   "circulation": "IGNORE",
+   "pid": 50283
+  },
+  {
+   "i": 22,
+   "module": "living_large_rect_28m2 · TV",
+   "label": "tv_frame",
+   "kind": "tv_frame",
+   "err_m": 4e-05,
+   "exp_min": [
+    2.4638,
+    0.2278,
+    0.7351
+   ],
+   "exp_max": [
+    3.7338,
+    0.253,
+    1.4651
+   ],
+   "skp_min": [
+    2.4638,
+    0.2278,
+    0.7351
+   ],
+   "skp_max": [
+    3.7338,
+    0.253,
+    1.4651
+   ],
+   "material": "ph_tv_frame",
+   "z0_plan_m": 0.7351,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50318
+  },
+  {
+   "i": 23,
+   "module": "living_large_rect_28m2 · TV",
+   "label": "tv_glass",
+   "kind": "tv_glass",
+   "err_m": 5e-05,
+   "exp_min": [
+    2.4839,
+    0.2484,
+    0.7549
+   ],
+   "exp_max": [
+    3.7137,
+    0.2603,
+    1.445
+   ],
+   "skp_min": [
+    2.4839,
+    0.2484,
+    0.7549
+   ],
+   "skp_max": [
+    3.7137,
+    0.2603,
+    1.445
+   ],
+   "material": "ph_tv_glass",
+   "z0_plan_m": 0.7549,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50351
+  },
+  {
+   "i": 24,
+   "module": "living_large_rect_28m2 · Mesa de jantar",
+   "label": "top",
+   "kind": "top",
+   "err_m": 3e-05,
+   "exp_min": [
+    0.3127,
+    0.3353,
+    0.7099
+   ],
+   "exp_max": [
+    1.3129,
+    0.9855,
+    0.7498
+   ],
+   "skp_min": [
+    0.3127,
+    0.3353,
+    0.7099
+   ],
+   "skp_max": [
+    1.3129,
+    0.9855,
+    0.7498
+   ],
+   "material": "ph_dining_table_top",
+   "z0_plan_m": 0.7099,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50386
+  },
+  {
+   "i": 25,
+   "module": "living_large_rect_28m2 · Mesa de jantar",
+   "label": "apron",
+   "kind": "saia",
+   "err_m": 2e-05,
+   "exp_min": [
+    0.3627,
+    0.3853,
+    0.6101
+   ],
+   "exp_max": [
+    1.2629,
+    0.9355,
+    0.7102
+   ],
+   "skp_min": [
+    0.3627,
+    0.3853,
+    0.6101
+   ],
+   "skp_max": [
+    1.2629,
+    0.9355,
+    0.7102
+   ],
+   "material": "ph_saia",
+   "z0_plan_m": 0.6101,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50419
+  },
+  {
+   "i": 26,
+   "module": "living_large_rect_28m2 · Mesa de jantar",
+   "label": "leg",
+   "kind": "foot",
+   "err_m": 3e-05,
+   "exp_min": [
+    1.1829,
+    0.8555,
+    0.0
+   ],
+   "exp_max": [
+    1.2629,
+    0.9355,
+    0.7099
+   ],
+   "skp_min": [
+    1.1829,
+    0.8555,
+    0.0
+   ],
+   "skp_max": [
+    1.2629,
+    0.9355,
+    0.7099
+   ],
+   "material": "ph_foot",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50452
+  },
+  {
+   "i": 27,
+   "module": "living_large_rect_28m2 · Mesa de jantar",
+   "label": "leg",
+   "kind": "foot",
+   "err_m": 3e-05,
+   "exp_min": [
+    0.3627,
+    0.8555,
+    0.0
+   ],
+   "exp_max": [
+    0.4427,
+    0.9355,
+    0.7099
+   ],
+   "skp_min": [
+    0.3627,
+    0.8555,
+    0.0
+   ],
+   "skp_max": [
+    0.4427,
+    0.9355,
+    0.7099
+   ],
+   "material": "ph_foot",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50484
+  },
+  {
+   "i": 28,
+   "module": "living_large_rect_28m2 · Mesa de jantar",
+   "label": "leg",
+   "kind": "foot",
+   "err_m": 3e-05,
+   "exp_min": [
+    1.1829,
+    0.3853,
+    0.0
+   ],
+   "exp_max": [
+    1.2629,
+    0.4653,
+    0.7099
+   ],
+   "skp_min": [
+    1.1829,
+    0.3853,
+    0.0
+   ],
+   "skp_max": [
+    1.2629,
+    0.4653,
+    0.7099
+   ],
+   "material": "ph_foot",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50516
+  },
+  {
+   "i": 29,
+   "module": "living_large_rect_28m2 · Mesa de jantar",
+   "label": "leg",
+   "kind": "foot",
+   "err_m": 3e-05,
+   "exp_min": [
+    0.3627,
+    0.3853,
+    0.0
+   ],
+   "exp_max": [
+    0.4427,
+    0.4653,
+    0.7099
+   ],
+   "skp_min": [
+    0.3627,
+    0.3853,
+    0.0
+   ],
+   "skp_max": [
+    0.4427,
+    0.4653,
+    0.7099
+   ],
+   "material": "ph_foot",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50548
+  },
+  {
+   "i": 30,
+   "module": "living_large_rect_28m2 · Cadeira jantar",
+   "label": "leg",
+   "kind": "foot",
+   "err_m": 5e-05,
+   "exp_min": [
+    0.3653,
+    1.063,
+    0.0
+   ],
+   "exp_max": [
+    0.3932,
+    1.0909,
+    0.4
+   ],
+   "skp_min": [
+    0.3653,
+    1.063,
+    0.0
+   ],
+   "skp_max": [
+    0.3932,
+    1.0909,
+    0.4
+   ],
+   "material": "ph_foot",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50582
+  },
+  {
+   "i": 31,
+   "module": "living_large_rect_28m2 · Cadeira jantar",
+   "label": "leg",
+   "kind": "foot",
+   "err_m": 5e-05,
+   "exp_min": [
+    0.7473,
+    1.063,
+    0.0
+   ],
+   "exp_max": [
+    0.7752,
+    1.0909,
+    0.4
+   ],
+   "skp_min": [
+    0.7473,
+    1.063,
+    0.0
+   ],
+   "skp_max": [
+    0.7752,
+    1.0909,
+    0.4
+   ],
+   "material": "ph_foot",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50614
+  },
+  {
+   "i": 32,
+   "module": "living_large_rect_28m2 · Cadeira jantar",
+   "label": "leg",
+   "kind": "foot",
+   "err_m": 5e-05,
+   "exp_min": [
+    0.3653,
+    1.4948,
+    0.0
+   ],
+   "exp_max": [
+    0.3932,
+    1.523,
+    0.4
+   ],
+   "skp_min": [
+    0.3653,
+    1.4948,
+    0.0
+   ],
+   "skp_max": [
+    0.3932,
+    1.523,
+    0.4
+   ],
+   "material": "ph_foot",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50646
+  },
+  {
+   "i": 33,
+   "module": "living_large_rect_28m2 · Cadeira jantar",
+   "label": "leg",
+   "kind": "foot",
+   "err_m": 5e-05,
+   "exp_min": [
+    0.7473,
+    1.4948,
+    0.0
+   ],
+   "exp_max": [
+    0.7752,
+    1.523,
+    0.4
+   ],
+   "skp_min": [
+    0.7473,
+    1.4948,
+    0.0
+   ],
+   "skp_max": [
+    0.7752,
+    1.523,
+    0.4
+   ],
+   "material": "ph_foot",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50678
+  },
+  {
+   "i": 34,
+   "module": "living_large_rect_28m2 · Cadeira jantar",
+   "label": "seat_frame",
+   "kind": "frame",
+   "err_m": 5e-05,
+   "exp_min": [
+    0.3653,
+    1.063,
+    0.4
+   ],
+   "exp_max": [
+    0.7752,
+    1.523,
+    0.4201
+   ],
+   "skp_min": [
+    0.3653,
+    1.063,
+    0.4
+   ],
+   "skp_max": [
+    0.7752,
+    1.523,
+    0.4201
+   ],
+   "material": "ph_frame",
+   "z0_plan_m": 0.4,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50710
+  },
+  {
+   "i": 35,
+   "module": "living_large_rect_28m2 · Cadeira jantar",
+   "label": "seat",
+   "kind": "seat",
+   "err_m": 5e-05,
+   "exp_min": [
+    0.3604,
+    1.0579,
+    0.4201
+   ],
+   "exp_max": [
+    0.7803,
+    1.5278,
+    0.4702
+   ],
+   "skp_min": [
+    0.3604,
+    1.0579,
+    0.4201
+   ],
+   "skp_max": [
+    0.7803,
+    1.5278,
+    0.4702
+   ],
+   "material": "ph_seat",
+   "z0_plan_m": 0.4201,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50743
+  },
+  {
+   "i": 36,
+   "module": "living_large_rect_28m2 · Cadeira jantar",
+   "label": "back_frame",
+   "kind": "frame",
+   "err_m": 4e-05,
+   "exp_min": [
+    0.3754,
+    1.4978,
+    0.4501
+   ],
+   "exp_max": [
+    0.7653,
+    1.523,
+    0.8801
+   ],
+   "skp_min": [
+    0.3754,
+    1.4978,
+    0.4501
+   ],
+   "skp_max": [
+    0.7653,
+    1.523,
+    0.8801
+   ],
+   "material": "ph_frame",
+   "z0_plan_m": 0.4501,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50776
+  },
+  {
+   "i": 37,
+   "module": "living_large_rect_28m2 · Cadeira jantar",
+   "label": "back",
+   "kind": "back",
+   "err_m": 5e-05,
+   "exp_min": [
+    0.3653,
+    1.4829,
+    0.5499
+   ],
+   "exp_max": [
+    0.7752,
+    1.505,
+    0.8999
+   ],
+   "skp_min": [
+    0.3653,
+    1.4829,
+    0.5499
+   ],
+   "skp_max": [
+    0.7752,
+    1.505,
+    0.8999
+   ],
+   "material": "ph_back",
+   "z0_plan_m": 0.5499,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50808
+  },
+  {
+   "i": 38,
+   "module": "living_large_rect_28m2 · Cadeira jantar",
+   "label": "leg",
+   "kind": "foot",
+   "err_m": 5e-05,
+   "exp_min": [
+    0.8654,
+    1.063,
+    0.0
+   ],
+   "exp_max": [
+    0.8933,
+    1.0909,
+    0.4
+   ],
+   "skp_min": [
+    0.8654,
+    1.063,
+    0.0
+   ],
+   "skp_max": [
+    0.8933,
+    1.0909,
+    0.4
+   ],
+   "material": "ph_foot",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50841
+  },
+  {
+   "i": 39,
+   "module": "living_large_rect_28m2 · Cadeira jantar",
+   "label": "leg",
+   "kind": "foot",
+   "err_m": 5e-05,
+   "exp_min": [
+    1.2474,
+    1.063,
+    0.0
+   ],
+   "exp_max": [
+    1.2753,
+    1.0909,
+    0.4
+   ],
+   "skp_min": [
+    1.2474,
+    1.063,
+    0.0
+   ],
+   "skp_max": [
+    1.2753,
+    1.0909,
+    0.4
+   ],
+   "material": "ph_foot",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50873
+  },
+  {
+   "i": 40,
+   "module": "living_large_rect_28m2 · Cadeira jantar",
+   "label": "leg",
+   "kind": "foot",
+   "err_m": 5e-05,
+   "exp_min": [
+    0.8654,
+    1.4948,
+    0.0
+   ],
+   "exp_max": [
+    0.8933,
+    1.523,
+    0.4
+   ],
+   "skp_min": [
+    0.8654,
+    1.4948,
+    0.0
+   ],
+   "skp_max": [
+    0.8933,
+    1.523,
+    0.4
+   ],
+   "material": "ph_foot",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50905
+  },
+  {
+   "i": 41,
+   "module": "living_large_rect_28m2 · Cadeira jantar",
+   "label": "leg",
+   "kind": "foot",
+   "err_m": 5e-05,
+   "exp_min": [
+    1.2474,
+    1.4948,
+    0.0
+   ],
+   "exp_max": [
+    1.2753,
+    1.523,
+    0.4
+   ],
+   "skp_min": [
+    1.2474,
+    1.4948,
+    0.0
+   ],
+   "skp_max": [
+    1.2753,
+    1.523,
+    0.4
+   ],
+   "material": "ph_foot",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50937
+  },
+  {
+   "i": 42,
+   "module": "living_large_rect_28m2 · Cadeira jantar",
+   "label": "seat_frame",
+   "kind": "frame",
+   "err_m": 5e-05,
+   "exp_min": [
+    0.8654,
+    1.063,
+    0.4
+   ],
+   "exp_max": [
+    1.2753,
+    1.523,
+    0.4201
+   ],
+   "skp_min": [
+    0.8654,
+    1.063,
+    0.4
+   ],
+   "skp_max": [
+    1.2753,
+    1.523,
+    0.4201
+   ],
+   "material": "ph_frame",
+   "z0_plan_m": 0.4,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 50969
+  },
+  {
+   "i": 43,
+   "module": "living_large_rect_28m2 · Cadeira jantar",
+   "label": "seat",
+   "kind": "seat",
+   "err_m": 5e-05,
+   "exp_min": [
+    0.8603,
+    1.0579,
+    0.4201
+   ],
+   "exp_max": [
+    1.2804,
+    1.5278,
+    0.4702
+   ],
+   "skp_min": [
+    0.8603,
+    1.0579,
+    0.4201
+   ],
+   "skp_max": [
+    1.2804,
+    1.5278,
+    0.4702
+   ],
+   "material": "ph_seat",
+   "z0_plan_m": 0.4201,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51001
+  },
+  {
+   "i": 44,
+   "module": "living_large_rect_28m2 · Cadeira jantar",
+   "label": "back_frame",
+   "kind": "frame",
+   "err_m": 4e-05,
+   "exp_min": [
+    0.8753,
+    1.4978,
+    0.4501
+   ],
+   "exp_max": [
+    1.2652,
+    1.523,
+    0.8801
+   ],
+   "skp_min": [
+    0.8753,
+    1.4978,
+    0.4501
+   ],
+   "skp_max": [
+    1.2652,
+    1.523,
+    0.8801
+   ],
+   "material": "ph_frame",
+   "z0_plan_m": 0.4501,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51033
+  },
+  {
+   "i": 45,
+   "module": "living_large_rect_28m2 · Cadeira jantar",
+   "label": "back",
+   "kind": "back",
+   "err_m": 5e-05,
+   "exp_min": [
+    0.8654,
+    1.4829,
+    0.5499
+   ],
+   "exp_max": [
+    1.2753,
+    1.505,
+    0.8999
+   ],
+   "skp_min": [
+    0.8654,
+    1.4829,
+    0.5499
+   ],
+   "skp_max": [
+    1.2753,
+    1.505,
+    0.8999
+   ],
+   "material": "ph_back",
+   "z0_plan_m": 0.5499,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51065
+  },
+  {
+   "i": 46,
+   "module": "living_large_rect_28m2 · Pendente",
+   "label": "pend_cabo",
+   "kind": "pend_cabo",
+   "err_m": 3e-05,
+   "exp_min": [
+    0.7968,
+    0.6444,
+    2.1001
+   ],
+   "exp_max": [
+    0.8288,
+    0.6764,
+    2.7
+   ],
+   "skp_min": [
+    0.7968,
+    0.6444,
+    2.1001
+   ],
+   "skp_max": [
+    0.8288,
+    0.6764,
+    2.7
+   ],
+   "material": "ph_pend_cabo",
+   "z0_plan_m": 2.1001,
+   "overlap_policy": "IGNORE",
+   "circulation": "IGNORE",
+   "pid": 51099
+  },
+  {
+   "i": 47,
+   "module": "living_large_rect_28m2 · Pendente",
+   "label": "pend_cupula",
+   "kind": "pend_cupula",
+   "err_m": 4e-05,
+   "exp_min": [
+    0.6281,
+    0.4757,
+    1.8499
+   ],
+   "exp_max": [
+    0.9975,
+    0.8451,
+    2.0998
+   ],
+   "skp_min": [
+    0.6281,
+    0.4757,
+    1.8499
+   ],
+   "skp_max": [
+    0.9975,
+    0.8451,
+    2.0998
+   ],
+   "material": "ph_pend_cupula",
+   "z0_plan_m": 1.8499,
+   "overlap_policy": "IGNORE",
+   "circulation": "IGNORE",
+   "pid": 51132
+  },
+  {
+   "i": 48,
+   "module": "living_large_rect_28m2 · Pendente",
+   "label": "pend_bronze",
+   "kind": "pend_bronze",
+   "err_m": 5e-05,
+   "exp_min": [
+    0.6226,
+    0.4702,
+    1.842
+   ],
+   "exp_max": [
+    1.003,
+    0.8506,
+    1.8519
+   ],
+   "skp_min": [
+    0.6226,
+    0.4702,
+    1.842
+   ],
+   "skp_max": [
+    1.003,
+    0.8506,
+    1.8519
+   ],
+   "material": "ph_pend_bronze",
+   "z0_plan_m": 1.842,
+   "overlap_policy": "IGNORE",
+   "circulation": "IGNORE",
+   "pid": 51193
+  },
+  {
+   "i": 49,
+   "module": "living_large_rect_28m2 · Sofa",
+   "label": "almofada",
+   "kind": "almofada",
+   "err_m": 5e-05,
+   "exp_min": [
+    2.3142,
+    3.9637,
+    0.4699
+   ],
+   "exp_max": [
+    2.7833,
+    4.194,
+    0.92
+   ],
+   "skp_min": [
+    2.3142,
+    3.9637,
+    0.4699
+   ],
+   "skp_max": [
+    2.7833,
+    4.194,
+    0.92
+   ],
+   "material": "ph_almofada",
+   "z0_plan_m": 0.4699,
+   "overlap_policy": "IGNORE",
+   "circulation": "IGNORE",
+   "pid": 51254
+  },
+  {
+   "i": 50,
+   "module": "living_large_rect_28m2 · Sofa",
+   "label": "almofada",
+   "kind": "almofada",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.4143,
+    3.9637,
+    0.4699
+   ],
+   "exp_max": [
+    3.8834,
+    4.194,
+    0.92
+   ],
+   "skp_min": [
+    3.4143,
+    3.9637,
+    0.4699
+   ],
+   "skp_max": [
+    3.8834,
+    4.194,
+    0.92
+   ],
+   "material": "ph_almofada",
+   "z0_plan_m": 0.4699,
+   "overlap_policy": "IGNORE",
+   "circulation": "IGNORE",
+   "pid": 51287
+  },
+  {
+   "i": 51,
+   "module": "living_large_rect_28m2 · Tapete",
+   "label": "rug_border",
+   "kind": "rug_border",
+   "err_m": 3e-05,
+   "exp_min": [
+    2.1989,
+    2.5989,
+    0.0
+   ],
+   "exp_max": [
+    3.9987,
+    3.7988,
+    0.018
+   ],
+   "skp_min": [
+    2.1989,
+    2.5989,
+    0.0
+   ],
+   "skp_max": [
+    3.9987,
+    3.7988,
+    0.018
+   ],
+   "material": "ph_rug_border",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "ALLOW",
+   "circulation": "WALKABLE",
+   "pid": 51321
+  },
+  {
+   "i": 52,
+   "module": "living_large_rect_28m2 · Tapete",
+   "label": "rug_field",
+   "kind": "rug_field",
+   "err_m": 4e-05,
+   "exp_min": [
+    2.2789,
+    2.6789,
+    0.0
+   ],
+   "exp_max": [
+    3.9187,
+    3.7188,
+    0.0201
+   ],
+   "skp_min": [
+    2.2789,
+    2.6789,
+    0.0
+   ],
+   "skp_max": [
+    3.9187,
+    3.7188,
+    0.0201
+   ],
+   "material": "ph_rug_field",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "ALLOW",
+   "circulation": "WALKABLE",
+   "pid": 51354
+  },
+  {
+   "i": 53,
+   "module": "living_large_rect_28m2 · Parede concreto",
+   "label": "parede_concreto",
+   "kind": "parede_concreto",
+   "err_m": 5e-05,
+   "exp_min": [
+    1.2987,
+    0.1354,
+    0.0
+   ],
+   "exp_max": [
+    4.8989,
+    0.1755,
+    2.4
+   ],
+   "skp_min": [
+    1.2987,
+    0.1354,
+    0.0
+   ],
+   "skp_max": [
+    4.8989,
+    0.1755,
+    2.4
+   ],
+   "material": "ph_parede_concreto",
+   "z0_plan_m": 0.0,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51389
+  },
+  {
+   "i": 54,
+   "module": "living_large_rect_28m2 · Planta",
+   "label": "pot",
+   "kind": "pot",
+   "err_m": 4e-05,
+   "exp_min": [
+    2.5237,
+    0.2804,
+    0.5199
+   ],
+   "exp_max": [
+    2.6838,
+    0.4404,
+    0.62
+   ],
+   "skp_min": [
+    2.5237,
+    0.2804,
+    0.5199
+   ],
+   "skp_max": [
+    2.6838,
+    0.4404,
+    0.62
+   ],
+   "material": "ph_pot",
+   "z0_plan_m": 0.5199,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51424
+  },
+  {
+   "i": 55,
+   "module": "living_large_rect_28m2 · Planta",
+   "label": "trunk",
+   "kind": "trunk",
+   "err_m": 4e-05,
+   "exp_min": [
+    2.5789,
+    0.3355,
+    0.62
+   ],
+   "exp_max": [
+    2.6289,
+    0.3853,
+    0.746
+   ],
+   "skp_min": [
+    2.5789,
+    0.3355,
+    0.62
+   ],
+   "skp_max": [
+    2.6289,
+    0.3853,
+    0.746
+   ],
+   "material": "ph_trunk",
+   "z0_plan_m": 0.62,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51457
+  },
+  {
+   "i": 56,
+   "module": "living_large_rect_28m2 · Planta",
+   "label": "foliage_1",
+   "kind": "foliage",
+   "err_m": 4e-05,
+   "exp_min": [
+    2.4539,
+    0.2106,
+    0.696
+   ],
+   "exp_max": [
+    2.7539,
+    0.5105,
+    0.8674
+   ],
+   "skp_min": [
+    2.4539,
+    0.2106,
+    0.696
+   ],
+   "skp_max": [
+    2.7539,
+    0.5105,
+    0.8674
+   ],
+   "material": "ph_foliage",
+   "z0_plan_m": 0.696,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51490
+  },
+  {
+   "i": 57,
+   "module": "living_large_rect_28m2 · Planta",
+   "label": "foliage_2",
+   "kind": "foliage",
+   "err_m": 5e-05,
+   "exp_min": [
+    2.4938,
+    0.1803,
+    0.8225
+   ],
+   "exp_max": [
+    2.7937,
+    0.4803,
+    0.953
+   ],
+   "skp_min": [
+    2.4938,
+    0.1803,
+    0.8225
+   ],
+   "skp_max": [
+    2.7937,
+    0.4803,
+    0.953
+   ],
+   "material": "ph_foliage",
+   "z0_plan_m": 0.8225,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51523
+  },
+  {
+   "i": 58,
+   "module": "living_large_rect_28m2 · Planta",
+   "label": "foliage_3",
+   "kind": "foliage",
+   "err_m": 5e-05,
+   "exp_min": [
+    2.4437,
+    0.2603,
+    0.9169
+   ],
+   "exp_max": [
+    2.6838,
+    0.5004,
+    1.0249
+   ],
+   "skp_min": [
+    2.4437,
+    0.2603,
+    0.9169
+   ],
+   "skp_max": [
+    2.6838,
+    0.5004,
+    1.0249
+   ],
+   "material": "ph_foliage",
+   "z0_plan_m": 0.9169,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51555
+  },
+  {
+   "i": 59,
+   "module": "living_large_rect_28m2 · Planta",
+   "label": "foliage_4",
+   "kind": "foliage",
+   "err_m": 5e-05,
+   "exp_min": [
+    2.5563,
+    0.283,
+    0.998
+   ],
+   "exp_max": [
+    2.6914,
+    0.4178,
+    1.0698
+   ],
+   "skp_min": [
+    2.5563,
+    0.283,
+    0.998
+   ],
+   "skp_max": [
+    2.6914,
+    0.4178,
+    1.0698
+   ],
+   "material": "ph_foliage",
+   "z0_plan_m": 0.998,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51587
+  },
+  {
+   "i": 60,
+   "module": "living_large_rect_28m2 · Quadro",
+   "label": "frame_l",
+   "kind": "frame",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.5189,
+    0.1654,
+    1.1501
+   ],
+   "exp_max": [
+    3.5489,
+    0.2256,
+    1.7701
+   ],
+   "skp_min": [
+    3.5189,
+    0.1654,
+    1.1501
+   ],
+   "skp_max": [
+    3.5489,
+    0.2256,
+    1.7701
+   ],
+   "material": "ph_frame",
+   "z0_plan_m": 1.1501,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51621
+  },
+  {
+   "i": 61,
+   "module": "living_large_rect_28m2 · Quadro",
+   "label": "frame_r",
+   "kind": "frame",
+   "err_m": 5e-05,
+   "exp_min": [
+    2.6487,
+    0.1654,
+    1.1501
+   ],
+   "exp_max": [
+    2.6787,
+    0.2256,
+    1.7701
+   ],
+   "skp_min": [
+    2.6487,
+    0.1654,
+    1.1501
+   ],
+   "skp_max": [
+    2.6787,
+    0.2256,
+    1.7701
+   ],
+   "material": "ph_frame",
+   "z0_plan_m": 1.1501,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51653
+  },
+  {
+   "i": 62,
+   "module": "living_large_rect_28m2 · Quadro",
+   "label": "frame_b",
+   "kind": "frame",
+   "err_m": 5e-05,
+   "exp_min": [
+    2.6787,
+    0.1654,
+    1.1501
+   ],
+   "exp_max": [
+    3.5189,
+    0.2256,
+    1.1801
+   ],
+   "skp_min": [
+    2.6787,
+    0.1654,
+    1.1501
+   ],
+   "skp_max": [
+    3.5189,
+    0.2256,
+    1.1801
+   ],
+   "material": "ph_frame",
+   "z0_plan_m": 1.1501,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51685
+  },
+  {
+   "i": 63,
+   "module": "living_large_rect_28m2 · Quadro",
+   "label": "frame_t",
+   "kind": "frame",
+   "err_m": 5e-05,
+   "exp_min": [
+    2.6787,
+    0.1654,
+    1.7399
+   ],
+   "exp_max": [
+    3.5189,
+    0.2256,
+    1.7699
+   ],
+   "skp_min": [
+    2.6787,
+    0.1654,
+    1.7399
+   ],
+   "skp_max": [
+    3.5189,
+    0.2256,
+    1.7699
+   ],
+   "material": "ph_frame",
+   "z0_plan_m": 1.7399,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51717
+  },
+  {
+   "i": 64,
+   "module": "living_large_rect_28m2 · Quadro",
+   "label": "canvas_1",
+   "kind": "canvas",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.4407,
+    0.1654,
+    1.1801
+   ],
+   "exp_max": [
+    3.5189,
+    0.1925,
+    1.7402
+   ],
+   "skp_min": [
+    3.4407,
+    0.1654,
+    1.1801
+   ],
+   "skp_max": [
+    3.5189,
+    0.1925,
+    1.7402
+   ],
+   "material": "ph_canvas",
+   "z0_plan_m": 1.1801,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51749
+  },
+  {
+   "i": 65,
+   "module": "living_large_rect_28m2 · Quadro",
+   "label": "canvas_2",
+   "kind": "canvas",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.0538,
+    0.1654,
+    1.1801
+   ],
+   "exp_max": [
+    3.4407,
+    0.1925,
+    1.2616
+   ],
+   "skp_min": [
+    3.0538,
+    0.1654,
+    1.1801
+   ],
+   "skp_max": [
+    3.4407,
+    0.1925,
+    1.2616
+   ],
+   "material": "ph_canvas",
+   "z0_plan_m": 1.1801,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51782
+  },
+  {
+   "i": 66,
+   "module": "living_large_rect_28m2 · Quadro",
+   "label": "accent_3",
+   "kind": "art_accent",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.0538,
+    0.1654,
+    1.2616
+   ],
+   "exp_max": [
+    3.4407,
+    0.1974,
+    1.5344
+   ],
+   "skp_min": [
+    3.0538,
+    0.1654,
+    1.2616
+   ],
+   "skp_max": [
+    3.4407,
+    0.1974,
+    1.5344
+   ],
+   "material": "ph_art_accent",
+   "z0_plan_m": 1.2616,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51814
+  },
+  {
+   "i": 67,
+   "module": "living_large_rect_28m2 · Quadro",
+   "label": "canvas_4",
+   "kind": "canvas",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.0538,
+    0.1654,
+    1.5344
+   ],
+   "exp_max": [
+    3.4407,
+    0.1925,
+    1.7399
+   ],
+   "skp_min": [
+    3.0538,
+    0.1654,
+    1.5344
+   ],
+   "skp_max": [
+    3.4407,
+    0.1925,
+    1.7399
+   ],
+   "material": "ph_canvas",
+   "z0_plan_m": 1.5344,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51847
+  },
+  {
+   "i": 68,
+   "module": "living_large_rect_28m2 · Quadro",
+   "label": "canvas_5",
+   "kind": "canvas",
+   "err_m": 5e-05,
+   "exp_min": [
+    2.9909,
+    0.1654,
+    1.1801
+   ],
+   "exp_max": [
+    3.0538,
+    0.1925,
+    1.7402
+   ],
+   "skp_min": [
+    2.9909,
+    0.1654,
+    1.1801
+   ],
+   "skp_max": [
+    3.0538,
+    0.1925,
+    1.7402
+   ],
+   "material": "ph_canvas",
+   "z0_plan_m": 1.1801,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51879
+  },
+  {
+   "i": 69,
+   "module": "living_large_rect_28m2 · Quadro",
+   "label": "canvas_6",
+   "kind": "canvas",
+   "err_m": 5e-05,
+   "exp_min": [
+    2.9187,
+    0.1654,
+    1.1801
+   ],
+   "exp_max": [
+    2.9909,
+    0.1925,
+    1.2245
+   ],
+   "skp_min": [
+    2.9187,
+    0.1654,
+    1.1801
+   ],
+   "skp_max": [
+    2.9909,
+    0.1925,
+    1.2245
+   ],
+   "material": "ph_canvas",
+   "z0_plan_m": 1.1801,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51911
+  },
+  {
+   "i": 70,
+   "module": "living_large_rect_28m2 · Quadro",
+   "label": "accent_7",
+   "kind": "art_accent",
+   "err_m": 5e-05,
+   "exp_min": [
+    2.9187,
+    0.1654,
+    1.2243
+   ],
+   "exp_max": [
+    2.9909,
+    0.1974,
+    1.6954
+   ],
+   "skp_min": [
+    2.9187,
+    0.1654,
+    1.2243
+   ],
+   "skp_max": [
+    2.9909,
+    0.1974,
+    1.6955
+   ],
+   "material": "ph_art_accent",
+   "z0_plan_m": 1.2243,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51943
+  },
+  {
+   "i": 71,
+   "module": "living_large_rect_28m2 · Quadro",
+   "label": "canvas_8",
+   "kind": "canvas",
+   "err_m": 5e-05,
+   "exp_min": [
+    2.9187,
+    0.1654,
+    1.6957
+   ],
+   "exp_max": [
+    2.9909,
+    0.1925,
+    1.7402
+   ],
+   "skp_min": [
+    2.9187,
+    0.1654,
+    1.6957
+   ],
+   "skp_max": [
+    2.9909,
+    0.1925,
+    1.7402
+   ],
+   "material": "ph_canvas",
+   "z0_plan_m": 1.6957,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 51975
+  },
+  {
+   "i": 72,
+   "module": "living_large_rect_28m2 · Quadro",
+   "label": "canvas_9",
+   "kind": "canvas",
+   "err_m": 5e-05,
+   "exp_min": [
+    2.6787,
+    0.1654,
+    1.1801
+   ],
+   "exp_max": [
+    2.9187,
+    0.1925,
+    1.7402
+   ],
+   "skp_min": [
+    2.6787,
+    0.1654,
+    1.1801
+   ],
+   "skp_max": [
+    2.9187,
+    0.1925,
+    1.7402
+   ],
+   "material": "ph_canvas",
+   "z0_plan_m": 1.1801,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 52007
+  },
+  {
+   "i": 73,
+   "module": "living_large_rect_28m2 · Prateleira",
+   "label": "plank_1",
+   "kind": "shelf_plank",
+   "err_m": 4e-05,
+   "exp_min": [
+    2.2238,
+    0.1854,
+    1.5199
+   ],
+   "exp_max": [
+    3.0739,
+    0.4054,
+    1.5598
+   ],
+   "skp_min": [
+    2.2238,
+    0.1854,
+    1.5199
+   ],
+   "skp_max": [
+    3.0739,
+    0.4054,
+    1.5598
+   ],
+   "material": "ph_shelf_plank",
+   "z0_plan_m": 1.5199,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 52041
+  },
+  {
+   "i": 74,
+   "module": "living_large_rect_28m2 · Prateleira",
+   "label": "bracket_1l",
+   "kind": "shelf_bracket",
+   "err_m": 3e-05,
+   "exp_min": [
+    2.9919,
+    0.1854,
+    1.4201
+   ],
+   "exp_max": [
+    3.0137,
+    0.3254,
+    1.5202
+   ],
+   "skp_min": [
+    2.9919,
+    0.1854,
+    1.4201
+   ],
+   "skp_max": [
+    3.0137,
+    0.3254,
+    1.5202
+   ],
+   "material": "ph_shelf_bracket",
+   "z0_plan_m": 1.4201,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 52074
+  },
+  {
+   "i": 75,
+   "module": "living_large_rect_28m2 · Prateleira",
+   "label": "bracket_1r",
+   "kind": "shelf_bracket",
+   "err_m": 3e-05,
+   "exp_min": [
+    2.2837,
+    0.1854,
+    1.4201
+   ],
+   "exp_max": [
+    2.3058,
+    0.3254,
+    1.5202
+   ],
+   "skp_min": [
+    2.2837,
+    0.1854,
+    1.4201
+   ],
+   "skp_max": [
+    2.3058,
+    0.3254,
+    1.5202
+   ],
+   "material": "ph_shelf_bracket",
+   "z0_plan_m": 1.4201,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 52107
+  },
+  {
+   "i": 76,
+   "module": "living_large_rect_28m2 · Prateleira",
+   "label": "plank_2",
+   "kind": "shelf_plank",
+   "err_m": 4e-05,
+   "exp_min": [
+    2.2238,
+    0.1854,
+    1.86
+   ],
+   "exp_max": [
+    3.0739,
+    0.4054,
+    1.8999
+   ],
+   "skp_min": [
+    2.2238,
+    0.1854,
+    1.86
+   ],
+   "skp_max": [
+    3.0739,
+    0.4054,
+    1.8999
+   ],
+   "material": "ph_shelf_plank",
+   "z0_plan_m": 1.86,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 52139
+  },
+  {
+   "i": 77,
+   "module": "living_large_rect_28m2 · Prateleira",
+   "label": "bracket_2l",
+   "kind": "shelf_bracket",
+   "err_m": 4e-05,
+   "exp_min": [
+    2.9919,
+    0.1854,
+    1.76
+   ],
+   "exp_max": [
+    3.0137,
+    0.3254,
+    1.86
+   ],
+   "skp_min": [
+    2.9919,
+    0.1854,
+    1.76
+   ],
+   "skp_max": [
+    3.0137,
+    0.3254,
+    1.86
+   ],
+   "material": "ph_shelf_bracket",
+   "z0_plan_m": 1.76,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 52171
+  },
+  {
+   "i": 78,
+   "module": "living_large_rect_28m2 · Prateleira",
+   "label": "bracket_2r",
+   "kind": "shelf_bracket",
+   "err_m": 4e-05,
+   "exp_min": [
+    2.2837,
+    0.1854,
+    1.76
+   ],
+   "exp_max": [
+    2.3058,
+    0.3254,
+    1.86
+   ],
+   "skp_min": [
+    2.2837,
+    0.1854,
+    1.76
+   ],
+   "skp_max": [
+    2.3058,
+    0.3254,
+    1.86
+   ],
+   "material": "ph_shelf_bracket",
+   "z0_plan_m": 1.76,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 52203
+  },
+  {
+   "i": 79,
+   "module": "living_large_rect_28m2 · Trilho de luz",
+   "label": "rail",
+   "kind": "track_rail",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.0864,
+    1.3721,
+    2.22
+   ],
+   "exp_max": [
+    3.1262,
+    2.8722,
+    2.2598
+   ],
+   "skp_min": [
+    3.0864,
+    1.3721,
+    2.22
+   ],
+   "skp_max": [
+    3.1262,
+    2.8722,
+    2.2598
+   ],
+   "material": "ph_track_rail",
+   "z0_plan_m": 2.22,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 52237
+  },
+  {
+   "i": 80,
+   "module": "living_large_rect_28m2 · Trilho de luz",
+   "label": "spot_1",
+   "kind": "track_spot",
+   "err_m": 5e-05,
+   "exp_min": [
+    3.0714,
+    1.5872,
+    2.1501
+   ],
+   "exp_max": [
+    3.1412,
+    1.6571,
+    2.2202
+   ],
+   "skp_min": [
+    3.0714,
+    1.5872,
+    2.1501
+   ],
+   "skp_max": [
+    3.1412,
+    1.6571,
+    2.2202
+   ],
+   "material": "ph_track_spot",
+   "z0_plan_m": 2.1501,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 52270
+  },
+  {
+   "i": 81,
+   "module": "living_large_rect_28m2 · Trilho de luz",
+   "label": "spot_2",
+   "kind": "track_spot",
+   "err_m": 3e-05,
+   "exp_min": [
+    3.0714,
+    2.0871,
+    2.1501
+   ],
+   "exp_max": [
+    3.1412,
+    2.1572,
+    2.2202
+   ],
+   "skp_min": [
+    3.0714,
+    2.0871,
+    2.1501
+   ],
+   "skp_max": [
+    3.1412,
+    2.1572,
+    2.2202
+   ],
+   "material": "ph_track_spot",
+   "z0_plan_m": 2.1501,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 52303
+  },
+  {
+   "i": 82,
+   "module": "living_large_rect_28m2 · Trilho de luz",
+   "label": "spot_3",
+   "kind": "track_spot",
+   "err_m": 4e-05,
+   "exp_min": [
+    3.0714,
+    2.5872,
+    2.1501
+   ],
+   "exp_max": [
+    3.1412,
+    2.6571,
+    2.2202
+   ],
+   "skp_min": [
+    3.0714,
+    2.5872,
+    2.1501
+   ],
+   "skp_max": [
+    3.1412,
+    2.6571,
+    2.2202
+   ],
+   "material": "ph_track_spot",
+   "z0_plan_m": 2.1501,
+   "overlap_policy": "EXCLUSIVE",
+   "circulation": "BLOCK",
+   "pid": 52335
+  }
+ ]
+}

@@ -1,0 +1,442 @@
+{
+ "schema_version": "advisory_cabinet_plan.v1",
+ "case_id": "synthetic-door-and-three-drawers",
+ "case_sha256": "c081966ce499cb9564268ba980c1fde69db12b40efa9b50820e0393d0be96689",
+ "catalog_sha256": "1ec26c59ecbc212ea1b00f29544f3710903e374ff57962c5a3cb92aab6d8d7d7",
+ "dimension_grounding": "SYNTHETIC_TEST_ONLY_NOT_PLANTA_74",
+ "edit_model": "READ_ONLY",
+ "execution_authorized": false,
+ "plan_state": "BLOCKED_CAPABILITY_MISSING",
+ "validation": {
+  "L1": "PASS_SYNTHETIC_CALCULATIONS_ONLY",
+  "L2": "PENDING_SKETCHUP",
+  "L3": "PENDING_HUMAN"
+ },
+ "recipes": [
+  {
+   "id": "cabinet.reusable-components",
+   "domain": "structure",
+   "title": "Repetição de portas e módulos com componentes",
+   "sources": [
+    {
+     "id": "yt-cabinet-tips-2021",
+     "title": "10 Tips for Modeling CABINETS in SketchUp!",
+     "creator": "TheSketchUpEssentials",
+     "url": "https://www.youtube.com/watch?v=39x1vITTNKw",
+     "language": "en",
+     "duration": "11:02",
+     "evidence": "TRANSCRIPT_AND_VISUAL_WALKTHROUGH",
+     "reviewed": "2026-10-18",
+     "license": "VIDEO_REFERENCE_ONLY_NO_REPUBLICATION",
+     "locator": "02:22–06:15"
+    }
+   ],
+   "goal": "Permitir duplicação e alteração consciente de peças idênticas.",
+   "when_use": "Portas iguais, puxadores reutilizados, módulos seriados.",
+   "avoid_when": "Quando uma instância precisa de geometria individual sem propagar a alteração; tornar única antes.",
+   "gui_steps": [
+    "Modelar e isolar a geometria de uma frente.",
+    "Transformar a frente em componente com nome funcional.",
+    "Duplicar por Move+Copy, respeitando orientação e folgas.",
+    "Criar grupo ou componente de módulo contendo caixa, frentes e ferragens; nomear no Outliner.",
+    "Antes de editar a definição, identificar quantas instâncias a compartilham."
+   ],
+   "api_candidates": [
+    {
+     "method": "Group#to_component",
+     "status": "DOCUMENTED_API"
+    },
+    {
+     "method": "Entities#add_instance",
+     "status": "DOCUMENTED_API"
+    },
+    {
+     "method": "ComponentInstance#make_unique",
+     "status": "DOCUMENTED_API_RECHECK_VERSION"
+    }
+   ],
+   "implementation_route": "BUILDER_COMPONENT_HIERARCHY_NOT_VERIFIED",
+   "preconditions": [
+    "Instâncias compartilhadas identificadas",
+    "Eixos locais e facing declarados"
+   ],
+   "invariants": [
+    "Instâncias não-alvo preservadas",
+    "Hierarquia de módulo estável",
+    "Folgas entre portas preservadas"
+   ],
+   "pitfalls": [
+    "Editar definição compartilhada altera múltiplas instâncias",
+    "Espelhar por escala negativa pode afetar handedness e materiais"
+   ],
+   "proof_state": "KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP"
+  },
+  {
+   "id": "cabinet.front-gaps-and-profiles",
+   "domain": "geometry",
+   "title": "Folgas reais e frentes com rebaixo",
+   "sources": [
+    {
+     "id": "yt-cabinet-tips-2021",
+     "title": "10 Tips for Modeling CABINETS in SketchUp!",
+     "creator": "TheSketchUpEssentials",
+     "url": "https://www.youtube.com/watch?v=39x1vITTNKw",
+     "language": "en",
+     "duration": "11:02",
+     "evidence": "TRANSCRIPT_AND_VISUAL_WALKTHROUGH",
+     "reviewed": "2026-10-18",
+     "license": "VIDEO_REFERENCE_ONLY_NO_REPUBLICATION",
+     "locator": "03:13–04:29"
+    },
+    {
+     "id": "yt-cabinet-styles-2024",
+     "title": "The ULTIMATE GUIDE To Modeling Cabinets in SketchUp!",
+     "creator": "TheSketchUpEssentials",
+     "url": "https://www.youtube.com/watch?v=OBtmisvuOHc",
+     "language": "en",
+     "duration": "35:32",
+     "evidence": "TRANSCRIPT_AND_DESCRIPTION_ONLY",
+     "reviewed": "2026-10-18",
+     "license": "VIDEO_REFERENCE_ONLY_NO_REPUBLICATION",
+     "locator": "04:36–05:24; 11:00–12:34; 16:19–23:36"
+    }
+   ],
+   "goal": "Ler corretamente portas, gavetas e frentes de estilo Shaker/rebaixadas.",
+   "when_use": "Precisar representar juntas, portas almofadadas ou frentes com detalhe geométrico.",
+   "avoid_when": "Não inventar folga ou largura de moldura sem projeto de marcenaria e ferragem escolhida.",
+   "gui_steps": [
+    "Modelar a frente como peça separada da caixa.",
+    "Definir gap perimetral no desenho antes de duplicar.",
+    "Para painel em rebaixo, criar perfil interno por Offset e extrusão negativa controlada.",
+    "Verificar normais, faces internas e contorno; suavização não substitui o recorte real.",
+    "Ao espelhar, inspecionar posição das juntas e handedness."
+   ],
+   "api_candidates": [
+    {
+     "method": "Entities#add_face",
+     "status": "DOCUMENTED_API"
+    },
+    {
+     "method": "Face#pushpull",
+     "status": "DOCUMENTED_API"
+    },
+    {
+     "method": "Face#offset",
+     "status": "ABSENT_METHOD_COMPUTE_PROFILE"
+    }
+   ],
+   "implementation_route": "PROFILE_BUILDER_EXTENSION_REQUIRED",
+   "preconditions": [
+    "Folgas cotadas pela spec ou hardware",
+    "Espessura mínima do painel verificada"
+   ],
+   "invariants": [
+    "Gap geométrico existe e é mensurável",
+    "Sem face degenerada ou auto-interseção",
+    "Portas não colidem nos envelopes de abertura"
+   ],
+   "pitfalls": [
+    "Offset da GUI não equivale a Face#offset na Ruby API",
+    "Apenas desenhar linha de divisão não cria folga",
+    "Tratamento especial para canto côncavo"
+   ],
+   "proof_state": "KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP"
+  },
+  {
+   "id": "cabinet.drawer-box-and-hardware",
+   "domain": "joinery",
+   "title": "Caixaria de gaveta e folgas dependentes da corrediça",
+   "sources": [
+    {
+     "id": "yt-kitchen-joinery-2024",
+     "title": "Técnicas de modelagem de projeto de marcenaria no Sketchup",
+     "creator": "Sara Vieira",
+     "url": "https://www.youtube.com/watch?v=RMJEqzbji5I",
+     "language": "pt",
+     "duration": "49:39",
+     "evidence": "TRANSCRIPT_AND_VISUAL_WALKTHROUGH",
+     "reviewed": "2026-10-18",
+     "license": "VIDEO_REFERENCE_ONLY_NO_REPUBLICATION",
+     "locator": "21:20–39:23"
+    }
+   ],
+   "goal": "Gerar frentes, laterais, fundo, divisórias e envelope de deslizamento com montagem compreensível.",
+   "when_use": "Armário com gavetas funcionais e auditoria de construção.",
+   "avoid_when": "Sem modelo específico de ferragem, não certificar folgas nem carga.",
+   "gui_steps": [
+    "Definir vão interno e escolher corrediça/ferragem.",
+    "Reservar folgas laterais e de instalação fornecidas pelo fabricante.",
+    "Desenhar frentes com juntas visíveis e alturas por divisão, em peças isoladas.",
+    "Modelar laterais, traseira, base e fundo da gaveta com espessuras explícitas.",
+    "Agrupar caixa com frente somente se o propósito de abertura/edição exigir; verificar colisão ao movimentar."
+   ],
+   "api_candidates": [
+    {
+     "method": "Entities#add_group",
+     "status": "DOCUMENTED_API"
+    },
+    {
+     "method": "Entities#add_face",
+     "status": "DOCUMENTED_API"
+    },
+    {
+     "method": "Face#pushpull",
+     "status": "DOCUMENTED_API"
+    }
+   ],
+   "implementation_route": "PARAMETRIC_DRAWER_ASSEMBLY_MISSING",
+   "preconditions": [
+    "Dimensões livres do vão",
+    "Ficha técnica e curso da corrediça",
+    "Espessuras de chapa de projeto"
+   ],
+   "invariants": [
+    "Folgas laterais compatíveis com ferragem",
+    "Gaveta não atravessa sifão ou estrutura",
+    "Frente e caixaria editáveis de modo intencional"
+   ],
+   "pitfalls": [
+    "Aula demonstra valores de um exemplo, não norma",
+    "Envelope de uso precisa ser auditado",
+    "Scale na frente pode alterar espessura: preferir alterar a spec"
+   ],
+   "case_only_measures": [
+    "A aula exemplifica recuos de 2cm, painéis de 15mm e fundo de 6mm; exigir fabricante e projeto antes de usar."
+   ],
+   "proof_state": "KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP"
+  }
+ ],
+ "strategies": [
+  {
+   "id": "M0",
+   "choice": "VISUAL_FALLBACK_ONLY",
+   "reason": "Caixas separadas não comprovam componentes editáveis nem ferragens."
+  },
+  {
+   "id": "M1",
+   "choice": "PROPOSED_NOT_IMPLEMENTED",
+   "reason": "Spec + componentes independentes preservam intenção após regeneração."
+  },
+  {
+   "id": "M2",
+   "choice": "REJECTED_FOR_REGENERABLE_BASE",
+   "reason": "Edição avulsa no SKP pode ser descartada pelo rebuild."
+  }
+ ],
+ "repo_evidence": [
+  {
+   "path": "tools/wardrobe_builder.py",
+   "symbol": "build_wardrobe",
+   "claim": "Emite corpo, portas e puxadores como peças _p; não articula portas."
+  },
+  {
+   "path": "tools/kitchen_layout.py",
+   "symbol": "_kmod",
+   "claim": "Usa volumes e painéis para representar módulos e frentes."
+  }
+ ],
+ "reference_frame": "LOCAL_MM_X_WIDTH_Y_DEPTH_Z_HEIGHT_FRONT_NEGATIVE_Y",
+ "calculations_mm": {
+  "bay_clear_width": 573.0,
+  "bay_clear_height": 684,
+  "carcass_internal_depth": 554,
+  "drawer_front_height": 236.0,
+  "front_gap": 3
+ },
+ "proposed_parts": [
+  {
+   "id": "side_left",
+   "parent": "carcass",
+   "bbox_mm": [
+    0,
+    0,
+    0,
+    18,
+    554,
+    720
+   ],
+   "intended_entity": "INDEPENDENT_COMPONENT_INSTANCE",
+   "definition_policy": "UNIQUE_UNTIL_REPETITION_IS_VERIFIED"
+  },
+  {
+   "id": "side_right",
+   "parent": "carcass",
+   "bbox_mm": [
+    1182,
+    0,
+    0,
+    1200,
+    554,
+    720
+   ],
+   "intended_entity": "INDEPENDENT_COMPONENT_INSTANCE",
+   "definition_policy": "UNIQUE_UNTIL_REPETITION_IS_VERIFIED"
+  },
+  {
+   "id": "bottom",
+   "parent": "carcass",
+   "bbox_mm": [
+    18,
+    0,
+    0,
+    1182,
+    554,
+    18
+   ],
+   "intended_entity": "INDEPENDENT_COMPONENT_INSTANCE",
+   "definition_policy": "UNIQUE_UNTIL_REPETITION_IS_VERIFIED"
+  },
+  {
+   "id": "top",
+   "parent": "carcass",
+   "bbox_mm": [
+    18,
+    0,
+    702,
+    1182,
+    554,
+    720
+   ],
+   "intended_entity": "INDEPENDENT_COMPONENT_INSTANCE",
+   "definition_policy": "UNIQUE_UNTIL_REPETITION_IS_VERIFIED"
+  },
+  {
+   "id": "divider",
+   "parent": "carcass",
+   "bbox_mm": [
+    591.0,
+    0,
+    18,
+    609.0,
+    554,
+    702
+   ],
+   "intended_entity": "INDEPENDENT_COMPONENT_INSTANCE",
+   "definition_policy": "UNIQUE_UNTIL_REPETITION_IS_VERIFIED"
+  },
+  {
+   "id": "back",
+   "parent": "carcass",
+   "bbox_mm": [
+    0,
+    554,
+    0,
+    1200,
+    560,
+    720
+   ],
+   "intended_entity": "INDEPENDENT_COMPONENT_INSTANCE",
+   "definition_policy": "UNIQUE_UNTIL_REPETITION_IS_VERIFIED"
+  },
+  {
+   "id": "door_left",
+   "parent": "fronts",
+   "bbox_mm": [
+    3,
+    -18,
+    3,
+    598.5,
+    0,
+    717
+   ],
+   "intended_entity": "INDEPENDENT_COMPONENT_INSTANCE",
+   "definition_policy": "UNIQUE_UNTIL_REPETITION_IS_VERIFIED"
+  },
+  {
+   "id": "drawer_front_1",
+   "parent": "fronts",
+   "bbox_mm": [
+    601.5,
+    -18,
+    3.0,
+    1197,
+    0,
+    239.0
+   ],
+   "intended_entity": "INDEPENDENT_COMPONENT_INSTANCE",
+   "definition_policy": "UNIQUE_UNTIL_REPETITION_IS_VERIFIED"
+  },
+  {
+   "id": "drawer_front_2",
+   "parent": "fronts",
+   "bbox_mm": [
+    601.5,
+    -18,
+    242.0,
+    1197,
+    0,
+    478.0
+   ],
+   "intended_entity": "INDEPENDENT_COMPONENT_INSTANCE",
+   "definition_policy": "UNIQUE_UNTIL_REPETITION_IS_VERIFIED"
+  },
+  {
+   "id": "drawer_front_3",
+   "parent": "fronts",
+   "bbox_mm": [
+    601.5,
+    -18,
+    481.0,
+    1197,
+    0,
+    717.0
+   ],
+   "intended_entity": "INDEPENDENT_COMPONENT_INSTANCE",
+   "definition_policy": "UNIQUE_UNTIL_REPETITION_IS_VERIFIED"
+  }
+ ],
+ "proposed_hierarchy": {
+  "cabinet": {
+   "carcass": [
+    "side_left",
+    "side_right",
+    "bottom",
+    "top",
+    "divider",
+    "back"
+   ],
+   "fronts": [
+    "door_left",
+    "drawer_front_1",
+    "drawer_front_2",
+    "drawer_front_3"
+   ]
+  }
+ },
+ "drawer_boxes": "NOT_DIMENSIONED_HARDWARE_REQUIRED",
+ "L1_checks": {
+  "positive_dimensions": true,
+  "unique_semantic_ids": true,
+  "no_positive_volume_overlaps": true
+ },
+ "capability_gaps": [
+  "PARAMETRIC_COMPONENT_MATERIALIZER_NOT_PROVEN",
+  "PARAMETRIC_DRAWER_ASSEMBLY_MISSING",
+  "DOOR_AND_DRAWER_MOTION_ENVELOPES_NOT_PROVEN"
+ ],
+ "missing_info": [
+  "Modelo e ficha técnica de dobradiças e corrediças",
+  "Folgas de instalação e curso; validar interferências e cargas"
+ ],
+ "required_L2_evidence": [
+  "Instâncias/definições e árvore medidas no Outliner; IDs persistentes",
+  "Bboxes e transformações em mundo; nenhuma geometria solta na raiz",
+  "Teste de definição compartilhada/make_unique e envelopes de abertura",
+  "Snapshot pré/pós comprova que módulos externos e arquitetura não mudaram"
+ ],
+ "protected_elements": [
+  "PDF/consensus",
+  "fixtures/planta_74",
+  "fixtures/quadrado",
+  "artifacts",
+  "architecture",
+  "rest_of_scene"
+ ],
+ "rollback": "Nenhum modelo foi alterado. Futuro executor usa cópia descartável e transação.",
+ "limitations": [
+  "BOM de estudo; não é plano de corte nem modelo pronto para fabricação",
+  "L1 calcula só painéis e frentes; não prova componentes, ferragens ou estética",
+  "Não é operation_plan.v1; ledger, validador geral e avaliação de competência pendentes",
+  "Não gera Ruby, _p, comandos MCP ou arquivos SKP"
+ ]
+}

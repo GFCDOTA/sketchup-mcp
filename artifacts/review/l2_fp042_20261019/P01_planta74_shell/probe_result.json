@@ -1,0 +1,1214 @@
+{
+  "ok": true,
+  "job": "geometry_probe",
+  "topology": {
+    "PlanShell_Group": [
+      {
+        "faces": 114,
+        "edges": 324,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "Floor_Group_r000": [
+      {
+        "faces": 1,
+        "edges": 20,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "Floor_Group_r001": [
+      {
+        "faces": 1,
+        "edges": 28,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "Floor_Group_r002": [
+      {
+        "faces": 1,
+        "edges": 35,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "Floor_Group_r003": [
+      {
+        "faces": 1,
+        "edges": 18,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "Floor_Group_r004": [
+      {
+        "faces": 1,
+        "edges": 8,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "Floor_Group_r005": [
+      {
+        "faces": 1,
+        "edges": 10,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "Floor_Group_r006": [
+      {
+        "faces": 1,
+        "edges": 10,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "Floor_Group_r007": [
+      {
+        "faces": 1,
+        "edges": 8,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "SoftBarrier_Group_8": [
+      {
+        "faces": 78,
+        "edges": 156,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "SoftBarrier_Group_9": [
+      {
+        "faces": 6,
+        "edges": 12,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "DoorLeaf_Group_h_o000": [
+      {
+        "faces": 6,
+        "edges": 12,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "DoorLeaf_Group_h_o001": [
+      {
+        "faces": 6,
+        "edges": 12,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "DoorLeaf_Group_h_o002": [
+      {
+        "faces": 6,
+        "edges": 12,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "DoorLeaf_Group_h_o003": [
+      {
+        "faces": 6,
+        "edges": 12,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "DoorLeaf_Group_h_o004": [
+      {
+        "faces": 6,
+        "edges": 12,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "DoorLeaf_Group_h_o005": [
+      {
+        "faces": 6,
+        "edges": 12,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "DoorLeaf_Group_h_o006": [
+      {
+        "faces": 6,
+        "edges": 12,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "WindowGlass_Group_h_o007": [
+      {
+        "faces": 24,
+        "edges": 48,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "WindowSash_Group_h_o007": [
+      {
+        "faces": 25,
+        "edges": 52,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "WindowGlass_Group_h_o008": [
+      {
+        "faces": 38,
+        "edges": 80,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "WindowGlass_Group_h_o009": [
+      {
+        "faces": 24,
+        "edges": 48,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "WindowSash_Group_h_o009": [
+      {
+        "faces": 25,
+        "edges": 52,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "WindowGlass_Group_h_o010": [
+      {
+        "faces": 38,
+        "edges": 80,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "GlazedBalcony_Group_h_o011": [
+      {
+        "faces": 6,
+        "edges": 12,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ]
+  },
+  "rays": [
+    {
+      "id": "h_o000|interior_door|z1.0|open|1|0.1399",
+      "hit": false
+    },
+    {
+      "id": "h_o000|interior_door|z2.0|open|1|0.1399",
+      "hit": false
+    },
+    {
+      "id": "h_o000|interior_door|z2.55|open|1|0.1399",
+      "hit": false
+    },
+    {
+      "id": "h_o000|interior_door|z1.0|open|-1|0.1399",
+      "hit": false
+    },
+    {
+      "id": "h_o000|interior_door|z2.0|open|-1|0.1399",
+      "hit": false
+    },
+    {
+      "id": "h_o000|interior_door|z2.55|open|-1|0.1399",
+      "hit": false
+    },
+    {
+      "id": "h_o001|interior_door|z1.0|open|1|0.1398",
+      "hit": true,
+      "distance_m": 1.3566,
+      "point_m": [
+        7.1672,
+        15.2764,
+        1.0
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o001|interior_door|z2.0|open|1|0.1398",
+      "hit": true,
+      "distance_m": 1.3566,
+      "point_m": [
+        7.1672,
+        15.2764,
+        2.0
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o001|interior_door|z2.55|open|1|0.1398",
+      "hit": true,
+      "distance_m": 1.3566,
+      "point_m": [
+        7.1672,
+        15.2764,
+        2.55
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o001|interior_door|z1.0|open|-1|0.1398",
+      "hit": true,
+      "distance_m": 1.658,
+      "point_m": [
+        7.1672,
+        17.5513,
+        1.0
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o001|interior_door|z2.0|open|-1|0.1398",
+      "hit": true,
+      "distance_m": 1.658,
+      "point_m": [
+        7.1672,
+        17.5513,
+        2.0
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o001|interior_door|z2.55|open|-1|0.1398",
+      "hit": true,
+      "distance_m": 1.658,
+      "point_m": [
+        7.1672,
+        17.5513,
+        2.55
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o002|interior_door|z1.0|open|1|0.1399",
+      "hit": true,
+      "distance_m": 2.9136,
+      "point_m": [
+        13.1675,
+        13.5175,
+        1.0
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o002|interior_door|z2.0|open|1|0.1399",
+      "hit": false
+    },
+    {
+      "id": "h_o002|interior_door|z2.55|open|1|0.1399",
+      "hit": true,
+      "distance_m": 2.9136,
+      "point_m": [
+        13.1675,
+        13.5175,
+        2.55
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o002|interior_door|z1.0|open|-1|0.1399",
+      "hit": true,
+      "distance_m": 1.8601,
+      "point_m": [
+        13.1675,
+        17.5513,
+        1.0
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o002|interior_door|z2.0|open|-1|0.1399",
+      "hit": true,
+      "distance_m": 1.8601,
+      "point_m": [
+        13.1675,
+        17.5513,
+        2.0
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o002|interior_door|z2.55|open|-1|0.1399",
+      "hit": true,
+      "distance_m": 1.8601,
+      "point_m": [
+        13.1675,
+        17.5513,
+        2.55
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o003|interior_door|z1.0|open|1|0.1398",
+      "hit": true,
+      "distance_m": 5.6297,
+      "point_m": [
+        3.3752,
+        15.7185,
+        1.0
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_2",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o003|interior_door|z2.0|open|1|0.1398",
+      "hit": true,
+      "distance_m": 5.6297,
+      "point_m": [
+        3.3752,
+        15.7185,
+        2.0
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_2",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o003|interior_door|z2.55|open|1|0.1398",
+      "hit": true,
+      "distance_m": 5.6297,
+      "point_m": [
+        3.3752,
+        15.7185,
+        2.55
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_2",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o003|interior_door|z1.0|open|-1|0.1398",
+      "hit": true,
+      "distance_m": 4.4239,
+      "point_m": [
+        12.689,
+        15.7185,
+        1.0
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o003|interior_door|z2.0|open|-1|0.1398",
+      "hit": true,
+      "distance_m": 4.4239,
+      "point_m": [
+        12.689,
+        15.7185,
+        2.0
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o003|interior_door|z2.55|open|-1|0.1398",
+      "hit": true,
+      "distance_m": 4.4239,
+      "point_m": [
+        12.689,
+        15.7185,
+        2.55
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o004|interior_door|z1.0|open|1|0.1399",
+      "hit": true,
+      "distance_m": 3.6688,
+      "point_m": [
+        8.1099,
+        11.9077,
+        1.0
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o004|interior_door|z2.0|open|1|0.1399",
+      "hit": false
+    },
+    {
+      "id": "h_o004|interior_door|z2.55|open|1|0.1399",
+      "hit": true,
+      "distance_m": 3.6688,
+      "point_m": [
+        8.1099,
+        11.9077,
+        2.55
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o004|interior_door|z1.0|open|-1|0.1399",
+      "hit": true,
+      "distance_m": 1.3567,
+      "point_m": [
+        8.1099,
+        16.1932,
+        1.0
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o004|interior_door|z2.0|open|-1|0.1399",
+      "hit": true,
+      "distance_m": 1.3567,
+      "point_m": [
+        8.1099,
+        16.1932,
+        2.0
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o004|interior_door|z2.55|open|-1|0.1399",
+      "hit": true,
+      "distance_m": 1.3567,
+      "point_m": [
+        8.1099,
+        16.1932,
+        2.55
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o005|interior_door|z1.0|open|1|0.1399",
+      "hit": false
+    },
+    {
+      "id": "h_o005|interior_door|z2.0|open|1|0.1399",
+      "hit": false
+    },
+    {
+      "id": "h_o005|interior_door|z2.55|open|1|0.1399",
+      "hit": false
+    },
+    {
+      "id": "h_o005|interior_door|z1.0|open|-1|0.1399",
+      "hit": true,
+      "distance_m": 3.3449,
+      "point_m": [
+        2.744,
+        18.0019,
+        1.0
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_0",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o005|interior_door|z2.0|open|-1|0.1399",
+      "hit": true,
+      "distance_m": 3.3449,
+      "point_m": [
+        2.744,
+        18.0019,
+        2.0
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_0",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o005|interior_door|z2.55|open|-1|0.1399",
+      "hit": true,
+      "distance_m": 3.3449,
+      "point_m": [
+        2.744,
+        18.0019,
+        2.55
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_0",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o006|interior_door|z1.0|open|1|0.1398",
+      "hit": true,
+      "distance_m": 2.8639,
+      "point_m": [
+        6.141,
+        14.7606,
+        1.0
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o006|interior_door|z2.0|open|1|0.1398",
+      "hit": true,
+      "distance_m": 2.8639,
+      "point_m": [
+        6.141,
+        14.7606,
+        2.0
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o006|interior_door|z2.55|open|1|0.1398",
+      "hit": true,
+      "distance_m": 2.8639,
+      "point_m": [
+        6.141,
+        14.7606,
+        2.55
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o006|interior_door|z1.0|open|-1|0.1398",
+      "hit": true,
+      "distance_m": 1.6581,
+      "point_m": [
+        9.9231,
+        14.7606,
+        1.0
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o006|interior_door|z2.0|open|-1|0.1398",
+      "hit": true,
+      "distance_m": 1.6581,
+      "point_m": [
+        9.9231,
+        14.7606,
+        2.0
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o006|interior_door|z2.55|open|-1|0.1398",
+      "hit": true,
+      "distance_m": 1.6581,
+      "point_m": [
+        9.9231,
+        14.7606,
+        2.55
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o007|window|below_sill|solid|1|0.1398",
+      "hit": true,
+      "distance_m": 0.3,
+      "point_m": [
+        13.25,
+        13.5175,
+        0.75
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o007|window|aperture|open_or_glass|1|0.1398",
+      "hit": true,
+      "distance_m": 0.4369,
+      "point_m": [
+        13.25,
+        13.3806,
+        1.8
+      ],
+      "path": [
+        "WindowSash_Group_h_o007",
+        "Grupo45#1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o007|window|above_head|solid|1|0.1398",
+      "hit": true,
+      "distance_m": 0.3,
+      "point_m": [
+        13.25,
+        13.5175,
+        2.4
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o007|window|below_sill|solid|-1|0.1398",
+      "hit": true,
+      "distance_m": 0.3,
+      "point_m": [
+        13.25,
+        13.3776,
+        0.75
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o007|window|aperture|open_or_glass|-1|0.1398",
+      "hit": true,
+      "distance_m": 0.3029,
+      "point_m": [
+        13.25,
+        13.3806,
+        1.8
+      ],
+      "path": [
+        "WindowSash_Group_h_o007",
+        "Grupo45#1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o007|window|above_head|solid|-1|0.1398",
+      "hit": true,
+      "distance_m": 0.3,
+      "point_m": [
+        13.25,
+        13.3776,
+        2.4
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o008|window|below_sill|solid|1|0.1398",
+      "hit": true,
+      "distance_m": 0.3,
+      "point_m": [
+        11.2248,
+        13.5175,
+        0.55
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o008|window|aperture|open_or_glass|1|0.1398",
+      "hit": true,
+      "distance_m": 0.3299,
+      "point_m": [
+        11.2248,
+        13.4876,
+        1.7
+      ],
+      "path": [
+        "WindowGlass_Group_h_o008",
+        "Grupo52#1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o008|window|above_head|solid|1|0.1398",
+      "hit": true,
+      "distance_m": 0.3,
+      "point_m": [
+        11.2248,
+        13.5175,
+        2.5
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o008|window|below_sill|solid|-1|0.1398",
+      "hit": true,
+      "distance_m": 0.3,
+      "point_m": [
+        11.2248,
+        13.3776,
+        0.55
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o008|window|aperture|open_or_glass|-1|0.1398",
+      "hit": true,
+      "distance_m": 0.3299,
+      "point_m": [
+        11.2248,
+        13.4076,
+        1.7
+      ],
+      "path": [
+        "WindowGlass_Group_h_o008",
+        "Grupo52#1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o008|window|above_head|solid|-1|0.1398",
+      "hit": true,
+      "distance_m": 0.3,
+      "point_m": [
+        11.2248,
+        13.3776,
+        2.5
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o009|window|below_sill|solid|1|0.143",
+      "hit": true,
+      "distance_m": 0.3,
+      "point_m": [
+        9.1924,
+        12.6132,
+        0.75
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o009|window|aperture|open_or_glass|1|0.143",
+      "hit": true,
+      "distance_m": 0.4385,
+      "point_m": [
+        9.1924,
+        12.4747,
+        1.8
+      ],
+      "path": [
+        "WindowSash_Group_h_o009",
+        "Grupo65#1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o009|window|above_head|solid|1|0.143",
+      "hit": true,
+      "distance_m": 0.3,
+      "point_m": [
+        9.1924,
+        12.6132,
+        2.4
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o009|window|below_sill|solid|-1|0.143",
+      "hit": true,
+      "distance_m": 0.3,
+      "point_m": [
+        9.1924,
+        12.4702,
+        0.75
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o009|window|aperture|open_or_glass|-1|0.143",
+      "hit": true,
+      "distance_m": 0.3045,
+      "point_m": [
+        9.1924,
+        12.4747,
+        1.8
+      ],
+      "path": [
+        "WindowSash_Group_h_o009",
+        "Grupo65#1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o009|window|above_head|solid|-1|0.143",
+      "hit": true,
+      "distance_m": 0.3,
+      "point_m": [
+        9.1924,
+        12.4702,
+        2.4
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o010|window|below_sill|solid|1|0.1398",
+      "hit": true,
+      "distance_m": 0.3,
+      "point_m": [
+        7.6583,
+        11.9077,
+        0.55
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o010|window|aperture|open_or_glass|1|0.1398",
+      "hit": true,
+      "distance_m": 0.3299,
+      "point_m": [
+        7.6583,
+        11.8778,
+        1.7
+      ],
+      "path": [
+        "WindowGlass_Group_h_o010",
+        "Grupo72#1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o010|window|above_head|solid|1|0.1398",
+      "hit": true,
+      "distance_m": 0.3,
+      "point_m": [
+        7.6583,
+        11.9077,
+        2.5
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o010|window|below_sill|solid|-1|0.1398",
+      "hit": true,
+      "distance_m": 0.3,
+      "point_m": [
+        7.6583,
+        11.7679,
+        0.55
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o010|window|aperture|open_or_glass|-1|0.1398",
+      "hit": true,
+      "distance_m": 0.3299,
+      "point_m": [
+        7.6583,
+        11.7978,
+        1.7
+      ],
+      "path": [
+        "WindowGlass_Group_h_o010",
+        "Grupo72#1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o010|window|above_head|solid|-1|0.1398",
+      "hit": true,
+      "distance_m": 0.3,
+      "point_m": [
+        7.6583,
+        11.7679,
+        2.5
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o011|glazed_balcony|z1.0|open|1|0.1398",
+      "hit": false
+    },
+    {
+      "id": "h_o011|glazed_balcony|z2.0|open|1|0.1398",
+      "hit": false
+    },
+    {
+      "id": "h_o011|glazed_balcony|z2.55|open|1|0.1398",
+      "hit": false
+    },
+    {
+      "id": "h_o011|glazed_balcony|z1.0|open|-1|0.1398",
+      "hit": true,
+      "distance_m": 4.6756,
+      "point_m": [
+        4.5326,
+        17.5513,
+        1.0
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o011|glazed_balcony|z2.0|open|-1|0.1398",
+      "hit": true,
+      "distance_m": 4.6756,
+      "point_m": [
+        4.5326,
+        17.5513,
+        2.0
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    },
+    {
+      "id": "h_o011|glazed_balcony|z2.55|open|-1|0.1398",
+      "hit": true,
+      "distance_m": 4.6756,
+      "point_m": [
+        4.5326,
+        17.5513,
+        2.55
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_1",
+        "Face"
+      ]
+    }
+  ],
+  "model_path": "E:\\Claude\\apps\\sketchup-mcp\\runs\\l2_fp042_20261019\\P01_planta74_shell\\open_probe\\_probe_model.skp",
+  "top_level": [
+    "PlanShell_Group",
+    "Floor_Group_r000",
+    "Floor_Group_r001",
+    "Floor_Group_r002",
+    "Floor_Group_r003",
+    "Floor_Group_r004",
+    "Floor_Group_r005",
+    "Floor_Group_r006",
+    "Floor_Group_r007",
+    "SoftBarrier_Group_8",
+    "SoftBarrier_Group_9",
+    "DoorLeaf_Group_h_o000",
+    "DoorLeaf_Group_h_o001",
+    "DoorLeaf_Group_h_o002",
+    "DoorLeaf_Group_h_o003",
+    "DoorLeaf_Group_h_o004",
+    "DoorLeaf_Group_h_o005",
+    "DoorLeaf_Group_h_o006",
+    "WindowGlass_Group_h_o007",
+    "WindowSash_Group_h_o007",
+    "WindowGlass_Group_h_o008",
+    "WindowGlass_Group_h_o009",
+    "WindowSash_Group_h_o009",
+    "WindowGlass_Group_h_o010",
+    "GlazedBalcony_Group_h_o011"
+  ],
+  "elapsed_s": 1.14,
+  "sketchup_version": "26.0.429"
+}

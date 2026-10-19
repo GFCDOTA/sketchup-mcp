@@ -1,0 +1,140 @@
+{
+  "ok": true,
+  "job": "geometry_probe",
+  "topology": {
+    "PlanShell_Group": [
+      {
+        "faces": 14,
+        "edges": 36,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "Floor_Group_r_main": [
+      {
+        "faces": 1,
+        "edges": 4,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "WindowGlass_Group_win_south": [
+      {
+        "faces": 24,
+        "edges": 48,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ],
+    "WindowSash_Group_win_south": [
+      {
+        "faces": 25,
+        "edges": 52,
+        "degenerate_faces": 0,
+        "zero_edges": 0,
+        "loose_edges": 0,
+        "edges_gt2_faces": 0
+      }
+    ]
+  },
+  "rays": [
+    {
+      "id": "win_below_sill_z0.5",
+      "hit": true,
+      "distance_m": 0.8865,
+      "point_m": [
+        5.5185,
+        3.6135,
+        0.5
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_0",
+        "Face"
+      ]
+    },
+    {
+      "id": "win_basc_solid_band_z1.2",
+      "hit": true,
+      "distance_m": 0.8865,
+      "point_m": [
+        5.5185,
+        3.6135,
+        1.2
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_0",
+        "Face"
+      ]
+    },
+    {
+      "id": "win_aperture_z1.8",
+      "hit": false
+    },
+    {
+      "id": "win_above_head_z2.4",
+      "hit": true,
+      "distance_m": 0.8865,
+      "point_m": [
+        5.5185,
+        3.6135,
+        2.4
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_0",
+        "Face"
+      ]
+    },
+    {
+      "id": "win_near_top_z2.65",
+      "hit": true,
+      "distance_m": 0.8865,
+      "point_m": [
+        5.5185,
+        3.6135,
+        2.65
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_0",
+        "Face"
+      ]
+    },
+    {
+      "id": "control_solid_x4.0_z1.8",
+      "hit": true,
+      "distance_m": 0.8865,
+      "point_m": [
+        4.0,
+        3.6135,
+        1.8
+      ],
+      "path": [
+        "PlanShell_Group",
+        "PlanShell_piece_0",
+        "Face"
+      ]
+    },
+    {
+      "id": "glass_aperture_z1.8",
+      "hit": false
+    }
+  ],
+  "model_path": "E:\\Claude\\apps\\sketchup-mcp\\runs\\l2_fp042_20261019\\S01_quadrado_shell\\probe\\_probe_model.skp",
+  "top_level": [
+    "PlanShell_Group",
+    "Floor_Group_r_main",
+    "WindowGlass_Group_win_south",
+    "WindowSash_Group_win_south"
+  ],
+  "elapsed_s": 0.02,
+  "sketchup_version": "26.0.429"
+}

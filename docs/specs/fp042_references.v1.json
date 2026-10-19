@@ -6369,6 +6369,576 @@
       "blob_sha": "42f50d658683639ac9decb78d373c8463b9dc043",
       "blob_size": 1239741,
       "owner_group": "other_canonical_reference"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P01_planta74_shell/geometry_report.json",
+      "blob_sha": "4b1c39d8bc1ab8a5e74ef1bb7d285f19918336df",
+      "blob_size": 26891,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P01_planta74_shell/inspect.json",
+      "blob_sha": "56adc090c514a19118e17e5ebe3a32eb24728f86",
+      "blob_size": 90361,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P01_planta74_shell/model.skp",
+      "blob_sha": "1254f5827c074503c1bf116db8db77631e483538",
+      "blob_size": 111957,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P01_planta74_shell/model_iso.png",
+      "blob_sha": "2ac14d41bf94502f6f322067cb2d861c94e74974",
+      "blob_size": 140885,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P01_planta74_shell/model_top.png",
+      "blob_sha": "2979ba98a994ddea487ced6c393e620768ca7ba7",
+      "blob_size": 29037,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P01_planta74_shell/probe_result.json",
+      "blob_sha": "c15401fe5cd6c8941e6d4b3fb1f8a69ef88e8180",
+      "blob_size": 23810,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/P02_furnish_mcp.json",
+      "blob_sha": "906b1816d189a264295a7fca7d3e2deadab4bba6",
+      "blob_size": 4461,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/inspect.json",
+      "blob_sha": "e2f1995e35623e4f5fdbf4f8a6638cf1d7250864",
+      "blob_size": 616231,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/planta_74_furnished.skp",
+      "blob_sha": "25086ffffb86c298c431c762a889bd70d8229ef2",
+      "blob_size": 3359078,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/planta_74_furnished_after_iso.png",
+      "blob_sha": "d14c0a600448fcfc2e2693c04a5875362b113a0f",
+      "blob_size": 242861,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/planta_74_furnished_after_top.png",
+      "blob_sha": "16319186fbe9eafca46995512491d1255a048c20",
+      "blob_size": 88185,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/planta_74_furnished_before_top.png",
+      "blob_sha": "7fd2d32663deb12a8c98c71c757dbfb61c78c0fc",
+      "blob_size": 29027,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/planta_74_furnished_log.txt",
+      "blob_sha": "f1b838a6bfcf5917e4710f1ddc4f6f91a05085b2",
+      "blob_size": 13966,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/planta_check.json",
+      "blob_sha": "0fc45131e11fcdb7984d1d737cb57b1e1f9dccc5",
+      "blob_size": 19662,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/A_S____TERRACO_SOCIAL___TERRACO_TECNICO_room_iso.png",
+      "blob_sha": "2278ce5e385d8113a1ef33e33dc154373d51bef1",
+      "blob_size": 119618,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/A_S____TERRACO_SOCIAL___TERRACO_TECNICO_room_top.png",
+      "blob_sha": "9afff407deb00a3cbec7f4f2917d085157a846a0",
+      "blob_size": 19772,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/BANHO_01_room_iso.png",
+      "blob_sha": "71c1b807a9bbef7b6eeda36cf43317989971cd55",
+      "blob_size": 93453,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/BANHO_01_room_top.png",
+      "blob_sha": "f6633d2fe9640da8ee92394b2e1330536ac87f93",
+      "blob_size": 31300,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/BANHO_02_room_iso.png",
+      "blob_sha": "b78f6d5ec13f0ed4efbb9dd7136a9abcb248761e",
+      "blob_size": 166101,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/BANHO_02_room_top.png",
+      "blob_sha": "6dbf450e292bbf17a5a6d0b0d6bf5d3851452f44",
+      "blob_size": 120371,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/COZINHA_room_iso.png",
+      "blob_sha": "f9999fd23b7898eae93dec762c2072f535cf3632",
+      "blob_size": 85583,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/COZINHA_room_top.png",
+      "blob_sha": "5ab1b2da5a6d2afac050a627966fba39d00ec00b",
+      "blob_size": 18100,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/LAVABO_room_iso.png",
+      "blob_sha": "d705cb7ab03a59445201ecaec3d3cefc7c4578ed",
+      "blob_size": 129813,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/LAVABO_room_top.png",
+      "blob_sha": "b82ed6824a0e87a7401a97aaf089bfb0eb499774",
+      "blob_size": 38039,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/SALA_DE_JANTAR___SALA_DE_ESTAR_room_iso.png",
+      "blob_sha": "0e098ad2a649df7bc39cc9bc306510565665050e",
+      "blob_size": 144756,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/SALA_DE_JANTAR___SALA_DE_ESTAR_room_top.png",
+      "blob_sha": "4e8e523bafd77ad378aea76c4add8f7a35461bab",
+      "blob_size": 36989,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/SUITE_01_room_iso.png",
+      "blob_sha": "7ae3b27be8a0dec7c0fb20711d645cc92ee3a06f",
+      "blob_size": 126647,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/SUITE_01_room_top.png",
+      "blob_sha": "28377b42696726caac65bf5de18647cdd7d60f6a",
+      "blob_size": 30263,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/SUITE_02_room_iso.png",
+      "blob_sha": "5746800475398d69b43b6b7671f621d185d97b5f",
+      "blob_size": 152049,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/SUITE_02_room_top.png",
+      "blob_sha": "911b143f94a4c958468d2803509b33b4525b789e",
+      "blob_size": 26791,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/isolated_report.json",
+      "blob_sha": "b00af052702999e8892f889a0430bbf55e92a610",
+      "blob_size": 1836,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P04_room_edit/edit.json",
+      "blob_sha": "5c172820ea4b8ac2ac153d8e06640fc580ecf3a7",
+      "blob_size": 1449,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P04_room_edit/inspect.json",
+      "blob_sha": "c49f49126ee548ebf846689915bb611459b63c1b",
+      "blob_size": 616503,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P05_sofa_premium/inspect_approved.json",
+      "blob_sha": "da07d0de19367697b51e9c324b111a6430f9af70",
+      "blob_size": 380898,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P07_scale_fix/P06_mcp_build_quadrado.json",
+      "blob_sha": "f42ebbcc559794708805ffeba1d81bd4174d3144",
+      "blob_size": 3496,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P07_scale_fix/geometry_report.json",
+      "blob_sha": "e5d8ffa7a06181e9612415abd68ef8f3e3f48010",
+      "blob_size": 26905,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/README.md",
+      "blob_sha": "334cfc8d8d0c75bf0762a54db290098fde816801",
+      "blob_size": 14932,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S01_quadrado_shell/build_result.json",
+      "blob_sha": "51f4c95f212dfc78cbf0758eef4716afb0172767",
+      "blob_size": 3176,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S01_quadrado_shell/geometry_report.json",
+      "blob_sha": "1603643beedfd07f0ea9577744d5abf8f4741c34",
+      "blob_size": 5523,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S01_quadrado_shell/inspect.json",
+      "blob_sha": "651b6d31ba8caef5dc09fcadac4af6c22cc007c0",
+      "blob_size": 21670,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S01_quadrado_shell/model.skp",
+      "blob_sha": "626faa3c9da529fd6b1d8da19d2b7c38a975923b",
+      "blob_size": 72560,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S01_quadrado_shell/model_iso.png",
+      "blob_sha": "2aee5f6bd0f10984975ed77a688ff449681e6a88",
+      "blob_size": 58715,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S01_quadrado_shell/model_top.png",
+      "blob_sha": "c57af704c2b4499f064a5e1e9130e4f3bd64582d",
+      "blob_size": 9172,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S01_quadrado_shell/probe_result.json",
+      "blob_sha": "011b62508d808d05052c3b45146a3132a4d152f0",
+      "blob_size": 2669,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_bedroom/compare.json",
+      "blob_sha": "48abeddbe2fe7fc00a711f65b4639720c865d463",
+      "blob_size": 37921,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_bedroom/furnished.skp",
+      "blob_sha": "920ee02e9502a74f25eb943150b4369d7e619e51",
+      "blob_size": 152966,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_bedroom/furnished_after_iso.png",
+      "blob_sha": "feffde1be0f1bb9ffcdda349906645cc01deeb59",
+      "blob_size": 72353,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_bedroom/furnished_after_top.png",
+      "blob_sha": "4ed935338fa83d643a529248be279fb2872a897a",
+      "blob_size": 13727,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_bedroom/furnished_log.txt",
+      "blob_sha": "7c351c919b80b8b77891d70904e2ffb6c51064ff",
+      "blob_size": 2135,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_living/compare.json",
+      "blob_sha": "c8b7cd075343afccefe7e572ce87974134bc50de",
+      "blob_size": 29045,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_living/furnished.skp",
+      "blob_sha": "c67704b6a7a1bd6e05083243fa1ac3b6c04a8d23",
+      "blob_size": 150071,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_living/furnished_after_iso.png",
+      "blob_sha": "eec15141d306f85e2fbe6216dadd9da0faa1bd16",
+      "blob_size": 83966,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_living/furnished_after_top.png",
+      "blob_sha": "fb262ae0472301d2dd9e846b50e205c976b2cd25",
+      "blob_size": 18415,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_living/furnished_log.txt",
+      "blob_sha": "7100952c07c159f41f2d42a16ef3d48fcdcc9191",
+      "blob_size": 1869,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S04_styled_living_large/compare.json",
+      "blob_sha": "07e8de90126ae801dc58a49b25d94329697ae527",
+      "blob_size": 50585,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S04_styled_living_large/furnished.skp",
+      "blob_sha": "e2cb0670c667f94e5d4c61621c66497ebe131773",
+      "blob_size": 606764,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S04_styled_living_large/furnished_after_iso.png",
+      "blob_sha": "4be25503cd7701e1d5fabbfe858f181f9e87c4be",
+      "blob_size": 121796,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S04_styled_living_large/furnished_log.txt",
+      "blob_sha": "080c4756ce0455c4d9c9a948c859bfcba0bb2ac9",
+      "blob_size": 3265,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S05_builders_before_fix/builders.skp",
+      "blob_sha": "032ee4a9bd9dd504d64b53d334184c79658a37df",
+      "blob_size": 234476,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S05_builders_before_fix/builders_iso.png",
+      "blob_sha": "4717517d2009a47237e1fc12eb63b83c39370c75",
+      "blob_size": 208771,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S05_builders_before_fix/builders_top.png",
+      "blob_sha": "148f3ce4ac309661e2c4cd1755c946028dbe3650",
+      "blob_size": 40167,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S05_builders_before_fix/compare.json",
+      "blob_sha": "04fb78cd83db38e428f47597b16339f949021115",
+      "blob_size": 130767,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S05_builders_before_fix/probe_result.json",
+      "blob_sha": "cb648c9ea4d11a5190483ac652c5a78b90582a06",
+      "blob_size": 41978,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S06_mcp_after_fix/suite.json",
+      "blob_sha": "5ebc6dd9270f33dc69d4fbecba768096a18b81cc",
+      "blob_size": 46275,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S06_mcp_before_fix/I01_retry.json",
+      "blob_sha": "fb2abcea7d6dd008eb6b4583677006ecb269a91c",
+      "blob_size": 891,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S06_mcp_before_fix/suite_stdout.txt",
+      "blob_sha": "35d881401d2b29fe3e12080a909cc7de2035b611",
+      "blob_size": 1468,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S07_repros/P02_fh.txt",
+      "blob_sha": "957534fdf82581f628a568476b60e1a45dd4c42b",
+      "blob_size": 28791,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S07_repros/job_repro.py",
+      "blob_sha": "de691de994d0b19f00cfdc138320407c49a92c3e",
+      "blob_size": 1794,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S07_repros/pending_read_repro.py",
+      "blob_sha": "4909b3d647eda282c5a17f23d3c017842d64e0db",
+      "blob_size": 1488,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S07_repros/stdin_repro.py",
+      "blob_sha": "efcab7fbd1e74c9f8995a9558176aff18a9b1538",
+      "blob_size": 1025,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S08_vray_proof/S08_vray_proof_result.json",
+      "blob_sha": "9138dfa185e3ed4d42da57398950d11ebb0a26a6",
+      "blob_size": 1917,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S08_vray_proof/vray.png",
+      "blob_sha": "6544137c2248d0681f47fb89c44988fa73708e6d",
+      "blob_size": 318551,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S08_vray_proof/vray_export_log.txt",
+      "blob_sha": "2e6a02a852dcad44d2f2b6d7f250c8751dda4f7a",
+      "blob_size": 172,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S09_builders_after_fix/builders.skp",
+      "blob_sha": "ae171ef85079931a7a306670f8b55eeaf6de60f1",
+      "blob_size": 235683,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S09_builders_after_fix/builders_iso.png",
+      "blob_sha": "9e2b5cbad1e4615e4e323a2820a7017af3fc3304",
+      "blob_size": 199342,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S09_builders_after_fix/builders_top.png",
+      "blob_sha": "d416cb2590f186ca82ad136fe7980ecf9d2ca389",
+      "blob_size": 64682,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S09_builders_after_fix/compare.json",
+      "blob_sha": "c0e2dfe7d225cd87261ad0018f60f4df3643ac79",
+      "blob_size": 130767,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S09_builders_after_fix/probe_result.json",
+      "blob_sha": "39537ee462c663fd42adefb273a3c3209c3c9e4f",
+      "blob_size": 34996,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S10_cabinet/cabinet_plan.json",
+      "blob_sha": "8f340c1adf698d304d62cd8d7f16c8d304d2d302",
+      "blob_size": 12885,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/SHA256SUMS",
+      "blob_sha": "6535eaf7627de38665ec4af954a51e5c7224f142",
+      "blob_size": 9643,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/integrity/S08_scene_hash_before.txt",
+      "blob_sha": "289a95dc543e2f255c669545a4d13a4c8030f086",
+      "blob_size": 160,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/integrity/hashes_after.sha256",
+      "blob_sha": "9cff8accbf26461ae9b978a5241dc40028d859a1",
+      "blob_size": 119950,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/integrity/hashes_before.sha256",
+      "blob_sha": "2b30e1f7c1d5110db559cbcbe05d9d04d841aa5b",
+      "blob_size": 119950,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/builders_fixture.py",
+      "blob_sha": "bcf6898a2372836bd962fd449e764764cd5b2254",
+      "blob_size": 4461,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/closepid.py",
+      "blob_sha": "718208529e1e35495759c79ba4e9113c17005e58",
+      "blob_size": 268,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/coll_summary.py",
+      "blob_sha": "6ebee5f464fe3e2f521d956cd1c117d80ed29f8c",
+      "blob_size": 793,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/compare_furnish.py",
+      "blob_sha": "250be85c89771c73cc71e696e6f2ccf4645278af",
+      "blob_size": 7083,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/geometry_probe.rb",
+      "blob_sha": "9f5177b7565df272bea4bb598bee7a21fa7e3ebf",
+      "blob_size": 2936,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/mcp_call.py",
+      "blob_sha": "74bea2735582327f9f516ea094cfa97de45a018e",
+      "blob_size": 2001,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/mcp_suite.py",
+      "blob_sha": "2ca5475d6a4a9c0b932f53417c86e452cd45d53f",
+      "blob_size": 16574,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/planta_check.py",
+      "blob_sha": "a4e0d9837f89c9485f2f8b0ea1b60bb84dba1ae9",
+      "blob_size": 8043,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/planta_rooms_isolated.py",
+      "blob_sha": "5a38280ea59a49cf0c997565bfe63a8935168a4c",
+      "blob_size": 3491,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/probe.py",
+      "blob_sha": "e0adc115c7826b0fb76ae6eb75778ec4bfc803c2",
+      "blob_size": 1219,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/run.py",
+      "blob_sha": "6ef6221841c766097b9102adab75355a196e1e11",
+      "blob_size": 551,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/synth_furnish.py",
+      "blob_sha": "857f89e3cb984fa70c741b2d5f3b37d279ce4fc9",
+      "blob_size": 2584,
+      "owner_group": "artifacts"
     }
   ]
 }

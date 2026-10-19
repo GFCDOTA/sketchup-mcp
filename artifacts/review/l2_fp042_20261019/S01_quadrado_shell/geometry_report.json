@@ -1,0 +1,257 @@
+{
+  "schema_version": "1.0.0",
+  "tool": "build_plan_shell_skp",
+  "consensus_path": "E:/Claude/apps/sketchup-mcp/fixtures/quadrado/consensus_with_window.json",
+  "skp_path": "E:/Claude/apps/sketchup-mcp/runs/l2_fp042_20261019/S01_quadrado_shell/model.skp",
+  "shell_json_path": "E:/Claude/apps/sketchup-mcp/runs/l2_fp042_20261019/S01_quadrado_shell/_shell_polygon.json",
+  "soft_barriers_mode": "groups",
+  "plan_shell": {
+    "faces": 14,
+    "edges": 36,
+    "sub_groups": 1,
+    "faces_with_holes": 4,
+    "top_or_bottom_faces": 4,
+    "default_material_faces": 0,
+    "present": true
+  },
+  "floor_groups": {
+    "present": true,
+    "count": 1,
+    "failed_count": 0,
+    "failed_records": [
+
+    ],
+    "records": [
+      {
+        "name": "Floor_Group_r_main",
+        "faces": 1,
+        "edges": 4,
+        "area_in2": 24331.0,
+        "area_m2": 15.6974
+      }
+    ]
+  },
+  "soft_barrier_groups": {
+    "present": false,
+    "count": 0,
+    "skipped_count": 0,
+    "skip_reasons": [
+
+    ],
+    "barriers": [
+
+    ]
+  },
+  "totals": {
+    "top_level_groups": 4,
+    "faces": 1,
+    "edges": 4
+  },
+  "groups_diagnostic": [
+    {
+      "name": "PlanShell_Group",
+      "entity_count": 1,
+      "face_count": 14,
+      "edge_count": 36,
+      "sub_group_count": 1,
+      "lateral_face_count": 10,
+      "top_or_bottom_face_count": 4,
+      "top_face_count": 2,
+      "default_material_face_count": 0,
+      "primary_material": "plan_wall",
+      "bbox_in": {
+        "min": [
+          134.7842,
+          134.7842,
+          0.0
+        ],
+        "max": [
+          299.7445,
+          299.7445,
+          106.2992
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          3.4235,
+          3.4235,
+          0.0
+        ],
+        "max": [
+          7.6135,
+          7.6135,
+          2.7
+        ]
+      },
+      "height_m": 2.7,
+      "footprint_bbox_m2": 17.556,
+      "footprint_top_face_m2": 3.2405
+    },
+    {
+      "name": "Floor_Group_r_main",
+      "entity_count": 5,
+      "face_count": 1,
+      "edge_count": 4,
+      "sub_group_count": 0,
+      "lateral_face_count": 0,
+      "top_or_bottom_face_count": 1,
+      "top_face_count": 1,
+      "default_material_face_count": 0,
+      "primary_material": "floor_r_main",
+      "bbox_in": {
+        "min": [
+          139.2724,
+          139.2724,
+          0.0
+        ],
+        "max": [
+          295.2563,
+          295.2563,
+          0.0
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          3.5375,
+          3.5375,
+          0.0
+        ],
+        "max": [
+          7.4995,
+          7.4995,
+          0.0
+        ]
+      },
+      "height_m": 0.0,
+      "footprint_bbox_m2": 15.6974,
+      "footprint_top_face_m2": 15.6974
+    },
+    {
+      "name": "WindowGlass_Group_win_south",
+      "entity_count": 4,
+      "face_count": 24,
+      "edge_count": 48,
+      "sub_group_count": 4,
+      "lateral_face_count": 16,
+      "top_or_bottom_face_count": 8,
+      "top_face_count": 4,
+      "default_material_face_count": 0,
+      "primary_material": "plan_window_frame",
+      "bbox_in": {
+        "min": [
+          196.4857,
+          136.9495,
+          59.0551
+        ],
+        "max": [
+          238.043,
+          140.0992,
+          82.6772
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          4.9907,
+          3.4785,
+          1.5
+        ],
+        "max": [
+          6.0463,
+          3.5585,
+          2.1
+        ]
+      },
+      "height_m": 0.6,
+      "footprint_bbox_m2": 0.0844,
+      "footprint_top_face_m2": 0.1769
+    },
+    {
+      "name": "WindowSash_Group_win_south",
+      "entity_count": 5,
+      "face_count": 25,
+      "edge_count": 52,
+      "sub_group_count": 5,
+      "lateral_face_count": 17,
+      "top_or_bottom_face_count": 8,
+      "top_face_count": 4,
+      "default_material_face_count": 0,
+      "primary_material": "plan_window_frame",
+      "bbox_in": {
+        "min": [
+          198.4542,
+          132.5168,
+          61.4498
+        ],
+        "max": [
+          236.0745,
+          139.437,
+          80.9532
+        ]
+      },
+      "bbox_m": {
+        "min": [
+          5.0407,
+          3.3659,
+          1.5608
+        ],
+        "max": [
+          5.9963,
+          3.5417,
+          2.0562
+        ]
+      },
+      "height_m": 0.4954,
+      "footprint_bbox_m2": 0.168,
+      "footprint_top_face_m2": 0.0946
+    }
+  ],
+  "shell_stats_from_python": {
+    "input_walls": 4,
+    "input_openings": 1,
+    "openings_carved": 0,
+    "window_apertures_3d": 1,
+    "endpoints_free": 0,
+    "endpoints_junction": 8,
+    "openings_skipped_by_origin": [
+
+    ],
+    "openings_skipped_by_error": [
+
+    ],
+    "openings_skipped": [
+
+    ],
+    "shell_pieces_after_union": 1,
+    "shell_pieces_after_sliver_filter": 1,
+    "slivers_removed": 0,
+    "redundant_vertices_dropped": 0,
+    "snap_eps_pts": 0.1,
+    "min_sliver_area_pts2": 0.5,
+    "carving_origins": [
+      "human_annotation",
+      "svg_arc",
+      "svg_segments"
+    ],
+    "total_shell_area_pts2": 2455.5744,
+    "window_apertures": [
+      {
+        "id": "win_south",
+        "wall_id": "w_bottom",
+        "kind_v5": "window",
+        "center": [
+          156.842,
+          100.0
+        ],
+        "opening_width_pts": 30.0,
+        "host_wall_orientation": "h",
+        "host_wall_thickness_pts": 5.4
+      }
+    ]
+  },
+  "gates_self_check": {
+    "plan_shell_group_exists": true,
+    "wall_shell_is_single_group": true,
+    "floors_separated_from_walls": true,
+    "default_material_faces_zero": true
+  }
+}

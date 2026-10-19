@@ -1,0 +1,20 @@
+I01   FAIL su_inspect      status=TIMEOUT :: {'job': 'inspect_model', 'out_dir': 'E:\\Claude\\apps\\sketchup-mcp\\runs\\planta_74\\mcp\\inspect_20261019_103925', 'status': 'TIMEOUT', 'mode': 'interactive', 'pid': 31108, 'elapsed_s': 180.08, 'su_left_running': True, 'command': ['C:\\Program Files\\Sk
+Traceback (most recent call last):
+  File "E:\Claude\apps\sketchup-mcp\runs\l2_fp042_20261019\_tools\mcp_suite.py", line 262, in <module>
+    asyncio.run(main())
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\asyncio\runners.py", line 195, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\felip_local\AppData\Roaming\uv\python\cpython-3.12.13-windows-x86_64-none\Lib\asyncio\base_events.py", line 691, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "E:\Claude\apps\sketchup-mcp\runs\l2_fp042_20261019\_tools\mcp_suite.py", line 101, in main
+    N0 = nodes_of(b0)
+         ^^^^^^^^^^^^
+  File "E:\Claude\apps\sketchup-mcp\runs\l2_fp042_20261019\_tools\mcp_suite.py", line 80, in nodes_of
+    return {n["name"]: n for n in res["result"]["nodes"] if n["name"]}
+                                  ~~~^^^^^^^^^^
+KeyError: 'result'

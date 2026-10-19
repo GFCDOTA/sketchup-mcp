@@ -1,0 +1,58 @@
+{
+ "job": "apply_edits",
+ "out_dir": "E:\\Claude\\apps\\sketchup-mcp\\runs\\l2_fp042_20261019\\P04_room_edit",
+ "status": "OK",
+ "mode": "interactive",
+ "pid": 32876,
+ "elapsed_s": 10.01,
+ "su_left_running": true,
+ "command": [
+  "C:\\Program Files\\SketchUp\\SketchUp 2026\\SketchUp\\SketchUp.exe",
+  "E:\\Claude\\apps\\sketchup-mcp\\runs\\l2_fp042_20261019\\P04_room_edit\\suite02_edit.skp",
+  "-RubyStartup",
+  "E:\\Claude\\apps\\sketchup-mcp\\tools\\sketchup\\ruby\\apply_edits.rb"
+ ],
+ "result": {
+  "ok": true,
+  "job": "apply_edits",
+  "applied": [
+   {
+    "index": 0,
+    "op": "set_material",
+    "matched": [
+     "SUITE 02 · rug",
+     "SUITE 02 · Cama",
+     "SUITE 02 · Painel cabeceira",
+     "SUITE 02 · Criado-mudo 1",
+     "SUITE 02 · Criado-mudo 2",
+     "SUITE 02 · Guarda-roupa"
+    ],
+    "contexts": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   },
+   {
+    "index": 1,
+    "op": "move",
+    "matched": [
+     "SUITE 02 · Cama"
+    ],
+    "contexts": [
+     1
+    ]
+   }
+  ],
+  "saved": true,
+  "out_skp": "E:\\Claude\\apps\\sketchup-mcp\\runs\\l2_fp042_20261019\\P04_room_edit\\suite02_edit.skp",
+  "size_bytes": 3359232,
+  "elapsed_s": 0.22,
+  "sketchup_version": "26.0.429"
+ },
+ "input_skp": "E:\\Claude\\apps\\sketchup-mcp\\runs\\l2_fp042_20261019\\P02_furnish_integrated\\planta_74_furnished.skp",
+ "out_skp": "E:\\Claude\\apps\\sketchup-mcp\\runs\\l2_fp042_20261019\\P04_room_edit\\suite02_edit.skp"
+}
