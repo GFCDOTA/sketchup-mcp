@@ -166,3 +166,11 @@ com facade pública no caminho histórico `interior.planners.living_room_planner
 `placement_brain` e `sofa_placement_gate` eliminam imports de quarto e
 consomem a geometria de `tools.rooms.shared.geometry` e a escala de `core.scale`.
 O funcionamento geométrico não foi alterado; CI exige gates e compatibilidade.
+
+
+### FP-042/P3 — classes de mobiliário por owner
+
+Classe de sofá, rack, mesa de centro, mesa de jantar, poltrona e cama
+migradas para living/bedroom; builder genérico de poltrona em shared.
+Imports históricos continuam disponíveis em facades tools.*, inclusive CLI.
+Geometria e SKPs não foram alterados.

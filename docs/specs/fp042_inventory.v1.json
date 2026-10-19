@@ -13850,6 +13850,62 @@
       "disposition": "retain_current_owner",
       "phase": "P3",
       "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tools/rooms/shared/armchair_builder.py",
+      "domain": "room_shared",
+      "disposition": "tools.rooms.shared",
+      "phase": "P3",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tools/rooms/living/armchair_class.py",
+      "domain": "room_living",
+      "disposition": "tools.rooms.living",
+      "phase": "P3",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tools/rooms/bedroom/bed_class.py",
+      "domain": "room_bedroom",
+      "disposition": "tools.rooms.bedroom",
+      "phase": "P3",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tools/rooms/living/coffee_table_class.py",
+      "domain": "room_living",
+      "disposition": "tools.rooms.living",
+      "phase": "P3",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tools/rooms/living/dining_table_class.py",
+      "domain": "room_living",
+      "disposition": "tools.rooms.living",
+      "phase": "P3",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tools/rooms/living/rack_class.py",
+      "domain": "room_living",
+      "disposition": "tools.rooms.living",
+      "phase": "P3",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tools/rooms/living/sofa_class.py",
+      "domain": "room_living",
+      "disposition": "tools.rooms.living",
+      "phase": "P3",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tests/test_fp042_furniture_classes_ownership.py",
+      "domain": "test",
+      "disposition": "retain_current_owner",
+      "phase": "P3",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
     }
   ]
 }
