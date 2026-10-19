@@ -97,3 +97,34 @@ def test_no_pure_white(suites, rid):
             continue
         assert sum(b["rgb"]) / 3 <= 225, \
             f"{rid}: branco em {b.get('module')}/{b['kind']} {b['rgb']}"
+
+
+@pytest.mark.parametrize("rid", ["r000", "r003"])
+def test_fp043_nightstand_every_built_piece_stays_outside_shell_walls(suites, rid):
+    """P3a-03: testar a geometria das PECAS, nao a caixa menor do planner."""
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union
+    from core.scale import PT_TO_IN, PT_TO_M
+    from tools.rooms.shared.spatial_model import build_spatial_model, wall_footprint
+
+    con = json.loads(Path("fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json")
+                     .read_text("utf-8"))
+    sm = build_spatial_model(con, rid)
+    walls = unary_union([
+        wall_footprint(sm["_geom"]["walls"][wid], extend_endpoints=True)
+        for wid in sm["_geom"]["room_walls"]
+    ])
+    boxes, meta = suites[rid]
+    parts = [b for b in boxes if str(b.get("module", "")).startswith("Criado-mudo")]
+    assert parts, f"{rid}: nao ha nenhum criado"
+    for part in parts:
+        fp = Polygon([(pt[0] / PT_TO_IN, pt[1] / PT_TO_IN) for pt in part["corners"]])
+        intrusion_m2 = fp.intersection(walls).area * PT_TO_M ** 2
+        assert intrusion_m2 < 1e-6, (
+            f"{rid}: {part['module']} / {part['kind']} invade parede "
+            f"({intrusion_m2 * 10000:.2f} cm2)"
+        )
+    if rid == "r000":
+        assert meta["nightstand_parametric"]["count"] == 2, (
+            "SUITE 01 perdeu criado em vez de encontrar duas posicoes viaveis"
+        )

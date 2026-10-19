@@ -112,7 +112,8 @@ def bedroom_designer_boxes(con, room_id):
         ns_boxes, n_ns = [], 0
         for it in ns_items:
             nw, nd, ncen = _wd_dims(it["box"], bed_facing)
-            nw, nd = round(max(nw, 0.40), 3), round(max(nd, 0.34), 3)
+            # Mesmas dimensoes aceitas pelo planner (inclui tampo saliente).
+            nw, nd, top_w, top_d = bedroom_designer.nightstand_real_dimensions(nw, nd)
             n_ns += 1
             _mod = f"Criado-mudo {n_ns}"
             _cb = [
@@ -122,7 +123,7 @@ def bedroom_designer_boxes(con, room_id):
                               [44, 45, 47], module=_mod),
                 _oriented_box("ks_gola", ncen, bed_facing, nw - 0.07, nd + 0.008, 0.322, 0.012,
                               [24, 24, 24], module=_mod),
-                _oriented_box("ks_criado_tampo", ncen, bed_facing, nw + 0.02, nd + 0.02, 0.52, 0.025,
+                _oriented_box("ks_criado_tampo", ncen, bed_facing, top_w, top_d, 0.52, 0.025,
                               [118, 90, 66], module=_mod),
                 _oriented_box("ks_led", ncen, bed_facing, nw - 0.06, nd - 0.06, 0.30, 0.014,
                               [255, 250, 232], module=_mod),
