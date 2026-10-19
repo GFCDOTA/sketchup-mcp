@@ -8,8 +8,8 @@ sobre a ÁRVORE RASTREADA (`git ls-files`):
 2. referências em texto: caminho (`/` e `\\`), módulo pontuado e nome do arquivo com
    extensão quando aparece isolado (`python foo.py`, `-RubyStartup foo.rb`).
 
-Limite assumido (e dito no relatório): caminho montado dinamicamente
-(`REPO / f"{fix}.pdf"`) não aparece. Por isso o mapa marca `dynamic_path_risk` onde isso
+Limite assumido (e dito no relatório): caminho montado dinamicamente (por exemplo o PDF da
+planta, montado com f-string antes de `core.project_sources`) não aparece. Por isso o mapa marca `dynamic_path_risk` onde isso
 é conhecido e cada PR de movimento revisa o item à mão antes de mover.
 
 Uso: python -m tools.navigation.consumers <item> [<item> ...] [--json]

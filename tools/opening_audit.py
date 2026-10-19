@@ -26,6 +26,12 @@ from __future__ import annotations
 import json
 import math
 from pathlib import Path
+try:
+    from core.project_sources import plant_pdf_path
+except ModuleNotFoundError:  # `python tools/x.py` direto: a raiz do repo não está no sys.path
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from core.project_sources import plant_pdf_path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 MAX_DOOR_M = 1.0          # a single residential door is ~0.7-0.9 m
@@ -91,7 +97,7 @@ def audit(fixture: str = "planta_74") -> dict:
     con = json.loads((REPO_ROOT / "fixtures" / fixture
                       / "consensus_with_human_walls_and_soft_barriers.json").read_text("utf-8"))
     rep = json.loads((REPO_ROOT / "runs" / fixture / "geometry_report.json").read_text("utf-8"))
-    pdf_path = REPO_ROOT / f"{fixture}.pdf"
+    pdf_path = plant_pdf_path(fixture, REPO_ROOT)
     PT_TO_M = _pt_to_m(con)
     walls = {w["id"]: w for w in con["walls"]}
     groups = {g["name"]: g for g in rep.get("groups_diagnostic", [])}

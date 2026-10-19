@@ -61,6 +61,7 @@ from tools.oracle_providers import (
     available_provider_names,
     get_provider,
 )
+from core.project_sources import plant_pdf_path  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCHEMA_VERSION = "visual_findings.v1"
@@ -786,7 +787,7 @@ def build_side_by_side(
     top = attempt_dir / "model_top.png"
     iso = attempt_dir / "model_iso.png"
     if pdf_path is None:
-        pdf_path = REPO_ROOT / f"{fixture}.pdf"
+        pdf_path = plant_pdf_path(fixture, REPO_ROOT)
     if not pdf_path.exists():
         return None, f"PDF not found at {_safe_rel(pdf_path)}"
     if not top.exists() or not iso.exists():

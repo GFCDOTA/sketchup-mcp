@@ -37,6 +37,12 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+try:
+    from core.project_sources import plant_pdf_path
+except ModuleNotFoundError:  # `python tools/x.py` direto: a raiz do repo não está no sys.path
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from core.project_sources import plant_pdf_path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -116,8 +122,8 @@ def _rewrite_sidecar(
 
 def _generate_side_by_side(plant: str, artifact_dir: Path, dry_run: bool) -> str:
     """Call compose_side_by_side if the PDF is available. Returns status string."""
-    # PDF is expected at <repo_root>/<plant>.pdf  (conventional location).
-    pdf = REPO_ROOT / f"{plant}.pdf"
+    # PDF location: single resolver (core.project_sources).
+    pdf = plant_pdf_path(plant, REPO_ROOT)
     top = artifact_dir / f"{plant}_top.png"
     iso = artifact_dir / f"{plant}_iso.png"
     out = artifact_dir / "side_by_side_pdf_vs_skp.png"
