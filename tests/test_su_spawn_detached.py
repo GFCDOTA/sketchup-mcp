@@ -56,3 +56,20 @@ def test_build_shell_usa_o_mesmo_lancamento():
     run_src = src[src.index("def run("):src.index("def _infer_plant(")]
     assert "spawn_detached(cmd, env)" in run_src
     assert "subprocess.Popen(" not in run_src
+
+
+def test_servidor_mcp_carrega_extensoes_c_antes_de_ler_o_stdin_sem_fixar_escala():
+    """L2 2026-10-19: su_furnish via MCP travava para sempre importando numpy (via
+    shapely) DENTRO da tool, com a leitura do pipe do JSON-RPC pendente. O servidor
+    pré-carrega as extensões C no import — só as bibliotecas: importar o
+    furnish_apartment ali arrastaria os brains inteiros para o boot do servidor."""
+    import os
+    import sys
+
+    env = {k: v for k, v in os.environ.items() if k != "PT_TO_M"}
+    code = ("import os, sys, tools.mcp_server.server; "
+            "missing = [m for m in ('numpy', 'shapely.geometry', 'shapely.ops', 'PIL.Image') if m not in sys.modules]; "
+            "assert not missing, missing; "
+            "assert 'tools.furnish_apartment' not in sys.modules")
+    r = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, env=env)
+    assert r.returncode == 0, r.stderr[-2000:]

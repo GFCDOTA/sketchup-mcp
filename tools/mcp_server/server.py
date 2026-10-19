@@ -39,6 +39,17 @@ if str(_REPO) not in sys.path:
 
 from mcp.server.fastmcp import FastMCP  # noqa: E402
 
+# Extensões C carregadas JÁ, antes de o servidor começar a ler o stdin. No Windows,
+# importar uma delas pela primeira vez DENTRO de uma tool (su_furnish/su_build_shell
+# importam shapely sob demanda) travava para sempre no carregamento da DLL do numpy,
+# com a leitura síncrona do pipe do JSON-RPC pendente (L2 2026-10-19, faulthandler:
+# numpy/_core/multiarray.py <- shapely <- tools/rooms/bedroom/designer.py). Só as
+# bibliotecas: os brains continuam carregando sob demanda.
+import numpy  # noqa: E402,F401
+import shapely.geometry  # noqa: E402,F401
+import shapely.ops  # noqa: E402,F401
+from PIL import Image as _PIL_Image  # noqa: E402,F401
+
 # --- módulos do pipeline (todos presentes na develop) ----------------------
 from tools.run_deterministic_gates import run_all  # noqa: E402
 from tools.promote_canonical import promote  # noqa: E402
