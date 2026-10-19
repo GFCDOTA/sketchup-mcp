@@ -744,9 +744,17 @@ def living_room_boxes(con, room_id):
     return boxes, out
 
 
-# dispatch por tipo de comodo (cresce conforme novos brains entram)
-BRAINS = {BEDROOM: bedroom_designer_boxes, KITCHEN: kitchen_boxes, LIVING: living_room_boxes,
-          BATHROOM: bath_boxes, SERVICE: service_boxes}
+# Dispatch por tipo de cômodo, com providers legados explicitamente injetados.
+# A composição não importa nenhum brain de dentro de tools.rooms.dispatch.
+from tools.rooms.dispatch import build_brain_registry, get_brain
+
+BRAINS = build_brain_registry(
+    bedroom=bedroom_designer_boxes,
+    kitchen=kitchen_boxes,
+    living=living_room_boxes,
+    bathroom=bath_boxes,
+    service=service_boxes,
+)
 
 
 def collect_boxes(con):
@@ -755,7 +763,7 @@ def collect_boxes(con):
     rooms = classify_rooms(con)
     all_boxes, summary = [], []
     for r in rooms:
-        brain = BRAINS.get(r["room_type"])
+        brain = get_brain(BRAINS, r["room_type"])
         if brain is None:
             summary.append((r["id"], r["name"], r["room_type"], "skip(sem brain)", 0))
             continue
