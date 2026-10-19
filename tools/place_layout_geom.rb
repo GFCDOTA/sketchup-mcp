@@ -63,6 +63,16 @@ module PlaceLayoutGeom
       t = ((p2[0] - p1[0]) * v2[1] - (p2[1] - p1[1]) * v2[0]) / den
       [p1[0] + v1[0] * t, p1[1] + v1[1] * t]
     end
-    signed_area(out) > 1e-9 ? out : nil
+    return nil unless signed_area(out) > 1e-9
+
+    # inset maior que a meia-largura cruza as arestas: o anel sai "virado" (girado
+    # 180°, área ainda positiva). Cada aresta nova tem de seguir o sentido da original.
+    flipped = (0...n).any? do |i|
+      a = out[i]
+      b = out[(i + 1) % n]
+      v = lines[i][1]
+      (b[0] - a[0]) * v[0] + (b[1] - a[1]) * v[1] <= 1e-12
+    end
+    flipped ? nil : out
   end
 end
