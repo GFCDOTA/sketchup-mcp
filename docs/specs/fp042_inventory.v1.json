@@ -10170,16 +10170,20 @@
     {
       "path": "scripts/make_gpt_review_sheet.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "repository_automation_scripts",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "scripts/set_clipboard_image.ps1",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "repository_automation_scripts",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "scripts/sofa_components.rb",
@@ -11558,23 +11562,29 @@
     {
       "path": "tools/auto_camera.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/bake_theme_skp.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/batch_theme_render.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/bathroom_layout.py",
@@ -11616,23 +11626,29 @@
     {
       "path": "tools/build_furniture_skp.rb",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/build_plan_shell_skp.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/build_plan_shell_skp.rb",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/circulation_gate.py",
@@ -11646,23 +11662,29 @@
     {
       "path": "tools/claude_bridge/__init__.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "agent_bridge",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/claude_bridge/_paths.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "agent_bridge",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/claude_bridge/skp_inventory.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "agent_bridge",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/coffee_table_class.py",
@@ -11683,79 +11705,101 @@
     {
       "path": "tools/compose_side_by_side.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/consult_tier.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/corpus_to_rag.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/correction_finding.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/correction_fixes.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/correction_loop.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/crop_render.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/curator.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/decor_anatomy_spec.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/decor_builders.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/diagnose_wall_stubs.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/dining_table_class.py",
@@ -11767,44 +11811,56 @@
     {
       "path": "tools/disarm_sketchup_autoruns.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/Dockerfile.dashboard",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "dashboard_container_runtime",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/door_swing_audit.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/estudio_banheiro_scene.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/fidelity_loop.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/finding_router.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/flat_white_gate.py",
@@ -11818,30 +11874,38 @@
     {
       "path": "tools/furnish_apartment.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_furnishing_orchestrator",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/furnish_plan.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/furnish_plan.rb",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/furniture_anatomy_spec.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "legacy_public_compatibility_api",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/furniture_overlap_gate.py",
@@ -11855,16 +11919,20 @@
     {
       "path": "tools/furniture_reference_analyzer.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/furniture_wall_gap.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/gate_filefetch.py",
@@ -11896,9 +11964,11 @@
     {
       "path": "tools/gen_textures.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/geometry_sanity.py",
@@ -11912,86 +11982,110 @@
     {
       "path": "tools/gpt_docker_visual_score.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/gpt_review.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/human_verdict.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/inspect_skp.rb",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/interior_quality_scorecard.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/interior_studio/__init__.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "interior_studio_runtime",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/interior_studio/architect_program.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "interior_studio_runtime",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/interior_studio/auditor.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "interior_studio_runtime",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/interior_studio/auto_decider.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "interior_studio_runtime",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/interior_studio/consult_gpt_bridge/__init__.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "interior_studio_runtime",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/interior_studio/consult_gpt_bridge/answer_parser.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "interior_studio_runtime",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/interior_studio/consult_gpt_bridge/contracts.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "interior_studio_runtime",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/interior_studio/consult_gpt_bridge/contracts/architect_answer_contract.v1.md",
@@ -12014,37 +12108,47 @@
     {
       "path": "tools/interior_studio/consult_gpt_bridge/contracts/schemas/answer_contract.schema.json",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "interior_studio_runtime",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/interior_studio/consult_gpt_bridge/contracts/schemas/question_contract.schema.json",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "interior_studio_runtime",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/interior_studio/consult_gpt_bridge/ingest.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "interior_studio_runtime",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/interior_studio/consult_gpt_bridge/openai_client.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "interior_studio_runtime",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/interior_studio/consult_gpt_bridge/prompt_builder.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "interior_studio_runtime",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/interior_studio/consult_gpt_bridge/README.md",
@@ -12058,9 +12162,11 @@
     {
       "path": "tools/interior_studio/consult_gpt_bridge/store.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "interior_studio_runtime",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/interior_studio/contracts/learning_patch.v1.md",
@@ -12074,51 +12180,65 @@
     {
       "path": "tools/interior_studio/cycles.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "interior_studio_runtime",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/interior_studio/decision_judge.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "interior_studio_runtime",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/interior_studio/gpt_review_bundle.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "interior_studio_runtime",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/interior_studio/interns.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "interior_studio_runtime",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/interior_studio/learning_patch.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "interior_studio_runtime",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/interior_studio/project_state.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "interior_studio_runtime",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/interior_studio/proposals.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "interior_studio_runtime",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/interior_studio/README_render_judges.md",
@@ -12132,44 +12252,56 @@
     {
       "path": "tools/interior_studio/reference_packs.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "interior_studio_runtime",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/interior_studio/render_fingerprint.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "interior_studio_runtime",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/interior_studio/render_judge.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "interior_studio_runtime",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/interior_studio/theme_registry.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "interior_studio_runtime",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/interior_studio/vision_describe.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "interior_studio_runtime",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/jsonl_io.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/kitchen_ergonomics.py",
@@ -12219,9 +12351,11 @@
     {
       "path": "tools/layout_candidates.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/layout_rules.py",
@@ -12242,9 +12376,11 @@
     {
       "path": "tools/make_synthetic_rooms.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/material_review.py",
@@ -12267,9 +12403,11 @@
     {
       "path": "tools/mcp_server/__init__.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "mcp_server_api",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/mcp_server/README.md",
@@ -12283,30 +12421,38 @@
     {
       "path": "tools/mcp_server/server.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "mcp_server_api",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/mcp_server/smoke.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "mcp_server_api",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/mcp_server/stdio_check.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "mcp_server_api",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/negative_dogfood.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/nightstand_builder.py",
@@ -12318,30 +12464,38 @@
     {
       "path": "tools/ollama_bridge.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/opening_aperture_audit.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/opening_audit.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/opening_host_audit.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/optimizer_consistency_gate.py",
@@ -12355,16 +12509,20 @@
     {
       "path": "tools/oracle_providers.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/overlay_diff.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/parapet_not_railing_fallback_gate.py",
@@ -12378,37 +12536,47 @@
     {
       "path": "tools/pdf_height_labels_audit.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/pdf_knowledge/__init__.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "pdf_knowledge_runtime",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/pdf_knowledge/export_claude_context.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "pdf_knowledge_runtime",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/pdf_knowledge/ingest_pdfs.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "pdf_knowledge_runtime",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/pdf_knowledge/pdf_manifest.template.yml",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "pdf_knowledge_runtime",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/pdf_knowledge/README.md",
@@ -12422,16 +12590,20 @@
     {
       "path": "tools/pdf_knowledge/search_pdf_index.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "pdf_knowledge_runtime",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/pdf_overlay_verify.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/place_bedroom_skp.py",
@@ -12443,16 +12615,20 @@
     {
       "path": "tools/place_layout_skp.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/place_layout_skp.rb",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/position_fidelity_gate.py",
@@ -12466,30 +12642,38 @@
     {
       "path": "tools/project_memory_db.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/promote_artifact.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/promote_canonical.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/prompts/__init__.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "agent_prompt_assets",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/prompts/gpt_auto_consult_gate.md",
@@ -12512,23 +12696,29 @@
     {
       "path": "tools/quadrado/__init__.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "synthetic_fixture_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/quadrado/render_view.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "synthetic_fixture_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/quadrado/render_view.rb",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "synthetic_fixture_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/rack_class.py",
@@ -12547,9 +12737,11 @@
     {
       "path": "tools/rag_freshness.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/railing_exact_match_gate.py",
@@ -12581,23 +12773,29 @@
     {
       "path": "tools/reference_db.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/reference_grammar.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/regenerate_consensus.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/render_banho_auto.py",
@@ -12620,9 +12818,11 @@
     {
       "path": "tools/render_bbox_audit.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/render_kitchen_angles.rb",
@@ -12636,37 +12836,47 @@
     {
       "path": "tools/render_parts_iso.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/render_room.ps1",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/render_sala_eyelevel.rb",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/render_scene_views.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/render_scene_vray.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/repo_health_gate.py",
@@ -12680,16 +12890,20 @@
     {
       "path": "tools/retrieval_eval.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/room_type.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/rooms/__init__.py",
@@ -12848,16 +13062,20 @@
     {
       "path": "tools/run_skp_visual_review.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/screenshot_camera.rb",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/semantic_geometry_contract_gate.py",
@@ -12871,114 +13089,146 @@
     {
       "path": "tools/semantic_zones.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/service_layout.py",
       "domain": "room_service_or_balcony",
-      "disposition": "legacy_compatibility_shim",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "VERIFIED_COMPATIBILITY_SHIM_PENDING_CI"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "legacy_public_compatibility_api",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/shell_parts.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/sketchup/__init__.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/sketchup/batch.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/sketchup/jobs.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/sketchup/knowledge.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/sketchup/ops.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/sketchup/paths.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/sketchup/process.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/sketchup/ruby/apply_edits.rb",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/sketchup/ruby/inspect_model.rb",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/sketchup/ruby/render_views.rb",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/sketchup/ruby/skmcp_core.rb",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/sketchup/ruby/skmcp_runtime.rb",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/skp_editability_report.rb",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/sofa_builder.py",
@@ -13053,9 +13303,11 @@
     {
       "path": "tools/soft_barrier_source_audit.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/spatial_model.py",
@@ -13069,9 +13321,11 @@
     {
       "path": "tools/studio_log.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/style_coherence_gate.py",
@@ -13094,58 +13348,74 @@
     {
       "path": "tools/su_runner_safety.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/taste_writeback.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/theme_palette.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/trace_view.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/tweak_vrscene.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/variant_axes.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/variant_sweep.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/vision_queue_consumer.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/visual_regression_gate.py",
@@ -13159,9 +13429,11 @@
     {
       "path": "tools/vray_export.rb",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/wall_exact_match_gate.py",
@@ -13175,9 +13447,11 @@
     {
       "path": "tools/wall_overlap_audit.py",
       "domain": "runtime_or_orchestrator",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
       "path": "tools/wardrobe_builder.py",
@@ -13544,6 +13818,24 @@
       "phase": "P2",
       "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
       "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/tooling_ownership.py",
+      "domain": "runtime_or_orchestrator",
+      "disposition": "retain_legacy_public_or_tooling_path",
+      "phase": "P4",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
+    },
+    {
+      "path": "tests/test_fp042_tooling_ownership.py",
+      "domain": "test",
+      "disposition": "retain_legacy_public_or_tooling_path",
+      "phase": "P4",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     }
   ]
 }
