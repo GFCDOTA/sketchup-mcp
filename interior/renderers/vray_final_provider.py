@@ -28,6 +28,7 @@ import time
 from pathlib import Path
 
 from interior.renderers.render_provider import ROOT, RenderProvider, RenderRequest, RenderResult
+from tools.sketchup.legacy_process import launch_owned, close_owned
 
 SU_EXE = Path(r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe")
 VRAY_SO = Path(r"C:\Program Files\Chaos\V-Ray\V-Ray for SketchUp\extension\vray4sketchup2026.so")
@@ -90,11 +91,8 @@ class VRayFinalProvider(RenderProvider):
                     "VRAY_CAM": "top" if "top" in req.renders else "iso"})
         if tex_dir.is_dir():
             env["VRAY_TEX_DIR"] = str(tex_dir)   # materiais texturizados (madeira/tecido)
-        ps = (f"Start-Process -FilePath '{self.su_exe}' "
-              f"-ArgumentList '\"{copy}\"','-RubyStartup','\"{VRAY_EXPORT_RB}\"'")
         try:
-            subprocess.run(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", ps],
-                           env=env, capture_output=True, timeout=60)
+            pid = launch_owned(self.su_exe, copy, VRAY_EXPORT_RB, env=env)
         except Exception as e:  # noqa: BLE001
             return RenderResult(status="fail", provider=self.name, error=f"SU launch: {e}")
         deadline = time.time() + export_timeout
@@ -103,7 +101,7 @@ class VRayFinalProvider(RenderProvider):
                 time.sleep(2)
                 break
             time.sleep(2)
-        subprocess.run(["taskkill", "/F", "/IM", "SketchUp.exe"], capture_output=True)
+        close_owned(pid)
         time.sleep(1)
         if not vrscene.exists():
             return RenderResult(status="fail", provider=self.name, base_intact=(_sha(skp) == skp_hash),

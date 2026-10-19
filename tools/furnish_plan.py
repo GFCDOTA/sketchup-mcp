@@ -108,13 +108,11 @@ def main():
     env["FURNISH_LOG"] = str(log_path).replace("\\", "/")
     env["FURNISH_PLACEMENTS"] = str(placements_path).replace("\\", "/")
 
-    subprocess.run(["taskkill", "/F", "/IM", "SketchUp.exe"],
-                   capture_output=True)
     time.sleep(1)
 
     cmd = [SKETCHUP_EXE, str(BASE_SKP), "-RubyStartup", str(ROOT / "tools/furnish_plan.rb")]
     print(f"[furnish] launching SU with {len(jobs)} job(s)...")
-    subprocess.Popen(cmd, env=env,
+    owned_su = subprocess.Popen(cmd, env=env,
                      creationflags=getattr(subprocess, "DETACHED_PROCESS", 0))
 
     deadline = time.time() + 240
@@ -124,7 +122,10 @@ def main():
             break
         time.sleep(1)
 
-    subprocess.run(["taskkill", "/F", "/IM", "SketchUp.exe"], capture_output=True)
+
+    # Fecha somente o processo lançado por ESTA execução; nunca usa /IM.
+    if owned_su.poll() is None:
+        owned_su.terminate()
 
     if log_path.exists():
         print("[furnish] LOG:")

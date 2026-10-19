@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import time
 from pathlib import Path
+from tools.sketchup.legacy_process import launch_owned, close_owned
 
 ROOT = Path(__file__).resolve().parents[2]
 SU = Path(r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe")
@@ -34,16 +35,14 @@ env.update({
     "VRAY_TEX_DIR": str(TEX),
     "RECOLOR_LOG": str(log).replace("\\", "/"),
 })
-ps = f"Start-Process -FilePath '{SU}' -ArgumentList '\"{copy}\"','-RubyStartup','\"{RB}\"'"
-subprocess.run(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", ps],
-               env=env, capture_output=True, timeout=60)
+pid = launch_owned(SU, copy, RB, env=env)
 deadline = time.time() + 150
 while time.time() < deadline:
     if log.exists():
         time.sleep(2)
         break
     time.sleep(2)
-subprocess.run(["taskkill", "/F", "/IM", "SketchUp.exe"], capture_output=True)
+close_owned(pid)
 time.sleep(1)
 intact = hashlib.sha256(BASE.read_bytes()).hexdigest() == base_hash
 print(log.read_text("utf-8", "ignore") if log.exists() else "(no log)")

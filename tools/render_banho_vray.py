@@ -64,7 +64,6 @@ def main():
     for p in (copy, vrs, log):
         if p.exists():
             p.unlink()
-    subprocess.run(["taskkill", "/F", "/IM", "SketchUp.exe"], capture_output=True)
     time.sleep(1)
     shutil.copy2(BASE, copy)
     base_hash = hashlib.sha256(BASE.read_bytes()).hexdigest()
@@ -77,7 +76,7 @@ def main():
                 "VRAY_BATH_THEME": "estudio",
                 **({"VRAY_HIDE": ns.hide} if ns.hide else {}),
                 "VRAY_TEX_DIR": str(ROOT / "assets/textures/procedural").replace("\\", "/")})
-    subprocess.Popen([str(SU_EXE), str(copy), "-RubyStartup", str(EXPORT_RB)],
+    owned_su = subprocess.Popen([str(SU_EXE), str(copy), "-RubyStartup", str(EXPORT_RB)],
                      env=env, creationflags=getattr(subprocess, "DETACHED_PROCESS", 0))
     t0 = time.time()
     deadline = time.time() + 120
@@ -86,8 +85,11 @@ def main():
             time.sleep(2)
             break
         time.sleep(2)
-    subprocess.run(["taskkill", "/F", "/IM", "SketchUp.exe"], capture_output=True)
     time.sleep(1)
+    # Fecha somente o processo lançado por ESTA execução; nunca usa /IM.
+    if owned_su.poll() is None:
+        owned_su.terminate()
+
     if not vrs.exists():
         print(json.dumps({"status": "fail", "error": "export .vrscene falhou",
                           "log": log.read_text("utf-8", errors="ignore")[-400:]

@@ -28,7 +28,9 @@ $env:VRAY_EYE=$Eye; $env:VRAY_TARGET=$Target; $env:VRAY_FOV=$Fov; $env:VRAY_TEX_
 $p=Start-Process -FilePath $su -ArgumentList "`"$copy`"","-RubyStartup","`"$rb`"" -PassThru
 $deadline=(Get-Date).AddSeconds(75)
 while((Get-Date) -lt $deadline){ if(Test-Path $log){ Start-Sleep 2; break }; Start-Sleep 2 }
-Start-Sleep 1; taskkill /F /IM SketchUp.exe 2>$null | Out-Null; Start-Sleep 1
+# Apenas a instância $p criada neste script; nunca encerrar todas as janelas humanas.
+if ($p -and -not $p.HasExited) { $p.CloseMainWindow() | Out-Null }
+Start-Sleep 1
 if(-not (Test-Path $vrs)){ "EXPORT FAIL"; if(Test-Path $log){ Get-Content $log }; exit 1 }
 Copy-Item $vrs "$scratch\room_raw.vrscene" -Force   # raw pristine (so camera) p/ tune rapido sem SU
 "vrscene: $((Get-Item $vrs).Length)b"; Get-Content $log | Select-Object -First 6
