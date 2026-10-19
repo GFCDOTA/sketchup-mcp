@@ -676,7 +676,7 @@ def _enxoval_parts(cell, ws_by_kind, bb_by_kind, door_c, lavabo, door_swings=())
         # Deslize somente sobre a MESMA parede do vaso. Se nao couber,
         # omitir acessorio secundario e jamais mover arquitetura/porta.
         vertical = vaso_ws["orient"] == "v"
-        for distance in (0.12, -0.12, 0.24, -0.24, 0.36, -0.36, 0.48, -0.48):
+        for distance in (d for step in range(1, 16) for d in (step * 0.08, -step * 0.08)):
             delta = M(distance) * PT_TO_IN
             shifted = dict(p)
             for k in (("y0", "y1") if vertical else ("x0", "x1")):
