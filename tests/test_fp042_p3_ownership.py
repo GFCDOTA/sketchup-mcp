@@ -7,7 +7,7 @@ def test_all_p3_paths_have_explicit_runtime_owners():
     index = json.loads(INVENTORY.read_text("utf-8"))
     report = audit_p3(index)
     assert report["result"] == "PASS", report
-    assert report["checked"] == len(OWNER_TABLE) == 114
+    assert report["checked"] == len(OWNER_TABLE) == 115
 
 
 def test_missing_or_unknown_p3_path_fails_closed():

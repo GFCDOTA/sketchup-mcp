@@ -20,7 +20,7 @@ MANIFEST = REPO_ROOT / "fixtures" / "visual_oracle_examples" / "manifest.json"
 SCHEMA = REPO_ROOT / "schemas" / "visual_findings.schema.json"
 SKILL = REPO_ROOT / ".claude" / "skills" / "skp-visual-self-correction" / "SKILL.md"
 SPEC = REPO_ROOT / "docs" / "specs" / "FP-030_visual_oracle_gate.md"
-TOOL = REPO_ROOT / "tools" / "run_skp_visual_review.py"
+TOOL = REPO_ROOT / "tools" / "oracle" / "run_skp_visual_review.py"
 REVIEWER_PROMPT = REPO_ROOT / "tools" / "prompts" / "visual_oracle_reviewer.md"
 
 

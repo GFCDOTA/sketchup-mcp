@@ -1,37 +1,22 @@
-"""crop_render.py — corta margens (top/bottom/left/right) de um PNG de render.
+"""Fachada FP-043/P4: implementacao unica em `tools.rendering.crop_render`.
 
-GPT NEXT_ACTION recorrente em enquadramento: "ajustar o crop/framebuffer para remover a faixa
-cinza inferior SEM aproximar a camera, preservando os moveis inteiros". Crop em POS resolve isso
-sem re-render (preserva o framing dos moveis, so remove faixa morta/teto-aberto).
-
-Uso: python tools/crop_render.py <in.png> <out.png> --bottom 180 --top 60 [--left 0 --right 0]
-(valores em PIXELS a remover de cada borda)
+Preserva `import tools.crop_render`, `python -m tools.crop_render` e `python tools/crop_render.py`; nada de logica aqui.
 """
 from __future__ import annotations
 
-import argparse
 import sys
 from pathlib import Path
 
-from PIL import Image
+_ROOT = Path(__file__).resolve().parents[1]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
 
-
-def crop(in_path, out_path, top=0, bottom=0, left=0, right=0):
-    im = Image.open(in_path)
-    w, h = im.size
-    box = (left, top, w - right, h - bottom)
-    if box[2] <= box[0] or box[3] <= box[1]:
-        raise ValueError(f"crop invalido: {box} de {(w,h)}")
-    im.crop(box).save(out_path)
-    return im.size, (box[2] - box[0], box[3] - box[1])
-
-
+_TARGET = "tools.rendering.crop_render"
 if __name__ == "__main__":
-    ap = argparse.ArgumentParser()
-    ap.add_argument("infile"); ap.add_argument("outfile")
-    ap.add_argument("--top", type=int, default=0); ap.add_argument("--bottom", type=int, default=0)
-    ap.add_argument("--left", type=int, default=0); ap.add_argument("--right", type=int, default=0)
-    a = ap.parse_args()
-    old, new = crop(a.infile, a.outfile, a.top, a.bottom, a.left, a.right)
-    print(f"crop {old} -> {new} :: {a.outfile}")
-    sys.exit(0)
+    import runpy
+
+    runpy.run_module(_TARGET, run_name="__main__", alter_sys=True)
+else:
+    import importlib
+
+    sys.modules[__name__] = importlib.import_module(_TARGET)

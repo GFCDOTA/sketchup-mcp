@@ -50,7 +50,7 @@
       real via `tools/room_introspect.py`): **GPT CAMERA=PASS** ("vende o sofá como ambiente real").
     - LUZ INTERNA quente (LightSphere fill procedural injetada no .vrscene, `tweak_vrscene.add_fill_light`):
       **GPT VERDICT=PASS / LIGHTING=PASS** ("sofá virou herói, paredes com preenchimento, janela controlada").
-    - Recipe reproduzível: `tools/render_room.ps1` (export+tweak+vray, hash base) + `tools/tune_render.ps1`
+    - Recipe reproduzível: `tools/rendering/render_room.ps1` (export+tweak+vray, hash base) + `tools/tune_render.ps1`
       (tune fill/exposição sem re-export). Deliverable: planta_74_vray_sala_eyefill3.png. GOTCHA: fill
       <55in da câmera = orb escuro visível.
     - **PRÓXIMO ROI** (backlog, não-bloqueante): (a) enquadramento final da sala (faixa cinza inferior +

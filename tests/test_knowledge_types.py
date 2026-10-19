@@ -23,7 +23,7 @@ def _source_types_declared_in_rag_freshness() -> set[str]:
     """Extrai os source_type literais só de dentro do bloco
     `SOURCES: list[tuple[str, str, str]] = [ ... ]` em tools/rag_freshness.py,
     sem importar o módulo (evita puxar dependências pesadas nos testes)."""
-    text = (REPO_ROOT / "tools" / "rag_freshness.py").read_text(encoding="utf-8")
+    text = (REPO_ROOT / "tools" / "knowledge" / "rag_freshness.py").read_text(encoding="utf-8")
     block_match = re.search(r"SOURCES:\s*list\[tuple\[str, str, str\]\]\s*=\s*\[(.*?)\n\]", text, re.S)
     assert block_match, "bloco SOURCES não encontrado em tools/rag_freshness.py — arquivo mudou de formato?"
     block = block_match.group(1)

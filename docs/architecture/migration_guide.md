@@ -106,6 +106,20 @@ Os 8 módulos de governança de `tools/rooms/` (`inventory_gate`, `ownership_aud
 `retain` e o CI os chama por esse caminho; mover seria mudança de política, não de responsabilidade comprovada (registrado como exceção
 nomeada, não esquecimento).
 
+## P4c-3 — renderização, orquestração, conhecimento, oráculo e estúdio (feito)
+
+| Antes | Agora | Compatibilidade |
+|---|---|---|
+| `render_*`, `auto_camera`, `batch_theme_render`, `compose_side_by_side`, `crop_render`, `gen_textures`, `material_review`, `overlay_diff`, `pdf_overlay_verify`, `theme_palette`, `tweak_vrscene` | `tools/rendering/` | fachada |
+| `material_review.rb`, `render_room.ps1` | `tools/rendering/{ruby/,}` | caminho único |
+| `furnish_apartment`, `fidelity_loop`, `promote_artifact`, `promote_canonical`, `regenerate_consensus`, `variant_axes`, `variant_sweep` | `tools/orchestration/` | fachada |
+| `correction_*`, `finding_router`, `jsonl_io`, `vision_queue_consumer` | `tools/orchestration/correction/` | fachada |
+| `corpus_to_rag`, `furniture_reference_analyzer`, `project_memory_db`, `rag_*`, `reference_db`, `reference_grammar`, `retrieval_eval`, `taste_writeback` | `tools/knowledge/` | fachada; `README_project_memory.md` ganha ponteiro |
+| `ask_gpt_gate`, `consult_tier`, `gpt_*`, `human_verdict`, `negative_dogfood`, `ollama_bridge`, `oracle_providers`, `run_skp_visual_review`, `scripts/make_gpt_review_sheet.py` | `tools/oracle/` | fachada; o veredito visual continua só do Felipe |
+| `curator`, `interior_quality_scorecard`, `studio_log` | `tools/interior_studio/` | fachada |
+
+L2: `material_review.rb` no caminho novo gera os 4 proofs **byte-idênticos** (SHA-256) aos do caminho antigo, sobre o mesmo `.skp` mobiliado.
+
 ## Para quem vai mover um arquivo (checklist do PR)
 
 1. `python -m tools.navigation.consumers <caminho>`: leia **todos** os consumidores (código, testes, CI, MCP, config, docs).

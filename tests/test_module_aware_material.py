@@ -133,7 +133,7 @@ def test_pl_run_prefers_resolved_material():
 
 
 def test_furnish_calls_attach_materials():
-    src = (ROOT / "tools/furnish_apartment.py").read_text("utf-8")
+    src = (ROOT / "tools/orchestration/furnish_apartment.py").read_text("utf-8")
     assert "attach_materials" in src, "furnish deve resolver material por modulo antes do dump"
 
 

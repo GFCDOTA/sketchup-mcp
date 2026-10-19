@@ -72,6 +72,7 @@ OWNER_TABLE = {
   "tools/rooms/bedroom/capabilities/place_bedroom_skp.py": "bedroom_sketchup_cli",
   "tools/rack_class.py": "public_legacy_compatibility_facade",
   "tools/rag_embed_backend.py": "cross_room_rag_infrastructure",
+  "tools/knowledge/rag_embed_backend.py": "cross_room_rag_infrastructure",
   "tools/rooms/balcony/__init__.py": "tools.rooms.balcony",
   "tools/rooms/bedroom/__init__.py": "tools.rooms.bedroom",
   "tools/rooms/living/__init__.py": "tools.rooms.living",
