@@ -10,7 +10,9 @@ Pipeline (reusa o caminho provado da suite01/mobiliar, agora no repo principal):
   3. tweak_vrscene.py: exposicao de INTERIOR (receita suite01: iso100/f7/sh160/
      sky0.3) + materiais premium por papel + fill lights opcionais
   4. vray.exe headless -> PNG premium
-No-disrupt: pula se o SketchUp ja esta aberto. Path do run dir SEMPRE resolvido
+A exportacao sobe a PROPRIA instancia via tools.sketchup.batch (nunca taskkill /IM).
+No-disrupt so para GERAR o scene_closed.skp (o provider ainda fecha por nome de
+imagem): sem ele e com SketchUp aberto, pula. Path do run dir SEMPRE resolvido
 absoluto (licao do cycle 002: SU resolve save/write contra o CWD DELE).
 
 Uso: python -m tools.render_scene_vray [runs/scenes/<id>] [--out nome.png]
@@ -90,8 +92,11 @@ def render_scene_vray(scene_dir, out_png=None, iso=100, fnum=7.0, shutter=160,
     scene = json.loads((d / "scene.json").read_text("utf-8"))
     if not (SU_EXE.exists() and VRAY_EXE.exists()):
         return {"status": "skipped", "reason": "SU/vray.exe ausentes"}
-    if _su_running():
-        return {"status": "skipped", "reason": "SketchUp em uso (no-disrupt)"}
+    # O provider que GERA o scene_closed.skp (SketchUpBasicProvider) ainda fecha o
+    # SketchUp por nome de imagem: só pode rodar sem nenhum SketchUp aberto.
+    if not (d / "scene_closed.skp").exists() and _su_running():
+        return {"status": "skipped",
+                "reason": "scene_closed.skp ausente e SketchUp em uso: o provider que o gera usa taskkill /IM"}
     closed = _ensure_closed_skp(d)
     if closed["status"] == "fail":
         return {"status": "fail", "error": closed["error"], "log": closed.get("log", "")}
@@ -120,19 +125,15 @@ def render_scene_vray(scene_dir, out_png=None, iso=100, fnum=7.0, shutter=160,
                 # texturas procedurais (fz_* da cena: sofa charcoal/tapete fibra/piso veio)
                 "VRAY_TEX_DIR": str(ROOT / "assets/textures/procedural").replace("\\", "/"),
                 **({"VRAY_SCENE_THEME": scene_theme} if scene_theme else {})})
-    ps = (f"Start-Process -FilePath '{SU_EXE}' "
-          f"-ArgumentList '\"{copy}\"','-RubyStartup','\"{EXPORT_RB}\"'")
+    # Exportação pela PRÓPRIA instância (tools.sketchup.batch): nunca mais
+    # `taskkill /IM SketchUp.exe`, que fechava sem salvar qualquer SketchUp aberto.
+    # Modo resolvido como nos su_*: interactive deixa a janela da cópia aberta.
+    from tools.sketchup.batch import run_script
+    from tools.sketchup.process import SketchUp
     t0 = time.time()
-    subprocess.run(["powershell", "-NoProfile", "-Command", ps],
-                   env=env, capture_output=True, timeout=60)
-    deadline = time.time() + timeout_export
-    while time.time() < deadline:
-        if log.exists():
-            time.sleep(2)
-            break
-        time.sleep(2)
-    subprocess.run(["taskkill", "/F", "/IM", "SketchUp.exe"], capture_output=True)
-    time.sleep(1)
+    run_script(SketchUp(), script=EXPORT_RB, done_marker=log, skp_in=copy,
+               env_extra={k: env[k] for k in env if k.startswith(("VRSCENE_", "VRAY_"))},
+               timeout_s=timeout_export)
     log_txt = log.read_text("utf-8", errors="ignore") if log.exists() else ""
     if not vrs.exists():
         return {"status": "fail", "error": "export .vrscene falhou",
