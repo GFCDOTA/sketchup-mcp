@@ -205,3 +205,34 @@ def test_wall_panels_reach_ceiling_no_gap(nm):
         assert top_in >= ceiling_z0_in - tol_in, (
             f"{nm}: painel {p['kind']} para em {top_in:.1f}in mas o teto comeca "
             f"em {ceiling_z0_in:.1f}in — vao de {ceiling_z0_in - top_in:.1f}in vaza fundo")
+
+
+def test_fp043_lavabo_brush_respects_door_swing():
+    """P3a-03: porta-escova fora do arco h_o001, nao so longe do centro do vao."""
+    from shapely.geometry import Polygon
+    from core.scale import PT_TO_IN, PT_TO_M
+    from tools.rooms.shared.geometry import door_swing_polygons
+
+    con = json.loads(Path("fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json")
+                     .read_text("utf-8"))
+    swings = door_swing_polygons(con, strict=True)
+    brushes = [b for b in ROOMS["LAVABO"] if b["kind"] == "kb_escova"]
+    assert brushes, "porta-escova desapareceu, requer decisao/revisao"
+    for b in brushes:
+        fp = Polygon([(p[0] / PT_TO_IN, p[1] / PT_TO_IN) for p in b["corners"]])
+        for door_id, swing in swings.items():
+            cm2 = fp.intersection(swing).area * PT_TO_M ** 2 * 10000
+            assert cm2 < 0.1, f"porta-escova invade {door_id}: {cm2:.2f} cm2"
+
+
+def test_fp043_door_swing_strict_requires_hinge_metadata():
+    from copy import deepcopy
+    from tools.rooms.shared.geometry import door_swing_polygons
+
+    con = json.loads(Path("fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json")
+                     .read_text("utf-8"))
+    invalid = deepcopy(con)
+    first_door = next(o for o in invalid["openings"] if o.get("kind_v5") == "interior_door")
+    first_door.pop("hinge_side", None)
+    with pytest.raises(ValueError, match="DOOR_SWING_METADATA_MISSING"):
+        door_swing_polygons(invalid, strict=True)

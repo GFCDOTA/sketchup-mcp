@@ -634,7 +634,7 @@ def _skin_parts(cell, ws_by_kind, zones_u, win_zone=None):
 
 
 
-def _enxoval_parts(cell, ws_by_kind, bb_by_kind, door_c, lavabo):
+def _enxoval_parts(cell, ws_by_kind, bb_by_kind, door_c, lavabo, door_swings=()):
     """ENXOVAL fora do box (consultoria GPT 2026-08-05): toalheiro na parede do
     box (lado de fora), argola de rosto junto ao gabinete, papeleira ao lado do
     vaso, 2 ganchos perto da porta, lixeira, escova, tapete diante do box e
@@ -652,6 +652,12 @@ def _enxoval_parts(cell, ws_by_kind, bb_by_kind, door_c, lavabo):
                  p["x1"] / PT_TO_IN, p["y1"] / PT_TO_IN)
         if not comodo.contains(bx):
             return False
+        # Um centro de porta livre nao prova que o arco da FOLHA esteja livre.
+        # A escova baixa nao pode cruzar o giro real (L2: h_o001, lavabo).
+        zmin = float(p.get("z0_in") or 0) / 39.3700787402
+        if (zmin < 2.10 and p.get("kind") == "kb_escova"
+                and any(bx.intersection(sw).area > 1e-8 for sw in door_swings)):
+            return False
         # acessorio SOLIDO de enxoval nunca dentro da louca do vaso (PR #245
         # f159f58: kb_lixeira caia na bacia em BANHO 01/02). kb_lixeira e'
         # DECORATIVE -> furniture_overlap=IGNORE, entao o gate nao ve: a guarda
@@ -664,6 +670,25 @@ def _enxoval_parts(cell, ws_by_kind, bb_by_kind, door_c, lavabo):
     def _add(p):
         if _ok(p):
             out.append(p)
+            return
+        if p.get("kind") != "kb_escova" or vaso_ws is None:
+            return
+        # Deslize somente sobre a MESMA parede do vaso. Se nao couber,
+        # omitir acessorio secundario e jamais mover arquitetura/porta.
+        vertical = vaso_ws["orient"] == "v"
+        for distance in (d for step in range(1, 16) for d in (step * 0.08, -step * 0.08)):
+            delta = M(distance) * PT_TO_IN
+            shifted = dict(p)
+            for k in (("y0", "y1") if vertical else ("x0", "x1")):
+                shifted[k] = p[k] + delta
+            shifted["corners"] = [
+                [round(pt[0] + (0 if vertical else delta), 2),
+                 round(pt[1] + (delta if vertical else 0), 2)]
+                for pt in p["corners"]
+            ]
+            if _ok(shifted):
+                out.append(shifted)
+                return
 
     pia_bb = bb_by_kind.get("bancada_banho")
     box_bb = bb_by_kind.get("box")
@@ -999,7 +1024,13 @@ def build_boxes(con, room_id):
                       "reason": "nenhuma louca coube"}
     zones = [z for z in (door_z, win_zone) if z is not None]
     items.extend(_skin_parts(cell, ws_by_kind, unary_union(zones) if zones else None, win_zone))
-    items.extend(_enxoval_parts(cell, ws_by_kind, bb_by_kind, door_c, lavabo))
+    from tools.rooms.shared.geometry import door_swing_polygons
+    swings = door_swing_polygons(con)
+    room_swings = [
+        swings[op["id"]] for op in con.get("openings", [])
+        if op["id"] in swings and op["wall_id"] in sm["_geom"]["room_walls"]
+    ]
+    items.extend(_enxoval_parts(cell, ws_by_kind, bb_by_kind, door_c, lavabo, room_swings))
     theme = theme_of(sm.get("room_name"))
     _apply_theme(items, theme)
     kinds = [it["kind"] for it in items]
