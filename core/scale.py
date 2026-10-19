@@ -31,6 +31,8 @@ M_TO_IN: float = 39.3700787402
 
 # default = ancoragem por espessura de parede (wall_thickness 0.19 m / 5.4 pt)
 _DEFAULT_PT_TO_M: float = 0.19 / 5.4
+# Anchor used by synthetic fixtures, independent of caller env overrides.
+DEFAULT_PT_TO_M: float = _DEFAULT_PT_TO_M
 
 # pt → m (ÚNICO ponto de leitura do env; default não muda sem env/config)
 PT_TO_M: float = float(os.environ.get("PT_TO_M") or _DEFAULT_PT_TO_M)
@@ -52,6 +54,22 @@ PT_TO_IN: float = PT_TO_M * M_TO_IN
 PLANT_PT_TO_M: dict[str, float] = {
     "planta_74": 0.0259,
 }
+
+
+
+def expected_pt_to_m(*, source: str | None = None, consensus_path=None) -> float:
+    """Absolute scale anchor independent of PT_TO_M/env/report.
+
+    Real projects with a PDF cota anchor use PLANT_PT_TO_M; the synthetic
+    quadrado/fixtures retain the historic wall-thickness calibration. For
+    unverified real projects a dedicated cota anchor must be registered before
+    certifying L2. Do not derive this value from the built SKP.
+    """
+    from pathlib import Path
+    plant_from_source = Path(str(source).replace("\\\\", "/")).stem if source else None
+    plant_from_path = plant_from_fixture_path(consensus_path) if consensus_path else None
+    plant = plant_from_source if plant_from_source in PLANT_PT_TO_M else plant_from_path
+    return PLANT_PT_TO_M.get(plant, DEFAULT_PT_TO_M)
 
 
 def plant_from_fixture_path(consensus_path) -> str | None:

@@ -10,7 +10,7 @@ que o gate valida.
 
 ## O que o mapa cobre
 
-188 itens: os 15 arquivos da raiz, os 142 arquivos diretos de `tools/`, os 11 de `scripts/`, e cada
+189 itens: os 15 arquivos da raiz, os 142 arquivos diretos de `tools/`, os 11 de `scripts/`, e cada
 subdiretório de `tools/`, `scripts/`, `ops/` e `interior/` como UMA unidade (os arquivos de dentro herdam
 a decisão do diretório). Cada item tem disposição, destino, fase, compatibilidade, risco com motivos e
 consumidores. Os outros diretórios de topo têm só a responsabilidade registrada (`directories` no JSON).

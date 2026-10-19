@@ -84,6 +84,10 @@ def run_all(
         from tools.parapet_not_railing_fallback_gate import (
             audit_parapet_not_railing_fallback)
         from tools.railing_exact_match_gate import audit_railing_exact_match
+        from tools.validation.scale_anchor_gate import audit as audit_scale_anchor
+        gates["scale_anchor"] = audit_scale_anchor(
+            con, rep, consensus_path=Path(consensus_path) if consensus_path else None
+        )
         gates["railing_match"] = audit_railing_exact_match(con, rep)
         gates["parapet_fallback"] = audit_parapet_not_railing_fallback(con, rep)
         # position-fidelity (Felipe 2026-06-02): centro/largura/host de portas+

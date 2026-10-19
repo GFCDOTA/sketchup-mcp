@@ -77,6 +77,12 @@ jobs:
         run: python -m tools.run_deterministic_gates --fixture planta_74
       - name: Gate — quadrado (micro-fixture canônico)
         run: python -m tools.run_deterministic_gates --fixture quadrado
+      # Scale is checked against an independent source (PDF cota / fixture),
+      # NEVER report metadata or environment PT_TO_M. Fails on 0.74x shells.
+      - name: FP-043 P3 — absolute scale (planta_74)
+        run: python -m tools.validation.scale_anchor_gate --consensus fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json --report artifacts/planta_74/geometry_report.json
+      - name: FP-043 P3 — absolute scale (quadrado)
+        run: python -m tools.validation.scale_anchor_gate --consensus fixtures/quadrado/consensus_with_window.json --report docs/specs/_assets/quadrado_canonical_geometry_report.json
 
   mcp-server:
     name: mcp server (smoke + stdio handshake)
