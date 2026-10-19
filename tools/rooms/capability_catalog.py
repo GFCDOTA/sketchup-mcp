@@ -63,7 +63,7 @@ def _find_node(tree: ast.AST, path: list[str]):
 
 
 def symbol_digest(symbol: dict, root: Path = ROOT) -> str | None:
-    """sha256 do codigo do simbolo. Python: AST do no (ignora comentario/formatacao); Ruby: texto normalizado do arquivo.
+    """sha256 do codigo do simbolo. Python: texto do no sem linhas de comentario/brancas (estavel entre versoes do Python); Ruby: texto normalizado do arquivo.
     None = simbolo inexistente."""
     lang, ref = symbol["lang"], symbol["ref"]
     if lang == "ruby":
@@ -75,10 +75,15 @@ def symbol_digest(symbol: dict, root: Path = ROOT) -> str | None:
     if found is None or not found[1]:
         return None
     file, rest = found
-    node = _find_node(ast.parse(file.read_text(encoding="utf-8")), rest)
+    text = file.read_text(encoding="utf-8")
+    node = _find_node(ast.parse(text), rest)
     if node is None:
         return None
-    return hashlib.sha256(ast.dump(node, include_attributes=False).encode("utf-8")).hexdigest()
+    # Texto do trecho do no (nao ast.dump: o dump muda entre 3.11 e 3.12 e a prova valeria so para uma versao do Python).
+    first = min([node.lineno] + [d.lineno for d in getattr(node, "decorator_list", [])])
+    lines = _norm_text(text).split(chr(10))[first - 1:node.end_lineno]
+    body = chr(10).join(ln.rstrip() for ln in lines if ln.strip() and not ln.lstrip().startswith("#"))
+    return hashlib.sha256(body.encode("utf-8")).hexdigest()
 
 
 def _tool_symbol(tool: str) -> dict | None:

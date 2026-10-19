@@ -42,7 +42,7 @@
             "commit": "9d7a496",
             "scope": "planta_74 r004: 76 pecas reabertas batem com o plano em 0,05 mm (SketchUp 26.0.429)",
             "symbol_digests": {
-              "python:tools.rooms.kitchen.layout.build_boxes": "dfceb375460810d5c3b10a813576c82873ea7497048c7ee1e039f4d2dc59ba3b",
+              "python:tools.rooms.kitchen.layout.build_boxes": "e74765ee18cf82738300b68a6dd60887618a1efe455dac634fcd014fe65eac74",
               "ruby:tools/sketchup/furnish/place_layout_skp.rb": "20ac2eda55bb296f04286d4d83e348bfa7eb395d953fbcdbda1a9afdba254b5a"
             }
           }
