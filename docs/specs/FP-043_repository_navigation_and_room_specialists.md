@@ -1,6 +1,8 @@
 # FP-043 — Organização navegável e especialistas por cômodo
 
 **Estado:** SPEC PROPOSTA; implementação não iniciada por este documento.
+
+> **Execução atualizada (19/10/2026):** P0–P2 e infra relevante de P3 foram integrados (#286–#296). Para o que ainda precisa ser implementado, seguir a [spec executável P3 residual → P8](FP-043_remaining_execution_P3_P8.md). O estado inicial abaixo é histórico; confirmar HEAD e evidências atuais antes de executar.
 **Data:** 2026-10-19. **Baseline observada:** develop `07959bfdd153031de13190e883583c7e8acb5c70` (PR #285).
 **Solicitante:** Felipe. **Executor previsto:** Claude no Windows com SketchUp.
 
