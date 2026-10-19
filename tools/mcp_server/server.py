@@ -158,7 +158,7 @@ def list_capabilities() -> dict[str, Any]:
             "su_apply_edits": "material/cor/textura, mover, girar, tag, visibilidade, renomear, apagar, inserir componente — salva CÓPIA.",
             "su_build_shell": "consensus -> shell .skp + renders + gates determinísticos (não promove).",
             "su_furnish": "mobilia a planta_74 no shell (brains de layout -> place_layout_skp.rb).",
-            "su_render_vray": "RECUSA hoje: o launcher legado mata o SketchUp por nome de imagem (taskkill /IM); devolve o motivo.",
+            "su_render_vray": "V-Ray de uma cena (scene.json + scene_closed.skp): exporta numa cópia pela PRÓPRIA instância e renderiza com vray.exe; saída em runs/.",
         },
         "furniture_kinds": sorted(_FURN),
         "edit_ops": sorted(su_ops.ALL_OPS),
@@ -479,12 +479,11 @@ def su_render_vray(
     height: int = 1000,
     fov: float = 65,
 ) -> dict[str, Any]:
-    """Render V-Ray de uma cena composta (dir com scene.skp + scene.json).
-
-    DESABILITADA: responde REFUSED com o motivo. O launcher legado
-    (tools/render_scene_vray.py) roda `taskkill /F /IM SketchUp.exe` depois da
-    exportação e escreve dentro do scene_dir; volta quando for portado para
-    tools.sketchup.batch (PID próprio + destino checado)."""
+    """Render V-Ray de uma cena composta: scene_dir com scene.json (câmera em
+    metros) + scene_closed.skp. Exporta o .vrscene numa CÓPIA pela própria
+    instância do SketchUp (nunca fecha outra janela) e renderiza com vray.exe
+    headless. scene_dir é só leitura; PNG/.vrscene/log saem em runs/ (ou
+    out_png, nunca em fixtures/ ou artifacts/). Aparência = VISUAL_REVIEW."""
     return su_jobs.render_vray(scene_dir, out_png=out_png, width=width, height=height, fov=fov)
 
 
