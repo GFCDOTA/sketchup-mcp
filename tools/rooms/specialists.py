@@ -22,6 +22,7 @@ from tools.rooms.registry import ROOM_ALIASES, load_manifest
 ROOT = Path(__file__).resolve().parents[2]
 BLOCKED = "BLOCKED_CAPABILITY_MISSING"
 PLAN_READY = "PLAN_READY_NOT_EXECUTED"
+LENGTH_UNITS = ("m", "cm", "mm")
 ARCHITECTURE_TERMS = (
     "mover parede", "remover parede", "derrubar parede", "tirar parede", "apagar parede", "abrir vao", "fechar vao",
     "mover porta", "mover janela", "remover porta", "remover janela", "alterar arquitetura",
@@ -282,7 +283,8 @@ def plan(request: dict, root: Path = ROOT) -> dict:
         if not isinstance(item, dict) or item.get("value") in (None, "") or not item.get("unit") or not item.get("origin"):
             missing.append(p["name"])
             continue
-        if item["unit"] != p["unit"] or (item["origin"] != p["origin"] and p["origin"] != "default_declared"):
+        unit_ok = item["unit"] in LENGTH_UNITS if p["unit"] == "length" else item["unit"] == p["unit"]
+        if not unit_ok or (item["origin"] != p["origin"] and p["origin"] != "default_declared"):
             missing.append(f"{p['name']} (esperado unit={p['unit']}, origin={p['origin']})")
     if missing:
         return {**base, **_blocked("BLOCKED_INPUT_INCOMPLETE", f"insumos sem valor/unidade/origem: {missing}",

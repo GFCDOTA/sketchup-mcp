@@ -6975,6 +6975,36 @@
       "blob_sha": "131e2522a55540adb2c7db31c5fb945b1acd9d02",
       "blob_size": 407,
       "owner_group": "artifacts"
+    },
+    {
+      "path": "fixtures/synthetic_cabinets/holdout_c.json",
+      "blob_sha": "ae1dfb59030a64b5e884b0001b5bcf8546cd9042",
+      "blob_size": 1454,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/synthetic_cabinets/invalid_impossible.json",
+      "blob_sha": "266cde3b654f005e867a0c102c0609c6cca215a6",
+      "blob_size": 1636,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/synthetic_cabinets/invalid_incomplete.json",
+      "blob_sha": "d0c66eb2817c4054fe2bf031eb21adb30924c4a7",
+      "blob_size": 1585,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/synthetic_cabinets/valid_a_base_600.json",
+      "blob_sha": "02443b5b2977594a85ba068d2cd4ddd3f3848af0",
+      "blob_size": 1269,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/synthetic_cabinets/valid_b_tall_900.json",
+      "blob_sha": "8a2124c6a17cc3de274e4c60d656022f35fcfa45",
+      "blob_size": 1463,
+      "owner_group": "fixtures"
     }
   ]
 }

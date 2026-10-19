@@ -21,7 +21,7 @@
       "type": "object", "required": ["name", "unit", "origin"], "additionalProperties": false,
       "properties": {
         "name": {"type": "string", "minLength": 1},
-        "unit": {"enum": ["m", "mm", "cm", "pt", "deg", "count", "text", "none"]},
+        "unit": {"enum": ["length", "m", "mm", "cm", "pt", "deg", "count", "text", "none"], "description": "length = qualquer unidade de comprimento aceita (m, cm, mm), convertida pela capacidade"},
         "origin": {"enum": ["pdf", "consensus", "user_request", "derived", "default_declared"]}
       }
     },

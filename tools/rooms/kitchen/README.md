@@ -49,12 +49,12 @@ Estados separados: **implementação**, **validação** e **visual** não se con
 | Layout linear (galley) em caixas/placeholders | implementada (`layout.build_boxes`) | L1: paleta/geometria dos boxes (`test_kitchen_layout_style`); L2 (SketchUp 26.0.429): as 76 peças do apê reabertas batem com o plano em 0,05 mm | pendente de revisão |
 | Âncora da pia na parede oeste | implementada | L1 PASS; L2: pia, cooktop e coifa dentro da cozinha, sobre a bancada colada na parede oeste | n/a |
 | Ergonomia (triângulo, folgas, aéreo) | implementada (`tools/kitchen_ergonomics.audit`) | L1 | n/a |
-| Gabinete compartilhado (caixaria + frentes) | **ausente** (previsto em `tools/rooms/shared/cabinet/`, P6) | — | — |
-| Porta Shaker / frente rebaixada | **ausente**: só há a recipe `cabinet.recessed-shaker-and-louvers` | `BLOCKED_CAPABILITY_MISSING` | — |
+| Gabinete compartilhado (caixaria retangular + frentes lisas separadas) | implementado como **plano L1** em [`tools/rooms/shared/cabinet/plan.py`](../shared/cabinet/plan.py) → `plan_cabinet`; adapter da cozinha em [`capabilities/cabinet.py`](capabilities/cabinet.py) → `plan_kitchen_cabinet` | L1: `tests/test_cabinet_plan.py`, `tests/test_kitchen_cabinet_adapter.py`; **L2 ainda não** (materialização é a P6b) | não revisado |
+| Porta Shaker / frente rebaixada | **ausente** (`tools/rooms/kitchen/capabilities/shaker.py` não existe): só há a recipe `cabinet.recessed-shaker-and-louvers` | `BLOCKED_CAPABILITY_MISSING` | — |
 | Gavetas, ferragens, recorte de cuba em bancada | **ausentes** (recipes consultivas) | `BLOCKED_CAPABILITY_MISSING` | — |
 | Lista de corte / fabricação | **ausente** | — | — |
 
-Capacidades exclusivas da cozinha ficam em [`capabilities/`](capabilities/) (V-Ray, bake de tema e os `.rb` de recolor/ângulos, movidos da raiz de `tools/` na FP-043/P4a); o adapter do gabinete paramétrico (`capabilities/cabinet.py`) é previsto (P6) e hoje não existe.
+Capacidades exclusivas da cozinha ficam em [`capabilities/`](capabilities/) (V-Ray, bake de tema, os `.rb` de recolor/ângulos e o adapter do gabinete). O adapter só planeja: o gabinete é aceito **depois** de `hydraulic_anchor` (pia na parede oeste), `architecture` (cabe na célula, sem tocar parede), `furniture_overlap` (sem sobrepor a mobília planejada) e `circulation` (zonas de porta livres + `circulation_gate` PASS), nesta ordem; o primeiro que falha para os demais. Ferragem, gaveta, porta Shaker, recorte de bancada/cuba e fabricação **não existem** e seguem `BLOCKED_CAPABILITY_MISSING`.
 
 O plano consultivo `cabinet_plan` ([`tools/sketchup/knowledge.py`](../../sketchup/knowledge.py)) devolve BOM proposta e
 caixas de um caso sintético com `plan_state = BLOCKED_CAPABILITY_MISSING` e `execution_authorized = false`: **não é
@@ -73,6 +73,8 @@ plano de operação** e não gera Ruby nem `.skp`. As recipes de cozinha estão 
 | `tests/test_kitchen_layout_style.py` | contratos determinísticos de paleta e geometria dos boxes (sem branco, pia lida de cima, cooktop fino); não julga beleza |
 | `tests/test_kitchen_wall_regression_gate.py` | `kitchen_wall_regression_gate`: passagem preservada passa, parede sólida nova que a fecha falha |
 | `tests/test_sketchup_knowledge.py` | plano consultivo do gabinete (`cabinet_plan`) |
+| `tests/test_cabinet_plan.py` | plano L1 do gabinete: 3 dimensões válidas (uma reservada, fixada por hash), geometria impossível, entrada incompleta, pose 0°/90°/30°, assinatura, `require_valid` |
+| `tests/test_kitchen_cabinet_adapter.py` | os quatro gates da cozinha, ordem e curto-circuito; consensus/fixture canônicos intactos (escala da planta_74) |
 
 ## Provas
 

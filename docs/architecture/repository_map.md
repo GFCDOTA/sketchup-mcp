@@ -98,8 +98,8 @@ A cozinha foi o primeiro módulo a seguir a convenção; os nove perfis (`specia
 | `tools/rooms/capability_catalog.v1.json` | existe | catálogo único fonte → recipe → capacidade → símbolo → fixture → teste → evidência (P5); gate `python -m tools.rooms.capability_catalog` |
 | `tools/rooms/specialists.py` | existe | perfis, roteamento e plano fail-closed (`BLOCKED_CAPABILITY_MISSING`); nunca executa (P5) |
 | `tools/rooms/kitchen/capabilities/` | existe | capacidades exclusivas da cozinha: V-Ray, bake de tema e Ruby de recolor/ângulos (P4a) |
-| `tools/rooms/kitchen/capabilities/cabinet.py` | previsto | adapter do gabinete paramétrico (P6) |
-| `tools/rooms/shared/cabinet/` | previsto | builder compartilhado de gabinete: **não existe** (P6) |
+| `tools/rooms/kitchen/capabilities/cabinet.py` | existe | adapter do gabinete paramétrico: planeja só após âncora hidráulica, arquitetura, mobília e circulação (P6a, L1) |
+| `tools/rooms/shared/cabinet/` | existe | gabinete paramétrico compartilhado: caixaria retangular + frentes lisas separadas; plano L1 (P6a); sem ferragem/gaveta/Shaker/recorte |
 
 ## 5. O que é prova, e de quê
 

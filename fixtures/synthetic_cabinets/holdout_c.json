@@ -1,0 +1,30 @@
+{
+  "schema_version": "cabinet_request.v1",
+  "request_id": "synthetic-holdout-c",
+  "note": "Caso RESERVADO para avaliacao pos-implementacao: criado e fixado por hash ANTES de existir o planner; o codigo nao foi ajustado olhando este caso.",
+  "dimensions": {
+    "width": {"value": 437, "unit": "mm", "origin": "user_request"},
+    "depth": {"value": 523, "unit": "mm", "origin": "user_request"},
+    "height": {"value": 1033, "unit": "mm", "origin": "user_request"}
+  },
+  "panels": {
+    "side": {"value": 15.5, "unit": "mm", "origin": "user_request"},
+    "top_bottom": {"value": 15.5, "unit": "mm", "origin": "user_request"},
+    "back": {"value": 3.2, "unit": "mm", "origin": "user_request"},
+    "front": {"value": 18.7, "unit": "mm", "origin": "user_request"}
+  },
+  "gaps": {
+    "front_clearance": {"value": 1.9, "unit": "mm", "origin": "user_request"},
+    "front_reveal": {"value": 2.3, "unit": "mm", "origin": "user_request"}
+  },
+  "fronts": {"count": 1},
+  "shelf": {"count": 0},
+  "materials": {"carcass": "mdf_cinza", "back": "hdf_branco", "front": "mdf_nogueira"},
+  "grain": {"carcass": "along_height", "back": "none", "front": "along_height"},
+  "pose": {
+    "x": {"value": 1.234, "unit": "m", "origin": "user_request"},
+    "y": {"value": 0.789, "unit": "m", "origin": "user_request"},
+    "z": {"value": 0.0, "unit": "m", "origin": "user_request"},
+    "rotation_deg": {"value": 30, "unit": "deg", "origin": "user_request"}
+  }
+}

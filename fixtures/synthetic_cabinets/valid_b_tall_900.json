@@ -1,0 +1,30 @@
+{
+  "schema_version": "cabinet_request.v1",
+  "request_id": "synthetic-b",
+  "dimensions": {
+    "width": {"value": 0.9, "unit": "m", "origin": "user_request"},
+    "depth": {"value": 350, "unit": "mm", "origin": "user_request"},
+    "height": {"value": 210, "unit": "cm", "origin": "user_request"}
+  },
+  "panels": {
+    "side": {"value": 18, "unit": "mm", "origin": "user_request"},
+    "top_bottom": {"value": 18, "unit": "mm", "origin": "user_request"},
+    "back": {"value": 6, "unit": "mm", "origin": "user_request"},
+    "front": {"value": 18, "unit": "mm", "origin": "user_request"},
+    "shelf": {"value": 18, "unit": "mm", "origin": "user_request"}
+  },
+  "gaps": {
+    "front_clearance": {"value": 2, "unit": "mm", "origin": "user_request"},
+    "front_reveal": {"value": 2.5, "unit": "mm", "origin": "user_request"}
+  },
+  "fronts": {"count": 2},
+  "shelf": {"count": 1, "height_from_bottom": {"value": 1.05, "unit": "m", "origin": "user_request"}},
+  "materials": {"carcass": "mdf_branco", "back": "hdf_branco", "shelf": "mdf_branco", "front": "mdf_branco"},
+  "grain": {"carcass": "along_height", "back": "none", "shelf": "along_width", "front": "along_height"},
+  "pose": {
+    "x": {"value": 0.5, "unit": "m", "origin": "user_request"},
+    "y": {"value": 0.25, "unit": "m", "origin": "user_request"},
+    "z": {"value": 0.0, "unit": "m", "origin": "user_request"},
+    "rotation_deg": {"value": 90, "unit": "deg", "origin": "user_request"}
+  }
+}

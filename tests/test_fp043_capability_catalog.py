@@ -102,7 +102,7 @@ def test_l2_com_simbolo_sem_prova_reprova():
 
 def test_validacao_afirmada_sobre_capacidade_planejada_reprova():
     def mutate(cat):
-        _cap(cat, "shared.cabinet.parametric")["validation"]["state"] = "L1_PASS"
+        _cap(cat, "shared.cabinet.parametric")["implementation"]["state"] = "PLANNED"      # afirma L1_PASS sobre algo so planejado
     assert "VALIDATION_CLAIM_WITHOUT_IMPLEMENTATION" in _verify(mutate)["errors"]
 
 

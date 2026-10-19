@@ -21,7 +21,8 @@
 | `kitchen.layout.galley` | IMPLEMENTED | L2_PASS |
 | `kitchen.sink-anchor-guard` | IMPLEMENTED | L1_PASS |
 | `kitchen.ergonomics.audit` | IMPLEMENTED | UNTESTED |
-| `shared.cabinet.parametric` | PLANNED | UNTESTED |
+| `kitchen.cabinet.plain-fronts` | IMPLEMENTED | L1_PASS |
+| `shared.cabinet.parametric` | IMPLEMENTED | L1_PASS |
 
 Recipes (so conhecimento, `KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP`): `cross.room.material-and-instance-rules`, `room.kitchen.cabinet-assemblies`, `cabinet.countertop-separate-and-bevel`, `cabinet.drawer-box-and-hardware`, `cabinet.front-gaps-and-profiles`, `cabinet.recessed-shaker-and-louvers`, `cabinet.reusable-components`, `cabinet.sink-and-wet-channel-cutouts`.
 
@@ -29,8 +30,11 @@ Recipes (so conhecimento, `KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP`): `cross.room.ma
 
 - `mcp:su_inspect`
 - `python:tools.rooms.kitchen.anchor_rules.validate`
+- `python:tools.rooms.kitchen.capabilities.cabinet.plan_kitchen_cabinet`
 - `python:tools.rooms.kitchen.layout.build_boxes`
 - `python:tools.rooms.kitchen.validation.ergonomics.audit`
+- `python:tools.rooms.shared.cabinet.plan.plan_cabinet`
+- `python:tools.rooms.shared.cabinet.plan.require_valid`
 - `ruby:tools/sketchup/furnish/place_layout_skp.rb`
 
 Qualquer outra ferramenta e recusada (`TOOL_NOT_ALLOWLISTED`).
@@ -55,6 +59,8 @@ Qualquer outra ferramenta e recusada (`TOOL_NOT_ALLOWLISTED`).
 - porta Shaker, gavetas e ferragens NAO existem
 - valida posicao relativa a parede; nao substitui projeto hidraulico
 - sem teste proprio hoje (UNTESTED); ergonomia nao e aprovacao estetica
+- so L1: planeja, nao materializa (P6b)
+- um gate reprovado recusa o plano inteiro
 - porta Shaker/frente rebaixada: nao ha builder de perfil/rebaixo nem fixture L2; so existe a recipe
 - gaveta e ferragens: nao ha builder de caixa de gaveta nem fixture L2; so existe a recipe
 - tampo separado com chanfro: sem builder nem fixture

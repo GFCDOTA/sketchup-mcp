@@ -29,13 +29,17 @@
     "kitchen.layout.galley",
     "kitchen.sink-anchor-guard",
     "kitchen.ergonomics.audit",
+    "kitchen.cabinet.plain-fronts",
     "shared.cabinet.parametric"
   ],
   "tool_allowlist": [
     "mcp:su_inspect",
     "python:tools.rooms.kitchen.anchor_rules.validate",
+    "python:tools.rooms.kitchen.capabilities.cabinet.plan_kitchen_cabinet",
     "python:tools.rooms.kitchen.layout.build_boxes",
     "python:tools.rooms.kitchen.validation.ergonomics.audit",
+    "python:tools.rooms.shared.cabinet.plan.plan_cabinet",
+    "python:tools.rooms.shared.cabinet.plan.require_valid",
     "ruby:tools/sketchup/furnish/place_layout_skp.rb"
   ],
   "constraints": [

@@ -172,27 +172,288 @@
       "room": "shared",
       "version": "1.0.0",
       "owner": "tools.rooms.shared",
-      "title": "Gabinete parametrico compartilhado (caixaria + frentes lisas)",
+      "title": "Gabinete parametrico compartilhado (caixaria retangular + frentes lisas separadas): plano L1",
       "implementation": {
-        "state": "PLANNED",
-        "symbols": []
+        "state": "IMPLEMENTED",
+        "symbols": [
+          {
+            "lang": "python",
+            "ref": "tools.rooms.shared.cabinet.plan.plan_cabinet"
+          },
+          {
+            "lang": "python",
+            "ref": "tools.rooms.shared.cabinet.plan.require_valid"
+          }
+        ]
       },
       "validation": {
-        "state": "UNTESTED",
-        "fixtures": [],
-        "tests": [],
+        "state": "L1_PASS",
+        "fixtures": [
+          "fixtures/synthetic_cabinets/valid_a_base_600.json",
+          "fixtures/synthetic_cabinets/valid_b_tall_900.json",
+          "fixtures/synthetic_cabinets/holdout_c.json"
+        ],
+        "tests": [
+          "tests/test_cabinet_plan.py"
+        ],
         "evidence": []
       },
       "visual": {
         "state": "NOT_REVIEWED"
       },
-      "tools": [],
-      "parameters": [],
-      "preconditions": [],
-      "invariants": [],
+      "tools": [
+        "python:tools.rooms.shared.cabinet.plan.plan_cabinet",
+        "python:tools.rooms.shared.cabinet.plan.require_valid"
+      ],
+      "parameters": [
+        {
+          "name": "dimensions.width",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "dimensions.depth",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "dimensions.height",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "panels.side",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "panels.top_bottom",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "panels.back",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "panels.front",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "gaps.front_clearance",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "gaps.front_reveal",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "fronts.count",
+          "unit": "count",
+          "origin": "user_request"
+        },
+        {
+          "name": "shelf.count",
+          "unit": "count",
+          "origin": "user_request"
+        },
+        {
+          "name": "materials.carcass",
+          "unit": "text",
+          "origin": "user_request"
+        },
+        {
+          "name": "materials.back",
+          "unit": "text",
+          "origin": "user_request"
+        },
+        {
+          "name": "materials.front",
+          "unit": "text",
+          "origin": "user_request"
+        },
+        {
+          "name": "pose.x",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "pose.y",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "pose.z",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "pose.rotation_deg",
+          "unit": "deg",
+          "origin": "user_request"
+        }
+      ],
+      "preconditions": [
+        "toda medida com valor, unidade e origem (sem padrao inventado)"
+      ],
+      "invariants": [
+        "plano so e materializavel depois de `require_valid`",
+        "geometria inviavel/nao finita/colidente e recusada",
+        "ferragem, gaveta, Shaker, recorte de bancada e fabricacao NAO existem"
+      ],
       "side_effects": "NONE",
       "limitations": [
-        "PLANNED para a FP-043/P6; hoje so existe o plano consultivo cabinet_plan"
+        "so L1: ainda nao ha materializacao no SketchUp (P6b)",
+        "orientacao do veio so e registrada; aplicacao depende de suporte de UV (P6b)"
+      ]
+    },
+    {
+      "id": "kitchen.cabinet.plain-fronts",
+      "room": "kitchen",
+      "version": "1.0.0",
+      "owner": "tools.rooms.kitchen",
+      "title": "Adapter da cozinha: gabinete de frentes lisas so apos ancora hidraulica, arquitetura, mobilia e circulacao",
+      "implementation": {
+        "state": "IMPLEMENTED",
+        "symbols": [
+          {
+            "lang": "python",
+            "ref": "tools.rooms.kitchen.capabilities.cabinet.plan_kitchen_cabinet"
+          },
+          {
+            "lang": "python",
+            "ref": "tools.rooms.shared.cabinet.plan.plan_cabinet"
+          }
+        ]
+      },
+      "validation": {
+        "state": "L1_PASS",
+        "fixtures": [
+          "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json",
+          "fixtures/synthetic_cabinets/valid_a_base_600.json"
+        ],
+        "tests": [
+          "tests/test_kitchen_cabinet_adapter.py"
+        ],
+        "evidence": []
+      },
+      "visual": {
+        "state": "NOT_REVIEWED"
+      },
+      "tools": [
+        "python:tools.rooms.kitchen.capabilities.cabinet.plan_kitchen_cabinet",
+        "python:tools.rooms.shared.cabinet.plan.plan_cabinet"
+      ],
+      "parameters": [
+        {
+          "name": "dimensions.width",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "dimensions.depth",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "dimensions.height",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "panels.side",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "panels.top_bottom",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "panels.back",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "panels.front",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "gaps.front_clearance",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "gaps.front_reveal",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "fronts.count",
+          "unit": "count",
+          "origin": "user_request"
+        },
+        {
+          "name": "shelf.count",
+          "unit": "count",
+          "origin": "user_request"
+        },
+        {
+          "name": "materials.carcass",
+          "unit": "text",
+          "origin": "user_request"
+        },
+        {
+          "name": "materials.back",
+          "unit": "text",
+          "origin": "user_request"
+        },
+        {
+          "name": "materials.front",
+          "unit": "text",
+          "origin": "user_request"
+        },
+        {
+          "name": "pose.x",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "pose.y",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "pose.z",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "pose.rotation_deg",
+          "unit": "deg",
+          "origin": "user_request"
+        }
+      ],
+      "preconditions": [
+        "consensus da planta com a cozinha identificada",
+        "escala PT_TO_M da planta (0,0259 para a planta_74)"
+      ],
+      "invariants": [
+        "a pia continua na parede oeste",
+        "nenhuma parede/porta/janela e alterada",
+        "sem sobreposicao com a mobilia planejada",
+        "zonas de porta livres"
+      ],
+      "side_effects": "NONE",
+      "limitations": [
+        "so L1: planeja, nao materializa (P6b)",
+        "um gate reprovado recusa o plano inteiro"
       ]
     },
     {
@@ -647,7 +908,7 @@
       "source_ids": [
         "yt-cabinet-tips-2021"
       ],
-      "capability_id": "shared.cabinet.parametric",
+      "capability_id": "kitchen.cabinet.plain-fronts",
       "terms": [
         "gabinete",
         "armario",
