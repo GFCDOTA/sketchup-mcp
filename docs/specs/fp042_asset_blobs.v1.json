@@ -4570,6 +4570,24 @@
       "blob_sha": "c035569b63897a0ee5775e32e549c52ac3254fc1",
       "blob_size": 188003,
       "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p7_kitchen_cabinet/cabinet.skp",
+      "blob_sha": "b65dcd66f4fbfa3805e5d5064867049aa0cc2ff8",
+      "blob_size": 3435398,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p7_kitchen_cabinet/iso.png",
+      "blob_sha": "663f8c40ee93d13f9e8db6642a13f67d0630f29e",
+      "blob_size": 189803,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p7_kitchen_cabinet/top.png",
+      "blob_sha": "85aed5b74207d3ff6802d2dfad732d266451d2c4",
+      "blob_size": 17652,
+      "owner_group": "artifacts"
     }
   ]
 }

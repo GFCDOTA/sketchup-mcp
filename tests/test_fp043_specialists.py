@@ -105,12 +105,16 @@ CAB_INPUTS = {
 }
 
 
-def test_gabinete_de_frentes_lisas_tem_capacidade_l1_e_gera_plano_sem_executar():
+def test_gabinete_de_frentes_lisas_tem_capacidade_l2_e_gera_plano_sem_executar():
     res = sp.plan({"text": "gabinete de cozinha com frentes lisas", "room": "kitchen", "inputs": CAB_INPUTS})
     assert res["state"] == "PLAN_READY_NOT_EXECUTED" and res["execution_authorized"] is False
-    assert res["capability"]["id"] == "kitchen.cabinet.plain-fronts" and res["capability"]["validation"] == "L1_PASS"
-    assert [s["tool"] for s in res["steps"]] == ["python:tools.rooms.kitchen.capabilities.cabinet.plan_kitchen_cabinet",
-                                                 "python:tools.rooms.shared.cabinet.plan.plan_cabinet"]
+    assert res["capability"]["id"] == "kitchen.cabinet.plain-fronts" and res["capability"]["validation"] == "L2_PASS"
+    assert [s["tool"] for s in res["steps"]] == [
+        "python:tools.rooms.kitchen.capabilities.cabinet.plan_kitchen_cabinet", "python:tools.rooms.shared.cabinet.plan.plan_cabinet",
+        "python:tools.rooms.shared.cabinet.plan.require_valid", "python:tools.rooms.shared.cabinet.sketchup.materialize",
+        "python:tools.rooms.shared.cabinet.sketchup.inspect", "ruby:tools/rooms/shared/cabinet/ruby/cabinet_build.rb",
+        "ruby:tools/rooms/shared/cabinet/ruby/cabinet_inspect.rb"]
+    assert res["execution_authorized"] is False                       # o plano nunca autoriza; o fluxo (P7) liga allowlist + gates + job
 
 
 def test_gabinete_sem_medidas_pergunta_em_vez_de_inventar_padrao():

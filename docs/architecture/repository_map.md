@@ -100,6 +100,7 @@ A cozinha foi o primeiro módulo a seguir a convenção; os nove perfis (`specia
 | `tools/rooms/kitchen/capabilities/` | existe | capacidades exclusivas da cozinha: V-Ray, bake de tema e Ruby de recolor/ângulos (P4a) |
 | `tools/rooms/kitchen/capabilities/cabinet.py` | existe | adapter do gabinete paramétrico: planeja só após âncora hidráulica, arquitetura, mobília e circulação (P6a, L1) |
 | `tools/rooms/shared/cabinet/` | existe | gabinete paramétrico compartilhado: caixaria retangular + frentes lisas separadas; plano L1 (P6a) e materializador SketchUp com L2 em micro-fixtures (P6b); sem ferragem/gaveta/Shaker/recorte |
+| `tools/rooms/kitchen/capabilities/cabinet_flow.py` | existe | fluxo vertical da cozinha (P7): pedido → 4 gates → allowlist → job SketchUp → reabertura → trace; evidência L2 em `artifacts/review/fp043/p7_kitchen_cabinet/` |
 | `tools/rooms/shared/cabinet/sketchup.py` | existe | driver da materialização: `materialize` (exige `require_valid`), `inspect` (reabre o salvo) e `verify` (plano × vértices reais) |
 | `tools/rooms/shared/cabinet/ruby/` | existe | jobs Ruby do gabinete: `cabinet_build.rb` (cria só o grupo `Cabinet_<id>`) e `cabinet_inspect.rb` (somente leitura) |
 

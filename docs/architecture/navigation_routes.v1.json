@@ -53,6 +53,16 @@
       ]
     },
     {
+      "id": "kitchen-vertical-trace",
+      "question": "Qual o percurso real do pedido de gabinete até o .skp e onde está a prova?",
+      "hops": ["README.md", "docs/architecture/repository_map.md", "tools/rooms/kitchen/README.md"],
+      "answers": [
+        {"path": "tools/rooms/kitchen/capabilities/cabinet_flow.py", "symbol": "run_request", "role": "fluxo pedido → gates → allowlist → job → reabertura → trace"},
+        {"path": "artifacts/review/fp043/p7_kitchen_cabinet/README.md", "role": "evidência L2 (SketchUp real) com negativos e job interrompido"},
+        {"path": "tools/rooms/shared/cabinet/ruby/cabinet_build.rb", "role": "job Ruby que cria só o grupo Cabinet_<id>"}
+      ]
+    },
+    {
       "id": "kitchen-specialist-and-catalog",
       "question": "Quem é o especialista de cozinha, qual o limite dele e onde está o catálogo de capacidades?",
       "hops": ["README.md", "docs/architecture/repository_map.md", "tools/rooms/kitchen/README.md"],

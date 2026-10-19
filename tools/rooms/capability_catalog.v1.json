@@ -219,14 +219,14 @@
         ],
         "evidence": [
           {
-            "ref": "artifacts/review/fp043/p6b_cabinet_l2/README.md",
+            "ref": "artifacts/review/fp043/p7_kitchen_cabinet/README.md",
             "sketchup_version": "26.0.429",
-            "commit": "cdb9dde",
+            "commit": "8317dce",
             "scope": "micro-fixtures sinteticos (3 dimensoes, poses 0/90/30, reexecucao, make_unique, edicao local), modelo base do template, SketchUp 26.0.429; NAO inclui cozinha real, ferragem, gaveta nem veio",
             "symbol_digests": {
               "python:tools.rooms.shared.cabinet.plan.plan_cabinet": "80b8bd953b0516ad10443be865d73e21b4d15c87b138cddbcdb82c75431063cf",
               "python:tools.rooms.shared.cabinet.plan.require_valid": "a641fbdb69d48374c799154304bf31036cc654600ee18de2b85fcb071b86bd39",
-              "python:tools.rooms.shared.cabinet.sketchup.materialize": "b308f51e8aa0d63cea20f5dbcc75109fdca507da5ac3be21e4094c152352e888",
+              "python:tools.rooms.shared.cabinet.sketchup.materialize": "4b30b9ec268b3dd4fd65aeae72a025f13b3275280634decefd8c543e135aac49",
               "python:tools.rooms.shared.cabinet.sketchup.inspect": "833ce948f9de37e6352529149126881ee2178a6cf3a723e522c99eb081e40eeb",
               "python:tools.rooms.shared.cabinet.sketchup.verify": "d7d3dc62dbb699890468614a89e09088fc3a1a23c70d32d2445ccdded23903dd",
               "ruby:tools/rooms/shared/cabinet/ruby/cabinet_build.rb": "faad1fe33e175ac0026a16eaa765f91b657116d72d6d7603da50af07273f24b9",
@@ -359,7 +359,7 @@
       "room": "kitchen",
       "version": "1.0.0",
       "owner": "tools.rooms.kitchen",
-      "title": "Adapter da cozinha: gabinete de frentes lisas so apos ancora hidraulica, arquitetura, mobilia e circulacao",
+      "title": "Gabinete de frentes lisas na cozinha: ancora hidraulica, arquitetura, mobilia e circulacao antes de materializar; fluxo pedido -> SKP com trace",
       "implementation": {
         "state": "IMPLEMENTED",
         "symbols": [
@@ -369,27 +369,55 @@
           },
           {
             "lang": "python",
+            "ref": "tools.rooms.kitchen.capabilities.cabinet.materialize_kitchen_cabinet"
+          },
+          {
+            "lang": "python",
+            "ref": "tools.rooms.kitchen.capabilities.cabinet_flow.run_request"
+          },
+          {
+            "lang": "python",
             "ref": "tools.rooms.shared.cabinet.plan.plan_cabinet"
           }
         ]
       },
       "validation": {
-        "state": "L1_PASS",
+        "state": "L2_PASS",
         "fixtures": [
           "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json",
-          "fixtures/synthetic_cabinets/valid_a_base_600.json"
+          "fixtures/synthetic_cabinets/valid_a_base_600.json",
+          "artifacts/review/fp043/p7_kitchen_cabinet/request.json"
         ],
         "tests": [
-          "tests/test_kitchen_cabinet_adapter.py"
+          "tests/test_kitchen_cabinet_adapter.py",
+          "tests/test_kitchen_cabinet_flow.py"
         ],
-        "evidence": []
+        "evidence": [
+          {
+            "ref": "artifacts/review/fp043/p7_kitchen_cabinet/README.md",
+            "sketchup_version": "26.0.429",
+            "commit": "8317dce",
+            "scope": "cozinha da planta_74 (copia do .skp mobiliado): pedido inedito -> gabinete salvo/reaberto/inspecionado, 6 negativos reais + job interrompido; SketchUp 26.0.429; NAO e veredito visual nem projeto de cozinha",
+            "symbol_digests": {
+              "python:tools.rooms.kitchen.capabilities.cabinet.plan_kitchen_cabinet": "97fa552cf5e14f6a30ab19a1a3474252d02e652e25b23cbf9c9fb12357d0bf59",
+              "python:tools.rooms.kitchen.capabilities.cabinet.materialize_kitchen_cabinet": "128a2cad06b8bc61dbacfa200bcbfae1ca4596c13ab51df38623ce39061709ac",
+              "python:tools.rooms.kitchen.capabilities.cabinet_flow.run_request": "05cf0f640ab90d773ebb7b87cb8b2ecabf363242648ccaa3a422a22b297781c8",
+              "python:tools.rooms.shared.cabinet.plan.plan_cabinet": "80b8bd953b0516ad10443be865d73e21b4d15c87b138cddbcdb82c75431063cf"
+            }
+          }
+        ]
       },
       "visual": {
         "state": "NOT_REVIEWED"
       },
       "tools": [
         "python:tools.rooms.kitchen.capabilities.cabinet.plan_kitchen_cabinet",
-        "python:tools.rooms.shared.cabinet.plan.plan_cabinet"
+        "python:tools.rooms.shared.cabinet.plan.plan_cabinet",
+        "python:tools.rooms.shared.cabinet.plan.require_valid",
+        "python:tools.rooms.shared.cabinet.sketchup.materialize",
+        "python:tools.rooms.shared.cabinet.sketchup.inspect",
+        "ruby:tools/rooms/shared/cabinet/ruby/cabinet_build.rb",
+        "ruby:tools/rooms/shared/cabinet/ruby/cabinet_inspect.rb"
       ],
       "parameters": [
         {
@@ -485,18 +513,21 @@
       ],
       "preconditions": [
         "consensus da planta com a cozinha identificada",
-        "escala PT_TO_M da planta (0,0259 para a planta_74)"
+        "escala PT_TO_M da planta (0,0259 para a planta_74)",
+        "base = copia de um .skp; o original nunca e aberto"
       ],
       "invariants": [
         "a pia continua na parede oeste",
         "nenhuma parede/porta/janela e alterada",
         "sem sobreposicao com a mobilia planejada",
-        "zonas de porta livres"
+        "zonas de porta livres",
+        "so ferramentas da allowlist do perfil; um gate reprovado recusa antes de subir o SketchUp"
       ],
-      "side_effects": "NONE",
+      "side_effects": "WRITES_WORKING_COPY",
       "limitations": [
-        "so L1: planeja, nao materializa (P6b)",
-        "um gate reprovado recusa o plano inteiro"
+        "a pose vem do pedido: passar nos gates nao significa bom layout",
+        "veio NOT_SUPPORTED; sem ferragem/gaveta/Shaker/recorte",
+        "visual NOT_REVIEWED"
       ]
     },
     {
