@@ -235,10 +235,6 @@ def build_shell(consensus_path: str | None = None, *, out_path: str | None = Non
     why = su.unavailable()
     if why:
         return {"status": "UNAVAILABLE", "reason": why}
-    if not su.system.exists(su.loc.plugins_dir / "autorun_consume.rb"):
-        return {"status": "UNAVAILABLE",
-                "reason": (f"o build do shell usa o plugin autorun_consume.rb, que não está em "
-                           f"{su.loc.plugins_dir} (ele não é versionado no repo)")}
     con = paths.resolve(consensus_path) if consensus_path else CONSENSUS_DEFAULT
     if not con.exists():
         return {"status": "ERROR", "reason": f"consensus não encontrado: {con}"}

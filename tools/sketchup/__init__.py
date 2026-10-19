@@ -15,5 +15,6 @@ código testável — não em prompt:
                build_shell/furnish/render_vray.
 
 Os jobs Ruby ficam versionados em `tools/sketchup/ruby/` — diferente do
-`autorun_consume.rb`, que só existe no `Plugins` da máquina.
+`autorun_consume.rb`, que só existe no `Plugins` da máquina e não é mais usado: o build do shell também roda no
+processo próprio, carregado por `skmcp_launch.rb`.
 """
