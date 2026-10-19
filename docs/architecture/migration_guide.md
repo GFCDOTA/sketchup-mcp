@@ -1,0 +1,61 @@
+# Guia de migração
+
+Para quem procura um arquivo que mudou de lugar, e para quem vai mover um. Mapa geral:
+[mapa do repositório](repository_map.md). Decisão e risco de **cada** arquivo: [mapa P0](../specs/fp043_p0_map.v1.json)
+(resumo: [FP-043 P0](../specs/FP-043_P0_map.md)).
+
+## Estado
+
+**Nada foi movido ainda.** A FP-043 está na fase de navegação (P1); a raiz muda em P2 e `tools/` em P4. Este guia
+vale desde já porque fixa as regras que toda movimentação segue.
+
+## Regras de compatibilidade
+
+1. **O caminho antigo continua funcionando.** Todo `python -m tools.<nome>` e todo `from tools.<nome> import …` documentado
+   segue válido: o arquivo antigo vira uma **fachada** que delega à implementação canônica (`compat: facade_at_old_path`
+   no mapa). Os módulos que já são fachada (`tools/sofa_builder.py`, `tools/kitchen_layout.py`, …) ficam como estão.
+2. **Uma implementação por responsabilidade.** A fachada só delega: sem lógica duplicada e sem cópia divergente.
+3. **Script carregado por caminho** (`.rb` em `-RubyStartup`, `ROOT / "tools" / "x.rb"`) **não** vira fachada: antes de
+   mover, introduz-se **um** resolvedor de caminho e os chamadores passam a usá-lo (`compat: path_resolver_unico`).
+4. **Fixtures e artefatos canônicos ficam onde estão.** A fonte `planta_74.pdf` é a única migração de *caminho* de um
+   protegido: bytes e SHA256 idênticos, sem cópia divergente, e só junto de um resolvedor único.
+5. **Janela de compatibilidade:** as fachadas **não** são removidas nesta fase. Remover uma exige spec própria, zero
+   consumidores no repositório e os externos atualizados (`E:/Claude/.mcp.json`, `harness-app`).
+6. **Pontos externos que não mudam de caminho:** `python -m tools.mcp_server.server` e
+   `fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json`.
+
+## Para onde cada família vai (resumo; o detalhe por arquivo está no JSON)
+
+| Hoje (direto em `tools/`) | Destino planejado | Fase |
+|---|---|---|
+| `*_gate.py`, `*_audit.py`, `geometry_sanity`, `run_deterministic_gates`, `repo_health_gate` | `tools/validation/` | P4 |
+| `render_*.py`, `compose_side_by_side`, `tweak_vrscene`, `overlay_diff`, `gen_textures`, … | `tools/rendering/` | P4 |
+| `furnish_apartment`, `variant_sweep`, `promote_*`, `correction_*`, `fidelity_loop`, … | `tools/orchestration/` | P4 |
+| RAG, `project_memory_db`, `reference_db`, `reference_grammar`, `pdf_knowledge/` | `tools/knowledge/` | P4 |
+| `ask_gpt_gate`, `oracle_providers`, `run_skp_visual_review`, `negative_dogfood`, … | `tools/oracle/` | P4 |
+| `place_layout_skp.*`, `build_plan_shell_skp.*`, `vray_export.rb`, `inspect_skp.rb`, `su_runner_safety` | `tools/sketchup/{furnish,shell,vray,inspect}/` e `runner_safety.py` | P4 |
+| `kitchen_*`, `sofa_*`, `render_banho_*`, `place_bedroom_skp`, `make_synthetic_*` | `tools/rooms/<cômodo>/…` | P4 |
+| `room_type`, `spatial_model`, `layout_rules`, `shell_parts`, `decor_*` | `tools/rooms/shared/` | P4 |
+| `scripts/*sofa*.rb` | `tools/rooms/living/capabilities/` | P4 |
+| `HANDOFF.md`, `KICKOFF.md`, `CLAUDE_COGNITIVE_ARCHITECTURE.md` (raiz) | `docs/handoffs/`, `docs/architecture/` | P2 |
+| `HISTORICO_SOFA.json`, `vray_pipeline_proof.png` (raiz) | `references/sofas/history/`, `artifacts/review/` | P2 |
+| `planta_74.pdf` (raiz) | `projects/planta_74/source/` | P2 |
+
+## Para quem vai mover um arquivo (checklist do PR)
+
+1. `python -m tools.navigation.consumers <caminho>`: leia **todos** os consumidores (código, testes, CI, MCP, config, docs).
+2. Revise à mão o que a busca não vê: caminho montado em runtime, `Path(__file__).parents[n]` (a profundidade muda),
+   `require_relative` em Ruby, strings em YAML/JSON/PowerShell.
+3. Mova a implementação para o destino do mapa; deixe a fachada no caminho antigo (ou o resolvedor, para scripts).
+4. Atualize o item no [mapa P0](../specs/fp043_p0_map.v1.json) (`status: done`) e o estado em [repository_map](repository_map.md).
+5. Atualize o inventário e os manifestos FP-042 **no mesmo PR**, sem regenerá-los por inteiro.
+6. Prove: imports frios em ordens diferentes, `-m` da CLI antiga, `python -m pytest tests/ -m "not planta74_scale"` e
+   `PT_TO_M=0.0259 python -m pytest tests/ -m planta74_scale` (processos separados), `python -m tools.mcp_server.smoke`,
+   `python -m tools.navigation.p0_map --check` e `python -m tools.navigation.docs_check`.
+7. Um PR por intenção: movimentação **não** vai junto de correção de comportamento nem de capacidade nova.
+
+## Para quem adiciona um módulo de cômodo
+
+Siga a convenção da [cozinha](../../tools/rooms/kitchen/README.md): `README.md` primeiro; `specialist.md`,
+`specialist.v1.json` e `knowledge/index.v1.json` quando o perfil existir (P5); `capabilities/` só quando houver adapter
+comprovado. Não crie pasta vazia: o estado `previsto` do mapa existe para isso.
