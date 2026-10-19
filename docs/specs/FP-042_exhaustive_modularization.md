@@ -174,3 +174,10 @@ Classe de sofá, rack, mesa de centro, mesa de jantar, poltrona e cama
 migradas para living/bedroom; builder genérico de poltrona em shared.
 Imports históricos continuam disponíveis em facades tools.*, inclusive CLI.
 Geometria e SKPs não foram alterados.
+
+
+## Conclusão do escopo automatizado
+
+Após aprovação da nova CI estrita, consultar
+`docs/specs/FP-042_automated_closure.md`. A checagem de ownership cobre
+todos os arquivos; não comprova SketchUp L2/visual ou semântica das aulas.
