@@ -13836,6 +13836,20 @@
       "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
       "tool_owner": "regression_test_suite",
       "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
+    },
+    {
+      "path": "tools/rooms/living/planner.py",
+      "domain": "room_living",
+      "disposition": "tools.rooms.living",
+      "phase": "P3",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
+    },
+    {
+      "path": "tests/test_fp042_living_planner_ownership.py",
+      "domain": "test",
+      "disposition": "retain_current_owner",
+      "phase": "P3",
+      "status": "PENDING_REVIEW_OR_MIGRATION"
     }
   ]
 }
