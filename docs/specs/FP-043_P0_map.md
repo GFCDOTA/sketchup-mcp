@@ -1,6 +1,6 @@
 # FP-043 / P0 — Mapa de reorganização
 
-**Estado:** P0 entregue (mapa + gate). Movimentações executadas até agora: os 6 arquivos soltos da raiz (P2; ver `status: done` no JSON).
+**Estado:** P0 entregue (mapa + gate), P2 raiz executada (6 arquivos), P4 executada nos itens com `status: done` (131 movimentos de arquivos e três famílias de diretórios com fachadas legadas). Itens `decision` D-002 a D-005 continuam sem resolução e não impedem tarefas independentes.
 **Baseline:** `develop` `07959bfdd153031de13190e883583c7e8acb5c70` (PR #285).
 **Fonte de verdade:** [`fp043_p0_map.v1.json`](fp043_p0_map.v1.json) · gate: `python -m tools.navigation.p0_map --check`
 · consumidores de qualquer item: `python -m tools.navigation.consumers <caminho>`.

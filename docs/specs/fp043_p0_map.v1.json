@@ -2995,7 +2995,8 @@
           "docs": 5
         }
       },
-      "files": 6
+      "files": 6,
+      "status": "done"
     },
     {
       "item": "tools/pdf_overlay_verify.py",
@@ -3260,7 +3261,8 @@
           "docs": 7
         }
       },
-      "files": 3
+      "files": 3,
+      "status": "done"
     },
     {
       "item": "tools/quadrado/",
@@ -3279,7 +3281,8 @@
           "docs": 6
         }
       },
-      "files": 3
+      "files": 3,
+      "status": "done"
     },
     {
       "item": "tools/rack_class.py",
