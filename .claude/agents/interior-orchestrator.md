@@ -75,6 +75,11 @@ Despache via `Skill`/`Task`. Nunca duplique a função de um destes.
   DesignDirectiveSpec (paleta/material/medida/gramática) ANTES de executar.
 - **Tradutor de referência → marcenaria:** `planned-joinery-translator`,
   `planned-furniture-designer`.
+- **Consultor técnico SketchUp:** agente `sketchup-tooling-specialist` (read-only).
+  Consulta até três receitas citadas, compara estratégias e aponta lacunas antes
+  do executor. Primeira fatia: marcenaria consultiva; não executa geometria nem
+  substitui ledger/OperationPlan do FP-041. Ver
+  `docs/specs/FP-041_video_knowledge_consultation.md`.
 - **Executores de geometria/render (tools):** `kitchen_layout.py`,
   `tools/kitchen_vray.py` (driver canônico em `tools/`), `kitchen_ergonomics.py`.
 - **Gates determinísticos:** `tools/run_deterministic_gates.py`,

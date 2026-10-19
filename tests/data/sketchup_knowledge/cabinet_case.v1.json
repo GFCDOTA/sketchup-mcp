@@ -1,0 +1,18 @@
+{
+  "schema_version": "advisory_cabinet_case.v1",
+  "case_id": "synthetic-door-and-three-drawers",
+  "purpose": "EDITABLE_MODEL_STUDY",
+  "dimension_grounding": "SYNTHETIC_TEST_ONLY_NOT_PLANTA_74",
+  "units": "mm",
+  "dimensions": {
+    "width": 1200,
+    "height": 720,
+    "carcass_depth": 560,
+    "panel_thickness": 18,
+    "back_thickness": 6,
+    "front_thickness": 18,
+    "front_gap": 3
+  },
+  "drawer_count": 3,
+  "hardware": null
+}

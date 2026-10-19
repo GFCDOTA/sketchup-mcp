@@ -2,6 +2,32 @@
 
 Branch em curso, objetivo, escopo, validação.
 
+## Continuação FP-041 / PR #252 — 2026-10-18
+
+Autorização do Felipe nesta sessão: "pode dar continuidade", após a proposta
+de integrar as receitas ao especialista e preparar micro-fixture consultiva.
+Branch: `feature/fp041-sketchup-video-knowledge`, base remota conferida
+`919fd9dc3dcd7f64cd49d9faf2fc4f3ed1a84b61` (PR aberto em draft para `develop`).
+
+- Adicionado `sketchup-tooling-specialist` somente leitura, conectado ao mapa
+  do orquestrador e ao catálogo de oito receitas.
+- `tools.sketchup.knowledge`: CLI read-only de consulta e plano sintético de
+  gabinete (uma porta, três frentes de gaveta). Cálculos L1 e proveniência;
+  nunca autoriza execução nem importa jobs/MCP/Ruby.
+- Caso de teste em `tests/data/sketchup_knowledge/`, sem mudar `fixtures/`,
+  builders, materializadores, `.skp` ou arquitetura.
+- Escopo/aceite: `docs/specs/FP-041_video_knowledge_consultation.md`.
+- Pendente: MVP geral FP-041 (ledger, OperationPlan e avaliação de competência),
+  materialização paramétrica de componentes e prova no SketchUp real.
+  L2 `PENDING_SKETCHUP`, L3 `PENDING_HUMAN`; não declarar melhoria do apartamento.
+- Continuação mantém PR em draft e não faz merge.
+- Validação local: 25 testes focados; suíte padrão 1536 passed / 19 skipped,
+  escala planta_74 74 passed; ruff dos arquivos Python novos, dois gates
+  determinísticos e smoke/stdio MCP passaram. Skips incluem Ruby ausente,
+  Qdrant/Ollama offline e artefatos não gerados; não são prova L2.
+
+O snapshot abaixo é histórico da sessão de reconciliação, anterior ao PR #252.
+
 > **Atualizar a cada session start / branch switch.** Se este
 > arquivo estiver stale, qualquer agente deve reconciliar antes
 > de operar.
