@@ -30,3 +30,30 @@ def test_imports_are_parsed_without_executing_modules():
     assert "tools.rooms.kitchen" in collect_imports(
         "if False:\n    import tools.rooms.kitchen\n"
     )
+
+
+def test_relative_cross_room_import_is_blocked():
+    code = "from ..bathroom import layout\n"
+    result = ownership_violations({"tools/rooms/kitchen/planner.py": code})
+    assert any(r["imported"] == "tools.rooms.bathroom" and
+               r["reason"] == "CROSS_ROOM_DEPENDENCY" for r in result)
+
+
+def test_relative_from_parent_import_room_alias_is_blocked():
+    code = "from .. import bathroom\n"
+    violations = ownership_violations({"tools/rooms/kitchen/planner.py": code})
+    assert any(r["imported"] == "tools.rooms.bathroom" for r in violations)
+
+
+def test_from_tools_import_legacy_builder_is_blocked_in_shared():
+    code = "from tools import kitchen_layout\n"
+    violations = ownership_violations({"tools/rooms/shared/geometry_ext.py": code})
+    assert any(r["imported"] == "tools.kitchen_layout" and
+               r["reason"] == "SHARED_IMPORTS_ROOM" for r in violations)
+
+
+def test_relative_local_import_remains_allowed():
+    code = "from . import validation\n"
+    assert ownership_violations({"tools/rooms/kitchen/layout.py": code}) == []
+    assert "tools.rooms.kitchen.validation" in collect_imports(
+        code, module_name="tools.rooms.kitchen.layout")

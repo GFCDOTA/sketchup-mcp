@@ -16,14 +16,40 @@ ROOM_NAMES = frozenset({
 })
 
 
-def collect_imports(source: str) -> set[str]:
+def collect_imports(source: str, *, module_name: str | None = None) -> set[str]:
+    """Resolve static absolute AND relative imports without loading any module.
+
+    `module_name` is the full dotted module path of the source file. The
+    optional argument preserves the existing public collect_imports(source)
+    contract for clients that only need absolute imports.
+    """
     tree = ast.parse(source)
-    imports = set()
+    imports: set[str] = set()
+    package = module_name.split(".")[:-1] if module_name else []
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
-            imports.update(a.name for a in node.names)
-        elif isinstance(node, ast.ImportFrom) and node.module:
-            imports.add(node.module)
+            imports.update(alias.name for alias in node.names)
+            continue
+        if not isinstance(node, ast.ImportFrom):
+            continue
+        if node.level:
+            if not package or node.level > len(package) + 1:
+                continue
+            prefix = package[:len(package) - node.level + 1]
+            if node.module:
+                prefix += node.module.split(".")
+            resolved = ".".join(prefix)
+        else:
+            resolved = node.module or ""
+        if resolved:
+            imports.add(resolved)
+        # `from .. import bedroom` and `from tools import kitchen_layout`
+        # import a module through an alias; a prefix-only scan misses both.
+        if (node.module is None or resolved in {"tools", "tools.rooms"}):
+            imports.update(
+                resolved + "." + alias.name if resolved else alias.name
+                for alias in node.names if alias.name != "*"
+            )
     return imports
 
 
@@ -37,7 +63,8 @@ def ownership_violations(files: dict[str, str]) -> list[dict]:
         owner = parts[2]
         if owner not in ROOM_NAMES and owner != "shared":
             continue
-        for imported in sorted(collect_imports(source)):
+        module_name = ".".join(Path(path).with_suffix("").parts)
+        for imported in sorted(collect_imports(source, module_name=module_name)):
             chunks = imported.split(".")
             if len(chunks) >= 3 and chunks[:2] == ["tools", "rooms"]:
                 other = chunks[2]
