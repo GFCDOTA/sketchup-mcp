@@ -22,7 +22,8 @@ sys.path.insert(0, str(ROOT))
 from shapely.ops import unary_union                               # noqa: E402
 from interior.semantics.room_graph import build_room_graph, neighbors_through  # noqa: E402
 from interior.semantics.wall_affordance import wall_affordance     # noqa: E402
-from tools.bedroom_layout import M, _door_zones, _fbox, _wall_setup  # noqa: E402
+from core.scale import M
+from tools.rooms.shared.geometry import _door_zones, _fbox, _wall_setup  # noqa: E402
 from tools.spatial_model import PT_TO_M, build_spatial_model        # noqa: E402
 
 from core.scale import PT_TO_IN  # noqa: E402  (fonte unica de escala; env PT_TO_M -> 0.0259)

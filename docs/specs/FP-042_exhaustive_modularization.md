@@ -157,3 +157,12 @@ mantendo os entrypoints históricos para compatibilidade. A certificação
 `VERIFIED_PATH_BASED_OWNER_CLASSIFICATION` prova **owner do caminho**,
 não comportamento operacional: este depende de pytest, smoke MCP e
 prova SketchUp L2 ainda pendente.
+
+
+### FP-042/P3 — brain de posicionamento da sala e dependências de engine
+
+O algoritmo de `plan_living` tem ownership em `tools.rooms.living.planner`,
+com facade pública no caminho histórico `interior.planners.living_room_planner`.
+`placement_brain` e `sofa_placement_gate` eliminam imports de quarto e
+consomem a geometria de `tools.rooms.shared.geometry` e a escala de `core.scale`.
+O funcionamento geométrico não foi alterado; CI exige gates e compatibilidade.
