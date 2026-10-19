@@ -442,8 +442,8 @@ def build_boxes(con, room_id):
 
 def main():
     import json
-    from tools.furnish_apartment import CONSENSUS
-    con = json.loads(Path(CONSENSUS).read_text("utf-8"))
+    from tools.rooms.shared.project_paths import PLANTA_74_CONSENSUS
+    con = json.loads(PLANTA_74_CONSENSUS.read_text("utf-8"))
     boxes, out = build_boxes(con, "r001")
     print(f"[service] {out['result']} — {out.get('n_placed', 0)} boxes")
     print(f"[service] zonas (m2): {out.get('zonas')}")
