@@ -6,6 +6,7 @@
 #   LAYOUT_OUT / LAYOUT_BEFORE / LAYOUT_AFTER_TOP / LAYOUT_AFTER_ISO / LAYOUT_LOG
 # Placeholders, NAO 3D Warehouse. Felipe 2026-06-04 (gate :8765 opcao A).
 require 'json'
+require_relative 'place_layout_geom'
 
 def pl_top_camera(model, bbox = nil)
   view = model.active_view
@@ -144,21 +145,22 @@ def pl_run
         face.pushpull(face.normal.z >= 0 ? (h - bev) : -(h - bev))
         topz = z0 + h - bev
         top = g.entities.grep(Sketchup::Face).find { |f| f.normal.z.abs > 0.9 && (f.bounds.center.z - topz).abs < 0.3 }
-        if top
-          bb = top.bounds
-          ix0, iy0, ix1, iy1 = bb.min.x + bev, bb.min.y + bev, bb.max.x - bev, bb.max.y - bev
-          if ix1 > ix0 && iy1 > iy0
-            th = z0 + h
-            if b['kind'] == 'arm'   # braco = casca INCLINADA (frustum), sem degrau (GPT)
-              bp = [[bb.min.x, bb.min.y, topz], [bb.max.x, bb.min.y, topz], [bb.max.x, bb.max.y, topz], [bb.min.x, bb.max.y, topz]].map { |p| Geom::Point3d.new(*p) }
-              tp = [[ix0, iy0, th], [ix1, iy0, th], [ix1, iy1, th], [ix0, iy1, th]].map { |p| Geom::Point3d.new(*p) }
-              top.erase!
-              4.times { |i| j = (i + 1) % 4; begin; g.entities.add_face(bp[i], bp[j], tp[j], tp[i]); rescue StandardError; end }
-              begin; g.entities.add_face(tp); rescue StandardError; end
-            else                    # almofada = topo inset levantado (degrau) — GPT aprovou
-              ip = [[ix0, iy0, topz], [ix1, iy0, topz], [ix1, iy1, topz], [ix0, iy1, topz]].map { |p| Geom::Point3d.new(*p) }
-              g.entities.add_face(ip).pushpull(bev)
-            end
+        # inset da PEGADA da peca, nao do bounds do topo (AABB): girada fora de 90 graus
+        # o AABB e maior que a peca e o topo inset vazava (place_layout_geom.rb).
+        ring = PlaceLayoutGeom.ccw((b['corners'] || []).map { |c| [c[0].to_f, c[1].to_f] })
+        inner = PlaceLayoutGeom.inset_convex(ring, bev)
+        if top && inner
+          th = z0 + h
+          if b['kind'] == 'arm'   # braco = casca INCLINADA (frustum), sem degrau (GPT)
+            bp = ring.map { |x, y| Geom::Point3d.new(x, y, topz) }
+            tp = inner.map { |x, y| Geom::Point3d.new(x, y, th) }
+            top.erase!
+            n = bp.length
+            n.times { |i| j = (i + 1) % n; begin; g.entities.add_face(bp[i], bp[j], tp[j], tp[i]); rescue StandardError; end }
+            begin; g.entities.add_face(tp); rescue StandardError; end
+          else                    # almofada = topo inset levantado (degrau) — GPT aprovou
+            ip = inner.map { |x, y| Geom::Point3d.new(x, y, topz) }
+            g.entities.add_face(ip).pushpull(bev)
           end
         end
       else
