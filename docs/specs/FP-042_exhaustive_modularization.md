@@ -145,3 +145,15 @@ Arquivos de infraestrutura, registry, core, schemas e gates têm
 reprova paths P1/P2 não reconhecidos; `ownership_audit` continua
 impedindo dependências AST entre implementações de cômodos. Escopo
 **classificação de caminho/owner**, não equivalência semântica/L2.
+
+
+### FP-042/P4 — ownership das ferramentas e APIs públicas
+
+A classificação da P4 distingue `tools.furnish_apartment` (orquestração
+entre cômodos), `tools.mcp_server` (API), `tools.interior_studio`,
+bridges, comandos legados, scripts e geração/validação. O gate
+`tooling_ownership` falha para caminhos operacionais P4 não catalogados,
+mantendo os entrypoints históricos para compatibilidade. A certificação
+`VERIFIED_PATH_BASED_OWNER_CLASSIFICATION` prova **owner do caminho**,
+não comportamento operacional: este depende de pytest, smoke MCP e
+prova SketchUp L2 ainda pendente.
