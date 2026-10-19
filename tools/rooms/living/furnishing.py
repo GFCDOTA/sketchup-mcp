@@ -101,8 +101,29 @@ def living_room_boxes(con, room_id):
     # é o fundo que faz rack+TV lerem como estar planejado. Fita LED 2700K no topo.
     _pan_w = round(max(1.80, min(_rack_wall_len - 0.10, 2.60)), 2)
     _pan_c = (rack_c[0] - rfx * 0.15 * M2IN, rack_c[1] - rfy * 0.15 * M2IN)
-    boxes.append(_oriented_box("painel_tv", _pan_c, rack_f, _pan_w, 0.05, 0.0, 2.40,
-                               [92, 64, 46], module="Painel TV"))
+    # FP-043/P3a-03: o painel e HOSPEDADO na parede, nao enterrado nela — avanca (passos de 5 mm) ate a pegada sair da massa da parede.
+    from shapely.geometry import Polygon as _PolyIn
+    from core.scale import PT_TO_IN as _PTI
+    from tools.rooms.shared.clearance import obstacles_in as _obstacles_in
+    _wall_in, _swings_in = _obstacles_in(con, _PTI)
+    # Se a ponta ainda morde uma parede PERPENDICULAR (canto), encurta o painel (centrado) de 4 em 4 cm; piso 1,27 m (a TV de 55").
+    _shift_m = 0.0
+    for _ in range(40):
+        _pan = _oriented_box("painel_tv", _pan_c, rack_f, _pan_w, 0.05, 0.0, 2.40, [92, 64, 46], module="Painel TV")
+        if _PolyIn(_pan["corners"]).intersection(_wall_in).area < 1e-6:
+            break
+        _pan_c = (_pan_c[0] + rfx * 0.005 * M2IN, _pan_c[1] + rfy * 0.005 * M2IN)
+        _shift_m += 0.005
+    if _shift_m:                      # o rack acompanha o painel (mantem a folga de ~3 cm entre os dois)
+        for _b in _rb:
+            _dx, _dy = rfx * _shift_m * M2IN, rfy * _shift_m * M2IN
+            _b["corners"] = [[round(c[0] + _dx, 2), round(c[1] + _dy, 2)] for c in _b["corners"]]
+            _xs, _ys = [c[0] for c in _b["corners"]], [c[1] for c in _b["corners"]]
+            _b["x0"], _b["x1"], _b["y0"], _b["y1"] = min(_xs), max(_xs), min(_ys), max(_ys)
+    while _PolyIn(_pan["corners"]).intersection(_wall_in).area >= 1e-6 and _pan_w - 0.04 >= 1.27:
+        _pan_w = round(_pan_w - 0.04, 2)
+        _pan = _oriented_box("painel_tv", _pan_c, rack_f, _pan_w, 0.05, 0.0, 2.40, [92, 64, 46], module="Painel TV")
+    boxes.append(_pan)
     boxes.append(_oriented_box("lv_led", (_pan_c[0] + rfx * 0.033 * M2IN, _pan_c[1] + rfy * 0.033 * M2IN),
                                rack_f, _pan_w - 0.20, 0.016, 2.32, 0.02, [255, 250, 232], module="Painel TV"))
     # TV 55" REAL em produção (era só proxy na matriz do juiz): moldura fina +
@@ -196,6 +217,10 @@ def living_room_boxes(con, room_id):
                     continue
                 _cand_boxes = _dining_set(_cx, _cy)
                 if not _cand_boxes:
+                    continue
+                # FP-043/P3a-03: mesa/cadeira nao ficam no giro da porta nem dentro da parede
+                _fps = [Polygon([(c[0], c[1]) for c in _b["corners"]]) for _b in _cand_boxes if _b.get("corners")]
+                if any(_f.intersection(_sw).area > 1e-3 * M2IN * M2IN for _f in _fps for _sw in _swings_in.values())                         or any(_f.intersection(_wall_in).area > 1e-6 for _f in _fps):
                     continue
                 if _occ_now is not None:
                     _cand_occ = _uni([Polygon([(c[0], c[1]) for c in _b["corners"]])

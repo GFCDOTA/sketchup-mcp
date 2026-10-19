@@ -1002,6 +1002,11 @@ def build_boxes(con, room_id):
     items.extend(_enxoval_parts(cell, ws_by_kind, bb_by_kind, door_c, lavabo))
     theme = theme_of(sm.get("room_name"))
     _apply_theme(items, theme)
+    # FP-043/P3a-03: ralo linear e vidro fixo estendem-se ate a parede do fundo; encurta a ponta que entraria nela.
+    from tools.rooms.shared.clearance import clip_box_outside, obstacles_in
+    _wall_in, _ = obstacles_in(con, PT_TO_IN)
+    items = [c for c in (clip_box_outside(it, _wall_in) if it.get("kind") in ("kb_ralo", "box_vidro") else it
+                         for it in items) if c is not None]
     kinds = [it["kind"] for it in items]
     return items, {"result": "OK", "room_name": sm.get("room_name"),
                    "theme": theme,

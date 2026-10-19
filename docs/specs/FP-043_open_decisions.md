@@ -87,3 +87,12 @@ Mudança global não é segura.
 com regressão por cômodo, mantendo cozinha/SUITE 02/SERVICE como controles. Qualquer mudança de aparência vira
 `VISUAL_REVIEW`. Até lá o contrato "nenhum móvel dentro da parede" fica como `xfail(strict)` — vira falha ruidosa quando
 for corrigido.
+
+## D-008 — Criado-mudo 2 da SUITE 01 (parede × faixa da porta × 2 criados)
+
+**Status: BLOCKED_DECISION (produto/visual — Felipe).** Com a pegada real construída (piso 0,40×0,34 m + tampo com 2 cm de beiral), na SUITE 01
+não existe posição em que os DOIS criados fiquem fora da parede e a cabeceira/painel fique fora da faixa de 22 pol da porta (`geometry_sanity`).
+O planner (P3a-03) agora prefere o deslocamento de cama que resolve, mas nesta suíte nenhum resolve. Opções: (a) manter 2 criados e aceitar o
+criado 2 entrando ~6 cm na parede (estado atual, declarado como TRADE-OFF no log e travado em `tests/test_fp043_room_collisions.py`);
+(b) 1 criado só (limpo; derruba a expectativa de 2 tampos em `test_suite01_scale_gate`); (c) reduzir o piso mínimo do criado no adapter (afeta a SUITE 02).
+Nenhuma alterada sem decisão.

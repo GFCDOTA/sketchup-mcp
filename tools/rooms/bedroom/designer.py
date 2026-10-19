@@ -159,19 +159,74 @@ def build_layout(sm, hb, bed_dims=KING, bed_label="king", minimalist=True):
     o, face, sgn, ac = hb["orient"], hb["face"], hb["sgn"], hb["along_c"]
     items, downgrades = [], []
 
+    # --- P0: criados-mudos simétricos, alinhados à LINHA DA CABECEIRA, com folga
+    # mínima da cama (GPT review: criados menores/leves, não colados no bloco) ---
+    # Door-aware: o _door_zones cobre só o VÃO; o geometry_sanity exige 22in de
+    # clearance ao redor do centro da porta. Quando o criado do lado da porta cai
+    # nessa faixa, encolhe/afasta SÓ esse criado (mantém simetria quando o default já
+    # passa) até zerar o overlap — sem reorganizar o quarto. (WARN criado×porta -> PASS.)
+    nw, nd, _ = NIGHTSTAND
+    _dc = M(22 * 0.0254)   # 22in (= geometry_sanity DOOR_CLEARANCE_IN) em pts
+    _door_kinds = ("interior_door", "interior_passage", "glazed_balcony")
+    _door_clear = unary_union([
+        box(o2["center"][0] - _dc, o2["center"][1] - _dc, o2["center"][0] + _dc, o2["center"][1] + _dc)
+        for o2 in g["con"]["openings"]
+        if o2.get("wall_id") in set(g["room_walls"])
+        and (o2.get("kind_v5") or o2.get("kind")) in _door_kinds]) \
+        if any((o2.get("kind_v5") or o2.get("kind")) in _door_kinds
+               and o2.get("wall_id") in set(g["room_walls"]) for o2 in g["con"]["openings"]) else None
+    _tol_door = (M(0.036)) ** 2   # < ~2in2 -> geometry_sanity PASS (nao WARN)
+
+    def _place_ns(ac_, base_items, strict=True):
+        """Criados-mudos dos dois lados da cabeceira em ac_; devolve os itens que couberam."""
+        placed = []
+        for side in (1, -1):
+            ns_ac = ac_ + side * (M(bw) / 2 + M(nw) / 2 + M(NS_GAP))
+            # candidatos: default; encolhe (centrado, tira o canto do clearance); afasta da parede.
+            # ultimo recurso (P3a-03): desliza ate NS_GAP em direcao a cama, afastando o criado de uma parede lateral.
+            for cw, cdp, dperp, slide in ((nw, nd, 0.0, 0.0), (nw * 0.85, nd * 0.85, 0.0, 0.0),
+                                          (nw * 0.72, nd * 0.72, 0.0, 0.0), (nw, nd, 0.06, 0.0),
+                                          (nw * 0.85, nd * 0.85, 0.06, 0.0),
+                                          (nw, nd, 0.0, 0.025), (nw, nd, 0.0, NS_GAP), (nw, nd, 0.06, NS_GAP)):
+                ns = _fbox(o, face, sgn, ns_ac - side * M(slide), M(BED_PERP + dperp), M(cw), M(cdp))
+                if not (comodo.contains(ns) and not _hit(ns, circ_u) and not _ov(ns, base_items + placed)):
+                    continue
+                # FP-043/P3a-03: o vao e a laje (entra sob a parede); o movel nao. E o que se constroi e MAIOR que o candidato
+                # (adapter: piso 0,40 x 0,34 m + tampo com 2 cm de beiral), entao a parede e testada na pegada REAL.
+                real_w, real_d = max(cw, 0.40) + 0.02, max(cdp, 0.34) + 0.02
+                ns_real = _fbox(o, face, sgn, ns_ac - side * M(slide), M(BED_PERP + dperp + cdp / 2 - real_d / 2), M(real_w), M(real_d))
+                if strict and ns_real.intersection(wfoot).area > 1e-6:
+                    continue
+                if _door_clear is not None and ns.intersection(_door_clear).area > _tol_door:
+                    continue
+                placed.append({"name": f"criado_mudo_{'dir' if side > 0 else 'esq'}", "type": "nightstand",
+                               "box": ns, "anchor_wall": hb["id"],
+                               "reason": "flanqueando a cabeceira (clearance da porta respeitada)"})
+                break
+        return placed
+
     # --- P0: cama CENTRALIZADA (tamanho conforme o quarto; desliza se não couber) ---
+    # P3a-03: prefere o deslocamento em que os DOIS criados-mudos cabem fora da parede; senao o primeiro valido (comportamento antigo).
     bw, bl, _ = bed_dims
-    bed = None
-    for off in (0.0, 0.3, -0.3, 0.6, -0.6):
+    bed, bed_fallback = None, None
+    for off in (0.0, 0.1, -0.1, 0.2, -0.2, 0.3, -0.3, 0.45, -0.45, 0.6, -0.6):
         b = _fbox(o, face, sgn, ac + M(off), M(BED_PERP), M(bw), M(bl))
         if comodo.contains(b) and not _hit(b, circ_u) and not _hit(b, win_zone):
-            bed = {"name": f"cama_{bed_label}", "type": "bed", "box": b, "facing": _facing(o, sgn),
-                   "anchor_wall": hb["id"], "reason": "âncora; cabeceira em parede limpa; centralizada",
-                   "off": off}
-            ac = ac + M(off)
-            break
+            cand = {"name": f"cama_{bed_label}", "type": "bed", "box": b, "facing": _facing(o, sgn),
+                    "anchor_wall": hb["id"], "reason": "âncora; cabeceira em parede limpa; centralizada",
+                    "off": off}
+            if bed_fallback is None:
+                bed_fallback = cand
+            hb_probe = {"type": "headboard", "box": _fbox(o, face, sgn, ac + M(off), M(0.0), M(bw), M(HEADBOARD_DEPTH))}
+            if _door_clear is not None and hb_probe["box"].intersection(_door_clear).area > _tol_door:
+                continue                # cabeceira/painel na faixa de 22 pol da porta (geometry_sanity WARN)
+            if len(_place_ns(ac + M(off), [cand, hb_probe])) == 2:
+                bed = cand
+                break
+    bed = bed or bed_fallback
     if bed is None:
         return None, ["cama king não coube na parede da cabeceira"]
+    ac = ac + M(bed["off"])
     items.append(bed)
 
     # --- P0: cabeceira/painel fino contra a parede, atrás da cama (GPT review: a
@@ -191,40 +246,17 @@ def build_layout(sm, hb, bed_dims=KING, bed_label="king", minimalist=True):
     items.append({"name": "tapete", "type": "rug", "box": rug_fit, "decorative": True,
                   "anchor_wall": hb["id"], "reason": "sob a cama (recortado ao quarto)"})
 
-    # --- P0: criados-mudos simétricos, alinhados à LINHA DA CABECEIRA, com folga
-    # mínima da cama (GPT review: criados menores/leves, não colados no bloco) ---
-    # Door-aware: o _door_zones cobre só o VÃO; o geometry_sanity exige 22in de
-    # clearance ao redor do centro da porta. Quando o criado do lado da porta cai
-    # nessa faixa, encolhe/afasta SÓ esse criado (mantém simetria quando o default já
-    # passa) até zerar o overlap — sem reorganizar o quarto. (WARN criado×porta -> PASS.)
-    nw, nd, _ = NIGHTSTAND
-    _dc = M(22 * 0.0254)   # 22in (= geometry_sanity DOOR_CLEARANCE_IN) em pts
-    _door_kinds = ("interior_door", "interior_passage", "glazed_balcony")
-    _door_clear = unary_union([
-        box(o2["center"][0] - _dc, o2["center"][1] - _dc, o2["center"][0] + _dc, o2["center"][1] + _dc)
-        for o2 in g["con"]["openings"]
-        if o2.get("wall_id") in set(g["room_walls"])
-        and (o2.get("kind_v5") or o2.get("kind")) in _door_kinds]) \
-        if any((o2.get("kind_v5") or o2.get("kind")) in _door_kinds
-               and o2.get("wall_id") in set(g["room_walls"]) for o2 in g["con"]["openings"]) else None
-    _tol_door = (M(0.036)) ** 2   # < ~2in2 -> geometry_sanity PASS (nao WARN)
-    placed_n = 0
-    for side in (1, -1):
-        ns_ac = ac + side * (M(bw) / 2 + M(nw) / 2 + M(NS_GAP))
-        # candidatos: default; encolhe (centrado, tira o canto do clearance); afasta da parede.
-        for cw, cdp, dperp in ((nw, nd, 0.0), (nw * 0.85, nd * 0.85, 0.0),
-                               (nw * 0.72, nd * 0.72, 0.0), (nw, nd, 0.06),
-                               (nw * 0.85, nd * 0.85, 0.06)):
-            ns = _fbox(o, face, sgn, ns_ac, M(BED_PERP + dperp), M(cw), M(cdp))
-            if not (comodo.contains(ns) and not _hit(ns, circ_u) and not _ov(ns, items)):
-                continue
-            if _door_clear is not None and ns.intersection(_door_clear).area > _tol_door:
-                continue
-            items.append({"name": f"criado_mudo_{'dir' if side > 0 else 'esq'}", "type": "nightstand",
-                          "box": ns, "anchor_wall": hb["id"],
-                          "reason": "flanqueando a cabeceira (clearance da porta respeitada)"})
-            placed_n += 1
-            break
+    placed = _place_ns(ac, items)
+    if len(placed) < 2:
+        # D-008 (decisao de produto do Felipe): sem cama/criado que fujam da parede E da faixa da porta, mantem o
+        # criado do lado que falta como antes (encostado na parede) e DECLARA o trade-off, em vez de omitir o movel.
+        have = {p["name"] for p in placed}
+        for extra in _place_ns(ac, items, strict=False):
+            if extra["name"] not in have:
+                placed.append(extra)
+                downgrades.append(f"{extra['name']}: invade a parede (D-008, sem posicao livre; decisao de produto)")
+    items.extend(placed)
+    placed_n = len(placed)
     if placed_n < 2:
         downgrades.append(f"criados-mudos: só {placed_n} coube(ram) (ideal 2)")
 
