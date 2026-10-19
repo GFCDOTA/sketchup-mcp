@@ -1,0 +1,35 @@
+{
+  "schema_version": "specialist_knowledge_index.v1",
+  "room": "kitchen",
+  "environment_recipes": [
+    "cross.room.material-and-instance-rules",
+    "room.kitchen.cabinet-assemblies"
+  ],
+  "video_recipes": [
+    "cabinet.countertop-separate-and-bevel",
+    "cabinet.drawer-box-and-hardware",
+    "cabinet.front-gaps-and-profiles",
+    "cabinet.recessed-shaker-and-louvers",
+    "cabinet.reusable-components",
+    "cabinet.sink-and-wet-channel-cutouts"
+  ],
+  "knowledge_sources": [
+    "official-components",
+    "official-groups"
+  ],
+  "capabilities": [
+    "kitchen.layout.galley",
+    "kitchen.sink-anchor-guard",
+    "kitchen.ergonomics.audit",
+    "shared.cabinet.parametric"
+  ],
+  "bindings": [
+    "bind.kitchen.layout",
+    "bind.kitchen.cabinet",
+    "bind.kitchen.shaker",
+    "bind.kitchen.drawer",
+    "bind.kitchen.countertop",
+    "bind.kitchen.sink-cutout"
+  ],
+  "note": "Indice por ID: o texto das recipes mora nos catalogos canonicos; nada e copiado aqui."
+}

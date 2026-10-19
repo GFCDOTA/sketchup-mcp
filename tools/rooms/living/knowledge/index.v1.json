@@ -1,0 +1,29 @@
+{
+  "schema_version": "specialist_knowledge_index.v1",
+  "room": "living",
+  "environment_recipes": [
+    "cross.room.material-and-instance-rules",
+    "room.living.media-wall",
+    "room.living.organic-sofa"
+  ],
+  "video_recipes": [
+    "cabinet.materials-and-texture-direction",
+    "cabinet.reusable-components"
+  ],
+  "knowledge_sources": [
+    "official-components",
+    "official-followme",
+    "official-model-organization",
+    "ruby-method-list"
+  ],
+  "capabilities": [
+    "living.layout.boxes",
+    "living.sofa.class",
+    "living.sofa.gate"
+  ],
+  "bindings": [
+    "bind.living.layout",
+    "bind.living.sofa"
+  ],
+  "note": "Indice por ID: o texto das recipes mora nos catalogos canonicos; nada e copiado aqui."
+}

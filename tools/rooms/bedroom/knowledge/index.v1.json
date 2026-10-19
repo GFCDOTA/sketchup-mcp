@@ -1,0 +1,27 @@
+{
+  "schema_version": "specialist_knowledge_index.v1",
+  "room": "bedroom",
+  "environment_recipes": [
+    "cross.room.material-and-instance-rules",
+    "room.bedroom.bed-and-headboard"
+  ],
+  "video_recipes": [
+    "cabinet.materials-and-texture-direction",
+    "cabinet.reusable-components"
+  ],
+  "knowledge_sources": [
+    "official-components",
+    "official-groups",
+    "official-texture-position"
+  ],
+  "capabilities": [
+    "bedroom.layout.boxes",
+    "bedroom.bed.build",
+    "bedroom.wardrobe.build",
+    "bedroom.wardrobe.gate"
+  ],
+  "bindings": [
+    "bind.bedroom.layout"
+  ],
+  "note": "Indice por ID: o texto das recipes mora nos catalogos canonicos; nada e copiado aqui."
+}

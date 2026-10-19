@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "capability_catalog.v1",
+  "description": "FP-043/P5: catalogo unico e versionado source -> recipe -> capability -> simbolo -> fixture -> teste -> evidencia. Quatro dimensoes de estado independentes (conhecimento, implementacao, validacao, visual). Declarativo: registrar NAO autoriza execucao.",
+  "type": "object",
+  "required": ["schema_version", "catalog_version", "policy", "knowledge_catalogs", "capabilities", "bindings"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": "capability_catalog.v1"},
+    "catalog_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "policy": {"const": "DECLARATIVE_NO_EXECUTION_AUTHORIZATION"},
+    "knowledge_catalogs": {
+      "type": "object", "required": ["video", "environment"], "additionalProperties": false,
+      "properties": {"video": {"type": "string"}, "environment": {"type": "string"}}
+    },
+    "capabilities": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/capability"}},
+    "bindings": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/binding"}}
+  },
+  "$defs": {
+    "param": {
+      "type": "object", "required": ["name", "unit", "origin"], "additionalProperties": false,
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "unit": {"enum": ["m", "mm", "cm", "pt", "deg", "count", "text", "none"]},
+        "origin": {"enum": ["pdf", "consensus", "user_request", "derived", "default_declared"]}
+      }
+    },
+    "symbol": {
+      "type": "object", "required": ["lang", "ref"], "additionalProperties": false,
+      "properties": {
+        "lang": {"enum": ["python", "ruby"]},
+        "ref": {"type": "string", "minLength": 3,
+                "description": "python: modulo.pontilhado.simbolo ; ruby: caminho do .rb a partir da raiz"}
+      }
+    },
+    "evidence": {
+      "type": "object", "required": ["ref", "sketchup_version", "commit", "symbol_digests"], "additionalProperties": false,
+      "properties": {
+        "ref": {"type": "string", "minLength": 3},
+        "sketchup_version": {"type": "string"},
+        "commit": {"type": "string", "pattern": "^[0-9a-f]{7,40}$"},
+        "symbol_digests": {
+          "type": "object", "minProperties": 1,
+          "additionalProperties": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "description": "sha256 do codigo de cada simbolo/arquivo NO MOMENTO da prova; se o codigo muda, a prova fica velha"
+        },
+        "scope": {"type": "string"}
+      }
+    },
+    "capability": {
+      "type": "object",
+      "required": ["id", "room", "version", "owner", "title", "implementation", "validation", "visual", "tools",
+                   "parameters", "preconditions", "invariants", "side_effects", "limitations"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z_]+(\\.[a-z0-9_-]+)+$"},
+        "room": {"type": "string"},
+        "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+        "owner": {"type": "string"},
+        "title": {"type": "string", "minLength": 8},
+        "implementation": {
+          "type": "object", "required": ["state", "symbols"], "additionalProperties": false,
+          "properties": {
+            "state": {"enum": ["PLANNED", "IMPLEMENTED", "RETIRED"]},
+            "symbols": {"type": "array", "items": {"$ref": "#/$defs/symbol"}}
+          }
+        },
+        "validation": {
+          "type": "object", "required": ["state", "fixtures", "tests", "evidence"], "additionalProperties": false,
+          "properties": {
+            "state": {"enum": ["UNTESTED", "L1_PASS", "L2_PASS", "FAILED", "BLOCKED"]},
+            "fixtures": {"type": "array", "items": {"type": "string"}},
+            "tests": {"type": "array", "items": {"type": "string"}},
+            "evidence": {"type": "array", "items": {"$ref": "#/$defs/evidence"}}
+          }
+        },
+        "visual": {
+          "type": "object", "required": ["state"], "additionalProperties": false,
+          "properties": {"state": {"enum": ["NOT_REVIEWED", "APPROVED", "CHANGES_REQUESTED", "NOT_APPLICABLE"]}}
+        },
+        "tools": {"type": "array", "uniqueItems": true,
+                  "items": {"type": "string", "pattern": "^(python|ruby|mcp):[A-Za-z0-9_./-]+$"}},
+        "parameters": {"type": "array", "items": {"$ref": "#/$defs/param"}},
+        "preconditions": {"type": "array", "items": {"type": "string"}},
+        "invariants": {"type": "array", "items": {"type": "string"}},
+        "side_effects": {"enum": ["NONE", "WRITES_WORKING_COPY"]},
+        "limitations": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "binding": {
+      "type": "object", "required": ["id", "room", "recipe_ids", "source_ids", "capability_id", "gap"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "pattern": "^bind\\.[a-z0-9_.-]+$"},
+        "room": {"type": "string"},
+        "recipe_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "source_ids": {"type": "array", "items": {"type": "string"}},
+        "capability_id": {"type": ["string", "null"], "description": "null = tecnica conhecida, capacidade AUSENTE"},
+        "terms": {"type": "array", "items": {"type": "string"}, "description": "termos de roteamento do pedido para esta tecnica"},
+        "gap": {"type": ["string", "null"], "description": "obrigatorio quando capability_id e null: a lacuna especifica"}
+      }
+    }
+  }
+}

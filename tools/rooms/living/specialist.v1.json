@@ -1,0 +1,55 @@
+{
+  "schema_version": "specialist_profile.v1",
+  "room": "living",
+  "aliases": [
+    "living",
+    "living_room",
+    "sala"
+  ],
+  "role": "planner",
+  "reuse_of": null,
+  "scope": "Sala de estar e jantar da planta: sofa, rack/painel de TV, mesa. Planeja em caixas/pecas sobre o shell; nao altera paredes, portas nem janelas.",
+  "owner": "tools.rooms.living",
+  "state": "LEGACY_PROVIDER_PRESENT",
+  "knowledge_room_ids": [
+    "living"
+  ],
+  "source_ids": [
+    "cross.room.material-and-instance-rules",
+    "room.living.media-wall",
+    "room.living.organic-sofa"
+  ],
+  "recipe_ids": [
+    "cabinet.materials-and-texture-direction",
+    "cabinet.reusable-components"
+  ],
+  "capability_ids": [
+    "living.layout.boxes",
+    "living.sofa.class",
+    "living.sofa.gate"
+  ],
+  "tool_allowlist": [
+    "python:tools.rooms.living.furnishing.living_room_boxes",
+    "python:tools.rooms.living.sofa_class.derive_living_sofa",
+    "python:tools.rooms.living.validation.sofa_gate.gate",
+    "ruby:tools/sketchup/furnish/place_layout_skp.rb"
+  ],
+  "constraints": [
+    "Nao criar, mover ou apagar parede, porta ou janela.",
+    "Medida sem ancora no PDF/consensus nao e inventada: pedir ou recusar.",
+    "Tecnica sem capacidade registrada responde BLOCKED_CAPABILITY_MISSING; nao gerar Ruby ad hoc."
+  ],
+  "result_types": [
+    "boxes_plan",
+    "advisory_plan",
+    "blocked"
+  ],
+  "stop_conditions": [
+    "Capacidade ausente ou PLANNED para a tecnica pedida.",
+    "Medida, unidade ou origem ausente no pedido.",
+    "O pedido exige ferramenta fora da allowlist deste perfil.",
+    "O pedido altera arquitetura derivada do PDF.",
+    "Mudanca de aparencia: encaminhar para VISUAL_REVIEW do Felipe (nunca aprovar sozinho)."
+  ],
+  "execution_authorized": false
+}

@@ -1,0 +1,42 @@
+{
+  "schema_version": "specialist_profile.v1",
+  "room": "home_office",
+  "aliases": [
+    "home_office"
+  ],
+  "role": "reuse",
+  "reuse_of": "bedroom",
+  "scope": "Home office: reaproveita o designer de quarto; sem builder proprio de mesa/prateleira.",
+  "owner": "tools.rooms.home_office",
+  "state": "NO_INDEPENDENT_BRAIN_USE_BEDROOM_DESIGNER",
+  "knowledge_room_ids": [
+    "home_office"
+  ],
+  "source_ids": [
+    "cross.room.material-and-instance-rules",
+    "room.office.desk-and-storage"
+  ],
+  "recipe_ids": [
+    "cabinet.materials-and-texture-direction",
+    "cabinet.reusable-components"
+  ],
+  "capability_ids": [],
+  "tool_allowlist": [],
+  "constraints": [
+    "Nao criar, mover ou apagar parede, porta ou janela.",
+    "Medida sem ancora no PDF/consensus nao e inventada: pedir ou recusar.",
+    "Tecnica sem capacidade registrada responde BLOCKED_CAPABILITY_MISSING; nao gerar Ruby ad hoc."
+  ],
+  "result_types": [
+    "advisory_plan",
+    "blocked"
+  ],
+  "stop_conditions": [
+    "Capacidade ausente ou PLANNED para a tecnica pedida.",
+    "Medida, unidade ou origem ausente no pedido.",
+    "O pedido exige ferramenta fora da allowlist deste perfil.",
+    "O pedido altera arquitetura derivada do PDF.",
+    "Mudanca de aparencia: encaminhar para VISUAL_REVIEW do Felipe (nunca aprovar sozinho)."
+  ],
+  "execution_authorized": false
+}

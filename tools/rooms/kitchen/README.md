@@ -10,7 +10,9 @@ prova, está escrito.
 |---|---|
 | o **planner** (layout da cozinha) | [`layout.py`](layout.py) → `build_boxes(con, room_id)` |
 | a **regra que protege a pia** (ponto hidráulico do PDF) | constantes `KITCHEN_SINK_ANCHOR` / `KITCHEN_SINK_SIDE` em `layout.py`; checagem em [`anchor_rules.py`](anchor_rules.py) → `validate`; trava fail-closed em [`validation/__init__.py`](validation/__init__.py) → `require_kitchen_anchor` |
-| a medição ergonômica | [`tools/kitchen_ergonomics.py`](../../kitchen_ergonomics.py) → `audit` (ainda em `tools/`; vai para `validation/` em P4) |
+| a medição ergonômica | [`validation/ergonomics.py`](validation/ergonomics.py) → `audit` (a CLI antiga `tools/kitchen_ergonomics.py` é fachada) |
+| o **especialista** (papel, fontes, ferramentas permitidas, limites) | [`specialist.md`](specialist.md), perfil [`specialist.v1.json`](specialist.v1.json), índice de conhecimento [`knowledge/index.v1.json`](knowledge/index.v1.json) |
+| o **catálogo de capacidades** (fonte → recipe → capacidade → símbolo → teste → evidência) | `tools/rooms/capability_catalog.v1.json` (gate: `python -m tools.rooms.capability_catalog`; roteamento e plano fail-closed: `tools/rooms/specialists.py`) |
 | quem chama a cozinha | `tools/furnish_apartment.py` (`collect_boxes`) via [`../dispatch.py`](../dispatch.py); manifesto em [`../manifest.v1.json`](../manifest.v1.json) |
 
 Os caminhos antigos `tools/kitchen_layout.py` e `tools/kitchen_validation.py` são fachadas: preservam import e CLI

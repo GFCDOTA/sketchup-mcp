@@ -5,7 +5,7 @@ caminho nas tabelas abaixo é conferido por teste (`python -m tools.navigation.d
 presente, `previsto` exige o caminho ausente. Quando uma fase cria uma pasta, este arquivo muda no mesmo PR.
 
 Partir daqui: [README](../../README.md) · de onde veio e para onde vai cada arquivo: [guia de migração](migration_guide.md) ·
-decisões e riscos por item: [mapa P0](../specs/FP-043_P0_map.md).
+decisões e riscos por item: [mapa P0](../specs/FP-043_P0_map.md) · os nove especialistas: [índice](specialists.md).
 
 ## 1. Do pedido ao `.skp`
 
@@ -59,6 +59,7 @@ reutilizáveis; **sketchup** executa e inspeciona, sem decidir decoração; **mc
 | `docs/architecture/` | existe | esta pasta: mapa, guia de migração, rotas de navegação |
 | `docs/specs/` | existe | especificações e manifestos (FP-042, FP-043) |
 | `docs/handoffs/` | existe | passagens de bastão datadas (inclui o ex-`HANDOFF.md` e o ex-`KICKOFF.md` da raiz) |
+| `docs/architecture/specialists.md` | existe | índice dos nove perfis de especialista: papel, fonte, limite e capacidade registrada (P5) |
 | `docs/architecture/agent_architecture.md` | existe | como o agente carrega contexto (ex-`CLAUDE_COGNITIVE_ARCHITECTURE.md` da raiz); auditoria de 2026-06-05 |
 | `references/sofas/history/` | existe | histórico de julgamento do programa do sofá (ex-`HISTORICO_SOFA.json` da raiz) |
 | `artifacts/review/vray_pipeline_proof_2026-06/` | existe | evidência de prova do pipeline V-Ray (ex-`vray_pipeline_proof.png` da raiz); não é render canônico |
@@ -86,14 +87,16 @@ Cada cômodo é um pacote em `tools/rooms/<cômodo>/`; o manifesto
 
 ## 4. Convenção de um módulo de cômodo
 
-A cozinha é o primeiro módulo a seguir a convenção; os demais a recebem em P4/P5.
+A cozinha foi o primeiro módulo a seguir a convenção; os nove perfis (`specialist.md`, `specialist.v1.json`, `knowledge/index.v1.json`) existem desde a P5.
 
 | Caminho (relativo ao módulo) | Estado | Conteúdo |
 |---|---|---|
 | `tools/rooms/kitchen/README.md` | existe | comece aqui: entradas, fluxo, dependências, capacidades, testes, provas e limites |
-| `tools/rooms/kitchen/specialist.md` | previsto | papel, decisões, fontes, ferramentas permitidas e condições de parada (P5) |
-| `tools/rooms/kitchen/specialist.v1.json` | previsto | IDs do perfil, roteamento e estados, sem autorização implícita (P5) |
-| `tools/rooms/kitchen/knowledge/index.v1.json` | previsto | referências por ID às recipes canônicas, sem copiá-las (P5) |
+| `tools/rooms/kitchen/specialist.md` | existe | papel, decisões, fontes, ferramentas permitidas e condições de parada ([P5](../../tools/rooms/kitchen/specialist.md)) |
+| `tools/rooms/kitchen/specialist.v1.json` | existe | IDs do perfil, roteamento e estados, sem autorização implícita (P5) |
+| `tools/rooms/kitchen/knowledge/index.v1.json` | existe | referências por ID às recipes canônicas, sem copiá-las (P5) |
+| `tools/rooms/capability_catalog.v1.json` | existe | catálogo único fonte → recipe → capacidade → símbolo → fixture → teste → evidência (P5); gate `python -m tools.rooms.capability_catalog` |
+| `tools/rooms/specialists.py` | existe | perfis, roteamento e plano fail-closed (`BLOCKED_CAPABILITY_MISSING`); nunca executa (P5) |
 | `tools/rooms/kitchen/capabilities/` | existe | capacidades exclusivas da cozinha: V-Ray, bake de tema e Ruby de recolor/ângulos (P4a) |
 | `tools/rooms/kitchen/capabilities/cabinet.py` | previsto | adapter do gabinete paramétrico (P6) |
 | `tools/rooms/shared/cabinet/` | previsto | builder compartilhado de gabinete: **não existe** (P6) |

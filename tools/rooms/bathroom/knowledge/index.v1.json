@@ -1,0 +1,25 @@
+{
+  "schema_version": "specialist_knowledge_index.v1",
+  "room": "bathroom",
+  "environment_recipes": [
+    "cross.room.material-and-instance-rules",
+    "room.bathroom.vanity-and-shower"
+  ],
+  "video_recipes": [
+    "cabinet.materials-and-texture-direction",
+    "cabinet.sink-and-wet-channel-cutouts"
+  ],
+  "knowledge_sources": [
+    "official-components",
+    "official-groups",
+    "official-materials"
+  ],
+  "capabilities": [
+    "bathroom.layout.boxes",
+    "bathroom.wet-room.guard"
+  ],
+  "bindings": [
+    "bind.bathroom.layout"
+  ],
+  "note": "Indice por ID: o texto das recipes mora nos catalogos canonicos; nada e copiado aqui."
+}
