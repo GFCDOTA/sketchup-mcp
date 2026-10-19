@@ -8838,16 +8838,20 @@
     {
       "path": "interior/__init__.py",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "interior_public_package",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/class_specs/__init__.py",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "shared_furniture_class_spec",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/class_specs/ARMCHAIR_CLASS_SPEC.md",
@@ -8879,198 +8883,254 @@
     {
       "path": "interior/composer/__init__.py",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "cross_room_scene_composition",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/composer/scene_composer.py",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "cross_room_scene_composition",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/planners/__init__.py",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "planner_engine_package",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/planners/living_room_planner.py",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "legacy_compatibility_shim",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "living_planner_legacy_facade",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/planners/placement_brain.py",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "cross_room_placement_engine",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/renderers/__init__.py",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "renderer_provider_engine",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/renderers/enscape_preview_provider.py",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "renderer_provider_engine",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/renderers/render_provider.py",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "renderer_provider_engine",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/renderers/sketchup_basic_provider.py",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "renderer_provider_engine",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/renderers/vray_final_provider.py",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "renderer_provider_engine",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/schemas/__init__.py",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "shared_schema_contract",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/schemas/design_intent.schema.json",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "shared_schema_contract",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/schemas/furniture_asset.schema.json",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "shared_schema_contract",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/schemas/furniture_intent.schema.json",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "shared_schema_contract",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/schemas/scene_intent.schema.json",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "shared_schema_contract",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/semantics/__init__.py",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "shared_spatial_semantics",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/semantics/room_graph.py",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "shared_spatial_semantics",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/semantics/wall_affordance.py",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "shared_spatial_semantics",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/specs/__init__.py",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "room_design_intent_reference",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/specs/planta_74_r004_kitchen.designintent.json",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "room_design_intent_reference",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/style_packs/__init__.py",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "shared_style_pack",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/style_packs/black_wood_gold_boutique.json",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "shared_style_pack",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/style_packs/modern_warm_minimal.json",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "shared_style_pack",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/validators/__init__.py",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "interior_semantic_validation",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/validators/bed_gate.py",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "interior_semantic_validation",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/validators/bed_placement_gate.py",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "interior_semantic_validation",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/validators/furniture_visual_gate.py",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "interior_semantic_validation",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/validators/nightstand_gate.py",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "interior_semantic_validation",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/validators/PHASE2_PLACEMENT_HANDOFF.md",
@@ -9084,30 +9144,38 @@
     {
       "path": "interior/validators/scene_spatial_gate.py",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "interior_semantic_validation",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/validators/sofa_placement_gate.py",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "interior_semantic_validation",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/validators/validation_report.py",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "interior_semantic_validation",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/validators/wardrobe_gate.py",
       "domain": "interior_engine",
-      "disposition": "review_shared_vs_room",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "interior_semantic_validation",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "KICKOFF.md",
@@ -10140,23 +10208,29 @@
     {
       "path": "scripts/build_sofa_3seat_v1.rb",
       "domain": "room_living_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "sofa_legacy_evaluation_script",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "scripts/build_sofa_eval_suite.rb",
       "domain": "room_living_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "sofa_legacy_evaluation_script",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "scripts/build_sofa_from_config.rb",
       "domain": "room_living_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "sofa_legacy_evaluation_script",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "scripts/generalization_gate.py",
@@ -10188,37 +10262,47 @@
     {
       "path": "scripts/sofa_components.rb",
       "domain": "room_living_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "sofa_legacy_evaluation_script",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "scripts/sofa_fabric_material.py",
       "domain": "room_living_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "sofa_legacy_evaluation_script",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "scripts/sofa_generator.rb",
       "domain": "room_living_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "sofa_legacy_evaluation_script",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "scripts/sofa_primitives.rb",
       "domain": "room_living_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "sofa_legacy_evaluation_script",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "scripts/sofa_vray_render.rb",
       "domain": "room_living_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "sofa_legacy_evaluation_script",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tests/__init__.py",
@@ -11177,7 +11261,9 @@
       "domain": "test",
       "disposition": "retain_current_owner",
       "phase": "P3",
-      "status": "VERIFIED_ARCHITECTURE_TEST_UPDATED_PENDING_CI"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tests/test_room_registry.py",
@@ -11539,16 +11625,20 @@
     {
       "path": "tools/armchair_builder.py",
       "domain": "room_living_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "legacy_compatibility_shim",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "public_legacy_compatibility_facade",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/armchair_class.py",
       "domain": "room_living_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "legacy_compatibility_shim",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "public_legacy_compatibility_facade",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/ask_gpt_gate.py",
@@ -11598,30 +11688,38 @@
     {
       "path": "tools/bed_builder.py",
       "domain": "room_bedroom_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "legacy_compatibility_shim",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "public_legacy_compatibility_facade",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/bed_class.py",
       "domain": "room_bedroom_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "legacy_compatibility_shim",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "public_legacy_compatibility_facade",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/bedroom_designer.py",
       "domain": "room_bedroom_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "legacy_compatibility_shim",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "public_legacy_compatibility_facade",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/bedroom_layout.py",
       "domain": "room_bedroom_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "legacy_compatibility_shim",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "public_legacy_compatibility_facade",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/build_furniture_skp.rb",
@@ -11689,9 +11787,11 @@
     {
       "path": "tools/coffee_table_class.py",
       "domain": "room_living_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "legacy_compatibility_shim",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "public_legacy_compatibility_facade",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/collision_envelope_gate.py",
@@ -11804,9 +11904,11 @@
     {
       "path": "tools/dining_table_class.py",
       "domain": "room_living_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "legacy_compatibility_shim",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "public_legacy_compatibility_facade",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/disarm_sketchup_autoruns.py",
@@ -12369,9 +12471,11 @@
     {
       "path": "tools/make_synthetic_bedrooms.py",
       "domain": "room_bedroom_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "synthetic_bedroom_fixture_tool",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/make_synthetic_rooms.py",
@@ -12457,9 +12561,11 @@
     {
       "path": "tools/nightstand_builder.py",
       "domain": "room_bedroom_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "legacy_compatibility_shim",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "public_legacy_compatibility_facade",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/ollama_bridge.py",
@@ -12608,9 +12714,11 @@
     {
       "path": "tools/place_bedroom_skp.py",
       "domain": "room_bedroom_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "bedroom_sketchup_cli",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/place_layout_skp.py",
@@ -12723,16 +12831,20 @@
     {
       "path": "tools/rack_class.py",
       "domain": "room_living_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "legacy_compatibility_shim",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "public_legacy_compatibility_facade",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/rag_embed_backend.py",
-      "domain": "room_bedroom_or_shared",
-      "disposition": "manual_owner_review",
+      "domain": "shared_domain",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "cross_room_rag_infrastructure",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/rag_freshness.py",
@@ -12917,9 +13029,11 @@
     {
       "path": "tools/rooms/balcony/__init__.py",
       "domain": "room_service_or_balcony",
-      "disposition": "manual_owner_review",
+      "disposition": "tools.rooms.balcony",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "tools.rooms.balcony",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/rooms/bathroom/__init__.py",
@@ -12933,9 +13047,11 @@
     {
       "path": "tools/rooms/bedroom/__init__.py",
       "domain": "room_bedroom_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "tools.rooms.bedroom",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "tools.rooms.bedroom",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/rooms/circulation/__init__.py",
@@ -12985,9 +13101,11 @@
     {
       "path": "tools/rooms/living/__init__.py",
       "domain": "room_living_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "tools.rooms.living",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "tools.rooms.living",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/rooms/manifest.v1.json",
@@ -13019,9 +13137,11 @@
     {
       "path": "tools/rooms/service/__init__.py",
       "domain": "room_service_or_balcony",
-      "disposition": "manual_owner_review",
+      "disposition": "tools.rooms.service",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "tools.rooms.service",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/rooms/shared/__init__.py",
@@ -13233,72 +13353,92 @@
     {
       "path": "tools/sofa_builder.py",
       "domain": "room_living_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "legacy_compatibility_shim",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "public_legacy_compatibility_facade",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/sofa_class_matrix.py",
       "domain": "room_living_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "living_visual_gate_and_cli",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/sofa_class.py",
       "domain": "room_living_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "legacy_compatibility_shim",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "public_legacy_compatibility_facade",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/sofa_furnish_fase1_compare.py",
       "domain": "room_living_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "living_visual_gate_and_cli",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/sofa_gate.py",
       "domain": "room_living_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "living_visual_gate_and_cli",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/sofa_premium_harness.py",
       "domain": "room_living_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "living_visual_gate_and_cli",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/sofa_premium_harness.rb",
       "domain": "room_living_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "living_visual_gate_and_cli",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/sofa_premium_integrate.rb",
       "domain": "room_living_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "living_visual_gate_and_cli",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/sofa_venezia_compare.py",
       "domain": "room_living_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "living_visual_gate_and_cli",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/sofa_venezia_room.py",
       "domain": "room_living_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "retain_path_with_explicit_runtime_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "living_visual_gate_and_cli",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/soft_barrier_source_audit.py",
@@ -13456,9 +13596,11 @@
     {
       "path": "tools/wardrobe_builder.py",
       "domain": "room_bedroom_or_shared",
-      "disposition": "manual_owner_review",
+      "disposition": "legacy_compatibility_shim",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "public_legacy_compatibility_facade",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "uv.lock",
@@ -13535,42 +13677,54 @@
       "domain": "room_living",
       "disposition": "tools.rooms.living",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "tools.rooms.living",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tests/test_fp042_living_component_ownership.py",
       "domain": "test",
       "disposition": "retain_current_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/rooms/bedroom/furnishing.py",
       "domain": "room_bedroom",
       "disposition": "tools.rooms.bedroom",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "tools.rooms.bedroom",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tests/test_fp042_bedroom_furnishing_adapter.py",
       "domain": "test",
       "disposition": "retain_current_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/rooms/living/furnishing.py",
       "domain": "room_living",
       "disposition": "tools.rooms.living",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "tools.rooms.living",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tests/test_fp042_living_furnishing_adapter.py",
       "domain": "test",
       "disposition": "retain_current_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/rooms/kitchen/anchor_rules.py",
@@ -13595,42 +13749,54 @@
       "domain": "room_service",
       "disposition": "tools.rooms.service",
       "phase": "P3",
-      "status": "VERIFIED_CODE_OWNERSHIP_PENDING_CI"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "tools.rooms.service",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tests/test_fp042_service_layout_ownership.py",
       "domain": "test",
       "disposition": "retain_current_owner",
       "phase": "P3",
-      "status": "VERIFIED_TEST_OWNERSHIP_PENDING_CI"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/rooms/asset_provenance.py",
       "domain": "tooling_ci",
       "disposition": "retain_infrastructure",
       "phase": "P6",
-      "status": "PROVENANCE_GATE_PENDING_CI"
+      "status": "VERIFIED_PROVENANCE_SUPPORT_IN_CI",
+      "ownership_evidence": "GITHUB_ACTIONS_SUCCESS_39196214685",
+      "proof_scope": "GIT_BYTES_AND_PATH_ONLY_NOT_SKETCHUP_L2"
     },
     {
       "path": "docs/specs/fp042_asset_blobs.v1.json",
       "domain": "artifact",
       "disposition": "provenance_manifest",
       "phase": "P6",
-      "status": "PROVENANCE_MANIFEST_PENDING_CI"
+      "status": "VERIFIED_PROVENANCE_SUPPORT_IN_CI",
+      "ownership_evidence": "GITHUB_ACTIONS_SUCCESS_39196214685",
+      "proof_scope": "GIT_BYTES_AND_PATH_ONLY_NOT_SKETCHUP_L2"
     },
     {
       "path": "docs/specs/FP-042_asset_provenance.md",
       "domain": "documentation",
       "disposition": "retain_current_owner",
       "phase": "P6",
-      "status": "PROVENANCE_POLICY_PENDING_CI"
+      "status": "VERIFIED_PROVENANCE_SUPPORT_IN_CI",
+      "ownership_evidence": "GITHUB_ACTIONS_SUCCESS_39196214685",
+      "proof_scope": "GIT_BYTES_AND_PATH_ONLY_NOT_SKETCHUP_L2"
     },
     {
       "path": "tests/test_fp042_asset_provenance.py",
       "domain": "test",
       "disposition": "retain_current_owner",
       "phase": "P6",
-      "status": "PROVENANCE_TEST_PENDING_CI"
+      "status": "VERIFIED_PROVENANCE_SUPPORT_IN_CI",
+      "ownership_evidence": "GITHUB_ACTIONS_SUCCESS_39196214685",
+      "proof_scope": "GIT_BYTES_AND_PATH_ONLY_NOT_SKETCHUP_L2"
     },
     {
       "path": "tests/test_fp042_knowledge_integrity.py",
@@ -13646,70 +13812,90 @@
       "domain": "room_kitchen",
       "disposition": "tools.rooms.kitchen",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "tools.rooms.kitchen",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/rooms/bathroom/layout.py",
       "domain": "room_bathroom",
       "disposition": "tools.rooms.bathroom",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "tools.rooms.bathroom",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tests/test_fp042_kitchen_bathroom_builder_ownership.py",
       "domain": "test",
       "disposition": "retain_current_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/rooms/bedroom/layout.py",
       "domain": "room_bedroom",
       "disposition": "tools.rooms.bedroom",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "tools.rooms.bedroom",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/rooms/bedroom/designer.py",
       "domain": "room_bedroom",
       "disposition": "tools.rooms.bedroom",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "tools.rooms.bedroom",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tests/test_fp042_bedroom_planner_ownership.py",
       "domain": "test",
       "disposition": "retain_current_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/rooms/reference_provenance.py",
       "domain": "tooling_ci",
       "disposition": "retain_infrastructure",
       "phase": "P6",
-      "status": "IMPLEMENTED_GATE_PENDING_CI"
+      "status": "VERIFIED_PROVENANCE_SUPPORT_IN_CI",
+      "ownership_evidence": "GITHUB_ACTIONS_SUCCESS_39197034475",
+      "proof_scope": "GIT_BYTES_AND_PATH_ONLY_NOT_SKETCHUP_L2"
     },
     {
       "path": "docs/specs/fp042_references.v1.json",
       "domain": "artifact",
       "disposition": "provenance_manifest",
       "phase": "P6",
-      "status": "IMPLEMENTED_MANIFEST_PENDING_CI"
+      "status": "VERIFIED_PROVENANCE_SUPPORT_IN_CI",
+      "ownership_evidence": "GITHUB_ACTIONS_SUCCESS_39197034475",
+      "proof_scope": "GIT_BYTES_AND_PATH_ONLY_NOT_SKETCHUP_L2"
     },
     {
       "path": "docs/specs/FP-042_all_reference_provenance.md",
       "domain": "documentation",
       "disposition": "retain_current_owner",
       "phase": "P6",
-      "status": "DOCUMENTED_PROOF_PENDING_CI"
+      "status": "VERIFIED_PROVENANCE_SUPPORT_IN_CI",
+      "ownership_evidence": "GITHUB_ACTIONS_SUCCESS_39197034475",
+      "proof_scope": "GIT_BYTES_AND_PATH_ONLY_NOT_SKETCHUP_L2"
     },
     {
       "path": "tests/test_fp042_reference_provenance.py",
       "domain": "test",
       "disposition": "retain_current_owner",
       "phase": "P6",
-      "status": "TESTED_PROOF_PENDING_CI"
+      "status": "VERIFIED_PROVENANCE_SUPPORT_IN_CI",
+      "ownership_evidence": "GITHUB_ACTIONS_SUCCESS_39197034475",
+      "proof_scope": "GIT_BYTES_AND_PATH_ONLY_NOT_SKETCHUP_L2"
     },
     {
       "path": "tools/rooms/shared/anatomy.py",
@@ -13842,70 +14028,126 @@
       "domain": "room_living",
       "disposition": "tools.rooms.living",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "tools.rooms.living",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tests/test_fp042_living_planner_ownership.py",
       "domain": "test",
       "disposition": "retain_current_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/rooms/shared/armchair_builder.py",
       "domain": "room_shared",
       "disposition": "tools.rooms.shared",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "tools.rooms.shared",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/rooms/living/armchair_class.py",
       "domain": "room_living",
       "disposition": "tools.rooms.living",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "tools.rooms.living",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/rooms/bedroom/bed_class.py",
       "domain": "room_bedroom",
       "disposition": "tools.rooms.bedroom",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "tools.rooms.bedroom",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/rooms/living/coffee_table_class.py",
       "domain": "room_living",
       "disposition": "tools.rooms.living",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "tools.rooms.living",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/rooms/living/dining_table_class.py",
       "domain": "room_living",
       "disposition": "tools.rooms.living",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "tools.rooms.living",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/rooms/living/rack_class.py",
       "domain": "room_living",
       "disposition": "tools.rooms.living",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "tools.rooms.living",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tools/rooms/living/sofa_class.py",
       "domain": "room_living",
       "disposition": "tools.rooms.living",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "tools.rooms.living",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tests/test_fp042_furniture_classes_ownership.py",
       "domain": "test",
       "disposition": "retain_current_owner",
       "phase": "P3",
-      "status": "PENDING_REVIEW_OR_MIGRATION"
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
+    },
+    {
+      "path": "tools/rooms/p3_ownership.py",
+      "domain": "tooling_ci",
+      "disposition": "retain_infrastructure",
+      "phase": "P3",
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "cross_room_ownership_audit",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
+    },
+    {
+      "path": "tests/test_fp042_p3_ownership.py",
+      "domain": "test",
+      "disposition": "retain_current_owner",
+      "phase": "P3",
+      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
+      "runtime_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
+    },
+    {
+      "path": "tests/test_fp042_automated_closure.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/specs/FP-042_automated_closure.md",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     }
   ]
 }
