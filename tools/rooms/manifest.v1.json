@@ -1,0 +1,124 @@
+{
+  "schema_version": "fp041_room_modules.v1",
+  "policy": "READ_ONLY_ROUTING_NO_DYNAMIC_IMPORT_OR_SKP_WRITES",
+  "shared": {
+    "code": [
+      "tools.rooms.shared.geometry"
+    ],
+    "knowledge": [
+      "cross.room.material-and-instance-rules",
+      "cabinet.reusable-components",
+      "cabinet.materials-and-texture-direction"
+    ],
+    "contracts": [
+      "core.scale",
+      "core.domain.room_registry",
+      "tools.spatial_model",
+      "tools.room_type"
+    ],
+    "scope": "Geometria, escala, componentes, materiais, proteção arquitetônica e gates com múltiplos consumidores."
+  },
+  "rooms": {
+    "living": {
+      "providers": [
+        "tools.place_layout_skp.build_boxes",
+        "tools.layout_candidates.run",
+        "tools.sofa_builder.build_sofa"
+      ],
+      "sources": [
+        "room.living.media-wall",
+        "room.living.organic-sofa"
+      ],
+      "state": "LEGACY_PROVIDER_PRESENT",
+      "package": "tools.rooms.living",
+      "execution_authorized": false
+    },
+    "bedroom": {
+      "providers": [
+        "tools.furnish_apartment.bedroom_designer_boxes",
+        "tools.bedroom_layout.run",
+        "tools.bed_builder.build_bed",
+        "tools.wardrobe_builder.build_wardrobe"
+      ],
+      "sources": [
+        "room.bedroom.bed-and-headboard"
+      ],
+      "state": "LEGACY_PROVIDER_PRESENT",
+      "package": "tools.rooms.bedroom",
+      "execution_authorized": false
+    },
+    "kitchen": {
+      "providers": [
+        "tools.kitchen_layout.build_boxes",
+        "tools.kitchen_validation.validate",
+        "tools.kitchen_ergonomics.audit"
+      ],
+      "sources": [
+        "room.kitchen.cabinet-assemblies"
+      ],
+      "state": "LEGACY_PROVIDER_PRESENT",
+      "package": "tools.rooms.kitchen",
+      "execution_authorized": false
+    },
+    "bathroom": {
+      "providers": [
+        "tools.bathroom_layout.build_boxes"
+      ],
+      "sources": [
+        "room.bathroom.vanity-and-shower"
+      ],
+      "state": "LEGACY_PROVIDER_PRESENT",
+      "package": "tools.rooms.bathroom",
+      "execution_authorized": false
+    },
+    "service": {
+      "providers": [
+        "tools.service_layout.build_boxes"
+      ],
+      "sources": [
+        "room.laundry.casework-and-appliances"
+      ],
+      "state": "COMPOSITE_SERVICE_AND_TERRACE",
+      "package": "tools.rooms.service",
+      "execution_authorized": false
+    },
+    "balcony": {
+      "providers": [],
+      "sources": [
+        "room.balcony.pergola-and-planter"
+      ],
+      "state": "NO_INDEPENDENT_BRAIN_COMPOSITE_SERVICE",
+      "package": "tools.rooms.balcony",
+      "execution_authorized": false
+    },
+    "closet": {
+      "providers": [],
+      "sources": [
+        "room.closet.wardrobe-sliding-doors"
+      ],
+      "state": "NO_INDEPENDENT_BRAIN_USE_BEDROOM_JOINERY",
+      "package": "tools.rooms.closet",
+      "execution_authorized": false
+    },
+    "home_office": {
+      "providers": [],
+      "sources": [
+        "room.office.desk-and-storage"
+      ],
+      "state": "NO_INDEPENDENT_BRAIN_USE_BEDROOM_DESIGNER",
+      "package": "tools.rooms.home_office",
+      "execution_authorized": false
+    },
+    "circulation": {
+      "providers": [
+        "tools.circulation_gate.gate"
+      ],
+      "sources": [
+        "room.circulation.hall-and-doors"
+      ],
+      "state": "VALIDATION_ONLY",
+      "package": "tools.rooms.circulation",
+      "execution_authorized": false
+    }
+  }
+}
