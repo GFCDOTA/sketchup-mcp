@@ -46,7 +46,7 @@ def test_cli_has_no_global_sketchup_kill(relative):
 
 
 def test_ps1_closes_only_created_pid():
-    script = (ROOT / "tools/render_room.ps1").read_text("utf-8")
+    script = (ROOT / "tools/rendering/render_room.ps1").read_text("utf-8")
     assert "$p=Start-Process" in script and "-PassThru" in script
     assert "$p.CloseMainWindow()" in script
     assert not re.search(r"taskkill[^\\n]*/IM", script, re.I)

@@ -41,11 +41,11 @@ reutilizáveis; **sketchup** executa e inspeciona, sem decidir decoração; **mc
 | `tools/pdf_knowledge/` | existe | ingestão de PDFs de referência para um índice pesquisável |
 | `tools/prompts/` | existe | prompts do oráculo visual e do gate de consulta |
 | `tools/claude_bridge/` | existe | `skp_inventory` (MCP) e `WORKSPACE_ROOT`; o nome vem do cockpit removido |
-| `tools/validation/` | existe | gate de escala física independente (`scale_anchor_gate.py`); demais gates e auditorias transversais migram em P4 |
-| `tools/rendering/` | previsto | utilidades de imagem/render e pós-processamento (hoje `tools/render_*.py`) |
-| `tools/orchestration/` | previsto | sequenciamento entre cômodos e executores (hoje `tools/furnish_apartment.py`) |
-| `tools/knowledge/` | previsto | RAG, memória do projeto, banco de referências |
-| `tools/oracle/` | previsto | juízes visuais e consultas; o veredito visual continua só do Felipe |
+| `tools/validation/` | existe | gates e auditorias transversais (escala, aberturas, paredes, grades, fidelidade de posição, saúde do repo) |
+| `tools/rendering/` | existe | utilidades de imagem/render e pós-processamento (`render_*`, câmera, overlay, texturas, V-Ray tweak) |
+| `tools/orchestration/` | existe | sequenciamento entre cômodos e executores (`furnish_apartment`, variantes, promoção, loop de correção) |
+| `tools/knowledge/` | existe | RAG, memória do projeto, banco de referências |
+| `tools/oracle/` | existe | juízes visuais e consultas; o veredito visual continua só do Felipe |
 | `projects/` | existe | fonte identificada de cada projeto: `projects/planta_74/source/planta_74.pdf` (ex-raiz) e README com as entradas/saídas canônicas |
 | `fixtures/` | existe | inputs canônicos e sintéticos; protegidos |
 | `artifacts/` | existe | entregáveis canônicos (`artifacts/<planta>/`) e evidência (`artifacts/review/`) |

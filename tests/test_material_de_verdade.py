@@ -235,6 +235,6 @@ def test_pl_material_sets_texture_when_png_present():
 
 def test_furnish_and_slice_call_texture_env():
     """Ambos os callers do path interativo injetam via style_spec.texture_env (fonte unica)."""
-    for f in ("tools/furnish_apartment.py", "tools/sketchup/furnish/place_layout_skp.py"):
+    for f in ("tools/orchestration/furnish_apartment.py", "tools/sketchup/furnish/place_layout_skp.py"):
         src = (ROOT / f).read_text("utf-8")
         assert "texture_env" in src, f"{f} nao injeta LAYOUT_TEX_MAP via texture_env"

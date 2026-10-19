@@ -810,7 +810,8 @@
         "counts": {
           "docs": 3
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "scripts/set_clipboard_image.ps1",
@@ -996,7 +997,8 @@
         "counts": {
           "docs": 2
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/armchair_builder.py",
@@ -1079,7 +1081,8 @@
           "tests/test_auto_decider_gate.py",
           "tests/test_auto_gpt_consult_wiring.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/auto_camera.py",
@@ -1101,7 +1104,8 @@
         "tests_sample": [
           "tests/test_auto_camera.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/bake_theme_skp.py",
@@ -1144,7 +1148,8 @@
           "docs": 5,
           "history": 1
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/bathroom_layout.py",
@@ -1503,7 +1508,8 @@
         "tests_sample": [
           "tests/test_side_by_side_composer.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/consult_tier.py",
@@ -1525,7 +1531,8 @@
         "tests_sample": [
           "tests/test_consult_tier.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/corpus_to_rag.py",
@@ -1548,7 +1555,8 @@
           "tests/test_corpus_to_rag_human_verdicts.py",
           "tests/test_variant_sweep.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/correction_finding.py",
@@ -1572,7 +1580,8 @@
           "tests/test_correction_loop.py",
           "tests/test_instrumentation_call_sites.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/correction_fixes.py",
@@ -1597,7 +1606,8 @@
           "tests/test_correction_loop.py",
           "tests/test_instrumentation_call_sites.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/correction_loop.py",
@@ -1622,7 +1632,8 @@
           "tests/test_correction_loop.py",
           "tests/test_instrumentation_call_sites.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/crop_render.py",
@@ -1640,7 +1651,8 @@
           "code": 1,
           "docs": 3
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/curator.py",
@@ -1663,7 +1675,8 @@
         "tests_sample": [
           "tests/test_curator.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/decor_anatomy_spec.py",
@@ -1852,7 +1865,8 @@
         "tests_sample": [
           "tests/test_fidelity_loop.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/finding_router.py",
@@ -1876,7 +1890,8 @@
           "tests/test_correction_finding.py",
           "tests/test_finding_router.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/flat_white_gate.py",
@@ -1934,7 +1949,8 @@
           "tests/test_fp042_living_component_ownership.py",
           "tests/test_fp042_living_furnishing_adapter.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/furnish_plan.py",
@@ -2052,7 +2068,8 @@
           "docs": 3,
           "history": 1
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/furniture_wall_gap.py",
@@ -2162,7 +2179,8 @@
           "docs": 7,
           "history": 1
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/geometry_sanity.py",
@@ -2214,7 +2232,8 @@
         "tests_sample": [
           "tests/test_gpt_docker_visual_score.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/gpt_review.py",
@@ -2238,7 +2257,8 @@
         "tests_sample": [
           "tests/test_gpt_review.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/human_verdict.py",
@@ -2260,7 +2280,8 @@
         "tests_sample": [
           "tests/test_human_verdict.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/inspect_skp.rb",
@@ -2303,7 +2324,8 @@
         "counts": {
           "docs": 3
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/interior_studio/",
@@ -2355,7 +2377,8 @@
         "tests_sample": [
           "tests/test_variant_sweep.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/kitchen_ergonomics.py",
@@ -2607,7 +2630,8 @@
         "tests_sample": [
           "tests/test_material_review.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/material_review.rb",
@@ -2633,7 +2657,8 @@
         "tests_sample": [
           "tests/test_material_review.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/mcp_server/",
@@ -2714,7 +2739,8 @@
           "tests/test_negative_dogfood.py",
           "tests/test_vision_acl.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/nightstand_builder.py",
@@ -2753,7 +2779,8 @@
         "counts": {
           "docs": 5
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/opening_aperture_audit.py",
@@ -2874,7 +2901,8 @@
           "tests/test_vision_acl.py",
           "tests/test_vision_queue_consumer.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/overlay_diff.py",
@@ -2898,7 +2926,8 @@
           "tests/test_opening_aperture_audit.py",
           "tests/test_overlay_diff.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/parapet_not_railing_fallback_gate.py",
@@ -2986,7 +3015,8 @@
           "docs": 7,
           "history": 4
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/place_bedroom_skp.py",
@@ -3154,7 +3184,8 @@
         "tests_sample": [
           "tests/test_corpus_to_rag.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/promote_artifact.py",
@@ -3177,7 +3208,8 @@
         "tests_sample": [
           "tests/test_promote_artifact.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/promote_canonical.py",
@@ -3208,7 +3240,8 @@
           "tests/test_build_promote_hook.py",
           "tests/test_promote_canonical.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/prompts/",
@@ -3299,7 +3332,8 @@
           "tests/test_rag_embed_backend.py",
           "tests/test_taste_writeback_recall.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/rag_freshness.py",
@@ -3328,7 +3362,8 @@
           "tests/test_rag_freshness_architect.py",
           "tests/test_taste_writeback.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/railing_exact_match_gate.py",
@@ -3407,7 +3442,8 @@
           "tests/test_observability_redact.py",
           "tests/test_rag_embed_backend.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/reference_grammar.py",
@@ -3437,7 +3473,8 @@
         "tests_sample": [
           "tests/test_reference_grammar.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/regenerate_consensus.py",
@@ -3460,7 +3497,8 @@
         "tests_sample": [
           "tests/test_regenerate_consensus.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/render_banho_auto.py",
@@ -3566,7 +3604,8 @@
           "docs": 7,
           "history": 1
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/render_room.ps1",
@@ -3589,7 +3628,8 @@
           "docs": 5,
           "history": 1
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/render_sala_eyelevel.rb",
@@ -3635,7 +3675,8 @@
         "tests_sample": [
           "tests/test_intent_to_scene.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/render_scene_vray.py",
@@ -3661,7 +3702,8 @@
           "tests/test_intent_to_scene.py",
           "tests/test_sketchup_specialist.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/repo_health_gate.py",
@@ -3707,7 +3749,8 @@
           "tests/test_retrieval_eval.py",
           "tests/test_retrieval_fusion.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/room_type.py",
@@ -3845,7 +3888,8 @@
           "tests/test_visual_oracle_contract.py",
           "tests/test_visual_oracle_negative_fixtures.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/screenshot_camera.rb",
@@ -4343,7 +4387,8 @@
         "counts": {
           "docs": 3
         }
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/style_coherence_gate.py",
@@ -4440,7 +4485,8 @@
           "tests/test_taste_writeback.py",
           "tests/test_taste_writeback_recall.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/theme_palette.py",
@@ -4462,7 +4508,8 @@
         "tests_sample": [
           "tests/test_theme_palette.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/trace_view.py",
@@ -4508,7 +4555,8 @@
         "tests_sample": [
           "tests/test_sketchup_specialist.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/variant_axes.py",
@@ -4533,7 +4581,8 @@
           "tests/test_variant_axes.py",
           "tests/test_variant_sweep.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/variant_sweep.py",
@@ -4560,7 +4609,8 @@
           "tests/test_variant_axes.py",
           "tests/test_variant_sweep.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/vision_queue_consumer.py",
@@ -4583,7 +4633,8 @@
           "tests/test_correction_loop.py",
           "tests/test_vision_queue_consumer.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/visual_regression_gate.py",
@@ -4770,6 +4821,66 @@
         ]
       },
       "files": 2
+    },
+    {
+      "item": "tools/knowledge/",
+      "kind": "directory",
+      "disposition": "retain",
+      "destination": null,
+      "phase": "P4",
+      "rationale": "Pacote criado pela migracao P4 (FP-043) para receber a responsabilidade indicada no mapa.",
+      "risk": "medium",
+      "risk_reasons": [],
+      "depth_sensitive": false,
+      "consumers": {
+        "counts": {}
+      },
+      "status": "done"
+    },
+    {
+      "item": "tools/oracle/",
+      "kind": "directory",
+      "disposition": "retain",
+      "destination": null,
+      "phase": "P4",
+      "rationale": "Pacote criado pela migracao P4 (FP-043) para receber a responsabilidade indicada no mapa.",
+      "risk": "medium",
+      "risk_reasons": [],
+      "depth_sensitive": false,
+      "consumers": {
+        "counts": {}
+      },
+      "status": "done"
+    },
+    {
+      "item": "tools/orchestration/",
+      "kind": "directory",
+      "disposition": "retain",
+      "destination": null,
+      "phase": "P4",
+      "rationale": "Pacote criado pela migracao P4 (FP-043) para receber a responsabilidade indicada no mapa.",
+      "risk": "medium",
+      "risk_reasons": [],
+      "depth_sensitive": false,
+      "consumers": {
+        "counts": {}
+      },
+      "status": "done"
+    },
+    {
+      "item": "tools/rendering/",
+      "kind": "directory",
+      "disposition": "retain",
+      "destination": null,
+      "phase": "P4",
+      "rationale": "Pacote criado pela migracao P4 (FP-043) para receber a responsabilidade indicada no mapa.",
+      "risk": "medium",
+      "risk_reasons": [],
+      "depth_sensitive": false,
+      "consumers": {
+        "counts": {}
+      },
+      "status": "done"
     }
   ]
 }

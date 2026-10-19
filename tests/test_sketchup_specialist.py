@@ -541,7 +541,7 @@ def test_render_vray_sem_vray_exe_e_unavailable(tmp_path):
 
 
 def test_launcher_legado_de_vray_nao_mata_mais_por_imagem():
-    src = Path(jobs.REPO / "tools" / "render_scene_vray.py").read_text("utf-8")
+    src = Path(jobs.REPO / "tools" / "rendering" / "render_scene_vray.py").read_text("utf-8")
     assert "[\"taskkill\"" not in src and "Start-Process" not in src  # comentário pode citar; chamada não
     assert "run_script(" in src
 

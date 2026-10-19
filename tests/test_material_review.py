@@ -85,7 +85,7 @@ def test_build_cameras_env_absolute_paths():
 
 # ---- CONTRATO-TEXTO do .rb (nao roda headless aqui) — FLAG: confirmar imagens em build SU real ----
 def test_material_review_rb_contract():
-    rb = (ROOT / "tools/material_review.rb").read_text("utf-8")
+    rb = (ROOT / "tools/rendering/ruby/material_review.rb").read_text("utf-8")
     assert "view.write_image" in rb, "o .rb precisa renderizar cada camera"
     assert "MR_CAMERAS" in rb and "MR_LOG" in rb, ".rb nao le o contrato de ENV"
     assert "g.hidden = !keep" in rb, "o .rb precisa esconder moveis de outros comodos (isolar)"

@@ -17,7 +17,7 @@ from tools.run_skp_visual_review import (
 )
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-TOOL = REPO_ROOT / "tools" / "run_skp_visual_review.py"
+TOOL = REPO_ROOT / "tools" / "oracle" / "run_skp_visual_review.py"
 
 
 def test_tool_exists():
