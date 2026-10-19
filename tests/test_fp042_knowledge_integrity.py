@@ -30,3 +30,23 @@ def test_catalogs_are_consultative_not_sketchup_execution_authority():
     assert all(r.get("execution_authorized") is False for r in env["recipes"])
     assert all(r["knowledge_state"] == "KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP"
                for r in env["recipes"])
+
+
+def test_manifest_knowledge_ids_resolve_in_the_catalogs():
+    manifest = json.loads((ROOT / 'tools/rooms/manifest.v1.json').read_text('utf-8'))
+    env = _load('environment_recipes.v1.json')
+    video = _load('video_recipes.v1.json')
+    ids = {r['id'] for catalog in (env, video) for r in catalog['recipes']}
+    assert set(manifest['shared']['knowledge']) <= ids
+    for room in manifest['rooms'].values():
+        assert set(room['sources']) <= ids
+
+
+def test_manifest_runtime_provider_symbols_exist_and_are_callable():
+    import importlib
+
+    manifest = json.loads((ROOT / 'tools/rooms/manifest.v1.json').read_text('utf-8'))
+    for room in manifest['rooms'].values():
+        for provider in room['providers']:
+            module, symbol = provider.rsplit('.', 1)
+            assert callable(getattr(importlib.import_module(module), symbol)), provider
