@@ -68,3 +68,21 @@ sem report (`.json`/`.md`), e `SCALE_DEF_FORA_DO_CORE` em `tools/interior_studio
 definido com um `test_repo_health` dentro de `tools/` (que o pytest não coleta) e nenhum teste de `tests/` o importa.
 Ligá-lo ao CI exige decidir: adicionar report às 3 pastas de evidência (mexe em `artifacts/`) e corrigir a definição de
 escala, ou aposentar essas regras.
+
+## D-007 — vão de mobiliar = laje (entra sob a parede) — causa do guarda-roupa "4,5 cm na parede" (P3a-02)
+
+**Achado.** Na fixture sintética `bedroom_medium_14m2` o guarda-roupa fica ~4,5 cm dentro da parede oeste. A hipótese
+inicial (polígono do cômodo no eixo da parede em vez da face interna) foi **refutada**: o planner nem lê o polígono —
+`tools/spatial_model.build_spatial_model` usa `compute_room_floors`, que devolve a **laje**, a qual entra
+`FLOOR_UNDER_FRAC = 0,4 × espessura` sob a parede (esconde a junta). Eixo × face interna dá layout idêntico
+(`tests/test_synthetic_polygon_convention.py`). A fixture `*_inner_face` foi criada e documenta a convenção real da
+`planta_74` (vértices a meia espessura do eixo), mas **não** resolve o achado.
+
+**Tentativa e porque foi revertida.** Planejar no vão livre (laje − massa das paredes) para todos os cômodos reprova a
+`SUITE 02` (`NO_VALID_LAYOUT`), tira 15 peças da `SUITE 01` e quebra o anchor da pia da cozinha (`require_kitchen_anchor`).
+Mudança global não é segura.
+
+**Direção técnica (P3a-03, sem decisão do Felipe):** adotar o vão livre por ambiente (`free_cell`), ambiente a ambiente,
+com regressão por cômodo, mantendo cozinha/SUITE 02/SERVICE como controles. Qualquer mudança de aparência vira
+`VISUAL_REVIEW`. Até lá o contrato "nenhum móvel dentro da parede" fica como `xfail(strict)` — vira falha ruidosa quando
+for corrigido.

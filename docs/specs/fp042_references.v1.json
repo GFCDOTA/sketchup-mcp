@@ -6951,6 +6951,12 @@
       "blob_sha": "91d81dacba3ff50ac9213b33e25e67b9a259e43a",
       "blob_size": 175850,
       "owner_group": "projects"
+    },
+    {
+      "path": "fixtures/synthetic_rooms/bedroom_medium_14m2_inner_face.json",
+      "blob_sha": "46fa0e0bc6e9ec32dd0eba0366bc3ca42eca5e4d",
+      "blob_size": 1666,
+      "owner_group": "fixtures"
     }
   ]
 }
