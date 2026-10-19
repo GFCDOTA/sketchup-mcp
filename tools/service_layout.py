@@ -43,6 +43,7 @@ from shapely.ops import unary_union                            # noqa: E402
 
 from core.scale import PT_TO_IN                                # noqa: E402
 from tools.spatial_model import build_spatial_model            # noqa: E402
+from tools.rooms.shared.geometry import _oriented_box         # noqa: E402
 
 IN2M = 0.0254
 M2IN = 39.3700787402
@@ -354,7 +355,6 @@ def _table_set(zone, placed, circ):
 def build_boxes(con, room_id):
     """Brain do comodo de servico. Devolve (boxes, out) no formato do
     place_layout (mesmo contrato dos outros brains do furnish_apartment)."""
-    from tools.furnish_apartment import _oriented_box          # lazy: evita ciclo
 
     sm = build_spatial_model(con, room_id)
     cell = _cell_m(sm)
