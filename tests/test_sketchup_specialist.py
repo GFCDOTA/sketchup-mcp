@@ -395,10 +395,11 @@ def test_render_com_vista_falha_e_partial(tmp_path, skp):
     assert r["status"] == "PARTIAL"
 
 
-def test_build_shell_sem_plugin_de_autorun_e_unavailable():
-    sys_ = FakeSystem(virtual=(EXE,))
-    r = jobs.build_shell(su=su_with(sys_))
-    assert r["status"] == "UNAVAILABLE" and "autorun_consume.rb" in r["reason"]
+def test_build_shell_nao_depende_mais_do_plugin_de_autorun_global(tmp_path, monkeypatch):
+    """O build roda no PRÓPRIO processo (-RubyStartup): sem autorun_consume.rb no Plugins e sem control file."""
+    sys_ = FakeSystem(virtual=(EXE,))           # nenhum plugin no Plugins
+    r = jobs.build_shell(consensus_path=str(tmp_path / "nao_existe.json"), su=su_with(sys_))
+    assert r["status"] == "ERROR" and "consensus não encontrado" in r["reason"]   # passou do guarda do plugin
 
 
 def test_build_shell_nao_escreve_em_artifacts(monkeypatch, repo_temporario, tmp_path):

@@ -26,6 +26,18 @@ from tools.sketchup.process import SketchUp
 from tools.su_runner_safety import MODES, parse_mode, should_terminate
 
 RUBY_DIR = Path(__file__).resolve().parent / "ruby"
+# Carrega um script Ruby neste processo (substitui o control file do autorun no Plugins global).
+LAUNCHER = RUBY_DIR / "skmcp_launch.rb"
+
+
+def launch_env(script: Path, error_file: Path | None = None, defer_s: float | None = None) -> dict[str, str]:
+    """Env que faz o `skmcp_launch.rb` carregar `script` (use com `-RubyStartup LAUNCHER`)."""
+    env = {"SKMCP_LAUNCH_SCRIPT": _slash(script)}
+    if error_file is not None:
+        env["SKMCP_LAUNCH_ERROR"] = _slash(error_file)
+    if defer_s is not None:
+        env["SKMCP_LAUNCH_DEFER"] = str(defer_s)
+    return env
 
 
 def resolve_mode(mode: str | None = None, env: dict[str, str] | None = None) -> str:

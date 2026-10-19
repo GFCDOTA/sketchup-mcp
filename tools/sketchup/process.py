@@ -28,8 +28,9 @@ EXE_DEFAULT = r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
 PLUGINS_DEFAULT = r"%APPDATA%\SketchUp\SketchUp 2026\SketchUp\Plugins"
 VRAY_EXE_DEFAULT = (r"C:\Program Files\Chaos\V-Ray\V-Ray for SketchUp"
                     r"\extension\vray\bin\vray.exe")
-# Plugin de autorun que build_plan_shell_skp usa. NÃO é versionado: mora só no
-# Plugins da máquina. Sem ele o build do shell não roda — status() avisa.
+# Plugin de autorun LEGADO (não versionado, mora só no Plugins da máquina). Nada neste repositório depende mais dele:
+# o build do shell e o render do quadrado rodam no próprio processo (-RubyStartup skmcp_launch.rb). status() só
+# informa se ele existe, porque um control file esquecido ainda o faria rodar em qualquer SketchUp aberto.
 AUTORUN_PLUGIN = "autorun_consume.rb"
 
 

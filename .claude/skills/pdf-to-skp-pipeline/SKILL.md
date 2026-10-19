@@ -22,7 +22,7 @@ Skill operacional pro pipeline principal do repo.
 consensus.json (PDF-points)
    ↓ tools/build_plan_shell_skp.py
 _shell_polygon.json (intermediate, em runs/)
-   ↓ tools/build_plan_shell_skp.rb (Ruby/SU autorun plugin)
+   ↓ tools/build_plan_shell_skp.rb (Ruby/SU, processo próprio via -RubyStartup skmcp_launch.rb)
 <plant>.skp + iso.png + top.png + geometry_report.json (em runs/)
    ↓ promotion (manual)
 artifacts/<plant>/<plant>.skp + sidecars

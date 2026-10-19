@@ -91,7 +91,8 @@ tools respondem `UNAVAILABLE` com o motivo, nunca sucesso fabricado.
 Como roda: `SketchUp.exe <cópia.skp> -RubyStartup tools/sketchup/ruby/<job>.rb`.
 O job lê `SKMCP_PARAMS` e escreve `SKMCP_RESULT` (JSON, atômico, por último): o
 resultado existir é a prova de que **esta** execução terminou. Diferente do
-`autorun_consume.rb`, os jobs são versionados e não deixam estado no `Plugins`.
+`autorun_consume.rb`, os jobs são versionados e não deixam estado no `Plugins`. O build do shell (`su_build_shell`) segue a
+mesma regra desde a FP-043: `-RubyStartup tools/sketchup/ruby/skmcp_launch.rb` no processo próprio, sem control file global.
 
 Regras que o código faz cumprir (não o prompt):
 

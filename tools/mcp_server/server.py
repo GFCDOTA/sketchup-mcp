@@ -370,8 +370,8 @@ def skp_inventory() -> dict[str, Any]:
 @mcp.tool()
 def su_status() -> dict[str, Any]:
     """Estado do SketchUp nesta máquina, sem subir nada: executável encontrado,
-    instâncias rodando (PID + memória), plugin de autorun do build do shell,
-    V-Ray, jobs Ruby disponíveis e o modo padrão. Chame antes das outras su_*.
+    instâncias rodando (PID + memória), plugin de autorun legado (informativo), V-Ray,
+    como o servidor está preso a um Job Object do Windows (`server_job`), jobs Ruby disponíveis e o modo padrão. Chame antes das outras su_*.
 
     `proof_state` = UNVERIFIED_ON_SKETCHUP: as su_* ainda não rodaram num
     SketchUp real — o resultado delas não é capacidade comprovada."""

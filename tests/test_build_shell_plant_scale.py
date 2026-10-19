@@ -41,8 +41,6 @@ def launched(monkeypatch, tmp_path):
 
     monkeypatch.setattr(subprocess, "Popen", FakePopen)
     monkeypatch.setattr(bps.time, "sleep", lambda s: None)
-    monkeypatch.setattr(bps, "disarm_autoruns", lambda d: [])
-    monkeypatch.setattr(bps, "write_control", lambda *a, **k: None)
     monkeypatch.setenv("PT_TO_M", "0.0259")  # o que o servidor MCP exporta
     return seen
 

@@ -44,9 +44,11 @@ Pipeline:
         Outer ring + holes per polygon piece, in PDF points. The Ruby
         exporter reads this and builds the SU face-with-holes + pushpull.
 
-The Ruby exporter (build_plan_shell_skp.rb) is invoked via the same
-autorun_consume.rb plugin mechanism used by skp_from_consensus.py —
-we only swap line 3 of autorun_control.txt to point at our .rb.
+The Ruby exporter (build_plan_shell_skp.rb) runs in OUR OWN SketchUp process
+(`SketchUp.exe <model.skp> -RubyStartup tools/sketchup/ruby/skmcp_launch.rb`), with
+the inputs in that process env. It no longer goes through the global autorun plugin
++ control file in the user's Plugins folder, which any other SketchUp opened
+meanwhile would have executed.
 """
 from __future__ import annotations
 
@@ -64,7 +66,7 @@ from shapely.geometry import LineString, MultiPolygon, Point, Polygon, box
 from shapely.ops import unary_union
 
 from core.scale import PLANT_PT_TO_M, plant_from_fixture_path, resolve_plant_pt_to_m
-from tools.disarm_sketchup_autoruns import disarm as disarm_autoruns
+from tools.sketchup.batch import LAUNCHER, launch_env
 from tools.su_runner_safety import log_mode, parse_mode, should_terminate
 
 SKETCHUP_EXE_DEFAULT = (
@@ -74,7 +76,6 @@ PLUGINS_DIR_DEFAULT = Path(os.path.expandvars(
     r"%APPDATA%\SketchUp\SketchUp 2026\SketchUp\Plugins"
 ))
 RUBY_TEMPLATE = Path(__file__).resolve().parent / "build_plan_shell_skp.rb"
-CONTROL_FILE = "autorun_control.txt"
 METADATA_SUFFIX = ".metadata.json"
 
 # ---- algorithmic tuning constants ------------------------------------
@@ -944,16 +945,6 @@ def should_skip(out_skp: Path, consensus_sha256: str) -> bool:
 
 # ---- launcher --------------------------------------------------------
 
-def write_control(plugins_dir: Path, consensus: Path, out_skp: Path) -> None:
-    plugins_dir.mkdir(parents=True, exist_ok=True)
-    txt = "\n".join([
-        str(consensus.resolve()).replace("\\", "/"),
-        str(out_skp.resolve()).replace("\\", "/"),
-        str(RUBY_TEMPLATE.resolve()).replace("\\", "/"),
-    ])
-    (plugins_dir / CONTROL_FILE).write_text(txt, encoding="utf-8")
-
-
 def find_bootstrap(out_skp: Path) -> Path | None:
     candidates = sorted(
         (p for p in out_skp.parent.glob("*.skp") if p != out_skp),
@@ -993,7 +984,7 @@ def _default_runner_mode() -> str:
 
 
 def run(consensus_path: Path, out_skp: Path, *, sketchup_exe: Path,
-        plugins_dir: Path = PLUGINS_DIR_DEFAULT,
+        plugins_dir: Path = PLUGINS_DIR_DEFAULT,   # obsoleto: sem control file no Plugins; mantido por compatibilidade
         timeout_s: int = 180,
         out_png_iso: Path | None = None,
         out_png_top: Path | None = None,
@@ -1081,17 +1072,19 @@ def run(consensus_path: Path, out_skp: Path, *, sketchup_exe: Path,
         f"area={stats['total_shell_area_pts2']:.1f} pts^2"
     )
 
-    # [Ruby phase] launch SU, autorun reads control file
-    for p in disarm_autoruns(plugins_dir):
-        print(f"[pre-launch disarm] removed orphan {p.name}")
-    write_control(plugins_dir, consensus_path, out_skp)
-
+    # [Ruby phase] launch OUR OWN SU process (-RubyStartup): no control file in the user's global Plugins
+    launch_error = out_skp.parent / "_launch_error.txt"
+    launch_error.unlink(missing_ok=True)
     bootstrap = find_bootstrap(out_skp)
     cmd = [str(sketchup_exe)]
     if bootstrap:
-        cmd.append(str(bootstrap))
+        cmd.append(str(bootstrap))      # positional BEFORE -RubyStartup
+    cmd += ["-RubyStartup", str(LAUNCHER)]
 
     env = os.environ.copy()
+    env.update(launch_env(RUBY_TEMPLATE, launch_error))
+    env["CONSENSUS_JSON"] = str(consensus_path.resolve()).replace("\\", "/")
+    env["SKP_OUT"] = str(out_skp.resolve()).replace("\\", "/")
     env["PNG_ISO_OUT"] = str(out_png_iso.resolve()).replace("\\", "/")
     env["PNG_TOP_OUT"] = str(out_png_top.resolve()).replace("\\", "/")
     env["REPORT_OUT"] = str(out_report.resolve()).replace("\\", "/")
@@ -1131,79 +1124,74 @@ def run(consensus_path: Path, out_skp: Path, *, sketchup_exe: Path,
     from tools.sketchup.process import spawn_detached
     proc = spawn_detached(cmd, env)
 
-    try:
-        deadline = time.time() + timeout_s
-        while time.time() < deadline:
-            if out_skp.exists():
-                time.sleep(2)  # flush
-                print(f"[ok] {out_skp} ({out_skp.stat().st_size} bytes)")
-                _pid = getattr(proc, "pid", "?")
-                if terminate_allowed:
-                    try:
-                        proc.terminate()
-                        print(f"[su-runner] terminated own child PID {_pid}")
-                    except Exception:  # noqa: BLE001
-                        pass
-                else:
-                    print(
-                        f"[su-runner] artifact ready; SU left running "
-                        f"(PID {_pid}) per mode={resolved_mode}"
-                    )
-                # Persist sidecar metadata so a future run with the
-                # same consensus short-circuits the cache check.
-                if consensus_sha is not None:
-                    write_metadata(
-                        out_skp,
-                        consensus_sha256=consensus_sha,
-                        sketchup_exe=sketchup_exe,
-                        command=cmd,
-                    )
-                return {
-                    "ok": True,
-                    "skipped": False,
-                    "skp_path": str(out_skp),
-                    "png_iso": str(out_png_iso),
-                    "png_top": str(out_png_top),
-                    "report": str(out_report),
-                    "shell_json": str(out_shell_json),
-                    "consensus_sha256": consensus_sha,
-                    "elapsed_s": round(time.time() - started, 4),
-                    "stats": stats,
-                }
-            if proc.poll() is not None:
-                err_file = plugins_dir / "autorun_error.txt"
+    deadline = time.time() + timeout_s
+    while time.time() < deadline:
+        if out_skp.exists():
+            time.sleep(2)  # flush
+            print(f"[ok] {out_skp} ({out_skp.stat().st_size} bytes)")
+            _pid = getattr(proc, "pid", "?")
+            if terminate_allowed:
+                try:
+                    proc.terminate()
+                    print(f"[su-runner] terminated own child PID {_pid}")
+                except Exception:  # noqa: BLE001
+                    pass
+            else:
                 print(
-                    f"[err] SU exited prematurely code={proc.returncode}"
+                    f"[su-runner] artifact ready; SU left running "
+                    f"(PID {_pid}) per mode={resolved_mode}"
                 )
-                if err_file.exists():
-                    print("---- ruby error ----")
-                    print(err_file.read_text(
-                        encoding="utf-8", errors="replace"
-                    ))
-                return {"ok": False, "stats": stats}
-            time.sleep(1)
-        print(f"[err] timeout {timeout_s}s waiting for {out_skp}")
-        # Timeout cleanup respects mode: in `interactive`/`attach` we
-        # leave SU running so the user can inspect what went wrong;
-        # in `headless` we terminate our own child cleanly.
-        _pid = getattr(proc, "pid", "?")
-        if terminate_allowed:
-            try:
-                proc.terminate()
-                time.sleep(2)
-                proc.kill()
-                print(f"[su-runner] timeout terminated own child PID {_pid}")
-            except Exception:  # noqa: BLE001
-                pass
-        else:
+            # Persist sidecar metadata so a future run with the
+            # same consensus short-circuits the cache check.
+            if consensus_sha is not None:
+                write_metadata(
+                    out_skp,
+                    consensus_sha256=consensus_sha,
+                    sketchup_exe=sketchup_exe,
+                    command=cmd,
+                )
+            return {
+                "ok": True,
+                "skipped": False,
+                "skp_path": str(out_skp),
+                "png_iso": str(out_png_iso),
+                "png_top": str(out_png_top),
+                "report": str(out_report),
+                "shell_json": str(out_shell_json),
+                "consensus_sha256": consensus_sha,
+                "elapsed_s": round(time.time() - started, 4),
+                "stats": stats,
+            }
+        if proc.poll() is not None:
             print(
-                f"[su-runner] timeout — SU left running (PID {_pid}) "
-                f"per mode={resolved_mode}; investigate manually"
+                f"[err] SU exited prematurely code={proc.returncode}"
             )
-        return {"ok": False, "stats": stats, "timeout": True}
-    finally:
-        for p in disarm_autoruns(plugins_dir):
-            print(f"[post-run disarm] removed {p.name}")
+            if launch_error.exists():
+                print("---- ruby error ----")
+                print(launch_error.read_text(
+                    encoding="utf-8", errors="replace"
+                ))
+            return {"ok": False, "stats": stats}
+        time.sleep(1)
+    print(f"[err] timeout {timeout_s}s waiting for {out_skp}")
+    # Timeout cleanup respects mode: in `interactive`/`attach` we
+    # leave SU running so the user can inspect what went wrong;
+    # in `headless` we terminate our own child cleanly.
+    _pid = getattr(proc, "pid", "?")
+    if terminate_allowed:
+        try:
+            proc.terminate()
+            time.sleep(2)
+            proc.kill()
+            print(f"[su-runner] timeout terminated own child PID {_pid}")
+        except Exception:  # noqa: BLE001
+            pass
+    else:
+        print(
+            f"[su-runner] timeout — SU left running (PID {_pid}) "
+            f"per mode={resolved_mode}; investigate manually"
+        )
+    return {"ok": False, "stats": stats, "timeout": True}
 
 
 def _infer_plant(consensus_path, explicit=None):
