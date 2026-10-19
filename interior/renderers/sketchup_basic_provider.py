@@ -2,7 +2,7 @@
 Encapsula a receita de render que estava inline no PowerShell: copia a base->scratch
 (NUNCA muta a base), monta o env (LAYOUT_BOXES/OUT/RENDER_*/LOG), lanca o SU via
 PowerShell Start-Process (unica via que pega o desktop interativo p/ write_image), faz
-poll do log, mata o SU e CONFERE o hash da base. Devolve RenderResult (status/timing/log).
+poll do log, fecha apenas o PID da execução e CONFERE o hash da base. Devolve RenderResult (status/timing/log).
 
 renderer='layout'    -> place_layout_skp.rb  (shell da planta; env LAYOUT_AFTER_TOP/ISO + LAYOUT_ZOOM_GROUP)
 renderer='furniture' -> build_furniture_skp.rb (movel standalone; env RENDER_TOP/FRONT/ISO, frame tight)
@@ -16,6 +16,7 @@ import time
 from pathlib import Path
 
 from interior.renderers.render_provider import ROOT, RenderProvider, RenderRequest, RenderResult
+from tools.sketchup.legacy_process import launch_owned, close_owned
 
 SU_EXE = r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
 BASE_SKP = ROOT / "artifacts/planta_74/planta_74.skp"
@@ -78,12 +79,9 @@ class SketchUpBasicProvider(RenderProvider):
         # Passar o env pro powershell; Start-Process herda o environment block.
         full_env = dict(__import__("os").environ)
         full_env.update(env)
-        ps = (f"Start-Process -FilePath '{self.su_exe}' "
-              f"-ArgumentList '\"{copy}\"','-RubyStartup','\"{RB[req.renderer]}\"'")
         t0 = time.time()
         try:
-            subprocess.run(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", ps],
-                           env=full_env, capture_output=True, timeout=60)
+            pid = launch_owned(self.su_exe, copy, RB[req.renderer], env=full_env)
         except Exception as e:  # noqa: BLE001
             return RenderResult(status="fail", provider=self.name, error=f"launch: {e}")
 
@@ -94,7 +92,7 @@ class SketchUpBasicProvider(RenderProvider):
                 time.sleep(2)
                 break
             time.sleep(2)
-        subprocess.run(["taskkill", "/F", "/IM", "SketchUp.exe"], capture_output=True)
+        close_owned(pid)
         time.sleep(1)
         timing = round(time.time() - t0, 1)
 

@@ -176,11 +176,10 @@ def main():
             print(f"[place] textura interativa: "
                   f"{len(json.loads(tex_env['LAYOUT_TEX_MAP']))} kind(s) mapeados (estilo {style})")
 
-    subprocess.run(["taskkill", "/F", "/IM", "SketchUp.exe"], capture_output=True)
     time.sleep(1)
     cmd = [SKETCHUP_EXE, str(BASE_SKP), "-RubyStartup", str(ROOT / "tools/place_layout_skp.rb")]
     print(f"[place] launching SU (base={BASE_SKP.name})...")
-    subprocess.Popen(cmd, env=env, creationflags=getattr(subprocess, "DETACHED_PROCESS", 0))
+    owned_su = subprocess.Popen(cmd, env=env, creationflags=getattr(subprocess, "DETACHED_PROCESS", 0))
 
     deadline = time.time() + 240
     while time.time() < deadline:
@@ -188,7 +187,10 @@ def main():
             time.sleep(2)
             break
         time.sleep(1)
-    subprocess.run(["taskkill", "/F", "/IM", "SketchUp.exe"], capture_output=True)
+
+    # Fecha somente o processo lançado por ESTA execução; nunca usa /IM.
+    if owned_su.poll() is None:
+        owned_su.terminate()
 
     if log_path.exists():
         print("[place] LOG:")

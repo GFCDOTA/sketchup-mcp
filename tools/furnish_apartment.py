@@ -7,7 +7,7 @@ Hoje mobilia: BEDROOM (bedroom_layout). Arquitetura cresce: e so registrar mais
 brains em BRAINS (KITCHEN, BATHROOM, LIVING). Felipe 2026-06-05. Placeholders,
 NAO 3D Warehouse.
 
-ATENCAO: sem --dry-run, da taskkill SketchUp.exe e LANCA o SketchUp.
+Sem --dry-run, abre uma instância própria do SketchUp; não encerra janelas humanas.
 Uso: python tools/furnish_apartment.py [--dry-run]
 """
 import argparse
@@ -185,8 +185,7 @@ def main():
     after_top = OUT_DIR / "planta_74_furnished_after_top.png"
     after_iso = OUT_DIR / "planta_74_furnished_after_iso.png"
     log_path = OUT_DIR / "planta_74_furnished_log.txt"
-    # mata o SketchUp ANTES de apagar os arquivos (senao o .skp fica travado)
-    subprocess.run(["taskkill", "/F", "/IM", "SketchUp.exe"], capture_output=True)
+    # Nunca encerrar instâncias humanas; saídas scratch antigas podem estar em uso
     time.sleep(1)
     for p in (skp_out, before, after_top, after_iso, log_path):
         try:
@@ -217,18 +216,20 @@ def main():
             print(f"[furnish-apt] textura interativa: "
                   f"{len(json.loads(tex_env['LAYOUT_TEX_MAP']))} kind(s) mapeados (estilo {style})")
 
-    subprocess.run(["taskkill", "/F", "/IM", "SketchUp.exe"], capture_output=True)
     time.sleep(1)
     cmd = [SKETCHUP_EXE, str(BASE_SKP), "-RubyStartup", str(RB)]
     print("[furnish-apt] launching SU...")
-    subprocess.Popen(cmd, env=env, creationflags=getattr(subprocess, "DETACHED_PROCESS", 0))
+    owned_su = subprocess.Popen(cmd, env=env, creationflags=getattr(subprocess, "DETACHED_PROCESS", 0))
     deadline = time.time() + 240
     while time.time() < deadline:
         if log_path.exists():
             time.sleep(2)
             break
         time.sleep(1)
-    subprocess.run(["taskkill", "/F", "/IM", "SketchUp.exe"], capture_output=True)
+
+    # Fecha somente o processo lançado por ESTA execução; nunca usa /IM.
+    if owned_su.poll() is None:
+        owned_su.terminate()
 
     if log_path.exists():
         print("[furnish-apt] LOG:")

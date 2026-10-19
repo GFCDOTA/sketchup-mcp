@@ -17,6 +17,7 @@ if not os.environ.get("PT_TO_M"):
 ROOT = Path(__file__).resolve().parents[1]   # tools/ -> raiz do repo (sketchup-mcp). NAO parents[2] (=apps).
 sys.path.insert(0, str(ROOT))
 from tools.tweak_vrscene import tweak_file   # noqa: E402
+from tools.sketchup.legacy_process import launch_owned, close_owned
 
 SU = Path(r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe")
 VRAY = Path(r"C:\Program Files\Chaos\V-Ray\V-Ray for SketchUp\extension\vray\bin\vray.exe")
@@ -56,16 +57,14 @@ env.pop("VRAY_EYE", None); env.pop("VRAY_TARGET", None)
 if os.environ.get("VRAY_EYE"):
     env["VRAY_EYE"] = os.environ["VRAY_EYE"]; env["VRAY_TARGET"] = os.environ["VRAY_TARGET"]
 
-ps = f"Start-Process -FilePath '{SU}' -ArgumentList '\"{copy}\"','-RubyStartup','\"{RB}\"'"
-subprocess.run(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", ps],
-               env=env, capture_output=True, timeout=60)
+pid = launch_owned(SU, copy, RB, env=env)
 deadline = time.time() + 110
 while time.time() < deadline:
     if log.exists():
         time.sleep(2)
         break
     time.sleep(2)
-subprocess.run(["taskkill", "/F", "/IM", "SketchUp.exe"], capture_output=True)
+close_owned(pid)
 time.sleep(1)
 if not vrs.exists():
     print("EXPORT FAIL")

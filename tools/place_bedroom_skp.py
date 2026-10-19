@@ -7,7 +7,7 @@ Mesma conversao do furnish_plan/place_layout_skp (SU = pdf * PT_TO_IN, sem flip
 de Y) que bate com o shell artifacts/planta_74.skp. ROOT vem de __file__ -> roda
 na worktree onde o script vive (isolamento multi-agente). Felipe 2026-06-05.
 
-ATENCAO: sem --dry-run, isto da `taskkill SketchUp.exe` e LANCA o SketchUp.
+Sem --dry-run, abre apenas uma nova instância controlada do SketchUp.
 
 Uso: python tools/place_bedroom_skp.py --room r003 [--dry-run]
 """
@@ -110,11 +110,10 @@ def main():
     env["LAYOUT_AFTER_ISO"] = str(after_iso).replace("\\", "/")
     env["LAYOUT_LOG"] = str(log_path).replace("\\", "/")
 
-    subprocess.run(["taskkill", "/F", "/IM", "SketchUp.exe"], capture_output=True)
     time.sleep(1)
     cmd = [SKETCHUP_EXE, str(BASE_SKP), "-RubyStartup", str(RB)]
     print(f"[bedroom-place] launching SU (base={BASE_SKP.name})...")
-    subprocess.Popen(cmd, env=env, creationflags=getattr(subprocess, "DETACHED_PROCESS", 0))
+    owned_su = subprocess.Popen(cmd, env=env, creationflags=getattr(subprocess, "DETACHED_PROCESS", 0))
 
     deadline = time.time() + 240
     while time.time() < deadline:
@@ -122,7 +121,10 @@ def main():
             time.sleep(2)
             break
         time.sleep(1)
-    subprocess.run(["taskkill", "/F", "/IM", "SketchUp.exe"], capture_output=True)
+
+    # Fecha somente o processo lançado por ESTA execução; nunca usa /IM.
+    if owned_su.poll() is None:
+        owned_su.terminate()
 
     if log_path.exists():
         print("[bedroom-place] LOG:")
