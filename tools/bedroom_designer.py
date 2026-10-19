@@ -19,8 +19,9 @@ from shapely.affinity import translate
 from shapely.geometry import box
 from shapely.ops import unary_union
 
-from tools.bedroom_layout import (M, _door_zones, _fbox, _headboard_candidates,
-                                  _wall_setup, _window_zones, wall_footprint)
+from core.scale import M
+from tools.bedroom_layout import _headboard_candidates, wall_footprint
+from tools.rooms.shared.geometry import _door_zones, _fbox, _wall_setup, _window_zones
 from tools.spatial_model import PT_TO_IN, PT_TO_M, build_spatial_model
 
 # --- móveis (m): (largura ao-longo da parede, profundidade perp, altura) ---

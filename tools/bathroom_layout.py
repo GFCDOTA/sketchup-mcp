@@ -13,8 +13,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from shapely.ops import unary_union   # noqa: E402
-from tools.bedroom_layout import (M, _door_zones, _fbox, _wall_setup,   # noqa: E402
-                                  _window_zones)
+from core.scale import M  # noqa: E402
+from tools.rooms.shared.geometry import _door_zones, _fbox, _wall_setup, _window_zones  # noqa: E402
 from tools.spatial_model import PT_TO_M, build_spatial_model   # noqa: E402
 
 from core.scale import PT_TO_IN  # noqa: E402  (fonte unica de escala; nao redefinir)
