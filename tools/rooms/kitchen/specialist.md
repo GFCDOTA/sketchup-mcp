@@ -35,6 +35,10 @@ Recipes (so conhecimento, `KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP`): `cross.room.ma
 - `python:tools.rooms.kitchen.validation.ergonomics.audit`
 - `python:tools.rooms.shared.cabinet.plan.plan_cabinet`
 - `python:tools.rooms.shared.cabinet.plan.require_valid`
+- `python:tools.rooms.shared.cabinet.sketchup.inspect`
+- `python:tools.rooms.shared.cabinet.sketchup.materialize`
+- `ruby:tools/rooms/shared/cabinet/ruby/cabinet_build.rb`
+- `ruby:tools/rooms/shared/cabinet/ruby/cabinet_inspect.rb`
 - `ruby:tools/sketchup/furnish/place_layout_skp.rb`
 
 Qualquer outra ferramenta e recusada (`TOOL_NOT_ALLOWLISTED`).
