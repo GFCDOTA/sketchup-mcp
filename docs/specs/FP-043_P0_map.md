@@ -88,6 +88,8 @@ outra sessão: ignorados, não tocados.
 
 ## Perguntas abertas (bloqueiam só o que dependem delas)
 
+O registro vivo dessas perguntas, com opções e recomendação, está em [FP-043 — decisões em aberto](FP-043_open_decisions.md).
+
 | Item | Pergunta |
 |---|---|
 | `tools/Dockerfile.dashboard` | arquivar o dashboard do estúdio (Dockerfile + compose)? |
