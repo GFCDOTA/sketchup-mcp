@@ -1,0 +1,4658 @@
+{
+ "schema_version": "fp043_p0_map.v1",
+ "spec": "docs/specs/FP-043_repository_navigation_and_room_specialists.md",
+ "baseline_commit": "07959bfdd153031de13190e883583c7e8acb5c70",
+ "method": "Consumidores: tools.navigation.consumers sobre `git ls-files` (imports por AST + referências em texto). Decisões: autorais (Claude, 2026-10-19) a partir de docstring/cabeçalho, consumidores e dono FP-042 — NÃO é revisão semântica do conteúdo nem prova de L2. `dynamic_path_risk`/`depth_sensitive` marcam o que a análise estática não enxerga ou que muda com a profundidade da pasta; cada PR de movimento revisa o item à mão.",
+ "vocabulary": {
+  "disposition": {
+   "retain": "fica onde está, com motivo",
+   "facade": "fica como fachada nomeada; implementação canônica em `destination`",
+   "move": "move para `destination` na fase indicada; `compat` diz como o caminho antigo é preservado",
+   "decision": "bloqueado por decisão registrada em `open_question`"
+  },
+  "compat": {
+   "facade_at_old_path": "arquivo antigo vira fachada que delega (CLI e import preservados)",
+   "facade_permanent_in_window": "fachada já existe; permanece durante a janela de compatibilidade",
+   "path_resolver_unico": "Ruby/script carregado por caminho: introduzir resolvedor único antes de mover",
+   "resolver_unico": "fonte lida por caminho em vários pontos: resolvedor único",
+   "none_needed": "documento/dado sem import; atualizar referências"
+  },
+  "risk": "high: CI/MCP/config, consumidor externo, caminho em tempo de execução, ≥15 consumidores ou profundidade; medium: ≥3 consumidores de código/testes, ≥10 docs ou um fator isolado; low: demais"
+ },
+ "root_allowlist": [
+  ".dockerignore",
+  ".gitattributes",
+  ".gitignore",
+  "CLAUDE.md",
+  "README.md",
+  "docker-compose.rag.yml",
+  "docker-compose.yml",
+  "pyproject.toml",
+  "uv.lock"
+ ],
+ "external_consumers": {
+  "E:/Claude/.mcp.json": "inicia `python -m tools.mcp_server.server` (PYTHONPATH do repo) — o módulo não pode mudar de caminho",
+  "E:/Claude/apps/harness-app": "lê fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json, core/observability e .ai_bridge/responses",
+  "E:/Claude/ops/sync_latest_skp.ps1": "varre *.skp dos repos sketchup-mcp* por mtime (hook Stop): mover .skp não quebra, mas muda a origem do 'último'",
+  "E:/Claude/ops/launchers/add-defender-exclusions.ps1": "exclui o python da .venv do Defender (caminho da venv, não de código)"
+ },
+ "directories": [
+  {
+   "dir": "core/",
+   "responsibility": "IDs, unidades, contratos e observabilidade (core.scale congela PT_TO_M no 1º import).",
+   "plan": "retain"
+  },
+  {
+   "dir": "interior/",
+   "responsibility": "Semântica/composição de cena e adapters de render.",
+   "plan": "retain"
+  },
+  {
+   "dir": "tools/",
+   "responsibility": "Execução, validação, renderização e orquestração do pipeline; alvo de P4.",
+   "plan": "reorganize"
+  },
+  {
+   "dir": "projects/",
+   "responsibility": "NOVO em P2: fonte identificada do projeto (planta_74.pdf).",
+   "plan": "create"
+  },
+  {
+   "dir": "fixtures/",
+   "responsibility": "Inputs canônicos e sintéticos; protegidos; não são outputs.",
+   "plan": "retain"
+  },
+  {
+   "dir": "artifacts/",
+   "responsibility": "Entregáveis canônicos e evidência (artifacts/review/).",
+   "plan": "retain"
+  },
+  {
+   "dir": "references/",
+   "responsibility": "Fontes, recipes e referências de design canônicas.",
+   "plan": "retain"
+  },
+  {
+   "dir": "assets/",
+   "responsibility": "Recursos reutilizáveis de entrada (assets/textures).",
+   "plan": "retain"
+  },
+  {
+   "dir": "textures/",
+   "responsibility": "6 arquivos de textura; fronteira com assets/textures documentada em P1, path mantido.",
+   "plan": "retain"
+  },
+  {
+   "dir": "renders/",
+   "responsibility": "54 arquivos (sofa_eval 45, check 5, sofa_vray 4): classificar como evidência/histórico em P2; não criar novo destino de output.",
+   "plan": "classify"
+  },
+  {
+   "dir": "runs/",
+   "responsibility": "Scratch ignorado pelo git; nunca é a única evidência final.",
+   "plan": "retain"
+  },
+  {
+   "dir": "tests/",
+   "responsibility": "Regressões; agrupamento por responsabilidade só após auditar conftest/markers/CI (P4).",
+   "plan": "retain"
+  },
+  {
+   "dir": "scripts/",
+   "responsibility": "Automação; a lógica de produto do sofá migra ao living (P4).",
+   "plan": "reorganize"
+  },
+  {
+   "dir": "ops/",
+   "responsibility": "Operação do repositório (painel do estúdio).",
+   "plan": "retain"
+  },
+  {
+   "dir": "docs/",
+   "responsibility": "Specs, handoffs, ADRs, arquivo histórico; ganha docs/architecture/ em P1.",
+   "plan": "retain"
+  },
+  {
+   "dir": "configs/ schemas/",
+   "responsibility": "Configuração e schemas de dados.",
+   "plan": "retain"
+  },
+  {
+   "dir": ".claude/ .ai_bridge/ .github/ .impeccable/",
+   "responsibility": "Instruções de agente, ponte entre sessões e CI: exigidos pela ferramenta.",
+   "plan": "retain"
+  }
+ ],
+ "summary": {
+  "items": 188,
+  "by_disposition": {
+   "retain": 25,
+   "facade": 19,
+   "move": 140,
+   "decision": 4
+  },
+  "by_risk": {
+   "high": 64,
+   "medium": 68,
+   "low": 56
+  },
+  "by_phase": {
+   "P1": 2,
+   "P2": 14,
+   "P4": 170,
+   "P5": 1,
+   "P8": 1
+  }
+ },
+ "items": [
+  {
+   "item": ".dockerignore",
+   "kind": "file",
+   "disposition": "retain",
+   "destination": null,
+   "phase": "P2",
+   "rationale": "Configuração que a ferramenta exige na raiz (git/docker/empacotamento/CI).",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 2,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_fp043_p0_map.py"
+    ]
+   }
+  },
+  {
+   "item": ".gitattributes",
+   "kind": "file",
+   "disposition": "retain",
+   "destination": null,
+   "phase": "P2",
+   "rationale": "Configuração que a ferramenta exige na raiz (git/docker/empacotamento/CI).",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "docs": 2,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_fp043_p0_map.py"
+    ]
+   }
+  },
+  {
+   "item": ".gitignore",
+   "kind": "file",
+   "disposition": "retain",
+   "destination": null,
+   "phase": "P2",
+   "rationale": "Configuração que a ferramenta exige na raiz (git/docker/empacotamento/CI).",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 14,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_fp043_p0_map.py"
+    ]
+   }
+  },
+  {
+   "item": "CLAUDE.md",
+   "kind": "file",
+   "disposition": "retain",
+   "destination": null,
+   "phase": "P2",
+   "rationale": "Bootloader curto (@.claude/CLAUDE.md); a ferramenta Claude Code o procura na raiz.",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 5,
+     "data": 1,
+     "docs": 17,
+     "history": 3,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_fp043_p0_map.py"
+    ]
+   }
+  },
+  {
+   "item": "CLAUDE_COGNITIVE_ARCHITECTURE.md",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "docs/architecture/agent_architecture.md",
+   "phase": "P2",
+   "rationale": "Documento de arquitetura do agente (322 linhas), não ponto de entrada. Referenciado pelo gate tools/rooms/knowledge_ownership.py e por docs/handoffs/; precisa conferir se o conteúdo ainda vale antes de mover.",
+   "compat": "none_needed",
+   "precondition": "atualizar knowledge_ownership.py, repo_health_gate.py e links em docs/handoffs/",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 2,
+     "docs": 4,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_fp043_p0_map.py"
+    ]
+   }
+  },
+  {
+   "item": "HANDOFF.md",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "docs/handoffs/2026-08-27_ai_pipeline_inspector_handoff.md",
+   "phase": "P2",
+   "rationale": "Conteúdo datado de 2026-08-27 (AI Pipeline Inspector, fases 1-3): histórico, não 'atual'. O fio vivo entre sessões é .ai_bridge/HANDOFF.md. Nome pelo assunto e data.",
+   "compat": "none_needed",
+   "precondition": "atualizar .gitignore, knowledge_ownership.py, optimizer_consistency_gate.py, project_memory_db.py e docs que o citam",
+   "risk": "medium",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 7,
+     "data": 1,
+     "docs": 19,
+     "history": 2,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_fp043_p0_map.py"
+    ]
+   }
+  },
+  {
+   "item": "HISTORICO_SOFA.json",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "references/sofas/history/HISTORICO_SOFA.json",
+   "phase": "P2",
+   "rationale": "Dado histórico do programa do sofá; consumido por teste de ownership e pela knowledge_ownership.",
+   "compat": "none_needed",
+   "precondition": "preservar bytes/hash; atualizar tests/test_fp042_knowledge_ownership.py e knowledge_ownership.py",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 3,
+     "tests": 2
+    },
+    "tests_sample": [
+     "tests/test_fp042_knowledge_ownership.py",
+     "tests/test_fp043_p0_map.py"
+    ]
+   }
+  },
+  {
+   "item": "KICKOFF.md",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "docs/handoffs/2026-07-23_kickoff_proxima_sessao.md",
+   "phase": "P2",
+   "rationale": "Kickoff gerado em 2026-07-23 junto de um HANDOFF anterior ('apagar/atualizar quando a missão landar'): histórico.",
+   "compat": "none_needed",
+   "precondition": "atualizar knowledge_ownership.py",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 2,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_fp043_p0_map.py"
+    ]
+   }
+  },
+  {
+   "item": "README.md",
+   "kind": "file",
+   "disposition": "retain",
+   "destination": null,
+   "phase": "P1",
+   "rationale": "Entrada humana; P1 o reescreve com o caminho para o mapa (afirmações desatualizadas: sem MCP, 85 suites, cockpit :8765).",
+   "risk": "high",
+   "risk_reasons": [
+    "consumido por CI/MCP/config"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 4,
+     "config": 1,
+     "data": 1,
+     "docs": 25,
+     "tests": 3
+    },
+    "config": [
+     "pyproject.toml"
+    ],
+    "tests_sample": [
+     "tests/test_fp043_p0_map.py",
+     "tests/test_oracle_providers.py",
+     "tests/test_promote_artifact.py"
+    ]
+   }
+  },
+  {
+   "item": "docker-compose.rag.yml",
+   "kind": "file",
+   "disposition": "retain",
+   "destination": null,
+   "phase": "P2",
+   "rationale": "Spec §4.1: manter na raiz inicialmente. Achado P0: docker-compose.yml sobe o dashboard do estúdio (tools/studio_dashboard.py) que NÃO existe mais; a stack RAG segue válida.",
+   "stale_note": "docker-compose.yml referencia tools/Dockerfile.dashboard → tools/studio_dashboard.py inexistente",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 2,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_fp043_p0_map.py"
+    ]
+   }
+  },
+  {
+   "item": "docker-compose.yml",
+   "kind": "file",
+   "disposition": "retain",
+   "destination": null,
+   "phase": "P2",
+   "rationale": "Spec §4.1: manter na raiz inicialmente. Achado P0: docker-compose.yml sobe o dashboard do estúdio (tools/studio_dashboard.py) que NÃO existe mais; a stack RAG segue válida.",
+   "stale_note": "docker-compose.yml referencia tools/Dockerfile.dashboard → tools/studio_dashboard.py inexistente",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 3,
+     "tests": 2
+    },
+    "tests_sample": [
+     "tests/test_fp042_knowledge_ownership.py",
+     "tests/test_fp043_p0_map.py"
+    ]
+   }
+  },
+  {
+   "item": "interior/__init__.py",
+   "kind": "file",
+   "disposition": "retain",
+   "destination": null,
+   "phase": "P4",
+   "rationale": "Semântica e composição de cenas/intenção + adapters de render (spec §4.2): fica; renderers adapta, não duplica planner.",
+   "risk": "high",
+   "risk_reasons": [
+    "≥15 consumidores em código+testes"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 17,
+     "docs": 2,
+     "tests": 7
+    },
+    "tests_sample": [
+     "tests/test_bed_placement_gate.py",
+     "tests/test_fp042_living_furnishing_adapter.py",
+     "tests/test_fp042_living_planner_ownership.py",
+     "tests/test_fp043_p0_map.py",
+     "tests/test_intent_to_scene.py",
+     "tests/test_living_sofa_is_approved_premium.py"
+    ]
+   }
+  },
+  {
+   "item": "interior/class_specs/",
+   "kind": "directory",
+   "disposition": "retain",
+   "destination": null,
+   "phase": "P5",
+   "rationale": "Especificações de classe de móvel (markdown). P5 as referencia pelos perfis de especialista; não duplicar.",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 2,
+     "docs": 7
+    }
+   },
+   "files": 4
+  },
+  {
+   "item": "interior/composer/",
+   "kind": "directory",
+   "disposition": "retain",
+   "destination": null,
+   "phase": "P4",
+   "rationale": "Semântica e composição de cenas/intenção + adapters de render (spec §4.2): fica; renderers adapta, não duplica planner.",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 4,
+     "docs": 4,
+     "tests": 2
+    },
+    "tests_sample": [
+     "tests/test_intent_to_scene.py",
+     "tests/test_living_sofa_is_approved_premium.py"
+    ]
+   },
+   "files": 2
+  },
+  {
+   "item": "interior/planners/",
+   "kind": "directory",
+   "disposition": "retain",
+   "destination": null,
+   "phase": "P4",
+   "rationale": "living_room_planner.py já é fachada de tools.rooms.living.planner; placement_brain.py deve ser auditado em P4 contra tools/rooms para não manter planner paralelo.",
+   "audit": "placement_brain.py vs tools/rooms/living/planner.py",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 7,
+     "docs": 7,
+     "tests": 7
+    },
+    "tests_sample": [
+     "tests/test_bed_placement_gate.py",
+     "tests/test_fp042_living_furnishing_adapter.py",
+     "tests/test_fp042_living_planner_ownership.py",
+     "tests/test_fp042_ownership_audit.py",
+     "tests/test_fp042_p3_ownership.py",
+     "tests/test_room_dependency_boundaries.py"
+    ]
+   },
+   "files": 3
+  },
+  {
+   "item": "interior/renderers/",
+   "kind": "directory",
+   "disposition": "retain",
+   "destination": null,
+   "phase": "P4",
+   "rationale": "Semântica e composição de cenas/intenção + adapters de render (spec §4.2): fica; renderers adapta, não duplica planner.",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 4,
+     "docs": 4
+    }
+   },
+   "files": 5
+  },
+  {
+   "item": "interior/schemas/",
+   "kind": "directory",
+   "disposition": "retain",
+   "destination": null,
+   "phase": "P4",
+   "rationale": "Semântica e composição de cenas/intenção + adapters de render (spec §4.2): fica; renderers adapta, não duplica planner.",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 3,
+     "docs": 3,
+     "history": 1
+    }
+   },
+   "files": 5
+  },
+  {
+   "item": "interior/semantics/",
+   "kind": "directory",
+   "disposition": "retain",
+   "destination": null,
+   "phase": "P4",
+   "rationale": "Semântica e composição de cenas/intenção + adapters de render (spec §4.2): fica; renderers adapta, não duplica planner.",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 5,
+     "docs": 3
+    }
+   },
+   "files": 3
+  },
+  {
+   "item": "interior/specs/",
+   "kind": "directory",
+   "disposition": "retain",
+   "destination": null,
+   "phase": "P4",
+   "rationale": "Semântica e composição de cenas/intenção + adapters de render (spec §4.2): fica; renderers adapta, não duplica planner.",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 2
+    }
+   },
+   "files": 2
+  },
+  {
+   "item": "interior/style_packs/",
+   "kind": "directory",
+   "disposition": "retain",
+   "destination": null,
+   "phase": "P4",
+   "rationale": "Semântica e composição de cenas/intenção + adapters de render (spec §4.2): fica; renderers adapta, não duplica planner.",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 2,
+     "docs": 3
+    }
+   },
+   "files": 3
+  },
+  {
+   "item": "interior/validators/",
+   "kind": "directory",
+   "disposition": "move",
+   "destination": "tools/rooms/<room>/validation/ (bed/nightstand/wardrobe→bedroom; sofa_placement→living; scene_spatial/furniture_visual/validation_report→tools/validation/)",
+   "phase": "P4",
+   "rationale": "Validadores por cômodo vivem hoje em interior/: gates exclusivos vão ao cômodo, os de cena ao validation transversal.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 7,
+     "tests": 4
+    },
+    "tests_sample": [
+     "tests/test_bed_placement_gate.py",
+     "tests/test_fp042_living_planner_ownership.py",
+     "tests/test_fp043_p0_map.py",
+     "tests/test_intent_to_scene.py"
+    ]
+   },
+   "files": 10
+  },
+  {
+   "item": "ops/estudio-front/",
+   "kind": "directory",
+   "disposition": "retain",
+   "destination": null,
+   "phase": "P4",
+   "rationale": "App operacional do painel do estúdio (servido em :8788), versionado no repo; é operação, não produto.",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 9,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_fp043_p0_map.py"
+    ]
+   },
+   "files": 20
+  },
+  {
+   "item": "planta_74.pdf",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "projects/planta_74/source/planta_74.pdf",
+   "phase": "P2",
+   "rationale": "Fonte do apartamento (verdade geométrica). Migração de PATH protegida: bytes/SHA256 idênticos, sem cópia divergente. O campo `source` do consensus (string 'planta_74.pdf') não é caminho e não muda.",
+   "compat": "resolver_unico",
+   "dynamic_path_risk": true,
+   "precondition": "um resolvedor único de caminho da fonte; revisar à mão f-strings (door_swing_audit usa REPO/f'{fix}.pdf'), compose_side_by_side, rooms/service/layout, core/scale e tests/test_side_by_side_composer",
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 3,
+     "data": 4,
+     "docs": 16,
+     "history": 6,
+     "tests": 2
+    },
+    "tests_sample": [
+     "tests/test_fp043_p0_map.py",
+     "tests/test_side_by_side_composer.py"
+    ]
+   }
+  },
+  {
+   "item": "pyproject.toml",
+   "kind": "file",
+   "disposition": "retain",
+   "destination": null,
+   "phase": "P2",
+   "rationale": "Configuração que a ferramenta exige na raiz (git/docker/empacotamento/CI).",
+   "risk": "high",
+   "risk_reasons": [
+    "consumido por CI/MCP/config"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "ci": 1,
+     "code": 2,
+     "docs": 9,
+     "tests": 1
+    },
+    "ci": [
+     ".github/workflows/ci.yml"
+    ],
+    "tests_sample": [
+     "tests/test_fp043_p0_map.py"
+    ]
+   }
+  },
+  {
+   "item": "scripts/build_sofa_3seat_v1.rb",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/living/capabilities/ruby/sofa_program/",
+   "phase": "P4",
+   "rationale": "Geradores Ruby do programa do sofá (consumidos entre si por require/caminho e por tools/rooms/living): lógica de produto do cômodo living, não automação operacional.",
+   "compat": "path_resolver_unico",
+   "dynamic_path_risk": true,
+   "precondition": "resolvedor único do caminho do script antes de mover; revisar depth/require_relative",
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução",
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 3
+    }
+   }
+  },
+  {
+   "item": "scripts/build_sofa_eval_suite.rb",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/living/capabilities/ruby/sofa_program/",
+   "phase": "P4",
+   "rationale": "Geradores Ruby do programa do sofá (consumidos entre si por require/caminho e por tools/rooms/living): lógica de produto do cômodo living, não automação operacional.",
+   "compat": "path_resolver_unico",
+   "dynamic_path_risk": true,
+   "precondition": "resolvedor único do caminho do script antes de mover; revisar depth/require_relative",
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução",
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 3
+    }
+   }
+  },
+  {
+   "item": "scripts/build_sofa_from_config.rb",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/living/capabilities/ruby/sofa_program/",
+   "phase": "P4",
+   "rationale": "Geradores Ruby do programa do sofá (consumidos entre si por require/caminho e por tools/rooms/living): lógica de produto do cômodo living, não automação operacional.",
+   "compat": "path_resolver_unico",
+   "dynamic_path_risk": true,
+   "precondition": "resolvedor único do caminho do script antes de mover; revisar depth/require_relative",
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução",
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 2
+    }
+   }
+  },
+  {
+   "item": "scripts/generalization_gate.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/validation/generalization_gate.py",
+   "phase": "P4",
+   "rationale": "Gate de generalização (sem consumidor em código): validação transversal.",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "data": 1,
+     "docs": 2
+    }
+   }
+  },
+  {
+   "item": "scripts/make_gpt_review_sheet.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/oracle/make_gpt_review_sheet.py",
+   "phase": "P4",
+   "rationale": "Monta folha de revisão para o oráculo.",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "docs": 3
+    }
+   }
+  },
+  {
+   "item": "scripts/set_clipboard_image.ps1",
+   "kind": "file",
+   "disposition": "decision",
+   "destination": "tools/oracle/set_clipboard_image.ps1",
+   "phase": "P4",
+   "rationale": "Colava imagem no ChatGPT; a memória do projeto registra que Ctrl+V/upload não funcionam (GPT vê via URL raw). DECISÃO: obsoleto? Arquivar em vez de mover.",
+   "open_question": "set_clipboard_image.ps1 ainda útil?",
+   "compat": "path_resolver_unico",
+   "dynamic_path_risk": true,
+   "precondition": "resolvedor único do caminho do script antes de mover; revisar depth/require_relative",
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 3
+    }
+   }
+  },
+  {
+   "item": "scripts/sofa_components.rb",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/living/capabilities/ruby/sofa_program/",
+   "phase": "P4",
+   "rationale": "Geradores Ruby do programa do sofá (consumidos entre si por require/caminho e por tools/rooms/living): lógica de produto do cômodo living, não automação operacional.",
+   "compat": "path_resolver_unico",
+   "dynamic_path_risk": true,
+   "precondition": "resolvedor único do caminho do script antes de mover; revisar depth/require_relative",
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução",
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 2
+    }
+   }
+  },
+  {
+   "item": "scripts/sofa_fabric_material.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/living/capabilities/sofa_fabric_material.py",
+   "phase": "P4",
+   "rationale": "Material de tecido do sofá (2 consumidores em código).",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 2,
+     "data": 1,
+     "docs": 3
+    }
+   }
+  },
+  {
+   "item": "scripts/sofa_generator.rb",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/living/capabilities/ruby/sofa_program/",
+   "phase": "P4",
+   "rationale": "Geradores Ruby do programa do sofá (consumidos entre si por require/caminho e por tools/rooms/living): lógica de produto do cômodo living, não automação operacional.",
+   "compat": "path_resolver_unico",
+   "dynamic_path_risk": true,
+   "precondition": "resolvedor único do caminho do script antes de mover; revisar depth/require_relative",
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução",
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "data": 1,
+     "docs": 2,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_fp043_p0_map.py"
+    ]
+   }
+  },
+  {
+   "item": "scripts/sofa_primitives.rb",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/living/capabilities/ruby/sofa_program/",
+   "phase": "P4",
+   "rationale": "Geradores Ruby do programa do sofá (consumidos entre si por require/caminho e por tools/rooms/living): lógica de produto do cômodo living, não automação operacional.",
+   "compat": "path_resolver_unico",
+   "dynamic_path_risk": true,
+   "precondition": "resolvedor único do caminho do script antes de mover; revisar depth/require_relative",
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 2,
+     "docs": 4
+    }
+   }
+  },
+  {
+   "item": "scripts/sofa_vray_render.rb",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/living/capabilities/ruby/sofa_program/",
+   "phase": "P4",
+   "rationale": "Geradores Ruby do programa do sofá (consumidos entre si por require/caminho e por tools/rooms/living): lógica de produto do cômodo living, não automação operacional.",
+   "compat": "path_resolver_unico",
+   "dynamic_path_risk": true,
+   "precondition": "resolvedor único do caminho do script antes de mover; revisar depth/require_relative",
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução",
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 2
+    }
+   }
+  },
+  {
+   "item": "tools/Dockerfile.dashboard",
+   "kind": "file",
+   "disposition": "decision",
+   "destination": null,
+   "phase": "P8",
+   "rationale": "Imagem do dashboard do estúdio que roda tools/studio_dashboard.py — arquivo que já não existe (dashboard removido). DECISÃO do Felipe: arquivar junto com o docker-compose.yml do dashboard (Hard Rule #4: classificar antes de mover).",
+   "open_question": "arquivar o dashboard do estúdio (Dockerfile + compose)?",
+   "stale_note": "aponta para tools/studio_dashboard.py inexistente",
+   "risk": "high",
+   "risk_reasons": [
+    "consumido por CI/MCP/config"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 2,
+     "config": 1,
+     "data": 1,
+     "docs": 2
+    },
+    "config": [
+     "docker-compose.yml"
+    ]
+   }
+  },
+  {
+   "item": "tools/README_project_memory.md",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/knowledge/README_project_memory.md",
+   "phase": "P4",
+   "rationale": "Infra de conhecimento/RAG/memória/referências: sem dono de cômodo. DECISÃO REGISTRADA: novo pacote tools/knowledge/ (a spec §4.2 não o lista, mas a classificação por responsabilidade o exige; não é pacote vazio).",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "docs": 2
+    }
+   }
+  },
+  {
+   "item": "tools/armchair_builder.py",
+   "kind": "file",
+   "disposition": "facade",
+   "destination": "tools/rooms/shared/armchair_builder.py",
+   "phase": "P4",
+   "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
+   "compat": "facade_permanent_in_window",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 2,
+     "docs": 5,
+     "tests": 2
+    },
+    "tests_sample": [
+     "tests/test_armchair_class.py",
+     "tests/test_fp042_furniture_classes_ownership.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/armchair_class.py",
+   "kind": "file",
+   "disposition": "facade",
+   "destination": "tools/rooms/living/armchair_class.py",
+   "phase": "P4",
+   "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
+   "compat": "facade_permanent_in_window",
+   "risk": "high",
+   "risk_reasons": [
+    "consumido por CI/MCP/config"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 3,
+     "docs": 5,
+     "mcp": 1,
+     "tests": 2
+    },
+    "mcp": [
+     "tools/mcp_server/server.py"
+    ],
+    "tests_sample": [
+     "tests/test_armchair_class.py",
+     "tests/test_fp042_furniture_classes_ownership.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/ask_gpt_gate.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/oracle/ask_gpt_gate.py",
+   "phase": "P4",
+   "rationale": "Oráculo/juízes visuais e consultas (FP-030): o veredito visual IMPROVED/SAME/WORSE continua SÓ do Felipe. DECISÃO REGISTRADA: novo pacote tools/oracle/ (não listado na spec; justificado por responsabilidade).",
+   "compat": "facade_at_old_path",
+   "risk": "high",
+   "risk_reasons": [
+    "consumido por CI/MCP/config",
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 2,
+     "docs": 10,
+     "mcp": 1,
+     "tests": 3
+    },
+    "mcp": [
+     "tools/mcp_server/README.md"
+    ],
+    "tests_sample": [
+     "tests/test_ask_gpt_gate.py",
+     "tests/test_auto_decider_gate.py",
+     "tests/test_auto_gpt_consult_wiring.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/auto_camera.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rendering/auto_camera.py",
+   "phase": "P4",
+   "rationale": "Utilidade comum de imagem/render/pós-processamento (spec §4.2 tools/rendering): o processo SketchUp continua em tools/sketchup e a intenção de render em interior/.",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "docs": 4,
+     "history": 1,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_auto_camera.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/bake_theme_skp.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/kitchen/capabilities/bake_theme.py",
+   "phase": "P4",
+   "rationale": "Capacidade de execução exclusiva da cozinha (adapter da cozinha, não builder genérico).",
+   "compat": "facade_at_old_path",
+   "dynamic_path_risk": true,
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução",
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "docs": 2
+    }
+   }
+  },
+  {
+   "item": "tools/batch_theme_render.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rendering/batch_theme_render.py",
+   "phase": "P4",
+   "rationale": "Utilidade comum de imagem/render/pós-processamento (spec §4.2 tools/rendering): o processo SketchUp continua em tools/sketchup e a intenção de render em interior/.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 5,
+     "history": 1
+    }
+   }
+  },
+  {
+   "item": "tools/bathroom_layout.py",
+   "kind": "file",
+   "disposition": "facade",
+   "destination": "tools/rooms/bathroom/layout.py",
+   "phase": "P4",
+   "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
+   "compat": "facade_permanent_in_window",
+   "risk": "medium",
+   "risk_reasons": [],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 7,
+     "docs": 12,
+     "tests": 5
+    },
+    "tests_sample": [
+     "tests/test_bathroom_enxoval_clearance.py",
+     "tests/test_bathrooms_style.py",
+     "tests/test_fp042_kitchen_bathroom_builder_ownership.py",
+     "tests/test_room_dependency_boundaries.py",
+     "tests/test_room_module_architecture.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/bed_builder.py",
+   "kind": "file",
+   "disposition": "facade",
+   "destination": "tools/rooms/shared/bed.py",
+   "phase": "P4",
+   "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
+   "compat": "facade_permanent_in_window",
+   "risk": "medium",
+   "risk_reasons": [],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 6,
+     "docs": 5,
+     "tests": 2
+    },
+    "tests_sample": [
+     "tests/test_bed_class.py",
+     "tests/test_fp042_shared_parametric_builders.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/bed_class.py",
+   "kind": "file",
+   "disposition": "facade",
+   "destination": "tools/rooms/bedroom/bed_class.py",
+   "phase": "P4",
+   "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
+   "compat": "facade_permanent_in_window",
+   "risk": "high",
+   "risk_reasons": [
+    "consumido por CI/MCP/config"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 4,
+     "docs": 3,
+     "mcp": 1,
+     "tests": 3
+    },
+    "mcp": [
+     "tools/mcp_server/server.py"
+    ],
+    "tests_sample": [
+     "tests/test_bed_class.py",
+     "tests/test_fp042_furniture_classes_ownership.py",
+     "tests/test_fp042_ownership_audit.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/bedroom_designer.py",
+   "kind": "file",
+   "disposition": "facade",
+   "destination": "tools/rooms/bedroom/designer.py",
+   "phase": "P4",
+   "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
+   "compat": "facade_permanent_in_window",
+   "risk": "medium",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 7,
+     "data": 1,
+     "docs": 9,
+     "tests": 3
+    },
+    "tests_sample": [
+     "tests/test_fp042_bedroom_planner_ownership.py",
+     "tests/test_room_dependency_boundaries.py",
+     "tests/test_room_module_architecture.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/bedroom_layout.py",
+   "kind": "file",
+   "disposition": "facade",
+   "destination": "tools/rooms/bedroom/layout.py",
+   "phase": "P4",
+   "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
+   "compat": "facade_permanent_in_window",
+   "risk": "high",
+   "risk_reasons": [
+    "≥15 consumidores em código+testes"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 8,
+     "data": 1,
+     "docs": 7,
+     "history": 1,
+     "tests": 7
+    },
+    "tests_sample": [
+     "tests/test_bedroom_layout.py",
+     "tests/test_fp042_bedroom_planner_ownership.py",
+     "tests/test_fp042_living_planner_ownership.py",
+     "tests/test_fp042_ownership_audit.py",
+     "tests/test_room_dependency_boundaries.py",
+     "tests/test_room_module_architecture.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/build_furniture_skp.rb",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/sketchup/furnish/build_furniture_skp.rb",
+   "phase": "P4",
+   "rationale": "Materialização de móveis no SketchUp (placeholders): execução SU, sem decisão de decoração. Os .rb são carregados por caminho (jobs.furnish, place_layout_geom via require_relative).",
+   "compat": "path_resolver_unico",
+   "dynamic_path_risk": true,
+   "precondition": "mover .rb e geom juntos (require_relative); resolvedor único; teste de contrato do texto Ruby",
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 4,
+     "docs": 4,
+     "history": 1
+    }
+   }
+  },
+  {
+   "item": "tools/build_plan_shell_skp.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/sketchup/shell/build_plan_shell_skp.py",
+   "phase": "P4",
+   "rationale": "Pipeline do shell consensus→.skp: entrypoint público e CLI documentada em 23 docs; o Python carrega o .rb por caminho.",
+   "compat": "facade_at_old_path",
+   "dynamic_path_risk": true,
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução",
+    "≥15 consumidores em código+testes",
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 6,
+     "docs": 24,
+     "history": 1,
+     "tests": 11
+    },
+    "tests_sample": [
+     "tests/test_build_plan_shell.py",
+     "tests/test_build_promote_hook.py",
+     "tests/test_build_shell_plant_scale.py",
+     "tests/test_opening_routing_invariants.py",
+     "tests/test_quadrado_canonical_smoke.py",
+     "tests/test_shell_geometry_integrity.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/build_plan_shell_skp.rb",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/sketchup/shell/build_plan_shell_skp.rb",
+   "phase": "P4",
+   "rationale": "Job Ruby do shell; carregado por caminho (control file/-RubyStartup) e citado em 4 testes.",
+   "compat": "path_resolver_unico",
+   "dynamic_path_risk": true,
+   "precondition": "resolvedor único do caminho do .rb antes de mover; depth de Path(__file__) revisado",
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 4,
+     "docs": 16,
+     "history": 7,
+     "tests": 4
+    },
+    "tests_sample": [
+     "tests/test_door_swing_contract.py",
+     "tests/test_quadrado_canonical_smoke.py",
+     "tests/test_shell_geometry_integrity.py",
+     "tests/test_window_aperture_geometry.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/circulation_gate.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/validation/circulation_gate.py",
+   "phase": "P4",
+   "rationale": "Gate/auditoria TRANSVERSAL (vale para mais de um cômodo ou para a planta toda): tools/validation/ (spec §4.2). Regras exclusivas de um cômodo ficam no cômodo.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 6,
+     "docs": 11,
+     "tests": 4
+    },
+    "tests_sample": [
+     "tests/test_bed_placement_gate.py",
+     "tests/test_circulation_gate.py",
+     "tests/test_fp042_ownership_audit.py",
+     "tests/test_living_room_style.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/claude_bridge/",
+   "kind": "directory",
+   "disposition": "retain",
+   "destination": null,
+   "phase": "P4",
+   "rationale": "skp_inventory (MCP) e _paths.WORKSPACE_ROOT. O nome vem do NOC removido em 2026-07-24; renomear é decisão de P4, não desta fase (consumidores: MCP e 8 módulos).",
+   "rename_candidate": "tools/workspace/",
+   "risk": "high",
+   "risk_reasons": [
+    "consumido por CI/MCP/config"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 8,
+     "data": 1,
+     "docs": 13,
+     "history": 1,
+     "mcp": 1,
+     "tests": 1
+    },
+    "mcp": [
+     "tools/mcp_server/server.py"
+    ],
+    "tests_sample": [
+     "tests/test_gate_filefetch.py"
+    ]
+   },
+   "files": 3
+  },
+  {
+   "item": "tools/coffee_table_class.py",
+   "kind": "file",
+   "disposition": "facade",
+   "destination": "tools/rooms/living/coffee_table_class.py",
+   "phase": "P4",
+   "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
+   "compat": "facade_permanent_in_window",
+   "risk": "high",
+   "risk_reasons": [
+    "consumido por CI/MCP/config"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 3,
+     "docs": 5,
+     "mcp": 1,
+     "tests": 2
+    },
+    "mcp": [
+     "tools/mcp_server/server.py"
+    ],
+    "tests_sample": [
+     "tests/test_coffee_table_class.py",
+     "tests/test_fp042_furniture_classes_ownership.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/collision_envelope_gate.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/validation/collision_envelope_gate.py",
+   "phase": "P4",
+   "rationale": "Gate/auditoria TRANSVERSAL (vale para mais de um cômodo ou para a planta toda): tools/validation/ (spec §4.2). Regras exclusivas de um cômodo ficam no cômodo.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "docs": 7,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_collision_envelope_gate.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/compose_side_by_side.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rendering/compose_side_by_side.py",
+   "phase": "P4",
+   "rationale": "Utilidade comum de imagem/render/pós-processamento (spec §4.2 tools/rendering): o processo SketchUp continua em tools/sketchup e a intenção de render em interior/.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 3,
+     "docs": 7,
+     "history": 3,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_side_by_side_composer.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/consult_tier.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/oracle/consult_tier.py",
+   "phase": "P4",
+   "rationale": "Oráculo/juízes visuais e consultas (FP-030): o veredito visual IMPROVED/SAME/WORSE continua SÓ do Felipe. DECISÃO REGISTRADA: novo pacote tools/oracle/ (não listado na spec; justificado por responsabilidade).",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 5,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_consult_tier.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/corpus_to_rag.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/knowledge/corpus_to_rag.py",
+   "phase": "P4",
+   "rationale": "Infra de conhecimento/RAG/memória/referências: sem dono de cômodo. DECISÃO REGISTRADA: novo pacote tools/knowledge/ (a spec §4.2 não o lista, mas a classificação por responsabilidade o exige; não é pacote vazio).",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "docs": 3,
+     "tests": 3
+    },
+    "tests_sample": [
+     "tests/test_corpus_to_rag.py",
+     "tests/test_corpus_to_rag_human_verdicts.py",
+     "tests/test_variant_sweep.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/correction_finding.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/orchestration/correction/correction_finding.py",
+   "phase": "P4",
+   "rationale": "Sequenciamento de pipelines entre cômodos/executores (spec §4.2 tools/orchestration), sem algoritmos exclusivos de um cômodo. furnish_apartment é o agregador cross-room: 21 testes e 18 consumidores (maior risco).",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 2,
+     "docs": 2,
+     "tests": 3
+    },
+    "tests_sample": [
+     "tests/test_correction_finding.py",
+     "tests/test_correction_loop.py",
+     "tests/test_instrumentation_call_sites.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/correction_fixes.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/orchestration/correction/correction_fixes.py",
+   "phase": "P4",
+   "rationale": "Sequenciamento de pipelines entre cômodos/executores (spec §4.2 tools/orchestration), sem algoritmos exclusivos de um cômodo. furnish_apartment é o agregador cross-room: 21 testes e 18 consumidores (maior risco).",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 3,
+     "docs": 8,
+     "history": 1,
+     "tests": 3
+    },
+    "tests_sample": [
+     "tests/test_correction_fixes.py",
+     "tests/test_correction_loop.py",
+     "tests/test_instrumentation_call_sites.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/correction_loop.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/orchestration/correction/correction_loop.py",
+   "phase": "P4",
+   "rationale": "Sequenciamento de pipelines entre cômodos/executores (spec §4.2 tools/orchestration), sem algoritmos exclusivos de um cômodo. furnish_apartment é o agregador cross-room: 21 testes e 18 consumidores (maior risco).",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "docs": 7,
+     "history": 1,
+     "tests": 2
+    },
+    "tests_sample": [
+     "tests/test_correction_loop.py",
+     "tests/test_instrumentation_call_sites.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/crop_render.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rendering/crop_render.py",
+   "phase": "P4",
+   "rationale": "Utilidade comum de imagem/render/pós-processamento (spec §4.2 tools/rendering): o processo SketchUp continua em tools/sketchup e a intenção de render em interior/.",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 3
+    }
+   }
+  },
+  {
+   "item": "tools/curator.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/interior_studio/curator.py",
+   "phase": "P4",
+   "rationale": "Loop do estúdio de interiores: já existe tools/interior_studio/ como dono.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "docs": 2,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_curator.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/decor_anatomy_spec.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/shared/decor_anatomy_spec.py",
+   "phase": "P4",
+   "rationale": "Contrato/modelo usado por mais de um cômodo (classificação, modelo espacial, regras, envelope arquitetônico, decor): tools/rooms/shared/. Auditar duplicação com shared/decor.py e shared/furniture.py antes de mover.",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 2,
+     "docs": 4,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_intent_to_scene.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/decor_builders.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/shared/decor_builders.py",
+   "phase": "P4",
+   "rationale": "Contrato/modelo usado por mais de um cômodo (classificação, modelo espacial, regras, envelope arquitetônico, decor): tools/rooms/shared/. Auditar duplicação com shared/decor.py e shared/furniture.py antes de mover.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 4,
+     "docs": 4,
+     "tests": 2
+    },
+    "tests_sample": [
+     "tests/test_fp042_living_component_ownership.py",
+     "tests/test_intent_to_scene.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/diagnose_wall_stubs.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/validation/diagnose_wall_stubs.py",
+   "phase": "P4",
+   "rationale": "Gate/auditoria TRANSVERSAL (vale para mais de um cômodo ou para a planta toda): tools/validation/ (spec §4.2). Regras exclusivas de um cômodo ficam no cômodo.",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "data": 3,
+     "docs": 7,
+     "history": 1,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_wall_stub_canonicalization.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/dining_table_class.py",
+   "kind": "file",
+   "disposition": "facade",
+   "destination": "tools/rooms/living/dining_table_class.py",
+   "phase": "P4",
+   "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
+   "compat": "facade_permanent_in_window",
+   "risk": "high",
+   "risk_reasons": [
+    "consumido por CI/MCP/config"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 2,
+     "docs": 2,
+     "mcp": 1,
+     "tests": 2
+    },
+    "mcp": [
+     "tools/mcp_server/server.py"
+    ],
+    "tests_sample": [
+     "tests/test_dining_table_class.py",
+     "tests/test_fp042_furniture_classes_ownership.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/disarm_sketchup_autoruns.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/sketchup/disarm_autoruns.py",
+   "phase": "P4",
+   "rationale": "Remove *_control.txt do Plugins: execução SU.",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 3
+    }
+   }
+  },
+  {
+   "item": "tools/door_swing_audit.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/validation/door_swing_audit.py",
+   "phase": "P4",
+   "rationale": "Gate/auditoria TRANSVERSAL (vale para mais de um cômodo ou para a planta toda): tools/validation/ (spec §4.2). Regras exclusivas de um cômodo ficam no cômodo.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "data": 1,
+     "docs": 4,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_door_swing_contract.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/estudio_banheiro_scene.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/bathroom/capabilities/estudio_banheiro_scene.py",
+   "phase": "P4",
+   "rationale": "Capacidade exclusiva dos banheiros.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "docs": 3
+    }
+   }
+  },
+  {
+   "item": "tools/fidelity_loop.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/orchestration/fidelity_loop.py",
+   "phase": "P4",
+   "rationale": "Sequenciamento de pipelines entre cômodos/executores (spec §4.2 tools/orchestration), sem algoritmos exclusivos de um cômodo. furnish_apartment é o agregador cross-room: 21 testes e 18 consumidores (maior risco).",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "docs": 4,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_fidelity_loop.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/finding_router.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/orchestration/correction/finding_router.py",
+   "phase": "P4",
+   "rationale": "Sequenciamento de pipelines entre cômodos/executores (spec §4.2 tools/orchestration), sem algoritmos exclusivos de um cômodo. furnish_apartment é o agregador cross-room: 21 testes e 18 consumidores (maior risco).",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 2,
+     "docs": 3,
+     "history": 1,
+     "tests": 2
+    },
+    "tests_sample": [
+     "tests/test_correction_finding.py",
+     "tests/test_finding_router.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/flat_white_gate.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/validation/flat_white_gate.py",
+   "phase": "P4",
+   "rationale": "Gate/auditoria TRANSVERSAL (vale para mais de um cômodo ou para a planta toda): tools/validation/ (spec §4.2). Regras exclusivas de um cômodo ficam no cômodo.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 4,
+     "tests": 2
+    },
+    "tests_sample": [
+     "tests/test_honest_fingerprint.py",
+     "tests/test_material_de_verdade.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/furnish_apartment.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/orchestration/furnish_apartment.py",
+   "phase": "P4",
+   "rationale": "Sequenciamento de pipelines entre cômodos/executores (spec §4.2 tools/orchestration), sem algoritmos exclusivos de um cômodo. furnish_apartment é o agregador cross-room: 21 testes e 18 consumidores (maior risco).",
+   "compat": "facade_at_old_path",
+   "risk": "high",
+   "risk_reasons": [
+    "≥15 consumidores em código+testes",
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 18,
+     "data": 2,
+     "docs": 21,
+     "history": 5,
+     "tests": 22
+    },
+    "tests_sample": [
+     "tests/test_auto_camera.py",
+     "tests/test_circulation_gate.py",
+     "tests/test_fp042_bedroom_furnishing_adapter.py",
+     "tests/test_fp042_furniture_classes_ownership.py",
+     "tests/test_fp042_living_component_ownership.py",
+     "tests/test_fp042_living_furnishing_adapter.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/furnish_plan.py",
+   "kind": "file",
+   "disposition": "decision",
+   "destination": "tools/sketchup/furnish/furnish_plan.py",
+   "phase": "P4",
+   "rationale": "Insere componentes do 3D Warehouse (fluxo antigo, sem consumidor em testes/código). DECISÃO: ainda é capacidade vigente ou histórico a arquivar? Não apagar sem classificação (Hard Rule #4).",
+   "compat": "facade_at_old_path",
+   "open_question": "furnish_plan.py/.rb: capacidade vigente ou histórico?",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "docs": 4
+    }
+   }
+  },
+  {
+   "item": "tools/furnish_plan.rb",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/sketchup/furnish/furnish_plan.rb",
+   "phase": "P4",
+   "rationale": "Materialização de móveis no SketchUp (placeholders): execução SU, sem decisão de decoração. Os .rb são carregados por caminho (jobs.furnish, place_layout_geom via require_relative).",
+   "compat": "path_resolver_unico",
+   "dynamic_path_risk": true,
+   "precondition": "mover .rb e geom juntos (require_relative); resolvedor único; teste de contrato do texto Ruby",
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 3
+    }
+   }
+  },
+  {
+   "item": "tools/furniture_anatomy_spec.py",
+   "kind": "file",
+   "disposition": "facade",
+   "destination": "tools/rooms/shared/anatomy.py",
+   "phase": "P4",
+   "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
+   "compat": "facade_permanent_in_window",
+   "risk": "high",
+   "risk_reasons": [
+    "≥15 consumidores em código+testes"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 17,
+     "docs": 5,
+     "tests": 3
+    },
+    "tests_sample": [
+     "tests/test_fp042_shared_parametric_builders.py",
+     "tests/test_furnish_sofa_gate.py",
+     "tests/test_sofa_class.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/furniture_overlap_gate.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/validation/furniture_overlap_gate.py",
+   "phase": "P4",
+   "rationale": "Gate/auditoria TRANSVERSAL (vale para mais de um cômodo ou para a planta toda): tools/validation/ (spec §4.2). Regras exclusivas de um cômodo ficam no cômodo.",
+   "compat": "facade_at_old_path",
+   "risk": "high",
+   "risk_reasons": [
+    "consumido por CI/MCP/config",
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 5,
+     "data": 7,
+     "docs": 11,
+     "history": 1,
+     "mcp": 1,
+     "tests": 2
+    },
+    "mcp": [
+     "tools/mcp_server/server.py"
+    ],
+    "tests_sample": [
+     "tests/test_correction_fixes.py",
+     "tests/test_fp042_ownership_audit.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/furniture_reference_analyzer.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/knowledge/furniture_reference_analyzer.py",
+   "phase": "P4",
+   "rationale": "Infra de conhecimento/RAG/memória/referências: sem dono de cômodo. DECISÃO REGISTRADA: novo pacote tools/knowledge/ (a spec §4.2 não o lista, mas a classificação por responsabilidade o exige; não é pacote vazio).",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "docs": 3,
+     "history": 1
+    }
+   }
+  },
+  {
+   "item": "tools/furniture_wall_gap.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/validation/furniture_wall_gap.py",
+   "phase": "P4",
+   "rationale": "Gate/auditoria TRANSVERSAL (vale para mais de um cômodo ou para a planta toda): tools/validation/ (spec §4.2). Regras exclusivas de um cômodo ficam no cômodo.",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "docs": 2,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_furniture_wall_gap.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/gate_filefetch.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/validation/gate_filefetch.py",
+   "phase": "P4",
+   "rationale": "Gate/auditoria TRANSVERSAL (vale para mais de um cômodo ou para a planta toda): tools/validation/ (spec §4.2). Regras exclusivas de um cômodo ficam no cômodo.",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "docs": 4,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_gate_filefetch.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/gate_util.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/validation/gate_util.py",
+   "phase": "P4",
+   "rationale": "Gate/auditoria TRANSVERSAL (vale para mais de um cômodo ou para a planta toda): tools/validation/ (spec §4.2). Regras exclusivas de um cômodo ficam no cômodo.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 3,
+     "docs": 3,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_gate_util.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/gate_verdict.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/validation/gate_verdict.py",
+   "phase": "P4",
+   "rationale": "Gate/auditoria TRANSVERSAL (vale para mais de um cômodo ou para a planta toda): tools/validation/ (spec §4.2). Regras exclusivas de um cômodo ficam no cômodo.",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 5,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_gate_verdict.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/gen_textures.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rendering/gen_textures.py",
+   "phase": "P4",
+   "rationale": "Utilidade comum de imagem/render/pós-processamento (spec §4.2 tools/rendering): o processo SketchUp continua em tools/sketchup e a intenção de render em interior/.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "docs": 7,
+     "history": 1
+    }
+   }
+  },
+  {
+   "item": "tools/geometry_sanity.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/validation/geometry_sanity.py",
+   "phase": "P4",
+   "rationale": "Gate/auditoria TRANSVERSAL (vale para mais de um cômodo ou para a planta toda): tools/validation/ (spec §4.2). Regras exclusivas de um cômodo ficam no cômodo.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 6,
+     "data": 2,
+     "docs": 13,
+     "history": 2,
+     "tests": 5
+    },
+    "tests_sample": [
+     "tests/test_fp042_ownership_audit.py",
+     "tests/test_fp043_p0_map.py",
+     "tests/test_geometry_sanity.py",
+     "tests/test_geometry_sanity_brains.py",
+     "tests/test_suite01_scale_gate.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/gpt_docker_visual_score.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/oracle/gpt_docker_visual_score.py",
+   "phase": "P4",
+   "rationale": "Oráculo/juízes visuais e consultas (FP-030): o veredito visual IMPROVED/SAME/WORSE continua SÓ do Felipe. DECISÃO REGISTRADA: novo pacote tools/oracle/ (não listado na spec; justificado por responsabilidade).",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "docs": 3,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_gpt_docker_visual_score.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/gpt_review.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/oracle/gpt_review.py",
+   "phase": "P4",
+   "rationale": "Oráculo/juízes visuais e consultas (FP-030): o veredito visual IMPROVED/SAME/WORSE continua SÓ do Felipe. DECISÃO REGISTRADA: novo pacote tools/oracle/ (não listado na spec; justificado por responsabilidade).",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 4,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_gpt_review.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/human_verdict.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/oracle/human_verdict.py",
+   "phase": "P4",
+   "rationale": "Oráculo/juízes visuais e consultas (FP-030): o veredito visual IMPROVED/SAME/WORSE continua SÓ do Felipe. DECISÃO REGISTRADA: novo pacote tools/oracle/ (não listado na spec; justificado por responsabilidade).",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 2,
+     "docs": 2,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_human_verdict.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/inspect_skp.rb",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/sketchup/inspect/inspect_skp.rb",
+   "phase": "P4",
+   "rationale": "Inspeção/captura no SketchUp (somente leitura).",
+   "compat": "path_resolver_unico",
+   "dynamic_path_risk": true,
+   "precondition": "resolvedor único do caminho do script antes de mover; revisar depth/require_relative",
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 3,
+     "history": 1
+    }
+   }
+  },
+  {
+   "item": "tools/interior_quality_scorecard.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/interior_studio/interior_quality_scorecard.py",
+   "phase": "P4",
+   "rationale": "Loop do estúdio de interiores: já existe tools/interior_studio/ como dono.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "docs": 3
+    }
+   }
+  },
+  {
+   "item": "tools/interior_studio/",
+   "kind": "directory",
+   "disposition": "retain",
+   "destination": null,
+   "phase": "P4",
+   "rationale": "Dono do loop do estúdio de interiores; recebe curator/studio_log/scorecard.",
+   "risk": "high",
+   "risk_reasons": [
+    "≥15 consumidores em código+testes"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 5,
+     "docs": 13,
+     "history": 1,
+     "tests": 13
+    },
+    "tests_sample": [
+     "tests/test_architect_program.py",
+     "tests/test_auditor.py",
+     "tests/test_auto_decider.py",
+     "tests/test_auto_decider_gate.py",
+     "tests/test_consult_bridge.py",
+     "tests/test_decision_judge.py"
+    ]
+   },
+   "files": 30
+  },
+  {
+   "item": "tools/jsonl_io.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/orchestration/correction/jsonl_io.py",
+   "phase": "P4",
+   "rationale": "Sequenciamento de pipelines entre cômodos/executores (spec §4.2 tools/orchestration), sem algoritmos exclusivos de um cômodo. furnish_apartment é o agregador cross-room: 21 testes e 18 consumidores (maior risco).",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 8,
+     "docs": 2,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_variant_sweep.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/kitchen_ergonomics.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/kitchen/validation/ergonomics.py",
+   "phase": "P4",
+   "rationale": "Regra exclusiva da cozinha (medidas/ergonomia); MCP o usa (kitchen_ergonomics_audit). Exige validation.py→validation/ sem colisão arquivo/pacote.",
+   "compat": "facade_at_old_path",
+   "risk": "high",
+   "risk_reasons": [
+    "consumido por CI/MCP/config",
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "data": 13,
+     "docs": 15,
+     "mcp": 1
+    },
+    "mcp": [
+     "tools/mcp_server/server.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/kitchen_layout.py",
+   "kind": "file",
+   "disposition": "facade",
+   "destination": "tools/rooms/kitchen/layout.py",
+   "phase": "P4",
+   "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
+   "compat": "facade_permanent_in_window",
+   "risk": "medium",
+   "risk_reasons": [],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 8,
+     "data": 11,
+     "docs": 26,
+     "tests": 6
+    },
+    "tests_sample": [
+     "tests/test_fp042_kitchen_anchor_ownership.py",
+     "tests/test_fp042_kitchen_bathroom_builder_ownership.py",
+     "tests/test_fp042_ownership_audit.py",
+     "tests/test_kitchen_layout_style.py",
+     "tests/test_room_dependency_boundaries.py",
+     "tests/test_room_module_architecture.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/kitchen_validation.py",
+   "kind": "file",
+   "disposition": "facade",
+   "destination": "tools/rooms/kitchen/anchor_rules.py",
+   "phase": "P4",
+   "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
+   "compat": "facade_permanent_in_window",
+   "risk": "medium",
+   "risk_reasons": [],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 5,
+     "data": 6,
+     "docs": 8,
+     "tests": 4
+    },
+    "tests_sample": [
+     "tests/test_fp042_kitchen_anchor_ownership.py",
+     "tests/test_fp042_kitchen_bathroom_builder_ownership.py",
+     "tests/test_fp042_kitchen_validation_boundary.py",
+     "tests/test_room_integration_regression.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/kitchen_vray.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/kitchen/capabilities/vray.py",
+   "phase": "P4",
+   "rationale": "Capacidade de execução exclusiva da cozinha (adapter da cozinha, não builder genérico).",
+   "compat": "facade_at_old_path",
+   "dynamic_path_risk": true,
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução",
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "data": 3,
+     "docs": 7,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_consult_bridge.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/kitchen_wall_regression_gate.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/kitchen/validation/wall_regression.py",
+   "phase": "P4",
+   "rationale": "Gate exclusivo da cozinha.",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "docs": 3,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_kitchen_wall_regression_gate.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/layout_candidates.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/living/planning/layout_candidates.py",
+   "phase": "P4",
+   "rationale": "Layout brain da sala (provider declarado do living no manifesto); é planner específico do cômodo.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 7,
+     "docs": 9,
+     "tests": 2
+    },
+    "tests_sample": [
+     "tests/test_layout_rules.py",
+     "tests/test_room_modes.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/layout_rules.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/shared/layout_rules.py",
+   "phase": "P4",
+   "rationale": "Contrato/modelo usado por mais de um cômodo (classificação, modelo espacial, regras, envelope arquitetônico, decor): tools/rooms/shared/. Auditar duplicação com shared/decor.py e shared/furniture.py antes de mover.",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "data": 1,
+     "docs": 7,
+     "history": 1,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_layout_rules.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/make_synthetic_bedrooms.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/bedroom/capabilities/make_synthetic_bedrooms.py",
+   "phase": "P4",
+   "rationale": "Capacidade exclusiva do quarto (materialização e fixtures sintéticas de quarto).",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 2,
+     "docs": 2,
+     "tests": 2
+    },
+    "tests_sample": [
+     "tests/test_bedroom_layout.py",
+     "tests/test_synthetic_bedrooms.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/make_synthetic_rooms.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/living/capabilities/make_synthetic_rooms.py",
+   "phase": "P4",
+   "rationale": "Ferramenta do programa do sofá/sala (harness, comparação, fixtures): pertence ao cômodo living. Antes de mover, confirmar se cada harness ainda executa; os sem consumidor são candidatos a arquivo.",
+   "compat": "facade_at_old_path",
+   "dynamic_path_risk": true,
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução",
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 4
+    }
+   }
+  },
+  {
+   "item": "tools/material_review.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rendering/material_review.py",
+   "phase": "P4",
+   "rationale": "Utilidade comum de imagem/render/pós-processamento (spec §4.2 tools/rendering): o processo SketchUp continua em tools/sketchup e a intenção de render em interior/.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "docs": 4,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_material_review.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/material_review.rb",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rendering/ruby/material_review.rb",
+   "phase": "P4",
+   "rationale": "Utilidade comum de imagem/render/pós-processamento (spec §4.2 tools/rendering): o processo SketchUp continua em tools/sketchup e a intenção de render em interior/.",
+   "compat": "path_resolver_unico",
+   "dynamic_path_risk": true,
+   "precondition": "resolvedor único do caminho do script antes de mover; revisar depth/require_relative",
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 3,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_material_review.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/mcp_server/",
+   "kind": "directory",
+   "disposition": "retain",
+   "destination": null,
+   "phase": "P4",
+   "rationale": "Protocolo MCP e registro das tools; apontado por .mcp.json do workspace (-m tools.mcp_server.server) e pelo CI: não mover.",
+   "external_consumers": [
+    "E:/Claude/.mcp.json"
+   ],
+   "risk": "high",
+   "risk_reasons": [
+    "consumido por CI/MCP/config",
+    "consumidor externo ao repo"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "ci": 1,
+     "code": 2,
+     "data": 3,
+     "docs": 8,
+     "tests": 2
+    },
+    "ci": [
+     ".github/workflows/ci.yml"
+    ],
+    "tests_sample": [
+     "tests/test_fp042_tooling_ownership.py",
+     "tests/test_su_spawn_detached.py"
+    ]
+   },
+   "files": 5
+  },
+  {
+   "item": "tools/navigation/",
+   "kind": "directory",
+   "disposition": "retain",
+   "destination": null,
+   "phase": "P1",
+   "rationale": "Ferramentas de navegação do repositório (FP-043): consumidores, mapa P0 e, em P1, validação de links e rotas.",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "docs": 1,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_fp043_p0_map.py"
+    ]
+   },
+   "files": 3
+  },
+  {
+   "item": "tools/negative_dogfood.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/oracle/negative_dogfood.py",
+   "phase": "P4",
+   "rationale": "Oráculo/juízes visuais e consultas (FP-030): o veredito visual IMPROVED/SAME/WORSE continua SÓ do Felipe. DECISÃO REGISTRADA: novo pacote tools/oracle/ (não listado na spec; justificado por responsabilidade).",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 8,
+     "history": 1,
+     "tests": 2
+    },
+    "tests_sample": [
+     "tests/test_negative_dogfood.py",
+     "tests/test_vision_acl.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/nightstand_builder.py",
+   "kind": "file",
+   "disposition": "facade",
+   "destination": "tools/rooms/shared/nightstand.py",
+   "phase": "P4",
+   "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
+   "compat": "facade_permanent_in_window",
+   "risk": "medium",
+   "risk_reasons": [],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 7,
+     "docs": 3,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_fp042_shared_parametric_builders.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/ollama_bridge.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/oracle/ollama_bridge.py",
+   "phase": "P4",
+   "rationale": "Oráculo/juízes visuais e consultas (FP-030): o veredito visual IMPROVED/SAME/WORSE continua SÓ do Felipe. DECISÃO REGISTRADA: novo pacote tools/oracle/ (não listado na spec; justificado por responsabilidade).",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "docs": 5
+    }
+   }
+  },
+  {
+   "item": "tools/opening_aperture_audit.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/validation/opening_aperture_audit.py",
+   "phase": "P4",
+   "rationale": "Gate/auditoria TRANSVERSAL (vale para mais de um cômodo ou para a planta toda): tools/validation/ (spec §4.2). Regras exclusivas de um cômodo ficam no cômodo.",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "docs": 3,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_opening_aperture_audit.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/opening_audit.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/validation/opening_audit.py",
+   "phase": "P4",
+   "rationale": "Gate/auditoria TRANSVERSAL (vale para mais de um cômodo ou para a planta toda): tools/validation/ (spec §4.2). Regras exclusivas de um cômodo ficam no cômodo.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "docs": 6,
+     "history": 3
+    }
+   }
+  },
+  {
+   "item": "tools/opening_host_audit.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/validation/opening_host_audit.py",
+   "phase": "P4",
+   "rationale": "Gate/auditoria TRANSVERSAL (vale para mais de um cômodo ou para a planta toda): tools/validation/ (spec §4.2). Regras exclusivas de um cômodo ficam no cômodo.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 3,
+     "docs": 5,
+     "tests": 2
+    },
+    "tests_sample": [
+     "tests/test_opening_host_audit.py",
+     "tests/test_regenerate_consensus.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/optimizer_consistency_gate.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/validation/optimizer_consistency_gate.py",
+   "phase": "P4",
+   "rationale": "Gate/auditoria TRANSVERSAL (vale para mais de um cômodo ou para a planta toda): tools/validation/ (spec §4.2). Regras exclusivas de um cômodo ficam no cômodo.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "docs": 8,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_optimizer_consistency_gate.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/oracle_providers.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/oracle/oracle_providers.py",
+   "phase": "P4",
+   "rationale": "Oráculo/juízes visuais e consultas (FP-030): o veredito visual IMPROVED/SAME/WORSE continua SÓ do Felipe. DECISÃO REGISTRADA: novo pacote tools/oracle/ (não listado na spec; justificado por responsabilidade).",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 4,
+     "docs": 8,
+     "history": 1,
+     "tests": 4
+    },
+    "tests_sample": [
+     "tests/test_oracle_providers.py",
+     "tests/test_variant_sweep.py",
+     "tests/test_vision_acl.py",
+     "tests/test_vision_queue_consumer.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/overlay_diff.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rendering/overlay_diff.py",
+   "phase": "P4",
+   "rationale": "Utilidade comum de imagem/render/pós-processamento (spec §4.2 tools/rendering): o processo SketchUp continua em tools/sketchup e a intenção de render em interior/.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 3,
+     "docs": 5,
+     "tests": 3
+    },
+    "tests_sample": [
+     "tests/test_gate_filefetch.py",
+     "tests/test_opening_aperture_audit.py",
+     "tests/test_overlay_diff.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/parapet_not_railing_fallback_gate.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/validation/parapet_not_railing_fallback_gate.py",
+   "phase": "P4",
+   "rationale": "Gate/auditoria TRANSVERSAL (vale para mais de um cômodo ou para a planta toda): tools/validation/ (spec §4.2). Regras exclusivas de um cômodo ficam no cômodo.",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 4,
+     "tests": 2
+    },
+    "tests_sample": [
+     "tests/test_railing_gates.py",
+     "tests/test_railing_real_build.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/pdf_height_labels_audit.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/validation/pdf_height_labels_audit.py",
+   "phase": "P4",
+   "rationale": "Gate/auditoria TRANSVERSAL (vale para mais de um cômodo ou para a planta toda): tools/validation/ (spec §4.2). Regras exclusivas de um cômodo ficam no cômodo.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "docs": 2,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_pdf_height_labels.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/pdf_knowledge/",
+   "kind": "directory",
+   "disposition": "move",
+   "destination": "tools/knowledge/pdf/",
+   "phase": "P4",
+   "rationale": "Infra de conhecimento/RAG/memória/referências: sem dono de cômodo. DECISÃO REGISTRADA: novo pacote tools/knowledge/ (a spec §4.2 não o lista, mas a classificação por responsabilidade o exige; não é pacote vazio).",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 2,
+     "data": 1,
+     "docs": 5
+    }
+   },
+   "files": 6
+  },
+  {
+   "item": "tools/pdf_overlay_verify.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rendering/pdf_overlay_verify.py",
+   "phase": "P4",
+   "rationale": "Utilidade comum de imagem/render/pós-processamento (spec §4.2 tools/rendering): o processo SketchUp continua em tools/sketchup e a intenção de render em interior/.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "docs": 7,
+     "history": 4
+    }
+   }
+  },
+  {
+   "item": "tools/place_bedroom_skp.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/bedroom/capabilities/place_bedroom_skp.py",
+   "phase": "P4",
+   "rationale": "Capacidade exclusiva do quarto (materialização e fixtures sintéticas de quarto).",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 4
+    }
+   }
+  },
+  {
+   "item": "tools/place_layout_geom.rb",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/sketchup/furnish/place_layout_geom.rb",
+   "phase": "P4",
+   "rationale": "Materialização de móveis no SketchUp (placeholders): execução SU, sem decisão de decoração. Os .rb são carregados por caminho (jobs.furnish, place_layout_geom via require_relative).",
+   "compat": "path_resolver_unico",
+   "dynamic_path_risk": true,
+   "precondition": "mover .rb e geom juntos (require_relative); resolvedor único; teste de contrato do texto Ruby",
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 2,
+     "tests": 2
+    },
+    "tests_sample": [
+     "tests/ruby/test_place_layout_geom.rb",
+     "tests/test_place_layout_geom.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/place_layout_skp.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/sketchup/furnish/place_layout_skp.py",
+   "phase": "P4",
+   "rationale": "Materialização de móveis no SketchUp (placeholders): execução SU, sem decisão de decoração. Os .rb são carregados por caminho (jobs.furnish, place_layout_geom via require_relative).",
+   "compat": "path_resolver_unico",
+   "dynamic_path_risk": true,
+   "precondition": "mover .rb e geom juntos (require_relative); resolvedor único; teste de contrato do texto Ruby",
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução",
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 3,
+     "docs": 5,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_material_de_verdade.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/place_layout_skp.rb",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/sketchup/furnish/place_layout_skp.rb",
+   "phase": "P4",
+   "rationale": "Materialização de móveis no SketchUp (placeholders): execução SU, sem decisão de decoração. Os .rb são carregados por caminho (jobs.furnish, place_layout_geom via require_relative).",
+   "compat": "path_resolver_unico",
+   "dynamic_path_risk": true,
+   "precondition": "mover .rb e geom juntos (require_relative); resolvedor único; teste de contrato do texto Ruby",
+   "risk": "high",
+   "risk_reasons": [
+    "consumido por CI/MCP/config",
+    "caminho resolvido em tempo de execução",
+    "≥15 consumidores em código+testes",
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 15,
+     "data": 3,
+     "docs": 11,
+     "history": 3,
+     "mcp": 2,
+     "tests": 7
+    },
+    "mcp": [
+     "tools/mcp_server/README.md",
+     "tools/mcp_server/server.py"
+    ],
+    "tests_sample": [
+     "tests/ruby/test_place_layout_geom.rb",
+     "tests/test_living_sofa_is_approved_premium.py",
+     "tests/test_material_de_verdade.py",
+     "tests/test_module_aware_material.py",
+     "tests/test_place_layout_geom.py",
+     "tests/test_sketchup_ruby_jobs.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/position_fidelity_gate.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/validation/position_fidelity_gate.py",
+   "phase": "P4",
+   "rationale": "Gate/auditoria TRANSVERSAL (vale para mais de um cômodo ou para a planta toda): tools/validation/ (spec §4.2). Regras exclusivas de um cômodo ficam no cômodo.",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 4,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_position_fidelity_gate.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/project_memory_db.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/knowledge/project_memory_db.py",
+   "phase": "P4",
+   "rationale": "Infra de conhecimento/RAG/memória/referências: sem dono de cômodo. DECISÃO REGISTRADA: novo pacote tools/knowledge/ (a spec §4.2 não o lista, mas a classificação por responsabilidade o exige; não é pacote vazio).",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "data": 1,
+     "docs": 5,
+     "history": 1,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_corpus_to_rag.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/promote_artifact.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/orchestration/promote_artifact.py",
+   "phase": "P4",
+   "rationale": "Sequenciamento de pipelines entre cômodos/executores (spec §4.2 tools/orchestration), sem algoritmos exclusivos de um cômodo. furnish_apartment é o agregador cross-room: 21 testes e 18 consumidores (maior risco).",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "docs": 7,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_promote_artifact.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/promote_canonical.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/orchestration/promote_canonical.py",
+   "phase": "P4",
+   "rationale": "Sequenciamento de pipelines entre cômodos/executores (spec §4.2 tools/orchestration), sem algoritmos exclusivos de um cômodo. furnish_apartment é o agregador cross-room: 21 testes e 18 consumidores (maior risco).",
+   "compat": "facade_at_old_path",
+   "risk": "high",
+   "risk_reasons": [
+    "consumido por CI/MCP/config",
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "data": 1,
+     "docs": 5,
+     "mcp": 1,
+     "tests": 2
+    },
+    "mcp": [
+     "tools/mcp_server/server.py"
+    ],
+    "tests_sample": [
+     "tests/test_build_promote_hook.py",
+     "tests/test_promote_canonical.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/prompts/",
+   "kind": "directory",
+   "disposition": "move",
+   "destination": "tools/oracle/prompts/",
+   "phase": "P4",
+   "rationale": "Oráculo/juízes visuais e consultas (FP-030): o veredito visual IMPROVED/SAME/WORSE continua SÓ do Felipe. DECISÃO REGISTRADA: novo pacote tools/oracle/ (não listado na spec; justificado por responsabilidade).",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 3,
+     "docs": 7
+    }
+   },
+   "files": 3
+  },
+  {
+   "item": "tools/quadrado/",
+   "kind": "directory",
+   "disposition": "move",
+   "destination": "tools/rendering/quadrado/",
+   "phase": "P4",
+   "rationale": "Utilidade comum de imagem/render/pós-processamento (spec §4.2 tools/rendering): o processo SketchUp continua em tools/sketchup e a intenção de render em interior/.",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 6
+    }
+   },
+   "files": 3
+  },
+  {
+   "item": "tools/rack_class.py",
+   "kind": "file",
+   "disposition": "facade",
+   "destination": "tools/rooms/living/rack_class.py",
+   "phase": "P4",
+   "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
+   "compat": "facade_permanent_in_window",
+   "risk": "high",
+   "risk_reasons": [
+    "consumido por CI/MCP/config"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 3,
+     "docs": 5,
+     "mcp": 1,
+     "tests": 2
+    },
+    "mcp": [
+     "tools/mcp_server/server.py"
+    ],
+    "tests_sample": [
+     "tests/test_fp042_furniture_classes_ownership.py",
+     "tests/test_rack_class.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/rag_embed_backend.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/knowledge/rag_embed_backend.py",
+   "phase": "P4",
+   "rationale": "Infra de conhecimento/RAG/memória/referências: sem dono de cômodo. DECISÃO REGISTRADA: novo pacote tools/knowledge/ (a spec §4.2 não o lista, mas a classificação por responsabilidade o exige; não é pacote vazio).",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 4,
+     "docs": 4,
+     "tests": 3
+    },
+    "tests_sample": [
+     "tests/test_fp042_p3_ownership.py",
+     "tests/test_rag_embed_backend.py",
+     "tests/test_taste_writeback_recall.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/rag_freshness.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/knowledge/rag_freshness.py",
+   "phase": "P4",
+   "rationale": "Infra de conhecimento/RAG/memória/referências: sem dono de cômodo. DECISÃO REGISTRADA: novo pacote tools/knowledge/ (a spec §4.2 não o lista, mas a classificação por responsabilidade o exige; não é pacote vazio).",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 5,
+     "docs": 3,
+     "tests": 7
+    },
+    "tests_sample": [
+     "tests/test_curator.py",
+     "tests/test_knowledge_types.py",
+     "tests/test_rag_embed_backend.py",
+     "tests/test_rag_freshness.py",
+     "tests/test_rag_freshness_architect.py",
+     "tests/test_taste_writeback.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/railing_exact_match_gate.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/validation/railing_exact_match_gate.py",
+   "phase": "P4",
+   "rationale": "Gate/auditoria TRANSVERSAL (vale para mais de um cômodo ou para a planta toda): tools/validation/ (spec §4.2). Regras exclusivas de um cômodo ficam no cômodo.",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 4,
+     "tests": 2
+    },
+    "tests_sample": [
+     "tests/test_railing_gates.py",
+     "tests/test_railing_real_build.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/recolor_kitchen_theme.rb",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/kitchen/capabilities/ruby/recolor_kitchen_theme.rb",
+   "phase": "P4",
+   "rationale": "Capacidade de execução exclusiva da cozinha (adapter da cozinha, não builder genérico).",
+   "compat": "path_resolver_unico",
+   "dynamic_path_risk": true,
+   "precondition": "resolvedor único do caminho do script antes de mover; revisar depth/require_relative",
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 2
+    }
+   }
+  },
+  {
+   "item": "tools/reference_db.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/knowledge/reference_db.py",
+   "phase": "P4",
+   "rationale": "Infra de conhecimento/RAG/memória/referências: sem dono de cômodo. DECISÃO REGISTRADA: novo pacote tools/knowledge/ (a spec §4.2 não o lista, mas a classificação por responsabilidade o exige; não é pacote vazio).",
+   "compat": "facade_at_old_path",
+   "risk": "high",
+   "risk_reasons": [
+    "≥15 consumidores em código+testes",
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 5,
+     "data": 1,
+     "docs": 10,
+     "history": 1,
+     "tests": 10
+    },
+    "tests_sample": [
+     "tests/test_architect_program.py",
+     "tests/test_corpus_to_rag.py",
+     "tests/test_instrumentation_call_sites.py",
+     "tests/test_observability_invariants.py",
+     "tests/test_observability_redact.py",
+     "tests/test_rag_embed_backend.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/reference_grammar.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/knowledge/reference_grammar.py",
+   "phase": "P4",
+   "rationale": "Infra de conhecimento/RAG/memória/referências: sem dono de cômodo. DECISÃO REGISTRADA: novo pacote tools/knowledge/ (a spec §4.2 não o lista, mas a classificação por responsabilidade o exige; não é pacote vazio).",
+   "compat": "facade_at_old_path",
+   "risk": "high",
+   "risk_reasons": [
+    "consumido por CI/MCP/config"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 4,
+     "history": 1,
+     "mcp": 2,
+     "tests": 1
+    },
+    "mcp": [
+     "tools/mcp_server/README.md",
+     "tools/mcp_server/server.py"
+    ],
+    "tests_sample": [
+     "tests/test_reference_grammar.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/regenerate_consensus.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/orchestration/regenerate_consensus.py",
+   "phase": "P4",
+   "rationale": "Sequenciamento de pipelines entre cômodos/executores (spec §4.2 tools/orchestration), sem algoritmos exclusivos de um cômodo. furnish_apartment é o agregador cross-room: 21 testes e 18 consumidores (maior risco).",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "docs": 7,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_regenerate_consensus.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/render_banho_auto.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/bathroom/capabilities/render_banho_auto.py",
+   "phase": "P4",
+   "rationale": "Capacidade exclusiva dos banheiros.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "docs": 2
+    }
+   }
+  },
+  {
+   "item": "tools/render_banho_vray.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/bathroom/capabilities/render_banho_vray.py",
+   "phase": "P4",
+   "rationale": "Capacidade exclusiva dos banheiros.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 2
+    }
+   }
+  },
+  {
+   "item": "tools/render_bbox_audit.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/validation/render_bbox_audit.py",
+   "phase": "P4",
+   "rationale": "Gate/auditoria TRANSVERSAL (vale para mais de um cômodo ou para a planta toda): tools/validation/ (spec §4.2). Regras exclusivas de um cômodo ficam no cômodo.",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 3,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_render_bbox_audit.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/render_kitchen_angles.rb",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/kitchen/capabilities/ruby/render_kitchen_angles.rb",
+   "phase": "P4",
+   "rationale": "Capacidade de execução exclusiva da cozinha (adapter da cozinha, não builder genérico).",
+   "compat": "path_resolver_unico",
+   "dynamic_path_risk": true,
+   "precondition": "resolvedor único do caminho do script antes de mover; revisar depth/require_relative",
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "docs": 4
+    }
+   }
+  },
+  {
+   "item": "tools/render_parts_iso.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rendering/render_parts_iso.py",
+   "phase": "P4",
+   "rationale": "Utilidade comum de imagem/render/pós-processamento (spec §4.2 tools/rendering): o processo SketchUp continua em tools/sketchup e a intenção de render em interior/.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 11,
+     "data": 1,
+     "docs": 7,
+     "history": 1
+    }
+   }
+  },
+  {
+   "item": "tools/render_room.ps1",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rendering/render_room.ps1",
+   "phase": "P4",
+   "rationale": "Utilidade comum de imagem/render/pós-processamento (spec §4.2 tools/rendering): o processo SketchUp continua em tools/sketchup e a intenção de render em interior/.",
+   "compat": "path_resolver_unico",
+   "dynamic_path_risk": true,
+   "precondition": "resolvedor único do caminho do script antes de mover; revisar depth/require_relative",
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 5,
+     "history": 1
+    }
+   }
+  },
+  {
+   "item": "tools/render_sala_eyelevel.rb",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/living/capabilities/ruby/render_sala_eyelevel.rb",
+   "phase": "P4",
+   "rationale": "Ferramenta do programa do sofá/sala (harness, comparação, fixtures): pertence ao cômodo living. Antes de mover, confirmar se cada harness ainda executa; os sem consumidor são candidatos a arquivo.",
+   "compat": "path_resolver_unico",
+   "dynamic_path_risk": true,
+   "precondition": "resolvedor único do caminho do script antes de mover; revisar depth/require_relative",
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "docs": 2
+    }
+   }
+  },
+  {
+   "item": "tools/render_scene_views.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rendering/render_scene_views.py",
+   "phase": "P4",
+   "rationale": "Utilidade comum de imagem/render/pós-processamento (spec §4.2 tools/rendering): o processo SketchUp continua em tools/sketchup e a intenção de render em interior/.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 2,
+     "docs": 3,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_intent_to_scene.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/render_scene_vray.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rendering/render_scene_vray.py",
+   "phase": "P4",
+   "rationale": "Utilidade comum de imagem/render/pós-processamento (spec §4.2 tools/rendering): o processo SketchUp continua em tools/sketchup e a intenção de render em interior/.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "data": 1,
+     "docs": 4,
+     "tests": 2
+    },
+    "tests_sample": [
+     "tests/test_intent_to_scene.py",
+     "tests/test_sketchup_specialist.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/repo_health_gate.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/validation/repo_health_gate.py",
+   "phase": "P4",
+   "rationale": "Gate/auditoria TRANSVERSAL (vale para mais de um cômodo ou para a planta toda): tools/validation/ (spec §4.2). Regras exclusivas de um cômodo ficam no cômodo.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "data": 1,
+     "docs": 5
+    }
+   }
+  },
+  {
+   "item": "tools/retrieval_eval.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/knowledge/retrieval_eval.py",
+   "phase": "P4",
+   "rationale": "Infra de conhecimento/RAG/memória/referências: sem dono de cômodo. DECISÃO REGISTRADA: novo pacote tools/knowledge/ (a spec §4.2 não o lista, mas a classificação por responsabilidade o exige; não é pacote vazio).",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "data": 1,
+     "docs": 3,
+     "tests": 2
+    },
+    "tests_sample": [
+     "tests/test_retrieval_eval.py",
+     "tests/test_retrieval_fusion.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/room_type.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/shared/room_type.py",
+   "phase": "P4",
+   "rationale": "Contrato/modelo usado por mais de um cômodo (classificação, modelo espacial, regras, envelope arquitetônico, decor): tools/rooms/shared/. Auditar duplicação com shared/decor.py e shared/furniture.py antes de mover.",
+   "compat": "facade_at_old_path",
+   "risk": "high",
+   "risk_reasons": [
+    "≥15 consumidores em código+testes"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 11,
+     "docs": 5,
+     "history": 1,
+     "tests": 7
+    },
+    "tests_sample": [
+     "tests/test_fp042_bedroom_furnishing_adapter.py",
+     "tests/test_fp042_kitchen_anchor_ownership.py",
+     "tests/test_fp042_living_furnishing_adapter.py",
+     "tests/test_room_dispatch_regression.py",
+     "tests/test_room_integration_regression.py",
+     "tests/test_room_type.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/rooms/",
+   "kind": "directory",
+   "disposition": "retain",
+   "destination": null,
+   "phase": "P4",
+   "rationale": "Dono dos cômodos. Divisão interna prevista: 8 módulos de GOVERNANÇA (inventory_gate, ownership_audit, p3_ownership, asset_provenance, reference_provenance, architecture_ownership, knowledge_ownership, tooling_ownership) saem do namespace de cômodo em P4 (destino proposto tools/validation/governance/); registry e dispatch ficam (roteamento).",
+   "risk": "high",
+   "risk_reasons": [
+    "consumido por CI/MCP/config",
+    "≥15 consumidores em código+testes"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "ci": 1,
+     "code": 24,
+     "data": 2,
+     "docs": 7,
+     "mcp": 1,
+     "tests": 29
+    },
+    "ci": [
+     ".github/workflows/ci.yml"
+    ],
+    "mcp": [
+     "tools/mcp_server/server.py"
+    ],
+    "tests_sample": [
+     "tests/test_fp042_architecture_ownership.py",
+     "tests/test_fp042_asset_provenance.py",
+     "tests/test_fp042_automated_closure.py",
+     "tests/test_fp042_bathroom_validation.py",
+     "tests/test_fp042_bedroom_furnishing_adapter.py",
+     "tests/test_fp042_bedroom_planner_ownership.py"
+    ]
+   },
+   "files": 51
+  },
+  {
+   "item": "tools/run_deterministic_gates.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/validation/run_deterministic_gates.py",
+   "phase": "P4",
+   "rationale": "Gate/auditoria TRANSVERSAL (vale para mais de um cômodo ou para a planta toda): tools/validation/ (spec §4.2). Regras exclusivas de um cômodo ficam no cômodo.",
+   "compat": "facade_at_old_path",
+   "risk": "high",
+   "risk_reasons": [
+    "consumido por CI/MCP/config",
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "ci": 1,
+     "code": 3,
+     "docs": 18,
+     "history": 1,
+     "mcp": 1,
+     "tests": 5
+    },
+    "ci": [
+     ".github/workflows/ci.yml"
+    ],
+    "mcp": [
+     "tools/mcp_server/server.py"
+    ],
+    "tests_sample": [
+     "tests/test_build_promote_hook.py",
+     "tests/test_gate_normalizer.py",
+     "tests/test_instrumentation_call_sites.py",
+     "tests/test_observability_invariants.py",
+     "tests/test_run_deterministic_gates.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/run_skp_visual_review.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/oracle/run_skp_visual_review.py",
+   "phase": "P4",
+   "rationale": "Oráculo/juízes visuais e consultas (FP-030): o veredito visual IMPROVED/SAME/WORSE continua SÓ do Felipe. DECISÃO REGISTRADA: novo pacote tools/oracle/ (não listado na spec; justificado por responsabilidade).",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 5,
+     "docs": 16,
+     "history": 5,
+     "tests": 5
+    },
+    "tests_sample": [
+     "tests/test_auto_gpt_consult_wiring.py",
+     "tests/test_skp_visual_review_contract.py",
+     "tests/test_vision_acl.py",
+     "tests/test_visual_oracle_contract.py",
+     "tests/test_visual_oracle_negative_fixtures.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/screenshot_camera.rb",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/sketchup/inspect/screenshot_camera.rb",
+   "phase": "P4",
+   "rationale": "Inspeção/captura no SketchUp (somente leitura).",
+   "compat": "path_resolver_unico",
+   "dynamic_path_risk": true,
+   "precondition": "resolvedor único do caminho do script antes de mover; revisar depth/require_relative",
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "docs": 2
+    }
+   }
+  },
+  {
+   "item": "tools/semantic_geometry_contract_gate.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/validation/semantic_geometry_contract_gate.py",
+   "phase": "P4",
+   "rationale": "Gate/auditoria TRANSVERSAL (vale para mais de um cômodo ou para a planta toda): tools/validation/ (spec §4.2). Regras exclusivas de um cômodo ficam no cômodo.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "docs": 7,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_semantic_geometry_contract_gate.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/semantic_zones.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/shared/semantic_zones.py",
+   "phase": "P4",
+   "rationale": "Contrato/modelo usado por mais de um cômodo (classificação, modelo espacial, regras, envelope arquitetônico, decor): tools/rooms/shared/. Auditar duplicação com shared/decor.py e shared/furniture.py antes de mover.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "docs": 2,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_semantic_zones.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/service_layout.py",
+   "kind": "file",
+   "disposition": "facade",
+   "destination": "tools/rooms/service/layout.py",
+   "phase": "P4",
+   "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
+   "compat": "facade_permanent_in_window",
+   "risk": "medium",
+   "risk_reasons": [],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 4,
+     "docs": 5,
+     "tests": 3
+    },
+    "tests_sample": [
+     "tests/test_fp042_service_layout_ownership.py",
+     "tests/test_room_dependency_boundaries.py",
+     "tests/test_room_module_architecture.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/shell_parts.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/shared/shell_parts.py",
+   "phase": "P4",
+   "rationale": "Contrato/modelo usado por mais de um cômodo (classificação, modelo espacial, regras, envelope arquitetônico, decor): tools/rooms/shared/. Auditar duplicação com shared/decor.py e shared/furniture.py antes de mover.",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 2,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_shell_parts.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/sketchup/",
+   "kind": "directory",
+   "disposition": "retain",
+   "destination": null,
+   "phase": "P4",
+   "rationale": "Executor SketchUp (jobs MCP). Ganha subpacotes shell/, furnish/, inspect/, vray/ com os scripts legados.",
+   "risk": "high",
+   "risk_reasons": [
+    "consumido por CI/MCP/config"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 3,
+     "data": 13,
+     "docs": 9,
+     "mcp": 2,
+     "tests": 7
+    },
+    "mcp": [
+     "tools/mcp_server/README.md",
+     "tools/mcp_server/server.py"
+    ],
+    "tests_sample": [
+     "tests/ruby/test_skmcp_core.rb",
+     "tests/ruby/test_skmcp_walk.rb",
+     "tests/test_room_dependency_boundaries.py",
+     "tests/test_sketchup_knowledge.py",
+     "tests/test_sketchup_ruby_jobs.py",
+     "tests/test_sketchup_specialist.py"
+    ]
+   },
+   "files": 12
+  },
+  {
+   "item": "tools/skp_editability_report.rb",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/sketchup/inspect/skp_editability_report.rb",
+   "phase": "P4",
+   "rationale": "Inspeção/captura no SketchUp (somente leitura).",
+   "compat": "path_resolver_unico",
+   "dynamic_path_risk": true,
+   "precondition": "resolvedor único do caminho do script antes de mover; revisar depth/require_relative",
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "docs": 4
+    }
+   }
+  },
+  {
+   "item": "tools/sofa_builder.py",
+   "kind": "file",
+   "disposition": "facade",
+   "destination": "tools/rooms/shared/sofa.py",
+   "phase": "P4",
+   "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
+   "compat": "facade_permanent_in_window",
+   "risk": "high",
+   "risk_reasons": [
+    "≥15 consumidores em código+testes"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 22,
+     "data": 2,
+     "docs": 5,
+     "history": 2,
+     "tests": 8
+    },
+    "tests_sample": [
+     "tests/test_fp042_bedroom_furnishing_adapter.py",
+     "tests/test_fp042_living_component_ownership.py",
+     "tests/test_fp042_shared_parametric_builders.py",
+     "tests/test_fp042_tooling_ownership.py",
+     "tests/test_fp043_p0_map.py",
+     "tests/test_furnish_sofa_gate.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/sofa_class.py",
+   "kind": "file",
+   "disposition": "facade",
+   "destination": "tools/rooms/living/sofa_class.py",
+   "phase": "P4",
+   "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
+   "compat": "facade_permanent_in_window",
+   "risk": "high",
+   "risk_reasons": [
+    "consumido por CI/MCP/config",
+    "≥15 consumidores em código+testes"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 16,
+     "docs": 8,
+     "mcp": 1,
+     "tests": 5
+    },
+    "mcp": [
+     "tools/mcp_server/server.py"
+    ],
+    "tests_sample": [
+     "tests/test_fp042_furniture_classes_ownership.py",
+     "tests/test_fp042_p3_ownership.py",
+     "tests/test_furnish_sofa_gate.py",
+     "tests/test_living_sofa_is_approved_premium.py",
+     "tests/test_sofa_class.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/sofa_class_matrix.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/living/capabilities/sofa_class_matrix.py",
+   "phase": "P4",
+   "rationale": "Ferramenta do programa do sofá/sala (harness, comparação, fixtures): pertence ao cômodo living. Antes de mover, confirmar se cada harness ainda executa; os sem consumidor são candidatos a arquivo.",
+   "compat": "facade_at_old_path",
+   "dynamic_path_risk": true,
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução",
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 10,
+     "docs": 6,
+     "history": 1,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_sofa_class.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/sofa_furnish_fase1_compare.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/living/capabilities/sofa_furnish_fase1_compare.py",
+   "phase": "P4",
+   "rationale": "Ferramenta do programa do sofá/sala (harness, comparação, fixtures): pertence ao cômodo living. Antes de mover, confirmar se cada harness ainda executa; os sem consumidor são candidatos a arquivo.",
+   "compat": "facade_at_old_path",
+   "dynamic_path_risk": true,
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução",
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 3
+    }
+   }
+  },
+  {
+   "item": "tools/sofa_gate.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/living/validation/sofa_gate.py",
+   "phase": "P4",
+   "rationale": "Gate exclusivo do sofá da sala.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 4,
+     "data": 1,
+     "docs": 3,
+     "history": 1,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_sofa_class.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/sofa_premium_harness.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/living/capabilities/sofa_premium_harness.py",
+   "phase": "P4",
+   "rationale": "Ferramenta do programa do sofá/sala (harness, comparação, fixtures): pertence ao cômodo living. Antes de mover, confirmar se cada harness ainda executa; os sem consumidor são candidatos a arquivo.",
+   "compat": "facade_at_old_path",
+   "dynamic_path_risk": true,
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução",
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 2
+    }
+   }
+  },
+  {
+   "item": "tools/sofa_premium_harness.rb",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/living/capabilities/ruby/sofa_premium_harness.rb",
+   "phase": "P4",
+   "rationale": "Ferramenta do programa do sofá/sala (harness, comparação, fixtures): pertence ao cômodo living. Antes de mover, confirmar se cada harness ainda executa; os sem consumidor são candidatos a arquivo.",
+   "compat": "path_resolver_unico",
+   "dynamic_path_risk": true,
+   "precondition": "resolvedor único do caminho do script antes de mover; revisar depth/require_relative",
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 2,
+     "docs": 2
+    }
+   }
+  },
+  {
+   "item": "tools/sofa_premium_integrate.rb",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/living/capabilities/ruby/sofa_premium_integrate.rb",
+   "phase": "P4",
+   "rationale": "Ferramenta do programa do sofá/sala (harness, comparação, fixtures): pertence ao cômodo living. Antes de mover, confirmar se cada harness ainda executa; os sem consumidor são candidatos a arquivo.",
+   "compat": "path_resolver_unico",
+   "dynamic_path_risk": true,
+   "precondition": "resolvedor único do caminho do script antes de mover; revisar depth/require_relative",
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 2
+    }
+   }
+  },
+  {
+   "item": "tools/sofa_venezia_compare.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/living/capabilities/sofa_venezia_compare.py",
+   "phase": "P4",
+   "rationale": "Ferramenta do programa do sofá/sala (harness, comparação, fixtures): pertence ao cômodo living. Antes de mover, confirmar se cada harness ainda executa; os sem consumidor são candidatos a arquivo.",
+   "compat": "facade_at_old_path",
+   "dynamic_path_risk": true,
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução",
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 2,
+     "docs": 2
+    }
+   }
+  },
+  {
+   "item": "tools/sofa_venezia_room.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/living/capabilities/sofa_venezia_room.py",
+   "phase": "P4",
+   "rationale": "Ferramenta do programa do sofá/sala (harness, comparação, fixtures): pertence ao cômodo living. Antes de mover, confirmar se cada harness ainda executa; os sem consumidor são candidatos a arquivo.",
+   "compat": "facade_at_old_path",
+   "dynamic_path_risk": true,
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução",
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 2
+    }
+   }
+  },
+  {
+   "item": "tools/soft_barrier_source_audit.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/validation/soft_barrier_source_audit.py",
+   "phase": "P4",
+   "rationale": "Gate/auditoria TRANSVERSAL (vale para mais de um cômodo ou para a planta toda): tools/validation/ (spec §4.2). Regras exclusivas de um cômodo ficam no cômodo.",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 4,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_soft_barrier_source_audit.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/spatial_model.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rooms/shared/spatial_model.py",
+   "phase": "P4",
+   "rationale": "Contrato/modelo usado por mais de um cômodo (classificação, modelo espacial, regras, envelope arquitetônico, decor): tools/rooms/shared/. Auditar duplicação com shared/decor.py e shared/furniture.py antes de mover.",
+   "compat": "facade_at_old_path",
+   "risk": "high",
+   "risk_reasons": [
+    "≥15 consumidores em código+testes"
+   ],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 20,
+     "docs": 6,
+     "history": 1,
+     "tests": 2
+    },
+    "tests_sample": [
+     "tests/test_auto_camera.py",
+     "tests/test_fp042_kitchen_anchor_ownership.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/studio_log.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/interior_studio/studio_log.py",
+   "phase": "P4",
+   "rationale": "Loop do estúdio de interiores: já existe tools/interior_studio/ como dono.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "docs": 3
+    }
+   }
+  },
+  {
+   "item": "tools/style_coherence_gate.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/validation/style_coherence_gate.py",
+   "phase": "P4",
+   "rationale": "Gate/auditoria TRANSVERSAL (vale para mais de um cômodo ou para a planta toda): tools/validation/ (spec §4.2). Regras exclusivas de um cômodo ficam no cômodo.",
+   "compat": "facade_at_old_path",
+   "risk": "high",
+   "risk_reasons": [
+    "consumido por CI/MCP/config",
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "docs": 5,
+     "history": 1,
+     "mcp": 1
+    },
+    "mcp": [
+     "tools/mcp_server/server.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/style_spec.py",
+   "kind": "file",
+   "disposition": "facade",
+   "destination": "tools/rooms/shared/materials.py",
+   "phase": "P4",
+   "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
+   "compat": "facade_permanent_in_window",
+   "risk": "medium",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 8,
+     "data": 1,
+     "docs": 7,
+     "history": 1,
+     "tests": 4
+    },
+    "tests_sample": [
+     "tests/test_fp042_shared_material_ownership.py",
+     "tests/test_material_de_verdade.py",
+     "tests/test_module_aware_material.py",
+     "tests/test_variant_axes.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/su_runner_safety.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/sketchup/runner_safety.py",
+   "phase": "P4",
+   "rationale": "Protocolo de ciclo de vida do SketchUp (modo, terminate): é execução SU.",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 2,
+     "docs": 5
+    }
+   }
+  },
+  {
+   "item": "tools/taste_writeback.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/knowledge/taste_writeback.py",
+   "phase": "P4",
+   "rationale": "Infra de conhecimento/RAG/memória/referências: sem dono de cômodo. DECISÃO REGISTRADA: novo pacote tools/knowledge/ (a spec §4.2 não o lista, mas a classificação por responsabilidade o exige; não é pacote vazio).",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 2,
+     "tests": 2
+    },
+    "tests_sample": [
+     "tests/test_taste_writeback.py",
+     "tests/test_taste_writeback_recall.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/theme_palette.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rendering/theme_palette.py",
+   "phase": "P4",
+   "rationale": "Utilidade comum de imagem/render/pós-processamento (spec §4.2 tools/rendering): o processo SketchUp continua em tools/sketchup e a intenção de render em interior/.",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 2,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_theme_palette.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/trace_view.py",
+   "kind": "file",
+   "disposition": "decision",
+   "destination": "tools/trace_view.py",
+   "phase": "P4",
+   "rationale": "CLI de leitura de trace do AI Pipeline Inspector: dono não é nem oráculo nem orquestração. DECISÃO: ficar como infra de observabilidade nomeada em tools/ ou ir para core/observability/cli/.",
+   "open_question": "dono da CLI de trace",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "docs": 3,
+     "tests": 2
+    },
+    "tests_sample": [
+     "tests/test_fp043_p0_map.py",
+     "tests/test_trace_view.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/tweak_vrscene.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/rendering/tweak_vrscene.py",
+   "phase": "P4",
+   "rationale": "Utilidade comum de imagem/render/pós-processamento (spec §4.2 tools/rendering): o processo SketchUp continua em tools/sketchup e a intenção de render em interior/.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 7,
+     "data": 4,
+     "docs": 9,
+     "history": 1,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_sketchup_specialist.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/variant_axes.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/orchestration/variant_axes.py",
+   "phase": "P4",
+   "rationale": "Sequenciamento de pipelines entre cômodos/executores (spec §4.2 tools/orchestration), sem algoritmos exclusivos de um cômodo. furnish_apartment é o agregador cross-room: 21 testes e 18 consumidores (maior risco).",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 3,
+     "docs": 3,
+     "tests": 2
+    },
+    "tests_sample": [
+     "tests/test_variant_axes.py",
+     "tests/test_variant_sweep.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/variant_sweep.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/orchestration/variant_sweep.py",
+   "phase": "P4",
+   "rationale": "Sequenciamento de pipelines entre cômodos/executores (spec §4.2 tools/orchestration), sem algoritmos exclusivos de um cômodo. furnish_apartment é o agregador cross-room: 21 testes e 18 consumidores (maior risco).",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 3,
+     "docs": 3,
+     "history": 1,
+     "tests": 3
+    },
+    "tests_sample": [
+     "tests/test_fp042_ownership_audit.py",
+     "tests/test_variant_axes.py",
+     "tests/test_variant_sweep.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/vision_queue_consumer.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/orchestration/correction/vision_queue_consumer.py",
+   "phase": "P4",
+   "rationale": "Sequenciamento de pipelines entre cômodos/executores (spec §4.2 tools/orchestration), sem algoritmos exclusivos de um cômodo. furnish_apartment é o agregador cross-room: 21 testes e 18 consumidores (maior risco).",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 4,
+     "tests": 2
+    },
+    "tests_sample": [
+     "tests/test_correction_loop.py",
+     "tests/test_vision_queue_consumer.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/visual_regression_gate.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/validation/visual_regression_gate.py",
+   "phase": "P4",
+   "rationale": "Gate/auditoria TRANSVERSAL (vale para mais de um cômodo ou para a planta toda): tools/validation/ (spec §4.2). Regras exclusivas de um cômodo ficam no cômodo.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "docs": 5
+    }
+   }
+  },
+  {
+   "item": "tools/vray_export.rb",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/sketchup/vray/vray_export.rb",
+   "phase": "P4",
+   "rationale": "Exportador .vrscene (usado por su_render_vray e render_scene_vray, 8 consumidores).",
+   "compat": "path_resolver_unico",
+   "dynamic_path_risk": true,
+   "precondition": "resolvedor único do caminho do script antes de mover; revisar depth/require_relative",
+   "risk": "high",
+   "risk_reasons": [
+    "caminho resolvido em tempo de execução",
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 8,
+     "docs": 13,
+     "history": 2,
+     "tests": 2
+    },
+    "tests_sample": [
+     "tests/test_module_aware_material.py",
+     "tests/test_sketchup_specialist.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/wall_exact_match_gate.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/validation/wall_exact_match_gate.py",
+   "phase": "P4",
+   "rationale": "Gate/auditoria TRANSVERSAL (vale para mais de um cômodo ou para a planta toda): tools/validation/ (spec §4.2). Regras exclusivas de um cômodo ficam no cômodo.",
+   "compat": "facade_at_old_path",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "docs": 3
+    }
+   }
+  },
+  {
+   "item": "tools/wall_overlap_audit.py",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "tools/validation/wall_overlap_audit.py",
+   "phase": "P4",
+   "rationale": "Gate/auditoria TRANSVERSAL (vale para mais de um cômodo ou para a planta toda): tools/validation/ (spec §4.2). Regras exclusivas de um cômodo ficam no cômodo.",
+   "compat": "facade_at_old_path",
+   "risk": "medium",
+   "risk_reasons": [
+    "Path(__file__)/parents dependente da profundidade"
+   ],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 3,
+     "docs": 5,
+     "tests": 2
+    },
+    "tests_sample": [
+     "tests/test_regenerate_consensus.py",
+     "tests/test_wall_overlap_audit.py"
+    ]
+   }
+  },
+  {
+   "item": "tools/wardrobe_builder.py",
+   "kind": "file",
+   "disposition": "facade",
+   "destination": "tools/rooms/shared/wardrobe.py",
+   "phase": "P4",
+   "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
+   "compat": "facade_permanent_in_window",
+   "risk": "medium",
+   "risk_reasons": [],
+   "depth_sensitive": true,
+   "consumers": {
+    "counts": {
+     "code": 7,
+     "data": 1,
+     "docs": 5,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_fp042_shared_parametric_builders.py"
+    ]
+   }
+  },
+  {
+   "item": "uv.lock",
+   "kind": "file",
+   "disposition": "retain",
+   "destination": null,
+   "phase": "P2",
+   "rationale": "Configuração que a ferramenta exige na raiz (git/docker/empacotamento/CI).",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "code": 1,
+     "docs": 4,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_fp043_p0_map.py"
+    ]
+   }
+  },
+  {
+   "item": "vray_pipeline_proof.png",
+   "kind": "file",
+   "disposition": "move",
+   "destination": "artifacts/review/vray_pipeline_proof_2026-06/vray_pipeline_proof.png",
+   "phase": "P2",
+   "rationale": "Evidência de prova do pipeline V-Ray (não é render canônico); só docs e manifestos FP-042 a citam.",
+   "compat": "none_needed",
+   "precondition": "registrar old_path/new_path e blob nos manifestos FP-042 (renomeação autorizada, sem regenerar)",
+   "risk": "low",
+   "risk_reasons": [],
+   "depth_sensitive": false,
+   "consumers": {
+    "counts": {
+     "docs": 5,
+     "tests": 1
+    },
+    "tests_sample": [
+     "tests/test_fp043_p0_map.py"
+    ]
+   }
+  }
+ ]
+}
