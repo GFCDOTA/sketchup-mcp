@@ -1,0 +1,4251 @@
+{
+  "schema_version": "fp042_asset_provenance.v1",
+  "snapshot_commit": "60aa9991f680bef4d3c0139b36ef4ff90d7d72f5",
+  "source": "TRACKED_GIT_BLOBS_NOT_FILESYSTEM_HASHES",
+  "provenance_policy": "IMMUTABLE_UNLESS_INTENTIONALLY_REBASELINED_AND_REVIEWED",
+  "preservation_scope": "BINARY_ASSETS_ONLY_L2_VISUAL_VERIFICATION_OUT_OF_SCOPE",
+  "assets": [
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/gpt_auto_consult_20260529_190232/final/model_iso.png",
+      "blob_sha": "a9d288256ca437ed31294db55a94627bd4b61f14",
+      "blob_size": 144277,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/gpt_auto_consult_20260529_190232/final/model_top.png",
+      "blob_sha": "6e07eacfde19e0aeff6ea99eb17ea9f70c19d721",
+      "blob_size": 32977,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/gpt_auto_consult_20260529_190232/final/side_by_side_pdf_vs_skp.png",
+      "blob_sha": "4c3707bcfb2110a4153c4b1e2f5718c900ccf58f",
+      "blob_size": 250226,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/gpt_auto_consult_required_20260529_190302/final/model_iso.png",
+      "blob_sha": "a9d288256ca437ed31294db55a94627bd4b61f14",
+      "blob_size": 144277,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/gpt_auto_consult_required_20260529_190302/final/model_top.png",
+      "blob_sha": "6e07eacfde19e0aeff6ea99eb17ea9f70c19d721",
+      "blob_size": 32977,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/gpt_auto_consult_required_20260529_190302/final/side_by_side_pdf_vs_skp.png",
+      "blob_sha": "4c3707bcfb2110a4153c4b1e2f5718c900ccf58f",
+      "blob_size": 250226,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/gpt_bridge_smoke_20260529T195038Z/final/model_iso.png",
+      "blob_sha": "a9d288256ca437ed31294db55a94627bd4b61f14",
+      "blob_size": 144277,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/gpt_bridge_smoke_20260529T195038Z/final/model_top.png",
+      "blob_sha": "6e07eacfde19e0aeff6ea99eb17ea9f70c19d721",
+      "blob_size": 32977,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/gpt_bridge_smoke_20260529T195038Z/final/side_by_side_pdf_vs_skp.png",
+      "blob_sha": "4c3707bcfb2110a4153c4b1e2f5718c900ccf58f",
+      "blob_size": 250226,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/gpt_bridge_smoke_20260529T200235Z/final/model_iso.png",
+      "blob_sha": "a9d288256ca437ed31294db55a94627bd4b61f14",
+      "blob_size": 144277,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/gpt_bridge_smoke_20260529T200235Z/final/model_top.png",
+      "blob_sha": "6e07eacfde19e0aeff6ea99eb17ea9f70c19d721",
+      "blob_size": 32977,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/gpt_bridge_smoke_20260529T200235Z/final/side_by_side_pdf_vs_skp.png",
+      "blob_sha": "4c3707bcfb2110a4153c4b1e2f5718c900ccf58f",
+      "blob_size": 250226,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/gpt_real_consult_20260529T193229Z/final/model_iso.png",
+      "blob_sha": "a9d288256ca437ed31294db55a94627bd4b61f14",
+      "blob_size": 144277,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/gpt_real_consult_20260529T193229Z/final/model_top.png",
+      "blob_sha": "6e07eacfde19e0aeff6ea99eb17ea9f70c19d721",
+      "blob_size": 32977,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/gpt_real_consult_20260529T193229Z/final/side_by_side_pdf_vs_skp.png",
+      "blob_sha": "4c3707bcfb2110a4153c4b1e2f5718c900ccf58f",
+      "blob_size": 250226,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/loop_cycle2/final/model_iso.png",
+      "blob_sha": "fdf0a71a2e07d333a3be0653d380c131576461ed",
+      "blob_size": 124275,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/loop_cycle2/final/model_top.png",
+      "blob_sha": "27f6eab52834bf39e84b765d43d4dbf230e38f35",
+      "blob_size": 29375,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/loop_cycle2/final/model.skp",
+      "blob_sha": "f305166ffc5a41e0a34f31de7dc3691c9199f270",
+      "blob_size": 119232,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/loop_cycle2/final/side_by_side_pdf_vs_skp.png",
+      "blob_sha": "ba62d331a0ab14b7196d1655e3c36604a8b62b30",
+      "blob_size": 243733,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/manual_validation_20260529_041751/final/model_iso.png",
+      "blob_sha": "6e1b06f0dd91645d6b63fe4e9b4e2225d98b664a",
+      "blob_size": 144277,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/manual_validation_20260529_041751/final/model_top.png",
+      "blob_sha": "d7930c90250423ddf4677146318dbe98d88d013b",
+      "blob_size": 32977,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/manual_validation_20260529_041751/final/side_by_side_pdf_vs_skp.png",
+      "blob_sha": "18bf45fcb752bea746024a6ef0de019447fb017e",
+      "blob_size": 251558,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/negative_dogfood_20260529T201219Z/clean_top.png",
+      "blob_sha": "6e07eacfde19e0aeff6ea99eb17ea9f70c19d721",
+      "blob_size": 32977,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/negative_dogfood_20260529T201219Z/corrupted_top.png",
+      "blob_sha": "95490f75b4c2ab09d90f882877b9e3b1d11b3ace",
+      "blob_size": 33444,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/negative_dogfood_parity_20260529T201758Z/clean_iso.png",
+      "blob_sha": "a9d288256ca437ed31294db55a94627bd4b61f14",
+      "blob_size": 144277,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/negative_dogfood_parity_20260529T201758Z/clean_side_by_side.png",
+      "blob_sha": "4c3707bcfb2110a4153c4b1e2f5718c900ccf58f",
+      "blob_size": 250226,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/negative_dogfood_parity_20260529T201758Z/clean_top.png",
+      "blob_sha": "6e07eacfde19e0aeff6ea99eb17ea9f70c19d721",
+      "blob_size": 32977,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/negative_dogfood_parity_20260529T201758Z/corrupted_side_by_side.png",
+      "blob_sha": "f95e97d548bfbe5f7b002242d8fae3a93664f6a4",
+      "blob_size": 250430,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/negative_dogfood_parity_20260529T201758Z/corrupted_top.png",
+      "blob_sha": "95490f75b4c2ab09d90f882877b9e3b1d11b3ace",
+      "blob_size": 33444,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/oracle_backend_20260529_172330/final/model_iso.png",
+      "blob_sha": "a9d288256ca437ed31294db55a94627bd4b61f14",
+      "blob_size": 144277,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/oracle_backend_20260529_172330/final/model_top.png",
+      "blob_sha": "6e07eacfde19e0aeff6ea99eb17ea9f70c19d721",
+      "blob_size": 32977,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/oracle_backend_20260529_172330/final/side_by_side_pdf_vs_skp.png",
+      "blob_sha": "4c3707bcfb2110a4153c4b1e2f5718c900ccf58f",
+      "blob_size": 250226,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/oracle_backend_20260529_184609/final/model_iso.png",
+      "blob_sha": "a9d288256ca437ed31294db55a94627bd4b61f14",
+      "blob_size": 144277,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/oracle_backend_20260529_184609/final/model_top.png",
+      "blob_sha": "6e07eacfde19e0aeff6ea99eb17ea9f70c19d721",
+      "blob_size": 32977,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/oracle_backend_20260529_184609/final/side_by_side_pdf_vs_skp.png",
+      "blob_sha": "4c3707bcfb2110a4153c4b1e2f5718c900ccf58f",
+      "blob_size": 250226,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/oracle_pluggable_20260529_165259/final/model_iso.png",
+      "blob_sha": "a9d288256ca437ed31294db55a94627bd4b61f14",
+      "blob_size": 144277,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/oracle_pluggable_20260529_165259/final/model_top.png",
+      "blob_sha": "6e07eacfde19e0aeff6ea99eb17ea9f70c19d721",
+      "blob_size": 32977,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/oracle_pluggable_20260529_165259/final/oracle_request_package/images/model_iso.png",
+      "blob_sha": "a9d288256ca437ed31294db55a94627bd4b61f14",
+      "blob_size": 144277,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/oracle_pluggable_20260529_165259/final/oracle_request_package/images/model_top.png",
+      "blob_sha": "6e07eacfde19e0aeff6ea99eb17ea9f70c19d721",
+      "blob_size": 32977,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/oracle_pluggable_20260529_165259/final/oracle_request_package/images/side_by_side_pdf_vs_skp.png",
+      "blob_sha": "4c3707bcfb2110a4153c4b1e2f5718c900ccf58f",
+      "blob_size": 250226,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/oracle_pluggable_20260529_165259/final/side_by_side_pdf_vs_skp.png",
+      "blob_sha": "4c3707bcfb2110a4153c4b1e2f5718c900ccf58f",
+      "blob_size": 250226,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/visual_oracle_bridge_20260529_maturity2/final/model_iso.png",
+      "blob_sha": "57ec42e84908fce982760be2d7c62cae41539abc",
+      "blob_size": 144284,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/visual_oracle_bridge_20260529_maturity2/final/model_top.png",
+      "blob_sha": "9cd4675e00a9fae5a4a2716da4633b980caffe5e",
+      "blob_size": 32978,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/_archive/review_legacy_20260609/visual_oracle_bridge_20260529_maturity2/final/side_by_side_pdf_vs_skp.png",
+      "blob_sha": "b42ff533b4c09fe1feed48daea1c18ec686aaa57",
+      "blob_size": 250220,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/corner_audit/banho01_c1_NO_ceilingfix.png",
+      "blob_sha": "a52fbeb09117f6baffd54cbad2d5b1f3b349938c",
+      "blob_size": 2271952,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/corner_audit/banho01_c1_NO_walltop_fix.png",
+      "blob_sha": "c4cf116a53e0d0dbb711290ca7a5b21fa13da8dc",
+      "blob_size": 2272989,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/corner_audit/banho01_c1_NO.png",
+      "blob_sha": "c9d8685da3e9cd834432cc36676978d15a865674",
+      "blob_size": 2269359,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/corner_audit/banho01_c2_NE.png",
+      "blob_sha": "428209a70e9744fa353ddf11e7bfe98b0f8c8b24",
+      "blob_size": 2250401,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/corner_audit/banho01_c3_SW.png",
+      "blob_sha": "5d68e6457e5c52dfd0366324e1a4f4f18fa56e43",
+      "blob_size": 2249201,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/corner_audit/banho01_c4_SE.png",
+      "blob_sha": "b438677e0ffdb91f60c273a79bb650cd82a05560",
+      "blob_size": 2071281,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/banho01_BEAUTY01.png",
+      "blob_sha": "60c093f522e67be546c55d0fe6ef496df09b38f8",
+      "blob_size": 4242318,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/banho01_BEAUTY05_slot.png",
+      "blob_sha": "f773329cab4f1aa3197a1c9053e0321cd01df2f4",
+      "blob_size": 4255068,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/banho01_BEAUTY06.png",
+      "blob_sha": "38e62df32c8e58e57f3f65d5613064b9347f3f39",
+      "blob_size": 4277086,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/banho01_GPTMATCH02.png",
+      "blob_sha": "f5de954c4fa4449bc561eebf277153865f7edb42",
+      "blob_size": 4597815,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/banho01_GPTMATCH03.png",
+      "blob_sha": "d6c79645cd49ef72af7d57899b30200f0d2abc2c",
+      "blob_size": 4493766,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/banho01_GPTMATCH04.png",
+      "blob_sha": "39218cbd20ebca6cb09b2afa18d9db6067654855",
+      "blob_size": 4482052,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/banho01_raiox_v2.png",
+      "blob_sha": "c94a023922a2ea1b113fce1f1fc325dbdc68796b",
+      "blob_size": 301636,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/banho01_raiox.png",
+      "blob_sha": "ab4c3c168074d3116aa765a500ed0fe23ddd81e9",
+      "blob_size": 298684,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/banho02_oak_p24.png",
+      "blob_sha": "2c4840f28732bc087dc96656614493c901135eb4",
+      "blob_size": 1901352,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/banho02_oak_p25.png",
+      "blob_sha": "cf49648097383582ae9d75e10b05c560e919d457",
+      "blob_size": 1904037,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/iter_01.png",
+      "blob_sha": "850b3fd626dedd3fb2ce2cc7c71cd0511e546a7c",
+      "blob_size": 2177812,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/iter_02.png",
+      "blob_sha": "57fce448355e817439c4227eaeaec6a0ea4ac61f",
+      "blob_size": 2109697,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/iter_03.png",
+      "blob_sha": "1573dc35b150739366d6e709a0a9374218536a9d",
+      "blob_size": 2100419,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/iter_04.png",
+      "blob_sha": "eccef1e7e4cb21eea9b1c3841c2588398e723614",
+      "blob_size": 2117813,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/iter_05.png",
+      "blob_sha": "ef61d37375ebaa2f40a3a0f91e6e74679f090b53",
+      "blob_size": 2155018,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/iter_06.png",
+      "blob_sha": "060678dcc0eb2785ce9a503a5b2d541b89aaba7d",
+      "blob_size": 2155474,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/lavabo_nero_p24.png",
+      "blob_sha": "c2e32e99b1aa3b0aa869b29c3ac53bdff2154850",
+      "blob_size": 1682576,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/lavabo_nero_p25.png",
+      "blob_sha": "6a611fd0d461dcb3f89a92ebfe891a1ead787911",
+      "blob_size": 1861964,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/planta_iter_01.png",
+      "blob_sha": "903a90862350cdf0bad9e68b0c2f201c7be56f17",
+      "blob_size": 1885478,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/planta_iter_02.png",
+      "blob_sha": "306340208c10d6c8190f5a3249e5610fb881a9f5",
+      "blob_size": 1922063,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/planta_iter_03.png",
+      "blob_sha": "69df9b5465c6177ed655dee81cebaf08ef1c7c64",
+      "blob_size": 1957403,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/planta_iter_04.png",
+      "blob_sha": "25fb8aa96320a69890bd3589c4150aa178d84bc1",
+      "blob_size": 1836255,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/planta_iter_05.png",
+      "blob_sha": "fc3155e6154c6ab11c4b65e2de02a5eedf5251ce",
+      "blob_size": 1749923,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/planta_iter_06.png",
+      "blob_sha": "0e6d29f429965a0a9fc8e89b95a9972d0dd37e1e",
+      "blob_size": 1776547,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/planta_iter_07.png",
+      "blob_sha": "ed4936420484943f70c4fe7a8e92b7a53a2d00bc",
+      "blob_size": 1771100,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/planta_iter_08.png",
+      "blob_sha": "1fb7fb37bd6d3abab56d17af2f432deb95aa3e3e",
+      "blob_size": 1787881,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/planta_iter_09.png",
+      "blob_sha": "1674e894cd6b95fb666ff6db5af280c9776487e6",
+      "blob_size": 1825809,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/planta_iter_10.png",
+      "blob_sha": "fe5180a9c652e4647e6fd782e694013384d3b494",
+      "blob_size": 1903336,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/planta_iter_11.png",
+      "blob_sha": "9a0a4552eb22ca53832817f0eb5e5c66c3334f56",
+      "blob_size": 1899085,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/planta_iter_12.png",
+      "blob_sha": "a2adbcb7b11f71807fa97eb56792e3c602dacaec",
+      "blob_size": 1896375,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/planta_iter_13.png",
+      "blob_sha": "9b1767e8c1a3f410562f310ab1231b1a97d3855e",
+      "blob_size": 1878978,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/planta_iter_14.png",
+      "blob_sha": "8c497d40ad0399b6053d2898619da5a9e8d944e3",
+      "blob_size": 1878727,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/planta_iter_15.png",
+      "blob_sha": "db51723dc67be04860158a3ca5325da019a9c93f",
+      "blob_size": 1857693,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/planta_iter_16.png",
+      "blob_sha": "5de2e7c0fe5a537cfafbb8b4fce89a44c6f2dfb8",
+      "blob_size": 1841912,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/planta_iter_17.png",
+      "blob_sha": "025f161b0a3d9de4e5497d0d1be2afc5b5380100",
+      "blob_size": 1825291,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/planta_iter_18.png",
+      "blob_sha": "26c88f6299f02988433d866bf352ace6757cffa7",
+      "blob_size": 1810117,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/planta_iter_19.png",
+      "blob_sha": "2e36a94f655e70334b75cca70f1ffb9d3e9a55f4",
+      "blob_size": 1795765,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/planta_iter_20.png",
+      "blob_sha": "aae1ed3acf694ca36d7fc071083c2cedfb76c2d7",
+      "blob_size": 1790251,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/planta_iter_21.png",
+      "blob_sha": "52f301a6d93ec6eb5acf8979a0e0323aefff7031",
+      "blob_size": 1789281,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/planta_iter_22.png",
+      "blob_sha": "2e1c0a5ce41bf962a2cc99969f9c30ace524b9e6",
+      "blob_size": 1789144,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/planta_iter_23.png",
+      "blob_sha": "c7b1709bb99643b5e843489b3ccb25a109e1f1da",
+      "blob_size": 1760765,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/estudio_banheiro/iterations/skp_vs_render_p08.png",
+      "blob_sha": "0bdf3dbf61f0a253b4e88722f6c6ab1d8be0b822",
+      "blob_size": 1582536,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/apto_portfolio_pbr.png",
+      "blob_sha": "94966895a424bf539f2e8dea62f6794628e1437a",
+      "blob_size": 294177,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/banho01_como_esta_no_skp.png",
+      "blob_sha": "ef2aea2abc9cbbbe14c3c6b6905ae8445c709eff",
+      "blob_size": 476922,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/banho01_localizacao.png",
+      "blob_sha": "d5a5ccdf4aa74adec33c1daab718859dadcc2077",
+      "blob_size": 49773,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/banho01_raiox_v2.png",
+      "blob_sha": "c94a023922a2ea1b113fce1f1fc325dbdc68796b",
+      "blob_size": 301636,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/banho01_raiox.png",
+      "blob_sha": "ab4c3c168074d3116aa765a500ed0fe23ddd81e9",
+      "blob_size": 298684,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/bedroom_designer_r000_after_iso.png",
+      "blob_sha": "6b2ee80dfd0001adfe0b8a97b1f383a8bebca3b9",
+      "blob_size": 100178,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/bedroom_designer_r000_after_top.png",
+      "blob_sha": "e5bd5e751256884dceab4c9ac804c1b04dbeef4a",
+      "blob_size": 23408,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/bedroom_designer_r000_before.png",
+      "blob_sha": "da20f5d0ec30ff5ad95e4035bc27c52dddcbf291",
+      "blob_size": 26920,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/bedroom_designer_r000.png",
+      "blob_sha": "8a0e62ffbaa1ceb38140cd0f0b289e800fe09a99",
+      "blob_size": 32023,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/bedroom_designer_r000.skp",
+      "blob_sha": "864927c5bf12fe53cfdfe4618b66dc6f0cf3b918",
+      "blob_size": 195379,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/bedroom_designer_r003_after_iso.png",
+      "blob_sha": "6ab3256393d01566f20f95e896d99909a5d25419",
+      "blob_size": 157949,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/bedroom_designer_r003_after_top.png",
+      "blob_sha": "be9c07c6544703d32ba2a205bb0bc3d10d4f38a1",
+      "blob_size": 25477,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/bedroom_designer_r003_before.png",
+      "blob_sha": "1b0baf258def7aaebdd912503479f628b3a54d43",
+      "blob_size": 26925,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/bedroom_designer_r003.png",
+      "blob_sha": "477520578664ea2672d6ae6c35197703d5395d15",
+      "blob_size": 33233,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/bedroom_designer_r003.skp",
+      "blob_sha": "9727ccbc2af3a46d66b2df06caa5c0bbcab98b35",
+      "blob_size": 218082,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/bedroom_designer_synthetic_king.png",
+      "blob_sha": "1f1e0946895b4b0055d379b17ddb2a82e3fd7990",
+      "blob_size": 32440,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/bedroom_r000_after_iso.png",
+      "blob_sha": "29e92f94be331f0940ddb103cca1be6649d3323a",
+      "blob_size": 147309,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/bedroom_r000_after_top.png",
+      "blob_sha": "a66d09595dc467c744c22f480d01d72000774c58",
+      "blob_size": 27372,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/bedroom_r000_before_top.png",
+      "blob_sha": "505a48530122b38cdaf8429fbcfe41efc879f6bd",
+      "blob_size": 26924,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/bedroom_r000_SUITE01_2Ddiagram.png",
+      "blob_sha": "d76753f2dbb37901a4e81719a44509616f7f2376",
+      "blob_size": 46229,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/bedroom_r003_after_iso.png",
+      "blob_sha": "772f577a925f9de575b786ccafc82d47b948081a",
+      "blob_size": 145751,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/bedroom_r003_after_top.png",
+      "blob_sha": "a8ccdc7d3144a79a65eecbae061976775517828c",
+      "blob_size": 27181,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/bedroom_r003_before_top.png",
+      "blob_sha": "00021afde1a42ca2401bbde61bd2d24faba2b0d3",
+      "blob_size": 26912,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/bedroom_r003_SUITE02_2Ddiagram.png",
+      "blob_sha": "ca34a31f8a402bb7b7303fbf83cc4ce964718c2c",
+      "blob_size": 62136,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/cozinha_check_iso.png",
+      "blob_sha": "415d84adf1951db86e07f94d982ad8fb2607a94c",
+      "blob_size": 88597,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/cozinha_check_top.png",
+      "blob_sha": "a52f79fb460821f2cbd840011fcf0dc6264b0de7",
+      "blob_size": 19079,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/fp035_kitchen/kitchen_material_proof_SU.png",
+      "blob_sha": "1b290341534934359dab590320215c2bcb4134bc",
+      "blob_size": 164926,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/fp035_kitchen/kitchen_r004_sufree_iso.png",
+      "blob_sha": "75da79549c465e75a1a6001b227bd9c84775b84b",
+      "blob_size": 68880,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/fp035_kitchen/kitchen_r004_sufree_top.png",
+      "blob_sha": "3f27084ada9e6a0dc7a9019f229edd31a8bede58",
+      "blob_size": 15338,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/fp035_kitchen/planta_74_furnished_after_iso.png",
+      "blob_sha": "556e2950209418752d4b3599ec5d1401957a3c02",
+      "blob_size": 177655,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/A_golden_atual.png",
+      "blob_sha": "6e787bcf84143cb7a5e4ee6e23a8473d2667a446",
+      "blob_size": 901495,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/apev1_banho_01_01_hero_3q.png",
+      "blob_sha": "8e984c402a8e101b9d6a5e7de5298dec6c3cdcef",
+      "blob_size": 49873,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/apev1_banho_01_02_elevacao.png",
+      "blob_sha": "fc99b6fc38914926d8d5af6e7687fda0dfe791ec",
+      "blob_size": 37651,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/apev1_banho_01_03_3q_alt.png",
+      "blob_sha": "b9a262dbed32420e44bea44eddce6462372b95e2",
+      "blob_size": 49014,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/apev1_banho_01_04_dollhouse.png",
+      "blob_sha": "5c72d99144f9ed8675607693073308f2ab325d6f",
+      "blob_size": 33060,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/apev1_banho_01_05_detalhe.png",
+      "blob_sha": "2d680b502977057e8b7ab0bbb87843efeee2934f",
+      "blob_size": 40346,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/B_moody_premium.png",
+      "blob_sha": "3430594fc3b8e7594d518e96368029aa0c738279",
+      "blob_size": 915602,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho_estudio_01_hero_3q.png",
+      "blob_sha": "95743b6e9dbde1babf20e4f917f62d1f8dee7a18",
+      "blob_size": 70920,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho_estudio_02_elevacao.png",
+      "blob_sha": "b7dcfee2f2abe3731c945ef52a071ed4d6444def",
+      "blob_size": 44239,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho_estudio_03_3q_alt.png",
+      "blob_sha": "b052d7ec88950d1740836ffc0635a56a6f6d44ad",
+      "blob_size": 75660,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho_estudio_04_dollhouse.png",
+      "blob_sha": "4546c81e7ae663f76beafd8c1c5f1fdfd316225e",
+      "blob_size": 55246,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho_estudio_05_detalhe.png",
+      "blob_sha": "80c0efc194953e34fdd7061e31daf0290dc595f2",
+      "blob_size": 33960,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho_estudio_banho_01_01_hero_3q.png",
+      "blob_sha": "22ade57a3e357921363b433348434da725f5ddde",
+      "blob_size": 52317,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho_estudio_banho_01_02_elevacao.png",
+      "blob_sha": "2e13654e36fce5ffaccd913989a3daa06b46dad1",
+      "blob_size": 38473,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho_estudio_banho_01_03_3q_alt.png",
+      "blob_sha": "2d0f05133142ece0ed5238424dc294a9eaf3d35d",
+      "blob_size": 54945,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho_estudio_banho_01_04_dollhouse.png",
+      "blob_sha": "77e38dd509afe71fcc24b120eb17b970674e42b3",
+      "blob_size": 43752,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho_estudio_banho_01_05_detalhe.png",
+      "blob_sha": "c6a544f84fcb805d99bf3e0c2d501292967baf34",
+      "blob_size": 36965,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho_estudio_banho_02_01_hero_3q.png",
+      "blob_sha": "f1908324bfbd522093e4751668380259a5798691",
+      "blob_size": 63417,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho_estudio_banho_02_02_elevacao.png",
+      "blob_sha": "eae2ef6cc7fa95240af68b24e9def9eb4c0e2694",
+      "blob_size": 42526,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho_estudio_banho_02_03_3q_alt.png",
+      "blob_sha": "02b0c30acb892588db2667ed7cffe218d99b30d1",
+      "blob_size": 64503,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho_estudio_banho_02_04_dollhouse.png",
+      "blob_sha": "97a9091f0573117872e2b6f3e7326701a8768e68",
+      "blob_size": 52514,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho_estudio_banho_02_05_detalhe.png",
+      "blob_sha": "099882001d3b6a28f7a35c79263dc30ec3ca94a2",
+      "blob_size": 38371,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho_ref_01_hero_3q.png",
+      "blob_sha": "c434a7190925cbe307ab37bdbbb2e2ba037134fa",
+      "blob_size": 67184,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho_ref_02_elevacao.png",
+      "blob_sha": "1cdef5319c95dbafcaa4a38f1be320dd59cefbe2",
+      "blob_size": 38455,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho_ref_03_3q_alt.png",
+      "blob_sha": "e215661c7dffb964a36391e8f83f208d954bf619",
+      "blob_size": 51648,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho_ref_04_dollhouse.png",
+      "blob_sha": "d3ece6c828100b3254b2dc307d015f9225760995",
+      "blob_size": 43882,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho_ref_05_detalhe.png",
+      "blob_sha": "de34566e7692001b238e6addd8a0e1b870980b68",
+      "blob_size": 33055,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho_v2_01_hero_3q.png",
+      "blob_sha": "015bd911f5a737ca66b07fba86fcbc397912132b",
+      "blob_size": 61026,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho_v2_02_elevacao.png",
+      "blob_sha": "dca13dcc94412a9453639319eded1196cc90be95",
+      "blob_size": 38922,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho_v2_03_3q_alt.png",
+      "blob_sha": "59dd4b91180f0dcb7f1744e1324e5dc7bb2625f8",
+      "blob_size": 54239,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho_v2_04_dollhouse.png",
+      "blob_sha": "6d506f0faf1fa977fd1935de672fd0ab1828b84d",
+      "blob_size": 44863,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho_v2_05_detalhe.png",
+      "blob_sha": "58c85f0ae15f2cc340d4ac26e6bba329fd553d05",
+      "blob_size": 38469,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_GPTMATCH04.png",
+      "blob_sha": "39218cbd20ebca6cb09b2afa18d9db6067654855",
+      "blob_size": 4482052,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_HERO_lavatorio.png",
+      "blob_sha": "2658737819f8f2855dc3b0afb1fcd7f58ff1824b",
+      "blob_size": 3734066,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_HERO.png",
+      "blob_sha": "a67314bfc0cec0543006c3575730d68da5ab6a2e",
+      "blob_size": 3735850,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i10.png",
+      "blob_sha": "fe5180a9c652e4647e6fd782e694013384d3b494",
+      "blob_size": 1903336,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i11.png",
+      "blob_sha": "9a0a4552eb22ca53832817f0eb5e5c66c3334f56",
+      "blob_size": 1899085,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i12.png",
+      "blob_sha": "a2adbcb7b11f71807fa97eb56792e3c602dacaec",
+      "blob_size": 1896375,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i13.png",
+      "blob_sha": "9b1767e8c1a3f410562f310ab1231b1a97d3855e",
+      "blob_size": 1878978,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i14.png",
+      "blob_sha": "8c497d40ad0399b6053d2898619da5a9e8d944e3",
+      "blob_size": 1878727,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i15.png",
+      "blob_sha": "db51723dc67be04860158a3ca5325da019a9c93f",
+      "blob_size": 1857693,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i16.png",
+      "blob_sha": "5de2e7c0fe5a537cfafbb8b4fce89a44c6f2dfb8",
+      "blob_size": 1841912,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i17.png",
+      "blob_sha": "025f161b0a3d9de4e5497d0d1be2afc5b5380100",
+      "blob_size": 1825291,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i18.png",
+      "blob_sha": "26c88f6299f02988433d866bf352ace6757cffa7",
+      "blob_size": 1810117,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i19.png",
+      "blob_sha": "2e36a94f655e70334b75cca70f1ffb9d3e9a55f4",
+      "blob_size": 1795765,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i20.png",
+      "blob_sha": "aae1ed3acf694ca36d7fc071083c2cedfb76c2d7",
+      "blob_size": 1790251,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i21.png",
+      "blob_sha": "52f301a6d93ec6eb5acf8979a0e0323aefff7031",
+      "blob_size": 1789281,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i22.png",
+      "blob_sha": "2e1c0a5ce41bf962a2cc99969f9c30ace524b9e6",
+      "blob_size": 1789144,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_stone_i23.png",
+      "blob_sha": "c7b1709bb99643b5e843489b3ccb25a109e1f1da",
+      "blob_size": 1760765,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_tema_p24.png",
+      "blob_sha": "f1d6db6e117bb7ff9a196b185c81d7a0a133886f",
+      "blob_size": 1822297,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_vray_estudio_i1.png",
+      "blob_sha": "903a90862350cdf0bad9e68b0c2f201c7be56f17",
+      "blob_size": 1885478,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_vray_estudio_i2.png",
+      "blob_sha": "306340208c10d6c8190f5a3249e5610fb881a9f5",
+      "blob_size": 1922063,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_vray_estudio_i3.png",
+      "blob_sha": "69df9b5465c6177ed655dee81cebaf08ef1c7c64",
+      "blob_size": 1957403,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_vray_estudio_i4.png",
+      "blob_sha": "25fb8aa96320a69890bd3589c4150aa178d84bc1",
+      "blob_size": 1836255,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_vray_estudio_i5.png",
+      "blob_sha": "fc3155e6154c6ab11c4b65e2de02a5eedf5251ce",
+      "blob_size": 1749923,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_vray_estudio_i6.png",
+      "blob_sha": "0e6d29f429965a0a9fc8e89b95a9972d0dd37e1e",
+      "blob_size": 1776547,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_vray_estudio_i7.png",
+      "blob_sha": "ed4936420484943f70c4fe7a8e92b7a53a2d00bc",
+      "blob_size": 1771100,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_vray_estudio_i8.png",
+      "blob_sha": "1fb7fb37bd6d3abab56d17af2f432deb95aa3e3e",
+      "blob_size": 1787881,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_vray_estudio_i9.png",
+      "blob_sha": "1674e894cd6b95fb666ff6db5af280c9776487e6",
+      "blob_size": 1825809,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho01_vray_estudio.png",
+      "blob_sha": "3743e4e22c2243dcedd382d649e4b2597c553084",
+      "blob_size": 1873530,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho02_oak_p24.png",
+      "blob_sha": "2c4840f28732bc087dc96656614493c901135eb4",
+      "blob_size": 1901352,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/banho02_oak_p25.png",
+      "blob_sha": "cf49648097383582ae9d75e10b05c560e919d457",
+      "blob_size": 1904037,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/before_kitchen_iso.png",
+      "blob_sha": "a1dc7fa94b94aa880daae6672774efc83624bc7a",
+      "blob_size": 333198,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v1_01_hero_3q.png",
+      "blob_sha": "28c929c246a7ee66e41df7c53503aaa7b66d02c7",
+      "blob_size": 73384,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v1_02_elevacao.png",
+      "blob_sha": "91c03541232080607077a9911bc79b7bed28c60f",
+      "blob_size": 40808,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v1_03_3q_alt.png",
+      "blob_sha": "63a8306b0746675466ccd8bbf17b7c18dca2b27b",
+      "blob_size": 70924,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v1_04_dollhouse.png",
+      "blob_sha": "09076e1cff266c6b0f0fc68fcfc49e94ff520809",
+      "blob_size": 89505,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v1_05_detalhe.png",
+      "blob_sha": "b4c91914b1bbc21d5a473ce38524251d97644b03",
+      "blob_size": 39064,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v10_rs60_01_hero_3q.png",
+      "blob_sha": "8ab163604348a4ae784207cb6b3baddedfbc5c2e",
+      "blob_size": 89647,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v10_rs60_02_elevacao.png",
+      "blob_sha": "f3a8088e93e279085ca6c9b9110592d7b25f1e33",
+      "blob_size": 42552,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v10_rs60_03_3q_alt.png",
+      "blob_sha": "a5e99d098f60bb95dfb77d69a2c737cc72e5ed62",
+      "blob_size": 85453,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v10_rs60_04_dollhouse.png",
+      "blob_sha": "cc06b886ad749748bfafa31f8796c8f268b20647",
+      "blob_size": 88422,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v10_rs60_05_detalhe.png",
+      "blob_sha": "9421139a4cfd53e4c71ddd3278e6db4e76a6bd55",
+      "blob_size": 59598,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v11_rt42_01_hero_3q.png",
+      "blob_sha": "ad9ef9a59cb5dce3964a1991b46e3e78ebb72133",
+      "blob_size": 90855,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v11_rt42_02_elevacao.png",
+      "blob_sha": "c9f4deb3b3ac71f66e8c894e74a67c3383249b52",
+      "blob_size": 43318,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v11_rt42_03_3q_alt.png",
+      "blob_sha": "93b5410844c03749960acc7e58e4b8e28defca09",
+      "blob_size": 85371,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v11_rt42_04_dollhouse.png",
+      "blob_sha": "cdd9f8a0f0fd42b8a282a5db482fe6dd86ea33d0",
+      "blob_size": 96893,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v11_rt42_05_detalhe.png",
+      "blob_sha": "2dae4a8fcb11d53edb00e55d8c062a1b19b3ed72",
+      "blob_size": 63179,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v2_01_hero_3q.png",
+      "blob_sha": "3a7dd807d606b8313a886e4a8975ec9ea7eab7a0",
+      "blob_size": 69440,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v2_02_elevacao.png",
+      "blob_sha": "6c69c43bac8b52231fc1a77637bf3f3934b710cb",
+      "blob_size": 40807,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v2_03_3q_alt.png",
+      "blob_sha": "797f3561baf48b60e44af3d8768c7c768d17fbd8",
+      "blob_size": 68396,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v2_04_dollhouse.png",
+      "blob_sha": "b5f1af25863a743b18b643be8a3a22309e51534b",
+      "blob_size": 87918,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v2_05_detalhe.png",
+      "blob_sha": "a726db1a9c842c607186a51d5c5b2eaaee224b38",
+      "blob_size": 44756,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v3_01_hero_3q.png",
+      "blob_sha": "2a5de0017fd5bb25313e92cc8ed1e7ee02bff477",
+      "blob_size": 73741,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v3_02_elevacao.png",
+      "blob_sha": "4d557e34c04294d3bd99cd75675ab686467df555",
+      "blob_size": 42411,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v3_03_3q_alt.png",
+      "blob_sha": "374737638d24cdd156bf268852edf9b0ab2fc996",
+      "blob_size": 73035,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v3_04_dollhouse.png",
+      "blob_sha": "d8b3f364db6845e5df553df456795ca4f2d8c401",
+      "blob_size": 97374,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v3_05_detalhe.png",
+      "blob_sha": "0b27577036c03fb707740d759f2be7717aa58683",
+      "blob_size": 47102,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v4_maleiro_01_hero_3q.png",
+      "blob_sha": "c5f44279c1f53ab74fbf29e0e213fdb39a962979",
+      "blob_size": 83215,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v4_maleiro_02_elevacao.png",
+      "blob_sha": "24271a2819e025bf0ca684524f3a8bfb71a7ba4b",
+      "blob_size": 41683,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v4_maleiro_03_3q_alt.png",
+      "blob_sha": "22a78afbd5b83f10da223f58c2eb0cc3121e9c49",
+      "blob_size": 83209,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v4_maleiro_04_dollhouse.png",
+      "blob_sha": "383901f8bb2f5e978ee595e879a1e796fa5107f0",
+      "blob_size": 93883,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v4_maleiro_05_detalhe.png",
+      "blob_sha": "70cbd4eb696cf6841c616b0f53067cd88452f57d",
+      "blob_size": 59833,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v5_maleiro_deep_01_hero_3q.png",
+      "blob_sha": "04713da0532cd9065180294eff300f2542cb26a7",
+      "blob_size": 84550,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v5_maleiro_deep_02_elevacao.png",
+      "blob_sha": "8c797c6c81228066080cadc0baf88df915ae0ce7",
+      "blob_size": 40718,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v5_maleiro_deep_03_3q_alt.png",
+      "blob_sha": "cff233ca3b8e672123867fbe7e522c276b33918b",
+      "blob_size": 85044,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v5_maleiro_deep_04_dollhouse.png",
+      "blob_sha": "48ae0e7495b292b2529f377172259e3f29f16189",
+      "blob_size": 91273,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v5_maleiro_deep_05_detalhe.png",
+      "blob_sha": "4f02b677411df4b7615c5ea1cf15b53548256b3a",
+      "blob_size": 59829,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v6_fix_01_hero_3q.png",
+      "blob_sha": "e20c9a12206d3cd96e6613179d57411eb0e6234c",
+      "blob_size": 84823,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v6_fix_02_elevacao.png",
+      "blob_sha": "b2198f2afc10e451a837a2be0d1bd0ee2ce25f95",
+      "blob_size": 40986,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v6_fix_03_3q_alt.png",
+      "blob_sha": "26d75b9e1d5674f1d7468e941ccd648ab6a51983",
+      "blob_size": 84142,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v6_fix_04_dollhouse.png",
+      "blob_sha": "ddbdf059bf4b0ec51ad653b3a9e09b1727709bce",
+      "blob_size": 90560,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v6_fix_05_detalhe.png",
+      "blob_sha": "d3c21490c0e8c4c246c4723bc00c01e994ae854b",
+      "blob_size": 61783,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v7_01_hero_3q.png",
+      "blob_sha": "d7fc7d42a0742f9c1508f3945072319049ee223d",
+      "blob_size": 83555,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v7_02_elevacao.png",
+      "blob_sha": "0a01269ac7ddce560ff4539d0a634e2f38a27317",
+      "blob_size": 40717,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v7_03_3q_alt.png",
+      "blob_sha": "15858864dbd7bebbd6ccae6cc0dfdbc927292587",
+      "blob_size": 81356,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v7_04_dollhouse.png",
+      "blob_sha": "b006b542f8ef5a321a182f7021e9631f50b36f41",
+      "blob_size": 89847,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v7_05_detalhe.png",
+      "blob_sha": "a88799a48040bd83b537faec60cec3de5eb31a38",
+      "blob_size": 57935,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v8_inox_01_hero_3q.png",
+      "blob_sha": "b3650f03e6698b6fc2d1f1d4556dd63674a21ef4",
+      "blob_size": 86615,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v8_inox_02_elevacao.png",
+      "blob_sha": "5a4efea1a3f91c9e3ee73872d0e7229cdbb420e7",
+      "blob_size": 41203,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v8_inox_03_3q_alt.png",
+      "blob_sha": "af042e01f89b82ede81ca7d196f8336c8e2aa371",
+      "blob_size": 83859,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v8_inox_04_dollhouse.png",
+      "blob_sha": "c5c0904bc6f7566aa865733503eb4f9cbd10e82b",
+      "blob_size": 94380,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v8_inox_05_detalhe.png",
+      "blob_sha": "5bb75ee713da9f348f16d163ea1d165cd980d507",
+      "blob_size": 59700,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v9_01_hero_3q.png",
+      "blob_sha": "14a4043d63d94423c9d5c85dae0964688fde738d",
+      "blob_size": 89322,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v9_02_elevacao.png",
+      "blob_sha": "4d67ac299f654e7b11566cf63095337c8e480ced",
+      "blob_size": 43259,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v9_03_3q_alt.png",
+      "blob_sha": "840bee92626ce13bf0068fa1e012df1af0618c45",
+      "blob_size": 89068,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v9_04_dollhouse.png",
+      "blob_sha": "a958814dae8e337edeafcb5fcfa29a6d1e340b2e",
+      "blob_size": 94758,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/black_wood_gold_v9_05_detalhe.png",
+      "blob_sha": "c33ecf7c9e5318396d4f15cba8b808ba60ff562f",
+      "blob_size": 59119,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/C_stress_nero.png",
+      "blob_sha": "256ff353e4c2961fc0d560e366e8f5527f700af6",
+      "blob_size": 898604,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_AB_clara_dark.png",
+      "blob_sha": "67bddc00dafe56d13beed620a4cefaba915f609d",
+      "blob_size": 293374,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_ang_01_hero_3q.png",
+      "blob_sha": "0e1550cfea0a98127b5cd2cd4965222c41a2e52d",
+      "blob_size": 95818,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_ang_02_elevacao.png",
+      "blob_sha": "a6af3f4ec3ec187f3c9b89fa0b2bf4abdded58b4",
+      "blob_size": 41784,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_ang_03_3q_alt.png",
+      "blob_sha": "15776ad469670572a5cd9e401ec7d70463842b66",
+      "blob_size": 76780,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_ang_04_dollhouse.png",
+      "blob_sha": "1ad0fb704673283f3579b2e8a83de10ee86f5d3a",
+      "blob_size": 100178,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_ang_05_detalhe.png",
+      "blob_sha": "6fc92b8558ba5db4e3e4933ec9734e3e3ecd0b40",
+      "blob_size": 42542,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_antes_depois.png",
+      "blob_sha": "73ae41b707ceef842ce36a0caff159c4578483bb",
+      "blob_size": 340344,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_B_antes_depois.png",
+      "blob_sha": "c0590cd64d58cc37b1eca346ba53e6bfa6947023",
+      "blob_size": 249280,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_biblioteca_temas.png",
+      "blob_sha": "266b133bace62997ab9261aae79145d30265abc1",
+      "blob_size": 183879,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_montagem_v2.png",
+      "blob_sha": "f0a2ae538381e5d233132220c4b1dfd1f6802c60",
+      "blob_size": 285743,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_montagem.png",
+      "blob_sha": "ea564487cb6926bf821a04b3d43e85567ff6ecc1",
+      "blob_size": 290350,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_skp_blackgold_3q.png",
+      "blob_sha": "256f5c70b483adf3d9617d901048122e291515ab",
+      "blob_size": 612235,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_skp_blackgold_elev.png",
+      "blob_sha": "c9afe278d27f3a0b08ff05512e6efae747195177",
+      "blob_size": 632700,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_skp_blackgold_hero_final.png",
+      "blob_sha": "1aa02f9112e77df0a7867d51f8c0e97ccc56b682",
+      "blob_size": 651907,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_skp_blackgold_hero_polish.png",
+      "blob_sha": "6b49f2cfa2b1d3eafaf90b956273ada05024a0b4",
+      "blob_size": 641835,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_skp_blackgold_montagem.png",
+      "blob_sha": "e0410779e86e31e6c0d973ec1343c4c04a9584b5",
+      "blob_size": 1657915,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_skp_blackgold_proof.png",
+      "blob_sha": "5c7402241ad04a582623c661b30f32dad11f1f9a",
+      "blob_size": 734821,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_skp_blackgold_vray_claro.png",
+      "blob_sha": "85af5034d38c34eea0078e509df3d4c8e8978941",
+      "blob_size": 674712,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_variante_B_v2.png",
+      "blob_sha": "eef0826b52d9f8b78ec2dc7b34ab0e1d00419e64",
+      "blob_size": 949472,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_variante_B.png",
+      "blob_sha": "3430594fc3b8e7594d518e96368029aa0c738279",
+      "blob_size": 915602,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_vray_3q.png",
+      "blob_sha": "54e5e306a64048e1604f64fbf22a8ad56ad9ab7a",
+      "blob_size": 631513,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_vray_elev.png",
+      "blob_sha": "d733458ad294b94096e6bef5e44ac3153bea1d7c",
+      "blob_size": 642915,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_vray_hero_blackgold.png",
+      "blob_sha": "c06202e1cad632f47b89e3ee1526067dce04ad8c",
+      "blob_size": 729305,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_vray_hero_boutique.png",
+      "blob_sha": "beb71ad54cdcabbf03bf8252dbd8feba5053eda6",
+      "blob_size": 722963,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_vray_hero_dark.png",
+      "blob_sha": "c2896ed553434285beda13a007cd66d5e2403e1f",
+      "blob_size": 717814,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_vray_hero.png",
+      "blob_sha": "24e7c963631de309a6f519d7ac1fa691673f7dd3",
+      "blob_size": 737315,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_vray_iso.png",
+      "blob_sha": "2314de926cc17b3a1eb7073ce30d91a49cd2cbce",
+      "blob_size": 127077,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_vray_montagem.png",
+      "blob_sha": "50a926d3684d6762bff269aba50cad0bfd79bf5e",
+      "blob_size": 1681108,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/kitchen_materials_candidates.png",
+      "blob_sha": "ddb13b1bad1a690aafa11ccc95ba9888890c8fbb",
+      "blob_size": 532277,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/lavabo_nero_p24.png",
+      "blob_sha": "c2e32e99b1aa3b0aa869b29c3ac53bdff2154850",
+      "blob_size": 1682576,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/lavabo_nero_p25.png",
+      "blob_sha": "6a611fd0d461dcb3f89a92ebfe891a1ead787911",
+      "blob_size": 1861964,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/matriz_ABC.png",
+      "blob_sha": "db22af0a91ac0a32af02534f0cbbc2167fcf8e65",
+      "blob_size": 443860,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/sala_baseline_montagem.png",
+      "blob_sha": "99350b5e7a069b709687d2cff25dbbf445ef4453",
+      "blob_size": 351162,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/sala_baseline_top_crop.png",
+      "blob_sha": "8cebc251538e52eccbc450ccd5ea10b23e791d23",
+      "blob_size": 78501,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/sala_bwg_flat_montagem.png",
+      "blob_sha": "02a5a30e8793489b0098ea5171cf69d3c515468b",
+      "blob_size": 374474,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/sala_bwg_top_crop.png",
+      "blob_sha": "017c785d4466a9d0993e13e5a60759c5bab2b52c",
+      "blob_size": 77067,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/sala_eye_01_sofa_to_tv.png",
+      "blob_sha": "5704d3ffe9540e1aac1216191a621766cd4dc9d0",
+      "blob_size": 116909,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/sala_eye_02_tv_to_sofa.png",
+      "blob_sha": "3faebc19f1a180f3e624e15e312d8527d11f46e8",
+      "blob_size": 75567,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/sala_eye_03_jantar.png",
+      "blob_sha": "fdc748ed1daaddc9511e76d18db83e366b096bfd",
+      "blob_size": 89458,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/sala_eye_04_dollhouse.png",
+      "blob_sha": "31a0492f3979f32ea40bb4859c7aa8226ebc2236",
+      "blob_size": 273121,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/sala_eye_04_overview.png",
+      "blob_sha": "4afa710b0dfd046025e79d0e23335a637f493e5f",
+      "blob_size": 60975,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/sala_eyelevel_montagem.png",
+      "blob_sha": "385ae88028f9a05d21833a0074449719846280e0",
+      "blob_size": 311547,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/sala_fixed_top_crop.png",
+      "blob_sha": "5aee93049f7024321f0e0a2f3be7d9161e414ad5",
+      "blob_size": 92674,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_angles/sala_layout_fix_antes_depois.png",
+      "blob_sha": "3249ac557c341351366fb2d13d591c5133446fe1",
+      "blob_size": 71580,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_crop_iso.png",
+      "blob_sha": "40e165bb4cfbd5582190667b11be854ba2d08b99",
+      "blob_size": 208356,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/kitchen_crop_top.png",
+      "blob_sha": "23fdff8dd52f707858243059715a5e60df43b6cb",
+      "blob_size": 65905,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/MVP_apto_mobiliado.png",
+      "blob_sha": "e8f114c804d97459f056ba6e385087c3ed4c1485",
+      "blob_size": 394803,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/p1_antes_depois_social.png",
+      "blob_sha": "6ceed8a863e36bc1a12c10b9d39519afd55d2cdd",
+      "blob_size": 35957,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_aereo_fills.png",
+      "blob_sha": "22a857c51d34e571c07bff7284232c7fff9c1ebe",
+      "blob_size": 584810,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_aereo_pbr.png",
+      "blob_sha": "7c247f1fe4522180345bb7b5f7ed7e5e96c436b3",
+      "blob_size": 571901,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_aereo.png",
+      "blob_sha": "af41efd017622db25bbb7090384316e0e116a26f",
+      "blob_size": 685299,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_banho01_crop.png",
+      "blob_sha": "719e45771cc196b41fae48356fc9c565f29c80cb",
+      "blob_size": 1099769,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_banho01.png",
+      "blob_sha": "5b50ef5a0791afb333b0d955d9e9286a1d127c86",
+      "blob_size": 1311459,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_bedroom_r000.skp",
+      "blob_sha": "f777e1946aefe77db1778d0d3ed9c3554f88c1de",
+      "blob_size": 213327,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_bedroom_r003.skp",
+      "blob_sha": "7beb81b38aa1669fdf67a245acc1af03f8648794",
+      "blob_size": 210626,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_cozinha_aerea_crop.png",
+      "blob_sha": "88215f0ee022d013f91f5f170cd7ebd1594bf521",
+      "blob_size": 1174306,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_cozinha_aerea.png",
+      "blob_sha": "cb853f54550bf0c8429fc5a374a601c2fdfcf9a2",
+      "blob_size": 1351468,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_cozinha_cinza.png",
+      "blob_sha": "ea83f698a081311034b5789ef0af13dbd605ecc1",
+      "blob_size": 145499,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_cozinha_crop.png",
+      "blob_sha": "68f00fbda7a2f22a681c13537b98f39a3d17cc48",
+      "blob_size": 1111704,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_cozinha_detalhada.png",
+      "blob_sha": "852b266720cc920a99b3b6c5c5debb4cdbba441e",
+      "blob_size": 1418734,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_cozinha_frente.png",
+      "blob_sha": "fd39a7563fffb08fc44fc3efc2d9359ade4e284d",
+      "blob_size": 1158143,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_cozinha_plano.png",
+      "blob_sha": "7344291f0be7a7708ebae6c0b1993ab661427ff1",
+      "blob_size": 14181,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_cozinha_vray_crop.png",
+      "blob_sha": "ad29853df995d9a9922e90ce47a4c7f3d1868a2c",
+      "blob_size": 1194775,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_cozinha_vray.png",
+      "blob_sha": "a547baa46c861595ffc621243c670c6488ad9649",
+      "blob_size": 1423784,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_cozinha.png",
+      "blob_sha": "e33f3a13cd98113e348ca5f0ced2b5e53eee6c5d",
+      "blob_size": 1301047,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_furnished_after_iso.png",
+      "blob_sha": "e463efc5fb9df8c53b1d396340c61511fb02f3cd",
+      "blob_size": 221081,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_furnished_after_top.png",
+      "blob_sha": "d564c18b0d600808a3c1c408664ced564e3293a1",
+      "blob_size": 86535,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_furnished_before_top.png",
+      "blob_sha": "c3eed86f549c7c4dffe695a3a4530cfe03c1a586",
+      "blob_size": 29036,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_furnished_black_wood_gold.skp",
+      "blob_sha": "6bbb25d8f2845f95f2941edb7197ae9bf0f22c6d",
+      "blob_size": 1136601,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_furnished_side_by_side.png",
+      "blob_sha": "dc53c1a5e25f6bacb9829aa24ba78241a05d1f07",
+      "blob_size": 293970,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_furnished_with_sofa_premium.skp",
+      "blob_sha": "c4b9f27687c3ff039c95d22d08779e2381c33fe0",
+      "blob_size": 1419247,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_furnished.skp",
+      "blob_sha": "2527193e460cc05715cf8fdbee49224761f69134",
+      "blob_size": 3426916,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_industrial_classes_crop.png",
+      "blob_sha": "19fcf7f4b6ea389ee627a4e4b3c093f8345da251",
+      "blob_size": 894999,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_industrial_classes.png",
+      "blob_sha": "a1cd7b68926e8e2122d0015af28129078a989b14",
+      "blob_size": 958642,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_industrial_pbr_crop.png",
+      "blob_sha": "c95a118b92e209bfaf09de352e3d18adb1bba36f",
+      "blob_size": 1039703,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_industrial_pbr.png",
+      "blob_sha": "5b245a0b3f67b95b50d7c6cd4831f81618c95dd0",
+      "blob_size": 1102174,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_industrial_r002_crop.png",
+      "blob_sha": "b56ea1f640f67131edfdd968209154e1f76732e0",
+      "blob_size": 911974,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_industrial_r002.png",
+      "blob_sha": "3460dbad8cbdaa026cfab8d9e47e108a22b832b5",
+      "blob_size": 975467,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_industrial_rackclass.png",
+      "blob_sha": "253bf1901011d99dcacd3cfc3b3925dbe8e14a7c",
+      "blob_size": 975482,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_jantar_crop.png",
+      "blob_sha": "dbea4713fdf67a31cbaa371a363dbb9d8ef1bb10",
+      "blob_size": 1244070,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_jantar_quadrada_crop.png",
+      "blob_sha": "ddf8c3eafb89c168182278352b6e1e310c8a3c14",
+      "blob_size": 1240979,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_jantar_quadrada.png",
+      "blob_sha": "fe9822f18e1a2a614d615fa181d8b1dfc26bfccb",
+      "blob_size": 1416837,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_jantar.png",
+      "blob_sha": "fcc8151c7010ee34bdda3e7d1bd54a68bcee3084",
+      "blob_size": 1414181,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_quarto_pbr_crop.png",
+      "blob_sha": "7a87c78274d581aa8cc11044d9e9715a4a8e1eb2",
+      "blob_size": 1211844,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_quarto_pbr.png",
+      "blob_sha": "3c61551609145f05f7a0f554a12e5a09f2244d05",
+      "blob_size": 1346946,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_quarto_suite01_crop.png",
+      "blob_sha": "f489d739347cd5fbb040ed439f1ae4a21de0ab5f",
+      "blob_size": 1209598,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_quarto_suite01.png",
+      "blob_sha": "df05bc8d7436e7e4e937198681ac35776a861ade",
+      "blob_size": 1345676,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_vray_bright.png",
+      "blob_sha": "51fdb6fe5554262df61250990c1df7defb299635",
+      "blob_size": 180291,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_vray_cozinha_auto_crop.png",
+      "blob_sha": "68f798892bc807eb71cc11383a7ce0b58fa04c7e",
+      "blob_size": 1364308,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_vray_cozinha_auto.png",
+      "blob_sha": "117ef416335d049bd17c19bb7d1c6580fa96f93b",
+      "blob_size": 1500701,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_vray_cozinha_product.png",
+      "blob_sha": "46a2c1a7cc0ca00fde8d53bd8f8a2c6e0734acdf",
+      "blob_size": 1400838,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_vray_iso_floor.png",
+      "blob_sha": "3c64c8e9fdbcd799ee349e0c3466650e6cf73aac",
+      "blob_size": 317387,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_vray_iso.png",
+      "blob_sha": "8f15d2aa0977bc665e5b0835992308b801a723b4",
+      "blob_size": 278995,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_vray_provider_iso.png",
+      "blob_sha": "a1f327392206472c4092135c150b1b435878ecb0",
+      "blob_size": 180335,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_vray_quarto_piso.png",
+      "blob_sha": "258f8b8db4767064dfd5a518042f7aac4418451d",
+      "blob_size": 1251334,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_vray_quarto_premium.png",
+      "blob_sha": "84b94c525aefde967654aa478cb1e5b9996d4d61",
+      "blob_size": 1336984,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_vray_quarto_WARN_promotable.png",
+      "blob_sha": "9d8ce35f18e3e6ebaee3b62589ff3a97a68d28dc",
+      "blob_size": 1301977,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_vray_sala_auto2.png",
+      "blob_sha": "eb7f6c2866290623e070e7a7e4393dd5b0639455",
+      "blob_size": 1237519,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_vray_sala_autocrop.png",
+      "blob_sha": "4b383c3a32ce011358f4a7cee2e88a16f19aa6f2",
+      "blob_size": 1205900,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_vray_sala_eye.png",
+      "blob_sha": "81114c5651ba5b00341af8da1996179db981212b",
+      "blob_size": 1275658,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_vray_sala_eyefill_crop.png",
+      "blob_sha": "40025af1b3b5819033f6779c503e89e56c06806d",
+      "blob_size": 1318146,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_vray_sala_eyefill3.png",
+      "blob_sha": "ab3a61351bf8916f5e809b65b647f46785b4c015",
+      "blob_size": 1291181,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_vray_sala_final.png",
+      "blob_sha": "6d556e3547e2fe8b10e0c7887bebc0cf23674e79",
+      "blob_size": 1455833,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_vray_sala_floor_crop.png",
+      "blob_sha": "a8da0e3767ce15e2db101805836daac7c06d0ffd",
+      "blob_size": 1366867,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_vray_sala_floor.png",
+      "blob_sha": "4baef6ef7a7a1dfbca68c58ce193baf2642dd1ab",
+      "blob_size": 1343103,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_vray_sala_mat.png",
+      "blob_sha": "af156d17b63e4732a76695e12dcdd707e9cff0a4",
+      "blob_size": 1372108,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_vray_sala_tex.png",
+      "blob_sha": "937365d29c791e13fbbae3f48cbf3d750bd86bee",
+      "blob_size": 1375874,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_vray_sala.png",
+      "blob_sha": "6b7052ab4bc5d68c58615da1b306085d3a1a1b4d",
+      "blob_size": 1370148,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_vray_suite02_crop.png",
+      "blob_sha": "b85464a370cfdd79530ee53dae48c37d4ffad6c5",
+      "blob_size": 1442014,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/planta_74_vray_suite02.png",
+      "blob_sha": "cbda9691c8f35e9fbc9bfc5f731bdcedc20f5bb1",
+      "blob_size": 1415947,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/sala_angles/sala_ang_01_hero_3q.png",
+      "blob_sha": "00b58a29561fb3f8521c451cac3b73faacd3a78a",
+      "blob_size": 84183,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/sala_angles/sala_ang_02_elevacao.png",
+      "blob_sha": "e82236f836fb01c9f5256e56d92045b6eb26f9f5",
+      "blob_size": 60055,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/sala_angles/sala_ang_03_3q_alt.png",
+      "blob_sha": "db4894ec29eb766a0f6384a361b8346fa9719fd7",
+      "blob_size": 98333,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/sala_angles/sala_ang_04_dollhouse.png",
+      "blob_sha": "3265c9f9926656f2aed67d6ad31b81d7c85afaae",
+      "blob_size": 97323,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/sala_angles/sala_ang_05_detalhe.png",
+      "blob_sha": "06399c31cb52240b3a76001209ef271e1344888a",
+      "blob_size": 78305,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/sala_pbr_antes_depois.png",
+      "blob_sha": "31816d3395a85a1a18b46a5bb454a305513c0816",
+      "blob_size": 248787,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/sala_sofa_golden_iso.png",
+      "blob_sha": "c1d84d1426aa397c3ef6f1462aec06d4297c26d4",
+      "blob_size": 120116,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/sala_sofa_golden_top.png",
+      "blob_sha": "deada90e6c6a97a196f84cd44b2aa1f7f6aa24ad",
+      "blob_size": 19531,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/sala_sofa_real_iso.png",
+      "blob_sha": "6d9847fd5e1d46d82e24341f160ea8b125cdb299",
+      "blob_size": 119669,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/sala_sofa_real_top.png",
+      "blob_sha": "a427fbc1167f1722c8d965060993172fd637dc7d",
+      "blob_size": 18518,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/sala_solver_iso.png",
+      "blob_sha": "bf83cc8ce9b26fdbf613d56bd93b15913f3883d6",
+      "blob_size": 180053,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/sala_solver_top.png",
+      "blob_sha": "f2bf95d2bc0930e07f8fd620226cd52dab237b38",
+      "blob_size": 20328,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/suite01_iso.png",
+      "blob_sha": "353bb9126ceacd2db4a41ef0043cff4bbc8e705c",
+      "blob_size": 115495,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/furnished/suite01_top.png",
+      "blob_sha": "84ce2918e6ca5d4237230838154ce565fb3b5e74",
+      "blob_size": 26913,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/planta_74_floors_top.png",
+      "blob_sha": "f46d8b9a61c3d0c6e6f87c53303cc623541b88f2",
+      "blob_size": 13268,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/planta_74_iso.png",
+      "blob_sha": "d97d1aea2d289fc9d01675f38cd356067f321c97",
+      "blob_size": 140900,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/planta_74_top.png",
+      "blob_sha": "fa61ea7c085bc2fe06ac53da0437f591bcab99cf",
+      "blob_size": 29038,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/planta_74.skp",
+      "blob_sha": "265019f3c914a0af546b850986dbdb9b65b50e2e",
+      "blob_size": 111942,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/planta_74/side_by_side_pdf_vs_skp.png",
+      "blob_sha": "605f80d0bcf8c20afa1610d1916d28e527633fc7",
+      "blob_size": 235060,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/reference_lab/inbox/kit_banho01/box_ideiaglass_nobre.jpg",
+      "blob_sha": "068406a0d0fd8863ff1fd2edbf6428539eb77795",
+      "blob_size": 72785,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/reference_lab/inbox/kit_banho01/chuveiro_deca_flexmax_22.jpg",
+      "blob_sha": "ad7cd517b4ca7befa34c89f84b086b31482f7828",
+      "blob_size": 75897,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/reference_lab/inbox/kit_banho01/cuba_deca_slim_L33050.jpg",
+      "blob_sha": "91d3d47ecf1f58b244ab078cda192de918af946b",
+      "blob_size": 6585,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/reference_lab/inbox/kit_banho01/gabinete_roca_tura.jpg",
+      "blob_sha": "f421cdeea3ae235203da03f115b43e0c8847b54a",
+      "blob_size": 18213,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/reference_lab/inbox/kit_banho01/torneira_deca_level_2880BL.jpg",
+      "blob_sha": "2cbeb1f3bb7b5b6b6a78330970ed3ee65de94bbc",
+      "blob_size": 37786,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/reference_lab/inbox/kit_banho01/vaso_roca_gap.jpg",
+      "blob_sha": "573bf58f4ff8853b186df74d1b048a3e4ed2d45c",
+      "blob_size": 38262,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/reference_lab/renders/kitchen_themes_ABC.png",
+      "blob_sha": "7e368728987d2736da8c40f72998c5ee15262482",
+      "blob_size": 243386,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/armchair_class/armchair_class_matrix.png",
+      "blob_sha": "efc3bc79e242f472dfdf37f1a90c16ddbff41128",
+      "blob_size": 335219,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/bed_class/bed_class_matrix.png",
+      "blob_sha": "4581f9cff3af4ed9fd719f2775c0cbdf40962a87",
+      "blob_size": 474796,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/bed/bed_iso.png",
+      "blob_sha": "1833c0f69caf236dd429d09dae0000e99a781e4c",
+      "blob_size": 95668,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/bed/bed_top.png",
+      "blob_sha": "bfd55f0b80527cfa7266a5225a6d57386d98315d",
+      "blob_size": 8369,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/bedroom_anatomy_montage_v2.png",
+      "blob_sha": "d3a2fc11b1dc460965c1842e1df6dd493556a73b",
+      "blob_size": 92727,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/bedroom_anatomy_montage.png",
+      "blob_sha": "698d3db090ab2cbe77ee18e269838ec70d963f53",
+      "blob_size": 136046,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/coffee_table_class/coffee_table_class_matrix.png",
+      "blob_sha": "95f0818a3704eee62d6424ee27c950cd2e0af454",
+      "blob_size": 330635,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/dining_table_class/dining_table_class_matrix.png",
+      "blob_sha": "755dd55a58907fc2546f9e680ae8a83d9c359ef0",
+      "blob_size": 462021,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/group_60/group_60_front.png",
+      "blob_sha": "e70f20274838923a02a35371eff1717fd9bb54fd",
+      "blob_size": 1056109,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/group_60/group_60_iso.png",
+      "blob_sha": "4378985e4fc912ef6312177a78027522d159ddd0",
+      "blob_size": 1357076,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/group_60/group_60_top.png",
+      "blob_sha": "843787767fb61a97e6a33a0d4c5e1dadfcff72d0",
+      "blob_size": 986770,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/kitchen/r004_plan_top.png",
+      "blob_sha": "c2cb5eea2f7c95cd882cf6165a7fd7cc92853068",
+      "blob_size": 25031,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/nightstand/nightstand_front.png",
+      "blob_sha": "df3f91653287178ff5c9911eb3116a757d563c9f",
+      "blob_size": 7895,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/nightstand/nightstand_iso.png",
+      "blob_sha": "856392a8337b97cac43f24dbbf6c23e2aefe1580",
+      "blob_size": 41068,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/nightstand/nightstand_provider_iso.png",
+      "blob_sha": "856392a8337b97cac43f24dbbf6c23e2aefe1580",
+      "blob_size": 41068,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/rack_class/apt_rack_industrial.png",
+      "blob_sha": "3212b39d2233f8a3b5683f47c3357e5217f9db06",
+      "blob_size": 43726,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/rack_class/rack_class_matrix.png",
+      "blob_sha": "1b69848f32f5754eb5117bd51c35dba6365ed852",
+      "blob_size": 343096,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/sofa_class/sofa_class_matrix_iso.png",
+      "blob_sha": "2814ac1bd219a4a95f9575113a18a3a04f793c06",
+      "blob_size": 202801,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/sofa_class/sofa_class_matrix.png",
+      "blob_sha": "dac8224224a2462936ee666b23558b0d06726a1a",
+      "blob_size": 456764,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/sofa_class/sofa_class_matrix.skp",
+      "blob_sha": "e12163bcea90d81f037fe87ca46b3102992fc5f8",
+      "blob_size": 324658,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/sofa/cycle2_bevel_before_after.png",
+      "blob_sha": "13dcdb8a0c127aef320b82f8825b33228c8c3a1c",
+      "blob_size": 79372,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/sofa/cycle3_rake_c2_c3.png",
+      "blob_sha": "57fd0061cae267625211305422beb8f58958d14c",
+      "blob_size": 93357,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/sofa/cycle4_refino_c3_c4.png",
+      "blob_sha": "3a8ceb7f1172104be047fd53c5a23631f7095194",
+      "blob_size": 80561,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/sofa/sofa_arms_front.png",
+      "blob_sha": "f5587e7ff0e6f6b0cf6d109fe8511dc693412f52",
+      "blob_size": 8244,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/sofa/sofa_arms_iso.png",
+      "blob_sha": "7af94d4c74a44d0d13dc66caeea72574f2fc9b41",
+      "blob_size": 101173,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/sofa/sofa_fixtures_front.png",
+      "blob_sha": "bf4948e550c54fac5e9f1813c29814952ecf29c7",
+      "blob_size": 9702,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/sofa/sofa_fixtures_iso.png",
+      "blob_sha": "0ed87269fe4eec79f4c72144b969e27b10379dc3",
+      "blob_size": 93239,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/sofa/sofa_fixtures_top.png",
+      "blob_sha": "584e7a33763e46cbc9a36ff3ebdcc9e27fc0d96b",
+      "blob_size": 9750,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/sofa/sofa_fixtures.skp",
+      "blob_sha": "234aeab7848cd17387c9164ae11612da336a745c",
+      "blob_size": 90003,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/sofa/sofa_form_PASS.png",
+      "blob_sha": "fa4cb7bd7773d6bcd5eb63b33fb33566afe1ae89",
+      "blob_size": 57490,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/sofa/venezia/NEW_venezia_2l.png",
+      "blob_sha": "ff7532bb2d38bdd21966834fc6df5b6bbcf19d54",
+      "blob_size": 51030,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/sofa/venezia/NEW_venezia_3l.png",
+      "blob_sha": "b3dabcd7f4879aeadf4f6b3b2940c088a1cec92d",
+      "blob_size": 51949,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/sofa/venezia/OLD_caixa_3l.png",
+      "blob_sha": "5c6c4cc2039ca0627b3ad28e89b5ae098ff4e314",
+      "blob_size": 44259,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/sofa/venezia/room_NEW.png",
+      "blob_sha": "4abe14c0e4804e0fec20467fb6611b4706436c8f",
+      "blob_size": 46956,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/sofa/venezia/room_OLD.png",
+      "blob_sha": "f26fe307a5b2ad487622bf12cbe1d7052aa9548c",
+      "blob_size": 44496,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/sofa/venezia/sofa_venezia_compare.png",
+      "blob_sha": "9d49200a7da7c79273c0ec803b82426e9705d608",
+      "blob_size": 136809,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/sofa/venezia/sofa_venezia_room.png",
+      "blob_sha": "8a60f29b745039f2724690f06f8ec5f917652550",
+      "blob_size": 67309,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/wardrobe/wardrobe_front.png",
+      "blob_sha": "8dc9071e08417a5dff24771087115f9232a296c6",
+      "blob_size": 8195,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/wardrobe/wardrobe_iso.png",
+      "blob_sha": "f8bb1c4d2fef45db92702e34a7a69caaebffe34d",
+      "blob_size": 37001,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/interior/living_compact_before_after.png",
+      "blob_sha": "c63122a720c25c724991f31948234669d422a4db",
+      "blob_size": 16997,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/interior/orientation_before_after.png",
+      "blob_sha": "ed4cf6c9733fcfb5faedafd1ddd098038e9310c1",
+      "blob_size": 49728,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/_preview/layout_r002_estar_ancorado_after_iso.png",
+      "blob_sha": "731b149ff412f752787308d5fc5310e8f0b1f163",
+      "blob_size": 151068,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/_preview/layout_r002_estar_ancorado_after_top.png",
+      "blob_sha": "411cf376adc0bdc6a15a68072d4e66123bb9827a",
+      "blob_size": 27433,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/_preview/layout_r002_evolucao.png",
+      "blob_sha": "2ce39bda4d10f7ac84ed572cfdd84ba3c5e04d40",
+      "blob_size": 42712,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/_preview/layout_r002_review_montage.png",
+      "blob_sha": "c4e1a0a829722b7558e28f775a311d6150b0a4fd",
+      "blob_size": 193013,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/_preview/sofa_compare_v2_v3.png",
+      "blob_sha": "5a69cabf4af45725dbc8b25cfb3ad10d071e9575",
+      "blob_size": 102072,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/canonical_20260531/final/banho2_before_after.png",
+      "blob_sha": "5e5de84a8c0bceaa9899a875633a6e2afaeaa4b8",
+      "blob_size": 178442,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/canonical_20260531/final/before_after_regen.png",
+      "blob_sha": "0255f85fe262fbc38cacf23157d178b66edf0276",
+      "blob_size": 278725,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/canonical_20260531/final/model_iso.png",
+      "blob_sha": "2e1937941fe020deadcd1a60ca72026522096967",
+      "blob_size": 119709,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/canonical_20260531/final/model_top.png",
+      "blob_sha": "98a5bd0e302db1337d9d716a179dda4e9cf61377",
+      "blob_size": 30054,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/canonical_20260531/final/model.skp",
+      "blob_sha": "84ff01161d67f6e598ca9038dd309d705bf447e9",
+      "blob_size": 113673,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/curation/planta_74__baseline__black_wood_gold__L0.png",
+      "blob_sha": "78a16f6cdace6929f95247804a71f00f1508f5a9",
+      "blob_size": 84289,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/curation/planta_74__baseline__black_wood_gold__L1.png",
+      "blob_sha": "c9f9c7b9741d003a8da28642ebc15407b9025c3f",
+      "blob_size": 80670,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/curation/planta_74__baseline__black_wood_gold__L2.png",
+      "blob_sha": "48d35728c6872d426757fa9e2653e7e4464f332c",
+      "blob_size": 81477,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/curation/planta_74__baseline__dark_walnut__L0.png",
+      "blob_sha": "9cbf984ed31cb6577a4d078ba8c236c837694c05",
+      "blob_size": 83601,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/curation/planta_74__baseline__dark_walnut__L1.png",
+      "blob_sha": "f438d46440cc38d57ef28d82d8fdcfc265a1b28c",
+      "blob_size": 79822,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/curation/planta_74__baseline__warm_compact__L0.png",
+      "blob_sha": "d9070ab45fc8f2861b2e1b6ee16514b5febb5b1e",
+      "blob_size": 84777,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/curation/planta_74__baseline__warm_compact__L1.png",
+      "blob_sha": "0987613bf7c07952d53fd785dd046f3521beff75",
+      "blob_size": 80745,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/curation/planta_74__baseline__warm_compact__L2.png",
+      "blob_sha": "e974e7b5cde3a3a8c21a3bb16cee1fa7bf2ef3cb",
+      "blob_size": 81598,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/curation/planta_74__industrial__warm_compact__L0.png",
+      "blob_sha": "da4a56cdfce2479ea0ff345503491427ee259059",
+      "blob_size": 64033,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/model_iso_stub_review.png",
+      "blob_sha": "04a5be43367e21250946455c9cb867dee980116a",
+      "blob_size": 144280,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/model_top_stub_review.png",
+      "blob_sha": "d7930c90250423ddf4677146318dbe98d88d013b",
+      "blob_size": 32977,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/railing_source_fix/final/before_after_iso.png",
+      "blob_sha": "a392fe240cc40a41a19ca8dd03121a40119e3253",
+      "blob_size": 171511,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/railing_source_fix/final/model_iso.png",
+      "blob_sha": "b6e77865f9ec0913d2f31a554e0dabed927dd28e",
+      "blob_size": 117716,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/railing_source_fix/final/model_top.png",
+      "blob_sha": "72a99a8625872b1b5a4670346eedfc8e5fcca46c",
+      "blob_size": 29980,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/railing_source_fix/final/model.skp",
+      "blob_sha": "10d637813a97591ed540ba564f86833aa60963cf",
+      "blob_size": 113165,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/regen_candidate_20260531/final/before_after_regen.png",
+      "blob_sha": "0255f85fe262fbc38cacf23157d178b66edf0276",
+      "blob_size": 278725,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/regen_candidate_20260531/final/model_iso.png",
+      "blob_sha": "eaf705df34f26182c53c775b5d8bc9b557dc10fd",
+      "blob_size": 118411,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/regen_candidate_20260531/final/model_top.png",
+      "blob_sha": "466ebfb65275237f8309dbdcabc365f1c7026c31",
+      "blob_size": 30054,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/sala_boutique_20260711/planta_74_furnished_top_atual.png",
+      "blob_sha": "a083cff73869bd3b8baf385b1e2bfa807631411c",
+      "blob_size": 94375,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/sala_boutique_20260711/sala_contact_sheet.png",
+      "blob_sha": "03c96f4515512ab4c414d85101136f706e01e243",
+      "blob_size": 382495,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/sala_boutique_20260711/sala_su_3_4_blindtest.png",
+      "blob_sha": "50883621b9e2d598e546b84db748acfaa92dafe8",
+      "blob_size": 120984,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/sala_boutique_20260711/sala_vray_iter4.png",
+      "blob_sha": "d9fc2ab6039dc09432631630b0412dd67963bc13",
+      "blob_size": 1167387,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/sala_boutique_20260711/sala_vray_iter5_hero_crop.png",
+      "blob_sha": "6e82553f0468aa0ff7156f3c22772befff628b8d",
+      "blob_size": 1403525,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/sala_boutique_20260711/sala_vray_iter6_crop.png",
+      "blob_sha": "4b172c7179f0ed6503be76bd515a6d4f944534e2",
+      "blob_size": 1126654,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/sala_boutique_20260711/sala_vray_iter7_premium_crop.png",
+      "blob_sha": "2aa84d67cfa71cc72206dfb2d5346ad7001a0b0d",
+      "blob_size": 1120233,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/sala_boutique_20260711/sofa_baseline_contact_sheet.png",
+      "blob_sha": "55797f5ca9aed444ad1715dcd37da00c8187f728",
+      "blob_size": 130171,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/shell_proof/warm_compact_L0_with_shell.png",
+      "blob_sha": "e43f894b330206f163fac8bd6493a179906fdd84",
+      "blob_size": 63484,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/spatial_model/r002_layout_candidates.png",
+      "blob_sha": "034f0f54c922429aab71b9fd4604081807f56080",
+      "blob_size": 82758,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/spatial_model/r002_spatial_map.png",
+      "blob_sha": "939eda71bb8e59b0014491cf079bba6e256da50b",
+      "blob_size": 37934,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/vision_acl_20260701T162323Z/clean_iso.png",
+      "blob_sha": "b6a1c97e5aa2767a3bd8085b1a0eff3169626488",
+      "blob_size": 137623,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/vision_acl_20260701T162323Z/clean_side_by_side.png",
+      "blob_sha": "605f80d0bcf8c20afa1610d1916d28e527633fc7",
+      "blob_size": 235060,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/vision_acl_20260701T162323Z/clean_top.png",
+      "blob_sha": "faba0794ad51581ce0826b8bee1e7212643716e3",
+      "blob_size": 28005,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/vision_acl_20260701T162323Z/corrupted_side_by_side.png",
+      "blob_sha": "76386450894e4c20f47ae291459d3f917ffdb9a8",
+      "blob_size": 235240,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/vision_acl_20260701T162323Z/corrupted_top.png",
+      "blob_sha": "cea67e44bb0f875aef570972af7aba992eeb18d1",
+      "blob_size": 28386,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/vision_acl_live8765_20260701T171307Z/clean_iso.png",
+      "blob_sha": "b6a1c97e5aa2767a3bd8085b1a0eff3169626488",
+      "blob_size": 137623,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/vision_acl_live8765_20260701T171307Z/clean_side_by_side.png",
+      "blob_sha": "605f80d0bcf8c20afa1610d1916d28e527633fc7",
+      "blob_size": 235060,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/vision_acl_live8765_20260701T171307Z/clean_top.png",
+      "blob_sha": "faba0794ad51581ce0826b8bee1e7212643716e3",
+      "blob_size": 28005,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/vision_acl_live8765_20260701T171307Z/corrupted_side_by_side.png",
+      "blob_sha": "76386450894e4c20f47ae291459d3f917ffdb9a8",
+      "blob_size": 235240,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/vision_acl_live8765_20260701T171307Z/corrupted_top.png",
+      "blob_sha": "cea67e44bb0f875aef570972af7aba992eeb18d1",
+      "blob_size": 28386,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/visual_regression_20260710T220408Z/montage_pdf_before_after.png",
+      "blob_sha": "feed3f48c01578617e800b3346214ac79efdfffa",
+      "blob_size": 451146,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/visual_regression_20260711T041950Z/montage_pdf_before_after.png",
+      "blob_sha": "843e7cba013546921cbb905a4c21ea9d4a7ce999",
+      "blob_size": 465309,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/visual_regression_20260711T134556Z/montage_pdf_before_after.png",
+      "blob_sha": "5f25f45a32e3d8e235567bcd7215c6c08739f0f5",
+      "blob_size": 444747,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/visual_regression_20260711T142403Z/montage_pdf_before_after.png",
+      "blob_sha": "6069ac445252f1bfecf32116ca4e711b677e6fb7",
+      "blob_size": 439972,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/wall_stub_debug_overlay.png",
+      "blob_sha": "81f6a69a4d23e2bd8374f3c769214aaf20085e23",
+      "blob_size": 36821,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/scenes/living_room_modern_warm_minimal/contact_sheet.png",
+      "blob_sha": "2c4c31694396fcd03997d46fa844dd6ae306d53a",
+      "blob_size": 456493,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/scenes/living_room_modern_warm_minimal/scene.skp",
+      "blob_sha": "3329a31c20125a202a9e11fec5e38290ec9f4c8f",
+      "blob_size": 144913,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/scenes/living_room_modern_warm_minimal/sketchup_3_4.png",
+      "blob_sha": "250337b55b28b18c081d1e640fc7088ab29850a4",
+      "blob_size": 132365,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/scenes/living_room_modern_warm_minimal/sketchup_top.png",
+      "blob_sha": "d77fe93ea0cec477f41cf837b7477a5432613483",
+      "blob_size": 17809,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/scenes/living_room_modern_warm_minimal/three_quarter.png",
+      "blob_sha": "937018f39124d35f020ec400cbbf6b09ce72d3ee",
+      "blob_size": 106282,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/scenes/living_room_modern_warm_minimal/top_view.png",
+      "blob_sha": "32a83435949ccad35e74245914fc4f8f5ddb544a",
+      "blob_size": 19966,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/scenes/living_room_modern_warm_minimal/vray_three_quarter.png",
+      "blob_sha": "17dca16994911520999d39639dfeaf5fdcbd5aaf",
+      "blob_size": 1155528,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/scenes/vray_pipeline_proof_20260622.png",
+      "blob_sha": "42f50d658683639ac9decb78d373c8463b9dc043",
+      "blob_size": 1239741,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/sofa_premium/alt_001_before_after.png",
+      "blob_sha": "2c0397b74f9541340f816ef4ebf4d3e757596fd3",
+      "blob_size": 252494,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/sofa_premium/alt_002_before_after.png",
+      "blob_sha": "28bb9daf24f12f6ac9b07e4fb46fac8f184f16eb",
+      "blob_size": 278070,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/sofa_premium/alt_003_before_after.png",
+      "blob_sha": "e447abd9a3ab00fd72d0e604860c99d4ecdd209f",
+      "blob_size": 294786,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/sofa_premium/alt_004_before_after.png",
+      "blob_sha": "01315e227a8f708bf2301a64a749b69a2956b7d1",
+      "blob_size": 249647,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/sofa_premium/alt_005_before_after.png",
+      "blob_sha": "c7dc6467432b36289a9a49df18cbda4c4c54c335",
+      "blob_size": 237448,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/sofa_premium/alt006_before_after.png",
+      "blob_sha": "2e15530dc2f01ad9d782bc13482a50422b990721",
+      "blob_size": 245645,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/sofa_premium/integration_evidence.png",
+      "blob_sha": "0ce400d792d51159accf9200e6d452fe3225eb9b",
+      "blob_size": 498427,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/sofa_premium/planta_sofa_smooth.png",
+      "blob_sha": "9388048c442628bafb7557092baf939fa925f4ca",
+      "blob_size": 222286,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/sofa_premium/programa_baseline_vs_atual.png",
+      "blob_sha": "e9c7d6fec11e92d5c6cc946a874abe48e29aa918",
+      "blob_size": 115382,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/sofa_premium/run_000_baseline/baseline_contact_sheet.png",
+      "blob_sha": "55797f5ca9aed444ad1715dcd37da00c8187f728",
+      "blob_size": 130171,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/sofa_premium/sofa_premium_harness.skp",
+      "blob_sha": "a0edfb3a98d9ec552c0e110ab52fc55cb7ea7704",
+      "blob_size": 87915,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/sofa_premium/su_baseline_contact_sheet.png",
+      "blob_sha": "ca7bc938cf7d0cb337d52cd8b2c9bcd5bef35ac8",
+      "blob_size": 177455,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/variant_sweep/planta_74/contact_sheet.png",
+      "blob_sha": "c94419969de5f28d753e87572218c7a817100e24",
+      "blob_size": 205290,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/variant_sweep/planta_74/planta_74__baseline__black_wood_gold__L0/iso.png",
+      "blob_sha": "900f44f805fcf4b55e5e0d04caad6c3a6786a238",
+      "blob_size": 62703,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/variant_sweep/planta_74/planta_74__baseline__black_wood_gold__L1/iso.png",
+      "blob_sha": "58aeddce0fe29ee66b16df62ad5c01379a204ca8",
+      "blob_size": 56512,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/variant_sweep/planta_74/planta_74__baseline__black_wood_gold__L2/iso.png",
+      "blob_sha": "6d608c293067dddd7d6a4363ef8d9c2e187c1a41",
+      "blob_size": 57471,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/variant_sweep/planta_74/planta_74__baseline__dark_walnut__L0/iso.png",
+      "blob_sha": "ba079a96b43602143177110b69657267ae72f0a2",
+      "blob_size": 61556,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/variant_sweep/planta_74/planta_74__baseline__dark_walnut__L1/iso.png",
+      "blob_sha": "c9f87d97ad35c875a09d552892ed36168ca7442c",
+      "blob_size": 55345,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/variant_sweep/planta_74/planta_74__baseline__warm_compact__L0/iso.png",
+      "blob_sha": "2e5d2faa6400601c2337bedcb3ab14172b6aff56",
+      "blob_size": 62248,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/variant_sweep/planta_74/planta_74__baseline__warm_compact__L1/iso.png",
+      "blob_sha": "2e42bf6f3dec406b741dbad23865122773a036be",
+      "blob_size": 56025,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/variant_sweep/planta_74/planta_74__baseline__warm_compact__L2/iso.png",
+      "blob_sha": "5b3f3ff92042c3bae4c8eddaf4ea3a755c1bb99c",
+      "blob_size": 56997,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "assets/furniture/sofa/thumbnails/sofa_parametric_straight_3seat_iso.png",
+      "blob_sha": "b413813e78600e659be0d94163d2ffef9b6223a7",
+      "blob_size": 70586,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/pbr/pbr_concrete.jpg",
+      "blob_sha": "165f18f2d9d4fe43851dc10da77c13c08c3b00c3",
+      "blob_size": 543902,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/pbr/pbr_fabric.jpg",
+      "blob_sha": "1dc5fa8fb5694c802f8c8d09f2afcc9d78403919",
+      "blob_size": 581360,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/pbr/pbr_granite.jpg",
+      "blob_sha": "a93791e3a79ebbdb3e447f8f625424967dd9866c",
+      "blob_size": 1056664,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/pbr/pbr_wood_floor.jpg",
+      "blob_sha": "4a03840c3b671db7836f9c73e6c3f01db542a1c8",
+      "blob_size": 734493,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/pbr/pbr_wood_furniture.jpg",
+      "blob_sha": "a0a6340f1daa5e80e7822dd0b84d3f6736f08b2f",
+      "blob_size": 570668,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/antracite_calmo.png",
+      "blob_sha": "dc08f1939272990573d96551d52e7a620225455b",
+      "blob_size": 23655,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/brick.png",
+      "blob_sha": "26f449cabd5693d6d85e6fd14bde5ba3c95a5b76",
+      "blob_size": 284847,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/candidates/A_quartzo_fio.png",
+      "blob_sha": "68ae260f50c3706274500604719f8571d5e95dde",
+      "blob_size": 602376,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/candidates/B_granito_claro.png",
+      "blob_sha": "6862a8ebdd5b91860ccea4ea7ecf294f90768c63",
+      "blob_size": 951936,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/candidates/C_nanoglass_nuvem.png",
+      "blob_sha": "69bc33c9288c98a617b310aad032e1219bd7c9b4",
+      "blob_size": 467947,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/candidates/D_veio_suave.png",
+      "blob_sha": "0095b4ad14637e16b2b473c0f98af0d672ac2a0a",
+      "blob_size": 495728,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/candidates/floor_amadeirado_escuro.png",
+      "blob_sha": "eb280a7f942a53c6089b498244a826e839365fa0",
+      "blob_size": 1349354,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/candidates/floor_cimento_queimado.png",
+      "blob_sha": "f7c4616d7068585f95e1814e138ff06ab2335486",
+      "blob_size": 602243,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/candidates/floor_grafite_medio.png",
+      "blob_sha": "415cb274d0a87094a8564dd96e7b19112702abfc",
+      "blob_size": 599742,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/candidates/kitchen_materials_candidates.png",
+      "blob_sha": "ddb13b1bad1a690aafa11ccc95ba9888890c8fbb",
+      "blob_size": 532277,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/candidates/stone_dark_gold_A_sutil.png",
+      "blob_sha": "f0611a687dd66c9d541d16016e142b9e1475bd03",
+      "blob_size": 524417,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/candidates/stone_dark_gold_B_medio.png",
+      "blob_sha": "f50503a5fa4d0a592b5095e2430fc96789292b2b",
+      "blob_size": 737379,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/candidates/stone_dark_gold_C_marcado.png",
+      "blob_sha": "3ceff2328d13567afa34f5d53d5045e0e914050a",
+      "blob_size": 1063579,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/candidates/stone_dark_gold_D_nero.png",
+      "blob_sha": "3b12c2f7e3a31d20eac00a13f8f124325f89a515",
+      "blob_size": 837132,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/candidates/stone_detail.png",
+      "blob_sha": "747151c9c590d78199a8e8a73e5f06c10619d29c",
+      "blob_size": 247215,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/candidates/stone_gold_crop.png",
+      "blob_sha": "4250610c07cb131f7a40171fa5d96567cc901202",
+      "blob_size": 57717,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/candidates/stone_panel.png",
+      "blob_sha": "5113e23d0735e861d174868eff6b573576fba65e",
+      "blob_size": 356890,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/concrete.png",
+      "blob_sha": "3646f3a0abfee9f2bbe023547d975d55d89b3f4b",
+      "blob_size": 453665,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/fabric_accent.png",
+      "blob_sha": "0cfc3f63b56bf35f462828c4b41ad02752a4876d",
+      "blob_size": 60357,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/fabric_charcoal.png",
+      "blob_sha": "39772fd2a6f9e0007a869ef670aadafc4ac6baaa",
+      "blob_size": 209571,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/fabric_light.png",
+      "blob_sha": "417bce883eab8a08721d01df153778387b4c437d",
+      "blob_size": 50619,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/fabric_linen.png",
+      "blob_sha": "de83a6450e11b032211e16b27695240ed6241cfb",
+      "blob_size": 133861,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/floor_cimento_queimado.png",
+      "blob_sha": "f7c4616d7068585f95e1814e138ff06ab2335486",
+      "blob_size": 602243,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/floor_grafite_medio.png",
+      "blob_sha": "415cb274d0a87094a8564dd96e7b19112702abfc",
+      "blob_size": 599742,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/metal_black_matte.png",
+      "blob_sha": "6606262b10447975db930466d9e6b8128bb9d105",
+      "blob_size": 94148,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/porcelain.png",
+      "blob_sha": "3a0d417409ea6011d0ae43d6c357d172c2aa5aa4",
+      "blob_size": 541237,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/porcelanato_greige_calmo.png",
+      "blob_sha": "360b2b34c0885d21cef388fb238ba6dbcd10f6dc",
+      "blob_size": 29328,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/stone_antracite_veins.png",
+      "blob_sha": "3618a61b9ba9dbf9d0199d099679e5ce948ffcc6",
+      "blob_size": 52716,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/stone_counter.png",
+      "blob_sha": "68ae260f50c3706274500604719f8571d5e95dde",
+      "blob_size": 602376,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/stone_dark_gold_B_medio.png",
+      "blob_sha": "f50503a5fa4d0a592b5095e2430fc96789292b2b",
+      "blob_size": 737379,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/stone_dark_gold_D_nero.png",
+      "blob_sha": "3b12c2f7e3a31d20eac00a13f8f124325f89a515",
+      "blob_size": 837132,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/stone_gold.png",
+      "blob_sha": "0e36e999cbd8fe40c5b442bd98400e4a53a24c4b",
+      "blob_size": 420897,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/stone_greige_veins.png",
+      "blob_sha": "17f9aab9cfce579c3cb3e408bd768efbb1c1b6ea",
+      "blob_size": 70357,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/wood_dark.png",
+      "blob_sha": "c65dfe119feea06c793dd6cfab77d5f507f17216",
+      "blob_size": 306309,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/wood_floor.png",
+      "blob_sha": "f49e683cc989c8be8c97b7705d0033a6eb80a0d4",
+      "blob_size": 377372,
+      "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/procedural/wood_medium.png",
+      "blob_sha": "f49e683cc989c8be8c97b7705d0033a6eb80a0d4",
+      "blob_size": 377372,
+      "owner_group": "assets"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/apt_full_0259/apt_full_0259.skp",
+      "blob_sha": "2655856772b833c80e8ebae2682c882e6e00bb66",
+      "blob_size": 236339,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/apt_full_0259/apt_full_iso_0259.png",
+      "blob_sha": "b024f9e9004b7ce58b27332496dfad20062407f1",
+      "blob_size": 167866,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/apt_full_0259/apt_full_top_0259.png",
+      "blob_sha": "d120257b4a79d9c262f321258c840c2a1c6fbb56",
+      "blob_size": 29609,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/bedroom-window-ratio/model_iso_after.png",
+      "blob_sha": "6cc904b9420924d3e32fc736427f93f42beb614e",
+      "blob_size": 146699,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/bedroom-window-ratio/windows_zoom.png",
+      "blob_sha": "a8b2f113fa84e7997aba9f217d240c6f2c884162",
+      "blob_size": 192584,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/furniture_canonical_0259/after_iso.png",
+      "blob_sha": "e9fee964b74e74fb623cdf31b38cea20fe46bc15",
+      "blob_size": 162367,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/furniture_canonical_0259/after_top.png",
+      "blob_sha": "d66d99e8233a23b7e26ac5d3c0b00c3c530c8022",
+      "blob_size": 33727,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/furniture_canonical_0259/before_top.png",
+      "blob_sha": "508cbc2d0bbb40bc99692a7e55974e28418db6a6",
+      "blob_size": 28006,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/furniture_canonical_0259/planta_74_furnished.skp",
+      "blob_sha": "481b0998872a462696fdc921634a122c6874b1c7",
+      "blob_size": 229779,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/glass-railing-3dw/glass_before_after.png",
+      "blob_sha": "c5d5970a96f471dd2013e701824ff19b7e26688e",
+      "blob_size": 408603,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/glass-railing-3dw/model_iso_after.png",
+      "blob_sha": "ea1ee2c9b514e16dc40b12e1f472ed30b175257c",
+      "blob_size": 134967,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/glass-railing-3dw/model_top_after.png",
+      "blob_sha": "83ae1b86d9b6ba5f17285349eb3bb6e0143b4760",
+      "blob_size": 29405,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_aligned_20260602T011150/final/model_iso.png",
+      "blob_sha": "35d59213000c0b87dd8b690dcbf230269f8215f8",
+      "blob_size": 121631,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_aligned_20260602T011150/final/model_top.png",
+      "blob_sha": "d4f8337a065a190543f4bce2eb25d62c8e8af9c1",
+      "blob_size": 28901,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_aligned_20260602T011150/final/model.skp",
+      "blob_sha": "10dc509516dcf7c0a2814887cbfcbc2378710254",
+      "blob_size": 133484,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_aligned_20260602T011150/final/side_by_side_pdf_vs_skp.png",
+      "blob_sha": "9875baa66338bba98c4f9f56dca8c4a921c2a09b",
+      "blob_size": 239685,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_closed_20260602T014123/final/model_iso.png",
+      "blob_sha": "a8e98cda8795218fe319ae96731430a6e0c75354",
+      "blob_size": 135895,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_closed_20260602T014123/final/model_top.png",
+      "blob_sha": "95e6d0d7a8a8619062b6bbbb5ee07ed5d395f7bf",
+      "blob_size": 29390,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_closed_20260602T014123/final/model.skp",
+      "blob_sha": "aae65eb8518d08b6f92aeed35f59d8744b3c94b4",
+      "blob_size": 142798,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_closed_20260602T014123/final/side_by_side_pdf_vs_skp.png",
+      "blob_sha": "b0b7f5cc5b6c973c6a3eb10fd144a3ec48a892db",
+      "blob_size": 242820,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_sourcegate_20260602T010239/final/model_iso.png",
+      "blob_sha": "ce14ccaf5752627f7193a6cbe871dd4b25e8827b",
+      "blob_size": 125253,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_sourcegate_20260602T010239/final/model_top.png",
+      "blob_sha": "0d40fb20edc76ee523b02691b8a3c3f971c383c7",
+      "blob_size": 28803,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_sourcegate_20260602T010239/final/model.skp",
+      "blob_sha": "08cd597d46aca973218699e9dd00304237cf7a17",
+      "blob_size": 133481,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/grade_sourcegate_20260602T010239/final/side_by_side_pdf_vs_skp.png",
+      "blob_sha": "4f1282b79dc63aa2f7e72826debf0b1488c86802",
+      "blob_size": 240347,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/janelas-esquadria/basculante_final.png",
+      "blob_sha": "118334b9a044570625e420c85e1fff31a522ff0c",
+      "blob_size": 192222,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/janelas-esquadria/model_iso_after.png",
+      "blob_sha": "4500ec6e090f5ae518ed31f01025bdb18dfe7654",
+      "blob_size": 142229,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/janelas-esquadria/window_before_after.png",
+      "blob_sha": "66752a4a98cf7cb4392f01c7327e0f57ba95f43d",
+      "blob_size": 319578,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/kitchen_fix_20260602T021617/final/model_iso.png",
+      "blob_sha": "da28839b4826c41b77949db6834fcd7d3aafd01e",
+      "blob_size": 140661,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/kitchen_fix_20260602T021617/final/model_top.png",
+      "blob_sha": "2bdba55afecf75f410a9ba95905b79ffaaca60d5",
+      "blob_size": 29154,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/kitchen_fix_20260602T021617/final/model.skp",
+      "blob_sha": "64156ba9dcdbfe8dd60d42b8a2e1d38fc97bbe50",
+      "blob_size": 142180,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/kitchen_fix_20260602T021617/final/side_by_side_pdf_vs_skp.png",
+      "blob_sha": "1ef05e28ec32d6830c84b832d9b2db39fa581132",
+      "blob_size": 244538,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_candidate_20260608/overlay_consensus_on_pdf.png",
+      "blob_sha": "097f216879818fd84c7c118ff9e98f9216b3dda4",
+      "blob_size": 137409,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_fix_20260530T182016Z/final/before_after.png",
+      "blob_sha": "fda250a3cea8a59e8bafa993d3275e5b6a4c6778",
+      "blob_size": 249532,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_fix_20260530T182016Z/final/iso.png",
+      "blob_sha": "094008bc18c7e4f93050b81f2f70b93f10188247",
+      "blob_size": 122662,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_fix_20260530T182016Z/final/pdf_overlay_consensus.png",
+      "blob_sha": "c9dbb47f60d720575a5032da28ba58d011459131",
+      "blob_size": 136380,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_fix_20260530T182016Z/final/pdf_vs_skp.png",
+      "blob_sha": "a8acfd0892ac51f73663782ed7dd3b9adbf82725",
+      "blob_size": 235790,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_fix_20260530T182016Z/final/top.png",
+      "blob_sha": "39cef1325dbf67c13a474bb48ce425a839dac5c2",
+      "blob_size": 32396,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_rebuild_0259_20260608/model_floors_top.png",
+      "blob_sha": "1c36897d96ba056581cda3ca9ae2501e011c2ec8",
+      "blob_size": 13519,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_rebuild_0259_20260608/model_iso.png",
+      "blob_sha": "4f4ca1013e233291de98d39aa0525fa90ca670c6",
+      "blob_size": 137611,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_rebuild_0259_20260608/model_top.png",
+      "blob_sha": "f0711885ea80ea161d2dd9bb9c309f2f5e396613",
+      "blob_size": 28005,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/scale_rebuild_0259_20260608/model.skp",
+      "blob_sha": "f22f0fee9171960d3e5dbbb8412431da460e53cb",
+      "blob_size": 111119,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/suite01_furnished_0259/suite01_furnished_0259.skp",
+      "blob_sha": "6f2fd9ae69f1a1fc9946788a557dd0d9a25b832a",
+      "blob_size": 178532,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/suite01_furnished_0259/suite01_furnished_iso_0259.png",
+      "blob_sha": "6d1c5dff071256786e153d297004c8e305186b6c",
+      "blob_size": 121415,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/suite01_furnished_0259/suite01_furnished_top_0259.png",
+      "blob_sha": "b3d00154104942233b1e5b868208188f433c5ffb",
+      "blob_size": 27687,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/suite01_furnished_0259/suite01_vray_0259_crop.png",
+      "blob_sha": "01a6586288d40b1817e6b3953a0d7d755e96d24a",
+      "blob_size": 1304742,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/suite01_furnished_0259/suite01_vray_0259.png",
+      "blob_sha": "d38743fc3323d86205457e2c240983204c898760",
+      "blob_size": 1356659,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/suite01_scale_0259/model_floors_top.png",
+      "blob_sha": "1c36897d96ba056581cda3ca9ae2501e011c2ec8",
+      "blob_size": 13519,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/suite01_scale_0259/model_iso.png",
+      "blob_sha": "c08d7a593406ef7b500d37cc409f76637204f04c",
+      "blob_size": 137620,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/suite01_scale_0259/model_top.png",
+      "blob_sha": "425da01714367665e930ee5e469d0d84ed257e4a",
+      "blob_size": 28005,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/suite01_scale_0259/suite01_rebuild_0259.skp",
+      "blob_sha": "275d8e435f5ee7f6818c6a54673e3d7dc38f4bc5",
+      "blob_size": 111089,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/visual_regression_20260530T042308Z/montage_pdf_before_after.png",
+      "blob_sha": "8f9f96b223ab44af40fcdccaafce20a75331b3fb",
+      "blob_size": 194471,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/visual_regression_20260530T061448Z/montage_pdf_before_after.png",
+      "blob_sha": "8a286d585af31378eeeee56ca9385b93821dc2d2",
+      "blob_size": 249530,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/visual_regression_20260530T180822Z/montage_pdf_before_after.png",
+      "blob_sha": "fda250a3cea8a59e8bafa993d3275e5b6a4c6778",
+      "blob_size": 249532,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/visual_regression_20260530T180822Z/pdf_overlay_consensus.png",
+      "blob_sha": "c9dbb47f60d720575a5032da28ba58d011459131",
+      "blob_size": 136380,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/visual_regression_20260530T183405Z/montage_pdf_before_after.png",
+      "blob_sha": "3a250a1079b549a57d3d8eb5bbb1a8206aac7b00",
+      "blob_size": 189801,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/window_fix_20260530/final/before_after_removal.png",
+      "blob_sha": "e9e57f7aaa6ff657fb17635eb61f7aa4a9e1823b",
+      "blob_size": 260359,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/window_fix_20260530/final/model_iso.png",
+      "blob_sha": "f2e05d8633cb8bce0a7d95e4c7fa6fb9b8af7709",
+      "blob_size": 124664,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/window_fix_20260530/final/model_top.png",
+      "blob_sha": "d2dd8f280cc63cc0eb1edb3f7eae7a60b6d70fa4",
+      "blob_size": 32412,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/window_fix_20260530/final/pdf_before_after_panel.png",
+      "blob_sha": "7f16efc366364ebc9721c14a6ad4e243b1f3216c",
+      "blob_size": 533273,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/window_fix_20260530/final/quadrado_aperture_preserved.png",
+      "blob_sha": "9a8cacf2b0011b06715f705b3b66837c221bd24d",
+      "blob_size": 51791,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/window_frame_20260530/final/before_after_iso.png",
+      "blob_sha": "052308b21f0bbccffa05dc38a5d369ff261fc5ef",
+      "blob_size": 254428,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/window_frame_20260530/final/model_iso.png",
+      "blob_sha": "c3e48e119cf9e88c141c4710a3422f5fba9e15b0",
+      "blob_size": 130498,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/window_frame_20260530/final/model_top.png",
+      "blob_sha": "18cf6e422bcb1c1383810bba9aaef32a71a083e5",
+      "blob_size": 32827,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/planta_74/window_frame_20260530/final/pdf_before_after.png",
+      "blob_sha": "741272cd4b59938841e7bd42cf89b715593a665d",
+      "blob_size": 442948,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/artifacts/review/synthetic/living_layout_candidates.png",
+      "blob_sha": "957e3e303ea651f8b96ccb2abead01d3c200cb40",
+      "blob_size": 144521,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/archive/2026-07-11/scratch_preserved/recovered_human_soft_barriers_annotation.png",
+      "blob_sha": "684e0a99cf09df0f07718c1a695c8a99d2bdcbb4",
+      "blob_size": 1467570,
+      "owner_group": "archived_docs"
+    },
+    {
+      "path": "docs/screenshots/harness-app/01-pipeline.png",
+      "blob_sha": "5eae446afff42889dac4d0e87bc5548dcc83611f",
+      "blob_size": 44047,
+      "owner_group": "other_binary"
+    },
+    {
+      "path": "docs/screenshots/harness-app/02-detalhe.png",
+      "blob_sha": "b1e3d46c41fd3f07c0546371897f9f6719ac82d4",
+      "blob_size": 81190,
+      "owner_group": "other_binary"
+    },
+    {
+      "path": "docs/specs/_assets/quadrado_canonical_success_render.png",
+      "blob_sha": "f9f1f2d25eaebf4a40fdcf75443be48aa488340f",
+      "blob_size": 71571,
+      "owner_group": "other_binary"
+    },
+    {
+      "path": "fixtures/planta_74/human_openings_annotation.png",
+      "blob_sha": "c6d66d4800b2c23cb34a10ac5ccbd76077934b6a",
+      "blob_size": 399259,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/planta_74/human_soft_barriers_annotation.png",
+      "blob_sha": "684e0a99cf09df0f07718c1a695c8a99d2bdcbb4",
+      "blob_size": 1467570,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/planta_74/human_walls_annotation.png",
+      "blob_sha": "51d94ff95c2d8ce42851d7ff842d3c18f738acb2",
+      "blob_size": 1558698,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/visual_oracle_examples/bad_real/bad_current_iso_suspicious.png",
+      "blob_sha": "f48e10dd87c3100d20bffbf0bd5250a37abdacea",
+      "blob_size": 179605,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/visual_oracle_examples/bad_real/bad_current_top_suspicious.png",
+      "blob_sha": "a0cae1dd866cdf401375e1292090c49eb90b9bbc",
+      "blob_size": 51901,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/visual_oracle_examples/bad_real/bad_orphan_glass_parapet_labelled.png",
+      "blob_sha": "2a7457f103155c14e9627e8476f6ee741a7fa7d3",
+      "blob_size": 246055,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/visual_oracle_examples/bad_real/bad_orphan_glass_parapet_marked.png",
+      "blob_sha": "60d819b8860060084ef8068300e7e60b75730afc",
+      "blob_size": 256099,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/visual_oracle_examples/bad_real/bad_suspicious_openings_iso.png",
+      "blob_sha": "302e91203f2db7631af903c3c181c519482d8e06",
+      "blob_size": 519341,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/visual_oracle_examples/bad_real/bad_wall_stubs_labelled.png",
+      "blob_sha": "4f1a8fee4ac535a8c464a1cd80f381e1f9285566",
+      "blob_size": 233573,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/visual_oracle_examples/bad_real/bad_wall_stubs_marked.png",
+      "blob_sha": "022aac641c46f8fb95cf6cfc1ee3c6965cd39b6f",
+      "blob_size": 357595,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/visual_oracle_examples/bad_synthetic/bad_floating_door_synthetic.png",
+      "blob_sha": "995793dc12ebf1d6e281cae8f80f5a06bdcd1cf5",
+      "blob_size": 23034,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/visual_oracle_examples/bad_synthetic/bad_floor_leak_synthetic.png",
+      "blob_sha": "40d4554ce44bdf08ce24818cf7ff696cebec2ea4",
+      "blob_size": 20751,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/visual_oracle_examples/bad_synthetic/bad_full_height_window_void_synthetic.png",
+      "blob_sha": "5355eb14f34451b2e97ead17c9ababb72de5af97",
+      "blob_size": 22819,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/visual_oracle_examples/bad_synthetic/bad_misplaced_soft_barrier_synthetic.png",
+      "blob_sha": "ccfdfa018d0df3c4ccb98b99a918b14361d339d6",
+      "blob_size": 24655,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/visual_oracle_examples/bad_synthetic/bad_misplaced_window_synthetic.png",
+      "blob_sha": "991be1fcac05bb165b305cf51974bc3cda935fcb",
+      "blob_size": 23071,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/visual_oracle_examples/bad_synthetic/bad_missing_wall_continuation_synthetic.png",
+      "blob_sha": "9d3adb91e45bdbdb583710c28c0aaacfa95e372b",
+      "blob_size": 22512,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/visual_oracle_examples/bad_synthetic/bad_orphan_glass_panel_synthetic.png",
+      "blob_sha": "71676d96cb58f70183d404de19ddd513a65aabe3",
+      "blob_size": 21834,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/visual_oracle_examples/bad_synthetic/bad_wall_stub_synthetic.png",
+      "blob_sha": "79c21e41117587986f1b3fe4cb1edb0a3ed4c212",
+      "blob_size": 22766,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/visual_oracle_examples/good_real/good_planta_74_current_iso.png",
+      "blob_sha": "a9d288256ca437ed31294db55a94627bd4b61f14",
+      "blob_size": 144277,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/visual_oracle_examples/good_real/good_planta_74_current_side_by_side.png",
+      "blob_sha": "595c9284999bd2c209915225de6e963967bf1f75",
+      "blob_size": 591242,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/visual_oracle_examples/good_real/good_planta_74_current_top.png",
+      "blob_sha": "6e07eacfde19e0aeff6ea99eb17ea9f70c19d721",
+      "blob_size": 32977,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/visual_oracle_examples/good_synthetic/good_clean_shell_hosted_openings_synthetic.png",
+      "blob_sha": "37c23250b3ec1ad5af57e2f5f5234988ce3b2987",
+      "blob_size": 23506,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "ops/estudio-front/assets/banho01.png",
+      "blob_sha": "39218cbd20ebca6cb09b2afa18d9db6067654855",
+      "blob_size": 4482052,
+      "owner_group": "other_binary"
+    },
+    {
+      "path": "ops/estudio-front/assets/banho02.png",
+      "blob_sha": "cf49648097383582ae9d75e10b05c560e919d457",
+      "blob_size": 1904037,
+      "owner_group": "other_binary"
+    },
+    {
+      "path": "ops/estudio-front/assets/box_ideiaglass_nobre.jpg",
+      "blob_sha": "068406a0d0fd8863ff1fd2edbf6428539eb77795",
+      "blob_size": 72785,
+      "owner_group": "other_binary"
+    },
+    {
+      "path": "ops/estudio-front/assets/chuveiro_deca_flexmax_22.jpg",
+      "blob_sha": "ad7cd517b4ca7befa34c89f84b086b31482f7828",
+      "blob_size": 75897,
+      "owner_group": "other_binary"
+    },
+    {
+      "path": "ops/estudio-front/assets/cuba_deca_slim_L33050.jpg",
+      "blob_sha": "91d3d47ecf1f58b244ab078cda192de918af946b",
+      "blob_size": 6585,
+      "owner_group": "other_binary"
+    },
+    {
+      "path": "ops/estudio-front/assets/gabinete_roca_tura.jpg",
+      "blob_sha": "f421cdeea3ae235203da03f115b43e0c8847b54a",
+      "blob_size": 18213,
+      "owner_group": "other_binary"
+    },
+    {
+      "path": "ops/estudio-front/assets/hero.png",
+      "blob_sha": "a67314bfc0cec0543006c3575730d68da5ab6a2e",
+      "blob_size": 3735850,
+      "owner_group": "other_binary"
+    },
+    {
+      "path": "ops/estudio-front/assets/lavabo.png",
+      "blob_sha": "6a611fd0d461dcb3f89a92ebfe891a1ead787911",
+      "blob_size": 1861964,
+      "owner_group": "other_binary"
+    },
+    {
+      "path": "ops/estudio-front/assets/p21.png",
+      "blob_sha": "52f301a6d93ec6eb5acf8979a0e0323aefff7031",
+      "blob_size": 1789281,
+      "owner_group": "other_binary"
+    },
+    {
+      "path": "ops/estudio-front/assets/p22.png",
+      "blob_sha": "2e1c0a5ce41bf962a2cc99969f9c30ace524b9e6",
+      "blob_size": 1789144,
+      "owner_group": "other_binary"
+    },
+    {
+      "path": "ops/estudio-front/assets/p23.png",
+      "blob_sha": "c7b1709bb99643b5e843489b3ccb25a109e1f1da",
+      "blob_size": 1760765,
+      "owner_group": "other_binary"
+    },
+    {
+      "path": "ops/estudio-front/assets/torneira_deca_level_2880BL.jpg",
+      "blob_sha": "2cbeb1f3bb7b5b6b6a78330970ed3ee65de94bbc",
+      "blob_size": 37786,
+      "owner_group": "other_binary"
+    },
+    {
+      "path": "ops/estudio-front/assets/vaso_roca_gap.jpg",
+      "blob_sha": "573bf58f4ff8853b186df74d1b048a3e4ed2d45c",
+      "blob_size": 38262,
+      "owner_group": "other_binary"
+    },
+    {
+      "path": "planta_74.pdf",
+      "blob_sha": "91d81dacba3ff50ac9213b33e25e67b9a259e43a",
+      "blob_size": 175850,
+      "owner_group": "other_binary"
+    },
+    {
+      "path": "references/sofas/audit/modern_dark_gray/modern_dark_gray_front.png",
+      "blob_sha": "db2222fce5c1f1535c27b580ebc851c12b635d53",
+      "blob_size": 291864,
+      "owner_group": "references"
+    },
+    {
+      "path": "references/sofas/audit/modern_dark_gray/modern_dark_gray_iso.png",
+      "blob_sha": "d3aacf304d6db188fbbc075c2f6160d30ab5abce",
+      "blob_size": 534894,
+      "owner_group": "references"
+    },
+    {
+      "path": "references/sofas/audit/modern_dark_gray/modern_dark_gray_top.png",
+      "blob_sha": "7ba3a36dff0c0f629e319c6fbe17b048b41f4d4b",
+      "blob_size": 407608,
+      "owner_group": "references"
+    },
+    {
+      "path": "references/sofas/raw/group60.skp",
+      "blob_sha": "f9a3a41bbb9cfcccd248db6403f53f7a519d9f3b",
+      "blob_size": 1075095,
+      "owner_group": "references"
+    },
+    {
+      "path": "references/sofas/raw/modern_dark_gray.skp",
+      "blob_sha": "a9fd545d6d849aad40ba645ddbbb0a08b44bfd3b",
+      "blob_size": 3668464,
+      "owner_group": "references"
+    },
+    {
+      "path": "renders/check/sofa_3q.png",
+      "blob_sha": "b0ff826a55af4593774fe418fcab099cd66d74a1",
+      "blob_size": 263705,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/check/sofa_3seat_v1.skp",
+      "blob_sha": "7056219903bf01ca7c0c579806d9412c7a789b83",
+      "blob_size": 292999,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/check/sofa_front.png",
+      "blob_sha": "e3592dcf9e6980f41459897cd7542f368eeb26b6",
+      "blob_size": 20349,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/check/sofa_side.png",
+      "blob_sha": "b7b9f61291d50c0701b46c29d7ade3ba389c3580",
+      "blob_size": 54213,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/check/sofa_top.png",
+      "blob_sha": "610c559a337211ea0cc66bc612b6f4ee4bf36ac8",
+      "blob_size": 74662,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/bench_seat_tight_back_exposed_legs/bench_seat_tight_back_exposed_legs.skp",
+      "blob_sha": "bfe3f25c5d5a4164ff01527f6442c5c5754a4991",
+      "blob_size": 224881,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/bench_seat_tight_back_exposed_legs/front.png",
+      "blob_sha": "b32ba83c37cc9a7f0fc591a1f46bd3787e17fd0c",
+      "blob_size": 23349,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/bench_seat_tight_back_exposed_legs/side.png",
+      "blob_sha": "e22d9d634f31a18c8328e22410b8024287bb2b18",
+      "blob_size": 44163,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/bench_seat_tight_back_exposed_legs/three_quarter.png",
+      "blob_sha": "3f4986158ba783662041052ec7682c79c713b351",
+      "blob_size": 175792,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/bench_seat_tight_back_exposed_legs/top.png",
+      "blob_sha": "ad8bdf13a93d2aff822432c0281e4d27505bee37",
+      "blob_size": 62129,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/contact_sheet_archetypes.png",
+      "blob_sha": "9305b79592054c0e94f2190278dfdf82ff358c5f",
+      "blob_size": 187290,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/contact_sheet_generalization.png",
+      "blob_sha": "4cd2cdb18f91110cddb113d38a66673be38ecf47",
+      "blob_size": 127949,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/contact_sheet_ref_vs_generated.png",
+      "blob_sha": "153155cf2bf9e5a37591ff6cf12e4f98bba29c2d",
+      "blob_size": 268884,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/eval_3seat_bench_wide_arm_recessed_base.skp",
+      "blob_sha": "057c49a1624b679edaa41a55af90038592d0878f",
+      "blob_size": 292222,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/front.png",
+      "blob_sha": "bb307d34ed42e0b730d69a4e937ebb49df9d4779",
+      "blob_size": 17215,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/side.png",
+      "blob_sha": "4a1e88dce5c945084711ef6160a1a9513c8b115a",
+      "blob_size": 46566,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/three_quarter.png",
+      "blob_sha": "f2d0c07b80e7f832ff36af49f508f7fdccdf17b8",
+      "blob_size": 195569,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/top.png",
+      "blob_sha": "098201dbe7d6b92688948dfa3f5b5e00b53375ae",
+      "blob_size": 42963,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/eval_loveseat_slim_arm_tight_back/eval_loveseat_slim_arm_tight_back.skp",
+      "blob_sha": "b6b2bea70d192e43f7549e867453fc70cb8cbc2c",
+      "blob_size": 246662,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/eval_loveseat_slim_arm_tight_back/front.png",
+      "blob_sha": "9e267ae0bec84da6fb53b439b5d655ae081daf17",
+      "blob_size": 44490,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/eval_loveseat_slim_arm_tight_back/side.png",
+      "blob_sha": "ce6f6c1b6b5929594c2efe073170c336453b8260",
+      "blob_size": 45409,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/eval_loveseat_slim_arm_tight_back/three_quarter.png",
+      "blob_sha": "13d4975f62fbda50bab5301f5833a70df4f7a6fe",
+      "blob_size": 220116,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/eval_loveseat_slim_arm_tight_back/top.png",
+      "blob_sha": "043271baad2e06f00da7282f0db1c18b391c67c1",
+      "blob_size": 144808,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/eval_low_modern_dark_3seat/eval_low_modern_dark_3seat.skp",
+      "blob_sha": "60af3cfc43472967a6308361ec47b122d9d5d6c2",
+      "blob_size": 282759,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/eval_low_modern_dark_3seat/front.png",
+      "blob_sha": "eced0bf5fb42d9c41d216089ec24177e3d9d88de",
+      "blob_size": 50962,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/eval_low_modern_dark_3seat/side.png",
+      "blob_sha": "01830144d20a222d2a881eeb663ea9f65ca9aac0",
+      "blob_size": 27008,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/eval_low_modern_dark_3seat/three_quarter.png",
+      "blob_sha": "52374c280f884b6ba212b54ef6fc70d2afd739a8",
+      "blob_size": 179873,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/eval_low_modern_dark_3seat/top.png",
+      "blob_sha": "89c90e3e295e34afaab5e6da8ed8eedd882ecdab",
+      "blob_size": 73912,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/gpt_review/eval_low_modern_dark_3seat_review.png",
+      "blob_sha": "ed58af1cb7b033f9d94464203283abe26006555a",
+      "blob_size": 143090,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/gpt_review/tufted_primitive_iso.png",
+      "blob_sha": "efbe4325edd886507b95aed022226dcbecd3f5d6",
+      "blob_size": 212171,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/primitives/primitives_front.png",
+      "blob_sha": "8d5dafdf9fda5d5911e037a52847fcd632c136a5",
+      "blob_size": 36525,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/primitives/primitives_three_quarter.png",
+      "blob_sha": "83d94c081e1926822113307e0a3b399b8683705c",
+      "blob_size": 171240,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/straight_2seat_slim_arm_split_cushion_back/front.png",
+      "blob_sha": "972843951a4b03ec63aae9896f6323fdc02dd87e",
+      "blob_size": 18624,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/straight_2seat_slim_arm_split_cushion_back/side.png",
+      "blob_sha": "9a0053f4b418573939cfd1e0124824bcc3c1dd0c",
+      "blob_size": 46218,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/straight_2seat_slim_arm_split_cushion_back/straight_2seat_slim_arm_split_cushion_back.skp",
+      "blob_sha": "c10b6cc3f4a59718d0ca9d64649a7110f6c11475",
+      "blob_size": 282516,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/straight_2seat_slim_arm_split_cushion_back/three_quarter.png",
+      "blob_sha": "6740938c7c8691754cbc6119bc6fbd1b21092e5c",
+      "blob_size": 199736,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/straight_2seat_slim_arm_split_cushion_back/top.png",
+      "blob_sha": "7f95f1f3fa147d41246f9d198b68ebe0eab3b710",
+      "blob_size": 42953,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/straight_3seat_track_arm_split_cushion_back/front.png",
+      "blob_sha": "e2c54143523d69cc2174dfa1935d9a48ce280d3d",
+      "blob_size": 98041,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/straight_3seat_track_arm_split_cushion_back/side.png",
+      "blob_sha": "aa4b7850677e10fea639ed3dfc38d2ec67801b63",
+      "blob_size": 41220,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/straight_3seat_track_arm_split_cushion_back/straight_3seat_track_arm_split_cushion_back.skp",
+      "blob_sha": "81a9cefee3c5bad1b69d99fd2d08708a4d384e8b",
+      "blob_size": 288616,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/straight_3seat_track_arm_split_cushion_back/three_quarter.png",
+      "blob_sha": "cfac953cb486e21e233d8b90adf6d86364a895e7",
+      "blob_size": 277540,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_eval/straight_3seat_track_arm_split_cushion_back/top.png",
+      "blob_sha": "eba220c408733a0a0792b59d400d9aa38e7afb3c",
+      "blob_size": 124195,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_vray/dark_lounge_vray_baseline.png",
+      "blob_sha": "e54b6ff92a9af09f4ed9f7f4896f2b59f7e280ca",
+      "blob_size": 933553,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_vray/dark_lounge_vray_ground_autoexp.png",
+      "blob_sha": "3d7a807891342ca642ec43f095e75650cb5872cd",
+      "blob_size": 568343,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_vray/dark_lounge_vray_material_complete.png",
+      "blob_sha": "928e8e7b920896059c5398bc1dc9cce410e2ca7c",
+      "blob_size": 1373496,
+      "owner_group": "renders"
+    },
+    {
+      "path": "renders/sofa_vray/dark_lounge_vray_microirregular.png",
+      "blob_sha": "86efffa4527f63766db46d46fc08f2554101e382",
+      "blob_size": 1374507,
+      "owner_group": "renders"
+    },
+    {
+      "path": "tests/data/overlay_gate/planta74_top.png",
+      "blob_sha": "98a5bd0e302db1337d9d716a179dda4e9cf61377",
+      "blob_size": 30054,
+      "owner_group": "other_binary"
+    },
+    {
+      "path": "textures/fabric_dark_charcoal_albedo.png",
+      "blob_sha": "ec539080b9a84852ea04e0ad9b8f57e0527e2ce7",
+      "blob_size": 303993,
+      "owner_group": "other_binary"
+    },
+    {
+      "path": "textures/fabric_dark_charcoal_bump.png",
+      "blob_sha": "9391d786a91ccfbb9e139b870fb7b0857ec13c84",
+      "blob_size": 4860,
+      "owner_group": "other_binary"
+    },
+    {
+      "path": "textures/fabric_light_linen_albedo.png",
+      "blob_sha": "14911523d8fca72fe7ff7f278833a29d88c46244",
+      "blob_size": 540523,
+      "owner_group": "other_binary"
+    },
+    {
+      "path": "textures/fabric_light_linen_bump.png",
+      "blob_sha": "7288eee7566ed7d10a85473895cba868210f4858",
+      "blob_size": 4857,
+      "owner_group": "other_binary"
+    },
+    {
+      "path": "textures/fabric_mid_gray_albedo.png",
+      "blob_sha": "9915f282fb91eddbabbed343f75d06979c8e7325",
+      "blob_size": 376377,
+      "owner_group": "other_binary"
+    },
+    {
+      "path": "textures/fabric_mid_gray_bump.png",
+      "blob_sha": "7213e1c27607d3a7abee238b9c705e8571190066",
+      "blob_size": 4838,
+      "owner_group": "other_binary"
+    },
+    {
+      "path": "vray_pipeline_proof.png",
+      "blob_sha": "42f50d658683639ac9decb78d373c8463b9dc043",
+      "blob_size": 1239741,
+      "owner_group": "other_binary"
+    }
+  ]
+}
