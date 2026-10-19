@@ -24,6 +24,10 @@ from __future__ import annotations
 RAILING_TYPES = {"guardrail", "railing", "guarda_corpo", "guarda-corpo",
                  "guarda_corpo_com_grade", "peitoril_com_grade"}
 LENGTH_TOL_M = 0.10
+# Mesma precedência do builder (`barrier_render_as` em build_plan_shell_skp.rb): o `render_as` EXPLÍCITO do consensus
+# (curadoria humana) vence o mapeamento por `barrier_type`, nos dois sentidos.
+EXPLICIT_RAILING = {"grade", "railing", "guardrail"}
+EXPLICIT_LOW_WALL = {"low_wall", "mureta", "peitoril", "parapet"}
 
 
 def _report_barriers(report: dict) -> list[dict]:
@@ -34,11 +38,19 @@ def _is_railing_type(bt) -> bool:
     return str(bt or "").strip().lower() in RAILING_TYPES
 
 
+def _expects_railing(sb: dict) -> bool:
+    explicit = str(sb.get("render_as") or "").strip().lower()
+    if explicit in EXPLICIT_RAILING:
+        return True
+    if explicit in EXPLICIT_LOW_WALL:
+        return False
+    return _is_railing_type(sb.get("barrier_type"))
+
+
 def audit_railing_exact_match(consensus: dict, report: dict,
                               *, length_tol_m: float = LENGTH_TOL_M) -> dict:
     con_by_id = {sb.get("id"): sb for sb in consensus.get("soft_barriers", [])}
-    expected = {sid for sid, sb in con_by_id.items()
-                if _is_railing_type(sb.get("barrier_type"))}
+    expected = {sid for sid, sb in con_by_id.items() if _expects_railing(sb)}
     barriers = _report_barriers(report)
     actual = {b.get("id") for b in barriers if b.get("render_as") == "railing"}
 
