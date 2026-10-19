@@ -254,7 +254,7 @@ def build_shell(consensus_path: str | None = None, *, out_path: str | None = Non
     from tools import build_plan_shell_skp as bps  # shapely: só quando precisa
 
     res = bps.run(con, out, sketchup_exe=su.loc.exe, plugins_dir=su.loc.plugins_dir,
-                  timeout_s=timeout_s, force_skp=force, mode=mode)
+                  timeout_s=timeout_s, force_skp=force, mode=mode, plant_scale_only=True)
     out_d: dict[str, Any] = {"status": "OK" if res.get("ok") else "FAILED", "mode": mode,
                              "consensus": str(con), "build": res}
     if res.get("ok") and not res.get("skipped"):

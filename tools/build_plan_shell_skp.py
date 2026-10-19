@@ -63,7 +63,7 @@ from typing import Any
 from shapely.geometry import LineString, MultiPolygon, Point, Polygon, box
 from shapely.ops import unary_union
 
-from core.scale import plant_from_fixture_path, resolve_plant_pt_to_m
+from core.scale import PLANT_PT_TO_M, plant_from_fixture_path, resolve_plant_pt_to_m
 from tools.disarm_sketchup_autoruns import disarm as disarm_autoruns
 from tools.su_runner_safety import log_mode, parse_mode, should_terminate
 
@@ -1001,7 +1001,8 @@ def run(consensus_path: Path, out_skp: Path, *, sketchup_exe: Path,
         out_shell_json: Path | None = None,
         soft_barriers_mode: str = "groups",
         force_skp: bool = False,
-        mode: str | None = None) -> dict[str, Any]:
+        mode: str | None = None,
+        plant_scale_only: bool = False) -> dict[str, Any]:
     """Build the plan shell .skp end-to-end.
 
     Args:
@@ -1015,6 +1016,10 @@ def run(consensus_path: Path, out_skp: Path, *, sketchup_exe: Path,
         None (default), resolves via parse_mode with a CI-aware safe
         default. Pass an explicit string (``"headless"`` /
         ``"interactive"`` / ``"attach"``) to override.
+      plant_scale_only: ignore an inherited ``PT_TO_M`` and use only the
+        plant's verified scale (fixtures/<plant>/ or consensus ``source``),
+        else the Ruby default. For long-lived callers whose own env carries a
+        scale for ANOTHER plant (the MCP server exports 0.0259 for planta_74).
 
     Returns a dict with paths and stats. Honours the content-hash
     cache via a sidecar `<out_skp>.metadata.json` (matches the
@@ -1095,7 +1100,15 @@ def run(consensus_path: Path, out_skp: Path, *, sketchup_exe: Path,
     # Inject the verified per-plant real-world scale unless the caller set
     # PT_TO_M explicitly. Plants without a verified anchor keep the Ruby
     # default (0.0352). See PLANT_PT_TO_M for the planta_74 derivation.
+    if plant_scale_only:
+        # O env herdado não é intenção do usuário: o servidor MCP exporta a escala
+        # da planta_74 e o quadrado saía ~0.74x (L2 2026-10-19, gates PASS mesmo assim).
+        env.pop("PT_TO_M", None)
     _plant_scale = resolve_plant_pt_to_m(consensus_path, env)
+    if _plant_scale is None and plant_scale_only:
+        _src = str(consensus.get("source") or "").rsplit(".", 1)[0]
+        if _src in PLANT_PT_TO_M:
+            _plant_scale = str(PLANT_PT_TO_M[_src])
     if _plant_scale is not None:
         env["PT_TO_M"] = _plant_scale
         print(
