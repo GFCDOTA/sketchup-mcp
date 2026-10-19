@@ -59,12 +59,15 @@ def test_no_direct_bedroom_helpers_in_other_room_modules():
     for path in [
         ROOT / "tools/kitchen_layout.py",
         ROOT / "tools/bathroom_layout.py",
-        ROOT / "interior/planners/living_room_planner.py",
+        ROOMS / "living" / "planner.py",
     ]:
         ast.parse(path.read_text(encoding="utf-8"))
         text = path.read_text(encoding="utf-8")
         assert "from tools.bedroom_layout import" not in text
         assert "from tools.rooms.shared.geometry import" in text
+    legacy = (ROOT / "interior/planners/living_room_planner.py").read_text(encoding="utf-8")
+    assert "from tools.rooms.living import planner as _impl" in legacy
+    assert "def plan_living(" not in legacy
 
 
 def test_service_no_longer_imports_orchestrator_for_geometry():
