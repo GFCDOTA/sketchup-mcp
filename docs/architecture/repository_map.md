@@ -64,8 +64,7 @@ reutilizáveis; **sketchup** executa e inspeciona, sem decidir decoração; **mc
 | `references/sofas/history/` | existe | histórico de julgamento do programa do sofá (ex-`HISTORICO_SOFA.json` da raiz) |
 | `artifacts/review/vray_pipeline_proof_2026-06/` | existe | evidência de prova do pipeline V-Ray (ex-`vray_pipeline_proof.png` da raiz); não é render canônico |
 
-Até P4 terminar, boa parte do código ainda está direto em `tools/`. Isso é o estado atual, não o desenho: o destino
-de cada arquivo está no [mapa P0](../specs/fp043_p0_map.v1.json).
+A migração P4 de código ativo foi executada em PRs pequenos (#301–#306); arquivos ainda diretos em `tools/` são fachadas de compatibilidade, infraestrutura com owner ou exceções por decisão D-002–D-005. O status verificável por item está no [mapa P0](../specs/fp043_p0_map.v1.json), com as três famílias de diretórios reconciliadas no #314. A [auditoria P8](../reports/FP-043_final_validation.md) discrimina os L2 pendentes.
 
 ## 3. Cômodos
 
