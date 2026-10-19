@@ -784,11 +784,8 @@ def collect_boxes(con):
         # GUARD anti-regressao (wet room): banheiro so aceita kinds de LOUCA. Se um movel de
         # quarto/sala vazar pra ca, LOGA (nao aborta) -> pega regressao futura de roteamento.
         if r["room_type"] == BATHROOM:
-            _WET = {"gabinete", "bancada_banho", "cuba", "espelho", "vaso", "box_vidro", "box"}
-            # kb_* = ferragem/luz legitima do banho (gola, torneira, LED, perfil, ducha, bronze)
-            estranhos = sorted({str(b.get("kind")) for b in (boxes or [])
-                                if str(b.get("kind")) not in _WET
-                                and not str(b.get("kind")).startswith("kb_")})
+            from tools.rooms.bathroom.validation import unexpected_wet_room_kinds
+            estranhos = unexpected_wet_room_kinds(boxes)
             if estranhos:
                 print(f"[furnish-apt] WARN wet-room {r['name']!r}: kind(s) fora da louca -> {estranhos}")
         # TRADE-OFF VISIVEL: peca que o brain teve que encolher/descartar por
