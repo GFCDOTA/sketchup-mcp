@@ -81,3 +81,35 @@ def test_service_no_longer_imports_orchestrator_for_geometry():
 def test_room_modules_do_not_turn_consultative_knowledge_into_execution():
     for name in TYPES:
         assert resolve_module(name)["execution_authorized"] is False
+
+
+def test_runtime_room_providers_are_owned_by_packages_with_legacy_aliases():
+    from tools import (bathroom_layout, bedroom_designer, bedroom_layout,
+                       kitchen_layout, service_layout)
+    from tools.rooms.bathroom import layout as bathroom
+    from tools.rooms.bedroom import designer as bedroom_designer_impl
+    from tools.rooms.bedroom import layout as bedroom
+    from tools.rooms.kitchen import layout as kitchen
+    from tools.rooms.service import layout as service
+
+    assert bathroom_layout.build_boxes is bathroom.build_boxes
+    assert kitchen_layout.build_boxes is kitchen.build_boxes
+    assert service_layout.build_boxes is service.build_boxes
+    assert bedroom_layout.run is bedroom.run
+    assert bedroom_designer.run is bedroom_designer_impl.run
+
+
+def test_legacy_entrypoints_preserve_cli_without_owning_room_builder_source():
+    for name in ("kitchen_layout", "bathroom_layout", "service_layout",
+                 "bedroom_layout", "bedroom_designer"):
+        path = ROOT / "tools" / f"{name}.py"
+        src = path.read_text("utf-8")
+        assert 'if __name__ == "__main__":' in src
+        assert "def build_boxes(" not in src
+        assert "def build_layout(" not in src
+    for name in ("kitchen", "bathroom", "service", "bedroom"):
+        path = ROOMS / name / "layout.py"
+        assert path.is_file()
+        assert (path.read_text("utf-8").count("def build_boxes(") == 1
+                if name in ("kitchen", "bathroom", "service") else
+                "def run(" in path.read_text("utf-8"))

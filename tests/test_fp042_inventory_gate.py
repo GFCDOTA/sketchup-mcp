@@ -45,3 +45,34 @@ def test_duplicate_path_is_detected():
 
 def test_gate_controls_are_not_counted_as_business_files():
     assert check_inventory(_index(), {"tools/a.py", *CONTROL_PATHS})["result"] == "PASS"
+
+
+def test_strict_mode_fails_on_pending_and_manual_owner():
+    data = _index()
+    pending = check_inventory(data, {"tools/a.py"}, require_complete=True)
+    assert pending["result"] == "FAIL"
+    assert "UNRESOLVED_OWNERSHIP_OR_MIGRATION" in pending["errors"]
+    assert pending["unresolved"] == ["tools/a.py"]
+    data["entries"][0].update({"status": "VERIFIED_CODE_OWNERSHIP",
+                               "disposition": "tools.rooms.kitchen"})
+    assert check_inventory(data, {"tools/a.py"}, require_complete=True)["result"] == "PASS"
+    data["entries"][0]["disposition"] = "manual_owner_review"
+    assert check_inventory(data, {"tools/a.py"}, require_complete=True)["result"] == "FAIL"
+
+
+def test_strict_mode_rejects_unclassified_and_pending_ci():
+    data = _index()
+    data["entries"][0].update({"status": "VERIFIED_CODE_OWNERSHIP_PENDING_CI",
+                               "domain": "unclassified_special_case"})
+    result = check_inventory(data, {"tools/a.py"}, require_complete=True)
+    assert result["result"] == "FAIL"
+    data["entries"][0].update({"status": "VERIFIED_CODE_OWNERSHIP", "domain": "room_kitchen",
+                               "disposition": "tools.rooms.kitchen"})
+    assert check_inventory(data, {"tools/a.py"}, require_complete=True)["result"] == "PASS"
+
+
+def test_coverage_mode_keeps_historical_contract_without_masking_unresolved():
+    result = check_inventory(_index(), {"tools/a.py"})
+    assert result["result"] == "PASS"
+    assert result["pending_count"] == result["unresolved_count"] == 1
+    assert result["strict"] is False
