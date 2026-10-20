@@ -3,7 +3,7 @@ componentes procedurais de DECOR da sala (rug, coffee_table, side_table, floor_l
 wall_art, curtain, plant_placeholder). Mesma convencao do furniture_anatomy_spec:
 dims em METROS, X=largura, Y=profundidade (frente=-Y), Z=altura, origem no canto
 (0,0,0). Pecas SEPARADAS com kind semantico — nao bloco unico. Os builders
-(tools/decor_builders.py) consomem estes specs; o SceneSpatialGate valida bbox
+(tools/rooms/shared/decor_builders.py) consomem estes specs; o SceneSpatialGate valida bbox
 plausivel via DECOR_PLAUSIBLE_BBOX_M.
 
 Regra da slice: componentes nao precisam ser perfeitos; precisam ser coerentes,

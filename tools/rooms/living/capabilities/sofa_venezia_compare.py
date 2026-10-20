@@ -12,9 +12,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT))
-from tools.furniture_anatomy_spec import SofaSpec          # noqa: E402
+from tools.rooms.shared.anatomy import SofaSpec          # noqa: E402
 from tools.render_parts_iso import render_parts            # noqa: E402
-from tools.sofa_builder import build_sofa                  # noqa: E402
+from tools.rooms.shared.sofa import build_sofa                  # noqa: E402
 from tools.rooms.living.sofa_class import derive_spec, sofa_class_gate  # noqa: E402
 from tools.rooms.living.capabilities.sofa_class_matrix import _grid_sheet            # noqa: E402
 from tools.rooms.living.validation.sofa_gate import gate as sofa_gate              # noqa: E402

@@ -43,7 +43,7 @@ class Variant:
 
 def style_axis() -> list[str | None]:
     """[None] + STYLE_TOKENS ordenados. None = baseline (FURNISH_STYLE vazio)."""
-    from tools.style_spec import STYLE_TOKENS
+    from tools.rooms.shared.materials import STYLE_TOKENS
     return [None] + sorted(STYLE_TOKENS)
 
 

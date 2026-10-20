@@ -43,7 +43,7 @@ def test_empty_ok_designer_preserves_contract(monkeypatch):
 
 
 def test_desk_chair_uses_shared_assembly_and_module(monkeypatch):
-    from tools import sofa_builder
+    from tools.rooms.shared import sofa as sofa_builder
 
     chair = {"type": "desk_chair", "box": SimpleNamespace(bounds=(0, 0, 60, 45)),
              "facing": (0, 1)}

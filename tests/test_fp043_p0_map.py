@@ -70,13 +70,14 @@ def test_move_exige_destino_e_compat_decisao_exige_pergunta_fachada_exige_canoni
     mv["destination"], mv["compat"] = None, None
     dec = next(r for r in ruim["items"] if r["item"] == "tools/trace_view.py")
     dec.pop("open_question")
-    fac = next(r for r in ruim["items"] if r["item"] == "tools/sofa_builder.py")
-    fac["destination"] = "tools/rooms/shared/nao_existe.py"
+    # as linhas `facade` do mapa sairam com as fachadas (FP-044/F6): a regra e exercitada numa linha transformada
+    fac = next(r for r in ruim["items"] if r["item"] == "tools/furnish_apartment.py")
+    fac["disposition"], fac["destination"] = "facade", "tools/rooms/shared/nao_existe.py"
     erros = check(ruim, tracked)["errors"]
     assert "tools/geometry_sanity.py" in erros["MISSING_DESTINATION"]
     assert "tools/geometry_sanity.py" in erros["MOVE_WITHOUT_COMPAT"]
     assert "tools/trace_view.py" in erros["DECISION_WITHOUT_QUESTION"]
-    assert erros["FACADE_CANONICAL_MISSING"] == ["tools/sofa_builder.py -> tools/rooms/shared/nao_existe.py"]
+    assert erros["FACADE_CANONICAL_MISSING"] == ["tools/furnish_apartment.py -> tools/rooms/shared/nao_existe.py"]
 
 
 def _doc_sintetico(compat):

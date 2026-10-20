@@ -41,7 +41,7 @@ def main() -> int:
     args = ap.parse_args()
     tag = args.tag or ("alt006" if args.alt006 else "baseline")
 
-    from tools.sofa_builder import build_sofa
+    from tools.rooms.shared.sofa import build_sofa
     parts, meta = build_sofa(premium_spec())
     out_dir = ROOT / "runs/sofa_premium/harness"
     out_dir.mkdir(parents=True, exist_ok=True)

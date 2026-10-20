@@ -34,7 +34,7 @@ Não reutilize medidas de aulas como cotas universais ou do `planta_74`.
 1. Leia os identificadores `recipes[].id` e escolha no máximo três receitas pertinentes.
 2. Confira `when_use`, `avoid_when`, `preconditions` e `sources[].locator`.
 3. Encontre a implementação existente no repo (`tools/rooms/kitchen/layout.py`,
-   `tools/wardrobe_builder.py`, `tools/sketchup/*`) e diferencie fatos verificados
+   `tools/rooms/shared/wardrobe.py`, `tools/sketchup/*`) e diferencie fatos verificados
    de capacidades não disponíveis.
 4. Compare pelo menos duas estratégias se houver geometria não trivial; explique
    por que a escolhida preserva editabilidade e a fonte de verdade paramétrica.

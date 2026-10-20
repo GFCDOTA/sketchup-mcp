@@ -1,6 +1,6 @@
 """Feedback loop / anti-patterns — prova que as regras de layout entraram.
 
-Cobre tools/layout_rules.py (catalogo + flag_anti_patterns) e a integracao no
+Cobre tools/rooms/shared/layout_rules.py (catalogo + flag_anti_patterns) e a integracao no
 tools/rooms/living/planning/layout_candidates.py (JSON ganha anti_patterns / anti_patterns_flagged).
 Sem 3DW, sem asset, sem SKP. Felipe 2026-06-04.
 """
@@ -14,7 +14,7 @@ import pytest
 # So test_ambiguous_tv_wall_is_explained_not_crammed carrega planta_74 real —
 # marcado @pytest.mark.planta74_scale pelo tests/conftest.py (roda na
 # invocacao `pytest -m planta74_scale` separada, com o env correto).
-from tools.layout_rules import (MIN_SOFA_TV, RULE_BY_ID, RULES,  # noqa: E402
+from tools.rooms.shared.layout_rules import (MIN_SOFA_TV, RULE_BY_ID, RULES,  # noqa: E402
                                  flag_anti_patterns)
 
 REPO = Path(__file__).resolve().parents[1]

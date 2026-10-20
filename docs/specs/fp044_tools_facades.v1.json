@@ -15,7 +15,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/armchair_class.py",
@@ -99,7 +99,7 @@
     "config": 3
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/bed_class.py",
@@ -291,7 +291,7 @@
     "config": 3
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/decor_builders.py",
@@ -303,7 +303,7 @@
     "config": 4
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/diagnose_wall_stubs.py",
@@ -436,7 +436,7 @@
     "config": 3
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/furniture_overlap_gate.py",
@@ -676,7 +676,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/make_synthetic_bedrooms.py",
@@ -736,7 +736,7 @@
     "config": 3
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/ollama_bridge.py",
@@ -1156,7 +1156,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/service_layout.py",
@@ -1168,7 +1168,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/shell_parts.py",
@@ -1180,7 +1180,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/sofa_builder.py",
@@ -1192,7 +1192,7 @@
     "config": 6
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/sofa_class.py",
@@ -1336,7 +1336,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/su_runner_safety.py",
@@ -1481,7 +1481,7 @@
     "config": 3
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   }
  ]
 }

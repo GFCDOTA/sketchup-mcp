@@ -16,10 +16,10 @@ def bedroom_designer_boxes(con, room_id):
     formato place_layout. Troca o placeholder 'bed' (BLOCO UNICO azul) pela CAMA
     GOLDEN composta (bed_builder: plinto+estrado+colchao+travesseiros+manta, material
     por papel + bevel) no MESMO footprint/facing. Substitui o place_bedroom_skp antigo."""
-    from tools.bed_builder import build_bed, place_bed_boxes
-    from tools.furniture_anatomy_spec import bed_spec, nightstand_spec, wardrobe_spec
-    from tools.nightstand_builder import build_nightstand, place_nightstand_boxes
-    from tools.wardrobe_builder import build_wardrobe, place_wardrobe_boxes
+    from tools.rooms.shared.bed import build_bed, place_bed_boxes
+    from tools.rooms.shared.anatomy import bed_spec, nightstand_spec, wardrobe_spec
+    from tools.rooms.shared.nightstand import build_nightstand, place_nightstand_boxes
+    from tools.rooms.shared.wardrobe import build_wardrobe, place_wardrobe_boxes
     sm, out = bedroom_designer.run(con, room_id, minimalist=True)
     if out.get("result") != "OK":
         return None, out
@@ -179,7 +179,7 @@ def bedroom_designer_boxes(con, room_id):
     # (linguagem única no apê). Troca o bloco chapado 'desk'/'desk_chair'.
     dk_item = next((it for it in items if it.get("type") == "desk"), None)
     if dk_item is not None:
-        from tools.sofa_builder import _p, place_sofa_boxes
+        from tools.rooms.shared.sofa import _p, place_sofa_boxes
         dfx, dfy = _wd_facing(dk_item)
         dw_m, dd_m, dcen = _wd_dims(dk_item["box"], (dfx, dfy))
         h, tt, lt = 0.75, 0.035, 0.05
@@ -200,7 +200,7 @@ def bedroom_designer_boxes(con, room_id):
                                   "D_m": round(dd_m, 2)}
     dc_item = next((it for it in items if it.get("type") == "desk_chair"), None)
     if dc_item is not None:
-        from tools.sofa_builder import place_sofa_boxes
+        from tools.rooms.shared.sofa import place_sofa_boxes
         cfx, cfy = _wd_facing(dc_item)
         _, _, ccen = _wd_dims(dc_item["box"], (cfx, cfy))
         # a cadeira encara a mesa: facing oposto ao da escrivaninha

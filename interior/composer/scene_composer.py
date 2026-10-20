@@ -1,7 +1,7 @@
 """scene_composer.py — Intent-to-Scene slice 1: COMPILADOR de SceneIntentSpec em cena
 3D procedural. O GPT (diretor de arte) emite o intent JSON (interior/schemas/
 scene_intent.schema.json); este modulo valida, resolve StylePack + generators
-procedurais (tools/sofa_builder, tools/decor_builders), POSICIONA por regra de
+procedurais (tools/rooms/shared/sofa, tools/rooms/shared/decor_builders), POSICIONA por regra de
 composicao (nao "joga movel") e emite a cena em parts world-space (metros) +
 scene_report.json com posicoes/distancias.
 
@@ -22,9 +22,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-from tools.decor_builders import BUILDERS as DECOR_BUILDERS          # noqa: E402
-from tools.furniture_anatomy_spec import sofa_spec                   # noqa: E402
-from tools.sofa_builder import build_sofa                            # noqa: E402
+from tools.rooms.shared.decor_builders import BUILDERS as DECOR_BUILDERS          # noqa: E402
+from tools.rooms.shared.anatomy import sofa_spec                   # noqa: E402
+from tools.rooms.shared.sofa import build_sofa                            # noqa: E402
 from tools.rooms.living.sofa_class import PREMIUM_LIVING_UPHOLSTERY               # noqa: E402
 
 STYLE_DIR = ROOT / "interior" / "style_packs"

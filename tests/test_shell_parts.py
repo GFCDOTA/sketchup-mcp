@@ -14,7 +14,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from tools.shell_parts import M_TO_IN, RGB_WALL, RGB_WINDOW, WALL_CUT_M, shell_parts  # noqa: E402
+from tools.rooms.shared.shell_parts import M_TO_IN, RGB_WALL, RGB_WINDOW, WALL_CUT_M, shell_parts  # noqa: E402
 
 PT_TO_IN = 0.0259 * M_TO_IN  # escala congelada da planta_74
 

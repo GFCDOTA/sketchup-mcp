@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.style_spec import STYLE_TOKENS, attach_materials, module_family, resolve_material
+from tools.rooms.shared.materials import STYLE_TOKENS, attach_materials, module_family, resolve_material
 
 ROOT = Path(__file__).resolve().parents[1]
 TEX_DIR = ROOT / "assets/textures/procedural"

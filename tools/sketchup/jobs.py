@@ -313,7 +313,7 @@ def furnish(*, consensus_path: str | None = None, base_skp: str | None = None,
         "LAYOUT_LOG": str(files["log"]).replace("\\", "/"),
     }
     if style:
-        from tools.style_spec import texture_env
+        from tools.rooms.shared.materials import texture_env
 
         env["FURNISH_STYLE"] = style
         env.update(texture_env(style, (REPO / "assets/textures/procedural").resolve()))

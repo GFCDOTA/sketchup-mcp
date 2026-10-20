@@ -72,13 +72,9 @@ def test_no_direct_bedroom_helpers_in_other_room_modules():
 
 
 def test_service_no_longer_imports_orchestrator_for_geometry():
-    # The legacy entrypoint is a thin facade; shared geometry belongs to the
-    # actual room-specific implementation, not the compatibility shim.
-    facade = (ROOT / "tools/service_layout.py").read_text(encoding="utf-8")
+    # A fachada service_layout saiu na FP-044/F6; a geometria compartilhada continua no dono do comodo.
     implementation = (ROOMS / "service" / "layout.py").read_text(encoding="utf-8")
-    assert "from tools.furnish_apartment import _oriented_box" not in facade
     assert "from tools.furnish_apartment import _oriented_box" not in implementation
-    assert "from tools.rooms.service import layout as _service" in facade
     assert "from tools.rooms.shared.geometry import _oriented_box" in implementation
 
 
@@ -87,25 +83,22 @@ def test_room_modules_do_not_turn_consultative_knowledge_into_execution():
         assert resolve_module(name)["execution_authorized"] is False
 
 
-def test_runtime_room_providers_are_owned_by_packages_with_legacy_aliases():
-    from tools import service_layout
+def test_runtime_room_providers_are_owned_by_room_packages():
+    # as fachadas de comodo em tools/ sairam na FP-044/F6: o consumidor importa o dono.
+    from tools.rooms.bathroom import layout as bathroom
+    from tools.rooms.bedroom import designer, layout as bedroom
+    from tools.rooms.kitchen import layout as kitchen
     from tools.rooms.service import layout as service
-
-    # as fachadas de cozinha, banheiro e quarto sairam na FP-044/F6: o consumidor importa o dono.
-    assert service_layout.build_boxes is service.build_boxes
+    for mod, fn in ((bathroom, "build_boxes"), (kitchen, "build_boxes"), (service, "build_boxes"),
+                    (bedroom, "run"), (designer, "run")):
+        assert getattr(mod, fn).__module__ == mod.__name__
 
 
 def test_legacy_entrypoints_preserve_cli_without_owning_room_builder_source():
     # Fachada aposentada (FP-044/F6): a CLI passa a ser o __main__ do dono.
     for owner in ("kitchen/layout.py", "kitchen/anchor_rules.py", "bathroom/layout.py", "bedroom/layout.py",
-                  "bedroom/designer.py"):
+                  "bedroom/designer.py", "service/layout.py"):
         assert 'if __name__ == "__main__":' in (ROOMS / owner).read_text("utf-8")
-    for name in ("service_layout",):
-        path = ROOT / "tools" / f"{name}.py"
-        src = path.read_text("utf-8")
-        assert 'if __name__ == "__main__":' in src
-        assert "def build_boxes(" not in src
-        assert "def build_layout(" not in src
     for name in ("kitchen", "bathroom", "service", "bedroom"):
         path = ROOMS / name / "layout.py"
         assert path.is_file()

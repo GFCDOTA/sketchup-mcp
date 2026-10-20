@@ -94,7 +94,7 @@ Renders (servíveis pelo cockpit `:8765/artifact?path=<...>`):
 - `artifacts/review/synthetic/living_layout_candidates.png` (+ `.json`) —
   snapshot da generalização sintética (candidatos de layout de sala).
 
-Código (em `develop`): `tools/rooms/living/planning/layout_candidates.py` + `tools/layout_rules.py`
+Código (em `develop`): `tools/rooms/living/planning/layout_candidates.py` + `tools/rooms/shared/layout_rules.py`
 (candidatos + regras/ranking), `tools/furnish_plan.{py,rb}` +
 `tools/sketchup/furnish/place_layout_skp.{py,rb}` (coloca o móvel no SKP),
 `tools/rooms/living/capabilities/make_synthetic_rooms.py` (cômodos sintéticos), e o harness de

@@ -6,9 +6,9 @@ Convencao: X=largura, Y=profundidade (FRENTE=Y=0=-Y, gaveta vira p/ fora), Z=alt
 Coloca via place_sofa_boxes (generico)."""
 from __future__ import annotations
 
-from tools.furniture_anatomy_spec import NIGHTSTAND_REQUIRED_PARTS, NightstandSpec, nightstand_spec  # noqa: F401,E501
-from tools.sofa_builder import PT_TO_IN, _p, parts_to_boxes  # noqa: F401
-from tools.sofa_builder import place_sofa_boxes as place_nightstand_boxes  # noqa: F401
+from tools.rooms.shared.anatomy import NIGHTSTAND_REQUIRED_PARTS, NightstandSpec, nightstand_spec  # noqa: F401,E501
+from tools.rooms.shared.sofa import PT_TO_IN, _p, parts_to_boxes  # noqa: F401
+from tools.rooms.shared.sofa import place_sofa_boxes as place_nightstand_boxes  # noqa: F401
 
 
 def build_nightstand(spec: NightstandSpec):

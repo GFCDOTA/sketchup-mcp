@@ -116,8 +116,8 @@ if __name__ == "__main__":
     # PROVA: renderiza o criado close-up via o provider (mesmo resultado do fluxo inline)
     import sys
     sys.path.insert(0, str(ROOT))
-    from tools.furniture_anatomy_spec import nightstand_spec
-    from tools.nightstand_builder import build_nightstand, parts_to_boxes
+    from tools.rooms.shared.anatomy import nightstand_spec
+    from tools.rooms.shared.nightstand import build_nightstand, parts_to_boxes
     parts, _ = build_nightstand(nightstand_spec())
     boxes = parts_to_boxes(parts)
     out = ROOT / "artifacts/review/furniture/nightstand"

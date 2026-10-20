@@ -202,8 +202,8 @@ Geometria: `room_introspect.py <room_id>`. Cama centro (636,789), cabeceira lest
 
 ## Componentes golden já construídos
 
-- Sofá: `tools/sofa_builder.py` + `furniture_anatomy_spec.SofaSpec` + `sofa_gate.py` + `furniture_visual_gate.py`.
-- Cama: `tools/bed_builder.py` + `BedSpec` + `interior/validators/bed_gate.py` (PASS king/queen/casal/solteiro).
+- Sofá: `tools/rooms/shared/sofa.py` + `furniture_anatomy_spec.SofaSpec` + `sofa_gate.py` + `furniture_visual_gate.py`.
+- Cama: `tools/rooms/shared/bed.py` + `BedSpec` + `interior/validators/bed_gate.py` (PASS king/queen/casal/solteiro).
   Aplicada em r000/r003. **PENDENTE: veredito GPT visual da cama (clipboard travou; retry).**
 - Apê inteiro: `tools/furnish_apartment.py` (BRAINS por tipo) → `planta_74_furnished.skp` (53 placeholders).
 

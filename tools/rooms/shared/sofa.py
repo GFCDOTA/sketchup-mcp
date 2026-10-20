@@ -9,7 +9,7 @@ do sofa = -Y (vira a parede-TV ao posicionar). Origem no canto (0,0,0).
 """
 from __future__ import annotations
 
-from tools.furniture_anatomy_spec import SofaSpec, sofa_spec   # noqa: F401
+from tools.rooms.shared.anatomy import SofaSpec, sofa_spec   # noqa: F401
 
 from core.scale import M_TO_IN as PT_TO_IN  # noqa: E402  (m->in; sofa standalone em metros)
 

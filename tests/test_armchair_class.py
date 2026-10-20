@@ -11,7 +11,7 @@ sys.path.insert(0, str(ROOT))
 
 from tools.rooms.living.armchair_class import (ARCHETYPES, _sabotages,            # noqa: E402
                                   armchair_class_gate, derive_armchair_spec)
-from tools.armchair_builder import build_armchair                     # noqa: E402
+from tools.rooms.shared.armchair_builder import build_armchair                     # noqa: E402
 
 COMBOS = [(a, b) for a in ARCHETYPES for b in ("legs", "plinth")]
 

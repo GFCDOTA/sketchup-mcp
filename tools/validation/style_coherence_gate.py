@@ -45,7 +45,7 @@ def style_coherence_gate(con, room_id, style="industrial"):
 
     from tools.furnish_apartment import living_room_boxes
     from tools.spatial_model import build_spatial_model
-    from tools.style_spec import STYLE_TOKENS, apply_style
+    from tools.rooms.shared.materials import STYLE_TOKENS, apply_style
 
     st = STYLE_TOKENS.get(style)
     if not st:

@@ -7,7 +7,7 @@ O Felipe abre o `.skp` mobiliado (`artifacts/planta_74/furnished/planta_74_furni
 - **Path V-Ray (`tools/sketchup/vray/vray_export.rb`)** — JA REAL. Aplica `m.texture = <png>` por kind via `tex_map` (linhas 18-143), gated por `VRAY_TEX_DIR`, com 17 PNGs procedurais/PBR ja versionados em `assets/textures/procedural/`. Funciona — mas SO na exportacao `.vrscene` (render premium).
 - **Path interativo/line (`tools/sketchup/furnish/place_layout_skp.rb` -> `pl_material`, linhas 43-50)** — o `.skp` que o Felipe efetivamente abre. So faz `m.color = Sketchup::Color.new(...)` + `m.alpha = 1.0`. **Nunca seta `m.texture`.** Por isso o material `ph_<kind>` e cor RGB chapada.
 
-Alem disso, `tools/style_spec.py::apply_style` (a fonte UNICA da cor do material `ph_<kind>`) so reescreve `b['rgb']` — cor chapada por kind. Ja existe `kind_texture` e `texture_map_for(style)` (linhas 40-46, 69-73, 109-112) que **documentam** o mapa de textura, mas o path interativo nunca consome esse mapa. E nao ha nenhuma nocao de **finish/roughness/metalness** como dado (so prosa em `references/materials/*.md`), entao mesmo onde ha cor, falta a leitura de reflexo que distingue inox de grafite de laca.
+Alem disso, `tools/rooms/shared/materials.py::apply_style` (a fonte UNICA da cor do material `ph_<kind>`) so reescreve `b['rgb']` — cor chapada por kind. Ja existe `kind_texture` e `texture_map_for(style)` (linhas 40-46, 69-73, 109-112) que **documentam** o mapa de textura, mas o path interativo nunca consome esse mapa. E nao ha nenhuma nocao de **finish/roughness/metalness** como dado (so prosa em `references/materials/*.md`), entao mesmo onde ha cor, falta a leitura de reflexo que distingue inox de grafite de laca.
 
 Resultado: material so existe "de verdade" no render V-Ray; o artefato humano principal (o `.skp` aberto) parece de papelao branco.
 
@@ -31,7 +31,7 @@ Resultado: material so existe "de verdade" no render V-Ray; o artefato humano pr
 | Path | Mudanca | Quem |
 |---|---|---|
 | `tools/sketchup/furnish/place_layout_skp.rb` | `pl_material` aceita `tex_dir`+`png` e seta `m.texture = path` + `m.texture.size`; `pl_run` le `LAYOUT_TEX_MAP` (JSON `kind->png`) e `LAYOUT_TEX_DIR` do ENV e passa o png do kind. Fallback: sem png -> cor chapada (comportamento atual). | NOVO (estende REAL) |
-| `tools/style_spec.py` | `StyleSpec` ganha `kind_finish: dict` (`kind -> {finish,roughness,metalness,tile_in}`); novo `finish_map_for(style)`. `texture_map_for` ja existe (REAL) — passa a ser a fonte consumida pelo interativo tambem. | NOVO campo (estende REAL) |
+| `tools/rooms/shared/materials.py` | `StyleSpec` ganha `kind_finish: dict` (`kind -> {finish,roughness,metalness,tile_in}`); novo `finish_map_for(style)`. `texture_map_for` ja existe (REAL) — passa a ser a fonte consumida pelo interativo tambem. | NOVO campo (estende REAL) |
 | `tools/furnish_apartment.py` | `main()` injeta `env["LAYOUT_TEX_MAP"]=json(texture_map_for(style))` e `env["LAYOUT_TEX_DIR"]=assets/textures/procedural` quando `FURNISH_STYLE` setado; chama `flat_white_check` no render gerado antes de promover. | NOVO (3 linhas + call) |
 | `tools/place_layout_skp.py` | mesma injecao de `LAYOUT_TEX_MAP`/`LAYOUT_TEX_DIR` no `env` (slice de prova r002). | NOVO |
 | `tools/flat_white_gate.py` | **NOVO** — `flat_white_check(png_path, style) -> {result, fails, warns, metrics}` usando `render_fingerprint.fingerprint`. CLI `python -m tools.flat_white_gate <png>`. | NOVO (STUB->REAL) |
@@ -134,7 +134,7 @@ def flat_white_check(png, style):
 
 - BUG (path humano chapado): `tools/sketchup/furnish/place_layout_skp.rb` `pl_material` linhas 43-50 (`m.color` so, sem `m.texture`).
 - REAL (path V-Ray que ja texturiza): `tools/sketchup/vray/vray_export.rb` linhas 14-143 (`tex_map`, `m.texture`, gated `VRAY_TEX_DIR`).
-- Mapa de textura por estilo (ja existe, subconsumido): `tools/style_spec.py` `_INDUSTRIAL_TEX`/`_MODERN_WARM_TEX` (40-73) + `texture_map_for` (109-112).
+- Mapa de textura por estilo (ja existe, subconsumido): `tools/rooms/shared/materials.py` `_INDUSTRIAL_TEX`/`_MODERN_WARM_TEX` (40-73) + `texture_map_for` (109-112).
 - Fonte unica da cor: `apply_style` (`style_spec.py` 93-106) — `kind` -> `ph_<kind>`.
 - PNGs versionados + gerador: `assets/textures/procedural/*.png` (17 arquivos) via `tools/gen_textures.py` (procedural + override PBR CC0 de `assets/textures/pbr/`).
 - Finish/roughness/metalness (linguagem-fonte do `kind_finish`): `references/materials/{metal,wood,lacquer,stone}.md` (ex. grafite fosco roughness 0.6-0.8 metalness medio; inox escovado roughness 0.3-0.5 metalness alto; laca gloss roughness baixa).

@@ -22,11 +22,11 @@ from shapely.affinity import rotate as shp_rotate
 from shapely.geometry import Point, box
 from shapely.ops import unary_union
 
-from tools.layout_rules import (FILL_IDEAL, RESPIRO_IDEAL, RULES, flag_anti_patterns)
-from tools.layout_rules import IDEAL_SOFA_TV as SOFA_TV_IDEAL
-from tools.layout_rules import MAX_SOFA_TV as SOFA_TV_MAX
-from tools.layout_rules import MIN_SOFA_TV as SOFA_TV_MIN
-from tools.layout_rules import PASSAGE_MIN_M as PASSAGE_M
+from tools.rooms.shared.layout_rules import (FILL_IDEAL, RESPIRO_IDEAL, RULES, flag_anti_patterns)
+from tools.rooms.shared.layout_rules import IDEAL_SOFA_TV as SOFA_TV_IDEAL
+from tools.rooms.shared.layout_rules import MAX_SOFA_TV as SOFA_TV_MAX
+from tools.rooms.shared.layout_rules import MIN_SOFA_TV as SOFA_TV_MIN
+from tools.rooms.shared.layout_rules import PASSAGE_MIN_M as PASSAGE_M
 from tools.spatial_model import (PT_TO_M, _tv_depth_m, _wall_mid,
                                  build_spatial_model, wall_footprint)
 
@@ -44,7 +44,7 @@ FURN = {
     "aparador": (1.60, 0.32),
 }
 # thresholds de REGRA (SOFA_TV_*, FILL_IDEAL, RESPIRO_IDEAL, PASSAGE_M) vem de
-# tools.layout_rules (fonte unica das regras). Aqui so os de implementacao:
+# tools.rooms.shared.layout_rules (fonte unica das regras). Aqui so os de implementacao:
 MARGIN_M = 0.03        # recuo do movel da face da parede (encosta sem cravar)
 TOL_CIRC_M2 = 0.02     # quase-zero: movel NAO pode bloquear circulacao/abertura
 TOL_WALL_M2 = 0.06     # toque leve na parede e OK (movel encosta)
@@ -420,7 +420,7 @@ def run(con, room_id):
     tv = _tv_setup(sm)
     out = {"stage": "BC_layout_candidates", "room_id": room_id,
            "tv_wall": sm["tv_wall_candidate"], "candidates": [],
-           "rules_source": "tools/layout_rules.py",
+           "rules_source": "tools/rooms/shared/layout_rules.py",
            "rules": [{"id": r["id"], "kind": r["kind"], "name": r["name"]} for r in RULES]}
     note = _tv_uncertainty_note(sm["tv_wall_candidate"])
     if note:

@@ -193,7 +193,7 @@ def cabinet_plan(case):
              "reason": "Edição avulsa no SKP pode ser descartada pelo rebuild."},
         ],
         "repo_evidence": [
-            {"path": "tools/wardrobe_builder.py", "symbol": "build_wardrobe",
+            {"path": "tools/rooms/shared/wardrobe.py", "symbol": "build_wardrobe",
              "claim": "Emite corpo, portas e puxadores como peças _p; não articula portas."},
             {"path": "tools/rooms/kitchen/layout.py", "symbol": "_kmod",
              "claim": "Usa volumes e painéis para representar módulos e frentes."},

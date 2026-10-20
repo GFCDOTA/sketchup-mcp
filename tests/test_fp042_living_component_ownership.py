@@ -69,7 +69,8 @@ def test_living_palette_does_not_mutate_protected_accents():
 
 
 def test_shared_decor_adapter_preserves_lift_position_and_module(monkeypatch):
-    from tools import decor_builders, sofa_builder
+    from tools.rooms.shared import decor_builders
+    from tools.rooms.shared import sofa as sofa_builder
 
     original = [{"z0": 0.20, "z1": 0.80}]
     build = Mock(return_value=(original, {"result": "OK"}))

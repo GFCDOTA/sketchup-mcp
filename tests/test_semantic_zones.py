@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.semantic_zones import (
+from tools.rooms.shared.semantic_zones import (
     assess_room_fidelity,
     count_cells,
     count_zones,
@@ -170,7 +170,7 @@ def test_wrong_merge_flag_is_rejected():
 
 def test_invalid_overlay_degrades_verdict_not_upgrades(tmp_path, monkeypatch):
     """A broken overlay must fall back to the honest WARN, never fake EXPLAINED."""
-    import tools.semantic_zones as sz
+    import tools.rooms.shared.semantic_zones as sz
 
     con = _mini_consensus()
     bad = _mini_overlay()

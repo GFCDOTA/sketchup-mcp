@@ -42,7 +42,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-from tools.decor_anatomy_spec import DECOR_PLAUSIBLE_BBOX_M   # noqa: E402
+from tools.rooms.shared.decor_anatomy_spec import DECOR_PLAUSIBLE_BBOX_M   # noqa: E402
 
 TABLE_GAP_RANGE = (0.35, 0.45)
 ART_CENTER_TOL = 0.05
