@@ -30,7 +30,7 @@ O agente traduz os dois.
 
 A referência **nunca** move ponto hidráulico, parede, porta, janela ou circulação. Esses são
 `fixed_anchors` do PDF/consensus. Se a referência "pede" a pia noutra parede, IGNORA — a pia é
-ponto hidráulico fixo (`tools/kitchen_validation.py` aborta o build se ela migrar).
+ponto hidráulico fixo (`tools/rooms/kitchen/anchor_rules.py` aborta o build se ela migrar).
 
 ## Princípio que generaliza: `loose_object → planned_niche_system`
 
@@ -88,7 +88,7 @@ reference_image → design_grammar_tokens → room_constraints(PDF) → DesignGr
 
 | Gate | Ferramenta | Critério |
 |---|---|---|
-| PDF-anchor | `tools/kitchen_validation.py` (molde p/ outros cômodos) | ponto fixo (pia/porta) na posição do PDF; aborta se migrar |
+| PDF-anchor | `tools/rooms/kitchen/anchor_rules.py` (molde p/ outros cômodos) | ponto fixo (pia/porta) na posição do PDF; aborta se migrar |
 | Circulação livre | `tools/geometry_sanity.py` | nada fora do cômodo / bloqueando porta/passagem |
 | Sem colisão | `tools/furniture_overlap_gate.py` | nenhum móvel em cima de móvel (trim/embutido isento) |
 | Editabilidade | `tools/sketchup/inspect/skp_editability_report.rb` | cada módulo = grupo nomeado isolável; 0 geometria solta no root; shell locked |

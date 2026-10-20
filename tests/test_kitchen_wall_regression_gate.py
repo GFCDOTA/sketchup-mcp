@@ -5,7 +5,7 @@ parede nova que hospeda abertura (porta/janela) NAO falha (tem passagem).
 """
 from __future__ import annotations
 
-from tools.kitchen_wall_regression_gate import audit
+from tools.rooms.kitchen.validation.wall_regression import audit
 
 BBOX = (0.0, 400.0, 400.0, 700.0)
 

@@ -96,7 +96,7 @@ Criterio de aceite:
 - coifa percebida em 2s
 - nao compete com backsplash
 Arquivos provaveis:
-- tools/kitchen_vray.py
+- tools/rooms/kitchen/capabilities/vray.py
 """
 
 
@@ -113,7 +113,7 @@ def test_parse_answer_full():
     assert p["next_microtask"]["id"] == "MT-09"
     assert p["next_microtask"]["description"].startswith("Gerar 3 variacoes")
     assert len(p["next_microtask"]["acceptance"]) == 2
-    assert p["next_microtask"]["likely_files"] == ["tools/kitchen_vray.py"]
+    assert p["next_microtask"]["likely_files"] == ["tools/rooms/kitchen/capabilities/vray.py"]
 
 
 def test_parse_answer_accepts_raw_json():

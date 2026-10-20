@@ -30,7 +30,7 @@ a permissão de Bash do futuro MVP não foi adicionada sem enforcement comprovad
    última é adaptação técnica, não conteúdo demonstrado pelo instrutor.
    Não diga que assistiu aos vídeos nesta sessão.
 3. Consulte `tools/wardrobe_builder.py::build_wardrobe`,
-   `tools/kitchen_layout.py::_kmod` e o materializador existente. Diferencie peças
+   `tools/rooms/kitchen/layout.py::_kmod` e o materializador existente. Diferencie peças
    volumétricas, componentes editáveis e fabricação; um não prova o outro.
 4. Compare ao menos duas estratégias para geometria não trivial. Prefira a spec
    de objeto regenerável a uma edição avulsa no `.skp`. Explique definições

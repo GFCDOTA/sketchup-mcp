@@ -5,46 +5,33 @@ import pytest
 
 from tools.rooms.kitchen import layout as kitchen
 from tools.rooms.bathroom import layout as bathroom
-from tools import kitchen_layout as legacy_kitchen
 from tools.rooms.shared import geometry
 
 
-@pytest.mark.parametrize("legacy,implementation,helpers", [
-    (legacy_kitchen, kitchen, ("_fbox", "_wall_setup", "_window_zones")),
+@pytest.mark.parametrize("implementation,helpers", [
+    (kitchen, ("_fbox", "_wall_setup", "_window_zones")),
+    (bathroom, ("_fbox", "_wall_setup", "_window_zones", "_door_zones")),
 ])
-def test_builder_ownership_and_compatibility(legacy, implementation, helpers):
-    assert legacy.build_boxes is implementation.build_boxes
-    assert legacy._to_box is implementation._to_box
-    assert legacy.PT_TO_M == implementation.PT_TO_M
-    assert legacy.PT_TO_IN == implementation.PT_TO_IN
+def test_builder_is_owned_by_the_room_and_reuses_shared_geometry(implementation, helpers):
+    """As fachadas kitchen_layout/bathroom_layout sairam na FP-044/F6; o contrato do dono continua."""
     assert implementation.build_boxes.__module__ == implementation.__name__
-    assert Path(implementation.__file__).resolve().parents[3] == Path(legacy.__file__).resolve().parents[1]
+    assert implementation._to_box.__module__ == implementation.__name__
     for sym in helpers:
-        assert getattr(legacy, sym) is getattr(geometry, sym)
         assert getattr(implementation, sym) is getattr(geometry, sym)
 
 
-def test_bathroom_builder_is_owned_by_the_room_and_reuses_shared_geometry():
-    """A fachada bathroom_layout saiu na FP-044/F6; o contrato do dono continua: builder unico + helpers do shared."""
-    assert bathroom.build_boxes.__module__ == bathroom.__name__
-    assert bathroom._to_box.__module__ == bathroom.__name__
-    for sym in ("_fbox", "_wall_setup", "_window_zones", "_door_zones"):
-        assert getattr(bathroom, sym) is getattr(geometry, sym)
-
-
-@pytest.mark.parametrize("legacy,room", [(legacy_kitchen, "kitchen")])
-def test_legacy_module_is_thin_facade_without_duplicate_builder(legacy, room):
-    text = Path(legacy.__file__).read_text(encoding="utf-8")
-    assert "def build_boxes(" not in text
-    assert f"from tools.rooms.{room} import layout as _impl" in text
+@pytest.mark.parametrize("implementation", [kitchen, bathroom])
+def test_owner_keeps_the_cli_and_a_single_builder(implementation):
+    text = Path(implementation.__file__).read_text(encoding="utf-8")
+    assert text.count("def build_boxes(") == 1
     assert 'if __name__ == "__main__":' in text
-    assert callable(legacy.main)
 
 
-def test_kitchen_anchor_validator_uses_same_canonical_builder():
+def test_kitchen_anchor_validator_and_its_cli_live_in_the_owner():
+    # a fachada kitchen_validation saiu na FP-044/F6; o main() foi movido para o dono sem mudanca
     from tools.rooms.kitchen import anchor_rules
-    from tools import kitchen_validation
-    assert kitchen_validation.validate is anchor_rules.validate
+    assert anchor_rules.validate.__module__ == anchor_rules.__name__
+    assert anchor_rules.main.__module__ == anchor_rules.__name__
 
 
 def test_bathroom_skin_and_sink_helpers_stay_in_bathroom():

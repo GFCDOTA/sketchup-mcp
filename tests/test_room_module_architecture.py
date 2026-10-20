@@ -58,7 +58,7 @@ def test_cross_room_geometry_is_in_shared_and_legacy_aliases_match():
 
 def test_no_direct_bedroom_helpers_in_other_room_modules():
     for path in [
-        ROOT / "tools/kitchen_layout.py",
+        ROOT / "tools/rooms/kitchen/layout.py",
         ROOT / "tools/rooms/bathroom/layout.py",
         ROOMS / "living" / "planner.py",
     ]:
@@ -88,20 +88,19 @@ def test_room_modules_do_not_turn_consultative_knowledge_into_execution():
 
 
 def test_runtime_room_providers_are_owned_by_packages_with_legacy_aliases():
-    from tools import kitchen_layout, service_layout
-    from tools.rooms.kitchen import layout as kitchen
+    from tools import service_layout
     from tools.rooms.service import layout as service
 
-    # as fachadas bathroom_layout, bedroom_layout e bedroom_designer sairam na FP-044/F6: o consumidor importa o dono.
-    assert kitchen_layout.build_boxes is kitchen.build_boxes
+    # as fachadas de cozinha, banheiro e quarto sairam na FP-044/F6: o consumidor importa o dono.
     assert service_layout.build_boxes is service.build_boxes
 
 
 def test_legacy_entrypoints_preserve_cli_without_owning_room_builder_source():
     # Fachada aposentada (FP-044/F6): a CLI passa a ser o __main__ do dono.
-    for owner in ("bathroom/layout.py", "bedroom/layout.py", "bedroom/designer.py"):
+    for owner in ("kitchen/layout.py", "kitchen/anchor_rules.py", "bathroom/layout.py", "bedroom/layout.py",
+                  "bedroom/designer.py"):
         assert 'if __name__ == "__main__":' in (ROOMS / owner).read_text("utf-8")
-    for name in ("kitchen_layout", "service_layout"):
+    for name in ("service_layout",):
         path = ROOT / "tools" / f"{name}.py"
         src = path.read_text("utf-8")
         assert 'if __name__ == "__main__":' in src

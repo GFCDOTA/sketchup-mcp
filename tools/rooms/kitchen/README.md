@@ -10,13 +10,14 @@ prova, está escrito.
 |---|---|
 | o **planner** (layout da cozinha) | [`layout.py`](layout.py) → `build_boxes(con, room_id)` |
 | a **regra que protege a pia** (ponto hidráulico do PDF) | constantes `KITCHEN_SINK_ANCHOR` / `KITCHEN_SINK_SIDE` em `layout.py`; checagem em [`anchor_rules.py`](anchor_rules.py) → `validate`; trava fail-closed em [`validation/__init__.py`](validation/__init__.py) → `require_kitchen_anchor` |
-| a medição ergonômica | [`validation/ergonomics.py`](validation/ergonomics.py) → `audit` (a CLI antiga `tools/kitchen_ergonomics.py` é fachada) |
+| a medição ergonômica | [`validation/ergonomics.py`](validation/ergonomics.py) → `audit` (CLI: `python -m tools.rooms.kitchen.validation.ergonomics`) |
 | o **especialista** (papel, fontes, ferramentas permitidas, limites) | [`specialist.md`](specialist.md), perfil [`specialist.v1.json`](specialist.v1.json), índice de conhecimento [`knowledge/index.v1.json`](knowledge/index.v1.json) |
 | o **catálogo de capacidades** (fonte → recipe → capacidade → símbolo → teste → evidência) | `tools/rooms/capability_catalog.v1.json` (gate: `python -m tools.rooms.capability_catalog`; roteamento e plano fail-closed: `tools/rooms/specialists.py`) |
 | quem chama a cozinha | `tools/furnish_apartment.py` (`collect_boxes`) via [`../dispatch.py`](../dispatch.py); manifesto em [`../manifest.v1.json`](../manifest.v1.json) |
 
-Os caminhos antigos `tools/kitchen_layout.py` e `tools/kitchen_validation.py` são fachadas: preservam import e CLI
-e delegam para os módulos acima.
+As fachadas antigas em `tools/` (`kitchen_validation`, `kitchen_ergonomics`, `kitchen_vray`, `bake_theme_skp`,
+`kitchen_wall_regression_gate`) saíram na FP-044/F6: a CLI de cada uma é `python -m` do dono acima (a do gate da pia é
+`python -m tools.rooms.kitchen.anchor_rules`). `tools/kitchen_layout.py` também saiu; o planner é `layout.py`.
 
 ## Fluxo
 
@@ -69,7 +70,7 @@ plano de operação** e não gera Ruby nem `.skp`. As recipes de cozinha estão 
 
 | Teste | Cobre |
 |---|---|
-| `tests/test_fp042_kitchen_anchor_ownership.py` | a regra da pia mora em `anchor_rules`; a fachada legada reexporta as mesmas funções |
+| `tests/test_fp042_kitchen_anchor_ownership.py` | a regra da pia mora em `anchor_rules` (que também expõe a CLI do gate) |
 | `tests/test_fp042_kitchen_validation_boundary.py` | `validation.py` chama o validador uma vez e é fail-closed |
 | `tests/test_fp042_kitchen_bathroom_builder_ownership.py` | dono único do layout de cozinha/banheiro e entradas legadas estáveis |
 | `tests/test_kitchen_layout_style.py` | contratos determinísticos de paleta e geometria dos boxes (sem branco, pia lida de cima, cooktop fino); não julga beleza |

@@ -20,8 +20,8 @@ MIGRATED_PY = (
     "tools/furnish_plan.py",
     "tools/furnish_apartment.py",
     "tools/rooms/bathroom/capabilities/render_banho_vray.py",
-    "tools/kitchen_vray.py",
-    "tools/bake_theme_skp.py",
+    "tools/rooms/kitchen/capabilities/vray.py",
+    "tools/rooms/kitchen/capabilities/bake_theme.py",
     "interior/renderers/sketchup_basic_provider.py",
     "interior/renderers/vray_final_provider.py",
 )

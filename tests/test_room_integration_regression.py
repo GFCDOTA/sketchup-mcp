@@ -53,7 +53,7 @@ def test_unknown_room_skips_without_invoking_any_brain(isolated):
 
 def test_kitchen_anchor_failure_prevents_furnishing(isolated):
     providers, monkeypatch = isolated
-    from tools import kitchen_validation
+    from tools.rooms.kitchen import anchor_rules as kitchen_validation
     monkeypatch.setattr(f, "classify_rooms", lambda _: _rooms(KITCHEN))
     providers[KITCHEN].return_value = ([{"kind": "pia"}], {"result": "OK"})
     monkeypatch.setattr(kitchen_validation, "validate", lambda *_: {
@@ -66,7 +66,7 @@ def test_kitchen_anchor_failure_prevents_furnishing(isolated):
 
 def test_kitchen_anchor_success_keeps_module_identity(isolated):
     providers, monkeypatch = isolated
-    from tools import kitchen_validation
+    from tools.rooms.kitchen import anchor_rules as kitchen_validation
     monkeypatch.setattr(f, "classify_rooms", lambda _: _rooms(KITCHEN))
     providers[KITCHEN].return_value = ([{"kind": "cuba", "module": "Cozinha"}],
                                        {"result": "OK"})

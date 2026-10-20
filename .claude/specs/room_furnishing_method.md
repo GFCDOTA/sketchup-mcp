@@ -8,7 +8,7 @@
 
 1. **PDF-anchor** — respeitar a planta PRIMEIRO: pontos fixos (hidráulica/pia, porta,
    parede, janela), circulação. O que é fixo no PDF é fixo no modelo. Ex.: a pia da
-   cozinha é ponto hidráulico da parede oeste — `tools/kitchen_validation.py` ABORTA o
+   cozinha é ponto hidráulico da parede oeste — `tools/rooms/kitchen/anchor_rules.py` ABORTA o
    build se ela migrar. (Consensus pode não ter o símbolo → ancorar na borda do polígono.)
 2. **Componentização** — cada móvel/módulo = grupo top-level SEPARADO, nomeado, editável,
    validável. Clique único seleciona só aquela peça. 0 geometria solta no root; shell

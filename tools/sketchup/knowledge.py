@@ -195,7 +195,7 @@ def cabinet_plan(case):
         "repo_evidence": [
             {"path": "tools/wardrobe_builder.py", "symbol": "build_wardrobe",
              "claim": "Emite corpo, portas e puxadores como peças _p; não articula portas."},
-            {"path": "tools/kitchen_layout.py", "symbol": "_kmod",
+            {"path": "tools/rooms/kitchen/layout.py", "symbol": "_kmod",
              "claim": "Usa volumes e painéis para representar módulos e frentes."},
         ],
         "reference_frame": "LOCAL_MM_X_WIDTH_Y_DEPTH_Z_HEIGHT_FRONT_NEGATIVE_Y",

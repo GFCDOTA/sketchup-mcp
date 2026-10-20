@@ -2,7 +2,7 @@
 
 Esconde tudo menos a COZINHA (VRAY_ISOLATE) -> mata a oclusão do galley -> a câmera iso do
 vray_export.rb auto-enquadra. Aplica madeira/pedra (kc_* tex_map) + exposição quente. NÃO
-altera geometria. Uso: PT_TO_M=0.0259 .venv/Scripts/python.exe tools/kitchen_vray.py [out.png]
+altera geometria. Uso: PT_TO_M=0.0259 .venv/Scripts/python.exe -m tools.rooms.kitchen.capabilities.vray [out.png]
 """
 import hashlib
 import os

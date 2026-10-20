@@ -1,6 +1,6 @@
 """Regras hidráulicas canônicas da cozinha (pia na parede oeste do PDF).
 
-Funções extraídas literalmente de tools.kitchen_validation, sem mudar
+Funções extraídas literalmente do antigo kitchen_validation (fachada aposentada na FP-044/F6), sem mudar
 tolerância, fail-closed, checks de cômodo ou formato do relatório.
 """
 from __future__ import annotations
@@ -28,7 +28,7 @@ def validate(con, room_id="r004"):
     from shapely.ops import unary_union
 
     from core.scale import PT_TO_IN
-    from tools.kitchen_layout import KITCHEN_SINK_SIDE, build_boxes
+    from tools.rooms.kitchen.layout import KITCHEN_SINK_SIDE, build_boxes
     from tools.room_type import classify_rooms
     from tools.spatial_model import build_spatial_model
 
@@ -116,3 +116,29 @@ def validate(con, room_id="r004"):
              + (f"  (bloqueando: {c['_blocking']})" if c.get("_blocking") else ""),
              f"- modules_grouped_individually = {str(c.get('modules_grouped_individually')).lower()}"]
     return {"result": result, "room": room_id, "checks": c, "lines": lines}
+
+
+def main():
+    """CLI do gate (era o main() da fachada kitchen_validation, movido sem mudanca na FP-044/F6).
+
+    Uso: PT_TO_M=0.0259 python -m tools.rooms.kitchen.anchor_rules [room_id]
+    """
+    import argparse
+    import json
+    import sys
+    from pathlib import Path
+
+    ap = argparse.ArgumentParser()
+    ap.add_argument("room", nargs="?", default="r004")
+    a = ap.parse_args()
+    root = Path(__file__).resolve().parents[3]
+    con = json.loads((root / "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json")
+                     .read_text("utf-8"))
+    res = validate(con, a.room)
+    print("\n".join(res["lines"]))
+    print(f"\nkitchen_validation => {res['result']}")
+    sys.exit(0 if res["result"] == "PASS" else 1)
+
+
+if __name__ == "__main__":
+    main()

@@ -325,11 +325,11 @@ def kitchen_ergonomics_audit(room_id: str = "r004", pt_to_m: float = 0.0259) -> 
     available=False em vez de quebrar."""
     os.environ["PT_TO_M"] = str(pt_to_m)
     try:
-        from tools.kitchen_ergonomics import audit
+        from tools.rooms.kitchen.validation.ergonomics import audit
     except Exception:  # noqa: BLE001
         return {
             "available": False,
-            "note": "tools.kitchen_ergonomics não está neste checkout (branch-only; "
+            "note": "tools.rooms.kitchen.validation.ergonomics não está neste checkout (branch-only; "
                     "merge a branch da cozinha pra habilitar).",
         }
     worst, rows, _by_mod = audit(room_id)

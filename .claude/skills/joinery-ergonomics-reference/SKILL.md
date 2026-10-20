@@ -8,7 +8,7 @@ description: >
   "REFERENCE_PACK", "board do Pinterest", "padrão de planejado". Regra: a referência influencia
   LINGUAGEM e MEDIDA, NUNCA a POSIÇÃO (pia/parede/porta/circulação = PDF). É a metade "medida"
   do método; a metade "gramática visual" é [[planned-joinery-translator]]. Audita com
-  `tools/kitchen_ergonomics.py`. NÃO transformar layout linear em U/L por causa de uma foto.
+  `tools/rooms/kitchen/validation/ergonomics.py`. NÃO transformar layout linear em U/L por causa de uma foto.
 ---
 
 # JOINERY_ERGONOMICS_REFERENCE — especialista em medidas
@@ -22,7 +22,7 @@ PDF        → POSIÇÃO (pia hidráulica, parede, porta, janela, circulação) 
 NÃO mudar a tipologia (linear/L/U) por causa de uma imagem.
 ```
 
-## Padrões ergonômicos (cm) — fonte do audit `tools/kitchen_ergonomics.py`
+## Padrões ergonômicos (cm) — fonte do audit `tools/rooms/kitchen/validation/ergonomics.py`
 
 | Medida | Alvo | Token |
 |---|---|---|
@@ -49,11 +49,11 @@ Tokens de linguagem que vêm junto: `tower_appliances_column`, `under_cabinet_le
    autoritativa) e avisar que o link não conferiu.
 3. **Extrair** (nunca copiar pixel): paleta, soluções de planejado, proporções/medidas.
 4. **Cruzar com o PDF** — medidas entram; posição NÃO muda.
-5. **Auditar** o build: `PT_TO_M=0.0259 python -m tools.kitchen_ergonomics` (PASS/WARN por medida).
+5. **Auditar** o build: `PT_TO_M=0.0259 python -m tools.rooms.kitchen.validation.ergonomics` (PASS/WARN por medida).
 6. Ajustar só o que estiver fora do alvo; re-render 5 ângulos; veredito humano/GPT.
 
 ## Como adicionar uma medida nova
-Editar `ERGO` em `tools/kitchen_ergonomics.py` (faixa min,max) e expor a constante
+Editar `ERGO` em `tools/rooms/kitchen/validation/ergonomics.py` (faixa min,max) e expor a constante
 correspondente no builder (ex.: `kitchen_layout.AEREO_Z0`, `TOE_KICK`, `TAMPO_THK`) pra o
 audit medir. WARN = guia (não derruba build); a POSIÇÃO continua sob os gates duros
 (`kitchen_validation` / `geometry_sanity` / `furniture_overlap_gate`).

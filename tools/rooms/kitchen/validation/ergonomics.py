@@ -4,7 +4,7 @@ REFERENCE_PACK do Felipe (2026-06-19): a referência influencia LINGUAGEM e MEDI
 POSIÇÃO (pia/parede/porta = PDF). Mede a cozinha CONSTRUÍDA (constantes + boxes reais) contra
 os padrões ergonômicos e reporta PASS/WARN/FAIL por métrica. NÃO altera a cozinha — só audita.
 
-Uso: PT_TO_M=0.0259 python -m tools.kitchen_ergonomics [room_id]
+Uso: PT_TO_M=0.0259 python -m tools.rooms.kitchen.validation.ergonomics [room_id]
 """
 from __future__ import annotations
 
@@ -90,7 +90,7 @@ def faucet_to_upper_clearance_m(by_mod, aereo_z0):
 
 def audit(room_id="r004"):
     import json
-    from tools import kitchen_layout as K
+    from tools.rooms.kitchen import layout as K
     con = json.loads((ROOT / "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json")
                      .read_text("utf-8"))
     boxes, _ = K.build_boxes(con, room_id)
@@ -147,9 +147,9 @@ def main():
     import json
     con = json.loads((ROOT / "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json")
                      .read_text("utf-8"))
-    from tools import kitchen_layout as K
+    from tools.rooms.kitchen import layout as K
     from tools.geometry_sanity import sanity_room
-    from tools.kitchen_validation import validate
+    from tools.rooms.kitchen.anchor_rules import validate
     sink_pdf = validate(con, room)["result"]
     try:
         door_clear = sanity_room(con, room)["status"]   # door-clearance (NÃO é triângulo de trabalho)

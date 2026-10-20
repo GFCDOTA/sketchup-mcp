@@ -10,7 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 INDEX = ROOT / "docs/specs/fp042_inventory.v1.json"
-LEGACY_FACADES = frozenset(["sofa_builder.py","bed_builder.py","wardrobe_builder.py","nightstand_builder.py","furniture_anatomy_spec.py","style_spec.py","kitchen_layout.py","service_layout.py"])
+LEGACY_FACADES = frozenset(["sofa_builder.py","bed_builder.py","wardrobe_builder.py","nightstand_builder.py","furniture_anatomy_spec.py","style_spec.py","service_layout.py"])
 OWNER_DIRS = (
     ("tools/interior_studio/", "interior_studio_runtime"),
     ("tools/mcp_server/", "mcp_server_api"),
