@@ -9,7 +9,7 @@ na worktree onde o script vive (isolamento multi-agente). Felipe 2026-06-05.
 
 Sem --dry-run, abre apenas uma nova instância controlada do SketchUp.
 
-Uso: python tools/place_bedroom_skp.py --room r003 [--dry-run]
+Uso: python -m tools.rooms.bedroom.capabilities.place_bedroom_skp --room r003 [--dry-run]
 """
 import argparse
 import json
@@ -20,7 +20,7 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[4]))   # roda standalone
-from tools.bedroom_layout import run   # noqa: E402
+from tools.rooms.bedroom.layout import run   # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[4]
 SKETCHUP_EXE = r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"

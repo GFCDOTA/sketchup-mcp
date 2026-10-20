@@ -188,3 +188,8 @@ propósito; use esta tabela para achar o arquivo hoje.
 | `tools.estudio_banheiro_scene` | `tools.rooms.bathroom.capabilities.estudio_banheiro_scene` | `rooms/bathroom` |
 | `tools.render_banho_auto` | `tools.rooms.bathroom.capabilities.render_banho_auto` | `rooms/bathroom` |
 | `tools.render_banho_vray` | `tools.rooms.bathroom.capabilities.render_banho_vray` | `rooms/bathroom` |
+| `tools.bed_class` | `tools.rooms.bedroom.bed_class` | `rooms/bedroom` |
+| `tools.bedroom_designer` | `tools.rooms.bedroom.designer` | `rooms/bedroom` |
+| `tools.bedroom_layout` | `tools.rooms.bedroom.layout` | `rooms/bedroom` |
+| `tools.make_synthetic_bedrooms` | `tools.rooms.bedroom.capabilities.make_synthetic_bedrooms` | `rooms/bedroom` |
+| `tools.place_bedroom_skp` | `tools.rooms.bedroom.capabilities.place_bedroom_skp` | `rooms/bedroom` |

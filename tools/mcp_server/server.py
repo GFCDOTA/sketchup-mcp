@@ -61,7 +61,7 @@ from tools.reference_grammar import (  # noqa: E402
 )
 
 from tools.sofa_class import derive_spec as _sofa_derive, sofa_class_gate  # noqa: E402
-from tools.bed_class import derive_bed_spec, bed_class_gate  # noqa: E402
+from tools.rooms.bedroom.bed_class import derive_bed_spec, bed_class_gate  # noqa: E402
 from tools.armchair_class import derive_armchair_spec, armchair_class_gate  # noqa: E402
 from tools.dining_table_class import derive_dining_spec, dining_class_gate  # noqa: E402
 from tools.rack_class import derive_rack_spec, rack_class_gate  # noqa: E402

@@ -1,6 +1,6 @@
 # CAMA — DesignIntentSpec da CLASSE procedural
 
-> 3a classe do programa (2026-06-12). Executável: `tools/bed_class.py`;
+> 3a classe do programa (2026-06-12). Executável: `tools/rooms/bedroom/bed_class.py`;
 > geometria: `bed_builder` estendido (base_style plinth/legs/box, reveal
 > paramétrico, saia, overhang da cabeceira — defaults neutros).
 > Criado-mudo = **constraint satélite** neste ciclo (não classe completa).

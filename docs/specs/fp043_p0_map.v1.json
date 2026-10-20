@@ -1147,11 +1147,11 @@
     {
       "item": "tools/bed_class.py",
       "kind": "file",
-      "disposition": "facade",
+      "disposition": "move",
       "destination": "tools/rooms/bedroom/bed_class.py",
       "phase": "P4",
-      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
-      "compat": "facade_permanent_in_window",
+      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "high",
       "risk_reasons": [
         "consumido por CI/MCP/config"
@@ -1172,16 +1172,17 @@
           "tests/test_fp042_furniture_classes_ownership.py",
           "tests/test_fp042_ownership_audit.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/bedroom_designer.py",
       "kind": "file",
-      "disposition": "facade",
+      "disposition": "move",
       "destination": "tools/rooms/bedroom/designer.py",
       "phase": "P4",
-      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
-      "compat": "facade_permanent_in_window",
+      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "medium",
       "risk_reasons": [],
       "depth_sensitive": false,
@@ -1197,16 +1198,17 @@
           "tests/test_room_dependency_boundaries.py",
           "tests/test_room_module_architecture.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/bedroom_layout.py",
       "kind": "file",
-      "disposition": "facade",
+      "disposition": "move",
       "destination": "tools/rooms/bedroom/layout.py",
       "phase": "P4",
-      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
-      "compat": "facade_permanent_in_window",
+      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "high",
       "risk_reasons": [
         "≥15 consumidores em código+testes"
@@ -1228,7 +1230,8 @@
           "tests/test_room_dependency_boundaries.py",
           "tests/test_room_module_architecture.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/build_furniture_skp.rb",
@@ -2510,8 +2513,8 @@
       "disposition": "move",
       "destination": "tools/rooms/bedroom/capabilities/make_synthetic_bedrooms.py",
       "phase": "P4",
-      "rationale": "Capacidade exclusiva do quarto (materialização e fixtures sintéticas de quarto).",
-      "compat": "facade_at_old_path",
+      "rationale": "Capacidade exclusiva do quarto (materialização e fixtures sintéticas de quarto). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "medium",
       "risk_reasons": [
         "Path(__file__)/parents dependente da profundidade"
@@ -2969,8 +2972,8 @@
       "disposition": "move",
       "destination": "tools/rooms/bedroom/capabilities/place_bedroom_skp.py",
       "phase": "P4",
-      "rationale": "Capacidade exclusiva do quarto (materialização e fixtures sintéticas de quarto).",
-      "compat": "facade_at_old_path",
+      "rationale": "Capacidade exclusiva do quarto (materialização e fixtures sintéticas de quarto). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "medium",
       "risk_reasons": [
         "Path(__file__)/parents dependente da profundidade"

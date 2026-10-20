@@ -5,7 +5,7 @@ nem contrato (boxes, out). O entrypoint legado permanece reexportado.
 """
 from __future__ import annotations
 
-from tools import bedroom_designer
+from tools.rooms.bedroom import designer as bedroom_designer
 from tools.rooms.shared.furniture import _chair_parts
 from tools.rooms.shared.geometry import _oriented_box
 

@@ -14,7 +14,7 @@ So mobilia comodos BEDROOM (tools/room_type). Dimensoes de movel + regras
 validadas com ChatGPT (consult "Prioridade Quartos e Layout", 2026-06-05;
 registro local em .ai_bridge/responses/). Felipe 2026-06-05. NAO usa 3DW/SKP.
 
-Uso: python -m tools.bedroom_layout --room r003   (default planta_74)
+Uso: python -m tools.rooms.bedroom.layout --room r003   (default planta_74)
 """
 from __future__ import annotations
 

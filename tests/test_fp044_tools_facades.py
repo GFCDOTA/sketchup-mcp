@@ -55,6 +55,6 @@ def test_fachada_removida_nao_tem_arquivo_nem_consumidor_em_codigo(entry):
     assert not (ROOT / entry["path"]).exists()
     name = re.escape(Path(entry["path"]).stem)
     pat = re.compile(r"(?<![\w.])tools\." + name + r"(?!\w)|(?<![\w/.\\-])tools[/\\]" + name + r"\.py(?!\w)")
-    hits = [f for f in _tracked() if f.endswith(CODE) and not f.startswith("artifacts/")
+    hits = [f for f in _tracked() if f.endswith(CODE) and not f.startswith(("artifacts/", "docs/archive/"))  # historico
             and pat.search((ROOT / f).read_text("utf-8", errors="replace"))]
     assert hits == [], hits

@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from tools.bed_builder import build_bed                                # noqa: E402
-from tools.bed_class import (ARCHETYPES, BED_SKUS, _sabotages,         # noqa: E402
+from tools.rooms.bedroom.bed_class import (ARCHETYPES, BED_SKUS, _sabotages,         # noqa: E402
                              bed_class_gate, derive_bed_spec,
                              nightstand_satellite_gate)
 
@@ -113,7 +113,7 @@ def test_nightstand_satellite_relation():
 
 def test_matrix_builds_and_gates(tmp_path):
     pytest.importorskip("matplotlib")
-    from tools.bed_class import build_matrix
+    from tools.rooms.bedroom.bed_class import build_matrix
     res = build_matrix(tmp_path)
     assert len(res["report"]) == 9
     for r in res["report"]:

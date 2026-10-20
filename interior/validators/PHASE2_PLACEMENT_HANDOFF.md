@@ -18,7 +18,7 @@
 ## Já existia (NÃO foi reconstruído — evitar duplicação)
 - `interior/planners/placement_brain.py` — **FurniturePlacementBrain** base
   (`place_against_wall`: candidatos/score/hard-reject/slide, genérico).
-- `tools/bedroom_layout.py` — placement real de cama (cabeceira em parede limpa,
+- `tools/rooms/bedroom/layout.py` — placement real de cama (cabeceira em parede limpa,
   evita janela) + criados flanqueando + guarda-roupa (frente livre, evita porta).
 - `interior/planners/living_room_planner.py` — **SofaBrain** (sofá ↔ TV, marco GPT).
 - gates: `bed_placement_gate`, `wardrobe_gate`, `nightstand_gate`, `sofa_placement_gate`,

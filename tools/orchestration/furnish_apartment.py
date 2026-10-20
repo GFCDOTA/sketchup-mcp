@@ -26,7 +26,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))   # roda standalone
 # 1o import, entao nao da pra corrigir depois. Este pipeline e planta_74-only.
 if not os.environ.get("PT_TO_M"):
     os.environ["PT_TO_M"] = "0.0259"
-from tools import bedroom_designer   # noqa: E402  (quartos: brain novo GPT-approved)
+from tools.rooms.bedroom import designer as bedroom_designer  # noqa: E402  (quartos: brain novo GPT-approved)
 from tools.rooms.shared.geometry import _oriented_box  # noqa: E402,F401 (re-export legado)
 from tools.rooms.bathroom.layout import build_boxes as bath_boxes   # noqa: E402
 from tools.kitchen_layout import build_boxes as kitchen_boxes   # noqa: E402
