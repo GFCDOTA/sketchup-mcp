@@ -23,6 +23,8 @@ from tools.rooms.living.validation.sofa_gate import gate as sofa_gate           
 # 9 celulas cobrindo os eixos: arquetipo x lugares x braco x base (+1 chaise).
 # Inclui extremos DELIBERADOS (4l chunky, lounge 4l) — degradacao em extremo
 # e' exatamente o que o juiz precisa ver.
+from tools.rooms.shared.contact_sheet import grid_sheet as _grid_sheet  # noqa: E402,F401  (D-012: implementacao unica em shared)
+
 MATRIX = [
     ("formal-2l-slim-legs", dict(seats=2, archetype="formal", arm_style="slim",
                                  base_style="legs")),
@@ -72,31 +74,6 @@ def build_matrix(out_dir):
         json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
     return {"sheet": sheet, "report": report}
 
-
-def _grid_sheet(cells, out_png, title, cols=3):
-    """Grade NxM com label por celula (o _contact_sheet existente e' linear)."""
-    from PIL import Image, ImageDraw
-    CELL_W, BAND, GAP, HEAD = 480, 26, 10, 40
-    tiles = []
-    for name, path, cls_r, anat_r in cells:
-        im = Image.open(path).convert("RGB")
-        h = int(im.height * CELL_W / im.width)
-        tiles.append((f"{name} [{cls_r}/{anat_r}]", im.resize((CELL_W, h))))
-    rows = (len(tiles) + cols - 1) // cols
-    cell_h = max(t.height for _, t in tiles) + BAND
-    W = cols * CELL_W + GAP * (cols + 1)
-    H = HEAD + rows * (cell_h + GAP) + GAP
-    sheet = Image.new("RGB", (W, H), (246, 244, 240))
-    dr = ImageDraw.Draw(sheet)
-    dr.text((GAP, 12), title, fill=(40, 38, 36))
-    for i, (label, t) in enumerate(tiles):
-        r, c = divmod(i, cols)
-        x = GAP + c * (CELL_W + GAP)
-        y = HEAD + r * (cell_h + GAP)
-        dr.text((x + 2, y + 4), label, fill=(90, 86, 80))
-        sheet.paste(t, (x, y + BAND))
-    sheet.save(out_png)
-    return str(out_png)
 
 
 def build_matrix_skp(out_skp, cols=3, pitch_x=4.0, pitch_y=3.2):

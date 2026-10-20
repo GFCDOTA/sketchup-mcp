@@ -64,7 +64,6 @@ OWNER_TABLE = {
   "tools/rooms/bedroom/__init__.py": "tools.rooms.bedroom",
   "tools/rooms/living/__init__.py": "tools.rooms.living",
   "tools/rooms/service/__init__.py": "tools.rooms.service",
-  "tools/sofa_class_matrix.py": "living_visual_gate_and_cli",
   "tools/rooms/living/capabilities/sofa_class_matrix.py": "living_visual_gate_and_cli",
   "tools/rooms/living/capabilities/sofa_furnish_fase1_compare.py": "living_visual_gate_and_cli",
   "tools/rooms/living/validation/sofa_gate.py": "living_visual_gate_and_cli",
