@@ -2,7 +2,7 @@
 
 Regras e medidas **destiladas** (não copiadas) de pesquisa com modelos de design
 e referências de ergonomia/marcenaria residencial BR. É a fonte-da-verdade
-textual do brain `tools/bedroom_layout.py`. Felipe 2026-06-05.
+textual do brain `tools/rooms/bedroom/layout.py`. Felipe 2026-06-05.
 
 ## Dimensões de móvel (m) — largura × profundidade × altura
 Cama (largura ao-longo da parede × comprimento × altura do box):
@@ -61,4 +61,4 @@ insuficiente em volta da cama; móvel grande demais para o cômodo; cabeceira so
 ## Fontes consultadas
 - **Ollama `interior-designer:latest`** (2026-06-05): guarda-roupa frente correr `0.75` / abrir `1.00`; lista de erros comuns; degradação de quarto pequeno.
 - **ChatGPT** "Prioridade Quartos e Layout" (2026-06-05): dimensões de cama/armário/criado, regra de cama por área, hard/soft gates iniciais.
-- Implementado/verificado em `tools/bedroom_layout.py` + `tests/test_bedroom_layout.py` (geometria pura, pytest).
+- Implementado/verificado em `tools/rooms/bedroom/layout.py` + `tests/test_bedroom_layout.py` (geometria pura, pytest).

@@ -12,8 +12,8 @@ DNA da classe:
   - CRIADO-MUDO entra como CONSTRAINT SATELITE (topo ~ topo do colchao),
     nao como classe completa neste ciclo.
 
-Uso: python -m tools.bed_class            (prova: derivados + sabotagens)
-     python -m tools.bed_class --matrix   (matriz 9 celulas pro juiz)
+Uso: python -m tools.rooms.bedroom.bed_class            (prova: derivados + sabotagens)
+     python -m tools.rooms.bedroom.bed_class --matrix   (matriz 9 celulas pro juiz)
 """
 from __future__ import annotations
 

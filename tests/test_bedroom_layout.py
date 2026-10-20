@@ -1,4 +1,4 @@
-"""Prova do bedroom layout brain (tools/bedroom_layout.py) — geometria pura.
+"""Prova do bedroom layout brain (tools/rooms/bedroom/layout.py) — geometria pura.
 
 Roda em fixtures sinteticas (quarto pequeno/medio/grande) + suites reais da
 planta_74 (r000/r003). Verifica: layout valido, cabeceira encostada em parede
@@ -22,7 +22,7 @@ import pytest
 # @pytest.mark.planta74_scale e roda esses numa invocacao `pytest -m
 # planta74_scale` separada, com o env correto. Os demais (SYN_CASES) rodam
 # na invocacao default (`-m "not planta74_scale"`), sem override.
-from tools.bedroom_layout import _bed_order, run  # noqa: E402
+from tools.rooms.bedroom.layout import _bed_order, run  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[1]
 SYN = REPO / "fixtures" / "synthetic_rooms"
@@ -90,7 +90,7 @@ def test_small_room_degrades_gracefully_but_valid():
 
 def test_no_wall_fits_bed_is_no_valid_layout():
     """Comodo que nao comporta a cama (raso demais) -> NO_VALID_LAYOUT honesto."""
-    from tools.make_synthetic_bedrooms import rect_bedroom
+    from tools.rooms.bedroom.capabilities.make_synthetic_bedrooms import rect_bedroom
     con = rect_bedroom("QUARTO MINUSCULO", w_m=1.5, d_m=1.5)
     sm, out = run(con, "bedroom")
     assert out["result"] == "NO_VALID_LAYOUT"

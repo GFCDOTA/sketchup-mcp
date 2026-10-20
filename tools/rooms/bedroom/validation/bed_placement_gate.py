@@ -27,7 +27,7 @@ ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT))
 from shapely.geometry import Point, Polygon            # noqa: E402
 from interior.planners.placement_brain import FurniturePlacementBrain  # noqa: E402
-from tools.bedroom_layout import M, _door_zones, _wall_setup  # noqa: E402
+from tools.rooms.bedroom.layout import M, _door_zones, _wall_setup  # noqa: E402
 from tools.spatial_model import PT_TO_M                  # noqa: E402
 
 from core.scale import PT_TO_IN  # noqa: E402  (fonte unica de escala; env PT_TO_M -> 0.0259)
@@ -175,7 +175,7 @@ def bed_placement_gate(con, room_id, layout):
 # ------------------------------------------------------------------ layout real + fixtures
 def real_layout(con, room_id):
     """Extrai o layout do bedroom_designer (placement real do quarto)."""
-    from tools import bedroom_designer
+    from tools.rooms.bedroom import designer as bedroom_designer
     _, out = bedroom_designer.run(con, room_id, minimalist=True)
     if out.get("result") != "OK":
         return None

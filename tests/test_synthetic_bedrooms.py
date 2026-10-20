@@ -1,5 +1,5 @@
 """Prova que as fixtures sinteticas de QUARTO sao inputs validos pro bedroom
-brain (tools/make_synthetic_bedrooms.py). Testa a LOGICA do gerador em memoria
+brain (tools/rooms/bedroom/capabilities/make_synthetic_bedrooms.py). Testa a LOGICA do gerador em memoria
 (sem I/O de arquivo): cada quarto e um consensus bem-formado, com 1 porta + 1
 janela, classifica como BEDROOM, e sempre oferece >=1 parede LIMPA (sem abertura)
 como candidata a cabeceira. Sem shapely / 3DW / SKP.
@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import pytest
 
-from tools.make_synthetic_bedrooms import SPECS, rect_bedroom
+from tools.rooms.bedroom.capabilities.make_synthetic_bedrooms import SPECS, rect_bedroom
 from tools.room_type import BEDROOM, classify_room_type
 
 _CASES = [(fname, room_name, kw) for fname, (room_name, kw) in SPECS.items()]

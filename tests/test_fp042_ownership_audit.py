@@ -69,10 +69,11 @@ def test_relative_local_import_remains_allowed():
         code, module_name="tools.rooms.kitchen.layout")
 
 
+# Os casos das fachadas de quarto (bedroom_layout, bedroom_designer, bed_class) viraram import direto do dono (as fachadas sairam na FP-044/F6);
+# o desvio por fachada legada que ainda existe segue coberto por kitchen_layout e sofa_class abaixo.
 @pytest.mark.parametrize('source', [
-    'import tools.bedroom_layout\n',
-    'from tools import bedroom_designer\n',
-    'from tools.bed_class import derive_spec\n',
+    'import tools.rooms.bedroom.layout\n',
+    'from tools.rooms.bedroom.bed_class import derive_spec\n',
 ])
 def test_room_cannot_bypass_boundary_through_legacy_facade(source):
     violations = ownership_violations({'tools/rooms/kitchen/planner.py': source})

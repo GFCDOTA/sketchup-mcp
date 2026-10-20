@@ -11,7 +11,7 @@ rodar standalone, igual ao sibling). Regras de dormitorio
 validadas com ChatGPT (consult "Prioridade Quartos e Layout", 2026-06-05).
 Felipe 2026-06-05. NAO usa 3D Warehouse / estilo / SKP.
 
-Uso: python tools/make_synthetic_bedrooms.py
+Uso: python -m tools.rooms.bedroom.capabilities.make_synthetic_bedrooms
      -> fixtures/synthetic_rooms/bedroom_{small,medium,large}_*.json
 """
 import json

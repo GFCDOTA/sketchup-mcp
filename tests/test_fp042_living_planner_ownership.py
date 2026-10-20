@@ -24,7 +24,7 @@ def test_legacy_planner_is_facade_and_keeps_standalone_cli():
 def test_cross_room_validation_and_engine_use_shared_geometry():
     for module in (placement_brain, sofa_placement_gate):
         source = Path(module.__file__).read_text(encoding="utf-8")
-        assert "from tools.bedroom_layout import" not in source
+        assert "from tools.rooms.bedroom.layout import" not in source
         assert "from tools.rooms.shared.geometry import" in source
         assert "from core.scale import M" in source
     assert placement_brain._wall_setup is planner._wall_setup

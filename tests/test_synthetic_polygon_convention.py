@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.make_synthetic_bedrooms import classify_polygon_convention, rect_bedroom
+from tools.rooms.bedroom.capabilities.make_synthetic_bedrooms import classify_polygon_convention, rect_bedroom
 
 ROOT = Path(__file__).resolve().parents[1]
 SYN = ROOT / "fixtures/synthetic_rooms"

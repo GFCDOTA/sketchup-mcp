@@ -7,8 +7,9 @@ def test_all_p3_paths_have_explicit_runtime_owners():
     index = json.loads(INVENTORY.read_text("utf-8"))
     report = audit_p3(index)
     assert report["result"] == "PASS", report
-    # 114: a FP-044/F2 removeu a fachada scripts/sofa_fabric_material.py (arquivo e linha da tabela saem juntos).
-    assert report["checked"] == len(OWNER_TABLE) == 114
+    # A contagem cai com cada fachada removida na FP-044 (F2: scripts/sofa_fabric_material.py; F6: lotes de comodo):
+    # arquivo e linha da tabela saem juntos.
+    assert report["checked"] == len(OWNER_TABLE) == 109
 
 
 def test_missing_or_unknown_p3_path_fails_closed():

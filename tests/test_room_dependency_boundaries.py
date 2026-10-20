@@ -12,7 +12,7 @@ ROOM_FILES = (
     ROOT / "tools/service_layout.py",
     ROOT / "interior/planners/living_room_planner.py",
 )
-FORBIDDEN = {"tools.bedroom_layout", "tools.bedroom_designer",
+FORBIDDEN = {"tools.rooms.bedroom.layout", "tools.rooms.bedroom.designer",
              "tools.furnish_apartment"}
 
 

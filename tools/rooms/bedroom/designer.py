@@ -7,7 +7,7 @@ soft score (pontos da spec) + múltiplos candidatos (top-3 paredes de cabeceira)
 JSON do layout + PNG top-down + relatório. Placeholders (caixas); SKP depois.
 Geometria pura (shapely), sem SketchUp para validar. Reusa o brain de quarto.
 
-Uso: python -m tools.bedroom_designer --room r000   (default planta_74 SUITE 01 king)
+Uso: python -m tools.rooms.bedroom.designer --room r000   (default planta_74 SUITE 01 king)
 """
 from __future__ import annotations
 
@@ -788,7 +788,7 @@ def build_skp(out_dir, tag, items):
 
 
 def main():
-    from tools.make_synthetic_bedrooms import rect_bedroom
+    from tools.rooms.bedroom.capabilities.make_synthetic_bedrooms import rect_bedroom
     ap = argparse.ArgumentParser()
     ap.add_argument("--room", default="r000")
     ap.add_argument("--synthetic", action="store_true", help="quarto king sintetico limpo")

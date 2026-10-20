@@ -46,7 +46,8 @@ def test_room_package_does_not_import_another_room_implementation(name):
 
 
 def test_cross_room_geometry_is_in_shared_and_legacy_aliases_match():
-    from tools import bedroom_layout as b, furnish_apartment as f
+    from tools import furnish_apartment as f
+    from tools.rooms.bedroom import layout as b
     from tools.rooms.shared import geometry as shared
 
     for name in ("_fbox", "_wall_setup", "_perp_depth",
@@ -63,7 +64,7 @@ def test_no_direct_bedroom_helpers_in_other_room_modules():
     ]:
         ast.parse(path.read_text(encoding="utf-8"))
         text = path.read_text(encoding="utf-8")
-        assert "from tools.bedroom_layout import" not in text
+        assert "from tools.rooms.bedroom.layout import" not in text
         assert "from tools.rooms.shared.geometry import" in text
     legacy = (ROOT / "interior/planners/living_room_planner.py").read_text(encoding="utf-8")
     assert "from tools.rooms.living import planner as _impl" in legacy
@@ -87,25 +88,20 @@ def test_room_modules_do_not_turn_consultative_knowledge_into_execution():
 
 
 def test_runtime_room_providers_are_owned_by_packages_with_legacy_aliases():
-    from tools import bedroom_designer, bedroom_layout, kitchen_layout, service_layout
-    from tools.rooms.bedroom import designer as bedroom_designer_impl
-    from tools.rooms.bedroom import layout as bedroom
+    from tools import kitchen_layout, service_layout
     from tools.rooms.kitchen import layout as kitchen
     from tools.rooms.service import layout as service
 
-    # a fachada bathroom_layout saiu na FP-044/F6: o consumidor importa tools.rooms.bathroom.layout direto.
+    # as fachadas bathroom_layout, bedroom_layout e bedroom_designer sairam na FP-044/F6: o consumidor importa o dono.
     assert kitchen_layout.build_boxes is kitchen.build_boxes
     assert service_layout.build_boxes is service.build_boxes
-    assert bedroom_layout.run is bedroom.run
-    assert bedroom_designer.run is bedroom_designer_impl.run
 
 
 def test_legacy_entrypoints_preserve_cli_without_owning_room_builder_source():
     # Fachada aposentada (FP-044/F6): a CLI passa a ser o __main__ do dono.
-    for owner in ("bathroom",):
-        assert 'if __name__ == "__main__":' in (ROOMS / owner / "layout.py").read_text("utf-8")
-    for name in ("kitchen_layout", "service_layout",
-                 "bedroom_layout", "bedroom_designer"):
+    for owner in ("bathroom/layout.py", "bedroom/layout.py", "bedroom/designer.py"):
+        assert 'if __name__ == "__main__":' in (ROOMS / owner).read_text("utf-8")
+    for name in ("kitchen_layout", "service_layout"):
         path = ROOT / "tools" / f"{name}.py"
         src = path.read_text("utf-8")
         assert 'if __name__ == "__main__":' in src

@@ -26,7 +26,8 @@ def test_oriented_box_has_nonzero_footprint_and_expected_height(facing):
 
 
 def test_legacy_exports_are_same_function_object():
-    from tools import bedroom_layout, furnish_apartment
+    from tools import furnish_apartment
+    from tools.rooms.bedroom import layout as bedroom_layout
     from tools.rooms.shared import geometry
     for name in ("_fbox", "_wall_setup", "_door_zones", "_window_zones", "_perp_depth"):
         assert getattr(bedroom_layout, name) is getattr(geometry, name)
