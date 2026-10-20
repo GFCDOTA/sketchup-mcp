@@ -29,7 +29,8 @@ e uma suíte de gates de fidelidade. O `.skp` é o entregável; o resto existe p
 | mexer num cômodo (exemplo completo: cozinha) | [`tools/rooms/kitchen/README.md`](tools/rooms/kitchen/README.md) |
 | saber quem usa um arquivo antes de movê-lo | `python -m tools.navigation.consumers <caminho>` |
 | ver o plano da reorganização (FP-043) e o estado dela | [relatório P8 (parcial)](docs/reports/FP-043_final_validation.md) · [spec de conclusão P3–P8](docs/specs/FP-043_remaining_execution_P3_P8.md) · [FP-043 original](docs/specs/FP-043_repository_navigation_and_room_specialists.md) · [mapa P0](docs/specs/FP-043_P0_map.md) |
-| ver o plano de enxugar a raiz e as fachadas de `tools/` (FP-044) | [spec FP-044](docs/specs/FP-044_root_and_tools_consolidation.md) |
+| ver o plano de enxugar a raiz e as fachadas de `tools/` (FP-044) e o estado dela | [relatório final (parcial)](docs/reports/FP-044_final_validation.md) · [spec FP-044](docs/specs/FP-044_root_and_tools_consolidation.md) |
+| saber o que ainda mora em `tools/*.py` e por quê | [`tools/PUBLIC_API.md`](tools/PUBLIC_API.md) |
 | saber o que o SketchUp real já provou | [`artifacts/review/l2_fp042_20261019/README.md`](artifacts/review/l2_fp042_20261019/README.md) |
 | as regras de quem edita (humano ou agente) | [`CLAUDE.md`](CLAUDE.md) → `.claude/` |
 

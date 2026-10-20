@@ -1,0 +1,153 @@
+{
+ "schema": "fp044_f7_l2.v1",
+ "develop_head": "ce25e8c6cf7a5311ea0a0042eb8a1e5815e38cc0",
+ "sketchup_version": "26.0.429",
+ "mcp": {
+  "transport": "stdio",
+  "server": "python -m tools.mcp_server.server (cwd = worktree no develop final)",
+  "n_tools": 18,
+  "env_PT_TO_M": "0.0259",
+  "calls": [
+   {
+    "tool": "su_status",
+    "status": "OK",
+    "pid": null,
+    "is_error": false
+   },
+   {
+    "tool": "su_build_shell",
+    "status": "OK",
+    "pid": null,
+    "is_error": false
+   },
+   {
+    "tool": "su_furnish",
+    "status": "OK",
+    "pid": 32996,
+    "is_error": false,
+    "close": {
+     "status": "CLOSED",
+     "closed": [
+      32996
+     ],
+     "still_running": []
+    }
+   },
+   {
+    "tool": "su_inspect",
+    "status": "OK",
+    "pid": 29556,
+    "is_error": false,
+    "close": {
+     "status": "PARTIAL",
+     "closed": [],
+     "still_running": [
+      29556
+     ]
+    }
+   }
+  ],
+  "pids_fechados_pelo_proprio_pid": [
+   32996,
+   29556
+  ],
+  "sketchup_abertos_antes": [],
+  "nota_close": "o su_close do inspect devolveu PARTIAL (still_running) no instante; conferido depois: 0 SketchUp em execucao"
+ },
+ "planta_check": {
+  "n_boxes": 402,
+  "n_matched": 402,
+  "max_err_m": 5e-05,
+  "unmatched": 0,
+  "identico_ao_P8_json_inteiro": true,
+  "por_comodo_penetracao_giro": {
+   "SUITE 01": [
+    0,
+    0
+   ],
+   "A.S. | TERRACO SOCIAL | TERRACO TECNICO": [
+    0,
+    0
+   ],
+   "SALA DE JANTAR | SALA DE ESTAR": [
+    0,
+    0
+   ],
+   "SUITE 02": [
+    0,
+    0
+   ],
+   "COZINHA": [
+    0,
+    0
+   ],
+   "BANHO 01": [
+    7,
+    1
+   ],
+   "BANHO 02": [
+    5,
+    1
+   ],
+   "LAVABO": [
+    4,
+    1
+   ]
+  }
+ },
+ "canonicos_sha256": {
+  "artifacts/planta_74/planta_74.skp": "7512d592e1d81208f3954bc24165b9ca069c7713b1fce990c4a23eaad1d91294",
+  "artifacts/planta_74/geometry_report.json": "dfc431da1bf299d9257057387400a057762cf42a3d2c1b06923570d0eebb63c6",
+  "artifacts/planta_74/furnished/planta_74_furnished.skp": "d2846ab684f47638f8177f29b3593c566d60c5cdb9c07addf56a9276e11a9397"
+ },
+ "programa_do_sofa": {
+  "old_abs": {
+   "pid": 40892,
+   "closed_by_pid": true,
+   "cwd": "C:\\Users\\felip_local\\AppData\\Local\\Temp\\claude\\E--Claude\\c6b341ef-a931-4265-bf6b-0cd4dce9a08a\\scratchpad\\base",
+   "log": "done id=eval_loveseat_slim_arm_tight_back status=OK bbox=[1.52, 0.963, 0.818] warns=0",
+   "validation": {
+    "status": "OK",
+    "bbox_m": [
+     1.52,
+     0.963,
+     0.818
+    ],
+    "n_parts": 10,
+    "warnings": []
+   },
+   "renders_sha256": {
+    "front.png": "b30c350aaf66d0170dada8c13d6fc19d2dd4959e6b73b808d849f5aec0de286f",
+    "side.png": "6339af250de2790c801043fe4a4d14072b24a22f889c5132d919eb88fe73fefc",
+    "top.png": "136cf294f9e3e715d9d9a13837d6b7c5922a3e94c04c3ccb9e1dfc9b5e5474db",
+    "three_quarter.png": "fcc42acc232ccb124d87cfa52428a463f0328291008a939fe71eb072fe68589d",
+    "macro.png": "77e0e608ad0fd8be98f45c2caf18a77ac894fa6233e13856ba753173ee46202a"
+   }
+  },
+  "f7_abs": {
+   "pid": 40784,
+   "closed_by_pid": true,
+   "cwd": "E:\\Claude\\worktrees\\w-gates",
+   "log": "done id=eval_loveseat_slim_arm_tight_back status=OK bbox=[1.52, 0.963, 0.818] warns=0",
+   "validation": {
+    "status": "OK",
+    "bbox_m": [
+     1.52,
+     0.963,
+     0.818
+    ],
+    "n_parts": 10,
+    "warnings": []
+   },
+   "renders_sha256": {
+    "front.png": "b30c350aaf66d0170dada8c13d6fc19d2dd4959e6b73b808d849f5aec0de286f",
+    "side.png": "6339af250de2790c801043fe4a4d14072b24a22f889c5132d919eb88fe73fefc",
+    "top.png": "136cf294f9e3e715d9d9a13837d6b7c5922a3e94c04c3ccb9e1dfc9b5e5474db",
+    "three_quarter.png": "fcc42acc232ccb124d87cfa52428a463f0328291008a939fe71eb072fe68589d",
+    "macro.png": "77e0e608ad0fd8be98f45c2caf18a77ac894fa6233e13856ba753173ee46202a"
+   }
+  },
+  "renders_identicos": true
+ },
+ "visual_review": "nenhum veredito visual atribuido; aparencia e do Felipe (VISUAL_REVIEW)"
+}

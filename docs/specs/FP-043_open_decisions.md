@@ -16,6 +16,8 @@ linha vira uma nota de decisão com data e o item sai daqui.
 
 **Linha final (P8, 2026-10-19):** D-001 a D-005 = BLOCKED_DECISION (Felipe; material da D-001 em `artifacts/review/fp043/p3a04_quadrado_d001/`); D-006 = RESOLVED; D-007 = OPEN_TECNICA (planta_74 já respeita o contrato por cômodo; sintéticas seguem `xfail(strict)`).
 
+**Linha final (FP-044/F7, 2026-10-20):** D-008 (`.impeccable/`) e D-009 (`ops/estudio-front/`) = BLOCKED_DECISION (Felipe; spec FP-044 §10); D-010 = manter as 8 públicas agora; D-011 e D-012 = OPEN_TECNICA (seções abaixo). Relatório: [FP-044_final_validation](../reports/FP-044_final_validation.md).
+
 **Decisão técnica já resolvida:** D-006 — o `repo_health_gate` foi corrigido e incluído no CI; evidências e contraprovas na seção histórica abaixo.
 
 ## D-001 — Peitoril (e mais) do `quadrado`: referência de 2026-05-24 × builder aprovado em 2026-06-04

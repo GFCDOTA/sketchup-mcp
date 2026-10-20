@@ -1,0 +1,959 @@
+{
+ "n_boxes": 402,
+ "n_matched": 402,
+ "unmatched": [],
+ "max_err_m": 5e-05,
+ "rooms": {
+  "SUITE 01": {
+   "pieces": 65,
+   "max_err_m": 5e-05,
+   "wall_penetration": [],
+   "hosted_in_wall": [
+    {
+     "module": "rug",
+     "label": "tapete",
+     "area_cm2": 1203.4,
+     "depth_cm": 5.6,
+     "host": "NONE",
+     "intent": "SOFT"
+    }
+   ],
+   "door_swing_hits": [],
+   "materials": {
+    "rug": [
+     "ph_rug"
+    ],
+    "Cama": [
+     "ph_cabeceira",
+     "ph_colchao",
+     "ph_estrado",
+     "ph_manta",
+     "ph_travesseiro"
+    ],
+    "Painel cabeceira": [
+     "ph_ks_bronze",
+     "ph_ks_led",
+     "ph_ks_painel_base",
+     "ph_ks_ripa"
+    ],
+    "Criado-mudo 1": [
+     "ph_ks_criado_corpo",
+     "ph_ks_criado_frente",
+     "ph_ks_criado_tampo",
+     "ph_ks_gola",
+     "ph_ks_led"
+    ],
+    "Criado-mudo 2": [
+     "ph_ks_criado_corpo",
+     "ph_ks_criado_frente",
+     "ph_ks_criado_tampo",
+     "ph_ks_gola",
+     "ph_ks_led"
+    ],
+    "Guarda-roupa": [
+     "ph_corpo",
+     "ph_ks_bronze",
+     "ph_ks_gola",
+     "ph_ks_maleiro",
+     "ph_porta",
+     "ph_rodape"
+    ],
+    "Escrivaninha": [
+     "ph_base",
+     "ph_foot",
+     "ph_frame",
+     "ph_saia",
+     "ph_top"
+    ],
+    "Cadeira escrivaninha": [
+     "ph_back",
+     "ph_foot",
+     "ph_frame",
+     "ph_seat"
+    ]
+   },
+   "modules": [
+    "Cadeira escrivaninha",
+    "Cama",
+    "Criado-mudo 1",
+    "Criado-mudo 2",
+    "Escrivaninha",
+    "Guarda-roupa",
+    "Painel cabeceira",
+    "rug"
+   ],
+   "elevated_modules": {
+    "Criado-mudo 1": 0.3,
+    "Criado-mudo 2": 0.3
+   }
+  },
+  "A.S. | TERRACO SOCIAL | TERRACO TECNICO": {
+   "pieces": 13,
+   "max_err_m": 5e-05,
+   "wall_penetration": [],
+   "hosted_in_wall": [],
+   "door_swing_hits": [],
+   "materials": {
+    "Tanque": [
+     "ph_tanque"
+    ],
+    "Maquina de lavar": [
+     "ph_maq_lavar"
+    ],
+    "Armario de servico": [
+     "ph_armario_servico"
+    ],
+    "Prateleira servico": [
+     "ph_prateleira_servico"
+    ],
+    "Varal de teto": [
+     "ph_varal_teto"
+    ],
+    "Churrasqueira": [
+     "ph_churrasqueira"
+    ],
+    "Coifa": [
+     "ph_coifa"
+    ],
+    "Bancada gourmet": [
+     "ph_bancada_gourmet",
+     "ph_cuba_gourmet"
+    ],
+    "Jardineira": [
+     "ph_jardineira"
+    ],
+    "Condensadora": [
+     "ph_condensadora"
+    ],
+    "Banqueta": [
+     "ph_banqueta"
+    ]
+   },
+   "modules": [
+    "Armario de servico",
+    "Bancada gourmet",
+    "Banqueta",
+    "Churrasqueira",
+    "Coifa",
+    "Condensadora",
+    "Jardineira",
+    "Maquina de lavar",
+    "Prateleira servico",
+    "Tanque",
+    "Varal de teto"
+   ],
+   "elevated_modules": {
+    "Prateleira servico": 1.62,
+    "Varal de teto": 2.0201,
+    "Coifa": 1.5499,
+    "Condensadora": 0.1199
+   }
+  },
+  "SALA DE JANTAR | SALA DE ESTAR": {
+   "pieces": 51,
+   "max_err_m": 5e-05,
+   "wall_penetration": [],
+   "hosted_in_wall": [],
+   "door_swing_hits": [],
+   "materials": {
+    "Sofa": [
+     "ph_almofada",
+     "ph_arm",
+     "ph_back_cushion",
+     "ph_base",
+     "ph_foot",
+     "ph_seat_cushion"
+    ],
+    "Rack TV": [
+     "ph_base",
+     "ph_foot",
+     "ph_front",
+     "ph_niche",
+     "ph_top"
+    ],
+    "Painel TV": [
+     "ph_lv_led",
+     "ph_painel_tv"
+    ],
+    "TV": [
+     "ph_tv_frame",
+     "ph_tv_glass"
+    ],
+    "Mesa de jantar": [
+     "ph_foot",
+     "ph_saia",
+     "ph_top"
+    ],
+    "Cadeira jantar": [
+     "ph_back",
+     "ph_foot",
+     "ph_frame",
+     "ph_seat"
+    ],
+    "Pendente": [
+     "ph_pend_bronze",
+     "ph_pend_cabo",
+     "ph_pend_cupula"
+    ],
+    "Tapete": [
+     "ph_rug_border",
+     "ph_rug_field"
+    ]
+   },
+   "modules": [
+    "Cadeira jantar",
+    "Mesa de jantar",
+    "Painel TV",
+    "Pendente",
+    "Rack TV",
+    "Sofa",
+    "TV",
+    "Tapete"
+   ],
+   "elevated_modules": {
+    "TV": 0.7351,
+    "Pendente": 1.842
+   }
+  },
+  "SUITE 02": {
+   "pieces": 47,
+   "max_err_m": 5e-05,
+   "wall_penetration": [],
+   "hosted_in_wall": [
+    {
+     "module": "rug",
+     "label": "tapete",
+     "area_cm2": 1292.5,
+     "depth_cm": 5.5,
+     "host": "NONE",
+     "intent": "SOFT"
+    }
+   ],
+   "door_swing_hits": [],
+   "materials": {
+    "rug": [
+     "ph_rug"
+    ],
+    "Cama": [
+     "ph_cabeceira",
+     "ph_colchao",
+     "ph_estrado",
+     "ph_manta",
+     "ph_travesseiro"
+    ],
+    "Painel cabeceira": [
+     "ph_ks_bronze",
+     "ph_ks_led",
+     "ph_ks_painel_base",
+     "ph_ks_ripa"
+    ],
+    "Criado-mudo 1": [
+     "ph_ks_criado_corpo",
+     "ph_ks_criado_frente",
+     "ph_ks_criado_tampo",
+     "ph_ks_gola",
+     "ph_ks_led"
+    ],
+    "Criado-mudo 2": [
+     "ph_ks_criado_corpo",
+     "ph_ks_criado_frente",
+     "ph_ks_criado_tampo",
+     "ph_ks_gola",
+     "ph_ks_led"
+    ],
+    "Guarda-roupa": [
+     "ph_corpo",
+     "ph_ks_bronze",
+     "ph_ks_gola",
+     "ph_ks_maleiro",
+     "ph_porta",
+     "ph_rodape"
+    ]
+   },
+   "modules": [
+    "Cama",
+    "Criado-mudo 1",
+    "Criado-mudo 2",
+    "Guarda-roupa",
+    "Painel cabeceira",
+    "rug"
+   ],
+   "elevated_modules": {
+    "Criado-mudo 1": 0.3,
+    "Criado-mudo 2": 0.3
+   }
+  },
+  "COZINHA": {
+   "pieces": 76,
+   "max_err_m": 5e-05,
+   "wall_penetration": [],
+   "hosted_in_wall": [
+    {
+     "module": "base_cabinet_01",
+     "label": "kc_soculo",
+     "area_cm2": 23.6,
+     "depth_cm": 0.5,
+     "host": "NONE",
+     "intent": "DECORATIVE"
+    },
+    {
+     "module": "base_cabinet_01",
+     "label": "kc_corpo",
+     "area_cm2": 27.8,
+     "depth_cm": 0.5,
+     "host": "NONE",
+     "intent": "DECORATIVE"
+    },
+    {
+     "module": "countertop",
+     "label": "kc_tampo",
+     "area_cm2": 29.1,
+     "depth_cm": 0.5,
+     "host": "NONE",
+     "intent": "DECORATIVE"
+    },
+    {
+     "module": "backsplash",
+     "label": "kc_backsplash",
+     "area_cm2": 0.2,
+     "depth_cm": 0.1,
+     "host": "NONE",
+     "intent": "DECORATIVE"
+    },
+    {
+     "module": "backsplash",
+     "label": "kc_backsplash",
+     "area_cm2": 0.3,
+     "depth_cm": 0.1,
+     "host": "NONE",
+     "intent": "DECORATIVE"
+    },
+    {
+     "module": "upper_cabinet_01",
+     "label": "kc_corpo_sup",
+     "area_cm2": 15.3,
+     "depth_cm": 0.5,
+     "host": "NONE",
+     "intent": "DECORATIVE"
+    },
+    {
+     "module": "upper_cabinet_01",
+     "label": "kc_corpo_sup",
+     "area_cm2": 27.8,
+     "depth_cm": 0.5,
+     "host": "NONE",
+     "intent": "DECORATIVE"
+    }
+   ],
+   "door_swing_hits": [],
+   "materials": {
+    "fridge": [
+     "ph_kc_geladeira",
+     "ph_kc_inox",
+     "ph_kc_soculo"
+    ],
+    "base_cabinet_01": [
+     "ph_kc_corpo",
+     "ph_kc_gaveta",
+     "ph_kc_porta",
+     "ph_kc_puxador",
+     "ph_kc_soculo"
+    ],
+    "countertop": [
+     "ph_kc_tampo"
+    ],
+    "backsplash": [
+     "ph_kc_backsplash"
+    ],
+    "sink_module": [
+     "ph_kc_bronze",
+     "ph_kc_cuba",
+     "ph_kc_cuba_rim",
+     "ph_kc_ralo",
+     "ph_kc_torneira"
+    ],
+    "cooktop_module": [
+     "ph_kc_anel",
+     "ph_kc_boca",
+     "ph_kc_vidro"
+    ],
+    "upper_cabinet_01": [
+     "ph_kc_corpo_sup",
+     "ph_kc_gola",
+     "ph_kc_led",
+     "ph_kc_niche_back",
+     "ph_kc_niche_wood",
+     "ph_kc_porta_sup"
+    ],
+    "hood": [
+     "ph_kc_coifa",
+     "ph_kc_vidro"
+    ],
+    "decor_board": [
+     "ph_decor_board"
+    ],
+    "decor_vaso": [
+     "ph_decor_vaso"
+    ],
+    "upper_cabinet_02": [
+     "ph_kc_corpo_sup",
+     "ph_kc_gola",
+     "ph_kc_niche_back",
+     "ph_kc_niche_wood",
+     "ph_kc_porta_sup"
+    ]
+   },
+   "modules": [
+    "backsplash",
+    "base_cabinet_01",
+    "cooktop_module",
+    "countertop",
+    "decor_board",
+    "decor_vaso",
+    "fridge",
+    "hood",
+    "sink_module",
+    "upper_cabinet_01",
+    "upper_cabinet_02"
+   ],
+   "elevated_modules": {
+    "fridge": 0.0201,
+    "countertop": 0.87,
+    "backsplash": 0.8999,
+    "sink_module": 0.6949,
+    "cooktop_module": 0.8979,
+    "upper_cabinet_01": 1.5039,
+    "hood": 1.4681,
+    "decor_board": 0.8999,
+    "decor_vaso": 0.8999,
+    "upper_cabinet_02": 1.747
+   }
+  },
+  "BANHO 01": {
+   "pieces": 59,
+   "max_err_m": 5e-05,
+   "wall_penetration": [
+    {
+     "module": "Box",
+     "label": "kb_folha",
+     "area_cm2": 4.1,
+     "depth_cm": 0.8,
+     "host": "NONE",
+     "intent": "STRUCTURAL"
+    },
+    {
+     "module": "Box",
+     "label": "kb_piso_box",
+     "area_cm2": 319.3,
+     "depth_cm": 4.1,
+     "host": "NONE",
+     "intent": "STRUCTURAL"
+    },
+    {
+     "module": "Pele",
+     "label": "kb_piso",
+     "area_cm2": 1782.9,
+     "depth_cm": 6.9,
+     "host": "NONE",
+     "intent": "STRUCTURAL"
+    },
+    {
+     "module": "PeleTeto",
+     "label": "kb_teto",
+     "area_cm2": 8526.8,
+     "depth_cm": 31.0,
+     "host": "NONE",
+     "intent": "STRUCTURAL"
+    },
+    {
+     "module": "Pele",
+     "label": "kb_parede",
+     "area_cm2": 14.2,
+     "depth_cm": 0.1,
+     "host": "NONE",
+     "intent": "STRUCTURAL"
+    },
+    {
+     "module": "Pele",
+     "label": "kb_parede_pedra",
+     "area_cm2": 1.3,
+     "depth_cm": 0.0,
+     "host": "NONE",
+     "intent": "STRUCTURAL"
+    },
+    {
+     "module": "Pele",
+     "label": "kb_janela_fosco",
+     "area_cm2": 61.1,
+     "depth_cm": 0.8,
+     "host": "NONE",
+     "intent": "STRUCTURAL"
+    }
+   ],
+   "hosted_in_wall": [
+    {
+     "module": "Box",
+     "label": "kb_trilho",
+     "area_cm2": 35.1,
+     "depth_cm": 5.1,
+     "host": "NONE",
+     "intent": "DECORATIVE"
+    },
+    {
+     "module": "Box",
+     "label": "kb_perfil",
+     "area_cm2": 4.8,
+     "depth_cm": 2.2,
+     "host": "NONE",
+     "intent": "DECORATIVE"
+    },
+    {
+     "module": "Box",
+     "label": "kb_guia",
+     "area_cm2": 12.8,
+     "depth_cm": 2.5,
+     "host": "NONE",
+     "intent": "DECORATIVE"
+    },
+    {
+     "module": "Box",
+     "label": "kb_haste",
+     "area_cm2": 0.0,
+     "depth_cm": 0.0,
+     "host": "NONE",
+     "intent": "DECORATIVE"
+    },
+    {
+     "module": "Pele",
+     "label": "kb_caixilho",
+     "area_cm2": 118.2,
+     "depth_cm": 1.4,
+     "host": "NONE",
+     "intent": "DECORATIVE"
+    },
+    {
+     "module": "Pele",
+     "label": "kb_caixilho",
+     "area_cm2": 118.2,
+     "depth_cm": 1.4,
+     "host": "NONE",
+     "intent": "DECORATIVE"
+    },
+    {
+     "module": "Pele",
+     "label": "kb_caixilho",
+     "area_cm2": 4.9,
+     "depth_cm": 1.4,
+     "host": "NONE",
+     "intent": "DECORATIVE"
+    },
+    {
+     "module": "Pele",
+     "label": "kb_caixilho",
+     "area_cm2": 4.9,
+     "depth_cm": 1.4,
+     "host": "NONE",
+     "intent": "DECORATIVE"
+    }
+   ],
+   "door_swing_hits": [
+    {
+     "door": "h_o002",
+     "module": "Pele",
+     "label": "kb_piso",
+     "area_cm2": 3123.7,
+     "z": [
+      0.001,
+      0.0119
+     ]
+    }
+   ],
+   "materials": {
+    "Bancada": [
+     "ph_bancada_banho",
+     "ph_cuba",
+     "ph_gabinete",
+     "ph_kb_gola",
+     "ph_kb_sombra",
+     "ph_kb_torneira"
+    ],
+    "Espelho": [
+     "ph_espelho",
+     "ph_kb_led",
+     "ph_kb_moldura",
+     "ph_kb_slot_led"
+    ],
+    "Vaso": [
+     "ph_kb_botao",
+     "ph_kb_tampa",
+     "ph_vaso"
+    ],
+    "Box": [
+     "ph_box_vidro",
+     "ph_kb_ducha",
+     "ph_kb_ducha_manual",
+     "ph_kb_folha",
+     "ph_kb_frasco",
+     "ph_kb_guia",
+     "ph_kb_haste",
+     "ph_kb_led",
+     "ph_kb_misturador",
+     "ph_kb_nicho_box",
+     "ph_kb_perfil",
+     "ph_kb_piso_box",
+     "ph_kb_puxador",
+     "ph_kb_ralo",
+     "ph_kb_trilho"
+    ],
+    "Pele": [
+     "ph_kb_caixilho",
+     "ph_kb_janela_fosco",
+     "ph_kb_parede",
+     "ph_kb_parede_pedra",
+     "ph_kb_piso"
+    ],
+    "PeleTeto": [
+     "ph_kb_teto"
+    ],
+    "Enxoval": [
+     "ph_kb_escova",
+     "ph_kb_gancho",
+     "ph_kb_papeleira",
+     "ph_kb_sabonete",
+     "ph_kb_tapete",
+     "ph_kb_toalheiro"
+    ]
+   },
+   "modules": [
+    "Bancada",
+    "Box",
+    "Enxoval",
+    "Espelho",
+    "Pele",
+    "PeleTeto",
+    "Vaso"
+   ],
+   "elevated_modules": {
+    "Bancada": 0.368,
+    "Espelho": 1.0599,
+    "PeleTeto": 2.5001
+   }
+  },
+  "BANHO 02": {
+   "pieces": 58,
+   "max_err_m": 5e-05,
+   "wall_penetration": [
+    {
+     "module": "Box",
+     "label": "kb_ralo",
+     "area_cm2": 0.0,
+     "depth_cm": 0.0,
+     "host": "NONE",
+     "intent": "FIXTURE"
+    },
+    {
+     "module": "Pele",
+     "label": "kb_piso",
+     "area_cm2": 1384.9,
+     "depth_cm": 7.3,
+     "host": "NONE",
+     "intent": "STRUCTURAL"
+    },
+    {
+     "module": "PeleTeto",
+     "label": "kb_teto",
+     "area_cm2": 8219.4,
+     "depth_cm": 28.9,
+     "host": "NONE",
+     "intent": "STRUCTURAL"
+    },
+    {
+     "module": "Pele",
+     "label": "kb_parede_pedra",
+     "area_cm2": 12.2,
+     "depth_cm": 0.1,
+     "host": "NONE",
+     "intent": "STRUCTURAL"
+    },
+    {
+     "module": "Pele",
+     "label": "kb_janela_fosco",
+     "area_cm2": 50.2,
+     "depth_cm": 0.8,
+     "host": "NONE",
+     "intent": "STRUCTURAL"
+    }
+   ],
+   "hosted_in_wall": [
+    {
+     "module": "Box",
+     "label": "kb_trilho",
+     "area_cm2": 4.0,
+     "depth_cm": 0.6,
+     "host": "NONE",
+     "intent": "DECORATIVE"
+    },
+    {
+     "module": "Box",
+     "label": "kb_perfil",
+     "area_cm2": 3.8,
+     "depth_cm": 1.7,
+     "host": "NONE",
+     "intent": "DECORATIVE"
+    },
+    {
+     "module": "Box",
+     "label": "kb_haste",
+     "area_cm2": 0.0,
+     "depth_cm": 0.0,
+     "host": "NONE",
+     "intent": "DECORATIVE"
+    },
+    {
+     "module": "Pele",
+     "label": "kb_caixilho",
+     "area_cm2": 98.8,
+     "depth_cm": 1.4,
+     "host": "NONE",
+     "intent": "DECORATIVE"
+    },
+    {
+     "module": "Pele",
+     "label": "kb_caixilho",
+     "area_cm2": 98.8,
+     "depth_cm": 1.4,
+     "host": "NONE",
+     "intent": "DECORATIVE"
+    },
+    {
+     "module": "Pele",
+     "label": "kb_caixilho",
+     "area_cm2": 4.9,
+     "depth_cm": 1.4,
+     "host": "NONE",
+     "intent": "DECORATIVE"
+    },
+    {
+     "module": "Pele",
+     "label": "kb_caixilho",
+     "area_cm2": 4.9,
+     "depth_cm": 1.4,
+     "host": "NONE",
+     "intent": "DECORATIVE"
+    }
+   ],
+   "door_swing_hits": [
+    {
+     "door": "h_o006",
+     "module": "Pele",
+     "label": "kb_piso",
+     "area_cm2": 2773.7,
+     "z": [
+      0.001,
+      0.0119
+     ]
+    }
+   ],
+   "materials": {
+    "Bancada": [
+     "ph_bancada_banho_oak",
+     "ph_cuba_oak",
+     "ph_gabinete_oak",
+     "ph_kb_gola_oak",
+     "ph_kb_sombra_oak",
+     "ph_kb_torneira_oak"
+    ],
+    "Espelho": [
+     "ph_espelho_oak",
+     "ph_kb_led_oak",
+     "ph_kb_moldura_oak",
+     "ph_kb_slot_led_oak"
+    ],
+    "Vaso": [
+     "ph_kb_botao_oak",
+     "ph_kb_tampa_oak",
+     "ph_vaso_oak"
+    ],
+    "Box": [
+     "ph_box_vidro_oak",
+     "ph_kb_ducha_manual_oak",
+     "ph_kb_ducha_oak",
+     "ph_kb_folha_oak",
+     "ph_kb_frasco_oak",
+     "ph_kb_guia_oak",
+     "ph_kb_haste_oak",
+     "ph_kb_led_oak",
+     "ph_kb_misturador_oak",
+     "ph_kb_nicho_box_oak",
+     "ph_kb_perfil_oak",
+     "ph_kb_piso_box_oak",
+     "ph_kb_puxador_oak",
+     "ph_kb_ralo_oak",
+     "ph_kb_trilho_oak"
+    ],
+    "Pele": [
+     "ph_kb_caixilho_oak",
+     "ph_kb_janela_fosco_oak",
+     "ph_kb_parede_oak",
+     "ph_kb_parede_pedra_oak",
+     "ph_kb_piso_oak"
+    ],
+    "PeleTeto": [
+     "ph_kb_teto_oak"
+    ],
+    "Enxoval": [
+     "ph_kb_escova_oak",
+     "ph_kb_gancho_oak",
+     "ph_kb_papeleira_oak",
+     "ph_kb_sabonete_oak",
+     "ph_kb_toalheiro_oak"
+    ]
+   },
+   "modules": [
+    "Bancada",
+    "Box",
+    "Enxoval",
+    "Espelho",
+    "Pele",
+    "PeleTeto",
+    "Vaso"
+   ],
+   "elevated_modules": {
+    "Bancada": 0.368,
+    "Espelho": 1.0599,
+    "PeleTeto": 2.5001
+   }
+  },
+  "LAVABO": {
+   "pieces": 33,
+   "max_err_m": 5e-05,
+   "wall_penetration": [
+    {
+     "module": "Pele",
+     "label": "kb_piso",
+     "area_cm2": 2.1,
+     "depth_cm": 0.4,
+     "host": "NONE",
+     "intent": "STRUCTURAL"
+    },
+    {
+     "module": "PeleTeto",
+     "label": "kb_teto",
+     "area_cm2": 5056.4,
+     "depth_cm": 28.0,
+     "host": "NONE",
+     "intent": "STRUCTURAL"
+    },
+    {
+     "module": "Pele",
+     "label": "kb_parede",
+     "area_cm2": 1.8,
+     "depth_cm": 0.0,
+     "host": "NONE",
+     "intent": "STRUCTURAL"
+    },
+    {
+     "module": "Pele",
+     "label": "kb_parede",
+     "area_cm2": 0.9,
+     "depth_cm": 0.0,
+     "host": "NONE",
+     "intent": "STRUCTURAL"
+    }
+   ],
+   "hosted_in_wall": [],
+   "door_swing_hits": [
+    {
+     "door": "h_o001",
+     "module": "Pele",
+     "label": "kb_piso",
+     "area_cm2": 3408.0,
+     "z": [
+      0.001,
+      0.0119
+     ]
+    }
+   ],
+   "materials": {
+    "Bancada": [
+     "ph_bancada_banho_nero",
+     "ph_cuba_nero",
+     "ph_gabinete_nero",
+     "ph_kb_gola_nero",
+     "ph_kb_sombra_nero",
+     "ph_kb_torneira_nero"
+    ],
+    "Espelho": [
+     "ph_espelho_nero",
+     "ph_kb_led_nero",
+     "ph_kb_moldura_nero",
+     "ph_kb_slot_led_nero"
+    ],
+    "Vaso": [
+     "ph_kb_botao_nero",
+     "ph_kb_tampa_nero",
+     "ph_vaso_nero"
+    ],
+    "Pele": [
+     "ph_kb_parede_nero",
+     "ph_kb_piso_nero"
+    ],
+    "PeleTeto": [
+     "ph_kb_teto_nero"
+    ],
+    "Enxoval": [
+     "ph_kb_bandeja_nero",
+     "ph_kb_copo_nero",
+     "ph_kb_escova_nero",
+     "ph_kb_lixeira_nero",
+     "ph_kb_papeleira_nero",
+     "ph_kb_sabonete_nero"
+    ]
+   },
+   "modules": [
+    "Bancada",
+    "Enxoval",
+    "Espelho",
+    "Pele",
+    "PeleTeto",
+    "Vaso"
+   ],
+   "elevated_modules": {
+    "Bancada": 0.368,
+    "Espelho": 1.0599,
+    "PeleTeto": 2.5001
+   }
+  }
+ },
+ "loose_root": {
+  "loose_faces_at_root": 0,
+  "loose_edges_at_root": 0
+ },
+ "locked_shell": [
+  "DoorLeaf_Group_h_o000",
+  "DoorLeaf_Group_h_o001",
+  "DoorLeaf_Group_h_o002",
+  "DoorLeaf_Group_h_o003",
+  "DoorLeaf_Group_h_o004",
+  "DoorLeaf_Group_h_o005",
+  "DoorLeaf_Group_h_o006",
+  "Floor_Group_r000",
+  "Floor_Group_r001",
+  "Floor_Group_r002",
+  "Floor_Group_r003",
+  "Floor_Group_r004",
+  "Floor_Group_r005",
+  "Floor_Group_r006",
+  "Floor_Group_r007",
+  "GlazedBalcony_Group_h_o011",
+  "PlanShell_Group",
+  "SoftBarrier_Group_8",
+  "SoftBarrier_Group_9",
+  "WindowGlass_Group_h_o007",
+  "WindowGlass_Group_h_o008",
+  "WindowGlass_Group_h_o009",
+  "WindowGlass_Group_h_o010",
+  "WindowSash_Group_h_o007",
+  "WindowSash_Group_h_o009"
+ ]
+}
