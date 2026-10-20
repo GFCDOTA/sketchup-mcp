@@ -11,7 +11,7 @@ Covers the three slices that make the visual ACL trustworthy:
 - a guard that no machine path emits an appearance verdict (IMPROVED/SAME/WORSE).
 
 Companion: `tools/oracle_providers.py`, `tools/run_skp_visual_review.py`,
-`tools/negative_dogfood.py`, `schemas/visual_findings.schema.json`.
+`tools/negative_dogfood.py`, `core/schemas/visual_findings.schema.json`.
 """
 from __future__ import annotations
 
@@ -22,13 +22,14 @@ from pathlib import Path
 
 import pytest
 from jsonschema import Draft202012Validator
+from core.schemas import schema_path
 
 from tools import oracle_providers as op
 from tools import run_skp_visual_review as rr
 from tools.oracle_providers import OracleRequest, get_provider
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-SCHEMA_PATH = REPO_ROOT / "schemas" / "visual_findings.schema.json"
+SCHEMA_PATH = schema_path("visual_findings.schema.json")
 
 
 @pytest.fixture(scope="module")

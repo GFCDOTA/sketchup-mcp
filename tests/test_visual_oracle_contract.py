@@ -15,9 +15,11 @@ from pathlib import Path
 
 import pytest
 
+from core.schemas import schema_path
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 MANIFEST = REPO_ROOT / "fixtures" / "visual_oracle_examples" / "manifest.json"
-SCHEMA = REPO_ROOT / "schemas" / "visual_findings.schema.json"
+SCHEMA = schema_path("visual_findings.schema.json")
 SKILL = REPO_ROOT / ".claude" / "skills" / "skp-visual-self-correction" / "SKILL.md"
 SPEC = REPO_ROOT / "docs" / "specs" / "FP-030_visual_oracle_gate.md"
 TOOL = REPO_ROOT / "tools" / "oracle" / "run_skp_visual_review.py"
@@ -201,7 +203,7 @@ def test_schema_severity_enum():
 
 def test_spec_references_schema_and_tool():
     text = SPEC.read_text(encoding="utf-8")
-    assert "schemas/visual_findings.schema.json" in text
+    assert "core/schemas/visual_findings.schema.json" in text
     assert "tools/run_skp_visual_review.py" in text
 
 

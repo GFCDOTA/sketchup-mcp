@@ -11,7 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
-# Entradas versionadas da raiz hoje. Alvo final (FP-044 §6): sem schemas/ ops/ scripts/ .impeccable/ (configs/ renders/ textures/ sairam na F2).
+# Entradas versionadas da raiz hoje. Alvo final (FP-044 §6): sem ops/ scripts/ .impeccable/ (configs/ renders/ textures/ sairam na F2; schemas/ na F3).
 ROOT_ALLOWED = {
     # arquivos do projeto
     ".dockerignore", ".gitattributes", ".gitignore", "CLAUDE.md", "README.md", "docker-compose.rag.yml",
@@ -22,7 +22,6 @@ ROOT_ALLOWED = {
     # pastas a aposentar nas fatias indicadas (remover a linha no PR da fatia)
     ".impeccable",   # F5 (D-008)
     "ops",           # F4 (D-009)
-    "schemas",       # F3
     "scripts",       # so o set_clipboard_image.ps1 ate a D-005
 }
 FACADES = ROOT / "docs/specs/fp044_tools_facades.v1.json"

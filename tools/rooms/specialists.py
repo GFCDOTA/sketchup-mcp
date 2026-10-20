@@ -16,6 +16,7 @@ import re
 import unicodedata
 from pathlib import Path
 
+from core.schemas import schema_path
 from tools.rooms import capability_catalog as cc
 from tools.rooms.registry import ROOM_ALIASES, load_manifest
 
@@ -67,7 +68,7 @@ def load_profile(room_or_alias: str, root: Path = ROOT) -> dict:
 
     room = room_key(room_or_alias)
     profile = _read(profile_path(room, root))
-    schema = _read(root / "schemas/specialist_profile.v1.schema.json")
+    schema = _read(schema_path("specialist_profile.v1.schema.json", root))
     errs = [e.message for e in Draft202012Validator(schema).iter_errors(profile)]
     if errs or profile["room"] != room:
         raise ValueError("INVALID_SPECIALIST_PROFILE_" + room + ": " + "; ".join(errs[:3]))

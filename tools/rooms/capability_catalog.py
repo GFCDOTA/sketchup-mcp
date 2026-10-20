@@ -16,10 +16,12 @@ import json
 import sys
 from pathlib import Path
 
+from core.schemas import schema_path
+
 ROOT = Path(__file__).resolve().parents[2]
 CATALOG_PATH = ROOT / "tools/rooms/capability_catalog.v1.json"
-SCHEMA_PATH = ROOT / "schemas/capability_catalog.v1.schema.json"
-PROFILE_SCHEMA_PATH = ROOT / "schemas/specialist_profile.v1.schema.json"
+SCHEMA_PATH = schema_path("capability_catalog.v1.schema.json")
+PROFILE_SCHEMA_PATH = schema_path("specialist_profile.v1.schema.json")
 ROOMS = ("living", "bedroom", "kitchen", "bathroom", "service", "balcony", "closet", "home_office", "circulation")
 
 
@@ -101,7 +103,7 @@ def verify(catalog: dict | None = None, profiles: dict[str, dict] | None = None,
         errors.setdefault(code, []).append(what)
 
     catalog = catalog if catalog is not None else load_catalog(root / "tools/rooms/capability_catalog.v1.json")
-    schema = _read_json(root / "schemas/capability_catalog.v1.schema.json")
+    schema = _read_json(schema_path("capability_catalog.v1.schema.json", root))
     for err in sorted(Draft202012Validator(schema).iter_errors(catalog), key=lambda e: list(e.path)):
         flag("SCHEMA", f"{'/'.join(str(p) for p in err.path)}: {err.message[:120]}")
     if errors:

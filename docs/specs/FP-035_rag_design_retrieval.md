@@ -15,7 +15,7 @@ Resultado: o conhecimento de design é uma pasta de JSON que ninguém consulta n
 
 Tornar o conhecimento de design **consultável e injetável**, fechando o laço curadoria→.skp:
 
-1. **Schema `DesignSpecBundle.v1`** — o contrato tipado que o retrieval devolve: `{tokens[], palette, anti_patterns[], layout_hints[], provenance[], confidence}`. `schemas/design_spec_bundle.schema.json`.
+1. **Schema `DesignSpecBundle.v1`** — o contrato tipado que o retrieval devolve: `{tokens[], palette, anti_patterns[], layout_hints[], provenance[], confidence}`. `core/schemas/design_spec_bundle.schema.json`.
 2. **Verbo `retrieve(room, style, budget)` em `reference_db.py`** — JOIN faceted sobre as tabelas JÁ populadas + tokens de `references/tokens/`, **rankeado** por `(facet_match, curation_status, gate_pass, cost_fit)`. Colapsa sinônimos via `reference_grammar.TOKEN_SYNONYMS`. Devolve um `DesignSpecBundle.v1`.
 3. **Indexação dos `references/tokens/*.json`** no índice (estender `ingest()` ou ler disco no retrieve — decisão na spec).
 4. **Injeção no gerador** — `architect_program.py` passa a injetar o bundle estruturado (não o `felipe_style_dna` cru truncado) no prompt, fechando o laço curadoria→furnish→.skp.
@@ -33,7 +33,7 @@ Tornar o conhecimento de design **consultável e injetável**, fechando o laço 
 
 | Path | Mudança | Quem |
 |---|---|---|
-| `schemas/design_spec_bundle.schema.json` | **NOVO** — contrato `DesignSpecBundle.v1` | nova sessão |
+| `core/schemas/design_spec_bundle.schema.json` | **NOVO** — contrato `DesignSpecBundle.v1` | nova sessão |
 | `tools/reference_db.py` | **ESTENDER** — verbo `retrieve(room, style, budget)` + ranking + leitura de `references/tokens/`; subcomando CLI `retrieve` | nova sessão |
 | `tools/reference_db.py::ingest()` | **ESTENDER** — varrer também `references/tokens/*.json` (hoje só pega `artifacts/reference_lab/**/tokens/`) | nova sessão |
 | `tools/interior_studio/architect_program.py` | **ESTENDER** — `room_context()` chama `retrieve()`; `PROMPT` injeta o bundle estruturado no lugar do `dna` cru truncado | nova sessão |
@@ -126,7 +126,7 @@ def retrieve(..., backend="embed"):
 
 ## Done means
 
-- [ ] `schemas/design_spec_bundle.schema.json` (`DesignSpecBundle.v1`) commitado.
+- [ ] `core/schemas/design_spec_bundle.schema.json` (`DesignSpecBundle.v1`) commitado.
 - [ ] `reference_db.py retrieve --room kitchen --style black_wood_gold [--budget mid] [--json]` devolve bundle ranqueado válido.
 - [ ] `references/tokens/*.json` indexados (ingest estendido OU lidos no retrieve — documentado no código).
 - [ ] Ranking determinístico (sinal: facet + curation + gate_pass + budget_fit); colapso de sinônimo via `reference_grammar`.
@@ -146,4 +146,4 @@ def retrieve(..., backend="embed"):
 - `tools/interior_studio/reference_packs.py` — curadoria Felipe (approve/reject/main/anti → `references/felipe/<bucket>/`), `curate()`/`_write_verdict()`/`_sync_cycle()`. Fonte do `curation_status`.
 - **FP-034** (dependência) — corpus julgado de variantes; fonte de `gate_verdicts`/`curation_status` que alimenta o ranking. Sem ele, retrieve degrada pra `confidence: LOW`.
 - **Embeddings (decisão honesta):** Ollama :11434 tem `nomic-embed-text` (768-dim, F16) instalado; `/api/embeddings` e `/api/embed` retornam vetor real (verificado por curl nesta sessão). MAS o caso real é exact-match sobre dados estruturados → **faceted-first**; embeddings são fatia OPCIONAL, não fundação.
-- `tools/interior_studio/cycles.py`, `schemas/visual_findings.schema.json` (FP-030) — padrão de schema versionado + degradação honesta (`SKIPPED_OFFLINE`) a espelhar.
+- `tools/interior_studio/cycles.py`, `core/schemas/visual_findings.schema.json` (FP-030) — padrão de schema versionado + degradação honesta (`SKIPPED_OFFLINE`) a espelhar.

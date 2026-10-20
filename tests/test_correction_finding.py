@@ -6,12 +6,13 @@ from pathlib import Path
 
 import pytest
 from jsonschema import Draft202012Validator
+from core.schemas import schema_path
 
 from tools import correction_finding as cf
 from tools import finding_router as fr
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-SCHEMA_PATH = REPO_ROOT / "schemas" / "correction_finding.schema.json"
+SCHEMA_PATH = schema_path("correction_finding.schema.json")
 
 
 @pytest.fixture(scope="module")

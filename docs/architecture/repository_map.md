@@ -55,7 +55,7 @@ reutilizáveis; **sketchup** executa e inspeciona, sem decidir decoração; **mc
 | `tests/` | existe | regressões em Python puro (marker `planta74_scale` separa a escala) |
 | `scripts/` | existe | só `set_clipboard_image.ps1` (D-005); as fachadas do sofá saíram na FP-044/F2 |
 | `ops/` | existe | painel do estúdio (`ops/estudio-front/`); destino na FP-044/F4 (D-009) |
-| `schemas/` | existe | JSON Schemas de contratos; destino `core/schemas/` (FP-044/F3) |
+| `core/schemas/` | existe | JSON Schemas de contratos (ex-`schemas/` da raiz, FP-044/F3); o caminho vive só em `core.schemas` (`SCHEMA_DIR`, `schema_path`, `load`) |
 | `.impeccable/` | existe | hook de design desligado; remoção pendente da D-008 (FP-044/F5) |
 | `docs/architecture/` | existe | esta pasta: mapa, guia de migração, rotas de navegação |
 | `docs/specs/` | existe | especificações e manifestos (FP-042, FP-043) |

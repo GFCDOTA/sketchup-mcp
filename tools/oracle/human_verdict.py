@@ -14,7 +14,7 @@ ambos igualmente EXCLUSIVOS do humano (a maquina nunca escreve nenhum):
     ele pode gostar de um SAME ou desgostar de um IMPROVED. null = nao sinalizado.
   - `tags`   (list[str]): rotulos livres da curadoria ("industrial", "escuro
     demais", "gostei da luz"). Territorio humano.
-Shape completo em schemas/curadoria_verdict.schema.json.
+Shape completo em core/schemas/curadoria_verdict.schema.json.
 """
 HUMAN_VERDICTS = ("IMPROVED", "SAME", "WORSE")
 

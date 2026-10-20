@@ -139,7 +139,7 @@
           }
         }
       ],
-      "description": "null = sem achados (PENDING_VISION, nunca fabricado); objeto = visual_findings.v1 (contrato completo em schemas/visual_findings.schema.json)"
+      "description": "null = sem achados (PENDING_VISION, nunca fabricado); objeto = visual_findings.v1 (contrato completo em core/schemas/visual_findings.schema.json)"
     },
     "machine_score": {
       "type": "object",

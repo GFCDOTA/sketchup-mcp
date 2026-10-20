@@ -16,8 +16,10 @@ from pathlib import Path
 import pytest
 from jsonschema import Draft202012Validator
 
+from core.schemas import SCHEMA_DIR
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
-SCHEMAS = REPO_ROOT / "schemas"
+SCHEMAS = SCHEMA_DIR
 DAR_PATH = SCHEMAS / "decision_audit_record.schema.json"
 CV_PATH = SCHEMAS / "curadoria_verdict.schema.json"
 RWB_PATH = SCHEMAS / "rag_writeback_record.schema.json"

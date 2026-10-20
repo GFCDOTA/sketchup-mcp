@@ -161,3 +161,10 @@ comprovado. Não crie pasta vazia: o estado `previsto` do mapa existe para isso.
 | saída **nova** dos geradores do sofá (`renders/…`) | `runs/sofa_program/…` (scratch, ignorado pelo git) | o Ruby não grava mais em pasta versionada |
 | `scripts/{generalization_gate,make_gpt_review_sheet,sofa_fabric_material}.py` | `python -m tools.validation.generalization_gate`, `python -m tools.oracle.make_gpt_review_sheet`, `python -m tools.rooms.living.capabilities.sofa_fabric_material` | fachadas removidas (sem consumidores restantes) |
 
+## FP-044 / F3 — contratos perto do uso
+
+| Antes | Depois | Observação |
+|---|---|---|
+| `schemas/*.schema.json` (9) | `core/schemas/` | mesmo blob (exceto a descrição de `judged_variant`, que citava o caminho antigo); quem lê usa `from core.schemas import schema_path, load` — nada de `ROOT / "schemas" / …` |
+| `capability_catalog.py`, `specialists.py` (`root / "schemas/…"`) | `schema_path(nome, root)` | o parâmetro `root` continua valendo (testes em diretório temporário) |
+| `interior/schemas/` | sem mudança | outro conjunto (intents de cena); não referencia os contratos movidos |

@@ -197,7 +197,7 @@ def test_evidencia_incompativel_com_o_codigo_atual_bloqueia_o_plano(monkeypatch)
 
 
 def _tmp_root(tmp_path: Path) -> Path:
-    for rel in ("schemas/specialist_profile.v1.schema.json", "schemas/capability_catalog.v1.schema.json",
+    for rel in ("core/schemas/specialist_profile.v1.schema.json", "core/schemas/capability_catalog.v1.schema.json",
                 "references/sketchup/knowledge/video_recipes.v1.json", "references/sketchup/knowledge/environment_recipes.v1.json",
                 "tools/rooms/capability_catalog.v1.json", "tools/rooms/kitchen/layout.py",
                 "tools/rooms/kitchen/anchor_rules.py", "tools/rooms/kitchen/validation/ergonomics.py",
