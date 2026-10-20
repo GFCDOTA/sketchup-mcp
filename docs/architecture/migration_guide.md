@@ -184,3 +184,7 @@ propósito; use esta tabela para achar o arquivo hoje.
 | `tools.curator` | `tools.interior_studio.curator` | `interior_studio` |
 | `tools.interior_quality_scorecard` | `tools.interior_studio.interior_quality_scorecard` | `interior_studio` |
 | `tools.studio_log` (`python tools/studio_log.py …`) | `python -m tools.interior_studio.studio_log …` | `interior_studio` |
+| `tools.bathroom_layout` (`main()` = `__main__` do dono, saída idêntica) | `tools.rooms.bathroom.layout` | `rooms/bathroom` |
+| `tools.estudio_banheiro_scene` | `tools.rooms.bathroom.capabilities.estudio_banheiro_scene` | `rooms/bathroom` |
+| `tools.render_banho_auto` | `tools.rooms.bathroom.capabilities.render_banho_auto` | `rooms/bathroom` |
+| `tools.render_banho_vray` | `tools.rooms.bathroom.capabilities.render_banho_vray` | `rooms/bathroom` |

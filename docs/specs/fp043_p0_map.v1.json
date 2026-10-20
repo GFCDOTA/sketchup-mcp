@@ -1097,11 +1097,11 @@
     {
       "item": "tools/bathroom_layout.py",
       "kind": "file",
-      "disposition": "facade",
+      "disposition": "move",
       "destination": "tools/rooms/bathroom/layout.py",
       "phase": "P4",
-      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
-      "compat": "facade_permanent_in_window",
+      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "medium",
       "risk_reasons": [],
       "depth_sensitive": true,
@@ -1118,7 +1118,8 @@
           "tests/test_room_dependency_boundaries.py",
           "tests/test_room_module_architecture.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/bed_builder.py",
@@ -1773,8 +1774,8 @@
       "disposition": "move",
       "destination": "tools/rooms/bathroom/capabilities/estudio_banheiro_scene.py",
       "phase": "P4",
-      "rationale": "Capacidade exclusiva dos banheiros.",
-      "compat": "facade_at_old_path",
+      "rationale": "Capacidade exclusiva dos banheiros. FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "medium",
       "risk_reasons": [
         "Path(__file__)/parents dependente da profundidade"
@@ -3452,8 +3453,8 @@
       "disposition": "move",
       "destination": "tools/rooms/bathroom/capabilities/render_banho_auto.py",
       "phase": "P4",
-      "rationale": "Capacidade exclusiva dos banheiros.",
-      "compat": "facade_at_old_path",
+      "rationale": "Capacidade exclusiva dos banheiros. FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "medium",
       "risk_reasons": [
         "Path(__file__)/parents dependente da profundidade"
@@ -3472,8 +3473,8 @@
       "disposition": "move",
       "destination": "tools/rooms/bathroom/capabilities/render_banho_vray.py",
       "phase": "P4",
-      "rationale": "Capacidade exclusiva dos banheiros.",
-      "compat": "facade_at_old_path",
+      "rationale": "Capacidade exclusiva dos banheiros. FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "medium",
       "risk_reasons": [
         "Path(__file__)/parents dependente da profundidade"

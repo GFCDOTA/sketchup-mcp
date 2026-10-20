@@ -58,7 +58,7 @@ def test_cross_room_geometry_is_in_shared_and_legacy_aliases_match():
 def test_no_direct_bedroom_helpers_in_other_room_modules():
     for path in [
         ROOT / "tools/kitchen_layout.py",
-        ROOT / "tools/bathroom_layout.py",
+        ROOT / "tools/rooms/bathroom/layout.py",
         ROOMS / "living" / "planner.py",
     ]:
         ast.parse(path.read_text(encoding="utf-8"))
@@ -87,15 +87,13 @@ def test_room_modules_do_not_turn_consultative_knowledge_into_execution():
 
 
 def test_runtime_room_providers_are_owned_by_packages_with_legacy_aliases():
-    from tools import (bathroom_layout, bedroom_designer, bedroom_layout,
-                       kitchen_layout, service_layout)
-    from tools.rooms.bathroom import layout as bathroom
+    from tools import bedroom_designer, bedroom_layout, kitchen_layout, service_layout
     from tools.rooms.bedroom import designer as bedroom_designer_impl
     from tools.rooms.bedroom import layout as bedroom
     from tools.rooms.kitchen import layout as kitchen
     from tools.rooms.service import layout as service
 
-    assert bathroom_layout.build_boxes is bathroom.build_boxes
+    # a fachada bathroom_layout saiu na FP-044/F6: o consumidor importa tools.rooms.bathroom.layout direto.
     assert kitchen_layout.build_boxes is kitchen.build_boxes
     assert service_layout.build_boxes is service.build_boxes
     assert bedroom_layout.run is bedroom.run
@@ -103,7 +101,10 @@ def test_runtime_room_providers_are_owned_by_packages_with_legacy_aliases():
 
 
 def test_legacy_entrypoints_preserve_cli_without_owning_room_builder_source():
-    for name in ("kitchen_layout", "bathroom_layout", "service_layout",
+    # Fachada aposentada (FP-044/F6): a CLI passa a ser o __main__ do dono.
+    for owner in ("bathroom",):
+        assert 'if __name__ == "__main__":' in (ROOMS / owner / "layout.py").read_text("utf-8")
+    for name in ("kitchen_layout", "service_layout",
                  "bedroom_layout", "bedroom_designer"):
         path = ROOT / "tools" / f"{name}.py"
         src = path.read_text("utf-8")

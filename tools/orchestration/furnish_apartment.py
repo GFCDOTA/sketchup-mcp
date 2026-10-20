@@ -28,7 +28,7 @@ if not os.environ.get("PT_TO_M"):
     os.environ["PT_TO_M"] = "0.0259"
 from tools import bedroom_designer   # noqa: E402  (quartos: brain novo GPT-approved)
 from tools.rooms.shared.geometry import _oriented_box  # noqa: E402,F401 (re-export legado)
-from tools.bathroom_layout import build_boxes as bath_boxes   # noqa: E402
+from tools.rooms.bathroom.layout import build_boxes as bath_boxes   # noqa: E402
 from tools.kitchen_layout import build_boxes as kitchen_boxes   # noqa: E402
 from tools.sketchup.furnish.place_layout_skp import build_boxes as living_boxes   # noqa: E402
 from tools.room_type import (BATHROOM, BEDROOM, KITCHEN, LIVING,   # noqa: E402

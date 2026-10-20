@@ -6,13 +6,11 @@ import pytest
 from tools.rooms.kitchen import layout as kitchen
 from tools.rooms.bathroom import layout as bathroom
 from tools import kitchen_layout as legacy_kitchen
-from tools import bathroom_layout as legacy_bathroom
 from tools.rooms.shared import geometry
 
 
 @pytest.mark.parametrize("legacy,implementation,helpers", [
     (legacy_kitchen, kitchen, ("_fbox", "_wall_setup", "_window_zones")),
-    (legacy_bathroom, bathroom, ("_fbox", "_wall_setup", "_window_zones", "_door_zones")),
 ])
 def test_builder_ownership_and_compatibility(legacy, implementation, helpers):
     assert legacy.build_boxes is implementation.build_boxes
@@ -26,7 +24,15 @@ def test_builder_ownership_and_compatibility(legacy, implementation, helpers):
         assert getattr(implementation, sym) is getattr(geometry, sym)
 
 
-@pytest.mark.parametrize("legacy,room", [(legacy_kitchen, "kitchen"), (legacy_bathroom, "bathroom")])
+def test_bathroom_builder_is_owned_by_the_room_and_reuses_shared_geometry():
+    """A fachada bathroom_layout saiu na FP-044/F6; o contrato do dono continua: builder unico + helpers do shared."""
+    assert bathroom.build_boxes.__module__ == bathroom.__name__
+    assert bathroom._to_box.__module__ == bathroom.__name__
+    for sym in ("_fbox", "_wall_setup", "_window_zones", "_door_zones"):
+        assert getattr(bathroom, sym) is getattr(geometry, sym)
+
+
+@pytest.mark.parametrize("legacy,room", [(legacy_kitchen, "kitchen")])
 def test_legacy_module_is_thin_facade_without_duplicate_builder(legacy, room):
     text = Path(legacy.__file__).read_text(encoding="utf-8")
     assert "def build_boxes(" not in text
@@ -42,6 +48,5 @@ def test_kitchen_anchor_validator_uses_same_canonical_builder():
 
 
 def test_bathroom_skin_and_sink_helpers_stay_in_bathroom():
-    assert legacy_bathroom._skin_parts is bathroom._skin_parts
-    assert legacy_bathroom._enxoval_parts is bathroom._enxoval_parts
-    assert legacy_bathroom.theme_of is bathroom.theme_of
+    for helper in (bathroom._skin_parts, bathroom._enxoval_parts, bathroom.theme_of):
+        assert helper.__module__ == bathroom.__name__

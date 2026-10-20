@@ -6,7 +6,7 @@ Deriva do brain (bathroom_layout) o bbox real do cômodo e a posição do hero
 câmera na parede da bancada olhando pro fundo, washes na parede do espelho,
 rectangle light no teto DENTRO do box. Delega o render ao render_banho_vray.
 
-Uso: python -m tools.render_banho_auto --room r006 --out artifacts/.../x.png
+Uso: python -m tools.rooms.bathroom.capabilities.render_banho_auto --room r006 --out artifacts/.../x.png
 """
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ sys.path.insert(0, str(ROOT))
 # .skp mobiliado se PT_TO_M estiver congelado ANTES do import — com o default
 # as peças saem 1.36x maiores e a câmera aponta pro vazio.
 os.environ.setdefault("PT_TO_M", "0.0259")
-from tools.bathroom_layout import build_boxes            # noqa: E402
+from tools.rooms.bathroom.layout import build_boxes            # noqa: E402
 
 CONSENSUS = ROOT / "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json"
 EYE_Z, TGT_Z = 64.0, 45.0          # 1.63m de olho, mira a 1.14m (receita p23)
@@ -110,7 +110,7 @@ def main() -> None:
     ns = ap.parse_args()
 
     f = frame(ns.room)
-    cmd = [sys.executable, "-m", "tools.render_banho_vray",
+    cmd = [sys.executable, "-m", "tools.rooms.bathroom.capabilities.render_banho_vray",
            "--eye", ",".join(f"{v:.1f}" for v in f["eye"]),
            "--target", ",".join(f"{v:.1f}" for v in f["target"]),
            "--fov", "60", "--iso", "160", "--shutter", "80", "--fnum", "5.6",

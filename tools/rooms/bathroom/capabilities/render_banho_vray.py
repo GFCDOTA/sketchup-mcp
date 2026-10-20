@@ -2,7 +2,7 @@
 Banheiro). Copia o furnished.skp, exporta .vrscene com camera custom (inches),
 aplica o theme estudio_banho (_ph_*) + fills e renderiza com vray.exe.
 
-Uso: python -m tools.render_banho_vray --eye x,y,z --target x,y,z --out png
+Uso: python -m tools.rooms.bathroom.capabilities.render_banho_vray --eye x,y,z --target x,y,z --out png
      [--fov 55 --iso 160 --fnum 5.6 --shutter 56 --sky 0.3 --width 1100
       --height 1375 --fill "x,y,z,int[,raio_in];..."  (tudo em INCHES)]
 """

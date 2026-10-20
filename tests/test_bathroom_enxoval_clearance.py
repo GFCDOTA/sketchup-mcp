@@ -34,7 +34,7 @@ def _z(b):
 
 
 def _bath_rooms():
-    from tools.bathroom_layout import build_boxes
+    from tools.rooms.bathroom.layout import build_boxes
     con = json.loads(CON.read_text("utf-8"))
     out = {}
     for r in con.get("rooms", []):
