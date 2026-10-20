@@ -6,7 +6,7 @@ porta nem janela) como boa parede de cabeceira. NAO sao plantas reais —
 exercitam o ranking (cabeceira na parede limpa, guarda-roupa, criados-mudos,
 sem bloquear porta/janela; cama sob janela = soft).
 
-Espelha os helpers/ancora de tools.make_synthetic_rooms (self-contained pra
+Espelha os helpers/ancora de tools.rooms.living.capabilities.make_synthetic_rooms (self-contained pra
 rodar standalone, igual ao sibling). Regras de dormitorio
 validadas com ChatGPT (consult "Prioridade Quartos e Layout", 2026-06-05).
 Felipe 2026-06-05. NAO usa 3D Warehouse / estilo / SKP.

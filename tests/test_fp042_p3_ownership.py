@@ -9,7 +9,7 @@ def test_all_p3_paths_have_explicit_runtime_owners():
     assert report["result"] == "PASS", report
     # A contagem cai com cada fachada removida na FP-044 (F2: scripts/sofa_fabric_material.py; F6: lotes de comodo):
     # arquivo e linha da tabela saem juntos.
-    assert report["checked"] == len(OWNER_TABLE) == 109
+    assert report["checked"] == len(OWNER_TABLE) == 99
 
 
 def test_missing_or_unknown_p3_path_fails_closed():
@@ -21,7 +21,7 @@ def test_missing_or_unknown_p3_path_fails_closed():
 
 
 def test_runtime_and_legacy_paths_have_different_roles():
-    assert OWNER_TABLE["tools/sofa_class.py"] == "public_legacy_compatibility_facade"
+    # (a fachada de sofa_class saiu na FP-044/F6; test_all_p3_paths_* exige OWNER_TABLE == inventario)
     assert OWNER_TABLE["tools/rooms/living/sofa_class.py"] == "tools.rooms.living"
     assert OWNER_TABLE["interior/planners/living_room_planner.py"] == "living_planner_legacy_facade"
     assert OWNER_TABLE["tools/rag_embed_backend.py"] == "cross_room_rag_infrastructure"

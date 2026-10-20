@@ -10,7 +10,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from tools.dining_table_class import (CHAIR, MATRIX, PLACE_W_MIN,  # noqa: E402
+from tools.rooms.living.dining_table_class import (CHAIR, MATRIX, PLACE_W_MIN,  # noqa: E402
                                       _apply_sab, _chair_proxy_parts,
                                       _sabotages, _seat_anchors,
                                       build_dining_table, chair_satellite_gate,
@@ -109,7 +109,7 @@ def test_visibility_gate_is_institutional():
 
 def test_matrix_builds(tmp_path):
     pytest.importorskip("matplotlib")
-    from tools.dining_table_class import build_matrix
+    from tools.rooms.living.dining_table_class import build_matrix
     res = build_matrix(tmp_path)
     assert len(res["report"]) == 9
     for r in res["report"]:

@@ -9,7 +9,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from tools.armchair_class import (ARCHETYPES, _sabotages,            # noqa: E402
+from tools.rooms.living.armchair_class import (ARCHETYPES, _sabotages,            # noqa: E402
                                   armchair_class_gate, derive_armchair_spec)
 from tools.armchair_builder import build_armchair                     # noqa: E402
 
@@ -79,7 +79,7 @@ def test_cavity_cushions_lighter_than_shell():
 
 def test_matrix_builds_and_gates(tmp_path):
     pytest.importorskip("matplotlib")
-    from tools.armchair_class import build_matrix
+    from tools.rooms.living.armchair_class import build_matrix
     res = build_matrix(tmp_path)
     assert len(res["report"]) == 9
     for r in res["report"]:

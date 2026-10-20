@@ -1,7 +1,7 @@
 # POLTRONA (armchair) — DesignIntentSpec da CLASSE procedural
 
 > Cycle 001 (2026-06-12) — 2a classe do programa arquiteto-de-classe, replicando o
-> template do sofá (PASS em 3 ciclos). Executável: `tools/armchair_class.py`.
+> template do sofá (PASS em 3 ciclos). Executável: `tools/rooms/living/armchair_class.py`.
 > Geometria: REUSA `sofa_builder.build_sofa(seats=1)` — herda a gramática congelada
 > do sofá (sapata/cap/taper, rake, bevel, overhang, recess). A classe é a TEORIA.
 

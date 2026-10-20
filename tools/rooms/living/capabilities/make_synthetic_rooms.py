@@ -4,7 +4,7 @@ gpt_composition_spec.md). Salas retangulares/L simples, com porta + porta-vidro
 (varanda) + paredes-TV candidatas. NAO sao plantas reais — so testam se o
 ranking se comporta certo (core ancorado vence, opcional removido se bloqueia).
 
-Uso: python -m tools.make_synthetic_rooms   (gera fixtures/synthetic_rooms/*.json)
+Uso: python -m tools.rooms.living.capabilities.make_synthetic_rooms   (gera fixtures/synthetic_rooms/*.json)
 """
 import json
 from pathlib import Path

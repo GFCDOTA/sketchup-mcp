@@ -16,8 +16,8 @@ Satelites (PADRAO INSTITUCIONAL — visiveis na matriz, nao so no label):
   - ENVELOPE de uso por cadeira (pad de piso 0.55x0.75 desde a borda);
   - ANEL DE CIRCULACAO 0.90m ao redor do footprint (area minima de uso humano).
 
-Uso: python -m tools.dining_table_class            (prova + sabotagens)
-     python -m tools.dining_table_class --matrix   (matriz 9 pro juiz)
+Uso: python -m tools.rooms.living.dining_table_class            (prova + sabotagens)
+     python -m tools.rooms.living.dining_table_class --matrix   (matriz 9 pro juiz)
 """
 from __future__ import annotations
 
@@ -568,7 +568,7 @@ MATRIX = [(f"{arch}@{seats}p", arch, seats)
 
 def build_matrix(out_dir):
     from tools.render_parts_iso import render_parts
-    from tools.sofa_class_matrix import _grid_sheet
+    from tools.rooms.living.capabilities.sofa_class_matrix import _grid_sheet
     import json as _json
     out = Path(out_dir).resolve()
     out.mkdir(parents=True, exist_ok=True)

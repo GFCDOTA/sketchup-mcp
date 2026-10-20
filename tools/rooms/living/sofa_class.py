@@ -13,7 +13,7 @@
 
 NAO toca tools/sofa_builder.py nem tools/furniture_anatomy_spec.py (geometria
 provada nos cycles 1-4 + worktree sofa-skill ativo nos mesmos arquivos).
-Uso: python -m tools.sofa_class   (valida arquetipos x lugares + sabotagens)
+Uso: python -m tools.rooms.living.sofa_class   (valida arquetipos x lugares + sabotagens)
 """
 from __future__ import annotations
 

@@ -178,7 +178,7 @@ def _apply_layout_seed(con: dict, boxes: list[dict], seed: int) -> tuple[list[di
     menos candidatos validos que seeds, ids continuam distintos)."""
     if seed <= 0:
         return boxes, "brain_default"
-    from tools.layout_candidates import run as lc_run
+    from tools.rooms.living.planning.layout_candidates import run as lc_run
     from tools.sketchup.furnish.place_layout_skp import build_boxes as template_boxes
     from tools.room_type import LIVING, classify_rooms
     living = next((r for r in classify_rooms(con) if r["room_type"] == LIVING), None)
@@ -503,7 +503,7 @@ def sweep(n: int | None, out_root: Path, *, plant: str = "planta_74",
         name = rec["variant_id"].split("__", 1)[-1][:42]
         cells4.append((name, p, worst, rec.get("verdict")))
     if cells4:
-        from tools.sofa_class_matrix import _grid_sheet
+        from tools.rooms.living.capabilities.sofa_class_matrix import _grid_sheet
         _grid_sheet(cells4, out_root / "contact_sheet.png",
                     f"FP-034 variant sweep — {plant} ({len(cells4)} celulas, "
                     f"verdicts = maquina provisional; aparencia final = Felipe)")

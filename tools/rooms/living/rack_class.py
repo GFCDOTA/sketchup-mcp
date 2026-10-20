@@ -9,8 +9,8 @@ XOR base/toe-recess), fachada com ritmo (nichos/gavetas) e vazio tecnico.
 
 Satelites: TV servida (55/65/75 pol) + SOFA (distancia/linha do olho sentado).
 
-Uso: python -m tools.rack_class            (prova + sabotagens)
-     python -m tools.rack_class --matrix   (matriz 9 pro juiz)
+Uso: python -m tools.rooms.living.rack_class            (prova + sabotagens)
+     python -m tools.rooms.living.rack_class --matrix   (matriz 9 pro juiz)
 """
 from __future__ import annotations
 
@@ -355,7 +355,7 @@ MATRIX = [(f"{arch}@tv{tv}", arch, tv)
 
 def build_matrix(out_dir):
     from tools.render_parts_iso import render_parts
-    from tools.sofa_class_matrix import _grid_sheet
+    from tools.rooms.living.capabilities.sofa_class_matrix import _grid_sheet
     import json as _json
     out = Path(out_dir).resolve()
     out.mkdir(parents=True, exist_ok=True)

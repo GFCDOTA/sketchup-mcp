@@ -45,7 +45,7 @@ def living_room_boxes(con, room_id):
     # bracos finos + pes de ferro). Substitui a heuristica `3 se w>=2.0 senao 2` que
     # esticava per_seat fora da classe (defeito que a Fase 0 revelou). So a largura e'
     # fixada ao nicho; o resto e' in-class por construcao.
-    from tools.sofa_class import derive_living_sofa, sofa_class_gate
+    from tools.rooms.living.sofa_class import derive_living_sofa, sofa_class_gate
     _sofa_spec = derive_living_sofa(width_m)
     parts, _ = build_sofa(_sofa_spec)
     # gate de classe no caminho REAL (Fase 0): agora o sofa nasce in-class, entao isto e'
@@ -79,7 +79,7 @@ def living_room_boxes(con, room_id):
     # RACK = painel/credenza PLANEJADO ancorado na parede-TV (planned_niche_system, NUNCA cubo proxy).
     # LIVING_ROOM_LAYOUT_FIX_OPTION_A: a FORMA entra SEMPRE (sai do proxy); a cor é neutra no baseline
     # e escura só sob FURNISH_STYLE (a estética black_wood_gold entra numa fase posterior).
-    from tools.rack_class import build_rack, derive_rack_spec
+    from tools.rooms.living.rack_class import build_rack, derive_rack_spec
     # BLACK_WOOD_GOLD DIRETO (programa apê-inteiro 2026-08-03): a sala nasce
     # estilizada como a cozinha — a estética não depende mais de FURNISH_STYLE.
     _rlen = round(min(1.55, max(1.30, _rack_wall_len - 0.35)), 2)
@@ -333,7 +333,7 @@ def living_room_boxes(con, room_id):
     # 2026-08-12: a conectividade dos portais é uma checagem de conjunto (flood-fill
     # no cômodo inteiro), então a mesa de jantar decide primeiro o "istmo" livre e a
     # mesa de centro busca (2D, gate real) o que ainda sobrou sem fechar o resto.
-    from tools.coffee_table_class import CoffeeTableClassSpec, build_coffee_table_v2
+    from tools.rooms.living.coffee_table_class import CoffeeTableClassSpec, build_coffee_table_v2
     _ct = CoffeeTableClassSpec(style="two_tier", length=0.95, width=0.50, height=0.38, shelf=True,
                                top_rgb=(30, 29, 32), leg_rgb=(26, 26, 28))
     _ctp, _ = build_coffee_table_v2(_ct.validate())

@@ -199,3 +199,8 @@ propósito; use esta tabela para achar o arquivo hoje.
 | `tools.kitchen_vray` | `tools.rooms.kitchen.capabilities.vray` | `rooms/kitchen` |
 | `tools.kitchen_wall_regression_gate` | `tools.rooms.kitchen.validation.wall_regression` | `rooms/kitchen` |
 | `tools.bake_theme_skp` | `tools.rooms.kitchen.capabilities.bake_theme` | `rooms/kitchen` |
+| `tools.{sofa,rack,coffee_table,dining_table,armchair}_class` | `tools.rooms.living.{…}_class` | `rooms/living` |
+| `tools.layout_candidates` | `tools.rooms.living.planning.layout_candidates` | `rooms/living` |
+| `tools.sofa_gate` | `tools.rooms.living.validation.sofa_gate` | `rooms/living` |
+| `tools.{make_synthetic_rooms,sofa_furnish_fase1_compare,sofa_premium_harness,sofa_venezia_compare,sofa_venezia_room}` | `tools.rooms.living.capabilities.{…}` | `rooms/living` |
+| `tools.sofa_class_matrix` | **fica** (D-012); consumidores do living já usam `tools.rooms.living.capabilities.sofa_class_matrix` | `rooms/living` |

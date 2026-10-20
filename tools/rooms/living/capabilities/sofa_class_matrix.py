@@ -1,11 +1,11 @@
 """sofa_class_matrix.py — FASE 3 do programa de classe: PROVA DE GENERALIZACAO
 visual. Gera uma MATRIZ de variantes do sofa derivadas PELA CLASSE
-(tools/sofa_class.derive_spec — nada e' ajustado a mao), valida cada uma no
+(tools.rooms.living.sofa_class.derive_spec — nada e' ajustado a mao), valida cada uma no
 sofa_class_gate + sofa_gate (anatomia), renderiza SU-free (render_parts_iso,
 camera 3/4 identica em todas) e monta um GRID unico pro juiz GPT julgar:
 identidade de familia, proporcao em escala, degradacao em extremos.
 
-Uso: python -m tools.sofa_class_matrix [out_dir]
+Uso: python -m tools.rooms.living.capabilities.sofa_class_matrix [out_dir]
 """
 from __future__ import annotations
 
@@ -17,8 +17,8 @@ ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT))
 from tools.render_parts_iso import render_parts            # noqa: E402
 from tools.sofa_builder import build_sofa                   # noqa: E402
-from tools.sofa_class import derive_spec, sofa_class_gate   # noqa: E402
-from tools.sofa_gate import gate as sofa_gate               # noqa: E402
+from tools.rooms.living.sofa_class import derive_spec, sofa_class_gate   # noqa: E402
+from tools.rooms.living.validation.sofa_gate import gate as sofa_gate               # noqa: E402
 
 # 9 celulas cobrindo os eixos: arquetipo x lugares x braco x base (+1 chaise).
 # Inclui extremos DELIBERADOS (4l chunky, lounge 4l) — degradacao em extremo

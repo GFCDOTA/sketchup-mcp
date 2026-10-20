@@ -5,7 +5,7 @@ w>=2.0 senao 2 — estica per_seat pra fora da classe). DEPOIS = Fase 1
 (derive_living_sofa: a CLASSE escolhe os lugares + arquetipo VENEZIA curado pelo
 Felipe). SU-free (render_parts_iso, mesma camera) -> sheet 2x2 pro veredito VISUAL.
 
-Uso: python -m tools.sofa_furnish_fase1_compare [out_dir]
+Uso: python -m tools.rooms.living.capabilities.sofa_furnish_fase1_compare [out_dir]
 """
 from __future__ import annotations
 
@@ -17,8 +17,8 @@ sys.path.insert(0, str(ROOT))
 from tools.furniture_anatomy_spec import sofa_spec               # noqa: E402
 from tools.render_parts_iso import render_parts                  # noqa: E402
 from tools.sofa_builder import build_sofa                        # noqa: E402
-from tools.sofa_class import derive_living_sofa, sofa_class_gate  # noqa: E402
-from tools.sofa_class_matrix import _grid_sheet                  # noqa: E402
+from tools.rooms.living.sofa_class import derive_living_sofa, sofa_class_gate  # noqa: E402
+from tools.rooms.living.capabilities.sofa_class_matrix import _grid_sheet                  # noqa: E402
 
 WIDTHS = (1.90, 2.80)   # nichos onde a heuristica antiga REPROVA a classe
 

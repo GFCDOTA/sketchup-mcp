@@ -19,8 +19,6 @@ ROOM_NAMES = frozenset({
 LEGACY_ROOM_MODULES = {
     "tools.service_layout": "tools.rooms.service.layout",
     "interior.planners.living_room_planner": "tools.rooms.living.planner",
-    **{f"tools.{name}_class": f"tools.rooms.living.{name}_class"
-       for name in ("sofa", "rack", "coffee_table", "dining_table", "armchair")},
 }
 
 

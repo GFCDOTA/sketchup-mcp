@@ -9,7 +9,7 @@ Deterministico (Python, sem SU). Criterios (Felipe):
   SOFT (falha -> no maximo WARN):
     - bbox bate com o esperado (tol 5 cm)
     - sem peca solta (conjunto conectado)
-Uso (cross-check da planta tb): from tools.sofa_gate import gate
+Uso (cross-check da planta tb): from tools.rooms.living.validation.sofa_gate import gate
 """
 from __future__ import annotations
 

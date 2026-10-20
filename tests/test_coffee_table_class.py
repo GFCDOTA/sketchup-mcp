@@ -9,7 +9,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from tools.coffee_table_class import (ARCHETYPES, SOFAS_REF, _apply_sab,  # noqa: E402
+from tools.rooms.living.coffee_table_class import (ARCHETYPES, SOFAS_REF, _apply_sab,  # noqa: E402
                                       _sabotages, build_coffee_table_v2,
                                       coffee_table_class_gate,
                                       derive_coffee_spec, sofa_satellite_gate)
@@ -67,7 +67,7 @@ def test_archetype_grammar_in_geometry():
 
 def test_matrix_builds(tmp_path):
     pytest.importorskip("matplotlib")
-    from tools.coffee_table_class import build_matrix
+    from tools.rooms.living.coffee_table_class import build_matrix
     res = build_matrix(tmp_path)
     assert len(res["report"]) == 9
     for r in res["report"]:

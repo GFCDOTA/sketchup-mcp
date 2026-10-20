@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.layout_candidates import run
+from tools.rooms.living.planning.layout_candidates import run
 
 REPO = Path(__file__).resolve().parents[1]
 SYNTH = REPO / "fixtures" / "synthetic_rooms"

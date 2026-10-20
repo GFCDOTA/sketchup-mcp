@@ -25,7 +25,7 @@ sys.path.insert(0, str(ROOT))
 from tools.decor_builders import BUILDERS as DECOR_BUILDERS          # noqa: E402
 from tools.furniture_anatomy_spec import sofa_spec                   # noqa: E402
 from tools.sofa_builder import build_sofa                            # noqa: E402
-from tools.sofa_class import PREMIUM_LIVING_UPHOLSTERY               # noqa: E402
+from tools.rooms.living.sofa_class import PREMIUM_LIVING_UPHOLSTERY               # noqa: E402
 
 STYLE_DIR = ROOT / "interior" / "style_packs"
 

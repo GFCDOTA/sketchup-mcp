@@ -1,7 +1,7 @@
 # SOFA — DesignIntentSpec da CLASSE procedural
 
 > FASE 1 do programa "arquiteto de classe" (2026-06-12). Este documento define a
-> TEORIA da classe sofá; a versão executável vive em `tools/sofa_class.py`
+> TEORIA da classe sofá; a versão executável vive em `tools/rooms/living/sofa_class.py`
 > (faixas, relações, derivação e gate de proporção). Regra do programa: melhoria
 > sobe pra spec/constraints/gerador/gate — nunca remendo de exemplar.
 > Os 4 ciclos GPT do exemplar (WARN→PASS limpo, verdicts SOFA-STRAIGHT-3SEAT_*)

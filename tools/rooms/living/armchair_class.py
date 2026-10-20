@@ -11,8 +11,8 @@ encosto acima do braco, e PRESENCA DO BRACO proporcional: braco fino COMPENSA
 com integracao (wrap), nunca engordando celula. Fonte: tabela ergonomica +
 veredito ARMCHAIR-CLASS_cycle001 ("objeto unitario, nao modulo de sofa cortado").
 
-Uso: python -m tools.armchair_class           (prova: arquetipos + sabotagens)
-     python -m tools.armchair_class --matrix  (matriz visual pro juiz)
+Uso: python -m tools.rooms.living.armchair_class           (prova: arquetipos + sabotagens)
+     python -m tools.rooms.living.armchair_class --matrix  (matriz visual pro juiz)
 """
 from __future__ import annotations
 
@@ -230,7 +230,7 @@ MATRIX = [
 
 def build_matrix(out_dir):
     from tools.render_parts_iso import render_parts
-    from tools.sofa_class_matrix import _grid_sheet
+    from tools.rooms.living.capabilities.sofa_class_matrix import _grid_sheet
     import json as _json
     out = Path(out_dir).resolve()
     out.mkdir(parents=True, exist_ok=True)

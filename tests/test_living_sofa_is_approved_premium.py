@@ -20,7 +20,7 @@ from __future__ import annotations
 import re
 
 from tools.sofa_builder import build_sofa
-from tools.sofa_class import derive_living_sofa
+from tools.rooms.living.sofa_class import derive_living_sofa
 
 WIDTHS_M = [1.9, 2.1, 2.8]  # nichos reais de sala; a classe fixa só a largura
 

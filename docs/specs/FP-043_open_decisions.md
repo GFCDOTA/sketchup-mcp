@@ -12,6 +12,7 @@ linha vira uma nota de decisão com data e o item sai daqui.
 | D-004 | Dono da CLI `tools/trace_view.py` | Felipe | só o destino dele em P4 |
 | D-005 | `scripts/set_clipboard_image.ps1` ainda útil | Felipe | só o destino dele em P4 |
 | D-011 | 4 fachadas de `tools/` lidas pelo Inspector do harness (fora das 8 públicas) | técnica (PR no harness) | só a remoção dessas 4 na FP-044/F6 |
+| D-012 | `tools/sofa_class_matrix.py` esconde uma dependência quarto → living do gate de fronteira | técnica (onde mora `_grid_sheet`) | só a remoção dessa fachada na FP-044/F6 |
 
 **Linha final (P8, 2026-10-19):** D-001 a D-005 = BLOCKED_DECISION (Felipe; material da D-001 em `artifacts/review/fp043/p3a04_quadrado_d001/`); D-006 = RESOLVED; D-007 = OPEN_TECNICA (planta_74 já respeita o contrato por cômodo; sintéticas seguem `xfail(strict)`).
 
@@ -107,3 +108,16 @@ repontando o catálogo para os donos (`tools/knowledge/reference_db.py`, `tools/
 `tools/oracle/ollama_bridge.py`, `tools/validation/run_deterministic_gates.py`); depois disso uma fatia futura remove
 as 4. Até lá, o critério §11 da FP-044 ("`tools/*.py` = 8 públicas + 2 bloqueadas") não fecha: estado `PARTIAL`
 (consumidor externo).
+
+## D-012 — fachada `tools/sofa_class_matrix.py` esconde uma dependência quarto → living (FP-044/F6)
+
+**Achado (lote `rooms/living`).** `tools/rooms/bedroom/bed_class.py::build_matrix` importa `_grid_sheet` (helper puro de
+folha-contato em PIL) de `tools.rooms.living.capabilities.sofa_class_matrix`, **pela fachada** `tools.sofa_class_matrix`.
+O gate de fronteira (`tools.rooms.ownership_audit`) só resolve as fachadas listadas em `LEGACY_ROOM_MODULES`; esta não
+está lá, então a dependência quarto → living ficava invisível. Reescrever o import para o dono faz o gate reprovar
+(`CROSS_ROOM_DEPENDENCY`) — o que é correto.
+
+**Decisão técnica tomada na F6:** a fachada fica (`BLOCKED_HIDDEN_CROSS_ROOM_DEPENDENCY` no JSON de fachadas; o
+`bed_class` continua importando por ela, exatamente como antes). Mover `_grid_sheet` para um lugar compartilhado
+(`tools/rooms/shared/` ou `tools/rendering/`) é uma alteração de estrutura que não foi pedida — fica como proposta para
+uma fatia própria; depois disso a fachada sai e o gate passa sem exceção.

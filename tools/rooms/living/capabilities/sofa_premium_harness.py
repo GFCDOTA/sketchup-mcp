@@ -7,7 +7,7 @@ do repo) e espera o DONE. Com --alt006, o .rb aplica o roundover nativo de
 25mm nas arestas verticais frontais dos braços (interseção de sólidos).
 
 Uso:
-    python -m tools.sofa_premium_harness [--alt006] [--tag baseline]
+    python -m tools.rooms.living.capabilities.sofa_premium_harness [--alt006] [--tag baseline]
 """
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ def premium_spec():
     # (PREMIUM_LIVING_UPHOLSTERY em sofa_class) — o builder de produção e este harness
     # não podem divergir. Antes, os overrides estavam duplicados AQUI e a produção
     # ficava com o sofá velho (bug 2026-07-12).
-    from tools.sofa_class import derive_living_sofa
+    from tools.rooms.living.sofa_class import derive_living_sofa
     return derive_living_sofa(2.1)
 
 

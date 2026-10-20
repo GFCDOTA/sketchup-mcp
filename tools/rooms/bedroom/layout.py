@@ -1,6 +1,6 @@
 """bedroom_layout.py — bedroom layout brain (Etapa B+C pra QUARTOS).
 
-Espelha tools/layout_candidates.py (sala), mas pra DORMITORIO: posiciona
+Espelha tools/rooms/living/planning/layout_candidates.py (sala), mas pra DORMITORIO: posiciona
 PLACEHOLDERS (cama + criados-mudos + guarda-roupa; bounding boxes, NAO assets
 3D) e scoreia por gates DUROS (dentro do comodo; cabeceira encostada na parede;
 nao bloquear porta/giro; passagem >= 0.60 m) e SUAVES (folga lateral/pe da cama,

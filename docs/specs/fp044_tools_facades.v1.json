@@ -27,7 +27,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/ask_gpt_gate.py",
@@ -171,7 +171,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/collision_envelope_gate.py",
@@ -327,7 +327,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/disarm_sketchup_autoruns.py",
@@ -664,7 +664,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/layout_rules.py",
@@ -700,7 +700,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/material_review.py",
@@ -928,7 +928,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/rag_embed_backend.py",
@@ -1204,7 +1204,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/sofa_class_matrix.py",
@@ -1216,7 +1216,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "BLOCKED_HIDDEN_CROSS_ROOM_DEPENDENCY"
   },
   {
    "path": "tools/sofa_furnish_fase1_compare.py",
@@ -1228,7 +1228,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/sofa_gate.py",
@@ -1240,7 +1240,7 @@
     "config": 3
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/sofa_premium_harness.py",
@@ -1252,7 +1252,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/sofa_venezia_compare.py",
@@ -1264,7 +1264,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/sofa_venezia_room.py",
@@ -1276,7 +1276,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/soft_barrier_source_audit.py",

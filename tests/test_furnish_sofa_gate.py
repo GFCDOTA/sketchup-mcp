@@ -10,7 +10,7 @@ import pytest
 
 from tools.furniture_anatomy_spec import sofa_spec
 from tools.sofa_builder import build_sofa
-from tools.sofa_class import derive_living_sofa, sofa_class_gate
+from tools.rooms.living.sofa_class import derive_living_sofa, sofa_class_gate
 
 
 # larguras reais de nicho num ape compacto (2-lug ate 4-lug)

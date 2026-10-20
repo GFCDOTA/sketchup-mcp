@@ -1,7 +1,7 @@
 """Feedback loop / anti-patterns — prova que as regras de layout entraram.
 
 Cobre tools/layout_rules.py (catalogo + flag_anti_patterns) e a integracao no
-tools/layout_candidates.py (JSON ganha anti_patterns / anti_patterns_flagged).
+tools/rooms/living/planning/layout_candidates.py (JSON ganha anti_patterns / anti_patterns_flagged).
 Sem 3DW, sem asset, sem SKP. Felipe 2026-06-04.
 """
 from __future__ import annotations
@@ -94,7 +94,7 @@ def test_every_flag_resolves_to_a_known_rule():
 
 @pytest.mark.skipif(not _PLANTA.exists(), reason="planta_74 fixture absent")
 def test_run_emits_anti_patterns_in_json():
-    from tools.layout_candidates import run
+    from tools.rooms.living.planning.layout_candidates import run
     con = json.loads(_PLANTA.read_text("utf-8"))
     _, out = run(con, "r002")
     # criterio #4: JSON inclui anti_patterns por candidato + agregado
@@ -108,7 +108,7 @@ def test_run_emits_anti_patterns_in_json():
 @pytest.mark.skipif(not _PLANTA.exists(), reason="planta_74 fixture absent")
 def test_ambiguous_tv_wall_is_explained_not_crammed():
     """RL-11: parede-TV AMBIGUOUS na sala r002 gera ressalva textual."""
-    from tools.layout_candidates import run
+    from tools.rooms.living.planning.layout_candidates import run
     con = json.loads(_PLANTA.read_text("utf-8"))
     _, out = run(con, "r002")
     if out["tv_wall"]["confidence"] == "ambiguous":
