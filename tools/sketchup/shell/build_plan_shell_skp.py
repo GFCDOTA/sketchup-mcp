@@ -1261,7 +1261,7 @@ def _auto_promote(args, result):
                for k, v in det.get("gates", {}).items()
                if v.get("overall", v.get("verdict")) != "PASS"}
         return f"PROMOTE_SKIPPED deterministic gates {det.get('overall')}: {bad}"
-    from tools.promote_canonical import promote as _promote
+    from tools.orchestration.promote_canonical import promote as _promote
     plant = _infer_plant(args.consensus, args.plant)
     res = _promote(out_dir, plant)
     return (f"PROMOTED -> artifacts/{plant}/{plant}.skp sha={res['sha']} "

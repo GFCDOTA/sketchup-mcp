@@ -26,7 +26,7 @@ determinístico, não depende de code review pegar a próxima duplicação.
 **Project example**: `tools/validation/optimizer_consistency_gate.py` — 3 camadas
 (implementação única, provenance persistida em
 `out["placement_decisions"]`, reavaliação do gate canônico no estado
-final). Achado ao vivo: `tools/correction_fixes.py` tinha uma cópia própria
+final). Achado ao vivo: `tools/orchestration/correction/correction_fixes.py` tinha uma cópia própria
 da regra de colisão que quebrou quando a canônica mudou — a motivação do
 gate virou realidade no mesmo dia em que foi escrito.
 

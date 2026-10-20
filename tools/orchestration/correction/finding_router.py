@@ -5,7 +5,7 @@ finding (from the deterministic gates OR from `visual_findings.v1` / FP-032), it
 decides who acts:
 
 - ``DETERMINISTIC_AUTOFIX`` — the loop fixes it itself (a registered, source-
-  supported handler exists for this type; ``tools/correction_fixes.py``).
+  supported handler exists for this type; ``tools/orchestration/correction/correction_fixes.py``).
 - ``NEEDS_VISION``          — no deterministic measure; needs the FP-032 visual ACL
   to confirm/localize, then the typed visual finding is re-injected next cycle.
 - ``NEEDS_FELIPE``          — an APPEARANCE judgment, or a fix that would invent

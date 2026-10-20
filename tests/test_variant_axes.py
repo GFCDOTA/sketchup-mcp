@@ -6,8 +6,8 @@ from __future__ import annotations
 import pytest
 
 from tools.rooms.shared.materials import STYLE_TOKENS
-from tools.variant_axes import Variant, default_axes, layout_axis, style_axis, theme_axis
-from tools.variant_sweep import expand_axes
+from tools.orchestration.variant_axes import Variant, default_axes, layout_axis, style_axis, theme_axis
+from tools.orchestration.variant_sweep import expand_axes
 
 
 def test_expand_axes_is_deterministic_and_ordered():

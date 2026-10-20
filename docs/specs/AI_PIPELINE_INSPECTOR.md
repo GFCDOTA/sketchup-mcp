@@ -390,7 +390,7 @@ usam `"stream": False`. Marcar `NOT INSTRUMENTED` até ligarmos streaming.
 
 Não existe SSE hoje. Proposta mínima:
 
-1. **Sink append-only**: `.ai_bridge/traces/<runId>.jsonl` via `tools/jsonl_io.append_jsonl` (**já existe**).
+1. **Sink append-only**: `.ai_bridge/traces/<runId>.jsonl` via `tools/orchestration/correction/jsonl_io.append_jsonl` (**já existe**).
 2. **Uma rota SSE nova** no `ops/estudio-front/server.py`: `GET /api/trace/stream?runId=…`
    — `text/event-stream`, tail do `.jsonl`, `Last-Event-ID` = `seq` para reconnect.
    ThreadingHTTPServer aguenta (é thread por conexão); heartbeat `: ping` a cada 15s.

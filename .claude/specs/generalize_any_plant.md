@@ -154,7 +154,7 @@ Reusa o pipeline que já existe (plant-agnóstico exceto os defaults):
   iso/top PNG + `side_by_side_pdf_vs_skp.png` + `geometry_report.json` + `README.md`.
 - `artifacts/review/<plant>/<run>/final/`: `regression_summary.md` (veredito por
   eixo) + `visual_findings.json`.
-- **Promoção `runs/ → artifacts/` é manual hoje** (`tools/promote_artifact.py` é TODO).
+- **Promoção `runs/ → artifacts/` é manual hoje** (`tools/orchestration/promote_artifact.py` é TODO).
   Construir esse promotor **É infra justificada** (destrava o deliverable por-planta
   e remove erro manual). → única peça de infra que o spec recomenda construir cedo.
 
@@ -196,7 +196,7 @@ Herda o `autonomous-fidelity-loop` + específicos por-planta:
 
 1. **Strip dos defaults `planta_74`** → `--plant` obrigatório, `consensus.json`
    padronizado, `plant.json`. *(refactor puro, destrava qualquer planta. FAZER 1º.)*
-2. **`tools/promote_artifact.py`** (runs→artifacts). *(infra justificada — o deliverable.)*
+2. **`tools/orchestration/promote_artifact.py`** (runs→artifacts). *(infra justificada — o deliverable.)*
 3. **Uma 2ª planta de verdade** como forcing function: pega um PDF simples, roda o
    loop parametrizado ponta-a-ponta, deixa os gaps reais aparecerem. *(generalização
    se PROVA com uma 2ª planta, não com abstração.)*

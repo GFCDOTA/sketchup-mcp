@@ -26,7 +26,7 @@ Honesty contract (FP-032 parity by REUSE, not copy):
   `vision_consumed.jsonl` (signatures), never by rewriting the queue
 
 CLI:
-    python -m tools.vision_queue_consumer --out runs/loop_x --fixture planta_74 \\
+    python -m tools.orchestration.correction.vision_queue_consumer --out runs/loop_x --fixture planta_74 \\
         --render <png> [--render <png>]... [--tier deep] [--bridge-url URL]
 
 Exit codes: 0 = EMPTY/DRAINED, 3 = BLOCKED_*, 1 = unexpected error.
@@ -38,7 +38,7 @@ import json
 from pathlib import Path
 from typing import Callable
 
-from tools.jsonl_io import append_jsonl, queue_key, read_jsonl
+from tools.orchestration.correction.jsonl_io import append_jsonl, queue_key, read_jsonl
 
 BACKEND = "claude_bridge_vision"
 
@@ -171,7 +171,7 @@ def drain(
     discriminated = bool(report and report.get("result") == "DISCRIMINATED")
     vf = _degrade_unproven(vf, discriminated)
 
-    from tools import correction_finding as cfind
+    from tools.orchestration.correction import correction_finding as cfind
     confirmed = cfind.from_visual_findings_v1(vf)
     for f in confirmed:
         f["consumed_at"] = now

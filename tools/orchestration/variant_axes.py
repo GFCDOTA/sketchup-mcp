@@ -8,7 +8,7 @@ Fontes dos eixos sao o codigo/dados VIVOS (nada duplicado a mao):
     fallback — hoje so 1 dos 4 presets carrega `kitchen_theme_env` machine-
     readable (ver theme_axis);
   - layout: layout_seed inteiro (0 = brain default; k>=1 = k-esimo template
-    VALIDO do layout_candidates — a mecanica vive em tools/variant_sweep.py).
+    VALIDO do layout_candidates — a mecanica vive em tools/orchestration/variant_sweep.py).
 
 Modulo leve: stdlib + style_spec/batch_theme_render em import lazy. Sem clock,
 sem random — mesmo input => mesmos eixos, mesmos ids.

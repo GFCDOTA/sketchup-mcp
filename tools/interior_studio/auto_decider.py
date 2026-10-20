@@ -34,7 +34,7 @@ from pathlib import Path
 from tools import ask_gpt_gate as agg
 from tools.interior_studio import decision_judge as dj
 from tools.interior_studio import proposals as ic_proposals
-from tools.jsonl_io import append_jsonl, read_jsonl
+from tools.orchestration.correction.jsonl_io import append_jsonl, read_jsonl
 
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_OUT = ROOT / "data" / "runs"

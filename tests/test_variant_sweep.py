@@ -21,9 +21,9 @@ from core.schemas import schema_path
 
 from tools import corpus_to_rag as ctr
 from tools import oracle_providers as op
-from tools import variant_axes as va
-from tools import variant_sweep as vs
-from tools.variant_axes import Variant
+from tools.orchestration import variant_axes as va
+from tools.orchestration import variant_sweep as vs
+from tools.orchestration.variant_axes import Variant
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCHEMA_PATH = schema_path("judged_variant.schema.json")
@@ -166,7 +166,7 @@ def test_sweep_uses_pt_to_m_0_0259():
     env.pop("PT_TO_M", None)
     out = subprocess.run(
         [sys.executable, "-c",
-         "import tools.variant_sweep; from core import scale; print(scale.PT_TO_M)"],
+         "import tools.orchestration.variant_sweep; from core import scale; print(scale.PT_TO_M)"],
         cwd=str(REPO_ROOT), env=env, capture_output=True, text=True, timeout=120)
     assert out.returncode == 0, out.stderr
     assert out.stdout.strip() == "0.0259"
@@ -339,7 +339,7 @@ def test_su_free_sweep_smoke_4_variants(tmp_path, validator):
     env = dict(os.environ)
     env.pop("PT_TO_M", None)
     r = subprocess.run(
-        [sys.executable, "-m", "tools.variant_sweep", "--n", "4",
+        [sys.executable, "-m", "tools.orchestration.variant_sweep", "--n", "4",
          "--out", str(out), "--dry-run", "--render", "su-free"],
         cwd=str(REPO_ROOT), env=env, capture_output=True, text=True, timeout=420)
     assert r.returncode == 0, r.stderr[-2000:]
@@ -361,7 +361,7 @@ def test_force_rerender_supersedes_existing(tmp_path, monkeypatch):
     """Idempotência por presença pula célula já vista; --force-rerender re-roda e
     APPENDA supersede (caso real: o renderer ganhou o shell arquitetônico e o
     corpus precisa do render novo sob os MESMOS variant_ids)."""
-    import tools.variant_sweep as vs
+    import tools.orchestration.variant_sweep as vs
 
     calls = []
 
@@ -381,7 +381,7 @@ def test_force_rerender_supersedes_existing(tmp_path, monkeypatch):
     vs.sweep(1, out, plant="planta_74", run_one=fake_run,
              force_rerender=True, log=lambda *a: None)
     assert len(calls) == 2                                    # force re-rodou
-    from tools.jsonl_io import read_jsonl
+    from tools.orchestration.correction.jsonl_io import read_jsonl
     recs = read_jsonl(out / "corpus.jsonl")
     assert len(recs) == 2                                     # supersede appendado
     assert recs[-1]["render_refs"]["sha256"] == "sha-2"       # last-wins = render novo

@@ -212,3 +212,5 @@ propósito; use esta tabela para achar o arquivo hoje.
 | 24 gates/auditorias `tools.{*_gate,*_audit,gate_util,gate_verdict,gate_filefetch,diagnose_wall_stubs,furniture_wall_gap,render_bbox_audit,repo_health_gate}` | `tools.validation.{…}` (mesmo nome) | `validation` |
 | `tools.run_deterministic_gates` | **fica** (D-011: lido pelo Inspector do harness); dono `tools.validation.run_deterministic_gates` | `validation` |
 | `tools.{auto_camera,batch_theme_render,compose_side_by_side,crop_render,gen_textures,material_review,overlay_diff,pdf_overlay_verify,render_parts_iso,render_scene_views,render_scene_vray,theme_palette,tweak_vrscene}` | `tools.rendering.{…}` (mesmo nome) | `rendering` |
+| `tools.{correction_finding,correction_fixes,jsonl_io,vision_queue_consumer}` | `tools.orchestration.correction.{…}` | `orchestration` |
+| `tools.{fidelity_loop,promote_artifact,promote_canonical,regenerate_consensus,variant_axes,variant_sweep}` | `tools.orchestration.{…}` | `orchestration` |

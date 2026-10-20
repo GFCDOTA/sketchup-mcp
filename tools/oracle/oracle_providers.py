@@ -651,7 +651,7 @@ class ClaudeBridgeVisionProvider(OracleProvider):
         renders (whose absolute paths are listed so `claude -p` can Read them).
 
         When the caller queued specific findings for confirmation
-        (``context["pending"]``, set by `tools/vision_queue_consumer`), they are
+        (``context["pending"]``, set by `tools/orchestration/correction/vision_queue_consumer`), they are
         rendered into the prompt so the eye actually SEES what it was asked to
         confirm/re-localize/drop — otherwise the confirm-or-drop contract would
         be decided by omission, not by the eye."""

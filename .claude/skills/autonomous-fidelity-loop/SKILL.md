@@ -18,7 +18,7 @@ que ele produziu e decidir o próximo passo. Não re-executar o ciclo à mão.
    ```
    python -m tools.correction_loop --fixture planta_74 --out runs/loop_x [--max-cycles N] [--dry-run]
    ```
-2. **`tools/vision_queue_consumer.py`** — drena `<out>/vision_requests.jsonl`
+2. **`tools/orchestration/correction/vision_queue_consumer.py`** — drena `<out>/vision_requests.jsonl`
    pelo olho FP-032 (`POST /ask-vision` no `:8765`) e escreve
    `vision_confirmed.jsonl`, que o loop re-injeta no próximo ciclo. Degrada
    honesto: sem render → `BLOCKED_NEEDS_RENDER`; bridge offline/incompatível →

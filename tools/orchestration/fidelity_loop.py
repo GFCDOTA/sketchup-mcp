@@ -13,10 +13,10 @@ NÃO julga: o veredito visual é do GPT via Chrome (negative_dogfood provou que 
 local alucina; skill gpt-review-gate diz que o agente NUNCA autojulga). Determinístico.
 
 CLI (exit-code = status; 0 ok, 1 erro):
-  python tools/fidelity_loop.py register-ref <id> <imagem> --room sala --style industrial
-  python tools/fidelity_loop.py package      <id> <render.png> [--attempt N]
-  python tools/fidelity_loop.py record       <id> <PASS|WARN|FAIL> [--attempt N] [--notes ..]
-  python tools/fidelity_loop.py kpi          [--object <id>]
+  python -m tools.orchestration.fidelity_loop register-ref <id> <imagem> --room sala --style industrial
+  python -m tools.orchestration.fidelity_loop package      <id> <render.png> [--attempt N]
+  python -m tools.orchestration.fidelity_loop record       <id> <PASS|WARN|FAIL> [--attempt N] [--notes ..]
+  python -m tools.orchestration.fidelity_loop kpi          [--object <id>]
 """
 from __future__ import annotations
 

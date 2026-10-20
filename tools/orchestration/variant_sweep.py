@@ -2,7 +2,7 @@
 
 Eleva o padrao provado do sofa_class_matrix (derive -> gate -> render SU-free ->
 grid -> report) de movel para planta: expande um produto cartesiano controlado
-de eixos (tools/variant_axes), roda o furnish por celula (collect_boxes, SEM
+de eixos (tools/orchestration/variant_axes), roda o furnish por celula (collect_boxes, SEM
 SketchUp), passa gates deterministicos HERMETICOS ANTES do render, renderiza o
 iso barato (render_parts_iso), coleta achados visuais honestos (FP-032) e grava
 um registro `judged_variant/1.0.0` por linha em corpus.jsonl (append-only,
@@ -19,8 +19,8 @@ Honestidade (contratos herdados de FP-032/033):
   com a regra "FAIL so se DISCRIMINATED" (degradacao do vision_queue_consumer).
 
 Uso:
-    PT_TO_M=0.0259 python -m tools.variant_sweep --n 4 --out runs/variant_sweep/s0 --dry-run
-    python -m tools.variant_sweep --ask-vision --only <variant_id> --out <run>
+    PT_TO_M=0.0259 python -m tools.orchestration.variant_sweep --n 4 --out runs/variant_sweep/s0 --dry-run
+    python -m tools.orchestration.variant_sweep --ask-vision --only <variant_id> --out <run>
 """
 from __future__ import annotations
 
@@ -47,8 +47,8 @@ sys.path.insert(0, str(ROOT))
 os.environ.setdefault("PT_TO_M", "0.0259")
 from core import scale  # noqa: E402
 from tools.furnish_apartment import CONSENSUS, collect_boxes  # noqa: E402
-from tools.jsonl_io import append_jsonl, read_jsonl  # noqa: E402
-from tools.variant_axes import Variant, default_axes  # noqa: E402
+from tools.orchestration.correction.jsonl_io import append_jsonl, read_jsonl  # noqa: E402
+from tools.orchestration.variant_axes import Variant, default_axes  # noqa: E402
 
 SCHEMA_ID = "judged_variant/1.0.0"
 MACHINE_LABEL = "machine_provisional"
@@ -275,7 +275,7 @@ def _collect_findings(png: Path, *, plant: str, provider=None,
         from tools.run_skp_visual_review import load_latest_discrimination
         report = load_latest_discrimination(plant, BACKEND)
     discriminated = bool(report and report.get("result") == "DISCRIMINATED")
-    from tools.vision_queue_consumer import _degrade_unproven
+    from tools.orchestration.correction.vision_queue_consumer import _degrade_unproven
     vf = _degrade_unproven(vf, discriminated)
     vf["fixture"] = plant
     vf["attempt"] = "variant"

@@ -1,7 +1,7 @@
 """Shared JSONL + queue-key helpers for the FP-033 correction queues.
 
 Single source for the idioms that the queue WRITER (`tools/correction_loop`)
-and the queue CONSUMER (`tools/vision_queue_consumer`) must keep in lockstep:
+and the queue CONSUMER (`tools/orchestration/correction/vision_queue_consumer`) must keep in lockstep:
 
 - tolerant JSONL read (skip blank/garbage lines, keep dict rows only) — the
   queues are append-only logs shared across processes, a torn line must never

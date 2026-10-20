@@ -5,7 +5,7 @@ import json
 
 import pytest
 
-from tools.promote_canonical import promote
+from tools.orchestration.promote_canonical import promote
 
 
 def _fake_build(d):

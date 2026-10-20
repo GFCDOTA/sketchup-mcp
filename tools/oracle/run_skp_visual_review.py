@@ -148,7 +148,7 @@ def degrade_unproven_fail(entry: dict, *, key: str = "verdict") -> dict:
     note to its ``evidence``. Mutates and returns ``entry``.
 
     Shared by this runner (per-axis, ``key="verdict"``) and by
-    ``tools/vision_queue_consumer`` (per-finding, ``key="severity"``) so the
+    ``tools/orchestration/correction/vision_queue_consumer`` (per-finding, ``key="severity"``) so the
     rule and its message cannot diverge between the two callers.
     """
     if entry.get(key) == "FAIL":

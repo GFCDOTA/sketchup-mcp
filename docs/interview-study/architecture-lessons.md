@@ -16,7 +16,7 @@ centroide da área livre = melhor"). O CI validava a posição final com
 implementações discordavam — o optimizer aprovava posições que o CI
 reprovava, gerando o mesmo padrão clássico de "passou local, falhou CI".
 
-Pior ainda: durante a correção, descobri que `tools/correction_fixes.py`
+Pior ainda: durante a correção, descobri que `tools/orchestration/correction/correction_fixes.py`
 tinha uma TERCEIRA cópia da regra de colisão (`_overlapping_module_pairs`),
 que quebrou silenciosamente (`ValueError`) quando a implementação canônica
 mudou de forma — prova ao vivo de que duplicar uma regra sempre cobra o

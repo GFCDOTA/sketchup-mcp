@@ -102,7 +102,7 @@ músculo ASSÍNCRONO de decisão barata (fila). Ambos compartilham o princípio:
 ## Slice implementado — fidelity loop (alvo do GPT + ciclo medível)
 
 (2026-06-08) Fase PRODUTO: "fiel à imagem do GPT" só tem sentido com (1) um ALVO e (2) o ciclo FAIL→PASS
-auditado. `tools/fidelity_loop.py` (determinístico, CLI + JSON compacto):
+auditado. `tools/orchestration/fidelity_loop.py` (determinístico, CLI + JSON compacto):
 - `register-ref <id> <imagem>` → guarda a imagem-ALVO do GPT como âncora (`.ai_bridge/fidelity/refs/<id>/`).
 - `package <id> <render.png>` → monta `alvo × render` + `ask_gpt.md` + schema em `runs/fidelity/` (scratch);
   devolve `{status:READY_FOR_GPT, montage, package_dir}`. O verboso fica no pacote, não no contexto.

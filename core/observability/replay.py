@@ -124,7 +124,7 @@ def parse_rows(rows: Iterable[dict], *, run_id: str | None = None) -> RunTrace:
 
 def load_run(path: Path | str, *, run_id: str | None = None) -> RunTrace:
     """Lê um `<runId>.jsonl`. Arquivo ausente devolve um RunTrace vazio."""
-    from tools.jsonl_io import read_jsonl  # lazy: core não importa tools no topo
+    from tools.orchestration.correction.jsonl_io import read_jsonl  # lazy: core não importa tools no topo
 
     p = Path(path)
     return parse_rows(read_jsonl(p), run_id=run_id or p.stem)

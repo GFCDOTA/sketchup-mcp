@@ -22,10 +22,10 @@ What it does NOT do
 
 Usage
 -----
-    python -m tools.promote_artifact planta_74
-    python -m tools.promote_artifact planta_74 --run-dir runs/planta_74
-    python -m tools.promote_artifact planta_74 --force   # overwrite existing
-    python -m tools.promote_artifact planta_74 --dry-run # show plan, no changes
+    python -m tools.orchestration.promote_artifact planta_74
+    python -m tools.orchestration.promote_artifact planta_74 --run-dir runs/planta_74
+    python -m tools.orchestration.promote_artifact planta_74 --force   # overwrite existing
+    python -m tools.orchestration.promote_artifact planta_74 --dry-run # show plan, no changes
 """
 from __future__ import annotations
 
@@ -177,7 +177,7 @@ python -m tools.sketchup.shell.build_plan_shell_skp \\
   {consensus_path} \\
   --out runs/{plant}/{plant}.skp
 
-python -m tools.promote_artifact {plant}
+python -m tools.orchestration.promote_artifact {plant}
 ```
 
 ## Status

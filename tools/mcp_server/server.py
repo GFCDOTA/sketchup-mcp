@@ -52,7 +52,7 @@ from PIL import Image as _PIL_Image  # noqa: E402,F401
 
 # --- módulos do pipeline (todos presentes na develop) ----------------------
 from tools.run_deterministic_gates import run_all  # noqa: E402
-from tools.promote_canonical import promote  # noqa: E402
+from tools.orchestration.promote_canonical import promote  # noqa: E402
 from tools.claude_bridge.skp_inventory import skp_inventory_v2  # noqa: E402
 from tools.reference_grammar import (  # noqa: E402
     grammar_contract,

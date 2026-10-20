@@ -2,7 +2,7 @@
 
 > **Status slice 3 (2026-07-01) — drifts resolvidos a favor do CÓDIGO:**
 > `BLOCKED_NEEDS_FP032` (spec) virou status do **CONSUMIDOR**
-> (`tools/vision_queue_consumer.py`), não estado do loop — o loop usa
+> (`tools/orchestration/correction/vision_queue_consumer.py`), não estado do loop — o loop usa
 > `PENDING_VISION`. `pending_vision_findings()` existe agora, keyed por
 > **out_dir** (não fixture — todas as filas do loop já são relativas ao
 > `--out`). O `--once` da spec é `--max-cycles 1` na task NOC
@@ -51,7 +51,7 @@ IMPROVED/SAME/WORSE).
      o achado visual tipado no próximo ciclo.
    - `NEEDS_FELIPE` — veredito de APARÊNCIA final ou conserto que inventa geometria →
      `VISUAL_REVIEW_QUEUED`, **nunca auto**.
-3. **Registry de fix-handlers determinísticos** (`tools/correction_fixes.py`): map
+3. **Registry de fix-handlers determinísticos** (`tools/orchestration/correction/correction_fixes.py`): map
    `finding_type → handler(con, finding) -> FixResult`. Cada handler é *source-supported*
    (não inventa parede/móvel) e idempotente. MVP cobre os tipos que os gates atuais já
    emitem; tabela em §Algorithm.
@@ -84,7 +84,7 @@ IMPROVED/SAME/WORSE).
 | Path | Mudança | Quem |
 |---|---|---|
 | `tools/correction_loop.py` | **NOVO** — máquina de estados + CLI (`--fixture --max-cycles --once --dry-run --room`) | loop driver |
-| `tools/correction_fixes.py` | **NOVO** — registry `finding_type → handler`, `FixResult` dataclass, handlers determinísticos idempotentes | fix registry |
+| `tools/orchestration/correction/correction_fixes.py` | **NOVO** — registry `finding_type → handler`, `FixResult` dataclass, handlers determinísticos idempotentes | fix registry |
 | `tools/finding_router.py` | **NOVO** — `classify(finding) -> Route{DETERMINISTIC_AUTOFIX\|NEEDS_VISION\|NEEDS_FELIPE}`; tabela source-of-truth dos tipos | classificador |
 | `core/schemas/correction_finding.schema.json` | **NOVO** — finding tipado UNIFICADO (normaliza gate-determinístico + `visual_findings.v1` num só shape: `type, severity, source_check, suspected_owner, route, evidence`) | schema |
 | `tools/run_deterministic_gates.py` | **EXISTE** — reusar `run_all()` como detector; **adicionar** `--json-out` p/ o loop consumir o dict de gates (hoje só printa) | gate suite |
@@ -223,7 +223,7 @@ run_loop(fixture, max_cycles, room=None, dry_run=False):
 
 - [ ] `tools/correction_loop.py` roda 1 fixture e fecha o laço determinístico sozinho (sem humano no laço interno), com log por ciclo no formato da `autonomous-fidelity-loop`.
 - [ ] `tools/finding_router.py` classifica todo finding em `DETERMINISTIC_AUTOFIX | NEEDS_VISION | NEEDS_FELIPE` pela tabela da §Algorithm; aparência final → SEMPRE `NEEDS_FELIPE`.
-- [ ] `tools/correction_fixes.py` tem ≥1 handler determinístico REAL, idempotente e source-supported (MVP: `furniture_overlap`), com os demais tipos honestamente roteados (não stubados como "consertados").
+- [ ] `tools/orchestration/correction/correction_fixes.py` tem ≥1 handler determinístico REAL, idempotente e source-supported (MVP: `furniture_overlap`), com os demais tipos honestamente roteados (não stubados como "consertados").
 - [ ] `core/schemas/correction_finding.schema.json` unifica gate-determinístico + `visual_findings.v1`; normalização testada por contract test.
 - [ ] Patinagem PARA (2 ciclos sem progresso) e fix-que-piora REVERTE (paridade com SAME/WORSE→revert).
 - [ ] Wiring NOC: ciclo que muda artefato passa pelo worktree isolado off develop, commit em branch (NUNCA main/merge); APARÊNCIA → `VISUAL_REVIEW_QUEUED`.
@@ -246,5 +246,5 @@ Lido e confirmado nesta sessão:
 - `tools/claude_bridge/noc_dispatcher.py` — `dispatch()`, worktree isolado off origin/develop, `_appearance_changed` → `VISUAL_REVIEW_QUEUED`, NUNCA main/merge; `kind:local_llm` (Ollama, token=0); fila/ledger `.ai_bridge/noc/{queue,actions}.jsonl`.
 - `tools/claude_bridge/server.py` — `POST /heartbeat` + `sessions_view()` com flags STALLED (>10min) / PARALYZED (`cycle` congelado 3 beats).
 - `apps/sketchup-mcp-bff/noc_mirror.py` — read-only do ledger NOC; `/api/noc/ledger` filtra `VISUAL_REVIEW_QUEUED`, `/api/noc/status` dá lock/queue/task counts.
-- `tools/fidelity_loop.py` — KPI Learning-Cycle-Time (FAIL→PASS por objeto); padrão de ledger reusável.
+- `tools/orchestration/fidelity_loop.py` — KPI Learning-Cycle-Time (FAIL→PASS por objeto); padrão de ledger reusável.
 - **Depende de FP-032** (ACL de visão): FP-033 consome `visual_findings.v1` e roteia; sem FP-032 a rota `NEEDS_VISION` degrada honesto pra `BLOCKED_NEEDS_FP032`.

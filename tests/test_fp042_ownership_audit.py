@@ -118,7 +118,7 @@ def test_room_packages_and_facades_import_in_a_fresh_process(reverse):
     # Cold imports catch partial-initialization failures hidden by pytest's
     # collection cache. No CLI entrypoints or SketchUp jobs are executed.
     modules = set(LEGACY_ROOM_MODULES) | {
-        'tools.furnish_apartment', 'tools.variant_sweep', 'tools.geometry_sanity',
+        'tools.furnish_apartment', 'tools.orchestration.variant_sweep', 'tools.geometry_sanity',
         'tools.furniture_overlap_gate', 'tools.circulation_gate',
     }
     modules.update('.'.join(p.relative_to(ROOT).with_suffix('').parts)

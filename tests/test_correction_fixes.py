@@ -3,8 +3,8 @@ from __future__ import annotations
 
 import copy
 
-from tools import correction_fixes as cfx
-from tools.correction_fixes import FixContext
+from tools.orchestration.correction import correction_fixes as cfx
+from tools.orchestration.correction.correction_fixes import FixContext
 from tools.furniture_overlap_gate import overlap_gate  # noqa: F401  (parity import)
 
 

@@ -10,7 +10,7 @@ Falta o **placar**: rodar N variantes de planta (eixos estilo x material x layou
 
 ## Scope
 
-1. **Gerador de variantes** (`tools/variant_sweep.py`, NOVO): expande um produto cartesiano controlado de eixos e, para cada celula, roda o furnish da planta, renderiza, coleta achados (FP-032) e grava um registro julgado. Espelha a arquitetura provada de `sofa_class_matrix.py` (derive -> gate -> render -> sheet -> report), elevada de movel para planta.
+1. **Gerador de variantes** (`tools/orchestration/variant_sweep.py`, NOVO): expande um produto cartesiano controlado de eixos e, para cada celula, roda o furnish da planta, renderiza, coleta achados (FP-032) e grava um registro julgado. Espelha a arquitetura provada de `sofa_class_matrix.py` (derive -> gate -> render -> sheet -> report), elevada de movel para planta.
    - **Eixo `estilo`**: `FURNISH_STYLE ∈ {baseline(None), industrial, modern_warm}` — REAL, ja gated em `furnish_apartment.py:280,350,393` + `style_spec.STYLE_TOKENS`.
    - **Eixo `material/tema`**: `KITCHEN_THEME ∈ {warm_compact(""), hotel_boutique, dark_walnut, black_wood_gold}` — REAL, presets em `artifacts/reference_lab/themes/*.json`, consumido pelo render path (`kitchen_vray.py:102`, `vray_export.rb`). (Coordenar com FP-036 "material de verdade" — FP-034 so VARIA o tema; FP-036 melhora a textura por tras dele.)
    - **Eixo `layout`**: `layout_seed` / variacao de plano por comodo (`living_room_planner`, `bedroom_designer`, `bathroom_layout`). Slice inicial: seed determinístico que perturba a escolha de parede-TV / lado-da-cama quando ha candidatas ambíguas (`layout_candidates.py` ja expõe `candidates`/`ranking`).
@@ -31,8 +31,8 @@ Falta o **placar**: rodar N variantes de planta (eixos estilo x material x layou
 
 | Path | Mudanca | Quem |
 |---|---|---|
-| `tools/variant_sweep.py` | **NOVO** — gerador: `expand_axes()`, `run_variant()`, `sweep()`, CLI `--n/--axes/--loop/--dry-run/--render su-free\|vray`. Espelha `sofa_class_matrix.py`. | FP-034 |
-| `tools/variant_axes.py` | **NOVO** — declaracao tipada dos 3 eixos (estilo/material/layout) + `Variant` dataclass; le `style_spec.STYLE_TOKENS` e `themes/*.json` como fontes (nao duplica). | FP-034 |
+| `tools/orchestration/variant_sweep.py` | **NOVO** — gerador: `expand_axes()`, `run_variant()`, `sweep()`, CLI `--n/--axes/--loop/--dry-run/--render su-free\|vray`. Espelha `sofa_class_matrix.py`. | FP-034 |
+| `tools/orchestration/variant_axes.py` | **NOVO** — declaracao tipada dos 3 eixos (estilo/material/layout) + `Variant` dataclass; le `style_spec.STYLE_TOKENS` e `themes/*.json` como fontes (nao duplica). | FP-034 |
 | `.claude/specs/judged_variant.schema.json` | **NOVO** — schema do registro julgado (contrato estavel p/ FP-035). | FP-034 |
 | `runs/variant_sweep/<run_id>/corpus.jsonl` | **NOVO (scratch, gitignored)** — append-only, 1 registro julgado por linha. | gerado |
 | `runs/variant_sweep/<run_id>/<variant_id>/` | **NOVO (scratch)** — renders (iso SU-free e/ou hero V-Ray) + `params.json` por variante. | gerado |
@@ -119,7 +119,7 @@ def _collect_findings(png):                              # adapter FINO p/ FP-03
 
 # --- NOC: kind=variant-sweep (rodar o dia todo) ---
 # queue.jsonl: {"id":"VS1","kind":"variant-sweep","safe":true,"appearance":true,
-#   "title":"Sweep diario de variantes planta_74","prompt":"python -m tools.variant_sweep --loop --n 12 --render su-free"}
+#   "title":"Sweep diario de variantes planta_74","prompt":"python -m tools.orchestration.variant_sweep --loop --n 12 --render su-free"}
 # noc_dispatcher: lock 1-atuador -> roda -> appearance:true => enfileira VISUAL_REVIEW (Felipe), NUNCA auto-aprova.
 ```
 
@@ -155,9 +155,9 @@ def _collect_findings(png):                              # adapter FINO p/ FP-03
 
 ## Done means
 
-- [ ] `tools/variant_axes.py` + `tools/variant_sweep.py` criados; eixos lem `style_spec.STYLE_TOKENS` e `themes/*.json` (sem duplicar valores).
+- [ ] `tools/orchestration/variant_axes.py` + `tools/orchestration/variant_sweep.py` criados; eixos lem `style_spec.STYLE_TOKENS` e `themes/*.json` (sem duplicar valores).
 - [ ] `.claude/specs/judged_variant.schema.json` (`judged_variant/1.0.0`) versionado e validado pelos testes contract.
-- [ ] Slice 0 SU-FREE provado: `python -m tools.variant_sweep --dry-run --n 4 --render su-free` emite 4 registros validos + `contact_sheet.png`, `visual_findings=null`, `verdict=PENDING_VISION`.
+- [ ] Slice 0 SU-FREE provado: `python -m tools.orchestration.variant_sweep --dry-run --n 4 --render su-free` emite 4 registros validos + `contact_sheet.png`, `visual_findings=null`, `verdict=PENDING_VISION`.
 - [ ] Adapter `_collect_findings` plugado em FP-032 quando este landar; com FP-032 vivo, ao menos 1 variante grava `visual_findings` tipado real (nao stub) e `verdict ∈ {CANDIDATE,FAIL}`.
 - [ ] Suite de testes (tabela acima) verde — incl. os 2 contract (schema + ingestao RAG) e os 3 de honestidade (no-fabricate, no-human-verdict, pt_to_m).
 - [ ] Task `kind=variant-sweep` adicionada a `.ai_bridge/noc/queue.jsonl` e validada num `--once` do `noc_dispatcher` (roda sob lock; `appearance:true` -> VISUAL_REVIEW enfileirado; nada em main).

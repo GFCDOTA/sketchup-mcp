@@ -147,8 +147,8 @@ def _emit_furnished_gallery_item(iso_png, *, skp, style, plant=PLANT,
     NUNCA como gate FAIL que travaria o item. Reusa variant_sweep.build_record via
     emit_gallery_item (fabrica canonica + append idempotente por variant_id).
     NUNCA espera veredito nem aborta o furnish."""
-    from tools.variant_axes import Variant
-    from tools.variant_sweep import emit_gallery_item
+    from tools.orchestration.variant_axes import Variant
+    from tools.orchestration.variant_sweep import emit_gallery_item
     corpus = Path(corpus) if corpus else (GALLERY_CORPUS_ROOT / plant / "corpus.jsonl")
     corpus.parent.mkdir(parents=True, exist_ok=True)
     v = Variant(plant=plant, style=style or None, theme="", layout_seed=0)

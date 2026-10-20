@@ -8,7 +8,7 @@ import pytest
 from jsonschema import Draft202012Validator
 from core.schemas import schema_path
 
-from tools import correction_finding as cf
+from tools.orchestration.correction import correction_finding as cf
 from tools import finding_router as fr
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
