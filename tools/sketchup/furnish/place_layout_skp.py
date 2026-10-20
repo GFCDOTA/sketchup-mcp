@@ -18,7 +18,7 @@ import sys
 import time
 from pathlib import Path
 
-from tools.layout_candidates import (EXTRA_TEMPLATES, M, TEMPLATES, _tv_setup,
+from tools.rooms.living.planning.layout_candidates import (EXTRA_TEMPLATES, M, TEMPLATES, _tv_setup,
                                      run, score)
 
 ROOT = Path(__file__).resolve().parents[3]   # repo root (era E:\Claude\sketchup-mcp, morto pos-consolidacao 2026-06-09)

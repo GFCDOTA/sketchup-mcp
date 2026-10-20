@@ -2,7 +2,7 @@
 (piso, paredes, rack+TV, mesa de centro, circulação visível), velho-caixa × novo no mesmo ângulo.
 SU-free (render_parts_iso) — valida ESCALA + circulação, não material. A beleza do couro = V-Ray depois.
 
-Uso: python -m tools.sofa_venezia_room [out_dir]
+Uso: python -m tools.rooms.living.capabilities.sofa_venezia_room [out_dir]
 """
 from __future__ import annotations
 
@@ -13,9 +13,9 @@ ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT))
 from tools.render_parts_iso import render_parts            # noqa: E402
 from tools.sofa_builder import build_sofa                  # noqa: E402
-from tools.sofa_class import derive_spec                   # noqa: E402
-from tools.sofa_class_matrix import _grid_sheet            # noqa: E402
-from tools.sofa_venezia_compare import old_box             # noqa: E402
+from tools.rooms.living.sofa_class import derive_spec                   # noqa: E402
+from tools.rooms.living.capabilities.sofa_class_matrix import _grid_sheet            # noqa: E402
+from tools.rooms.living.capabilities.sofa_venezia_compare import old_box             # noqa: E402
 
 FLOOR = (198, 192, 182)
 WALL = (214, 210, 204)

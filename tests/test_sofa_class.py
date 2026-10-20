@@ -14,9 +14,9 @@ sys.path.insert(0, str(ROOT))
 
 from tools.furniture_anatomy_spec import SofaSpec                       # noqa: E402
 from tools.sofa_builder import build_sofa                               # noqa: E402
-from tools.sofa_class import (ARCHETYPES, ARM_STYLES, BASE_STYLES,      # noqa: E402
+from tools.rooms.living.sofa_class import (ARCHETYPES, ARM_STYLES, BASE_STYLES,      # noqa: E402
                               _sabotages, derive_spec, sofa_class_gate)
-from tools.sofa_gate import gate as anatomy_gate                        # noqa: E402
+from tools.rooms.living.validation.sofa_gate import gate as anatomy_gate                        # noqa: E402
 
 ALL_COMBOS = [(a, s, arm, b) for a in ARCHETYPES for s in (2, 3, 4)
               for arm in ARM_STYLES for b in BASE_STYLES]
@@ -78,7 +78,7 @@ def test_default_exemplar_still_in_class():
 
 def test_matrix_builds_and_gates(tmp_path):
     pytest.importorskip("matplotlib")
-    from tools.sofa_class_matrix import build_matrix
+    from tools.rooms.living.capabilities.sofa_class_matrix import build_matrix
     res = build_matrix(tmp_path)
     assert len(res["report"]) == 9
     for r in res["report"]:

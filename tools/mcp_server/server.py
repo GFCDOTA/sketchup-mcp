@@ -60,12 +60,12 @@ from tools.reference_grammar import (  # noqa: E402
     validate_grammar_spec as _validate_grammar_spec,
 )
 
-from tools.sofa_class import derive_spec as _sofa_derive, sofa_class_gate  # noqa: E402
+from tools.rooms.living.sofa_class import derive_spec as _sofa_derive, sofa_class_gate  # noqa: E402
 from tools.rooms.bedroom.bed_class import derive_bed_spec, bed_class_gate  # noqa: E402
-from tools.armchair_class import derive_armchair_spec, armchair_class_gate  # noqa: E402
-from tools.dining_table_class import derive_dining_spec, dining_class_gate  # noqa: E402
-from tools.rack_class import derive_rack_spec, rack_class_gate  # noqa: E402
-from tools.coffee_table_class import derive_coffee_spec, coffee_table_class_gate  # noqa: E402
+from tools.rooms.living.armchair_class import derive_armchair_spec, armchair_class_gate  # noqa: E402
+from tools.rooms.living.dining_table_class import derive_dining_spec, dining_class_gate  # noqa: E402
+from tools.rooms.living.rack_class import derive_rack_spec, rack_class_gate  # noqa: E402
+from tools.rooms.living.coffee_table_class import derive_coffee_spec, coffee_table_class_gate  # noqa: E402
 from tools.sketchup import jobs as su_jobs  # noqa: E402
 from tools.sketchup import ops as su_ops  # noqa: E402
 from tools.mcp_server.stdio_isolation import isolate_stdio, quiet_tools  # noqa: E402

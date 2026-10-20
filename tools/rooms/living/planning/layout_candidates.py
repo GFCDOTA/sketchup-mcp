@@ -10,7 +10,7 @@ Objetivo: provar que o cerebro sabe POSICIONAR movel basico sem bloquear
 circulacao/portas/janelas/varanda. NAO usa 3D Warehouse, NAO baixa asset, NAO
 aplica estilo, NAO insere no SKP. Felipe 2026-06-04.
 
-Uso: python -m tools.layout_candidates --room r002
+Uso: python -m tools.rooms.living.planning.layout_candidates --room r002
 """
 from __future__ import annotations
 

@@ -1,7 +1,7 @@
 # Modos estruturais de sala (A2 sintético)
 
 > Derivado do loop com o ChatGPT (conversa "Crítica de layout sala") +
-> fixtures sintéticas (`tools/make_synthetic_rooms.py`). As fixtures provaram
+> fixtures sintéticas (`tools/rooms/living/capabilities/make_synthetic_rooms.py`). As fixtures provaram
 > que o core de layout **generaliza** pra sala retangular normal, mas há **2
 > modos estruturais** que o pipeline ainda precisa conhecer. 2026-06-04.
 

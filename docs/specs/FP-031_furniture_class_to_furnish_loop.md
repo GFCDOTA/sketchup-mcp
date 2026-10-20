@@ -27,7 +27,7 @@ Fechar o laço por fases, de ROI decrescente:
 - **Fase 0 (FEITA):** chamar `sofa_class_gate(spec, parts)` no caminho REAL
   (`furnish_apartment.py::living_room_boxes`, após `build_sofa`), em **WARN-log** (não
   aborta). Surfaça móvel fora-da-classe sem quebrar o build.
-- **Fase 1 (FEITA):** `tools/sofa_class.py::derive_living_sofa(width)` — fonte única: a
+- **Fase 1 (FEITA):** `tools/rooms/living/sofa_class.py::derive_living_sofa(width)` — fonte única: a
   CLASSE escolhe os lugares (`per_seat` na faixa, clampa `seats∈[2,4]`), fixa a largura
   ao nicho, e o sofá nasce do arquétipo **VENEZIA curado** (`thin` arms + `legs`).
   `furnish_apartment` passa a usar isso no lugar da heurística.
@@ -53,9 +53,9 @@ Fechar o laço por fases, de ROI decrescente:
 
 | Path | Mudança | Quem produz | Fase |
 |---|---|---|---|
-| `tools/sofa_class.py` | `+ derive_living_sofa(width)` (fonte única) | classe | 1 |
+| `tools/rooms/living/sofa_class.py` | `+ derive_living_sofa(width)` (fonte única) | classe | 1 |
 | `tools/furnish_apartment.py` | living usa `derive_living_sofa`; `sofa_class_gate` WARN-log | gerador | 0+1 |
-| `tools/sofa_furnish_fase1_compare.py` | render SU-free BEFORE/AFTER (iso) | review | 1 |
+| `tools/rooms/living/capabilities/sofa_furnish_fase1_compare.py` | render SU-free BEFORE/AFTER (iso) | review | 1 |
 | `tests/test_furnish_sofa_gate.py` | invariante in-class do sofá da sala | testes | 0+1 |
 | `artifacts/review/furniture/sofa/fase1/*.png` | sheet ANTES×DEPOIS pro veredito visual | review | 1 |
 

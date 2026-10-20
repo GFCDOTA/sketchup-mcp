@@ -969,11 +969,11 @@
     {
       "item": "tools/armchair_class.py",
       "kind": "file",
-      "disposition": "facade",
+      "disposition": "move",
       "destination": "tools/rooms/living/armchair_class.py",
       "phase": "P4",
-      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
-      "compat": "facade_permanent_in_window",
+      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "high",
       "risk_reasons": [
         "consumido por CI/MCP/config"
@@ -993,7 +993,8 @@
           "tests/test_armchair_class.py",
           "tests/test_fp042_furniture_classes_ownership.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/ask_gpt_gate.py",
@@ -1384,11 +1385,11 @@
     {
       "item": "tools/coffee_table_class.py",
       "kind": "file",
-      "disposition": "facade",
+      "disposition": "move",
       "destination": "tools/rooms/living/coffee_table_class.py",
       "phase": "P4",
-      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
-      "compat": "facade_permanent_in_window",
+      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "high",
       "risk_reasons": [
         "consumido por CI/MCP/config"
@@ -1408,7 +1409,8 @@
           "tests/test_coffee_table_class.py",
           "tests/test_fp042_furniture_classes_ownership.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/collision_envelope_gate.py",
@@ -1700,11 +1702,11 @@
     {
       "item": "tools/dining_table_class.py",
       "kind": "file",
-      "disposition": "facade",
+      "disposition": "move",
       "destination": "tools/rooms/living/dining_table_class.py",
       "phase": "P4",
-      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
-      "compat": "facade_permanent_in_window",
+      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "high",
       "risk_reasons": [
         "consumido por CI/MCP/config"
@@ -1724,7 +1726,8 @@
           "tests/test_dining_table_class.py",
           "tests/test_fp042_furniture_classes_ownership.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/disarm_sketchup_autoruns.py",
@@ -2466,8 +2469,8 @@
       "disposition": "move",
       "destination": "tools/rooms/living/planning/layout_candidates.py",
       "phase": "P4",
-      "rationale": "Layout brain da sala (provider declarado do living no manifesto); é planner específico do cômodo.",
-      "compat": "facade_at_old_path",
+      "rationale": "Layout brain da sala (provider declarado do living no manifesto); é planner específico do cômodo. FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "medium",
       "risk_reasons": [],
       "depth_sensitive": false,
@@ -2541,8 +2544,8 @@
       "disposition": "move",
       "destination": "tools/rooms/living/capabilities/make_synthetic_rooms.py",
       "phase": "P4",
-      "rationale": "Ferramenta do programa do sofá/sala (harness, comparação, fixtures): pertence ao cômodo living. Antes de mover, confirmar se cada harness ainda executa; os sem consumidor são candidatos a arquivo.",
-      "compat": "facade_at_old_path",
+      "rationale": "Ferramenta do programa do sofá/sala (harness, comparação, fixtures): pertence ao cômodo living. Antes de mover, confirmar se cada harness ainda executa; os sem consumidor são candidatos a arquivo. FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "dynamic_path_risk": true,
       "risk": "high",
       "risk_reasons": [
@@ -3236,11 +3239,11 @@
     {
       "item": "tools/rack_class.py",
       "kind": "file",
-      "disposition": "facade",
+      "disposition": "move",
       "destination": "tools/rooms/living/rack_class.py",
       "phase": "P4",
-      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
-      "compat": "facade_permanent_in_window",
+      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "high",
       "risk_reasons": [
         "consumido por CI/MCP/config"
@@ -3260,7 +3263,8 @@
           "tests/test_fp042_furniture_classes_ownership.py",
           "tests/test_rack_class.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/rag_embed_backend.py",
@@ -4051,11 +4055,11 @@
     {
       "item": "tools/sofa_class.py",
       "kind": "file",
-      "disposition": "facade",
+      "disposition": "move",
       "destination": "tools/rooms/living/sofa_class.py",
       "phase": "P4",
-      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
-      "compat": "facade_permanent_in_window",
+      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "high",
       "risk_reasons": [
         "consumido por CI/MCP/config",
@@ -4079,7 +4083,8 @@
           "tests/test_living_sofa_is_approved_premium.py",
           "tests/test_sofa_class.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/sofa_class_matrix.py",
@@ -4115,8 +4120,8 @@
       "disposition": "move",
       "destination": "tools/rooms/living/capabilities/sofa_furnish_fase1_compare.py",
       "phase": "P4",
-      "rationale": "Ferramenta do programa do sofá/sala (harness, comparação, fixtures): pertence ao cômodo living. Antes de mover, confirmar se cada harness ainda executa; os sem consumidor são candidatos a arquivo.",
-      "compat": "facade_at_old_path",
+      "rationale": "Ferramenta do programa do sofá/sala (harness, comparação, fixtures): pertence ao cômodo living. Antes de mover, confirmar se cada harness ainda executa; os sem consumidor são candidatos a arquivo. FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "dynamic_path_risk": true,
       "risk": "high",
       "risk_reasons": [
@@ -4138,8 +4143,8 @@
       "disposition": "move",
       "destination": "tools/rooms/living/validation/sofa_gate.py",
       "phase": "P4",
-      "rationale": "Gate exclusivo do sofá da sala.",
-      "compat": "facade_at_old_path",
+      "rationale": "Gate exclusivo do sofá da sala. FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "medium",
       "risk_reasons": [],
       "depth_sensitive": false,
@@ -4163,8 +4168,8 @@
       "disposition": "move",
       "destination": "tools/rooms/living/capabilities/sofa_premium_harness.py",
       "phase": "P4",
-      "rationale": "Ferramenta do programa do sofá/sala (harness, comparação, fixtures): pertence ao cômodo living. Antes de mover, confirmar se cada harness ainda executa; os sem consumidor são candidatos a arquivo.",
-      "compat": "facade_at_old_path",
+      "rationale": "Ferramenta do programa do sofá/sala (harness, comparação, fixtures): pertence ao cômodo living. Antes de mover, confirmar se cada harness ainda executa; os sem consumidor são candidatos a arquivo. FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "dynamic_path_risk": true,
       "risk": "high",
       "risk_reasons": [
@@ -4232,8 +4237,8 @@
       "disposition": "move",
       "destination": "tools/rooms/living/capabilities/sofa_venezia_compare.py",
       "phase": "P4",
-      "rationale": "Ferramenta do programa do sofá/sala (harness, comparação, fixtures): pertence ao cômodo living. Antes de mover, confirmar se cada harness ainda executa; os sem consumidor são candidatos a arquivo.",
-      "compat": "facade_at_old_path",
+      "rationale": "Ferramenta do programa do sofá/sala (harness, comparação, fixtures): pertence ao cômodo living. Antes de mover, confirmar se cada harness ainda executa; os sem consumidor são candidatos a arquivo. FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "dynamic_path_risk": true,
       "risk": "high",
       "risk_reasons": [
@@ -4255,8 +4260,8 @@
       "disposition": "move",
       "destination": "tools/rooms/living/capabilities/sofa_venezia_room.py",
       "phase": "P4",
-      "rationale": "Ferramenta do programa do sofá/sala (harness, comparação, fixtures): pertence ao cômodo living. Antes de mover, confirmar se cada harness ainda executa; os sem consumidor são candidatos a arquivo.",
-      "compat": "facade_at_old_path",
+      "rationale": "Ferramenta do programa do sofá/sala (harness, comparação, fixtures): pertence ao cômodo living. Antes de mover, confirmar se cada harness ainda executa; os sem consumidor são candidatos a arquivo. FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "dynamic_path_risk": true,
       "risk": "high",
       "risk_reasons": [

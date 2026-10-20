@@ -34,7 +34,7 @@ def _placement():
 def _sofa_anatomy_visual():
     from interior.validators.furniture_visual_gate import visual_gate
     from tools.sofa_builder import build_sofa, sofa_spec
-    from tools.sofa_gate import gate as anat
+    from tools.rooms.living.validation.sofa_gate import gate as anat
     rows, ok = [], True
     for v in ("straight", "chaise_right", "chaise_left"):
         s = sofa_spec(v)

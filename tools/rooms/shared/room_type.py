@@ -38,7 +38,7 @@ UNKNOWN = "UNKNOWN"
 ALL_TYPES = (BEDROOM, LIVING, KITCHEN, BATHROOM, SERVICE, BALCONY, UNKNOWN)
 
 # comodos que o auto-mobiliado v1 sabe mobiliar POR ESTE pipeline. LIVING ja tem
-# o cerebro legado (tools/layout_candidates.py); cozinha/banho ainda nao entram.
+# o cerebro legado (tools/rooms/living/planning/layout_candidates.py); cozinha/banho ainda nao entram.
 FURNISHABLE_V1 = frozenset({BEDROOM})
 
 ROOM_TYPE_SOURCE = "name_regex"

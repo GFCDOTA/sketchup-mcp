@@ -9,7 +9,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from tools.rack_class import (ARCHETYPES, TVS, _apply_sab, _sabotages,  # noqa: E402
+from tools.rooms.living.rack_class import (ARCHETYPES, TVS, _apply_sab, _sabotages,  # noqa: E402
                               build_rack, derive_rack_spec, rack_class_gate,
                               sofa_satellite_gate, tv_satellite_gate)
 
@@ -69,7 +69,7 @@ def test_cycle002_floating_context_and_facades():
 
 
 def test_tv_proxy_parts():
-    from tools.rack_class import _tv_proxy_parts
+    from tools.rooms.living.rack_class import _tv_proxy_parts
     spec = derive_rack_spec("65", "low_credenza")
     proxy = _tv_proxy_parts(spec, "65")
     assert any(p["label"] == "eye_line" for p in proxy)
@@ -93,7 +93,7 @@ def test_sofa_satellite():
 
 def test_matrix_builds(tmp_path):
     pytest.importorskip("matplotlib")
-    from tools.rack_class import build_matrix
+    from tools.rooms.living.rack_class import build_matrix
     res = build_matrix(tmp_path)
     assert len(res["report"]) == 9
     for r in res["report"]:

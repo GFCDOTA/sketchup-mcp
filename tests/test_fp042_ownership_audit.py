@@ -82,11 +82,12 @@ def test_room_cannot_bypass_boundary_through_legacy_facade(source):
     assert any(v['reason'] == 'CROSS_ROOM_DEPENDENCY' for v in violations)
 
 
-def test_shared_cannot_import_room_class_through_legacy_facade():
+def test_shared_cannot_import_room_class():
+    # a fachada sofa_class saiu na FP-044/F6; o import do dono continua barrado no shared
     violations = ownership_violations({
-        'tools/rooms/shared/parts.py': 'from tools import sofa_class\n',
+        'tools/rooms/shared/parts.py': 'from tools.rooms.living import sofa_class\n',
     })
-    assert any(v['reason'] == 'SHARED_IMPORTS_ROOM' for v in violations)
+    assert any(v['imported'].startswith('tools.rooms.living') for v in violations)
 
 
 @pytest.mark.parametrize('source', [

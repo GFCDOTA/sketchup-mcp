@@ -11,8 +11,8 @@ Intent-to-Scene PASS usa): 3 arquetipos com gramatica distinta:
   organic     — tampo de cantos suavizados (racetrack low-poly) + pernas CONICAS
                 (verts8 taper) com ar leve
 
-Uso: python -m tools.coffee_table_class           (prova + sabotagens)
-     python -m tools.coffee_table_class --matrix  (matriz 9 pro juiz)
+Uso: python -m tools.rooms.living.coffee_table_class           (prova + sabotagens)
+     python -m tools.rooms.living.coffee_table_class --matrix  (matriz 9 pro juiz)
 """
 from __future__ import annotations
 
@@ -305,7 +305,7 @@ MATRIX = [(f"{arch}@{sname}", arch, sw, ssh)
 
 def build_matrix(out_dir):
     from tools.render_parts_iso import render_parts
-    from tools.sofa_class_matrix import _grid_sheet
+    from tools.rooms.living.capabilities.sofa_class_matrix import _grid_sheet
     import json as _json
     out = Path(out_dir).resolve()
     out.mkdir(parents=True, exist_ok=True)

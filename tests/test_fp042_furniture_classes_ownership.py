@@ -4,7 +4,14 @@ from importlib import import_module
 from pathlib import Path
 import pytest
 
-CASES = [["tools.armchair_builder","tools.rooms.shared.armchair_builder","build_armchair"],["tools.armchair_class","tools.rooms.living.armchair_class","derive_armchair_spec"],["tools.coffee_table_class","tools.rooms.living.coffee_table_class","build_coffee_table_v2"],["tools.dining_table_class","tools.rooms.living.dining_table_class","build_dining_table"],["tools.rack_class","tools.rooms.living.rack_class","build_rack"],["tools.sofa_class","tools.rooms.living.sofa_class","derive_living_sofa"]]
+CASES = [["tools.armchair_builder","tools.rooms.shared.armchair_builder","build_armchair"]]
+# fachadas aposentadas na FP-044/F6: o contrato que sobra e o do dono (simbolo definido nele, sem orquestrador)
+RETIRED = [["tools.rooms.bedroom.bed_class", "derive_bed_spec"],
+           ["tools.rooms.living.armchair_class", "derive_armchair_spec"],
+           ["tools.rooms.living.coffee_table_class", "build_coffee_table_v2"],
+           ["tools.rooms.living.dining_table_class", "build_dining_table"],
+           ["tools.rooms.living.rack_class", "build_rack"],
+           ["tools.rooms.living.sofa_class", "derive_living_sofa"]]
 
 
 @pytest.mark.parametrize("old,canonical,symbol", CASES)
@@ -18,11 +25,10 @@ def test_reexport_and_no_duplicate_implementation(old, canonical, symbol):
     assert "from tools.furnish_apartment import" not in Path(owner_mod.__file__).read_text("utf-8")
 
 
-@pytest.mark.parametrize("owner", ["tools.rooms.bedroom.bed_class"])
-def test_owner_of_retired_facade_has_the_symbol_and_does_not_import_the_orchestrator(owner):
-    # fachada aposentada na FP-044/F6: o contrato que sobra e o do dono
+@pytest.mark.parametrize("owner,symbol", RETIRED)
+def test_owner_of_retired_facade_has_the_symbol_and_does_not_import_the_orchestrator(owner, symbol):
     mod = import_module(owner)
-    assert callable(mod.derive_bed_spec) and mod.derive_bed_spec.__module__ == owner
+    assert callable(getattr(mod, symbol)) and getattr(mod, symbol).__module__ == owner
     assert "from tools.furnish_apartment import" not in Path(mod.__file__).read_text("utf-8")
 
 
