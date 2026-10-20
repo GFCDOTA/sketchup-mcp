@@ -168,7 +168,7 @@ def _oracle_context(geom_path: Path) -> dict:
 
 def _compose_sxs(pdf: Path, top: Path, iso: Path, out: Path) -> Path | None:
     try:
-        from tools.compose_side_by_side import compose_to_file
+        from tools.rendering.compose_side_by_side import compose_to_file
         compose_to_file(pdf_path=pdf, top_path=top, iso_path=iso, out_path=out)
         return out if out.exists() else None
     except Exception as e:  # composer is best-effort; oracle still runs on 2 imgs

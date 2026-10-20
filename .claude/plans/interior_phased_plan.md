@@ -26,7 +26,7 @@
     .vrscene); `vray.exe -sceneFile=x.vrscene -imgFile=y.png -display=0 -autoClose=1` → PNG ~3s GPU.
     `VRayFinalProvider.render(in_skp)` funcional, available()=True. Render planta mobiliada gerado.
     **REFINO premium EM ANDAMENTO** (commits 2e1c2a5 exposure, 01a5aa1 camera, eaf0999 exposure-balance):
-    - EXPOSURE: tools/tweak_vrscene.py pos-processa o .vrscene (export sai p/ exterior f/8-1/300-ISO100
+    - EXPOSURE: tools/rendering/tweak_vrscene.py pos-processa o .vrscene (export sai p/ exterior f/8-1/300-ISO100
       = interior escuro). Tuning POR-SHOT: dollhouse overview pede mais luz; interior fechado pede menos
       (ISO~100, f~5.6, shutter~1/125, sky~0.55) p/ não estourar a janela.
     - CAMERA: vray_export.rb aceita VRAY_EYE/VRAY_TARGET/VRAY_FOV (inches). Interior eye-level OBSTRUI
@@ -43,7 +43,7 @@
       (asset catalog) ou geração procedural. Pede direção/assets do Felipe.
     - Outros premium: câmera eye-level cinematográfica (resolver oclusão L-shape); render dos quartos.
   - **SALA PREMIUM = VERDICT PASS (2026-06-07/08; commits 6684876 texturas, ececc16 janela, a02f174 eye+luz):**
-    - TEXTURAS procedurais (madeira grão + tecido trama, numpy/PIL, `tools/gen_textures.py`, aplicadas no
+    - TEXTURAS procedurais (madeira grão + tecido trama, numpy/PIL, `tools/rendering/gen_textures.py`, aplicadas no
       vray_export.rb via material.texture): **GPT MATERIALS=PASS** ("deixou de parecer plástico liso").
     - LIGHTING janela estourada (FAIL recorrente) → ISO100/f7/1-160/sky0.3 → **GPT LIGHTING=PASS** (segurou).
     - CÂMERA eye-level (z 150→62, DENTRO da sala, costas p/ parede sul; oclusão resolvida pela geometria
@@ -120,7 +120,7 @@ Geometria: `room_introspect.py <room_id>`. Cama centro (636,789), cabeceira lest
   (faixa inferior + oclusão), NUNCA materiais/luz/piso (esses são PASS). Próximo salto de maior ROI no render NÃO é
   grindar câmera per-room — é resolver o enquadramento de forma SISTÊMICA (auto-câmera das bounds do cômodo +
   crop-rule), que conserta os 3 cômodos de uma vez. (Análogo ao piso: fix root-cause apartment-wide.)
-- **AUTO-CAMERA + AUTO-CROP — BUILT + VALIDADO (2026-06-08)**: `tools/auto_camera.py` deriva eye/target/fov das
+- **AUTO-CAMERA + AUTO-CROP — BUILT + VALIDADO (2026-06-08)**: `tools/rendering/auto_camera.py` deriva eye/target/fov das
   bounds REAIS do cômodo — alvo no CENTRO DO CLUSTER de estar/dormir + sightline LIMPA pro herói + penalidade de
   occluder grande no FOV + eye-level — **sem coords hardcoded (robusto a rebuild do `.skp`, nunca fica stale)**;
   + auto-crop rule (top 11% / bottom 28%) remove o foreground morto. **GPT na SALA: VERDICT PASS + CAMERA PASS**

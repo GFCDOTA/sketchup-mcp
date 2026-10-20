@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from tools.overlay_diff import (
+from tools.rendering.overlay_diff import (
     Affine,
     dark_mask,
     detect_missing_walls,
@@ -91,7 +91,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.overlay_diff import affine_from_sidecar, run_gate, wall_inframe_fraction
+from tools.rendering.overlay_diff import affine_from_sidecar, run_gate, wall_inframe_fraction
 
 REPO = Path(__file__).resolve().parents[1]
 RENDER = REPO / "tests" / "data" / "overlay_gate" / "planta74_top.png"

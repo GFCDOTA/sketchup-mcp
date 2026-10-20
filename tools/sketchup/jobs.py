@@ -334,7 +334,7 @@ def furnish(*, consensus_path: str | None = None, base_skp: str | None = None,
     return out
 
 
-# V-Ray: o launcher legado (tools/render_scene_vray.py) matava o SketchUp por NOME
+# V-Ray: o launcher legado (tools/rendering/render_scene_vray.py) matava o SketchUp por NOME
 # DE IMAGEM (`taskkill /F /IM SketchUp.exe`) depois da exportação e escrevia dentro
 # do scene_dir. Aqui a exportação passa por batch.run_script (a PRÓPRIA instância,
 # fechada só pelo modo/PID dela), o scene_dir é só leitura e tudo sai no out_dir.
@@ -426,7 +426,7 @@ def render_vray(scene_dir: str, *, out_png: str | None = None, width: int = 1500
     if not vrs.exists() or vrs.stat().st_size == 0:
         out.update(status="FAILED", reason="vray_export.rb terminou sem .vrscene (V-Ray carregado no SketchUp?)")
         return out
-    from tools.tweak_vrscene import tweak_file
+    from tools.rendering.tweak_vrscene import tweak_file
 
     tweak_file(str(vrs), width=width, height=height, materials=True, **VRAY_RECIPE)
     r = _vray_exe_run([str(su.loc.vray_exe), f"-sceneFile={vrs}", f"-imgFile={png}",

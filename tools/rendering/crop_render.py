@@ -4,7 +4,7 @@ GPT NEXT_ACTION recorrente em enquadramento: "ajustar o crop/framebuffer para re
 cinza inferior SEM aproximar a camera, preservando os moveis inteiros". Crop em POS resolve isso
 sem re-render (preserva o framing dos moveis, so remove faixa morta/teto-aberto).
 
-Uso: python tools/crop_render.py <in.png> <out.png> --bottom 180 --top 60 [--left 0 --right 0]
+Uso: python -m tools.rendering.crop_render <in.png> <out.png> --bottom 180 --top 60 [--left 0 --right 0]
 (valores em PIXELS a remover de cada borda)
 """
 from __future__ import annotations

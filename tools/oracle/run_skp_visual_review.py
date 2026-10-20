@@ -782,7 +782,7 @@ def build_side_by_side(
 
     Returns (output_path, error_message). On success error_message is None.
     """
-    from tools.compose_side_by_side import compose_to_file
+    from tools.rendering.compose_side_by_side import compose_to_file
 
     top = attempt_dir / "model_top.png"
     iso = attempt_dir / "model_iso.png"

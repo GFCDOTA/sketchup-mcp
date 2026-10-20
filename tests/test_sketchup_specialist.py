@@ -492,7 +492,7 @@ def test_render_vray_exporta_pela_propria_instancia_sem_tocar_o_scene_dir(tmp_pa
     instância) e o scene_dir não ganha nem perde arquivo."""
     d = _vray_scene(tmp_path)
     before = sorted(p.name for p in d.iterdir())
-    monkeypatch.setattr("tools.tweak_vrscene.tweak_file", lambda *a, **k: None)
+    monkeypatch.setattr("tools.rendering.tweak_vrscene.tweak_file", lambda *a, **k: None)
     rendered = {}
 
     def vray(cmd, timeout_s):

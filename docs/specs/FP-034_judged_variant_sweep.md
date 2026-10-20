@@ -4,7 +4,7 @@
 
 ## Problem
 
-Hoje o sistema gera UMA planta mobiliada por vez (`tools/furnish_apartment.py`), com um unico estilo escolhido a mao (env `FURNISH_STYLE`), e o julgamento do resultado vive espalhado: em `tools/batch_theme_render.py` os vereditos (`gpt`, `gates`, `RANKING`) sao **hard-coded curados de GPT/Felipe** (ver `THEMES`/`RANKING`, linhas 32-57) — nao saem de uma rodada real. `tools/rooms/living/capabilities/sofa_class_matrix.py` PROVA que o padrao "matriz de variantes derivadas -> gate -> render SU-free -> grid + `matrix_report.json`" funciona, mas **so para um movel (sofa)**, nunca para a planta inteira.
+Hoje o sistema gera UMA planta mobiliada por vez (`tools/furnish_apartment.py`), com um unico estilo escolhido a mao (env `FURNISH_STYLE`), e o julgamento do resultado vive espalhado: em `tools/rendering/batch_theme_render.py` os vereditos (`gpt`, `gates`, `RANKING`) sao **hard-coded curados de GPT/Felipe** (ver `THEMES`/`RANKING`, linhas 32-57) — nao saem de uma rodada real. `tools/rooms/living/capabilities/sofa_class_matrix.py` PROVA que o padrao "matriz de variantes derivadas -> gate -> render SU-free -> grid + `matrix_report.json`" funciona, mas **so para um movel (sofa)**, nunca para a planta inteira.
 
 Falta o **placar**: rodar N variantes de planta (eixos estilo x material x layout) o dia todo em fundo, anotar cada uma com os achados visuais tipados (de FP-032) e **armazenar como CORPUS JULGADO** — o registro `variante -> params -> achados_visuais -> verdito` que materializa o insight que o Felipe pediu ("melhor nesse caso, pior naquele"). Esse corpus e' o **insumo cru do RAG (FP-035)**; sem ele o RAG nao tem o que indexar alem das referencias curadas que `reference_db.py` ja tem.
 
@@ -37,7 +37,7 @@ Falta o **placar**: rodar N variantes de planta (eixos estilo x material x layou
 | `runs/variant_sweep/<run_id>/corpus.jsonl` | **NOVO (scratch, gitignored)** — append-only, 1 registro julgado por linha. | gerado |
 | `runs/variant_sweep/<run_id>/<variant_id>/` | **NOVO (scratch)** — renders (iso SU-free e/ou hero V-Ray) + `params.json` por variante. | gerado |
 | `runs/variant_sweep/<run_id>/contact_sheet.png` | **NOVO (scratch)** — grid das variantes (reusa `_grid_sheet` de `sofa_class_matrix.py`). | gerado |
-| `tools/render_parts_iso.py` | **REUSO** (`render_parts`) — renderer barato p/ proporcao; nenhuma mudanca. | existente |
+| `tools/rendering/render_parts_iso.py` | **REUSO** (`render_parts`) — renderer barato p/ proporcao; nenhuma mudanca. | existente |
 | `tools/furnish_apartment.py` | **REUSO via subprocess/env** — `FURNISH_STYLE`+`PT_TO_M=0.0259`+`KITCHEN_THEME`. Talvez extrair `collect_boxes()` como entrada importavel (refactor minimo, sem mudar comportamento). | existente |
 | `tools/rooms/shared/materials.py` / `artifacts/reference_lab/themes/*.json` | **REUSO** — fontes dos eixos estilo/material. | existente |
 | `.ai_bridge/noc/queue.jsonl` | **APPEND** — task `kind=variant-sweep` (`safe:true`, `appearance:true` -> VISUAL_REVIEW). | FP-034 |
@@ -171,9 +171,9 @@ def _collect_findings(png):                              # adapter FINO p/ FP-03
 - `tools/rooms/living/capabilities/sofa_class_matrix.py` — padrao matriz-de-variantes (derive->gate->render->`_grid_sheet`->`matrix_report.json`); espelhar para planta. **Reuso direto**: `_grid_sheet`.
 - `tools/furnish_apartment.py` — furnish da planta inteira; eixo ESTILO via env `FURNISH_STYLE` (linhas 280/350/393), `collect_boxes()` (l.407), `apply_style` (l.437), gotcha `PT_TO_M=0.0259` (l.27-28).
 - `tools/rooms/shared/materials.py` — `STYLE_TOKENS` `{industrial, modern_warm}` (kind->rgb + textura); fonte do eixo estilo.
-- `tools/batch_theme_render.py` — eixo MATERIAL/TEMA (`KITCHEN_THEME`); HOJE `THEMES`/`RANKING` (l.32-57) sao **vereditos curados a mao** — FP-034 substitui isso por verdito derivado de achados (prior art, nao reuso cego).
+- `tools/rendering/batch_theme_render.py` — eixo MATERIAL/TEMA (`KITCHEN_THEME`); HOJE `THEMES`/`RANKING` (l.32-57) sao **vereditos curados a mao** — FP-034 substitui isso por verdito derivado de achados (prior art, nao reuso cego).
 - `artifacts/reference_lab/themes/*.json` — 4 presets (`black_wood_gold` etc.) com `gates`/`status`; fonte do eixo tema.
-- `tools/render_parts_iso.py` — `render_parts()` SU-free; renderer barato de proporcao p/ o sweep. **Reuso direto.**
+- `tools/rendering/render_parts_iso.py` — `render_parts()` SU-free; renderer barato de proporcao p/ o sweep. **Reuso direto.**
 - `tools/reference_db.py` (RAG #1, SQLite/visual) e `tools/project_memory_db.py` (RAG #2, SQLite + Ollama `nomic-embed-text`) — consumidores em FP-035; ja existem.
 - `tools/claude_bridge/noc_dispatcher.py` + `.ai_bridge/noc/queue.jsonl` + `actions.jsonl` — runner de fundo (lock 1-atuador, NUNCA main, APARENCIA->VISUAL_REVIEW); base do `kind=variant-sweep`.
 - `tools/rooms/living/planning/layout_candidates.py` — expõe `candidates`/`ranking` de parede-TV (ambíguo) — base do eixo `layout_seed`.

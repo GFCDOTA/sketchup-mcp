@@ -129,7 +129,7 @@ def test_place_parts_free_rotation():
 def test_scene_boxes_rotated_corners(scene):
     """Caminho SU: part girada exporta corners do quad inferior (nao AABB)."""
     from core.scale import M_TO_IN
-    from tools.render_scene_views import scene_boxes
+    from tools.rendering.render_scene_views import scene_boxes
     acc_parts = [p for p in scene["parts"] if p.get("item") == "accent_seat"]
     assert acc_parts and all(p.get("verts8") for p in acc_parts), "rotacao livre gera verts8"
     boxes = scene_boxes(acc_parts)
@@ -252,7 +252,7 @@ def test_rug_anchors_seating_zone(scene):
 def test_render_harness_smoke(tmp_path, scene):
     pytest.importorskip("matplotlib")
     from interior.composer.scene_composer import write_scene
-    from tools.render_scene_views import render_views, scene_boxes
+    from tools.rendering.render_scene_views import render_views, scene_boxes
     out = write_scene(scene, tmp_path / "scene")
     m = render_views(out, su="off")
     for k in ("top_view", "three_quarter", "contact_sheet"):
@@ -267,7 +267,7 @@ def test_render_scene_vray_contract(tmp_path):
     """Contrato SU-free do orquestrador V-Ray: falha explicita sem a cena;
     camera m->inches correta. (Render real e' provado manualmente — depende de
     SU+V-Ray instalados e SketchUp fechado.)"""
-    from tools.render_scene_vray import _fmt_in, render_scene_vray
+    from tools.rendering.render_scene_vray import _fmt_in, render_scene_vray
     assert _fmt_in(1.0) == "39.37"
     (tmp_path / "scene.json").write_text("{}", encoding="utf-8")
     r = render_scene_vray(tmp_path)
@@ -276,7 +276,7 @@ def test_render_scene_vray_contract(tmp_path):
 
 def test_shell_has_ceiling_hidden_from_views(scene):
     """Teto existe no shell (V-Ray interior) mas NUNCA aparece no dollhouse."""
-    from tools.render_scene_views import _visible_parts
+    from tools.rendering.render_scene_views import _visible_parts
     ceil = [p for p in scene["parts"] if p["label"] == "ceiling"]
     assert len(ceil) == 1 and ceil[0]["kind"] == "ceiling"
     H = scene["room"]["height_m"]

@@ -35,7 +35,7 @@ Resultado: material so existe "de verdade" no render V-Ray; o artefato humano pr
 | `tools/furnish_apartment.py` | `main()` injeta `env["LAYOUT_TEX_MAP"]=json(texture_map_for(style))` e `env["LAYOUT_TEX_DIR"]=assets/textures/procedural` quando `FURNISH_STYLE` setado; chama `flat_white_check` no render gerado antes de promover. | NOVO (3 linhas + call) |
 | `tools/place_layout_skp.py` | mesma injecao de `LAYOUT_TEX_MAP`/`LAYOUT_TEX_DIR` no `env` (slice de prova r002). | NOVO |
 | `tools/validation/flat_white_gate.py` | **NOVO** — `flat_white_check(png_path, style) -> {result, fails, warns, metrics}` usando `render_fingerprint.fingerprint`. CLI `python -m tools.validation.flat_white_gate <png>`. | NOVO (STUB->REAL) |
-| `tools/gen_textures.py` | (se faltar PNG pra algum kind do mapa) adicionar a textura procedural correspondente. So se um kind do `texture_map_for` nao tiver png. | EDIT condicional |
+| `tools/rendering/gen_textures.py` | (se faltar PNG pra algum kind do mapa) adicionar a textura procedural correspondente. So se um kind do `texture_map_for` nao tiver png. | EDIT condicional |
 | `assets/textures/procedural/*.png` | novos PNGs so se gerados por `gen_textures.py` (auto-contido). | possivel NOVO |
 | `references/materials/*.md` | leitura-fonte do `kind_finish` (RGB+roughness+metalness ja documentados). Sem mudanca de conteudo, so consumo. | REAL (read-only) |
 
@@ -136,7 +136,7 @@ def flat_white_check(png, style):
 - REAL (path V-Ray que ja texturiza): `tools/sketchup/vray/vray_export.rb` linhas 14-143 (`tex_map`, `m.texture`, gated `VRAY_TEX_DIR`).
 - Mapa de textura por estilo (ja existe, subconsumido): `tools/rooms/shared/materials.py` `_INDUSTRIAL_TEX`/`_MODERN_WARM_TEX` (40-73) + `texture_map_for` (109-112).
 - Fonte unica da cor: `apply_style` (`style_spec.py` 93-106) — `kind` -> `ph_<kind>`.
-- PNGs versionados + gerador: `assets/textures/procedural/*.png` (17 arquivos) via `tools/gen_textures.py` (procedural + override PBR CC0 de `assets/textures/pbr/`).
+- PNGs versionados + gerador: `assets/textures/procedural/*.png` (17 arquivos) via `tools/rendering/gen_textures.py` (procedural + override PBR CC0 de `assets/textures/pbr/`).
 - Finish/roughness/metalness (linguagem-fonte do `kind_finish`): `references/materials/{metal,wood,lacquer,stone}.md` (ex. grafite fosco roughness 0.6-0.8 metalness medio; inox escovado roughness 0.3-0.5 metalness alto; laca gloss roughness baixa).
 - Molde de gate deterministico a espelhar: `tools/validation/style_coherence_gate.py` (PASS/WARN/FAIL + metrics; nao auto-julga aparencia).
 - Extrator pro flat-white gate: `tools/interior_studio/render_fingerprint.py` (`fingerprint`, `clipped_white_px`, `palette`, `zone_colors`, `contrast_std`).

@@ -1258,7 +1258,7 @@ def write_png(model, path, width = 1600, height = 1200)
 end
 
 # FP-031 #2: emit the EXACT top-view projection so the deterministic
-# wall-presence gate (tools/overlay_diff.py) needs zero pixel calibration.
+# wall-presence gate (tools/rendering/overlay_diff.py) needs zero pixel calibration.
 # Writes a sidecar `<png>.proj.json` (additive — does NOT change the render).
 # Must be called while the TOP camera is active, right after zoom_extents and
 # before any other view mutation (view.screen_coords is viewport-dependent).

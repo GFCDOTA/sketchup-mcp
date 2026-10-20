@@ -79,7 +79,7 @@ diferença absurda consensus×.skp×render. (Shell: complementa `tools/run_deter
 Resultado: **PASS** (sem regressão objetiva) · **WARN** (segue com motivo explícito) · **FAIL** (bloqueia promoção).
 **Não aprova beleza/premium/fidelidade subjetiva** — só impede caos geométrico.
 
-## 7. Auto-camera rules (`tools/auto_camera.py`)
+## 7. Auto-camera rules (`tools/rendering/auto_camera.py`)
 
 USA: bounds reais do cômodo · centro do CLUSTER funcional (não só o herói) · sightline limpa ·
 penalidade de oclusor grande no 1º plano/FOV · eye-level · fov proporcional · auto-crop (remove área morta).

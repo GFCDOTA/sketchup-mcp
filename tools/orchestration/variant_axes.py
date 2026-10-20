@@ -57,7 +57,7 @@ def theme_axis(themes_dir: Path = THEMES_DIR) -> list[str]:
     (batch_theme_render.THEMES, os valores que o path V-Ray de fato le) via
     match do theme_id; sem match -> '' (default). Nenhum valor e' inventado.
     """
-    from tools.batch_theme_render import THEMES as _consumer_themes
+    from tools.rendering.batch_theme_render import THEMES as _consumer_themes
     vocab = [t["theme"] for t in _consumer_themes if t.get("theme")]
     tokens: set[str] = set()
     for p in sorted(Path(themes_dir).glob("*.json")):

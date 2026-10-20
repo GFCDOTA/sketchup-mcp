@@ -24,7 +24,7 @@ def test_parse_need_files_variants():
 
 def test_is_allowed_repo_text_file():
     assert is_allowed(_REAL, REPO)
-    assert is_allowed("tools/overlay_diff.py", REPO)
+    assert is_allowed("tools/rendering/overlay_diff.py", REPO)
 
 
 def test_is_allowed_blocks_secrets_and_traversal():

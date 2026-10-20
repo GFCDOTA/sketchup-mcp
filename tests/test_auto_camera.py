@@ -7,7 +7,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from shapely.geometry import Point, Polygon  # noqa: E402
 
-from tools.auto_camera import PT_TO_IN, auto_camera  # noqa: E402
+from tools.rendering.auto_camera import PT_TO_IN, auto_camera  # noqa: E402
 from tools.furnish_apartment import CONSENSUS  # noqa: E402
 from tools.spatial_model import build_spatial_model  # noqa: E402
 

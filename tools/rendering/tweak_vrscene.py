@@ -3,7 +3,7 @@ render V-Ray. O export sai com a CameraPhysical setada p/ exterior claro (f/8, 1
 -> interior subexposto/escuro. Aqui ajustamos ISO/f_number/shutter (e opcional sky/res) p/ um
 interior bem exposto. Deterministico, reusavel no pipeline (export -> tweak -> vray.exe).
 
-Uso: python tools/tweak_vrscene.py <in.vrscene> [out.vrscene] [--iso N --fnum F --shutter S
+Uso: python -m tools.rendering.tweak_vrscene <in.vrscene> [out.vrscene] [--iso N --fnum F --shutter S
       --sky M --width W --height H]
 """
 from __future__ import annotations
