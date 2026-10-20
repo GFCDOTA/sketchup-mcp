@@ -1,7 +1,7 @@
 """soft_barrier_source_audit — provenance of soft barriers (finding #4)."""
 from __future__ import annotations
 
-from tools.soft_barrier_source_audit import audit_soft_barrier_sources
+from tools.validation.soft_barrier_source_audit import audit_soft_barrier_sources
 
 
 def test_bare_polyline_is_unsourced_warn():

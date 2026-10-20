@@ -21,8 +21,8 @@ janela seguem convenção NBR documentada no builder (honesto: sem medida,
 sem invenção).
 
 Uso:
-    python -m tools.pdf_height_labels_audit            # planta_74
-    python -m tools.pdf_height_labels_audit --json
+    python -m tools.validation.pdf_height_labels_audit            # planta_74
+    python -m tools.validation.pdf_height_labels_audit --json
 """
 from __future__ import annotations
 

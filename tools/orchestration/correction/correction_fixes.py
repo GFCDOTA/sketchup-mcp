@@ -65,7 +65,7 @@ def fix_wall_overlap(ctx: FixContext, finding: dict) -> FixResult:
     keep the longer span (more information), tie-broken by id (stable). If BOTH
     host openings, dropping either would orphan openings -> escalate (ok=False).
     """
-    from tools.wall_overlap_audit import audit_wall_overlaps
+    from tools.validation.wall_overlap_audit import audit_wall_overlaps
 
     t = "wall_overlap"
     if not isinstance(ctx.consensus, dict):

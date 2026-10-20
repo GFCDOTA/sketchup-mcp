@@ -78,7 +78,7 @@ O gate v2 emite `result ∈ {PASS, WARN, FAIL}` + `flags` de um **vocabulário F
 | Arquivo | Papel | Mudança FP-039 |
 |---|---|---|
 | `tools/interior_studio/render_fingerprint.py` | `fingerprint()` → dict plano (exposure/clipped/near_white_pct/texture_frac/palette/zones) | NOVO: `large_flat_area_frac`, `neutral_dominance`, `edge_frac`, `palette_entropy` + `METRIC_TIERS` (manifesto de tiers); chaves antigas preservadas |
-| `tools/flat_white_gate.py` | veredito = near_white + blank WARN; `texture_frac_advisory` reportado (FP-036) | Passa a consumir **só o tier CONFIÁVEL** via `METRIC_TIERS`; ganha flags `grande_area_chapada`/`neutro_monotono`; vocabulário de flags FIXO |
+| `tools/validation/flat_white_gate.py` | veredito = near_white + blank WARN; `texture_frac_advisory` reportado (FP-036) | Passa a consumir **só o tier CONFIÁVEL** via `METRIC_TIERS`; ganha flags `grande_area_chapada`/`neutro_monotono`; vocabulário de flags FIXO |
 | `tools/interior_studio/render_judge.py` | lê `fp["exposure"]`, `clipped_pct`, `warmth`, `palette` (l.99-111) | READ-ONLY (compat: só lê chaves que continuam existindo) |
 | `references/…` (memórias) | `feedback_visual_review_chrome_only`, `negative_dogfood` | READ-ONLY (fonte da regra "estética = humano") |
 

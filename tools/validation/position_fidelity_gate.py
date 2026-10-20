@@ -27,7 +27,7 @@ import math
 import sys
 from pathlib import Path
 
-from tools.gate_util import pt_seg_dist
+from tools.validation.gate_util import pt_seg_dist
 
 TOL = {
     "center_m": 0.10,        # centro de abertura

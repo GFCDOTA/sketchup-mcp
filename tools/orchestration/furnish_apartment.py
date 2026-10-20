@@ -243,7 +243,7 @@ def main():
     fw = None
     if after_iso.exists():
         try:
-            from tools.flat_white_gate import flat_white_check
+            from tools.validation.flat_white_gate import flat_white_check
             fw = flat_white_check(after_iso, os.environ.get("FURNISH_STYLE"))
             print(f"\n[furnish-apt] flat_white_check({after_iso.name}) => {fw['result']}")
             for line in fw.get("fails", []) + fw.get("warns", []):

@@ -86,7 +86,7 @@ RULES = [
                   f"nao tem folga atras nem fica centralizada com vao dos lados.",
      "anti_pattern": "AP-15: guarda-roupa/bancada a MARGIN_M da parede OU centralizado com lacuna "
                      "(planejado mal planejado).",
-     "enforced_by": "soft.planejado_encosta (tools/furniture_wall_gap.audit); fix: margin 0 p/ planejado em _place_against"},
+     "enforced_by": "soft.planejado_encosta (tools/validation/furniture_wall_gap.audit); fix: margin 0 p/ planejado em _place_against"},
 ]
 
 RULE_BY_ID = {r["id"]: r for r in RULES}

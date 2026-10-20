@@ -7,10 +7,10 @@ railing as railing, the peitoril as low wall, and skips the unsourced (GOOD).
 """
 from __future__ import annotations
 
-from tools.parapet_not_railing_fallback_gate import (
+from tools.validation.parapet_not_railing_fallback_gate import (
     audit_parapet_not_railing_fallback,
 )
-from tools.railing_exact_match_gate import audit_railing_exact_match
+from tools.validation.railing_exact_match_gate import audit_railing_exact_match
 
 CONSENSUS = {"soft_barriers": [
     {"id": "g1", "barrier_type": "guardrail", "host_wall_id": "w1"},

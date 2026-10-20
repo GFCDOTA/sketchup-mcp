@@ -309,7 +309,7 @@ def room_gates(
     except Exception as e:  # noqa: BLE001
         out["overlap"] = {"error": repr(e)}
     try:
-        from tools.style_coherence_gate import style_coherence_gate
+        from tools.validation.style_coherence_gate import style_coherence_gate
         out["style_coherence"] = style_coherence_gate(con, room_id, style)
     except Exception as e:  # noqa: BLE001
         out["style_coherence"] = {"error": repr(e)}

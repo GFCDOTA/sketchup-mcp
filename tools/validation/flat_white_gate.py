@@ -14,7 +14,7 @@ TAXONOMIA (tools/interior_studio/render_fingerprint.METRIC_TIERS):
 Vocabulario FIXO de flags: chapado_de_branco, quase_branco, neutro_monotono, quase_vazio.
 A prova de TEXTURA aplicada continua sendo o log per-kind do place_layout_skp.rb + o olho do Felipe.
 
-Uso: python -m tools.flat_white_gate <render.png> [--style industrial]
+Uso: python -m tools.validation.flat_white_gate <render.png> [--style industrial]
 """
 from __future__ import annotations
 

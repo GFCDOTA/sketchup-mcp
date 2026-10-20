@@ -83,7 +83,7 @@ Stop conditions:
 ## TODO — validar contra repo
 
 - [ ] Confirmar localização do `repo_health_gate.py` mencionado
-      em `.gitignore` (`# Enforced by tools/repo_health_gate.py
+      em `.gitignore` (`# Enforced by tools/validation/repo_health_gate.py
       E001`) — pode ter sido movido em PR #184
 - [ ] Listar allowlist de root scripts (se existir)
 - [ ] Listar pasta de archive atual (`docs/archive/`?

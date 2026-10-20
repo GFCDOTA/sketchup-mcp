@@ -11,10 +11,10 @@ from pathlib import Path
 
 import pytest
 
-from tools.parapet_not_railing_fallback_gate import (
+from tools.validation.parapet_not_railing_fallback_gate import (
     audit_parapet_not_railing_fallback,
 )
-from tools.railing_exact_match_gate import audit_railing_exact_match
+from tools.validation.railing_exact_match_gate import audit_railing_exact_match
 
 REPO = Path(__file__).resolve().parents[1]
 _REPORT = (REPO / "artifacts" / "review" / "planta_74" / "railing_source_fix"

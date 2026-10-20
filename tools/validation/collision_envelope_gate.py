@@ -21,7 +21,7 @@ envelope de uso [pra cadeira: atrás + puxada] cobre o que precisa cobrir).
                               tem envelope de uso (atrás + puxada) resolvido
                               pelo circulation_gate — não só footprint estático.
 
-Uso: python -m tools.collision_envelope_gate [room_id|all]
+Uso: python -m tools.validation.collision_envelope_gate [room_id|all]
 """
 from __future__ import annotations
 

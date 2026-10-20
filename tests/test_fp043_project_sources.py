@@ -52,8 +52,10 @@ def test_nenhum_modulo_monta_caminho_de_pdf_por_conta_propria():
     assert donos == [], f"monte o caminho do PDF com core.project_sources.plant_pdf_path: {donos}"
 
 
-@pytest.mark.parametrize("modulo", ["door_swing_audit", "pdf_height_labels_audit", "opening_audit", "pdf_overlay_verify"])
-def test_execucao_direta_pelo_arquivo_continua_funcionando(modulo):
-    """`python tools/x.py` (sem `-m`) funcionava antes do resolvedor; o fallback do import preserva."""
-    r = subprocess.run([sys.executable, f"tools/{modulo}.py", "--help"], cwd=ROOT, capture_output=True, text=True)
+@pytest.mark.parametrize("arquivo", ["tools/validation/door_swing_audit.py", "tools/validation/pdf_height_labels_audit.py",
+                                     "tools/validation/opening_audit.py", "tools/rendering/pdf_overlay_verify.py"])
+def test_execucao_direta_pelo_arquivo_continua_funcionando(arquivo):
+    """`python <arquivo>.py` (sem `-m`) funcionava antes do resolvedor; o fallback do import preserva.
+    FP-044/F6: as fachadas em tools/ sairam; o contrato vale para o arquivo do dono."""
+    r = subprocess.run([sys.executable, arquivo, "--help"], cwd=ROOT, capture_output=True, text=True)
     assert r.returncode == 0, r.stderr[-400:]

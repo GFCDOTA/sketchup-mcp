@@ -26,7 +26,7 @@ Três estados (não apenas PASS/FAIL — migração é gradual, não big-bang):
       SEM contrato declarado é perigosa por definição: o gate não tem como
       saber se a forma é intencional ou um bug, então força declaração.
 
-Uso: python -m tools.semantic_geometry_contract_gate [room_id|all]
+Uso: python -m tools.validation.semantic_geometry_contract_gate [room_id|all]
 """
 from __future__ import annotations
 

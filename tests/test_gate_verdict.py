@@ -1,7 +1,7 @@
 """Gate framework §6.4 — Verdict parser (confidence + assumptions)."""
 from __future__ import annotations
 
-from tools.gate_verdict import ANSWER_FORMAT, VERDICT_ENUM, parse_verdict
+from tools.validation.gate_verdict import ANSWER_FORMAT, VERDICT_ENUM, parse_verdict
 
 SAMPLE = """- Verdict: GO
 - Confidence: medium

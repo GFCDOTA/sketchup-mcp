@@ -23,7 +23,7 @@ candidato (nome + versão), e um gate separado reavalia essa decisão contra
 o estado FINAL, comparando com o que foi gravado. Divergência vira FAIL
 determinístico, não depende de code review pegar a próxima duplicação.
 
-**Project example**: `tools/optimizer_consistency_gate.py` — 3 camadas
+**Project example**: `tools/validation/optimizer_consistency_gate.py` — 3 camadas
 (implementação única, provenance persistida em
 `out["placement_decisions"]`, reavaliação do gate canônico no estado
 final). Achado ao vivo: `tools/correction_fixes.py` tinha uma cópia própria
@@ -200,7 +200,7 @@ contrato declarado é igualmente arriscado — geometria simples sem contrato
 (rotacionada, não-retangular) sem contrato é alto risco (o default não tem
 como saber se é intencional).
 
-**Project example**: `tools/semantic_geometry_contract_gate.py` — 3 estados
+**Project example**: `tools/validation/semantic_geometry_contract_gate.py` — 3 estados
 (`PASS`/`WARN_LEGACY_SEMANTICS`/`FAIL_MISSING_SEMANTICS`), onde WARN só se
 aplica a formas simples (baixo risco: herdar `FURNITURE` como default é
 seguro) e FAIL se aplica a formas complexas sem declaração (alto risco: é

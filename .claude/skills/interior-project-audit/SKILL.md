@@ -58,8 +58,8 @@ manufacturer_references}`.
 `windows`, `shafts`, `structure`. Qualquer valor presumido = `UNVERIFIED`, nunca
 inventado. (Pega o gotcha real do BANHO 01: vãos de teto abertos vazando background —
 isso é bug de geometria, não estética, e é HARD FAIL aqui.)
-Antes de julgar aqui: rodar `python -m tools.semantic_geometry_contract_gate <room>`
-e `python -m tools.collision_envelope_gate <room>` (determinísticos, 2026-08-12 —
+Antes de julgar aqui: rodar `python -m tools.validation.semantic_geometry_contract_gate <room>`
+e `python -m tools.validation.collision_envelope_gate <room>` (determinísticos, 2026-08-12 —
 ver `core/spatial_semantics.py`). Este GATE 1 **audita o resultado**, não reimplementa
 a checagem — se algum item vier `FAIL_MISSING_SEMANTICS` ou `soft_items_never_solid`,
 já é HARD FAIL aqui, sem precisar de julgamento humano/GPT pra essa parte.
@@ -74,7 +74,7 @@ Nada de objeto genérico tipo `black_rectangle_02` — vira `toilet_paper_holder
 `front_margin, rear_margin, drill_clearance, trap_collision, drawer_collision,
 service_access → PASS|WARN|FAIL`.
 Se algum otimizador/busca de posição escolheu onde essa peça vai, rodar
-`python -m tools.optimizer_consistency_gate <room>` — otimizador que aprova
+`python -m tools.validation.optimizer_consistency_gate <room>` — otimizador que aprova
 uma posição usando heurística diferente do gate real é o mesmo bug de
 "testar peça isolada" (achado 2026-08-12: `correction_fixes.py` tinha uma
 cópia própria da regra de colisão que divergiu da canônica sem ninguém notar).

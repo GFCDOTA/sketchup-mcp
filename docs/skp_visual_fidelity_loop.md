@@ -10,7 +10,7 @@ source PDF. Default mode: **`OFFLINE_DATA_ONLY`** (no GPT/Chrome dependency).
    PDF raster is an *exact, deterministic* comparison (no calibration, no
    hallucination, ~1-2 s, no SketchUp, no GPU). This is the authoritative
    correctness check. Tools: `tools/pdf_overlay_verify.py` (walls/rooms/openings
-   on PDF + PDF door-arc measurement), `tools/opening_audit.py`, the deterministic
+   on PDF + PDF door-arc measurement), `tools/validation/opening_audit.py`, the deterministic
    heuristics in `run_skp_visual_review.py`, `geometry_report.json`.
 2. **Image/render = representation/legibility AUDIT, not a fidelity judge.**
    A render can look bad with correct geometry, or look fine with wrong geometry

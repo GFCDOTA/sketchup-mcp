@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from tools.opening_aperture_audit import detect_blind_pockets, wall_solidity_ratio
+from tools.validation.opening_aperture_audit import detect_blind_pockets, wall_solidity_ratio
 from tools.overlay_diff import Affine, dark_mask
 
 # project(x, y) = (x, 100 - y): pdf-point -> pixel, y flipped (like ortho-top).

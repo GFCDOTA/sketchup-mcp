@@ -1,4 +1,4 @@
-"""Micro-tests for the shared gate primitives (tools/gate_util.py).
+"""Micro-tests for the shared gate primitives (tools/validation/gate_util.py).
 
 Locks the contract of the point-to-segment distance that was extracted from the
 three byte-identical copies in kitchen_wall_regression_gate / wall_exact_match_gate
@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import math
 
-from tools.gate_util import load_json, pt_seg_dist
+from tools.validation.gate_util import load_json, pt_seg_dist
 
 
 def test_point_on_segment_is_zero():

@@ -3,7 +3,7 @@
 que o hospedava). Hermético (boxes sintéticos)."""
 from __future__ import annotations
 
-from tools.collision_envelope_gate import audit, resolve_envelope
+from tools.validation.collision_envelope_gate import audit, resolve_envelope
 
 RECT = [[0, 0], [10, 0], [10, 10], [0, 10]]
 

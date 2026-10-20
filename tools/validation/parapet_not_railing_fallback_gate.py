@@ -14,7 +14,7 @@ FAIL, regardless of whether it rendered as a low_wall, block, or railing.
 """
 from __future__ import annotations
 
-from tools.soft_barrier_source_audit import _source_of
+from tools.validation.soft_barrier_source_audit import _source_of
 
 
 def _report_barriers(report: dict) -> list[dict]:

@@ -382,8 +382,8 @@ def run_loop(
 def _consensus_detector(_ctx: cfix.FixContext) -> list[dict]:
     """Consensus-only gates (pure, fast): opening_host + wall_overlap on the
     loop's WORKING COPY, so fixes are visible to the re-check."""
-    from tools.opening_host_audit import audit_opening_hosts
-    from tools.wall_overlap_audit import audit_wall_overlaps
+    from tools.validation.opening_host_audit import audit_opening_hosts
+    from tools.validation.wall_overlap_audit import audit_wall_overlaps
     con = _ctx.consensus or {}
     return cfind.from_deterministic_gates({
         "opening_host": audit_opening_hosts(con),

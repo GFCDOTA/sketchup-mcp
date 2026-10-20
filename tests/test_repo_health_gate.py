@@ -1,4 +1,4 @@
-"""FP-043 P3a-05 / D-006 — `tools/repo_health_gate.py` passa a rodar no CI (pytest coleta `tests/`).
+"""FP-043 P3a-05 / D-006 — `tools/validation/repo_health_gate.py` passa a rodar no CI (pytest coleta `tests/`).
 
 Antes: o gate tinha um `test_repo_health` dentro de `tools/` (nao coletado) e reprovava 4 itens sem ninguem ver.
 Agora: os 4 foram resolvidos (3 READMEs de proveniencia + escala da planta_74 vinda de `core.scale`) e as regras
@@ -6,7 +6,7 @@ passam a ser verificadas; as contraprovas abaixo garantem que o gate ainda repro
 """
 from __future__ import annotations
 
-from tools import repo_health_gate as gate
+from tools.validation import repo_health_gate as gate
 
 
 def test_repo_health_sem_violacoes():
