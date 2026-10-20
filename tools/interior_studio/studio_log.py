@@ -6,9 +6,9 @@ Quem orquestra (a sessão principal) posta em volta de cada dispatch/consulta �
 do que está rolando enquanto se programa.
 
 Uso:
-    python tools/studio_log.py post designer working "decidindo a paleta da cozinha"
-    python tools/studio_log.py post designer done "parede [60,58,54] quente, mata a caverna"
-    python tools/studio_log.py tail 20
+    python -m tools.interior_studio.studio_log post designer working "decidindo a paleta da cozinha"
+    python -m tools.interior_studio.studio_log post designer done "parede [60,58,54] quente, mata a caverna"
+    python -m tools.interior_studio.studio_log tail 20
 """
 from __future__ import annotations
 

@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import json
 
-from tools import curator as cur
+from tools.interior_studio import curator as cur
 from tools import rag_freshness as rf
 
 # ── o tick encadeia os 3 passos, na ordem, e agrega ──────────────────────────
